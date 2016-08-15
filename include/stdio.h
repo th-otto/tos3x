@@ -111,6 +111,7 @@ long lseek PROTO((int fd, long offs, int whence));
 long getl PROTO((FILE * sp));
 int getw PROTO((FILE * sp));
 
+int fputn PROTO((const char *buf, int num, FILE *sp));
 
 /*************************** end of stdio.h *********************************/
 

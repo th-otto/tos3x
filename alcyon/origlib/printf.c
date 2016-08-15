@@ -1,29 +1,38 @@
-/*
-	Copyright 1982
-	Alcyon Corporation
-	8716 Production Ave.
-	San Diego, Ca.  92121
-*/
+/************************************************************************
+*
+*			p r i n t f   F u n c t i o n
+*			-----------------------------
+*	Copyright 1982 by Digital Research Inc.  All rights reserved.
+*
+*	"printf" prints args specified in format string to stdout.
+*
+*	Calling sequence:
+*		nchrs = printf(fmt,arg1,arg2,...argn);
+*	Where:
+*		nchrs = # chars output by printf
+*		fmt -> a string specifying how arg1-n are to be printed.
+*
+**************************************************************************/
+
+#define printf std_printf
+#define fprintf std_fprintf
 
 #include "lib.h"
 
-/**
- **	formated print
- **/
+#undef printf
+#undef fprintf
 
-#ifdef __USE_STDARG
-int printf(const char *fmt, ...)
-#else
-int printf(fmt, va_alist)
-const char *fmt;
-va_dcl
-#endif
+int printf PROTO((const char *fmt, ...));
+
+int printf(P(const char *, fmt) _va_alist)
+PP(const char *, fmt;)
+_va_dcl
 {
+#ifdef __USE_STDARG
 	va_list args;
-	register int ret;
-	
-	__c_va_start(args, fmt);
-	ret = __doprint(stdout, fmt, 0, args);
-	__c_va_end(args);
-	return ret;
+	va_start(args, fmt);
+	return _doprt(stdout, fmt, (char *)args);
+#else
+	return _doprt(stdout, fmt, (char *)&va_alist);
+#endif
 }

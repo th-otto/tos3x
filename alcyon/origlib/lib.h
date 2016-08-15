@@ -6,24 +6,24 @@
 #endif
 #ifdef __USE_STDARG
 #  include <stdarg.h>
-#  define __c_va_alist				, ...
-#  define __c_va_dcl
-#  define __c_va_list				va_list
-#  define __c_va_start(pvar, prev) 	va_start(pvar, prev)
-#  define __c_va_arg(pvar, type)	va_arg(pvar, type)
-#  define __c_va_end(pvar) 			va_end(pvar)
+#  define _va_alist				, ...
+#  define _va_dcl
+#  define _va_list				va_list
+#  define _va_start(pvar, prev) va_start(pvar, prev)
+#  define _va_arg(pvar, type)	va_arg(pvar, type)
+#  define _va_end(pvar) 		va_end(pvar)
 #else
 #  include <varargs.h>
-#  define __c_va_alist				, va_alist
-#  define __c_va_dcl				va_dcl
-#  define __c_va_list				va_list
-#  define __c_va_start(pvar, prev) 	va_start(pvar)
-#  define __c_va_arg(pvar, type)	va_arg(pvar, type)
-#  define __c_va_end(pvar) 			va_end(pvar)
+#  define _va_alist				, va_alist
+#  define _va_dcl				va_dcl
+#  define _va_list				va_list
+#  define _va_start(pvar, prev) va_start(pvar)
+#  define _va_arg(pvar, type)	va_arg(pvar, type)
+#  define _va_end(pvar) 		va_end(pvar)
 #endif
 
-#define __c_va_no_args NULL
-#define __c_va_is_no_args(args) ((args) == __c_va_no_args)
+#define _va_no_args NULL
+#define _va_is_no_args(args) ((args) == _va_no_args)
 
 #include <stdio.h>
 
@@ -38,16 +38,16 @@ extern char __tname[];					/* Terminal name        */
 extern char __pname[];					/* Program name         */
 extern char *_break;					/* -> Program break location */
 
-VOID _petoa PROTO((NOTHING));
-VOID _pftoa PROTO((NOTHING));
-VOID _pgtoa PROTO((NOTHING));
-VOID _atof PROTO((NOTHING));
+VOID _petoa PROTO((char *, char *, int, int));
+VOID _pftoa PROTO((char *, char *, int, int));
+VOID _pgtoa PROTO((char *, char *, int, int));
+VOID _atof PROTO((const char *));
 
 typedef char *(*printfunc) PROTO((long n, char **pbuf, int base, int issigned, char *digs));
 
 char *__prtshort PROTO((long n, char **pbuf, int base, int issigned, char *digs));
 char *__prtld PROTO((long n, char **pbuf, int base, int issigned, char *digs));
-char *__prtint PROTO((long n, char *pbuf, int base, int issigned, printfunc f, int upper));
+char *__prtint PROTO((char *, char *pbuf, int base, int issigned, printfunc f));
 
 int __doprint PROTO((FILE *stream, const char *fmt, int mode, va_list args));
 
@@ -55,6 +55,7 @@ long fptoffp PROTO((double f));
 double ffptof PROTO((long lf));
 long fpftol PROTO((long f));
 long fpltof PROTO((long l));
+int _doprt PROTO((FILE *sp, const char * fmt, char *pb));
 
 int _creat PROTO((const char *name, int prot, int type));
 int _open PROTO((const char *name, int mode, int type));

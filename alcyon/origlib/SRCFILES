@@ -1,19 +1,23 @@
-AOBJS = \
+AOBJS1 = \
 	blivot.o \
 	lmul.o \
 	uldiv.o \
 	xsignal.o \
 	abort.o \
+	$(empty)
+
+AOBJS2 = \
 	aldiv.o \
 	almul.o \
 	alrem.o \
 	salloc.o \
 	setjmp.o \
 	stkcpy.o \
-	\
 	$(empty)
 
-COBJS = \
+AOBJS = $(AOBJS1) $(AOBJS2)
+
+COBJS1 = \
 	atof.o \
 	atoi.o \
 	ceil.o \
@@ -21,6 +25,9 @@ COBJS = \
 	fabs.o \
 	ffptof.o \
 	floor.o \
+	$(empty)
+
+COBJS2 = \
 	fmod.o \
 	ftoa.o \
 	ftoffp.o \
@@ -30,6 +37,9 @@ COBJS = \
 	fprintf.o \
 	xdoprtfp.o \
 	prtld.o \
+	$(empty)
+
+COBJS3 = \
 	prtint.o \
 	ctype.o \
 	nofloat.o \
@@ -40,5 +50,10 @@ COBJS = \
 	optoff.o \
 	$(empty)
 
-OBJS = $(AOBJS) $(COBJS)
+COBJS4 = \
+	doprt.o \
+	$(empty)
 
+COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4)
+
+OBJS = $(AOBJS) $(COBJS)
