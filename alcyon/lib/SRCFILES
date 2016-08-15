@@ -73,6 +73,7 @@ COBJS = \
 	creat.o \
 	exit.o \
 	cleanup.o \
+	fclose.o \
 	\
 	ldiv.o \
 	lmul.o \
