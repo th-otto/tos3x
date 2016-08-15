@@ -66,3 +66,5 @@ VOID _optoff PROTO((const char * msg));
 VOID _chinit PROTO((NOTHING));
 int _main PROTO((char *com, int len));
 int __main PROTO((char *com, int len));
+
+int _filbuf PROTO((FILE *));
