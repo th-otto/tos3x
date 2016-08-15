@@ -1,0 +1,76 @@
+AOBJS = \
+	atan.o \
+	cosh.o \
+	ffpabs.o \
+	ffpadd.o \
+	ffpatan.o \
+	ffpcmp.o \
+	ffpcpyrt.o \
+	ffpdiv.o \
+	ffpexp.o \
+	ffphthet.o \
+	ffplog.o \
+	ffpmul2.o \
+	ffppwr.o \
+	ffpsin.o \
+	ffpsinh.o \
+	ffpsqrt.o \
+	ffptheta.o \
+	ffptnorm.o \
+	fpadd.o \
+	fpcmp.o \
+	fpcos.o \
+	fpdiv.o \
+	fpexp.o \
+	fplog.o \
+	fpmul.o \
+	fpneg.o \
+	fppwr.o \
+	fpsin.o \
+	fpsqrt.o \
+	fpsub.o \
+	sinh.o \
+	tanh.o \
+	\
+	blivot.o \
+	xsignal.o \
+	salloc.o \
+	setjmp.o \
+	\
+	$(empty)
+
+COBJS = \
+	atof.o \
+	atoi.o \
+	ceil.o \
+	etoa.o \
+	fabs.o \
+	ffptof.o \
+	floor.o \
+	fmod.o \
+	ftoa.o \
+	ftoffp.o \
+	ftol.o \
+	ltof.o \
+	printf.o \
+	fprintf.o \
+	xdoprtfp.o \
+	prtld.o \
+	prtint.o \
+	ctype.o \
+	getl.o \
+	getw.o \
+	fopen.o \
+	xmain.o \
+	\
+	ldiv.o \
+	lmul.o \
+	lrem.o \
+	uldiv.o \
+	aldiv.o \
+	almul.o \
+	alrem.o \
+	abort.o \
+	$(empty)
+
+OBJS = $(AOBJS) $(COBJS)

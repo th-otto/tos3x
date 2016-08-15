@@ -1,0 +1,51 @@
+AS68 [-F d:] [-P] [-S d:] [-U] [-L] [-N] [-I]
+[-0 object filename]
+source filename [> listing filename]
+
+-F d:
+The -F option specifies the drive on which temporary files are created.
+The variable d: is the drive designation, which must be followed by a
+colon. If this option is not specified, the temporary files that AS68
+creates are created on the current drive.
+
+-I
+The -I option initializes the assembler. See Section 5.2 for details.
+
+-p
+If specified, AS68 produces and prints a listing on the standard output
+device which, by default, is the console. You can redirect the listing,
+including error messages, to a file by using the >1isting filename
+parameter. Note that error messages are produced whether or not the
+-p option is· specified. No listing is produced, however, unless you
+specify the -P option.
+
+-S d:
+The -S option indicates the drive on which the assembler initialization
+file, AS68SYMB.DAT, resides. This file is created when you initialize
+AS68. See Section 5.2. AS68 reads the file AS68SYMB.DAT before it
+assembles a source file. The variable, d:, is the drive designation; it
+must be followed by a colon. If you do not specify this option, AS68
+assumes the initialization file is on the default drive.
+
+-U
+Causes all undefined symbols in the assembly to be treated as global
+references.
+
+-L
+Ensures all address constants are generated as longwords. Use the
+-L option for programs that require more than 64K for execution or
+if the TPA is not contained in the first 64K bytes of memory. If -L is
+not specified, the program is assembled to run in the first 64 K bytes
+of memory. If an address in the assembly does not fit within one word
+an error occurs. Appendix E describes all AS68 errors.
+
+-N
+Disables optimization of branches on forward references. Normally,
+wherever possible, AS68 uses the 2-byte form of the conditional
+branch and the 4-byte BSR instruction to speed program execution
+and reduce the instruction size instead of the 6-byte ]SR instruction.
+
+source filename
+This is the only required parameter. It is the file specification of the
+assembly language source program to be assembled.
+

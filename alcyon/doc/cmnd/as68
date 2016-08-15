@@ -1,0 +1,113 @@
+.so macro
+.he 'AS68''AS68'
+.pr PROGRAM AS
+as68 - assembler for the Motorola 68000
+.us USAGE
+as68 [-i] [-p] [-u] [-L] [-N] sourcefile
+.fn FUNCTION
+\&'as68' is the REGULUS 68000 assembler.
+It is used to assemble a program for the Motorola 68000.
+The syntax accepted is identical to the Motorola 68000 cross assembler as
+described in Motorola Manual M68KXASM(D3) with the exceptions and
+additions described below.
+The source file must be present as the first argument.
+The assembler always produces a relocatable object file whose name
+is the same as the source file primary name with a ".o" extension --
+ie. if the source file name is "test.s" then the object file name is
+"test.o"; if the source file name is "pgm1" then the object file
+name is "pgm1.o".
+.sp
+The -i option is used to initialize the assembler in the case that
+the file '/lib/as68symb' does not exist or becomes corrupted.  It
+also requires the use of the initialization file /lib/as68init.
+The command would be of the form : 'as68 -i /lib/as68init'.
+.sp
+If the -p flag is specified, the assembler produces a hexidecimal
+side-by-side listing on the standard output
+(you may want to redirect this to a file).
+Error messages are also produced on the standard output file whether or not
+the -p flag is specified.
+.sp
+If the -u flag is specified, all undefined symbols in the assembly
+are treated as global.
+.sp
+If the -L flag is specified, all address constants are generated
+as 32-bit numbers.
+Default is 16-bit numbers where possible.
+.sp
+If the -N flag is specified, pass 1.5 of the assembler is not executed.
+This pass changes all long relative branches to short relative branches
+where possible.
+.sp
+Error messages begin with an &,
+indicate the source line on which the error occurred
+and are meant to be self-explanatory.
+The error messages preceded by a single '&' are generated during the
+first pass of the assembler and those preceded by a pair '&&' are
+generated during the second pass of the assembler.
+.sp
+The assembler accepts both upper and lower case characters.
+Labels and variables are case sensitive ('LOOP' is different
+from 'Loop'), but mnemonics and directives can be in either upper
+or lower case.
+.sp
+Macros are implemented using the C preprocessor which is part of the
+cc68 command (see C68(cmnd)).
+Conditional assembly is also implemented using the
+preprocessor.
+Use the command "cc -P pgm.s" to expand macros using the C preprocessor.
+The expanded file is left on pgm.i.
+.sp
+.fl FILES
+/lib/as68symb
+.br
+/tmp/a6????A (???? is the process id number)
+.br
+/lib/as68init
+.sa SEE ALSO
+as68 (misc), lo68 (cmnd), c68 (cmnd)
+.ex EXTRAS
+The following enhancements have been added to aid the assembly language
+programmer by making the assembly language more regular:
+.sp
+move, add, sub mnemonics will actually generate moveq, addq, and suba
+instructions where possible.
+If a move instruction rather than a moveq instruction is desired (affecting
+only lower byte or word of D register), the size attribute must be
+explicitly coded ie. move.b or move.w.
+The assembler will change any
+move or move.l to moveq if possible.
+.sp
+clr.x An is allowed and will actually generate a suba.x An,An instruction.
+.sp
+add, sub, cmp with an A register source/destination are allowed and
+generate adda, suba, cmpa.
+.sp
+add, and, cmp, eor, or, sub are allowed with immediate first operands
+and actually generate addi, andi, cmpi, eori, ori, subi instructions
+if the second operand is not register direct.
+.sp
+All branch instructions generate short relative branches where
+possible, including forward references.
+.sp
+Any shift instruction with no shift count specified assumes a shift count
+of one; ie. "asl r1" is equivalent to "asl #1,r1".
+.sp
+jsr instructions are changed to bsr instructions if the resulting
+bsr is shorter than the jsr.
+.sp
+The mnemonics 'inc' and 'dec' are also recognized and are functionally
+equivilent to "addq 1" or "subq 1".
+.sp
+Several additional mnemonics have been added to the condition code
+instructions which map to the standard set (bt -> bra, bhs
+-> bhis, bnz -> bne, bze -> beq, dbhs -> dbhi,
+dblo -> dbcs, dbnz -> dbne, dbze -> dbeq, shs
+-> scc, slo -> scc, snz -> sne, sze -> seq).
+.bg BUGS
+\&.set is currently implemented as a .equ.
+.sp
+There are several directives which are recognized but ignored:
+mask2, idnt, ttl, opt, and page.
+.sp
+PC relative addressing mode is currently not supported.

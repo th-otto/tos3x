@@ -1,0 +1,17 @@
+.th GETCHAR
+.sh NAME
+getchar \*- read character
+.sh SYNOPSIS
+.ft B
+int getchar( )
+.br
+.ft R
+.sh DESCRIPTION
+Getchar reads records from the standard input (VERSAdos file #5)
+into a buffer and returns these characters one per call to the
+user.  Getchar assumes that it is reading ASCII records.  It
+places a '\\n' character on the end of each record, and translates
+the VERSAdos tab character (any negative character) into a '\\t'.
+Getchar returns a negative number for EOF or read error.
+Since all VERSAdos I/O is record I/O, getchar must be buffered,
+and thus is not any less efficient than getc.

@@ -1,0 +1,6 @@
+/usr/local/c68 -v test.c -o test -l6
+/usr/local/c68 -v -a test2.c -o test2
+# test3 should generate warnings: 5 on 11, 1 on 17, 1 on 22, and 1 on 156
+/usr/local/c68 test3.c -o test3
+/usr/local/c68 -a -e fptest.c -o etest
+/usr/local/c68 -a -f fptest.c -o ftest

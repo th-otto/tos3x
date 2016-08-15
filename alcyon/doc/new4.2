@@ -1,0 +1,82 @@
+
+
+                        V4.2 C68 Changes
+
+Enhancements
+    - Block Declarations now supported.
+
+    - Local initializations now supported.
+
+    - Structure Bit field initializations now supported.
+    
+    - Preprocessor is now a separate pass and may be called manually.
+
+    - Support of the '-C' preprocessor flag.
+
+    - Support of the '-g' flag for use with the symbolic debugger.
+
+    - The '-L' flag which forces all externally addressed variables to 32
+      bit addresses is now the default, the '-a' flag may be used to force
+      them to 16 bit addresses.
+
+    - The assembler now handles the new mnemonics required by the 68010.
+
+    - All compiler error messages designate the source file in which the
+      problem occured as well as the line number.
+
+    - All compiler error messages are written to the standard error device.
+
+    - Addition of warning messages for possibly erraneous or unportable
+      constructs.
+
+Bug Fixes
+    - Local, global, and block variables with the same names are now allowed
+      as well as subroutines with the same names as labels.
+
+    - Character constant array subscripting (problem only in 4.1 release). 
+
+    - Structure initializations are now handled properly (including bit
+      fields and arrays).
+
+    - Sizeof works properly on all combinations of arrays and structures.
+
+    - Complex conditional expression of the form (--regi != -1 && expression)
+      generates the correct code now (problem only in 4.0 and 4.1 releases).
+
+    - Structure assignments of structures larger then 22 bytes now works
+      properly.
+
+    - -Idir no longer requires a terminating slash.
+
+    - Floating point operations of the form "if (fp)" where fp is a float 
+      now generates the proper code.
+
+    - Floating point constants no longer require a digit to precede the
+      decimal point.
+
+    - Pre/post increment/decrement on floats now generates the proper code
+      in all cases, equal-op operations on floats now work propely in all
+      cases.  (in particular if the floating point value is a structure
+      member).
+
+    _ Long expression cast as int destined for stack will always be past
+      as an int.
+
+    - Long constants as array indices will not be turned into 16-bit 
+      displacement values.
+
+    - All octal and hex constants which fit into 16 bits as unsigned values
+      will be treated as integer constants.
+
+Known Deficiencies
+    - Unsigned long not supported.  (system III unix)
+
+    - Unsigned char not supported.  (system III unix)
+
+    - Void type unimplemented.  (system III unix)
+    
+    - Enum type unimplemented.  (system III unix)
+    
+    - Functions can not return structures.  (system III unix)
+
+    - You can't pass structures as arguments.   (system III unix)

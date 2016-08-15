@@ -1,0 +1,105 @@
+$2cp68 -i 0$1 test.c $1x.i
+$2c068 $1x.i $1x.1 $1x.2 $1x.3
+era $1x.i
+$2c168 $1x.1 $1x.2 test.s
+era $1x.1
+era $1x.2
+$2as68 -f $1 -s 0$1 -l -u test.s
+era test.s
+$2lo68 -f $1 -u_nofloat -r -o test.68k 0$1s.o test.o 0$2clib
+era test.o
+test.68k
+era test.68k
+
+$2cp68 test2.c $1x.i
+$2c068 $1x.i $1x.1 $1x.2 $1x.3
+era $1x.i
+$2c168 $1x.1 $1x.2 test2.s
+era $1x.1
+era $1x.2
+$2as68 -f $1 -s 0$1 -l -u test2.s
+era test2.s
+$2lo68 -f $1 -u_nofloat -r -o test2.68k 0$1s.o test2.o 0$2clib
+era test2.o
+test2.68k
+era test2.68k
+
+$2cp68 test3.c $1x.i
+$2c068 $1x.i $1x.1 $1x.2 $1x.3
+era $1x.i
+$2c168 $1x.1 $1x.2 test3.s
+era $1x.1
+era $1x.2
+$2as68 -f $1 -s 0$1 -l -u test3.s
+era test3.s
+$2lo68 -f $1 -u_nofloat -r -o test3.68k 0$1s.o test3.o 0$2clib
+era test3.o
+test3.68k
+era test3.68k
+
+$2cp68 test4.c $1x.i
+$2c068 $1x.i $1x.1 $1x.2 $1x.3
+era $1x.i
+$2c168 $1x.1 $1x.2 test4.s
+era $1x.1
+era $1x.2
+$2as68 -f $1 -s 0$1 -l -u test4.s
+era test4.s
+$2lo68 -f $1 -u_nofloat -r -o test4.68k 0$1s.o test4.o 0$2clib
+era test4.o
+test4.68k
+era test4.68k
+
+$2cp68 test5.c $1x.i
+$2c068 $1x.i $1x.1 $1x.2 $1x.3
+era $1x.i
+$2c168 $1x.1 $1x.2 test5.s
+era $1x.1
+era $1x.2
+$2as68 -f $1 -s 0$1 -l -u test5.s
+era test5.s
+$2lo68 -f $1 -u_nofloat -r -o test5.68k 0$1s.o test5.o 0$2clib
+era test5.o
+test5.68k
+era test5.68k
+
+$2cp68 fptest.c $1x.i
+$2c068 $1x.i $1x.1 $1x.2 $1x.3 -f
+era $1x.i
+$2c168 $1x.1 $1x.2 fptest.s 
+era $1x.1
+era $1x.2
+$2as68 -f $1 -s 0$1 -l -u fptest.s
+era fptest.s
+$2lo68 -f $1 -r -o fptest.68k 0$1s.o fptest.o 0$2clib 0$2libf.a
+era fptest.o
+fptest.68k
+era fptest.68k
+
+$2cp68 fptest.c $1x.i
+$2c068 $1x.i $1x.1 $1x.2 $1x.3 -e
+era $1x.i
+$2c168 $1x.1 $1x.2 fptest.s 
+era $1x.1
+era $1x.2
+$2as68 -f $1 -s 0$1 -l -u fptest.s
+era fptest.s
+$2lo68 -f $1 -r -o fptest.68k 0$1s.o fptest.o 0$2clib 0$2libe.a
+era fptest.o
+fptest.68k
+era fptest.68k
+
+$2cp68 -i 0$1 stest.c $1x.i
+$2c068 $1x.i $1x.1 $1x.2 $1x.3
+era $1x.i
+$2c168 $1x.1 $1x.2 stest.s
+era $1x.1
+era $1x.2
+$2as68 -f $1 -s 0$1 -l -u stest.s
+era stest.s
+$2lo68 -f $1 -u_nofloat -r -o stest.68k 0$1s.o stest.o 0$2clib
+era stest.o
+stest.68k
+era stest.68k
+
+user 1!make $1 $2

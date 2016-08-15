@@ -1,0 +1,17 @@
+.so macro
+.he 'FABS''FABS'
+.n  FABS
+fabs - floating point absolute
+.sy SYNOPSIS
+.nf
+#include <math.h>
+
+double
+fabs(d)
+double d;
+.fi
+.d  DESCRIPTION
+\&'fabs' returns the absolute value of a floating point number.
+.fl FILES
+math.h - declaration include file
+.sa SEE ALSO

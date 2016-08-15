@@ -1,0 +1,18 @@
+.so macro
+.he 'FLOOR''FLOOR'
+.n	FLOOR
+floor - floating point floor function
+.sy SYNOPSIS
+.nf
+#include <math.h>
+
+double floor(d)
+double d;
+.fi
+.d  DESCRIPTION
+\&'floor' returns the largest integer (as a double precision
+number) not greater than x.
+.fl FILES
+math.h - declaration include file
+.sa SEE ALSO
+ceil(subs)

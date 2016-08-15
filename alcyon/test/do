@@ -1,0 +1,5 @@
+date
+/usr/local/c68 -v -S stest.c
+date
+/usr/local/as68 -u -p stest.s > stest.asmlst
+/usr/local/lo68 -X /usr/local/lib/c680.o stest.o lib7.a

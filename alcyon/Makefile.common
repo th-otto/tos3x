@@ -1,0 +1,35 @@
+# nasty workaround to avoid backslash at end-of-line
+BS=\$(empty)
+
+BIN=$(ALCYON)\bin$(BS)
+LIB=$(ALCYON)\lib$(BS)
+INC=$(ALCYON)\include$(BS)
+EXEEXT=.ttp
+
+
+CFLAGS= -f 
+ASFLAGS = -u -L -s $(LIB)
+CPPFLAGS = -I ..\include$(BS) -I $(INC)
+
+AR = $(BIN)ar68$(EXEEXT)
+ARFLAGS = -rv
+
+# Wether to run the optimizer pass.
+# the default is evaluated by RUN_OPTIMIZE_,
+# which must be either $(RUN_OPTIMIZE_0) or $(RUN_OPTIMIZE_1).
+# It can be overridden by specifying foo_OPTIMIZE=0
+# for individual files.
+RUN_OPTIMIZE_0 = :
+RUN_OPTIMIZE_1 = $(BIN)optimize$(EXEEXT)
+RUN_OPTIMIZE_ = $(RUN_OPTIMIZE_1)
+
+.c.o:
+	$(AM_V_CC)$(BIN)cp68$(EXEEXT) $(CPPFLAGS) $*.c $*.i
+	$(AM_V_at)$(BIN)c068$(EXEEXT) $*.i $*.1 $*.2 $*.3 $(CFLAGS)
+	$(AM_V_at)$(BIN)c168$(EXEEXT) $*.1 $*.2 $*.s
+	$(AM_V_at)$(BIN)as68$(EXEEXT) $(ASFLAGS) $*.s
+	$(AM_V_at)$(RUN_OPTIMIZE_$($*_OPTIMIZE)) $f.s > NUL:
+	$(AM_V_at)$(RM) $*.s $*.i $*.1 $*.2 $*.3
+
+.s.o:
+	$(AM_V_AS)$(BIN)as68$(EXEEXT) $(ASFLAGS) $*.s

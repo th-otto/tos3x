@@ -1,0 +1,166 @@
+.so macro
+.he 'C.OUT''C.OUT'
+.n NAME c.out
+c.out - 68000 loader output
+.d DESCRIPTION
+'c.out' is the output file of the loader 'ld68 (cmnd)'.
+The loader makes 'c.out' executable if there were no
+errors and no unresolved external references.
+The *.o relocatable object files which are produced by the assembler
+'as68 (cmnd)' have this same format.
+.sp
+This file has four sections:
+a header, the program and data text, a symbol table, and relocation bits
+(in that order).
+The last two may be empty if the program was loaded
+with the '-s' option of 'ld68 (cmnd)'.
+.sp
+There are two formats of the header.
+The first header format starts
+with the identifying number 601A hex and contains 14 words in the
+following format:
+.sp
+.nf
+.na
+.in +5
+struct hdr {
+    int magic;         //c.out magic number = 601A hex
+    long tsize;        //# bytes in program text segment
+    long dsize;        //# bytes in program data segment
+    long bsize;        //# bytes in program bss  segment
+    long ssize;        //# bytes in symbol table
+    long stksize;      //initial stack size
+    long entry;        //entry point
+    int rlbflg;        //relocation bits suppressed flag
+ };
+.fi
+.ad
+.sp
+.in -5
+The second header format is used when noncontiguous text, data,
+and bss segments are specified to the loader using the -T, -D,
+and -B flags.
+This header begins with the identifying number
+601B hex and contains 18 words in the following format:
+.sp
+.in +5
+.nf
+.na
+struct hdr {
+    int magic;         //c.out magic number = 601B hex
+    long tsize;        //# bytes in program text segment
+    long dsize;        //# bytes in program data segment
+    long bsize;        //# bytes in program bss  segment
+    long ssize;        //# bytes in symbol table
+    long stksize;      //initial stack size
+    long entry;        //entry point--address of text segment
+    int rlbflg;        //relocation bits suppressed flag
+    long dstart;       //address of data segment
+    long bstart;       //address of bss segment
+ };
+.fi
+.ad
+.sp
+.in -5
+The sizes of each segment are in bytes but are even.
+The size of the header is not included in any of the other sizes.
+.sp
+When a file produced by the loader is loaded into memory for execution,
+three logical segments are set up:
+the text segment, the data segment
+(with uninitialized data,
+which starts off as all 0, following initialized),
+and a stack.
+The text segment begins at the address contained in "entry"
+in the core image; the header is not loaded.
+If the magic number (word 0) is 601A hex, it indicates that the text
+segment is not to be write-protected and shared,
+so the data segment is immediately contiguous
+with the text segment.
+If the magic number is 601C hex, it indicates that the text segment is
+to be write protected and shared and that the beginning of the data
+segment is at the first 2K byte boundary beyond the text segment.
+If the magic number is 601D hex, it indicates that the text segment and
+the data segment are both loaded with virtual addresses beginning
+at 0 (I and D split).
+If the magic number is 601E hex, it indicates that the text segment is
+to be write protected and shared and that the beginning of the data
+segment is at the first 4K byte boundary beyond the text segment.
+.sp
+The symbol table consists of 7-word entries.
+The first four words contain the ASCII name of the symbol, null-padded.
+The next word is a flag indicating the type of symbol.
+The following values are possible:
+.sp
+.in +5
+.nf
+.na
+0100000        defined
+0040000        equated
+0020000        global - entry or external
+0010000        equated register
+0004000        external reference
+0002000        DATA based relocatable
+0001000        TEXT based relocatable
+0000400        BSS based relocatable
+.in -5
+.fi
+.ad
+.sp
+These values are bit flags which may be or'ed together to indicate
+completely a symbol type such as 0122000 for a defined global data
+segment relocatable symbol.
+.sp
+The last two words (long) of a symbol table
+entry contain the value of the symbol.
+.sp
+If the symbol's type is undefined external,
+and the value field is non-zero,
+the symbol is interpreted by the loader
+ld
+as the name of a common region
+whose size is indicated by the value of the symbol.
+.sp
+The value of a word in the text or data portions which is not
+a reference to an undefined external symbol
+is exactly that value which will appear in memory
+when the file is executed.
+If a word in the text or data portion
+involves a reference to an undefined external symbol,
+as indicated by the relocation bits for that word,
+then the value of the word as stored in the file
+is an offset from the associated external symbol.
+When the file is processed by the
+loader and the external symbol becomes
+defined, the value of the symbol will
+be added into the word in the file.
+.sp
+If relocation information is present, it amounts to one word per
+word of program text or initialized data.
+There is no relocation information if the "suppress relocation"
+flag in the header is on.
+.sp
+Bits 2-0 of a relocation word indicate the segment referred
+to by the text or data word associated with the relocation word:
+.sp
+.nf
+.na
+.in +5
+00    indicates the reference is absolute
+01    indicates the reference is data segment relocatable
+02    indicates the reference is text segment relocatable
+03    indicates the reference is bss segment relocatable
+04    indicates the reference is to an undefined external symbol
+05    indicates the reference is to the upper word of a long
+06    indicates the reference is pc-relative to an undefined external symbol
+07    indicates the absolute first word of an instruction
+.fi
+.ad
+.in -5
+.sp
+The remainder of the relocation word (bits 15-3)
+contains a symbol number in the case of external
+references, and is unused otherwise.
+The first symbol is numbered 0, the second 1, etc.
+.sa "SEE ALSO"
+as68 (cmnd), ld68 (cmnd)

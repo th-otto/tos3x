@@ -1,0 +1,44 @@
+AOBJS = \
+	blivot.o \
+	lmul.o \
+	uldiv.o \
+	xsignal.o \
+	abort.o \
+	aldiv.o \
+	almul.o \
+	alrem.o \
+	salloc.o \
+	setjmp.o \
+	stkcpy.o \
+	\
+	$(empty)
+
+COBJS = \
+	atof.o \
+	atoi.o \
+	ceil.o \
+	etoa.o \
+	fabs.o \
+	ffptof.o \
+	floor.o \
+	fmod.o \
+	ftoa.o \
+	ftoffp.o \
+	ftol.o \
+	ltof.o \
+	printf.o \
+	fprintf.o \
+	xdoprtfp.o \
+	prtld.o \
+	prtint.o \
+	ctype.o \
+	nofloat.o \
+	fopen.o \
+	getl.o \
+	getw.o \
+	xmain.o \
+	optoff.o \
+	$(empty)
+
+OBJS = $(AOBJS) $(COBJS)
+

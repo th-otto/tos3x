@@ -1,0 +1,6 @@
+rm -rf 1 2 3
+mkdir 1 2 3
+cp test.c test.h 1
+cp test.c test.h 2
+cp test.c test.h 3
+		cd 1; cc -L -r test.c -l6 &; cd ../2; cc -L -r test.c -l6 &; cd ../3; cc -L -r test.c -l6 &; cd .. 

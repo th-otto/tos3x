@@ -1,0 +1,23 @@
+.text
+movec usp,d6
+movec d6,usp
+movec sfc,d6
+movec d6,sfc
+movec vsr,d6
+movec d6,vsr
+movec dfc,d6
+movec d6,dfc
+rtd #$7f
+rtd #$31f
+rtd #$e000
+moves r5,(a7)
+moves (a7),r5
+moves r9,(a1)
+moves (a1),r9
+moves r1,(a2)
+moves (a2),r1
+moves r3,(a4)
+moves (a4),r3
+move ccr,d3
+move ccr,(a3)
+move ccr,3(a7)

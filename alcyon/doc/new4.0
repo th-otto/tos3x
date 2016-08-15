@@ -1,0 +1,118 @@
+.he "C68 version 4.0"Change Log"Page %"
+.de bg
+.sp
+.in +5
+..
+.de eg
+.sp
+.in -5
+..
+1. Temp files generated in the current directory
+.bg
+In generating all other files into the current directory the temp files
+also were generated there.
+.eg
+2. Floating Point flags
+.bg
+Added the -e and -f flags for specification of the IEEE or FFP floating
+point packages (constant evaluations and libraries).
+.eg
+3. Optimization flag
+.bg
+Recognize the -O optimization flag and ignore it.
+.eg
+4. Compatibility flags
+.bg
+Added the -3, -5, -6, -7 flags for system 3, system 5, version 6 and
+version 7.  Adds an include file on the search list, as well as a 
+default library.
+.eg
+5. include file error messages
+.bg
+Added explicit line number and file name's within the error messages if
+processing an include file.
+.eg
+6. Symbol Table overflow
+.bg
+Added clearing of the symbol table between compiles (c68 *.c).
+.eg
+7. Preprocessor error status
+.bg
+If error's occurred in the preprocessor pass the exit status wasn't
+reflecting it.
+.eg
+8. Structure assignments
+.bg
+One structure may be assigned to another provided that the one on
+the right is smaller than or equal to the left one in size.
+.eg
+9. Don't generate .globl's for external functions
+.bg
+Don't automatically generate .globl's for external functions, avoids
+automatically loading routines which may never be used (like stdio).
+.eg
+10. Sizeof as array size specification
+.bg
+Recursive call to 'getdecl' caused the size specified using sizeof
+to be lost.
+.eg
+11. Procedure/function name as identifier
+.bg
+Generated "tst.l #_ident" for "if (ident) ;" where ident is a procedure
+or function name.  Changed this to generate as true instead.
+.eg
+12. Outgoto macro
+.bg
+Made the outgoto procedure a macro, requires it's single parameter to
+be a constant.
+.eg
+13. Typedef of forward referenced structures
+.bg
+The dimension table pointer of a typedefed forward referenced structure
+was being initialized incorrectly.
+.eg
+14. Structure assignments
+.bg
+One structure may be assigned to another provided that the one on
+the right is smaller than or equal to the left one in size.
+.eg
+15. Floating point
+.bg
+Floating point handling including constants, conversions and operations
+added.
+.eg
+16.	Pop stack instruction
+.bg
+The popstack instruction of 1..8 was turned into an addq.w which only
+affected half of the sp register.  The "add #d,sp" has been replaced
+by either "addq.l #d,sp" or "adda.l #d,sp".
+.eg
+17.	Optimization eqmult, eqdiv, eqmod
+.bg
+Generated a new code skeleton entry to deal with register integer mults,
+divs, and mods (eg. register int i; i =* 34;).
+.eg
+18.	Return of 0L
+.bg
+Code skeletons generated a clr R0 regardless of operand type.
+.eg
+19. Prefix ++, -- problems with bytes
+.bg
+The code skeletons for fr_eqop were a total mess, particularly for
+the left hand side being a character.
+Rewrote all fr_eqop and fr_eqmult code skeletons to handle these cases.
+Unfortunately rcgen also gets into the act turning all =+, =-, =&, =| and
+pre++, pre-- compiled for register into compiled for effect then returning
+the left hand side symbol.
+This is probably OK for word and long LHS but for byte it results in
+lost precision.
+Changed rcgen to check for CHAR LHS and not to compile for effect if so.
+.eg
+20. Long eq_shift int
+.bg
+Bad code was generated for long's left shifted by integer values.
+.eg
+21.  Pointer to structure comparisons to integers
+.bg
+Previously the integer value was being multiplied by the size of the
+structure in words.

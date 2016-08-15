@@ -1,0 +1,29 @@
+.so macro
+.he 'ATOF''ATOF'
+.n  NAME
+atof - ascii to floating point conversion
+.sy SYNOPSIS
+.nf
+#include <math.h>
+
+double
+atof(s)
+char *s;
+.fi
+.d  DESCRIPTION
+\&'atof' converts an ascii string into it's floating point representation,
+where the string is of the format :
+.sp
+.nf
+.ti +5
+{sign}{digits}{'.'}{digits}{E}{sign}{digits}
+.fi
+.sp
+Both signs and the exponent string is optional.  The decimal point is
+optional, but may appear at any point in the digit string.
+The single precision result is returned.
+.fl FILES
+math.h - routine declaration
+.sa SEE ALSO
+etoa(subs), ftoa(subs), atol(subs)
+.dg DIAGNOSTICS

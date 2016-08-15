@@ -1,0 +1,37 @@
+.so macro
+.he 'SENDC68''SENDC68'
+.pr PROGRAM SENDC68
+sendc68 - 68000 downloader
+.us USAGE
+sendc68 [-r] [-d delay] [-s start] [-e end] [-] objectfile [ ttyname ]
+.fn FUNCTION
+\&'sendc68' reads the objectfile, which must be in the c.out format produced
+by the 68000 linking loader lo68.  Sendc68 converts this executable
+object code into the absolute ASCII load format (S records) acceptable
+by the MACSBUG monitor and then sends these S records to the 68000
+via a serial line.
+.sp
+Locations 400 hexadecimal through 1000 hexidecimal are MACSBUG ram
+and will not be loaded.  In order to override this, the '-s' and '-e' 
+flags can be used to alter the addresses which are not to be
+loaded.  With 'start' being the first address to not load, and 'end'
+being the last address.  By setting the ending address to be smaller
+than the starting address all locations will be considered legitimate.
+.sp
+The optional argument '-r' will only output a newline, rather than
+the standard newline-carriage return.  This is for use by systems
+which translate newline to carriage return-newline.
+.sp
+The '-d delay' flag allows the user to specify a line delay.  This is
+for slowing the output of sendc68 when outputting to a slow device.
+.sp
+If the optional final argument 'ttyname' is
+present, this is the name of the special file (ie. /dev/tty?) to use
+to download the 68000.  If this optional third argument is not
+present, the standard output file is used.
+.sp
+If the optional "-" argument is specified, sendc68 does not clear
+the bss segment during the load.  This results in a faster load, but
+all bss memory will have random initial values.
+.sa SEE ALSO
+c68 (cmnd), as68 (cmnd), lo68 (cmnd), c.out (files)

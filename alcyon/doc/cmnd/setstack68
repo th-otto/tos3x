@@ -1,0 +1,20 @@
+.so macro
+.he 'SETSTACK68''SETSTACK68'
+.pr PROGRAM SETSTACK68
+setstack68 - set the stack size
+.us USAGE
+setstack68 file stacksize [breaksize]
+.fn FUNCTION
+Sets the stack entry or break size in an executable file to the given
+values.
+The values are rounded up to the next 1K value.
+If the stacksize is 0, the entry in the executable file is not changed.
+If the breaksize is not given, the entry in the executable file is not
+changed.
+The entries are only advisory on a system with a Memory Management Unit.
+.sa SEE ALSO
+.br
+size68 (cmnd)
+.br
+c.out (file)
+.bg BUGS

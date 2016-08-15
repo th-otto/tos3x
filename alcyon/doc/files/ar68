@@ -1,0 +1,27 @@
+.so macro
+.he 'AR68''AR68'
+.n NAME AR68
+ar68 - archive format
+.d DESCRIPTION
+The first word in an archive file is a magic number which
+defines the type of archive file.
+Magic number (0177545) archives are maintained on REGULUS.
+Each constituent file in an archive file is preceeded by a file header.
+The structure of the file header is:
+.sp
+.in +5
+.nf
+.na
+struct arhdr {
+    char a_fname[14];  // file name
+    long a_modti;      // last modified time
+    char a_userid;     // user id (uid)
+    char a_gid;        // group id (gid)
+    int  a_fimode;     // mode word
+    long a_fsize;      // file size
+};
+.fi
+.ad
+.in -5
+.sa SEE ALSO
+ar68 (cmnd), lo68 (cmnd)

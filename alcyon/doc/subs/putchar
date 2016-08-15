@@ -1,0 +1,25 @@
+.th PUTCHAR
+.sh NAME
+putchar - write a character
+.sh SYNOPSIS
+.ft B
+int getchar(c)
+.br
+char c;
+.ft R
+.sh DESCRIPTION
+Putchar writes one character to the standard output (VERSAdos file #6).
+Putchar assumes it is writting ASCII characters and buffers all
+characters until a '\\n' is received.  Then the '\\n' is stripped
+from the buffer and the record is written.  Tab characters are left
+as '\\t' -- they are not translated into the VERSAdos convention
+of a negative number.  Putchar returns the character received for
+success and returns a negative integer for failure.
+
+Putchar may aso be used to write ASCII characters to a file other than
+the standard output.  If the external variable named fout is set to
+any valid file descriptor, then putchar writes to that file rather
+than the standard output.  The routine named flush which writes
+any characters in the putchar output buffer may be called to
+force a write; however, writes occur automatically at the end
+of each record ('\\n' delimiter).
