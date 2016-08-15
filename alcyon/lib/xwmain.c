@@ -37,6 +37,8 @@
 #include <ostruct.h>
 
 
+int main PROTO((int argc, char **argv, char **envp));
+
 #define ISWHITE(ch) ((ch) == '\0' || isspace((UBYTE)ch))
 
 
@@ -46,20 +48,17 @@ static char **argv2;					/* Companion ptr to argv */
 
 
 /* Error routine */
-static VOID _err(P(const char *, s1), P(const char *, s2))
-PP(const char *, s1;)
-PP(const char *, s2;)
+/* output directly to CON: */
+static VOID _err(P(const char *) s1, P(const char *) s2)
+PP(const char *s1;)
+PP(const char *s2;)
 {
-	char buf[128];						/* place to build message */
-
 	/* Output error message */
-	strcpy(buf, s1);
+	__OSIF(C_WRITESTR, s1);
 	/* And filename */
-	strcat(buf, s2);
+	__OSIF(C_WRITESTR, s2);
 	/* + Newline */
-	strcat(buf, "\r\n$");
-	/* output directly to CON: */
-	__OSIF(C_WRITESTR, buf);
+	__OSIF(C_WRITESTR, "\r\n");
 	/* And fail hard */
 	exit(-1);
 }
@@ -69,8 +68,8 @@ PP(const char *, s2;)
  *	Addargv function -- adds a pointer to the argv array, getting the
  *	space from the heap.
  */
-static VOID addargv(P(register char *, ptr))
-PP(register char *, ptr;)							/* -> Argument string to add */
+static VOID addargv(P(register char *) ptr)
+PP(register char *ptr;)							/* -> Argument string to add */
 {
 	/* Load pointer */
 	*argv2 = ptr;
@@ -92,10 +91,10 @@ PP(register char *, ptr;)							/* -> Argument string to add */
  *	/ drive field to produce an ascii file name for SEARCHes.
  *
  */
-static VOID _toasc(P(register FD *, p), P(register char, c), P(register char *, buf))
-PP(register FD *, p;)						/* -> Data area */
-PP(register char, c;)						/* 0 .. 3 search code */
-PP(register char *, buf;)					/* Output buffer area */
+static VOID _toasc(P(register FD *) p, P(register char) c, P(register char *) buf)
+PP(register FD *p;)						/* -> Data area */
+PP(register char c;)						/* 0 .. 3 search code */
+PP(register char *buf;)					/* Output buffer area */
 {
 	register char *f;						/* -> Fcb in DMA buffer */
 	int i;
@@ -158,9 +157,9 @@ VOID nowildcards(NOTHING)
 #endif
 
 
-int __main(P(char *, com), P(int, len))
-PP(char *, com;)								/* Command address */
-PP(int, len;)								/* Command length */
+int __main(P(char *) com, P(int) len)
+PP(char *com;)								/* Command address */
+PP(int len;)								/* Command length */
 {
 	register int i;							/* Define a count var. */
 	register char *s;						/* Temp byte pointer */
@@ -297,5 +296,3 @@ PP(int, len;)								/* Command length */
 	/* Invoke C program (No Env) */
 	exit(main(argc, argv, NULL));
 }
-
-

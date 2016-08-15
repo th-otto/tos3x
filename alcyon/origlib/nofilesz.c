@@ -5,7 +5,7 @@
 VOID nofilesz(NOTHING) { ; }				/* stubroutine 'tag'	    */
 
 
-long _filesz(P(int, fd))
+long _filesz(P(int) fd)
 {
 	return 32767;
 }

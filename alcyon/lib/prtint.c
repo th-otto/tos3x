@@ -10,13 +10,13 @@
 #include "lib.h"
 
 
-char *__prtint(P(long, n), P(char *, buf), P(int, base), P(int, issigned), P(printfunc, f), P(int, upper))
-PP(long, n;)
-PP(char *, buf;)
-PP(int, base;)
-PP(int, issigned;)
-PP(printfunc, f;)
-PP(int, upper;)
+char *__prtint(P(long) n, P(char *) buf, P(int) base, P(int) issigned, P(printfunc) f, P(int) upper)
+PP(long n;)
+PP(char *buf;)
+PP(int base;)
+PP(int issigned;)
+PP(printfunc f;)
+PP(int upper;)
 {
 	char digs[15];
 	register char *dp;

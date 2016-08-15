@@ -32,11 +32,12 @@
 
 #include "lib.h"
 #include <fcntl.h>
+#include <errno.h>
 
-static FILE *_fopen(P(register const char *, name), P(register const char *, mode), P(int, ascii))
-PP(register const char *, name;)			/* file name            */
-PP(register const char *, mode;)				/* "r","w", or "a"      */
-PP(int, ascii;)								/* CP/M text file       */
+static FILE *_fopen(P(register const char *) name, P(register const char *) mode, P(int) ascii)
+PP(register const char *name;)			/* file name            */
+PP(register const char *mode;)				/* "r","w", or "a"      */
+PP(int ascii;)								/* CP/M text file       */
 {
 	register FILE *sp;					/* stream pointer       */
 	register int ii;					/* index into _iob      */
@@ -46,7 +47,10 @@ PP(int, ascii;)								/* CP/M text file       */
 	for (ii = 0; ii < MAXFILES && (sp = (&_iob[ii]))->_flag & (_IOREAD | _IOWRT); ii++)
 		;
 	if (ii >= MAXFILES)
+	{
+		errno = EMFILE;
 		return NULL;				/*   fail           */
+	}
 	if (*mode == 'w' || *mode == 'W')	/* 'w'rite mode?        */
 		fd = _creat(name, CREATMODE, ascii);	/*  create file ******** */
 	else if (*mode == 'a' || *mode == 'A')	/* 'a'ppend mode?       */
@@ -78,25 +82,25 @@ PP(int, ascii;)								/* CP/M text file       */
 
 
 /* ascii file open */
-FILE *fopen(P(const char *, name), P(const char *, mode))
-PP(const char *, name;)
-PP(const char *, mode;)
+FILE *fopen(P(const char *) name, P(const char *) mode)
+PP(const char *name;)
+PP(const char *mode;)
 {
 	return _fopen(name, mode, 0);
 }
 
 /* ascii file open */
-FILE *fopena(P(const char *, name), P(const char *, mode))
-PP(const char *, name;)
-PP(const char *, mode;)
+FILE *fopena(P(const char *) name, P(const char *) mode)
+PP(const char *name;)
+PP(const char *mode;)
 {
 	return _fopen(name, mode, 0);
 }
 
 /* binary file open */
-FILE *fopenb(P(const char *, name), P(const char *, mode))
-PP(const char *, name;)
-PP(const char *, mode;)
+FILE *fopenb(P(const char *) name, P(const char *) mode)
+PP(const char *name;)
+PP(const char *mode;)
 {
 	return _fopen(name, mode, 1);
 }

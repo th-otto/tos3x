@@ -11,12 +11,12 @@
 #include "osif.h"
 
 
-char *__prtshort(P(char *, pobj), P(char **, pbuf), P(int, base), P(int, issigned), P(char *, digs))
-PP(char *, pobj;)
-PP(char **, pbuf;)
-PP(int, base;)
-PP(int, issigned;)
-PP(char *, digs;)
+char *__prtshort(P(char *) pobj, P(char **) pbuf, P(int) base, P(int) issigned, P(char *) digs)
+PP(char *pobj;)
+PP(char **pbuf;)
+PP(int base;)
+PP(int issigned;)
+PP(char *digs;)
 {
 	register unsigned int n;
 	register char *p;

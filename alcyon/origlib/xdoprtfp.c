@@ -24,11 +24,11 @@
 #include <math.h>
 #include <string.h>
 
-char *_pftoa(P(double *, addr), P(char *, buf), P(int, prec), P(int, c))
-PP(double *, addr;)
-PP(char *, buf;)
-PP(int, prec;)
-PP(int, c;)
+char *_pftoa(P(double *) addr, P(char *) buf, P(int) prec, P(int) c)
+PP(double *addr;)
+PP(char *buf;)
+PP(int prec;)
+PP(int c;)
 {
 	double fp;
 	
@@ -39,11 +39,11 @@ PP(int, c;)
 	return ftoa(fp, buf, prec);
 }
 
-char *_petoa(P(double *, addr), P(char *, buf), P(int, prec), P(int, c))
-PP(double *, addr;)
-PP(char *, buf;)
-PP(int, prec;)
-PP(int, c;)
+char *_petoa(P(double *) addr, P(char *) buf, P(int) prec, P(int) c)
+PP(double *addr;)
+PP(char *buf;)
+PP(int prec;)
+PP(int c;)
 {
 	double fp;
 	
@@ -54,11 +54,11 @@ PP(int, c;)
 	return etoa(fp, buf, prec);
 }
 
-char *_pgtoa(P(double *, addr), P(char *, buf), P(int, prec), P(int, c))
-PP(double *, addr;)
-PP(char *, buf;)
-PP(int, prec;)
-PP(int, c;)
+char *_pgtoa(P(double *) addr, P(char *) buf, P(int) prec, P(int) c)
+PP(double *addr;)
+PP(char *buf;)
+PP(int prec;)
+PP(int c;)
 {
 	char *sp;
 

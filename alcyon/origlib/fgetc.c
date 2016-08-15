@@ -19,8 +19,8 @@
 
 #define CMASK 0xFF
 
-int fgetc(P(FILE *, sp))
-PP(register FILE *, sp;)							/* stream pointer       */
+int fgetc(P(FILE *) sp)
+PP(register FILE *sp;)							/* stream pointer       */
 {
 	if (--sp->_cnt >= 0)				/* any chars left in buf?   */
 		return (((int) *sp->_ptr++) & CMASK);	/* return & advance ptr ifso */

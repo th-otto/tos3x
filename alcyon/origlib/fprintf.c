@@ -24,9 +24,9 @@
 
 int fprintf PROTO((FILE *sp, const char *fmt, ...));
 
-int fprintf(P(FILE *, sp), P(const char *, fmt) _va_alist)
-PP(FILE *, sp;)
-PP(const char *, fmt;)
+int fprintf(P(FILE *) sp, P(const char *) fmt _va_alist)
+PP(FILE *sp;)
+PP(const char *fmt;)
 _va_dcl
 {
 #ifdef __USE_STDARG

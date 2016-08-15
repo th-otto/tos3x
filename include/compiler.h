@@ -16,15 +16,15 @@
 #define VOIDPTR char *
 #define NOTHING                     /* no parameters */
 #define PROTO(p) ()
-#define P(t,v) v
-#define PP(t,v) t v
+#define P(t)
+#define PP(v) v
 #define volatile
 #define const
 #else
 #define NOTHING void                /* no parameters */
 #define PROTO(p) p
-#define P(t, v) t v
-#define PP(t, v)
+#define P(t) t
+#define PP(v)
 #endif
 
 #ifdef __TURBOC__

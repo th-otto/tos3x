@@ -4,10 +4,10 @@
 #include "lib.h"
 #include <math.h>
 
-char *ftoa(P(double, x), P(char *, str), P(int, prec))
-PP(double, x;)								/* Arg to convert   */
-PP(char, *str;)								/* -> Output area   */
-PP(int, prec;)								/* # digits right of dp */
+char *ftoa(P(double) x, P(char *) str, P(int) prec)
+PP(double x;)								/* Arg to convert   */
+PP(char *str;)								/* -> Output area   */
+PP(int prec;)								/* # digits right of dp */
 {
 	register int ie;
 	register int i;

@@ -16,10 +16,10 @@ VOID nostart(NOTHING) { ; }
 
 int main PROTO((char *, int));
 
-/* stubroutine for starup '_main()' */
-int _main(P(char *, cmd), P(int, len))
-PP(char *, cmd;)			/* ptr to CP/M command tail	    */
-PP(int, len;)			/* length of CP/M command tail	    */
+/* stubroutine for startup '_main()' */
+int _main(P(char *) cmd, P(int) len)
+PP(char *cmd;)			/* ptr to CP/M command tail	    */
+PP(int len;)			/* length of CP/M command tail	    */
 {
-	_exit(main(cmd,len));		/* call the main program	    */
+	_exit(main(cmd, len));		/* call the main program	    */
 }

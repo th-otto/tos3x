@@ -27,8 +27,8 @@
 
 
 
-static double power10(P(int, pwr))						/* 10^pwr */
-PP(int, pwr;)
+static double power10(P(int) pwr)						/* 10^pwr */
+PP(int pwr;)
 {
 	double f;
 
@@ -42,8 +42,8 @@ PP(int, pwr;)
 }
 
 
-static double strbin(P(const char *, p))							/* decimal string => binary long */
-PP(const char *, p;)
+static double strbin(P(const char *) p)							/* decimal string => binary long */
+PP(const char *p;)
 {
 	double f;
 
@@ -56,8 +56,8 @@ PP(const char *, p;)
 }
 
 
-double atof(P(const char *, buf))
-PP(const char *, buf;)
+double atof(P(const char *) buf)
+PP(const char *buf;)
 {
 	char ibuf[FRACSIZ];
 	char ebuf[EXPSIZ];

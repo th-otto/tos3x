@@ -18,8 +18,8 @@
  *	Returns : absolute Floating point number
  */
 
-double fabs(P(double, f))
-PP(double, f;)
+double fabs(P(double) f)
+PP(double f;)
 {
 	union {
 		double f;

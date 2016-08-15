@@ -37,10 +37,10 @@
 #define CHOOSELS(isl) ((isl) ? __prtld : __prtshort )	/* prt long or short  */
 #define XPUTC(a1,a2) {putc(a1,a2);nchrs++;}	/* count chars output       */
 
-int _doprt(P(FILE *, sp), P(const char *, fmt), P(char *, pb))
-PP(FILE *, sp;)							/* stream buffer ptr        */
-PP(const char *, fmt;)					/* format string        */
-PP(register char *, pb;)				/* pointer to args      */
+int _doprt(P(FILE *) sp, P(const char *) fmt, P(char *) pb)
+PP(FILE *sp;)							/* stream buffer ptr        */
+PP(const char *fmt;)					/* format string        */
+PP(register char *pb;)				/* pointer to args      */
 {
 	register char c;					/* format char          */
 	char **ppi;							/* pointer to ptr       */

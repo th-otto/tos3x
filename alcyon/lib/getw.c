@@ -19,8 +19,8 @@
 
 #include "lib.h"
 
-int getw(P(FILE *, sp))
-PP(register FILE *, sp;)				/* the stream to get from   */
+int getw(P(FILE *) sp)
+PP(register FILE *sp;)				/* the stream to get from   */
 {
 	int w;								/* place to get to      */
 	register char *p;					/* make ptr to w        */

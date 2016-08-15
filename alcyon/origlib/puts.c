@@ -17,8 +17,8 @@
 
 #include <stdio.h>
 
-int puts(P(register const char *, str))
-PP(register const char *, str;)							/* null term string     */
+int puts(P(register const char *) str)
+PP(register const char *str;)							/* null term string     */
 {
 	while (*str)						/* for all chars in s       */
 		if (putc(*str++, stdout) == -1)	/*   if putc fouls up       */

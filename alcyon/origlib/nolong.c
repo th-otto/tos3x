@@ -7,5 +7,5 @@
 /* stubroutine 'tag'	    */
 VOID nolong(NOTHING) { ; }
 
-char * __nolong_msg = "long int conversion";
+const char * __nolong_msg = "long int conversion";
 

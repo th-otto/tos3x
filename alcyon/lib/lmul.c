@@ -10,9 +10,9 @@
 
 #include "lib.h"
 
-long lmul(P(long, al1), P(long, al2))
-PP(long, al1;)
-PP(long, al2;)
+long lmul(P(long) al1, P(long) al2)
+PP(long al1;)
+PP(long al2;)
 {
 	register union ll t1;
 	register union ll l1;

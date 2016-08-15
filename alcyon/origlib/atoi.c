@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <portab.h>
 
-int atoi(P(const char *, s))
-PP(register const char *, s;)
+int atoi(P(const char *) s)
+PP(register const char *s;)
 {
 	register int val;
 	register int isneg;

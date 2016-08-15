@@ -6,14 +6,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-VOID _optoff(P(const char *, msg))
-PP(const char *, msg;)
+VOID _optoff(P(const char *) msg)
+PP(const char *msg;)
 {
-	char buf[200];						/* ought to be big enough   */
-
-	strcpy(buf, "C RTL - program not linked for ");
-	strcat(buf, msg);
-	strcat(buf, "\r\nProgram terminating\r\n$");
-	__OSIF(C_WRITESTR, buf);
+	__OSIF(C_WRITESTR, "C RTL - program not linked for ");
+	__OSIF(C_WRITESTR, msg);
+	__OSIF(C_WRITESTR, "\r\nProgram terminating\r\n");
 	_exit(-1);
 }

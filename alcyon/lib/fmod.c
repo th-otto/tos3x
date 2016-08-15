@@ -10,9 +10,9 @@
 /* fmod - returns the number f such that x = iy + f, and
 		  0 <= f <= y. */
 
-double fmod(P(double, x), P(double, y))
-PP(double, x;)
-PP(double, y;)
+double fmod(P(double) x, P(double) y)
+PP(double x;)
+PP(double y;)
 {
 	double z;
 	double retval;

@@ -28,10 +28,10 @@
 #include <osiferr.h>
 #include <errno.h>
 
-size_t read(P(int, fd), P(VOIDPTR, buff), P(size_t, bytes))
-PP(int, fd;)								/* File descriptor      */
-PP(VOIDPTR, buff;)							/* -> buffer start      */
-PP(size_t, bytes;)							/* =  byte count to read    */
+size_t read(P(int) fd, P(VOIDPTR) buff, P(size_t) bytes)
+PP(int fd;)								/* File descriptor      */
+PP(VOIDPTR buff;)							/* -> buffer start      */
+PP(size_t bytes;)							/* =  byte count to read    */
 {
 	register FD *fp;							/* -> ccb to read from      */
 

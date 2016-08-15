@@ -10,8 +10,8 @@
 /* floor - returns the largest integer (as a double precision
 		   number) not greater than x. */
 
-double floor(P(double, x))
-PP(double, x;)
+double floor(P(double) x)
+PP(double x;)
 {
 	register long i;
 	double retval;

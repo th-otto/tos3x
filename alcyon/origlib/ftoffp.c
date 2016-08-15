@@ -18,8 +18,8 @@
  *	Rely's on the fact that a long and a float are both 32 bits.
  */
 
-long fptoffp(P(double, f))							/* convert current machine float to ffp rep */
-PP(double, f;)								/* unsigned input, guaranteed positive */
+long fptoffp(P(double) f)							/* convert current machine float to ffp rep */
+PP(double f;)								/* unsigned input, guaranteed positive */
 {
 	register int exp, sign;
 	long l;

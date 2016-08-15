@@ -2,9 +2,9 @@
 
 long ldivr;
 
-long ldiv(P(long, al1), P(long, al2))
-PP(long, al1;)
-PP(long, al2;)
+long ldiv(P(long) al1, P(long) al2)
+PP(long al1;)
+PP(long al2;)
 {
 	register long l1, l2, q, b;
 	register int sign;

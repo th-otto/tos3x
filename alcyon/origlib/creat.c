@@ -30,10 +30,10 @@
 
 
 
-int _creat(P(const char *, fname), P(mode_t, prot), P(int, binary))
-PP(const char *, fname;)				/* -> File name         */
-PP(mode_t, prot;)						/* Open mode            */
-PP(int, binary;)						/* ASCII/BINARY flag        */
+int _creat(P(const char *) fname, P(mode_t) prot, P(int) binary)
+PP(const char *fname;)				/* -> File name         */
+PP(mode_t prot;)						/* Open mode            */
+PP(int binary;)						/* ASCII/BINARY flag        */
 {
 	register int ich;						/* Channel number for open  */
 	register FD *ch;						/* -> CCB for channel       */
@@ -67,25 +67,25 @@ PP(int, binary;)						/* ASCII/BINARY flag        */
 }
 
 /* default to ascii */
-int creat(P(const char *, fname), P(mode_t, prot))
-PP(const char *, fname;)
-PP(mode_t, prot;)
+int creat(P(const char *) fname, P(mode_t) prot)
+PP(const char * fname;)
+PP(mode_t prot;)
 {
 	return _creat(fname, prot, 0);
 }
 
 /* ascii file open */
-int creata(P(const char *, fname), P(mode_t, prot))
-PP(const char *, fname;)
-PP(mode_t, prot;)
+int creata(P(const char *) fname, P(mode_t) prot)
+PP(const char *fname;)
+PP(mode_t prot;)
 {
 	return _creat(fname, prot, 0);
 }
 
 /* binary file open */
-int creatb(P(const char *, fname), P(mode_t, prot))
-PP(const char *, fname;)
-PP(mode_t, prot;)
+int creatb(P(const char *) fname, P(mode_t) prot)
+PP(const char *fname;)
+PP(mode_t prot;)
 {
 	return _creat(fname, prot, 1);
 }

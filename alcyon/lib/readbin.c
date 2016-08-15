@@ -21,13 +21,13 @@
 #include "lib.h"
 #include <errno.h>
 
-long _rdbin(P(register FD *, fp), P(VOIDPTR, buff), P(long, bytes))
-PP(register FD *, fp;)								/* -> ccb for the file      */
-PP(register VOIDPTR, buff;)							/* -> buffer to receive data */
-PP(register long, bytes;)							/* =  # bytes to xfer       */
-{						/****************************/
+long _rdbin(P(register FD *) fp, P(VOIDPTR) buff, P(long) bytes)
+PP(register FD *fp;)								/* -> ccb for the file      */
+PP(register VOIDPTR buff;)							/* -> buffer to receive data */
+PP(register long bytes;)							/* =  # bytes to xfer       */
+{
 
-#if CPM	   /*===============================================================*/
+#if CPM
 	register char *p;						/* Temp byte pointer        */
 	LOCAL long xsector;					/* Temp sector number       */
 	LOCAL long nsector;					/* Multi-sector count       */

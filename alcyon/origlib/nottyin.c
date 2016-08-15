@@ -9,12 +9,12 @@ VOID nottyin(NOTHING)
 {
 }
 
-static char * __nottyin_msg = "tty input";
+static const char * __nottyin_msg = "tty input";
 
-size_t _ttyin(P(FD *, fp), P(VOIDPTR, buff), P(size_t, bytes))
-PP(FD *, fp;)
-PP(VOIDPTR, buff;)
-PP(size_t, bytes;)
+size_t _ttyin(P(FD *) fp, P(VOIDPTR) buff, P(size_t) bytes)
+PP(FD *fp;)
+PP(VOIDPTR buff;)
+PP(size_t bytes;)
 {
 	UNUSED(fp);
 	UNUSED(buff);

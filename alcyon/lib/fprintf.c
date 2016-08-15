@@ -13,10 +13,10 @@
 #include <string.h>
 
 
-static VOID __putch(P(FILE *, stream), P(int, mode), P(char, c))
-PP(FILE *, stream;)
-PP(int, mode;)
-PP(char, c;)
+static VOID __putch(P(FILE *) stream, P(int) mode, P(char) c)
+PP(FILE *stream;)
+PP(int mode;)
+PP(char c;)
 {
 	char **str;
 	
@@ -31,11 +31,11 @@ PP(char, c;)
 }
 
 
-int __doprint(P(FILE *, stream), P(const char *, fmt), P(int, mode), P(va_list, args))
-PP(FILE *, stream;)
-PP(register const char *, fmt;)
-PP(int, mode;)
-PP(va_list, args;)
+int __doprint(P(FILE *) stream, P(const char *) fmt, P(int) mode, P(va_list) args)
+PP(FILE *stream;)
+PP(register const char *fmt;)
+PP(int mode;)
+PP(va_list args;)
 {
 	register char c;
 	char buf[BUFSIZ];
@@ -261,9 +261,9 @@ PP(va_list, args;)
 #ifdef __USE_STDARG
 int fprintf(FILE *fp, const char *fmt, ...)
 #else
-int fprintf(P(FILE *, fp), P(const char *, fmt), va_alist)
-PP(FILE *, fp;)
-PP(const char *, fmt;)
+int fprintf(P(FILE *) fp, P(const char *) fmt, va_alist)
+PP(FILE *fp;)
+PP(const char *fmt;)
 va_dcl
 #endif
 {
@@ -284,9 +284,9 @@ va_dcl
 #ifdef __USE_STDARG
 int sprintf(char *s, const char *fmt, ...)
 #else
-int sprintf(P(char *, s), P(const char *, fmt), va_alist)
-PP(char *, s;)
-PP(const char *, fmt;)
+int sprintf(P(char *) s, P(const char *) fmt, va_alist)
+PP(char *s;)
+PP(const char *fmt;)
 va_dcl
 #endif
 {

@@ -13,12 +13,12 @@ extern long uldiv PROTO((long, long));
 extern struct long_struct uldivr;
 
 
-char *__prtld(P(char *, pobj), P(char **, pbuf), P(int, base), P(int, issigned), P(char *, digs))
-PP(char *, pobj;)
-PP(char **, pbuf;)
-PP(int, base;)
-PP(int, issigned;)
-PP(char, *digs;)
+char *__prtld(P(char *) pobj, P(char **) pbuf, P(int) base, P(int) issigned, P(char *) digs)
+PP(char *pobj;)
+PP(char **pbuf;)
+PP(int base;)
+PP(int issigned;)
+PP(char *digs;)
 {
 	register long n;
 	register long b;

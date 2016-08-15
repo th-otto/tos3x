@@ -7,9 +7,9 @@
  *	lmul.s does the meat of the work
  */
 
-VOID almul(P(register long *, l1), P(long, l2))
-PP(register long *, l1;)
-PP(long, l2;)
+VOID almul(P(register long *) l1, P(long) l2)
+PP(register long *l1;)
+PP(long l2;)
 {
 	*l1 = lmul(*l1, l2);
 }

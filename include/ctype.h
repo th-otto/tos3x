@@ -31,7 +31,7 @@
 #define	__cs	041
 #define	__ps	042
 
-extern	char	__atab[];
+extern	char const __atab[];
 
 /*
  *	Character Class Testing and Conversion DEFINEs:

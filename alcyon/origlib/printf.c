@@ -24,8 +24,8 @@
 
 int printf PROTO((const char *fmt, ...));
 
-int printf(P(const char *, fmt) _va_alist)
-PP(const char *, fmt;)
+int printf(P(const char *) fmt _va_alist)
+PP(const char * fmt;)
 _va_dcl
 {
 #ifdef __USE_STDARG

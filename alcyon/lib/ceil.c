@@ -10,8 +10,8 @@
 /* ceil - returns the smallest integer (as a double precision
 		  number) not greater than x. */
 
-double ceil(P(double, x))
-PP(double, x;)
+double ceil(P(double) x)
+PP(double x;)
 {
 	register long i;
 	double retval;

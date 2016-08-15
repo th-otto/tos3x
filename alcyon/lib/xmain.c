@@ -27,9 +27,9 @@
 
 #define ISWHITE(ch) ((ch) == '\0' || isspace(ch))
 
-int _main(P(char *, com), P(int, len))
-PP(char *, com;)							/* Command address      */
-PP(int, len;)								/* Command length       */
+int _main(P(char *) com, P(int) len)
+PP(char * com;)							/* Command address      */
+PP(int len;)								/* Command length       */
 {
 	register char *s;						/* Temp char pointer        */
 

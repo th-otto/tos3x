@@ -21,8 +21,8 @@
 #include <stdlib.h>
 #define CMASK 0xFF
 
-int _filbuf(P(register FILE *, sp))
-PP(register FILE *,sp;)							/* from this stream     */
+int _filbuf(P(register FILE *) sp)
+PP(register FILE *sp;)							/* from this stream     */
 {
 	static char onebuf[MAXFILES];		/* a place if no mem avail. */
 

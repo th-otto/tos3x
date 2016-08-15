@@ -6,7 +6,8 @@
 
 #include <ctype.h>
 
-char __atab[] = {	/* table of ascii char types */
+/* table of ascii char types */
+char const __atab[] = {
 
 /********************************************************************/
 /*	 nn0	nn1	nn2	nn3	nn4	nn5	nn6	nn7 */

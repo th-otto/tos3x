@@ -18,8 +18,8 @@
  *	Return : Floating Point representation of Long Fixed point integer
  */
 
-long fpltof(P(long, l))
-PP(long, l;)
+long fpltof(P(long) l)
+PP(long l;)
 {
 	register long exp;
 	register int sign;

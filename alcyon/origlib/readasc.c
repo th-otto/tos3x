@@ -27,10 +27,10 @@
 /* Zaps CRs in buff */
 size_t _cr_collapse PROTO((char *buf, size_t cnt));
 
-size_t _rdasc(P(register FD *, fp), P(VOIDPTR, buff), P(long, bytes))
-PP(register FD *, fp;)								/* -> ccb for the file      */
-PP(register VOIDPTR, buff;)							/* -> buffer to receive data */
-PP(register long, bytes;)							/* =  # bytes to xfer       */
+size_t _rdasc(P(register FD *) fp, P(VOIDPTR) buff, P(long) bytes)
+PP(register FD *fp;)								/* -> ccb for the file      */
+PP(register VOIDPTR buff;)							/* -> buffer to receive data */
+PP(register long bytes;)							/* =  # bytes to xfer       */
 {
 #if CPM	   /*===============================================================*/
 	register char *p1;						/* Temp byte pointer        */
@@ -127,9 +127,9 @@ PP(register long, bytes;)							/* =  # bytes to xfer       */
 
 #if PCDOS
 
-size_t _cr_collapse(P(char *, buf), P(size_t, cnt))			/* Stomp out Returns (0x13) */
-PP(register char, *buf;)							/* Where to stomp       */
-PP(size_t, cnt;)								/* How much of buf to stomp */
+size_t _cr_collapse(P(char *) buf, P(size_t) cnt)			/* Stomp out Returns (0x13) */
+PP(register char *buf;)							/* Where to stomp       */
+PP(size_t cnt;)								/* How much of buf to stomp */
 {
 	register char *chk;						/* Check pointer        */
 	char *savbuf;						/* Save pointer         */

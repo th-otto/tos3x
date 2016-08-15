@@ -6,8 +6,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-VOID _optoff(P(const char *, msg))
-PP(const char *, msg;)
+VOID _optoff(P(const char *) msg)
+PP(const char *msg;)
 {
 	char buf[200];						/* ought to be big enough   */
 

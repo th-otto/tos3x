@@ -20,8 +20,8 @@
  *	Rely's on the fact that a long and a float are both 32 bits.
  */
 
-double ffptof(P(long, lf))
-PP(long, lf;)
+double ffptof(P(long) lf)
+PP(long lf;)
 {
 	register int exp, fsign;
 	double f;

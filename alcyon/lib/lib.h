@@ -118,5 +118,3 @@ VOID nobinary PROTO((NOTHING));
 VOID nofilesz PROTO((NOTHING));
 VOID nofloat PROTO((NOTHING));
 VOID nowildcards PROTO((NOTHING));
-
-int main PROTO((int argc, char **argv, char **envp));

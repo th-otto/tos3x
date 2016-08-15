@@ -4,9 +4,9 @@
 
 long uldivr;
 
-long uldiv(P(long, al1), P(long, al2))
-PP(long, al1;)
-PP(long, al2;)
+long uldiv(P(long) al1, P(long) al2)
+PP(long al1;)
+PP(long al2;)
 {
 	register unsigned long l1, l2;
 	register long q, b;

@@ -18,8 +18,8 @@
  *	Return : Fixed Point representation of Floating Point Number
  */
 
-long fpftol(P(long, f))
-PP(long, f;)
+long fpftol(P(long) f)
+PP(long f;)
 {
 	register long l;
 	register int exp, sign;

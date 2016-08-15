@@ -9,12 +9,12 @@
 
 extern long uldivr;
 
-char *__prtld(P(register long, n), P(char **, pbuf), P(int, base), P(int, issigned), P(char *, digs))
-PP(register long, n;)
-PP(char **, pbuf;)
-PP(int, base;)
-PP(int, issigned;)
-PP(char, *digs;)
+char *__prtld(P(register long) n, P(char **) pbuf, P(int) base, P(int) issigned, P(char *) digs)
+PP(register long n;)
+PP(char **pbuf;)
+PP(int base;)
+PP(int issigned;)
+PP(char *digs;)
 {
 	register long b;
 	register char *p;

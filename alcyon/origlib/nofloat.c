@@ -7,7 +7,11 @@ VOID nofloat(NOTHING) { ; }					/* stubroutine 'tag'	    */
 
 const char *__nofloat_msg = "floating point";
 
-char *_petoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
+char *_petoa(P(double *) pb, P(char *) buf, P(int) prec, P(int) c)
+PP(double *pb;)
+PP(char *buf;)
+PP(int prec;)
+PP(int c;)
 {
 	UNUSED(pb);
 	UNUSED(buf);
@@ -17,7 +21,11 @@ char *_petoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
 }
 
 
-char *_pftoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
+char *_pftoa(P(double *) pb, P(char *) buf, P(int) prec, P(int) c)
+PP(double *pb;)
+PP(char *buf;)
+PP(int prec;)
+PP(int c;)
 {
 	UNUSED(pb);
 	UNUSED(buf);
@@ -27,7 +35,11 @@ char *_pftoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
 }
 
 
-char *_pgtoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
+char *_pgtoa(P(double *) pb, P(char *) buf, P(int) prec, P(int) c)
+PP(double *pb;)
+PP(char *buf;)
+PP(int prec;)
+PP(int c;)
 {
 	UNUSED(pb);
 	UNUSED(buf);
@@ -37,7 +49,8 @@ char *_pgtoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
 }
 
 
-VOID _atof(P(const char *, str))
+VOID _atof(P(const char *) str)
+PP(const char *str;)
 {
 	UNUSED(str);
 	_optoff(__nofloat_msg);

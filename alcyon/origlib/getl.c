@@ -19,8 +19,8 @@
 
 #include "lib.h"
 
-long getl(P(FILE *, sp))
-PP(register FILE *, sp;)					/* the stream to get from   */
+long getl(P(FILE *) sp)
+PP(register FILE *sp;)					/* the stream to get from   */
 {
 	long l;									/* place to get to      */
 	register char *p;						/* make ptr to l        */

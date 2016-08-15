@@ -5,10 +5,10 @@
 #include <math.h>
 #include <string.h>
 
-char *gtoa(P(double, x), P(char *, buf), P(int, prec))
-PP(double, x;)								/* Arg to convert   */
-PP(char *, buf;)							/* -> Output area   */
-PP(int, prec;)								/* # digits right of dp */
+char *gtoa(P(double) x, P(char *) buf, P(int) prec)
+PP(double x;)								/* Arg to convert   */
+PP(char *buf;)							/* -> Output area   */
+PP(int prec;)								/* # digits right of dp */
 {
 	char *sp;
 	

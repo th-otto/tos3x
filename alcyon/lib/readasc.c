@@ -28,9 +28,9 @@
 
 /* Zaps CRs in buff */
 
-static long _cr_collapse(P(char *, buf), P(long, cnt))
-PP(register char, *buf;)							/* Where to stomp       */
-PP(long, cnt;)								/* How much of buf to stomp */
+static long _cr_collapse(P(char *) buf, P(long) cnt)
+PP(register char *buf;)							/* Where to stomp       */
+PP(long cnt;)								/* How much of buf to stomp */
 {
 	register char *chk;						/* Check pointer        */
 	char *savbuf;						/* Save pointer         */
@@ -46,10 +46,10 @@ PP(long, cnt;)								/* How much of buf to stomp */
 #endif
 
 
-long _rdasc(P(register FD *, fp), P(VOIDPTR, buff), P(long, bytes))
-PP(register FD *, fp;)								/* -> ccb for the file      */
-PP(register VOIDPTR, buff;)							/* -> buffer to receive data */
-PP(register long, bytes;)							/* =  # bytes to xfer       */
+long _rdasc(P(register FD *) fp, P(VOIDPTR) buff, P(long) bytes)
+PP(register FD *fp;)								/* -> ccb for the file      */
+PP(register VOIDPTR buff;)							/* -> buffer to receive data */
+PP(register long bytes;)							/* =  # bytes to xfer       */
 {
 #if CPM	   /*===============================================================*/
 	register char *p1;						/* Temp byte pointer        */

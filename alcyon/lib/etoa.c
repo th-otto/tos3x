@@ -3,10 +3,10 @@
  */
 #include <math.h>
 
-char *etoa(P(double, x), P(char *, str), P(int, prec))
-PP(double, x;)								/* Arg to convert   */
-PP(char *, str;)							/* -> Output area   */
-PP(int, prec;)								/* # digits right of dp */
+char *etoa(P(double) x, P(char *) str, P(int) prec)
+PP(double x;)								/* Arg to convert   */
+PP(char *str;)							/* -> Output area   */
+PP(int prec;)								/* # digits right of dp */
 {
 	register int ie, i, k, ndig;		/* Temps        */
 	char *savstr;						/* Copy of str to return */
