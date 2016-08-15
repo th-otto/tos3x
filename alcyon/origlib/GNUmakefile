@@ -10,13 +10,17 @@ include ../Makefile.silent
 CPPFLAGS = -I ../include -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-all: klib.a crt0.o
+all: libc.a options.a crt0.o
 
 include SRCFILES
 
-klib.a: $(OBJS)
+libc.a: $(OBJS)
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OBJS)
+
+options.a: $(OPTIONOBJS)
+	$(AM_V_at)$(RM) $@
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OPTIONOBJS)
 
 clean:
 	$(RM) *.o *.a

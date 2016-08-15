@@ -43,5 +43,10 @@
 #define CDECL
 #endif
 
+#ifndef __attribute__
+#  ifndef __GNUC__
+#    define __attribute__(x)
+#  endif
+#endif
 
 #endif /* __COMPILER_H__ */

@@ -7,7 +7,38 @@ VOID nofloat(NOTHING) { ; }					/* stubroutine 'tag'	    */
 
 const char *__nofloat_msg = "floating point";
 
-VOID _petoa(NOTHING) { _optoff(__nofloat_msg); }
-VOID _pftoa(NOTHING) { _optoff(__nofloat_msg); }
-VOID _pgtoa(NOTHING) { _optoff(__nofloat_msg); }
-VOID _atof(NOTHING)   { _optoff(__nofloat_msg); }
+char *_petoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
+{
+	UNUSED(pb);
+	UNUSED(buf);
+	UNUSED(prec);
+	UNUSED(c);
+	_optoff(__nofloat_msg);
+}
+
+
+char *_pftoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
+{
+	UNUSED(pb);
+	UNUSED(buf);
+	UNUSED(prec);
+	UNUSED(c);
+	_optoff(__nofloat_msg);
+}
+
+
+char *_pgtoa(P(double *, pb), P(char *, buf), P(int, prec), P(int, c))
+{
+	UNUSED(pb);
+	UNUSED(buf);
+	UNUSED(prec);
+	UNUSED(c);
+	_optoff(__nofloat_msg);
+}
+
+
+VOID _atof(P(const char *, str))
+{
+	UNUSED(str);
+	_optoff(__nofloat_msg);
+}

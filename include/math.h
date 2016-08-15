@@ -23,6 +23,7 @@ extern	double	cos PROTO((double x));		/* cosine				*/
 extern	double	sin PROTO((double x));		/* sine					*/
 char *ftoa PROTO((double fp, char *buf, int prec));		/* floating to string			*/
 char *etoa PROTO((double fp, char *buf, int prec));		/* floating to string			*/
+char *gtoa PROTO((double fp, char *buf, int prec));		/* floating to string			*/
 extern	double	exp PROTO((double x));		/* exponent base e			*/
 extern	double	fabs PROTO((double x));		/* floating absolute val		*/
 extern	double	floor PROTO((double x));	/* floor function			*/

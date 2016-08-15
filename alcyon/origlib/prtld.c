@@ -6,39 +6,50 @@
 */
 
 #include "lib.h"
+#include "osif.h"
 
-char *__prtld(P(register long, n), P(char **, pbuf), P(int, base), P(int, issigned), P(char *, digs))
-PP(register long, n;)
+extern long uldiv PROTO((long, long));
+
+extern struct long_struct uldivr;
+
+
+char *__prtld(P(char *, pobj), P(char **, pbuf), P(int, base), P(int, issigned), P(char *, digs))
+PP(char *, pobj;)
 PP(char **, pbuf;)
 PP(int, base;)
 PP(int, issigned;)
 PP(char, *digs;)
 {
+	register long n;
 	register long b;
 	register char *p;
-	register int i;
+	register int ii;
 
+	struct long_struct *p_uldivr;
+
+	p_uldivr = &uldivr;
 	p = digs;
 	b = base;
+	n = *((long *)pobj);
 	if (base == 16)
 	{									/* special because of negatives */
-		i = 8;
-		while (n && i)
+		ii = 8;
+		while (n && ii)
 		{
-			*p++ = n & 0xf;
+			*p++ = (int) n & 0xf;
 			n >>= 4;
-			i--;
+			ii--;
 		}
 	} else if (base == 8)
 	{
-		i = 11;
-		while (n && i)
+		ii = 11;
+		while (n && ii)
 		{
-			*p++ = n & 7;
+			*p++ = (int) n & 7;
 			n >>= 3;
-			i--;
+			ii--;
 		}
-		if (i == 0)
+		if (ii == 0)
 		{
 			*(p - 1) &= 3;				/* only 2 bits in upper octal digit */
 		}
@@ -51,8 +62,8 @@ PP(char, *digs;)
 		}
 		while (n)
 		{
-			*p++ = n % b;
-			n /= b;
+			n = uldiv(n, b);			/* n>0 (or unsigned), do unsigned div */
+			*p++ = p_uldivr->lblolo;
 		}
 	}
 	return p;

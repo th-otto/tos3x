@@ -1,8 +1,12 @@
 /* NOFILESZ: eliminates routine to calculate filesize (used in lseek()) */
 
+#include "lib.h"
 
-nofilesz() { ; }				/* stubroutine 'tag'	    */
+VOID nofilesz(NOTHING) { ; }				/* stubroutine 'tag'	    */
 
 
-int	_filesz() { return 32767; }
+long _filesz(P(int, fd))
+{
+	return 32767;
+}
 

@@ -22,8 +22,8 @@ va_dcl
 	va_list args;
 	register int ret;
 	
-	__c_va_start(args, fmt);
+	_va_start(args, fmt);
 	ret = __doprint(stdout, fmt, 0, args);
-	__c_va_end(args);
+	_va_end(args);
 	return ret;
 }

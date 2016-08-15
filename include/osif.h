@@ -28,6 +28,9 @@
  *									    
  ****************************************************************************/
 
+#ifndef __OSIF_H__
+#define __OSIF_H__ 1
+
 /*
  *	"machine.h": to determine what kind of machine you want to run on.
  */
@@ -287,3 +290,5 @@ struct word_struct{				/*			    */
 #endif						/****************************/
 
 /*************************** end of osif.h **********************************/
+
+#endif /* __OSIF_H__ */

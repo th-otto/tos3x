@@ -49,6 +49,7 @@ COBJS = \
 	floor.o \
 	fmod.o \
 	ftoa.o \
+	gtoa.o \
 	ftoffp.o \
 	ftol.o \
 	ltof.o \
@@ -57,6 +58,7 @@ COBJS = \
 	xdoprtfp.o \
 	prtld.o \
 	prtint.o \
+	prtshort.o \
 	ctype.o \
 	getl.o \
 	getw.o \
@@ -64,6 +66,7 @@ COBJS = \
 	xmain.o \
 	fgetc.o \
 	filbuf.o \
+	read.o \
 	\
 	ldiv.o \
 	lmul.o \

@@ -19,6 +19,7 @@ extern	int	rand PROTO((NOTHING));		/* random function			*/
 extern	VOID srand PROTO((unsigned int seed));	/* seed random generator		*/
 
 VOID abort PROTO((NOTHING));
-VOID _exit PROTO((int status));
+VOID _exit PROTO((int status)) __attribute__((noreturn));
+VOID exit PROTO((int status)) __attribute__((noreturn));
 
 #endif /* __STDLIB_H__ */

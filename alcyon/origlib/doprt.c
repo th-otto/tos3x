@@ -214,7 +214,7 @@ PP(register char *, pb;)				/* pointer to args      */
 			case 'E':
 			case 'e':
 				/* E format */
-				_petoa(pb, buf, prec, c);	/* Do the conversion       */
+				_petoa((double *)pb, buf, prec, c);	/* Do the conversion       */
 				FARG(pb);				/* Bump to next arg     */
 				prec = -1;				/* Avoid truncation     */
 				break;
@@ -222,7 +222,7 @@ PP(register char *, pb;)				/* pointer to args      */
 			case 'F':
 			case 'f':
 				/* F format floating */
-				_pftoa(pb, buf, prec, c);	/* do the conversion       */
+				_pftoa((double *)pb, buf, prec, c);	/* do the conversion       */
 				FARG(pb);				/* Bump to next arg     */
 				prec = -1;				/* Avoid truncation     */
 				break;
@@ -230,7 +230,7 @@ PP(register char *, pb;)				/* pointer to args      */
 			case 'G':
 			case 'g':
 				/* G format floating */
-				_pgtoa(pb, buf, prec, c);	/* do the conversion       */
+				_pgtoa((double *)pb, buf, prec, c);	/* do the conversion       */
 				FARG(pb);				/* Bump to next arg     */
 				prec = -1;				/* Avoid truncation     */
 				break;

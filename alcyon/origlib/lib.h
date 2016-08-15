@@ -27,6 +27,19 @@
 
 #include <stdio.h>
 
+#ifdef __ALCYON__
+#  define UNUSED(x)
+#else
+#  define UNUSED(x) ((void)(x))
+#endif
+
+#ifndef __attribute__
+#  ifndef __GNUC__
+#    define __attribute__(x)
+#  endif
+#endif
+
+
 #define CREATMODE 1						/* mode to use for 'creat'  */
 
 /* file descriptors */
@@ -38,16 +51,16 @@ extern char __tname[];					/* Terminal name        */
 extern char __pname[];					/* Program name         */
 extern char *_break;					/* -> Program break location */
 
-VOID _petoa PROTO((char *, char *, int, int));
-VOID _pftoa PROTO((char *, char *, int, int));
-VOID _pgtoa PROTO((char *, char *, int, int));
+char *_petoa PROTO((double *, char *, int, int));
+char *_pftoa PROTO((double *, char *, int, int));
+char *_pgtoa PROTO((double *, char *, int, int));
 VOID _atof PROTO((const char *));
 
-typedef char *(*printfunc) PROTO((long n, char **pbuf, int base, int issigned, char *digs));
+typedef char *(*printfunc) PROTO((char *pobj, char **pbuf, int base, int issigned, char *digs));
 
-char *__prtshort PROTO((long n, char **pbuf, int base, int issigned, char *digs));
-char *__prtld PROTO((long n, char **pbuf, int base, int issigned, char *digs));
-char *__prtint PROTO((char *, char *pbuf, int base, int issigned, printfunc f));
+char *__prtshort PROTO((char *pobj, char **pbuf, int base, int issigned, char *digs));
+char *__prtld PROTO((char *pobj, char **pbuf, int base, int issigned, char *digs));
+char *__prtint PROTO((char *pobj, char *pbuf, int base, int issigned, printfunc f));
 
 int __doprint PROTO((FILE *stream, const char *fmt, int mode, va_list args));
 
@@ -60,11 +73,29 @@ int _doprt PROTO((FILE *sp, const char * fmt, char *pb));
 int _creat PROTO((const char *name, int prot, int type));
 int _open PROTO((const char *name, int mode, int type));
 
-VOID nofloat PROTO((NOTHING));
-VOID _optoff PROTO((const char * msg));
+VOID _optoff PROTO((const char * msg)) __attribute__((noreturn));
 
 VOID _chinit PROTO((NOTHING));
 int _main PROTO((char *com, int len));
 int __main PROTO((char *com, int len));
 
 int _filbuf PROTO((FILE *));
+long _filesz PROTO((int fd));
+
+#ifdef __OSIF_H__
+FD *_chkc PROTO((int fd));						/* Converts fd to fp */
+size_t _ttyin PROTO((FD *fp, VOIDPTR buff, size_t bytes));					/* Read from tty rtn        */
+size_t _rdasc PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read ascii rtn       */
+size_t _rdbin PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read binary rtn      */
+size_t _wrtasc PROTO((FD *fp, const VOIDPTR buff, long bytes));
+size_t _wrtbin PROTO((FD *fp, const VOIDPTR buff, long bytes));
+#endif
+
+VOID nottyin PROTO((NOTHING));
+VOID nostart PROTO((NOTHING));
+VOID nodisk PROTO((NOTHING));
+VOID nolong PROTO((NOTHING));
+VOID noascii PROTO((NOTHING));
+VOID nobinary PROTO((NOTHING));
+VOID nofilesz PROTO((NOTHING));
+VOID nofloat PROTO((NOTHING));

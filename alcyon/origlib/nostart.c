@@ -8,12 +8,18 @@
 /* NOTE: 'argc/argv' is replaced by 'cmd/len', where cmd -> command tail    */
 /*	and len is the length of this string.				    */
 
+#include "lib.h"
+#include <stdlib.h>
 
-nostart() { ; }				/* stubroutine tag		    */
+/* stubroutine tag */
+VOID nostart(NOTHING) { ; }
 
-_main(cmd,len)				/* stubroutine for starup '_main()' */
-	char *cmd;			/* ptr to CP/M command tail	    */
-	int len;			/* length of CP/M command tail	    */
+int main PROTO((char *, int));
+
+/* stubroutine for starup '_main()' */
+int _main(P(char *, cmd), P(int, len))
+PP(char *, cmd;)			/* ptr to CP/M command tail	    */
+PP(int, len;)			/* length of CP/M command tail	    */
 {
 	_exit(main(cmd,len));		/* call the main program	    */
 }

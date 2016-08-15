@@ -2,7 +2,10 @@
 	library references from 'printf' et al.	
 */
 
-nolong() { ; }					/* stubroutine 'tag'	    */
+#include "lib.h"
+
+/* stubroutine 'tag'	    */
+VOID nolong(NOTHING) { ; }
 
 char * __nolong_msg = "long int conversion";
 

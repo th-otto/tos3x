@@ -41,8 +41,8 @@ COBJS2 = \
 
 COBJS3 = \
 	prtint.o \
+	prtshort.o \
 	ctype.o \
-	nofloat.o \
 	fopen.o \
 	getl.o \
 	getw.o \
@@ -55,8 +55,21 @@ COBJS4 = \
 	puts.o \
 	fgetc.o \
 	filbuf.o \
+	read.o \
 	$(empty)
 
-COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4)
+COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5)
 
 OBJS = $(AOBJS) $(COBJS)
+
+OPTIONOBJS = \
+	nofloat.o \
+	nottyin.o \
+	nostart.o \
+	nodisk.o \
+	nolong.o \
+	noascii.o \
+	nobinary.o \
+	nofilesz.o \
+	$(empty)
+

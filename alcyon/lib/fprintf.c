@@ -213,9 +213,7 @@ PP(va_list, args;)
 		case 'g':						/* e or f */
 		case 'G':
 			d = va_arg(args, double);
-			pftoa(d, buf, prec);
-			if (strlen(buf) > (7 + prec))	/* smallest fp string */
-				petoa(d, buf, prec);
+			pgtoa(d, buf, prec);
 			prec = -1;
 			break;
 
@@ -275,9 +273,9 @@ va_dcl
 	if (!(fp->_flag & _IOWRT))
 		return -1;
 
-	__c_va_start(args, fmt);
+	_va_start(args, fmt);
 	ret = __doprint(fp, fmt, 0, args);
-	__c_va_end(args);
+	_va_end(args);
 	fflush(fp);
 	return ret;
 }
@@ -297,9 +295,9 @@ va_dcl
 	va_list args;
 	
 	stream = (FILE *)&s;
-	__c_va_start(args, fmt);
+	_va_start(args, fmt);
 	ret = __doprint(stream, fmt, 1, args);
-	__c_va_end(args);
+	_va_end(args);
 	*s = '\0';
 	return ret;
 }
