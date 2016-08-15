@@ -90,6 +90,7 @@ VOID _optoff PROTO((const char * msg)) __attribute__((noreturn));
 VOID _chinit PROTO((NOTHING));
 VOID __chinit PROTO((int fd));
 int _allocc PROTO((NOTHING));						/* gets a channel       */
+int _freec PROTO((int fd));
 
 int _main PROTO((char *com, int len));
 int __main PROTO((char *com, int len));
