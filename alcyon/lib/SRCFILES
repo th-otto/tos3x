@@ -71,6 +71,7 @@ COBJS = \
 	readasc.o \
 	readbin.o \
 	creat.o \
+	exit.o \
 	\
 	ldiv.o \
 	lmul.o \

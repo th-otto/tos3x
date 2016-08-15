@@ -60,6 +60,7 @@ COBJS4 = \
 	readasc.o \
 	readbin.o \
 	creat.o \
+	exit.o \
 	$(empty)
 
 COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5)

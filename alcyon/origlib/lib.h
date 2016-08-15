@@ -83,6 +83,7 @@ int _allocc PROTO((NOTHING));						/* gets a channel       */
 
 int _main PROTO((char *com, int len));
 int __main PROTO((char *com, int len));
+VOID _cleanup PROTO((NOTHING));
 
 int _filbuf PROTO((FILE *));
 long _filesz PROTO((int fd));
