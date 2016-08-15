@@ -97,19 +97,23 @@ int fputc PROTO((int c, FILE *stream));
 int fgetc PROTO((FILE *stream));
 
 int fflush PROTO((FILE *stream));
+int puts PROTO((const char * str));
 
 FILE *fopen PROTO((const char * name, const char * mode));
-
-FILE *fopena PROTO((const char * name, const char *mode));
-FILE *fopenb PROTO((const char * name, const char *mode));
 
 int open PROTO((const char *pathname, int flags, ...));
 int creat PROTO((const char *pathname, mode_t mode));
 int close PROTO((int fd));
 long lseek PROTO((int fd, long offs, int whence));
 
+/*
+ * non-standard functions
+ */
 long getl PROTO((FILE * sp));
 int getw PROTO((FILE * sp));
+
+FILE *fopena PROTO((const char * name, const char *mode));
+FILE *fopenb PROTO((const char * name, const char *mode));
 
 int fputn PROTO((const char *buf, int num, FILE *sp));
 

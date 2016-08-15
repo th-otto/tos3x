@@ -52,6 +52,7 @@ COBJS3 = \
 
 COBJS4 = \
 	doprt.o \
+	puts.o \
 	$(empty)
 
 COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4)
