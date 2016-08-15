@@ -15,6 +15,8 @@
 *****************************************************************************/
 
 #include "lib.h"
+#include <stdlib.h>
+
 #define CMASK 0xFF
 
 int fgetc(P(FILE *, sp))

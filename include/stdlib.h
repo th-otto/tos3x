@@ -4,6 +4,14 @@
 #ifndef __COMPILER_H__
 #include <compiler.h>
 #endif
+#ifndef __SYS_TYPES_H__
+#include <sys/types.h>
+#endif
+
+VOIDPTR malloc PROTO((size_t size));
+VOID free PROTO((VOIDPTR));
+VOIDPTR realloc PROTO((VOIDPTR ptr, size_t size));
+VOIDPTR calloc PROTO((size_t nmemb, size_t size));
 
 int atoi PROTO((const char *s));
 

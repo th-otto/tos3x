@@ -105,6 +105,7 @@ int open PROTO((const char *pathname, int flags, ...));
 int creat PROTO((const char *pathname, mode_t mode));
 int close PROTO((int fd));
 long lseek PROTO((int fd, long offs, int whence));
+size_t read PROTO((int fd, VOIDPTR buf, size_t count));
 
 /*
  * non-standard functions

@@ -63,6 +63,7 @@ COBJS = \
 	fopen.o \
 	xmain.o \
 	fgetc.o \
+	filbuf.o \
 	\
 	ldiv.o \
 	lmul.o \
