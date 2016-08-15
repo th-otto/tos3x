@@ -67,6 +67,8 @@ COBJS = \
 	fgetc.o \
 	filbuf.o \
 	read.o \
+	readasc.o \
+	readbin.o \
 	\
 	ldiv.o \
 	lmul.o \

@@ -56,6 +56,8 @@ COBJS4 = \
 	fgetc.o \
 	filbuf.o \
 	read.o \
+	readasc.o \
+	readbin.o \
 	$(empty)
 
 COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5)

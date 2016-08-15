@@ -89,6 +89,8 @@ size_t _rdasc PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read ascii rtn  
 size_t _rdbin PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read binary rtn      */
 size_t _wrtasc PROTO((FD *fp, const VOIDPTR buff, long bytes));
 size_t _wrtbin PROTO((FD *fp, const VOIDPTR buff, long bytes));
+size_t _pc_readblk PROTO((struct fcbtab *fcb, long offset, VOIDPTR buff, size_t bytes, size_t secsiz));
+size_t _pc_writeblk PROTO((struct fcbtab *fcb, long offset, const VOIDPTR buff, size_t bytes, size_t secsiz));
 #endif
 
 VOID nottyin PROTO((NOTHING));

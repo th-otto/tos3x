@@ -10,6 +10,8 @@ printf_OPTIMIZE=0
 fprintf_OPTIMIZE=0
 doprt_OPTIMIZE=0
 prtint_OPTIMIZE=0
+readasc_OPTIMIZE=0
+readbin_OPTIMIZE=0
 
 libc.a: $(OBJS)
 	$(AM_V_at)$(RM) $@

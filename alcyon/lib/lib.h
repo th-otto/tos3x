@@ -95,10 +95,12 @@ long _filesz PROTO((int fd));
 #ifdef __OSIF_H__
 FD *_chkc PROTO((int fd));						/* Converts fd to fp */
 size_t _ttyin PROTO((FD *fp, VOIDPTR buff, size_t bytes));					/* Read from tty rtn        */
-size_t _rdasc PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read ascii rtn       */
-size_t _rdbin PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read binary rtn      */
-size_t _wrtasc PROTO((FD *fp, const VOIDPTR buff, long bytes));
-size_t _wrtbin PROTO((FD *fp, const VOIDPTR buff, long bytes));
+long _rdasc PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read ascii rtn       */
+long _rdbin PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read binary rtn      */
+long _wrtasc PROTO((FD *fp, const VOIDPTR buff, long bytes));
+long _wrtbin PROTO((FD *fp, const VOIDPTR buff, long bytes));
+long _pc_readblk PROTO((struct fcbtab *fcb, long offset, VOIDPTR buff, long bytes));
+long _pc_writeblk PROTO((struct fcbtab *fcb, long offset, const VOIDPTR buff, long bytes));
 #endif
 
 VOID nottyin PROTO((NOTHING));
