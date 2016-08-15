@@ -36,11 +36,11 @@ struct _iobuf {                         /*                                  */
         char *_ptr;                     /* current r/w pointer              */
          int _cnt;                      /* # chars to be read/have been wrt */
 };                                      /*                                  */
-#ifndef FILE                            /* conditionally include:           */
-extern struct _iobuf _iob[MAXFILES];    /* an array of this info            */
-typedef struct _iobuf FILE;             /* stream definition                */
-#endif                                  /************************************/
-                                        /* flag byte definition             */
+
+extern struct _iobuf _iob[MAXFILES];
+typedef struct _iobuf FILE;
+
+/* flag byte definition             */
 #define _IOREAD 0x01                    /* readable file                    */
 #define _IOWRT  0x02                    /* writeable file                   */
 #define _IOABUF 0x04                    /* alloc'd buffer                   */
@@ -50,11 +50,11 @@ typedef struct _iobuf FILE;             /* stream definition                */
 #define _IOLBUF 0x40                    /* handle as line buffer            */
 #define _IOSTRI 0x80                    /* this stream is really a string   */
 #define _IOASCI 0x100                   /* this was opened as an ascii file */
-                                        /************************************/
+
 #define stdin  (&_iob[0])               /* standard input stream            */
 #define stdout (&_iob[1])               /*    "     output  "               */
 #define stderr (&_iob[2])               /*    "     error   "               */
-                                        /************************************/
+
 #define clearerr(p) ((p)->_flag &= ~_IOERR) /* clear error flag             */
 #define feof(p) ((p)->_flag & _IOEOF)   /* EOF encountered on stream        */
 #define ferror(p) ((p)->_flag & _IOERR) /* error encountered on stream      */
@@ -100,6 +100,7 @@ int fflush PROTO((FILE *stream));
 int puts PROTO((const char * str));
 
 FILE *fopen PROTO((const char * name, const char * mode));
+int fclose PROTO((FILE *stream));
 
 int open PROTO((const char *pathname, int flags, ...));
 int creat PROTO((const char *pathname, mode_t mode));
