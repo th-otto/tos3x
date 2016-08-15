@@ -82,8 +82,9 @@ VOID alrem PROTO((long *al1, long al2));
 
 int _creat PROTO((const char *name, int prot, int type));
 int _open PROTO((const char *name, int mode, int type));
+int __open PROTO((int fd, const char *name, int search));
 
-VOID _optoff PROTO((const char * msg));
+VOID _optoff PROTO((const char * msg)) __attribute__((noreturn));
 
 VOID _chinit PROTO((NOTHING));
 int _main PROTO((char *com, int len));
@@ -91,6 +92,7 @@ int __main PROTO((char *com, int len));
 
 int _filbuf PROTO((FILE *));
 long _filesz PROTO((int fd));
+char *_salloc PROTO((size_t size));					/* Stack allocation routine */
 
 #ifdef __OSIF_H__
 FD *_chkc PROTO((int fd));						/* Converts fd to fp */
@@ -111,4 +113,6 @@ VOID noascii PROTO((NOTHING));
 VOID nobinary PROTO((NOTHING));
 VOID nofilesz PROTO((NOTHING));
 VOID nofloat PROTO((NOTHING));
+VOID nowildcards PROTO((NOTHING));
 
+int main PROTO((int argc, char **argv, char **envp));

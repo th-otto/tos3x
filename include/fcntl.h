@@ -16,4 +16,12 @@
 #define	O_ACCMODE	(O_RDONLY|O_WRONLY|O_RDWR)
 #endif
 
+/*
+ * non-standard functions
+ */
+int opena PROTO((const char *, int, ...));
+int openb PROTO((const char *, int, ...));
+int creata PROTO((const char *pathname, mode_t mode));
+int creatb PROTO((const char *pathname, mode_t mode));
+
 #endif /* __FCNTL_H__ */

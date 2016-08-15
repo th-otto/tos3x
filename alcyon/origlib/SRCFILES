@@ -47,6 +47,7 @@ COBJS3 = \
 	getl.o \
 	getw.o \
 	xmain.o \
+	xwmain.o \
 	optoff.o \
 	$(empty)
 

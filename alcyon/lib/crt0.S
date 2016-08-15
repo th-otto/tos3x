@@ -20,7 +20,7 @@ command equ 128		* Command tail
 prtstr equ 9		* Print string BDOS Call
 exit equ 0			* BDOS exit call
 		xref	__main
-		xref	__exit
+		xdef	__exit
 		xdef	__break
 		xdef	__start
 		xdef	___cpmrv
@@ -47,7 +47,8 @@ start:		move.l	4(a7),a0		*	a0 -> Base page
 		move.l	a2,-(a7)		*	Push commnd
 		suba.l	a6,a6			*	Clear frame pointer
 		jsr	__main			*	call main routine
-		jmp	__exit			*	call "exit"
+		move.w d0,-(a7)
+		bsr.s	__exit			*	call "exit"
 *
 *
 		bss
@@ -72,22 +73,13 @@ brkok:
 		clr.l	d0			*	Set OK return
 		rts				*	return
 		
-		xdef	___BDOS
-___BDOS:	link	a6,#0			*	link
-		move.w	8(sp),d0		*	Load func code
-		move.l	10(sp),d1		*	Load Paramter
-		trap	#2			*	Enter BDOS
-		cmpa.l	__break,sp		*	Check for stack ovf
-		bcc	noovf			*	NO overflow, continue
-__sovf:		move.w	#prtstr,d0		*	String print
-		lea	ovf,a0			*	a0-> message
-		move.l	a0,d1			*	load proper reg
-		trap	#2			*	Issue message
-__exit:		move.w	#exit,-(a7)		*	Exit
+__exit:
+		tst.l (a7)+
+		move.w	#exit,-(a7)		*	Exit
+_halt:
 		trap	#1			*		now
-noovf:						*	Here if all OK
-		unlk	a6			*
-		rts				*	Back to caller
+		bra.s _halt
+
 *
 *	Block Fill function:
 *
