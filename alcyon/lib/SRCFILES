@@ -70,6 +70,7 @@ COBJS = \
 	read.o \
 	readasc.o \
 	readbin.o \
+	creat.o \
 	\
 	ldiv.o \
 	lmul.o \
@@ -79,6 +80,9 @@ COBJS = \
 	almul.o \
 	alrem.o \
 	abort.o \
+	\
+	optoff.o \
+	\
 	$(empty)
 
 OBJS = $(AOBJS) $(COBJS)

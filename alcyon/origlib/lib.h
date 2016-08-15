@@ -47,8 +47,9 @@
 #define STDOUT 1
 #define STDERR 2
 
-extern char __tname[];					/* Terminal name        */
 extern char __pname[];					/* Program name         */
+extern char __tname[];					/* Terminal name        */
+extern char __lname[];					/* List device name     */
 extern char *_break;					/* -> Program break location */
 
 char *_petoa PROTO((double *, char *, int, int));
@@ -70,13 +71,16 @@ long fpftol PROTO((long f));
 long fpltof PROTO((long l));
 int _doprt PROTO((FILE *sp, const char * fmt, char *pb));
 
-int _creat PROTO((const char *name, int prot, int type));
-int _open PROTO((const char *name, int mode, int type));
+int _creat PROTO((const char *name, mode_t prot, int binary));
+int _open PROTO((const char *name, int mode, int binary));
 int __open PROTO((int fd, const char *name, int search));
 
 VOID _optoff PROTO((const char * msg)) __attribute__((noreturn));
 
 VOID _chinit PROTO((NOTHING));
+VOID __chinit PROTO((int fd));
+int _allocc PROTO((NOTHING));						/* gets a channel       */
+
 int _main PROTO((char *com, int len));
 int __main PROTO((char *com, int len));
 

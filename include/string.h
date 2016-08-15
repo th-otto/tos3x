@@ -23,6 +23,8 @@ extern	char	*strncat PROTO((char *dst, const char *src, int len));	/* concat num
 extern	char	*strcpy PROTO((char *dst, const char *src));	/* copy whole string		*/
 extern	char	*strncpy PROTO((char *dst, const char *src, int len));	/* copy specified length	*/
 extern	int	strlen PROTO((const char *str));	/* return length of string	*/
+int _strcmp PROTO((const char *, const char *));
+#define strcmp _strcmp
 
 #define strchr index
 #define strrchr rindex
