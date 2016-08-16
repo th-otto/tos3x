@@ -90,6 +90,7 @@ int _filbuf PROTO((FILE *));
 long _filesz PROTO((int fd));						/* computes CP/M file size  */
 char *_salloc PROTO((size_t size));					/* Stack allocation routine */
 VOID __fdecls PROTO((NOTHING));
+int _flsbuf PROTO((int c, FILE *fp));
 
 #ifdef __OSIF_H__
 FD *_chkc PROTO((int fd));						/* Converts fd to fp */
