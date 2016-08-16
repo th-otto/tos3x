@@ -50,6 +50,5 @@ PP(size_t bytes;)							/* Number of bytes to xfer  */
 
 	if (fp->flags & ISASCII)			/* If ascii file        */
 		return _wrtasc(fp, buff, xbytes);	/* do ascii style       */
-	else
-		return _wrtbin(fp, buff, xbytes);	/* do binary style      */
+	return _wrtbin(fp, buff, xbytes);	/* do binary style      */
 }

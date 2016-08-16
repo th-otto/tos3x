@@ -104,7 +104,7 @@ char *_salloc PROTO((size_t size));					/* Stack allocation routine */
 int _flsbuf PROTO((int c, FILE *fp));
 
 #ifdef __OSIF_H__
-FD *_chkc PROTO((int fd));						/* Converts fd to fp */
+FD *_chkc PROTO((unsigned int fd));						/* Converts fd to fp */
 size_t _ttyin PROTO((FD *fp, VOIDPTR buff, size_t bytes));					/* Read from tty rtn        */
 long _rdasc PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read ascii rtn       */
 long _rdbin PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read binary rtn      */

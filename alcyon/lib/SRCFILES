@@ -92,6 +92,7 @@ COBJS = \
 	blkfill.o \
 	write.o \
 	wrtchr.o \
+	channels.o \
 	\
 	ldiv.o \
 	lmul.o \
