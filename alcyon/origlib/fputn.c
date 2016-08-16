@@ -27,7 +27,7 @@ PP(register FILE *sp;)						/* stream to write to       */
 	if (sp->_flag & _IONBUF)			/* Non-buffered file?       */
 	{
 		sp->_cnt = 0;					/* Always force to zero     */
-		if (num != write(sp->_fd, buf, num))	/* try to write         */
+		if (num != write(fileno(sp), buf, num))	/* try to write         */
 		{
 			/* mark this file and complain */
 			sp->_flag |= _IOERR;

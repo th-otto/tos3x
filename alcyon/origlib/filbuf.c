@@ -42,10 +42,10 @@ PP(register FILE *sp;)							/* from this stream     */
 			sp->_flag |= _IOABUF;		/* we're all set        */
 	}
 	if (sp->_flag & _IONBUF)			/* insure this set right    */
-		sp->_base = &onebuf[sp->_fd];	/*   set 'buf' to small buf */
+		sp->_base = &onebuf[fileno(sp)];	/*   set 'buf' to small buf */
 	if (sp == stdin && (stdout->_flag & _IOLBUF))	/* console i/o?      */
 		fflush(stdout);					/* output whatever to con   */
-	sp->_cnt = read(sp->_fd, sp->_base,	/* read to our buffer       */
+	sp->_cnt = read(fileno(sp), sp->_base,	/* read to our buffer       */
 					sp->_flag & _IONBUF ? 1 : BUFSIZ);	/*   the right # of bytes   */
 	if (sp->_cnt <= 0)					/* did read screw up?       */
 	{									/* yup...******************* */

@@ -63,7 +63,7 @@ COBJS4 = \
 	exit.o \
 	$(empty)
 
-COBJS4 = \
+COBJS5 = \
 	cleanup.o \
 	fclose.o \
 	close.o \
@@ -75,7 +75,11 @@ COBJS4 = \
 	fputc.o \
 	$(empty)
 
-COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5)
+COBJS6 = \
+	flsbuf.o \
+	$(empty)
+
+COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5) $(COBJS6)
 
 OBJS = $(AOBJS) $(COBJS)
 

@@ -81,6 +81,7 @@ COBJS = \
 	lseek.o \
 	fputn.o \
 	fputc.o \
+	flsbuf.o \
 	\
 	ldiv.o \
 	lmul.o \

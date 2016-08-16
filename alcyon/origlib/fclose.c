@@ -32,5 +32,5 @@ PP(register FILE *sp;)
 	/* reset all flags */
 	sp->_flag &= ~(_IOREAD | _IOWRT | _IOABUF | _IONBUF | _IOERR | _IOEOF | _IOLBUF);
 	/* and return */
-	return close(sp->_fd);
+	return close(fileno(sp));
 }

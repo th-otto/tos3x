@@ -28,7 +28,7 @@ PP(register FILE *sp;)							/* stream to flush      */
 	if ((sp->_flag & (_IONBUF | _IOWRT)) == _IOWRT	/* does it have a wrt buf?  */
 		&& (ns = (long) sp->_ptr - (long)sp->_base) > 0)	/*  and does buf need wrt? */
 	{
-		n = write(sp->_fd, sp->_base, ns);	/* do it            */
+		n = write(fileno(sp), sp->_base, ns);	/* do it            */
 		if (ns != n)					/* did they all git writ?   */
 		{
 			sp->_flag |= _IOERR;		/*   this stream no good    */
@@ -46,7 +46,7 @@ PP(register FILE *sp;)							/* stream to flush      */
 		}
 	} else
 	{									/* is a readable file       */
-		lseek(sp->_fd, (long) - (sp->_cnt), SEEK_CUR);	/* back up cur position ptr */
+		lseek(fileno(sp), (long) - (sp->_cnt), SEEK_CUR);	/* back up cur position ptr */
 		sp->_cnt = 0;					/* zap out count        */
 	}
 	sp->_ptr = sp->_base;				/* reset buf */
