@@ -120,6 +120,7 @@ size_t _pc_readblk PROTO((struct fcbtab *fcb, long offset, VOIDPTR buff, size_t 
 size_t _pc_writeblk PROTO((struct fcbtab *fcb, long offset, const VOIDPTR buff, size_t bytes, size_t secsiz));
 int _ttyout PROTO(( const char *buff ));
 int _lstout PROTO(( const char *buff ));
+long _blkio PROTO((FD *ccbp, long sector, VOIDPTR buffer, long count, int bdosfunc));
 #endif
 
 /************************* #include "malloc.h"  *****************************/

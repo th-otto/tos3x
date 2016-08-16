@@ -132,10 +132,11 @@ long _rdbin PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read binary rtn   
 long _wrtasc PROTO((FD *fp, const VOIDPTR buff, long bytes));
 long _wrtbin PROTO((FD *fp, const VOIDPTR buff, long bytes));
 long _wrtchr PROTO((FD *fp, const VOIDPTR buff, long bytes));
-long _pc_readblk PROTO((struct fcbtab *fcb, long offset, VOIDPTR buff, long bytes));
-long _pc_writeblk PROTO((struct fcbtab *fcb, long offset, const VOIDPTR buff, long bytes));
+long _pc_readblk PROTO((FD *ccbp, long offset, VOIDPTR buff, long bytes));
+long _pc_writeblk PROTO((FD *ccbp, long offset, const VOIDPTR buff, long bytes));
 int _ttyout PROTO(( const char *buff ));
 int _lstout PROTO(( const char *buff ));
+long _blkio PROTO((FD *ccbp, long sector, VOIDPTR buffer, long count, int bdosfunc));
 #endif
 
 /************************* #include "malloc.h"  *****************************/

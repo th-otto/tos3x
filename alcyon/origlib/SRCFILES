@@ -91,9 +91,12 @@ COBJS7 = \
 	writeasc.o \
 	writebin.o \
 	xopen.o \
+	blkio.o \
+	xread.o \
+	xwrite.o \
 	$(empty)
 
-COBJS7 = \
+COBJS8 = \
 	strcpy.o \
 	strcat.o \
 	strlen.o \

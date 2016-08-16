@@ -124,7 +124,7 @@ PP(register long bytes;)							/* =  # bytes to xfer       */
 #if PCDOS
 	long xbytes;						/* More byte count temps    */
 
-	xbytes = _pc_readblk(&(fp->fcb), fp->offset, buff, bytes);
+	xbytes = _pc_readblk(fp, fp->offset, buff, bytes);
 	if (xbytes == 0)					/* EOF or error condition   */
 		fp->flags |= ATEOF;				/* Set EOF flag         */
 	fp->offset += xbytes;				/* Calculate new offset     */

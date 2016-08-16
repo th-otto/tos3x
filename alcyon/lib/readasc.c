@@ -114,7 +114,7 @@ PP(register long bytes;)							/* =  # bytes to xfer       */
 	xbytes = bytes;						/* Remember org. request    */
 	while (bytes > 0 && (fp->flags & ATEOF) == 0)	/* Until read is satisfied  */
 	{
-		ii = _pc_readblk(&(fp->fcb), fp->offset, buff, bytes);
+		ii = _pc_readblk(fp, fp->offset, buff, bytes);
 		for (jj = 0; jj < ii; ++jj)		/* EOF scan         */
 			if (((char *)buff)[jj] == EOFCHAR)
 				break;					/* Last char EOF?       */

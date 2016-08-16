@@ -35,7 +35,7 @@ PP(long bytes;)					/* # bytes to write     */
 #if PCDOS
 	long ii;							/* Byte counter         */
 
-	ii = _pc_writeblk(&(fp->fcb), fp->offset, buff, bytes);
+	ii = _pc_writeblk(fp, fp->offset, buff, bytes);
 	if (ii == 0)						/* Problems?            */
 		RETERR(-1, EIO);			/* Tell them so         */
 	fp->offset += ii;					/* Incr pos in file     */

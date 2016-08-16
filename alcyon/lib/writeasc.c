@@ -47,7 +47,7 @@ PP(long xbytes;)					/* # bytes to write     */
 			;							/* for newline chars        */
 		if (kk - jj > 0)
 		{								/* something to write?      */
-			ii = _pc_writeblk(&(fp->fcb), fp->offset, buff + jj, kk - jj);
+			ii = _pc_writeblk(fp, fp->offset, buff + jj, kk - jj);
 			fp->offset += ii;			/* Incr pos in file     */
 			if (ii == 0)				/* Problems?            */
 				RETERR(-1, EIO);	/* Tell them so         */
@@ -55,7 +55,7 @@ PP(long xbytes;)					/* # bytes to write     */
 		} else
 		{								/* It was a newline     */
 			kk++;						/* write it out next time   */
-			ii = _pc_writeblk(&(fp->fcb), fp->offset, "\r", 1L);
+			ii = _pc_writeblk(fp, fp->offset, "\r", 1L);
 			fp->offset += ii;			/* Incr pos in file     */
 		}
 	}									/* end FOR loop         */

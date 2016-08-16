@@ -9,3 +9,4 @@ doindex.s
 dump.s
 nm68.s
 size68.s
+make.s
