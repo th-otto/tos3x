@@ -79,6 +79,7 @@ COBJS = \
 	fflush.o \
 	open.o \
 	lseek.o \
+	fputn.o \
 	\
 	ldiv.o \
 	lmul.o \

@@ -71,6 +71,7 @@ COBJS4 = \
 	fflush.o \
 	open.o \
 	lseek.o \
+	fputn.o \
 	$(empty)
 
 COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5)
