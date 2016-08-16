@@ -93,6 +93,8 @@ COBJS = \
 	write.o \
 	wrtchr.o \
 	channels.o \
+	writeasc.o \
+	writebin.o \
 	\
 	ldiv.o \
 	lmul.o \
