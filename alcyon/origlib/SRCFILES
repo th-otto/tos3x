@@ -67,6 +67,7 @@ COBJS4 = \
 	cleanup.o \
 	fclose.o \
 	close.o \
+	fdecls.o \
 	$(empty)
 
 COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5)
