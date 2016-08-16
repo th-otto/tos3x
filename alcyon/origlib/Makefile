@@ -23,9 +23,12 @@ libc.a: $(OBJS)
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(AOBJS1)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(AOBJS2)
-	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS1)
-	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS2)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS3)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS4)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS5)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS6)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS7)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS8)
 
 options.a: $(OPTIONOBJS)
 	$(AM_V_at)$(RM) $@

@@ -98,6 +98,9 @@ COBJS = \
 	xopen.o \
 	strupr.o \
 	strlwr.o \
+	strcpy.o \
+	strlen.o \
+	strcat.o \
 	\
 	ldiv.o \
 	lmul.o \
