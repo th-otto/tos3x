@@ -36,6 +36,7 @@ AOBJS = \
 	xsignal.o \
 	salloc.o \
 	setjmp.o \
+	blkfills.o \
 	\
 	$(empty)
 
@@ -89,6 +90,8 @@ COBJS = \
 	mallocnd.o \
 	sbrk.o \
 	blkfill.o \
+	write.o \
+	wrtchr.o \
 	\
 	ldiv.o \
 	lmul.o \

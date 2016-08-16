@@ -10,10 +10,10 @@ VOID noascii(NOTHING) { ; }
 const char * __noascii_io_msg = "ascii disk i/o rtns";
 
 
-size_t _wrtasc(P(FD *) fp, P(const VOIDPTR) buff, P(long) bytes)
+size_t _wrtasc(P(FD *) fp, P(const VOIDPTR) buff, P(size_t) bytes)
 PP(FD * fp;)
 PP(const VOIDPTR buff;)
-PP(long bytes;)
+PP(size_t bytes;)
 {
 	UNUSED(fp);
 	UNUSED(buff);

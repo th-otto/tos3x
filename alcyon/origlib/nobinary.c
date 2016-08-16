@@ -22,10 +22,10 @@ PP(long bytes;)
 }
 
 
-size_t _wrtbin(P(FD *) fp, P(const VOIDPTR) buff, P(long) bytes)
+size_t _wrtbin(P(FD *) fp, P(const VOIDPTR) buff, P(size_t) bytes)
 PP(FD *fp;)
 PP(const VOIDPTR buff;)
-PP(long bytes;)
+PP(size_t bytes;)
 {
 	UNUSED(fp);
 	UNUSED(buff);
