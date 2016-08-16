@@ -6,5 +6,7 @@
 #endif
 
 int isatty PROTO((int fd));
+int isdev PROTO((int fd));
+char *ttyname PROTO((int fd));
 
 #endif /* __UNISTD_H__ */

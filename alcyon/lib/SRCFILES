@@ -82,6 +82,9 @@ COBJS = \
 	fputn.o \
 	fputc.o \
 	flsbuf.o \
+	isatty.o \
+	isdev.o \
+	ttyname.o \
 	\
 	ldiv.o \
 	lmul.o \

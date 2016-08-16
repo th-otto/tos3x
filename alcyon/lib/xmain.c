@@ -21,18 +21,13 @@
 *****************************************************************************/
 
 #include "lib.h"
-#include <ctype.h>						/* char type definitions    */
 #include <portab.h>
 #include <fcntl.h>
-
-#define ISWHITE(ch) ((ch) == '\0' || isspace(ch))
 
 int _main(P(char *) com, P(int) len)
 PP(char * com;)							/* Command address      */
 PP(int len;)								/* Command length       */
 {
-	register char *s;						/* Temp char pointer        */
-
 	/* Initialize channels */
 	_chinit();
 	open(__tname, O_RDONLY);				/* Open STDIN           */
@@ -41,8 +36,5 @@ PP(int len;)								/* Command length       */
 
 	com[len] = '\0';						/* Insure null at line end  */
 	
-	/* Convert string to lower case */
-	for (s = com; *s; s++)
-		*s = tolower((UBYTE) *s);
 	return __main(com, len);
 }
