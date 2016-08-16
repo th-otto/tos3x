@@ -13,5 +13,6 @@ typedef int mode_t;
 typedef unsigned int size_t;
 
 typedef long ptrdiff_t;
+typedef long off_t;
 
 #endif

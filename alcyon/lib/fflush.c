@@ -46,7 +46,7 @@ PP(register FILE *sp;)							/* stream to flush      */
 		}
 	} else
 	{									/* is a readable file       */
-		lseek(sp->_fd, (long) - (sp->_cnt), 1);	/* back up cur position ptr */
+		lseek(sp->_fd, (long) - (sp->_cnt), SEEK_CUR);	/* back up cur position ptr */
 		sp->_cnt = 0;					/* zap out count        */
 	}
 	sp->_ptr = sp->_base;				/* reset buf */

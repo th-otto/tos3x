@@ -1,10 +1,6 @@
 #ifndef __FCNTL_H__
 #define __FCNTL_H__ 1
 
-#define SEEK_SET	0	/* Seek from beginning of file.  */
-#define SEEK_CUR	1	/* Seek from current position.  */
-#define SEEK_END	2	/* Seek from end of file.  */
-
 /* File access modes for `open' and `fcntl'.  */
 #ifndef O_RDONLY
 #define	O_RDONLY	0x00	/* Open read-only.  */

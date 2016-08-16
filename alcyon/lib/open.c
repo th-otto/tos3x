@@ -57,31 +57,30 @@ PP(int binary;)								/* File type            */
 		ch->flags |= ISASCII;
 	
 	/* if a terminal, mark as tty */
-	if (_strcmp(fname, __tname) == 0)
+	if (strcmp(fname, __tname) == 0)
 	{
 		ch->flags |= ISTTY | OPENED;
 		ch->dosfd = mode; /* ??? */
-		return ich;
 	} else if (strcmp(fname, __lname) == 0)
 	{
 		/* Mark as printer */
 		ch->flags |= ISLPT | OPENED;
-		return ich;
-	}
-
-	/* Use POS SVC interface */
-	if (__open(ich, fname, OPEN) != 0)
+	} else
 	{
-		/* deallocate channel */
-		_freec(ich);
-		RETERR(-1, ENOENT);
+		/* Use POS SVC interface */
+		if (__open(ich, fname, OPEN) != 0)
+		{
+			/* deallocate channel */
+			_freec(ich);
+			RETERR(-1, ENOENT);
+		}
+		
+		/* Set OPEN bit */
+		ch->flags |= OPENED;
+		/* Kludge to set hi water mark */
+		lseek(ch->chan, 0L, SEEK_END);
+		lseek(ch->chan, 0L, SEEK_SET);
 	}
-	
-	/* Set OPEN bit */
-	ch->flags |= OPENED;
-	/* Kludge to set hi water mark */
-	lseek(ch->chan, 0L, 2);
-	lseek(ch->chan, 0L, 0);
 	return ich;
 }
 

@@ -97,7 +97,7 @@ int __main PROTO((char *com, int len));
 VOID _cleanup PROTO((NOTHING));
 
 int _filbuf PROTO((FILE *));
-long _filesz PROTO((int fd));
+long _filesz PROTO((int fd));						/* computes CP/M file size  */
 char *_salloc PROTO((size_t size));					/* Stack allocation routine */
 
 #ifdef __OSIF_H__

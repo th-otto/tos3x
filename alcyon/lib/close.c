@@ -33,7 +33,7 @@ PP(register int fd;)							/* File descriptor to close */
 	register int rv;						/* return value         */
 
 	if ((fp = _chkc(fd)) == NULLFD)		/* File Open?           */
-		RETERR(-1, EBADF);			/*      no, quit    */
+		return -1;			/*      no, quit    */
 	rv = 0;						/* assume it will work      */
 	if ((fp->flags & (ISTTY | ISLPT)) == 0)	/* Character device?        */
 	{									/* if not, handle file: **** */
@@ -43,7 +43,7 @@ PP(register int fd;)							/* File descriptor to close */
 		if ((fp->flags & ISASCII) != 0 && (fp->flags & ISREAD) == 0)	/*  */
 		{								/* ASCII file? not ReadOnly? */
 			if (fp->offset < fp->hiwater)	/* Have we been seeking?    */
-				lseek(fd, 0L, 2);		/*   Seek to EOF ifso       */
+				lseek(fd, 0L, SEEK_END);		/*   Seek to EOF ifso       */
 			write(fd, &__xeof, 1);		/* Write a ^Z character     */
 		}
 		if ((fp->flags & DIRTY) != 0)	/* Buffer dirty?        */

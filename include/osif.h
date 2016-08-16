@@ -145,7 +145,7 @@ extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
 /*      Flags word bit definitions                                          */
                                         /************************************/
 #define OPENED  0x01                    /*      Channel is OPEN             */
-#define ISTTY   0x02                    /*      Channel open to TTT         */
+#define ISTTY   0x02                    /*      Channel open to TTY         */
 #define ISLPT   0x04                    /*      Channel open to LPT         */
 #define ISREAD  0x08                    /*      Channel open readonly       */
 #define ISASCII 0x10                    /*      ASCII file attached         */

@@ -57,7 +57,7 @@ PP(int binary;)								/* File type            */
 		ch->flags |= ISASCII;
 	
 	/* if a terminal, mark as tty */
-	if (_strcmp(fname, __tname) == 0)
+	if (strcmp(fname, __tname) == 0)
 	{
 		ch->flags |= ISTTY | OPENED;
 		ch->dosfd = mode; /* ??? */
@@ -80,8 +80,8 @@ PP(int binary;)								/* File type            */
 	/* Set OPEN bit */
 	ch->flags |= OPENED;
 	/* Kludge to set hi water mark */
-	lseek(ch->chan, 0L, 2);
-	lseek(ch->chan, 0L, 0);
+	lseek(ch->chan, 0L, SEEK_END);
+	lseek(ch->chan, 0L, SEEK_SET);
 	return ich;
 }
 

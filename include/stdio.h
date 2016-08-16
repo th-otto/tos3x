@@ -24,6 +24,10 @@
 #include <stdarg.h>
 #endif
 
+#define SEEK_SET	0	/* Seek from beginning of file.  */
+#define SEEK_CUR	1	/* Seek from current position.  */
+#define SEEK_END	2	/* Seek from end of file.  */
+
 /****************************************************************************
 *       Stream I/O File Definitions
 *****************************************************************************/
@@ -105,15 +109,16 @@ int fclose PROTO((FILE *stream));
 int open PROTO((const char *pathname, int flags, ...));
 int creat PROTO((const char *pathname, mode_t mode));
 int close PROTO((int fd));
-long lseek PROTO((int fd, long offs, int whence));
+off_t lseek PROTO((int fd, off_t offs, int whence));
 size_t read PROTO((int fd, VOIDPTR buf, size_t count));
 size_t write PROTO((int fd, const VOIDPTR buf, size_t count));
+off_t tell PROTO((int fd));
 
 /*
  * non-standard functions
  */
-long getl PROTO((FILE * sp));
-int getw PROTO((FILE * sp));
+long getl PROTO((FILE *sp));
+int getw PROTO((FILE *sp));
 
 FILE *fopena PROTO((const char * name, const char *mode));
 FILE *fopenb PROTO((const char * name, const char *mode));
