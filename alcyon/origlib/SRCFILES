@@ -97,6 +97,8 @@ COBJS7 = \
 	strcpy.o \
 	strcat.o \
 	strlen.o \
+	strcmp.o \
+	stricmp.o \
 	$(empty)
 
 COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5) $(COBJS6) $(COBJS7) $(COBJS8)

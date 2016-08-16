@@ -1,6 +1,5 @@
 /**************************************************************************
 *   CTYPE.C  -  provides static tables for 'ctype.h' extern defs.
-*	Modified 10/31/82 by MGL to add ___atab() for forced loading
 ***************************************************************************/
 
 

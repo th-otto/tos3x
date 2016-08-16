@@ -57,12 +57,12 @@ PP(int binary;)								/* File type            */
 		ch->flags |= ISASCII;
 	
 	/* if a terminal, mark as tty */
-	if (strcmp(fname, __tname) == 0)
+	if (strcasecmp(fname, __tname) == 0)
 	{
 		ch->flags |= ISTTY | OPENED;
 		ch->dosfd = mode; /* ??? */
 		return ich;
-	} else if (strcmp(fname, __lname) == 0)
+	} else if (strcasecmp(fname, __lname) == 0)
 	{
 		/* Mark as printer */
 		ch->flags |= ISLPT | OPENED;

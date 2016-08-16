@@ -156,3 +156,7 @@ VOID nobinary PROTO((NOTHING));
 VOID nofilesz PROTO((NOTHING));
 VOID nofloat PROTO((NOTHING));
 VOID nowildcards PROTO((NOTHING));
+
+VOID ___atab PROTO((NOTHING));
+
+#define strcasecmp _strcmp

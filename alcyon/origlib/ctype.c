@@ -4,7 +4,8 @@
 ***************************************************************************/
 
 
-#include "ctype.h"
+#include "lib.h"
+#include <ctype.h>
 
 char const __atab[] = {	/* table of ascii char types */
 
@@ -60,3 +61,7 @@ char const __atab[] = {	/* table of ascii char types */
 /*17m*/ __l,	__l,	__l,	__p,	__p,	__p,	__p,	__c
 
 };
+
+VOID ___atab(NOTHING)
+{
+}

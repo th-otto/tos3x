@@ -48,11 +48,11 @@ PP(int binary;)						/* ASCII/BINARY flag        */
 	if (binary == 0)						/* ASCII file?          */
 		ch->flags |= ISASCII;			/*  Yes, mark it.       */
 	
-	if (strcmp(fname, __tname) == 0)	/* Terminal file?       */
+	if (strcasecmp(fname, __tname) == 0)	/* Terminal file?       */
 	{
 		ch->flags |= ISTTY | OPENED;	/* Set flag         */
 		return ich;						/* Return file descriptor   */
-	} else if (strcmp(fname, __lname) == 0)	/* List device?         */
+	} else if (strcasecmp(fname, __lname) == 0)	/* List device?         */
 	{
 		ch->flags |= ISLPT | OPENED;	/* set flag         */
 		return ich;
