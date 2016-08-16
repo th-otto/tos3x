@@ -13,6 +13,8 @@ prtint_OPTIMIZE=0
 readasc_OPTIMIZE=0
 readbin_OPTIMIZE=0
 xwmain_OPTIMIZE=0
+malloc_OPTIMIZE=0
+
 
 libc.a: $(OBJS)
 	$(AM_V_at)$(RM) $@

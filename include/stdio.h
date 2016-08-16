@@ -87,8 +87,6 @@ typedef struct _iobuf FILE;
 
 #define EOF (-1)		/* End of File marker */
 
-#define	NULL	((VOIDPTR)0)			/*	Null pointer value	    */
-
 int printf PROTO((const char *fmt, ...));
 int fprintf PROTO((FILE *fp, const char *fmt, ...));
 int sprintf PROTO((char *str, const char *fmt, ...));

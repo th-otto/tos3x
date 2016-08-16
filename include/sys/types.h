@@ -10,9 +10,16 @@ typedef int mode_t;
  * Also, several library function like malloc() and read()
  * take only unsigned int as argument.
  */
-typedef unsigned int size_t;
+#ifndef __SIZE_TYPE__
+#define __SIZE_TYPE__ unsigned int
+#endif
+typedef __SIZE_TYPE__ size_t;
 
-typedef long ptrdiff_t;
+#ifndef __PTRDIFF_TYPE__
+#define __PTRDIFF_TYPE__ long
+#endif
+typedef __PTRDIFF_TYPE__ ptrdiff_t;
+
 typedef long off_t;
 
 #endif

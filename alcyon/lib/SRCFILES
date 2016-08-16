@@ -85,6 +85,7 @@ COBJS = \
 	isatty.o \
 	isdev.o \
 	ttyname.o \
+	malloc.o \
 	\
 	ldiv.o \
 	lmul.o \

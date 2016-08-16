@@ -49,4 +49,6 @@
 #  endif
 #endif
 
+#define	NULL	((VOIDPTR)0)			/*	Null pointer value	    */
+
 #endif /* __COMPILER_H__ */

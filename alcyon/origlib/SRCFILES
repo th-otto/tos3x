@@ -78,6 +78,7 @@ COBJS5 = \
 COBJS6 = \
 	flsbuf.o \
 	isatty.o \
+	malloc.o \
 	$(empty)
 
 COBJS = $(COBJS1) $(COBJS2) $(COBJS3) $(COBJS4) $(COBJS5) $(COBJS6)

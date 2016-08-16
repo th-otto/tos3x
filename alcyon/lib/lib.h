@@ -112,6 +112,12 @@ long _pc_readblk PROTO((struct fcbtab *fcb, long offset, VOIDPTR buff, long byte
 long _pc_writeblk PROTO((struct fcbtab *fcb, long offset, const VOIDPTR buff, long bytes));
 #endif
 
+#define ERR_FINDBLOCK 	1				/* error in 'findblock()'   */
+#define ERR_GETMEM	2					/* error in 'getmemory()'   */
+#define ERR_FREE	3					/* error in 'free()'        */
+
+VOID _errmalloc PROTO((int code)) __attribute__((noreturn));
+
 VOID nottyin PROTO((NOTHING));
 VOID nostart PROTO((NOTHING));
 VOID nodisk PROTO((NOTHING));
