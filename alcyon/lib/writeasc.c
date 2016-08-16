@@ -30,7 +30,7 @@
 long _wrtasc(P(FD *) ccb, P(const VOIDPTR) buffp, P(long) xbytes)
 PP(FD *ccb;)						/* -> CCB           */
 PP(const VOIDPTR buffp;)				/* -> User's buffer     */
-PP(longt xbytes;)					/* # bytes to write     */
+PP(long xbytes;)					/* # bytes to write     */
 {
 	register FD *fp;
 	register const char *buff;

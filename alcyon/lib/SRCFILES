@@ -95,6 +95,9 @@ COBJS = \
 	channels.o \
 	writeasc.o \
 	writebin.o \
+	xopen.o \
+	strupr.o \
+	strlwr.o \
 	\
 	ldiv.o \
 	lmul.o \

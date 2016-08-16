@@ -52,11 +52,11 @@ PP(int ascii;)								/* CP/M text file       */
 		return NULL;				/*   fail           */
 	}
 	if (*mode == 'w' || *mode == 'W')	/* 'w'rite mode?        */
-		fd = _creat(name, CREATMODE, ascii);	/*  create file ******** */
+		fd = _creat(name, O_WRONLY, ascii);	/*  create file ******** */
 	else if (*mode == 'a' || *mode == 'A')	/* 'a'ppend mode?       */
 	{									/*              */
 		if ((fd = _open(name, O_WRONLY, ascii)) < 0)	/* try open      */
-			fd = _creat(name, CREATMODE, ascii);	/* ow. do create    */
+			fd = _creat(name, O_WRONLY, ascii);	/* ow. do create    */
 		else
 			lseek(fd, 0L, SEEK_END);			/* its out there, seek EOF  */
 	}

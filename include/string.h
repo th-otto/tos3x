@@ -29,4 +29,7 @@ int _strcmp PROTO((const char *, const char *));
 #define strchr index
 #define strrchr rindex
 
+char *strlwr PROTO ((char *str));
+char *strupr PROTO ((char *str));
+
 #endif /* __STRING_H__ */

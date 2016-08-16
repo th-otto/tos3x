@@ -33,7 +33,24 @@
 #  define UNUSED(x) ((void)(x))
 #endif
 
-#define CREATMODE 1						/* mode to use for 'creat'  */
+#ifndef NO_CONST
+#  ifdef __GNUC__
+#	 define NO_CONST(p) __extension__({ union { const void *cs; void *s; } x; x.cs = p; x.s; })
+#  else
+#    ifdef __ALCYON__ /* Alcyon parses the cast as function call??? */
+#      define NO_CONST(p) p
+#    else
+#      define NO_CONST(p) ((void *)(p))
+#    endif
+#  endif
+#endif
+
+#ifndef __attribute__
+#  ifndef __GNUC__
+#    define __attribute__(x)
+#  endif
+#endif
+
 
 /* file descriptors */
 #define STDIN 0
@@ -83,9 +100,12 @@ long uldiv PROTO((long al1, long al2));
 VOID aldiv PROTO((long * al1, long al2));
 VOID alrem PROTO((long *al1, long al2));
 
-int _creat PROTO((const char *name, mode_t prot, int type));
+int _creat PROTO((const char *name, mode_t prot, int binary));
 int _open PROTO((const char *name, int mode, int binary));
 int __open PROTO((int fd, const char *name, int search));
+int _chkuser PROTO((int newu));
+int _uchkuser PROTO((int newu, int prevu));
+VOID ucase PROTO ((char *str));
 
 VOID _optoff PROTO((const char * msg)) __attribute__((noreturn));
 
@@ -104,6 +124,7 @@ char *_salloc PROTO((size_t size));					/* Stack allocation routine */
 int _flsbuf PROTO((int c, FILE *fp));
 
 #ifdef __OSIF_H__
+char *_parsefn PROTO((const char *filename, struct fcbtab *fdb));
 FD *_chkc PROTO((unsigned int fd));						/* Converts fd to fp */
 size_t _ttyin PROTO((FD *fp, VOIDPTR buff, size_t bytes));					/* Read from tty rtn        */
 long _rdasc PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read ascii rtn       */

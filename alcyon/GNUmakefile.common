@@ -59,7 +59,8 @@ WARN = \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wcast-qual \
-	-Waggregate-return
+	-Waggregate-return \
+	-Wundef
 
 
 .c.o:

@@ -7,7 +7,7 @@
 #include <ctype.h>
 
 /* table of ascii char types */
-char const __atab[] = {
+char const __atab[256] = {
 
 /********************************************************************/
 /*	 nn0	nn1	nn2	nn3	nn4	nn5	nn6	nn7 */
