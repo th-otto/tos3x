@@ -32,28 +32,8 @@
 #include "lib.h"
 #include <stdlib.h>
 
-/************************* #include "malloc.h"  *****************************/
-#define FB_HDR struct hdr				/* free block header type   */
-#define NULLFBH ((FB_HDR *)0)			/* Null of above struct     */
-
-FB_HDR
-{										/* mem_block header     */
-	struct hdr *ptr;					/* ptr next blk (when freed) */
-	size_t size;						/* block size (always)      */
-	size_t chksize;						/* 1's complement of size   */
-};
-
-
-static FB_HDR _afreebase = { &_afreebase, 0, ~0 };	/* initial (empty) block    */
-
-static FB_HDR *_aflistptr = &_afreebase;		/* ptr into ring of freeblks */
-
-#define AOFFS 1L						/* alignment offset: 0=byte, 1=word, 3=quad */
-#define AMASK(c) ((char *)((long)(c) & ~AOFFS))	/* mask alignment bits      */
-#define AFUDGE 4						/* leeway for passing block as is */
-#define ACHUNKS 64						/* chunks to alloc from O.S. */
-
-/*** end of "malloc.h" ******/
+FB_HDR _afreebase = { &_afreebase, 0, ~0 };	/* initial (empty) block    */
+FB_HDR *_aflistptr = &_afreebase;		/* ptr into ring of freeblks */
 
 /****************************************************************************/
 /* getmemory - gets memory from O.S. 					    */
@@ -261,7 +241,7 @@ PP(register size_t siz;)
 	
 	/* stuff back into free list: any coalesce will not */
 	free(ptr); /* WTF; bad idea */
-	if (siz == NULL)
+	if (siz == 0)
 		return NULL;
 	/* affect original data region */
 	nmults = (siz + sizeof(FB_HDR) - 1) / sizeof(FB_HDR) + 1;

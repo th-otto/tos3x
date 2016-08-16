@@ -86,6 +86,9 @@ COBJS = \
 	isdev.o \
 	ttyname.o \
 	malloc.o \
+	mallocnd.o \
+	sbrk.o \
+	blkfill.o \
 	\
 	ldiv.o \
 	lmul.o \
@@ -101,3 +104,7 @@ COBJS = \
 	$(empty)
 
 OBJS = $(AOBJS) $(COBJS)
+
+OPTIONOBJS = \
+	mallocdb.o \
+	$(empty)

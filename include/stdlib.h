@@ -22,7 +22,7 @@ VOID abort PROTO((NOTHING));
 VOID _exit PROTO((int status)) __attribute__((noreturn));
 VOID exit PROTO((int status)) __attribute__((noreturn));
 
-VOIDPTR sbrk PROTO((ptrdiff_t increment));
+VOIDPTR sbrk PROTO((int increment)); /* should be ptrdiff_t */
 int brk PROTO((VOIDPTR addr));
 
 #endif /* __STDLIB_H__ */

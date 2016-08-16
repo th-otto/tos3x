@@ -43,28 +43,10 @@
 #endif
 RETTYPE free PROTO((VOIDPTR fmp));
 
-/************************* #include "malloc.h"  *****************************/
-#define FB_HDR struct hdr				/* free block header type   */
-#define NULLFBH ((FB_HDR *)0)			/* Null of above struct     */
-
-FB_HDR
-{										/* mem_block header     */
-	struct hdr *ptr;					/* ptr next blk (when freed) */
-	size_t size;						/* block size (always)      */
-	size_t chksize;						/* 1's complement of size   */
-};
-
-
 FB_HDR _afreebase = { &_afreebase, 0, ~0 };	/* initial (empty) block    */
 
 FB_HDR *_aflistptr = &_afreebase;		/* ptr into ring of freeblks */
 
-#define AOFFS 1L						/* alignment offset: 0=byte, 1=word, 3=quad */
-#define AMASK(c) ((char *)((long)(c) & ~AOFFS))	/* mask alignment bits      */
-#define AFUDGE 4						/* leeway for passing block as is */
-#define ACHUNKS 64						/* chunks to alloc from O.S. */
-
-/*** end of "malloc.h" ******/
 
 /* find free block */
 static FB_HDR *findblock PROTO((size_t units));

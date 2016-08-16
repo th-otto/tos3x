@@ -45,6 +45,8 @@ extern char __tname[];					/* Terminal name        */
 extern char __lname[];					/* List device name     */
 extern char *_break;					/* -> Program break location */
 
+VOID blkfill PROTO((VOIDPTR ptr, int c, size_t bytes));
+
 char *petoa PROTO((double fp, char *buf, int prec));
 char *pftoa PROTO((double fp, char *buf, int prec));
 char *pgtoa PROTO((double fp, char *buf, int prec));
@@ -112,11 +114,30 @@ long _pc_readblk PROTO((struct fcbtab *fcb, long offset, VOIDPTR buff, long byte
 long _pc_writeblk PROTO((struct fcbtab *fcb, long offset, const VOIDPTR buff, long bytes));
 #endif
 
+/************************* #include "malloc.h"  *****************************/
+#define FB_HDR struct hdr				/* free block header type   */
+#define NULLFBH ((FB_HDR *)0)			/* Null of above struct     */
+
+FB_HDR
+{										/* mem_block header     */
+	struct hdr *ptr;					/* ptr next blk (when freed) */
+	size_t size;						/* block size (always)      */
+	size_t chksize;						/* 1's complement of size   */
+};
+
 #define ERR_FINDBLOCK 	1				/* error in 'findblock()'   */
 #define ERR_GETMEM	2					/* error in 'getmemory()'   */
 #define ERR_FREE	3					/* error in 'free()'        */
 
-VOID _errmalloc PROTO((int code)) __attribute__((noreturn));
+#define AOFFS 1L						/* alignment offset: 0=byte, 1=word, 3=quad */
+#define AMASK(c) ((char *)((long)(c) & ~AOFFS))	/* mask alignment bits      */
+#define AFUDGE 4						/* leeway for passing block as is */
+#define ACHUNKS 64						/* chunks to alloc from O.S. */
+
+VOID _errmalloc PROTO((int code));
+int malloc_debug PROTO((NOTHING));
+
+/*** end of "malloc.h" ******/
 
 VOID nottyin PROTO((NOTHING));
 VOID nostart PROTO((NOTHING));
