@@ -4,6 +4,7 @@ AOBJS1 = \
 	uldiv.o \
 	xsignal.o \
 	abort.o \
+	trap.o \
 	$(empty)
 
 AOBJS2 = \
