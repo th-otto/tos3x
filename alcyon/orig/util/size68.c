@@ -4,7 +4,7 @@
 
 extern int nofloat;
 
-FILE *stream = 0;
+FILE *stream;
 
 #ifdef __GNUC__
 #define fopenb(f, mode) fopen(f, "rb")
@@ -50,7 +50,8 @@ PP(char **argv;)
 				continue;
 			}
 			printf("\n%s:\n", argv[i]);
-			if ((w = getw(stream)) == MAGIC)
+			w = getw(stream);
+			if (w == MAGIC)
 			{
 				puts("\tContiguous");
 			} else if (w == MAGIC1)

@@ -6,21 +6,23 @@ AOBJS=${AOBJS1} ${AOBJS2}
 
 COBJS1=atof.o atoi.o ceil.o etoa.o fabs.o ffptof.o floor.o
 
-COBJS2=fmod.o ftoa.o ftoffp.o ftol.o ltof.o printf.o fprintf.o xdoprtfp.o prtld.o
+COBJS2=fopen.o getl.o getw.o xmain.o optoff.o
 
-COBJS3=prtint.o prtshort.o ctype.o fopen.o getl.o getw.o xmain.o xwmain.o optoff.o
+COBJS3=fmod.o ftoa.o ftoffp.o ftol.o ltof.o printf.o fprintf.o xdoprtfp.o prtld.o
 
-COBJS4=doprt.o puts.o fgetc.o filbuf.o read.o readasc.o readbin.o creat.o exit.o
+COBJS4=prtint.o prtshort.o ctype.o xwmain.o
 
-COBJS5=cleanup.o fclose.o close.o fdecls.o fflush.o open.o lseek.o fputn.o fputc.o
+COBJS5=doprt.o puts.o fgetc.o filbuf.o read.o readasc.o readbin.o creat.o exit.o
 
-COBJS6=flsbuf.o isatty.o malloc.o mallocnd.o sbrk.o blkfill.o write.o wrtchr.o channels.o
+COBJS6=cleanup.o fclose.o close.o fdecls.o fflush.o open.o lseek.o fputn.o fputc.o
 
-COBJS7=writeasc.o writebin.o xopen.o blkio.o xread.o xwrite.o errno.o
+COBJS7=flsbuf.o isatty.o malloc.o mallocnd.o sbrk.o blkfill.o write.o wrtchr.o channels.o
 
-COBJS8=strcpy.o strcat.o strlen.o strcmp.o stricmp.o
+COBJS8=writeasc.o writebin.o xopen.o blkio.o xread.o xwrite.o errno.o
 
-COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8}
+COBJS9=strcpy.o strcat.o strlen.o strcmp.o stricmp.o
+
+COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} ${COBJS9}
 
 OBJS=${AOBJS} ${COBJS}
 
@@ -40,6 +42,7 @@ srcfiles.sh: SRCFILES ${MAKEFILE}
 	@echo COBJS6=\"${COBJS6}\" >> $@
 	@echo COBJS7=\"${COBJS7}\" >> $@
 	@echo COBJS8=\"${COBJS8}\" >> $@
+	@echo COBJS9=\"${COBJS9}\" >> $@
 	@echo OPTIONOBJS=\"${OPTIONOBJS}\" >> $@
 	@echo CRT0=\"${CRT0}\" >> $@
 	@echo LIBC=\"${LIBC}\" >> $@
