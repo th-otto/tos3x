@@ -14,11 +14,9 @@ lbss equ 24			* Bss  segment start
 bsslen equ 28		* Bss  segment length
 freelen equ 32		* free segment length
 resvd equ 36		* Reserved
-fcb2 equ 56			* 2nd parsed fcb
-fcb1 equ 92			* 1st parsed fcb
 command equ 128		* Command tail
-prtstr equ 9		* Print string BDOS Call
-exit equ 0			* BDOS exit call
+prtstr equ 9		* Cconws Print string GEMDOS Call
+exit equ 76			* Pterm GEMDOS exit call
 		xref	__main
 		xdef	__exit
 		xdef	__break
@@ -73,8 +71,16 @@ brkok:
 		clr.l	d0			*	Set OK return
 		rts				*	return
 		
+__sovf:
+		lea	ovf(pc),a0			*	a0-> message
+		move.l	a0,-(a7)			*	load proper reg
+		move.w	#prtstr,-(a7)		*	String print
+		trap	#1			*	Issue message
+		moveq   #-1,d0
+		move.w  d0,4(a7)
+
 __exit:
-		tst.l (a7)+
+		addq.l   #4,a7			* pop return pc; we dont return to caller
 		move.w	#exit,-(a7)		*	Exit
 _halt:
 		trap	#1			*		now
@@ -98,6 +104,10 @@ notend:	cmp.b	(a0)+,d0			*	check for character
 	move.l	a0,d0				*	Found it
 	subq.l	#1,d0				*	set return pointer
 	rts					*
+
+ovf:		dc.b	'Stack Overflow'	*	Error message
+    dc.b 13,10,0
+    even
 *
 *	Data area
 *
@@ -106,7 +116,6 @@ notend:	cmp.b	(a0)+,d0			*	check for character
 		xdef	___tname		*	Terminal Name
 		xdef	___lname		*	List device name
 		xdef	___xeof			*	^Z byte
-ovf:		dc.b	'Stack Overflow$'	*	Error message
 ___pname:	dc.b	'C runtime',0		*	Program name
 ___tname:	dc.b	'CON:',0		*	Console name
 ___lname:	dc.b	'LST:',0		*	List device name

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <cout.h>
+#include <option.h>
 
 int fd = 0;
 const char *fn = "c.out";
@@ -17,6 +17,8 @@ PP(char **argv;)
 {
 	register int i, j;
 	long l;
+
+NOFLOAT
 
 	i = 1;
 	if (argc < 2)

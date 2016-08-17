@@ -148,16 +148,6 @@ int malloc_debug PROTO((NOTHING));
 
 /*** end of "malloc.h" ******/
 
-VOID nottyin PROTO((NOTHING));
-VOID nostart PROTO((NOTHING));
-VOID nodisk PROTO((NOTHING));
-VOID nolong PROTO((NOTHING));
-VOID noascii PROTO((NOTHING));
-VOID nobinary PROTO((NOTHING));
-VOID nofilesz PROTO((NOTHING));
-VOID nofloat PROTO((NOTHING));
-VOID nowildcards PROTO((NOTHING));
-
 VOID ___atab PROTO((NOTHING));
 
 #define strcasecmp _strcmp

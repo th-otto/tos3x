@@ -3,6 +3,7 @@
 */
 
 #include "lib.h"
+#include <option.h>
 
 /* stubroutine 'tag'	    */
 VOID nolong(NOTHING) { ; }

@@ -17,7 +17,7 @@ all: $(PROGRAMS)
 include SRCFILES
 
 size68$(EXEEXT): $(SIZE_OBJS)
-	$(AM_V_LD)$(LD) $(CRT0) $(SIZE_OBJS) $(LDFLAGS) -o $@
+	$(AM_V_LD)$(LD) $(SIZE_OBJS) $(LDFLAGS) -o $@
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

@@ -20,7 +20,7 @@ command equ 128		* Command tail
 prtstr equ 9		* Print string BDOS Call
 exit equ 0			* BDOS exit call
 		xref	__main
-		xref	__exit
+		xdef	__exit
 		xdef	__break
 		xdef	__start
 		xdef	___cpmrv

@@ -10,6 +10,5 @@ COBJS6="flsbuf.o isatty.o malloc.o mallocnd.o sbrk.o blkfill.o write.o wrtchr.o 
 COBJS7="writeasc.o writebin.o xopen.o blkio.o xread.o xwrite.o errno.o"
 COBJS8="strcpy.o strcat.o strlen.o strcmp.o stricmp.o"
 OPTIONOBJS="nofloat.o nottyin.o nostart.o nodisk.o nolong.o noascii.o nobinary.o nofilesz.o mallocdb.o"
-CRT0O="crt0.o"
+CRT0="crt0.o"
 LIBC="libc.a"
-LIBO="options.a"

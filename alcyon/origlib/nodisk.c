@@ -1,7 +1,8 @@
-/* NODISK: pulls out as much disk i/o as possible. */
+/* NODISK:  */
 
 #include <osif.h>
 #include "lib.h"
+#include <option.h>
 
 /* stubroutine 'tag' */
 VOID nodisk(NOTHING) { ; }
@@ -58,4 +59,3 @@ PP(size_t bytes;)
 	_optoff(__nodisk_io_msg);
 	return -1;
 }
-

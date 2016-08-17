@@ -5,7 +5,7 @@
 . srcfiles.sh
 . optimize.mak
 
-for i in $AOBJS1 $AOBJS2 $CRT0O; do
+for i in $AOBJS1 $AOBJS2 $CRT0; do
 	i=`basename $i .o`.S
 	echo AS $i
 	AS $i

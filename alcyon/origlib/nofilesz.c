@@ -1,6 +1,7 @@
 /* NOFILESZ: eliminates routine to calculate filesize (used in lseek()) */
 
 #include "lib.h"
+#include <option.h>
 
 VOID nofilesz(NOTHING) { ; }				/* stubroutine 'tag'	    */
 

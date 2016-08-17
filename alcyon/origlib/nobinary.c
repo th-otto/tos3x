@@ -2,6 +2,7 @@
 
 #include <osif.h>
 #include "lib.h"
+#include <option.h>
 
 /* stubroutine 'tag'	    */
 VOID nobinary(NOTHING) { ; }

@@ -10,9 +10,10 @@
 
 #include "lib.h"
 #include <stdlib.h>
+#include <option.h>
 
 /* stubroutine tag */
-VOID nostart(NOTHING) { ; }
+VOID nostartup(NOTHING) { ; }
 
 int main PROTO((char *, int));
 

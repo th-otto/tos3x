@@ -3,6 +3,13 @@ LIB=../../lib/
 INC=../../include
 EXEEXT=
 
+ALNPATH=${LIB}
+CRT0=crt0.o
+LIBC=libc.a
+LIBC_NDX=
+LIBM=libm.a
+LIBM_NDX=
+
 #
 # target and host compiler
 # 

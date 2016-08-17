@@ -2,6 +2,7 @@
 /*	references from 'printf' et al.					    */
 
 #include "lib.h"
+#include <option.h>
 
 VOID nofloat(NOTHING) { ; }					/* stubroutine 'tag'	    */
 
