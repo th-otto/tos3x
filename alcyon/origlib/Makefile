@@ -1,23 +1,14 @@
 include ../Makefile.common
 include ../Makefile.silent
 
-all: libc.a options.a crt0.o
+CRT0O=crt0.o
+LIBC=libc.a
+LIBO=options.a
+
+all: ${LIBC} ${LIBO} ${CRT0O} srcfiles.sh
 
 include SRCFILES
-
-optoff_OPTIMIZE=0
-printf_OPTIMIZE=0
-fprintf_OPTIMIZE=0
-doprt_OPTIMIZE=0
-prtint_OPTIMIZE=0
-readasc_OPTIMIZE=0
-readbin_OPTIMIZE=0
-xwmain_OPTIMIZE=0
-malloc_OPTIMIZE=0
-channels_OPTIMIZE=0
-writeasc_OPTIMIZE=0
-writebin_OPTIMIZE=0
-
+include optimize.mak
 
 libc.a: $(OBJS)
 	$(AM_V_at)$(RM) $@
@@ -32,21 +23,41 @@ libc.a: $(OBJS)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS7)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS8)
 
-libc.ndx: libc.a
+libc.ndx: ${LIBC}
 	$(AM_V_RANLIB)$(RANLIB) $<
 
 options.a: $(OPTIONOBJS)
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OPTIONOBJS)
 
-options.ndx: options.a
+options.ndx: ${LIBO}
 	$(AM_V_RANLIB)$(RANLIB) $<
 
-install: options.ndx libc.ndx crt0.o
-	$(CP) libc.a libc.ndx options.a options.ndx crt0.o $(LIB)
+
+srcfiles.sh: SRCFILES ${MAKEFILE}
+	$(AM_V_GEN)
+	@echo "#!mupfel"            > $@
+	@echo AOBJS1=\"${AOBJS1}\" >> $@
+	@echo AOBJS2=\"${AOBJS2}\" >> $@
+	@echo COBJS1=\"${COBJS1}\" >> $@
+	@echo COBJS2=\"${COBJS2}\" >> $@
+	@echo COBJS3=\"${COBJS3}\" >> $@
+	@echo COBJS4=\"${COBJS4}\" >> $@
+	@echo COBJS5=\"${COBJS5}\" >> $@
+	@echo COBJS6=\"${COBJS6}\" >> $@
+	@echo COBJS7=\"${COBJS7}\" >> $@
+	@echo COBJS8=\"${COBJS8}\" >> $@
+	@echo OPTIONOBJS=\"${OPTIONOBJS}\" >> $@
+	@echo CRT0O=\"${CRT0O}\" >> $@
+	@echo LIBC=\"${LIBC}\" >> $@
+	@echo LIBO=\"${LIBO}\" >> $@
+
+install: options.ndx libc.ndx ${CRT0O}
+	$(CP) ${LIBC} libc.ndx ${LIBO} options.ndx ${CRT0O} $(LIB)
+
 
 clean:
 	$(RM) *.o *.a *.ndx
 
 echo:
-	echo $(COBJS:.o=.c)
+	echo ${MAKEFILE}
