@@ -23,7 +23,7 @@ options.a: $(OPTIONOBJS)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OPTIONOBJS)
 
 clean:
-	$(RM) *.o *.a
+	$(RM) *.o *.a *.ndx
 
 echo:
 	echo $(COBJS:.o=.c)

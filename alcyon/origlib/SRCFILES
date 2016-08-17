@@ -1,19 +1,21 @@
 AOBJS1 = \
-	blivot.o \
-	lmul.o \
-	uldiv.o \
-	xsignal.o \
-	abort.o \
-	trap.o \
-	$(empty)
-
-AOBJS2 = \
 	aldiv.o \
 	almul.o \
 	alrem.o \
+	lrem.o \
+	lmul.o \
+	ldiv.o \
+	uldiv.o \
+	$(empty)
+
+AOBJS2 = \
+	blivot.o \
 	salloc.o \
 	setjmp.o \
 	stkcpy.o \
+	xsignal.o \
+	abort.o \
+	trap.o \
 	$(empty)
 
 AOBJS = $(AOBJS1) $(AOBJS2)
@@ -95,6 +97,7 @@ COBJS7 = \
 	blkio.o \
 	xread.o \
 	xwrite.o \
+	errno.o \
 	$(empty)
 
 COBJS8 = \

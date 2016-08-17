@@ -6,13 +6,18 @@ LIB=$(ALCYON)\lib$(BS)
 INC=$(ALCYON)\include$(BS)
 EXEEXT=.ttp
 
-
+CC=NYI
 CFLAGS= -f 
 ASFLAGS = -u -L -s $(LIB)
-CPPFLAGS = -I ..\include$(BS) -I $(INC)
+CPPFLAGS = -I $(INC)
 
 AR = $(BIN)ar68$(EXEEXT)
 ARFLAGS = -r
+RANLIB = $(BIN)doindex$(EXEEXT)
+
+LD = $(BIN)aln$(EXEEXT)
+CRT0 = $(LIB)crt0.o
+LDFLAGS = 
 
 # Wether to run the optimizer pass.
 # the default is evaluated by RUN_OPTIMIZE_,

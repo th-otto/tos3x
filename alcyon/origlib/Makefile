@@ -23,6 +23,8 @@ libc.a: $(OBJS)
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(AOBJS1)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(AOBJS2)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS1)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS2)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS3)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS4)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS5)
@@ -30,12 +32,21 @@ libc.a: $(OBJS)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS7)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(COBJS8)
 
+libc.ndx: libc.a
+	$(AM_V_RANLIB)$(RANLIB) $<
+
 options.a: $(OPTIONOBJS)
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OPTIONOBJS)
 
+options.ndx: options.a
+	$(AM_V_RANLIB)$(RANLIB) $<
+
+install: options.ndx libc.ndx crt0.o
+	$(CP) libc.a libc.ndx options.a options.ndx crt0.o $(LIB)
+
 clean:
-	$(RM) *.o *.a
+	$(RM) *.o *.a *.ndx
 
 echo:
 	echo $(COBJS:.o=.c)

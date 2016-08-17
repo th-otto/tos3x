@@ -1,15 +1,14 @@
-.so macro
-.he 'LO68''LO68'
+.TH "AR68" 1
 .de np
 .sp
 .in -5
 .lp +5 5
 ..
-.pr PROGRAM LO68
+.SH NAME
 lo68 - 68000 link editor
-.us USAGE
+.SH USAGE
 lo68 [ -slXZUoIr] name ...
-.fn FUNCTION
+.SH FUNCTION
 \&'lo68'
 combines several object programs into one;
 resolves external references; and searches libraries.
@@ -48,28 +47,33 @@ understands several flag arguments which are written
 preceded by a `-'.
 Except for -l,
 they should appear before the file names.
-.sp
-.lp +4 4
--s\ \ \ `strip' the output, that is, remove the symbol table
+.TP 8
+.I -s
+`strip' the output, that is, remove the symbol table
 and relocation bits to save space.
-.np +4 4
--r\ \ \ put the relocation bits on the output file
+.TP 8
+.I -r
+put the relocation bits on the output file
 (default is no relocation bits on the output file).
-.np +4 4
--I\ \ \ don't output error messages for 16-bit address overflow.
-.np +4 4
--U\ \ \ take the following argument as a symbol and enter
+.TP 8
+.I -I
+don't output error messages for 16-bit address overflow.
+.TP 8
+.I -U
+take the following argument as a symbol and enter
 it as undefined in the symbol table.
 This is useful
 for loading wholly from a library, since initially the symbol
 table is empty and an unresolved reference is needed
 to force the loading of the first routine.
-.np +4 4
--o\ \ \ interprets the argument immediately following it as the name
+.TP 8
+.I -o
+interprets the argument immediately following it as the name
 of the output file.  If this argument is not specified, the name
 of the output file is c.out.
-.np +4 4
--l\ \ \ This option is an abbreviation for a library name.
+.TP 8
+.I -l
+This option is an abbreviation for a library name.
 -l
 alone stands for `/lib/lib7.a', which
 is the standard system library for assembly language programs.
@@ -78,8 +82,9 @@ stands for `/lib/libx.a' where x is any character.
 A library is searched when its name is encountered,
 so the placement of a -l
 is significant.
-.np +4 4
--X\ \ \ Save local symbols
+.TP 8
+.I -X
+Save local symbols
 except for those whose names begin with `L'.
 This option is used by
 \&'lo68'
@@ -87,18 +92,21 @@ to discard internally generated labels while
 retaining symbols local to routines.
 If the -X flag is not specified, lo68 puts only global symbols
 into the symbol table.
-.np +4 4
--Znnnnnnnn\ \ \ Define nnnnnnnn as beginning hex address for
+.TP 8
+.I -Znnnnnnnn
+Define nnnnnnnn as beginning hex address for
 text segment.
 This address defaults to 0, but can be specified as any hex number
 between 0 and 0FFFFFFFF hex.
 This option is especially useful for stand-alone programs.
 nnnnnnnn must be a hex number -- lower case a-f or upper case A-F are
 both allowed.
-.np +4 4
--Tnnnnnnnn\ \ \ Same as -Znnnnnnnn.
-.np +4 4
--Dnnnnnnnn\ \ \ Define nnnnnnnn as beginning hex address for
+.TP 8
+.I -Tnnnnnnnn
+Same as -Znnnnnnnn.
+.TP 8
+.I -Dnnnnnnnn
+Define nnnnnnnn as beginning hex address for
 data segment.
 This address defaults to next byte after end of text segment,
 but can be specified as any hex number
@@ -106,8 +114,9 @@ between 0 and 0FFFFFFFF hex.
 This option is especially useful for stand-alone programs.
 nnnnnnnn must be a hex number -- lower case a-f or upper case A-F are
 both allowed.
-.np +4 4
--Bnnnnnnnn\ \ \ Define nnnnnnnn as beginning hex address for
+.TP 8
+.I -Bnnnnnnnn
+Define nnnnnnnn as beginning hex address for
 bss segment.
 This address defaults to next byte after end of data segment,
 but can be specified as any hex number
@@ -115,16 +124,16 @@ between 0 and 0FFFFFFFF hex.
 This option is especially useful for stand-alone programs.
 nnnnnnnn must be a hex number -- lower case a-f or upper case A-F are
 both allowed.
-.in -5
-.dt
-.fl FILES
+.SH FILES
 .nf
 /lib/lib7.a   standard library
 /lib/libF.a   floating point library
 .fi
 .br
 c.out   output file
-.sa "SEE ALSO"
-as(cmnd), ar(cmnd), cc(cmnd)
-.dg DIAGNOSTICS
+.SH "SEE ALSO"
+.BR as68(1),
+.BR ar68(1),
+.BR cc68(1)
+.SH DIAGNOSTICS
 Error messages begin with a : and are meant to be self-explanatory.

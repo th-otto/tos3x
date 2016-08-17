@@ -118,6 +118,7 @@ COBJS = \
 	abort.o \
 	\
 	optoff.o \
+	errno.o \
 	\
 	$(empty)
 

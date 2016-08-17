@@ -23,6 +23,7 @@ NATIVECFLAGS = -O -Wall
 endif
 
 CC = $(CROSSPREFIX)gcc
+LD = $(CC)
 AS = $(CROSSPREFIX)as --mri
 AR = $(CROSSPREFIX)ar
 ARFLAGS = rcs

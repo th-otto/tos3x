@@ -1,18 +1,21 @@
 #include <stdio.h>
-#include <klib.h>
-#include "cout.h"
-#define MAGIC1 MAGIC+1
+#include <stdlib.h>
+
+#include <cout.h>
 
 int fd = 0;
-char *fn = { "c.out" };
+const char *fn = "c.out";
 
-main(argc, argv)
-char **argv;
+struct hdr couthd;
+
+VOID lhex PROTO((long al));
+VOID ldec PROTO((long al));
+
+int main(P(int) argc, P(char **) argv)
+PP(int argc;)
+PP(char **argv;)
 {
-
-	register i,
-	 j;
-
+	register int i, j;
 	long l;
 
 	i = 1;
@@ -25,17 +28,17 @@ char **argv;
 		if ((fd = open(fn, 0, 1)) < 0)
 		{
 			printf("unable to open %s\n", fn);
-			exit();
+			exit(1);
 		}
 		if ((j = read(fd, &couthd, HDSIZE)) != HDSIZE)
 		{
 			printf("read error on %s\n", fn);
-			exit();
+			exit(1);
 		}
 		if (couthd.ch_magic != MAGIC && couthd.ch_magic != MAGIC1)
 		{
 			printf("File format error: %s\n", fn);
-			exit();
+			exit(1);
 		}
 		printf("%s:", fn);
 		l = couthd.ch_tsize + couthd.ch_dsize + couthd.ch_bsize;
@@ -62,19 +65,17 @@ char **argv;
 			putchar('\n');
 		}
 	}
+	return 0;
 }
 
 char ostr[80] = { 0 };
 
-lhex(al)
-long al;
+VOID lhex(P(long) al)
+PP(long al;)
 {
-
-	register i;
-
+	register int i;
 	register char *p;
-
-	register j;
+	register int j;
 
 	p = &ostr[80];
 	*--p = 0;
@@ -93,15 +94,13 @@ long al;
 	printf("%s", p);
 }
 
-ldec(al)
-long al;
+
+VOID ldec(P(long) al)
+PP(long al;)
 {
-
-	register i;
-
+	register int i;
 	register char *p;
-
-	register j;
+	register int j;
 
 	p = &ostr[80];
 	*--p = 0;
