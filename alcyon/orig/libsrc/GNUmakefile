@@ -14,15 +14,20 @@ all::
 
 include SRCFILES
 
-all:: ${LIBC} ${OPTIONOBJS} ${CRT0} srcfiles.sh
+all:: ${LIBC} ${LIBM} ${OPTIONOBJS} ${CRT0} srcfiles.sh
 
 ${LIBC}: $(OBJS)
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OBJS)
 	$(AM_V_RANLIB)$(RANLIB) $@
 
+${LIBM}: $(MOBJS)
+	$(AM_V_at)$(RM) $@
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(MOBJS)
+	$(AM_V_RANLIB)$(RANLIB) $@
+
 install: ${LIBC_NDX} ${OPTIONOBJS} ${CRT0}
-	$(CP) ${LIBC} ${LIBC_NDX} ${OPTIONOBJS} ${CRT0} $(LIB)
+	$(CP) ${LIBC} ${LIBC_NDX} ${CRT0} $(LIB)
 
 clean:
 	$(RM) *.o *.a *.ndx

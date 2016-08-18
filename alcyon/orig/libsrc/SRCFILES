@@ -1,30 +1,61 @@
-AOBJS1=aldiv.o almul.o alrem.o lrem.o lmul.o ldiv.o uldiv.o
+# $ ar68 r  clib setjmp.o signal.o xsignal.o xstrcmp.o ldiv.o blivot.o
 
-AOBJS2=blivot.o salloc.o setjmp.o stkcpy.o xsignal.o abort.o trap.o
+#
+# Dividing the object list is neccessary for the stupid original tools
+# which have a 126 byte command length limit.
+# Also, if you want to reproduce the exact same binaries as those
+# from the Atari Developer Kit, dont change the order here
+#
+
+COBJS1=nofloat.o xmain.o xwmain.o perror.o mktemp.o chmod.o chown.o
+
+COBJS2=fprintf.o printf.o sprintf.o doprt.o prtint.o prtld.o
+
+COBJS3=prtshort.o fscanf.o scanf.o sscanf.o xdoscan.o fdopen.o
+
+COBJS4=fopen.o freopen.o ftell.o rewind.o fseek.o exit.o
+
+COBJS5=cleanup.o fclose.o fflush.o fread.o fwrite.o fgets.o
+
+COBJS6=gets.o fputs.o puts.o getl.o getw.o putl.o putw.o
+
+COBJS7=ungetc.o setbuf.o fgetc.o fputc.o filbuf.o flsbuf.o
+
+COBJS8=fdecls.o close.o creat.o lseek.o xfilesz.o
+
+COBJS9=open.o read.o xttyin.o unlink.o write.o xopen.o access.o
+
+COBJS10=getpass.o ttyname.o isatty.o chinit.o chkc.o blkio.o
+
+COBJS11=allocc.o atoi.o atol.o swab.o getpid.o rand.o qsort.o
+
+COBJS12=calloc.o malloc.o sbrk.o errno.o ctype.o strchr.o
+
+COBJS13=strrchr.o strcat.o strcmp.o strcpy.o strlen.o strncat.o
+
+COBJS14=strncmp.o strncpy.o mallocnd.o blkfill.o wrtchr.o readasc.o readbin.o
+
+COBJS15=fputn.o
+
+COBJS16=writeasc.o writebin.o xread.o xwrite.o stricmp.o
+
+COBJS17=optoff.o signal.o
+
+COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} \
+      ${COBJS9} ${COBJS10} ${COBJS11} ${COBJS12} ${COBJS13} ${COBJS14} ${COBJS15} ${COBJS16} ${COBJS17}
+
+AOBJS1=abort.o aldiv.o almul.o alrem.o lmul.o lrem.o uldiv.o
+
+AOBJS2=setjmp.o xsignal.o salloc.o stkcpy.o ldiv.o blivot.o trap.o
 
 AOBJS=${AOBJS1} ${AOBJS2}
 
-COBJS1=atof.o atoi.o ceil.o etoa.o fabs.o ffptof.o floor.o
+OBJS=${COBJS} ${AOBJS}
 
-COBJS2=fopen.o getl.o getw.o xmain.o optoff.o
 
-COBJS3=fmod.o ftoa.o ftoffp.o ftol.o ltof.o printf.o fprintf.o xdoprtfp.o prtld.o
-
-COBJS4=prtint.o prtshort.o ctype.o xwmain.o
-
-COBJS5=doprt.o puts.o fgetc.o filbuf.o read.o readasc.o readbin.o creat.o exit.o
-
-COBJS6=cleanup.o fclose.o close.o fdecls.o fflush.o open.o lseek.o fputn.o fputc.o
-
-COBJS7=flsbuf.o isatty.o malloc.o mallocnd.o sbrk.o blkfill.o write.o wrtchr.o channels.o
-
-COBJS8=writeasc.o writebin.o xopen.o blkio.o xread.o xwrite.o errno.o
-
-COBJS9=strcpy.o strcat.o strlen.o strcmp.o stricmp.o
-
-COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} ${COBJS9}
-
-OBJS=${AOBJS} ${COBJS}
+MOBJS1=atof.o ceil.o etoa.o fabs.o ffptof.o floor.o fmod.o ftoa.o
+MOBJS2=ftoffp.o ftol.o ltof.o xdoprtfp.o 
+MOBJS=${MOBJS1} ${MOBJS2}
 
 OPTIONOBJS=nofloat.o nottyin.o nostart.o nodisk.o nolong.o noascii.o nobinary.o nofilesz.o mallocdb.o
 
@@ -43,7 +74,16 @@ srcfiles.sh: SRCFILES ${MAKEFILE}
 	@echo COBJS7=\"${COBJS7}\" >> $@
 	@echo COBJS8=\"${COBJS8}\" >> $@
 	@echo COBJS9=\"${COBJS9}\" >> $@
+	@echo COBJS10=\"${COBJS10}\" >> $@
+	@echo COBJS11=\"${COBJS11}\" >> $@
+	@echo COBJS12=\"${COBJS12}\" >> $@
+	@echo COBJS13=\"${COBJS13}\" >> $@
+	@echo COBJS14=\"${COBJS14}\" >> $@
+	@echo COBJS15=\"${COBJS15}\" >> $@
+	@echo COBJS16=\"${COBJS16}\" >> $@
+	@echo COBJS17=\"${COBJS17}\" >> $@
+	@echo MOBJS1=\"${MOBJS1}\" >> $@
+	@echo MOBJS2=\"${MOBJS2}\" >> $@
 	@echo OPTIONOBJS=\"${OPTIONOBJS}\" >> $@
 	@echo CRT0=\"${CRT0}\" >> $@
 	@echo LIBC=\"${LIBC}\" >> $@
-

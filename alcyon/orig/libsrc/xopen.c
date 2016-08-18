@@ -102,7 +102,7 @@ PP(int bdosfunc;)							/* BDOS Function        */
 			rv = junlink(filename);
 			break;
 			/* 2nd break leftover? */
-			break;
+			/* break; */
 		}
 	}
 	

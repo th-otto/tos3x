@@ -36,7 +36,6 @@ PP(char *digs;)
 	{
 		if ((int) n < 0)
 		{
-			asm("clr.w d0"); /* WTF */
 			n = -n;
 			*(*pbuf)++ = '-';
 		}

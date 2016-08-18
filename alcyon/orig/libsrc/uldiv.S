@@ -74,6 +74,7 @@ _uldiv:
 	bne L2
 	move.l #$80000000,_uldivr
 	move.l #$80000000,d0
+	divu.w #0,d0
 	bra L1
 L2:
 	cmp.l d7,d6
@@ -116,7 +117,7 @@ L8:
 L5:
 	move.l d7,_uldivr
 	move.l d5,d0
-	bra L1
+*	bra L1
 L1:
 	tst.l (sp)+
 	movem.l (sp)+,d4-d7

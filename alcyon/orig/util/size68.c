@@ -4,12 +4,13 @@
 
 extern int nofloat;
 
+long l;
 FILE *stream;
 
 #ifdef __GNUC__
 #define fopenb(f, mode) fopen(f, "rb")
 
-int getw(P(FILE *) sp)
+static int getw(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
 	unsigned int c1 = getc(sp) & 0xff;
@@ -17,12 +18,13 @@ PP(register FILE *sp;)				/* the stream to get from   */
 	unsigned int w = (c1 << 8) | c2;
 	return w;
 }
-long getl PROTO((FILE *sp))
+static long getl(P(FILE *) *sp))
+PP(register FILE *sp;)				/* the stream to get from   */
 {
 	unsigned int w1 = getw(sp);
 	unsigned int w2 = getw(sp);
-	long l = ((long)w1 << 16) | w2;
-	return l;
+	long ll = ((long)w1 << 16) | w2;
+	return ll;
 }
 
 #endif
@@ -46,7 +48,7 @@ PP(char **argv;)
 		{
 			if ((stream = fopenb(argv[i], "r")) == NULL)
 			{
-				printf("\tcannot open %s\n", argv[i]);
+				printf("\tCannot open %s.\n", argv[i]);
 				continue;
 			}
 			printf("\n%s:\n", argv[i]);
@@ -67,7 +69,7 @@ PP(char **argv;)
 			print_l(".data length\t\t");
 			print_l(".bss length\t\t");
 			print_l("Symbol table length\t");
-			getl(stream); /* skip stksize aka prgflags */
+			getl(stream); /* skip stksize */
 			print_l("Start of .text\t\t");
 			if (getw(stream) != 0)
 			{
@@ -93,8 +95,8 @@ PP(char **argv;)
 VOID print_l(P(const char *) tag)
 PP(const char *tag;)
 {
-	long l;
+	long ll;
 	
-	l = getl(stream);
-	printf("\t%s- %6ld\t%8lx\n", tag, l, l);
+	ll = getl(stream);
+	printf("\t%s= %6ld\t%8lx\n", tag, ll, ll);
 }

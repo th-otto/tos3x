@@ -51,6 +51,7 @@
 #  endif
 #endif
 
+#define	MAXCCBS 16					/* Maximum Num CCBs     */
 
 /* file descriptors */
 #define STDIN 0

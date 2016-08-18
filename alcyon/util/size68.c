@@ -4,12 +4,9 @@
 
 extern int nofloat;
 
-FILE *stream = 0;
+static FILE *stream;
 
-#ifdef __GNUC__
-#define fopenb(f, mode) fopen(f, "rb")
-
-int getw(P(FILE *) sp)
+static int get16be(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
 	unsigned int c1 = getc(sp) & 0xff;
@@ -17,25 +14,34 @@ PP(register FILE *sp;)				/* the stream to get from   */
 	unsigned int w = (c1 << 8) | c2;
 	return w;
 }
-long getl PROTO((FILE *sp))
+
+
+static long get32be(P(FILE *) sp)
+PP(register FILE *sp;)				/* the stream to get from   */
 {
-	unsigned int w1 = getw(sp);
-	unsigned int w2 = getw(sp);
+	unsigned int w1 = get16be(sp);
+	unsigned int w2 = get16be(sp);
 	long l = ((long)w1 << 16) | w2;
 	return l;
 }
 
-#endif
 
-VOID print_l PROTO((const char *tag));
+static VOID print_l(P(const char *) tag)
+PP(const char *tag;)
+{
+	long l;
+	
+	l = get32be(stream);
+	printf("  %-30s- %6ld  %8lx\n", tag, l, l);
+}
 
 
 int main(P(int) argc, P(char **) argv)
 PP(int argc;)
 PP(char **argv;)
 {
-	int w;
-	int i;
+	register int w;
+	register int i;
 
 	if (argc < 2)
 	{
@@ -44,56 +50,44 @@ PP(char **argv;)
 	{
 		for (i = 1; i < argc; i++)
 		{
-			if ((stream = fopenb(argv[i], "r")) == NULL)
+			if ((stream = fopen(argv[i], "rb")) == NULL)
 			{
-				printf("\tcannot open %s\n", argv[i]);
+				printf("  Cannot open %s.\n", argv[i]);
 				continue;
 			}
 			printf("\n%s:\n", argv[i]);
-			if ((w = getw(stream)) == MAGIC)
+			if ((w = get16be(stream)) == MAGIC)
 			{
-				puts("\tContiguous");
+				puts("  Contiguous");
 			} else if (w == MAGIC1)
 			{
-				puts("\tNon-contiguous");
+				puts("  Non-contiguous");
 			} else 
 			{
-				puts("\tNot a program file.");
+				puts("  Not a program file.");
 				fclose(stream);
 				continue;
 			}
-			print_l(".text length\t\t");
-			print_l(".data length\t\t");
-			print_l(".bss length\t\t");
-			print_l("Symbol table length\t");
-			getl(stream); /* skip stksize aka prgflags */
-			print_l("Start of .text\t\t");
+			print_l(".text length");
+			print_l(".data length");
+			print_l(".bss length");
+			print_l("Symbol table length");
+			print_l("Stacksize");
+			print_l("Program flags");
 			if (getw(stream) != 0)
 			{
-				puts("\tNo relocation information in file.");
+				puts("  No relocation information in file.");
 			} else
 			{
-				puts("\tFile is relocatable.");
+				puts("  File is relocatable.");
 			}
 			if (w == MAGIC1)
 			{
-				print_l("Start of .data\t\t");
-				print_l("Start of .bss\t\t");
+				print_l("Start of .data");
+				print_l("Start of .bss");
 			}
 			fclose(stream);
 		}
 	}
-#ifdef __GNUC__
 	return 0;
-#endif
-}
-
-
-VOID print_l(P(const char *) tag)
-PP(const char *tag;)
-{
-	long l;
-	
-	l = getl(stream);
-	printf("\t%s- %6ld\t%8lx\n", tag, l, l);
 }

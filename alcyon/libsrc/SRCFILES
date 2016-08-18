@@ -93,7 +93,9 @@ COBJS = \
 	blkfill.o \
 	write.o \
 	wrtchr.o \
-	channels.o \
+	chinit.o \
+	allocc.o \
+	chkc.o \
 	writeasc.o \
 	writebin.o \
 	blkio.o \

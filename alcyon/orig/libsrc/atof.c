@@ -57,7 +57,7 @@ PP(const char *p;)
 
 
 double atof(P(const char *) buf)
-PP(const char * buf;)
+PP(const char *buf;)
 {
 	char ibuf[FRACSIZ];
 	char ebuf[EXPSIZ];
