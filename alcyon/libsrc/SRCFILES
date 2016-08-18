@@ -107,8 +107,10 @@ COBJS = \
 	strupr.o \
 	strlwr.o \
 	strcpy.o \
+	strncpy.o \
 	strlen.o \
 	strcat.o \
+	strncat.o \
 	strcmp.o \
 	stricmp.o \
 	\
