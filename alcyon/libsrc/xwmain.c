@@ -206,7 +206,7 @@ PP(int len;)								/* Command length */
 			case '<':
 				/* Redirecting input */
 				close(STDIN);
-				if (opena(s + 1, O_RDONLY) != STDIN)
+				if (open(s + 1, O_RDONLY | O_TEXT) != STDIN)
 					_err("Cannot open ", s + 1);
 				break;
 
@@ -216,12 +216,12 @@ PP(int len;)								/* Command length */
 				if (s[1] == '>')
 				{
 					/* Appending, try to open old */
-					if (opena(s + 2, O_WRONLY) != STDOUT || lseek(STDOUT, 0L, SEEK_END) < 0)
+					if (open(s + 2, O_WRONLY | O_TEXT | O_CREAT | O_APPEND) != STDOUT)
 						_err("Cannot append ", s + 1);
 				} else
 				{
 					/* Try to open new */
-					if (creata(s + 1, 0) != STDOUT)
+					if (open(s + 1, O_WRONLY | O_CREAT | O_TRUNC | O_TEXT) != STDOUT)
 						_err("Cannot create ", s + 1);
 				}
 				break;

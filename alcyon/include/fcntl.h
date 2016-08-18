@@ -12,12 +12,23 @@
 #define	O_ACCMODE	(O_RDONLY|O_WRONLY|O_RDWR)
 #endif
 
-/*
- * non-standard functions
- */
-int opena PROTO((const char *, int, ...));
-int openb PROTO((const char *, int, ...));
-int creata PROTO((const char *pathname, mode_t mode));
-int creatb PROTO((const char *pathname, mode_t mode));
+#define O_APPEND    0x0008		/* position at EOF */
+#define	O_NONBLOCK	0x0100		/* Non-blocking I/O */
+#define O_CREAT 	0x0200		/* create new file if needed */
+#define O_TRUNC	    0x0400		/* make file 0 length */
+#define O_EXCL  	0x0800		/* error if file exists */
+#define O_BINARY    0
+#define O_TEXT      0x1000		/* translate cr/lf */
+
+
+# ifndef R_OK			/* Verbatim from <unistd.h>.  Ugh.  */
+/* Values for the second argument to access.
+   These may be OR'd together.  */
+#  define R_OK	4		/* Test for read permission.  */
+#  define W_OK	2		/* Test for write permission.  */
+#  define X_OK	1		/* Test for execute permission.  */
+#  define F_OK	0		/* Test for existence.  */
+# endif
+
 
 #endif /* __FCNTL_H__ */

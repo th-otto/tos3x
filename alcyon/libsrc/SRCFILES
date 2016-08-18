@@ -102,6 +102,7 @@ COBJS = \
 	xread.o \
 	xwrite.o \
 	xopen.o \
+	getmode.o \
 	strupr.o \
 	strlwr.o \
 	strcpy.o \

@@ -30,16 +30,20 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#include <sys/stat.h>
 
 
-int _open(P(const char *) fname, P(int) mode, P(int) binary)
+int open(P(const char *) fname, P(int) flags  _va_alist)
 PP(const char *fname;)						/* -> File name         */
-PP(int mode;)								/* Open mode            */
-PP(int binary;)								/* File type            */
+PP(int flags;)								/* Open mode            */
+_va_dcl
 {
 	register int ich;						/* Channel number for open  */
 	register FD *ch;						/* -> CCB for channel       */
-
+	mode_t mode;
+	va_list args;
+	int ret;
+	
 	/* Allocate a channel */
 	if ((ich = _allocc()) == -1)
 		return -1;
@@ -50,17 +54,17 @@ PP(int binary;)								/* File type            */
 	ch = _getccb(ich);
 	
 	/* If read only, set READONLY bit */
-	if (mode == O_RDONLY)
+	if (flags == O_RDONLY)
 		ch->flags |= ISREAD;
 	/* Is ASCII file? */
-	if (binary == 0)
+	if (flags & O_TEXT)
 		ch->flags |= ISASCII;
 	
 	/* if a terminal, mark as tty */
 	if (strcasecmp(fname, __tname) == 0)
 	{
 		ch->flags |= ISTTY | OPENED;
-		ch->dosfd = mode; /* ??? */
+		ch->dosfd = flags; /* ??? */
 	} else if (strcasecmp(fname, __lname) == 0)
 	{
 		/* Mark as printer */
@@ -68,7 +72,36 @@ PP(int binary;)								/* File type            */
 	} else
 	{
 		/* Use POS SVC interface */
-		if (__open(ich, fname, OPEN) != 0)
+		if (flags & O_CREAT)
+		{
+			_va_start(args, flags);
+			mode = _va_arg(args, mode_t);
+			_va_end(args);
+			if (!(flags & O_EXCL))
+			{
+				if (flags & O_TRUNC)
+					ret = __open(ich, fname, CREATE);
+				else
+					ret = __open(ich, fname, OPEN);
+			} else
+			{
+				ret = __open(ich, fname, OPEN);
+				if (ret == 0)
+				{
+					close(ch->chan);
+					RETERR(-1, EEXIST);
+				} else if (flags & O_TRUNC)
+				{
+					ret = __open(ich, fname, CREATE);
+				}
+			}
+			if (ret == 0)
+				chmod(fname, mode);
+		} else
+		{
+			ret = __open(ich, fname, OPEN);
+		}
+		if (ret != 0)
 		{
 			/* deallocate channel */
 			_freec(ich);
@@ -77,36 +110,12 @@ PP(int binary;)								/* File type            */
 		
 		/* Set OPEN bit */
 		ch->flags |= OPENED;
+
 		/* Kludge to set hi water mark */
 		lseek(ch->chan, 0L, SEEK_END);
-		lseek(ch->chan, 0L, SEEK_SET);
+
+		if (!(flags & O_APPEND))
+			lseek(ch->chan, 0L, SEEK_SET);
 	}
 	return ich;
-}
-
-
-int open(P(const char *) fname, P(int) mode _va_alist)
-PP(const char *fname;)
-PP(int mode;)
-_va_dcl
-{
-	return _open(fname, mode, 0);
-}
-
-
-int opena(P(const char *) fname, P(int) mode _va_alist)
-PP(const char *fname;)
-PP(int mode;)
-_va_dcl
-{
-	return _open(fname, mode, 0);
-}
-
-
-int openb(P(const char *) fname, P(int) mode _va_alist)
-PP(const char *fname;)
-PP(int mode;)
-_va_dcl
-{
-	return _open(fname, mode, 1);
 }

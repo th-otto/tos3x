@@ -66,24 +66,8 @@ PP(int binary;)						/* ASCII/BINARY flag        */
 	return ich;
 }
 
-/* default to ascii */
+/* default to binary */
 int creat(P(const char *) fname, P(mode_t) prot)
-PP(const char *fname;)
-PP(mode_t prot;)
-{
-	return _creat(fname, prot, 0);
-}
-
-/* ascii file open */
-int creata(P(const char *) fname, P(mode_t) prot)
-PP(const char *fname;)
-PP(mode_t prot;)
-{
-	return _creat(fname, prot, 0);
-}
-
-/* binary file open */
-int creatb(P(const char *) fname, P(mode_t) prot)
 PP(const char *fname;)
 PP(mode_t prot;)
 {

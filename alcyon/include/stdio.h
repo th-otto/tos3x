@@ -118,9 +118,6 @@ off_t tell PROTO((int fd));
 long getl PROTO((FILE *sp));
 int getw PROTO((FILE *sp));
 
-FILE *fopena PROTO((const char * name, const char *mode));
-FILE *fopenb PROTO((const char * name, const char *mode));
-
 int fputn PROTO((const char *buf, int num, FILE *sp));
 
 /*************************** end of stdio.h *********************************/

@@ -34,15 +34,18 @@
 #include <fcntl.h>
 #include <errno.h>
 
-static FILE *_fopen(P(register const char *) name, P(register const char *) mode, P(int) ascii)
+FILE *fopen(P(register const char *) name, P(register const char *) mode)
 PP(register const char *name;)			/* file name            */
 PP(register const char *mode;)				/* "r","w", or "a"      */
-PP(int ascii;)								/* CP/M text file       */
 {
 	register FILE *sp;					/* stream pointer       */
 	register int ii;					/* index into _iob      */
 	register int fd;					/* file descriptor      */
-
+	register int flags;
+	
+	if ((flags = __getmode(mode)) == -1)
+		return NULL;
+	
 	/* look at _iob table not marked rd/wrt */
 	for (ii = 0; ii < MAXFILES && (sp = (&_iob[ii]))->_flag & (_IOREAD | _IOWRT); ii++)
 		;
@@ -51,56 +54,19 @@ PP(int ascii;)								/* CP/M text file       */
 		errno = EMFILE;
 		return NULL;				/*   fail           */
 	}
-	if (*mode == 'w' || *mode == 'W')	/* 'w'rite mode?        */
-		fd = _creat(name, O_WRONLY, ascii);	/*  create file ******** */
-	else if (*mode == 'a' || *mode == 'A')	/* 'a'ppend mode?       */
-	{									/*              */
-		if ((fd = _open(name, O_WRONLY, ascii)) < 0)	/* try open      */
-			fd = _creat(name, O_WRONLY, ascii);	/* ow. do create    */
-		else
-			lseek(fd, 0L, SEEK_END);			/* its out there, seek EOF  */
-	}
-	else if (*mode == 'r' || *mode == 'R')	/* 'r'ead mode?         */
-		fd = _open(name, O_RDONLY, ascii);	/*  try open *********** */
-	else
-		return NULL;					/* bad mode barf...     */
+	fd = open(name, flags, 0644);	/*  try open *********** */
 
 	if (fd < 0)							/* did one of those work?   */
 		return NULL;					/*  no, oh well     */
 	sp->_cnt = 0;						/* init count           */
 	sp->_fd = fd;						/*  and file des        */
 	sp->_base = sp->_ptr = NULL;		/*  and buffer pointers     */
-	if (*mode == 'r' || *mode == 'R')	/* 'r'ead mode?         */
-		sp->_flag = _IOREAD;			/*  say so          */
-	else
+	if ((flags & O_ACCMODE) != O_WRONLY)
+		sp->_flag = _IOREAD;
+	if ((flags & O_ACCMODE) != O_RDONLY)
 		sp->_flag = _IOWRT;				/* else 'w'rite mode        */
-	if (ascii == 0)						/* ascii mode?          */
-		sp->_flag |= _IOASCI;			/*              */
+	if (flags & O_TEXT)
+		sp->_flag |= _IOASCI;
 
 	return sp;						/* return the stream ptr    */
-}
-
-
-/* ascii file open */
-FILE *fopen(P(const char *) name, P(const char *) mode)
-PP(const char *name;)
-PP(const char *mode;)
-{
-	return _fopen(name, mode, 0);
-}
-
-/* ascii file open */
-FILE *fopena(P(const char *) name, P(const char *) mode)
-PP(const char *name;)
-PP(const char *mode;)
-{
-	return _fopen(name, mode, 0);
-}
-
-/* binary file open */
-FILE *fopenb(P(const char *) name, P(const char *) mode)
-PP(const char *name;)
-PP(const char *mode;)
-{
-	return _fopen(name, mode, 1);
 }
