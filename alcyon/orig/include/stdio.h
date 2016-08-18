@@ -103,6 +103,7 @@ int vsprintf PROTO((char *str, const char *fmt, va_list args));
 
 int fputc PROTO((int c, FILE *stream));
 int fgetc PROTO((FILE *stream));
+char *fgets PROTO((char *str, int maxc, FILE *sp));
 
 int fflush PROTO((FILE *stream));
 int puts PROTO((const char * str));

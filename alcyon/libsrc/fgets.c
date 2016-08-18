@@ -31,9 +31,7 @@ PP(register FILE *sp;)							/* where to get from        */
 	register char *sav;						/* sav pointer for return   */
 
 	sav = str;							/* remember this        */
-#ifndef __ALCYON__
 	c = 0;
-#endif
 	while (--maxc > 0 &&				/* while there's still room */
 									   /*   for getc and NULL      */
 		   (c = getc(sp)) != EOF)	/*   and read_char ok       */
@@ -43,7 +41,7 @@ PP(register FILE *sp;)							/* where to get from        */
 			break;						/*     stop the presses     */
 	}
 	*str = '\0';						/* clean up string      */
-	if (c == EOF)		/* BUG: c may be used uninitialzed */
+	if (c == EOF)
 		return NULL;				/*   then tell them so      */
 	return sav;
 }

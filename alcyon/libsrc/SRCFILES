@@ -72,6 +72,7 @@ COBJS = \
 	xmain.o \
 	xwmain.o \
 	fgetc.o \
+	fgets.o \
 	filbuf.o \
 	read.o \
 	readasc.o \
