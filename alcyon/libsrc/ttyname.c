@@ -12,13 +12,11 @@
 *
 **************************************************************************/
 
-#include <osif.h>
+/* ttyname - find name of a terminal */
+/*	returns "CON:" if isatty, NULL o.w., under CP/M */
+
 #include "lib.h"
 #include <unistd.h>
-
-
-/* ttyname - find name of a terminal */
-/*	returns "CON:" if isatty, NULLPTR o.w., under CP/M */
 
 char *ttyname(P(int) fd)
 PP(int fd;)
