@@ -39,6 +39,9 @@ AOBJS = \
 	blkfills.o \
 	brk.o \
 	trap.o \
+	bios.o \
+	xbios.o \
+	gemdos.o \
 	\
 	$(empty)
 
