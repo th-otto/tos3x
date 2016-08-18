@@ -11,8 +11,7 @@ PP(register FILE *sp;)				/* the stream to get from   */
 {
 	unsigned int c1 = getc(sp) & 0xff;
 	unsigned int c2 = getc(sp) & 0xff;
-	unsigned int w = (c1 << 8) | c2;
-	return w;
+	return (c1 << 8) | c2;
 }
 
 
@@ -21,8 +20,7 @@ PP(register FILE *sp;)				/* the stream to get from   */
 {
 	unsigned int w1 = get16be(sp);
 	unsigned int w2 = get16be(sp);
-	long l = ((long)w1 << 16) | w2;
-	return l;
+	return ((long)w1 << 16) | w2;
 }
 
 

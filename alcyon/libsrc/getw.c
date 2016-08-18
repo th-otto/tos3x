@@ -22,11 +22,7 @@
 int getw(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
-	int w;								/* place to get to      */
-	register char *p;					/* make ptr to w        */
-
-	p = (char *) &w;
-	*p++ = getc(sp);
-	*p++ = getc(sp);
-	return w;
+	register unsigned int c1 = getc(sp) & 0xff;
+	register unsigned int c2 = getc(sp) & 0xff;
+	return (c1 << 8) | c2;
 }

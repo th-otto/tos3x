@@ -4,7 +4,8 @@
 
 
 /* Dissect the given mode string into an mode_t.  */
-int __getmode(const char *modeptr)
+int __getmode(P(const char *) modeptr)
+PP(const char *modeptr;)
 {
 	int mode;
 	

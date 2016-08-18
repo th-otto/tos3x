@@ -13,3 +13,6 @@ ${LIBM}: $(OBJS)
 
 ${LIBM_NDX}: ${LIBM}
 	$(AM_V_RANLIB)$(RANLIB) $<
+
+clean:
+	$(RM) *.o *.a *.ndx

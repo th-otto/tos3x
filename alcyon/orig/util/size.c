@@ -10,6 +10,8 @@ FILE *stream;
 #ifdef __GNUC__
 #define fopenb(f, mode) fopen(f, "rb")
 
+#undef getw
+#define getw get16be
 static int getw(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
@@ -18,7 +20,10 @@ PP(register FILE *sp;)				/* the stream to get from   */
 	unsigned int w = (c1 << 8) | c2;
 	return w;
 }
-static long getl(P(FILE *) *sp))
+
+#undef getl
+#define getl get32be
+static long getl(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
 	unsigned int w1 = getw(sp);

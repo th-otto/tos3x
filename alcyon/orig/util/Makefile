@@ -1,10 +1,10 @@
 include ../Makefile.common
 include ../Makefile.silent
 
-PROGRAMS = size68$(EXEEXT)
+PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT)
 LIBS = ${LIBC}
 
-all: size68$(EXEEXT)
+all: $(PROGRAMS)
 
 include SRCFILES
 
@@ -67,6 +67,9 @@ size68$(EXEEXT): $(SIZE_OBJS)
 		$(LIBSRC)trap.o \
 		$(LIBSRC)lmul.o \
 		$(empty)
+
+nm68$(EXEEXT): $(NM_OBJS)
+	$(AM_V_LD)$(LD) $(LDFLAGS) -o $@ $(CRT0) $(NM_OBJS) $(LIBS)
 
 clean:
 	$(RM) *.o *.a *.s *.i *.1 *.2 $(PROGRAMS)

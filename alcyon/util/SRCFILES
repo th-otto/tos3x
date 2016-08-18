@@ -1,1 +1,2 @@
-SIZE_OBJS = size68.o
+SIZE_OBJS = size.o
+NM_OBJS = nm.o libget.o getchd.o

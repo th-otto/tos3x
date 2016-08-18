@@ -55,9 +55,15 @@ typedef struct _iobuf FILE;
 #define _IOSTRI 0x80                    /* this stream is really a string   */
 #define _IOASCI 0x100                   /* this was opened as an ascii file */
 
+#ifdef __GNUC__
+extern FILE *stdin;          /* Standard input stream.  */
+extern FILE *stdout;         /* Standard output stream.  */
+extern FILE *stderr;         /* Standard error output stream.  */
+#else
 #define stdin  (&_iob[0])               /* standard input stream            */
 #define stdout (&_iob[1])               /*    "     output  "               */
 #define stderr (&_iob[2])               /*    "     error   "               */
+#endif
 
 #define clearerr(p) ((p)->_flag &= ~_IOERR) /* clear error flag             */
 #define feof(p) ((p)->_flag & _IOEOF)   /* EOF encountered on stream        */
@@ -103,6 +109,7 @@ int puts PROTO((const char * str));
 
 FILE *fopen PROTO((const char * name, const char * mode));
 int fclose PROTO((FILE *stream));
+int fseek PROTO((FILE *stream, long offset, int whence));
 
 int open PROTO((const char *pathname, int flags, ...));
 int creat PROTO((const char *pathname, mode_t mode));
@@ -111,6 +118,7 @@ off_t lseek PROTO((int fd, off_t offs, int whence));
 size_t read PROTO((int fd, VOIDPTR buf, size_t count));
 size_t write PROTO((int fd, const VOIDPTR buf, size_t count));
 off_t tell PROTO((int fd));
+int rewind PROTO((FILE *sp));
 
 /*
  * non-standard functions

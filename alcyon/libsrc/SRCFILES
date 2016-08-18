@@ -37,6 +37,7 @@ AOBJS = \
 	salloc.o \
 	setjmp.o \
 	blkfills.o \
+	brk.o \
 	trap.o \
 	\
 	$(empty)

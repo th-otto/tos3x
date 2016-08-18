@@ -104,7 +104,7 @@ _blkfill:
 	move.w	10(a7),d0			*	=  output count
 	ext.l	d0				*	make it long
 	subq.l	#1,d0				*	decrement
-	ble	filldone			*	Done if le
+	ble	filldone			*	Done if le BUG: blkfill(ptr,c,1) does not clear anything
 fillit:	move.b	d1,(a0)+			*	move a byte
 	dbra	d0,fillit			*	Continue
 filldone: clr.l	d0				*	always return 0

@@ -16,6 +16,7 @@ PP(long al2;)
 	if (l2 == 0)
 	{
 		uldivr = 0x80000000;
+		asm("divu.w #0,d0");
 		return 0x80000000;
 	}
 	if (l2 > l1)
