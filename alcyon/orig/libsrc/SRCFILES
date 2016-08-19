@@ -25,7 +25,7 @@ COBJS8=fdecls.o close.o creat.o lseek.o xfilesz.o
 
 COBJS9=open.o read.o xttyin.o unlink.o write.o xopen.o access.o
 
-COBJS10=getpass.o ttyname.o isatty.o chinit.o chkc.o blkio.o
+COBJS10=getpass.o isatty.o chinit.o chkc.o blkio.o
 
 COBJS11=allocc.o atoi.o atol.o swab.o getpid.o rand.o qsort.o
 
