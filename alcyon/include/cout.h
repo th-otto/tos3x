@@ -57,8 +57,8 @@ struct nlist {
 };
 
 /* HDSIZE should be 28 bytes, HDSIZ2 should be 36 bytes */
-#define HDSIZE		28
-#define HDSIZ2		36
+#define HDSIZE		28		/* sizeof(hdr) on disk */
+#define HDSIZ2		36		/* sizeof(hdr2) on disk */
 
 #define MAGIC		(unsigned short) 0x601a	/*  bra .+26 instruction */
 #define MAGIC1		(unsigned short) 0x601b	/* data & bss base defined */

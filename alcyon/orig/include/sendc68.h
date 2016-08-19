@@ -39,12 +39,14 @@ struct irts {
 };
 
 #ifndef VAX11
-struct mlong { int hiword; int loword; };
-struct mshort { char lobyte; char hibyte; };
+struct mlongbytes { short hiword; short loword; };
+struct mshortbytes { char lobyte; char hibyte; };
 #else
-struct mlong { short loword; short hiword; };
-struct mshort { char hibyte; char lobyte; };
+struct mlongbytes { short loword; short hiword; };
+struct mshortbytes { char hibyte; char lobyte; };
 #endif
+union mlong { struct mlongbytes u; long l; };
+union mshort { struct mshortbytes u; short l; };
 
 /* relocation bit definitions: */
 #define RBMASK		07		/*tells type of relocation */
@@ -55,13 +57,3 @@ struct mshort { char hibyte; char lobyte; };
 #define BRELOC		3		/* BSS relocatable */
 #define EXTVAR		4		/* ref to external variable */
 #define LUPPER		5		/* upper word of long */
-
-struct buf{
-	int fildes;
-	int nunused;
-	char *xfree;
-	char buff[512];
-};
-
-struct buf ibuf;
-const char *ifilname;

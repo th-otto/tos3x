@@ -39,7 +39,6 @@ size68$(EXEEXT): $(SIZE_OBJS)
 		$(LIBSRC)fputc.o \
 		$(LIBSRC)flsbuf.o \
 		$(LIBSRC)isatty.o \
-		$(LIBSRC)ttyname.o \
 		$(LIBSRC)malloc.o \
 		$(LIBSRC)mallocnd.o \
 		$(LIBSRC)prtint.o \
@@ -69,7 +68,10 @@ size68$(EXEEXT): $(SIZE_OBJS)
 		$(empty)
 
 nm68$(EXEEXT): $(NM_OBJS)
-	$(AM_V_LD)$(LD) $(LDFLAGS) -o $@ $(CRT0) $(NM_OBJS) $(LIBS)
+	$(AM_V_LD)$(LD) $(LDFLAGS) -s -o $@ $(CRT0) $(NM_OBJS) $(LIBS)
 
 clean:
 	$(RM) *.o *.a *.s *.i *.1 *.2 $(PROGRAMS)
+
+check::
+	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done

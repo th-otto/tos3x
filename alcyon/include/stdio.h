@@ -108,8 +108,9 @@ char *fgets PROTO((char *str, int maxc, FILE *sp));
 int fflush PROTO((FILE *stream));
 int puts PROTO((const char * str));
 
-FILE *fopen PROTO((const char * name, const char * mode));
+FILE *fopen PROTO((const char * name, const char *mode));
 int fclose PROTO((FILE *stream));
+FILE *fdopen PROTO((int, const char *mode));
 
 long ftell PROTO((FILE *sp));
 int rewind PROTO((FILE *sp));

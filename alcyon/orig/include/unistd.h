@@ -8,5 +8,7 @@
 int isatty PROTO((int fd));
 int isdev PROTO((int fd));
 char *ttyname PROTO((int fd));
+int dup PROTO((int oldfd));
+int dup2 PROTO((int oldfd, int newfd));
 
 #endif /* __UNISTD_H__ */
