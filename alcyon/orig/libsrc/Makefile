@@ -6,7 +6,7 @@ all::
 include SRCFILES
 include optimize.mak
 
-all:: ${LIBC_NDX} ${LIBM_NDX} ${OPTIONOBJS} ${CRT0} srcfiles.sh
+all:: ${LIBC} ${LIBC_NDX} ${LIBM} ${LIBM_NDX} ${OPTIONOBJS} ${CRT0} srcfiles.sh
 
 ${LIBC}: $(OBJS) ${OPTIONOBJS} ${MAKEFILE}
 	$(AM_V_at)$(RM) $@
@@ -35,8 +35,8 @@ ${LIBC_NDX}: ${LIBC}
 
 ${LIBM}: $(MOBJS) ${MAKEFILE}
 	$(AM_V_at)$(RM) $@
-	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(MOBJS1)
-	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(MOBJS2)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(MCOBJS1)
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(MCOBJS2)
 
 ${LIBM_NDX}: ${LIBM}
 	$(AM_V_RANLIB)$(RANLIB) $<
@@ -47,6 +47,3 @@ install: all
 
 clean:
 	$(RM) *.o *.a *.ndx
-
-echo:
-	echo ${MAKEFILE}

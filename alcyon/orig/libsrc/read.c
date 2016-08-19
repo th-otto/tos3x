@@ -42,7 +42,7 @@ PP(size_t bytes;)							/* =  byte count to read    */
 	if ((fp->flags & ISLPT) != 0)		/* A wise guy??         */
 		RETERR(-1, EBADF);			/*  A wise guy!!        */
 
-#if 0
+#if !GEMDOS
 	if ((fp->flags & ISTTY) != 0)		/* TTY?             */
 		return _ttyin(fp, buff, bytes);	/*  Yes, read 1 line    */
 #endif

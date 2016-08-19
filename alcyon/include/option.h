@@ -78,11 +78,7 @@
 * "fprintf()", and "sprintf()".
 **************/
 VOID nofloat PROTO((NOTHING));
-#ifdef __GNUC__
-#define NOFLOAT nofloat();
-#else
-#define NOFLOAT nofloat;
-#endif
+#define NOFLOAT extern int nofloat;
 
 /*************
 * NOLONG: link out long integer conversion routines in "printf()",
@@ -90,11 +86,7 @@ VOID nofloat PROTO((NOTHING));
 * Saves: CPM small 3200, big 3500
 **************/
 VOID nolong PROTO((NOTHING));
-#ifdef __GNUC__
-#define NOLONG nolong();
-#else
-#define NOLONG nolong;
-#endif
+#define NOLONG extern int nolong;
 
 
 /*************
@@ -103,11 +95,9 @@ VOID nolong PROTO((NOTHING));
 * Saves: CPM small 300, big 350
 *************/
 VOID nottyin PROTO((NOTHING));
-#ifdef __GNUC__
-#define NOTTYIN nottyin();
-#else
-#define NOTTYIN nottyin;
-#endif
+#define NOTTYIN extern int nottyin;
+VOID nottyout PROTO((NOTHING));
+#define NOTTYOUT extern int nottyout;
 
 
 
@@ -116,11 +106,7 @@ VOID nottyin PROTO((NOTHING));
 * Saves: CPM small 500, big 650
 *************/
 VOID nowildcards PROTO((NOTHING));
-#ifdef __GNUC__
-#define NOWILDCARDS nowildcards();
-#else
-#define NOWILDCARDS nowildcards;
-#endif
+#define NOWILDCARDS extern int nowildcards;
 
 
 
@@ -134,11 +120,7 @@ VOID nowildcards PROTO((NOTHING));
 * Saves: CPM small 1950, big 1950
 *************/
 VOID maxfiles5 PROTO((NOTHING));
-#ifdef __GNUC__
-#define MAXFILES5 maxfiles5();
-#else
-#define MAXFILES5 maxfiles5;
-#endif
+#define MAXFILES5 extern int maxfiles5;
 
 
 /*************
@@ -147,11 +129,7 @@ VOID maxfiles5 PROTO((NOTHING));
 * Saves: CPM small 550, big 800
 *************/
 VOID nofilesz PROTO((NOTHING));
-#ifdef __GNUC__
-#define NOFILESZ nofilesz();
-#else
-#define NOFILESZ nofilesz;
-#endif
+#define NOFILESZ extern int nofilesz;
 
 
 /*************
@@ -161,11 +139,7 @@ VOID nofilesz PROTO((NOTHING));
 * Saves: CPM small 2200, big 2900
 *************/
 VOID nobinary PROTO((NOTHING));
-#ifdef __GNUC__
-#define NOBINARY nobinary();
-#else
-#define NOBINARY nobinary;
-#endif
+#define NOBINARY extern int nobinary;
 
 
 /*************
@@ -175,11 +149,7 @@ VOID nobinary PROTO((NOTHING));
 * Saves: CPM small 1100, big 1500
 *************/
 VOID noascii PROTO((NOTHING));
-#ifdef __GNUC__
-#define NOASCII noascii();
-#else
-#define NOASCII noascii;
-#endif
+#define NOASCII extern int noascii;
 
 
 /*************
@@ -187,11 +157,7 @@ VOID noascii PROTO((NOTHING));
 *         Same effect as NOASCII NOBINARY, but gives a distinct error message
 *************/
 VOID nodisk PROTO((NOTHING));
-#ifdef __GNUC__
-#define NODISK nodisk();
-#else
-#define NODISK nodisk;
-#endif
+#define NODISK extern int nodisk;
 
 
 /*************
@@ -209,10 +175,6 @@ VOID nodisk PROTO((NOTHING));
 * by experienced programmers.
 **************/
 VOID nostartup PROTO((NOTHING));
-#ifdef __GNUC__
-#define NOSTARTUP nostartup();
-#else
-#define NOSTARTUP nostartup;
-#endif
+#define NOSTARTUP extern int nostartup;
 
 #endif /* __OPTION_H__ */

@@ -9,6 +9,10 @@ PP(long al2;)
 	register long l1, l2, q, b;
 	register int sign;
 
+#ifdef __ALCYON__
+	asm("  xdef ldiv");
+	asm("ldiv equ _ldiv");
+#endif
 	sign = 0;
 	l1 = al1;
 	l2 = al2;

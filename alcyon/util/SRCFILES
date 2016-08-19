@@ -1,2 +1,3 @@
 SIZE_OBJS = size.o
 NM_OBJS = nm.o libget.o getchd.o
+ANALYZE_OBJS = analyze.o getarhd.o libget.o getchd.o

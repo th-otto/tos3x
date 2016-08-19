@@ -1,139 +1,43 @@
-AOBJS = \
-	atan.o \
-	cosh.o \
-	ffpabs.o \
-	ffpadd.o \
-	ffpatan.o \
-	ffpcmp.o \
-	ffpcpyrt.o \
-	ffpdiv.o \
-	ffpexp.o \
-	ffphthet.o \
-	ffplog.o \
-	ffpmul2.o \
-	ffppwr.o \
-	ffpsin.o \
-	ffpsinh.o \
-	ffpsqrt.o \
-	ffptheta.o \
-	ffptnorm.o \
-	fpadd.o \
-	fpcmp.o \
-	fpcos.o \
-	fpdiv.o \
-	fpexp.o \
-	fplog.o \
-	fpmul.o \
-	fpneg.o \
-	fppwr.o \
-	fpsin.o \
-	fpsqrt.o \
-	fpsub.o \
-	sinh.o \
-	tanh.o \
-	\
-	blivot.o \
-	xsignal.o \
-	salloc.o \
-	setjmp.o \
-	blkfills.o \
-	brk.o \
-	trap.o \
-	bios.o \
-	xbios.o \
-	gemdos.o \
-	\
-	$(empty)
+AOBJS1 = blivot.o xsignal.o salloc.o setjmp.o blkfills.o brk.o
+AOBJS2 = trap.o bios.o xbios.o gemdos.o
 
-COBJS = \
-	atof.o \
-	atoi.o \
-	ceil.o \
-	etoa.o \
-	fabs.o \
-	ffptof.o \
-	floor.o \
-	fmod.o \
-	ftoa.o \
-	gtoa.o \
-	ftoffp.o \
-	ftol.o \
-	ltof.o \
-	printf.o \
-	fprintf.o \
-	xdoprtfp.o \
-	prtld.o \
-	prtint.o \
-	prtshort.o \
-	ctype.o \
-	getl.o \
-	getw.o \
-	fopen.o \
-	xmain.o \
-	xwmain.o \
-	fgetc.o \
-	fgets.o \
-	filbuf.o \
-	read.o \
-	readasc.o \
-	readbin.o \
-	creat.o \
-	exit.o \
-	cleanup.o \
-	fclose.o \
-	close.o \
-	fdecls.o \
-	fflush.o \
-	open.o \
-	lseek.o \
-	fputn.o \
-	fputc.o \
-	flsbuf.o \
-	isatty.o \
-	isdev.o \
-	ttyname.o \
-	malloc.o \
-	mallocnd.o \
-	sbrk.o \
-	blkfill.o \
-	write.o \
-	wrtchr.o \
-	chinit.o \
-	allocc.o \
-	chkc.o \
-	writeasc.o \
-	writebin.o \
-	blkio.o \
-	xread.o \
-	xwrite.o \
-	xopen.o \
-	getmode.o \
-	strupr.o \
-	strlwr.o \
-	strcpy.o \
-	strncpy.o \
-	strlen.o \
-	strcat.o \
-	strncat.o \
-	strcmp.o \
-	stricmp.o \
-	\
-	ldiv.o \
-	lmul.o \
-	lrem.o \
-	uldiv.o \
-	aldiv.o \
-	almul.o \
-	alrem.o \
-	abort.o \
-	\
-	optoff.o \
-	errno.o \
-	\
-	$(empty)
+AOBJS = $(AOBJS1) $(AOBJS2)
+
+COBJS1 = nofloat.o atoi.o prtld.o prtint.o prtshort.o
+COBJS2 = ctype.o getl.o getw.o fopen.o xmain.o xwmain.o fgetc.o fgets.o
+COBJS3 = filbuf.o read.o readasc.o readbin.o creat.o exit.o cleanup.o
+COBJS4 = fclose.o close.o fdecls.o fflush.o open.o lseek.o fputn.o
+COBJS5 = fputc.o flsbuf.o isatty.o isdev.o ttyname.o malloc.o mallocnd.o
+COBJS6 = sbrk.o blkfill.o write.o wrtchr.o chinit.o allocc.o chkc.o
+COBJS7 = writeasc.o writebin.o blkio.o xread.o xwrite.o xopen.o getmode.o
+COBJS8 = strupr.o strlwr.o strcpy.o strncpy.o strlen.o strcat.o strncat.o
+COBJS9 = strcmp.o stricmp.o
+COBJS10 = printf.o fprintf.o sprintf.o xdoprtfp.o doprint.o
+COBJS11 = ldiv.o lmul.o lrem.o
+COBJS12 = aldiv.o almul.o alrem.o
+COBJS13 = uldiv.o
+COBJS14 = puts.o xttyin.o ttyin.o ttyout.o nottyin.o nottyout.o
+COBJS15 = abort.o chmod.o
+COBJS16 = optoff.o
+COBJS17 = errno.o
+
+COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} \
+      ${COBJS9} ${COBJS10} ${COBJS11} ${COBJS12} ${COBJS13} ${COBJS14} ${COBJS15} ${COBJS16} ${COBJS17}
 
 OBJS = $(AOBJS) $(COBJS)
 
-OPTIONOBJS = \
-	mallocdb.o \
-	$(empty)
+MAOBJS1 = atan.o cosh.o ffpabs.o ffpadd.o ffpatan.o ffpcmp.o ffpcpyrt.o ffpdiv.o ffpexp.o
+MAOBJS2 = ffphthet.o ffplog.o ffpmul2.o ffppwr.o ffpsin.o ffpsinh.o ffpsqrt.o ffptheta.o
+MAOBJS3 = ffptnorm.o fpadd.o fpcmp.o fpcos.o fpdiv.o fpexp.o fplog.o fpmul.o fpneg.o
+MAOBJS4 = fppwr.o fpsin.o fpsqrt.o fpsub.o sinh.o tanh.o
+
+MAOBJS = $(MAOBJS1) $(MAOBJS2) $(MAOBJS3) $(MAOBJS4)
+
+MCOBJS1 = atof.o ceil.o etoa.o fabs.o ffptof.o floor.o fmod.o ftoa.o gtoa.o ftoffp.o
+MCOBJS2 = ftol.o ltof.o
+
+MCOBJS = $(MCOBJS1) $(MCOBJS2) $(MCOBJS3) $(MCOBJS4)
+
+MOBJS = $(MAOBJS) $(MCOBJS)
+
+OPTIONOBJS = mallocdb.o nottyin.o nottyout.o

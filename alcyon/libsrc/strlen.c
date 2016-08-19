@@ -7,8 +7,8 @@
 
 #include <string.h>
 
-int strlen(P(const char *) str)
-PP(register char *str;)
+size_t strlen(P(const char *) str)
+PP(register const char *str;)
 {
 	register const char *p;
 

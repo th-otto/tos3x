@@ -56,12 +56,9 @@ struct mshort { char hibyte; char lobyte; };
 #define EXTVAR		4		/* ref to external variable */
 #define LUPPER		5		/* upper word of long */
 
-struct buf{
+struct buf {
 	int fildes;
 	int nunused;
 	char *xfree;
 	char buff[512];
 };
-
-struct buf ibuf;
-const char *ifilname;

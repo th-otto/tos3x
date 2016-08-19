@@ -20,6 +20,10 @@ PP(long al2;)
 	register int sign;
 	register short t2;
 
+#ifdef __ALCYON__
+	asm("  xdef lmul");
+	asm("lmul equ _lmul");
+#endif
 	l1.l = al1;
 	l2.l = al2;
 	sign = 0;

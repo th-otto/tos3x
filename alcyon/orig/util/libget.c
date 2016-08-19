@@ -41,7 +41,7 @@ PP(FILE *f;)
 	return ferror(f) ? -1 : 0;
 }
 
-int lgetw(P(short *) llp, P(FILE *) f)
+int lgetw(P(unsigned short *) llp, P(FILE *) f)
 PP(struct mwbytes *llp;)
 PP(FILE *f;)
 {

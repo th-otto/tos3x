@@ -25,7 +25,7 @@ int getchd(P(FILE *) fp, P(struct hdr2 *)arptr)
 PP(FILE * fp;)
 PP(struct hdr2 *arptr;)
 {
-	if (lgetw((short *)&arptr->ch_magic, fp) == -1)
+	if (lgetw(&arptr->ch_magic, fp) == -1)
 		return -1;
 	if (lgetl(&arptr->ch_tsize, fp) == -1)
 		return -1;

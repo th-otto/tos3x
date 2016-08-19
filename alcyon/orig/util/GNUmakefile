@@ -9,7 +9,7 @@ CFLAGS = $(OPTS) $(WARN)
 
 PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT)
 
-all: $(PROGRAMS)
+all: $(PROGRAMS) getarhd.o
 
 include SRCFILES
 

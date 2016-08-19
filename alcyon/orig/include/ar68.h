@@ -7,6 +7,9 @@
 	@(#) ar68.h - Jul 26, 1983  REGULUS 4.1
 */
 
+#ifndef __AR68_H__
+#define __AR68_H__ 1
+
 #define LIBMAGIC	0xff65
 #define LIBHDSIZE	26
 #define LIBNSIZE	14
@@ -20,3 +23,5 @@ struct libhdr
 	unsigned short lfimode;
 	long lfsize;
 };
+
+#endif

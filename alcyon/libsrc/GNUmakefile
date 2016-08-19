@@ -14,11 +14,15 @@ all::
 
 include SRCFILES
 
-all:: ${LIBM} ${OPTIONOBJS} ${CRT0}
+all:: ${LIBC} ${LIBM} ${OPTIONOBJS} ${CRT0}
 
-${LIBM}: $(OBJS)
+${LIBC}: $(OBJS)
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OBJS)
+
+${LIBM}: $(MOBJS)
+	$(AM_V_at)$(RM) $@
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(MOBJS)
 
 clean:
 	$(RM) *.o *.a *.ndx

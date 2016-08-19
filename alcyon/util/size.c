@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cout.h>
+#include "util.h"
 
 extern int nofloat;
 
 static FILE *stream;
 
-static int get16be(P(FILE *) sp)
+static unsigned short get16be(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
 	unsigned int c1 = getc(sp) & 0xff;
@@ -38,7 +39,7 @@ int main(P(int) argc, P(char **) argv)
 PP(int argc;)
 PP(char **argv;)
 {
-	register int w;
+	register unsigned short w;
 	register int i;
 
 	if (argc < 2)

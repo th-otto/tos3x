@@ -42,11 +42,12 @@ PP(size_t bytes;)							/* =  byte count to read    */
 	if ((fp->flags & ISLPT) != 0)		/* A wise guy??         */
 		RETERR(-1, EBADF);			/*  A wise guy!!        */
 
+#if !GEMDOS
 	if ((fp->flags & ISTTY) != 0)		/* TTY?             */
 		return _ttyin(fp, buff, bytes);	/*  Yes, read 1 line    */
+#endif
 
 	if (fp->flags & ISASCII)			/* ASCII??          */
 		return _rdasc(fp, buff, (long) bytes);	/* Yes, read ascii     */
-	else
-		return _rdbin(fp, buff, (long) bytes);	/* No, read binary     */
+	return _rdbin(fp, buff, (long) bytes);	/* No, read binary     */
 }

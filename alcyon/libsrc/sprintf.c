@@ -14,23 +14,22 @@
 
 
 #ifdef __USE_STDARG
-int fprintf(FILE *fp, const char *fmt, ...)
+int sprintf(char *s, const char *fmt, ...)
 #else
-int fprintf(P(FILE *) fp, P(const char *) fmt, va_alist)
-PP(FILE *fp;)
+int sprintf(P(char *) s, P(const char *) fmt, va_alist)
+PP(char *s;)
 PP(const char *fmt;)
 va_dcl
 #endif
 {
 	register int ret;
+	FILE *stream;
 	va_list args;
 	
-	if (!(fp->_flag & _IOWRT))
-		return -1;
-
+	stream = (FILE *)&s;
 	_va_start(args, fmt);
-	ret = __doprint(fp, fmt, 0, args);
+	ret = __doprint(stream, fmt, 1, args);
 	_va_end(args);
-	fflush(fp);
+	*s = '\0';
 	return ret;
 }

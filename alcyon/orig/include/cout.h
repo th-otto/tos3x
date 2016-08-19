@@ -7,6 +7,8 @@
 	@(#) sys/cout.h - Jul 26, 1983  REGULUS 4.1
 */
 
+#ifndef __COUT_H__
+#define __COUT_H__ 1
 
 struct hdr
 {
@@ -17,7 +19,7 @@ struct hdr
 	long ch_ssize;						/* symbol table size */
 	long ch_stksize;					/* stack size */
 	long ch_entry;						/* location of entry point */
-	short ch_rlbflg;					/* relocation bits present flag, must be signed */
+	unsigned short ch_rlbflg;			/* relocation bits present flag, must be signed */
 };
 
 struct hdr_cout
@@ -41,7 +43,7 @@ struct hdr2
 	long ch_ssize;						/* # bytes in symbol table */
 	long ch_stksize;					/* initial stack size */
 	long ch_entry;						/* entry point--address of text segment */
-	short ch_rlbflg;					/* relocation bits suppressed flag, must be signed */
+	unsigned short ch_rlbflg;			/* relocation bits suppressed flag, must be signed */
 	long ch_dstart;						/* address of data segment */
 	long ch_bstart;						/* address of bss segment */
 };
@@ -50,7 +52,7 @@ struct hdr2
 
 struct nlist {
 	char n_name[8];
-	short n_type;
+	unsigned short n_type;
 	long n_value;
 };
 
@@ -74,3 +76,5 @@ struct nlist {
 #define SHT2KFIX(x)		(((x+SHT2KBOUND-1)/SHT2KBOUND)*SHT2KBOUND)
 #define SHT4KBOUND		4096
 #define SHT4KFIX(x)		(((x+SHT4KBOUND-1)/SHT4KBOUND)*SHT4KBOUND)
+
+#endif /* __COUT_H__ */

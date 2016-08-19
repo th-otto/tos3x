@@ -29,7 +29,7 @@ struct hdr2 couthd;
 char eflag, gflag, qflag, xflag, dflag, tflag, bflag, aflag;
 
 int accept PROTO((int af, int optioncount));
-VOID prtflags PROTO((int af));
+VOID prtflags PROTO((unsigned int af));
 int openfile PROTO((const char *ap));
 int readhdr PROTO((NOTHING));
 
@@ -49,7 +49,7 @@ PP(char **argv;)
 	register long symsize;
 	register int i, c, tellem;
 	long l, value;
-	short flags;
+	unsigned short flags;
 	int optioncount, argc_old;
 
 	char symbol[20];
@@ -167,10 +167,10 @@ PP(char **argv;)
 }
 
 
-VOID prtflags(P(int) af)
-PP(int af;)
+VOID prtflags(P(unsigned int) af)
+PP(unsigned int af;)
 {
-	register int f;
+	register unsigned int f;
 
 	f = af;
 	if (f & SYEQ)

@@ -45,8 +45,10 @@ PP(size_t bytes;)							/* Number of bytes to xfer  */
 	if ((fp->flags & ISREAD) != 0)		/* Check for readonly file  */
 		RETERR(-1, EBADF);			/* Barf if so           */
 
+#if !GEMDOS
 	if (fp->flags & (ISTTY | ISLPT | ISQUE))	/* TTY, LST or QUE File?    */
 		return _wrtchr(fp, buff, xbytes);	/*  Yes, handle it      */
+#endif
 
 	if (fp->flags & ISASCII)			/* If ascii file        */
 		return _wrtasc(fp, buff, xbytes);	/* do ascii style       */

@@ -16,6 +16,8 @@ char *version = "@(#)nm - Apr 29, 1983";
 
 #define SYNAMLEN	8
 
+const char *ifilname;
+
 int loctr;
 
 int pflg;
@@ -49,7 +51,7 @@ PP(char **argv;)
 	register long symsize;
 	register int i, c, tellem;
 	long l, value;
-	short flags;
+	unsigned short flags;
 	int optioncount, argc_old;
 
 	char symbol[20];

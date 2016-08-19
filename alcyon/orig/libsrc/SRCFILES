@@ -53,9 +53,12 @@ AOBJS=${AOBJS1} ${AOBJS2}
 OBJS=${COBJS} ${AOBJS}
 
 
-MOBJS1=atof.o ceil.o etoa.o fabs.o ffptof.o floor.o fmod.o ftoa.o
-MOBJS2=ftoffp.o ftol.o ltof.o xdoprtfp.o 
-MOBJS=${MOBJS1} ${MOBJS2}
+MCOBJS1=atof.o ceil.o etoa.o fabs.o ffptof.o floor.o fmod.o ftoa.o
+MCOBJS2=ftoffp.o ftol.o ltof.o xdoprtfp.o 
+MCOBJS=${MCOBJS1} ${MCOBJS2}
+
+MOBJS = $(MAOBJS) $(MCOBJS)
+
 
 OPTIONOBJS=nofloat.o nottyin.o nostart.o nodisk.o nolong.o noascii.o nobinary.o nofilesz.o mallocdb.o
 
@@ -82,8 +85,8 @@ srcfiles.sh: SRCFILES ${MAKEFILE}
 	@echo COBJS15=\"${COBJS15}\" >> $@
 	@echo COBJS16=\"${COBJS16}\" >> $@
 	@echo COBJS17=\"${COBJS17}\" >> $@
-	@echo MOBJS1=\"${MOBJS1}\" >> $@
-	@echo MOBJS2=\"${MOBJS2}\" >> $@
+	@echo MCOBJS1=\"${MCOBJS1}\" >> $@
+	@echo MCOBJS2=\"${MCOBJS2}\" >> $@
 	@echo OPTIONOBJS=\"${OPTIONOBJS}\" >> $@
 	@echo CRT0=\"${CRT0}\" >> $@
 	@echo LIBC=\"${LIBC}\" >> $@

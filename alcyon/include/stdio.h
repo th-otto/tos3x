@@ -110,7 +110,12 @@ int puts PROTO((const char * str));
 
 FILE *fopen PROTO((const char * name, const char * mode));
 int fclose PROTO((FILE *stream));
+
+long ftell PROTO((FILE *sp));
+int rewind PROTO((FILE *sp));
 int fseek PROTO((FILE *stream, long offset, int whence));
+size_t fread PROTO((void *ptr, size_t size, size_t nmemb, FILE *stream));
+size_t fwrite PROTO((const void *ptr, size_t size, size_t nmemb, FILE *stream));
 
 int open PROTO((const char *pathname, int flags, ...));
 int creat PROTO((const char *pathname, mode_t mode));
@@ -119,7 +124,6 @@ off_t lseek PROTO((int fd, off_t offs, int whence));
 size_t read PROTO((int fd, VOIDPTR buf, size_t count));
 size_t write PROTO((int fd, const VOIDPTR buf, size_t count));
 off_t tell PROTO((int fd));
-int rewind PROTO((FILE *sp));
 
 /*
  * non-standard functions
