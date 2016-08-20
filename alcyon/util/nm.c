@@ -28,17 +28,10 @@ FILE *ifp;
 
 struct hdr2 couthd;
 
-char eflag,
- gflag,
- qflag,
- xflag,
- dflag,
- tflag,
- bflag,
- aflag;
+char eflag, gflag, qflag, xflag, dflag, tflag, bflag, aflag;
 
 int accept PROTO((int af, int optioncount));
-VOID prtflags PROTO((int af));
+VOID prtflags PROTO((unsigned int af));
 int openfile PROTO((const char *ap));
 int readhdr PROTO((NOTHING));
 
@@ -56,6 +49,11 @@ PP(char **argv;)
 
 	char symbol[20];
 
+	if (argc < 2)
+	{
+		printf("Usage: nm68 objectfile\n");
+		exit(1);
+	}
 	eflag = gflag = qflag = xflag = dflag = tflag = bflag = aflag = 0;
 	argc_old = argc;
 	optioncount = 0;
@@ -164,6 +162,32 @@ PP(char **argv;)
 }
 
 
+VOID prtflags(P(unsigned int) af)
+PP(unsigned int af;)
+{
+	register unsigned int f;
+
+	f = af;
+	if (f & SYEQ)
+		printf(" equ");
+	if (f & SYGL)
+		printf(" global");
+	if (f & SYER)
+		printf(" reg");
+	if (f & SYXR)
+		printf(" external");
+	if (f & SYDA)
+		printf(" data");
+	else if (f & SYTX)
+		printf(" text");
+	else if (f & SYBS)
+		printf(" bss");
+	else
+		printf(" abs");
+	putchar('\n');
+}
+
+
 int accept(P(int) af, P(int) optioncount)
 PP(int af;)
 PP(int optioncount;)
@@ -194,32 +218,6 @@ PP(int optioncount;)
 		pft = 1;
 
 	return pft;
-}
-
-
-VOID prtflags(P(int) af)
-PP(int af;)
-{
-	register int f;
-
-	f = af;
-	if (f & SYEQ)
-		printf(" equ");
-	if (f & SYGL)
-		printf(" global");
-	if (f & SYER)
-		printf(" reg");
-	if (f & SYXR)
-		printf(" external");
-	if (f & SYDA)
-		printf(" data");
-	else if (f & SYTX)
-		printf(" text");
-	else if (f & SYBS)
-		printf(" bss");
-	else
-		printf(" abs");
-	putchar('\n');
 }
 
 
@@ -254,6 +252,7 @@ int readhdr(NOTHING)
 	}
 	return 1;
 }
+
 
 #ifdef PDP11
 int longseek(al, fildes, pn)

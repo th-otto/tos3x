@@ -1,169 +1,92 @@
-/*
-	Copyright 1983
-	Alcyon Corporation
-	8716 Production Ave.
-	San Diego, Ca. 92121
-*/
-
-char *version = "@(#)nm - Apr 29, 1983";
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-#include <cout.h>
-#include <sendc68.h>
+#include "cout.h"
+struct hdr couthd = { 0 };
 #include "util.h"
+#include "../libsrc/klib.h"
+#include "sendc68.h"
 
-#define SYNAMLEN	8
+#ifdef __ALCYON__
+FILE ibuf = { 0 };
+#else
+struct _iobuf ibuf;
+#endif
+const char *ifilname = 0;
 
-int loctr;
+int hdsize = 0;
+int loctr = 0; /* BUG: unused */
+int pflg = 0; /* BUG: unused */
+int syno = 0;
+int symflg; /* BUG: unused */
 
-int pflg;
-
-int symflg;
-
-FILE *ifp;
-
-struct hdr2 couthd;
-
-char eflag, gflag, qflag, xflag, dflag, tflag, bflag, aflag;
-
-int accept PROTO((int af, int optioncount));
-VOID prtflags PROTO((unsigned int af));
-int openfile PROTO((const char *ap));
-int readhdr PROTO((NOTHING));
+#ifdef __ALCYON__
+extern int fout;
+#endif
 
 #ifdef __ALCYON__
 #define EXIT() exit()
 #else
-#define EXIT() exit(1)
+#define EXIT() exit(EXIT_FAILURE)
 #endif
 
+VOID prtflags PROTO((unsigned int af));
+VOID openfile PROTO((const char *ap));
+VOID readhdr PROTO((NOTHING));
+
+extern int nofloat;
+extern int maxfiles5;
+extern int nowildcards;
 
 
 int main(P(int) argc, P(char **) argv)
 PP(int argc;)
 PP(char **argv;)
 {
-	register char *p;
-	register long symsize;
-	register int i, c, tellem;
-	long l, value;
-	unsigned short flags;
-	int optioncount, argc_old;
-
-	char symbol[20];
+	union mlong l;
+	long l1;
+	register int i, j, k;
 
 	if (argc < 2)
 	{
 		printf("Usage: nm68 objectfile\n");
 		EXIT();
 	}
-	eflag = gflag = qflag = xflag = dflag = tflag = bflag = aflag = 0;
-	argc_old = argc;
-	optioncount = 0;
-
-	while (argc > 1)					/* set flags, ignore filenames  */
-	{
-		if (*argv[argc - 1] == '-')
-		{
-			optioncount++;
-			switch (*++argv[--argc])
-			{
-			case 'e':
-				eflag = 1;
-				break;
-			case 'g':
-				gflag = 1;
-				break;
-			case 'q':
-				qflag = 1;
-				break;
-			case 'x':
-				xflag = 1;
-				break;
-			case 'd':
-				dflag = 1;
-				break;
-			case 't':
-				tflag = 1;
-				break;
-			case 'b':
-				bflag = 1;
-				break;
-			case 'a':
-				aflag = 1;
-				break;
-			default:
-				printf("nm: nonexistent option %s\n", argv[argc]);
-				optioncount--;
-				break;
-			}
-			--argv[argc];
-		} else
-		{
-			argc--;
-		}
-	}
-	argc = argc_old;
-
-	if (((argc - optioncount) < 1) || (argc > (3 + optioncount)))
-		tellem = 1;
-	else
-		tellem = 0;
-	if ((argc - optioncount) <= 1)
-		*argv = "c.out";				/* default */
-	else
-	{
-		--argc;
-		++argv;
-	}
-
-	/*  process each file - ignore options in parameter list    */
-
-	while (argc--)
-	{
-		if (**argv == '-')
-		{
-			argv++;
-			continue;
-		}
-		if (openfile(*argv++) == 0)
-			continue;
-		if (tellem)
-			printf("%s:\n", ifilname);
-		l = couthd.ch_tsize + couthd.ch_dsize + HDSIZE;
-#ifdef PDP11
-		if (longseek(l, fileno(ifp), 3) == 0)
-#else
-		if (fseek(ifp, l, 0) == EOF)
+	hdsize = HDSIZE;
+#ifdef __ALCYON__
+	fout = dup(1);
 #endif
+	i = 1;
+	openfile(argv[i]);
+	l.l = couthd.ch_tsize + couthd.ch_dsize + hdsize;
+	lseek(fileno(&ibuf), l.l, 0);
+#ifdef __ALCYON__
+	ibuf.cc = 0;
+#endif
+	l1 = couthd.ch_ssize;
+	syno = 0;
+	while (l1)
+	{
+		syno++;
+		for (i = 0; i < 8; i++)			/* Print Symbol name */
 		{
-			fclose(ifp);
-			continue;
+			k = getc(&ibuf) & 0377;
+			if (k < ' ')
+				k = ' ';				/* Filter ctrl chars */
+			putchar(k);
 		}
-
-		for (symsize = couthd.ch_ssize; symsize > 0; symsize -= OSTSIZE)
-		{
-			p = symbol;
-			for (i = SYNAMLEN; --i != -1;)
-			{
-				if ((c = getc(ifp)) > 0)
-					*p++ = c;
-				else
-					*p = '\0';
-			}
-			lgetw(&flags, ifp);
-			lgetl(&value, ifp);
-			if (accept(flags, optioncount))
-			{
-				printf("%-11s", symbol);
-				printf("%8lx", value);
-				prtflags(flags);
-			}
-		}
+		putchar((char) '\t');
+		j = getw(&ibuf);				/* flags */
+		l.u.hiword = getw(&ibuf);
+		l.u.loword = getw(&ibuf);
+		printf("%8lx", l.l);
+		prtflags(j);
+		l1 -= OSTSIZE;
 	}
-	exit(0);
+#ifndef __ALCYON__
+	return EXIT_SUCCESS;
+#endif
 }
 
 
@@ -189,102 +112,64 @@ PP(unsigned int af;)
 		printf(" bss");
 	else
 		printf(" abs");
-	putchar('\n');
+	putchar((char) '\n');
 }
 
 
-int accept(P(int) af, P(int) optioncount)
-PP(int af;)
-PP(int optioncount;)
-{
-	register int f;
-	int pft;
-
-	pft = 0;
-	if (!(optioncount))
-		return 1;
-
-	f = af;
-	if (eflag && (f & SYEQ))
-		pft = 1;
-	if (gflag && (f & SYGL))
-		pft = 1;
-	if (qflag && (f & SYER))
-		pft = 1;
-	if (xflag && (f & SYXR))
-		pft = 1;
-	if (dflag && (f & SYDA))
-		pft = 1;
-	if (tflag && (f & SYTX))
-		pft = 1;
-	if (bflag && (f & SYBS))
-		pft = 1;
-	if (aflag && ((!(f & SYDA)) && (!(f & SYTX)) && (!(f & SYBS))))
-		pft = 1;
-
-	return pft;
-}
-
-
-int openfile(P(const char *) ap)
+VOID openfile(P(const char *) ap)
 PP(const char *ap;)
 {
 	register const char *p;
 
 	p = ap;
-	if ((ifp = fopen(p, "r")) == NULL)
+	if ((ibuf._fd = fopen(p, &ibuf, 1)) < 0)
 	{
 		printf("unable to open %s\n", p);
-		return 0;
+		EXIT();
 	}
-	ifilname = p;						/* point to current file name for error msgs */
-	return readhdr();					/* read file header */
-}
-
-
-int readhdr(NOTHING)
-{
-	if (getchd(ifp, &couthd) != 0)
+	ifilname = p;						/*point to current file name for error msgs */
+	if (read(fileno(&ibuf), &couthd, 2) != 2)
 	{
-		printf("error reading %s\n", ifilname);
-		return 0;
+		printf("read error on file: %s\n", ifilname);
+		EXIT();
 	}
-
-	if (couthd.ch_magic < MAGIC || couthd.ch_magic > MAGICST)
-	{
-		printf("file format error: %s %x\n", ifilname, couthd.ch_magic);
-		return 0;
-	}
-	return 1;
+#ifdef __ALCYON__
+	ibuf.cc = 0;
+#endif
+	lseek(fileno(&ibuf), 0L, SEEK_SET);
+	readhdr();							/*read file header */
 }
 
 
-#ifdef PDP11
-int longseek(al, fildes, pn)
-long al;
-int fildes;
-int pn;
+VOID readhdr(NOTHING)
 {
-	long l;
-	register b, o;
+	register int i;
+	register short *p;
 
-	l = al >> 9;
-	b = l.loword;						/* block # */
-	o = al.loword & 0777;				/* offset in block */
-	if (doseek(fildes, b, pn) == 0)		/* seek to block */
-		return 0;
-	if (doseek(fildes, o, SEEKREL) == 0)	/* do offset */
-		return 0;
-	return 1;
-}
-
-int doseek(afd, aoff, apnam)
-{
-	if (seek(afd, aoff, apnam) < 0)
+	p = (short *)&couthd;
+	for (i = 0; i < HDSIZE / 2; i++)
+		*p++ = getw(&ibuf);
+	if (couthd.ch_magic != MAGIC)
 	{
-		printf("seek error on file %s\n", ifilname);
-		return 0;
+		if (couthd.ch_magic == MAGIC1)
+		{
+			hdsize += 8;
+		} else
+		{
+			printf("file format error: %s\n", ifilname);
+			EXIT();
+		}
 	}
-	return 1;
 }
+
+
+/*
+ * these are here only to be able to compile & link with non-Alcyon compilers;
+ * running the program will not work
+ */
+
+#ifndef __ALCYON__
+int xfopen PROTO((const char *fname, FILE *i, int binary)) { return 0; }
+int xgetw PROTO((FILE *i)) { return EOF; }
+int xgetc PROTO((FILE *i)) { return EOF; }
 #endif

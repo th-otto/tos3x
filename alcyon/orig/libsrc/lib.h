@@ -1,3 +1,6 @@
+#ifndef __LIBC_H__
+#define __LIBC_H__ 1
+
 #ifdef __cplusplus
 #  define __USE_STDARG 1
 #endif
@@ -152,3 +155,6 @@ int malloc_debug PROTO((NOTHING));
 VOID ___atab PROTO((NOTHING));
 
 #define strcasecmp _strcmp
+
+
+#endif /* __LIBC_H__ */

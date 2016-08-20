@@ -74,10 +74,3 @@ PP(int whence;)								/* Sense of offset      */
 	fp->flags &= ~ATEOF;
 	return fp->offset;
 }
-
-
-off_t tell(P(int) fd)
-PP(int fd;)
-{
-	return lseek(fd, 0L, SEEK_CUR);
-}

@@ -7,7 +7,7 @@
 # from the Atari Developer Kit, dont change the order here
 #
 
-COBJS1=nofloat.o xmain.o xwmain.o perror.o mktemp.o chmod.o chown.o
+COBJS1=nofloat.o xmain.o xwmain.o xnwmain.o perror.o mktemp.o chmod.o chown.o
 
 COBJS2=fprintf.o printf.o sprintf.o doprt.o prtint.o prtld.o
 
@@ -39,7 +39,7 @@ COBJS15=fputn.o optoff.o signal.o
 
 COBJS16=writeasc.o writebin.o xread.o xwrite.o stricmp.o
 
-COBJS17=kopen.o kcreat.o cputc.o kdup.o kgetc.o kgetchar.o kputc.o kputchar.o kseek.o kstrcmp.o
+COBJS17=kopen.o kcreat.o cputc.o kdup.o kgetc.o kgetchar.o kputc.o kputchar.o kseek.o kstrcmp.o kwritef.o
 
 COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} \
       ${COBJS9} ${COBJS10} ${COBJS11} ${COBJS12} ${COBJS13} ${COBJS14} ${COBJS15} ${COBJS16} ${COBJS17}
@@ -60,7 +60,7 @@ MCOBJS=${MCOBJS1} ${MCOBJS2}
 MOBJS = $(MAOBJS) $(MCOBJS)
 
 
-OPTIONOBJS=nofloat.o nottyin.o nostart.o nodisk.o nolong.o noascii.o nobinary.o nofilesz.o mallocdb.o
+OPTIONOBJS=nofloat.o nottyin.o nostart.o nodisk.o nolong.o noascii.o nobinary.o nofilesz.o mallocdb.o channel5.o xnwmain.o
 
 
 srcfiles.sh: SRCFILES ${MAKEFILE}

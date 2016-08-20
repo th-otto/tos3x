@@ -107,6 +107,7 @@ char *fgets PROTO((char *str, int maxc, FILE *sp));
 
 int fflush PROTO((FILE *stream));
 int puts PROTO((const char * str));
+int fputs PROTO((const char *str, FILE *sp));
 
 FILE *fopen PROTO((const char * name, const char *mode));
 int fclose PROTO((FILE *stream));

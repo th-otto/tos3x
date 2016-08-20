@@ -68,3 +68,5 @@ int xfoflush PROTO((NOTHING));
 int xputchar PROTO((char cc));
 int xseek PROTO((int fildes, int offset, int whence));
 int xstrcmp PROTO((const char *s1, const char *s2));
+
+VOID xwritefail PROTO((NOTHING)) __attribute__((noreturn));

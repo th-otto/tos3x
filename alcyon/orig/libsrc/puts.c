@@ -22,6 +22,6 @@ PP(register const char *str;)							/* null term string     */
 {
 	while (*str)						/* for all chars in s       */
 		if (putc(*str++, stdout) == -1)	/*   if putc fouls up       */
-			return -1;			/*     give up          */
+			return EOF;			/*     give up          */
 	return putc('\n', stdout);		/* append newline & return  */
 }

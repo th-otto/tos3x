@@ -35,6 +35,7 @@
 #include <ctype.h>
 #include <portab.h>
 #include <fcntl.h>
+#include <option.h>
 #undef lseek
 int lseek PROTO((int fd, long offs, int whence));
 
@@ -51,7 +52,6 @@ static char **argv2;						/* Companion ptr to argv */
 
 static VOID _err PROTO((const char *s1, const char *s2)) __attribute__((noreturn));
 static VOID addargv PROTO((char *ptr));
-static VOID _toasc PROTO((FD *p, char c, char * buf));
 
 
 int __main(P(char *) com, P(int) len)
@@ -128,36 +128,6 @@ PP(int len;)								/* Command length */
 				break;
 
 			default:
-
-				if (strchr(s, '?') ||	/* Wild */
-					strchr(s, '*'))		/* Cards? */
-				{
-					/* Use unused channel */
-					pfd = _getccb(STDERR + 1);
-					/* Use buffer for DMA */
-#if 1 /* BUG: original library contained call to __BDOS */
-					__BDOS(SETDMA, (long)(pfd->buffer));
-#else
-					__OSIF(SETDMA, pfd->buffer);
-#endif
-					/* Do the search */
-					c = __open(STDERR + 1, s, SEARCHF);
-					if (c == 0xff)
-						_err(s, ": No match");
-					/* Do search next's */
-					while (c != 0xff)
-					{
-						/* Convert file to ascii */
-						_toasc(pfd, c, tmpbuf);
-						/* Allocate area */
-						p = _salloc(strlen(tmpbuf) + 1);
-						/* Move in filename */
-						strcpy(p, tmpbuf);
-						/* Add this file to argv */
-						addargv(p);
-						c = __open(STDERR + 1, s, SEARCHN);
-					}
-				} else
 				{
 					/* save in argv */
 					addargv(s);
@@ -218,68 +188,7 @@ PP(register char *ptr;)							/* -> Argument string to add */
 
 /*****************************************************************************/
 
-
-/*
- *	Toasc routine -- combines the FCB name in the DMA and the user number
- *	/ drive field to produce an ascii file name for SEARCHes.
- *
- */
-static VOID _toasc(P(register FD *) p, P(register char) c, P(register char *) buf)
-PP(register FD *p;)						/* -> Data area */
-PP(register char c;)						/* 0 .. 3 search code */
-PP(register char *buf;)					/* Output buffer area */
+/* stubroutine for OPTION*.h package */
+VOID nowildcards(NOTHING)
 {
-	register char *f;						/* -> Fcb in DMA buffer */
-#if GEMDOS
-	f = p->buffer + 30; /* DTA.d_name */
-	while ((*buf++ = *f++) != '\0')
-		;
-#else
-	int i;
-
-	/* Nullify at first */
-	*buf = '\0';
-	i = FALSE;
-	/* Pnt to results of search */
-	f = p->buffer;
-#if CPM
-	/* c == directory search code */
-	f += c * 32;
-	if (p->user)
-	{
-		/* User # not default, cvt to real user # */
-		i = (p->user) - 1;
-		if (i >= 10)
-			*buf++ = '1';				/* Assume user # <15 */
-		*buf++ = (i % 10) + '0';
-		*buf++ = ':';
-		i = TRUE;
-	}
-#endif
-	/* Drive specified? */
-	if (p->fcb.drive)
-	{
-		if (i)							/* User #? */
-			buf--;						/* Yes, back up over ':' */
-		/* Put in drive code */
-		*buf++ = p->fcb.drive - 1 + 'a';
-		*buf++ = ':';					/* And delimiter */
-	}
-	/* Move the filename */
-	for (i = 1; i < 9; i++)
-	{
-		if (f[i] != ' ')
-			*buf++ = tolower((f[i] & 0x7f));
-	}
-	/* Put in delimiter */
-	*buf++ = '.';
-	/* Move in extension */
-	for (i = 9; i < 12; i++)
-	{
-		if (f[i] != ' ')
-			*buf++ = tolower((f[i] & 0x7f));
-	}
-	/* Null at end */
-	*buf++ = '\0';
-#endif
 }
