@@ -28,11 +28,11 @@ PP(size_t nmemb;)
 PP(register FILE *sp;)
 {
 	register const char *buff = pbuff;
-	register size_t jj,  kk;
+	register long j, k;
 
-	for (jj = 0; jj < nmemb; jj++)
-		for (kk = 0; kk < size; kk++)
-			if (fputc(*buff++, sp) == EOF)	/* used for side effects */
-				return 0;
+	k = (long)size * (long)nmemb;
+	for (j = 0; j < k; j++)
+		if (fputc(*buff++, sp) < 0)	/* used for side effects */
+			return 0;
 	return nmemb;
 }

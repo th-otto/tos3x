@@ -28,16 +28,15 @@ PP(size_t nmemb;)
 PP(register FILE *sp;)
 {
 	register char *buff = pbuff;
-	register size_t jj, kk;
+	register long j, k;
 	register int ch;
 
-	for (jj = 0; jj < nmemb; jj++)
-		for (kk = 0; kk < size; kk++)
-		{
-			if ((ch = getc(sp)) == EOF)
-				return 0;
-			else
-				*buff++ = ch;
-		}
+	k = (long)size * (long)nmemb;
+	for (j = 0; j < k; j++)
+	{
+		if ((ch = getc(sp)) < 0)
+			return 0;
+		*buff++ = ch;
+	}
 	return nmemb;
 }
