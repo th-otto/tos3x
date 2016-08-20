@@ -19,6 +19,7 @@
 #include "lib.h"					/* Include std definitions  */
 #include <osiferr.h>				/* To set error vars        */
 #include <errno.h>					/* Error return vals        */
+#include <string.h>
 
 
 FD _fds[MAXCCBS];						/* Allocate CCB storage     */
@@ -64,9 +65,9 @@ PP(int i;)
 	ch->hiwater = 0;					/* Init hiwater mark        */
 	ch->fcb.drive = 0;					/* Init drive field of fcb  */
 	/* Init rest of fcb to zeros */
-	blkfill(&ch->fcb, 0, sizeof(ch->fcb));
+	memset(&ch->fcb, 0, sizeof(ch->fcb));
 	/* Init file name fields to spaces */
-	blkfill(ch->fcb.fname, ' ', 8 + 3);
+	memset(ch->fcb.fname, ' ', 8 + 3);
 }
 
 

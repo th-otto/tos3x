@@ -73,7 +73,7 @@ PP(long bytes;)					/* # bytes to write     */
 					RETERR(FAILURE, EIO);	/* Can't            */
 			}
 			else
-				blkfill(fp->buffer, 0, SECSIZ);	/* Zero out the buffer      */
+				memset(fp->buffer, 0, SECSIZ);	/* Zero out the buffer      */
 			
 			fp->sector = xsector;		/* Label buffer         */
 		}
@@ -151,7 +151,7 @@ PP(long bytes;)					/* # bytes to write     */
 		_blkio(fp, fp->sector, fp->buffer, 1L,	/* Read sector          */
 			   B_READ);					/*              */
 	else
-		blkfill(fp->buffer, 0, SECSIZ);
+		memset(fp->buffer, 0, SECSIZ);
 	p1 = &(fp->buffer[0]);				/* p1 -> address        */
 	while (bytes > 0)					/* Move the bytes       */
 	{									/*              */

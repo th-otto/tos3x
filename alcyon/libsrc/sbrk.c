@@ -24,6 +24,7 @@
 #include <osiferr.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 VOIDPTR sbrk(P(int) incr)
@@ -49,7 +50,7 @@ PP(int incr;)								/* Incremental storage      */
 		RETERR((VOIDPTR)-1, ENOMEM);
 	
 	if (incr > 0)
-		blkfill(t1, 0, incr);
+		memset(t1, 0, incr);
 	
 	return t1;
 }
