@@ -18,6 +18,7 @@
 ****************************************************************************/
 
 #include "lib.h"
+#include <string.h>
 
 #if 0 /* not used; optimized version in startup code */
 

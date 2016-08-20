@@ -80,14 +80,14 @@ ___cpmrv:	.ds.w	1			*	Last CP/M return val
 *
 *	Block Fill function:
 *
-*	blkfill(dest,char,cnt);
+*	memset(dest,char,cnt);
 *
 *	BYTE	*dest;		/* -> area to be filled	*/
 *	BYTE	char;		/* =  char to fill	*/
 *	WORD	cnt;		/* =  # bytes to fill   */
 *
-	xdef	_blkfill
-_blkfill:
+	xdef	_memset
+_memset:
 	move.l	4(a7),a0			*	-> Output area
 	move.w	8(a7),d1			*	=  output char
 	move.w	10(a7),d0			*	=  output count

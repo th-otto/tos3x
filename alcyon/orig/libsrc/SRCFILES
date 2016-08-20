@@ -33,7 +33,7 @@ COBJS12=calloc.o malloc.o sbrk.o errno.o ctype.o strchr.o
 
 COBJS13=strrchr.o strcat.o strcmp.o strcpy.o strlen.o strncat.o
 
-COBJS14=strncmp.o strncpy.o mallocnd.o blkfill.o wrtchr.o readasc.o readbin.o
+COBJS14=strncmp.o strncpy.o mallocnd.o memset.o wrtchr.o readasc.o readbin.o
 
 COBJS15=fputn.o optoff.o signal.o
 

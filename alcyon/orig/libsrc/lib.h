@@ -66,8 +66,6 @@ extern char __tname[];					/* Terminal name        */
 extern char __lname[];					/* List device name     */
 extern char *_break;					/* -> Program break location */
 
-VOID blkfill PROTO((VOIDPTR ptr, int c, size_t bytes));
-
 char *_petoa PROTO((double *, char *, int, int));
 char *_pftoa PROTO((double *, char *, int, int));
 char *_pgtoa PROTO((double *, char *, int, int));

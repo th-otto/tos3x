@@ -91,20 +91,20 @@ noovf:						*	Here if all OK
 *
 *	Block Fill function:
 *
-*	blkfill(dest,char,cnt);
+*	memset(dest,char,cnt);
 *
 *	BYTE	*dest;		/* -> area to be filled	*/
 *	BYTE	char;		/* =  char to fill	*/
 *	WORD	cnt;		/* =  # bytes to fill   */
 *
-	xdef	_blkfill
-_blkfill:
+	xdef	_memset
+_memset:
 	move.l	4(a7),a0			*	-> Output area
 	move.w	8(a7),d1			*	=  output char
 	move.w	10(a7),d0			*	=  output count
 	ext.l	d0				*	make it long
 	subq.l	#1,d0				*	decrement
-	ble	filldone			*	Done if le BUG: blkfill(ptr,c,1) does not clear anything
+	ble	filldone			*	Done if le BUG: memset(ptr,c,1) does not clear anything
 fillit:	move.b	d1,(a0)+			*	move a byte
 	dbra	d0,fillit			*	Continue
 filldone: clr.l	d0				*	always return 0

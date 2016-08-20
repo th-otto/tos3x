@@ -22,6 +22,7 @@
 #include "lib.h"
 #include <osiferr.h>
 #include <errno.h>
+#include <string.h>
 
 #define OFFSECT   (fp->offset    & ~(SECSIZ-1))
 #define HIWSECT   (fp->hiwater-1 & ~(SECSIZ-1))
@@ -73,7 +74,7 @@ PP(size_t bytes;)					/* # bytes to write     */
 					RETERR(FAILURE, EIO);	/* Can't            */
 			}
 			else
-				blkfill(fp->buffer, 0, SECSIZ);	/* Zero out the buffer      */
+				memset(fp->buffer, 0, SECSIZ);	/* Zero out the buffer      */
 			
 			fp->sector = xsector;		/* Label buffer         */
 		}
@@ -151,7 +152,7 @@ PP(size_t bytes;)					/* # bytes to write     */
 		_blkio(fp, fp->sector, fp->buffer, 1L,	/* Read sector          */
 			   B_READ);					/*              */
 	else
-		blkfill(fp->buffer, 0, SECSIZ);
+		memset(fp->buffer, 0, SECSIZ);
 	p1 = &(fp->buffer[0]);				/* p1 -> address        */
 	while (bytes > 0)					/* Move the bytes       */
 	{									/*              */

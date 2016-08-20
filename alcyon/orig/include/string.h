@@ -35,4 +35,6 @@ int strcasecmp PROTO((const char *, const char *));
 char *strlwr PROTO ((char *str));
 char *strupr PROTO ((char *str));
 
+VOIDPTR memset PROTO((VOIDPTR ptr, int c, size_t bytes));
+
 #endif /* __STRING_H__ */

@@ -144,6 +144,8 @@ PP(int len;)								/* Command length */
 		_err("Stack Overflow", "");
 	/* Invoke C program (No Env) */
 	exit(main(argc, argv, NULL));
+	UNUSED(tmpbuf);
+	UNUSED(pfd);
 }
 
 

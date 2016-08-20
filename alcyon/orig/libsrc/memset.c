@@ -4,24 +4,25 @@
 *			-------------------------------			    
 *	Copyright 1983 by Digital Research Inc.  All rights reserved.	    
 *									    
-*	The blkfill function sets a region of memory to a given value.	    
+*	The memset function sets a region of memory to a given value.	    
 *									    
 *	Calling Sequence:						    
 *									    
-*		blkfill(addr,fc,num);					    
+*		memset(addr,fc,num);					    
 *									    
 *	Where:								    
-*		addr	Is a pointer to region of memory to blkfill	    
-*		fc	Is a character to blkfill with			    
-*		num	Is the number of chars to blkfill with		    
+*		addr	Is a pointer to region of memory to fill	    
+*		fc	Is a character to fill with			    
+*		num	Is the number of chars to fill with		    
 *									    
 ****************************************************************************/
 
 #include "lib.h"
+#include <string.h>
 
 #if 0 /* not used; optimized version in startup code */
 
-VOID blkfill(P(VOIDPTR) addr, P(int) fc, P(size_t) num)
+VOIDPTR memset(P(VOIDPTR) addr, P(int) fc, P(size_t) num)
 PP(VOIDPTR addr;)
 PP(register int fc;)
 PP(register size_t num;)
@@ -35,6 +36,7 @@ PP(register size_t num;)
 			*ptr++ = fc;
 		} while (--num);
 	}
+	return addr;
 }
 
 #endif
