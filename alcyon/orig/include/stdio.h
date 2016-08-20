@@ -84,8 +84,6 @@ extern FILE *stderr;         /* Standard error output stream.  */
 /*                                                                          */
 /****************************************************************************/
 
-#define abs(x)  ((x) < 0 ? -(x) : (x))  /*      Absolute value function     */
-
 #define MAX(x,y)   (((x) > (y)) ? (x) :  (y))   /* Max function             */
 #define MIN(x,y)   (((x) < (y)) ? (x) :  (y))   /* Min function             */
 #define max(x,y)   (((x) > (y)) ? (x) :  (y))   /* Max function             */
@@ -137,7 +135,5 @@ FILE *fopena PROTO((const char * name, const char *mode));
 FILE *fopenb PROTO((const char * name, const char *mode));
 
 int fputn PROTO((const char *buf, int num, FILE *sp));
-
-/*************************** end of stdio.h *********************************/
 
 #endif /* __STDIO_H__ */

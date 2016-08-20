@@ -45,4 +45,11 @@ __EXITING exit PROTO((int status)) __NORETURN;
 VOIDPTR sbrk PROTO((int increment)); /* should be ptrdiff_t */
 int brk PROTO((VOIDPTR addr));
 
+#ifndef __COMPAR_FN_T
+# define __COMPAR_FN_T
+typedef int (*__compar_fn_t) PROTO((const void *, const void *));
+#endif
+VOID qsort PROTO((VOIDPTR bas, size_t num, size_t siz, __compar_fn_t cmp));
+
+
 #endif /* __STDLIB_H__ */

@@ -30,10 +30,25 @@
 #define LINEPOS(nn) ((nn) * siz + (char *)bas)
 #define EXCHANGE(aa,bb) _swap(aa, bb, siz)
 
-static VOID _swap PROTO((char *a, char *b, size_t wid));
+
+static VOID _swap(P(char *) a, P(char *) b, P(size_t) wid)
+PP(register char *a;)
+PP(register char *b;)
+PP(register size_t wid;)
+{
+	register char tmp;
+
+	if (a != b)
+		for (; wid-- > 0; a++, b++)
+		{
+			tmp = *a;
+			*a = *b;
+			*b = tmp;
+		}
+}
 
 
-int qsort(P(VOIDPTR) bas, P(size_t) num, P(size_t) siz, P(__compar_fn_t) cmp)
+VOID qsort(P(VOIDPTR) bas, P(size_t) num, P(size_t) siz, P(__compar_fn_t) cmp)
 PP(VOIDPTR bas;)
 PP(size_t num;)
 PP(size_t siz;)
@@ -67,22 +82,4 @@ PP(__compar_fn_t cmp;)
 			qsort(bas, i, siz, cmp);
 		}
 	}
-	return 0;
-}
-
-
-static VOID _swap(P(char *) a, P(char *) b, P(size_t) wid)
-PP(register char *a;)
-PP(register char *b;)
-PP(register size_t wid;)
-{
-	register char tmp;
-
-	if (a != b)
-		for (; wid-- > 0; a++, b++)
-		{
-			tmp = *a;
-			*a = *b;
-			*b = tmp;
-		}
 }
