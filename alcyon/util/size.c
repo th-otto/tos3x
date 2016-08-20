@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cout.h>
+#include <option.h>
 #include "util.h"
-
-extern int nofloat;
 
 static FILE *stream;
 

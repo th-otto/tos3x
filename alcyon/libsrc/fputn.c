@@ -37,7 +37,7 @@ PP(register FILE *sp;)						/* stream to write to       */
 	{
 		while (num--)						/* Buffered output      */
 			if (fputc(*buf++, sp) < 0)	/* try to put in buf        */
-				return -1;
+				return EOF;
 	}
 	return 0;
 }

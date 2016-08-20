@@ -20,6 +20,8 @@
 #define PP(v) v
 #define volatile
 #define const
+#define signed
+#define __MSHORT__ 1
 #else
 #define NOTHING void                /* no parameters */
 #define PROTO(p) p
@@ -29,6 +31,13 @@
 
 #ifdef __TURBOC__
 #define CDECL cdecl
+#define __MSHORT__ 1
+#endif
+
+#ifdef __PUREC__
+#ifndef __AHCC__
+#define __MSHORT__ 1
+#endif
 #endif
 
 #ifndef VOID

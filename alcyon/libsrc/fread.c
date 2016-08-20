@@ -35,7 +35,7 @@ PP(register FILE *sp;)
 	for (j = 0; j < k; j++)
 	{
 		if ((ch = getc(sp)) < 0)
-			return 0;
+			return j / size;
 		*buff++ = ch;
 	}
 	return nmemb;

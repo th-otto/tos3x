@@ -10,6 +10,7 @@
 
 #include <cout.h>
 #include <sendc68.h>
+#include <option.h>
 #include "util.h"
 
 #define SYNAMLEN	8

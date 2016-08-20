@@ -1,7 +1,7 @@
 #!mupfel
 AOBJS1="abort.o aldiv.o almul.o alrem.o lmul.o lrem.o uldiv.o setjmp.o"
 AOBJS2="xsignal.o salloc.o stkcpy.o ldiv.o blivot.o trap.o bios.o xbios.o gemdos.o"
-COBJS1="nofloat.o xmain.o xwmain.o xnwmain.o perror.o mktemp.o chmod.o chown.o"
+COBJS1="xmain.o xwmain.o xnwmain.o perror.o mktemp.o chmod.o chown.o"
 COBJS2="fprintf.o printf.o sprintf.o doprt.o prtint.o prtld.o"
 COBJS3="prtshort.o fscanf.o scanf.o sscanf.o xdoscan.o fdopen.o"
 COBJS4="fopen.o freopen.o ftell.o rewind.o fseek.o exit.o"

@@ -33,6 +33,6 @@ PP(register FILE *sp;)
 	k = (long)size * (long)nmemb;
 	for (j = 0; j < k; j++)
 		if (fputc(*buff++, sp) < 0)	/* used for side effects */
-			return 0;
+			return j / size;
 	return nmemb;
 }

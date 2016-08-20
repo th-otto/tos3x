@@ -7,7 +7,7 @@
 # from the Atari Developer Kit, dont change the order here
 #
 
-COBJS1=nofloat.o xmain.o xwmain.o xnwmain.o perror.o mktemp.o chmod.o chown.o
+COBJS1=xmain.o xwmain.o xnwmain.o perror.o mktemp.o chmod.o chown.o
 
 COBJS2=fprintf.o printf.o sprintf.o doprt.o prtint.o prtld.o
 

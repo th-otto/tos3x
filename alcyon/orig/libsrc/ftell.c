@@ -36,7 +36,7 @@ PP(register FILE *sp;)							/* stream pointer       */
 			return -1L;			/*  quit if bad lseek       */
 		if (sp->_base == NULL)			/* if file hasn't had i/o   */
 			return filepos;				/*  return this position    */
-		nread = sp->_ptr - sp->_base;	/* calc for # read/written  */
+		nread = (long)sp->_ptr - (long)sp->_base;	/* calc for # read/written  */
 		filepos += nread;				/* correct for # read/wrtn  */
 		if (sp->_flag & _IOREAD)		/* if reading from file     */
 			if (filepos > 0)			/*  and we've read from file */

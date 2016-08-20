@@ -45,7 +45,7 @@ ${LIBM_NDX}: ${LIBM}
 	$(AM_V_RANLIB)$(RANLIB) $<
 
 install: all
-	$(CP) ${LIBC} ${LIBC_NDX} ${CRT0} $(LIB)
+	$(CP) ${LIBC} ${LIBC_NDX} ${CRT0} nofloat.o $(LIB)
 
 
 clean:

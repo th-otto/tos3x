@@ -3,7 +3,7 @@ AOBJS2 = trap.o bios.o xbios.o gemdos.o
 
 AOBJS = $(AOBJS1) $(AOBJS2)
 
-COBJS1 = nofloat.o atoi.o prtld.o prtint.o prtshort.o
+COBJS1 = atoi.o prtld.o prtint.o prtshort.o
 COBJS2 = ctype.o getl.o getw.o fopen.o xmain.o xwmain.o fgetc.o fgets.o
 COBJS3 = filbuf.o read.o readasc.o readbin.o creat.o exit.o cleanup.o
 COBJS4 = fclose.o close.o fdecls.o fflush.o open.o lseek.o tell.o fputn.o
@@ -16,7 +16,7 @@ COBJS10 = printf.o fprintf.o sprintf.o xdoprtfp.o doprint.o
 COBJS11 = fread.o fwrite.o
 COBJS12 = ldiv.o lmul.o lrem.o
 COBJS13 = aldiv.o almul.o alrem.o uldiv.o
-COBJS14 = puts.o fputs.o xttyin.o ttyin.o ttyout.o nottyin.o nottyout.o
+COBJS14 = puts.o fputs.o xttyin.o ttyin.o ttyout.o
 COBJS15 = abort.o chmod.o dup.o
 COBJS16 = optoff.o
 COBJS17 = errno.o
@@ -40,4 +40,4 @@ MCOBJS = $(MCOBJS1) $(MCOBJS2) $(MCOBJS3) $(MCOBJS4)
 
 MOBJS = $(MAOBJS) $(MCOBJS)
 
-OPTIONOBJS = mallocdb.o nottyin.o nottyout.o
+OPTIONOBJS = mallocdb.o nofloat.o nottyin.o nottyout.o
