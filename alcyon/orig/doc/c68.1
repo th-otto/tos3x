@@ -1,0 +1,179 @@
+.so macro
+.he 'C68''C68'
+.de sw
+.sp
+.ti -8
+..
+.pr PROGRAM C68
+c68 - 68000 C compiler
+.us USAGE
+c68 [-c] [-[e|f]] [-v] [-L] [-a] [-S] [-T] [-t] [-[6|7|3|5]] file...
+.fn FUNCTION
+'c68' is the REGULUS 68000 C compiler.  It accepts three types of arguments:
+.sp
+Arguments whose names end with '.c' are taken to be C source programs; 
+they are compiled, and each object program is left on the file
+whose name is that of the source with '.o' substituted for '.c'.
+The '.o' file is normally deleted, however, if a single
+C program is compiled and loaded all at one go.
+.sp
+The aforementioned flags as well as the C preprocessor flags (eg. -P or -D)
+See 'cpp68(cmnd)' and the link-editor flags (eg. -l or -s) See 'lo68(cmnd)'.
+The following flags are interpreted by 'c68'.
+.in +8
+.sw
+-c\ \ \ \ \ \ Suppress the loading phase of the compilation and force an
+object file to be produced, even if only one program is compiled.
+.sw
+-e\ \ \ \ \ \ Specify that floating point arithmetic is used.  Instructs
+the loader to load the floating point library 'libE.a'.  Constants
+will be generated in the 'IEEE Floating Point' format.  Constants will
+be generated in this format by default.
+.sw
+-f\ \ \ \ \ \ Specify that floating point arithmetic is used.  Instructs
+the loader to load the floating point library 'libF.a'.  Constants
+will be generated in the 'Fast Floating Point' format.
+.sw
+-v\ \ \ \ \ \ Force the 'C' source file being processed to be printed
+regardless of whether there is more than one or not.
+.sw
+-S\ \ \ \ \ \ Compile the named C programs, and leave
+the assembler-language output on corresponding file suffixed by '.s'.
+Line number comments are included in the assembly code to help relate
+the assembly code and the C source.
+.sw
+-L\ \ \ \ \ \ (default) Compile a program which is larger than 32K bytes.
+This flag instructs the assembler to generate 32 bit addresses for
+all external references and also changes some code generation 
+sequences (i.e. indexed array references).  This flag MUST be specified 
+for all programs whose total size (text size + data size + bss size) 
+is larger than 32K bytes.
+.sw
+-a\ \ \ \ \ \ This is the alternate of the '-L' flag, it causes
+the assembler to generate 16 bit addresses for all externally referenced
+variables.
+.sw
+-T\ \ \ \ \ \ Generate assembler code suitable for the 68010.
+Generates "move cc" instead of "move sr".  Let's the assembler know the 
+meaning of the "movec", "moves", "rte", and "rtd" instructions.
+.sw
+-t\ \ \ \ \ \ Causes string constants to be placed in the text segment
+(as opposed to the data segment).  The '-t' flag with an appended
+0, 1, 2, or p (eg. '-tp') is used to specify an alternate parser, 
+code generator, assembler or preprocessor respectively.  The alternate 
+executables are expected to be located in the directory "/usr/c68".
+.sw
+-6\ \ \ \ \ \ Version 6 compatibility mode.  Adds the v6 include file
+directory onto the include file search list (/usr/include/v6), and
+adds the version 6 compatibility library (/lib/libv6.a) to the
+loader's library search list.
+.sw
+-7\ \ \ \ \ \ Version 7 compatibility mode.  Adds the v7 include file
+directory onto the include file search list (/usr/include/v7), and
+adds the version 7 compatibility library (/lib/libv7.a) to the
+loader's library search list.
+.sw
+-3\ \ \ \ \ \ System 3 compatibility mode.  Adds the s3 include file
+directory onto the include file search list (/usr/include/sys3), and
+adds the system 3 compatibility library (/lib/libs3.a) to the
+loader's library search list.
+.sw
+-5\ \ \ \ \ \ System 5 compatibility mode.  Adds the s5 include file
+directory onto the include file search list (/usr/include/sys5), and
+adds the system 5 compatibility library (/lib/libs5.a) to the
+loader's library search list.
+.sw
+-P\ \ \ \ \ \ Run only the macro preprocessor
+on the named C programs, and leave the output on corresponding
+files suffixed '.i'.
+.sw
+-E\ \ \ \ \ \ Run only the macro preprocessor on the named C programs,
+and write the output to the standard output device.  Each code block is
+identified using a sequence consisting of the source file name and
+line number (eg. # 34 file.c).
+.sw
+-C\ \ \ \ \ \ Like the -C flag except that the comments are not removed.
+This is used by lint and similar programs which need information which
+is stored in comments.
+.sw
+-Dxxx\ \ \ Define the symbol "xxx" as a preprocessor symbol.
+This flag is useful for setting compile time options such as "DEBUG"
+or "NOMMU". (See the "ifdef" construct described below)
+.sw
+-Idir\ \ \ Specify a directory (eg. -I/usr/include/test) in which to 
+search for include files which are surrounded by angle brackets <stdio.h> 
+or quotes "ctypes.h" before searching in the default directory '/usr/include'.
+If '-I' is specified without a directory name the current directory will 
+be used.
+.in -8
+.sp
+Other arguments are taken to be either loader flag arguments,
+or C-compatible object programs, typically produced by an earlier 'c68' run,
+or perhaps libraries of C-compatible routines.  These programs, 
+together with the results of any compilations specified, are loaded
+(in the order given) to produce an executable program with name 'c.out'.
+.sp
+The instruction 'asm("text");' will output a single line of text into the
+assembly output literally.
+.fl FILES
+.nf
+.na
+file.c        input file
+file.o        object file
+file.s        assembly language file
+file.i        preprocessor output file
+a.out         loaded output
+/tmp/c6t?a    temporary
+/lib/c068     parser
+/lib/c168     code generator
+/lib/c680.o   runtime startoff
+/lib/lib7.a   68000 C library
+/lib/libF.a   68000 fast floating point library
+/lib/libE.a   68000 IEEE floating point library
+/lib/libv6.a  version 6 compatibility library
+/lib/libv7.a  version 7 compatibility library
+/lib/libs3.a  system 3 compatiblity library
+/lib/libs5.a  system 5 compatibility library
+.fi
+.ad
+.sa SEE ALSO
+.fi
+.ad
+"The C Programming Language" by Kernighan and Ritchie, published by
+Prentice-Hall in 1978.
+.br
+cpp(cmnd), as(cmnd), ld(cmnd), float(misc), a.out(files)
+.br
+float(misc)
+.dg DIAGNOSTICS
+The diagnostics produced by C itself are intended to be self-explanatory.
+Occasional messages may be produced by the assembler or loader.
+To distinguish the source of error messages,
+compiler error messages begin with an *,
+assembler error messages begin with an &,
+and loader error messages begin with a :.
+.sp
+.ti -5
+DIFFERENCES
+.br
+This compiler is an implementation of the language as described in
+Kernighan and Ritchie Appendix A with the following exceptions
+and/or machine dependencies:
+.sp
+All pointers are 32 bits in length to accommodate the full 68000
+addressing range.
+Address constants are generated as 32-bit numbers
+unless the -a flag is specified.
+.sp
+Pointer register variables are assigned to A-registers.
+All other register variables are assigned to D-registers.
+There are 5 D-registers and 3 A-registers available for register variables.
+.sp
+Structure arguments, and structures returned
+from procedures are not yet implemented.
+.sp
+An additional comment syntax has been added.  Comments may be introduced
+by two slashes (i.e. //) and are terminated by the end of the source line.
+The standard C comment syntax (i.e. /* comment */) is also supported.
+.sp
+Unsigned long and unsigned short have not yet been implemented. 

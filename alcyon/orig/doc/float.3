@@ -1,0 +1,54 @@
+.so macro
+.he 'FLOAT''FLOAT'
+.n  NAME
+float - floating point number formats
+.d  DESCRIPTION
+.ti +5
+Regulus supports two formats of single precision floating point numbers.
+They are the Motorola 'Fast Floating Point' and the 'IEEE standard'.
+Both types are stored in 32-bit entities.  They are not compatible.
+.sp
+.ti +5
+The FFP format consists of a 24 bit mantissa, 1 bit of sign, and
+7 bits of exponent.  The exponent is stored in it's two's complement
+form.
+.sp
+.na
+.nf
+.in +3
+[ | | | | | | | ~~~~ | | | | | | | | | | | | | | | | ]
+|------------ Mantissa --------------|S|---- Exp ----|
+.in -3
+.fi
+.ad
+.sp
+The IEEE format consists of 1 sign bit, 8 bits of exponent, and 23
+bits of mantissa.  The exponent is store in it's Excess 127 format.
+.sp
+.na
+.nf
+.in +3
+[ | | | | | | | | | | | | | | | ~~~~ | | | | | | | | ]
+|S|----- Exp -----|---------- Mantissa --------------|
+.in -3
+.fi
+.ad
+.sp
+The floating point numbers represented by the IEEE format are :
+(-1)^S * 1.F * 2^E, the FFP floating point numbers are of the form :
+(-1)^S * 0.F * 2^E.
+.sp
+.ti +5
+The IEEE format will be used if the -e flag is given to the compiler
+or if the -lE flag is given to the loader.  The FFP format will be
+used if the -f flag is given to the compiler or if the -lF flag is
+given to the loader.  These flags cause floating point constants of
+the appropriate flavor to be generated and the appropriate library
+to be loaded.
+.sp
+.ti +5
+The IEEE floating point values lose some precision due to the fact that
+calculations use the fast floating point routines, and a translation to
+and from the FFP format.
+.sa SEE ALSO
+cc(cmnd), lo(cmnd)

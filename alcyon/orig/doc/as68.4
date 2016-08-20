@@ -1,0 +1,222 @@
+.de zi
+.sp
+.ti -5
+..
+.de zb
+.br
+.ti -5
+..
+.so macro
+.he 'AS68''AS68'
+.n NAME as
+as68 - assembler for the Motorola 68000
+.fn FUNCTION
+The REGULUS assembler 'as' is designed to be used in conjunction with 
+the other REGULUS standard language processing tools: c68 and lo68.  The
+language implemented is primarily as is described in any of the standard
+68000 assembler manuals, with a few enhancements to make it accept
+some of the more standard assembler mnemonics.  It will attempt to 
+optimize instructions to take advantage of certain 68000 instructions
+\&(for example the add quick instruction). 
+.sp
+The following instructions are recoginized to aid the assembly language
+programmer by making the assembly language more regular: clr.x An (where 
+x is l,b, or w) is allowed and will actually generate a suba.x An,An 
+instruction; add, sub, cmp with an A register source/destination are 
+allowed and generate adda, suba, cmpa; add, and, cmp, eor, or, sub are 
+allowed with immediate first operands and actually generate addi, andi, 
+cmpi, eori, ori, subi instructions if the second operand is not register 
+direct; any shift instruction with no shift count specified assumes a 
+shift count of one (ie. "asl r1" is equivalent to "asl #1,r1"); the 
+mnemonics 'inc' and 'dec' are also recognized and are functionally 
+equivilent to "addq 1" or "subq 1".
+Several mnemonics have been added to the standard set of condition code
+instructions: 'bt' maps to  'bra', 'bhs' maps to 'bhis', 'bnz' maps to 'bne', 
+\&'bze' maps to 'beq', 'dbhs' maps to 'dbhi', 'dblo' maps to 'dbcs', 
+\&'dbnz' maps to 'dbne', 'dbze' maps to 'dbeq', 'shs' maps to 'scc', 
+\&'slo' maps to 'scc', 'snz' maps to 'sne', and 'sze' maps to 'seq'.
+.sp
+Several optimizations take place.  All branch instructions generate 
+short relative branches where possible, including forward references.
+\&'jsr' instructions are changed to 'bsr' instructions if the resulting
+\&'bsr' is shorter than the 'jsr'.  'move', 'add', 'sub' mnemonics will 
+actually generate 'moveq', 'addq', and 'suba' instructions where possible.
+If a 'move' instruction rather than a 'moveq' instruction is desired (affecting
+only lower byte or word of D register), the size attribute must be
+explicitly coded ie. move.b or move.w.  The assembler will change any 
+move or move.l to moveq if possible.
+.sp
+All labels must terminate with a ':', unless they start in column 1.
+Registers may be referenced as r0 - r15, R0 - R15, D0 - D7, d0 - d7,
+A0 - A7, or a0-a7.  Registers R8 - R15 are the same as A0 - A7.
+Numbers are interpreted as decimal.  Hexidecimal may be specified
+by preceding the number by a dollar sign ($) and numbers which
+begin with a preceeding zero (0) are assumed to be octal.
+.sp
+REGULUS assembler directives can be specified in upper and/or lower
+case characters and may be preceded by an optional dot (.).
+The following directives have been implemented: 
+.in +10
+.zi
+text
+.zb
+data
+.zb
+bss
+.br
+These three directives instruct the assembler to change the assembler 
+base segment to the text, data, or bss segment respectively.  Each 
+assembly starts in the text segment.  It is illegal to assemble 
+instructions or data into the bss segment.  Symbols may be defined and 
+storage may be reserved using the .ds directive in the bss segment.
+.zi
+section #
+.br
+This directive is used to define a base segment like the .bss, .data
+and .text directives discussed above.  The sections can be numbered
+0 to 15 inclusive.  Section 14 maps to data, section 15 is bss and
+all the others are text sections.
+.zi
+globl name[,name...]
+.zb
+xdef name[,name...]
+.zb
+xref name[,name...]
+.br
+These directives make the name(s) external.  If they are defined in 
+the current assembly, this statement makes these names available to 
+other routines during a load by lo68.  If these names are not defined 
+in the current assembly, they become undefined external references
+and lo68 will link them to external values of the same name in other 
+routines.  Specifying the -u flag will force the assembler to make all 
+undefined names external.
+.zi
+comm name,expression
+.br
+This directive defines a named block common area.  When several routines 
+are linked together with lo68, all block common areas with the same name 
+are loaded at the same address.  The size of this block common storage 
+area is the largest value of the expression part of all 'comm' directives 
+with the same name.  No error message is produced if the areas are of 
+different sizes.
+.zi
+even
+.br
+If the location counter is odd, it is incremented by one so that the
+next instruction or data field will begin on an even memory boundary.
+.sp
+The relocation counter may be manipulated with a statement like:
+.br
+.ti +10
+*=expr
+.br
+Care should be exercised when using this facility.
+The expression may only move the relocation counter forward.
+The unused space is filled
+with zeroes in the text or data segments and is simply not assigned in
+the bss segment.
+This facility requires the assembler to not allow comment lines which
+begin with "*=".
+Comments beginning with "* =" are allowed.
+.zi
+org expression
+.br
+This directive is used to change the program counter to the specified
+address.  The expression must not contain any external references and
+must be computable at the time of assembly.
+.zi
+ds[.x] operand
+.br
+This is the directive used to define storage.  Storage can be defined
+in bytes, words or long words depending upon the extension specified
+\&('b', 'w', 'l' where word is the default).  The memory is not initialized,
+just reserved.  Word or long defined storage will be aligned on a word
+boundary.
+.zi
+comline expression
+.br
+This directive is identical to the 'ds.b' instruction.  The specified
+argument must be a constant expression.
+.zi
+equ expression
+.zb
+set expression
+.br
+Currently 'set' and 'equ' are implemented exactly the same.  These directives
+are used to assign a value to the specified label.  This non-optional label 
+may not be redefined elsewhere in the program.  It can then be used anywhere
+that a constant is required and will be evaluated to the specified value.
+.zi
+end
+.br
+The 'end' directive specifies the end of the assembler text.  It is not
+required for appropriate assembly.  If it is not at the end of the text
+an error will be reported.
+.zi
+offset expression
+.br
+This directive creates a dummy storage section using the 'ds' directive.  
+No code generating instructions may occur.  It is terminated by 
+a 'section', 'data', 'bss', 'text' or 'end'.  The offset table begins 
+at the address specified in the expression.  The 'set', 'equ', 'reg', 
+\&'xref', 'xdef', 'globl', 'offset', and any conditional directive may 
+appear inside.
+.zi
+dcb[.x] size,value
+.br
+Just like the dc.b command.  Defines a constant block of the specified size
+of bytes, words or longs.
+.zi
+reg reglist
+.br
+This directive builds a register mask which can be used by the
+movem instruction.  One or more registers can be listed in
+increasing order of the form : 'R?[-R?[/R?[-R?...]...]]'.
+Where R? can be replaced by A0-A7, D0-D7 and R0-R15.  The
+register list might look like : A2-A4/A7/D1/D3-D5.
+The registers may also be designated separated by 
+commas (eg. A1,A2,D5,D7).
+.sp
+.in -10
+Conditional assembly directives can have any level of nesting.
+The following conditional assembler directives have been implemented:
+.in +10
+.zi
+ifeq expression
+.zb
+ifne expression
+.zb
+ifle expression
+.zb
+iflt expression
+.zb
+ifge expression
+.zb
+ifgt expression
+.br
+The expression is tested against zero (with ifeq: equal, ifne: not equal, 
+ifle: less or equal, iflt: less than, ifge: greater or equal, 
+ifgt: greater) and if it is evaluated true then
+the code enclosed is assembled, otherwise the code is ignored until
+the matching endc is found.
+.zi
+ifc 'string1','string2'
+.zb
+ifnc 'string1','string2'
+.br
+The two strings are compared.  The 'c' condition is true if they are
+exactly the same, the 'nc' condition is true if they do not match.
+.zi
+endc
+.br
+Signifies the end of the code to be conditionally assembled.
+.sp
+.in -10
+ASCII string constants may be enclosed in single quotes (ie. 'ABCD') or
+in double quotes (ie. "ac14").
+.sp
+Several directives are recognized, but ignored: 'mask2', 'idnt', 'ttl',
+\& 'opt', and 'page'.
+.sp
+.sa SEE ALSO
+as68(cmnd)

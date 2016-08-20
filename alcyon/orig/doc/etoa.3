@@ -1,0 +1,27 @@
+.so macro
+.he 'ETOA''ETOA'
+.n  etoa
+etoa - floating point exponential to ascii
+.sy SYNOPSIS
+.nf
+#include <math.h>
+
+char *
+etoa(fp,buf,prec)
+float fp;
+char *buf;
+int prec;
+.fi
+.d  DESCRIPTION
+\&'etoa' converts a float into it's ascii exponential representation.
+Where fp is a floating point number, buf is the buffer in
+which to return the string, and
+prec is the precision of the decimal places.
+If the precision is specified to be zero or negative then the default
+precision of six decimal places will be used.
+A pointer to the beginning of buf is returned.
+.fl FILES
+math.h - routine declaration
+.sa SEE ALSO
+ftoa(subs), atoi(subs), atol(subs), itoa(subs)
+.dg DIAGNOSTICS

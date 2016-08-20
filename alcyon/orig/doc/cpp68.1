@@ -1,0 +1,155 @@
+.so macro
+.he 'CPP68''CPP68'
+.de sw
+.sp
+.ti -8
+..
+.pr PROGRAM CPP68
+cpp68 - 68000 C preprocessor
+.us USAGE
+cpp68 [-C] [-P] [-E] [-D] [-I] [-[6|7|3|5]] source
+.fn FUNCTION
+'cpp68' is the REGULUS 68000 C preprocessor.  It may be called specifically
+or by using 'cc'.  The following flags re interpreted by the C preprocessor:
+.sp
+.sw
+-P\ \ \ \ \ \ Run only the macro preprocessor
+on the named C programs, and leave the output on corresponding
+files suffixed '.i'.
+.sw
+-E\ \ \ \ \ \ Run only the macro preprocessor on the named C programs,
+and write the output to the standard output device.  Each code block is
+identified using a sequence consisting of the source file name and
+line number (eg. # 34 file.c).
+.sw
+-C\ \ \ \ \ \ Like the -C flag except that the comments are not removed.
+This is used by lint and similar programs which need information which
+is stored in comments.
+.sw
+-Idir\ \ \ Specify a directory (eg. -I/usr/include/test) in which to 
+search for include files which are surrounded by angle brackets <stdio.h> 
+or quotes "ctypes.h" before searching in the default directory '/usr/include'.
+If '-I' is specified without a directory name the current directory will 
+be used.
+.sw
+-6\ \ \ \ \ \ Version 6 compatibility mode.  Adds the v6 include file
+directory onto the include file search list (/usr/include/v6), and
+adds the version 6 compatibility library (/lib/libv6.a) to the
+loader's library search list.
+.sw
+-7\ \ \ \ \ \ Version 7 compatibility mode.  Adds the v7 include file
+directory onto the include file search list (/usr/include/v7), and
+adds the version 7 compatibility library (/lib/libv7.a) to the
+loader's library search list.
+.sw
+-3\ \ \ \ \ \ System 3 compatibility mode.  Adds the s3 include file
+directory onto the include file search list (/usr/include/sys3), and
+adds the system 3 compatibility library (/lib/libs3.a) to the
+loader's library search list.
+.sw
+-5\ \ \ \ \ \ System 5 compatibility mode.  Adds the s5 include file
+directory onto the include file search list (/usr/include/sys5), and
+adds the system 5 compatibility library (/lib/libs5.a) to the
+loader's library search list.
+.in -8
+.sp
+.ne 4
+'cpp68' provides a macro processing facility with the following commands:
+.sp
+.in +8
+.ti -8
+#include "filename"
+.br
+.ti -8
+#include <filename>
+.sp
+Causes the text of the named file to be inserted in the input stream.
+Files may contain (nested) #include statements.  The quoted (single or
+double) inlude file will first be looked for in the directory where the 
+source file exists which references it, followed by the directories
+specified using the '-I' flag, and finally in the directory '/usr/include'.
+An include file surrounded by angle brackets will be looked for only on
+the include file path list, and in '/usr/include'.
+.sp
+.ti -8
+#define NAME string
+.sp
+Causes the contents of "string" to be substituted
+for NAME whenever NAME is encountered in the input stream.
+NAME must be a valid "C" identifier.
+.sp
+.ti -8
+#define NAME(a,b,c) text
+.sp
+Causes substitution of the text (with
+parameters) whenever
+NAME(p1,p2,p3) is encountered in the input stream.
+NAME, a, b, and c must be valid "C" identifiers.
+.sp
+.ti -8
+#undef NAME
+.sp
+Causes the definition of NAME to be forgotten.
+.sp
+.ti -8
+#ifdef NAME
+.sp
+If NAME has been previously defined in a #define statement
+or via the -D flag,
+include all input until a corresponding #else or #endif is encountered;
+if NAME is undefined, skip the input.
+Nesting of conditional statements is permitted.
+The value of NAME is immaterial.
+.sp
+.ti -8
+#ifndef NAME
+.sp
+If NAME has not been defined in a previous #define statement,
+include all input until a corresponding #else or #endif
+is encountered in the input
+stream; if NAME is defined, skip the input.
+.sp
+.ti -8
+#if CONSTANT_EXPRESSION
+.sp
+If the CONSTANT_EXPRESSION has a non-zero value, include
+all input until a corresponding #endif or #else is encountered in the
+input stream; if CONSTANT_EXPRESSION is zero, skip the input.
+.sp
+.ti -8
+#else
+.sp
+If the checked condition in the corresponding #if, #ifdef, or
+#ifndef is true then any lines between #else and #endif are ignored.
+If the checked condition is false then any lines between the test
+and the #else or, lacking a #else, the #endif, are ignored.
+.sp
+.ti -8
+#endif
+.sp
+Terminate a #if or #ifdef or #ifndef statement.
+.sp
+.ti -8
+#line LINE [FILENAME]
+.sp
+Coerces the preprocessor and the parser into believing that the next line
+is in the specified file on the specified line.  If no filename is
+specified uses the current source file name.
+.in -8
+.sp
+There are two predefined, user redefineable macro's __FILE and __LINE
+while will respectively be evaluated to the current file name enclosed
+in double quotes and line number respectively by the preprocessor.
+.sp
+.fl FILES
+.nf
+.na
+file.c        input file
+file.s        assembly language input file
+file.i        preprocessor output file
+.fi
+.ad
+.sa SEE ALSO
+.fi
+.ad
+c68(cmnd)

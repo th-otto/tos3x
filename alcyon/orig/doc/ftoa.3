@@ -1,0 +1,28 @@
+.so macro
+.he 'FTOA''FTOA'
+.n  NAME
+ftoa - floating point to ascii conversion
+.sy SYNOPSIS
+.nf
+#include <math.h>
+
+char *
+ftoa(fp,buf,prec)
+float fp;
+char *buf;
+int prec;
+.fi
+.d  DESCRIPTION
+\&'ftoa' converts a float into it's ascii representation.
+Where fp is a floating point number, buf is the buffer in
+which to return the string, and
+prec is the precision of the decimal places.
+If the specified precision is zero then no decimal point will be
+printed.  If the precision is negative then the default precision
+\&(6) will be used.
+A pointer to the beginning of buf is returned.
+.fl FILES
+math.h - routine declaration
+.sa SEE ALSO
+etoa(subs), atoi(subs), atol(subs), itoa(subs)
+.dg DIAGNOSTICS

@@ -1,0 +1,23 @@
+.so macro
+.he 'TEKSENDC68''TEKSENDC68'
+.pr PROGRAM TEKSENDC68
+teksendc68 - 68000 downloader
+.us USAGE
+teksendc68 [-] objectfile [ttyname]
+.fn FUNCTION
+Teksendc68
+reads the objectfile, which must be in the c.out format produced
+by the 68000 linking loader lo68.  Teksendc68 converts this executable
+object code into the Tektronix Extended TEKHEX format acceptable by
+the 8540 for the 68000 and writes this TEKHEX to the output file.
+.sp
+If the optional third argument (ttyname) is
+present, this is the name of the special file (ie. /dev/tty?) to use
+to download the 68000.  If this optional third argument is not
+present, the standard output file is used.
+.sp
+If the optional "-" argument is specified, teksendc68 does not clear
+the bss segment during the load.  This results in a faster load, but
+all bss memory will have random initial values.
+.sa SEE ALSO
+c68 (cmnd), as68 (cmnd), lo68 (cmnd), c.out (files)

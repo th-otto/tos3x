@@ -1,0 +1,89 @@
+.TH "AR68" 1
+.SH NAME
+ar68 - archive maintainer
+.SH USAGE
+ar68 flags [pos] archive file1 file2 ...
+.SH FUNCTION
+\&'ar68' collects individual files into a single archive,
+or library file.
+It is primarily used to maintain libraries of object files
+for use by the loader,
+although it can be used with any type of file.
+.sp 1
+The flags argument determines the function that 'ar68' performs.
+One character from the set {dprtx} must be specified;
+these are the function select flags.
+The function select flags specify the following functions:
+.sp 2
+.in +8
+.ti -8
+d\ \ \ \ \ \ \ Delete the specified files from the archive.
+.sp
+.ti -8
+p\ \ \ \ \ \ \ Print the specified files.
+If the files are not printable,
+e.g. object files, havoc results.
+.sp
+.ti -8
+r\ \ \ \ \ \ \ Replace the specified files.
+If an optional position flag from the set
+{abi} is not specified new files are placed at the end of the archive.
+.sp
+.ti -8
+t\ \ \ \ \ \ \ Print a table of contents of the archive.
+If files are specified only the specified files are listed.
+.sp
+.ti -8
+x\ \ \ \ \ \ \ Extract the specified files from the archive,
+creating loose files in the current directory.
+If no files are specified, all of the files in the archive are extracted.
+Note that 'x' does not alter the archive.
+The 'd' flag must be used to delete files from an archive.
+.sp 2
+.in -8
+The files must be specified in the same order as they appear in the
+archive file,
+otherwise some of the files may not be found.
+For example, if an archive "t.a" consists of the files file1, file2
+and file3 in that order,
+the command "ar t t.a file2 file1" will cause file2 to be listed,
+but not file1.
+Instead, the message "file1 not in archive" will be printed.
+This is because 'ar68' only searches the archive once.
+Files must be specified in the order they appear in the archive.
+.sp 2
+Characters from the set {abiv} may be included in the flags argument.
+These characters have the following function:
+.in +8
+.sp 2
+.ti -8
+a\ \ \ \ \ \ \ When used with the 'r' flag, 'a' specifies that new files
+are to be inserted after the file "pos" in the archive.
+Note that the "pos" argument must be specified if and only if
+one of the characters {abi} appear in the flags argument.
+.sp
+.ti -8
+b\ \ \ \ \ \ \ 'b' has the same function as 'a', except that new files are
+inserted before the file "pos" in the archive.
+.sp
+.ti -8
+i\ \ \ \ \ \ \ 'i' has exactly the same meaning as 'b', the two characters
+can be used interchangeably (but only one must appear).
+.sp
+.ti -8
+v\ \ \ \ \ \ \ 'v' (verbose) causes a file by file description of the
+operation of 'ar68' to be printed.
+Files are either copied (c),
+replaced (r), added (a), deleted (d) or extracted (x) from an archive.
+When used with the 't' flag, 'v' causes a long listing to be printed.
+Verbose has no effect on the print function.
+.in -8
+.SH FILES
+_~ar????? (process id in octal)  - temporary file
+.SH SEE ALSO
+lo68 (cmnd), ar68 (files)
+.SH BUGS
+When using any of the 'a' 'b', or 'i' flags to position the files,
+if any of the files in the namelist already exist in the archive,
+you must delete them with the delete option first. Otherwise, 'ar68'
+will make another copy of them.

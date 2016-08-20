@@ -1,0 +1,89 @@
+.so macro
+.he 'PRINTF''PRINTF'
+.n  NAME PRINTF
+printf - formatted print
+.sy SYNOPSIS
+printf(plist);
+char *plist;
+.d  DESCRIPTION
+\&'printf' takes the input string and interprets various formatting
+commands and outputs the results to the standard output device.
+There are two types of items in the input string: characters which
+are copied literally and format statements which work on strings,
+characters and numerics.
+.sp
+The string takes the form of a literal string with embedded format
+statements and the various arguments on which the format statements
+act: printf("...",arg1,arg2...).
+All format statements are
+preceded by a percent sign and terminated by one of the conversion
+characters.
+Between the percent sign and the conversion characters
+are optional symbols which adjust the standard formats.
+.sp
+The format statement consists of a contiguous group of characters.
+A minus sign '-' may follow the percent sign to designate that the
+item is to be left justified.
+A decimal number designating the field width may optionally be specified.
+If the item is larger than the specified width it will be printed as is.
+If the item is smaller,
+the item will be padded with spaces.
+If the first digit of the specified width is a '0' then the item
+will be padded with zero's instead of spaces.
+If the item is a string or
+a floating point number a second field preceded by a period '.'
+may be specified.
+The second width field specifies the number of
+digits to the right of the decimal point in the case of a floating
+point and the maximum number of characters to be printed in the
+case of a string.
+.sp
+The last item of a format statement describes the item we are 
+formatting.
+They are 'c', 'd', 'e', 'f', 'u', 'o', 's', and 'x'.
+.sp
+.in +6
+.ti -7
+\ 'c'\ \ \ The argument to be printed is a single character.
+.sp
+.ti -7
+\ 's'\ \ \ The argument is a string or character pointer.
+All characters will be printed unless a maximum width field is in force.
+.sp
+.ti -7
+\ 'd'\ \ \ The argument is a decimal numeric.
+.sp
+.ti -7
+\ 'o'\ \ \ The argument is a octal numeric.
+.sp
+.ti -7
+\ 'x'\ \ \ The argument is a hexidecimal numeric.
+.sp
+.ti -7
+\ 'u'\ \ \ The argument will be interpreted as an unsigned decimal
+integer in the range 0 to 65535.
+.sp
+.ti -7
+\ 'f'\ \ \ The argument is either a floating point or double precision
+number.
+It will be of the form: an optional minus sign, digits,
+a decimal point, and more digits.
+If no second width field has
+been specified there will be six digits to the right of the decimal point.
+.sp
+.ti -7
+\ 'e'\ \ \ The argument is to be printed in scientific notation and is
+either a floating point or double precision number.
+The format is
+exactly like the 'f' format except that only one digit is to the
+right of the decimal point and a two digit exponent is specified after
+the number.
+.sp
+Format descriptors 'd', 'o', 'x', and 'u' may optionally be preceeded
+by a 'l' character to specify that the argument to be printed is a
+long rather than an integer.
+.sp
+Any other character following a percent sign will be taken as a
+literal and will itself be printed.
+In this way you can print a percent sign or a double quote.
+.sp

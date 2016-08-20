@@ -1,0 +1,14 @@
+.so macro
+.he 'NMC68''NMC68'
+.pr PROGRAM NMC68
+nmc68 - print c68 symbol table
+.us USAGE
+nmc68 [ name ]
+.fn FUNCTION
+prints the symbol table from the output file of an
+68000 assembler (as68) or loader (lo68) run.
+Each symbol name is followed by its value
+and one or more of the following type descriptors: equ (equated), global,
+equreg (equated register), external, data, text, bss, abs (absolute).
+The output is not sorted and thus appears in the order that the
+symbols appear in the file's symbol table.
