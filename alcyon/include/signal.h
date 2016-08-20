@@ -1,4 +1,3 @@
-
 /****************************************************************************/
 /*									    */
 /*		    S i g n a l   H e a d e r   F i l e			    */
@@ -10,6 +9,9 @@
 /*	not get compile-time errors.  Some functions are not implemented.   */
 /*									    */
 /****************************************************************************/
+#ifndef __SIGNAL_H__
+#define __SIGNAL_H__ 1
+
 #define	NSIG	16			/* 16 simulated signals		    */
 #define	SIGHUP	 1			/* Hangup			    */
 #define	SIGINT	 2			/* Interrupt (^C)		    */
@@ -26,9 +28,10 @@
 #define	SIGPIPE	13			/* Write on a broken pipe	    */
 #define	SIGALRM	14			/* Alarm clock (what a name!)	    */
 #define	SIGTERM	15			/* Software termination signal 	    */
-					/************************************/
-#define	BADSIG	(-1L)			/* Error return			    */
+
+#define	SIG_ERR	(-1L)			/* Error return			    */
 #define	SIG_DFL	(0L)			/* Default action on signal call    */
 #define	SIG_IGN (1L)			/* Ignore			    */
-					/************************************/
 
+
+#endif /* __SIGNAL_H__ */

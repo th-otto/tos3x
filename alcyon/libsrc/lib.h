@@ -1,3 +1,6 @@
+/* always defined when comiling the library */
+#define _LIBC 1
+
 #ifdef __cplusplus
 #  define __USE_STDARG 1
 #endif

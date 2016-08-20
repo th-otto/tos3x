@@ -17,7 +17,7 @@
 *
 *****************************************************************************/
 
-#include <stdio.h>
+#include "lib.h"
 
 int fflush(P(FILE *) sp)
 PP(register FILE *sp;)							/* stream to flush      */

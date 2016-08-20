@@ -17,7 +17,7 @@
 *
 *****************************************************************************/
 
-#include <stdio.h>
+#include "lib.h"
 
 int fputn(P(register const char *) buf, P(register int) num, P(register FILE *) sp)
 PP(register const char *buf;)				/* chars to be written      */

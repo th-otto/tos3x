@@ -1,7 +1,9 @@
-
 /*
  * errno.h - error codes
  */
+
+#ifndef __ERRNO_H__
+#define __ERRNO_H__ 1
 
 #ifndef __COMPILER_H__
 #include <compiler.h>
@@ -50,6 +52,4 @@ extern int errno;
 #define ENODSPC	35
 #define ERENAME	36
 
-/****** end of errno.h ******/
-
-
+#endif /* __ERRNO_H__ */

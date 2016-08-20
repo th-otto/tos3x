@@ -41,6 +41,9 @@
 #include <cout.h>
 #include <ar68.h>
 
+#define FALSE 0
+#define TRUE  1
+
 int lgetl PROTO((long *lp, FILE *f));
 int lgetw PROTO((unsigned short *lp, FILE *f));
 int getchd PROTO((FILE *fp, struct hdr2 *arptr));

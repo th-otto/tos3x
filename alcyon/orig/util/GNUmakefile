@@ -19,5 +19,8 @@ size68$(EXEEXT): $(SIZE_OBJS)
 nm68$(EXEEXT): $(NM_OBJS)
 	$(AM_V_LD)$(LD) $(NM_OBJS) $(LDFLAGS) -o $@
 
+check::
+	for i in $(PROGRAMS); do cmp $$i.ttp ../bin/$$i.ttp; done
+
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

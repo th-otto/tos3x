@@ -49,6 +49,26 @@
 #  endif
 #endif
 
+#ifdef __GNUC__
+# ifdef __GNUC_MINOR__
+#  define __GNUC_PREREQ(maj, min) ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
+# endif
+#endif
+#ifndef __GNUC_PREREQ
+# define __GNUC_PREREQ(maj, min) 0
+#endif
+
+#if __GNUC_PREREQ(2, 5)
+#define __EXITING void
+#else
+#define __EXITING volatile VOID
+#endif
+#ifndef __NORETURN
+#define __NORETURN __attribute__ ((noreturn))
+#endif
+
+#define __EXTERN extern
+
 #define	NULL	((VOIDPTR)0)			/*	Null pointer value	    */
 
 #endif /* __COMPILER_H__ */

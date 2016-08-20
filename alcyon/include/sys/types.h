@@ -20,6 +20,11 @@ typedef __SIZE_TYPE__ size_t;
 #endif
 typedef __PTRDIFF_TYPE__ ptrdiff_t;
 
+#ifndef __WCHAR_TYPE__
+#define __WCHAR_TYPE__ int
+#endif
+typedef __WCHAR_TYPE__ wchar_t;
+
 typedef long off_t;
 
 #endif

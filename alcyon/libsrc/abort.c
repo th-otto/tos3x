@@ -1,6 +1,7 @@
+#include "lib.h"
 #include <stdlib.h>
 
-VOID abort(NOTHING)
+__EXITING abort(NOTHING)
 {
 	for (;;)
 	{

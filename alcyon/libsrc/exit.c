@@ -20,7 +20,7 @@
 #include "lib.h"
 #include <stdlib.h>
 
-VOID exit(P(int) code)
+__EXITING exit(P(int) code)
 PP(int code;)
 {
 	/* Close all (stream) files */

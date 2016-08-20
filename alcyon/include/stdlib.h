@@ -8,12 +8,20 @@
 #include <sys/types.h>
 #endif
 
+#define	EXIT_FAILURE	1	/* Failing exit status.  */
+#define	EXIT_SUCCESS	0	/* Successful exit status.  */
+
+#ifdef __GNUC__
+ #include <stdint.h>
+ #define ldiv std_ldiv
+ #include_next <stdlib.h>
+ #undef RAND_MAX
+ #undef ldiv
+#endif
+
 /* The largest number rand will return (same as INT_MAX).  */
 #define	RAND_MAX	32767
 
-
-#define	EXIT_FAILURE	1	/* Failing exit status.  */
-#define	EXIT_SUCCESS	0	/* Successful exit status.  */
 
 VOIDPTR malloc PROTO((size_t size));
 VOID free PROTO((VOIDPTR));
@@ -22,12 +30,17 @@ VOIDPTR calloc PROTO((size_t nmemb, size_t size));
 
 int atoi PROTO((const char *s));
 
+/* Absolute value function */
+int abs PROTO((int));
+long int labs PROTO((long int));
+
+
 extern	int	rand PROTO((NOTHING));		/* random function			*/
 extern	VOID srand PROTO((unsigned int seed));	/* seed random generator		*/
 
-VOID abort PROTO((NOTHING));
-VOID _exit PROTO((int status)) __attribute__((noreturn));
-VOID exit PROTO((int status)) __attribute__((noreturn));
+__EXITING abort PROTO((NOTHING)) __NORETURN;
+__EXITING _exit PROTO((int status)) __NORETURN;
+__EXITING exit PROTO((int status)) __NORETURN;
 
 VOIDPTR sbrk PROTO((int increment)); /* should be ptrdiff_t */
 int brk PROTO((VOIDPTR addr));

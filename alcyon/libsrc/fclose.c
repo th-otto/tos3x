@@ -15,7 +15,7 @@
 *
 *****************************************************************************/
 
-#include <stdio.h>
+#include "lib.h"
 #include <stdlib.h>
 
 int fclose(P(FILE *) sp)

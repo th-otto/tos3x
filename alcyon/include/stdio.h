@@ -24,6 +24,14 @@
 #include <stdarg.h>
 #endif
 
+#ifdef __GNUC__
+ #ifndef _LIBC
+ #  include_next <stdio.h>
+ #  define _NO_FILE
+ #endif
+#endif
+
+
 #define SEEK_SET	0	/* Seek from beginning of file.  */
 #define SEEK_CUR	1	/* Seek from current position.  */
 #define SEEK_END	2	/* Seek from end of file.  */
@@ -31,6 +39,8 @@
 /****************************************************************************
 *       Stream I/O File Definitions
 *****************************************************************************/
+
+#ifndef _NO_FILE
 #define BUFSIZ          512             /*      Standard (ascii) buf size   */
 #define MAXFILES        16              /*      Max # open files ( < 32 )   */
 struct _iobuf {                         /*                                  */
@@ -74,6 +84,7 @@ extern FILE *stderr;         /* Standard error output stream.  */
 #define putc fputc
 #define getc fgetc
 
+#endif
 
 /****************************************************************************/
 /*                                                                          */
@@ -83,8 +94,6 @@ extern FILE *stderr;         /* Standard error output stream.  */
 /*      Define some stuff as macros ....                                    */
 /*                                                                          */
 /****************************************************************************/
-
-#define abs(x)  ((x) < 0 ? -(x) : (x))  /*      Absolute value function     */
 
 #define MAX(x,y)   (((x) > (y)) ? (x) :  (y))   /* Max function             */
 #define MIN(x,y)   (((x) < (y)) ? (x) :  (y))   /* Min function             */
@@ -114,7 +123,7 @@ int fclose PROTO((FILE *stream));
 FILE *fdopen PROTO((int, const char *mode));
 
 long ftell PROTO((FILE *sp));
-int rewind PROTO((FILE *sp));
+VOID rewind PROTO((FILE *sp));
 int fseek PROTO((FILE *stream, long offset, int whence));
 size_t fread PROTO((void *ptr, size_t size, size_t nmemb, FILE *stream));
 size_t fwrite PROTO((const void *ptr, size_t size, size_t nmemb, FILE *stream));
@@ -134,7 +143,5 @@ long getl PROTO((FILE *sp));
 int getw PROTO((FILE *sp));
 
 int fputn PROTO((const char *buf, int num, FILE *sp));
-
-/*************************** end of stdio.h *********************************/
 
 #endif /* __STDIO_H__ */

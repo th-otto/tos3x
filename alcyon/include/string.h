@@ -17,6 +17,10 @@
 #include <sys/types.h>
 #endif
 
+#ifdef __GNUC__
+ #include_next <string.h>
+#endif
+
 char *getpass PROTO((const char *prompt));	/* get password function	*/
 char *strchr PROTO((const char *str, int c));	/* locate first occurence	*/
 char *strrchr PROTO((const char *str, int c));	/* locate last occurence	*/
