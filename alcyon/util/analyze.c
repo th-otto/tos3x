@@ -7,6 +7,8 @@
 #include <sendc68.h>
 #include "util.h"
 
+#define DEBUG 0
+
 static char const prg_name[] = "analyze";
 
 static int verbose;
@@ -19,6 +21,12 @@ static const char *ifilname;
 static char *prg_image;
 static long prg_size;
 
+struct symbol {
+	unsigned short flags;
+	long value;
+	char name[SYNAMLEN + 1];
+};
+
 struct member {
 	long tsize;
 	long dsize;
@@ -30,6 +38,8 @@ struct member {
 	unsigned short *reloc;
 	char *ignore;
 	int found;
+	size_t numsyms;
+	struct symbol *symtab;
 	struct member *next;
 };
 static struct member *members;
@@ -113,38 +123,38 @@ PP(struct member *m;)
 	for (i = 0; i < m->tsize; i++)
 	{
 		relword = m->reloc[i];
-		switch (relword & 0x07)
+		switch (relword & RBMASK)
 		{
-		case 0x00: /* absolute */
+		case DABS: /* absolute */
 			if (last_upperword)
 				m->ignore[i] = 1;
 			break;
-		case 0x01: /* relocation to data segment */
+		case DRELOC: /* relocation to data segment */
 			slots++;
 			m->ignore[i] = 1;
 			break;
-		case 0x02: /* relocation to text segment */
+		case TRELOC: /* relocation to text segment */
 			slots++;
 			m->ignore[i] = 1;
 			break;
-		case 0x03: /* relocation to bss segment */
+		case BRELOC: /* relocation to bss segment */
 			slots++;
 			m->ignore[i] = 1;
 			break;
-		case 0x04: /* relocation to external symbol */
+		case EXTVAR: /* relocation to external symbol */
 			slots++;
 			m->ignore[i] = 1;
 			break;
-		case 0x05: /* upper word of a long */
+		case LUPPER: /* upper word of a long */
 			if (last_upperword)
 				fprintf(stderr, "%s: warning: 2 consecutive marker for upper word\n", arhdr.lfname);
 			m->ignore[i] = 1;
 			break;
-		case 0x06: /* pc-relative to external symbol */
+		case EXTREL: /* pc-relative to external symbol */
 			slots++;
 			m->ignore[i] = 1;
 			break;
-		case 0x07: /* first word of an instruction */
+		case INSABS: /* first word of an instruction */
 			if (last_upperword)
 				fprintf(stderr, "%s: warning: upper word marker before instruction\n", arhdr.lfname);
 			break;
@@ -165,7 +175,7 @@ static int search_lib(NOTHING)
 	register int match, thismatch, anymatch;
 	const unsigned short *tryend;
 	const unsigned short *start;
-	long longest_match, matchlen;
+	long matchlen;
 	
 	anymatch = FALSE;
 	for (s = shead.next; s != &shead; s = next)
@@ -183,7 +193,6 @@ static int search_lib(NOTHING)
 			if (m->found)
 				continue;
 			match = FALSE;
-			longest_match = 0;
 			tryend = (const unsigned short *)(prg_image + s->pos + s->size - (m->tsize << 1));
 			start = (const unsigned short *)(prg_image + s->pos);
 			while (start <= tryend)
@@ -193,9 +202,6 @@ static int search_lib(NOTHING)
 				{
 					if (!m->ignore[j] && start[j] != m->text[j])
 					{
-						matchlen = j << 1;
-						if (matchlen > longest_match)
-							longest_match = matchlen;
 						thismatch = FALSE;
 						break;
 					}
@@ -207,6 +213,7 @@ static int search_lib(NOTHING)
 				}
 				start++;
 			}
+			
 			next = s->next;
 			if (match)
 			{
@@ -216,7 +223,9 @@ static int search_lib(NOTHING)
 				anymatch = TRUE;
 				matchlen = m->tsize << 1;
 				m->found = TRUE;
+#if DEBUG
 				printf("%s found at %08lx-%08lx\n", m->name, pos, pos + (m->tsize << 1));
+#endif
 				if (pos == s->pos)
 				{
 					/* match at start of segment */
@@ -224,6 +233,9 @@ static int search_lib(NOTHING)
 					{
 						/* exact match of segment */
 						s->mem = m;
+#if DEBUG
+						printf("exact match\n");
+#endif
 					} else
 					{
 						/* mark start of found text, put remainder in new segment */
@@ -239,10 +251,15 @@ static int search_lib(NOTHING)
 						s->size = matchlen;
 						/* continue search with new segment */
 						next = news;
+#if DEBUG
+						printf("match at start match %08lx-%08lx remain %08lx-%08lx\n",
+							s->pos, s->pos + s->size,
+							news->pos, news->pos + news->size);
+#endif
 					}
 				} else
 				{
-					if ((pos + matchlen) == s->size)
+					if ((pos + matchlen) == (s->pos + s->size))
 					{
 						/* match at end of segment */
 						news = (struct segment *)malloc(sizeof(*s));
@@ -256,8 +273,15 @@ static int search_lib(NOTHING)
 						s->size -= matchlen;
 						/* continue search with old segment */
 						next = s;
+#if DEBUG
+						printf("match at end remain %08lx-%08lx match %08lx-%08lx\n",
+							s->pos, s->pos + s->size,
+							news->pos, news->pos + news->size);
+#endif
 					} else
 					{
+						long remain = s->pos + s->size - pos - matchlen;
+						
 						/* match in middle of segment */
 						news = (struct segment *)malloc(sizeof(*s));
 						news->pos = pos;
@@ -274,12 +298,19 @@ static int search_lib(NOTHING)
 						s = news;
 						news = (struct segment *)malloc(sizeof(*s));
 						news->pos = s->pos + matchlen;
-						news->size = matchlen;
+						news->size = remain;
 						news->mem = NULL;
 						news->next = s->next;
 						news->prev = s;
 						s->next->prev = news;
 						s->next = news;
+
+#if DEBUG
+						printf("match in middle before  %08lx-%08lx match %08lx-%08lx after %08lx-%08lx\n",
+							s->prev->pos, s->prev->pos + s->prev->size,
+							s->pos, s->pos + s->size,
+							news->pos, news->pos + news->size);
+#endif
 					}
 				}
 				break;
@@ -350,6 +381,7 @@ PP(char **argv;)
 			long i;
 			long l;
 			long tsize;
+			long pos;
 			
 			tsize = (couthd.ch_tsize + 1) >> 1;
 			if (tsize <= 0)
@@ -366,6 +398,8 @@ PP(char **argv;)
 				strcpy(m->name, name);
 				m->pos = ftell(ifp);
 				m->next = NULL;
+				m->symtab = NULL;
+				m->numsyms = 0;
 				m->found = FALSE;
 				last = &members;
 				while (*last)
@@ -384,9 +418,27 @@ PP(char **argv;)
 				/* skip data segment */
 				l = ((couthd.ch_dsize + 1) >> 1) << 1;
 				fseek(ifp, l, SEEK_CUR);
-				/* skip symbol table */
+				/* read symbol table */
+				pos = ftell(ifp);
 				l = couthd.ch_ssize;
-				fseek(ifp, l, SEEK_CUR);
+				l /= OSTSIZE;
+				if (l > 0)
+				{
+					int n;
+					
+					m->numsyms = l;
+					m->symtab = (struct symbol *)malloc(m->numsyms * sizeof(struct symbol));
+					for (i = 0; i < l; i++)
+					{
+						struct symbol *sym = &m->symtab[i];
+						for (n = 0; n < SYNAMLEN; n++)
+							sym->name[n] = getc(ifp);
+						sym->name[n] = '\0';
+						lgetw(&sym->flags, ifp);
+						lgetl(&sym->value, ifp);
+					}
+				}
+				fseek(ifp, pos + couthd.ch_ssize, SEEK_SET);
 				if (couthd.ch_bstart == 0)
 				{
 					/* read relocation info */
@@ -426,7 +478,7 @@ PP(char **argv;)
 		qsort(sorted_members, num_members, sizeof(struct member *), cmp_member);
 	}
 	
-	if (verbose || 1)
+	if (verbose || DEBUG)
 	{
 		size_t i;
 
@@ -456,7 +508,20 @@ PP(char **argv;)
 		
 		for (s = shead.next; s != &shead; s = s->next)
 		{
-			printf("0x%08lx - 0x%08lx %s\n", s->pos, s->pos + s->size, s->mem ? s->mem->name : "<unknown>");
+			m = s->mem;
+			printf("0x%08lx - 0x%08lx %s\n", s->pos, s->pos + s->size, m ? m->name : "<unknown>");
+			if (m && m->symtab)
+			{
+				size_t i;
+				struct symbol *sym;
+				
+				for (i = 0; i < m->numsyms; i++)
+				{
+					sym = &m->symtab[i];
+					if ((sym->flags & SYTX) && !(sym->flags & SYXR) && (sym->flags & SYGL))
+						printf("             0x%08lx %s\n", sym->value + s->pos, sym->name);
+				}
+			}
 		}
 	}
 	
@@ -479,6 +544,7 @@ PP(char **argv;)
 			free(m->text);
 			free(m->reloc);
 			free(m->ignore);
+			free(m->symtab);
 			free(m);
 		}
 	}

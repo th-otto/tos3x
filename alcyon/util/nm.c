@@ -13,8 +13,6 @@
 #include <option.h>
 #include "util.h"
 
-#define SYNAMLEN	8
-
 const char *ifilname;
 FILE *ifp;
 struct hdr2 couthd;
@@ -129,7 +127,7 @@ int pn;
 	o = al.loword & 0777;				/* offset in block */
 	if (doseek(fildes, b, pn) == 0)		/* seek to block */
 		return 0;
-	if (doseek(fildes, o, SEEKREL) == 0)	/* do offset */
+	if (doseek(fildes, o, SEEK_CUR) == 0)	/* do offset */
 		return 0;
 	return 1;
 }
@@ -262,7 +260,7 @@ PP(char **argv;)
 			lgetl(&value, ifp);
 			if (accept(flags, optioncount))
 			{
-				printf("%-11s", symbol);
+				printf("%-*s", SYNAMLEN + 3, symbol);
 				printf("%8lx", value);
 				prtflags(flags);
 			}

@@ -30,6 +30,13 @@ ${LIBC}: $(OBJS) ${OPTIONOBJS} ${MAKEFILE}
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(AOBJS1) > NUL:
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(AOBJS2) > NUL:
 
+# library with all objects, including optional and runtime,
+# for use by analyze tool
+liba.a: ${LIBC} ${OPTIONOBJS} ${CRT0}
+	cp $< $@
+	$(AR) $(ARFLAGS) $@ ${CRT0} ${OPTIONOBJS1}
+	$(AR) $(ARFLAGS) $@ ${OPTIONOBJS2}
+
 ${LIBC_NDX}: ${LIBC}
 	$(AM_V_RANLIB)$(RANLIB) $<
 

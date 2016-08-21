@@ -60,8 +60,9 @@ MCOBJS=${MCOBJS1} ${MCOBJS2}
 MOBJS = $(MAOBJS) $(MCOBJS)
 
 
-OPTIONOBJS=nofloat.o nottyin.o nostart.o nodisk.o nolong.o noascii.o nobinary.o nofilesz.o mallocdb.o channel5.o xnwmain.o
-
+OPTIONOBJS1=nofloat.o nottyin.o nostart.o nodisk.o nolong.o noascii.o
+OPTIONOBJS2=nobinary.o nofilesz.o mallocdb.o channel5.o xnwmain.o
+OPTIONOBJS=${OPTIONOBJS1} ${OPTIONOBJS2}
 
 srcfiles.sh: SRCFILES ${MAKEFILE}
 	$(AM_V_GEN)
@@ -87,6 +88,7 @@ srcfiles.sh: SRCFILES ${MAKEFILE}
 	@echo COBJS17=\"${COBJS17}\" >> $@
 	@echo MCOBJS1=\"${MCOBJS1}\" >> $@
 	@echo MCOBJS2=\"${MCOBJS2}\" >> $@
-	@echo OPTIONOBJS=\"${OPTIONOBJS}\" >> $@
+	@echo OPTIONOBJS1=\"${OPTIONOBJS1}\" >> $@
+	@echo OPTIONOBJS2=\"${OPTIONOBJS2}\" >> $@
 	@echo CRT0=\"${CRT0}\" >> $@
 	@echo LIBC=\"${LIBC}\" >> $@
