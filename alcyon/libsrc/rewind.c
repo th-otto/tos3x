@@ -16,7 +16,6 @@
 *************************************************************************/
 
 #include "lib.h"
-#include <stdio.h>
 
 VOID rewind(P(FILE *) sp)
 PP(FILE *sp;)
