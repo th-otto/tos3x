@@ -158,5 +158,7 @@ VOID ___atab PROTO((NOTHING));
 
 #define strcasecmp _strcmp
 
+long readl PROTO((int fd, char *buf, long lnum));
+long writel PROTO((int fd, const char *buf, long lnum));
 
 #endif /* __LIBC_H__ */
