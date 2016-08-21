@@ -22,22 +22,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-VOIDPTR zalloc PROTO((size_t nbytes));
-
-VOIDPTR zalloc(P(size_t) nbytes)
-PP(size_t nbytes;)							/* number of bytes */
-{
-	register char *rp;						/* pointer to region */
-
-	if ((rp = malloc(nbytes)) == NULL)
-		return NULL;
-	memset(rp, 0, nbytes);
-	return rp;
-}
-
-VOIDPTR calloc(P(size_t) nelem, P(size_t) sizelem)			/* CLEAR FUNCTION ********** */
+VOIDPTR calloc(P(size_t) nelem, P(size_t) sizelem)
 PP(size_t nelem;)								/* number of elements */
 PP(size_t sizelem;)							/* size of element */
 {
-	return zalloc(sizelem * nelem);
+	char *rp;						/* pointer to region */
+
+	nelem *= sizelem;
+	if ((rp = malloc(nelem)) != NULL)
+		memset(rp, 0, nelem);
+	return rp;
 }
