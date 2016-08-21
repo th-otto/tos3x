@@ -109,6 +109,8 @@ char *_salloc PROTO((size_t size));					/* Stack allocation routine */
 VOID __fdecls PROTO((NOTHING));
 int _flsbuf PROTO((int c, FILE *fp));
 
+VOID blkmove PROTO((char *to, const char *from, size_t nn));
+
 #ifdef __OSIF_H__
 char *_parsefn PROTO((const char *filename, struct fcbtab *fdb));
 FD *_chkc PROTO((unsigned int fd));						/* Converts fd to fp */
