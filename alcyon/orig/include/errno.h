@@ -9,6 +9,10 @@
 #include <compiler.h>
 #endif
 
+extern int errno;
+extern int sys_nerr;
+extern const char *const sys_errlist[];
+
 #define EPERM	1
 #define ENOENT	2
 #define ESRCH	3
@@ -49,5 +53,7 @@
 /* hereafter is available to CP/M specials */
 #define ENODSPC	35
 #define ERENAME	36
+
+int perror PROTO((const char *s));
 
 #endif /* __ERRNO_H__ */

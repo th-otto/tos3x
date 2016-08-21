@@ -22,59 +22,13 @@
 *
 **************************************************************************/
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 #include <string.h>
 
 #define NUMERRS 37
-#define STDERR 2
 static char const _undeferr[] = "Error undefined";
 
 int sys_nerr = NUMERRS;
-
-static char *_itoa PROTO((int nm, char *bp));
-
-int perror(P(const char *) str)
-PP(const char *str;)
-{
-	register const char *err;
-	char lbuf[20];
-	char *buf;
-
-	if (errno < 0 || errno >= sys_nerr)
-		err = _undeferr;
-	else
-		err = sys_errlist[errno];
-	/* BUG: using write() here badly interferes with buffered output on stderr */
-	write(STDERR, str, strlen(str));
-	write(STDERR, ": ", 2);
-	write(STDERR, err, strlen(err));
-	write(STDERR, " (", 2);
-	buf = _itoa(errno, lbuf);
-	if (_errcpm != 0)					/* assume this had something to do */
-	{
-		*buf++ = '.';
-		buf = _itoa(_errcpm, buf);
-	}
-	*buf++ = ')';
-	*buf++ = '\n';
-	*buf = '\0';
-	write(STDERR, lbuf, strlen(lbuf));
-	return errno;
-}
-
-
-static char *_itoa(P(int) nm, P(char *) bp)
-PP(int nm;)
-PP(register char *bp;)
-{
-	/* temporary... */
-	sprintf(bp, "%d", nm);
-	while (*bp)
-		bp++;
-	return bp;
-}
-
 
 const char *const sys_errlist[NUMERRS] = {
 	_undeferr,							/* 0 */
@@ -116,3 +70,22 @@ const char *const sys_errlist[NUMERRS] = {
 	"ENODSPC No directory space",		/* 35 */
 	"ERENAME Can't rename file"			/* 36 */
 };
+
+
+VOID perror(P(const char *) str)
+PP(const char *str;)
+{
+	register const char *err;
+
+	if (errno < 0 || errno >= sys_nerr)
+		err = _undeferr;
+	else
+		err = sys_errlist[errno];
+	if (str && *str)
+	{
+		fputs(str, stderr);
+		fputs(": ", stderr);
+	}
+	fputs(err, stderr);
+	fputc('\n', stderr);
+}

@@ -10,6 +10,8 @@
 #endif
 
 extern int errno;
+extern int sys_nerr;
+extern const char *const sys_errlist[];
 
 #define EPERM	1
 #define ENOENT	2
@@ -51,5 +53,7 @@ extern int errno;
 /* hereafter is available to CP/M specials */
 #define ENODSPC	35
 #define ERENAME	36
+
+VOID perror PROTO((const char *s));
 
 #endif /* __ERRNO_H__ */
