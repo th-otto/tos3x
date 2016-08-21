@@ -28,8 +28,8 @@ int abs PROTO((int));
 long int labs PROTO((long int));
 
 
-extern	int	rand PROTO((NOTHING));		/* random function			*/
-extern	VOID srand PROTO((unsigned int seed));	/* seed random generator		*/
+int rand PROTO((NOTHING));		/* random function			*/
+int srand PROTO((unsigned int seed));	/* seed random generator		*/
 
 __EXITING abort PROTO((NOTHING)) __NORETURN;
 __EXITING _exit PROTO((int status)) __NORETURN;
@@ -45,6 +45,5 @@ typedef int (*__compar_fn_t) PROTO((const void *, const void *));
 int qsort PROTO((VOIDPTR bas, size_t num, size_t siz, __compar_fn_t cmp));
 
 char *mktemp PROTO((char *template));
-
 
 #endif /* __STDLIB_H__ */

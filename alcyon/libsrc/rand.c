@@ -23,7 +23,7 @@ int rand(NOTHING)
 }
 
 
-int srand(P(unsigned int) seed1)
+VOID srand(P(unsigned int) seed1)
 PP(unsigned int seed1;)
 {
 	register int ncs;
@@ -31,5 +31,4 @@ PP(unsigned int seed1;)
 	_seeds[0] = seed1;
 	for (ncs = seed1 & 077; ncs; ncs--)
 		rand();
-	return rand();
 }

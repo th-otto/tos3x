@@ -36,8 +36,8 @@ int abs PROTO((int));
 long int labs PROTO((long int));
 
 
-extern	int	rand PROTO((NOTHING));		/* random function			*/
-extern	VOID srand PROTO((unsigned int seed));	/* seed random generator		*/
+int	rand PROTO((NOTHING));		/* random function			*/
+VOID srand PROTO((unsigned int seed));	/* seed random generator		*/
 
 __EXITING abort PROTO((NOTHING)) __NORETURN;
 __EXITING _exit PROTO((int status)) __NORETURN;
