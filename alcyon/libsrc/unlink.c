@@ -24,6 +24,9 @@
 int unlink(P(const char *) filename)
 PP(const char *filename;)
 {
+#if GEMDOS
+	return Fdelete(filename) >= 0 ? 0 : -1;
+#else
 	register int ch;						/* Channel number       */
 	register int ret;						/* Temp return value        */
 
@@ -34,4 +37,5 @@ PP(const char *filename;)
 	ret = __open(ch, filename, DELETE);	/* Delete the file      */
 	_freec(ch);							/* Free the channel     */
 	return ret;						/* Return result of DELETE  */
+#endif
 }

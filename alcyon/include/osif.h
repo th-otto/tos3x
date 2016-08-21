@@ -246,7 +246,7 @@ extern long __BDOS PROTO ((short code, long arg));
 #define jsnext() trap(0x4f)                     /*         == 0: SUCCESS    */
 #define jopen(a,b) trap(0x3d,a,b)
 #define jclose(a) trap(0x3e,a)
-#define junlink(a) trap(0x41,a)
+#define Fdelete(a) trap(0x41,a)
 #define jlseek(a,b,c) trap(0x42,a,b,c)
 #define jread(a,b,c) trap(0x3f,a,b,c)
 #define jwrite(a,b,c) trap(0x40,a,b,c)

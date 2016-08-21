@@ -99,7 +99,7 @@ PP(int bdosfunc;)							/* BDOS Function        */
 			}
 			break;
 		case DELETE:
-			rv = junlink(filename);
+			rv = Fdelete(filename);
 			break;
 			/* 2nd break leftover? */
 			/* break; */
