@@ -29,6 +29,7 @@ VOIDPTR realloc PROTO((VOIDPTR ptr, size_t size));
 VOIDPTR calloc PROTO((size_t nmemb, size_t size));
 
 int atoi PROTO((const char *s));
+long atol PROTO((const char *s));
 
 /* Absolute value function */
 int abs PROTO((int));

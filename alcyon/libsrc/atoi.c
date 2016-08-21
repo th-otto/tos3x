@@ -11,7 +11,7 @@ PP(register const char *s;)
 	register int isneg;
 
 	val = 0;
-	isneg = 0;
+	isneg = FALSE;
 	while (isspace((UBYTE)*s))
 		s++;
 	if (*s == '+')

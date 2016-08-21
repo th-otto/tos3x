@@ -50,7 +50,7 @@ int _allocc(NOTHING)
 		if ((j & _chvec) == 0)			/* If 0, then channel free  */
 		{
 			_chvec |= j;				/* set allocated bit        */
-			return (i);					/* and return the channel # */
+			return i;					/* and return the channel # */
 		}
 		j <<= 1;						/* Up to next bit       */
 	}									/* End FOR loop         */
