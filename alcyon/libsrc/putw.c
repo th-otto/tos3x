@@ -24,12 +24,9 @@ int putw(P(int) wrd, P(FILE *) sp)
 PP(int wrd;)								/* the word to be put       */
 PP(FILE *sp;)								/* the stream to put to     */
 {
-	register int i;							/* index            */
-	register char *p;						/* make ptr to w        */
-
-	p = (char *) &wrd;					/* point to w           */
-	for (i = 0; i < 2; i++)				/* for all the 2 bytes in w */
-		if (putc(*p++, sp) == EOF)	/* put dem          */
-			return EOF;
-	return wrd;						/* it worked            */
+	if (putc(wrd >> 8, sp) < 0)
+		return EOF;
+	if (putc(wrd, sp) < 0)
+		return EOF;
+	return 0;
 }

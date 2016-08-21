@@ -152,6 +152,8 @@ int vfscanf PROTO((FILE *stream, const char *format, va_list args));
  */
 long getl PROTO((FILE *sp));
 int getw PROTO((FILE *sp));
+long putl PROTO((long lnum, FILE *sp));
+int putw PROTO((int lnum, FILE *sp));
 
 int fputn PROTO((const char *buf, int num, FILE *sp));
 
