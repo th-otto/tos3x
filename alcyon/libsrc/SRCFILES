@@ -4,7 +4,7 @@ AOBJS2 = trap.o bios.o xbios.o gemdos.o strchrs.o
 AOBJS = $(AOBJS1) $(AOBJS2)
 
 COBJS1 = atoi.o atol.o prtld.o prtint.o prtshort.o
-COBJS2 = ctype.o getl.o getw.o fopen.o xmain.o xwmain.o fgetc.o fgets.o
+COBJS2 = ctype.o getl.o getw.o fopen.o xmain.o xwmain.o fgetc.o ungetc.o fgets.o
 COBJS3 = filbuf.o read.o readasc.o readbin.o creat.o exit.o cleanup.o
 COBJS4 = fclose.o close.o fdecls.o fflush.o open.o lseek.o tell.o fputn.o
 COBJS5 = fputc.o flsbuf.o isatty.o isdev.o ttyname.o malloc.o calloc.o mallocnd.o
