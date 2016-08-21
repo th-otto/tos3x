@@ -4,6 +4,9 @@
 #ifndef __COMPILER_H__
 #include <compiler.h>
 #endif
+#ifndef __SYS_TYPES_H__
+#include <sys/types.h>
+#endif
 
 /* Values for the second argument to access.
    These may be OR'd together.  */
@@ -32,5 +35,6 @@ int execvp PROTO((const char *file, char *const argv[]));
 int execvpe PROTO((const char *file, char *const argv[], char *const envp[]));
 
 char *getpass PROTO((const char *prompt));	/* get password function */
+VOID swab PROTO((VOIDPTR from, VOIDPTR to, ssize_t n));
 
 #endif /* __UNISTD_H__ */

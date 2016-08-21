@@ -22,6 +22,15 @@ typedef int gid_t;
 #endif
 typedef __SIZE_TYPE__ size_t;
 
+#ifndef __SSIZE_TYPE__
+#ifdef __ALCYON__
+#define __SSIZE_TYPE__ int
+#else
+#define __SSIZE_TYPE__ long
+#endif
+#endif
+typedef __SSIZE_TYPE__ ssize_t;
+
 #ifndef __PTRDIFF_TYPE__
 #define __PTRDIFF_TYPE__ long
 #endif
