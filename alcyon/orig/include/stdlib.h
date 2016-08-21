@@ -44,5 +44,7 @@ typedef int (*__compar_fn_t) PROTO((const void *, const void *));
 #endif
 int qsort PROTO((VOIDPTR bas, size_t num, size_t siz, __compar_fn_t cmp));
 
+char *mktemp PROTO((char *template));
+
 
 #endif /* __STDLIB_H__ */

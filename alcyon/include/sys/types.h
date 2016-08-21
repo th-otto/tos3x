@@ -1,6 +1,10 @@
 #ifndef __SYS_TYPES_H__
 #define __SYS_TYPES_H__ 1
 
+#ifndef __COMPILER_H__
+#include <compiler.h>
+#endif
+
 typedef int mode_t;
 typedef int pid_t;
 typedef int uid_t;
