@@ -29,7 +29,7 @@ COBJS10=getpass.o isatty.o chinit.o chkc.o blkio.o chkuser.o
 
 COBJS11=allocc.o atoi.o atol.o swab.o getpid.o rand.o qsort.o
 
-COBJS12=calloc.o malloc.o sbrk.o errno.o ctype.o strchr.o index.o
+COBJS12=calloc.o malloc.o sbrk.o errno.o ctype.o strchr.o index.o strins.o
 
 COBJS13=strrchr.o rindex.o strcat.o strcmp.o strcpy.o strlen.o strncat.o
 

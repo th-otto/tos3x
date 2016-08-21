@@ -38,4 +38,10 @@ char *strupr PROTO ((char *str));
 
 VOIDPTR memset PROTO((VOIDPTR ptr, int c, size_t bytes));
 
+/*
+ * non-standard functions
+ */
+VOID strins PROTO((const char *s1, char *s2, int pos));
+VOID strdel PROTO((char *sp, int len));
+
 #endif /* __STRING_H__ */
