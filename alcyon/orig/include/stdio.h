@@ -103,6 +103,7 @@ int fputc PROTO((int c, FILE *stream));
 int fgetc PROTO((FILE *stream));
 char *fgets PROTO((char *str, int maxc, FILE *sp));
 int ungetc PROTO((int c, FILE *stream));
+char *gets PROTO((char *str));
 
 int fflush PROTO((FILE *stream));
 int puts PROTO((const char * str));
