@@ -22,4 +22,11 @@ int dup2 PROTO((int oldfd, int newfd));
 int access PROTO((const char *fname, int mode));
 int chown PROTO((const char *name, uid_t owner, gid_t group));
 
+int execl PROTO((const char *path, const char *arg, ...));
+int execlp PROTO((const char *file, const char *arg, ...));
+int execle PROTO((const char *path, const char *arg, ... /* , char *const envp[] */));
+int execv PROTO((const char *path, char *const argv[]));
+int execvp PROTO((const char *file, char *const argv[]));
+int execvpe PROTO((const char *file, char *const argv[], char *const envp[]));
+
 #endif /* __UNISTD_H__ */
