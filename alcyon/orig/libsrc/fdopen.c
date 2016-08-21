@@ -10,7 +10,7 @@
 *	Calling sequence:
 *		stream = fdopen( fd, mode )
 *	Where:
-*		stream -> stream info (FILE *) (NULLPTR returned on fail)
+*		stream -> stream info (FILE *) (NULL returned on fail)
 *		fd     =  small int returned by open or creat
 *		mode   = "r" for read-only, "w" for write, "a" for append
 *

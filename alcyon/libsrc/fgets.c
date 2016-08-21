@@ -5,7 +5,7 @@
 *	Copyright 1982 by Digital Research Inc.  All rights reserved.
 *
 *	"fgets" reads a string from a stream file (up to n-1 chars), and 
-*	returns pointer s (NULLPTR on end of file).  The newline at the
+*	returns pointer s (NULL on end of file).  The newline at the
 *	end of line is included, NOT replaced, and the string is terminated
 *	by a NULL.
 *
@@ -15,7 +15,7 @@
 *		saddr -> where the string is to go (no bounds check)
 *		n     = max # chars (inc. NULL) for saddr (assumed > 0)
 *		stream-> where to get from
-*		addr  = saddr if all ok, NULLPTR o.w.
+*		addr  = saddr if all ok, NULL o.w.
 *
 *****************************************************************************/
 

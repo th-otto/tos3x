@@ -7,7 +7,7 @@
 * char *malloc(numbytes) 
 *		int numbytes
 *	Returns a pointer to an area of memory at least 'numbytes'
-*	in length.  Returns NULLPTR if out of memory or corrupted freelist.
+*	in length.  Returns NULL if out of memory or corrupted freelist.
 *	Warning: the size of the area is right below the region: 
 *	do not overwrite!
 *
@@ -24,7 +24,7 @@
 *		int numbytes
 *	Returns a pointer to a (probably different) region of memory
 *	(numbytes long) containing the same data as the old region 
-*	pointed to by mptr. Returns NULLPTR if not enough memory, or
+*	pointed to by mptr. Returns NULL if not enough memory, or
 *	if freelist was corrupted.
 *
 ************************************************************************/

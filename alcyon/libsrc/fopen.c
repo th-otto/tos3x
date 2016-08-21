@@ -16,7 +16,7 @@
 *		stream = fopen(name,mode)	(default-ascii files)
 *		stream = _fopen(name,mode,ascii)
 *	Where:
-*		stream -> file opened (FILE *), NULLPTR if failure
+*		stream -> file opened (FILE *), NULL if failure
 *		name   -> NULL terminated string containing filename,
 *				name="CON:" means the console,
 *				name="LST:" goes to the line printer, and

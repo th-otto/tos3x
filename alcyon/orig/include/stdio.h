@@ -111,6 +111,7 @@ int fputs PROTO((const char *str, FILE *sp));
 FILE *fopen PROTO((const char * name, const char *mode));
 int fclose PROTO((FILE *stream));
 FILE *fdopen PROTO((int, const char *mode));
+FILE *freopen PROTO((const char *name, const char *mode, FILE *sp));
 
 long ftell PROTO((FILE *sp));
 int rewind PROTO((FILE *sp));
@@ -142,6 +143,9 @@ int getw PROTO((FILE *sp));
 
 FILE *fopena PROTO((const char * name, const char *mode));
 FILE *fopenb PROTO((const char * name, const char *mode));
+
+FILE *freopa PROTO((const char *name, const char *mode, FILE *sp));
+FILE *freopb PROTO((const char *name, const char *mode, FILE *sp));
 
 int fputn PROTO((const char *buf, int num, FILE *sp));
 

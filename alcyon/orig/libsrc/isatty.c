@@ -40,7 +40,7 @@ PP(int fd;)
 
 
 /* ttyname - find name of a terminal */
-/*	returns "CON:" if isatty, NULLPTR o.w., under CP/M */
+/*	returns "CON:" if isatty, NULL o.w., under CP/M */
 
 char *ttyname(P(int) fd)
 PP(int fd;)

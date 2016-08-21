@@ -10,7 +10,7 @@
  *									    
  *	Calling Sequence:						    
  *									    
- *		execl(name,arg0,arg1,...,argn,NULLPTR);			    
+ *		execl(name,arg0,arg1,...,argn,NULL);			    
  *									    
  *	Where:								    
  *		name, arg0, arg1...argn are pointers to character strings   

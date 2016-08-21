@@ -122,6 +122,7 @@ int fputs PROTO((const char *str, FILE *sp));
 FILE *fopen PROTO((const char * name, const char *mode));
 int fclose PROTO((FILE *stream));
 FILE *fdopen PROTO((int, const char *mode));
+FILE *freopen PROTO((const char *name, const char *mode, FILE *sp));
 
 long ftell PROTO((FILE *sp));
 VOID rewind PROTO((FILE *sp));
