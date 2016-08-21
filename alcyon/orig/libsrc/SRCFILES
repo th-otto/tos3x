@@ -23,7 +23,7 @@ COBJS7=ungetc.o setbuf.o fgetc.o fputc.o filbuf.o flsbuf.o
 
 COBJS8=fdecls.o close.o creat.o lseek.o xfilesz.o rename.o
 
-COBJS9=open.o read.o xttyin.o unlink.o write.o xopen.o access.o
+COBJS9=open.o read.o xttyin.o unlink.o write.o xopen.o access.o ttyinraw.o
 
 COBJS10=getpass.o isatty.o chinit.o chkc.o blkio.o chkuser.o
 

@@ -234,6 +234,13 @@ extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
 #define B_READ  33                              /* Read Random record       */
 #define B_WRITE 34                              /* Write Random record      */
 #define FILSIZ  35                              /* Compute File Size        */
+
+extern long trap PROTO ((short code, ...));
+extern long __BDOS PROTO ((short code, long arg));
+
+#endif                                          /****************************/
+
+#if GEMDOS
 #define jcreat(a,b) trap(0x3c,a,b)
 #define jsfirst(a,b) trap(0x4e,a,b)             /* GEMDOS: <= 0: FAILURE    */
 #define jsnext() trap(0x4f)                     /*         == 0: SUCCESS    */
@@ -243,11 +250,13 @@ extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
 #define jlseek(a,b,c) trap(0x42,a,b,c)
 #define jread(a,b,c) trap(0x3f,a,b,c)
 #define jwrite(a,b,c) trap(0x40,a,b,c)
+#define Frename(a,b) gemdos(0x56,0,a,b)
+#define Crawcin() gemdos(7)
+extern long gemdos PROTO ((short code, ...));
+extern long bios PROTO ((short code, ...));
+extern long xbios PROTO ((short code, ...));
+#endif
 
-extern long trap PROTO ((short code, ...));
-extern long __BDOS PROTO ((short code, long arg));
-
-#endif                                          /****************************/
 /****************************************************************************/
 /* Other CP/M definitions                                                   */
 /****************************************************************************/
