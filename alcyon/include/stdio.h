@@ -147,6 +147,8 @@ int vscanf PROTO((const char *format, va_list args));
 int vsscanf PROTO((const char *str, const char *format, va_list args));
 int vfscanf PROTO((FILE *stream, const char *format, va_list args));
 
+int rename PROTO((const char *from, const char *to));
+
 /*
  * non-standard functions
  */

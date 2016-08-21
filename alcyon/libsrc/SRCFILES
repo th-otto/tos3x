@@ -17,7 +17,7 @@ COBJS11 = fread.o fwrite.o blkmove.o fdopen.o freopen.o filesz.o
 COBJS12 = ldiv.o lmul.o lrem.o putl.o putw.o rand.o
 COBJS13 = aldiv.o almul.o alrem.o uldiv.o
 COBJS14 = puts.o fputs.o xttyin.o ttyin.o ttyout.o getpass.o getpid.o
-COBJS15 = abort.o chmod.o access.o chown.o dup.o
+COBJS15 = abort.o chmod.o access.o chown.o dup.o rename.o
 COBJS16 = doscan.o scanf.o fscanf.o sscanf.o optoff.o
 COBJS17 = errno.o strchr.o strrchr.o lstout.o mktemp.o perror.o
 
