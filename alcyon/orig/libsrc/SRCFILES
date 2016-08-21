@@ -37,7 +37,7 @@ COBJS14=strncmp.o strncpy.o mallocnd.o memset.o wrtchr.o readasc.o readbin.o
 
 COBJS15=fputn.o optoff.o signal.o blkmove.o execl.o
 
-COBJS16=writeasc.o writebin.o xread.o xwrite.o stricmp.o
+COBJS16=writeasc.o writebin.o xread.o xwrite.o filesz.o stricmp.o
 
 COBJS17=kopen.o kcreat.o cputc.o kdup.o kgetc.o kgetchar.o kputc.o kputchar.o kseek.o kstrcmp.o kwritef.o
 
