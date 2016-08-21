@@ -51,7 +51,7 @@ PP(register const char *mode;)				/* "r","w", or "a"      */
 		;
 	if (ii >= MAXFILES)
 	{
-		errno = EMFILE;
+		__set_errno(EMFILE);
 		return NULL;				/*   fail           */
 	}
 	fd = open(name, flags, 0644);	/*  try open *********** */

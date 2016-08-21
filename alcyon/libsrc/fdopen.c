@@ -17,6 +17,9 @@
 *****************************************************************************/
 
 #include "lib.h"
+#include <errno.h>
+#include <fcntl.h>
+
 
 FILE *fdopen(P(int) fd, P(const char *) mode)
 PP(register int fd;)
@@ -24,30 +27,33 @@ PP(register const char *mode;)
 {
 	register FILE *sp;
 	register int ii;
+	register int flags;
 
 	/* is fd valid? */
 	if (fd < 0 || lseek(fd, 0L, SEEK_CUR) == EOF)
 		return NULL;
 	/* look at _iob table not marked rd/wrt */
-	for (ii = 0; (sp = (&_iob[ii]))->_flag & (_IOREAD | _IOWRT); ii++)
-		if (ii >= MAXFILES)
-			break;
+	for (ii = 0; ii < MAXFILES && (sp = (&_iob[ii]))->_flag & (_IOREAD | _IOWRT); ii++)
+		;
 	if (ii >= MAXFILES)
+	{
+		__set_errno(EMFILE);
+		return NULL;				/*   fail           */
+	}
+	if ((flags = __getmode(mode)) == -1)
 		return NULL;
 	/* not 'r'ead mode? */
-	if (*mode != 'r' && *mode != 'R')
-	{
-		/* set this flag */
-		sp->_flag |= _IOWRT;
-		if (*mode == 'a' || *mode == 'A')
-			lseek(fd, 0L, SEEK_END);			/* its out there, seef EOF  */
-	} else
-	{
-		sp->_flag |= _IOREAD;			/* 'r'ead mode          */
-	}
+	if ((flags & O_ACCMODE) != O_WRONLY)
+		sp->_flag = _IOREAD;
+	if ((flags & O_ACCMODE) != O_RDONLY)
+		sp->_flag = _IOWRT;				/* else 'w'rite mode        */
+	if (flags & O_TEXT)
+		sp->_flag |= _IOASCI;
 	sp->_cnt = 0;						/* init count           */
 	sp->_fd = fd;						/*  and file des        */
 	sp->_base = sp->_ptr = NULL;		/*  and buffer pointers     */
+	if (flags & O_APPEND)
+		lseek(fd, 0L, SEEK_END);			/* its out there, seef EOF  */
 	
 	return sp;						/* return the stream ptr    */
 }
