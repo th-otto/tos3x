@@ -35,7 +35,7 @@ COBJS13=strrchr.o rindex.o strcat.o strcmp.o strcpy.o strlen.o strncat.o
 
 COBJS14=strncmp.o strncpy.o mallocnd.o memset.o wrtchr.o readasc.o readbin.o
 
-COBJS15=fputn.o optoff.o signal.o blkmove.o execl.o
+COBJS15=fputn.o optoff.o signal.o blkmove.o execl.o lstout.o
 
 COBJS16=writeasc.o writebin.o xread.o xwrite.o filesz.o stricmp.o
 
