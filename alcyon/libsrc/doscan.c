@@ -74,8 +74,8 @@ PP(va_list args;)								/* Argument ptrs ptr        */
 
 	char locbuf[BUFSIZ];				/* Local buffer area        */
 	char *db;							/* Destination ptr      */
-	char setbuf[128];					/* Area for '[...]' sets    */
-	char *sb;							/* Ptr into setbuf      */
+	char setsbuf[128];					/* Area for '[...]' sets    */
+	char *sb;							/* Ptr into setsbuf      */
 
 	nitems = 0;
 	while ((c = *fmt++) != 0)
@@ -226,10 +226,10 @@ PP(va_list args;)								/* Argument ptrs ptr        */
 					invert = TRUE;
 					c = *fmt++;
 				}
-				for (sb = setbuf; c != '\0' && c != ']'; sb++, c = *fmt++)
+				for (sb = setsbuf; c != '\0' && c != ']'; sb++, c = *fmt++)
 					*sb = c;
 				*sb = '\0';
-				sb = setbuf;
+				sb = setsbuf;
 			}
 			if (noassign)
 				db = locbuf;			/* give rtn somewhere to pt */
@@ -262,7 +262,7 @@ PP(va_list args;)								/* Argument ptrs ptr        */
 			else
 				db = (char *)va_arg(args, double *);			/* like to put it here      */
 
-			sb = setbuf;				/* setup up addr to hold string */
+			sb = setsbuf;				/* setup up addr to hold string */
 			while (width-- > 0)
 			{
 				*sb++ = ni;
@@ -274,9 +274,9 @@ PP(va_list args;)								/* Argument ptrs ptr        */
 			ungetc(ni, sp);
 			*--sb = '\0';
 			if (longf)
-				*(double *) db = atof(setbuf);
+				*(double *) db = atof(setsbuf);
 			else
-				*(float *) db = (float) atof(setbuf);
+				*(float *) db = (float) atof(setsbuf);
 
 			if (!noassign)
 				nitems++;

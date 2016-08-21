@@ -59,6 +59,7 @@ typedef struct _iobuf FILE;
 #define _IOWRT  0x02                    /* writeable file                   */
 #define _IOABUF 0x04                    /* alloc'd buffer                   */
 #define _IONBUF 0x08                    /* no buffer                        */
+#define _IOFBF  0x00					/* fully buffered                   */
 #define _IOERR  0x10                    /* error has occurred               */
 #define _IOEOF  0x20                    /* EOF has occurred                 */
 #define _IOLBUF 0x40                    /* handle as line buffer            */
@@ -148,6 +149,8 @@ int vsscanf PROTO((const char *str, const char *format, va_list args));
 int vfscanf PROTO((FILE *stream, const char *format, va_list args));
 
 int rename PROTO((const char *from, const char *to));
+int setbuf PROTO((FILE *sp, char *buf));
+int setvbuf PROTO((FILE *sp, char *buf, int mode, size_t size));
 
 /*
  * non-standard functions

@@ -56,10 +56,10 @@ PP(char **aps;)								/* Argument ptrs ptr        */
 	long val,							/* For numeric conversion   */
 	 locval;							/* Local value area     */
 
-	char locbuf[BUFSIZ],				/* Local buffer area        */
-	*db,								/* Destination ptr      */
-	 setbuf[128],						/* Area for '[...]' sets    */
-	*sb;								/* Ptr into setbuf      */
+	char locbuf[BUFSIZ];				/* Local buffer area        */
+	char *db;							/* Destination ptr      */
+	char setsbuf[128];					/* Area for '[...]' sets    */
+	char *sb;							/* Ptr into setsbuf      */
 
 	nitems = 0;
 	while ((c = *fmt++) != 0)
@@ -210,10 +210,10 @@ PP(char **aps;)								/* Argument ptrs ptr        */
 					invert = TRUE;
 					c = *fmt++;
 				}
-				for (sb = setbuf; c != '\0' && c != ']'; sb++, c = *fmt++)
+				for (sb = setsbuf; c != '\0' && c != ']'; sb++, c = *fmt++)
 					*sb = c;
 				*sb = '\0';
-				sb = setbuf;
+				sb = setsbuf;
 			}
 			if (noassign)
 				db = locbuf;			/* give rtn somewhere to pt */
@@ -246,7 +246,7 @@ PP(char **aps;)								/* Argument ptrs ptr        */
 			else
 				db = *aps++;			/* like to put it here      */
 
-			sb = setbuf;				/* setup up addr to hold string */
+			sb = setsbuf;				/* setup up addr to hold string */
 			while (width-- > 0)
 			{
 				*sb++ = ni;
@@ -258,9 +258,9 @@ PP(char **aps;)								/* Argument ptrs ptr        */
 			ungetc(ni, sp);
 			*--sb = '\0';
 			if (longf)
-				*(double *) db = _atof(setbuf);
+				*(double *) db = _atof(setsbuf);
 			else
-				*(float *) db = (float) _atof(setbuf);
+				*(float *) db = (float) _atof(setsbuf);
 
 			if (!noassign)
 				nitems++;
