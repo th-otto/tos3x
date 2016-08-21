@@ -27,11 +27,11 @@ PP(register FILE *sp;)							/* from this stream     */
 	static char onebuf[MAXFILES];		/* a place if no mem avail. */
 
 	if ((sp->_flag & _IOREAD) == 0)		/* is readable file?        */
-		return -1;
+		return EOF;
 	if (sp->_flag & _IOSTRI)			/* is this stream a string? */
 	{									/*    yes: handle EOS as EOF */
 		sp->_flag |= _IOEOF;
-		return -1;
+		return EOF;
 	}
 	if (sp->_base == NULL)				/* has this been done?      */
 	{
@@ -53,7 +53,7 @@ PP(register FILE *sp;)							/* from this stream     */
 			sp->_flag |= _IOERR | _IOEOF;
 		else
 			sp->_flag |= _IOEOF;		/* or just say we can't read */
-		return -1;
+		return EOF;
 	}
 	sp->_cnt--;							/* take the 1st item        */
 	sp->_ptr = sp->_base;				/* set up stream        */

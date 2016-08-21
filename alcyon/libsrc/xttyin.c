@@ -96,5 +96,5 @@ register size_t bytes;							/* =  requested byte count  */
 		*buff++ = '\n';					/* No, plug in newline      */
 		p++;							/* Bump pointer         */
 	}
-	return ((int) (p - &ttybuf[2]));	/* Return # bytes moved     */
+	return ((int) ((long)p - (long)&ttybuf[2]));	/* Return # bytes moved     */
 }

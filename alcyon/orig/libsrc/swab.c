@@ -2,7 +2,7 @@
 /*	constructed to allow in-place swabs (fr==to) */
 #include <unistd.h>
 
-VOID swab(VOIDPTR _from, VOIDPTR _to, ssize_t num)
+VOID swab(P(VOIDPTR) _from, P(VOIDPTR) _to, P(ssize_t) num)
 PP(VOIDPTR _from;)
 PP(VOIDPTR _to;)
 PP(register ssize_t num;)

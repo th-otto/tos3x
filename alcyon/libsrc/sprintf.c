@@ -13,14 +13,10 @@
 #include <string.h>
 
 
-#ifdef __USE_STDARG
-int sprintf(char *s, const char *fmt, ...)
-#else
-int sprintf(P(char *) s, P(const char *) fmt, va_alist)
+int sprintf(P(char *) s, P(const char *) fmt _va_alist)
 PP(char *s;)
 PP(const char *fmt;)
-va_dcl
-#endif
+_va_dcl
 {
 	register int ret;
 	FILE *stream;

@@ -50,7 +50,6 @@ PP(register char *pb;)				/* pointer to args      */
 	char buf[BUFSIZ];					/* s usually points here    */
 
 	int width;							/* for format spec      */
-
 	register int prec,					/* precision            */
 	 len;								/* total length of field    */
 

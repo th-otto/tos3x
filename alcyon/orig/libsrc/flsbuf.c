@@ -36,7 +36,7 @@ PP(register FILE *sp;)							/* stream to write to       */
 	ns = n = 0;
 	/* is this file writeable?  */
 	if ((sp->_flag & _IOWRT) == 0)
-		return -1;
+		return EOF;
 	/* if no init yet and not a no buff file */
 	if (sp->_base == NULL && (sp->_flag & _IONBUF) == 0)
 	{
