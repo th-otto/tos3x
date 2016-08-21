@@ -28,13 +28,5 @@ PP(register char ch;)
 	for (; ch != *t; t--)				/* look for c in s.     */
 		if (t == str)					/* if we get to start of string, */
 			return NULL;				/*   too far.           */
-	return NO_CONST(t);
-}
-
-
-char *rindex(P(const char *) str, P(int) ch)
-PP(register const char *str;)
-PP(register char ch;)
-{
-	return strrchr(str, ch);			/* 'jacket' rtn for V7 compatability */
+	return NO_CONST(t);							/* found c. note that 'rindex'  */
 }

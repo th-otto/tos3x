@@ -19,6 +19,8 @@
 
 char *index PROTO((const char *str, int c));	/* locate first occurence	*/
 char *rindex PROTO((const char *str, int c));	/* locate last occurence	*/
+char *strchr PROTO((const char *str, int c));	/* locate first occurence	*/
+char *strrchr PROTO((const char *str, int c));	/* locate last occurence	*/
 char *mktemp PROTO((char *template));	/* create temp file name	*/
 char *strcat PROTO((char *dst, const char *src));	/* concat whole			*/
 char *strncat PROTO((char *dst, const char *src, size_t len));	/* concat number specified.	*/

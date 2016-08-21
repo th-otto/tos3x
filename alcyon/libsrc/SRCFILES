@@ -1,5 +1,5 @@
 AOBJS1 = blivot.o xsignal.o salloc.o setjmp.o memsets.o brk.o
-AOBJS2 = trap.o bios.o xbios.o gemdos.o
+AOBJS2 = trap.o bios.o xbios.o gemdos.o strchrs.o
 
 AOBJS = $(AOBJS1) $(AOBJS2)
 
@@ -19,7 +19,7 @@ COBJS13 = aldiv.o almul.o alrem.o uldiv.o
 COBJS14 = puts.o fputs.o xttyin.o ttyin.o ttyout.o getpass.o getpid.o
 COBJS15 = abort.o chmod.o access.o chown.o dup.o
 COBJS16 = doscan.o scanf.o fscanf.o sscanf.o optoff.o
-COBJS17 = errno.o
+COBJS17 = errno.o strchr.o strrchr.o
 
 COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} \
       ${COBJS9} ${COBJS10} ${COBJS11} ${COBJS12} ${COBJS13} ${COBJS14} ${COBJS15} ${COBJS16} ${COBJS17}
