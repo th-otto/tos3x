@@ -40,7 +40,7 @@ _va_dcl
 	{
 	va_list args;
 	va_start(args, fmt);
-	return _doscan(sp, fmt, (char **)args);
+	return _doscan(sp, fmt, args);
 	}
 #else
 	return _doscan(sp, fmt, &va_alist);

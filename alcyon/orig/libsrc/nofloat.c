@@ -50,7 +50,7 @@ PP(int c;)
 }
 
 
-VOID _atof(P(const char *) str)
+double _atof(P(const char *) str)
 PP(const char *str;)
 {
 	UNUSED(str);

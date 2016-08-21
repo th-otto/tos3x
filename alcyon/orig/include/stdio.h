@@ -102,6 +102,7 @@ int vsprintf PROTO((char *str, const char *fmt, va_list args));
 int fputc PROTO((int c, FILE *stream));
 int fgetc PROTO((FILE *stream));
 char *fgets PROTO((char *str, int maxc, FILE *sp));
+int ungetc PROTO((int c, FILE *stream));
 
 int fflush PROTO((FILE *stream));
 int puts PROTO((const char * str));
@@ -124,6 +125,14 @@ off_t lseek PROTO((int fd, off_t offs, int whence));
 size_t read PROTO((int fd, VOIDPTR buf, size_t count));
 size_t write PROTO((int fd, const VOIDPTR buf, size_t count));
 off_t tell PROTO((int fd));
+
+int scanf PROTO((const char *format, ...));
+int sscanf PROTO((const char *str, const char *format, ...));
+int fscanf PROTO((FILE *stream, const char *format, ...));
+
+int vscanf PROTO((const char *format, va_list args));
+int vsscanf PROTO((const char *str, const char *format, va_list args));
+int vfscanf PROTO((FILE *stream, const char *format, va_list args));
 
 /*
  * non-standard functions

@@ -35,7 +35,7 @@ PP(size_t nbytes;)							/* number of bytes */
 	return rp;
 }
 
-VOIDPTR calloc(P(size_t) nelem, P(size_t) sizelem)			/* CLEAR FUNCTION ********** */
+VOIDPTR calloc(P(size_t) nelem, P(size_t) sizelem)
 PP(size_t nelem;)								/* number of elements */
 PP(size_t sizelem;)							/* size of element */
 {

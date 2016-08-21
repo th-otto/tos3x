@@ -69,7 +69,7 @@ extern char *_break;					/* -> Program break location */
 char *_petoa PROTO((double *, char *, int, int));
 char *_pftoa PROTO((double *, char *, int, int));
 char *_pgtoa PROTO((double *, char *, int, int));
-VOID _atof PROTO((const char *));
+double _atof PROTO((const char *));
 
 typedef char *(*printfunc) PROTO((char *pobj, char **pbuf, int base, int issigned, char *digs));
 
@@ -77,13 +77,12 @@ char *__prtshort PROTO((char *pobj, char **pbuf, int base, int issigned, char *d
 char *__prtld PROTO((char *pobj, char **pbuf, int base, int issigned, char *digs));
 char *__prtint PROTO((char *pobj, char *pbuf, int base, int issigned, printfunc f));
 
-int __doprint PROTO((FILE *stream, const char *fmt, int mode, va_list args));
-
 long fptoffp PROTO((double f));
 double ffptof PROTO((long lf));
 long fpftol PROTO((long f));
 long fpltof PROTO((long l));
-int _doprt PROTO((FILE *sp, const char * fmt, char *pb));
+int _doprt PROTO((FILE *sp, const char *fmt, char *pb));
+int _doscan PROTO((FILE *sp, const char *fmt, char **aps));
 
 int _creat PROTO((const char *name, mode_t prot, int binary));
 int _open PROTO((const char *name, int mode, int binary));

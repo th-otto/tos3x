@@ -77,6 +77,7 @@ char *__prtld PROTO((long n, char **pbuf, int base, int issigned, char *digs));
 char *__prtint PROTO((long n, char *pbuf, int base, int issigned, printfunc f, int upper));
 
 int __doprint PROTO((FILE *stream, const char *fmt, int mode, va_list args));
+int _doscan PROTO((FILE *stream, const char *fmt, va_list args));
 
 long fptoffp PROTO((double f));
 double ffptof PROTO((long lf));
