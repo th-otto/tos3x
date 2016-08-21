@@ -2,6 +2,9 @@
 #define __SYS_TYPES_H__ 1
 
 typedef int mode_t;
+typedef int pid_t;
+typedef int uid_t;
+typedef int gid_t;
 
 /*
  * not quite right:

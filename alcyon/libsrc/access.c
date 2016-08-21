@@ -34,8 +34,7 @@ PP(int mode;)
 {
 	register int rval;
 
-	/* BUG: mode not evaluated here */
-	/* BUG: existing does mean we are able to open it */
+	/* NYI */
 	UNUSED(mode);
 	if ((rval = open(fname, O_RDONLY)) >= 0)	/* File must be there ... */
 	{
@@ -43,30 +42,4 @@ PP(int mode;)
 		return 0;
 	}
 	RETERR(-1, ENOENT);
-}
-
-
-/***************************************/
-/* chmod - change mode: NOP under CP/M */
-/***************************************/
-int chmod(P(const char *) name, P(mode_t) mode)
-PP(const char *name;)
-PP(mode_t mode;)
-{
-	/* BUG: mode is a total different thing here */
-	return access(name, mode);
-}
-
-
-/**************************************************/
-/* chown - change owner: like access() under CP/M */
-/**************************************************/
-int chown(P(const char *) name, P(uid_t) owner, P(gid_t) group)
-PP(const char *name;)
-PP(uid_t owner;)
-PP(gid_t group;)
-{
-	UNUSED(owner);
-	UNUSED(group);
-	return access(name, F_OK);
 }
