@@ -21,6 +21,8 @@ int dup PROTO((int oldfd));
 int dup2 PROTO((int oldfd, int newfd));
 int access PROTO((const char *fname, int mode));
 int chown PROTO((const char *name, uid_t owner, gid_t group));
+pid_t getpid PROTO((NOTHING));
+pid_t getppid PROTO((NOTHING));
 
 int execl PROTO((const char *path, const char *arg, ...));
 int execlp PROTO((const char *file, const char *arg, ...));
