@@ -12,6 +12,10 @@
 #ifndef __SIGNAL_H__
 #define __SIGNAL_H__ 1
 
+#ifndef __COMPILER_H__
+#include <compiler.h>
+#endif
+
 #define	NSIG	16			/* 16 simulated signals		    */
 #define	SIGHUP	 1			/* Hangup			    */
 #define	SIGINT	 2			/* Interrupt (^C)		    */
@@ -29,9 +33,12 @@
 #define	SIGALRM	14			/* Alarm clock (what a name!)	    */
 #define	SIGTERM	15			/* Software termination signal 	    */
 
-#define	SIG_ERR	(-1L)			/* Error return			    */
-#define	SIG_DFL	(0L)			/* Default action on signal call    */
-#define	SIG_IGN (1L)			/* Ignore			    */
+typedef VOID (*sighandler_t) PROTO((int sig));
 
+sighandler_t signal PROTO((int __sig, sighandler_t __handler));
+
+#define	SIG_ERR	((sighandler_t)-1L)			/* Error return			    */
+#define	SIG_DFL	((sighandler_t)0L)			/* Default action on signal call    */
+#define	SIG_IGN ((sighandler_t)1L)			/* Ignore			    */
 
 #endif /* __SIGNAL_H__ */

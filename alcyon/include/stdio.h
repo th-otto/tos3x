@@ -149,7 +149,7 @@ int vsscanf PROTO((const char *str, const char *format, va_list args));
 int vfscanf PROTO((FILE *stream, const char *format, va_list args));
 
 int rename PROTO((const char *from, const char *to));
-int setbuf PROTO((FILE *sp, char *buf));
+VOID setbuf PROTO((FILE *sp, char *buf));
 int setvbuf PROTO((FILE *sp, char *buf, int mode, size_t size));
 
 /*

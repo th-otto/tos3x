@@ -17,32 +17,34 @@
 	xdef	__arith			*	Arithmetic traps    EPA
 	comm	___signal,64		*	-> epa's of C functions
 
-	bss
-epa:	ds.l	1			*		non-reentrant!!
 	text
 __illinst:				*
-	move.l	___signal+16,epa	*	Set up epa
+	move.l a0,-(a7)
+	move.l	___signal+16,a0	*	Set up epa
 	add.l	#2,2(a7)		*	Bump PC to next inst
-	bra	process			*	Process exception
+	bra.s	process			*	Process exception
 __trace:
-	move.l	___signal+20,epa	*	Set up epa
-	bra	process			*	process
+	move.l a0,-(a7)
+	move.l	___signal+20,a0	*	Set up epa
+	bra.s	process			*	process
 
 __trap:					*
-	move.l	___signal+24,epa	*	Select epa
-	bra	process			*
+	move.l a0,-(a7)
+	move.l	___signal+24,a0 *	Select epa
+	bra.s	process			*
 
 __buserr:				*	Here for buserr crap
-	cmpm.l	(a7)+,(a7)+		*	Prune junk
-	move.l	___signal+40,epa	*	move in epa
-	bra	process			*	process exception
+	move.l a0,-(a7)
+	move.l	___signal+40,a0	*	move in epa
+	bra.s	process			*	process exception
 
 __arith:				*	
-	move.l	___signal+32,epa	*	move in epa
+	move.l a0,-(a7)
+	move.l	___signal+32,a0	*	move in epa
 process:				*	Here to process exception
-	movem.l	d0-d7/a0-a6,-(sp)	*	Save all registers
-	move.l	epa,a0			*	Load entry point
+	movem.l	d0-d7/a1-a6,-(sp)	*	Save all registers
 	suba.l    a6,a6			*	Clear out a6
 	jsr	(a0)			*	Call processing routine
-	movem.l	(sp)+,d0-d7/a0-a6	*	restore registers
-	rtr				*	Resume processing
+	movem.l	(sp)+,d0-d7/a1-a6	*	restore registers
+	move.l (a7)+,a0
+	rte

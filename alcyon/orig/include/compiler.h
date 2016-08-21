@@ -12,7 +12,7 @@
 #endif
 
 #ifdef __ALCYON__
-#define VOID						/* Void function return	   */
+#define VOID int					/* Void function return	   */
 #define VOIDPTR char *
 #define NOTHING                     /* no parameters */
 #define PROTO(p) ()

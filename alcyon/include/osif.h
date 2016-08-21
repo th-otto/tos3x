@@ -252,6 +252,8 @@ extern long __BDOS PROTO ((short code, long arg));
 #define jwrite(a,b,c) trap(0x40,a,b,c)
 #define Frename(a,b) gemdos(0x56,0,a,b)
 extern long gemdos PROTO ((short code, ...));
+extern long bios PROTO ((short code, ...));
+extern long xbios PROTO ((short code, ...));
 #endif
 
 /****************************************************************************/
