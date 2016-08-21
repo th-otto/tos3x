@@ -26,26 +26,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
-static VOID _noecho PROTO((char *bf, int ln));
-static VOID _conout PROTO((const char *buffer, int count, int os_func));
-
-
-char *getpass(P(const char *) prompt)
-PP(const char *prompt;)
-{
-	static char ibuf[9];
-
-	_conout(prompt, strlen(prompt), CONOUT);	/* same fn write uses */
-	_noecho(ibuf, 9);
-	return ibuf;
-}
-
-
 #define CMASK	0x7F
 #define DEL	0x7F
 #define CTRLX	0x18
 #define CTRLC	0x03
+
 
 static VOID _noecho(P(char *) bf, P(int) ln)
 PP(register char *bf;)
@@ -90,14 +75,12 @@ PP(int ln;)
 }
 
 
-static VOID _conout(P(const char *) buffer, P(int) count, P(int) os_func)
-PP(register const char *buffer;)						/* -> 1st char output      */
-PP(register int count;)							/* =  # bytes to xfer      */
-PP(register int os_func;)						/* OS function to use      */
+char *getpass(P(const char *) prompt)
+PP(const char *prompt;)
 {
-	int xcount;						/* save area for count     */
+	static char ibuf[9];
 
-	UNUSED(xcount);
-	while (count-- > 0)					/* Until all written       */
-		__OSIF(os_func, *buffer++);		/* Output next character   */
+	__OSIF(C_WRITESTR, prompt);
+	_noecho(ibuf, 9);
+	return ibuf;
 }

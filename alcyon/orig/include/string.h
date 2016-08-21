@@ -17,7 +17,6 @@
 #include <sys/types.h>
 #endif
 
-char *getpass PROTO((const char *prompt));	/* get password function	*/
 char *index PROTO((const char *str, int c));	/* locate first occurence	*/
 char *rindex PROTO((const char *str, int c));	/* locate last occurence	*/
 char *mktemp PROTO((char *template));	/* create temp file name	*/

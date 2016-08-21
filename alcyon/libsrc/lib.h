@@ -147,6 +147,7 @@ int _ttyout PROTO(( const char *buff ));
 int _lstout PROTO(( const char *buff ));
 long _blkio PROTO((FD *ccbp, long sector, VOIDPTR buffer, long count, int bdosfunc));
 #endif
+int _ttyinraw PROTO((NOTHING));
 
 /************************* #include "malloc.h"  *****************************/
 #define FB_HDR struct hdr				/* free block header type   */

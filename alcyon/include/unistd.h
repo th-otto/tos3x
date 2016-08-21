@@ -29,4 +29,6 @@ int execv PROTO((const char *path, char *const argv[]));
 int execvp PROTO((const char *file, char *const argv[]));
 int execvpe PROTO((const char *file, char *const argv[], char *const envp[]));
 
+char *getpass PROTO((const char *prompt));	/* get password function */
+
 #endif /* __UNISTD_H__ */

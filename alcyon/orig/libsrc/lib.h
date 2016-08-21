@@ -126,6 +126,7 @@ int _lstout PROTO(( const char *buff ));
 long _blkio PROTO((FD *ccbp, long sector, VOIDPTR buffer, long count, int bdosfunc));
 #endif
 VOID _pc_chain PROTO((const char *cmdline));
+int _ttyinraw PROTO((NOTHING));
 
 
 /************************* #include "malloc.h"  *****************************/
