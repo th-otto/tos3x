@@ -6,7 +6,7 @@ all::
 include SRCFILES
 include optimize.mak
 
-STARTUPS = ${CRT0} gemst0.o gemst1.o gemst2.o gemst3.o gemst4.o gemst8k.o gemsta.o
+STARTUPS = ${CRT0} crtg.o gemst0.o gemst1.o gemst2.o gemst3.o gemst4.o gemst8k.o gemsta.o
 
 all:: ${LIBC} ${LIBC_NDX} ${LIBM} ${LIBM_NDX} ${OPTIONOBJS} ${STARTUPS} srcfiles.sh
 
@@ -35,10 +35,10 @@ ${LIBC}: $(OBJS) ${OPTIONOBJS} ${MAKEFILE}
 # library with all objects, including optional and runtime,
 # for use by analyze tool
 FIXOBJS = fixxopen.o fixlst.o fixwrtc.o fixwrite.o
-liba.a: ${LIBC} ${OPTIONOBJS} ${STARTUPS} $(FIXOBJS) xdoprtfp.o
+liba.a: ${LIBC} ${OPTIONOBJS} ${STARTUPS} $(FIXOBJS) xdoprtfp.o kopen2.o
 	cp $< $@
 	$(AR) $(ARFLAGS) $@ ${STARTUPS}
-	$(AR) $(ARFLAGS) $@ $(FIXOBJS) xdoprtfp.o
+	$(AR) $(ARFLAGS) $@ $(FIXOBJS) xdoprtfp.o kopen2.o
 	$(AR) $(ARFLAGS) $@ ${OPTIONOBJS1}
 	$(AR) $(ARFLAGS) $@ ${OPTIONOBJS2}
 

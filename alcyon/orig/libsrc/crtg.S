@@ -28,7 +28,7 @@ exit equ 0			* BDOS exit call
 		xref  _sw_
 	    xdef	__sovf
 
-crtghack equ 0
+crtghack equ 1
 
 		text
 __start:	clr.l	d5			* clear a register

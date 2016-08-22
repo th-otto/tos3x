@@ -1,33 +1,7 @@
 #ifndef __LIBC_H__
 #define __LIBC_H__ 1
 
-#ifdef __cplusplus
-#  define __USE_STDARG 1
-#endif
-#ifdef __STDC__
-#  define __USE_STDARG 1
-#endif
-#ifdef __USE_STDARG
-#  include <stdarg.h>
-#  define _va_alist				, ...
-#  define _va_dcl
-#  define _va_list				va_list
-#  define _va_start(pvar, prev) va_start(pvar, prev)
-#  define _va_arg(pvar, type)	va_arg(pvar, type)
-#  define _va_end(pvar) 		va_end(pvar)
-#else
-#  include <varargs.h>
-#  define _va_alist				, va_alist
-#  define _va_dcl				va_dcl
-#  define _va_list				va_list
-#  define _va_start(pvar, prev) va_start(pvar)
-#  define _va_arg(pvar, type)	va_arg(pvar, type)
-#  define _va_end(pvar) 		va_end(pvar)
-#endif
-
-#define _va_no_args NULL
-#define _va_is_no_args(args) ((args) == _va_no_args)
-
+#include <stdarg.h>
 #include <stdio.h>
 
 #ifdef __ALCYON__

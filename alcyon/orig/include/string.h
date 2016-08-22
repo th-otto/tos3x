@@ -26,7 +26,7 @@ char *strcat PROTO((char *dst, const char *src));	/* concat whole			*/
 char *strncat PROTO((char *dst, const char *src, size_t len));	/* concat number specified.	*/
 char *strcpy PROTO((char *dst, const char *src));	/* copy whole string		*/
 char *strncpy PROTO((char *dst, const char *src, size_t len));	/* copy specified length	*/
-int strlen PROTO((const char *str));	/* return length of string	*/
+size_t strlen PROTO((const char *str));	/* return length of string	*/
 int strcmp PROTO((const char *, const char *));
 int strncmp PROTO((const char *, const char *, size_t));
 int strcasecmp PROTO((const char *, const char *));
