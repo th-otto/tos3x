@@ -17,7 +17,7 @@
 char *strncpy(P(char *) s1, P(const char *) s2, P(size_t) num)
 PP(char *s1;)
 PP(register char *s2;)
-PP(size_t num;)
+PP(int num;)
 {
 	register char *cp;
 

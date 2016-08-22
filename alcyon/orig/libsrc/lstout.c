@@ -29,6 +29,22 @@ PP(register const char *buffer;)						/* -> 1st char output      */
 	xcount = count = (0xFF & *buffer++);	/* Copy for later      */
 
 	while (count-- > 0)					/* Until all written       */
+#ifdef FIXED_BDOS
+		j30ent(3, 0, *buffer++);		/* Output next character   */
+#else
 		__OSIF(LSTOUT, *buffer++);		/* Output next character   */
+#endif
 	return xcount;					/* return original count   */
 }
+
+#ifdef FIXED_BDOS
+long xyzzx;
+VOID j30june(NOTHING)
+{
+	asm("_j30ent:");
+	asm("      move.l (a7)+,xyzzx");
+	asm("      trap   #13");
+	asm("      move.l xyzzx,-(a7)");
+	asm("      rts");
+}
+#endif

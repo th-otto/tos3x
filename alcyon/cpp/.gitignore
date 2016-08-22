@@ -7,5 +7,5 @@ conv65.s
 cp68.s
 doindex.s
 dump.s
-nm68.s
+optimize.s
 make.s

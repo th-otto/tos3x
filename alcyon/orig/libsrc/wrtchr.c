@@ -27,7 +27,11 @@ PP(FD *fp;)									/* -> CCB           */
 PP(const VOIDPTR bufp;)						/* -> User's buffer     */
 PP(size_t bytes;)							/* # bytes to write     */
 {
+#ifdef FIXED_BDOS
+#define buf bufp
+#else
 	register const char *buf = bufp;
+#endif
 	size_t nbs;							/* num bytes remaining      */
 	int ii;								/* local counter        */
 	char cp[SECSIZ];					/* ptr to local buffer      */
@@ -48,8 +52,10 @@ PP(size_t bytes;)							/* # bytes to write     */
 		fnout = _ttyout;				/*   use that function      */
 	else if (fp->flags & ISLPT)			/* If LST Output        */
 		fnout = _lstout;				/*   use this function      */
+#ifndef FIXED_BDOS
 	else
 		return 0;
+#endif
 #if CPM3
 	else if (fp->flags & ISQUE)
 	{

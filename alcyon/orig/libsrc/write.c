@@ -27,6 +27,8 @@
 #include <osiferr.h>
 #include <errno.h>
 
+
+
 size_t write(P(int) fd, P(const VOIDPTR) buff, P(size_t) bytes)
 PP(int fd;)									/* File descriptor      */
 PP(const VOIDPTR buff;)						/* Buffer address       */
@@ -44,9 +46,14 @@ PP(size_t bytes;)							/* Number of bytes to xfer  */
 	if ((fp->flags & ISREAD) != 0)		/* Check for readonly file  */
 		RETERR(-1, EBADF);			/* Barf if so           */
 
+#ifdef FIXED_BDOS
+	if (fp->flags & (ISLPT | ISQUE))	/* TTY, LST or QUE File?    */
+		return _wrtchr(fp, buff, bytes);	/*  Yes, handle it      */
+#else
 #if !GEMDOS
 	if (fp->flags & (ISTTY | ISLPT | ISQUE))	/* TTY, LST or QUE File?    */
 		return _wrtchr(fp, buff, bytes);	/*  Yes, handle it      */
+#endif
 #endif
 
 	if (fp->flags & ISASCII)			/* If ascii file        */

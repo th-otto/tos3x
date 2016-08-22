@@ -83,10 +83,18 @@ PP(int bdosfunc;)							/* BDOS Function        */
 		
 		/* strange interface for SEARCHF/SEARCHN; but isn't used anymore */
 		case SEARCHF:
+#ifdef FIXED_BDOS
+			rv = jsfirst(filename, 0) == 0 ? 0 : 255;
+#else
 			rv = jsfirst(filename, 0) != 0 ? 0 : 255;
+#endif
 			break;
 		case SEARCHN:
+#ifdef FIXED_BDOS
+			rv = jsnext() == 0 ? 0 : 255;
+#else
 			rv = jsnext() != 0 ? 0 : 255;
+#endif
 			break;
 		
 		case OPEN:

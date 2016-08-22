@@ -175,7 +175,7 @@ extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
                                                 /****************************/
 #if CPM68K
 #if PCDOS
-#define __OSIF(fn,arg) trap((fn), (long)(arg))  /* GEMDOS does it this way  */
+#define __OSIF(fn,arg) trap((fn), (long)(arg))  /* GEMDOS does it this way; BUG: the console character functions only take word as argument */
 #else
 #define __OSIF(fn,arg) __BDOS((fn),(long)(arg)) /* CPM68K does it this way  */
 #endif

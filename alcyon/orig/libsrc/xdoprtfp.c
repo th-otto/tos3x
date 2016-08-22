@@ -33,8 +33,7 @@ PP(int c;)
 	double fp;
 	
 	UNUSED(c);
-	if (prec < 0)
-		prec = 6;
+	prec = prec < 0 ? 6 : prec;
 	fp = *addr;
 	return ftoa(fp, buf, prec);
 }
@@ -48,8 +47,7 @@ PP(int c;)
 	double fp;
 	
 	UNUSED(c);
-	if (prec < 0)
-		prec = 6;
+	prec = prec < 0 ? 6 : prec;
 	fp = *addr;
 	return etoa(fp, buf, prec);
 }
@@ -62,8 +60,9 @@ PP(int c;)
 {
 	char *sp;
 
-	sp = _pftoa(addr, buf, prec, c);
+	UNUSED(c);
+	sp = _pftoa(addr, buf, prec);
 	if (strlen(buf) > (7 + prec))		/* Smallest FP string           */
-		sp = _petoa(addr, buf, prec, c);
+		sp = _petoa(addr, buf, prec);
 	return sp;
 }
