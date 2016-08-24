@@ -2,7 +2,7 @@
 AOBJS1="abort.o aldiv.o almul.o alrem.o lmul.o lrem.o uldiv.o setjmp.o"
 AOBJS2="xsignal.o salloc.o stkcpy.o ldiv.o blivot.o trap.o bios.o xbios.o gemdos.o"
 COBJS1="xmain.o xwmain.o xnwmain.o perror.o mktemp.o chmod.o chown.o"
-COBJS2="fprintf.o printf.o sprintf.o doprt.o prtint.o prtld.o"
+COBJS2="printf.o fprintf.o sprintf.o doprt.o prtint.o prtld.o"
 COBJS3="prtshort.o scanf.o sscanf.o doscan.o fdopen.o"
 COBJS4="fopen.o freopen.o ftell.o rewind.o fseek.o exit.o"
 COBJS5="cleanup.o fclose.o fflush.o fread.o fwrite.o fgets.o"

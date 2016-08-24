@@ -67,8 +67,6 @@ int ndefs, nincl;
 
 int status = 0;
 
-extern int errno;
-
 VOID make_intermediate PROTO((NOTHING));
 VOID cexit PROTO((NOTHING)) __attribute__((noreturn));
 
@@ -254,18 +252,20 @@ PP(register char **argv;)
 }
 
 
-/* cexit - exit from C compiler driver*/
-/*      This deletes any existing temps and exits with the error status.*/
+/*
+ * cexit - exit from C compiler driver
+ *      This deletes any existing temps and exits with the error status.
+ */
 VOID cexit(NOTHING)
 {
 	exit(status);
 }
 
 
-/**
+/*
  * itoa - integer to ASCII conversion
  *      Converts integer to ASCII string, handles '-'.
-**/
+ */
 VOID itoa(P(int) n, P(char *) s, P(int) w)
 PP(int n;)									/* number to convert */
 PP(char *s;)								/* resulting string */
@@ -366,8 +366,9 @@ PP(const char *as;)
 }
 
 
+/* if source t.c dest <= t.i */
 VOID make_intermediate(NOTHING)
-{										/* if source t.c dest <= t.i */
+{
 	register char *d, *s;
 	register int ndx;
 
@@ -418,8 +419,8 @@ PP(FILE *v6buf;)
 {
 	register int i;
 
-	i = BSIZE - v6buf->cc;
-	v6buf->cc = BSIZE;
+	i = BLEN - v6buf->cc;
+	v6buf->cc = BLEN;
 	v6buf->cp = &(v6buf->cbuf[0]);
 	if (write(fileno(v6buf), v6buf->cp, i) != i)
 		return EOF;
@@ -433,9 +434,7 @@ PP(FILE *v6buf;)
 
 #ifdef VERSADOS
 
-#define BSIZE 512
-
-struct iob versfout = { 1, BSIZE, &versfout.cbuf[0] };
+struct iob versfout = { 1, BLEN, &versfout.cbuf[0] };
 
 int versaputchar(c)
 char c;
@@ -451,9 +450,9 @@ char c;
 	if (versfout.cc <= 0)
 	{
 		versfout.cp = &(versfout.cbuf[0]);
-		if (write(versfout.fd, versfout.cp, BSIZE) != BSIZE)
+		if (write(versfout.fd, versfout.cp, BLEN) != BLEN)
 			return EOF;
-		versfout.cc = BSIZE;
+		versfout.cc = BLEN;
 	}
 	*(versfout.cp)++ = c;
 	versfout.cc--;
@@ -466,9 +465,9 @@ int versaflush()
 	register short size;
 	register short fildes;
 
-	if ((size = (BSIZE - versfout.cc)) == 0)
+	if ((size = (BLEN - versfout.cc)) == 0)
 		return 0;
-	versfout.cc = BSIZE;
+	versfout.cc = BLEN;
 	versfout.cp = &(versfout.cbuf[0]);
 	fildes = (versfout.fd <= STDERR) ? 6 : versfout.fd;
 	if (write(fildes, versfout.cp, size) < 0)

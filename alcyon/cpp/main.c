@@ -81,15 +81,17 @@ static VOID usage(NOTHING)
  *      assember are fexec'd.  The loader arguments are collected and
  *      the loader is fexec'd.
  */
-int main(P(int) argc, P(register char **) argv)
+int main(P(int) argc, P(char **) argv)
 PP(int argc;)
 PP(register char **argv;)
 {
 	register char *arg;
 	const char *argv0;
 	register int c, i, x;
-
-	argv0 = *argv++;
+	
+	argv0 = NULL;
+	if (argc >= 1)
+		argv0 = *argv++;
 	if (argv0 == NULL || *argv0 == 0)
 	{
 		strcpy(stdincl, "/usr/include");
@@ -208,22 +210,24 @@ PP(register char **argv;)
 }
 
 
-/* cexit - exit from C compiler driver*/
-/*      This deletes any existing temps and exits with the error status.*/
+/*
+ * cexit - exit from C compiler driver
+ *      This deletes any existing temps and exits with the error status.
+ */
 VOID cexit(NOTHING)
 {
 	exit(status);
 }
 
 
-/**
+/*
  * itoa - integer to ASCII conversion
  *      Converts integer to ASCII string, handles '-'.
-**/
+ */
 VOID itoa(P(int) n, P(char *) s, P(int) w)
-PP(int n;)
-PP(char *s;)
-PP(int w;)
+PP(int n;)									/* number to convert */
+PP(char *s;)								/* resulting string */
+PP(int w;)									/* minimum width of string */
 {
 	register char *tp;
 	register int sign, i;
@@ -251,7 +255,11 @@ PP(int w;)
 }
 
 
-/* strindex - find the index of a character in a string */
+/*
+ * strindex - find the index of a character in a string
+ *      This is identical to Software Tools index.
+ * returns index of c in str or -1
+ */
 int strindex(P(const char *) str, P(char) chr)
 PP(const char *str;)
 PP(char chr;)
@@ -260,8 +268,10 @@ PP(char chr;)
 	register int i;
 
 	for (s = str, i = 0; *s != '\0'; i++)
+	{
 		if (*s++ == chr)
 			return i;
+	}
 	return -1;
 }
 
@@ -280,5 +290,5 @@ PP(const char *as;)
 		sign = (*s++ == '+') ? 1 : -1;
 	for (n = 0; *s >= '0' && *s <= '9'; s++)
 		n = (n * 10) + (*s - '0');
-	return (sign * n);
+	return sign * n;
 }

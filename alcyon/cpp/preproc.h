@@ -76,7 +76,6 @@
 /* General Defines */
 #define	SOH			'\01'
 #define	SSIZE		8
-#define BSIZE		512
 #define	LINESIZE	512
 #define	MAXARGS		60
 #define	ARGBSIZE	1000
@@ -100,7 +99,7 @@
 #	define	HSIZE	2048
 #endif
 
-	/* Symbol Table Entry structure */
+/* Symbol Table Entry structure */
 struct symbol {
 	char s_name[SSIZE];
 	char *s_def;
@@ -127,7 +126,7 @@ struct stackstruc {
 extern struct stackstruc filestack[FSTACK], *filep;		/* stack of incl files, ptr to... */
 
 /* Variables used by #line macros */
-extern int literal;			/* 4.0 using #line */
+extern int literal;			/* using #line */
 extern int lit_num;			/* for error messages */
 extern char lit_file[];		/* for error messages */
 

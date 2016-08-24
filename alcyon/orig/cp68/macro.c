@@ -8,6 +8,8 @@
 #include "preproc.h"
 #include <fcntl.h>
 
+#define NUMLEN      6
+
 #ifndef DECC
 #	include <ctype.h>
 #else
@@ -63,12 +65,12 @@ const char *stdincl = "";
 short clabel = LABSTART;
 short nlabel = LABSTART + 1;
 char null[] = "";
-short nincl;
 char *incl[NUMINCL];
 char tmp[NUMLEN];						/* temporary spot for line number itoa conversion */
 extern char const ctype[];
 char lit_file[MAXPSIZE];
 short lit_skip;
+extern int nincl;
 
 struct builtin
 {
@@ -1115,7 +1117,7 @@ PP(const char *infile;)
 		filep->tcp = inbuf.cp;
 		ptr1 = &filep->tbuf[0];
 		ptr2 = &inbuf.cbuf[0];
-		for (i = 0; i < BSIZE; i++)
+		for (i = 0; i < BLEN; i++)
 			*ptr1++ = *ptr2++;
 #else
 		/*sw    seek(fd,-inbuf.cc,1);  *//*back up file ptr */

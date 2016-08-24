@@ -118,7 +118,6 @@ you loose
 /* General Defines */
 #define	SOH			'\01'
 #define	SSIZE		8
-#define BSIZE		512
 #define	LINESIZE	512
 #define	MAXARGS		60
 #define	ARGBSIZE	1000
@@ -136,7 +135,6 @@ you loose
 #define FILESEP2    '\\'
 #define NINCL       10
 #define LABSTART    1000
-#define NUMLEN      6
 
 #ifndef VERSADOS
 #	define	HSIZE	1024
@@ -166,7 +164,7 @@ struct stackstruc {
 	char ifile[MAXPSIZE];
 	int lineno;
 #ifdef NONEST
-	char tbuf[BSIZE];		/* hold buffer in include... */
+	char tbuf[BLEN];		/* hold buffer in include... */
 	int tcc;				/* hold count into buffer... */
 	char *tcp;				/* pointer into buffer... */
 #else						/*sw Nesting really could be allowed on all */
@@ -177,7 +175,7 @@ struct stackstruc {
 /* Variables used by #line macros */
 int literal;			/* using #line */
 int lit_num;			/* for error messages */
-extern char lit_file[/* MAXPSIZE */];		/* for error messages */
+char lit_file[/* MAXPSIZE */];		/* for error messages */
 
 /* Flag Variable Declarations */
 int pflag;

@@ -9,7 +9,7 @@
 
 COBJS1=xmain.o xwmain.o xnwmain.o perror.o mktemp.o chmod.o chown.o
 
-COBJS2=fprintf.o printf.o sprintf.o doprt.o prtint.o prtld.o
+COBJS2=printf.o fprintf.o sprintf.o doprt.o prtint.o prtld.o
 
 COBJS3=prtshort.o scanf.o sscanf.o doscan.o fdopen.o
 

@@ -258,7 +258,7 @@ int ngetch(NOTHING)
 		inbuf.cp = filep->tcp;
 		p = &inbuf.cbuf[0];
 		q = &filep->tbuf[0];
-		for (i = 0; i < BSIZE; i++)
+		for (i = 0; i < BLEN; i++)
 			*p++ = *q++;
 #else
 /*sw This code no longer necessary ...
@@ -618,7 +618,7 @@ struct iob *ibuf;
 	if (ibuf->cc <= 0)
 	{
 		ibuf->cp = &(ibuf->cbuf[0]);
-		ibuf->cc = read(ibuf->fd, ibuf->cp, BSIZE);
+		ibuf->cc = read(ibuf->fd, ibuf->cp, BLEN);
 	}
 	if (ibuf->cc <= 0)
 		return EOF;
