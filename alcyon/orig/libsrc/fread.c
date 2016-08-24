@@ -22,22 +22,27 @@
 #include "lib.h"
 
 size_t fread(P(VOIDPTR) pbuff, P(size_t) size, P(size_t) nmemb, P(FILE *) sp)
-PP(char *pbuff;)
+PP(register VOIDPTR pbuff;)
 PP(size_t size;)
 PP(size_t nmemb;)
 PP(register FILE *sp;)
 {
+#ifdef __ALCYON__
+#define buff pbuff
+#else
 	register char *buff = pbuff;
+#endif
 	register size_t jj, kk;
 	register int ch;
 
-	for (jj = 0; jj < nmemb; jj++)
-		for (kk = 0; kk < size; kk++)
+	for (jj = 0; (int)jj < (int)nmemb; jj++)
+		for (kk = 0; (int)kk < (int)size; kk++)
 		{
 			if ((ch = getc(sp)) == EOF)
-				return 0;
+				return (int)jj;
 			else
 				*buff++ = ch;
 		}
-	return nmemb;
+	return (int)nmemb;
+#undef buff
 }
