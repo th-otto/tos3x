@@ -20,7 +20,7 @@
 int strncmp(P(const char *) s1, P(const char *) s2, P(size_t) num)
 PP(register const char *s1;)
 PP(register const char *s2;)
-PP(register size_t num;)
+PP(register int num;)
 {
 	for (; --num > 0 && (*s1 == *s2); s1++, s2++)
 		if (*s1 == '\0')
