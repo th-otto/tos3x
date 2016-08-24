@@ -63,10 +63,16 @@ int xgetchar PROTO((NOTHING));
 int xfcreat PROTO((const char *fname, FILE *ibuf, int binary));
 int xputc PROTO((char c, FILE *ibuf));
 int xputw PROTO((int w, register FILE *ibuf));
+int xputwp PROTO((unsigned short *w, FILE *ibuf));
 int xfflush PROTO((FILE *ibuf));
 int xfoflush PROTO((NOTHING));
 int xputchar PROTO((char cc));
 int xseek PROTO((int fildes, int offset, int whence));
 int xstrcmp PROTO((const char *s1, const char *s2));
+
+/* same as xfflush, but most tools have a local copy */
+int v6flush PROTO((FILE *ibuf));
+char *xstrcpy PROTO((char *dst, const char *src));
+int xstrcmp PROTO((const char *, const char *));
 
 VOID xwritefail PROTO((NOTHING)) __attribute__((noreturn));

@@ -27,7 +27,7 @@ char const program_name[] = "cp68";
 
 
 /* if source t.c dest <= t.i */
-static void make_intermediate(void)
+static VOID make_intermediate(NOTHING)
 {
 	register char *d, *s;
 	register int ndx;
@@ -43,7 +43,8 @@ static void make_intermediate(void)
 }
 
 
-static void make_stdincl(const char *argv0)
+static VOID make_stdincl(P(const char *) argv0)
+PP(const char *argv0;)
 {										/* if source t.c dest <= t.i */
 	register char *d;
 	register const char *s;
@@ -67,7 +68,7 @@ static void make_stdincl(const char *argv0)
 }
 
 
-static void usage(void)
+static VOID usage(NOTHING)
 {
 	printf("usage: %s [-C] [-P] [-E] [-D] [-I] [-6] [-7] [-3] source [dest]\n", program_name);
 }
@@ -80,7 +81,9 @@ static void usage(void)
  *      assember are fexec'd.  The loader arguments are collected and
  *      the loader is fexec'd.
  */
-int main(int argc, register char **argv)
+int main(P(int) argc, P(register char **) argv)
+PP(int argc;)
+PP(register char **argv;)
 {
 	register char *arg;
 	const char *argv0;
@@ -207,7 +210,7 @@ int main(int argc, register char **argv)
 
 /* cexit - exit from C compiler driver*/
 /*      This deletes any existing temps and exits with the error status.*/
-void cexit(void)
+VOID cexit(NOTHING)
 {
 	exit(status);
 }
@@ -217,11 +220,14 @@ void cexit(void)
  * itoa - integer to ASCII conversion
  *      Converts integer to ASCII string, handles '-'.
 **/
-void itoa(int n, char *s, int w)
+VOID itoa(P(int) n, P(char *) s, P(int) w)
+PP(int n;)
+PP(char *s;)
+PP(int w;)
 {
 	register char *tp;
 	register int sign, i;
-	char temp[6];
+	char temp[20];
 
 	if ((sign = n) < 0)
 		n = -n;
@@ -246,7 +252,9 @@ void itoa(int n, char *s, int w)
 
 
 /* strindex - find the index of a character in a string */
-int strindex(const char *str, char chr)
+int strindex(P(const char *) str, P(char) chr)
+PP(const char *str;)
+PP(char chr;)
 {
 	register const char *s;
 	register int i;
@@ -258,7 +266,8 @@ int strindex(const char *str, char chr)
 }
 
 
-int atoi(const char *as)
+int atoi(P(const char *) as)
+PP(const char *as;)
 {
 	register int n, sign;
 	register const char *s;

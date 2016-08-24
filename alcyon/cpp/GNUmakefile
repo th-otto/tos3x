@@ -2,17 +2,20 @@ include ../GNUmakefile.common
 include ../Makefile.silent
 include SRCFILES
 
-LIB =
+LIBS =
 
 CPPFLAGS = -I../common
 CFLAGS = $(OPTS) $(WARN)
 
-all: $(BIN)cp68$(EXEEXT)
+PROGRAMS = cp68$(EXEEXT)
 
+all: $(PROGRAMS)
 
-$(BIN)cp68$(EXEEXT): ${OBJS}
-	$(AM_V_LD)${CC} ${CFLAGS} ${OBJS} ${LIB} -o $@
+cp68$(EXEEXT): ${OBJS}
+	$(AM_V_LD)${CC} ${CFLAGS} ${OBJS} ${LIBS} -o $@
 
+install: all
+	$(CP) cp68$(EXEEXT) $(BIN)
 
 clean::
-	$(RM) *.o $(BIN)cp68$(EXEEXT)
+	$(RM) *.o $(PROGRAMS)

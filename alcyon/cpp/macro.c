@@ -1,5 +1,5 @@
 /*
-    Copyright 1982
+    Copyright 1982, 1983
     Alcyon Corporation
     8716 Production Ave.
     San Diego, Ca.  92121
@@ -23,6 +23,7 @@ struct defstruc defs[NDEFS];
 
 static int skip;					/* skipping current line */
 static char *defp;					/* pointer to next avail define byte */
+static char *defap;					/* pointer start of define area */
 static int defcount;				/* bytes left in define area */
 static int defused;					/* number of bytes used in define area */
 static int defmax;					/* maximum define area used */
@@ -30,14 +31,12 @@ static int defmax;					/* maximum define area used */
 static int clabel = LABSTART;
 static int nlabel = LABSTART + 1;
 
-static char tmp[NUMLEN];						/* temporary spot for line number itoa conversion */
-
 
 static struct builtin
 {
-	char *b_name;
+	const char *b_name;
 	int b_type;
-} btab[] =
+} const btab[] =
 {
 	{ "define", DEFINE },
 	{ "include", INCLUDE },
@@ -56,7 +55,7 @@ static char *cstkptr;
 static char inclname[TOKSIZE];
 
 
-static int getaline(const char *infile);
+static int getaline PROTO((const char *infile));
 
 
 /*
@@ -64,7 +63,8 @@ static int getaline(const char *infile);
  *      Does the macro pre-processing on the input file and leaves the
  *      result on the output file.
  */
-int domacro(int nd)
+int domacro(P(int) nd)
+PP(int nd;)
 {
 	register char *l;
 	register struct symbol *sp;
@@ -74,21 +74,22 @@ int domacro(int nd)
 	if ((inbuf = fopen(source, "r")) == NULL)
 	{									/* 3rd arg for versados */
 		error("can't open source file %s\n", source);
-		return 0;
+		return FALSE;
 	}
 	if (!Eflag)
 	{
 		if ((outbuf = fopen(dest, "w")) == NULL)
-		{								/* 3rd arg for versados */
+		{
 			error("can't creat %s\n", dest);
-			return 0;
+			return FALSE;
 		}
 	}
 	putid(source, 1);					/* identify as first line in source file */
 
+	/* clear out symbol table */
 	for (sp = &symtab[0]; sp <= &symtab[HSIZE - 1]; sp++)	/*3.4 */
-		sp->s_def = null;				/* clear out symbol table */
-	defp = malloc(DEFSIZE);
+		sp->s_def = null;
+	defp = defap = malloc(DEFSIZE);
 	if (defp == NULL)
 	{
 		error("define table overflow");
@@ -141,9 +142,13 @@ int domacro(int nd)
 
 
 /* [vlh] 4.0 SOH line header */
-void putid(const char *fname, int lnum)
+VOID putid(P(const char *) fname, P(int) lnum)
+PP(const char *fname;)
+PP(int lnum;)
 {
 	register const char *p;
+#define NUMLEN  20
+	char tmp[NUMLEN];						/* temporary spot for line number itoa conversion */
 
 	if (asflag || pflag)
 		return;
@@ -156,9 +161,7 @@ void putid(const char *fname, int lnum)
 
 	fputc('#', outbuf);
 	fputc(' ', outbuf);
-	itoa(lnum, tmp, NUMLEN - 1);
-	for (p = tmp; *p == ' ';)
-		p++;
+	itoa(lnum, tmp, 0);
 	for (; *p; p++)
 		fputc(*p, outbuf);
 	fputc(' ', outbuf);
@@ -170,7 +173,9 @@ void putid(const char *fname, int lnum)
 }
 
 
-void install(const char *name, int def)
+VOID install(P(const char *) name, P(int) def)
+PP(const char *name;)
+PP(int def;)
 {
 	register struct symbol *sp;
 
@@ -182,7 +187,9 @@ void install(const char *name, int def)
 }
 
 
-void dinstall(const char *name, const char *def)
+VOID dinstall(P(const char *) name, P(const char *) def)
+PP(const char *name;)								/* macro name */
+PP(const char *def;)								/* pointer to definition */
 {
 	register struct symbol *sp;
 
@@ -191,59 +198,71 @@ void dinstall(const char *name, const char *def)
 	sp->s_def = defp;
 	putd(NOARGS);
 	if (def)							/* [vlh] character strings... */
+	{
 		while (*def)
 			putd(*def++);
-	else
+	} else
+	{
 		putd('1');						/* [vlh] default define value */
+	}
 	putd('\0');
 }
 
 
-/* kwlook - look up the macro built-in names*/
-/*      Searches thru the built-in table for the name.*/
-int kwlook(const char *name)
+/*
+ * kwlook - look up the macro built-in names
+ *      Searches thru the built-in table for the name.
+ * returns keyword index or 0
+ */
+int kwlook(P(const char *) name)
+PP(const char *name;)
 {
-	register struct builtin *bp;
+	register const struct builtin *bp;
 
-	for (bp = &btab[0]; bp->b_name; bp++)
+	for (bp = &btab[0]; bp->b_name != NULL; bp++)
 		if (strcmp(bp->b_name, name) == 0)
 			return bp->b_type;
 	return 0;
 }
 
 
-/* special - check for predefined macros, if they exist expand them */
-/*  __FILE - current file name, __LINE - current line number */
-static int special(const char *token, const char *infile)
+/*
+ * special - check for predefined macros, if they exist expand them 
+ *  __FILE - current file name, __LINE - current line number
+ */
+static int special(P(const char *) token, P(const char *) infile)
+PP(const char *token;)
+PP(const char *infile;)
 {
 	register const char *p;
 	int xline;
-	char buf[8];
+	char buf[NUMLEN];
 
 	if (strcmp(token, "__FILE") == 0)
 	{
-		putl('"');
+		ppputl('"');
 		for (p = infile; *p;)
-			putl(*p++);
-		putl('"');
+			ppputl(*p++);
+		ppputl('"');
 	} else if (strcmp(token, "__LINE") == 0)
 	{
 		xline = (literal) ? lit_num : (filep == &filestack[0]) ? lineno : (filep - 1)->lineno;
-		itoa(xline, buf, 7);
-		buf[7] = 0;
-		for (p = &buf[0]; *p == ' ';)
-			p++;
+		itoa(xline, buf, 0);
 		while (*p)
-			putl(*p++);
+			ppputl(*p++);
 	} else
-		return 0;
-	return 1;
+	{
+		return FALSE;
+	}
+	return TRUE;
 }
 
 
-/* eatup - eat up the rest of the input line until a newline or CEOF*/
-/*      Does gettok calls.*/
-static void eatup(void)									/* returns - none */
+/*
+ * eatup - eat up the rest of the input line until a newline or CEOF
+ *      Does gettok calls.
+ */
+static VOID eatup(NOTHING)
 {
 	register int type;
 	char etoken[TOKSIZE];
@@ -253,9 +272,12 @@ static void eatup(void)									/* returns - none */
 }
 
 
-/* undefine - does undef command */
-/*      Sets the symbols definition to the null pointer*/
-static void undefine(const char *name)
+/*
+ * undefine - does undef command
+ *      Sets the symbols definition to the null pointer
+ */
+static VOID undefine(P(const char *) name)
+PP(const char *name;)
 {
 	register struct symbol *sp;
 
@@ -265,18 +287,22 @@ static void undefine(const char *name)
 }
 
 
-/* pattern - if the pattern occurs in the token starting at the first */
-/*  position in the string, pattern returns the length of the pattern */
-/*  else pattern returns a zero. */
-static int pattern(const char *pat, const char *token)
+/*
+ * pattern - if the pattern occurs in the token starting at the first
+ *	 position in the string, pattern returns the length of the pattern
+ *	 else pattern returns a zero.
+ */
+static int pattern(P(const char *) pat, P(const char *) token)
+PP(const char *pat;)
+PP(const char *token;)
 {
 	register int len;
 
 	len = strlen(pat);
-	if (len > strlen(token))			/* couldn't possibly work */
-		return 0;
+	if (len > (int)strlen(token))			/* couldn't possibly work */
+		return FALSE;
 	if (isalnum(token[len]) || token[len] == '_')
-		return 0;						/* not deliminated by non-alphanumeric */
+		return FALSE;						/* not deliminated by non-alphanumeric */
 
 	for (len = 0; *pat;)
 	{
@@ -289,7 +315,11 @@ static int pattern(const char *pat, const char *token)
 
 
 /* trymatch - check for arguments */
-static void trymatch(const char *token, int type, int nargs, char *args[])
+static VOID trymatch(P(const char *) token, P(int) type, P(int) nargs, P(char **) args)
+PP(const char *token;)
+PP(int type;)
+PP(int nargs;)
+PP(char **args;)
 {
 	register const char *p;
 	register int i, len;
@@ -300,27 +330,35 @@ static void trymatch(const char *token, int type, int nargs, char *args[])
 	while (*p != 0)
 	{
 		for (i = 0; i < nargs; i++)
+		{
 			if ((len = pattern(args[i], p)) != 0)
 				break;
+		}
 		if (i < nargs)
 		{								/* sub ARG marker for formal arg */
 			putd(i + 1);
 			putd(ARG);
 			p += len;
 		} else
+		{
 			do
 			{
 				putd(*p++);
 			} while (isalnum(*p) || *p == '_');
-		while (!(isalnum(*p)) && *p != '_' && *p)	/* get to next possible */
+		}
+		while (!isalnum(*p) && *p != '_' && *p)	/* get to next possible */
 			putd(*p++);
 	}
 }
 
 
-/* getfarg - get macro formal parameters*/
-/*      Skips blanks and handles "," and ")".*/
-static int getfarg(char *token)
+/*
+ * getfarg - get macro formal parameters
+ *      Skips blanks and handles "," and ")".
+ * returns token type
+ */
+static int getfarg(P(char *) token)
+PP(char *token;)
 {
 	register int type;
 
@@ -332,22 +370,18 @@ static int getfarg(char *token)
 }
 
 
-/* dodefine - do #define processing*/
-/*      Checks the define name, collects formal arguements and saves*/
-/*      macro definition, substituting for formal arguments as it goes.*/
-static void dodefine(void)
+/*
+ * dodefine - do #define processing
+ *      Checks the define name, collects formal arguements and saves
+ *      macro definition, substituting for formal arguments as it goes.
+ */
+static VOID dodefine(NOTHING)
 {
-	char token[TOKSIZE],
-	*args[MAXARGS],
-	 argbuf[ARGBSIZE];
-
-	register char *abp,
-	*p;
-
-	register int type,
-	 nargs,
-	 i;
-
+	char token[TOKSIZE];
+	char *args[MAXARGS];
+	char argbuf[ARGBSIZE];
+	register char *abp, *p;
+	register int type, nargs, i;
 	register struct symbol *sp;
 
 	if ((type = getntok(token)) != ALPHA)
@@ -413,9 +447,12 @@ static void dodefine(void)
 }
 
 
-/* push - push a #ifdef condition value on condition stack*/
-/*      Checks for stack overflow.*/
-static void push(int val)
+/*
+ * push - push a #ifdef condition value on condition stack
+ *      Checks for stack overflow.
+ */
+static VOID push(P(int) val)
+PP(int val;)
 {
 	if (cstkptr >= &cstack[CSTKSIZE])
 	{
@@ -426,9 +463,12 @@ static void push(int val)
 }
 
 
-/* pop - pop the #ifdef, etc. condition stack*/
-/*      Checks for stack undeflow.*/
-static int pop(void)
+/*
+ * pop - pop the #ifdef, etc. condition stack
+ *      Checks for stack undeflow.
+ * returns - top of condition stack
+ */
+static int pop(NOTHING)
 {
 	if (cstkptr <= &cstack[0])
 		return -1;
@@ -436,7 +476,8 @@ static int pop(void)
 }
 
 
-static void doifile(const char *p)
+static VOID doifile(P(const char *) p)
+PP(const char *p;)
 {
 	register char *iptr;
 
@@ -447,7 +488,9 @@ static void doifile(const char *p)
 
 
 /* getinclude - get include file full pathname */
-static char *getinclude(const char *fname, const char *parent)
+static char *getinclude(P(const char *) fname, P(const char *) parent)
+PP(const char *fname;)
+PP(const char *parent;)
 {
 	register const char *q;
 	register char *t;
@@ -491,10 +534,13 @@ static char *getinclude(const char *fname, const char *parent)
 }
 
 
-/* doinclude - handle #include command*/
-/*      Checks for file name or library file name and pushes file on*/
-/*      include file stack.*/
-static void doinclude(const char *infile)
+/*
+ * doinclude - handle #include command
+ *      Checks for file name or library file name and pushes file on
+ *      include file stack.
+ */
+static VOID doinclude(P(const char *) infile)
+PP(const char *infile;)
 {
 	register int type;
 	char token[TOKSIZE];
@@ -515,8 +561,10 @@ static void doinclude(const char *infile)
 	} else
 	{
 		while ((type = gettok(token)) != GREAT && type != NEWL && type != CEOF)
+		{
 			for (q = token; (*p = *q++) != 0; p++)
 				;
+		}
 		if (type != GREAT)
 		{
 			error("bad include file name");
@@ -527,11 +575,12 @@ static void doinclude(const char *infile)
 	}
 	eatup();							/*need here... */
 	if (filep >= &filestack[FSTACK])
+	{
 		error("includes nested too deeply");
-	else
+	} else
 	{
 		if ((inbuf = fopen(p, "r")) == NULL)
-		{								/* 3rd arg for versados */
+		{
 			if (type != SQUOTE && type != DQUOTE)
 				error("can't open include file %s", p);
 			else
@@ -549,14 +598,16 @@ static void doinclude(const char *infile)
 
 
 #define SKIPWHITE(ch)     do { ch = ngetch(); } while (ctype[ch] == WHITE)
-static void doline(void)
+static VOID doline(NOTHING)
 {
 	register char *ptr;
 	char token[TOKSIZE];
 	register int ch, lnum, type;
 
 	/* get line number associated with #LINE */
-	while ((type = gettok(token)) == WHITE) ;	/* skip white space */
+	/* skip white space */
+	while ((type = gettok(token)) == WHITE)
+		;
 	if (type != DIGIT)
 	{
 		error("invalid #line args");
@@ -575,23 +626,30 @@ static void doline(void)
 		} while (ctype[ch] != NEWL && ctype[ch] != CEOF && ctype[ch] != WHITE);
 		*ptr = 0;
 		putid(token, lnum);
-	} else /* source or header file */ if (filep == &filestack[0])
-		putid(source, lnum);			/* [vlh] 4.2.c */
-	else
-		putid((filep - 1)->ifile, lnum);	/* [vlh] 4.2.c */
+	} else if (filep == &filestack[0])	/* source or header file */
+	{
+		putid(source, lnum);
+	} else
+	{
+		putid((filep - 1)->ifile, lnum);
+	}
 	if (ch != NEWL)
+	{
 		for (; ctype[ch] != NEWL && ctype[ch] != CEOF;)
 			ch = ngetch();
+	}
 }
 
 
-/* putl - put a character to the current output line */
+/* ppputl - put a character to the current output line */
 /*      Checks for line overflow.*/
-void putl(int c)
+VOID ppputl(P(int) c)
+PP(int c;)
 {
 	if (linep < &line[LINESIZE])
+	{
 		*linep++ = c;
-	else if (!loverflow)
+	} else if (!loverflow)
 	{
 		loverflow++;
 		error("line overflow");
@@ -599,26 +657,32 @@ void putl(int c)
 }
 
 
-/* initl - initialize current line*/
-/*      Sets the line pointer and the line overflow flag.*/
-void initl(void)
+/*
+ * initl - initialize current line
+ *      Sets the line pointer and the line overflow flag.
+ */
+VOID initl(NOTHING)
 {
 	*(linep = &line[0]) = '\0';
 	loverflow = 0;
 }
 
 
-/* putd - put a character to the define buffer*/
-/*      Does dynamic allocation for define buffer*/
-void putd(int c)
+/*
+ * putd - put a character to the define buffer
+ *      Does dynamic allocation for define buffer
+ */
+VOID putd(P(int) c)
+PP(int c;)
 {
 	if (!defcount)
 	{
-		if ((defp = realloc(defp, defused + DEFSIZE)) == NULL)
+		if ((defap = realloc(defap, defused + DEFSIZE)) == NULL)
 		{
 			error("define table overflow");
 			cexit();
 		}
+		defp = defap + defused;
 		defcount = DEFSIZE;
 	}
 	defused++;
@@ -627,11 +691,14 @@ void putd(int c)
 }
 
 
-/* getaarg - get macro actual argument*/
-/*      This handles the collecting of the macro's call arguments.*/
-/*      Note that you may have parenthesis as part of the macro argument,*/
-/*      hence you need to keep track of them.*/
-static int getaarg(char *argp)
+/*
+ * getaarg - get macro actual argument
+ *      This handles the collecting of the macro's call arguments.
+ *      Note that you may have parenthesis as part of the macro argument,
+ *      hence you need to keep track of them.
+ */
+static int getaarg(P(char *) argp)
+PP(char *argp;)
 {
 	int type, plevel, i;
 	register char *p;
@@ -642,19 +709,29 @@ static int getaarg(char *argp)
 	*ap = '\0';
 	plevel = 0;
 	i = TOKSIZE;
-	while (((type = gettok(token)) != COMMA && type != RPAREN) || plevel)
+	while (((type = gettok(token)) != COMMA && type != RPAREN) || plevel != 0)
 	{
-		for (p = token; (*ap = *p++) != 0; ap++)
-			if (--i <= 0)
+		if (type == NEWL)				/* [vlh] 4.3 multi line macro expansion */
+		{
+			ppputl('\n');
+		} else
+		{
+			for (p = token; (*ap = *p++) != 0; ap++)
 			{
-				error("macro argument too long");
-				return CEOF;
+				if (--i <= 0)
+				{
+					error("macro argument too long");
+					return CEOF;
+				}
 			}
+		}
 		if (type == LPAREN)
+		{
 			plevel++;
-		else if (type == RPAREN)
+		} else if (type == RPAREN)
+		{
 			plevel--;
-		else if (type == CEOF)
+		} else if (type == CEOF)
 		{
 			error("unexpected EOF");
 			cexit();
@@ -666,7 +743,8 @@ static int getaarg(char *argp)
 }
 
 
-static void pbnum(int num)
+static VOID pbnum(P(int) num)
+PP(int num;)
 {
 	register int digit;
 
@@ -679,12 +757,15 @@ static void pbnum(int num)
 }
 
 
-/* expand - expands the macro definition*/
-/*  Checks for define recursion and #define x x problems, collects*/
-/*  the actual arguments using getaarg, and then expands the macro*/
-/*  by pushing it onto the push back buffer, substituting arguments*/
-/*  as it goes.*/
-void expand(struct symbol *sp)
+/*
+ * expand - expands the macro definition
+ *  Checks for define recursion and #define x x problems, collects
+ *  the actual arguments using getaarg, and then expands the macro
+ *  by pushing it onto the push back buffer, substituting arguments
+ *  as it goes.
+ */
+VOID expand(P(struct symbol *) sp)
+PP(struct symbol *sp;)
 {
 	char argbuf[ARGBSIZE];
 	char *args[MAXARGS];
@@ -700,15 +781,17 @@ void expand(struct symbol *sp)
 	if (strcmp(sp->s_name, mdef = sp->s_def) == 0)
 	{									/*handle #define x x */
 		while (*mdef)
-			putl(*mdef++);
+			ppputl(*mdef++);
 		return;
 	}
 	nargs = 0;
 	if (*mdef == NOARGS)				/*suppress grabbing of args */
+	{
 		;
-	else if (getntok(token) != LPAREN)	/* [vlh] 4.1 ignore white space */
+	} else if (getntok(token) != LPAREN)	/* [vlh] 4.1 ignore white space */
+	{
 		pbtok(token);
-	else
+	} else
 	{
 		abp = &argbuf[0];
 		while ((type = getaarg(token)) != CEOF)
@@ -756,15 +839,21 @@ void expand(struct symbol *sp)
 				if ((j = *--p) <= nargs)
 					pbtok(args[j - 1]);
 			} else
+			{
 				putback(*p);
+			}
 		}
 	}
 }
 
 
-/* getntok - get next token, suppressing white space*/
-/*      Merely gettok's until non-white space is there*/
-int getntok(char *token)
+/*
+ * getntok - get next token, suppressing white space
+ *      Merely gettok's until non-white space is there
+ * returns token type
+ */
+int getntok(P(char *) token)
+PP(char *token;)
 {
 	register int type;
 
@@ -782,8 +871,10 @@ int getntok(char *token)
  *  This is all handled with the condition stack and the skip variable.
  *  The skip variable is non-zero if any condition on the condition
  *  stack is SKIP.
+ * returns 0 for CEOF, 1 otherwise
  */
-static int getaline(const char *infile)
+static int getaline(P(const char *) infile)
+PP(const char *infile;)
 {
 	char token[TOKSIZE];
 	register int type, i;
@@ -792,18 +883,18 @@ static int getaline(const char *infile)
 	
 	initl();
 	if ((type = gettok(token)) == CEOF)
-		return 0;
+		return FALSE;
 	if (type == POUND)
 	{
 		if ((type = getntok(token)) == NEWL)
-			return 1;
+			return TRUE;
 		switch (kwlook(token))
 		{
-
 		case IFDEF:
 			if (getntok(token) == ALPHA && lookup(token))
+			{
 				push(NOSKIP);
-			else
+			} else
 			{
 				push(SKIP);
 				skip++;
@@ -816,14 +907,19 @@ static int getaline(const char *infile)
 				push(SKIP);
 				skip++;
 			} else
+			{
 				push(NOSKIP);
+			}
 			break;
 
 		case ENDIF:
 			if ((i = pop()) == SKIP)
+			{
 				skip--;
-			else if (i != NOSKIP)
+			} else if (i != NOSKIP)
+			{
 				error("invalid #endif");
+			}
 			break;
 
 		case ELSE:
@@ -836,7 +932,9 @@ static int getaline(const char *infile)
 				skip++;
 				push(SKIP);
 			} else
+			{
 				error("invalid #else");
+			}
 			break;
 
 		case DEFINE:
@@ -865,18 +963,22 @@ static int getaline(const char *infile)
 			break;
 
 		case IF:
-			if (cexpr())				/*evaluate constant expression */
-				push(NOSKIP);			/*non-zero, so don't skip */
-			else
+			if (!skip && cexpr())		/*evaluate constant expression */
 			{
+				push(NOSKIP);			/*non-zero, so don't skip */
+			} else
+			{							/* don't do if skipping or cexpr evaluates zero */
 				push(SKIP);
 				skip++;
 			}
 			break;
 
 		case LINE:						/* [vlh] 4.0 */
-			doline();
-			return getaline(infile);
+			if (!skip)
+			{							/* [vlh] 4.3, do skip... */
+				doline();
+				return getaline(infile);
+			}
 			break;
 
 		default:
@@ -887,22 +989,23 @@ static int getaline(const char *infile)
 	} else if (type != NEWL)
 	{
 		if (skip)
+		{
 			eatup();
-		else
+		} else
 		{
 			for (; type != NEWL && type != CEOF; type = gettok(token))
 			{
 				if (type == ALPHA && (p = lookup(token)) != NULL)
 				{
 					expand(p);
-				} else if (!special(token, infile))	/* [vlh] 4.1 */
+				} else if (!special(token, infile))
 				{
 					for (cp = token; *cp;)
-						putl(*cp++);
+						ppputl(*cp++);
 				}
 			}
 		}
 	}
-	putl('\0');
-	return 1;
+	ppputl('\0');
+	return TRUE;
 }

@@ -1,14 +1,17 @@
 include ../Makefile.common
 include SRCFILES
 
-LIB =
+PROGRAMS = cp68$(EXEEXT)
 
-all: $(BIN)cp68$(EXEEXT)
+LIBS = $(LIBC)
 
+all: $(PROGRAMS)
 
-$(BIN)cp68$(EXEEXT): ${OBJS}
-	${CC} ${CFLAGS} ${OBJS} ${LIB} -o $@
+cp68$(EXEEXT): ${OBJS}
+	$(AM_V_LD)${CC} ${CFLAGS} ${OBJS} ${LIBS} -o $@
 
+install: all
+	$(CP) cp68$(EXEEXT) $(BIN)
 
 clean::
-	$(RM) *.o
+	$(RM) *.o $(PROGRAMS)

@@ -1,0 +1,10 @@
+- change for (init; cond; expr) into
+  init;
+  for (;;)
+  {
+     if (!cond) break;
+     ...
+     expr;
+  }
+
+- change continue in some for loops into goto start of loop

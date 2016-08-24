@@ -10,15 +10,15 @@
 #define OPPRI   077
 #define OPBIN   0100
 #define STKLEN  64
-int oprstk[STKLEN];						/* operator stack */
-int opnstk[STKLEN];						/* operand stack */
-int pristk[STKLEN];						/* operator priority stack */
-int *oprptr;							/* pointer to operator stack */
-int *opnptr;							/* pointer to operand stack */
-int *priptr;							/* pointer to priority stack */
+int oprstk[STKLEN];					/* operator stack */
+int opnstk[STKLEN];					/* operand stack */
+int pristk[STKLEN];					/* operator priority stack */
+int *oprptr;						/* pointer to operator stack */
+int *opnptr;						/* pointer to operand stack */
+int *priptr;						/* pointer to priority stack */
 int cvalue;
 
-static int const opinfo[] = {
+int const opinfo[] = {
 	0,									/* CEOF=0 */
 	16 | OPBIN,							/* SUB=1 */
 	16 | OPBIN,							/* ADD=2 */
@@ -59,6 +59,7 @@ int cexpr(NOTHING)									/* returns constant evaluated */
 	lop = -1;
 	for (;;)
 	{
+cont:
 		switch (type = getctok())
 		{
 		case CONST:
@@ -71,7 +72,7 @@ int cexpr(NOTHING)									/* returns constant evaluated */
 			}
 			lop = FALSE;
 			*++opnptr = cvalue;
-			continue;
+			goto cont;
 
 		case SUB:
 			if (lop)
@@ -80,7 +81,7 @@ int cexpr(NOTHING)									/* returns constant evaluated */
 
 		case ADD:
 			if (lop)
-				continue;				/* ignore unary + */
+				goto cont;				/* ignore unary + */
 			break;
 
 		case COMPL:
@@ -96,7 +97,7 @@ int cexpr(NOTHING)									/* returns constant evaluated */
 			lop = FALSE;
 			if (!stkop(type))
 				goto syntax;
-			continue;
+			goto cont;
 
 		case NEWL:
 		case CEOF:
@@ -119,7 +120,12 @@ int cexpr(NOTHING)									/* returns constant evaluated */
 	error("expression syntax");
 	if (type == NEWL)
 		putback('\n');
+#ifdef __ALCYON__
+	asm("clr.w d0");
+	asm("nop");
+#else
 	return 0;
+#endif
 }
 
 
@@ -130,7 +136,6 @@ int getctok(NOTHING)
 	register int type;
 	register int c;
 	register int count;
-	register struct symbol *sp;
 	register char *p;
 	char token[TOKSIZE];
 
@@ -143,16 +148,26 @@ int getctok(NOTHING)
 			return CONST;
 
 		case SQUOTE:
-			for (cvalue = 0, p = &token[1], count = 2; --count >= 0;)
+			cvalue = 0;
+			p = &token[1];
+			count = 2;
+			for (;;)
 			{
+				if (--count < 0)
+					break;
 				if ((c = *p++) == '\'')
 					break;
 				if (c == '\\')
 				{
 					if (*p >= '0' && *p <= '7')
 					{
-						for (c = 0; *p >= '0' && *p <= '7';)
+						c = 0;
+						for (;;)
+						{
+							if (*p < '0' || *p > '7')
+								break;
 							c = (c << 3) + (*p++ - '0');
+						}
 					} else
 					{
 						switch (c = *p++)
@@ -174,7 +189,7 @@ int getctok(NOTHING)
 							break;
 
 						case 'f':
-							c = '\f';
+							c = 'f'; /* BUG: should be \f */
 							break;
 						}
 					}
@@ -184,8 +199,8 @@ int getctok(NOTHING)
 			return CONST;
 
 		case ALPHA:
-			if ((sp = lookup(token)) != NULL)
-				expand(sp);
+			if ((p = (char *)lookup(token)) != NULL)
+				expand((struct symbol *) p);
 			else
 				return ALPHA;
 			break;
@@ -211,9 +226,14 @@ PP(int opr;)
 	register int op2;
 	register int pri;
 
+#ifndef __ALCYON__
 	op2 = 0; /* avoid compiler warning */
-	for (pri = opinfo[opr] & OPPRI; pri < *priptr;)
+#endif
+	pri = opinfo[opr] & OPPRI;
+	for (;;)
 	{
+		if (pri >= *priptr)
+			break;
 		if (*oprptr == LPAREN)
 		{
 			if (opr == RPAREN)
@@ -287,10 +307,16 @@ PP(int opr;)
 			break;
 
 		case LSHIFT:
+#ifdef __ALCYON__
+			asm("clr.l d0");
+#endif
 			op1 = op1 << op2;
 			break;
 
 		case RSHIFT:
+#ifdef __ALCYON__
+			asm("clr.l d0");
+#endif
 			op1 = op1 >> op2;
 			break;
 
@@ -330,7 +356,12 @@ PP(int opr;)
 	}
 	*++oprptr = opr;					/* operator value */
 	*++priptr = pri;					/* operator priority */
+#ifdef __ALCYON__
+	asm("moveq.l   #1,d0");
+	asm("nop");
+#else
 	return 1;
+#endif
 }
 
 
@@ -343,7 +374,7 @@ PP(int opr;)
 int constexpr(P(const char *) str)
 PP(const char *str;)
 {
-	register int c, i, radix;
+	register int c, ch, i, radix;
 
 	i = 0;
 	radix = 10;
@@ -356,10 +387,13 @@ PP(const char *str;)
 			str++;
 		}
 	}
-	while ((c = *str++) != 0)
+	for (;;)
 	{
-		if ((c = toupper(c)) >= 'A' && c <= 'F')
-			c = c - ('A' - 10);
+		if ((c = *str++) == 0)
+			break;
+		ch = toupper(c);
+		if (ch >= 'A' && ch <= 'F')
+			c = ch - ('A' - 10);
 		else if (c >= '0' && c <= '9')
 			c -= '0';
 		else
@@ -368,5 +402,10 @@ PP(const char *str;)
 			break;
 		i = i * radix + c;
 	}
+#ifdef __ALCYON__
+	asm("move.w  d5,d0");
+	asm("nop");
+#else
 	return i;
+#endif
 }

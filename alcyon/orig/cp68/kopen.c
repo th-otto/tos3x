@@ -22,8 +22,8 @@
 *
 *****************************************************************************/
 
-#include "lib.h"
-#include "klib.h"
+#include "../libsrc/lib.h"
+#include "../libsrc/klib.h"
 
 int xopen(P(const char *) fname, P(int) mode, P(int) binary)
 PP(const char *fname;)				/* -> File name		    */

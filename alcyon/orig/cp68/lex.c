@@ -7,6 +7,20 @@
 
 #include "preproc.h"
 
+#ifdef WHITESM
+#define ALTER_PR 1
+#endif
+#ifdef GEMDOS
+#define ALTER_PR 1
+#endif
+#ifdef CPM
+#define ALTER_PR 1
+#endif
+
+int status;
+
+extern char null[];
+
 char const ctype[] = {
 	CEOF, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
 	ANYC, WHITE, NEWL, ANYC, ANYC, ANYC, ANYC, ANYC,
@@ -26,13 +40,11 @@ char const ctype[] = {
 	ALPHA, ALPHA, ALPHA, ANYC, OR, ANYC, COMPL, ANYC
 };
 
-struct stackstruc *filep;
-struct stackstruc filestack[FSTACK];
-int lineno;
-char pbbuf[PBSIZE];					/* push back buffer */
-char *pbp;							/* push back pointer */
-int pbflag;							/* checks for recursive definition */
-struct symbol symtab[HSIZE];
+int peekis PROTO((int c));
+int symhash PROTO((const char *sym));
+int symequal PROTO((const char *sym1, const char *sym2));
+
+
 
 
 /*
@@ -41,15 +53,31 @@ struct symbol symtab[HSIZE];
  *      size.
  * returns hash value for symbol
  */
-static int symhash(P(const char *) sym)
+int symhash(P(const char *) sym)
 PP(const char *sym;)
 {
 	register const char *p;
 	register int hashval, i;
 
-	for (p = sym, i = SSIZE, hashval = 0; *p != '\0' && i > 0; i--)
+	p = sym;
+	i = SSIZE;
+	hashval = 0;
+	for (;;)
+	{
+		if (*p == '\0' || i <= 0)
+			break;
 		hashval += *p++;
+		i--;
+	}
+#ifdef __ALCYON__
+	asm("move.w    d7,d0");
+	asm("ext.l     d0");
+	asm("divs.w    #$03FE,d0");
+	asm("swap      d0");
+	asm("nop");
+#else
 	return hashval % (HSIZE - 2);
+#endif
 }
 
 
@@ -58,7 +86,7 @@ PP(const char *sym;)
  *      Does comparison between two symbols.
  * returns 1 if equal, 0 otherwise
  */
-static int symequal(P(const char *) sym1, P(const char *) sym2)
+int symequal(P(const char *) sym1, P(const char *) sym2)
 PP(const char *sym1;)
 PP(const char *sym2;)
 {
@@ -68,14 +96,22 @@ PP(const char *sym2;)
 
 	q = sym2;
 	i = SSIZE;
-	for (p = sym1; *p == *q++;)
+	p = sym1;
+	for (;;)
 	{
+		if (*p != *q++)
+			break;
 		if (*p++ == '\0' || --i == 0)
 		{
 			return TRUE;
 		}
 	}
+#ifdef __ALCYON__
+	asm("clr.w     d0");
+	asm("nop");
+#else
 	return FALSE;
+#endif
 }
 
 
@@ -91,8 +127,13 @@ PP(char *sym2;)
 	register char *q;
 	register int i;
 
-	for (p = sym1, q = sym2, i = SSIZE; --i >= 0;)
+	p = sym1;
+	q = sym2;
+	i = SSIZE;
+	for (;;)
 	{
+		if (--i < 0)
+			break;
 		if (*p)
 			*q++ = *p++;
 		else
@@ -107,12 +148,35 @@ PP(char *sym2;)
  *      Outputs line number and error message and keeps track of errors.
  */
 #ifdef __USE_VARARGS
-VOID error(P(const char *) s, va_alist)
-PP(const char *s;)
-va_dcl
+VOID error(s, x1, x2, x3, x4, x5, x6)
+const char *s;
+int x1, x2, x3, x4, x5, x6;
+{
+#ifndef ALTER_PR
+	if (literal)
+		printf((char *) STDERR, "%s, # line %d: ", lit_file, lit_num);
+	else if (filep == &filestack[0])	/* [vlh] 3.4 not in include */
+		printf((char *) STDERR, "%s, # line %d: ", source, lineno);
+	else
+		printf((char *) STDERR, "%s, # line %d: ", (filep)->ifile, (filep)->lineno);
+	printf((char *) STDERR, s, x1, x2, x3, x4, x5, x6);
+	cputc('\n', STDERR);
 #else
-VOID error(const char *s, ...)
+	if (literal)
+		printf("%s, # line %d: ", lit_file, lit_num);
+	else if (filep == &filestack[0])	/* [vlh] 3.4 not in include */
+		printf("%s, # line %d: ", source, lineno);
+	else
+		printf("%s, # line %d: ", (filep)->ifile, (filep)->lineno);
+	printf(s, x1, x2, x3, x4, x5, x6);
+	printf("\n");
 #endif
+	status++;
+}
+#else
+VOID error(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
 {
 	va_list args;
 	
@@ -128,6 +192,7 @@ VOID error(const char *s, ...)
 	va_end(args);
 	status++;
 }
+#endif
 
 
 /*
@@ -155,8 +220,13 @@ PP(const char *s;)
 {
 	register const char *p;
 
-	for (p = s + strlen(s); p > s;)
+	p = s + (int)strlen(s);
+	for (;;)
+	{
+		if (p <= s)
+			break;
 		putback(*--p);
+	}
 }
 
 
@@ -168,29 +238,54 @@ PP(const char *s;)
  */
 int ngetch(NOTHING)
 {
-	register int c;
+	register int c, i;
+	register char *p, *q;
 
 	if (pbp > &pbbuf[0])
 		return *--pbp;
 	pbflag = 0;
-	while ((c = getc(inbuf)) < 0)
+	for (;;)
 	{
+		c = getc(&(filep->inbuf));
+		if (c >= 0)
+			break;
 		if (filep == &filestack[0])
 			return CEOF;
-		fclose(inbuf);
+		close(fileno(&filep->inbuf));
 		filep--;
-		inbuf = filep->ifd;
+#ifdef NONEST
+		inbuf.cc = filep->tcc;
+		inbuf.cp = filep->tcp;
+		p = &inbuf.cbuf[0];
+		q = &filep->tbuf[0];
+		for (i = 0; i < BSIZE; i++)
+			*p++ = *q++;
+#else
+/*sw This code no longer necessary ...
+		inbuf.cc = 0;
+        inbuf.cp = &inbuf.cbuf[0];
+*/
+#endif
+/*sw    filep->inbuf.fd = filep->ifd; */
 		if (filep == &filestack[0])
 		{								/* need line for #include... */
 			lineno++;
 			putid(source, lineno);		/* [vlh] 4.2 id line .... */
 		} else
 		{
-			(filep - 1)->lineno++;
-			putid((filep - 1)->ifile, (filep - 1)->lineno);
+			(filep)->lineno++;
+			putid((filep)->ifile, (filep)->lineno);
 		}
 	}
+	UNUSED(p);
+	UNUSED(q);
+	UNUSED(i);
+#ifdef __ALCYON__
+	asm("move.w d7,d0");
+	asm("nop");
+#else
 	return c;
+#endif
 }
 
 
@@ -208,8 +303,11 @@ PP(const char *name;)
 
 	wrap = 0;
 	asp = 0;
-	for (sp = &symtab[symhash(name)]; sp->s_def != null;)
+	sp = &symtab[symhash(name)];
+	for (;;)
 	{
+		if (sp->s_def == null)
+			break;
 		if (symequal(sp->s_name, name))
 			return sp;
 		if (!asp && sp->s_def == null)
@@ -224,7 +322,16 @@ PP(const char *name;)
 			sp = &symtab[0];
 		}
 	}
+#ifdef __ALCYON__
+	asm("move.l a4,d0");
+	asm("beq.s *+6");
+	asm("move.l a4,d0");
+	asm("bra.s *+4");
+	asm("move.l a5,d0");
+	asm("nop");
+#else
 	return asp ? asp : sp;
+#endif
 }
 
 
@@ -232,7 +339,7 @@ PP(const char *name;)
  * lookup - looks up a symbol to see if it is defined
  *		Returns pointer to definition if found.
  */
-struct symbol *lookup(P(const char *) name)
+char *lookup(P(const char *) name)
 PP(const char *name;)
 {
 	register struct symbol *sp;
@@ -240,25 +347,12 @@ PP(const char *name;)
 	sp = getsp(name);
 	if (sp->s_def == 0 || sp->s_def == null)
 		return NULL;
-	return sp;
-}
-
-
-/*
- * peekis - peeks at next character for specific character
- *      Gets next (possibly pushed back) character, if it matches
- *      the given character 1 is returned, otherwise the character
- *      is put back.
- */
-static int peekis(P(int) tc)
-PP(int tc;)
-{
-	register int c;
-
-	if ((c = ngetch()) == tc)
-		return TRUE;
-	putback(c);
-	return FALSE;
+#ifdef __ALCYON__
+	asm("move.l a5,d0");
+	asm("nop");
+#else
+	return (char *) sp;
+#endif
 }
 
 
@@ -271,7 +365,7 @@ int gettok(P(char *) token)
 PP(char *token;)
 {
 	register char *p;
-	register int c;
+	register char c;
 	register char *s;
 	register int type;
 	register int t;
@@ -280,7 +374,7 @@ PP(char *token;)
 	p = token;
 	c = ngetch();
 	*p++ = c;
-	switch (type = ctype[c])
+	switch (type = ctype[(__uint8_t)c])
 	{
 	case SQUOTE:
 	case DQUOTE:
@@ -294,11 +388,12 @@ PP(char *token;)
 
 	case DIGIT:
 	case ALPHA:
-		for (; p < &token[TOKSIZE]; p++)
+		for (; ; p++)
 		{
-			c = ngetch();
-			*p = c;
-			if ((t = ctype[c]) != ALPHA && t != DIGIT)
+			if (p >= &token[TOKSIZE])
+				break;
+			*p = ngetch();
+			if ((t = ctype[(__uint8_t)*p]) != ALPHA && t != DIGIT)
 				break;
 		}
 		putback(*p);
@@ -351,23 +446,28 @@ PP(char *token;)
 				ppputl('/');
 				ppputl('*');
 			}
-			l = lineno;
-			while ((c = ngetch()) != CEOF)
+			l = 0;						/* [vlh] 4.3, change in line counting technique */
+			for (;;)
 			{
+				if ((c = ngetch()) == CEOF)
+					break;
 				if (c == '\n')
 				{
-					if (filep == &filestack[0] && pbp == &pbbuf[0])
-						lineno++;
+					l++;				/* [vlh] 4.3, keep line counter */
 					if (Cflag)
 					{					/* [vlh] 4.2 */
 						ppputl('\0');
 						s = line;
-						while (*s)
-							fputc(*s++, outbuf);
+						for (;;)
+						{
+							if (*s == 0)
+								break;
+							doputc(*s++, &outbuf);
+						}
 						initl();
 					}
-					fputc(' ', outbuf);
-					fputc('\n', outbuf);
+					doputc(' ', &outbuf);
+					doputc('\n', &outbuf);
 				} else if (c == '*' && peekis('/'))
 				{
 					if (Cflag)
@@ -382,10 +482,11 @@ PP(char *token;)
 				}
 			}
 			if (c == CEOF)
-			{
-				lineno = l;
 				error("no */ before EOF");
-			}
+			if (filep == &filestack[0])	/* [vlh] 4.3 */
+				lineno += l;
+			else						/* [vlh] 4.3, update include lineno */
+				(filep)->lineno += l;
 			type = WHITE;
 			token[0] = ' ';
 		} else if (peekis('/'))
@@ -395,8 +496,10 @@ PP(char *token;)
 				ppputl('/');
 				ppputl('/');
 			}
-			while ((c = ngetch()) != CEOF && c != '\n')
+			for (;;)
 			{
+				if ((c = ngetch()) == CEOF || c == '\n')
+					break;
 				if (Cflag)
 					ppputl(c);
 			}
@@ -411,7 +514,12 @@ PP(char *token;)
 
 	}
 	*p = '\0';
+#ifdef __ALCYON__
+	asm("move.w d6,d0");
+	asm("nop");
+#else
 	return type;
+#endif
 }
 
 
@@ -429,14 +537,20 @@ PP(char endc;)
 
 	p = str;
 	*p++ = endc;
-	for (i = nchars - 2; (c = ngetch()) != endc;)
+	for (i = nchars - 2; ;)
 	{
+		if ((c = ngetch()) == endc)
+			break;
 		if (c == CEOF || c == '\n')
 		{								/* [vlh] 4.3, ignore non ended string */
 			*p = '\0';
 			p = str;
-			while (*p)
+			for (;;)
+			{
+				if (*p == '\0')
+					break;
 				ppputl((int) *p++);
+			}
 			return FALSE;
 		}								/* [vlh] 4.3, may be assembly language comment !!!! */
 		if (--i > 0)
@@ -454,5 +568,71 @@ PP(char endc;)
 	}
 	*p++ = endc;
 	*p = '\0';
+#ifdef __ALCYON__
+	asm("moveq #1,d0");
+	asm("nop");
+#else
 	return TRUE;
+#endif
 }
+
+
+/*
+ * peekis - peeks at next character for specific character
+ *      Gets next (possibly pushed back) character, if it matches
+ *      the given character 1 is returned, otherwise the character
+ *      is put back.
+ */
+int peekis(P(int) tc)
+PP(int tc;)
+{
+	register int c;
+
+	if ((c = ngetch()) == tc)
+		return TRUE;
+	putback(c);
+#ifdef __ALCYON__
+	asm("clr.w d0");
+	asm("nop");
+#else
+	return FALSE;
+#endif
+}
+
+
+VOID doputc(P(char) ch, P(struct iob *) buffer)
+PP(char ch;)
+PP(struct iob *buffer;)
+{
+	if (!Eflag)
+		putc(ch, buffer);
+	else
+		putchar(ch);
+}
+
+
+#ifdef DECC								/*sw You should really do this as a library... */
+int getc(ibuf)
+struct iob *ibuf;
+{
+	if (ibuf->cc <= 0)
+	{
+		ibuf->cp = &(ibuf->cbuf[0]);
+		ibuf->cc = read(ibuf->fd, ibuf->cp, BSIZE);
+	}
+	if (ibuf->cc <= 0)
+		return EOF;
+	ibuf->cc--;
+	return ((int) (*(ibuf->cp)++) & 0xff);
+}
+
+
+int fopen(fname, ibuf)
+char *fname;
+register struct iob *ibuf;
+{
+	ibuf->cc = 0;						/* no chars */
+	ibuf->fd = open(fname, 0);
+	return ibuf->fd;
+}
+#endif

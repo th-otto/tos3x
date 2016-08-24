@@ -13,6 +13,7 @@
 #endif
 
 #ifndef __USE_STDARG
+#define __USE_VARARGS 1
 /* ..it was a lie */
 #include <varargs.h>
 #else

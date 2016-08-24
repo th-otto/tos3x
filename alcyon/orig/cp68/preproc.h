@@ -10,8 +10,50 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../util/util.h"
+#include "../libsrc/klib.h"
 
+#ifdef __ALCYON__
+#  define UNUSED(x)
+#else
+#  define UNUSED(x) ((void)(x))
+#endif
+
+#ifndef CPM
+#ifndef GEMDOS
+#ifndef DECC
+#ifndef VERSADOS
+#ifndef VAX11
+#ifndef PDP11
+you loose
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+#ifdef GEMDOS
+#  undef CPM /* just in case; original version seems to have this defined */
+#endif
+
+#ifdef DECC
+#	define NONEST	1
+#endif
+
+#ifdef VERSADOS
+#	define NONEST	1
+#	define NOFORKS	1
+#endif
+
+#ifdef VAX11
+#	ifndef VMS
+#		define UNIX 1
+#	endif
+#endif
+
+#ifdef PDP11
+#	define UNIX 1
+#endif
 
 /* cexpr operators */
 #define CEOF		0
@@ -83,6 +125,7 @@
 #define	TOKSIZE		300
 #define	DEFSIZE		1024
 #define PBSIZE		1000
+#define STDERR		2				/* [vlh] 4.2, write errors to.... */
 
 #define TRUE		1
 #define FALSE		0
@@ -93,6 +136,7 @@
 #define FILESEP2    '\\'
 #define NINCL       10
 #define LABSTART    1000
+#define NUMLEN      6
 
 #ifndef VERSADOS
 #	define	HSIZE	1024
@@ -100,57 +144,67 @@
 #	define	HSIZE	2048
 #endif
 
-	/* Symbol Table Entry structure */
+/* Symbol Table Entry structure */
 struct symbol {
 	char s_name[SSIZE];
 	char *s_def;
-};
-extern struct symbol symtab[HSIZE];
+} symtab[HSIZE];
 
 /* buffered I/O structure */
-extern FILE *inbuf, *outbuf;
+struct iob outbuf;
 
 /* command line define structure */
 struct defstruc {
 	char *ptr;
 	char *value;
-};
-extern struct defstruc defs[NDEFS];
+} defs[NDEFS];
 
 #define	FSTACK	 10
 #define MAXPSIZE 128
 struct stackstruc {
-	FILE *ifd;
+	int ifd;
 	char ifile[MAXPSIZE];
 	int lineno;
-};
-extern struct stackstruc filestack[FSTACK], *filep;		/* stack of incl files, ptr to... */
+#ifdef NONEST
+	char tbuf[BSIZE];		/* hold buffer in include... */
+	int tcc;				/* hold count into buffer... */
+	char *tcp;				/* pointer into buffer... */
+#else						/*sw Nesting really could be allowed on all */
+	struct iob inbuf;		/*sw Moved this for include file nesting */
+#endif
+} filestack[FSTACK], *filep;		/* stack of incl files, ptr to... */
 
 /* Variables used by #line macros */
-extern int literal;			/* 4.0 using #line */
-extern int lit_num;			/* for error messages */
-extern char lit_file[];		/* for error messages */
+int literal;			/* using #line */
+int lit_num;			/* for error messages */
+extern char lit_file[/* MAXPSIZE */];		/* for error messages */
 
 /* Flag Variable Declarations */
-extern int pflag;
-extern int Cflag;
-extern int Eflag;
-extern int asflag;
-extern char *source;			/* preprocessor source file */
-extern char dest[MAXPSIZE];		/* preprocessor destination file */
+int pflag;
+int Cflag;
+int Eflag;
+int asflag;
+char *source;			/* preprocessor source file */
+char dest[MAXPSIZE];	/* preprocessor destination file */
+
+/* Miscellaneous Variable Declarations */
+int skip;							/* skipping current line */
+char *defap;						/* pointer to available define area */
+char *defp;							/* pointer to next avail define byte */
+int defcount;						/* bytes left in define area */
+int defused;						/* number of bytes used in define area */
+int defmax;							/* maximum define area used */
 
 /* line to output after macro substitution */
-extern char line[LINESIZE+2];				/* line buffer */
-extern char *linep;							/* current line pointer */
-extern int loverflow;						/* line overflow flag */
-extern int lineno;
+char line[LINESIZE+2];				/* line buffer */
+char *linep;						/* current line pointer */
+int loverflow;						/* line overflow flag */
+int lineno;
 
 /* push back buffer */
-extern char pbbuf[PBSIZE];					/* push back buffer */
-extern char *pbp;							/* push back pointer */
-extern int pbflag;							/* checks for recursive definition */
-
-extern char null[];
+char pbbuf[PBSIZE];					/*push back buffer*/
+char *pbp;							/*push back pointer*/
+int pbflag;							/*checks for recursive definition*/
 
 /* Function declarations */
 
@@ -165,8 +219,6 @@ int constexpr PROTO((const char *str));
 /*
  * lex.c
  */
-extern char const ctype[];
-
 VOID symcopy PROTO((const char *sym1, char *sym2));
 VOID error PROTO((const char *s, ...)) __attribute__((format(printf, 1, 2)));
 VOID putback PROTO((int c));
@@ -175,14 +227,13 @@ int ngetch PROTO((NOTHING));
 struct symbol *getsp PROTO((const char *name));
 int gettok PROTO((char *token));
 int getstr PROTO((char *str, int nchars, char endc));
-struct symbol *lookup PROTO((const char *name));
+char *lookup PROTO((const char *name));
+VOID doputc PROTO((char ch, struct iob *buffer));
+
 
 /*
  * macro.c
  */
-extern int nincl;
-extern char *incl[NINCL];
-
 VOID putid PROTO((const char *fname, int lnum));
 VOID install PROTO((const char *name, int def));
 VOID dinstall PROTO((const char *name, const char *def));
@@ -194,12 +245,12 @@ VOID expand PROTO((struct symbol *sp));
 int getntok PROTO((char *token));
 int domacro PROTO((int nd));
 
+
 /*
  * main.c
  */
-extern int status;
-
 VOID cexit PROTO((NOTHING));
 VOID itoa PROTO((int n, char *s, int w));
 int strindex PROTO((const char *str, char chr));
 int atoi PROTO((const char *as));
+VOID cputc PROTO((char c, int fn));
