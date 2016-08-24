@@ -218,9 +218,9 @@ static int search_lib(NOTHING)
 					if (nummatches == 0)
 					{
 						matchmember = m;
-						matchpos = ((const char *)start) - prg_image;;
+						matchpos = ((const char *)start) - prg_image;
 						nummatches++;
-					} else if (matchmember->tsize == m->tsize)
+					} else if (matchmember->tsize == m->tsize && matchpos == ((const char *)start) - prg_image)
 					{
 						fprintf(stderr, "ambiguous: %s and %s\n", matchmember->name, m->name);
 						nummatches++;
