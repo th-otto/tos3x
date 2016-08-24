@@ -173,6 +173,9 @@ static int search_lib(NOTHING)
 	register long j;
 	register struct member *m;
 	register int match, thismatch, anymatch;
+	int nummatches;
+	struct member *matchmember;
+	long matchpos;
 	const unsigned short *tryend;
 	const unsigned short *start;
 	long matchlen;
@@ -185,6 +188,9 @@ static int search_lib(NOTHING)
 		{
 			continue;
 		}
+		nummatches = 0;
+		matchmember = NULL;
+		matchpos = 0;
 		for (i = 0; i < num_members; i++)
 		{
 			m = sorted_members[i];
@@ -209,111 +215,124 @@ static int search_lib(NOTHING)
 				if (thismatch)
 				{
 					match = TRUE;
+					if (nummatches == 0)
+					{
+						matchmember = m;
+						matchpos = ((const char *)start) - prg_image;;
+						nummatches++;
+					} else if (matchmember->tsize == m->tsize)
+					{
+						fprintf(stderr, "ambiguous: %s and %s\n", matchmember->name, m->name);
+						nummatches++;
+					}
 					break;
 				}
 				start++;
 			}
+		}
+		if (nummatches != 0)
+		{
+			struct segment *news;
 			
-			next = s->next;
-			if (match)
+			m = matchmember;
+			anymatch = TRUE;
+			matchlen = m->tsize << 1;
+			m->found = TRUE;
+			/*
+			 * this sometimes happens for modules which produce identical code,
+			 * but reference different external symbols
+			 */
+#if DEBUG
+			if (nummatches > 1)
+				fprintf(stderr, "ambiguous match found at %08lx-%08lx, using %s\n", matchpos, matchpos + (m->tsize << 1), m->name);
+			printf("%s found at %08lx-%08lx\n", m->name, matchpos, matchpos + (m->tsize << 1));
+#endif
+			if (matchpos == s->pos)
 			{
-				long pos = ((const char *)start) - prg_image;
-				struct segment *news;
-				
-				anymatch = TRUE;
-				matchlen = m->tsize << 1;
-				m->found = TRUE;
-#if DEBUG
-				printf("%s found at %08lx-%08lx\n", m->name, pos, pos + (m->tsize << 1));
-#endif
-				if (pos == s->pos)
+				/* match at start of segment */
+				if (matchlen == s->size)
 				{
-					/* match at start of segment */
-					if (matchlen == s->size)
-					{
-						/* exact match of segment */
-						s->mem = m;
+					/* exact match of segment */
+					s->mem = m;
 #if DEBUG
-						printf("exact match\n");
+					printf("exact match\n");
 #endif
-					} else
-					{
-						/* mark start of found text, put remainder in new segment */
-						news = (struct segment *)malloc(sizeof(*s));
-						news->pos = s->pos + matchlen;
-						news->size = s->size - matchlen;
-						news->mem = NULL;
-						news->next = s->next;
-						news->prev = s;
-						s->next->prev = news;
-						s->next = news;
-						s->mem = m;
-						s->size = matchlen;
-						/* continue search with new segment */
-						next = news;
-#if DEBUG
-						printf("match at start match %08lx-%08lx remain %08lx-%08lx\n",
-							s->pos, s->pos + s->size,
-							news->pos, news->pos + news->size);
-#endif
-					}
 				} else
 				{
-					if ((pos + matchlen) == (s->pos + s->size))
-					{
-						/* match at end of segment */
-						news = (struct segment *)malloc(sizeof(*s));
-						news->pos = pos;
-						news->size = matchlen;
-						news->mem = m;
-						news->next = s->next;
-						news->prev = s;
-						s->next->prev = news;
-						s->next = news;
-						s->size -= matchlen;
-						/* continue search with old segment */
-						next = s;
+					/* mark start of found text, put remainder in new segment */
+					news = (struct segment *)malloc(sizeof(*s));
+					news->pos = s->pos + matchlen;
+					news->size = s->size - matchlen;
+					news->mem = NULL;
+					news->next = s->next;
+					news->prev = s;
+					s->next->prev = news;
+					s->next = news;
+					s->mem = m;
+					s->size = matchlen;
+					/* continue search with new segment */
+					next = news;
 #if DEBUG
-						printf("match at end remain %08lx-%08lx match %08lx-%08lx\n",
-							s->pos, s->pos + s->size,
-							news->pos, news->pos + news->size);
+					printf("match at start match %08lx-%08lx remain %08lx-%08lx\n",
+						s->pos, s->pos + s->size,
+						news->pos, news->pos + news->size);
 #endif
-					} else
-					{
-						long remain = s->pos + s->size - pos - matchlen;
-						
-						/* match in middle of segment */
-						news = (struct segment *)malloc(sizeof(*s));
-						news->pos = pos;
-						news->size = matchlen;
-						news->mem = m;
-						news->next = s->next;
-						news->prev = s;
-						s->next->prev = news;
-						s->next = news;
-						s->size = pos - s->pos;
-						/* continue search with old segment */
-						next = s;
-
-						s = news;
-						news = (struct segment *)malloc(sizeof(*s));
-						news->pos = s->pos + matchlen;
-						news->size = remain;
-						news->mem = NULL;
-						news->next = s->next;
-						news->prev = s;
-						s->next->prev = news;
-						s->next = news;
-
-#if DEBUG
-						printf("match in middle before  %08lx-%08lx match %08lx-%08lx after %08lx-%08lx\n",
-							s->prev->pos, s->prev->pos + s->prev->size,
-							s->pos, s->pos + s->size,
-							news->pos, news->pos + news->size);
-#endif
-					}
 				}
-				break;
+			} else
+			{
+				if ((matchpos + matchlen) == (s->pos + s->size))
+				{
+					/* match at end of segment */
+					news = (struct segment *)malloc(sizeof(*s));
+					news->pos = matchpos;
+					news->size = matchlen;
+					news->mem = m;
+					news->next = s->next;
+					news->prev = s;
+					s->next->prev = news;
+					s->next = news;
+					s->size -= matchlen;
+					/* continue search with old segment */
+					next = s;
+#if DEBUG
+					printf("match at end remain %08lx-%08lx match %08lx-%08lx\n",
+						s->pos, s->pos + s->size,
+						news->pos, news->pos + news->size);
+#endif
+				} else
+				{
+					long remain = s->pos + s->size - matchpos - matchlen;
+					
+					/* match in middle of segment */
+					news = (struct segment *)malloc(sizeof(*s));
+					news->pos = matchpos;
+					news->size = matchlen;
+					news->mem = m;
+					news->next = s->next;
+					news->prev = s;
+					s->next->prev = news;
+					s->next = news;
+					s->size = matchpos - s->pos;
+					/* continue search with old segment */
+					next = s;
+
+					s = news;
+					news = (struct segment *)malloc(sizeof(*s));
+					news->pos = s->pos + matchlen;
+					news->size = remain;
+					news->mem = NULL;
+					news->next = s->next;
+					news->prev = s;
+					s->next->prev = news;
+					s->next = news;
+
+#if DEBUG
+					printf("match in middle before  %08lx-%08lx match %08lx-%08lx after %08lx-%08lx\n",
+						s->prev->pos, s->prev->pos + s->prev->size,
+						s->pos, s->pos + s->size,
+						news->pos, news->pos + news->size);
+#endif
+				}
 			}
 		}
 	}
