@@ -38,21 +38,27 @@ static struct hdr couthd;
 #define SZMT 300						/* initial size of the main table */
 					/* must be large enough to initialize */
 #define ICRSZMT 100						/* add to main table when run out */
-static int cszmt;						/* current size of main table */
+static size_t cszmt;					/* current size of main table */
 
-static char *bmte;						/* beginning of main table */
-static char *emte;						/* end of main table */
+static struct symtab *bmte;				/* beginning of main table */
+static struct symtab *emte;				/* end of main table */
 
+struct symhash {
+	struct symtab *last;		/* ptr to last entry in chain */
+	struct symtab *first;		/* ptr to first entry in chain */
+};
 /* initial reference table for externals */
-# define SZIRT	64
-static struct symtab *eirt[SZIRT];
-static struct symtab *saveirt[SZIRT];
+# define SZIRT	32
+static struct symhash eirt[SZIRT];
+static struct symhash saveirt[SZIRT];
+
+
 
 /* initial reference table for globals */
-static struct symtab *girt[SZIRT];
-static struct symtab *savgirt[SZIRT];
+static struct symhash girt[SZIRT];
+static struct symhash savgirt[SZIRT];
 
-static struct symtab **pirt;
+static struct symhash *pirt;
 
 static struct symtab *lmte;							/* last entry in main table */
 
@@ -462,7 +468,7 @@ static int hash(NOTHING)
 	p = &lmte->name[0];
 	for (i = 0; i < SYNAMLEN; i++)
 		ht1 += *p++;
-	return ht1 & (SZIRT - 2);					/* make hash code even and between 0 and 62 */
+	return ht1 & (SZIRT - 1);					/* make hash code even and between 0 and 62 */
 }
 
 static struct symtab *nextsy(P(struct symtab *) amtpt)
@@ -489,17 +495,17 @@ PP(struct symtab *amtpt;)
 	return mtpt;
 }
 
-static struct symtab *lemt(P(struct symtab **) airt)
-PP(struct symtab **airt;)
+static struct symtab *lemt(P(struct symhash *) airt)
+PP(struct symhash *airt;)
 {
 	register struct symtab *mtpt;
 
 	pirt = airt + hash();				/* pointer to entry in irt */
-	mtpt = ((struct irts *)pirt)->irfe;					/* pointer to first entry in chain */
-	if (mtpt == 0)						/* empty chain */
+	mtpt = pirt->first;					/* pointer to first entry in chain */
+	if (mtpt == NULL)					/* empty chain */
 		mtpt = lmte;					/* start at end of main table */
 	else
-		(((struct irts *)pirt)->irle)->tlnk = lmte;		/* last entry in chain is new symbol */
+		pirt->last->tlnk = lmte;		/* last entry in chain is new symbol */
 	return nextsy(mtpt);				/* return next match on chain */
 }
 
@@ -853,14 +859,14 @@ PP(const char *p;)
 static VOID addmte(NOTHING)
 {
 	lmte++;			/* bump last main table entry pointer */
-	if ((char *)lmte >= emte)
+	if (lmte >= emte)
 	{									/* main table overflow */
 		if (sbrk(sizeof(*symptr) * ICRSZMT) == (char *)-1)
 		{
 			fatalx(FALSE, _("symbol table overflow\n"));			/* could not get more memory */
 		} else
 		{								/* move end of main table */
-			emte += sizeof(*symptr) * ICRSZMT;
+			emte += ICRSZMT;
 			cszmt += ICRSZMT;
 		}
 	}
@@ -875,9 +881,9 @@ static VOID addmte(NOTHING)
 
 static VOID mmte(NOTHING)
 {
-	((struct irts *)pirt)->irle = lmte;					/* pointer to last entry in chain */
-	if (((struct irts *)pirt)->irfe == 0)				/* first entry in chain */
-		((struct irts *)pirt)->irfe = lmte;
+	pirt->last = lmte;					/* pointer to last entry in chain */
+	if (pirt->first == NULL)			/* first entry in chain */
+		pirt->first = lmte;
 	addmte();
 }
 
@@ -948,7 +954,7 @@ static VOID addsym(NOTHING)
 
 static VOID savsymtab(NOTHING)
 {
-	register struct symtab **p1, **p2;
+	register struct symhash *p1, *p2;
 	register int i;
 
 	savlmte = lmte;
@@ -965,7 +971,7 @@ static VOID savsymtab(NOTHING)
 /* restore the symbol table as it was when we last saved it */
 static VOID restsymtab(NOTHING)
 {
-	register struct symtab **p1, **p2;
+	register struct symhash *p1, *p2;
 	register int i;
 
 	lmte = savlmte;
@@ -1407,26 +1413,24 @@ PP(int order;)								/* specifies which order walk   */
 
 static VOID intsytab(NOTHING)
 {
-	register struct symtab **p1;
-	register struct symtab **p2;
+	register struct symhash *p1;
+	register struct symhash *p2;
 	register int i;
 
-	bmte = sbrk(sizeof(*symptr) * SZMT + 2);
-	emte = bmte + sizeof(*symptr) * SZMT;	/* end of main table */
+	bmte = (struct symtab *)sbrk(sizeof(*symptr) * SZMT + 2);
+	emte = bmte + SZMT;	/* end of main table */
 	if ((long) bmte & 1)
 		bmte++;
-	lmte = (struct symtab *)bmte;						/* beginning main table */
+	lmte = bmte;						/* beginning main table */
 	cszmt = SZMT;						/* current size of main table */
 	p1 = eirt;
 	p2 = girt;
-	for (i = 0; i < (SZIRT / 2); i++)
+	for (i = 0; i < SZIRT; i++, p1++, p2++)
 	{
-		*p1 = (VOIDPTR)p1;
-		p1++;
-		*p1++ = 0;
-		*p2 = (VOIDPTR)p2;
-		p2++;
-		*p2++ = 0;
+		p1->last = (struct symtab *)p1;
+		p1->first = NULL;
+		p2->last = (struct symtab *)p2;
+		p2->first = NULL;
 	}
 }
 
@@ -1547,23 +1551,23 @@ astry2:
 static VOID fixexts(NOTHING)
 {
 	register struct symtab *p;
-	register struct symtab **sx1, **sx2;
+	register struct symhash *sx1;
+	register struct symtab *sx2;
 
-	for (sx1 = eirt; sx1 < &eirt[SZIRT - 1]; sx1 += 2)
+	for (sx1 = eirt; sx1 < &eirt[SZIRT]; sx1++)
 	{									/* go thru externals */
-		if (*(sx2 = sx1 + 1) == 0)		/* this chain empty */
+		if ((sx2 = sx1->first) == NULL)		/* this chain empty */
 			continue;
 
 		/* go thru symbols on chain */
-		sx2 = (struct symtab **)*sx2;						/* first entry on this chain */
-		while (1)
+		for (;;)
 		{
-			if (!(((struct symtab *)sx2)->vl1))			/* skip overlay calls   */
-				asgnext((struct symtab *)sx2);			/* match to a global    */
-			p = (struct symtab *)sx2;
-			if (p == *sx1)				/* end of chain */
+			if (sx2->vl1 == 0)			/* skip overlay calls   */
+				asgnext(sx2);			/* match to a global    */
+			p = sx2;
+			if (p == sx1->last)			/* end of chain */
 				break;
-			sx2 = (struct symtab **)(((struct symtab *)sx2)->tlnk);			/* next entry in chain */
+			sx2 = sx2->tlnk;			/* next entry in chain */
 		}
 	}
 }
@@ -1582,7 +1586,7 @@ static VOID fixsyms(NOTHING)
 {
 	register struct symtab *p;
 
-	for (p = (struct symtab *)bmte; p < lmte; p++)
+	for (p = bmte; p < lmte; p++)
 	{									/* look at each symbol */
 		if (p->flags & SYXR)
 			continue;
@@ -1715,26 +1719,26 @@ PP(struct symtab *ap;)
 static VOID fixcoms(NOTHING)
 {
 	register struct symtab *p;
-	register struct symtab **sx1, **sx2;
+	register struct symhash *sx1;
+	register struct symtab *sx2;
 	long oldtop;
 
 	oldtop = ovtree[ROOT]->ovcap - ovtree[ROOT]->ovbsbase;
 	bsscomm = oldtop;					/* current free bss */
-	for (sx1 = eirt; sx1 < &eirt[SZIRT - 1]; sx1 += 2)
+	for (sx1 = eirt; sx1 < &eirt[SZIRT]; sx1++)
 	{									/* go thru externals */
-		if (*(sx2 = sx1 + 1) == 0)		/* this chain empty */
+		if ((sx2 = sx1->first) == NULL)		/* this chain empty */
 			continue;
 
 		/* go thru symbols on chain */
-		sx2 = (struct symtab **)*sx2;						/* first entry on this chain */
-		while (1)
+		for (;;)
 		{
-			if (((struct symtab *)sx2)->vl1)
-				asgncomn((struct symtab *)sx2);			/* assign a common address */
-			p = (struct symtab *)sx2;
-			if (p == *sx1)				/* end of chain */
+			if (sx2->vl1 != 0)
+				asgncomn(sx2);			/* assign a common address */
+			p = sx2;
+			if (p == sx1->last)			/* end of chain */
 				break;
-			sx2 = (struct symtab **)(((struct symtab *)sx2)->tlnk);			/* next entry in chain */
+			sx2 = sx2->tlnk;			/* next entry in chain */
 		}
 	}
 	ovtree[ROOT]->ovcap += (bsscomm - oldtop);	/* adjust for common   */
@@ -1968,7 +1972,7 @@ static VOID osymt(NOTHING)
 
 /* now output the symbols deleting externals */
 
-	for (p = (struct symtab *)bmte; p < lmte; p++)
+	for (p = bmte; p < lmte; p++)
 	{
 		if (p->flags & SYXR)			/* external symbol */
 			continue;
@@ -2101,7 +2105,7 @@ static VOID dumpsyms(NOTHING)
 	printf("\nDUMP OF INTERNAL SYMBOL TABLE\n");
 	printf("BMTE = %lx, LMTE = %lx\n\n", (long)bmte, (long)lmte);
 
-	for (p = (struct symtab *)bmte; p < lmte; p++)
+	for (p = bmte; p < lmte; p++)
 	{
 		printf("NAME:    %s\n", p->name);
 		printf("FLAGS:   ");
