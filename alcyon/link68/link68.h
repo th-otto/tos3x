@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#define _(x) x
+
 #define LINK68 1
 
 #include <sendc68.h>
@@ -30,7 +32,7 @@
 #define	ROOT	 0	/* overlay number for root */
 #define JSRL	0x4EB9	/* jsr to long address */
 #define	JMPL	0x4EF9	/* jmp to long address */
-#define DEFTYPE	".O"	/* default file type */
+#define DEFTYPE	".o"	/* default file type */
 #define DEFLEN	2	/* length of deftype */
 
 /*
@@ -120,21 +122,6 @@ extern int numovls;			/* number of actual overlays */
 
 /* structure of entry in output overlay table */
 
-struct ovtab {
-	char tbname[8];			/* file name -- pad with blanks */
-	char tbext[4];			/* file extension -- no dot (.) */
-	long tbldpt;			/* load point for module */
-};
-
-/* structure of an indirect call to an overlay routine */
-
-struct ovcalblk {
-	short jsrovh;			/* call overlay handler */
-	long ovhandlr;			/* address of overlay handlr */
-	long ovtabad;			/* pointer into overlay table */
-	short jmprout;			/* jump to overlayed routine */
-	long routaddr;			/* address to jump to */
-};
 
 
 extern long textstart;

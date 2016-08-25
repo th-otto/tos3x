@@ -174,25 +174,6 @@ struct ovtrnode {			/* info about each overlay */
 extern struct ovtrnode *ovtree[MAXOVLS+1]; /* leave room for root info */
 extern int numovls;			/* number of actual overlays */
 
-/* structure of entry in output overlay table */
-
-struct ovtab {
-	char tbname[8];			/* file name -- pad with blanks */
-	char tbext[4];			/* file extension -- no dot (.) */
-	union mlong tbldpt;			/* load point for module */
-};
-
-/* structure of an indirect call to an overlay routine */
-
-struct ovcalblk {
-	short jsrovh;			/* call overlay handler */
-	union mlong ovhandlr;	/* address of overlay handlr */
-	union mlong ovtabad;	/* pointer into overlay table */
-	short jmprout;			/* jump to overlayed routine */
-	union mlong routaddr;	/* address to jump to */
-};
-
-
 extern union mlong textstart;
 extern union mlong datastart;
 extern union mlong bssstart;

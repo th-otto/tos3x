@@ -21,6 +21,11 @@
 int fclose(P(FILE *) sp)
 PP(register FILE *sp;)
 {
+	if (!__validfp(sp))
+	{
+		__set_errno(EINVAL);
+		return EOF;
+	}
 	if (sp->_flag & (_IOREAD | _IOWRT))	/* is it closeable?     */
 	{									/* yup...           */
 		fflush(sp);						/* do the flush         */

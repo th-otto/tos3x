@@ -76,6 +76,8 @@ static long bsssize;
 static long stacksize;
 
 static const char *ifilname;			/* points to name of current input file  */
+static char ilibmem[FNAMELEN * 2 + 2];
+static const char *ilibname;
 
 static const char *outfname;			/* points to name of current output file */
 
@@ -119,7 +121,6 @@ struct lib2hdr
 	long l2fsize;
 	short l2junk;
 };
-static struct lib2hdr *lib2hd;
 
 #define	ARMAG	"!<arch>\n"
 #define	SARMAG	8
@@ -167,6 +168,26 @@ static char rdfnc;
 
 static int saverbits;
 
+#define TBNAMESIZE 8
+#define TBEXTSIZE  3
+struct ovtab {
+	char tbname[TBNAMESIZE];	/* file name -- pad with blanks */
+	char tbext[TBEXTSIZE + 1];	/* file extension -- no dot (.) */
+	long tbldpt;				/* load point for module */
+};
+#define SIZEOF_OVTAB 16
+
+/* structure of an indirect call to an overlay routine */
+
+struct ovcalblk {
+	short jsrovh;			/* call overlay handler */
+	long ovhandlr;			/* address of overlay handlr */
+	long ovtabad;			/* pointer into overlay table */
+	short jmprout;			/* jump to overlayed routine */
+	long routaddr;			/* address to jump to */
+};
+#define SIZEOF_OVCALBLK 16
+
 static struct ovtab ovtab1;
 
 /* 68000 linking loader -- adapted from */
@@ -192,7 +213,7 @@ static char libname[] = "lib6.a";
 #endif
 
 #ifdef GEMDOS
-static char libname[] = "lib6.a";
+static char libname[] = "libc.a";
 #define	LIBCHAR	libname[3]				/* Character to be modified */
 #endif
 
@@ -209,8 +230,8 @@ static const char *tfbase = "loXXXXXA";				/* Temp base name   */
 char tdisk[DRIVELEN];					/* Temp disk name   */
 #endif
 
-char *tfchar;							/* -> changeable character */
-char tfilname[80];						/* first temp file name */
+static char *tfchar;							/* -> changeable character */
+static char tfilname[80];						/* first temp file name */
 
 #define TFCHAR *tfchar					/* Name to simplify assignments */
 static char const etexstr[] = "_etext\0\0";
@@ -224,6 +245,7 @@ static long rdtsize;						/* size of root's data          */
 static long hihiaddr;						/* first even word above whole program  */
 
 static long ovtable;						/* address of overlay table start   */
+
 static struct ovcalblk ovcall;
 
 
@@ -290,7 +312,7 @@ PP(long al;)
 PP(FILE *bp;)
 {
 	if (fseek(bp, al, SEEK_SET) < 0)
-		fatalx(FALSE, "SEEK ERROR ON FILE: %s\n", ifilname);
+		fatalx(FALSE, _("seek error on file: %s\n"), ifilname);
 }
 
 
@@ -309,9 +331,9 @@ static VOID readhdr(NOTHING)
 	p->ch_entry = get32be(fp);
 	p->ch_rlbflg = get16be(fp);
 	if (p->ch_magic != MAGIC)
-		fatalx(FALSE, "FILE FORMAT ERROR IN %s\n", ifilname);
+		fatalx(FALSE, _("file format error in %s\n"), ifilname);
 	if (p->ch_rlbflg != 0)
-		fatalx(FALSE, "NO RELOCATION BITS IN %s\n", ifilname);
+		fatalx(FALSE, _("no relocation bits in %s\n"), ifilname);
 }
 
 
@@ -342,11 +364,14 @@ static BOOLEAN rdlibhdr(NOTHING)
 		p->hdr2.l2gid = getc(fp);
 		p->hdr2.l2fimode = get16be(fp);
 		p->hdr2.l2fsize = get32be(fp);
+		p->hdr2.l2junk = get16be(fp);
 		libfilsize = p->hdr2.l2fsize;
 		break;
 	}
 	if (libhd.hdr2.l2fname[0] == '\0')
 		return FALSE;
+	sprintf(ilibmem, "%s(%s)", ilibname, p->hdr2.l2fname);
+	ifilname = ilibmem;
 	return TRUE;
 }
 
@@ -599,7 +624,7 @@ PP(int lflg;)
 	symptr = *firstsym++;				/* beginning of this symbol table */
 	l = couthd.ch_tsize + couthd.ch_dsize + couthd.ch_ssize + HDSIZE;
 	if (lflg)
-		l += lbctr + sizeof(*lib2hd);
+		l += lbctr + libhdsize;
 	lbseek(l, rbuf);					/* long seek */
 	l = couthd.ch_tsize;
   do2l1:
@@ -669,7 +694,7 @@ PP(int lflg;)
 				l1 = l1 + extval(j >> 3) - textbase - tpc + 2;
 				if (l1 < (-32768L) || l1 > 0x7fff)
 				{
-					errorx("RELATIVE ADDRESS OVERFLOW AT %lx IN %s\n", tpc - 2, ifilname);
+					errorx(_("relative address overflow at %lx in %s\n"), tpc - 2, ifilname);
 					prextname(j >> 3);	/* give name referenced */
 				}
 				if (saverbits)
@@ -679,7 +704,7 @@ PP(int lflg;)
 			}
 			if (ignflg == 0 && longf == 0 && (l1 & 0xffff8000L) && saof)
 			{
-				errorx("SHORT ADDRESS OVERFLOW AT %lx IN %s\n", tpc - 2, ifilname);
+				errorx(_("short address overflow at %lx in %s\n"), tpc - 2, ifilname);
 				if (wasext)
 					prextname(j >> 3);
 				if (lflg)
@@ -710,7 +735,7 @@ PP(int lflg;)
 
 		default:
 		  do2199:
-			fatalx(FALSE, "INVALID RELOCATION FLAG IN %s\n", ifilname);
+			fatalx(FALSE, _("invalid relocation flag in %s\n"), ifilname);
 			break;
 		}
 	}
@@ -737,6 +762,7 @@ static VOID loadlib(NOTHING)
 	i = *libfctr++;						/* # files to load from this library */
 	if (i == 0)
 		return;							/* none to load */
+	ilibname = ifilname;
 	while (i--)
 	{									/* load the files */
 		l = *libptr++;					/* library offset for this file */
@@ -802,7 +828,7 @@ static VOID relocsym(NOTHING)
 	{
 		if (lmte->flags & SYEQ)			/* equated */
 			return;						/* abs */
-		fatalx(FALSE, "INVALID SYMBOL FLAG IN %s, SYMBOL: \"%s\"\n", ifilname, lmte->name);
+		fatalx(FALSE, _("invalid symbol flag in %s, symbol: \"%s\"\n"), ifilname, lmte->name);
 	}
 	lmte->vl1 += l;
 }
@@ -811,7 +837,7 @@ static VOID relocsym(NOTHING)
 static VOID prdup(P(const char *) p)
 PP(const char *p;)
 {
-	errorx("\"%s\" DOUBLY DEFINED IN %s\n", p, ifilname);
+	errorx(_("\"%s\" doubly defined in %s\n"), p, ifilname);
 }
 
 
@@ -831,7 +857,7 @@ static VOID addmte(NOTHING)
 	{									/* main table overflow */
 		if (sbrk(sizeof(*symptr) * ICRSZMT) == (char *)-1)
 		{
-			fatalx(FALSE, "SYMBOL TABLE OVERFLOW\n");			/* could not get more memory */
+			fatalx(FALSE, _("symbol table overflow\n"));			/* could not get more memory */
 		} else
 		{								/* move end of main table */
 			emte += sizeof(*symptr) * ICRSZMT;
@@ -971,7 +997,7 @@ PP(char *ap;)
 		if (*++p)
 			LIBCHAR = *p;
 		else
-			LIBCHAR = '6';				/* default library name */
+			fatalx(FALSE, _("missing filename for -l\n"));
 		p = libname;
 	} else
 	{
@@ -982,13 +1008,13 @@ PP(char *ap;)
 		strncpy(tempname, p, FNAMELEN - DEFLEN);
 		strcat(tempname, DEFTYPE);
 		if ((ibuf = fopen(tempname, "rb")) == NULL)
-			fatalx(FALSE, "CANNOT OPEN %s FOR INPUT\n", p);
+			fatalx(FALSE, _("cannot open %s for input\n"), p);
 		strcpy(p, tempname);
 	}
 	ifilname = p;						/* point to current file name for error msgs */
 	couthd.ch_magic = get16be(ibuf);
-	if (feof(ibuf))
-		fatalx(FALSE, "READ ERROR ON FILE: %s\n", ifilname);
+	if (feof(ibuf) || ferror(ibuf))
+		fatalx(FALSE, _("read error on file: %s\n"), ifilname);
 	if (couthd.ch_magic != LIB2MAGIC)
 	{
 		fseek(ibuf, 0L, SEEK_SET);
@@ -1015,9 +1041,9 @@ PP(int lflg;)								/* set if file is in a library  */
 	register long l;
 
 	*firstsym = lmte;					/* remember where this symbol table starts */
-	l = couthd.ch_tsize + couthd.ch_dsize + sizeof(couthd);
+	l = couthd.ch_tsize + couthd.ch_dsize + HDSIZE;
 	if (lflg)
-		l += lbctr + sizeof(*lib2hd);
+		l += lbctr + libhdsize;
 	lbseek(l, ibuf);
 	i = couthd.ch_ssize;				/* size of symbol table */
 	while (i > 0)
@@ -1039,12 +1065,12 @@ static VOID searchlib(NOTHING)
 {
 	*libfctr = 0;						/* no files from this library yet */
 	lbctr = 2;							/* current library position - skip magic */
+	ilibname = ifilname;
 	while (rdlibhdr())
 	{									/* read library file header */
 		savsymtab();					/* save current state of symbol table */
 		extmatch = 0;
 		noload = 0;
-		ifilname = libhd.hdr1.l1fname;
 		readhdr();						/* read the file header */
 		do1load(1);						/* load this lib file */
 		if (extmatch > noload)
@@ -1243,14 +1269,14 @@ PP(register struct symtab *spt;)
 			return 0;					/* no jump block    */
 	if (!(gpt->flags & SYTX))
 	{
-		errorx("ILLEGAL REFERENCE TO OVERLAY SYMBOL %s FROM MODULE %s\n", spt->name, ovtree[spt->ovlnum]->ovfname);
+		errorx(_("illegal reference to overlay symbol %s from module %s\n"), spt->name, ovtree[spt->ovlnum]->ovfname);
 		return 0;
 	}
 	i = ovpath[ovpathtp];				/* current overlay number */
 	ovpt = ovtree[i];
 	if (!(inkid(gpt->ovlnum, i)))
 	{
-		errorx("ILLEGAL REFERENCE TO OVERLAY SYMBOL %s FROM MODULE %s\n", spt->name, ovtree[spt->ovlnum]->ovfname);
+		errorx(_("illegal reference to overlay symbol %s from module %s\n"), spt->name, ovtree[spt->ovlnum]->ovfname);
 		return 0;
 	}
 	jpt = newjblk();					/* put a new jump block in  */
@@ -1258,9 +1284,9 @@ PP(register struct symtab *spt;)
 	cbadd = ovpt->ovdtbase;				/* get address of new code  */
 	if (i != ROOT)						/* non-root text-based globals  */
 		cbadd -= ovpt->ovtxbase;		/* are relocated later     */
-	ovpt->ovdtbase += sizeof(ovcall);	/* bump size up for new code */
+	ovpt->ovdtbase += SIZEOF_OVCALBLK;	/* bump size up for new code */
 	lemt(eirt);							/* get pointers right       */
-	while (1)
+	for (;;)
 	{
 		spt->vl1 = cbadd;				/* actual address of call block */
 		spt->flags |= SYTX;				/* text-based relocatable   */
@@ -1316,7 +1342,7 @@ PP(register struct ovtrnode *ovpt;)				/* points to node in command tree */
 				ovrefs += chkovext(cursym);	/* check ext ref    */
 			cursym++;					/* get the next symbol  */
 		}
-	newbase = ovrefs * sizeof(ovcall);	/* size of extra code    */
+	newbase = ovrefs * SIZEOF_OVCALBLK;	/* size of extra code    */
 	ovpt->ovbsbase += newbase;			/* add in space for ovcalls */
 	ovpt->ovcap += newbase;				/* ovdtbase adjusted in chkovext */
 	if (onum == ROOT)
@@ -1465,7 +1491,7 @@ PP(FILE **fp;)
 	(TFCHAR)++;
 	if ((*fp = fopen(tfilname, "wb")) == NULL)
 	{
-		fatalx(FALSE, "UNABLE TO OPEN TEMPORARY FILE: %s\n", tfilname);
+		fatalx(FALSE, _("unable to open temporary file: %s\n"), tfilname);
 	}
 }
 
@@ -1486,7 +1512,7 @@ astry2:
 	{									/* no match in global symbols */
 		pg = lemt(eirt);				/* set ptrs for external chains */
 		if (pg == lmte)
-			fatalx(FALSE, "INTERNAL ERROR IN %s\n", "asgnext");
+			fatalx(FALSE, _("internal error in %s\n"), "asgnext");
 		if (spendsym(ap))				/* end, etext, errot, or edata */
 			return;
 		if (umesflg == 0)
@@ -1755,7 +1781,7 @@ PP(char *ofilname;)
 {
 	outfname = ofilname;				/* save name in case of error   */
 	if ((obuf = fopen(ofilname, "wb")) == NULL)
-		fatalx(FALSE, "UNABLE TO CREATE FILE: %s\n", ofilname);
+		fatalx(FALSE, _("unable to create file: %s\n"), ofilname);
 	if (Dflag | Bflag)
 		put16be(MAGIC1, obuf);				/* data & bss bases in header */
 	else
@@ -1809,7 +1835,7 @@ static VOID wrjumps(NOTHING)
 	while (jpt != NULL)
 	{
 		onum = (jpt->globref)->ovlnum;	/* where is global? */
-		ovcall.ovtabad = ovtable + ((onum - 1) * sizeof(ovcall));
+		ovcall.ovtabad = ovtable + ((onum - 1) * SIZEOF_OVCALBLK);
 		ovcall.routaddr = (jpt->globref)->vl1;
 
 		put16be(ovcall.jsrovh, obuf);		/* jsr  _ovhdlr */
@@ -1818,7 +1844,7 @@ static VOID wrjumps(NOTHING)
 		put16be(ovcall.jmprout, obuf);		/* jmp  routine */
 		put32be(ovcall.routaddr, obuf);
 
-		textbase += sizeof(ovcall);		/* bump for block size  */
+		textbase += SIZEOF_OVCALBLK;		/* bump for block size  */
 
 		if (saverbits)
 		{
@@ -1853,22 +1879,21 @@ PP(register struct ovtrnode *opt;)
 {
 	register int i, j;
 
-	for (i = 0; i < 8; i++)				/* sizeof(ovtab1.tbname) */
-		if (!isalnum((__uint8_t)(ovtab1.tbname[i] = opt->ovfname[i])))
+	for (i = 0; i < TBNAMESIZE; i++)
+		if (!isalnum((ovtab1.tbname[i] = opt->ovfname[i])))
 			break;						/* found end of name        */
-	for (; i < 8; i++)					/* sizeopf(ovtab1.tbname) */
-
+	for (; i < TBNAMESIZE; i++)
 		ovtab1.tbname[i] = ' ';			/* blank out rest of name   */
 	for (i = 0; i < FNAMELEN; i++)
 		if (opt->ovfname[i] == '.')		/* find file type   */
 			break;
 	i++;								/* skip dot, if there   */
-	for (j = 0; (j < 3) && (i < FNAMELEN); i++, j++)
-		if (!isalnum((__uint8_t)(ovtab1.tbext[j] = opt->ovfname[i])))
+	for (j = 0; j < TBEXTSIZE && i < FNAMELEN; i++, j++)
+		if (!isalnum((ovtab1.tbext[j] = opt->ovfname[i])))
 			break;						/* copy only letters and digits */
-	for (; j < 3; j++)
+	for (; j < TBEXTSIZE; j++)
 		ovtab1.tbext[j] = ' ';			/* blank fill rest of type field */
-	ovtab1.tbext[3] = '\0';				/* zero for overlay handler */
+	ovtab1.tbext[TBEXTSIZE] = '\0';		/* zero for overlay handler */
 }
 
 
@@ -1965,7 +1990,7 @@ PP(long size;)
 	fclose(pb);
 	TFCHAR = fnc;
 	if ((pb = fopen(tfilname, "rb")) == NULL)
-		fatalx(FALSE, "UNABLE TO REOPEN FILE: %s\n", tfilname);
+		fatalx(FALSE, _("unable to reopen file: %s\n"), tfilname);
 	while (size > 0)
 	{
 		j = get16be(pb);					/* Fetch word from source buffer */
@@ -1991,7 +2016,7 @@ static VOID finalwr(NOTHING)
 		wrjumps();
 	if ((textsize + textstart) != textbase)
 	{
-		errorx("TEXT SIZE ERROR IN %s\n", outfname);
+		errorx(_("text size error in %s\n"), outfname);
 	}
 	if (ovflag && !chnflg && (ovpath[ovpathtp] == ROOT))
 		wrovtab();
@@ -2007,10 +2032,9 @@ static VOID finalwr(NOTHING)
 	put32be(stlen, obuf);
 	if (ferror(obuf))
 	{
-		errorx("WRITE ERROR ON FILE: %s\n", outfname);
+		errorx(_("write error on file: %s\n"), outfname);
 	}
-	if (exstat != 0)
-		endit(EXIT_FAILURE);
+	endit(exstat);
 }
 
 
@@ -2124,7 +2148,7 @@ static VOID buildf(NOTHING)
 VOID endit(P(int) stat)
 PP(int stat;)
 {
-	if (stat == EXIT_SUCCESS)
+	if (stat == 0)
 		fclose(obuf);
 	if (dafnc)
 	{
@@ -2140,7 +2164,8 @@ PP(int stat;)
 	}
 	if (dmpflg)
 		dumpsyms();
-	exit(stat);
+	if (stat != 0)
+		exit(EXIT_FAILURE);
 }
 
 /************************************************************************
@@ -2169,9 +2194,9 @@ PP(char **argv;)
 
 	for (i = 1; i < argc; i++)			/* assemble command line */
 	{
-		if (((int)strlen(cmdline) + (int)strlen(argv[i])) > (LINELEN - 2))
+		if ((strlen(cmdline) + strlen(argv[i])) > (LINELEN - 2))
 		{
-			fatalx(FALSE, "COMMAND LINE TOO LONG\n");
+			fatalx(FALSE, _("command line too long\n"));
 		} else
 		{
 			strcat(cmdline, argv[i]);	/* put in the command */
@@ -2190,7 +2215,8 @@ PP(char **argv;)
 	/* on top of any additions to the symbol table.         */
 
 	openfile((ovtree[ROOT]->ovflist)->fnfname);	/* first input file */
-	fclose(ibuf);						/* will open again later */
+	if (ibuf)
+		fclose(ibuf);					/* will open again later */
 	intsytab();							/* init. symbol table   */
 	firstsym = fsymp;
 	libfctr = lbfictr;
@@ -2207,9 +2233,9 @@ PP(char **argv;)
 	if (ovflag && !chnflg)
 	{									/* add room for overlay table in root's data segment */
 		ovtable = ovtree[ROOT]->ovbsbase;	/* changes in ovexts  */
-		ovtree[ROOT]->ovbsbase += numovls * sizeof(ovtab1);
-		ovtree[ROOT]->ovcap += numovls * sizeof(ovtab1);
-		rdtsize += numovls * sizeof(ovtab1);
+		ovtree[ROOT]->ovbsbase += numovls * SIZEOF_OVTAB;
+		ovtree[ROOT]->ovcap += numovls * SIZEOF_OVTAB;
+		rdtsize += numovls * SIZEOF_OVTAB;
 	}
 	fixcoms();							/* allocate common and global static space */
 	hihiaddr = ovtree[ROOT]->ovcap;		/* current top of bss   */

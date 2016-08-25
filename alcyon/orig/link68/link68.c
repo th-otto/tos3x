@@ -160,6 +160,28 @@ char rdfnc = 0;
 
 int saverbits = 0;
 
+/* structure of entry in output overlay table */
+
+#define TBNAMESIZE 8
+#define TBEXTSIZE  3
+struct ovtab {
+	char tbname[TBNAMESIZE];	/* file name -- pad with blanks */
+	char tbext[TBEXTSIZE + 1];	/* file extension -- no dot (.) */
+	union mlong tbldpt;			/* load point for module */
+};
+#define SIZEOF_OVTAB 16
+
+/* structure of an indirect call to an overlay routine */
+
+struct ovcalblk {
+	short jsrovh;			/* call overlay handler */
+	union mlong ovhandlr;	/* address of overlay handlr */
+	union mlong ovtabad;	/* pointer into overlay table */
+	short jmprout;			/* jump to overlayed routine */
+	union mlong routaddr;	/* address to jump to */
+};
+
+
 struct ovtab ovtab1 = { { 0 } };
 
 /* 68000 linking loader -- adapted from */
@@ -376,9 +398,9 @@ PP(char **argv;)
 	if (ovflag && !chnflg)
 	{									/* add room for overlay table in root's data segment */
 		ovtable = ovtree[ROOT]->ovbsbase;	/* changes in ovexts  */
-		ovtree[ROOT]->ovbsbase += numovls * sizeof(ovtab1);
-		ovtree[ROOT]->ovcap += numovls * sizeof(ovtab1);
-		rdtsize += numovls * sizeof(ovtab1);
+		ovtree[ROOT]->ovbsbase += numovls * SIZEOF_OVTAB;
+		ovtree[ROOT]->ovcap += numovls * SIZEOF_OVTAB;
+		rdtsize += numovls * SIZEOF_OVTAB;
 	}
 	fixcoms();							/* allocate common and global static space */
 	hihiaddr = ovtree[ROOT]->ovcap;		/* current top of bss   */
@@ -514,7 +536,7 @@ PP(register struct ovtrnode *ovpt;)				/* points to node in command tree */
 				ovrefs += chkovext(cursym);	/* check ext ref    */
 			cursym++;					/* get the next symbol  */
 		}
-	newbase = ovrefs * sizeof(ovcall);	/* size of extra code    */
+	newbase = ovrefs * SIZEOF_OVCALBLK;	/* size of extra code    */
 	ovpt->ovbsbase += newbase;			/* add in space for ovcalls */
 	ovpt->ovcap += newbase;				/* ovdtbase adjusted in chkovext */
 	if (onum == ROOT)
@@ -677,7 +699,7 @@ long libfilsize = 0;
 VOID searchlib(NOTHING)
 {
 	*libfctr = 0;						/* no files from this library yet */
-	lbctr = sizeof(short);				/* current library position - skip magic */
+	lbctr = 2;							/* current library position - skip magic */
 	while (rdlibhdr())
 	{									/* read library file header */
 		savsymtab();					/* save current state of symbol table */
@@ -717,7 +739,7 @@ BOOLEAN rdlibhdr(NOTHING)
 	register char *pc;
 
 	p = (char *)&libhd;
-	for (i = 0; i < sizeof(*lib2hd); i++)
+	for (i = 0; i < LIB2HDSIZE; i++)
 		*p++ = getc(ibuf);
 	libhd.hdr2.l2modti = 0;
 	libfilsize = libhd.hdr2.l2fsize;
@@ -795,7 +817,7 @@ VOID readhdr(NOTHING)
 	register unsigned short *p;
 
 	p = (unsigned short *)&couthd;
-	for (i = 0; i < (sizeof couthd) / 2; i++)
+	for (i = 0; i < (HDSIZE / 2); i++)
 		*p++ = getw(ibuf);
 	if (couthd.ch_magic != MAGIC)
 		errorx(FORMATERR, ifilname);
@@ -818,9 +840,9 @@ PP(int lflg;)								/* set if file is in a library  */
 	register long l;
 
 	*firstsym = lmte;					/* remember where this symbol table starts */
-	l = couthd.ch_tsize + couthd.ch_dsize + sizeof(couthd);
+	l = couthd.ch_tsize + couthd.ch_dsize + HDSIZE;
 	if (lflg)
-		l += lbctr + sizeof(*lib2hd);
+		l += lbctr + LIB2HDSIZE;
 	lbseek(l, ibuf);
 	i = couthd.ch_ssize;				/* size of symbol table */
 	while (i > 0)
@@ -1560,7 +1582,7 @@ PP(register struct symtab *spt;)
 	cbadd = ovpt->ovdtbase;				/* get address of new code  */
 	if (i != ROOT)						/* non-root text-based globals  */
 		cbadd -= ovpt->ovtxbase;		/* are relocated later     */
-	ovpt->ovdtbase += sizeof(ovcall);	/* bump size up for new code */
+	ovpt->ovdtbase += SIZEOF_OVCALBLK;	/* bump size up for new code */
 	lemt(eirt);							/* get pointers right       */
 	while (1)
 	{
@@ -1768,7 +1790,7 @@ PP(int extno;)
 	register struct symtab *p;
 	register struct symtab *pg;
 
-	p = symptr + extno;					/* symptr + extno*sizeof(symbol) */
+	p = symptr + extno;
 	if ((p->flags & SYXR) == 0)
 	{
 		return p->vl1;
@@ -1839,7 +1861,7 @@ PP(int lflg;)
 	symptr = *firstsym++;				/* beginning of this symbol table */
 	l = couthd.ch_tsize + couthd.ch_dsize + couthd.ch_ssize + HDSIZE;
 	if (lflg)
-		l += lbctr + sizeof(*lib2hd);
+		l += lbctr + LIB2HDSIZE;
 	lbseek(l, rbuf);					/* long seek */
 	l = couthd.ch_tsize;
   do2l1:
@@ -1987,7 +2009,7 @@ VOID wrjumps(NOTHING)
 	while (jpt != NULL)
 	{
 		onum = (jpt->globref)->ovlnum;	/* where is global? */
-		ovcall.ovtabad.l = ovtable + ((onum - 1) * sizeof(ovcall));
+		ovcall.ovtabad.l = ovtable + ((onum - 1) * SIZEOF_OVCALBLK);
 		ovcall.routaddr.l = (jpt->globref)->vl1;
 
 		putw(ovcall.jsrovh, obuf);		/* jsr  _ovhdlr */
@@ -1999,7 +2021,7 @@ VOID wrjumps(NOTHING)
 		putw(ovcall.routaddr.u.hiword, obuf);
 		putw(ovcall.routaddr.u.loword, obuf);
 
-		textbase += sizeof(ovcall);		/* bump for block size  */
+		textbase += SIZEOF_OVCALBLK;		/* bump for block size  */
 
 		if (saverbits)
 		{
@@ -2068,22 +2090,21 @@ PP(register struct ovtrnode *opt;)
 {
 	register int i, j;
 
-	for (i = 0; i < 8; i++)				/* sizeof(ovtab1.tbname) */
+	for (i = 0; i < TBNAMESIZE; i++)
 		if (!isalnum((__uint8_t)(ovtab1.tbname[i] = opt->ovfname[i])))
 			break;						/* found end of name        */
-	for (; i < 8; i++)					/* sizeopf(ovtab1.tbname) */
-
+	for (; i < TBNAMESIZE; i++)
 		ovtab1.tbname[i] = ' ';			/* blank out rest of name   */
 	for (i = 0; i < FNAMELEN; i++)
 		if (opt->ovfname[i] == '.')		/* find file type   */
 			break;
 	i++;								/* skip dot, if there   */
-	for (j = 0; (j < 3) && (i < FNAMELEN); i++, j++)
+	for (j = 0; j < TBEXTSIZE && i < FNAMELEN; i++, j++)
 		if (!isalnum((__uint8_t)(ovtab1.tbext[j] = opt->ovfname[i])))
 			break;						/* copy only letters and digits */
-	for (; j < 3; j++)
+	for (; j < TBEXTSIZE; j++)
 		ovtab1.tbext[j] = ' ';			/* blank fill rest of type field */
-	ovtab1.tbext[3] = '\0';				/* zero for overlay handler */
+	ovtab1.tbext[TBEXTSIZE] = '\0';		/* zero for overlay handler */
 }
 
 

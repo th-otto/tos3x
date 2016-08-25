@@ -12,11 +12,11 @@ static char const progname[] = PROGNAME;
 
 VOID banner(NOTHING)
 {
-	printf("--------------------------------------------------\n");
-	printf("LINK68 Overlay Linker                  Release 0.f\n");
-	printf("Serial No. XXXX-0000-654321    All Rights Reserved\n");
-	printf("Copyright (c) 1983          Digital Research, Inc.\n");
-	printf("--------------------------------------------------\n\n");
+	printf(_("--------------------------------------------------\n"));
+	printf(_("LINK68 Overlay Linker                  Release 0.f\n"));
+	printf(_("Serial No. XXXX-0000-654321    All Rights Reserved\n"));
+	printf(_("Copyright (c) 1983          Digital Research, Inc.\n"));
+	printf(_("--------------------------------------------------\n\n"));
 }
 
 
@@ -56,18 +56,18 @@ _va_dcl
 	va_start(args, fmt);
 	vfprintf(stderr, fmt, args);
 	va_end(args);
-	endit(EXIT_FAILURE);
+	endit(-1);
 }
 
 VOID synerr(P(const char *) str)
 PP(const char *str;)
 {
-	fatalx(TRUE, "SYNTAX ERROR, EXPECTED: %s\n", str);
+	fatalx(TRUE, _("syntax error, expected: %s\n"), str);
 }
 
 VOID oom(NOTHING)
 {
-	fatalx(FALSE, "HEAP OVERFLOW -- NOT ENOUGH MEMORY\n");
+	fatalx(FALSE, _("heap overflow -- not enough memory\n"));
 }
 
 /************************************************************************
@@ -80,19 +80,19 @@ VOID oom(NOTHING)
 
 VOID usage(NOTHING)
 {
-	printf("USAGE: %s [options] output = file, file, ...\n\n", progname);
-	printf("THE OPTIONS ARE:\n\n");
-	printf("\tABSOLUTE\n");
-	printf("\tBSSBASE[hex number]\n");
-	printf("\tCOMMAND[filename]\n");
-	printf("\tCHAINED\n");
-	printf("\tDATABASE[hex number]\n");
-	printf("\tIGNORE\n");
-	printf("\tLOCALS\n");
-	/* printf("\tMAP\n"); */
-	printf("\tNOLOCALS\n");
-	printf("\tSYMBOLS\n");
-	printf("\tTEMPFILES[drive]\n");
-	printf("\tTEXTBASE[hex number]\n");
-	printf("\tUNDEFINED\n");
+	printf(_("usage: %s [options] output = file, file, ...\n\n"), progname);
+	printf(_("The options are:\n\n"));
+	printf(_("\tABSOLUTE\n"));
+	printf(_("\tBSSBASE[hex number]\n"));
+	printf(_("\tCOMMAND[filename]\n"));
+	printf(_("\tCHAINED\n"));
+	printf(_("\tDATABASE[hex number]\n"));
+	printf(_("\tIGNORE\n"));
+	printf(_("\tLOCALS\n"));
+	/* printf(_("\tMAP\n")); */
+	printf(_("\tNOLOCALS\n"));
+	printf(_("\tSYMBOLS\n"));
+	printf(_("\tTEMPFILES[drive]\n"));
+	printf(_("\tTEXTBASE[hex number]\n"));
+	printf(_("\tUNDEFINED\n"));
 }

@@ -126,13 +126,13 @@ static FILE *cmdfpt;					/* command file         */
 
 static int lookahd(NOTHING)
 {
-	register char c;
+	register int c;
 	register int i;
 
 	i = scanpos;
 	c = cmdline[i];
 
-	while (isspace((__uint8_t)c) && (c != EOS))	/* skip over white space */
+	while (isspace(c) && c != EOS)	/* skip over white space */
 		c = cmdline[++i];
 
 	switch (c)							/* see if simple character */
@@ -159,9 +159,9 @@ static int lookahd(NOTHING)
 
 	/* only get here if not a single-character token (or junk)  */
 
-	if (isalpha((__uint8_t)c))						/* file or option name? */
+	if (isalpha(c))						/* file or option name? */
 		return NAMETK;
-	else if (isdigit((__uint8_t)c))				/* number?      */
+	else if (isdigit(c))				/* number?      */
 		return NUMBTK;
 	else								/* who knows?       */
 		return JUNK;
@@ -181,12 +181,12 @@ static VOID println(P(const char *) st)
 PP(const char *st;)
 {
 	register int i;
-	register char c;
+	register int c;
 	i = 0;
 
 	while ((c = st[i++]) != EOS)
 	{
-		if (isspace((__uint8_t)c))
+		if (isspace(c))
 			printf(" ");				/* convert whitespace   */
 		else
 			printf("%c", c);
@@ -215,14 +215,14 @@ PP(const char *st;)
 
 static int scan(NOTHING)
 {
-	register char c;
+	register int c;
 	register int i, j;
 	register int toktype;
 
 	tokenval[0] = EOS;					/* zero it out      */
 
 	c = cmdline[i = scanpos];
-	while (isspace((__uint8_t)c))					/* skip white space */
+	while (isspace(c))					/* skip white space */
 		c = cmdline[++i];
 	scanpos = i;						/* update scan position */
 	lastpos = i;						/* beginning of token   */
@@ -244,8 +244,7 @@ static int scan(NOTHING)
 			}
 		} else
 			return NOMORE;			/* end of console line  */
-	}
-	else if ((toktype == NAMETK) || (toktype == NUMBTK) || (toktype == DOT))
+	} else if (toktype == NAMETK || toktype == NUMBTK || toktype == DOT)
 	{
 		j = 0;
 
@@ -253,10 +252,10 @@ static int scan(NOTHING)
 		{
 			if (j < TOKLEN - 1)			/* don't overflow string,  */
 			{							/* save room for null   */
-				tokenval[j++] = toupper((__uint8_t)c);
+				tokenval[j++] = c;
 			}
 			c = cmdline[++i];
-		} while (isalnum((__uint8_t)c) || (c == ':') || (c == '.'));
+		} while (isalnum(c) || c == ':' || c == '.' || c == '/' || c == '\\');
 
 		/* parser validifies number */
 		tokenval[j] = EOS;				/* mark end of string   */
@@ -287,7 +286,7 @@ static int scan(NOTHING)
 static long scannum(NOTHING)
 {
 	register char *st;					/* working string   */
-	register char c;					/* current charater */
+	register int c;						/* current charater */
 	register long val;					/* cumulative value */
 
 	if ((scan() != LBRACK) || (scan() != NUMBTK))	/* get number */
@@ -298,12 +297,14 @@ static long scannum(NOTHING)
 
 	while ((c = *st++) != EOS)
 	{
-		if (isdigit((__uint8_t)c))
+		if (isdigit(c))
 			c -= '0';					/* ascii to int     */
-		else if ((c >= 'A') && (c <= 'F'))
+		else if (c >= 'A' && c <= 'F')
 			c = (c - 'A') + 10;			/* ascii to int     */
+		else if (c >= 'a' && c <= 'f')
+			c = (c - 'a') + 10;			/* ascii to int     */
 		else							/* bad character    */
-			fatalx(TRUE, "IMPROPERLY FORMED HEX NUMBER: \"%s\"\n", tokenval);	/* so long for now...  */
+			fatalx(TRUE, _("improperly formed hex number: \"%s\"\n"), tokenval);	/* so long for now...  */
 
 		val = (val << 4) + c;			/* val * 16 + c     */
 	}
@@ -332,7 +333,7 @@ static VOID cmdfile(NOTHING)
 	int toktype;
 
 	if (cfileflg)						/* should not be set    */
-		fatalx(TRUE, "NESTED COMMAND FILES NOT ALLOWED\n");			/* no nested cmd files  */
+		fatalx(TRUE, _("nested command files not allowed\n"));			/* no nested cmd files  */
 
 	cfileflg = TRUE;					/* set it       */
 
@@ -340,7 +341,7 @@ static VOID cmdfile(NOTHING)
 		synerr(BRKNAM);		/* syntax error     */
 
 	if ((cmdfpt = fopen(tokenval, "r")) == NULL)
-		fatalx(FALSE, "CANNOT OPEN %s FOR INPUT\n", tokenval);		/* can't open file  */
+		fatalx(FALSE, _("cannot open %s for input\n"), tokenval);		/* can't open file  */
 
 	if (fgets(cmdline, LINELEN, cmdfpt) == NULL)	/* empty file?    */
 		cmdline[0] = EOS;				/* don't leave garbage  */
@@ -366,7 +367,7 @@ PP(const char *s2;)
 	register int i;
 
 	i = 0;
-	while (s1[i] == s2[i])
+	while (toupper(s1[i]) == toupper(s2[i]))
 		if (s1[i++] == EOS)				/* end of s1 & s2?  */
 			return TRUE;				/* they match       */
 	if (s1[i] == EOS)
@@ -501,7 +502,7 @@ static VOID tdrvscan(NOTHING)
 {
 	register int toknum;
 
-	if ((scan() != LBRACK) || ((toknum = scan()) != NAMETK))
+	if (scan() != LBRACK || (toknum = scan()) != NAMETK)
 		synerr(BRKNAM);		/* must be '[' <drive>  */
 
 	strcpy(tdisk, tokenval);			/* set global variable  */
@@ -534,7 +535,7 @@ static VOID globops(NOTHING)
 		if (tokenum != NAMETK)			/* better be a name */
 		{
 			if (tokenum == JUNK)
-				fatalx(TRUE, "ILLEGAL CHARACTER: '%s'\n", tokenval);
+				fatalx(TRUE, _("illegal character: '%s'\n"), tokenval);
 			else
 				synerr(NAMESTR);
 		}
@@ -585,7 +586,7 @@ static VOID globops(NOTHING)
 		} else if (opnum == UNDEFINED)
 			udfflg = TRUE;				/* allow undefineds */
 		else
-			fatalx(TRUE, "UNRECOGNIZED OR MISPLACED OPTION NAME: \"%s\"\n", tokenval);	/* goodbye  */
+			fatalx(TRUE, _("unrecognized or misplaced option name: \"%s\"\n"), tokenval);	/* goodbye  */
 
 		if ((tokenum = scan()) == COMMA)
 			tokenum = scan();			/* skip over comma  */
@@ -701,16 +702,16 @@ static struct filenode *newflnod(NOTHING)
 static VOID symscan(NOTHING)
 {
 	register int i;
-	register char c;
+	register int c;
 
 	i = 0;
 	tokenval[0] = EOS;					/* zap out string   */
 
-	while (((c = cmdline[scanpos]) != EOS) && (isspace((__uint8_t)c)))
+	while ((c = cmdline[scanpos]) != EOS && isspace(c))
 		scanpos++;						/* find beginning of name */
 	lastpos = scanpos;					/* save location    */
 
-	while (((c = cmdline[scanpos]) != EOS) && (!isspace((__uint8_t)c)) && (c != ']'))
+	while ((c = cmdline[scanpos]) != EOS && !isspace(c) && c != ']')
 	{
 		scanpos++;						/* move to next char    */
 
@@ -802,7 +803,7 @@ PP(struct filenode *fnpt;)
 			return;						/* leave loop -- return */
 		} else
 		{
-			fatalx(TRUE, "UNRECOGNIZED OR MISPLACED OPTION NAME: \"%s\"\n", tokenval);
+			fatalx(TRUE, _("unrecognized or misplaced option name: \"%s\"\n"), tokenval);
 		}
 		
 		if ((toknum = scan()) == COMMA)
@@ -891,7 +892,7 @@ PP(register int parent;)
 			synerr(NAMESTR);
 
 		if (curovnum == MAXOVLS)		/* too many?    */
-			fatalx(FALSE, "TOO MANY OVERLAYS\n");
+			fatalx(FALSE, _("too many overlays\n"));
 
 		ovtree[++curovnum] = newovnod();	/* new overlay node */
 
@@ -903,7 +904,7 @@ PP(register int parent;)
 		lastsib = curovnum;				/* save index   */
 
 		if (((ovdepth += 1) > MAXOVDEP) || (chnflg && (ovdepth > 1)))
-			fatalx(TRUE, "OVERLAYS NESTED TOO DEEPLY\n");		/* overlays too deep    */
+			fatalx(TRUE, _("overlays nested too deeply\n"));		/* overlays too deep    */
 
 		inparse(curovnum, ovnum);		/* parse ov spec */
 
@@ -949,9 +950,9 @@ static VOID parsecmd(NOTHING)
 	} else								/* something wrong  */
 	{
 		if (toknum == NOMORE)			/* early eof?       */
-			fatalx(TRUE, "UNEXPECTED END OF COMMAND STREAM\n");		/*   yes, good bye  */
+			fatalx(TRUE, _("unexpected end of command stream\n"));		/*   yes, good bye  */
 		if (toknum == JUNK)				/* what kind of error   */
-			fatalx(TRUE, "ILLEGAL CHARACTER: '%s'\n", tokenval);	/* illegal character */
+			fatalx(TRUE, _("illegal character: '%s'\n"), tokenval);	/* illegal character */
 		else
 			synerr(NMORBRK);	/* unexpected token    */
 	}
@@ -960,7 +961,7 @@ static VOID parsecmd(NOTHING)
 		fclose(cmdfpt);					/* close it     */
 
 	if (lastscan != NOMORE)				/* better be at end */
-		fatalx(TRUE, "PARSE END BEFORE COMMAND STREAM END\n");		/* could be bad parse   */
+		fatalx(TRUE, _("parse end before command stream end\n"));		/* could be bad parse   */
 }
 
 /*
@@ -986,7 +987,7 @@ VOID preproc(NOTHING)
 	numovls = curovnum;
 	ovflag = (numovls > 0);
 	if (ovflag && (Dflag || Bflag))
-		fatalx(FALSE, "CANNOT SET DATA OR BSS BASE WHEN USING OVERLAYS\n");
+		fatalx(FALSE, _("cannot set data or bss base when using overlays\n"));
 }
 
 
