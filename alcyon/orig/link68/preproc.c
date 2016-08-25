@@ -171,7 +171,7 @@ VOID preproc(NOTHING)
  ************************************************************************/
 
 
-VOID parsecmd()
+VOID parsecmd(NOTHING)
 {
 	register int toknum;
 
@@ -220,7 +220,7 @@ VOID parsecmd()
  *
  ************************************************************************/
 
-int scan()
+int scan(NOTHING)
 {
 	register char c;
 	register int i, j;
@@ -242,17 +242,16 @@ int scan()
 		if (cfileflg)					/* reading from file?   */
 		{
 			if (fgets(cmdline, LINELEN, cmdfpt) == NULL)
-				return (NOMORE);
+				return NOMORE;
 			else						/* got another line */
 			{
 				println(cmdline);
 				scanpos = 0;			/* ready for new line   */
-				return (scan());		/* scan new line    */
+				return scan();		/* scan new line    */
 			}
 		} else
-			return (NOMORE);			/* end of console line  */
+			return NOMORE;			/* end of console line  */
 	}
-
 	else if ((toktype == NAMETK) || (toktype == NUMBTK) || (toktype == DOT))
 	{
 		j = 0;
@@ -269,15 +268,14 @@ int scan()
 		/* parser validifies number */
 		tokenval[j] = EOS;				/* mark end of string   */
 		scanpos = i;					/* save scan position   */
-		return (toktype);
+		return toktype;
 	}
-
 	else								/* single character */
 	{
 		scanpos += 1;					/* next char in stream  */
 		tokenval[0] = c;				/* keep old character   */
 		tokenval[1] = EOS;				/* mark string end  */
-		return (toktype);				/* good or bad token    */
+		return toktype;					/* good or bad token    */
 	}
 }
 
@@ -310,33 +308,33 @@ int lookahd(NOTHING)
 	switch (c)							/* see if simple character */
 	{
 	case '=':
-		return (EQSIGN);
+		return EQSIGN;
 	case EOS:
-		return (NOMORE);
+		return NOMORE;
 	case '\\':
-		return (NOMORE);				/* comment delimiter    */
+		return NOMORE;					/* comment delimiter    */
 	case '(':
-		return (LPAREN);
+		return LPAREN;
 	case ')':
-		return (RPAREN);
+		return RPAREN;
 	case '[':
-		return (LBRACK);
+		return LBRACK;
 	case ']':
-		return (RBRACK);
+		return RBRACK;
 	case ',':
-		return (COMMA);
+		return COMMA;
 	case '.':
-		return (DOT);					/* nameless file    */
+		return DOT;						/* nameless file    */
 	}
 
 	/* only get here if not a single-character token (or junk)  */
 
 	if (isalpha((__uint8_t)c))						/* file or option name? */
-		return (NAMETK);
+		return NAMETK;
 	else if (isdigit((__uint8_t)c))				/* number?      */
-		return (NUMBTK);
+		return NUMBTK;
 	else								/* who knows?       */
-		return (JUNK);
+		return JUNK;
 }
 
 
@@ -602,7 +600,7 @@ long scannum(NOTHING)
 	if (scan() != RBRACK)
 		errorx(BADSYNT, "']'");
 
-	return (val);						/* normal return    */
+	return val;							/* normal return    */
 }
 
 /************************************************************************
@@ -697,7 +695,7 @@ struct filenode *newflnod()
 	newnode->fnflags = 0;
 	newnode->fnnext = NULL;
 
-	return (newnode);
+	return newnode;
 }
 
 
@@ -859,9 +857,9 @@ PP(char *oname;)
 		count++;
 	}
 	if (count == 1)						/* only found one match */
-		return (op);
+		return op;
 	else
-		return (JUNKOP);				/* none or more than one */
+		return JUNKOP;					/* none or more than one */
 }
 
 /************************************************************************

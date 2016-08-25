@@ -19,17 +19,16 @@ struct hdr couthd = { 0 };
 
 struct symtab *symptr = 0;
 
-/* parameters that define the main table*/
+/* parameters that define the main table */
 #define SZMT 300						/* initial size of the main table */
 					/* must be large enough to initialize */
 #define ICRSZMT 100						/* add to main table when run out */
 int cszmt = 0;							/* current size of main table */
 
 char *bmte = 0;							/* beginning of main table */
-
 char *emte = 0;							/* end of main table */
 
-/* initial reference table for externals*/
+/* initial reference table for externals */
 # define SZIRT	64
 struct symtab *eirt[SZIRT] = { 0 };
 struct symtab *saveirt[SZIRT] = { 0 };
@@ -48,39 +47,26 @@ struct symtab *savlmte = 0;
 #define AREGHI		15
 
 FILE *ibuf = NULL;
-
 FILE *tbuf = NULL;
-
 FILE *obuf = NULL;
-
 FILE *rbuf = NULL;
-
 FILE *rtbuf = NULL;
-
 FILE *rdbuf = NULL;
 
 
 long textbase = 0;
-
 long database = 0;
-
 long bssbase = 0;
 
 union mlong textsize = { { 0 } };
-
 union mlong datasize = { { 0 } };
-
 union mlong bsssize = { { 0 } };
-
 union mlong stacksize = { { 0 } };
-
 union mlong textstart = { { 0 } };
-
 union mlong datastart = { { 0 } };
-
 union mlong bssstart = { { 0 } };
 
-char *ifilname = 0;						/* points to name of current input file  */
+static const char *ifilname = 0;		/* points to name of current input file  */
 
 char *outfname = 0;						/* points to name of current output file */
 
@@ -153,36 +139,23 @@ union {
 } libhd = { { { 0 } } };
 
 int umesflg = 0;
-
 char dafnc = 0;
-
 int pass2 = 0;
-
 long stlen = 0;
-
 int Xflag = 0;
-
 int Dflag = 0;
-
 int Bflag = 0;
-
 int Zflag = 0;
-
 int sflag = 0;							/* if set, keep symbol table */
 
 
 struct symtab *etextptr = 0;
-
 struct symtab *edataptr = 0;
-
 struct symtab *erootptr = 0;
-
 struct symtab *endptr = 0;
-
 struct symtab *lastdup = 0;
 
 char rtfnc = 0;
-
 char rdfnc = 0;
 
 int saverbits = 0;
@@ -222,10 +195,10 @@ char libname[] = "/lib/lib6.a";			/* Default library name     */
 #endif
 
 #ifdef	UNIX
-char *tfbase = "loXXXXXX";				/* Temp base name   */
+static const char *tfbase = "loXXXXXX";				/* Temp base name   */
 char tdisk[DRIVELEN] = "/tmp/";			/* Temp disk name   */
 #else /* CP/M and VMS     */
-char *tfbase = "loXXXXXA";				/* Temp base name   */
+static const char *tfbase = "loXXXXXA";				/* Temp base name   */
 char tdisk[DRIVELEN] = "";				/* Temp disk name   */
 #endif
 
@@ -233,22 +206,15 @@ char *tfchar = 0;						/* -> changeable character */
 char tfilname[80] = { 0 };				/* first temp file name */
 
 #define TFCHAR *tfchar					/* Name to simplify assignments */
-char etexstr[] = "_etext\0\0";
-
-char edatstr[] = "_edata\0\0";
-
-char erootstr[] = "_eroot\0\0";
-
-char eendstr[] = "_end\0\0\0\0";
-
-char ovhstr[] = "_ovhdlr\0";
+static char const etexstr[] = "_etext\0\0";
+static char const edatstr[] = "_edata\0\0";
+static char const erootstr[] = "_eroot\0\0";
+static char const eendstr[] = "_end\0\0\0\0";
+static char const ovhstr[] = "_ovhdlr\0";
 
 int ignflg = 0;
-
 int debug = 0;
-
 int exstat = 0;
-
 int ovflag = 0;
 
 #ifdef __ALCYON__
@@ -260,9 +226,7 @@ int ovflag = 0;
 #endif
 
 long rtxsize = 0;						/* size of root's text          */
-
 long rdtsize = 0;						/* size of root's data          */
-
 long hihiaddr = 0;						/* first even word above whole program  */
 
 long ovtable = 0;						/* address of overlay table start   */
@@ -272,17 +236,11 @@ struct ovcalblk ovcall = { 0 };
 char cmdline[LINELEN + 2] = "";
 
 int mapflg = FALSE;
-
 int absflg = FALSE;
-
 int libflg = FALSE;						/* set if an input file to be searched  */
-
 int symflg = FALSE;						/* set if symbol table to be saved  */
-
 int udfflg = FALSE;						/* set if undefined symbols allowed */
-
 int chnflg = FALSE;						/* set if linking chained program   */
-
 int dmpflg = FALSE;						/* set for dumping symbol table     */
 
 struct ovtrnode *ovtree[MAXOVLS + 1] = { NULL };	/* command tree     */
@@ -317,7 +275,7 @@ struct symtab *nextsy PROTO((struct symtab *amtpt));
 VOID mmte PROTO((NOTHING));
 VOID addmte PROTO((NOTHING));
 int hash PROTO((NOTHING));
-VOID pack PROTO((int *apkstr, int *apkptr));
+VOID pack PROTO((const char *apkstr, char *apkptr));
 VOID gettempf PROTO((FILE **fp));
 VOID addsizes PROTO((NOTHING));
 VOID savsymtab PROTO((NOTHING));
@@ -409,7 +367,7 @@ PP(char **argv;)
 	saverbits = !absflg;				/* keep relocation bits */
 	if (ovflag && !chnflg)				/* put _ovhdlr in symbol */
 	{									/*  table       */
-		pack((int *) ovhstr, (int *) lmte);
+		pack(ovhstr, lmte->name);
 		lmte->flags = SYXR;				/* make it external */
 		lmte->ovlnum = ROOT;			/* belongs to root  */
 		addsym();
@@ -436,7 +394,7 @@ PP(char **argv;)
 	Xflag = TRUE;						/* print all locals entered by pass 1   */
 	if (ovflag && !chnflg)				/* set up template overlay call block   */
 	{
-		pack((int *) ovhstr, (int *) lmte);				/* get overlay handler address  */
+		pack(ovhstr, lmte->name);				/* get overlay handler address  */
 		pt = lemt(girt);
 		ovcall.ovhandlr.l = pt->vl1;
 		ovcall.jsrovh = JSRL;
@@ -484,7 +442,7 @@ PP(register struct ovtrnode *opt;)				/* pointer to node in command tree */
 			tfpt = fpt->fnnext;			/* get the include symbols */
 			while ((tfpt != NULL) && (tfpt->fnflags & FNSYM))
 			{							/* put in symbol table  */
-				pack((int *) tfpt->fnfname, (int *) lmte);	/* copy name        */
+				pack(tfpt->fnfname, lmte->name);	/* copy name        */
 				lmte->flags = SYXR;		/* external     */
 				lmte->ovlnum = ovpath[ovpathtp];	/* mark which module */
 				addsym();				/* regular symbol   */
@@ -707,8 +665,10 @@ PP(char *ap;)
 	fclose(ibuf);
 }
 
-/* search a library for files to include.  include an entry only*/
-/*  if it has a global symbol which matches an external.*/
+/*
+ * search a library for files to include.  include an entry only 
+ *  if it has a global symbol which matches an external.
+ */
 
 long lbctr = 0;
 
@@ -775,7 +735,7 @@ BOOLEAN rdlibhdr(NOTHING)
 VOID openfile(P(char *) ap)
 PP(char *ap;)
 {
-	register char *p;
+	register const char *p;
 	register short i;
 	char tempname[FNAMELEN];
 
@@ -797,7 +757,7 @@ PP(char *ap;)
 		strcat(tempname, DEFTYPE);
 		if ((ibuf = fopenbr(tempname)) == 0)
 			errorx(BADINFIL, p);
-		strcpy(p, tempname);
+		strcpy(p, tempname); /* BUG: ovewrites callers argument */
 	}
 	ifilname = p;						/* point to current file name for error msgs */
 	if (readshort(ibuf, &couthd.ch_magic))
@@ -814,7 +774,7 @@ PP(char *ap;)
 	UNUSED(i);
 }
 
-/* read the header of the input file*/
+/* read the header of the input file */
 
 int readshort(P(FILE *) fp, P(unsigned short *) s)
 PP(FILE *fp;)
@@ -904,8 +864,10 @@ VOID getsym(NOTHING)
 }
 
 
-/* relocate the symbol value pointed to by lmte according to*/
-/*  symbol type and corresponding relocation base*/
+/*
+ * relocate the symbol value pointed to by lmte according to
+ * symbol type and corresponding relocation base
+ */
 
 VOID relocsym(NOTHING)
 {
@@ -1159,8 +1121,10 @@ VOID addmte(NOTHING)
 	}
 }
 
-/* compute a hash code for the last entry in the main table*/
-/* returns the hash code */
+/*
+ * compute a hash code for the last entry in the main table
+ * returns the hash code
+ */
 
 int hash(NOTHING)
 {
@@ -1171,7 +1135,7 @@ int hash(NOTHING)
 	p = &lmte->name[0];
 	for (i = 0; i < SYNAMLEN; i++)
 		ht1 += *p++;
-	return (ht1 & 076);					/* make hash code even and between 0 and 62 */
+	return ht1 & 076;					/* make hash code even and between 0 and 62 */
 }
 
 /*
@@ -1180,20 +1144,21 @@ int hash(NOTHING)
  *		pointer to the string
  *		pointer to desired entry in the main table
  */
-VOID pack(P(int *) apkstr, P(int *) apkptr)
-PP(int *apkstr;)
-PP(int *apkptr;)
+VOID pack(P(const char *) apkstr, P(char *) apkptr)
+PP(const char *apkstr;)
+PP(char *apkptr;)
 {
 	register int i;
-	register int *pkstr, *pkptr;
+	register const short *pkstr;
+	register short *pkptr;
 
-	pkstr = apkstr;
-	pkptr = apkptr;
+	pkstr = (const short *)apkstr;
+	pkptr = (short *)apkptr;
 	for (i = 0; i < SYNAMLEN / (sizeof i); i++)
 		*pkptr++ = *pkstr++;
 }
 
-/* get a temp file for the intermediate text*/
+/* get a temp file for the intermediate text */
 
 VOID gettempf(P(FILE **) fp)
 PP(FILE **fp;)
@@ -1210,7 +1175,7 @@ PP(FILE **fp;)
 	UNUSED(j);
 }
 
-/* update the relocation counters with the sizes in the header*/
+/* update the relocation counters with the sizes in the header */
 
 VOID addsizes(NOTHING)
 {
@@ -1219,7 +1184,7 @@ VOID addsizes(NOTHING)
 	bssbase += ((couthd.ch_bsize + 1) & ~1);
 }
 
-/* save the current state of the symbol table -- it may be restored later*/
+/* save the current state of the symbol table -- it may be restored later */
 
 VOID savsymtab(NOTHING)
 {
@@ -1237,7 +1202,7 @@ VOID savsymtab(NOTHING)
 		*p1++ = *p2++;
 }
 
-/* restore the symbol table as it was when we last saved it*/
+/* restore the symbol table as it was when we last saved it */
 VOID restsymtab(NOTHING)
 {
 	register struct symtab **p1, **p2;
@@ -1274,7 +1239,7 @@ VOID resolve(NOTHING)
 	fixexts();							/* fix external addresses & commons */
 	if (etextptr)
 	{
-		pack((int *) etexstr, (int *) lmte);
+		pack(etexstr, lmte->name);
 		p = lemt(eirt);
 		do
 		{
@@ -1285,7 +1250,7 @@ VOID resolve(NOTHING)
 	}
 	if (edataptr)
 	{
-		pack((int *) edatstr, (int *) lmte);
+		pack(edatstr, lmte->name);
 		p = lemt(eirt);
 		do
 		{
@@ -1296,7 +1261,7 @@ VOID resolve(NOTHING)
 	}
 	if (erootptr)
 	{
-		pack((int *) erootstr, (int *) lmte);
+		pack(erootstr, lmte->name);
 		p = lemt(eirt);
 		do
 		{
@@ -1307,7 +1272,7 @@ VOID resolve(NOTHING)
 	}
 	if (endptr)
 	{
-		pack((int *) eendstr, (int *) lmte);
+		pack(eendstr, lmte->name);
 		p = lemt(eirt);
 		do
 		{
@@ -1399,7 +1364,7 @@ PP(struct symtab *ap;)
 	register long l;
 
 	p = ap;
-	pack((int *) p, (int *) lmte);
+	pack(p->name, lmte->name);
 	p1 = lemt(girt);
 	if (p1 != lmte)
 	{									/* matches a global entry */
@@ -1469,7 +1434,7 @@ PP(struct symtab *ap;)
 	register struct symtab *p, *pg;
 
 	p = ap;
-	pack((int *) p, (int *)lmte);						/* copy current symbol name */
+	pack(p->name, lmte->name);						/* copy current symbol name */
 	pg = lemt(girt);
 astry2:
 	if (pg == lmte)
@@ -1522,7 +1487,7 @@ struct jmpblock *newjblk(NOTHING)
 		tpt->nxtjbl = npt;				/* put at end of list   */
 	}
 	npt->nxtjbl = NULL;
-	return (npt);
+	return npt;
 }
 
 /************************************************************************
@@ -1539,10 +1504,10 @@ PP(register int node;)
 	while (node != 0)
 	{
 		if (node == num)				/* same node?       */
-			return (TRUE);
+			return TRUE;
 		node = ovtree[node]->ovnxtsib;	/* get the next kid */
 	}
-	return (FALSE);						/* didn't find it       */
+	return FALSE;						/* didn't find it       */
 }
 
 /************************************************************************
@@ -1564,23 +1529,23 @@ PP(register struct symtab *spt;)
 	register long cbadd;
 
 	if (spt->vl1)						/* already been processed   */
-		return (0);
-	pack((int *) spt->name, (int *) lmte);				/* set up for search        */
+		return 0;
+	pack(spt->name, lmte->name);		/* set up for search        */
 	gpt = lemt(girt);					/* look for global match    */
 	if (gpt == lmte)					/* no match? -- return and let  */
-		return (0);						/*   fixexts handle unresolved  */
+		return 0;						/*   fixexts handle unresolved  */
 
 	/* validate global -- must be either non-overlayed (relative to */
 	/* module) or in child module and text-based            */
 
 	for (i = 0; i <= ovpathtp; i++)		/* non-overlayed?   */
 		if (gpt->ovlnum == ovpath[i])
-			return (0);					/* no jump block    */
+			return 0;					/* no jump block    */
 	if (!(gpt->flags & SYTX))
 	{
 		errst1 = ovtree[spt->ovlnum]->ovfname;
 		errorx(BADOVREF, spt->name);	/* returns      */
-		return (0);
+		return 0;
 	}
 	i = ovpath[ovpathtp];				/* current overlay number */
 	ovpt = ovtree[i];
@@ -1588,7 +1553,7 @@ PP(register struct symtab *spt;)
 	{
 		errst1 = ovtree[spt->ovlnum]->ovfname;
 		errorx(BADOVREF, spt->name);
-		return (0);
+		return 0;
 	}
 	jpt = newjblk();					/* put a new jump block in  */
 	jpt->globref = gpt;					/*   ovtree, remember symbol    */
@@ -1604,7 +1569,7 @@ PP(register struct symtab *spt;)
 		spt->flags &= ~SYXR;			/* no longer external       */
 		spt = nextsy(spt->tlnk);		/* get all references   */
 		if ((spt == lmte) || (spt->ovlnum != i))
-			return (1);					/* done with this symbol    */
+			return 1;					/* done with this symbol    */
 	}
 }
 
@@ -1678,7 +1643,6 @@ PP(char *ofilname;)
 		putw(MAGIC1, obuf);				/* data & bss bases in header */
 	else
 		putw(MAGIC, obuf);				/* normal header */
-	/* putw(0,obuf);*//* pad for VAX header */
 
 	putw(textsize.u.hiword, obuf);
 	putw(textsize.u.loword, obuf);
@@ -1809,7 +1773,7 @@ PP(int extno;)
 	{
 		return p->vl1;
 	}
-	pack((int *) p, (int *) lmte);
+	pack(p->name, lmte->name);
 	pg = lemt(girt);
 	if (pg == lmte)
 		pg = lemt(eirt);				/* may be common */
@@ -1834,19 +1798,19 @@ PP(int extno;)
 		pg = p;
 	} else
 	{
-		pack((int *) p, (int *) lmte);
+		pack(p->name, lmte->name);
 		pg = lemt(girt);
 		if (pg == lmte)
 			pg = lemt(eirt);			/* may be common */
 	}
 	i = pg->flags;
 	if (i & SYDA)
-		return (DRELOC);
+		return DRELOC;
 	else if (i & SYTX)
-		return (TRELOC);
+		return TRELOC;
 	else if (i & SYBS)
-		return (BRELOC);
-	return (DABS);
+		return BRELOC;
+	return DABS;
 }
 
 /*
@@ -2160,7 +2124,7 @@ VOID finalwr(NOTHING)
 }
 
 
-/* copy the initialized data words from temp file to output file*/
+/* copy the initialized data words from temp file to output file */
 VOID cpdata(P(FILE *) pb, P(int) fnc, P(long) size)
 PP(register FILE *pb;)
 PP(int fnc;)
@@ -2182,7 +2146,7 @@ PP(long size;)
 	fclose(pb);
 }
 
-/* output symbol table to file*/
+/* output symbol table to file */
 
 VOID osymt(NOTHING)
 {
@@ -2192,7 +2156,7 @@ VOID osymt(NOTHING)
 	if (!sflag)							/* no symbol table desired */
 		return;
 
-/* now output the symbols deleting externals*/
+/* now output the symbols deleting externals */
 
 	for (p = (struct symtab *)bmte; p < lmte; p++)
 	{
@@ -2237,7 +2201,7 @@ PP(struct symtab *aosypt;)
 }
 
 
-/* look for and define if found etext, edata, eroot, and end*/
+/* look for and define if found etext, edata, eroot, and end */
 
 int spendsym(P(struct symtab *) ap)
 PP(struct symtab *ap;)
@@ -2248,27 +2212,27 @@ PP(struct symtab *ap;)
 	if (eqstr(etexstr, &p->name[0]))
 	{
 		etextptr = p;
-		return (1);
+		return 1;
 	}
 	if (eqstr(edatstr, &p->name[0]))
 	{
 		edataptr = p;
-		return (1);
+		return 1;
 	}
 	if (eqstr(erootstr, &p->name[0]))
 	{
 		erootptr = p;
-		return (1);
+		return 1;
 	}
 	if (eqstr(eendstr, &p->name[0]))
 	{
 		endptr = p;
-		return (1);
+		return 1;
 	}
-	return (0);
+	return 0;
 }
 
-/* test two symbol names for equality*/
+/* test two symbol names for equality */
 
 int eqstr(P(const char *) ap1, P(const char *) ap2)
 PP(const char *ap1;)
@@ -2283,13 +2247,13 @@ PP(const char *ap2;)
 	{
 		if (*p1++ != *p2++)
 		{
-			return (0);
+			return 0;
 		}
 	}
-	return (1);
+	return 1;
 }
 
-/* print an error message giving an external name*/
+/* print an error message giving an external name */
 
 VOID prextname(P(int) extno)
 PP(int extno;)
