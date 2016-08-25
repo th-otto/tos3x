@@ -7,6 +7,9 @@
 	@(#) sendc68.h - Jul 26, 1983  REGULUS 4.1
 */
 
+#ifndef __SENDC68_H__
+#define __SENDC68_H__ 1
+
 /* format of a symbol entry in the main table */
 
 #define OSTSIZE	14	/* symbol table entry length on object file */
@@ -18,7 +21,10 @@ struct symtab {
 	char name[SYNAMLEN];		/* symbol name */
 	short flags;				/* bit flags */
 	long  vl1;					/* symbol value */
-	char *tlnk;					/* table link */
+#ifdef LINK68
+	short ovlnum;				/* overlay number */
+#endif
+	struct symtab *tlnk;		/* table link */
 };
 
 struct symtab *symptr;
@@ -34,8 +40,8 @@ struct symtab *symptr;
 #define SYBS	0x0100		/* BSS based relocatable */
 
 struct irts {
-	char *irle;		/* ptr to last entry in chain */
-	char *irfe;		/* ptr to first entry in chain */
+	struct symtab *irle;		/* ptr to last entry in chain */
+	struct symtab *irfe;		/* ptr to first entry in chain */
 };
 
 #ifndef VAX11
@@ -56,5 +62,7 @@ union mshort { struct mshortbytes u; short l; };
 #define BRELOC		3		/* BSS relocatable */
 #define EXTVAR		4		/* ref to external variable */
 #define LUPPER		5		/* upper word of long */
-#define EXTREL		6		/* relative mode on external variable */
+#define EXTREL		6		/* pc-relative mode on external variable */
 #define INSABS		7		/* first word of instr -- absolute */
+
+#endif
