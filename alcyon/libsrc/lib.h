@@ -1,4 +1,4 @@
-/* always defined when comiling the library */
+/* always defined when compiling the library */
 #define _LIBC 1
 
 #include <stdarg.h>

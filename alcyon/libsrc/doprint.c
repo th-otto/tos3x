@@ -26,7 +26,7 @@ PP(char c;)
 		*(*str)++ = c;
 	} else
 	{
-		putc(c, stream);
+		fputc(c, stream);
 	}
 }
 

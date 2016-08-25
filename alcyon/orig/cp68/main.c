@@ -490,5 +490,4 @@ int _open PROTO((const char *fname, int mode, int binary));
 int _open PROTO((const char *fname, int mode, int binary)) { return -1; }
 int xcreat PROTO((const char *fname, int mode, int binary)) { return -1; }
 VOID xwritefail(NOTHING) { abort(); }
-char const __atab[256];
 #endif

@@ -11,13 +11,9 @@
  **	formated print
  **/
 
-#ifdef __USE_STDARG
-int printf(const char *fmt, ...)
-#else
-int printf(fmt, va_alist)
-const char *fmt;
+int printf(P(const char *) fmt _va_alist)
+PP(const char *fmt;)
 va_dcl
-#endif
 {
 	va_list args;
 	register int ret;

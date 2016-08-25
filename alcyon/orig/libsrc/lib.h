@@ -1,6 +1,9 @@
 #ifndef __LIBC_H__
 #define __LIBC_H__ 1
 
+/* always defined when compiling the library */
+#define _LIBC 1
+
 #include <stdarg.h>
 #include <stdio.h>
 

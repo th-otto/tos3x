@@ -22,6 +22,16 @@
 #include <compiler.h>
 #endif
 
+#ifdef __GNUC__
+ #ifndef _LIBC
+ #  include_next <ctype.h>
+ #  define _NO_CTYPE
+ #endif
+#endif
+
+
+#ifndef _NO_CTYPE
+
 /*
  *	Bit patterns for character class DEFINEs
  */
@@ -53,5 +63,7 @@ extern	char const __atab[];
 #define	tolower(ch) (isupper(ch) ? (ch)+('a'-'A') : (ch))
 #define	toupper(ch) (islower(ch) ? (ch)+('A'-'a') : (ch))
 #define	toascii(ch) ((ch) & 0177)
+
+#endif
 
 #endif /* __CTYPE_H__ */

@@ -13,14 +13,10 @@
 #include <string.h>
 
 
-#ifdef __USE_STDARG
-int fprintf(FILE *fp, const char *fmt, ...)
-#else
-int fprintf(P(FILE *) fp, P(const char *) fmt, va_alist)
+int fprintf(P(FILE *) fp, P(const char *) fmt _va_alist)
 PP(FILE *fp;)
 PP(const char *fmt;)
 va_dcl
-#endif
 {
 	register int ret;
 	va_list args;
@@ -31,6 +27,7 @@ va_dcl
 	_va_start(args, fmt);
 	ret = __doprint(fp, fmt, 0, args);
 	_va_end(args);
-	fflush(fp);
+	if (!(fp->_flag & _IONBUF))
+		fflush(fp);
 	return ret;
 }
