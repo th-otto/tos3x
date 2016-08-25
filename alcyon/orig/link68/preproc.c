@@ -685,7 +685,7 @@ PP(char *fltype;)
  *
  ************************************************************************/
 
-struct filenode *newflnod()
+struct filenode *newflnod(NOTHING)
 {
 	register struct filenode *newnode;	/* temporary pointer    */
 

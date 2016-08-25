@@ -735,7 +735,7 @@ BOOLEAN rdlibhdr(NOTHING)
 VOID openfile(P(char *) ap)
 PP(char *ap;)
 {
-	register const char *p;
+	register char *p;
 	register short i;
 	char tempname[FNAMELEN];
 
@@ -757,7 +757,7 @@ PP(char *ap;)
 		strcat(tempname, DEFTYPE);
 		if ((ibuf = fopenbr(tempname)) == 0)
 			errorx(BADINFIL, p);
-		strcpy(p, tempname); /* BUG: ovewrites callers argument */
+		strcpy(p, tempname);
 	}
 	ifilname = p;						/* point to current file name for error msgs */
 	if (readshort(ibuf, &couthd.ch_magic))
@@ -986,7 +986,7 @@ VOID intsytab(NOTHING)
 	cszmt = SZMT;						/* current size of main table */
 	p1 = eirt;
 	p2 = girt;
-	for (i = 0; i < 32; i++)
+	for (i = 0; i < (SZIRT / 2); i++)
 	{
 #ifdef __ALCYON__
 		*p1++ = p1;		/* BUG: operation on p1 may be undefined */
@@ -1062,16 +1062,16 @@ struct symtab *nextsy(P(struct symtab *) amtpt)
 PP(struct symtab *amtpt;)
 {
 	register struct symtab *mtpt;
-	register int *p1, *p2;
+	register short *p1, *p2;
 	register int i;
 
 	mtpt = amtpt;
 
 	/* loop to locate entry in main table */
   lemtl:
-	p1 = (int *)&mtpt->name[0];
-	p2 = (int *)&lmte->name[0];
-	for (i = 0; i < SYNAMLEN / (sizeof i); i++)
+	p1 = (short *)&mtpt->name[0];
+	p2 = (short *)&lmte->name[0];
+	for (i = 0; i < SYNAMLEN / (sizeof (*p1)); i++)
 	{
 		if (*p1++ != *p2++)
 		{
@@ -1154,7 +1154,7 @@ PP(char *apkptr;)
 
 	pkstr = (const short *)apkstr;
 	pkptr = (short *)apkptr;
-	for (i = 0; i < SYNAMLEN / (sizeof i); i++)
+	for (i = 0; i < SYNAMLEN / (sizeof (*pkstr)); i++)
 		*pkptr++ = *pkstr++;
 }
 
@@ -2313,13 +2313,3 @@ VOID dumpsyms(NOTHING)
 	}
 	dmpflg = FALSE;
 }
-
-
-/*
- * these are here only to be able to compile & link with non-Alcyon compilers;
- * running the program will not work
- */
-
-#ifndef __ALCYON__
-char const __atab[256];
-#endif

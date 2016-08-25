@@ -22,30 +22,30 @@
  *		the manner which will be understood on the current machine.
  */
 int getchd(P(FILE *) fp, P(struct hdr2 *)arptr)
-PP(FILE * fp;)
+PP(FILE *fp;)
 PP(struct hdr2 *arptr;)
 {
-	if (lgetw(&arptr->ch_magic, fp) == -1)
+	if (lgetw(&arptr->ch_magic, fp) < 0)
 		return -1;
-	if (lgetl(&arptr->ch_tsize, fp) == -1)
+	if (lgetl(&arptr->ch_tsize, fp) < 0)
 		return -1;
-	if (lgetl(&arptr->ch_dsize, fp) == -1)
+	if (lgetl(&arptr->ch_dsize, fp) < 0)
 		return -1;
-	if (lgetl(&arptr->ch_bsize, fp) == -1)
+	if (lgetl(&arptr->ch_bsize, fp) < 0)
 		return -1;
-	if (lgetl(&arptr->ch_ssize, fp) == -1)
+	if (lgetl(&arptr->ch_ssize, fp) < 0)
 		return -1;
-	if (lgetl(&arptr->ch_stksize, fp) == -1)
+	if (lgetl(&arptr->ch_stksize, fp) < 0)
 		return -1;
-	if (lgetl(&arptr->ch_entry, fp) == -1)
+	if (lgetl(&arptr->ch_entry, fp) < 0)
 		return -1;
-	if (lgetw(&arptr->ch_rlbflg, fp) == -1)
+	if (lgetw(&arptr->ch_rlbflg, fp) < 0)
 		return -1;
 	if (arptr->ch_magic == EX_ABMAGIC)
 	{
-		if (lgetl(&arptr->ch_dstart, fp) == -1)
+		if (lgetl(&arptr->ch_dstart, fp) < 0)
 			return -1;
-		if (lgetl(&arptr->ch_bstart, fp) == -1)
+		if (lgetl(&arptr->ch_bstart, fp) < 0)
 			return -1;
 	}
 	return 0;
