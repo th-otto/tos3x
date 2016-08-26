@@ -40,7 +40,7 @@ PP(register int fd;)							/* File descriptor to close */
 #if CPM
 		register int xuser;						/* User number temporary    */
 		
-		if ((fp->flags & ISASCII) != 0 && (fp->flags & ISREAD) == 0)	/*  */
+		if ((fp->flags & ISASCII) != 0 && (fp->flags & ISREAD) == 0)
 		{								/* ASCII file? not ReadOnly? */
 			if (fp->offset < fp->hiwater)	/* Have we been seeking?    */
 				lseek(fd, 0L, SEEK_END);		/*   Seek to EOF ifso       */
@@ -56,7 +56,7 @@ PP(register int fd;)							/* File descriptor to close */
 #endif
 	
 #if GEMDOS
-		if ((rv = jclose(fp->dosfd)) < 0)	/* Close the fcb       */
+		if ((rv = Fclose(fp->dosfd)) < 0)	/* Close the fcb       */
 			rv = -1;
 #else
 #if PCDOS

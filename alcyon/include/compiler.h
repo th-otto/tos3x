@@ -71,6 +71,20 @@
 # define __GNUC_PREREQ(maj, min) 0
 #endif
 
+#if __GNUC_PREREQ(3, 3)
+# define __CLOBBER_RETURN(a) 
+#else
+# define __CLOBBER_RETURN(a) a,
+#endif
+
+#if __GNUC_PREREQ(2, 6)
+#define AND_MEMORY , "memory"
+#define ONLY_MEMORY "memory"
+#else
+#define AND_MEMORY
+#define ONLY_MEMORY
+#endif
+
 #if __GNUC_PREREQ(2, 5)
 #define __EXITING void
 #else

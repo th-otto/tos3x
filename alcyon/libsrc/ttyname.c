@@ -18,10 +18,12 @@
 #include "lib.h"
 #include <unistd.h>
 
+static char tname[] = "CON:";
+
 char *ttyname(P(int) fd)
 PP(int fd;)
 {
 	if (isatty(fd))
-		return __tname;
+		return tname;
 	return NULL;
 }

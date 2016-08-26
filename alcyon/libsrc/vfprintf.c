@@ -1,6 +1,6 @@
 #include "lib.h"
 
-int vfprintf(P(FILE *) fp, P(const char *fmt) fmt, P(va_list) args)
+int vfprintf(P(FILE *) fp, P(const char *) fmt, P(va_list) args)
 PP(FILE *fp;)
 PP(const char *fmt;)
 PP(va_list args;)

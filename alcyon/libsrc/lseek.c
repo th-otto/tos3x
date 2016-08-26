@@ -44,7 +44,7 @@ PP(int whence;)								/* Sense of offset      */
 	if ((fp = _chkc(fd)) == NULLFD)
 		return -1;	
 #if GEMDOS
-	fp->offset = jlseek(offs, fp->dosfd, whence);
+	fp->offset = Fseek(offs, fp->dosfd, whence);
 #else
 	switch (whence)
 	{

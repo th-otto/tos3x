@@ -16,7 +16,7 @@
 int fprintf(P(FILE *) fp, P(const char *) fmt _va_alist)
 PP(FILE *fp;)
 PP(const char *fmt;)
-va_dcl
+_va_dcl
 {
 	register int ret;
 	va_list args;

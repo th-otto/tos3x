@@ -29,47 +29,10 @@
 #include <string.h>
 
 
-
-int _creat(P(const char *) fname, P(mode_t) prot, P(int) binary)
-PP(const char *fname;)				/* -> File name         */
-PP(mode_t prot;)						/* Open mode            */
-PP(int binary;)						/* ASCII/BINARY flag        */
-{
-	register int ich;						/* Channel number for open  */
-	register FD *ch;						/* -> CCB for channel       */
-
-	/* Allocate a channel */
-	if ((ich = _allocc()) == -1)
-		return -1;
-	
-	__chinit(ich);						/* Clear out channel's ccb  */
-	ch = _getccb(ich);					/* Get address of ccb       */
-	
-	if (binary == 0)						/* ASCII file?          */
-		ch->flags |= ISASCII;			/*  Yes, mark it.       */
-	
-	if (strcasecmp(fname, __tname) == 0)	/* Terminal file?       */
-	{
-		ch->flags |= ISTTY | OPENED;	/* Set flag         */
-		return ich;						/* Return file descriptor   */
-	} else if (strcasecmp(fname, __lname) == 0)	/* List device?         */
-	{
-		ch->flags |= ISLPT | OPENED;	/* set flag         */
-		return ich;
-	}
-	
-
-	if (__open(ich, fname, CREATE) != 0)	/* Use BDOS interface       */
-		RETERR(-1, ENODSPC);		/*   Oops, No dir space.    */
-
-	ch->flags |= OPENED;				/*   Set OPEN bit       */
-	return ich;
-}
-
 /* default to binary */
 int creat(P(const char *) fname, P(mode_t) prot)
 PP(const char *fname;)
 PP(mode_t prot;)
 {
-	return _creat(fname, prot, 1);
+	return open(fname, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, prot);
 }

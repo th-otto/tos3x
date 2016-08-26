@@ -13,7 +13,7 @@
 
 int printf(P(const char *) fmt _va_alist)
 PP(const char *fmt;)
-va_dcl
+_va_dcl
 {
 	va_list args;
 	register int ret;

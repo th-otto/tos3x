@@ -100,11 +100,7 @@ notend:	cmp.b	(a0)+,d0			*	check for character
 *
 		data
 		xdef	___pname		*	Program Name
-		xdef	___tname		*	Terminal Name
-		xdef	___lname		*	List device name
 		xdef	___xeof			*	^Z byte
 ovf:		dc.b	'Stack Overflow$'	*	Error message
 ___pname:	dc.b	'C runtime',0		*	Program name
-___tname:	dc.b	'CON:',0		*	Console name
-___lname:	dc.b	'LST:',0		*	List device name
 ___xeof:	dc.b	$1a			*	Control-Z

@@ -38,7 +38,7 @@ PP(va_list args;)
 
 int nf_dbgprintf(P(const char *) format _va_alist)
 PP(const char *format;)
-va_dcl
+_va_dcl
 {
 	int ret;
 	va_list args;

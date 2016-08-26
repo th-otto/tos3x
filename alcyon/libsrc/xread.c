@@ -8,5 +8,5 @@ PP(long offset;)
 PP(VOIDPTR buff;)
 PP(long bytes;)
 {
-	return jread(ccbp->dosfd, bytes, buff);
+	return Fread(ccbp->dosfd, bytes, buff);
 }

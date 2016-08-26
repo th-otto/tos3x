@@ -20,6 +20,7 @@
 *
 *****************************************************************************/
 
+#include <osif.h>
 #include "lib.h"
 #include <portab.h>
 #include <fcntl.h>
@@ -28,12 +29,29 @@ int _main(P(char *) com, P(int) len)
 PP(char * com;)							/* Command address      */
 PP(int len;)								/* Command length       */
 {
+	register FD *ch;;
+	
 	/* Initialize channels */
 	_chinit();
-	open(__tname, O_RDONLY);				/* Open STDIN           */
-	open(__tname, O_WRONLY);				/* Open STDOUT          */
-	open(__tname, O_WRONLY);				/* Open STDERR          */
-
+	ch = _fd_get(O_RDONLY | O_TEXT);				/* Open STDIN           */
+	if (ch)
+	{
+		ch->dosfd = STDIN;
+		ch->flags |= OPENED;
+	}
+	ch = _fd_get(O_WRONLY | O_TEXT);				/* Open STDOUT          */
+	if (ch)
+	{
+		ch->dosfd = STDOUT;
+		ch->flags |= OPENED;
+	}
+	ch = _fd_get(O_WRONLY | O_TEXT);				/* Open STDERR          */
+	if (ch)
+	{
+		ch->dosfd = STDERR;
+		ch->flags |= OPENED;
+	}
+	
 	com[len] = '\0';						/* Insure null at line end  */
 	
 	return __main(com, len);

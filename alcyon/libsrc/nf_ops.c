@@ -197,7 +197,7 @@ static long __attribute__((noinline)) __CDECL _nf_call(long id, ...)
 static long _nf_det(void)
 {
 	register long ret __asm__ ("d0");
-	register const char *nf_version __asm__("a1") = NF_ID_VERSION;
+	register const char *nf_version_str __asm__("a1") = NF_ID_VERSION;
 	
 	__asm__ volatile(
 	"\tmove.l	%1,-(sp)\n"
@@ -224,7 +224,7 @@ static long _nf_det(void)
 
 	"\tnop\n"						/* flush pipelines (for 68040+) */
 	: "=g"(ret)  /* outputs */
-	: "g"(nf_version)		/* inputs  */
+	: "g"(nf_version_str)		/* inputs  */
 	: __CLOBBER_RETURN("d0") "a0", "d1" AND_MEMORY
 	);
 	return ret;
@@ -277,7 +277,7 @@ asm("nfret:");
 
 #endif 
 
-static struct nf_ops _nf_ops = { _nf_get_id, _nf_call, 0, 0, 0 };
+static struct nf_ops _nf_ops = { _nf_get_id, _nf_call };
 static struct nf_ops *nf_ops;
 
 /* NatFeat code */
@@ -335,12 +335,12 @@ struct nf_ops *nf_init(NOTHING)
 long nf_get_id(P(const char *) feature_name)
 PP(const char *feature_name;)
 {
-	struct nf_ops *nf_ops;
+	struct nf_ops *ops;
 	long id = 0;
 	
-	if ((nf_ops = nf_init()) != NULL)
+	if ((ops = nf_init()) != NULL)
 	{
-		id = NF_GET_ID(nf_ops, feature_name);
+		id = NF_GET_ID(ops, feature_name);
 	}
 	return id;
 }

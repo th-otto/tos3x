@@ -42,8 +42,8 @@ PP(size_t bytes;)							/* Number of bytes to xfer  */
 	if (bytes == 0)						/* Trying to write 0        */
 		return 0;						/* Yes, a wise guy!     */
 
-	if ((fp->flags & ISREAD) != 0)		/* Check for readonly file  */
-		RETERR(-1, EBADF);			/* Barf if so           */
+	if ((fp->flags & ISWRITE) == 0)		/* Check for readonly file  */
+		RETERR(-1, EBADF);
 
 #if !GEMDOS
 	if (fp->flags & (ISTTY | ISLPT | ISQUE))	/* TTY, LST or QUE File?    */

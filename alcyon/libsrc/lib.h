@@ -36,8 +36,6 @@
 #define STDERR 2
 
 extern char __pname[];					/* Program name         */
-extern char __tname[];					/* Terminal name        */
-extern char __lname[];					/* List device name     */
 extern char *_break;					/* -> Program break location */
 
 char *petoa PROTO((double fp, char *buf, int prec));
@@ -82,7 +80,6 @@ long uldiv PROTO((long al1, long al2));
 VOID aldiv PROTO((long * al1, long al2));
 VOID alrem PROTO((long *al1, long al2));
 
-int _creat PROTO((const char *name, mode_t prot, int binary));
 int _open PROTO((const char *name, int mode, int binary));
 int __open PROTO((int fd, const char *name, int search));
 int _chkuser PROTO((int newu));
@@ -108,6 +105,7 @@ int _flsbuf PROTO((int c, FILE *fp));
 VOID blkmove PROTO((char *to, const char *from, size_t nn));
 
 #ifdef __OSIF_H__
+FD *_fd_get PROTO((int flags));
 char *_parsefn PROTO((const char *filename, struct fcbtab *fdb));
 FD *_chkc PROTO((unsigned int fd));						/* Converts fd to fp */
 size_t _ttyin PROTO((FD *fp, VOIDPTR buff, size_t bytes));					/* Read from tty rtn        */

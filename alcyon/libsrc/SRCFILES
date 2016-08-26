@@ -1,5 +1,5 @@
 AOBJS1 = blivot.o xsignal.o salloc.o setjmp.o memsets.o brk.o
-AOBJS2 = trap.o bios.o xbios.o gemdos.o strchrs.o
+AOBJS2 = bios.o xbios.o gemdos.o strchrs.o
 
 AOBJS = $(AOBJS1) $(AOBJS2)
 

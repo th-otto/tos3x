@@ -8,5 +8,5 @@ PP(long offset;)
 PP(const VOIDPTR buff;)
 PP(long bytes;)
 {
-	return jwrite(ccbp->dosfd, bytes, buff);
+	return Fwrite(ccbp->dosfd, bytes, buff);
 }

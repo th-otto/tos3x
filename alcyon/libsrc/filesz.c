@@ -34,7 +34,7 @@ PP(int fd;)								/* file descriptor      */
 	if (fp->flags & (ISTTY | ISLPT))	/* Non disk file?       */
 		return 0;
 #if GEMDOS
-	fp->offset = jlseek(0L, fp->dosfd, SEEK_END);
+	fp->offset = Fseek(0L, fp->dosfd, SEEK_END);
 #else
 #if PCDOS
 	fp->offset = (fp->fcb).fcb_filsiz;	/* simple, eh? */

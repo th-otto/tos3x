@@ -538,13 +538,9 @@ _crystal:
 *
 	.data
 	.globl	___pname	* Program Name
-	.globl	___tname	* Terminal Name
-	.globl	___lname	* List device name
 	.globl	___xeof		* ^Z byte
 ovf:		.dc.b	'Stack Overflow',13,10,0	* Overflow message
 ___pname:	.dc.b	'runtime',0	* Program name
-___tname:	.dc.b	'CON:',0	* Console name
-___lname:	.dc.b	'LST:',0	* List device name
 ___xeof:	.dc.b	$1a		* Control-Z
 abortmsg:	.dc.b	'Cannot initialize stack',13,10,0	* abort message
 

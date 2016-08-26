@@ -60,7 +60,7 @@ PP(int binary;)								/* File type            */
 	if (strcasecmp(fname, __tname) == 0)
 	{
 		ch->flags |= ISTTY | OPENED;
-		ch->dosfd = mode; /* ??? */
+		ch->dosfd = mode; /* BUG: ugly hack; the call here is from xmain, and mode is either 0 or 1 */
 		return ich;
 	} else if (strcasecmp(fname, __lname) == 0)
 	{

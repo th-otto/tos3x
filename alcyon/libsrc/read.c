@@ -39,8 +39,8 @@ PP(size_t bytes;)							/* =  byte count to read    */
 		return -1;				/*  No: EBADF       */
 	if ((fp->flags & ATEOF) != 0)		/* End of file already?     */
 		return 0;						/* Yes, quit now        */
-	if ((fp->flags & ISLPT) != 0)		/* A wise guy??         */
-		RETERR(-1, EBADF);			/*  A wise guy!!        */
+	if ((fp->flags & ISREAD) == 0)		/* Check for readonly file  */
+		RETERR(-1, EBADF);
 
 #if !GEMDOS
 	if ((fp->flags & ISTTY) != 0)		/* TTY?             */

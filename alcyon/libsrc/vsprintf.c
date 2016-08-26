@@ -1,6 +1,6 @@
 #include "lib.h"
 
-int vsprintf(P(char *) str, P(const char *fmt) fmt, P(va_list) args)
+int vsprintf(P(char *) str, P(const char *) fmt, P(va_list) args)
 PP(char *str;)
 PP(const char *fmt;)
 PP(va_list args;)

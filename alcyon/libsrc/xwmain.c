@@ -237,7 +237,7 @@ PP(int len;)								/* Command length */
 					long res;
 					
 					__OSIF(SETDMA, &dta);
-					res = jsfirst(s, 0);
+					res = Fsfirst(s, 0);
 					if (res < 0)
 						_err(s, ": No match");
 					/* Do search next's */
@@ -249,7 +249,7 @@ PP(int len;)								/* Command length */
 						strcpy(p, dta.d_fname);
 						/* Add this file to argv */
 						addargv(p);
-						res = jsnext();
+						res = Fsnext();
 					}
 #else
 					FD *pfd;							/* File Desc temp */

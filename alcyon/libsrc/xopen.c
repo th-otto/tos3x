@@ -62,7 +62,7 @@ PP(int bdosfunc;)							/* BDOS Function        */
 		switch (bdosfunc)
 		{
 		case CREATE:
-			if ((rv = jcreat(filename, 0)) > 0)
+			if ((rv = Fcreate(filename, 0)) > 0)
 			{
 				fp->dosfd = rv;
 				rv = 0;
@@ -71,16 +71,32 @@ PP(int bdosfunc;)							/* BDOS Function        */
 		
 		/* strange interface for SEARCHF/SEARCHN; but isn't used anymore */
 		case SEARCHF:
-			rv = jsfirst(filename, 0) != 0 ? 0 : 255;
+			rv = Fsfirst(filename, 0) != 0 ? 0 : 255;
 			break;
 		case SEARCHN:
-			rv = jsnext() != 0 ? 0 : 255;
+			rv = Fsnext() != 0 ? 0 : 255;
 			break;
 		
 		case OPEN:
 			/* GEMDOS uses the same values for the mode as the open() call */
-			mode = fp->flags & ISREAD ? O_RDONLY : O_RDWR;
-			if ((dosfd = jopen(filename, mode)) >= -6)
+			switch (fp->flags & (ISREAD|ISWRITE))
+			{
+			case 0:
+			case ISREAD:
+				mode = O_RDONLY;
+				break;
+			case ISWRITE:
+				mode = O_WRONLY;
+				break;
+			default:
+				mode = O_RDWR;
+				break;
+			}
+			/*
+			 * Remember that we can get valid negative handle from e.g. Fopen("PRN:"),
+			 * hence the >= -6
+			 */
+			if ((dosfd = Fopen(filename, mode)) >= -6)
 			{
 				fp->dosfd = dosfd;
 				rv = 0;
