@@ -586,7 +586,7 @@ extern int Getcookie PROTO((long cookie, long *val));
 int Cookie_JarInstalled PROTO((NOTHING));
 int Cookie_UsedEntries PROTO((NOTHING));
 int Cookie_JarSize PROTO((NOTHING));
-int Cookie_ReadJar PROTO((unsigned long id, long *value));
-int Cookie_WriteJar PROTO((unsigned long id, long value));
+int Cookie_ReadJar PROTO((__uint32_t id, long *value));
+int Cookie_WriteJar PROTO((__uint32_t id, long value));
 
 #endif

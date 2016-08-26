@@ -14,5 +14,12 @@ link68$(EXEEXT): $(LINK_OBJS) ${MAKEFILE}
 
 check::
 
+link68.rel::
+	cp ../libsrc/crt0.o .
+	cp ../libsrc/libc.a .
+	cp ../libsrc/libc.ndx .
+	cp ../libsrc/nofloat.o .
+	./link68$(EXEEXT) '[s]' $@=crt0.o,nofloat.o,link68.o,preproc.o,lnkmess.o,libc.a
+
 clean:
 	$(RM) *.o *.a *.s *.i *.1 *.2 *.rel *.mod $(PROGRAMS)

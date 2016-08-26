@@ -15,6 +15,34 @@ extern	long bios PROTO((short code, ...));
 extern	long xbios PROTO((short code, ...));
 extern	long gemdos PROTO((short code, ...));
 
+#ifdef __GNUC__
+#ifdef __mc68000__
+#define trap_1_wwll(n, a, b, c)						\
+__extension__								\
+({									\
+	register long retvalue __asm__("d0");				\
+	short _a = (short)(a);						\
+	long  _b = (long) (b);						\
+	long  _c = (long) (c);						\
+	    								\
+	__asm__ volatile						\
+	(								\
+		"movl	%4,sp@-\n\t"					\
+		"movl	%3,sp@-\n\t"					\
+		"movw	%2,sp@-\n\t"					\
+		"movw	%1,sp@-\n\t"					\
+		"trap	#1\n\t"						\
+		"lea	sp@(12),sp"					\
+	: "=r"(retvalue)			/* outputs */		\
+	: "g"(n), "r"(_a), "r"(_b), "r"(_c)     /* inputs  */		\
+	: __CLOBBER_RETURN("d0") "d1", "d2", "a0", "a1", "a2"    /* clobbered regs */	\
+	  AND_MEMORY							\
+	);								\
+	retvalue;							\
+})
+#endif
+#endif
+
 #define VEC_INQUIRE            (-1L)
 
 /*	BIOS	(trap13)	*/

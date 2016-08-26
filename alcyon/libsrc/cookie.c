@@ -10,6 +10,14 @@
 #include <mint/cookie.h>
 #include <mint/ssystem.h>
 
+#ifndef __SHORT_EXTERNAL_NAMES
+#define ck_ji Cookie_JarInstalled
+#define ck_ue Cookie_UsedEntries
+#define ck_js Cookie_JarSize
+#define ck_rdj Cookie_ReadJar
+#define ck_wrj Cookie_WriteJar
+#endif
+
 typedef struct {
 	union {
 		__uint32_t id;
@@ -224,7 +232,7 @@ PP(long *value;)
 		if (get_cookie(id, &val))
 		{
 			setval(valp, val);
-			return ;
+			return 1;
 		}
 	}
 	return 0;

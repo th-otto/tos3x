@@ -22,6 +22,8 @@
 int fclose(P(FILE *) sp)
 PP(register FILE *sp;)
 {
+	register int fd;
+	
 	if (!__validfp(sp))
 	{
 		__set_errno(EINVAL);
@@ -38,5 +40,7 @@ PP(register FILE *sp;)
 	/* reset all flags */
 	sp->_flag &= ~(_IOREAD | _IOWRT | _IOABUF | _IONBUF | _IOERR | _IOEOF | _IOLBUF);
 	/* and return */
-	return close(fileno(sp));
+	fd = fileno(sp);
+	fileno(sp) = -1;
+	return close(fd);
 }

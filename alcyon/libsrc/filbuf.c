@@ -19,24 +19,35 @@
 
 #include "lib.h"
 #include <stdlib.h>
+#include <errno.h>
+
 #define CMASK 0xFF
 
 int _filbuf(P(register FILE *) sp)
-PP(register FILE *sp;)							/* from this stream     */
+PP(register FILE *sp;)
 {
 	static char onebuf[MAXFILES];		/* a place if no mem avail. */
 
+	if (!__validfp(sp))
+	{
+		__set_errno(EINVAL);
+		return EOF;
+	}
 	if ((sp->_flag & _IOREAD) == 0)		/* is readable file?        */
-		return -1;
+	{
+		return EOF;
+	}
 	if (sp->_flag & _IOSTRI)			/* is this stream a string? */
 	{									/*    yes: handle EOS as EOF */
 		sp->_flag |= _IOEOF;
-		return -1;
+		return EOF;
 	}
 	if (sp->_base == NULL)				/* has this been done?      */
 	{
-		if (sp->_flag & _IONBUF ||		/* is the No Buf flag set?  */
-			(sp->_base = malloc(BUFSIZ)) == NULL)	/* can't we get buffer?   */
+		/* is the No Buf flag set? */
+		if (sp->_flag & _IONBUF)
+			sp->_flag |= _IONBUF;		/*   set No Buf flag        */
+		else if ((sp->_base = malloc(BUFSIZ)) == NULL)	/* can't we get buffer?   */
 			sp->_flag |= _IONBUF;		/*   set No Buf flag        */
 		else
 			sp->_flag |= _IOABUF;		/* we're all set        */
@@ -47,13 +58,14 @@ PP(register FILE *sp;)							/* from this stream     */
 		fflush(stdout);					/* output whatever to con   */
 	sp->_cnt = read(fileno(sp), sp->_base,	/* read to our buffer       */
 					sp->_flag & _IONBUF ? 1 : BUFSIZ);	/*   the right # of bytes   */
-	if (sp->_cnt <= 0)					/* did read screw up?       */
-	{									/* yup...******************* */
-		if (sp->_cnt == -1)
+	/* did read screw up? */
+	if (sp->_cnt <= 0)
+	{
+		if (sp->_cnt < 0)
 			sp->_flag |= _IOERR | _IOEOF;
 		else
 			sp->_flag |= _IOEOF;		/* or just say we can't read */
-		return -1;
+		return EOF;
 	}
 	sp->_cnt--;							/* take the 1st item        */
 	sp->_ptr = sp->_base;				/* set up stream        */

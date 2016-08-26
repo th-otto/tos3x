@@ -21,9 +21,10 @@ int lgetw(P(unsigned short *) lp, P(FILE *) f)
 PP(unsigned short *lp;)
 PP(FILE *f;)
 {
-	unsigned int c1 = getc(f);
-	unsigned int c2 = getc(f);
-	*lp = (c1 << 8) | c2;
+	register unsigned int w1;
+	w1 = getc(f);
+	w1 <<= 8;
+	*lp = (w1 << 8) | getc(f);
 	return feof(f) ? EOF : 0;
 }
 

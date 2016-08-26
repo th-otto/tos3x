@@ -273,18 +273,19 @@ static long libfilsize;
 static unsigned short get16be(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
-	unsigned int c1 = getc(sp) & 0xff;
-	unsigned int c2 = getc(sp) & 0xff;
-	return (c1 << 8) | c2;
+	register unsigned int w1;
+	w1 = getc(sp);
+	w1 <<= 8;
+	return w1 | getc(sp);
 }
 
 
 static long get32be(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
-	unsigned int w1 = get16be(sp);
-	unsigned int w2 = get16be(sp);
-	return ((long)w1 << 16) | w2;
+	register unsigned int w1;
+	w1 = get16be(sp);
+	return ((long)w1 << 16) | get16be(sp);
 }
 
 
@@ -861,9 +862,9 @@ static VOID addmte(NOTHING)
 	lmte++;			/* bump last main table entry pointer */
 	if (lmte >= emte)
 	{									/* main table overflow */
-		if (sbrk(sizeof(*symptr) * ICRSZMT) == (char *)-1)
+		if (sbrk(sizeof(*symptr) * ICRSZMT) == (VOIDPTR)-1)
 		{
-			fatalx(FALSE, _("symbol table overflow\n"));			/* could not get more memory */
+			oom();
 		} else
 		{								/* move end of main table */
 			emte += ICRSZMT;
@@ -1227,7 +1228,7 @@ static struct jmpblock *newjblk(NOTHING)
 	register struct jmpblock *npt, *tpt;
 	register struct ovtrnode *opt;
 
-	if ((npt = sbrk(sizeof(*npt))) <= 0)	/* get a piece of memory   */
+	if ((npt = sbrk(sizeof(*npt))) == (VOIDPTR)-1)	/* get a piece of memory   */
 		oom();
 	opt = ovtree[ovpath[ovpathtp]];		/* get current command tree node */
 	if ((tpt = opt->ovjblck) == NULL)	/* empty list?      */
@@ -1418,6 +1419,8 @@ static VOID intsytab(NOTHING)
 	register int i;
 
 	bmte = (struct symtab *)sbrk(sizeof(*symptr) * SZMT + 2);
+	if (bmte == (VOIDPTR)-1)
+		oom();
 	emte = bmte + SZMT;	/* end of main table */
 	if ((long) bmte & 1)
 		bmte++;

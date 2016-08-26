@@ -42,7 +42,7 @@ PP(va_list args;)
 	int width, prec;
 	int left, longf, prepend;
 	char padchar;
-	char *s;
+	const char *s;
 	long n;
 	double d;
 	int total;
@@ -105,9 +105,14 @@ PP(va_list args;)
 			prec = va_arg(args, int);
 		}
 		longf = 0;
-		if (c == 'l')
+		if (c == 'l' || c == 'L' || c == 'j' || c == 't' || c == 'q')
 		{
 			longf++;
+			c = *fmt++;
+		}
+		if (c == 'l' || c == 'h' || c == 'z')
+		{
+			/* just ignore for now */
 			c = *fmt++;
 		}
 		/*
@@ -118,7 +123,7 @@ PP(va_list args;)
 		switch (c)
 		{
 		case 'd':						/* decimal signed */
-		case 'D':
+		case 'i':
 			if (longf)
 			{
 				n = va_arg(args, long);
@@ -147,11 +152,6 @@ PP(va_list args;)
 
 		case 'o':						/* octal unsigned */
 		case 'O':
-			if (prepend)
-			{
-				__putch(stream, mode, '0');
-				total++;
-			}
 			if (longf)
 			{
 				n = va_arg(args, long);
@@ -160,18 +160,17 @@ PP(va_list args;)
 			{
 				n = va_arg(args, int);
 				fn = __prtshort;
+			}
+			if (prepend && n != 0)
+			{
+				__putch(stream, mode, '0');
+				total++;
 			}
 			__prtint(n, buf, 8, 0, fn, 0);
 			break;
 
 		case 'x':						/* hexadecimal unsigned */
 		case 'X':
-			if (prepend)
-			{							/* [vlh] 26 jul 83 */
-				__putch(stream, mode, '0');
-				__putch(stream, mode, 'x');
-				total += 2;
-			}
 			if (longf)
 			{
 				n = va_arg(args, long);
@@ -181,12 +180,38 @@ PP(va_list args;)
 				n = va_arg(args, int);
 				fn = __prtshort;
 			}
+			if (prepend && n != 0)
+			{
+				__putch(stream, mode, '0');
+				__putch(stream, mode, 'x');
+				total += 2;
+			}
 			__prtint(n, buf, 16, 0, fn, c == 'X');
+			break;
+
+		case 'p':						/* pointer */
+			n = va_arg(args, long);
+			if (n == 0L)
+			{
+				s = "(nil)";
+			} else
+			{
+				fn = __prtld;
+				if (prepend)
+				{
+					__putch(stream, mode, '0');
+					__putch(stream, mode, 'x');
+					total += 2;
+				}
+				__prtint(n, buf, 16, 0, fn, 0);
+			}
 			break;
 
 		case 's':						/* string */
 		case 'S':
 			s = va_arg(args, char *);
+			if (s == NULL)
+				s = "(null)";
 			break;
 
 		case 'c':						/* character */
