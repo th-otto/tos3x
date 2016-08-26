@@ -65,6 +65,7 @@ long lrem PROTO((long al1, long al2));
 int __getmode PROTO((const char *mode));
 
 #define __set_errno(e) (errno = (e))
+#define __validfp(p) ((p) != NULL)
 
 union ll {
 	struct

@@ -3,26 +3,27 @@ AOBJS2 = trap.o bios.o xbios.o gemdos.o strchrs.o
 
 AOBJS = $(AOBJS1) $(AOBJS2)
 
-COBJS1 = atoi.o atol.o prtld.o prtint.o prtshort.o
+COBJS1 = atoi.o perror.o atol.o
 COBJS2 = ctype.o getl.o getw.o fopen.o xmain.o xwmain.o fgetc.o ungetc.o fgets.o
 COBJS3 = filbuf.o read.o readasc.o readbin.o creat.o exit.o cleanup.o
 COBJS4 = fclose.o close.o fdecls.o fflush.o open.o lseek.o tell.o fputn.o
-COBJS5 = fputc.o flsbuf.o isatty.o isdev.o ttyname.o malloc.o calloc.o mallocnd.o
+COBJS5 = putl.o putw.o fputc.o flsbuf.o isatty.o isdev.o ttyname.o malloc.o calloc.o mallocnd.o
 COBJS6 = sbrk.o memset.o write.o wrtchr.o chinit.o allocc.o chkc.o
 COBJS7 = writeasc.o writebin.o blkio.o xread.o xwrite.o xopen.o getmode.o
 COBJS8 = strupr.o strlwr.o strcpy.o strncpy.o strlen.o strcat.o strncat.o
 COBJS9 = strcmp.o strncmp.o stricmp.o qsort.o fseek.o rewind.o ftell.o gets.o
 COBJS10 = printf.o fprintf.o sprintf.o vprintf.o vfprintf.o vsprintf.o xdoprtfp.o doprint.o
 COBJS11 = fread.o fwrite.o blkmove.o fdopen.o freopen.o filesz.o
-COBJS12 = ldiv.o lmul.o lrem.o putl.o putw.o rand.o setbuf.o
-COBJS13 = aldiv.o almul.o alrem.o uldiv.o signal.o swab.o
-COBJS14 = puts.o fputs.o xttyin.o ttyin.o ttyout.o getpass.o getpid.o
-COBJS15 = abort.o chmod.o access.o chown.o dup.o rename.o unlink.o
-COBJS16 = doscan.o scanf.o fscanf.o sscanf.o optoff.o sgtty.o ttyinraw.o
-COBJS17 = errno.o strchr.o strrchr.o lstout.o mktemp.o perror.o
+COBJS12 = puts.o fputs.o xttyin.o ttyin.o ttyout.o getpass.o getpid.o
+COBJS13 = abort.o chmod.o access.o chown.o dup.o rename.o unlink.o
+COBJS14 = doscan.o scanf.o fscanf.o sscanf.o optoff.o sgtty.o ttyinraw.o
+COBJS15 = errno.o strchr.o strrchr.o lstout.o mktemp.o prtld.o prtint.o prtshort.o
+COBJS16 = rand.o setbuf.o signal.o swab.o
+COBJS17 = nf_name.o nf_vers.o nf_debug.o nf_shutd.o nf_ops.o cookie.o
+COBJS18 = aldiv.o almul.o alrem.o uldiv.o ldiv.o lmul.o lrem.o
 
-COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} \
-      ${COBJS9} ${COBJS10} ${COBJS11} ${COBJS12} ${COBJS13} ${COBJS14} ${COBJS15} ${COBJS16} ${COBJS17}
+COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} ${COBJS9} \
+      ${COBJS10} ${COBJS11} ${COBJS12} ${COBJS13} ${COBJS14} ${COBJS15} ${COBJS16} ${COBJS17} ${COBJS18}
 
 OBJS = $(AOBJS) $(COBJS)
 

@@ -26,6 +26,7 @@ ${LIBC}: $(OBJS) ${OPTIONOBJS} ${MAKEFILE}
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(COBJS15) > NUL:
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(COBJS16) > NUL:
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(COBJS17) > NUL:
+	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(COBJS18) > NUL:
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(AOBJS1) > NUL:
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(AOBJS2) > NUL:
 

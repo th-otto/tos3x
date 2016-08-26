@@ -22,6 +22,7 @@
 #define const
 #define signed
 #define __MSHORT__ 1
+#define __SHORT_EXTERNAL_NAMES
 #else
 #define NOTHING void                /* no parameters */
 #define PROTO(p) p
@@ -50,6 +51,9 @@
 
 #ifndef CDECL
 #define CDECL
+#endif
+#ifndef __CDECL
+#define __CDECL CDECL
 #endif
 
 #ifndef __attribute__

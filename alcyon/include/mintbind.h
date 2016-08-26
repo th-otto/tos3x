@@ -1,4 +1,4 @@
-/*  osbind.h -- MiNTLib.
+/*  mintbind.h -- MiNTLib.
     Copyright (C) 2000 Frank Naumann <fnaumann@freemint.de>
 
     This file is part of the MiNTLib project, and may only be used
@@ -10,9 +10,9 @@
     Just a wrapper for backward compatibility.
 */
 
-#ifndef _OSBIND_H
-#define _OSBIND_H	1
+#ifndef _MINTBIND_H
+#define _MINTBIND_H	1
 
-#include <mint/osbind.h>
+#include <mint/mintbind.h>
 
-#endif /* _OSBIND_H */
+#endif /* _MINTBIND_H */

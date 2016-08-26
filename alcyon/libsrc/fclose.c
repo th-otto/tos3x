@@ -17,6 +17,7 @@
 
 #include "lib.h"
 #include <stdlib.h>
+#include <errno.h>
 
 int fclose(P(FILE *) sp)
 PP(register FILE *sp;)

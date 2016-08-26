@@ -10,8 +10,10 @@
 #endif
 
 extern int errno;
+/*
 extern int sys_nerr;
 extern const char *const sys_errlist[];
+*/
 
 #define EPERM	1
 #define ENOENT	2

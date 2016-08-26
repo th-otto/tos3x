@@ -75,7 +75,7 @@ typedef __UINT16_TYPE__ __uint16_t;
 typedef __INT32_TYPE__ __int32_t;
 
 #ifndef __UINT32_TYPE__
-#ifdef __ALCYON___
+#ifdef __ALCYON__
 #define __UINT32_TYPE__ long
 #else
 #ifdef __MSHORT__
