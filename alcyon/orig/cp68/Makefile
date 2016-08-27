@@ -9,8 +9,7 @@ all: $(PROGRAMS)
 
 include SRCFILES
 
-cp68$(EXEEXT): $(CP_OBJS) ${MAKEFILE}
-	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ crtg.o $(CP_OBJS) \
+LIBOBJS = \
 		$(LIBSRC)kcreat.o \
 		$(LIBSRC)kwritef.o \
 		$(LIBSRC)xnwmain.o \
@@ -63,14 +62,19 @@ cp68$(EXEEXT): $(CP_OBJS) ${MAKEFILE}
 		$(LIBSRC)lmul.o \
 		$(empty)
 
+#cp68$(EXEEXT): $(CP_OBJS) ${MAKEFILE}
+#	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ crtg.o $(CP_OBJS) $(LIBOBJS)
+
+
 cp68.rel: $(CP_OBJS) ${MAKEFILE}
-	$(CP) $(LIBSRC)crtg.o $(LIBSRC)$(LIBC) $(LIBSRC)kcreat.o $(LIBSRC)kwritef.o .
+	$(CP) $(LIBSRC)crtg.o $(LIBSRC)$(LIBC) $(LIBOBJS) .
 	$(RM) $@
-	$(LINK68) [s,un] $@=crtg.o,cexpr.o,lex.o,macro.o,main.o,util.o,kputc.o,kgetc.o,kopen.o,kcreat.o,kwritef.o,$(LIBC)
+	$(LINK68) [un,co[cp68.lnk]]
 	$(RM) crtg.o kcreat.o kwritef.o $(LIBC)
 
-cp68.mod: cp68.rel
+cp68$(EXEEXT): cp68.rel
 	$(RELMOD) $< $@
+	$(PRGFLAGS) 7 7 $@
 
 check::
 	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
