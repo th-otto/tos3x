@@ -42,9 +42,9 @@ long xyzzx;
 VOID j30june(NOTHING)
 {
 	asm("_j30ent:");
-	asm("      move.l (a7)+,xyzzx");
+	asm("      move.l (a7)+,_xyzzx");
 	asm("      trap   #13");
-	asm("      move.l xyzzx,-(a7)");
+	asm("      move.l _xyzzx,-(a7)");
 	asm("      rts");
 }
 #endif

@@ -1,0 +1,1 @@
+DOINDEX_OBJS = gemst8k.o xmain.o xomain.o doindex.o

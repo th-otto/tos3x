@@ -65,7 +65,7 @@ PP(int c;)
 #else
 	sp = _pftoa(addr, buf, prec, c);
 #endif
-	if (strlen(buf) > (7 + prec))		/* Smallest FP string           */
+	if ((int)strlen(buf) > (7 + prec))		/* Smallest FP string           */
 #ifdef __ALCYON__
 		sp = _petoa(addr, buf, prec);
 #else
