@@ -1,1 +1,2 @@
 LINK_OBJS = link68.o preproc.o lnkmess.o
+RELMOD_OBJS = relmod.o

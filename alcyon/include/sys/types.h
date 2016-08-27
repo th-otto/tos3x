@@ -5,7 +5,7 @@
 #include <compiler.h>
 #endif
 
-typedef int mode_t;
+typedef unsigned int mode_t;
 typedef int pid_t;
 typedef int uid_t;
 typedef int gid_t;

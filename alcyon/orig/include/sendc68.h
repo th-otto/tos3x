@@ -27,8 +27,6 @@ struct symtab {
 	struct symtab *tlnk;		/* table link */
 };
 
-struct symtab *symptr;
-
 /* flags for symbols */
 #define SYDF	0x8000		/* defined */
 #define SYEQ	0x4000		/* equated */

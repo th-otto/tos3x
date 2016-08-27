@@ -1,6 +1,13 @@
 #ifndef __FCNTL_H__
 #define __FCNTL_H__ 1
 
+#ifdef __GNUC__
+ #ifndef _LIBC
+ #  include_next <fcntl.h>
+ #endif
+
+#else
+
 /* File access modes for `open' and `fcntl'.  */
 #ifndef O_RDONLY
 #define	O_RDONLY	0x00	/* Open read-only.  */
@@ -17,7 +24,6 @@
 #define O_CREAT 	0x0200		/* create new file if needed */
 #define O_TRUNC	    0x0400		/* make file 0 length */
 #define O_EXCL  	0x0800		/* error if file exists */
-#define O_BINARY    0
 #define O_TEXT      0x1000		/* translate cr/lf */
 
 
@@ -30,5 +36,10 @@
 #  define F_OK	0		/* Test for existence.  */
 # endif
 
+#endif
+
+#ifndef O_BINARY
+#define O_BINARY    0
+#endif
 
 #endif /* __FCNTL_H__ */

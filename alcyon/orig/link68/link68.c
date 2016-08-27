@@ -180,6 +180,7 @@ struct ovcalblk {
 	short jmprout;			/* jump to overlayed routine */
 	union mlong routaddr;	/* address to jump to */
 };
+#define SIZEOF_OVCALBLK 16
 
 
 struct ovtab ovtab1 = { { 0 } };

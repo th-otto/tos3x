@@ -1,7 +1,7 @@
 include ../Makefile.common
 include ../Makefile.silent
 
-PROGRAMS = link68$(EXEEXT)
+PROGRAMS = link68$(EXEEXT) relmod$(EXEEXT)
 LIBS = ${LIBC}
 CPPFLAGS += -DGEMDOS
 
@@ -11,6 +11,9 @@ include SRCFILES
 
 link68$(EXEEXT): $(LINK_OBJS) ${MAKEFILE}
 	$(AM_V_LD)$(LD) $(LDFLAGS) -u -h 7 -o $@ $(CRT0) nofloat.o $(LINK_OBJS) $(LIBS)
+
+relmod$(EXEEXT): $(RELMOD_OBJS) ${MAKEFILE}
+	$(AM_V_LD)$(LD) $(LDFLAGS) -u -h 7 -o $@ $(CRT0) nofloat.o $(RELMOD_OBJS) $(LIBS)
 
 check::
 

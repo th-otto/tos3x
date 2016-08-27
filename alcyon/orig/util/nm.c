@@ -8,6 +8,8 @@ struct hdr couthd = { 0 };
 #include "../libsrc/klib.h"
 #include "sendc68.h"
 
+struct symtab *symptr;
+
 #ifdef __ALCYON__
 FILE ibuf = { 0 };
 #else
