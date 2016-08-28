@@ -35,12 +35,18 @@ ${LIBC}: $(OBJS) ${OPTIONOBJS} ${MAKEFILE}
 # library with all objects, including optional and runtime,
 # for use by analyze tool
 FIXOBJS = fixxopen.o fixlst.o fixwrtc.o fixwrite.o
-liba.a: ${LIBC} ${OPTIONOBJS} ${STARTUPS} $(FIXOBJS) xdoprtfp.o
+liba.a: ${LIBC} ${OPTIONOBJS} ${STARTUPS} $(FIXOBJS) $(MCOBJS) $(MAOBJS)
 	cp $< $@
 	$(AR) $(ARFLAGS) $@ ${STARTUPS}
-	$(AR) $(ARFLAGS) $@ $(FIXOBJS) xdoprtfp.o
+	$(AR) $(ARFLAGS) $@ $(FIXOBJS)
 	$(AR) $(ARFLAGS) $@ ${OPTIONOBJS1}
 	$(AR) $(ARFLAGS) $@ ${OPTIONOBJS2}
+	$(AR) $(ARFLAGS) $@ ${MCOBJS1}
+	$(AR) $(ARFLAGS) $@ ${MCOBJS2}
+	$(AR) $(ARFLAGS) $@ ${MAOBJS1}
+	$(AR) $(ARFLAGS) $@ ${MAOBJS2}
+	$(AR) $(ARFLAGS) $@ ${MAOBJS3}
+	$(AR) $(ARFLAGS) $@ ${MAOBJS4}
 
 fixxopen.o: fixxopen.c xopen.c
 fixlst.o: fixlst.c lstout.c

@@ -31,3 +31,5 @@ install: ${LIBC_NDX} ${OPTIONOBJS} ${CRT0}
 
 clean:
 	$(RM) *.o *.a *.ndx
+
+check::

@@ -14,6 +14,9 @@ channels_OPTIMIZE=0
 writeasc_OPTIMIZE=0
 writebin_OPTIMIZE=0
 
+ftoa_OPTIMIZE=1
+etoa_OPTIMIZE=1
+
 gemst0_ASFLAGS=-n
 gemst1_ASFLAGS=-n
 gemst2_ASFLAGS=-n
