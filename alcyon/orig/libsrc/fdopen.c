@@ -16,7 +16,11 @@
 *
 *****************************************************************************/
 
+/* BUG: lseek not declared in original (returns long) */
+#define lseek bug_lseek
 #include "lib.h"
+#undef lseek
+int lseek PROTO((int fd, long offs, int whence));
 
 FILE *fdopen(P(int) fd, P(const char *) mode)
 PP(register int fd;)

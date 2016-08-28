@@ -27,6 +27,7 @@
 *
 *****************************************************************************/
 
+/* BUG: lseek not declared in original (returns long) */
 #define lseek bug_lseek
 #include <osif.h>
 #include "lib.h"
