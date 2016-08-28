@@ -31,6 +31,8 @@
 /****************************************************************************
 *       Stream I/O File Definitions
 *****************************************************************************/
+
+#ifndef _NO_FILE
 #define BUFSIZ          512             /*      Standard (ascii) buf size   */
 #define MAXFILES        16              /*      Max # open files ( < 32 )   */
 struct _iobuf {                         /*                                  */
@@ -75,6 +77,7 @@ extern FILE *stderr;         /* Standard error output stream.  */
 #define putc fputc
 #define getc fgetc
 
+#endif
 
 /****************************************************************************/
 /*                                                                          */

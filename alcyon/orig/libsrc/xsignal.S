@@ -15,7 +15,7 @@
 	xdef	__trap			*	All trap instructions
 	xdef	__buserr		*	BUSERR, addressing  EPA
 	xdef	__arith			*	Arithmetic traps    EPA
-	.comm	___signal,64		*	-> epa's of C functions
+	comm	___signal,64		*	-> epa's of C functions
 
 	bss
 epa:	ds.l	1			*		non-reentrant!!

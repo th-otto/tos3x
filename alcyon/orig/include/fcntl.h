@@ -1,6 +1,13 @@
 #ifndef __FCNTL_H__
 #define __FCNTL_H__ 1
 
+#ifndef __COMPILER_H__
+#include <compiler.h>
+#endif
+#ifndef __SYS_TYPES_H__
+#include <sys/types.h>
+#endif
+
 /* File access modes for `open' and `fcntl'.  */
 #ifndef O_RDONLY
 #define	O_RDONLY	0x00	/* Open read-only.  */

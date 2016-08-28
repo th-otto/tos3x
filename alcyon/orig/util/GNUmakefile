@@ -7,7 +7,7 @@ include ../Makefile.silent
 CPPFLAGS = -I ../common -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT)
+PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT) ar68$(EXEEXT)
 
 all: $(PROGRAMS) getarhd.o
 
@@ -18,6 +18,9 @@ size68$(EXEEXT): $(SIZE_OBJS)
 
 nm68$(EXEEXT): $(NM_OBJS)
 	$(AM_V_LD)$(LD) $(NM_OBJS) $(LDFLAGS) -o $@
+
+ar68$(EXEEXT): $(AR_OBJS)
+	$(AM_V_LD)$(LD) $(AR_OBJS) $(LDFLAGS) -o $@
 
 check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i.ttp ../bin/$$i.ttp; done

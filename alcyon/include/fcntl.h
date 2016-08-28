@@ -4,9 +4,18 @@
 #ifdef __GNUC__
  #ifndef _LIBC
  #  include_next <fcntl.h>
+ #  define _NO_FILE
  #endif
+#endif
 
-#else
+#ifndef _NO_FILE
+
+#ifndef __COMPILER_H__
+#include <compiler.h>
+#endif
+#ifndef __SYS_TYPES_H__
+#include <sys/types.h>
+#endif
 
 /* File access modes for `open' and `fcntl'.  */
 #ifndef O_RDONLY

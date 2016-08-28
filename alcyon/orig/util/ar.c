@@ -8,149 +8,139 @@
 char *SCCSID = "@(#) ar68 - July 1, 1983";
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <unistd.h>
+#include <ar68.h>
+#include "util.h"
 
-#ifndef PDP11
-#	define SEEKTYPE long
-#	include <sys/types.h>
-#	include <stat.h>
-#	ifdef VAX11
-#		include <c68/ar68.h>
-#	else
-#		include <ar68.h>
-#	endif
-#else
-#	include <stat11.h>
-#	define SEEKTYPE int
+#define FALSE 0
+#define TRUE  1
 
-long mklong();
+#define _(x) x
+
+#ifndef NO_CONST
+#  ifdef __GNUC__
+#	 define NO_CONST(p) __extension__({ union { const void *cs; void *s; } x; x.cs = p; x.s; })
+#  else
+#    ifdef __ALCYON__ /* Alcyon parses the cast as function call??? */
+#      define NO_CONST(p) p
+#    else
+#      define NO_CONST(p) ((void *)(p))
+#    endif
+#  endif
 #endif
 
-#ifdef VAX11
-#	define int short
+#ifdef __ALCYON__
+#define fopenbr(f) fopenb(f, "r")
+#define fopenbw(f) fopenb(f, "w")
+#else
+#define fopenbr(f) fopen(f, "rb")
+#define fopenbw(f) fopen(f, "wb")
+#define efseek fseek
+#define creatb creat
+#define openb open
 #endif
 
 #define USAGE		"usage: %s [rdxtpvabi] [pos] archive file [file ...]\n"
 #define DEFMODE  	0666
 
+#define SYMDEF "._SYMDEF"
+
 char buff[BUFSIZ];
 
-struct stat astat,
- tstat;									/* 11 apr 83, struct stat */
-
-#define READ	0
-#define WRITE	1
+#if 0
+struct stat astat, tstat;
+#endif
 
 /* flags for cp1file */
 
 #define IEVEN	1
 #define OEVEN	2
 #define WHDR	4
-
-#define	ROWN	0400					/* file protection flags */
-#define	WOWN	0200
-#define	XOWN	0100
-#define	RGRP	040
-#define	WGRP	020
-#define	XGRP	010
-#define	ROTH	04
-#define	WOTH	02
-#define	XOTH	01
+#define WCOUTHD 8
 
 struct libhdr libhd;
-struct libhdr *lp = { &libhd };
+struct libhdr *lp = &libhd;
 
-int libmagic = LIBMAGIC;
+unsigned short libmagic = LIBMAGIC;
 
-int rflg,
- dflg,
- xflg,
- tflg,
- vflg;
-
+int rflg, dflg, xflg, tflg,vflg;
 int uflg;
-
 int pflg;
-
 int areof;
-
 FILE *arfp;
-
 FILE *tempfd;
 
-int aflg,
- bflg;
-
+int aflg, bflg;
 int psflg;
-
 int matchflg;
-
 char *psname;
+char *arname, *tempname;
 
-char *arname,
-*tempname;
+char *myname;
+struct hdr2 couthd;
+int exitstat;
 
-FILE *openar();
+FILE *openar PROTO((const char *arp, int crfl));
+VOID xtell PROTO((const char * ap));
+VOID pfname PROTO((NOTHING));
+VOID replace PROTO((const char *name));
+VOID delete PROTO((const char *name));
+VOID extract PROTO((const char *name));
+VOID print PROTO((const char *name));
+VOID endit PROTO((NOTHING));
+VOID cleanup PROTO((NOTHING));
+VOID listall PROTO((NOTHING));
+int nextar PROTO((NOTHING));
+VOID skcopy PROTO((int cpflag));
+char *mktemp PROTO((char *ap));
+int streq PROTO((const char *s1, const char *s2));
+VOID pmode PROTO((int aflg1));
+VOID select PROTO((int *pairp, int flg));
+VOID inform PROTO((char cc));
+VOID copystr PROTO((const char *ap1, char *ap2, int alen));
+VOID cprest PROTO((NOTHING));
+VOID cp1file PROTO((FILE *ifd, FILE *ofd, int aflags, const char *iname, const char *oname));
+int ckafile PROTO((const char *ap));
+VOID exall PROTO((NOTHING));
+VOID tmp2ar PROTO((NOTHING));
+const char *fnonly PROTO((const char *s));
+int copy PROTO((const char *from, const char *to));
 
-char *mktemp();
 
-char *ctime();
-
-char *fnonly();
-
-int (*docom) ();
-
-int endit();
-
-int replace();
-
-int delete();
-
-int extract();
-
-int tell();
-
-int print();
-
-#ifdef VAX11
-struct
-{
-	short loword;
-	short hiword;
-};
-#else
-struct
-{
-	int hiword;
-	int loword;
-};
-#endif
+VOID (*docom) PROTO((const char *name));
 
 char fname[15];
 
-main(argc, argv)
-char **argv;
+int main(P(int) argc, P(char **) argv)
+PP(int argc;)
+PP(char **argv;)
 {
-	register char *p1,
-	*p2;
-
+	register char *p1, *p2;
 	register char **ap;
-
 	register int i;
+	int j, docopy;
 
-	int j,
-	 docopy;
-
-	char *myname;
-
+	UNUSED(p2);
+	printf(_("AR68 Archiver (c) Alcyon Corporation\n"));
+	close(2); /* WTF? */
+	close(0); /* WTF? */
 	myname = *argv;
+	exitstat = 0;
 	if (argc < 3)
 	{
 	  usage:
 		printf(USAGE, myname);
 		endit();
 	}
-	signal(1, endit);
-	signal(2, endit);
+	signal(SIGHUP, (sighandler_t)endit);
+	signal(SIGINT, (sighandler_t)endit);
 	ap = &argv[1];
 	p1 = *ap++;
 	i = argc - 3;
@@ -183,7 +173,7 @@ char **argv;
 			break;
 		case 't':
 			tflg++;
-			docom = tell;
+			docom = xtell;
 			break;
 		case 'p':
 			pflg++;
@@ -195,52 +185,64 @@ char **argv;
 		case '-':
 			break;
 		default:
-			printf("invalid option flag: %c\n", *--p1);
+			printf(_("%s: invalid option flag: %c\n"), myname, *--p1);
 			endit();
 		}
 	}
 	uflg = rflg + dflg;
 	if ((uflg + xflg + tflg + pflg) != 1)
 	{
-		printf("At least one and only one of 'rdxt' flags required\n");
+		printf(_("%s: one and only one of 'rdxt' flags required\n"), myname);
 		endit();
 	}
 	psflg = aflg + bflg;
 	if (psflg > 1)
 	{
-		printf("only one of 'abi' flags allowed\n");
+		printf(_("%s: only one of 'abi' flags allowed\n"), myname);
 		endit();
 	}
 	if (psflg && (rflg != 1))
 	{
-		printf("'abi' flags can only be used with 'r' flag\n");
+		printf(_("%s: 'abi' flags can only be used with 'r' flag\n"), myname);
 		endit();
 	}
 	arname = *ap++;
-	arfp = openar(arname, rflg);
+	if ((arfp = openar(arname, rflg)) == NULL)
+	{
+		if ((tflg + xflg + bflg + aflg + dflg) != 0)
+		{
+			printf("%s: no such file '%s'\n", myname, arname);
+			endit();
+		}
+	}
 	if (i == 0 && tflg)
 	{
 		listall();
-		endit();
+		cleanup();
 	}
 	if (i == 0 && xflg)
 	{
 		exall();
-		endit();
+		cleanup();
 	}
 	if (i <= 0)
 		goto usage;
-	tempname = mktemp("/tmp/_~ar?????");
-	if ((tempfd = fopen(tempname, "w")) == NULL)
+	if (libmagic == (uflg == 0 ? 0 : 1))
+		printf(_("%s: warning, changing a random access library\n"), myname);
+	if (!pflg && !tflg)
 	{
-		printf("can't create %s\n", tempname);
-		endit();
+		tempname = mktemp("art?????");
+		if ((tempfd = fopenbw(tempname)) == NULL)
+		{
+			printf(_("%s: can't create %s\n"), myname, tempname);
+			endit();
+		}
+
+		if (lputw(&libmagic, tempfd) != 0)
+			printf(_("%s: write error on magic number"), myname); /* BUG: no newline; should use perror */
 	}
-
-	if (lputw(&libmagic, tempfd) != 0)
-		perror("ar: write error on magic number");
-
-/* read archive, executing appropriate commands */
+	
+	/* read archive, executing appropriate commands */
 	while (matchflg == 0 && nextar())
 	{
 		docopy = 1;
@@ -272,30 +274,35 @@ char **argv;
 			skcopy(uflg);
 	}
 
-/* deal with the leftovers */
+	/* deal with the leftovers */
 	if (i > 0)
 	{
 		for (j = 0; j < i; j++)
 		{
 			if (rflg)
+			{
 				(*docom) (ap[j]);
-			else
-				printf("%s not found\n", ap[j]);
+			} else
+			{
+				printf(_("%s not found\n"), ap[j]);
+				exitstat = EXIT_FAILURE;
+			}
 		}
 	}
-	(*docom) (0L);
+	(*docom) (NULL);
 
-/* make temp file the archive file */
+#if 0
+	/* make temp file the archive file */
 	if (stat(tempname, &tstat) < 0)
 	{
-		printf("can't find %s\n", tempname);
+		printf(_("can't find %s\n"), tempname);
 		endit();
 	}
 	if (arfp != NULL)
 	{
 		if (stat(arname, &astat) < 0)
 		{
-			printf("can't find %s\n", arname);
+			printf(_("can't find %s\n"), arname);
 			endit();
 		}
 		if ((astat.st_nlink != 1) || (astat.st_dev != tstat.st_dev))
@@ -304,85 +311,96 @@ char **argv;
 			tmp2ar();
 		} else if ((unlink(arname) == -1))
 		{
-			printf("can't unlink old archive\nnew archive left in %s\n", tempname);
+			printf(_("can't unlink old archive\nnew archive left in %s\n"), tempname);
 			tempname = 0;				/* keeps endit from removing the archive */
 		} else if (link(tempname, arname) < 0)
 		{
 			if (copy(tempname, arname) < 0)
 			{
-				printf("can't link to %s\nnew archive left in %s\n", arname, tempname);
+				printf(_("can't link to %s\nnew archive left in %s\n"), arname, tempname);
 				tempname = 0;
 			}
 		}
 	} else
 	{
-		if ((arfp = fopen(arname, "w")) == NULL)
+		if ((arfp = fopenbw(arname)) == NULL)
 		{
-			printf("can't create %s\narchive left in %s\n", arname, tempname);
+			printf(_("can't create %s\narchive left in %s\n"), arname, tempname);
 			tempname = 0;				/* keeps endit from removing the archive */
 			endit();
 		}
 		if (stat(arname, &astat) < 0)
 		{
-			printf("can't find %s\n", arname);
+			printf(_("can't find %s\n"), arname);
 			endit();
 		}
 		fclose(arfp);
 		if (astat.st_dev != tstat.st_dev)
-			tmp2ar();
-		else if ((unlink(arname) < 0) || (link(tempname, arname) < 0))
 		{
-			printf("can't link to %s\n", arname);
-			printf("new archive left in %s\n", tempname);
+			tmp2ar();
+			exitstat = EXIT_SUCCESS;
+		} else if ((unlink(arname) < 0) || (link(tempname, arname) < 0))
+		{
+			printf(_("can't link to %s\n"), arname);
+			printf(_("new archive left in %s\n"), tempname);
 			tempname = 0;				/* keeps endit from removing the archive */
 		}
 	}
 	endit();
+#else
+	if (tflg || pflg)
+		cleanup();
+	tmp2ar();
+	exitstat = EXIT_SUCCESS;
+	cleanup();
+#endif
+
+#ifndef __ALYCYON__
+	return EXIT_SUCCESS;
+#endif
 }
 
-FILE *openar(arp, crfl)
-char *arp;
+
+FILE *openar(P(const char *) arp, P(int) crfl)
+PP(const char *arp;)
+PP(int crfl;)
 {
 	register FILE *i;
+	unsigned short ib;
 
-	unsigned int ib;
-
-	if ((i = fopen(arp, "r")) == NULL)
+	if ((i = fopenbr(arp)) == NULL)
 	{									/* does not exist */
 		areof = 1;
-		return (NULL);
+		return NULL;
 	}
 	if (lgetw(&ib, i) != 0 || ib != LIBMAGIC)
 	{
-	  notar:
-		printf("not archive format: %s %o\n", arp, ib);
+	/*  notar: */
+		printf(_("%s: not archive format: %s %x\n"), myname, arp, ib);
 		endit();
 	}
-	return (i);
+	return i;
 }
+
 
 /* execute one command -- call with filename or 0 */
 
-int tell(ap)
-char *ap;
+VOID xtell(P(const char *) ap)
+PP(const char *ap;)
 {
 	register char *p;
-
-	register i;
-
+	register int i;
 	register char *p1;
 
-	if (ckafile(ap))
+	UNUSED(i);
+	UNUSED(p);
+	if (ap != (char *)-1 && ckafile(ap))
 		return;
 	if (vflg)
 	{									/* long list */
 		pmode(lp->lfimode);
 		printf(" %d/%d ", lp->luserid, lp->lgid);
-#ifdef PDP11
-		plong("%6ld", lp->lfsize);
-#else
 		printf("%6ld", lp->lfsize);
-#endif
 		p1 = ctime(&lp->lmodti);
 		p1[24] = '\0';
 		p1 += 4;
@@ -392,11 +410,11 @@ char *ap;
 	skcopy(0);
 }
 
-pfname()
+
+VOID pfname(NOTHING)
 {
 	register char *p;
-
-	register i;
+	register int i;
 
 	p = &lp->lfname[0];
 	i = LIBNSIZE;
@@ -408,45 +426,49 @@ pfname()
 	putchar('\n');
 }
 
-int replace(name)
-char *name;
+
+VOID replace(P(const char *) name)
+PP(const char *name;)
 {
 	register int i;
-
 	register FILE *ifd;
-
-	register struct stat *stp;			/* 11 apr 83, struct stat */
-
-	struct stat stbuf;
-
-#ifdef PDP11
-	long l;
-#endif
-
-	stp = &stbuf;
-	if (name == 0)
+	char namebuf[32];
+	
+	UNUSED(i);
+	if (name == NULL)
 	{
 		if (bflg && areof == 0)
 		{
-			if (fseek(arfp, -(SEEKTYPE) LIBHDSIZE, 1) == -1)
-				printf("fseek error\n");
+			if (efseek(arfp, -(off_t) LIBHDSIZE, SEEK_CUR) == -1)
+			{
+#ifdef __ALCYON__
+				/* BUG: should print arname instead */
+				printf(_("%s: fseek error\n"), myname);
+#else
+				fprintf(stderr, _("%s: %s: fseek error\n"), myname, arname);
+#endif
+			}
 		}
 		cprest();
 		return;
 	}
-	if (stat(name, stp) < 0)
+	copystr(name, namebuf, sizeof(namebuf));
+	
+	if ((ifd = fopenbr(namebuf)) == NULL)
 	{
-		printf("can't find %s\n", name);
+		/* BUG: should use namebuf */
+		printf(_("%s: can't open %s\n"), myname, name);
 		endit();
 	}
-	if ((ifd = fopen(name, "r")) == NULL)
+	/* BUG: ar should not depend on members being object files */
+	if (getchd(ifd, &couthd) < 0)
 	{
-		printf("can't open %s\n", name);
+		printf(_("%s: can't read %s\n"), myname, name);
 		endit();
 	}
 	if (areof && psflg)
 	{
-		printf("%s not in library\n", psname);
+		printf(_("%s: %s not in library\n"), myname, psname);
 		endit();
 	}
 	if ((bflg | aflg) && matchflg == 0)
@@ -457,54 +479,60 @@ char *name;
 	}
 	copystr(name, &lp->lfname[0], LIBNSIZE);
 	if (areof | aflg)
+	{
 		inform('a');
-	else if (bflg)
+	} else if (bflg)
+	{
 		inform('i');
-	else
+	} else
 	{
 		inform('r');
 		skcopy(0);						/* skip old copy */
 	}
+#if 0
 	lp->luserid = stp->st_uid;
 	lp->lgid = stp->st_gid;
 	lp->lfimode = stp->st_mode;
-#ifdef PDP11
-	l = mklong(stp->st_mtime[0], stp->st_mtime[1]);
-	lp->lmodti = l;
-	l = mklong(stp->st_size0, stp->st_size1);
-	lp->lfsize = l;
-#else
 	lp->lmodti = stp->st_mtime;
 	lp->lfsize = stp->st_size;
+#else
+	lp->lfsize = couthd.ch_tsize + couthd.ch_dsize + couthd.ch_ssize + HDSIZE; /* BUG: should check magic first for headersize */
+	if (couthd.ch_rlbflg == 0)
+		lp->lfsize += couthd.ch_tsize + couthd.ch_dsize;
 #endif
 	cp1file(ifd, tempfd, WHDR + OEVEN, name, tempname);
 	fclose(ifd);
 }
 
-int delete(ap)
-char *ap;
+
+VOID delete(P(const char *) ap)
+PP(const char *ap;)
 {
-	if (ap == 0)
+	if (ap == NULL)
 	{
 		cprest();
+		efseek(tempfd, 0L, SEEK_SET);
+		lputw(&libmagic, tempfd);
 		return;
 	}
+	if (strcmp(ap, SYMDEF) == 0)
+		libmagic = LIBMAGIC;
 	inform('d');
 	skcopy(0);
 }
 
-int extract(ap)
-char *ap;
+
+VOID extract(P(const char *) ap)
+PP(const char *ap;)
 {
 	register FILE *ofd;
-
-	register i;
+	register int i;
 
 	if (ckafile(ap))
 		return;
-	if ((i = creat(ap, lp->lfimode)) < 0)
+	if ((i = creatb(ap, lp->lfimode)) < 0)
 	{
-		printf("can't create %s\n", ap);
+		printf(_("%s: can't create %s\n"), myname, ap);
 		endit();
 	}
 	ofd = fdopen(i, "w");
@@ -513,53 +541,64 @@ char *ap;
 	fclose(ofd);
 }
 
-int print(ap)
-char *ap;
-{
 
+VOID print(P(const char *) ap)
+PP(const char *ap;)
+{
 	if (ckafile(ap))
 		return;
+	/* WTF; 2nd argument to cp1file is a FILE *, not '1' */
+#ifdef __ALCYON___
 	cp1file(arfp, 1, IEVEN, arname, "std output");
+#else
+	cp1file(arfp, (FILE *)1, IEVEN, arname, "std output");
+#endif
 }
 
-int endit()
-{
 
+VOID endit(NOTHING)
+{
+	exitstat = EXIT_FAILURE;
+	cleanup();
+}
+
+
+VOID cleanup(NOTHING)
+{
 	if (tempname)
 		unlink(tempname);
-	exit(0);
+	exit(exitstat);
 }
+
 
 /* list all file in the library */
 
-listall()
+VOID listall(NOTHING)
 {
-
 	while (nextar())
-		tell((char *) -1);
+		xtell((char *) -1);
 }
 
 /* read next ar file header into libhd */
 
-nextar()
+int nextar(NOTHING)
 {
-
 	if (areof || getarhd(arfp, &libhd) == EOF || libhd.lfname[0] == 0)
 	{
 		areof++;
-		return (0);
+		return FALSE;
 	}
-	return (1);
+	return TRUE;
 }
 
 /* call with cpflag = 0 for skip, cpflag = 1 for copy */
-skcopy(cpflag)
-int cpflag;
+VOID skcopy(P(int) cpflag)
+PP(int cpflag;)
 {
-	register SEEKTYPE l;
-
+	register off_t l;
 	register int i;
 
+	UNUSED(i);
 	if (areof)
 		return;
 	l = lp->lfsize;
@@ -571,21 +610,20 @@ int cpflag;
 		cp1file(arfp, tempfd, WHDR + OEVEN + IEVEN, arname, tempname);
 	} else
 	{
-		if (fseek(arfp, l, 1) == -1)
+		if (efseek(arfp, l, SEEK_CUR) == -1)
 		{
-			printf("seek error on library\n");
+			printf(_("%s; seek error on library\n"), myname);
 			endit();
 		}
 	}
 }
 
-char *mktemp(ap)
-char *ap;
+
+char *mktemp(P(char *) ap)
+PP(char *ap;)
 {
 	register char *p;
-
-	register i,
-	 j;
+	register int i, j;
 
 	i = getpid();						/* process id */
 	p = ap;
@@ -596,37 +634,40 @@ char *ap;
 		*--p = ((i & 7) + '0');
 		i >>= 3;
 	}
-	return (ap);
+	return ap;
 }
 
-streq(s1, s2)
-char *s1,
-*s2;
+
+int streq(P(const char *) s1, P(const char *) s2)
+PP(const char *s1;)
+PP(const char *s2;)
 {
-	register char *p1,
-	*p2;
+	register const char *p1;
+	register const char *p2;
 
 	p1 = s1;
 	p2 = s2;
 	while (*p1++ == *p2)
 		if (*p2++ == 0)
-			return (1);
-	return (0);
+			return TRUE;
+	return FALSE;
 }
 
-int m1[] = { 1, ROWN, 'r', '-' };
-int m2[] = { 1, WOWN, 'w', '-' };
-int m3[] = { 1, XOWN, 'x', '-' };
-int m4[] = { 1, RGRP, 'r', '-' };
-int m5[] = { 1, WGRP, 'w', '-' };
-int m6[] = { 1, XGRP, 'x', '-' };
-int m7[] = { 1, ROTH, 'r', '-' };
-int m8[] = { 1, WOTH, 'w', '-' };
-int m9[] = { 1, XOTH, 'x', '-' };
+
+int m1[] = { 1, S_IRUSR, 'r', '-' };
+int m2[] = { 1, S_IWUSR, 'w', '-' };
+int m3[] = { 1, S_IXUSR, 'x', '-' };
+int m4[] = { 1, S_IRGRP, 'r', '-' };
+int m5[] = { 1, S_IWGRP, 'w', '-' };
+int m6[] = { 1, S_IXGRP, 'x', '-' };
+int m7[] = { 1, S_IROTH, 'r', '-' };
+int m8[] = { 1, S_IWOTH, 'w', '-' };
+int m9[] = { 1, S_IXOTH, 'x', '-' };
 
 int *m[] = { m1, m2, m3, m4, m5, m6, m7, m8, m9 };
 
-pmode(aflg1)
+VOID pmode(P(int) aflg1)
+PP(int aflg1;)
 {
 	register int **mp;
 
@@ -634,14 +675,14 @@ pmode(aflg1)
 		select(*mp++, aflg1);
 }
 
-select(pairp, flg)
-int *pairp;
 
-int flg;
+VOID select(P(int *) pairp, P(int) flg)
+PP(int *pairp;)
+PP(int flg;)
 {
-	register int n,
-	*ap,
-	 f;
+	register int n;
+	register int *ap;
+	register int f;
 
 	ap = pairp;
 	f = flg;
@@ -651,10 +692,10 @@ int flg;
 	putchar(*ap);
 }
 
-inform(cc)
-char cc;
-{
 
+VOID inform(P(char) cc)
+PP(char cc;)
+{
 	if (vflg)
 	{
 		putchar(cc);
@@ -663,20 +704,21 @@ char cc;
 	}
 }
 
-copystr(ap1, ap2, alen)
-char *ap1,
-*ap2;
-{
-	register char *p1,
-	*p2;
 
-	register len;
+VOID copystr(P(const char *) ap1, P(char *) ap2, P(int) alen)
+PP(const char *ap1;)
+PP(char *ap2;)
+PP(int alen;)
+{
+	register const char *p1;
+	register char *p2;
+	register int len;
 
 	p2 = 0;
 	p1 = ap1;
 	while (*p1)
 		if (*p1++ == '/')
-			p2 = p1;					/* point to char after last '/' in name */
+			p2 = NO_CONST(p1);					/* point to char after last '/' in name */
 	if (p2)
 		p1 = p2;
 	else
@@ -693,71 +735,76 @@ char *ap1,
 		*p2++ = '\0';
 }
 
-#ifdef PDP11
-long mklong(ai1, ai2)
+
+VOID cprest(NOTHING)
 {
-	long l;
-
-	l.hiword = ai1;
-	l.loword = ai2;
-	return (l);
-}
-
-plong(num)
-long num;
-{
-}
-#endif
-
-cprest()
-{
-
 	while (nextar())
 		skcopy(1);						/* copy rest of library */
 }
 
-cp1file(ifd, ofd, aflags, iname, oname)
-FILE *ifd,
-*ofd;
 
-int aflags;
-
-char *iname,
-*oname;
+VOID cp1file(P(FILE *) ifd, P(FILE *) ofd, P(int) aflags, P(const char *) iname, P(const char *) oname)
+PP(FILE *ifd;)
+PP(FILE *ofd;)
+PP(int aflags;)
+PP(const char *iname;)
+PP(const char *oname;)
 {
-	register i;
-
+	register int i;
 	register long l;
-
-	register int flags,
-	 sz;
-
+	register int flags, sz;
 	char str[50];
 
 	flags = aflags;
+	UNUSED(str);
 	if (flags & WHDR)
 	{
 		if (putarhd(ofd, &libhd) != 0)
 		{
 		  iwrerr:
-			sprintf(str, "ar: write error on %s", oname);
-			perror(str);
+#ifdef __ALCYON__
+			sprintf(str, _("%s: write error on %s"), myname, oname);
+			printf("%s\n", str);
+#else
+			fprintf(stderr, "%s: ", myname);
+			perror(oname);
+#endif
 			endit();
 		}
 	}
-	l = lp->lfsize;
+	if (flags & WCOUTHD)
+	{
+		if (putchd(ofd, &couthd) != 0)
+		{
+#ifdef __ALCYON__
+			sprintf(str, _("%s: write error on CHDR %s"), myname, oname);
+			printf("%s\n", str);
+#else
+			goto iwrerr;
+#endif
+		}
+		l = lp->lfsize - HDSIZE;
+	} else
+	{
+		l = lp->lfsize;
+	}
 	while (l)
 	{
 		if (l < BUFSIZ)
 			sz = l;
 		else
 			sz = BUFSIZ;
-		if ((i = fread(buff, sizeof(char), sz, ifd)) == NULL)
+		if ((i = fread(buff, sizeof(char), sz, ifd)) == 0)
 		{
-			perror("ar: read error");
+#ifdef __ALCYON__
+			printf(_("%s: read error\n"), myname);
+#else
+			fprintf(stderr, "%s: ", myname);
+			perror(iname);
+#endif
 			endit();
 		}
-		if (fwrite(buff, sizeof(char), i, ofd) == NULL)
+		if (fwrite(buff, sizeof(char), i, ofd) == 0)
 			goto iwrerr;
 		l -= i;
 	}
@@ -767,59 +814,75 @@ char *iname,
 			fwrite("", sizeof(char), 1, ofd);
 	}
 	if (flags & IEVEN)
+	{
 		if (lp->lfsize & 1)
 			fread(buff, sizeof(char), 1, ifd);
+	}
 }
 
-ckafile(ap)
-char *ap;
-{
 
-	if (ap == 0)
-		endit();
+int ckafile(P(const char *) ap)
+PP(const char *ap;)
+{
+	if (ap == NULL || *ap == '\0')
+		cleanup();
 	if (areof)
 	{
-		printf("%s not in archive file\n", ap);
-		return (1);
+		printf(_("%s: %s not in archive file\n"), myname, ap);
+		return TRUE;
 	}
-	return (0);
+	return FALSE;
 }
 
-exall()
-{
-	while (nextar())
-		extract(lp->lfname);
-}
 
-tmp2ar()
+VOID exall(NOTHING)
 {
-	register int n,
-	 ifd,
-	 ofd;
-
-	if ((ofd = creat(arname, DEFMODE)) < 0)
+	if (nextar())
 	{
-		printf("can't create %s\n", arname);
-		printf("archive left in %s\n", tempname);
-		tempname = 0;					/* keeps endit from removing the archive */
+		if (strcmp(libhd.lfname, SYMDEF) == 0)
+		{
+			efseek(arfp, lp->lfsize, SEEK_CUR);
+			if (nextar() == FALSE)
+				return;
+		}
+	}
+	do {
+		extract(lp->lfname);
+	} while (nextar());
+}
+
+
+VOID tmp2ar(NOTHING)
+{
+	register int n, ifd, ofd;
+
+	if ((ofd = creatb(arname, DEFMODE)) < 0)
+	{
+		printf(_("%s: can't create %s\narchive left in %s\n"), myname, arname, tempname);
+		tempname = NULL;					/* keeps endit from removing the archive */
 		return;
 	}
+	fflush(tempfd); /* BUG: superfluous */
 	fclose(tempfd);
-	if ((ifd = open(tempname, 0)) < 0)
+	if ((ifd = openb(tempname, O_RDONLY)) < 0)
 	{
-		printf("failed to open %s\n", tempname);
+		printf(_("%s: failed to open %s\n"), myname, tempname);
 		return;
 	}
 	while ((n = read(ifd, buff, BUFSIZ)) > 0)
 		write(ofd, buff, n);
+	buff[0] = buff[1] = buff[2] = buff[3] = 0;
+	write(ofd, buff, 4);
+	/* BUG: ofd never closed */
 	tempfd = fdopen(ifd, "r");
 }
 
-char *fnonly(s)
-char *s;
+
+const char *fnonly(P(const char *) s)
+PP(const char *s;)
 {
-	register char *p,
-	*r;
+	register const char *p;
+	register const char *r;
 
 	r = s;
 	strcpy(fname, r);
@@ -838,28 +901,27 @@ char *s;
 	} else
 		p = fname;
 
-	return (p);
+	return p;
 }
 
-/* this is a copy routine for the cross device archive creation */
-copy(from, to)
-char *from,
-*to;
-{
-	register int ifd,
-	 ofd,
-	 len;
 
-	if ((ofd = open(to, WRITE)) == -1)
+/* this is a copy routine for the cross device archive creation */
+int copy(P(const char *) from, P(const char *) to)
+PP(const char *from;)
+PP(const char *to;)
+{
+	register int ifd, ofd, len;
+
+	if ((ofd = open(to, O_WRONLY)) == -1) /* BUG: open() opens in ASCII mode by default */
 	{
-		if ((ofd = creat(to, DEFMODE)) == -1)
-			return (-1);
+		if ((ofd = creat(to, DEFMODE)) == -1) /* BUG: creat() opens in ASCII mode by default */
+			return -1;
 	}
-	if ((ifd = open(from, READ)) == -1)
+	if ((ifd = open(from, O_RDONLY)) == -1) /* BUG: open() opens in ASCII mode by default */
 	{
 		close(ofd);
 		unlink(to);
-		return (-1);
+		return -1;
 	}
 
 	while ((len = read(ifd, buff, sizeof buff)) > 0)
@@ -867,4 +929,8 @@ char *from,
 
 	close(ifd);
 	close(ofd);
+	/* BUG: no return value */
+#ifndef __ALCYON__
+	return 0;
+#endif
 }

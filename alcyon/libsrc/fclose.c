@@ -38,7 +38,7 @@ PP(register FILE *sp;)
 		sp->_cnt = 0;
 	}
 	/* reset all flags */
-	sp->_flag &= ~(_IOREAD | _IOWRT | _IOABUF | _IONBUF | _IOERR | _IOEOF | _IOLBUF);
+	sp->_flag = 0;
 	/* and return */
 	fd = fileno(sp);
 	fileno(sp) = -1;

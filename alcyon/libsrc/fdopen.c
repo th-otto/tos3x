@@ -16,6 +16,7 @@
 *
 *****************************************************************************/
 
+#include <osif.h>
 #include "lib.h"
 #include <errno.h>
 #include <fcntl.h>
@@ -30,7 +31,7 @@ PP(register const char *mode;)
 	register int flags;
 
 	/* is fd valid? */
-	if (fd < 0 || lseek(fd, 0L, SEEK_CUR) == EOF)
+	if (_chkc(fd) == NULL)
 		return NULL;
 	/* look at _iob table not marked rd/wrt */
 	for (ii = 0; ii < MAXFILES && (sp = (&_iob[ii]))->_flag & (_IOREAD | _IOWRT); ii++)
@@ -43,12 +44,15 @@ PP(register const char *mode;)
 	if ((flags = __getmode(mode)) == -1)
 		return NULL;
 	/* not 'r'ead mode? */
+	sp->_flag = 0;
 	if ((flags & O_ACCMODE) != O_WRONLY)
-		sp->_flag = _IOREAD;
+		sp->_flag |= _IOREAD;
 	if ((flags & O_ACCMODE) != O_RDONLY)
-		sp->_flag = _IOWRT;				/* else 'w'rite mode        */
+		sp->_flag |= _IOWRT;				/* else 'w'rite mode        */
 	if (flags & O_TEXT)
 		sp->_flag |= _IOASCI;
+	else
+		sp->_flag &= ~_IOASCI;
 	sp->_cnt = 0;						/* init count           */
 	sp->_fd = fd;						/*  and file des        */
 	sp->_base = sp->_ptr = NULL;		/*  and buffer pointers     */
