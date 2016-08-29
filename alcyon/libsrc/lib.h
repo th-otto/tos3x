@@ -122,6 +122,12 @@ long _blkio PROTO((FD *ccbp, long sector, VOIDPTR buffer, long count, int bdosfu
 #endif
 int _ttyinraw PROTO((NOTHING));
 
+#ifdef __TIME_H__
+struct tm *_conSD_r PROTO((time_t clock, int local, struct tm *tp));
+struct tm *_conSD PROTO((time_t clock, int local));
+time_t _cnvDS PROTO((const struct tm *tm));
+#endif
+
 /************************* #include "malloc.h"  *****************************/
 #define FB_HDR struct hdr				/* free block header type   */
 #define NULLFBH ((FB_HDR *)0)			/* Null of above struct     */

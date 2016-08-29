@@ -54,5 +54,6 @@ VOID qsort PROTO((VOIDPTR bas, size_t num, size_t siz, __compar_fn_t cmp));
 
 char *mktemp PROTO((char *template));
 
+char *getenv PROTO((const char *name));
 
 #endif /* __STDLIB_H__ */

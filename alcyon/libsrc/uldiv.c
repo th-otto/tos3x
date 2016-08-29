@@ -107,4 +107,7 @@ asm("   move.l d5,d0");
 asm("L99:");
 asm("   movem.l (sp)+,d4-d7");
 #endif
+#ifndef __ALCYON__
+	return 0;
+#endif
 }
