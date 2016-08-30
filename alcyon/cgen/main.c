@@ -3,11 +3,11 @@
 	Alcyon Corporation
 	8716 Production Ave.
 	San Diego, Ca.  92121
+
+	@(#)main.c	1.7	12/28/83
 */
 
-char *version = "@(#)c168 code generator 4.2 - Sep 6, 1983";
-
-/**
+/*
  *	ALCYON C Compiler for the Motorola 68000 - Code Generator
  *
  *	Called from c68:
@@ -26,241 +26,61 @@ char *version = "@(#)c168 code generator 4.2 - Sep 6, 1983";
  *	main				- main routine
  *		readicode		- code generation driven by intermediate code
  *
-**/
+ */
 
 #include "cgen.h"
-#include "cskel.h"
+#include <stdlib.h>
 
+
+short m68010;
 char *opap;
+short stacksize;
+char exprarea[EXPSIZE];
+short onepass;
+short dflag;
+short cflag;
+short bol;
+short eflag;
 short gflag;
-short nextlabel	= 10000;
-char null[] = "";
+short lineno;
+short mflag;
+short oflag;
+short errcnt;
+
+
+short nextlabel = 10000;
+
+struct tnode null;
+
 short lflag = 1;
+
 char source[PATHSIZE] = "";
 
-char *readtree();
-char *readsym();
+/* io buffer declaration */
+static FILE *ifil, *lfil, *ofil;
 
-/* main - main routine, handles arguments and files*/
-main(argc,argv)						/* returns - none*/
-int argc;							/* arg count*/
-char **argv;						/* arg pointers*/
-{
-	register char *q, *calledby;
+static char const program_name[] = "c168";
 
-	calledby = *argv++;
-	if( argc < 4 )
-		usage(calledby);
-	if( fopen(*argv,&ibuf,0) < 0 )	/* 3rd arg for versados */
-		ferror("can't open %s",*argv);
-	if( fopen(*++argv,&lbuf,0) < 0)
-		ferror("can't open %s",*argv);
-	if( fcreat(*++argv,&obuf,0) < 0 )
-		ferror("can't create %s",*argv);
 
-	for( argc -= 4; argc--; ) {
-		q = *++argv;
-		if( *q++ != '-' )
-			usage(calledby);
-		while( 1 ) {
-			switch( *q++ ) {
 
-			case 'a':		/* [vlh] 4.2, alter ego of the '-L' flag */
-				lflag = 0;
-				continue;
 
-			case 'c':
-				cflag++;
-				continue;
 
-			case 'e':
-				eflag++;
-				continue;
-
-			case 'f':
-				fflag++;
-				continue;
-
-			case 'g':	/* [vlh] 4.2 generate line labels for cdb */
-				gflag++;
-				continue;
-
-			case 'm':
-				mflag++;
-				continue;
-
-			case 'o':
-				oflag++;
-				continue;
-
-			case 'D':
-				dflag++;
-				continue;
-
-			case 'L':	/* [vlh] 4.2, OBSOLETE */
-				lflag++;
-				continue;
-
-			case 'T':	/* [vlh] 4.2 generates code for the 68010 */
-				m68010++;
-				continue;
-
-			case '\0':
-				break;
-
-			default:
-				usage(calledby);
-			}
-			break;
-		}
-	}
-
-	readicode();
-	myfflush(&obuf);
-	exit(errcnt!=0);
-}
-
-/* readicode - read intermediate code and dispatch output*/
-/*		This copies assembler lines beginning with '(' to assembler*/
-/*		output and builds trees starting with '.' line.*/
-readicode()								/*returns - none*/
-{
-	register short c;
-	register struct tnode *tp;
-
-	while( (c=getc(&ibuf)) > 0 ) {
-		switch(c) {
-
-		case '.':
-			lineno = readshort();
-			readfid();
-			opap = exprarea;
-			if( tp = readtree() ) {
-				PUTEXPR(cflag,"readicode",tp);
-				switch( tp->t_op ) {
-
-				case INIT:
-					outinit(tp->t_left);
-					break;
-
-				case CFORREG:
-					outcforreg(tp->t_left);
-					break;
-
-				case IFGOTO:
-					outifgoto(tp->t_left,tp->t_type,tp->t_su);
-					break;
-
-				default:
-					outexpr(tp);
-					break;
-				}
-			}
-			else
-				outline();
-			break;
-
-		case '(':
-			while( (c=getc(&ibuf)) != '\n' )
-				putchar(c);
-			putchar(c);
-			break;
-
-		case '%':		/* [vlh] 4.2 */
-			while( (c=getc(&ibuf)) != '\n' )
-				;	/* skip over carriage return */
-			while( (c=getc(&lbuf)) != '%' && c != -1)
-				putchar(c);
-			if (c == -1)
-				ferror("early termination of link file");
-			break;
-
-		default:
-			error("intermediate code error %c,%d",c,c);
-			break;
-		}
-	}
-}
-
-/* readtree - recursive intermediate code tree read*/
-char *
-readtree()						/* returns ptr to expression tree*/
-{
-	register short op, type, sc;
-	register struct tnode *tp, *rtp;
-	char sym[SSIZE];
-
-	if( (op=readshort()) <= 0 )
-		return(0);
-	type = readshort();
-	switch( op ) {
-
-	case SYMBOL:
-		if( (sc=readshort()) == EXTERNAL )
-			tp = cenalloc(type,sc,readsym(sym));
-		else
-			tp = snalloc(type,sc,readshort(),0,0);
-		break;
-
-	case CINT:
-		tp = cnalloc(type,readshort());
-		break;
-
-	case CLONG:
-		tp = lcnalloc(type,readlong());	/* [vlh] 4.1 was two readshort's */
-		break;
-
-	case CFLOAT:	/* [vlh] 3.4 */
-		tp = fpcnalloc(type,readlong());	/* [vlh] 4.1 was two readshort's */
-		break;
-
-	case IFGOTO:
-	case BFIELD:
-		sc = readshort();
-		if( tp = readtree() )
-			tp = tnalloc(op,type,sc,0,tp,null);
-		break;
-
-	default:
-		if( BINOP(op) ) {
-			if( !(tp=readtree()) )
-				return(0);
-			if( !(rtp=readtree()) )
-				return(0);
-			tp = tnalloc(op,type,0,0,tp,rtp);
-		}
-		else if( tp = readtree() )
-			tp = tnalloc(op,type,0,0,tp,null);
-		break;
-	}
-	return(tp);
-}
-
-/* readfid - read source filename out of intermediate file */
-readfid()
-{
-	register char *p;
-
-	p = &source[0];
-	while( (*p = getc(&ibuf)) != '\n') 
-		p++;
-	*p = 0;
-}
-
-/* readshort - reads an integer value from intermediate code*/
-short
-readshort()
+/* readshort - reads an integer value from intermediate code */
+static short readshort(NOTHING)
 {
 	register short c;
 	register short i;
 
 	i = 0;
-	while(1) {
-		switch( c = getc(&ibuf) ) {
-
+	for (;;)
+	{
+		switch (c = getc(ifil))
+		{
+		case '\r':
+			break;
 		case '.':
-		case '\n': 
-			return(i);
+		case '\n':
+			return i;
 
 		case '0':
 		case '1':
@@ -273,7 +93,7 @@ readshort()
 		case '8':
 		case '9':
 			i <<= 4;
-			i += (c-'0');
+			i += (c - '0');
 			break;
 
 		case 'a':
@@ -283,7 +103,7 @@ readshort()
 		case 'e':
 		case 'f':
 			i <<= 4;
-			i += (c-('a'-10));
+			i += (c - ('a' - 10));
 			break;
 
 		case 'A':
@@ -293,27 +113,34 @@ readshort()
 		case 'E':
 		case 'F':
 			i <<= 4;
-			i += (c-('A'-10));
+			i += (c - ('A' - 10));
 			break;
 
 		default:
-			error("intermediate code error - %c,%d",c,c);
+			error(_("intermediate code error - %c,%d"), c, c);
+			break;
 		}
 	}
 }
 
-/* readlong - reads a long value from intermediate code*/
-long
-readlong()		/* [vlh] 4.1 */
+
+/* readlong - reads a long value from intermediate code */
+static long readlong(NOTHING)
 {
-	long l;
+	union {
+		struct words w;
+		long l;
+	} l;
 	register unsigned short w1, w2;
 	register short c, onedot;
 
-	w2 = 0; onedot = 0;
-	while(1) {
-		switch( c = getc(&ibuf) ) {
-
+	w1 = 0;
+	w2 = 0;
+	onedot = 0;
+	while (1)
+	{
+		switch (c = getc(ifil))
+		{
 		case '0':
 		case '1':
 		case '2':
@@ -325,7 +152,7 @@ readlong()		/* [vlh] 4.1 */
 		case '8':
 		case '9':
 			w2 <<= 4;
-			w2 += (c-'0');
+			w2 += (c - '0');
 			break;
 
 		case 'a':
@@ -335,289 +162,389 @@ readlong()		/* [vlh] 4.1 */
 		case 'e':
 		case 'f':
 			w2 <<= 4;
-			w2 += (c-('a'-10));
+			w2 += (c - ('a' - 10));
+			break;
+
+		case 'A':						/* sw Hex in upper case as well... */
+		case 'B':
+		case 'C':
+		case 'D':
+		case 'E':
+		case 'F':
+			w2 <<= 4;
+			w2 += (c - ('A' - 10));
+			break;
+
+		case '\r':
 			break;
 
 		case '.':
-			if (!onedot++) {
+			if (!onedot++)
+			{
 				w1 = w2;
 				w2 = 0;
 				continue;
 			}
-		case '\n': 
-			if (onedot) {
-				l.hiword = w1;
-				l.loword = w2;
-				return(l);
+		case '\n':
+			if (onedot)
+			{
+				l.w.hiword = w1;
+				l.w.loword = w2;
+				return l.l;
 			}
 		default:
-			error("intermediate code error - %c,%d",c,c);
+			error(_("intermediate code error - %c,%d"), c, c);
+			break;
 		}
 	}
 }
 
-/* readsym - read a symbol from intermediate code*/
-char *readsym(sym)
-char *sym;
+
+/* readsym - read a symbol from intermediate code */
+static char *readsym(P(char *) sym)
+PP(char *sym;)
 {
 	register short i, c;
 	register char *s;
 
-	for( i = SSIZE, s = sym; (c=getc(&ibuf)) != '\n'; )
-		if( --i >= 0 )
+	for (i = SSIZE, s = sym; (c = getc(ifil)) != '\n';)
+	{
+		if (c < 0)
+			break;
+		if (c != '\r' && --i >= 0)
 			*s++ = c;
-	if( i > 0 )
+	}
+	if (i > 0)
 		*s = '\0';
-	return(sym);
+	return sym;
 }
 
-/* error - output an error message*/
-error(s,x1,x2,x3,x4,x5,x6)
-char *s;
-int x1, x2, x3, x4, x5, x6;
+
+/* readtree - recursive intermediate code tree read */
+static struct tnode *readtree(NOTHING)						/* returns ptr to expression tree */
 {
-	errcnt++;
-	if( lineno != 0 )
-		printf((char *)STDERR,"\"%s\", ** %d: ",source,lineno);
-	printf((char *)STDERR,s,x1,x2,x3,x4,x5,x6);
-	cputc('\n',STDERR);
+	register short op, type, sc;
+	register struct tnode *tp, *rtp;
+	char sym[SSIZE];
+
+	if ((op = readshort()) <= 0)
+		return NULL;
+	type = readshort();
+	switch (op)
+	{
+	case SYMBOL:
+		if ((sc = readshort()) == EXTERNAL)
+			tp = cenalloc(type, sc, readsym(sym));
+		else
+			tp = snalloc(type, sc, (long) readshort(), 0, 0);
+		break;
+
+	case CINT:
+		tp = cnalloc(type, readshort());
+		break;
+
+	case CLONG:
+		tp = lcnalloc(type, readlong());
+		break;
+
+	case CFLOAT:
+		tp = fpcnalloc(type, readlong());
+		break;
+
+	case IFGOTO:
+	case BFIELD:
+		sc = readshort();
+		if ((tp = readtree()) != NULL)
+			tp = tnalloc(op, type, sc, 0, tp, &null);
+		break;
+
+	default:
+		if (BINOP(op))
+		{
+			if (!(tp = readtree()))
+				return 0;
+			if (!(rtp = readtree()))
+				return 0;
+			tp = tnalloc(op, type, 0, 0, tp, rtp);
+		} else if ((tp = readtree()) != NULL)
+		{
+			tp = tnalloc(op, type, 0, 0, tp, &null);
+		}
+		break;
+	}
+	return tp;
 }
 
-/* warning - output a warning message*/
-warning(s,x1,x2,x3,x4,x5,x6)
-char *s;
-int x1, x2, x3, x4, x5, x6;
+
+/* readfid - read source filename out of intermediate file */
+static VOID readfid(NOTHING)
 {
-	if( lineno != 0 )
-		printf((char *)STDERR,"\"%s\", ** %d: (warning) ",source,lineno);
-	else
-		printf((char *)STDERR,"(warning) ");
-	printf((char *)STDERR,s,x1,x2,x3,x4,x5,x6);
-	cputc('\n',STDERR);
+	register char *p;
+	register int c;
+	
+	p = &source[0];
+	while ((c = getc(ifil)) > 0 && c != '\n')
+		if (c != '\r')
+			*p++ = c;
+	*p = 0;
 }
 
-/* ferror - output error message and die*/
-ferror(s,x1,x2,x3,x4,x5,x6)
-char *s;
-int x1, x2, x3, x4, x5, x6;
-{
-	error(s,x1,x2,x3,x4,x5,x6);
-	exit(1);
-}
 
-/* tnalloc - allocate binary expression tree node*/
-/*	returns ptr to node made.*/
-char *tnalloc(op,type,info,dummy,left,right)
-int op;						/* operator*/
-int type;					/* resultant node type*/
-int info;					/* info field*/
-int dummy;					/* dummy field - used to match pass1 args*/
-struct tnode *left;			/* left sub-tree*/
-struct tnode *right;		/* righst sub-tree*/
+/*
+ * readicode - read intermediate code and dispatch output
+ * This copies assembler lines beginning with '(' to assembler
+ * output and builds trees starting with '.' line.
+ */
+static VOID readicode(NOTHING)
 {
+	register short c;
 	register struct tnode *tp;
 
-	tp = talloc(sizeof(*tp));
-	tp->t_op = op;
-	tp->t_type = type;
-	tp->t_su = info;			/* info for bit-field & condbr's*/
-	tp->t_left = left;
-	tp->t_right = right;
-	return(tp);
+	while ((c = getc(ifil)) > 0)
+	{
+		switch (c)
+		{
+		case '.':
+			lineno = readshort();
+			readfid();
+			opap = exprarea;
+			if ((tp = readtree()) != NULL)
+			{
+				PUTEXPR(cflag, "readicode", tp);
+				switch (tp->t_op)
+				{
+				case INIT:
+					outinit(tp->t_left);
+					break;
+
+				case CFORREG:
+					outcforreg(tp->t_left);
+					break;
+
+				case IFGOTO:
+					outifgoto(tp->t_left, tp->t_type, tp->t_su);
+					break;
+
+				default:
+					outexpr(tp);
+					break;
+				}
+			} else
+			{
+				outline();
+			}
+			break;
+
+		case '(':
+			while ((c = getc(ifil)) > 0 && c != '\n')
+				oputchar(c);
+			if (c > 0)
+				oputchar(c);
+			break;
+
+		case '%':
+			while ((c = getc(ifil)) > 0 && c != '\n')
+				;						/* skip over carriage return */
+			while ((c = getc(lfil)) > 0 && c != '%')
+				oputchar(c);
+			if (c < 0)
+				fatal(_("early termination of link file"));
+			break;
+
+		default:
+			error(_("intermediate code error %c,%d"), c, c);
+			break;
+		}
+	}
 }
 
-/* cnalloc - allocate constant expression tree node*/
-char *cnalloc(type,value)	/* returns pointer to node alloced*/
-int type;						/* type of constant*/
-int value;						/* value of constant*/
+
+static VOID endit(P(int) stat)
+PP(int stat;)
 {
-	register struct conode *cp;
-
-	cp = talloc(sizeof(*cp));
-	cp->t_op = CINT;
-	cp->t_type = type;
-	cp->t_value = value;
-	return(cp);
+	if (ifil)
+		fclose(ifil);
+	if (ofil)
+		fclose(ofil);
+	if (lfil)
+		fclose(lfil);
+	exit(stat);
 }
 
-/* lcnalloc - allocate constant expression tree node*/
-char *lcnalloc(type,value)	/* returns pointer to node alloced*/
-int type;						/* type of constant*/
-long value;						/* value of constant*/
+
+/* error - output an error message */
+VOID error(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
 {
-	register struct lconode *cp;
-
-	cp = talloc(sizeof(*cp));
-	cp->t_op = CLONG;
-	cp->t_type = type;
-	cp->t_lvalue = value;
-	return(cp);
+	va_list args;
+	
+	errcnt++;
+	if (lineno != 0)
+		fprintf(stderr, "\"%s\", ** %d: ", source, lineno);
+	va_start(args, s);
+	vfprintf(stderr, s, args);
+	fprintf(stderr, "\n");
+	va_end(args);
 }
 
-/* fpcnalloc - allocate constant expression tree node*/
-char *fpcnalloc(type,value)	/* returns pointer to node alloced*/
-int type;						/* type of constant*/
-long value;						/* value of constant*/
-{								/* [vlh] 3.4 */
-	register struct lconode *cp;
 
-	cp = talloc(sizeof(*cp));
-	cp->t_op = CFLOAT;
-	cp->t_type = type;
-	cp->t_lvalue = value;
-	return(cp);
-}
-
-/* talloc - allocate expression tree area*/
-char *talloc(size)				/* returns pointer to area alloced*/
-int size;						/* number of bytes to alloc*/
+/* warning - output a warning message */
+VOID warning(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
 {
-	register char *p;
-
-	p = opap;
-	if( p + size >= &exprarea[EXPSIZE] )
-		ferror("expression too complex");
-	opap = p + size;
-	return(p);
-}
-
-/* symcopy - copy symbol*/
-symcopy(sym1,sym2)					/* returns - none*/
-char *sym1;						/* from symbol*/
-char *sym2;						/* to symbol*/
-{
-	register char *p, *q;
-	register short i;
-
-	for( p = sym1, q = sym2, i = SSIZE; --i >= 0; )
-		*q++ = (*p ? *p++ : '\0');
-}
-
-/* usage - ouput usage message*/
-usage(calledby)
-char *calledby;
-{
-	ferror("usage: %s icode link asm [-DLameco]",calledby);
-}
-
-/* cputc - put a character to a file descriptor (used by error) */
-cputc(c, fn)
-char c;
-int fn;
-{
-#ifdef VERSADOS
-	versaputchar(c);
-#else
-	if (fn == STDERR)
-		write(STDERR, &c, 1);
+	va_list args;
+	
+	if (lineno != 0)
+		fprintf(stderr, "\"%s\", ** %d: (warning) ", source, lineno);
 	else
-		putchar(c);
-#endif
+		fprintf(stderr, "(warning) ");
+	va_start(args, s);
+	vfprintf(stderr, s, args);
+	fprintf(stderr, "\n");
+	va_end(args);
 }
 
-/**
- * putchar - special version
+
+/* fatal - output error message and die */
+VOID fatal(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
+{
+	va_list args;
+	
+	errcnt++;
+	if (lineno != 0)
+		fprintf(stderr, "\"%s\", ** %d: ", source, lineno);
+	va_start(args, s);
+	vfprintf(stderr, s, args);
+	fprintf(stderr, "\n");
+	endit(EXIT_FAILURE);
+}
+
+
+/*
+ * oputchar - special version
  *		This allows the use of printf for error messages, debugging
  *		output and normal output.
-**/
-putchar(c)							/* returns - none*/
-char c;								/* character to output*/
+ */
+VOID oputchar(P(char) c)
+PP(char c;)
 {
-	if( dflag > 1 )
-		write(1,&c,1);			/*to standard output*/
-	putc(c,&obuf);				/*put to assembler file*/
+	if (dflag > 1)
+		fputc(c, stdout);
+	if (c != '\r')
+		fputc(c, ofil);						/* put to assembler file */
 }
 
-#ifdef VERSADOS
 
-#define STDOUT 1
-
-struct iob versfout { STDOUT, BSIZE, &versfout.cbuf[0]};
-
-versaputchar(c)
-char c;
+VOID oprintf(P(const char *) string _va_alist)
+PP(const char *string;)
+_va_dcl
 {
-	if (c == '\n') {	/* end of line */
-		if (versaflush())	/* write one line */
-			return(-1);
-		return(c);
-	}
-
-	/* buffered output */
-	if (versfout.cc <= 0) {
-		versfout.cp = &(versfout.cbuf[0]);
-		if (write(versfout.fd,versfout.cp,BSIZE) != BSIZE)
-			return(-1);
-		versfout.cc = BSIZE;
-	}
-	*(versfout.cp)++ = c;
-	versfout.cc--;
-	return(c);
+	va_list args;
+	
+	va_start(args, string);
+	if (dflag > 1)
+		vfprintf(stdout, string, args);
+	vfprintf(ofil, string, args);
+	va_end(args);
 }
 
-versaflush()
-{
-	register short size, fildes;
 
-	if ((size = (BSIZE - versfout.cc)) == 0)
-		return(0);
-	versfout.cc = BSIZE;
-	versfout.cp = &(versfout.cbuf[0]);
-	fildes = (versfout.fd <= STDERR) ? 6 : versfout.fd;
-	if (write(fildes,versfout.cp,size) < 0)
-		return(-1);
-	return(0);
-}
+
+/* usage - output usage message */
+static VOID usage(NOTHING)
+{
+#ifdef DEBUG
+	fatal("usage: %s icode link asm [-DTacemov]", program_name);
 #else
-#	ifdef VAX11
-	getc(ibuf)
-	struct iob *ibuf;
+	fatal("usage: %s icode link asm [-Tav]", program_name);
+#endif
+}
+
+
+/* main - main routine, handles arguments and files */
+int main(P(int) argc, P(char **) argv)
+PP(int argc;)
+PP(char **argv;)
+{
+	register char *q;
+
+	if (argc < 4)
+		usage();
+	if ((ifil = fopen(argv[1], "r")) == NULL)
+		fatal("can't open %s", *argv);
+	if ((lfil = fopen(argv[2], "r")) == NULL)
+		fatal("can't open %s", *argv);
+	if ((ofil = fopen(argv[3], "w")) == NULL)
+		fatal("can't create %s", *argv);
+
+	for (argc -= 4; argc--;)
 	{
-		if (ibuf->cc <= 0) {
-			ibuf->cp = &(ibuf->cbuf[0]);
-			ibuf->cc = read(ibuf->fd,ibuf->cp,BSIZE);
+		q = *++argv;
+		if (*q++ != '-')
+			usage();
+		for (;;)
+		{
+			switch (*q++)
+			{
+			case 'a':					/* alter ego of the '-L' flag */
+				lflag = 0;
+				continue;
+
+			case 'f':
+				/* fflag++; */
+				continue;
+
+			case 'g':					/* generate line labels for cdb */
+				gflag++;
+				continue;
+
+			case 'D':
+			case 'd':
+				dflag++;
+				continue;
+#ifdef DEBUG
+			case 'c':
+				cflag++;
+				continue;
+
+			case 'e':
+				eflag++;
+				continue;
+
+			case 'm':
+				mflag++;
+				continue;
+
+			case 'o':
+				oflag++;
+				continue;
+#endif
+			case 'L':					/* OBSOLETE */
+			case 'l':
+				lflag++;
+				continue;
+
+			case 'T':					/* generates code for the 68010 */
+			case 't':
+				m68010++;
+				continue;
+
+			case '\0':
+				break;
+
+			default:
+				usage();
+				break;
+			}
+			break;
 		}
-		if (ibuf->cc <= 0)
-			return(-1);
-		ibuf->cc--;
-		return((int)(*(ibuf->cp)++)&0xff);
 	}
 
-	fopen(fname,ibuf)
-	char *fname;
-	register struct iob *ibuf;
-	{
-		ibuf->cc = 0;   /* no chars */
-		ibuf->fd = open(fname,0);
-		return(ibuf->fd);
-	}
-#	endif
-#endif
-
-myfflush(mybuf)
-register struct iob *mybuf;
-{
-	register i;
-
-	i = BSIZE - mybuf->cc;
-	mybuf->cc = BSIZE;
-	mybuf->cp = &(mybuf->cbuf[0]);
-	if (write(mybuf->fd,mybuf->cp,i) != i)
-		return(-1);
-	return(0);
+	readicode();
+	endit(errcnt != 0);
+	return EXIT_SUCCESS;
 }
-
-#ifdef DRI
-printf(string,a,b,c,d,e,f,g)
-char *string;
-int a,b,c,d,e,f,g;
-{
-	char area[256];
-	register char *p;
-
-	sprintf(area,string,a,b,c,d,e,f,g);
-	for(p = &area[0]; *p ; p++ )
-		putchar(*p);
-}
-#endif
-

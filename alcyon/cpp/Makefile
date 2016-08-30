@@ -8,10 +8,12 @@ LIBS = $(LIBC)
 all: $(PROGRAMS)
 
 cp68$(EXEEXT): ${OBJS}
-	$(AM_V_LD)${CC} ${CFLAGS} ${OBJS} ${LIBS} -o $@
+	$(AM_V_LD)${LD} ${LDFLAGS} -u -h 7 -o $@ $(CRT0) nofloat.o ${OBJS} ${LIBS}
 
 install: all
-	$(CP) cp68$(EXEEXT) $(BIN)
+	$(CP) $(PROGRAMS) $(BIN)
+
+check::
 
 clean::
 	$(RM) *.o $(PROGRAMS)

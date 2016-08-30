@@ -45,7 +45,7 @@ PP(struct skeleton *skp;)					/* pointer to code skeleton */
 	op = tp->t_op;
 #ifdef DEBUG
 	if (eflag)
-		printf("expand op=%d left=%x right=%x skp=%lo\n", op, skp->sk_left, skp->sk_right, skp);
+		printf("expand op=%d left=%x right=%x skp=%p\n", op, skp->sk_left, skp->sk_right, skp);
 #endif
 	if (((op >= MULT && op <= COMPL) || (op >= LMULT && op <= LMOD)) || tp->t_type == CHAR)
 		freg = DREG(freg);
@@ -306,7 +306,7 @@ PP(struct skeleton *skp;)					/* pointer to code skeleton */
 	}
 #ifdef DEBUG
 	if (eflag)
-		printf("ending expand skp=%lo\n", skp);
+		printf("ending expand skp=%p\n", skp);
 #endif
 	return freg;
 }
@@ -438,7 +438,7 @@ PP(int reg;)								/* register to use */
 		ltp = tp;
 	else
 		ltp = tp->t_left;
-	if ((bop = BINOP(op))) /* XXX */
+	if ((bop = BINOP(op)) /* != 0 */)
 	{
 		rtp = tp->t_right;
 		if (CONVOP(ltp->t_op))
@@ -497,7 +497,7 @@ PP(int reg;)								/* register to use */
 	skp = codeskels[i];
 #ifdef DEBUG
 	if (mflag)
-		printf("codeskels[%d]=%o\n", i, skp);
+		printf("codeskels[%d]=%p\n", i, skp);
 #endif
 #ifdef DEBUG
 	if (mflag)
@@ -524,7 +524,7 @@ PP(int reg;)								/* register to use */
 			continue;
 #ifdef DEBUG
 		if (mflag)
-			printf("match found skp=%o left=%x right=%x\n", skp, skp->sk_left, skp->sk_right);
+			printf("match found skp=%p left=%x right=%x\n", skp, skp->sk_left, skp->sk_right);
 #endif
 		return skp;
 	}
@@ -549,7 +549,7 @@ PP(int skinfo;)
 	type = tp->t_type;
 	if (ISFUNCTION(type))
 		type = BTYPE(type);
-	if ((unsignf = UNSIGN(type))) /* XXX */
+	if ((unsignf = UNSIGN(type)) /* != 0 */)
 		type = BASETYPE(type);
 	isconstant = 0;
 

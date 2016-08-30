@@ -1099,7 +1099,7 @@ PP(struct tnode **tpp;)
 
 	tp = *tpp;
 	PUTEXPR(oflag, "multop", *tpp);
-	if ((change = power2(tpp))) /* XXX */
+	if ((change = power2(tpp)) /* != 0 */)
 		tp = *tpp;
 	if (chklong(rtp = tp->t_right) || chklong(tp->t_left))
 	{

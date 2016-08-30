@@ -96,7 +96,7 @@ char *opname[] = {
 #ifdef	DEBUG
 
 VOID outlevel PROTO((NOTHING));
-VOID putsexpr PROTO(struct tnode *tp));
+VOID putsexpr PROTO((struct tnode *tp));
 
 char *types[] = {
 	"typeless-invalid",					/* 0=TYPELESS */
@@ -251,7 +251,7 @@ VOID outlevel(NOTHING)
 
 
 VOID puttsu(P(struct tnode *) tp)
-struct tnode *tp;
+PP(struct tnode *tp;)
 {
 	register short i;
 

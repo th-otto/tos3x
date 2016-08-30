@@ -43,3 +43,17 @@ PP(int prec;)
 		prec = 6;
 	return etoa(fp, buf, prec);
 }
+
+
+char *pgtoa(P(double) fp, P(char *) buf, P(int) prec)
+PP(double fp;)
+PP(char *buf;)
+PP(int prec;)
+{
+	char *sp;
+
+	sp = pftoa(fp, buf, prec);
+	if ((int)strlen(buf) > (7 + prec))		/* Smallest FP string           */
+		sp = petoa(fp, buf, prec);
+	return sp;
+}
