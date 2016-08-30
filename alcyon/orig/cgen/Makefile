@@ -1,7 +1,7 @@
 include ../Makefile.common
 include ../Makefile.silent
 
-PROGRAMS = cp68$(EXEEXT)
+PROGRAMS = c168$(EXEEXT)
 LIBS = ${LIBC}
 CPPFLAGS += -DGEMDOS
 
@@ -9,8 +9,9 @@ all: $(PROGRAMS)
 
 include SRCFILES
 
+LIB1OBJS = kputc.o kgetc.o kopen.o kcreat.o
+
 LIBOBJS = \
-		$(LIBSRC)kcreat.o \
 		$(LIBSRC)kwritef.o \
 		$(LIBSRC)xnwmain.o \
 		$(LIBSRC)nofloat.o \
@@ -30,6 +31,7 @@ LIBOBJS = \
 		$(LIBSRC)fflush.o \
 		$(LIBSRC)open.o \
 		$(LIBSRC)lseek.o \
+		$(LIBSRC)sprintf.o \
 		$(LIBSRC)doprt.o \
 		$(LIBSRC)fputn.o \
 		$(LIBSRC)fputc.o \
@@ -54,27 +56,29 @@ LIBOBJS = \
 		$(LIBSRC)strlen.o \
 		$(LIBSRC)ctype.o \
 		$(LIBSRC)stricmp.o \
+		$(LIBSRC)ldiv.o \
+		$(LIBSRC)lmul.o \
+		$(LIBSRC)lrem.o \
 		$(LIBSRC)uldiv.o \
 		$(LIBSRC)blivot.o \
 		$(LIBSRC)xread.o \
 		$(LIBSRC)xwrite.o \
 		$(LIBSRC)trap.o \
-		$(LIBSRC)lmul.o \
 		$(empty)
 
-#cp68$(EXEEXT): $(CP_OBJS) ${MAKEFILE}
-#	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ crtg.o $(CP_OBJS) $(LIBOBJS)
+#c168$(EXEEXT): $(C168_OBJS) $(LIB1OBJS) ${MAKEFILE}
+#	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ crtg.o $(C168_OBJS) $(LIB1OBJS) $(LIBOBJS)
 
-
-cp68.rel: $(CP_OBJS) cp68.lnk ${MAKEFILE}
+c168.rel: $(C168_OBJS) $(LIB1OBJS) c168.lnk ${MAKEFILE}
 	$(CP) $(LIBSRC)crtg.o $(LIBSRC)$(LIBC) $(LIBOBJS) .
 	$(RM) $@
-	$(LINK68) [un,co[cp68.lnk]]
-	$(RM) crtg.o kcreat.o kwritef.o $(LIBC)
+	$(LINK68) [un,co[c168.lnk]]
+	$(RM) crtg.o $(LIBC)
 
-cp68$(EXEEXT): cp68.rel
+c168$(EXEEXT): c168.rel
 	$(RELMOD) $< $@
 	$(PRGFLAGS) 7 7 $@
+
 
 check::
 	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done

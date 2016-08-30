@@ -14,10 +14,6 @@ VOID fakecmpm PROTO((int type, int lreg, int rreg));
 
 
 
-extern char null[];
-
-extern char *opname[];
-
 /* xnalloc - allocate address-indexed node */
 struct tnode *xnalloc(P(int) type, P(int) ar, P(long) off, P(int) xr, P(int) xt)
 PP(int type;)								/* data type */

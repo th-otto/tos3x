@@ -310,7 +310,19 @@ PP(struct tnode **tpp;)
 				}
 				if (cval == 1)
 				{						/* X%1->0 */
-					SETVAL(lconst, p, 0);
+					/* SETVAL(lconst, p, 0); */
+					if (lconst)
+					{
+#ifdef __ALCYON__
+						asm("movea.l   -4(a6),a0");
+						asm("clr.l     8(a0)");
+#else
+						p->t_lvalue = 0;
+#endif
+					} else
+					{
+						p->t_value = 0;
+					}
 					if (op == EQMOD)
 						tp->t_op = ASSIGN;
 					else
@@ -724,6 +736,7 @@ PP(struct tnode *tp;)
 	return tp;
 }
 
+
 /*
  * harder - test one sub-expression for being "harder" than another
  *      This requires some special finagling for registers.  The reason
@@ -1086,7 +1099,7 @@ PP(struct tnode **tpp;)
 
 	tp = *tpp;
 	PUTEXPR(oflag, "multop", *tpp);
-	if ((change = power2(tpp)) != 0)
+	if ((change = power2(tpp))) /* XXX */
 		tp = *tpp;
 	if (chklong(rtp = tp->t_right) || chklong(tp->t_left))
 	{

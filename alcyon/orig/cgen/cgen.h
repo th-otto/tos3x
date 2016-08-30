@@ -50,6 +50,9 @@ extern char brtab[][2];
 extern short invrel[];
 extern short swaprel[];
 extern const char *const strtab[];
+extern char null[]; /* BUG */
+extern char *opname[];
+
 
 #ifndef VAX11
 struct words { short hiword; short loword; };
@@ -117,29 +120,36 @@ struct tnode {
 
 
 /* io buffer declaration */
-FILE ibuf, lbuf, obuf;
+extern FILE ibuf, lbuf, obuf;
 
 /* Code generation argument flags */
-short dflag;
-short mflag;
-short cflag;
-short eflag;
-short fflag;
-short oflag;
-short lflag;
-short m68010;
+extern short m68010;
+extern short dflag;
+extern short mflag;
+extern short cflag;
+extern short eflag;
+extern short fflag;
+extern short gflag;
+extern short oflag;
+extern short lflag;
 
-	/* Miscellaneous variables */
-short lineno;
-short errcnt;
+/* expression tree storage */
+#define EXPSIZE     4096
+extern char exprarea[EXPSIZE];
+
+/* Miscellaneous variables */
+extern short lineno;
+extern short errcnt;
+extern short onepass;
+extern short bol;
 extern short opinfo[];
-short nextlabel;
+extern short nextlabel;
 extern char optab[][6];
 extern const char *const mnemonics[];
 extern struct skeleton *codeskels[];
-short stacksize;
+extern short stacksize;
 
-	/* general define macros */
+/* general define macros */
 #define	WALLIGN(add)	((add+1)&(~1))
 #define	ISARRAY(type)	((type&SUPTYP)==ARRAY)
 #define	ISFUNCTION(type)	((type&SUPTYP)==FUNCTION)
@@ -174,9 +184,9 @@ short stacksize;
 /* one line routines turned into defines for speed */
 
 /* outgoto - output "bra L[labno]" */
-#define OUTGOTO(lab)	if ((lab) > 0) printf("bra L%d\n",lab) /* BUG: missing parens for side effects */
+#define OUTGOTO(lab)	if (lab > 0) printf("bra L%d\n",lab) /* BUG: missing parens for side effects */
 /* outlab - output "L[labno]:" */
-#define OUTLAB(lab)		if ((lab) > 0) printf("L%d:",lab) /* BUG: missing parens for side effects */
+#define OUTLAB(lab)		if (lab > 0) printf("L%d:",lab) /* BUG: missing parens for side effects */
 
 /* outext - output register sign extension */
 #define OUTEXT(reg)		printf("ext.l R%d\n",reg)
@@ -258,7 +268,6 @@ VOID symcopy PROTO((const char *from, char *to));
 
 VOID putchar PROTO((char c));
 VOID cputc PROTO((char c, int fn));
-int xfflush PROTO((FILE *mybuf));
 VOID printf PROTO((const char *s, ...)) __attribute__((format(__printf__, 1, 2)));
 
 /*
@@ -266,6 +275,7 @@ VOID printf PROTO((const char *s, ...)) __attribute__((format(__printf__, 1, 2))
  */
 VOID putexpr PROTO((const char *name, struct tnode *tp));
 VOID puttsu PROTO((struct tnode *tp));
+
 
 /*
  * smatch.c

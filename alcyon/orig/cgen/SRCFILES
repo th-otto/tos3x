@@ -1,0 +1,1 @@
+C168_OBJS = interf.o main.o codegen.o canon.o optab.o putexpr.o smatch.o cskels.o sucomp.o tabl.o util.o

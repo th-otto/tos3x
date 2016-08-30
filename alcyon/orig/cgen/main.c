@@ -34,9 +34,23 @@ char *version = "@(#)main.c	1.7 12/28/83";
 #include <stdlib.h>
 
 
+FILE ibuf, lbuf, obuf;
+short m68010;
 char *opap;
-
+short stacksize;
+char exprarea[EXPSIZE];
+short onepass;
+short dflag;
+short cflag;
+short bol;
+short eflag;
+short fflag;
 short gflag;
+short lineno;
+short mflag;
+short oflag;
+short errcnt;
+
 
 short nextlabel = 10000;
 
@@ -54,6 +68,7 @@ short readshort PROTO((NOTHING));
 long readlong PROTO((NOTHING));
 char *readsym PROTO((char *sym));
 VOID usage PROTO((const char *calledby));
+int x1flush PROTO((FILE *mybuf));
 
 
 
@@ -141,14 +156,16 @@ PP(char **argv;)
 	}
 
 	readicode();
-	xfflush(&obuf);						/* sw Name conflict with klib */
+	x1flush(&obuf);
 	exit(errcnt != 0);
 }
 
 
-/* readicode - read intermediate code and dispatch output */
-/*	This copies assembler lines beginning with '(' to assembler */
-/*	output and builds trees starting with '.' line. */
+/*
+ * readicode - read intermediate code and dispatch output
+ * This copies assembler lines beginning with '(' to assembler
+ * output and builds trees starting with '.' line.
+ */
 VOID readicode(NOTHING)
 {
 	register short c;
@@ -197,9 +214,9 @@ VOID readicode(NOTHING)
 		case '%':
 			while ((c = getc(&ibuf)) != '\n')
 				;						/* skip over carriage return */
-			while ((c = getc(&lbuf)) != '%' && c != -1)
+			while ((c = getc(&lbuf)) != '%' && c != EOF)
 				putchar(c);
-			if (c == -1)
+			if (c == EOF)
 				ferror("early termination of link file");
 			break;
 
@@ -225,7 +242,7 @@ struct tnode *readtree(NOTHING)						/* returns ptr to expression tree */
 	{
 	case SYMBOL:
 		if ((sc = readshort()) == EXTERNAL)
-			tp = cenalloc(type, sc, readsym(sym)); /* BUG: readsym not declared */
+			tp = cenalloc(type, sc, readsym(sym));
 		else
 			tp = snalloc(type, sc, (long) readshort(), 0, 0);
 		break;
@@ -425,7 +442,7 @@ PP(char *sym;)
 
 
 /* error - output an error message */
-#ifdef __USE_VARARGS
+#ifdef __ALCYON__
 VOID error(s, x1, x2, x3, x4, x5, x6)
 const char *s;
 int x1, x2, x3, x4, x5, x6;
@@ -454,7 +471,7 @@ _va_dcl
 #endif
 
 
-#ifdef __USE_VARARGS
+#ifdef __ALCYON__
 /* warning - output a warning message */
 VOID warning(s, x1, x2, x3, x4, x5, x6)
 const char *s;
@@ -488,9 +505,9 @@ _va_dcl
 
 
 /* ferror - output error message and die */
-#ifdef __USE_VARARGS
+#ifdef __ALCYON__
 VOID ferror(s, x1, x2, x3, x4, x5, x6)
-PP(const char *s;)
+const char *s;
 int x1, x2, x3, x4, x5, x6;
 {
 	error(s, x1, x2, x3, x4, x5, x6);
@@ -605,7 +622,22 @@ PP(char *to;)								/* to symbol */
 	register short i;
 
 	for (p = from, q = to, i = SSIZE; --i >= 0;)
+	{
+#ifdef __ALCYON__
+		asm("tst.b     (a5)");
+		asm("beq.s     l8887");
+		asm("move.b    (a5)+,d0");
+		asm("ext.w     d0");
+		asm("bra.s     l8888");
+		asm("l8887:");
+		asm("clr.w     d0");
+		asm("l8888:");
+		asm("ext.w     d0");
+		asm("move.b    d0,(a4)+");
+#else
 		*q++ = (*p ? *p++ : '\0');
+#endif
+	}
 }
 
 
@@ -647,7 +679,7 @@ PP(char c;)
 }
 
 
-int xfflush(P(FILE *) mybuf)
+int x1flush(P(FILE *) mybuf)
 PP(register FILE *mybuf;)
 {
 	register int i;
@@ -661,7 +693,7 @@ PP(register FILE *mybuf;)
 }
 
 
-#ifdef __USE_VARARGS
+#ifdef __ALCYON__
 VOID printf(string, a, b, c, d, e, f, g)
 const char *string;
 int a, b, c, d, e, f, g;
@@ -698,8 +730,20 @@ _va_dcl
  */
 
 #ifndef __ALCYON__
-#undef fopen
 #undef FILE
+#undef getc
+#undef putchar
+#undef fopen
+int xgetc(struct iob *i)
+{
+	FILE *fp = *((FILE **)i);
+	return fgetc(fp);
+}
+int xputc(char c, struct iob *o)
+{
+	FILE *fp = *((FILE **)o);
+	return fputc(c, fp);
+}
 int xfopen(const char *fname, struct iob *i, int binary)
 {
 	FILE *fp;
@@ -721,15 +765,5 @@ int xfcreat(const char *fname, struct iob *o, int binary)
 		return 0;
 	}
 	return -1;
-}
-int xgetc(struct iob *i)
-{
-	FILE *fp = *((FILE **)i);
-	return fgetc(fp);
-}
-int xputc(char c, struct iob *o)
-{
-	FILE *fp = *((FILE **)o);
-	return fputc(c, fp);
 }
 #endif

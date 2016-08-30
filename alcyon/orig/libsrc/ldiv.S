@@ -14,6 +14,7 @@ ldiv:
 	bne L2
 	move.l #$80000000,_ldivr
 	move.l #$80000000,d0
+	divs.w #$0000,d0
 	bra L1
 L2:
 	bge L3

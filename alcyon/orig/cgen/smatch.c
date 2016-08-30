@@ -438,7 +438,7 @@ PP(int reg;)								/* register to use */
 		ltp = tp;
 	else
 		ltp = tp->t_left;
-	if ((bop = BINOP(op)) != 0)
+	if ((bop = BINOP(op))) /* XXX */
 	{
 		rtp = tp->t_right;
 		if (CONVOP(ltp->t_op))
@@ -549,7 +549,7 @@ PP(int skinfo;)
 	type = tp->t_type;
 	if (ISFUNCTION(type))
 		type = BTYPE(type);
-	if ((unsignf = UNSIGN(type)) != 0)
+	if ((unsignf = UNSIGN(type))) /* XXX */
 		type = BASETYPE(type);
 	isconstant = 0;
 

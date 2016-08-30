@@ -9,11 +9,6 @@
 
 #include "cgen.h"
 
-short bol;
-
-short gflag;
-
-short onepass;
 
 int exprok PROTO((struct tnode *tp));
 

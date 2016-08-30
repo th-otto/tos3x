@@ -7,9 +7,6 @@
 
 #include "cgen.h"
 
-extern char null[]; /* BUG */
-
-extern char *opname[];
 
 
 struct tnode *addptree PROTO((struct tnode *tp, struct tnode ***clp));
@@ -135,6 +132,7 @@ PP(struct tnode ***clp;)
 	tp->t_left = addptree(tp->t_left, clp);
 	return tp;
 }
+
 
 /*
  * codegen - generate code for expression
@@ -353,10 +351,12 @@ PP(int reg;)								/* first available register */
 		if (ISASGOP(tp->t_op) && indexreg(tp->t_left))
 			outcmp0(tp->t_left->t_reg, tp->t_left);
 	} else if ((p = (struct tnode *)match(tp, cookie, reg)) != NULL)
+	{
 		r = expand(tp, cookie, reg, (struct skeleton *)p);
-	else if (cookie != FORREG)
+	} else if (cookie != FORREG)
+	{
 		r = fixresult(tp, cookie, ucodegen(tp, FORREG, reg));
-	else
+	} else
 	{
 		if (tp->t_type != STRUCT)
 			error("no code table for %s", opname[tp->t_op]);
@@ -606,7 +606,7 @@ PP(int reg;)
 		r = scodegen(tp->t_right->t_left, cookie, reg);	/* [mc] 4.0 */
 		outmovr(r, reg, tp);
 		stacksize = savestk;
-		OUTGOTO(lab2 = nextlabel++);
+		OUTGOTO(lab2 = nextlabel++); /* BUG: expanded to lab2 = nextlabel++ > 0, not what was intended */
 		OUTLAB(lab1);
 		r = scodegen(tp->t_right->t_right, cookie, reg);	/* [mc] 4.0 */
 		outmovr(r, reg, tp);

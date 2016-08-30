@@ -222,10 +222,3 @@
 #define LPNPRI      18              /* ., ->, [, (, function call */
 #define PSTPRI      19              /* in-stack post--, post++ */
 
-
-#define EXPSIZE     4096
-char exprarea[EXPSIZE];
-
-/* v6io buffer declaration */
-#define BLEN    512
-
