@@ -23,7 +23,7 @@
 	/* 040000-- OPTERM - termination node */
 	/* 100000 - OPCONVS - conversion operator */
 short const opinfo[] = {
-	TRMPRI,										/* EOF */
+	TRMPRI,										/* CEOF */
 	ADDPRI | OPCOM | OPBIN,						/* ADD - expr + expr */
 	ADDPRI | OPBIN,								/* SUB - expr - expr */
 	MULPRI | OPCOM | OPBIN,						/* MULT - expr * expr */
@@ -61,8 +61,8 @@ short const opinfo[] = {
 	RELPRI | OPREL | OPBIN,						/* LESSEQ - expr <= expr */
 	TRMPRI | OPCONVS,							/* INT2L */
 	TRMPRI | OPCONVS,							/* LONG2I */
-	TRMPRI | OPBIN, 							/* BTST */
-	TRMPRI, 									/* LOAD */
+	TRMPRI | OPBIN,								/* BTST */
+	TRMPRI,										/* LOAD */
 	TRMPRI | OPBIN,								/* LMULT */
 	TRMPRI | OPBIN,								/* LDIV */
 	TRMPRI | OPBIN,								/* LMOD */
@@ -98,9 +98,9 @@ short const opinfo[] = {
 	LPNPRI | OPBIN,								/* CALL - call with arguments */
 	LPNPRI,										/* NACALL - no argument call */
 	TRMPRI,										/* BFIELD - field selection */
-	TRMPRI,										/* CONDBR */
+	TRMPRI,										/* IFGOTO */
 	TRMPRI,										/* INIT */
-	TRMPRI,										/* LOADREG */
+	TRMPRI,										/* CFORREG */
 	TRMPRI | OPTERM,							/* DCLONG - divide const long */
 	TRMPRI | OPTERM,							/* CFLOAT */
 	UNOPRI | OPRAS | OPASSIGN | OPBIN,			/* CAST */
@@ -117,4 +117,5 @@ short const opinfo[] = {
 	LPNPRI | OPBIN,								/* PERIOD - expr . symbol */
 	UNOPRI | OPRAS,								/* SIZEOF - sizeof expr */
 	LPNPRI | OPBIN,								/* MPARENS - matching parens () */
+	UNOPRI | OPRAS | OPASSIGN | OPBIN,			/* FRETURN */
 };

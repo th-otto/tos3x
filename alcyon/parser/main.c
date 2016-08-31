@@ -49,6 +49,7 @@ char *version = "@(#)c068 parser 4.2 - Sep 6, 1983";
 **/
 
 char strfile[] = "/tmp/pXXXXXX";
+
 int cleanup();
 
 /**
@@ -56,38 +57,44 @@ int cleanup();
  *		Checks arguments, opens input and output files, does main loop
  *		for external declarations and blocks.
 **/
-main(argc,argv)							/* returns - none*/
-int argc;								/* argument count*/
-char *argv[];							/* argument pointers*/
+main(argc, argv)						/* returns - none */
+int argc;								/* argument count */
+
+char *argv[];							/* argument pointers */
 {
-	register char *q, *p, *calledby;
+	register char *q,
+	*p,
+	*calledby;
 
 	calledby = *argv++;
-	if( argc < 4 )
+	if (argc < 4)
 		usage(calledby);
-	signal(SIGINT,cleanup);
-	for(q = &source, p = *argv++; *q++ = *p++; );
-	if( fopen(source,&ibuf,0) < 0 )	/* 3rd arg for versados */
-		ferror("can't open %s",source);
-	source[strlen(source)-1] = 'c';
-	if( fcreat(*argv++,&obuf,0) < 0 || fcreat(*argv++,&lbuf,0) < 0 )
+	signal(SIGINT, cleanup);
+	for (q = &source, p = *argv++; *q++ = *p++;) ;
+	if (fopen(source, &ibuf, 0) < 0)	/* 3rd arg for versados */
+		ferror("can't open %s", source);
+	source[strlen(source) - 1] = 'c';
+	if (fcreat(*argv++, &obuf, 0) < 0 || fcreat(*argv++, &lbuf, 0) < 0)
 		ferror("temp creation error");
 
 	mktemp(strfile);
-    if (fcreat(strfile,&sbuf,0) < 0)
+	if (fcreat(strfile, &sbuf, 0) < 0)
 		ferror("string file temp creation error");
 	obp = &obuf;
 	lineno++;
-	frstp = -1;		/* [vlh] 3.4 - initialize only once */
-	cr_last = 1;	/* [vlh] 4.2 */
+	frstp = -1;							/* [vlh] 3.4 - initialize only once */
+	cr_last = 1;						/* [vlh] 4.2 */
 
-#ifndef VERSADOS	
-	for( argc -= 4; argc; argv++, argc--) {		/* get args.... */
+#ifndef VERSADOS
+	for (argc -= 4; argc; argv++, argc--)
+	{									/* get args.... */
 		q = *argv;
-		if( *q++ != '-' )
+		if (*q++ != '-')
 			usage(calledby);
-		while( 1 ) {
-			switch( *q++ ) {
+		while (1)
+		{
+			switch (*q++)
+			{
 
 			case 'e':
 				eflag++;
@@ -96,54 +103,54 @@ char *argv[];							/* argument pointers*/
 			case 'f':
 				fflag++;
 				continue;
-			
-			case 'g':	/* symbolic debugger flag */
+
+			case 'g':					/* symbolic debugger flag */
 				gflag++;
 				continue;
 
-			case 'w':	/* [vlh] 4.1 warning messages, not fatal */
+			case 'w':					/* [vlh] 4.1 warning messages, not fatal */
 				wflag++;
 				continue;
 
-			case 't':	/* [vlh] 4.1, put strings into text segment */
+			case 't':					/* [vlh] 4.1, put strings into text segment */
 				tflag++;
 				continue;
 
 #ifdef DEBUG
-			case 'D':	/* [vlh] 4.1, turn debugging on */
+			case 'D':					/* [vlh] 4.1, turn debugging on */
 				debug++;
 				continue;
 
-			case 's':	/* [vlh] 4.1, if debug on, debug symbols */
+			case 's':					/* [vlh] 4.1, if debug on, debug symbols */
 				if (debug)
 					symdebug++;
 				continue;
-				
-			case 'x':	/* [vlh] 4.1, if debug on, debug expr tree */
+
+			case 'x':					/* [vlh] 4.1, if debug on, debug expr tree */
 				if (debug)
 					treedebug++;
 				continue;
 #endif
-				
+
 			case '\0':
 				break;
 
 			default:
 				usage(calledby);
 
-			}	/* end of case */
+			}							/* end of case */
 			break;
-		}		/* end of while loop */
-	}			/* end of for loop to get flags */
+		}								/* end of while loop */
+	}									/* end of for loop to get flags */
 #endif
-	
+
 	syminit();
-	while( !PEEK(EOF) )
+	while (!PEEK(EOF))
 		doextdef();
 	outeof();
-	if (!tflag)		/* [vlh] 4.1 */
+	if (!tflag)							/* [vlh] 4.1 */
 		outdata();
-	else			/* [vlh] 4.1, output strings into text segment */
+	else								/* [vlh] 4.1, output strings into text segment */
 		OUTTEXT();
 	copysfile(strfile);
 	cleanup();
@@ -151,17 +158,17 @@ char *argv[];							/* argument pointers*/
 
 cleanup()
 {
-	signal(SIGINT,SIG_IGN);
+	signal(SIGINT, SIG_IGN);
 	close(lbuf.fd);
 	unlink(strfile);
-	exit(errcnt!=0);
+	exit(errcnt != 0);
 }
 
 /* usage - output usage error message and die*/
 usage(calledby)
 char *calledby;
 {
-	ferror("usage: %s source link icode [-e|-f] [-w] [-T]",calledby);
+	ferror("usage: %s source link icode [-e|-f] [-w] [-T]", calledby);
 }
 
 /**
@@ -169,23 +176,35 @@ char *calledby;
  *		outputs current line number and error message
  *		[vlh] 4.2 generate filename and approp line number
 **/
-error(s,x1,x2,x3,x4,x5,x6)			/* returns - none*/
-char *s;							/* error message*/
-int x1, x2, x3, x4, x5, x6;		/* args for printf*/
+error(s, x1, x2, x3, x4, x5, x6)		/* returns - none */
+char *s;								/* error message */
+
+int x1,
+ x2,
+ x3,
+ x4,
+ x5,
+ x6;									/* args for printf */
 {
-	printf((char *)STDERR,"\"%s\", * %d: ",source,lineno);
-	printf((char *)STDERR,s,x1,x2,x3,x4,x5,x6);
-	cputc('\n',STDERR);
+	printf((char *) STDERR, "\"%s\", * %d: ", source, lineno);
+	printf((char *) STDERR, s, x1, x2, x3, x4, x5, x6);
+	cputc('\n', STDERR);
 	errcnt++;
 }
 
 /* ferror - fatal error*/
 /*		Outputs error message and exits*/
-ferror(s,x1,x2,x3,x4,x5,x6)			/* returns - none*/
-char *s;							/* error message*/
-int x1, x2, x3, x4, x5, x6;			/* args for printf*/
+ferror(s, x1, x2, x3, x4, x5, x6)		/* returns - none */
+char *s;								/* error message */
+
+int x1,
+ x2,
+ x3,
+ x4,
+ x5,
+ x6;									/* args for printf */
 {
-	error(s,x1,x2,x3,x4,x5,x6);
+	error(s, x1, x2, x3, x4, x5, x6);
 	errcnt = -1;
 	cleanup();
 }
@@ -195,28 +214,39 @@ int x1, x2, x3, x4, x5, x6;			/* args for printf*/
  *		Outputs error message
  *		[vlh] 4.2, generate filename and approp line number
 **/
-warning(s,x1,x2,x3,x4,x5,x6)		/* returns - none*/
-char *s;							/* error message*/
-int x1, x2, x3, x4, x5, x6;		/* args for printf*/
+warning(s, x1, x2, x3, x4, x5, x6)		/* returns - none */
+char *s;								/* error message */
+
+int x1,
+ x2,
+ x3,
+ x4,
+ x5,
+ x6;									/* args for printf */
 {
 	if (wflag)
 		return;
-	printf((char *)STDERR,"\"%s\", * %d: (warning) ",source,lineno);
-	printf((char *)STDERR,s,x1,x2,x3,x4,x5,x6);
-	cputc('\n',STDERR);
+	printf((char *) STDERR, "\"%s\", * %d: (warning) ", source, lineno);
+	printf((char *) STDERR, s, x1, x2, x3, x4, x5, x6);
+	cputc('\n', STDERR);
 }
 
 /* synerr - syntax error*/
 /*		Outputs error message and tries to resyncronize input.*/
-synerr(s,x1,x2,x3,x4,x5,x6)				/* returns - none*/
-char *s;								/* printf format string*/
-int x1, x2, x3, x4, x5, x6;			/* printf arguments*/
+synerr(s, x1, x2, x3, x4, x5, x6)		/* returns - none */
+char *s;								/* printf format string */
+
+int x1,
+ x2,
+ x3,
+ x4,
+ x5,
+ x6;									/* printf arguments */
 {
 	register short token;
 
-	error(s,x1,x2,x3,x4,x5,x6);
-	while( (token=gettok(0)) != SEMI && token != EOF && token != LCURBR &&
-			token != RCURBR )
+	error(s, x1, x2, x3, x4, x5, x6);
+	while ((token = gettok(0)) != SEMI && token != EOF && token != LCURBR && token != RCURBR)
 		;
 	pbtok(token);
 }
@@ -229,24 +259,26 @@ struct iob *v6buf;
 	i = BLEN - v6buf->cc;
 	v6buf->cc = BLEN;
 	v6buf->cp = &(v6buf->cbuf[0]);
-	if(write(v6buf->fd,v6buf->cp,i) != i)
-		return(-1);
-	return(0);
+	if (write(v6buf->fd, v6buf->cp, i) != i)
+		return (-1);
+	return (0);
 }
 
 /* index - find the index of a character in a string*/
 /*		This is identical to Software Tools index.*/
-index(str,chr)						/* returns index of c in str or -1*/
-char *str;							/* pointer to string to search*/
-char chr;							/* character to search for*/
+index(str, chr)							/* returns index of c in str or -1 */
+char *str;								/* pointer to string to search */
+
+char chr;								/* character to search for */
 {
 	register char *s;
+
 	register short i;
 
-	for( s = str, i = 0; *s != '\0'; i++ )
-		if( *s++ == chr )
-			return(i);
-	return(-1);
+	for (s = str, i = 0; *s != '\0'; i++)
+		if (*s++ == chr)
+			return (i);
+	return (-1);
 }
 
 
@@ -256,9 +288,10 @@ char *ptr;
 {
 	register short num;
 
-	*ptr++ = ' ';	/* symbols will never have names starting with a space */
-	for (num=structlabel; num != 0; ) {
-		*ptr++ = (num%10) + '0';
+	*ptr++ = ' ';						/* symbols will never have names starting with a space */
+	for (num = structlabel; num != 0;)
+	{
+		*ptr++ = (num % 10) + '0';
 		num /= 10;
 	}
 	*ptr = '\0';
@@ -271,26 +304,29 @@ char *mktemp(ap)
 char *ap;
 {
 	register char *p;
-	register int i,j;
+
+	register int i,
+	 j;
 
 	p = ap;
-	i = getpid();		/*process id*/
+	i = getpid();						/*process id */
 
-	while( *p )
+	while (*p)
 		p++;
 
-	for(j = 5; --j != -1; ) {
-		*--p = ((i&7) + '0');
+	for (j = 5; --j != -1;)
+	{
+		*--p = ((i & 7) + '0');
 		i >>= 3;
 	}
 	*--p = _uniqlet;
 
 	_uniqlet++;
-	if( _uniqlet > 'Z' )
+	if (_uniqlet > 'Z')
 		_uniqlet = 'a';
-	if( _uniqlet == 'z' )
-		return(0);
-	return(ap);
+	if (_uniqlet == 'z')
+		return (0);
+	return (ap);
 }
 
 /** 
@@ -299,24 +335,32 @@ char *ap;
 **/
 strlen(s)
 char *s;
-{	register int n;
+{
+	register int n;
 
-	for (n=0; *s++ != '\0'; )
+	for (n = 0; *s++ != '\0';)
 		n++;
-	return(n);
+	return (n);
 }
 
 #ifdef DRI
-printf(string,a,b,c,d,e,f,g)
+printf(string, a, b, c, d, e, f, g)
 char *string;
-int a,b,c,d,e,f,g;
+
+int a,
+ b,
+ c,
+ d,
+ e,
+ f,
+ g;
 {
 	char area[256];
+
 	register char *p;
 
-	sprintf(area,string,a,b,c,d,e,f,g);
-	for(p = &area[0]; *p ; p++)
+	sprintf(area, string, a, b, c, d, e, f, g);
+	for (p = &area[0]; *p; p++)
 		putchar(*p);
 }
 #endif
-

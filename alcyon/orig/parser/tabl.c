@@ -5,7 +5,7 @@
     San Diego, Ca.  92121
 */
 
-#include "cgen.h"
+#include "parser.h"
 #define ASGOP   OPRAS|OPASSIGN|OPLVAL|OPBIN
 
 	/* info on operators: */
@@ -20,7 +20,7 @@
 	/* 020000-- OPRAS - right associative */
 	/* 040000-- OPTERM - termination node */
 	/* 100000 - OPCONVS - conversion operator */
-short opinfo[] = {
+short const opinfo[] = {
 	TRMPRI,										/* CEOF */
 	ADDPRI | OPCOM | OPBIN,						/* ADD - expr + expr */
 	ADDPRI | OPBIN,								/* SUB - expr - expr */
@@ -99,7 +99,11 @@ short opinfo[] = {
 	TRMPRI,										/* IFGOTO */
 	TRMPRI,										/* INIT */
 	TRMPRI,										/* CFORREG */
+#ifdef __ALCYON__
+	TRMPRI,										/* DCLONG - divide const long */
+#else
 	TRMPRI | OPTERM,							/* DCLONG - divide const long */
+#endif
 	TRMPRI | OPTERM,							/* CFLOAT */
 	UNOPRI | OPRAS | OPASSIGN | OPBIN,			/* CAST */
 	TRMPRI,										/* SEMI */
@@ -115,4 +119,5 @@ short opinfo[] = {
 	LPNPRI | OPBIN,								/* PERIOD - expr . symbol */
 	UNOPRI | OPRAS,								/* SIZEOF - sizeof expr */
 	LPNPRI | OPBIN,								/* MPARENS - matching parens () */
+	UNOPRI | OPRAS | OPASSIGN | OPBIN,			/* FRETURN */
 };

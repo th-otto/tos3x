@@ -8,35 +8,56 @@
 #include "parser.h"
 short bol;
 
-outinit(tp, type)						/* returns - none */
-struct tnode *tp;
+
+VOID outinit(P(struct tnode *) tp, P(int) type)
+PP(struct tnode *tp;)
+PP(int type;)
 {
+#ifdef __ALCYON__
+	/* BUG: missing argument to tnalloc */
 	outexpr(tnalloc(INIT, type, 0, 0, tp));
+#else
+	outexpr(tnalloc(INIT, type, 0, 0, tp, NULL));
+#endif
 }
 
-outcforreg(tp)
-struct tnode *tp;
+
+VOID outcforreg(P(struct tnode *) tp)
+PP(struct tnode *tp;)
 {
+#ifdef __ALCYON__
+	/* BUG: missing argument to tnalloc */
 	outexpr(tnalloc(CFORREG, tp->t_type, 0, 0, tp));
+#else
+	outexpr(tnalloc(CFORREG, tp->t_type, 0, 0, tp, NULL));
+#endif
 }
 
-outifgoto(tp, dir, lab)
-struct tnode *tp;
 
-int dir;
-
-int lab;
+VOID outifgoto(P(struct tnode *) tp, P(int) dir, P(int) lab)
+PP(struct tnode *tp;)
+PP(int dir;)
+PP(int lab;)
 {
+#ifdef __ALCYON__
+	/* BUG: missing argument to tnalloc */
 	outexpr(tnalloc(IFGOTO, dir, lab, 0, tp));
+#else
+	outexpr(tnalloc(IFGOTO, dir, lab, 0, tp, NULL));
+#endif
 }
 
-/* outasm - outputs asm literal.		 [vlh] 4.2 asm instruction */
-outasm()
+
+/* outasm - outputs asm literal. */
+VOID outasm(NOTHING)
 {
 	register char *p;
 
-	OUTLINE();
-	OUTNULL();
+	if (lineno != lst_ln_id)
+	{
+		outline();
+		OUTNULL();
+	}
 	putchar('\t');
 	for (p = cstr; *p; p++)
 	{
@@ -47,21 +68,22 @@ outasm()
 	putchar('\n');
 }
 
-outexpr(tp)
-struct tnode *tp;
+
+VOID outexpr(P(struct tnode *) tp)
+PP(struct tnode *tp;)
 {
 	if (!tp)
 		return;
-	OUTLINE();
+	outline();
 	outtree(tp);
 }
 
+
 /* interprets and prints the parse tree */
-outtree(tp)
-struct tnode *tp;
+VOID outtree(P(struct tnode *) tp)
+PP(struct tnode *tp;)
 {
-	short w1,
-	 w2;
+	short w1, w2;
 
 	if (!tp)
 		return;
@@ -70,27 +92,26 @@ struct tnode *tp;
 
 	switch (tp->t_op)
 	{
-
 	case CINT:
 		printf(".%x\n", ((struct conode *) tp)->t_value);
 		break;
 
 	case CLONG:
-		w1 = ((struct lconode *) tp)->t_lvalue.hiword;
-		w2 = ((struct lconode *) tp)->t_lvalue.loword;
+		w1 = ((struct lconode *) tp)->_l.w.hiword;
+		w2 = ((struct lconode *) tp)->_l.w.loword;
 		printf(".%x.%x\n", w1, w2);
 		break;
 
-	case CFLOAT:						/*[vlh] 3.4 */
-		w1 = ((struct lconode *) tp)->t_lvalue.hiword;
-		w2 = ((struct lconode *) tp)->t_lvalue.loword;
+	case CFLOAT:
+		w1 = ((struct lconode *) tp)->_l.w.hiword;
+		w2 = ((struct lconode *) tp)->_l.w.loword;
 		printf(".%x.%x\n", w1, w2);
 		break;
 
 	case SYMBOL:
 		printf(".%x", ((struct symnode *) tp)->t_sc);
 		if (((struct symnode *) tp)->t_sc == EXTERNAL)
-			printf(".%.8s\n", ((struct extnode *) tp)->t_symbol);
+			printf(".%.8s\n", (char *)((struct extnode *) tp)->t_symbol);
 		else
 			printf(".%x\n", ((struct symnode *) tp)->t_offset);
 		break;
@@ -113,5 +134,5 @@ struct tnode *tp;
 			outtree(tp->t_right);
 		}
 		break;
-	}									/* end of case... */
+	}
 }
