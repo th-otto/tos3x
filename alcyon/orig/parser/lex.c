@@ -95,17 +95,21 @@ PP(int pseen;)								/* period seen and couldn't be pushed back */
 }
 
 
-double power10(P(long) pwr)						/* used by getfp, 10^pwr */
+/* used by getfp, 10^pwr */
+double power10(P(long) pwr)
 PP(long pwr;)
 {
 	double f;
 
 	if (pwr < 0L)						/* negative power */
+	{
 		for (f = 1.0; pwr < 0L; pwr++)
 			f = f / 10.0;
-	else								/* positive power */
+	} else								/* positive power */
+	{
 		for (f = 1.0; pwr > 0L; pwr--)
 			f = f * 10.0;
+	}
 	return f;
 }
 
@@ -117,6 +121,26 @@ PP(double f;)
 	register long exp, l;
 	register short sign;
 
+#ifdef __ALCYON__
+	asm("clr.l     -(a7)");			/*  generated: move.l $0,-(a7) */
+	asm("move.l    8(a6),-(a7)");
+	asm("jsr       _fpcmp");
+	asm("addq.l    #8,a7");
+	asm("bne.s     L8000");
+	return 0L;
+	asm("L8000:")
+	asm("clr.l     -(a7)");
+	asm("move.l    8(a6),-(a7)");
+	asm("jsr       _fpcmp");
+	asm("addq.l    #8,a7");
+	asm("bge.s     L8001");
+	sign = 1;
+	f = -f;
+	asm("bra.s     L8002");
+	asm("L8001:")
+	sign = 0;
+	asm("L8002:")
+#else
 	if (f == 0.0)
 		return 0L;
 	if (f < 0.0)
@@ -127,6 +151,7 @@ PP(double f;)
 	{
 		sign = 0;
 	}
+#endif
 	exp = 0L;
 	for (; f >= 1.0; f = f / 2.0)
 		exp++;
@@ -150,6 +175,26 @@ PP(double f;)
 	register long exp, l;
 	register short sign;
 
+#ifdef __ALCYON__
+	asm("clr.l     -(a7)");			/*  generated: move.l $0,-(a7) */
+	asm("move.l    8(a6),-(a7)");
+	asm("jsr       _fpcmp");
+	asm("addq.l    #8,a7");
+	asm("bne.s     L8090");
+	return 0L;
+	asm("L8090:")
+	asm("clr.l     -(a7)");
+	asm("move.l    8(a6),-(a7)");
+	asm("jsr       _fpcmp");
+	asm("addq.l    #8,a7");
+	asm("bge.s     L8091");
+	sign = 1;
+	f = -f;
+	asm("bra.s     L8092");
+	asm("L8091:")
+	sign = 0;
+	asm("L8092:")
+#else
 	if (f == 0.0)
 		return 0L;
 	if (f < 0.0)
@@ -157,13 +202,24 @@ PP(double f;)
 		sign = 1;
 		f = -f;
 	} else
+	{
 		sign = 0;
+	}
+#endif
 	exp = 0L;
 	for (; f >= 2.0; f = f / 2.0)
 		exp++;
 	for (; f < 1.0; f = f * 2.0)
 		exp--;
+#ifdef __ALCYON__
+	asm("move.l    #$00000041,-(a7)"); /* seems to be buggy 1.0 constant */
+	asm("move.l    8(a6),-(a7)");
+	asm("jsr       _fpadd");
+	asm("addq.l    #8,a7");
+	asm("move.l    d0,8(a6)");
+#else
 	f = f - 1.0;
+#endif
 	f = f * 8388608.0;					/* 2 ^ 23 */
 	l = f;
 	if (sign)
@@ -188,15 +244,39 @@ long gethex(NOTHING)
 	{
 		if ((c = ngetch()) >= '0' && c <= '9')
 			c -= '0';
-		else if ((ch = TOUPPER(c)) >= 'A' && ch <= 'F')
-			c = ch - ('A' - 10);
 		else
+		{
+#ifdef __ALCYON__
+			asm("move.b    d6,d0");
+			asm("ext.w     d0");
+			asm("and.w     #$FFDF,d0");
+			asm("move.b    d0,d5");
+			asm("cmp.w     #$0041,d0");
+			asm("blt.s     L8100");
+			asm("cmp.b     #$46,d5");
+			asm("bgt.s     L8100");
+			asm("move.b    d5,d0");
+			asm("ext.w     d0");
+			asm("add.w     #$FFC9,d0");
+			asm("ext.w     d0");
+			asm("move.b    d0,d6");
+			asm("bra.s L8101");
+			asm("L8100:");
 			break;
+			asm("L8101:");
+#else
+			if ((ch = TOUPPER(c)) >= 'A' && ch <= 'F')
+				c = ch - ('A' - 10);
+			else
+				break;
+#endif
+		}
 		value = (value << 4) + c;
 	}
 	putback(c);
 	return value;
 }
+
 
 /*
  * getoct - get an octal number
@@ -245,7 +325,6 @@ PP(int force;)								/* force nested decls */
 	{
 		switch (ctype[c])
 		{
-
 		case BADC:						/* bad character */
 			error("invalid character");
 			break;
@@ -253,6 +332,7 @@ PP(int force;)								/* force nested decls */
 		case SEMI:
 			indecl = 0;
 			cvalue = 0;
+			/* fall through */
 		default:
 			return ctype[c];
 
@@ -392,7 +472,7 @@ PP(int force;)								/* force nested decls */
 			{
 				if (peekis('<'))
 				{
-					warning("old fashion assignment \"=<<\"");
+					warning(_("old fashion assignment \"=<<\""));
 					return EQLSH;
 				}
 				error("illegal operator '=<'");
@@ -401,25 +481,27 @@ PP(int force;)								/* force nested decls */
 			{
 				if (peekis('>'))
 				{
-					warning("old fashion assignment \"=>>\"");
+					warning(_("old fashion assignment \"=>>\""));
 					return EQRSH;
 				}
 				error("illegal operator '=>'");
 				return EQUALS;
-			} else if ((i = strindex("-*& += /|^%", (c = ngetch()))) >= 0)
+			} else if ((i = strindex("-*&=+/|^%", (c = ngetch()))) >= 0)
 			{
 				if (i < 3)
 				{
 					if ((nextc = ngetch()) != ' ')
-						warning("=%c assumed", c);
+						warning(_("=%c assumed"), c);
 					putback(nextc);
 				}
 				i = asmap[i];
 				if (i != EQUALS)
-					warning("old fashion assignment statement");
+					warning(_("old fashion assignment statement"));
 				return i;
 			} else
+			{
 				putback(c);
+			}
 			return ASSIGN;
 
 		case RCAROT:					/* >=, >>, >>= or > */
@@ -516,9 +598,9 @@ int ngetch(NOTHING)
 		lineno = getdec() & 077777;
 		ptr = &source[0];
 		if ((c = getc(&ibuf)) != '\"')	/* get past double quote */
-			*ptr++ = c & 0377;
+			*ptr++ = (char)(c & 0377); /* XXX */
 		while ((c = getc(&ibuf)) != '\"' && c != '\n')
-			*ptr++ = c & 0377;
+			*ptr++ = (char)(c & 0377); /* XXX */
 		if (c != '\n')
 			c = getc(&ibuf);			/* get carriage return */
 		*ptr = 0;

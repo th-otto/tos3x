@@ -57,10 +57,10 @@ MCOBJS1=atof.o ceil.o etoa.o fabs.o ffptof.o floor.o fmod.o ftoa.o
 MCOBJS2=ftoffp.o ftol.o ltof.o xdoprtfp.o xatof.o
 MCOBJS=${MCOBJS1} ${MCOBJS2}
 
-MAOBJS1=ffpabs.o ffpadd.o ffpcmp.o ffpcpyrt.o ffpdiv.o
+MAOBJS1=ffpabs.o ffpadd.o ffpcmp.o ffpcp.o ffpdiv.o
 MAOBJS2=ffpmul2.o
 MAOBJS3=ffptnorm.o fpadd.o fpcmp.o fpdiv.o fpmul.o fpneg.o
-MAOBJS4=fpsub.o
+MAOBJS4=fpsub.o ffpcpyrt.o
 MAOBJS = $(MAOBJS1) $(MAOBJS2) $(MAOBJS3) $(MAOBJS4)
 
 MOBJS = $(MAOBJS) $(MCOBJS)

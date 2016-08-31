@@ -114,30 +114,30 @@
 #define STACKEND    100
 
 /* data types */
-#define TYPELESS    0
-#define CHAR        01
-#define SHORT       02
-#define INT         03
-#define LONG        04
-#define UCHAR       05
-#define USHORT      06
-#define UNSIGNED    07
-#define ULONG       010
-#define FLOAT       011
-#define DOUBLE      012
+#define TYPELESS     0
+#define CHAR         1
+#define SHORT        2
+#define INT          3
+#define LONG         4
+#define UCHAR        5
+#define USHORT       6
+#define UNSIGNED     7
+#define ULONG        8
+#define FLOAT        9
+#define DOUBLE      10
 
 /* data types local to parser */
-#define STRUCT      013
-#define FRSTRUCT    014
-#define LLABEL      015
+#define STRUCT      11
+#define FRSTRUCT    12
+#define LLABEL      13
 
 /* type flags and definitions */
-#define TYPE        017
-#define SUPTYP      060
-#define ALLTYPE     077
-#define POINTER     020
-#define FUNCTION    040
-#define ARRAY       060
+#define TYPE        0x0f
+#define SUPTYP      0x30
+#define ALLTYPE     0x3f
+#define POINTER     0x10
+#define FUNCTION    0x20
+#define ARRAY       0x30
 #define SUTYPLEN    2
 
 /* data registers */

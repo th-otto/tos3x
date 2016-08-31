@@ -368,7 +368,6 @@ PP(int fn;)
  * putchar - This catches tabs to allow for the integration of the
  *      parser and code generator into one pass.  By merely throwing
  *      away the tabs here, the output will be OK for the assembler.
- *      VERSADOS - handle outputting to intermediate or error files
  */
 VOID putchar(P(char) c)
 PP(char c;)

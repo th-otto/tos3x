@@ -17,6 +17,20 @@ short bol;
 int nextrw PROTO((int rw));
 int addswitch PROTO((struct swtch *sp, int ncases, int nval, int nlab));
 VOID outforreg PROTO((int op, struct tnode *ltp, struct tnode *rtp));
+struct tnode *balpar PROTO((NOTHING));
+int gotolabel PROTO((NOTHING));
+VOID dolabel PROTO((NOTHING));
+int brklabel PROTO((NOTHING));
+int contlabel PROTO((NOTHING));
+VOID docase PROTO((NOTHING));
+VOID dodefault PROTO((NOTHING));
+VOID dodo PROTO((NOTHING));
+VOID dofor PROTO((NOTHING));
+VOID doif PROTO((NOTHING));
+VOID doreturn PROTO((NOTHING));
+VOID doasm PROTO((NOTHING));
+VOID doswitch PROTO((NOTHING));
+VOID dowhile PROTO((NOTHING));
 
 
 

@@ -69,9 +69,9 @@ PP(int offset;)								/* symbol offset (resword value) */
 	}
 	is = in_struct;
 	symbols = sp->s_next;
-	sp->s_attrib = attrib;
+	sp->s_attrib = (char)attrib; /* XXX */
 	sp->s_offset = offset;
-	sp->s_sc = sp->s_type = sp->s_dp = sp->s_ssp = 0;
+	sp->s_sc = (char)(sp->s_type = sp->s_dp = sp->s_ssp = 0); /* XXX */
 	sp->s_sib = sp->s_child = sp->s_par = 0;
 	if (is)
 	{
@@ -252,7 +252,7 @@ PP(int ok;)
 			if (sc == PDECLIST || sc == PDECREG)
 			{
 				error("not in parameter list: %.8s", sp->s_symbol);
-				sp->s_sc = (sc == PDECLIST) ? AUTO : REGISTER;
+				sp->s_sc = (char)((sc == PDECLIST) ? AUTO : REGISTER); /* XXX */
 				if (ok)
 					outlocal(sp->s_type, sp->s_sc, sp->s_symbol, sp->s_offset);
 			}
@@ -331,5 +331,20 @@ PP(char *to;)								/* pointer to area to copy to */
 	register short i;
 
 	for (p = from, q = to, i = SSIZE; --i >= 0;)
+	{
+#ifdef __ALCYON__
+		asm("tst.b     (a5)");
+		asm("beq.s     l8887");
+		asm("move.b    (a5)+,d0");
+		asm("ext.w     d0");
+		asm("bra.s     l8888");
+		asm("l8887:");
+		asm("clr.w     d0");
+		asm("l8888:");
+		asm("ext.w     d0");
+		asm("move.b    d0,(a4)+");
+#else
 		*q++ = (*p ? *p++ : '\0');
+#endif
+	}
 }

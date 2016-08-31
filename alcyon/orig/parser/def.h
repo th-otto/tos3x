@@ -1,11 +1,11 @@
-/**
+/*
  *	Copyright 1983
  *	Alcyon Corporation
  *	8716 Production Ave.
  *	San Diego, CA  92121
  *
  *	@(#)def.h	1.3	11/4/83
-**/
+ */
 
 /* Parser External Definition File */
 
@@ -43,22 +43,22 @@ struct resword const reswords[] = {
 };
 
 char const dinfo[] = {
-    0,                              /*TYPELESS=0*/
-    1|DREG,                         /*CHAR=1*/
-    2|DREG,                         /*SHORT=2*/
-    2|DREG,                         /*INT=3*/
-    4|DREG,                         /*LONG=4*/
-    1|DREG,                         /*UCHAR=5*/
-    2|DREG,                         /*USHORT=6*/
-    2|DREG,                         /*UNSIGNED=7*/
-    4|DREG,                         /*ULONG=8*/
-    4|DREG,                         /*FLOAT=9*/
-    4|DREG,                         /*DOUBLE=10*/
-    0,                              /*STRUCT=11*/
-    0,                              /*FRSTRUCT=12*/
-    0,                              /*LLABEL=13*/
-    0,                              /*INVALID=14*/
-    0,                              /*INVALID=15*/
+    0,                              /* TYPELESS=0 */
+    1|DREG,                         /* CHAR=1 */
+    2|DREG,                         /* SHORT=2 */
+    2|DREG,                         /* INT=3 */
+    4|DREG,                         /* LONG=4 */
+    1|DREG,                         /* UCHAR=5 */
+    2|DREG,                         /* USHORT=6 */
+    2|DREG,                         /* UNSIGNED=7 */
+    4|DREG,                         /* ULONG=8 */
+    4|DREG,                         /* FLOAT=9 */
+    4|DREG,                         /* DOUBLE=10 */
+    0,                              /* STRUCT=11 */
+    0,                              /* FRSTRUCT=12 */
+    0,                              /* LLABEL=13 */
+    0,                              /* INVALID=14 */
+    0,                              /* INVALID=15 */
 };
 
 char const aregtab[] = { AREG5, AREG4, AREG3, 0 };

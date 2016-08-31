@@ -51,7 +51,7 @@ PP(int lab;)
 /* outasm - outputs asm literal. */
 VOID outasm(NOTHING)
 {
-	register char *p;
+	register const char *p;
 
 	if (lineno != lst_ln_id)
 	{

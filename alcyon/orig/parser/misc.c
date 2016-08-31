@@ -25,7 +25,7 @@ PP(long dimsize;)
 	register short i;
 
 	if ((i = cdp++) >= DSIZE - 1)
-		ferror("dimension table overflow");
+		ferror(_("dimension table overflow"));
 	dtab[i] = dimsize;
 	return i;
 }
@@ -182,8 +182,9 @@ PP(int tbool;)								/* 1==>sizeof expr, 0==>other sizeof */
 
 	PUTEXPR(treedebug, "dosizeof", tp);
 	if (NOTPOINTER(tp->t_type) || tp->t_op != ADD)
+	{
 		size = dsize(tp->t_type, tp->t_dp, tp->t_ssp);
-	else
+	} else
 	{
 		lp = tp->t_left;
 		rp = tp->t_right;

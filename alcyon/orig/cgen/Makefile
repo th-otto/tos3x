@@ -9,9 +9,10 @@ all: $(PROGRAMS)
 
 include SRCFILES
 
-LIB1OBJS = kputc.o kgetc.o kopen.o kcreat.o
+LIB1OBJS = kputc.o kgetc.o kopen.o
 
 LIBOBJS = \
+		$(LIBSRC)kcreat.o \
 		$(LIBSRC)kwritef.o \
 		$(LIBSRC)xnwmain.o \
 		$(LIBSRC)nofloat.o \

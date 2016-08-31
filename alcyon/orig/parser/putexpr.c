@@ -5,7 +5,7 @@
     San Diego, Ca.  92121
 */
 
-#ifdef  DEBUG
+#ifdef DEBUG
 #include "parser.h"
 #include <ctype.h>
 

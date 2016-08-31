@@ -9,7 +9,15 @@ char *version = "@(#)main.c	1.8	12/28/83";
 
 #include "parser.h"
 #include <string.h>
+#ifdef __ALCYON__
+/* BUG: signal() not declared */
+#define signal std_signal
 #include <signal.h>
+#undef signal
+int (*(signal()))();
+#else
+#include <signal.h>
+#endif
 #include <stdlib.h>
 #include <unistd.h>
 #include "def.h"
@@ -76,12 +84,44 @@ PP(char **argv;)							/* argument pointers */
 	if (argc < 5)
 		usage(calledby);
 
+	/* BUG: signal() not declared; useless anyway, since they are not implemented in the library */
+	/* BUG2: comparing the result of signal to a function pointer generates totally bogus code */
+#ifdef __ALCYON__
+	asm("move.l    #$00000001,(a7)");
+	asm("move.w    #$0002,-(a7)");
+	asm("jsr       _signal");
+	asm("addq.l    #2,a7");
+	asm("ext.l     d0");
+	asm("cmp.l     #$00000001,d0");
+	asm("beq.s     L8001");
+	signal(SIGINT, (sighandler_t)cleanup);
+	asm("L8001:");
+	asm("move.l    #$00000001,(a7)");
+	asm("move.w    #$0003,-(a7)");
+	asm("jsr       _signal");
+	asm("addq.l    #2,a7");
+	asm("ext.l     d0");
+	asm("cmp.l     #$00000001,d0");
+	asm("beq.s     L8002");
+	signal(SIGQUIT, (sighandler_t)cleanup);
+	asm("L8002:");
+	asm("move.l    #$00000001,(a7)");
+	asm("move.w    #$0001,-(a7)");
+	asm("jsr       _signal");
+	asm("addq.l    #2,a7");
+	asm("ext.l     d0");
+	asm("cmp.l     #$00000001,d0");
+	asm("beq.s     L8003");
+	signal(SIGHUP, (sighandler_t)cleanup);
+	asm("L8003:");
+#else
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
 		signal(SIGINT, (sighandler_t)cleanup);
 	if (signal(SIGQUIT, SIG_IGN) != SIG_IGN)
 		signal(SIGQUIT, (sighandler_t)cleanup);
 	if (signal(SIGHUP, SIG_IGN) != SIG_IGN)
 		signal(SIGHUP, (sighandler_t)cleanup);
+#endif
 	signal(SIGTERM, (sighandler_t)cleanup);
 
 	for (q = source, p = *argv++; (*q++ = *p++) != 0;)
@@ -110,7 +150,7 @@ PP(char **argv;)							/* argument pointers */
 			switch (*q++)
 			{
 			case 'e':
-				eflag++;
+				eflag++;	/* BUG: eflag never used; should clear fflag instead */
 				continue;
 
 			case 'f':
@@ -401,7 +441,7 @@ PP(char *ap;)
 
 	for (j = 5; --j != -1;)
 	{
-		*--p = ((i & 7) + '0');
+		*--p = (char)((i & 7) + '0'); /* XXX */
 		i >>= 3;
 	}
 	*--p = _uniqlet;

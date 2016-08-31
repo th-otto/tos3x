@@ -87,6 +87,7 @@ PP(long value;)								/* constant value */
 	return cp;
 }
 
+
 /*
  *	fpcnalloc - floating point constant node allocation
  *		Allocates a constant tree node and fills the info fields.

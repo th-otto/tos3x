@@ -135,7 +135,7 @@ PP(int declok;)								/* as opposed to casting op */
 	dtype = TYPELESS;
 	sc = *defsc;
 	indecl = 0;							/* start off at 0 !!!! */
-#ifndef __ALYCON__
+#ifndef __ALCYON__
 	sp = NULL;
 #endif
 	for (;; decflag++)
@@ -312,8 +312,7 @@ PP(short *pdtype;)
 		sp->s_type = STRUCT;
 		sp->s_ssp = dalloc(0L);
 		TO_DSK(sp, sp_addr);
-	} /* sc <-- STRPROTO */
-	else if (sp->s_sc != STRPROTO)
+	} else if (sp->s_sc != STRPROTO)
 	{
 #ifdef DEBUG
 		if (treedebug)
@@ -330,18 +329,32 @@ PP(short *pdtype;)
 		struc_sib[in_struct] = hold_sib;
 		if (hold_sib)
 		{								/* not struct element yet... */
-			hold_sib->s_sib = 0;		/* not null parent !! */
+#ifdef __ALCYON__
+			asm("move.l _hold_sib,a0");
+			asm("clr.l 28(a0)");
+#else
+			hold_sib->s_sib = NULL;		/* not null parent !! */
+#endif
 		}
 		in_struct++;
 		struc_parent[in_struct] = sp;
+#ifdef __ALCYON__
+		asm("movea.w   _in_struc,a0");
+		asm("adda.l    a0,a0");
+		asm("adda.l    a0,a0");
+		asm("adda.l    #_struc_s,a0");
+		asm("clr.l     (a0)"); /* generated: move.l #$0,(a0) */
+#else
 		struc_sib[in_struct] = 0;
+#endif
 		sbits = boffset;
 		boffset = 0;
 		*ptsize = dlist(token == STRUCT ? STELCL : UNELCL);
 		boffset = sbits;
 		if (!next(RCURBR))
+		{
 			synerr("structure declaration syntax");
-		else if (sp)
+		} else if (sp)
 		{
 			if (dtab[sp->s_ssp])
 			{
@@ -356,15 +369,30 @@ PP(short *pdtype;)
 			}
 			dtab[sp->s_ssp] = *ptsize;
 		}
+#ifdef __ALCYON__
+		asm("movea.w   _in_struc,a0");
+		asm("adda.l    a0,a0");
+		asm("adda.l    a0,a0");
+		asm("adda.l    #_struc_p,a0");
+		asm("clr.l     (a0)"); /* generated: move.l #$0,(a0) */
+		asm("movea.w   _in_struc,a0");
+		asm("adda.l    a0,a0");
+		asm("adda.l    a0,a0");
+		asm("adda.l    #_struc_s,a0");
+		asm("clr.l     (a0)"); /* generated: move.l #$0,(a0) */
+#else
 		struc_parent[in_struct] = 0;
 		struc_sib[in_struct] = 0;
+#endif
 		if (!(--in_struct))
-			hold_sib = 0;
+			hold_sib = NULL;
 	} else if (fake)
+	{
 		error("no structure name");
-	else if (sp->s_sc != STRPROTO)
+	} else if (sp->s_sc != STRPROTO)
+	{
 		error("invalid structure prototype: %.8s", sp->s_symbol);
-	else if (!dtab[sp->s_ssp])
+	} else if (!dtab[sp->s_ssp])
 	{									/* FRSTRUCT */
 		if (struc_sib[in_struct])
 		{								/* don't access off of zero */
@@ -373,7 +401,16 @@ PP(short *pdtype;)
 				struc_sib[in_struct] = hold_sib;
 				if (hold_sib)
 				{
-					hold_sib->s_sib = hold_sib->s_par = 0;
+#ifdef __ALCYON__
+					asm("movea.l   _hold_si,a0");
+					asm("clr.w     d0");
+					asm("ext.l     d0");
+					asm("move.l    d0,20(a0)");
+					asm("movea.l   _hold_si,a1");
+					asm("move.l    d0,28(a1)");
+#else
+					hold_sib->s_sib = hold_sib->s_par = NULL;
+#endif
 				}
 			}
 		}
@@ -437,12 +474,13 @@ PP(long size;)								/* size of single data item 3.4 i=> l */
 			else
 				error("invalid structure declaration: %.8s", sp->s_symbol);
 		} else if (BTYPE(type) == FRSTRUCT)
+		{
 			sp->s_ssp = frstp;
+		}
 		TO_DSK(sp, sp_addr);
 		READ_ST(dsp, dsp_addr);
 		switch (sp->s_sc)
 		{								/* check for redeclarations. */
-
 		case STELCL:
 		case UNELCL:
 		case 0:
@@ -534,17 +572,22 @@ PP(long size;)								/* size of single data item 3.4 i=> l */
 				else
 					sp->s_offset = dregtab[ndregs++];
 			} else if (!aregtab[naregs] || dtype != POINTER)
+			{
 				sc = AUTO;				/* no more regs, make it auto */
-			else
+			} else
+			{
 				sp->s_offset = aregtab[naregs++];
+			}
 		}
 		if (sc == AUTO)
 		{
 			localsize += WALIGN(dsize(sp->s_type, sp->s_dp, sp->s_ssp));
 			sp->s_offset = -localsize;
 		} else if (sc == STATIC)
+		{
 			sp->s_offset = nextlabel++;
-		sp->s_sc = sc;
+		}
+		sp->s_sc = (char)sc; /* XXX */
 		sp->s_attrib |= SDEFINED;
 		if (!infunc)
 			sp->s_attrib |= SGLOBAL;
@@ -735,7 +778,7 @@ PP(int defsc;)								/* default storage class */
 				expr_setup();			/* setup expr op stack */
 				p = get_symbol();
 				if (doopd((struct tnode *)p))
-					synerr("auto initilization syntax");
+					synerr(_("auto initilization syntax"));
 				else if ((tp = expr(1)) != 0)
 					outexpr(tp);
 				else
@@ -862,7 +905,12 @@ PP(int castflg;)							/* casting flag, 1=>allow no declarator */
 						break;
 				}
 				indecl--;				/* must not confuse, we are in decls */
+#ifdef __ALCYON__
+				asm("movea.l   -4(a6),a0");
+				asm("clr.l     (a0)"); /* generated: move.l #$0,(a0)" */
+#else
 				fp->f_sp = 0;
+#endif
 			}
 			if (!next(RPAREN))
 				break;

@@ -278,15 +278,23 @@ PP(short *token;)
 			if (PEEK(CFLOAT))
 			{
 				if (!fflag)
-				{						/* IEEE format */
+				{
+					/* IEEE format */
 					if (clvalue & 0x80000000)
 						clvalue &= 0x7fffffff;
 					else
 						clvalue |= 0x80000000;
-				} else /* FFP format */ if (clvalue & 0x80)
-					clvalue &= 0xffffff7f;
-				else
-					clvalue |= 0x80;
+				} else
+				{
+					/* FFP format */
+					if (clvalue & 0x80)
+					{
+						clvalue &= 0xffffff7f;
+					} else
+					{
+						clvalue |= 0x80;
+					}
+				}
 				return IS_TERMINAL;
 			}
 			*token = UMINUS;
