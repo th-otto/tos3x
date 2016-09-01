@@ -1,17 +1,18 @@
-/**
+/*
  *	Copyright 1983
  *	Alcyon Corporation
  *	8716 Production Ave.
  *	San Diego, Ca.  92121
-**/
-
-char *version = "@(#)c068 parser 4.2 - Sep 6, 1983";
+ */
 
 #include "parser.h"
-#include "def.h"
+#include <string.h>
 #include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-/**
+
+/*
  *	ALCYON C Compiler for the Motorola 68000 - Parser
  *
  *	Called from c68:
@@ -46,87 +47,123 @@ char *version = "@(#)c068 parser 4.2 - Sep 6, 1983";
  *					stmt			recursive stmt call
  *					expr			arithmetic expressions
  *
-**/
+ */
 
-char strfile[] = "/tmp/pXXXXXX";
+static char *strfile;
 
-int cleanup();
+static char const program_name[] = "c068";
 
-/**
+
+static VOID cleanup(NOTHING)
+{
+	signal(SIGINT, SIG_IGN);
+	if (lfil)
+		fclose(lfil);
+	if (ifil && ifil != stdin)
+		fclose(ifil);
+	if (ofil && ofil != stdout)
+		fclose(ofil);
+	if (sfil)
+		fclose(sfil);
+	if (strfile)
+		unlink(strfile);
+	exit(errcnt != 0);
+}
+
+
+/* usage - output usage error message and die */
+static VOID usage(NOTHING)
+{
+	fatal(_("usage: %s source link icode strings [-e|-f] [-w] [-t]\n"), program_name);
+}
+
+
+/*
  * main - main routine for parser
  *		Checks arguments, opens input and output files, does main loop
  *		for external declarations and blocks.
-**/
-main(argc, argv)						/* returns - none */
-int argc;								/* argument count */
-
-char *argv[];							/* argument pointers */
+ */
+int main(P(int) argc, P(char **)argv)
+PP(int argc;)								/* argument count */
+PP(char **argv;)							/* argument pointers */
 {
-	register char *q,
-	*p,
-	*calledby;
+	register char *q, *p;
 
-	calledby = *argv++;
-	if (argc < 4)
-		usage(calledby);
-	signal(SIGINT, cleanup);
-	for (q = &source, p = *argv++; *q++ = *p++;) ;
-	if (fopen(source, &ibuf, 0) < 0)	/* 3rd arg for versados */
-		ferror("can't open %s", source);
-	source[strlen(source) - 1] = 'c';
-	if (fcreat(*argv++, &obuf, 0) < 0 || fcreat(*argv++, &lbuf, 0) < 0)
-		ferror("temp creation error");
+	if (argc < 5)
+		usage();
 
-	mktemp(strfile);
-	if (fcreat(strfile, &sbuf, 0) < 0)
-		ferror("string file temp creation error");
-	obp = &obuf;
+	signal(SIGINT, (sighandler_t)cleanup);
+	signal(SIGQUIT, (sighandler_t)cleanup);
+	signal(SIGHUP, (sighandler_t)cleanup);
+	signal(SIGTERM, (sighandler_t)cleanup);
+
+	argv++;
+	for (q = source, p = *argv++; (*q++ = *p++) != 0;)
+		;
+	if ((ifil = fopen(source, "r")) == NULL)
+		fatal(_("can't open %s"), source);
+	source[(int)strlen(source) - 1] = 'c';
+	if ((ofil = fopen(*argv++, "w")) == NULL || (lfil = fopen(*argv++, "w")) == NULL)
+		fatal(_("temp creation error"));
+
+	strfile = *argv++;
+	if ((sfil = fopen(strfile, "w")) == NULL)
+		fatal(_("string file temp creation error"));
+	obp = ofil;
 	lineno++;
-	frstp = -1;							/* [vlh] 3.4 - initialize only once */
-	cr_last = 1;						/* [vlh] 4.2 */
+	frstp = -1;							/* initialize only once */
+	cr_last = 1;
 
-#ifndef VERSADOS
-	for (argc -= 4; argc; argv++, argc--)
-	{									/* get args.... */
+	for (argc -= 5; argc; argv++, argc--)
+	{
 		q = *argv;
 		if (*q++ != '-')
-			usage(calledby);
+			usage();
 		while (1)
 		{
 			switch (*q++)
 			{
-
-			case 'e':
-				eflag++;
+			case 'e':					/* ieee floats */
+				fflag = 0;				
 				continue;
 
-			case 'f':
-				fflag++;
+			case 'f':					/* FFP floats */
+				fflag = 1;
 				continue;
 
 			case 'g':					/* symbolic debugger flag */
 				gflag++;
 				continue;
 
-			case 'w':					/* [vlh] 4.1 warning messages, not fatal */
+			case 't':					/* put strings into text segment */
+				tflag++;
+				continue;
+#ifndef NOPROFILE
+			case 'p':					/* profiler output file */
+				profile++;
+				continue;
+#endif
+			case 'w':					/* warning messages, not fatal */
 				wflag++;
 				continue;
 
-			case 't':					/* [vlh] 4.1, put strings into text segment */
-				tflag++;
-				continue;
-
 #ifdef DEBUG
-			case 'D':					/* [vlh] 4.1, turn debugging on */
+			case 'D':					/* turn debugging on */
+			case 'd':
 				debug++;
 				continue;
 
-			case 's':					/* [vlh] 4.1, if debug on, debug symbols */
+			case 'i':					/* if debug on, debug initialization */
+				if (debug)
+					initdebug++;
+				continue;
+
+			case 's':					/* if debug on, debug symbols */
 				if (debug)
 					symdebug++;
 				continue;
 
-			case 'x':					/* [vlh] 4.1, if debug on, debug expr tree */
+			case 'x':					/* if debug on, debug expr tree */
 				if (debug)
 					treedebug++;
 				continue;
@@ -136,231 +173,141 @@ char *argv[];							/* argument pointers */
 				break;
 
 			default:
-				usage(calledby);
-
-			}							/* end of case */
+				usage();
+				break;
+			}
 			break;
-		}								/* end of while loop */
-	}									/* end of for loop to get flags */
-#endif
+		}
+	}
 
 	syminit();
-	while (!PEEK(EOF))
+	while (!PEEK(CEOF))
 		doextdef();
 	outeof();
-	if (!tflag)							/* [vlh] 4.1 */
+	if (!tflag)
 		outdata();
-	else								/* [vlh] 4.1, output strings into text segment */
+	else
 		OUTTEXT();
 	copysfile(strfile);
 	cleanup();
+	return 0;
 }
 
-cleanup()
-{
-	signal(SIGINT, SIG_IGN);
-	close(lbuf.fd);
-	unlink(strfile);
-	exit(errcnt != 0);
-}
 
-/* usage - output usage error message and die*/
-usage(calledby)
-char *calledby;
+static VOID verror(P(const char *) s, P(va_list) args)
 {
-	ferror("usage: %s source link icode [-e|-f] [-w] [-T]", calledby);
-}
-
-/**
- * error - report an error message
- *		outputs current line number and error message
- *		[vlh] 4.2 generate filename and approp line number
-**/
-error(s, x1, x2, x3, x4, x5, x6)		/* returns - none */
-char *s;								/* error message */
-
-int x1,
- x2,
- x3,
- x4,
- x5,
- x6;									/* args for printf */
-{
-	printf((char *) STDERR, "\"%s\", * %d: ", source, lineno);
-	printf((char *) STDERR, s, x1, x2, x3, x4, x5, x6);
-	cputc('\n', STDERR);
+	fprintf(stderr, "\"%s\", * %d: ", source, lineno);
+	vfprintf(stderr, s, args);
+	fprintf(stderr, "\n");
 	errcnt++;
 }
 
-/* ferror - fatal error*/
-/*		Outputs error message and exits*/
-ferror(s, x1, x2, x3, x4, x5, x6)		/* returns - none */
-char *s;								/* error message */
 
-int x1,
- x2,
- x3,
- x4,
- x5,
- x6;									/* args for printf */
+/*
+ * error - report an error message
+ *		outputs current line number and error message
+ *		generate filename and approp line number
+ */
+VOID error(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
 {
-	error(s, x1, x2, x3, x4, x5, x6);
+	va_list args;
+	
+	va_start(args, s);
+	verror(s, args);
+	va_end(args);
+}
+
+
+/*
+ * fatal - fatal error
+ * Outputs error message and exits
+ */
+VOID fatal(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
+{
+	va_list args;
+	
+	va_start(args, s);
+	verror(s, args);
+	va_end(args);
 	errcnt = -1;
 	cleanup();
 }
 
-/**
+
+/*
  * warning - Bad practices error message (non-portable code)
  *		Outputs error message
- *		[vlh] 4.2, generate filename and approp line number
-**/
-warning(s, x1, x2, x3, x4, x5, x6)		/* returns - none */
-char *s;								/* error message */
-
-int x1,
- x2,
- x3,
- x4,
- x5,
- x6;									/* args for printf */
+ *		generate filename and approp line number
+ */
+VOID warning(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
 {
+	va_list args;
+	
 	if (wflag)
 		return;
-	printf((char *) STDERR, "\"%s\", * %d: (warning) ", source, lineno);
-	printf((char *) STDERR, s, x1, x2, x3, x4, x5, x6);
-	cputc('\n', STDERR);
+	va_start(args, s);
+	fprintf(stderr, "\"%s\", * %d: (warning) ", source, lineno);
+	vfprintf(stderr, s, args);
+	fprintf(stderr, "\n");
+	va_end(args);
 }
 
-/* synerr - syntax error*/
-/*		Outputs error message and tries to resyncronize input.*/
-synerr(s, x1, x2, x3, x4, x5, x6)		/* returns - none */
-char *s;								/* printf format string */
 
-int x1,
- x2,
- x3,
- x4,
- x5,
- x6;									/* printf arguments */
+/*
+ * synerr - syntax error
+ * Outputs error message and tries to resyncronize input.
+ */
+VOID synerr(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
 {
 	register short token;
-
-	error(s, x1, x2, x3, x4, x5, x6);
-	while ((token = gettok(0)) != SEMI && token != EOF && token != LCURBR && token != RCURBR)
+	va_list args;
+	
+	va_start(args, s);
+	verror(s, args);
+	while ((token = gettok(0)) != SEMI && token != CEOF && token != LCURBR && token != RCURBR)
 		;
 	pbtok(token);
 }
 
-v6flush(v6buf)
-struct iob *v6buf;
+
+/*
+ * strindex - find the index of a character in a string
+ * This is identical to Software Tools index.
+ * returns index of c in str or -1
+ */
+int strindex(P(const char *) str, P(char) chr)
+PP(const char *str;)								/* pointer to string to search */
+PP(char chr;)								/* character to search for */
 {
-	register short i;
-
-	i = BLEN - v6buf->cc;
-	v6buf->cc = BLEN;
-	v6buf->cp = &(v6buf->cbuf[0]);
-	if (write(v6buf->fd, v6buf->cp, i) != i)
-		return (-1);
-	return (0);
-}
-
-/* index - find the index of a character in a string*/
-/*		This is identical to Software Tools index.*/
-index(str, chr)							/* returns index of c in str or -1 */
-char *str;								/* pointer to string to search */
-
-char chr;								/* character to search for */
-{
-	register char *s;
-
+	register const char *s;
 	register short i;
 
 	for (s = str, i = 0; *s != '\0'; i++)
 		if (*s++ == chr)
-			return (i);
-	return (-1);
+			return i;
+	return -1;
 }
 
 
-/* genunique - generate a unique structure name */
-genunique(ptr)
-char *ptr;
-{
-	register short num;
-
-	*ptr++ = ' ';						/* symbols will never have names starting with a space */
-	for (num = structlabel; num != 0;)
-	{
-		*ptr++ = (num % 10) + '0';
-		num /= 10;
-	}
-	*ptr = '\0';
-	structlabel++;
-}
-
-static char _uniqlet = 'A';
-
-char *mktemp(ap)
-char *ap;
-{
-	register char *p;
-
-	register int i,
-	 j;
-
-	p = ap;
-	i = getpid();						/*process id */
-
-	while (*p)
-		p++;
-
-	for (j = 5; --j != -1;)
-	{
-		*--p = ((i & 7) + '0');
-		i >>= 3;
-	}
-	*--p = _uniqlet;
-
-	_uniqlet++;
-	if (_uniqlet > 'Z')
-		_uniqlet = 'a';
-	if (_uniqlet == 'z')
-		return (0);
-	return (ap);
-}
-
-/** 
- *	strlen - compute string length.
- *		computes number of bytes in a string.
-**/
-strlen(s)
-char *s;
-{
-	register int n;
-
-	for (n = 0; *s++ != '\0';)
-		n++;
-	return (n);
-}
-
-#ifdef DRI
-printf(string, a, b, c, d, e, f, g)
-char *string;
-
-int a,
- b,
- c,
- d,
- e,
- f,
- g;
+VOID oprintf(P(const char *) string _va_alist)
+PP(const char *string;)
+_va_dcl
 {
 	char area[256];
-
 	register char *p;
-
-	sprintf(area, string, a, b, c, d, e, f, g);
+	va_list args;
+	
+	va_start(args, string);
+	vsprintf(area, string, args);
 	for (p = &area[0]; *p; p++)
-		putchar(*p);
+		oputchar(*p);
+	va_end(args);
 }
-#endif

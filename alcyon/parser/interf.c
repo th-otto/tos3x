@@ -6,112 +6,118 @@
 */
 
 #include "parser.h"
-short bol;
 
-outinit(tp, type)						/* returns - none */
-struct tnode *tp;
+
+
+VOID outinit(P(struct tnode *) tp, P(int) type)
+PP(struct tnode *tp;)
+PP(int type;)
 {
-	outexpr(tnalloc(INIT, type, 0, 0, tp));
+	outexpr(tnalloc(INIT, type, 0, 0, tp, NULL));
 }
 
-outcforreg(tp)
-struct tnode *tp;
+
+VOID outcforreg(P(struct tnode *) tp)
+PP(struct tnode *tp;)
 {
-	outexpr(tnalloc(CFORREG, tp->t_type, 0, 0, tp));
+	outexpr(tnalloc(CFORREG, tp->t_type, 0, 0, tp, NULL));
 }
 
-outifgoto(tp, dir, lab)
-struct tnode *tp;
 
-int dir;
-
-int lab;
+VOID outifgoto(P(struct tnode *) tp, P(int) dir, P(int) lab)
+PP(struct tnode *tp;)
+PP(int dir;)
+PP(int lab;)
 {
-	outexpr(tnalloc(IFGOTO, dir, lab, 0, tp));
+	outexpr(tnalloc(IFGOTO, dir, lab, 0, tp, NULL));
 }
 
-/* outasm - outputs asm literal.		 [vlh] 4.2 asm instruction */
-outasm()
-{
-	register char *p;
 
-	OUTLINE();
-	OUTNULL();
-	putchar('\t');
+/* outasm - outputs asm literal. */
+VOID outasm(NOTHING)
+{
+	register const char *p;
+
+	if (lineno != lst_ln_id)
+	{
+		outline();
+		OUTNULL();
+	}
+	oputchar('\t');
 	for (p = cstr; *p; p++)
 	{
-		putchar(*p);
+		oputchar(*p);
 		if (*p == '\n')
-			putchar('\t');
+			oputchar('\t');
 	}
-	putchar('\n');
+	oputchar('\n');
 }
 
-outexpr(tp)
-struct tnode *tp;
+
+VOID outexpr(P(struct tnode *) tp)
+PP(struct tnode *tp;)
 {
 	if (!tp)
 		return;
-	OUTLINE();
+	outline();
 	outtree(tp);
 }
 
+
 /* interprets and prints the parse tree */
-outtree(tp)
-struct tnode *tp;
+VOID outtree(P(struct tnode *) tp)
+PP(struct tnode *tp;)
 {
-	short w1,
-	 w2;
+	short w1, w2;
 
 	if (!tp)
 		return;
 
-	printf("%x.%x", tp->t_op, tp->t_type);
+	oprintf("%x.%x", tp->t_op, tp->t_type);
 
 	switch (tp->t_op)
 	{
-
 	case CINT:
-		printf(".%x\n", ((struct conode *) tp)->t_value);
+		oprintf(".%x\n", ((struct conode *) tp)->t_value);
 		break;
 
 	case CLONG:
-		w1 = ((struct lconode *) tp)->t_lvalue.hiword;
-		w2 = ((struct lconode *) tp)->t_lvalue.loword;
-		printf(".%x.%x\n", w1, w2);
+		w1 = ((struct lconode *) tp)->_l.w.hiword;
+		w2 = ((struct lconode *) tp)->_l.w.loword;
+		oprintf(".%x.%x\n", w1, w2);
 		break;
 
-	case CFLOAT:						/*[vlh] 3.4 */
-		w1 = ((struct lconode *) tp)->t_lvalue.hiword;
-		w2 = ((struct lconode *) tp)->t_lvalue.loword;
-		printf(".%x.%x\n", w1, w2);
+	case CFLOAT:
+		w1 = ((struct lconode *) tp)->_l.w.hiword;
+		w2 = ((struct lconode *) tp)->_l.w.loword;
+		oprintf(".%x.%x\n", w1, w2);
 		break;
 
 	case SYMBOL:
-		printf(".%x", ((struct symnode *) tp)->t_sc);
+		oprintf(".%x", ((struct symnode *) tp)->t_sc);
 		if (((struct symnode *) tp)->t_sc == EXTERNAL)
-			printf(".%.8s\n", ((struct extnode *) tp)->t_symbol);
+			oprintf(".%.*s\n", SSIZE, ((struct extnode *) tp)->t_symbol);
 		else
-			printf(".%x\n", ((struct symnode *) tp)->t_offset);
+			oprintf(".%x\n", ((struct symnode *) tp)->t_offset);
 		break;
 
 	case 0:
-		putchar('\n');
+		oputchar('\n');
 		break;
 
 	case IFGOTO:
 	case BFIELD:
-		printf(".%x\n", tp->t_dp);
+		oprintf(".%x\n", tp->t_dp);
 		outtree(tp->t_left);
 		break;
 
 	default:
-		putchar('\n');
+		oputchar('\n');
 		outtree(tp->t_left);
 		if (BINOP(tp->t_op))
 		{
 			outtree(tp->t_right);
 		}
 		break;
-	}									/* end of case... */
+	}
 }

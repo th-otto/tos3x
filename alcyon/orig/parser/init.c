@@ -323,7 +323,7 @@ PP(struct symbol *child;)
 			{
 #ifdef DEBUG
 				if (initdebug)
-					printf("BASIC_AR onetype 0%o\n", onetype);
+					printf("BASIC_AR onetype 0%lo\n", onetype);
 #endif
 				datasize = dsize(onetype, child->s_dp, child->s_ssp);
 				i = str_init(datasize, onetype);

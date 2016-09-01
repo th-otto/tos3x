@@ -4,7 +4,7 @@
 include ../GNUmakefile.common
 include ../Makefile.silent
 
-PROGRAMS = c168$(EXEEXT)
+PROGRAMS = c068$(EXEEXT)
 
 LIBS =
 
@@ -15,13 +15,14 @@ all: $(PROGRAMS)
 
 include SRCFILES
 
-c168$(EXEEXT): $(C168_OBJS)
-	$(AM_V_LD)$(CC) ${CFLAGS} $(C168_OBJS) ${LIBS} $(LDFLAGS) -o $@
+c068$(EXEEXT): $(C068_OBJS)
+	$(AM_V_LD)$(CC) ${CFLAGS} $(C068_OBJS) ${LIBS} $(LDFLAGS) -o $@
 
 install: all
 	$(CP) $(PROGRAMS) $(BIN)
 
 check::
+	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i.ttp ../bin/$$i.ttp; done
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

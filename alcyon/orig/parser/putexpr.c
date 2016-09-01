@@ -5,8 +5,8 @@
     San Diego, Ca.  92121
 */
 
-#ifdef DEBUG
 #include "parser.h"
+#ifdef DEBUG
 #include <ctype.h>
 
 static char const invalid[] = "INVALID";
@@ -162,7 +162,7 @@ PP(struct tnode *tp;)
 	case DCLONG:
 	case CLONG:
 	case CFLOAT:
-		printf(" %x.%x\n", ((struct lconode *) tp)->t_lvalue.hiword, ((struct lconode *) tp)->_l.w.loword);
+		printf(" %x.%x\n", ((struct lconode *) tp)->_l.w.hiword, ((struct lconode *) tp)->_l.w.loword);
 		break;
 
 	case CINT:
@@ -243,11 +243,8 @@ VOID outlevel(NOTHING)
 VOID puttsu(P(struct tnode *) tp)
 PP(struct tnode *tp;)
 {
-	register short i;
-
 	switch (SUPTYPE(tp->t_type))
 	{
-
 	case FUNCTION:
 		printf("()");
 		break;

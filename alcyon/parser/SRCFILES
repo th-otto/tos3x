@@ -1,0 +1,1 @@
+C068_OBJS = decl.o expr.o icode.o init.o interf.o lex.o main.o misc.o node.o putexpr.o stmt.o symt.o tabl.o tree.o

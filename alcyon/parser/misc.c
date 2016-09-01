@@ -1,97 +1,112 @@
 /*
-	Copyright 1982
+	Copyright 1982, 1983
 	Alcyon Corporation
 	8716 Production Ave.
 	San Diego, Ca.  92121
 */
 
-/**
+/*
  * alignment, node type altering routines, dimension table allocating
  * routine, and routines to determine elements actual size
-**/
+ */
 
 #include "parser.h"
 
-#define DTSIZE	077						/*data size in bytes */
+#define DTSIZE	077						/* data size in bytes */
 
-char dinfo[];
-
-/* dalloc - dimension table allocation*/
-/*		Allocates an entry in the dimension table.*/
-dalloc(dimsize)							/* returns ptr to dimension allocated */
-long dimsize;							/* dimension size [vlh] 3.4 i=>l */
+/*
+ * dalloc - dimension table allocation
+ * Allocates an entry in the dimension table.
+ * returns ptr to dimension allocated
+ */
+short dalloc(P(long) dimsize)
+PP(long dimsize;)
 {
 	register short i;
 
 	if ((i = cdp++) >= DSIZE - 1)
-		ferror("dimension table overflow");
+		fatal(_("dimension table overflow"));
 	dtab[i] = dimsize;
-	return (i);
+	return i;
 }
 
-/* addsp - add special type to special type info*/
-/*		Takes given special type and adds it into the special type field.*/
-addsp(type, nsptype)					/* returns resulting type */
-int type;								/* old type field */
 
-int nsptype;							/* special type to be added */
+/*
+ * addsp - add special type to special type info
+ * Takes given special type and adds it into the special type field.
+ * returns resulting type
+ */
+int addsp(P(int) type, P(int) nsptype)
+PP(int type;)								/* old type field */
+PP(int nsptype;)							/* special type to be added */
 {
 	register short dtype;
 
 	dtype = BTYPE(type);
-	type &= (~TYPE);
-	return ((type << SUTYPLEN) | SUPTYPE(nsptype) | dtype);
+	type &= ~TYPE;
+	if (type & (0xc000 >> SUTYPLEN))		/* top type field full */
+		error(_("arrays limited to five dimensions"));
+	else
+		type <<= SUTYPLEN;
+	return type | SUPTYPE(nsptype) | dtype;
 }
 
-/* delsp - delete one special type info field from special type info*/
-/*		Takes given special type field and deletes least sign.*/
-delsp(type)								/* returns resulting type */
-int type;								/* old special type */
+
+/*
+ * delsp - delete one special type info field from special type info
+ * Takes given special type field and deletes least sign.
+ * returns resulting type
+ */
+int delsp(P(int) type)
+PP(int type;)								/* old special type */
 {
 	register short dtype;
 
 	dtype = BTYPE(type);
 	type &= (~(ALLTYPE));
-	return ((type >> SUTYPLEN) | dtype);
+	return (type >> SUTYPLEN) | dtype;
 }
+
 
 /*
  * revsp - reverse special type info
- *		This allows for the processing of the super-type info in
- *		the reverse order, which is necessary for initializations.
+ * This allows for the processing of the super-type info in
+ * the reverse order, which is necessary for initializations.
+ * returns reversed type info 
  */
-revsp(type)								/* returns reversed type info */
-int type;								/* type to reverse */
+int revsp(P(int) type)
+PP(int type;)								/* type to reverse */
 {
 	register short t;
 
 	for (t = BTYPE(type); SUPTYPE(type) != 0; type = delsp(type))
 		t = addsp(t, type);
-	return (t);
+	return t;
 }
 
-/* falign - handle bit field alignments*/
-falign(type, flen, offset)				/* returns number of bytes padded */
-int type;								/* data type */
 
-int flen;								/* field length */
-
-int offset;								/* current structure offset */
+/*
+ * falign - handle bit field alignments
+ * returns number of bytes padded
+ */
+int falign(P(int) type, P(int) flen, P(int) offset)
+PP(int type;)								/* data type */
+PP(int flen;)								/* field length */
+PP(int offset;)								/* current structure offset */
 {
 	register short off;
 
 	if (flen <= 0)
 	{
-		error("invalid field size");
+		error(_("invalid field size"));
 		flen = 0;
 	}
 	switch (type)
 	{
-
 	case INT:
 	case UNSIGNED:
 		if (flen > BITSPWORD)
-			error("field overflows word");
+			error(_("field overflows word"));
 		if ((flen + boffset) > BITSPWORD)
 			off = CHRSPWORD;
 		else
@@ -101,72 +116,75 @@ int offset;								/* current structure offset */
 	case CHAR:
 	case UCHAR:
 		if (flen > BITSPCHAR)
-			error("field overflows byte");
+			error(_("field overflows byte"));
 		off = ((flen + boffset) > BITSPCHAR);
 		break;
 
 	default:
-		error("invalid field type description");
-		return (0);
+		error(_("invalid field type description"));
+		return 0;
 
 	}
 	if (off)
 		boffset = 0;
 	boffset += flen;
-	return (off);
+	return off;
 }
 
-/* salign - structure alignment*/
-salign(type, offset)					/* returns bytes of padding */
-int type;								/* data type to align */
 
-int offset;								/* current structure offset */
+/*
+ * salign - structure alignment
+ * returns bytes of padding
+ */
+int salign(P(int) type, P(int) offset)
+PP(int type;)								/* data type to align */
+PP(int offset;)								/* current structure offset */
 {
 	register short off;
 
 	off = offset;
 	if (boffset)
-	{									/*remaining bit fields, flush 'em */
+	{									/* remaining bit fields, flush 'em */
 		off += (boffset + (BITSPCHAR - 1)) / BITSPCHAR;
 		boffset = 0;
 	}
-	while (ISARRAY(type))				/*get base type */
+	while (ISARRAY(type))				/* get base type */
 		type = delsp(type);
-	if (type != CHAR)					/*need word boundary */
+	if (type != CHAR)					/* need word boundary */
 		off = WALIGN(off);
-	return (off - offset);
+	return off - offset;
 }
 
-/* delspchk - delete one special reference and check if non-zero*/
-delspchk(type)							/*returns new special type */
-int type;								/* type to modify */
+
+/*
+ * delspchk - delete one special reference and check if non-zero
+ * returns new special type
+ */
+int delspchk(P(int) type)
+PP(int type;)								/* type to modify */
 {
 	if (!(SUPTYPE(type)))
-	{
-#ifdef DEBUG
-		if (treedebug)
-			printf("bad indirection..................\n");
-#endif
-		error("bad indirection");
-	}
-	return (delsp(type));
+		error(_("bad indirection"));
+	return delsp(type);
 }
 
-/* dosizeof - return size of object ptd at by POINTER [vlh] 4.2 */
-dosizeof(tp, bool)						/* returns size of object in bytes */
-struct tnode *tp;						/* POINTER to tree node */
 
-int bool;								/* 1==>sizeof expr, 0==>other sizeof */
+/*
+ * dosizeof - return size of object ptd at by POINTER
+ * returns size of object in bytes
+ */
+int dosizeof(P(struct tnode *) tp, P(int) tbool)
+PP(struct tnode *tp;)						/* POINTER to tree node */
+PP(int tbool;)								/* 1==>sizeof expr, 0==>other sizeof */
 {
-	short size;
-
-	struct tnode *lp,
-	*rp;
+	short size, type;
+	struct tnode *lp, *rp;
 
 	PUTEXPR(treedebug, "dosizeof", tp);
 	if (NOTPOINTER(tp->t_type) || tp->t_op != ADD)
+	{
 		size = dsize(tp->t_type, tp->t_dp, tp->t_ssp);
-	else
+	} else
 	{
 		lp = tp->t_left;
 		rp = tp->t_right;
@@ -175,34 +193,55 @@ int bool;								/* 1==>sizeof expr, 0==>other sizeof */
 			rp = lp->t_right;
 			lp = lp->t_left;
 		}
-		size = dtab[lp->t_dp - 1] * dsize(rp->t_type, rp->t_dp, rp->t_ssp);
+		type = lp->t_type;
+		if ((type & STRUCT) == STRUCT || (type & FRSTRUCT) == FRSTRUCT)
+			size = dtab[lp->t_dp - 1] * dsize(rp->t_type, rp->t_dp, rp->t_ssp);
+		else
+			size = dtab[lp->t_dp - 1] * (dinfo[type & TYPE] & DTSIZE);
+#ifdef DEBUG
+		if (treedebug)
+		{
+			fprintf(stderr, "second case: rtype 0%o ltype 0%o ", rp->t_type, lp->t_type);
+			fprintf(stderr, "dtab %ld\n", dtab[lp->t_dp - 1]);
+		}
+#endif
 	}
-	if (bool)							/* [vlh] 4.2 */
+	if (tbool)
 		indecl = predecl;				/* value previous to sizeof.... */
-	return (size);
+#ifdef DEBUG
+	if (treedebug)
+	{
+		fprintf(stderr, "rtype 0%o ltype 0%o ", rp->t_type, lp->t_type);
+		fprintf(stderr, "size %d, dtab %ld\n", size, dtab[lp->t_dp - 1]);
+	}
+#endif
+	return size;
 }
 
-/* psize - return size of object ptd at by POINTER*/
-long									/* [vlh] 3.4 short => long */
-psize(tp)								/* returns size of object in bytes */
-struct tnode *tp;						/* POINTER to tree node */
+
+/*
+ * psize - return size of object ptd at by POINTER
+ * returns size of object in bytes 
+ */
+long psize(P(struct tnode *) tp)
+PP(struct tnode *tp;)						/* POINTER to tree node */
 {
 	if (!(SUPTYPE(tp->t_type)))			/* what case ??? */
-		return (1);
-	return (dsize(delsp(tp->t_type), tp->t_dp, tp->t_ssp));
+		return 1;
+	return dsize(delsp(tp->t_type), tp->t_dp, tp->t_ssp);
 }
 
-/* dsize - returns size of data object in bytes*/
-long									/* [vlh] 3.4 */
-dsize(type, dp, sp)						/* returns number of bytes */
-int type;								/* type of node */
 
-int dp;									/* dimension POINTER */
-
-int sp;									/* size POINTER if structure */
+/*
+ * dsize - returns size of data object in bytes
+ * returns number of bytes
+ */
+long dsize(P(int) type, P(int) dp, P(int) sp)
+PP(int type;)								/* type of node */
+PP(int dp;)									/* dimension POINTER */
+PP(int sp;)									/* size POINTER if structure */
 {
-	register long nel,
-	 size;
+	register long nel, size;
 
 	nel = 1;
 	if (ISARRAY(type))
@@ -214,23 +253,33 @@ int sp;									/* size POINTER if structure */
 		nel = dtab[dp];
 	}
 	if (ISFUNCTION(type))
-		return (0);
+		return 0;
 	size = (ISPOINTER(type)) ? PTRSIZE : (type == STRUCT) ? dtab[sp] : dinfo[type] & DTSIZE;
+#ifdef DEBUG
+	if (treedebug)
+	{
+		fprintf(stderr, "size %ld ", size);
+		fprintf(stderr, "nel %ld ", nel);
+		fprintf(stderr, "dinfo[type=0%o] ==> %d\n", type, dinfo[type] & DTSIZE);
+	}
+#endif
 	if (!size)
-		error("invalid data type");
-	return (size * nel);
+		error(_("invalid data type"));
+	return size * nel;
 }
 
-/* integral - checks operand for integral type*/
-/*		This checks for needing an integral operand.*/
-integral(tp, atype)						/* returns - none */
-struct tnode *tp;						/* pointer to tree node */
 
-int atype;								/* alternate type allowable */
+/*
+ * integral - checks operand for integral type
+ * This checks for needing an integral operand.
+ */
+VOID integral(P(struct tnode *) tp, P(int) atype)
+PP(struct tnode *tp;)						/* pointer to tree node */
+PP(int atype;)								/* alternate type allowable */
 {
 	register short type;
 
 	type = tp->t_type;
-	if (type != INT && type != UNSIGNED && type != CHAR && type != UCHAR && !SUPTYPE(type) && type != atype)	/* [vlh]4.2 was error: */
-		warning("integral type expected");	/* "invalid operand type" */
+	if (type != INT && type != UNSIGNED && type != CHAR && type != UCHAR && !SUPTYPE(type) && type != atype)
+		warning(_("integral type expected"));	/* "invalid operand type" */
 }

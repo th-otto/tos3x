@@ -405,8 +405,8 @@ PP(struct lconode *rtp;)					/* pointer to right subtree */
 	register long lvalue, rvalue;
 	short islong, size;
 
-	PUTEXPR(treedebug, "binopeval l", ltp);
-	PUTEXPR(treedebug, "binopeval r", rtp);
+	PUTEXPR(treedebug, "binopeval l", (struct tnode *)ltp);
+	PUTEXPR(treedebug, "binopeval r", (struct tnode *)rtp);
 	islong = 0;
 
 	if (rtp->t_op == CINT)
@@ -524,7 +524,7 @@ PP(struct lconode *rtp;)					/* pointer to right subtree */
 		((struct conode *) ltp)->t_value = lvalue;
 	}
 	pushopd(ltp);
-	PUTEXPR(treedebug, "result binop", ltp);
+	PUTEXPR(treedebug, "result binop", (struct tnode *)ltp);
 	return 1;
 }
 
