@@ -58,13 +58,17 @@ PP(const char *argv0;)
 		s += ndx + 1;
 	s--;
 	ndx = s - argv0;
-	if (ndx > 4 && (s[-4] == FILESEP || s[-4] == FILESEP2) && strcmp(s - 3, "bin") == 0)
+	if (ndx > 4 && (s[-4] == FILESEP || s[-4] == FILESEP2) && strncmp(s - 3, "bin", 3) == 0)
 		s -= 4;
 	end = s;
 	s = argv0;
-	for (d = dest; s != end; )
+	for (d = stdincl; s != end; )
 		*d++ = *s++;
 	*d = '\0';
+	if (strcmp(stdincl, ".") == 0)
+		strcpy(stdincl, "../include");
+	else
+		strcpy(d, "/include");
 }
 
 
@@ -103,11 +107,11 @@ PP(register char **argv;)
 	if (argc < 2)
 	{									/* cpp source */
 		usage();
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	for (; --argc > 0 && **argv == '-';)
-	{									/*process arguments */
+	{									/* process arguments */
 		arg = *argv++;
 		arg++;
 		for (i = 0; (c = *arg++) != 0;)
@@ -115,11 +119,20 @@ PP(register char **argv;)
 			switch (c)
 			{
 			case 'D':
+				if (*arg == '\0')
+				{
+					if (--argc <= 0)
+					{
+						usage();
+						exit(EXIT_FAILURE);
+					}
+					arg = *argv++;
+				}
 				defs[ndefs].ptr = arg;
 				if ((x = strindex(arg, '=')) >= 0)
 				{
 					defs[ndefs++].value = (arg + x + 1);
-					arg[x] = 0;			/*get rid of value */
+					arg[x] = 0;			/* get rid of value */
 				} else
 				{
 					defs[ndefs++].value = 0;
@@ -128,13 +141,22 @@ PP(register char **argv;)
 				break;
 
 			case 'I':
+				if (*arg == '\0')
+				{
+					if (--argc <= 0)
+					{
+						usage();
+						exit(EXIT_FAILURE);
+					}
+					arg = *argv++;
+				}
 				incl[nincl++] = arg;
 				i++;
 				break;
 
-			case 'C':					/* [vlh] 4.2 Leave comments in... */
+			case 'C':					/* Leave comments in... */
 				Cflag++;
-			case 'E':					/* [vlh] 4.0 Preprocessor to stdout */
+			case 'E':					/* Preprocessor to stdout */
 				Eflag++;
 				continue;
 
@@ -142,35 +164,35 @@ PP(register char **argv;)
 				pflag++;
 				continue;
 
-			case '6':					/* [vlh] 3.4 v6 compatibility */
+			case '6':					/* v6 compatibility */
 				v_compat = 6;
 				continue;
 
-			case '7':					/* [vlh] 3.4 v7 compatibility */
+			case '7':					/* v7 compatibility */
 				v_compat = 7;
 				continue;
 
-			case '3':					/* [vlh] 3.4 s3 compatibility */
+			case '3':					/* s3 compatibility */
 				v_compat = 3;
 				continue;
 
-			case '5':					/* [vlh] 3.4 s5 compatiblity */
+			case '5':					/* s5 compatiblity */
 				v_compat = 5;
 				continue;
 
 			default:
 				usage();
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 			if (i)
 				break;
 		}
 	}
 
-	if (argc > 2)
+	if (argc != 1 && argc != 2)
 	{									/* source [dest] */
 		usage();
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	switch (v_compat)
@@ -202,11 +224,14 @@ PP(register char **argv;)
 			strcpy(dest, *argv);
 		else
 			make_intermediate();
+	} else
+	{
+		strcpy(dest, "-");
 	}
 	
 	asflag = source[strlen(source) - 1] == 's';
 	domacro(ndefs);
-	return status;
+	return status == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 
@@ -216,7 +241,7 @@ PP(register char **argv;)
  */
 VOID cexit(NOTHING)
 {
-	exit(status);
+	exit(status == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 
@@ -247,9 +272,9 @@ PP(int w;)									/* minimum width of string */
 		i++;
 		*tp++ = '-';
 	}
-	while (--w >= i)					/*pad on left with blanks */
+	while (--w >= i)					/* pad on left with blanks */
 		*s++ = ' ';
-	while (--i >= 0)					/*move chars reversed */
+	while (--i >= 0)					/* move chars reversed */
 		*s++ = *--tp;
 	*s = '\0';
 }
