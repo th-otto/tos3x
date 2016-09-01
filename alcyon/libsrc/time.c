@@ -1,5 +1,6 @@
 #include <time.h>
 #include "lib.h"
+#include <osif.h>
 
 time_t time(P(time_t *) ptime)
 PP(time_t *ptime;)

@@ -22,6 +22,7 @@
 
 #include "lib.h"
 #include <math.h>
+#include <string.h>
 
 char *pftoa(P(double) fp, P(char *) buf, P(int) prec)
 PP(double fp;)
