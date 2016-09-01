@@ -4,7 +4,7 @@ include SRCFILES
 
 LIBS =
 
-CPPFLAGS = -I../common
+CPPFLAGS = -I../common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
 PROGRAMS = cp68$(EXEEXT)

@@ -62,4 +62,12 @@ VOIDPTR lmalloc PROTO((long size));
 VOID lfree PROTO((VOIDPTR));
 VOIDPTR lrealloc PROTO((VOIDPTR ptr, long size));
 
+#ifdef __GNUC__
+ # ifndef _LIBC
+ #  define lmalloc(size) malloc(size)
+ #  define lrealloc(ptr, size) realloc(ptr, size)
+ #  define lfree(ptr) free(ptr)
+ # endif
+#endif
+
 #endif /* __STDLIB_H__ */

@@ -12,6 +12,7 @@
 
 #include "../util/util.h"
 
+#define _(x) x
 
 /* cexpr operators */
 #define CEOF		0
@@ -102,7 +103,7 @@
 /* Symbol Table Entry structure */
 struct symbol {
 	char s_name[SSIZE];
-	char *s_def;
+	long s_def;
 };
 extern struct symbol symtab[HSIZE];
 
@@ -149,8 +150,6 @@ extern char pbbuf[PBSIZE];					/* push back buffer */
 extern char *pbp;							/* push back pointer */
 extern int pbflag;							/* checks for recursive definition */
 
-extern char null[];
-
 /* Function declarations */
 
 /*
@@ -184,11 +183,9 @@ extern char *incl[NINCL];
 
 VOID putid PROTO((const char *fname, int lnum));
 VOID install PROTO((const char *name, int def));
-VOID dinstall PROTO((const char *name, const char *def));
 int kwlook PROTO((const char *name));
 VOID ppputl PROTO((int c));
 VOID initl PROTO((NOTHING));
-VOID putd PROTO((int c));
 VOID expand PROTO((struct symbol *sp));
 int getntok PROTO((char *token));
 int domacro PROTO((int nd));

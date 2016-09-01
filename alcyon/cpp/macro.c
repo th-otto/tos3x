@@ -12,7 +12,6 @@
 int literal;
 int lit_num;
 char lit_file[MAXPSIZE];
-char null[] = "";
 int nincl;
 char *incl[NINCL];
 
@@ -23,11 +22,10 @@ int loverflow;						/* line overflow flag */
 struct defstruc defs[NDEFS];
 
 static int skip;					/* skipping current line */
-static char *defp;					/* pointer to next avail define byte */
 static char *defap;					/* pointer start of define area */
 static int defcount;				/* bytes left in define area */
-static int defused;					/* number of bytes used in define area */
-static int defmax;					/* maximum define area used */
+static long defused;				/* number of bytes used in define area */
+static long defmax;					/* maximum define area used */
 
 static int clabel = LABSTART;
 static int nlabel = LABSTART + 1;
@@ -60,6 +58,52 @@ static int getaline PROTO((const char *infile));
 
 
 /*
+ * putd - put a character to the define buffer
+ *      Does dynamic allocation for define buffer
+ */
+static VOID putd(P(int) c)
+PP(int c;)
+{
+	char *mdef;
+	
+	if (!defcount)
+	{
+		if ((defap = lrealloc(defap, defused + DEFSIZE)) == NULL)
+		{
+			error(_("define table overflow"));
+			cexit();
+		}
+		defcount = DEFSIZE;
+	}
+	defcount--;
+	mdef = defap + defused++;
+	*mdef = c;
+}
+
+
+static VOID dinstall(P(const char *) name, P(const char *) def)
+PP(const char *name;)								/* macro name */
+PP(const char *def;)								/* pointer to definition */
+{
+	register struct symbol *sp;
+
+	sp = getsp(name);
+	symcopy(name, sp->s_name);
+	sp->s_def = defused;
+	putd(NOARGS);
+	if (def)
+	{
+		while (*def)
+			putd(*def++);
+	} else
+	{
+		putd('1');						/* default define value */
+	}
+	putd('\0');
+}
+
+
+/*
  * domacro - do macro processing
  *      Does the macro pre-processing on the input file and leaves the
  *      result on the output file.
@@ -71,34 +115,36 @@ PP(int nd;)
 	register struct symbol *sp;
 
 	filep = &filestack[0];
-	lineno = 1;
 	if ((inbuf = fopen(source, "r")) == NULL)
 	{
-		error("can't open source file %s\n", source);
+		error(_("can't open source file %s\n"), source);
 		return FALSE;
 	}
 	if (!Eflag)
 	{
 		if ((outbuf = fopen(dest, "w")) == NULL)
 		{
-			error("can't creat %s\n", dest);
+			error(_("can't creat %s\n"), dest);
 			return FALSE;
 		}
 	}
+	lineno = 1;
 	putid(source, 1);					/* identify as first line in source file */
 
 	/* clear out symbol table */
 	for (sp = &symtab[0]; sp <= &symtab[HSIZE - 1]; sp++)
-		sp->s_def = null;
-	defp = defap = sbrk(DEFSIZE);
-	if (defp == NULL)
+		sp->s_def = 0;
+	defap = lmalloc((long)DEFSIZE);
+	if (defap == NULL)
 	{
-		error("define table overflow");
+		error(_("define table overflow"));
 		cexit();
 	}
-	defmax = defcount = DEFSIZE;
-
+	defcount = DEFSIZE;
+	defmax = 0;
 	defused = 0;
+	putd('\0');
+
 	pbp = &pbbuf[0];
 	cstkptr = &cstack[0];
 	install("Newlabel", NEWLABEL);
@@ -131,7 +177,7 @@ PP(int nd;)
 		}
 	}
 	if (cstkptr != &cstack[0])
-		error("unmatched conditional");
+		error(_("unmatched conditional"));
 	if (defused > defmax)
 		defmax = defused;
 	fflush(outbuf);
@@ -182,30 +228,8 @@ PP(int def;)
 
 	sp = getsp(name);
 	symcopy(name, sp->s_name);
-	sp->s_def = defp;
+	sp->s_def = defused;
 	putd(def);
-	putd('\0');
-}
-
-
-VOID dinstall(P(const char *) name, P(const char *) def)
-PP(const char *name;)								/* macro name */
-PP(const char *def;)								/* pointer to definition */
-{
-	register struct symbol *sp;
-
-	sp = getsp(name);
-	symcopy(name, sp->s_name);
-	sp->s_def = defp;
-	putd(NOARGS);
-	if (def)
-	{
-		while (*def)
-			putd(*def++);
-	} else
-	{
-		putd('1');						/* default define value */
-	}
 	putd('\0');
 }
 
@@ -284,8 +308,8 @@ PP(const char *name;)
 	register struct symbol *sp;
 
 	sp = getsp(name);
-	if (sp->s_def)
-		sp->s_def = null;
+	if (sp->s_def > 0)
+		sp->s_def = -1;
 }
 
 
@@ -367,7 +391,7 @@ PP(char *token;)
 	if ((type = getntok(token)) == RPAREN || type == ALPHA)
 		return type;
 	if (type != COMMA || (type = getntok(token)) != ALPHA)
-		error("bad argument:%s", token);
+		error(_("bad argument:%s"), token);
 	return type;
 }
 
@@ -388,12 +412,12 @@ static VOID dodefine(NOTHING)
 
 	if ((type = getntok(token)) != ALPHA)
 	{
-		error("bad define name: %s", token);
+		error(_("bad define name: %s"), token);
 		return;
 	}
 	sp = getsp(token);
 	symcopy(token, sp->s_name);
-	sp->s_def = defp;
+	sp->s_def = defused;
 	nargs = 0;
 	abp = argbuf;
 	if ((type = gettok(token)) == LPAREN)
@@ -402,7 +426,7 @@ static VOID dodefine(NOTHING)
 		{
 			if (nargs >= MAXARGS)
 			{
-				error("too many arguments");
+				error(_("too many arguments"));
 				break;
 			}
 			args[nargs] = abp;
@@ -410,7 +434,7 @@ static VOID dodefine(NOTHING)
 			{
 				if (abp >= &argbuf[ARGBSIZE])
 				{
-					error("argument buffer overflow");
+					error(_("argument buffer overflow"));
 					break;
 				}
 			}
@@ -458,7 +482,7 @@ PP(int val;)
 {
 	if (cstkptr >= &cstack[CSTKSIZE])
 	{
-		error("condition stack overflow");
+		error(_("condition stack overflow"));
 		cexit();
 	}
 	*cstkptr++ = val;
@@ -559,7 +583,7 @@ PP(const char *infile;)
 		p = getinclude(fname, infile);
 	} else if (type != LESS)
 	{
-		error("bad include file");
+		error(_("bad include file"));
 		return;
 	} else
 	{
@@ -570,7 +594,7 @@ PP(const char *infile;)
 		}
 		if (type != GREAT)
 		{
-			error("bad include file name");
+			error(_("bad include file name"));
 			pbtok(token);
 			return;
 		}
@@ -579,15 +603,15 @@ PP(const char *infile;)
 	eatup();							/* need here... */
 	if (filep >= &filestack[FSTACK])
 	{
-		error("includes nested too deeply");
+		error(_("includes nested too deeply"));
 	} else
 	{
 		if ((ifd = fopen(p, "r")) == NULL)
 		{
 			if (type != SQUOTE && type != DQUOTE)
-				error("can't open include file %s", p);
+				error(_("can't open include file %s"), p);
 			else
-				error("can't open include file %s", fname);
+				error(_("can't open include file %s"), fname);
 		} else
 		{
 			filep->ifd = inbuf;
@@ -614,7 +638,7 @@ static VOID doline(NOTHING)
 		;
 	if (type != DIGIT)
 	{
-		error("invalid #line args");
+		error(_("invalid #line args"));
 		return;
 	}
 	lnum = atoi(token);
@@ -656,7 +680,7 @@ PP(int c;)
 	} else if (!loverflow)
 	{
 		loverflow++;
-		error("line overflow");
+		error(_("line overflow"));
 	}
 }
 
@@ -669,28 +693,6 @@ VOID initl(NOTHING)
 {
 	*(linep = &line[0]) = '\0';
 	loverflow = 0;
-}
-
-
-/*
- * putd - put a character to the define buffer
- *      Does dynamic allocation for define buffer
- */
-VOID putd(P(int) c)
-PP(int c;)
-{
-	if (!defcount)
-	{
-		if (sbrk(DEFSIZE) == (char *) -1)
-		{
-			error("define table overflow");
-			cexit();
-		}
-		defcount = DEFSIZE;
-	}
-	defused++;
-	defcount--;
-	*defp++ = c;
 }
 
 
@@ -723,7 +725,7 @@ PP(char *argp;)
 			{
 				if (--i <= 0)
 				{
-					error("macro argument too long");
+					error(_("macro argument too long"));
 					return CEOF;
 				}
 			}
@@ -736,7 +738,7 @@ PP(char *argp;)
 			plevel--;
 		} else if (type == CEOF)
 		{
-			error("unexpected EOF");
+			error(_("unexpected EOF"));
 			cexit();
 		}
 	}
@@ -773,15 +775,18 @@ PP(struct symbol *sp;)
 	char argbuf[ARGBSIZE];
 	char *args[MAXARGS];
 	char token[TOKSIZE];
-	register char *p, *abp, *mdef;
+	register const char *p;
+	register char *abp;
+	register const char *mdef;
 	register int i, j, nargs, type;
 
 	if (pbflag++ > 100)
 	{
-		error("define recursion");
+		error(_("define recursion"));
 		return;
 	}
-	if (strcmp(sp->s_name, mdef = sp->s_def) == 0)
+	mdef = defap + sp->s_def;
+	if (strcmp(sp->s_name, mdef) == 0)
 	{									/* handle #define x x */
 		while (*mdef)
 			ppputl(*mdef++);
@@ -801,7 +806,7 @@ PP(struct symbol *sp;)
 		{
 			if (nargs >= MAXARGS)
 			{
-				error("too many arguments");
+				error(_("too many arguments"));
 				return;
 			}
 			args[nargs++] = abp;
@@ -809,7 +814,7 @@ PP(struct symbol *sp;)
 			{
 				if (abp >= &argbuf[ARGBSIZE])
 				{
-					error("argument buffer overflow");
+					error(_("argument buffer overflow"));
 					return;
 				}
 			}
@@ -921,7 +926,7 @@ PP(const char *infile;)
 				skip--;
 			} else if (i != NOSKIP)
 			{
-				error("invalid #endif");
+				error(_("invalid #endif"));
 			}
 			break;
 
@@ -936,7 +941,7 @@ PP(const char *infile;)
 				push(SKIP);
 			} else
 			{
-				error("invalid #else");
+				error(_("invalid #else"));
 			}
 			break;
 
@@ -985,7 +990,7 @@ PP(const char *infile;)
 			break;
 
 		default:
-			error("invalid preprocessor command");
+			error(_("invalid preprocessor command"));
 			break;
 		}
 		eatup();

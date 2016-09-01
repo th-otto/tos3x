@@ -56,15 +56,21 @@ PP(const char *argv0;)
 		s += ndx + 1;
 	while ((ndx = strindex(s, FILESEP2)) >= 0)
 		s += ndx + 1;
-	s--;
-	ndx = s - argv0;
-	if (ndx > 4 && (s[-4] == FILESEP || s[-4] == FILESEP2) && strncmp(s - 3, "bin", 3) == 0)
-		s -= 4;
-	end = s;
-	s = argv0;
-	for (d = stdincl; s != end; )
-		*d++ = *s++;
-	*d = '\0';
+	if (s == argv0)
+	{
+		strcpy(stdincl, ".");
+	} else
+	{
+		s--;
+		ndx = (__intptr_t)s - (__intptr_t)argv0;
+		if (ndx > 4 && (s[-4] == FILESEP || s[-4] == FILESEP2) && strncmp(s - 3, "bin", 3) == 0)
+			s -= 4;
+		end = s;
+		s = argv0;
+		for (d = stdincl; s != end; )
+			*d++ = *s++;
+		*d = '\0';
+	}
 	if (strcmp(stdincl, ".") == 0)
 		strcpy(stdincl, "../include");
 	else

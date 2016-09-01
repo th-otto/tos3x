@@ -1,4 +1,5 @@
 include ../Makefile.common
+include ../Makefile.silent
 include SRCFILES
 
 PROGRAMS = cp68$(EXEEXT)

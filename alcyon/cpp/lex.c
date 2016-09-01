@@ -106,22 +106,21 @@ PP(char *sym2;)
  * error - output error message
  *      Outputs line number and error message and keeps track of errors.
  */
-#ifdef __USE_VARARGS
-VOID error(P(const char *) s, va_alist)
+VOID error(P(const char *) s _va_alist)
 PP(const char *s;)
-va_dcl
-#else
-VOID error(const char *s, ...)
-#endif
+_va_dcl
 {
 	va_list args;
 	
-	if (literal)
-		fprintf(stderr, "%s, # line %d: ", lit_file, lit_num);
-	else if (filep == &filestack[0])	/* not in include */
-		fprintf(stderr, "%s, # line %d: ", source, lineno);
-	else
-		fprintf(stderr, "%s, # line %d: ", (filep - 1)->ifile, (filep - 1)->lineno);
+	if (lineno != 0)
+	{
+		if (literal)
+			fprintf(stderr, "%s, # line %d: ", lit_file, lit_num);
+		else if (filep == &filestack[0])	/* not in include */
+			fprintf(stderr, "%s, # line %d: ", source, lineno);
+		else
+			fprintf(stderr, "%s, # line %d: ", (filep - 1)->ifile, (filep - 1)->lineno);
+	}
 	va_start(args, s);
 	vfprintf(stderr, s, args);
 	fputc('\n', stderr);
@@ -139,7 +138,12 @@ PP(int c;)
 {
 	if (pbp >= &pbbuf[PBSIZE])
 	{
-		error("too many characters pushed back");
+		int l = (__intptr_t)pbp - (__intptr_t)pbbuf;
+		
+		error(_("too many characters pushed back %d"), l);
+		while (pbp > pbbuf)
+			fputc(*--pbp, stderr);
+		fputc('\n', stderr);
 		cexit();
 	}
 	*pbp++ = c;
@@ -208,17 +212,17 @@ PP(const char *name;)
 
 	wrap = 0;
 	asp = 0;
-	for (sp = &symtab[symhash(name)]; sp->s_def != null;)
+	for (sp = &symtab[symhash(name)]; sp->s_def != 0;)
 	{
 		if (symequal(sp->s_name, name))
 			return sp;
-		if (!asp && sp->s_def == null)
+		if (!asp && sp->s_def == 0)
 			asp = sp;
 		if (++sp >= &symtab[HSIZE])
 		{
 			if (wrap++)
 			{
-				error("symbol table overflow");
+				error(_("symbol table overflow"));
 				cexit();
 			}
 			sp = &symtab[0];
@@ -238,7 +242,7 @@ PP(const char *name;)
 	register struct symbol *sp;
 
 	sp = getsp(name);
-	if (sp->s_def == 0 || sp->s_def == null)
+	if (sp->s_def <= 0)
 		return NULL;
 	return sp;
 }
@@ -285,12 +289,12 @@ PP(char *token;)
 	case SQUOTE:
 	case DQUOTE:
 		if (getstr(token, TOKSIZE, c))
+		{
 			return type;
-		else
-		{								/* ignore incomplete strings... could be asm comment */
-			token[0] = '\n';
-			return NEWL;
 		}
+		/* ignore incomplete strings... could be asm comment */
+		token[0] = '\n';
+		return NEWL;
 
 	case DIGIT:
 	case ALPHA:
@@ -384,7 +388,7 @@ PP(char *token;)
 			if (c == CEOF)
 			{
 				lineno = l;
-				error("no */ before EOF");
+				error(_("no */ before EOF"));
 			}
 			type = WHITE;
 			token[0] = ' ';
@@ -406,7 +410,7 @@ PP(char *token;)
 		break;
 
 	case BADC:
-		error("bad character 0%o", c);
+		error(_("bad character 0%o"), c);
 		break;
 
 	}
@@ -442,14 +446,14 @@ PP(char endc;)
 		if (--i > 0)
 			*p++ = c;
 		else if (!i)
-			error("string too long");
+			error(_("string too long"));
 		if (c == '\\')
 		{
 			c = ngetch();
 			if (--i > 0)
 				*p++ = c;
 			else if (!i)
-				error("string too long");
+				error(_("string too long"));
 		}
 	}
 	*p++ = endc;

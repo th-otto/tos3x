@@ -149,11 +149,11 @@ struct tnode {
 /* expression tree node for symbol - only keeps location */
 struct symnode {
 	short t_op;
-	short t_type;				  /* data type of symbol */
-	short t_dp; 				  /* dimension pointer of symbol */
-	short t_ssp;				  /* structure size index to dtab */
-	short t_sc; 				  /* storage class of symbol */
-	short t_offset; 			  /* offset of symbol */
+	short t_type;				/* data type of symbol */
+	short t_dp; 				/* dimension pointer of symbol */
+	short t_ssp;				/* structure size index to dtab */
+	short t_sc; 				/* storage class of symbol */
+	short t_offset; 			/* offset of symbol */
 	short t_label;
 };
 
@@ -166,7 +166,7 @@ struct extnode {
 	short t_sc;
 	short t_offset;
 	short t_reg;
-	char  t_symbol[SSIZE];		  /* symbol name */
+	char  t_symbol[SSIZE];		/* symbol name */
 };
 
 /* expression tree node for integer constant */
@@ -175,7 +175,7 @@ struct conode {
 	short t_type;
 	short t_dp;
 	short t_ssp;
-	short t_value;				  /* constant value */
+	short t_value;				/* constant value */
 };
 
 /* long constant node structure */
@@ -186,9 +186,9 @@ struct lconode {
 	short t_ssp;
 	union {
 		struct words w;
-		long l;							/* value or label number */
+		long l;					/* value or label number */
 	} _l;
-#define t_lvalue _l.l				/* constant value */
+#define t_lvalue _l.l			/* constant value */
 };
 
 /* switch table structure */
