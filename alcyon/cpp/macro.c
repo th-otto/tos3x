@@ -7,6 +7,7 @@
 
 #include "preproc.h"
 #include <ctype.h>
+#include <unistd.h>
 
 int literal;
 int lit_num;
@@ -89,7 +90,7 @@ PP(int nd;)
 	/* clear out symbol table */
 	for (sp = &symtab[0]; sp <= &symtab[HSIZE - 1]; sp++)
 		sp->s_def = null;
-	defp = defap = malloc(DEFSIZE);
+	defp = defap = sbrk(DEFSIZE);
 	if (defp == NULL)
 	{
 		error("define table overflow");
@@ -547,7 +548,8 @@ PP(const char *infile;)
 	char token[TOKSIZE];
 	char fname[TOKSIZE];
 	register char *p, *q, c;
-
+	FILE *ifd;
+	
 	p = fname;
 	if ((type = getntok(token)) == SQUOTE || type == DQUOTE)
 	{
@@ -580,7 +582,7 @@ PP(const char *infile;)
 		error("includes nested too deeply");
 	} else
 	{
-		if ((inbuf = fopen(p, "r")) == NULL)
+		if ((ifd = fopen(p, "r")) == NULL)
 		{
 			if (type != SQUOTE && type != DQUOTE)
 				error("can't open include file %s", p);
@@ -593,6 +595,7 @@ PP(const char *infile;)
 			putid(p, 1);				/* id for include file */
 			doifile(p);
 			filep++;
+			inbuf = ifd;
 		}
 	}
 }
@@ -678,12 +681,11 @@ PP(int c;)
 {
 	if (!defcount)
 	{
-		if ((defap = realloc(defap, defused + DEFSIZE)) == NULL)
+		if (sbrk(DEFSIZE) == (char *) -1)
 		{
 			error("define table overflow");
 			cexit();
 		}
-		defp = defap + defused;
 		defcount = DEFSIZE;
 	}
 	defused++;
