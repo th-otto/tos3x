@@ -5,6 +5,8 @@
 #include <compiler.h>
 #endif
 
+typedef long __intptr_t;
+
 typedef unsigned int mode_t;
 typedef int pid_t;
 typedef int uid_t;
