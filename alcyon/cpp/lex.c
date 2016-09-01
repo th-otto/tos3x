@@ -98,7 +98,7 @@ PP(char *sym2;)
 		else
 			*q++ = '\0';
 	}
-	*q = '\0';							/* [vlh] 4.1, force null terminator */
+	*q = '\0';
 }
 
 
@@ -118,7 +118,7 @@ VOID error(const char *s, ...)
 	
 	if (literal)
 		fprintf(stderr, "%s, # line %d: ", lit_file, lit_num);
-	else if (filep == &filestack[0])	/* [vlh] 3.4 not in include */
+	else if (filep == &filestack[0])	/* not in include */
 		fprintf(stderr, "%s, # line %d: ", source, lineno);
 	else
 		fprintf(stderr, "%s, # line %d: ", (filep - 1)->ifile, (filep - 1)->lineno);
@@ -183,7 +183,7 @@ int ngetch(NOTHING)
 		if (filep == &filestack[0])
 		{								/* need line for #include... */
 			lineno++;
-			putid(source, lineno);		/* [vlh] 4.2 id line .... */
+			putid(source, lineno);		/* id line .... */
 		} else
 		{
 			(filep - 1)->lineno++;
@@ -287,7 +287,7 @@ PP(char *token;)
 		if (getstr(token, TOKSIZE, c))
 			return type;
 		else
-		{								/* [vlh]4.3, ignore incomplete strings... could be asm comment */
+		{								/* ignore incomplete strings... could be asm comment */
 			token[0] = '\n';
 			return NEWL;
 		}
@@ -359,7 +359,7 @@ PP(char *token;)
 					if (filep == &filestack[0] && pbp == &pbbuf[0])
 						lineno++;
 					if (Cflag)
-					{					/* [vlh] 4.2 */
+					{
 						ppputl('\0');
 						s = line;
 						while (*s)
@@ -371,12 +371,12 @@ PP(char *token;)
 				} else if (c == '*' && peekis('/'))
 				{
 					if (Cflag)
-					{					/* [vlh] 4.2 */
+					{
 						ppputl('*');
 						ppputl('/');
 					}
 					break;
-				} else if (Cflag)		/* [vlh] 4.2.c */
+				} else if (Cflag)
 				{
 					ppputl(c);
 				}
@@ -432,13 +432,13 @@ PP(char endc;)
 	for (i = nchars - 2; (c = ngetch()) != endc;)
 	{
 		if (c == CEOF || c == '\n')
-		{								/* [vlh] 4.3, ignore non ended string */
+		{								/* ignore non ended string */
 			*p = '\0';
 			p = str;
 			while (*p)
 				ppputl((int) *p++);
 			return FALSE;
-		}								/* [vlh] 4.3, may be assembly language comment !!!! */
+		}								/* may be assembly language comment !!!! */
 		if (--i > 0)
 			*p++ = c;
 		else if (!i)

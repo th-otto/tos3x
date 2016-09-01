@@ -69,10 +69,10 @@ PP(int nd;)
 	register char *l;
 	register struct symbol *sp;
 
-	filep = &filestack[0];				/* [vlh] 4.0 moved for error msgs */
-	lineno = 1;							/* [vlh] 4.0 moved for error msgs */
+	filep = &filestack[0];
+	lineno = 1;
 	if ((inbuf = fopen(source, "r")) == NULL)
-	{									/* 3rd arg for versados */
+	{
 		error("can't open source file %s\n", source);
 		return FALSE;
 	}
@@ -87,7 +87,7 @@ PP(int nd;)
 	putid(source, 1);					/* identify as first line in source file */
 
 	/* clear out symbol table */
-	for (sp = &symtab[0]; sp <= &symtab[HSIZE - 1]; sp++)	/*3.4 */
+	for (sp = &symtab[0]; sp <= &symtab[HSIZE - 1]; sp++)
 		sp->s_def = null;
 	defp = defap = malloc(DEFSIZE);
 	if (defp == NULL)
@@ -109,7 +109,7 @@ PP(int nd;)
 		l = line;
 		if (filep == &filestack[0] && pbp == &pbbuf[0])
 			lineno++;
-		else if (filep != &filestack[0])	/*[vlh] include file */
+		else if (filep != &filestack[0])
 			(filep - 1)->lineno++;
 		while (*l)
 			fputc(*l++, outbuf);
@@ -141,7 +141,7 @@ PP(int nd;)
 }
 
 
-/* [vlh] 4.0 SOH line header */
+/* SOH line header */
 VOID putid(P(const char *) fname, P(int) lnum)
 PP(const char *fname;)
 PP(int lnum;)
@@ -162,7 +162,7 @@ PP(int lnum;)
 	fputc('#', outbuf);
 	fputc(' ', outbuf);
 	itoa(lnum, tmp, 0);
-	for (; *p; p++)
+	for (p = tmp; *p; p++)
 		fputc(*p, outbuf);
 	fputc(' ', outbuf);
 	fputc('"', outbuf);
@@ -197,13 +197,13 @@ PP(const char *def;)								/* pointer to definition */
 	symcopy(name, sp->s_name);
 	sp->s_def = defp;
 	putd(NOARGS);
-	if (def)							/* [vlh] character strings... */
+	if (def)
 	{
 		while (*def)
 			putd(*def++);
 	} else
 	{
-		putd('1');						/* [vlh] default define value */
+		putd('1');						/* default define value */
 	}
 	putd('\0');
 }
@@ -238,16 +238,17 @@ PP(const char *infile;)
 	int xline;
 	char buf[NUMLEN];
 
-	if (strcmp(token, "__FILE") == 0)
+	if (strcmp(token, "__FILE") == 0 || strcmp(token, "__FILE__") == 0)
 	{
 		ppputl('"');
 		for (p = infile; *p;)
 			ppputl(*p++);
 		ppputl('"');
-	} else if (strcmp(token, "__LINE") == 0)
+	} else if (strcmp(token, "__LINE") == 0 || strcmp(token, "__LINE__") == 0)
 	{
 		xline = (literal) ? lit_num : (filep == &filestack[0]) ? lineno : (filep - 1)->lineno;
 		itoa(xline, buf, 0);
+		p = buf;
 		while (*p)
 			ppputl(*p++);
 	} else
@@ -419,17 +420,17 @@ static VOID dodefine(NOTHING)
 		pbtok(token);
 		putd(NOARGS);
 	}
-	type = getntok(token);				/*get next non-white token */
+	type = getntok(token);				/* get next non-white token */
 	for (; type != NEWL && type != CEOF; type = gettok(token))
 	{
 		if (type == ALPHA || type == SQUOTE || type == DQUOTE)
-		{								/* [vlh] 4.1 */
-			trymatch(token, type, nargs, args);	/* [vlh] 4.1 */
+		{
+			trymatch(token, type, nargs, args);
 			continue;
 		} else if (type == BSLASH)
 		{
 			if ((i = ngetch()) == '\n')
-			{							/*multi-line macro? */
+			{							/* multi-line macro? */
 				if (filep == &filestack[0] && pbp == &pbbuf[0])
 				{
 					lineno++;
@@ -573,7 +574,7 @@ PP(const char *infile;)
 		}
 		p = getinclude(fname, (char *) 0L);
 	}
-	eatup();							/*need here... */
+	eatup();							/* need here... */
 	if (filep >= &filestack[FSTACK])
 	{
 		error("includes nested too deeply");
@@ -588,7 +589,7 @@ PP(const char *infile;)
 		} else
 		{
 			filep->ifd = inbuf;
-			filep->lineno = 1;			/* [vlh] */
+			filep->lineno = 1;
 			putid(p, 1);				/* id for include file */
 			doifile(p);
 			filep++;
@@ -711,7 +712,7 @@ PP(char *argp;)
 	i = TOKSIZE;
 	while (((type = gettok(token)) != COMMA && type != RPAREN) || plevel != 0)
 	{
-		if (type == NEWL)				/* [vlh] 4.3 multi line macro expansion */
+		if (type == NEWL)				/* multi line macro expansion */
 		{
 			ppputl('\n');
 		} else
@@ -779,16 +780,16 @@ PP(struct symbol *sp;)
 		return;
 	}
 	if (strcmp(sp->s_name, mdef = sp->s_def) == 0)
-	{									/*handle #define x x */
+	{									/* handle #define x x */
 		while (*mdef)
 			ppputl(*mdef++);
 		return;
 	}
 	nargs = 0;
-	if (*mdef == NOARGS)				/*suppress grabbing of args */
+	if (*mdef == NOARGS)				/* suppress grabbing of args */
 	{
 		;
-	} else if (getntok(token) != LPAREN)	/* [vlh] 4.1 ignore white space */
+	} else if (getntok(token) != LPAREN)	/* ignore white space */
 	{
 		pbtok(token);
 	} else
@@ -831,7 +832,7 @@ PP(struct symbol *sp;)
 		pbtok("_L");
 	} else
 	{
-		mdef++;							/*skip no. of args */
+		mdef++;							/* skip no. of args */
 		for (p = mdef + strlen(mdef) - 1; p >= mdef; p--)
 		{
 			if (*p == ARG)
@@ -938,13 +939,13 @@ PP(const char *infile;)
 			break;
 
 		case DEFINE:
-			if (!skip)					/*if in skip, don't do define */
+			if (!skip)					/* if in skip, don't do define */
 				dodefine();
 			break;
 
 		case UNDEF:
 			if (!skip)
-			{							/*if in skip, don't undef */
+			{							/* if in skip, don't undef */
 				if ((type = getntok(token)) == ALPHA)
 					undefine(token);
 			}
@@ -952,7 +953,7 @@ PP(const char *infile;)
 
 		case INCLUDE:
 			if (!skip)
-			{							/*if in skip, don't do include */
+			{							/* if in skip, don't do include */
 				doinclude(infile);
 				if (filep != &filestack[0])
 					i = getaline((filep - 1)->ifile);
@@ -963,9 +964,9 @@ PP(const char *infile;)
 			break;
 
 		case IF:
-			if (!skip && cexpr())		/*evaluate constant expression */
+			if (!skip && cexpr())		/* evaluate constant expression */
 			{
-				push(NOSKIP);			/*non-zero, so don't skip */
+				push(NOSKIP);			/* non-zero, so don't skip */
 			} else
 			{							/* don't do if skipping or cexpr evaluates zero */
 				push(SKIP);
@@ -973,9 +974,9 @@ PP(const char *infile;)
 			}
 			break;
 
-		case LINE:						/* [vlh] 4.0 */
+		case LINE:
 			if (!skip)
-			{							/* [vlh] 4.3, do skip... */
+			{
 				doline();
 				return getaline(infile);
 			}
