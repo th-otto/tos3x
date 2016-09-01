@@ -56,4 +56,10 @@ char *mktemp PROTO((char *template));
 
 char *getenv PROTO((const char *name));
 
+VOIDPTR lsbrk PROTO((long increment)); /* should be ptrdiff_t */
+
+VOIDPTR lmalloc PROTO((long size));
+VOID lfree PROTO((VOIDPTR));
+VOIDPTR lrealloc PROTO((VOIDPTR ptr, long size));
+
 #endif /* __STDLIB_H__ */
