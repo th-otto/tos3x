@@ -54,18 +54,8 @@ VOID outasm(NOTHING)
 }
 
 
-VOID outexpr(P(struct tnode *) tp)
-PP(struct tnode *tp;)
-{
-	if (!tp)
-		return;
-	outline();
-	outtree(tp);
-}
-
-
 /* interprets and prints the parse tree */
-VOID outtree(P(struct tnode *) tp)
+static VOID outtree(P(struct tnode *) tp)
 PP(struct tnode *tp;)
 {
 	short w1, w2;
@@ -120,4 +110,14 @@ PP(struct tnode *tp;)
 		}
 		break;
 	}
+}
+
+
+VOID outexpr(P(struct tnode *) tp)
+PP(struct tnode *tp;)
+{
+	if (!tp)
+		return;
+	outline();
+	outtree(tp);
 }

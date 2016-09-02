@@ -137,7 +137,10 @@ static VOID outlevel(NOTHING)
 
 	for (i = 0; i < level; i++)
 	{
-		fputs("     ", stderr);
+		oputchar(' ');
+		oputchar(' ');
+		oputchar(' ');
+		oputchar(' ');
 	}
 }
 
@@ -148,15 +151,15 @@ PP(struct tnode *tp;)
 	switch (SUPTYPE(tp->t_type))
 	{
 	case FUNCTION:
-		fputs("()", stderr);
+		oprintf("()");
 		break;
 
 	case ARRAY:
-		fputs("[]", stderr);
+		oprintf("[]");
 		break;
 
 	case POINTER:
-		fputs("*", stderr);
+		oprintf("*");
 		break;
 	}
 	fprintf(stderr, "%s ", types[BTYPE(tp->t_type)]);
@@ -178,64 +181,64 @@ PP(struct tnode *tp;)
 		error("INVALID op");
 		return;
 	}
-	fprintf(stderr, "%s ", opname[op]);
+	oprintf("%s ", opname[op]);
 	puttsu(tp);
 	switch (op)
 	{
 	case DCLONG:
 	case CLONG:
 	case CFLOAT:
-		fprintf(stderr, " %ld %x.%x\n", ((struct lconode *) tp)->t_lvalue, ((struct lconode *) tp)->_l.w.hiword, ((struct lconode *) tp)->_l.w.loword);
+		oprintf(" %ld %x.%x\n", ((struct lconode *) tp)->t_lvalue, ((struct lconode *) tp)->_l.w.hiword, ((struct lconode *) tp)->_l.w.loword);
 		break;
 
 	case CINT:
-		fprintf(stderr, " %d [0x%x]\n", ((struct conode *) tp)->t_value, ((struct conode *) tp)->t_value);
+		oprintf(" %d [0x%x]\n", ((struct conode *) tp)->t_value, ((struct conode *) tp)->t_value);
 		break;
 
 	case AUTODEC:
 	case AUTOINC:
-		fprintf(stderr, "Autodec or Autoinc\n");
+		oprintf("Autodec or Autoinc\n");
 		break;
 
 	case SYMBOL:
 		switch (((struct symnode *) tp)->t_sc)
 		{
 		case REGISTER:
-			fprintf(stderr, " Register");
+			oprintf(" Register");
 			break;
 
 		case CINDR:
-			fprintf(stderr, " %d", ((struct symnode *) tp)->t_offset);
+			oprintf(" %d", ((struct symnode *) tp)->t_offset);
 			break;
 
 		case CLINDR:
 		case CFINDR:
-			fprintf(stderr, " %x.%x", ((struct symnode *) tp)->t_offset, tp->t_ssp);
+			oprintf(" %x.%x", ((struct symnode *) tp)->t_offset, tp->t_ssp);
 			break;
 
 		case REGOFF:
-			fprintf(stderr, " Regoffset");
+			oprintf(" Regoffset");
 			break;
 
 		case EXTERNAL:
 		case EXTOFF:
-			fprintf(stderr, " %s+%d", ((struct extnode *) tp)->t_symbol, ((struct extnode *) tp)->t_offset);
+			oprintf(" %s+%d", ((struct extnode *) tp)->t_symbol, ((struct extnode *) tp)->t_offset);
 			if (((struct symnode *) tp)->t_sc == EXTOFF)
-				fprintf(stderr, " Ext offset");
+				oprintf(" Ext offset");
 			break;
 
 		case STATIC:
 		case STATOFF:
-			fprintf(stderr, " STATIC or STATOFF");
+			oprintf(" STATIC or STATOFF");
 			if (((struct symnode *) tp)->t_sc == STATOFF)
-				fprintf(stderr, "STATOFF");
+				oprintf("STATOFF");
 			break;
 
 		case INDEXED:
-			fprintf(stderr, " %d indexed", ((struct symnode *) tp)->t_offset);
+			oprintf(" %d indexed", ((struct symnode *) tp)->t_offset);
 			break;
 		}
-		fputc('\n', stderr);
+		oputchar('\n');
 		break;
 
 	case IFGOTO:
@@ -243,7 +246,7 @@ PP(struct tnode *tp;)
 		break;
 
 	default:
-		fputc('\n', stderr);
+		oputchar('\n');
 		putsexpr(tp->t_left);
 		if (BINOP(tp->t_op))
 			putsexpr(tp->t_right);

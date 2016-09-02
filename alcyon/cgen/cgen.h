@@ -3,8 +3,6 @@
 	Alcyon Corporation
 	8716 Production Ave.
 	San Diego, Ca.  92121
-
-	@(#)cgen.h	1.7	12/28/83
 */
 
 #include <stdio.h>

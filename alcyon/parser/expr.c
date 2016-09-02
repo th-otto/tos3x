@@ -408,8 +408,9 @@ PP(struct lconode *rtp;)					/* pointer to right subtree */
 	islong = 0;
 
 	if (rtp->t_op == CINT)
+	{
 		rvalue = ((struct conode *) rtp)->t_value;
-	else if (rtp->t_op == CLONG)
+	} else if (rtp->t_op == CLONG)
 	{
 		rvalue = rtp->t_lvalue;
 		islong++;
@@ -419,8 +420,9 @@ PP(struct lconode *rtp;)					/* pointer to right subtree */
 	}
 	
 	if (ltp->t_op == CINT)
+	{
 		lvalue = ((struct conode *) ltp)->t_value;
-	else if (ltp->t_op == CLONG)
+	} else if (ltp->t_op == CLONG)
 	{
 		if ((ltp->t_type & POINTER) && op == ADD)
 		{
@@ -484,27 +486,27 @@ PP(struct lconode *rtp;)					/* pointer to right subtree */
 		break;
 
 	case EQUALS:
-		lvalue = (lvalue == rvalue);
+		lvalue = lvalue == rvalue;
 		break;
 
 	case NEQUALS:
-		lvalue = (lvalue != rvalue);
+		lvalue = lvalue != rvalue;
 		break;
 
 	case GREAT:
-		lvalue = (lvalue > rvalue);
+		lvalue = lvalue > rvalue;
 		break;
 
 	case LESS:
-		lvalue = (lvalue < rvalue);
+		lvalue = lvalue < rvalue;
 		break;
 
 	case GREATEQ:
-		lvalue = (lvalue >= rvalue);
+		lvalue = lvalue >= rvalue;
 		break;
 
 	case LESSEQ:
-		lvalue = (lvalue <= rvalue);
+		lvalue = lvalue <= rvalue;
 		break;
 
 	default:

@@ -3,8 +3,6 @@
 	Alcyon Corporation
 	8716 Production Ave.
 	San Diego, Ca.  92121
-
-	@(#)smatch.c	1.9	11/22/83
 */
 
 /* Code Skeleton expansion and matching */

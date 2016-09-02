@@ -3,8 +3,6 @@
 	Alcyon Corporation
 	8716 Production Ave.
 	San Diego, Ca.  92121
-
-	@(#)main.c	1.7	12/28/83
 */
 
 /*

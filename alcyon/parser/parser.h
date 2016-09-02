@@ -279,7 +279,6 @@ short wflag;					/* don't generate warning messages */
 short profile;					/* profiler output */
 #endif
 #ifdef DEBUG
-short debug;					/* debug flag */
 short initdebug;				/* init debug flag */
 short symdebug; 				/* sym debug flag */
 short treedebug;				/* expr tree debug flag */
@@ -467,7 +466,6 @@ VOID outcforreg PROTO((struct tnode *tp));
 VOID outifgoto PROTO((struct tnode *tp, int dir, int lab));
 VOID outasm PROTO((NOTHING));
 VOID outexpr PROTO((struct tnode *tp));
-VOID outtree PROTO((struct tnode *tp));
 
 
 /*

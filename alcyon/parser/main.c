@@ -149,7 +149,6 @@ PP(char **argv;)							/* argument pointers */
 
 #ifdef DEBUG
 			case 'd':					/* turn debugging on */
-				debug++;
 				while (*q)
 				{
 					switch (*q)
