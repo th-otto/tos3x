@@ -184,6 +184,10 @@ PP(int tbool;)								/* 1==>sizeof expr, 0==>other sizeof */
 	if (NOTPOINTER(tp->t_type) || tp->t_op != ADD)
 	{
 		size = dsize(tp->t_type, tp->t_dp, tp->t_ssp);
+#ifdef DEBUG
+		lp = NULL;
+		rp = NULL;
+#endif
 	} else
 	{
 		lp = tp->t_left;
@@ -211,7 +215,8 @@ PP(int tbool;)								/* 1==>sizeof expr, 0==>other sizeof */
 #ifdef DEBUG
 	if (treedebug)
 	{
-		fprintf(stderr, "rtype 0%o ltype 0%o ", rp->t_type, lp->t_type);
+		if (lp && rp)
+			fprintf(stderr, "rtype 0%o ltype 0%o ", rp->t_type, lp->t_type);
 		fprintf(stderr, "size %d, dtab %ld\n", size, dtab[lp->t_dp - 1]);
 	}
 #endif

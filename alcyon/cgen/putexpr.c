@@ -2,9 +2,7 @@
 	Copyright 1982
 	Alcyon Corporation
 	8716 Production Ave.
-	San Diego, Ca.  92121
-
-	@(#)putexpr.c	1.4	12/15/83
+	San Diego, Ca. 92121
 */
 
 #include "cgen.h"
@@ -29,7 +27,7 @@ const char *const opname[] = {
 	"--p",								/* 14=PREDEC */
 	"++p",								/* 15=PREINC */
 	"p--",								/* 16=POSTDEC */
-	"p++",								/* 17=POSTDEC */
+	"p++",								/* 17=POSTINC */
 	"=",								/* 18=ASSIGN */
 	"+=",								/* 19=EQADD */
 	"-=",								/* 20=EQSUB */
@@ -102,17 +100,17 @@ static const char *const types[] = {
 	"short",							/* 2=SHORT */
 	"int",								/* 3=INT */
 	"long",								/* 4=LONG */
-	"uchar-invalid",					/* 5=UCHAR */
-	"ushort-invalid",					/* 6=USHORT */
+	"uchar",							/* 5=UCHAR */
+	"ushort",							/* 6=USHORT */
 	"uint",								/* 7=UINT */
-	"ulong-invalid",					/* 8=ULONG */
+	"ulong",							/* 8=ULONG */
 	"float",							/* 9=FLOAT */
 	"double",							/* 10=DOUBLE */
 	"struct",							/* 11=STRUCT */
 	invalid,							/* 12=undefined */
 	invalid,							/* 13=undefined */
 	invalid,							/* 14=undefined */
-	invalid,							/* 15=undefined */
+	invalid								/* 15=undefined */
 };
 
 static const char *const suvals[] = {
@@ -132,6 +130,7 @@ static const char *const suvals[] = {
 
 static short level;
 
+
 static VOID outlevel(NOTHING)
 {
 	register short i;
@@ -146,6 +145,25 @@ static VOID outlevel(NOTHING)
 }
 
 
+VOID puttsu(P(struct tnode *) tp)
+PP(struct tnode *tp;)
+{
+	register short i;
+
+	if (SUPTYPE(tp->t_type))
+		oputchar('*');
+	oprintf("%s ", types[BTYPE(tp->t_type)]);
+	if (tp->t_su != 0 || (tp->t_op == CINT && tp->t_value == 0))
+	{
+		i = tp->t_su >> 8;
+		if (i > 15 || i < 0)
+			oprintf("INVALID");
+		else
+			oprintf("%s", suvals[i]);
+	}
+}
+
+
 static VOID putsexpr(P(struct tnode *) tp)
 PP(struct tnode *tp;)
 {
@@ -155,7 +173,7 @@ PP(struct tnode *tp;)
 	if (tp->t_op == BFIELD || tp->t_op == IFGOTO)
 	{
 		if (tp->t_op == BFIELD)
-			oprintf("off=%d len=%d\n", (tp->t_su >> 8) & 0377, tp->t_su & 0377);
+			oprintf("off=%d len=%d\n", BFOFFS(tp->t_su), BFLEN(tp->t_su));
 		else
 			oprintf("%s goto L%d\n", tp->t_type ? "TRUE" : "FALSE", tp->t_su);
 		putsexpr(tp->t_left);
@@ -245,24 +263,5 @@ PP(struct tnode *tp;)
 {
 	oprintf("%s\n", name);
 	putsexpr(tp);
-}
-
-
-VOID puttsu(P(struct tnode *) tp)
-PP(struct tnode *tp;)
-{
-	register short i;
-
-	if (SUPTYPE(tp->t_type))
-		oputchar('*');
-	oprintf("%s ", types[BTYPE(tp->t_type)]);
-	if (tp->t_su != 0 || (tp->t_op == CINT && tp->t_value == 0))
-	{
-		i = tp->t_su >> 8;
-		if (i > 15 || i < 0)
-			oprintf("INVALID");
-		else
-			oprintf("%s", suvals[tp->t_su >> 8]);
-	}
 }
 #endif

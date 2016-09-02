@@ -146,6 +146,8 @@ PP(int sc;)									/* storage type */
 PP(const char *sym;)								/* symbol name */
 PP(int val;)
 {
+	if (!gflag)
+		return;
 	switch (sc)
 	{
 	case STATIC:

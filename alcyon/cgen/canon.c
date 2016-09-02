@@ -822,8 +822,8 @@ PP(struct tnode *tp;)						/* pointer to tree */
 		tp->t_right = fixbfield(tp->t_right);
 		btp = tp->t_left;				/* pointer to BFIELD node */
 		stp = btp->t_left;				/* pointer to son of BFIELD node */
-		foff = (btp->t_su >> 8) & 0377;
-		flen = btp->t_su & 0377;
+		foff = BFOFFS(btp->t_su);
+		flen = BFLEN(btp->t_su);
 		fmask = (1 << flen) - 1;
 		if (tp->t_right->t_op == CINT && (op == ASSIGN || op == EQXOR))
 		{
@@ -871,8 +871,8 @@ PP(struct tnode *tp;)						/* pointer to tree */
 		}
 	} else if (op == BFIELD)
 	{
-		foff = (tp->t_su >> 8) & 0377;
-		fmask = (1 << (tp->t_su & 0377)) - 1;
+		foff = BFOFFS(tp->t_su);
+		fmask = (1 << BFLEN(tp->t_su)) - 1;
 		tp = tnalloc(RSH, INT, 0, 0, tp->t_left, cnalloc(INT, foff));
 		tp = tnalloc(AND, INT, 0, 0, tp, cnalloc(INT, fmask));
 	} else

@@ -327,8 +327,7 @@ PP(struct symbol *fsp;)
 			if (sp->s_sc == STATIC || sp->s_sc == AUTO)
 				outlocal(sp->s_type, sp->s_sc, sp->s_symbol, sp->s_offset);
 		}
-		if (gflag)
-			outlocal(CHAR, AUTO, "_EnD__", offset);
+		outlocal(CHAR, AUTO, "_EnD__", offset);
 		offset += 2;					/* for cdb, argument end argument */
 		OUTBENTRY();					/* must be before declarations */
 		dlist(TYPELESS);

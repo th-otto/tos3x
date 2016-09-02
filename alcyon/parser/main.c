@@ -119,7 +119,7 @@ PP(char **argv;)							/* argument pointers */
 		q = *argv;
 		if (*q++ != '-')
 			usage();
-		while (1)
+		for (;;)
 		{
 			switch (*q++)
 			{
@@ -148,24 +148,24 @@ PP(char **argv;)							/* argument pointers */
 				continue;
 
 #ifdef DEBUG
-			case 'D':					/* turn debugging on */
-			case 'd':
+			case 'd':					/* turn debugging on */
 				debug++;
-				continue;
-
-			case 'i':					/* if debug on, debug initialization */
-				if (debug)
-					initdebug++;
-				continue;
-
-			case 's':					/* if debug on, debug symbols */
-				if (debug)
-					symdebug++;
-				continue;
-
-			case 'x':					/* if debug on, debug expr tree */
-				if (debug)
-					treedebug++;
+				while (*q)
+				{
+					switch (*q)
+					{
+					case 'i':					/* if debug on, debug initialization */
+						initdebug++;
+						break;
+					case 's':					/* if debug on, debug symbols */
+						symdebug++;
+						break;
+					case 'x':					/* if debug on, debug expr tree */
+						treedebug++;
+						break;
+					}
+					q++;
+				}
 				continue;
 #endif
 

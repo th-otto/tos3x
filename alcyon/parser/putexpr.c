@@ -1,8 +1,8 @@
 /*
-    Copyright 1982
-    Alcyon Corporation
-    8716 Production Ave.
-    San Diego, Ca.  92121
+	Copyright 1982
+	Alcyon Corporation
+	8716 Production Ave.
+	San Diego, Ca. 92121
 */
 
 #include "parser.h"
@@ -13,97 +13,98 @@ static char const invalid[] = "INVALID";
 
 static const char *const opname[] = {
 	invalid,							/*  0 */
-	"+",								/*  1 */
-	"-",								/*  2 */
-	"*",								/*  3 */
-	"/",								/*  4 */
-	"%",								/*  5 */
-	">>",								/*  6 */
-	"<<",								/*  7 */
-	"&",								/*  8 */
-	"|",								/*  9 */
-	"^",								/* 10 */
-	"!",								/* 11 */
-	"U-",								/* 12 */
-	"~",								/* 13 */
-	"--p",								/* 14 */
-	"++p",								/* 15 */
-	"p--",								/* 16 */
-	"p++",								/* 17 */
-	"=",								/* 18 */
-	"+=",								/* 19 */
-	"-=",								/* 20 */
-	"*=",								/* 21 */
-	"/=",								/* 22 */
-	"%=",								/* 23 */
-	">>=",								/* 24 */
-	"<<=",								/* 25 */
-	"&=",								/* 26 */
-	"|=",								/* 27 */
-	"^=",								/* 28 */
-	"jsr",								/* 29 */
-	"==",								/* 30 */
-	"!=",								/* 31 */
-	">",								/* 32 */
-	">=",								/* 33 */
-	"<",								/* 34 */
-	"<=",								/* 35 */
-	"int->long",						/* 36 */
-	"long->int",						/* 37 */
-	"btst",								/* 38 */
-	"load",								/* 39 */
-	"long*",							/* 40 */
-	"long/",							/* 41 */
-	"long%",							/* 42 */
-	"long*=",							/* 43 */
-	"long/=",							/* 44 */
-	"long%=",							/* 45 */
-	"=addr",							/* 46 */
-	"=not",								/* 47 */
-	"=neg",								/* 48 */
-	"docast",							/* 49 */
-	"st=",								/* 50 */
-	"ltof",								/* 51 */
-	"ftol",								/* 52 */
-	"itof",								/* 53 */
-	"ftoi",								/* 54 */
-	"tochar",							/* 55 */
+	"+",								/*  1=ADD */
+	"-",								/*  2=SUB */
+	"*",								/*  3=MULT */
+	"/",								/*  4=DIV */
+	"%",								/*  5=MOD */
+	">>",								/*  6=RSH */
+	"<<",								/*  7=LSH */
+	"&",								/*  8=AND */
+	"|",								/*  9=OR */
+	"^",								/* 10=XOR */
+	"!",								/* 11=NOT */
+	"U-",								/* 12=UMINUS */
+	"~",								/* 13=COMPL */
+	"--p",								/* 14=PREDEC */
+	"++p",								/* 15=PREINC */
+	"p--",								/* 16=POSTDEC */
+	"p++",								/* 17=POSTINC */
+	"=",								/* 18=ASSIGN */
+	"+=",								/* 19=EQADD */
+	"-=",								/* 20=EQSUB */
+	"*=",								/* 21=EQMULT */
+	"/=",								/* 22=EQDIV */
+	"%=",								/* 23=EQMOD */
+	">>=",								/* 24=EQRSH */
+	"<<=",								/* 25=EQLSH */
+	"&=",								/* 26=EQAND */
+	"|=",								/* 27=EQOR */
+	"^=",								/* 28=EQXOR */
+	"jsr",								/* 29=FJSR */
+	"==",								/* 30=EQUALS */
+	"!=",								/* 31=NEQUALS */
+	">",								/* 32=GREAT */
+	">=",								/* 33=GREATEQ */
+	"<",								/* 34=LESS */
+	"<=",								/* 35=LESSEQ */
+	"int->long",						/* 36=INT2L */
+	"long->int",						/* 37=LONG2I */
+	"btst",								/* 38=BTST */
+	"load",								/* 39=LOAD */
+	"long*",							/* 40=LMULT */
+	"long/",							/* 41=LDIV */
+	"long%",							/* 42=LMOD */
+	"long*=",							/* 43=LEQMULT */
+	"long/=",							/* 44=LEQDIV */
+	"long%=",							/* 45=LEQMOD */
+	"=addr",							/* 46=EQADDR */
+	"=not",								/* 47=EQNOT */
+	"=neg",								/* 48=EQNEG */
+	"docast",							/* 49=DOCAST */
+	"st=",								/* 50=STASSIGN */
+	"long->float",						/* 51=LONG2F */
+	"float->long",						/* 52=FLOAT2L */
+	"int->float",						/* 53=INT2F */
+	"float->int",						/* 54=FLOAT2I */
+	"tochar",							/* 55=TOCHAR */
 	invalid,							/* 56 */
 	invalid,							/* 57 */
 	invalid,							/* 58 */
 	invalid,							/* 59 */
-	"U&",								/* 60 */
-	"U*",								/* 61 */
-	"&&",								/* 62 */
-	"||",								/* 63 */
-	"?",								/* 64 */
-	":",								/* 65 */
-	",",								/* 66 */
-	"cint",								/* 67 */
-	"clong",							/* 68 */
-	"symbol",							/* 69 */
-	"++a",								/* 70 */
-	"a--",								/* 71 */
-	"call",								/* 72 */
-	"call()",							/* 73 */
-	"bitfield",							/* 74 */
-	"if",								/* 75 */
-	"init",								/* 76 */
-	"loadR0",							/* 77 */
-	"divlong",							/* 78 */
+	"U&",								/* 60=ADDR */
+	"U*",								/* 61=INDR */
+	"&&",								/* 62=LAND */
+	"||",								/* 63=LOR */
+	"?",								/* 64=QMARK */
+	":",								/* 65=COLON */
+	",",								/* 66=COMMA */
+	"cint",								/* 67=CINT */
+	"clong",							/* 68=CLONG */
+	"symbol",							/* 69=SYMBOL */
+	"++a",								/* 70=AUTOINC */
+	"a--",								/* 71=AUTODEC */
+	"call",								/* 72=CALL */
+	"call()",							/* 73=NACALL */
+	"bitfield",							/* 74=BFIELD */
+	"if",								/* 75=IFGOTO */
+	"init",								/* 76=INIT */
+	"loadR0",							/* 77=CFORREG */
+	"divlong",							/* 78=DCLONG */
+	"cfloat",							/* 79=CFLOAT */
 };
 
 static const char *const types[] = {
-	"typeless",							/*  0=TYPELESS */
-	"char",								/*  1=CHAR */
-	"short",							/*  2=SHORT */
-	"int",								/*  3=INT */
-	"long",								/*  4=LONG */
-	"uchar",							/*  5=UCHAR */
-	"ushort",							/*  6=USHORT */
-	"uint",								/*  7=UINT */
-	"ulong",							/*  8=ULONG */
-	"float",							/*  9=FLOAT */
+	"typeless-invalid",					/* 0=TYPELESS */
+	"char",								/* 1=CHAR */
+	"short",							/* 2=SHORT */
+	"int",								/* 3=INT */
+	"long",								/* 4=LONG */
+	"uchar",							/* 5=UCHAR */
+	"ushort",							/* 6=USHORT */
+	"uint",								/* 7=UINT */
+	"ulong",							/* 8=ULONG */
+	"float",							/* 9=FLOAT */
 	"double",							/* 10=DOUBLE */
 	"struct",							/* 11=STRUCT */
 	invalid,							/* 12=undefined */
@@ -135,7 +136,9 @@ static VOID outlevel(NOTHING)
 	register short i;
 
 	for (i = 0; i < level; i++)
-		fprintf(stderr, "     ");
+	{
+		fputs("     ", stderr);
+	}
 }
 
 
@@ -145,15 +148,15 @@ PP(struct tnode *tp;)
 	switch (SUPTYPE(tp->t_type))
 	{
 	case FUNCTION:
-		fprintf(stderr, "()");
+		fputs("()", stderr);
 		break;
 
 	case ARRAY:
-		fprintf(stderr, "[]");
+		fputs("[]", stderr);
 		break;
 
 	case POINTER:
-		fprintf(stderr, "*");
+		fputs("*", stderr);
 		break;
 	}
 	fprintf(stderr, "%s ", types[BTYPE(tp->t_type)]);
@@ -172,7 +175,7 @@ PP(struct tnode *tp;)
 	outlevel();
 	if (op < 0 || op > CFLOAT)
 	{
-		error(_("INVALID op"));
+		error("INVALID op");
 		return;
 	}
 	fprintf(stderr, "%s ", opname[op]);
@@ -182,7 +185,7 @@ PP(struct tnode *tp;)
 	case DCLONG:
 	case CLONG:
 	case CFLOAT:
-		fprintf(stderr, " %x.%x\n", ((struct lconode *) tp)->_l.w.hiword, ((struct lconode *) tp)->_l.w.loword);
+		fprintf(stderr, " %ld %x.%x\n", ((struct lconode *) tp)->t_lvalue, ((struct lconode *) tp)->_l.w.hiword, ((struct lconode *) tp)->_l.w.loword);
 		break;
 
 	case CINT:
@@ -191,7 +194,7 @@ PP(struct tnode *tp;)
 
 	case AUTODEC:
 	case AUTOINC:
-		fprintf(stderr, "Autodec or Autoinc");
+		fprintf(stderr, "Autodec or Autoinc\n");
 		break;
 
 	case SYMBOL:
@@ -202,12 +205,12 @@ PP(struct tnode *tp;)
 			break;
 
 		case CINDR:
-			fprintf(stderr, " %d\n", ((struct symnode *) tp)->t_offset);
+			fprintf(stderr, " %d", ((struct symnode *) tp)->t_offset);
 			break;
 
 		case CLINDR:
 		case CFINDR:
-			fprintf(stderr, " %x.%x\n", ((struct symnode *) tp)->t_offset, tp->t_ssp);
+			fprintf(stderr, " %x.%x", ((struct symnode *) tp)->t_offset, tp->t_ssp);
 			break;
 
 		case REGOFF:
@@ -218,7 +221,7 @@ PP(struct tnode *tp;)
 		case EXTOFF:
 			fprintf(stderr, " %s+%d", ((struct extnode *) tp)->t_symbol, ((struct extnode *) tp)->t_offset);
 			if (((struct symnode *) tp)->t_sc == EXTOFF)
-				fprintf(stderr, "Ext offset");
+				fprintf(stderr, " Ext offset");
 			break;
 
 		case STATIC:
@@ -232,7 +235,7 @@ PP(struct tnode *tp;)
 			fprintf(stderr, " %d indexed", ((struct symnode *) tp)->t_offset);
 			break;
 		}
-		oputchar('\n');
+		fputc('\n', stderr);
 		break;
 
 	case IFGOTO:
@@ -240,7 +243,7 @@ PP(struct tnode *tp;)
 		break;
 
 	default:
-		oputchar('\n');
+		fputc('\n', stderr);
 		putsexpr(tp->t_left);
 		if (BINOP(tp->t_op))
 			putsexpr(tp->t_right);

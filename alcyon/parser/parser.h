@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #define NOPROFILE
+#define DEBUG
 
 #include "icode.h"
 
@@ -368,7 +369,7 @@ short frstp;
 /* output a label */
 #define OUTLAB(lab) 	oprintf("\tL%d:",lab)
 /* output function label */
-#define OUTFLAB(sym)	oprintf("\t_%.*s:\n\t~~%.*s:\n", SSIZE, sym, SSIZE, sym)
+#define OUTFLAB(sym)	oprintf("\t_%.*s:\n", SSIZE, sym); if (gflag) oprintf("\t~~%.*s:\n", SSIZE, sym)
 #ifndef NOPROFILE
 /* output function label */
 #define OUTPCALL(sym)	oprintf("\tmove.l _%.*s,(sp)\n\tjsr ___popen\n", SSIZE, sym)

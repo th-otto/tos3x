@@ -2,7 +2,7 @@ include ../Makefile.common
 include ../Makefile.silent
 
 PROGRAMS = c068$(EXEEXT)
-LIBS = ${LIBC}
+LIBS = ${LIBC} ${LIBM}
 CPPFLAGS += -DGEMDOS
 
 all: $(PROGRAMS)

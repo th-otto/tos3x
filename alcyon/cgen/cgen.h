@@ -203,6 +203,10 @@ extern short stacksize;
 #define CONSTZERO(ltyp,p) ((ltyp && !p->t_lvalue) || (!ltyp && !p->t_value))
 #define SETVAL(ltyp,p,val) if (ltyp) p->t_lvalue = val; else p->t_value = val
 
+#define BFOFFS(su) (((su) >> 8) & 0xff)
+#define BFLEN(su)  (((su)     ) & 0xff)
+
+
 #ifdef DEBUG
 #	define PUTEXPR(cond,id_str,node_ptr)	if (cond) putexpr(id_str,node_ptr)
 #else
