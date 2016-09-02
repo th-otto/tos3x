@@ -244,7 +244,9 @@ PP(register long siz;)
 	register char *np;						/* ptr to new allocation    */
 	register long nmults;					/* multiples if FB_HDR size */
 	FB_HDR *pp;
+	long oldsiz;
 	
+	oldsiz = ((((FB_HDR *) ptr) - 1)->size - 1) * sizeof(FB_HDR);
 	/* stuff back into free list: any coalesce will not */
 	lfree(ptr); /* WTF; bad idea */
 	if (siz == 0)
@@ -258,11 +260,12 @@ PP(register long siz;)
 	np = (char *)(pp->ptr + 1);
 	if (ptr != NULL && ptr != np && siz != 0)
 	{
+		if (oldsiz < siz)
+			siz = oldsiz;
 		/* if ptr changed */
 		if (np < (char *)ptr)
 		{
 			/* if new ptr in lower mem, copy up */
-			/* BUG: should copy old size only */
 			do
 			{
 				*np++ = *ptr++;
@@ -270,7 +273,6 @@ PP(register long siz;)
 		} else
 		{
 			/* if new ptr in higher mem copy down */
-			/* BUG: should copy old size only */
 			np += siz;
 			ptr += siz;
 			do
