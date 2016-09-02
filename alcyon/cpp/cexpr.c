@@ -10,13 +10,13 @@
 #define OPPRI   077
 #define OPBIN   0100
 #define STKLEN  64
-int oprstk[STKLEN];						/* operator stack */
-int opnstk[STKLEN];						/* operand stack */
-int pristk[STKLEN];						/* operator priority stack */
-int *oprptr;							/* pointer to operator stack */
-int *opnptr;							/* pointer to operand stack */
-int *priptr;							/* pointer to priority stack */
-int cvalue;
+static int oprstk[STKLEN];					/* operator stack */
+static long opnstk[STKLEN];					/* operand stack */
+static int pristk[STKLEN];					/* operator priority stack */
+static int *oprptr;							/* pointer to operator stack */
+static long *opnptr;						/* pointer to operand stack */
+static int *priptr;							/* pointer to priority stack */
+static long cvalue;
 
 static int const opinfo[] = {
 	0,									/* CEOF=0 */
@@ -45,157 +45,6 @@ static int const opinfo[] = {
 	20,									/* COMPL=23 */
 };
 
-/* cexpr - constant expression evaluation*/
-/*      Does priority-driven operator/operand stack evaluation of*/
-/*      constant expressions.*/
-int cexpr(NOTHING)									/* returns constant evaluated */
-{
-	register int lop, type;
-
-	oprptr = &oprstk[0];
-	opnptr = &opnstk[0];
-	priptr = &pristk[0];
-	*priptr = 0;
-	lop = -1;
-	for (;;)
-	{
-		switch (type = getctok())
-		{
-		case CONST:
-			if (!lop)					/* last was not operator */
-				goto syntax;
-			if (opnptr >= &opnstk[STKLEN])
-			{
-				error("expression stack overflow");
-				cexit();
-			}
-			lop = FALSE;
-			*++opnptr = cvalue;
-			continue;
-
-		case SUB:
-			if (lop)
-				type = NEG;				/* unary minus */
-			break;
-
-		case ADD:
-			if (lop)
-				continue;				/* ignore unary + */
-			break;
-
-		case COMPL:
-		case LPAREN:
-		case NOT:
-			if (!lop)
-				goto syntax;
-			break;
-
-		case RPAREN:
-			if (lop)
-				goto syntax;
-			lop = FALSE;
-			if (!stkop(type))
-				goto syntax;
-			continue;
-
-		case NEWL:
-		case CEOF:
-			if (lop || !stkop(CEOF) || opnptr != &opnstk[1])
-				goto syntax;
-			type = opnstk[1];
-			putback('\n');
-			return type;
-
-		default:
-			if (lop || type > LASTOP)
-				goto syntax;
-			break;
-		}
-		lop = TRUE;
-		if (!stkop(type))
-			goto syntax;
-	}
-  syntax:
-	error("expression syntax");
-	if (type == NEWL)
-		putback('\n');
-	return 0;
-}
-
-
-/* getctok - get a constant expression token*/
-/*      Handles conversion of quoted character strings and numbers.*/
-int getctok(NOTHING)
-{
-	register int type;
-	register int c;
-	register int count;
-	register struct symbol *sp;
-	register char *p;
-	char token[TOKSIZE];
-
-	for (;;)
-	{
-		switch (type = getntok(token))
-		{
-		case DIGIT:
-			cvalue = constexpr(token);
-			return CONST;
-
-		case SQUOTE:
-			for (cvalue = 0, p = &token[1], count = 2; --count >= 0;)
-			{
-				if ((c = *p++) == '\'')
-					break;
-				if (c == '\\')
-				{
-					if (*p >= '0' && *p <= '7')
-					{
-						for (c = 0; *p >= '0' && *p <= '7';)
-							c = (c << 3) + (*p++ - '0');
-					} else
-					{
-						switch (c = *p++)
-						{
-						case 'n':
-							c = '\n';
-							break;
-
-						case 't':
-							c = '\t';
-							break;
-
-						case 'b':
-							c = '\b';
-							break;
-
-						case 'r':
-							c = '\r';
-							break;
-
-						case 'f':
-							c = '\f';
-							break;
-						}
-					}
-				}
-				cvalue = (cvalue << 8) | c;
-			}
-			return CONST;
-
-		case ALPHA:
-			if ((sp = lookup(token)) != NULL)
-				expand(sp);
-			else
-				return ALPHA;
-			break;
-
-		default:
-			return type;
-		}
-	}
-}
-
 
 /*
  * stkop - stack an operator on the operand stack
@@ -204,11 +53,11 @@ int getctok(NOTHING)
  * they are unstacked.
  * returns 1 if ok, 0 otherwise
  */
-int stkop(P(int) opr)
+static int stkop(P(int) opr)
 PP(int opr;)
 {
-	register int op1;
-	register int op2;
+	register long op1;
+	register long op2;
 	register int pri;
 
 	op2 = 0; /* avoid compiler warning */
@@ -325,7 +174,7 @@ PP(int opr;)
 	}
 	if (priptr >= &pristk[STKLEN - 1])
 	{
-		error("expression operator stack overflow");
+		error(_("expression operator stack overflow"));
 		cexit();
 	}
 	*++oprptr = opr;					/* operator value */
@@ -334,17 +183,206 @@ PP(int opr;)
 }
 
 
+/*
+ * getctok - get a constant expression token
+ * Handles conversion of quoted character strings and numbers.
+ */
+static int getctok(NOTHING)
+{
+	register int type;
+	register int c;
+	register int count;
+	register struct symbol *sp;
+	register char *p;
+	char token[TOKSIZE];
+
+	for (;;)
+	{
+		switch (type = getntok(token))
+		{
+		case DIGIT:
+			cvalue = constexpr(token);
+			return CONST;
+
+		case SQUOTE:
+			printf("SQUOTE: %s\n", token);
+			for (cvalue = 0, p = &token[1], count = sizeof(cvalue); --count >= 0;)
+			{
+				if ((c = *p++) == '\'')
+					break;
+				if (c == '\\')
+				{
+					if (*p >= '0' && *p <= '7')
+					{
+						for (c = 0; *p >= '0' && *p <= '7';)
+							c = (c << 3) + (*p++ - '0');
+					} else
+					{
+						switch (c = *p++)
+						{
+						case 'n':
+							c = 0x0a;
+							break;
+
+						case 't':
+							c = 0x09;
+							break;
+
+						case 'b':
+							c = 0x08;
+							break;
+
+						case 'r':
+							c = 0x0d;
+							break;
+
+						case 'f':
+							c = 0x0c;
+							break;
+
+						case 'a':
+							c = 0x07;
+							break;
+
+						case 'v':
+							c = 0x0b;
+							break;
+
+						case 'e':
+							c = 0x1b;
+							break;
+						
+						case '\'':
+						case '"':
+						case '\\':
+							break;
+						
+						default:
+							warning(_("unknown escape sequence '\\%c'"), c);
+							break;
+						}
+					}
+				}
+				cvalue = (cvalue << 8) | c;
+			}
+			if (count < (sizeof(cvalue) - 2))
+				warning(_("multi-character character constant"));
+			return CONST;
+
+		case ALPHA:
+			if ((sp = lookup(token)) != NULL)
+			{
+				expand(sp);
+			} else
+			{
+				warning(_("\"%s\" is not defined"), token);
+				cvalue = 0;
+				return ALPHA;
+			}
+			break;
+
+		default:
+			return type;
+		}
+	}
+}
+
+
+/*
+ * cexpr - constant expression evaluation
+ *      Does priority-driven operator/operand stack evaluation of
+ *      constant expressions.
+ */
+long cexpr(NOTHING)									/* returns constant evaluated */
+{
+	register int lop, type;
+	register long v;
+	
+	oprptr = &oprstk[0];
+	opnptr = &opnstk[0];
+	priptr = &pristk[0];
+	*priptr = 0;
+	lop = -1;
+	for (;;)
+	{
+		switch (type = getctok())
+		{
+		case ALPHA:
+		case CONST:
+			if (!lop)					/* last was not operator */
+				goto syntax;
+			if (opnptr >= &opnstk[STKLEN])
+			{
+				error(_("expression stack overflow"));
+				cexit();
+			}
+			lop = FALSE;
+			*++opnptr = cvalue;
+			continue;
+
+		case SUB:
+			if (lop)
+				type = NEG;				/* unary minus */
+			break;
+
+		case ADD:
+			if (lop)
+				continue;				/* ignore unary + */
+			break;
+
+		case COMPL:
+		case LPAREN:
+		case NOT:
+			if (!lop)
+				goto syntax;
+			break;
+
+		case RPAREN:
+			if (lop)
+				goto syntax;
+			lop = FALSE;
+			if (!stkop(type))
+				goto syntax;
+			continue;
+
+		case NEWL:
+		case CEOF:
+			if (lop || !stkop(CEOF) || opnptr != &opnstk[1])
+				goto syntax;
+			v = opnstk[1];
+			putback('\n');
+			return v;
+
+		default:
+			if (lop || type > LASTOP)
+				goto syntax;
+			break;
+		}
+		lop = TRUE;
+		if (!stkop(type))
+			goto syntax;
+	}
+  syntax:
+	error(_("expression syntax"));
+	if (type == NEWL)
+		putback('\n');
+	return 0;
+}
+
+
+#undef toupper
 #define toupper(c)  ((c) & ~32)
 /*
  * constexpr - alpha to int conversion, handles octal and hexadecimal
  *      Uses Horner's method to evaluate number.
  * returns number evaluated
  */
-int constexpr(P(const char *) str)
+long constexpr(P(const char *) str)
 PP(const char *str;)
 {
-	register int c, i, radix;
-
+	register int c, radix;
+	register long i;
+	
 	i = 0;
 	radix = 10;
 	if (*str == '0')
@@ -358,10 +396,10 @@ PP(const char *str;)
 	}
 	while ((c = *str++) != 0)
 	{
-		if ((c = toupper(c)) >= 'A' && c <= 'F')
-			c = c - ('A' - 10);
-		else if (c >= '0' && c <= '9')
+		if (c >= '0' && c <= '9')
 			c -= '0';
+		else if ((c = toupper(c)) >= 'A' && c <= 'F')
+			c = c - ('A' - 10);
 		else
 			break;
 		if (c >= radix)

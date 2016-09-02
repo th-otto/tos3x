@@ -9,6 +9,8 @@ all: $(PROGRAMS)
 
 include SRCFILES
 
+LIB1OBJS = kputc.o kgetc.o kopen.o
+
 LIBOBJS = \
 		$(LIBSRC)kcreat.o \
 		$(LIBSRC)kwritef.o \
@@ -62,11 +64,11 @@ LIBOBJS = \
 		$(LIBSRC)lmul.o \
 		$(empty)
 
-#cp68$(EXEEXT): $(CP_OBJS) ${MAKEFILE}
-#	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ crtg.o $(CP_OBJS) $(LIBOBJS)
+#cp68$(EXEEXT): $(CP_OBJS) $(LIB1OBJS) ${MAKEFILE}
+#	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ crtg.o $(CP_OBJS) $(LIB1OBJS) $(LIBOBJS)
 
 
-cp68.rel: $(CP_OBJS) cp68.lnk ${MAKEFILE}
+cp68.rel: $(CP_OBJS) $(LIB1OBJS) cp68.lnk ${MAKEFILE}
 	$(CP) $(LIBSRC)crtg.o $(LIBSRC)$(LIBC) $(LIBOBJS) .
 	$(RM) $@
 	$(LINK68) [un,co[cp68.lnk]]

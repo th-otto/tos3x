@@ -124,7 +124,7 @@ you loose
 #define	TOKSIZE		300
 #define	DEFSIZE		1024
 #define PBSIZE		1000
-#define STDERR		2				/* [vlh] 4.2, write errors to.... */
+#define STDERR		2				/* write errors to.... */
 
 #define TRUE		1
 #define FALSE		0
@@ -175,7 +175,7 @@ struct stackstruc {
 /* Variables used by #line macros */
 int literal;			/* using #line */
 int lit_num;			/* for error messages */
-char lit_file[/* MAXPSIZE */];		/* for error messages */
+char lit_file[MAXPSIZE];		/* for error messages */
 
 /* Flag Variable Declarations */
 int pflag;

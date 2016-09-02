@@ -92,7 +92,7 @@ static char const asmap[] = {
 
 static short pbchar;								/* pushed back character */
 
-static char const escmap[] = "\010\012\015\011\014";
+static char const escmap[] = "\010\012\015\011\014\007\011\033";
 
 
 /* used by getfp, 10^pwr */
@@ -694,10 +694,13 @@ PP(char endc;)								/* ending string character */
 					error(_("bad character constant"));
 					continue;
 				}
-			} else if ((j = strindex("bnrtf", c)) >= 0)	/* 4.1 added f... */
-				c = escmap[j];
-			else if (c == EOLC)			/* escape followed by nl->ignore */
+			} else if (c == EOLC)			/* escape followed by nl->ignore */
+			{
 				continue;
+			} else if ((j = strindex("bnrtfave", c)) >= 0)
+			{
+				c = escmap[j];
+			}
 		}
 		if (i > 0)
 		{								/* room left in string? */

@@ -139,7 +139,7 @@ PP(char *sym2;)
 		else
 			*q++ = '\0';
 	}
-	*q = '\0';							/* [vlh] 4.1, force null terminator */
+	*q = '\0';
 }
 
 
@@ -155,7 +155,7 @@ int x1, x2, x3, x4, x5, x6;
 #ifndef ALTER_PR
 	if (literal)
 		printf((char *) STDERR, "%s, # line %d: ", lit_file, lit_num);
-	else if (filep == &filestack[0])	/* [vlh] 3.4 not in include */
+	else if (filep == &filestack[0])
 		printf((char *) STDERR, "%s, # line %d: ", source, lineno);
 	else
 		printf((char *) STDERR, "%s, # line %d: ", (filep)->ifile, (filep)->lineno);
@@ -164,7 +164,7 @@ int x1, x2, x3, x4, x5, x6;
 #else
 	if (literal)
 		printf("%s, # line %d: ", lit_file, lit_num);
-	else if (filep == &filestack[0])	/* [vlh] 3.4 not in include */
+	else if (filep == &filestack[0])
 		printf("%s, # line %d: ", source, lineno);
 	else
 		printf("%s, # line %d: ", (filep)->ifile, (filep)->lineno);
@@ -182,7 +182,7 @@ _va_dcl
 	
 	if (literal)
 		fprintf(stderr, "%s, # line %d: ", lit_file, lit_num);
-	else if (filep == &filestack[0])	/* [vlh] 3.4 not in include */
+	else if (filep == &filestack[0])
 		fprintf(stderr, "%s, # line %d: ", source, lineno);
 	else
 		fprintf(stderr, "%s, # line %d: ", (filep - 1)->ifile, (filep - 1)->lineno);
@@ -261,16 +261,11 @@ int ngetch(NOTHING)
 		for (i = 0; i < BLEN; i++)
 			*p++ = *q++;
 #else
-/*sw This code no longer necessary ...
-		inbuf.cc = 0;
-        inbuf.cp = &inbuf.cbuf[0];
-*/
 #endif
-/*sw    filep->inbuf.fd = filep->ifd; */
 		if (filep == &filestack[0])
 		{								/* need line for #include... */
 			lineno++;
-			putid(source, lineno);		/* [vlh] 4.2 id line .... */
+			putid(source, lineno);
 		} else
 		{
 			(filep)->lineno++;
@@ -381,7 +376,7 @@ PP(char *token;)
 		if (getstr(token, TOKSIZE, c))
 			return type;
 		else
-		{								/* [vlh]4.3, ignore incomplete strings... could be asm comment */
+		{								/* ignore incomplete strings... could be asm comment */
 			token[0] = '\n';
 			return NEWL;
 		}
@@ -446,16 +441,16 @@ PP(char *token;)
 				ppputl('/');
 				ppputl('*');
 			}
-			l = 0;						/* [vlh] 4.3, change in line counting technique */
+			l = 0;
 			for (;;)
 			{
 				if ((c = ngetch()) == CEOF)
 					break;
 				if (c == '\n')
 				{
-					l++;				/* [vlh] 4.3, keep line counter */
+					l++;				/* keep line counter */
 					if (Cflag)
-					{					/* [vlh] 4.2 */
+					{
 						ppputl('\0');
 						s = line;
 						for (;;)
@@ -471,21 +466,21 @@ PP(char *token;)
 				} else if (c == '*' && peekis('/'))
 				{
 					if (Cflag)
-					{					/* [vlh] 4.2 */
+					{
 						ppputl('*');
 						ppputl('/');
 					}
 					break;
-				} else if (Cflag)		/* [vlh] 4.2.c */
+				} else if (Cflag)
 				{
 					ppputl(c);
 				}
 			}
 			if (c == CEOF)
 				error("no */ before EOF");
-			if (filep == &filestack[0])	/* [vlh] 4.3 */
+			if (filep == &filestack[0])
 				lineno += l;
-			else						/* [vlh] 4.3, update include lineno */
+			else						/* update include lineno */
 				(filep)->lineno += l;
 			type = WHITE;
 			token[0] = ' ';
@@ -542,7 +537,7 @@ PP(char endc;)
 		if ((c = ngetch()) == endc)
 			break;
 		if (c == CEOF || c == '\n')
-		{								/* [vlh] 4.3, ignore non ended string */
+		{								/* ignore non ended string */
 			*p = '\0';
 			p = str;
 			for (;;)
@@ -552,7 +547,7 @@ PP(char endc;)
 				ppputl((int) *p++);
 			}
 			return FALSE;
-		}								/* [vlh] 4.3, may be assembly language comment !!!! */
+		}								/* may be assembly language comment !!!! */
 		if (--i > 0)
 			*p++ = c;
 		else if (!i)
@@ -611,7 +606,7 @@ PP(struct iob *buffer;)
 }
 
 
-#ifdef DECC								/*sw You should really do this as a library... */
+#ifdef DECC
 int getc(ibuf)
 struct iob *ibuf;
 {

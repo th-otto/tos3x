@@ -17,7 +17,7 @@
 #endif
 
 #ifdef REGULUS
-const char *stdincl = "/usr/include";			/*standard include directory */
+const char *stdincl = "/usr/include";			/* standard include directory */
 #endif
 
 #ifdef VMS
@@ -42,14 +42,14 @@ char *defbufp = &defbuf[0];				/* pointer int buffer */
 
 char *defpnew;							/* address of beginning of define entry */
 
-const char *stdincl = "/usr/include/";		/*standard include directory */
+const char *stdincl = "/usr/include/";		/* standard include directory */
 #	else
-const char *stdincl = "lib:";					/*standard include directory */
+const char *stdincl = "lib:";					/* standard include directory */
 #	endif
 #endif
 
 #ifdef UNIX
-const char *stdincl = "/usr/include/c68";		/*standard include directory */
+const char *stdincl = "/usr/include/c68";		/* standard include directory */
 #endif
 
 #ifdef CPM
@@ -128,10 +128,10 @@ PP(int nd;)									/* number of defines */
 	register struct symbol *sp;
 	register int x;
 
-	filep = &filestack[0];				/* [vlh] 4.0 moved for error msgs */
-	lineno = 1;							/* [vlh] 4.0 moved for error msgs */
+	filep = &filestack[0];
+	lineno = 1;
 	if (fopen(source, &(filep->inbuf), 0) < 0)
-	{									/*sw 3rd arg for versados */
+	{
 		error("can't open source file %s\n", source);
 		return FALSE;
 	}
@@ -177,12 +177,12 @@ PP(int nd;)									/* number of defines */
 			break;
 		if (filep == &filestack[0] && pbp == &pbbuf[0])
 			lineno++;
-		else if (filep != &filestack[0])	/*[vlh] include file */
+		else if (filep != &filestack[0])
 			(filep)->lineno++;
 		if (!skip)
-		{								/* [vlh] 4.3, don't put out cr-lf if skipping */
+		{								/* don't put out cr-lf if skipping */
 			if (!lit_skip)
-			{							/* [vlh] 4.3, endif literalized */
+			{							/* endif literalized */
 				l = line;
 				for (;;)
 				{
@@ -190,12 +190,11 @@ PP(int nd;)									/* number of defines */
 						break;
 					doputc(*l++, &outbuf);
 				}
-#ifdef VERSADOS
-				doputc(' ', &outbuf);
-#endif
 				doputc('\n', &outbuf);
 			} else
+			{
 				lit_skip = 0;
+			}
 		}
 		if (literal)
 		{
@@ -229,7 +228,7 @@ PP(int nd;)									/* number of defines */
 }
 
 
-/* [vlh] 4.0 SOH line header */
+/* SOH line header */
 VOID putid(P(const char *) fname, P(int) lnum)
 PP(const char *fname;)
 PP(int lnum;)
@@ -248,6 +247,7 @@ PP(int lnum;)
 	doputc('#', &outbuf);
 	doputc(' ', &outbuf);
 	itoa(lnum, tmp, NUMLEN - 1);
+	/* nonsense: itoa with length argument to fill with space, only to skip it right again */
 	for (p = tmp; ;)
 	{
 		if (*p != ' ')
@@ -261,6 +261,7 @@ PP(int lnum;)
 		doputc(*p, &outbuf);
 	}
 	doputc(' ', &outbuf);
+	/* BUG: missing quotes around filename */
 	for (p = fname; ; p++)
 	{
 		if (*p == '\0')
@@ -295,7 +296,7 @@ PP(const char *def;)								/* pointer to definition */
 	symcopy(name, sp->s_name);
 	sp->s_def = defp;
 	putd(NOARGS);
-	if (def)							/* [vlh] character strings... */
+	if (def)							/* character strings... */
 	{
 		for (;;)
 		{
@@ -305,7 +306,7 @@ PP(const char *def;)								/* pointer to definition */
 		}
 	} else
 	{
-		putd('1');						/* [vlh] default define value */
+		putd('1');						/* default define value */
 	}
 	putd('\0');
 }
@@ -390,7 +391,7 @@ PP(const char *infile;)
 			{
 				skip--;
 				if (!skip)
-				{						/* [vlh] 4.3, matches original skip.... */
+				{						/* matches original skip.... */
 					if (filep != &filestack[0])
 						putid((filep)->ifile, (filep)->lineno);
 					else
@@ -398,7 +399,7 @@ PP(const char *infile;)
 #ifdef __ALCYON__
 					lit_skip; /* hmpf? */
 #endif
-				}						/* [vlh]4.3, identify this line */
+				}
 			} else if (i != NOSKIP)
 			{
 				error("invalid #endif");
@@ -406,6 +407,7 @@ PP(const char *infile;)
 			break;
 
 		case ELSE:
+			/* BUG: does not detect else after else */
 			if ((i = pop()) == SKIP)
 			{
 				skip--;
@@ -421,13 +423,13 @@ PP(const char *infile;)
 			break;
 
 		case DEFINE:
-			if (!skip)					/*if in skip, don't do define */
+			if (!skip)					/* if in skip, don't do define */
 				dodefine();
 			break;
 
 		case UNDEF:
 			if (!skip)
-			{							/*if in skip, don't undef */
+			{							/* if in skip, don't undef */
 				if ((type = getntok(token)) == ALPHA)
 					undefine(token);
 			}
@@ -435,7 +437,7 @@ PP(const char *infile;)
 
 		case INCLUDE:
 			if (!skip)
-			{							/*if in skip, don't do include */
+			{							/* if in skip, don't do include */
 				doinclude(infile);
 				if (filep != &filestack[0])
 					i = getaline((filep)->ifile);
@@ -446,9 +448,9 @@ PP(const char *infile;)
 			break;
 
 		case IF:
-			if (!skip && cexpr())		/*[vlh]4.3, don't do if skipping */
+			if (!skip && cexpr())		/* don't do if skipping */
 			{
-				push(NOSKIP);			/*non-zero, so don't skip */
+				push(NOSKIP);			/* non-zero, so don't skip */
 			} else
 			{							/* don't do if skipping or cexpr evaluates zero */
 				push(SKIP);
@@ -456,9 +458,9 @@ PP(const char *infile;)
 			}
 			break;
 
-		case LINE:						/* [vlh] 4.0 */
+		case LINE:
 			if (!skip)
-			{							/* [vlh] 4.3, do skip... */
+			{
 				doline();
 				return getaline(infile);
 			}
@@ -530,6 +532,7 @@ PP(const char *infile;)
 	} else if (strcmp(token, "__LINE") == 0)
 	{
 		xline = (literal) ? lit_num : (filep == &filestack[0]) ? lineno : (filep)->lineno;
+		/* nonsense: itoa with length argument to fill with space, only to skip it right again */
 		itoa(xline, buf, 7);
 		buf[7] = 0;
 		for (p = &buf[0]; ;)
@@ -693,19 +696,19 @@ VOID dodefine(NOTHING)
 		pbtok(token);
 		putd(NOARGS);
 	}
-	type = getntok(token);				/*get next non-white token */
+	type = getntok(token);				/* get next non-white token */
 	for (; ; type = gettok(token))
 	{
 		if (type == NEWL || type == CEOF)
 			break;
 		if (type == ALPHA || type == SQUOTE || type == DQUOTE)
-		{								/* [vlh] 4.1 */
-			trymatch(token, type, nargs, args);	/* [vlh] 4.1 */
+		{
+			trymatch(token, type, nargs, args);
 			continue;
 		} else if (type == BSLASH)
 		{
 			if ((i = ngetch()) == '\n')
-			{							/*multi-line macro? */
+			{							/* multi-line macro? */
 				if (filep == &filestack[0])
 					lineno++;
 				else
@@ -830,7 +833,7 @@ PP(struct symbol *sp;)
 		return;
 	}
 	if (strcmp(sp->s_name, mdef = sp->s_def) == 0)
-	{									/*handle #define x x */
+	{									/* handle #define x x */
 		for (;;)
 		{
 			if (*mdef == '\0')
@@ -840,10 +843,10 @@ PP(struct symbol *sp;)
 		return;
 	}
 	nargs = 0;
-	if (*mdef == NOARGS)				/*suppress grabbing of args */
+	if (*mdef == NOARGS)				/* suppress grabbing of args */
 	{
 		;
-	} else if (getntok(token) != LPAREN)	/* [vlh] 4.1 ignore white space */
+	} else if (getntok(token) != LPAREN)	/* ignore white space */
 	{
 		pbtok(token);
 	} else
@@ -890,7 +893,7 @@ PP(struct symbol *sp;)
 		pbtok("_L");
 	} else
 	{
-		mdef++;							/*skip no. of args */
+		mdef++;							/* skip no. of args */
 		for (p = mdef + (int)strlen(mdef) - 1; ; p--)
 		{
 			if (p < mdef)
@@ -978,7 +981,7 @@ PP(char *argp;)
 	{
 		if (((type = gettok(token)) == COMMA || type == RPAREN) && plevel == 0)
 			break;
-		if (type == NEWL)				/* [vlh] 4.3 multi line macro expansion */
+		if (type == NEWL)				/* multi line macro expansion */
 		{
 			ppputl('\n');
 		} else
@@ -1104,14 +1107,13 @@ PP(const char *infile;)
 		}
 		p = getinclude(fname, (char *) 0L);
 	}
-	eatup();							/*need here... */
-	filep++;							/*sw Increment BEFORE */
+	eatup();							/* need here... */
+	filep++;							/* sw Increment BEFORE */
 	if (filep >= &filestack[FSTACK])
 	{
 		error("includes nested too deeply");
 	} else
 	{
-/*sw    fd = inbuf.fd; */
 #ifdef NONEST
 		filep->tcc = inbuf.cc;
 		filep->tcp = inbuf.cp;
@@ -1119,12 +1121,9 @@ PP(const char *infile;)
 		ptr2 = &inbuf.cbuf[0];
 		for (i = 0; i < BLEN; i++)
 			*ptr1++ = *ptr2++;
-#else
-		/*sw    seek(fd,-inbuf.cc,1);  *//*back up file ptr */
 #endif
-/*      inbuf.cc = 0; */
 		if (fopen(p, &(filep->inbuf), 0) < 0)
-		{								/* 3rd arg for versados */
+		{
 			if (type != SQUOTE && type != DQUOTE)
 				error("can't open include file %s", p);
 			else
@@ -1132,14 +1131,12 @@ PP(const char *infile;)
 #ifdef NONEST
 			inbuf.cc = filep->tcc;
 #endif
-			filep--;					/*sw Undo the damage        */
+			filep--;					/* Undo the damage */
 		} else
 		{
-/*sw        filep->ifd = fd;	*/
-			filep->lineno = 1;			/* [vlh] */
+			filep->lineno = 1;
 			putid(p, 1);				/* id for include file */
 			doifile(p);
-/*sw        filep++;*/
 		}
 	}
 	UNUSED(ptr1);
@@ -1248,7 +1245,7 @@ PP(const char *parent;)
 		if ((*t++ = *q++) == '\0')
 			break;
 	}
-#ifdef	UNIX							/*sw You can't have tested this.... */
+#ifdef	UNIX
 	*(t - 1) = FILESEP;
 #endif
 #ifdef	REGULUS

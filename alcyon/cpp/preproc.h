@@ -155,10 +155,8 @@ extern int pbflag;							/* checks for recursive definition */
 /*
  * cexpr.c
  */
-int cexpr PROTO((NOTHING));
-int getctok PROTO((NOTHING));
-int stkop PROTO((int opr));
-int constexpr PROTO((const char *str));
+long cexpr PROTO((NOTHING));
+long constexpr PROTO((const char *str));
 
 /*
  * lex.c
@@ -167,6 +165,7 @@ extern char const ctype[];
 
 VOID symcopy PROTO((const char *sym1, char *sym2));
 VOID error PROTO((const char *s, ...)) __attribute__((format(printf, 1, 2)));
+VOID warning PROTO((const char *s, ...)) __attribute__((format(printf, 1, 2)));
 VOID putback PROTO((int c));
 VOID pbtok PROTO((const char *s));
 int ngetch PROTO((NOTHING));
@@ -182,7 +181,6 @@ extern int nincl;
 extern char *incl[NINCL];
 
 VOID putid PROTO((const char *fname, int lnum));
-VOID install PROTO((const char *name, int def));
 int kwlook PROTO((const char *name));
 VOID ppputl PROTO((int c));
 VOID initl PROTO((NOTHING));

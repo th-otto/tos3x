@@ -9,7 +9,7 @@
 
 char const ctype[] = {
 	CEOF, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
-	ANYC, WHITE, NEWL, ANYC, ANYC, ANYC, ANYC, ANYC,
+	ANYC, WHITE, NEWL, ANYC, WHITE, WHITE, WHITE, ANYC,
 	ANYC, ANYC, ANYC, ANYC, NEWL, ANYC, ANYC, ANYC,
 	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
 	WHITE, NOT, DQUOTE, POUND, ANYC, MOD, AND, SQUOTE,
@@ -23,7 +23,15 @@ char const ctype[] = {
 	ANYC, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA,
 	ALPHA, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA,
 	ALPHA, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA, ALPHA,
-	ALPHA, ALPHA, ALPHA, ANYC, OR, ANYC, COMPL, ANYC
+	ALPHA, ALPHA, ALPHA, ANYC, OR, ANYC, COMPL, ANYC,
+	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
+	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
+	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
+	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
+	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
+	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
+	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC,
+	ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC, ANYC
 };
 
 struct stackstruc *filep;
@@ -130,6 +138,33 @@ _va_dcl
 
 
 /*
+ * warning - output warning message
+ *      Outputs line number and error message.
+ */
+VOID warning(P(const char *) s _va_alist)
+PP(const char *s;)
+_va_dcl
+{
+	va_list args;
+	
+	if (lineno != 0)
+	{
+		if (literal)
+			fprintf(stderr, "%s, # line %d: ", lit_file, lit_num);
+		else if (filep == &filestack[0])	/* not in include */
+			fprintf(stderr, "%s, # line %d: ", source, lineno);
+		else
+			fprintf(stderr, "%s, # line %d: ", (filep - 1)->ifile, (filep - 1)->lineno);
+	}
+	fputs(_("warning: "), stderr);
+	va_start(args, s);
+	vfprintf(stderr, s, args);
+	fputc('\n', stderr);
+	va_end(args);
+}
+
+
+/*
  * putback - puts back a single character
  *      Checks for push back buffer overflow.
  */
@@ -212,11 +247,11 @@ PP(const char *name;)
 
 	wrap = 0;
 	asp = 0;
-	for (sp = &symtab[symhash(name)]; sp->s_def != 0;)
+	for (sp = &symtab[symhash(name)]; sp->s_def >= 0;)
 	{
 		if (symequal(sp->s_name, name))
 			return sp;
-		if (!asp && sp->s_def == 0)
+		if (!asp && sp->s_def < 0)
 			asp = sp;
 		if (++sp >= &symtab[HSIZE])
 		{

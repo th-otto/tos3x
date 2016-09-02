@@ -54,9 +54,6 @@ static char *cstkptr;
 static char inclname[TOKSIZE];
 
 
-static int getaline PROTO((const char *infile));
-
-
 /*
  * putd - put a character to the define buffer
  *      Does dynamic allocation for define buffer
@@ -103,124 +100,7 @@ PP(const char *def;)								/* pointer to definition */
 }
 
 
-/*
- * domacro - do macro processing
- *      Does the macro pre-processing on the input file and leaves the
- *      result on the output file.
- */
-int domacro(P(int) nd)
-PP(int nd;)
-{
-	register char *l;
-	register struct symbol *sp;
-
-	filep = &filestack[0];
-	if ((inbuf = fopen(source, "r")) == NULL)
-	{
-		error(_("can't open source file %s\n"), source);
-		return FALSE;
-	}
-	if (!Eflag)
-	{
-		if ((outbuf = fopen(dest, "w")) == NULL)
-		{
-			error(_("can't creat %s\n"), dest);
-			return FALSE;
-		}
-	}
-	lineno = 1;
-	putid(source, 1);					/* identify as first line in source file */
-
-	/* clear out symbol table */
-	for (sp = &symtab[0]; sp <= &symtab[HSIZE - 1]; sp++)
-		sp->s_def = 0;
-	defap = lmalloc((long)DEFSIZE);
-	if (defap == NULL)
-	{
-		error(_("define table overflow"));
-		cexit();
-	}
-	defcount = DEFSIZE;
-	defmax = 0;
-	defused = 0;
-	putd('\0');
-
-	pbp = &pbbuf[0];
-	cstkptr = &cstack[0];
-	install("Newlabel", NEWLABEL);
-	install("Label", LABEL);
-	while (--nd >= 0)
-		dinstall(defs[nd].ptr, defs[nd].value);
-	while (getaline(source))
-	{
-		l = line;
-		if (filep == &filestack[0] && pbp == &pbbuf[0])
-			lineno++;
-		else if (filep != &filestack[0])
-			(filep - 1)->lineno++;
-		while (*l)
-			fputc(*l++, outbuf);
-		fputc(' ', outbuf);
-		fputc('\n', outbuf);
-		if (literal)
-		{
-			if (filep != &filestack[0])
-			{
-				(filep - 1)->lineno++;
-				putid((filep - 1)->ifile, (filep - 1)->lineno);
-			} else
-			{
-				lineno++;
-				putid(source, lineno);
-			}
-			literal = 0;
-		}
-	}
-	if (cstkptr != &cstack[0])
-		error(_("unmatched conditional"));
-	if (defused > defmax)
-		defmax = defused;
-	fflush(outbuf);
-	if (!Eflag)
-		fclose(outbuf);
-	fclose(inbuf);
-	return 1;
-}
-
-
-/* SOH line header */
-VOID putid(P(const char *) fname, P(int) lnum)
-PP(const char *fname;)
-PP(int lnum;)
-{
-	register const char *p;
-#define NUMLEN  20
-	char tmp[NUMLEN];						/* temporary spot for line number itoa conversion */
-
-	if (asflag || pflag)
-		return;
-
-	if (literal)
-	{
-		strcpy(lit_file, fname);
-		lit_num = lnum;
-	}
-
-	fputc('#', outbuf);
-	fputc(' ', outbuf);
-	itoa(lnum, tmp, 0);
-	for (p = tmp; *p; p++)
-		fputc(*p, outbuf);
-	fputc(' ', outbuf);
-	fputc('"', outbuf);
-	for (p = fname; *p; p++)
-		fputc(*p, outbuf);
-	fputc('"', outbuf);
-	fputc('\n', outbuf);
-}
-
-
-VOID install(P(const char *) name, P(int) def)
+static VOID install(P(const char *) name, P(int) def)
 PP(const char *name;)
 PP(int def;)
 {
@@ -235,23 +115,6 @@ PP(int def;)
 
 
 /*
- * kwlook - look up the macro built-in names
- *      Searches thru the built-in table for the name.
- * returns keyword index or 0
- */
-int kwlook(P(const char *) name)
-PP(const char *name;)
-{
-	register const struct builtin *bp;
-
-	for (bp = &btab[0]; bp->b_name != NULL; bp++)
-		if (strcmp(bp->b_name, name) == 0)
-			return bp->b_type;
-	return 0;
-}
-
-
-/*
  * special - check for predefined macros, if they exist expand them 
  *  __FILE - current file name, __LINE - current line number
  */
@@ -261,6 +124,7 @@ PP(const char *infile;)
 {
 	register const char *p;
 	int xline;
+#define NUMLEN  20
 	char buf[NUMLEN];
 
 	if (strcmp(token, "__FILE") == 0 || strcmp(token, "__FILE__") == 0)
@@ -271,7 +135,7 @@ PP(const char *infile;)
 		ppputl('"');
 	} else if (strcmp(token, "__LINE") == 0 || strcmp(token, "__LINE__") == 0)
 	{
-		xline = (literal) ? lit_num : (filep == &filestack[0]) ? lineno : (filep - 1)->lineno;
+		xline = literal ? lit_num : (filep == &filestack[0]) ? lineno : (filep - 1)->lineno;
 		itoa(xline, buf, 0);
 		p = buf;
 		while (*p)
@@ -309,7 +173,7 @@ PP(const char *name;)
 
 	sp = getsp(name);
 	if (sp->s_def > 0)
-		sp->s_def = -1;
+		sp->s_def = 0;
 }
 
 
@@ -489,9 +353,40 @@ PP(int val;)
 }
 
 
+/* SOH line header */
+VOID putid(P(const char *) fname, P(int) lnum)
+PP(const char *fname;)
+PP(int lnum;)
+{
+	register const char *p;
+	char tmp[NUMLEN];						/* temporary spot for line number itoa conversion */
+
+	if (asflag || pflag)
+		return;
+
+	if (literal)
+	{
+		strcpy(lit_file, fname);
+		lit_num = lnum;
+	}
+
+	fputc('#', outbuf);
+	fputc(' ', outbuf);
+	itoa(lnum, tmp, 0);
+	for (p = tmp; *p; p++)
+		fputc(*p == '\\' ? '/' : *p, outbuf);
+	fputc(' ', outbuf);
+	fputc('"', outbuf);
+	for (p = fname; *p; p++)
+		fputc(*p, outbuf);
+	fputc('"', outbuf);
+	fputc('\n', outbuf);
+}
+
+
 /*
  * pop - pop the #ifdef, etc. condition stack
- *      Checks for stack undeflow.
+ *      Checks for stack underflow.
  * returns - top of condition stack
  */
 static int pop(NOTHING)
@@ -546,7 +441,9 @@ PP(const char *parent;)
 	{
 		for (t = inclname, q = incl[i]; (*t++ = *q++) != 0; )
 			;
-		*(t - 1) = FILESEP;
+		t--;
+		if (t > inclname && t[-1] != FILESEP && t[-1] != FILESEP2)
+			*t++ = FILESEP;
 		for (q = fname; (*t++ = *q++) != 0; )
 			;
 		*t = 0;
@@ -669,33 +566,6 @@ static VOID doline(NOTHING)
 }
 
 
-/* ppputl - put a character to the current output line */
-/*      Checks for line overflow.*/
-VOID ppputl(P(int) c)
-PP(int c;)
-{
-	if (linep < &line[LINESIZE])
-	{
-		*linep++ = c;
-	} else if (!loverflow)
-	{
-		loverflow++;
-		error(_("line overflow"));
-	}
-}
-
-
-/*
- * initl - initialize current line
- *      Sets the line pointer and the line overflow flag.
- */
-VOID initl(NOTHING)
-{
-	*(linep = &line[0]) = '\0';
-	loverflow = 0;
-}
-
-
 /*
  * getaarg - get macro actual argument
  *      This handles the collecting of the macro's call arguments.
@@ -759,6 +629,284 @@ PP(int num;)
 		num /= 10;
 		putback(digit + '0');
 	} while (num > 0);
+}
+
+
+/*
+ * getaline - get input line handling macro statements
+ *  Checks for a preprocessor statement on the line and if there
+ *  is one there, it processes it.  Note that most of the work is
+ *  in determining whether we need to skip the current line or not.
+ *  This is all handled with the condition stack and the skip variable.
+ *  The skip variable is non-zero if any condition on the condition
+ *  stack is SKIP.
+ * returns 0 for CEOF, 1 otherwise
+ */
+static int getaline(P(const char *) infile)
+PP(const char *infile;)
+{
+	char token[TOKSIZE];
+	register int type, i;
+	register struct symbol *p;
+	register const char *cp;
+	
+	initl();
+	if ((type = gettok(token)) == CEOF)
+		return FALSE;
+	if (type == POUND)
+	{
+		if ((type = getntok(token)) == NEWL)
+			return TRUE;
+		switch (kwlook(token))
+		{
+		case IFDEF:
+			if (!skip && getntok(token) == ALPHA && lookup(token))
+			{
+				push(NOSKIP);
+			} else
+			{
+				push(SKIP);
+				skip++;
+			}
+			break;
+
+		case IFNDEF:
+			if (skip || (getntok(token) == ALPHA && lookup(token)))
+			{
+				push(SKIP);
+				skip++;
+			} else
+			{
+				push(NOSKIP);
+			}
+			break;
+
+		case ENDIF:
+			if ((i = pop()) == SKIP)
+			{
+				skip--;
+			} else if (i != NOSKIP)
+			{
+				error(_("invalid #endif"));
+			}
+			break;
+
+		case ELSE:
+			/* BUG: does not detect else after else */
+			if ((i = pop()) == SKIP)
+			{
+				skip--;
+				push(NOSKIP);
+			} else if (i == NOSKIP)
+			{
+				skip++;
+				push(SKIP);
+			} else
+			{
+				error(_("invalid #else"));
+			}
+			break;
+
+		case DEFINE:
+			if (!skip)					/* if in skip, don't do define */
+				dodefine();
+			break;
+
+		case UNDEF:
+			if (!skip)
+			{							/* if in skip, don't undef */
+				if ((type = getntok(token)) == ALPHA)
+					undefine(token);
+			}
+			break;
+
+		case INCLUDE:
+			if (!skip)
+			{							/* if in skip, don't do include */
+				doinclude(infile);
+				if (filep != &filestack[0])
+					i = getaline((filep - 1)->ifile);
+				else
+					i = getaline(infile);
+				return i;
+			}
+			break;
+
+		case IF:
+			if (!skip && cexpr())		/* evaluate constant expression */
+			{
+				push(NOSKIP);			/* non-zero, so don't skip */
+			} else
+			{							/* don't do if skipping or cexpr evaluates zero */
+				push(SKIP);
+				skip++;
+			}
+			break;
+
+		case LINE:
+			if (!skip)
+			{
+				doline();
+				return getaline(infile);
+			}
+			break;
+
+		default:
+			error(_("invalid preprocessor command"));
+			break;
+		}
+		eatup();
+	} else if (type != NEWL)
+	{
+		if (skip)
+		{
+			eatup();
+		} else
+		{
+			for (; type != NEWL && type != CEOF; type = gettok(token))
+			{
+				if (type == ALPHA && (p = lookup(token)) != NULL)
+				{
+					expand(p);
+				} else if (!special(token, infile))
+				{
+					for (cp = token; *cp;)
+						ppputl(*cp++);
+				}
+			}
+		}
+	}
+	ppputl('\0');
+	return TRUE;
+}
+
+
+/*
+ * domacro - do macro processing
+ *      Does the macro pre-processing on the input file and leaves the
+ *      result on the output file.
+ */
+int domacro(P(int) nd)
+PP(int nd;)
+{
+	register char *l;
+	register struct symbol *sp;
+
+	filep = &filestack[0];
+	if ((inbuf = fopen(source, "r")) == NULL)
+	{
+		error(_("can't open source file %s\n"), source);
+		return FALSE;
+	}
+	if (!Eflag)
+	{
+		if ((outbuf = fopen(dest, "w")) == NULL)
+		{
+			error(_("can't creat %s\n"), dest);
+			return FALSE;
+		}
+	}
+	lineno = 1;
+	putid(source, 1);					/* identify as first line in source file */
+
+	/* clear out symbol table */
+	for (sp = &symtab[0]; sp <= &symtab[HSIZE - 1]; sp++)
+		sp->s_def = -1;
+	defap = lmalloc((long)DEFSIZE);
+	if (defap == NULL)
+	{
+		error(_("define table overflow"));
+		cexit();
+	}
+	defcount = DEFSIZE;
+	defmax = 0;
+	defused = 0;
+	putd('\0');
+
+	pbp = &pbbuf[0];
+	cstkptr = &cstack[0];
+	install("Newlabel", NEWLABEL);
+	install("Label", LABEL);
+	while (--nd >= 0)
+		dinstall(defs[nd].ptr, defs[nd].value);
+	while (getaline(source))
+	{
+		l = line;
+		if (filep == &filestack[0] && pbp == &pbbuf[0])
+			lineno++;
+		else if (filep != &filestack[0])
+			(filep - 1)->lineno++;
+		while (*l)
+			fputc(*l++, outbuf);
+		fputc(' ', outbuf);
+		fputc('\n', outbuf);
+		if (literal)
+		{
+			if (filep != &filestack[0])
+			{
+				(filep - 1)->lineno++;
+				putid((filep - 1)->ifile, (filep - 1)->lineno);
+			} else
+			{
+				lineno++;
+				putid(source, lineno);
+			}
+			literal = 0;
+		}
+	}
+	if (cstkptr != &cstack[0])
+		error(_("unmatched conditional"));
+	if (defused > defmax)
+		defmax = defused;
+	fflush(outbuf);
+	if (!Eflag)
+		fclose(outbuf);
+	fclose(inbuf);
+	return 1;
+}
+
+
+/*
+ * kwlook - look up the macro built-in names
+ *      Searches thru the built-in table for the name.
+ * returns keyword index or 0
+ */
+int kwlook(P(const char *) name)
+PP(const char *name;)
+{
+	register const struct builtin *bp;
+
+	for (bp = &btab[0]; bp->b_name != NULL; bp++)
+		if (strcmp(bp->b_name, name) == 0)
+			return bp->b_type;
+	return 0;
+}
+
+
+/* ppputl - put a character to the current output line */
+/*      Checks for line overflow.*/
+VOID ppputl(P(int) c)
+PP(int c;)
+{
+	if (linep < &line[LINESIZE])
+	{
+		*linep++ = c;
+	} else if (!loverflow)
+	{
+		loverflow++;
+		error(_("line overflow"));
+	}
+}
+
+
+/*
+ * initl - initialize current line
+ *      Sets the line pointer and the line overflow flag.
+ */
+VOID initl(NOTHING)
+{
+	*(linep = &line[0]) = '\0';
+	loverflow = 0;
 }
 
 
@@ -868,152 +1016,4 @@ PP(char *token;)
 	while ((type = gettok(token)) == WHITE)
 		;
 	return type;
-}
-
-
-/*
- * getaline - get input line handling macro statements
- *  Checks for a preprocessor statement on the line and if there
- *  is one there, it processes it.  Note that most of the work is
- *  in determining whether we need to skip the current line or not.
- *  This is all handled with the condition stack and the skip variable.
- *  The skip variable is non-zero if any condition on the condition
- *  stack is SKIP.
- * returns 0 for CEOF, 1 otherwise
- */
-static int getaline(P(const char *) infile)
-PP(const char *infile;)
-{
-	char token[TOKSIZE];
-	register int type, i;
-	register struct symbol *p;
-	register const char *cp;
-	
-	initl();
-	if ((type = gettok(token)) == CEOF)
-		return FALSE;
-	if (type == POUND)
-	{
-		if ((type = getntok(token)) == NEWL)
-			return TRUE;
-		switch (kwlook(token))
-		{
-		case IFDEF:
-			if (getntok(token) == ALPHA && lookup(token))
-			{
-				push(NOSKIP);
-			} else
-			{
-				push(SKIP);
-				skip++;
-			}
-			break;
-
-		case IFNDEF:
-			if (getntok(token) == ALPHA && lookup(token))
-			{
-				push(SKIP);
-				skip++;
-			} else
-			{
-				push(NOSKIP);
-			}
-			break;
-
-		case ENDIF:
-			if ((i = pop()) == SKIP)
-			{
-				skip--;
-			} else if (i != NOSKIP)
-			{
-				error(_("invalid #endif"));
-			}
-			break;
-
-		case ELSE:
-			if ((i = pop()) == SKIP)
-			{
-				skip--;
-				push(NOSKIP);
-			} else if (i == NOSKIP)
-			{
-				skip++;
-				push(SKIP);
-			} else
-			{
-				error(_("invalid #else"));
-			}
-			break;
-
-		case DEFINE:
-			if (!skip)					/* if in skip, don't do define */
-				dodefine();
-			break;
-
-		case UNDEF:
-			if (!skip)
-			{							/* if in skip, don't undef */
-				if ((type = getntok(token)) == ALPHA)
-					undefine(token);
-			}
-			break;
-
-		case INCLUDE:
-			if (!skip)
-			{							/* if in skip, don't do include */
-				doinclude(infile);
-				if (filep != &filestack[0])
-					i = getaline((filep - 1)->ifile);
-				else
-					i = getaline(infile);
-				return i;
-			}
-			break;
-
-		case IF:
-			if (!skip && cexpr())		/* evaluate constant expression */
-			{
-				push(NOSKIP);			/* non-zero, so don't skip */
-			} else
-			{							/* don't do if skipping or cexpr evaluates zero */
-				push(SKIP);
-				skip++;
-			}
-			break;
-
-		case LINE:
-			if (!skip)
-			{
-				doline();
-				return getaline(infile);
-			}
-			break;
-
-		default:
-			error(_("invalid preprocessor command"));
-			break;
-		}
-		eatup();
-	} else if (type != NEWL)
-	{
-		if (skip)
-		{
-			eatup();
-		} else
-		{
-			for (; type != NEWL && type != CEOF; type = gettok(token))
-			{
-				if (type == ALPHA && (p = lookup(token)) != NULL)
-				{
-					expand(p);
-				} else if (!special(token, infile))
-				{
-					for (cp = token; *cp;)
-						ppputl(*cp++);
-				}
-			}
-		}
-	}
-	ppputl('\0');
-	return TRUE;
 }

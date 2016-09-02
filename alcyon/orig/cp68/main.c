@@ -13,7 +13,7 @@ char *version = "@(#)main.c	1.6	12/28/83";
 #define FLAGS "[-C] [-P] [-E] [-D] [-I] [-6] [-7] [-3]"
 #define USAGE "usage: %s %s source [dest]\n"
 
-#ifdef REGULUS							/*sw not MC68000 */
+#ifdef REGULUS							/* not MC68000 */
 char *v6incl = "/usr/include/v6";
 char *v7incl = "/usr/include/v7";
 char *s3incl = "/usr/include/sys3";
@@ -61,7 +61,7 @@ char *ucbincl = "";
 char *s5incl = "";
 #endif
 
-char *stdincl;							/*sw define it so i can clobber it ... */
+char *stdincl;							/* define it so i can clobber it ... */
 char *incl[NINCL];
 int ndefs, nincl;
 
@@ -119,7 +119,7 @@ PP(register char **argv;)
 			switch (c)
 			{
 			case 'D':
-			case 'd':					/*sw Make case-insensitive */
+			case 'd':
 				defs[ndefs].ptr = arg;
 				if ((x = strindex(arg, '=')) != -1)
 				{
@@ -130,7 +130,7 @@ PP(register char **argv;)
 					defs[ndefs++].value = 0;
 				}
 				i++;
-#ifdef CPM								/*sw Up-case the argument */
+#ifdef CPM								/* Up-case the argument */
 				p = defs[ndefs - 1].ptr;
 				while (*p)
 				{
@@ -148,7 +148,7 @@ PP(register char **argv;)
 					p++;
 				}
 #endif
-#ifdef	WHITESM							/*sw Up-case the argument */
+#ifdef	WHITESM							/* Up-case the argument */
 				p = defs[ndefs - 1].ptr;
 				while (*p)
 				{
@@ -161,7 +161,7 @@ PP(register char **argv;)
 			case 'I':
 			case 'i':
 #ifdef CPM
-				stdincl = *argv++;		/*sw Compatible with our past... */
+				stdincl = *argv++;		/* Compatible with our past... */
 				--argc;
 #endif
 #ifdef GEMDOS
@@ -170,7 +170,7 @@ PP(register char **argv;)
 				--argc;
 #endif
 #ifdef WHITESM
-				stdincl = *argv++;		/*sw Compatible with our past... */
+				stdincl = *argv++;		/* Compatible with our past... */
 				--argc;
 #endif
 #ifdef	REGULUS
@@ -181,17 +181,17 @@ PP(register char **argv;)
 				incl[nincl++] = arg;
 				i++;
 #endif
-#ifdef	VERSADOS						/*sw ?Will this work? */
+#ifdef	VERSADOS						/* ?Will this work? */
 				incl[nincl++] = arg;
 				i++;
 #endif
 				break;
 
-			case 'C':					/* [vlh] 4.2 Leave comments in... */
+			case 'C':					/* Leave comments in... */
 			case 'c':
 				Cflag++;
 				/* sw "break" here???? */
-			case 'E':					/* [vlh] 4.0 Preprocessor to stdout */
+			case 'E':					/* Preprocessor to stdout */
 			case 'e':
 				Eflag++;
 				goto cont;
@@ -201,23 +201,23 @@ PP(register char **argv;)
 				pflag++;
 				goto cont;
 
-			case '6':					/* [vlh] 3.4 v6 compatibility */
+			case '6':					/* v6 compatibility */
 				incl[nincl++] = v6incl;
 				goto cont;
 
-			case '7':					/* [vlh] 3.4 v7 compatibility */
+			case '7':					/* v7 compatibility */
 				incl[nincl++] = v7incl;
 				goto cont;
 
-			case '3':					/* [vlh] 3.4 s3 compatibility */
+			case '3':					/* s3 compatibility */
 				incl[nincl++] = s3incl;
 				goto cont;
 
-			case '4':					/* [vlh] 4.3 ucb compatibility */
+			case '4':					/* ucb compatibility */
 				incl[nincl++] = ucbincl;
 				goto cont;
 
-			case '5':					/* [vlh] 3.4 s5 compatiblity */
+			case '5':					/* s5 compatiblity */
 				incl[nincl++] = s5incl;
 				goto cont;
 
@@ -486,8 +486,47 @@ int versaflush()
  */
 
 #ifndef __ALCYON__
-int _open PROTO((const char *fname, int mode, int binary));
-int _open PROTO((const char *fname, int mode, int binary)) { return -1; }
-int xcreat PROTO((const char *fname, int mode, int binary)) { return -1; }
-VOID xwritefail(NOTHING) { abort(); }
+#undef FILE
+#undef getc
+#undef putchar
+#undef fopen
+#undef open
+int xgetc(struct iob *i)
+{
+	FILE *fp = *((FILE **)i);
+	return fgetc(fp);
+}
+int xputc(char c, struct iob *o)
+{
+	FILE *fp = *((FILE **)o);
+	return fputc(c, fp);
+}
+int xfopen(const char *fname, struct iob *i, int binary)
+{
+	FILE *fp;
+	fp = fopen(fname, "r");
+	if (fp)
+	{
+		*((FILE **)i) = fp;
+		return 0;
+	}
+	return -1;
+}
+int xopen(const char *fname, int mode, int binary)
+{
+	int fd;
+	fd = open(fname, mode);
+	return fd;
+}
+int xfcreat(const char *fname, struct iob *o, int binary)
+{
+	FILE *fp;
+	fp = fopen(fname, "w");
+	if (fp)
+	{
+		*((FILE **)o) = fp;
+		return 0;
+	}
+	return -1;
+}
 #endif

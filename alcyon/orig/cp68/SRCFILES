@@ -1,1 +1,1 @@
-CP_OBJS = cexpr.o lex.o macro.o main.o util.o kputc.o kgetc.o kopen.o
+CP_OBJS = cexpr.o lex.o macro.o main.o util.o
