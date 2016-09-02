@@ -57,6 +57,20 @@ PP(int bdosfunc;)							/* BDOS Function        */
 	{
 		short mode;
 		long dosfd;
+		register char *tmp;
+		
+		if (strchr(filename, '/') != 0)
+		{
+			tmp = _salloc(strlen(filename) + 1);
+			strcpy(tmp, filename);
+			filename = tmp;
+			while (*tmp)
+			{
+				if (*tmp == '/')
+					*tmp = '\\';
+				tmp++;
+			}
+		}
 		
 		rv = -1;
 		switch (bdosfunc)
