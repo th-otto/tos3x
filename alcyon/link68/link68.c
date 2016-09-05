@@ -835,7 +835,7 @@ static VOID relocsym(NOTHING)
 	{
 		if (lmte->flags & SYEQ)			/* equated */
 			return;						/* abs */
-		fatalx(FALSE, _("invalid symbol flag in %s, symbol: \"%s\"\n"), ifilname, lmte->name);
+		fatalx(FALSE, _("invalid symbol flag in %s, symbol: \"%.*s\"\n"), ifilname, SYNAMLEN, lmte->name);
 	}
 	lmte->vl1 += l;
 }
@@ -844,7 +844,7 @@ static VOID relocsym(NOTHING)
 static VOID prdup(P(const char *) p)
 PP(const char *p;)
 {
-	errorx(_("\"%s\" doubly defined in %s\n"), p, ifilname);
+	errorx(_("\"%.*s\" doubly defined in %s\n"), SYNAMLEN, p, ifilname);
 }
 
 
@@ -1276,14 +1276,14 @@ PP(register struct symtab *spt;)
 			return 0;					/* no jump block    */
 	if (!(gpt->flags & SYTX))
 	{
-		errorx(_("illegal reference to overlay symbol %s from module %s\n"), spt->name, ovtree[spt->ovlnum]->ovfname);
+		errorx(_("illegal reference to overlay symbol %.*s from module %s\n"), SYNAMLEN, spt->name, ovtree[spt->ovlnum]->ovfname);
 		return 0;
 	}
 	i = ovpath[ovpathtp];				/* current overlay number */
 	ovpt = ovtree[i];
 	if (!(inkid(gpt->ovlnum, i)))
 	{
-		errorx(_("illegal reference to overlay symbol %s from module %s\n"), spt->name, ovtree[spt->ovlnum]->ovfname);
+		errorx(_("illegal reference to overlay symbol %.*s from module %s\n"), SYNAMLEN, spt->name, ovtree[spt->ovlnum]->ovfname);
 		return 0;
 	}
 	jpt = newjblk();					/* put a new jump block in  */
