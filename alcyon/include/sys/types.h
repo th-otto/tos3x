@@ -5,7 +5,10 @@
 #include <compiler.h>
 #endif
 
-typedef long __intptr_t;
+#ifndef __INTPTR_TYPE__
+#define __INTPTR_TYPE__ long
+#endif
+typedef __INTPTR_TYPE__ __intptr_t;
 
 typedef unsigned int mode_t;
 typedef int pid_t;

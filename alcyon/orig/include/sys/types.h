@@ -5,7 +5,10 @@
 #include <compiler.h>
 #endif
 
-typedef long __intptr_t;
+#ifndef __INTPTR_TYPE__
+#define __INTPTR_TYPE__ long
+#endif
+typedef __INTPTR_TYPE__ __intptr_t;
 
 typedef int mode_t;
 typedef int pid_t;
@@ -77,7 +80,7 @@ typedef __UINT16_TYPE__ __uint16_t;
 typedef __INT32_TYPE__ __int32_t;
 
 #ifndef __UINT32_TYPE__
-#ifdef __ALCYON___
+#ifdef __ALCYON__
 #define __UINT32_TYPE__ long
 #else
 #ifdef __MSHORT__

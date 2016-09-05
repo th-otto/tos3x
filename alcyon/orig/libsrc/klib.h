@@ -64,6 +64,8 @@ int xfcreat PROTO((const char *fname, FILE *ibuf, int binary));
 int xputc PROTO((char c, FILE *ibuf));
 int xputw PROTO((int w, register FILE *ibuf));
 int xputwp PROTO((unsigned short *w, FILE *ibuf));
+long xputl PROTO((long l, FILE *ibuf));
+long xputlp PROTO((long *l, FILE *ibuf));
 int xfflush PROTO((FILE *ibuf));
 int xfoflush PROTO((NOTHING));
 int xputchar PROTO((char cc));
