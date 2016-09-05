@@ -5,35 +5,47 @@
     San Diego, Ca.  92121
 */
 
-/* symbol table and miscellaneous pass 1 routines */
-
 #include "as68.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
-char *ermsg[];
-char initfnam[];
-char ldfn[];
-char tlab1[];
+
+char ldfn[40];          /* name of the relocatable object file */
+extern char tlab1[SYNAMLEN];
 short ftudp;
-short poslab;
+int poslab;
 
-/*output it for beginning of statement*/
-opitb()
+
+int astring PROTO((NOTHING));
+int astr1 PROTO((int adelim));
+VOID oconst PROTO((int ardx));
+int constant PROTO((long *pnum, char *pstr, int idx));
+short hash PROTO((NOTHING));
+VOID doitwr PROTO((NOTHING));
+
+
+
+/* output it for beginning of statement */
+VOID opitb(NOTHING)
 {
-    stbuf[0].itty = ITBS;   /*beginning of statement*/
-    stbuf[0].itop = (fchr!=EOLC) ? absln : absln-1;
-    stbuf[1].itty = ITSY;   /*label entry*/
-    stbuf[1].itop.ptrw2 = lblpt;    /*pointer to symbol or 0*/
+	stbuf[0].itty = ITBS;				/* beginning of statement */
+	stbuf[0].itop.l = (fchr != EOLC) ? absln : absln - 1;
+	stbuf[1].itty = ITSY;				/* label entry */
+	stbuf[1].itop.ptrw2 = lblpt;		/* pointer to symbol or 0 */
 
-/*put opcode in it buffer*/
-    stbuf[2].itty = ITSY;
-    stbuf[2].itrl = modelen;    /*mode of instr(byte, word, long)*/
-    stbuf[2].itop.ptrw2 = opcpt;    /*pointer to opcode in main table*/
-    stbuf[3].itty = ITCN;
-    stbuf[3].itrl = rlflg;      /*relocation base*/
-    stbuf[3].itop = loctr;      /*pass1 location counter*/
-    itwc = ITOP1;               /*next available slot-currently 4*/
-    pitw = &stbuf[ITOP1].itty;  /*init the pointer*/
+	/* put opcode in it buffer */
+	stbuf[2].itty = ITSY;
+	stbuf[2].itrl = modelen;			/* mode of instr(byte, word, long) */
+	stbuf[2].itop.ptrw2 = opcpt;		/* pointer to opcode in main table */
+	stbuf[3].itty = ITCN;
+	stbuf[3].itrl = rlflg;				/* relocation base */
+	stbuf[3].itop.l = loctr;			/* pass1 location counter */
+	itwc = ITOP1;						/* next available slot-currently 4 */
+	pitw = &stbuf[ITOP1];				/* init the pointer */
 }
+
 
 /*
  *  get an input term  (symbol, constant, or special character)
@@ -58,255 +70,283 @@ opitb()
  * contents of the state table is the next state.  processing stops when
  * state 3 is encountered.  state 2 is the beginning state.
  */
-int sttbl[] = {0,1,1,0,3,0,3,3,3};    /*state table for parser*/
+int const sttbl[] = { 0, 1, 1, 0, 3, 0, 3, 3, 3 };	/* state table for parser */
 
-gterm(constpc)
-int constpc;
+VOID gterm(P(int) constpc)
+PP(int constpc;)
 {
-    register short smode, i;
-    register char *p;
-    register short tmode;
-    register char *j;
-    long num;
-    char istr[80];
+	register int smode, i;
+	register char *p;
+	register int tmode;
+	register struct symtab *j;
+	long num;
+	char istr[80];
 
-    if(fchr == '\'' || fchr == '"')
-        if(astring())       /*maybe ascii string*/
-            return;
-    smode = 2;  /*beginning state*/
-    i = 0;
-    p = istr;
+	if (fchr == '\'' || fchr == '"')
+		if (astring())					/* maybe ascii string */
+			return;
+	smode = 2;							/* beginning state */
+	i = 0;
+	p = istr;
 
-/*loop to put item on istr*/
-    while(fchr>=' ') {      /*until a control char*/
-        if(smode==2 && fchr=='.')
-            tmode = 3;
-        else if(isalpha(fchr) || fchr=='~' || fchr=='_' || (fchr=='$'&&i))
-            tmode=3;
-        else if(isdigit(fchr))
-            tmode=0;
-        else
-            tmode = 6;
-        tmode = sttbl[tmode+smode]; /*new state*/
-        if(tmode==3) break;         /*end of item*/
-        smode = tmode;
-        *p++ = fchr;            /*save character*/
-        i++;
-        fchr=gchr();
-    }
+	/* loop to put item on istr */
+	while (fchr >= ' ')
+	{									/* until a control char */
+		if (smode == 2 && fchr == '.')
+			tmode = 3;
+		else if (isalpha(fchr) || fchr == '~' || fchr == '_' || (fchr == '$' && i))
+			tmode = 3;
+		else if (isdigit(fchr))
+			tmode = 0;
+		else
+			tmode = 6;
+		tmode = sttbl[tmode + smode];	/* new state */
+		if (tmode == 3)
+			break;						/* end of item */
+		smode = tmode;
+		*p++ = fchr;					/* save character */
+		i++;
+		fchr = gchr();
+	}
+	/* end of item */
 
-/* end of item*/
-    switch(smode) {
+	switch (smode)
+	{
+	case 0:								/* symbol */
+		*p = '\0';						/* end of symbol */
+		itype = ITSY;					/* symbol */
+		pack(istr, lmte);				/* put symbol at end of main table */
+		j = lemt(FALSE, sirt);
+		if (istr[0] != '~' && !poslab && (j->flags & (SYEQ | SYER)) == SYEQ)
+		{
+			itype = (j->flags & SYRM) ? ITRM : ITCN;
+			ival.l = j->vl1;
+			reloc = ((j->flags) & SYRO) ? TEXT : ((j->flags) & SYRA) ? DATA : ((j->flags) & SYBS) ? BSS : ABS;
+		}
+		return;
 
-    case 0:         		/*symbol*/
-        *p = '\0';      	/*end of symbol*/
-        itype = ITSY;       /*symbol*/
-        pack(istr,lmte);    /*put symbol at end of main table*/
-        j = lemt(FALSE,sirt);
-        if(istr[0]!='~' && !poslab && (j->flags&(SYEQ|SYER))==SYEQ) {
-            itype = (j->flags&SYRM) ? ITRM : ITCN;  /* [vlh] */
-            ival = j->vl1;
-            reloc = ((j->flags)&SYRO) ? TEXT : ((j->flags)&SYRA) ? DATA :
-                ((j->flags)&SYBS) ? BSS : ABS;
-        }
-        return;
+	case 1:								/* constant */
+		if (!constant(&num, istr, i))
+		{
+			uerr(17);					/* illegal constant */
+			num = 0;
+		}
+		ival.l = num;
+		itype = ITCN;
+		reloc = ABS;
+		return;
 
-    case 1:         	/*constant*/
-        if(!constant(&num,istr,i)) {
-            uerr(17);   /*illegal constant*/
-            num = 0;
-        }
-        ival = num;
-        itype = ITCN;
-        reloc = ABS;
-        return;
+	case 2:								/* just a special char */
+		switch (fchr)
+		{
+		case '*':						/* location counter */
+			if (starmul)
+			{							/* multiply */
+				starmul = 0;
+				goto specsy;
+			}
+			refpc++;					/* referenced pgm ctr */
+			reloc = rlflg;				/* relocation of location counter */
+			ival.l = loctr;
+			itype = (constpc) ? ITCN : ITPC;
+			break;
 
-    case 2:         /*just a special char*/
-        switch(fchr) {
+		case '$':						/* hex constant */
+			oconst(16);
+			return;
 
-        case '*':           /*location counter*/
-            if(starmul) {   /*multiply*/
-                starmul = 0;
-                goto specsy;
-            }
-            refpc++;    /*referenced pgm ctr*/
-            reloc = rlflg;  /*relocation of location counter*/
-            ival = loctr;
-            itype = (constpc) ? ITCN : ITPC;
-            break;
+		case '@':						/* octal const */
+			oconst(8);
+			return;
 
+		case '%':						/* binary const */
+			oconst(2);
+			return;
 
-        case '$':           /*hex constant*/
-            oconst(16);
-            return;
+		case '#':
+			immed[opdix]++;
+			goto specsy;
 
-        case '@':           /*octal const*/
-            oconst(8);
-            return;
+		case '(':
+			indir[opdix]++;
+			plevel++;
+			goto specsy;
 
-        case '%':           /*binary const*/
-            oconst(2);
-            return;
+		case ')':
+			plevel--;
+			goto specsy;
 
-        case '#':
-            immed[opdix]++;
-            goto specsy;
+		default:
+		  specsy:
+			itype = ITSP;				/* return special char */
+			ival.l = fchr;
+		}
+		if (fchr != EOLC)
+			fchr = gchr();				/* get next char */
+		if ((ival.l == '>' && fchr == '>') || (ival.l == '<' && fchr == '<'))
+			fchr = gchr();				/* shift op, ignore second char */
+		return;
 
-        case '(':
-            indir[opdix]++;
-            plevel++;
-            goto specsy;
-
-        case ')':
-            plevel--;
-            goto specsy;
-
-        default:
-specsy:
-            itype = ITSP;       /*return special char*/
-            ival = fchr;
-        }
-        if(fchr != EOLC)
-            fchr=gchr();        /*get next char*/
-        if((ival=='>' && fchr=='>') || (ival=='<' && fchr=='<'))
-            fchr=gchr();            /*shift op, ignore second char*/
-        return;
-
-    default:
-        abort();        /*not possible*/
-    }
-}
-
-/*astring - check for an ascii string enclosed in single quotes*/
-astring()
-{
-    register char delim;
-
-    if(fchr != '\'' && fchr != '"')     /*valid delimiter*/
-        return(0);
-    delim = fchr;
-    if(equflg || (itype==ITSP && ival.loword=='#')) {  /*immediate operand*/
-        if(astr1(delim)) {
-            fchr = gchr();
-            if(fchr!=delim)
-                xerr(19);
-            fchr=gchr();
-        }
-        return((equflg) ? 1 : 0);
-    }
-    while(astr1(delim)) {
-        itype = ITSP;
-        ival = ',';         /*separate by commas*/
-        reloc = ABS;
-        opitoo();
-    }
-    return(0);
-}
-
-astr1(adelim)
-int adelim;
-{
-    register short delim,i,retv;
-    register long l;
-
-    delim = adelim;
-    i = 0; l = 0;
-    retv = 1;
-    while((fchr=gchr()) != EOF) {
-        if(fchr==delim) {
-            fchr = gchr();
-            if(fchr != delim) {
-                retv = 0;       /*end of string*/
-                break;
-            }
-        }
-        if(fchr == EOLC) {
-            xerr(19);
-            retv = 0;   /*end of string*/
-            break;
-        }
-        l = (l<<8) | fchr;
-        if(++i >= modelen) {
-            if((fchr=gchr()) == delim) {
-                fchr = gchr();
-                retv = 0;       /*end of string*/
-            }
-            else
-                peekc = fchr;   /*next char in string*/
-            break;          /*filled one bucket*/
-        }
-    }
-    while(i < modelen) {
-        l <<= 8;
-        i++;
-    }
-    itype = ITCN;
-    ival = l;
-    reloc = ABS;
-    if(!equflg)
-        opitoo();           /*output one operand*/
-    return(retv);
-}
-
-/*get constant given radix*/
-oconst(ardx)
-int ardx;
-{
-    register short trdx,j;
-    register long i;
-
-    switch (ardx) {     /* radix as power of 2 */
-        case 16 : trdx = 4; break;
-        case  8 : trdx = 3; break;
-        case  2 : trdx = 1; break;
-        default :
-            rpterr("invalid radix in oconst");
-            abort();
-    }
-    i=0;
-    while(1) {
-        fchr=gchr();
-        j=fchr;
-        if(isdigit(j))
-            j -= '0';
-        else if((j=tolower(j))>='a' && j<='f')
-            j = j-'a'+10;
-        else
-            break;          /*not valid numeric char*/
-        if(j>=0 && j<ardx)
-            i = (i<<trdx)+j;
-        else
-            break;
-    }
-    ival = i;
-    itype = ITCN;
-    reloc = ABS;
+	default:
+		asabort();						/* not possible */
+	}
 }
 
 
-/*convert ascii constant to binary*/
-constant(pnum,pstr,idx)
-long *pnum;
-register char *pstr;
-int idx;
+/* astring - check for an ascii string enclosed in single quotes */
+int astring(NOTHING)
 {
-    register short i,j;
-    register long l;
+	register char delim;
 
-    l = 0;
-    for(i=0; i<idx; i++) {
-        j = *pstr++;
-        if(isdigit(j))
-            j -= '0';
-        if(j<0 || j>=10)
-            return(0);
-        l = (l<<3) + (l<<1) + j;    /* l = l*10 + j*/
-    }
-    *pnum = l;
-    return(1);
+	if (fchr != '\'' && fchr != '"')	/* valid delimiter */
+		return FALSE;
+	delim = fchr;
+	if (equflg || (itype == ITSP && ival.u.loword == '#'))
+	{									/* immediate operand */
+		if (astr1(delim))
+		{
+			fchr = gchr();
+			if (fchr != delim)
+				xerr(19);
+			fchr = gchr();
+		}
+		return equflg ? TRUE : FALSE;
+	}
+	while (astr1(delim))
+	{
+		itype = ITSP;
+		ival.l = ',';						/* separate by commas */
+		reloc = ABS;
+		opitoo();
+	}
+	return FALSE;
 }
 
-/**
+
+int astr1(P(int) adelim)
+PP(int adelim;)
+{
+	register int delim, i, retv;
+	register long l;
+
+	delim = adelim;
+	i = 0;
+	l = 0;
+	retv = TRUE;
+	while ((fchr = gchr()) != CEOF)
+	{
+		if (fchr == delim)
+		{
+			fchr = gchr();
+			if (fchr != delim)
+			{
+				retv = FALSE;				/* end of string */
+				break;
+			}
+		}
+		if (fchr == EOLC)
+		{
+			xerr(19);
+			retv = FALSE;					/* end of string */
+			break;
+		}
+		l = (l << 8) | fchr;
+		if (++i >= modelen)
+		{
+			if ((fchr = gchr()) == delim)
+			{
+				fchr = gchr();
+				retv = FALSE;				/* end of string */
+			} else
+			{
+				peekc = fchr;			/* next char in string */
+			}
+			break;						/* filled one bucket */
+		}
+	}
+	while (i < modelen)
+	{
+		l <<= 8;
+		i++;
+	}
+	itype = ITCN;
+	ival.l = l;
+	reloc = ABS;
+	if (!equflg)
+		opitoo();						/* output one operand */
+	return retv;
+}
+
+
+/* get constant given radix */
+VOID oconst(P(int) ardx)
+PP(int ardx;)
+{
+	register short trdx, j;
+	register long i;
+
+	switch (ardx)
+	{									/* radix as power of 2 */
+	case 16:
+		trdx = 4;
+		break;
+	case 8:
+		trdx = 3;
+		break;
+	case 2:
+		trdx = 1;
+		break;
+	default:
+		rpterr("invalid radix in oconst");
+		asabort();
+	}
+	i = 0;
+	while (1)
+	{
+		fchr = gchr();
+		j = fchr;
+		if (isdigit(j))
+			j -= '0';
+		else if ((j = tolower(j)) >= 'a' && j <= 'f')
+			j = j - 'a' + 10;
+		else
+			break;						/* not valid numeric char */
+		if (j >= 0 && j < ardx)
+			i = (i << trdx) + j;
+		else
+			break;
+	}
+	ival.l = i;
+	itype = ITCN;
+	reloc = ABS;
+}
+
+
+/* convert ascii constant to binary */
+int constant(P(long *) pnum, P(char *) pstr, P(int) idx)
+PP(long *pnum;)
+PP(register char *pstr;)
+PP(int idx;)
+{
+	register short i, j;
+	register long l;
+
+	l = 0;
+	for (i = 0; i < idx; i++)
+	{
+		j = *pstr++;
+		if (isdigit(j))
+			j -= '0';
+		if (j < 0 || j >= 10)
+			return FALSE;
+		l = (l << 3) + (l << 1) + j;	/* l = l*10 + j */
+	}
+	*pnum = l;
+	return TRUE;
+}
+
+
+/*
  * method for looking up entries in the main table
  *
  * Note:    The entry to be looked up must be placed at the end
@@ -352,62 +392,70 @@ int idx;
  *      returns:
  *          a pointer to the entry.  if this pointer is equal to
  *          lmte then the symbol was not previously in the table.
-**/
-char *
-lemt(oplook,airt)
-char **airt;
-int oplook;     /* if true then looking in opcode table */
+ */
+struct symtab *lemt(P(int) oplook, P(struct symtab **) airt)
+PP(int oplook;)								/* if true then looking in opcode table */
+PP(struct symtab **airt;)
 {
-    register char *mtpt;
-    register short *p1, *p2, i, j;
+	register struct symtab *mtpt;
+	register short *p1, *p2, i, j;
 
-    if (oplook) {   /* [vlh] get rid of preceding '.', to lowercase */
-        if (lmte->name[0]=='.') {
-            lmte->name[NAMELEN-1] = NULL;   /* in case of '.' */
-            j = 1;
-        }
-        else 
-            j = 0;
-        for (i=0; j<NAMELEN; i++, j++)
-            lmte->name[i] = tolower(lmte->name[j]);
-    }
-    pirt = airt + hash();   /*hashed ptr to irt*/
-    mtpt = pirt->irfe;      /*pointer to first entry in chain*/
-    if(!mtpt)             	/*empty chain*/
-        mtpt = lmte;        /*start at end of main table*/
-    else
-        (pirt->irle)->tlnk = lmte;  /*last entry in chain is new symbol*/
-	if((lmte->name[0]=='~') && (lmte->name[1]!='~') && (lmte->name[1]!='.'))
-		return(lmte);		/*[vlh] 4.2, force local symbols */
+	if (oplook)
+	{									/* get rid of preceding '.', to lowercase */
+		if (lmte->name[0] == '.')
+		{
+			lmte->name[SYNAMLEN - 1] = '\0';	/* in case of '.' */
+			j = 1;
+		} else
+		{
+			j = 0;
+		}
+		for (i = 0; j < SYNAMLEN; i++, j++)
+			lmte->name[i] = tolower(lmte->name[j]); /* WTF? */
+	}
+	pirt = airt + hash();				/* hashed ptr to irt */
+	mtpt = ((struct irts *)pirt)->irfe;					/* pointer to first entry in chain */
+	if (!mtpt)							/* empty chain */
+		mtpt = lmte;					/* start at end of main table */
+	else
+		(((struct irts *)pirt)->irle)->tlnk = lmte;		/* last entry in chain is new symbol */
+	if ((lmte->name[0] == '~') && (lmte->name[1] != '~') && (lmte->name[1] != '.'))
+		return lmte;					/* force local symbols */
 
-/*loop to locate entry in main table*/
-lemtl:
-    p1 = &mtpt->name[0];
-    p2 = &lmte->name[0];
-    i = NAMELEN/(sizeof i);
-    while(i) {
-        if(*p1++ != *p2++) {
-            mtpt = mtpt->tlnk;  /*go to next entry in chain*/
-            goto lemtl;
-        }
-        i--;
-    }
-    return(mtpt);
+	/* loop to locate entry in main table */
+  lemtl:
+	p1 = (short *)&mtpt->name[0];
+	p2 = (short *)&lmte->name[0];
+	i = SYNAMLEN / (sizeof *p1);
+	while (i)
+	{
+		if (*p1++ != *p2++)
+		{
+			mtpt = mtpt->tlnk;			/* go to next entry in chain */
+			goto lemtl;
+		}
+		i--;
+	}
+	return mtpt;
 }
 
-/* compute a hash code for the last entry in the main table*/
-/*  returns the hash code*/
-hash()
-{
-    register short i, ht1;
-    register char *p;
 
-    ht1 = 0;
-    p = &lmte->name[0];
-    for(i=0; i<NAMELEN; i++) 
-        ht1 += *p++;
-    return(ht1&(SZIRT-2));  /*make hash code even and between 0 & SZIRT-2*/
+/*
+ * compute a hash code for the last entry in the main table
+ * returns the hash code
+ */
+short hash(NOTHING)
+{
+	register short i, ht1;
+	register char *p;
+
+	ht1 = 0;
+	p = &lmte->name[0];
+	for (i = 0; i < SYNAMLEN; i++)
+		ht1 += *p++;
+	return ht1 & (SZIRT - 2);			/* make hash code even and between 0 & SZIRT-2 */
 }
+
 
 /*
  * Make an entry in the main table
@@ -415,23 +463,26 @@ hash()
  *   entry to be made is pointed at by lmte
  *   pirt points to the correct initial reference table entry.
  */
-mmte()
+VOID mmte(NOTHING)
 {
-    pirt->irle = lmte;      /*pointer to last entry in chain*/
-    if(pirt->irfe == 0)     /*first entry in chain*/
-        pirt->irfe = lmte;
-    lmte += STESIZE;            /*bump last main table entry pointer*/
-    if(lmte>=emte) {        /*main table overflow*/
-        if(sbrk(STESIZE*ICRSZMT) == -1){    /*get more memory*/
-            rpterr("symbol table overflow\n");
-            endit();
-        }
-        else {
-            emte += STESIZE*ICRSZMT;    /*move end of main table*/
-            cszmt += ICRSZMT;
-        }
-    }
+	((struct irts *)pirt)->irle = lmte;					/* pointer to last entry in chain */
+	if (((struct irts *)pirt)->irfe == 0)				/* first entry in chain */
+		((struct irts *)pirt)->irfe = lmte;
+	lmte++;								/* bump last main table entry pointer */
+	if (lmte >= emte)
+	{									/* main table overflow */
+		if (sbrk(sizeof(struct symtab) * ICRSZMT) == (VOIDPTR)-1)
+		{								/* get more memory */
+			rpterr("symbol table overflow\n");
+			endit();
+		} else
+		{
+			emte += ICRSZMT;	/* move end of main table */
+			cszmt += ICRSZMT;
+		}
+	}
 }
+
 
 /*
  * make an entry in the main table for a directive
@@ -440,23 +491,25 @@ mmte()
  *      address of routine to handle directive in pass one
  *      address of routine to handle directive in pass two
  */
-mdemt(mdstr,dirnum)
-char *mdstr;
-int dirnum;
+VOID mdemt(P(const char *) mdstr, P(int) dirnum)
+PP(const char *mdstr;)
+PP(int dirnum;)
 {
-    register char *mdept;
+	register struct symtab *mdept;
 
-    pack(mdstr,lmte);       /*pack name at end of main table*/
-    mdept=lemt(TRUE,oirt);  /*look up in opcode table*/
-    if(mdept != lmte) {     /*best not be there already*/
-        uerr(5);
-        abort();
-        return;
-    }
-    mmte();                 	/*make main table entry*/
-    mdept->flags |= OPDR|SYIN;  /*directive*/
-    mdept->vl1 = dirnum;        /*directive #*/
+	pack(mdstr, lmte);					/* pack name at end of main table */
+	mdept = lemt(TRUE, oirt);			/* look up in opcode table */
+	if (mdept != lmte)
+	{									/* best not be there already */
+		uerr(5);
+		asabort();
+		return;
+	}
+	mmte();								/* make main table entry */
+	mdept->flags |= OPDR | SYIN;		/* directive */
+	mdept->vl1 = dirnum;				/* directive # */
 }
+
 
 /*
  * pack a string into an entry in the main table
@@ -464,88 +517,109 @@ int dirnum;
  *      pointer to the string
  *      pointer to desired entry in the main table
  */
-pack(apkstr,apkptr)
-char *apkstr, *apkptr;
+VOID pack(P(const char *) apkstr, P(struct symtab *) apkptr)
+PP(const char *apkstr;)
+PP(struct symtab *apkptr;)
 {
-    register short i;
-    register char *pkstr, *pkptr;
+	register short i;
+	register const char *pkstr;
+	register char *pkptr;
 
-    pkstr = apkstr;
-    pkptr = apkptr;
-    i = NAMELEN;
-    while(*pkstr && i) {
-        *pkptr++ = *pkstr++;
-        i--;
-    }
-    while(i--)
-        *pkptr++ = '\0';    /*pad with nulls*/
+	pkstr = apkstr;
+	pkptr = apkptr->name;
+	i = SYNAMLEN;
+	while (*pkstr && i)
+	{
+		*pkptr++ = *pkstr++;
+		i--;
+	}
+	while (i--)
+		*pkptr++ = '\0';				/* pad with zeroes */
 }
 
-/* function to get characters from source file*/
-gchr()
-{
-    register short chr1;
 
-    if(peekc) {
-        chr1 = peekc;
-        peekc = 0;
-    }
-    else {
-gchr1:
-        if(sbuflen<=0){     /*nothing on input buffer*/
-            sbuflen=read(ifn,sbuf,BSIZE); /*read in source*/
-            if(sbuflen<=0)
-                return(EOF);            /*end of file*/
-            psbuf = sbuf;
-        }
-        chr1 = *psbuf++;
-        sbuflen--;
-    }
-    if (chr1 == SOH)    /*preprocessor flag*/
-        goto gchr1;     /*ignore it*/
-    if(chr1 == EOLC) {      /*end of line*/
-        if(!p2flg)      /*pass 1 only*/
-            absln++;
-    }
-    else if(chr1=='\t') {   /*convert tabs to spaces*/
-        chr1 = ' ';
-    }
-    return(chr1);
+int xcol = 0;							/* Column number            */
+int spcnt = 0;							/* Fill counter             */
+
+
+/* function to get characters from source file */
+int gchr(NOTHING)
+{
+	register short chr1;
+
+	if (peekc)
+	{
+		chr1 = peekc;
+		peekc = 0;
+		xcol--;
+	} else if (spcnt)
+	{
+		spcnt--;
+		return ' ';
+	} else
+	{
+		if (sbuflen <= 0)
+		{								/* nothing on input buffer */
+			sbuflen = fread(sbuf, 1, sizeof(sbuf), ifn);	/* read in source */
+			if (sbuflen <= 0)
+				return CEOF;			/* end of file */
+			psbuf = sbuf;
+		}
+		chr1 = *psbuf++;
+		sbuflen--;
+	}
+	if (chr1 == EOLC)
+	{									/* end of line */
+		xcol = -1;						/* Init column counter  */
+		if (!p2flg)						/* pass 1 only */
+			absln++;
+	} else if (chr1 == '\t')
+	{									/* convert tabs to spaces */
+		spcnt += 7 - (xcol & 7);		/* Set fill count           */
+		xcol += spcnt;					/* Adjust column number     */
+		chr1 = ' ';
+	}
+	xcol++;								/* Bump column number       */
+	return chr1;
 }
+
 
 /*
  * write out intermediate text for one statement
  *  call with
  *      the it for the statement in stbuf
  */
-wostb()
+VOID wostb(NOTHING)
 {
-    register short woix, *itwo, i;
+	register short woix, *itwo;
+	register unsigned short i;
 
-    if(stbuf[0].itty != ITBS) 
-		abort();  /*not beginning of stmt*/
-    itwo = &stbuf;
-    woix = stbuf[0].itrl & 0377;    /*unsigned byte*/
-    while(woix--) {
-        for(i=0; i<STBFSIZE/(sizeof *itwo); i++) {
-            if(pitix > &itbuf[ITBSZ-1])       /*no room in buffer*/
-                doitwr();
-            *pitix++ = *itwo++; /*first word*/
-        }
-    }
-/*  debug();        //call debug package*/
+	if (stbuf[0].itty != ITBS)
+		asabort();						/* not beginning of stmt */
+	itwo = (short *)&stbuf;
+	woix = stbuf[0].itrl & 0xff;		/* unsigned byte */
+	while (woix--)
+	{
+		for (i = 0; i < (sizeof(struct it) / (sizeof *itwo)); i++)
+		{
+			if (pitix >= ITBSZ)	/* no room in buffer */
+				doitwr();
+			itbuf[pitix++] = *itwo++;			/* first word */
+		}
+	}
 }
 
-doitwr()
-{
-    register short i;
 
-    if(write(itfn,itbuf,ITBSZ*(sizeof i)) != ITBSZ*(sizeof i)) {
-        rpterr("it write error errno=%o\n",errno);
-        endit();
-    }
-    pitix = itbuf;
+VOID doitwr(NOTHING)
+{
+	if (fwrite(itbuf, 1, ITBSZ * sizeof(itbuf[0]), itfn) != ITBSZ * sizeof(itbuf[0]))
+	{
+		rpterr("it write error: %s\n", strerror(errno));
+		endit();
+	}
+	pitix = 0;
 }
+
 
 /*
  * user source error
@@ -554,93 +628,98 @@ doitwr()
  *  types the error number and the line number on which
  *  the error occured.
  */
-uerr(errn)
-int errn;
+VOID uerr(P(int) errn)
+PP(int errn;)
 {
-	putchar(0);	/* clear the buffer */
-	stdofd = STDERR;	/* output file descriptor <== STDERR */
-	if(p2flg) { /*pass 2 gets two ampersands*/
-        in_err++;   /* [vlh] instrlen <- pass1 estimation */
-        printf("&& %d: %s\n",p2absln,ermsg[errn-1]);
-    }
-    else
-        printf("& %d: %s\n",(fchr==EOLC)?absln-1:absln,
-			   ermsg[errn-1]);
-	putchar(0);
-	stdofd = STDOUT;
-    nerror++;
+	if (p2flg)
+	{									/* pass 2 gets two ampersands */
+		in_err++;
+		fprintf(stderr, "&& %d: %s\n", p2absln, ermsg[errn - 1]);
+	} else
+	{
+		fprintf(stderr, "& %d: %s\n", (fchr == EOLC) ? absln - 1 : absln, ermsg[errn - 1]);
+	}
+	nerror++;
 }
+
+
 /*
  * user error that causes the statement to be abandoned
  *  call with:
  *      error number
  */
-xerr(xern)
-int xern;
+VOID xerr(P(int) xern)
+PP(int xern;)
 {
-    uerr(xern);     /*type error message*/
-    if(!p2flg)      /*pass one*/
-        igrst();    /*pass rest of source*/
+	uerr(xern);							/* type error message */
+	if (!p2flg)							/* pass one */
+		igrst();						/* pass rest of source */
 }
 
-/* abort the assembly*/
-abort()
+
+/* abort the assembly */
+VOID asabort(NOTHING)
 {
-    rpterr("as68 abort\n");
-    endit();
+	rpterr("as68 abort\n");
+	endit();
 }
 
-/*ignore rest of statement*/
-igrst()
+
+/* ignore rest of statement */
+VOID igrst(NOTHING)
 {
-    while(fchr!=EOLC && fchr!=EOF)  /*until end of line*/
-        fchr=gchr();
-    while((fchr=gchr())==EOLC) ;    /*ignore null lines*/
+	while (fchr != EOLC && fchr != CEOF)	/* until end of line */
+		fchr = gchr();
+	while ((fchr = gchr()) == EOLC) ;	/* ignore empty lines */
 }
 
-/*ignore blanks after a label*/
-ligblk()
+
+/* ignore blanks after a label */
+VOID ligblk(NOTHING)
 {
-    if(fchr == EOF) return;
-    igblk();
-    if(fchr==EOLC) {
-        fchr=gchr();
-        ligblk();
-    }
+	if (fchr == CEOF)
+		return;
+	igblk();
+	if (fchr == EOLC)
+	{
+		fchr = gchr();
+		ligblk();
+	}
 }
 
-rubout()
+
+/* exit from the assembler */
+VOID endit(NOTHING)
 {
-    nerror = -1;
-    endit();
+	if (itfn)
+		fclose(itfn);
+	if (lfil)
+		fclose(lfil);
+	if (dafil)
+		fclose(dafil);
+	if (trfil)
+		fclose(trfil);
+	if (drfil)
+		fclose(drfil);
+	unlink(itfilnam);					/* delete temporary files */
+	unlink(trfilnam);
+	unlink(dafilnam);
+	unlink(drfilnam);
+	if (nerror != -1)
+	{									/* not rubout */
+		if (ftudp)
+			putchar('\n');
+	}
+	if (nerror > 0)
+	{
+		fprintf(stderr, "& %d errors\n", nerror);
+	}
+	if (initflg					/* get rid of empty .o file */
+		|| nerror != 0)
+		unlink(ldfn);
+	exit(nerror != 0);
 }
 
-/* exit from the assembler*/
-endit()
-{
-    LASTCHTFN = itfnc;
-    unlink(tfilname);       /*delete temporary files*/
-    LASTCHTFN = trbfnc;
-    unlink(tfilname);
-    LASTCHTFN = dafnc;
-    unlink(tfilname);
-    LASTCHTFN = drbfnc;
-    unlink(tfilname);
-    if(nerror != -1) {      /*not rubout*/
-        if(ftudp)
-            putchar('\n');
-        putchar(0); /* flush the printing*/
-    }
-    if(nerror > 0) {
-        putchar(0);
-        stdofd = STDERR;
-        printf("& %d errors\n",nerror);
-        putchar(0);
-    }
-    if (initflg)
-        unlink(ldfn);   /* [vlh] get rid of empty .o file */
-    exit(nerror!=0);
-}
 
 /*
  * open files
@@ -649,176 +728,181 @@ endit()
  *      flag for how to open
  *          0 => read
  *          1 => write
+ *		Flag for file type
+ *			0 => ASCII
+ *			1 => Binary
  */
-openfi(pname,hflag)
-char *pname;
-int hflag;
+FILE *openfi(P(const char *) pname, P(const char*) m)
+PP(const char *pname;)
+PP(const char *m;)
 {
-    register short fd;
+	register FILE *fp;
 
-    fd = (hflag) ? creat(pname,0666) : open(pname,hflag);
-    if(fd < 0) {    /*open failed*/
-        rpterr("can't open %s errno=%o\n",pname,errno);
-        endit();
-    }
-    return(fd);
+	fp = fopen(pname, m);
+	if (fp == NULL)
+	{									/* open failed */
+		rpterr("can't open %s: %s\n", pname, strerror(errno));
+		endit();
+	}
+	return fp;
 }
 
-/* get a temp file for the intermediate text*/
-gettempf()
-{
-    register short j;
-    register char *p;
 
-    if(LASTCHTFN == 'A') {
-        j = getpid();
-        p = &LASTCHTFN-4;
-        while(p < &LASTCHTFN) {
-            *p++ = (j&017) + 'a';
-            j >>= 4;
-        }
-    }
-    while(LASTCHTFN < 'z') {
-        LASTCHTFN++;
-        if((j=creat(tfilname,0600))>=0)
-            return(j);
-    }
-    rpterr("temp file create error: %s errno=%o\n",tfilname,errno);
-    endit();
+/* move label name from lbt to main table entry pointed to by lmte */
+VOID setname(NOTHING)
+{
+	register short *p1, *p2;
+
+	p1 = (short *)&lmte->name[0];
+	for (p2 = (short *)&lbt[0]; p2 < (short *)(&lbt[SYNAMLEN]);)
+	{
+		*p1++ = *p2;
+		*p2++ = 0;
+	}
 }
 
-/* move label name from lbt to main table entry pointed to by lmte*/
-setname()
-{
-    register short *p1, *p2;
 
-    p1 = &lmte->name[0];
-    for(p2 = &lbt[0]; p2 < &lbt[NAMELEN]; ) {
-        *p1++ = *p2;
-        *p2++ = 0;
-    }
-}
-
-/* get the initialized main table and initial reference tables from*/
-/*  the initialize file*/
-getsymtab()
-{
-    register char **p;
-    register struct symtab *p1;
-    register char *p2;
-    register short fd,i;
-
-    if((fd=open(initfnam,0)) < 0) {
-rerr:
-        printf("& Unable to read init file: %s\n", initfnam);
-        endit();
-    }
-    if(read(fd,sirt,SZIRT*SIRTSIZE) != SZIRT*SIRTSIZE) {
-        goto rerr;
-    }
-
-    if(read(fd,oirt,SZIRT*SIRTSIZE) != SZIRT*SIRTSIZE)
-        goto rerr;
-
-    if((i=read(fd,bmte,SZMT*STESIZE)) <= 0)
-        goto rerr;
-
-    if((i%STESIZE) != 0)
-        goto rerr;
-
-    lmte = bmte + i;
-    p2 = bmte-1;
-    for(p=sirt; p<&sirt[SZIRT]; p++) {
-        if(*p)
-            *p += (long)p2; /* 11 apr 83, for vax */
-    }
-    for(p=oirt; p<&oirt[SZIRT]; p++) {
-        if(*p)
-            *p += (long)p2; /* 11 apr 83, for vax */
-    }
-    for(p1=bmte; p1<lmte; p1++) {
-        if(p1->tlnk)
-            p1->tlnk += (long)p2; /* 11 apr 83, for vax */
-    }
-    close(fd);
-}
-
-/* write the initialization file*/
-putsymtab()
-{
-    register char **p;
-    register struct symtab *p1;
-    register char *p2;
-    register short fd,i;
-
-    if((fd=creat(initfnam,0644))<0) {
-werr:
-        printf("& Write error on init file: %s\n", initfnam);
-        return;
-    }
 /*
- * change all pointers so that they are relative to the beginning
- * of the symbol table
+ * get the initialized main table and initial reference tables from
+ * the initialize file
  */
-    p2 = bmte-1;
-    for(p=sirt; p<&sirt[SZIRT]; p++) {
-        if(*p)
-            *p = *p - p2;   /* 11 apr 83, for vax */
-    }
-    for(p=oirt; p<&oirt[SZIRT]; p++) {
-        if(*p)
-            *p = *p - p2;   /* 11 apr 83, for vax */
-    }
-    for(p1=bmte; p1<lmte; p1++) {
-        if(p1->tlnk)
-            p1->tlnk = p1->tlnk - p2;   /* 11 apr 83, for vax */
-    }
+VOID getsymtab(NOTHING)
+{
+	register char **p;
+	register struct symtab *p1;
+	register __intptr_t p2;
+	register FILE *fp;
+	unsigned short j;
 
-    if(write(fd,sirt,SZIRT*SIRTSIZE) != SZIRT*SIRTSIZE) {
-        goto werr;
-    }
+	if ((fp = fopen(initfnam, "rb")) == NULL)
+	{
+	  rerr:
+		rpterr("& Unable to read init file: %s\n", initfnam);
+		endit();
+	}
+	if (fread(sirt, 1, SZIRT * sizeof(struct symtab *), fp) != SZIRT * sizeof(struct symtab *))
+		goto rerr;
+	
+	if (fread(oirt, 1, SZIRT * sizeof(struct symtab *), fp) != SZIRT * sizeof(struct symtab *))
+		goto rerr;
 
-    if(write(fd,oirt,SZIRT*OIRTSIZE) != SZIRT*OIRTSIZE)
-        goto werr;
+	if (lgetw(&j, fp) < 0)
+		goto rerr;
+	if ((j % sizeof(struct symtab)) != 0)
+		goto rerr;
+	if (fread(bmte, 1, j, fp) != j)
+		goto rerr;
 
-    i = (char *)lmte - bmte;        /*length of current main table*/
-    if((i % STESIZE) != 0) {
-        goto werr;
-    }
-    if(write(fd,bmte,i) != i)
-        goto werr;
-    close(fd);
+	lmte = (struct symtab *)((char *)bmte + j);
+	p2 = (__intptr_t)((char *)bmte - 1);
+	for (p = (char **)sirt; p < (char **)&sirt[SZIRT]; p++)
+	{
+		if (*p)
+			*p += p2;
+	}
+	for (p = (char **)oirt; p < (char **)&oirt[SZIRT]; p++)
+	{
+		if (*p)
+			*p += p2;
+	}
+	for (p1 = bmte; p1 < lmte; p1++)
+	{
+		if (p1->tlnk)
+			p1->tlnk = (struct symtab *)((char *)p1->tlnk + p2);
+	}
+	fclose(fp);
 }
 
-/* print an error on file descriptor 2*/
-/*  used for errors with disasterous consequences*/
-rpterr(ptch,x1,x2,x3,x4,x5,x6)
-char *ptch;
+
+/* write the initialization file */
+VOID putsymtab(NOTHING)
 {
-    putchar(0);     /*flush buffer*/
-    stdofd = STDERR;     /*error file*/
-    printf("& %d: ",absln);
-    printf(ptch,x1,x2,x3,x4,x5,x6);
-	nerror++;	/* [vlh] 4.2.... */
+	register char **p;
+	register struct symtab *p1;
+	register __intptr_t p2;
+	register FILE *fp;
+	unsigned short j;
+
+	if ((fp = fopen(initfnam, "wb")) == NULL)
+	{
+	  werr:
+		printf("& Write error on init file: %s\n", initfnam);
+		return;
+	}
+	/*
+	 * change all pointers so that they are relative to the beginning
+	 * of the symbol table
+	 */
+	p2 = (__intptr_t)((char *)bmte - 1);
+	for (p = (char **)sirt; p < (char **)&sirt[SZIRT]; p++)
+	{
+		if (*p)
+			*p -= p2;
+	}
+	for (p = (char **)oirt; p < (char **)&oirt[SZIRT]; p++)
+	{
+		if (*p)
+			*p -= p2;
+	}
+	for (p1 = bmte; p1 < lmte; p1++)
+	{
+		if (p1->tlnk)
+			p1->tlnk = (struct symtab *)((char *)p1->tlnk - p2);
+	}
+
+	if (fwrite(sirt, 1, SZIRT * sizeof(struct symtab *), fp) != SZIRT * sizeof(struct symtab *))
+		goto werr;
+
+	if (fwrite(oirt, 1, SZIRT * sizeof(struct symtab *), fp) != SZIRT * sizeof(struct symtab *))
+		goto werr;
+
+	j = (__intptr_t) lmte - (__intptr_t)bmte;			/* length of current main table */
+	if (lputw(&j, fp) < 0)
+		goto werr;
+	if (fwrite(bmte, 1, j, fp) != j)
+		goto werr;
+	fclose(fp);
 }
 
-/* set the file name for the relocatable object file (sourcefile.o)*/
-setldfn(ap)
-char *ap;
-{
-    register char *p1,*p2;
 
-    p1 = ap;
-    p2 = ldfn;
-    while(*p1) {
-        *p2++ = *p1++;
-    }
-    if(*(p2-2) != '.') {    /*not name.?*/
-        *p2++ = '.';
-        *p2++ = 'o';
-    }
-    else {          /* is name.? */
-        *(p2-1) = 'o';
-    }
-    *p2 = '\0';
+/*
+ * print an error on stderr
+ * used for errors with disasterous consequences
+ */
+VOID rpterr(P(const char *) ptch _va_alist)
+PP(const char *ptch;)
+_va_dcl
+{
+	va_list args;
+	
+	va_start(args, ptch);
+	fprintf(stderr, "& %d: ", absln);
+	vfprintf(stderr, ptch, args);
+	va_end(args);
+	nerror++;
+}
+
+
+/* set the file name for the relocatable object file (sourcefile.o) */
+VOID setldfn(P(const char *) ap)
+PP(const char *ap;)
+{
+	register const char *p1;
+	register char *p2;
+
+	p1 = ap;
+	p2 = ldfn;
+	while (*p1)
+	{
+		*p2++ = *p1++;
+	}
+	if (*(p2 - 2) != '.')
+	{									/* not name.? */
+		*p2++ = '.';
+		*p2++ = 'o';
+	} else
+	{									/* is name.? */
+		*(p2 - 1) = 'o';
+	}
+	*p2 = '\0';
 }

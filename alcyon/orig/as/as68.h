@@ -190,7 +190,7 @@ struct mlongbytes { short loword; short hiword; };
 /* format of a symbol entry in the main table */
 struct symtab {
     char name[SYNAMLEN]; /* symbol name */
-    short flags; /* XXX */
+    short flags;
 	union {
 		struct mlongbytes u;
 		long l;
@@ -604,4 +604,4 @@ VOID setldfn PROTO((const char *ap));
 /*
  * putchd.c
  */
-VOID putchd PROTO((FILE *fp, struct hdr *arptr)); /* XXX */
+VOID putchd PROTO((FILE *fp, struct hdr *arptr));

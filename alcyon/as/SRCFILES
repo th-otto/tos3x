@@ -1,0 +1,1 @@
+AS68_OBJS = dir.o expr.o list.o main.o misc.o pass1a.o pass2.o symt.o putchd.o libput.o libget.o

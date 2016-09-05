@@ -143,7 +143,7 @@ PP(int opn;)
 		pitw--;
 	}
   dosimp:								/* simple addr or imm expr */
-	if ((i = gspreg())) /* XXX */
+	if ((i = gspreg()))
 	{
 		inst = ins[0];
 		if (i == PC || (i == USP && inst != MOVE && inst != MOVEC))
@@ -346,7 +346,7 @@ VOID ristb(NOTHING)
 		asm("mulu.w    #$0006,d0");
 		asm("add.l     d0,_itoffset");
 #else
-		itoffset += (riix & 0xff) * sizeof(struct it); /* XXX */
+		itoffset += (riix & 0xff) * sizeof(struct it);
 #endif
 		pi = (short *)stbuf;
 		for (i = 0; i < (unsigned)(sizeof(struct it) / (sizeof *pi)); i++)
@@ -492,7 +492,7 @@ PP(struct symtab *aosypt;)
 	for (i = 0; i < SYNAMLEN; i++)		/* output symbol name */
 		putc(*p1++, &lbuf);
 
-	xputwp((unsigned short *)&osypt->flags, &lbuf);		/* output symbol flags */ /* XXX */
+	xputwp((unsigned short *)&osypt->flags, &lbuf);		/* output symbol flags */
 #ifdef DEBUG
 	if (debug)							/* prints symbol table entries */
 		printf("> %-8.8s* %o\n", osypt->name, (int) osypt->flags);

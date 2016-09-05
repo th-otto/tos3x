@@ -5,7 +5,7 @@
  * putchd - fills the buffer from the c.out header structure in
  *		the byte orientation of the target machine (68000).
  */
-VOID putchd(P(FILE *) fp, P(struct hdr *) arptr) /* XXX */
+VOID putchd(P(FILE *) fp, P(struct hdr *) arptr)
 PP(FILE *fp;)
 PP(struct hdr *arptr;)
 {

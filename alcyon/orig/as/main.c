@@ -417,7 +417,7 @@ VOID cisit(NOTHING)
 		igblk();
 		if (fchr == EOLC)				/* blank line */
 			goto cistop;
-		peekc = (char) fchr; /* XXX */
+		peekc = (char) fchr;
 		if (fchr != CEOF)
 			fchr = ' ';					/* catch eof... */
 	}
@@ -566,7 +566,7 @@ VOID cisit(NOTHING)
 
 	i = calcilen();
 	stbuf[1].itrl = i;					/* assumed instruction length */
-	stbuf[0].itrl = (char)itwc;				/* number of it entries */ /* XXX */
+	stbuf[0].itrl = (char)itwc;				/* number of it entries */
 	wostb();							/* write out statement buffer */
 	loctr += i;
 }
@@ -597,7 +597,7 @@ VOID getmode(NOTHING)
 			mode = LONG;
 			break;
 		default:
-			peekc = (char)fchr; /* XXX */
+			peekc = (char)fchr;
 			fchr = '.';
 			goto getm1;
 		}

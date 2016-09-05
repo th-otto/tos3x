@@ -139,7 +139,7 @@ PP(int xrtyp;)
 	rlflg = xrtyp;
 	loctr = savelc[xrtyp];				/* set new base relocation ctr */
 	opitb();
-	stbuf[0].itrl = (char)itwc; /* XXX */
+	stbuf[0].itrl = (char)itwc;
 	wostb();
 	igrst();
 }
@@ -255,7 +255,7 @@ PP(struct symtab *p;)
 	asm("movea.l   8(a6),a1")
 	asm("move.w    d0,14(a1)");
 #else
-	p->vextno = (int)((_intptr_t)pexti - (__intptr_t)extbl) / (int)sizeof(VOIDPTR);	/* external symbol index # */ /* XXX */
+	p->vextno = (int)((__intptr_t)pexti - (__intptr_t)extbl) / (int)sizeof(VOIDPTR);	/* external symbol index # */
 #endif
 	*pexti++ = p;						/* save external in external table */
 	extindx++;
@@ -271,10 +271,10 @@ VOID hend(NOTHING)
 	lblpt = 0;							/* no label */
 	opitb();							/* output beginning of statement */
 	igrst();							/* ignore operands */
-	stbuf[0].itrl = (char)itwc;				/* number of it entries */ /* XXX */
+	stbuf[0].itrl = (char)itwc;				/* number of it entries */
 	wostb();							/* write out statement buffer */
 	if (pitix > itbuf)					/* some it in buffer */
-		if (write(itfn, itbuf, ITBSZ * (sizeof i)) != ITBSZ * (sizeof i))
+		if (write(itfn, itbuf, ITBSZ * sizeof(itbuf[0])) != ITBSZ * sizeof(itbuf[0]))
 		{
 			rpterr("I/O write error on it file\n");
 			endit();
@@ -317,7 +317,7 @@ VOID hds(NOTHING)
 	if (!inoffset)
 	{									/* don't generate it if in offset */
 		opitoo();						/* output one operand */
-		stbuf[0].itrl = (char)itwc; /* XXX */
+		stbuf[0].itrl = (char)itwc;
 		wostb();						/* write out statement buffer */
 	}
 	loctr += modelen * ival.l;
@@ -335,7 +335,7 @@ VOID chkeven(NOTHING)
 		pi = opcpt;
 		opcpt = evenptr;
 		opitb();
-		stbuf[0].itrl = (char)itwc; /* XXX */
+		stbuf[0].itrl = (char)itwc;
 		wostb();
 		opcpt = pi;
 		loctr++;
@@ -365,7 +365,7 @@ PP(int mul;)
 	opitb();							/* beginning of statement */
 	numops = 0;							/* initialize count for number of operands */
 	opito();							/* output it for operands */
-	stbuf[0].itrl = (char)itwc;				/* # of it entries */ /* XXX */
+	stbuf[0].itrl = (char)itwc;				/* # of it entries */
 	wostb();							/* write out statement buffer */
 	loctr += numops * mul;				/* count by bytes or words */
 }
@@ -390,7 +390,7 @@ VOID horg(NOTHING)
 	opcpt = orgptr;						/* org directive for pass 2 */
 	opitb();
 	opitoo();
-	stbuf[0].itrl = (char)itwc; /* XXX */
+	stbuf[0].itrl = (char)itwc;
 	wostb();
 	loctr = ival.l;
 	dlabl();							/* define label */
@@ -507,7 +507,7 @@ VOID hdcb(NOTHING)
 	dlabl();							/* define label... */
 	opitb();
 	opito();
-	stbuf[0].itrl = (char)itwc; /* XXX */
+	stbuf[0].itrl = (char)itwc;
 	numops = stbuf[ITOP1].itop.l;
 	loctr += numops * modelen;
 	wostb();							/* write out statement buffer */
@@ -533,7 +533,7 @@ VOID hcomline(NOTHING)
 		return;
 	}
 	opitoo();							/* output one operand */
-	stbuf[0].itrl = (char)itwc; /* XXX */
+	stbuf[0].itrl = (char)itwc;
 	wostb();							/* write out statement buffer */
 	loctr += ival.l;
 	igrst();
@@ -590,8 +590,8 @@ VOID hsection(NOTHING)
 	rlflg = (ival.l == 14) ? DATA : (ival.l == 15) ? BSS : TEXT;
 	loctr = savelc[rlflg];
 	stbuf[3].itop.l = loctr;				/* pass 1 location counter */
-	stbuf[3].itrl = (char)rlflg;				/* relocation base */ /* XXX */
-	stbuf[0].itrl = (char)itwc; /* XXX */
+	stbuf[3].itrl = (char)rlflg;				/* relocation base */
+	stbuf[0].itrl = (char)itwc;
 	wostb();
 	igrst();
 }
@@ -643,7 +643,7 @@ VOID send(NOTHING)
 	myflush(&tbuf);					/* flush text relocation bits */
 	cprlbits();							/* copy relocation bits */
 	myflush(&lbuf);
-	i = (sizeof couthd.ch_magic) + 3 * (sizeof couthd.ch_tsize);
+	i = 2 + 3 * 4;
 	if ((lseek(lfn, (long) i, SEEK_SET) == -1L) || write(lfn, &stlen, sizeof(stlen)) != sizeof(stlen))
 		rpterr("I/O error on loader output file\n");
 	endit();

@@ -9,6 +9,15 @@
 #include <compiler.h>
 #endif
 
+#ifdef __GNUC__
+ #ifndef _LIBC
+ #  include_next <errno.h>
+ #  define _NO_ERRNO
+ #endif
+#endif
+
+#ifndef _NO_ERRNO
+
 extern int errno;
 /*
 extern int sys_nerr;
@@ -55,6 +64,8 @@ extern const char *const sys_errlist[];
 /* hereafter is available to CP/M specials */
 #define ENODSPC	35
 #define ERENAME	36
+
+#endif
 
 VOID perror PROTO((const char *s));
 

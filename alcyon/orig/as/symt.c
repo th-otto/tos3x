@@ -8,6 +8,7 @@
 #include "as68.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 
 char ldfn[40];          /* name of the relocatable object file */
@@ -35,10 +36,10 @@ VOID opitb(NOTHING)
 
 	/* put opcode in it buffer */
 	stbuf[2].itty = ITSY;
-	stbuf[2].itrl = (char)modelen;			/* mode of instr(byte, word, long) */ /* XXX */
+	stbuf[2].itrl = (char)modelen;			/* mode of instr(byte, word, long) */
 	stbuf[2].itop.ptrw2 = opcpt;		/* pointer to opcode in main table */
 	stbuf[3].itty = ITCN;
-	stbuf[3].itrl = (char)rlflg;				/* relocation base */ /* XXX */
+	stbuf[3].itrl = (char)rlflg;				/* relocation base */
 	stbuf[3].itop.l = loctr;			/* pass1 location counter */
 	itwc = ITOP1;						/* next available slot-currently 4 */
 	pitw = &stbuf[ITOP1];				/* init the pointer */
@@ -102,7 +103,7 @@ PP(int constpc;)
 		if (tmode == 3)
 			break;						/* end of item */
 		smode = tmode;
-		*p++ = (char)fchr;					/* save character */ /* XXX */
+		*p++ = (char)fchr;					/* save character */
 		i++;
 		fchr = gchr();
 	}
@@ -198,7 +199,7 @@ int astring(NOTHING)
 
 	if (fchr != '\'' && fchr != '"')	/* valid delimiter */
 		return FALSE;
-	delim = (char)fchr; /* XXX */
+	delim = (char)fchr;
 	if (equflg || (itype == ITSP && ival.u.loword == '#'))
 	{									/* immediate operand */
 		if (astr1(delim))
@@ -257,7 +258,7 @@ PP(int adelim;)
 				retv = FALSE;				/* end of string */
 			} else
 			{
-				peekc = (char)fchr;			/* next char in string */ /* XXX */
+				peekc = (char)fchr;			/* next char in string */
 			}
 			break;						/* filled one bucket */
 		}
@@ -601,7 +602,7 @@ VOID wostb(NOTHING)
 	woix = stbuf[0].itrl & 0xff;		/* unsigned byte */
 	while (woix--)
 	{
-		for (i = 0; i < (unsigned)(sizeof(struct it) / (sizeof *itwo)); i++) /* XXX */
+		for (i = 0; i < (unsigned)(sizeof(struct it) / (sizeof *itwo)); i++)
 		{
 			if (pitix > &itbuf[ITBSZ - 1])	/* no room in buffer */
 				doitwr();
@@ -796,15 +797,15 @@ VOID getsymtab(NOTHING)
 {
 	register char **p;
 	register struct symtab *p1;
-	register char *p2; /* XXX __intptr_t */
+	register char *p2;
 	register short fd, i;
 	int j;
 
 #ifdef __ALCYON__
 	/* BUG: missing 3rd argument for open */
-	if ((fd = open(initfnam, 0)) < 0)
+	if ((fd = open(initfnam, O_RDONLY)) < 0)
 #else
-	if ((fd = open(initfnam, 0, 1)) < 0)
+	if ((fd = open(initfnam, O_RDONLY, 1)) < 0)
 #endif
 	{
 	  rerr:
@@ -857,7 +858,7 @@ VOID putsymtab(NOTHING)
 {
 	register char **p;
 	register struct symtab *p1;
-	register char *p2; /* XXX __intptr_t */
+	register char *p2;
 	register short fd, i;
 	short j;
 
@@ -877,12 +878,12 @@ VOID putsymtab(NOTHING)
 	 * of the symbol table
 	 */
 	p2 = ((char *)bmte - 1);
-	for (p = sirt; p < &sirt[SZIRT]; p++)
+	for (p = (char **)sirt; p < (char **)&sirt[SZIRT]; p++)
 	{
 		if (*p)
 			*p = *p - (__intptr_t)p2;
 	}
-	for (p = oirt; p < &oirt[SZIRT]; p++)
+	for (p = (char **)oirt; p < (char **)&oirt[SZIRT]; p++)
 	{
 		if (*p)
 			*p = *p - (__intptr_t)p2;

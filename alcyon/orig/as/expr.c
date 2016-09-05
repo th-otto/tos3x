@@ -479,10 +479,10 @@ VOID p1gi(NOTHING)
 				mmte();					/* put it in table */
 		} else if (itype == ITCN)
 		{
-			exitm.itrl = (char)reloc; /* XXX */
+			exitm.itrl = (char)reloc;
 		}
 	}
-	exitm.itty = (char)itype; /* XXX */
+	exitm.itty = (char)itype;
 	exitm.itop.p = ival.p;
 }
 
@@ -500,7 +500,7 @@ VOID p2gi(NOTHING)
 	{									/* end of statement */
 		itype = ITSP;
 		ival.l = ' ';						/* blank */
-		exitm.itty = (char)itype; /* XXX */
+		exitm.itty = (char)itype;
 		exitm.itop.p = ival.p;
 		return;
 	}

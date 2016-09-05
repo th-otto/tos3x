@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include <cout.h>
-#include "util.h"
+#include "../util/util.h"
 
 int lgetw(P(unsigned short *) lp, P(FILE *) f)
 PP(unsigned short *lp;)
