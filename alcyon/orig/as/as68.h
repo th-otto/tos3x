@@ -113,7 +113,6 @@
 #define BSS    3
 #define EXTRN  4   /* externally defined */
 
-
 /* Conditional Assembly variables and constants */
 #define LOW_CA  21
 #define HI_CA   30
@@ -129,7 +128,6 @@
 /* Ascii values */
 #define EOLC    '\n'/* end of line character */
 #define SOH     1
-
 #define CEOF     0
 
 /* Miscellaneous Defines */
@@ -143,7 +141,7 @@
 #define SZIRT   128
 #define EXTSZ   512
 #define DIRECT  34  /* number of entries in p2direct */
-#define ORGDIR  14  /* entry in p2direct */
+#define ORGDIR  14  /* org entry in p2direct */
 
 /*
  * intermediate text file
@@ -192,7 +190,7 @@ struct mlongbytes { short loword; short hiword; };
 /* format of a symbol entry in the main table */
 struct symtab {
     char name[SYNAMLEN]; /* symbol name */
-    unsigned short flags;
+    short flags; /* XXX */
 	union {
 		struct mlongbytes u;
 		long l;
@@ -241,25 +239,21 @@ short modelen;          /* operand length per mode */
 
 /* parameters that define the main table */
 #define SZMT 300        /* initial size of the main table must be large enough to initialize */
-#define ICRSZMT 10     /* add to main table when run out */
+#define ICRSZMT 10      /* add to main table when run out */
 
-short cszmt;            /* current size of main table */
+short cszmt;            /* current size of main table */ /* unused */
 struct symtab *bmte;    /* beginning of main table */
 struct symtab *emte;    /* end of main table */
 
 short itbuf[ITBSZ];     /* it buffer */
 
 struct it stbuf[STMAX]; /* holds it for one statement */
-#define STBFSIZE (sizeof stbuf[0])
 
-char sbuf[BLEN];       /* holds one block of source */
+char sbuf[BLEN];        /* holds one block of source */
 
 /* format of a symbol entry in the main table */
-struct symtab *symtptr;
+struct symtab *symtptr; /* unused */
 
-/* STESIZE - byte length of symbol table entry -- should be 18 */
-/* must use a sizeof to avoid over run variables */
-#define STESIZE (sizeof *symtptr)
 struct symtab *lmte;             /* last entry in main table */
 
 struct irts {
@@ -271,19 +265,17 @@ long stlen;             /* length of symbol table */
 
 /* initial reference table for symbols */
 struct symtab *sirt[SZIRT];
-#define SIRTSIZE    (sizeof sirt[0])
 
 /* initial reference table to opcodes */
 struct symtab *oirt[SZIRT];
-#define OIRTSIZE    (sizeof oirt[0])
 
 /* external symbol table */
 struct symtab *extbl[EXTSZ];
 short extindx;          /* index to external symbol table */
 struct symtab **pexti;  /* ptr to external symbol table */
 
-short absln;            /* absolute line number */
-short p2absln;          /* pass 2 line number */
+int absln;              /* absolute line number */
+int p2absln;            /* pass 2 line number */
 short fcflg;            /* 0=>passed an item.  1=>first char */
 short fchr;             /* first char in term */
 short ifn;              /* source file descriptor */
@@ -293,7 +285,7 @@ struct it *pitw;        /* ptr to it buffer next entry */
 short itype;            /* type of item */
 union iival ival;       /* value of item */
 struct symtab *lblpt;   /* label pointer */
-char lbt[SYNAMLEN];      /* holds label name */
+char lbt[SYNAMLEN];     /* holds label name */
 long loctr;             /* location counter */
 long savelc[4];         /* save relocation counters for 3 bases */
 short nite;             /* number of entries in stbuf */
@@ -304,7 +296,7 @@ short p2flg;            /* 0=>pass 1  1=>pass 2 */
 struct symtab **pirt;   /* entry in initial reference table */
 short reloc;            /* reloc value returned by expr evaluator (expr) */
 short rlflg;            /* relocation value of current location counter */
-struct hdr2 couthd;     /* cout header structure */
+struct hdr couthd;      /* cout header structure */
 
 short format;
 short sbuflen;          /* number of chars in sbuf */
@@ -357,16 +349,9 @@ short plevel;           /* parenthesis level counter */
 short opdix;            /* operand index counter */
 
 /* ptrs to ins[] and rlbits[] */
-union insw {
-	short w;
-	struct {
-		char hibyte;
-		char lobyte;
-	} b;
-};
-union insw *pins;
+short *pins;
 short *prlb;
-union insw ins[5];           /* holds instruction words */
+short ins[5];           /* holds instruction words */
 
 #define PRTCHLEN 128
 char prtchars[PRTCHLEN];/* line buffer for putchar */
@@ -571,7 +556,7 @@ VOID cpop01 PROTO((NOTHING));
 VOID cksize PROTO((struct op *ap));
 VOID ccr_or_sr PROTO((NOTHING));
 int get2ops PROTO((NOTHING));
-
+int myflush PROTO((FILE *));
 
 /*
  * pass1a.c
@@ -583,7 +568,7 @@ VOID pass1a PROTO((NOTHING));
  * pass2.c
  */
 extern short rlbits[];
-extern short f2mode[];
+extern short const f2mode[];
 VOID pass2 PROTO((NOTHING));
 
 
@@ -615,3 +600,8 @@ VOID getsymtab PROTO((NOTHING));
 VOID putsymtab PROTO((NOTHING));
 VOID rpterr PROTO((const char *ptch, ...)) __attribute__((format(__printf__, 1, 2)));
 VOID setldfn PROTO((const char *ap));
+
+/*
+ * putchd.c
+ */
+VOID putchd PROTO((FILE *fp, struct hdr *arptr)); /* XXX */

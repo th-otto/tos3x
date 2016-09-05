@@ -9,7 +9,12 @@ PP(int binary;)
 	ibuf->cc = BLEN;					/* no chars */
 	ibuf->cp = &(ibuf->cbuf[0]);
 	binary = (binary == 0) ? 0 : 1;
-	return (ibuf->_fd = xcreat(fname, 2, binary));
+#ifdef __ALCYON__
+	ibuf->_fd = xcreat(fname, 2, binary);
+	asm("nop");
+#else
+	return ibuf->_fd = xcreat(fname, 2, binary);
+#endif
 }
 
 
@@ -26,7 +31,13 @@ PP(register FILE *ibuf;)
 	}
 	*(ibuf->cp)++ = c;
 	ibuf->cc--;
+#ifdef __ALCYON__
+	asm("move.b    9(a6),d0");
+	asm("ext.w     d0");
+	asm("nop");
+#else
 	return c;
+#endif
 }
 
 
@@ -41,7 +52,12 @@ PP(register FILE *ibuf;)
 	putc(w & 0xff, ibuf);
 	UNUSED(i);
 	UNUSED(j);
+#ifdef __ALCYON__
+	asm("move.w    8(a6),d0");
+	asm("nop");
+#else
 	return w;
+#endif
 }
 
 
@@ -49,7 +65,12 @@ int xputwp(P(unsigned short *) w, P(FILE *) ibuf)
 PP(unsigned short *w;)
 PP(FILE *ibuf;)
 {
+#ifdef __ALCYON__
+	xputw(*w, ibuf);
+	asm("nop");
+#else
 	return xputw(*w, ibuf);
+#endif
 }
 
 
@@ -63,5 +84,10 @@ PP(register FILE *ibuf;)
 	ibuf->cp = &(ibuf->cbuf[0]);
 	if (write(fileno(ibuf), ibuf->cp, i) != i)
 		xwritefail();
+#ifdef __ALCYON__
+	asm("clr.w     d0");
+	asm("nop");
+#else
 	return 0;
+#endif
 }

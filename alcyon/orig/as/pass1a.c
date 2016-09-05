@@ -8,6 +8,7 @@
 /* reduce long relative branches to short if possible */
 
 #include "as68.h"
+#include <fcntl.h>
 
 VOID fixsyadr PROTO((int al));
 
@@ -20,11 +21,11 @@ VOID pass1a(NOTHING)
 	pitix = &itbuf[ITBSZ];
 	reduced = itoffset = 0L;
 	stbuf[0].itrl = 0;
-	wsize = 3 * STBFSIZE;				/* don't calculate many times */
+	wsize = 3 * sizeof(struct it);				/* don't calculate many times */
 	close(itfn);
 	LASTCHTFN = itfnc;
-	itfn = openfi(tfilname, 0, 1);		/* open it for reading */
-	writfn = open(tfilname, 1, 1);		/* may need to rewrite some of it */
+	itfn = openfi(tfilname, O_RDONLY, 1);		/* open it for reading */
+	writfn = open(tfilname, O_WRONLY, 1);		/* may need to rewrite some of it */
 	if (writfn < 0)
 		asabort();
 	while (1)
@@ -37,7 +38,7 @@ VOID pass1a(NOTHING)
 			p1inlen = stbuf[1].itrl;	/* pass 1 instr length guess */
 			if (((format == 6 && p1inlen == 4) || opcpt == jsrptr) && (rlflg = stbuf[3].itrl) == TEXT)
 			{
-				nite = stbuf[0].itrl & 0377;	/* # of it entries */
+				nite = stbuf[0].itrl & 0xff;	/* # of it entries */
 				pnite = &stbuf[nite];	/* ptr to end of stmt */
 				modelen = stbuf[2].itrl;	/* instr mode length */
 				opdix = ITOP1;			/* first operand */
@@ -68,7 +69,7 @@ VOID pass1a(NOTHING)
 					stbuf[1].itrl -= i;	/* reduced instr lenght somewhat */
 					if (!stbuf[1].itrl)
 						stbuf[1].itrl = -1;	/* ignore flag */
-					if (lseek(writfn, itoffset, 0) == -1L)
+					if (lseek(writfn, itoffset, SEEK_SET) == -1L)
 					{
 						rpterr("seek error on intermediate file\n");
 						asabort();

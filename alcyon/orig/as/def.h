@@ -54,9 +54,11 @@ const char *const ermsg[] = {
 };
 
 
-short brkln1 = 077777;    /* pass 1 break line number for debugging */
-short opcval;             /* opcode */
-short chmvq;
+char ldfn[40];          /* name of the relocatable object file */
+
+int brkln1 = 077777;    /* pass 1 break line number for debugging */
+int opcval;             /* opcode */
+int chmvq;
 
 adirect const p1direct[] = {
     hopd,       /*  0 */
@@ -134,13 +136,14 @@ adirect const p2direct[] = {
     0
 };
 
-short symcon;
-char endstr[] = "end";
-char equstr[] = "equ";
-char evnstr[] = "even";
-char orgstr1[] = "~.yxzorg";
-char orgstr2[] = "org";
+int symcon;
+char const endstr[] = "end";
+char const equstr[] = "equ";
+char const evnstr[] = "even";
+char const orgstr1[] = "~.yxzorg";
+char const orgstr2[] = "org";
 
-short poslab;
-short explmode;   /* explicit mode length given */
+int poslab;
+char tlab1[SYNAMLEN];
+int explmode;   /* explicit mode length given */
 

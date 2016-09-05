@@ -30,5 +30,10 @@ PP(const char *fname;)				/* -> File name		    */
 PP(int mode;)				/* Open mode		    */
 PP(int binary;)				/* File type		    */
 {
+#ifdef __ALCYON__
+	_open(fname, mode, binary);	/* Call clib routine	    */
+	asm("nop");
+#else
 	return _open(fname, mode, binary);	/* Call clib routine	    */
+#endif
 }

@@ -139,7 +139,7 @@ PP(int xrtyp;)
 	rlflg = xrtyp;
 	loctr = savelc[xrtyp];				/* set new base relocation ctr */
 	opitb();
-	stbuf[0].itrl = itwc;
+	stbuf[0].itrl = (char)itwc; /* XXX */
 	wostb();
 	igrst();
 }
@@ -217,7 +217,7 @@ VOID hext(NOTHING)
 	}
 	if ((lblpt = lemt(FALSE, sirt)) == lmte)	/* look up in main table */
 		mmte();							/* not there, make new entry */
-	else if (lblpt->flags & SYDF && (lblpt->flags & SYXR) == 0)	/* already there */
+	else if ((lblpt->flags & SYDF) && (lblpt->flags & SYXR) == 0)	/* already there */
 		uerr(29);
 	lblpt->flags |= SYXR | SYDF;		/* symbol is an external */
 	mkextidx(lblpt);					/* put into external table */
@@ -247,7 +247,16 @@ PP(struct symtab *p;)
 		rpterr("overflow of external table\n");
 		endit();
 	}
-	p->vextno = ((int) ((__intptr_t)pexti - (__intptr_t)extbl)) / sizeof(VOIDPTR);	/* external symbol index # */ /* XXX */
+#ifdef __ALCYON__
+	asm("move.l    _pexti,d0");
+	asm("sub.l     #_extbl,d0");
+	asm("divs.w    #$0004,d0");
+	asm("ext.l     d0");
+	asm("movea.l   8(a6),a1")
+	asm("move.w    d0,14(a1)");
+#else
+	p->vextno = (int)((_intptr_t)pexti - (__intptr_t)extbl) / (int)sizeof(VOIDPTR);	/* external symbol index # */ /* XXX */
+#endif
 	*pexti++ = p;						/* save external in external table */
 	extindx++;
 }
@@ -262,7 +271,7 @@ VOID hend(NOTHING)
 	lblpt = 0;							/* no label */
 	opitb();							/* output beginning of statement */
 	igrst();							/* ignore operands */
-	stbuf[0].itrl = itwc;				/* number of it entries */
+	stbuf[0].itrl = (char)itwc;				/* number of it entries */ /* XXX */
 	wostb();							/* write out statement buffer */
 	if (pitix > itbuf)					/* some it in buffer */
 		if (write(itfn, itbuf, ITBSZ * (sizeof i)) != ITBSZ * (sizeof i))
@@ -308,10 +317,10 @@ VOID hds(NOTHING)
 	if (!inoffset)
 	{									/* don't generate it if in offset */
 		opitoo();						/* output one operand */
-		stbuf[0].itrl = itwc;
+		stbuf[0].itrl = (char)itwc; /* XXX */
 		wostb();						/* write out statement buffer */
 	}
-	loctr += (ival.l * modelen);
+	loctr += modelen * ival.l;
 	igrst();
 }
 
@@ -326,7 +335,7 @@ VOID chkeven(NOTHING)
 		pi = opcpt;
 		opcpt = evenptr;
 		opitb();
-		stbuf[0].itrl = itwc;
+		stbuf[0].itrl = (char)itwc; /* XXX */
 		wostb();
 		opcpt = pi;
 		loctr++;
@@ -356,7 +365,7 @@ PP(int mul;)
 	opitb();							/* beginning of statement */
 	numops = 0;							/* initialize count for number of operands */
 	opito();							/* output it for operands */
-	stbuf[0].itrl = itwc;				/* # of it entries */
+	stbuf[0].itrl = (char)itwc;				/* # of it entries */ /* XXX */
 	wostb();							/* write out statement buffer */
 	loctr += numops * mul;				/* count by bytes or words */
 }
@@ -381,7 +390,7 @@ VOID horg(NOTHING)
 	opcpt = orgptr;						/* org directive for pass 2 */
 	opitb();
 	opitoo();
-	stbuf[0].itrl = itwc;
+	stbuf[0].itrl = (char)itwc; /* XXX */
 	wostb();
 	loctr = ival.l;
 	dlabl();							/* define label */
@@ -428,7 +437,7 @@ VOID hreg(NOTHING)
 	igrst();
 }
 
-short regmsk[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
+short const regmsk[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
 	0100, 040, 020, 010, 4, 2, 1
 };
 
@@ -436,7 +445,8 @@ short regmsk[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0
 /* make a register mask for the reg routine */
 int mkmask(NOTHING)
 {
-	register short *p, i, j, mask;
+	register const short *p;
+	register short i, j, mask;
 
 	p = regmsk;
 	mask = 0;
@@ -448,17 +458,19 @@ int mkmask(NOTHING)
 			if ((j = chkreg()) == -1)
 			{
 				xerr(40);
-				return (-1);
+				return -1;
 			}
 			while (i <= j)
 				mask |= p[i++];
 		} else
+		{
 			mask |= p[i];
+		}
 		if (fchr != '/' && fchr != ',')
 			break;						/* Signetics fix */
 		fchr = gchr();
 	}
-	return (mask);
+	return mask;
 }
 
 
@@ -471,7 +483,7 @@ int chkreg(NOTHING)
 	if (fchr == 'a' || fchr == 'A')
 		i = 8;
 	else if (fchr != 'd' && fchr != 'r' && fchr != 'D' && fchr != 'R')
-		return (-1);
+		return -1;
 	fchr = gchr();
 	do
 	{
@@ -479,12 +491,12 @@ int chkreg(NOTHING)
 		fchr = gchr();
 	} while (isdigit(fchr));
 	if (j < 0 || j > AREGHI)
-		return (-1);
+		return -1;
 	i += j;
 	if (i >= 0 && i <= AREGHI)
-		return (i);
+		return i;
 	else
-		return (-1);
+		return -1;
 }
 
 
@@ -495,7 +507,7 @@ VOID hdcb(NOTHING)
 	dlabl();							/* define label... */
 	opitb();
 	opito();
-	stbuf[0].itrl = itwc;
+	stbuf[0].itrl = (char)itwc; /* XXX */
 	numops = stbuf[ITOP1].itop.l;
 	loctr += numops * modelen;
 	wostb();							/* write out statement buffer */
@@ -521,7 +533,7 @@ VOID hcomline(NOTHING)
 		return;
 	}
 	opitoo();							/* output one operand */
-	stbuf[0].itrl = itwc;
+	stbuf[0].itrl = (char)itwc; /* XXX */
 	wostb();							/* write out statement buffer */
 	loctr += ival.l;
 	igrst();
@@ -578,8 +590,8 @@ VOID hsection(NOTHING)
 	rlflg = (ival.l == 14) ? DATA : (ival.l == 15) ? BSS : TEXT;
 	loctr = savelc[rlflg];
 	stbuf[3].itop.l = loctr;				/* pass 1 location counter */
-	stbuf[3].itrl = rlflg;				/* relocation base */
-	stbuf[0].itrl = itwc;
+	stbuf[3].itrl = (char)rlflg;				/* relocation base */ /* XXX */
+	stbuf[0].itrl = (char)itwc; /* XXX */
 	wostb();
 	igrst();
 }
@@ -628,11 +640,11 @@ VOID send(NOTHING)
 	print(0);
 	cpdata();							/* copy data to loader file */
 	osymt();							/* output symbol table */
-	xfflush(&tbuf);					/* flush text relocation bits */
+	myflush(&tbuf);					/* flush text relocation bits */
 	cprlbits();							/* copy relocation bits */
-	xfflush(&lbuf);
+	myflush(&lbuf);
 	i = (sizeof couthd.ch_magic) + 3 * (sizeof couthd.ch_tsize);
-	if ((lseek(lfn, (long) i, 0) == -1L) || write(lfn, &stlen, sizeof(stlen)) != sizeof(stlen))
+	if ((lseek(lfn, (long) i, SEEK_SET) == -1L) || write(lfn, &stlen, sizeof(stlen)) != sizeof(stlen))
 		rpterr("I/O error on loader output file\n");
 	endit();
 }
@@ -690,12 +702,20 @@ VOID sdcb(NOTHING)
 		{
 			if (!hflg)
 			{
-				ins[i].b.hibyte = ival.l;
+#ifdef __ALCYON__
+				*((char *)&ins[i] + 0) = ival.l;
+#else
+				ins[i] = ((int)ival.l & 0xff) << 8;
+#endif
 				outbyte(ival.u.loword, DABS);
 				hflg++;
 			} else
 			{
-				ins[i++].b.lobyte = ival.l;
+#ifdef __ALCYON__
+				*((char *)&ins[i++] + 1) = ival.l;
+#else
+				ins[i++] |= ival.l & 0xff;
+#endif
 				outbyte(ival.u.loword, DABS);
 				hflg = 0;
 			}
@@ -703,7 +723,7 @@ VOID sdcb(NOTHING)
 		} else if (modelen == WORDSIZ)
 		{
 		  sdbl1:
-			ins[i++].w = ival.u.loword;
+			ins[i++] = ival.u.loword;
 			outword((int) ival.u.loword, reloc);
 		  sdbl2:
 			if (i > 3)
@@ -715,7 +735,7 @@ VOID sdcb(NOTHING)
 			}
 		} else
 		{								/* long word... */
-			ins[i++].w = ival.u.hiword;
+			ins[i++] = ival.u.hiword;
 			outword(ival.u.hiword, LUPPER);
 			goto sdbl1;
 		}
@@ -779,7 +799,7 @@ VOID sorg(NOTHING)
 	if (rlflg == TEXT || rlflg == DATA)
 	{									/* must put out zeros */
 		l = stbuf[ITOP1].itop.l - loctr;	/* # zeroes to output */
-		ins[0].w = 0;
+		ins[0] = 0;
 		print(1);
 		while (l > 0)
 		{
@@ -822,7 +842,7 @@ PP(int dtyp;)
 		}
 		if (reloc == EXTRN)
 			reloc = (extref << 3) | EXTVAR;	/* gen extern reference */
-		if (dtyp == 1)
+		if (dtyp == BYTESIZ)
 		{								/* defining a byte */
 			if (ival.l < -128 || ival.l >= 256 || reloc != ABS)
 			{							/* not a byte */
@@ -832,20 +852,28 @@ PP(int dtyp;)
 			}
 			if (!hflg)
 			{
-				ins[i].b.hibyte = ival.l;
+#ifdef __ALCYON__
+				*((char *)&ins[i] + 0) = ival.l;
+#else
+				ins[i] = ((int)ival.l & 0xff) << 8;;
+#endif
 				outbyte(ival.u.loword, DABS);
 				hflg++;
 			} else
 			{
-				ins[i++].b.lobyte = ival.l;
+#ifdef __ALCYON__
+				*((char *)&ins[i++] + 1) = ival.l;
+#else
+				ins[i++] |= ((int)ival.l & 0xff) << 8;
+#endif
 				hflg = 0;
 				outbyte(ival.u.loword, DABS);
 			}
 			goto sdal2;
-		} else if (dtyp == 2)
+		} else if (dtyp == WORDSIZ)
 		{								/* defining a word */
 		  sdal1:
-			ins[i++].w = ival.u.loword;
+			ins[i++] = ival.u.loword;
 			outword(ival.u.loword, reloc);
 		  sdal2:
 			if (i > 3)
@@ -857,7 +885,7 @@ PP(int dtyp;)
 			}
 		} else
 		{								/* long words */
-			ins[i++].w = ival.u.hiword;
+			ins[i++] = ival.u.hiword;
 			outword(ival.u.hiword, LUPPER);
 			goto sdal1;
 		}
@@ -868,7 +896,11 @@ PP(int dtyp;)
 		{
 			if (hflg)
 			{
-				ins[i++].b.lobyte = 0;
+#ifdef __ALCYON__
+				*((char *)&ins[i++] + 1) = 0;
+#else
+				i++;
+#endif
 			}
 			if (i)
 			{							/* more printing */
@@ -1032,15 +1064,15 @@ int acok(NOTHING)
 	if (itype != ITCN)
 	{
 		xerr(7);						/* must be a constant */
-		return (0);
+		return FALSE;
 	}
 	if (reloc != ABS)
 	{
 		xerr(11);						/* must be absolute, no forward references */
-		return (0);
+		return FALSE;
 	}
 	igrst();
-	return (1);
+	return TRUE;
 }
 
 
@@ -1081,7 +1113,17 @@ int cmp_ops(NOTHING)
 	igrst();
 	if (len1 != len2)
 		return FALSE;
+#ifdef __ALCYON__
+	asm("movea.w   d6,a0");
+	asm("adda.l    a6,a0");
+	asm("clr.w     d0"); /* generated: moveq 0,d0 */
+	asm("move.b    d0,-52(a0)");
+	asm("movea.w   d7,a1");
+	asm("adda.l    a6,a1");
+	asm("move.b    d0,-26(a1)");
+#else
 	str1[len1] = str2[len2] = '\0';
+#endif
 	return strcmp(str1, str2) == 0;
 }
 

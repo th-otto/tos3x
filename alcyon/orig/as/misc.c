@@ -8,11 +8,11 @@
 /* pass 2 miscellaneous routines */
 
 #include "as68.h"
-#include "../util/util.h"
+#include <fcntl.h>
 
 long stlen;
 
-short stdofd = STDOUT;
+short stdofd = STDOUT; /* unused */
 
 short debug = 0;
 
@@ -145,7 +145,7 @@ PP(int opn;)
   dosimp:								/* simple addr or imm expr */
 	if ((i = gspreg())) /* XXX */
 	{
-		inst = ins[0].w;
+		inst = ins[0];
 		if (i == PC || (i == USP && inst != MOVE && inst != MOVEC))
 			uerr(20);
 		if (i == SR || i == CCR)
@@ -241,12 +241,12 @@ int getareg(NOTHING)
 	i = getreg();
 	if (i >= AREGLO && i <= AREGHI)
 	{
-		return (i & 7);
+		return i & 7;
 	} else
 	{
 		if (i != -1)
 			pitw--;
-		return (-1);
+		return -1;
 	}
 }
 
@@ -265,12 +265,13 @@ int getreg(NOTHING)
 
 	i = getrgs();
 	if (i >= 0 && i <= AREGHI)
-		return (i);
-	else
+	{
+		return i;
+	} else
 	{
 		if (i != -1)
 			pitw--;
-		return (-1);
+		return -1;
 	}
 }
 
@@ -320,8 +321,8 @@ PP(const struct it *ckpt;)
 PP(int cksc;)
 {
 	if (ckpt >= pnite || ckpt->itty != ITSP || ckpt->itop.u.loword != cksc)
-		return (0);
-	return (1);
+		return 0;
+	return 1;
 }
 
 
@@ -338,9 +339,17 @@ VOID ristb(NOTHING)
 	do
 	{
 		riix = stbuf[0].itrl;
-		itoffset += (riix & 0377) * STBFSIZE;
-		pi = (short *)&stbuf[0];
-		for (i = 0; i < (STBFSIZE) / (sizeof *pi); i++)
+#ifdef __ALCYON__
+		asm("clr.l     d0");
+		asm("move.w    d7,d0");
+		asm("and.w     #$00FF,d0");
+		asm("mulu.w    #$0006,d0");
+		asm("add.l     d0,_itoffset");
+#else
+		itoffset += (riix & 0xff) * sizeof(struct it); /* XXX */
+#endif
+		pi = (short *)stbuf;
+		for (i = 0; i < (unsigned)(sizeof(struct it) / (sizeof *pi)); i++)
 		{
 			if (pitix > &itbuf[ITBSZ - 1])
 			{							/* need new buffer full */
@@ -352,11 +361,11 @@ VOID ristb(NOTHING)
 			asabort();
 
 		/* get the rest of the statement it */
-		riix = stbuf[0].itrl & 0377;	/* unsigned byte */
+		riix = stbuf[0].itrl & 0xff;	/* unsigned byte */
 		riix--;							/* already got first entry */
 		while (riix--)
 		{
-			for (i = 0; i < (STBFSIZE) / (sizeof *pi); i++)
+			for (i = 0; i < (unsigned)(sizeof(struct it)) / (sizeof *pi); i++)
 			{
 				if (pitix > &itbuf[ITBSZ - 1])
 				{
@@ -375,7 +384,7 @@ VOID doitrd(NOTHING)
 	register short i;
 
 	pitix = itbuf;
-	if ((i = read(itfn, itbuf, ITBSZ * (sizeof i))) <= 0)
+	if ((i = read(itfn, itbuf, ITBSZ * sizeof(itbuf[0]))) <= 0)
 	{
 		fprintf(stderr, "it read error i=%d errno=%o\n", i, errno);
 		asabort();
@@ -391,13 +400,13 @@ int ckeop(P(int) uen)
 PP(int uen;)
 {
 	if (pitw >= pnite)					/* end of all operands */
-		return (1);
+		return TRUE;
 	if (!ckitc(pitw, ','))
 	{									/* not end of stmt must be op,op */
 		uerr(uen);
-		return (0);
+		return FALSE;
 	}
-	return (1);
+	return TRUE;
 }
 
 
@@ -483,12 +492,12 @@ PP(struct symtab *aosypt;)
 	for (i = 0; i < SYNAMLEN; i++)		/* output symbol name */
 		putc(*p1++, &lbuf);
 
-	lputw(&osypt->flags, &lbuf);		/* output symbol flags */
+	xputwp((unsigned short *)&osypt->flags, &lbuf);		/* output symbol flags */ /* XXX */
 #ifdef DEBUG
 	if (debug)							/* prints symbol table entries */
 		printf("> %-8.8s* %o\n", osypt->name, (int) osypt->flags);
 #endif
-	lputl(&osypt->vl1.l, &lbuf);			/* symbol value */
+	xputlp(&osypt->vl1.l, &lbuf);			/* symbol value */
 	UNUSED(lsyval);
 }
 
@@ -516,24 +525,6 @@ PP(struct symtab *udspt;)
 		udfct = 0;
 	}
 }
-
-
-#if 0
-/* buffered putchar routine */
-VOID putchar(P(char) c)
-PP(char c;)
-{
-	register short i;
-
-	*prtchidx++ = c;
-	if (!c || prtchidx >= &prtchars[PRTCHLEN])
-	{
-		i = (short) (prtchidx - prtchars);
-		write(stdofd, prtchars, i);
-		prtchidx = prtchars;
-	}
-}
-#endif
 
 
 short hibytflg[4], hibytw[4];
@@ -567,13 +558,13 @@ PP(unsigned short rb;)
 	switch (rlflg)
 	{
 	case TEXT:
-		lputw(&val, &lbuf);
-		lputw(&rb, &tbuf);
+		xputwp(&val, &lbuf);
+		xputwp(&rb, &tbuf);
 		break;
 
 	case DATA:
-		lputw(&val, &dabuf);
-		lputw(&rb, &drbuf);
+		xputwp(&val, &dabuf);
+		xputwp(&rb, &drbuf);
 		break;
 
 	case BSS:
@@ -590,14 +581,14 @@ PP(unsigned short rb;)
 VOID outinstr(NOTHING)
 {
 	register short i;
-	register union insw *p1;
+	register short *p1;
 	register short *p2;
 
 	i = instrlen >> 1;
 	p1 = ins;
 	p2 = rlbits;
 	while (i--)
-		outword((p1++)->w, *p2++);
+		outword(*p1++, *p2++);
 
 }
 
@@ -605,8 +596,8 @@ VOID outinstr(NOTHING)
 /* copy data bits from temporary file to loader file */
 VOID cpdata(NOTHING)
 {
-	xfflush(&lbuf);
-	xfflush(&dabuf);
+	myflush(&lbuf);
+	myflush(&dabuf);
 	docp(dafn, dafnc, savelc[DATA]);
 }
 
@@ -614,8 +605,8 @@ VOID cpdata(NOTHING)
 /* copy text then data relocation bits from temporary file to loader file */
 VOID cprlbits(NOTHING)
 {
-	xfflush(&lbuf);
-	xfflush(&drbuf);
+	myflush(&lbuf);
+	myflush(&drbuf);
 	docp(trbfn, trbfnc, savelc[TEXT]);
 	docp(drbfn, drbfnc, savelc[DATA]);
 }
@@ -633,12 +624,12 @@ PP(int cfn;)
 PP(int cfnc;)
 PP(long length;)
 {
-	register short i;
-	register short j;
+	register int i;
+	register int j;
 
 	close(cfn);
 	LASTCHTFN = cfnc;
-	cfn = openfi(tfilname, 0, 1);
+	cfn = openfi(tfilname, O_RDONLY, 1);
 	while (length > 0)
 	{
 		if (length > BLEN)				/* 512 bytes at a time      */
@@ -690,13 +681,13 @@ PP(struct op *ap;)
 
 	i = ap->ea & 070;
 	if (i == INDIRECT || i == INDDISP || i == INDINX)
-		return (1);
+		return TRUE;
 	if (i == 070)
 	{
 		if ((ap->ea & 7) <= 3)
-			return (1);
+			return TRUE;
 	}
-	return (0);
+	return FALSE;
 }
 
 
@@ -705,9 +696,9 @@ int ckcomma(NOTHING)
 	if (ckitc(pitw, ','))
 	{									/* next token a comma */
 		pitw++;
-		return (1);
+		return TRUE;
 	}
-	return (0);
+	return FALSE;
 }
 
 
@@ -742,10 +733,10 @@ PP(struct op *apea;)
 	  dindx:
 		if (p->con.l > 255L || p->con.l < -128L)
 			uerr(35);
-		i = (p->con.u.loword & 0377) | (p->idx << 12) | (p->xmod << 11);
+		i = (p->con.u.loword & 0xff) | (p->idx << 12) | (p->xmod << 11);
 		if (p->drlc != ABS)
 			uerr(27);
-		(pins++)->w = i;
+		*pins++ = i;
 		*prlb++ = DABS;
 		instrlen += 2;
 		return;
@@ -795,7 +786,7 @@ PP(struct op *ap;)
 	register struct op *p;
 
 	p = ap;
-	(pins++)->w = p->con.u.loword;			/* displacement */
+	*pins++ = p->con.u.loword;			/* displacement */
 	if (p->con.u.hiword && p->con.u.hiword != -1)
 		uerr(41);						/* invalid 16-bit disp */
 	*prlb++ = (p->ext != -1) ? (p->ext << 3) | EXTVAR : p->drlc;
@@ -806,7 +797,7 @@ PP(struct op *ap;)
 VOID doupper(P(struct op *) p)
 PP(struct op *p;)
 {
-	(pins++)->w = p->con.u.hiword;			/* upper half of long addr or constant */
+	*pins++ = p->con.u.hiword;			/* upper half of long addr or constant */
 	*prlb++ = LUPPER;
 	instrlen += 2;
 }
@@ -827,9 +818,9 @@ PP(struct op *apea;)
 	register struct op *p;
 
 	p = apea;
-	ins[0].w |= (arreg << 9);				/* put in reg # */
-	ins[0].w |= armode;					/* instr mode bits */
-	ins[0].w |= p->ea;					/* put in effective addr bits */
+	ins[0] |= (arreg << 9);				/* put in reg # */
+	ins[0] |= armode;					/* instr mode bits */
+	ins[0] |= p->ea;					/* put in effective addr bits */
 	doea(p);							/* may be more words in ea */
 }
 
@@ -837,7 +828,7 @@ PP(struct op *apea;)
 /* generate an immediate instr */
 VOID genimm(NOTHING)
 {
-	ins[0].w |= (f2mode[modelen] | opnd[1].ea);
+	ins[0] |= (f2mode[modelen] | opnd[1].ea);
 	if (modelen == LONGSIZ)
 	{
 		doupper(&opnd[0]);
@@ -873,9 +864,9 @@ PP(struct op *ap;)
 int makeimm(NOTHING)
 {
 	if (opnd[0].ea != IMM)
-		return (0);
+		return FALSE;
 	if (!dataalt(&opnd[1]))
-		return (0);
+		return FALSE;
 	if (opcpt == addptr)
 		opcpt = addiptr;
 	else if (opcpt == andptr)
@@ -889,11 +880,11 @@ int makeimm(NOTHING)
 	else if (opcpt == eorptr)
 		opcpt = eoriptr;
 	else
-		return (0);
-	ins[0].w = opcpt->vl1.u.loword;
+		return FALSE;
+	ins[0] = opcpt->vl1.u.loword;
 	format = opcpt->flags & OPFF;
 	genimm();
-	return (1);
+	return TRUE;
 }
 
 
@@ -911,10 +902,10 @@ int gspreg(NOTHING)
 
 	i = getrgs();
 	if (i > AREGHI)
-		return (i);
+		return i;
 	if (i != -1)
 		pitw--;
-	return (0);
+	return 0;
 }
 
 
@@ -929,8 +920,8 @@ PP(struct op *ap;)
 PP(int v1;)
 {
 	if (ap->ea)
-		return (0);
-	return ((ap->idx == v1));
+		return 0;
+	return ap->idx == v1;
 }
 
 
@@ -939,10 +930,10 @@ int anysprg(P(struct op *) ap)
 PP(struct op *ap;)
 {
 	if (ap->ea)
-		return (0);
+		return FALSE;
 	if (ap->idx >= CCR && ap->idx <= USP)
-		return (1);
-	return (0);
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -991,7 +982,7 @@ VOID ccr_or_sr(NOTHING)
 		uerr(34);
 	}
 	cksize(&opnd[0]);
-	ins[0].w |= IMM | f2mode[modelen];
+	ins[0] |= IMM | f2mode[modelen];
 	dodisp(&opnd[0]);
 }
 
@@ -1002,17 +993,17 @@ int get2ops(NOTHING)
 	if (!ckcomma())
 	{
 		uerr(10);
-		return (1);						/* no second op */
+		return TRUE;						/* no second op */
 	}
 	getea(1);							/* get second effective address */
-	return (0);
+	return FALSE;
 }
 
 
-int xfflush(P(FILE *) ibuf)
+int myflush(P(FILE *) ibuf)
 PP(register FILE *ibuf;)
 {
-	register short i;
+	register int i;
 
 	i = BLEN - ibuf->cc;
 	ibuf->cc = BLEN;

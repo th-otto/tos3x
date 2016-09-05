@@ -63,13 +63,13 @@ VOID psyms(NOTHING)
 	for (p = bmte; p < lmte; p++)	/* Loop through symbol table */
 	{
 		if (j > 3)						/* 4 Symbols / line         */
-		{								/*                          */
-			printf("\n");				/* Print newline            */
+		{
+			printf("\n");
 			page();						/* Check for top of page    */
 			j = 0;						/* Reset counter            */
 		}
-		j += psyme(p);					/* Print 1 table entry      */
-	}									/*        (maybe)           */
+		j += psyme(p);					/* Print 1 table entry (maybe) */
+	}
 	if (j <= 3)							/* Partial line?            */
 		printf("\n");					/*  Yes, finish it          */
 }
@@ -98,7 +98,7 @@ PP(register struct symtab *osypt;)
 
 	/* Do we need to print it?  */
 	if ((osypt->flags & SYER) != 0 || (osypt->flags & SYIN))
-		return (0);
+		return 0;
 	
 	p = &(osypt->name[0]);				/* p -> Symbol name field   */
 	for (i = 0; i < SYNAMLEN; i++)
@@ -117,7 +117,7 @@ PP(register struct symtab *osypt;)
 	if (osypt->flags & SYXR)
 	{
 		printf("******** EXT   ");		/* Macro-11 style.          */
-		return (1);
+		return 1;
 	}
 	/* Defined? */
 	if (osypt->flags & SYDF)
@@ -141,7 +141,7 @@ PP(register struct symtab *osypt;)
 		/* Identify FUBAR */
 		printf("*UNDEFINED*    ");
 	}
-	return (1);
+	return 1;
 }
 
 
@@ -156,7 +156,7 @@ VOID print(P(int) pflag)
 PP(int pflag;)
 {
 	register short i;
-	register union insw *pi;
+	register short *pi;
 
 	if (!prtflg || fchr == CEOF)		/* no printing desired, or end of source file */
 		return;
@@ -167,7 +167,7 @@ PP(int pflag;)
 	{									/* need to print some lines */
 		page();
 		printf("%4d ", pline);			/* put source line num on listing */
-		printf("                          ");	/* align the source */
+		printf("                              ");	/* align the source */
 		prtline(1);
 		putchar('\n');
 		if ((fchr = gchr()) == CEOF)
@@ -189,20 +189,20 @@ PP(int pflag;)
 	putchar(' ');
 	if (!pflag)							/* no binary */
 	{
-		printf("                 ");	/* blanks instead */
+		printf("                     ");	/* blanks instead */
 	} else
 	{
 		pi = ins;
 		for (i = 0; i < (instrlen / 2); i++)	/* binary */
-			puthex((pi++)->w, 4);
+			puthex(*pi++, 4);
 		if (instrlen & 1)
 		{
 			i++;
-			puthex(pi->w, 2);
+			puthex(*pi, 2);
 			printf("  ");				/* Word align */
 		}
 		putchar(' ');
-		for (; i < 4; i++)				/* four bytes max per line */
+		for (; i < 5; i++)				/* four bytes max per line */
 			printf("    ");				/* align the source */
 	}
 	if (pline > p2absln || pflag == 2)
@@ -238,8 +238,7 @@ VOID page(NOTHING)
 {
 	if ((prtflg == 0) || (++xline < LPP))
 		return;
-	printf("\vC P / M   6 8 0 0 0   A s s e m b l e r\t\t%s\t\tPage%4d\n", "Revision 04.03", ++xpage);
+	printf("\fC P / M   6 8 0 0 0   A s s e m b l e r\t\t%s\t\tPage%4d\n", "Revision 04.03", ++xpage);
 	printf("Source File: %s\n\n", sfname);
 	xline = 3;
 }
-

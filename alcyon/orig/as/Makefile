@@ -9,11 +9,9 @@ all: $(PROGRAMS)
 
 include SRCFILES
 
-LIB1OBJS = kputc.o
+LIB1OBJS = kputc.o kopen.o kcreat.o
 
 LIBOBJS = \
-		$(LIBSRC)kopen.o \
-		$(LIBSRC)kcreat.o \
 		$(LIBSRC)kwritef.o \
 		$(LIBSRC)xnwmain.o \
 		$(LIBSRC)nofloat.o \
@@ -74,18 +72,18 @@ LIBOBJS = \
 		$(LIBSRC)trap.o \
 		$(empty)
 
-as68$(EXEEXT): $(AS68_OBJS) $(LIB1OBJS) ${MAKEFILE}
-	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ crtg.o $(AS68_OBJS) $(LIB1OBJS) $(LIBOBJS)
+#as68$(EXEEXT): $(AS68_OBJS) $(LIB1OBJS) ${MAKEFILE}
+#	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ $(CRT0) $(AS68_OBJS) $(LIB1OBJS) $(LIBOBJS)
 
 as68.rel: $(AS68_OBJS) $(LIB1OBJS) as68.lnk ${MAKEFILE}
-	$(CP) $(LIBSRC)crtg.o $(LIBSRC)$(LIBC) $(LIBOBJS) .
+	$(CP) $(LIBSRC)crt0.o $(LIBSRC)$(LIBC) $(LIBOBJS) .
 	$(RM) $@
-	$(LINK68) [un,co[as68.lnk]]
-	$(RM) crtg.o $(LIBC)
+	$(LINK68) [co[as68.lnk]]
+	$(RM) crt0.o $(LIBC)
 
-#as68$(EXEEXT): as68.rel
-#	$(RELMOD) $< $@
-#	$(PRGFLAGS) 7 7 $@
+as68$(EXEEXT): as68.rel
+	$(RELMOD) $< $@
+	$(PRGFLAGS) 7 7 $@
 
 
 check::

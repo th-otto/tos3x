@@ -11,9 +11,9 @@
 
 
 char ldfn[40];          /* name of the relocatable object file */
-char tlab1[SYNAMLEN];
+extern char tlab1[SYNAMLEN];
 short ftudp;
-short poslab;
+int poslab;
 
 
 int astring PROTO((NOTHING));
@@ -35,10 +35,10 @@ VOID opitb(NOTHING)
 
 	/* put opcode in it buffer */
 	stbuf[2].itty = ITSY;
-	stbuf[2].itrl = modelen;			/* mode of instr(byte, word, long) */
+	stbuf[2].itrl = (char)modelen;			/* mode of instr(byte, word, long) */ /* XXX */
 	stbuf[2].itop.ptrw2 = opcpt;		/* pointer to opcode in main table */
 	stbuf[3].itty = ITCN;
-	stbuf[3].itrl = rlflg;				/* relocation base */
+	stbuf[3].itrl = (char)rlflg;				/* relocation base */ /* XXX */
 	stbuf[3].itop.l = loctr;			/* pass1 location counter */
 	itwc = ITOP1;						/* next available slot-currently 4 */
 	pitw = &stbuf[ITOP1];				/* init the pointer */
@@ -68,14 +68,14 @@ VOID opitb(NOTHING)
  * contents of the state table is the next state.  processing stops when
  * state 3 is encountered.  state 2 is the beginning state.
  */
-int sttbl[] = { 0, 1, 1, 0, 3, 0, 3, 3, 3 };	/* state table for parser */
+int const sttbl[] = { 0, 1, 1, 0, 3, 0, 3, 3, 3 };	/* state table for parser */
 
 VOID gterm(P(int) constpc)
 PP(int constpc;)
 {
-	register short smode, i;
+	register int smode, i;
 	register char *p;
-	register short tmode;
+	register int tmode;
 	register struct symtab *j;
 	long num;
 	char istr[80];
@@ -102,7 +102,7 @@ PP(int constpc;)
 		if (tmode == 3)
 			break;						/* end of item */
 		smode = tmode;
-		*p++ = fchr;					/* save character */
+		*p++ = (char)fchr;					/* save character */ /* XXX */
 		i++;
 		fchr = gchr();
 	}
@@ -137,7 +137,6 @@ PP(int constpc;)
 	case 2:								/* just a special char */
 		switch (fchr)
 		{
-
 		case '*':						/* location counter */
 			if (starmul)
 			{							/* multiply */
@@ -149,7 +148,6 @@ PP(int constpc;)
 			ival.l = loctr;
 			itype = (constpc) ? ITCN : ITPC;
 			break;
-
 
 		case '$':						/* hex constant */
 			oconst(16);
@@ -199,8 +197,8 @@ int astring(NOTHING)
 	register char delim;
 
 	if (fchr != '\'' && fchr != '"')	/* valid delimiter */
-		return (0);
-	delim = fchr;
+		return FALSE;
+	delim = (char)fchr; /* XXX */
 	if (equflg || (itype == ITSP && ival.u.loword == '#'))
 	{									/* immediate operand */
 		if (astr1(delim))
@@ -210,7 +208,7 @@ int astring(NOTHING)
 				xerr(19);
 			fchr = gchr();
 		}
-		return ((equflg) ? 1 : 0);
+		return equflg ? TRUE : FALSE;
 	}
 	while (astr1(delim))
 	{
@@ -219,20 +217,20 @@ int astring(NOTHING)
 		reloc = ABS;
 		opitoo();
 	}
-	return (0);
+	return FALSE;
 }
 
 
 int astr1(P(int) adelim)
 PP(int adelim;)
 {
-	register short delim, i, retv;
+	register int delim, i, retv;
 	register long l;
 
 	delim = adelim;
 	i = 0;
 	l = 0;
-	retv = 1;
+	retv = TRUE;
 	while ((fchr = gchr()) != CEOF)
 	{
 		if (fchr == delim)
@@ -240,14 +238,14 @@ PP(int adelim;)
 			fchr = gchr();
 			if (fchr != delim)
 			{
-				retv = 0;				/* end of string */
+				retv = FALSE;				/* end of string */
 				break;
 			}
 		}
 		if (fchr == EOLC)
 		{
 			xerr(19);
-			retv = 0;					/* end of string */
+			retv = FALSE;					/* end of string */
 			break;
 		}
 		l = (l << 8) | fchr;
@@ -256,9 +254,11 @@ PP(int adelim;)
 			if ((fchr = gchr()) == delim)
 			{
 				fchr = gchr();
-				retv = 0;				/* end of string */
+				retv = FALSE;				/* end of string */
 			} else
-				peekc = fchr;			/* next char in string */
+			{
+				peekc = (char)fchr;			/* next char in string */ /* XXX */
+			}
 			break;						/* filled one bucket */
 		}
 	}
@@ -272,7 +272,7 @@ PP(int adelim;)
 	reloc = ABS;
 	if (!equflg)
 		opitoo();						/* output one operand */
-	return (retv);
+	return retv;
 }
 
 
@@ -336,11 +336,11 @@ PP(int idx;)
 		if (isdigit(j))
 			j -= '0';
 		if (j < 0 || j >= 10)
-			return (0);
+			return FALSE;
 		l = (l << 3) + (l << 1) + j;	/* l = l*10 + j */
 	}
 	*pnum = l;
-	return (1);
+	return TRUE;
 }
 
 
@@ -434,7 +434,7 @@ PP(struct symtab **airt;)
 		}
 		i--;
 	}
-	return (mtpt);
+	return mtpt;
 }
 
 
@@ -451,7 +451,7 @@ short hash(NOTHING)
 	p = &lmte->name[0];
 	for (i = 0; i < SYNAMLEN; i++)
 		ht1 += *p++;
-	return (ht1 & (SZIRT - 2));			/* make hash code even and between 0 & SZIRT-2 */
+	return ht1 & (SZIRT - 2);			/* make hash code even and between 0 & SZIRT-2 */
 }
 
 
@@ -554,7 +554,7 @@ int gchr(NOTHING)
 	} else if (spcnt)
 	{
 		spcnt--;
-		return (' ');
+		return ' ';
 	} else
 	{
 	  gchr1:
@@ -582,7 +582,7 @@ int gchr(NOTHING)
 		chr1 = ' ';
 	}
 	xcol++;								/* Bump column number       */
-	return (chr1);
+	return chr1;
 }
 
 
@@ -598,10 +598,10 @@ VOID wostb(NOTHING)
 	if (stbuf[0].itty != ITBS)
 		asabort();						/* not beginning of stmt */
 	itwo = (short *)&stbuf;
-	woix = stbuf[0].itrl & 0377;		/* unsigned byte */
+	woix = stbuf[0].itrl & 0xff;		/* unsigned byte */
 	while (woix--)
 	{
-		for (i = 0; i < STBFSIZE / (sizeof *itwo); i++)
+		for (i = 0; i < (unsigned)(sizeof(struct it) / (sizeof *itwo)); i++) /* XXX */
 		{
 			if (pitix > &itbuf[ITBSZ - 1])	/* no room in buffer */
 				doitwr();
@@ -615,11 +615,12 @@ VOID doitwr(NOTHING)
 {
 	register short i;
 
-	if (write(itfn, itbuf, ITBSZ * (sizeof i)) != ITBSZ * (sizeof i))
+	if (write(itfn, itbuf, ITBSZ * sizeof(itbuf[0])) != ITBSZ * sizeof(itbuf[0]))
 	{
 		rpterr("it write error errno=%o\n", errno);
 		endit();
 	}
+	UNUSED(i);
 	pitix = itbuf;
 }
 
@@ -748,7 +749,7 @@ PP(int file;)
 		rpterr("can't open %s errno=%o\n", pname, errno);
 		endit();
 	}
-	return (fd);
+	return fd;
 }
 
 
@@ -793,9 +794,9 @@ VOID setname(NOTHING)
  */
 VOID getsymtab(NOTHING)
 {
-	register struct symtab **p;
+	register char **p;
 	register struct symtab *p1;
-	register __intptr_t p2;
+	register char *p2; /* XXX __intptr_t */
 	register short fd, i;
 	int j;
 
@@ -810,12 +811,12 @@ VOID getsymtab(NOTHING)
 		rpterr("& Unable to read init file: %s\n", initfnam);
 		endit();
 	}
-	if (read(fd, sirt, SZIRT * SIRTSIZE) != SZIRT * SIRTSIZE)
+	if (read(fd, sirt, SZIRT * sizeof(struct symtab *)) != SZIRT * sizeof(struct symtab *))
 	{
 		goto rerr;
 	}
-
-	if (read(fd, oirt, SZIRT * SIRTSIZE) != SZIRT * SIRTSIZE)
+	
+	if (read(fd, oirt, SZIRT * sizeof(struct symtab *)) != SZIRT * sizeof(struct symtab *))
 		goto rerr;
 
 	if (read(fd, &j, sizeof(j)) != sizeof(j))
@@ -823,25 +824,29 @@ VOID getsymtab(NOTHING)
 	if ((i = read(fd, bmte, j)) != j)
 		goto rerr;
 
-	if ((i % STESIZE) != 0)
+	if ((i % (unsigned)sizeof(struct symtab)) != 0)
 		goto rerr;
 
 	lmte = (struct symtab *)((char *)bmte + i);
-	p2 = (__intptr_t)((char *)bmte - 1);
-	for (p = sirt; p < &sirt[SZIRT]; p++)
+	p2 = ((char *)bmte - 1);
+	for (p = (char **)sirt; p < (char **)&sirt[SZIRT]; p++)
 	{
 		if (*p)
-			*p += p2;
+			*p += (__intptr_t)p2;
 	}
-	for (p = oirt; p < &oirt[SZIRT]; p++)
+	for (p = (char **)oirt; p < (char **)&oirt[SZIRT]; p++)
 	{
 		if (*p)
-			*p += p2;
+			*p += (__intptr_t)p2;
 	}
 	for (p1 = bmte; p1 < lmte; p1++)
 	{
 		if (p1->tlnk)
-			p1->tlnk = (struct symtab *)((char *)p1->tlnk + p2);
+#ifdef __ALCYON__
+			(char *)p1->tlnk += (__intptr_t)p2;
+#else
+			p1->tlnk = (struct symtab *)((char *)p1->tlnk + (__intptr_t)p2);
+#endif
 	}
 	close(fd);
 }
@@ -850,9 +855,9 @@ VOID getsymtab(NOTHING)
 /* write the initialization file */
 VOID putsymtab(NOTHING)
 {
-	register struct symtab **p;
+	register char **p;
 	register struct symtab *p1;
-	register __intptr_t p2;
+	register char *p2; /* XXX __intptr_t */
 	register short fd, i;
 	short j;
 
@@ -871,33 +876,33 @@ VOID putsymtab(NOTHING)
 	 * change all pointers so that they are relative to the beginning
 	 * of the symbol table
 	 */
-	p2 = (__intptr_t)((char *)bmte - 1);
+	p2 = ((char *)bmte - 1);
 	for (p = sirt; p < &sirt[SZIRT]; p++)
 	{
 		if (*p)
-			*p = *p - p2;
+			*p = *p - (__intptr_t)p2;
 	}
 	for (p = oirt; p < &oirt[SZIRT]; p++)
 	{
 		if (*p)
-			*p = *p - p2;
+			*p = *p - (__intptr_t)p2;
 	}
 	for (p1 = bmte; p1 < lmte; p1++)
 	{
 		if (p1->tlnk)
-			p1->tlnk = (struct symtab *)((__intptr_t)p1->tlnk - p2);
+			p1->tlnk = (struct symtab *)((char *)p1->tlnk - (__intptr_t)p2);
 	}
 
-	if (write(fd, sirt, SZIRT * SIRTSIZE) != SZIRT * SIRTSIZE)
+	if (write(fd, sirt, SZIRT * sizeof(struct symtab *)) != SZIRT * sizeof(struct symtab *))
 	{
 		goto werr;
 	}
 
-	if (write(fd, oirt, SZIRT * OIRTSIZE) != SZIRT * OIRTSIZE)
+	if (write(fd, oirt, SZIRT * sizeof(struct symtab *)) != SZIRT * sizeof(struct symtab *))
 		goto werr;
 
 	i = (__intptr_t) lmte - (__intptr_t)bmte;			/* length of current main table */
-	if ((i % STESIZE) != 0)
+	if ((i % (unsigned)sizeof(struct symtab)) != 0)
 	{
 		goto werr;
 	}

@@ -260,7 +260,7 @@ VOID collapse(NOTHING)
 			}
 			piop = &tree[iop];
 			piop->itty = ITCN;			/* must be constant */
-			piop->itop.l = tv1.l;			/* value */
+			piop->itop.l = tv1.l;		/* value */
 			piop->itrl = rv1;			/* relocation value */
 
 			if (iop != bos)
@@ -384,26 +384,26 @@ PP(int dprc;)
 	case '&':							/* and */
 	case '!':							/* or */
 	case '^':							/* exclusive or */
-		return (PPM);
+		return PPM;
 
 	case '/':
 	case '*':
 	case '<':							/* left shift */
 	case '>':							/* right shift */
-		return (PMD);
+		return PMD;
 
 	case '(':
 		if (lastopr)
-			return (PLP);
+			return PLP;
 		break;
 
 	case ')':
 		if (!prcnt)						/* no left parens */
 			break;
-		return (PRP);
+		return PRP;
 
 	}
-	return (PEE);						/* end of expression */
+	return PEE;							/* end of expression */
 }
 
 
@@ -432,19 +432,19 @@ PP(struct it *avwrd;)
 	{
 		uerr(6);
 		rval = ABS;
-		return (0);
+		return 0;
 	}
 	p = vwrd->itop.ptrw2;
 	if (p->flags & SYXR)
 	{									/* external reference */
 		fixext(p);
-		return (0);
+		return 0;
 	}
 	if ((p->flags & SYDF) != SYDF || (p->flags & SYER))
 	{
 		uerr(6);
 		rval = ABS;
-		return (0);
+		return 0;
 	}
 	rval = (p->flags & SYRA) ? DATA : (p->flags & SYRO)	/* reloc of item */
 		? TEXT : (p->flags & SYBS) ? BSS : ABS;
@@ -479,10 +479,10 @@ VOID p1gi(NOTHING)
 				mmte();					/* put it in table */
 		} else if (itype == ITCN)
 		{
-			exitm.itrl = reloc;
+			exitm.itrl = (char)reloc; /* XXX */
 		}
 	}
-	exitm.itty = itype;
+	exitm.itty = (char)itype; /* XXX */
 	exitm.itop.p = ival.p;
 }
 
@@ -500,7 +500,7 @@ VOID p2gi(NOTHING)
 	{									/* end of statement */
 		itype = ITSP;
 		ival.l = ' ';						/* blank */
-		exitm.itty = itype;
+		exitm.itty = (char)itype; /* XXX */
 		exitm.itop.p = ival.p;
 		return;
 	}
@@ -532,7 +532,7 @@ PP(int acksc;)
 
 	cksc = acksc;
 	if (isalnum(cksc))
-		return (0);
+		return 0;
 	return strindex("_~*.@$%\'", cksc) != -1 ? 0 : 1;
 }
 
@@ -543,11 +543,11 @@ PP(int rv1;)
 PP(int rv2;)
 {
 	if (rv1 == rv2)
-		return (rv1);
+		return rv1;
 	if (rv1 == ABS || rv2 == ABS)
-		return (rv1 + rv2);				/* the one that is not ABS */
+		return rv1 + rv2;				/* the one that is not ABS */
 	uerr(27);
-	return (ABS);
+	return ABS;
 }
 
 
@@ -559,11 +559,11 @@ PP(int rv2;)
 	if (rv2 == EXTRN)
 		uerr(26);
 	if (rv1 == rv2)
-		return (ABS);
+		return ABS;
 	if (rv2 == ABS)
-		return (rv1 + rv2);
+		return rv1 + rv2;
 	uerr(27);
-	return (ABS);
+	return ABS;
 }
 
 
@@ -574,7 +574,7 @@ PP(int rv2;)
 {
 	if (rv1 != ABS || rv2 != ABS)
 		uerr(27);
-	return (ABS);
+	return ABS;
 }
 
 

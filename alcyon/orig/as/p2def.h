@@ -45,15 +45,15 @@ adirect const opfary[] = {
 
 #define LSTFRMT 31
 
-short f1mode[]  = { 0,      0,   0100, 0,   0200 };
-short f2mode[]  = { 0,      0,   0100, 0,   0200 };
-short f3mode[]  = { 0, 010000, 030000, 0, 020000 };
-short f15mode[] = { 0,      0,   0300, 0,   0700 };
-short f5mode[]  = { 0,      0,   0100, 0,   0200 };
-short f5amode[] = { 0,      0,   0300, 0,   0700 };
-short f13mode[] = { 0,      0,   0200, 0,   0300 };
-short f23mode[] = { 0,   0400,   0500, 0,   0600 };
+short const f1mode[]  = { 0,      0,   0100, 0,   0200 };
+short const f2mode[]  = { 0,      0,   0100, 0,   0200 };
+short const f3mode[]  = { 0, 010000, 030000, 0, 020000 };
+short const f15mode[] = { 0,      0,   0300, 0,   0700 };
+short const f5mode[]  = { 0,      0,   0100, 0,   0200 };
+short const f5amode[] = { 0,      0,   0300, 0,   0700 };
+short const f13mode[] = { 0,      0,   0200, 0,   0300 };
+short const f23mode[] = { 0,   0400,   0500, 0,   0600 };
 short rlbits[5];		/* holds relocation bits for instr */
-short pline;			/* number of last printed line */
-short brkln2 = 077777;	/* pass 2 break line number for debugging */
-short prsp;				/* special print alignment flag */
+int pline;				/* number of last printed line */
+int brkln2 = 077777;	/* pass 2 break line number for debugging */
+short prsp;				/* special print alignment flag */ /* unused */

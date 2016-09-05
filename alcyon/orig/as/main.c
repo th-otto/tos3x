@@ -25,6 +25,7 @@ char *version = "@(#)main.c	1.5    12/28/83";
  */
 
 #include "as68.h"
+#include <fcntl.h>
 #include "def.h"
 #ifdef __ALCYON__
 /* BUG: signal() not declared */
@@ -65,11 +66,11 @@ VOID mystrncpy PROTO((char *astr1, const char *astr2, int alen));
  * switches.
  */
 
-char *tdname = "";						/*  Temp files in same directory    */
-char *idname = "0:";					/*  Init file  in user 0        */
+const char *tdname = "";					/*  Temp files in same directory    */
+const char *idname = "0:";					/*  Init file  in user 0        */
 
-char tfilebase[] = "a6AXXXXXX";			/*  Temp file  basename         */
-char initbase[] = "as68symb.dat";		/*  Init file  basename         */
+char const tfilebase[] = "a6AXXXXXX";		/*  Temp file  basename         */
+char const initbase[] = "as68symb.dat";		/*  Init file  basename         */
 
 
 #define INIT(op,ptr) pack(op,lmte); ptr=lemt(TRUE,oirt)
@@ -83,7 +84,7 @@ PP(char **argv;)
 	register __intptr_t longtmp;
 
 	nerror = initflg = 0;
-	prtchidx = prtchars;
+	prtchidx = prtchars; /* unused */
 
 	/* BUG: signal() not declared; useless anyway, since they are not implemented in the library */
 	/* BUG2: comparing the result of signal to a function pointer generates totally bogus code */
@@ -128,11 +129,15 @@ PP(char **argv;)
 	pitix = itbuf;
 	pexti = extbl;
 
-	ttmp = (STESIZE * SZMT) + 2;
+	ttmp = (sizeof(struct symtab) * SZMT) + 2;
 	bmte = (struct symtab *)sbrk(ttmp);
 	longtmp = (__intptr_t)bmte;
 	if (longtmp & 1L)
+#ifdef __ALCYON__
+		asm("addq.l #1,_bmte");							/* make it even */
+#else
 		bmte = (struct symtab *)((char *)bmte + 1);							/* make it even */
+#endif
 	emte = (struct symtab *)((char *)bmte + ttmp - 2);				/* end of main table */
 
 	if (argc <= 1)
@@ -191,11 +196,11 @@ PP(char **argv;)
 	/* Remember source filename */
 	sfname = argv[i];
 	/* open source file */
-	ifn = openfi(argv[i], 0, 0);
+	ifn = openfi(argv[i], O_RDONLY, 0);
 	/* create relocatable object file name */
 	setldfn(argv[i]);
 	/* open loader file */
-	lfn = openfi(ldfn, 1, 1);
+	lfn = openfi(ldfn, O_WRONLY, 1);
 
 	/* Init for strcat */
 	tfilname[0] = '\0';
@@ -205,7 +210,7 @@ PP(char **argv;)
 	strcat(tfilname, tfilebase);
 	/* Make it unique */
 	mktemp(tfilname);
-	tfilptr = &tfilname[strlen(tfilname) - 1] - 6;
+	tfilptr = &tfilname[(int)strlen(tfilname) - 1] - 6;
 	/* Build Symbol file name */
 	strcat(initfnam, idname);
 	strcat(initfnam, initbase);
@@ -224,11 +229,15 @@ PP(char **argv;)
 	drbfn = gettempf();
 	drbfnc = LASTCHTFN;
 
-	ttmp = (STESIZE * SZMT) + 2;
+	ttmp = (sizeof(struct symtab) * SZMT) + 2;
 	bmte = (struct symtab *)sbrk(ttmp - 1);
 	longtmp = (__intptr_t)bmte;
 	if (longtmp & 1L)
+#ifdef __ALCYON__
+		asm("addq.l #1,_bmte");							/* make it even */
+#else
 		bmte = (struct symtab *)((char *)bmte + 1);							/* make it even */
+#endif
 	/* end of main table */
 	emte = (struct symtab *)((char *)bmte + ttmp - 2);				/* end of main table */
 
@@ -240,9 +249,27 @@ PP(char **argv;)
 		for (i = 0; i <= SZIRT - 2; i += 2)
 		{
 			sirt[i] = (struct symtab *)&sirt[i];			/* initialize the initial ref tables */
+#ifdef __ALCYON__
+			asm("movea.w   d7,a0");
+			asm("addq.w    #1,a0");
+			asm("adda.l    a0,a0");
+			asm("adda.l    a0,a0");
+			asm("adda.l    #_sirt,a0");
+			asm("clr.l     (a0)"); /* generated: move.l #$0,(a0) */
+#else
 			sirt[i + 1] = 0;
+#endif
 			oirt[i] = (struct symtab *)&oirt[i];
+#ifdef __ALCYON__
+			asm("movea.w   d7,a0");
+			asm("addq.w    #1,a0");
+			asm("adda.l    a0,a0");
+			asm("adda.l    a0,a0");
+			asm("adda.l    #_oirt,a0");
+			asm("clr.l     (a0)"); /* generated: move.l #$0,(a0) */
+#else
 			oirt[i + 1] = 0;
+#endif
 		}
 
 		/* make entries in main table for directives */
@@ -281,7 +308,6 @@ PP(char **argv;)
 		mdemt("opt", 31);				/* ignored, assemb options */
 		mdemt("ttl", 32);				/* ttl define, ignore */
 		mdemt("page", 33);				/* page define, ignore */
-
 	} else
 	{
 		/* read initialized main table */
@@ -391,7 +417,7 @@ VOID cisit(NOTHING)
 		igblk();
 		if (fchr == EOLC)				/* blank line */
 			goto cistop;
-		peekc = fchr;
+		peekc = (char) fchr; /* XXX */
 		if (fchr != CEOF)
 			fchr = ' ';					/* catch eof... */
 	}
@@ -424,7 +450,7 @@ VOID cisit(NOTHING)
 		if (itype != ITSY)
 		{								/* not a symbol */
 			uerr(2);
-			lbt[0] = (char) 0;			/* no label */
+			lbt[0] = 0;					/* no label */
 		} else
 		{
 			p2 = (short *)&lmte->name[0];
@@ -540,7 +566,7 @@ VOID cisit(NOTHING)
 
 	i = calcilen();
 	stbuf[1].itrl = i;					/* assumed instruction length */
-	stbuf[0].itrl = itwc;				/* number of it entries */
+	stbuf[0].itrl = (char)itwc;				/* number of it entries */ /* XXX */
 	wostb();							/* write out statement buffer */
 	loctr += i;
 }
@@ -571,7 +597,7 @@ VOID getmode(NOTHING)
 			mode = LONG;
 			break;
 		default:
-			peekc = fchr;
+			peekc = (char)fchr; /* XXX */
 			fchr = '.';
 			goto getm1;
 		}
@@ -601,31 +627,31 @@ int modeok(NOTHING)
 	case 0:
 	case 14:
 	case 18:
-		return (FALSE);
+		return FALSE;
 	case 13:
 	case 15:
 	case 20:
 	case 21:
-		return (modelen == BYTESIZ ? FALSE : TRUE);
+		return modelen == BYTESIZ ? FALSE : TRUE;
 	case 4:
 	case 25:
-		return (modelen == BYTESIZ ? TRUE : FALSE);
+		return modelen == BYTESIZ ? TRUE : FALSE;
 	case 7:
 	case 9:
-		return (modelen == WORDSIZ ? FALSE : TRUE);
+		return modelen == WORDSIZ ? FALSE : TRUE;
 	case 5:
 	case 11:
 	case 28:
-		return (modelen == WORDSIZ ? TRUE : FALSE);
+		return modelen == WORDSIZ ? TRUE : FALSE;
 	case 6:
-		return (modelen == LONGSIZ ? FALSE : TRUE);
+		return modelen == LONGSIZ ? FALSE : TRUE;
 	case 12:
 	case 30:
 	case 22:
 	case 29:
-		return (modelen == LONGSIZ ? TRUE : FALSE);
+		return modelen == LONGSIZ ? TRUE : FALSE;
 	default:
-		return (TRUE);
+		return TRUE;
 	}
 }
 
@@ -662,11 +688,11 @@ int calcilen(NOTHING)
 		if (!explmode)
 			i += lenea(0);
 		else
-			return (mode == LONG ? 6 : 4);	/* explicit jmp.? */
+			return mode == LONG ? 6 : 4;	/* explicit jmp.? */
 		break;
 
 	case 7:
-		i += (immed[0]) ? 2 + lenea(1) : lenea(1);
+		i += immed[0] ? 2 + lenea(1) : lenea(1);
 		break;
 
 	case 14:
@@ -717,7 +743,7 @@ int calcilen(NOTHING)
 		break;
 	}
 
-	return (i);
+	return i;
 }
 
 
@@ -726,8 +752,8 @@ int lenea(P(int) lidx)
 PP(int lidx;)
 {
 	if (immed[lidx])
-		return (mode == LONG ? LONGSIZ : WORDSIZ);
-	return (shiftea(lidx));
+		return mode == LONG ? LONGSIZ : WORDSIZ;
+	return shiftea(lidx);
 }
 
 
@@ -735,10 +761,10 @@ int shiftea(P(int) lidx)
 PP(int lidx;)
 {
 	if (indir[lidx] && numreg[lidx])
-		return ((numcon[lidx] || numsym[lidx]) ? 2 : 0);
+		return (numcon[lidx] || numsym[lidx]) ? 2 : 0;
 	if (numsym[lidx] || numcon[lidx])
-		return ((!shortadr || numcon[lidx] == 2) ? 4 : 2);
-	return (0);
+		return (!shortadr || numcon[lidx] == 2) ? 4 : 2;
+	return 0;
 }
 
 
@@ -801,7 +827,7 @@ VOID dlabl(NOTHING)
  */
 VOID opito(NOTHING)
 {
-	register short lopcomma;
+	register int lopcomma;
 
 	lopcomma = symcon = chmvq = 0;
 	numops++;							/* count first operand */
@@ -1038,6 +1064,16 @@ int xputc(char c, struct iob *o)
 {
 	FILE *fp = *((FILE **)o);
 	return fputc(c, fp);
+}
+int xputw(int w, struct iob *i)
+{
+	xputc((w >> 8) & 0xff, i);
+	xputc(w & 0xff, i);
+	return w;
+}
+int xputwp(unsigned short *w, struct iob *i)
+{
+	return xputw(*w, i);
 }
 int xfopen(const char *fname, struct iob *i, int binary)
 {

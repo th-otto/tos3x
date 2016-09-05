@@ -14,7 +14,9 @@
  */
 
 #include "as68.h"
-#include "../util/util.h"
+#include <fcntl.h>
+#include <ar68.h>
+#include <cout.h>
 
 /* Second Pass Subroutines */
 VOID relbr PROTO((NOTHING));
@@ -41,7 +43,7 @@ VOID opf31 PROTO((NOTHING));
 
 
 VOID gcist PROTO((NOTHING));
-int getrlist PROTO((short *ap));
+int getrlist PROTO((const short *ap));
 int fixmask PROTO((int msk));
 
 
@@ -54,13 +56,13 @@ VOID pass2(NOTHING)
 
 	pitix = &itbuf[ITBSZ];				/* it buffer is empty */
 	lbuf.cc = tbuf.cc = dabuf.cc = drbuf.cc = BLEN;
-	fileno(&lbuf) = lfn;						/* set buffered io for binary file */
+	fileno(&lbuf) = lfn;				/* set buffered io for binary file */
 	lbuf.cp = &lbuf.cbuf[0];
-	fileno(&tbuf) = trbfn;					/* set buffered io for text reloc bits file */
+	fileno(&tbuf) = trbfn;				/* set buffered io for text reloc bits file */
 	tbuf.cp = &tbuf.cbuf[0];
-	fileno(&dabuf) = dafn;					/* set buffered io for data bytes */
+	fileno(&dabuf) = dafn;				/* set buffered io for data bytes */
 	dabuf.cp = &dabuf.cbuf[0];
-	fileno(&drbuf) = drbfn;					/* set buffered io for data reloc bits */
+	fileno(&drbuf) = drbfn;				/* set buffered io for data reloc bits */
 	drbuf.cp = &drbuf.cbuf[0];
 	couthd.ch_magic = MAGIC;			/* c.out magic number */
 	if (savelc[TEXT] & 1)
@@ -74,22 +76,22 @@ VOID pass2(NOTHING)
 	 * symbol table size is not known now -- it is set at end of pass 2
 	 * entry point and stack size are zero for now
 	 */
-	putchd(&lbuf, &couthd);				/* replaces write_header */
-	savelc[0] = 0;
-	savelc[1] = 0;
-	savelc[2] = 0;
-	savelc[3] = 0;
+	putchd(&lbuf, &couthd);
+	savelc[ABS] = 0;
+	savelc[DATA] = 0;
+	savelc[TEXT] = 0;
+	savelc[BSS] = 0;
 	loctr = 0;							/* location counter */
 	rlflg = TEXT;						/* TEXT relocatable */
 	p2flg = 1;							/* pass two */
-	if (lseek(ifn, 0L, 0) == -1L)
+	if (lseek(ifn, 0L, SEEK_SET) == -1L)
 	{									/* beginning of source */
 		rpterr("seek error on source file\n");
 		asabort();
 	}
 	close(itfn);
 	LASTCHTFN = itfnc;
-	itfn = openfi(tfilname, 0, 1);		/* open it for reading */
+	itfn = openfi(tfilname, O_RDONLY, 1);		/* open it for reading */
 	pline = 1;							/* no lines printed */
 	fchr = gchr();						/* get first char */
 	while (1)
@@ -99,7 +101,7 @@ VOID pass2(NOTHING)
 		if (p2absln >= brkln2)			/* for debugging the assembler */
 			i = 0;
 		opcpt = stbuf[2].itop.ptrw2;	/* ptr to opcode entry in main tab */
-		nite = stbuf[0].itrl & 0377;	/* number of it entries */
+		nite = stbuf[0].itrl & 0xff;	/* number of it entries */
 		pnite = &stbuf[nite];		    /* ptr to end of stmt */
 		modelen = stbuf[2].itrl;		/* instr mode length */
 		p1inlen = stbuf[1].itrl;		/* pass 1 instr length guess */
@@ -140,7 +142,7 @@ VOID gcist(NOTHING)
 	ival.p = 0;							/* initial value for possible operand */
 	reloc = ABS;
 	instrlen = 2;						/* at least 2 bytes */
-	ins[0].w = opcpt->vl1.u.loword;			/* opcode value, 4.2 ==> loword */
+	ins[0] = opcpt->vl1.u.loword;		/* opcode value */
 	rlbits[0] = INSABS;					/* instruction absolute */
 	pins = &ins[1];
 	prlb = &rlbits[1];
@@ -175,7 +177,7 @@ VOID relbr(NOTHING)
 	if (extflg)
 	{									/* external reference */
 		instrlen += 2;					/* long relative */
-		(pins++)->w = ival.l;			/* pass constant part */
+		*pins++ = ival.l;			/* pass constant part */
 		*prlb++ = (extref << 3) | EXTREL;	/* ext ref */
 		return;
 	}
@@ -191,23 +193,23 @@ VOID relbr(NOTHING)
 		if (ival.l > 32767 || ival.l < -32768)
 			uerr(22);
 		instrlen += 2;
-		(pins++)->w = ival.l;
+		*pins++ = ival.l;
 		*prlb++ = DABS;					/* data absolute */
 	} else
 	{									/* short displacement */
 		if (ival.l > 127 || ival.l < -128)
 			uerr(22);
-		ins[0].w |= (ival.u.loword & 0377);
+		ins[0] |= (ival.u.loword & 0xff);
 	}
 	/* make it a nop if -N specified */
 	if ((ival.l == 0) || (ival.l == 2 && didorg))
 	{
 		opcpt = nopptr;
-		ins[0].w = opcpt->vl1.u.loword;
+		ins[0] = opcpt->vl1.u.loword;
 		if (instrlen == 4)
 		{								/* long branch */
 			pins = &ins[1];
-			(pins++)->w = opcpt->vl1.u.loword;
+			*pins++ = opcpt->vl1.u.loword;
 			rlbits[1] = INSABS;
 		}
 	}
@@ -222,18 +224,18 @@ VOID relbr(NOTHING)
  */
 VOID opf1(NOTHING)
 {
-	register short *p;
+	register const short *p;
 
 	if (get2ops())
 		return;
-	if (ins[0].w == (US AND) || ins[0].w == (US OR))
+	if (ins[0] == (US AND) || ins[0] == (US OR))
 		if (cksprg(&opnd[1], CCR) || cksprg(&opnd[1], SR))
 		{
-			if (ins[0].w == (US AND))
+			if (ins[0] == (US AND))
 				opcpt = andiptr;
 			else
 				opcpt = oriptr;
-			ins[0].w = opcpt->vl1.u.loword;
+			ins[0] = opcpt->vl1.u.loword;
 			format = opcpt->flags & OPFF;
 			ccr_or_sr();
 			return;
@@ -270,7 +272,9 @@ VOID opf1(NOTHING)
 		makef1(opnd[1].ea, p[modelen], &opnd[0]);	/* make instr */
 		return;
 	} else if (!makeimm())				/* make an immediate instr */
+	{
 		uerr(20);
+	}
 }
 
 
@@ -279,7 +283,7 @@ VOID opf2(NOTHING)
 {
 	if (get2ops())
 		return;
-	if (ins[0].w == ANDI || ins[0].w == ORI || ins[0].w == EORI)
+	if (ins[0] == ANDI || ins[0] == ORI || ins[0] == EORI)
 	{
 		if (cksprg(&opnd[1], CCR) || cksprg(&opnd[1], SR))
 		{
@@ -310,14 +314,14 @@ VOID opf3(NOTHING)
 		return;
 	if (cksprg(&opnd[0], CCR))
 	{
-		ins[0].w = MOVEFCC;
+		ins[0] = MOVEFCC;
 		if (anysprg(&opnd[1]))
 			uerr(20);
 		if (modelen == BYTESIZ || modelen == LONGSIZ)
 			uerr(34);
 		if (!m68010)
 			uerr(8);
-		ins[0].w |= opnd[1].ea;
+		ins[0] |= opnd[1].ea;
 		if (!dataea(&opnd[1]))
 			uerr(9);
 		doea(&opnd[1]);
@@ -325,13 +329,13 @@ VOID opf3(NOTHING)
 	}
 	if (cksprg(&opnd[1], CCR))
 	{
-		ins[0].w = MOVETCC;
+		ins[0] = MOVETCC;
 	  opf3l1:
 		if (anysprg(&opnd[0]))
 			uerr(20);
 		if (modelen == BYTESIZ || modelen == LONGSIZ)
 			uerr(34);
-		ins[0].w |= opnd[0].ea;
+		ins[0] |= opnd[0].ea;
 		if (!dataea(&opnd[0]))
 			uerr(9);
 		doea(&opnd[0]);
@@ -339,7 +343,7 @@ VOID opf3(NOTHING)
 	}
 	if (cksprg(&opnd[1], SR))
 	{
-		ins[0].w = MOVESR;
+		ins[0] = MOVESR;
 		goto opf3l1;
 	}
 	if (cksprg(&opnd[0], SR))
@@ -348,7 +352,7 @@ VOID opf3(NOTHING)
 			uerr(34);
 		if (anysprg(&opnd[1]))
 			uerr(20);
-		ins[0].w = SRMOVE | opnd[1].ea;
+		ins[0] = SRMOVE | opnd[1].ea;
 		if (!dataalt(&opnd[1]) || pcea(&opnd[1]))
 			uerr(10);
 		doea(&opnd[1]);
@@ -360,7 +364,7 @@ VOID opf3(NOTHING)
 			uerr(34);					/* default is word, can't test */
 		if (!ckareg(&opnd[1]))
 			uerr(33);
-		ins[0].w = MOVEUSP | 8 | (opnd[1].ea & 7);
+		ins[0] = MOVEUSP | 8 | (opnd[1].ea & 7);
 		return;
 	}
 	if (cksprg(&opnd[1], USP))
@@ -369,16 +373,16 @@ VOID opf3(NOTHING)
 			uerr(34);					/* default is word, can't test */
 		if (!ckareg(&opnd[0]))
 			uerr(33);
-		ins[0].w = MOVEUSP | (opnd[0].ea & 7);
+		ins[0] = MOVEUSP | (opnd[0].ea & 7);
 		return;
 	}
-	k = ins[0].w;
-	ins[0].w |= f3mode[modelen];
+	k = ins[0];
+	ins[0] |= f3mode[modelen];
 	ckbytea();
-	ins[0].w |= opnd[0].ea;				/* source ea */
+	ins[0] |= opnd[0].ea;				/* source ea */
 	doea(&opnd[0]);
-	ins[0].w |= (opnd[1].ea & 7) << 9;	/* dest register */
-	ins[0].w |= (opnd[1].ea & 070) << 3;	/* dest mode */
+	ins[0] |= (opnd[1].ea & 7) << 9;	/* dest register */
+	ins[0] |= (opnd[1].ea & 070) << 3;	/* dest mode */
 	doea(&opnd[1]);
 	if (k == MOVEA)
 	{
@@ -398,12 +402,12 @@ VOID opf4(NOTHING)
 		return;
 	if (format == 27)
 	{									/* addx,subx add in size bits */
-		ins[0].w |= f1mode[modelen];
+		ins[0] |= f1mode[modelen];
 	} else if (format == 10)
 	{									/* cmpm */
 		if ((opnd[0].ea & 070) != INDINC || (opnd[1].ea & 070) != INDINC)
 			uerr(20);
-		ins[0].w |= f1mode[modelen] | ((opnd[0].ea & 7) | ((opnd[1].ea & 7) << 9));
+		ins[0] |= f1mode[modelen] | ((opnd[0].ea & 7) | ((opnd[1].ea & 7) << 9));
 		if (m68010)
 		{
 			uerr(31);
@@ -413,12 +417,12 @@ VOID opf4(NOTHING)
 	}
 	if (ckdreg(&opnd[0]) && ckdreg(&opnd[1]))
 	{
-		ins[0].w |= ((opnd[0].ea & 7) | ((opnd[1].ea & 7) << 9));
+		ins[0] |= ((opnd[0].ea & 7) | ((opnd[1].ea & 7) << 9));
 		return;
 	}
 	if ((opnd[0].ea & 070) == DECIND && (opnd[1].ea & 070) == DECIND)
 	{
-		ins[0].w |= 010 | ((opnd[0].ea & 7) | ((opnd[1].ea & 7) << 9));
+		ins[0] |= 010 | ((opnd[0].ea & 7) | ((opnd[1].ea & 7) << 9));
 		return;
 	}
 	uerr(20);
@@ -436,7 +440,7 @@ VOID opf5(NOTHING)
 		if (opcpt == cmpptr)
 		{
 			if (!dataea(&opnd[1]))
-				ins[0].w |= f5amode[modelen];	/* was pumode */
+				ins[0] |= f5amode[modelen];	/* was pumode */
 			else if (makeimm())
 				return;
 			else
@@ -446,13 +450,13 @@ VOID opf5(NOTHING)
 	}
 	if (opcpt == cmpptr)
 	{
-		ins[0].w |= f5mode[modelen];		/* was pumode */
+		ins[0] |= f5mode[modelen];		/* was pumode */
 		ckbytea();
 	} else if (!dataea(&opnd[0]))
 	{
 		uerr(20);
 	}
-	ins[0].w |= (opnd[1].ea & 7) << 9 | opnd[0].ea;
+	ins[0] |= (opnd[1].ea & 7) << 9 | opnd[0].ea;
 	doea(&opnd[0]);
 }
 
@@ -463,25 +467,25 @@ VOID opf7(NOTHING)
 {
 	if (get2ops())
 		return;
-	if (opnd[1].ea == IMM || (ins[0].w != BTST && pcea(&opnd[1])) || ckareg(&opnd[1]))
+	if (opnd[1].ea == IMM || (ins[0] != BTST && pcea(&opnd[1])) || ckareg(&opnd[1]))
 		uerr(20);
 	if (ckdreg(&opnd[0]))
 	{
-		ins[0].w |= (opnd[0].ea << 9) | 0400;
+		ins[0] |= (opnd[0].ea << 9) | 0400;
 	} else
 	{									/* static bit # */
 		if (opnd[0].con.l < 0L || opnd[0].con.l > 31 || (opnd[1].ea & INDIRECT && opnd[0].con.l > 7))
 			uerr(23);
 		if (opnd[0].ea != IMM)
 			uerr(17);
-		ins[0].w |= 04000;
+		ins[0] |= 04000;
 		dodisp(&opnd[0]);
 	}
 	if (modelen == 1 && !(memea(&opnd[1])))
 		uerr(20);
 	else if (!(ckdreg(&opnd[1])) && modelen == 4)
 		uerr(20);
-	ins[0].w |= opnd[1].ea;
+	ins[0] |= opnd[1].ea;
 	doea(&opnd[1]);
 }
 
@@ -504,12 +508,12 @@ VOID opf8(NOTHING)
 		  opf8l1:
 			if (opnd[0].con.l < 1 || opnd[0].con.l > 8)	/* legal range 1..8 */
 				uerr(37);
-			ins[0].w |= ((opnd[0].con.u.loword & 7) << 9) | f1mode[modelen] | opnd[1].ea;
+			ins[0] |= ((opnd[0].con.u.loword & 7) << 9) | f1mode[modelen] | opnd[1].ea;
 			return;
 		}
-		i = (ins[0].w & 077) << 6;
-		ins[0].w &= 0177700;
-		ins[0].w |= 0300 | i | opnd[0].ea;
+		i = (ins[0] & 077) << 6;
+		ins[0] &= 0177700;
+		ins[0] |= 0300 | i | opnd[0].ea;
 		if (!memalt(&opnd[0]) || pcea(&opnd[0]) || modelen != 2)
 			uerr(20);
 		doea(&opnd[0]);
@@ -525,14 +529,14 @@ VOID opf8(NOTHING)
 		uerr(20);
 	if (ckdreg(&opnd[0]))
 	{									/* first op is D reg */
-		ins[0].w |= (opnd[0].ea << 9) | 040;	/* reg # and reg bit */
+		ins[0] |= (opnd[0].ea << 9) | 040;	/* reg # and reg bit */
 	} else
 	{
 		if (opnd[0].ea != IMM)
 			uerr(20);
 		goto opf8l1;
 	}
-	ins[0].w |= f1mode[modelen] | opnd[1].ea;	/* put in size and reg # */
+	ins[0] |= f1mode[modelen] | opnd[1].ea;	/* put in size and reg # */
 }
 
 
@@ -548,7 +552,7 @@ VOID opf9(NOTHING)
 	getea(0);
 	if (format == 24)
 	{									/* clr, not, etc */
-		ins[0].w |= f1mode[modelen];		/* add size bits */
+		ins[0] |= f1mode[modelen];		/* add size bits */
 		if (!dataalt(&opnd[0]) || pcea(&opnd[0]))
 			uerr(20);
 	} else if (format == 25)
@@ -557,7 +561,7 @@ VOID opf9(NOTHING)
 			uerr(20);
 	} else if (format == 14)
 	{									/* stop */
-		if (ins[0].w == RTD && !m68010)
+		if (ins[0] == RTD && !m68010)
 			uerr(8);
 		if (modelen != 2 || opnd[0].ea != IMM)
 			uerr(20);
@@ -565,7 +569,7 @@ VOID opf9(NOTHING)
 		return;
 	} else if (!controlea(&opnd[0]))	/* jmp, jsr, etc */
 		uerr(20);
-	ins[0].w |= opnd[0].ea;
+	ins[0] |= opnd[0].ea;
 	doea(&opnd[0]);
 }
 
@@ -592,7 +596,7 @@ VOID opf11(NOTHING)
 		cksize(&opnd[1]);
 		opnd[1].drlc = ABS;				/* not relocatable */
 	}
-	ins[0].w |= opnd[0].ea & 7;			/* put in reg # */
+	ins[0] |= opnd[0].ea & 7;			/* put in reg # */
 	dodisp(&opnd[1]);
 }
 
@@ -608,12 +612,12 @@ VOID opf12(NOTHING)
 	{
 		if (ckdreg(&opnd[1]))
 		{								/* exchange D regs */
-			ins[0].w |= 0100 | ((opnd[0].ea & 7) << 9) | (opnd[1].ea & 7);
+			ins[0] |= 0100 | ((opnd[0].ea & 7) << 9) | (opnd[1].ea & 7);
 			return;
 		}
 		if (ckareg(&opnd[1]))
 		{								/* ins[0] <- A and D flag */
-			ins[0].w |= 0210 | ((opnd[0].ea & 7) << 9) | (opnd[1].ea & 7);
+			ins[0] |= 0210 | ((opnd[0].ea & 7) << 9) | (opnd[1].ea & 7);
 			return;
 		}
 	}
@@ -621,7 +625,7 @@ VOID opf12(NOTHING)
 	{
 		if (ckareg(&opnd[1]))
 		{								/* both a regs */
-			ins[0].w |= 0110 | ((opnd[0].ea & 7) << 9) | (opnd[1].ea & 7);
+			ins[0] |= 0110 | ((opnd[0].ea & 7) << 9) | (opnd[1].ea & 7);
 			return;
 		}
 		if (ckdreg(&opnd[1]))
@@ -629,7 +633,7 @@ VOID opf12(NOTHING)
 			i = opnd[0].ea;				/* exchg ea's */
 			opnd[0].ea = opnd[1].ea;
 			opnd[1].ea = i;
-			ins[0].w |= 0210 | ((opnd[0].ea & 7) << 9) | (opnd[1].ea & 7);
+			ins[0] |= 0210 | ((opnd[0].ea & 7) << 9) | (opnd[1].ea & 7);
 			return;
 		}
 	}
@@ -649,10 +653,10 @@ VOID opf13(NOTHING)
 	{									/* trap */
 		if (opnd[0].con.l < 0 || opnd[0].con.l > 15)
 			uerr(15);
-		ins[0].w |= opnd[0].con.u.loword;
+		ins[0] |= opnd[0].con.u.loword;
 		return;
 	}
-	if (ins[0].w == UNLK)
+	if (ins[0] == UNLK)
 	{									/* unlk instr */
 		if (!ckareg(&opnd[0]))
 			uerr(20);
@@ -661,9 +665,9 @@ VOID opf13(NOTHING)
 		if (!ckdreg(&opnd[0]))
 			uerr(20);
 		if (format == 13)				/* ext */
-			ins[0].w |= f13mode[modelen];
+			ins[0] |= f13mode[modelen];
 	}
-	ins[0].w |= opnd[0].ea & 7;
+	ins[0] |= opnd[0].ea & 7;
 }
 
 
@@ -713,17 +717,17 @@ VOID opf17(NOTHING)
 		uerr(15);
 	if (modelen == 1 && !dataea(&opnd[1]))
 		uerr(34);
-	ins[0].w |= f1mode[modelen] | ((opnd[0].con.u.loword & 7) << 9) | opnd[1].ea;
+	ins[0] |= f1mode[modelen] | ((opnd[0].con.u.loword & 7) << 9) | opnd[1].ea;
 	doea(&opnd[1]);
 }
 
 
 /* format 20 -- movem */
-short regmsk0[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
+short const regmsk0[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
 	0100, 040, 020, 010, 4, 2, 1
 };
 
-short regmsk1[] = { 1, 2, 4, 010, 020, 040, 0100, 0200, 0400, 01000, 02000, 04000, 010000,
+short const regmsk1[] = { 1, 2, 4, 010, 020, 040, 0100, 0200, 0400, 01000, 02000, 04000, 010000,
 	020000, 040000, 0100000
 };
 
@@ -769,9 +773,9 @@ VOID opf20(NOTHING)
 	if (!controlea(&opnd[0]) && i != INDINC && i != DECIND)
 		uerr(20);
 	if (modelen == 4)					/* long */
-		ins[0].w |= 0100;
-	ins[0].w |= opnd[0].ea | dr;
-	(pins++)->w = j;						/* reg mask */
+		ins[0] |= 0100;
+	ins[0] |= opnd[0].ea | dr;
+	*pins++ = j;						/* reg mask */
 	*prlb++ = DABS;
 	instrlen += 2;
 	doea(&opnd[0]);
@@ -789,10 +793,11 @@ VOID opf20(NOTHING)
  * call with:
  *	ptr to reg-to-mem or mem-to-reg array of bits
  */
-int getrlist(P(short *) ap)
-PP(short *ap;)
+int getrlist(P(const short *) ap)
+PP(const short *ap;)
 {
-	register short *p, i, j, mask;
+	register const short *p;
+	register short i, j, mask;
 
 	p = ap;
 	mask = 0;
@@ -809,7 +814,9 @@ PP(short *ap;)
 			while (i <= j)
 				mask |= p[i++];
 		} else
+		{
 			mask |= p[i];
+		}
 		if (ckitc(pitw, '/'))
 			pitw++;
 		else
@@ -817,7 +824,7 @@ PP(short *ap;)
 	}
 	if (!mask)
 		uerr(40);
-	return (mask);
+	return mask;
 }
 
 
@@ -837,7 +844,7 @@ PP(int msk;)
 		i <<= 1;
 		j >>= 1;
 	}
-	return (k);
+	return k;
 }
 
 
@@ -871,8 +878,8 @@ VOID opf21(NOTHING)
 		uerr(20);
 	if (modelen == 4)
 		m |= 0100;
-	ins[0].w |= (d << 9) | m | (p->ea & 7);
-	(pins++)->w = p->con.u.loword;
+	ins[0] |= (d << 9) | m | (p->ea & 7);
+	*pins++ = p->con.u.loword;
 	*prlb++ = p->drlc;
 	instrlen += 2;
 }
@@ -889,7 +896,7 @@ VOID opf22(NOTHING)
 		uerr(15);
 	if (!ckdreg(&opnd[1]))
 		uerr(33);
-	ins[0].w |= (opnd[1].ea << 9) | (opnd[0].con.u.loword & 0377);
+	ins[0] |= (opnd[1].ea << 9) | (opnd[0].con.u.loword & 0xff);
 }
 
 
@@ -901,7 +908,7 @@ VOID opf23(NOTHING)
 	if (cksprg(&opnd[1], CCR) || cksprg(&opnd[1], SR))
 	{
 		opcpt = eoriptr;
-		ins[0].w = opcpt->vl1.u.loword;
+		ins[0] = opcpt->vl1.u.loword;
 		format = opcpt->flags & OPFF;
 		ccr_or_sr();
 		return;
@@ -914,7 +921,7 @@ VOID opf23(NOTHING)
 	}
 	if (!dataalt(&opnd[1]) || pcea(&opnd[1]))
 		uerr(20);
-	ins[0].w |= (opnd[0].ea << 9) | f23mode[modelen] | opnd[1].ea;
+	ins[0] |= (opnd[0].ea << 9) | f23mode[modelen] | opnd[1].ea;
 	doea(&opnd[1]);
 }
 
@@ -930,7 +937,7 @@ VOID opf31(NOTHING)
 
 	if (get2ops())
 		return;
-	if (ins[0].w == MOVEC)
+	if (ins[0] == MOVEC)
 	{
 		if (modelen == BYTESIZ)
 			uerr(34);
@@ -942,38 +949,38 @@ VOID opf31(NOTHING)
 		{
 			if (!cksprg(&opnd[1], USP) && !cksprg(&opnd[1], SFC) && !cksprg(&opnd[1], DFC) && !cksprg(&opnd[1], VSR))
 				uerr(18);
-			ins[0].w |= 1;				/* direction Rn --> Rc */
+			ins[0] |= 1;				/* direction Rn --> Rc */
 			cntrl = &opnd[1];
 			genrl = &opnd[0];
 		}
 		if (!ckreg(genrl))
 			uerr(18);
-		pins->w = ((genrl->ea) << 12) & 0xF000;
+		*pins = ((genrl->ea) << 12) & 0xF000;
 		if (cksprg(cntrl, DFC))
-			pins->w |= DFC_CR;
+			*pins |= DFC_CR;
 		else if (cksprg(cntrl, USP))
-			pins->w |= USP_CR;
+			*pins |= USP_CR;
 		else if (cksprg(cntrl, VSR))
-			pins->w |= VSR_CR;
+			*pins |= VSR_CR;
 		/* else... *pins |= SFC_CR; (SFC_CR == 0) */
 	} else
 	{									/* MOVES */
-		ins[0].w |= f1mode[modelen];
+		ins[0] |= f1mode[modelen];
 		if (ckreg(&opnd[0]))
 		{
 			genrl = &opnd[0];
 			eaop = &opnd[1];
-			pins->w = 0x800;				/* from general register to <ea> */
+			*pins = 0x800;				/* from general register to <ea> */
 		} else
 		{
 			genrl = &opnd[1];
 			eaop = &opnd[0];
-			pins->w = 0;
+			*pins = 0;
 		}
-		pins->w |= ((genrl->ea) << 12) & 0xF000;
+		*pins |= ((genrl->ea) << 12) & 0xF000;
 		if (!memalt(eaop) || pcea(eaop) || ckreg(eaop))
 			uerr(20);
-		ins[0].w |= eaop->ea;
+		ins[0] |= eaop->ea;
 		doea(eaop);
 	}
 }
