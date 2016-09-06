@@ -69,6 +69,9 @@ VOID mystrncpy PROTO((char *astr1, const char *astr2, int alen));
 const char *tdname = "";					/*  Temp files in same directory    */
 const char *idname = "0:";					/*  Init file  in user 0        */
 
+/*
+ * BUG: template name too long (9 chars),
+ */
 char const tfilebase[] = "a6AXXXXXX";		/*  Temp file  basename         */
 char const initbase[] = "as68symb.dat";		/*  Init file  basename         */
 

@@ -47,7 +47,7 @@ PP(register const char *mode;)				/* "r","w", or "a"      */
 		return NULL;
 	
 	/* look at _iob table not marked rd/wrt */
-	for (ii = 0; ii < MAXFILES && (sp = (&_iob[ii]))->_flag & (_IOREAD | _IOWRT); ii++)
+	for (ii = 0; ii < MAXFILES && (sp = &_iob[ii])->_flag & (_IOREAD | _IOWRT); ii++)
 		;
 	if (ii >= MAXFILES)
 	{

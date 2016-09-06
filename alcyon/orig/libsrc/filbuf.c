@@ -35,18 +35,18 @@ PP(register FILE *sp;)							/* from this stream     */
 	}
 	if (sp->_base == NULL)				/* has this been done?      */
 	{
-		if (sp->_flag & _IONBUF ||		/* is the No Buf flag set?  */
+		if (sp->_flag & _IONBF ||		/* is the No Buf flag set?  */
 			(sp->_base = malloc(BUFSIZ)) == NULL)	/* can't we get buffer?   */
-			sp->_flag |= _IONBUF;		/*   set No Buf flag        */
+			sp->_flag |= _IONBF;		/*   set No Buf flag        */
 		else
 			sp->_flag |= _IOABUF;		/* we're all set        */
 	}
-	if (sp->_flag & _IONBUF)			/* insure this set right    */
+	if (sp->_flag & _IONBF)			/* insure this set right    */
 		sp->_base = &onebuf[fileno(sp)];	/*   set 'buf' to small buf */
-	if (sp == stdin && (stdout->_flag & _IOLBUF))	/* console i/o?      */
+	if (sp == stdin && (stdout->_flag & _IOLBF))	/* console i/o?      */
 		fflush(stdout);					/* output whatever to con   */
 	sp->_cnt = read(fileno(sp), sp->_base,	/* read to our buffer       */
-					sp->_flag & _IONBUF ? 1 : BUFSIZ);	/*   the right # of bytes   */
+					sp->_flag & _IONBF ? 1 : BUFSIZ);	/*   the right # of bytes   */
 	if (sp->_cnt <= 0)					/* did read screw up?       */
 	{									/* yup...******************* */
 		if (sp->_cnt == -1)

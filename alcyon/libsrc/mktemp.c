@@ -26,10 +26,6 @@
 
 static char _mktchar = 'A';
 
-#ifdef __GNUC__
- #pragma GCC diagnostic ignored "-Wformat" /* '0' flag ignored with precision and '%d' gnu_printf format */
-#endif
-
 char *mktemp(P(char *) template)
 PP(register char *template;)
 {
@@ -37,10 +33,10 @@ PP(register char *template;)
 
 	for (ss = template; *ss != 'x' && *ss != 'X'; ss++)
 		if (*ss == '\0')
-			return (template);			/* resign           */
+			return template;			/* resign           */
 	if (_mktchar < 'A' || _mktchar > 'Z')
 		_mktchar = 'A';
-	sprintf(ss, "X%04.4d%c", getpid(), _mktchar);
+	sprintf(ss, "%c%04xX", _mktchar, getpid());
 	_mktchar++;
 	return template;
 }

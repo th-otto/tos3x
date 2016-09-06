@@ -21,8 +21,9 @@ exit equ 76			* Pterm GEMDOS exit call
 		xdef	__exit
 		xdef	__break
 		xdef	__start
-		xdef	___cpmrv
 		xdef	__base
+		xdef	__BasPag
+		xdef	__PgmSize
 		xref  _sw_
 	    xdef	__sovf
 
@@ -38,6 +39,8 @@ start:		move.l	4(a7),a0		*	a0 -> Base page
 		move.l	lbss(a0),a1		*	a1 -> bss region
 		adda.l	bsslen(a0),a1		*	a1 -> 1st heap loc
 		move.l	a1,__break		*	Put in "break" loc
+		suba.l  a0,a1
+		move.l  a1,__PgmSize
 		lea.l	command(a0),a2		*	a2 -> command line
 		move.b	(a2)+,d0		*	d0 = byte count
 		andi.l	#$ff,d0			*	clear junk
@@ -50,9 +53,10 @@ start:		move.l	4(a7),a0		*	a0 -> Base page
 *
 *
 		bss
+__BasPag:
 __base:		ds.l	1			*	-> Base Page
 __break:	ds.l	1			*	Break function
-___cpmrv:	ds.w	1			*	Last CP/M return val
+__PgmSize:  ds.l    1
 
 		text
 *

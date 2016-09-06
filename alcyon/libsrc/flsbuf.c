@@ -5,8 +5,8 @@
 *	Copyright 1982 by Digital Research Inc.  All rights reserved.
 *
 *	'_flsbuf' handles writes to the stream when its buffer is full.
-*	Included is the ability to handle 'non-buffered' (_IONBUF), as
-*	well as line buffered (_IOLBUF) output.  It is supposed to be
+*	Included is the ability to handle 'non-buffered' (_IONBF), as
+*	well as line buffered (_IOLBF) output.  It is supposed to be
 *	called by 'putc'.  It will init the buffers, as needed.
 *
 *	Calling sequence:
@@ -39,12 +39,12 @@ PP(register FILE *sp;)							/* stream to write to       */
 		return EOF;
 	c &= 0xff;
 	/* if no init yet and not a no buff file */
-	if (sp->_base == NULL && (sp->_flag & _IONBUF) == 0)
+	if (sp->_base == NULL && (sp->_flag & _IONBF) == 0)
 	{
 		if ((sp->_ptr = sp->_base = malloc(BUFSIZ)) == NULL)
 		{
 			/* set to a no buff file */
-			sp->_flag |= _IONBUF;
+			sp->_flag |= _IONBF;
 		} else
 		{
 			/* mark it as alloc'd */
@@ -52,28 +52,29 @@ PP(register FILE *sp;)							/* stream to write to       */
 			/* do we handle newlines?   */
 			if (isatty(fileno(sp)))
 			{
-				sp->_flag |= _IOLBUF;
+				sp->_flag |= _IOLBF;
 			} else
 			{
 				/* lv room for 1st & last ch */
 				sp->_cnt = BUFSIZ - 2;
 				*sp->_ptr++ = c;
+				sp->_flag |= _IOWRTN;
 				return c;
 			}
 		}
 	}
-	if (sp->_flag & _IONBUF)			/* insure this pts ok       */
-		sp->_ptr = sp->_base = &csave;	/* give buff a temp place   */
-	*sp->_ptr++ = c;					/* put this somewhere       */
-	if (sp->_flag & _IONBUF)			/* if a no buff file        */
+	if (sp->_flag & _IONBF)			/* if a no buff file        */
 	{
 		/* write single char */
 		ns = 1;
-		n = write(fileno(sp), sp->_base, ns);
+		csave = c;
+		n = write(fileno(sp), &csave, ns);
 		/* enforce coming back again */
 		sp->_cnt = 0;
-	} else if (sp->_flag & _IOLBUF)
+		sp->_base = sp->_ptr = NULL;
+	} else if (sp->_flag & _IOLBF)
 	{
+		*sp->_ptr++ = c;					/* put this somewhere       */
 		/* its a line buff file */
 		if (c == '\n' || sp->_ptr >= sp->_base + BUFSIZ)
 		{
@@ -85,15 +86,24 @@ PP(register FILE *sp;)							/* stream to write to       */
 		}
 		/* enforce coming right back */
 		sp->_cnt = 0;
+		sp->_flag &= ~_IOWRTN;
 	} else
 	{
-		/* o.w. we really have a full buffer */
-		ns = (long)sp->_ptr - (long)sp->_base;
-		n = write(fileno(sp), sp->_base, ns);
-		/* lv room for last char */
-		sp->_cnt = BUFSIZ - 1;
-		/* init ptr */
-		sp->_ptr = sp->_base;
+		*sp->_ptr++ = c;					/* put this somewhere       */
+		if (sp->_ptr >= sp->_base + BUFSIZ)
+		{
+			/* o.w. we really have a full buffer */
+			ns = (long)sp->_ptr - (long)sp->_base;
+			n = write(fileno(sp), sp->_base, ns);
+			/* lv room for last char */
+			sp->_cnt = BUFSIZ - 1;
+			/* init ptr */
+			sp->_ptr = sp->_base;
+		} else
+		{
+			sp->_cnt = BUFSIZ - 2;
+		}
+		sp->_flag |= _IOWRTN;
 	}
 	/* error on write? */
 	if (ns != n)

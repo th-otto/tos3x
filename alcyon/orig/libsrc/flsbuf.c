@@ -5,8 +5,8 @@
 *	Copyright 1982 by Digital Research Inc.  All rights reserved.
 *
 *	'_flsbuf' handles writes to the stream when its buffer is full.
-*	Included is the ability to handle 'non-buffered' (_IONBUF), as
-*	well as line buffered (_IOLBUF) output.  It is supposed to be
+*	Included is the ability to handle 'non-buffered' (_IONBF), as
+*	well as line buffered (_IOLBF) output.  It is supposed to be
 *	called by 'putc'.  It will init the buffers, as needed.
 *
 *	Calling sequence:
@@ -38,12 +38,12 @@ PP(register FILE *sp;)							/* stream to write to       */
 	if ((sp->_flag & _IOWRT) == 0)
 		return EOF;
 	/* if no init yet and not a no buff file */
-	if (sp->_base == NULL && (sp->_flag & _IONBUF) == 0)
+	if (sp->_base == NULL && (sp->_flag & _IONBF) == 0)
 	{
 		if ((sp->_ptr = sp->_base = malloc(BUFSIZ)) == NULL)
 		{
 			/* set to a no buff file */
-			sp->_flag |= _IONBUF;
+			sp->_flag |= _IONBF;
 		} else
 		{
 			/* mark it as alloc'd */
@@ -51,7 +51,7 @@ PP(register FILE *sp;)							/* stream to write to       */
 			/* do we handle newlines?   */
 			if (isatty(fileno(sp)))
 			{
-				sp->_flag |= _IOLBUF;
+				sp->_flag |= _IOLBF;
 			} else
 			{
 				/* lv room for 1st & last ch */
@@ -60,17 +60,17 @@ PP(register FILE *sp;)							/* stream to write to       */
 			}
 		}
 	}
-	if (sp->_flag & _IONBUF)			/* insure this pts ok       */
+	if (sp->_flag & _IONBF)			/* insure this pts ok       */
 		sp->_ptr = sp->_base = &csave;	/* give buff a temp place   */
 	*sp->_ptr++ = c;					/* put this somewhere       */
-	if (sp->_flag & _IONBUF)			/* if a no buff file        */
+	if (sp->_flag & _IONBF)			/* if a no buff file        */
 	{
 		/* write single char */
 		ns = 1;
 		n = write(fileno(sp), sp->_base, ns);
 		/* enforce coming back again */
 		sp->_cnt = 0;
-	} else if (sp->_flag & _IOLBUF)
+	} else if (sp->_flag & _IOLBF)
 	{
 		/* its a line buff file */
 		if (c == '\n' || sp->_ptr >= sp->_base + BUFSIZ)

@@ -128,6 +128,16 @@ struct tm *_conSD PROTO((time_t clock, int local));
 time_t _cnvDS PROTO((const struct tm *tm));
 #endif
 
+/*
+ * calculate Pseudo-Pid from basepage value.
+ * A basepage is at least 256 bytes, so the least significant 8
+ * bits can safely be dropped.
+ * Note that getpid() etc. are not supposed to return an
+ * error code (they always succeed), and thus the resulting
+ * value might be negative.
+ */
+#define pid_from_basepage(bp)  ((pid_t) (((long) (bp)) >> 8))
+
 /************************* #include "malloc.h"  *****************************/
 #define FB_HDR struct hdr				/* free block header type   */
 #define NULLFBH ((FB_HDR *)0)			/* Null of above struct     */

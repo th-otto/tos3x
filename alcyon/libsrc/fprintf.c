@@ -27,7 +27,7 @@ _va_dcl
 	_va_start(args, fmt);
 	ret = __doprint(fp, fmt, 0, args);
 	_va_end(args);
-	if (!(fp->_flag & _IONBUF))
+	if (!(fp->_flag & _IONBF))
 		fflush(fp);
 	return ret;
 }

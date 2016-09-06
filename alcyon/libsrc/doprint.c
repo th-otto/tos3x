@@ -194,6 +194,7 @@ PP(va_list args;)
 			if (n == 0L)
 			{
 				s = "(nil)";
+				padchar = ' ';
 			} else
 			{
 				fn = __prtld;
@@ -211,7 +212,10 @@ PP(va_list args;)
 		case 'S':
 			s = va_arg(args, char *);
 			if (s == NULL)
+			{
 				s = "(null)";
+				padchar = ' ';
+			}
 			break;
 
 		case 'c':						/* character */

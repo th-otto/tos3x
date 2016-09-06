@@ -45,19 +45,19 @@ PP(register FILE *sp;)
 	if (sp->_base == NULL)				/* has this been done?      */
 	{
 		/* is the No Buf flag set? */
-		if (sp->_flag & _IONBUF)
-			sp->_flag |= _IONBUF;		/*   set No Buf flag        */
+		if (sp->_flag & _IONBF)
+			sp->_flag |= _IONBF;		/*   set No Buf flag        */
 		else if ((sp->_base = malloc(BUFSIZ)) == NULL)	/* can't we get buffer?   */
-			sp->_flag |= _IONBUF;		/*   set No Buf flag        */
+			sp->_flag |= _IONBF;		/*   set No Buf flag        */
 		else
 			sp->_flag |= _IOABUF;		/* we're all set        */
 	}
-	if (sp->_flag & _IONBUF)			/* insure this set right    */
+	if (sp->_flag & _IONBF)			/* insure this set right    */
 		sp->_base = &onebuf[fileno(sp)];	/*   set 'buf' to small buf */
-	if (sp == stdin && (stdout->_flag & _IOLBUF))	/* console i/o?      */
+	if (sp == stdin && (stdout->_flag & _IOLBF))	/* console i/o?      */
 		fflush(stdout);					/* output whatever to con   */
 	sp->_cnt = read(fileno(sp), sp->_base,	/* read to our buffer       */
-					sp->_flag & _IONBUF ? 1 : BUFSIZ);	/*   the right # of bytes   */
+					sp->_flag & _IONBF ? 1 : BUFSIZ);	/*   the right # of bytes   */
 	/* did read screw up? */
 	if (sp->_cnt <= 0)
 	{
@@ -67,6 +67,7 @@ PP(register FILE *sp;)
 			sp->_flag |= _IOEOF;		/* or just say we can't read */
 		return EOF;
 	}
+	sp->_flag |= _IOREDN;
 	sp->_cnt--;							/* take the 1st item        */
 	sp->_ptr = sp->_base;				/* set up stream        */
 	return (((int) (*sp->_ptr++) & CMASK));	/* and return the char      */

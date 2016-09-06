@@ -43,28 +43,30 @@
 #ifndef _NO_FILE
 #define BUFSIZ          512             /*      Standard (ascii) buf size   */
 #define MAXFILES        16              /*      Max # open files ( < 32 )   */
-struct _iobuf {                         /*                                  */
+struct _iobuf {
          int _fd;                       /* file descriptor for low level io */
          int _flag;                     /* stream info flags                */
         char *_base;                    /* base of buffer                   */
         char *_ptr;                     /* current r/w pointer              */
          int _cnt;                      /* # chars to be read/have been wrt */
-};                                      /*                                  */
+};
 
 extern struct _iobuf _iob[MAXFILES];
 typedef struct _iobuf FILE;
 
-/* flag byte definition             */
-#define _IOREAD 0x01                    /* readable file                    */
-#define _IOWRT  0x02                    /* writeable file                   */
-#define _IOABUF 0x04                    /* alloc'd buffer                   */
-#define _IONBUF 0x08                    /* no buffer                        */
-#define _IOFBF  0x00					/* fully buffered                   */
-#define _IOERR  0x10                    /* error has occurred               */
-#define _IOEOF  0x20                    /* EOF has occurred                 */
-#define _IOLBUF 0x40                    /* handle as line buffer            */
-#define _IOSTRI 0x80                    /* this stream is really a string   */
-#define _IOASCI 0x100                   /* this was opened as an ascii file */
+/* flag byte definition */
+#define _IOREAD 0x0001                  /* readable file                    */
+#define _IOWRT  0x0002                  /* writeable file                   */
+#define _IOABUF 0x0004                  /* alloc'd buffer                   */
+#define _IONBF  0x0008                  /* no buffer                        */
+#define _IOFBF  0x0000					/* fully buffered                   */
+#define _IOERR  0x0010                  /* error has occurred               */
+#define _IOEOF  0x0020                  /* EOF has occurred                 */
+#define _IOLBF  0x0040                  /* handle as line buffer            */
+#define _IOSTRI 0x0080                  /* this stream is really a string   */
+#define _IOASCI 0x0100                  /* this was opened as an ascii file */
+#define _IOWRTN 0x0200                  /* write buffer has been modified   */
+#define _IOREDN 0x0400                  /* read buffer has been filled      */
 
 #ifdef __GNUC__
 extern FILE *stdin;          /* Standard input stream.  */

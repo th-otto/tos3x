@@ -13,7 +13,7 @@ PP(register char *buf;)
 		return;
 	sp->_base = sp->_ptr = buf;
 	if (buf == NULL)
-		sp->_flag |= _IONBUF;
+		sp->_flag |= _IONBF;
 	else
-		sp->_flag &= ~_IONBUF;
+		sp->_flag &= ~_IONBF;
 }

@@ -49,12 +49,12 @@ const char *const sys_errlist[NUMERRS] = {
 };
 
 
-const char *strerror(P(int) err_no)
+char *strerror(P(int) err_no)
 PP(int err_no;)
 {
 	register const char *err;
 
 	if (err_no < 0 || err_no >= sys_nerr)
-		return _undeferr;
-	return sys_errlist[err_no];
+		return NO_CONST(_undeferr);
+	return NO_CONST(sys_errlist[err_no]);
 }

@@ -18,37 +18,46 @@
 *****************************************************************************/
 
 #include "lib.h"
+#include <errno.h>
 
 int fflush(P(FILE *) sp)
 PP(register FILE *sp;)							/* stream to flush      */
 {
 	register int n;							/* num written          */
 	register int ns;						/* num sposed to be written */
+	register int ii;
 
-	if ((sp->_flag & (_IONBUF | _IOWRT)) == _IOWRT	/* does it have a wrt buf?  */
-		&& (ns = (long) sp->_ptr - (long)sp->_base) > 0)	/*  and does buf need wrt? */
+	if (sp == NULL)
 	{
-		n = write(fileno(sp), sp->_base, ns);	/* do it            */
-		if (ns != n)					/* did they all git writ?   */
-		{
-			sp->_flag |= _IOERR;		/*   this stream no good    */
-			return -1;				/*   let em know        */
-		}
+		n = 0;
+		for (ii = 0; ii < MAXFILES; ii++)
+			n |= fflush(&_iob[ii]);
+		return n;
 	}
-	if (sp->_flag & _IOWRT)				/* is this a writable file? */
+	
+	if (!__validfp(sp))
 	{
-		if (sp->_base != NULL)			/* written to already?      */
+		__set_errno(EINVAL);
+		return EOF;
+	}
+	if (sp->_flag & _IOWRTN)	/* does it have a wrt buf?  */
+	{
+		if ((ns = (long) sp->_ptr - (long)sp->_base) > 0)	/*  and does buf need wrt? */
 		{
-			if (sp->_flag & _IONBUF)	/* is this a nobuf stream?  */
-				sp->_cnt = 1;
-			else
-				sp->_cnt = BUFSIZ - 1;	/* standard size        */
+			n = write(fileno(sp), sp->_base, ns);	/* do it            */
+			if (ns != n)					/* did they all git writ?   */
+			{
+				sp->_flag |= _IOERR;		/*   this stream no good    */
+				return EOF;
+			}
 		}
-	} else
+	} else if (sp->_flag & _IOREDN)
 	{									/* is a readable file       */
-		lseek(fileno(sp), (long) - (sp->_cnt), SEEK_CUR);	/* back up cur position ptr */
-		sp->_cnt = 0;					/* zap out count        */
+		if (sp->_cnt > 0)
+			lseek(fileno(sp), (long) - (sp->_cnt), SEEK_CUR);	/* back up cur position ptr */
 	}
+	sp->_cnt = 0;					/* zap out count        */
 	sp->_ptr = sp->_base;				/* reset buf */
+	sp->_flag &= ~(_IOWRTN | _IOREDN);
 	return 0;
 }

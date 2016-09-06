@@ -29,9 +29,9 @@ PP(int sense;)
 {
 	long p;
 
-	if (fflush(sp) == -1)
-		return -1;
+	if (fflush(sp) < 0)
+		return EOF;
 	p = lseek(fileno(sp), offs, sense);
 	sp->_flag &= ~_IOEOF;				/* any seek clears EOF flag */
-	return (p == (long) -1 ? -1 : 0);
+	return p == (long) -1 ? -1 : 0;
 }

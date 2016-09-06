@@ -24,7 +24,7 @@ PP(register FILE *sp;)							/* stream pointer       */
 {
 	register long filepos;					/* file position        */
 	register char *bp;						/* Buffer ptr           */
-	long nread;							/* Temp var         */
+	long nread;
 
 	if (isatty(fileno(sp)))				/* are we talking to a tty? */
 		return 0L;					/* quit now if so       */
@@ -38,14 +38,14 @@ PP(register FILE *sp;)							/* stream pointer       */
 			return filepos;				/*  return this position    */
 		nread = (long)sp->_ptr - (long)sp->_base;	/* calc for # read/written  */
 		filepos += nread;				/* correct for # read/wrtn  */
-		if (sp->_flag & _IOREAD)		/* if reading from file     */
+		if (sp->_flag & _IOREDN)		/* if reading from file     */
 			if (filepos > 0)			/*  and we've read from file */
 				filepos -= nread + sp->_cnt;	/* adjust file position     */
 		/*  to reflect read ahead   */
 		if (sp->_flag & _IOASCI)		/* ascii file? ************* */
 		{								/* count the newlines       */
 			if (sp->_flag & _IOWRT)		/* add in newline's cr's    */
-			{							/*              */
+			{
 				for (bp = sp->_base; bp < sp->_ptr; bp++)	/*         */
 					if (*bp == '\n')	/* count newlines in stuff  */
 						filepos++;		/*   written/read so far    */

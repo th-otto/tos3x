@@ -5,7 +5,7 @@
 *	Copyright 1983 by Digital Research Inc.  All rights reserved.
 *
 *	'fputn()' writes 'n' chars to a buffered file.  It optimizes
-*	for 'non-buffered' (_IONBUF) output.
+*	for 'non-buffered' (_IONBF) output.
 *
 *	Calling sequence:
 *		rv = fputn(cp,n,stream)
@@ -24,7 +24,7 @@ PP(register const char *buf;)				/* chars to be written      */
 PP(register int num;)						/* num chars to be written  */
 PP(register FILE *sp;)						/* stream to write to       */
 {
-	if (sp->_flag & _IONBUF)			/* Non-buffered file?       */
+	if (sp->_flag & _IONBF)			/* Non-buffered file?       */
 	{
 		sp->_cnt = 0;					/* Always force to zero     */
 		if (num != write(fileno(sp), buf, num))	/* try to write         */

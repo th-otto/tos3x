@@ -25,7 +25,7 @@ PP(register FILE *sp;)							/* stream to flush      */
 	register int n;							/* num written          */
 	register int ns;						/* num sposed to be written */
 
-	if ((sp->_flag & (_IONBUF | _IOWRT)) == _IOWRT	/* does it have a wrt buf?  */
+	if ((sp->_flag & (_IONBF | _IOWRT)) == _IOWRT	/* does it have a wrt buf?  */
 		&& (ns = (long) sp->_ptr - (long)sp->_base) > 0)	/*  and does buf need wrt? */
 	{
 		n = write(fileno(sp), sp->_base, ns);	/* do it            */
@@ -39,7 +39,7 @@ PP(register FILE *sp;)							/* stream to flush      */
 	{
 		if (sp->_base != NULL)			/* written to already?      */
 		{
-			if (sp->_flag & _IONBUF)	/* is this a nobuf stream?  */
+			if (sp->_flag & _IONBF)	/* is this a nobuf stream?  */
 				sp->_cnt = 1;
 			else
 				sp->_cnt = BUFSIZ - 1;	/* standard size        */

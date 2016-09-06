@@ -15,8 +15,8 @@ compile snafu:fix following table
 #endif
 struct _iobuf _iob[16] = {
 	{  0, _IOREAD, NULL, NULL, 0 },
-	{  1, _IOWRT + _IONBUF, NULL, NULL, 0 },
-	{  2, _IOWRT + _IONBUF, NULL, NULL, 0 },
+	{  1, _IOWRT + _IONBF, NULL, NULL, 0 },
+	{  2, _IOWRT + _IONBF, NULL, NULL, 0 },
 	{ -1, 0, NULL, NULL, 0 },
 	{ -1, 0, NULL, NULL, 0 },
 	{ -1, 0, NULL, NULL, 0 },
