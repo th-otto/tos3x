@@ -7,14 +7,10 @@
 
 
 #define	LPP	58							/* # Lines per listing page     */
-int xline = LPP;						/* Current line on page         */
+static int xline = LPP;					/* Current line on page         */
+static int xpage = 0;					/* Current page #               */
+static int pline = 1;					/* number of last printed line */
 
-int xpage = 0;							/* Current page #               */
-
-short pline;							/* Current listing line #       */
-
-int symcmp PROTO((const VOIDPTR a, const VOIDPTR b));
-int psyme PROTO((struct symtab *osypt));
 
 
 /****************************************************************************/
@@ -41,56 +37,12 @@ VOID spage(NOTHING)
 
 
 /****************************************************************************/
-/*																		    */
-/*	Symbol table print routine.  "psyms" is called AFTER the symbol table   */
-/*	has been output to the loader file.  We sort the symbol table, and print*/
-/*	the sorted table in PDP-11ish (RT-11) fashion, with a reasonable format */
-/*	for the symbols.													    */
-/*																		    */
-/****************************************************************************/
-VOID psyms(NOTHING)
-{
-	register long j;					/* Temporary                */
-	register struct symtab *p;					/* -> Symbol table entries  */
-
-	xline = LPP;						/* Force page               */
-	page();								/*              Eject       */
-	printf("S y m b o l   T a b l e\n\n");	/* Print Header             */
-	xline++;							/* Bump line counter        */
-	j = (((__intptr_t)lmte - (__intptr_t)bmte) / sizeof(*p));		/* Compute # elements       */
-	qsort(bmte, (int) j, sizeof(*p), symcmp);	/* Sort'em                  */
-	j = 0;								/* Count symbols / line     */
-	for (p = bmte; p < lmte; p++)	/* Loop through symbol table */
-	{
-		if (j > 3)						/* 4 Symbols / line         */
-		{
-			printf("\n");
-			page();						/* Check for top of page    */
-			j = 0;						/* Reset counter            */
-		}
-		j += psyme(p);					/* Print 1 table entry (maybe) */
-	}
-	if (j <= 3)							/* Partial line?            */
-		printf("\n");					/*  Yes, finish it          */
-}
-
-
-/* Qsort comparison function */
-int symcmp(P(const VOIDPTR) a, P(const VOIDPTR) b)
-PP(register const VOIDPTR a;)
-PP(register const VOIDPTR b;)										/* -> Elts to compare       */
-{
-	return strncmp(a, b, SYNAMLEN);
-}
-
-
-/****************************************************************************/
 /*																			*/
 /*	Psyme function.  This function prints a single symbol table entry on	*/
 /*	the listing file, complete with TEXT, DATA, BSS, EXT, or UNDEF tag.		*/
 /*																			*/
 /****************************************************************************/
-int psyme(P(struct symtab *) osypt)
+static int psyme(P(struct symtab *) osypt)
 PP(register struct symtab *osypt;)
 {
 	register char *p;					/* -> Name field            */
@@ -140,6 +92,51 @@ PP(register struct symtab *osypt;)
 		printf("*UNDEFINED*    ");
 	}
 	return 1;
+}
+
+
+/****************************************************************************/
+/*																		    */
+/*	Symbol table print routine.  "psyms" is called AFTER the symbol table   */
+/*	has been output to the loader file.  We sort the symbol table, and print*/
+/*	the sorted table in PDP-11ish (RT-11) fashion, with a reasonable format */
+/*	for the symbols.													    */
+/*																		    */
+/****************************************************************************/
+
+/* Qsort comparison function */
+static int symcmp(P(const VOIDPTR) a, P(const VOIDPTR) b)
+PP(register const VOIDPTR a;)
+PP(register const VOIDPTR b;)										/* -> Elts to compare       */
+{
+	return strncmp(a, b, SYNAMLEN);
+}
+
+
+VOID psyms(NOTHING)
+{
+	register long j;					/* Temporary                */
+	register struct symtab *p;					/* -> Symbol table entries  */
+
+	xline = LPP;						/* Force page               */
+	page();								/*              Eject       */
+	printf("S y m b o l   T a b l e\n\n");	/* Print Header             */
+	xline++;							/* Bump line counter        */
+	j = (((__intptr_t)lmte - (__intptr_t)bmte) / sizeof(*p));		/* Compute # elements       */
+	qsort(bmte, (int) j, sizeof(*p), symcmp);	/* Sort'em                  */
+	j = 0;								/* Count symbols / line     */
+	for (p = bmte; p < lmte; p++)	/* Loop through symbol table */
+	{
+		if (j > 3)						/* 4 Symbols / line         */
+		{
+			printf("\n");
+			page();						/* Check for top of page    */
+			j = 0;						/* Reset counter            */
+		}
+		j += psyme(p);					/* Print 1 table entry (maybe) */
+	}
+	if (j <= 3)							/* Partial line?            */
+		printf("\n");					/*  Yes, finish it          */
 }
 
 

@@ -217,7 +217,6 @@ VOID relbr(NOTHING)
 }
 
 
-#define US	(unsigned short)
 /*
  * format one -- add, sub, and, or, cmp, etc.
  * one operand must be a D reg (or A reg dest for add, sub, or cmp)
@@ -228,10 +227,10 @@ VOID opf1(NOTHING)
 
 	if (get2ops())
 		return;
-	if (ins[0] == (US AND) || ins[0] == (US OR))
+	if (ins[0] == AND || ins[0] == OR)
 		if (cksprg(&opnd[1], CCR) || cksprg(&opnd[1], SR))
 		{
-			if (ins[0] == (US AND))
+			if (ins[0] == AND)
 				opcpt = andiptr;
 			else
 				opcpt = oriptr;

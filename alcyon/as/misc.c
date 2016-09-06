@@ -13,24 +13,11 @@
 
 long stlen;
 
-short stdofd = STDOUT; /* unused */
-
 short debug = 0;
 
-short udfct, ftudp, pline, prsp;
-
-VOID do_ireg PROTO((struct op *p, int i, int opn));
-int getareg PROTO((NOTHING));
-int getrgs PROTO((NOTHING));
-VOID ckrparen PROTO((NOTHING));
-VOID doitrd PROTO((NOTHING));
-VOID osyme PROTO((struct symtab *aosypt));
-VOID pudfs PROTO((struct symtab *udspt));
-VOID docp PROTO((FILE *, long length));
-VOID chkimm PROTO((struct op *ap));
-int gspreg PROTO((NOTHING));
-VOID doupper PROTO((struct op *p));
-
+short ftudp;
+static short udfct;
+static short hibytflg[4], hibytw[4];
 
 
 
@@ -42,12 +29,110 @@ PP(struct op *ap;)
 
 	p = ap;
 	p->ea = p->len = p->xmod = p->drlc = 0;
-	p->con.l = 0;
+	p->con = 0;
 	p->ext = p->idx = -1;
 }
 
 
-#define US	(unsigned short)
+/* get any register specification */
+static int getrgs(NOTHING)
+{
+	register struct symtab *i;
+
+	if (pitw->itty == ITSY)
+	{
+		i = pitw->itop.ptrw2;		/* symbol ptr */
+		if (i->flags & SYER)
+		{
+			pitw++;
+			return i->vl1;			/* register # */
+		}
+	}
+	return -1;
+}
+
+
+/*
+ * check for a right paren as the next char
+ * output error msg if not found
+ */
+static VOID ckrparen(NOTHING)
+{
+	if (ckitc(pitw, ')'))				/* found it */
+		pitw++;
+	else
+		uerr(32);
+}
+
+
+static VOID do_ireg(P(struct op *) p, P(int) i, P(int) opn)
+PP(struct op *p;)
+PP(int i;)
+PP(int opn;)
+{
+	pitw++;
+	p->idx = getreg();
+	if (p->idx < 0 || p->idx > AREGHI)
+		uerr(14);
+	p->len = 2;
+	if (!ckitc(pitw, ')'))
+	{
+		p->xmod = getrgs() - WORD_ID;
+		if (p->xmod < 0 || p->xmod > 1)
+		{
+			uerr(34);
+			p->xmod = 0;
+		}
+	}
+	ckrparen();
+	ckeop(9 + opn);
+	if (i == PC)
+		p->ea += 1;
+	else
+		p->ea |= INDINX;
+}
+
+
+/*
+ * get an A register specification
+ *  call with:
+ *		pitw pointing to reg operand
+ *  returns:
+ *		-1 if not vaid A reg
+ *		A reg # if valid
+ *		also updates pitw if valid
+ */
+static int getareg(NOTHING)
+{
+	register short i;
+
+	i = getreg();
+	if (i >= AREGLO && i <= AREGHI)
+	{
+		return i & 7;
+	} else
+	{
+		if (i != -1)
+			pitw--;
+		return -1;
+	}
+}
+
+
+/* get a special register token (CCR, SR, USP, SFC, DFC or VSR) */
+static int gspreg(NOTHING)
+{
+	register short i;
+
+	i = getrgs();
+	if (i > AREGHI)
+		return i;
+	if (i != -1)
+		pitw--;
+	return 0;
+}
+
+
 /*
  * get one operand effective adddress (operand until , or EOS)
  * returns:
@@ -62,7 +147,7 @@ PP(struct op *ap;)
 VOID getea(P(int) opn)
 PP(int opn;)
 {
-	register short i, disp, inst;
+	register short i, disp, inst, h;
 	register struct op *p;
 
 	p = &opnd[opn];
@@ -101,11 +186,7 @@ PP(int opn;)
 		}
 		if (ckitc(pitw, ','))
 		{								/* must be index reg # */
-#ifdef __ALCYON__
-			do_ireg(p, i);		/* BUG: parameter opn not passed */
-#else
 			do_ireg(p, i, opn);
-#endif
 			return;
 		}
 		ckrparen();
@@ -150,7 +231,7 @@ PP(int opn;)
 		if (i == PC || (i == USP && inst != MOVE && inst != MOVEC))
 			uerr(20);
 		if (i == SR || i == CCR)
-			if (inst != (US AND) && inst != (US OR) && inst != (US EOR) && inst != ANDI
+			if (inst != AND && inst != OR && inst != EOR && inst != ANDI
 				&& inst != ORI && inst != EORI && inst != MOVE)
 				uerr(20);
 		if ((i == SFC || i == DFC || i == VSR) && inst != MOVEC)
@@ -175,7 +256,7 @@ PP(int opn;)
 		p->ext = extref;
 		extflg = 0;
 	}
-	p->con.l = ival.l;
+	p->con = ival.l;
 	p->drlc = reloc;					/* relocation factor */
 	if (ckitc(pitw, '('))
 	{
@@ -184,7 +265,8 @@ PP(int opn;)
 	}
 	if (!p->ea)
 	{									/* memory  address */
-		if (shortadr && (!ival.u.hiword || ival.u.hiword == -1))
+		h = (short)(ival.l >> 16);
+		if (shortadr && (h == 0 || h == -1))
 		{								/* 16-bit addrs */
 			p->ea = SADDR;
 			p->len = 2;
@@ -195,60 +277,6 @@ PP(int opn;)
 		}
 	}
 	ckeop(9 + opn);
-}
-
-
-VOID do_ireg(P(struct op *) p, P(int) i, P(int) opn)
-PP(struct op *p;)
-PP(int i;)
-PP(int opn;) /* BUG: never passed */
-{
-	pitw++;
-	p->idx = getreg();
-	if (p->idx < 0 || p->idx > AREGHI)
-		uerr(14);
-	p->len = 2;
-	if (!ckitc(pitw, ')'))
-	{
-		p->xmod = getrgs() - WORD_ID;
-		if (p->xmod < 0 || p->xmod > 1)
-		{
-			uerr(34);
-			p->xmod = 0;
-		}
-	}
-	ckrparen();
-	ckeop(9 + opn);
-	if (i == PC)
-		p->ea += 1;
-	else
-		p->ea |= INDINX;
-}
-
-
-/*
- * get an A register specification
- *  call with:
- *		pitw pointing to reg operand
- *  returns:
- *		-1 if not vaid A reg
- *		A reg # if valid
- *		also updates pitw if valid
- */
-int getareg(NOTHING)
-{
-	register short i;
-
-	i = getreg();
-	if (i >= AREGLO && i <= AREGHI)
-	{
-		return i & 7;
-	} else
-	{
-		if (i != -1)
-			pitw--;
-		return -1;
-	}
 }
 
 
@@ -277,37 +305,6 @@ int getreg(NOTHING)
 }
 
 
-/* get any register specification */
-int getrgs(NOTHING)
-{
-	register struct symtab *i;
-
-	if (pitw->itty == ITSY)
-	{
-		i = pitw->itop.ptrw2;		/* symbol ptr */
-		if (i->flags & SYER)
-		{
-			pitw++;
-			return i->vl1;			/* register # */
-		}
-	}
-	return -1;
-}
-
-
-/*
- * check for a right paren as the next char
- * output error msg if not found
- */
-VOID ckrparen(NOTHING)
-{
-	if (ckitc(pitw, ')'))				/* found it */
-		pitw++;
-	else
-		uerr(32);
-}
-
-
 /*
  * check intermedate text item for special character
  *	call with:
@@ -321,9 +318,22 @@ int ckitc(P(const struct it *) ckpt, P(int) cksc)
 PP(const struct it *ckpt;)
 PP(int cksc;)
 {
-	if (ckpt >= pnite || ckpt->itty != ITSP || ckpt->itop.u.loword != cksc)
+	if (ckpt >= pnite || ckpt->itty != ITSP || ckpt->itop.oper != cksc)
 		return 0;
 	return 1;
+}
+
+
+static VOID doitrd(NOTHING)
+{
+	register int i;
+
+	pitix = 0;
+	if ((i = fread(itbuf, 1, ITBSZ * sizeof(itbuf[0]), itfn)) <= 0)
+	{
+		fprintf(stderr, "it read error: %s\n", strerror(errno));
+		asabort();
+	}
 }
 
 
@@ -372,18 +382,6 @@ VOID ristb(NOTHING)
 }
 
 
-VOID doitrd(NOTHING)
-{
-	register int i;
-
-	pitix = 0;
-	if ((i = fread(itbuf, 1, ITBSZ * sizeof(itbuf[0]), itfn)) <= 0)
-	{
-		fprintf(stderr, "it read error: %s\n", strerror(errno));
-		asabort();
-	}
-}
-
 /*
  * check for end of operand
  * call with
@@ -400,6 +398,65 @@ PP(int uen;)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+
+/*
+ * print undefined symbols
+ * call with
+ *	pointer to undefined symbol
+ */
+static VOID pudfs(P(struct symtab *) udspt)
+PP(struct symtab *udspt;)
+{
+	nerror++;
+	if (!ftudp)
+	{									/* first time thru */
+		printf("\n&& UNDEFINED SYMBOLS &&\n");
+		ftudp++;
+		udfct = 0;						/* no symbols on this line */
+	}
+
+	printf("%-8.8s  ", &(udspt->name[0]));
+	if (udfct++ > 6)
+	{
+		printf("\n");
+		udfct = 0;
+	}
+}
+
+
+/*
+ * output symbols in a form to be read by a debugger
+ * call with pointer to symbol table entry
+ * prints all undefined symbols
+ */
+static VOID osyme(P(struct symtab *) aosypt)
+PP(struct symtab *aosypt;)
+{
+	register struct symtab *osypt;
+	register char *p1;
+	register short i;
+
+	osypt = aosypt;						/* pointer to symbol table entry */
+	if (!prtflg && !(osypt->flags & SYDF))
+	{									/* undefined symbol */
+		pudfs(osypt);					/* print undefined */
+		return;
+	}
+	stlen += OSTSIZE;					/* one more symbol out */
+
+	/* output symbol to loader file */
+	p1 = &(osypt->name[0]);
+	for (i = 0; i < SYNAMLEN; i++)		/* output symbol name */
+		putc(*p1++, lfil);
+
+	lputw(&osypt->flags, lfil);			/* output symbol flags */
+#ifdef DEBUG
+	if (debug)							/* prints symbol table entries */
+		printf("> %-8.8s* %o\n", osypt->name, (int) osypt->flags);
+#endif
+	lputl(&osypt->vl1, lfil);			/* symbol value */
 }
 
 
@@ -457,68 +514,6 @@ VOID fixunds(NOTHING)
 		}
 	}
 }
-
-
-/*
- * output symbols in a form to be read by a debugger
- * call with pointer to symbol table entry
- * prints all undefined symbols
- */
-VOID osyme(P(struct symtab *) aosypt)
-PP(struct symtab *aosypt;)
-{
-	register struct symtab *osypt;
-	register char *p1;
-	register short i;
-
-	osypt = aosypt;						/* pointer to symbol table entry */
-	if (!prtflg && !(osypt->flags & SYDF))
-	{									/* undefined symbol */
-		pudfs(osypt);					/* print undefined */
-		return;
-	}
-	stlen += OSTSIZE;					/* one more symbol out */
-
-	/* output symbol to loader file */
-	p1 = &(osypt->name[0]);
-	for (i = 0; i < SYNAMLEN; i++)		/* output symbol name */
-		putc(*p1++, lfil);
-
-	lputw(&osypt->flags, lfil);			/* output symbol flags */
-#ifdef DEBUG
-	if (debug)							/* prints symbol table entries */
-		printf("> %-8.8s* %o\n", osypt->name, (int) osypt->flags);
-#endif
-	lputl(&osypt->vl1, lfil);			/* symbol value */
-}
-
-
-/*
- * print undefined symbols
- * call with
- *	pointer to undefined symbol
- */
-VOID pudfs(P(struct symtab *) udspt)
-PP(struct symtab *udspt;)
-{
-	nerror++;
-	if (!ftudp)
-	{									/* first time thru */
-		printf("\n&& UNDEFINED SYMBOLS &&\n");
-		ftudp++;
-		udfct = 0;						/* no symbols on this line */
-	}
-
-	printf("%-8.8s  ", &(udspt->name[0]));
-	if (udfct++ > 6)
-	{
-		printf("\n");
-		udfct = 0;
-	}
-}
-
-
-short hibytflg[4], hibytw[4];
 
 
 VOID outbyte(P(int) bv, P(int) br)
@@ -584,21 +579,6 @@ VOID outinstr(NOTHING)
 }
 
 
-/* copy data bits from temporary file to loader file */
-VOID cpdata(NOTHING)
-{
-	docp(dafil, savelc[DATA]);
-}
-
-
-/* copy text then data relocation bits from temporary file to loader file */
-VOID cprlbits(NOTHING)
-{
-	docp(trfil, savelc[TEXT]);
-	docp(drfil, savelc[DATA]);
-}
-
-
 /*
  * copy one of the temporary files to the loader file
  * call with:
@@ -606,7 +586,7 @@ VOID cprlbits(NOTHING)
  *	last char of the temporary file name
  *	number of bytes to copy
  */
-VOID docp(P(FILE *) fp, P(long) length)
+static VOID docp(P(FILE *) fp, P(long) length)
 PP(FILE *fp;)
 PP(long length;)
 {
@@ -640,21 +620,18 @@ PP(long length;)
 }
 
 
-/* check for a control operand */
-int controlea(P(struct op *) ap)
-PP(struct op *ap;)
+/* copy data bits from temporary file to loader file */
+VOID cpdata(NOTHING)
 {
-	register short i;
+	docp(dafil, savelc[DATA]);
+}
 
-	i = ap->ea & 070;
-	if (i == INDIRECT || i == INDDISP || i == INDINX)
-		return TRUE;
-	if (i == 070)
-	{
-		if ((ap->ea & 7) <= 3)
-			return TRUE;
-	}
-	return FALSE;
+
+/* copy text then data relocation bits from temporary file to loader file */
+VOID cprlbits(NOTHING)
+{
+	docp(trfil, savelc[TEXT]);
+	docp(drfil, savelc[DATA]);
 }
 
 
@@ -666,6 +643,69 @@ int ckcomma(NOTHING)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+
+VOID chkimm(P(struct op *) ap)
+PP(struct op *ap;)
+{
+	register struct op *p;
+	register short h;
+	
+	p = ap;
+	h = (short)(p->con >> 16);
+	if (modelen == WORDSIZ)
+	{									/* word */
+		if (h != 0 && h != -1)
+			uerr(42);
+	} else if (modelen == BYTESIZ)
+	{									/* byte */
+		if (h != 0 && h != -1)
+			uerr(43);
+		h = (short)p->con;
+		if (h > 255 || h <= -256)
+			uerr(43);
+	}
+}
+
+
+static VOID doupper(P(struct op *) p)
+PP(struct op *p;)
+{
+	*pins++ = (short)(p->con >> 16);	/* upper half of long addr or constant */
+	*prlb++ = LUPPER;
+	instrlen += 2;
+}
+
+
+/* generate an immediate instr */
+VOID genimm(NOTHING)
+{
+	ins[0] |= f2mode[modelen] | opnd[1].ea;
+	if (modelen == LONGSIZ)
+	{
+		doupper(&opnd[0]);
+		opnd[0].con &= 0xffffL;			/* clear for dodisp check */
+	}
+	chkimm(&opnd[0]);					/* check for valid immed length */
+	dodisp(&opnd[0]);
+	doea(&opnd[1]);
+}
+
+
+VOID dodisp(P(struct op *) ap)
+PP(struct op *ap;)
+{
+	register struct op *p;
+	short h;
+	
+	p = ap;
+	*pins++ = (short)p->con;			/* displacement */
+	h = (short)(p->con >> 16);
+	if (h != 0 && h != -1)
+		uerr(41);						/* invalid 16-bit disp */
+	*prlb++ = (p->ext != -1) ? (p->ext << 3) | EXTVAR : p->drlc;
+	instrlen += 2;
 }
 
 
@@ -698,9 +738,9 @@ PP(struct op *apea;)
 
 	case 6:							/* d(An,Ri) */
 	  dindx:
-		if (p->con.l > 255L || p->con.l < -128L)
+		if (p->con > 255L || p->con < -128L)
 			uerr(35);
-		i = (p->con.u.loword & 0xff) | (p->idx << 12) | (p->xmod << 11);
+		i = ((short)p->con & 0xff) | (p->idx << 12) | (p->xmod << 11);
 		if (p->drlc != ABS)
 			uerr(27);
 		*pins++ = i;
@@ -713,7 +753,7 @@ PP(struct op *apea;)
 		{
 		case 1:						/* xxx.L */
 			doupper(p);
-			p->con.u.hiword = 0;			/* clear for dodisp check */
+			p->con &= 0xffffL;		/* clear for dodisp check */
 
 		case 0:						/* xxx.W */
 			dodisp(p);
@@ -725,7 +765,7 @@ PP(struct op *apea;)
 			{
 				if (p->drlc != rlflg)	/* not same reloc base */
 					uerr(27);
-				p->con.l -= (loctr + instrlen);
+				p->con -= (loctr + instrlen);
 				p->drlc = ABS;
 			}
 			if ((p->ea & 7) == 3)		/* d(PC,Ri.X) */
@@ -738,182 +778,12 @@ PP(struct op *apea;)
 			if (modelen == LONGSIZ)
 			{							/* instr mode is long */
 				doupper(p);
-				p->con.u.hiword = 0;		/* clear for dodisp check */
+				p->con &= 0xffffL;		/* clear for dodisp check */
 			}
 			dodisp(p);
 			return;
 		}								/* switch in case 7 */
 	}
-}
-
-
-VOID dodisp(P(struct op *) ap)
-PP(struct op *ap;)
-{
-	register struct op *p;
-
-	p = ap;
-	*pins++ = p->con.u.loword;			/* displacement */
-	if (p->con.u.hiword && p->con.u.hiword != -1)
-		uerr(41);						/* invalid 16-bit disp */
-	*prlb++ = (p->ext != -1) ? (p->ext << 3) | EXTVAR : p->drlc;
-	instrlen += 2;
-}
-
-
-VOID doupper(P(struct op *) p)
-PP(struct op *p;)
-{
-	*pins++ = p->con.u.hiword;			/* upper half of long addr or constant */
-	*prlb++ = LUPPER;
-	instrlen += 2;
-}
-
-
-/*
- * build a format 1 (add, sub, and, etc) instr
- * call with:
- *	register #
- *	mode bits
- *	ptr to operand structure for effective address
- */
-VOID makef1(P(int) arreg, P(int) armode, P(struct op *) apea)
-PP(int arreg;)
-PP(int armode;)
-PP(struct op *apea;)
-{
-	register struct op *p;
-
-	p = apea;
-	ins[0] |= (arreg << 9);				/* put in reg # */
-	ins[0] |= armode;					/* instr mode bits */
-	ins[0] |= p->ea;					/* put in effective addr bits */
-	doea(p);							/* may be more words in ea */
-}
-
-
-/* generate an immediate instr */
-VOID genimm(NOTHING)
-{
-	ins[0] |= (f2mode[modelen] | opnd[1].ea);
-	if (modelen == LONGSIZ)
-	{
-		doupper(&opnd[0]);
-		opnd[0].con.u.hiword = 0;			/* clear for dodisp check */
-	}
-	chkimm(&opnd[0]);					/* check for valid immed length */
-	dodisp(&opnd[0]);
-	doea(&opnd[1]);
-}
-
-
-VOID chkimm(P(struct op *) ap)
-PP(struct op *ap;)
-{
-	register struct op *p;
-
-	p = ap;
-	if (modelen == WORDSIZ)
-	{									/* word */
-		if (p->con.u.hiword && p->con.u.hiword != -1)
-			uerr(42);
-	} else if (modelen == BYTESIZ)
-	{									/* byte */
-		if (p->con.u.hiword && p->con.u.hiword != -1)
-			uerr(43);
-		if (p->con.u.loword > 255 || p->con.u.loword <= -256)
-			uerr(43);
-	}
-}
-
-
-/* try to make a normal instr into an immediate instr */
-int makeimm(NOTHING)
-{
-	if (opnd[0].ea != IMM)
-		return FALSE;
-	if (!dataalt(&opnd[1]))
-		return FALSE;
-	if (opcpt == addptr)
-		opcpt = addiptr;
-	else if (opcpt == andptr)
-		opcpt = andiptr;
-	else if (opcpt == orptr)
-		opcpt = oriptr;
-	else if (opcpt == subptr)
-		opcpt = subiptr;
-	else if (opcpt == cmpptr)
-		opcpt = cmpiptr;
-	else if (opcpt == eorptr)
-		opcpt = eoriptr;
-	else
-		return FALSE;
-	ins[0] = opcpt->vl1;
-	format = opcpt->flags & OPFF;
-	genimm();
-	return TRUE;
-}
-
-
-VOID ckbytea(NOTHING)
-{
-	if (modelen == BYTESIZ && !dataea(&opnd[0]))
-		uerr(20);						/* byte mod not allowed */
-}
-
-
-/* get a special register token (CCR, SR, USP, SFC, DFC or VSR) */
-int gspreg(NOTHING)
-{
-	register short i;
-
-	i = getrgs();
-	if (i > AREGHI)
-		return i;
-	if (i != -1)
-		pitw--;
-	return 0;
-}
-
-
-/*
- * check an operand for a special register
- * call with:
- *  ptr to operand struct
- *  special register value
- */
-int cksprg(P(struct op *) ap, P(int) v1)
-PP(struct op *ap;)
-PP(int v1;)
-{
-	if (ap->ea)
-		return 0;
-	return ap->idx == v1;
-}
-
-
-/* check for operand as any special register */
-int anysprg(P(struct op *) ap)
-PP(struct op *ap;)
-{
-	if (ap->ea)
-		return FALSE;
-	if (ap->idx >= CCR && ap->idx <= USP)
-		return TRUE;
-	return FALSE;
-}
-
-
-/* copy opnd 0 to opnd 1 */
-VOID cpop01(NOTHING)
-{
-	opnd[1].ea = opnd[0].ea;
-	opnd[1].len = opnd[0].len;
-	opnd[1].con.l = opnd[0].con.l;
-	opnd[1].drlc = opnd[0].drlc;
-	opnd[1].ext = opnd[0].ext;
-	opnd[1].idx = opnd[0].idx;
-	opnd[1].xmod = opnd[0].xmod;
 }
 
 
@@ -925,7 +795,7 @@ PP(struct op *ap;)
 
 	if ((ap->ea & 070) != 070)
 		return;
-	value = (ap->con.l > 0 && ap->con.l & 0100000) ? -(ap->con.l & ~0100000) : ap->con.l;
+	value = (ap->con > 0 && ap->con & 0100000) ? -(ap->con & ~0100000) : ap->con;
 	if (modelen == BYTESIZ)
 	{
 		if (value < -128L || value > 255L)	/* 8 bits */
@@ -935,33 +805,4 @@ PP(struct op *ap;)
 		if (value > 32767L || value < -32768L)	/* 16 bits */
 			uerr(41);
 	}
-}
-
-
-VOID ccr_or_sr(NOTHING)
-{
-	if (opnd[1].idx == CCR)
-	{
-		modelen = BYTESIZ;				/* byte mode only */
-	} else if (modelen != WORDSIZ)
-	{
-		modelen = WORDSIZ;
-		uerr(34);
-	}
-	cksize(&opnd[0]);
-	ins[0] |= IMM | f2mode[modelen];
-	dodisp(&opnd[0]);
-}
-
-
-int get2ops(NOTHING)
-{
-	getea(0);							/* get first effective address */
-	if (!ckcomma())
-	{
-		uerr(10);
-		return TRUE;						/* no second op */
-	}
-	getea(1);							/* get second effective address */
-	return FALSE;
 }

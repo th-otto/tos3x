@@ -63,7 +63,7 @@
 #define LUPPER      5       /* upper word of long */
 #define EXTREL      6       /* external relative mode */
 
-    /* Register values, as reflected in as68init */
+/* Register values, as reflected in as68init */
 #define CCR     16
 #define SR      17
 #define USP     18
@@ -73,13 +73,13 @@
 #define DFC     24      /* control register for 68010 */
 #define VSR     25      /* control register for 68010 */
 
-    /* Control Register Numeric Values */
+/* Control Register Numeric Values */
 #define SFC_CR  0
 #define DFC_CR  1
 #define USP_CR  0x800
 #define VSR_CR  0x801
 
-    /* Instruction Formats */
+/* Instruction Formats */
 #define ANDI    01000
 #define AND     0140000
 #define ORI     0
@@ -126,9 +126,6 @@
 /* Miscellaneous Defines */
 #define TRUE    1   /* boolean values */
 #define FALSE   0   /* boolean values */
-#define STDOUT  1   /* file descriptor for standard output */
-#define STDERR  2   /* file descriptor for standard error */
-#define SYNAMLEN 8   /* length of name in symbol table */
 #define ITBSZ   256 /* size of the it buffer */
 #define STMAX   200 /* size of intermediate text buffer */
 #define SZIRT   128
@@ -173,13 +170,6 @@
 
 #define ITOP1   4   /* first it entry for operands */
 
-#ifndef VAX11
-struct mlongbytes { short hiword; short loword; };
-#else
-struct mlongbytes { short loword; short hiword; };
-#endif
-
-
 /* format of a symbol entry in the main table */
 struct symtab {
     char name[SYNAMLEN]; /* symbol name */
@@ -203,8 +193,8 @@ struct symtab {
  */
 
 union iival {
-	struct mlongbytes u;
 	long l;
+	long oper;
 	struct symtab *ptrw2;
 	VOIDPTR p;
 };
@@ -231,7 +221,6 @@ short modelen;          /* operand length per mode */
 #define SZMT 300        /* initial size of the main table must be large enough to initialize */
 #define ICRSZMT 10      /* add to main table when run out */
 
-short cszmt;            /* current size of main table */ /* unused */
 struct symtab *bmte;    /* beginning of main table */
 struct symtab *emte;    /* end of main table */
 
@@ -239,12 +228,9 @@ short itbuf[ITBSZ];     /* it buffer */
 
 struct it stbuf[STMAX]; /* holds it for one statement */
 
-char sbuf[512];        /* holds one block of source */
+char sbuf[512];         /* holds one block of source */
 
-/* format of a symbol entry in the main table */
-struct symtab *symtptr; /* unused */
-
-struct symtab *lmte;             /* last entry in main table */
+struct symtab *lmte;            /* last entry in main table */
 
 struct irts {
 	struct symtab *irle;		/* ptr to last entry in chain */
@@ -335,19 +321,12 @@ short *pins;
 short *prlb;
 short ins[5];           /* holds instruction words */
 
-#define PRTCHLEN 128
-char prtchars[PRTCHLEN];/* line buffer for putchar */
-char *prtchidx;         /* index for putchar */
-
 short extflg, extref;   /* external in expr */
 
 struct op {
     short ea;           /* effective address bits */
     short len;          /* effective address length in bytes */
-	union {
-		struct mlongbytes u;
-		long l;
-    } con;              /* constant or reloc part of operand */
+    long con;           /* constant or reloc part of operand */
     short drlc;         /* reloc of con */
     short ext;          /* external variable # */
     short idx;          /* index register if any */
@@ -367,9 +346,9 @@ char itfilnam[PATH_MAX];
 char dafilnam[PATH_MAX];
 char trfilnam[PATH_MAX];
 char drfilnam[PATH_MAX];
+char ldfn[PATH_MAX];        /* name of the relocatable object file */
 char *sfname;				/* Source filename */
-char initfnam[PATH_MAX];			/* Init file name */
-#define LASTCHTFN   (*tfilptr)
+char initfnam[PATH_MAX];	/* Init file name */
 
 /* assembler flag variables */
 short didorg;
@@ -506,12 +485,13 @@ extern const char *const ermsg[];
 VOID dlabl PROTO((NOTHING));
 VOID opito PROTO((NOTHING));
 VOID opitoo PROTO((NOTHING));
-int strindex PROTO((const char *str, char chr));
 
 
 /*
  * misc.c
  */
+extern short ftudp;
+
 VOID clrea PROTO((struct op *ap));
 VOID getea PROTO((int opn));
 int getreg PROTO((NOTHING));
@@ -525,20 +505,13 @@ VOID outword PROTO((unsigned short val, unsigned short rb));
 VOID outinstr PROTO((NOTHING));
 VOID cpdata PROTO((NOTHING));
 VOID cprlbits PROTO((NOTHING));
-int controlea PROTO((struct op *ap));
 int ckcomma PROTO((NOTHING));
 VOID doea PROTO((struct op *apea));
 VOID dodisp PROTO((struct op *ap));
-VOID makef1 PROTO((int arreg, int armode, struct op *apea));
-VOID genimm PROTO((NOTHING));
-int makeimm PROTO((NOTHING));
-VOID ckbytea PROTO((NOTHING));
-int cksprg PROTO((struct op *ap, int v1));
-int anysprg PROTO((struct op *ap));
-VOID cpop01 PROTO((NOTHING));
 VOID cksize PROTO((struct op *ap));
-VOID ccr_or_sr PROTO((NOTHING));
-int get2ops PROTO((NOTHING));
+VOID chkimm PROTO((struct op *ap));
+VOID genimm PROTO((NOTHING));
+
 
 /*
  * pass1a.c
@@ -557,8 +530,7 @@ VOID pass2 PROTO((NOTHING));
 /*
  * symt.c
  */
-extern char ldfn[];
-extern char tlab1[];
+extern int poslab;
 
 VOID opitb PROTO((NOTHING));
 VOID gterm PROTO((int constpc));

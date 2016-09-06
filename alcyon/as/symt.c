@@ -12,18 +12,11 @@
 #include <string.h>
 
 
-char ldfn[40];          /* name of the relocatable object file */
-extern char tlab1[SYNAMLEN];
-short ftudp;
 int poslab;
 
+static int xcol = 0;							/* Column number            */
+static int spcnt = 0;							/* Fill counter             */
 
-int astring PROTO((NOTHING));
-int astr1 PROTO((int adelim));
-VOID oconst PROTO((int ardx));
-int constant PROTO((long *pnum, char *pstr, int idx));
-short hash PROTO((NOTHING));
-VOID doitwr PROTO((NOTHING));
 
 
 
@@ -44,6 +37,159 @@ VOID opitb(NOTHING)
 	stbuf[3].itop.l = loctr;			/* pass1 location counter */
 	itwc = ITOP1;						/* next available slot-currently 4 */
 	pitw = &stbuf[ITOP1];				/* init the pointer */
+}
+
+
+static int astr1(P(int) adelim)
+PP(int adelim;)
+{
+	register int delim, i, retv;
+	register long l;
+
+	delim = adelim;
+	i = 0;
+	l = 0;
+	retv = TRUE;
+	while ((fchr = gchr()) != CEOF)
+	{
+		if (fchr == delim)
+		{
+			fchr = gchr();
+			if (fchr != delim)
+			{
+				retv = FALSE;				/* end of string */
+				break;
+			}
+		}
+		if (fchr == EOLC)
+		{
+			xerr(19);
+			retv = FALSE;					/* end of string */
+			break;
+		}
+		l = (l << 8) | fchr;
+		if (++i >= modelen)
+		{
+			if ((fchr = gchr()) == delim)
+			{
+				fchr = gchr();
+				retv = FALSE;				/* end of string */
+			} else
+			{
+				peekc = fchr;			/* next char in string */
+			}
+			break;						/* filled one bucket */
+		}
+	}
+	while (i < modelen)
+	{
+		l <<= 8;
+		i++;
+	}
+	itype = ITCN;
+	ival.l = l;
+	reloc = ABS;
+	if (!equflg)
+		opitoo();						/* output one operand */
+	return retv;
+}
+
+
+/* astring - check for an ascii string enclosed in single quotes */
+static int astring(NOTHING)
+{
+	register char delim;
+
+	if (fchr != '\'' && fchr != '"')	/* valid delimiter */
+		return FALSE;
+	delim = fchr;
+	if (equflg || (itype == ITSP && ival.oper == '#'))
+	{									/* immediate operand */
+		if (astr1(delim))
+		{
+			fchr = gchr();
+			if (fchr != delim)
+				xerr(19);
+			fchr = gchr();
+		}
+		return equflg ? TRUE : FALSE;
+	}
+	while (astr1(delim))
+	{
+		itype = ITSP;
+		ival.l = ',';						/* separate by commas */
+		reloc = ABS;
+		opitoo();
+	}
+	return FALSE;
+}
+
+
+/* get constant given radix */
+static VOID oconst(P(int) ardx)
+PP(int ardx;)
+{
+	register short trdx, j;
+	register long i;
+
+	switch (ardx)
+	{									/* radix as power of 2 */
+	case 16:
+		trdx = 4;
+		break;
+	case 8:
+		trdx = 3;
+		break;
+	case 2:
+		trdx = 1;
+		break;
+	default:
+		rpterr("invalid radix in oconst");
+		asabort();
+	}
+	i = 0;
+	while (1)
+	{
+		fchr = gchr();
+		j = fchr;
+		if (isdigit(j))
+			j -= '0';
+		else if ((j = tolower(j)) >= 'a' && j <= 'f')
+			j = j - 'a' + 10;
+		else
+			break;						/* not valid numeric char */
+		if (j >= 0 && j < ardx)
+			i = (i << trdx) + j;
+		else
+			break;
+	}
+	ival.l = i;
+	itype = ITCN;
+	reloc = ABS;
+}
+
+
+/* convert ascii constant to binary */
+static int constant(P(long *) pnum, P(char *) pstr, P(int) idx)
+PP(long *pnum;)
+PP(register char *pstr;)
+PP(int idx;)
+{
+	register short i, j;
+	register long l;
+
+	l = 0;
+	for (i = 0; i < idx; i++)
+	{
+		j = *pstr++;
+		if (isdigit(j))
+			j -= '0';
+		if (j < 0 || j >= 10)
+			return FALSE;
+		l = (l << 3) + (l << 1) + j;	/* l = l*10 + j */
+	}
+	*pnum = l;
+	return TRUE;
 }
 
 
@@ -70,7 +216,7 @@ VOID opitb(NOTHING)
  * contents of the state table is the next state.  processing stops when
  * state 3 is encountered.  state 2 is the beginning state.
  */
-int const sttbl[] = { 0, 1, 1, 0, 3, 0, 3, 3, 3 };	/* state table for parser */
+static int const sttbl[] = { 0, 1, 1, 0, 3, 0, 3, 3, 3 };	/* state table for parser */
 
 VOID gterm(P(int) constpc)
 PP(int constpc;)
@@ -193,159 +339,6 @@ PP(int constpc;)
 }
 
 
-/* astring - check for an ascii string enclosed in single quotes */
-int astring(NOTHING)
-{
-	register char delim;
-
-	if (fchr != '\'' && fchr != '"')	/* valid delimiter */
-		return FALSE;
-	delim = fchr;
-	if (equflg || (itype == ITSP && ival.u.loword == '#'))
-	{									/* immediate operand */
-		if (astr1(delim))
-		{
-			fchr = gchr();
-			if (fchr != delim)
-				xerr(19);
-			fchr = gchr();
-		}
-		return equflg ? TRUE : FALSE;
-	}
-	while (astr1(delim))
-	{
-		itype = ITSP;
-		ival.l = ',';						/* separate by commas */
-		reloc = ABS;
-		opitoo();
-	}
-	return FALSE;
-}
-
-
-int astr1(P(int) adelim)
-PP(int adelim;)
-{
-	register int delim, i, retv;
-	register long l;
-
-	delim = adelim;
-	i = 0;
-	l = 0;
-	retv = TRUE;
-	while ((fchr = gchr()) != CEOF)
-	{
-		if (fchr == delim)
-		{
-			fchr = gchr();
-			if (fchr != delim)
-			{
-				retv = FALSE;				/* end of string */
-				break;
-			}
-		}
-		if (fchr == EOLC)
-		{
-			xerr(19);
-			retv = FALSE;					/* end of string */
-			break;
-		}
-		l = (l << 8) | fchr;
-		if (++i >= modelen)
-		{
-			if ((fchr = gchr()) == delim)
-			{
-				fchr = gchr();
-				retv = FALSE;				/* end of string */
-			} else
-			{
-				peekc = fchr;			/* next char in string */
-			}
-			break;						/* filled one bucket */
-		}
-	}
-	while (i < modelen)
-	{
-		l <<= 8;
-		i++;
-	}
-	itype = ITCN;
-	ival.l = l;
-	reloc = ABS;
-	if (!equflg)
-		opitoo();						/* output one operand */
-	return retv;
-}
-
-
-/* get constant given radix */
-VOID oconst(P(int) ardx)
-PP(int ardx;)
-{
-	register short trdx, j;
-	register long i;
-
-	switch (ardx)
-	{									/* radix as power of 2 */
-	case 16:
-		trdx = 4;
-		break;
-	case 8:
-		trdx = 3;
-		break;
-	case 2:
-		trdx = 1;
-		break;
-	default:
-		rpterr("invalid radix in oconst");
-		asabort();
-	}
-	i = 0;
-	while (1)
-	{
-		fchr = gchr();
-		j = fchr;
-		if (isdigit(j))
-			j -= '0';
-		else if ((j = tolower(j)) >= 'a' && j <= 'f')
-			j = j - 'a' + 10;
-		else
-			break;						/* not valid numeric char */
-		if (j >= 0 && j < ardx)
-			i = (i << trdx) + j;
-		else
-			break;
-	}
-	ival.l = i;
-	itype = ITCN;
-	reloc = ABS;
-}
-
-
-/* convert ascii constant to binary */
-int constant(P(long *) pnum, P(char *) pstr, P(int) idx)
-PP(long *pnum;)
-PP(register char *pstr;)
-PP(int idx;)
-{
-	register short i, j;
-	register long l;
-
-	l = 0;
-	for (i = 0; i < idx; i++)
-	{
-		j = *pstr++;
-		if (isdigit(j))
-			j -= '0';
-		if (j < 0 || j >= 10)
-			return FALSE;
-		l = (l << 3) + (l << 1) + j;	/* l = l*10 + j */
-	}
-	*pnum = l;
-	return TRUE;
-}
-
-
 /*
  * method for looking up entries in the main table
  *
@@ -393,12 +386,31 @@ PP(int idx;)
  *          a pointer to the entry.  if this pointer is equal to
  *          lmte then the symbol was not previously in the table.
  */
+
+/*
+ * compute a hash code for the last entry in the main table
+ * returns the hash code
+ */
+static short hash(NOTHING)
+{
+	register short i, ht1;
+	register char *p;
+
+	ht1 = 0;
+	p = &lmte->name[0];
+	for (i = 0; i < SYNAMLEN; i++)
+		ht1 += *p++;
+	return ht1 & (SZIRT - 2);			/* make hash code even and between 0 & SZIRT-2 */
+}
+
+
 struct symtab *lemt(P(int) oplook, P(struct symtab **) airt)
 PP(int oplook;)								/* if true then looking in opcode table */
 PP(struct symtab **airt;)
 {
 	register struct symtab *mtpt;
-	register short *p1, *p2, i, j;
+	register char *p1, *p2;
+	register short i, j;
 
 	if (oplook)
 	{									/* get rid of preceding '.', to lowercase */
@@ -411,7 +423,7 @@ PP(struct symtab **airt;)
 			j = 0;
 		}
 		for (i = 0; j < SYNAMLEN; i++, j++)
-			lmte->name[i] = tolower(lmte->name[j]); /* WTF? */
+			lmte->name[i] = tolower(lmte->name[j]);
 	}
 	pirt = airt + hash();				/* hashed ptr to irt */
 	mtpt = ((struct irts *)pirt)->irfe;					/* pointer to first entry in chain */
@@ -419,14 +431,14 @@ PP(struct symtab **airt;)
 		mtpt = lmte;					/* start at end of main table */
 	else
 		(((struct irts *)pirt)->irle)->tlnk = lmte;		/* last entry in chain is new symbol */
-	if ((lmte->name[0] == '~') && (lmte->name[1] != '~') && (lmte->name[1] != '.'))
+	if (lmte->name[0] == '~' && lmte->name[1] != '~' && lmte->name[1] != '.')
 		return lmte;					/* force local symbols */
 
 	/* loop to locate entry in main table */
   lemtl:
-	p1 = (short *)&mtpt->name[0];
-	p2 = (short *)&lmte->name[0];
-	i = SYNAMLEN / (sizeof *p1);
+	p1 = &mtpt->name[0];
+	p2 = &lmte->name[0];
+	i = SYNAMLEN;
 	while (i)
 	{
 		if (*p1++ != *p2++)
@@ -437,23 +449,6 @@ PP(struct symtab **airt;)
 		i--;
 	}
 	return mtpt;
-}
-
-
-/*
- * compute a hash code for the last entry in the main table
- * returns the hash code
- */
-short hash(NOTHING)
-{
-	register short i, ht1;
-	register char *p;
-
-	ht1 = 0;
-	p = &lmte->name[0];
-	for (i = 0; i < SYNAMLEN; i++)
-		ht1 += *p++;
-	return ht1 & (SZIRT - 2);			/* make hash code even and between 0 & SZIRT-2 */
 }
 
 
@@ -475,11 +470,9 @@ VOID mmte(NOTHING)
 		{								/* get more memory */
 			rpterr("symbol table overflow\n");
 			endit();
-		} else
-		{
-			emte += ICRSZMT;	/* move end of main table */
-			cszmt += ICRSZMT;
 		}
+		memset(lmte, 0, ICRSZMT * sizeof(struct symtab));
+		emte += ICRSZMT;	/* move end of main table */
 	}
 }
 
@@ -538,10 +531,6 @@ PP(struct symtab *apkptr;)
 }
 
 
-int xcol = 0;							/* Column number            */
-int spcnt = 0;							/* Fill counter             */
-
-
 /* function to get characters from source file */
 int gchr(NOTHING)
 {
@@ -584,6 +573,17 @@ int gchr(NOTHING)
 }
 
 
+static VOID doitwr(NOTHING)
+{
+	if (fwrite(itbuf, 1, ITBSZ * sizeof(itbuf[0]), itfn) != ITBSZ * sizeof(itbuf[0]))
+	{
+		rpterr("it write error: %s\n", strerror(errno));
+		endit();
+	}
+	pitix = 0;
+}
+
+
 /*
  * write out intermediate text for one statement
  *  call with
@@ -607,17 +607,6 @@ VOID wostb(NOTHING)
 			itbuf[pitix++] = *itwo++;			/* first word */
 		}
 	}
-}
-
-
-VOID doitwr(NOTHING)
-{
-	if (fwrite(itbuf, 1, ITBSZ * sizeof(itbuf[0]), itfn) != ITBSZ * sizeof(itbuf[0]))
-	{
-		rpterr("it write error: %s\n", strerror(errno));
-		endit();
-	}
-	pitix = 0;
 }
 
 
@@ -701,10 +690,14 @@ VOID endit(NOTHING)
 		fclose(trfil);
 	if (drfil)
 		fclose(drfil);
-	unlink(itfilnam);					/* delete temporary files */
-	unlink(trfilnam);
-	unlink(dafilnam);
-	unlink(drfilnam);
+	if (*itfilnam)
+		unlink(itfilnam);					/* delete temporary files */
+	if (*trfilnam)
+		unlink(trfilnam);
+	if (*dafilnam)
+		unlink(dafilnam);
+	if (*drfilnam)
+		unlink(drfilnam);
 	if (nerror != -1)
 	{									/* not rubout */
 		if (ftudp)
@@ -714,8 +707,8 @@ VOID endit(NOTHING)
 	{
 		fprintf(stderr, "& %d errors\n", nerror);
 	}
-	if (initflg					/* get rid of empty .o file */
-		|| nerror != 0)
+	/* get rid of empty .o file */
+	if ((initflg || nerror != 0) && *ldfn)
 		unlink(ldfn);
 	exit(nerror != 0);
 }
@@ -751,10 +744,10 @@ PP(const char *m;)
 /* move label name from lbt to main table entry pointed to by lmte */
 VOID setname(NOTHING)
 {
-	register short *p1, *p2;
+	register char *p1, *p2;
 
-	p1 = (short *)&lmte->name[0];
-	for (p2 = (short *)&lbt[0]; p2 < (short *)(&lbt[SYNAMLEN]);)
+	p1 = &lmte->name[0];
+	for (p2 = &lbt[0]; p2 < &lbt[SYNAMLEN];)
 	{
 		*p1++ = *p2;
 		*p2++ = 0;

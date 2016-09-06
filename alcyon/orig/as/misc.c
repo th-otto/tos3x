@@ -46,7 +46,6 @@ PP(struct op *ap;)
 }
 
 
-#define US	(unsigned short)
 /*
  * get one operand effective adddress (operand until , or EOS)
  * returns:
@@ -149,7 +148,7 @@ PP(int opn;)
 		if (i == PC || (i == USP && inst != MOVE && inst != MOVEC))
 			uerr(20);
 		if (i == SR || i == CCR)
-			if (inst != (US AND) && inst != (US OR) && inst != (US EOR) && inst != ANDI
+			if (inst != AND && inst != OR && inst != EOR && inst != ANDI
 				&& inst != ORI && inst != EORI && inst != MOVE)
 				uerr(20);
 		if ((i == SFC || i == DFC || i == VSR) && inst != MOVEC)

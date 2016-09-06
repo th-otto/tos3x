@@ -22,27 +22,16 @@
 #define TREELEN 20
 
 /* globals for this package */
-struct it exitm;						/* expression item */
-short prcnt;							/* paren count */
-short rval;								/* relocation value */
-short lpflg;
-short lastopr;							/* last token was operator when set */
+static struct it exitm;					/* expression item */
+static int prcnt;						/* paren count */
+static int rval;						/* relocation value */
+static int lpflg;
+static int lastopr;						/* last token was operator when set */
 
-
-VOID collapse PROTO((NOTHING));
-VOID get_val PROTO((int reloc_val));
-VOID exerr PROTO((NOTHING));
-int gprc PROTO((int dprc));
-long gval PROTO((struct it *avwrd));
-int ckspc PROTO((int acksc));
-int ckrl1 PROTO((int rv1, int rv2));
-int ckrl2 PROTO((int rv1, int rv2));
-int ckrl3 PROTO((int rv1, int rv2));
-VOID fixext PROTO((struct symtab *p));
-
-
-
-
+static struct it *piop, *pitr;
+static short iop, itr;
+static struct it opstk[OPSTLEN];				/* operator stack */
+static struct it tree[TREELEN];				/* operand stack */
 
 
 /*
@@ -63,132 +52,145 @@ VOID fixext PROTO((struct symtab *p));
  *      external+constant or external-constant
  */
 
-struct it *piop, *pitr;
-short iop, itr;
-struct it opstk[OPSTLEN];				/* operator stack */
-struct it tree[TREELEN];				/* operand stack */
 
-
-VOID expr(P(aexpr) iploc)
-PP(aexpr iploc;)
+/* generate new relocation for op + op */
+static int ckrl1(P(int) rv1, P(int) rv2)
+PP(int rv1;)
+PP(int rv2;)
 {
-	register short i, ipr;
+	if (rv1 == rv2)
+		return rv1;
+	if (rv1 == ABS || rv2 == ABS)
+		return rv1 + rv2;				/* the one that is not ABS */
+	uerr(27);
+	return ABS;
+}
 
-	extflg = starmul = iop = lpflg = 0;
-	piop = &opstk[0];
-	itr = -1;							/* tree stack pointer */
-	pitr = &tree[0];
-	pitr--;
-	/* form end of expression operator */
-	opstk[0].itty = ITSP;				/* special character */
-	opstk[0].itop.l = '?';
-	lastopr = 1;
 
-	/* get an input item */
-	while (1)
+/* generate new relocation for op - op */
+static int ckrl2(P(int) rv1, P(int) rv2)
+PP(int rv1;)
+PP(int rv2;)
+{
+	if (rv2 == EXTRN)
+		uerr(26);
+	if (rv1 == rv2)
+		return ABS;
+	if (rv2 == ABS)
+		return rv1 + rv2;
+	uerr(27);
+	return ABS;
+}
+
+
+/* generate new relocation for op / * & | < > ^ ! op */
+static int ckrl3(P(int) rv1, P(int) rv2)
+PP(int rv1;)
+PP(int rv2;)
+{
+	if (rv1 != ABS || rv2 != ABS)
+		uerr(27);
+	return ABS;
+}
+
+
+static VOID fixext(P(struct symtab *) p)
+PP(struct symtab *p;)
+{
+	if (extflg)
+		uerr(36);						/* two externals in expr */
+	extflg++;
+	extref = p->vextno;					/* get external # */
+	rval = EXTRN;
+	itype = ITCN;
+	ival.p = NULL;
+}
+
+
+/*
+ * if defined symbol get value and say constant
+ * except for externals and equated registers
+ */
+static VOID get_val(P(int) reloc_val)
+PP(int reloc_val;)
+{
+	if (itype == ITSY && (ival.ptrw2->flags & (SYXR | SYER)) == 0)
 	{
-		if (itr >= TREELEN - 2)
-		{
-			rpterr("expr tree overflow\n");
-			asabort();
-		}
-		if (iop >= OPSTLEN - 1)
-		{
-			rpterr("expr opstk overflow\n");
-			asabort();
-		}
-		(*iploc) ();					/* get an input term */
-		if (itype == ITPC)
-			return;
-		starmul = 0;					/* * is location counter */
-
-		/* special character */
-		if (itype == ITSP)
-		{
-			i = ival.l;
-			ipr = gprc(i);				/* get precedence of character */
-			if (ipr == PEE)				/* end of expression */
-				break;
-			lastopr = 1;
-			if (ipr == PLP)
-			{							/* left paren */
-				lpflg++;
-				prcnt++;
-				iop++;					/* up stack pointer */
-				piop++;
-				piop->swd1 = exitm.swd1;	/* put operator on stack */
-				piop->itop.p = exitm.itop.p;
-				continue;
-			}
-			if (ipr == PRP)
-			{							/* right paren */
-				if (lpflg)
-				{
-					exerr();
-					return;
-				}
-				starmul = 1;			/* * is multiply */
-				prcnt--;				/* down one level */
-
-				while (piop->itop.l != '(')
-				{						/* top stk is '(' */
-					itr++;				/* up tree pointer */
-					pitr++;
-					pitr->swd1 = piop->swd1;	/* move operator */
-					pitr->itop.l = piop->itop.l;
-					iop--;				/* reduce operand stack */
-					piop--;
-				}
-				iop--;					/* remove stack */
-				piop--;
-				continue;
-			}
-
-			while (ipr <= gprc(i = piop->itop.l))
-			{							/* >= precedence */
-				itr++;
-				pitr++;
-				pitr->swd1 = piop->swd1;	/* move operator */
-				pitr->itop.p = piop->itop.p;
-				iop--;					/* reduce operand stack */
-				piop--;
-			}
-			iop++;						/* up operator stack */
-			piop++;
-			piop->swd1 = exitm.swd1;	/* put in operator stack */
-			piop->itop.p = exitm.itop.p;
-			continue;
-		}
-
-		/* symbol or constant */
+		if (ival.ptrw2->flags & SYRA)	/* get symbol relocation factor */
+			reloc = DATA;
+		else if (ival.ptrw2->flags & SYRO)
+			reloc = TEXT;
+		else if (ival.ptrw2->flags & SYBS)
+			reloc = BSS;
 		else
-		{
-			lastopr = lpflg = 0;		/* clear flag */
-			itr++;						/* up tree pointer */
-			pitr++;
-			pitr->swd1 = exitm.swd1;	/* put in tree */
-			pitr->itop.p = exitm.itop.p;
-			starmul = 1;				/* * is multiply */
-			continue;
-		}
-	}									/* end while(1)... */
+			reloc = ABS;
+		ival.l = ival.ptrw2->vl1;			/* symbol vaue */
+		itype = ITCN;					/* constant */
+	} else if (itype == ITSY && ival.ptrw2->flags & SYXR)
+	{									/* external symbol */
+		fixext(ival.ptrw2);
+		reloc = EXTRN;
+	} else
+		reloc = reloc_val;				/* relocation value of item */
+}
 
-	/* output the rest of the operator stack to the tree */
-	for (i = iop; i >= 0; i--)
-	{
-		itr++;
-		pitr++;
-		pitr->swd1 = piop->swd1;		/* move operator */
-		pitr->itop.p = piop->itop.p;
-		piop--;
+
+static VOID exerr(NOTHING)
+{
+	uerr(6);
+	ival.l = 0;
+	itype = ITCN;
+	reloc = ABS;
+}
+
+
+/*
+ * get value from an it format item
+ *  call with
+ *      address of it format item
+ *  returns
+ *      the value
+ *      relocation value in rval
+ *  calls uerr if it cant get a value
+ */
+static long gval(P(struct it *) avwrd)
+PP(struct it *avwrd;)
+{
+	register struct it *vwrd;
+	register struct symtab *p;
+
+	vwrd = avwrd;
+	if (vwrd->itty == ITCN)
+	{									/* constant */
+		rval = vwrd->itrl;
+		return vwrd->itop.l;			/* value */
 	}
-
-	collapse();
+	if (vwrd->itty != ITSY)
+	{
+		uerr(6);
+		rval = ABS;
+		return 0;
+	}
+	p = vwrd->itop.ptrw2;
+	if (p->flags & SYXR)
+	{									/* external reference */
+		fixext(p);
+		return 0;
+	}
+	if ((p->flags & SYDF) != SYDF || (p->flags & SYER))
+	{
+		uerr(6);
+		rval = ABS;
+		return 0;
+	}
+	rval = (p->flags & SYRA) ? DATA : (p->flags & SYRO)	/* reloc of item */
+		? TEXT : (p->flags & SYBS) ? BSS : ABS;
+	return p->vl1;
 }
 
 
 /* collapse the tree into one entry */
-VOID collapse(NOTHING)
+static VOID collapse(NOTHING)
 {
 	register short rv1, rv2, topr, i, bos, low;
 	register union iival tv1;
@@ -332,50 +334,13 @@ VOID collapse(NOTHING)
 
 
 /*
- *if defined symbol get value and say constant
- * except for externals and equated registers
- */
-VOID get_val(P(int) reloc_val)
-PP(int reloc_val;)
-{
-	if (itype == ITSY && (ival.ptrw2->flags & (SYXR | SYER)) == 0)
-	{
-		if (ival.ptrw2->flags & SYRA)	/* get symbol relocation factor */
-			reloc = DATA;
-		else if (ival.ptrw2->flags & SYRO)
-			reloc = TEXT;
-		else if (ival.ptrw2->flags & SYBS)
-			reloc = BSS;
-		else
-			reloc = ABS;
-		ival.l = ival.ptrw2->vl1;			/* symbol vaue */
-		itype = ITCN;					/* constant */
-	} else if (itype == ITSY && ival.ptrw2->flags & SYXR)
-	{									/* external symbol */
-		fixext(ival.ptrw2);
-		reloc = EXTRN;
-	} else
-		reloc = reloc_val;				/* relocation value of item */
-}
-
-
-VOID exerr(NOTHING)
-{
-	uerr(6);
-	ival.l = 0;
-	itype = ITCN;
-	reloc = ABS;
-}
-
-
-/*
  * get precedence of a operator
  *  call with
  *      operator
  *  returns
  *      precedence
  */
-int gprc(P(int) dprc)
+static int gprc(P(int) dprc)
 PP(int dprc;)
 {
 	switch (dprc)
@@ -408,48 +373,158 @@ PP(int dprc;)
 }
 
 
-/*
- * get value from an it format item
- *  call with
- *      address of it format item
- *  returns
- *      the value
- *      relocation value in rval
- *  calls uerr if it cant get a value
- */
-long gval(P(struct it *) avwrd)
-PP(struct it *avwrd;)
+VOID expr(P(aexpr) iploc)
+PP(aexpr iploc;)
 {
-	register struct it *vwrd;
-	register struct symtab *p;
+	register short i, ipr;
 
-	vwrd = avwrd;
-	if (vwrd->itty == ITCN)
-	{									/* constant */
-		rval = vwrd->itrl;
-		return vwrd->itop.l;			/* value */
-	}
-	if (vwrd->itty != ITSY)
+	extflg = starmul = iop = lpflg = 0;
+	piop = &opstk[0];
+	itr = -1;							/* tree stack pointer */
+	pitr = &tree[0];
+	pitr--;
+	/* form end of expression operator */
+	opstk[0].itty = ITSP;				/* special character */
+	opstk[0].itop.l = '?';
+	lastopr = 1;
+
+	/* get an input item */
+	while (1)
 	{
-		uerr(6);
-		rval = ABS;
-		return 0;
-	}
-	p = vwrd->itop.ptrw2;
-	if (p->flags & SYXR)
-	{									/* external reference */
-		fixext(p);
-		return 0;
-	}
-	if ((p->flags & SYDF) != SYDF || (p->flags & SYER))
+		if (itr >= TREELEN - 2)
+		{
+			rpterr("expr tree overflow\n");
+			asabort();
+		}
+		if (iop >= OPSTLEN - 1)
+		{
+			rpterr("expr opstk overflow\n");
+			asabort();
+		}
+		(*iploc) ();					/* get an input term */
+		if (itype == ITPC)
+			return;
+		starmul = 0;					/* * is location counter */
+
+		/* special character */
+		if (itype == ITSP)
+		{
+			i = ival.l;
+			ipr = gprc(i);				/* get precedence of character */
+			if (ipr == PEE)				/* end of expression */
+				break;
+			lastopr = 1;
+			if (ipr == PLP)
+			{							/* left paren */
+				lpflg++;
+				prcnt++;
+				iop++;					/* up stack pointer */
+				piop++;
+				piop->swd1 = exitm.swd1;	/* put operator on stack */
+				piop->itop.p = exitm.itop.p;
+				continue;
+			}
+			if (ipr == PRP)
+			{							/* right paren */
+				if (lpflg)
+				{
+					exerr();
+					return;
+				}
+				starmul = 1;			/* * is multiply */
+				prcnt--;				/* down one level */
+
+				while (piop->itop.l != '(')
+				{						/* top stk is '(' */
+					itr++;				/* up tree pointer */
+					pitr++;
+					pitr->swd1 = piop->swd1;	/* move operator */
+					pitr->itop.l = piop->itop.l;
+					iop--;				/* reduce operand stack */
+					piop--;
+				}
+				iop--;					/* remove stack */
+				piop--;
+				continue;
+			}
+
+			while (ipr <= gprc(i = piop->itop.l))
+			{							/* >= precedence */
+				itr++;
+				pitr++;
+				pitr->swd1 = piop->swd1;	/* move operator */
+				pitr->itop.p = piop->itop.p;
+				iop--;					/* reduce operand stack */
+				piop--;
+			}
+			iop++;						/* up operator stack */
+			piop++;
+			piop->swd1 = exitm.swd1;	/* put in operator stack */
+			piop->itop.p = exitm.itop.p;
+			continue;
+		}
+
+		/* symbol or constant */
+		else
+		{
+			lastopr = lpflg = 0;		/* clear flag */
+			itr++;						/* up tree pointer */
+			pitr++;
+			pitr->swd1 = exitm.swd1;	/* put in tree */
+			pitr->itop.p = exitm.itop.p;
+			starmul = 1;				/* * is multiply */
+			continue;
+		}
+	}									/* end while(1)... */
+
+	/* output the rest of the operator stack to the tree */
+	for (i = iop; i >= 0; i--)
 	{
-		uerr(6);
-		rval = ABS;
-		return 0;
+		itr++;
+		pitr++;
+		pitr->swd1 = piop->swd1;		/* move operator */
+		pitr->itop.p = piop->itop.p;
+		piop--;
 	}
-	rval = (p->flags & SYRA) ? DATA : (p->flags & SYRO)	/* reloc of item */
-		? TEXT : (p->flags & SYBS) ? BSS : ABS;
-	return p->vl1;
+
+	collapse();
+}
+
+
+/*
+ * index - find the index of a character in a string
+ *      This is identical to Software Tools index.
+ */
+static int strindex(P(const char *) str, P(char) chr)
+PP(const char *str;)								/* pointer to string to search */
+PP(char chr;)								/* character to search for */
+{
+	register const char *s;
+	register short i;
+
+	for (s = str, i = 0; *s != '\0'; i++)
+		if (*s++ == chr)
+			return i;
+	return -1;
+}
+
+
+/*
+ *check for a special character
+ *  call with
+ *      character to check
+ *  returns:
+ *      0 => character is number or letter
+ */
+static int ckspc(P(int) acksc)
+PP(int acksc;)
+{
+	register short cksc;
+
+	cksc = acksc;
+	if (isalnum(cksc))
+		return 0;
+	return strindex("_~*.@$%\'", cksc) != -1 ? 0 : 1;
 }
 
 
@@ -516,77 +591,4 @@ VOID p2gi(NOTHING)
 	exitm.swd1 = pitw->swd1;
 	exitm.itop.p = ival.p;
 	pitw++;
-}
-
-
-/*
- *check for a special character
- *  call with
- *      character to check
- *  returns:
- *      0 => character is number or letter
- */
-int ckspc(P(int) acksc)
-PP(int acksc;)
-{
-	register short cksc;
-
-	cksc = acksc;
-	if (isalnum(cksc))
-		return 0;
-	return strindex("_~*.@$%\'", cksc) != -1 ? 0 : 1;
-}
-
-
-/* generate new relocation for op + op */
-int ckrl1(P(int) rv1, P(int) rv2)
-PP(int rv1;)
-PP(int rv2;)
-{
-	if (rv1 == rv2)
-		return rv1;
-	if (rv1 == ABS || rv2 == ABS)
-		return rv1 + rv2;				/* the one that is not ABS */
-	uerr(27);
-	return ABS;
-}
-
-
-/* generate new relocation for op - op */
-int ckrl2(P(int) rv1, P(int) rv2)
-PP(int rv1;)
-PP(int rv2;)
-{
-	if (rv2 == EXTRN)
-		uerr(26);
-	if (rv1 == rv2)
-		return ABS;
-	if (rv2 == ABS)
-		return rv1 + rv2;
-	uerr(27);
-	return ABS;
-}
-
-
-/* generate new relocation for op / * & | < > ^ ! op */
-int ckrl3(P(int) rv1, P(int) rv2)
-PP(int rv1;)
-PP(int rv2;)
-{
-	if (rv1 != ABS || rv2 != ABS)
-		uerr(27);
-	return ABS;
-}
-
-
-VOID fixext(P(struct symtab *) p)
-PP(struct symtab *p;)
-{
-	if (extflg)
-		uerr(36);						/* two externals in expr */
-	extflg++;
-	extref = p->vextno;					/* get external # */
-	rval = EXTRN;
-	itype = ITCN;
-	ival.p = NULL;
 }

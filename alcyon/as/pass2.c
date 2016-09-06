@@ -18,154 +18,33 @@
 #include <cout.h>
 
 
-/* Second Pass Subroutines */
-VOID relbr PROTO((NOTHING));
-VOID opf1 PROTO((NOTHING));
-VOID opf2 PROTO((NOTHING));
-VOID opf3 PROTO((NOTHING));
-VOID opf4 PROTO((NOTHING));
-VOID opf5 PROTO((NOTHING));
-VOID opf7 PROTO((NOTHING));
-VOID opf8 PROTO((NOTHING));
-VOID opf9 PROTO((NOTHING));
-VOID opf11 PROTO((NOTHING));
-VOID opf12 PROTO((NOTHING));
-VOID opf13 PROTO((NOTHING));
-VOID opf15 PROTO((NOTHING));
-VOID opf17 PROTO((NOTHING));
-VOID opf20 PROTO((NOTHING));
-VOID opf21 PROTO((NOTHING));
-VOID opf22 PROTO((NOTHING));
-VOID opf23 PROTO((NOTHING));
-VOID opf31 PROTO((NOTHING));
 
-#include "p2def.h"
+static short const f1mode[]  = { 0,      0,   0100, 0,   0200 };
+       short const f2mode[]  = { 0,      0,   0100, 0,   0200 };
+static short const f3mode[]  = { 0, 010000, 030000, 0, 020000 };
+static short const f15mode[] = { 0,      0,   0300, 0,   0700 };
+static short const f5mode[]  = { 0,      0,   0100, 0,   0200 };
+static short const f5amode[] = { 0,      0,   0300, 0,   0700 };
+static short const f13mode[] = { 0,      0,   0200, 0,   0300 };
+static short const f23mode[] = { 0,   0400,   0500, 0,   0600 };
+short rlbits[5];		/* holds relocation bits for instr */
 
 
-VOID gcist PROTO((NOTHING));
-int getrlist PROTO((const short *ap));
-int fixmask PROTO((int msk));
+/* format 20 -- movem */
+static short const regmsk0[] = {
+	0x8000, 0x4000, 0x2000, 0x1000, 0x0800, 0x0400, 0x0200, 0x0100,
+	0x0080, 0x0040, 0x0020, 0x0010, 0x0008, 0x0004, 0x0002, 0x0001
+};
 
+static short const regmsk1[] = {
+	0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080,
+	0x0100, 0x0200, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000, 0x8000
+};
 
-
-/* pass two driver */
-VOID pass2(NOTHING)
-{
-	register short i;
-	register adirect dirop;
-
-	pitix = ITBSZ;						/* it buffer is empty */
-	couthd.ch_magic = MAGIC;			/* c.out magic number */
-	if (savelc[TEXT] & 1)
-		savelc[TEXT]++;					/* make it even */
-	couthd.ch_tsize = savelc[TEXT];		/* text size */
-	if (savelc[DATA] & 1)
-		savelc[DATA]++;					/* make it even */
-	couthd.ch_dsize = savelc[DATA];		/* data size */
-	couthd.ch_bsize = savelc[BSS];		/* bss size */
-	/*
-	 * symbol table size is not known now -- it is set at end of pass 2
-	 * entry point and stack size are zero for now
-	 */
-	putchd(lfil, &couthd);
-	savelc[ABS] = 0;
-	savelc[DATA] = 0;
-	savelc[TEXT] = 0;
-	savelc[BSS] = 0;
-	loctr = 0;							/* location counter */
-	rlflg = TEXT;						/* TEXT relocatable */
-	p2flg = 1;							/* pass two */
-	if (fseek(ifn, 0L, SEEK_SET) < 0)
-	{									/* beginning of source */
-		rpterr("seek error on source file\n");
-		asabort();
-	}
-	fflush(itfn);
-	if (fseek(itfn, 0L, SEEK_SET) < 0)
-	{
-		rpterr("seek error on intermediate file\n");
-		asabort();
-	}
-	pline = 1;							/* no lines printed */
-	fchr = gchr();						/* get first char */
-	for (;;)
-	{									/* pass 2 main loop */
-		ristb();						/* read it for one statement */
-		p2absln = stbuf[0].itop.l;		/* line number */
-		if (p2absln >= brkln2)			/* for debugging the assembler */
-			i = 0;
-		opcpt = stbuf[2].itop.ptrw2;	/* ptr to opcode entry in main tab */
-		nite = stbuf[0].itrl & 0xff;	/* number of it entries */
-		pnite = &stbuf[nite];		    /* ptr to end of stmt */
-		modelen = stbuf[2].itrl;		/* instr mode length */
-		p1inlen = stbuf[1].itrl;		/* pass 1 instr length guess */
-		opdix = ITOP1;					/* first operand */
-		pitw = &stbuf[ITOP1];		    /* ptr to first operand */
-		prsp = 0;						/* special print flag off */
-		instrlen = 2;					/* default for print */
-		if (opcpt->flags & OPDR)
-		{								/* opcode is a directive */
-			i = opcpt->vl1;				/* directive number */
-			if (i <= (DIRECT - 1))
-			{
-				dirop = p2direct[i];
-				(*dirop) ();			/* handle directive */
-			} else
-			{
-				uerr(21);
-			}
-		} else
-		{
-			gcist();					/* generate code for one statement */
-		}
-	}
-}
-
-
-/*
- * generate code for an instruction
- * call with
- * intermediate text for instruction in stbuf
- */
-VOID gcist(NOTHING)
-{
-	if (stbuf[0].itty != ITBS)			/* beginning of statement */
-		asabort();
-	format = opcpt->flags & OPFF;
-	in_err = 0;							/* no error this instruction, yet */
-	ival.p = 0;							/* initial value for possible operand */
-	reloc = ABS;
-	instrlen = 2;						/* at least 2 bytes */
-	ins[0] = opcpt->vl1;				/* opcode value */
-	rlbits[0] = INSABS;					/* instruction absolute */
-	pins = &ins[1];
-	prlb = &rlbits[1];
-	if (nite > ITOP1)
-	{									/* operands */
-		if (!format)
-		{
-			uerr(9);
-		} else if (format > LSTFRMT)		/* was a magic number... */
-		{
-			asabort();
-		} else
-		{
-			(*opfary[format]) ();
-		}
-	}
-	if (!ckein() && !in_err)			/* at end of statement ?? */
-		uerr(6);
-	print(1);							/* print source */
-
-	loctr += p1inlen;
-	if (!in_err && p1inlen != instrlen)	/* 2nd pass error recovery */
-		uerr(38);
-	outinstr();							/* write out instr binary */
-}
 
 
 /* relative branches */
-VOID relbr(NOTHING)
+static VOID relbr(NOTHING)
 {
 	expr(p2gi);
 	if (extflg)
@@ -193,7 +72,7 @@ VOID relbr(NOTHING)
 	{									/* short displacement */
 		if (ival.l > 127 || ival.l < -128)
 			uerr(22);
-		ins[0] |= (ival.u.loword & 0xff);
+		ins[0] |= ((short)ival.l & 0xff);
 	}
 	/* make it a nop if -N specified */
 	if ((ival.l == 0) || (ival.l == 2 && didorg))
@@ -211,21 +90,113 @@ VOID relbr(NOTHING)
 }
 
 
-#define US	(unsigned short)
+/*
+ * build a format 1 (add, sub, and, etc) instr
+ * call with:
+ *	register #
+ *	mode bits
+ *	ptr to operand structure for effective address
+ */
+static VOID makef1(P(int) arreg, P(int) armode, P(struct op *) apea)
+PP(int arreg;)
+PP(int armode;)
+PP(register struct op *apea;)
+{
+	ins[0] |= (arreg << 9);				/* put in reg # */
+	ins[0] |= armode;					/* instr mode bits */
+	ins[0] |= apea->ea;					/* put in effective addr bits */
+	doea(apea);							/* may be more words in ea */
+}
+
+
+/* try to make a normal instr into an immediate instr */
+static int makeimm(NOTHING)
+{
+	if (opnd[0].ea != IMM)
+		return FALSE;
+	if (!dataalt(&opnd[1]))
+		return FALSE;
+	if (opcpt == addptr)
+		opcpt = addiptr;
+	else if (opcpt == andptr)
+		opcpt = andiptr;
+	else if (opcpt == orptr)
+		opcpt = oriptr;
+	else if (opcpt == subptr)
+		opcpt = subiptr;
+	else if (opcpt == cmpptr)
+		opcpt = cmpiptr;
+	else if (opcpt == eorptr)
+		opcpt = eoriptr;
+	else
+		return FALSE;
+	ins[0] = opcpt->vl1;
+	format = opcpt->flags & OPFF;
+	genimm();
+	return TRUE;
+}
+
+
+/*
+ * check an operand for a special register
+ * call with:
+ *  ptr to operand struct
+ *  special register value
+ */
+static int cksprg(P(struct op *) ap, P(int) v1)
+PP(struct op *ap;)
+PP(int v1;)
+{
+	if (ap->ea)
+		return 0;
+	return ap->idx == v1;
+}
+
+
+static VOID ccr_or_sr(NOTHING)
+{
+	if (opnd[1].idx == CCR)
+	{
+		modelen = BYTESIZ;				/* byte mode only */
+	} else if (modelen != WORDSIZ)
+	{
+		modelen = WORDSIZ;
+		uerr(34);
+	}
+	cksize(&opnd[0]);
+	ins[0] |= IMM | f2mode[modelen];
+	dodisp(&opnd[0]);
+}
+
+
+static int get2ops(NOTHING)
+{
+	getea(0);							/* get first effective address */
+	if (!ckcomma())
+	{
+		uerr(10);
+		return TRUE;						/* no second op */
+	}
+	getea(1);							/* get second effective address */
+	return FALSE;
+}
+
+
 /*
  * format one -- add, sub, and, or, cmp, etc.
  * one operand must be a D reg (or A reg dest for add, sub, or cmp)
  */
-VOID opf1(NOTHING)
+static VOID opf1(NOTHING)
 {
 	register const short *p;
 
 	if (get2ops())
 		return;
-	if (ins[0] == (US AND) || ins[0] == (US OR))
+	if (ins[0] == AND || ins[0] == OR)
+	{
 		if (cksprg(&opnd[1], CCR) || cksprg(&opnd[1], SR))
 		{
-			if (ins[0] == (US AND))
+			if (ins[0] == AND)
 				opcpt = andiptr;
 			else
 				opcpt = oriptr;
@@ -234,6 +205,7 @@ VOID opf1(NOTHING)
 			ccr_or_sr();
 			return;
 		}
+	}
 	p = f1mode;
 	if (ckdreg(&opnd[1]))
 	{									/* destn is D reg */
@@ -273,7 +245,7 @@ VOID opf1(NOTHING)
 
 
 /* format 2 -- addi, andi, subi, etc */
-VOID opf2(NOTHING)
+static VOID opf2(NOTHING)
 {
 	if (get2ops())
 		return;
@@ -299,8 +271,28 @@ VOID opf2(NOTHING)
 }
 
 
+static VOID ckbytea(NOTHING)
+{
+	if (modelen == BYTESIZ && !dataea(&opnd[0]))
+		uerr(20);						/* byte mod not allowed */
+}
+
+
+/* check for operand as any special register */
+static int anysprg(P(struct op *) ap)
+PP(struct op *ap;)
+{
+	if (ap->ea)
+		return FALSE;
+	if (ap->idx >= CCR && ap->idx <= USP)
+		return TRUE;
+	return FALSE;
+}
+
+
+#define MOVEA   0100
 /* format #3 -- move and movea */
-VOID opf3(NOTHING)
+static VOID opf3(NOTHING)
 {
 	register short k;
 
@@ -390,7 +382,7 @@ VOID opf3(NOTHING)
 /* format 4 -- abcd, sbcd */
 /* format 10 -- cmpm */
 /* format 27 -- addx, subx */
-VOID opf4(NOTHING)
+static VOID opf4(NOTHING)
 {
 	if (get2ops())
 		return;
@@ -425,7 +417,7 @@ VOID opf4(NOTHING)
 
 /* format 5 -- div, mul */
 /* format 26 -- cmp, chk */
-VOID opf5(NOTHING)
+static VOID opf5(NOTHING)
 {
 	if (get2ops())
 		return;
@@ -457,7 +449,7 @@ VOID opf5(NOTHING)
 
 #define BTST	0000
 /* format 7 -- bit instrs -- btst, bclr, bset, etc */
-VOID opf7(NOTHING)
+static VOID opf7(NOTHING)
 {
 	if (get2ops())
 		return;
@@ -468,7 +460,7 @@ VOID opf7(NOTHING)
 		ins[0] |= (opnd[0].ea << 9) | 0400;
 	} else
 	{									/* static bit # */
-		if (opnd[0].con.l < 0L || opnd[0].con.l > 31 || (opnd[1].ea & INDIRECT && opnd[0].con.l > 7))
+		if (opnd[0].con < 0L || opnd[0].con > 31 || (opnd[1].ea & INDIRECT && opnd[0].con > 7))
 			uerr(23);
 		if (opnd[0].ea != IMM)
 			uerr(17);
@@ -484,8 +476,21 @@ VOID opf7(NOTHING)
 }
 
 
+/* copy opnd 0 to opnd 1 */
+static VOID cpop01(NOTHING)
+{
+	opnd[1].ea = opnd[0].ea;
+	opnd[1].len = opnd[0].len;
+	opnd[1].con = opnd[0].con;
+	opnd[1].drlc = opnd[0].drlc;
+	opnd[1].ext = opnd[0].ext;
+	opnd[1].idx = opnd[0].idx;
+	opnd[1].xmod = opnd[0].xmod;
+}
+
+
 /* format 8 -- shifts and rotates */
-VOID opf8(NOTHING)
+static VOID opf8(NOTHING)
 {
 	register short i;
 
@@ -496,13 +501,13 @@ VOID opf8(NOTHING)
 		{								/* shift dreg one bit */
 			cpop01();					/* copy opnd 0 to 1 */
 			opnd[0].ea = IMM;
-			opnd[0].con.l = 1L;
+			opnd[0].con = 1L;
 			if (!ckdreg(&opnd[1]))
 				uerr(20);
 		  opf8l1:
-			if (opnd[0].con.l < 1 || opnd[0].con.l > 8)	/* legal range 1..8 */
+			if (opnd[0].con < 1 || opnd[0].con > 8)	/* legal range 1..8 */
 				uerr(37);
-			ins[0] |= ((opnd[0].con.u.loword & 7) << 9) | f1mode[modelen] | opnd[1].ea;
+			ins[0] |= (((short)opnd[0].con & 7) << 9) | f1mode[modelen] | opnd[1].ea;
 			return;
 		}
 		i = (ins[0] & 077) << 6;
@@ -534,6 +539,24 @@ VOID opf8(NOTHING)
 }
 
 
+/* check for a control operand */
+static int controlea(P(struct op *) ap)
+PP(struct op *ap;)
+{
+	register short i;
+
+	i = ap->ea & 070;
+	if (i == INDIRECT || i == INDDISP || i == INDINX)
+		return TRUE;
+	if (i == 070)
+	{
+		if ((ap->ea & 7) <= 3)
+			return TRUE;
+	}
+	return FALSE;
+}
+
+
 /* format 9 -- jmp, jsr */
 /* format 14 -- stop */
 /* format 14 -- rtd (68010) */
@@ -541,7 +564,7 @@ VOID opf8(NOTHING)
 /* format 25 -- s?? */
 /* format 29 -- pea */
 /* one operand instructions -- jmp, clr, neg, not, sge, etc. */
-VOID opf9(NOTHING)
+static VOID opf9(NOTHING)
 {
 	getea(0);
 	if (format == 24)
@@ -570,7 +593,7 @@ VOID opf9(NOTHING)
 
 /* format 11 -- dbcc */
 /* format 19 -- link */
-VOID opf11(NOTHING)
+static VOID opf11(NOTHING)
 {
 	if (get2ops())
 		return;
@@ -586,7 +609,7 @@ VOID opf11(NOTHING)
 			uerr(33);
 		if (opnd[1].drlc != rlflg)		/* don't chk opnd[1].ea!=LADDR||SADDR */
 			uerr(22);
-		opnd[1].con.l -= (loctr + 2L);
+		opnd[1].con -= (loctr + 2L);
 		cksize(&opnd[1]);
 		opnd[1].drlc = ABS;				/* not relocatable */
 	}
@@ -596,7 +619,7 @@ VOID opf11(NOTHING)
 
 
 /* format 12 -- exg */
-VOID opf12(NOTHING)
+static VOID opf12(NOTHING)
 {
 	register short i;
 
@@ -640,14 +663,14 @@ VOID opf12(NOTHING)
 /* format 28 -- swap */
 #define UNLK	047130
 
-VOID opf13(NOTHING)
+static VOID opf13(NOTHING)
 {
 	getea(0);
 	if (format == 18)
 	{									/* trap */
-		if (opnd[0].con.l < 0 || opnd[0].con.l > 15)
+		if (opnd[0].con < 0 || opnd[0].con > 15)
 			uerr(15);
-		ins[0] |= opnd[0].con.u.loword;
+		ins[0] |= (short)opnd[0].con;
 		return;
 	}
 	if (ins[0] == UNLK)
@@ -667,7 +690,7 @@ VOID opf13(NOTHING)
 
 /* format 15 -- adda, cmpa, suba */
 /* format 30 -- lea */
-VOID opf15(NOTHING)
+static VOID opf15(NOTHING)
 {
 	register short i;
 
@@ -691,13 +714,13 @@ VOID opf15(NOTHING)
 
 
 /* formats 16 and 17 -- addq, inc, subq, dec */
-VOID opf17(NOTHING)
+static VOID opf17(NOTHING)
 {
 	if (format == 16)
 	{									/* inc or dec */
 		clrea(&opnd[0]);
 		opnd[0].ea = IMM;
-		opnd[0].con.l = 1L;
+		opnd[0].con = 1L;
 		opnd[0].drlc = ABS;
 		getea(1);
 	} else
@@ -707,25 +730,76 @@ VOID opf17(NOTHING)
 	}
 	if (opnd[0].ea != IMM || !altea(&opnd[1]) || pcea(&opnd[1]))
 		uerr(20);
-	if (opnd[0].con.l <= 0 || opnd[0].con.l > 8)
+	if (opnd[0].con <= 0 || opnd[0].con > 8)
 		uerr(15);
 	if (modelen == 1 && !dataea(&opnd[1]))
 		uerr(34);
-	ins[0] |= f1mode[modelen] | ((opnd[0].con.u.loword & 7) << 9) | opnd[1].ea;
+	ins[0] |= f1mode[modelen] | (((short)opnd[0].con & 7) << 9) | opnd[1].ea;
 	doea(&opnd[1]);
 }
 
 
-/* format 20 -- movem */
-short const regmsk0[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
-	0100, 040, 020, 010, 4, 2, 1
-};
+/* reverse a movem register mask for control ea to memory */
+static int fixmask(P(int) msk)
+PP(int msk;)
+{
+	register short i, j, k;
 
-short const regmsk1[] = { 1, 2, 4, 010, 020, 040, 0100, 0200, 0400, 01000, 02000, 04000, 010000,
-	020000, 040000, 0100000
-};
+	k = 0;
+	i = 1;
+	j = 0x8000;
+	while (i)
+	{
+		if (msk & i)
+			k |= j;
+		i <<= 1;
+		j >>= 1;
+	}
+	return k;
+}
 
-VOID opf20(NOTHING)
+
+/*
+ * get a list of registers for the movem instr
+ * call with:
+ *	ptr to reg-to-mem or mem-to-reg array of bits
+ */
+static int getrlist(P(const short *) ap)
+PP(const short *ap;)
+{
+	register const short *p;
+	register short i, j, mask;
+
+	p = ap;
+	mask = 0;
+	while ((i = getreg()) != -1)
+	{
+		if (ckitc(pitw, '-'))
+		{
+			pitw++;
+			if ((j = getreg()) < 0)
+			{
+				uerr(40);
+				break;
+			}
+			while (i <= j)
+				mask |= p[i++];
+		} else
+		{
+			mask |= p[i];
+		}
+		if (ckitc(pitw, '/'))
+			pitw++;
+		else
+			break;
+	}
+	if (!mask)
+		uerr(40);
+	return mask;
+}
+
+
+static VOID opf20(NOTHING)
 {
 	register short dr, i, j;
 
@@ -744,15 +818,18 @@ VOID opf20(NOTHING)
 		if (!ckcomma())
 			uerr(10);
 	} else
+	{
 		dr = 02000;
+	}
 	getea(0);
 	if (dr)
 	{
 		if (!ckcomma())
 			uerr(10);
 		if (pitw->itty != ITRM)
+		{
 			j = getrlist(regmsk1);		/* mem to regs */
-		else
+		} else
 		{
 			j = pitw->itop.l;
 			j = fixmask(j);
@@ -782,68 +859,8 @@ VOID opf20(NOTHING)
 }
 
 
-/*
- * get a list of registers for the movem instr
- * call with:
- *	ptr to reg-to-mem or mem-to-reg array of bits
- */
-int getrlist(P(const short *) ap)
-PP(const short *ap;)
-{
-	register const short *p;
-	register short i, j, mask;
-
-	p = ap;
-	mask = 0;
-	while ((i = getreg()) != -1)
-	{
-		if (ckitc(pitw, '-'))
-		{
-			pitw++;
-			if ((j = getreg()) == -1)
-			{
-				uerr(40);
-				break;
-			}
-			while (i <= j)
-				mask |= p[i++];
-		} else
-		{
-			mask |= p[i];
-		}
-		if (ckitc(pitw, '/'))
-			pitw++;
-		else
-			break;
-	}
-	if (!mask)
-		uerr(40);
-	return mask;
-}
-
-
-/* reverse a movem register mask for control ea to memory */
-int fixmask(P(int) msk)
-PP(int msk;)
-{
-	register short i, j, k;
-
-	k = (msk & 1) ? 0100000 : 0;
-	i = 2;
-	j = 040000;
-	while (i)
-	{
-		if (msk & i)
-			k |= j;
-		i <<= 1;
-		j >>= 1;
-	}
-	return k;
-}
-
-
 /* format 21 -- movep */
-VOID opf21(NOTHING)
+static VOID opf21(NOTHING)
 {
 	register short m, d;
 	register struct op *p;
@@ -863,39 +880,36 @@ VOID opf21(NOTHING)
 	} else
 	{
 		uerr(20);
-		/* BUG: falls through with undefined values for m, d, p */
-#ifndef __ALCYON__
 		return;
-#endif
 	}
 	if ((p->ea & 070) != INDDISP)
 		uerr(20);
 	if (modelen == 4)
 		m |= 0100;
 	ins[0] |= (d << 9) | m | (p->ea & 7);
-	*pins++ = p->con.u.loword;
+	*pins++ = (short)p->con;
 	*prlb++ = p->drlc;
 	instrlen += 2;
 }
 
 
 /* format 22 -- moveq */
-VOID opf22(NOTHING)
+static VOID opf22(NOTHING)
 {
 	if (get2ops())
 		return;
 	if (opnd[0].ea != IMM)
 		uerr(17);
-	if (opnd[0].con.l > 255L || opnd[0].con.l < -256L)
+	if (opnd[0].con > 255L || opnd[0].con < -256L)
 		uerr(15);
 	if (!ckdreg(&opnd[1]))
 		uerr(33);
-	ins[0] |= (opnd[1].ea << 9) | (opnd[0].con.u.loword & 0xff);
+	ins[0] |= (opnd[1].ea << 9) | ((short)opnd[0].con & 0xff);
 }
 
 
 /* format 23 -- eor */
-VOID opf23(NOTHING)
+static VOID opf23(NOTHING)
 {
 	if (get2ops())
 		return;
@@ -921,7 +935,7 @@ VOID opf23(NOTHING)
 
 
 /* format 31 -- movec and moves (68010 only) */
-VOID opf31(NOTHING)
+static VOID opf31(NOTHING)
 {
 	register struct op *cntrl, *genrl, *eaop;
 
@@ -976,5 +990,154 @@ VOID opf31(NOTHING)
 			uerr(20);
 		ins[0] |= eaop->ea;
 		doea(eaop);
+	}
+}
+
+
+static adirect const opfary[] = {
+	0,		/*  0 */
+	opf1,	/*  1 */
+	opf2,	/*  2 */
+	opf3,	/*  3 */
+	opf4,	/*  4 */
+	opf5,	/*  5 */
+	relbr,	/*  6 */
+	opf7,	/*  7 */
+	opf8,	/*  8 */
+	opf9,	/*  9 */
+	opf4,	/* 10 */
+	opf11,	/* 11 */
+	opf12,	/* 12 */
+	opf13,	/* 13 */
+	opf9,	/* 14 */
+	opf15,	/* 15 */
+	opf17,	/* 16 */
+	opf17,	/* 17 */
+	opf13,	/* 18 */
+	opf11,	/* 19 */
+	opf20,	/* 20 */
+	opf21,	/* 21 */
+	opf22,	/* 22 */
+	opf23,	/* 23 */
+	opf9,	/* 24 */
+	opf9,	/* 25 */
+	opf5,	/* 26 */		/* cmp, chk, extention verification */
+	opf4,	/* 27 */		/* addx, subx, extension verification */
+	opf13,	/* 28 */		/* swap, extension verification */
+	opf9,	/* 29 */		/* pea, extention verification */
+	opf15,  /* 30 */		/* lea, extension verification */
+	opf31	/* 31 */		/* movec & moves 68010 */
+};
+#define LSTFRMT 31
+
+
+/*
+ * generate code for an instruction
+ * call with
+ * intermediate text for instruction in stbuf
+ */
+static VOID gcist(NOTHING)
+{
+	if (stbuf[0].itty != ITBS)			/* beginning of statement */
+		asabort();
+	format = opcpt->flags & OPFF;
+	in_err = 0;							/* no error this instruction, yet */
+	ival.p = 0;							/* initial value for possible operand */
+	reloc = ABS;
+	instrlen = 2;						/* at least 2 bytes */
+	ins[0] = opcpt->vl1;				/* opcode value */
+	rlbits[0] = INSABS;					/* instruction absolute */
+	pins = &ins[1];
+	prlb = &rlbits[1];
+	if (nite > ITOP1)
+	{									/* operands */
+		if (!format)
+		{
+			uerr(9);
+		} else if (format > LSTFRMT)		/* was a magic number... */
+		{
+			asabort();
+		} else
+		{
+			(*opfary[format]) ();
+		}
+	}
+	if (!ckein() && !in_err)			/* at end of statement ?? */
+		uerr(6);
+	print(1);							/* print source */
+
+	loctr += p1inlen;
+	if (!in_err && p1inlen != instrlen)	/* 2nd pass error recovery */
+		uerr(38);
+	outinstr();							/* write out instr binary */
+}
+
+
+/* pass two driver */
+VOID pass2(NOTHING)
+{
+	register short i;
+	register adirect dirop;
+
+	pitix = ITBSZ;						/* it buffer is empty */
+	couthd.ch_magic = MAGIC;			/* c.out magic number */
+	if (savelc[TEXT] & 1)
+		savelc[TEXT]++;					/* make it even */
+	couthd.ch_tsize = savelc[TEXT];		/* text size */
+	if (savelc[DATA] & 1)
+		savelc[DATA]++;					/* make it even */
+	couthd.ch_dsize = savelc[DATA];		/* data size */
+	couthd.ch_bsize = savelc[BSS];		/* bss size */
+	/*
+	 * symbol table size is not known now -- it is set at end of pass 2
+	 * entry point and stack size are zero for now
+	 */
+	putchd(lfil, &couthd);
+	savelc[ABS] = 0;
+	savelc[DATA] = 0;
+	savelc[TEXT] = 0;
+	savelc[BSS] = 0;
+	loctr = 0;							/* location counter */
+	rlflg = TEXT;						/* TEXT relocatable */
+	p2flg = 1;							/* pass two */
+	if (fseek(ifn, 0L, SEEK_SET) < 0)
+	{									/* beginning of source */
+		rpterr("seek error on source file\n");
+		asabort();
+	}
+	fflush(itfn);
+	if (fseek(itfn, 0L, SEEK_SET) < 0)
+	{
+		rpterr("seek error on intermediate file\n");
+		asabort();
+	}
+	fchr = gchr();						/* get first char */
+	for (;;)
+	{									/* pass 2 main loop */
+		ristb();						/* read it for one statement */
+		p2absln = stbuf[0].itop.l;		/* line number */
+		opcpt = stbuf[2].itop.ptrw2;	/* ptr to opcode entry in main tab */
+		nite = stbuf[0].itrl & 0xff;	/* number of it entries */
+		pnite = &stbuf[nite];		    /* ptr to end of stmt */
+		modelen = stbuf[2].itrl;		/* instr mode length */
+		p1inlen = stbuf[1].itrl;		/* pass 1 instr length guess */
+		opdix = ITOP1;					/* first operand */
+		pitw = &stbuf[ITOP1];		    /* ptr to first operand */
+		instrlen = 2;					/* default for print */
+		if (opcpt->flags & OPDR)
+		{								/* opcode is a directive */
+			i = opcpt->vl1;				/* directive number */
+			if (i < DIRECT)
+			{
+				dirop = p2direct[i];
+				(*dirop) ();			/* handle directive */
+			} else
+			{
+				uerr(21);
+			}
+		} else
+		{
+			gcist();					/* generate code for one statement */
+		}
 	}
 }

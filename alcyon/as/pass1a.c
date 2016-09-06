@@ -9,7 +9,41 @@
 
 #include "as68.h"
 
-VOID fixsyadr PROTO((int al));
+
+
+/*
+ * fix all symbol addresses that are text based and greater than loctr
+ * fix means subtract al from them
+ */
+static VOID fixsyadr(P(int) al)
+PP(int al;)
+{
+	register struct symtab **sx1, **sx2;
+	register long l;
+
+	l = al;
+	/* loop thru symbol initial reference table */
+	for (sx1 = sirt; sx1 < &sirt[SZIRT - 1]; sx1 += 2)
+	{
+		if (*(sx2 = sx1 + 1) == 0)		/* this chain is empty */
+			continue;
+
+		/* symbols on one chain */
+		sx2 = (struct symtab **)*sx2;						/* first entry on this chain */
+		while (1)
+		{
+			if (((((struct symtab *)sx2)->flags & SYDF) || (((struct symtab *)sx2)->flags & SYPC)) &&
+				(((struct symtab *)sx2)->flags & SYRO) &&
+				((struct symtab *)sx2)->vl1 > loctr)
+			{
+				((struct symtab *)sx2)->vl1 -= l;
+			}
+			if (((struct symtab *)sx2) == *sx1)			/* end of chain */
+				break;
+			sx2 = (struct symtab **)(((struct symtab *)sx2)->tlnk);			/* next entry in chain */
+		}
+	}
+}
 
 
 VOID pass1a(NOTHING)
@@ -82,41 +116,6 @@ VOID pass1a(NOTHING)
 		{
 			savelc[TEXT] -= reduced;
 			return;
-		}
-	}
-}
-
-
-/*
- * fix all symbol addresses that are text based and greater than loctr
- * fix means subtract al from them
- */
-VOID fixsyadr(P(int) al)
-PP(int al;)
-{
-	register struct symtab **sx1, **sx2;
-	register short l;
-
-	l = al;
-	/* loop thru symbol initial reference table */
-	for (sx1 = sirt; sx1 < &sirt[SZIRT - 1]; sx1 += 2)
-	{
-		if (*(sx2 = sx1 + 1) == 0)		/* this chain is empty */
-			continue;
-
-		/* symbols on one chain */
-		sx2 = (struct symtab **)*sx2;						/* first entry on this chain */
-		while (1)
-		{
-			if (((((struct symtab *)sx2)->flags & SYDF) || (((struct symtab *)sx2)->flags & SYPC)) &&
-				(((struct symtab *)sx2)->flags & SYRO) &&
-				((struct symtab *)sx2)->vl1 > loctr)
-			{
-				((struct symtab *)sx2)->vl1 -= l;
-			}
-			if (((struct symtab *)sx2) == *sx1)			/* end of chain */
-				break;
-			sx2 = (struct symtab **)(((struct symtab *)sx2)->tlnk);			/* next entry in chain */
 		}
 	}
 }

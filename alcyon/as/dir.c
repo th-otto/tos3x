@@ -11,13 +11,10 @@
 /* Pass 1 and pass 2 directive handling routines */
 /* code to handle conditional assembly directives */
 
-VOID hdata PROTO((int mul));
-VOID chkeven PROTO((NOTHING));
-int mkmask PROTO((NOTHING));
-int chkreg PROTO((NOTHING));
-VOID sdata PROTO((int dtyp));
-int acok PROTO((NOTHING));
-int cmp_ops PROTO((NOTHING));
+
+static short const regmsk[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
+	0100, 040, 020, 010, 4, 2, 1
+};
 
 
 
@@ -125,6 +122,24 @@ VOID hequ(NOTHING)
 VOID hdsect(NOTHING)
 {
 	dorlst(DATA);
+}
+
+
+/* make pc even if necessary for .dc and .ds */
+static VOID chkeven(NOTHING)
+{
+	register struct symtab *pi;
+
+	if (modelen > BYTESIZ && (loctr & 1))
+	{
+		pi = opcpt;
+		opcpt = evenptr;
+		opitb();
+		stbuf[0].itrl = itwc;
+		wostb();
+		opcpt = pi;
+		loctr++;
+	}
 }
 
 
@@ -313,32 +328,6 @@ VOID hds(NOTHING)
 }
 
 
-/* make pc even if necessary for .dc and .ds */
-VOID chkeven(NOTHING)
-{
-	register struct symtab *pi;
-
-	if (modelen > BYTESIZ && (loctr & 1))
-	{
-		pi = opcpt;
-		opcpt = evenptr;
-		opitb();
-		stbuf[0].itrl = itwc;
-		wostb();
-		opcpt = pi;
-		loctr++;
-	}
-}
-
-
-/* define byte directive */
-VOID hdc(NOTHING)
-{
-	chkeven();
-	hdata(modelen);
-}
-
-
 /*
  * define bytes or words of data
  *	call with:
@@ -346,7 +335,7 @@ VOID hdc(NOTHING)
  *		2 => defining words
  *		4 => defining long words
  */
-VOID hdata(P(int) mul)
+static VOID hdata(P(int) mul)
 PP(int mul;)
 {
 	dlabl();							/* define label */
@@ -356,6 +345,14 @@ PP(int mul;)
 	stbuf[0].itrl = itwc;				/* # of it entries */
 	wostb();							/* write out statement buffer */
 	loctr += numops * mul;				/* count by bytes or words */
+}
+
+
+/* define byte directive */
+VOID hdc(NOTHING)
+{
+	chkeven();
+	hdata(modelen);
 }
 
 
@@ -392,6 +389,64 @@ VOID hmask2(NOTHING)
 }
 
 
+/* get a register # from file, return -1 if none or illegal */
+static int chkreg(NOTHING)
+{
+	register short i, j;
+
+	i = j = 0;
+	if (fchr == 'a' || fchr == 'A')
+		i = 8;
+	else if (fchr != 'd' && fchr != 'r' && fchr != 'D' && fchr != 'R')
+		return -1;
+	fchr = gchr();
+	do
+	{
+		j = (j * 10) + (fchr - '0');
+		fchr = gchr();
+	} while (isdigit(fchr));
+	if (j < 0 || j > AREGHI)
+		return -1;
+	i += j;
+	if (i >= 0 && i <= AREGHI)
+		return i;
+	else
+		return -1;
+}
+
+
+/* make a register mask for the reg routine */
+static int mkmask(NOTHING)
+{
+	register const short *p;
+	register short i, j, mask;
+
+	p = regmsk;
+	mask = 0;
+	while ((i = chkreg()) != -1)
+	{
+		if (fchr == '-')
+		{
+			fchr = gchr();
+			if ((j = chkreg()) == -1)
+			{
+				xerr(40);
+				return -1;
+			}
+			while (i <= j)
+				mask |= p[i++];
+		} else
+		{
+			mask |= p[i];
+		}
+		if (fchr != '/' && fchr != ',')
+			break;						/* Signetics fix */
+		fchr = gchr();
+	}
+	return mask;
+}
+
+
 /* Define register list */
 VOID hreg(NOTHING)
 {
@@ -424,69 +479,6 @@ VOID hreg(NOTHING)
 	lblpt->vl1 = mask;
 	igrst();
 }
-
-short const regmsk[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
-	0100, 040, 020, 010, 4, 2, 1
-};
-
-
-/* make a register mask for the reg routine */
-int mkmask(NOTHING)
-{
-	register const short *p;
-	register short i, j, mask;
-
-	p = regmsk;
-	mask = 0;
-	while ((i = chkreg()) != -1)
-	{
-		if (fchr == '-')
-		{
-			fchr = gchr();
-			if ((j = chkreg()) == -1)
-			{
-				xerr(40);
-				return -1;
-			}
-			while (i <= j)
-				mask |= p[i++];
-		} else
-		{
-			mask |= p[i];
-		}
-		if (fchr != '/' && fchr != ',')
-			break;						/* Signetics fix */
-		fchr = gchr();
-	}
-	return mask;
-}
-
-
-/* get a register # from file, return -1 if none or illegal */
-int chkreg(NOTHING)
-{
-	register short i, j;
-
-	i = j = 0;
-	if (fchr == 'a' || fchr == 'A')
-		i = 8;
-	else if (fchr != 'd' && fchr != 'r' && fchr != 'D' && fchr != 'R')
-		return -1;
-	fchr = gchr();
-	do
-	{
-		j = (j * 10) + (fchr - '0');
-		fchr = gchr();
-	} while (isdigit(fchr));
-	if (j < 0 || j > AREGHI)
-		return -1;
-	i += j;
-	if (i >= 0 && i <= AREGHI)
-		return i;
-	else
-		return -1;
-}
-
 
 /* Define constant block */
 VOID hdcb(NOTHING)
@@ -666,7 +658,7 @@ VOID sds(NOTHING)
 /* second pass - define block storage, initialized */
 VOID sdcb(NOTHING)
 {
-	register short pfg, i, hflg, len;
+	register short pfg, i, hflg, len, w;
 
 	i = pfg = hflg = 0;
 	expr(p2gi);
@@ -689,29 +681,23 @@ VOID sdcb(NOTHING)
 		{
 			if (!hflg)
 			{
-#ifdef __ALCYON__
-				*((char *)&ins[i] + 0) = ival.l;
-#else
 				ins[i] = ((int)ival.l & 0xff) << 8;
-#endif
-				outbyte(ival.u.loword, DABS);
+				outbyte((int)ival.l, DABS);
 				hflg++;
 			} else
 			{
-#ifdef __ALCYON__
-				*((char *)&ins[i++] + 1) = ival.l;
-#else
-				ins[i++] |= ival.l & 0xff;
-#endif
-				outbyte(ival.u.loword, DABS);
+				w = (int)ival.l & 0xff;
+				ins[i++] |= w;
+				outbyte(w, DABS);
 				hflg = 0;
 			}
 			goto sdbl2;
 		} else if (modelen == WORDSIZ)
 		{
 		  sdbl1:
-			ins[i++] = ival.u.loword;
-			outword((int) ival.u.loword, reloc);
+		  	w = (short)ival.l;
+			ins[i++] = w;
+			outword(w, reloc);
 		  sdbl2:
 			if (i > 3)
 			{
@@ -722,8 +708,9 @@ VOID sdcb(NOTHING)
 			}
 		} else
 		{								/* long word... */
-			ins[i++] = ival.u.hiword;
-			outword(ival.u.hiword, LUPPER);
+			w = (short)(ival.l >> 16);
+			ins[i++] = w;
+			outword(w, LUPPER);
 			goto sdbl1;
 		}
 	}
@@ -810,10 +797,10 @@ VOID sorg(NOTHING)
  *	1 => defining bytes
  *	4 => defining long words
  */
-VOID sdata(P(int) dtyp)
+static VOID sdata(P(int) dtyp)
 PP(int dtyp;)
 {
-	register short pfg, i, hflg;
+	register short pfg, i, hflg, w;
 
 	hflg = i = pfg = 0;
 	while (1)
@@ -839,29 +826,23 @@ PP(int dtyp;)
 			}
 			if (!hflg)
 			{
-#ifdef __ALCYON__
-				*((char *)&ins[i] + 0) = ival.l;
-#else
-				ins[i] = ((int)ival.l & 0xff) << 8;;
-#endif
-				outbyte(ival.u.loword, DABS);
+				ins[i] = ((short)ival.l & 0xff) << 8;;
+				outbyte((int)ival.l, DABS);
 				hflg++;
 			} else
 			{
-#ifdef __ALCYON__
-				*((char *)&ins[i++] + 1) = ival.l;
-#else
-				ins[i++] |= ((int)ival.l & 0xff) << 8;
-#endif
+				w = (short)ival.l & 0xff;
+				ins[i++] |= w;
 				hflg = 0;
-				outbyte(ival.u.loword, DABS);
+				outbyte(w, DABS);
 			}
 			goto sdal2;
 		} else if (dtyp == WORDSIZ)
 		{								/* defining a word */
 		  sdal1:
-			ins[i++] = ival.u.loword;
-			outword(ival.u.loword, reloc);
+		  	w = (short)ival.l;
+			ins[i++] = w;
+			outword(w, reloc);
 		  sdal2:
 			if (i > 3)
 			{
@@ -872,8 +853,9 @@ PP(int dtyp;)
 			}
 		} else
 		{								/* long words */
-			ins[i++] = ival.u.hiword;
-			outword(ival.u.hiword, LUPPER);
+			w = (short)(ival.l >> 16);
+			ins[i++] = w;
+			outword(w, LUPPER);
 			goto sdal1;
 		}
 		if (!ckeop(15))					/* should be end of operand */
@@ -883,16 +865,12 @@ PP(int dtyp;)
 		{
 			if (hflg)
 			{
-#ifdef __ALCYON__
-				*((char *)&ins[i++] + 1) = 0;
-#else
 				i++;
-#endif
 			}
 			if (i)
 			{							/* more printing */
 				instrlen = i * 2 - hflg;
-				print((pfg) ? 2 : 1);
+				print(pfg ? 2 : 1);
 				loctr += instrlen;
 			}
 			return;
@@ -921,6 +899,66 @@ VOID ssection(NOTHING)
 }
 
 /****	Conditional assembly directives ****/
+
+static int acok(NOTHING)
+{
+	expr(p1gi);
+	if (itype != ITCN)
+	{
+		xerr(7);						/* must be a constant */
+		return FALSE;
+	}
+	if (reloc != ABS)
+	{
+		xerr(11);						/* must be absolute, no forward references */
+		return FALSE;
+	}
+	igrst();
+	return TRUE;
+}
+
+
+/* return 1 true, 0 false */
+static int cmp_ops(NOTHING)
+{
+	char str1[25], str2[25];
+	register short len1, len2;
+
+	if (fchr != '\'')
+	{
+		xerr(9);
+		return FALSE;
+	}
+	len1 = len2 = 0;
+	while ((fchr = gchr()) && fchr != '\'')
+	{
+		if (fchr == EOLC)
+			return FALSE;
+		str1[len1++] = fchr;
+	}
+	if ((fchr = gchr()) != ',')
+	{
+		xerr(9);
+		return FALSE;
+	}
+	if ((fchr = gchr()) != '\'')
+	{
+		xerr(10);
+		return FALSE;
+	}
+	while ((fchr = gchr()) && fchr != '\'')
+	{
+		if (fchr == EOLC)
+			return FALSE;
+		str2[len2++] = fchr;
+	}
+	igrst();
+	if (len1 != len2)
+		return FALSE;
+	str1[len1] = str2[len2] = '\0';
+	return strcmp(str1, str2) == 0;
+}
+
 
 VOID hifeq(NOTHING)
 {
@@ -1042,64 +1080,4 @@ VOID hendc(NOTHING)
 		if (ca_level == ca)
 			ca_true = 1;
 	igrst();
-}
-
-
-int acok(NOTHING)
-{
-	expr(p1gi);
-	if (itype != ITCN)
-	{
-		xerr(7);						/* must be a constant */
-		return FALSE;
-	}
-	if (reloc != ABS)
-	{
-		xerr(11);						/* must be absolute, no forward references */
-		return FALSE;
-	}
-	igrst();
-	return TRUE;
-}
-
-
-/* return 1 true, 0 false */
-int cmp_ops(NOTHING)
-{
-	char str1[25], str2[25];
-	register short len1, len2;
-
-	if (fchr != '\'')
-	{
-		xerr(9);
-		return FALSE;
-	}
-	len1 = len2 = 0;
-	while ((fchr = gchr()) && fchr != '\'')
-	{
-		if (fchr == EOLC)
-			return FALSE;
-		str1[len1++] = fchr;
-	}
-	if ((fchr = gchr()) != ',')
-	{
-		xerr(9);
-		return FALSE;
-	}
-	if ((fchr = gchr()) != '\'')
-	{
-		xerr(10);
-		return FALSE;
-	}
-	while ((fchr = gchr()) && fchr != '\'')
-	{
-		if (fchr == EOLC)
-			return FALSE;
-		str2[len2++] = fchr;
-	}
-	igrst();
-	if (len1 != len2)
-		return FALSE;
-	str1[len1] = str2[len2] = '\0';
-	return strcmp(str1, str2) == 0;
 }

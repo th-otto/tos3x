@@ -39,6 +39,8 @@ char *strupr PROTO ((char *str));
 
 VOIDPTR memset PROTO((VOIDPTR ptr, int c, size_t bytes));
 
+const char *strerror PROTO((int err_no));
+
 /*
  * non-standard functions
  */
