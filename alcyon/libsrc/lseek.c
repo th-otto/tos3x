@@ -44,7 +44,12 @@ PP(int whence;)								/* Sense of offset      */
 	if ((fp = _chkc(fd)) == NULLFD)
 		return -1;	
 #if GEMDOS
-	fp->offset = Fseek(offs, fp->dosfd, whence);
+	{
+		long pos;
+		pos = Fseek(offs, fp->dosfd, whence);
+		if (pos >= 0)
+			fp->offset = pos;
+	}
 #else
 	switch (whence)
 	{
@@ -58,9 +63,9 @@ PP(int whence;)								/* Sense of offset      */
 
 	case SEEK_END:						/* From end of file     */
 		/* go find the end of file  */
-		fp->hiwater = _filesz(fd);
+		fp->offset = _filesz(fd);
 		/* compute from end of file */
-		fp->offset = fp->hiwater + offs;
+		fp->offset = fp->offset + offs;
 		break;
 
 	default:							/* All others NFG       */

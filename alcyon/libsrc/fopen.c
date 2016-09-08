@@ -61,10 +61,11 @@ PP(register const char *mode;)				/* "r","w", or "a"      */
 	sp->_cnt = 0;						/* init count           */
 	sp->_fd = fd;						/*  and file des        */
 	sp->_base = sp->_ptr = NULL;		/*  and buffer pointers     */
+	sp->_flag = 0;
 	if ((flags & O_ACCMODE) != O_WRONLY)
-		sp->_flag = _IOREAD;
+		sp->_flag |= _IOREAD;
 	if ((flags & O_ACCMODE) != O_RDONLY)
-		sp->_flag = _IOWRT;				/* else 'w'rite mode        */
+		sp->_flag |= _IOWRT;				/* else 'w'rite mode        */
 	if (flags & O_TEXT)
 		sp->_flag |= _IOASCI;
 

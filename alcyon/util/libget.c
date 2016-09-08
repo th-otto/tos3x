@@ -24,7 +24,7 @@ PP(FILE *f;)
 	register unsigned int w1;
 	w1 = getc(f);
 	w1 <<= 8;
-	*lp = (w1 << 8) | getc(f);
+	*lp = w1 | getc(f);
 	return feof(f) ? EOF : 0;
 }
 

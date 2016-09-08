@@ -64,14 +64,14 @@ static VOID relbr(NOTHING)
 	if (p1inlen == 4)
 	{									/* long displacement */
 		if (ival.l > 32767 || ival.l < -32768)
-			uerr(22);
+			uerr(22);	/* illegal relative address */
 		instrlen += 2;
 		*pins++ = ival.l;
 		*prlb++ = DABS;					/* data absolute */
 	} else
 	{									/* short displacement */
 		if (ival.l > 127 || ival.l < -128)
-			uerr(22);
+			uerr(22); /* illegal relative address */
 		ins[0] |= ((short)ival.l & 0xff);
 	}
 	/* make it a nop if -N specified */
@@ -161,7 +161,7 @@ static VOID ccr_or_sr(NOTHING)
 	} else if (modelen != WORDSIZ)
 	{
 		modelen = WORDSIZ;
-		uerr(34);
+		uerr(34); /* illegal size */
 	}
 	cksize(&opnd[0]);
 	ins[0] |= IMM | f2mode[modelen];
@@ -174,7 +174,7 @@ static int get2ops(NOTHING)
 	getea(0);							/* get first effective address */
 	if (!ckcomma())
 	{
-		uerr(10);
+		uerr(10); /* invalid second operand */
 		return TRUE;						/* no second op */
 	}
 	getea(1);							/* get second effective address */
@@ -210,13 +210,13 @@ static VOID opf1(NOTHING)
 	if (ckdreg(&opnd[1]))
 	{									/* destn is D reg */
 		if ((opcpt == andptr || opcpt == orptr) && ckareg(&opnd[0]))	/* A source */
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		makef1(opnd[1].ea, p[modelen], &opnd[0]);	/* make instr */
 		return;
 	} else if (ckdreg(&opnd[0]) && memalt(&opnd[1]))
 	{									/* source is D reg */
 		if (pcea(&opnd[1]))
-			uerr(10);
+			uerr(10); /* invalid second operand */
 		makef1(opnd[0].ea, p[modelen] + 0400, &opnd[1]);
 		return;
 	} else if (ckareg(&opnd[1]))
@@ -229,7 +229,7 @@ static VOID opf1(NOTHING)
 			opcpt = subaptr;
 		else
 		{
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 			return;
 		}
 		format = opcpt->flags & OPFF;
@@ -239,7 +239,7 @@ static VOID opf1(NOTHING)
 		return;
 	} else if (!makeimm())				/* make an immediate instr */
 	{
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	}
 }
 
@@ -259,12 +259,12 @@ static VOID opf2(NOTHING)
 	}
 	if (opnd[0].ea != IMM)
 	{
-		uerr(9);
+		uerr(9); /* invalid first operand */
 		return;
 	}
 	if (!dataalt(&opnd[1]) || pcea(&opnd[1]))
 	{
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 		return;
 	}
 	genimm();
@@ -274,7 +274,7 @@ static VOID opf2(NOTHING)
 static VOID ckbytea(NOTHING)
 {
 	if (modelen == BYTESIZ && !dataea(&opnd[0]))
-		uerr(20);						/* byte mod not allowed */
+		uerr(34);						/* byte mod not allowed */
 }
 
 
@@ -302,14 +302,14 @@ static VOID opf3(NOTHING)
 	{
 		ins[0] = MOVEFCC;
 		if (anysprg(&opnd[1]))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		if (modelen == BYTESIZ || modelen == LONGSIZ)
-			uerr(34);
+			uerr(34); /* illegal size */
 		if (!m68010)
-			uerr(8);
+			uerr(8); /* opcode for 68010 only */
 		ins[0] |= opnd[1].ea;
 		if (!dataea(&opnd[1]))
-			uerr(9);
+			uerr(9); /* invalid first operand */
 		doea(&opnd[1]);
 		return;
 	}
@@ -318,12 +318,12 @@ static VOID opf3(NOTHING)
 		ins[0] = MOVETCC;
 	  opf3l1:
 		if (anysprg(&opnd[0]))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		if (modelen == BYTESIZ || modelen == LONGSIZ)
-			uerr(34);
+			uerr(34); /* illegal size */
 		ins[0] |= opnd[0].ea;
 		if (!dataea(&opnd[0]))
-			uerr(9);
+			uerr(9); /* invalid first operand */
 		doea(&opnd[0]);
 		return;
 	}
@@ -335,12 +335,12 @@ static VOID opf3(NOTHING)
 	if (cksprg(&opnd[0], SR))
 	{
 		if (modelen == BYTESIZ || modelen == LONGSIZ)
-			uerr(34);
+			uerr(34); /* illegal size */
 		if (anysprg(&opnd[1]))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		ins[0] = SRMOVE | opnd[1].ea;
 		if (!dataalt(&opnd[1]) || pcea(&opnd[1]))
-			uerr(10);
+			uerr(10); /* invalid second operand */
 		doea(&opnd[1]);
 		return;
 	}
@@ -349,7 +349,7 @@ static VOID opf3(NOTHING)
 		if (modelen == BYTESIZ)
 			uerr(34);					/* default is word, can't test */
 		if (!ckareg(&opnd[1]))
-			uerr(33);
+			uerr(33); /* register required */
 		ins[0] = MOVEUSP | 8 | (opnd[1].ea & 7);
 		return;
 	}
@@ -358,7 +358,7 @@ static VOID opf3(NOTHING)
 		if (modelen == BYTESIZ)
 			uerr(34);					/* default is word, can't test */
 		if (!ckareg(&opnd[0]))
-			uerr(33);
+			uerr(33); /* register required */
 		ins[0] = MOVEUSP | (opnd[0].ea & 7);
 		return;
 	}
@@ -373,9 +373,11 @@ static VOID opf3(NOTHING)
 	if (k == MOVEA)
 	{
 		if (dataea(&opnd[1]))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 	} else if ((pcea(&opnd[1]) && dataea(&opnd[1])) || opnd[1].ea == IMM)
-		uerr(20);
+	{
+		uerr(20); /* illegal addressing mode */
+	}
 }
 
 
@@ -392,11 +394,11 @@ static VOID opf4(NOTHING)
 	} else if (format == 10)
 	{									/* cmpm */
 		if ((opnd[0].ea & 070) != INDINC || (opnd[1].ea & 070) != INDINC)
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		ins[0] |= f1mode[modelen] | ((opnd[0].ea & 7) | ((opnd[1].ea & 7) << 9));
 		if (m68010)
 		{
-			uerr(31);
+			uerr(31); /* warning: cmpm generated for 68010 */
 			nerror--;					/* just a warning */
 		}
 		return;
@@ -411,7 +413,7 @@ static VOID opf4(NOTHING)
 		ins[0] |= 010 | ((opnd[0].ea & 7) | ((opnd[1].ea & 7) << 9));
 		return;
 	}
-	uerr(20);
+	uerr(20); /* illegal addressing mode */
 }
 
 
@@ -430,9 +432,11 @@ static VOID opf5(NOTHING)
 			else if (makeimm())
 				return;
 			else
-				uerr(20);
+				uerr(20); /* illegal addressing mode */
 		} else
-			uerr(20);
+		{
+			uerr(20); /* illegal addressing mode */
+		}
 	}
 	if (opcpt == cmpptr)
 	{
@@ -440,7 +444,7 @@ static VOID opf5(NOTHING)
 		ckbytea();
 	} else if (!dataea(&opnd[0]))
 	{
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	}
 	ins[0] |= (opnd[1].ea & 7) << 9 | opnd[0].ea;
 	doea(&opnd[0]);
@@ -454,23 +458,23 @@ static VOID opf7(NOTHING)
 	if (get2ops())
 		return;
 	if (opnd[1].ea == IMM || (ins[0] != BTST && pcea(&opnd[1])) || ckareg(&opnd[1]))
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	if (ckdreg(&opnd[0]))
 	{
 		ins[0] |= (opnd[0].ea << 9) | 0400;
 	} else
 	{									/* static bit # */
 		if (opnd[0].con < 0L || opnd[0].con > 31 || (opnd[1].ea & INDIRECT && opnd[0].con > 7))
-			uerr(23);
+			uerr(23); /* invalid bit range */
 		if (opnd[0].ea != IMM)
-			uerr(17);
+			uerr(17); /* illegal format */
 		ins[0] |= 04000;
 		dodisp(&opnd[0]);
 	}
 	if (modelen == 1 && !(memea(&opnd[1])))
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	else if (!(ckdreg(&opnd[1])) && modelen == 4)
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	ins[0] |= opnd[1].ea;
 	doea(&opnd[1]);
 }
@@ -503,10 +507,10 @@ static VOID opf8(NOTHING)
 			opnd[0].ea = IMM;
 			opnd[0].con = 1L;
 			if (!ckdreg(&opnd[1]))
-				uerr(20);
+				uerr(20); /* illegal addressing mode */
 		  opf8l1:
 			if (opnd[0].con < 1 || opnd[0].con > 8)	/* legal range 1..8 */
-				uerr(37);
+				uerr(37); /* illegal shift count */
 			ins[0] |= (((short)opnd[0].con & 7) << 9) | f1mode[modelen] | opnd[1].ea;
 			return;
 		}
@@ -514,25 +518,25 @@ static VOID opf8(NOTHING)
 		ins[0] &= 0177700;
 		ins[0] |= 0300 | i | opnd[0].ea;
 		if (!memalt(&opnd[0]) || pcea(&opnd[0]) || modelen != 2)
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		doea(&opnd[0]);
 		return;
 	}
 	if (!ckcomma())
 	{
-		uerr(10);
+		uerr(10); /* invalid second operand */
 		return;
 	}
 	getea(1);							/* get second operand */
 	if (!ckdreg(&opnd[1]))				/* second operand must be dreg */
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	if (ckdreg(&opnd[0]))
 	{									/* first op is D reg */
 		ins[0] |= (opnd[0].ea << 9) | 040;	/* reg # and reg bit */
 	} else
 	{
 		if (opnd[0].ea != IMM)
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		goto opf8l1;
 	}
 	ins[0] |= f1mode[modelen] | opnd[1].ea;	/* put in size and reg # */
@@ -571,21 +575,23 @@ static VOID opf9(NOTHING)
 	{									/* clr, not, etc */
 		ins[0] |= f1mode[modelen];		/* add size bits */
 		if (!dataalt(&opnd[0]) || pcea(&opnd[0]))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 	} else if (format == 25)
 	{									/* tas,scc, etc */
 		if (ckareg(&opnd[0]) || pcea(&opnd[0]) || opnd[0].ea == IMM)
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 	} else if (format == 14)
 	{									/* stop */
 		if (ins[0] == RTD && !m68010)
-			uerr(8);
+			uerr(8); /* opcode for 68010 only */
 		if (modelen != 2 || opnd[0].ea != IMM)
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		doea(&opnd[0]);
 		return;
 	} else if (!controlea(&opnd[0]))	/* jmp, jsr, etc */
-		uerr(20);
+	{
+		uerr(20); /* illegal addressing mode */
+	}
 	ins[0] |= opnd[0].ea;
 	doea(&opnd[0]);
 }
@@ -600,15 +606,15 @@ static VOID opf11(NOTHING)
 	if (format == 19)
 	{									/* link */
 		if (!ckareg(&opnd[0]))
-			uerr(33);
+			uerr(33); /* register required */
 		if (opnd[1].ea != IMM)
-			uerr(17);
+			uerr(17); /* constant required */
 	} else
 	{
 		if (!ckdreg(&opnd[0]))
-			uerr(33);
+			uerr(33); /* register required */
 		if (opnd[1].drlc != rlflg)		/* don't chk opnd[1].ea!=LADDR||SADDR */
-			uerr(22);
+			uerr(22); /* illegal relative address */
 		opnd[1].con -= (loctr + 2L);
 		cksize(&opnd[1]);
 		opnd[1].drlc = ABS;				/* not relocatable */
@@ -654,7 +660,7 @@ static VOID opf12(NOTHING)
 			return;
 		}
 	}
-	uerr(20);
+	uerr(20); /* illegal addressing mode */
 }
 
 
@@ -669,18 +675,18 @@ static VOID opf13(NOTHING)
 	if (format == 18)
 	{									/* trap */
 		if (opnd[0].con < 0 || opnd[0].con > 15)
-			uerr(15);
+			uerr(15); /* illegal constant */
 		ins[0] |= (short)opnd[0].con;
 		return;
 	}
 	if (ins[0] == UNLK)
 	{									/* unlk instr */
 		if (!ckareg(&opnd[0]))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 	} else
 	{
 		if (!ckdreg(&opnd[0]))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		if (format == 13)				/* ext */
 			ins[0] |= f13mode[modelen];
 	}
@@ -697,12 +703,12 @@ static VOID opf15(NOTHING)
 	if (get2ops())
 		return;
 	if (!ckareg(&opnd[1]))
-		uerr(33);
+		uerr(33); /* register required */
 	if (format == 30)
 	{
 		i = 0700;
 		if (!controlea(&opnd[0]))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 	} else
 	{
 		i = f15mode[modelen];
@@ -729,11 +735,11 @@ static VOID opf17(NOTHING)
 			return;
 	}
 	if (opnd[0].ea != IMM || !altea(&opnd[1]) || pcea(&opnd[1]))
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	if (opnd[0].con <= 0 || opnd[0].con > 8)
-		uerr(15);
+		uerr(15); /* illegal constant */
 	if (modelen == 1 && !dataea(&opnd[1]))
-		uerr(34);
+		uerr(34); /* illegal size */
 	ins[0] |= f1mode[modelen] | (((short)opnd[0].con & 7) << 9) | opnd[1].ea;
 	doea(&opnd[1]);
 }
@@ -779,7 +785,7 @@ PP(const short *ap;)
 			pitw++;
 			if ((j = getreg()) < 0)
 			{
-				uerr(40);
+				uerr(40); /* backward assignment to * */
 				break;
 			}
 			while (i <= j)
@@ -794,7 +800,7 @@ PP(const short *ap;)
 			break;
 	}
 	if (!mask)
-		uerr(40);
+		uerr(40); /* backward assignment to * */
 	return mask;
 }
 
@@ -816,7 +822,7 @@ static VOID opf20(NOTHING)
 			pitw++;
 		}
 		if (!ckcomma())
-			uerr(10);
+			uerr(10); /* invalid second operand */
 	} else
 	{
 		dr = 02000;
@@ -825,7 +831,7 @@ static VOID opf20(NOTHING)
 	if (dr)
 	{
 		if (!ckcomma())
-			uerr(10);
+			uerr(10); /* invalid second operand */
 		if (pitw->itty != ITRM)
 		{
 			j = getrlist(regmsk1);		/* mem to regs */
@@ -842,7 +848,7 @@ static VOID opf20(NOTHING)
 	}
 	i = opnd[0].ea & 070;
 	if (!controlea(&opnd[0]) && i != INDINC && i != DECIND)
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	if (modelen == 4)					/* long */
 		ins[0] |= 0100;
 	ins[0] |= opnd[0].ea | dr;
@@ -879,11 +885,11 @@ static VOID opf21(NOTHING)
 		p = &opnd[0];
 	} else
 	{
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 		return;
 	}
 	if ((p->ea & 070) != INDDISP)
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	if (modelen == 4)
 		m |= 0100;
 	ins[0] |= (d << 9) | m | (p->ea & 7);
@@ -899,11 +905,11 @@ static VOID opf22(NOTHING)
 	if (get2ops())
 		return;
 	if (opnd[0].ea != IMM)
-		uerr(17);
+		uerr(17); /* constant required */
 	if (opnd[0].con > 255L || opnd[0].con < -256L)
-		uerr(15);
+		uerr(15); /* illegal constant */
 	if (!ckdreg(&opnd[1]))
-		uerr(33);
+		uerr(33); /* register required */
 	ins[0] |= (opnd[1].ea << 9) | ((short)opnd[0].con & 0xff);
 }
 
@@ -928,7 +934,7 @@ static VOID opf23(NOTHING)
 		uerr(20);						/* or error */
 	}
 	if (!dataalt(&opnd[1]) || pcea(&opnd[1]))
-		uerr(20);
+		uerr(20); /* illegal addressing mode */
 	ins[0] |= (opnd[0].ea << 9) | f23mode[modelen] | opnd[1].ea;
 	doea(&opnd[1]);
 }
@@ -941,35 +947,35 @@ static VOID opf31(NOTHING)
 
 	instrlen += 2;
 	if (!m68010)
-		uerr(8);
+		uerr(8); /* opcode for 68010 only */
 
 	if (get2ops())
 		return;
 	if (ins[0] == MOVEC)
 	{
 		if (modelen == BYTESIZ)
-			uerr(34);
-		if (cksprg(&opnd[0], USP) || cksprg(&opnd[0], SFC) || cksprg(&opnd[0], DFC) || cksprg(&opnd[0], VSR))
+			uerr(34); /* illegal size */
+		if (cksprg(&opnd[0], USP) || cksprg(&opnd[0], SFC) || cksprg(&opnd[0], DFC) || cksprg(&opnd[0], VBR))
 		{
 			cntrl = &opnd[0];
 			genrl = &opnd[1];
 		} else
 		{
-			if (!cksprg(&opnd[1], USP) && !cksprg(&opnd[1], SFC) && !cksprg(&opnd[1], DFC) && !cksprg(&opnd[1], VSR))
-				uerr(18);
+			if (!cksprg(&opnd[1], USP) && !cksprg(&opnd[1], SFC) && !cksprg(&opnd[1], DFC) && !cksprg(&opnd[1], VBR))
+				uerr(18); /* illegal format */
 			ins[0] |= 1;				/* direction Rn --> Rc */
 			cntrl = &opnd[1];
 			genrl = &opnd[0];
 		}
 		if (!ckreg(genrl))
-			uerr(18);
+			uerr(18); /* illegal format */
 		*pins = ((genrl->ea) << 12) & 0xF000;
 		if (cksprg(cntrl, DFC))
 			*pins |= DFC_CR;
 		else if (cksprg(cntrl, USP))
 			*pins |= USP_CR;
-		else if (cksprg(cntrl, VSR))
-			*pins |= VSR_CR;
+		else if (cksprg(cntrl, VBR))
+			*pins |= VBR_CR;
 		/* else... *pins |= SFC_CR; (SFC_CR == 0) */
 	} else
 	{									/* MOVES */
@@ -987,7 +993,7 @@ static VOID opf31(NOTHING)
 		}
 		*pins |= ((genrl->ea) << 12) & 0xF000;
 		if (!memalt(eaop) || pcea(eaop) || ckreg(eaop))
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		ins[0] |= eaop->ea;
 		doea(eaop);
 	}
@@ -1039,7 +1045,10 @@ static adirect const opfary[] = {
 static VOID gcist(NOTHING)
 {
 	if (stbuf[0].itty != ITBS)			/* beginning of statement */
+	{
+		rpterr(_("internal: not at beginning of stmt"));
 		asabort();
+	}
 	format = opcpt->flags & OPFF;
 	in_err = 0;							/* no error this instruction, yet */
 	ival.p = 0;							/* initial value for possible operand */
@@ -1053,9 +1062,10 @@ static VOID gcist(NOTHING)
 	{									/* operands */
 		if (!format)
 		{
-			uerr(9);
+			uerr(9); /* invalid first operand */
 		} else if (format > LSTFRMT)		/* was a magic number... */
 		{
+			rpterr(_("internal: illegal format %d"), format);
 			asabort();
 		} else
 		{
@@ -1063,12 +1073,12 @@ static VOID gcist(NOTHING)
 		}
 	}
 	if (!ckein() && !in_err)			/* at end of statement ?? */
-		uerr(6);
+		uerr(6); /* illegal expr */
 	print(1);							/* print source */
 
 	loctr += p1inlen;
 	if (!in_err && p1inlen != instrlen)	/* 2nd pass error recovery */
-		uerr(38);
+		uerr(38); /* invalid instruction length */
 	outinstr();							/* write out instr binary */
 }
 
@@ -1102,13 +1112,13 @@ VOID pass2(NOTHING)
 	p2flg = 1;							/* pass two */
 	if (fseek(ifn, 0L, SEEK_SET) < 0)
 	{									/* beginning of source */
-		rpterr("seek error on source file\n");
+		rpterr(_("seek error on source file"));
 		asabort();
 	}
 	fflush(itfn);
 	if (fseek(itfn, 0L, SEEK_SET) < 0)
 	{
-		rpterr("seek error on intermediate file\n");
+		rpterr(_("seek error on intermediate file"));
 		asabort();
 	}
 	fchr = gchr();						/* get first char */
@@ -1133,7 +1143,8 @@ VOID pass2(NOTHING)
 				(*dirop) ();			/* handle directive */
 			} else
 			{
-				uerr(21);
+				rpterr(_("internal: invalid directive %d"), i);
+				asabort();
 			}
 		} else
 		{

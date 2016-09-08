@@ -22,7 +22,7 @@
 long getl(P(FILE *) sp)
 PP(register FILE *sp;)					/* the stream to get from   */
 {
-	register unsigned int w1 = getw(sp);
-	register unsigned int w2 = getw(sp);
-	return ((long)w1 << 16) | w2;
+	register long w1;
+	w1 = getw(sp);
+	return (w1 << 16) | (unsigned short)getw(sp);
 }

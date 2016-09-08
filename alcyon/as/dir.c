@@ -12,8 +12,9 @@
 /* code to handle conditional assembly directives */
 
 
-static short const regmsk[] = { 0100000, 040000, 020000, 010000, 04000, 02000, 01000, 0400, 0200,
-	0100, 040, 020, 010, 4, 2, 1
+static short const regmsk[] = {
+	0x8000, 0x4000, 0x2000, 0x1000, 0x0800, 0x0400, 0x0200, 0x0100,
+	0x0080, 0x0040, 0x0020, 0x0010, 0x0008, 0x0004, 0x0002, 0x0001
 };
 
 
@@ -29,7 +30,7 @@ VOID hopd(NOTHING)
 	setname();							/* move label into main table */
 	if ((lblpt = lemt(TRUE, oirt)) != lmte)
 	{
-		xerr(5);						/* opcode redefined */
+		xerr(5, lbt);					/* opcode redefined */
 		return;
 	}
 	mmte();								/* make main table entry */
@@ -42,7 +43,7 @@ VOID hopd(NOTHING)
 	lblpt->flags |= ival.l | SYIN;		/* remember format */
 	if (fchr != ',')
 	{									/* field separator */
-		xerr(10);
+		xerr(10); /* invalid second operand */
 		return;
 	}
 	expr(p1gi);							/* get opcode value */
@@ -78,7 +79,7 @@ VOID hequ(NOTHING)
 	}
 	if (lblpt->flags & SYXR)
 	{
-		xerr(29);
+		xerr(29); /* bad use of symbol */
 		return;
 	}
 	lblpt->flags |= SYDF | SYEQ;		/* defined & equate */
@@ -86,7 +87,7 @@ VOID hequ(NOTHING)
 	modelen = LONGSIZ;
 	expr(p1gi);
 	equflg = 0;
-	if (itype == ITSY && ival.ptrw2->flags & SYER)
+	if (itype == ITSY && (ival.ptrw2->flags & SYER))
 	{
 		lblpt->flags |= SYER;			/* equated register */
 		ival.l = ival.ptrw2->vl1;
@@ -97,21 +98,23 @@ VOID hequ(NOTHING)
 	}
 	if (inoffset && reloc != ABS)
 	{
-		xerr(11);
+		xerr(11); /* absolute value required */
 		return;
 	}
-	if (initflg)						/* doing symbol table initialization */
-		lblpt->flags |= SYIN;			/* internal symbol */
 	lblpt->vl1 = ival.l;
 	if (reloc == DATA)					/* check relocation */
 	{
 		lblpt->flags |= SYRA;			/* DATA relocatable */
 	} else if (reloc == TEXT)
+	{
 		lblpt->flags |= SYRO;			/* TEXT relocatable */
-	else if (reloc == BSS)
+	} else if (reloc == BSS)
+	{
 		lblpt->flags |= SYBS;			/* BSS relocatable */
-	else if (fchr == ',' && (fchr = gchr()) == 'r')
+	} else if (fchr == ',' && (fchr = gchr()) == 'r')
+	{
 		lblpt->flags |= SYER;			/* equated register */
+	}
 	if (refpc)							/* flag directive is pc relative */
 		lblpt->flags |= SYPC;
 	igrst();
@@ -189,29 +192,33 @@ VOID heven(NOTHING)
 /* process globl directive */
 VOID hent(NOTHING)
 {
-	while (1)
+	for (;;)
 	{
 		gterm(TRUE);					/* get entry symbol */
 		if (itype != ITSY)
 		{								/* error if not symbol */
-			xerr(28);
+			xerr(28); /* symbol required */
 			return;
 		}
 		if ((lblpt = lemt(FALSE, sirt)) == lmte)	/* look up in main table */
+		{
 			mmte();						/* not there, make new entry */
-		else if (lblpt->flags & SYER)	/* already there */
-			uerr(29);
+		} else if (lblpt->flags & SYER)	/* already there */
+		{
+			uerr(29);	/* bad use of symbol */
+		}
 		lblpt->flags |= SYGL;			/* symbol is an entry */
 		if (lblpt->flags & SYXR)		/* been thru hext code */
 			lblpt->flags &= ~(SYXR | SYDF);	/* reset for init of .comm */
 		if (inoffset && reloc != ABS)
 		{
-			xerr(11);
+			xerr(11); /* absolute value required */
 			return;
 		}
 		if (fchr == ',')				/* skip ',' between entries */
+		{
 			fchr = gchr();
-		else
+		} else
 		{
 			igrst();					/* statement finished */
 			return;
@@ -226,13 +233,16 @@ VOID hext(NOTHING)
 	gterm(TRUE);						/* get external symbol */
 	if (itype != ITSY)
 	{									/* error if not symbol */
-		xerr(28);
+		xerr(28); /* symbol required */
 		return;
 	}
 	if ((lblpt = lemt(FALSE, sirt)) == lmte)	/* look up in main table */
+	{
 		mmte();							/* not there, make new entry */
-	else if ((lblpt->flags & SYDF) && (lblpt->flags & SYXR) == 0)	/* already there */
-		uerr(29);
+	} else if ((lblpt->flags & SYDF) && (lblpt->flags & SYXR) == 0)	/* already there */
+	{
+		uerr(29); /* bad use of symbol */
+	}
 	lblpt->flags |= SYXR | SYDF;		/* symbol is an external */
 	mkextidx(lblpt);					/* put into external table */
 	if (fchr == ',')
@@ -241,7 +251,7 @@ VOID hext(NOTHING)
 		gterm(TRUE);
 		if (itype != ITCN)
 		{
-			xerr(17);
+			xerr(17); /* constant required */
 			return;
 		}
 		lblpt->vl1 = ival.l;			/* # bytes of storage required */
@@ -258,12 +268,11 @@ PP(struct symtab *p;)
 {
 	if (extindx >= EXTSZ)
 	{									/* check for overflow of external symbol tbl */
-		rpterr("overflow of external table\n");
-		endit();
+		rpterr(_("overflow of external table"));
+		asabort();
 	}
-	p->vextno = pexti;
-	extbl[pexti++] = p;						/* save external in external table */
-	extindx++;
+	p->vextno = extindx;
+	extbl[extindx++] = p;						/* save external in external table */
 }
 
 
@@ -271,27 +280,23 @@ PP(struct symtab *p;)
 VOID hend(NOTHING)
 {
 	inoffset = 0;						/* turn off inoffset mode */
-	lblpt = 0;							/* no label */
+	lblpt = NULL;						/* no label */
 	opitb();							/* output beginning of statement */
 	igrst();							/* ignore operands */
 	stbuf[0].itrl = itwc;				/* number of it entries */
 	wostb();							/* write out statement buffer */
 	if (pitix > 0)						/* some it in buffer */
+	{
 		if (fwrite(itbuf, 1, ITBSZ * (sizeof itbuf[0]), itfn) != ITBSZ * (sizeof itbuf[0]))
 		{
-			rpterr("I/O write error on it file\n");
-			endit();
+			rpterr(_("I/O write error on it file"));
+			asabort();
 		}
-	if (initflg)
-	{
-		putsymtab();
-		printf("68000 assembler initialized\n");
-		endit();
 	}
 	if ((fchr = gchr()) != CEOF)
-		rpterr("end statement not at end of source\n");
+		rpterr(_("end statement not at end of source"));
 	savelc[rlflg] = loctr;				/* last location on current reloc base */
-	fixunds();							/* make golbals and maybe undefineds external */
+	fixunds();							/* make globals and maybe undefineds external */
 	if (!didorg)						/* did not assign to location counter */
 		pass1a();						/* resolve short branches */
 	pass2();							/* assembler pass 2 */
@@ -364,7 +369,7 @@ VOID horg(NOTHING)
 	expr(p1gi);							/* value of new relocation counter */
 	if (reloc != rlflg && reloc != ABS)
 	{
-		xerr(27);
+		xerr(27); /* relocation error */
 		return;
 	}
 	if (ival.l < loctr)
@@ -430,7 +435,7 @@ static int mkmask(NOTHING)
 			fchr = gchr();
 			if ((j = chkreg()) == -1)
 			{
-				xerr(40);
+				xerr(40); /* backward assignment to * */
 				return -1;
 			}
 			while (i <= j)
@@ -460,25 +465,28 @@ VOID hreg(NOTHING)
 	setname();							/* move label into main table */
 	if ((lblpt = lemt(FALSE, sirt)) != lmte)
 	{
-		xerr(5);						/* opcode redefined */
+		xerr(5, lbt);					/* opcode redefined */
 		return;
 	}
 	if (inoffset)
+	{
 		if (reloc != ABS)
 		{
-			xerr(11);
+			xerr(11); /* absolute value required */
 			return;
 		}
+	}
 	mmte();								/* make main table entry */
 	if ((mask = mkmask()) == -1)
 	{
-		xerr(6);
+		xerr(6); /* illegal expr */
 		return;
 	}
 	lblpt->flags |= SYDF | SYEQ | SYRM;	/* register mask, defined & equated */
 	lblpt->vl1 = mask;
 	igrst();
 }
+
 
 /* Define constant block */
 VOID hdcb(NOTHING)
@@ -624,7 +632,7 @@ VOID send(NOTHING)
 	fflush(lfil);
 	i = 2 + 3 * 4;
 	if (fseek(lfil, (long) i, SEEK_SET) < 0 || lputl(&stlen, lfil) < 0)
-		rpterr("I/O error on loader output file\n");
+		rpterr(_("I/O error on loader output file"));
 	endit();
 }
 
@@ -638,7 +646,7 @@ VOID sds(NOTHING)
 		expr(p2gi);
 		if (itype != ITCN)
 		{
-			uerr(13);
+			uerr(13);		/* undefined symbol */
 			return;
 		}
 		ival.l *= modelen;
@@ -671,7 +679,7 @@ VOID sdcb(NOTHING)
 	expr(p2gi);
 	if (modelen == BYTESIZ && (ival.l < -128 || ival.l >= 256 || reloc != ABS))
 	{
-		uerr(20);
+		uerr(20);		/* illegal addressing mode */
 		ival.l = 0;
 		reloc = ABS;
 	}
@@ -810,7 +818,7 @@ PP(int dtyp;)
 			pitw--;						/* expr passed a token */
 		if (itype != ITCN && reloc != EXTRN)
 		{								/* must be constant */
-			uerr(13);
+			uerr(13);	/* undefined symbol */
 			ival.l = 0;
 			reloc = ABS;
 		}
@@ -820,7 +828,7 @@ PP(int dtyp;)
 		{								/* defining a byte */
 			if (ival.l < -128 || ival.l >= 256 || reloc != ABS)
 			{							/* not a byte */
-				uerr(20);
+				uerr(20); /* illegal addressing mode */
 				ival.l = 0;
 				reloc = ABS;
 			}
@@ -926,7 +934,7 @@ static int cmp_ops(NOTHING)
 
 	if (fchr != '\'')
 	{
-		xerr(9);
+		xerr(9); /* invalid first operand */
 		return FALSE;
 	}
 	len1 = len2 = 0;
@@ -938,12 +946,12 @@ static int cmp_ops(NOTHING)
 	}
 	if ((fchr = gchr()) != ',')
 	{
-		xerr(9);
+		xerr(9); /* invalid first operand */
 		return FALSE;
 	}
 	if ((fchr = gchr()) != '\'')
 	{
-		xerr(10);
+		xerr(10); /* invalid second operand */
 		return FALSE;
 	}
 	while ((fchr = gchr()) && fchr != '\'')

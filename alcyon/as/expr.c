@@ -62,7 +62,7 @@ PP(int rv2;)
 		return rv1;
 	if (rv1 == ABS || rv2 == ABS)
 		return rv1 + rv2;				/* the one that is not ABS */
-	uerr(27);
+	uerr(27);	/* relocation error */
 	return ABS;
 }
 
@@ -73,12 +73,12 @@ PP(int rv1;)
 PP(int rv2;)
 {
 	if (rv2 == EXTRN)
-		uerr(26);
+		uerr(26);	/* endc expected */
 	if (rv1 == rv2)
 		return ABS;
 	if (rv2 == ABS)
 		return rv1 + rv2;
-	uerr(27);
+	uerr(27); /* relocation error */
 	return ABS;
 }
 
@@ -89,7 +89,7 @@ PP(int rv1;)
 PP(int rv2;)
 {
 	if (rv1 != ABS || rv2 != ABS)
-		uerr(27);
+		uerr(27); /* relocation error */
 	return ABS;
 }
 
@@ -137,7 +137,7 @@ PP(int reloc_val;)
 
 static VOID exerr(NOTHING)
 {
-	uerr(6);
+	uerr(6); /* illegal expr */
 	ival.l = 0;
 	itype = ITCN;
 	reloc = ABS;
@@ -167,7 +167,7 @@ PP(struct it *avwrd;)
 	}
 	if (vwrd->itty != ITSY)
 	{
-		uerr(6);
+		uerr(6); /* illegal expr */
 		rval = ABS;
 		return 0;
 	}
@@ -179,7 +179,7 @@ PP(struct it *avwrd;)
 	}
 	if ((p->flags & SYDF) != SYDF || (p->flags & SYER))
 	{
-		uerr(6);
+		uerr(6); /* illegal expr */
 		rval = ABS;
 		return 0;
 	}
@@ -393,12 +393,12 @@ PP(aexpr iploc;)
 	{
 		if (itr >= TREELEN - 2)
 		{
-			rpterr("expr tree overflow\n");
+			rpterr(_("expr tree overflow"));
 			asabort();
 		}
 		if (iop >= OPSTLEN - 1)
 		{
-			rpterr("expr opstk overflow\n");
+			rpterr(_("expr opstk overflow"));
 			asabort();
 		}
 		(*iploc) ();					/* get an input term */
@@ -552,7 +552,9 @@ VOID p1gi(NOTHING)
 		{								/* got a symbol */
 			ival.ptrw2 = lemt(FALSE, sirt);	/* look up in main table */
 			if (ival.ptrw2 == lmte)		/* not there before */
+			{
 				mmte();					/* put it in table */
+			}
 		} else if (itype == ITCN)
 		{
 			exitm.itrl = reloc;

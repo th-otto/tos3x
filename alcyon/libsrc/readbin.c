@@ -64,9 +64,7 @@ PP(register long bytes;)							/* =  # bytes to xfer       */
 		}
 		if (bytes == 0)					/* Zero byte count now?     */
 		{
-			if (fp->offset > fp->hiwater)	/* Adjust hiwater if        */
-				fp->hiwater = fp->offset;	/*      necessary   */
-			return (xbytes);			/* Yes, just return     */
+			return xbytes;		    	/* Yes, just return     */
 		}
 		xsector++;						/* Bump sector pointer      */
 	}
@@ -88,8 +86,6 @@ PP(register long bytes;)							/* =  # bytes to xfer       */
 	bytes -= i * SECSIZ;				/* Update byte count        */
 	buff += i * SECSIZ;					/* Update buffer address    */
 	
-	if (fp->offset > fp->hiwater)		/* Adjust hiwater       */
-		fp->hiwater = fp->offset;		/*        if needed */
 	if (i != nsector)					/* Short read??         */
 	{
 		fp->flags |= ATEOF;				/* set EOF Flag         */
@@ -127,10 +123,10 @@ PP(register long bytes;)							/* =  # bytes to xfer       */
 	xbytes = _pc_readblk(fp, fp->offset, buff, bytes);
 	if (xbytes == 0)					/* EOF or error condition   */
 		fp->flags |= ATEOF;				/* Set EOF flag         */
+	if (xbytes < 0)
+		RETERR(-1, EIO);
 	fp->offset += xbytes;				/* Calculate new offset     */
 #endif
 
-	if (fp->offset > fp->hiwater)		/* Fix up hiwater mark      */
-		fp->hiwater = fp->offset;
 	return xbytes;					/* Read fully satisfied     */
 }

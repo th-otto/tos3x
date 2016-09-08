@@ -43,15 +43,10 @@ PP(int fd;)								/* file descriptor      */
 
 #if CPM
 	{
-	register char *p1, *p2;
-	register long xsector;					/* where we are in file     */
-	register int xuser;						/* Current user #       */
-
-	if (fp->flags & DIRTY)
-	{									/* File been used?      */
-		fp->offset = fp->hiwater;		/* yes: this must be right  */
-	} else
-	{
+		register char *p1, *p2;
+		register long xsector;					/* where we are in file     */
+		register int xuser;						/* Current user #       */
+	
 		xuser = _chkuser(fp->user);		/* Check user # for change  */
 		__OSIF(FILSIZ, &(fp->fcb));		/* Do BDOS call         */
 		_uchkuser(fp->user, xuser);		/* Change back if needed    */
@@ -85,17 +80,13 @@ PP(int fd;)								/* file descriptor      */
 				while (p1 < p2 && *p1 != EOFCHAR)	/* look for EOFCHAR     */
 					p1++;
 				fp->offset += p1 - &(fp->buffer[0]);	/* update offset to EOF     */
-			}
-			else
+			} else
+			{
 				fp->offset = 0;			/* o.w. beginning of file   */
-		} else
-		{								/* Binary file:compute size */
-			fp->offset = (xsector + 1) << 7;	/* set to end of last record */
+			}
 		}
 	}
-	}
 #endif
-	fp->hiwater = fp->offset;			/* whatever happened, set it */
 	fp->flags |= ATEOF;					/* make sure they know      */
 	return fp->offset;					/* this is it           */
 }

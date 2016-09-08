@@ -40,7 +40,7 @@ register size_t bytes;							/* =  requested byte count  */
 
 	register char *p;						/* Temp pointer         */
 
-	static struct sgttyb *tyb;			/* TTY info ptr (at fp->fcb) */
+	struct sgttyb *tyb;					/* TTY info ptr (at fp->fcb) */
 
 	if (fp->flags & ISSPTTY)			/* is this a special tty?   */
 	{

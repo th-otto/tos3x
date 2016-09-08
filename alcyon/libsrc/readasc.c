@@ -87,8 +87,6 @@ PP(register long bytes;)							/* =  # bytes to xfer       */
 			if (c == EOFCHAR)			/* ^Z??             */
 			{							/* Yes,             */
 				fp->flags |= ATEOF;		/*  Set EOF flag        */
-				if (fp->offset > fp->hiwater)	/* set hiwater mark     */
-					fp->hiwater = fp->offset;	/*     if necessary     */
 				return (xbytes - bytes);	/* Return number read       */
 			}
 			else if (c == '\r')			/* Carriage return?     */
@@ -115,15 +113,17 @@ PP(register long bytes;)							/* =  # bytes to xfer       */
 	while (bytes > 0 && (fp->flags & ATEOF) == 0)	/* Until read is satisfied  */
 	{
 		ii = _pc_readblk(fp, fp->offset, buff, bytes);
+		if (ii < 0)
+			RETERR(-1, EIO);
 		for (jj = 0; jj < ii; ++jj)		/* EOF scan         */
 			if (((char *)buff)[jj] == EOFCHAR)
 				break;					/* Last char EOF?       */
-		if (ii == 0 || ((char *)buff)[jj] == EOFCHAR)
+		jj = _cr_collapse(buff, jj);	/* Stomp out Returns (0x13) */
+		if (jj == 0)
 		{								/* No chars or Last char EOF? */
-			ii = jj;					/* Num valid chars      */
 			fp->flags |= ATEOF;			/* Yes, mark file       */
+			break;
 		}
-		jj = _cr_collapse(buff, ii);	/* Stomp out Returns (0x13) */
 		fp->offset += ii;				/* Calculate new offset     */
 #ifdef __ALCYON__
 		buff += jj;						/* advance the buffer ptr   */
@@ -136,7 +136,5 @@ PP(register long bytes;)							/* =  # bytes to xfer       */
 #endif
 
 
-	if (fp->offset > fp->hiwater)		/* Fix up hiwater mark      */
-		fp->hiwater = fp->offset;
 	return xbytes;					/* Read fully satisfied     */
 }

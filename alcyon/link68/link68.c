@@ -38,7 +38,6 @@ static struct hdr couthd;
 #define SZMT 300						/* initial size of the main table */
 					/* must be large enough to initialize */
 #define ICRSZMT 100						/* add to main table when run out */
-static size_t cszmt;					/* current size of main table */
 
 static struct symtab *bmte;				/* beginning of main table */
 static struct symtab *emte;				/* end of main table */
@@ -868,7 +867,6 @@ static VOID addmte(NOTHING)
 		} else
 		{								/* move end of main table */
 			emte += ICRSZMT;
-			cszmt += ICRSZMT;
 		}
 	}
 }
@@ -924,8 +922,9 @@ static VOID addsym(NOTHING)
 		p = lemt(girt);
 	 addtry2:
 	 	if (p == lmte)
+	 	{
 			mmte();
-		else
+		} else
 		{
 		 	if (chnflg && (p->ovlnum != ROOT) &&
 				(lmte->ovlnum != ROOT) && (p->ovlnum != lmte->ovlnum))
@@ -1425,7 +1424,6 @@ static VOID intsytab(NOTHING)
 	if ((long) bmte & 1)
 		bmte++;
 	lmte = bmte;						/* beginning main table */
-	cszmt = SZMT;						/* current size of main table */
 	p1 = eirt;
 	p2 = girt;
 	for (i = 0; i < SZIRT; i++, p1++, p2++)

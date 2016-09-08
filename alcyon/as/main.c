@@ -44,21 +44,12 @@ int mkstemp(char *template);
  */
 
 static const char *tdname = "";				/*  Temp files in same directory    */
-const char *idname = "0:";					/*  Init file  in user 0        */
-
-static char const tfilebase[] = "a6AXXXXXX";		/*  Temp file  basename         */
-char const initbase[] = "as68symb.dat";		/*  Init file  basename         */
+static char const tfilebase[] = "a6XXXXXX";		/*  Temp file  basename         */
 
 static int symcon;
 static int explmode;   /* explicit mode length given */
-
-static char const endstr[] = "end";
-static char const equstr[] = "equ";
-static char const evnstr[] = "even";
-static char const orgstr1[] = "~.yxzorg";
-static char const orgstr2[] = "org";
-
-#define INIT(op,ptr) pack(op,lmte); ptr=lemt(TRUE,oirt)
+static int opcval;     /* opcode */
+static int chmvq;
 
 
 /* get a temp file for the intermediate text */
@@ -76,7 +67,7 @@ PP(char *filnam;)
 	fp = fopen(filnam, "w+b");
 	if (fp != NULL)
 		return fp;
-	rpterr("temp file create error: %s %s\n", filnam, strerror(errno));
+	rpterr(_("temp file create error: %s %s"), filnam, strerror(errno));
 	endit();
 }
 
@@ -100,7 +91,7 @@ PP(register int alen;)
 
 	str1 = astr1;
 	str2 = astr2;
-	while (--alen != -1)
+	while (--alen >= 0)
 		*str1++ = *str2++;
 }
 
@@ -365,12 +356,12 @@ static VOID cisit(NOTHING)
 		col1 = 0;
 		if (itype != ITSY)
 		{								/* not a symbol */
-			uerr(2);
-			lbt[0] = 0;					/* no label */
+			uerr(2);					/* invalid label */
+			lbt[0] = 0;
 		} else
 		{
-			p2 = &lmte->name[0];
-			for (p1 = &lbt[0]; p1 < &lbt[SYNAMLEN];)
+			p2 = lmte->name;
+			for (p1 = lbt; p1 < &lbt[SYNAMLEN];)
 			{
 				*p1++ = *p2++;
 			}
@@ -393,7 +384,7 @@ static VOID cisit(NOTHING)
 			{
 				mystrncpy(tlab1, lmte->name, SYNAMLEN);	/* save current label */
 				dlabl();				/* define the last one */
-				pack(tlab1, lmte);		/* restor the old lable */
+				pack(tlab1, lmte);		/* restore the old label */
 			}
 			goto label;
 		}
@@ -429,7 +420,7 @@ static VOID cisit(NOTHING)
 		}
 	  cisi3:
 		if (ca_true)					/* report error if not in CA false */
-			xerr(3);
+			xerr(3); /* invalid opcode */
 		igrst();
 		return;
 	}
@@ -445,8 +436,8 @@ static VOID cisit(NOTHING)
 		if (inoffset)
 		{
 			if (!(NOCODE))
-			{							/* can't generate code in offset */
-				xerr(12);
+			{
+				xerr(12); /* no code or data allowed in offset */
 				return;
 			}
 		}
@@ -459,18 +450,20 @@ static VOID cisit(NOTHING)
 		return;
 	} else if (inoffset)
 	{
-		xerr(12);
+		xerr(12); /* no code or data allowed in offset */
 		return;
 	}
 
 	opcval = opcpt->vl1;				/* opcode */
 	format = opcpt->flags & OPFF;		/* format of this instr */
 	if (explmode)
+	{
 		if (!modeok())
 		{
-			xerr(16);
+			xerr(16); /* illegal extension */
 			return;
 		}
+	}
 	dlabl();							/* define label */
 	opitb();							/* beginning of statement */
 	if (format)
@@ -501,6 +494,8 @@ static VOID mloop(NOTHING)
 	opcpt = endptr;
 	hend();
 }
+
+
 /*
  * define a label if there is one to define
  *  call with:
@@ -523,14 +518,14 @@ VOID dlabl(NOTHING)
 			{
 				if (lblpt->flags & SYXR)
 				{
-					uerr(29);
-					lblpt = 0;
+					uerr(29); /* bad use of symbol */
+					lblpt = NULL;
 					return;
 				}
-				if ((lblpt->flags) & SYDF)
+				if (lblpt->flags & SYDF)
 				{
-					uerr(1);
-					lblpt = 0;
+					uerr(1, lblpt->name);	/* label redefined */
+					lblpt = NULL;
 					return;
 				}
 			}
@@ -548,7 +543,9 @@ VOID dlabl(NOTHING)
 		/* No flags to set if absolute */
 		lblpt->vl1 = loctr;				/* label value */
 	} else
-		lblpt = 0;
+	{
+		lblpt = NULL;
+	}
 }
 
 
@@ -601,7 +598,7 @@ VOID opito(NOTHING)
 			if (plevel == 1 && !numcon[opdix])
 				numcon[opdix] = 1;
 			if (lopcomma)
-				uerr(30);
+				uerr(30);	/* invalid data list */
 			lopcomma++;
 			igblk();					/* ignore blanks for 68000 C compiler */
 		} else
@@ -615,21 +612,25 @@ VOID opito(NOTHING)
 		}
 	}
 	if (chmvq)							/* changed move to moveq */
+	{
 		if (numops != 2 || immed[1] || indir[1] || numcon[1] || numsym[1] || numreg[1] >= AREGLO)
 		{
 			stbuf[2].itop.ptrw2 = moveptr;	/* change it back */
 			opcpt = moveptr;
 		}
-
+	}
+	
 	if (stbuf[2].itop.ptrw2 == cmpptr)	/* cmp -> cmpm ?? */
+	{
 		if (numreg[0] && numreg[1] && indir[0] && indir[1])
 		{
 			stbuf[2].itop.ptrw2 = cmpmptr;
 			opcpt = cmpmptr;
 		}
-
+	}
+	
 	if (lopcomma)
-		uerr(30);
+		uerr(30); /* invalid data list */
 }
 
 
@@ -707,7 +708,7 @@ VOID opitoo(NOTHING)
 	
 	if (itwc >= STMAX)
 	{									/* it overflow */
-		rpterr("i.t. overflow\n");
+		rpterr(_("i.t. overflow"));
 		asabort();
 	}
 	pitw->itty = itype;					/* type of it entry */
@@ -716,9 +717,11 @@ VOID opitoo(NOTHING)
 	if (itype == ITSY)
 	{
 		sp = lemt(FALSE, sirt);			/* look up it main table */
-		pitw->itop.ptrw2 = sp;			/* ptr to symbol entry */
 		if (sp == lmte)					/* first occurrance */
+		{
 			mmte();
+		}
+		pitw->itop.ptrw2 = sp;			/* ptr to symbol entry */
 		itwc++;							/* count entries in it buffer */
 		pitw++;
 		if (!(sp->flags & SYER))		/* is it a register? */
@@ -737,7 +740,7 @@ VOID opitoo(NOTHING)
 			tryquick();
 	}
 
-/* special characters and constants */
+	/* special characters and constants */
 	pitw->itop.p = ival.p;
 	pitw->itrl = reloc;
 	itwc++;
@@ -745,10 +748,145 @@ VOID opitoo(NOTHING)
 }
 
 
+static struct {
+	char name[4];
+	short val;
+} const regnames[] = {
+	{ "R0", 0 },
+	{ "R1", 1 },
+	{ "R2", 2 },
+	{ "R3", 3 },
+	{ "R4", 4 },
+	{ "R5", 5 },
+	{ "R6", 6 },
+	{ "R7", 7 },
+	{ "R8", 8 },
+	{ "R9", 9 },
+	{ "R10", 10 },
+	{ "R11", 11 },
+	{ "R12", 12 },
+	{ "R13", 13 },
+	{ "R14", 14 },
+	{ "R15", 15 },
+	{ "D0", 0 },
+	{ "D1", 1 },
+	{ "D2", 2 },
+	{ "D3", 3 },
+	{ "D4", 4 },
+	{ "D5", 5 },
+	{ "D6", 6 },
+	{ "D7", 7 },
+	{ "A0", 8 },
+	{ "A1", 9 },
+	{ "A2", 10 },
+	{ "A3", 11 },
+	{ "A4", 12 },
+	{ "A5", 13 },
+	{ "A6", 14 },
+	{ "A7", 15 },
+	{ "SP", 15 },
+	{ "CCR", CCR },
+	{ "SR", SR },
+	{ "USP", USP },
+	{ ".B", BYTE_ID },
+	{ ".W", WORD_ID },
+	{ ".L", LONG_ID },
+	{ "PC", PC },
+	{ "SFC", SFC },
+	{ "DFC", DFC },
+	{ "VSR", VBR },
+	{ "VBR", VBR },
+
+	{ "r0", 0 },
+	{ "r1", 1 },
+	{ "r2", 2 },
+	{ "r3", 3 },
+	{ "r4", 4 },
+	{ "r5", 5 },
+	{ "r6", 6 },
+	{ "r7", 7 },
+	{ "r8", 8 },
+	{ "r9", 9 },
+	{ "r10", 10 },
+	{ "r11", 11 },
+	{ "r12", 12 },
+	{ "r13", 13 },
+	{ "r14", 14 },
+	{ "r15", 15 },
+	{ "d0", 0 },
+	{ "d1", 1 },
+	{ "d2", 2 },
+	{ "d3", 3 },
+	{ "d4", 4 },
+	{ "d5", 5 },
+	{ "d6", 6 },
+	{ "d7", 7 },
+	{ "a0", 8 },
+	{ "a1", 9 },
+	{ "a2", 10 },
+	{ "a3", 11 },
+	{ "a4", 12 },
+	{ "a5", 13 },
+	{ "a6", 14 },
+	{ "a7", 15 },
+	{ "sp", 15 },
+	{ "ccr", CCR },
+	{ "sr", SR },
+	{ "usp", USP },
+	{ ".b", BYTE_ID },
+	{ ".w", WORD_ID },
+	{ ".l", LONG_ID },
+	{ "pc", PC },
+	{ "sfc", SFC },
+	{ "dfc", DFC },
+	{ "vsr", VBR },
+	{ "vbr", VBR },
+};
+
+
+static VOID equreg(P(const char *) name, P(int) val)
+PP(const char *name;)
+PP(int val;)
+{
+	register struct symtab *ptr;
+	
+	pack(name, lmte);
+	ptr = lemt(FALSE, sirt);
+	if (ptr != lmte)
+	{
+		uerr(1, name);	/* label redefined */
+		asabort();
+	}
+	mmte();
+	ptr->flags = SYDF | SYEQ | SYER | SYIN;
+	ptr->vl1 = val;
+}
+
+
+static struct symtab *mkopd(P(const char *) name, P(int) formt, P(unsigned short) val)
+PP(const char *name;)
+PP(int formt;)
+PP(unsigned short val;)
+{
+	register struct symtab *ptr;
+	
+	pack(name, lmte);
+	ptr = lemt(FALSE, oirt);
+	if (ptr != lmte)
+	{
+		uerr(5, name); /* opcode redefined */
+		asabort();
+	}
+	mmte();
+	ptr->flags = formt | SYIN;
+	ptr->vl1 = val;
+	return ptr;
+}
+
 
 static VOID usage(NOTHING)
 {
-	rpterr("Usage: as68 [-p] [-u] [-l] [-n] [-s d:] [-f d:] sourcefile\n");
+	rpterr(_("Usage: as68 [-p] [-u] [-l] [-n] [-s d:] [-f d:] sourcefile"));
 	exit(EXIT_FAILURE);
 }
 
@@ -758,9 +896,8 @@ PP(int argc;)
 PP(char **argv;)
 {
 	register short i;
-	size_t ttmp;
 
-	nerror = initflg = 0;
+	nerror = 0;
 
 	signal(SIGINT, rubout);
 	signal(SIGQUIT, rubout);
@@ -768,7 +905,6 @@ PP(char **argv;)
 	signal(SIGTERM, rubout);
 
 	pitix = 0;
-	pexti = 0;
 
 	if (argc <= 1)
 		usage();
@@ -783,7 +919,7 @@ PP(char **argv;)
 			break;
 
 		case 'i':						/* initialize the assembler */
-			initflg++;
+			/* ignored; no longer needed */
 			break;
 
 		case 'p':						/* produce a listing */
@@ -814,7 +950,8 @@ PP(char **argv;)
 			break;
 
 		case 's':						/* Change symbol table prefix */
-			idname = argv[i++];
+			i++;
+			/* ignored; no longer needed */
 			break;
 
 		default:
@@ -831,80 +968,199 @@ PP(char **argv;)
 	setldfn(argv[i]);
 	/* open loader file */
 	lfil = openfi(ldfn, "wb");
-
-	/* Build Symbol file name */
-	strcpy(initfnam, idname);
-	strcat(initfnam, initbase);
-
+	
 	/* get a temp file for it */
 	itfn = gettempf(itfilnam);
-	/* remember last char for unlink */
 	/* temp for text relocation bits */
 	trfil = gettempf(trfilnam);
 	/* temp for data binary */
 	dafil = gettempf(dafilnam);
 	/* temp for data relocation bits */
 	drfil = gettempf(drfilnam);
+	
+	initsy();
+	
+	/* make entries in main table for directives */
+	mdemt("opd", 0);				/* opcode definition */
+	endptr = mdemt("end", 1);		/* end statement */
+	mdemt("data", 2);				/* dsect directive(code DATA based) */
+	mdemt("text", 3);				/* psect directive(code TEXT based) */
+	equptr = mdemt("equ", 4);		/* equate */
+	mdemt("set", 5);				/* .set - same as .equ */
+	mdemt("dc", 8);					/* define byte */
+	mdemt("globl", 9);				/* define global (public) symbols */
+	mdemt("xdef", 9);				/* define global (public) symbols */
+	mdemt("xref", 9);				/* define global (public) symbols */
+	mdemt("comm", 10);				/* define external symbols */
+	mdemt("bss", 11);				/* block storage based */
+	mdemt("ds", 12);				/* block storage based */
+	evenptr = mdemt("even", 13);	/* round pc */
+	mdemt("~.yxzorg", 14);			/* internal, *= */
+	orgptr = mdemt("org", 14);		/* org location, also *= */
+	mdemt("mask2", 15);				/* assemble for mask2, ignore */
+	mdemt("reg", 16);				/* register equate */
+	mdemt("dcb", 17);				/* define block */
+	mdemt("comline", 18);			/* command line */
+	mdemt("idnt", 19);				/* relocateable id record, ignore */
+	mdemt("offset", 20);			/* define offsets */
+	mdemt("section", 21);			/* define sections */
+	mdemt("ifeq", 22);				/* ca if expr = 0 */
+	mdemt("ifne", 23);				/* ca if expr != 0 */
+	mdemt("iflt", 24);				/* ca if expr < 0 */
+	mdemt("ifle", 25);				/* ca if expr <= 0 */
+	mdemt("ifgt", 26);				/* ca if expr > 0 */
+	mdemt("ifge", 27);				/* ca if expr >= 0 */
+	mdemt("endc", 28);				/* end ca */
+	mdemt("ifc", 29);				/* ca if string compare */
+	mdemt("ifnc", 30);				/* ca if not string compare */
+	mdemt("opt", 31);				/* ignored, assemb options */
+	mdemt("ttl", 32);				/* ttl define, ignore */
+	mdemt("page", 33);				/* page define, ignore */
+	
+	/* make entries in main table for registers */
+	for (i = 0; i < sizeof(regnames) / sizeof(regnames[0]); i++)
+		equreg(regnames[i].name, regnames[i].val);
+	
+	/* make entries in opcode table */
 
-	ttmp = sizeof(struct symtab) * SZMT;
-	bmte = (struct symtab *)sbrk(ttmp);
-	memset(bmte, 0, ttmp);
-	/* end of main table */
-	emte = (struct symtab *)((char *)bmte + ttmp);				/* end of main table */
-
-	if (initflg)
-	{
-		/* initializing the main table */
-		lmte = bmte;
-		for (i = 0; i <= SZIRT - 2; i += 2)
-		{
-			sirt[i] = (struct symtab *)&sirt[i];			/* initialize the initial ref tables */
-			sirt[i + 1] = 0;
-			oirt[i] = (struct symtab *)&oirt[i];
-			oirt[i + 1] = 0;
-		}
-
-		/* make entries in main table for directives */
-		mdemt("opd", 0);				/* opcode definition */
-		mdemt(endstr, 1);				/* end statement */
-		mdemt("data", 2);				/* dsect directive(code DATA based) */
-		mdemt("text", 3);				/* psect directive(code TEXT based) */
-		mdemt(equstr, 4);				/* equate */
-		mdemt("set", 5);				/* .set - same as .equ */
-		mdemt("dc", 8);					/* define byte */
-		mdemt("globl", 9);				/* define global (public) symbols */
-		mdemt("xdef", 9);				/* define global (public) symbols */
-		mdemt("xref", 9);				/* define global (public) symbols */
-		mdemt("comm", 10);				/* define external symbols */
-		mdemt("bss", 11);				/* block storage based */
-		mdemt("ds", 12);				/* block storage based */
-		mdemt(evnstr, 13);				/* round pc */
-		mdemt(orgstr1, 14);				/* internal, *= */
-		mdemt(orgstr2, 14);				/* org location, also *= */
-		mdemt("mask2", 15);				/* assemble for mask2, ignore */
-		mdemt("reg", 16);				/* register equate */
-		mdemt("dcb", 17);				/* define block */
-		mdemt("comline", 18);			/* command line */
-		mdemt("idnt", 19);				/* relocateable id record, ignore */
-		mdemt("offset", 20);			/* define offsets */
-		mdemt("section", 21);			/* define sections */
-		mdemt("ifeq", 22);				/* ca if expr = 0 */
-		mdemt("ifne", 23);				/* ca if expr != 0 */
-		mdemt("iflt", 24);				/* ca if expr < 0 */
-		mdemt("ifle", 25);				/* ca if expr <= 0 */
-		mdemt("ifgt", 26);				/* ca if expr > 0 */
-		mdemt("ifge", 27);				/* ca if expr >= 0 */
-		mdemt("endc", 28);				/* end ca */
-		mdemt("ifc", 29);				/* ca if string compare */
-		mdemt("ifnc", 30);				/* ca if not string compare */
-		mdemt("opt", 31);				/* ignored, assemb options */
-		mdemt("ttl", 32);				/* ttl define, ignore */
-		mdemt("page", 33);				/* page define, ignore */
-	} else
-	{
-		/* read initialized main table */
-		getsymtab();
-	}
+	mkopd("abcd",    4, 0140400);
+	addptr = mkopd("add",    1, 0150000);
+	addaptr = mkopd("adda",    15, 0150000);
+	addiptr = mkopd("addi",    2, 0003000);
+	addqptr = mkopd("addq",    17, 0050000);
+	mkopd("inc",    16, 0050000);
+	mkopd("addx",    27, 0150400);
+	andptr = mkopd("and",    1, 0140000);
+	andiptr = mkopd("andi",    2, 0001000);
+	mkopd("asl",    8, 0160400);
+	mkopd("asr",    8, 0160000);
+	mkopd("bcc",    6, 0062000);
+	mkopd("bcs",    6, 0062400);
+	mkopd("beq",    6, 0063400);
+	mkopd("bze",    6, 0063400);
+	mkopd("bge",    6, 0066000);
+	mkopd("bgt",    6, 0067000);
+	mkopd("bhi",    6, 0061000);
+	mkopd("bhis",    6, 0062000);
+	mkopd("bhs",    6, 0062000);
+	mkopd("ble",    6, 0067400);
+	mkopd("blo",    6, 0062400);
+	mkopd("bls",    6, 0061400);
+	mkopd("blos",    6, 0061400);
+	mkopd("blt",    6, 0066400);
+	mkopd("bmi",    6, 0065400);
+	mkopd("bne",    6, 0063000);
+	mkopd("bnz",    6, 0063000);
+	mkopd("bpl",    6, 0065000);
+	mkopd("bvc",    6, 0064000);
+	mkopd("bvs",    6, 0064400);
+	mkopd("bchg",    7, 0000100);
+	mkopd("bclr",    7, 0000200);
+	mkopd("bra",    6, 0060000);
+	mkopd("bt",    6, 0060000);
+	mkopd("bset",    7, 0000300);
+	bsrptr = mkopd("bsr",    6, 0060400);
+	mkopd("btst",    7, 0000000);
+	mkopd("chk",    26, 0040600);
+	mkopd("clr",    24, 0041000);
+	cmpptr = mkopd("cmp",    26, 0130000);
+	cmpaptr = mkopd("cmpa",    15, 0130000);
+	cmpiptr = mkopd("cmpi",    2, 0006000);
+	cmpmptr = mkopd("cmpm",    10, 0130410);
+	mkopd("dbcc",    11, 0052310);
+	mkopd("dbcs",    11, 0052710);
+	mkopd("dblo",    11, 0052710);
+	mkopd("dbeq",    11, 0053710);
+	mkopd("dbze",    11, 0053710);
+	mkopd("dbra",    11, 0050710);
+	mkopd("dbf",    11, 0050710);
+	mkopd("dbge",    11, 0056310);
+	mkopd("dbgt",    11, 0057310);
+	mkopd("dbhi",    11, 0051310);
+	mkopd("dbhs",    11, 0051310);
+	mkopd("dble",    11, 0057710);
+	mkopd("dbls",    11, 0051710);
+	mkopd("dblt",    11, 0056710);
+	mkopd("dbmi",    11, 0055710);
+	mkopd("dbne",    11, 0053310);
+	mkopd("dbnz",    11, 0053310);
+	mkopd("dbpl",    11, 0055310);
+	mkopd("dbt",    11, 0050310);
+	mkopd("dbvc",    11, 0054310);
+	mkopd("dbvs",    11, 0054710);
+	mkopd("divs",    5, 0100700);
+	mkopd("divu",    5, 0100300);
+	eorptr = mkopd("eor",    23, 0130000);
+	eoriptr = mkopd("eori",    2, 0005000);
+	exgptr = mkopd("exg",    12, 0140400);
+	mkopd("ext",    13, 0044000);
+	mkopd("jmp",    9, 0047300);
+	jsrptr = mkopd("jsr",    9, 0047200);
+	mkopd("illegal",   0, 0045374);
+	mkopd("lea",    30, 0040700);
+	mkopd("link",    19, 0047120);
+	mkopd("lsr",    8, 0160010);
+	mkopd("lsl",    8, 0160410);
+	moveptr = mkopd("move",    3, 0000000);
+	mkopd("movea",    3, 0000100);
+	mkopd("movec",    31, 0047172);
+	mkopd("movem",    20, 0044200);
+	mkopd("movep",    21, 0000010);
+	moveqptr = mkopd("moveq",    22, 0070000);
+	mkopd("moves",    31, 0007000);
+	mkopd("muls",    5, 0140700);
+	mkopd("mulu",    5, 0140300);
+	mkopd("nbcd",    25, 0044000);
+	mkopd("neg",    24, 0042000);
+	mkopd("negx",    24, 0040000);
+	nopptr = mkopd("nop",    0, 0047161);
+	mkopd("not",    24, 0043000);
+	orptr = mkopd("or",    1, 0100000);
+	oriptr = mkopd("ori",    2, 0000000);
+	mkopd("pea",    29, 0044100);
+	mkopd("reset",    0, 0047160);
+	mkopd("rol",    8, 0160430);
+	mkopd("ror",    8, 0160030);
+	mkopd("roxl",    8, 0160420);
+	mkopd("roxr",    8, 0160020);
+	mkopd("rtd",    14, 0047164);
+	mkopd("rte",    0, 0047163);
+	mkopd("rtr",    0, 0047167);
+	mkopd("rts",    0, 0047165);
+	mkopd("sbcd",    4, 0100400);
+	mkopd("scc",    25, 0052300);
+	mkopd("shs",    25, 0052300);
+	mkopd("scs",    25, 0052700);
+	mkopd("slo",    25, 0052700);
+	mkopd("seq",    25, 0053700);
+	mkopd("sze",    25, 0053700);
+	mkopd("sf",    25, 0050700);
+	mkopd("sge",    25, 0056300);
+	mkopd("sgt",    25, 0057300);
+	mkopd("shi",    25, 0051300);
+	mkopd("sle",    25, 0057700);
+	mkopd("sls",    25, 0051700);
+	mkopd("slt",    25, 0056700);
+	mkopd("smi",    25, 0055700);
+	mkopd("sne",    25, 0053300);
+	mkopd("snz",    25, 0053300);
+	mkopd("spl",    25, 0055300);
+	mkopd("st",    25, 0050300);
+	mkopd("svc",    25, 0054300);
+	mkopd("svs",    25, 0054700);
+	mkopd("stop",    14, 0047162);
+	subptr = mkopd("sub",    1, 0110000);
+	subaptr = mkopd("suba",    15, 0110000);
+	subiptr = mkopd("subi",    2, 0002000);
+	subqptr = mkopd("subq",    17, 0050400);
+	mkopd("dec",    16, 0050400);
+	mkopd("subx",    27, 0110400);
+	mkopd("swap",    28, 0044100);
+	mkopd("tas",    25, 0045300);
+	mkopd("trap",    18, 0047100);
+	mkopd("trapv",    0, 0047166);
+	mkopd("tst",    24, 0045000);
+	mkopd("unlk",    13, 0047130);
 	
 	rlflg = TEXT;						/* code initially TEXT based */
 	inoffset = 0;						/* not in offset mode */
@@ -914,39 +1170,8 @@ PP(char **argv;)
 	p2flg = 0;							/* pass 1 */
 	ca_true = 1;						/* true unless in side false case */
 	absln = 1;
-	sbuflen = -1;						/* no source yet */
 	fchr = gchr();						/* get first char */
-	if (!initflg)
-	{									/* not initializing */
-		INIT(orgstr2, orgptr);
-		INIT(endstr, endptr);
-		INIT(equstr, equptr);
-		INIT("add", addptr);
-		INIT("addi", addiptr);
-		INIT("addq", addqptr);
-		INIT("sub", subptr);
-		INIT("subi", subiptr);
-		INIT("subq", subqptr);
-		INIT("cmp", cmpptr);
-		INIT("adda", addaptr);
-		INIT("cmpa", cmpaptr);
-		INIT("suba", subaptr);
-		INIT("cmpm", cmpmptr);
-		INIT("and", andptr);
-		INIT("andi", andiptr);
-		INIT("or", orptr);
-		INIT("ori", oriptr);
-		INIT("cmpi", cmpiptr);
-		INIT("eor", eorptr);
-		INIT("eori", eoriptr);
-		INIT("move", moveptr);
-		INIT("moveq", moveqptr);
-		INIT("exg", exgptr);
-		INIT("jsr", jsrptr);
-		INIT("bsr", bsrptr);
-		INIT("nop", nopptr);
-		INIT(evnstr, evenptr);
-	}
+
 	mloop();
 	return EXIT_SUCCESS;
 }

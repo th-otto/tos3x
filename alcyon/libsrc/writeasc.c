@@ -23,9 +23,6 @@
 #include <osiferr.h>
 #include <errno.h>
 
-#define OFFSECT   (fp->offset    & ~(SECSIZ-1))
-#define HIWSECT   (fp->hiwater-1 & ~(SECSIZ-1))
-
 
 long _wrtasc(P(FD *) ccb, P(const VOIDPTR) buffp, P(long) xbytes)
 PP(FD *ccb;)						/* -> CCB           */
@@ -48,19 +45,19 @@ PP(long xbytes;)					/* # bytes to write     */
 		if (kk - jj > 0)
 		{								/* something to write?      */
 			ii = _pc_writeblk(fp, fp->offset, buff + jj, kk - jj);
+			if (ii < 0)
+				RETERR(-1, EIO);
 			fp->offset += ii;			/* Incr pos in file     */
-			if (ii == 0)				/* Problems?            */
-				RETERR(-1, EIO);	/* Tell them so         */
 			jj = kk;					/* advance this ptr     */
 		} else
 		{								/* It was a newline     */
 			kk++;						/* write it out next time   */
 			ii = _pc_writeblk(fp, fp->offset, "\r", 1L);
+			if (ii < 0)
+				RETERR(-1, EIO);
 			fp->offset += ii;			/* Incr pos in file     */
 		}
 	}									/* end FOR loop         */
-	if (fp->offset > fp->hiwater)		/* Need to advance?     */
-		fp->hiwater = fp->offset;		/*   then do so         */
 	return jj;							/* Number written       */
 #endif
 
@@ -88,11 +85,8 @@ PP(long xbytes;)					/* # bytes to write     */
 				fp->flags &= ~DIRTY;	/* Nice clean buffer now    */
 			}
 
-			if (OFFSECT <= HIWSECT)		/* and below hiwater mark   */
-			{
-				if (_blkio(fp, xsector, fp->buffer, 1L, B_READ) != 1)	/* Now read the correct sec */
-					RETERR(-1, EIO);	/* Couldn't         */
-			}
+			if (_blkio(fp, xsector, fp->buffer, 1L, B_READ) != 1)	/* Now read the correct sec */
+				memset(fp->buffer, 0, SECSIZ);	/* Zero out the buffer      */
 			fp->sector = xsector;		/* Mark buffer correctly    */
 		}
 
@@ -121,8 +115,6 @@ PP(long xbytes;)					/* # bytes to write     */
 			fp->flags |= DIRTY;			/* Buffer dirty again       */
 		if (bytes == 0)					/* If done,         */
 		{								/* Check offset here        */
-			if (fp->offset > fp->hiwater)
-				fp->hiwater = fp->offset;	/* Fix hiwater if necessary */
 			return written;
 		}
 	}

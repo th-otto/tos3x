@@ -89,7 +89,7 @@ PP(register struct symtab *osypt;)
 		/* Bump Error count */
 		nerror++;
 		/* Identify FUBAR */
-		printf("*UNDEFINED*    ");
+		printf(_("*UNDEFINED*    "));
 	}
 	return 1;
 }
@@ -109,23 +109,35 @@ static int symcmp(P(const VOIDPTR) a, P(const VOIDPTR) b)
 PP(register const VOIDPTR a;)
 PP(register const VOIDPTR b;)										/* -> Elts to compare       */
 {
-	return strncmp(a, b, SYNAMLEN);
+	register const struct symtab *s1 = *((const struct symtab *const *)a);
+	register const struct symtab *s2 = *((const struct symtab *const *)b);
+	
+	return strncmp(s1->name, s2->name, SYNAMLEN);
 }
 
 
 VOID psyms(NOTHING)
 {
-	register long j;					/* Temporary                */
+	register size_t i, j, num;					/* Temporary                */
+	register struct symtab **sorted;
 	register struct symtab *p;					/* -> Symbol table entries  */
-
+	
 	xline = LPP;						/* Force page               */
 	page();								/*              Eject       */
-	printf("S y m b o l   T a b l e\n\n");	/* Print Header             */
+	printf(_("S y m b o l   T a b l e\n\n"));	/* Print Header             */
 	xline++;							/* Bump line counter        */
-	j = (((__intptr_t)lmte - (__intptr_t)bmte) / sizeof(*p));		/* Compute # elements       */
-	qsort(bmte, (int) j, sizeof(*p), symcmp);	/* Sort'em                  */
+	/* Compute # elements */
+	for (num = 0, p = bmte; p != emte; num++, p = p->next)
+		;
+	sorted = (struct symtab **)malloc(num * sizeof(struct symtab *));
+	if (sorted == NULL)
+		return;
+	for (i = 0, p = bmte; p != emte; i++, p = p->next)
+		sorted[i] = p;
+	qsort(sorted, num, sizeof(p), symcmp);	/* Sort'em                  */
+	
 	j = 0;								/* Count symbols / line     */
-	for (p = bmte; p < lmte; p++)	/* Loop through symbol table */
+	for (i = 0; i < num; i++)
 	{
 		if (j > 3)						/* 4 Symbols / line         */
 		{
@@ -133,10 +145,11 @@ VOID psyms(NOTHING)
 			page();						/* Check for top of page    */
 			j = 0;						/* Reset counter            */
 		}
-		j += psyme(p);					/* Print 1 table entry (maybe) */
+		j += psyme(sorted[i]);			/* Print 1 table entry (maybe) */
 	}
 	if (j <= 3)							/* Partial line?            */
 		printf("\n");					/*  Yes, finish it          */
+	free(sorted);
 }
 
 
@@ -225,7 +238,7 @@ VOID page(NOTHING)
 {
 	if ((prtflg == 0) || (++xline < LPP))
 		return;
-	printf("\fC P / M   6 8 0 0 0   A s s e m b l e r\t\t%s\t\tPage%4d\n", "Revision 04.03", ++xpage);
-	printf("Source File: %s\n\n", sfname);
+	printf(_("\fC P / M   6 8 0 0 0   A s s e m b l e r\t\t%s\t\tPage%4d\n"), "Revision 04.03", ++xpage);
+	printf(_("Source File: %s\n\n"), sfname);
 	xline = 3;
 }

@@ -118,11 +118,8 @@ _va_dcl
 	/* Set OPEN bit */
 	ch->flags |= OPENED;
 
-	/* Kludge to set hi water mark */
-	lseek(ch->chan, 0L, SEEK_END);
-
-	if (!(flags & O_APPEND))
-		lseek(ch->chan, 0L, SEEK_SET);
+	if (flags & O_APPEND)
+		lseek(ch->chan, 0L, SEEK_END);
 
 	return ch->chan;
 }

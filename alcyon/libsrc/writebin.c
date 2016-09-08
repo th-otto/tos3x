@@ -24,8 +24,6 @@
 #include <errno.h>
 #include <string.h>
 
-#define OFFSECT   (fp->offset    & ~(SECSIZ-1))
-#define HIWSECT   (fp->hiwater-1 & ~(SECSIZ-1))
 
 
 long _wrtbin(P(FD *) fp, P(const VOIDPTR) buff, P(long) bytes)
@@ -37,19 +35,15 @@ PP(long bytes;)					/* # bytes to write     */
 	long ii;							/* Byte counter         */
 
 	ii = _pc_writeblk(fp, fp->offset, buff, bytes);
-	if (ii == 0)						/* Problems?            */
+	if (ii <= 0)						/* Problems?            */
 		RETERR(-1, EIO);			/* Tell them so         */
 	fp->offset += ii;					/* Incr pos in file     */
-	if (fp->offset > fp->hiwater)		/* Need to advance?     */
-		fp->hiwater = fp->offset;		/*   then do so         */
 	return ii;							/* Number written       */
 #endif
 
 #if CPM		 /*=============================================================*/
 	static long xsector;					/* Sector temp          */
-
 	static long nsector;					/* Multi-sector count       */
-
 	static long written;					/* # bytes to write     */
 
 	register char *p1;					/* Temp buffer pointer      */
@@ -68,12 +62,7 @@ PP(long bytes;)					/* # bytes to write     */
 				fp->flags &= ~DIRTY;	/* Clear dirty bit      */
 			}
 
-			if (OFFSECT <= HIWSECT)		/* Within the hiwater area? */
-			{							/* If yes, then read it     */
-				if (_blkio(fp, xsector, fp->buffer, 1L, B_READ) != 1)	/* Try to read the correct  */
-					RETERR(FAILURE, EIO);	/* Can't            */
-			}
-			else
+			if (_blkio(fp, xsector, fp->buffer, 1L, B_READ) != 1)	/* Try to read the correct  */
 				memset(fp->buffer, 0, SECSIZ);	/* Zero out the buffer      */
 			
 			fp->sector = xsector;		/* Label buffer         */
@@ -97,8 +86,6 @@ PP(long bytes;)					/* # bytes to write     */
 			} else
 				fp->flags |= DIRTY;		/* Yes, buffer is now dirty */
 			fp->offset += written;		/* fix offset           */
-			if (fp->offset > fp->hiwater)	/* See if above hiwater mark */
-				fp->hiwater = fp->offset;	/* Fix if necessary     */
 			return (written);			/* Return original byte cnt */
 		}
 		if (_blkio(fp, xsector, fp->buffer, 1L,	/* Write full buffer        */
@@ -134,8 +121,6 @@ PP(long bytes;)					/* # bytes to write     */
 	buff += (nsector << 7);				/* Update address       */
 	fp->offset += written;				/* Update offset now        */
 	/* (All I/O is complete)    */
-	if (fp->offset > fp->hiwater)		/* Fix up hiwater mark      */
-		fp->hiwater = fp->offset;		/*              */
 	if (bytes == 0)						/* If done,         */
 		return written;				/*      return success  */
 	
@@ -147,11 +132,7 @@ PP(long bytes;)					/* # bytes to write     */
 	}
 	fp->flags |= DIRTY;					/* Let's dirty the buffer   */
 	fp->sector = fp->offset >> 7;		/* Mark sector number       */
-	if (OFFSECT <= HIWSECT)				/* Sector in high water area */
-		/* MGL              */
-		_blkio(fp, fp->sector, fp->buffer, 1L,	/* Read sector          */
-			   B_READ);					/*              */
-	else
+	if (_blkio(fp, fp->sector, fp->buffer, 1L, B_READ) != 1)
 		memset(fp->buffer, 0, SECSIZ);
 	p1 = &(fp->buffer[0]);				/* p1 -> address        */
 	while (bytes > 0)					/* Move the bytes       */

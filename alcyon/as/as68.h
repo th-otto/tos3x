@@ -10,23 +10,26 @@
 #include <cout.h>
 #include "../util/util.h"
 
+#define _(x) x
+#define N_(x) x
+
 
 /* flags for symbols */
-#define SYDF    0100000     /* defined */
-#define SYEQ    0040000     /* equated */
-#define SYGL    0020000     /* global - entry or external */
-#define SYER    0010000     /* equated register */
-#define SYXR    0004000     /* external reference */
-#define SYRA    0002000     /* DATA based relocatable */
-#define SYRO    0001000     /* TEXT based relocatable */
-#define SYBS    0000400     /* BSS based relocatable */
-#define SYIN    0000200     /* internal symbol -- opcode, dir or equ */
-#define SYPC    0000100     /* equated using star '*' expression */
-#define SYRM    0000040     /* register mask equate */
+#define SYDF    0x8000     /* defined */
+#define SYEQ    0x4000     /* equated */
+#define SYGL    0x2000     /* global - entry or external */
+#define SYER    0x1000     /* equated register */
+#define SYXR    0x0800     /* external reference */
+#define SYRA    0x0400     /* DATA based relocatable */
+#define SYRO    0x0200     /* TEXT based relocatable */
+#define SYBS    0x0100     /* BSS based relocatable */
+#define SYIN    0x0080     /* internal symbol -- opcode, dir or equ */
+#define SYPC    0x0040     /* equated using star '*' expression */
+#define SYRM    0x0020     /* register mask equate */
 
 /* flags for opcodes and directives */
-#define OPDR   0100000      /* 0=>opcode, 1=>directive */
-#define OPFF   037          /* type of instruction (used as mask) */
+#define OPDR   0x8000      /* 0=>opcode, 1=>directive */
+#define OPFF   0x1f        /* type of instruction (used as mask) */
 
 /* intermediate text types */
 #define ITBS    0       /* beginning of statement */
@@ -67,17 +70,19 @@
 #define CCR     16
 #define SR      17
 #define USP     18
+#define BYTE_ID 19
 #define WORD_ID 20
+#define LONG_ID 21
 #define PC      22
 #define SFC     23      /* control register for 68010 */
 #define DFC     24      /* control register for 68010 */
-#define VSR     25      /* control register for 68010 */
+#define VBR     25      /* control register for 68010 */
 
 /* Control Register Numeric Values */
 #define SFC_CR  0
 #define DFC_CR  1
 #define USP_CR  0x800
-#define VSR_CR  0x801
+#define VBR_CR  0x801
 
 /* Instruction Formats */
 #define ANDI    01000
@@ -176,7 +181,8 @@ struct symtab {
     unsigned short flags;
 	long vl1;            /* symbol value */
 	short vextno;		 /* external symbol reference # */
-    struct symtab *tlnk; /* table link */
+    struct symtab *tlnk; /* hash table link */
+    struct symtab *next; /* global table link */
 };
 
 /*
@@ -217,10 +223,6 @@ struct it {
 short mode;             /* operand mode (byte, word, long) */
 short modelen;          /* operand length per mode */
 
-/* parameters that define the main table */
-#define SZMT 300        /* initial size of the main table must be large enough to initialize */
-#define ICRSZMT 10      /* add to main table when run out */
-
 struct symtab *bmte;    /* beginning of main table */
 struct symtab *emte;    /* end of main table */
 
@@ -228,9 +230,7 @@ short itbuf[ITBSZ];     /* it buffer */
 
 struct it stbuf[STMAX]; /* holds it for one statement */
 
-char sbuf[512];         /* holds one block of source */
-
-struct symtab *lmte;            /* last entry in main table */
+struct symtab *lmte;    /* last entry in main table */
 
 struct irts {
 	struct symtab *irle;		/* ptr to last entry in chain */
@@ -240,15 +240,14 @@ struct irts {
 long stlen;             /* length of symbol table */
 
 /* initial reference table for symbols */
-struct symtab *sirt[SZIRT];
+struct irts sirt[SZIRT];
 
 /* initial reference table to opcodes */
-struct symtab *oirt[SZIRT];
+struct irts oirt[SZIRT];
 
 /* external symbol table */
 struct symtab *extbl[EXTSZ];
-short extindx;          /* index to external symbol table */
-int pexti;              /* ptr to external symbol table */
+int extindx;            /* index to external symbol table */
 
 int absln;              /* absolute line number */
 int p2absln;            /* pass 2 line number */
@@ -261,21 +260,19 @@ struct it *pitw;        /* ptr to it buffer next entry */
 short itype;            /* type of item */
 union iival ival;       /* value of item */
 struct symtab *lblpt;   /* label pointer */
-char lbt[SYNAMLEN];     /* holds label name */
+char lbt[SYNAMLEN + 1]; /* holds label name */
 long loctr;             /* location counter */
 long savelc[4];         /* save relocation counters for 3 bases */
 short nite;             /* number of entries in stbuf */
 struct it *pnite;
 struct symtab *opcpt;   /* pointer to opcode entry in main table */
 short p2flg;            /* 0=>pass 1  1=>pass 2 */
-struct symtab **pirt;   /* entry in initial reference table */
+struct irts *pirt;      /* entry in initial reference table */
 short reloc;            /* reloc value returned by expr evaluator (expr) */
 short rlflg;            /* relocation value of current location counter */
 struct hdr2 couthd;     /* cout header structure */
 
 short format;
-short sbuflen;          /* number of chars in sbuf */
-char *psbuf;            /* ptr into sbuf */
 FILE *itfn;             /* it file number */
 short prtflg;           /* print output flag */
 short undflg;           /* make undefined symbols external flag */
@@ -348,12 +345,10 @@ char trfilnam[PATH_MAX];
 char drfilnam[PATH_MAX];
 char ldfn[PATH_MAX];        /* name of the relocatable object file */
 char *sfname;				/* Source filename */
-char initfnam[PATH_MAX];	/* Init file name */
 
 /* assembler flag variables */
 short didorg;
 short shortadr;         /* short addresses if set */
-short initflg;          /* initialize flag */
 short m68010;           /* 68010 code */
 
 /* pass 1 global variables */
@@ -480,8 +475,6 @@ VOID page PROTO((NOTHING));
 /*
  * main.c
  */
-extern const char *const ermsg[];
-
 VOID dlabl PROTO((NOTHING));
 VOID opito PROTO((NOTHING));
 VOID opitoo PROTO((NOTHING));
@@ -490,8 +483,6 @@ VOID opitoo PROTO((NOTHING));
 /*
  * misc.c
  */
-extern short ftudp;
-
 VOID clrea PROTO((struct op *ap));
 VOID getea PROTO((int opn));
 int getreg PROTO((NOTHING));
@@ -532,23 +523,22 @@ VOID pass2 PROTO((NOTHING));
  */
 extern int poslab;
 
+VOID initsy PROTO((NOTHING));
 VOID opitb PROTO((NOTHING));
 VOID gterm PROTO((int constpc));
-struct symtab *lemt PROTO((int oplook, struct symtab **airt));
+struct symtab *lemt PROTO((int oplook, struct irts *airt));
 VOID mmte PROTO((NOTHING));
-VOID mdemt PROTO((const char *mdstr, int dirnum));
+struct symtab *mdemt PROTO((const char *mdstr, int dirnum));
 VOID pack PROTO((const char *apkstr, struct symtab *apkptr));
 int gchr PROTO((NOTHING));
 VOID wostb PROTO((NOTHING));
-VOID uerr PROTO((int errn));
-VOID xerr PROTO((int errn));
+VOID uerr PROTO((int errn, ...));
+VOID xerr PROTO((int errn, ...));
 VOID asabort PROTO((NOTHING)) __attribute__((noreturn));
 VOID ligblk PROTO((NOTHING));
 VOID igrst PROTO((NOTHING));
 VOID endit PROTO((NOTHING)) __attribute__((noreturn));
 VOID setname PROTO((NOTHING));
-VOID getsymtab PROTO((NOTHING));
-VOID putsymtab PROTO((NOTHING));
 VOID rpterr PROTO((const char *ptch, ...)) __attribute__((format(__printf__, 1, 2)));
 VOID setldfn PROTO((const char *ap));
 FILE *openfi PROTO((const char *pname, const char *mode));

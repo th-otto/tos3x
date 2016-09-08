@@ -18,29 +18,29 @@
 static VOID fixsyadr(P(int) al)
 PP(int al;)
 {
-	register struct symtab **sx1, **sx2;
+	register struct irts *sx1;
+	register struct symtab *sx2;
 	register long l;
 
 	l = al;
 	/* loop thru symbol initial reference table */
-	for (sx1 = sirt; sx1 < &sirt[SZIRT - 1]; sx1 += 2)
+	for (sx1 = sirt; sx1 < &sirt[SZIRT]; sx1++)
 	{
-		if (*(sx2 = sx1 + 1) == 0)		/* this chain is empty */
+		if ((sx2 = sx1->irfe) == 0)		/* this chain is empty */
 			continue;
 
 		/* symbols on one chain */
-		sx2 = (struct symtab **)*sx2;						/* first entry on this chain */
-		while (1)
+		for (;;)
 		{
-			if (((((struct symtab *)sx2)->flags & SYDF) || (((struct symtab *)sx2)->flags & SYPC)) &&
-				(((struct symtab *)sx2)->flags & SYRO) &&
-				((struct symtab *)sx2)->vl1 > loctr)
+			if (((sx2->flags & SYDF) || (sx2->flags & SYPC)) &&
+				(sx2->flags & SYRO) &&
+				sx2->vl1 > loctr)
 			{
-				((struct symtab *)sx2)->vl1 -= l;
+				sx2->vl1 -= l;
 			}
-			if (((struct symtab *)sx2) == *sx1)			/* end of chain */
+			if (sx2 == sx1->irle)			/* end of chain */
 				break;
-			sx2 = (struct symtab **)(((struct symtab *)sx2)->tlnk);			/* next entry in chain */
+			sx2 = sx2->tlnk;			/* next entry in chain */
 		}
 	}
 }
@@ -50,11 +50,16 @@ VOID pass1a(NOTHING)
 {
 	register long reduced;
 	register int i, wsize;
-
+	long itpos;
+	
 	pitix = ITBSZ;
 	reduced = itoffset = 0L;
 	fflush(itfn);
-	fseek(itfn, 0L, SEEK_SET);
+	if (fseek(itfn, 0L, SEEK_SET) < 0)
+	{
+		rpterr(_("seek error on intermediate file"));
+		asabort();
+	}
 	stbuf[0].itrl = 0;
 	wsize = 3 * sizeof(struct it);				/* don't calculate many times */
 	for (;;)
@@ -100,14 +105,20 @@ VOID pass1a(NOTHING)
 					stbuf[1].itrl -= i;	/* reduced instr length somewhat */
 					if (!stbuf[1].itrl)
 						stbuf[1].itrl = -1;	/* ignore flag */
+					itpos = ftell(itfn);
 					if (fseek(itfn, itoffset, SEEK_SET) < 0)
 					{
-						rpterr("seek error on intermediate file\n");
+						rpterr(_("seek error on intermediate file"));
 						asabort();
 					}
 					if (fwrite(&stbuf[0], 1, wsize, itfn) != wsize)
 					{
-						rpterr("write error on it file\n");
+						rpterr(_("write error on it file"));
+						asabort();
+					}
+					if (fseek(itfn, itpos, SEEK_SET) < 0)
+					{
+						rpterr(_("seek error on intermediate file"));
 						asabort();
 					}
 				}

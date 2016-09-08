@@ -18,6 +18,52 @@ static int xcol = 0;							/* Column number            */
 static int spcnt = 0;							/* Fill counter             */
 
 
+static const char *const ermsg[] = {
+    N_("label %s redefined"),               /*  1 */
+    N_("invalid label"),                    /*  2 */
+    N_("invalid opcode"),                   /*  3 */
+    N_("no label for operand"),             /*  4 */
+    N_("opcode %s redefined"),              /*  5 */
+    N_("illegal expr"),                     /*  6 */
+    N_("undefined symbol in equate"),       /*  7 */
+    N_("opcode for 68010 only"),			/*  8 */
+    N_("invalid first operand"),            /*  9 */
+    N_("invalid second operand"),           /* 10 */
+    N_("absolute value required"),          /* 11 */
+    N_("no code or data allowed in offset"),/* 12 */
+    N_("undefined symbol"),                 /* 13 */
+    N_("illegal index register"),           /* 14 */
+    N_("illegal constant"),                 /* 15 */
+    N_("illegal extension"),                /* 16 */
+    N_("constant required"),                /* 17 */
+    N_("illegal format"),                   /* 18 */
+    N_("illegal string"),                   /* 19 */
+    N_("illegal addressing mode"),          /* 20 */
+    N_("assembler confusion..."),			/* 21 */
+    N_("illegal relative address"),         /* 22 */
+    N_("invalid bit range"),                /* 23 */
+    N_("illegal text delimiter"),           /* 24 */
+    N_("unexpected endc"),                  /* 25 */
+    N_("endc expected"),                    /* 26 */
+    N_("relocation error"),                 /* 27 */
+    N_("symbol required"),                  /* 28 */
+    N_("bad use of symbol"),                /* 29 */
+    N_("invalid data list"),                /* 30 */
+    N_("warning: cmpm generated for 68010"),/* 31 */
+    N_("missing )"),                        /* 32 */
+    N_("register required"),                /* 33 */
+    N_("illegal size"),                     /* 34 */
+    N_("illegal 8-bit displacement"),       /* 35 */
+    N_("illegal external"),                 /* 36 */
+    N_("illegal shift count"),              /* 37 */
+    N_("invalid instruction length"),       /* 38 */
+    N_("code or data not allowed in bss"),  /* 39 */
+    N_("backward assignment to *"),         /* 40 */
+    N_("illegal 16-bit displacement"),      /* 41 */
+    N_("illegal 16-bit immediate"),         /* 42 */
+    N_("illegal 8-bit immediate"),          /* 43 */
+};
+
 
 
 /* output it for beginning of statement */
@@ -63,7 +109,7 @@ PP(int adelim;)
 		}
 		if (fchr == EOLC)
 		{
-			xerr(19);
+			xerr(19); /* illegal format */
 			retv = FALSE;					/* end of string */
 			break;
 		}
@@ -109,7 +155,7 @@ static int astring(NOTHING)
 		{
 			fchr = gchr();
 			if (fchr != delim)
-				xerr(19);
+				xerr(19); /* illegal format */
 			fchr = gchr();
 		}
 		return equflg ? TRUE : FALSE;
@@ -144,11 +190,11 @@ PP(int ardx;)
 		trdx = 1;
 		break;
 	default:
-		rpterr("invalid radix in oconst");
+		rpterr(_("invalid radix in oconst"));
 		asabort();
 	}
 	i = 0;
-	while (1)
+	for (;;)
 	{
 		fchr = gchr();
 		j = fchr;
@@ -267,9 +313,9 @@ PP(int constpc;)
 		{
 			itype = (j->flags & SYRM) ? ITRM : ITCN;
 			ival.l = j->vl1;
-			reloc = ((j->flags) & SYRO) ? TEXT : ((j->flags) & SYRA) ? DATA : ((j->flags) & SYBS) ? BSS : ABS;
+			reloc = (j->flags & SYRO) ? TEXT : (j->flags & SYRA) ? DATA : (j->flags & SYBS) ? BSS : ABS;
 		}
-		return;
+		break;
 
 	case 1:								/* constant */
 		if (!constant(&num, istr, i))
@@ -280,7 +326,7 @@ PP(int constpc;)
 		ival.l = num;
 		itype = ITCN;
 		reloc = ABS;
-		return;
+		break;
 
 	case 2:								/* just a special char */
 		switch (fchr)
@@ -331,10 +377,12 @@ PP(int constpc;)
 			fchr = gchr();				/* get next char */
 		if ((ival.l == '>' && fchr == '>') || (ival.l == '<' && fchr == '<'))
 			fchr = gchr();				/* shift op, ignore second char */
-		return;
+		break;
 
 	default:
+		rpterr(_("internal: invalid smode %d"), smode);
 		asabort();						/* not possible */
+		break;
 	}
 }
 
@@ -400,13 +448,13 @@ static short hash(NOTHING)
 	p = &lmte->name[0];
 	for (i = 0; i < SYNAMLEN; i++)
 		ht1 += *p++;
-	return ht1 & (SZIRT - 2);			/* make hash code even and between 0 & SZIRT-2 */
+	return ht1 & (SZIRT - 1);			/* make hash code even and between 0 & SZIRT-2 */
 }
 
 
-struct symtab *lemt(P(int) oplook, P(struct symtab **) airt)
+struct symtab *lemt(P(int) oplook, P(struct irts *) airt)
 PP(int oplook;)								/* if true then looking in opcode table */
-PP(struct symtab **airt;)
+PP(struct irts *airt;)
 {
 	register struct symtab *mtpt;
 	register char *p1, *p2;
@@ -426,18 +474,18 @@ PP(struct symtab **airt;)
 			lmte->name[i] = tolower(lmte->name[j]);
 	}
 	pirt = airt + hash();				/* hashed ptr to irt */
-	mtpt = ((struct irts *)pirt)->irfe;					/* pointer to first entry in chain */
+	mtpt = pirt->irfe;					/* pointer to first entry in chain */
 	if (!mtpt)							/* empty chain */
 		mtpt = lmte;					/* start at end of main table */
 	else
-		(((struct irts *)pirt)->irle)->tlnk = lmte;		/* last entry in chain is new symbol */
+		pirt->irle->tlnk = lmte;		/* last entry in chain is new symbol */
 	if (lmte->name[0] == '~' && lmte->name[1] != '~' && lmte->name[1] != '.')
 		return lmte;					/* force local symbols */
 
 	/* loop to locate entry in main table */
   lemtl:
-	p1 = &mtpt->name[0];
-	p2 = &lmte->name[0];
+	p1 = mtpt->name;
+	p2 = lmte->name;
 	i = SYNAMLEN;
 	while (i)
 	{
@@ -452,6 +500,27 @@ PP(struct symtab **airt;)
 }
 
 
+static struct symtab *allocsy(NOTHING)
+{
+	register struct symtab *ptr;
+	
+	ptr = malloc(sizeof(*ptr));
+	if (ptr == NULL)
+	{
+		perror(NULL);
+		asabort();
+	}
+	emte = ptr;
+	ptr->name[0] = '\0';
+	ptr->flags = 0;
+	ptr->vl1 = 0;
+	ptr->vextno = 0;
+	ptr->tlnk = NULL;
+	ptr->next = NULL;
+	return ptr;
+}
+
+
 /*
  * Make an entry in the main table
  * assumes :
@@ -460,20 +529,14 @@ PP(struct symtab **airt;)
  */
 VOID mmte(NOTHING)
 {
-	((struct irts *)pirt)->irle = lmte;					/* pointer to last entry in chain */
-	if (((struct irts *)pirt)->irfe == 0)				/* first entry in chain */
-		((struct irts *)pirt)->irfe = lmte;
-	lmte++;								/* bump last main table entry pointer */
-	if (lmte >= emte)
-	{									/* main table overflow */
-		if (sbrk(sizeof(struct symtab) * ICRSZMT) == (VOIDPTR)-1)
-		{								/* get more memory */
-			rpterr("symbol table overflow\n");
-			endit();
-		}
-		memset(lmte, 0, ICRSZMT * sizeof(struct symtab));
-		emte += ICRSZMT;	/* move end of main table */
-	}
+	register struct symtab *ptr;
+	
+	ptr = lmte;
+	pirt->irle = ptr;					/* pointer to last entry in chain */
+	if (pirt->irfe == NULL)				/* first entry in chain */
+		pirt->irfe = ptr;
+	lmte = allocsy();
+	ptr->next = lmte;
 }
 
 
@@ -484,7 +547,7 @@ VOID mmte(NOTHING)
  *      address of routine to handle directive in pass one
  *      address of routine to handle directive in pass two
  */
-VOID mdemt(P(const char *) mdstr, P(int) dirnum)
+struct symtab *mdemt(P(const char *) mdstr, P(int) dirnum)
 PP(const char *mdstr;)
 PP(int dirnum;)
 {
@@ -494,13 +557,14 @@ PP(int dirnum;)
 	mdept = lemt(TRUE, oirt);			/* look up in opcode table */
 	if (mdept != lmte)
 	{									/* best not be there already */
-		uerr(5);
+		uerr(5, mdstr);	/* opcode redefined */
 		asabort();
-		return;
+		return NULL;
 	}
 	mmte();								/* make main table entry */
 	mdept->flags |= OPDR | SYIN;		/* directive */
 	mdept->vl1 = dirnum;				/* directive # */
+	return mdept;
 }
 
 
@@ -547,15 +611,24 @@ int gchr(NOTHING)
 		return ' ';
 	} else
 	{
-		if (sbuflen <= 0)
-		{								/* nothing on input buffer */
-			sbuflen = fread(sbuf, 1, sizeof(sbuf), ifn);	/* read in source */
-			if (sbuflen <= 0)
-				return CEOF;			/* end of file */
-			psbuf = sbuf;
+		chr1 = fgetc(ifn);
+		if (chr1 == EOF)
+			return CEOF;
+		if (chr1 == 0x0d)
+		{
+			chr1 = fgetc(ifn);
+			if (chr1 == EOF)
+			{
+				chr1 = EOLC;
+			} else if (chr1 != 0x0a)
+			{
+				peekc = chr1;
+				chr1 = EOLC;
+			} else
+			{
+				chr1 = EOLC;
+			}
 		}
-		chr1 = *psbuf++;
-		sbuflen--;
 	}
 	if (chr1 == EOLC)
 	{									/* end of line */
@@ -577,8 +650,8 @@ static VOID doitwr(NOTHING)
 {
 	if (fwrite(itbuf, 1, ITBSZ * sizeof(itbuf[0]), itfn) != ITBSZ * sizeof(itbuf[0]))
 	{
-		rpterr("it write error: %s\n", strerror(errno));
-		endit();
+		rpterr(_("it write error: %s"), strerror(errno));
+		asabort();
 	}
 	pitix = 0;
 }
@@ -595,7 +668,10 @@ VOID wostb(NOTHING)
 	register unsigned short i;
 
 	if (stbuf[0].itty != ITBS)
+	{
+		rpterr(_("internal: not at beginning of stmt"));
 		asabort();						/* not beginning of stmt */
+	}
 	itwo = (short *)&stbuf;
 	woix = stbuf[0].itrl & 0xff;		/* unsigned byte */
 	while (woix--)
@@ -617,18 +693,33 @@ VOID wostb(NOTHING)
  *  types the error number and the line number on which
  *  the error occured.
  */
-VOID uerr(P(int) errn)
+static VOID verr(P(int) errn, P(va_list) args)
 PP(int errn;)
+PP(va_list args;)
 {
 	if (p2flg)
 	{									/* pass 2 gets two ampersands */
 		in_err++;
-		fprintf(stderr, "&& %d: %s\n", p2absln, ermsg[errn - 1]);
+		fprintf(stderr, "&& %d: ", p2absln);
 	} else
 	{
-		fprintf(stderr, "& %d: %s\n", (fchr == EOLC) ? absln - 1 : absln, ermsg[errn - 1]);
+		fprintf(stderr, "& %d: ", fchr == EOLC ? absln - 1 : absln);
 	}
+	vfprintf(stderr, _(ermsg[errn - 1]), args);
+	fputc('\n', stderr);
 	nerror++;
+}
+
+
+VOID uerr(P(int) errn _va_alist)
+PP(int errn;)
+_va_dcl
+{
+	va_list args;
+	
+	va_start(args, errn);
+	verr(errn, args);
+	va_end(args);
 }
 
 
@@ -637,10 +728,15 @@ PP(int errn;)
  *  call with:
  *      error number
  */
-VOID xerr(P(int) xern)
-PP(int xern;)
+VOID xerr(P(int) errn _va_alist)
+PP(int errn;)
+_va_dcl
 {
-	uerr(xern);							/* type error message */
+	va_list args;
+	
+	va_start(args, errn);
+	verr(errn, args);					/* type error message */
+	va_end(args);
 	if (!p2flg)							/* pass one */
 		igrst();						/* pass rest of source */
 }
@@ -649,7 +745,7 @@ PP(int xern;)
 /* abort the assembly */
 VOID asabort(NOTHING)
 {
-	rpterr("as68 abort\n");
+	rpterr(_("as68 abort"));
 	endit();
 }
 
@@ -659,7 +755,8 @@ VOID igrst(NOTHING)
 {
 	while (fchr != EOLC && fchr != CEOF)	/* until end of line */
 		fchr = gchr();
-	while ((fchr = gchr()) == EOLC) ;	/* ignore empty lines */
+	while ((fchr = gchr()) == EOLC)			/* ignore empty lines */
+		;
 }
 
 
@@ -698,17 +795,12 @@ VOID endit(NOTHING)
 		unlink(dafilnam);
 	if (*drfilnam)
 		unlink(drfilnam);
-	if (nerror != -1)
-	{									/* not rubout */
-		if (ftudp)
-			putchar('\n');
-	}
 	if (nerror > 0)
 	{
-		fprintf(stderr, "& %d errors\n", nerror);
+		fprintf(stderr, _("& %d errors\n"), nerror);
 	}
 	/* get rid of empty .o file */
-	if ((initflg || nerror != 0) && *ldfn)
+	if (nerror != 0 && *ldfn)
 		unlink(ldfn);
 	exit(nerror != 0);
 }
@@ -734,7 +826,7 @@ PP(const char *m;)
 	fp = fopen(pname, m);
 	if (fp == NULL)
 	{									/* open failed */
-		rpterr("can't open %s: %s\n", pname, strerror(errno));
+		rpterr(_("can't open %s: %s"), pname, strerror(errno));
 		endit();
 	}
 	return fp;
@@ -755,106 +847,21 @@ VOID setname(NOTHING)
 }
 
 
-/*
- * get the initialized main table and initial reference tables from
- * the initialize file
- */
-VOID getsymtab(NOTHING)
+VOID initsy(NOTHING)
 {
-	register char **p;
-	register struct symtab *p1;
-	register __intptr_t p2;
-	register FILE *fp;
-	unsigned short j;
-
-	if ((fp = fopen(initfnam, "rb")) == NULL)
-	{
-	  rerr:
-		rpterr("& Unable to read init file: %s\n", initfnam);
-		endit();
-	}
-	if (fread(sirt, 1, SZIRT * sizeof(struct symtab *), fp) != SZIRT * sizeof(struct symtab *))
-		goto rerr;
+	register int i;
 	
-	if (fread(oirt, 1, SZIRT * sizeof(struct symtab *), fp) != SZIRT * sizeof(struct symtab *))
-		goto rerr;
+	lmte = bmte = allocsy();
 
-	if (lgetw(&j, fp) < 0)
-		goto rerr;
-	if ((j % sizeof(struct symtab)) != 0)
-		goto rerr;
-	if (fread(bmte, 1, j, fp) != j)
-		goto rerr;
-
-	lmte = (struct symtab *)((char *)bmte + j);
-	p2 = (__intptr_t)((char *)bmte - 1);
-	for (p = (char **)sirt; p < (char **)&sirt[SZIRT]; p++)
+	/* initializing the main table */
+	for (i = 0; i < SZIRT; i++)
 	{
-		if (*p)
-			*p += p2;
+		/* initialize the initial ref tables */
+		sirt[i].irle = (struct symtab *)&sirt[i];
+		sirt[i].irfe = NULL;
+		oirt[i].irle = (struct symtab *)&oirt[i];
+		oirt[i].irfe = NULL;
 	}
-	for (p = (char **)oirt; p < (char **)&oirt[SZIRT]; p++)
-	{
-		if (*p)
-			*p += p2;
-	}
-	for (p1 = bmte; p1 < lmte; p1++)
-	{
-		if (p1->tlnk)
-			p1->tlnk = (struct symtab *)((char *)p1->tlnk + p2);
-	}
-	fclose(fp);
-}
-
-
-/* write the initialization file */
-VOID putsymtab(NOTHING)
-{
-	register char **p;
-	register struct symtab *p1;
-	register __intptr_t p2;
-	register FILE *fp;
-	unsigned short j;
-
-	if ((fp = fopen(initfnam, "wb")) == NULL)
-	{
-	  werr:
-		printf("& Write error on init file: %s\n", initfnam);
-		return;
-	}
-	/*
-	 * change all pointers so that they are relative to the beginning
-	 * of the symbol table
-	 */
-	p2 = (__intptr_t)((char *)bmte - 1);
-	for (p = (char **)sirt; p < (char **)&sirt[SZIRT]; p++)
-	{
-		if (*p)
-			*p -= p2;
-	}
-	for (p = (char **)oirt; p < (char **)&oirt[SZIRT]; p++)
-	{
-		if (*p)
-			*p -= p2;
-	}
-	for (p1 = bmte; p1 < lmte; p1++)
-	{
-		if (p1->tlnk)
-			p1->tlnk = (struct symtab *)((char *)p1->tlnk - p2);
-	}
-
-	if (fwrite(sirt, 1, SZIRT * sizeof(struct symtab *), fp) != SZIRT * sizeof(struct symtab *))
-		goto werr;
-
-	if (fwrite(oirt, 1, SZIRT * sizeof(struct symtab *), fp) != SZIRT * sizeof(struct symtab *))
-		goto werr;
-
-	j = (__intptr_t) lmte - (__intptr_t)bmte;			/* length of current main table */
-	if (lputw(&j, fp) < 0)
-		goto werr;
-	if (fwrite(bmte, 1, j, fp) != j)
-		goto werr;
-	fclose(fp);
 }
 
 
@@ -869,9 +876,10 @@ _va_dcl
 	va_list args;
 	
 	va_start(args, ptch);
-	fprintf(stderr, "& %d: ", absln);
+	fprintf(stderr, "& %d: ", fchr == EOLC ? absln - 1 : absln);
 	vfprintf(stderr, ptch, args);
 	va_end(args);
+	fputc('\n', stderr);
 	nerror++;
 }
 

@@ -52,8 +52,6 @@ const char *const sys_errlist[NUMERRS] = {
 char *strerror(P(int) err_no)
 PP(int err_no;)
 {
-	register const char *err;
-
 	if (err_no < 0 || err_no >= sys_nerr)
 		return NO_CONST(_undeferr);
 	return NO_CONST(sys_errlist[err_no]);

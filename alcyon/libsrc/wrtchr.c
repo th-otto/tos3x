@@ -38,12 +38,11 @@ PP(long bytes;)							/* # bytes to write     */
 
 	int DoAscii;						/* Flag: xlate newlines?    */
 
-	int DoXTabs;						/* Flag: xpand tabs?        */
+	int DoXTabs = 0;					/* Flag: xpand tabs?        */
 
 	struct sgttyb *tyb;					/* Special TTY ptr      */
 
 	DoAscii = 1;						/* Default: xlate newlines  */
-	DoXTabs = 0;					/* Default: no expand tabs  */
 	if (fp->flags & ISTTY)				/* If TTY Output        */
 		fnout = _ttyout;				/*   use that function      */
 	else if (fp->flags & ISLPT)			/* If LST Output        */
@@ -62,7 +61,6 @@ PP(long bytes;)							/* # bytes to write     */
 		DoXTabs = (tyb->sg_flags) & XTABS;
 	}
 
-
 	col = 0;							/* Assume we're at start of */
 	/*   line: not really kosher */
 	for (nbs = bytes; nbs != 0;)		/* For all the bytes        */
@@ -79,7 +77,7 @@ PP(long bytes;)							/* # bytes to write     */
 					cp[ii] = '\r';		/* Preceed with Return char */
 					++ii;				/* Incr num in buffer       */
 				}
-			} else /*****			    */ if (*buf == '\t' && DoXTabs)	/* Expand this tab char?    */
+			} else if (*buf == '\t' && DoXTabs)	/* Expand this tab char?    */
 			{							/*   yes...         */
 				nsp = 8 - (col & 7);	/* calc number spaces       */
 				if (ii + nsp >= SECSIZ)

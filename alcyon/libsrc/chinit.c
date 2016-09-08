@@ -59,11 +59,11 @@ PP(int i;)
 	ch = _getccb(i);					/* convert fd to CCB        */
 	ch->chan = i;						/* Load channel byte        */
 	ch->flags = 0;						/* clear flag word      */
+	ch->offset = 0;						/* Clear file offset word   */
+#if CPM
 	ch->user = 0;						/* assume user 0        */
 	ch->sector = -1;					/* Set no sector in buff    */
-	ch->offset = 0;						/* Clear file offset word   */
-	ch->hiwater = 0;					/* Init hiwater mark        */
-	ch->fcb.drive = 0;					/* Init drive field of fcb  */
+#endif
 	/* Init rest of fcb to zeros */
 	memset(&ch->fcb, 0, sizeof(ch->fcb));
 	/* Init file name fields to spaces */

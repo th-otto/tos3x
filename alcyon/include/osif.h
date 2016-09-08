@@ -128,14 +128,15 @@ struct  fcbtab {                                /****************************/
 struct  ccb                             /************************************/
 {                                       /*                                  */
         short   flags;                  /*sw    Flags byte                  */
-        char    user;                   /*sw    User #                      */
-        char    chan;                   /*      Channel number being used   */
+        short   chan;                   /*      Channel number being used   */
         short   dosfd;                  /*jsl   Dos 2.0 file descriptor     */
         long    offset;                 /*      File offset word (bytes)    */
-        long    sector;                 /*      Sector currently in buffer  */
-        long    hiwater;                /*      High water mark             */
         struct fcbtab fcb;              /*      File FCB (may have TTY info)*/
+#if CPM
+        short   user;                   /*sw    User #                      */
+        long    sector;                 /*      Sector currently in buffer  */
         char    buffer[SECSIZ];         /*      Read/write buffer           */
+#endif
 };                                      /************************************/
 
 extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */

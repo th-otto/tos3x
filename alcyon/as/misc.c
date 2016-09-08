@@ -15,7 +15,7 @@ long stlen;
 
 short debug = 0;
 
-short ftudp;
+static short ftudp;
 static short udfct;
 static short hibytflg[4], hibytw[4];
 
@@ -61,7 +61,7 @@ static VOID ckrparen(NOTHING)
 	if (ckitc(pitw, ')'))				/* found it */
 		pitw++;
 	else
-		uerr(32);
+		uerr(32); /* missing ) */
 }
 
 
@@ -73,14 +73,14 @@ PP(int opn;)
 	pitw++;
 	p->idx = getreg();
 	if (p->idx < 0 || p->idx > AREGHI)
-		uerr(14);
+		uerr(14); /* illegal index register */
 	p->len = 2;
 	if (!ckitc(pitw, ')'))
 	{
 		p->xmod = getrgs() - WORD_ID;
 		if (p->xmod < 0 || p->xmod > 1)
 		{
-			uerr(34);
+			uerr(34); /* illegal size */
 			p->xmod = 0;
 		}
 	}
@@ -119,7 +119,7 @@ static int getareg(NOTHING)
 }
 
 
-/* get a special register token (CCR, SR, USP, SFC, DFC or VSR) */
+/* get a special register token (CCR, SR, USP, SFC, DFC or VBR) */
 static int gspreg(NOTHING)
 {
 	register short i;
@@ -176,7 +176,7 @@ PP(int opn;)
 			{							/* not a reg # next */
 				if (disp || getreg() != -1)
 				{
-					uerr(14);			/* illegal index reg */
+					uerr(14);			/* illegal index register */
 					return;
 				}
 				pitw--;
@@ -233,9 +233,9 @@ PP(int opn;)
 		if (i == SR || i == CCR)
 			if (inst != AND && inst != OR && inst != EOR && inst != ANDI
 				&& inst != ORI && inst != EORI && inst != MOVE)
-				uerr(20);
-		if ((i == SFC || i == DFC || i == VSR) && inst != MOVEC)
-			uerr(20);
+				uerr(20); /* illegal addressing mode */
+		if ((i == SFC || i == DFC || i == VBR) && inst != MOVEC)
+			uerr(20); /* illegal addressing mode */
 		p->idx = i;
 		ckeop(9 + opn);
 		return;
@@ -244,7 +244,7 @@ PP(int opn;)
 	{									/* register direct */
 		p->ea = i;
 		if (modelen == BYTESIZ && i >= AREGLO && i <= AREGHI)
-			uerr(20);
+			uerr(20); /* illegal addressing mode */
 		ckeop(9 + opn);
 		return;
 	}
@@ -327,11 +327,12 @@ PP(int cksc;)
 static VOID doitrd(NOTHING)
 {
 	register int i;
-
+	
 	pitix = 0;
-	if ((i = fread(itbuf, 1, ITBSZ * sizeof(itbuf[0]), itfn)) <= 0)
+	i = fread(itbuf, 1, ITBSZ * sizeof(itbuf[0]), itfn);
+	if (i <= 0)
 	{
-		fprintf(stderr, "it read error: %s\n", strerror(errno));
+		fprintf(stderr, _("it read error: %s\n"), ferror(itfn) ? strerror(errno) : _("unexpected EOF"));
 		asabort();
 	}
 }
@@ -362,8 +363,11 @@ VOID ristb(NOTHING)
 			*pi++ = itbuf[pitix++];			/* first word of it */
 		}
 		if (stbuf[0].itty != ITBS)		/* best be beginning of statement */
+		{
+			rpterr(_("internal: not at beginning of stmt"));
 			asabort();
-
+		}
+		
 		/* get the rest of the statement it */
 		riix = stbuf[0].itrl & 0xff;	/* unsigned byte */
 		riix--;							/* already got first entry */
@@ -412,15 +416,15 @@ PP(struct symtab *udspt;)
 	nerror++;
 	if (!ftudp)
 	{									/* first time thru */
-		printf("\n&& UNDEFINED SYMBOLS &&\n");
+		fprintf(stderr, _("\n&& UNDEFINED SYMBOLS &&\n"));
 		ftudp++;
 		udfct = 0;						/* no symbols on this line */
 	}
 
-	printf("%-8.8s  ", &(udspt->name[0]));
+	fprintf(stderr, "%-*.*s  ", SYNAMLEN, SYNAMLEN, udspt->name);
 	if (udfct++ > 6)
 	{
-		printf("\n");
+		fputc('\n', stderr);
 		udfct = 0;
 	}
 }
@@ -447,14 +451,14 @@ PP(struct symtab *aosypt;)
 	stlen += OSTSIZE;					/* one more symbol out */
 
 	/* output symbol to loader file */
-	p1 = &(osypt->name[0]);
+	p1 = osypt->name;
 	for (i = 0; i < SYNAMLEN; i++)		/* output symbol name */
 		putc(*p1++, lfil);
 
 	lputw(&osypt->flags, lfil);			/* output symbol flags */
 #ifdef DEBUG
 	if (debug)							/* prints symbol table entries */
-		printf("> %-8.8s* %o\n", osypt->name, (int) osypt->flags);
+		printf("> %-*.*s* %o\n", SYNAMLEN, SYNAMLEN, osypt->name, osypt->flags);
 #endif
 	lputl(&osypt->vl1, lfil);			/* symbol value */
 }
@@ -474,11 +478,16 @@ VOID osymt(NOTHING)
 		for (i = 0; i < extindx; i++)	/* go through external table */
 			osyme(*sx1++);				/* output symbol */
 	}
-	for (p = bmte; p < lmte; p++)
+	for (p = bmte; p != emte; p = p->next)
 	{									/* want them in order defined */
 		if (p->flags & (SYXR | SYIN))
 			continue;
 		osyme(p);
+	}
+	if (udfct != 0)
+	{
+		fputc('\n', stderr);
+		udfct = 0;
 	}
 	if (prtflg)							/* Printing? */
 		psyms();						/* Yes, call ST print routine */
@@ -488,29 +497,29 @@ VOID osymt(NOTHING)
 /* make all undefined symbols external */
 VOID fixunds(NOTHING)
 {
-	register struct symtab **sx1, **sx2;
+	register struct irts *sx1;
+	register struct symtab *sx2;
 
 	/* loop thru symbol initial reference table */
-	for (sx1 = sirt; sx1 < &sirt[SZIRT - 1]; sx1 += 2)
+	for (sx1 = sirt; sx1 < &sirt[SZIRT]; sx1++)
 	{
-		if (*(sx2 = sx1 + 1) == 0)		/* this chain is empty */
+		if ((sx2 = sx1->irfe) == 0)		/* this chain is empty */
 			continue;
 
 		/* symbols on one chain	*/
-		sx2 = (struct symtab **)*sx2;						/* first entry on this chain */
-		while (1)
+		for (;;)
 		{
-			if (!(((struct symtab *)sx2)->flags & SYDF))
+			if (!(sx2->flags & SYDF))
 			{							/* not defined */
-				if (undflg || ((struct symtab *)sx2)->flags & SYGL)
+				if (undflg || (sx2->flags & SYGL))
 				{						/* all or globals */
-					((struct symtab *)sx2)->flags = ((struct symtab *)sx2)->flags | SYDF | SYXR;
-					mkextidx(((struct symtab *)sx2));
+					sx2->flags = sx2->flags | SYDF | SYXR;
+					mkextidx(sx2);
 				}
 			}
-			if (((struct symtab *)sx2) == *sx1)			/* end of chain */
+			if (sx2 == sx1->irle)			/* end of chain */
 				break;
-			sx2 = (struct symtab **)(((struct symtab *)sx2)->tlnk);			/* next entry in chain */
+			sx2 = sx2->tlnk;			/* next entry in chain */
 		}
 	}
 }
@@ -522,7 +531,7 @@ PP(int br;)
 {
 	if (rlflg == BSS)
 	{
-		uerr(39);
+		uerr(39); /* code or data not allowed in bss */
 		return;
 	}
 	if (hibytflg[rlflg])
@@ -554,11 +563,11 @@ PP(unsigned short rb;)
 		break;
 
 	case BSS:
-		uerr(39);
+		uerr(39); /* code or data not allowed in bss */
 		break;
 
 	default:
-		rpterr("& outword: bad rlflg\n");
+		rpterr(_("& outword: bad rlflg"));
 		asabort();
 	}
 }
@@ -605,14 +614,14 @@ PP(long length;)
 		/* Read a buffer full */
 		if (fread(itbuf, 1, j, fp) != j)
 		{
-			rpterr("& Read error on Intermediate File\n");
+			rpterr(_("& Read error on Intermediate File"));
 			asabort();
 		}
 		
 		/* Now write buffer */
 		if (fwrite(itbuf, 1, j, lfil) != j)
 		{
-			rpterr("& Write error on Intermediate File\n");	/*              */
+			rpterr(_("& Write error on Intermediate File"));
 			asabort();
 		}
 		length -= j;					/* Decrement byte count     */
@@ -657,14 +666,14 @@ PP(struct op *ap;)
 	if (modelen == WORDSIZ)
 	{									/* word */
 		if (h != 0 && h != -1)
-			uerr(42);
+			uerr(42); /* illegal 16-bit immediate */
 	} else if (modelen == BYTESIZ)
 	{									/* byte */
 		if (h != 0 && h != -1)
-			uerr(43);
+			uerr(43); /* illegal 8-bit immediate */
 		h = (short)p->con;
 		if (h > 255 || h <= -256)
-			uerr(43);
+			uerr(43); /* illegal 8-bit immediate */
 	}
 }
 
@@ -738,11 +747,11 @@ PP(struct op *apea;)
 
 	case 6:							/* d(An,Ri) */
 	  dindx:
-		if (p->con > 255L || p->con < -128L)
-			uerr(35);
+		if (p->con > 127L || p->con < -128L)
+			uerr(35); /* illegal 8-bit displacement */
 		i = ((short)p->con & 0xff) | (p->idx << 12) | (p->xmod << 11);
 		if (p->drlc != ABS)
-			uerr(27);
+			uerr(27); /* relocation error */
 		*pins++ = i;
 		*prlb++ = DABS;
 		instrlen += 2;
@@ -764,7 +773,7 @@ PP(struct op *apea;)
 			if (p->drlc != ABS)
 			{
 				if (p->drlc != rlflg)	/* not same reloc base */
-					uerr(27);
+					uerr(27); /* relocation error */
 				p->con -= (loctr + instrlen);
 				p->drlc = ABS;
 			}
@@ -795,11 +804,11 @@ PP(struct op *ap;)
 
 	if ((ap->ea & 070) != 070)
 		return;
-	value = (ap->con > 0 && ap->con & 0100000) ? -(ap->con & ~0100000) : ap->con;
+	value = (ap->con > 0 && (ap->con & 0x8000)) ? -(ap->con & ~0x8000) : ap->con;
 	if (modelen == BYTESIZ)
 	{
 		if (value < -128L || value > 255L)	/* 8 bits */
-			uerr(35);
+			uerr(35); /* illegal 8-bit displacement */
 	} else if (modelen == WORDSIZ)
 	{
 		if (value > 32767L || value < -32768L)	/* 16 bits */
