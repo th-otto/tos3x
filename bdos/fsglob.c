@@ -1,0 +1,57 @@
+/*  fsglob.c - global variables for the file system			*/
+
+/*
+**  Mod #	   who date		modification
+**  -------------- --- ---------	------------
+**  M01.01.1023.02 scc 10/23/86		Changed the definition of time and date
+**					to unsigned int
+**
+*/
+
+#include	"tos.h"
+#include	"fs.h"
+#include	"bios.h"
+
+/*
+**  drvtbl -
+*/
+
+DMD *drvtbl[16];
+
+
+/*
+**  logmsk -
+**	log values of:
+**        1, 2, 4, 8, 16, 32, 64, 128  256, 512, 1024, 2048 ... 
+*/
+
+int16_t logmsk[] = { 0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047,
+	4095, 8191, 16383, 32767
+};
+
+
+/*
+**  sft -
+*/
+
+FTAB sft[OPNFILES];
+
+
+/*
+**  rwerr -  hard error number currently in progress 
+*/
+
+ERROR rwerr;
+
+/*
+**  errdrv -  drive on which error occurred 
+*/
+
+int16_t errdrv;
+
+
+/*
+**  time - , date - who knows why this is here?
+*/
+
+uint16_t time, date;

@@ -1,0 +1,1 @@
+char *bdosts = "*** GEMDOS 1.1 12/15/86 15:55:06 SCC ***\r\n";

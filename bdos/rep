@@ -1,0 +1,6 @@
+/BYTE/char/wg
+/WORD/int16_t/wg
+/UWORD/uint16_t/wg
+/LONG/int32_t/wg
+/REG/register/wg
+/NULLPTR/NULL/wg
