@@ -2,7 +2,6 @@ include ../Makefile.common
 include ../Makefile.silent
 
 LIBS = ${LIBC}
-CPPFLAGS += -DGEMDOS
 
 all: bdos.a
 

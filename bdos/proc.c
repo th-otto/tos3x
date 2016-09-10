@@ -37,12 +37,12 @@
  *
  */
 
-#include	"tos.h"
-#include	"fs.h"
-#include	"bios.h"
-#include	"mem.h"
-#include	<toserror.h>
-#include	"btools.h"
+#include "tos.h"
+#include "fs.h"
+#include "bios.h"
+#include "mem.h"
+#include <toserrno.h>
+#include "btools.h"
 
 #define	DBGPROC	0
 
@@ -94,10 +94,13 @@ PP(char *v;)								/* command, tail, environment   */
 	char *b, *e;
 	int i, h;
 	int cnt;
-	long rc, max;
+	ERROR rc;
+	int32_t max;
 	MD *m, *env;
-	long *spl;
+	int32_t *spl;
 
+	UNUSED(cnt);
+	
 	m = env = 0L;
 
 	/*
@@ -105,7 +108,7 @@ PP(char *v;)								/* command, tail, environment   */
 	 */
 
 	if (flg && (flg < 3 || flg > 5))
-		return (EINVFN);
+		return E_INVFN;
 
 	/*
 	 *   if we have to load, find the file
@@ -113,7 +116,7 @@ PP(char *v;)								/* command, tail, environment   */
 
 	if ((flg == 0) || (flg == 3))
 		if (ixsfirst(s, 0, 0L))
-			return (EFILNF);			/*  file not found  */
+			return E_FILNF;			/*  file not found  */
 
 	xmovs(sizeof(errbuf), errbuf, bakbuf);
 
@@ -137,7 +140,7 @@ PP(char *v;)								/* command, tail, environment   */
 #else
 		/* Free any memory allocated to this program. */
 		if (flg != 4)					/* did we allocate any memory? */
-			ixterm(t);					/*  yes - free it */
+			ixterm((PD *)t);					/*  yes - free it */
 
 		xlongjmp(bakbuf, rc);
 #endif
@@ -147,7 +150,6 @@ PP(char *v;)								/* command, tail, environment   */
 
 	if (flg != 4)
 	{									/* get largest memory partition available */
-
 		if (!v)
 			v = run->p_env;
 
@@ -162,12 +164,12 @@ PP(char *v;)								/* command, tail, environment   */
 		 *  allocate environment
 		 */
 
-		if (!(env = ffit((long) i, &pmd)))
+		if (!(env = ffit((long) i, &pmd, 0)))
 		{
 #if	DBGPROC
 			kprintf("xexec: Not Enough Memory!\n\r");
 #endif
-			return (ENSMEM);
+			return E_NSMEM;
 		}
 
 		e = (char *) env->m_start;
@@ -178,12 +180,11 @@ PP(char *v;)								/* command, tail, environment   */
 
 		bmove(v, e, i);
 
-
 		/* 
 		 *   allocate base page
 		 */
 
-		max = (long) ffit(-1L, &pmd);	/*  amount left */
+		max = (int32_t) ffit(-1L, &pmd, 0);	/*  amount left */
 
 		if (max < sizeof(PD))
 		{								/*  not enoufg even for PD  */
@@ -191,13 +192,13 @@ PP(char *v;)								/* command, tail, environment   */
 #if	DBGPROC
 			kprintf("xexec: No Room For Base Pg\n\r");
 #endif
-			return (ENSMEM);
+			return E_NSMEM;
 		}
 
 		/*  allocate the base page.  The owner of it is either the
 		   new process being created, or the parent  */
 
-		m = ffit(max, &pmd);
+		m = ffit(max, &pmd, 0);
 
 		p = (PD *) m->m_start;			/*  PD is first in bp   */
 
@@ -212,12 +213,11 @@ PP(char *v;)								/* command, tail, environment   */
 		 *   initialize the PD (first, by zero'ing it out)
 		 */
 
-
 		bzero(p, sizeof(PD));
 
-		p->p_lowtpa = (long) p;
-		p->p_hitpa = (long) p + max;
-		p->p_xdta = &p->p_cmdlin[0];	/* default p_xdta is p_cmdlin */
+		p->p_lowtpa = (int32_t) p;
+		p->p_hitpa = (int32_t) p + max;
+		p->p_xdta = (DTA *)&p->p_cmdlin[0];	/* default p_xdta is p_cmdlin */
 		p->p_env = (char *) env->m_start;
 
 
@@ -255,22 +255,24 @@ PP(char *v;)								/* command, tail, environment   */
 	 *      tpa limits, filled in with start addrs,lens 
 	 */
 
-	if ((flg == 0) || (flg == 3))
-		if (rc = xpgmld(s, t))
+	if (flg == 0 || flg == 3)
+	{
+		if ((rc = xpgmld(s, (PD *)t)) != 0)
 		{
 #if	DBGPROC
 			kprintf("cmain: error returned from xpgmld = %lx\n\r", rc);
 #endif
-			ixterm(t);
-			return (rc);
+			ixterm((PD *)t);
+			return rc;
 		}
-
-	if ((flg == 0) || (flg == 4))
+	}
+	
+	if (flg == 0 || flg == 4)
 	{
 		p = (PD *) t;
 		p->p_parent = run;
-		spl = (long *) p->p_hitpa;
-		*--spl = (long) p;
+		spl = (int32_t *) p->p_hitpa;
+		*--spl = (int32_t) p;
 		*--spl = 0L;					/* bogus retadd */
 
 		/* 10 regs (40 bytes) of zeroes  */
@@ -279,7 +281,16 @@ PP(char *v;)								/* command, tail, environment   */
 			*--spl = 0L;
 
 		*--spl = p->p_tbase;			/* text start */
-		*--(int16_t *) spl = 0;						/* startup status reg */
+#ifndef __ALCYON__
+		{
+			int16_t *spw;
+			spw = (int16_t *) spl;
+			*--spw = 0;						/* startup status reg */
+			spl = (int32_t *) spw;
+		}
+#else
+		*--((int16_t *) spl) = 0;						/* startup status reg */
+#endif
 		*--spl = (long) &supstk[SUPSIZ];
 		p->p_areg[6 - 3] = p->p_areg[7 - 3] = (long) spl;
 		p->p_areg[5 - 3] = p->p_dbase;
@@ -291,7 +302,7 @@ PP(char *v;)								/* command, tail, environment   */
 
 	/* sub-func 3 and 5 return here */
 
-	return ((long) t);
+	return (ERROR) t;
 }
 
 /*
@@ -308,13 +319,13 @@ PP(char *v;)								/* command, tail, environment   */
 int envsize(P(const char *) env)
 PP(const char *env;)
 {
-	register char *e;
+	register const char *e;
 	register int cnt;
 
 	for (e = env, cnt = 0; !(*e == '\0' && *(e + 1) == '\0'); ++e, ++cnt)
 		;
 
-	return (cnt + 2);					/*  count terminating double null  */
+	return cnt + 2;					/*  count terminating double null  */
 }
 
 
@@ -332,6 +343,7 @@ VOID x0term(NOTHING)
 	xterm(0);
 }
 
+
 /*
  *  xterm - terminate a process
  *	terminate the current process and transfer control to the colling
@@ -346,7 +358,11 @@ PP(uint16_t rc;)
 {
 	register PD *r;
 
-	(*(int (*)()) trap13(0x00050102L, -1L)) ();	/*  call user term handler */
+#ifdef __ALCYON__
+	(*(int (*) PROTO((NOTHING))) trap13(0x00050102L, -1L)) ();	/*  call user term handler */
+#else
+	(*(int (*) PROTO((NOTHING))) trap13(0x0005, 0x0102, -1L)) ();	/*  call user term handler */
+#endif
 
 	run = (r = run)->p_parent;
 	ixterm(r);
@@ -361,26 +377,12 @@ PP(uint16_t rc;)
  */
 
 /* 306: 00e176d6 */
-VOID xtermres(int16_t blkln, long rc)
-int16_t rc;
-long blkln;
+VOID xtermres(P(int32_t) blkln, P(int16_t) rc)
+PP(int32_t blkln;)
+PP(int16_t rc;)
 {
-	MD *m, **q;
-
 	xsetblk(0, run, blkln);
-
-	for (m = *(q = &pmd.mp_mal); m; m = *q)
-	{
-		if (m->m_own == run)
-		{
-			*q = m->m_link;				/* pouf ! like magic */
-			xmfreblk(m);
-		} else
-		{
-			q = &m->m_link;
-		}
-	}
-	
+	xmakeres(run);
 	xterm(rc);
 }
 
@@ -395,12 +397,10 @@ long blkln;
 VOID ixterm(P(PD *) r)
 PP(PD *r;)									/*  PD of process to terminate      */
 {
-	register MD *m, **q;
 	register int h;
 	register int i;
 
 	/*  check the standard devices in both file tables  */
-
 	for (i = 0; i < NUMSTD; i++)
 		if ((h = r->p_uft[i]) > 0)
 			xclose(h);
@@ -409,27 +409,13 @@ PP(PD *r;)									/*  PD of process to terminate      */
 		if (r == sft[i].f_own)
 			xclose(i + NUMSTD);
 
-
 	/*  check directory usage */
-
 	for (i = 0; i < NUMCURDIR; i++)
 	{
 		if ((h = r->p_curdir[i]) != 0)
 			diruse[h]--;
 	}
 
-	/*
-	 *   for each item in the allocated list that is owned by 'r', 
-	 *  free it
-	 */
-
-	for (m = *(q = &pmd.mp_mal); m; m = *q)
-	{
-		if (m->m_own == r)
-		{
-			*q = m->m_link;
-			freeit(m, &pmd);
-		} else
-			q = &m->m_link;
-	}
+	/* free process memory */
+	xmfreall(r);
 }

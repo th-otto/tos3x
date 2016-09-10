@@ -111,13 +111,11 @@
  */
 
 
-#include	"tos.h"
-#include	"fs.h"
-#include	"bios.h"
-#include	<toserrno.h>
-#include	"btools.h"
-
-#define FA_NORM (FA_ARCH|FA_HIDDEN|FA_RDONLY|FA_SYSTEM)
+#include "tos.h"
+#include "fs.h"
+#include "bios.h"
+#include <toserrno.h>
+#include "btools.h"
 
 
 /*
@@ -154,8 +152,8 @@ static char dots2[22] = { "..         " };
 ERROR xmkdir(P(const char *) s)
 PP(const char *s;)
 {
-	register OFD *f;
-	register FCB *f2;
+	OFD *f;
+	FCB *f2;
 	OFD *fd, *f0;
 	FCB *b;
 	DND *dn;
@@ -165,7 +163,7 @@ PP(const char *s;)
 	ERROR rc;
 
 	if ((h = rc = ixcreat(s, FA_DIREC)) < 0)
-		return (rc);
+		return rc;
 
 	f = getofd(h);
 
@@ -249,7 +247,7 @@ PP(const char *s;)
 	xmfreblk(f);
 	sft[h - NUMSTD].f_own = 0;
 	sft[h - NUMSTD].f_ofd = 0;
-	return (E_OK);
+	return E_OK;
 }
 
 
@@ -298,7 +296,7 @@ PP(const char *p;)
 	{
 		if (!(f = (FCB *) ixread(fd, 32L, NULL)))
 			break;
-	} while (f->f_name[0] == 0x0e5);
+	} while (f->f_name[0] == 0xe5);
 
 
 	if (f != NULL && f->f_name[0] != 0)
@@ -331,7 +329,7 @@ PP(const char *p;)
 	ixlseek((f2 = fd->o_dirfil), (pos = fd->o_dirbyt));
 	f = (FCB *) ixread(f2, 32L, NULL);
 
-	return (ixdel(d1, f, pos));
+	return ixdel(d1, f, pos);
 }
 
 
@@ -558,9 +556,9 @@ PP(const char *p2;)
 	}
 
 	if ((rc = xclose((int) h1)) < 0L)
-		return (rc);
+		return rc;
 
-	return (ixclose(fd, CL_DIR));
+	return ixclose(fd, CL_DIR);
 }
 
 /*	
@@ -706,7 +704,7 @@ PP(register DTAINFO *addr;)						/*  ptr to dta info         */
 		makbuf(f, addr);
 	}
 
-	return (E_OK);
+	return E_OK;
 }
 
 
@@ -745,7 +743,7 @@ PP(DND *dn;)								/*  dir descr for dir           */
 	f1 = (FCB *) (s1 = getrec(fd->o_currec, dn->d_drv, 1));
 
 	bzero(s1, num);
-	return (f1);
+	return f1;
 }
 
 
@@ -918,7 +916,7 @@ PP(int *len;)
 			break;
 		}
 	}
-	return (buf);
+	return buf;
 }
 
 
@@ -950,7 +948,7 @@ PP(int dflag;)								/*  T: name is for a directory      */
 	n = name;
 
 	if ((long) (p = dcrack(&n)) <= 0)
-		return (p);
+		return p;
 
 	/*  
 	 *  Force scan() to read from the beginning of the directory again, 
@@ -1024,7 +1022,7 @@ PP(int dflag;)								/*  T: name is for a directory      */
 
 	*sp = n;
 
-	return (p);
+	return p;
 }
 
 /*
@@ -1053,6 +1051,7 @@ PP(int dflag;)								/*  T: name is for a directory      */
  *	M01.01a.0708.01 - removed use of d_scan field
  */
 
+/* 306: 00e15580 */
 FCB *scan(P(DND *) dnd, P(const char *) n, P(int16_t) att, P(int32_t *) posp)
 PP(register DND *dnd;)
 PP(const char *n;)
@@ -1077,7 +1076,7 @@ PP(int32_t *posp;)
 	{
 		if (!(dnd->d_ofd = (fd = makofd(dnd))))
 		{
-			return ((FCB *) 0);
+			return (FCB *)0;
 		}
 	}
 
@@ -1127,17 +1126,17 @@ PP(int32_t *posp;)
 	if (!m)
 	{									/*  assumes that (*n != 0xe5) (if posp == -1)  */
 		if (fcb && (*n == 0xe5))
-			return (fcb);
-		return ((FCB *) 0);
+			return fcb;
+		return (FCB *)0;
 	}
 
 	if (*posp == -1)
 	{									/*  seek to position of found entry  */
 		ixlseek(fd, fd->o_bytnum - 32);
-		return (((FCB *) dnd1));
+		return (FCB *)dnd1;
 	}
 
-	return (fcb);
+	return fcb;
 }
 
 
@@ -1194,7 +1193,7 @@ PP(FCB *b;)
 	if (!p1)
 	{
 		if (!(p1 = MGET(DND)))
-			return ((DND *) 0);			/* ran out of system memory */
+			return (DND *) 0;			/* ran out of system memory */
 
 		/* do this init only on a newly allocated DND */
 		p1->d_right = p->d_left;
@@ -1214,7 +1213,7 @@ PP(FCB *b;)
 	p1->d_td.date = b->f_td.date;
 	xmovs(11, (char *) b->f_name, (char *) p1->d_name);
 
-	return (p1);
+	return p1;
 }
 
 
@@ -1270,7 +1269,7 @@ PP(const char **np;)
 	/* whew ! *//*  <= thankyou, Jason, for that wonderful comment */
 
 	*np = n;
-	return (p);
+	return p;
 }
 
 
@@ -1315,16 +1314,16 @@ PP(int dirspec;)							/*  true = no file name, just dir path  */
 			i2--;						/*  -1 for dot      */
 			if (p[1] == '.')
 				i2--;					/*  -2 for dotdot   */
-			return (i2);
+			return i2;
 		}
 
 		if (i)							/*  if not null path el */
 			builds(p, d);				/*  d => dir style fn   */
 
-		return (i);						/*  return nbr chars    */
+		return i;						/*  return nbr chars    */
 	}
 
-	return (0);							/*  if string is a file name        */
+	return 0;							/*  if string is a file name        */
 }
 
 
@@ -1347,9 +1346,9 @@ PP(register const char *s2;)									/*  name in fcb             */
 	if (*s2 == 0xe5)
 	{
 		if (*s1 == '?')
-			return (FALSE);
+			return FALSE;
 		else if (*s1 == 0xe5)
-			return (TRUE);
+			return TRUE;
 	}
 
 	/*
@@ -1359,7 +1358,7 @@ PP(register const char *s2;)									/*  name in fcb             */
 	for (i = 0; i < 11; i++, s1++, s2++)
 		if (*s1 != '?')
 			if (uc(*s1) != uc(*s2))
-				return (FALSE);
+				return FALSE;
 
 	/* 
 	 *  check attribute match
@@ -1368,9 +1367,9 @@ PP(register const char *s2;)									/*  name in fcb             */
 
 	if ((*s1 != FA_LABEL) && (*s1 != FA_DIREC))
 		if (!(*s2))
-			return (TRUE);
+			return TRUE;
 
-	return (*s1 & *s2 ? TRUE : FALSE);
+	return *s1 & *s2 ? TRUE : FALSE;
 }
 
 
@@ -1417,8 +1416,8 @@ PP(register const char *d;)
 
 	for (i = 0; i < 11; i++)
 		if (uc(*s++) != uc(*d++))
-			return (0);
-	return (1);
+			return 0;
+	return 1;
 }
 
 
@@ -1435,7 +1434,7 @@ PP(DND *d;)									/*  root where we start the search  */
 	for (dnd = d->d_left; dnd; dnd = dnd->d_right)
 	{
 		if (xcmps(n, &dnd->d_name[0]))
-			return (dnd);
+			return dnd;
 	}
 	return NULL;
 
@@ -1484,5 +1483,5 @@ PP(const char *s11;)
 			if (i == 9)
 				len++;
 		}
-	return (len);
+	return len;
 }

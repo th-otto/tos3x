@@ -1,79 +1,79 @@
 /*	con.c
-** 
-** GEMDOS console system
-** 
-** Originally written by JSL as noted below.
-** 
-** MODIFICATION HISTORY
-** 
-** 	10 Mar 85	SCC	Added xauxout(), xprtout(), xauxin().
-** 				(getch() can be used to perform function 7.)
-** 				Updated rawconio() to spec (no 0xFE).
-** 				Register optimization.
-** 
-** 	11 Mar 85	SCC	Further register optimization.
-** 				Added xconostat(), xprtostat(), xauxistat(), &
-** 				xauxostat().
-** 	12 Mar 85	SCC	Fixed xauxin().
-** 	14 Mar 85	SCC	Extended path from BIOS character input
-** 				through to returning the character to the
-** 				user to be long.
-** 				OOPS!  Repaired a '=' to a '==' in rawconio().
-** 	19 Mar 85	SCC	Modified tests in conbrk() to just check low
-** 				byte of character (ignoring scan code info).
-** 	21 Mar 85	SCC	Modified conin()'s echo of long input
-** 				character to int.
-** 				Added definition of 'h' to conout parameters.
-** 	25 Mar 85	SCC	Changed constat return to -1 (to spec).
-** 				Modified xauxistat() to use constat() rather
-** 				than bconstat() directly.
-** 	 1 Apr 85	SCC	Added x7in().  getch() cannot be used directly
-** 				for function 0x07.
-** 	10 Apr 85	EWF	Installed circular buffer for typeahead.
-** 	11 Apr 85	EWF	Modified ^R handling in cgets().
-** 	12 Apr 85	EWF	Installed 'ring bell' on typeahead full.
-** 			SCC	Installed EWF's changes of 10, 11 & 12 Apr 85.
-** 	26 Apr 85	SCC	Modified ^X & ^C handling to flush BIOS buffer
-** 				as well as BDOS buffer.
-** 	29 Apr 85	SCC	Modified buffer flushing to flush just BDOS
-** 				buffer, but to re-insert ^X into buffer.
-** 
-** 	11 Aug 85	SCC	Modified references that convert p_uft[] entry
-** 				to BIOS handle to use HXFORM() macro.
-** 				Added 'extern int bios_dev[]' for HXFORM().
-** 
-** 	16 Aug 85	SCC	Modified xtabout().  The character parameter
-** 				was omitted from the the call to tabout()
-** 				inadvertently in the course of the previous
-** 				changes.
-** 
-** 				Modified xconin().  It was not checking for
-** 				possible break.
-** 
-** 				Modified x8in().  It was checking for break
-** 				after getting a character, rather than before.
-** 
-** 	18 Aug 85	SCC	Modified constat() to return input status
-** 				for all new character devices.
-** 
-** 				Modified all references of p_uft[3] (for PRN:)
-** 				to p_uft[4], because of insertion of stderr.
-** 
-** 				Modified all references of p_uft[2] (for AUX:)
-** 				to p_uft[3], because of insertion of stderr.
-** 
-**	15 Oct 85	KTB	M01.01.01: code to accomodate split of fs.h
-**				into fs.h and bdos.h
-**
-**	21 Oct 85	KTB	M01.01.02: included portab.h
-** 	
-** NAMES
-** 
-** 	JSL	Jason S. Loveman
-** 	SCC	Steve C. Cavender
-** 	EWF	Eric W. Fleischman
-**	KTB	Karl T. Braun (kral)
-*/
+ * 
+ * GEMDOS console system
+ * 
+ * Originally written by JSL as noted below.
+ * 
+ * MODIFICATION HISTORY
+ * 
+ * 	10 Mar 85	SCC	Added xauxout(), xprtout(), xauxin().
+ * 				(getch() can be used to perform function 7.)
+ * 				Updated rawconio() to spec (no 0xFE).
+ * 				Register optimization.
+ * 
+ * 	11 Mar 85	SCC	Further register optimization.
+ * 				Added xconostat(), xprtostat(), xauxistat(), &
+ * 				xauxostat().
+ * 	12 Mar 85	SCC	Fixed xauxin().
+ * 	14 Mar 85	SCC	Extended path from BIOS character input
+ * 				through to returning the character to the
+ * 				user to be long.
+ * 				OOPS!  Repaired a '=' to a '==' in rawconio().
+ * 	19 Mar 85	SCC	Modified tests in conbrk() to just check low
+ * 				byte of character (ignoring scan code info).
+ * 	21 Mar 85	SCC	Modified conin()'s echo of long input
+ * 				character to int.
+ * 				Added definition of 'h' to conout parameters.
+ * 	25 Mar 85	SCC	Changed constat return to -1 (to spec).
+ * 				Modified xauxistat() to use constat() rather
+ * 				than bconstat() directly.
+ * 	 1 Apr 85	SCC	Added x7in().  getch() cannot be used directly
+ * 				for function 0x07.
+ * 	10 Apr 85	EWF	Installed circular buffer for typeahead.
+ * 	11 Apr 85	EWF	Modified ^R handling in cgets().
+ * 	12 Apr 85	EWF	Installed 'ring bell' on typeahead full.
+ * 			SCC	Installed EWF's changes of 10, 11 & 12 Apr 85.
+ * 	26 Apr 85	SCC	Modified ^X & ^C handling to flush BIOS buffer
+ * 				as well as BDOS buffer.
+ * 	29 Apr 85	SCC	Modified buffer flushing to flush just BDOS
+ * 				buffer, but to re-insert ^X into buffer.
+ * 
+ * 	11 Aug 85	SCC	Modified references that convert p_uft[] entry
+ * 				to BIOS handle to use HXFORM() macro.
+ * 				Added 'extern int bios_dev[]' for HXFORM().
+ * 
+ * 	16 Aug 85	SCC	Modified xtabout().  The character parameter
+ * 				was omitted from the the call to tabout()
+ * 				inadvertently in the course of the previous
+ * 				changes.
+ * 
+ * 				Modified xconin().  It was not checking for
+ * 				possible break.
+ * 
+ * 				Modified x8in().  It was checking for break
+ * 				after getting a character, rather than before.
+ * 
+ * 	18 Aug 85	SCC	Modified constat() to return input status
+ * 				for all new character devices.
+ * 
+ * 				Modified all references of p_uft[3] (for PRN:)
+ * 				to p_uft[4], because of insertion of stderr.
+ * 
+ * 				Modified all references of p_uft[2] (for AUX:)
+ * 				to p_uft[3], because of insertion of stderr.
+ * 
+ *	15 Oct 85	KTB	M01.01.01: code to accomodate split of fs.h
+ *				into fs.h and bdos.h
+ *
+ *	21 Oct 85	KTB	M01.01.02: included portab.h
+ * 	
+ * NAMES
+ * 
+ * 	JSL	Jason S. Loveman
+ * 	SCC	Steve C. Cavender
+ * 	EWF	Eric W. Fleischman
+ *	KTB	Karl T. Braun (kral)
+ */
 
 /* console system for GEMDOS 3/6/85 JSL */
 
@@ -81,26 +81,9 @@
 #include 	"fs.h"
 #include	"bios.h"
 
-#ifdef	OLDCODE
-/* *************************** typeahead buffer ************************* */
-							/*						*//* EWF  12 Apr 85 */
-/* The following data structures are used for the typeahead buffer:	  */
-/*									  */
-long glbkbchar[3][KBBUFSZ];				/* The actual typeahead buffer    */
-
-					/* The 3 elements are prn,aux,con */
-char kbchar[3];							/* size of typeahead buffer for   */
-
-					/* each element           */
-long *insptr[3];						/* insertion ptr for each buffer  */
-
-long *remptr[3];						/* removal ptr for each buffer    */
-
-/* ********************************************************************** */
-#else
 /* *************************** typeahead buffer ************************* */
 /* The following data structures are used for the typeahead buffer:	  */
-/*									  */
+
 long glbkbchar[3][KBBUFSZ];				/* The actual typeahead buffer    */
 
 					/* The 3 elements are prn,aux,con */
@@ -108,13 +91,10 @@ int add[3];								/*  index of add position     */
 
 int remove[3];							/*  index of remove position      */
 
-/* ********************************************************************** */
-#endif
 
 VOID conbrk PROTO((FH h));
 VOID buflush PROTO((FH h));
 VOID conout PROTO((FH h, int ch));
-VOID tabout PROTO((FH h, int ch));
 VOID cookdout PROTO((FH h, int ch));
 int32_t getch PROTO((FH h));
 VOID prt_line PROTO((FH h, const char *p));
@@ -148,86 +128,91 @@ int glbcolumn[3];
 ** constat -
 **
 ******************************************************************************
-*/
+ */
 
 int32_t constat(P(FH) h)
 PP(FH h;)
 {
 	if (h > BFHCON)
-		return (0);
+		return 0;
 
-	return (add[h] > remove[h] ? -1L : bconstat(h));
+	return add[h] > remove[h] ? -1L : bconstat(h);
 }
 
 /*****************************************************************************
 **
 ** xconstat - 
-**	Function 0x0B - Console input status
+**	Function 0x0B - Cconis - Console input status
 **
 **	Last modified	SCC	11 Aug 85
 **
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e138e8 */
 int32_t xconstat(NOTHING)
 {
-	return (constat(HXFORM(run->p_uft[0])));
+	return constat(HXFORM(run->p_uft[0]));
 }
 
 /*****************************************************************************
 **
 ** xconostat -
-**	Function 0x10 - console output status
+**	Function 0x10 - Cconos - console output status
 **
 **	Last Modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13902 */
 int32_t xconostat(NOTHING)
 {
-	return (bconostat(HXFORM(run->p_uft[1])));
+	return bconostat(HXFORM(run->p_uft[1]));
 }
 
 /*****************************************************************************
 **
 ** xprtostat -
-**	Function 0x11 - Printer output status
+**	Function 0x11 - Cprnos - Printer output status
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13926 */
 int32_t xprtostat(NOTHING)
 {
-	return (bconostat(HXFORM(run->p_uft[4])));
+	return bconostat(HXFORM(run->p_uft[4]));
 }
 
 /*****************************************************************************
 **
 ** xauxistat -
-**	Function 0x12 - Auxillary input status
+**	Function 0x12 - Cauxis - Auxiliary input status
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e1394a */
 int32_t xauxistat(NOTHING)
 {
-	return (constat(HXFORM(run->p_uft[3])));
+	return constat(HXFORM(run->p_uft[3]));
 }
 
 /*****************************************************************************
 **
 ** xauxostat -
-**	Function 0x13 - Auxillary output status
+**	Function 0x13 - Cauxos - Auxiliary output status
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13966 */
 int32_t xauxostat(NOTHING)
 {
-	return (bconostat(HXFORM(run->p_uft[3])));
+	return bconostat(HXFORM(run->p_uft[3]));
 }
 
 
@@ -307,12 +292,13 @@ PP(int ch;)
 /*****************************************************************************
 **
 ** xtabout -
-**	Function 0x02 - console output with tab expansion
+**	Function 0x02 - Cconout - console output with tab expansion
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13bbc */
 VOID xtabout(P(int16_t) ch)
 PP(int16_t ch;)
 {
@@ -324,7 +310,7 @@ PP(int16_t ch;)
 ** tabout -
 **
 ******************************************************************************
-*/
+ */
 
 VOID tabout(P(FH) h, P(int) ch)
 PP(FH h;)
@@ -367,12 +353,13 @@ PP(int ch;)									/* character to output to console   */
 /*****************************************************************************
 **
 ** xauxout -
-**	Function 0x04 - auxillary output
+**	Function 0x04 - Cauxout - auxiliary output
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13c7e */
 int16_t xauxout(P(int16_t) ch)
 PP(int16_t ch;)
 {
@@ -382,12 +369,13 @@ PP(int16_t ch;)
 /*****************************************************************************
 **
 ** xprtout -
-**	Function 0x05 - printer output
+**	Function 0x05 - Cprnout - printer output
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13ca6 */
 int32_t xprtout(P(int16_t) ch)
 PP(int16_t ch;)
 {
@@ -416,12 +404,13 @@ PP(FH h;)
 /*****************************************************************************
 **
 ** x7in -
-**	Function 0x07 - Direct console input without echo
+**	Function 0x07 - Crawcin - Direct console input without echo
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13d7c */
 int32_t x7in(NOTHING)
 {
 	return getch(HXFORM(run->p_uft[0]));
@@ -434,18 +423,19 @@ PP(FH h;)
 	long ch;
 
 	conout(h, (int) (ch = getch(h)));
-	return (ch);
+	return ch;
 }
 
 /*****************************************************************************
 **
 ** xconin -
-**	Function 0x01 - console input
+**	Function 0x01 - Cconin - console input
 **
 **	Last modified	SCC	16 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13dd0 */
 int32_t xconin(NOTHING)
 {
 	int h;
@@ -458,12 +448,13 @@ int32_t xconin(NOTHING)
 /*****************************************************************************
  *
  * x8in -
- *	Function 0x08 - Console input without echo
+ *	Function 0x08 - Cnecin - Console input without echo
  *
  *	Last modified	SCC	24 Sep 85
  *****************************************************************************
  */
 
+/* 306: 00e13dea */
 int32_t x8in(NOTHING)
 {
 	register int h;
@@ -478,33 +469,35 @@ int32_t x8in(NOTHING)
 		__builtin_unreachable(); /* quiet compiler about no return value */
 	} else
 	{
-		return (ch);
+		return ch;
 	}
 }
 
 /*****************************************************************************
  *
  * xauxin -
- *	Function 0x03 - Auxillary input
+ *	Function 0x03 - Cauxin - Auxiliary input
  *
  *	Last modified	SCC	11 Aug 85
  *****************************************************************************
  */
 
+/* 306: 00e13e22 */
 int32_t xauxin(NOTHING)
 {
-	return (bconin(HXFORM(run->p_uft[3])));
+	return bconin(HXFORM(run->p_uft[3]));
 }
 
 /*****************************************************************************
 **
 ** rawconio -
-**	Function 0x06 - Raw console I/O
+**	Function 0x06 - Crawio - Raw console I/O
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13e46 */
 int32_t rawconio(P(int16_t) parm)
 PP(int16_t parm;)
 {
@@ -521,12 +514,13 @@ PP(int16_t parm;)
 /*****************************************************************************
 **
 ** xprt_line -
-**	Function 0x09 - Print line up to nul with tab expansion
+**	Function 0x09 - Cconws - Print line up to nul with tab expansion
 **
 **	Last modified	SCC	11 Aug 85
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13ea6 */
 VOID xprt_line(P(const char *) p)
 PP(const char *p;)
 {
@@ -604,10 +598,11 @@ PP(int col;)								/* starting console column  */
 /*****************************************************************************
 **
 ** readline -
-**	Function 0x0A - Read console string into buffer
+**	Function 0x0A - Cconrs - Read console string into buffer
 ******************************************************************************
-*/
+ */
 
+/* 306: 00e13fd6 */
 VOID readline(P(char *) p)
 PP(char *p;)								/* max length, return length, buffer space */
 {
@@ -658,5 +653,6 @@ PP(char *buf;)
 			cookdout(h, buf[retlen++] = ch);
 		}
 	}
-  getout:return (retlen);
+getout:
+	return retlen;
 }

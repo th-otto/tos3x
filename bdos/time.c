@@ -28,15 +28,15 @@ NAMES
 	SCC	Steven C. Cavender
 	EWF	Eric W. Fleischman
 	ACH	Anthony C. Hay (DR UK)
-*/
+ */
 
 #include "tos.h"
-#include <toserror.h>
+#include <toserrno.h>
 #include "bios.h"
 
 
 /****************************/
-/* Function 0x2A:  Get date */
+/* Function 0x2A:  Tgetdate */
 /****************************/
 
 int32_t xgetdate(NOTHING)
@@ -47,7 +47,7 @@ int32_t xgetdate(NOTHING)
 
 
 /****************************/
-/* Function 0x2B:  Set date */
+/* Function 0x2B:  Tsetdate */
 /****************************/
 
 
@@ -85,7 +85,7 @@ PP(int16_t d;)
 
 
 /****************************/
-/* Function 0x2C:  Get time */
+/* Function 0x2C:  Tgettime */
 /****************************/
 
 int32_t xgettime(NOTHING)
@@ -96,7 +96,7 @@ int32_t xgettime(NOTHING)
 
 
 /****************************/
-/* Function 0x2D:  Set time */
+/* Function 0x2D:  Tsettime */
 /****************************/
 
 

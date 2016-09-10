@@ -2,6 +2,7 @@
 
 
 #define	bzero( s , n ) 		bfill( s , 0 , n )
+#define	xmovs(n,s,d)	bmove(s,d,n)
 
 
 VOID	bmove PROTO((const VOIDPTR src, VOIDPTR dst, uint16_t cnt));

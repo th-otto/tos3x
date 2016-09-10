@@ -407,7 +407,7 @@
  *  xfr2usr -
  */
 
-VOID xfr2usr(P(int) n, register char *s, register char *d)
+VOID xfr2usr(P(int) n, P(register char *) s, P(register char *) d)
 PP(register int n;)
 PP(register char *s;)
 PP(register char *d;)
@@ -445,7 +445,7 @@ PP(register char c;)
 
 
 /*
- *  xgetdta - Function 0x2F	f_getdta
+ *  xgetdta - Function 0x2F	Fgetdta
  */
 
 DTA *xgetdta(NOTHING)							/*+ return address of dta */
@@ -455,7 +455,7 @@ DTA *xgetdta(NOTHING)							/*+ return address of dta */
 
 
 /*
- *  xsetdta - Function 0x1A	f_setdta
+ *  xsetdta - Function 0x1A	Fsetdta
  */
 
 VOID xsetdta(P(DTA *) addr)							/*+ set transfer address to addr */
@@ -469,7 +469,7 @@ PP(DTA *addr;)
 /*
  *  xsetdrv - set default drive
  *	( 0 = A, etc )
- *	Function 0x0E	d_setdrv
+ *	Function 0x0E	Dsetdrv
  */
 
 ERROR xsetdrv(P(int16_t) drv)
@@ -482,7 +482,7 @@ PP(int16_t drv;)
 	if (drvmap & (1 << drv))
 	{
 		run->p_curdrv = drv;
-		return (drvmap);
+		return drvmap;
 	}
 
 	return E_DRIVE;
@@ -493,7 +493,7 @@ PP(int16_t drv;)
  *  xgetdrv - get default drive
  *	(0 = A, etc )
  *
- *	Function 0x19	d_getdrv
+ *	Function 0x19	Dgetdrv
  *
  *	Last modified	SCC	1 May 85
  */
@@ -514,7 +514,7 @@ PP(register DND *p;)
 	register OFD *f;
 
 	if (!(f = MGET(OFD)))
-		return ((OFD *) 0);
+		return (OFD *) 0;
 
 	f->o_strtcl = p->d_strtcl;
 	f->o_fileln = 0x7fffffffL;
@@ -525,7 +525,7 @@ PP(register DND *p;)
 	f->o_td.time = p->d_td.time;
 	f->o_dmd = p->d_drv;
 
-	return (f);
+	return f;
 }
 
 
@@ -590,6 +590,8 @@ int16_t bios_dev[] = { BFHPRN, BFHAUX, BFHCON, BFHCLK, BFHMOU };
  ******************************************************************************
  */
 
+#if !GEMDOS
+
 ERROR F_IOCtl(P(int) fn, P(FH) h, P(int) n, P(VOIDPTR) buf)
 PP(int fn;)
 PP(FH h;)
@@ -600,6 +602,7 @@ PP(VOIDPTR buf;)
 	register OFD *pofd;					/* pointer to OFD       */
 	BPB *tmp;
 
+	pofd = 0;
 	if ((fn != DREADC) && (fn != DWRITEC) && (fn != REMEDIA))
 	{									/* If handle,           */
 		if (h >= 0)						/* If file handle,      */
@@ -615,7 +618,7 @@ PP(VOIDPTR buf;)
 	switch (fn)
 	{
 	case XCVECTOR:						/* Exchange char vector     */
-		return (CVE(HXFORM(h), buf));
+		return CVE(HXFORM(h), buf);
 
 	case GETINFO:						/* Get device information   */
 		if (h >= 0)						/* For disk file:       */
@@ -624,15 +627,16 @@ PP(VOIDPTR buf;)
 			rv = h = pofd->o_dmd->m_drvnum;
 			if (!DIOCR(h, 0, 0L))		/* 'or' in CONTROL bit      */
 				rv |= Does_IOCtl;
-			return (rv);
+			return rv;
 		}
 
 		/* else *//* For character devices:   */
 		rv = Is_Character;
 
 		if (h == H_Null)
+		{
 			rv |= Is_NUL;
-		else
+		} else
 		{
 			if (h == H_Console)
 				rv |= Is_Console;
@@ -643,27 +647,27 @@ PP(VOIDPTR buf;)
 				rv |= Does_IOCtl;
 		}
 
-		return (rv);
+		return rv;
 
 	case CREADC:						/* Read character control   */
-		return (CIOCR(HXFORM(h), n, buf));
+		return CIOCR(HXFORM(h), n, buf);
 
 	case CWRITEC:						/* Write character control  */
-		return (CIOCW(HXFORM(h), n, buf));
+		return CIOCW(HXFORM(h), n, buf);
 
 	case DREADC:						/* Read disk control string */
-		return (DIOCR(h, n, buf));
+		return DIOCR(h, n, buf);
 
 	case DWRITEC:						/* Write disk control string */
-		return (DIOCW(h, n, buf));
+		return DIOCW(h, n, buf);
 
 	case INSTAT:						/* Get input status     */
 		if (h < 0)						/* For Character Device:    */
 		{
 			if (h == H_Null)
-				return (0);
+				return 0;
 
-			return (constat(HXFORM(h)));
+			return constat(HXFORM(h));
 		}
 
 		/* else fall through to common code for disk files      */
@@ -672,28 +676,32 @@ PP(VOIDPTR buf;)
 		if (h < 0)						/* For Character Device:    */
 		{
 			if (h == H_Null)
-				return (0);
+				return 0;
 
-			return (COStat(HXFORM(h)));
+			return COStat(HXFORM(h));
 		}
 
 		/* else *//* For disk file:       */
-		return (pofd->o_bytnum != pofd->o_fileln);
+		return pofd->o_bytnum != pofd->o_fileln;
 
 	case REMEDIA:						/* Get removeable media sts */
 		tmp = GetBPB(h);
 
 		if (tmp == 0)
-			return (ERR);
+			return ERR;
 		if (tmp < 0)
-			return ((long) tmp);
+			return ((ERROR) tmp);
 
-		return (!(tmp->b_flags & B_FIX));
+		return !(tmp->b_flags & B_FIX);
 
 	default:							/* No function 1, etc. yet. */
 		return E_INVFN;
 	}
 }
+
+#endif
+
+
 
 /******************************************************************************
  *
@@ -712,5 +720,5 @@ PP(int16_t *d;)
 	*d = *d ? *d - 1 : run->p_curdrv;	/* Resolve drive number     */
 	map = GetDM();
 
-	return (map & (1 << *d));			/* Check for existence      */
+	return map & (1 << *d);			/* Check for existence      */
 }

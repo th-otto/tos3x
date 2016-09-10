@@ -197,8 +197,8 @@ BCB
 MD
 {
 	MD	*m_link;
-	long	m_start;
-	long	m_length;
+	intptr_t m_start;
+	intptr_t m_length;
 	PD	*m_own;
 };
 

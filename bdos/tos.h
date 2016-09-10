@@ -5,6 +5,35 @@
 #include <stdint.h>
 #endif
 
+#define TOSVERSION 0x0306
+
+/* major.minor */
+#if TOSVERSION >= 0x0100
+#undef GEMDOS
+#define GEMDOS 0x0013
+#endif
+#if TOSVERSION >= 0x0103
+#undef GEMDOS
+#define GEMDOS 0x0014
+#endif
+#if TOSVERSION >= 0x0104
+#undef GEMDOS
+#define GEMDOS 0x0015
+#endif
+#if TOSVERSION >= 0x0162
+#undef GEMDOS
+#define GEMDOS 0x0017
+#endif
+#if TOSVERSION >= 0x0201
+#undef GEMDOS
+#define GEMDOS 0x0019
+#endif
+#if TOSVERSION >= 0x0306
+#undef GEMDOS
+#define GEMDOS 0x0020
+#endif
+
+
 #ifndef __GNUC__
 #define __builtin_unreachable()
 #endif

@@ -6,12 +6,11 @@
 #include	<toserrno.h>
 
 
-VOID clfix PROTO((CLNO cl, CLNO link, DMD *dm));
 
 
 /*
-**  cl2rec -
-*/
+ *  cl2rec -
+ */
 
 RECNO cl2rec(P(CLNO) cl, P(DMD *)dm)
 PP(CLNO cl;)
@@ -24,10 +23,10 @@ PP(DMD *dm;)
 
 
 /*
-**  clfix -
-**	replace the contents of the fat entry indexed by 'cl' with the value
-**	'link', which is the index of the next cluster in the chain.
-*/
+ *  clfix -
+ *	replace the contents of the fat entry indexed by 'cl' with the value
+ *	'link', which is the index of the next cluster in the chain.
+ */
 
 VOID clfix(P(CLNO) cl, P(CLNO) link, P(DMD *) dm)
 PP(CLNO cl;)
@@ -75,13 +74,13 @@ PP(DMD *dm;)
 
 
 /*
-**  getcl -
-**	get the contents of the fat entry indexed by 'cl'.
-**
-**  returns
-**	0xffff if entry contains the end of file marker
-**	otherwise, the contents of the entry (16 bit value always returned).
-*/
+ *  getcl -
+ *	get the contents of the fat entry indexed by 'cl'.
+ *
+ *  returns
+ *	0xffff if entry contains the end of file marker
+ *	otherwise, the contents of the entry (16 bit value always returned).
+ */
 
 CLNO getcl(P(int) cl, P(DMD *) dm)
 PP(int cl;)
@@ -90,14 +89,14 @@ PP(DMD *dm;)
 	CLNO f[1];
 
 	if (cl < 0)
-		return (cl + 1);
+		return cl + 1;
 
 	if (dm->m_16)
 	{
 		ixlseek(dm->m_fatofd, (long) ((long) (cl) << 1));
 		ixread(dm->m_fatofd, 2L, f);
 		swp68(f[0]);
-		return (f[0]);
+		return f[0];
 	}
 
 	ixlseek(dm->m_fatofd, ((long) (cl + (cl >> 1))));
@@ -110,24 +109,23 @@ PP(DMD *dm;)
 		cl = 0x0fff & f[0];
 
 	if (cl == 0x0fff)
-		return (-1);
+		return -1;
 
-	return (cl);
+	return cl;
 }
 
 
 
 
 /*
-**  nextcl -
-**	get the cluster number which follows the cluster indicated in the curcl
-**	field of the OFD, and place it in the OFD.
-**
-**  returns
-**	E_OK	if success,
-**	-1	if error
-**
-*/
+ *  nextcl -
+ *	get the cluster number which follows the cluster indicated in the curcl
+ *	field of the OFD, and place it in the OFD.
+ *
+ *  returns
+ *	E_OK	if success,
+ *	-1	if error
+ */
 
 int nextcl(P(OFD *) p, P(int) wrtflg)
 PP(OFD *p;)
@@ -180,30 +178,30 @@ PP(int wrtflg;)
 				p->o_flag |= O_DIRTY;
 			}
 		} else
-			return (0xffff);
+			return 0xffff;
 	}
 
 	if (cl2 == 0xffff)
-		return (0xffff);
+		return 0xffff;
 
   retcl:p->o_curcl = cl2;
 	p->o_currec = cl2rec(cl2, dm);
 	p->o_curbyt = 0;
 
-	return (E_OK);
+	return E_OK;
 }
 
 
 
 
 
-/*	Function 0x36	d_free
+/*	Function 0x36	Dfree
 
 	Error returns
 		ERR
 
 	Last modified	SCC	15 May 85
-*/
+ */
 
 ERROR xgetfree(P(int32_t *) buf, P(int16_t) drv)					/*+ get disk free space data into buffer */
 PP(int32_t *buf;)
@@ -215,16 +213,16 @@ PP(int16_t drv;)
 	drv = (drv ? drv - 1 : run->p_curdrv);
 
 	if ((i = ckdrv(drv)) < 0)
-		return (ERR);
+		return ERR;
 
 	dm = drvtbl[i];
 	free = 0;
 	for (i = 2; i < dm->m_numcl; i++)
 		if (!getcl(i, dm))
 			free++;
-	*buf++ = (long) (free);
-	*buf++ = (long) (dm->m_numcl);
-	*buf++ = (long) (dm->m_recsiz);
-	*buf++ = (long) (dm->m_clsiz);
-	return (E_OK);
+	*buf++ = free;
+	*buf++ = dm->m_numcl;
+	*buf++ = dm->m_recsiz;
+	*buf++ = dm->m_clsiz;
+	return E_OK;
 }

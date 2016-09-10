@@ -1,141 +1,141 @@
-/*	rwa.a - GEMDOS assembler interface	*/
-/**************************************************************************
-**
-**
-**  NOTE:	This MUST be assembled with AS68's "-t" option.
-**
-** Originally written by JSL.
-**
-** MODIFICATION HISTORY
-**
-**	11 Mar 85	SCC	Added xgetsup() functionality as a hack in
-**				_entry().
-**				Removed get sup functionality from exit().
-**	11 Mar 85	JSL	Changed timer vector number.
-**	12 Mar 85	SCC	Modified xgetsup() functionality in _entry().
-**	13 Mar 85	SCC	Changed 'xgetsup()' type functionality to
-**				'toggle/inquire processor/stack state' type
-**				functionality.
-**	25 Mar 85	SCC	Modified 'tikhnd:'.  It didn't need to save
-**				the registers it was saving.
-**	 1 Apr 85	SCC	Modified 'tikhnd:'.  It needed to get the
-**				number of milliseconds since last tick into
-**				the right place for the stack frame for call
-**				to tikfrk().
-**	10 Apr 85	SCC	Modified longjmp() to use long return value
-**				on stack.
-**	12 Apr 85	SCC	Modified exit() to check for function -1
-**				(return address of screen driver.
-**	14 Apr 85	SCC	Modified osinit() to disable interrupts while
-**				initializing the tick vector.
-**	19 Apr 85	SCC	Modified osinit() to preserve the previous
-**				state of the SR.
-**	22 Apr 85	SCC	Modified the saving of SR to store it
-**				temporarily in a static.
-**
-**	31 May 85	EWF	Added in conditional assembly for 68010-based
-**				systems.
-**
-**	19 Jun 85	EWF	Added additional conditional assemblies for
-**				68010-based systems.
-**
-**	 9 Aug 85	SCC	Modified osinit() to get tick vector from
-**				clock device handle.
-**
-**				NOTE:	STACK LOOKS DIFFERENT THAT ATARI'S ON
-**					INVOCATION OF TICK HANDLER!
-**
-**				Modified tikhnd: to work with new clock format
-**				(tick value in long above long flag value on
-**				stack)
-**
-**	15 Aug 85	SCC	Modified tikhnd:.  It was picking up the
-**				number of milliseconds from the wrong location
-**				on the stack.
-**
-**	18 Aug 85	SCC	Added copyright message.
-**
-**	 1 Nov 85	SCC	Converted to runtime determination of
-**				processor type (68000 v. 68010)
-**
-**				Added 68010 'MOVE SR,...' to 'MOVE CCR,...'
-**				illegal instruction handler
-**
-**				Converted all exception vector handling to
-**				use BIOS calls, rather than direct addresses.
-**
-**	 4 Nov 85	SCC	Cleaned up a stack imbalance problem in
-**				'ii_handler'.  It was not POPing D0/A0 off
-**				the stack before going off to the OEM's
-**				Illegal Instruction handler.
-**
-**	11 Nov 85	KTB	put trap2 handler back in for the nonce
-**
-**	14 May 86	KTB	removed dojmp
-**
-**	02 Jul 86	KTB	M01.01a.0702.01 osinit now returns address of 
-**				date/time stamp for bdos
-**
-**	23 Jul 86	KTB	M01.01.0723.01 osinit needs to save stack ptr
-**				in some other reg besides d1.
-**
-**	24 Jul 86	KTB	M01.01.0724.01 osinit no longer returns addr
-**				of date/time stamp.  this is all handled in 
-**				startup.a
-**
-**	04 Aug 86	KTB	M01.01.0804.02 osinit => _osinit
-**
-**	28 Aug 86	SCC	M01.01.0828.01 changed TRAP #2 handler back
-**				similar to the way it was in the olden days
-**				for Atari's benefit in bringing up a system
-**				where the VDI and AES are already in memory.
-**
-**	19 May 87	ACH   	The 68070 has an exception stack frame similar
-**				to the 68010 but it does not impliment the
-**				"move ccr,d0" instruction. Hence the 68000 vs.
-**				68010 detection would give the oposite result
-**				to the one desired. Force mc68010 flag to true.
-**
-**	19 Nov 87	ACH	Moved _lbmove, _bfill, _bmove into this module.
-**
-** NAMES
-**
-**	EWF	Eric W. Fleischman
-**	JSL	Jason S. Loveman
-**	SCC	Steven C. Cavender
-**	ACH	Anthony C. Hay
-**
-******************************************************************************/
+*	rwa.a - GEMDOS assembler interface	*
+
+*
+*
+*  NOTE:	This MUST be assembled with AS68's "-t" option.
+*
+* Originally written by JSL.
+*
+* MODIFICATION HISTORY
+*
+*	11 Mar 85	SCC	Added xgetsup() functionality as a hack in
+*				_entry().
+*				Removed get sup functionality from exit().
+*	11 Mar 85	JSL	Changed timer vector number.
+*	12 Mar 85	SCC	Modified xgetsup() functionality in _entry().
+*	13 Mar 85	SCC	Changed 'xgetsup()' type functionality to
+*				'toggle/inquire processor/stack state' type
+*				functionality.
+*	25 Mar 85	SCC	Modified 'tikhnd:'.  It didn't need to save
+*				the registers it was saving.
+*	 1 Apr 85	SCC	Modified 'tikhnd:'.  It needed to get the
+*				number of milliseconds since last tick into
+*				the right place for the stack frame for call
+*				to tikfrk().
+*	10 Apr 85	SCC	Modified longjmp() to use long return value
+*				on stack.
+*	12 Apr 85	SCC	Modified exit() to check for function -1
+*				(return address of screen driver.
+*	14 Apr 85	SCC	Modified osinit() to disable interrupts while
+*				initializing the tick vector.
+*	19 Apr 85	SCC	Modified osinit() to preserve the previous
+*				state of the SR.
+*	22 Apr 85	SCC	Modified the saving of SR to store it
+*				temporarily in a static.
+*
+*	31 May 85	EWF	Added in conditional assembly for 68010-based
+*				systems.
+*
+*	19 Jun 85	EWF	Added additional conditional assemblies for
+*				68010-based systems.
+*
+*	 9 Aug 85	SCC	Modified osinit() to get tick vector from
+*				clock device handle.
+*
+*				NOTE:	STACK LOOKS DIFFERENT THAT ATARI'S ON
+*					INVOCATION OF TICK HANDLER!
+*
+*				Modified tikhnd: to work with new clock format
+*				(tick value in long above long flag value on
+*				stack)
+*
+*	15 Aug 85	SCC	Modified tikhnd:.  It was picking up the
+*				number of milliseconds from the wrong location
+*				on the stack.
+*
+*	18 Aug 85	SCC	Added copyright message.
+*
+*	 1 Nov 85	SCC	Converted to runtime determination of
+*				processor type (68000 v. 68010)
+*
+*				Added 68010 'MOVE SR,...' to 'MOVE CCR,...'
+*				illegal instruction handler
+*
+*				Converted all exception vector handling to
+*				use BIOS calls, rather than direct addresses.
+*
+*	 4 Nov 85	SCC	Cleaned up a stack imbalance problem in
+*				'ii_handler'.  It was not POPing D0/A0 off
+*				the stack before going off to the OEM's
+*				Illegal Instruction handler.
+*
+*	11 Nov 85	KTB	put trap2 handler back in for the nonce
+*
+*	14 May 86	KTB	removed dojmp
+*
+*	02 Jul 86	KTB	M01.01a.0702.01 osinit now returns address of 
+*				date/time stamp for bdos
+*
+*	23 Jul 86	KTB	M01.01.0723.01 osinit needs to save stack ptr
+*				in some other reg besides d1.
+*
+*	24 Jul 86	KTB	M01.01.0724.01 osinit no longer returns addr
+*				of date/time stamp.  this is all handled in 
+*				startup.a
+*
+*	04 Aug 86	KTB	M01.01.0804.02 osinit => _osinit
+*
+*	28 Aug 86	SCC	M01.01.0828.01 changed TRAP #2 handler back
+*				similar to the way it was in the olden days
+*				for Atari's benefit in bringing up a system
+*				where the VDI and AES are already in memory.
+*
+*	19 May 87	ACH   	The 68070 has an exception stack frame similar
+*				to the 68010 but it does not impliment the
+*				"move ccr,d0" instruction. Hence the 68000 vs.
+*				68010 detection would give the oposite result
+*				to the one desired. Force mc68010 flag to true.
+*
+*	19 Nov 87	ACH	Moved _lbmove, _bfill, _bmove into this module.
+*
+* NAMES
+*
+*	EWF	Eric W. Fleischman
+*	JSL	Jason S. Loveman
+*	SCC	Steven C. Cavender
+*	ACH	Anthony C. Hay
+*
+******************************************************************************
 
 _68070		equ	1		* 1=running on 68070, 0=68000/68010
 
 
-/*****************************************************************************
-**
-**	Global References
-**
-*****************************************************************************/
+*****************************************************************************
+*
+*	Global References
+*
+*****************************************************************************
 
-	.xref	_s68
-	.xref	_s68l
-	.xref	_xsetjmp
-	.xref	_xlongjmp
-	.xref	_gouser
-	.xref	_oscall
-	.xref	_trap13
-	.xref	__osinit
-	.xref	mc68010
+	xref	_s68
+	xref	_s68l
+	xref	_xsetjmp
+	xref	_xlongjmp
+	xref	_gouser
+	xref	_oscall
+	xref	_trap13
+	xref	__osinit
+	xref	mc68010
 
-	.xdef	_osif
-	.xdef	_xterm
-	.xdef	_cinit
-	.xdef	_run
-	.xdef	_tikfrk
-	.xdef	fstrt
+	xdef	_osif
+	xdef	_xterm
+	xdef	_cinit
+	xdef	_run
+	xdef	_tikfrk
+	xdef	fstrt
 
-	.xref	_lbmove
-	.xref	_bfill
-	.xref	_bmove
+	xref	_lbmove
+	xref	_bfill
+	xref	_bmove
 
 
 **
@@ -148,27 +148,27 @@ cve		equ	16
 BFHCLK		equ	-1		* BIOS handle for tick
 
 
-	.text
-	.page
+	text
+	page
 ******************************************************************************
-**
-**	__osinit - Initialize OS exeception vectors, etc.
-**
+*
+*	__osinit - Initialize OS exeception vectors, etc.
+*
 ******************************************************************************
 
-	.text
+	text
 
-.ifeq	_68070
+	ifeq	_68070
 
 __osinit:
-**
-** First of all:  Are we executing on a 68000 or a 68010?
-**	We find out by taking over the illegal instruction trap and then
-**	executing a 'MOVE CCR,D0' which is not implemented on the 68000.
-**	We will set a flag for use later on as we enter and exit the BDOS.
-**	We also will set up a handler on the 68010 to convert 'MOVE SR,...'
-**	to 'MOVE CCR,...' at execution time, so that we can support one
-**	release of 68XXX software.
+*
+* First of all:  Are we executing on a 68000 or a 68010?
+*	We find out by taking over the illegal instruction trap and then
+*	executing a 'MOVE CCR,D0' which is not implemented on the 68000.
+*	We will set a flag for use later on as we enter and exit the BDOS.
+*	We also will set up a handler on the 68010 to convert 'MOVE SR,...'
+*	to 'MOVE CCR,...' at execution time, so that we can support one
+*	release of 68XXX software.
 
 	move.l	sp,ii_stksav		* save the current sp
 	clr.w	mc68010			* pre-clear processor flag
@@ -190,13 +190,13 @@ ii_move:
 	move.w	#4,-(sp)		* or install our 68010 conversion
 	move.w	#x_vector,-(sp)		* handler
 	trap	#13
-.endc
+	endc
 
-.ifne	_68070
+	ifne	_68070
 __osinit:
-	move.w	#1, mc68010		* flag that we're on a 68010 (68070)
-	subq.l	#8, sp
-.endc
+	move.w	#1,mc68010		* flag that we're on a 68010 (68070)
+	subq.l	#8,sp
+	endc
 
 	move.l	#_enter,4(sp)		* take over the handling of TRAP #1
 	move.w	#$21,2(sp)
@@ -218,8 +218,8 @@ __osinit:
 	jsr	_cinit
 	rts
 
-	.dc.b	"Copyright 1985, Digital Research, Inc.",0
-	.even
+*	dc.b	"Copyright 1985, Digital Research, Inc.",0
+	even
 
 *
 *  ground_it - trap 2 entry point
@@ -257,64 +257,64 @@ not_SR:
 	move.l	ii_old,-(sp)		* let OEM handle it
 	rts
 
-	.bss
-	.even
+	bss
+	even
 
 mc68010:				* 0 = 68000, 1 = 68010
-	.ds.w	1
+	ds.w	1
 
 old_2:
-	.ds.l	1			* old TRAP #2 handler
+	ds.l	1			* old TRAP #2 handler
 
 ii_save:				* routine to set up as illegal
-	.ds.l	1			* instruction handler
+	ds.l	1			* instruction handler
 ii_old:
-	.ds.l	1
+	ds.l	1
 ii_stksav:
-	.ds.l	1			* at osinit: save sp here
+	ds.l	1			* at osinit: save sp here
 
-	.page
+	page
 ***************************************************************************
-**
-**  trap13 -
-**	perform trap 13 supervisor call on behalf of caller
-**
-******************************************************************************
+*
+*  trap13 -
+*	perform trap 13 supervisor call on behalf of caller
+*
+***************************************************************************
 
-	.text
+	text
 _trap13:
 	move.l	(sp)+,biosav
 	trap	#13
 	move.l	biosav,-(sp)
 	rts
 
-	.bss
-	.even
+	bss
+	even
 biosav:
-	.ds.l	1
+	ds.l	1
 
 ***************************************************************************
-**
-**  tikhnd -
-**	logical tick interrupt handler
-**
-******************************************************************************
+*
+*  tikhnd -
+*	logical tick interrupt handler
+*
+***************************************************************************
 
-	.text
+	text
 tikhnd:
 	move.w	$A(sp),-(sp)	* get tick value.  ignore flags
 	jsr	_tikfrk		* call interrupt handler extension
 	addq.l	#2,sp		* clear the stack
 	rts
 
-	.page
+	page
 ***************************************************************************
-**
-**  _s68 - swap bytes in a word
-**
-******************************************************************************
+*
+*  _s68 - swap bytes in a word
+*
+***************************************************************************
 
-	.text
+	text
 _s68:
 	link	a6,#0
 	move.l	8(a6),a0
@@ -325,12 +325,12 @@ _s68:
 	rts
 
 ***************************************************************************
-**
-**  _s68l - swap word & bytes in long
-**
-******************************************************************************
+*
+*  _s68l - swap word & bytes in long
+*
+***************************************************************************
 
-	.text
+	text
 _s68l:
 	link	a6,#0
 	move.l	8(a6),a0
@@ -344,7 +344,7 @@ _s68l:
 
 
 _bfill:
-*******
+*
 * Entry
 *	4(sp)	-> first byte in block
 *	8(sp)	=  BYTE value to fill with
@@ -353,22 +353,22 @@ _bfill:
 *	none
 
 	
-	move.l	4(sp), a0		* a0 -> block
-	move	8(sp), d0		* d0.b = byte to fill with
-	move	10(sp), d1		* d1.w = byte count
+	move.l	4(sp),a0		* a0 -> block
+	move	8(sp),d0		* d0.b = byte to fill with
+	move	10(sp),d1		* d1.w = byte count
 	bra	f_test
 
 f_loop:
-	move.b	d0, (a0)+
+	move.b	d0,(a0)+
 f_test:
-	dbf	d1, f_loop
+	dbf	d1,f_loop
 
 	rts
 
 
 
 _bmove:
-*******
+*
 * Entry
 *	4(sp)	-> first byte in source block
 *	8(sp)	-> first byte in destination block
@@ -377,22 +377,22 @@ _bmove:
 *	none
 
 	
-	move.l	4(sp), a0		* a0 -> source block
-	move.l	8(sp), a1		* a1 -> destination block
-	move	12(sp), d0		* d0.w = byte count
+	move.l	4(sp),a0		* a0 -> source block
+	move.l	8(sp),a1		* a1 -> destination block
+	move	12(sp),d0		* d0.w = byte count
 	bra	b_test
 
 b_loop:
-	move.b	(a0)+, (a1)+
+	move.b	(a0)+,(a1)+
 b_test:
-	dbf	d0, b_loop
+	dbf	d0,b_loop
 
 	rts
 
 
 
 _lbmove:
-********
+*
 * Entry
 *	4(sp)	-> first byte in source block
 *	8(sp)	-> first byte in destination block
@@ -401,18 +401,18 @@ _lbmove:
 *	none
 
 	
-	move.l	4(sp), a0		* a0 -> source block
-	move.l	8(sp), a1		* a1 -> destination block
-	move.l	12(sp), d0
-	move	d0, d1			* d1.W = ls 16 bits of count
+	move.l	4(sp),a0		* a0 -> source block
+	move.l	8(sp),a1		* a1 -> destination block
+	move.l	12(sp),d0
+	move	d0,d1			* d1.W = ls 16 bits of count
 	swap	d0			* d0.W = ms 16 bits of count
 	bra	lb_test
 
 lb_loop:
-	move.b	(a0)+, (a1)+
+	move.b	(a0)+,(a1)+
 lb_test:
-	dbf	d1, lb_loop
-	dbf	d0, lb_loop
+	dbf	d1,lb_loop
+	dbf	d0,lb_loop
 
 	rts
 
@@ -420,12 +420,12 @@ lb_test:
 
 
 ***************************************************************************
-**
-**  _xsetjmp -
-**
-******************************************************************************
+*
+*  _xsetjmp -
+*
+***************************************************************************
 
-	.text
+	text
 _xsetjmp:
 	link	a6,#0
 	move.l	8(a6),a0
@@ -438,12 +438,12 @@ _xsetjmp:
 	rts
 
 ***************************************************************************
-**
-**  _xlongjmp -
-**
-******************************************************************************
+*
+*  _xlongjmp -
+*
+***************************************************************************
 
-	.text
+	text
 _xlongjmp:
 	link	a6,#0
 	move.l	12(a6),d0
@@ -458,14 +458,14 @@ okrc:
 	move.l	(a0),-(sp)
 	rts
 
-	.page
+	page
 ******************************************************************************
-**
-**	_enter - Front end of TRAP #1 handler
-**
+*
+*	_enter - Front end of TRAP #1 handler
+*
 ******************************************************************************
 
-	.text
+	text
 _enter:
 	bsr	_fix_trap
 
@@ -519,10 +519,10 @@ callos:	move.l	a0,-(sp)	* push parm pointer
 *...fall into gouser....
 
 ***************************************************************************
-**
-**  _gouser -
-**
-******************************************************************************
+*
+*  _gouser -
+*
+***************************************************************************
 
 _gouser:
 	move.l	_run,a5
@@ -546,22 +546,22 @@ retsys:	move.l	a6,sp
 	move.l	a4,usp
 	bra	gousr
 
-	.bss
-	.even
+	bss
+	even
 
-	.ds.w	1000
+	ds.w	1000
 fstrt:
-	.ds.l	1
+	ds.l	1
 
-	.page
+	page
 ******************************************************************************
-**
-** function 0x20 handler
-** toggle/inquire processor/stack state
-**
+*
+* function 0x20 handler
+* toggle/inquire processor/stack state
+*
 ******************************************************************************
 
-	.text
+	text
 x20_usr:			* user mode entry point
 	move.l	2(a0),d1	* get parameter
 	beq	xu_0		* already have new SSP from
@@ -628,14 +628,14 @@ x20_inq:
 xi_exit:
 	bra	_fix_rte
 
-	.page
+	page
 ******************************************************************************
-**
-** call dosjr from within itself (or from linked-in shell)
-**
+*
+* call dosjr from within itself (or from linked-in shell)
+*
 ******************************************************************************
 
-	.text
+	text
 _oscall:
 	link	a6,#0
 	move.l	a0,-(sp)
@@ -647,14 +647,14 @@ _oscall:
 	unlk	a6
 	rts
 
-	.page
+	page
 ******************************************************************************
-**
-** _fix_trap - make 68010 exception stack frame look like a 68000 frame
-**
+*
+* _fix_trap - make 68010 exception stack frame look like a 68000 frame
+*
 ******************************************************************************
 
-	.text
+	text
 _fix_trap:
 	tst.w	mc68010		* check processor type
 	beq	ft_exit
@@ -669,12 +669,12 @@ ft_exit:
 	rts
 
 ******************************************************************************
-**
-** _fix_rte - restore a 68010 exception stack frame
-**
+*
+* _fix_rte - restore a 68010 exception stack frame
+*
 ******************************************************************************
 
-	.text
+	text
 _fix_rte:
 	tst.w	mc68010		* check processor type
 	beq	fr_exit
@@ -686,6 +686,3 @@ _fix_rte:
 	clr.w	6(sp)		* store a bogus exception frame type
 fr_exit:
 	rte
-
-	.end
-

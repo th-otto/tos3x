@@ -6,6 +6,7 @@ CROSS := $(shell $(EVAL_CROSS))
 
 include ../GNUmakefile.common
 include ../Makefile.silent
+CC += -mshort
 
 LIBS =
 

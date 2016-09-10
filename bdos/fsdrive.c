@@ -1,24 +1,24 @@
 /*  fsdrive.c - physical drive routines for file system			*/
 
 /*
-**    date      who     comment
-**  ---------	---	-------
-**  21 Mar 86	ktb	M01.01.20 - ckdrv() returns EINTRN if no slots
-**			avail in dirtbl.
-**
-**  15 Sep 86	scc	M01.01.0915.02	ckdrv() now checks for negative error
-**					return from BIOS
-**
-**   7 Oct 86	scc	M01.01.1007.01  cast several pointers to longs when
-**			they are compared to 0.
-**
-**  31 Oct 86	scc	M01.01.1031.01  removed definition of drvmap.  It was used on
-**			the assumption that the drive map would not change after boot
-**			time, which is not the case in BNR land.  Also removed
-**			ValidDrv(), which checked it.  Corresponding change made in
-**			xgetdir() in FSDIR.C
-**
-*/
+ *    date      who     comment
+ *  ---------	---	-------
+ *  21 Mar 86	ktb	M01.01.20 - ckdrv() returns EINTRN if no slots
+ *			avail in dirtbl.
+ *
+ *  15 Sep 86	scc	M01.01.0915.02	ckdrv() now checks for negative error
+ *					return from BIOS
+ *
+ *   7 Oct 86	scc	M01.01.1007.01  cast several pointers to longs when
+ *			they are compared to 0.
+ *
+ *  31 Oct 86	scc	M01.01.1031.01  removed definition of drvmap.  It was used on
+ *			the assumption that the drive map would not change after boot
+ *			time, which is not the case in BNR land.  Also removed
+ *			ValidDrv(), which checked it.  Corresponding change made in
+ *			xgetdir() in FSDIR.C
+ *
+ */
 
 
 #include	"tos.h"
@@ -27,22 +27,22 @@
 #include	<toserrno.h>
 
 /*
-**  globals
-*/
+ *  globals
+ */
 
 	/*
-	 **  dirtbl - default directories.
-	 ** Each entry points to the DND for someone's default directory.
-	 ** They are linked to each process by the p_curdir entry in the PD.
-	 ** The first entry (dirtbl[0]) is not used, as p_curdir[i]==0
-	 ** means 'none set yet'.
+	 *  dirtbl - default directories.
+	 * Each entry points to the DND for someone's default directory.
+	 * They are linked to each process by the p_curdir entry in the PD.
+	 * The first entry (dirtbl[0]) is not used, as p_curdir[i]==0
+	 * means 'none set yet'.
 	 */
 
 DND *dirtbl[NCURDIR];
 
 	/*
-	 **  diruse - use count 
-	 **  drvsel - mask of drives selected since power up
+	 *  diruse - use count 
+	 *  drvsel - mask of drives selected since power up
 	 */
 
 char diruse[NCURDIR];
@@ -51,14 +51,14 @@ int16_t drvsel;
 
 
 /*
-**  ckdrv - check the drive, see if it needs to be logged in.
-**
-**  returns:
-**	ERR	if getbpb() failed
-**	ENSMEM	if login() failed
-**	EINTRN	if no room in dirtbl
-**	drive nbr if success.
-*/
+ *  ckdrv - check the drive, see if it needs to be logged in.
+ *
+ *  returns:
+ *	ERR	if getbpb() failed
+ *	ENSMEM	if login() failed
+ *	EINTRN	if no room in dirtbl
+ *	drive nbr if success.
+ */
 
 ERROR ckdrv(P(int) d)
 PP(int d;)									/* has this drive been accessed, or had a media change */
@@ -73,9 +73,9 @@ PP(int d;)									/* has this drive been accessed, or had a media change */
 		b = (BPB *) getbpb(d);
 
 		if (!(long) b)
-			return (ERR);
-		if ((long) b < 0)
-			return ((long) b);
+			return ERR;
+		if ((ERROR) b < 0)
+			return (ERROR) b;
 
 		if (login(b, d))
 			return E_NSMEM;
@@ -98,14 +98,14 @@ PP(int d;)									/* has this drive been accessed, or had a media change */
 		run->p_curdir[d] = i;			/*  link to process */
 	}
 
-	return (d);
+	return d;
 }
 
 
 
 /*
-**  getdmd - allocate storage for and initialize a DMD
-*/
+ *  getdmd - allocate storage for and initialize a DMD
+ */
 
 DMD *getdmd(P(int) drv)
 PP(int drv;)
@@ -113,7 +113,7 @@ PP(int drv;)
 	DMD *dm;
 
 	if (!(drvtbl[drv] = dm = MGET(DMD)))
-		return ((DMD *) 0);
+		return (DMD *) 0;
 
 	if (!(dm->m_dtl = MGET(DND)))
 		goto fredm;
@@ -124,22 +124,22 @@ PP(int drv;)
 	if (!(dm->m_fatofd = MGET(OFD)))
 		goto freofd;
 
-	return (dm);
+	return dm;
 
   freofd:xmfreblk(dm->m_dtl->d_ofd);
   fredtl:xmfreblk(dm->m_dtl);
   fredm:xmfreblk(dm);
 
-	return ((DMD *) 0);
+	return (DMD *) 0;
 }
 
 
 
 /*
-**  login -
-**	log in media 'b' on drive 'drv'.
-**
-*/
+ *  login -
+ *	log in media 'b' on drive 'drv'.
+ *
+ */
 
 ERROR login(P(BPB *) b, P(int) drv)
 PP(BPB *b;)									/*  bios parm block for drive       */
@@ -200,15 +200,15 @@ PP(int drv;)								/*  drive number            */
 	fo->o_curbyt = 3;
 	fo->o_fileln = fs * rsiz;
 
-	return (0L);
+	return E_OK;
 }
 
 
 
 /*
-**  xlog2 -
-**	return log base 2 of n
-*/
+ *  xlog2 -
+ *	return log base 2 of n
+ */
 
 int xlog2(P(int) n)
 PP(int n;)
@@ -218,5 +218,5 @@ PP(int n;)
 	for (i = 0; n; i++)
 		n >>= 1;
 
-	return (i - 1);
+	return i - 1;
 }

@@ -32,7 +32,7 @@ struct _pd
 	PD		*p_parent;		/* parent PD */
 	int16_t p_flags;
 	int16_t p_0fill[1];
-	int8_t	*p_env; 		/* pointer to environment string */
+	char	*p_env; 		/* pointer to environment string */
 /* 0x30 */
 	int8_t	p_uft[NUMSTD];	/* index into sys file table for std files */
 	int8_t	p_lddrv;
@@ -46,7 +46,7 @@ struct _pd
 	int32_t    p_dreg[1];	   /* dreg[0] */
 	int32_t    p_areg[5];	   /* areg[3..7] */
 /* 0x80 */
-	int8_t	p_cmdlin[PDCLSIZE]; 	/* command line image */
+	char	p_cmdlin[PDCLSIZE]; 	/* command line image */
 };
 
 /* p_flags values: */

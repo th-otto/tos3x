@@ -1,7 +1,6 @@
 #include "tos.h"
 #include <ostruct.h>
 #include <toserrno.h>
-#include <fcntl.h>
 #include "fs.h"
 
 /* 306: 00e17662 */

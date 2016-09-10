@@ -40,8 +40,9 @@
 #define getmpb(a) trap13(0,a)
 #define rwabs(a,b,c,d,e) if((rwerr=trap13(4,a,b,c,d,e))!=0){errdrv=e;xlongjmp(errbuf,rwerr);}
 
-#define min(a,b) (((a) < (b)) ? (a) : (b))
-#define	xmovs(n,s,d)	bmove(s,d,n)
+
+#define FA_NORM (FA_ARCH|FA_HIDDEN|FA_RDONLY|FA_SYSTEM)
+
 
 /*
  *  OFD - open file descriptor
@@ -85,10 +86,10 @@ OFD
  */
 #define INH_MODE    0x80    /* bit 7 is inheritance flag (not yet implemented) */
 #define MODE_FSM    0x70    /* bits 4-6 are file sharing mode (not yet implemented) */
-#define MODE_FAC    0x07    /* bits 0-2 are file access code: */
-#define RO_MODE        0
-#define WO_MODE        1
-#define RW_MODE        2
+#define MODE_FAC    0x03    /* bits 0-1 are file access code: (same as O_ACCMODE) */
+#define RO_MODE        0	/* Open read-only - same as O_RDONLY */
+#define WO_MODE        1	/* Open write-only - same as O_WRONLY */
+#define RW_MODE        2	/* Open read/write - same as O_RDWR */
 #define VALID_FOPEN_BITS    MODE_FAC    /* currently-valid bits for Fopen() */
 
 /*
@@ -177,12 +178,12 @@ FTAB
 *******************************************
 */
 
-#define	H_Null		((uint16_t)0xffff)		/* not passed through to BIOS	*/
-#define	H_Print		((uint16_t)0xfffe)
-#define	H_Aux		((uint16_t)0xfffd)
-#define	H_Console	((uint16_t)0xfffc)
-#define	H_Clock		((uint16_t)0xfffb)
-#define	H_Mouse		((uint16_t)0xfffa)
+#define	H_Null		(-1)		/* not passed through to BIOS	*/
+#define	H_Print		(-2)
+#define	H_Aux		(-3)
+#define	H_Console	(-4)
+#define	H_Clock		(-5)
+#define	H_Mouse		(-6)
 
 
 /****************************************
@@ -294,6 +295,8 @@ extern	uint16_t time, date;
 extern	int16_t	bios_dev[];		/*  in fsfioctl.c		*/
 extern	ERROR errbuf[3];			/*  sup.c  */
 extern int const nday[];						/* declared in sup.c */
+extern int add[];
+extern int remove[];
 
 /********************************
  *
@@ -302,7 +305,8 @@ extern int const nday[];						/* declared in sup.c */
  ********************************
 */
 
-int32_t	trap13 PROTO((int16_t fn, ...));
+int32_t	trap13 PROTO((int16_t, ...));
+ERROR oscall PROTO((int16_t, ...));
 VOID s68 PROTO((uint16_t *p));
 VOID s68l PROTO((int32_t *p));
 
@@ -335,6 +339,7 @@ DMD *getdmd PROTO((int drv));
 int xlog2 PROTO((int n));
 
 RECNO cl2rec PROTO((CLNO cl, DMD *dm));
+VOID clfix PROTO((CLNO cl, CLNO link, DMD *dm));
 CLNO getcl PROTO((int cl, DMD *dm));
 int nextcl PROTO((OFD *p, int wrtflg));
 
@@ -369,10 +374,12 @@ ERROR xpgmld PROTO((const char *s, PD *p));
 
 VOID ixterm PROTO((PD *r));
 
+VOID tabout PROTO((FH h, int ch));
 int32_t constat PROTO((FH h));
 int32_t conin PROTO((FH h));
 int cgets PROTO((FH h, int maxlen, char *buf));
 
+int contains_dots PROTO((const char *name, char ill));
 
 /********************************
  *
@@ -407,7 +414,7 @@ ERROR xunlink PROTO((const char *name));
 ERROR xexec PROTO((int16_t flg, char *s, char *t, char *v));
 VOID x0term PROTO((NOTHING));
 VOID xterm PROTO((uint16_t rc));
-VOID xtermres PROTO((int16_t blkln, long rc));
+VOID xtermres PROTO((int32_t blkln, int16_t rc));
 int32_t xgetdate PROTO((NOTHING));
 int32_t xsetdate PROTO((int16_t d));
 int32_t xgettime PROTO((NOTHING));
@@ -430,6 +437,8 @@ VOID readline PROTO((char *p));
 ERROR xmalloc PROTO((int32_t amount));
 ERROR xmfree PROTO((int32_t addr));
 ERROR xsetblk PROTO((int16_t n, VOIDPTR blk, int32_t len));
+ERROR xmaddalt PROTO((char *start, int32_t len));
+ERROR xmxalloc PROTO((int32_t amount, int16_t mode));
 
 
 

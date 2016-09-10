@@ -11,15 +11,15 @@
 
 
 /*
-**  xforce -
-**
-**	Function 0x46	Fforce
-**
-**	Error returns
-**		EIHNDL
-**
-**	Last modified	SCC	5 Apr 85
-*/
+ *  xforce -
+ *
+ *	Function 0x46	Fforce
+ *
+ *	Error returns
+ *		EIHNDL
+ *
+ *	Last modified	SCC	5 Apr 85
+ */
 
 /* 306: 00e16f5e */
 ERROR xforce(P(int16_t) std, P(int16_t) h)
@@ -30,9 +30,9 @@ PP(int16_t h;)
 }
 
 /*
-**  ixforce - force a std handle to a non-std handle.
-**	if the std handle is for an open non-char device, close it
-*/
+ *  ixforce - force a std handle to a non-std handle.
+ *	if the std handle is for an open non-char device, close it
+ */
 
 long ixforce(P(int16_t) std, P(int16_t) h, P(PD *) p)
 PP(int16_t std;)								/* std must be a standard handle    */
@@ -63,14 +63,14 @@ PP(PD *p;)
 			sft[h - NUMSTD].f_use++;
 		}
 	}
-	return (E_OK);
+	return E_OK;
 }
 
 
 
 /*
-**  syshnd -
-*/
+ *  syshnd -
+ */
 
 /* 306: 00e16e68 */
 int16_t syshnd(P(int16_t) h)
@@ -85,8 +85,8 @@ PP(register int16_t h;)
 
 
 /*
-**  ixdirdup -
-*/
+ *  ixdirdup -
+ */
 
 VOID ixdirdup(P(int16_t) h, P(int16_t) dn, P(PD *) p)
 PP(int16_t h;)									/* file handle              */
@@ -99,17 +99,17 @@ PP(PD *p;)
 
 
 /*
-**  dup -
-**	duplicate a file handle.
-**
-**	Function 0x45	Fdup
-**
-**	Error returns
-**		EIHNDL
-**		ENHNDL
-**
-**	Last modified	SCC	 5 Apr 85
-*/
+ *  dup -
+ *	duplicate a file handle.
+ *
+ *	Function 0x45	Fdup
+ *
+ *	Error returns
+ *		EIHNDL
+ *		ENHNDL
+ *
+ *	Last modified	SCC	 5 Apr 85
+ */
 
 /* 306: 00e16eda */
 ERROR xdup(P(int16_t) h)
@@ -135,18 +135,4 @@ PP(int16_t h;)									/*+ h must be a standard handle (checked) */
 	p->f_use = 1;
 
 	return i + NUMSTD;
-}
-
-
-
-/* 306: 00e171d8 */
-FH ffhndl(NOTHING)
-{
-	register int i;
-	register FTAB *p;
-	
-	for (i = 0, p = sft; i < (OPNFILES - NUMSTD); i++, p++)
-		if (p->f_own == NULL)
-			return i;
-	return -1;
 }

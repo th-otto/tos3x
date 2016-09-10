@@ -2,13 +2,13 @@
 
 
 /*
-**  mods
-**     date     who mod 		fix/change/note
-**  ----------- --  ------------------	-------------------------------
-**  27 May 1986 ktb M01.01.0527.02	moved makbuf to fsdir, as it was
-**					only called from there and really had
-**					nothing to do with cache buffers
-*/
+ *  mods
+ *     date     who mod 		fix/change/note
+ *  ----------- --  ------------------	-------------------------------
+ *  27 May 1986 ktb M01.01.0527.02	moved makbuf to fsdir, as it was
+ *					only called from there and really had
+ *					nothing to do with cache buffers
+ */
 
 
 #include	"tos.h"
@@ -18,14 +18,14 @@
 
 
 /*
-**  flush -
-**
-**	Last modified	SCC	10 Apr 85
-**
-**	NOTE:	rwabs() is a macro that includes a longjmp() which is executed 
-**		if the BIOS returns an error, therefore flush() does not need 
-**		to return any error codes.
-*/
+ *  flush -
+ *
+ *	Last modified	SCC	10 Apr 85
+ *
+ *	NOTE:	rwabs() is a macro that includes a longjmp() which is executed 
+ *		if the BIOS returns an error, therefore flush() does not need 
+ *		to return any error codes.
+ */
 
 VOID flush(P(BCB *) b)
 PP(register BCB *b;)
@@ -59,9 +59,9 @@ PP(register BCB *b;)
 
 
 /*
-**  getrec -
-**	return the ptr to the buffer containing the desired record
-*/
+ *  getrec -
+ *	return the ptr to the buffer containing the desired record
+ */
 
 char *getrec(P(int) recn, P(DMD *)dm, P(int) wrtflg)
 PP(int recn;)
@@ -87,10 +87,10 @@ PP(int wrtflg;)
 	phdr = &bufl[(n != 0)];
 
 	/*
-	 **  see if the desired record for the desired drive is in memory.
-	 ** if it is, we will use it.  Otherwise we will use
-	 **     the last invalid (available) buffer,  or
-	 **     the last (least recently) used buffer.
+	 *  see if the desired record for the desired drive is in memory.
+	 * if it is, we will use it.  Otherwise we will use
+	 *     the last invalid (available) buffer,  or
+	 *     the last (least recently) used buffer.
 	 */
 
 	for (b = *(q = phdr); b; b = *(q = &b->b_link))
@@ -98,7 +98,7 @@ PP(int wrtflg;)
 		if ((b->b_bufdrv == dm->m_drvnum) && (b->b_bufrec == recn))
 			break;
 		/*  
-		 **  keep track of the last invalid buffer
+		 *  keep track of the last invalid buffer
 		 */
 		if (b->b_bufdrv == -1)			/*  if buffer not valid */
 			mtbuf = b;					/*    then it's 'empty' */
@@ -107,14 +107,14 @@ PP(int wrtflg;)
 
 	if (!b)
 	{									/* 
-										 **  not in memory.  If there was an 'empty; buffer, use it.
+										 *  not in memory.  If there was an 'empty; buffer, use it.
 										 */
 		if (mtbuf)
 			b = mtbuf;
 
 		/*
-		 **  find predecessor of mtbuf, or last guy in list, which
-		 **  is the least recently used.
+		 *  find predecessor of mtbuf, or last guy in list, which
+		 *  is the least recently used.
 		 */
 
 	  doio:for (p = *(q = phdr); p->b_link; p = *(q = &p->b_link))
@@ -123,15 +123,15 @@ PP(int wrtflg;)
 		b = p;
 
 		/*
-		 **  flush the current contents of the buffer, and read in the 
-		 ** new record.
+		 *  flush the current contents of the buffer, and read in the 
+		 * new record.
 		 */
 
 		flush(b);
 		rwabs(0, b->b_bufr, 1, recn + dm->m_recoff[n], dm->m_drvnum);
 
 		/*
-		 **  make the new buffer current
+		 *  make the new buffer current
 		 */
 
 		b->b_bufrec = recn;
@@ -156,7 +156,7 @@ PP(int wrtflg;)
 	}
 
 	/*
-	 **  now put the current buffer at the head of the list
+	 *  now put the current buffer at the head of the list
 	 */
 
 	*q = b->b_link;
@@ -164,19 +164,19 @@ PP(int wrtflg;)
 	*phdr = b;
 
 	/*
-	 **  if we are writing to the buffer, dirty it.
+	 *  if we are writing to the buffer, dirty it.
 	 */
 
 	if (wrtflg)
 		b->b_dirty = 1;
 
-	return (b->b_bufr);
+	return b->b_bufr;
 }
 
 
 /*
-**  packit - pack into user buffer
-*/
+ *  packit - pack into user buffer
+ */
 
 char *packit(P(const char *) s, P(char *) d)
 PP(register const char *s;)
@@ -205,5 +205,5 @@ PP(register char *d;)
 	for (i = 0; (i < 3) && (*s) && (*s != ' '); i++)
 		*d++ = *s++;
   pakok:*d = 0;
-	return (d);
+	return d;
 }
