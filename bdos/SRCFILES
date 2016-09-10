@@ -1,4 +1,5 @@
 BDOS_OBJS = \
+	osinit.o \
 	bdosmain.o \
 	bdosts.o \
 	console.o \

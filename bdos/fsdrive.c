@@ -9,20 +9,20 @@
  *  globals
  */
 
-	/*
-	 *  dirtbl - default directories.
-	 * Each entry points to the DND for someone's default directory.
-	 * They are linked to each process by the p_curdir entry in the PD.
-	 * The first entry (dirtbl[0]) is not used, as p_curdir[i]==0
-	 * means 'none set yet'.
-	 */
+/*
+ *  dirtbl - default directories.
+ * Each entry points to the DND for someone's default directory.
+ * They are linked to each process by the p_curdir entry in the PD.
+ * The first entry (dirtbl[0]) is not used, as p_curdir[i]==0
+ * means 'none set yet'.
+ */
 
 DND *dirtbl[NCURDIR];
 
-	/*
-	 *  diruse - use count 
-	 *  drvsel - mask of drives selected since power up
-	 */
+/*
+ *  diruse - use count 
+ *  drvsel - mask of drives selected since power up
+ */
 
 char diruse[NCURDIR];
 
@@ -39,7 +39,7 @@ PP(int drv;)
 	DMD *dm;
 
 	if (!(drvtbl[drv] = dm = MGET(DMD)))
-		return (DMD *) 0;
+		return NULL;
 
 	if (!(dm->m_dtl = MGET(DND)))
 		goto fredm;
@@ -52,11 +52,14 @@ PP(int drv;)
 
 	return dm;
 
-  freofd:xmfreblk(dm->m_dtl->d_ofd);
-  fredtl:xmfreblk(dm->m_dtl);
-  fredm:xmfreblk(dm);
+freofd:
+	xmfreblk(dm->m_dtl->d_ofd);
+fredtl:
+	xmfreblk(dm->m_dtl);
+fredm:
+	xmfreblk(dm);
 
-	return (DMD *) 0;
+	return NULL;
 }
 
 

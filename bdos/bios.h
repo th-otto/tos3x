@@ -246,3 +246,5 @@ MPB
 
 
 VOID xbsettime PROTO((NOTHING));
+VOID xbgettime PROTO((NOTHING));
+VOID indcall PROTO((intptr_t addr));

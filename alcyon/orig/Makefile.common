@@ -41,7 +41,6 @@ RUN_OPTIMIZE_0 = \#
 RUN_OPTIMIZE_1 = ${BIN}optimize${EXEEXT} $*.s > NUL: ; sed -e 's/move.l #$$[0],-(sp)/clr.l -(sp)/' $*.s > $*.1; mv $*.1 $*.s
 RUN_OPTIMIZE_ = ${RUN_OPTIMIZE_0}
 
-
 .c.o:
 	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
 	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}

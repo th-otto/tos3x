@@ -3,7 +3,20 @@ NCURDIR equ 40
     
 	bss
 
-    ds.b $575c
+    ds.b $4322
+    
+biosav: ds.l 1
+
+     ds.l 1 ; unused
+
+savesr: ds.w 1
+
+fstack: ds.w 1034
+fstrt: ds.l 1
+old_tik: ds.l 1
+old_2: ds.l 1
+
+    ds.b $c10
     
 	xdef _time
 _time: ds.w 1
@@ -41,7 +54,12 @@ _errbuf: ds.l 3
 	xdef _diruse
 _diruse: ds.b NCURDIR
 
-    ds.b $58
+    ds.b $40
+    
+	xdef _drvsel
+_drvsel: ds.w 1
+
+    ds.b $16
     
 	xdef _errdrv
 _errdrv: ds.w 1

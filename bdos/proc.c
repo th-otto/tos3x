@@ -323,11 +323,12 @@ PP(uint16_t rc;)
 	register PD *r;
 
 #ifdef __ALCYON__
-	(*(int (*) PROTO((NOTHING))) trap13(0x00050102L, -1L)) ();	/*  call user term handler */
+	indcall(trap13(0x00050102L, -1L));	/*  call user term handler */
 #else
-	(*(int (*) PROTO((NOTHING))) trap13(0x0005, 0x0102, -1L)) ();	/*  call user term handler */
+	indcall(trap13(0x0005, 0x0102, -1L));	/*  call user term handler */
 #endif
-
+	xbgettime();
+	
 	run = (r = run)->p_parent;
 	ixterm(r);
 	run->p_dreg[0] = rc;

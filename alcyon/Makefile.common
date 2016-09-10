@@ -31,17 +31,17 @@ LDFLAGS=
 # which must be either ${RUN_OPTIMIZE_0} or ${RUN_OPTIMIZE_1}.
 # It can be overridden by specifying foo_OPTIMIZE=0
 # for individual files.
-RUN_OPTIMIZE_0 = :
-RUN_OPTIMIZE_1 = ${BIN}optimize${EXEEXT}
+RUN_OPTIMIZE_0 = \#
+RUN_OPTIMIZE_1 = ${BIN}optimize${EXEEXT} $*.s > NUL: ; sed -e 's/move.l #$$[0],-(sp)/clr.l -(sp)/' $*.s > $*.1; mv $*.1 $*.s
 RUN_OPTIMIZE_ = ${RUN_OPTIMIZE_1}
 
 .c.o:
 	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
 	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
 	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
-	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} $*.s
-	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}} $*.s > NUL:
+	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s
 	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
 
 .s.o:
-	$(AM_V_AS)${BIN}as68${EXEEXT} ${ASFLAGS} $*.s
+	$(AM_V_AS)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s

@@ -208,7 +208,8 @@ PP(int wrtflg;)
 ERROR ckdrv(P(int) d)
 PP(int d;)									/* has this drive been accessed, or had a media change */
 {
-	int mask, i;
+	register int16_t mask;
+	register int i;
 	BPB *b;
 
 	mask = 1 << d;
