@@ -2,21 +2,6 @@
 /*  xpgmld								*/
 
 
-
-/*
- *  mods
- *
- *  25 Sep 86	scc	M01.01.0925.01	Items needing relocation were not being
- *					relocated if the program being loaded had no
- *					BSS (because the size of BSS determined how
- *					many bytes of relocation info were read).
- *
- *  23 Oct 86	scc	M01.01.1023.01	Error returns from xread() and pgfix01() in
- *					the 'FOREVER' loop in pgmld01() were not being
- *					checked for and returned.
- *
- */
-
 #include "tos.h"
 #include "fs.h"
 #include "bios.h"

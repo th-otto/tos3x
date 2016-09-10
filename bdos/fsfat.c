@@ -7,7 +7,6 @@
 
 
 
-
 /*
  *  cl2rec -
  */
@@ -39,7 +38,7 @@ PP(DMD *dm;)
 
 	if (dm->m_16)
 	{
-		swp68(link);
+		swp68(&link);
 		pos = (long) (cl) << 1;
 		ixlseek(dm->m_fatofd, pos);
 		ixwrite(dm->m_fatofd, 2L, &link);
@@ -62,9 +61,9 @@ PP(DMD *dm;)
 	/* pre -read */
 	ixread(dm->m_fatofd, 2L, f);
 
-	swp68(f[0]);
+	swp68(&f[0]);
 	f[0] = (f[0] & mask) | link;
-	swp68(f[0]);
+	swp68(&f[0]);
 
 	ixlseek(dm->m_fatofd, pos);
 	ixwrite(dm->m_fatofd, 2L, f);
@@ -95,13 +94,13 @@ PP(DMD *dm;)
 	{
 		ixlseek(dm->m_fatofd, (long) ((long) (cl) << 1));
 		ixread(dm->m_fatofd, 2L, f);
-		swp68(f[0]);
+		swp68(&f[0]);
 		return f[0];
 	}
 
 	ixlseek(dm->m_fatofd, ((long) (cl + (cl >> 1))));
 	ixread(dm->m_fatofd, 2L, f);
-	swp68(f[0]);
+	swp68(&f[0]);
 
 	if (cl & 1)
 		cl = f[0] >> 4;
@@ -195,6 +194,60 @@ PP(int wrtflg;)
 
 
 
+/*
+ *  ckdrv - check the drive, see if it needs to be logged in.
+ *
+ *  returns:
+ *	ERR	if Getbpb() failed
+ *	ENSMEM	if login() failed
+ *	EINTRN	if no room in dirtbl
+ *	drive nbr if success.
+ */
+
+/* 306: 00e152e2 */
+ERROR ckdrv(P(int) d)
+PP(int d;)									/* has this drive been accessed, or had a media change */
+{
+	int mask, i;
+	BPB *b;
+
+	mask = 1 << d;
+
+	if (!(mask & drvsel))
+	{									/*  drive has not been selected yet  */
+		b = Getbpb(d);
+
+		if (!(long) b)
+			return ERR;
+		if ((ERROR) b < 0)
+			return (ERROR) b;
+
+		if (login(b, d))
+			return E_NSMEM;
+
+		drvsel |= mask;
+	}
+
+	if ((!run->p_curdir[d]) || (!dirtbl[run->p_curdir[d]]))
+	{									/* need to allocate current dir on this drv */
+
+		for (i = 1; i < NCURDIR; i++)	/*  find unused slot    */
+			if (!diruse[i])
+				break;
+
+		if (i == NCURDIR)				/*  no slot available   */
+			return E_INTRN;
+
+		diruse[i]++;					/*  mark as used    */
+		dirtbl[i] = drvtbl[d]->m_dtl;	/*  link to DND     */
+		run->p_curdir[d] = i;			/*  link to process */
+	}
+
+	return d;
+}
+
+
+
 /*	Function 0x36	Dfree
 
 	Error returns
@@ -203,6 +256,7 @@ PP(int wrtflg;)
 	Last modified	SCC	15 May 85
  */
 
+/* 306: 00e153c8 */
 ERROR xgetfree(P(int32_t *) buf, P(int16_t) drv)					/*+ get disk free space data into buffer */
 PP(int32_t *buf;)
 PP(int16_t drv;)
@@ -210,7 +264,7 @@ PP(int16_t drv;)
 	int i, free;
 	DMD *dm;
 
-	drv = (drv ? drv - 1 : run->p_curdrv);
+	drv = drv ? drv - 1 : run->p_curdrv;
 
 	if ((i = ckdrv(drv)) < 0)
 		return ERR;

@@ -2,23 +2,6 @@
 /*  xmalloc, xmfreblk, xsetblk						*/
 
 
-/*
- * NOTE:
- *	mods with "SCC.XX.NN" are mods which try to merge fixes to a special
- *	post 1.0 / pre 1.1 version.  The notation refers to a DRI internal
- *	document (see SCC), which is a change log.  SCC refers to the
- *	originator of the fix.  The XX refers to the module in which the
- *	fix was originally made, fs.c (FS), sup.c (SUP), etc.  The NN is
- *	the fix number to that module as indicated on the change log.  For
- *	the most part, these numbers are meaningless, and serve only to 
- *	correspond code to particular problems.
- *
- *  mods
- *     date     who mod 		fix/change/note
- *  ----------- --  ------------------	-------------------------------
- *  06 May 1986 ktb M01.01.SCC.MEM.03	xmalloc(): amount < -1L.
- */
-
 #ifndef	DBGUMEM
 #define	DBGUMEM	0
 #endif

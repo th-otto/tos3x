@@ -1,16 +1,6 @@
 /*  fsbuf.c - buffer mgmt for file system				*/
 
 
-/*
- *  mods
- *     date     who mod 		fix/change/note
- *  ----------- --  ------------------	-------------------------------
- *  27 May 1986 ktb M01.01.0527.02	moved makbuf to fsdir, as it was
- *					only called from there and really had
- *					nothing to do with cache buffers
- */
-
-
 #include	"tos.h"
 #include	"fs.h"
 #include	"bios.h"

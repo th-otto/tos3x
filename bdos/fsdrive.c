@@ -1,26 +1,5 @@
 /*  fsdrive.c - physical drive routines for file system			*/
 
-/*
- *    date      who     comment
- *  ---------	---	-------
- *  21 Mar 86	ktb	M01.01.20 - ckdrv() returns EINTRN if no slots
- *			avail in dirtbl.
- *
- *  15 Sep 86	scc	M01.01.0915.02	ckdrv() now checks for negative error
- *					return from BIOS
- *
- *   7 Oct 86	scc	M01.01.1007.01  cast several pointers to longs when
- *			they are compared to 0.
- *
- *  31 Oct 86	scc	M01.01.1031.01  removed definition of drvmap.  It was used on
- *			the assumption that the drive map would not change after boot
- *			time, which is not the case in BNR land.  Also removed
- *			ValidDrv(), which checked it.  Corresponding change made in
- *			xgetdir() in FSDIR.C
- *
- */
-
-
 #include	"tos.h"
 #include	"fs.h"
 #include	"bios.h"
@@ -48,59 +27,6 @@ DND *dirtbl[NCURDIR];
 char diruse[NCURDIR];
 
 int16_t drvsel;
-
-
-/*
- *  ckdrv - check the drive, see if it needs to be logged in.
- *
- *  returns:
- *	ERR	if getbpb() failed
- *	ENSMEM	if login() failed
- *	EINTRN	if no room in dirtbl
- *	drive nbr if success.
- */
-
-ERROR ckdrv(P(int) d)
-PP(int d;)									/* has this drive been accessed, or had a media change */
-{
-	int mask, i;
-	BPB *b;
-
-	mask = 1 << d;
-
-	if (!(mask & drvsel))
-	{									/*  drive has not been selected yet  */
-		b = (BPB *) getbpb(d);
-
-		if (!(long) b)
-			return ERR;
-		if ((ERROR) b < 0)
-			return (ERROR) b;
-
-		if (login(b, d))
-			return E_NSMEM;
-
-		drvsel |= mask;
-	}
-
-	if ((!run->p_curdir[d]) || (!dirtbl[run->p_curdir[d]]))
-	{									/* need to allocate current dir on this drv */
-
-		for (i = 1; i < NCURDIR; i++)	/*  find unused slot    */
-			if (!diruse[i])
-				break;
-
-		if (i == NCURDIR)				/*  no slot available   */
-			return E_INTRN;
-
-		diruse[i]++;					/*  mark as used    */
-		dirtbl[i] = drvtbl[d]->m_dtl;	/*  link to DND     */
-		run->p_curdir[d] = i;			/*  link to process */
-	}
-
-	return d;
-}
-
 
 
 /*

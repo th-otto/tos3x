@@ -28,17 +28,8 @@
  *  code macros
  */
 
-#define swp68(x) s68(&x)
-#define swp68l(x) s68l(&x)
 #define MGET(x) ((x *) xmgetblk((sizeof(x) + 15)>>4))
-#define bconstat(a) trap13(1,a)
-#define bconin(a) trap13(2,a)
-#define bconout(a,b) trap13(3,a,b)
-/* SCC  11 Mar 85 */
-#define bconostat(a) trap13(8,a)
-#define getbpb(a) trap13(7,a)
-#define getmpb(a) trap13(0,a)
-#define rwabs(a,b,c,d,e) if((rwerr=trap13(4,a,b,c,d,e))!=0){errdrv=e;xlongjmp(errbuf,rwerr);}
+#define rwabs(a,b,c,d,e) if((rwerr=Rwabs(a,b,c,d,e))!=0){errdrv=e;xlongjmp(errbuf,rwerr);}
 
 
 #define FA_NORM (FA_ARCH|FA_HIDDEN|FA_RDONLY|FA_SYSTEM)
@@ -203,15 +194,19 @@ FTAB
  **********************
 */
 
-#define	CIStat(d)	trap13(0x01,d)		/* Character Input Status   */
-#define GetBPB(d)	(BPB *)trap13(0x07,d)	/* Get BIOS Parameter Block */
-#define	COStat(d)	trap13(0x08,d)		/* Character Output Status  */
-#define	GetDM()		trap13(0x0A)		/* Get Drive Map	    */
+#define getmpb(a)   	trap13(0x00,a)
+#define bconstat(a) 	trap13(0x01,a)		/* Character Input Status   */
+#define bconin(a)		trap13(0x02,a)
+#define bconout(a,b)	trap13(0x03,a,b)
+#define Rwabs(a,b,c,d,e) trap13(0x04,a,b,c,d,e)
+#define Getbpb(d)		(BPB *)trap13(0x07,d)	/* Get BIOS Parameter Block */
+#define bconostat(a)	trap13(0x08,a)		/* Character Output Status  */
+#define	Drvmap()		trap13(0x0A)		/* Get Drive Map	    */
 #define CIOCR(d,l,b)	trap13(0x0C,d,l,b)	/* Char IOCtl Read	    */
 #define CIOCW(d,l,b)	trap13(0x0D,d,l,b)	/* Char IOCtl Write	    */
 #define DIOCR(d,l,b)	trap13(0x0E,d,l,b)	/* Disk IOCtl Read	    */
 #define DIOCW(d,l,b)	trap13(0x0F,d,l,b)	/* Disk IOCtl Write	    */
-#define CVE(d,a)	trap13(0x10,d,a)	/* Char Vector Exchange	    */
+#define CVE(d,a)		trap13(0x10,d,a)	/* Char Vector Exchange	    */
 
 
 /**********************
@@ -307,8 +302,8 @@ extern int remove[];
 
 int32_t	trap13 PROTO((int16_t, ...));
 ERROR oscall PROTO((int16_t, ...));
-VOID s68 PROTO((uint16_t *p));
-VOID s68l PROTO((int32_t *p));
+VOID swp68 PROTO((uint16_t *p));
+VOID swp68l PROTO((int32_t *p));
 
 ERROR ixcreat PROTO((const char *fname, int8_t attr));
 ERROR ixopen PROTO((const char *fname, int16_t mode));
@@ -320,9 +315,7 @@ FCB *dirinit PROTO((DND *dn));
 VOID builds PROTO((const char *src, char *dst));
 char *dopath PROTO((DND *p, char *buf, int *len));
 DND *findit PROTO((const char *name, const char **sp, int dflag));
-FCB *scan PROTO((DND *dnd, const char *n, int16_t att, int32_t *posp));
 DND	*makdnd PROTO((DND *, FCB *b));
-DND *dcrack PROTO((const char **np));
 int getpath PROTO((const char *p, char *d, int dirspec));
 BOOLEAN match PROTO((const char *s1, const char *s2));
 VOID makbuf PROTO((FCB *f, DTAINFO *dt));
@@ -348,6 +341,9 @@ int16_t syshnd PROTO((int16_t h));
 VOID ixdirdup PROTO((int16_t h, int16_t dn, PD *p));
 FH ffhndl PROTO((NOTHING));
 
+typedef VOID (*xfer) PROTO((int, char *, char *));
+
+ERROR xrw PROTO((int wrtflg, OFD *p, long len, char *ubufr, xfer bufxfr));
 ERROR ixlseek PROTO((OFD *p, long n));
 ERROR ixread PROTO((OFD *p, long len, VOIDPTR ubufr));
 ERROR ixwrite PROTO((OFD *p, long len, VOIDPTR ubufr));
@@ -360,6 +356,9 @@ OFD *getofd PROTO((FH h));
 int16_t divmod PROTO((int16_t *modp, int32_t divdnd, int16_t divsor));
 ERROR F_IOCtl PROTO((int fn, FH h, int n, VOIDPTR buf));
 int Chk_Drv PROTO((int16_t *d));
+
+FCB *scan PROTO((DND *dnd, const char *n, int16_t att, int32_t *posp));
+VOID sftdel PROTO((FTAB *sftp));
 
 ERROR opnfil PROTO((FCB *f, DND *dn, int16_t mod));
 ERROR makopn PROTO((FCB *f, DND *dn, FH h, int16_t mod));

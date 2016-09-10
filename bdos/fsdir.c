@@ -1,115 +1,4 @@
 /*  fsdir - directory routines for the file system			*/
-/*
- * NOTE:
- *	mods with "SCC.XX.NN" are mods which try to merge fixes to a special
- *	post 1.0 / pre 1.1 version.  The notation refers to a DRI internal
- *	document (see SCC), which is a change log.  SCC refers to the
- *	originator of the fix.  The XX refers to the module in which the
- *	fix was originally made, fs.c (FS), sup.c (SUP), etc.  The NN is
- *	the fix number to that module as indicated on the change log.  For
- *	the most part, these numbers are meaningless, and serve only to 
- *	correspond code to particular problems.
- *
- *  mods
- *     date     who mod 		fix/change/note
- *  ----------- --  ------------------	-------------------------------
- *  06 May 1986 ktb M01.01.SCC.FS.03	logical drive select fix
- *  06 May 1986 ktb M01.01.SCC.FS.04	fix to xmkdir for time/date stamp swp
- *  06 May 1986 ktb M01.01.SCC.FS.06	fix to xmkdir for time/date stamp swp
- *  06 May 1986 ktb M01.01.SCC.FS.07	replaced some routines per change log.
- *  06 May 1986 ktb M01.01.SCC.FS.08	fix to match()
- *  06 May 1986 ktb M01.01.SCC.FS.09	fix to xrmdir re: rmovg . & ..
- *  11 May 1986 ktb M01.01.KTB.SCC.01	fix to SCC DND alloc scheme [1]
- *  11 May 1986 ktb M01.01.0512.01	changed the complex if statement in
- *					scan to something a little more readable
- *
- *  12 May 1986 ktb M01.01.KTB.SCC.02	makdnd: dir is in use if files are
- *					open in it.
- *
- *  27 May 1986 ktb M01.01.0527.01	adding definitions of a structure for
- *					the info kept in the dta between 
- *					search-first and search-next calls.
- *
- *  27 May 1986 ktb M01.01.0527.02	moved makbuf from fsdir to here.
- *
- *  27 May 1986 ktb M01.01.0527.03	changed match's return type
- *
- *  27 May 1986 ktb M01.01.0527.04	moved xcmps here from fsmain.c
- *
- *  27 May 1986 ktb M01.01.0527.06	new subroutine for searching for DND's
- *
- *  27 May 1986 ktb M01.01.0529.01	findit(), scan(): removed all ref's
- *					to O_COMPLETE flag, as we follow 
- *					different algorithms now.
- *
- *  08 Jul 1986 ktb M01.01a.0708.01	removed all references to d_scan
- *					field in DND.
- *
- *  08 Jul 1986 ktb M01.01a.0708.02	moved def of dirscan() here from fs.h
- *
- *  08 Jul 1986 ktb M01.01a.0708.01	removed all references to d_scan
- *
- *  14 Jul 1986 ktb M01.01a.0714.01	clean up some code
- *
- *  21 Jul 1986 ktb M01.01.0721.02	paranoia code
- *
- *  31 Jul 1986 ktb M01.01.0731.01	bug in xgsdtof, writes to the file,
- *					but only needed to update OFD.
- *
- *  18 Sep 1986 scc M01.01.0918.01	Completion of M01.01.0731.01:  The OFD
- *					needed to be marked as O_DIRTY so that
- *					the directory entry would be rewritten.
- *					Also, the user buffer was left byte
- *					swapped after a 'set' operation.
- *
- *  24 Oct 1986 scc M01.01.1024.02	Addition of buffer length check to xgetdir()
- *					and dopath().
- *
- *  31 Oct 1986 scc M01.01.1031.01	Changed reference to ValidDrv() in xgetdir()
- *					to call bios 'drive map' directly.
- *
- *					Added freednd() routine to completely remove
- *					partially installed DNDs.  It is used in
- *					xmkdir().
- *
- *   3 Nov 1986 scc M01.01.1103.01	Added code to delete written directory entry
- *					for partially installed new directory in
- *					xmkdir() when it cannot be fully created.
- *					Also, zero out parent DND's d_left if we've
- *					gotten that far.  Also made a number of changes
- *					from NULL to NULPTR where we really wanted a
- *					long zero.
- *
- *   7 Nov 1986 scc M01.01.1107.01	Added code to xmkdir() to check for and disallow
- *					the creation of a directory which would make
- *					the path length longer than 63 characters.  Also
- *					added the routine namlen() which returns the
- *					length of 1 subdirectory name.
- *
- *   9 Dec 1986 scc M01.01.1209.01	Modified xsfirst() and xsnext() to flag and to
- *					check for an initialized DTA, so that doing
- *					a Search_Next after an unsuccessful Search_First
- *					will fail correctly.
- *
- *  12 Dec 1986 scc M01.01.1212.01	Modified dcrack() to return a negative error
- *					code from when it calls ckdrv().  Modified
- *					findit() to return a negative error code from
- *					when it calls dcrack().  Modified xrmdir(),
- *					xchmod(), xrename(), xchdir(), and ixsfirst()
- *					to check for negative error code from calls to
- *					findit().
- *
- *  14 Dec 1986 scc M01.01.1214.01	Further modification to M01.01.1212.01 so that
- *					both the negative error code and a 0 (for BDOS
- *					level error) are checked for.
- *
- *		    M01.01.1214.02	Added declaration of ckdrv() as long.
- *
- * [1]	the scheme had a small hole, where not all searches for entries
- *	started at the start of the dir (d_scan !always= 0 on entry to 
- *	scan)..
- */
-
 
 #include "tos.h"
 #include "fs.h"
@@ -141,6 +30,379 @@ DND *GetDnd PROTO((const char *n, DND *d));
 static char dots[22] = { ".          " };
 static char dots2[22] = { "..         " };
 
+/*
+ *  negone - for use as parameter
+ */
+
+static int32_t negone = -1L;
+
+
+
+/*
+ *  scan - scan a directory for an entry with the desired name.
+ *	scans a directory indicated by a DND.  attributes figure in matching
+ *	as well as the entry's name.  posp is an indicator as to where to start
+ *	searching.  A posp of -1 means to use the scan pointer in the dnd, and
+ *	return the pointer to the DND, not the FCB.
+ */
+
+/* 306: 00e15580 */
+FCB *scan(P(DND *) dnd, P(const char *) n, P(int16_t) att, P(int32_t *) posp)
+PP(register DND *dnd;)
+PP(const char *n;)
+PP(int att;)
+PP(int32_t *posp;)
+{
+	char name[12];
+	register FCB *fcb;
+	OFD *fd;
+	DND *dnd1;
+	BOOLEAN m;								/*  T: found a matching FCB     */
+
+	m = 0;								/*  have_match = false          */
+	builds(n, name);					/*  format name into dir format     */
+	name[11] = att;
+
+	/*
+	 *  if there is no open file descr for this directory, make one
+	 */
+
+	if (!(fd = dnd->d_ofd))
+	{
+		if (!(dnd->d_ofd = (fd = makofd(dnd))))
+		{
+			return (FCB *)0;
+		}
+	}
+
+	/*
+	 *  seek to desired starting position.  If posp == -1, then start at
+	 * the beginning.
+	 */
+
+	ixlseek(fd, (*posp == -1) ? 0L : *posp);
+
+	/*
+	 *  scan thru the directory file, looking for a match
+	 */
+
+	while ((fcb = (FCB *) ixread(fd, 32L, NULL)) && (fcb->f_name[0]))
+	{
+		/*
+		 *  Add New DND.
+		 *  ( iff after scan ptr && complete flag not set && not a .
+		 *  or .. && subdirectory && not deleted )
+		 */
+
+		if ((fcb->f_attrib & FA_DIREC) && (fcb->f_name[0] != '.') && (fcb->f_name[0] != 0xE5)
+			)
+		{								/*  see if we already have it  */
+			dnd1 = GetDnd(&fcb->f_name[0], dnd);
+			if (!dnd1)
+				if (!(dnd1 = makdnd(dnd, fcb)))
+					return NULL;
+		}
+
+		if ((m = match(name, fcb->f_name)) != 0)
+			break;
+	}
+
+	/* restore directory scanning pointer */
+
+	if (*posp != -1L)
+		*posp = fd->o_bytnum;
+
+	/*
+	 *  if there was no match, but we were looking for a deleted entry,
+	 *  then return a pointer to a deleted fcb.  Otherwise, if there was
+	 *  no match, return a null pointer
+	 */
+
+	if (!m)
+	{									/*  assumes that (*n != 0xe5) (if posp == -1)  */
+		if (fcb && (*n == 0xe5))
+			return fcb;
+		return (FCB *)0;
+	}
+
+	if (*posp == -1)
+	{									/*  seek to position of found entry  */
+		ixlseek(fd, fd->o_bytnum - 32);
+		return (FCB *)dnd1;
+	}
+
+	return fcb;
+}
+
+
+/*
+ *  dcrack - parse out start of 1st path element, get DND
+ *	if needed, logs in the drive specified (explicitly or implicitly) in
+ *	the path spec pointed to by 'np', parses out the first path element
+ *	in that path spec, and adjusts 'np' to point to the first char in that
+ *	path element.
+ *
+ *  returns
+ *	ptr to DND for 1st element in path, or
+ *	error
+ */
+
+/* 306: 00e156b4 */
+static DND *dcrack(P(const char **) np)
+PP(const char **np;)
+{
+	register const char *n;
+	DND *p;
+	register int d;
+	int32_t l;
+
+	/*
+	 *  get drive spec (or default) and make sure drive is logged in
+	 */
+
+	n = *np;							/*  get ptr to name     */
+	if (n[1] == ':')					/*  if we start with drive spec */
+	{
+		d = uc(n[0]) - 'A';				/*    compute drive number  */
+		n += 2;							/*    bump past drive number    */
+	} else								/*  otherwise           */
+		d = run->p_curdrv;				/*    assume default        */
+
+	if ((l = ckdrv(d)) < 0)				/*  check for valid drive & log */
+		return (DND *)l;				/*    in.  abort if error   */
+
+	/*
+	 *  if the pathspec begins with SLASH, then the first element is
+	 *  the root.  Otherwise, it is the current default directory.  Get
+	 *  the proper DND for this element
+	 */
+
+	if (*n == SLASH)
+	{									/* [D:]\path */
+		p = drvtbl[d]->m_dtl;			/*  get root dir for log drive  */
+		n++;							/*  skip over slash     */
+	} else
+		p = dirtbl[run->p_curdir[d]];	/*  else use curr dir   */
+
+	/* whew ! *//*  <= thankyou, Jason, for that wonderful comment */
+
+	*np = n;
+	return p;
+}
+
+
+/*
+ *  findit - find a file/dir entry
+ */
+
+/* 306: 00e15750 */
+DND *findit(P(const char *) name, P(const char **) sp, P(int) dflag)
+PP(const char *name;)								/*  name of file/dir            */
+PP(const char **sp;)
+PP(int dflag;)								/*  T: name is for a directory      */
+{
+	register DND *p;
+	const char *n;
+	DND *pp, *newp;
+	int i;
+	char s[11];
+
+	/* crack directory and drive */
+
+	n = name;
+
+	if ((long) (p = dcrack(&n)) <= 0)
+		return p;
+
+	/*
+	 *  Force scan() to read from the beginning of the directory again,
+	 *  since we have gone to a scheme of keeping fewer DNDs in memory.
+	 */
+
+	do
+	{
+		if (!(i = getpath(n, s, dflag)))
+			break;
+
+		if (i < 0)
+		{								/*  path is '.' or '..'  */
+
+			if (i == -2)				/*  go to parent (..)  */
+				p = p->d_parent;
+
+			i = -i;						/*  num chars is 1 or 2  */
+			goto scanxt;
+		}
+
+		/*
+		 * go down a level in the path...
+		 * save a pointer to the current DND, which will
+		 * become the parent, and get the node on the left,
+		 * which is the first child.
+		 */
+
+		pp = p;							/*  save ptr to parent dnd  */
+
+		if (!(newp = p->d_left))
+		{								/*  [1]         */
+			/*  make sure children  */
+			newp = dirscan(p, n);		/*  are logged in   */
+		}
+
+		if (!(p = newp))				/*  If no children, exit loop */
+			break;
+
+		/*
+		 *  check all subdirectories at this level.  if we run out
+		 * of siblings in the DND list (p->d_right == NULL), then
+		 * we should rescan the whole directory and make sure they
+		 * are all logged in.
+		 */
+
+		while (p && (xcmps(s, p->d_name) == FALSE))
+		{
+			newp = p->d_right;			/*  next sibling    */
+
+			if (newp == NULL)			/* if no more siblings  */
+			{
+				p = 0;
+				if (pp)
+				{
+					p = dirscan(pp, n);
+				}
+			} else
+				p = newp;
+		}
+
+	  scanxt:if (*(n = n + i))
+			n++;
+		else
+			break;
+	} while (p && i);
+
+	/* p = 0 ==> not found
+	   i = 0 ==> found at p (dnd entry)
+	   n = points at filename */
+
+	*sp = n;
+
+	return p;
+}
+
+/*
+ * [1]	The first call to dirscan is if there are no children logged in.
+ *	However, we need to call dirscan if children are logged in and we still
+ *	didn't find the desired node, as the desired child may've been flushed.
+ *	This is a terrible thing to have happen to a child.  However, we can't
+ *	afford to have all these kids around here, so when new ones come in, we
+ *	see which we can flush out (see makdnd()).  This is a hack -- no doubt
+ *	about that; the cached DND scheme needs to be redesigned all around.
+ *	Anyway, the second call to dirscan backs up to the parent (note that n
+ *	has not yet been bumped, so is still pointing to the current subdir's
+ *	name -- in effect, starting us at this level all over again.
+ *			-- ktb
+ */
+
+
+/*
+ *  xchdir - change current dir to path p (extended cd n:=[a:][\bin])
+ *
+ *	Function 0x3B	Dsetpath
+ *
+ *	Error returns
+ *		EPTHNF
+ *		ckdrv()
+ */
+
+/* 306: 00e15876 */
+ERROR xchdir(P(const char *) p)
+PP(const char *p;)
+{
+	register long l;
+	register int i;
+	register int dlog;
+	register int dr;
+	const char *s;
+
+	if (p[1] == ':')
+	{
+		dlog = uc(p[0]) - 'A';
+		p += 2;
+	} else
+	{
+		dlog = run->p_curdrv;
+	}
+
+	/* BUG: if drive was specified in path this will call findit() on the current drive */
+	if (!(l = (long) findit(p, &s, 1)))
+		return E_PTHNF;
+
+	/* find space in dirtbl */
+	dr = run->p_curdir[dlog];
+
+	for (i = 1; i < NCURDIR; i++)
+	{
+		if (dirtbl[i] == (DND *)l)
+		{
+			goto found;
+		}
+	}
+	for (i = 1; i < NCURDIR; i++)
+	{
+		if (!diruse[i])
+		{
+			dirtbl[i] = (DND *)l;
+			goto found;
+		}
+	}
+	return E_PTHNF;
+
+found:
+
+	if (dr != 0 && diruse[dr])
+		--diruse[dr];
+
+	diruse[i]++;
+
+	run->p_curdir[dlog] = i;
+
+	return E_OK;
+}
+
+
+/*
+ *  xgetdir -
+ *
+ *	Function 0x47	Dgetpath
+ *
+ *	Error returns
+ *		EDRIVE
+ */
+
+/* 306: 00e15972 */
+ERROR xgetdir(P(char *) buf, P(int16_t) drv)					/*+ return text of current dir into specified buffer */
+PP(char *buf;)
+PP(register int16_t drv;)
+{
+	DND *p;
+	int len;
+
+	drv = (drv == 0) ? run->p_curdrv : drv - 1;
+
+	if (!(Drvmap() & (1 << drv)) || (ckdrv(drv) < 0))
+	{
+		*buf = 0;
+		return E_DRIVE;
+	}
+
+	p = dirtbl[run->p_curdir[drv]];
+	len = 64;
+	buf = dopath(p, buf, &len);
+	*--buf = 0;							/* null as last char, not slash */
+
+	return E_OK;
+}
+
 
 /*
  *  xmkdir - make a directory, given path 's'
@@ -149,6 +411,7 @@ static char dots2[22] = { "..         " };
  *
  */
 
+/* 306: 00e15afc */
 ERROR xmkdir(P(const char *) s)
 PP(const char *s;)
 {
@@ -216,11 +479,11 @@ PP(const char *s;)
 	xmovs(22, dots, (char *) f2);
 	f2->f_attrib = FA_DIREC;
 	f2->f_td.time = time;
-	swp68(f2->f_td.time);
+	swp68(&f2->f_td.time);
 	f2->f_td.date = date;
-	swp68(f2->f_td.date);
+	swp68(&f2->f_td.date);
 	cl = f0->o_strtcl;
-	swp68(cl);
+	swp68(&cl);
 	f2->f_clust = cl;
 	f2->f_fileln = 0;
 	f2++;
@@ -230,15 +493,15 @@ PP(const char *s;)
 	xmovs(22, dots2, (char *) f2);
 	f2->f_attrib = FA_DIREC;
 	f2->f_td.time = time;
-	swp68(f2->f_td.time);
+	swp68(&f2->f_td.time);
 	f2->f_td.date = date;
-	swp68(f2->f_td.date);
+	swp68(&f2->f_td.date);
 	cl = f->o_dirfil->o_strtcl;
 
 	if (cl < 0)
 		cl = 0;
 
-	swp68(cl);
+	swp68(&cl);
 	f2->f_clust = cl;
 	f2->f_fileln = 0;
 	xmovs(sizeof(OFD), (char *) f0, (char *) f);
@@ -252,7 +515,7 @@ PP(const char *s;)
 
 
 /*
- *  xrmdir - remove (delete) a directory 
+ *  xrmdir - remove (delete) a directory
  *
  *	Function 0x3A	Ddelete
  *
@@ -263,6 +526,7 @@ PP(const char *s;)
  *
  */
 
+/* 306: 00e15d08 */
 ERROR xrmdir(P(const char *)p)
 PP(const char *p;)
 {
@@ -334,342 +598,14 @@ PP(const char *p;)
 
 
 /*
- *  xchmod - change/get attrib of path p
- *		if wrt = 1, set; else get
- *
- *	Function 0x43	Fattrib
- *
- *	Error returns
- *		EPTHNF
- *		EFILNF
- *
- */
-
-char xchmod(P(const char *) p, P(int16_t) wrt, P(char) mod)
-PP(const char *p;)
-PP(int16_t wrt;)
-PP(char mod;)
-{
-	OFD *fd;
-	DND *dn;
-	const char *s;
-	int32_t pos;
-
-	if ((ERROR) (dn = findit(p, &s, 0)) < 0)
-		return (ERROR)dn;
-	if (!dn)
-		return E_PTHNF;
-
-	pos = 0;
-
-	if (!scan(dn, s, FA_NORM, &pos))
-		return E_FILNF;
-
-	pos -= 21;							/* point at attribute in file */
-	fd = dn->d_ofd;
-	ixlseek(fd, pos);
-	if (!wrt)
-		ixread(fd, 1L, &mod);
-	else
-	{
-		ixwrite(fd, 1L, &mod);
-		ixclose(fd, CL_DIR);			/* for flush */
-	}
-	return mod;
-}
-
-
-/*
- *  xsfirst - search first for matching name, into dta
- *
- *	Function 0x4E	Fsfirst
- *
- *	Error returns
- *		EFILNF
- */
-
-ERROR xsfirst(P(const char *) name, P(int16_t) att)
-PP(const char *name;)
-PP(int16_t att;)
-{
-	DTAINFO *dt;
-
-	dt = (DTAINFO *) (run->p_xdta);
-
-	/* set an indication of 'uninitialized DTA' */
-	dt->dt_dnd = NULL;
-
-	return ixsfirst(name, att, dt);
-}
-
-
-/*
- *  xsnext -
- *	search next, return into dta 
- *
- *	Function 0x4F	Fsnext
- *
- *	Error returns
- *		ENMFIL
- */
-
-ERROR xsnext(NOTHING)
-{
-	register FCB *f;
-	register DTAINFO *dt;
-
-	dt = (DTAINFO *) run->p_xdta;
-
-	/* has the DTA been initialized? */
-	if (dt->dt_dnd == NULL)
-		return E_NMFIL;
-
-	f = scan(dt->dt_dnd, &dt->dt_name[0], dt->dt_attr, &dt->dt_pos);
-
-	if (f == NULL)
-		return E_NMFIL;
-
-	makbuf(f, (DTAINFO *) run->p_xdta);
-	return E_OK;
-
-}
-
-
-/*
- *  xgsdtof - get/set date/time of file into of from buffer
- *
- *	Function 0x57	Fdatime
- */
-
-/* 306: 00e167c4 */
-ERROR xgsdtof(P(uint16_t *) buf, P(FH) h, P(int16_t) wrt)
-PP(uint16_t *buf;)
-PP(FH h;)
-PP(int16_t wrt;)
-{
-	register OFD *f;
-	register OFD *p;
-	uint16_t b[2];
-	
-	f = getofd(h);
-	if (f == NULL || ((ERROR)f) < 0)
-		return E_IHNDL;
-	
-	if (!wrt)
-	{
-		buf[0] = f->o_td.time;
-		buf[1] = f->o_td.date;
-		return E_OK;
-	}
-
-	b[0] = buf[0];
-	b[1] = buf[1];
-	swp68(b[0]);
-	swp68(b[1]);
-
-	for (p = f->o_dnode->d_files; p; p = p->o_link)
-	{
-		p->o_td.time = b[0];
-		p->o_td.date = b[1];
-		p->o_flag |= O_DIRTY;
-	}
-	
-	return E_OK;
-}
-
-
-
-/*
- *  xrename - rename a file, 
- *	oldpath p1, new path p2
- *
- *	Function 0x56	Frename
- *
- *	Error returns
- *		EPTHNF
- *
- */
-
-ERROR xrename(P(int16_t) n, P(const char *) p1, P(const char *)p2)	/*+ rename file, old path p1, new path p2 */
-PP(int16_t n;)									/*  not used                */
-PP(const char *p1;)
-PP(const char *p2;)
-{
-	register OFD *fd2;
-	OFD *f1, *fd;
-	FCB *f;
-	DND *dn1, *dn2;
-	const char *s1;
-	const char *s2;
-	char buf[11];
-	int hnew, att;
-	ERROR rc, h1;
-
-	UNUSED(n);
-	
-	if (!ixsfirst(p2, 0, (DTAINFO *) 0L))
-		return E_ACCDN;
-
-	if ((ERROR) (dn1 = findit(p1, &s1, 0)) < 0)
-		return (ERROR)dn1;
-	if (!dn1)
-		return E_PTHNF;
-
-	if ((ERROR) (dn2 = findit(p2, &s2, 0)) < 0)
-		return (ERROR)dn2;
-	if (!dn2)
-		return E_PTHNF;
-
-	if ((h1 = xopen(p1, 2)) < 0L)
-		return h1;
-
-	f1 = getofd((int) h1);
-
-	fd = f1->o_dirfil;
-	buf[0] = 0xe5;
-	ixlseek(fd, f1->o_dirbyt);
-
-	if (dn1 != dn2)
-	{
-		/* get old attribute */
-		f = (FCB *) ixread(fd, 32L, NULL);
-		att = f->f_attrib;
-		/* erase (0xe5) old file */
-		ixlseek(fd, f1->o_dirbyt);
-		ixwrite(fd, 1L, buf);
-
-		/* copy time/date/clust, etc. */
-
-		ixlseek(fd, f1->o_dirbyt + 22);
-		ixread(fd, 10L, buf);
-		hnew = xcreat(p2, att);
-		fd2 = getofd(hnew);
-		ixlseek(fd2->o_dirfil, fd2->o_dirbyt + 22);
-		ixwrite(fd2->o_dirfil, 10L, buf);
-		fd2->o_flag &= ~O_DIRTY;
-		xclose(hnew);
-		ixclose(fd2->o_dirfil, CL_DIR);
-	} else
-	{
-		builds(s2, buf);
-		ixwrite(fd, 11L, buf);
-	}
-
-	if ((rc = xclose((int) h1)) < 0L)
-		return rc;
-
-	return ixclose(fd, CL_DIR);
-}
-
-/*	
- *  xchdir - change current dir to path p (extended cd n:=[a:][\bin])
- *
- *	Function 0x3B	Dsetpath
- *
- *	Error returns
- *		EPTHNF
- *		ckdrv()
- */
-
-/* 306: 00e15876 */
-ERROR xchdir(P(const char *) p)
-PP(const char *p;)
-{
-	register long l;
-	register int i;
-	register int dlog;
-	register int dr;
-	const char *s;
-	
-	if (p[1] == ':')
-	{
-		dlog = uc(p[0]) - 'A';
-		p += 2;
-	} else
-	{
-		dlog = run->p_curdrv;
-	}
-	
-	/* BUG: if drive was specified in path this will call findit() on the current drive */
-	if (!(l = (long) findit(p, &s, 1)))
-		return E_PTHNF;
-
-	/* find space in dirtbl */
-	dr = run->p_curdir[dlog];
-
-	for (i = 1; i < NCURDIR; i++)
-	{
-		if (dirtbl[i] == (DND *)l)
-		{
-			goto found;
-		}
-	}
-	for (i = 1; i < NCURDIR; i++)
-	{
-		if (!diruse[i])
-		{
-			dirtbl[i] = (DND *)l;
-			goto found;
-		}
-	}
-	return E_PTHNF;
-
-found:
-
-	if (dr != 0 && diruse[dr])
-		--diruse[dr];
-	
-	diruse[i]++;
-
-	run->p_curdir[dlog] = i;
-
-	return E_OK;
-}
-
-
-/*	
- *  xgetdir -
- *
- *	Function 0x47	Dgetpath
- *
- *	Error returns
- *		EDRIVE
- */
-
-ERROR xgetdir(P(char *) buf, P(int16_t) drv)					/*+ return text of current dir into specified buffer */
-PP(char *buf;)
-PP(register int16_t drv;)
-{
-	DND *p;
-	int len;
-
-	drv = (drv == 0) ? run->p_curdrv : drv - 1;
-
-	if (!(trap13(0xA) & (1 << drv)) || (ckdrv(drv) < 0))
-	{
-		*buf = 0;
-		return E_DRIVE;
-	}
-
-	p = dirtbl[run->p_curdir[drv]];
-	len = 64;
-	buf = dopath(p, buf, &len);
-	*--buf = 0;							/* null as last char, not slash */
-
-	return E_OK;
-}
-
-
-
-
-/*
  *  ixsfirst - search for first dir entry that matches pattern
- *	search first for matching name, into specified address.  if 
- *	address = 0L, caller wants search only, no buffer info 
+ *	search first for matching name, into specified address.  if
+ *	address = 0L, caller wants search only, no buffer info
  *  returns:
  *	error code.
  */
 
+/* 306: 00e15e3a */
 ERROR ixsfirst(P(const char *) name, P(int16_t) att, P(DTAINFO *)addr)
 PP(const char *name;)								/*  name of file to match   */
 PP(register int16_t att;)							/*  attribute of file       */
@@ -707,6 +643,110 @@ PP(register DTAINFO *addr;)						/*  ptr to dta info         */
 	return E_OK;
 }
 
+
+
+/*
+ *  xsnext -
+ *	search next, return into dta
+ *
+ *	Function 0x4F	Fsnext
+ *
+ *	Error returns
+ *		ENMFIL
+ */
+
+/* 306: 00e15f20 */
+ERROR xsnext(NOTHING)
+{
+	register FCB *f;
+	register DTAINFO *dt;
+
+	dt = (DTAINFO *) run->p_xdta;
+
+	/* has the DTA been initialized? */
+	if (dt->dt_dnd == NULL)
+		return E_NMFIL;
+
+	f = scan(dt->dt_dnd, &dt->dt_name[0], dt->dt_attr, &dt->dt_pos);
+
+	if (f == NULL)
+		return E_NMFIL;
+
+	makbuf(f, (DTAINFO *) run->p_xdta);
+	return E_OK;
+}
+
+
+/*
+ *  ixclose -
+ *
+ *	Error returns
+ *		EINTRN
+ *
+ *	Last modified	SCC	10 Apr 85
+ *
+ *	NOTE:	I'm not sure that returning immediatly upon an error from 
+ *		ixlseek() is the right thing to do.  Some data structures may 
+ *		not be updated correctly.  Watch out for this!
+ *		Also, I'm not sure that the EINTRN return is ok.
+ */
+
+/* 306: 00e160ba */
+ERROR ixclose(P(OFD *) fd, P(int) part)
+PP(register OFD *fd;)
+PP(int part;)
+{
+	OFD *p, **q;
+	long tmp;
+	register int i;
+	BCB *b;
+
+	if (fd->o_flag & O_DIRTY)
+	{
+		ixlseek(fd->o_dirfil, fd->o_dirbyt + 22);
+
+		swp68(&fd->o_strtcl);
+		swp68l(&fd->o_fileln);
+
+		if (part & CL_DIR)
+		{
+			tmp = fd->o_fileln;			/* [1] */
+			fd->o_fileln = 0;
+			ixwrite(fd->o_dirfil, 10L, &fd->o_td.time);
+			fd->o_fileln = tmp;
+		} else
+		{
+			ixwrite(fd->o_dirfil, 10L, &fd->o_td.time);
+		}
+		
+		swp68(&fd->o_strtcl);
+		swp68l(&fd->o_fileln);
+	}
+
+	if ((!part) || (part & CL_FULL))
+	{
+		q = &fd->o_dnode->d_files;
+
+		for (p = *q; p; p = *(q = &p->o_link))
+			if (p == fd)
+				break;
+
+		/* someone else has this file open */
+
+		if (p)
+			*q = p->o_link;
+		else
+			return E_INTRN;			/* some kind of internal error */
+	}
+
+	/* only flush to appropriate drive */
+
+	for (i = 0; i < 2; i++)
+		for (b = bufl[i]; b; b = b->b_link)
+			flush(b);
+
+	return E_OK;
+}
 
 
 /*
@@ -753,17 +793,17 @@ PP(DND *dn;)								/*  dir descr for dir           */
 #define	MAXFNCHARS	8
 
 
-/*	
+/*
  *  builds - build a directory style file spec from a portion of a path name
- *	the string at 's1' is expected to be a path spec in the form of 
+ *	the string at 's1' is expected to be a path spec in the form of
  *	(xxx/yyy/zzz).  *builds* will take the string and crack it
  *	into the form 'ffffffffeee' where 'ffffffff' is a non-terminated
  *	string of characters, padded on the right, specifying the filename
  *	portion of the file spec.  (The file spec terminates with the first
  *	occurrence of a SLASH or EOS, the filename portion of the file spec
  *	terminates with SLASH, EOS, PERIOD or WILDCARD-CHAR).  'eee' is the
- *	file extension portion of the file spec, and is terminated with 
- *	any of the above.  The file extension portion is left justified into 
+ *	file extension portion of the file spec, and is terminated with
+ *	any of the above.  The file extension portion is left justified into
  *	the last three characters of the destination (11 char) buffer, but is
  *	padded on the right.  The padding character depends on whether or not
  *	the filename or file extension was terminated with a separator
@@ -842,7 +882,7 @@ PP(register char *s2;)									/*  s2 dest         */
 
 #else
 
-/*	
+/*
  *  builds -
  *
  *	Last modified	LTG	23 Jul 85
@@ -887,260 +927,6 @@ PP(register char *s2;)									/*  s2 dest         */
 
 
 /*
- *  dopath -
- *
- */
-
-char *dopath(P(DND *) p, P(char *) buf, P(int *) len)
-PP(DND *p;)
-PP(char *buf;)
-PP(int *len;)
-{
-	char temp[14];
-	char *tp;
-	long tlen;
-
-	if (p->d_parent)
-		buf = dopath(p->d_parent, buf, len);
-
-	tlen = (long) packit(p->d_name, temp) - (long) temp;
-	tp = temp;
-	while (*len)
-	{
-		(*len)--;						/* len must never go < 0 */
-		if (tlen--)
-			*buf++ = *tp++;
-		else
-		{
-			*buf++ = SLASH;
-			break;
-		}
-	}
-	return buf;
-}
-
-
-
-/*
- *  negone - for use as parameter
- */
-
-static int32_t negone = -1L;
-
-
-/*	
- *  findit - find a file/dir entry 
- */
-
-DND *findit(P(const char *) name, P(const char **) sp, P(int) dflag)
-PP(const char *name;)								/*  name of file/dir            */
-PP(const char **sp;)
-PP(int dflag;)								/*  T: name is for a directory      */
-{
-	register DND *p;
-	const char *n;
-	DND *pp, *newp;
-	int i;
-	char s[11];
-
-	/* crack directory and drive */
-
-	n = name;
-
-	if ((long) (p = dcrack(&n)) <= 0)
-		return p;
-
-	/*  
-	 *  Force scan() to read from the beginning of the directory again, 
-	 *  since we have gone to a scheme of keeping fewer DNDs in memory.
-	 */
-
-	do
-	{
-		if (!(i = getpath(n, s, dflag)))
-			break;
-
-		if (i < 0)
-		{								/*  path is '.' or '..'  */
-
-			if (i == -2)				/*  go to parent (..)  */
-				p = p->d_parent;
-
-			i = -i;						/*  num chars is 1 or 2  */
-			goto scanxt;
-		}
-
-		/*
-		 * go down a level in the path...
-		 * save a pointer to the current DND, which will
-		 * become the parent, and get the node on the left,
-		 * which is the first child.
-		 */
-
-		pp = p;							/*  save ptr to parent dnd  */
-
-		if (!(newp = p->d_left))
-		{								/*  [1]         */
-			/*  make sure children  */
-			newp = dirscan(p, n);		/*  are logged in   */
-		}
-
-		if (!(p = newp))				/*  If no children, exit loop */
-			break;
-
-		/* 
-		 *  check all subdirectories at this level.  if we run out
-		 * of siblings in the DND list (p->d_right == NULL), then
-		 * we should rescan the whole directory and make sure they
-		 * are all logged in.
-		 */
-
-		while (p && (xcmps(s, p->d_name) == FALSE))
-		{
-			newp = p->d_right;			/*  next sibling    */
-
-			if (newp == NULL)			/* if no more siblings  */
-			{
-				p = 0;
-				if (pp)
-				{
-					p = dirscan(pp, n);
-				}
-			} else
-				p = newp;
-		}
-
-	  scanxt:if (*(n = n + i))
-			n++;
-		else
-			break;
-	} while (p && i);
-
-	/* p = 0 ==> not found
-	   i = 0 ==> found at p (dnd entry)
-	   n = points at filename */
-
-	*sp = n;
-
-	return p;
-}
-
-/*
- * [1]	The first call to dirscan is if there are no children logged in.
- *	However, we need to call dirscan if children are logged in and we still
- *	didn't find the desired node, as the desired child may've been flushed.
- *	This is a terrible thing to have happen to a child.  However, we can't 
- *	afford to have all these kids around here, so when new ones come in, we
- *	see which we can flush out (see makdnd()).  This is a hack -- no doubt 
- *	about that; the cached DND scheme needs to be redesigned all around.
- *	Anyway, the second call to dirscan backs up to the parent (note that n
- *	has not yet been bumped, so is still pointing to the current subdir's
- *	name -- in effect, starting us at this level all over again.
- *			-- ktb
- */
-
-
-/*	
- *  scan - scan a directory for an entry with the desired name.
- *	scans a directory indicated by a DND.  attributes figure in matching
- *	as well as the entry's name.  posp is an indicator as to where to start
- *	searching.  A posp of -1 means to use the scan pointer in the dnd, and
- *	return the pointer to the DND, not the FCB.
- *
- *	M01.01.SCC.FS.07
- *	M01.01a.0708.01 - removed use of d_scan field
- */
-
-/* 306: 00e15580 */
-FCB *scan(P(DND *) dnd, P(const char *) n, P(int16_t) att, P(int32_t *) posp)
-PP(register DND *dnd;)
-PP(const char *n;)
-PP(int att;)
-PP(int32_t *posp;)
-{
-	char name[12];
-	register FCB *fcb;
-	OFD *fd;
-	DND *dnd1;
-	BOOLEAN m;								/*  T: found a matching FCB     */
-
-	m = 0;								/*  have_match = false          */
-	builds(n, name);					/*  format name into dir format     */
-	name[11] = att;
-
-	/*
-	 *  if there is no open file descr for this directory, make one
-	 */
-
-	if (!(fd = dnd->d_ofd))
-	{
-		if (!(dnd->d_ofd = (fd = makofd(dnd))))
-		{
-			return (FCB *)0;
-		}
-	}
-
-	/*
-	 *  seek to desired starting position.  If posp == -1, then start at
-	 * the beginning.
-	 */
-
-	ixlseek(fd, (*posp == -1) ? 0L : *posp);
-
-	/*
-	 *  scan thru the directory file, looking for a match
-	 */
-
-	while ((fcb = (FCB *) ixread(fd, 32L, NULL)) && (fcb->f_name[0]))
-	{
-		/* 
-		 *  Add New DND.
-		 *  ( iff after scan ptr && complete flag not set && not a . 
-		 *  or .. && subdirectory && not deleted )
-		 */
-
-		if ((fcb->f_attrib & FA_DIREC) && (fcb->f_name[0] != '.') && (fcb->f_name[0] != 0xE5)
-			)
-		{								/*  see if we already have it  */
-			dnd1 = GetDnd(&fcb->f_name[0], dnd);
-			if (!dnd1)
-				if (!(dnd1 = makdnd(dnd, fcb)))
-					return NULL;
-		}
-
-		if ((m = match(name, fcb->f_name)) != 0)
-			break;
-	}
-
-	/* restore directory scanning pointer */
-
-	if (*posp != -1L)
-		*posp = fd->o_bytnum;
-
-	/*
-	 *  if there was no match, but we were looking for a deleted entry,
-	 *  then return a pointer to a deleted fcb.  Otherwise, if there was
-	 *  no match, return a null pointer
-	 */
-
-	if (!m)
-	{									/*  assumes that (*n != 0xe5) (if posp == -1)  */
-		if (fcb && (*n == 0xe5))
-			return fcb;
-		return (FCB *)0;
-	}
-
-	if (*posp == -1)
-	{									/*  seek to position of found entry  */
-		ixlseek(fd, fd->o_bytnum - 32);
-		return (FCB *)dnd1;
-	}
-
-	return fcb;
-}
-
-
-/*
  *  makdnd - make a child subdirectory of directory p
  */
 
@@ -1155,9 +941,9 @@ PP(FCB *b;)
 	int in_use;
 	fd = p->d_ofd;
 
-	/* 
-	 *  scavenge a DND at this level if we can find one that has not 
-	 *  d_left 
+	/*
+	 *  scavenge a DND at this level if we can find one that has not
+	 *  d_left
 	 */
 
 	for (prev = &p->d_left; (p1 = *prev) != NULL; prev = &p1->d_right)
@@ -1205,7 +991,7 @@ PP(FCB *b;)
 
 	p1->d_ofd = (OFD *) 0;
 	p1->d_strtcl = b->f_clust;
-	swp68(p1->d_strtcl);
+	swp68(&p1->d_strtcl);
 	p1->d_drv = p->d_drv;
 	p1->d_dirfil = fd;
 	p1->d_dirpos = fd->o_bytnum - 32;
@@ -1216,61 +1002,6 @@ PP(FCB *b;)
 	return p1;
 }
 
-
-
-/*	
- *  dcrack - parse out start of 1st path element, get DND
- *	if needed, logs in the drive specified (explicitly or implicitly) in 
- *	the path spec pointed to by 'np', parses out the first path element
- *	in that path spec, and adjusts 'np' to point to the first char in that
- *	path element.
- *
- *  returns
- *	ptr to DND for 1st element in path, or
- *	error
- */
-
-DND *dcrack(P(const char **) np)
-PP(const char **np;)
-{
-	register const char *n;
-	DND *p;
-	register int d;
-	int32_t l;
-
-	/*
-	 *  get drive spec (or default) and make sure drive is logged in  
-	 */
-
-	n = *np;							/*  get ptr to name     */
-	if (n[1] == ':')					/*  if we start with drive spec */
-	{
-		d = uc(n[0]) - 'A';				/*    compute drive number  */
-		n += 2;							/*    bump past drive number    */
-	} else								/*  otherwise           */
-		d = run->p_curdrv;				/*    assume default        */
-
-	if ((l = ckdrv(d)) < 0)				/*  check for valid drive & log */
-		return (DND *)l;				/*    in.  abort if error   */
-
-	/* 
-	 *  if the pathspec begins with SLASH, then the first element is
-	 *  the root.  Otherwise, it is the current default directory.  Get
-	 *  the proper DND for this element
-	 */
-
-	if (*n == SLASH)
-	{									/* [D:]\path */
-		p = drvtbl[d]->m_dtl;			/*  get root dir for log drive  */
-		n++;							/*  skip over slash     */
-	} else
-		p = dirtbl[run->p_curdir[d]];	/*  else use curr dir   */
-
-	/* whew ! *//*  <= thankyou, Jason, for that wonderful comment */
-
-	*np = n;
-	return p;
-}
 
 
 /*
@@ -1301,7 +1032,7 @@ PP(int dirspec;)							/*  true = no file name, just dir path  */
 
 	/*
 	 *  If the string we have just scanned over is a directory name, it
-	 * will either be terminated by a SLASH, or 'dirspec' will be set 
+	 * will either be terminated by a SLASH, or 'dirspec' will be set
 	 * indicating that we are dealing with a directory path only
 	 * (no file name at the end).
 	 */
@@ -1360,7 +1091,7 @@ PP(register const char *s2;)									/*  name in fcb             */
 			if (uc(*s1) != uc(*s2))
 				return FALSE;
 
-	/* 
+	/*
 	 *  check attribute match
 	 * volume labels and subdirs must be specifically asked for
 	 */
@@ -1384,11 +1115,11 @@ PP(register DTAINFO *dt;)
 {
 	dt->dt_fattr = f->f_attrib;
 	dt->dt_td.time = f->f_td.time;
-	swp68(dt->dt_td.time);
+	swp68(&dt->dt_td.time);
 	dt->dt_td.date = f->f_td.date;
-	swp68(dt->dt_td.date);
+	swp68(&dt->dt_td.date);
 	dt->dt_fileln = f->f_fileln;
-	swp68l(dt->dt_fileln);
+	swp68l(&dt->dt_fileln);
 
 	if (f->f_attrib & FA_LABEL)
 	{
@@ -1402,7 +1133,7 @@ PP(register DTAINFO *dt;)
 
 
 
-/*  
+/*
  *  xcmps - utility routine to compare two 11-character strings
  *
  *	Last modified	19 Jul 85	SCC
@@ -1484,4 +1215,40 @@ PP(const char *s11;)
 				len++;
 		}
 	return len;
+}
+
+
+
+/*
+ *  dopath -
+ *
+ */
+
+/* 306: 00e1761a */
+char *dopath(P(DND *) p, P(char *) buf, P(int *) len)
+PP(DND *p;)
+PP(char *buf;)
+PP(int *len;)
+{
+	char temp[14];
+	char *tp;
+	long tlen;
+
+	if (p->d_parent)
+		buf = dopath(p->d_parent, buf, len);
+
+	tlen = (long) packit(p->d_name, temp) - (long) temp;
+	tp = temp;
+	while (*len)
+	{
+		(*len)--;						/* len must never go < 0 */
+		if (tlen--)
+			*buf++ = *tp++;
+		else
+		{
+			*buf++ = SLASH;
+			break;
+		}
+	}
+	return buf;
 }

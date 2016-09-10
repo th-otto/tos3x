@@ -1,13 +1,5 @@
 /*  fsglob.c - global variables for the file system			*/
 
-/*
- *  Mod #	   who date		modification
- *  -------------- --- ---------	------------
- *  M01.01.1023.02 scc 10/23/86		Changed the definition of time and date
- *					to unsigned int
- *
- */
-
 #include	"tos.h"
 #include	"fs.h"
 #include	"bios.h"

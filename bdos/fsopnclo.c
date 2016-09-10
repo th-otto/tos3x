@@ -1,50 +1,145 @@
 /*  fsopnclo.c - open/close/create/delete routines for file system	*/
 
-/*
- * NOTE:
- *	mods with "SCC.XX.NN" are mods which try to merge fixes to a special
- *	post 1.0 / pre 1.1 version.  The notation refers to a DRI internal
- *	document (see SCC), which is a change log.  SCC refers to the
- *	originator of the fix.  The XX refers to the module in which the
- *	fix was originally made, fs.c (FS), sup.c (SUP), etc.  The NN is
- *	the fix number to that module as indicated on the change log.  For
- *	the most part, these numbers are meaningless, and serve only to 
- *	correspond code to particular problems.
- *
- *  mods
- *     date     who mod 		fix/change/note
- *  ----------- --  ------------------	-------------------------------
- *  06 May 1986 ktb M01.01.SCC.FS.02	ixcreat(): rescan.
- *  21 Jul 1986 ktb M01.01.0721.01	ixcreat(): check for bad chars
- *  30 Jul 1986 ktb M01.01.0730.01	deleting entries from the sft had
- *					problems if there were dup'd entries
- *					pointing to the same OFD
- *  15 Sep 1986 scc M01.01.0915.01	ixcreat(): disallow creation of subdir
- *					if file by same name exists
- *  22 Oct 1986 scc M01.01.1022.01	xclose(): range check the handle coming in
- *  23 Oct 1986 scc M01.01.1023.01	xclose(): check for closing a standard handle
- *					that was already closed
- *  23 Oct 1986 scc M01.01.1023.03	sftdel() and sftosrch() erroneously used NULL
- *					rather than NULLPTR.
- *
- *  12 Dec 1986 scc M01.01.1212.01	modified ixcreat(), ixopen(), and xunlink() to
- *					check for a negative error return from findit().
- *
- *  14 Dec 1986 scc M01.01.1214.01	Further modification of M01.01.1212.01 to check
- *					for 0 return (indicating BDOS level error).
- */
-
-
 #include "tos.h"
 #include <ostruct.h>
 #include <toserrno.h>
 #include "fs.h"
 #include "bios.h"
+#include "mem.h"
 #include "btools.h"
 
 
 FTAB *sftsrch PROTO((int field, VOIDPTR ptr));
-VOID sftdel PROTO((FTAB *sftp));
+
+
+/*
+ *  makofd -
+ */
+
+/* 306: 00e161de */
+OFD *makofd(P(DND *) p)
+PP(register DND *p;)
+{
+	register OFD *f;
+
+	if (!(f = mgetofd()))
+		return NULL;
+
+	f->o_strtcl = p->d_strtcl;
+	f->o_fileln = 0x7fffffffL;
+	f->o_dirfil = p->d_dirfil;
+	f->o_dnode = p->d_parent;
+	f->o_dirbyt = p->d_dirpos;
+	f->o_td.date = p->d_td.date;
+	f->o_td.time = p->d_td.time;
+	f->o_dmd = p->d_drv;
+
+	return f;
+}
+
+
+
+/*
+ *  ixread -
+ *
+ *	Last modified	SCC	26 July 85
+ */
+
+/* 306: 00e16236 */
+ERROR ixread(P(OFD *)p, P(long) len, P(VOIDPTR) ubufr)
+PP(register OFD *p;)
+PP(long len;)
+PP(VOIDPTR ubufr;)
+{
+	long maxlen;
+
+	/* Make sure file not opened as write only. */
+	if (p->o_mod == WO_MODE)
+		return E_ACCDN;
+
+	if (len > (maxlen = p->o_fileln - p->o_bytnum))
+		len = maxlen;
+
+	if (len > 0)
+		return xrw(0, p, len, ubufr, xfr2usr);
+
+	return 0;						/* zero bytes read for zero requested */
+}
+
+
+
+/*
+ *  ixwrite -
+ */
+
+/* 306: 00e16286 */
+ERROR ixwrite(P(OFD *) p, P(long) len, P(VOIDPTR) ubufr)
+PP(OFD *p;)
+PP(long len;)
+PP(VOIDPTR ubufr;)
+{
+	return xrw(1, p, len, ubufr, usr2xfr);
+}
+
+
+
+/*
+ *  makopn - make an open file for sft handle h 
+ *
+ *	Last modified	SCC	8 Apr 85
+ */
+
+/* 306: 00e162ae */
+ERROR makopn(P(FCB *) f, P(DND *) dn, P(FH) h, P(int16_t) mod)
+PP(FCB *f;)
+PP(DND *dn;)
+PP(FH h;)
+PP(int mod;)
+{
+	register OFD *p;
+	register OFD *p2;
+	register DMD *dm;
+
+	dm = dn->d_drv;
+
+	if (!(p = mgetofd()))
+		return E_NSMEM;
+
+	p->o_mod = mod;						/*  set mode            */
+	p->o_dmd = dm;						/*  link OFD to media       */
+	sft[h - NUMSTD].f_ofd = p;
+	p->o_usecnt = 0;					/*  init usage          */
+	p->o_curcl = 0;						/*  init file pointer info  */
+	p->o_curbyt = 0;					/*  "               */
+	p->o_dnode = dn;					/*  link to directory       */
+	p->o_dirfil = dn->d_ofd;			/*  link to dir's ofd       */
+	p->o_dirbyt = dn->d_ofd->o_bytnum - 32;	/*  offset of fcb in dir */
+
+	for (p2 = dn->d_files; p2; p2 = p2->o_link)
+		if (p2->o_dirbyt == p->o_dirbyt)
+			break;						/* same dir, same dcnt */
+
+	p->o_link = dn->d_files;
+	dn->d_files = p;
+
+	if (p2)
+	{									/* steal time,date,startcl,fileln */
+		xmovs(12, &p2->o_td.time, &p->o_td.time);
+		/* not used yet... */
+		p2->o_thread = p;
+	} else
+	{
+		p->o_strtcl = f->f_clust;		/*  1st cluster of file */
+		swp68(&p->o_strtcl);
+		p->o_fileln = f->f_fileln;		/*  init length of file */
+		swp68l(&p->o_fileln);
+		p->o_td.date = f->f_td.date;
+		p->o_td.time = f->f_td.time;
+	}
+
+	return h;
+}
+
 
 
 /*	
@@ -71,7 +166,7 @@ PP(int8_t attr;)
 	
 	/* first find path */
 	
-	if ((intptr_t) (dn = findit(name, &s, 0)) == 0)
+	if ((dn = findit(name, &s, 0)) == NULL)
 		return E_PTHNF;
 	
 	if (contains_dots(s, 0) != 0)
@@ -118,9 +213,9 @@ PP(int8_t attr;)
 	for (i = 0; i < 10; i++)
 		f->f_fill[i] = 0;
 	f->f_td.time = time;
-	swp68(f->f_td.time);
+	swp68(&f->f_td.time);
 	f->f_td.date = date;
-	swp68(f->f_td.date);
+	swp68(&f->f_td.date);
 	f->f_clust = 0;
 	f->f_fileln = 0;
 	ixlseek(fd, pos);
@@ -179,188 +274,93 @@ PP(int16_t mode;)
 
 
 /*
- *  opnfil - does the real work in opening a file
+ *  xchmod - change/get attrib of path p
+ *		if wrt = 1, set; else get
+ *
+ *	Function 0x43	Fattrib
  *
  *	Error returns
- *		ENHNDL
+ *		EPTHNF
+ *		EFILNF
  *
- *	NOTES:
- *		make a pointer to the ith entry of sft 
- *		make i a register int.
  */
 
-/* 306: 00e17176 */
-ERROR opnfil(P(FCB *) f, P(DND *) dn, P(int16_t) mod)
-PP(FCB *f;)
-PP(DND *dn;)
-PP(int16_t mod;)
+/* 306: 00e166e6 */
+char xchmod(P(const char *) p, P(int16_t) wrt, P(char) mod)
+PP(const char *p;)
+PP(int16_t wrt;)
+PP(char mod;)
 {
-	register int i;
-	int h;
-
-	/* find free sft handle */
-	if ((i = ffhndl()) < 0)
-		return E_NHNDL;
-
-	sft[i].f_own = run;
-	sft[i].f_use = 1;
-	h = i + NUMSTD;
-
-	return makopn(f, dn, h, mod);
-}
-
-
-
-/* 306: 00e171d8 */
-FH ffhndl(NOTHING)
-{
-	register int i;
-	register FTAB *p;
-	
-	for (i = 0, p = sft; i < (OPNFILES - NUMSTD); i++, p++)
-		if (p->f_own == NULL)
-			return i;
-	return -1;
-}
-/*
- *  xclose - Close a file.
- *
- *	Function 0x3E	Fclose
- *
- *	Error returns
- *		EIHNDL
- *		ixclose()
- *
- *	SCC:	I have added 'rc' to allow return of status from ixclose().  I 
- *		do not yet know whether it is appropriate to perform the 
- *		operations inside the 'if' statement following the invocation 
- *		of ixclose(), but I am leaving the flow of control intact.
- */
-
-ERROR xclose(P(FH) h)
-PP(int h;)
-{
-	int h0;
 	OFD *fd;
-	ERROR rc;
+	DND *dn;
+	const char *s;
+	int32_t pos;
 
-	if (h < 0)
-		return E_OK;					/* always a good close on a character device */
+	if ((ERROR) (dn = findit(p, &s, 0)) < 0)
+		return (ERROR)dn;
+	if (!dn)
+		return E_PTHNF;
 
-	if (h > (OPNFILES + NUMSTD - 1))
+	pos = 0;
+
+	if (!scan(dn, s, FA_NORM, &pos))
+		return E_FILNF;
+
+	pos -= 21;							/* point at attribute in file */
+	fd = dn->d_ofd;
+	ixlseek(fd, pos);
+	if (!wrt)
+		ixread(fd, 1L, &mod);
+	else
+	{
+		ixwrite(fd, 1L, &mod);
+		ixclose(fd, CL_DIR);			/* for flush */
+	}
+	return mod;
+}
+
+
+/*
+ *  xgsdtof - get/set date/time of file into of from buffer
+ *
+ *	Function 0x57	Fdatime
+ */
+
+/* 306: 00e167c4 */
+ERROR xgsdtof(P(uint16_t *) buf, P(FH) h, P(int16_t) wrt)
+PP(uint16_t *buf;)
+PP(FH h;)
+PP(int16_t wrt;)
+{
+	register OFD *f;
+	register OFD *p;
+	uint16_t b[2];
+
+	f = getofd(h);
+	if (f == NULL || ((ERROR)f) < 0)
 		return E_IHNDL;
 
-	if ((h0 = h) < NUMSTD)
+	if (!wrt)
 	{
-		h = run->p_uft[h];
-		run->p_uft[h0] = 0;				/* mark std dev as not in use */
-		if (h <= 0)
-			return E_OK;
-	} else if (((long) sft[h - NUMSTD].f_ofd) < 0L)
-	{
-		if (!(--sft[h - NUMSTD].f_use))
-		{
-			sft[h - NUMSTD].f_ofd = 0;
-			sft[h - NUMSTD].f_own = 0;
-		}
+		buf[0] = f->o_td.time;
+		buf[1] = f->o_td.date;
 		return E_OK;
 	}
 
-	if (!(fd = getofd(h)))
-		return E_IHNDL;
+	b[0] = buf[0];
+	b[1] = buf[1];
+	swp68(&b[0]);
+	swp68(&b[1]);
 
-	rc = ixclose(fd, 0);
-
-	if (!(--sft[h - NUMSTD].f_use))
-		sftdel(&sft[h - NUMSTD]);
-
-	return rc;
-}
-
-
-/*
- *  ixclose -
- *
- *	Error returns
- *		EINTRN
- *
- *	Last modified	SCC	10 Apr 85
- *
- *	NOTE:	I'm not sure that returning immediatly upon an error from 
- *		ixlseek() is the right thing to do.  Some data structures may 
- *		not be updated correctly.  Watch out for this!
- *		Also, I'm not sure that the EINTRN return is ok.
- */
-
-#define CL_DIR 0x0002					/* this is a directory file, flush, do not free */
-#define CL_FULL 0x0004					/* even though its a directory, full close */
-
-ERROR ixclose(P(OFD *) fd, P(int) part)
-PP(register OFD *fd;)
-PP(int part;)
-{
-	OFD *p, **q;
-	long tmp;
-	register int i;
-	BCB *b;
-
-	if (fd->o_flag & O_DIRTY)
+	for (p = f->o_dnode->d_files; p; p = p->o_link)
 	{
-		ixlseek(fd->o_dirfil, fd->o_dirbyt + 22);
-
-		swp68(fd->o_strtcl);
-		swp68l(fd->o_fileln);
-
-		if (part & CL_DIR)
-		{
-			tmp = fd->o_fileln;			/* [1] */
-			fd->o_fileln = 0;
-			ixwrite(fd->o_dirfil, 10L, &fd->o_td.time);
-			fd->o_fileln = tmp;
-		} else
-		{
-			ixwrite(fd->o_dirfil, 10L, &fd->o_td.time);
-		}
-		
-		swp68(fd->o_strtcl);
-		swp68l(fd->o_fileln);
+		p->o_td.time = b[0];
+		p->o_td.date = b[1];
+		p->o_flag |= O_DIRTY;
 	}
-
-	if ((!part) || (part & CL_FULL))
-	{
-		q = &fd->o_dnode->d_files;
-
-		for (p = *q; p; p = *(q = &p->o_link))
-			if (p == fd)
-				break;
-
-		/* someone else has this file open */
-
-		if (p)
-			*q = p->o_link;
-		else
-			return E_INTRN;			/* some kind of internal error */
-	}
-
-	/* only flush to appropriate drive */
-
-	for (i = 0; i < 2; i++)
-		for (b = bufl[i]; b; b = b->b_link)
-			flush(b);
 
 	return E_OK;
 }
-
-
-/*
- * [1]	We play games here (thanx, Jason).  The ixwrite() call will essentially
- *	copy the time, date, cluster, and length fields from the OFD of the
- *	(dir) file we are closeing to the FCB for this (dir) file in the 
- *	parent dir.  The fileln field of this dir is thus set to 0.  But if 
- *	this is a directory we are closing (path & CL_DIR), shouldn't the 
- *	fileln be zero anyway?  I give up.
- *					- ktb
- */
 
 
 
@@ -376,6 +376,7 @@ PP(int part;)
  *
  */
 
+/* 306: 00e16876 */
 ERROR xunlink(P(const char *) name)
 PP(const char *name;)								/*  path name of file to delete     */
 {
@@ -424,6 +425,7 @@ PP(const char *name;)								/*  path name of file to delete     */
  * 
  */
 
+/* 306: 00e168e6 */
 ERROR ixdel(P(DND *) dn, P(FCB *) f, P(long) pos)
 PP(DND *dn;)
 PP(FCB *f;)
@@ -451,7 +453,7 @@ PP(long pos;)
 
 	dm = dn->d_drv;
 	n = f->f_clust;
-	swp68(n);
+	swp68(&n);
 
 	while (n && (n != -1))
 	{
@@ -478,6 +480,200 @@ PP(long pos;)
 
 	return E_OK;
 }
+
+
+/*
+ *  xrename - rename a file,
+ *	oldpath p1, new path p2
+ *
+ *	Function 0x56	Frename
+ *
+ *	Error returns
+ *		EPTHNF
+ *
+ */
+
+/* 306: 00e16a06 */
+ERROR xrename(P(int16_t) n, P(const char *) p1, P(const char *)p2)	/*+ rename file, old path p1, new path p2 */
+PP(int16_t n;)									/*  not used                */
+PP(const char *p1;)
+PP(const char *p2;)
+{
+	register OFD *fd2;
+	OFD *f1, *fd;
+	FCB *f;
+	DND *dn1, *dn2;
+	const char *s1;
+	const char *s2;
+	char buf[11];
+	int hnew, att;
+	ERROR rc, h1;
+
+	UNUSED(n);
+
+	if (!ixsfirst(p2, 0, (DTAINFO *) 0L))
+		return E_ACCDN;
+
+	if ((dn1 = findit(p1, &s1, 0)) == NULL)
+		return E_PTHNF;
+
+	if ((ERROR) (dn2 = findit(p2, &s2, 0)) < 0)
+		return (ERROR)dn2;
+	if (!dn2)
+		return E_PTHNF;
+
+	if ((h1 = xopen(p1, 2)) < 0L)
+		return h1;
+
+	f1 = getofd((int) h1);
+
+	fd = f1->o_dirfil;
+	buf[0] = 0xe5;
+	ixlseek(fd, f1->o_dirbyt);
+
+	if (dn1 != dn2)
+	{
+		/* get old attribute */
+		f = (FCB *) ixread(fd, 32L, NULL);
+		att = f->f_attrib;
+		/* erase (0xe5) old file */
+		ixlseek(fd, f1->o_dirbyt);
+		ixwrite(fd, 1L, buf);
+
+		/* copy time/date/clust, etc. */
+
+		ixlseek(fd, f1->o_dirbyt + 22);
+		ixread(fd, 10L, buf);
+		hnew = xcreat(p2, att);
+		fd2 = getofd(hnew);
+		ixlseek(fd2->o_dirfil, fd2->o_dirbyt + 22);
+		ixwrite(fd2->o_dirfil, 10L, buf);
+		fd2->o_flag &= ~O_DIRTY;
+		xclose(hnew);
+		ixclose(fd2->o_dirfil, CL_DIR);
+	} else
+	{
+		builds(s2, buf);
+		ixwrite(fd, 11L, buf);
+	}
+
+	if ((rc = xclose((int) h1)) < 0L)
+		return rc;
+
+	return ixclose(fd, CL_DIR);
+}
+
+
+/*
+ *  xlseek -
+ *	seek to byte position n on file with handle h
+ *
+ *  Function 0x42	Fseek
+ *
+ *	Error returns
+ *		EIHNDL
+ *		EINVFN
+ *		ixlseek()
+ */
+
+/* 306: 00e16cf6 */
+ERROR xlseek(P(long) n, P(int16_t) h, P(int16_t) flg)
+PP(long n;)
+PP(int16_t h;)
+PP(int16_t flg;)
+{
+	OFD *f;
+
+	if (!(f = getofd(h)))
+		return E_IHNDL;
+
+	if (flg == 2)
+		n += f->o_fileln;
+	else if (flg == 1)
+		n += f->o_bytnum;
+	else if (flg)
+		return E_INVFN;
+
+	return ixlseek(f, n);
+}
+
+
+/*
+ *  ixlseek -
+ *	file position seek
+ *
+ *	Error returns
+ *		ERANGE
+ *		EINTRN
+ *
+ *	Last modified	LTG	31 Jul 85
+ *
+ *	NOTE:	This function returns ERANGE and EINTRN errors, which are new 
+ *		error numbers I just made up (that is, they were not defined 
+ *		by the BIOS or by PC DOS).
+ */
+
+/* 306: 00e16d58 */
+ERROR ixlseek(P(OFD *) p, P(long) n)
+PP(register OFD *p;)								/*  file descriptor for file in use */
+PP(long n;)									/*  number of bytes to seek     */
+{
+	int clnum, clx, curnum, i;
+	int curflg;
+	register DMD *dm;
+
+	if (n > p->o_fileln)
+		return E_RANGE;
+
+	if (n < 0)
+		return E_RANGE;
+
+	dm = p->o_dmd;
+	if (!n)
+	{
+		clx = 0;
+		p->o_curbyt = 0;
+		goto fillin;
+	}
+
+	/* do we need to start from the beginning ? */
+
+	if (((!p->o_curbyt) || (p->o_curbyt == dm->m_clsizb)) && p->o_bytnum)
+		curflg = 1;
+	else
+		curflg = 0;
+
+	clnum = divmod((int16_t *)&p->o_curbyt, n, dm->m_clblog);
+
+	if (p->o_curcl && (n >= p->o_bytnum))
+	{
+		curnum = p->o_bytnum >> dm->m_clblog;
+		clnum -= curnum;
+		clnum += curflg;
+
+		clx = p->o_curcl;
+
+	} else
+	{
+		clx = p->o_strtcl;
+	}
+	
+	for (i = 1; i < clnum; i++)
+		if ((clx = getcl(clx, dm)) == -1)
+			return -1;
+
+	/* go one more except on cluster boundary */
+
+	if (p->o_curbyt && clnum)
+		clx = getcl(clx, dm);
+
+  fillin:p->o_curcl = clx;
+	p->o_currec = cl2rec(clx, dm);
+	p->o_bytnum = n;
+
+	return n;
+}
+
 
 
 /*
@@ -566,6 +762,7 @@ PP(VOIDPTR ptr;)								/*  ptr to match on         */
  *	have the same ofd, free up the OFD, also.
  */
 
+/* 306: 00e189ce */
 VOID sftdel(P(FTAB *) sftp)
 PP(FTAB *sftp;)
 {

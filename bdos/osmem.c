@@ -16,17 +16,6 @@
 #define	OSMPANIC	FALSE
 
 
-
-
-/*
- *  mods
- *
- *  mod no.	 date      who	comments
- *  ------------ --------  ---	--------
- *  M01.01a.0708 08 Jul 86 ktb	xmgetblk wasn't checking root index
- *
- */
-
 #include "tos.h"
 #include "fs.h"
 #include "bios.h"

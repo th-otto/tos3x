@@ -3,229 +3,6 @@
 #define	DBGOSIF	0
 
 
-/*
- * 
- * 
- * Originally written by JSL as noted below.
- * 
- * MODIFICATION HISTORY
- * 
- * 	10 Mar 85	SCC	Added normal handling of functions 3-5, 7, 8
- * 				and redirection of functions 3-8.
- * 
- * 	11 Mar 85	JSL	Modified calling convention for xexec().
- * 
- * 	11 Mar 85	SCC	Added handling of extended console functions
- * 				16-19.
- * 
- * 	13 Mar 85	SCC	Added handling of other hard errors from disk.
- * 				THIS IS ONLY A ROUGH FIRST CUT!
- * 
- * 			SCC	Added check of return from getbpb() in hard
- * 				error processing.
- * 
- * 	14 Mar 85	SCC	Added xgetver() function at 0x30.
- * 
- * 	18 Mar 85	SCC	Added x0term() for function 0x00.
- * 
- * 	19 Mar 85	SCC	Version 0.3.
- * 
- * 	21 Mar 85	SCC	Added initialization of stdaux and stdprn to
- * 				cinit().
- * 
- * 	25 Mar 85	SCC	Added get/set date/time routines.
- * 
- * 	 1 Apr 85	SCC	Version 0.4.
- * 				Changed reference to getch() to x7in().
- * 
- * 	10 Apr 85	SCC	Modified osif() to return EINVFN for functions
- * 				greater than 0x57.
- * 
- * 				Added external definition of setjmp() to return
- * 				long.
- * 
- * 				Modified osif() to return long.
- * 
- * 				Modified ni() to return EINVFN.
- * 
- * 			EWF	Added in the typeahead buffer initializations.
- * 
- * 	11 Apr 85	SCC	Added xfreset() function at 0x0D.
- * 
- * 				Installed EWF's changes of 10 Apr 85.
- * 
- * 	12 Apr 85	EWF	Modified typeahead buffer initialization to use
- * 				KBBUFSZ.
- * 
- * 			SCC	Installed EWF's change.
- * 
- * 				Modified osif() to return EIHNDL.
- * 
- * 	14 Apr 85	SCC	Backed out modifications of 11 Apr 85 for
- * 				xfreset().
- * 
- * 				The function is removed.  It was not the right
- * 				fix for the problem it was intended to solve
- * 				(see note in the CLI about the ^C problem.
- * 
- * 	17 Apr 85	SCC	Version 0.5.
- * 
- * 	22 Apr 85	SCC	Changed reference to external time and date
- * 				variables to unsigned in an attempt to correct
- * 				the code in tikfrk().
- * 
- * 	26 Apr 85	SCC	Version 0.6.
- * 
- * 	29 Apr 85	SCC	Version 0.7.
- * 
- * 	 7 May 85	SCC	Version 0.8.
- * 
- * 				Modified tikfrk()'s date handling.
- * 
- * 	13 May 85	SCC	Version 0.9.
- * 
- * 	15 May 85	SCC	Version 0.A.
- * 
- * 	16 May 85	SCC	Modified osif()'s handling of function 0x0A 
- *				when stdin is re-directed to a file.
- * 
- * 				Version 0.B.
- * 
- * 	24 May 85	SCC	Version 0.C.
- * 
- * 	28 May 85	SCC	Version 0.D.
- * 
- * 	 3 Jun 85	SCC	Modified osif() to return int16_t rather than 
- *				int32_t -1, -2 and -3 for f_open()'s on CON:, 
- *				AUX:, and PRN:.
- * 
- * 				Version 0.E.
- * 
- * 	11 Jun 85	SCC	Modified osif()'s handling of device (negative)
- *				handles vs. standard handles.
- * 
- * 				Version 0.F.
- * 
- *	29 Jun 85	LTG	Modified osif to return ENSMEM if log fails.
- * 
- *				Added log() to table of external functions 
- *				returning long.
- * 
- *				Bumped LENOSM from 2000 -> 3000.
- *     
- *				Version 0.10.
- * 
- * 	23 Jul 85	SCC	Version 0.11.
- * 
- * 				LTG previously changed LENOSM from 3000 -> 2000.
- * 
- * 	24 Jul 85	SCC	Version 0.12.
- * 
- * 	25 Jul 85	SCC	Version 0.13.
- * 
- * 	05 Aug 85	KTB	Version 0.14.
- * 
- * 	06 Aug 85	LTG	Version 0.15.
- * 
- * 	09 Aug 85	SCC	Moved ncmps() here from MEM.C.  It was only used
- * 				here.  Also added use of uc() in compare loop.
- * 
- * 				Version 0.16.
- * 
- * 				Added external reference and jump table entries
- * 				for F_IOCtl(), S_SetVec(), S_GetVec().
- * 
- * 				Changed character devices supported by F_Open()
- *				to NUL:, PRN:, AUX:, CON:, CLOCK:, MOUSE:.
- * 
- * 				Changed character devices supported by F_Read()
- *				and F_Write().
- * 
- * 				Modified cinit()'s initialization of standard
- * 				handles.
- * 
- * 				Included S_SetVec() and S_GetVec().
- * 
- * 				Removed extern definition of errbuf[], since
- * 				it is defined in this source.
- * 
- * 	11 Aug 85	SCC	Added 'extern int bios_dev[];' for HXFORM().
- *
- *	18 Aug 85	SCC	Modified osif() for NUL: handling.
- *
- *				VERSION 01.00
- *
- *				Added version string.
- *
- *	30 Aug 85	KTB	M01.01.01:  drive logout fix.
- *
- *	30 Aug 85	KTB	M01.01.02:  version name and number.
- *
- *	15 Oct 85	KTB	M01.01.03: accomodate split of fs.h into
- *				fs.h and bios.h
- * 
- *	21 Oct 85	KTB	M01.01.04: fs.h now has common external
- *				declarations; changes are made here to delete
- *				duplicate declarations.
- *
- *	21 Oct 85	KTB	M01.01.05:  now includes portab.h
- *
- *	05 Nov 85	KTB	M01.01.06:  cleared diruse entry in freetree.
- *
- *	05 Nov 85	KTB	debug modifications to osif
- *
- *	07 Nov 85	KTB	took out & in front of array and function names.
- *
- *	13 Nov 85	SCC	M01.01.07: console output char call being re-
- *				directed to a file.
- *
- *	22 Jan 86	KTB/SCC	M01.01.08: fix to tabout call.
- *
- *	28 May 86	KTB	M01.01.0528.01: sup doesn't check for valid
- *				std. file handles; needs to as lower routines
- *				assume that the file handle is valid and
- *				indexes with it.
- *
- *	 7 Oct 86	scc	M01.01.1007.01:  cast some pointers to long
- *				before comparing them with 0.
- *
- *	24 Oct 86	scc	M01.01.1024.01:  check return of getbpb() for long
- *				negative error code (as well as zero) in setjmp section
- *				error handling.
- *
- *	29 Oct 86	scc	M01.01.1029.01:  check return of bconout in F_Write
- *				handling for character devices in osif().
- *
- *	 4 Nov 86	scc	M01.01.1104.01:  bumped up the value of LENOSM from
- *				2000 to 4000 to reduce the likelyhood of reaching the
- *				limit on DNDs.
- *
- *	16 Sep 87	ACH	cinit() now calls the new BIOS functions to
- *				initialise the internal date and time variables
- *				from the real time clock (if supported).
- *
- * NOTES
- * 
- * 	osif()
- * 
- * 		TBA note on 'do real hard error stuff'
- * 
- * 		Toggle/inquire processor/stack state is being done at a higher
- * 		level.  This may be changed in the future.
- * 
- * 		See note on 13 Mar 85 change above.
- * 
- * NAMES
- * 
- * 	EWF	Eric W. Fleischman
- * 	JSL	Jason S. Loveman
- * 	SCC	Steven C. Cavender
- *	LTG	Louis T. Garavaglia
- * 	KTB	Karl T. Braun (kral)
- *	ACH	Anthony C. Hay (DR UK)
- * 
- */
-
 #include "tos.h"
 #include "fs.h"
 #include "bios.h"
@@ -626,7 +403,8 @@ PP(int16_t *pw;)
 	DND *dn;
 	int typ, h, i, fn;
 	int num, max;
-	long rc, numl;
+	ERROR rc;
+	long numl;
 	const FND *f;
 
 	oscnt = 0;
@@ -659,12 +437,12 @@ PP(int16_t *pw;)
 
 			/* then, in with the new */
 
-			b = (BPB *) getbpb(errdrv);
-			if ((long) b <= 0)
+			b = Getbpb(errdrv);
+			if ((ERROR) b <= 0)
 			{
 				drvsel &= ~(1 << errdrv);
-				if ((long) b)
-					return (long) b;
+				if ((ERROR) b)
+					return (ERROR) b;
 				return rc;
 			}
 			

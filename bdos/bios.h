@@ -243,3 +243,6 @@ MPB
 #define IVNSER	0x45		/*	serial port interrupt vector number */
 
 #define IVNABT	0x4e		/*	abort button interrupt vector no	*/
+
+
+VOID xbsettime PROTO((NOTHING));

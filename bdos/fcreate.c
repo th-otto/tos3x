@@ -3,6 +3,32 @@
 #include <toserrno.h>
 #include "fs.h"
 
+
+/*
+ *  xsfirst - search first for matching name, into dta
+ *
+ *	Function 0x4E	Fsfirst
+ *
+ *	Error returns
+ *		EFILNF
+ */
+
+/* 306: 00e1726a */
+ERROR xsfirst(P(const char *) name, P(int16_t) att)
+PP(const char *name;)
+PP(int16_t att;)
+{
+	DTAINFO *dt;
+
+	dt = (DTAINFO *) (run->p_xdta);
+
+	/* set an indication of 'uninitialized DTA' */
+	dt->dt_dnd = NULL;
+
+	return ixsfirst(name, att, dt);
+}
+
+
 /*
  *  xcreat -
  *  create file with specified name, attributes

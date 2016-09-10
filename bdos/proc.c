@@ -1,42 +1,6 @@
 /*  proc.c - process management routines				*/
 /*  xexec, xterm, x0term, xtermres					*/
 
-/*
- *  mods
- *
- *  mod no.	date       who	comments
- *  ---------	---------  ---	--------
- *  M01.01.01	22 Oct 85  ktb	split up mem.c
- *
- *  M01.01.02	22 Oct 85  ktb	changed var 'long *p;' to 'PD *p;', since that
- *				seems to be what it is used for. (not marked)
- *
- *  M01.01.03	22 Oct 85  ktb	added var 'p1' to aid portability.
- *
- *  M01.01.04	23 Oct 85  ktb	removed var 'int absflg;', 'int j;';
- *		Not used.
- *
- *  M01.01.05	23 Oct 85  ktb	initialized var 'env' & 'm' to keep lint quite.
- *
- *  M01.01.06	13 Nov 85  ktb	proper usage of pointer variables.
- *
- *  M01.01.07	18 Nov 85  ktb	no one was ever decrementing diruse
- *
- *  see fsdir.c for a meaningless explanation of the following mod #'s
- *
- *  M01.01.SCC.MEM.02 - M01.01.07 change
- *
- *  M0101082701  27 Aug 86 ktb	cleaned up some unecessary code
- *
- *  M0101082702  27 Aug 86 ktb	cleaned up code that sizes env
- *
- *  M0101082703  27 Aug 86 ktb	unessecary extra pointer, use cast instead.
- *
- *           	05 Jun 87  ACH	In xexec() changed the way memory is dealocated
- *				on disk errors.
- *
- */
-
 #include "tos.h"
 #include "fs.h"
 #include "bios.h"
