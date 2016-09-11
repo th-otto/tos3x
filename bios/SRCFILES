@@ -1,0 +1,3 @@
+BIOS_OBJS = \
+	tosvars.o \
+	$(empty)

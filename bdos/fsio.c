@@ -259,7 +259,7 @@ PP(register DMD *dm;)
 {
 	register BCB *b;
 
-	for (b = bufl[1]; b; b = b->b_link)
+	for (b = bufl[BI_DATA]; b; b = b->b_link)
 		if ((b->b_bufdrv == dm->m_drvnum) && (b->b_bufrec >= strt) && (b->b_bufrec < strt + num))
 			flush(b);
 

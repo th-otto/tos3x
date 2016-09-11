@@ -5,6 +5,7 @@ GEMDOS time and date functions
  */
 
 #include "tos.h"
+#include "fs.h"
 #include <toserrno.h>
 #include "bios.h"
 

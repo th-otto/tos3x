@@ -42,7 +42,9 @@ typedef int16_t BOOLEAN;
 #define FALSE 0
 #define TRUE 1
 
-
+/* ERROR - error return code */
+typedef	int32_t ERROR;
+ 
 #define    ERR      -1L    /* basic, fundamental error     0xffffffff      */
 
 #ifdef __ALCYON__
@@ -67,6 +69,4 @@ extern xjmp_buf errbuf;		/*  in sup.c			*/
 
 int32_t xsetjmp PROTO((xjmp_buf buf));
 VOID xlongjmp PROTO((xjmp_buf buf, int32_t rc));
-
-
-extern const char *bdosts;
+long lmul PROTO((long l1, long l2));

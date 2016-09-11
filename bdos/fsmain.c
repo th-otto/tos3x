@@ -265,23 +265,11 @@ PP(int16_t *d;)
 
 
 /*
- *  xfr2usr -
- */
-
-VOID xfr2usr(P(int) n, P(char *) s, P(char *) d)
-PP(register int n;)
-PP(register char *s;)
-PP(register char *d;)
-{
-	while (n--)
-		*d++ = *s++;
-}
-
-
-/*
  *  usr2xfr -
  */
 
+#if !GEMDOS /* assembly routine provided */
+/* 306: 00e1386c */
 VOID usr2xfr(P(int) n, P(char *) d, P(char *) s)
 PP(register int n;)
 PP(register char *s;)
@@ -291,3 +279,17 @@ PP(register char *d;)
 		*d++ = *s++;
 }
 
+/*
+ *  xfr2usr -
+ */
+
+/* 306: 00e13876 */
+VOID xfr2usr(P(int) n, P(char *) s, P(char *) d)
+PP(register int n;)
+PP(register char *s;)
+PP(register char *d;)
+{
+	while (n--)
+		*d++ = *s++;
+}
+#endif

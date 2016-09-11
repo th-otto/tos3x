@@ -226,7 +226,6 @@ PP(int dflag;)								/*  T: name is for a directory      */
 
 		if (i < 0)
 		{								/*  path is '.' or '..'  */
-
 			if (i == -2)				/*  go to parent (..)  */
 				p = p->d_parent;
 

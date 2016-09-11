@@ -39,7 +39,12 @@ _sft: ds.b 10*OPNFILES
 	xdef _run
 _run: ds.l 1
 
-    ds.b $8f6
+    ds.b $d0
+    
+	xdef _secbuf
+_secbuf: ds.b 4*512
+
+    ds.b $26
     
 	xdef _dirtbl
 _dirtbl: ds.l NCURDIR
@@ -73,3 +78,6 @@ _ospd: ds.b 256
     
 	xdef _date
 _date: ds.w 1
+
+	xdef _bcbx
+_bcbx: ds.b 4*20

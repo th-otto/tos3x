@@ -337,6 +337,7 @@ PP(DND *d;)
 	xmfreblk(d);
 }
 
+
 /*
  *  offree -
  */

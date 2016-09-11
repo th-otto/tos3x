@@ -1,28 +1,7 @@
 #ifndef FS_H
 #define FS_H
 
-#include "pd.h"
-
-/*
- *  Type declarations
- */
-
-#define FTAB    struct _ftab
-#define OFD     struct _ofd
-#define FCB     struct _fcb
-#define DND     struct _dnd
-#define FH      int16_t    /*  file handle    */
-#define DMD     struct _dmd
-#define BCB struct _bcb
-
-
-#define SLASH '\\'
-
-#define SUPSIZ 1024     /* common supervisor stack size (in words) */
-#define OPNFILES 81     /* max open files in system */
-#define NCURDIR 40      /* max current directories in use in system */
-#define KBBUFSZ 128     /* size of typeahead buffer -- must be power of 2!! */
-#define KBBUFMASK       (KBBUFSZ-1)
+#include "bios.h"
 
 /*
  *  code macros
@@ -261,9 +240,6 @@ DTAINFO
 };                              /*    includes null terminator          */
 
 
-/* ERROR - error return code */
-typedef	int32_t ERROR;
- 
 typedef	ERROR (*PFE) PROTO((NOTHING));			/* ptr to func ret err */
 typedef	int32_t (*PFL) PROTO((NOTHING));		/* ptr to func ret long */
 
@@ -285,7 +261,6 @@ extern	int16_t logmsk[];
 extern	FTAB sft[];
 extern	ERROR rwerr;
 extern	int16_t	errdrv;
-extern	BCB	*bufl[2];		/*  in bios main.c		*/
 extern	uint16_t time, date;
 extern	int16_t	bios_dev[];		/*  in fsfioctl.c		*/
 extern	ERROR errbuf[3];			/*  sup.c  */

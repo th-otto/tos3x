@@ -2,6 +2,7 @@
 
 
 #include "tos.h"
+#include "fs.h"
 #include "bios.h"
 
 
@@ -28,18 +29,48 @@ int16_t supstk[SUPSIZ];
  *	(vme bios does this in biosc.c)
  */
 
+#if !GEMDOS
 BCB *bufl[2];
+#endif
 
 
 /*
  *  osinit - the bios calls this routine to initialize the os
  */
 
+/* 306: 00e18a6c */
 VOID osinit(NOTHING)
 {
+	/* set up sector buffers */
+	bcbx[0].b_link = &bcbx[1];
+	bcbx[2].b_link = &bcbx[3];
+
+	/*  
+	 *  invalidate BCBs
+	 */
+
+	bcbx[0].b_bufdrv = -1;
+	bcbx[1].b_bufdrv = -1;
+	bcbx[2].b_bufdrv = -1;
+	bcbx[3].b_bufdrv = -1;
+
+	/*
+	 *  initialize buffer pointers in BCBs
+	 */
+
+	bcbx[0].b_bufr = &secbuf[0][0];
+	bcbx[1].b_bufr = &secbuf[1][0];
+	bcbx[2].b_bufr = &secbuf[2][0];
+	bcbx[3].b_bufr = &secbuf[3][0];
+
+	/*
+	 *  initialize the buffer list pointers
+	 */
+
+	bufl[BI_FAT] = &bcbx[0]; 			/* fat buffers */
+	bufl[BI_DATA] = &bcbx[2]; 			/* dir/data buffers */
+
 	_osinit();							/*  real routine in bdos.arc    */
-#if	TIMESTAMP
-	kprintf(bdosts);					/*  kprintf is in tools.arc */
-	/*  bdosts is in bdos.arc   */
-#endif
+	
+	xsetdrv(bootdev);
 }

@@ -1,7 +1,8 @@
 BDOS_OBJS = \
 	osinit.o \
-	bdosmain.o \
-	bdosts.o \
+	lmul.o \
+	ldiv.o \
+	xfer.o \
 	console.o \
 	fsbuf.o \
 	fsfat.o \
@@ -15,6 +16,7 @@ BDOS_OBJS = \
 	kpgmld.o \
 	osmem.o \
 	proc.o \
+	bdosmain.o \
 	sup.o \
 	time.o \
 	umem.o \

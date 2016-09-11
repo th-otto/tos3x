@@ -1,4 +1,6 @@
 /*	bios.h - bios defines						*/
+#ifndef BIOS_H
+#define BIOS_H 1
 
 /*
  *
@@ -15,9 +17,27 @@
 #ifndef PD_H
 #include "pd.h"
 #endif
-#ifndef FS_H
-#include "fs.h"
-#endif
+
+/*
+ *  Type declarations
+ */
+
+#define FTAB    struct _ftab
+#define OFD     struct _ofd
+#define FCB     struct _fcb
+#define DND     struct _dnd
+#define FH      int16_t    /*  file handle    */
+#define DMD     struct _dmd
+#define BCB 	struct _bcb
+
+
+#define SLASH '\\'
+
+#define SUPSIZ 1024     /* common supervisor stack size (in words) */
+#define OPNFILES 81     /* max open files in system */
+#define NCURDIR 40      /* max current directories in use in system */
+#define KBBUFSZ 128     /* size of typeahead buffer -- must be power of 2!! */
+#define KBBUFMASK       (KBBUFSZ-1)
 
 /*
  *	Bios Function Numbers
@@ -45,13 +65,6 @@
 #define MEDIANOCHANGE	0L		/*	media def has not changed	*/
 #define MEDIAMAYCHANGE	1L		/*	media may have changed	*/
 #define MEDIACHANGE 2L		/*	media def has changed	*/
-
-/*
- *	code macros
- */
-
-#define ADDRESS_OF(x)	x
-
 
 /*
  *	bios data types
@@ -160,13 +173,14 @@ DMD /* drive media block */
 
 BCB
 {
-    BCB     *b_link;    /*  next bcb (API)              */
-    int16_t b_bufdrv;   /*  unit for buffer (API)       */
-    int16_t b_buftyp;   /*  buffer type                 */
-    RECNO   b_bufrec;   /*  record number               */
-    int16_t b_dirty;    /*  true if buffer dirty        */
-    DMD     *b_dm;      /*  ptr to drive media block    */
-    char    *b_bufr;    /*  pointer to buffer (API)     */
+    /*  0 */ BCB     *b_link;    /*  next bcb (API)              */
+    /*  4 */ int16_t b_bufdrv;   /*  unit for buffer (API)       */
+    /*  6 */ int16_t b_buftyp;   /*  buffer type                 */
+    /*  8 */ RECNO   b_bufrec;   /*  record number               */
+    /* 10 */ int16_t b_dirty;    /*  true if buffer dirty        */
+    /* 12 */ DMD     *b_dm;      /*  ptr to drive media block    */
+    /* 16 */ char    *b_bufr;    /*  pointer to buffer (API)     */
+    /* 20 */
 };
 
 
@@ -188,6 +202,8 @@ BCB
 #define BI_DIR		1		/*	other dir buffer list	*/
 #define BI_DATA 	1		/*	data buffer list		*/
 
+extern BCB bcbx[4];
+extern char secbuf[4][512];
 
 /*
  *	MD - Memory Descriptor
@@ -245,6 +261,17 @@ MPB
 #define IVNABT	0x4e		/*	abort button interrupt vector no	*/
 
 
+/*
+ * system variables provides by BIOS.
+ * In GEMDOS, most of them are documented at fixed addresses.
+ */
+extern int16_t bootdev;
+extern BCB *bufl[2];
+
+
+
 VOID xbsettime PROTO((NOTHING));
 VOID xbgettime PROTO((NOTHING));
 VOID indcall PROTO((intptr_t addr));
+
+#endif /* BIOS_H */
