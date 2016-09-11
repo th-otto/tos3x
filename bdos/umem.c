@@ -54,7 +54,7 @@ VOID xminit(NOTHING)
 	register intptr_t am;
 	
 	UNUSED(unused);
-	getmpb(&pmd);
+	Getmpb(&pmd);
 	for (q = pmd.mp_mfl; q != NULL; q = q->m_link)
 	{
 		start = q->m_start;
@@ -513,7 +513,7 @@ PP(const char *str;)
 #ifdef __ALCYON__
 		trap13(0x00030002L, *str);
 #else
-		bconout(2, *str);
+		Bconout(2, *str);
 #endif
 		str++;
 	}

@@ -285,10 +285,14 @@ VOID cinit(NOTHING)
 	for (i = 0; i < NUMSTD; i++)
 		r->p_uft[0] = stddev[i];
 
-	add[0] = remove[0] = add[1] = remove[1] = add[2] = remove[2] = 0;
+	buptr[0] = beptr[0] = glbkbchar[0];
+	buptr[1] = beptr[1] = glbkbchar[1];
+	buptr[2] = beptr[2] = glbkbchar[2];
 
+#if !GEMDOS
 	date_time(GET_DATE, &date);			/* allow bios to initialise date and */
 	date_time(GET_TIME, &time);			/* time from hardware, if supported */
+#endif
 }
 
 
@@ -603,7 +607,7 @@ PP(int16_t *pw;)
 						tabout(HXFORM(num), *pb2++);
 					} else
 					{
-						rc = bconout(HXFORM(num), *pb2++);
+						rc = Bconout(HXFORM(num), *pb2++);
 						if (rc < 0)
 							return rc;
 					}

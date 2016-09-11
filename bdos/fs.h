@@ -164,7 +164,12 @@ FTAB
 *****************************************
 */
 
+#if GEMDOS
+#define HXFORM(h)	((h) + 3)
+#else
+extern	int16_t	bios_dev[];		/*  in fsfioctl.c		*/
 #define HXFORM(h)	bios_dev[-h-2]
+#endif
 
 /**********************
  *
@@ -173,19 +178,22 @@ FTAB
  **********************
 */
 
-#define getmpb(a)   	trap13(0x00,a)
-#define bconstat(a) 	trap13(0x01,a)		/* Character Input Status   */
-#define bconin(a)		trap13(0x02,a)
-#define bconout(a,b)	trap13(0x03,a,b)
+#define Getmpb(a)   	trap13(0x00,a)
+#define Bconstat(a) 	trap13(0x01,a)		/* Character Input Status   */
+#define Bconin(a)		trap13(0x02,a)
+#define Bconout(a,b)	trap13(0x03,a,b)
 #define Rwabs(a,b,c,d,e) trap13(0x04,a,b,c,d,e)
+#define Setexc(d,a)		trap13(0x05,d,a)	/* Vector Exchange	    */
+#define Tickcal()		trap13(0x06)		/* Timer tick		    */
 #define Getbpb(d)		(BPB *)trap13(0x07,d)	/* Get BIOS Parameter Block */
-#define bconostat(a)	trap13(0x08,a)		/* Character Output Status  */
+#define Bcostat(a)		trap13(0x08,a)		/* Character Output Status  */
+#define Mediach(d)		trap13(0x09,d)
 #define	Drvmap()		trap13(0x0A)		/* Get Drive Map	    */
+#define Kbshift(a)		trap13(0x0B,a)		/* Shift state		    */
 #define CIOCR(d,l,b)	trap13(0x0C,d,l,b)	/* Char IOCtl Read	    */
 #define CIOCW(d,l,b)	trap13(0x0D,d,l,b)	/* Char IOCtl Write	    */
 #define DIOCR(d,l,b)	trap13(0x0E,d,l,b)	/* Disk IOCtl Read	    */
 #define DIOCW(d,l,b)	trap13(0x0F,d,l,b)	/* Disk IOCtl Write	    */
-#define CVE(d,a)		trap13(0x10,d,a)	/* Char Vector Exchange	    */
 
 
 /**********************
@@ -262,11 +270,9 @@ extern	FTAB sft[];
 extern	ERROR rwerr;
 extern	int16_t	errdrv;
 extern	uint16_t time, date;
-extern	int16_t	bios_dev[];		/*  in fsfioctl.c		*/
-extern	ERROR errbuf[3];			/*  sup.c  */
+extern xjmp_buf errbuf;
 extern int const nday[];						/* declared in sup.c */
-extern int add[];
-extern int remove[];
+extern char fill[3];
 
 /********************************
  *

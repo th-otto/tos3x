@@ -36,8 +36,6 @@
 #define SUPSIZ 1024     /* common supervisor stack size (in words) */
 #define OPNFILES 81     /* max open files in system */
 #define NCURDIR 40      /* max current directories in use in system */
-#define KBBUFSZ 128     /* size of typeahead buffer -- must be power of 2!! */
-#define KBBUFMASK       (KBBUFSZ-1)
 
 /*
  *	Bios Function Numbers
@@ -52,6 +50,13 @@
 #define BFHPRN	0
 #define BFHAUX	1
 #define BFHCON	2
+#define BFHKBD	3
+#define BFHMIDI	4
+#define BFHSCR	5
+#define BFHMDM1	6
+#define BFHMDM2	7
+#define BFHMDM3	8
+#define BFHMDM4	9
 #define BFHCLK	-1
 #define BFHMOU	-2
 
@@ -268,6 +273,12 @@ MPB
 extern int16_t bootdev;
 extern BCB *bufl[2];
 
+#define KBBUFSZ 80     /* size of typeahead buffer -- must be power of 2!! */
+#define KBBUFMASK       (KBBUFSZ-1)
+
+extern int32_t glbkbchar[3][KBBUFSZ];				/* The actual typeahead buffer    */
+extern int32_t *buptr[3];
+extern int32_t *beptr[3];
 
 
 VOID xbsettime PROTO((NOTHING));

@@ -1,9 +1,10 @@
 OPNFILES equ 81
 NCURDIR equ 40
+KBBUFSZ equ 80
     
 	bss
 
-    ds.b $4322
+    ds.b $3b22
     
 biosav: ds.l 1
 
@@ -21,7 +22,22 @@ old_2: ds.l 1
 	xdef _time
 _time: ds.w 1
 
-	ds.b $1c66
+	ds.b $58
+
+	xdef _glbkbchar
+_glbkbchar: ds.l 3*KBBUFSZ
+
+	ds.b 8
+
+	xdef _glbcolumn
+_glbcolumn: ds.w 3
+
+	ds.b $1e8
+
+	xdef _ldivr
+_ldivr: ds.l 1
+
+	ds.b $1654
 
 	xdef _rwerr
 _rwerr: ds.l 1
@@ -39,7 +55,12 @@ _sft: ds.b 10*OPNFILES
 	xdef _run
 _run: ds.l 1
 
-    ds.b $d0
+    ds.b $78
+    
+	xdef _fill
+_fill: ds.b 4
+
+    ds.b $54
     
 	xdef _secbuf
 _secbuf: ds.b 4*512
@@ -74,10 +95,18 @@ _errdrv: ds.w 1
 	xdef _ospd
 _ospd: ds.b 256
 
-    ds.b $10
+    xdef _buptr
+_buptr: ds.l 3
+
+    ds.l 1
     
 	xdef _date
 _date: ds.w 1
 
 	xdef _bcbx
 _bcbx: ds.b 4*20
+
+    ds.w 1
+
+    xdef _beptr
+_beptr: ds.l 3

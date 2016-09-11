@@ -201,7 +201,7 @@ _kcl_hook:      ds.l   1       * pointer to routine for system keyclick
 *        org 0x800
 
 
-_shifty:        ds.w   1       * reflects the status up/down of mode keys
+* _shifty:        ds.w   1       * reflects the status up/down of mode keys
 
 * ===========================================================================
 * ==== End ==================================================================

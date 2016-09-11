@@ -21,8 +21,6 @@ mc68010 equ 1
 
 cve     equ 5
 
-BFHCLK      equ $100        * BIOS handle for tick
-
 
     page
 ******************************************************************************
@@ -50,7 +48,7 @@ __osinit:
     move.w  sr,savesr
     ori.w   #$0700,sr
     move.l  #tikhnd,-(sp)       * set clock vector
-    move.w  #BFHCLK,-(sp)       * handle for clock
+    move.w  #$100,-(sp)       * handle for clock
     move.w  #cve,-(sp)      * vector exchange
     trap    #13
     addq.l  #8,sp

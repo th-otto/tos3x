@@ -6,8 +6,9 @@
 
 /* *************************** typeahead buffer ************************* */
 /* The following data structures are used for the typeahead buffer:	  */
-
-long glbkbchar[3][KBBUFSZ];				/* The actual typeahead buffer    */
+int32_t glbkbchart[3][KBBUFSZ];				/* The actual typeahead buffer    */
+int32_t *buptr[3];
+int32_t *beptr[3];
 
 					/* The 3 elements are prn,aux,con */
 int add[3];								/*  index of add position     */
@@ -15,7 +16,8 @@ int add[3];								/*  index of add position     */
 int remove[3];							/*  index of remove position      */
 
 
-VOID conbrk PROTO((FH h));
+VOID conbrk PROTO((FH h, int flag));
+VOID conadd PROTO((FH h, int32_t ch));
 VOID buflush PROTO((FH h));
 VOID conout PROTO((FH h, int ch));
 VOID cookdout PROTO((FH h, int ch));
@@ -47,29 +49,31 @@ int glbcolumn[3];
 #define warmboot() xterm(-32)
 
 /*****************************************************************************
-**
-** constat -
-**
-******************************************************************************
+ *
+ * constat -
+ *
+ *****************************************************************************
  */
 
+/* 306: 00e138b2 */
 int32_t constat(P(FH) h)
 PP(FH h;)
 {
-	if (h > BFHCON)
-		return 0;
-
-	return add[h] > remove[h] ? -1L : bconstat(h);
+	if (fill[h])
+		return -1;
+	if (h != BFHPRN)
+		return Bconstat(h);
+	return 0;
 }
 
 /*****************************************************************************
-**
-** xconstat - 
-**	Function 0x0B - Cconis - Console input status
-**
-**	Last modified	SCC	11 Aug 85
-**
-******************************************************************************
+ *
+ * xconstat - 
+ *	Function 0x0B - Cconis - Console input status
+ *
+ *	Last modified	SCC	11 Aug 85
+ *
+ *****************************************************************************
  */
 
 /* 306: 00e138e8 */
@@ -79,63 +83,63 @@ int32_t xconstat(NOTHING)
 }
 
 /*****************************************************************************
-**
-** xconostat -
-**	Function 0x10 - Cconos - console output status
-**
-**	Last Modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * xconostat -
+ *	Function 0x10 - Cconos - console output status
+ *
+ *	Last Modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13902 */
 int32_t xconostat(NOTHING)
 {
-	return bconostat(HXFORM(run->p_uft[1]));
+	return Bcostat(HXFORM(run->p_uft[1]));
 }
 
 /*****************************************************************************
-**
-** xprtostat -
-**	Function 0x11 - Cprnos - Printer output status
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * xprtostat -
+ *	Function 0x11 - Cprnos - Printer output status
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13926 */
 int32_t xprtostat(NOTHING)
 {
-	return bconostat(HXFORM(run->p_uft[4]));
+	return Bcostat(HXFORM(run->p_uft[3]));
 }
 
 /*****************************************************************************
-**
-** xauxistat -
-**	Function 0x12 - Cauxis - Auxiliary input status
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * xauxistat -
+ *	Function 0x12 - Cauxis - Auxiliary input status
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e1394a */
 int32_t xauxistat(NOTHING)
 {
-	return constat(HXFORM(run->p_uft[3]));
+	return constat(HXFORM(run->p_uft[2]));
 }
 
 /*****************************************************************************
-**
-** xauxostat -
-**	Function 0x13 - Cauxos - Auxiliary output status
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * xauxostat -
+ *	Function 0x13 - Cauxos - Auxiliary output status
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13966 */
 int32_t xauxostat(NOTHING)
 {
-	return bconostat(HXFORM(run->p_uft[3]));
+	return Bcostat(HXFORM(run->p_uft[2]));
 }
 
 
@@ -143,54 +147,77 @@ int32_t xauxostat(NOTHING)
 /* check for ctrl/s */
 /* used internally  */
 /********************/
-VOID conbrk(P(FH) h)
-PP(FH h;)
+/* 306: 00e1398a */
+VOID conbrk(P(FH) h, P(int) flag)
+PP(register FH h;)
+PP(register int flag;)
 {
-	register long ch;
+	register int32_t ch;
 	register int stop, c;
-
+	int unused;
+	
+	UNUSED(unused);
 	stop = 0;
-	if (bconstat(h))
+	while ((flag && fill[h] == 0) || (h != BFHPRN && Bconstat(h) != 0))
 	{
 		do
 		{
-			c = (ch = bconin(h)) & 0xFF;
+			c = (ch = Bconin(h)) & 0xFF;
 			if (c == ctrlc)
 			{
 				buflush(h);				/* flush BDOS & BIOS buffers */
 				warmboot();
-				return;
+				unreachable();
 			}
 
 			if (c == ctrls)
+			{
 				stop = 1;
-			else if (c == ctrlq)
+			} else if (c == ctrlq)
+			{
 				stop = 0;
-			else if (c == ctrlx)
+			} else if (c == ctrlx)
 			{
 				buflush(h);
-				glbkbchar[h][add[h]++ & KBBUFMASK] = ch;
+				conadd(h, ch);
 			} else
 			{
-				if (add[h] < remove[h] + KBBUFSZ)
-				{
-					glbkbchar[h][add[h]++ & KBBUFMASK] = ch;
-				} else
-				{
-					bconout(h, 7);
-				}
+				conadd(h, ch);
 			}
 		} while (stop);
 	}
 }
 
 
+/*  306: 00e13a3a */
 VOID buflush(P(FH) h)
 PP(FH h;)
 {
 	/* flush BDOS type-ahead buffer */
 
-	add[h] = remove[h] = 0;
+	fill[h] = 0;
+	buptr[h] = beptr[h] = glbkbchar[h];
+}
+
+
+/* 306: 00e13a7e */
+VOID conadd(P(FH) h, P(int32_t) ch)
+PP(register FH h;)
+PP(int32_t ch;)
+{
+	register FH hh;
+	
+	hh = h;
+	if (fill[hh] < KBBUFSZ)
+	{
+		*(beptr[hh])++ = ch;
+		if (beptr[hh] == &glbkbchar[hh][KBBUFSZ])
+			beptr[hh] = glbkbchar[hh];
+		fill[hh]++;
+	} else
+	{
+		Bconout(hh, 7);
+	}
 }
 
 /******************/
@@ -198,12 +225,13 @@ PP(FH h;)
 /* used internally*/
 /******************/
 
+/* 306: 00e13b32 */
 VOID conout(P(FH) h, P(int) ch)
-PP(FH h;)
-PP(int ch;)
+PP(register FH h;)
+PP(register int ch;)
 {
-	conbrk(h);							/* check for control-s break */
-	bconout(h, ch);						/* output character to console */
+	conbrk(h, FALSE);					/* check for control-s break */
+	Bconout(h, ch);						/* output character to console */
 	if (ch >= ' ')
 		glbcolumn[h]++;					/* keep track of screen column */
 	else if (ch == cr)
@@ -213,32 +241,34 @@ PP(int ch;)
 }
 
 /*****************************************************************************
-**
-** xtabout -
-**	Function 0x02 - Cconout - console output with tab expansion
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * xtabout -
+ *	Function 0x02 - Cconout - console output with tab expansion
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13bbc */
 VOID xtabout(P(int16_t) ch)
 PP(int16_t ch;)
 {
-	tabout(HXFORM(run->p_uft[1]), ch);
+	tabout(HXFORM(run->p_uft[1]), ch & 0xff);
 }
 
 /*****************************************************************************
-**
-** tabout -
-**
-******************************************************************************
+ *
+ * tabout -
+ *
+ *****************************************************************************
  */
 
+/* 306: 00e13be0 */
 VOID tabout(P(FH) h, P(int) ch)
-PP(FH h;)
-PP(int ch;)									/* character to output to console   */
+PP(register FH h;)
+PP(register int ch;)									/* character to output to console   */
 {
+	ch &= 0xff;
 	if (ch == tab)
 	{
 		do
@@ -255,10 +285,12 @@ PP(int ch;)									/* character to output to console   */
 /* control character expansion */
 /*******************************/
 
+/* 306: 00e13c30 */
 VOID cookdout(P(FH) h, P(int) ch)
-PP(FH h;)
-PP(int ch;)									/* character to output to console   */
+PP(register FH h;)
+PP(register int ch;)									/* character to output to console   */
 {
+	ch &= 0xff;
 	if (ch == tab)
 	{
 		tabout(h, ch);					/* if tab, expand it   */
@@ -274,63 +306,64 @@ PP(int ch;)									/* character to output to console   */
 }
 
 /*****************************************************************************
-**
-** xauxout -
-**	Function 0x04 - Cauxout - auxiliary output
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * xauxout -
+ *	Function 0x04 - Cauxout - auxiliary output
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13c7e */
 int16_t xauxout(P(int16_t) ch)
 PP(int16_t ch;)
 {
-	return bconout(HXFORM(run->p_uft[3]), ch);
+	return Bconout(HXFORM(run->p_uft[2]), ch);
 }
 
 /*****************************************************************************
-**
-** xprtout -
-**	Function 0x05 - Cprnout - printer output
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * xprtout -
+ *	Function 0x05 - Cprnout - printer output
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13ca6 */
 int32_t xprtout(P(int16_t) ch)
 PP(int16_t ch;)
 {
-	return bconout(HXFORM(run->p_uft[4]), ch);
+	return Bconout(HXFORM(run->p_uft[3]), ch);
 }
 
 
+/* 306: 00e13cce */
 int32_t getch(P(FH) h)
-PP(FH h;)
+PP(register FH h;)
 {
-	int32_t temp;
+	register int32_t temp;
 
-	if (add[h] > remove[h])
+	if (fill[h])
 	{
-		temp = glbkbchar[h][remove[h]++ & KBBUFMASK];
-		if (add[h] == remove[h])
-		{
-			buflush(h);
-		}
+		temp = *(buptr[h])++;
+		fill[h]--;
+		if (buptr[h] == &glbkbchar[h][KBBUFSZ])
+			buptr[h] = glbkbchar[h];
 		return temp;
+	} else
+	{
+		return Bconin(h);
 	}
-
-	return bconin(h);
 }
 
 /*****************************************************************************
-**
-** x7in -
-**	Function 0x07 - Crawcin - Direct console input without echo
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * x7in -
+ *	Function 0x07 - Crawcin - Direct console input without echo
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13d7c */
@@ -340,32 +373,30 @@ int32_t x7in(NOTHING)
 }
 
 
+/* 306: 00e13d98 */
 int32_t conin(P(FH) h)							/* BDOS console input function */
-PP(FH h;)
+PP(register FH h;)
 {
-	long ch;
+	register long ch;
 
+	conbrk(h, TRUE);
 	conout(h, (int) (ch = getch(h)));
 	return ch;
 }
 
 /*****************************************************************************
-**
-** xconin -
-**	Function 0x01 - Cconin - console input
-**
-**	Last modified	SCC	16 Aug 85
-******************************************************************************
+ *
+ * xconin -
+ *	Function 0x01 - Cconin - console input
+ *
+ *	Last modified	SCC	16 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13dd0 */
 int32_t xconin(NOTHING)
 {
-	int h;
-
-	h = HXFORM(run->p_uft[0]);
-	conbrk(h);
-	return conin(h);
+	return conin(HXFORM(run->p_uft[0]));
 }
 
 /*****************************************************************************
@@ -380,20 +411,13 @@ int32_t xconin(NOTHING)
 /* 306: 00e13dea */
 int32_t x8in(NOTHING)
 {
-	register int h;
+	register FH h;
 	register long ch;
 
 	h = HXFORM(run->p_uft[0]);
-	conbrk(h);
+	conbrk(h, TRUE);
 	ch = getch(h);
-	if ((ch & 0xFF) == ctrlc)
-	{
-		warmboot();
-		__builtin_unreachable(); /* quiet compiler about no return value */
-	} else
-	{
-		return ch;
-	}
+	return ch;
 }
 
 /*****************************************************************************
@@ -408,39 +432,39 @@ int32_t x8in(NOTHING)
 /* 306: 00e13e22 */
 int32_t xauxin(NOTHING)
 {
-	return bconin(HXFORM(run->p_uft[3]));
+	return Bconin(HXFORM(run->p_uft[2]));
 }
 
 /*****************************************************************************
-**
-** rawconio -
-**	Function 0x06 - Crawio - Raw console I/O
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * rawconio -
+ *	Function 0x06 - Crawio - Raw console I/O
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13e46 */
 int32_t rawconio(P(int16_t) parm)
 PP(int16_t parm;)
 {
-	int i;
+	register FH i;
 
 	if (parm == 0xFF)
 	{
 		i = HXFORM(run->p_uft[0]);
 		return constat(i) ? getch(i) : 0L;
 	}
-	return bconout(HXFORM(run->p_uft[1]), parm);
+	return Bconout(HXFORM(run->p_uft[1]), parm);
 }
 
 /*****************************************************************************
-**
-** xprt_line -
-**	Function 0x09 - Cconws - Print line up to nul with tab expansion
-**
-**	Last modified	SCC	11 Aug 85
-******************************************************************************
+ *
+ * xprt_line -
+ *	Function 0x09 - Cconws - Print line up to nul with tab expansion
+ *
+ *	Last modified	SCC	11 Aug 85
+ *****************************************************************************
  */
 
 /* 306: 00e13ea6 */
@@ -451,9 +475,10 @@ PP(const char *p;)
 }
 
 
+/* 306: 00e13ec6 */
 VOID prt_line(P(FH) h, P(const char *) p)
-PP(FH h;)
-PP(const char *p;)
+PP(register FH h;)
+PP(register const char *p;)
 {
 	while (*p)
 		tabout(h, *p++);
@@ -466,9 +491,10 @@ PP(const char *p;)
 
 /* Two subroutines first */
 
+/* 306: 00e13ef4 */
 VOID newline(P(FH) h, P(int) startcol)
-PP(FH h;)
-PP(int startcol;)
+PP(register int startcol;)
+PP(register FH h;)
 {
 	conout(h, cr);						/* go to new line */
 	conout(h, lf);
@@ -481,6 +507,7 @@ PP(int startcol;)
 
 
 /* backspace one character position */
+/* 306: 00e13f3a */
 int backsp(P(FH) h, P(const char *) cbuf, P(int) retlen, P(int) col)
 PP(FH h;)
 PP(const char *cbuf;)
@@ -503,11 +530,14 @@ PP(int col;)								/* starting console column  */
 		{
 			col += 8;
 			col &= ~7;					/* for tab, go to multiple of 8 */
-		} else if (ch < ' ')
+		} else if ((ch & ~0x1f) == 0)
+		{
+			/* control chars put out 2 printable chars */
 			col += 2;
-		/* control chars put out 2 printable chars */
-		else
+		} else
+		{
 			col += 1;
+		}
 	}
 	while (glbcolumn[h] > col)
 	{
@@ -519,31 +549,34 @@ PP(int col;)								/* starting console column  */
 }
 
 /*****************************************************************************
-**
-** readline -
-**	Function 0x0A - Cconrs - Read console string into buffer
-******************************************************************************
+ *
+ * readline -
+ *	Function 0x0A - Cconrs - Read console string into buffer
+ *****************************************************************************
  */
 
 /* 306: 00e13fd6 */
 VOID readline(P(char *) p)
-PP(char *p;)								/* max length, return length, buffer space */
+PP(register char *p;)								/* max length, return length, buffer space */
 {
 	p[1] = cgets(HXFORM(run->p_uft[0]), (((int) p[0]) & 0xFF), &p[2]);
 }
 
 
+/* 306: 00e14012 */
 int cgets(P(FH) h, P(int) maxlen, P(char *) buf)
-PP(FH h;)									/* h is special handle denoting device number */
+PP(register FH h;)									/* h is special handle denoting device number */
 PP(int maxlen;)
 PP(char *buf;)
 {
 	char ch;
-	int i, stcol, retlen;
+	int i;
+	register int stcol, retlen;
 
 	stcol = glbcolumn[h];				/* set up starting column */
 	for (retlen = 0; retlen < maxlen;)
 	{
+		conbrk(h, TRUE);
 		switch (ch = getch(h))
 		{
 		case cr:
@@ -554,8 +587,6 @@ PP(char *buf;)
 		case rub:
 			retlen = backsp(h, buf, retlen, stcol);
 			break;
-		case ctrlc:
-			warmboot();
 		case ctrlx:
 			do
 				retlen = backsp(h, buf, retlen, stcol);

@@ -34,8 +34,10 @@
 #endif
 
 
-#ifndef __GNUC__
-#define __builtin_unreachable()
+#ifdef __GNUC__
+#define unreachable() __builtin_unreachable()
+#else
+#define unreachable()
 #endif
 
 typedef int16_t BOOLEAN;

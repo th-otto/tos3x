@@ -112,15 +112,6 @@ PP(register int16_t divsor;)							/* divsor is log2 of actual divisor */
 
 
 
-/*
- *  bios_dev - 
- *	Array of BIOS device handles.  Used by HXFORM macro
- *	to convert BDOS level handle to BIOS level handle.
- */
-
-int16_t bios_dev[] = { BFHPRN, BFHAUX, BFHCON, BFHCLK, BFHMOU };
-
-
 /*****************************************************************************
  *
  * F_IOCtl - Function 0x44:  File, character and disk device I/O control
@@ -131,6 +122,15 @@ int16_t bios_dev[] = { BFHPRN, BFHAUX, BFHCON, BFHCLK, BFHMOU };
  */
 
 #if !GEMDOS
+
+/*
+ *  bios_dev - 
+ *	Array of BIOS device handles.  Used by HXFORM macro
+ *	to convert BDOS level handle to BIOS level handle.
+ */
+
+int16_t bios_dev[] = { BFHPRN, BFHAUX, BFHCON, BFHCLK, BFHMOU };
+
 
 ERROR F_IOCtl(P(int) fn, P(FH) h, P(int) n, P(VOIDPTR) buf)
 PP(int fn;)
@@ -158,7 +158,7 @@ PP(VOIDPTR buf;)
 	switch (fn)
 	{
 	case XCVECTOR:						/* Exchange char vector     */
-		return CVE(HXFORM(h), buf);
+		return Setexc(HXFORM(h), buf);
 
 	case GETINFO:						/* Get device information   */
 		if (h >= 0)						/* For disk file:       */
@@ -218,7 +218,7 @@ PP(VOIDPTR buf;)
 			if (h == H_Null)
 				return 0;
 
-			return bconostat(HXFORM(h));
+			return Bcostat(HXFORM(h));
 		}
 
 		/* else *//* For disk file:       */
