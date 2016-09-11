@@ -1,1 +1,2 @@
-CACHE_OBJS = cache100.o
+CACHE100_OBJS = cache100.o
+CACHE101_OBJS = cache101.o
