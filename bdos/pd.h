@@ -27,8 +27,7 @@ struct _pd
 	/*  28 */ int32_t    p_blen;		   /* length of bss segment */
 	/*  32 */ DTA 	*p_xdta;
 	/*  36 */ PD		*p_parent;		/* parent PD */
-	/*  40 */ int16_t p_flags;
-	/*  42 */ int16_t p_0fill[1];
+	/*  40 */ int32_t p_flags;
 	/*  44 */ char	*p_env; 		/* pointer to environment string */
 	/*  48 */ int8_t	p_uft[NUMSTD];	/* index into sys file table for std files */
 	/*  54 */ int8_t	p_lddrv;

@@ -23,7 +23,7 @@
  *  STATIUMEM - cond comp; set to true to count calls to these routines
  */
 
-#define	STATIUMEM	TRUE
+#define	STATIUMEM	FALSE
 
 #ifndef	DBGIUMEM
 #define	DBGIUMEM	0
@@ -103,96 +103,113 @@ PP(long amount;)
 PP(MPB *mp;)
 PP(int16_t mode;)
 {
-	MD *p, *q, *p1;								/* free list is composed of MD's */
-	BOOLEAN maxflg;
-	intptr_t maxval;
+	register MD *q;
+	register MD *p;
+	register MD *p1;
+	MD *q1;
+	register BOOLEAN altflag;
 
 #if	STATIUMEM
 	++ccffit;
 #endif
 
-	if ((q = mp->mp_rover) == 0)		/*  get rotating pointer    */
+	p = (MD *)mp;
+	if ((q = ((MPB *)p)->mp_mfl) == NULL)		/* get free list pointer */
 	{
 #if	DBGIUMEM
 		kprintf("ffit: null rover\n");
 #endif
 		return NULL;
 	}
-
-	maxval = 0;
-	maxflg = (amount == -1 ? TRUE : FALSE);
-
-	p = q->m_link;						/*  start with next MD      */
-
-	do									/* search the list for an MD with enough space */
+	if (amount <= 0)
+		return NULL;
+	amount = (amount + 1) & ~1;
+	
+	altflag = TRUE;
+	switch (mode)
 	{
+	case MX_STRAM:
+		altflag = FALSE;
+	case MX_TTRAM:
+		while (q != NULL && (q->m_length < amount || (q->m_start & M_ALTFLAG) != altflag))
+		{
+			p = q;
+			q = p->m_link;
+		}
+		if (q == NULL)
+			return NULL;
+		break;
+	case MX_PREFSTRAM:
+	case MX_PREFTTRAM:
+		while (q != NULL && q->m_length < amount)
+		{
+			p = q;
+			q = p->m_link;
+		}
+		if (q == NULL)
+			return NULL;
+		if ((q->m_start & M_ALTFLAG) || mode == MX_PREFSTRAM)
+			break;
+		q1 = q;
+		p1 = p;
+		while (q != NULL && !(q->m_start & M_ALTFLAG))
+		{
+			p = q;
+			q = p->m_link;
+		}
+		while (q != NULL && q->m_length < amount)
+		{
+			p = q;
+			q = p->m_link;
+		}
+		if (q == NULL)
+		{
+			q = q1;
+			p = p1;
+		}
+		break;
+	}
 
-		if (p == 0)
-		{								/*  at end of list, wrap back to start  */
-			q = (MD *) & mp->mp_mfl;	/*  q => mfl field  */
-			p = q->m_link;				/*  p => 1st MD     */
+	if (q->m_length == amount)
+	{
+		/* take the whole thing */
+		p->m_link = q->m_link;
+	} else
+	{							/* break it up - 1st allocate a new
+								   MD to describe the remainder */
+		/*********** TBD **********
+		*  Nicer Handling of This *
+		*         Situation       *
+		**************************/
+		if ((q1 = getmd()) == NULL)
+		{
+#if	DBGIUMEM
+			kprintf("ffit: Null Mget\n");
+#endif
+			return NULL;
 		}
 
-		if ((!maxflg) && (p->m_length >= amount))
-		{
-			/*  big enough  */
+		/*  init new MD  */
 
-			if (p->m_length == amount)
-				/* take the whole thing */
-				q->m_link = p->m_link;
-			else
-			{							/* break it up - 1st allocate a new
-										   MD to describe the remainder */
+		q1->m_length = q->m_length - amount;
+		q1->m_start = q->m_start + amount;
+		q1->m_link = q->m_link;
 
-				/*********** TBD **********
-				*  Nicer Handling of This *
-				*         Situation       *
-				**************************/
-				if ((p1 = getmd()) == NULL)
-				{
-#if	DBGIUMEM
-					kprintf("ffit: Null Mget\n");
-#endif
-					return NULL;
-				}
+		/*  adjust allocated block  */
 
-				/*  init new MD  */
+		q->m_length = amount;
+		p->m_link = q1;
+	}
 
-				p1->m_length = p->m_length - amount;
-				p1->m_start = p->m_start + amount;
-				p1->m_link = p->m_link;
+	/*  link allocate block into allocated list,
+	   mark owner of block, & adjust rover  */
 
-				/*  adjust allocated block  */
+	q->m_link = mp->mp_mal;
+	mp->mp_mal = q;
 
-				p->m_length = amount;
-				q->m_link = p1;
-			}
+	q->m_own = run;
 
-			/*  link allocate block into allocated list,
-			   mark owner of block, & adjust rover  */
-
-			p->m_link = mp->mp_mal;
-			mp->mp_mal = p;
-
-			p->m_own = run;
-
-			mp->mp_rover = (q == (MD *) & mp->mp_mfl ? q->m_link : q);
-
-			return p;					/* got some */
-		} else if (p->m_length > maxval)
-			maxval = p->m_length;
-
-		p = (q = p)->m_link;
-
-	} while (q != mp->mp_rover);
-
-	/*  return either the max, or 0 (error)  */
-
-#if	DBGIUMEM
-	if (!maxflg)
-		kprintf("ffit: Not Enough Contiguous Memory\n");
-#endif
-	return maxflg ? ((MD *) maxval) : ((MD *)0);
+	return q;					/* got some */
 }
 
 
@@ -208,9 +225,9 @@ PP(int16_t mode;)
 ERROR xsetblk(P(int16_t) n, P(VOIDPTR) blk, P(int32_t) len)
 PP(int16_t n;)									/*  dummy, not used         */
 PP(VOIDPTR blk;)								/*  addr of block to free   */
-PP(int32_t len;)								/*  length of block to free */
+PP(register int32_t len;)								/*  length of block to free */
 {
-	MD *m, *p;
+	register MD *m, *p;
 
 	UNUSED(n);
 	/*
@@ -218,15 +235,21 @@ PP(int32_t len;)								/*  length of block to free */
 	 */
 
 	for (p = pmd.mp_mal; p; p = p->m_link)
-		if ((intptr_t) blk == p->m_start)
-			break;
+		if ((intptr_t) blk == (p->m_start & ~M_ALTFLAG))
+			goto found;
 
 	/*
 	 * If block address doesn't match any memory descriptor, then abort.
 	 */
 
-	if (!p)
-		return E_IMBA;
+	return E_IMBA;
+
+found:
+	/*
+	 *  Always shrink to an even word length.
+	 */
+	len++;
+	len &= ~1L;
 
 	/*
 	 *  If the caller is not shrinking the block size, then abort.
@@ -234,14 +257,15 @@ PP(int32_t len;)								/*  length of block to free */
 
 	if (p->m_length < len)
 		return E_GSBF;
+	if (p->m_length == len)
+		return E_OK;
 
-	/*
-	 *  Always shrink to an even word length.
-	 */
-
-	if (len & 1)
-		len++;
-
+	if (len == 0)
+	{
+		freeit(p, &pmd);
+		return E_OK;
+	}
+	
 	/*
 	 *  Create a memory descriptor for the freed portion of memory.
 	 */
@@ -250,11 +274,13 @@ PP(int32_t len;)								/*  length of block to free */
 	/*
 	 * what if 0? *
 	 */
-#if	DBGUMEM
 	if (m == NULL)
+	{
+#if	DBGUMEM
 		panic("umem.c/xsetblk: Null Return From MGET\n");
 #endif
-
+		return ERR;
+	}
 	m->m_start = p->m_start + len;
 	m->m_length = p->m_length - len;
 	p->m_length = len;
@@ -270,54 +296,59 @@ PP(int32_t len;)								/*  length of block to free */
 
 /* 306: 00e182bc */
 VOID freeit(P(MD *) m, P(MPB *) mp)
-PP(MD *m;)
+PP(register MD *m;)
 PP(MPB *mp;)
 {
-	MD *p, *q;
-
+	register MD *p, *q;
+	register intptr_t s;
+	register intptr_t addr;
+	MD *p1;
+	
 #if	STATIUMEM
 	++ccfreeit;
 #endif
 
-	q = 0;
+	p1 = NULL;
 
-	for (p = mp->mp_mfl; p; p = (q = p)->m_link)
-		if (m->m_start <= p->m_start)
+	addr = m->m_start;
+	q = (MD *)mp;
+	p = ((MPB *)q)->mp_mfl;
+	for (; p; p = (q = p)->m_link)
+	{
+		s = p->m_start;
+		if (s > 0 && addr > 0 && addr < s)
 			break;
-
+		if (s < 0 && addr > 0) 
+			break;
+		if (s < 0 && addr < 0 && addr < s)
+			break;
+		p1 = p;
+	}
+	
 	m->m_link = p;
-
-	if (q)
-		q->m_link = m;
-	else
-		mp->mp_mfl = m;
-
-	if (!mp->mp_rover)
-		mp->mp_rover = m;
+	q->m_link = m;
 
 	if (p)
+	{
 		if (m->m_start + m->m_length == p->m_start)
 		{								/* join to higher neighbor */
 			m->m_length += p->m_length;
 			m->m_link = p->m_link;
 
-			if (p == mp->mp_rover)
-				mp->mp_rover = m;
-
 			xmfreblk(p);
 		}
-
-	if (q)
-		if (q->m_start + q->m_length == m->m_start)
+	}
+	
+	if (p1)
+	{
+		if (p1->m_start + p1->m_length == m->m_start)
 		{								/* join to lower neighbor */
-			q->m_length += m->m_length;
-			q->m_link = m->m_link;
-
-			if (m == mp->mp_rover)
-				mp->mp_rover = q;
+			p1->m_length += m->m_length;
+			p1->m_link = m->m_link;
 
 			xmfreblk(m);
 		}
+	}
 }
 
 
@@ -383,7 +414,7 @@ PP(int32_t amount;)
 ERROR xmfree(P(int32_t) addr)
 PP(int32_t addr;)
 {
-	MD *p, **q;
+	register MD *p, **q;
 
 	for (p = *(q = &pmd.mp_mal); p; p = *(q = &p->m_link))
 		if (addr == (p->m_start & ~M_ALTFLAG))
