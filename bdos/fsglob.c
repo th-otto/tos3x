@@ -1,8 +1,8 @@
 /*  fsglob.c - global variables for the file system			*/
 
-#include	"tos.h"
-#include	"fs.h"
-#include	"bios.h"
+#include "tos.h"
+#include "fs.h"
+#include "bios.h"
 
 /*
  *  drvtbl -

@@ -22,14 +22,19 @@ extern int16_t osmptr;
 extern PD ospd;
 
 VOID xminit PROTO((NOTHING));
+VOID osminit PROTO((NOTHING));
+VOID ofdadd PROTO((FOFD *buf, long len));
 MD *ffit PROTO((long amount, MPB *mp, int16_t mode));
 VOID freeit PROTO((MD *m, MPB *mp));
 VOID xmakeres PROTO((PD *p));
 VOID xmfreall PROTO((PD *r));
 VOID xmsetown PROTO((VOIDPTR addr, PD *own));
-MD *getmd PROTO((NOTHING));
+MD *mgetmd PROTO((NOTHING));
 OFD *mgetofd PROTO((NOTHING));
 VOID foldermsg PROTO((NOTHING));
+OFD *oftdel PROTO((OFD *ofd));
+VOIDPTR xmdfree PROTO((MD *m));
+OFD *fsgetofd PROTO((NOTHING));
 
 /*
  *  process management

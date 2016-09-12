@@ -1,10 +1,10 @@
 /*  fsbuf.c - buffer mgmt for file system				*/
 
 
-#include	"tos.h"
-#include	"fs.h"
-#include	"bios.h"
-#include	<toserrno.h>
+#include "tos.h"
+#include "fs.h"
+#include "bios.h"
+#include <toserrno.h>
 
 
 /*

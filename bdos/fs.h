@@ -23,26 +23,36 @@
 
 OFD
 {
-	/*  0 */ OFD   *o_link;		/*	link to next OFD					*/
-	/*  4 */ uint16_t o_flag;
+	/*   0 */ OFD   *o_link;		/*	link to next OFD					*/
+	/*   4 */ uint16_t o_flag;
 					/* the following 3 items must be as in FCB: */
-	/*  6 */ DOSTIME o_td;		/*	creation time/date: little-endian!	*/
-	/* 10 */ CLNO  o_strtcl; 	/*	starting cluster number 			*/
-	/* 12 */ int32_t  o_fileln;	/*  length of file in bytes			    */
+	/*   6 */ DOSTIME o_td;			/*	creation time/date: little-endian!	*/
+	/*  10 */ CLNO  o_strtcl; 		/*	starting cluster number 			*/
+	/*  12 */ int32_t  o_fileln;	/*  length of file in bytes			    */
 
-	/* 16 */ DMD   *o_dmd;		/*	link to media descr 				*/
-	/* 20 */ DND   *o_dnode; 	/*	link to dir for this file			*/
-	/* 24 */ OFD   *o_dirfil;	/*	OFD for dir for this file			*/
-	/* 28 */ int32_t  o_dirbyt;	/*  pos in dir of this files fcb (dcnt) */
+	/*  16 */ DMD   *o_dmd;			/*	link to media descr 				*/
+	/*  20 */ DND   *o_dnode; 		/*	link to dir for this file			*/
+	/*  24 */ OFD   *o_dirfil;		/*	OFD for dir for this file			*/
+	/*  28 */ int32_t  o_dirbyt;	/*  pos in dir of this files fcb (dcnt) */
 
-	/* 32 */ int32_t  o_bytnum;	/* byte pointer within file			    */
-	/* 36 */ CLNO  o_curcl;		/* current cluster number for file		*/
-	/* 38 */ RECNO o_currec; 	/* current record number for file		*/
-	/* 40 */ uint16_t o_curbyt;	/* byte pointer within current cluster  */
-	/* 42 */ int16_t  o_usecnt;	/* use count for inherited files 	    */
-	/* 44 */ OFD   *o_thread;	/* mulitple open thread list			*/
-	/* 48 */ uint16_t o_mod; 	/* mode file opened in (see below)	    */
-	/* 50 */ 
+	/*  32 */ int32_t  o_bytnum;	/* byte pointer within file			    */
+	/*  36 */ CLNO  o_curcl;		/* current cluster number for file		*/
+	/*  38 */ RECNO o_currec; 		/* current record number for file		*/
+	/*  40 */ uint16_t o_curbyt;	/* byte pointer within current cluster  */
+	/*  42 */ int16_t  o_usecnt;	/* use count for inherited files 	    */
+	/*  44 */ OFD   *o_thread;		/* mulitple open thread list			*/
+	/*  48 */ uint16_t o_mod; 		/* mode file opened in (see below)	    */
+	/*  50 */ 
+};
+
+
+FOFD
+{
+	/*   0 */ FOFD  *o_link;
+	/*   4 */ uint8_t x_flag;
+	          uint8_t pad;
+	          MD buf[4];
+	/*  70 */
 };
 
 
@@ -348,7 +358,7 @@ ERROR ixdel PROTO((DND *dn, FCB *f, long pos));
 BOOLEAN match1 PROTO((const char *ref, const char *test));
 
 VOIDPTR xmgetblk PROTO((int i));
-VOID xmfreblk PROTO((VOIDPTR m));
+VOID xmfrebblk PROTO((VOIDPTR m));
 
 ERROR xpgmld PROTO((const char *s, PD *p));
 

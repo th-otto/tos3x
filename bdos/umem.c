@@ -181,7 +181,7 @@ PP(int16_t mode;)
 		*  Nicer Handling of This *
 		*         Situation       *
 		**************************/
-		if ((q1 = getmd()) == NULL)
+		if ((q1 = mgetmd()) == NULL)
 		{
 #if	DBGIUMEM
 			kprintf("ffit: Null Mget\n");
@@ -270,7 +270,7 @@ found:
 	 *  Create a memory descriptor for the freed portion of memory.
 	 */
 
-	m = getmd();
+	m = mgetmd();
 	/*
 	 * what if 0? *
 	 */
@@ -516,7 +516,7 @@ PP(int32_t len;)
 	len &= ~1L;
 	if (len <= 0)
 		return E_OK;
-	if ((q = getmd()) == NULL)
+	if ((q = mgetmd()) == NULL)
 		return ERR;
 	q->m_start = (intptr_t)start | M_ALTFLAG;
 	q->m_length = len;

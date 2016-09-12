@@ -402,15 +402,18 @@ int16_t *pw;
 int32_t osif2(P(int16_t *) pw)
 PP(int16_t *pw;)
 {
-	char **pb, *pb2, *p, ctmp;
-	BPB *b;
-	BCB *bx;
-	DND *dn;
-	int typ, h, i, fn;
-	int num, max;
-	ERROR rc;
-	long numl;
-	const FND *f;
+	char **volatile pb;
+	char *volatile pb2;
+	char *volatile p;
+	char ctmp;
+	BPB *volatile b;
+	BCB *volatile bx;
+	DND *volatile dn;
+	volatile int typ, h, i, fn;
+	volatile int num, max;
+	volatile ERROR rc;
+	volatile long numl;
+	const FND *volatile f;
 
 	oscnt = 0;
   restrt:

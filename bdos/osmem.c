@@ -1,20 +1,4 @@
 /*  osmem.c - allocate/release os memory				*/
-/*  getosm, xmgetblk, xmfreblk						*/
-
-#ifndef	DBGFREMEM
-#define	DBGFREMEM	0
-#endif
-
-#ifndef	DBGOSMEM
-#define	DBGOSMEM	0
-#endif
-
-/*
- *  conditional compile switches
- */
-
-#define	OSMPANIC	FALSE
-
 
 #include "tos.h"
 #include "fs.h"
@@ -22,13 +6,21 @@
 #include "mem.h"
 #include <toserrno.h>
 
+/* should actually be offsetof(struct FOFD, buf) */
+#define MD_OFFSET (sizeof(FOFD *) + 2)
+
 /*
  *  osmptr - 
  */
 
 int16_t osmptr;
 
-int16_t *getosm PROTO((int n));
+static MD *mdfind PROTO((FOFD **p1, int *a, FOFD *p));
+int mdlink PROTO((MD *m, MD *p));
+
+static FOFD *ofdmore PROTO((NOTHING));
+static FOFD *getosm PROTO((NOTHING));
+
 
 
 /*
@@ -42,15 +34,192 @@ int16_t *getosm PROTO((int n));
 #define	MAXQUICK	20
 VOIDPTR root[MAXQUICK];
 
-/*
- *  local debug counters
- */
 
-long dbgfreblk = 0;
+FOFD ofdbuf[80];
+FOFD *ofdlist;
+FOFD *ofdfree;
 
-long dbggtosm = 0;
 
-long dbggtblk = 0;
+/* 306: 00e185b0 */
+VOID osminit(NOTHING)
+{
+	ofdlist = NULL;
+	ofdadd(ofdbuf, (long)sizeof(ofdbuf));
+}
+
+
+/* 306: 00e185ce */
+VOID ofdadd(P(FOFD *) p, P(long) len)
+PP(register FOFD *p;)
+PP(register long len;)
+{
+	register VOIDPTR unused;
+	register int x;
+	
+	UNUSED(unused);
+	UNUSED(x);
+	
+	len = (len / sizeof(*p)) * sizeof(*p);
+	
+	while (len != 0)
+	{
+		p->o_link = ofdlist;
+		ofdlist = p;
+		p->x_flag = 0;
+		len -= sizeof(*p);
+		p++;
+	}
+}
+
+
+/* 306: 00e1862c */
+OFD *mgetofd(NOTHING)
+{
+	register FOFD *p;
+	register MD *x;
+	register int32_t *y;
+	register int i;
+	register int thisfree;
+	register int total;
+	
+	total = 0;
+	for (p = ofdlist; p; p = p->o_link)
+	{
+		if (p->x_flag == 0)
+			goto found;
+		if (p->x_flag > 0)
+		{
+			thisfree = 0;
+			x = p->buf;
+			for (i = 3; i >= 0; i--, x++)
+			{
+				if (x->m_own == MF_FREE)
+				{
+					total++;
+					thisfree++;
+				}
+			}
+			if (thisfree == 4)
+			{
+				goto found;
+			}
+		}
+	}
+
+	p = ofdmore();
+	if (p != NULL)
+		goto found;
+
+	if (total >= 4)
+	{
+		p = getosm();
+		if (p != NULL)
+			goto found;
+	} else
+	{
+		y = (int32_t *)fsgetofd();
+		if (y != NULL)
+		{
+			p = (FOFD *)((char *)y - MD_OFFSET);
+			goto found;
+		}
+	}
+	foldermsg();
+	
+found:
+	p->x_flag = -1;
+	y = (int32_t *)p->buf;
+	while (y < (int32_t *)(&p->buf[4]))
+	{
+		*y = 0;
+		y++;
+	}
+	return (OFD *)p->buf;
+}
+
+
+/* 306: 00e186da */
+static FOFD *ofdmore(NOTHING)
+{
+	register FOFD *p;
+	register FOFD *q;
+	register PD **pp;
+	
+	p = ofdfree;
+	if (p == NULL)
+		return NULL;
+	while (p != NULL)
+	{
+		for (q = p; q->o_link != NULL && q->o_link == (FOFD *)&q->buf[3].m_own; q = q->o_link)
+			;
+		pp = &q->buf[3].m_own;
+		q = q->o_link;
+		ofdadd(p, (long)pp - (long)p);
+		p = q;
+	}
+	ofdfree = NULL;
+	return ofdlist;
+}
+
+
+/* 306: 00e8738 */
+MD *mgetmd(NOTHING)
+{
+	register FOFD *p;
+	register FOFD *q;
+	register MD *x;
+	register int i;
+	OFD *y;
+	
+	q = NULL;
+	p = ofdlist;
+	while (p != NULL)
+	{
+		if (p->x_flag == 0)
+		{
+			q = p;
+		} else if (p->x_flag > 0)
+		{
+			x = p->buf;
+			for (i = 3; i >= 0; i--, x++)
+			{
+				if (x->m_own == MF_FREE)
+				{
+					goto found;
+				}
+			}
+		}
+		p = p->o_link;
+	}
+	if (q != NULL)
+	{
+		p = q;
+	} else
+	{
+		p = ofdmore();
+		if (p != NULL)
+		{
+			;
+		} else
+		{
+			if ((y = fsgetofd()) != NULL)
+			{
+				p = (FOFD *)((char *)y - MD_OFFSET);
+			} else
+			{
+				return NULL;
+			}
+		}
+	}
+	p->x_flag = 1;
+	x = p->buf;
+	(x++)->m_own = MF_FREE;
+	(x++)->m_own = MF_FREE;
+	(x++)->m_own = MF_FREE;
+found:
+	x->m_link = (MD *)(x->m_start = x->m_length = (intptr_t)(x->m_own = NULL));
+	return x;
+}
 
 
 /*
@@ -61,110 +230,202 @@ long dbggtblk = 0;
  *	the base.
  */
 
-int16_t *getosm(P(int) n)
-PP(int n;)									/* number of words          */
+/* 306: 00e18804 */
+static FOFD *getosm(NOTHING)
 {
-	int16_t *m;
-
-	if (n > osmlen)
+	register FOFD *p;
+	register FOFD *q;
+	register MD *x;
+	FOFD *p1;
+	register int i;
+	register int idx;
+	register int thisfree;
+	register int maxfree;
+	int a;
+	MD *p2;
+	
+	p1 = p = NULL;
+	q = ofdlist;
+	maxfree = 0;
+	while (q != NULL)
 	{
-		/*  not enough room  */
-#if	OSMPANIC
-		mgtpanic(root, 20);				/*  will not return     */
+		if (q->x_flag > 0)
+		{
+			thisfree = 0;
+			x = q->buf;
+			for (i = 3; i >= 0; i--, x++)
+			{
+				if (x->m_own == MF_FREE)
+				{
+					thisfree++;
+					if (p1 == NULL)
+						p1 = q;
+				}
+			}
+			if (thisfree > maxfree)
+			{
+				p = q;
+				maxfree = thisfree;
+				if (thisfree == 4)
+					return p;
+				if (thisfree == 3)
+					break;
+			}
+		}
+		q = q->o_link;
+	}
+	
+	if (p1 == p && !(p1 = p->o_link))
+		return NULL;
+	
+	a = 0;
+	x = p->buf;
+	idx = 0;
+	while (x->m_own == MF_FREE)
+		idx++, x++;
+	while (1)
+	{
+		p2 = mdfind(&p1, &a, p);
+		mdlink(x, p2);
+		x->m_own = MF_FREE;
+		x++;
+		idx++;
+		while (idx < 4)
+		{
+			if (x->m_own != MF_FREE)
+				goto search;
+			idx++, x++;
+		}
+		return p;
+	search:;
+	}
+}
+
+
+/* 306: 00e188f8 */
+int mdlink(P(MD *) m, P(MD *) p)
+PP(register MD *m;)
+PP(register MD *p;)
+{
+	register int i;
+	static MD **mds[2] = { &pmd.mp_mfl, &pmd.mp_mal };
+	register MD *q;
+	MD *p1;
+	MD *p2;
+	
+	for (i = 0; i < 2; i++)
+	{
+		p1 = (MD *)mds[i];
+		q = (p2 = p1)->m_link;
+		while (q != NULL)
+		{
+			if (q == m)
+				goto found;
+			q = (p2 = q)->m_link;
+		}
+	}
+	return TRUE;
+	
+found:
+	*p = *m;
+	p2->m_link = p;
+	return FALSE;
+}
+
+
+/* 306: 00e18962 */
+MD *mdfind(P(FOFD **) p1, P(int *) a, P(FOFD *) p)
+PP(FOFD **p1;)
+PP(int *a;)
+PP(FOFD *p;)
+{
+	register FOFD *q;
+	register MD *m;
+	register int i;
+	
+	q = *p1;
+	i = *a;
+	
+	while (q != NULL)
+	{
+		if (q->x_flag > 0)
+		{
+			m = &q->buf[i];
+			while (i < 4)
+			{
+				if (m->m_own == MF_FREE)
+				{
+					*p1 = q;
+					*a = i;
+					return m;
+				}
+				i++, m++;
+			}
+		}
+		q = q->o_link;
+		if (q == p)
+			q = q->o_link;
+		i = 0;
+	}
+
+#ifndef __ALCYON__
+	/* BUG: no explicit return statement here, but has q == NULL in D0 */
+	return NULL;
 #endif
-		dbggtosm++;
-		return NULL;
-	}
-
-	m = &osmem[osmptr];					/*  start at base       */
-	osmptr += n;						/*  new base            */
-	osmlen -= n;						/*  new length of free block    */
-	return m;							/*  allocated memory        */
 }
 
 
-
 /*
- *  xmgetblk - get a block of memory from the o/s pool.
- *	first try to get a block of size i**16 bytes (i paragraphs) from
- *	the 'fast' list - a list of lists of blocks, where list[i] is a 
- *	list of i paragraphs sized blocks.  These lists are singly linked
- *	and are deleted/removed in LIFO order from the root.  If there is 
- *	no free blocks on the desired list, we call getosm to get a block
- *	from the os memory pool
+ *  oftdel - delete an entry from the oft list
  */
 
-VOIDPTR xmgetblk(P(int) i)
-PP(int i;)
+/* 306: 00e189ce */
+OFD *oftdel(P(OFD *) ofd)
+PP(OFD *ofd;)
 {
-	int16_t j, w, *m, *q;
-	VOIDPTR *r;
+	register FOFD *p;
 
-	w = i << 3;							/*  number of words     */
-
-	/*
-	 *  allocate block
-	 */
-
-	if (i >= MAXQUICK)
-	{
-		dbggtblk++;
-		return NULL;
-	}
-
-	if (*(r = &root[i]))
-	{									/*  there is an item on the list  */
-		m = *r;							/*  get 1st item on list    */
-		*r = *((int **) m);				/*  root pts to next item   */
-	} else
-	{									/*  nothing on list, try pool  */
-		if ((m = getosm(w + 1)) != NULL)			/*  add size of control word    */
-			*m++ = i;					/*  put size in control word    */
-	}
-
-	/*
-	 *  zero out the block
-	 */
-
-	if ((q = m) != NULL)
-		for (j = 0; j < w; j++)
-			*q++ = 0;
-
-	return m;
+	p = (FOFD *)((char *)ofd - MD_OFFSET);
+	if (p->x_flag == 0)
+		foldermsg();
+	p->x_flag = 0;
+	return NULL;
 }
 
-
-/*
- *  xmfreblk - free up memory allocated through mgetblk
- */
 
 /* 306: 00e189f8 */
-VOID xmfreblk(P(VOIDPTR) m)
-PP(VOIDPTR m;)
+VOIDPTR xmdfree(P(MD *) m)
+PP(register MD *m;)
 {
-	int16_t i;
-
-	i = *((int16_t *)m - 1);
-	if (i < 0 || i >= MAXQUICK)
+	register FOFD *p;
+	register MD *q;
+	register int i;
+	
+	for (p = ofdlist; p; p = p->o_link)
 	{
-		/*  bad index  */
-#if	DBGOSMEM
-		kprintf("xmfreblk: bad index (0x%x)\n");
-		kprintf("stack at %08lx\n", &m);
-		while (1) ;
-#endif
-		dbgfreblk++;
-	} else
-	{
-		/*  ok to free up  */
-		*((int16_t **) m) = root[i];
-		root[i] = m;
-#if	DBGFREMEM
-		if (*((int16_t **) m) == m)
+		if ((MD *)p < m && m < (MD *)(p + 1))
 		{
-			kprintf("xmfreblk: Circular link in root[%x]\n", i);
-			kprintf("\tat %lx\n", m);
+			if (p->x_flag <= 0)
+			{
+				break; /* goto fail */
+			}
+			q = &p->buf[3];
+			for (i = 3; i >= 0; i--, q--)
+			{
+				if (m == q)
+				{
+					if (q->m_own == MF_FREE)
+					{
+						goto fail;
+					}
+					q->m_own = MF_FREE;
+					return NULL;
+				}
+			}
+			break; /* goto fail; */
 		}
-#endif
 	}
+fail:
+	foldermsg();
+	unreachable();
 }

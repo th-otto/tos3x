@@ -24,6 +24,7 @@
 
 #define FTAB    struct _ftab
 #define OFD     struct _ofd
+#define FOFD    struct _fofd
 #define FCB     struct _fcb
 #define DND     struct _dnd
 #define FH      int16_t    /*  file handle    */
@@ -139,25 +140,26 @@ ERROR login PROTO((BPB *b, int drv));
 
 DMD /* drive media block */
 {
-    RECNO   m_recoff[3]; /*  record offsets for fat,dir,data     */
-    int16_t m_drvnum;    /*  drive number for this media         */
-    RECNO m_fsiz;        /*  fat size in records                 */
-    RECNO m_clsiz;       /*  cluster size in records             */
-    uint16_t m_clsizb;   /*  cluster size in bytes               */
-    int16_t m_recsiz;    /*  record size in bytes                */
+	/*  0 */ RECNO	m_recoff[3]; /*  record offsets for fat,dir,data	 */
+	/*  6 */ int16_t m_drvnum;	 /*  drive number for this media		 */
+	/*  8 */ RECNO m_fsiz;		 /*  fat size in records				 */
+	/* 10 */ RECNO m_clsiz;		 /*  cluster size in records			 */
+	/* 12 */ uint16_t m_clsizb;	 /*  cluster size in bytes				 */
+	/* 14 */ int16_t m_recsiz;	 /*  record size in bytes				 */
 
-    CLNO    m_numcl;     /*  total number of clusters in data    */
-    int16_t m_clrlog;    /* log (base 2) of clsiz in records     */
-    int16_t m_clrm;      /* clsiz in rec, mask                   */
-    int16_t m_rblog;     /* log (base 2) of recsiz in bytes      */
-    int16_t m_rbm;       /* recsiz in bytes, mask                */
-    int16_t m_clblog;    /* log (base 2) of clsiz in bytes       */
-    int16_t m_clbm;      /* clsiz in bytes, mask                 */
-    OFD    *m_fatofd;    /* OFD for 'fat file'                   */
+	/* 16 */ CLNO	m_numcl;	 /*  total number of clusters in data	 */
+	/* 18 */ int16_t m_clrlog;	 /* log (base 2) of clsiz in records	 */
+	/* 20 */ int16_t m_clrm; 	 /* clsiz in rec, mask					 */
+	/* 22 */ int16_t m_rblog;	 /* log (base 2) of recsiz in bytes 	 */
+	/* 24 */ int16_t m_rbm;		 /* recsiz in bytes, mask				 */
+	/* 26 */ int16_t m_clblog;	 /* log (base 2) of clsiz in bytes		 */
+	/* 28 */ int16_t m_clbm; 	 /* clsiz in bytes, mask				 */
+	/* 30 */ OFD    *m_fatofd;	 /* OFD for 'fat file'					 */
 
-    OFD     *m_ofl;      /*  list of open files                  */
-    DND     *m_dtl;      /* root of directory tree list          */
-    uint16_t m_16;       /* 16 bit fat ?                         */
+	/* 34 */ OFD 	*m_ofl; 	 /*  list of open files 				 */
+	/* 38 */ DND 	*m_dtl; 	 /* root of directory tree list 		 */
+	/* 42 */ uint16_t m_16;		 /* 16 bit fat ?						 */
+	/* 44 */
 };
 
 
@@ -227,7 +229,7 @@ MD
  *	fields in Memory Descriptor
  */
 
-#define MF_FREE 1
+#define MF_FREE ((PD *)1)
 
 
 /*

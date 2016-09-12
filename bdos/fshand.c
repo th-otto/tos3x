@@ -1,9 +1,9 @@
 /*  fshand.c - file handle routines for the file system			*/
 
-#include	"tos.h"
-#include	"fs.h"
-#include	"bios.h"
-#include	<toserrno.h>
+#include "tos.h"
+#include "fs.h"
+#include "bios.h"
+#include <toserrno.h>
 
 
 

@@ -754,31 +754,3 @@ PP(VOIDPTR ptr;)								/*  ptr to match on         */
 	}
 	return i >= OPNFILES ? (FTAB *) NULL : sftp;
 }
-
-
-/*
- *  sftdel - delete an entry from the sft
- *	delete the entry from the sft.  If no other entries in the sft
- *	have the same ofd, free up the OFD, also.
- */
-
-/* 306: 00e189ce */
-VOID sftdel(P(FTAB *) sftp)
-PP(FTAB *sftp;)
-{
-	register FTAB *s;
-	register OFD *ofd;
-
-	/*  clear out the entry  */
-
-	ofd = (s = sftp)->f_ofd;
-
-	s->f_ofd = 0;
-	s->f_own = 0;
-	s->f_use = 0;
-
-	/*  if no other sft entries with same OFD, delete ofd  */
-
-	if (SFTOFDSRCH(ofd) == (FTAB *) NULL)
-		xmfreblk(ofd);
-}

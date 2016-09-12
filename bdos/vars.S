@@ -22,12 +22,20 @@ old_2: ds.l 1
 	xdef _time
 _time: ds.w 1
 
-	ds.b $58
+	ds.b $18
+
+	xdef _ofdfree
+_ofdfree: ds.l 1
+
+	ds.b $3c
 
 	xdef _glbkbchar
 _glbkbchar: ds.l 3*KBBUFSZ
 
-	ds.b 8
+	xdef _ofdlist
+_ofdlist: ds.l 1
+
+ 	ds.l 1
 
 	xdef _glbcolumn
 _glbcolumn: ds.w 3
@@ -37,7 +45,10 @@ _glbcolumn: ds.w 3
 	xdef _ldivr
 _ldivr: ds.l 1
 
-	ds.b $1654
+	xdef _ofdbuf
+_ofdbuf: ds.b 56*100
+
+	ds.b $74
 
 	xdef _rwerr
 _rwerr: ds.l 1
@@ -80,8 +91,9 @@ _errbuf: ds.l 3
 	xdef _diruse
 _diruse: ds.b NCURDIR
 
-    ds.b $40
-    
+	xdef _drvtbl
+_drvtbl: ds.l 16
+
 	xdef _drvsel
 _drvsel: ds.w 1
 

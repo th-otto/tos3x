@@ -657,8 +657,8 @@ PP(register DTAINFO *addr;)						/*  ptr to dta info         */
 /* 306: 00e15f20 */
 ERROR xsnext(NOTHING)
 {
-	register FCB *f;
 	register DTAINFO *dt;
+	register FCB *f;
 
 	dt = (DTAINFO *) run->p_xdta;
 

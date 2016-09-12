@@ -1,8 +1,8 @@
 /* console system for GEMDOS */
 
-#include	"tos.h"
-#include 	"fs.h"
-#include	"bios.h"
+#include "tos.h"
+#include "fs.h"
+#include "bios.h"
 
 /* *************************** typeahead buffer ************************* */
 /* The following data structures are used for the typeahead buffer:	  */

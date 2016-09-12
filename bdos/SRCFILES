@@ -4,6 +4,7 @@ BDOS_OBJS = \
 	ldiv.o \
 	xfer.o \
 	console.o \
+	fsmem.o \
 	fsbuf.o \
 	fsfat.o \
 	fsdir.o \
@@ -14,8 +15,8 @@ BDOS_OBJS = \
 	fsmain.o \
 	fsopnclo.o \
 	kpgmld.o \
-	osmem.o \
 	proc.o \
+	osmem.o \
 	bdosmain.o \
 	sup.o \
 	time.o \
