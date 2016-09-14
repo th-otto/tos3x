@@ -89,6 +89,7 @@ ERROR xgetdrv(NOTHING)
 }
 
 
+#if 0 /* now a macro */
 
 /*
  *  divmod - do divide and modulo arithmetic
@@ -107,7 +108,7 @@ PP(register int16_t divsor;)							/* divsor is log2 of actual divisor */
 	return divdnd >> divsor;
 }
 
-
+#endif
 
 
 

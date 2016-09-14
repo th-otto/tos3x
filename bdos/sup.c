@@ -39,6 +39,7 @@ VOID tikfrk PROTO((int n));
  *  globals
  */
 
+char osuser;
 int oscnt;
 
 long uptime;
@@ -402,6 +403,10 @@ int16_t *pw;
 int32_t osif2(P(int16_t *) pw)
 PP(int16_t *pw;)
 {
+	/*
+	 * the setjmp() routine used in GEMDOS does not save any registers,
+	 * so no register variables must be used here.
+	 */
 	char **volatile pb;
 	char *volatile pb2;
 	char *volatile p;
@@ -415,6 +420,7 @@ PP(int16_t *pw;)
 	volatile long numl;
 	const FND *volatile f;
 
+	osuser++;
 	oscnt = 0;
   restrt:
 	oscnt++;
@@ -448,7 +454,7 @@ PP(int16_t *pw;)
 			b = Getbpb(errdrv);
 			if ((ERROR) b <= 0)
 			{
-				drvsel &= ~(1 << errdrv);
+				drvsel &= ~DRVMASK(errdrv);
 				if ((ERROR) b)
 					return (ERROR) b;
 				return rc;

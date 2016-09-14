@@ -37,6 +37,16 @@
 #define SUPSIZ 1024     /* common supervisor stack size (in words) */
 #define OPNFILES 81     /* max open files in system */
 #define NCURDIR 40      /* max current directories in use in system */
+#define BLKDEVNUM 16	/* number of block devices supported: A: ... Z: */
+
+#if BLKDEVNUM > 16
+#define drvmask int32_t
+#define DRVMASK(d) (1L << (d))
+#else
+#define drvmask int16_t
+#define DRVMASK(d) (1 << (d))
+#endif
+
 
 /*
  *	Bios Function Numbers
@@ -110,26 +120,29 @@ typedef int32_t SSN;
 #define BPB struct _bpb_t
 BPB /* bios parameter block */
 {
-	int16_t recsiz; 	/* sector size in bytes */
-	int16_t clsiz;		/* cluster size in sectors */
-	int16_t clsizb; 	/* cluster size in bytes */
-	int16_t rdlen;		/* root directory length in records */
-	int16_t fsiz;		/* fat size in records */
-	int16_t fatrec; 	/* first fat record (of last fat) */
-	int16_t datrec; 	/* first data record */
-	int16_t numcl;		/* number of data clusters available */
-	int16_t b_flags;
+	/*  0 */ int16_t recsiz; 	/* sector size in bytes */
+	/*  2 */ int16_t clsiz;		/* cluster size in sectors */
+	/*  4 */ int16_t clsizb; 	/* cluster size in bytes */
+	/*  6 */ int16_t rdlen;		/* root directory length in records */
+	/*  8 */ int16_t fsiz;		/* fat size in records */
+	/* 10 */ int16_t fatrec; 	/* first fat record (of last fat) */
+	/* 12 */ int16_t datrec; 	/* first data record */
+	/* 14 */ int16_t numcl;		/* number of data clusters available */
+	/* 16 */ int16_t b_flags;
+	/* 18 */ 
 };
 
 ERROR login PROTO((BPB *b, int drv));
 
 
 /*
- *	flags for BPB
+ *	bit usage in b_flags for BPB
  */
 
 #define B_16	1			/* device has 16-bit FATs	*/
 #define B_FIX	2			/* device has fixed media	*/
+#define DND_LOCKED  0x8000  /* DND may not be scavenged (see     */
+                            /* free_available_dnds() in fsdir.c) */
 
 
 /*
@@ -140,23 +153,23 @@ ERROR login PROTO((BPB *b, int drv));
 
 DMD /* drive media block */
 {
-	/*  0 */ RECNO	m_recoff[3]; /*  record offsets for fat,dir,data	 */
-	/*  6 */ int16_t m_drvnum;	 /*  drive number for this media		 */
-	/*  8 */ RECNO m_fsiz;		 /*  fat size in records				 */
-	/* 10 */ RECNO m_clsiz;		 /*  cluster size in records			 */
-	/* 12 */ uint16_t m_clsizb;	 /*  cluster size in bytes				 */
-	/* 14 */ int16_t m_recsiz;	 /*  record size in bytes				 */
+	/*  0 */ RECNO	m_recoff[3]; /* record offsets for fat,dir,data		 */
+	/*  6 */ int16_t m_drvnum;	 /* drive number for this media			 */
+	/*  8 */ CLNO m_fatrec;		 /* first fat record (of last fat)       */
+	/* 10 */ RECNO m_fsiz;		 /* fat size in records					 */
+	/* 12 */ RECNO m_clsiz;		 /* cluster size in records				 */
+	/* 14 */ uint16_t m_clsizb;	 /* cluster size in bytes				 */
+	/* 16 */ int16_t m_recsiz;	 /* record size in bytes				 */
 
-	/* 16 */ CLNO	m_numcl;	 /*  total number of clusters in data	 */
-	/* 18 */ int16_t m_clrlog;	 /* log (base 2) of clsiz in records	 */
-	/* 20 */ int16_t m_clrm; 	 /* clsiz in rec, mask					 */
-	/* 22 */ int16_t m_rblog;	 /* log (base 2) of recsiz in bytes 	 */
-	/* 24 */ int16_t m_rbm;		 /* recsiz in bytes, mask				 */
-	/* 26 */ int16_t m_clblog;	 /* log (base 2) of clsiz in bytes		 */
-	/* 28 */ int16_t m_clbm; 	 /* clsiz in bytes, mask				 */
+	/* 18 */ CLNO	m_numcl;	 /*  total number of clusters in data	 */
+	/* 20 */ int16_t m_clrlog;	 /* log (base 2) of clsiz in records	 */
+	/* 22 */ int16_t m_clrm; 	 /* clsiz in rec, mask					 */
+	/* 24 */ int16_t m_rblog;	 /* log (base 2) of recsiz in bytes 	 */
+	/* 26 */ int16_t m_rbm;		 /* recsiz in bytes, mask				 */
+	/* 28 */ int16_t m_clblog;	 /* log (base 2) of clsiz in bytes		 */
 	/* 30 */ OFD    *m_fatofd;	 /* OFD for 'fat file'					 */
-
-	/* 34 */ OFD 	*m_ofl; 	 /*  list of open files 				 */
+	/* 34 */ uint16_t m_fixed;	 /* fixed media ?						 */
+	/* 36 */ uint16_t m_unused;
 	/* 38 */ DND 	*m_dtl; 	 /* root of directory tree list 		 */
 	/* 42 */ uint16_t m_16;		 /* 16 bit fat ?						 */
 	/* 44 */
@@ -182,9 +195,15 @@ BCB
 {
     /*  0 */ BCB     *b_link;    /*  next bcb (API)              */
     /*  4 */ int16_t b_bufdrv;   /*  unit for buffer (API)       */
+#ifdef EMUTOS
+    /*  6 */ LRECNO  b_bufrec;   /*  record number               */
+    /* 10 */ uint8_t b_buftyp;   /*  buffer type                 */
+    /* 11 */ uint8_t b_dirty;    /*  true if buffer dirty        */
+#else
     /*  6 */ int16_t b_buftyp;   /*  buffer type                 */
     /*  8 */ RECNO   b_bufrec;   /*  record number               */
     /* 10 */ int16_t b_dirty;    /*  true if buffer dirty        */
+#endif
     /* 12 */ DMD     *b_dm;      /*  ptr to drive media block    */
     /* 16 */ char    *b_bufr;    /*  pointer to buffer (API)     */
     /* 20 */
@@ -197,8 +216,7 @@ BCB
 
 #define BT_FAT		0		/*	fat buffer			*/
 #define BT_ROOT 	1		/*	root dir buffer 	*/
-#define BT_DIR		2		/*	other dir buffer		*/
-#define BT_DATA 	3		/*	data buffer 		*/
+#define BT_DATA 	2		/*	data/dir buffer 	*/
 
 /*
  *	buffer list indexes

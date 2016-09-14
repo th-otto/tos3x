@@ -1,27 +1,30 @@
-BDOS_OBJS = \
+BDOS_OBJS1 = \
+	vars.o \
 	osinit.o \
 	lmul.o \
 	ldiv.o \
 	xfer.o \
 	console.o \
-	fsmem.o \
-	fsbuf.o \
 	fsfat.o \
+	$(empty)
+
+BDOS_OBJS2 = \
+	fsbuf.o \
 	fsdir.o \
-	fsdrive.o \
 	fsglob.o \
 	fshand.o \
-	fsio.o \
 	fsmain.o \
 	fsopnclo.o \
 	kpgmld.o \
+
+BDOS_OBJS3 = \
 	proc.o \
 	osmem.o \
 	bdosmain.o \
 	sup.o \
 	time.o \
 	umem.o \
-	\
 	rwa.o \
-	vars.o \
 	$(empty)
+
+BDOS_OBJS = $(BDOS_OBJS1) $(BDOS_OBJS2) $(BDOS_OBJS3)

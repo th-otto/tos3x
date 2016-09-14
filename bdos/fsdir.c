@@ -388,7 +388,7 @@ PP(register int16_t drv;)
 
 	drv = (drv == 0) ? run->p_curdrv : drv - 1;
 
-	if (!(Drvmap() & (1 << drv)) || (ckdrv(drv) < 0))
+	if (!(Drvmap() & DRVMASK(drv)) || (ckdrv(drv) < 0))
 	{
 		*buf = 0;
 		return E_DRIVE;
@@ -482,7 +482,7 @@ PP(const char *s;)
 	f2->f_td.date = date;
 	swp68(&f2->f_td.date);
 	cl = f0->o_strtcl;
-	swp68(&cl);
+	swp68((uint16_t *)&cl);
 	f2->f_clust = cl;
 	f2->f_fileln = 0;
 	f2++;
@@ -500,7 +500,7 @@ PP(const char *s;)
 	if (cl < 0)
 		cl = 0;
 
-	swp68(&cl);
+	swp68((uint16_t *)&cl);
 	f2->f_clust = cl;
 	f2->f_fileln = 0;
 	xmovs(sizeof(OFD), (char *) f0, (char *) f);
@@ -704,7 +704,7 @@ PP(int part;)
 	{
 		ixlseek(fd->o_dirfil, fd->o_dirbyt + 22);
 
-		swp68(&fd->o_strtcl);
+		swp68((uint16_t *)&fd->o_strtcl);
 		swp68l(&fd->o_fileln);
 
 		if (part & CL_DIR)
@@ -718,7 +718,7 @@ PP(int part;)
 			ixwrite(fd->o_dirfil, 10L, &fd->o_td.time);
 		}
 		
-		swp68(&fd->o_strtcl);
+		swp68((uint16_t *)&fd->o_strtcl);
 		swp68l(&fd->o_fileln);
 	}
 
@@ -990,7 +990,7 @@ PP(FCB *b;)
 
 	p1->d_ofd = (OFD *) 0;
 	p1->d_strtcl = b->f_clust;
-	swp68(&p1->d_strtcl);
+	swp68((uint16_t *)&p1->d_strtcl);
 	p1->d_drv = p->d_drv;
 	p1->d_dirfil = fd;
 	p1->d_dirpos = fd->o_bytnum - 32;

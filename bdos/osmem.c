@@ -202,7 +202,7 @@ MD *mgetmd(NOTHING)
 			;
 		} else
 		{
-			if ((y = fsgetofd()) != NULL)
+			if ((y = (OFD *)fsgetofd()) != NULL)
 			{
 				p = (FOFD *)((char *)y - MD_OFFSET);
 			} else

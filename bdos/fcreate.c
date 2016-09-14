@@ -75,3 +75,22 @@ ERROR xopen(P(const char *) fname, P(int16_t) mode)
 {
 	return ixopen(fname, mode);
 }
+
+
+
+/*
+ *  xlog2 -
+ *	return log base 2 of n
+ */
+
+/* 306: 00e172e0 */
+int xlog2(P(int) n)
+PP(int n;)
+{
+	int i;
+
+	for (i = 0; n; i++)
+		n >>= 1;
+
+	return i - 1;
+}

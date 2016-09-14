@@ -54,14 +54,21 @@ PP(char *s;)
 PP(char *t;)
 PP(char *v;)								/* command, tail, environment   */
 {
-	PD *p;
-	char *b, *e;
-	int i, h;
-	int cnt;
-	ERROR rc;
-	int32_t max;
-	MD *m, *env;
-	int32_t *spl;
+	/*
+	 * the setjmp() routine used in GEMDOS does not save any registers,
+	 * so no register variables must be used here.
+	 */
+	PD *volatile p;
+	char *volatile b;
+	char *volatile e;
+	int volatile i;
+	int volatile h;
+	int volatile cnt;
+	ERROR volatile rc;
+	int32_t volatile max;
+	MD *volatile m;
+	MD *volatile env;
+	int32_t *volatile spl;
 
 	UNUSED(cnt);
 	

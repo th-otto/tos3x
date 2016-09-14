@@ -130,7 +130,7 @@ PP(int mod;)
 	} else
 	{
 		p->o_strtcl = f->f_clust;		/*  1st cluster of file */
-		swp68(&p->o_strtcl);
+		swp68((uint16_t *)&p->o_strtcl);
 		p->o_fileln = f->f_fileln;		/*  init length of file */
 		swp68l(&p->o_fileln);
 		p->o_td.date = f->f_td.date;
@@ -161,7 +161,7 @@ PP(int8_t attr;)
 	int32_t pos;
 	ERROR rc;
 	
-	n[0] = 0xe5;
+	n[0] = ERASE_MARKER;
 	n[1] = 0;
 	
 	/* first find path */
@@ -453,12 +453,12 @@ PP(long pos;)
 
 	dm = dn->d_drv;
 	n = f->f_clust;
-	swp68(&n);
+	swp68((uint16_t *)&n);
 
-	while (n && (n != -1))
+	while (n && !endofchain(n))
 	{
 		n2 = getcl(n, dm);
-		clfix(n, 0, dm);
+		clfix(n, FREECLUSTER, dm);
 		n = n2;
 	}
 
@@ -468,7 +468,7 @@ PP(long pos;)
 
 	fd = dn->d_ofd;
 	ixlseek(fd, pos);
-	c = 0xe5;
+	c = ERASE_MARKER;
 	ixwrite(fd, 1L, &c);
 	ixclose(fd, CL_DIR);
 
@@ -528,7 +528,7 @@ PP(const char *p2;)
 	f1 = getofd((int) h1);
 
 	fd = f1->o_dirfil;
-	buf[0] = 0xe5;
+	buf[0] = ERASE_MARKER;
 	ixlseek(fd, f1->o_dirbyt);
 
 	if (dn1 != dn2)

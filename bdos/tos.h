@@ -55,9 +55,9 @@ typedef	int32_t ERROR;
 #  define UNUSED(x) ((void)(x))
 #endif
 
-typedef uint16_t CLNO;             /* cluster number */
-typedef uint16_t RECNO;            /* record number  */
-typedef uint32_t LRECNO;           /* record number  */
+typedef int16_t CLNO;              /* cluster number */ /* BUG: should be unsigned */
+typedef int16_t RECNO;             /* record number  */ /* BUG: should be unsigned */
+typedef int32_t LRECNO;            /* record number  */ /* BUG: should be unsigned, but Alcyon does not support unsigned long */
 
 VOID _osinit PROTO((NOTHING));
 VOID osinit PROTO((NOTHING));

@@ -34,7 +34,7 @@ OFD *mgetofd PROTO((NOTHING));
 VOID foldermsg PROTO((NOTHING));
 OFD *oftdel PROTO((OFD *ofd));
 VOIDPTR xmdfree PROTO((MD *m));
-OFD *fsgetofd PROTO((NOTHING));
+DND *fsgetofd PROTO((NOTHING));
 
 /*
  *  process management

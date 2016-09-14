@@ -323,19 +323,3 @@ FH ffhndl(NOTHING)
 			return i;
 	return -1;
 }
-
-
-/*
- *  ixdirdup -
- */
-
-VOID ixdirdup(P(int16_t) h, P(int16_t) dn, P(PD *) p)
-PP(int16_t h;)									/* file handle              */
-PP(int16_t dn;)									/* directory number         */
-PP(PD *p;)
-{
-	p->p_curdir[h] = dn;
-	diruse[dn]++;
-}
-
-

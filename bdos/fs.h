@@ -8,7 +8,9 @@
  */
 
 #define MGET(x) ((x *) xmgetblk((sizeof(x) + 15)>>4))
-#define rwabs(a,b,c,d,e) if((rwerr=Rwabs(a,b,c,d,e))!=0){errdrv=e;xlongjmp(errbuf,rwerr);}
+#define rwabs(wrtflg,buf,count,rec,drive) if((rwerr=Rwabs(wrtflg,buf,count,rec,drive))!=0){errdrv=drive;xlongjmp(errbuf,rwerr);}
+#define rwabsw(buf,count,rec,drive) if((rwerr=Rwabsw(buf,count,rec,drive))!=0){errdrv=drive;xlongjmp(errbuf,rwerr);}
+#define rwabsr(buf,count,rec,drive) if((rwerr=Rwabsr(buf,count,rec,drive))!=0){errdrv=drive;xlongjmp(errbuf,rwerr);}
 
 
 #define FA_NORM (FA_ARCH|FA_HIDDEN|FA_RDONLY|FA_SYSTEM)
@@ -38,7 +40,7 @@ OFD
 	/*  32 */ int32_t  o_bytnum;	/* byte pointer within file			    */
 	/*  36 */ CLNO  o_curcl;		/* current cluster number for file		*/
 	/*  38 */ RECNO o_currec; 		/* current record number for file		*/
-	/*  40 */ uint16_t o_curbyt;	/* byte pointer within current cluster  */
+	/*  40 */ int16_t o_curbyt;		/* byte pointer within current cluster  */
 	/*  42 */ int16_t  o_usecnt;	/* use count for inherited files 	    */
 	/*  44 */ OFD   *o_thread;		/* mulitple open thread list			*/
 	/*  48 */ uint16_t o_mod; 		/* mode file opened in (see below)	    */
@@ -50,10 +52,11 @@ FOFD
 {
 	/*   0 */ FOFD  *o_link;
 	/*   4 */ uint8_t x_flag;
-	          uint8_t pad;
+	/*   5 */ uint8_t x_user;
 	          MD buf[4];
 	/*  70 */
 };
+#define X_USER(dnd) ((char *)(dnd))[-1]
 
 
 /*
@@ -109,7 +112,7 @@ FCB
 DND /* directory node descriptor */
 {
 	/*  0 */ char d_name[11];	/*	directory name						*/
-	/* 11 */ char d_fill;		/*	attributes? 						*/
+	/* 11 */ char d_fill;		/*	to attributes? 						*/
 	/* 12 */ uint16_t d_flag;
 	/* 14 */ CLNO d_strtcl;		/*	starting cluster number of dir		*/
 
@@ -128,15 +131,6 @@ DND /* directory node descriptor */
 	/* 56 */ int16_t d_usecount; /*	Fsfirst/Fsnext's in progress		*/
 	/* 58 */ 
 };
-
-/*
- * bit usage in d_flag
- */
-#define	B_16	1				/* device has 16-bit FATs	*/
-#define	B_FIX	2				/* device has fixed media	*/
-#define DND_LOCKED  0x8000  /* DND may not be scavenged (see     */
-                            /* free_available_dnds() in fsdir.c) */
-
 
 /*
  * FTAB - Open File Table Entry
@@ -192,7 +186,14 @@ extern	int16_t	bios_dev[];		/*  in fsfioctl.c		*/
 #define Bconstat(a) 	trap13(0x01,a)		/* Character Input Status   */
 #define Bconin(a)		trap13(0x02,a)
 #define Bconout(a,b)	trap13(0x03,a,b)
-#define Rwabs(a,b,c,d,e) trap13(0x04,a,b,c,d,e)
+#define Rwabs(wrtflg,buf,count,rec,drive) trap13(0x04,wrtflg,buf,count,rec,drive)
+#ifdef __ALCYON__
+#define Rwabsw(buf,count,rec,drive) trap13(0x00040001l,buf,count,rec,drive)
+#define Rwabsr(buf,count,rec,drive) trap13(0x00040000l,buf,count,rec,drive)
+#else
+#define Rwabsw(buf,count,rec,drive) Rwabs(1,buf,count,rec,drive)
+#define Rwabsr(buf,count,rec,drive) Rwabs(0,buf,count,rec,drive)
+#endif
 #define Setexc(d,a)		trap13(0x05,d,a)	/* Vector Exchange	    */
 #define Tickcal()		trap13(0x06)		/* Timer tick		    */
 #define Getbpb(d)		(BPB *)trap13(0x07,d)	/* Get BIOS Parameter Block */
@@ -271,18 +272,20 @@ typedef	int32_t (*PFL) PROTO((NOTHING));		/* ptr to func ret long */
 /* External Declarations */
 
 
-extern	DND	*dirtbl[];
-extern	DMD	*drvtbl[];
-extern	char diruse[];
-extern	int16_t	drvsel;
-extern	int16_t logmsk[];
-extern	FTAB sft[];
-extern	ERROR rwerr;
-extern	int16_t	errdrv;
-extern	uint16_t time, date;
+extern DND *dirtbl[NCURDIR];
+extern DMD *drvtbl[BLKDEVNUM];
+extern char diruse[];
+extern drvmask drvsel;
+extern int16_t const logmsk[];
+extern FTAB sft[OPNFILES];
+extern ERROR rwerr;
+extern int16_t errdrv;
+extern uint16_t time, date;
 extern xjmp_buf errbuf;
-extern int const nday[];						/* declared in sup.c */
+extern int const nday[];
 extern char fill[3];
+extern BOOLEAN dirlock;
+extern char osuser;
 
 /********************************
  *
@@ -291,7 +294,7 @@ extern char fill[3];
  ********************************
 */
 
-int32_t	trap13 PROTO((int16_t, ...));
+int32_t trap13 PROTO((int16_t, ...));
 ERROR oscall PROTO((int16_t, ...));
 VOID swp68 PROTO((uint16_t *p));
 VOID swp68l PROTO((int32_t *p));
@@ -306,25 +309,30 @@ FCB *dirinit PROTO((DND *dn));
 VOID builds PROTO((const char *src, char *dst));
 char *dopath PROTO((DND *p, char *buf, int *len));
 DND *findit PROTO((const char *name, const char **sp, int dflag));
-DND	*makdnd PROTO((DND *, FCB *b));
+DND *makdnd PROTO((DND *, FCB *b));
 int getpath PROTO((const char *p, char *d, int dirspec));
 BOOLEAN match PROTO((const char *s1, const char *s2));
 VOID makbuf PROTO((FCB *f, DTAINFO *dt));
 int xcmps PROTO((const char *s, const char *d));
 VOID freednd PROTO((DND *dn));
 int namlen PROTO((const char *s11));
+VOID flushall PROTO((NOTHING));
 
-VOID flush PROTO((BCB *b));
-char *getrec PROTO((int recn, DMD *dm, int wrtflg));
+char *getrec PROTO((RECNO recno, DMD *dm, int wrtflg));
 char *packit PROTO((const char *s, char *d));
 
 ERROR ckdrv PROTO((int d));
 DMD *getdmd PROTO((int drv));
 int xlog2 PROTO((int n));
 
+#if 0
 RECNO cl2rec PROTO((CLNO cl, DMD *dm));
+#else
+#define cl2rec(cl, dm) ((cl) * (dm)->m_clsiz)
+#endif
+
 VOID clfix PROTO((CLNO cl, CLNO link, DMD *dm));
-CLNO getcl PROTO((int cl, DMD *dm));
+CLNO getcl PROTO((CLNO cl, DMD *dm));
 int nextcl PROTO((OFD *p, int wrtflg));
 
 long ixforce PROTO((int16_t std, int16_t h, PD *p));
@@ -344,7 +352,13 @@ VOID usr2xfr PROTO((int, char *, char *));
 int uc PROTO((char c));
 OFD *makofd PROTO((DND *p));
 OFD *getofd PROTO((FH h));
+#if 0
 int16_t divmod PROTO((int16_t *modp, int32_t divdnd, int16_t divsor));
+#define DIVMOD(res, modp, divdnd, divsor) res = divmod(&(modp), (int32_t)(divdnd), divsor)
+#else
+#define DIVMOD(res, modp, divdnd, divsor) modp = (int32_t)(divdnd) & logmsk[divsor], res = (int32_t)(divdnd) >> (divsor)
+#endif
+
 ERROR F_IOCtl PROTO((int fn, FH h, int n, VOIDPTR buf));
 int Chk_Drv PROTO((int16_t *d));
 
@@ -437,8 +451,12 @@ ERROR xmxalloc PROTO((int32_t amount, int16_t mode));
  */
 #define FREECLUSTER     0x0000
 #define ENDOFCHAIN      0xffff                  /* our end-of-chain marker */
+#ifdef EMUTOS
 #define endofchain(a)   (((a)&0xfff8)==0xfff8)  /* in case file was created by someone else */
-
+#else
+#define endofchain(a) ((a) == ENDOFCHAIN)
+#endif
+#define ERASE_MARKER ((char)0xe5)
 
 /* Misc. defines */
                     /* the following are used for the second arg to ixclose() */
