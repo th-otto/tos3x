@@ -296,6 +296,7 @@ extern int const nday[];
 extern char fill[3];
 extern BOOLEAN dirlock;
 extern char osuser;
+extern int8_t const stddev[NUMSTD];
 
 /********************************
  *
@@ -341,9 +342,9 @@ VOID clfix PROTO((CLNO cl, CLNO link, DMD *dm));
 CLNO getcl PROTO((CLNO cl, DMD *dm));
 int nextcl PROTO((OFD *p, int wrtflg));
 
-long ixforce PROTO((int16_t std, int16_t h, PD *p));
+ERROR ixforce PROTO((FH std, FH h, PD *p));
 FH syshnd PROTO((FH h));
-VOID ixdirdup PROTO((int16_t h, int16_t dn, PD *p));
+VOID ixdirdup PROTO((FH h, int16_t dn, PD *p));
 FH ffhndl PROTO((NOTHING));
 
 typedef VOID (*xfer) PROTO((int, char *, char *));
@@ -369,7 +370,6 @@ ERROR F_IOCtl PROTO((int fn, FH h, int n, VOIDPTR buf));
 int Chk_Drv PROTO((int16_t *d));
 
 FCB *scan PROTO((DND *dnd, const char *n, int16_t att, int32_t *posp));
-VOID sftdel PROTO((FTAB *sftp));
 
 ERROR opnfil PROTO((const FCB *f, DND *dn, int16_t mod));
 ERROR makopn PROTO((const FCB *f, DND *dn, FH h, int16_t mod));

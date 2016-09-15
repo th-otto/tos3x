@@ -17,7 +17,7 @@ FH syshnd(P(FH) h)
 PP(register FH h;)
 {
 	if (h >= NUMSTD || (h = run->p_uft[h]) > 0)
-		return h - NUMSTD;
+		h -= NUMSTD;
 
 	return h;
 }
@@ -106,26 +106,33 @@ PP(int16_t h;)
  */
 
 /* 306: 00e16f74 */
-long ixforce(P(int16_t) std, P(int16_t) h, P(PD *) p)
-PP(int16_t std;)								/* std must be a standard handle    */
-PP(int16_t h;)									/* h   must NOT be a standard handle    */
-PP(PD *p;)
+ERROR ixforce(P(FH) _std, P(FH) _h, P(PD *) _p)
+PP(FH _std;)								/* std must be a standard handle    */
+PP(FH _h;)									/* h   must NOT be a standard handle    */
+PP(PD *_p;)
 {
-	long fh;
+	register PD *p = _p;
+	register FH std = _std;
+	register FH h = _h;
+	register long fh;
 
-	if ((std < 0) || (std >= NUMSTD))
+	if (std < 0 || std >= NUMSTD)
 		return E_IHNDL;
 
+#if 0
 	if (p->p_uft[std] > 0)
 		xclose(std);
+#endif
 
 	if (h < 0)
+	{
 		p->p_uft[std] = h;
-	else
+	} else
 	{
 		if (h < NUMSTD)
 			return E_IHNDL;
-
+		if (getofd(h) == NULL)
+			return E_IHNDL;
 		if ((fh = (long) sft[h - NUMSTD].f_ofd) < 0L)
 		{
 			p->p_uft[std] = fh;
@@ -156,30 +163,31 @@ PP(PD *p;)
 
 /* 306: 00e17024 */
 ERROR xclose(P(FH) h)
-PP(int h;)
+PP(FH h;)
 {
-	int h0;
-	OFD *fd;
-	ERROR rc;
+	register FH h0;
+	register OFD *fd;
+	register FTAB *ftab;
+	register ERROR rc;
 
+	ftab = &sft[h - NUMSTD];
+	
 	if (h < 0)
 		return E_OK;					/* always a good close on a character device */
-
-	if (h > (OPNFILES + NUMSTD - 1))
-		return E_IHNDL;
 
 	if ((h0 = h) < NUMSTD)
 	{
 		h = run->p_uft[h];
-		run->p_uft[h0] = 0;				/* mark std dev as not in use */
-		if (h <= 0)
+		ftab = &sft[h - NUMSTD];
+		run->p_uft[h0] = stddev[h0];				/* mark std dev as not in use */
+		if (h < 0)
 			return E_OK;
-	} else if (((long) sft[h - NUMSTD].f_ofd) < 0L)
+	} else if (((long) ftab->f_ofd) < 0L) /* BUG: h has not being checked yet for being < OPNFILES */
 	{
-		if (!(--sft[h - NUMSTD].f_use))
+		if (--ftab->f_use == 0)
 		{
-			sft[h - NUMSTD].f_ofd = 0;
-			sft[h - NUMSTD].f_own = 0;
+			ftab->f_ofd = NULL;
+			ftab->f_own = NULL;
 		}
 		return E_OK;
 	}
@@ -189,9 +197,13 @@ PP(int h;)
 
 	rc = ixclose(fd, 0);
 
-	if (!(--sft[h - NUMSTD].f_use))
-		sftdel(&sft[h - NUMSTD]);
-
+	if (--ftab->f_use == 0)
+	{
+		oftdel(ftab->f_ofd);
+		ftab->f_ofd = NULL;
+		ftab->f_own = NULL;
+	}
+	
 	return rc;
 }
 
@@ -296,8 +308,8 @@ PP(const FCB *f;)
 PP(DND *dn;)
 PP(int16_t mod;)
 {
-	register int i;
-	int h;
+	register FH i;
+	register FH h;
 
 	/* find free sft handle */
 	if ((i = ffhndl()) < 0)

@@ -12,9 +12,9 @@ BDOS_OBJS2 = \
 	fsdir.o \
 	fsopnclo.o \
 	fshand.o \
+	fsmain.o \
 	fsbuf.o \
 	fsglob.o \
-	fsmain.o \
 	kpgmld.o \
 
 BDOS_OBJS3 = \

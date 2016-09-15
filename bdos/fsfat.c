@@ -1153,8 +1153,8 @@ PP(DMD *dm;)
  *  ixdirdup -
  */
 
-VOID ixdirdup(P(int16_t) h, P(int16_t) dn, P(PD *) p)
-PP(int16_t h;)									/* file handle              */
+VOID ixdirdup(P(FH) h, P(int16_t) dn, P(PD *) p)
+PP(FH h;)									/* file handle              */
 PP(int16_t dn;)									/* directory number         */
 PP(PD *p;)
 {
