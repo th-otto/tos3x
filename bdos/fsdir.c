@@ -761,7 +761,7 @@ ERROR xsnext(NOTHING)
 	char name[12];
 	DND *dnd;
 	
-	dt = (DTAINFO *) run->p_xdta;
+	dt = run->p_xdta;
 	dmd = drvtbl[dt->dt_offset_drive & DTA_DRIVEMASK];
 	attr = dt->dt_attr;
 	curbyt = dt->dt_curbyt;

@@ -16,6 +16,12 @@
 #define FA_NORM (FA_ARCH|FA_HIDDEN|FA_RDONLY|FA_SYSTEM)
 
 
+#if BLKDEVNUM > 16
+#define DTA_DRIVEMASK   0x0000001fL
+#else
+#define DTA_DRIVEMASK   0x0000000fL
+#endif
+
 /*
  *  OFD - open file descriptor
  *
@@ -243,32 +249,6 @@ extern	int16_t	bios_dev[];		/*  in fsfioctl.c		*/
 #define Does_IOCtl	0x4000
 
 
-/*
- * DTAINFO - Information stored in the dta by srch-frst for use by srch-nxt.
- * bytes 0-20 are reserved by o/s, and are used by sfirst/snext.  beyond
- * that, contents are published in programmer's guide.
- */
-#define DTAINFO struct DtaInfo
-DTAINFO
-{
-    char  dt_name[12];          /*  file name: filename.typ     00-11   */
-    int32_t dt_offset_drive;    /*  dir position                12-15   */
-	int16_t dt_curbyt;			/* byte pointer within current cluster 16-17 */
-	CLNO  dt_curcl;				/* current cluster number for file	   18-19 */
-    char  dt_attr;              /*  attributes of file          20      */
-                                /*  --  below must not change -- [1]    */
-    char  dt_fattr;             /*  attrib from fcb             21      */
-    DOSTIME dt_td;              /*  time, date fields from fcb  22-25   */
-    int32_t  dt_fileln;         /*  file length field from fcb  26-29   */
-    char  dt_fname[14];         /*  file name from fcb          30-43   */
-};                              /*    includes null terminator          */
-
-#if BLKDEVNUM > 16
-#define DTA_DRIVEMASK   0x0000001fL
-#else
-#define DTA_DRIVEMASK   0x0000000fL
-#endif
-
 typedef	ERROR (*PFE) PROTO((NOTHING));			/* ptr to func ret err */
 typedef	int32_t (*PFL) PROTO((NOTHING));		/* ptr to func ret long */
 
@@ -415,8 +395,8 @@ ERROR xdup PROTO((FH h));
 ERROR xlseek PROTO((long n, FH h, int16_t flg));
 ERROR xread PROTO((FH h, long len, VOIDPTR ubufr));
 ERROR xwrite PROTO((FH h, long len, VOIDPTR ubufr));
-DTA *xgetdta PROTO((NOTHING));
-VOID xsetdta PROTO((DTA *addr));
+DTAINFO *xgetdta PROTO((NOTHING));
+VOID xsetdta PROTO((DTAINFO *addr));
 ERROR xsetdrv PROTO((int16_t drv));
 ERROR xgetdrv PROTO((NOTHING));
 ERROR xclose PROTO((FH h));

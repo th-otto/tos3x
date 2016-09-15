@@ -3,6 +3,7 @@
 #include "tos.h"
 #include "fs.h"
 #include "bios.h"
+#include "mem.h"
 #include <toserrno.h>
 
 

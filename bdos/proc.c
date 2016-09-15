@@ -188,7 +188,7 @@ PP(char *v;)								/* command, tail, environment   */
 
 		p->p_lowtpa = (int32_t) p;
 		p->p_hitpa = (int32_t) p + max;
-		p->p_xdta = (DTA *)&p->p_cmdlin[0];	/* default p_xdta is p_cmdlin */
+		p->p_xdta = (DTAINFO *)&p->p_cmdlin[0];	/* default p_xdta is p_cmdlin */
 		p->p_env = (char *) env->m_start;
 
 

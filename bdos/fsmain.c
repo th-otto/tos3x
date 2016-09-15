@@ -14,7 +14,7 @@
  */
 
 /* 306: 00e1720e */
-DTA *xgetdta(NOTHING)							/*+ return address of dta */
+DTAINFO *xgetdta(NOTHING)							/*+ return address of dta */
 {
 	return run->p_xdta;
 }
@@ -25,8 +25,8 @@ DTA *xgetdta(NOTHING)							/*+ return address of dta */
  */
 
 /* 306: 00e17220 */
-VOID xsetdta(P(DTA *) addr)							/*+ set transfer address to addr */
-PP(DTA *addr;)
+VOID xsetdta(P(DTAINFO *) addr)							/*+ set transfer address to addr */
+PP(DTAINFO *addr;)
 {
 	run->p_xdta = addr;
 }
@@ -59,17 +59,8 @@ PP(register char c;)
 ERROR xsetdrv(P(int16_t) drv)
 PP(int16_t drv;)
 {
-	int drvmap;
-
-	drvmap = trap13(0x0a);
-
-	if (drvmap & (1 << drv))
-	{
-		run->p_curdrv = drv;
-		return drvmap;
-	}
-
-	return E_DRIVE;
+	run->p_curdrv = drv;
+	return Drvmap();
 }
 
 
@@ -240,10 +231,6 @@ PP(VOIDPTR buf;)
 	}
 }
 
-#endif
-
-
-
 /******************************************************************************
  *
  * Chk_Drv - Check drive number
@@ -263,6 +250,10 @@ PP(int16_t *d;)
 
 	return map & (1 << *d);			/* Check for existence      */
 }
+
+
+#endif
+
 
 
 /*
