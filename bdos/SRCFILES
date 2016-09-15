@@ -11,9 +11,9 @@ BDOS_OBJS1 = \
 BDOS_OBJS2 = \
 	fsdir.o \
 	fsopnclo.o \
+	fshand.o \
 	fsbuf.o \
 	fsglob.o \
-	fshand.o \
 	fsmain.o \
 	kpgmld.o \
 

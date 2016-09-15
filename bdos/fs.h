@@ -75,6 +75,10 @@ FOFD
 #define RW_MODE        2	/* Open read/write - same as O_RDWR */
 #define VALID_FOPEN_BITS    MODE_FAC    /* currently-valid bits for Fopen() */
 
+#define SEEK_SET     0       /* Seek from beginning of file.  */
+#define SEEK_CUR     1       /* Seek from current position.  */
+#define SEEK_END     2       /* Seek from end of file.  */
+
 /*
  * O_DIRTY - Dirty Flag
  *
@@ -338,7 +342,7 @@ CLNO getcl PROTO((CLNO cl, DMD *dm));
 int nextcl PROTO((OFD *p, int wrtflg));
 
 long ixforce PROTO((int16_t std, int16_t h, PD *p));
-int16_t syshnd PROTO((int16_t h));
+FH syshnd PROTO((FH h));
 VOID ixdirdup PROTO((int16_t h, int16_t dn, PD *p));
 FH ffhndl PROTO((NOTHING));
 
@@ -367,8 +371,8 @@ int Chk_Drv PROTO((int16_t *d));
 FCB *scan PROTO((DND *dnd, const char *n, int16_t att, int32_t *posp));
 VOID sftdel PROTO((FTAB *sftp));
 
-ERROR opnfil PROTO((FCB *f, DND *dn, int16_t mod));
-ERROR makopn PROTO((FCB *f, DND *dn, FH h, int16_t mod));
+ERROR opnfil PROTO((const FCB *f, DND *dn, int16_t mod));
+ERROR makopn PROTO((const FCB *f, DND *dn, FH h, int16_t mod));
 ERROR ixclose PROTO((OFD *fd, int part));
 ERROR ixdel PROTO((DND *dn, FCB *f, long pos));
 BOOLEAN match1 PROTO((const char *ref, const char *test));
@@ -398,7 +402,7 @@ ERROR xcreat PROTO((const char *fname, int8_t attr));
 ERROR xopen PROTO((const char *fname, int16_t mode));
 ERROR xmkdir PROTO((const char *s));
 ERROR xrmdir PROTO((const char *p));
-char xchmod PROTO((const char *p, int16_t wrt, char mod));
+ERROR xchmod PROTO((const char *p, int16_t wrt, char mod));
 ERROR xsfirst PROTO((const char *name, int16_t att));
 ERROR xsnext PROTO((NOTHING));
 ERROR xgsdtof PROTO((uint16_t *buf, FH h, int16_t wrt));

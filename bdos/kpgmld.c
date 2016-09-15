@@ -28,7 +28,7 @@ PP(PD *p;)									/*  ptr to PD               */
 	FH h;
 	int16_t magic;
 
-	if ((r = xopen(s, 0)) < 0L)			/*  open file for read  */
+	if ((r = xopen(s, RO_MODE)) < 0L)			/*  open file for read  */
 		return r;
 
 	h = (int) r;						/*  get file handle */
@@ -153,7 +153,7 @@ PP(PD *pdptr;)
 	if (!hd->h01_abs)
 	{
 		/* should change hard coded 0x1c */
-		if ((r = xlseek(flen + pi->pi_slen + 0x1c, h, 0)) < 0L)
+		if ((r = xlseek(flen + pi->pi_slen + 0x1c, h, SEEK_SET)) < 0L)
 			return r;
 
 		if ((r = xread(h, (long) sizeof(relst), &relst)) < 0L)

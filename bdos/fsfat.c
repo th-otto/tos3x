@@ -890,7 +890,7 @@ PP(xfer bufxfr;)
 
 		if (!ubufr)
 		{
-			rc = (long) (bufp + bytn);	/* ???????????  */
+			rc = (long) (bufp + bytn);	/* return buffer address instead */
 			goto exit;
 		}
 

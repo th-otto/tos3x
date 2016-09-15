@@ -13,8 +13,8 @@
  */
 
 /* 306: 00e16e68 */
-int16_t syshnd(P(int16_t) h)
-PP(register int16_t h;)
+FH syshnd(P(FH) h)
+PP(register FH h;)
 {
 	if (h >= NUMSTD || (h = run->p_uft[h]) > 0)
 		return h - NUMSTD;
@@ -291,8 +291,8 @@ PP(VOIDPTR ubufr;)
  */
 
 /* 306: 00e17176 */
-ERROR opnfil(P(FCB *) f, P(DND *) dn, P(int16_t) mod)
-PP(FCB *f;)
+ERROR opnfil(P(const FCB *) f, P(DND *) dn, P(int16_t) mod)
+PP(const FCB *f;)
 PP(DND *dn;)
 PP(int16_t mod;)
 {

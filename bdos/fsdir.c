@@ -12,7 +12,7 @@
  *  local macros
  */
 
-#define dirscan(a,c) ((DND *) scan(a,c,0x10,&negone))
+#define dirscan(a,c) ((DND *) scan(a,c,FA_DIREC,&negone))
 
 static VOID makbuf PROTO((FCB *f, DTAINFO *dt));
 
@@ -21,19 +21,17 @@ static VOID makbuf PROTO((FCB *f, DTAINFO *dt));
  */
 
 /*
- *  dots -, dots2  -
- */
-
-static char /* const */ dots[22] = { ".          " };
-static char /* const */ dots2[22] = { "..         " };
-
-/*
  *  negone - for use as parameter
  */
 
 static int32_t negone = -1L;
 
+/*
+ *  dots -, dots2  -
+ */
 
+static char /* const */ dots[22] = { ".          " };
+static char /* const */ dots2[22] = { "..         " };
 
 /*
  *  GetDnd - find a dnd with matching name
@@ -754,14 +752,14 @@ ERROR xsnext(NOTHING)
 	register DTAINFO *dt;
 	register DMD *dmd;
 	register FCB *f;
-	char attr; /* -2 */
+	char attr;
 	register uint16_t curbyt;
 	register uint16_t /* CLNO */ curcl;
 	register BOOLEAN first;
-	int32_t pos; /* -6 */
+	int32_t pos;
 	char *s1;
 	char name[12];
-	DND *dnd; /* -26 */
+	DND *dnd;
 	
 	dt = (DTAINFO *) run->p_xdta;
 	dmd = drvtbl[dt->dt_offset_drive & DTA_DRIVEMASK];
