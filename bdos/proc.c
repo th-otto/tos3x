@@ -149,7 +149,7 @@ PP(char *v;)								/* command, tail, environment   */
 		 * now copy it 
 		 */
 
-		bmove(v, e, i);
+		xmovs(i, v, e);
 
 		/* 
 		 *   allocate base page

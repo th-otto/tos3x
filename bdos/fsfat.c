@@ -142,7 +142,7 @@ PP(int drv;)								/*  drive number            */
 	DND *d;
 	DMD *dm;
 	int rsiz, cs, n;
-	int /* RECNO */ fs; /* BUG: should by RECNO (unsigned) */
+	RECNO fs; /* BUG: should by unsigned */
 	CLNO ncl, fcl;
 
 	rsiz = b->recsiz;
@@ -832,16 +832,16 @@ PP(char *ubufr;)
 PP(xfer bufxfr;)
 {
 	register DMD *dm;
-	char *bufp; /* -4 */
-	int16_t bytn; /* -6 */
-	RECNO recn; /* -8 */
-	int recsiz; /* -10 */
-	int lenxfr; /* -12 */
-	int clsiz; /* -14 */
-	int clsizb; /* -16 */
-	int lentail; /* -18 */
+	char *bufp;
+	int16_t bytn;
+	RECNO recn;
+	int recsiz;
+	int lenxfr;
+	int clsiz;
+	int clsizb;
+	int lentail;
 	RECNO num;
-	RECNO hdrrec; /* -22 */
+	RECNO hdrrec;
 	int lsiz;
 	RECNO tailrec;
 	int last;
@@ -849,9 +849,9 @@ PP(xfer bufxfr;)
 	int lflg;
 	long nbyts;
 	register long rc;
-	long bytpos; /* -40 */
+	long bytpos;
 	long lenrec;
-	long lenmid; /* -48 */
+	long lenmid;
 	RECNO midrec;
 	
 	/*

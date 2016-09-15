@@ -93,12 +93,12 @@ FOFD
 
 FCB
 {
-    char f_name[11];
-    char f_attrib;
-    char f_fill[10];
-    DOSTIME f_td;           /* time, date */
-    CLNO f_clust;
-    int32_t f_fileln;
+	char f_name[11];
+	char f_attrib;
+	char f_fill[10];
+	DOSTIME f_td;			/* time, date */
+	CLNO f_clust;
+	int32_t f_fileln;
 };
 
 
@@ -248,8 +248,9 @@ extern	int16_t	bios_dev[];		/*  in fsfioctl.c		*/
 DTAINFO
 {
     char  dt_name[12];          /*  file name: filename.typ     00-11   */
-    int32_t  dt_pos;            /*  dir position                12-15   */
-    DND   *dt_dnd;              /*  pointer to DND              16-19   */
+    int32_t dt_offset_drive;    /*  dir position                12-15   */
+	int16_t dt_curbyt;			/* byte pointer within current cluster 16-17 */
+	CLNO  dt_curcl;				/* current cluster number for file	   18-19 */
     char  dt_attr;              /*  attributes of file          20      */
                                 /*  --  below must not change -- [1]    */
     char  dt_fattr;             /*  attrib from fcb             21      */
@@ -258,6 +259,11 @@ DTAINFO
     char  dt_fname[14];         /*  file name from fcb          30-43   */
 };                              /*    includes null terminator          */
 
+#if BLKDEVNUM > 16
+#define DTA_DRIVEMASK   0x0000001fL
+#else
+#define DTA_DRIVEMASK   0x0000000fL
+#endif
 
 typedef	ERROR (*PFE) PROTO((NOTHING));			/* ptr to func ret err */
 typedef	int32_t (*PFL) PROTO((NOTHING));		/* ptr to func ret long */
@@ -307,15 +313,11 @@ ERROR ixopen PROTO((const char *fname, int16_t mode));
 ERROR ixsfirst PROTO((const char *name, int16_t att, DTAINFO *addr));
 FCB *dirinit PROTO((DND *dn));
 VOID builds PROTO((const char *src, char *dst));
-char *dopath PROTO((DND *p, char *buf, int *len));
+char *dopath PROTO((DND *p, char *buf));
 DND *findit PROTO((const char *name, const char **sp, int dflag));
-DND *makdnd PROTO((DND *, FCB *b));
 int getpath PROTO((const char *p, char *d, int dirspec));
 BOOLEAN match PROTO((const char *s1, const char *s2));
-VOID makbuf PROTO((FCB *f, DTAINFO *dt));
 int xcmps PROTO((const char *s, const char *d));
-VOID freednd PROTO((DND *dn));
-int namlen PROTO((const char *s11));
 VOID flushall PROTO((NOTHING));
 
 char *getrec PROTO((RECNO recno, DMD *dm, int wrtflg));
@@ -456,7 +458,7 @@ ERROR xmxalloc PROTO((int32_t amount, int16_t mode));
 #else
 #define endofchain(a) ((a) == ENDOFCHAIN)
 #endif
-#define ERASE_MARKER ((char)0xe5)
+#define ERASE_MARKER 0xe5
 
 /* Misc. defines */
                     /* the following are used for the second arg to ixclose() */

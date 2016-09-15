@@ -1,5 +1,5 @@
 /*  umem.c - user memory management interface routines			*/
-/*  xmalloc, xmfreblk, xsetblk						*/
+/*  xmalloc, xsetblk						*/
 
 
 #ifndef	DBGUMEM
@@ -335,7 +335,7 @@ PP(MPB *mp;)
 			m->m_length += p->m_length;
 			m->m_link = p->m_link;
 
-			xmfreblk(p);
+			xmdfree(p);
 		}
 	}
 	
@@ -346,7 +346,7 @@ PP(MPB *mp;)
 			p1->m_length += m->m_length;
 			p1->m_link = m->m_link;
 
-			xmfreblk(m);
+			xmdfree(m);
 		}
 	}
 }

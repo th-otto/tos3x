@@ -129,7 +129,7 @@ PP(PD *pdptr;)
 	 *  initialize PD fields
 	 */
 
-	bmove((char *) &pi->pi_tbase, (char *) &p->p_tbase, 6 * sizeof(int32_t));
+	xmovs(6 * sizeof(int32_t), (char *) &pi->pi_tbase, (char *) &p->p_tbase);
 
 	/*  
 	 *  read in the program file (text and data)

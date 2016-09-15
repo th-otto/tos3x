@@ -23,7 +23,9 @@ PP(int16_t att;)
 	dt = (DTAINFO *) (run->p_xdta);
 
 	/* set an indication of 'uninitialized DTA' */
+#if 0
 	dt->dt_dnd = NULL;
+#endif
 
 	return ixsfirst(name, att, dt);
 }

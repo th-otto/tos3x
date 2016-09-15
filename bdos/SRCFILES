@@ -9,12 +9,12 @@ BDOS_OBJS1 = \
 	$(empty)
 
 BDOS_OBJS2 = \
-	fsbuf.o \
 	fsdir.o \
+	fsopnclo.o \
+	fsbuf.o \
 	fsglob.o \
 	fshand.o \
 	fsmain.o \
-	fsopnclo.o \
 	kpgmld.o \
 
 BDOS_OBJS3 = \

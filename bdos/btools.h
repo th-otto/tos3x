@@ -2,9 +2,10 @@
 
 
 #define	bzero( s , n ) 		bfill( s , 0 , n )
-#define	xmovs(n,s,d)	bmove(s,d,n)
 
 
-VOID	bmove PROTO((const VOIDPTR src, VOIDPTR dst, uint16_t cnt));
-VOID	lbmove PROTO((const VOIDPTR src, VOIDPTR dst, uint32_t cnt));
-VOID	bfill PROTO((VOIDPTR dst, uint8_t val, uint16_t size));
+VOID xmovs PROTO((int n, const VOIDPTR src, VOIDPTR dst));
+VOID lbmove PROTO((const VOIDPTR src, VOIDPTR dst, uint32_t cnt));
+VOID bfill PROTO((VOIDPTR dst, uint8_t val, uint16_t size));
+VOID zeromem PROTO((VOIDPTR start, VOIDPTR end));
+
