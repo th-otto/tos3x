@@ -355,7 +355,6 @@ ERROR opnfil PROTO((const FCB *f, DND *dn, int16_t mod));
 ERROR makopn PROTO((const FCB *f, DND *dn, FH h, int16_t mod));
 ERROR ixclose PROTO((OFD *fd, int part));
 ERROR ixdel PROTO((DND *dn, FCB *f, long pos));
-BOOLEAN match1 PROTO((const char *ref, const char *test));
 
 VOIDPTR xmgetblk PROTO((int i));
 VOID xmfrebblk PROTO((VOIDPTR m));

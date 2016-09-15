@@ -13,12 +13,12 @@ BDOS_OBJS2 = \
 	fsopnclo.o \
 	fshand.o \
 	fsmain.o \
-	fsbuf.o \
-	fsglob.o \
+	fssupp.o \
+	proc.o \
 	kpgmld.o \
 
 BDOS_OBJS3 = \
-	proc.o \
+	fsglob.o \
 	osmem.o \
 	bdosmain.o \
 	sup.o \

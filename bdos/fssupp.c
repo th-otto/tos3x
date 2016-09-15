@@ -4,6 +4,11 @@
 #include <ostruct.h>
 #include <toserrno.h>
 #include "fs.h"
+#include "mem.h"
+#include "btools.h"
+
+
+#define UC(c) (((c) >= 'a' && (c) <= 'z') ? ((c) & 0x5f) : (c))
 
 
 /*
@@ -20,16 +25,7 @@ ERROR xsfirst(P(const char *) name, P(int16_t) att)
 PP(const char *name;)
 PP(int16_t att;)
 {
-	DTAINFO *dt;
-
-	dt = run->p_xdta;
-
-	/* set an indication of 'uninitialized DTA' */
-#if 0
-	dt->dt_dnd = NULL;
-#endif
-
-	return ixsfirst(name, att, dt);
+	return ixsfirst(name, att, run->p_xdta);
 }
 
 
@@ -76,6 +72,8 @@ PP(int8_t attr;)
 
 /* 306: 00e172c8 */
 ERROR xopen(P(const char *) fname, P(int16_t) mode)
+PP(const char *fname;)
+PP(int16_t mode;)
 {
 	return ixopen(fname, mode);
 }
@@ -91,7 +89,7 @@ ERROR xopen(P(const char *) fname, P(int16_t) mode)
 int xlog2(P(int) n)
 PP(int n;)
 {
-	int i;
+	register int i;
 
 	for (i = 0; n; i++)
 		n >>= 1;
@@ -103,11 +101,13 @@ PP(int n;)
 /* 306: 00e17306 */
 VOID xmovs(P(int) n, P(const VOIDPTR) psrc, P(VOIDPTR) pdst)
 PP(register int n;)
-PP(register const VOIDPTR psrc;)
-PP(register VOIDPTR pdst;)
+PP(const VOIDPTR psrc;)
+PP(VOIDPTR pdst;)
 {
-	register const char *src = psrc;
-	register char *dst = pdst;
+	register const char *src;
+	register char *dst;
+	src = psrc;
+	dst = pdst;
 	while (n--)
 		*dst++ = *src++;
 }
@@ -163,7 +163,7 @@ PP(register const char *s2;)									/*  name in fcb             */
 
 	for (i = 0; i < 11; i++, s1++, s2++)
 		if (*s1 != '?')
-			if (uc(*s1) != uc(*s2))
+			if (UC(*s1) != UC(*s2)) /* ??? why is a macro used here? */
 				return FALSE;
 
 	/*
@@ -171,11 +171,7 @@ PP(register const char *s2;)									/*  name in fcb             */
 	 * volume labels and subdirs must be specifically asked for
 	 */
 
-	if ((*s1 != FA_LABEL) && (*s1 != FA_DIREC))
-		if (!(*s2))
-			return TRUE;
-
-	return *s1 & *s2 ? TRUE : FALSE;
+ 	return (*s2 != 0 || *s1 == FA_LABEL) && (*s1 & *s2) == 0 ? FALSE : TRUE;
 }
 
 
@@ -203,13 +199,12 @@ PP(register const char *s2;)									/*  name in fcb             */
  *
  */
 
-/* 306: 00e17424 */
 VOID builds(P(const char *) s1, P(char *) s2)
 PP(register char *s1;)							/*  source          */
 PP(register char *s2;)									/*  s2 dest         */
 {
 	register int i;
-	char c;
+	register char c;
 
 	/*
 	 * copy filename part of pathname to destination buffer until a
@@ -281,12 +276,13 @@ PP(register char *s2;)									/*  s2 dest         */
  *	Last modified	LTG	23 Jul 85
  */
 
+/* 306de: 00e17424 */
 VOID builds(P(const char *) s1, P(char *) s2)
 PP(register char *s1;)							/*  source          */
 PP(register char *s2;)									/*  s2 dest         */
 {
-	int i;
-	char c;
+	register int i;
+	register char c;
 
 	for (i = 0; (i < 8) && (*s1) && (*s1 != '*') && (*s1 != SLASH) && (*s1 != '.') && (*s1 != ' '); i++)
 		*s2++ = uc(*s1++);
@@ -335,15 +331,16 @@ PP(register char *s2;)									/*  s2 dest         */
 
 /* 306: 00e17508 */
 int getpath(P(const char *) p, P(char *) d, P(int) dirspec)
-PP(const char *p;)								/*  start of path element to crack  */
+PP(register const char *p;)								/*  start of path element to crack  */
 PP(char *d;)									/*  ptr to destination buffer       */
 PP(int dirspec;)							/*  true = no file name, just dir path  */
 {
 	register int i, i2;
 	register const char *p1;
 
-	for (i = 0, p1 = p; *p1 && (*p1 != SLASH); p1++, i++)
-		;
+	for (i = 0, p1 = p; *p1; p1++, i++)
+		if (*p1 == SLASH)
+			break;
 
 	/*
 	 *  If the string we have just scanned over is a directory name, it
@@ -354,15 +351,8 @@ PP(int dirspec;)							/*  true = no file name, just dir path  */
 
 	if (*p1 != '\0' || dirspec)
 	{									/*  directory name  */
-		i2 = 0;
-		if (p[0] == '.')				/*  dots in name    */
-		{
-			i2--;						/*  -1 for dot      */
-			if (p[1] == '.')
-				i2--;					/*  -2 for dotdot   */
+		if ((i2 = contains_dots(p, *p1)) < 0)
 			return i2;
-		}
-
 		if (i)							/*  if not null path el */
 			builds(p, d);				/*  d => dir style fn   */
 
@@ -370,6 +360,42 @@ PP(int dirspec;)							/*  true = no file name, just dir path  */
 	}
 
 	return 0;							/*  if string is a file name        */
+}
+
+
+/*
+ *  packit - pack into user buffer
+ */
+
+/* 306de: 00e17568 */
+char *packit(P(const char *) s, P(char *) d)
+PP(const char *s;)
+PP(char *d;)
+{
+	register const char *s0;
+	register int i;
+
+	if (!(*s))
+		goto pakok;
+
+	s0 = s;
+	for (i = 0; (i < 8) && (*s) && (*s != ' '); i++)
+		*d++ = *s++;
+
+	if (*s0 == '.')
+		goto pakok;
+
+	s = s0 + 8;							/* ext */
+
+	if (*s != ' ')
+		*d++ = '.';
+	else
+		goto pakok;
+
+	for (i = 0; (i < 3) && (*s) && (*s != ' '); i++)
+		*d++ = *s++;
+  pakok:*d = 0;
+	return d;
 }
 
 
@@ -383,27 +409,11 @@ char *dopath(P(DND *) p, P(char *) buf)
 PP(DND *p;)
 PP(char *buf;)
 {
-	char temp[14];
-	char *tp;
-	long tlen;
-	int len;
-	
 	if (p->d_parent)
 		buf = dopath(p->d_parent, buf);
 
-	tlen = (long) packit(p->d_name, temp) - (long) temp;
-	tp = temp;
-	while (len)
-	{
-		len--;						/* len must never go < 0 */
-		if (tlen--)
-			*buf++ = *tp++;
-		else
-		{
-			*buf++ = SLASH;
-			break;
-		}
-	}
+	buf = packit(p->d_name, buf);
+	*buf++ = SLASH;
 	return buf;
 }
 
@@ -429,6 +439,28 @@ PP(char ill;)
 
 
 /*
+ *  ncmps -  compare two text strings.
+ */
+
+/* 306de: 00e176a4 */
+int ncmps(P(int) n, P(const char *) s, P(const char *) d)
+PP(register int n;)
+PP(register const char *s;)
+PP(register const char *d;)
+{
+	while (n--)
+		if (*s++ != *d++)
+			return 0;
+
+	return 1;
+}
+
+
+#if 0 /* no longer used */
+
+BOOLEAN match1 PROTO((const char *ref, const char *test));
+
+/*
  *  match1 - check for bad chars in path name
  *	check thru test string to see if any character in the ref str is found
  *	(utility routine for ixcreat())
@@ -451,3 +483,5 @@ PP(const char *test;)
 
 	return FALSE;
 }
+
+#endif

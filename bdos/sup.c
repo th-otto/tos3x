@@ -8,6 +8,8 @@
 #include "bios.h"
 #include <toserrno.h>
 #include "mem.h"
+#include "btools.h"
+
 
 /*
  *  local constants
@@ -28,7 +30,6 @@ int32_t xgetver PROTO((NOTHING));
 int32_t S_SetVec PROTO((int16_t n, int32_t address));
 int32_t S_GetVec PROTO((int16_t n));
 
-int ncmps PROTO((int n, const char *s, const char *d));
 VOID freetree PROTO((DND *d));
 VOID offree PROTO((DMD *d));
 int32_t osif PROTO((int16_t *));
@@ -294,23 +295,6 @@ VOID cinit(NOTHING)
 	date_time(GET_DATE, &date);			/* allow bios to initialise date and */
 	date_time(GET_TIME, &time);			/* time from hardware, if supported */
 #endif
-}
-
-
-/*
- *  ncmps -  compare two text strings, ignoring case.
- */
-
-int ncmps(P(int) n, P(const char *) s, P(const char *) d)
-PP(int n;)
-PP(const char *s;)
-PP(const char *d;)
-{
-	while (n--)
-		if (uc(*s++) != uc(*d++))
-			return 0;
-
-	return 1;
 }
 
 
