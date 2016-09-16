@@ -41,7 +41,7 @@ static DND *leftmost PROTO((DND *));
 
 
 
-/* 306: 00e1412c */
+/* 306de: 00e1412c */
 DND *fsgetofd(NOTHING)
 {
 	register int i;
@@ -74,7 +74,7 @@ DND *fsgetofd(NOTHING)
 }
 
 
-/* 306: 00e141ac */
+/* 306de: 00e141ac */
 static DND *leftmost(P(DND *) dnd)
 PP(register DND *dnd;)
 {
@@ -110,7 +110,7 @@ PP(register DND *dnd;)
  *  getdmd - allocate storage for and initialize a DMD
  */
 
-/* 306: 00e1423e */
+/* 306de: 00e1423e */
 DMD *getdmd(P(int) drv)
 PP(int drv;)
 {
@@ -133,7 +133,7 @@ PP(int drv;)
  *
  */
 
-/* 306: 00e1428e */
+/* 306de: 00e1428e */
 ERROR login(P(BPB *) b, P(int) drv)
 PP(BPB *b;)									/*  bios parm block for drive       */
 PP(int drv;)								/*  drive number            */
@@ -200,7 +200,7 @@ PP(int drv;)								/*  drive number            */
 }
 
 
-/* 306: 00e144d2 */
+/* 306de: 00e144d2 */
 static VOID invalidate(P(int) drv)
 PP(register int drv;)
 {
@@ -228,7 +228,7 @@ PP(register int drv;)
  *		to return any error codes.
  */
 
-/* 306: 00e14516 */
+/* 306de: 00e14516 */
 static VOID flush(P(BCB *) b)
 PP(register BCB *b;)
 {
@@ -261,7 +261,7 @@ PP(register BCB *b;)
 }
 
 
-/* 306: 00e14624 */
+/* 306de: 00e14624 */
 VOID flushall(NOTHING)
 {
 	register int drv;
@@ -293,7 +293,7 @@ VOID flushall(NOTHING)
  *		to return any error codes.
  */
 
-/* 306: 00e14676 */
+/* 306de: 00e14676 */
 static VOID usrio(P(int) wrtflg, P(RECNO) count, P(RECNO) recno, P(char *) buf, P(DMD *)dm)
 PP(int wrtflg;)
 PP(RECNO count;)
@@ -331,7 +331,7 @@ PP(DMD *dm;)
  *	return the ptr to the buffer containing the desired record
  */
 
-/* 306: 00e1473e */
+/* 306de: 00e1473e */
 char *getrec(P(RECNO) recno, P(DMD *)dm, P(int) wrtflg)
 PP(register RECNO recno;)
 PP(register DMD *dm;)
@@ -467,7 +467,7 @@ PP(int wrtflg;)
 }
 
 
-/* 306: 00e1492c */
+/* 306de: 00e1492c */
 static char *getdirrec(P(RECNO) recno, P(DMD *)dm, P(int) wrtflg)
 PP(RECNO recno;)
 PP(DMD *dm;)
@@ -489,7 +489,7 @@ PP(int wrtflg;)
  *	'link', which is the index of the next cluster in the chain.
  */
 
-/* 306: 00e1498a */
+/* 306de: 00e1498a */
 VOID clfix(P(CLNO) cl, P(CLNO) link, P(DMD *) dm)
 PP(register CLNO cl;)
 PP(CLNO link;)
@@ -569,7 +569,7 @@ PP(register DMD *dm;)
  *	otherwise, the contents of the entry (16 bit value always returned).
  */
 
-/* 306: 00e14b62 */
+/* 306de: 00e14b62 */
 CLNO getcl(P(CLNO) cl, P(DMD *) dm)
 PP(register CLNO cl;)
 PP(register DMD *dm;)
@@ -645,7 +645,7 @@ PP(register DMD *dm;)
  *	-1	if error
  */
 
-/* 306: 00e14d1a */
+/* 306de: 00e14d1a */
 int nextcl(P(OFD *) p, P(int) wrtflg)
 PP(register OFD *p;)
 PP(int wrtflg;)
@@ -727,7 +727,7 @@ retcl:
 }
 
 
-/* 306: 00e14e22 */
+/* 306de: 00e14e22 */
 CLNO xgscan16(P(DMD *) dm, P(CLNO) numcl, P(int) flag)
 PP(DMD *dm;)
 PP(CLNO numcl;)
@@ -786,7 +786,7 @@ PP(int flag;)
  *	have been written to it.
  */
 
-/* 306: 00e14ece */
+/* 306de: 00e14ece */
 static VOID addit(P(OFD *) p, P(long) siz, P(int) flg)
 PP(register OFD *p;)
 PP(long siz;)
@@ -823,7 +823,7 @@ PP(int flg;)								/* update curbyt ? (yes if less than 1 cluster transferred) 
  *	nbr of bytes read/written from/to the file.
  */
 
-/* 306: 00e14f10 */
+/* 306de: 00e14f10 */
 ERROR xrw(P(int) wrtflg, P(OFD *) p, P(long) len, P(char *) ubufr, P(xfer) bufxfr)
 PP(int wrtflg;)
 PP(register OFD *p;)
@@ -1042,7 +1042,7 @@ exit:
  *	drive nbr if success.
  */
 
-/* 306: 00e152e2 */
+/* 306de: 00e152e2 */
 ERROR ckdrv(P(int) d)
 PP(register int d;)									/* has this drive been accessed, or had a media change */
 {
@@ -1100,7 +1100,7 @@ PP(register int d;)									/* has this drive been accessed, or had a media chan
 	Last modified	SCC	15 May 85
  */
 
-/* 306: 00e153c8 */
+/* 306de: 00e153c8 */
 ERROR xgetfree(P(int32_t *) bufp, P(int16_t) drv)					/*+ get disk free space data into buffer */
 PP(register int16_t drv;)
 PP(int32_t *bufp;)

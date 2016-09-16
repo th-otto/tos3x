@@ -13,7 +13,7 @@
  *  xgetdta - Function 0x2F	Fgetdta
  */
 
-/* 306: 00e1720e */
+/* 306de: 00e1720e */
 DTAINFO *xgetdta(NOTHING)							/*+ return address of dta */
 {
 	return run->p_xdta;
@@ -24,7 +24,7 @@ DTAINFO *xgetdta(NOTHING)							/*+ return address of dta */
  *  xsetdta - Function 0x1A	Fsetdta
  */
 
-/* 306: 00e17220 */
+/* 306de: 00e17220 */
 VOID xsetdta(P(DTAINFO *) addr)							/*+ set transfer address to addr */
 PP(DTAINFO *addr;)
 {
@@ -40,7 +40,7 @@ PP(DTAINFO *addr;)
  */
 
 #if !GEMDOS /* assembly routine provided */
-/* 306: 00e13584 */
+/* 306de: 00e13584 */
 int uc(P(char) c)
 PP(register char c;)
 {
@@ -55,7 +55,7 @@ PP(register char c;)
  *	Function 0x0E	Dsetdrv
  */
 
-/* 306: 00e17234 */
+/* 306de: 00e17234 */
 ERROR xsetdrv(P(int16_t) drv)
 PP(int16_t drv;)
 {
@@ -73,7 +73,7 @@ PP(int16_t drv;)
  *	Last modified	SCC	1 May 85
  */
 
-/* 306: 00e17254 */
+/* 306de: 00e17254 */
 ERROR xgetdrv(NOTHING)
 {
 	return run->p_curdrv;
@@ -261,7 +261,7 @@ PP(int16_t *d;)
  */
 
 #if !GEMDOS /* assembly routine provided */
-/* 306: 00e1386c */
+/* 306de: 00e1386c */
 VOID usr2xfr(P(int) n, P(char *) d, P(char *) s)
 PP(register int n;)
 PP(register char *s;)
@@ -275,7 +275,7 @@ PP(register char *d;)
  *  xfr2usr -
  */
 
-/* 306: 00e13876 */
+/* 306de: 00e13876 */
 VOID xfr2usr(P(int) n, P(char *) s, P(char *) d)
 PP(register int n;)
 PP(register char *s;)

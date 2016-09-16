@@ -16,8 +16,6 @@
  */
 
 
-int8_t const stddev[NUMSTD] = { H_Console, H_Console, H_Aux, H_Print, H_Console, H_Console };
-
 /*
  *  forward declarations
  */
@@ -88,7 +86,7 @@ FND
 #define GDF (gdf)
 #endif
 
-/* 306: 00e3d9f8 */
+/* 306de: 00e3d9f8 */
 FND const funcs[0x58] = {
 
 	/* 0x00 */ { GDF x0term, 0 },
@@ -231,23 +229,17 @@ FND const funcs[0x58] = {
 };
 
 
-/************************************************************************/
-
-char *bdosver = "GEMDOS Version 01.KTB";
-
-/************************************************************************/
-
-
-
 /*
  *  ni -
  */
 
-/* 306: 00e18af6 */
+/* 306de: 00e18af6 */
 ERROR ni(NOTHING)
 {
 	return E_INVFN;
 }
+
+int8_t const stddev[NUMSTD] = { H_Console, H_Console, H_Aux, H_Print, H_Console, H_Console };
 
 
 
@@ -256,7 +248,7 @@ ERROR ni(NOTHING)
  *	return current version number
  */
 
-/* 306: 00e18b00 */
+/* 306de: 00e18b00 */
 int32_t xgetver(NOTHING)
 {
 	return ((GEMDOS & 0xff) << 8) | ((GEMDOS >> 8) & 0xff);					/*  minor.major */
@@ -267,7 +259,7 @@ int32_t xgetver(NOTHING)
  *  cinit - C part of osinit().
  */
 
-/* 306: 00e18b0e */
+/* 306de: 00e18b0e */
 VOID cinit(NOTHING)
 {
 	register PD *r;
@@ -284,11 +276,11 @@ VOID cinit(NOTHING)
 	for (i = 0; i < NUMSTD; i++)
 		r->p_uft[i] = stddev[i];
 
-	fill[0] = fill[1] = fill[2] = 0;
+	fill[BFHPRN] = fill[BFHAUX] = fill[BFHCON] = 0;
 	
-	buptr[0] = beptr[0] = glbkbchar[0];
-	buptr[1] = beptr[1] = glbkbchar[1];
-	buptr[2] = beptr[2] = glbkbchar[2];
+	buptr[BFHPRN] = beptr[BFHPRN] = glbkbchar[BFHPRN];
+	buptr[BFHAUX] = beptr[BFHAUX] = glbkbchar[BFHAUX];
+	buptr[BFHCON] = beptr[BFHCON] = glbkbchar[BFHCON];
 
 	osuser = 0;
 	
@@ -303,7 +295,7 @@ VOID cinit(NOTHING)
  *  freetree -  free the directory node tree
  */
 
-/* 306: 00e18bb6 */
+/* 306de: 00e18bb6 */
 VOID freetree(P(DND *)d)
 PP(DND *d;)
 {
@@ -333,7 +325,7 @@ PP(DND *d;)
  *  offree -
  */
 
-/* 306: 00e18c46 */
+/* 306de: 00e18c46 */
 VOID offree(P(DMD *) d)
 PP(DMD *d;)
 {

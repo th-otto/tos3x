@@ -17,24 +17,12 @@ static FOFD *getosm PROTO((NOTHING));
 
 
 
-/*
- *  root - root array for 'quick' pool.
- *	root is an array of ptrs to memblocks of size 'i' paragraphs,
- *	where 'i' is the index into the array (a paragraph is 16 bites).
- *	Each list is singly linked.  Items on the list are
- *	deleted/added in LIFO order from the root.  
- */
-
-#define	MAXQUICK	20
-VOIDPTR root[MAXQUICK];
-
-
 FOFD ofdbuf[80];
 FOFD *ofdlist;
 FOFD *ofdfree;
 
 
-/* 306: 00e185b0 */
+/* 306de: 00e185b0 */
 VOID osminit(NOTHING)
 {
 	ofdlist = NULL;
@@ -42,7 +30,7 @@ VOID osminit(NOTHING)
 }
 
 
-/* 306: 00e185ce */
+/* 306de: 00e185ce */
 VOID ofdadd(P(FOFD *) p, P(long) len)
 PP(register FOFD *p;)
 PP(register long len;)
@@ -66,7 +54,7 @@ PP(register long len;)
 }
 
 
-/* 306: 00e1862c */
+/* 306de: 00e1862c */
 OFD *mgetofd(NOTHING)
 {
 	register FOFD *p;
@@ -132,7 +120,7 @@ found:
 }
 
 
-/* 306: 00e186da */
+/* 306de: 00e186da */
 static FOFD *ofdmore(NOTHING)
 {
 	register FOFD *p;
@@ -156,7 +144,7 @@ static FOFD *ofdmore(NOTHING)
 }
 
 
-/* 306: 00e8738 */
+/* 306de: 00e8738 */
 MD *mgetmd(NOTHING)
 {
 	register FOFD *p;
@@ -224,7 +212,7 @@ found:
  *	the base.
  */
 
-/* 306: 00e18804 */
+/* 306de: 00e18804 */
 static FOFD *getosm(NOTHING)
 {
 	register FOFD *p;
@@ -296,7 +284,7 @@ static FOFD *getosm(NOTHING)
 }
 
 
-/* 306: 00e188f8 */
+/* 306de: 00e188f8 */
 int mdlink(P(MD *) m, P(MD *) p)
 PP(register MD *m;)
 PP(register MD *p;)
@@ -327,7 +315,7 @@ found:
 }
 
 
-/* 306: 00e18962 */
+/* 306de: 00e18962 */
 MD *mdfind(P(FOFD **) p1, P(int *) a, P(FOFD *) p)
 PP(FOFD **p1;)
 PP(int *a;)
@@ -373,7 +361,7 @@ PP(FOFD *p;)
  *  oftdel - delete an entry from the oft list
  */
 
-/* 306: 00e189ce */
+/* 306de: 00e189ce */
 OFD *oftdel(P(OFD *) ofd)
 PP(OFD *ofd;)
 {
@@ -387,7 +375,7 @@ PP(OFD *ofd;)
 }
 
 
-/* 306: 00e189f8 */
+/* 306de: 00e189f8 */
 VOIDPTR xmdfree(P(MD *) m)
 PP(register MD *m;)
 {

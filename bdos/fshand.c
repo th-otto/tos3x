@@ -13,7 +13,7 @@
  *  syshnd -
  */
 
-/* 306: 00e16e68 */
+/* 306de: 00e16e68 */
 FH syshnd(P(FH) h)
 PP(register FH h;)
 {
@@ -28,7 +28,7 @@ PP(register FH h;)
 /*
  *  getofd -
  */
-/* 306: 00e16e98 */
+/* 306de: 00e16e98 */
 OFD *getofd(P(FH) h)
 PP(FH h;)
 {
@@ -54,7 +54,7 @@ PP(FH h;)
  *	Last modified	SCC	 5 Apr 85
  */
 
-/* 306: 00e16eda */
+/* 306de: 00e16eda */
 ERROR xdup(P(int16_t) h)
 PP(int16_t h;)									/*+ h must be a standard handle (checked) */
 {
@@ -92,7 +92,7 @@ PP(int16_t h;)									/*+ h must be a standard handle (checked) */
  *	Last modified	SCC	5 Apr 85
  */
 
-/* 306: 00e16f5e */
+/* 306de: 00e16f5e */
 ERROR xforce(P(int16_t) std, P(int16_t) h)
 PP(int16_t std;)
 PP(int16_t h;)
@@ -106,7 +106,7 @@ PP(int16_t h;)
  *	if the std handle is for an open non-char device, close it
  */
 
-/* 306: 00e16f74 */
+/* 306de: 00e16f74 */
 ERROR ixforce(P(FH) _std, P(FH) _h, P(PD *) _p)
 PP(FH _std;)								/* std must be a standard handle    */
 PP(FH _h;)									/* h   must NOT be a standard handle    */
@@ -162,7 +162,7 @@ PP(PD *_p;)
  *		of ixclose(), but I am leaving the flow of control intact.
  */
 
-/* 306: 00e17024 */
+/* 306de: 00e17024 */
 ERROR xclose(P(FH) h)
 PP(FH h;)
 {
@@ -234,7 +234,7 @@ PP(FH h;)
  *	Last modified	SCC	8 Apr 85
  */
 
-/* 306: 00e170f0 */
+/* 306de: 00e170f0 */
 ERROR xread(P(int16_t) h, P(long) len, P(VOIDPTR) ubufr)
 PP(int16_t h;)
 PP(long len;)
@@ -266,7 +266,7 @@ PP(VOIDPTR ubufr;)
  *	Last modified	SCC	10 Apr 85
  */
 
-/* 306: 00e17130 */
+/* 306de: 00e17130 */
 ERROR xwrite(P(FH) h, P(long) len, P(VOIDPTR) ubufr)
 PP(FH h;)
 PP(long len;)
@@ -303,7 +303,7 @@ PP(VOIDPTR ubufr;)
  *		make i a register int.
  */
 
-/* 306: 00e17176 */
+/* 306de: 00e17176 */
 ERROR opnfil(P(const FCB *) f, P(DND *) dn, P(int16_t) mod)
 PP(const FCB *f;)
 PP(DND *dn;)
@@ -325,7 +325,7 @@ PP(int16_t mod;)
 
 
 
-/* 306: 00e171d8 */
+/* 306de: 00e171d8 */
 FH ffhndl(NOTHING)
 {
 	register int i;

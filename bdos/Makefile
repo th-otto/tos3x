@@ -15,7 +15,7 @@ bdos.a: $(BDOS_OBJS) ${MAKEFILE}
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(BDOS_OBJS3)
 
 bdos.o: vars.o $(BDOS_OBJS) ${MAKEFILE}
-	$(LD) -s -u -o $@ -a $(gemdos_tbase) x 0 ../bios/tosvars.o vars.o $(BDOS_OBJS)
+	$(LD) -s -u -o $@ -a $(gemdos_tbase) $(gemdos_dbase) 0 ../bios/tosvars.o vars.o $(BDOS_OBJS)
 
 check::
 

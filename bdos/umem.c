@@ -45,7 +45,7 @@ static VOID printstr PROTO((const char *str));
  * xminit - initialize memory descriptors.
  */
 
-/* 306: 00e1800c */
+/* 306de: 00e1800c */
 VOID xminit(NOTHING)
 {
 	register MD *q;
@@ -72,7 +72,7 @@ VOID xminit(NOTHING)
 }
 
 
-/* 306: 00e1806c */
+/* 306de: 00e1806c */
 static int32_t xmfsize(P(MPB *) mp, P(int16_t) mode)
 PP(MPB *mp;)
 PP(int16_t mode;)
@@ -97,7 +97,7 @@ PP(int16_t mode;)
 }
 
 
-/* 306: 00e180b8 */
+/* 306de: 00e180b8 */
 MD *ffit(P(long) amount, P(MPB *) mp, P(int16_t) mode)
 PP(long amount;)
 PP(MPB *mp;)
@@ -221,7 +221,7 @@ PP(int16_t mode;)
  *	Last modified	SCC	19 Apr 85
  */
 
-/* 306: 00e1821c */
+/* 306de: 00e1821c */
 ERROR xsetblk(P(int16_t) n, P(VOIDPTR) blk, P(int32_t) len)
 PP(int16_t n;)									/*  dummy, not used         */
 PP(VOIDPTR blk;)								/*  addr of block to free   */
@@ -294,7 +294,7 @@ found:
  *  freeit - Free up a memory descriptor
  */
 
-/* 306: 00e182bc */
+/* 306de: 00e182bc */
 VOID freeit(P(MD *) m, P(MPB *) mp)
 PP(register MD *m;)
 PP(MPB *mp;)
@@ -360,7 +360,7 @@ PP(MPB *mp;)
  *	Last modified	SCC	3 Jun 85
  */
 
-/* 306: 00e18372 */
+/* 306de: 00e18372 */
 int32_t xmxalloc(P(int32_t) amount, P(int16_t) mode)
 PP(int32_t amount;)
 PP(int16_t mode;)
@@ -393,7 +393,7 @@ PP(int16_t mode;)
  *	Last modified	SCC	3 Jun 85
  */
 
-/* 306: 00e183cc */
+/* 306de: 00e183cc */
 int32_t xmalloc(P(int32_t) amount)
 PP(int32_t amount;)
 {
@@ -410,7 +410,7 @@ PP(int32_t amount;)
  *	Function 0x49	Mfree
  */
 
-/* 306: 00e183fe */
+/* 306de: 00e183fe */
 ERROR xmfree(P(int32_t) addr)
 PP(int32_t addr;)
 {
@@ -430,7 +430,7 @@ found:
 }
 
 
-/* 306: 00e183fe */
+/* 306de: 00e183fe */
 VOID xmakeres(P(PD *) p)
 PP(PD *p;)
 {
@@ -456,7 +456,7 @@ PP(PD *p;)
  *  free it
  */
 
-/* 306: 00e1847c */
+/* 306de: 00e1847c */
 VOID xmfreall(P(PD *) r)
 PP(PD *r;)
 {
@@ -478,7 +478,7 @@ PP(PD *r;)
 }
 
 
-/* 306: 00e184be */
+/* 306de: 00e184be */
 VOID xmsetown(P(VOIDPTR) paddr, P(PD *) own)
 PP(VOIDPTR paddr;)
 PP(PD *own;)
@@ -498,7 +498,7 @@ PP(PD *own;)
 }
 
 
-/* 306: 00e184f8 */
+/* 306de: 00e184f8 */
 ERROR xmaddalt(P(char *) start, P(int32_t) len)
 PP(char *start;)
 PP(int32_t len;)
@@ -528,7 +528,7 @@ PP(int32_t len;)
 }
 
 
-/* 306: 00e18570 */
+/* 306de: 00e18570 */
 VOID foldermsg(NOTHING)
 {
 	printstr("\033H*** OUT OF INTERNAL MEMORY:\033K\r\n*** USE FOLDR100.PRG TO GET MORE.\033K\r\n\033K\n\033K\n*** SYSTEM HALTED ***\033K");

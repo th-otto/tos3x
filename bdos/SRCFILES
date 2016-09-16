@@ -8,16 +8,16 @@ BDOS_OBJS1 = \
 	$(empty)
 
 BDOS_OBJS2 = \
+	fsglob.o \
 	fsdir.o \
 	fsopnclo.o \
 	fshand.o \
 	fsmain.o \
 	fssupp.o \
-	proc.o \
 	$(empty)
 
 BDOS_OBJS3 = \
-	fsglob.o \
+	proc.o \
 	umem.o \
 	osmem.o \
 	bdosmain.o \

@@ -38,7 +38,7 @@ BCB *bufl[2];
  *  osinit - the bios calls this routine to initialize the os
  */
 
-/* 306: 00e18a6c */
+/* 306de: 00e18a6c */
 VOID osinit(NOTHING)
 {
 	/* set up sector buffers */

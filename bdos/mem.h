@@ -15,7 +15,6 @@
  */
 
 extern MPB pmd;
-extern VOIDPTR root[20];
 extern PD ospd;
 
 VOID xminit PROTO((NOTHING));

@@ -26,7 +26,7 @@ ERROR xrendir PROTO((DND *dn, const char *name, const char *to));
  *		Also, I'm not sure that the EINTRN return is ok.
  */
 
-/* 306: 00e160ba */
+/* 306de: 00e160ba */
 ERROR ixclose(P(OFD *) fd, P(int) part)
 PP(register OFD *fd;)
 PP(int part;)
@@ -110,7 +110,7 @@ PP(int part;)
  *  makofd -
  */
 
-/* 306: 00e161de */
+/* 306de: 00e161de */
 OFD *makofd(P(DND *) p)
 PP(register DND *p;)
 {
@@ -140,7 +140,7 @@ PP(register DND *p;)
  *	Last modified	SCC	26 July 85
  */
 
-/* 306: 00e16236 */
+/* 306de: 00e16236 */
 ERROR ixread(P(OFD *)p, P(long) len, P(VOIDPTR) ubufr)
 PP(register OFD *p;)
 PP(register long len;)
@@ -171,7 +171,7 @@ PP(VOIDPTR ubufr;)
  *  ixwrite -
  */
 
-/* 306: 00e16286 */
+/* 306de: 00e16286 */
 ERROR ixwrite(P(OFD *) p, P(long) len, P(VOIDPTR) ubufr)
 PP(OFD *p;)
 PP(long len;)
@@ -188,7 +188,7 @@ PP(VOIDPTR ubufr;)
  *	Last modified	SCC	8 Apr 85
  */
 
-/* 306: 00e162ae */
+/* 306de: 00e162ae */
 ERROR makopn(P(const FCB *) f, P(DND *) dn, P(FH) h, P(int16_t) mod)
 PP(register const FCB *f;)
 PP(DND *dn;)
@@ -244,7 +244,7 @@ PP(int mod;)
  *  ixcreat - internal routine for creating files
  */
 
-/* 306: 00e163be */
+/* 306de: 00e163be */
 ERROR ixcreat(P(const char *) name, P(int8_t) attr)
 PP(const char *name;)
 PP(int8_t attr;)
@@ -364,7 +364,7 @@ PP(int8_t attr;)
  *	>0 = file handle
  */
 
-/* 306: 00e16670 */
+/* 306de: 00e16670 */
 ERROR ixopen(P(const char *) name, P(int16_t) mode)
 PP(const char *name;)
 PP(int16_t mode;)
@@ -407,7 +407,7 @@ PP(int16_t mode;)
  *
  */
 
-/* 306: 00e166e6 */
+/* 306de: 00e166e6 */
 ERROR xchmod(P(const char *) p, P(int16_t) wrt, P(char) mod)
 PP(const char *p;)
 PP(int16_t wrt;)
@@ -449,7 +449,7 @@ PP(char mod;)
  *	Function 0x57	Fdatime
  */
 
-/* 306: 00e167c4 */
+/* 306de: 00e167c4 */
 ERROR xgsdtof(P(uint16_t *) buf, P(FH) h, P(int16_t) wrt)
 PP(uint16_t *buf;)
 PP(FH h;)
@@ -504,7 +504,7 @@ PP(int16_t wrt;)
  *
  */
 
-/* 306: 00e16876 */
+/* 306de: 00e16876 */
 ERROR xunlink(P(const char *) name)
 PP(const char *name;)								/*  path name of file to delete     */
 {
@@ -547,7 +547,7 @@ PP(const char *name;)								/*  path name of file to delete     */
  * 
  */
 
-/* 306: 00e168e6 */
+/* 306de: 00e168e6 */
 ERROR ixdel(P(DND *) dn, P(FCB *) f, P(long) pos)
 PP(DND *dn;)
 PP(FCB *f;)
@@ -625,7 +625,7 @@ PP(long pos;)
  *
  */
 
-/* 306: 00e16a06 */
+/* 306de: 00e16a06 */
 ERROR xrename(P(int16_t) n, P(const char *) p1, P(const char *)p2)	/*+ rename file, old path p1, new path p2 */
 PP(int16_t n;)									/*  not used                */
 PP(const char *p1;)
@@ -719,7 +719,7 @@ PP(const char *p2;)
 }
 
 
-/* 306: 00e16c48 */
+/* 306de: 00e16c48 */
 ERROR xrendir(P(DND *) dn, P(const char *) name, P(const char *) to)
 PP(DND *dn;)
 PP(const char *name;)
@@ -757,7 +757,7 @@ PP(const char *to;)
  *		ixlseek()
  */
 
-/* 306: 00e16cf6 */
+/* 306de: 00e16cf6 */
 ERROR xlseek(P(long) n, P(int16_t) h, P(int16_t) flg)
 PP(long n;)
 PP(int16_t h;)
@@ -794,7 +794,7 @@ PP(int16_t flg;)
  *		by the BIOS or by PC DOS).
  */
 
-/* 306: 00e16d58 */
+/* 306de: 00e16d58 */
 ERROR ixlseek(P(OFD *) p, P(long) n)
 PP(register OFD *p;)								/*  file descriptor for file in use */
 PP(register long n;)								/*  number of bytes to seek     */

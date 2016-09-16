@@ -24,14 +24,14 @@ static VOID makbuf PROTO((FCB *f, DTAINFO *dt));
  *  negone - for use as parameter
  */
 
-static int32_t negone = -1L;
+STATIC int32_t negone = -1L;
 
 /*
  *  dots -, dots2  -
  */
 
-static char /* const */ dots[22] = { ".          " };
-static char /* const */ dots2[22] = { "..         " };
+STATIC char /* const */ dots[22] = { ".          " };
+STATIC char /* const */ dots2[22] = { "..         " };
 
 /*
  *  GetDnd - find a dnd with matching name
@@ -81,7 +81,7 @@ PP(register FCB *fcb;)									/*  root where we start the search  */
  *	return the pointer to the DND, not the FCB.
  */
 
-/* 306: 00e15580 */
+/* 306de: 00e15580 */
 FCB *scan(P(DND *) dnd, P(const char *) n, P(int16_t) att, P(int32_t *) posp)
 PP(register DND *dnd;)
 PP(const char *n;)
@@ -181,7 +181,7 @@ PP(int32_t *posp;)
  *	error
  */
 
-/* 306: 00e156b4 */
+/* 306de: 00e156b4 */
 static DND *dcrack(P(const char **) np)
 PP(const char **np;)
 {
@@ -233,7 +233,7 @@ PP(const char **np;)
  *  findit - find a file/dir entry
  */
 
-/* 306: 00e15750 */
+/* 306de: 00e15750 */
 DND *findit(P(const char *) name, P(const char **) sp, P(int) dflag)
 PP(const char *name;)								/*  name of file/dir            */
 PP(const char **sp;)
@@ -360,7 +360,7 @@ PP(int dflag;)								/*  T: name is for a directory      */
  *		ckdrv()
  */
 
-/* 306: 00e15876 */
+/* 306de: 00e15876 */
 ERROR xchdir(P(const char *) p)
 PP(const char *p;)
 {
@@ -425,7 +425,7 @@ found:
  *		EDRIVE
  */
 
-/* 306: 00e15972 */
+/* 306de: 00e15972 */
 ERROR xgetdir(P(char *) buf, P(int16_t) drv)					/*+ return text of current dir into specified buffer */
 PP(char *buf;)
 PP(int16_t drv;)
@@ -452,7 +452,7 @@ PP(int16_t drv;)
  *  makbuf - copy info from FCB into DTA info area
  */
 
-/* 306: 00e159f6 */
+/* 306de: 00e159f6 */
 VOID makbuf(P(FCB *) fp, P(DTAINFO *) dtp)
 PP(FCB *fp;)
 PP(DTAINFO *dtp;)
@@ -487,7 +487,7 @@ PP(DTAINFO *dtp;)
  *  dirinit -
  */
 
-/* 306: 00e15a60 */
+/* 306de: 00e15a60 */
 FCB *dirinit(P(DND *)dn)
 PP(register DND *dn;)								/*  dir descr for dir           */
 {
@@ -533,7 +533,7 @@ PP(register DND *dn;)								/*  dir descr for dir           */
  *
  */
 
-/* 306: 00e15afc */
+/* 306de: 00e15afc */
 ERROR xmkdir(P(const char *) s)
 PP(const char *s;)
 {
@@ -614,7 +614,7 @@ PP(const char *s;)
  *
  */
 
-/* 306: 00e15d08 */
+/* 306de: 00e15d08 */
 ERROR xrmdir(P(const char *)p)
 PP(const char *p;)
 {
@@ -690,7 +690,7 @@ PP(const char *p;)
  *	error code.
  */
 
-/* 306: 00e15e3a */
+/* 306de: 00e15e3a */
 ERROR ixsfirst(P(const char *) name, P(int16_t) att, P(DTAINFO *)addr)
 PP(const char *name;)								/*  name of file to match   */
 PP(int16_t att;)							/*  attribute of file       */
@@ -746,7 +746,7 @@ PP(DTAINFO *addr;)						/*  ptr to dta info         */
  *		ENMFIL
  */
 
-/* 306: 00e15f20 */
+/* 306de: 00e15f20 */
 ERROR xsnext(NOTHING)
 {
 	register DTAINFO *dt;

@@ -14,7 +14,7 @@ GEMDOS time and date functions
 /* Function 0x2A:  Tgetdate */
 /****************************/
 
-/* 306: 00e196a4 */
+/* 306de: 00e196a4 */
 int32_t xgetdate(NOTHING)
 {
 #if !GEMDOS
@@ -33,7 +33,7 @@ int32_t xgetdate(NOTHING)
 #define	MTH_BM		0x01E0
 #define	YRS_BM		0xFE00
 
-/* 306: 00e196b4 */
+/* 306de: 00e196b4 */
 int32_t xsetdate(P(int16_t) d)
 PP(int16_t d;)
 {
@@ -70,7 +70,7 @@ PP(int16_t d;)
 /* Function 0x2C:  Tgettime */
 /****************************/
 
-/* 306: 00e19732 */
+/* 306de: 00e19732 */
 int32_t xgettime(NOTHING)
 {
 #if !GEMDOS
@@ -90,7 +90,7 @@ int32_t xgettime(NOTHING)
 #define	MIN_BM		0x07E0
 #define	HRS_BM		0xF800
 
-/* 306: 00e19742 */
+/* 306de: 00e19742 */
 int32_t xsettime(P(int16_t) t)
 PP(int16_t t;)
 {

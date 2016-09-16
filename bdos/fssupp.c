@@ -20,7 +20,7 @@
  *		EFILNF
  */
 
-/* 306: 00e1726a */
+/* 306de: 00e1726a */
 ERROR xsfirst(P(const char *) name, P(int16_t) att)
 PP(const char *name;)
 PP(int16_t att;)
@@ -43,7 +43,7 @@ PP(int16_t att;)
  *	Last modified	SCC	13 May 85
  */
 
-/* 306: 00e1728c */
+/* 306de: 00e1728c */
 ERROR xcreat(P(const char *) fname, P(int8_t) attr)
 PP(const char *fname;)
 PP(int8_t attr;)
@@ -70,7 +70,7 @@ PP(int8_t attr;)
  *	Last modified	SCC	5 Apr 85
  */
 
-/* 306: 00e172c8 */
+/* 306de: 00e172c8 */
 ERROR xopen(P(const char *) fname, P(int16_t) mode)
 PP(const char *fname;)
 PP(int16_t mode;)
@@ -85,7 +85,7 @@ PP(int16_t mode;)
  *	return log base 2 of n
  */
 
-/* 306: 00e172e0 */
+/* 306de: 00e172e0 */
 int xlog2(P(int) n)
 PP(int n;)
 {
@@ -98,7 +98,7 @@ PP(int n;)
 }
 
 
-/* 306: 00e17306 */
+/* 306de: 00e17306 */
 VOID xmovs(P(int) n, P(const VOIDPTR) psrc, P(VOIDPTR) pdst)
 PP(register int n;)
 PP(const VOIDPTR psrc;)
@@ -119,7 +119,7 @@ PP(VOIDPTR pdst;)
  *	Last modified	19 Jul 85	SCC
  */
 
-/* 306: 00e17330 */
+/* 306de: 00e17330 */
 int xcmps(P(const char *) s, P(const char *) d)
 PP(register const char *s;)
 PP(register const char *d;)
@@ -137,7 +137,7 @@ PP(register const char *d;)
  *  match - utility routine to compare file names
  */
 
-/* 306: 00e1737c */
+/* 306de: 00e1737c */
 BOOLEAN match(P(const char *) s1, P(const char *) s2)
 PP(register const char *s1;)							/*  name we are checking        */
 PP(register const char *s2;)									/*  name in fcb             */
@@ -329,7 +329,7 @@ PP(register char *s2;)									/*  s2 dest         */
  *
  */
 
-/* 306: 00e17508 */
+/* 306de: 00e17508 */
 int getpath(P(const char *) p, P(char *) d, P(int) dirspec)
 PP(register const char *p;)								/*  start of path element to crack  */
 PP(char *d;)									/*  ptr to destination buffer       */
@@ -404,7 +404,7 @@ PP(char *d;)
  *
  */
 
-/* 306: 00e1761a */
+/* 306de: 00e1761a */
 char *dopath(P(DND *) p, P(char *) buf)
 PP(DND *p;)
 PP(char *buf;)
@@ -418,7 +418,7 @@ PP(char *buf;)
 }
 
 
-/* 306: 00e17662 */
+/* 306de: 00e17662 */
 int contains_dots(P(const char *) name, P(char) ill)
 PP(register const char *name;)
 PP(char ill;)

@@ -6,14 +6,11 @@
 
 /* *************************** typeahead buffer ************************* */
 /* The following data structures are used for the typeahead buffer:	  */
+/* The 3 elements are prn,aux,con */
 int32_t glbkbchart[3][KBBUFSZ];				/* The actual typeahead buffer    */
 int32_t *buptr[3];
 int32_t *beptr[3];
-
-					/* The 3 elements are prn,aux,con */
-int add[3];								/*  index of add position     */
-
-int remove[3];							/*  index of remove position      */
+int glbcolumn[3];
 
 
 VOID conbrk PROTO((FH h, int flag));
@@ -27,7 +24,6 @@ VOID newline PROTO((FH h, int startcol));
 int backsp PROTO((FH h, const char *cbuf, int retlen, int col));
 
 
-int glbcolumn[3];
 
 #define UBWORD(x) (((int) x) & 0x00ff)
 
@@ -55,7 +51,7 @@ int glbcolumn[3];
  *****************************************************************************
  */
 
-/* 306: 00e138b2 */
+/* 306de: 00e138b2 */
 int32_t constat(P(FH) h)
 PP(FH h;)
 {
@@ -76,7 +72,7 @@ PP(FH h;)
  *****************************************************************************
  */
 
-/* 306: 00e138e8 */
+/* 306de: 00e138e8 */
 int32_t xconstat(NOTHING)
 {
 	return constat(HXFORM(run->p_uft[0]));
@@ -91,7 +87,7 @@ int32_t xconstat(NOTHING)
  *****************************************************************************
  */
 
-/* 306: 00e13902 */
+/* 306de: 00e13902 */
 int32_t xconostat(NOTHING)
 {
 	return Bcostat(HXFORM(run->p_uft[1]));
@@ -106,7 +102,7 @@ int32_t xconostat(NOTHING)
  *****************************************************************************
  */
 
-/* 306: 00e13926 */
+/* 306de: 00e13926 */
 int32_t xprtostat(NOTHING)
 {
 	return Bcostat(HXFORM(run->p_uft[3]));
@@ -121,7 +117,7 @@ int32_t xprtostat(NOTHING)
  *****************************************************************************
  */
 
-/* 306: 00e1394a */
+/* 306de: 00e1394a */
 int32_t xauxistat(NOTHING)
 {
 	return constat(HXFORM(run->p_uft[2]));
@@ -136,7 +132,7 @@ int32_t xauxistat(NOTHING)
  *****************************************************************************
  */
 
-/* 306: 00e13966 */
+/* 306de: 00e13966 */
 int32_t xauxostat(NOTHING)
 {
 	return Bcostat(HXFORM(run->p_uft[2]));
@@ -147,7 +143,7 @@ int32_t xauxostat(NOTHING)
 /* check for ctrl/s */
 /* used internally  */
 /********************/
-/* 306: 00e1398a */
+/* 306de: 00e1398a */
 VOID conbrk(P(FH) h, P(int) flag)
 PP(register FH h;)
 PP(register int flag;)
@@ -189,7 +185,7 @@ PP(register int flag;)
 }
 
 
-/*  306: 00e13a3a */
+/*  306de: 00e13a3a */
 VOID buflush(P(FH) h)
 PP(FH h;)
 {
@@ -200,7 +196,7 @@ PP(FH h;)
 }
 
 
-/* 306: 00e13a7e */
+/* 306de: 00e13a7e */
 VOID conadd(P(FH) h, P(int32_t) ch)
 PP(register FH h;)
 PP(int32_t ch;)
@@ -225,7 +221,7 @@ PP(int32_t ch;)
 /* used internally*/
 /******************/
 
-/* 306: 00e13b32 */
+/* 306de: 00e13b32 */
 VOID conout(P(FH) h, P(int) ch)
 PP(register FH h;)
 PP(register int ch;)
@@ -249,7 +245,7 @@ PP(register int ch;)
  *****************************************************************************
  */
 
-/* 306: 00e13bbc */
+/* 306de: 00e13bbc */
 VOID xtabout(P(int16_t) ch)
 PP(int16_t ch;)
 {
@@ -263,7 +259,7 @@ PP(int16_t ch;)
  *****************************************************************************
  */
 
-/* 306: 00e13be0 */
+/* 306de: 00e13be0 */
 VOID tabout(P(FH) h, P(int) ch)
 PP(register FH h;)
 PP(register int ch;)									/* character to output to console   */
@@ -285,7 +281,7 @@ PP(register int ch;)									/* character to output to console   */
 /* control character expansion */
 /*******************************/
 
-/* 306: 00e13c30 */
+/* 306de: 00e13c30 */
 VOID cookdout(P(FH) h, P(int) ch)
 PP(register FH h;)
 PP(register int ch;)									/* character to output to console   */
@@ -314,7 +310,7 @@ PP(register int ch;)									/* character to output to console   */
  *****************************************************************************
  */
 
-/* 306: 00e13c7e */
+/* 306de: 00e13c7e */
 int16_t xauxout(P(int16_t) ch)
 PP(int16_t ch;)
 {
@@ -330,7 +326,7 @@ PP(int16_t ch;)
  *****************************************************************************
  */
 
-/* 306: 00e13ca6 */
+/* 306de: 00e13ca6 */
 int32_t xprtout(P(int16_t) ch)
 PP(int16_t ch;)
 {
@@ -338,7 +334,7 @@ PP(int16_t ch;)
 }
 
 
-/* 306: 00e13cce */
+/* 306de: 00e13cce */
 int32_t getch(P(FH) h)
 PP(register FH h;)
 {
@@ -366,14 +362,14 @@ PP(register FH h;)
  *****************************************************************************
  */
 
-/* 306: 00e13d7c */
+/* 306de: 00e13d7c */
 int32_t x7in(NOTHING)
 {
 	return getch(HXFORM(run->p_uft[0]));
 }
 
 
-/* 306: 00e13d98 */
+/* 306de: 00e13d98 */
 int32_t conin(P(FH) h)							/* BDOS console input function */
 PP(register FH h;)
 {
@@ -393,7 +389,7 @@ PP(register FH h;)
  *****************************************************************************
  */
 
-/* 306: 00e13dd0 */
+/* 306de: 00e13dd0 */
 int32_t xconin(NOTHING)
 {
 	return conin(HXFORM(run->p_uft[0]));
@@ -408,7 +404,7 @@ int32_t xconin(NOTHING)
  *****************************************************************************
  */
 
-/* 306: 00e13dea */
+/* 306de: 00e13dea */
 int32_t x8in(NOTHING)
 {
 	register FH h;
@@ -429,7 +425,7 @@ int32_t x8in(NOTHING)
  *****************************************************************************
  */
 
-/* 306: 00e13e22 */
+/* 306de: 00e13e22 */
 int32_t xauxin(NOTHING)
 {
 	return Bconin(HXFORM(run->p_uft[2]));
@@ -444,7 +440,7 @@ int32_t xauxin(NOTHING)
  *****************************************************************************
  */
 
-/* 306: 00e13e46 */
+/* 306de: 00e13e46 */
 int32_t rawconio(P(int16_t) parm)
 PP(int16_t parm;)
 {
@@ -467,7 +463,7 @@ PP(int16_t parm;)
  *****************************************************************************
  */
 
-/* 306: 00e13ea6 */
+/* 306de: 00e13ea6 */
 VOID xprt_line(P(const char *) p)
 PP(const char *p;)
 {
@@ -475,7 +471,7 @@ PP(const char *p;)
 }
 
 
-/* 306: 00e13ec6 */
+/* 306de: 00e13ec6 */
 VOID prt_line(P(FH) h, P(const char *) p)
 PP(register FH h;)
 PP(register const char *p;)
@@ -491,7 +487,7 @@ PP(register const char *p;)
 
 /* Two subroutines first */
 
-/* 306: 00e13ef4 */
+/* 306de: 00e13ef4 */
 VOID newline(P(FH) h, P(int) startcol)
 PP(register int startcol;)
 PP(register FH h;)
@@ -507,7 +503,7 @@ PP(register FH h;)
 
 
 /* backspace one character position */
-/* 306: 00e13f3a */
+/* 306de: 00e13f3a */
 int backsp(P(FH) h, P(const char *) cbuf, P(int) retlen, P(int) col)
 PP(FH h;)
 PP(const char *cbuf;)
@@ -555,7 +551,7 @@ PP(int col;)								/* starting console column  */
  *****************************************************************************
  */
 
-/* 306: 00e13fd6 */
+/* 306de: 00e13fd6 */
 VOID readline(P(char *) p)
 PP(register char *p;)								/* max length, return length, buffer space */
 {
@@ -563,7 +559,7 @@ PP(register char *p;)								/* max length, return length, buffer space */
 }
 
 
-/* 306: 00e14012 */
+/* 306de: 00e14012 */
 int cgets(P(FH) h, P(int) maxlen, P(char *) buf)
 PP(register FH h;)									/* h is special handle denoting device number */
 PP(int maxlen;)

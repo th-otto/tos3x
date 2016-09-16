@@ -57,7 +57,7 @@ xjmp_buf bakbuf;
  *	Function 0x31	Ptermres
  */
 
-/* 306: 00e176d6 */
+/* 306de: 00e176d6 */
 VOID xtermres(P(int32_t) blkln, P(int16_t) rc)
 PP(int32_t blkln;)
 PP(int16_t rc;)

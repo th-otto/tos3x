@@ -78,3 +78,6 @@ VOID xlongjmp PROTO((xjmp_buf buf, int32_t rc));
  */
 long lmul PROTO((long l1, long l2));
 long ldiv PROTO((long l1, long l2));
+
+
+#define STATIC
