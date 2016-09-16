@@ -1,5 +1,4 @@
 BDOS_OBJS1 = \
-	vars.o \
 	osinit.o \
 	lmul.o \
 	ldiv.o \

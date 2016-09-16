@@ -8,12 +8,12 @@ include ../GNUmakefile.common
 include ../Makefile.silent
 CC += -mshort
 
-LIBS =
-
 CPPFLAGS = -I../common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-all: bdos.a
+include bdos.lng
+
+all: vars.o bdos.a
 
 include SRCFILES
 
