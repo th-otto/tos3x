@@ -1049,7 +1049,10 @@ PP(register int d;)									/* has this drive been accessed, or had a media chan
 	register drvmask mask;
 	register int i;
 	register BPB *b;
-
+	long unused;
+	
+	UNUSED(unused);
+	
 	mask = DRVMASK(d);
 
 	if (!(mask & drvsel))

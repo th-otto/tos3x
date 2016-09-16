@@ -15,10 +15,7 @@
  */
 
 extern MPB pmd;
-extern int16_t osmem[];
-extern int16_t osmlen;
 extern VOIDPTR root[20];
-extern int16_t osmptr;
 extern PD ospd;
 
 VOID xminit PROTO((NOTHING));

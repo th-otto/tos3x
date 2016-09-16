@@ -7,7 +7,6 @@
  *  code macros
  */
 
-#define MGET(x) ((x *) xmgetblk((sizeof(x) + 15)>>4))
 #define rwabs(wrtflg,buf,count,rec,drive) if((rwerr=Rwabs(wrtflg,buf,count,rec,drive))!=0){errdrv=drive;xlongjmp(errbuf,rwerr);}
 #define rwabsw(buf,count,rec,drive) if((rwerr=Rwabsw(buf,count,rec,drive))!=0){errdrv=drive;xlongjmp(errbuf,rwerr);}
 #define rwabsr(buf,count,rec,drive) if((rwerr=Rwabsr(buf,count,rec,drive))!=0){errdrv=drive;xlongjmp(errbuf,rwerr);}
@@ -162,12 +161,18 @@ FTAB
 *******************************************
 */
 
+#if GEMDOS
+#define	H_Print		(-3)
+#define	H_Aux		(-2)
+#define	H_Console	(-1)
+#else
 #define	H_Null		(-1)		/* not passed through to BIOS	*/
 #define	H_Print		(-2)
 #define	H_Aux		(-3)
 #define	H_Console	(-4)
 #define	H_Clock		(-5)
 #define	H_Mouse		(-6)
+#endif
 
 
 /****************************************
@@ -355,9 +360,6 @@ ERROR opnfil PROTO((const FCB *f, DND *dn, int16_t mod));
 ERROR makopn PROTO((const FCB *f, DND *dn, FH h, int16_t mod));
 ERROR ixclose PROTO((OFD *fd, int part));
 ERROR ixdel PROTO((DND *dn, FCB *f, long pos));
-
-VOIDPTR xmgetblk PROTO((int i));
-VOID xmfrebblk PROTO((VOIDPTR m));
 
 VOID ixterm PROTO((PD *r));
 

@@ -519,16 +519,16 @@ PP(PD *pdptr;)
 	register char *rp;				/*  relocation info pointer */
 	register char *relocstart;
 	int32_t *cp;					/*  code pointer        */
-	intptr_t tbase; /* -8 */		/*  base addr of text segment   */
-	int32_t addr; /* -12 */
-	int32_t flen; /* -16 */
+	intptr_t tbase;					/*  base addr of text segment   */
+	int32_t addr;
+	int32_t flen;
 	int32_t unused;
-	int32_t fixbase; /* -24 */
-	int32_t relst; /* -28 */
+	int32_t fixbase;
+	int32_t relst;
 	int32_t rlen;					/*  nbr of relocation bytes */
 	register short c;
-	int32_t blen; /* -36 */
-	int32_t tpalen; /* -40 */
+	int32_t blen;
+	int32_t tpalen;
 	register int32_t fixp;
 	register int32_t n;
 

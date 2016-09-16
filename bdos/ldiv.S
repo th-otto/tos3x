@@ -15,7 +15,7 @@ ldiv:
 	move.l #$80000000,_ldivr
 	move.l #$80000000,d0
 	divs.w #$0000,d0
-	bra L1
+	bra.s L1
 L2:
 	bge L3
 	neg.l d6
@@ -71,7 +71,7 @@ L16:
 	move.l d7,_ldivr
 	move.l d5,d0
 L1:
-	tst.l (sp)+
+	addq.l    #4,a7
 	movem.l (sp)+,d3-d7
 	unlk a6
 	rts

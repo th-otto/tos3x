@@ -20,7 +20,13 @@ fstrt: ds.l 1
 old_tik: ds.l 1
 old_2: ds.l 1
 
-    ds.b $40c
+    ds.l 1
+    ds.l 1
+    
+    xdef _msec
+_msec: ds.w 1
+
+    ds.b $402
     
     xdef _supstk
 _supstk: ds.w SUPSIZ
@@ -149,7 +155,12 @@ _drvtbl: ds.l 16
 	xdef _drvsel
 _drvsel: ds.w 1
 
-    ds.b $16
+    ds.b $10
+    
+    xdef _uptime
+_uptime: ds.l 1
+
+    ds.w 1
     
 	xdef _errdrv
 _errdrv: ds.w 1
@@ -174,3 +185,9 @@ _bcbx: ds.b 4*20
 
     xdef _beptr
 _beptr: ds.l 3
+
+
+	xdef _zeromem
+_zeromem equ $00e01680
+	xdef vdidsp
+vdidsp   equ $00e078b4

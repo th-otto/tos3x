@@ -15,16 +15,15 @@ BDOS_OBJS2 = \
 	fsmain.o \
 	fssupp.o \
 	proc.o \
-	kpgmld.o \
+	$(empty)
 
 BDOS_OBJS3 = \
 	fsglob.o \
+	umem.o \
 	osmem.o \
 	bdosmain.o \
 	sup.o \
 	time.o \
-	umem.o \
-	rwa.o \
 	$(empty)
 
 BDOS_OBJS = $(BDOS_OBJS1) $(BDOS_OBJS2) $(BDOS_OBJS3)

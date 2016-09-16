@@ -9,12 +9,6 @@
 /* should actually be offsetof(struct FOFD, buf) */
 #define MD_OFFSET (sizeof(FOFD *) + 2)
 
-/*
- *  osmptr - 
- */
-
-int16_t osmptr;
-
 static MD *mdfind PROTO((FOFD **p1, int *a, FOFD *p));
 int mdlink PROTO((MD *m, MD *p));
 

@@ -885,7 +885,7 @@ PP(FCB *b;)
 				p1->d_files = (OFD *) 0;
 				if (p1->d_ofd)
 				{
-					xmfreblk(p1->d_ofd);
+					oftdel(p1->d_ofd);
 				}
 				break;
 			}

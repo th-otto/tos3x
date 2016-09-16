@@ -15,10 +15,8 @@
  *  local constants
  */
 
-#define LENOSM 4000
 
-
-int8_t const stddev[NUMSTD] = { H_Null, H_Null, H_Print, H_Aux, H_Null, H_Null };
+int8_t const stddev[NUMSTD] = { H_Console, H_Console, H_Aux, H_Print, H_Console, H_Console };
 
 /*
  *  forward declarations
@@ -33,6 +31,8 @@ int32_t S_GetVec PROTO((int16_t n));
 VOID freetree PROTO((DND *d));
 VOID offree PROTO((DMD *d));
 int32_t osif PROTO((int16_t *));
+ERROR chgdrv PROTO((int16_t drv, ERROR rc));
+ERROR adddrv PROTO((int16_t drv, ERROR rc));
 VOID tikfrk PROTO((int n));
 
 
@@ -57,9 +57,6 @@ int const nday[] =
 
 MPB pmd;
 
-int16_t osmlen;
-
-int16_t osmem[LENOSM];
 
 
 
@@ -86,7 +83,7 @@ FND
  */
 
 #ifdef __ALCYON__
-#define GDF /* does not casts in initialization */ 
+#define GDF /* does not like casts in initialization */ 
 #else
 #define GDF (gdf)
 #endif
@@ -277,20 +274,24 @@ VOID cinit(NOTHING)
 	register int32_t *p;
 	register int i;
 	
+	osminit();
 	xminit();
-	osmlen = LENOSM;
 	r = run = &ospd;
 	for (p = (int32_t *)r, i = sizeof(*r) / sizeof(*p); i != 0; i--)
 		*p++ = 0;
 
 	/* set up system initial standard handles */
 	for (i = 0; i < NUMSTD; i++)
-		r->p_uft[0] = stddev[i];
+		r->p_uft[i] = stddev[i];
 
+	fill[0] = fill[1] = fill[2] = 0;
+	
 	buptr[0] = beptr[0] = glbkbchar[0];
 	buptr[1] = beptr[1] = glbkbchar[1];
 	buptr[2] = beptr[2] = glbkbchar[2];
 
+	osuser = 0;
+	
 #if !GEMDOS
 	date_time(GET_DATE, &date);			/* allow bios to initialise date and */
 	date_time(GET_TIME, &time);			/* time from hardware, if supported */
@@ -302,10 +303,11 @@ VOID cinit(NOTHING)
  *  freetree -  free the directory node tree
  */
 
+/* 306: 00e18bb6 */
 VOID freetree(P(DND *)d)
 PP(DND *d;)
 {
-	int i;
+	register int i;
 
 	if (d->d_left)
 		freetree(d->d_left);
@@ -313,17 +315,17 @@ PP(DND *d;)
 		freetree(d->d_right);
 	if (d->d_ofd)
 	{
-		xmfreblk(d->d_ofd);
+		oftdel(d->d_ofd);
 	}
 	for (i = 0; i < NCURDIR; i++)
 	{
 		if (dirtbl[i] == d)
 		{
 			dirtbl[i] = 0;
-			diruse[i] = 0;
+			/* diruse[i] = 0; */
 		}
 	}
-	xmfreblk(d);
+	oftdel((OFD *)d);
 }
 
 
@@ -331,17 +333,18 @@ PP(DND *d;)
  *  offree -
  */
 
+/* 306: 00e18c46 */
 VOID offree(P(DMD *) d)
 PP(DMD *d;)
 {
-	int i;
-	OFD *f;
+	register int i;
+	register OFD *f;
 
-	for (i = 0; i < OPNFILES; i++)
+	for (i = 0; i < (OPNFILES - NUMSTD); i++)
 		if (((long) (f = sft[i].f_ofd)) > 0L)
 			if (f->o_dmd == d)
 			{
-				xmfreblk(f);
+				oftdel(f);
 				sft[i].f_ofd = 0;
 				sft[i].f_own = 0;
 				sft[i].f_use = 0;
@@ -361,8 +364,8 @@ PP(DMD *d;)
 
 int32_t osif2 PROTO((int16_t *));
 
-long osif(int16_t *pw)
-int16_t *pw;
+int32_t osif(P(int16_t *) pw)
+PP(int16_t *pw;)
 {
 	in16_t *p;
 	int32_t r;
@@ -395,15 +398,20 @@ PP(int16_t *pw;)
 	char *volatile pb2;
 	char *volatile p;
 	char ctmp;
-	BPB *volatile b;
 	BCB *volatile bx;
-	DND *volatile dn;
-	volatile int typ, h, i, fn;
-	volatile int num, max;
+	volatile int typ;
+	volatile int h;
+	volatile int i;
+	volatile int fn;
+	volatile int num;
+	volatile int max;
 	volatile ERROR rc;
 	volatile long numl;
 	const FND *volatile f;
-
+	volatile long cnt;
+	volatile long j;
+	volatile OFD *fd;
+	
 	osuser++;
 	oscnt = 0;
   restrt:
@@ -419,34 +427,9 @@ PP(int16_t *pw;)
 		/* is this a media change ? */
 
 		if (rc == E_CHNG)
-		{								/* first, out with the old stuff */
-			dn = drvtbl[errdrv]->m_dtl;
-			offree(drvtbl[errdrv]);
-			xmfreblk(drvtbl[errdrv]);
-			drvtbl[errdrv] = 0;
-
-			if (dn)
-				freetree(dn);
-
-			for (i = 0; i < 2; i++)
-				for (bx = bufl[i]; bx; bx = bx->b_link)
-					if (bx->b_bufdrv == errdrv)
-						bx->b_bufdrv = -1;
-
-			/* then, in with the new */
-
-			b = Getbpb(errdrv);
-			if ((ERROR) b <= 0)
-			{
-				drvsel &= ~DRVMASK(errdrv);
-				if ((ERROR) b)
-					return (ERROR) b;
+		{
+			if ((rc = chgdrv(errdrv, rc)))
 				return rc;
-			}
-			
-			if (login(b, errdrv))
-				return E_NSMEM;
-
 			rwerr = 0;
 			errdrv = 0;
 			goto restrt;
@@ -464,40 +447,55 @@ PP(int16_t *pw;)
 	f = &funcs[fn];
 	typ = f->fntyp;
 
-	if (typ && fn && ((fn < 12) || ((fn >= 16) && (fn <= 19))))	/* std funcs */
+	if (typ && fn && (fn < 12 || (fn >= 16 && fn <= 19)))	/* std funcs */
 	{
-		if ((h = run->p_uft[typ & 0x7f]) > 0)
+		if (fn == 6) /* Crawio */
+		{
+			typ = (pw[1] == 0xff ? 0 : 1) + 0x80;
+		}
+		h = run->p_uft[typ & 0x7f];
+		if (h > 0)
 		{								/* do std dev function from a file */
 			switch (fn)
 			{
-			case 6:
+			case 6:                 /* Crawio() */
 				if (pw[1] != 0xFF)
 					goto rawout;
-			case 1:
-			case 3:
-			case 7:
-			case 8:
+			case 1:                 /* Cconin() */
+			case 3:                 /* Cauxin() */
+			case 7:                 /* Crawcin() */
+			case 8:                 /* Cnecin() */
+				if (xread(h, 1L, &ctmp) == 1)
+					return ctmp;
+				else
+					return 0;
+				/* old code; never reached */
 				xread(h, 1L, &ctmp);
 				return ctmp;
-
-			case 2:
-			case 4:
+			case 2:                 /* Cconout */
+			case 4:                 /* Cauxout() */
 			case 5:
 				/* write the char in the int at pw[1] */
 			  rawout:
-				return xwrite(h, 1L, ((char *) &pw[1]) + 1);
-
-			case 9:
+				xwrite(h, 1L, ((char *) &pw[1]) + 1);
+				return E_OK; /* returned result of xwrite in previous versions??? */
+				
+			case 9:                 /* Cconws() */
 				pb2 = *((char **) &pw[1]);
-				while (*pb2)
-					xwrite(h, 1L, pb2++);
-#ifdef __ALCYON__
-				return; /* BUG: return without value */
-#else
-				return E_OK;
-#endif
+				for (j = 0; pb2[j]; j++)
+					;
+				if ((cnt = xwrite(h, j, pb2)) < 0)
+				{
+					return cnt;
+				} else if (cnt < j)
+				{
+					return ERR;
+				} else
+				{
+					return E_OK;
+				}
 
-			case 10:
+			case 10:                /* Cconrs() */
 				pb2 = *((char **) &pw[1]);
 				max = *pb2++;
 				p = pb2 + 1;
@@ -517,19 +515,27 @@ PP(int16_t *pw;)
 				*pb2 = i;
 				return 0;
 
-			case 11:
-			case 16:
-			case 17:
-			case 18:
-			case 19:
-				return 0xFF;
+			case 11:                /* Cconis() */
+			case 16:                /* Cconos() */
+			case 17:                /* Cprnos() */
+			case 18:                /* Cauxis() */
+			case 19:                /* Cauxos() */
+				if (!(fd = getofd(h)))
+					return 0;
+				if (fd->o_bytnum != fd->o_fileln)
+					return -1;
+				return 0;
+				return -1; /* not reached */
+				break; /* not reached */
 			}
 		}
-
+		
+#if 0 /* disabled??? */
 		if (h == H_Null)
 			return 0;
+#endif
 
-		if ((fn == 10) || (fn == 9))
+		if (fn == 10 || fn == 9)
 			typ = 1;
 		else
 			typ = 0;
@@ -543,35 +549,42 @@ PP(int16_t *pw;)
 			h = pw[1];
 
 		if (h >= NUMSTD)
+		{
 			numl = (long) sft[h - NUMSTD].f_ofd;
-		else if (h >= 0)
+		} else if (h >= 0)
 		{
 			if ((h = run->p_uft[h]) > 0)
 				numl = (long) sft[h - NUMSTD].f_ofd;
 			else
 				numl = h;
 		} else
+		{
 			numl = h;
-
+		}
+		
 		if (!numl)
 			return E_IHNDL;			/* invalid handle: media change, etc */
 
 		if (numl < 0)
-		{								/* nul, prn, aux, con, clock, mouse */
-			/* -1   -2   -3   -4   -5     -6    */
+		{
+			/* prn, aux, con */
+			/* -3   -2   -1  */
 
+#if 0 /* disabled??? */
 			if ((num = numl) == H_Null)
 				return 0;				/* NUL: always returns 0    */
 
 			/*  check for valid handle  */
 			if (num < -6)
 				return E_IHNDL;
-
+#endif
+			
+			num = numl;
 			pb = (char **) &pw[4];
 
 			/* only do things on read and write */
 
-			if (fn == 0x3f)				/* read */
+			if (fn == 0x3f)				/* Fread */
 			{
 				if (pw[2])				/* disallow HUGE reads      */
 					return 0;
@@ -585,28 +598,33 @@ PP(int16_t *pw;)
 				return cgets(HXFORM(num), pw[3], *pb);
 			}
 
-			if (fn == 0x40)				/* write */
+			if (fn == 0x40)				/* Fwrite */
 			{
+#if 0
 				if (pw[2])				/* disallow HUGE writes     */
 					return 0;
+#endif
 
 				pb2 = *pb;				/* char * is buffer address */
 
-
-				for (i = 0; i < pw[3]; i++)
+				num += 3; /* should be: num = HXFORM(num); */
+				numl = *((int32_t *)&pw[2]);
+				while (numl--)
 				{
-					if (num == H_Console)
+					if (num == BFHCON)
 					{
-						tabout(HXFORM(num), *pb2++);
+						tabout(num, *pb2++);
 					} else
 					{
-						rc = Bconout(HXFORM(num), *pb2++);
+						/* rc = */ Bconout(num, *pb2++);
+#if 0 /* check disabled??? */
 						if (rc < 0)
 							return rc;
+#endif
 					}
 				}
 
-				return pw[3];
+				return *((int32_t *)&pw[2]);
 			}
 
 			return 0;
@@ -616,18 +634,27 @@ PP(int16_t *pw;)
 	if (fn == 0x3d || fn == 0x3c)	/* open, create */
 	{
 		p = *((char **) &pw[1]);
+#if GEMDOS
+		if (ncmps(5, p, "CON:") || ncmps(5, p, "con:"))
+			rc = 0x0000ffffL; /* should be ((uint16_t)H_Console), but stupid Alcyon sign extends it */
+		else if (ncmps(5, p, "AUX:") || ncmps(5, p, "aux:"))
+			rc = 0x0000fffel; /* should be ((uint16_t)H_Aux), but stupid Alcyon sign extends it */
+		else if (ncmps(5, p, "PRN:") || ncmps(5, p, "prn:"))
+			rc = 0x0000fffdl; /* should be ((uint16_t)H_Print), but stupid Alcyon sign extends it */
+#else
 		if (ncmps(5, p, "NUL:"))
-			rc = H_Null;
+			rc = (uint16_t)H_Null;
 		else if (ncmps(5, p, "PRN:"))
-			rc = H_Print;
+			rc = (uint16_t)H_Print;
 		else if (ncmps(5, p, "AUX:"))
-			rc = H_Aux;
+			rc = (uint16_t)H_Aux;
 		else if (ncmps(5, p, "CON:"))
-			rc = H_Console;
+			rc = (uint16_t)H_Console;
 		else if (ncmps(7, p, "CLOCK:"))
-			rc = H_Clock;
+			rc = (uint16_t)H_Clock;
 		else if (ncmps(7, p, "MOUSE:"))
-			rc = H_Mouse;
+			rc = (uint16_t)H_Mouse;
+#endif
 	}
 	if (!rc)
 	{
@@ -653,6 +680,8 @@ PP(int16_t *pw;)
 	return rc;
 }
 
+
+#if !GEMDOS
 
 /******************************************************************************
  *
@@ -688,16 +717,18 @@ PP(int16_t n;)
 	return trap13(5, n, -1L);			/* pass to BIOS to get it   */
 }
 
+#endif
 
 
 /*
  *  tikfrk -
  */
 
+/* 306de: 00e193ac */
 VOID tikfrk(P(int) n)
 PP(int n;)
 {
-	int curmo;
+	register int curmo;
 
 	uptime += n;
 	msec += n;
@@ -720,7 +751,7 @@ PP(int n;)
 		time &= 0xF81F;
 		time += 0x0800;
 
-		if ((time & 0xF800) != (24 << 11))
+		if ((time & 0xF800) != (int16_t)(24 << 11))
 			return;
 
 		time = 0;
@@ -760,4 +791,70 @@ PP(int n;)
 		date &= 0xFE00;					/* bump year */
 		date += 0x0221;
 	}
+}
+
+
+/* 306de: 00e194ec */
+ERROR chgdrv(P(int16_t) drv, P(ERROR) rc)
+PP(int16_t drv;)
+PP(ERROR rc;)
+{
+	int i;
+	DND *dn;
+	BCB *bx;
+	long unused;
+	
+	UNUSED(unused);
+	
+	/* first, out with the old stuff */
+	dn = drvtbl[drv]->m_dtl;
+	offree(drvtbl[drv]);
+	if (drvtbl[drv]->m_fatofd)
+		oftdel(drvtbl[drv]->m_fatofd);
+
+	for (i = 0; i < NCURDIR; i++)
+	{
+		if (diruse[i])
+		{
+			if (dirtbl[i]->d_drv == dn->d_drv)
+			{
+				diruse[i] = 0;
+				dirtbl[i] = NULL;
+			}
+		}
+	}
+	
+	if (dn)
+		freetree(dn);
+
+	oftdel((OFD *)drvtbl[drv]);
+	drvtbl[drv] = NULL;
+
+	for (i = 0; i < 2; i++)
+		for (bx = bufl[i]; bx; bx = bx->b_link)
+			if (bx->b_bufdrv == drv)
+				bx->b_bufdrv = -1;
+
+	/* then, in with the new */
+	return adddrv(drv, rc);
+}
+
+
+/* 306de: 00e1964e */
+ERROR adddrv(P(int16_t) drv, P(ERROR) rc)
+PP(int16_t drv;)
+PP(ERROR rc;)
+{
+	register BPB *b;
+
+	b = Getbpb(drv);
+	if (b == NULL)
+	{
+		drvsel &= ~DRVMASK(drv);
+		return rc;
+	}
+	
+	if (login(b, drv))
+		return E_NSMEM;
+	return E_OK;
 }

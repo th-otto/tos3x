@@ -71,4 +71,10 @@ extern xjmp_buf errbuf;		/*  in sup.c			*/
 
 int32_t xsetjmp PROTO((xjmp_buf buf));
 VOID xlongjmp PROTO((xjmp_buf buf, int32_t rc));
+
+
+/*
+ * compiler support routines for long integer multiply/divide
+ */
 long lmul PROTO((long l1, long l2));
+long ldiv PROTO((long l1, long l2));
