@@ -14,10 +14,6 @@
  * KTB Karl T. Braun (kral)
  */
 
-#ifndef PD_H
-#include "pd.h"
-#endif
-
 /*
  *  Type declarations
  */
@@ -45,6 +41,10 @@
 #else
 #define drvmask int16_t
 #define DRVMASK(d) (1 << (d))
+#endif
+
+#ifndef PD_H
+#include "pd.h"
 #endif
 
 

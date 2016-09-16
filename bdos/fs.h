@@ -359,8 +359,6 @@ ERROR ixdel PROTO((DND *dn, FCB *f, long pos));
 VOIDPTR xmgetblk PROTO((int i));
 VOID xmfrebblk PROTO((VOIDPTR m));
 
-ERROR xpgmld PROTO((const char *s, PD *p));
-
 VOID ixterm PROTO((PD *r));
 
 VOID tabout PROTO((FH h, int ch));

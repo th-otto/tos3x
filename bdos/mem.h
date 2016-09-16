@@ -7,8 +7,8 @@
 /* allowed values for Mxalloc mode: */
 #define MX_STRAM 0
 #define MX_TTRAM 1
-#define MX_PREFSTRAM 2
-#define MX_PREFTTRAM 3
+#define MX_PSTRAM 2  /* MX_PREFSTRAM; renamed because of 8-char identifier limit */
+#define MX_PTTRAM 3  /* MX_PREFTTRAM; renamed because of 8-char identifier limit */
 
 /*
  *  externals

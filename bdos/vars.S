@@ -1,10 +1,11 @@
 OPNFILES equ 81
 NCURDIR equ 40
 KBBUFSZ equ 80
+SUPSIZ equ 1024
     
 	bss
 
-*	ds.b $800
+*	ds.b $800       ; the BIOS vars go here
 	
 	ds.b $3b22
     
@@ -19,8 +20,17 @@ fstrt: ds.l 1
 old_tik: ds.l 1
 old_2: ds.l 1
 
-    ds.b $c10
+    ds.b $40c
     
+    xdef _supstk
+_supstk: ds.w SUPSIZ
+
+	ds.b 1
+	even
+	
+	ds.b 1
+	even
+	
 	xdef _time
 _time: ds.w 1
 
@@ -104,7 +114,10 @@ _run: ds.l 1
 	xdef _fill
 _fill: ds.b 4
 
-    ds.b $54
+	xdef _bakbuf
+_bakbuf: ds.l 3
+
+    ds.b $48
     
 	xdef _secbuf
 _secbuf: ds.b 4*512

@@ -139,8 +139,8 @@ PP(int16_t mode;)
 		if (q == NULL)
 			return NULL;
 		break;
-	case MX_PREFSTRAM:
-	case MX_PREFTTRAM:
+	case MX_PSTRAM:
+	case MX_PTTRAM:
 		while (q != NULL && q->m_length < amount)
 		{
 			p = q;
@@ -148,7 +148,7 @@ PP(int16_t mode;)
 		}
 		if (q == NULL)
 			return NULL;
-		if ((q->m_start & M_ALTFLAG) || mode == MX_PREFSTRAM)
+		if ((q->m_start & M_ALTFLAG) || mode == MX_PSTRAM)
 			break;
 		q1 = q;
 		p1 = p;
@@ -397,8 +397,8 @@ PP(int16_t mode;)
 int32_t xmalloc(P(int32_t) amount)
 PP(int32_t amount;)
 {
-	if (run->p_flags & PF_TTRAMMEM)
-		return xmxalloc(amount, MX_PREFTTRAM);
+	if (run->p_flags & PF_ALLOCTTRAM)
+		return xmxalloc(amount, MX_PTTRAM);
 	else
 		return xmxalloc(amount, MX_STRAM);
 }

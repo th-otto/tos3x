@@ -31,8 +31,8 @@ DTAINFO
  *  PD - Process Descriptor
  */
 
-#define PDCLSIZE    0x80    /*  size of command line in bytes  */
-#define NUMCURDIR   26      /* number of entries in curdir array */
+#define PDCLSIZE    0x80           /*  size of command line in bytes  */
+#define NUMCURDIR   BLKDEVNUM      /* number of entries in curdir array */
 
 typedef struct _pd PD;
 struct _pd
@@ -54,7 +54,7 @@ struct _pd
 	/*  55 */ int8_t	 p_curdrv;
 	/*  56 */ int32_t    p_1fill[2];
 	/*  64 */ int8_t	 p_curdir[NUMCURDIR];	  /* index into sys dir table */
-	/*  90 */ int8_t	 p_2fill[32-NUMCURDIR];
+	/*  80 */ int8_t	 p_2fill[32-NUMCURDIR];
 	/*  96 */ int32_t    p_3fill[2];
 	/* 104 */ int32_t    p_dreg[1];		/* dreg[0] */
 	/* 108 */ int32_t    p_areg[5];		/* areg[3..7] */
@@ -64,8 +64,8 @@ struct _pd
 
 /* p_flags values: */
 #define PF_FASTLOAD     0x0001
-#define PF_TTRAMLOAD    0x0002
-#define PF_TTRAMMEM     0x0004
+#define PF_LOADTTRAM    0x0002 /* PF_TTRAMLOAD; renamed because of 8-char identifier limit */
+#define PF_ALLOCTTRAM   0x0004 /* PF_TTRAMMEM; renamed because of 8-char identifier limit */
 
 extern PD *run; /* Pointer to the basepage of the current process */
 
