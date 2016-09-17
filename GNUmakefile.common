@@ -50,6 +50,7 @@ TOUCH = touch
 MKDIR = mkdir
 MKDIR_P = $(MKDIR) -p
 SED   = sed
+AWK   = awk
 
 #
 # optimizations

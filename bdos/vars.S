@@ -2,10 +2,11 @@ OPNFILES equ 81
 NCURDIR equ 40
 KBBUFSZ equ 80
 SUPSIZ equ 1024
+MAXQUICK equ 4
     
 	bss
 
-*	ds.b $800       ; the BIOS vars go here
+	ds.b $800       ; the BIOS vars go here
 	
 	ds.b $3b22
     
@@ -40,7 +41,10 @@ _supstk: ds.w SUPSIZ
 	xdef _time
 _time: ds.w 1
 
-	ds.b $18
+	ds.b 8
+
+	xdef _root
+_root: ds.l MAXQUICK
 
 	xdef _ofdfree
 _ofdfree: ds.l 1

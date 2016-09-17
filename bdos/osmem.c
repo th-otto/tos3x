@@ -19,6 +19,8 @@ static FOFD *getosm PROTO((NOTHING));
 
 FOFD ofdbuf[80];
 FOFD *ofdlist;
+#define MAXQUICK 4
+int16_t *root[MAXQUICK];
 FOFD *ofdfree;
 
 

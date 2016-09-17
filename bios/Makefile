@@ -1,7 +1,7 @@
 include ../Makefile.common
 include ../Makefile.silent
 
-LIBS = ${LIBC}
+include ../language.mak
 
 all: bios.a
 
@@ -9,6 +9,14 @@ include SRCFILES
 
 bios.a: $(BIOS_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(BIOS_OBJS)
+
+startup.o: startup.S header.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+header.h:
+	$(AWK) -f ../tools/mkheader.awk $(LANG) > $@
 
 check::
 

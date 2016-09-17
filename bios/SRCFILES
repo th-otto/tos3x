@@ -1,3 +1,4 @@
 BIOS_OBJS = \
 	tosvars.o \
+	startup.o \
 	$(empty)

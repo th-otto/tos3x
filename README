@@ -1,0 +1,6 @@
+
+- Don't put comments after constants that are used in assembler
+  expressions. Since it is a K&R preprocessor, the spaces between
+  the constant and the comment will make it to the source, and
+  the assembler does not like spaces in operands.
+

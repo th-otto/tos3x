@@ -26,6 +26,20 @@ LIBM_NDX=libm.ndx
 NOFLOAT=nofloat.o
 LDFLAGS=
 
+# 
+# some tools
+# 
+YACC  = bison -dk
+LEX   = flex
+MV    = mv
+CP    = cp
+RM    = rm -f
+TOUCH = touch
+MKDIR = mkdir
+MKDIR_P = $(MKDIR) -p
+SED   = sed
+AWK   = awk
+
 # Wether to run the optimizer pass.
 # the default is evaluated by RUN_OPTIMIZE_,
 # which must be either ${RUN_OPTIMIZE_0} or ${RUN_OPTIMIZE_1}.
@@ -34,6 +48,8 @@ LDFLAGS=
 RUN_OPTIMIZE_0 = \#
 RUN_OPTIMIZE_1 = ${BIN}optimize${EXEEXT} $*.s > NUL: ; sed -e 's/move.l #$$[0],-(sp)/clr.l -(sp)/' $*.s > $*.1; mv $*.1 $*.s
 RUN_OPTIMIZE_ = ${RUN_OPTIMIZE_1}
+
+.SUFFIXES: .c .S .s .o .oo
 
 .c.o:
 	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
@@ -45,3 +61,9 @@ RUN_OPTIMIZE_ = ${RUN_OPTIMIZE_1}
 
 .s.o:
 	$(AM_V_AS)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s
+
+.S.o:
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
