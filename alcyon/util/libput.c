@@ -21,8 +21,9 @@ int lputl(P(long *) lp, P(FILE *) f)			/* returns 0 for success, -1 for failure 
 PP(register long *lp;)
 PP(register FILE *f;)
 {
-	register long l = *lp;
+	register long l;
 	
+	l = *lp;
 	putc((int)((l >> 24) & 0xff), f);
 	putc((int)((l >> 16) & 0xff), f);
 	putc((int)((l >>  8) & 0xff), f);
@@ -34,8 +35,9 @@ int lputw(P(unsigned short *) wp, P(FILE *) f)			/* returns 0 for success, -1 fo
 PP(register unsigned short *wp;)
 PP(register FILE *f;)
 {
-	register unsigned short w = *wp;
+	register unsigned short w;
 	
+	w = *wp;
 	putc((int)((w >>  8) & 0xff), f);
 	putc((int)(w) & 0xff, f);
 	return ferror(f) ? EOF : 0;
