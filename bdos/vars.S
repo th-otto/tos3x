@@ -1,3 +1,10 @@
+*
+* common variables
+*
+* This file is only used when linking a single module,
+* to get the same addresses as when linking the whole ROM
+*
+
 OPNFILES equ 81
 NCURDIR equ 40
 KBBUFSZ equ 80
@@ -6,19 +13,25 @@ MAXQUICK equ 4
     
 	bss
 
-	ds.b $800       ; the BIOS vars go here
+*	ds.b $800       ; the BIOS vars go here
 	
 	ds.b $3b22
-    
+
+	xdef biosav
 biosav: ds.l 1
 
     ds.l 1 ; unused
 
+	xdef savesr
 savesr: ds.w 1
 
+	xdef fstack
 fstack: ds.w 1034
+	xdef fstrt
 fstrt: ds.l 1
+	xdef old_tik
 old_tik: ds.l 1
+	xdef old_2
 old_2: ds.l 1
 
     ds.l 1
@@ -191,6 +204,10 @@ _bcbx: ds.b 4*20
 _beptr: ds.l 3
 
 
+*
+* These 2 functions are referenced by GEMDOS,
+* but are defined elsewhere
+*
 	xdef _zeromem
 _zeromem equ $00e01680
 	xdef vdidsp

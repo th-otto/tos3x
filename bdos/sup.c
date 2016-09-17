@@ -103,7 +103,7 @@ FND const funcs[0x58] = {
 	
 	/* 0x04 */ { GDF xauxout, 0x82 },
 	/* 0x05 */ { GDF xprtout, 0x83 },
-	/* 0x06 */ { GDF rawconio, 0 },
+	/* 0x06 */ { GDF rawconio, 0x80 },
 	
 	/* 0x07 */ { GDF x7in, 0x80 },
 	/* 0x08 */ { GDF x8in, 0x80 },
@@ -453,15 +453,14 @@ PP(int16_t *pw;)
 			case 6:                 /* Crawio() */
 				if (pw[1] != 0xFF)
 					goto rawout;
-			case 1:                 /* Cconin() */
-			case 3:                 /* Cauxin() */
-			case 7:                 /* Crawcin() */
-			case 8:                 /* Cnecin() */
 				if (xread(h, 1L, &ctmp) == 1)
 					return ctmp;
 				else
 					return 0;
-				/* old code; never reached */
+			case 1:                 /* Cconin() */
+			case 3:                 /* Cauxin() */
+			case 7:                 /* Crawcin() */
+			case 8:                 /* Cnecin() */
 				xread(h, 1L, &ctmp);
 				return ctmp;
 			case 2:                 /* Cconout */
@@ -508,16 +507,16 @@ PP(int16_t *pw;)
 				return 0;
 
 			case 11:                /* Cconis() */
-			case 16:                /* Cconos() */
-			case 17:                /* Cprnos() */
 			case 18:                /* Cauxis() */
-			case 19:                /* Cauxos() */
 				if (!(fd = getofd(h)))
 					return 0;
 				if (fd->o_bytnum != fd->o_fileln)
 					return -1;
 				return 0;
-				return -1; /* not reached */
+			case 16:                /* Cconos() */
+			case 17:                /* Cprnos() */
+			case 19:                /* Cauxos() */
+				return -1;
 				break; /* not reached */
 			}
 		}

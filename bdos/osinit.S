@@ -256,7 +256,7 @@ enter_2:
     move.l  a0,-(a5)
     move.l  a5,$7c(a6)
 * now switch to fs stack
-    move.l  #fstrt,sp
+    move.l  #fstack+2*1034,sp
     lea 50(a5),a0
     bra callos
 * he was using his own ssp
@@ -267,7 +267,7 @@ systk:  movem.l d1-d7/a0-a2,-(sp)
     move.l  a0,-(sp)
     move.l  sp,$7c(a6)
     lea 50(sp),a0
-    move.l  #fstrt,sp
+    move.l  #fstack+2*1034,sp
 callos: move.l  a0,-(sp)    * push parm pointer
     jsr _osif
     add.l   #4,sp
@@ -445,20 +445,18 @@ _xbsettime:
     bss
     even
 
-biosav:
-    ds.l    1
-    ds.l    1 ; unused
-savesr:
-    ds.w    1
-old_tik:
-    ds.l    1
-old_2:
-    ds.l    1           * old TRAP #2 handler
+	xdef biosav
+	comm biosav,8
+	xdef savesr
+	comm savesr,2
+	xdef old_tik
+	comm old_tik,4
+	xdef old_2
+	comm old_2,4           * old TRAP #2 handler
 
-    ds.w    1034
-fstrt:
-    ds.l 1
+	xdef fstack
+	comm fstack,2*1034+4
 
     data
-fstrtend: dc.l fstrt
+fstrtend: dc.l fstack+2*1034
 
