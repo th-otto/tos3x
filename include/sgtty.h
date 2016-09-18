@@ -1,3 +1,6 @@
+#ifndef __SGTTY_H__
+#define __SGTTY_H__ 1
+
 /* sgtty.h - tty control information */
 /*	Note reduced contents for CP/M implementation... */
 struct sgttyb{
@@ -15,3 +18,7 @@ struct sgttyb{
 #define LCASE	0000004
 #define CBREAK	0000002
 
+int stty PROTO((int fd, const struct sgttyb *argp));
+int gtty PROTO((int fd, struct sgttyb *argp));
+
+#endif /* __SGTTY_H__ */

@@ -5,8 +5,21 @@
 #include <compiler.h>
 #endif
 
+#ifdef __cplusplus
+#  define __USE_STDARG 1
+#endif
+#ifdef __STDC__
+#  define __USE_STDARG 1
+#endif
+
+#ifndef __USE_STDARG
+#define __USE_VARARGS 1
+/* ..it was a lie */
+#include <varargs.h>
+#else
+
 #ifdef __GNUC__
-#include_next <stdarg.h>
+ #include_next <stdarg.h>
 #else
 
 #ifndef __VA_LIST
@@ -24,6 +37,15 @@ typedef char *va_list;
     (*((type *)(ap))++))
 #define va_end(ap)
 
-#endif
+#endif /* __GNUC__ */
 
-#endif
+#define _va_alist				, ...
+#define _va_dcl
+#define _va_list				va_list
+#define _va_start(pvar, prev) va_start(pvar, prev)
+#define _va_arg(pvar, type)	va_arg(pvar, type)
+#define _va_end(pvar) 		va_end(pvar)
+
+#endif /* __USE_STDARG */
+
+#endif /* __STDARG_H__ */

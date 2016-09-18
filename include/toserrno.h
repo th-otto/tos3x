@@ -51,4 +51,3 @@
 #define E_NOSPC  -91 /* disk full */
 
 #define E_MOUNT  -200 /* used by MiNT-kernel */
-

@@ -18,7 +18,7 @@ PP(WORD, dev;)
 	register BYTE *stat;
 	
 	if (dev >= 2)
-		return TOS_EUNDEV;
+		return E_UNDEV;
 	unit = dev;
 	stat = &flop_stat[unit];
 	if (*stat == MEDIACHANGE)
@@ -37,7 +37,7 @@ bios_hdv_mediach:
 [00e058b2] 48e7 0304                 movem.l   d6-d7/a5,-(a7)
 [00e058b6] 0c6e 0002 0008            cmpi.w    #$0002,8(a6)
 [00e058bc] 6d04                      blt.s     $00E058C2
-[00e058be] 70f1                      moveq.l   #-15,d0 ; TOS_EUNDEV
+[00e058be] 70f1                      moveq.l   #-15,d0 ; E_UNDEV
 [00e058c0] 604c                      bra.s     $00E0590E
 [00e058c2] 3e2e 0008                 move.w    8(a6),d7
 [00e058c6] 3a47                      move.w    d7,a5

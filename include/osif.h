@@ -128,14 +128,15 @@ struct  fcbtab {                                /****************************/
 struct  ccb                             /************************************/
 {                                       /*                                  */
         short   flags;                  /*sw    Flags byte                  */
-        char    user;                   /*sw    User #                      */
-        char    chan;                   /*      Channel number being used   */
+        short   chan;                   /*      Channel number being used   */
         short   dosfd;                  /*jsl   Dos 2.0 file descriptor     */
         long    offset;                 /*      File offset word (bytes)    */
-        long    sector;                 /*      Sector currently in buffer  */
-        long    hiwater;                /*      High water mark             */
         struct fcbtab fcb;              /*      File FCB (may have TTY info)*/
+#if CPM
+        short   user;                   /*sw    User #                      */
+        long    sector;                 /*      Sector currently in buffer  */
         char    buffer[SECSIZ];         /*      Read/write buffer           */
+#endif
 };                                      /************************************/
 
 extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
@@ -146,17 +147,15 @@ extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
                                         /************************************/
 #define OPENED  0x01                    /*      Channel is OPEN             */
 #define ISTTY   0x02                    /*      Channel open to TTY         */
-#define ISLPT   0x04                    /*      Channel open to LPT         */
-#define ISREAD  0x08                    /*      Channel open readonly       */
+#define ISREAD  0x04                    /*      Channel can be read from    */
+#define ISWRITE 0x08                    /*      Channel can  written to     */
 #define ISASCII 0x10                    /*      ASCII file attached         */
 #define ATEOF   0x20                    /*      End of file encountered     */
 #define DIRTY   0x40                    /*      Buffer needs writing        */
 #define ISSPTTY 0x80                    /*      Special tty info            */
 #define ISAUX   0x100                   /*sw    Auxiliary device            */
 #define ISQUE   0x0200                  /*whf   Queue device                */
-                                        /************************************/
-#define READ    0                       /* Read mode parameter for open     */
-#define WRITE   1                       /* Write mode                       */
+#define ISLPT   0
 
 /*      CCB manipulation macros         *************************************/
 #define _getccb(i) (&_fds[i])           /*      Get CCB addr                */
@@ -175,7 +174,7 @@ extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
                                                 /****************************/
 #if CPM68K
 #if PCDOS
-#define __OSIF(fn,arg) trap((fn), (long)(arg))  /* GEMDOS does it this way  */
+#define __OSIF(fn,arg) gemdos((fn), (long)(arg))  /* GEMDOS does it this way  */
 #else
 #define __OSIF(fn,arg) __BDOS((fn),(long)(arg)) /* CPM68K does it this way  */
 #endif
@@ -234,20 +233,29 @@ extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
 #define B_READ  33                              /* Read Random record       */
 #define B_WRITE 34                              /* Write Random record      */
 #define FILSIZ  35                              /* Compute File Size        */
-#define jcreat(a,b) trap(0x3c,a,b)
-#define jsfirst(a,b) trap(0x4e,a,b)             /* GEMDOS: <= 0: FAILURE    */
-#define jsnext() trap(0x4f)                     /*         == 0: SUCCESS    */
-#define jopen(a,b) trap(0x3d,a,b)
-#define jclose(a) trap(0x3e,a)
-#define junlink(a) trap(0x41,a)
-#define jlseek(a,b,c) trap(0x42,a,b,c)
-#define jread(a,b,c) trap(0x3f,a,b,c)
-#define jwrite(a,b,c) trap(0x40,a,b,c)
 
-extern long trap PROTO ((short code, ...));
+extern long gemdos PROTO ((short code, ...));
 extern long __BDOS PROTO ((short code, long arg));
 
-#endif                                          /****************************/
+#endif
+
+#if GEMDOS
+#define Fcreate(a,b) gemdos(0x3c,a,b)
+#define Fsfirst(a,b) gemdos(0x4e,a,b)             /* GEMDOS: <= 0: FAILURE    */
+#define Fsnext() gemdos(0x4f)                     /*         == 0: SUCCESS    */
+#define Fopen(a,b) gemdos(0x3d,a,b)
+#define Fclose(a) gemdos(0x3e,a)
+#define Fdelete(a) gemdos(0x41,a)
+#define Fseek(a,b,c) gemdos(0x42,a,b,c)
+#define Fread(a,b,c) gemdos(0x3f,a,b,c)
+#define Fwrite(a,b,c) gemdos(0x40,a,b,c)
+#define Frename(a,b) gemdos(0x56,0,a,b)
+#define Crawcin() gemdos(7)
+extern long gemdos PROTO ((short code, ...));
+extern long bios PROTO ((short code, ...));
+extern long xbios PROTO ((short code, ...));
+#endif
+
 /****************************************************************************/
 /* Other CP/M definitions                                                   */
 /****************************************************************************/

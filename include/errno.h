@@ -1,13 +1,28 @@
-
 /*
  * errno.h - error codes
  */
+
+#ifndef __ERRNO_H__
+#define __ERRNO_H__ 1
 
 #ifndef __COMPILER_H__
 #include <compiler.h>
 #endif
 
+#ifdef __GNUC__
+ #ifndef _LIBC
+ #  include_next <errno.h>
+ #  define _NO_ERRNO
+ #endif
+#endif
+
+#ifndef _NO_ERRNO
+
 extern int errno;
+/*
+extern int sys_nerr;
+extern const char *const sys_errlist[];
+*/
 
 #define EPERM	1
 #define ENOENT	2
@@ -50,6 +65,8 @@ extern int errno;
 #define ENODSPC	35
 #define ERENAME	36
 
-/****** end of errno.h ******/
+#endif
 
+VOID perror PROTO((const char *s));
 
+#endif /* __ERRNO_H__ */

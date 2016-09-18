@@ -237,7 +237,7 @@ extern  struct  ccb     _fds[]; /*  */  /*      Declare storage             */
 extern long gemdos PROTO ((short code, ...));
 extern long __BDOS PROTO ((short code, long arg));
 
-#endif                                          /****************************/
+#endif
 
 #if GEMDOS
 #define Fcreate(a,b) gemdos(0x3c,a,b)
