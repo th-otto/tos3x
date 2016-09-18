@@ -23,30 +23,22 @@
  *		the byte orientation of the target machine (68000).
  */
 int putchd(P(FILE *) fp, P(struct hdr2 *) arptr)
-PP(FILE *fp;)
-PP(struct hdr2 *arptr;)
+PP(register FILE *fp;)
+PP(register struct hdr2 *arptr;)
 {
-	if (lputw(&arptr->ch_magic, fp) == -1)
-		return -1;
-	if (lputl(&arptr->ch_tsize, fp) == -1)
-		return -1;
-	if (lputl(&arptr->ch_dsize, fp) == -1)
-		return -1;
-	if (lputl(&arptr->ch_bsize, fp) == -1)
-		return -1;
-	if (lputl(&arptr->ch_ssize, fp) == -1)
-		return -1;
-	if (lputl(&arptr->ch_stksize, fp) == -1)
-		return -1;
-	if (lputl(&arptr->ch_entry, fp) == -1)
-		return -1;
-	if (lputw(&arptr->ch_rlbflg, fp) == -1)
+	if (lputw(&arptr->ch_magic, fp) < 0 ||
+		lputl(&arptr->ch_tsize, fp) < 0 ||
+		lputl(&arptr->ch_dsize, fp) < 0 ||
+		lputl(&arptr->ch_bsize, fp) < 0 ||
+		lputl(&arptr->ch_ssize, fp) < 0 ||
+		lputl(&arptr->ch_stksize, fp) < 0 ||
+		lputl(&arptr->ch_entry, fp) < 0 ||
+		lputw(&arptr->ch_rlbflg, fp) < 0)
 		return -1;
 	if (arptr->ch_magic == EX_ABMAGIC)
 	{
-		if (lputl(&arptr->ch_dstart, fp) == -1)
-			return -1;
-		if (lputl(&arptr->ch_bstart, fp) == -1)
+		if (lputl(&arptr->ch_dstart, fp) < 0 ||
+			lputl(&arptr->ch_bstart, fp) < 0)
 			return -1;
 	}
 	return 0;

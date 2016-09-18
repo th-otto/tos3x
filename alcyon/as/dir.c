@@ -91,7 +91,7 @@ VOID hequ(NOTHING)
 	{
 		lblpt->flags |= SYER;			/* equated register */
 		ival.l = ival.ptrw2->vl1;
-	} else if (itype != ITCN)
+	} else if (itype != ITCN && itype != ITCW)
 	{
 		xerr(7);						/* not a constant */
 		return;
@@ -626,13 +626,16 @@ VOID send(NOTHING)
 	reloc = ABS;
 	ckeop(9);
 	print(0);
-	cpdata();							/* copy data to loader file */
-	osymt();							/* output symbol table */
-	cprlbits();							/* copy relocation bits */
-	fflush(lfil);
-	i = 2 + 3 * 4;
-	if (fseek(lfil, (long) i, SEEK_SET) < 0 || lputl(&stlen, lfil) < 0)
-		rpterr(_("I/O error on loader output file"));
+	if (nerror == 0)
+	{
+		cpdata();							/* copy data to loader file */
+		osymt();							/* output symbol table */
+		cprlbits();							/* copy relocation bits */
+		fflush(lfil);
+		i = 2 + 3 * 4;
+		if (fseek(lfil, (long) i, SEEK_SET) < 0 || lputl(&stlen, lfil) < 0)
+			rpterr(_("I/O error on loader output file"));
+	}
 	endit();
 }
 

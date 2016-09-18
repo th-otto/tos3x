@@ -25,6 +25,7 @@
 #include "as68.h"
 #include "def.h"
 #include <signal.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -50,6 +51,12 @@ static int symcon;
 static int explmode;   /* explicit mode length given */
 static int opcval;     /* opcode */
 static int chmvq;
+
+short indir[2];
+short immed[2];
+static short numcon[2];
+static short numsym[2];
+static short numreg[2];
 
 
 /* get a temp file for the intermediate text */
@@ -184,9 +191,23 @@ static int shiftea(P(int) lidx)
 PP(int lidx;)
 {
 	if (indir[lidx] && numreg[lidx])
-		return (numcon[lidx] || numsym[lidx]) ? 2 : 0;
-	if (numsym[lidx] || numcon[lidx])
-		return (!shortadr || numcon[lidx] == 2) ? 4 : 2;
+	{
+		if (numreg[lidx] == WORD_ID)
+		{
+			numcon[lidx] = 1;
+			return WORDSIZ;
+		}
+		if (numreg[lidx] == LONG_ID)
+		{
+			numcon[lidx] = 2;
+			return LONGSIZ;
+		}
+		return (numcon[lidx] || numsym[lidx]) ? WORDSIZ : 0;
+	}
+	if (numsym[lidx])
+		return LONGSIZ;
+	if (numcon[lidx])
+		return numcon[lidx] == 2 ? LONGSIZ : WORDSIZ;
 	return 0;
 }
 
@@ -195,9 +216,13 @@ PP(int lidx;)
 static int lenea(P(int) lidx)
 PP(int lidx;)
 {
+	int l;
+	
 	if (immed[lidx])
-		return mode == LONG ? LONGSIZ : WORDSIZ;
-	return shiftea(lidx);
+		l = mode == LONG ? LONGSIZ : WORDSIZ;
+	else
+		l = shiftea(lidx);
+	return l;
 }
 
 
@@ -250,9 +275,10 @@ static int calcilen(NOTHING)
 	case 6:								/* relative branches */
 		if (itwc == ITOP1 + 1)
 		{
-			if (stbuf[ITOP1].itty == ITCN)
+			if (stbuf[ITOP1].itty == ITCN || stbuf[ITOP1].itty == ITCW)
+			{
 				l = stbuf[ITOP1].itop.l;
-			else if (stbuf[ITOP1].itty == ITSY)
+			} else if (stbuf[ITOP1].itty == ITSY)
 			{
 				p = stbuf[ITOP1].itop.ptrw2;
 				if (p->flags & SYDF)
@@ -260,7 +286,9 @@ static int calcilen(NOTHING)
 				else
 					goto loffst;
 			} else
+			{
 				goto loffst;
+			}
 			l -= (loctr + 2);
 			if (l <= 127 && l >= -128)	/* 8 bit offset */
 				break;
@@ -271,12 +299,12 @@ static int calcilen(NOTHING)
 		break;
 
 	case 2:
-		i += (mode == LONG ? 4 : 2) + lenea(1);
+		i += (mode == LONG ? LONGSIZ : WORDSIZ) + lenea(1);
 		break;
 
 	case 23:
 		if (immed[0])
-			i += (mode == LONG ? 4 : 2);
+			i += (mode == LONG ? LONGSIZ : WORDSIZ);
 	case 17:
 	case 22:
 		i += lenea(1);
@@ -308,8 +336,11 @@ static VOID cisit(NOTHING)
 	char tlab1[SYNAMLEN];
 
   ciss1:
-	immed[0] = immed[1] = indir[0] = indir[1] = numcon[0] = 0;
-	numcon[1] = numsym[0] = numsym[1] = numreg[0] = numreg[1] = 0;
+	immed[0] = immed[1] =
+	indir[0] = indir[1] =
+	numcon[0] = numcon[1] =
+	numsym[0] = numsym[1] =
+	numreg[0] = numreg[1] = 0;
 	plevel = numops = opdix = explmode = 0;
   cistop:
 	col1 = 1;
@@ -584,7 +615,7 @@ VOID opito(NOTHING)
 
 	lopcomma = symcon = chmvq = 0;
 	numops++;							/* count first operand */
-	while (1)
+	for (;;)
 	{
 		starmul = symcon;				/* star is multiply op if flag is set */
 		if (fchr == '\'' || fchr == '"')
@@ -602,7 +633,9 @@ VOID opito(NOTHING)
 			lopcomma++;
 			igblk();					/* ignore blanks for 68000 C compiler */
 		} else
+		{
 			lopcomma = 0;
+		}
 		if (ival.l == EOLC && itype == ITSP)	/* end of operands */
 			break;
 		if (fchr == EOLC)
@@ -680,7 +713,7 @@ static VOID tryquick(NOTHING)
 VOID opitoo(NOTHING)
 {
 	register struct symtab *sp;
-	register short h;
+	register int16_t h;
 	
 	symcon = 0;
 	if (itype == ITSP)
@@ -722,22 +755,52 @@ VOID opitoo(NOTHING)
 			mmte();
 		}
 		pitw->itop.ptrw2 = sp;			/* ptr to symbol entry */
+		if (!(sp->flags & SYER))		/* is it a register? */
+		{
+			numsym[opdix]++;
+		} else							/* yes, a register */
+		{
+			if (numreg[opdix] == 0)
+				numreg[opdix] = sp->vl1;
+			if (itwc > ITOP1)
+			{
+				if (pitw[-1].itty == ITCN || pitw[-1].itty == ITCW)
+				{
+					if (sp->vl1 == WORD_ID)
+					{
+						h = (int16_t)(pitw[-1].itop.l >> 16);
+						if (h != 0 && h != -1)
+						{
+							uerr(44); /* warning: constant out of range */
+							nerror--;
+						}
+						pitw[-1].itty = ITCW;
+						numcon[opdix] = 1;
+					} else if (sp->vl1 == LONG_ID)
+					{
+						pitw[-1].itty = ITCN;
+						numcon[opdix] = 2;
+					}
+				}	
+			}
+		}
 		itwc++;							/* count entries in it buffer */
 		pitw++;
-		if (!(sp->flags & SYER))		/* is it a register? */
-			numsym[opdix]++;
-		else if (sp->vl1)				/* yes, a register & not D0 */
-			numreg[opdix] = sp->vl1;
 		return;
 	} else if (itype == ITCN)
 	{
-		h = (short)(ival.l >> 16);
-		if (h != 0 && h != -1)
+		h = (int16_t)(ival.l >> 16);
+		if (!shortadr || (h != 0 && h != -1))
+		{
 			numcon[opdix] = 2;
-		else if (!numcon[opdix])
+		} else if (!numcon[opdix])
+		{
 			numcon[opdix] = 1;
+			itype = pitw->itty = ITCW;
+		}
 		if (numops == 1)
 			tryquick();
+		reloc = ABS;
 	}
 
 	/* special characters and constants */

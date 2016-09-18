@@ -12,6 +12,9 @@ include SRCFILES
 c168$(EXEEXT): $(C168_OBJS) $(LIB1OBJS) ${MAKEFILE}
 	$(AM_V_LD)$(LD) $(LDFLAGS) -u -s -h 7 -o $@ $(CRT0) nofloat.o $(C168_OBJS) $(LIBS)
 
+install: all
+	$(CP) $(PROGRAMS) $(BIN)
+
 check::
 
 clean:

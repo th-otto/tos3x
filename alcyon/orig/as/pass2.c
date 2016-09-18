@@ -202,7 +202,8 @@ VOID relbr(NOTHING)
 		ins[0] |= (ival.u.loword & 0xff);
 	}
 	/* make it a nop if -N specified */
-	if ((ival.l == 0) || (ival.l == 2 && didorg))
+	/* BUG: querying -N flag is wrong; it may also happen when using explicit .w suffix */
+	if (ival.l == 0 || (ival.l == 2 && didorg))
 	{
 		opcpt = nopptr;
 		ins[0] = opcpt->vl1.u.loword;

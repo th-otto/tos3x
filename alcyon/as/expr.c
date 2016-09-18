@@ -60,8 +60,10 @@ PP(int rv2;)
 {
 	if (rv1 == rv2)
 		return rv1;
-	if (rv1 == ABS || rv2 == ABS)
-		return rv1 + rv2;				/* the one that is not ABS */
+	if (rv1 == ABS)
+		return rv2;				/* the one that is not ABS */
+	if (rv2 == ABS)
+		return rv1;				/* the one that is not ABS */
 	uerr(27);	/* relocation error */
 	return ABS;
 }
@@ -73,11 +75,11 @@ PP(int rv1;)
 PP(int rv2;)
 {
 	if (rv2 == EXTRN)
-		uerr(26);	/* endc expected */
+		uerr(27);	/* relocation error */
 	if (rv1 == rv2)
 		return ABS;
 	if (rv2 == ABS)
-		return rv1 + rv2;
+		return rv1;
 	uerr(27); /* relocation error */
 	return ABS;
 }
@@ -124,14 +126,16 @@ PP(int reloc_val;)
 			reloc = BSS;
 		else
 			reloc = ABS;
-		ival.l = ival.ptrw2->vl1;			/* symbol vaue */
+		ival.l = ival.ptrw2->vl1;		/* symbol value */
 		itype = ITCN;					/* constant */
 	} else if (itype == ITSY && ival.ptrw2->flags & SYXR)
 	{									/* external symbol */
 		fixext(ival.ptrw2);
 		reloc = EXTRN;
 	} else
+	{
 		reloc = reloc_val;				/* relocation value of item */
+	}
 }
 
 
@@ -160,7 +164,7 @@ PP(struct it *avwrd;)
 	register struct symtab *p;
 
 	vwrd = avwrd;
-	if (vwrd->itty == ITCN)
+	if (vwrd->itty == ITCN || vwrd->itty == ITCW)
 	{									/* constant */
 		rval = vwrd->itrl;
 		return vwrd->itop.l;			/* value */
@@ -283,6 +287,23 @@ static VOID collapse(NOTHING)
 		}
 	}
 
+	if ((tree[bos].itty == ITCN || tree[bos].itty == ITCW) &&
+		tree[bos + 1].itty == ITSY &&
+		(tree[bos + 1].itop.ptrw2->flags & SYER))
+	{
+		ival.l = gval(&tree[bos]);
+		if (tree[bos + 1].itop.ptrw2->vl1 == WORD_ID)
+		{
+			itype = tree[bos].itty = ITCW;
+			return;
+		}
+		if (tree[bos + 1].itop.ptrw2->vl1 == LONG_ID)
+		{
+			itype = tree[bos].itty = ITCN;
+			return;
+		}
+	}
+	
 	/* check for unary minus and unary plus */
 	if (tree[bos + 1].itty != ITSP && tree[bos].itop.l == '?')
 	{
@@ -315,7 +336,7 @@ static VOID collapse(NOTHING)
 		}
 	}
 	/* send results back to caller */
-	if ((itype = tree[bos].itty) == ITCN)
+	if ((itype = tree[bos].itty) == ITCN || itype == ITCW)
 	{
 		ival.l = gval(&tree[bos]);
 	} else
@@ -389,7 +410,7 @@ PP(aexpr iploc;)
 	lastopr = 1;
 
 	/* get an input item */
-	while (1)
+	for (;;)
 	{
 		if (itr >= TREELEN - 2)
 		{
@@ -475,7 +496,7 @@ PP(aexpr iploc;)
 			starmul = 1;				/* * is multiply */
 			continue;
 		}
-	}									/* end while(1)... */
+	}
 
 	/* output the rest of the operator stack to the tree */
 	for (i = iop; i >= 0; i--)
@@ -519,7 +540,7 @@ PP(char chr;)								/* character to search for */
 static int ckspc(P(int) acksc)
 PP(int acksc;)
 {
-	register short cksc;
+	register int cksc;
 
 	cksc = acksc;
 	if (isalnum(cksc))
@@ -555,7 +576,7 @@ VOID p1gi(NOTHING)
 			{
 				mmte();					/* put it in table */
 			}
-		} else if (itype == ITCN)
+		} else if (itype == ITCN || itype == ITCW)
 		{
 			exitm.itrl = reloc;
 		}

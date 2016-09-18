@@ -182,6 +182,7 @@ PP(int opn;)
 	}
 	if (!p->ea)
 	{									/* memory  address */
+		/* BUG: this will use short form also for undefined external symbols because their value is 0 */
 		if (shortadr && (!ival.u.hiword || ival.u.hiword == -1))
 		{								/* 16-bit addrs */
 			p->ea = SADDR;

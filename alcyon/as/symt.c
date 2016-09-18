@@ -62,8 +62,10 @@ static const char *const ermsg[] = {
     N_("illegal 16-bit displacement"),      /* 41 */
     N_("illegal 16-bit immediate"),         /* 42 */
     N_("illegal 8-bit immediate"),          /* 43 */
+    N_("warning: constant out of range")    /* 44 */
 };
 
+static const char *const itbtname[] = { "ITBS", "ITSY", "ITCN", "ITSP", "ITRM", "ITPC", "ITCW" };
 
 
 /* output it for beginning of statement */
@@ -340,7 +342,7 @@ PP(int constpc;)
 			refpc++;					/* referenced pgm ctr */
 			reloc = rlflg;				/* relocation of location counter */
 			ival.l = loctr;
-			itype = (constpc) ? ITCN : ITPC;
+			itype = constpc ? ITCN : ITPC;
 			break;
 
 		case '$':						/* hex constant */
@@ -657,6 +659,19 @@ static VOID doitwr(NOTHING)
 }
 
 
+VOID prstbuf(P(const char *) tag)
+PP(const char *tag;)
+{
+	register int i, cnt;
+	
+	cnt = stbuf[0].itrl & 0xff;
+	printf("%s %d: ", tag, cnt);
+	for (i = 1; i < cnt; i++)
+		printf(" %s %02x %08lx", itbtname[stbuf[i].itty & 0xff], stbuf[i].itrl, stbuf[i].itop.l);
+	printf("\n");
+}
+
+
 /*
  * write out intermediate text for one statement
  *  call with
@@ -674,6 +689,7 @@ VOID wostb(NOTHING)
 	}
 	itwo = (short *)&stbuf;
 	woix = stbuf[0].itrl & 0xff;		/* unsigned byte */
+	/* prstbuf("wostb"); */
 	while (woix--)
 	{
 		for (i = 0; i < (sizeof(struct it) / (sizeof *itwo)); i++)

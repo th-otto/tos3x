@@ -286,6 +286,7 @@ VOID collapse(NOTHING)
 		exerr();
 		return;
 	}
+	/* BUG: that happily accepts $xxx.w (tree[bos + 1].itty == ITSY) for .w, zeroing out the value */
 	if (tree[bos + 1].itty != ITSP || tree[bos].itty == ITSP)
 	{
 		reloc = ABS;

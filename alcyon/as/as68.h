@@ -38,6 +38,7 @@
 #define ITSP    3       /* special */
 #define ITRM    4       /* register mask */
 #define ITPC    5       /* pc relative argument */
+#define ITCW    6       /* constant.w */
 
 /* Effective address mode bits */
 #define DDIR        000
@@ -309,7 +310,8 @@ struct symtab *jsrptr;
 struct symtab *bsrptr;
 struct symtab *nopptr;
 
-short numcon[2], numsym[2], indir[2], immed[2], numreg[2];
+extern short indir[2];
+extern short immed[2];
 short plevel;           /* parenthesis level counter */
 short opdix;            /* operand index counter */
 
@@ -542,3 +544,4 @@ VOID setname PROTO((NOTHING));
 VOID rpterr PROTO((const char *ptch, ...)) __attribute__((format(__printf__, 1, 2)));
 VOID setldfn PROTO((const char *ap));
 FILE *openfi PROTO((const char *pname, const char *mode));
+VOID prstbuf PROTO((const char *tag));

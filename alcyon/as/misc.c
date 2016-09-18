@@ -65,6 +65,31 @@ static VOID ckrparen(NOTHING)
 }
 
 
+/*
+ * get any register specification
+ *  call with :
+ *		pitw pointing at operand
+ *  returns:
+ *		register # with pitw updated
+ *		-1 if not valid register
+ */
+int getreg(NOTHING)
+{
+	register int i;
+
+	i = getrgs();
+	if (i >= 0 && i <= AREGHI)
+	{
+		return i;
+	} else
+	{
+		if (i != -1)
+			pitw--;
+		return -1;
+	}
+}
+
+
 static VOID do_ireg(P(struct op *) p, P(int) i, P(int) opn)
 PP(struct op *p;)
 PP(int i;)
@@ -147,7 +172,7 @@ static int gspreg(NOTHING)
 VOID getea(P(int) opn)
 PP(int opn;)
 {
-	register short i, disp, inst, h;
+	register short i, disp, inst;
 	register struct op *p;
 
 	p = &opnd[opn];
@@ -238,6 +263,17 @@ PP(int opn;)
 			uerr(20); /* illegal addressing mode */
 		p->idx = i;
 		ckeop(9 + opn);
+#if 0
+		if (itype == ITCW)
+		{								/* 16-bit addrs */
+			p->ea = SADDR;
+			p->len = 2;
+		} else if (itype == ITCN)
+		{
+			p->ea = LADDR;
+			p->len = 4;
+		}
+#endif
 		return;
 	}
 	if ((i = getreg()) >= 0)
@@ -263,10 +299,14 @@ PP(int opn;)
 		disp++;
 		goto geteal1;
 	}
-	if (!p->ea)
+	if (p->ea == 0)
 	{									/* memory  address */
-		h = (short)(ival.l >> 16);
-		if (shortadr && (h == 0 || h == -1))
+		i = gspreg();
+		if (i == WORD_ID)
+			itype = ITCW;
+		else if (i == LONG_ID)
+			itype = ITCN;
+		if (itype == ITCW)
 		{								/* 16-bit addrs */
 			p->ea = SADDR;
 			p->len = 2;
@@ -281,32 +321,7 @@ PP(int opn;)
 
 
 /*
- * get any register specification
- *  call with :
- *		pitw pointing at operand
- *  returns:
- *		register # with pitw updated
- *		-1 if not valid register
- */
-int getreg(NOTHING)
-{
-	register short i;
-
-	i = getrgs();
-	if (i >= 0 && i <= AREGHI)
-	{
-		return i;
-	} else
-	{
-		if (i != -1)
-			pitw--;
-		return -1;
-	}
-}
-
-
-/*
- * check intermedate text item for special character
+ * check intermediate text item for special character
  *	call with:
  *		pointer to desired item in stbuf
  *		character to check for
@@ -382,6 +397,7 @@ VOID ristb(NOTHING)
 				*pi++ = itbuf[pitix++];
 			}
 		}
+		/* prstbuf("ristb"); */
 	} while (stbuf[1].itrl == -1);		/* eliminated instr, read next one */
 }
 
@@ -567,7 +583,7 @@ PP(unsigned short rb;)
 		break;
 
 	default:
-		rpterr(_("& outword: bad rlflg"));
+		rpterr(_("outword: bad rlflg"));
 		asabort();
 	}
 }
@@ -584,7 +600,6 @@ VOID outinstr(NOTHING)
 	p2 = rlbits;
 	while (i--)
 		outword(*p1++, *p2++);
-
 }
 
 
@@ -614,14 +629,14 @@ PP(long length;)
 		/* Read a buffer full */
 		if (fread(itbuf, 1, j, fp) != j)
 		{
-			rpterr(_("& Read error on Intermediate File"));
+			rpterr(_("Read error on Intermediate File"));
 			asabort();
 		}
 		
 		/* Now write buffer */
 		if (fwrite(itbuf, 1, j, lfil) != j)
 		{
-			rpterr(_("& Write error on Intermediate File"));
+			rpterr(_("Write error on Intermediate File"));
 			asabort();
 		}
 		length -= j;					/* Decrement byte count     */
@@ -782,7 +797,7 @@ PP(struct op *apea;)
 			dodisp(p);
 			return;
 
-		case 4:						/* #xxx */
+		case 4:							/* #xxx */
 			chkimm(p);					/* check for valid length */
 			if (modelen == LONGSIZ)
 			{							/* instr mode is long */

@@ -75,7 +75,8 @@ static VOID relbr(NOTHING)
 		ins[0] |= ((short)ival.l & 0xff);
 	}
 	/* make it a nop if -N specified */
-	if ((ival.l == 0) || (ival.l == 2 && didorg))
+	/* BUG: querying -N flag is wrong; it may also happen when using explicit .w suffix */
+	if (ival.l == 0 || (ival.l == 2 && didorg))
 	{
 		opcpt = nopptr;
 		ins[0] = opcpt->vl1;
@@ -861,7 +862,9 @@ static VOID opf20(NOTHING)
 		if (pcea(&opnd[0]) || (opnd[0].ea & 070) == INDINC)
 			uerr(20);					/* xx(pc), xx(pc,dx), -(ax) */
 	} else /* 2nd argument (1st is reg list) */ if ((opnd[0].ea & 070) == DECIND)
+	{
 		uerr(20);						/* (ax)+ */
+	}
 }
 
 

@@ -12,6 +12,9 @@ include SRCFILES
 c068$(EXEEXT): $(C068_OBJS) $(LIB1OBJS) ${MAKEFILE}
 	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(CRT0) nofloat.o $(C068_OBJS) $(LIBS)
 
+install: all
+	$(CP) $(PROGRAMS) $(BIN)
+
 check::
 	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
 
