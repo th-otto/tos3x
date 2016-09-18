@@ -210,5 +210,3 @@ _beptr: ds.l 3
 *
 	xdef _zeromem
 _zeromem equ $00e01680
-	xdef vdidsp
-vdidsp   equ $00e078b4

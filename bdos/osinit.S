@@ -234,7 +234,6 @@ _enter:
     bra enter_2
 
 enter_1:
-
     cmp.w   #$20,8(sp)  * toggle/inquire state? BUG: assumes 68010+, does not check _longframe
     beq x20_sup     * yes, go perform function
 
