@@ -1,9 +1,9 @@
 include ../Makefile.common
 include ../Makefile.silent
 
-include ../language.mak
-
 all: bios.a
+
+include ../language.mak
 
 include SRCFILES
 

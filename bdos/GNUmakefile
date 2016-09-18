@@ -11,16 +11,16 @@ CC += -mshort
 CPPFLAGS = -I../common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-include ../language.mak
-
 all: vars.o bdos.a
+
+include ../language.mak
 
 include SRCFILES
 
-bdos.a: $(BDOS_OBJS) ${MAKEFILE}
+bdos.a: checklang $(BDOS_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(BDOS_OBJS)
 
-check:: bdos.o
+check:: bdos.o checklang
 	$(AM_V_at)if ! test -f ../roms/tos$(TOSVERSION)$(LANG).img; then \
 		echo "../roms/tos$(TOSVERSION)$(LANG).img: no such file" >&2; \
 		exit 1; \

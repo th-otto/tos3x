@@ -15,6 +15,8 @@ CFLAGS = $(OPTS) $(WARN)
 
 all: bios.a
 
+include ../language.mak
+
 include SRCFILES
 
 bios.a: $(BIOS_OBJS) ${MAKEFILE}
