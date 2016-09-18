@@ -16,6 +16,7 @@
 #include "as68.h"
 #include <ar68.h>
 #include <cout.h>
+#include <stdint.h>
 
 
 
@@ -31,16 +32,16 @@ short rlbits[5];		/* holds relocation bits for instr */
 
 
 /* format 20 -- movem */
-static short const regmsk0[] = {
+/* should be uint16_t, but buggy Alcyon does not like it */
+static int16_t const regmsk0[] = {
 	0x8000, 0x4000, 0x2000, 0x1000, 0x0800, 0x0400, 0x0200, 0x0100,
 	0x0080, 0x0040, 0x0020, 0x0010, 0x0008, 0x0004, 0x0002, 0x0001
 };
 
-static short const regmsk1[] = {
+static int16_t const regmsk1[] = {
 	0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080,
 	0x0100, 0x0200, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000, 0x8000
 };
-
 
 
 /* relative branches */
@@ -747,10 +748,10 @@ static VOID opf17(NOTHING)
 
 
 /* reverse a movem register mask for control ea to memory */
-static int fixmask(P(int) msk)
-PP(int msk;)
+static uint16_t fixmask(P(uint16_t) msk)
+PP(uint16_t msk;)
 {
-	register short i, j, k;
+	register uint16_t i, j, k;
 
 	k = 0;
 	i = 1;
@@ -771,11 +772,12 @@ PP(int msk;)
  * call with:
  *	ptr to reg-to-mem or mem-to-reg array of bits
  */
-static int getrlist(P(const short *) ap)
-PP(const short *ap;)
+static int getrlist(P(const int16_t *) ap)
+PP(const int16_t *ap;)
 {
-	register const short *p;
-	register short i, j, mask;
+	register const int16_t *p;
+	register int i, j;
+	register uint16_t mask;
 
 	p = ap;
 	mask = 0;
@@ -786,7 +788,7 @@ PP(const short *ap;)
 			pitw++;
 			if ((j = getreg()) < 0)
 			{
-				uerr(40); /* backward assignment to * */
+				uerr(45); /* illegal register list */
 				break;
 			}
 			while (i <= j)
@@ -801,14 +803,15 @@ PP(const short *ap;)
 			break;
 	}
 	if (!mask)
-		uerr(40); /* backward assignment to * */
+		uerr(45); /* illegal register list */
 	return mask;
 }
 
 
 static VOID opf20(NOTHING)
 {
-	register short dr, i, j;
+	register short dr, i;
+	register uint16_t j;
 
 	dr = 0;
 	if (getreg() != -1 || pitw->itty == ITRM)

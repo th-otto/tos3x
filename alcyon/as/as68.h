@@ -545,3 +545,4 @@ VOID rpterr PROTO((const char *ptch, ...)) __attribute__((format(__printf__, 1, 
 VOID setldfn PROTO((const char *ap));
 FILE *openfi PROTO((const char *pname, const char *mode));
 VOID prstbuf PROTO((const char *tag));
+VOID prits PROTO((const struct it *its, int cnt));

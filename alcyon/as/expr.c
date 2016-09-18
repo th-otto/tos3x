@@ -30,7 +30,7 @@ static int lastopr;						/* last token was operator when set */
 
 static struct it *piop, *pitr;
 static short iop, itr;
-static struct it opstk[OPSTLEN];				/* operator stack */
+static struct it opstk[OPSTLEN];			/* operator stack */
 static struct it tree[TREELEN];				/* operand stack */
 
 

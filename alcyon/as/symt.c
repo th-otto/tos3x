@@ -62,7 +62,8 @@ static const char *const ermsg[] = {
     N_("illegal 16-bit displacement"),      /* 41 */
     N_("illegal 16-bit immediate"),         /* 42 */
     N_("illegal 8-bit immediate"),          /* 43 */
-    N_("warning: constant out of range")    /* 44 */
+    N_("warning: constant out of range"),   /* 44 */
+    N_("illegal register list"),            /* 45 */
 };
 
 static const char *const itbtname[] = { "ITBS", "ITSY", "ITCN", "ITSP", "ITRM", "ITPC", "ITCW" };
@@ -659,16 +660,70 @@ static VOID doitwr(NOTHING)
 }
 
 
+VOID prits(P(const struct it *) its, P(int) cnt)
+PP(register const struct it *its;)
+PP(int cnt;)
+{
+	register int i;
+
+	for (i = 0; i < cnt; i++)
+	{
+		switch (its[i].itty)
+		{
+		case ITBS:
+			printf("(stmt)");
+			break;
+		case ITSY:
+			printf("%s", its[i].itop.ptrw2 ? its[i].itop.ptrw2->name : "(nil)");
+			break;
+		case ITCN:
+			printf("$%lx", its[i].itop.l);
+			break;
+		case ITSP:
+			printf("%c", (int)its[i].itop.l);
+			break;
+		case ITRM:
+			printf("rm(%lx)", its[i].itop.l);
+			break;
+		case ITPC:
+			printf("*");
+			break;
+		case ITCW:
+			printf("$%lx.w", its[i].itop.l);
+			break;
+		}
+	}
+	printf("\n");
+}
+
+
 VOID prstbuf(P(const char *) tag)
 PP(const char *tag;)
 {
 	register int i, cnt;
 	
 	cnt = stbuf[0].itrl & 0xff;
-	printf("%s %d: ", tag, cnt);
-	for (i = 1; i < cnt; i++)
-		printf(" %s %02x %08lx", itbtname[stbuf[i].itty & 0xff], stbuf[i].itrl, stbuf[i].itop.l);
-	printf("\n");
+	printf("%s %3d: ", tag, cnt);
+	if (cnt >= ITOP1 && stbuf[0].itty == ITBS && stbuf[1].itty == ITSY && stbuf[2].itty == ITSY && stbuf[3].itty == ITCN)
+	{
+		printf("    [%08lx] ", stbuf[3].itop.l);
+		if (stbuf[1].itop.ptrw2)
+			printf("%-*.*s:   ", SYNAMLEN, SYNAMLEN, stbuf[1].itop.ptrw2->name);
+		else
+			printf("%-*.*s    ", SYNAMLEN, SYNAMLEN, "");
+		printf("%s%s    ", stbuf[2].itop.ptrw2->name,
+			stbuf[2].itrl == 0 ? "" :
+			stbuf[2].itrl == BYTESIZ ? ".b" :
+			stbuf[2].itrl == WORDSIZ ? ".w" :
+			stbuf[2].itrl == LONGSIZ ? ".l" :
+			".?");
+		prits(&stbuf[ITOP1], cnt - ITOP1);
+	} else
+	{
+		for (i = 1; i < cnt; i++)
+			printf("    %s %02x %08lx", itbtname[stbuf[i].itty & 0xff], stbuf[i].itrl, stbuf[i].itop.l);
+		printf("\n");
+	}
 }
 
 

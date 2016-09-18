@@ -139,6 +139,7 @@ static VOID chkeven(NOTHING)
 		opcpt = evenptr;
 		opitb();
 		stbuf[0].itrl = itwc;
+		stbuf[2].itrl = 0; /* modeless */
 		wostb();
 		opcpt = pi;
 		loctr++;
@@ -157,6 +158,7 @@ PP(int xrtyp;)
 	loctr = savelc[xrtyp];				/* set new base relocation ctr */
 	opitb();
 	stbuf[0].itrl = itwc;
+	stbuf[2].itrl = 0; /* modeless */
 	wostb();
 	igrst();
 }
@@ -284,6 +286,7 @@ VOID hend(NOTHING)
 	opitb();							/* output beginning of statement */
 	igrst();							/* ignore operands */
 	stbuf[0].itrl = itwc;				/* number of it entries */
+	stbuf[2].itrl = 0; /* modeless */
 	wostb();							/* write out statement buffer */
 	if (pitix > 0)						/* some it in buffer */
 	{
