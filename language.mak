@@ -19,6 +19,12 @@ gemdos_dbase_fr=E3D8F8
 gemdos_dlen_fr=39E
 vdidsp_fr=E078D2
 
+gemdos_tbase_uk=E1348A
+gemdos_tlen_uk=62AC
+gemdos_dbase_uk=E3D8AA
+gemdos_dlen_uk=39E
+vdidsp_uk=E0785A
+
 gemdos_tbase=$(gemdos_tbase_$(LANG))
 gemdos_dbase=$(gemdos_dbase_$(LANG))
 
@@ -26,6 +32,7 @@ langcheck_=false
 langcheck_de=true
 langcheck_us=true
 langcheck_fr=true
+langcheck_uk=true
 
 #
 # check that $LANG is one of our supported languages
