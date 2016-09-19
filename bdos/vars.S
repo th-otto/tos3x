@@ -202,11 +202,3 @@ _bcbx: ds.b 4*20
 
     xdef _beptr
 _beptr: ds.l 3
-
-
-*
-* These 2 functions are referenced by GEMDOS,
-* but are defined elsewhere
-*
-	xdef _zeromem
-_zeromem equ $00e01680
