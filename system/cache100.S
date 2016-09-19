@@ -6,7 +6,7 @@ _bootdev equ $446
      clr.l     -(a7)
      move.w    #$0020,-(a7) ; Super
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      move.l    d0,-(a7)
      move.w    #$0020,-(a7)
      lea.l     128(a6),a6
@@ -67,13 +67,14 @@ noargs:
      clr.w     d3
      move.w    #$002F,-(a7) ; Fgetdta
      trap      #1
+     addq.w    #2,a7
      movea.l   d0,a3
      lea.l     35(a3),a3
      move.w    #0,-(a7)
      pea.l     fname(pc)
      move.w    #$004E,-(a7) ; Fsfirst
      trap      #1
-     addq.l    #8,a7
+     addq.w    #8,a7
      tst.w     d0
      beq.s     found
 *     move.w    _bootdev.w,d0
@@ -85,13 +86,13 @@ noargs:
      pea.l     pname(pc)
      move.w    #$004E,-(a7) ; Fsfirst
      trap      #1
-     addq.l    #8,a7
+     addq.w    #8,a7
      tst.w     d0
      beq.s     found
      pea.l     notfoundmsg(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      moveq.l   #-33,d5
      bra       failexit
 found:
@@ -106,7 +107,7 @@ install:
      pea.l     usage(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      bra       failexit
 instok:
 * now: D4 = Data buffers, D5 = Fat buffers
@@ -128,28 +129,32 @@ noahdi:
      move.w    d4,d6
      add.w     d5,d6
      mulu.w    d7,d6
-     movea.l   a6,a0
-     adda.l    d6,a0
-     adda.l    #$00040000,a0
-     cmpa.l    a7,a0
+     addq.w    #4,d6
+     move.l    a6,d0
+     addq.l    #3,d0
+     and.b     #$FC,d0
+     movea.l   d0,a6
+     add.l     d6,d0
+     add.l     #$00040000,d0
+     cmp.l     a7,d0
      bgt.s     oom
      add.l     #128,d6
      pea.l     crsp(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      move.l    d5,d0
      bsr       prtdec
      pea.l     fatroot(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      move.l    d4,d0
      bsr.s     prtdec
      pea.l     datadir(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      move.l    d6,d0
      moveq.l   #10,d1
      lsr.l     d1,d0
@@ -157,11 +162,11 @@ noahdi:
      pea.l     kdot(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      pea.l     copyright(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
 *
 * copy resident part to basepage
 *
@@ -177,7 +182,7 @@ oom:
      pea.l     nomem(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      move.l    d6,d0
      moveq.l   #10,d1
      lsr.l     d1,d0
@@ -185,17 +190,17 @@ oom:
      pea.l     kdotdot(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      moveq.l   #-39,d5
 
 failexit:
      pea.l     failmsg(pc)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      bsr.s     wait
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      move.w    d5,-(a7)
      move.w    #$004C,-(a7)
      trap      #1
@@ -214,16 +219,16 @@ prtdec1:
      pea.l     (a0)
      move.w    #$0009,-(a7)
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      rts
 digits:                              dc.b '00000',0
 
 wait:
      moveq.l   #90,d3
 wait1:
-     move.w    #$0024,-(a7) ; BUG? $24 is Prtblk, probably they meant $25 (Vsync)
+     move.w    #$0025,-(a7) ; Vsync
      trap      #14
-     addq.l    #2,a7
+     addq.w    #2,a7
      dbf       d3,wait1
      rts
 
@@ -260,17 +265,17 @@ endlist:
      move.w    d4,d0        ; next loop for count of root buffers
      dbf       d3,nextbufl
      trap      #1
-     addq.l    #6,a7
+     addq.w    #6,a7
      move.w    #0,-(a7)
      move.l    d6,-(a7)
      move.w    #$0031,-(a7)
      trap      #1
-     addq.l    #8,a7
+     addq.w    #8,a7
 resprgend:
 
-notfoundmsg:                         dc.b 13,10,'Couldn',39,'t find CACHE*.* or '
+notfoundmsg:                         dc.b 13,10,'Couldn',39,'t find CACHE*.PRG or '
 pname:                               dc.b 'X:',$5c,'AUTO',$5c
-fname:                               dc.b 'CACHE*.*',0
+fname:                               dc.b 'CACHE*.PRG',0
 crsp:                                dc.b 13,10,' ',0
 fatroot:                             dc.b ' FAT/root, ',13,10,' ',0
 datadir:                             dc.b ' data/dir cache buffers in ',0
@@ -279,7 +284,8 @@ nomem:                               dc.b 13,10,'Not enough memory for ',0
 kdotdot:                             dc.b 'K...',0
 
 failmsg:                             dc.b 13,10,'No cache buffers added.',13,10
-copyright:                           dc.b 27,'p','CACHEnnn',27,'q',' Copyright ',189,' 1989, Atari Corp.',13,10,0
+copyright:                           dc.b 27,'p',' CACHEnnn v901121                     ',27,'q',13,10
+                                     dc.b 'Copyright ',189,' 1989-90, Atari Corporation',13,10,0
 usage:                               dc.b 13,10,'Usage:',9,'cache [D]nnn [Fnnn] (nnn = 1 to 999)',13,10
                                      dc.b 9,'D=Data/Dir buffers',13,10
                                      dc.b 9,'F=FAT/Root Dir buffers',13,10
