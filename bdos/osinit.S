@@ -233,8 +233,13 @@ _enter:
 
     bra enter_2
 
-enter_1:
+enter_1: ds.b 0
+    ifne mc68010
     cmp.w   #$20,8(sp)  * toggle/inquire state? BUG: assumes 68010+, does not check _longframe
+    endc
+    ifeq mc68010
+    cmp.w   #$20,6(sp)  * toggle/inquire state?
+    endc
     beq x20_sup     * yes, go perform function
 
 enter_2:
@@ -244,7 +249,9 @@ enter_2:
     move.l  (sp)+,$78(a6)   * olda6
     move.w  (sp)+,d0    * status reg
     move.l  (sp)+,a4    * retadd
+    ifne mc68010
     addq.l    #2,a7
+    endc
     btst    #13,d0      * if he is in system state, use his stack
     bne systk
     move.l  usp,a5
@@ -291,8 +298,10 @@ entusr:
     bne retsys      * a6 is (user-supplied) system stack
     move.l  a4,sp
     move.l  a6,usp
-gousr:
+gousr: ds.b 0
+    ifne mc68010
     clr.w     -(a7)
+    endc
     move.l  a3,-(sp)
     move.w  d0,-(sp)
     movem.l $68(a5),d0/a3-a6
@@ -325,11 +334,18 @@ x20_usr:            * user mode entry point
     beq x20_inq     * go handle inquiry
 
     move.l  2(a0),a0    * get new SSP from parameter
-xu_0:
+xu_0: ds.b 0
+    ifne mc68010
     lea.l     -6(a0),a0
+    endc
+    ifeq mc68010
+    lea.l     -4(a0),a0
+    endc
     move.w  (sp)+,d0    * pop SR
     move.l  (sp)+,(a0)  * transport the return address
+    ifne mc68010
     move.w    (a7)+,4(a0) * transform format word
+    endc
     ori.w   #$2000,d0   * set supervisor mode
     move.w  d0,-(a0)    * push SR
     move.l  sp,d0       * set return value (old SSP)
@@ -338,17 +354,29 @@ xu_0:
 
 * supervisor mode entry point
 
-x20_sup:
+x20_sup: ds.b 0
+    ifne mc68010
     move.l  10(sp),d1   * get parameter
+    endc
+    ifeq mc68010
+    move.l  8(sp),d1    * get parameter
+    endc
     beq xs_0        * go handle 0L entry
 
     subq.l  #1,d1       * check for 1L entry
     beq x20_inq     * go handle inquiry
 
+    ifne mc68010
     move.l  10(sp),a1   * point to new SSP
+    endc
+    ifeq mc68010
+    move.l  8(sp),a1    * point to new SSP
+    endc
     move.w  (sp)+,d0    * pop SR
     move.l  (sp)+,d1    * pop the return address
+    ifne mc68010
     move.w    (a7)+,-(a1) * transport the format word
+    endc
     move.l  d1,-(a1)    * pop the return address
     move.w  d0,-(a1)    * push SR
     move.l  usp,a0      * get USP
@@ -363,8 +391,13 @@ xs_usp:
     move.l  a1,sp       * update SSP
     bra xs_scram
 
-xs_0:
+xs_0: ds.b 0
+    ifne mc68010
     lea     8(sp),a0        * create USP
+    endc
+    ifeq mc68010
+    lea     6(sp),a0        * create USP
+    endc
 xs_exit:
     move.l  a0,usp      * update USP
 xs_scram:
