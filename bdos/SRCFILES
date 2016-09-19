@@ -26,3 +26,39 @@ BDOS_OBJS3 = \
 	$(empty)
 
 BDOS_OBJS = $(BDOS_OBJS1) $(BDOS_OBJS2) $(BDOS_OBJS3)
+
+BDOS_SRCS = \
+	osinit.S \
+	lmul.S \
+	ldiv.S \
+	xfer.S \
+	console.c \
+	fsfat.c \
+	fsglob.c \
+	fsdir.c \
+	fsopnclo.c \
+	fshand.c \
+	fsmain.c \
+	fssupp.c \
+	proc.c \
+	umem.c \
+	osmem.c \
+	bdosmain.c \
+	sup.c \
+	time.c \
+	vars.S \
+	vdidspde.S \
+	vdidspfr.S \
+	vdidsppl.S \
+	vdidspsv.S \
+	vdidspuk.S \
+	vdidspus.S \
+	\
+	bios.h \
+	btools.h \
+	fs.h \
+	mem.h \
+	pd.h \
+	pghdr.h \
+	tos.h \
+	$(empty)

@@ -1,2 +1,3 @@
 CACHE100_OBJS = cache100.o
-CACHE101_OBJS = cache101.o
+CACHE100_OLD_OBJS = cache100_old.o
+FOLDR100_OBJS = foldr100.o

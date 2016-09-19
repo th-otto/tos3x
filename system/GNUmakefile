@@ -13,7 +13,7 @@ LIBS =
 CPPFLAGS = -I../common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = cache100.prg cache101.prg
+PROGRAMS = cache100.prg foldr100.prg
 
 all: $(PROGRAMS)
 
@@ -22,8 +22,11 @@ include SRCFILES
 cache100.prg: $(CACHE100_OBJS) ${MAKEFILE}
 	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ ${CACHE100_OBJS}
 
-cache101.prg: $(CACHE101_OBJS) ${MAKEFILE}
-	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ ${CACHE101_OBJS}
+foldr100.prg: $(FOLDR100_OBJS) ${MAKEFILE}
+	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ ${FOLDR100_OBJS}
+
+cache100_old.prg: $(CACHE100_OLD_OBJS) ${MAKEFILE}
+	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ ${CACHE100_OLD_OBJS}
 
 check::
 

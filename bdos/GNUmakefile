@@ -39,5 +39,8 @@ check:: bdos.o checklang
 	$(RM) bdos.orig bdos.new; \
 	exit $$status
 
+dist::
+	$(CP) -a $(BDOS_SRCS) GNUmakefile Makefile SRCFILES optimize.mak tos306de.map tos306us.map ../$(DISTDIR)/bdos
+
 clean:
 	$(RM) *.o *.a $(PROGRAMS) bdos.orig bdos.new

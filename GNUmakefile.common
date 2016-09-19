@@ -3,6 +3,8 @@ LIB=../lib/
 INC=../include
 EXEEXT=
 
+DISTDIR=../tmp/tos306de
+
 ALNPATH=${LIB}
 CRT0=crt0.o
 LIBC=libc.a
