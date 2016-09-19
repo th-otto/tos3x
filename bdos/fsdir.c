@@ -82,6 +82,7 @@ PP(register FCB *fcb;)									/*  root where we start the search  */
  */
 
 /* 306de: 00e15580 */
+/* 306us: 00e15526 */
 FCB *scan(P(DND *) dnd, P(const char *) n, P(int16_t) att, P(int32_t *) posp)
 PP(register DND *dnd;)
 PP(const char *n;)
@@ -182,6 +183,7 @@ PP(int32_t *posp;)
  */
 
 /* 306de: 00e156b4 */
+/* 306us: 00e1565a */
 static DND *dcrack(P(const char **) np)
 PP(const char **np;)
 {
@@ -234,6 +236,7 @@ PP(const char **np;)
  */
 
 /* 306de: 00e15750 */
+/* 306us: 00e156f6 */
 DND *findit(P(const char *) name, P(const char **) sp, P(int) dflag)
 PP(const char *name;)								/*  name of file/dir            */
 PP(const char **sp;)
@@ -361,6 +364,7 @@ PP(int dflag;)								/*  T: name is for a directory      */
  */
 
 /* 306de: 00e15876 */
+/* 306us: 00e1581c */
 ERROR xchdir(P(const char *) p)
 PP(const char *p;)
 {
@@ -426,6 +430,7 @@ found:
  */
 
 /* 306de: 00e15972 */
+/* 306us: 00e15918 */
 ERROR xgetdir(P(char *) buf, P(int16_t) drv)					/*+ return text of current dir into specified buffer */
 PP(char *buf;)
 PP(int16_t drv;)
@@ -453,6 +458,7 @@ PP(int16_t drv;)
  */
 
 /* 306de: 00e159f6 */
+/* 306us: 00e1599c */
 VOID makbuf(P(FCB *) fp, P(DTAINFO *) dtp)
 PP(FCB *fp;)
 PP(DTAINFO *dtp;)
@@ -488,6 +494,7 @@ PP(DTAINFO *dtp;)
  */
 
 /* 306de: 00e15a60 */
+/* 306us: 00e15a06 */
 FCB *dirinit(P(DND *)dn)
 PP(register DND *dn;)								/*  dir descr for dir           */
 {
@@ -534,6 +541,7 @@ PP(register DND *dn;)								/*  dir descr for dir           */
  */
 
 /* 306de: 00e15afc */
+/* 306us: 00e15aa2 */
 ERROR xmkdir(P(const char *) s)
 PP(const char *s;)
 {
@@ -615,6 +623,7 @@ PP(const char *s;)
  */
 
 /* 306de: 00e15d08 */
+/* 306us: 00e15cae */
 ERROR xrmdir(P(const char *)p)
 PP(const char *p;)
 {
@@ -691,6 +700,7 @@ PP(const char *p;)
  */
 
 /* 306de: 00e15e3a */
+/* 306us: 00e15de0 */
 ERROR ixsfirst(P(const char *) name, P(int16_t) att, P(DTAINFO *)addr)
 PP(const char *name;)								/*  name of file to match   */
 PP(int16_t att;)							/*  attribute of file       */
@@ -747,6 +757,7 @@ PP(DTAINFO *addr;)						/*  ptr to dta info         */
  */
 
 /* 306de: 00e15f20 */
+/* 306us: 00e15ec6 */
 ERROR xsnext(NOTHING)
 {
 	register DTAINFO *dt;

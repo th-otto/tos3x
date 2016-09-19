@@ -15,6 +15,7 @@ GEMDOS time and date functions
 /****************************/
 
 /* 306de: 00e196a4 */
+/* 306us: 00e1964a */
 int32_t xgetdate(NOTHING)
 {
 #if !GEMDOS
@@ -34,6 +35,7 @@ int32_t xgetdate(NOTHING)
 #define	YRS_BM		0xFE00
 
 /* 306de: 00e196b4 */
+/* 306us: 00e1965a */
 int32_t xsetdate(P(int16_t) d)
 PP(int16_t d;)
 {
@@ -71,6 +73,7 @@ PP(int16_t d;)
 /****************************/
 
 /* 306de: 00e19732 */
+/* 306us: 00e196d8 */
 int32_t xgettime(NOTHING)
 {
 #if !GEMDOS
@@ -91,6 +94,7 @@ int32_t xgettime(NOTHING)
 #define	HRS_BM		0xF800
 
 /* 306de: 00e19742 */
+/* 306us: 00e196e8 */
 int32_t xsettime(P(int16_t) t)
 PP(int16_t t;)
 {

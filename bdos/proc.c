@@ -58,6 +58,7 @@ xjmp_buf bakbuf;
  */
 
 /* 306de: 00e176d6 */
+/* 306us: 00e1767c */
 VOID xtermres(P(int32_t) blkln, P(int16_t) rc)
 PP(int32_t blkln;)
 PP(int16_t rc;)
@@ -78,6 +79,7 @@ PP(int16_t rc;)
  */
 
 /* 306de: 00e17704 */
+/* 306us: 00e176aa */
 VOID xterm(P(uint16_t) rc)
 PP(uint16_t rc;)
 {
@@ -106,6 +108,7 @@ PP(uint16_t rc;)
  */
 
 /* 306de: 00e17760 */
+/* 306us: 00e17706 */
 VOID x0term(NOTHING)
 {
 	xterm(0);
@@ -118,6 +121,7 @@ VOID x0term(NOTHING)
  */
 
 /* 306de: 00e1776c */
+/* 306us: 00e17712 */
 VOID ixterm(P(PD *) r)
 PP(PD *r;)									/*  PD of process to terminate      */
 {
@@ -157,6 +161,7 @@ PP(PD *r;)									/*  PD of process to terminate      */
  */
 
 /* 306de: 00e17808 */
+/* 306us: 00e177ae */
 ERROR xexec(P(int16_t) mode, P(char *) s, P(char *) t, P(char *) v)
 PP(int16_t mode;)								/*  0, 3, 4, or 5       */
 PP(char *s;)
@@ -510,6 +515,7 @@ donehdr:
  */
 
 /* 306de: 00e17dca */
+/* 306us: 00e17d70 */
 ERROR xpgmld(P(PGMHDR01 *) hdr, P(FH) fh, P(PD *) pdptr)
 PP(PGMHDR01 *hdr;)
 PP(FH fh;)

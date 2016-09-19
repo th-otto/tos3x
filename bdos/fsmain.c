@@ -14,6 +14,7 @@
  */
 
 /* 306de: 00e1720e */
+/* 306us: 00e171b4 */
 DTAINFO *xgetdta(NOTHING)							/*+ return address of dta */
 {
 	return run->p_xdta;
@@ -25,6 +26,7 @@ DTAINFO *xgetdta(NOTHING)							/*+ return address of dta */
  */
 
 /* 306de: 00e17220 */
+/* 306us: 00e171c6 */
 VOID xsetdta(P(DTAINFO *) addr)							/*+ set transfer address to addr */
 PP(DTAINFO *addr;)
 {
@@ -41,6 +43,7 @@ PP(DTAINFO *addr;)
 
 #if !GEMDOS /* assembly routine provided */
 /* 306de: 00e13584 */
+/* 306us: 00e1352a */
 int uc(P(char) c)
 PP(register char c;)
 {
@@ -56,6 +59,7 @@ PP(register char c;)
  */
 
 /* 306de: 00e17234 */
+/* 306us: 00e171da */
 ERROR xsetdrv(P(int16_t) drv)
 PP(int16_t drv;)
 {
@@ -74,6 +78,7 @@ PP(int16_t drv;)
  */
 
 /* 306de: 00e17254 */
+/* 306us: 00e171fa */
 ERROR xgetdrv(NOTHING)
 {
 	return run->p_curdrv;
@@ -262,6 +267,7 @@ PP(int16_t *d;)
 
 #if !GEMDOS /* assembly routine provided */
 /* 306de: 00e1386c */
+/* 306us: 00e13812 */
 VOID usr2xfr(P(int) n, P(char *) d, P(char *) s)
 PP(register int n;)
 PP(register char *s;)
@@ -276,6 +282,7 @@ PP(register char *d;)
  */
 
 /* 306de: 00e13876 */
+/* 306us: 00e1381c */
 VOID xfr2usr(P(int) n, P(char *) s, P(char *) d)
 PP(register int n;)
 PP(register char *s;)

@@ -46,6 +46,7 @@ static VOID printstr PROTO((const char *str));
  */
 
 /* 306de: 00e1800c */
+/* 306us: 00e17fb2 */
 VOID xminit(NOTHING)
 {
 	register MD *q;
@@ -73,6 +74,7 @@ VOID xminit(NOTHING)
 
 
 /* 306de: 00e1806c */
+/* 306us: 00e18012 */
 static int32_t xmfsize(P(MPB *) mp, P(int16_t) mode)
 PP(MPB *mp;)
 PP(int16_t mode;)
@@ -98,6 +100,7 @@ PP(int16_t mode;)
 
 
 /* 306de: 00e180b8 */
+/* 306us: 00e1805e */
 MD *ffit(P(long) amount, P(MPB *) mp, P(int16_t) mode)
 PP(long amount;)
 PP(MPB *mp;)
@@ -222,6 +225,7 @@ PP(int16_t mode;)
  */
 
 /* 306de: 00e1821c */
+/* 306us: 00e181c2 */
 ERROR xsetblk(P(int16_t) n, P(VOIDPTR) blk, P(int32_t) len)
 PP(int16_t n;)									/*  dummy, not used         */
 PP(VOIDPTR blk;)								/*  addr of block to free   */
@@ -295,6 +299,7 @@ found:
  */
 
 /* 306de: 00e182bc */
+/* 306us: 00e18262 */
 VOID freeit(P(MD *) m, P(MPB *) mp)
 PP(register MD *m;)
 PP(MPB *mp;)
@@ -361,6 +366,7 @@ PP(MPB *mp;)
  */
 
 /* 306de: 00e18372 */
+/* 306us: 00e18318 */
 int32_t xmxalloc(P(int32_t) amount, P(int16_t) mode)
 PP(int32_t amount;)
 PP(int16_t mode;)
@@ -394,6 +400,7 @@ PP(int16_t mode;)
  */
 
 /* 306de: 00e183cc */
+/* 306us: 00e18372 */
 int32_t xmalloc(P(int32_t) amount)
 PP(int32_t amount;)
 {
@@ -411,6 +418,7 @@ PP(int32_t amount;)
  */
 
 /* 306de: 00e183fe */
+/* 306us: 00e183a4 */
 ERROR xmfree(P(int32_t) addr)
 PP(int32_t addr;)
 {
@@ -431,6 +439,7 @@ found:
 
 
 /* 306de: 00e183fe */
+/* 306us: 00e183a4 */
 VOID xmakeres(P(PD *) p)
 PP(PD *p;)
 {
@@ -457,6 +466,7 @@ PP(PD *p;)
  */
 
 /* 306de: 00e1847c */
+/* 306us: 00e18422 */
 VOID xmfreall(P(PD *) r)
 PP(PD *r;)
 {
@@ -479,6 +489,7 @@ PP(PD *r;)
 
 
 /* 306de: 00e184be */
+/* 306us: 00e18464 */
 VOID xmsetown(P(VOIDPTR) paddr, P(PD *) own)
 PP(VOIDPTR paddr;)
 PP(PD *own;)
@@ -499,6 +510,7 @@ PP(PD *own;)
 
 
 /* 306de: 00e184f8 */
+/* 306us: 00e1849e */
 ERROR xmaddalt(P(char *) start, P(int32_t) len)
 PP(char *start;)
 PP(int32_t len;)
@@ -529,6 +541,7 @@ PP(int32_t len;)
 
 
 /* 306de: 00e18570 */
+/* 306us: 00e18516 */
 VOID foldermsg(NOTHING)
 {
 	printstr("\033H*** OUT OF INTERNAL MEMORY:\033K\r\n*** USE FOLDR100.PRG TO GET MORE.\033K\r\n\033K\n\033K\n*** SYSTEM HALTED ***\033K");

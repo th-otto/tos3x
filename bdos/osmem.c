@@ -25,6 +25,7 @@ FOFD *ofdfree;
 
 
 /* 306de: 00e185b0 */
+/* 306us: 00e18556 */
 VOID osminit(NOTHING)
 {
 	ofdlist = NULL;
@@ -33,6 +34,7 @@ VOID osminit(NOTHING)
 
 
 /* 306de: 00e185ce */
+/* 306us: 00e18574 */
 VOID ofdadd(P(FOFD *) p, P(long) len)
 PP(register FOFD *p;)
 PP(register long len;)
@@ -57,6 +59,7 @@ PP(register long len;)
 
 
 /* 306de: 00e1862c */
+/* 306us: 00e185d2 */
 OFD *mgetofd(NOTHING)
 {
 	register FOFD *p;
@@ -123,6 +126,7 @@ found:
 
 
 /* 306de: 00e186da */
+/* 306us: 00e18680 */
 static FOFD *ofdmore(NOTHING)
 {
 	register FOFD *p;
@@ -147,6 +151,7 @@ static FOFD *ofdmore(NOTHING)
 
 
 /* 306de: 00e18738 */
+/* 306us: 00e186de */
 MD *mgetmd(NOTHING)
 {
 	register FOFD *p;
@@ -215,6 +220,7 @@ found:
  */
 
 /* 306de: 00e18804 */
+/* 306us: 00e187aa */
 static FOFD *getosm(NOTHING)
 {
 	register FOFD *p;
@@ -287,6 +293,7 @@ static FOFD *getosm(NOTHING)
 
 
 /* 306de: 00e188f8 */
+/* 306us: 00e1889e */
 int mdlink(P(MD *) m, P(MD *) p)
 PP(register MD *m;)
 PP(register MD *p;)
@@ -318,6 +325,7 @@ found:
 
 
 /* 306de: 00e18962 */
+/* 306us: 00e18908 */
 MD *mdfind(P(FOFD **) p1, P(int *) a, P(FOFD *) p)
 PP(FOFD **p1;)
 PP(int *a;)
@@ -364,6 +372,7 @@ PP(FOFD *p;)
  */
 
 /* 306de: 00e189ce */
+/* 306us: 00e18974 */
 OFD *oftdel(P(OFD *) ofd)
 PP(OFD *ofd;)
 {
@@ -378,6 +387,7 @@ PP(OFD *ofd;)
 
 
 /* 306de: 00e189f8 */
+/* 306us: 00e1899e */
 VOIDPTR xmdfree(P(MD *) m)
 PP(register MD *m;)
 {

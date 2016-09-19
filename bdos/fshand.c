@@ -14,6 +14,7 @@
  */
 
 /* 306de: 00e16e68 */
+/* 306us: 00e16e0e */
 FH syshnd(P(FH) h)
 PP(register FH h;)
 {
@@ -29,6 +30,7 @@ PP(register FH h;)
  *  getofd -
  */
 /* 306de: 00e16e98 */
+/* 306us: 00e16e3e */
 OFD *getofd(P(FH) h)
 PP(FH h;)
 {
@@ -55,6 +57,7 @@ PP(FH h;)
  */
 
 /* 306de: 00e16eda */
+/* 306us: 00e16e80 */
 ERROR xdup(P(int16_t) h)
 PP(int16_t h;)									/*+ h must be a standard handle (checked) */
 {
@@ -93,6 +96,7 @@ PP(int16_t h;)									/*+ h must be a standard handle (checked) */
  */
 
 /* 306de: 00e16f5e */
+/* 306us: 00e16f04 */
 ERROR xforce(P(int16_t) std, P(int16_t) h)
 PP(int16_t std;)
 PP(int16_t h;)
@@ -107,6 +111,7 @@ PP(int16_t h;)
  */
 
 /* 306de: 00e16f74 */
+/* 306us: 00e16f1a */
 ERROR ixforce(P(FH) _std, P(FH) _h, P(PD *) _p)
 PP(FH _std;)								/* std must be a standard handle    */
 PP(FH _h;)									/* h   must NOT be a standard handle    */
@@ -163,6 +168,7 @@ PP(PD *_p;)
  */
 
 /* 306de: 00e17024 */
+/* 306us: 00e16fca */
 ERROR xclose(P(FH) h)
 PP(FH h;)
 {
@@ -235,6 +241,7 @@ PP(FH h;)
  */
 
 /* 306de: 00e170f0 */
+/* 306us: 00e17096 */
 ERROR xread(P(int16_t) h, P(long) len, P(VOIDPTR) ubufr)
 PP(int16_t h;)
 PP(long len;)
@@ -267,6 +274,7 @@ PP(VOIDPTR ubufr;)
  */
 
 /* 306de: 00e17130 */
+/* 306us: 00e170d6 */
 ERROR xwrite(P(FH) h, P(long) len, P(VOIDPTR) ubufr)
 PP(FH h;)
 PP(long len;)
@@ -304,6 +312,7 @@ PP(VOIDPTR ubufr;)
  */
 
 /* 306de: 00e17176 */
+/* 306us: 00e1711c */
 ERROR opnfil(P(const FCB *) f, P(DND *) dn, P(int16_t) mod)
 PP(const FCB *f;)
 PP(DND *dn;)
@@ -326,6 +335,7 @@ PP(int16_t mod;)
 
 
 /* 306de: 00e171d8 */
+/* 306us: 00e1717e */
 FH ffhndl(NOTHING)
 {
 	register int i;

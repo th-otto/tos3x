@@ -87,6 +87,7 @@ FND
 #endif
 
 /* 306de: 00e3d9f8 */
+/* 306us: 00e3d9c8 */
 FND const funcs[0x58] = {
 
 	/* 0x00 */ { GDF x0term, 0 },
@@ -234,6 +235,7 @@ FND const funcs[0x58] = {
  */
 
 /* 306de: 00e18af6 */
+/* 306us: 00e18a9c */
 ERROR ni(NOTHING)
 {
 	return E_INVFN;
@@ -249,6 +251,7 @@ int8_t const stddev[NUMSTD] = { H_Console, H_Console, H_Aux, H_Print, H_Console,
  */
 
 /* 306de: 00e18b00 */
+/* 306us: 00e18aa6 */
 int32_t xgetver(NOTHING)
 {
 	return ((GEMDOS & 0xff) << 8) | ((GEMDOS >> 8) & 0xff);					/*  minor.major */
@@ -260,6 +263,7 @@ int32_t xgetver(NOTHING)
  */
 
 /* 306de: 00e18b0e */
+/* 306us: 00e18ab4 */
 VOID cinit(NOTHING)
 {
 	register PD *r;
@@ -296,6 +300,7 @@ VOID cinit(NOTHING)
  */
 
 /* 306de: 00e18bb6 */
+/* 306us: 00e18b5c */
 VOID freetree(P(DND *)d)
 PP(DND *d;)
 {
@@ -326,6 +331,7 @@ PP(DND *d;)
  */
 
 /* 306de: 00e18c46 */
+/* 306us: 00e18bec */
 VOID offree(P(DMD *) d)
 PP(DMD *d;)
 {
@@ -379,6 +385,8 @@ PP(int16_t *pw;)
 
 #endif
 
+/* 306de: 00e18cc6 */
+/* 306us: 00e18c6c */
 int32_t osif2(P(int16_t *) pw)
 PP(int16_t *pw;)
 {
@@ -716,6 +724,7 @@ PP(int16_t n;)
  */
 
 /* 306de: 00e193ac */
+/* 306us: 00e19352 */
 VOID tikfrk(P(int) n)
 PP(int n;)
 {
@@ -786,6 +795,7 @@ PP(int n;)
 
 
 /* 306de: 00e194ec */
+/* 306us: 00e19492 */
 ERROR chgdrv(P(int16_t) drv, P(ERROR) rc)
 PP(int16_t drv;)
 PP(ERROR rc;)
@@ -832,6 +842,7 @@ PP(ERROR rc;)
 
 
 /* 306de: 00e1964e */
+/* 306us: 00e195f4 */
 ERROR adddrv(P(int16_t) drv, P(ERROR) rc)
 PP(int16_t drv;)
 PP(ERROR rc;)

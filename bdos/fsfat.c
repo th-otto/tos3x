@@ -42,6 +42,7 @@ static DND *leftmost PROTO((DND *));
 
 
 /* 306de: 00e1412c */
+/* 306us: 00e140d2 */
 DND *fsgetofd(NOTHING)
 {
 	register int i;
@@ -75,6 +76,7 @@ DND *fsgetofd(NOTHING)
 
 
 /* 306de: 00e141ac */
+/* 306us: 00e14152 */
 static DND *leftmost(P(DND *) dnd)
 PP(register DND *dnd;)
 {
@@ -111,6 +113,7 @@ PP(register DND *dnd;)
  */
 
 /* 306de: 00e1423e */
+/* 306us: 00e141e4 */
 DMD *getdmd(P(int) drv)
 PP(int drv;)
 {
@@ -134,6 +137,7 @@ PP(int drv;)
  */
 
 /* 306de: 00e1428e */
+/* 306us: 00e14234 */
 ERROR login(P(BPB *) b, P(int) drv)
 PP(BPB *b;)									/*  bios parm block for drive       */
 PP(int drv;)								/*  drive number            */
@@ -201,6 +205,7 @@ PP(int drv;)								/*  drive number            */
 
 
 /* 306de: 00e144d2 */
+/* 306us: 00e14478 */
 static VOID invalidate(P(int) drv)
 PP(register int drv;)
 {
@@ -229,6 +234,7 @@ PP(register int drv;)
  */
 
 /* 306de: 00e14516 */
+/* 306us: 00e144bc */
 static VOID flush(P(BCB *) b)
 PP(register BCB *b;)
 {
@@ -262,6 +268,7 @@ PP(register BCB *b;)
 
 
 /* 306de: 00e14624 */
+/* 306us: 00e145ca */
 VOID flushall(NOTHING)
 {
 	register int drv;
@@ -294,6 +301,7 @@ VOID flushall(NOTHING)
  */
 
 /* 306de: 00e14676 */
+/* 306us: 00e1461c */
 static VOID usrio(P(int) wrtflg, P(RECNO) count, P(RECNO) recno, P(char *) buf, P(DMD *)dm)
 PP(int wrtflg;)
 PP(RECNO count;)
@@ -332,6 +340,7 @@ PP(DMD *dm;)
  */
 
 /* 306de: 00e1473e */
+/* 306us: 00e146e4 */
 char *getrec(P(RECNO) recno, P(DMD *)dm, P(int) wrtflg)
 PP(register RECNO recno;)
 PP(register DMD *dm;)
@@ -468,6 +477,7 @@ PP(int wrtflg;)
 
 
 /* 306de: 00e1492c */
+/* 306us: 00e148d2 */
 static char *getdirrec(P(RECNO) recno, P(DMD *)dm, P(int) wrtflg)
 PP(RECNO recno;)
 PP(DMD *dm;)
@@ -490,6 +500,7 @@ PP(int wrtflg;)
  */
 
 /* 306de: 00e1498a */
+/* 306us: 00e14930 */
 VOID clfix(P(CLNO) cl, P(CLNO) link, P(DMD *) dm)
 PP(register CLNO cl;)
 PP(CLNO link;)
@@ -570,6 +581,7 @@ PP(register DMD *dm;)
  */
 
 /* 306de: 00e14b62 */
+/* 306us: 00e14b08 */
 CLNO getcl(P(CLNO) cl, P(DMD *) dm)
 PP(register CLNO cl;)
 PP(register DMD *dm;)
@@ -646,6 +658,7 @@ PP(register DMD *dm;)
  */
 
 /* 306de: 00e14d1a */
+/* 306us: 00e14cc0 */
 int nextcl(P(OFD *) p, P(int) wrtflg)
 PP(register OFD *p;)
 PP(int wrtflg;)
@@ -728,6 +741,7 @@ retcl:
 
 
 /* 306de: 00e14e22 */
+/* 306us: 00e14dc8 */
 CLNO xgscan16(P(DMD *) dm, P(CLNO) numcl, P(int) flag)
 PP(DMD *dm;)
 PP(CLNO numcl;)
@@ -787,6 +801,7 @@ PP(int flag;)
  */
 
 /* 306de: 00e14ece */
+/* 306us: 00e14e74 */
 static VOID addit(P(OFD *) p, P(long) siz, P(int) flg)
 PP(register OFD *p;)
 PP(long siz;)
@@ -824,6 +839,7 @@ PP(int flg;)								/* update curbyt ? (yes if less than 1 cluster transferred) 
  */
 
 /* 306de: 00e14f10 */
+/* 306us: 00e14eb6 */
 ERROR xrw(P(int) wrtflg, P(OFD *) p, P(long) len, P(char *) ubufr, P(xfer) bufxfr)
 PP(int wrtflg;)
 PP(register OFD *p;)
@@ -1043,6 +1059,7 @@ exit:
  */
 
 /* 306de: 00e152e2 */
+/* 306us: 00e15288 */
 ERROR ckdrv(P(int) d)
 PP(register int d;)									/* has this drive been accessed, or had a media change */
 {
@@ -1101,6 +1118,7 @@ PP(register int d;)									/* has this drive been accessed, or had a media chan
  */
 
 /* 306de: 00e153c8 */
+/* 306us: 00e1536e */
 ERROR xgetfree(P(int32_t *) bufp, P(int16_t) drv)					/*+ get disk free space data into buffer */
 PP(register int16_t drv;)
 PP(int32_t *bufp;)

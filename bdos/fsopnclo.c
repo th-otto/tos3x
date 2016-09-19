@@ -27,6 +27,7 @@ ERROR xrendir PROTO((DND *dn, const char *name, const char *to));
  */
 
 /* 306de: 00e160ba */
+/* 306us: 00e16060 */
 ERROR ixclose(P(OFD *) fd, P(int) part)
 PP(register OFD *fd;)
 PP(int part;)
@@ -111,6 +112,7 @@ PP(int part;)
  */
 
 /* 306de: 00e161de */
+/* 306us: 00e16184 */
 OFD *makofd(P(DND *) p)
 PP(register DND *p;)
 {
@@ -141,6 +143,7 @@ PP(register DND *p;)
  */
 
 /* 306de: 00e16236 */
+/* 306us: 00e161dc */
 ERROR ixread(P(OFD *)p, P(long) len, P(VOIDPTR) ubufr)
 PP(register OFD *p;)
 PP(register long len;)
@@ -172,6 +175,7 @@ PP(VOIDPTR ubufr;)
  */
 
 /* 306de: 00e16286 */
+/* 306us: 00e1622c */
 ERROR ixwrite(P(OFD *) p, P(long) len, P(VOIDPTR) ubufr)
 PP(OFD *p;)
 PP(long len;)
@@ -189,6 +193,7 @@ PP(VOIDPTR ubufr;)
  */
 
 /* 306de: 00e162ae */
+/* 306us: 00e16254 */
 ERROR makopn(P(const FCB *) f, P(DND *) dn, P(FH) h, P(int16_t) mod)
 PP(register const FCB *f;)
 PP(DND *dn;)
@@ -245,6 +250,7 @@ PP(int mod;)
  */
 
 /* 306de: 00e163be */
+/* 306us: 00e16364 */
 ERROR ixcreat(P(const char *) name, P(int8_t) attr)
 PP(const char *name;)
 PP(int8_t attr;)
@@ -365,6 +371,7 @@ PP(int8_t attr;)
  */
 
 /* 306de: 00e16670 */
+/* 306us: 00e16616 */
 ERROR ixopen(P(const char *) name, P(int16_t) mode)
 PP(const char *name;)
 PP(int16_t mode;)
@@ -408,6 +415,7 @@ PP(int16_t mode;)
  */
 
 /* 306de: 00e166e6 */
+/* 306us: 00e1668c */
 ERROR xchmod(P(const char *) p, P(int16_t) wrt, P(char) mod)
 PP(const char *p;)
 PP(int16_t wrt;)
@@ -450,6 +458,7 @@ PP(char mod;)
  */
 
 /* 306de: 00e167c4 */
+/* 306us: 00e1676a */
 ERROR xgsdtof(P(uint16_t *) buf, P(FH) h, P(int16_t) wrt)
 PP(uint16_t *buf;)
 PP(FH h;)
@@ -505,6 +514,7 @@ PP(int16_t wrt;)
  */
 
 /* 306de: 00e16876 */
+/* 306us: 00e1681c */
 ERROR xunlink(P(const char *) name)
 PP(const char *name;)								/*  path name of file to delete     */
 {
@@ -548,6 +558,7 @@ PP(const char *name;)								/*  path name of file to delete     */
  */
 
 /* 306de: 00e168e6 */
+/* 306us: 00e1688c */
 ERROR ixdel(P(DND *) dn, P(FCB *) f, P(long) pos)
 PP(DND *dn;)
 PP(FCB *f;)
@@ -626,6 +637,7 @@ PP(long pos;)
  */
 
 /* 306de: 00e16a06 */
+/* 306us: 00e169ac */
 ERROR xrename(P(int16_t) n, P(const char *) p1, P(const char *)p2)	/*+ rename file, old path p1, new path p2 */
 PP(int16_t n;)									/*  not used                */
 PP(const char *p1;)
@@ -720,6 +732,7 @@ PP(const char *p2;)
 
 
 /* 306de: 00e16c48 */
+/* 306us: 00e16bee */
 ERROR xrendir(P(DND *) dn, P(const char *) name, P(const char *) to)
 PP(DND *dn;)
 PP(const char *name;)
@@ -758,6 +771,7 @@ PP(const char *to;)
  */
 
 /* 306de: 00e16cf6 */
+/* 306us: 00e16c9c */
 ERROR xlseek(P(long) n, P(int16_t) h, P(int16_t) flg)
 PP(long n;)
 PP(int16_t h;)
@@ -795,6 +809,7 @@ PP(int16_t flg;)
  */
 
 /* 306de: 00e16d58 */
+/* 306us: 00e16cfe */
 ERROR ixlseek(P(OFD *) p, P(long) n)
 PP(register OFD *p;)								/*  file descriptor for file in use */
 PP(register long n;)								/*  number of bytes to seek     */
