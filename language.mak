@@ -31,6 +31,12 @@ gemdos_dbase_pl=3BD8DA
 gemdos_dlen_pl=39E
 vdidsp_pl=3878B4
 
+gemdos_tbase_sv=E13502
+gemdos_tlen_sv=62AC
+gemdos_dbase_sv=E3D8F8
+gemdos_dlen_sv=39E
+vdidsp_sv=E078D2
+
 gemdos_tbase=$(gemdos_tbase_$(LANG))
 gemdos_dbase=$(gemdos_dbase_$(LANG))
 
@@ -40,6 +46,7 @@ langcheck_us=true
 langcheck_fr=true
 langcheck_uk=true
 langcheck_pl=true
+langcheck_sv=true
 
 
 #

@@ -31,6 +31,8 @@
 #define CTRY_IT  5
 /* Sweden */
 #define CTRY_SE  6
+/* Sweden (alternative name) */
+#define CTRY_SV  CTRY_SE
 /* Switzerland (French) */
 #define CTRY_SF  7
 /* Switzerland (German), NOT Singapore! */

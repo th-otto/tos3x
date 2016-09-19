@@ -146,7 +146,7 @@ static FOFD *ofdmore(NOTHING)
 }
 
 
-/* 306de: 00e8738 */
+/* 306de: 00e18738 */
 MD *mgetmd(NOTHING)
 {
 	register FOFD *p;
