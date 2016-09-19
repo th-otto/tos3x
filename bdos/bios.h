@@ -20,7 +20,7 @@
 
 #define FTAB    struct _ftab
 #define OFD     struct _ofd
-#define FOFD    struct _fofd
+#define MDBLOCK struct _mdblock
 #define FCB     struct _fcb
 #define DND     struct _dnd
 #define FH      int16_t    /*  file handle    */

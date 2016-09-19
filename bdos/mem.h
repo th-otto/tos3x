@@ -19,7 +19,7 @@ extern PD ospd;
 
 VOID xminit PROTO((NOTHING));
 VOID osminit PROTO((NOTHING));
-VOID ofdadd PROTO((FOFD *buf, long len));
+VOID ofdadd PROTO((MDBLOCK *buf, long len));
 MD *ffit PROTO((long amount, MPB *mp, int16_t mode));
 VOID freeit PROTO((MD *m, MPB *mp));
 VOID xmakeres PROTO((PD *p));

@@ -6,22 +6,22 @@
 #include "mem.h"
 #include <toserrno.h>
 
-/* should actually be offsetof(struct FOFD, buf) */
-#define MD_OFFSET (sizeof(FOFD *) + 2)
+/* should actually be offsetof(struct MDBLOCK, buf) */
+#define MD_OFFSET (sizeof(MDBLOCK *) + 2)
 
-static MD *mdfind PROTO((FOFD **p1, int *a, FOFD *p));
+static MD *mdfind PROTO((MDBLOCK **p1, int *a, MDBLOCK *p));
 int mdlink PROTO((MD *m, MD *p));
 
-static FOFD *ofdmore PROTO((NOTHING));
-static FOFD *getosm PROTO((NOTHING));
+static MDBLOCK *ofdmore PROTO((NOTHING));
+static MDBLOCK *getosm PROTO((NOTHING));
 
 
 
-FOFD ofdbuf[80];
-FOFD *ofdlist;
-#define MAXQUICK 4
-int16_t *root[MAXQUICK];
-FOFD *ofdfree;
+MDBLOCK ofdbuf[80];
+MDBLOCK *ofdlist;
+#define MAXQUICK 5
+MDBLOCK *root[MAXQUICK];
+#define ofdfree root[4]
 
 
 /* 306de: 00e185b0 */
@@ -35,8 +35,8 @@ VOID osminit(NOTHING)
 
 /* 306de: 00e185ce */
 /* 306us: 00e18574 */
-VOID ofdadd(P(FOFD *) p, P(long) len)
-PP(register FOFD *p;)
+VOID ofdadd(P(MDBLOCK *) p, P(long) len)
+PP(register MDBLOCK *p;)
 PP(register long len;)
 {
 	register VOIDPTR unused;
@@ -62,7 +62,7 @@ PP(register long len;)
 /* 306us: 00e185d2 */
 OFD *mgetofd(NOTHING)
 {
-	register FOFD *p;
+	register MDBLOCK *p;
 	register MD *x;
 	register int32_t *y;
 	register int i;
@@ -78,7 +78,7 @@ OFD *mgetofd(NOTHING)
 		{
 			thisfree = 0;
 			x = p->buf;
-			for (i = 3; i >= 0; i--, x++)
+			for (i = MDS_PER_BLOCK - 1; i >= 0; i--, x++)
 			{
 				if (x->m_own == MF_FREE)
 				{
@@ -86,7 +86,7 @@ OFD *mgetofd(NOTHING)
 					thisfree++;
 				}
 			}
-			if (thisfree == 4)
+			if (thisfree == MDS_PER_BLOCK)
 			{
 				goto found;
 			}
@@ -97,7 +97,7 @@ OFD *mgetofd(NOTHING)
 	if (p != NULL)
 		goto found;
 
-	if (total >= 4)
+	if (total >= MDS_PER_BLOCK)
 	{
 		p = getosm();
 		if (p != NULL)
@@ -107,7 +107,7 @@ OFD *mgetofd(NOTHING)
 		y = (int32_t *)fsgetofd();
 		if (y != NULL)
 		{
-			p = (FOFD *)((char *)y - MD_OFFSET);
+			p = (MDBLOCK *)((char *)y - MD_OFFSET);
 			goto found;
 		}
 	}
@@ -116,7 +116,7 @@ OFD *mgetofd(NOTHING)
 found:
 	p->x_flag = -1;
 	y = (int32_t *)p->buf;
-	while (y < (int32_t *)(&p->buf[4]))
+	while (y < (int32_t *)(&p->buf[MDS_PER_BLOCK]))
 	{
 		*y = 0;
 		y++;
@@ -127,10 +127,10 @@ found:
 
 /* 306de: 00e186da */
 /* 306us: 00e18680 */
-static FOFD *ofdmore(NOTHING)
+static MDBLOCK *ofdmore(NOTHING)
 {
-	register FOFD *p;
-	register FOFD *q;
+	register MDBLOCK *p;
+	register MDBLOCK *q;
 	register PD **pp;
 	
 	p = ofdfree;
@@ -138,9 +138,9 @@ static FOFD *ofdmore(NOTHING)
 		return NULL;
 	while (p != NULL)
 	{
-		for (q = p; q->o_link != NULL && q->o_link == (FOFD *)&q->buf[3].m_own; q = q->o_link)
+		for (q = p; q->o_link != NULL && q->o_link == (MDBLOCK *)&q->buf[MDS_PER_BLOCK-1].m_own; q = q->o_link)
 			;
-		pp = &q->buf[3].m_own;
+		pp = &q->buf[MDS_PER_BLOCK-1].m_own;
 		q = q->o_link;
 		ofdadd(p, (long)pp - (long)p);
 		p = q;
@@ -154,8 +154,8 @@ static FOFD *ofdmore(NOTHING)
 /* 306us: 00e186de */
 MD *mgetmd(NOTHING)
 {
-	register FOFD *p;
-	register FOFD *q;
+	register MDBLOCK *p;
+	register MDBLOCK *q;
 	register MD *x;
 	register int i;
 	OFD *y;
@@ -170,7 +170,7 @@ MD *mgetmd(NOTHING)
 		} else if (p->x_flag > 0)
 		{
 			x = p->buf;
-			for (i = 3; i >= 0; i--, x++)
+			for (i = MDS_PER_BLOCK-1; i >= 0; i--, x++)
 			{
 				if (x->m_own == MF_FREE)
 				{
@@ -193,7 +193,7 @@ MD *mgetmd(NOTHING)
 		{
 			if ((y = (OFD *)fsgetofd()) != NULL)
 			{
-				p = (FOFD *)((char *)y - MD_OFFSET);
+				p = (MDBLOCK *)((char *)y - MD_OFFSET);
 			} else
 			{
 				return NULL;
@@ -214,19 +214,16 @@ found:
 /*
  *  getosm - get a block of memory from the main o/s memory pool
  *	(as opposed to the 'fast' list of freed blocks).
- *
- *	treats the os pool as a large array of integers, allocating from
- *	the base.
  */
 
 /* 306de: 00e18804 */
 /* 306us: 00e187aa */
-static FOFD *getosm(NOTHING)
+static MDBLOCK *getosm(NOTHING)
 {
-	register FOFD *p;
-	register FOFD *q;
+	register MDBLOCK *p;
+	register MDBLOCK *q;
 	register MD *x;
-	FOFD *p1;
+	MDBLOCK *p1;
 	register int i;
 	register int idx;
 	register int thisfree;
@@ -243,7 +240,7 @@ static FOFD *getosm(NOTHING)
 		{
 			thisfree = 0;
 			x = q->buf;
-			for (i = 3; i >= 0; i--, x++)
+			for (i = MDS_PER_BLOCK-1; i >= 0; i--, x++)
 			{
 				if (x->m_own == MF_FREE)
 				{
@@ -256,9 +253,9 @@ static FOFD *getosm(NOTHING)
 			{
 				p = q;
 				maxfree = thisfree;
-				if (thisfree == 4)
+				if (thisfree == MDS_PER_BLOCK)
 					return p;
-				if (thisfree == 3)
+				if (thisfree == MDS_PER_BLOCK-1)
 					break;
 			}
 		}
@@ -280,7 +277,7 @@ static FOFD *getosm(NOTHING)
 		x->m_own = MF_FREE;
 		x++;
 		idx++;
-		while (idx < 4)
+		while (idx < MDS_PER_BLOCK)
 		{
 			if (x->m_own != MF_FREE)
 				goto search;
@@ -326,12 +323,12 @@ found:
 
 /* 306de: 00e18962 */
 /* 306us: 00e18908 */
-MD *mdfind(P(FOFD **) p1, P(int *) a, P(FOFD *) p)
-PP(FOFD **p1;)
+MD *mdfind(P(MDBLOCK **) p1, P(int *) a, P(MDBLOCK *) p)
+PP(MDBLOCK **p1;)
 PP(int *a;)
-PP(FOFD *p;)
+PP(MDBLOCK *p;)
 {
-	register FOFD *q;
+	register MDBLOCK *q;
 	register MD *m;
 	register int i;
 	
@@ -343,7 +340,7 @@ PP(FOFD *p;)
 		if (q->x_flag > 0)
 		{
 			m = &q->buf[i];
-			while (i < 4)
+			while (i < MDS_PER_BLOCK)
 			{
 				if (m->m_own == MF_FREE)
 				{
@@ -376,9 +373,9 @@ PP(FOFD *p;)
 OFD *oftdel(P(OFD *) ofd)
 PP(OFD *ofd;)
 {
-	register FOFD *p;
+	register MDBLOCK *p;
 
-	p = (FOFD *)((char *)ofd - MD_OFFSET);
+	p = (MDBLOCK *)((char *)ofd - MD_OFFSET);
 	if (p->x_flag == 0)
 		foldermsg();
 	p->x_flag = 0;
@@ -391,7 +388,7 @@ PP(OFD *ofd;)
 VOIDPTR xmdfree(P(MD *) m)
 PP(register MD *m;)
 {
-	register FOFD *p;
+	register MDBLOCK *p;
 	register MD *q;
 	register int i;
 	
@@ -403,8 +400,8 @@ PP(register MD *m;)
 			{
 				break; /* goto fail */
 			}
-			q = &p->buf[3];
-			for (i = 3; i >= 0; i--, q--)
+			q = &p->buf[MDS_PER_BLOCK-1];
+			for (i = MDS_PER_BLOCK-1; i >= 0; i--, q--)
 			{
 				if (m == q)
 				{

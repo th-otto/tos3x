@@ -9,7 +9,7 @@ OPNFILES equ 81
 NCURDIR equ 40
 KBBUFSZ equ 80
 SUPSIZ equ 1024
-MAXQUICK equ 4
+MAXQUICK equ 5
     
 	bss
 
@@ -58,9 +58,6 @@ _time: ds.w 1
 
 	xdef _root
 _root: ds.l MAXQUICK
-
-	xdef _ofdfree
-_ofdfree: ds.l 1
 
 	ds.b $3c
 

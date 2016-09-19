@@ -53,12 +53,13 @@ OFD
 };
 
 
-FOFD
+#define MDS_PER_BLOCK 4
+MDBLOCK
 {
-	/*   0 */ FOFD  *o_link;
+	/*   0 */ MDBLOCK  *o_link;
 	/*   4 */ uint8_t x_flag;
 	/*   5 */ uint8_t x_user;
-	          MD buf[4];
+	          MD buf[MDS_PER_BLOCK]; /* must be large enough to also hold an OFD structure */
 	/*  70 */
 };
 #define X_USER(dnd) ((char *)(dnd))[-1]
