@@ -127,7 +127,8 @@ PP(int reloc_val;)
 		else
 			reloc = ABS;
 		ival.l = ival.ptrw2->vl1;		/* symbol value */
-		itype = ITCN;					/* constant */
+		if (itype != ITCW)
+			itype = ITCN;				/* constant */
 	} else if (itype == ITSY && ival.ptrw2->flags & SYXR)
 	{									/* external symbol */
 		fixext(ival.ptrw2);
@@ -295,6 +296,7 @@ static VOID collapse(NOTHING)
 		if (tree[bos + 1].itop.ptrw2->vl1 == WORD_ID)
 		{
 			itype = tree[bos].itty = ITCW;
+			reloc = ABS;
 			return;
 		}
 		if (tree[bos + 1].itop.ptrw2->vl1 == LONG_ID)
