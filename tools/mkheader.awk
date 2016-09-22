@@ -57,7 +57,7 @@ BEGIN {
     print "#define COPYRIGHT_YEAR \"" year "\"\n"
 
     print "/* the build date in Binary-Coded Decimal */"
-    print "#define OS_DATE 0x" month day year "\n"
+    print "#define OS_DATE $" month day year "\n"
 
     dos_date = day + month * 32 + (year - 1980) * 512
 

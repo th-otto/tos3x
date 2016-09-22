@@ -1,4 +1,9 @@
 BIOS_OBJS = \
-	tosvars.o \
 	startup.o \
+	memory.o \
+	scrdmp.o \
+	chardev.o \
+	blkdev.o \
+	ikbd.o \
+	linea.o \
 	$(empty)

@@ -11,41 +11,44 @@
 
 #include "asmdefs.h"
 #include "header.h"
+#include "tosvars.inc"
 
 
-// ==== Defines ==============================================================
+* ==== Defines ==============================================================
+TOSVERSION equ $306
+mc68010 equ 1
 
-cart_base  equ   $00fa0000 // Base of ROM port cartridge
+cart_base  equ   $00fa0000 * Base of ROM port cartridge
+GEM_MUPB_MAGIC equ $87654321
 
-// ==== Definitions ==========================================================
+NCOOKIES equ 16
+
+save_siz equ 314
+
+* ==== Definitions ==========================================================
 
         xdef  _os_entry
         xdef  _run_cartridge_applications
 
-// ==== References ===========================================================
+* ==== References ===========================================================
 
-        // TOS System variables
-        xref resvalid
-        xref resvector
-        xref _stktop
-
-        // Memory
+* Memory
         xref memchk
         
-        // BIOS C part
-        xref _biosmain     // BIOS C entry point
+* BIOS C part
+*        xref _biosmain     * BIOS C entry point
 
-        // Overall memory map
-        xref __end         // end of bss + comm sections (ld generated)
-        xref __etext       // end of text section
-        xref __edata       // end of data section
-        xref _endvdibss    // end of VDI BSS
-        xref _endgembss    // end of GEM BSS
-        xref __ebss        // end of BSS
+* Overall memory map
+*       xref __end         * end of bss + comm sections (ld generated)
+*       xref __etext       * end of text section
+*       xref __edata       * end of data section
+        xref _endvdibss    * end of VDI BSS
+        xref _endgembss    * end of GEM BSS
+        xref __ebss        * end of BSS
 
-// ===========================================================================
-// ==== TEXT segment (TOS image) =============================================
-// ===========================================================================
+* ===========================================================================
+* ==== TEXT segment (TOS image) =============================================
+* ===========================================================================
 
         text
 
@@ -67,37 +70,37 @@ cart_base  equ   $00fa0000 // Base of ROM port cartridge
         xref  _run
 		
 _os_entry:
-    bra.s   _main       // os_entry, branch to _main
+    bra.s   _main       * os_entry, branch to _main
 os_version:
-    dc.w    TOS_VERSION // os_version, TOS version
+    dc.w    TOSVERSION  * os_version, TOS version
 reseth:
-    dc.l    _main       // reseth, pointer to reset handler
+    dc.l    _main       * reseth, pointer to reset handler
 _os_beg:
-    dc.l    _os_entry   // os_beg, base of os = _sysbase
+    dc.l    _os_entry   * os_beg, base of os = _sysbase
 os_end:
-    dc.l    _endvdibss  // os_end, end of VDI BSS
+    dc.l    _endvdibss  * os_end, end of VDI BSS
 os_res1:
-    dc.l    _main       // os_res1, reserved
+    dc.l    _main       * os_res1, reserved
 _os_magic:
-    dc.l    _ui_mupb    // os_magic, pointer to GEM's MUPB
+    dc.l    _ui_mupb    * os_magic, pointer to GEM's MUPB
 _os_date:
-    dc.l   OS_DATE     // os_date, Date of system build
-_os_conf:               // Flag for PAL version + country
+    dc.l   OS_DATE      * os_date, Date of system build
+_os_conf:               * Flag for PAL version + country
 #ifdef CONF_MULTILANG
     dc.w   OS_CONF_MULTILANG
 #else
     dc.w   (OS_COUNTRY<<1)+OS_PAL
 #endif
 _os_dosdate:
-    dc.w   OS_DOSDATE  // os_date, Date of system build in GEMDOS format
+    dc.w   OS_DOSDATE   * os_date, Date of system build in GEMDOS format
 os_root:
-    dc.l   _root       // Pointer to the GEMDOS mem pool
+    dc.l   _root        * Pointer to the GEMDOS mem pool
 os_kbshift:
-    dc.l   _shifty     // Pointer to the keyboard shift keys states
+    dc.l   _shifty      * Pointer to the keyboard shift keys states
 os_run:
-    dc.l   _run        // Pointer to a pointer to the actual basepage
+    dc.l   _run         * Pointer to a pointer to the actual basepage
 os_dummy:
-    dc.l   0           // _main should start at offset 0x30, shouldn't it?
+    dc.l   0            * _main should start at offset 0x30, shouldn't it?
 
 
 
@@ -119,42 +122,40 @@ os_dummy:
  */
 
 _main:
-        // disable the interrupts
-        // this is useless on cold boot,
-        // but it matters for software reset
+* disable the interrupts
+* this is useless on cold boot,
+* but it matters for software reset
         move    #$2700,sr
 
-        // special TT reset
+* special TT reset
         move.w #$0100,($FFFF8606).w
         move.w #$0000,($FFFF8606).w
-        reset                  // reset all hardware
+        reset                  * reset all hardware
 
 /*
  * Check for diagnostic cartridge
  */
-
-        cmp.l   #$fa52235f,cart_base  // magic - is cartridge present?
-        bne     nodiag                  // no -> go on
-        lea     nodiag(pc), a6          // save return address
-        jmp     cart_base+4             // execute diagnostig cartridge
+        cmp.l   #$fa52235f,cart_base    * magic - is cartridge present?
+        bne     nodiag                  * no -> go on
+        lea     nodiag(pc),a6           * save return address
+        jmp     cart_base+4             * execute diagnostig cartridge
 nodiag:
 
 /*
  * disable the instruction/data caches
  */
-        move.l  #$00000808,d0     // clear & disable instruction/data caches on
-        MOVEC_D0_CACR              //  68020-60 (even though bit usage differs!)
+        move.l  #$00000808,d0     * clear & disable instruction/data caches on
+        D0_CACR              *  68020-60 (even though bit usage differs!)
 
         moveq   #0,d0
-        MOVEC_D0_VBR           // initialise VBR to zero
+        D0_VBR           * initialise VBR to zero
 /*
  * disable the MMU
  */
-        PMOVE_TO_TC(zero)          //  we're done if we get a lineF exception ...
-        PMOVE_TO_TTR0(zero)        // first we initialise the TTRs (ACRs on a 68ec030)
-        PMOVE_TO_TTR1(zero)
-        FRESTORE
-        dc.l zero
+        TO_TC(zero)          *  we're done if we get a lineF exception ...
+        TO_TTR0(zero)        * first we initialise the TTRs (ACRs on a 68ec030)
+        TO_TTR1(zero)
+        FRESTORE(zero)
         
         btst      #0,($FFFF8E09).w
         beq noreset
@@ -169,18 +170,17 @@ memcret:
  */
 
 resetvec:
-       cmpi.l   #$31415926,(resvalid).w   // Jump to resetvector?
-       bne.s    noreset                 // No --> noreset
-       move.l   (resvector).w,d0           // Yes: old resvec to d0
-       beq.s    noreset                 // Address null? Yes --> noreset
-       btst     #0,d0                  // Address odd ?
-       bne.s    noreset                 // Yes --> noreset
-       movea.l  d0,a0                  // resvec
-       lea      resetvec(pc),a6        // save return address
-       // Note: the return address intentionally points to the resvalid test.
-       // So the reset routine must explicitly clear resvalid before returning
-       // to a6, otherwise there will be an infinite loop.
-       jmp      (a0)                    // jump to resvec
+        cmpi.l   #$31415926,(resvalid).w  * Jump to resetvector?
+        bne.s    noreset                * No --> noreset
+        move.l   (resvector).w,d0       * Yes: old resvec to d0
+        btst     #0,d0                  * Address odd ?
+        bne.s    noreset                * Yes --> noreset
+        movea.l  d0,a0                  * resvec
+        lea      resetvec(pc),a6        * save return address
+* Note: the return address intentionally points to the resvalid test.
+* So the reset routine must explicitly clear resvalid before returning
+* to a6, otherwise there will be an infinite loop.
+        jmp      (a0)                   * jump to resvec
 noreset:
 
 
@@ -193,14 +193,609 @@ noreset:
 *
 meminit:
 
+        lea.l     ($FFFF8800).w,a0
+        move.b    #$07,(a0)  ; select mixer control
+        move.b    #$C0,2(a0) ; Port A+B = output
+        move.b    #$0E,(a0)  ; select Port A
+        move.b    #$07,2(a0) ; deselect floppy drives
+        
+        move.b    #$01,($FFFF820A).w ; set video sync
 
 /*
- * From now, the stack is allowed, and C code can be used.
- * The BIOS startup goes on in bios.c
+ * next, set up the palette(s)
  */
 
-        jmp     _biosmain
+        lea.l     ($FFFF8240).w,a1
+        move.w    #$000F,d0
+        lea.l     dflt_pal(pc),a0
+initpal:
+        move.w    (a0)+,(a1)+
+        dbf       d0,initpal
 
+* set Video screen memory position to 0x10000
+        move.b    #$01,($FFFF8201).w
+        clr.b     ($FFFF8203).w
+
+        btst      #0,($FFFF8E09).w
+        beq domemchk
+        move.b    (memctrl).w,d6
+        move.l    (_phystop).w,d5
+        lea memcret2(pc),a6
+        bra memchk
+memcret2:
+        beq nomemchk
+domemchk:
+
+* ===========================================================================
+* ==== memconf for TT =======================================================
+* ===========================================================================
+/*
+ * The following configurations are valid for ST-RAM in a TT, listed as
+ * total RAM (motherboard RAM + optional daughterboard RAM):
+ *  2MB (2MB + 0MB), 4MB (2MB + 2MB), 10MB (2MB + 8MB)
+ * [According to the TT rev B MCU functional description, it is also
+ * possible to have 8MB (8MB + 0MB) and 10MB (8MB + 2MB) configurations,
+ * but I have not seen this.]  When an 8MB board is present, it is always
+ * mapped to the first 8MB of memory.
+ *
+ * Systems with only 2MB boards require a memcntlr value of 0x05; systems
+ * with an 8MB board require a memcntlr value of 0x0a.  We detect which
+ * size of board is in low memory by assuming an 8MB board, then checking
+ * for different memory addresses mapping to the same physical address.
+ *
+ * rfb (sep/2016)
+ */
+        move.w    #$0005,d6           * assume 2MB board
+        move.b    #$0A,($FFFF8001).w  * set memory controller for 8MB
+        moveq.l   #0,d0               
+        move.l    d0,($00001008).w    * zero out test addresses
+        move.l    d0,($0000100C).w
+        move.l    #$06161964,d0       * write test value #1 to an address
+        move.l    d0,($00000008).w    *  that may be mapped into test address #1
+        cmp.l     ($00001008).w,d0    * did test address #1 get updated?
+        bne.s     set_8MB             * no, must be an 8MB board
+        move.l    #$04251987,d0       * yes, repeat with test value #2 to be sure
+        move.l    d0,($0000000C).w    * did test address #2 get updated?
+        cmp.l     ($0000100C).w,d0    * yes, use the 2MB memcntlr value 
+        beq.s     set_2MB
+set_8MB:
+        move.w    #$000A,d6           * set 8MB memcntlr value
+set_2MB:
+        move.b    d6,($FFFF8001).w    * update memcntlr
+
+/*
+ * We now need to size the actual memory present.  We test memory,
+ * starting at 128K and increasing by 128K each time.  For each area of
+ * memory, we start at the current address, and work downwards, storing
+ * a series of values; we then verify that the values have been stored
+ * correctly.  An invalid value (or a bus error when we try to access a
+ * memory location) causes us to stop and size the memory accordingly.
+ */
+
+        lea.l     $00008000,a7
+        movea.l   (_buserror).w,a4
+        lea.l     st_ramsize_done(pc),a0 * bus error means end of ram
+        move.l    a0,(_buserror).w
+        move.w    #$FB55,d3           * d3.w = difference between adjacent stored values
+        move.l    #$00020000,d7       * d7 = address of first memory test zone & gap between memory test zones
+                                        
+        movea.l   d7,a0               * a0 = address of current test zone
+next_zone:
+        movea.l   a0,a1               * a1 -> memory being tested
+        move.w    d0,d2               * d2.w = test value
+        moveq.l   #42,d1              * d1.w = loop count-1
+store_mem:
+        move.w    d2,-(a1)            * store a value
+        add.w     d3,d2               * update the value for next time
+        dbf       d1,store_mem        * rinse & repeat
+* now check the values we stored
+        movea.l   a0,a1               * a1 -> test area
+        moveq.l   #42,d1              * loop count
+check_mem:
+        cmp.w     -(a1),d0            
+        bne.s     st_ramsize_done   * miscompare, ram invalid, exit
+        clr.w     (a1)                * else zero it out
+        add.w     d3,d0               * update for next compare
+        dbf       d1,check_mem        * until we're done
+        adda.l    d7,a0               * point to next test area
+        bra.s     next_zone
+st_ramsize_done:                    * bus error or bad ram 
+        suba.l    d7,a0               * (a0 -> first zone that failed)
+        move.l    a0,d5               * d5 = st ram size
+        move.l    a4,(_buserror).w
+
+* ===========================================================================
+* ==== This part is executed only on first boot =============================
+* ===========================================================================
+
+        /* Clear the memory */
+        movea.w   #sysvars_start,a0
+        move.l    d5,d4
+        moveq.l   #0,d0
+clrmem:
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        cmpa.l    d4,a0
+        bne.s     clrmem
+
+        /* Store the ST-RAM parameters in the ST-RAM itself */
+        move.b  d6,(memctrl).w             * set copy of hw memory config
+        move.l  d5,(_phystop).w            * highest address as phystop
+
+        move.l    #$752019F3,(_memvalid).w * set memvalid to ok
+        move.l    #$237698AA,(_memval2).w  * set memval2 to ok
+        move.l    #$5555AAAA,(_memval3).w  * set memval3 to ok
+
+* We must set the FastRAM refresh rate before we use it.  The
+* rate is set by writing a "don't care" value to an address in
+* the range 0xffd00000-0xffd000ff; the low-order byte of the
+* address sets the refresh rate (specifically the number of
+* system clock cycles between each refresh request).  TT TOS
+* uses the value 0xe0; so do we.
+* NOTE: whether we actually have FastRAM or not, setting the
+* value always causes a bus error, so we need to handle it.
+        move.l  #refresh_done,(_buserror).w      * bus error vector
+        move.w  #$0000,$ffd000e0
+refresh_done:
+
+        /* Can we access FastRAM region? */
+
+        move.l    #tt_ramsize_done,(_buserror).w
+        move.w    #$FB55,d3           * d3.w = difference between adjacent stored values
+        moveq.l   #0,d0
+        move.l    #$00020000,d7       * d7 = address gap between memory test zones
+        movea.l   #$01020000,a0       * a0 = address of current test zone
+next_tt:
+        movea.l   a0,a1               * a1 -> memory being tested
+        move.w    d0,d2               * d2.w = test value
+        moveq.l   #42,d1              * d1.w = loop count-1
+store_tt:
+        move.w    d2,-(a1)            * store a value
+        add.w     d3,d2               * update the value for next time
+        dbf       d1,store_tt
+* now check the values we stored
+        movea.l   a0,a1               * a1 -> test area
+        moveq.l   #42,d1              * loop count
+check_tt:
+        cmp.w     -(a1),d0
+        bne.s     tt_ramsize_done
+        clr.w     (a1)
+        add.w     d3,d0
+        dbf       d1,check_tt
+        adda.l    d7,a0
+        bra.s     next_tt
+tt_ramsize_done:                    * bus error or bad ram 
+        suba.l    d7,a0
+        cmpa.l    #$01000000,a0
+        bne.s     ttramok
+        suba.l    a0,a0
+ttramok:
+        move.l    a0,d5
+        move.l    d5,(_ramtop).w
+        move.l    #$1357BD13,(_ramvalid).w
+        bset      #0,($FFFF8E09).w
+nomemchk:
+
+
+* detect basic STe/TT DMA sound
+
+        movea.l   #_supstkend,a7
+        clr.b     _has_dmasound
+        movea.l   a7,a6
+        move.l    #nodmasound,(_buserror).w
+        clr.w     ($FFFF8900).w
+        st        _has_dmasound
+        lea.l     microwtab(pc),a0
+        move.w    (a0)+,($FFFF8924).w
+        bra.s     checkmicro
+microwtab:
+        dc.w      $0ffe  ; value for microwire mask register
+        dc.w      $09d1,$0aa9,$0a29,$090d,$088d,$0803,0  ; values for microwire data register
+nextmicro:
+        move.w    d0,($FFFF8922).w
+waitmicro:
+        tst.w     ($FFFF8922).w
+        bne.s     waitmicro
+checkmicro:
+        move.w    (a0)+,d0
+        bne.s     nextmicro
+nodmasound:
+        movea.l   a6,a7
+        sf        _has_microwire
+
+
+* clear the remainder of the BSS section
+
+        movea.l   #__ebss,a1
+        movea.l   #__sbss,a0
+        moveq.l   #0,d0
+clrbss:
+        move.w    d0,(a0)+
+        cmpa.l    a0,a1
+        bne.s     clrbss
+
+
+* initialize the MMU
+        bsr       initmmu
+
+* clear screen memory
+
+scrsize equ ((1280*960)/8+$100)
+
+        movea.l   (_phystop).w,a0
+        suba.l    #scrsize,a0
+        move.w    #(scrsize/16)-1,d1
+        move.l    a0,(_v_bas_ad).w
+        move.b    (_v_bas_ad+1).w,($FFFF8201).w
+        move.b    (_v_bas_ad+2).w,($FFFF8203).w
+        moveq.l   #0,d0
+clrscr:
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        dbf       d1,clrscr
+
+* does os_magic indicate GEM in ROM?
+        movea.l   _os_magic(pc),a0
+        cmpi.l    #GEM_MUPB_MAGIC,(a0)
+        beq.s     gemok
+        lea.l     _os_beg,a0
+gemok:  
+        move.l    4(a0),(_end_os).w
+        move.l    8(a0),(_exec_os).w
+
+* ===========================================================================
+* initialize system variables
+* ===========================================================================
+
+        move.l    #_bhdv_init,(_hdv_init).w
+        move.l    #_bhdv_rwabs,(_hdv_rw).w
+        move.l    #_bhdv_getbpb,(_hdv_bpb).w
+        move.l    #_bhdv_mediach,(_hdv_mediach).w
+        move.l    #_bhdv_boot,(_hdv_boot).w
+
+        move.l    #_bco0stat,(_prt_stat).w
+        move.l    #_bcon0out,(_prt_vec).w
+        move.l    #_bco1stat,(_aux_stat).w
+        move.l    #_bcon1out,(_aux_vec).w
+        move.l    #_bscr_dump,(_scr_dmp).w
+
+        move.l    (_v_bas_ad).w,(_memtop).w
+        move.l    (_end_os).w,(_membot).w
+        move.w    #8,(_nvbls).w
+        st        (_fverify).w
+        move.w    #3,(_seekrate).w
+        move.l    #_dskbuf,(_dskbufp).w
+        move.w    #-1,(_dumpflg).w
+        move.l    #_os_entry,(_sysbase).w          ; unnessary; will be overwritten by instoshdr below
+        move.l    #save_beg+save_siz,(_savptr).w
+        move.l    #bios_unimpl,(_swv_vec).w
+        clr.l     (_drvbits).w
+        move.l    #_do_bell,(_bell_hook).w
+        move.l    #_do_keyclick,(_kcl_hook).w
+
+        bsr       instoshdr
+
+        lea.l     cookies,a0
+        move.l    a0,(_p_cookies).w
+        move.l    #$5F435055,(a0)+ ; '_CPU'
+
+* detect CPU type
+* (actually nonsense since 68030 instructions have already been used above)
+        moveq.l   #0,d1         * assume 68000
+        movea.w   #_illinst,a2
+        movea.l   (a2),a3       * save illegal instruction vector
+        movea.l   a7,a1         * save SP
+        move.l    #cpuexit,(a2)
+        CCR_D0                  * move.w ccr,d0 legal on 68010+
+        moveq.l   #10,d1        * assume 68000
+        dc.w $49c0              * extb.l    d0
+        moveq.l   #20,d1        * assume 68020
+        CACR_D0
+        bset      #9,d0         * set an unused bit
+        D0_CACR
+        CACR_D0
+        bclr      #9,d0
+        beq.s     cpuexit
+        moveq.l   #30,d1        * assume 68030
+        D0_CACR
+cpuexit:
+        movea.l   a1,a7         * restore SP
+        move.l    a3,(a2)       * save illegal instruction vector
+        move.l    d1,(a0)+      * set _CPU cookie
+        sne       (_longframe+1).w
+        move.l    #$5F56444F,(a0)+ ; '_VDO'
+        move.l    #$00020000,(a0)+
+        move.l    #$5F4D4348,(a0)+ ; '_MCH'
+        move.l    #$00020000,(a0)+
+        move.b    #$7F,d0
+        tst.b     _has_microwire
+        bne.s     nomicro
+        move.l    #$5F535749,(a0)+ ; '_SWI'
+        moveq.l   #0,d0
+        move.w    ($FFFF9200).w,d0
+        lsr.w     #8,d0
+        move.l    d0,(a0)+
+nomicro:
+        moveq.l   #3,d1
+        move.l    #$5F534E44,(a0)+ ; '_SND'
+        btst      #7,d0
+        bne.s     yesstereo
+        bclr      #1,d1
+yesstereo:
+        move.l    d1,(a0)+
+        btst      #6,d0
+        bne.s     nofdc
+        move.b    #$08,$00001820
+        move.l    #$5F464443,(a0)+ ; '_FDC'
+        move.l    #$01415443,(a0)+ ; FDC_1ATC
+nofdc:
+
+* detect FPU
+
+        move.l    #$5F465055,(a0)+ ; '_FPU'
+        movea.l   (_lineftrap).w,a1 ; save Line-F trap
+        movea.l   (_coprovio).w,a2
+        movea.l   a7,a3         * save SP
+        move.l    #nofpu,(_lineftrap).w
+        move.l    #nofpu,(_coprovio).w
+        FP0_D0
+        move.l    #$00020000,(a0)+
+        bra.s     fpudone
+nofpu:
+        clr.l     (a0)+
+fpudone:
+        move.l    a1,(_lineftrap).w ; restore Line-F trap
+        move.l    a2,(_coprovio).w
+        movea.l   a3,a7         * restore SP
+
+* check memory-mapped FPU
+        movea.l   (_buserror).w,a1
+        movea.l   a7,a2         * save SP
+        move.l    #nosfp,(_buserror).w
+        move.w    ($FFFFFA40).w,d0
+        bset      #0,-3(a0)
+nosfp:
+        move.l    a1,(_buserror).w
+        movea.l   a2,a7         * restore SP
+
+* check wether fast ram buffer is needed
+        tst.l     (_ramtop).w
+        beq.s     frbdone
+        move.l    #$5F465242,(a0)+ ; '_FRB'
+        move.l    (_membot).w,d0
+        move.l    d0,(a0)+
+        add.l     #$00010000,d0
+        move.l    d0,(_membot).w
+        move.l    d0,(_end_os).w
+frbdone:
+
+* terminate cookie jar
+        clr.l     (a0)+
+        move.l    #NCOOKIES,(a0)+
+
+* ===========================================================================
+* initialize exception vectors
+* ===========================================================================
+
+        lea.l     just_rte(pc),a3
+        lea.l     bios_unimpl(pc),a4
+        lea.l     any_vec(pc),a1       * default to exception handler displaying bombs
+        lea.l     (2*4).w,a0
+        move.w    #64-3,d0
+initexc:
+        move.l    a1,(a0)+
+        dbf       d0,initexc
+
+        move.l    a3,(_zerodiv).w      * ignore zeo divide
+        move.l    a3,(_lvl7vec).w      * ignore NMI
+
+        moveq.l   #6,d0
+        lea.l     (_lvl1vec).w,a1
+initauto:
+        move.l    #just_rte,(a1)+      * ignore auto vectors
+        dbf       d0,initauto
+
+        move.l    #int_vbl,(_lvl4vec).w
+        move.l    #int_hbl,(_lvl2vec).w
+        move.l    a3,(_trap2vec).w     * ignore GEM trap for now
+        move.l    #_biostrap,(_trap13vec).w
+        move.l    #_xbiostrap,(_trap14vec).w
+        move.l    #line1010,(_lineatrap).w
+        move.l    a4,(_etv_timer).w    * no timer yet
+        move.l    #critret,(_etv_critic).w
+        move.l    a4,(_etv_term).w     * no user defined function
+        lea.l     (_vbl_list).w,a0
+        move.l    a0,(_vblqueue).w
+        move.w    #$0007,d0
+initvbl:
+        clr.l     (a0)+
+        dbf       d0,initvbl
+
+* init bios device vectors
+        lea.l     conxxinit,a0
+        movea.w   #_bconstat_vec,a1
+        moveq.l   #31,d0
+initcon:
+        move.l    (a0)+,(a1)+
+        dbf       d0,initcon
+
+* init VME bus
+        movea.l   (_buserror).w,a0
+        movea.l   a7,a1
+        move.l    #vmedone,(_buserror).w
+        move.b    #$40,($FFFF8E0D).w
+        move.b    #$14,($FFFF8E01).w
+vmedone:
+        move.l    a0,(_buserror).w
+        movea.l   a1,a7
+
+* initialize MFP
+        bsr       initmfp
+        move.w    #(4<<8),d0 ; Divisor 50 for Timer C
+        bsr       ttdelayc
+
+* reset IKBD
+        move.l    #ikbdres,-(a7)
+        move.w    #$0001,-(a7)
+        jsr       _ikbdws
+        addq.l    #6,a7
+        move.w    #(7<<8),d0 ; Divisor 200 for Timer C
+        move.w    #$000E,d1
+ikbdwait:
+        bsr       ttdelayc
+        dbf       d1,ikbdwait
+
+/* Run all boot applications from the application cartridge,
+ * before video initialization.
+ */
+        moveq.l   #2,d0
+        bsr       _run_cartridge_applications
+
+/*
+ * check monitor type, and set boot resolution
+ */
+        moveq.l   #4,d1              * assume color, video mode 640x480x16
+        btst      #7,(MFP_LPT).w
+        bne.s     moncolor
+        moveq.l   #6,d1
+moncolor:
+        move.b    d1,($FFFF8262).w   * set TT shifter video mode
+        move.b    d1,(_sshiftmod).w  * .. and also system var
+
+/*
+ * initialize video
+ */
+        bsr       ckblitter
+        jsr       $00E069F4
+        jsr       $00E0694A
+        move.l    #_main,(_swv_vec).w
+        move.w    #$0001,(_vblsem).w
+
+/* Run all boot applications from the application cartridge,
+ * after hardware initialization.
+ */
+        clr.w     d0
+        bsr       _run_cartridge_applications
+
+/* Run all boot applications from the application cartridge,
+ * with interrupts enabled.
+ */
+        move.w    #$2300,sr
+        moveq.l   #1,d0
+        bsr       _run_cartridge_applications
+
+/*
+ * continue with rest of bios initialization
+ */
+        move.l    #_int_priv,(_privvio).w
+        bra       biosinit
+
+flush_cache_all_030:
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        CACR_D0
+        or.l      #$00000808,d0
+        D0_CACR
+        move.w    (a7)+,sr
+        rts
+
+/*
+ * _int_priv - privileged instruction handler
+ *
+ * Convert a privileged 'MOVE SR,...' to 'MOVE CCR,...'
+ */
+/* 306de: 00e0060a */
+_int_priv:
+        movem.l   d0-d2,-(a7)      * saving some registers while we test
+        move.l    a1,-(a7)
+        move.l    a0,-(a7)
+        movea.l   22(a7),a0        * the offending address
+        move.w    (a0),d0          // the offending instruction
+        move.w    d0,d1            * save for later tests
+        and.w     #$FFC0,d0        // isolate move from SR opcode
+        cmp.w     #$40C0,d0        // we don't care where "To" was
+        bne       pi_back          // Not a MOVE SR,XX instruction
+        move.l    #$30004E71,privinst.w   ; move.w d0,d0; nop
+        move.l    #$4E714E75,(privinst+4).w ; nop; rts
+        move.w    d1,d0
+        and.w     #$0007,d0
+        lsl.w     #8,d0
+        lsl.w     #1,d0
+        or.w      d0,privinst.w    * insert the destination register
+        move.w    d1,d0
+        and.w     #$0038,d0
+        lsl.w     #3,d0
+        or.w      d0,privinst.w    * insert the destination addressing mode
+        moveq.l   #2,d2            * skip that many instruction bytes
+        cmp.w     #$0180,d0        * is it indexed?
+        beq       pi_back          * yes, fail
+        tst.w     d0               * is it data-register direct?
+        beq.s     int_p4           * yes go execute it
+        cmp.w     #$0140,d0        * is it d(An)?
+        beq.s     int_p2           * yes
+        cmp.w     #$01C0,d0        * is it absolute?
+        bne.s     int_p3
+        and.w     #$0007,d1        * is it absolute short?
+        beq.s     int_p1           * yes, skip
+        addq.w    #2,d2            * 2 more bytes of instruction
+        move.w    4(a0),(privinst+4).w * copy lower 16 bits of address
+int_p1:
+        addq.w    #2,d2            * 2 more bytes of instruction
+        move.w    2(a0),(privinst+2).w * copy remaining 16 bits of address
+        bra.s     int_p5
+int_p2:
+        addq.w    #2,d2            * 2 more bytes of instruction
+        move.w    2(a0),(privinst+2).w * copy displacement
+int_p3:
+        and.w     #$0007,d1        * is USP affected?
+        cmp.w     #$0007,d1
+        bne.s     int_p5
+        move.l    usp,a1
+        andi.w    #$F3FF,privinst.w
+        add.l     d2,22(a7)
+        bsr       flush_cache_all_030
+        move.w    20(a7),d0
+        jsr       privinst.w
+        move.l    a1,usp
+        movea.l   (a7)+,a0
+        movea.l   (a7)+,a1
+        movem.l   (a7)+,d0-d2
+        rte
+int_p4:
+        add.l     d2,22(a7)           * adjust return PC by number of bytes to skip
+        ori.w     #$0010,privinst.w
+        bsr       flush_cache_all_030
+        lea.l     20(a7),a0           * a0 = address of SR from stack frame
+        movem.l   8(a7),d0-d2
+        jsr       privinst.w
+        movea.l   (a7)+,a0
+        movea.l   (a7)+,a1
+        adda.w    #$000C,a7
+        rte
+int_p5:
+        add.l     d2,22(a7)           * adjust return PC by number of bytes to skip
+        bsr       flush_cache_all_030
+        movea.l   (a7)+,a0
+        movea.l   (a7)+,a1
+        move.w    12(a7),d0
+        jsr       privinst.w
+        movem.l   (a7)+,d0-d2
+        rte
+pi_back:
+        movea.l   (a7)+,a0
+        movea.l   (a7)+,a1
+        movem.l   (a7)+,d0-d2
+        jmp       any_vec
+
+biosinit:
+		jsr       _osinit
+
+ikbdres:
+        dc.b $80,$01
 
 /*
  * void run_cartridge_applications(WORD typebit);
@@ -209,33 +804,211 @@ meminit:
  *
  * typebit: application type bit number which must be set to 1 to match
  */
+/* 306de: 00e00bbc */
 _run_cartridge_applications:
-        move.w  4(sp),d0                // application bit number
         lea     cart_base,a0
-        cmp.l   #$ABCDEF42,(a0)+      // is cartridge present?
-        bne     cartover                // no -> cartover
+        cmp.l   #$ABCDEF42,(a0)+        * is cartridge present?
+        bne     cartover                * no -> cartover
 testtype:
-        btst    d0,4(a0)               // What type?
+        btst    d0,4(a0)                * What type?
         beq     nextapp
 
-        movem.l d0-d7/a0-a6,-(sp)      // save registers
-        move.l  4(a0),d0                // d0 = address of cartridge init
-        andi.l  #$00ffffff,d0          // make it 24-bit clean
+        movem.l d0-d7/a0-a6,-(sp)       * save registers
+        move.l  4(a0),d0                * d0 = address of cartridge init
+        and.l   #$00ffffff,d0           * make it 24-bit clean
         movea.l d0,a0
-        jsr     (a0)                    // execute app in cartridge
-        movem.l (sp)+,d0-d7/a0-a6      // restore registers
+        jsr     (a0)                    * execute app in cartridge
+        movem.l (sp)+,d0-d7/a0-a6       * restore registers
 nextapp:
-        tst.l   (a0)                    // another application?
-        move.l  (a0), a0
+        tst.l   (a0)                    * another application?
+        move.l  (a0),a0
         bne     testtype
 cartover:
         rts
 
+/* 306de: 00e00bee */
+bios_unimpl:
+		rts
+
+*
+* check for valid memory configuration.
+* Return address passed in A6
+*
+/* 306de: 00e00c06 */
+memchk:
+        cmpi.l    #$752019F3,(_memvalid).w
+        bne.s     memchk1
+        cmpi.l    #$237698AA,(_memval2).w
+        bne.s     memchk1
+        cmpi.l    #$5555AAAA,(_memval3).w
+memchk1:
+        jmp       (a6)
+
+/* 306de: 00e00c24 */
+dflt_pal:
+		dc.w $0fff,$0f00,$00f0,$0ff0
+		dc.w $000f,$0f0f,$00ff,$0555
+		dc.w $0333,$0f33,$03f3,$0ff3
+		dc.w $033f,$0f3f,$03ff,$0000
+
+/* 306de: 00e00c44 */
+int_hbl:
+        move.w    d0,-(a7)
+        move.w    2(a7),d0
+        and.w     #$0700,d0
+        bne.s     int_hbl1
+        ori.w     #$0300,2(a7)
+int_hbl1:
+        move.w    (a7)+,d0
+        rte
+
+/* 306de: 00e00c5a */
+int_vbl:
+        rte
+
+just_rte:
+        rte
+
+/* 306de: 00e00d92 */
+		xdef _callcrit
+_callcrit:
+        move.l    _etv_critic,-(a7)
+critret:
+        moveq.l   #-1,d0
+        rts
+
+_xbiostrap:
+        rte
+
+_biostrap:
+        rte
+
+any_vec:
+		rte
+
+conxxinit:
+        dc.l      bios_unimpl
+        dc.l      _bcon1stat
+        dc.l      _bcon2stat
+        dc.l      _bcon3stat
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+        dc.l      _bcon0in
+        dc.l      _bcon1in
+        dc.l      _bcon2in
+        dc.l      _bcon3in
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+        dc.l      _bco0stat
+        dc.l      _bco1stat
+        dc.l      _bco2stat
+        dc.l      _bco4stat ; BUG compatibility with early TOS versions: MIDI(3) and KBD(4) are swapped
+        dc.l      _bco3stat
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+        dc.l      _bcon0out
+        dc.l      _bcon1out
+        dc.l      _bcon2out
+        dc.l      _bcon3out
+        dc.l      _bcon4out
+        dc.l      _bcon5out
+        dc.l      bios_unimpl
+        dc.l      bios_unimpl
+
+_do_bell:
+		rts
+
+_do_keyclick:
+		rts
+
+/* 306de: 00e015a2 */
+instoshdr:
+        lea.l     _os_entry(pc),a0
+        lea.l     oshdr+6,a1
+        moveq.l   #47,d0
+instos1:
+        move.b    0(a0,d0.w),0(a1,d0.w)
+        dbf       d0,instos1
+        move.w    jmpop(pc),-6(a1) ; ? BUG? the jmpop there is short abs jump
+        move.l    4(a1),-4(a1)
+        move.w    braop(pc),(a1)
+        move.w    30(a1),28(a1) ; ??? oshdr.os_conf = oshdr.os_dosdate
+        move.l    a1,_sysbase
+        rts
+jmpop:
+        jmp       ($00000000).w
+braop:
+        bra.s     jmpop
+
+
+/* 306de: 00e01604 */
+ckblitter:
+		rts
+
+/* 306de: 00e0162e */
+ttdelayc:
+        bsr.s     tttimerc
+ttdelay1:
+        btst      #5,(TTMFP_REGS+MFP_IPRB).w
+        beq.s     ttdelay1
+        rts
+
+*
+* (re-)program TT MFP Timer C
+* Input: D0: initial counter (low byte) + (divisor<<8)
+*
+/* 306de: 00e0163a */
+tttimerc:
+        movem.w   d0-d1,-(a7)
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        move.b    (TTMFP_REGS+MFP_TCDCR).w,d1 ; save original Timer C+D mode
+        and.b     #$0F,d1
+        move.b    d1,(TTMFP_REGS+MFP_TCDCR).w  Stop timer C
+        bclr      #5,(TTMFP_REGS+MFP_IERB).w ; Disable Timer C interrupt
+        move.b    #$DF,(TTMFP_REGS+MFP_IPRB).w ; Clear pending Interrupt flag
+        bclr      #5,(TTMFP_REGS+MFP_IMRB).w ; Mask Timer C interrupt
+        bset      #5,(TTMFP_REGS+MFP_IERB).w ; Enable Timer C interrupt again
+        move.b    d0,(TTMFP_REGS+MFP_TCDR).w ; Set Timer C counter
+        lsr.w     #4,d0
+        and.b     #$F0,d0
+        or.b      d0,d1
+        move.b    d1,(TTMFP_REGS+MFP_TCDCR).w ; Set Timer C mode
+        move.w    (a7)+,sr
+        movem.w   (a7)+,d0-d1
+        rts
+
+/* 306de: 00e024d6 */
+initmfp:
+		rts
+
 
         data
 _ui_mupb:
-        dc.l $87654321
+        dc.l GEM_MUPB_MAGIC
         dc.l _endgembss
         dc.l _ui_start
 zero:
-	
+	    dc.l 0
+
+		bss
+		xdef save_beg
+		comm save_beg,save_siz
+		
+		xdef oshdr
+		comm oshdr,70 ; 6+48+16
+
+		xdef privinst
+		comm privinst,8
+
+		xdef cookies
+cooksize equ NCOOKIES*2*4
+		comm cookies,cooksize
+
+		xdef bcmap_root
+		comm bcmap_root,16

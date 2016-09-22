@@ -81,4 +81,4 @@ WARN = \
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 .S.o:
-	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(AM_V_AS)$(CC) -Wa,--mri $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<

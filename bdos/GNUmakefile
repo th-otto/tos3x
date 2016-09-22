@@ -25,12 +25,11 @@ check:: bdos.o checklang
 		echo "../roms/tos$(TOSVERSION)$(LANG).img: no such file" >&2; \
 		exit 1; \
 	fi
-	$(AM_V_at)if test "$(LANG)" = pl; then rombase=380000; else rombase=E00000; fi; \
-	offset=`echo 16 i $(gemdos_tbase_$(LANG)) $$rombase - p | dc`; \
-	tlen=`echo 16 i $(gemdos_tlen_$(LANG)) p | dc`; \
+	$(AM_V_at)offset=`echo 16 i $(gemdos_tbase) $(rombase) - p | dc`; \
+	tlen=`echo 16 i $(gemdos_tlen) p | dc`; \
 	dd if=../roms/tos$(TOSVERSION)$(LANG).img bs=1 skip=$$offset count=$$tlen of=bdos.orig 2> /dev/null; \
-	offset=`echo 16 i $(gemdos_dbase_$(LANG)) $$rombase - p | dc`; \
-	dlen=`echo 16 i $(gemdos_dlen_$(LANG)) p | dc`; \
+	offset=`echo 16 i $(gemdos_dbase) $(rombase) - p | dc`; \
+	dlen=`echo 16 i $(gemdos_dlen) p | dc`; \
 	dd if=../roms/tos$(TOSVERSION)$(LANG).img bs=1 skip=$$offset count=$$dlen seek=$$tlen of=bdos.orig 2> /dev/null; \
 	total=`echo $$tlen $$dlen + p | dc`; \
 	dd if=$< of=bdos.new bs=1 skip=36 count=$$total 2> /dev/null; \

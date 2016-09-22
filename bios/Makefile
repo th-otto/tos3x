@@ -1,22 +1,42 @@
 include ../Makefile.common
 include ../Makefile.silent
 
-all: bios.a
+all: bios.a bios.o vars.o
 
 include ../language.mak
 
 include SRCFILES
 
-bios.a: $(BIOS_OBJS) ${MAKEFILE}
-	$(AR) $(ARFLAGS) $@ $(BIOS_OBJS)
+CPPFLAGS +=
 
+bios.a: tosvars.o $(BIOS_OBJS) ${MAKEFILE}
+	$(AR) $(ARFLAGS) $@ tosvars.o $(BIOS_OBJS)
+
+#
+# need to repeat the default suffix rule here,
+# because on a FAT filesystem, .S cannot be
+# distinguished from .s
+#
 startup.o: startup.S header.h
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.S $*.i
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+memory.o: memory.S
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+uistart.o: uistart.S
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P '-DGTSTART=$$'$(gemdos_tbase) '-DGTLEN=$$'$(gemdos_tlen) $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
 header.h:
 	$(AWK) -f ../tools/mkheader.awk $(LANG) > $@
+
+bios.o: checklang tosvars.o vars.o $(BIOS_OBJS) uistart.o ${MAKEFILE}
+	$(LD) -u -s -l -o $@ -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) uistart.o
 
 check::
 

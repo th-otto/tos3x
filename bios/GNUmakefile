@@ -22,6 +22,11 @@ include SRCFILES
 bios.a: $(BIOS_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(BIOS_OBJS)
 
+startup.o: startup.S header.h
+
+header.h:
+	$(AWK) -f ../tools/mkheader.awk $(LANG) > $@
+
 check::
 
 clean:

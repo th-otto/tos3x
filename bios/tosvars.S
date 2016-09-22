@@ -111,6 +111,9 @@ _proc_stk:      ds.w   16      * 16 words from exception stack
         ds.b 20
         
 * ==== Start of System variables ============================================
+        xdef  sysvars_end
+sysvars_start:
+
 _etv_timer:     ds.l   1       * GEM event timer vector
 _etv_critic:    ds.l   1       * GEM critical error handler
 _etv_term:      ds.l   1       * GEM program termination vector
