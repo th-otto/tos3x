@@ -177,10 +177,10 @@ static int get2ops(NOTHING)
 	if (!ckcomma())
 	{
 		uerr(10); /* invalid second operand */
-		return TRUE;						/* no second op */
+		return FALSE;					/* no second op */
 	}
 	getea(1);							/* get second effective address */
-	return FALSE;
+	return TRUE;
 }
 
 
@@ -192,7 +192,7 @@ static VOID opf1(NOTHING)
 {
 	register const short *p;
 
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (ins[0] == AND || ins[0] == OR)
 	{
@@ -249,7 +249,7 @@ static VOID opf1(NOTHING)
 /* format 2 -- addi, andi, subi, etc */
 static VOID opf2(NOTHING)
 {
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (ins[0] == ANDI || ins[0] == ORI || ins[0] == EORI)
 	{
@@ -298,7 +298,7 @@ static VOID opf3(NOTHING)
 {
 	register short k;
 
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (cksprg(&opnd[0], CCR))
 	{
@@ -388,7 +388,7 @@ static VOID opf3(NOTHING)
 /* format 27 -- addx, subx */
 static VOID opf4(NOTHING)
 {
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (format == 27)
 	{									/* addx,subx add in size bits */
@@ -423,7 +423,7 @@ static VOID opf4(NOTHING)
 /* format 26 -- cmp, chk */
 static VOID opf5(NOTHING)
 {
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (!ckdreg(&opnd[1]))
 	{
@@ -457,7 +457,7 @@ static VOID opf5(NOTHING)
 /* format 7 -- bit instrs -- btst, bclr, bset, etc */
 static VOID opf7(NOTHING)
 {
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (opnd[1].ea == IMM || (ins[0] != BTST && pcea(&opnd[1])) || ckareg(&opnd[1]))
 		uerr(20); /* illegal addressing mode */
@@ -603,7 +603,7 @@ static VOID opf9(NOTHING)
 /* format 19 -- link */
 static VOID opf11(NOTHING)
 {
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (format == 19)
 	{									/* link */
@@ -631,7 +631,7 @@ static VOID opf12(NOTHING)
 {
 	register short i;
 
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (ckdreg(&opnd[0]))
 	{
@@ -702,7 +702,7 @@ static VOID opf15(NOTHING)
 {
 	register short i;
 
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (!ckareg(&opnd[1]))
 		uerr(33); /* register required */
@@ -733,7 +733,7 @@ static VOID opf17(NOTHING)
 		getea(1);
 	} else
 	{
-		if (get2ops())
+		if (!get2ops())
 			return;
 	}
 	if (opnd[0].ea != IMM || !altea(&opnd[1]) || pcea(&opnd[1]))
@@ -877,7 +877,7 @@ static VOID opf21(NOTHING)
 	register short m, d;
 	register struct op *p;
 
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (ckdreg(&opnd[0]))
 	{									/* d reg source */
@@ -908,7 +908,7 @@ static VOID opf21(NOTHING)
 /* format 22 -- moveq */
 static VOID opf22(NOTHING)
 {
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (opnd[0].ea != IMM)
 		uerr(17); /* constant required */
@@ -923,7 +923,7 @@ static VOID opf22(NOTHING)
 /* format 23 -- eor */
 static VOID opf23(NOTHING)
 {
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (cksprg(&opnd[1], CCR) || cksprg(&opnd[1], SR))
 	{
@@ -955,7 +955,7 @@ static VOID opf31(NOTHING)
 	if (!m68010)
 		uerr(8); /* opcode for 68010 only */
 
-	if (get2ops())
+	if (!get2ops())
 		return;
 	if (ins[0] == MOVEC)
 	{

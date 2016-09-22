@@ -288,7 +288,7 @@ static VOID collapse(NOTHING)
 		}
 	}
 
-	if ((tree[bos].itty == ITCN || tree[bos].itty == ITCW) &&
+	if ((tree[bos].itty == ITCN || tree[bos].itty == ITCW || tree[bos].itty == ITSY) &&
 		tree[bos + 1].itty == ITSY &&
 		(tree[bos + 1].itop.ptrw2->flags & SYER))
 	{

@@ -205,7 +205,19 @@ PP(int lidx;)
 		return (numcon[lidx] || numsym[lidx]) ? WORDSIZ : 0;
 	}
 	if (numsym[lidx])
+	{
+		if (numreg[lidx] == WORD_ID)
+		{
+			numcon[lidx] = 1;
+			return WORDSIZ;
+		}
+		if (numreg[lidx] == LONG_ID)
+		{
+			numcon[lidx] = 2;
+			return LONGSIZ;
+		}
 		return LONGSIZ;
+	}
 	if (numcon[lidx])
 		return numcon[lidx] == 2 ? LONGSIZ : WORDSIZ;
 	return 0;

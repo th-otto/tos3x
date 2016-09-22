@@ -226,7 +226,9 @@ PP(int opn;)
 				p->ea |= INDDISP;
 				p->len = 2;
 			} else
+			{
 				p->ea |= INDIRECT;
+			}
 		}
 		ckeop(9 + opn);
 		return;
@@ -250,7 +252,8 @@ PP(int opn;)
 		pitw--;
 	}
   dosimp:								/* simple addr or imm expr */
-	if ((i = gspreg()) != 0)
+	i = gspreg();
+	if (i != 0)
 	{
 		inst = ins[0];
 		if (i == PC || (i == USP && inst != MOVE && inst != MOVEC))
@@ -276,7 +279,8 @@ PP(int opn;)
 #endif
 		return;
 	}
-	if ((i = getreg()) >= 0)
+	i = getreg();
+	if (i >= 0)
 	{									/* register direct */
 		p->ea = i;
 		if (modelen == BYTESIZ && i >= AREGLO && i <= AREGHI)
