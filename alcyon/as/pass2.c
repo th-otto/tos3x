@@ -75,9 +75,8 @@ static VOID relbr(NOTHING)
 			uerr(22); /* illegal relative address */
 		ins[0] |= ((short)ival.l & 0xff);
 	}
-	/* make it a nop if -N specified */
-	/* BUG: querying -N flag is wrong; it may also happen when using explicit .w suffix */
-	if (ival.l == 0 || (ival.l == 2 && didorg))
+	/* make it a nop if destination is next instruction */
+	if ((instrlen == 2 && ival.l == 0) || (instrlen == 4 && ival.l == 2))
 	{
 		opcpt = nopptr;
 		ins[0] = opcpt->vl1;
