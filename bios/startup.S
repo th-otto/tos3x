@@ -22,6 +22,7 @@ cart_base  equ   $00fa0000 * Base of ROM port cartridge
 GEM_MUPB_MAGIC equ $87654321
 
 NCOOKIES equ 16
+nvram_rtc_year_offset equ 1980-1968
 
 save_siz equ 314
 
@@ -29,6 +30,15 @@ save_siz equ 314
 
         xdef  _os_entry
         xdef  _run_cartridge_applications
+
+* ==== Iorec offsets ========================================================
+
+buf     equ 0
+size    equ 4
+head    equ 6
+tail    equ 8
+low     equ 10
+high    equ 12
 
 * ==== References ===========================================================
 
@@ -45,6 +55,22 @@ save_siz equ 314
         xref _endvdibss    * end of VDI BSS
         xref _endgembss    * end of GEM BSS
         xref __ebss        * end of BSS
+
+* ==== Structures ===========================================================
+
+#define kbdvec    _kbdvecs+0
+#define midivec   _kbdvecs+4
+#define vkbderr   _kbdvecs+8
+#define vmiderr   _kbdvecs+12
+#define statvec   _kbdvecs+16
+#define mousevec  _kbdvecs+20
+#define clockvec  _kbdvecs+24
+#define joyvec    _kbdvecs+28
+#define ikbdsys   _kbdvecs+32
+#define midisys   _kbdvecs+36
+#define ikbdstate _kbdvecs+40
+#define kbdlength _kbdvecs+41
+
 
 * ===========================================================================
 * ==== TEXT segment (TOS image) =============================================
@@ -136,7 +162,7 @@ _main:
  * Check for diagnostic cartridge
  */
         cmp.l   #$fa52235f,cart_base    * magic - is cartridge present?
-        bne     nodiag                  * no -> go on
+        bne.s   nodiag                  * no -> go on
         lea     nodiag(pc),a6           * save return address
         jmp     cart_base+4             * execute diagnostig cartridge
 nodiag:
@@ -158,11 +184,11 @@ nodiag:
         FRESTORE(zero)
         
         btst      #0,($FFFF8E09).w
-        beq noreset
-        lea memcret(pc),a6
-        bra memchk
+        beq.s     noreset
+        lea       memcret(pc),a6
+        bra       memchk
 memcret:
-        bne noreset
+        bne.s      noreset
         move.b    (memctrl).w,($FFFF8001).w
         
 /*
@@ -217,13 +243,13 @@ initpal:
         clr.b     ($FFFF8203).w
 
         btst      #0,($FFFF8E09).w
-        beq domemchk
+        beq.s      domemchk
         move.b    (memctrl).w,d6
         move.l    (_phystop).w,d5
-        lea memcret2(pc),a6
-        bra memchk
+        lea       memcret2(pc),a6
+        bra       memchk
 memcret2:
-        beq nomemchk
+        beq       nomemchk
 domemchk:
 
 * ===========================================================================
@@ -479,6 +505,10 @@ gemok:
 
         bsr       instoshdr
 
+* ===========================================================================
+* initialize cookie jar
+* ===========================================================================
+
         lea.l     cookies,a0
         move.l    a0,(_p_cookies).w
         move.l    #$5F435055,(a0)+ ; '_CPU'
@@ -590,7 +620,7 @@ initexc:
         move.l    a1,(a0)+
         dbf       d0,initexc
 
-        move.l    a3,(_zerodiv).w      * ignore zeo divide
+        move.l    a3,(_zerodiv).w      * ignore zero divide
         move.l    a3,(_lvl7vec).w      * ignore NMI
 
         moveq.l   #6,d0
@@ -793,6 +823,61 @@ pi_back:
 
 biosinit:
 		jsr       _osinit
+        move.w    _os_dosdate,_date
+
+        jsr       ngetdt
+        beq.s     clockdone
+        bsr       igetdt
+        swap      d0
+        tst.b     d0
+        beq.s     clockdone
+        move.w    d0,_date
+        swap      d0
+        move.w    d0,_time
+clockdone:
+        clr.b     (MFP_TACR).w     ; stop Timer A
+        bclr      #5,(MFP_IERA).w  ; disable Timer A interrupt
+        move.l    #$00003111,d0
+        D0_CACR
+
+
+/* 
+ * Draw the Atari logo.
+ */
+        movea.l   #atarilogo,a0
+        movea.l   (_v_bas_a).w,a1
+        move.b    (_sshiftmod).w,d0
+        cmp.b     #$02,d0          ; ST-High resolution?
+        beq.s     logomono
+        cmp.b     #$06,d0
+        beq.s     logomono         ; TT-High resolution?
+        adda.w    #((640/8)*4)*4,a1  ; start at screen line 4
+        move.w    #$0055,d0        ; 86 lines of data
+logocol1:
+        moveq.l   #5,d1            ; 12 bytes of data per line
+logocol2:
+        move.w    (a0)+,d2
+        move.w    d2,(a1)+         ; write 4 plane words
+        move.w    d2,(a1)+
+        move.w    d2,(a1)+
+        move.w    d2,(a1)+
+        dbf       d1,logocol2
+        adda.w    #(640/8-12)*4,a1
+        dbf       d0,logocol1
+        bra.s     logodone
+logomono:
+        adda.w    #(1280/8)*4,a1   ; start at screen line 4
+        move.w    #$0055,d0        ; 86 lines of data
+logomon1:
+        moveq.l   #11,d1           ; 12 bytes of data per line
+logomon2:
+        move.b    (a0)+,(a1)+
+        dbf       d1,logomon2
+        adda.w    #(1280/8)-12,a1
+        dbf       d0,logomon1
+logodone:
+
+
 
 ikbdres:
         dc.b $80,$01
@@ -802,7 +887,7 @@ ikbdres:
  *
  * Run all cartridge applications of the specified type.
  *
- * typebit: application type bit number which must be set to 1 to match
+ * typebit(d0): application type bit number which must be set to 1 to match
  */
 /* 306de: 00e00bbc */
 _run_cartridge_applications:
@@ -866,6 +951,7 @@ int_hbl1:
 int_vbl:
         rte
 
+/* 306de: 00e00d78 */
 just_rte:
         rte
 
@@ -877,15 +963,15 @@ critret:
         moveq.l   #-1,d0
         rts
 
+/* 306de: 00e00d9c */
 _xbiostrap:
         rte
 
+/* 306de: 00e00da2 */
 _biostrap:
         rte
 
-any_vec:
-		rte
-
+/* 306de: 00e01024 */
 conxxinit:
         dc.l      bios_unimpl
         dc.l      _bcon1stat
@@ -920,11 +1006,9 @@ conxxinit:
         dc.l      bios_unimpl
         dc.l      bios_unimpl
 
-_do_bell:
-		rts
-
-_do_keyclick:
-		rts
+/* 306de: 00e0121c */
+any_vec:
+		rte
 
 /* 306de: 00e015a2 */
 instoshdr:
@@ -983,10 +1067,146 @@ tttimerc:
         movem.w   (a7)+,d0-d1
         rts
 
+/* 306de: 00e01ef0 */
+ngetdt:
+        bsr       detect_nvram
+        bcs.s     inittc2
+        move.b    #$0D,(NVRAM_ADDR_REG).w ; select register D
+        move.b    (NVRAM_DATA_REG).w,d0
+        btst      #7,d0                   ; is RAM & time valid?
+        bne.s     inittc1                 ; yes
+        move.l    #$12C80000,-(a7) (9<<9)+(6<<5)+8
+        bsr       wrttclock
+        addq.w    #4,a7
+inittc1:
+        bsr.s     rdttclock
+        cmp.l     #$FFFFFFFF,d0
+        beq.s     inittc2
+        moveq.l   #0,d0
+inittc2:
+        rts
+
+*
+* reads date & time from TT clock,
+* and updates GEMDOS variables from it
+*
+/* 306de: 00e01f20 */
+rdttclock:
+        bsr       detect_nvram
+        bcs.s     inittc2
+        move.b    #$0D,(NVRAM_ADDR_REG).w ; select register D
+        btst      #7,(NVRAM_DATA_REG).w   ; is RAM & time valid?
+        beq       rdttc2                  ; no, fail
+        move.w    sr,d2
+        move.w    d2,d0
+        or.w      #$0700,d0
+rdttc1:
+        move.b    #$0A,(NVRAM_ADDR_REG).w ; select register A
+        btst      #7,(NVRAM_DATA_REG).w   ; is update in progress?
+        bne.s     rdttc1                  ; yes, wait
+        moveq.l   #0,d0
+        move.l    d0,d1
+        move.b    #$00,(NVRAM_ADDR_REG).w ; select register 0 (seconds)
+        move.b    (NVRAM_DATA_REG).w,d0
+        asr.w     #1,d0
+        move.b    #$02,(NVRAM_ADDR_REG).w ; select register 2 (minutes)
+        move.b    (NVRAM_DATA_REG).w,d1
+        dc.w $efc0,$1546                  ; bfins     d1,d0{21:6}
+        move.b    #$04,(NVRAM_ADDR_REG).w ; select register 4 (hours)
+        move.b    (NVRAM_DATA_REG).w,d1
+        dc.w $efc0,$1405                  ; bfins     d1,d0{16:5}
+        move.b    #$07,(NVRAM_ADDR_REG).w ; select register 7 (day of month)
+        move.b    (NVRAM_DATA_REG).w,d1
+        dc.w $efc0,$12c5                  ; bfins     d1,d0{11:5}
+        move.b    #$08,(NVRAM_ADDR_REG).w ; select register 8 (month)
+        move.b    (NVRAM_DATA_REG).w,d1
+        dc.w $efc0,$11c4                  ; bfins     d1,d0{7:4}
+        move.b    #$09,(NVRAM_ADDR_REG).w ; select register 9 (year)
+        move.b    (NVRAM_DATA_REG).w,d1
+        sub.b     #nvram_rtc_year_offset,d1                 ; ??? shouldnt that be add?
+        dc.w $efc0,$1007                  ; bfins     d1,d0{0:7}
+        move.w    d2,sr
+        move.w    sr,d2
+        ori.w     #$0700,sr
+        move.w    d0,_time
+        swap      d0
+        move.w    d0,_date
+        swap      d0
+        move.w    d2,sr
+        rts
+rdttc2:
+        moveq.l   #-1,d0
+        rts
+
+*
+* write date & time to TT clock
+*
+/* 306de: 00e01fc6 */
+wrttclock:
+        bsr       detect_nvram
+        bcs       inittc2
+        move.l    4(a7),d0
+        move.b    #$0B,(NVRAM_ADDR_REG).w ; select register B
+        move.b    #$80,(NVRAM_DATA_REG).w ; abort update cycle
+        move.b    #$0A,(NVRAM_ADDR_REG).w ; select register A
+        move.b    #$2A,(NVRAM_DATA_REG).w ; divider = 2, rate = 10
+        move.b    #$0B,(NVRAM_ADDR_REG).w ; select register B
+        move.b    #$8E,(NVRAM_DATA_REG).w ; enable data mode binary, 24hr, daylight savings
+        move.b    #$00,(NVRAM_ADDR_REG).w ; select register 0 (seconds)
+        dc.w $e9c0,$16c5   ; bfextu    d0{27:5},d1 
+        add.b     d1,d1
+        move.b    d1,(NVRAM_DATA_REG).w
+        move.b    #$02,(NVRAM_ADDR_REG).w ; select register 2 (minutes)
+        dc.w $e9c0,$1546    ; bfextu    d0{21:6},d1
+        move.b    d1,(NVRAM_DATA_REG).w
+        move.b    #$04,(NVRAM_ADDR_REG).w ; select register 4 (hours)
+        dc.w $e9c0,$1405    ; bfextu    d0{16:5},d1
+        move.b    d1,(NVRAM_DATA_REG).w
+        move.b    #$07,(NVRAM_ADDR_REG).w ; select register 7 (day of month)
+        dc.w $e9c0,$12c5    ; bfextu    d0{11:5},d1
+        move.b    d1,(NVRAM_DATA_REG).w
+        move.b    #$08,(NVRAM_ADDR_REG).w ; select register 8 (month)
+        dc.w $e9c0,$11c4    ; bfextu    d0{7:4},d1
+        move.b    d1,(NVRAM_DATA_REG).w
+        move.b    #$09,(NVRAM_ADDR_REG).w ; select register 9 (year)
+        dc.w $e9c0,$1007    ; bfextu    d0{0:7},d1
+        add.b     #nvram_rtc_year_offset,d1                 ; ??? shouldnt that be sub?
+        move.b    d1,(NVRAM_DATA_REG).w
+        move.b    #$0B,(NVRAM_ADDR_REG).w
+        move.b    #$0E,(NVRAM_DATA_REG).w
+        rts
+
+/* 306de: 00e0205e */
+detect_nvram:
+        movea.l   a7,a0
+        movea.l   (_buserror).w,a1
+        move.l    #nvramfail,(_buserror).w
+        move.b    #$00,(NVRAM_ADDR_REG).w
+        move.b    (NVRAM_DATA_REG).w,d0
+        move.l    a1,(_buserror).w
+        andi.b    #$FE,ccr                ; clear carry bit
+        rts
+nvramfail:
+        movea.l   a0,a7
+        move.l    a1,(_buserror).w
+        ori.b     #$01,ccr                ; set carry bit
+        rts
+
+/* 306de: 00e021a4 */
+igetdt:
+		rts
+
 /* 306de: 00e024d6 */
 initmfp:
 		rts
 
+/* 306de: 00e0378a */
+_do_keyclick:
+		rts
+
+/* 306de: 00e03b98 */
+_do_bell:
+		rts
 
         data
 _ui_mupb:
@@ -996,6 +1216,95 @@ _ui_mupb:
 zero:
 	    dc.l 0
 
+* 96x86 image of atari logo displayed at boot time
+atarilogo:
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
+        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
+        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
+        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
+        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
+        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
+        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
+        dc.w $0000,$0007,$f1ff,$1fc0,$0000,$0000
+        dc.w $0000,$0007,$f1ff,$1fc0,$0000,$0000
+        dc.w $0000,$000f,$f1ff,$1fe0,$0000,$0000
+        dc.w $0000,$000f,$f1ff,$1fe0,$0000,$0000
+        dc.w $0000,$001f,$e1ff,$0ff0,$0000,$0000
+        dc.w $0000,$003f,$e1ff,$0ff8,$0000,$0000
+        dc.w $0000,$003f,$e1ff,$0ff8,$0000,$0000
+        dc.w $0000,$007f,$c1ff,$07fc,$0000,$0000
+        dc.w $0000,$00ff,$c1ff,$07fe,$0000,$0000
+        dc.w $0000,$01ff,$81ff,$03ff,$0000,$0000
+        dc.w $0000,$03ff,$81ff,$03ff,$8000,$0000
+        dc.w $0000,$07ff,$01ff,$01ff,$c000,$0000
+        dc.w $0000,$0ffe,$01ff,$00ff,$e000,$0000
+        dc.w $0000,$1ffe,$01ff,$00ff,$f000,$0000
+        dc.w $0000,$7ffc,$01ff,$007f,$fc00,$0000
+        dc.w $0000,$fff8,$01ff,$003f,$fe00,$0000
+        dc.w $0003,$fff0,$01ff,$001f,$ff80,$0000
+        dc.w $001f,$ffe0,$01ff,$000f,$fff0,$0000
+        dc.w $00ff,$ffc0,$01ff,$0007,$fffe,$0000
+        dc.w $00ff,$ff80,$01ff,$0003,$fffe,$0000
+        dc.w $00ff,$ff00,$01ff,$0001,$fffe,$0000
+        dc.w $00ff,$fc00,$01ff,$0000,$7ffe,$0000
+        dc.w $00ff,$f800,$01ff,$0000,$3ffe,$0000
+        dc.w $00ff,$e000,$01ff,$0000,$0ffe,$0000
+        dc.w $00ff,$8000,$01ff,$0000,$03fe,$0000
+        dc.w $00fc,$0000,$01ff,$0000,$007e,$0000
+        dc.w $00e0,$0000,$01ff,$0000,$000e,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$c07f,$fe03,$0007,$c01e,$0700
+        dc.w $0001,$e07f,$fe07,$801f,$f81e,$18c0
+        dc.w $0003,$e07f,$fe0f,$803f,$fc1e,$1740
+        dc.w $0003,$f07f,$fe0f,$c03f,$fe1e,$2520
+        dc.w $0003,$f07f,$fe0f,$c03f,$fe1e,$2620
+        dc.w $0007,$f803,$c01f,$e03c,$1f1e,$2520
+        dc.w $0007,$f803,$c01f,$e03c,$0f1e,$1540
+        dc.w $0007,$f803,$c01f,$e03c,$0f1e,$18c0
+        dc.w $000f,$7c03,$c03d,$f03c,$0f1e,$0700
+        dc.w $000f,$3c03,$c03c,$f03c,$0f1e,$0000
+        dc.w $000f,$3c03,$c03c,$f03c,$1e1e,$0000
+        dc.w $001e,$3e03,$c078,$f83c,$7e1e,$0000
+        dc.w $001e,$1e03,$c078,$783d,$fc1e,$0000
+        dc.w $001e,$1e03,$c078,$783d,$f81e,$0000
+        dc.w $003e,$1f03,$c0f8,$7c3d,$e01e,$0000
+        dc.w $003f,$ff03,$c0ff,$fc3d,$e01e,$0000
+        dc.w $003f,$ff03,$c0ff,$fc3d,$e01e,$0000
+        dc.w $007f,$ff83,$c1ff,$fe3c,$f01e,$0000
+        dc.w $007f,$ff83,$c1ff,$fe3c,$f81e,$0000
+        dc.w $0078,$0783,$c1e0,$1e3c,$781e,$0000
+        dc.w $00f8,$07c3,$c3e0,$1f3c,$3c1e,$0000
+        dc.w $00f0,$07c3,$c3c0,$1f3c,$3e1e,$0000
+        dc.w $00f0,$03c3,$c3c0,$0f3c,$1e1e,$0000
+        dc.w $01f0,$03e3,$c7c0,$0fbc,$1f1e,$0000
+        dc.w $01e0,$01e3,$c780,$07b8,$0f1e,$0000
+
 		bss
 		xdef save_beg
 		comm save_beg,save_siz
@@ -1003,12 +1312,28 @@ zero:
 		xdef oshdr
 		comm oshdr,70 ; 6+48+16
 
-		xdef privinst
-		comm privinst,8
-
 		xdef cookies
 cooksize equ NCOOKIES*2*4
 		comm cookies,cooksize
+
+		xdef privinst
+		comm privinst,8
+
+		xdef _pbdef
+		comm _pbdef,30
+		
+		xdef midiiorec
+		comm midiiorec,14
+		xdef midibuf
+		comm midibuf,256
+		
+		xdef ikbdiorec
+		comm ikbdiorec,14
+		xdef ikbdbuf
+		comm ikbdbuf,128
+		
+		xdef _kbdvecs
+		comm _kbdvecs,42
 
 		xdef bcmap_root
 		comm bcmap_root,16

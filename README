@@ -1,6 +1,15 @@
+- Assembler sources are written in a format that is accepted
+  both by as68 and by the GNU assembler with the --mri option.
+  If you have to use a different assembler, they might need
+  conversion.
 
 - Don't put comments after constants that are used in assembler
   expressions. Since it is a K&R preprocessor, the spaces between
   the constant and the comment will make it to the source, and
   the assembler does not like spaces in operands.
 
+- Assembliing the assembler sources in the bios directory with
+  the original as68 from the developer kit will not work, mostly
+  because it does not support abs.w addressing mode, but also due
+  to numerous bugs. Either use the fixed version from the bin
+  directory or try some other assembler.

@@ -1,5 +1,6 @@
 include ../Makefile.common
 include ../Makefile.silent
+include optimize.mak
 
 all: bios.a bios.o vars.o
 

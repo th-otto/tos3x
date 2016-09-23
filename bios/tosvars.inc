@@ -215,3 +215,7 @@ MFP_TRSS        equ MFP_REGS+44
 MFP_USDR        equ MFP_REGS+46
 
 TTMFP_REGS      equ $fffffa81
+
+NVRAM_ADDR_REG  equ $ffff8961
+NVRAM_DATA_REG  equ $ffff8963
+

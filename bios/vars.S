@@ -44,7 +44,22 @@ privinst: ds.l 2
 	xdef _pbdef
 _pbdef: ds.b 30
 
-	ds.b $629
+	ds.b $438
+
+	xdef midiiorec
+midiiorec: ds.b 14
+	xdef midibuf
+midibuf: ds.b 256
+
+	xdef ikbdiorec
+ikbdiorec: ds.b 14
+	xdef ikbdbuf
+ikbdbuf: ds.b 128
+
+	xdef _kbdvecs
+_kbdvecs: ds.b 42
+
+	ds.b $2b
 
 	xdef _shifty
 _shifty: ds.b 1
@@ -54,7 +69,10 @@ _shifty: ds.b 1
 	xdef _tim_c_sieve
 _tim_c_sieve: ds.w 1
 
-	ds.b $0c
+	ds.b $0a
+
+	xdef iclk_ready
+iclk_ready: ds.w 1
 
 	xdef bcmap_root
 bcmap_root: ds.b 16
