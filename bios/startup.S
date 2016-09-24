@@ -24,7 +24,10 @@ GEM_MUPB_MAGIC equ $87654321
 NCOOKIES equ 16
 nvram_rtc_year_offset equ 1980-1968
 
-save_siz equ 314
+#define RR_MAGIC    $12123456
+#define RR_CHKSUM   $5678
+
+save_siz equ 238
 
 * ==== Definitions ==========================================================
 
@@ -700,8 +703,8 @@ moncolor:
  * initialize video
  */
         bsr       ckblitter
-        jsr       $00E069F4
-        jsr       $00E0694A
+        jsr       x00E069F4
+        jsr       x00E0694A
         move.l    #_main,(_swv_vec).w
         move.w    #$0001,(_vblsem).w
 
@@ -877,10 +880,345 @@ logomon2:
         dbf       d0,logomon1
 logodone:
 
+/*
+ * position VT52 cursor below logo
+ */
+        moveq.l   #32+7,d7
+        tst.b     (_sshiftmod).w
+        bne.s     notlow
+        moveq.l   #32+12,d7
+notlow:
+        move.l    #$00030002,d6
+        move.w    #$001B,-(a7)
+        move.l    d6,-(a7)
+        trap      #13             ; Bconout(2, ESC)
+        move.w    #$0059,4(a7)
+        move.l    d6,(a7)
+        trap      #13             ; Bconout(2, 'Y')
+        move.w    d7,4(a7)
+        move.l    d6,(a7)
+        trap      #13             ; Bconout(2, row)
+        move.w    #$0020,4(a7)
+        move.l    d6,(a7)
+        trap      #13             ; Bconout(2, col)
+        addq.w    #6,a7
 
+/*
+ * check the ROM crc
+ */
+        move.l    #$0001FFFE,d7
+        move.w    #$0003,d6
+        movea.l   #_os_entry,a5
+crccheck:
+        move.w    #$0004,-(a7)
+        move.l    d7,-(a7)
+        move.l    a5,-(a7)
+        bsr       check_rom_crc
+        adda.w    #$000A,a7
+        movea.l   a5,a0
+        adda.l    #$0007FFF8,a0
+        move.b    (a0),d1
+        lsl.w     #8,d1
+        move.b    4(a0),d1
+        cmp.w     d1,d0
+        bne.s     crcfail
+        addq.l    #1,a5
+        dbf       d6,crccheck
+        bra.s     crcok
+crcmsg: dc.b 'WARNING: BAD ROM CRC IN CHIP ',0
+crcmsg2 dc.b '.',13,10,0
+crcfail:
+        move.l    a5,d5
+        pea.l     crcmsg
+        move.w    #$0009,-(a7)
+        trap      #1
+        move.b    #$45,d0
+        btst      #0,d5
+        beq.s     chipE
+        move.b    #$4F,d0
+chipE:
+        move.w    d0,2(a7)
+        move.w    #$0002,(a7)
+        trap      #1
+        move.b    #$45,d0
+        btst      #1,d5
+        beq.s     chipE2
+        move.b    #$4F,d0
+chipE2:
+        move.w    d0,2(a7)
+        move.w    #$0002,(a7)
+        trap      #1
+        move.l    #crcmsg2,2(a7)
+        move.w    #$0009,(a7)
+        trap      #1
+        addq.w    #6,a7
+        addq.l    #1,a5
+        dbf       d6,crccheck
+crcok:
+
+
+/*
+ * switch to ST low res unless in TT high res
+ * ??? why? a bit too late, after displaying error messages
+ */
+        cmpi.b    #$06,(_sshiftmod).w
+        beq.s     nosetrez
+        move.l    #$000BFFFF,-(a7)
+        trap      #13          ; Kbshift(-1)
+        addq.w    #4,a7
+        btst      #3,d0
+        beq.s     nosetrez
+        clr.w     -(a7)
+        pea.l     ($FFFFFFFF).w
+        pea.l     ($FFFFFFFF).w
+        move.w    #$0005,-(a7)
+        trap      #14         ; Setscreen(-1L, -1L, 0)
+        adda.w    #$000C,a7
+        move.l    #$00000808,d0 ; BUG? this will be skipped too if in TT high rez
+        D0_CACR
+nosetrez:
+
+/* boot eventually from a block device (floppy or harddisk) */
+        bsr       diskboot
+/* boot eventually from a SCSI/ACSI */
+        bsr       dmaboot
+/* run resident programs */
+        bsr       run_reset_resident
+        tst.w     _cmdload
+        beq.s     nocmd
+        bsr       autoexec
+        move.l    #_os_entry,_sysbase
+        pea.l     emptystr(pc)
+        pea.l     emptystr(pc)
+        pea.l     command_prg(pc)
+        clr.w     -(a7)        ; Load&Go
+        bra.s     dopexec
+nocmd:
+        bsr       autoexec
+        move.l    #_os_entry,_sysbase
+        lea.l     default_env(pc),a0
+        movea.l   #gem_env,a1
+copyenv:
+        cmpi.b    #$23,(a0)
+        bne.s     nextenvc
+        movea.l   a1,a2            ; remember dest addr of drive character
+nextenvc:
+        move.b    (a0)+,(a1)+
+        bpl.s     copyenv
+        move.b    _bootdev,d0      ; infamous old bug accessing _bootdev as byte
+        add.b     #$41,d0
+        move.b    d0,(a2)
+        pea.l     gem_env
+        pea.l     emptystr
+        pea.l     emptystr(pc)
+        move.w    #$0005,-(a7)
+        move.w    #$004B,-(a7)
+        trap      #1               ; Pexec(5) Create basepage
+        adda.w    #$000E,a7
+        movea.l   d0,a0
+        move.l    _exec_os,8(a0)   ; set p_tbase of created PD
+        pea.l     gem_env
+        move.l    a0,-(a7)
+        pea.l     emptystr(pc)
+        move.w    #$0004,-(a7)
+dopexec:
+        move.w    #$004B,-(a7)
+        trap      #1               ; Pexec(4) Just go: execute GEM
+        adda.w    #$000E,a7
+        jmp       _main
+
+default_env: dc.b 'PATH=',0,'#:',$5c,0,0,$ff
+command_prg: dc.b 'COMMAND.PRG',0
+gem_prg:     dc.b 'GEM.PRG'
+
+emptystr: dc.b 0,0,0
 
 ikbdres:
         dc.b $80,$01
+
+/* Run all boot applications from the application cartridge.
+ * Beware: Hatari features a special cartridge which is used
+ * for GEMDOS drive emulation. It will hack drvbits and hook Pexec().
+ * It will also hack Line A variables to enable extended VDI video modes.
+ */
+/* 306de: 00e0098a */
+diskboot:
+        moveq.l   #3,d0
+        bsr       _run_cartridge_applications
+        movea.l   (_hdv_boot).w,a0
+        jsr       (a0)
+        tst.w     d0
+        bne.s     nodiskboot
+        movea.l   (_dskbufp).w,a0
+        jsr       (a0)
+nodiskboot:
+        rts
+
+
+/* 306de: 00e009a2 */
+dmaboot:
+        move.l    #16000,d7
+        cmp.l     _hz_200,d7
+        bcs       dmadone
+        movea.w   #$0000,a5
+dmaloop:
+        cmpa.w    #$0000,a5
+        bne       skipsp
+        bsr       x00E05FA4
+        movea.w   d0,a5
+        beq       dmawait
+        move.w    #$001B,-(a7)
+        move.l    #$00030002,-(a7)
+        trap      #13               ; Bconout(2, ESC)
+        move.w    #$0070,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, 'p')
+        move.w    #$001B,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, ESC)
+        move.w    #$0077,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, 'w')
+        move.l    #200,d5
+        move.w    #$004F,d4
+        tst.b     _sshiftmod
+        bne.s     nolowres
+        move.l    #400,d5
+        moveq.l   #39,d4
+nolowres:
+        move.l    d5,d6
+        move.l    d4,d3
+prspace:
+        move.w    #$0020,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, ' ')
+        dbf       d4,prspace
+        move.w    #$000D,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, '\r')
+        subq.l    #1,d3
+prspace2:
+        move.w    #$0020,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, ' ')
+        dbf       d3,prspace2
+        move.w    #$001B,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, ESC)
+        move.w    #$0071,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, 'q')
+        addq.l    #6,a7
+skipsp:
+        cmp.l     _hz_200,d6
+        bhi.s     dmawait
+        move.w    #$001B,-(a7)
+        move.l    #$00030002,-(a7)
+        trap      #13               ; Bconout(2, ESC)
+        move.w    #$004B,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, 'K')
+        move.w    #$0008,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, '\b')
+        addq.w    #6,a7
+        add.l     d5,d6
+dmawait:
+        cmpa.w    #$0000,a5
+        beq.s     dmakey
+        cmp.l     _hz_200,d7
+        bls.s     dmaline
+dmakey:
+        move.l    #$00010002,-(a7)
+        trap      #13               ; Bconstat(2)
+        addq.l    #4,a7
+        tst.l     d0
+        beq       dmaloop
+        move.l    #$00020002,-(a7)
+        trap      #13               ; Bconin(2)
+        addq.l    #4,a7
+        cmpa.w    #$0000,a5
+        bne.s     dmaline
+        bsr       x00E061F2
+        move.l    d7,_hz_200
+        bra.s     dmadone
+dmaline:
+        move.l    d7,_hz_200
+        move.w    #$000D,-(a7)
+        move.l    #$00030002,-(a7)
+        trap      #13               ; Bconout(2, '\r')
+        move.w    #$001B,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, ESC)
+        move.w    #$004B,4(a7)
+        move.l    #$00030002,(a7)
+        trap      #13               ; Bconout(2, 'K')
+        addq.l    #6,a7
+dmadone:
+        jsr       x00E01CFE
+        moveq.l   #8,d4      ; d4 = device (SCSI0)
+        move.b    ($FFFF8E09).w,d0
+        and.w     #$00F8,d0
+        move.w    d0,(_bootpref).w
+        bne.s     confdone
+        pea.l     (_bootpref).w
+        move.w    #$0002,-(a7)
+        clr.l     -(a7)
+        jsr       _nvmaccess ; read first 2 bytes of nvram (bootpref)
+        adda.w    #$000A,a7
+        tst.w     d0
+        beq.s     confdone
+        clr.w     (_bootpref).w
+confdone:
+        move.w    #$0001,d1
+dmadev:
+        move.w    d1,-(a7)
+        move.w    d4,-(a7)
+        move.l    (_dskbufp).w,-(a7)
+        move.w    #$0001,-(a7)
+        clr.l     -(a7)
+        jsr       _dmaread
+        adda.w    #$000C,a7
+        move.w    (a7)+,d1
+        tst.l     d0
+        beq.s     dmaok
+        addq.l    #1,d0
+        dbeq      d1,dmadev
+        bra.s     nextdev
+dmaok:
+        movea.l   (_dskbufp).w,a0
+        move.w    #$00FF,d0
+        moveq.l   #0,d1
+dmacrc:
+        add.w     (a0)+,d1
+        dbf       d0,dmacrc
+        cmp.w     #$1234,d1
+        beq.s     doboot
+nextdev:
+        addq.w    #1,d4
+        move.w    d4,d0
+        and.w     #$0007,d0
+        bne.s     confdone
+        cmp.w     #$0008,d4
+        beq.s     nodmaboot
+        moveq.l   #0,d4       ; retry all again with ACSI devices
+        bra.s     confdone
+nodmaboot:
+        rts
+doboot:
+        movea.l   (_dskbufp).w,a0
+        move.l    #$444D4172,d3   ; 'DMAr'
+        move.w    d4,d7
+        asl.w     #5,d7
+        move.w    (_bootpref).w,d5
+        move.l    d4,-(a7)
+        move.l    _hdv_rw,-(a7)
+        jsr       (a0)
+        move.l    (a7)+,d0
+        move.l    (a7)+,d4
+        cmp.l     (_hdv_rw).w,d0
+        beq.s     nextdev
+        rts
 
 /*
  * void run_cartridge_applications(WORD typebit);
@@ -893,10 +1231,10 @@ ikbdres:
 _run_cartridge_applications:
         lea     cart_base,a0
         cmp.l   #$ABCDEF42,(a0)+        * is cartridge present?
-        bne     cartover                * no -> cartover
+        bne.s   cartover                * no -> cartover
 testtype:
         btst    d0,4(a0)                * What type?
-        beq     nextapp
+        beq.s   nextapp
 
         movem.l d0-d7/a0-a6,-(sp)       * save registers
         move.l  4(a0),d0                * d0 = address of cartridge init
@@ -907,13 +1245,26 @@ testtype:
 nextapp:
         tst.l   (a0)                    * another application?
         move.l  (a0),a0
-        bne     testtype
+        bne.s   testtype
 cartover:
         rts
 
 /* 306de: 00e00bee */
 bios_unimpl:
 		rts
+
+unknown:
+        adda.l    d1,a0
+        clr.w     d0
+        lea.l     504(a0),a1
+unknown1:
+        cmp.w     (a0)+,d0
+        bne.s     unknown2
+        add.w     #$FA54,d0
+        cmpa.l    a0,a1
+        bne.s     unknown1
+unknown2:
+        jmp       (a4)
 
 *
 * check for valid memory configuration.
@@ -1010,6 +1361,47 @@ conxxinit:
 any_vec:
 		rte
 
+/* 306de: 00e0133c */
+autoexec:
+		rts
+
+/*
+ * run_reset_resident - run "reset-resident" code
+ *
+ * "Reset-resident" code is code that has been loaded into RAM prior
+ * to a warm boot.  It has a special header with a magic number, it
+ * is 512 bytes long (aligned on a 512-byte boundary), and it has a
+ * specific checksum (calculated on a word basis).
+ *
+ * Note: this is an undocumented feature of TOS that exists in all
+ * versions of Atari TOS.
+ */
+/* 306de: 00e01530 */
+run_reset_resident:
+        movea.l   _phystop,a0
+run_res1:
+        suba.w    #$0200,a0
+        cmpa.w    #$0400,a0
+        bls.s     run_res3
+        cmpi.l    #RR_MAGIC,(a0)
+        bne.s     run_res1
+        cmpa.l    4(a0),a0
+        bne.s     run_res1
+        clr.w     d0
+        movea.l   a0,a1
+        move.w    #$00FF,d1
+run_res2:
+        add.w     (a1)+,d0
+        dbf       d1,run_res2
+        cmp.w     #RR_CHKSUM,d0
+        bne.s     run_res1
+        move.l    a0,-(a7)
+        jsr       8(a0)
+        movea.l   (a7)+,a0
+        bra.s     run_res1
+run_res3:
+        rts
+
 /* 306de: 00e015a2 */
 instoshdr:
         lea.l     _os_entry(pc),a0
@@ -1065,6 +1457,10 @@ tttimerc:
         move.b    d1,(TTMFP_REGS+MFP_TCDCR).w ; Set Timer C mode
         move.w    (a7)+,sr
         movem.w   (a7)+,d0-d1
+        rts
+
+/* 306de: 00e01724 */
+check_rom_crc:
         rts
 
 /* 306de: 00e01ef0 */
@@ -1123,7 +1519,7 @@ rdttc1:
         dc.w $efc0,$11c4                  ; bfins     d1,d0{7:4}
         move.b    #$09,(NVRAM_ADDR_REG).w ; select register 9 (year)
         move.b    (NVRAM_DATA_REG).w,d1
-        sub.b     #nvram_rtc_year_offset,d1                 ; ??? shouldnt that be add?
+        sub.b     #nvram_rtc_year_offset,d1
         dc.w $efc0,$1007                  ; bfins     d1,d0{0:7}
         move.w    d2,sr
         move.w    sr,d2
@@ -1153,7 +1549,7 @@ wrttclock:
         move.b    #$0B,(NVRAM_ADDR_REG).w ; select register B
         move.b    #$8E,(NVRAM_DATA_REG).w ; enable data mode binary, 24hr, daylight savings
         move.b    #$00,(NVRAM_ADDR_REG).w ; select register 0 (seconds)
-        dc.w $e9c0,$16c5   ; bfextu    d0{27:5},d1 
+        dc.w $e9c0,$16c5    ; bfextu    d0{27:5},d1 
         add.b     d1,d1
         move.b    d1,(NVRAM_DATA_REG).w
         move.b    #$02,(NVRAM_ADDR_REG).w ; select register 2 (minutes)
@@ -1170,7 +1566,7 @@ wrttclock:
         move.b    d1,(NVRAM_DATA_REG).w
         move.b    #$09,(NVRAM_ADDR_REG).w ; select register 9 (year)
         dc.w $e9c0,$1007    ; bfextu    d0{0:7},d1
-        add.b     #nvram_rtc_year_offset,d1                 ; ??? shouldnt that be sub?
+        add.b     #nvram_rtc_year_offset,d1
         move.b    d1,(NVRAM_DATA_REG).w
         move.b    #$0B,(NVRAM_ADDR_REG).w
         move.b    #$0E,(NVRAM_DATA_REG).w
@@ -1207,6 +1603,21 @@ _do_keyclick:
 /* 306de: 00e03b98 */
 _do_bell:
 		rts
+
+x00E01CFE:
+	rts
+x00E05FA4:
+	rts
+x00E061F2:
+	rts
+x00E0694A:
+	rts
+x00E069F4:
+	rts
+_nvmaccess:
+	rts
+_dmaread:
+	rts
 
         data
 _ui_mupb:
@@ -1306,6 +1717,10 @@ atarilogo:
         dc.w $01e0,$01e3,$c780,$07b8,$0f1e,$0000
 
 		bss
+		
+		xdef gem_env
+		comm gem_env,12
+		
 		xdef save_beg
 		comm save_beg,save_siz
 		
@@ -1316,6 +1731,18 @@ atarilogo:
 cooksize equ NCOOKIES*2*4
 		comm cookies,cooksize
 
+		xdef _bootpref
+		comm _bootpref,2
+		
+		xdef _altmd
+		comm _altmd,16
+		
+		xdef _has_dmasound
+		comm _has_dmasound,1
+		
+		xdef _has_microwire
+		comm _has_microwire,1
+		
 		xdef privinst
 		comm privinst,8
 

@@ -15,9 +15,14 @@ MAXQUICK equ 5
 
 *	ds.b $800       ; the BIOS vars go here
 
+	ds.b $40
+
+	xdef gem_env
+gem_env: ds.b 12
+
 * save area for trap13/14.
     xdef save_beg
-save_beg:  ds.w   157
+save_beg:  ds.b   238
     xdef _trap_save_area
 _trap_save_area: ds.b 0         * End of Save storage
 
@@ -27,7 +32,11 @@ oshdr: ds.b 6+64
 	xdef cookies
 cookies: ds.l 16*2
 
-	ds.b $12
+	xdef _bootpref
+_bootpref: ds.w 1
+
+	xdef _altmd
+_altmd: ds.l 4
 
 	xdef _has_dmasound
 _has_dmasound: ds.b 1
