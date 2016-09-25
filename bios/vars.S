@@ -13,7 +13,7 @@ MAXQUICK equ 5
     
 	bss
 
-*	ds.b $800       ; the BIOS vars go here
+*	ds.b $800       ; the system variables go here
 
 	ds.b $40
 
@@ -48,12 +48,33 @@ __sbss: ds.b 0
     xdef privinst
 privinst: ds.l 2
 
-	ds.b $58
+    xdef savepc
+savepc: ds.l 1
+    xdef execpath
+execpath: ds.l 1
+    xdef execname
+execname: ds.l 1
+    xdef execdta
+execdta: ds.b 44
+    xdef execfname
+execfname: ds.b 32
 
 	xdef _pbdef
 _pbdef: ds.b 30
 
-	ds.b $438
+	ds.b 14
+
+	xdef dmarwflg
+dmarwflg: ds.b 2
+
+	ds.b $204
+
+	xdef rs232ibuf
+rs232ibuf: ds.b 256
+    xdef rs232obuf
+rs232obuf: ds.b 256
+	xdef rs232iorec
+rs232iorec: ds.b 2*14+8
 
 	xdef midiiorec
 midiiorec: ds.b 14
@@ -73,12 +94,32 @@ _kbdvecs: ds.b 42
 	xdef _shifty
 _shifty: ds.b 1
 
-	ds.b $24
+	xdef _curkeytbl
+_curkeytbl: ds.l 3
+
+	ds.b 20
+
+    xdef kb_initial
+kb_initial: ds.b 1
+    xdef kb_repeat
+kb_repeat: ds.b 1
+
+	ds.l 1
 
 	xdef _tim_c_sieve
 _tim_c_sieve: ds.w 1
 
-	ds.b $0a
+	xdef _sndtable
+_sndtable: ds.l 1
+
+	xdef _snddelay
+_snddelay: ds.b 1
+
+	xdef _sndtmp
+_sndtmp: ds.b 1
+
+	xdef _prtconfig
+_prtconfig: ds.w 1
 
 	xdef iclk_ready
 iclk_ready: ds.w 1
@@ -91,7 +132,11 @@ bcmap_root: ds.b 16
 	xdef _dskbuf
 _dskbuf: ds.b 0
 
-	ds.b $2AC8
+	ds.b $1E32
+
+#include "linea.inc"
+
+	ds.b $85A
 
 	xdef biosav
 biosav: ds.l 1
@@ -283,8 +328,8 @@ _endvdibss: ds.b 0
 
     ds.b $63E6
 
-	xdef __ebss
 	xdef _endgembss
-__ebss: ds.b 0
 _endgembss: ds.b 0
+	xdef __ebss
+__ebss: ds.b 0
 

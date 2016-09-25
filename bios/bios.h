@@ -64,3 +64,4 @@ int32_t bcon4out PROTO((int16_t dev, int16_t c));
 int32_t bcon5out PROTO((int16_t dev, int16_t c));
 VOID midiws PROTO((uint16_t cnt, const VOIDPTR ptr));
 VOID ikbdws PROTO((uint16_t cnt, const VOIDPTR ptr));
+ERROR dbmsg PROTO((int16_t rsrvd, int16_t msg_num, int32_t msg_arg));

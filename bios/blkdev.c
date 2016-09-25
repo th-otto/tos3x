@@ -1,9 +1,31 @@
 #include "bios.h"
+#include <toserrno.h>
 
 
 /* 306de: 00e055da */
 VOID bhdv_init(NOTHING)
 {
+}
+
+
+/*
+ * XBIOS #11 - Dbmsg - Output debug message
+ *
+ * Available Only if a resident debugger was loaded,
+ * which supports this call. The only debugger that currently
+ * supports this call is the Atari debugger.
+ * Was never implemented in any offical ROM version.
+ */
+/* 306de: 00e05652 */
+ERROR dbmsg(P(int16_t) rsrvd, P(int16_t) msg_num, P(int32_t) msg_arg)
+PP(int16_t rsrvd;)
+PP(int16_t msg_num;)
+PP(int32_t msg_arg;)
+{
+	UNUSED(rsrvd);
+	UNUSED(msg_num);
+	UNUSED(msg_arg);
+	return E_OK;
 }
 
 

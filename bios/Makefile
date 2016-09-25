@@ -18,18 +18,18 @@ bios.a: tosvars.o $(BIOS_OBJS) ${MAKEFILE}
 # because on a FAT filesystem, .S cannot be
 # distinguished from .s
 #
-startup.o: startup.S header.h
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
-	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
-	$(AM_V_at)${RM} $*.i
-
-memory.o: memory.S
+startup.o: startup.S header.h scrdmp.inc mmu030.inc romcrc.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
 uistart.o: uistart.S
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P '-DGTSTART=$$'$(gemdos_tbase) '-DGTLEN=$$'$(gemdos_tlen) $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+vars.o: vars.S linea.inc
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
