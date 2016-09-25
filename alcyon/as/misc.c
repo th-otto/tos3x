@@ -305,7 +305,10 @@ PP(int opn;)
 	}
 	if (p->ea == 0)
 	{									/* memory  address */
-		i = gspreg();
+		if (pitw >= pnite)
+			i = 0;
+		else
+			i = gspreg();
 		if (i == WORD_ID)
 			itype = ITCW;
 		else if (i == LONG_ID)

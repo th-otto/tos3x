@@ -706,7 +706,7 @@ PP(const char *tag;)
 	printf("%s %3d: ", tag, cnt);
 	if (cnt >= ITOP1 && stbuf[0].itty == ITBS && stbuf[1].itty == ITSY && stbuf[2].itty == ITSY && stbuf[3].itty == ITCN)
 	{
-		printf("    [%08lx] ", stbuf[3].itop.l);
+		printf("    [%08lx:%02x] ", stbuf[3].itop.l, stbuf[1].itrl);
 		if (stbuf[1].itop.ptrw2)
 			printf("%-*.*s:   ", SYNAMLEN, SYNAMLEN, stbuf[1].itop.ptrw2->name);
 		else
