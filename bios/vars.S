@@ -62,12 +62,19 @@ execfname: ds.b 32
 	xdef _pbdef
 _pbdef: ds.b 30
 
-	ds.b 14
+	xdef nextacsi
+nextacsi: ds.l 1
+
+	xdef scsicmd
+scsicmd: ds.b 10
 
 	xdef dmarwflg
 dmarwflg: ds.b 2
 
-	ds.b $204
+	xdef idebuf
+idebuf: ds.b 512
+
+	ds.l 1 ; unused
 
 	xdef rs232ibuf
 rs232ibuf: ds.b 256

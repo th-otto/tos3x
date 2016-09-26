@@ -190,6 +190,7 @@ _kcl_hook       equ $5b0      * pointer to routine for system keyclick
 
 MFP_REGS        equ $fffffa01
 MFP_LPT         equ MFP_REGS+0
+MFP_GPIP        equ MFP_REGS+0
 MFP_AER         equ MFP_REGS+2
 MFP_DD          equ MFP_REGS+4
 MFP_IERA        equ MFP_REGS+6

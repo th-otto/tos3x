@@ -695,7 +695,7 @@ ikbdwait:
  * check monitor type, and set boot resolution
  */
         moveq.l   #4,d1              * assume color, video mode 640x480x16
-        btst      #7,(MFP_LPT).w
+        btst      #7,(MFP_GPIP).w
         bne.s     moncolor
         moveq.l   #6,d1
 moncolor:
@@ -1158,7 +1158,7 @@ dmaline:
         trap      #13               ; Bconout(2, 'K')
         addq.l    #6,a7
 dmadone:
-        jsr       x00E01CFE
+        jsr       scsirst
         moveq.l   #8,d4      ; d4 = device (SCSI0)
         move.b    ($FFFF8E09).w,d0
         and.w     #$00F8,d0
@@ -1331,7 +1331,7 @@ vbl_loop:
         movem.l   (a7)+,d7/a0
 vbl_next:
         dbf       d7,vbl_loop
-        move.b    (MFP_LPT).w,d1
+        move.b    (MFP_GPIP).w,d1
         tst.b     _has_dmasound
         beq.s     nomoncheck
 * Check for monitor switching,
@@ -1340,10 +1340,10 @@ vbl_next:
         ori.w     #$0700,sr
 moncheck:
         move.b    ($FFFF8901).w,d0
-        move.b    (MFP_LPT).w,d1
+        move.b    (MFP_GPIP).w,d1
         btst      #7,d1
         sne       d1
-        move.b    (MFP_LPT).w,d2
+        move.b    (MFP_GPIP).w,d2
         btst      #7,d2
         sne       d2
         cmp.b     d1,d2
@@ -2197,6 +2197,15 @@ autosca4:
 
 bombimage:        dc.w $0600,$2900,$0080,$4840,$11f0,$01f0,$07fc,$0ffe,$0dfe,$1fff,$1fef,$0fee,$0fde,$07fc,$03f8,$00e0
 
+/* function at e01516; seems to be unused */
+        clr.b     (MFP_TBCR).w      ; stop Timer B
+        clr.b     (MFP_TBDR).w      ; clear data register
+        move.b    #$08,(MFP_TBCR).w ; put timer B into event count mode
+waitev:
+        tst.b     (MFP_TBDR).w
+        beq.s     waitev
+        jmp       (a6)
+
 
 dovsync:
         bra       _vsync
@@ -2319,7 +2328,7 @@ ckblitter:
         ori.w     #$0700,sr
         movea.l   _buserror(a0),a1
         move.l    #noblitter,_buserror(a0)
-        tst.w     $8a00(a0)
+        tst.w     $ffff8a00(a0)
         moveq.l   #2,d0
 noblitter:
         move.l    a1,_buserror(a0)
@@ -2331,7 +2340,7 @@ noblitter:
 ttdelayc:
         bsr.s     tttimerc
 ttdelay1:
-        btst      #5,(TTMFP_REGS+MFP_IPRB).w
+        btst      #5,(MFP_IPRB+(TTMFP_REGS-MFP_REGS)).w
         beq.s     ttdelay1
         rts
 
@@ -2344,18 +2353,18 @@ tttimerc:
         movem.w   d0-d1,-(a7)
         move.w    sr,-(a7)
         ori.w     #$0700,sr
-        move.b    (TTMFP_REGS+MFP_TCDCR).w,d1 ; save original Timer C+D mode
+        move.b    (MFP_TCDCR+(TTMFP_REGS-MFP_REGS)).w,d1 ; save original Timer C+D mode
         and.b     #$0F,d1
-        move.b    d1,(TTMFP_REGS+MFP_TCDCR).w  Stop timer C
-        bclr      #5,(TTMFP_REGS+MFP_IERB).w ; Disable Timer C interrupt
-        move.b    #$DF,(TTMFP_REGS+MFP_IPRB).w ; Clear pending Interrupt flag
-        bclr      #5,(TTMFP_REGS+MFP_IMRB).w ; Mask Timer C interrupt
-        bset      #5,(TTMFP_REGS+MFP_IERB).w ; Enable Timer C interrupt again
-        move.b    d0,(TTMFP_REGS+MFP_TCDR).w ; Set Timer C counter
+        move.b    d1,(MFP_TCDCR+(TTMFP_REGS-MFP_REGS)).w  Stop timer C
+        bclr      #5,(MFP_IERB+(TTMFP_REGS-MFP_REGS)).w ; Disable Timer C interrupt
+        move.b    #$DF,(MFP_IPRB+(TTMFP_REGS-MFP_REGS)).w ; Clear pending Interrupt flag
+        bclr      #5,(MFP_IMRB+(TTMFP_REGS-MFP_REGS)).w ; Mask Timer C interrupt
+        bset      #5,(MFP_IERB+(TTMFP_REGS-MFP_REGS)).w ; Enable Timer C interrupt again
+        move.b    d0,(MFP_TCDR+(TTMFP_REGS-MFP_REGS)).w ; Set Timer C counter
         lsr.w     #4,d0
         and.b     #$F0,d0
         or.b      d0,d1
-        move.b    d1,(TTMFP_REGS+MFP_TCDCR).w ; Set Timer C mode
+        move.b    d1,(MFP_TCDCR+(TTMFP_REGS-MFP_REGS)).w ; Set Timer C mode
         move.w    (a7)+,sr
         movem.w   (a7)+,d0-d1
         rts
@@ -2497,7 +2506,7 @@ _esetpalette:
         move.w    d0,d1
 esetpal1:
         movea.l   8(a7),a1
-        lea.l     $8400(a0),a0
+        lea.l     $ffff8400(a0),a0
         bra.s     esetpal3
 esetpal2:
         move.w    (a1)+,(a0)+
@@ -2574,25 +2583,9 @@ esetsm1:
 esetsm2:
         rts
 
-/*
- * XBIOS #42 - DMAread
- */
-/* 306de: 00e0186c */
-_dmaread:
-        move.b    #$00,dmarwflg
-        move.w    #$0008,d1
-        bra.s     dmarw
-/*
- * XBIOS #43 - DMAwrite
- */
-/* 306de: 00e0187a */
-_dmawrite:
-        move.b    #$01,dmarwflg
-        move.w    #$000A,d1
-dmarw:
 
-x00E01CFE:
-	rts
+#include "dma.inc"
+
 
 /* 306de: 00e01ef0 */
 ngetdt:

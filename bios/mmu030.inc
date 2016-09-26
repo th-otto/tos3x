@@ -1,5 +1,5 @@
-#include "asmdefs.h"
-#include "tosvars.inc"
+* #include "asmdefs.h"
+* #include "tosvars.inc"
 
 mmutable_ram equ $700 ; CPU root table in memory
 
