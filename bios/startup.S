@@ -15,9 +15,6 @@
 
 
 * ==== Defines ==============================================================
-TOSVERSION equ $306
-mc68010 equ 1
-
 cart_base  equ   $00fa0000 * Base of ROM port cartridge
 GEM_MUPB_MAGIC equ $87654321
 
@@ -133,7 +130,7 @@ BCONMAP_START_HANDLE equ 6
 _os_entry:
     bra.s   _main       * os_entry, branch to _main
 os_version:
-    dc.w    TOSVERSION  * os_version, TOS version
+    dc.w    ATOSVERSION  * os_version, TOS version
 reseth:
     dc.l    _main       * reseth, pointer to reset handler
 _os_beg:

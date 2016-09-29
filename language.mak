@@ -1,6 +1,3 @@
-LANG=de
-TOSVERSION=306
-
 gemdos_tbase_de=E134E4
 gemdos_tlen_de=62AC
 gemdos_dbase_de=E3D8DA
@@ -49,12 +46,12 @@ vdidsp_sv=E078D2
 bios_tbase_sv=E00000
 bios_dbase_sv=E36008
 
-gemdos_tbase=$(gemdos_tbase_$(LANG))
-gemdos_tlen=$(gemdos_tlen_$(LANG))
-gemdos_dbase=$(gemdos_dbase_$(LANG))
-gemdos_dlen=$(gemdos_dlen_$(LANG))
-bios_tbase=$(bios_tbase_$(LANG))
-bios_dbase=$(bios_dbase_$(LANG))
+gemdos_tbase=$(gemdos_tbase_$(COUNTRY))
+gemdos_tlen=$(gemdos_tlen_$(COUNTRY))
+gemdos_dbase=$(gemdos_dbase_$(COUNTRY))
+gemdos_dlen=$(gemdos_dlen_$(COUNTRY))
+bios_tbase=$(bios_tbase_$(COUNTRY))
+bios_dbase=$(bios_dbase_$(COUNTRY))
 
 rombase=$(bios_tbase)
 
@@ -68,7 +65,7 @@ langcheck_sv=true
 
 
 #
-# check that $LANG is one of our supported languages
+# check that $COUNTRY is one of our supported languages
 #
 checklang::
-	@test "$(langcheck_$(LANG))" = true
+	@test "$(langcheck_$(COUNTRY))" = true

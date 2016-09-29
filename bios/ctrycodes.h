@@ -19,40 +19,58 @@
 /* these are documented in the Compendium */
 /* USA */
 #define CTRY_US  0
+#define CTRY_us  CTRY_US
 /* Germany */
 #define CTRY_DE  1
+#define CTRY_de  CTRY_DE
 /* France */
 #define CTRY_FR  2
+#define CTRY_fr  CTRY_FR
 /* United Kingdom */
 #define CTRY_UK  3
+#define CTRY_uk  CTRY_UK
 /* Spain */
 #define CTRY_ES  4
+#define CTRY_es  CTRY_ES
 /* Italy */
 #define CTRY_IT  5
+#define CTRY_it  CTRY_IT
 /* Sweden */
 #define CTRY_SE  6
+#define CTRY_se  CTRY_SE
 /* Sweden (alternative name) */
 #define CTRY_SV  CTRY_SE
+#define CTRY_sv  CTRY_SV
 /* Switzerland (French) */
 #define CTRY_SF  7
+#define CTRY_sf  CTRY_SF
 /* Switzerland (German), NOT Singapore! */
 #define CTRY_SG  8
+#define CTRY_sg  CTRY_sg
 /* Turkey */
 #define CTRY_TR  9
+#define CTRY_tr  CTRY_tr
 /* Finland */
 #define CTRY_FI 10
+#define CTRY_fi CTRY_FI
 /* Norway */
 #define CTRY_NO 11
+#define CTRY_no CTRY_NO
 /* Denmark */
 #define CTRY_DK 12
+#define CTRY_dk CTRY_dk
 /* Saudi Arabia */
 #define CTRY_SA 13
+#define CTRY_sa CTRY_SA
 /* Holland */
 #define CTRY_NL 14
+#define CTRY_nl CTRY_nl
 /* Czech Republic */
 #define CTRY_CZ 15
+#define CTRY_cz CTRY_cz
 /* Hungary */
 #define CTRY_HU 16
+#define CTRY_hu CTRY_HU
 
 /*
  * The following country codes were not defined by Atari.
@@ -64,8 +82,10 @@
  */
 /* Russia */
 #define CTRY_RU 19
+#define CTRY_ru CTRY_RU
 /* Greece */
 #define CTRY_GR 31
+#define CTRY_gr CTRY_GR
 
 /*
  * Special value of os_conf to indicate that the display and keyboard languages

@@ -3,5 +3,5 @@ BIOS_OBJS = \
 	chardev.o \
 	blkdev.o \
 	linea.o \
-	keytbl$(LANG).o \
+	keytbl$(COUNTRY).o \
 	$(empty)
