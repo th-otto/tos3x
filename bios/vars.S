@@ -10,6 +10,7 @@ NCURDIR equ 40
 KBBUFSZ equ 80
 SUPSIZ equ 1024
 MAXQUICK equ 5
+SERIAL_BUFSIZE equ 256
     
 	bss
 
@@ -77,41 +78,75 @@ idebuf: ds.b 512
 	ds.l 1 ; unused
 
 	xdef rs232ibuf
-rs232ibuf: ds.b 256
+rs232ibuf: ds.b SERIAL_BUFSIZE
     xdef rs232obuf
-rs232obuf: ds.b 256
+rs232obuf: ds.b SERIAL_BUFSIZE
 	xdef rs232iorec
 rs232iorec: ds.b 2*14+8
-
-	xdef midiiorec
-midiiorec: ds.b 14
-	xdef midibuf
-midibuf: ds.b 256
 
 	xdef ikbdiorec
 ikbdiorec: ds.b 14
 	xdef ikbdbuf
-ikbdbuf: ds.b 128
+ikbdbuf: ds.b SERIAL_BUFSIZE
+
+	xdef midiiorec
+midiiorec: ds.b 14
+	xdef midibuf
+midibuf: ds.b 128
 
 	xdef _kbdvecs
 _kbdvecs: ds.b 42
 
-	ds.b $2b
+	xdef kb_altnum
+kb_altnum:  ds.w 1
+	
+	xdef kbdbuf
+kbdbuf: ds.b 7
+	xdef mousebuf
+mousebuf: ds.b 5
+	xdef relmbuf
+relmbuf: ds.b 3
+	xdef clockbuf
+clockbuf: ds.b 6
+	xdef joybuf
+joybuf: ds.b 3
+    even
 
+	xdef iclkrtime
+iclkrtime: ds.l 1
+
+	xdef iclkwtime
+iclkwtime: ds.l 1
+	
+	xdef iclkbuf
+iclkbuf: ds.b 6      ; buffer for writing time packet to IKBD
+
+	xdef buttonbuf
+buttonbuf: ds.b 3
+	
 	xdef _shifty
 _shifty: ds.b 1
 
 	xdef _curkeytbl
 _curkeytbl: ds.l 3
 
-	ds.b 20
+	xdef initmbuf
+initmbuf: ds.b 17
+
+	xdef kb_key_last
+kb_key_last: ds.b 1
+	xdef kb_ticks
+kb_ticks: ds.b 1
+	xdef kb_delay
+kb_delay: ds.b 1
 
     xdef kb_initial
 kb_initial: ds.b 1
     xdef kb_repeat
 kb_repeat: ds.b 1
 
-	ds.l 1
+	xdef lst_timeout
+lst_timeout: ds.l 1
 
 	xdef _tim_c_sieve
 _tim_c_sieve: ds.w 1
@@ -134,7 +169,31 @@ iclk_ready: ds.w 1
 	xdef bcmap_root
 bcmap_root: ds.b 16
 
-	ds.b $75c
+	xdef bcmap_devs
+bcmap_devs: ds.l 4*6
+
+	xdef mdm3ibuf
+mdm3ibuf: ds.b SERIAL_BUFSIZE
+	xdef mdm3obuf
+mdm3obuf: ds.b SERIAL_BUFSIZE
+	xdef mdm3iorec
+mdm3iorec: ds.b 2*14+8
+
+	xdef mdm4ibuf
+mdm4ibuf: ds.b SERIAL_BUFSIZE
+	xdef mdm4obuf
+mdm4obuf: ds.b SERIAL_BUFSIZE
+	xdef mdm4iorec
+mdm4iorec: ds.b 2*14+8
+
+	xdef mdm2ibuf
+mdm2ibuf: ds.b SERIAL_BUFSIZE
+	xdef mdm2obuf
+mdm2obuf: ds.b SERIAL_BUFSIZE
+	xdef mdm2iorec
+mdm2iorec: ds.b 2*14+8
+
+	ds.b $90
 
 	xdef _dskbuf
 _dskbuf: ds.b 0

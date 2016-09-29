@@ -189,31 +189,56 @@ _kcl_hook       equ $5b0      * pointer to routine for system keyclick
 
 
 MFP_REGS        equ $fffffa01
+/* parallel port output - write */
 MFP_LPT         equ MFP_REGS+0
+/* general purpose - input */
 MFP_GPIP        equ MFP_REGS+0
+/* active edge register */
 MFP_AER         equ MFP_REGS+2
-MFP_DD          equ MFP_REGS+4
+/* data direction register */
+MFP_DDR         equ MFP_REGS+4
+/* interrupt enable register A */
 MFP_IERA        equ MFP_REGS+6
+/* interrupt enable register B */
 MFP_IERB        equ MFP_REGS+8
+/* interrupt pending register A */
 MFP_IPRA        equ MFP_REGS+10
+/* interrupt pending register B */
 MFP_IPRB        equ MFP_REGS+12
+/* interrupt in-service register A */
 MFP_ISRA        equ MFP_REGS+14
+/* interrupt in-service register B */
 MFP_ISRB        equ MFP_REGS+16
+/* interrupt mask register A */
 MFP_IMRA        equ MFP_REGS+18
+/* interrupt mask register B */
 MFP_IMRB        equ MFP_REGS+20
+/* vector register */
 MFP_VR          equ MFP_REGS+22
+/* timer A control register */
 MFP_TACR        equ MFP_REGS+24
+/* timer B control register */
 MFP_TBCR        equ MFP_REGS+26
+/* timer C+D control register */
 MFP_TCDCR       equ MFP_REGS+28
+/* timer A data register */
 MFP_TADR        equ MFP_REGS+30
+/* timer B data register */
 MFP_TBDR        equ MFP_REGS+32
+/* timer C data register */
 MFP_TCDR        equ MFP_REGS+34
+/* timer D data register */
 MFP_TDDR        equ MFP_REGS+36
-MFP_SYNC        equ MFP_REGS+38
-MFP_USART       equ MFP_REGS+40
-MFP_RCVS        equ MFP_REGS+42
-MFP_TRSS        equ MFP_REGS+44
-MFP_USDR        equ MFP_REGS+46
+/* synchronous character register */
+MFP_SCR         equ MFP_REGS+38
+/* USART control register */
+MFP_UCR         equ MFP_REGS+40
+/* receiver status register */
+MFP_RSR         equ MFP_REGS+42
+/* transmitter status register */
+MFP_TSR         equ MFP_REGS+44
+/* USART data register */
+MFP_UDR         equ MFP_REGS+46
 
 TTMFP_REGS      equ $fffffa81
 

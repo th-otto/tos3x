@@ -29,8 +29,25 @@ nvram_rtc_year_offset equ 1980-1968
 
 save_siz equ 238
 
-#define IOREC_SIZE 14
-#define EXTIOREC_SIZE 2*14+8
+/* sizeof(IOREC) */
+IOREC_SIZE equ 14
+
+FASTRAMBASE equ $01000000
+
+#define ACIA_IKBD_BASE $fffffc00
+#define ACIA_MIDI_BASE $fffffc04
+
+#define ACIA_CTRL 0
+#define ACIA_DATA 2
+
+#define SCCA_BASE $FFFF8C81
+#define SCCA_CTRL SCCA_BASE+0
+#define SCCA_DATA SCCA_BASE+2
+#define SCCB_BASE $FFFF8C85
+#define SCCB_CTRL SCCB_BASE+0
+#define SCCB_DATA SCCN_BASE+2
+
+#define SERIAL_BUFSIZE 256
 
 * ==== Definitions ==========================================================
 
@@ -39,12 +56,24 @@ save_siz equ 238
 
 * ==== Iorec offsets ========================================================
 
-buf     equ 0
+#define buf
 size    equ 4
 head    equ 6
 tail    equ 8
 low     equ 10
 high    equ 12
+
+rcv      equ 2*IOREC_SIZE+0
+wr5      equ 2*IOREC_SIZE+1
+rcts     equ 2*IOREC_SIZE+2
+xoff     equ 2*IOREC_SIZE+3
+ctr      equ 2*IOREC_SIZE+4
+xonoffc  equ 2*IOREC_SIZE+5
+baudrate equ 2*IOREC_SIZE+6
+datamask equ 2*IOREC_SIZE+7
+EXTIOREC_SIZE equ 2*IOREC_SIZE+8
+
+BCONMAP_START_HANDLE equ 6
 
 * ==== References ===========================================================
 
@@ -72,8 +101,8 @@ high    equ 12
 #define mousevec  _kbdvecs+20
 #define clockvec  _kbdvecs+24
 #define joyvec    _kbdvecs+28
-#define ikbdsys   _kbdvecs+32
-#define midisys   _kbdvecs+36
+#define midisys   _kbdvecs+32
+#define ikbdsys   _kbdvecs+36
 #define ikbdstate _kbdvecs+40
 #define kbdlength _kbdvecs+41
 
@@ -491,8 +520,8 @@ gemok:
 
         move.l    #_bco0stat,(_prt_stat).w
         move.l    #_bcon0out,(_prt_vec).w
-        move.l    #_bco1stat,(_aux_stat).w
-        move.l    #_bcon1out,(_aux_vec).w
+        move.l    #_bco6stat,(_aux_stat).w  ; BIOS device 1 (AUX) defaults to RS232 port
+        move.l    #_bcon6out,(_aux_vec).w   ; BIOS device 1 (AUX) defaults to RS232 port
         move.l    #_bscr_dump,(_scr_dmp).w
 
         move.l    (_v_bas_ad).w,(_memtop).w
@@ -544,9 +573,9 @@ cpuexit:
         move.l    d1,(a0)+      * set _CPU cookie
         sne       (_longframe+1).w
         move.l    #$5F56444F,(a0)+ ; '_VDO'
-        move.l    #$00020000,(a0)+
+        move.l    #$00020000,(a0)+ ; 2,0 = TT Shifter
         move.l    #$5F4D4348,(a0)+ ; '_MCH'
-        move.l    #$00020000,(a0)+
+        move.l    #$00020000,(a0)+ ; 2,0 = TT
         move.b    #$7F,d0
         tst.b     _has_microwire
         bne.s     nomicro
@@ -1597,7 +1626,7 @@ xbios_vecs:
         dc.l bios_unimpl
 xbvecsend:
 
-/* unknown: 00e00fae */
+/* unknown: 00e00fae; seems to be unused */
         btst      #0,1(a7)
         bne.s     bx_notodd
         move.l    #rw_ret,(a7)
@@ -1612,7 +1641,7 @@ rw_ret:
 
 
 /*
- * XBIOS #26 - Supexec
+ * XBIOS #26 - Supexec - Start routine in supervisor-mode.
  *
  * 'codeptr' points to a piece of code, ending in an RTS, that is
  * executed in supervisor mode. The executed code cannot perform
@@ -1710,7 +1739,7 @@ doxconstd:
 /* 306de: 00e01024 */
 conxxinit:
         dc.l      bios_unimpl
-        dc.l      _bcon1stat
+        dc.l      _bcon6stat    ; BIOS device 1 (AUX) defaults to RS232 port
         dc.l      _bcon2stat
         dc.l      _bcon3stat
         dc.l      bios_unimpl
@@ -1718,7 +1747,7 @@ conxxinit:
         dc.l      bios_unimpl
         dc.l      bios_unimpl
         dc.l      _bcon0in
-        dc.l      _bcon1in
+        dc.l      _bcon6in      ; BIOS device 1 (AUX) defaults to RS232 port
         dc.l      _bcon2in
         dc.l      _bcon3in
         dc.l      bios_unimpl
@@ -1726,7 +1755,7 @@ conxxinit:
         dc.l      bios_unimpl
         dc.l      bios_unimpl
         dc.l      _bco0stat
-        dc.l      _bco1stat
+        dc.l      _bco6stat     ; BIOS device 1 (AUX) defaults to RS232 port
         dc.l      _bco2stat
         dc.l      _bco4stat ; BUG compatibility with early TOS versions: MIDI(3) and KBD(4) are swapped
         dc.l      _bco3stat
@@ -1734,7 +1763,7 @@ conxxinit:
         dc.l      bios_unimpl
         dc.l      bios_unimpl
         dc.l      _bcon0out
-        dc.l      _bcon1out
+        dc.l      _bcon6out     ; BIOS device 1 (AUX) defaults to RS232 port
         dc.l      _bcon2out
         dc.l      _bcon3out
         dc.l      _bcon4out
@@ -1796,27 +1825,27 @@ kbshift1:
 _getmpb:
         movea.l   4(a7),a0
         lea.l     (_themd).w,a1
-        move.l    a1,(a0)
-        clr.l     4(a0)
-        clr.l     8(a0)
-        clr.l     (a1)
-        move.l    (_membot).w,4(a1)
+        move.l    a1,(a0)            ; mp_mfl = &themd;
+        clr.l     4(a0)              ; mp_mal = NULL;
+        clr.l     8(a0)              ; mp_rover = NULL;
+        clr.l     (a1)               ; themd.m_link = NULL;
+        move.l    (_membot).w,4(a1)  ; themd.m_start = membot;
         move.l    (_memtop).w,d0
         sub.l     (_membot).w,d0
-        move.l    d0,8(a1)
-        clr.l     12(a1)
+        move.l    d0,8(a1)           ; themd.m_length = memtop - membot;
+        clr.l     12(a1)             ; themd.m_own = NULL;
         cmpi.l    #$1357BD13,_ramvalid
         bne.s     getmpb1
-        cmpi.l    #$01000000,_ramtop
+        cmpi.l    #FASTRAMBASE,_ramtop
         bls.s     getmpb1
         lea.l     (_altmd).w,a2
-        move.l    a2,(a1)
-        clr.l     (a2)
-        move.l    #$01000001,4(a2)
+        move.l    a2,(a1)            ; altmd.m_link = &themd;
+        clr.l     (a2)               ; altmd.m_link = NULL;
+        move.l    #FASTRAMBASE+1,4(a2)   ; altmd.m_start = (base address of fast mem) | M_ALTFLAG
         move.l    _ramtop,d0
-        sub.l     #$01000000,d0
-        move.l    d0,8(a2)
-        clr.l     12(a2)
+        sub.l     #FASTRAMBASE,d0
+        move.l    d0,8(a2)           ; altmd.m_length = ramtop - base address of fast mem
+        clr.l     12(a2)             ; altmd.m_own = NULL;
 getmpb1:
         rts
 
@@ -2586,150 +2615,597 @@ esetsm2:
 
 #include "dma.inc"
 
+#include "nvram.inc"
 
-/* 306de: 00e01ef0 */
-ngetdt:
-        bsr       detect_nvram
-        bcs.s     inittc2
-        move.b    #$0D,(NVRAM_ADDR_REG).w ; select register D
-        move.b    (NVRAM_DATA_REG).w,d0
-        btst      #7,d0                   ; is RAM & time valid?
-        bne.s     inittc1                 ; yes
-        move.l    #$12C80000,-(a7)        ; (9<<9)+(6<<5)+8
-        bsr       wrttclock
-        addq.w    #4,a7
-inittc1:
-        bsr.s     rdttclock
-        cmp.l     #$FFFFFFFF,d0
-        beq.s     inittc2
-        moveq.l   #0,d0
-inittc2:
-        rts
+#include "ikbdclock.inc"
 
-*
-* reads date & time from TT clock,
-* and updates GEMDOS variables from it
-*
-/* 306de: 00e01f20 */
-rdttclock:
-        bsr       detect_nvram
-        bcs.s     inittc2
-        move.b    #$0D,(NVRAM_ADDR_REG).w ; select register D
-        btst      #7,(NVRAM_DATA_REG).w   ; is RAM & time valid?
-        beq       rdttc2                  ; no, fail
-        move.w    sr,d2
-        move.w    d2,d0
-        or.w      #$0700,d0
-rdttc1:
-        move.b    #$0A,(NVRAM_ADDR_REG).w ; select register A
-        btst      #7,(NVRAM_DATA_REG).w   ; is update in progress?
-        bne.s     rdttc1                  ; yes, wait
-        moveq.l   #0,d0
-        move.l    d0,d1
-        move.b    #$00,(NVRAM_ADDR_REG).w ; select register 0 (seconds)
-        move.b    (NVRAM_DATA_REG).w,d0
-        asr.w     #1,d0
-        move.b    #$02,(NVRAM_ADDR_REG).w ; select register 2 (minutes)
-        move.b    (NVRAM_DATA_REG).w,d1
-        dc.w $efc0,$1546                  ; bfins     d1,d0{21:6}
-        move.b    #$04,(NVRAM_ADDR_REG).w ; select register 4 (hours)
-        move.b    (NVRAM_DATA_REG).w,d1
-        dc.w $efc0,$1405                  ; bfins     d1,d0{16:5}
-        move.b    #$07,(NVRAM_ADDR_REG).w ; select register 7 (day of month)
-        move.b    (NVRAM_DATA_REG).w,d1
-        dc.w $efc0,$12c5                  ; bfins     d1,d0{11:5}
-        move.b    #$08,(NVRAM_ADDR_REG).w ; select register 8 (month)
-        move.b    (NVRAM_DATA_REG).w,d1
-        dc.w $efc0,$11c4                  ; bfins     d1,d0{7:4}
-        move.b    #$09,(NVRAM_ADDR_REG).w ; select register 9 (year)
-        move.b    (NVRAM_DATA_REG).w,d1
-        sub.b     #nvram_rtc_year_offset,d1
-        dc.w $efc0,$1007                  ; bfins     d1,d0{0:7}
-        move.w    d2,sr
-        move.w    sr,d2
-        ori.w     #$0700,sr
-        move.w    d0,_time
-        swap      d0
-        move.w    d0,_date
-        swap      d0
-        move.w    d2,sr
-        rts
-rdttc2:
+/*
+ * Bcostat function for device 3 (midi)
+ */
+/* 306de: 00e02266 */
+_bco3stat:
         moveq.l   #-1,d0
-        rts
-
-*
-* write date & time to TT clock
-*
-/* 306de: 00e01fc6 */
-wrttclock:
-        bsr       detect_nvram
-        bcs       inittc2
-        move.l    4(a7),d0
-        move.b    #$0B,(NVRAM_ADDR_REG).w ; select register B
-        move.b    #$80,(NVRAM_DATA_REG).w ; abort update cycle
-        move.b    #$0A,(NVRAM_ADDR_REG).w ; select register A
-        move.b    #$2A,(NVRAM_DATA_REG).w ; divider = 2, rate = 10
-        move.b    #$0B,(NVRAM_ADDR_REG).w ; select register B
-        move.b    #$8E,(NVRAM_DATA_REG).w ; enable data mode binary, 24hr, daylight savings
-        move.b    #$00,(NVRAM_ADDR_REG).w ; select register 0 (seconds)
-        dc.w $e9c0,$16c5    ; bfextu    d0{27:5},d1 
-        add.b     d1,d1
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$02,(NVRAM_ADDR_REG).w ; select register 2 (minutes)
-        dc.w $e9c0,$1546    ; bfextu    d0{21:6},d1
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$04,(NVRAM_ADDR_REG).w ; select register 4 (hours)
-        dc.w $e9c0,$1405    ; bfextu    d0{16:5},d1
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$07,(NVRAM_ADDR_REG).w ; select register 7 (day of month)
-        dc.w $e9c0,$12c5    ; bfextu    d0{11:5},d1
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$08,(NVRAM_ADDR_REG).w ; select register 8 (month)
-        dc.w $e9c0,$11c4    ; bfextu    d0{7:4},d1
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$09,(NVRAM_ADDR_REG).w ; select register 9 (year)
-        dc.w $e9c0,$1007    ; bfextu    d0{0:7},d1
-        add.b     #nvram_rtc_year_offset,d1
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$0B,(NVRAM_ADDR_REG).w
-        move.b    #$0E,(NVRAM_DATA_REG).w
-        rts
-
-/* 306de: 00e0205e */
-detect_nvram:
-        movea.l   a7,a0
-        movea.l   (_buserror).w,a1
-        move.l    #nvramfail,(_buserror).w
-        move.b    #$00,(NVRAM_ADDR_REG).w
-        move.b    (NVRAM_DATA_REG).w,d0
-        move.l    a1,(_buserror).w
-        andi.b    #$FE,ccr                ; clear carry bit
-        rts
-nvramfail:
-        movea.l   a0,a7
-        move.l    a1,(_buserror).w
-        ori.b     #$01,ccr                ; set carry bit
+        move.b    (ACIA_MIDI_BASE+ACIA_CTRL).w,d2
+        btst      #1,d2
+        bne.s     bco3sret
+        moveq.l   #0,d0
+bco3sret:
         rts
 
 /*
- * XBIOS +42 - NVMaccess
+ * Bconout function for device 3 (midi)
  */
-/* 306de: 00e0208c */
-_nvmaccess:
-	rts
+/* 306de: 00e02276 */
+_bcon3out:
+        move.w    6(a7),d1
+bcon3o1:
+        lea.l     (ACIA_MIDI_BASE).w,a1
+bcon3o2:
+        move.b    (a1),d2
+        btst      #1,d2
+        beq.s     bcon3o2
+        move.b    d1,ACIA_DATA(a1)
+        rts
 
-/* 306de: 00e021a4 */
-igetdt:
-		rts
 
-/* 306de: 00e021ce */
-isetdt:
-		rts
+/*
+ * XBIOS #12 - Midiws - Write string of characters to the MIDI port. 
+ * VOID midiws(uint16_t cnt, const VOIDPTR ptr)
+ */
+/* 306de: 00e0228c */
+		xdef _midiws
+_midiws:
+        moveq.l   #0,d3
+        move.w    4(a7),d3
+        movea.l   6(a7),a2
+midiws1:
+        move.b    (a2)+,d1
+        bsr.s     bcon3o1
+        dbf       d3,midiws1
+        rts
+
+/*
+ * Bconstat function for device 3 (midi)
+ */
+/* 306de: 00e022a0 */
+_bcon3stat:
+        lea.l     (midiiorec).w,a0
+        lea.l     (ACIA_MIDI_BASE).w,a1
+        moveq.l   #-1,d0
+        lea.l     head(a0),a2
+        lea.l     tail(a0),a3
+        cmpm.w    (a3)+,(a2)+
+        bne.s     bcon3s1
+        moveq.l   #0,d0
+bcon3s1:
+        rts
+
+/*
+ * Bconin function for device 3 (midi)
+ */
+/* 306de: 00e022ba */
+_bcon3in:
+        bsr.s     _bcon3stat
+        tst.w     d0
+        beq.s     _bcon3in
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        move.w    head(a0),d1
+        cmp.w     tail(a0),d1
+        beq.s     bcon3i2
+        addq.w    #1,d1
+        cmp.w     size(a0),d1
+        bcs.s     bcon3i1
+        moveq.l   #0,d1
+bcon3i1:
+        movea.l   buf(a0),a1
+        and.l     #$0000FFFF,d1
+        move.b    0(a1,d1.l),d0
+        move.w    d1,head(a0)
+bcon3i2:
+        move.w    (a7)+,sr
+        rts
+
+/*
+ * Bconout function for device 0 (printer)
+ */
+/* 306de: 00e022ee */
+_bcon0out:
+        btst      #4,(_prtconfig).w  ; Printer configured for output to RS232?
+        bne       _bcon6out
+        move.l    (_hz_200).w,d2
+        sub.l     (lst_timeout).w,d2
+        cmpi.l    #$000003E8,d2
+        bcs.s     bcon0o2
+        move.l    (_hz_200).w,d2
+bcon0o1:
+        bsr       _bco0stat
+        tst.w     d0
+        bne.s     bcon0o3
+        move.l    (_hz_200).w,d3
+        sub.l     d2,d3
+        cmpi.l    #$00001770,d3
+        blt.s     bcon0o1
+bcon0o2:
+        moveq.l   #0,d0
+        move.l    (_hz_200).w,(lst_timeout).w
+        rts
+bcon0o3:
+        move.w    sr,d3
+        ori.w     #$0700,sr
+        moveq.l   #7,d1
+        bsr       giaccess
+        ori.b     #$80,d0
+        move.b    #$87,d1
+        bsr       giaccess
+        move.w    d3,sr
+        move.w    6(a7),d0
+        move.b    #$8F,d1
+        bsr       giaccess
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        bsr.s     strobeon
+        bsr.s     strobeon
+        bsr.s     strobeoff
+        move.w    (a7)+,sr
+        moveq.l   #-1,d0
+        rts
+
+strobeoff:
+        moveq.l   #32,d2
+        bra       ongibit
+
+strobeon:
+        move.b    #$DF,d2
+        bra       offgibit
+
+
+/*
+ * Bconin function for device 0 (printer)
+ */
+/* 306de: 00e02372 */
+_bcon0in:
+        moveq.l   #7,d1
+        bsr       giaccess
+        andi.b    #$7F,d0
+        move.b    #$87,d1
+        bsr       giaccess
+        bsr.s     strobeoff
+bcon0in1:
+        bsr.s     _bco0stat
+        tst.w     d0
+        bne.s     bcon0in1
+        bsr.s     strobeon
+        moveq.l   #15,d1
+        bra       giaccess
+
+/*
+ * Bcostat function for device 0 (printer)
+ */
+/* 306de: 00e02394 */
+_bco0stat:
+        lea.l     (MFP_GPIP).w,a0
+        moveq.l   #-1,d0
+        btst      #0,(a0)
+        beq.s     bco0st1
+        moveq.l   #0,d0
+bco0st1:
+        rts
+
+/*
+ * Bconstat function for device 6 (rs232 driven by MFP)
+ */
+/* 306de: 00e023a4 */
+_bcon6stat:
+        lea.l     (rs232iorec).w,a0
+bcon6st1:
+        moveq.l   #-1,d0
+        lea.l     head(a0),a1
+        lea.l     tail(a0),a0
+        cmpm.w    (a0)+,(a1)+
+        bne.s     bcon6st2
+        moveq.l   #0,d0
+bcon6st2:
+        rts
+
+/*
+ * Bconin function for device 6 (rs232 driven by MFP)
+ */
+/* 306de: 00e023ba */
+_bcon6in:
+        lea.l     (rs232iorec).w,a0
+        lea.l     (MFP_REGS).w,a2
+bcon6in1:
+        bsr       iorecget
+        move.w    d0,-(a7)
+        tst.b     ctr(a0)
+        beq.s     bcon6in3
+        move.w    tail(a0),d0
+        sub.w     head(a0),d0
+        bpl.s     bcon6in2
+        add.w     size(a0),d0
+bcon6in2:
+        cmp.w     low(a0),d0
+        bgt.s     bcon6in3
+        tst.b     rcts(a0)
+        beq.s     bcon6in3
+        bsr.s     rs232cont
+bcon6in3:
+        move.w    (a7)+,d0
+        rts
+
+rs232cont:
+        clr.b     rcts(a0)
+        btst      #0,ctr(a0)
+        bne.s     rs232co1
+        bra       rtson
+rs232co1:
+        move.b    #$11,xonoffc(a0)
+        bra.s     bcon6o1
+
+/*
+ * Bcostat function for device 6 (rs232 driven by MFP)
+ */
+/* 306de: 00e02406 */
+_bco6stat:
+        lea.l     (rs232iorec+IOREC_SIZE).w,a0    ; rs232iorec.out
+bco6s1:
+        move.w    tail(a0),d1             ; rs232iorec.out.tail
+        bsr       wrapin
+        moveq.l   #-1,d0
+        cmp.w     head(a0),d1
+        bne.s     _bco6sret
+        moveq.l   #0,d0
+_bco6sret:
+        rts
+
+
+/*
+ * Bconout function for device 6 (rs232 driven by MFP)
+ */
+/* 306de: 00e0241e */
+_bcon6out:
+        move.w    6(a7),d0
+        lea.l     (rs232iorec+IOREC_SIZE).w,a0    ; rs232iorec.out
+        bsr       iorecput
+        lea.l     (rs232iorec).w,a0       ; rs232iorec.in
+        lea.l     (MFP_REGS).w,a2
+bcon6o1:
+        tst.b     MFP_TSR-MFP_REGS(a2)
+        bpl.s     bcon6o2
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        bsr       iorecout
+        move.w    (a7)+,sr
+bcon6o2:
+        rts
+
+
+/*
+ * Bcostat function for device 4 (keyboard)
+ */
+/* 306de: 00e02446 */
+_bco4stat:
+        moveq.l   #-1,d0
+        move.b    (ACIA_IKBD_BASE+ACIA_CTRL).w,d2
+        btst      #1,d2
+        bne.s     bco4st1
+        moveq.l   #0,d0
+bco4st1:
+        rts
+
+/*
+ * Bconout function for device 4 (keyboard)
+ */
+/* 306de: 00e02456 */
+_bcon4out:
+        move.w    6(a7),d1
+ikbd_writeb:
+        lea.l     (ACIA_IKBD_BASE).w,a1
+ikbd_wr1:
+        move.b    (a1),d2
+        btst      #1,d2
+        beq.s     ikbd_wr1
+        move.w    #$0400,d0
+        bsr       ttdelayc
+        move.b    d1,ACIA_DATA(a1)
+        rts
+
+/*
+ * XBIOS #25 - Ikbdws - write string to keyboard
+ * VOID ikbdws(uint16_t cnt, VOIDPTR ptr);
+ */
+/* 306de: 00e02474 */
+		xdef _ikbdws
+_ikbdws:
+        moveq.l   #0,d3
+        move.w    4(a7),d3
+        movea.l   6(a7),a2
+ikbdws1:
+        move.b    (a2)+,d1
+        bsr.s     ikbd_writeb
+        dbf       d3,ikbdws1
+        rts
+
+/*
+ * Bconstat function for device 2 (console)
+ */
+/* 306de: 00e02488 */
+_bcon2stat:
+        lea.l     (ikbdiorec).w,a0
+        moveq.l   #-1,d0
+        lea.l     head(a0),a2
+        lea.l     tail(a0),a3
+        cmpm.w    (a3)+,(a2)+
+        bne.s     bcon2st1
+        moveq.l   #0,d0
+bcon2st1:
+        rts
+
+/*
+ * Bconin function for device 2 (console)
+ */
+/* 306de: 00e0249e */
+_bcon2in:
+        bsr.s     _bcon2stat
+        tst.w     d0
+        beq.s     _bcon2in
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        move.w    head(a0),d1
+        cmp.w     tail(a0),d1
+        beq.s     bcon2in2
+        addq.w    #4,d1
+        cmp.w     size(a0),d1
+        bcs.s     bcon2in1
+        moveq.l   #0,d1
+bcon2in1:
+        movea.l   (a0),a1
+        and.l     #$0000FFFF,d1
+        move.l    0(a1,d1.l),d0
+        move.w    d1,head(a0)
+bcon2in2:
+        move.w    (a7)+,sr
+        rts
+
+/*
+ * Bcostat function for device 2 (console)
+ */
+/* 306de: 00e024d2 */
+_bco2stat:
+        moveq.l   #-1,d0
+        rts
+
+
 
 /* 306de: 00e024d6 */
 initmfp:
-		rts
+        lea.l     (MFP_REGS).w,a0
+        moveq.l   #0,d0
+        movep.l   d0,0(a0)    ; clear gpip thru iera
+        movep.l   d0,8(a0)    ; clear ierb thru isrb
+        movep.l   d0,16(a0)   ; clear isrb thru vr
+        move.b    #$48,MFP_VR-MFP_REGS(a0) ; set mfp autovector to $100 and s-bit
+        bset      #2,MFP_AER-MFP_REGS(a0)  ; set cts to low to high transition
+        lea.l     (TTMFP_REGS).w,a0
+        moveq.l   #0,d0
+        movep.l   d0,0(a0)    ; clear gpip thru iera
+        movep.l   d0,8(a0)    ; clear ierb thru isrb
+        movep.l   d0,16(a0)   ; clear isrb thru vr
+        move.b    #$58,MFP_VR-MFP_REGS(a0) ; set mfp autovector to $140 and s-bit
+        clr.b     (_privvio).w ; ???
+        move.w    #$1111,(_tim_c_sieve).w
+        move.w    #20,(_timer_ms).w
+        moveq.l   #2,d0
+        moveq.l   #80,d1
+        move.w    #$00C0,d2
+        bsr       settimer    ; initialize Timer C (200hz timer)
+        lea.l     timercint,a2
+        moveq.l   #5,d0
+        bsr       initint
+        moveq.l   #3,d0
+        moveq.l   #1,d1
+        moveq.l   #2,d2
+        bsr       settimer
+        move.b    #$01,(rs232iorec+baudrate).w
+        lea.l     (MFP_REGS).w,a0
+        move.l    #$00880105,d0
+        movep.l   d0,MFP_SCR-MFP_REGS(a0)
+        lea.l     (TTMFP_REGS).w,a0
+        move.l    #$00880105,d0
+        movep.l   d0,MFP_SCR-MFP_REGS(a0)
+        move.b    #$01,(MFP_TCDCR+(TTMFP_REGS-MFP_REGS)).w
+        move.b    #$02,(MFP_TDDR+(TTMFP_REGS-MFP_REGS)).w
+        move.b    #$01,(mdm3iorec+baudrate).w
+        tst.b     _has_microwire
+        bne.s     initmfp2
+        bsr       initscc
+initmfp2:
+        bsr       dtron
+        bsr       rtson
+        lea.l     (rs232iorec).w,a0
+        lea.l     rs232table,a1
+        moveq.l   #EXTIOREC_SIZE-1,d0
+        bsr       copymem
+        lea.l     (mdm3iorec).w,a0
+        lea.l     mdm3table,a1
+        moveq.l   #EXTIOREC_SIZE-1,d0
+        bsr       copymem
+        lea.l     (midiiorec).w,a0
+        lea.l     miditable,a1
+        moveq.l   #IOREC_SIZE-1,d0
+        bsr       copymem
+        move.w    #$FFFF,kb_altnum
+        move.l    #aciasys2,d0
+        move.l    d0,(vkbderr).w
+        move.l    d0,(vmiderr).w
+        move.l    #_midivec,(midivec).w
+        move.l    #_midisys,(midisys).w
+        move.l    #_ikbdsys,(ikbdsys).w
+        move.l    #_kbdvec,(kbdvec).w
+* reset midi acia
+        move.b    #$03,(ACIA_MIDI_BASE+ACIA_CTRL).w
+* init the acia to divide by 16x clock, 8 bit data, 1 stop bit, no parity,
+* rts low, transmitting interrupt disabled, receiving interrupt enabled
+        move.b    #$95,(ACIA_MIDI_BASE+ACIA_CTRL).w
+        move.b    #$07,(_conterm).w
+        move.l    #_clockvec,(clockvec).w
+        move.l    #dummyrts,d0
+        move.l    d0,(statvec).w
+        move.l    d0,(mousevec).w
+        move.l    d0,(joyvec).w
+        bsr       initdevstables
+        moveq.l   #0,d0
+        move.l    d0,(_sndtable).w
+        move.b    d0,(_snddelay).w
+        move.b    d0,(_sndtmp).w
+        move.l    d0,(lst_timeout).w
+        bsr       strobeoff
+        move.b    #$0F,(kb_initial).w
+        move.b    #$02,(kb_repeat).w
+        lea.l     (ikbdiorec).w,a0
+        lea.l     ikbdtable,a1
+        moveq.l   #IOREC_SIZE-1,d0
+        bsr.s     copymem
+        bsr       _bioskeys
+* reset ikbd acia
+        move.b    #$03,(ACIA_IKBD_BASE+ACIA_CTRL).w
+* init the acia do divide by 64 clock, 8 bit data, 1 stop bit, no parity,
+* rts low, transmitting interrupt disabled, receiving interrupt enabled
+        move.b    #$96,(ACIA_IKBD_BASE+ACIA_CTRL).w
+        movea.l   #mfpvectr,a3
+        moveq.l   #3,d1
+initmfp3:
+        move.l    d1,d2
+        move.l    d1,d0
+        addi.b    #$09,d0
+        asl.l     #2,d2
+        movea.l   0(a3,d2.w),a2
+        bsr       initint
+        dbf       d1,initmfp3
+        lea.l     _int_acia,a2
+        moveq.l   #6,d0
+        bsr       initint
+        lea.l     ctsint,a2
+        moveq.l   #2,d0
+        bsr       initint
+        movea.l   #ttmfpvectr,a3
+        movea.w   #TTMFP9,a0
+        move.l    (a3)+,(a0)+
+        move.l    (a3)+,(a0)+
+        move.l    (a3)+,(a0)+
+        move.l    (a3)+,(a0)+
+        ori.b     #$1E,(MFP_IERA+(TTMFP_REGS-MFP_REGS)).w
+        ori.b     #$1E,(MFP_IMRA+(TTMFP_REGS-MFP_REGS)).w
+dummyrts:
+        rts
+
+		data
+ttmfpvectr:
+        dc.l tttxerror
+        dc.l tttxrint
+        dc.l ttrxerror
+        dc.l ttrcvrint
+
+/*
+ * initial EXT_IOREC for device 8 (modem3)
+ */
+/* 306de: 00e36744 */
+mdm3table:
+        dc.l mdm3ibuf
+        dc.w SERIAL_BUFSIZE,0,0,128,192
+        dc.l mdm3obuf
+        dc.w SERIAL_BUFSIZE,0,0,128,192
+        dc.b 0,0,0,0,1,0,1,-1
+		text
+
+
+/* 306de: 00e026b2 */
+copymem:
+        move.b    (a1)+,(a0)+
+        dbf       d0,copymem
+        rts
+
+ikbdtable:                
+        dc.l      ikbdbuf
+        dc.w      SERIAL_BUFSIZE,0,0,64,192
+miditable:
+        dc.l      midibuf
+        dc.w      128,0,0,32,96
+
+
+/*
+ * initial EXT_IOREC for device 6 (rs232)
+ */
+rs232table:
+        dc.l      rs232ibuf
+        dc.w      SERIAL_BUFSIZE,0,0,128,192
+        dc.l      rs232obuf
+        dc.w      SERIAL_BUFSIZE,0,0,128,192
+        dc.b      0,0,0,0,1,0,1,-1
+
+mfpvectr:
+        dc.l txerror
+        dc.l txrint
+        dc.l rxerror
+        dc.l rcvrint
+
+*
+*
+settimer:
+        movem.l   d0-d4/a0-a3,-(a7)
+        movea.w   #MFP_REGS,a0
+        movea.l   #imrt,a3
+        movea.l   #imrmt,a2
+        bsr.s     mskreg
+        movea.l   #iert,a3
+        movea.l   #imrmt,a2
+        bsr.s     mskreg
+        movea.l   #iprt,a3
+        movea.l   #imrmt,a2
+        bsr.s     mskreg
+        movea.l   #isrt,a3
+        movea.l   #imrmt,a2
+        bsr.s     mskreg
+        movea.l   #tcrtab,a3
+        movea.l   #tcrmsk,a2
+        bsr.s     mskreg
+        exg       a3,a1
+        lea.l     tdrtab,a3
+        moveq.l   #0,d3
+        move.b    0(a3,d0.w),d3
+settim1:
+        move.b    d2,0(a0,d3.w)
+        cmp.b     0(a0,d3.w),d2
+        bne.s     settim1
+        exg       a3,a1
+        or.b      d1,(a3)
+        movem.l   (a7)+,d0-d4/a0-a3
+        rts
+
+mskreg:
+        bsr.s     getmask
+        move.b    (a2),d3
+        and.b     d3,(a3)
+        rts
+
+getmask:
+        moveq.l   #0,d3
+        adda.w    d0,a3
+        move.b    (a3),d3
+        add.l     a0,d3
+        movea.l   d3,a3
+        adda.w    d0,a2
+        rts
+
+iert:    dc.b $06,$06,$08,$08
+iprt:    dc.b $0a,$0a,$0c,$0c
+isrt:    dc.b $0e,$0e,$10,$10
+imrt:    dc.b $12,$12,$14,$14
+imrmt:   dc.b $df,$fe,$df,$ef
+tcrtab:  dc.b $18,$1a,$1c,$1c
+tcrmsk:  dc.b $00,$00,$8f,$f8
+tdrtab:  dc.b $1e,$20,$22,$24
 
 /*
  * XBIOS #13 - Mfpint - Set the MFP interrupt number
@@ -2742,6 +3218,7 @@ _mfpint:
         move.w    4(a7),d0
         movea.l   6(a7),a2
         andi.l    #$0000000F,d0
+initint:
         movem.l   d0-d2/a0-a2,-(a7)
         bsr.s     jdisint1
         move.l    d0,d2
@@ -2796,6 +3273,10 @@ jenabin1:
         movem.l   (a7)+,d0-d1/a0-a1
         rts
 
+/*
+ * helper function for above.
+ * calculates the bit number and the MFP register address.
+ */
 mfpea:
         move.b    d0,d1
         cmpi.b    #$08,d1
@@ -2806,13 +3287,244 @@ mfpea1:
         addq.l    #MFP_IERB-MFP_IERA,a1
         rts
 
+*************************************************************************
+*                                                                       *
+*               receiver buffer full interrupt routine                  *
+*                                                                       *
+*               grabs data from the rs-232 receiver port                *
+*                                                                       *
+*************************************************************************
+/* 306de: 00e02848 */
+rcvrint:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (rs232iorec).w,a0
+        lea.l     (MFP_REGS).w,a2
+rcvrint1:
+        move.b    MFP_RSR-MFP_REGS(a2),rcv(a0)
+        move.b    MFP_UDR-MFP_REGS(a2),d0
+        btst      #0,ctr(a0)
+        beq.s     rcvrint3
+        cmpi.b    #$13,d0
+        bne.s     rcvrint2
+        move.b    #-1,xoff(a0)
+        bra.s     rcvrint7
+rcvrint2:
+        cmpi.b    #$11,d0
+        bne.s     rcvrint3
+        clr.b     xoff(a0)
+        bra.s     rcvrint6
+rcvrint3:
+        move.w    tail(a0),d1
+        bsr       wrapin
+        cmp.w     head(a0),d1
+        beq.s     rcvrint7
+        bsr       iorecput
+        tst.b     ctr(a0)
+        beq.s     rcvrint7
+        move.w    tail(a0),d0
+        sub.w     head(a0),d0
+        bpl.s     rcvrint4
+        add.w     size(a0),d0
+rcvrint4:
+        cmp.w     high(a0),d0
+        blt.s     rcvrint7
+        tst.b     rcts(a0)
+        bne.s     rcvrint7
+        move.b    #-1,rcts(a0)
+        btst      #0,ctr(a0)
+        bne.s     rcvrint5
+        bsr       rtsoff
+        bra.s     rcvrint7
+rcvrint5:
+        move.b    #$13,xonoffc(a0)
+rcvrint6:
+        tst.b     MFP_TSR-MFP_REGS(a2)
+        bpl.s     rcvrint7
+        bsr       iorecout
+rcvrint7:
+        move.b    #$EF,MFP_ISRA-MFP_REGS(a2)
+        movem.l   (a7)+,d0-d1/a0-a2
+        rte
+
+*************************************************************************
+*                                                                       *
+*               transmit buffer empty interrupt routine                 *
+*                                                                       *
+*************************************************************************
+/* 306de: 00e028e2 */
+txrint:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (MFP_REGS).w,a2
+        lea.l     (rs232iorec).w,a0
+txrint1:
+        bsr       iorecout
+        move.b    #$FB,MFP_ISRA-MFP_REGS(a2)
+        movem.l   (a7)+,d0-d1/a0-a2
+        rte
+
+*************************************************************************
+*                                                                       *
+*               Clear-To-Send interrupt routine                         *
+*                                                                       *
+*************************************************************************
+/* 306de: 00e028fe */
+ctsint:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (rs232iorec).w,a0
+        lea.l     (MFP_REGS).w,a2
+        btst      #1,ctr(a0)
+        beq.s     ctsint2
+        btst      #2,(a2)
+        bne.s     ctsint1
+        clr.b     xoff(a0)
+        bset      #2,MFP_AER-MFP_REGS(a2)
+        tst.b     MFP_TSR-MFP_REGS(a2)
+        bpl.s     ctsint2
+        bsr.s     iorecout
+        bra.s     ctsint2
+ctsint1:
+        move.b    #-1,xoff(a0)
+        bclr      #2,MFP_AER-MFP_REGS(a2)
+ctsint2:
+        move.b    #$FB,MFP_ISRB-MFP_REGS(a2)
+        movem.l   (a7)+,d0-d1/a0-a2
+        rte
+
+
+*************************************************************************
+*               routines to handle tx or rx errors                      *
+*************************************************************************
+/* 306de: 00e02944 */
+rxerror:
+        movem.l   d0/a0,-(a7)
+        lea.l     (MFP_REGS).w,a0
+rxerror1:
+        move.b    MFP_RSR-MFP_REGS(a0),rs232iorec+rcv
+        move.b    MFP_UDR-MFP_REGS(a0),d0
+        move.b    #$F7,MFP_ISRA-MFP_REGS(a0)
+        movem.l   (a7)+,d0/a0
+        rte
+
+/* 306de: 00e02964 */
+txerror:
+        move.l    a0,-(a7)
+        lea.l     (MFP_REGS).w,a0
+txerror1:
+        move.b    MFP_TSR-MFP_REGS(a0),rs232iorec+wr5
+        move.b    #$FD,MFP_ISRA-MFP_REGS(a0)
+        movea.l   (a7)+,a0
+        tst.b     (MFP_TSR).w
+        rte
+
+*************************************************************************
+* write a character from the ring buffer to the serial port             *
+*************************************************************************
+/* 306de: 00e02980 */
+iorecout:
+        move.l    a0,-(a7)
+        move.b    xonoffc(a0),d0
+        beq.s     ioreco1
+        clr.b     xonoffc(a0)
+        bra.s     ioreco2
+ioreco1:
+        move.b    ctr(a0),d0
+        and.b     xoff(a0),d0
+        bne.s     ioreco3
+        adda.w    #IOREC_SIZE,a0
+        move.w    head(a0),d0
+        cmp.w     tail(a0),d0
+        beq.s     ioreco3
+        bsr.s     iorecget
+ioreco2:
+        tst.b     MFP_TSR-MFP_REGS(a2)
+        bpl.s     ioreco2
+        move.b    MFP_TSR-MFP_REGS(a2),$00000EC3
+        move.b    d0,MFP_UDR-MFP_REGS(a2)
+ioreco3:
+        movea.l   (a7)+,a0
+        rts
+
+*************************************************************************
+* put a character into the ring buffer                                  *
+*************************************************************************
+/* 306de: 00e029be */
+iorecput:
+        move.w    tail(a0),d1
+        bsr.s     wrapin
+iorecp1:
+        cmp.w     head(a0),d1
+        beq.s     iorecp1
+        movea.l   buf(a0),a1
+        and.l     #$0000FFFF,d1
+        move.b    d0,0(a1,d1.l)
+        move.w    d1,tail(a0)
+        rts
+
+*************************************************************************
+* get a character from the ring buffer                                  *
+*************************************************************************
+/* 306de: 00e029dc */
+iorecget:
+        move.w    head(a0),d1
+        cmp.w     tail(a0),d1
+        beq.s     iorecget
+        bsr.s     wrapin
+        movea.l   buf(a0),a1
+        moveq.l   #0,d0
+        and.l     #$0000FFFF,d1
+        move.b    0(a1,d1.l),d0
+        move.w    d1,head(a0)
+        rts
+
+*************************************************************************
+* set RTS signal                                                        *
+*************************************************************************
+/* 306de: 00e029fc */
+rtson:
+        lea.l     ($FFFF8800).w,a1
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        move.b    #$0E,(a1)
+        move.b    (a1),d1
+        and.b     #$F7,d1
+        move.b    d1,2(a1)
+        move.w    (a7)+,sr
+        rts
+
+*************************************************************************
+* clear RTS signal                                                      *
+*************************************************************************
+/* 306de: 00e02a18 */
+rtsoff:
+        lea.l     ($FFFF8800).w,a1
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        move.b    #$0E,(a1)
+        move.b    (a1),d1
+        ori.b     #$08,d1
+        move.b    d1,2(a1)
+        move.w    (a7)+,sr
+        rts
+
+*************************************************************************
+* get next index for ringbuffer into D1                                 *
+*************************************************************************
+wrapin:
+        addq.w    #1,d1
+        cmp.w     size(a0),d1
+        bcs.s     wrapin1
+        moveq.l   #0,d1
+wrapin1:
+        rts
+
+
 /*
  * XBIOS #14 - Iorec - Returns pointer to a serial device's input buffer record.
  */
-_iorec:
 /* 306de: 00e02a40 */
+_iorec:
         move.w    4(a7),d1
-        beq.s     iorec1
+        beq.s     iorec1               ; for device 0 (rs232), return bconmap configuration
         asl.l     #2,d1
         move.l    iorectab(pc,d1.w),d0
         rts
@@ -2821,8 +3533,9 @@ iorec1:
         rts
 iorectab:
         dc.l rs232iorec
-        dc.l midiiorec
         dc.l ikbdiorec
+        dc.l midiiorec
+
 
 /*
  * XBIOS #15 - Rsconf - Configure RS-232 port.
@@ -2843,31 +3556,1509 @@ _rsconf:
         jmp       (a0)
 
 /*
+ * Rsconf function for device 6 (rs232 driven by MFP)
+ */
+/* 306de: 00e02a66 */
+_rs6conf:
+        lea.l     (rs232iorec).w,a0
+        lea.l     (MFP_REGS).w,a2
+rs6conf1:
+        moveq.l   #0,d0
+        cmpi.w    #-2,4(a7)
+        bne.s     rs6conf2
+        move.b    baudrate(a0),d0
+        rts
+rs6conf2:
+        ori.w     #$0700,sr
+        movep.l   MFP_UCR-MFP_REGS(a2),d7
+        move.w    6(a7),d0
+        cmp.w     #$0003,d0
+        bhi.s     rs6conf6
+        bne.s     rs6conf3
+        moveq.l   #1,d0
+rs6conf3:
+        cmp.b     ctr(a0),d0
+        beq.s     rs6conf6
+        move.w    d0,-(a7)
+        tst.b     xoff(a0)
+        beq.s     rs6conf4
+        clr.b     xoff(a0)
+        bsr       iorecout
+rs6conf4:
+        tst.b     rcts(a0)
+        beq.s     rs6conf5
+        bsr       rs232cont
+rs6conf5:
+        move.w    (a7)+,d0
+        move.b    d0,ctr(a0)
+rs6conf6:
+        tst.w     4(a7)
+        bmi.s     rs6conf7
+        bclr      #0,MFP_RSR-MFP_REGS(a2)
+        bclr      #0,MFP_TSR-MFP_REGS(a2)
+        move.w    4(a7),d1
+        move.b    d1,baudrate(a0)
+        move.b    baudctrl(pc,d1.w),d0
+        move.b    bauddata(pc,d1.w),d2
+        andi.b    #$70,MFP_TCDCR-MFP_REGS(a2)
+        move.b    d2,MFP_TDDR-MFP_REGS(a2)
+        or.b      d0,MFP_TCDCR-MFP_REGS(a2)
+        bset      #0,MFP_RSR-MFP_REGS(a2)
+        bset      #0,MFP_TSR-MFP_REGS(a2)
+rs6conf7:
+        tst.w     8(a7)
+        bmi.s     rs6conf8
+        move.b    9(a7),MFP_UCR-MFP_REGS(a2)
+rs6conf8:
+        tst.w     10(a7)
+        bmi.s     rs6conf9
+        move.b    11(a7),MFP_RSR-MFP_REGS(a2)
+rs6conf9:
+        tst.w     12(a7)
+        bmi.s     rs6con10
+        move.b    13(a7),MFP_TSR-MFP_REGS(a2)
+rs6con10:
+        tst.w     14(a7)
+        bmi.s     rs6con11
+        move.b    15(a7),MFP_SCR-MFP_REGS(a2)
+rs6con11:
+        move.l    d7,d0
+        rts
+
+baudctrl: dc.b $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$02,$02
+bauddata: dc.b $01,$02,$04,$05,$08,$0a,$0b,$10,$20,$40,$60,$80,$8f,$af,$40,$60
+
+/*
+ * initial values for 4 extra MAPTAB structures
+ */
+/* 306de: 00e02b4a */
+bcondevs:
+        dc.l      _bcon6stat
+        dc.l      _bcon6in
+        dc.l      _bco6stat
+        dc.l      _bcon6out
+        dc.l      _rs6conf
+        dc.l      rs232iorec
+        dc.l      _bcon7stat
+        dc.l      _bcon7in
+        dc.l      _bco7stat
+        dc.l      _bcon7out
+        dc.l      _rs7conf
+        dc.l      mdm2iorec
+        dc.l      _bcon8stat
+        dc.l      _bcon8in
+        dc.l      _bco8stat
+        dc.l      _bcon8out
+        dc.l      _rs8conf
+        dc.l      mdm3iorec
+        dc.l      _bcon9stat
+        dc.l      _bcon9in
+        dc.l      _bco9stat
+        dc.l      _bcon9out
+        dc.l      _rs9conf
+        dc.l      mdm4iorec
+
+/*
  * XBIOS #44 - Bconmap - Select a default port.
  */
 /* 306de: 00e02baa */
 _bconmap:
-		rts
+        moveq.l   #0,d0
+        move.w    4(a7),d1
+        move.w    (bcmap_root+6).w,d0 ; bcmap_root.auxnr
+        cmp.w     #$FFFF,d1
+        beq.s     bconmap1
+        move.l    #bcmap_root,d0
+        cmp.w     #$FFFE,d1
+        beq.s     bconmap1
+        moveq.l   #0,d0
+        subq.w    #BCONMAP_START_HANDLE,d1
+        bmi.s     bconmap1
+        cmp.w     (bcmap_root+4).w,d1 ; bcmap_root.maptabsize
+        bcc.s     bconmap1
+        move.w    (bcmap_root+6).w,d1 ; bcmap_root.auxnr
+        subq.w    #6,d1
+        asl.w     #3,d1 ; calculate d1 * 24
+        move.w    d1,d2
+        add.w     d1,d1
+        add.w     d1,d2 ; d2 now sizeof(MAPTAB)
+        movea.l   (bcmap_root).w,a0 ; bcmap_root.maptab
+        adda.w    d2,a0
+* build active MAPTAB from system variables for device 1 (aux)
+        lea.l     (_bconstat_vec+1*4).w,a1
+        move.l    (a1),(a0)+
+        move.l    32(a1),(a0)+
+        move.l    64(a1),(a0)+
+        move.l    96(a1),(a0)+
+        move.l    bcmap_root+8,(a0)+ ; bcmap_root.rscon
+        move.l    (bcmap_root+12).w,(a0)+ ; bcmap_root.iorec
+        move.w    4(a7),d1
+        subq.w    #BCONMAP_START_HANDLE,d1
+        asl.w     #3,d1
+        move.w    d1,d2
+        add.w     d1,d1
+        add.w     d1,d2
+        movea.l   (bcmap_root).w,a0 ; bcmap_root.maptab
+        adda.w    d2,a0
+* update system variables for device 1 (aux)
+        move.l    (a0)+,(a1)
+        move.l    (a0)+,32(a1)
+        move.l    (a0)+,64(a1)
+        move.l    (a0)+,96(a1)
+        move.l    (a0)+,(bcmap_root+8).w ; bcmap_root.rscon
+        move.l    (a0)+,(bcmap_root+12).w ; bcmap_root.iorec
+        move.w    (bcmap_root+6).w,d0 ; bcmap_root.auxnr
+        move.w    4(a7),(bcmap_root+6).w
+bconmap1:
+        rts
 
 
+initdevstables:
+        lea.l     (bcmap_devs).w,a0        
+        move.l    a0,(bcmap_root+0).w     ; bcmap_root.maptab
+        move.w    #$0004,(bcmap_root+4).w ; bcmap_root.maptabsize
+        lea.l     bcondevs(pc),a1
+        move.w    #4*6-1,d0
+initdev1:
+        move.l    (a1)+,(a0)+
+        dbf       d0,initdev1
+        move.w    #$0006,(bcmap_root+6).w ; bcmap_root.auxnr
+* install device 6 vectors also in system variables for device 1 (aux)
+        lea.l     bcondevs,a1
+        lea.l     (_bconstat_vec+1*4).w,a0
+        move.l    (a1)+,(a0)
+        move.l    (a1)+,32(a0)
+        move.l    (a1)+,64(a0)
+        move.l    (a1)+,96(a0)
+        move.l    (a1)+,(bcmap_root+8).w ; bcmap_root.rscon
+        move.l    (a1)+,(bcmap_root+12).w ; bcmap_root.iorec
+        rts
+
+/*
+ * Bconstat function for device 8 (TTMFP serial port)
+ */
+_bcon8stat:
+        lea.l     (mdm3iorec).w,a0
+        bra       bcon6st1
+
+/*
+ * Bconin function for device 8 (TTMFP serial port)
+ */
+_bcon8in:
+        lea.l     (mdm3iorec).w,a0
+        lea.l     (TTMFP_REGS).w,a2
+        bra       bcon6in1
+
+/*
+ * Bcostat function for device 8 (TTMFP serial port)
+ */
+_bco8stat:
+        lea.l     (mdm3iorec+IOREC_SIZE).w,a0
+        bra       bco6s1
+
+
+/*
+ * Bconout function for device 8 (TTMFP serial port)
+ */
+_bcon8out:
+        move.w    6(a7),d0
+        lea.l     (mdm3iorec+IOREC_SIZE).w,a0
+        bsr       iorecput
+        lea.l     (mdm3iorec).w,a0
+        lea.l     (TTMFP_REGS).w,a2
+        bra       bcon6o1
+
+*************************************************************************
+* receiver buffer full interrupt routine for TTMFP                      *
+*************************************************************************
+/* 306de: 00e02cb0 */
+ttrcvrint:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (mdm3iorec).w,a0
+        lea.l     (TTMFP_REGS).w,a2
+        bra       rcvrint1
+
+*************************************************************************
+* transmit buffer empty interrupt routine fo TTFMP                      *
+*************************************************************************
+tttxrint:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (TTMFP_REGS).w,a2
+        lea.l     (mdm3iorec).w,a0
+        bra       txrint1
+
+*************************************************************************
+* routines to handle tx or rx errors for TTMFP                          *
+*************************************************************************
+ttrxerror:
+        movem.l   d0/a0,-(a7)
+        lea.l     (TTMFP_REGS).w,a0
+        bra       rxerror1
+
+tttxerror:
+        move.l    a0,-(a7)
+        lea.l     (TTMFP_REGS).w,a0
+        bra       txerror1
+
+/*
+ * Rsconf function for device 8 (TTMFP serial port)
+ */
+/* 306de: 00e02ce6 */
+_rs8conf:
+        lea.l     (mdm3iorec).w,a0
+        lea.l     (TTMFP_REGS).w,a2
+        bra       rs6conf1
+
+
+sccinit:
+        move.b    (a1)+,d0
+        bmi.s     sccinit1
+        move.b    d0,(a0)
+        move.b    (a1)+,(a0)
+        bra.s     sccinit
+sccinit1:
+        rts
+
+
+scctbl:
+        dc.b $04,$44            ; x16 clock mode, 1 stop bit, no parity
+        dc.b $01,$04            ; 'parity is special condition'
+        dc.b $02,$60            ; interrupt vector #s start at 0x60 (lowmem 0x180)
+        dc.b $03,$c0            ; Rx 8 bits/char, disabled
+        dc.b $05,$e2            ; Tx 8 bits/char, disabled, DTR, RTS
+        dc.b $06,$00            ; SDLC (n/a)
+        dc.b $07,$00            ; SDLC (n/a)
+        dc.b $09,$01            ; status low, vector includes status
+        dc.b $0a,$00            ; misc flags
+        dc.b $0b,$50            ; Rx/Tx clocks from baudrate generator output
+        dc.b $0c,$18            ; time const low = 24 | so rate = (24+2)*2/BR clock period
+        dc.b $0d,$00            ; time const hi = 0   | = 52/(8053976/16) => 9680 bps
+        dc.b $0e,$02            ; baudrate generator source = PCLK (8MHz)
+        dc.b $0e,$03            ; ditto + enable baudrate generator
+        dc.b $03,$c1            ; Rx 8 bits/char, enabled
+        dc.b $05,$ea            ; Tx 8 bits/char, enabled, DTR, RTS
+        dc.b $0f,$20            ; CTS interrupt enable
+        dc.b $00,$10            ; reset external/status interrupts
+        dc.b $00,$10            ; reset again (necessary, see manual)
+        dc.b $01,$17            ; interrupts for Rx, Tx, special condition; parity is special
+        dc.b $09,$09            ; status low, master interrupt enable
+        dc.b $ff,$00            ; end of table
+
+
+* disconnect LAN from port a
+nolan:
+        move.w    sr,d1
+        ori.w     #$0700,sr
+        move.b    #$0E,($FFFF8800).w
+        move.b    ($FFFF8800).w,d0
+        bset      #7,d0
+        move.b    #$0E,($FFFF8800).w
+        move.b    d0,($FFFF8802).w
+        move.w    d1,sr
+        rts
+
+/* 306de: 00e02d4c */
+initscc:
+        movea.l   (_buserror).w,a0
+        movea.l   a7,a1
+        move.l    #initscc2,(_buserror).w
+        tst.b     (SCCA_DATA).w
+        move.l    a0,(_buserror).w
+        lea.l     ($00000180).w,a0
+        lea.l     sccvect(pc),a1
+        moveq.l   #4*4-1,d0
+initscc1:
+        move.l    (a1)+,(a0)+
+        dbf       d0,initscc1
+        clr.w     ($FFFF8C14).w
+        bsr.s     nolan
+        lea.l     (mdm4iorec).w,a0
+        lea.l     mdm2table(pc),a1
+        moveq.l   #EXTIOREC_SIZE+1,d0 ; BUG: should be -1
+        bsr       copymem
+        lea.l     (mdm2iorec).w,a0
+        lea.l     mdm2table(pc),a1
+        moveq.l   #EXTIOREC_SIZE+1,d0 ; BUG: should be -1
+        bsr       copymem
+        move.l    #mdm2ibuf,(mdm2iorec).w
+        move.l    #mdm2obuf,(mdm2iorec+IOREC_SIZE).w
+        lea.l     (SCCA_BASE).w,a2
+        move.b    #$09,(a2)
+        move.b    #$C0,(a2)
+        move.w    #$0104,d0
+        jsr       ttdelayc
+        lea.l     (SCCA_BASE).w,a0
+        lea.l     scctbl(pc),a1
+        bsr       sccinit
+        lea.l     (SCCB_BASE).w,a0
+        lea.l     scctbl(pc),a1
+        bsr       sccinit
+        bset      #5,($FFFF8E0D).w
+        rts
+initscc2:
+        move.l    a0,(_buserror).w
+        movea.l   a1,a7
+        rts
+
+*************************************************************************
+* transmit buffer empty interrupt routine for SCC channel B             *
+*************************************************************************
+sccbempty:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (SCCB_BASE).w,a2
+        lea.l     (mdm2iorec).w,a0
+        bra       sccempty
+
+*************************************************************************
+* status interrupt routine for SCC channel B                            *
+*************************************************************************
+sccbstat:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (SCCB_BASE).w,a2
+        lea.l     (mdm2iorec).w,a0
+        bra       sccstat
+
+*************************************************************************
+* receiver buffer full interrupt routine for SCC channel B              *
+*************************************************************************
+sccbrxint:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (SCCB_BASE).w,a2
+        lea.l     (mdm2iorec).w,a0
+        bra.s     sccrxint
+
+*************************************************************************
+* RX/TX error interrupt routine for SCC channel B (unused)              *
+*************************************************************************
+sccbrxerr:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (SCCB_BASE).w,a2
+        lea.l     mdm2iorec,a0
+        bra       sccrxerr
+
+*************************************************************************
+* transmit buffer empty interrupt routine for SCC channel A             *
+*************************************************************************
+sccaempty:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (SCCA_BASE).w,a2
+        lea.l     (mdm4iorec).w,a0
+        bra       sccempty
+
+*************************************************************************
+* status interrupt routine for SCC channel A                            *
+*************************************************************************
+sccastat:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (SCCA_BASE).w,a2
+        lea.l     (mdm4iorec).w,a0
+        bra       sccstat
+
+*************************************************************************
+* receiver buffer full interrupt routine for SCC channel A              *
+*************************************************************************
+sccarxint:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (SCCA_BASE).w,a2
+        lea.l     (mdm4iorec).w,a0
+        bra.s     sccrxint
+
+*************************************************************************
+* RX/TX error interrupt routine for SCC channel A (unused)              *
+*************************************************************************
+sccarxerr:
+        movem.l   d0-d1/a0-a2,-(a7)
+        lea.l     (SCCA_BASE).w,a2
+        lea.l     mdm4iorec,a0
+        bra       sccrxerr
+
+*************************************************************************
+* receiver buffer full interrupt routine for SCC                        *
+*************************************************************************
+/* 306de: 00e02e62 */
+sccrxint:
+        move.b    #$08,(a2)
+        move.b    (a2),d0
+        and.b     datamask(a0),d0
+        btst      #0,ctr(a0)
+        beq.s     sccrxin2
+        cmp.b     #$13,d0
+        bne.s     sccrxin1
+        st        xoff(a0)
+        bra.s     sccrxin6
+sccrxin1:
+        cmp.b     #$11,d0
+        bne.s     sccrxin2
+        tst.b     xoff(a0)
+        sf        xoff(a0)
+        bne.s     sccrxin5
+sccrxin2:
+        move.w    tail(a0),d1
+        bsr       wrapin
+        cmp.w     head(a0),d1
+        beq.s     sccrxin6
+        bsr       iorecput
+        tst.b     ctr(a0)
+        beq.s     sccrxin6
+        tst.b     rcts(a0)
+        bne.s     sccrxin6
+        move.w    tail(a0),d0
+        sub.w     head(a0),d0
+        bpl.s     sccrxin3
+        add.w     size(a0),d0
+sccrxin3:
+        cmp.w     high(a0),d0
+        blt.s     sccrxin6
+        st        rcts(a0)
+        btst      #0,ctr(a0)
+        bne.s     sccrxin4
+        move.b    wr5(a0),d0
+        bclr      #1,d0
+        move.b    d0,wr5(a0)
+        move.b    #$05,(a2)
+        move.b    d0,(a2)
+        bra.s     sccrxin6
+sccrxin4:
+        move.b    #$13,xonoffc(a0)
+sccrxin5:
+        move.b    #$00,(a2)
+        move.b    (a2),d0
+        btst      #2,d0
+        beq.s     sccrxin6
+        bsr.s     sccout
+sccrxin6:
+        move.b    #$00,(a2)
+        move.b    #$38,(a2)
+        movem.l   (a7)+,d0-d1/a0-a2
+        rte
+
+*************************************************************************
+* RX/TX error interrupt routine for SCC                                 *
+*************************************************************************
+sccrxerr:
+        move.b    #$01,(a2)
+        move.b    (a2),d0
+        move.b    #$08,(a2)
+        move.b    (a2),d0
+        move.b    #$00,(a2)
+        move.b    #$30,(a2)
+        bra.s     sccrxin6
+
+*************************************************************************
+* write a character from the ring buffer to the SCC                     *
+*************************************************************************
+/* 306de: 00e02f1a */
+sccout:
+        move.l    a0,-(a7)
+        tst.b     xonoffc(a0)
+        bne.s     sccout1
+        move.b    ctr(a0),d0
+        and.b     xoff(a0),d0
+        bne.s     sccout4
+sccout1:
+        move.b    #$00,(a2)
+        move.b    (a2),d0
+        btst      #2,d0
+        beq.s     sccout4
+        move.b    xonoffc(a0),d0
+        beq.s     sccout2
+        clr.b     xonoffc(a0)
+        bra.s     sccout3
+sccout2:
+        adda.w    #$000E,a0
+        move.w    head(a0),d0
+        cmp.w     tail(a0),d0
+        beq.s     sccout4
+        bsr       iorecget
+sccout3:
+        move.b    #$08,(a2)
+        move.b    d0,(a2)
+sccout4:
+        movea.l   (a7)+,a0
+        rts
+
+*************************************************************************
+* transmit buffer empty interrupt routine for SCC                       *
+*************************************************************************
+/* 306de: 00e02f60 */
+sccempty:
+        move.b    #$00,(a2)
+        move.b    #$28,(a2)
+        move.b    #$00,(a2)
+        move.b    #$38,(a2)
+        bsr.s     sccout
+        movem.l   (a7)+,d0-d1/a0-a2
+        rte
+
+*************************************************************************
+* status interrupt routine for SCC                                      *
+*************************************************************************
+/* 306de: 00e02f78 */
+sccstat:
+        btst      #1,ctr(a0)
+        beq.s     sccstat1
+        move.b    #$00,(a2)
+        move.b    (a2),d0
+        btst      #5,d0
+        seq       xoff(a0)
+        beq.s     sccstat1
+        bsr.s     sccout
+sccstat1:
+        move.b    #$00,(a2)
+        move.b    #$10,(a2)
+        move.b    #$00,(a2)
+        move.b    #$38,(a2)
+        movem.l   (a7)+,d0-d1/a0-a2
+        rte
+
+/*
+ * Bconstat function for device 7 (SCC channel B)
+ */
+/* 306de: 00e02fa8 */
+_bcon7stat:
+        lea.l     (mdm2iorec).w,a0
+        lea.l     (SCCB_BASE).w,a2
+        bra.s     sccistat
+
+/*
+ * Bconin function for device 7 (SCC channel B)
+ */
+/* 306de: 00e02fb2 */
+_bcon7in:
+        lea.l     (mdm2iorec).w,a0
+        lea.l     (SCCB_BASE).w,a2
+        bra.s     sccin
+
+/*
+ * Bcostat function for device 7 (SCC channel B)
+ */
+/* 306de: 00e02fbc */
+_bco7stat:
+        lea.l     (mdm2iorec).w,a0
+        lea.l     (SCCB_BASE).w,a2
+        bra.s     sccostat
+
+/*
+ * Bconout function for device 7 (SCC channel B)
+ */
+/* 306de: 00e02fc6 */
+_bcon7out:
+        lea.l     (mdm2iorec).w,a0
+        lea.l     (SCCB_BASE).w,a2
+        bra       sccxout
+
+/*
+ * Bconstat function for device 9 (SCC channel A)
+ */
+/* 306de: 00e02fd2 */
+_bcon9stat:
+        lea.l     (mdm4iorec).w,a0
+        lea.l     (SCCA_BASE).w,a2
+        bra.s     sccistat
+
+/*
+ * Bconin function for device 9 (SCC channel A)
+ */
+/* 306de: 00e02fdc */
+_bcon9in:
+        lea.l     (mdm4iorec).w,a0
+        lea.l     (SCCA_BASE).w,a2
+        bra.s     sccin
+
+/*
+ * Bcostat function for device 9 (SCC channel A)
+ */
+/* 306de: 00e02fe6 */
+_bco9stat:
+        lea.l     (mdm4iorec).w,a0
+        lea.l     (SCCA_BASE).w,a2
+        bra.s     sccostat
+
+/*
+ * Bconout function for device 9 (SCC channel A)
+ */
+/* 306de: 00e02ff0 */
+_bcon9out:
+        lea.l     (mdm4iorec).w,a0
+        lea.l     (SCCA_BASE).w,a2
+        bra.s     sccxout
+
+sccistat:
+        moveq.l   #0,d0
+        lea.l     head(a0),a1
+        lea.l     tail(a0),a0
+        cmpm.w    (a0)+,(a1)+
+        beq.s     sccist1
+        moveq.l   #-1,d0
+sccist1:
+        rts
+
+sccostat:
+        move.w    tail(a0),d1
+        bsr       wrapin
+        cmp.w     head(a0),d1
+        beq.s     sccost1
+        moveq.l   #-1,d0
+        rts
+sccost1:
+        moveq.l   #0,d0
+        rts
+
+sccin:
+        bsr       iorecget
+        move.w    d0,-(a7)
+        tst.b     ctr(a0)
+        beq.s     sccin2
+        tst.b     rcts(a0)
+        beq.s     sccin2
+        move.w    tail(a0),d0
+        sub.w     head(a0),d0
+        bpl.s     sccin1
+        add.w     size(a0),d0
+sccin1:
+        cmp.w     low(a0),d0
+        bgt.s     sccin2
+        bsr.s     scccont
+sccin2:
+        move.w    (a7)+,d0
+        rts
+
+scccont:
+        clr.b     rcts(a0)
+        btst      #0,ctr(a0)
+        beq.s     scccont1
+        move.b    #$11,xonoffc(a0)
+        bra.s     sccxout0
+scccont1:
+        move.b    wr5(a0),d0
+        bset      #1,d0
+        move.b    d0,wr5(a0)
+        move.b    #$05,(a2)
+        move.b    d0,(a2)
+        rts
+
+sccxout:
+        move.w    6(a7),d0
+        adda.w    #IOREC_SIZE,a0
+        bsr       iorecput
+        suba.w    #IOREC_SIZE,a0
+sccxout0:
+        move.b    #$00,(a2)
+        move.b    (a2),d0
+        btst      #2,d0
+        beq.s     sccxout1
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        bsr       sccout
+        move.w    (a7)+,sr
+sccxout1:
+        rts
+
+
+/*
+ * Rsconf function for device 9 (SCC channel A)
+ */
+/* 306de: 00e030a0 */
+_rs9conf:
+        lea.l     (mdm4iorec).w,a0
+        lea.l     (SCCA_BASE).w,a2
+        bra.s     sccconf
+
+/*
+ * Rsconf function for device 7 (SCC channel B)
+ */
+/* 306de: 00e030aa */
+_rs7conf:
+        lea.l     (mdm2iorec).w,a0
+        lea.l     (SCCB_BASE).w,a2
+sccconf:
+        moveq.l   #0,d0
+        cmpi.w    #$FFFE,4(a7)
+        bne.s     sccconf1
+        move.b    baudrate(a0),d0
+        rts
+sccconf1:
+        ori.w     #$0700,sr
+        moveq.l   #0,d7
+        move.b    rcv(a0),d7
+        asl.w     #8,d7
+        swap      d7
+        move.b    wr5(a0),d7
+        lsr.b     #1,d7
+        and.b     #$04,d7
+        asl.w     #8,d7
+        move.w    6(a7),d0
+        cmp.w     #$0003,d0
+        bhi.s     sccconf5
+        bne.s     sccconf2
+        moveq.l   #1,d0
+sccconf2:
+        cmp.b     ctr(a0),d0
+        beq.s     sccconf5
+        tst.b     xoff(a0)
+        beq.s     sccconf3
+        clr.b     xoff(a0)
+        bsr       sccout
+sccconf3:
+        tst.b     rcts(a0)
+        beq.s     sccconf4
+        move.w    d0,-(a7)
+        bsr       scccont
+        move.w    (a7)+,d0
+sccconf4:
+        move.b    d0,ctr(a0)
+sccconf5:
+        move.w    4(a7),d0
+        cmp.w     #$000F,d0
+        bhi.s     sccconf6
+        move.b    d0,baudrate(a0)
+        asl.w     #1,d0
+        lea.l     sccbaudtab,a1
+        move.w    0(a1,d0.w),d0
+        move.b    #$0C,(a2)
+        move.b    d0,(a2)
+        lsr.w     #8,d0
+        move.b    #$0D,(a2)
+        move.b    d0,(a2)
+sccconf6:
+        move.w    8(a7),d0
+        bmi.s     scccon11
+        move.b    d0,rcv(a0)
+        move.b    d0,d1
+        and.b     #$60,d1
+        lsr.b     #5,d1
+        moveq.l   #-1,d2
+        lsr.b     d1,d2
+        move.b    d2,datamask(a0)
+        move.b    d0,d1
+        and.b     #$60,d1
+        beq.s     sccconf7
+        cmp.b     #$60,d1
+        bne.s     sccconf8
+sccconf7:
+        eori.b    #$60,d1
+sccconf8:
+        move.b    wr5(a0),d2
+        and.b     #$9F,d2
+        or.b      d1,d2
+        move.b    d2,wr5(a0)
+        move.b    #$05,(a2)
+        move.b    d2,(a2)
+        asl.b     #1,d1
+        or.b      #$01,d1
+        move.b    #$03,(a2)
+        move.b    d1,(a2)
+        move.b    d0,d1
+        and.b     #$1E,d1
+        lsr.b     #1,d1
+        bclr      #1,d1
+        sne       d2
+        bclr      #0,d1
+        bne.s     sccconf9
+        bclr      #1,d2
+        bra.s     scccon10
+sccconf9:
+        bset      #1,d2
+scccon10:
+        and.b     #$03,d2
+        or.b      d2,d1
+        or.b      #$40,d1
+        move.b    #$04,(a2)
+        move.b    d1,(a2)
+scccon11:
+        move.w    10(a7),d0
+        bmi.s     scccon13
+        btst      #3,d0
+        beq.s     scccon12
+        bset      #4,wr5(a0)
+        bne.s     scccon13
+        move.b    #$05,(a2)
+        move.b    wr5(a0),(a2)
+        bra.s     scccon13
+scccon12:
+        bclr      #4,wr5(a0)
+        beq.s     scccon13
+        move.b    #$05,(a2)
+        move.b    wr5(a0),(a2)
+scccon13:
+        move.l    d7,d0
+        rts
+
+/* 306de: 00e031e4 */
+sccbaudtab: dc.w $000b,$0018,$0032,$0044,$0067,$007c,$008a,$00d0
+            dc.w $01a1,$0345,$04e8,$068c,$074d,$08ee,$0d1a,$13a8
+
+
+/*
+ * interrupt vectors for SCC A&B copied to 0x180
+ */
+sccvect:
+       dc.l      sccbempty
+       dc.l      0
+       dc.l      sccbstat
+       dc.l      0
+       dc.l      sccbrxint
+       dc.l      0
+       dc.l      sccbrxint
+       dc.l      0
+       dc.l      sccaempty
+       dc.l      0
+       dc.l      sccastat
+       dc.l      0
+       dc.l      sccarxint
+       dc.l      0
+       dc.l      sccarxint
+       dc.l      0
+
+/*
+ * initial EXT_IOREC for device 7 (modem2) & device 9 (modem4)
+ */
+mdm2table:
+        dc.l mdm4ibuf
+        dc.w SERIAL_BUFSIZE,0,0,128,192
+        dc.l mdm4obuf
+        dc.w SERIAL_BUFSIZE,0,0,128,192
+        dc.b 8,$ea,0,0,1,0,1,$ff
+
+
+*************************************************************************
+* receiver buffer full interrupt handler for IKBD/MIDI ACIA
+*************************************************************************
+/* 306de: 00e03268 */
+_int_acia:
+        movem.l   d0-d3/a0-a3,-(a7)
+intacia1:
+        movea.l   (midisys).w,a2
+        jsr       (a2)
+        movea.l   (ikbdsys).w,a2
+        jsr       (a2)
+        btst      #4,(MFP_GPIP).w      ; ACIA receiver buffer empty?
+        beq.s     intacia1             ; no, read more bytes
+        move.b    #$BF,(MFP_ISRB).w    ; clear in-service bit
+        movem.l   (a7)+,d0-d3/a0-a3
+        rte
+
+_midisys:
+        lea.l     (midiiorec).w,a0
+        lea.l     (ACIA_MIDI_BASE).w,a1
+        movea.l   (vmiderr).w,a2
+        bra.s     _aciasys
+_ikbdsys:
+        lea.l     (ikbdiorec).w,a0
+        lea.l     (ACIA_IKBD_BASE).w,a1
+        movea.l   (vkbderr).w,a2
+_aciasys:
+        move.b    (a1),d2
+        btst      #7,d2        ; interrupt request?
+        beq.s     aciasys2     ; no, ignore
+        btst      #0,d2        ; receiver data full?
+        beq.s     aciasys1     ; no, skip processing
+        movem.l   d2/a0-a2,-(a7)
+        bsr.s     aciaread
+        movem.l   (a7)+,d2/a0-a2
+aciasys1:
+        andi.b    #$20,d2      ; receiver overrun?
+        beq.s     aciasys2     ; no, we are done
+        move.b    ACIA_DATA(a1),d0     ; read data byte
+        jmp       (a2)         ; yes, call error function
+aciasys2:
+        rts
+
+
+* ==== IKBD stuff ================
+*
+* Packets received from the IKBD are accumulated into the kbdbuf buffer.
+* The packet header (F6 to FF) determines the packet length and the
+* action to be taken once the packet has been received completely.
+* During the reception of a packet, variable ikbdstate contains the
+* action number, and variable kbdlength contains the number of bytes
+* not received yet.
+*
+* action <--whole IKBD packet-->  Comment
+* number    <-given to routine->
+*
+*  1     F6 a1 a2 a3 a4 a5 a6 a7 (miscellaneous, 7 bytes)
+*  2     F7 0b xh xl yh yl       (absolute mouse)
+*  3     F8 dx dy                (relative mouse, no button)
+*  3     F9 dx dy                (relative mouse, button 1)
+*  3     FA dx dy                (relative mouse, button 2)
+*  3     FB dx dy                (relative mouse, both buttons)
+*  4     FC yy MM dd hh mm ss    (date and time)
+*  5     FD j0 j1                (both joysticks)
+*  6     FE bj                   (joystick 0)
+*  7     FF bj                   (joystick 1)
+*
+
+aciaread:
+        move.b    ACIA_DATA(a1),d0      ; read data byte
+        cmpa.l    #ikbdiorec,a0
+        bne       midiread
+        tst.b     (ikbdstate).w         ; inside a multi-byte packet?
+        bne.s     in_packet             ; ikbdstate != 0 => go and add to the packet
+        cmpi.b    #$F6,d0               ; is byte a packet header?
+        bcc.s     begin_packet          ; byte >= 0xf6 => go begin receiving a packet
+        move.l    (kbdvec).w,-(a7)      ; ordinary key byte in d0. jump in vector
+        rts
+begin_packet:
+        subi.b    #$F6,d0               ; generate table index
+        andi.l    #$000000FF,d0
+        lea.l     ikbd_state_table,a3   
+        move.b    0(a3,d0.w),(ikbdstate).w ; set ikbd state
+        lea.l     kbd_length_table,a3
+        move.b    0(a3,d0.w),(kbdlength).w ; set number expected bytes to follow
+        addi.w    #$00F6,d0             ; reconstruct input byte
+        cmpi.b    #$F8,d0               ; mouse position record?
+        blt.s     begin_p1              ; no
+        cmpi.b    #$FB,d0               ; mouse position record?
+        bgt.s     begin_p1              ; no
+        move.b    d0,(relmbuf).w        ; store first byte with button states
+        rts
+begin_p1:
+        cmpi.b    #$FD,d0               ; joystick record?
+        blt.s     begin_p2              ; no
+        move.b    d0,(joybuf).w         ; store joystick byte
+begin_p2:
+        rts
+
+ikbd_state_table:                     dc.b 1,2,3,3,3,3,4,5,6,7
+kbd_length_table:                     dc.b 7,5,2,2,2,2,6,2,1,1
+
+in_packet:
+        cmpi.b    #$06,(ikbdstate).w  ; joystick packet?
+        bcc       kbd_joy             ; yes, handle separately
+        lea.l     ikbdbaddr,a2
+        moveq.l   #0,d2
+        move.b    (ikbdstate).w,d2
+        subq.b    #1,d2
+        asl.w     #1,d2
+        add.b     (ikbdstate).w,d2
+        subq.b    #1,d2
+        asl.w     #2,d2 ; d2 now (ikbdstate - 1) * 12
+        movea.l   0(a2,d2.w),a0       ; get start of buffer
+        movea.l   4(a2,d2.w),a1       ; get end of buffer
+        movea.l   8(a2,d2.w),a2       ; get packet handler address
+        movea.l   (a2),a2             ; get packet handler
+        moveq.l   #0,d2
+        move.b    (kbdlength).w,d2
+        suba.l    d2,a1
+        move.b    d0,(a1)             ; store input byte
+        subq.b    #1,(kbdlength).w    ; decrement the number of bytes in the package
+        tst.b     (kbdlength).w       ; packet complete?
+        bne.s     in_pack2            ; no
+in_pack1:
+        move.l    a0,-(a7)            
+        jsr       (a2)                ; call packet handler
+        addq.w    #4,a7
+        clr.b     (ikbdstate).w       ; reset ikbd state
+in_pack2:
+        rts
+
+ikbdbaddr:
+        dc.l kbdbuf,kbdbuf+7,statvec
+        dc.l mousebuf,mousebuf+5,mousevec
+        dc.l relmbuf,relmbuf+3,mousevec
+        dc.l clockbuf,clockbuf+6,clockvec
+        dc.l joybuf,joybuf+2,joyvec
+
+* handle joystick packet $FE,$FF
+kbd_joy:
+        move.l    #joybuf+1,d1
+        add.b     (ikbdstate).w,d1              ; ikbdstate reflects joy0 or joy1 state
+        subq.b    #6,d1
+        movea.l   d1,a2
+        move.b    d0,(a2)
+        movea.l   (joyvec).w,a2                 ; get user defined handler
+        lea.l     (joybuf).w,a0
+        bra.s     in_pack1                      ; and go call it
+
+********************************
+* handler for ordinary keys
+********************************
+_kbdvec:
+        move.b    (_shifty).w,d1                ; get current shift state
+        cmpi.b    #$2A,d0                       ; left shift pressed?
+        bne.s     kbdvec1
+        bset      #1,d1
+        bra       kbdvec10
+kbdvec1:
+        cmpi.b    #$AA,d0                       ; left shift released?
+        bne.s     kbdvec2
+        bclr      #1,d1
+        bra       kbdvec10
+kbdvec2:
+        cmpi.b    #$36,d0                       ; right shift pressed?
+        bne.s     kbdvec3
+        bset      #0,d1
+        bra.s     kbdvec10
+kbdvec3:
+        cmpi.b    #$B6,d0                       ; right shift released?
+        bne.s     kbdvec4
+        bclr      #0,d1
+        bra.s     kbdvec10
+kbdvec4:
+        cmpi.b    #$1D,d0                       ; control pressed?
+        bne.s     kbdvec5
+        bset      #2,d1
+        bra.s     kbdvec10
+kbdvec5:
+        cmpi.b    #$9D,d0                       ; control released?
+        bne.s     kbdvec6
+        bclr      #2,d1
+        bra.s     kbdvec10
+kbdvec6:
+        cmpi.b    #$38,d0                       ; ALT pressed?
+        bne.s     kbdvec7
+        bset      #3,d1
+        bra.s     kbdvec10
+kbdvec7:
+        cmpi.b    #$B8,d0                       ; ALT released?
+        bne.s     kbdvec8
+        bclr      #3,d1
+        tst.w     kb_altnum                     ; ascii code via numpad active?
+        bmi.s     kbdvec10
+        move.b    d1,(_shifty).w
+        move.l    a0,-(a7)
+        moveq.l   #0,d1                         ; clear ascii code reg
+        move.w    d1,d0         
+        move.b    kb_altnum+1,d0                ; get entered ascii code
+        move.w    #$FFFF,kb_altnum
+        bra       kbdvec44
+kbdvec8:
+        cmpi.b    #$3A,d0                       ; CAPS LOCK pressed?
+        bne.s     kbdvec11
+        btst      #0,(_conterm).w               ; should click sound be produced?
+        beq.s     kbdvec9
+        movem.l   d0-d2/a0-a2,-(a7)
+        movea.l   (_kcl_hook).w,a0
+        jsr       (a0)
+        movem.l   (a7)+,d0-d2/a0-a2
+kbdvec9:
+        bchg      #4,d1                         ; toggle CAPS LOCK state
+kbdvec10:
+        move.b    d1,(_shifty).w                ; store new shift state
+        rts
+kbdvec11:
+        btst      #7,d0                         ; was key released?
+        bne.s     kbdvec12
+        move.b    d0,(kb_key_last).w            ; save for key repeat
+        move.b    kb_initial,(kb_ticks).w
+        move.b    kb_repeat,(kb_delay).w
+        bra.s     kbdvec15
+kbdvec12:
+        move.b    d0,d1
+        bclr      #7,d1
+        cmp.b     (kb_key_last).w,d1
+        bne.s     kbdvec13
+        moveq.l   #0,d1
+        move.b    d1,(kb_key_last).w
+        move.b    d1,(kb_ticks).w
+        move.b    d1,(kb_delay).w
+kbdvec13:
+        cmpi.b    #$C7,d0                       ; was it HOME?
+        beq.s     kbdvec14
+        cmpi.b    #$D2,d0                       ; was it INSERT?
+        bne       kbdvec47
+kbdvec14:
+        btst      #3,(_shifty).w                ; ... and ALT active?
+        beq       kbdvec47
+kbdvec15:
+        btst      #0,(_conterm).w               ; should click sound be produced?
+        beq.s     kbdvec16
+        movem.l   d0-d2/a0-a2,-(a7)
+        movea.l   (_kcl_hook).w,a1
+        jsr       (a1)
+        movem.l   (a7)+,d0-d2/a0-a2
+kbdvec16:
+        move.l    a0,-(a7)
+        moveq.l   #0,d1
+        move.b    d0,d1
+        movea.l   (_curkeytbl).w,a0
+        andi.w    #$007F,d0
+        btst      #4,(_shifty).w                ; caps-lock active?
+        beq.s     kbdvec17
+        movea.l   (_curkeytbl+8).w,a0           ; use caps-lock table
+kbdvec17:
+        btst      #0,(_shifty).w                ; left shift active?
+        bne.s     kbdvec18
+        btst      #1,(_shifty).w                ; right shift active?
+        beq.s     kbdvec20
+kbdvec18:
+        cmpi.b    #$3B,d0                       ; was it a function key?
+        bcs.s     kbdvec19                      ; no
+        cmpi.b    #$44,d0
+        bhi.s     kbdvec19                      ; no
+        addi.w    #$0019,d1                     ; add to change to GSX standard
+        moveq.l   #0,d0
+        bra       kbdvec44
+kbdvec19:
+        movea.l   (_curkeytbl+4).w,a0           ; use the shift table
+kbdvec20:
+        move.b    0(a0,d0.w),d0                 ; get ascii code from key table
+        btst      #2,(_shifty).w                ; control active?
+        beq.s     kbdvec27
+        cmpi.b    #$0D,d0                       ; control-CR, convert to LF
+        bne.s     kbdvec21
+        moveq.l   #10,d0
+        beq.s     kbdvec24
+kbdvec21:
+        cmpi.b    #$47,d1                       ; convert CONTROL-home to gsx standard
+        bne.s     kbdvec22
+        addi.w    #$0030,d1
+        bra       kbdvec44
+kbdvec22:
+        cmpi.b    #$4B,d1                       ; convert CONTROL-left arrow to gsx standard
+        bne.s     kbdvec23
+        moveq.l   #$73,d1
+        moveq.l   #0,d0
+        bra       kbdvec44
+kbdvec23:
+        cmpi.b    #$4D,d1                       ; convert CONTROL-right arrow to gsx standard
+        bne.s     kbdvec24
+        moveq.l   #$74,d1
+        moveq.l   #0,d0
+        bra       kbdvec44
+kbdvec24:
+        cmpi.b    #$32,d0                       ; convert control-shift-down arrow to gsx standard
+        bne.s     kbdvec25
+        moveq.l   #0,d0
+        bra       kbdvec44
+kbdvec25:
+        cmpi.b    #$36,d0                       ; convert control-shift-right arrow to gsx standard
+        bne.s     kbdvec26
+        moveq.l   #$1e,d0
+        bra       kbdvec44
+kbdvec26:
+        cmpi.b    #$2D,d0                       ; convert control-shift-kp-minus to gsx standard
+        bne.s     kbdvec27
+        moveq.l   #$1f,d0
+        bra       kbdvec44
+kbdvec27:
+        btst      #3,(_shifty).w                ; is alt active?
+        beq       kbdvec42
+        cmp.b     #$67,d1                       ; keypad key 0 - 9?
+        bcs.s     kbdvec29                      ; no
+        cmp.b     #$70,d1
+        bhi.s     kbdvec29                      ; no
+        move.w    kb_altnum,d0
+        bpl.s     kbdvec28
+        moveq.l   #0,d0
+kbdvec28:
+        mulu.w    #$000A,d0
+        ext.w     d1
+        move.b    0(a0,d1.w),d1                 ; get ascii code of keypad key
+        sub.b     #$30,d1
+        add.b     d1,d0
+        move.w    d0,kb_altnum                  ; store as new number code
+        movea.l   (a7)+,a0
+        rts
+kbdvec29:
+        cmpi.b    #$1A,d1                       ; convert ALT-udiaresis to @ or backslash
+        bne.s     kbdvec30
+        move.b    #$40,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$5C,d0
+        bra       kbdvec42
+kbdvec30:
+        cmpi.b    #$27,d1                       ; convert ALT odiaresis to [ or {
+        bne.s     kbdvec31
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdvec31:
+        cmpi.b    #$28,d1                       ; convert ALT adiaresis to ] or }
+        bne.s     kbdvec32
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdvec32:
+        cmpi.b    #$62,d1                       ; is it an "alt help" signal to dump the screen?
+        bne.s     kbdvec33
+        addq.w    #1,(_dumpflg).w
+        movea.l   (a7)+,a0
+        bra       kbdvec47
+kbdvec33:
+        lea.l     mousekey,a2                   ; get pointer to first alt. mouse scancode table
+        moveq.l   #3,d2
+kbdvec34:
+        cmp.b     0(a2,d2.w),d1
+        beq       keymouse
+        dbf       d2,kbdvec34
+        cmpi.b    #$48,d1                       ; is it an up arrow?
+        bne.s     kbdvec35
+        move.b    #$00,d1
+        move.b    #$FFF8,d2
+        move.b    (_shifty).w,d0
+        andi.b    #$03,d0
+        beq       keymous4
+        move.b    #$FFFF,d2
+        bra       keymous4
+kbdvec35:
+        cmpi.b    #$4B,d1                       ; is it an left arrow?
+        bne.s     kbdvec36
+        move.b    #$00,d2
+        move.b    #$FFF8,d1
+        move.b    (_shifty).w,d0
+        andi.b    #$03,d0
+        beq       keymous4
+        move.b    #$FFFF,d1
+        bra       keymous4
+kbdvec36:
+        cmpi.b    #$4D,d1                       ; is it an right arrow?
+        bne.s     kbdvec37
+        move.b    #$08,d1
+        move.b    #$00,d2
+        move.b    (_shifty).w,d0
+        andi.b    #$03,d0
+        beq       keymous4
+        move.b    #$01,d1
+        bra       keymous4
+kbdvec37:
+        cmpi.b    #$50,d1                       ; is it an down arrow?
+        bne.s     kbdvec38
+        move.b    #$00,d1
+        move.b    #$08,d2
+        move.b    (_shifty).w,d0
+        andi.b    #$03,d0
+        beq       keymous4
+        move.b    #$01,d2
+        bra       keymous4
+kbdvec38:
+        btst      #2,(_shifty).w                ; is control active?
+        bne.s     kbdvec43                      ; yes, skip
+        cmpi.b    #$02,d1                       ; is scancode between '1' key and '=' key?
+        bcs.s     kbdvec39
+        cmpi.b    #$0D,d1
+        bhi.s     kbdvec39
+        addi.b    #$76,d1
+        bra.s     kbdvec40
+kbdvec39:
+        cmpi.b    #$41,d0                       ; is it an ascii character 'A' -'Z'?
+        bcs.s     kbdvec41
+        cmpi.b    #$5A,d0
+        bhi.s     kbdvec41
+kbdvec40:
+        moveq.l   #0,d0
+        bra.s     kbdvec44
+kbdvec41:
+        cmpi.b    #$61,d0                       ; is it an ascii character 'a' -'z'?
+        bcs.s     kbdvec44
+        cmpi.b    #$7A,d0
+        bhi.s     kbdvec44
+        bra.s     kbdvec40
+kbdvec42:
+        btst      #2,(_shifty).w
+        beq.s     kbdvec44
+kbdvec43:
+        andi.w    #$001F,d0
+kbdvec44:
+        asl.w     #8,d1                         ; put scancode to high byte
+        add.w     d1,d0                         ; insert ascii code
+        movea.l   (a7)+,a0
+        move.w    tail(a0),d1
+        addq.w    #4,d1
+        cmp.w     size(a0),d1                   ; room for 4 bytes?
+        bcs.s     kbdvec45
+        moveq.l   #0,d1
+kbdvec45:
+        cmp.w     head(a0),d1                   ; keyboard buffer full?
+        beq.s     kbdvec47                      ; yes, drop it
+        movea.l   buf(a0),a2
+        swap      d0                            ; put shift state to high word
+        clr.w     d0
+        move.b    (_shifty).w,d0
+        swap      d0
+        lsl.l     #8,d0
+        lsr.w     #8,d0
+        move.l    d0,d2                         ; save keycode for tests
+        bclr      #28,d2                        ; clear capslock state
+        swap      d2
+        cmp.w     #$0C53,d2                     ; control+alt+delete?
+        beq       _main                         ; yes, reset
+        cmp.w     #$0D53,d2                     ; control+alt+leftshift-delete?
+        beq       coldboot
+        btst      #3,(_conterm).w
+        bne.s     kbdvec46
+        andi.l    #$00FFFFFF,d0
+kbdvec46:
+        and.l     #$0000FFFF,d1
+        move.l    d0,0(a2,d1.l)
+        move.w    d1,tail(a0)
+kbdvec47:
+        rts
+
+/*
+ * default function for system variable kcl_hook
+ */
 /* 306de: 00e0378a */
 _do_keyclick:
-		rts
+        move.l    #clicksnd,(_sndtable).w
+        move.b    #$00,(_snddelay).w
+        rts
+
+/* 306de: 00e0379a */
+midiread:
+        movea.l   (midivec).w,a2
+        jmp       (a2)
+
+/* 306de: 00e037a0 */
+_midivec:
+        move.w    tail(a0),d1
+        addq.w    #1,d1
+        cmp.w     size(a0),d1
+        bcs.s     midivec1
+        moveq.l   #0,d1
+midivec1:
+        cmp.w     head(a0),d1
+        beq.s     midivec2
+        movea.l   buf(a0),a2
+        and.l     #$0000FFFF,d1
+        move.b    d0,0(a2,d1.l)
+        move.w    d1,tail(a0)
+midivec2:
+        rts
+
+
+/* 306de: 00e037c6 */
+keymouse:
+        moveq.l   #5,d3
+        btst      #4,d1
+        beq.s     keymous1
+        moveq.l   #6,d3
+keymous1:
+        btst      #7,d1
+        beq.s     keymous2
+        bclr      d3,(_shifty).w
+        bra.s     keymous3
+keymous2:
+        bset      d3,(_shifty).w
+keymous3:
+        moveq.l   #0,d1
+        moveq.l   #0,d2
+keymous4:
+        lea.l     (buttonbuf).w,a0
+        movea.l   (mousevec).w,a2
+        clr.l     d0
+        move.b    (_shifty).w,d0
+        lsr.b     #5,d0
+        addi.b    #$F8,d0
+        move.b    d0,(a0)
+        move.b    d1,1(a0)
+        move.b    d2,2(a0)
+        jsr       (a2)
+        movea.l   (a7)+,a0
+        rts
+
+/* scancode that send mouse packets */
+mousekey:  dc.b      $47,$c7,$52,$d2
+
+
+coldboot:
+        move.w    #$2700,sr
+        move.l    #$00000808,d0
+        D0_CACR
+        moveq.l   #0,d0
+        D0_VBR
+        TO_TC(zero2)   ; disable PMMU and address translation
+        TO_TTR0(zero2)
+        TO_TTR1(zero2)
+* copy erase routine to low memory
+        move.w    #(coldbend-coldboo2)/4-1,d0
+        lea.l     coldboo2(pc),a0
+        movea.w   #$00c,a1
+coldboo1:
+        move.l    (a0)+,(a1)+
+        dbf       d0,coldboo1
+        jmp       ($0000000C).w
+* clear ST memory until buserror
+coldboo2:
+        lea.l     coldboo4(pc),a0
+        move.l    a0,(_buserror).w
+        lea.l     coldboo6(pc),a0
+        moveq.l   #0,d0
+coldboo3:
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        bra.s     coldboo3
+* clear FASTRAM until buserror
+coldboo4:
+        move.l    ($00000004).w,(_buserror).w
+        lea.l     FASTRAMBASE,a0
+coldboo5:
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        move.l    d0,(a0)+
+        bra.s     coldboo5
+coldboo6:
+        nop
+coldbend:  ds.b 0
+
+        data
+zero2:  dc.l 0
+		text
+
 
 /*
  * XBIOS #28 - Giaccess - Permit access to the registers of the GI sound chip. 
  */
 /* 306de: 00e0387e */
 _giaccess:
-		rts
+        move.w    4(a7),d0
+        move.w    6(a7),d1
+giaccess:
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        movem.l   d1-d2/a0,-(a7)
+        lea.l     ($FFFF8800).w,a0
+        move.b    d1,d2
+        andi.b    #$0F,d1
+        move.b    d1,(a0)
+        asl.b     #1,d2
+        bcc.s     giacces1
+        move.b    d0,2(a0)
+giacces1:
+        moveq.l   #0,d0
+        move.b    (a0),d0
+        movem.l   (a7)+,d1-d2/a0
+        move.w    (a7)+,sr
+        rts
 
+
+dtron:
+        move.b    #$EF,d2
+        bra.s     offgibit
 
 /*
  * XBIOS #30 - Ongibit - Set individual bits in the port A register of the GI sound chip. 
  */
 /* 306de: 00e038b6 */
 _ongibit:
-		rts
+        moveq.l   #0,d2
+        move.w    4(a7),d2
+ongibit:
+        movem.l   d0-d2,-(a7)
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        moveq.l   #14,d1
+        move.l    d2,-(a7)
+        bsr.s     giaccess
+        move.l    (a7)+,d2
+        or.b      d2,d0
+        move.b    #$8E,d1
+        bsr.s     giaccess
+        move.w    (a7)+,sr
+        movem.l   (a7)+,d0-d2
+        rts
 
 
 /*
@@ -2875,7 +5066,22 @@ _ongibit:
  */
 /* 306de: 00e038de */
 _offgibit:
-		rts
+        moveq.l   #0,d2
+        move.w    4(a7),d2
+offgibit:
+        movem.l   d0-d2,-(a7)
+        move.w    sr,-(a7)
+        ori.w     #$0700,sr
+        moveq.l   #14,d1
+        move.l    d2,-(a7)
+        bsr.s     giaccess
+        move.l    (a7)+,d2
+        and.b     d2,d0
+        move.b    #$8E,d1
+        bsr.s     giaccess
+        move.w    (a7)+,sr
+        movem.l   (a7)+,d0-d2
+        rts
 
 
 /*
@@ -2883,15 +5089,96 @@ _offgibit:
  */
 /* 306de: 00e03906 */
 _initmouse:
-		rts
+        tst.w     4(a7)
+        beq.s     initmou1
+        move.l    10(a7),(mousevec).w
+        movea.l   6(a7),a3
+        cmpi.w    #$0001,4(a7)
+        beq.s     initmou2
+        cmpi.w    #$0002,4(a7)
+        beq.s     initmou3
+        cmpi.w    #$0004,4(a7)
+        beq.s     initmou4
+        moveq.l   #0,d0
+        rts
+initmou1:
+        moveq.l   #18,d1
+        bsr       ikbd_writeb
+        move.l    #imrts,(mousevec).w
+        bra.s     initmou5
+initmou2:
+        lea.l     (initmbuf).w,a2
+        move.b    #$08,(a2)+
+        move.b    #$0B,(a2)+
+        bsr.s     setmouse
+        moveq.l   #6,d3
+        lea.l     (initmbuf).w,a2
+        bsr       ikbdws1
+        bra.s     initmou5
+initmou3:
+        lea.l     (initmbuf).w,a2
+        move.b    #$09,(a2)+
+        move.b    4(a3),(a2)+
+        move.b    5(a3),(a2)+
+        move.b    6(a3),(a2)+
+        move.b    7(a3),(a2)+
+        move.b    #$0C,(a2)+
+        bsr.s     setmouse
+        move.b    #$0E,(a2)+
+        move.b    #$00,(a2)+
+        move.b    8(a3),(a2)+
+        move.b    9(a3),(a2)+
+        move.b    10(a3),(a2)+
+        move.b    11(a3),(a2)+
+        moveq.l   #16,d3
+        lea.l     (initmbuf).w,a2
+        bsr       ikbdws1
+        bra.s     initmou5
+initmou4:
+        lea.l     (initmbuf).w,a2
+        move.b    #$0A,(a2)+
+        bsr.s     setmouse
+        moveq.l   #5,d3
+        lea.l     (initmbuf).w,a2
+        bsr       ikbdws1
+initmou5:
+        moveq.l   #-1,d0
+        rts
 
+setmouse:
+        move.b    2(a3),(a2)+
+        move.b    3(a3),(a2)+
+        moveq.l   #16,d1
+        sub.b     (a3),d1
+        move.b    d1,(a2)+
+        move.b    #$07,(a2)+
+        move.b    1(a3),(a2)+
+        rts
 
 /*
  * XBIOS #31 - Xbtimer - Initialize the timer in the MFP chip.
  */
 /* 306de: 00e039ce */
 _xbtimer:
-		rts
+        moveq.l   #0,d0
+        moveq.l   #0,d1
+        moveq.l   #0,d2
+        move.w    4(a7),d0
+        move.w    6(a7),d1
+        move.w    8(a7),d2
+        bsr       settimer
+        tst.l     10(a7)
+        bmi.s     imrts
+        movea.l   10(a7),a2
+        moveq.l   #0,d1
+        lea.l     xbtimtab(pc),a1
+        andi.l    #$000000FF,d0
+        move.b    0(a1,d0.w),d0
+        bsr       initint
+imrts:
+        rts
+
+xbtimtab:  dc.b 13,8,5,4
 
 
 /*
@@ -2978,10 +5265,156 @@ _kbdvbase:
         move.l    #_kbdvecs+4,d0
         rts
 
+***********************
+* Timer C interrupt
+***********************
+/* 306de: 00e03a9e */
+timercint:
+        addq.l    #1,_hz_200
+*        rol.b     _tim_c_sieve
+* workaround for as68 which does not handle rol.b ea
+        dc.w $e7f9
+        dc.l _tim_c_sieve
+        bpl.s     timerci3
+        movem.l   d0-d7/a0-a6,-(a7)
+        bsr.s     soundirq
+        btst      #1,(_conterm).w
+        beq.s     timerci2
+        tst.b     (kb_key_last).w
+        beq.s     timerci2
+        tst.b     (kb_ticks).w
+        beq.s     timerci1
+        subq.b    #1,(kb_ticks).w
+        bne.s     timerci2
+timerci1:
+        subq.b    #1,(kb_delay).w
+        bne.s     timerci2
+        move.b    (kb_repeat).w,(kb_delay).w
+        move.b    (kb_key_last).w,d0
+        lea.l     (ikbdiorec).w,a0
+        bsr       kbdvec15
+timerci2:
+        move.w    (_timer_ms).w,-(a7)
+        movea.l   (_etv_timer).w,a0
+        jsr       (a0)
+        addq.w    #2,a7
+        movem.l   (a7)+,d0-d7/a0-a6
+timerci3:
+        move.b    #$DF,($FFFFFA11).w
+        rte
 
+* Sound interrupt routine
+* Called from timer C irq
+soundirq:
+        movem.l   d0-d1/a0,-(a7)
+        move.l    (_sndtable).w,d0
+        beq.s     soundir7
+        movea.l   d0,a0
+        move.b    (_snddelay).w,d0
+        beq.s     soundir1
+        subq.b    #1,d0
+        move.b    d0,(_snddelay).w
+        bra.s     soundir7
+soundir1:
+        move.b    (a0)+,d0
+        bmi.s     soundir3
+        move.b    d0,($FFFF8800).w
+        cmpi.b    #$07,d0
+        bne.s     soundir2
+        move.b    (a0)+,d1
+        andi.b    #$3F,d1
+        move.b    ($FFFF8800).w,d0
+        andi.b    #$C0,d0
+        or.b      d1,d0
+        move.b    d0,($FFFF8802).w
+        bra.s     soundir1
+soundir2
+        move.b    (a0)+,($FFFF8802).w
+        bra.s     soundir1
+soundir3:
+        addq.b    #1,d0
+        bpl.s     soundir5
+        cmpi.b    #$81,d0
+        bne.s     soundir4
+        move.b    (a0)+,(_sndtmp).w
+        bra.s     soundir1
+soundir4:
+        cmpi.b    #$82,d0
+        bne.s     soundir5
+        move.b    (a0)+,($FFFF8800).w
+        move.b    (a0)+,d0
+        add.b     d0,(_sndtmp).w
+        move.b    (a0)+,d0
+        move.b    (_sndtmp).w,($FFFF8802).w
+        cmp.b     (_sndtmp).w,d0
+        beq.s     soundir6
+        subq.w    #4,a0
+        bra.s     soundir6
+soundir5:
+        move.b    (a0)+,(_snddelay).w
+        bne.s     soundir6
+        movea.w   #$0000,a0
+soundir6:
+        move.l    a0,(_sndtable).w
+soundir7:
+        movem.l   (a7)+,d0-d1/a0
+        rts
+
+*********************************************************
+* VT52 emulator callback for the bell sound
+*********************************************************
+/* 306de: 00e03b86 */
+ringbell:
+        btst      #2,(_conterm).w
+        beq.s     soundir8
+        movea.l   _bell_hook,a0
+        jsr       (a0)
+        rts
+
+/*
+ * default function for system variable bell_hook
+ */
 /* 306de: 00e03b98 */
 _do_bell:
-		rts
+        move.l    #bellsnd,(_sndtable).w
+        move.b    #$00,(_snddelay).w
+soundir8:
+        rts
+
+        data
+bellsnd:
+        dc.b $00,$34
+        dc.b $01,$00
+        dc.b $02,$00
+        dc.b $03,$00
+        dc.b $04,$00
+        dc.b $05,$00
+        dc.b $06,$00
+        dc.b $07,$fe
+        dc.b $08,$10
+        dc.b $09,$00
+        dc.b $0a,$00
+        dc.b $0b,$00
+        dc.b $0c,$10
+        dc.b $0d,$09
+        dc.b $ff,$00
+clicksnd:
+        dc.b $00,$3b
+        dc.b $01,$00
+        dc.b $02,$00
+        dc.b $03,$00
+        dc.b $04,$00
+        dc.b $05,$00
+        dc.b $06,$00
+        dc.b $09,$00
+        dc.b $0a,$00
+        dc.b $07,$fe
+        dc.b $08,$10
+        dc.b $0d,$03
+        dc.b $0b,$80
+        dc.b $0c,$01
+        dc.b $ff,$00
+        text
 
 /*
  * XBIOS #8 - Floprd - Read individual sectors from floppy disk.
@@ -3225,7 +5658,7 @@ cooksize equ NCOOKIES*2*4
 		xdef midiiorec
 		comm midiiorec,14
 		xdef midibuf
-		comm midibuf,256
+		comm midibuf,SERIAL_BUFSIZE
 		
 		xdef ikbdiorec
 		comm ikbdiorec,14
@@ -3237,3 +5670,6 @@ cooksize equ NCOOKIES*2*4
 
 		xdef bcmap_root
 		comm bcmap_root,16
+
+		xdef bcmap_devs
+		comm bcmap_devs,96

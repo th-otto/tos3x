@@ -2,7 +2,6 @@ BIOS_OBJS = \
 	startup.o \
 	chardev.o \
 	blkdev.o \
-	ikbd.o \
 	linea.o \
 	keytbl$(LANG).o \
 	$(empty)

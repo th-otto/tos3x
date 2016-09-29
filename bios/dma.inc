@@ -285,10 +285,10 @@ acsisize:
 
 /* 306de: 00e01b56 */
 shortdelay:
-        tst.b     (MFP_REGS).w
-        tst.b     (MFP_REGS).w
-        tst.b     (MFP_REGS).w
-        tst.b     (MFP_REGS).w
+        tst.b     (MFP_GPIP).w
+        tst.b     (MFP_GPIP).w
+        tst.b     (MFP_GPIP).w
+        tst.b     (MFP_GPIP).w
         rts
 
 

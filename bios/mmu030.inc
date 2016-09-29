@@ -15,9 +15,12 @@ mmutable_ram equ $700 ; CPU root table in memory
 /*
  * pmmu descriptor flags
  */
-#define PD   $01        /* short-format page descriptor */
-#define TD   $02        /* short-format table descriptor */
-#define CI   $40        /* cache inhibit (page descriptors only) */
+/* short-format page descriptor */
+#define PD   $01
+/* short-format table descriptor */
+#define TD   $02
+/* cache inhibit (page descriptors only) */
+#define CI   $40
 
 /*
  * some macros useful for table creation
