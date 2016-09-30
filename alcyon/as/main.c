@@ -10,16 +10,6 @@
  *
  *  Bill Allen
  *  Modified by Vicki Hutchison
- *
- *  after any of this assembler is recompiled, it must be initialized
- *  before it will execute properly.  To initialize, become super user
- *  and execute the command:
- *
- *      as68 -i as68init
- *
- *  where as68 is the newly compiled version of the assembler.  With-
- *  out this initialization, the assembler will not run (probably bus
- *  error).
  */
 
 #include "as68.h"
@@ -302,7 +292,7 @@ static int calcilen(NOTHING)
 				goto loffst;
 			}
 			l -= (loctr + 2);
-			if (l <= 127 && l >= -128)	/* 8 bit offset */
+			if ((!explmode || modelen == BYTESIZ) && l <= 127 && l >= -128)	/* 8 bit offset */
 				break;
 		}
 	  loffst:
