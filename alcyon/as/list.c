@@ -195,7 +195,7 @@ PP(int pflag;)
 	{
 		pi = ins;
 		for (i = 0; i < (instrlen / 2); i++)	/* binary */
-			printf("%04x", (uint16_t)*pi++);
+			printf("%04x", (unsigned short)*pi++);
 		if (instrlen & 1)
 		{
 			i++;
