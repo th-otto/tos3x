@@ -29,6 +29,8 @@ save_siz equ 238
 /* sizeof(IOREC) */
 IOREC_SIZE equ 14
 
+#define NUMFLOPPIES 2
+
 FASTRAMBASE equ $01000000
 
 #define ACIA_IKBD_BASE $fffffc00
@@ -45,6 +47,44 @@ FASTRAMBASE equ $01000000
 #define SCCB_DATA SCCN_BASE+2
 
 #define SERIAL_BUFSIZE 256
+
+*
+* struct dsb {
+*    uint8_t drivetype;    /* == 8 for HD */
+*    uint8_t pad;
+*    uint16_t curtrack;
+*    uint16_t density;     /* 0 = SD, 3 = DD */
+*    uint16_t seekrate;
+* };
+fd_drivetype equ 0
+fd_curtrack equ 2
+fd_density equ 4
+fd_seekrate equ 6
+
+/*
+ * size of a raw sector for flopfmt:
+ *    12 gap $00
+ * +   3 id mark $f5
+ * +   1 address mark $fe
+ * +   1 track #
+ * +   1 side #
+ * +   1 sector #
+ * +   1 sector size
+ * +   1 checksum $f7
+ * +  22 gap $4e
+ * +  12 gap $00
+ * +   3 id mark
+ * +   1 address mark $fb
+ * + 512 data
+ * +   1 checksum $f7
+ * +  40 gap $4e
+ * = 612
+ */
+#define FD_RAWSEC 612
+#define FD_RAWTRACK (60 + 18 * FD_RAWSEC + 1401)
+
+#define DMA_DATA $ffff8604
+#define DMA_CTRL $ffff8606
 
 * ==== Definitions ==========================================================
 
@@ -161,6 +201,15 @@ os_dummy:
     dc.l   0            * _main should start at offset 0x30, shouldn't it?
 
 
+        data
+_ui_mupb:
+        dc.l GEM_MUPB_MAGIC
+        dc.l _endgembss
+        dc.l _ui_start
+zero:
+	    dc.l 0
+
+		text
 
 
 /*
@@ -591,7 +640,7 @@ yesstereo:
         move.l    d1,(a0)+
         btst      #6,d0
         bne.s     nofdc
-        move.b    #$08,$00001820
+        move.b    #$08,dsb+fd_drivetype
         move.l    #$5F464443,(a0)+ ; '_FDC'
         move.l    #$01415443,(a0)+ ; FDC_1ATC
 nofdc:
@@ -908,6 +957,99 @@ logomon2:
         adda.w    #(1280/8)-12,a1
         dbf       d0,logomon1
 logodone:
+
+        data
+
+* 96x86 image of atari logo displayed at boot time
+atarilogo:
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
+        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
+        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
+        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
+        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
+        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
+        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
+        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
+        dc.w $0000,$0007,$f1ff,$1fc0,$0000,$0000
+        dc.w $0000,$0007,$f1ff,$1fc0,$0000,$0000
+        dc.w $0000,$000f,$f1ff,$1fe0,$0000,$0000
+        dc.w $0000,$000f,$f1ff,$1fe0,$0000,$0000
+        dc.w $0000,$001f,$e1ff,$0ff0,$0000,$0000
+        dc.w $0000,$003f,$e1ff,$0ff8,$0000,$0000
+        dc.w $0000,$003f,$e1ff,$0ff8,$0000,$0000
+        dc.w $0000,$007f,$c1ff,$07fc,$0000,$0000
+        dc.w $0000,$00ff,$c1ff,$07fe,$0000,$0000
+        dc.w $0000,$01ff,$81ff,$03ff,$0000,$0000
+        dc.w $0000,$03ff,$81ff,$03ff,$8000,$0000
+        dc.w $0000,$07ff,$01ff,$01ff,$c000,$0000
+        dc.w $0000,$0ffe,$01ff,$00ff,$e000,$0000
+        dc.w $0000,$1ffe,$01ff,$00ff,$f000,$0000
+        dc.w $0000,$7ffc,$01ff,$007f,$fc00,$0000
+        dc.w $0000,$fff8,$01ff,$003f,$fe00,$0000
+        dc.w $0003,$fff0,$01ff,$001f,$ff80,$0000
+        dc.w $001f,$ffe0,$01ff,$000f,$fff0,$0000
+        dc.w $00ff,$ffc0,$01ff,$0007,$fffe,$0000
+        dc.w $00ff,$ff80,$01ff,$0003,$fffe,$0000
+        dc.w $00ff,$ff00,$01ff,$0001,$fffe,$0000
+        dc.w $00ff,$fc00,$01ff,$0000,$7ffe,$0000
+        dc.w $00ff,$f800,$01ff,$0000,$3ffe,$0000
+        dc.w $00ff,$e000,$01ff,$0000,$0ffe,$0000
+        dc.w $00ff,$8000,$01ff,$0000,$03fe,$0000
+        dc.w $00fc,$0000,$01ff,$0000,$007e,$0000
+        dc.w $00e0,$0000,$01ff,$0000,$000e,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$0000,$0000,$0000,$0000,$0000
+        dc.w $0000,$c07f,$fe03,$0007,$c01e,$0700
+        dc.w $0001,$e07f,$fe07,$801f,$f81e,$18c0
+        dc.w $0003,$e07f,$fe0f,$803f,$fc1e,$1740
+        dc.w $0003,$f07f,$fe0f,$c03f,$fe1e,$2520
+        dc.w $0003,$f07f,$fe0f,$c03f,$fe1e,$2620
+        dc.w $0007,$f803,$c01f,$e03c,$1f1e,$2520
+        dc.w $0007,$f803,$c01f,$e03c,$0f1e,$1540
+        dc.w $0007,$f803,$c01f,$e03c,$0f1e,$18c0
+        dc.w $000f,$7c03,$c03d,$f03c,$0f1e,$0700
+        dc.w $000f,$3c03,$c03c,$f03c,$0f1e,$0000
+        dc.w $000f,$3c03,$c03c,$f03c,$1e1e,$0000
+        dc.w $001e,$3e03,$c078,$f83c,$7e1e,$0000
+        dc.w $001e,$1e03,$c078,$783d,$fc1e,$0000
+        dc.w $001e,$1e03,$c078,$783d,$f81e,$0000
+        dc.w $003e,$1f03,$c0f8,$7c3d,$e01e,$0000
+        dc.w $003f,$ff03,$c0ff,$fc3d,$e01e,$0000
+        dc.w $003f,$ff03,$c0ff,$fc3d,$e01e,$0000
+        dc.w $007f,$ff83,$c1ff,$fe3c,$f01e,$0000
+        dc.w $007f,$ff83,$c1ff,$fe3c,$f81e,$0000
+        dc.w $0078,$0783,$c1e0,$1e3c,$781e,$0000
+        dc.w $00f8,$07c3,$c3e0,$1f3c,$3c1e,$0000
+        dc.w $00f0,$07c3,$c3c0,$1f3c,$3e1e,$0000
+        dc.w $00f0,$03c3,$c3c0,$0f3c,$1e1e,$0000
+        dc.w $01f0,$03e3,$c7c0,$0fbc,$1f1e,$0000
+        dc.w $01e0,$01e3,$c780,$07b8,$0f1e,$0000
+
+		text
 
 /*
  * position VT52 cursor below logo
@@ -4571,6 +4713,7 @@ kbd_joy:
 ********************************
 * handler for ordinary keys
 ********************************
+/* 306de: 00e033ea */
 _kbdvec:
         move.b    (_shifty).w,d1                ; get current shift state
         cmpi.b    #$2A,d0                       ; left shift pressed?
@@ -4791,21 +4934,21 @@ kbdvec34:
         cmpi.b    #$48,d1                       ; is it an up arrow?
         bne.s     kbdvec35
         move.b    #$00,d1
-        move.b    #$FFF8,d2
+        move.b    #-$08,d2
         move.b    (_shifty).w,d0
         andi.b    #$03,d0
         beq       keymous4
-        move.b    #$FFFF,d2
+        move.b    #-1,d2
         bra       keymous4
 kbdvec35:
         cmpi.b    #$4B,d1                       ; is it an left arrow?
         bne.s     kbdvec36
         move.b    #$00,d2
-        move.b    #$FFF8,d1
+        move.b    #-$08,d1
         move.b    (_shifty).w,d0
-        andi.b    #$03,d0
+        andi.b    #-$08,d0
         beq       keymous4
-        move.b    #$FFFF,d1
+        move.b    #-1,d1
         bra       keymous4
 kbdvec36:
         cmpi.b    #$4D,d1                       ; is it an right arrow?
@@ -4896,7 +5039,7 @@ kbdvec47:
  */
 /* 306de: 00e0378a */
 _do_keyclick:
-        move.l    #clicksnd,(_sndtable).w
+        move.l    #_clicksnd,(_sndtable).w
         move.b    #$00,(_snddelay).w
         rts
 
@@ -5373,84 +5516,14 @@ ringbell:
  */
 /* 306de: 00e03b98 */
 _do_bell:
-        move.l    #bellsnd,(_sndtable).w
+        move.l    #_bellsnd,(_sndtable).w
         move.b    #$00,(_snddelay).w
 soundir8:
         rts
 
-        data
-bellsnd:
-        dc.b $00,$34
-        dc.b $01,$00
-        dc.b $02,$00
-        dc.b $03,$00
-        dc.b $04,$00
-        dc.b $05,$00
-        dc.b $06,$00
-        dc.b $07,$fe
-        dc.b $08,$10
-        dc.b $09,$00
-        dc.b $0a,$00
-        dc.b $0b,$00
-        dc.b $0c,$10
-        dc.b $0d,$09
-        dc.b $ff,$00
-clicksnd:
-        dc.b $00,$3b
-        dc.b $01,$00
-        dc.b $02,$00
-        dc.b $03,$00
-        dc.b $04,$00
-        dc.b $05,$00
-        dc.b $06,$00
-        dc.b $09,$00
-        dc.b $0a,$00
-        dc.b $07,$fe
-        dc.b $08,$10
-        dc.b $0d,$03
-        dc.b $0b,$80
-        dc.b $0c,$01
-        dc.b $ff,$00
-        text
 
-/*
- * XBIOS #8 - Floprd - Read individual sectors from floppy disk.
- */
-/* 306de: 00e03c10 */
-_floprd:
-		rts
+#include "floppy.inc"
 
-/*
- * XBIOS #9 - Flopwr - Write individual sectors on a floppy disk.
- */
-/* 306de: 00e03d12 */
-_flopwrt:
-		rts
-
-/*
- * XBIOS #10 - Flopfmt - Format specific tracks on a floppy 
- */
-/* 306de: 00e03e02 */
-_flopfmt:
-		rts
-
-/*
- * XBIOS #19 - Flopver - Verify sectors of a floppy disk.
- */
-/* 306de: 00e03ffe */
-_flopver:
-		rts
-
-/* 306de: 00e04106 */
-_flopvbl:
-	rts
-
-/*
- * XBIOS #41 - Floprate - Read or set the seek rate of a floppy drive.
- */
-/* 306de: 00e044b6 */
-_floprate:
-		rts
 
 /*
  * XBIOS #36 - Prtblk - Hardcopy print-out 
@@ -5521,103 +5594,6 @@ setblit2:
 getblitmode:
         move.w    LA_BLTMODE,d0
         rts
-
-        data
-_ui_mupb:
-        dc.l GEM_MUPB_MAGIC
-        dc.l _endgembss
-        dc.l _ui_start
-zero:
-	    dc.l 0
-
-* 96x86 image of atari logo displayed at boot time
-atarilogo:
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
-        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
-        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
-        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
-        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
-        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
-        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
-        dc.w $0000,$0007,$f1ff,$1fc0,$0000,$0000
-        dc.w $0000,$0007,$f1ff,$1fc0,$0000,$0000
-        dc.w $0000,$000f,$f1ff,$1fe0,$0000,$0000
-        dc.w $0000,$000f,$f1ff,$1fe0,$0000,$0000
-        dc.w $0000,$001f,$e1ff,$0ff0,$0000,$0000
-        dc.w $0000,$003f,$e1ff,$0ff8,$0000,$0000
-        dc.w $0000,$003f,$e1ff,$0ff8,$0000,$0000
-        dc.w $0000,$007f,$c1ff,$07fc,$0000,$0000
-        dc.w $0000,$00ff,$c1ff,$07fe,$0000,$0000
-        dc.w $0000,$01ff,$81ff,$03ff,$0000,$0000
-        dc.w $0000,$03ff,$81ff,$03ff,$8000,$0000
-        dc.w $0000,$07ff,$01ff,$01ff,$c000,$0000
-        dc.w $0000,$0ffe,$01ff,$00ff,$e000,$0000
-        dc.w $0000,$1ffe,$01ff,$00ff,$f000,$0000
-        dc.w $0000,$7ffc,$01ff,$007f,$fc00,$0000
-        dc.w $0000,$fff8,$01ff,$003f,$fe00,$0000
-        dc.w $0003,$fff0,$01ff,$001f,$ff80,$0000
-        dc.w $001f,$ffe0,$01ff,$000f,$fff0,$0000
-        dc.w $00ff,$ffc0,$01ff,$0007,$fffe,$0000
-        dc.w $00ff,$ff80,$01ff,$0003,$fffe,$0000
-        dc.w $00ff,$ff00,$01ff,$0001,$fffe,$0000
-        dc.w $00ff,$fc00,$01ff,$0000,$7ffe,$0000
-        dc.w $00ff,$f800,$01ff,$0000,$3ffe,$0000
-        dc.w $00ff,$e000,$01ff,$0000,$0ffe,$0000
-        dc.w $00ff,$8000,$01ff,$0000,$03fe,$0000
-        dc.w $00fc,$0000,$01ff,$0000,$007e,$0000
-        dc.w $00e0,$0000,$01ff,$0000,$000e,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$c07f,$fe03,$0007,$c01e,$0700
-        dc.w $0001,$e07f,$fe07,$801f,$f81e,$18c0
-        dc.w $0003,$e07f,$fe0f,$803f,$fc1e,$1740
-        dc.w $0003,$f07f,$fe0f,$c03f,$fe1e,$2520
-        dc.w $0003,$f07f,$fe0f,$c03f,$fe1e,$2620
-        dc.w $0007,$f803,$c01f,$e03c,$1f1e,$2520
-        dc.w $0007,$f803,$c01f,$e03c,$0f1e,$1540
-        dc.w $0007,$f803,$c01f,$e03c,$0f1e,$18c0
-        dc.w $000f,$7c03,$c03d,$f03c,$0f1e,$0700
-        dc.w $000f,$3c03,$c03c,$f03c,$0f1e,$0000
-        dc.w $000f,$3c03,$c03c,$f03c,$1e1e,$0000
-        dc.w $001e,$3e03,$c078,$f83c,$7e1e,$0000
-        dc.w $001e,$1e03,$c078,$783d,$fc1e,$0000
-        dc.w $001e,$1e03,$c078,$783d,$f81e,$0000
-        dc.w $003e,$1f03,$c0f8,$7c3d,$e01e,$0000
-        dc.w $003f,$ff03,$c0ff,$fc3d,$e01e,$0000
-        dc.w $003f,$ff03,$c0ff,$fc3d,$e01e,$0000
-        dc.w $007f,$ff83,$c1ff,$fe3c,$f01e,$0000
-        dc.w $007f,$ff83,$c1ff,$fe3c,$f81e,$0000
-        dc.w $0078,$0783,$c1e0,$1e3c,$781e,$0000
-        dc.w $00f8,$07c3,$c3e0,$1f3c,$3c1e,$0000
-        dc.w $00f0,$07c3,$c3c0,$1f3c,$3e1e,$0000
-        dc.w $00f0,$03c3,$c3c0,$0f3c,$1e1e,$0000
-        dc.w $01f0,$03e3,$c7c0,$0fbc,$1f1e,$0000
-        dc.w $01e0,$01e3,$c780,$07b8,$0f1e,$0000
 
 		bss
 		

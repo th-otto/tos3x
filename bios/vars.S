@@ -11,6 +11,7 @@ KBBUFSZ equ 80
 SUPSIZ equ 1024
 MAXQUICK equ 5
 SERIAL_BUFSIZE equ 256
+NUMFLOPPPIES equ 2
     
 	bss
 
@@ -193,7 +194,68 @@ mdm2obuf: ds.b SERIAL_BUFSIZE
 	xdef mdm2iorec
 mdm2iorec: ds.b 2*14+8
 
-	ds.b $90
+	xdef fd_retry
+fd_retry: ds.w 1
+	xdef _fd_wp
+_fd_wp: ds.b NUMFLOPPIES
+	xdef _fd_latch
+_fd_latch: ds.b NUMFLOPPIES
+	xdef _fd_lastacc
+_fd_lastacc: ds.l NUMFLOPPIES
+	xdef fd_timeout
+fd_timeout: ds.l 1
+	xdef fd_motoron
+fd_motoron: ds.w 1
+	xdef fd_desel
+fd_desel: ds.w 1
+	xdef fd_dev
+fd_dev: ds.w 1
+	xdef fd_track
+fd_track: ds.w 1
+	xdef fd_sect
+fd_sect: ds.w 1
+	xdef fd_side
+fd_side: ds.w 1
+	xdef fd_scount
+fd_scount: ds.w 1
+	xdef fd_buffer
+fd_buffer: ds.l 1
+	xdef fd_spt
+fd_spt: ds.w 1
+	xdef fd_interlv
+fd_interlv: ds.w 1
+	xdef fd_virgin
+fd_virgin: ds.w 1
+	xdef fd_secmap
+fd_secmap: ds.l 1
+	xdef fd_deferr
+fd_deferr: ds.w 1
+	xdef fd_curerr
+fd_curerr: ds.w 1
+
+	xdef flopsregs
+flopsregs: ds.l 9
+
+	xdef dsb
+dsb: ds.b 8*NUMFLOPPPIES
+	
+	xdef fd_rtryseek
+fd_rtryseek: ds.w 1
+	xdef fd_frb
+fd_frb: ds.l 1
+	xdef fd_copyp
+fd_copyp: ds.l 1
+	xdef fd_cscnt
+fd_cscnt: ds.w 1
+
+	ds.l 1
+	ds.l 1
+	ds.l 1
+	ds.l 1
+	ds.l 1
+	ds.l 1
+	ds.l 1
+	ds.w 1
 
 	xdef _dskbuf
 _dskbuf: ds.b 0
@@ -262,7 +324,9 @@ _ofdlist: ds.l 1
 _glbcolumn: ds.w 3
 
 	ds.w 1
-	ds.w 1
+	
+	xdef _drivechange
+_drivechange: ds.b NUMFLOPPPIES
 
 	xdef _rrecno
 _rrecno: ds.l 1
@@ -272,8 +336,10 @@ _rrecno: ds.l 1
 
 	xdef _rwrtflg
 _rwrtflg: ds.w 1
+	xdef _curflop
+_curflop: ds.w 1
 
-	ds.b $1c6
+	ds.b $1c4
 
 	xdef _rdm
 _rdm: ds.l 1
@@ -398,4 +464,3 @@ _endvdibss: ds.b 0
 _endgembss: ds.b 0
 	xdef __ebss
 __ebss: ds.b 0
-

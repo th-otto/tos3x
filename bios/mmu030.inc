@@ -125,3 +125,5 @@ mmu_tt0:
         dc.l                      $017e8107 ; for 0x01000000-0x7fffffff, caching allowed
 mmu_tt1:
         dc.l                      $807e8507 ; for 0x80000000-0xfeffffff, *caching inhibited*
+
+	text

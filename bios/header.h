@@ -40,9 +40,6 @@
 #endif
 
 
-/* the default country number */
-#define OS_COUNTRY CTRY_DE
-
 /* the PAL/NTSC flag */
 #if OS_COUNTRY == CTRY_US
 #define OS_PAL 1
