@@ -111,7 +111,7 @@ _proc_stk:      ds.w   16      * 16 words from exception stack
         ds.b 20
         
 * ==== Start of System variables ============================================
-        xdef  sysvars_end
+        xdef  sysvars_start
 sysvars_start:
 
 _etv_timer:     ds.l   1       * GEM event timer vector
@@ -202,9 +202,6 @@ _kcl_hook:      ds.l   1       * pointer to routine for system keyclick
         
 *        org 0x800
 
-
-*	    xdef _shifty
-* _shifty:        ds.w   1       * reflects the status up/down of mode keys
 
 * ===========================================================================
 * ==== End ==================================================================

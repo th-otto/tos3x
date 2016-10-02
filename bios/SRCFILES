@@ -2,7 +2,11 @@ BIOS_OBJS = \
 	startup.o \
 	keytbl$(COUNTRY).o \
 	sounds.o \
+	prtblk.o \
+	prt.o \
+	memtest.o \
 	chardev.o \
 	blkdev.o \
 	linea.o \
+	rest.o \
 	$(empty)

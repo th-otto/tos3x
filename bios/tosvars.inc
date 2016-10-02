@@ -161,7 +161,7 @@ _drvbits        equ $4c2      * bit allocation for physical drives
 _dskbufp        equ $4c6      * pointer to disk buffer
 _autopath       equ $4ca      * pointer to auto-execute path
 _vbl_list       equ $4ce      * pointers to 8 VBl routines
-_dumpflg        equ $4ee      * flag for screen dump (unsused)
+_dumpflg        equ $4ee      * flag for screen dump
 _prtabt         equ $4f0      * printer abort flag
 _sysbase        equ $4f2      * pointer to start of OS
 _shell_p        equ $4f6      * pointer to shell

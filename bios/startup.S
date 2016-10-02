@@ -1235,7 +1235,7 @@ dmaboot:
 dmaloop:
         cmpa.w    #$0000,a5
         bne       skipsp
-        bsr       x00E05FA4
+        bsr       memtest
         movea.w   d0,a5
         beq       dmawait
         move.w    #$001B,-(a7)
@@ -1310,7 +1310,7 @@ dmakey:
         addq.l    #4,a7
         cmpa.w    #$0000,a5
         bne.s     dmaline
-        bsr       x00E061F2
+        bsr       memtestabort
         move.l    d7,_hz_200
         bra.s     dmadone
 dmaline:
@@ -5524,76 +5524,6 @@ soundir8:
 
 #include "floppy.inc"
 
-
-/*
- * XBIOS #36 - Prtblk - Hardcopy print-out 
- */
-/* 306de: 00e045d8 */
-_prtblk:
-	rts
-
-
-/*
- * XBIOS #17 - Random - Random number generator
- */
-/* 306de: 00e05d38 */
-_random:
-	rts
-
-
-/*
- * XBIOS #18 - Protobt - Generate a standard boot-sector for a floppy disk.
- */
-/* 306de: 00e05e04 */
-_protobt:
-		rts
-
-x00E05FA4:
-	rts
-x00E061F2:
-	rts
-
-/* 306de: 00e0694a */
-vdireinit:
-	rts
-
-/* 306de: 00e069f4 */
-resetdev:
-	rts
-
-/* 306de: 00e0761a */
-_blink:
-	rts
-
-
-/*
- * XBIOS #21 - Cursconf - Sets the working of the VT52 cursor
- */
-/* 306: 00e0764c */
-_cursconf:
-		rts
-
-
-/* 306: 00e07f20 */
-setblitmode:
-        move.w    d0,LA_BLTMODE
-        movea.l   LA_CURDEV,a0
-        btst      #0,d0
-        beq.s     setblit1
-        movea.l   LA_ROUTINES,a0
-setblit1:
-        lea.l     LA_USERDEVINIT,a1
-        moveq.l   #9,d0
-setblit2:
-        move.l    (a0)+,(a1)+
-        dbf       d0,setblit2
-        rts
-
-	xdef getblitmode
-/* 306: 00e07f48 */
-getblitmode:
-        move.w    LA_BLTMODE,d0
-        rts
 
 		bss
 		

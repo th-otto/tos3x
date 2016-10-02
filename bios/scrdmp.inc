@@ -9,8 +9,11 @@ _scrdmp:
         move.w    #-1,_dumpflg
         rts
 
+/*
+ * default function for system variable scr_dmp/dump_vec
+ */
 /* 306de: 00e01462 */
-		xdef _bscr_dump
+	xdef _bscr_dump
 _bscr_dump:
         move.l    (_v_bas_ad).w,(_pbdef).w ; pbdef.pb_pb_scrptr
         clr.w     (_pbdef+4).w ; pbdef.pb_offset
@@ -24,7 +27,7 @@ _bscr_dump:
         clr.w     (_pbdef+10).w ; pbdef.pb_left
         clr.w     (_pbdef+12).w ; pbdef.pb_right
         move.l    #$FFFF8240,(_pbdef+18).w ; pbdef.pb_colptr
-        clr.w     (_pbdef+26).w ; pbdef.pb_mask
+        clr.w     (_pbdef+26).w ; pbdef.pb_mask; BUG: pb_mask is long (pointer)
         move.w    (_prtconfig).w,d1
         lsr.w     #3,d1
         and.w     #$0001,d1

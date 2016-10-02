@@ -24,7 +24,7 @@ gem_env: ds.b 12
 
 * save area for trap13/14.
     xdef save_beg
-save_beg:  ds.b   238
+save_beg: ds.b   238
     xdef _trap_save_area
 _trap_save_area: ds.b 0         * End of Save storage
 
@@ -99,7 +99,7 @@ midibuf: ds.b 128
 _kbdvecs: ds.b 42
 
 	xdef kb_altnum
-kb_altnum:  ds.w 1
+kb_altnum: ds.w 1
 	
 	xdef kbdbuf
 kbdbuf: ds.b 7
@@ -260,7 +260,14 @@ fd_cscnt: ds.w 1
 	xdef _dskbuf
 _dskbuf: ds.b 0
 
-	ds.b $1E32
+	ds.b $2c
+	
+	xdef _width
+_width: ds.w 1
+	xdef _height
+_height: ds.w 1
+
+	ds.b $1E02
 
 #include "linea.inc"
 
@@ -269,7 +276,7 @@ _dskbuf: ds.b 0
 	xdef biosav
 biosav: ds.l 1
 
-    ds.l 1 ; unused
+	ds.l 1 ; unused
 
 	xdef savesr
 savesr: ds.w 1
@@ -283,29 +290,42 @@ old_tik: ds.l 1
 	xdef old_2
 old_2: ds.l 1
 
-    ds.l 1
-    ds.l 1
-    
+	ds.l 1
+
+	xdef _prtbdev
+_prtbdev: ds.b 1
+	even
+
+	xdef _prtboch
+_prtboch: ds.b 1
+	even
+
     xdef _msec
 _msec: ds.w 1
 
-    ds.b $402
+	xdef _prtbbval
+_prtbbval: ds.w 1
+
+	ds.b $400
     
     xdef _supstk
 _supstk: ds.w SUPSIZ
     xdef _supstkend
-_supstkend:
+_supstkend: ds.b 0
 
-	ds.b 1
+	xdef _prtbflg
+_prtbflg: ds.b 1
 	even
 	
-	ds.b 1
+	xdef _prtbdmask
+_prtbdmask: ds.b 1
 	even
 	
 	xdef _time
 _time: ds.w 1
 
-	ds.b 8
+	xdef _prtboval
+_prtboval: ds.w 4
 
 	xdef _root
 _root: ds.l MAXQUICK
@@ -318,48 +338,81 @@ _glbkbchar: ds.l 3*KBBUFSZ
 	xdef _ofdlist
 _ofdlist: ds.l 1
 
- 	ds.l 1
+	ds.l 1
 
 	xdef _glbcolumn
 _glbcolumn: ds.w 3
 
-	ds.w 1
+	xdef _prtbwidth
+_prtbwidth: ds.w 1
 	
 	xdef _drivechange
 _drivechange: ds.b NUMFLOPPPIES
 
 	xdef _rrecno
-_rrecno: ds.l 1
+_rrecno: ds.w 1
 
-	ds.b 2
-	ds.b 2
+	xdef _prtbbytes
+_prtbbytes: ds.w 1
+
+	xdef _prtbilow
+_prtbilow: ds.b 1
+	even
+	xdef _prtbihigh
+_prtbihigh: ds.b 1
+	even
 
 	xdef _rwrtflg
 _rwrtflg: ds.w 1
 	xdef _curflop
 _curflop: ds.w 1
 
-	ds.b $1c4
+	xdef _prtbwords
+_prtbwords: ds.w 1
+
+	xdef _prtbstrt
+_prtbstrt: ds.l 1
+
+	xdef _prtbp2
+_prtbp2: ds.l 1
+
+	xdef _prtbchunk
+_prtbchunk: ds.w 1
+
+	ds.b $1b4
+
+	xdef _prtbp1
+_prtbp1: ds.l 1
 
 	xdef _rdm
 _rdm: ds.l 1
 
-	ds.w 1
-	ds.l 1
-	ds.w 1
-	ds.w 1
+	xdef _prtbgval
+_prtbgval: ds.w 1
+
+	xdef _prtbend
+_prtbend: ds.l 1
+
+	xdef _prtbpmsk
+_prtbpmsk: ds.w 1
+
+	xdef _prtbidx
+_prtbidx: ds.w 1
 
 	xdef _dirlock
 _dirlock: ds.w 1
 
-	ds.w 1
-	ds.w 1
+	xdef _prtbinvert
+_prtbinvert: ds.w 1
+
+	xdef _prtbink
+_prtbink: ds.w 1
 
 	xdef _ldivr
 _ldivr: ds.l 1
 
 	xdef _ofdbuf
-_ofdbuf: ds.b 56*100
+_ofdbuf: ds.b 70*80
 
 	ds.b $18
 
@@ -371,7 +424,8 @@ _oscnt: ds.w 1
 	xdef _rwerr
 _rwerr: ds.l 1
 
-    ds.w 1
+	xdef _prtbrval
+_prtbrval: ds.w 1
 
 	xdef _pmd
 _pmd: ds.l 3
@@ -384,15 +438,17 @@ _sft: ds.b 10*OPNFILES
 	xdef _run
 _run: ds.l 1
 
-    ds.b $78
+	ds.b $5a
     
-	xdef _fill
-_fill: ds.b 4
+    xdef _pbpar
+_pbpar: ds.b 30
+
+	ds.l 1 ; unused
 
 	xdef _bakbuf
 _bakbuf: ds.l 3
 
-    ds.b $48
+	ds.b $48
     
 	xdef _secbuf
 _secbuf: ds.b 4*512
@@ -403,17 +459,39 @@ _osuser: ds.b 1
 	xdef _dirrec
 _dirrec: ds.l 1
 
-    ds.b $20
+	xdef _prtbval
+_prtbval: ds.w 16
     
 	xdef _dirtbl
 _dirtbl: ds.l NCURDIR
 
-    ds.b 4
+	xdef _prtbplanes
+_prtbplanes: ds.w 1
+
+	xdef _prtboffset
+_prtboffset: ds.w 1
     
 	xdef _errbuf
 _errbuf: ds.l 3
 
-    ds.b $32
+	xdef _prtbtcol
+_prtbtcol: ds.w 1
+
+	xdef _prtbacol
+_prtbacol: ds.b 1
+	even
+
+	xdef _prtbmaxval
+_prtbmaxval: ds.w 16
+
+	xdef _prtbeps
+_prtbeps: ds.b 1
+	even
+	
+	xdef _prtbobuf
+_prtbobuf: ds.b 8
+
+	ds.b 4
     
 	xdef _diruse
 _diruse: ds.b NCURDIR
@@ -424,17 +502,52 @@ _drvtbl: ds.l 16
 	xdef _drvsel
 _drvsel: ds.w 1
 
-    ds.b $10
+	xdef _prtbheight
+_prtbheight: ds.w 1
     
+    xdef _prtbmono
+_prtbmono: ds.b 1
+	even
+	
+	xdef _prtbmval
+_prtbmval: ds.w 4
+
+    xdef _prtbmed
+_prtbmed: ds.b 1
+	even
+	
+	xdef _prtbempty
+_prtbempty: ds.b 1
+	even
+	
     xdef _uptime
 _uptime: ds.l 1
 
-    ds.w 1
+	xdef _prtblines
+_prtblines: ds.w 1
     
 	xdef _errdrv
 _errdrv: ds.w 1
 
-    ds.b $2a
+	xdef _prtbodd
+_prtbodd: ds.b 1
+	even
+
+	xdef _prtbdots
+_prtbdots: ds.w 1
+
+	xdef _prtbomask
+_prtbomask ds.w 1
+	
+	xdef _prtbbits
+_prtbbits: ds.w 1
+    
+	xdef _prtbprez
+_prtbprez: ds.b 1
+	even
+
+	xdef _prtbminval
+_prtbminval: ds.w 16
     
 	xdef _ospd
 _ospd: ds.b 256
@@ -442,7 +555,13 @@ _ospd: ds.b 256
     xdef _buptr
 _buptr: ds.l 3
 
-    ds.l 1
+	xdef _prtblow
+_prtblow: ds.b 1
+	even
+	
+	xdef _prtbamon
+_prtbamon: ds.b 1
+	even
     
 	xdef _date
 _date: ds.w 1
@@ -450,17 +569,22 @@ _date: ds.w 1
 	xdef _bcbx
 _bcbx: ds.b 4*20
 
-    ds.w 1
+	xdef _prtbbol
+_prtbbol: ds.b 1
+	even
 
     xdef _beptr
 _beptr: ds.l 3
 
+* This label is referenced by the OSHEADER
 	xdef _endvdibss
 _endvdibss: ds.b 0
 
-    ds.b $63E6
+	ds.b $63E6
 
+* This label is referenced by the GEM_MUPB structure
 	xdef _endgembss
 _endgembss: ds.b 0
+
 	xdef __ebss
 __ebss: ds.b 0
