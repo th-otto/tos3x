@@ -92,7 +92,6 @@ const char *const opname[] = {
 	"cfloat",							/* 79=CFLOAT */
 };
 
-#ifdef	DEBUG
 
 static const char *const types[] = {
 	"typeless-invalid",					/* 0=TYPELESS */
@@ -137,10 +136,10 @@ static VOID outlevel(NOTHING)
 
 	for (i = 0; i < level; i++)
 	{
-		oputchar(' ');
-		oputchar(' ');
-		oputchar(' ');
-		oputchar(' ');
+		fputc(' ', stderr);
+		fputc(' ', stderr);
+		fputc(' ', stderr);
+		fputc(' ', stderr);
 	}
 }
 
@@ -151,15 +150,15 @@ PP(struct tnode *tp;)
 	register short i;
 
 	if (SUPTYPE(tp->t_type))
-		oputchar('*');
-	oprintf("%s ", types[BTYPE(tp->t_type)]);
+		fputc('*', stderr);
+	fprintf(stderr, "%s ", types[BTYPE(tp->t_type)]);
 	if (tp->t_su != 0 || (tp->t_op == CINT && tp->t_value == 0))
 	{
 		i = tp->t_su >> 8;
 		if (i > 15 || i < 0)
-			oprintf("INVALID");
+			fprintf(stderr, "INVALID");
 		else
-			oprintf("%s", suvals[i]);
+			fprintf(stderr, "%s", suvals[i]);
 	}
 }
 
@@ -169,13 +168,13 @@ PP(struct tnode *tp;)
 {
 	level++;
 	outlevel();
-	oprintf("%s ", opname[tp->t_op]);
+	fprintf(stderr, "%s ", opname[tp->t_op]);
 	if (tp->t_op == BFIELD || tp->t_op == IFGOTO)
 	{
 		if (tp->t_op == BFIELD)
-			oprintf("off=%d len=%d\n", BFOFFS(tp->t_su), BFLEN(tp->t_su));
+			fprintf(stderr, "off=%d len=%d\n", BFOFFS(tp->t_su), BFLEN(tp->t_su));
 		else
-			oprintf("%s goto L%d\n", tp->t_type ? "TRUE" : "FALSE", tp->t_su);
+			fprintf(stderr, "%s goto L%d\n", tp->t_type ? "TRUE" : "FALSE", tp->t_su);
 		putsexpr(tp->t_left);
 		level--;
 		return;
@@ -186,60 +185,60 @@ PP(struct tnode *tp;)
 	case DCLONG:
 	case CLONG:
 	case CFLOAT:
-		oprintf(" %x.%x\n", tp->v.w.hiword, tp->v.w.loword);
+		fprintf(stderr, " %x.%x\n", tp->v.w.hiword, tp->v.w.loword);
 		break;
 
 	case CINT:
-		oprintf(" %d\n", tp->t_value);
+		fprintf(stderr, " %d\n", tp->t_value);
 		break;
 
 	case AUTODEC:
 	case AUTOINC:
-		oprintf(" R%d\n", tp->t_reg);
+		fprintf(stderr, " R%d\n", tp->t_reg);
 		break;
 
 	case SYMBOL:
 		switch (tp->t_sc)
 		{
 		case REGISTER:
-			oprintf(" R%d", tp->t_reg);
+			fprintf(stderr, " R%d", tp->t_reg);
 			break;
 
 		case CINDR:
-			oprintf(" %ld\n", tp->t_offset);
+			fprintf(stderr, " %ld\n", tp->t_offset);
 			break;
 
 		case CLINDR:
 		case CFINDR:
-			oprintf(" %lx.", tp->t_offset);
-			oprintf("%x\n", tp->t_ssp);
+			fprintf(stderr, " %lx.", tp->t_offset);
+			fprintf(stderr, "%x\n", tp->t_ssp);
 			break;
 
 		case REGOFF:
-			oprintf(" %ld", tp->t_offset);
-			oprintf("(R%d)", tp->t_reg);
+			fprintf(stderr, " %ld", tp->t_offset);
+			fprintf(stderr, "(R%d)", tp->t_reg);
 			break;
 
 		case EXTERNAL:
 		case EXTOFF:
-			oprintf(" %s+%ld", tp->t_symbol, tp->t_offset);
+			fprintf(stderr, " %s+%ld", tp->t_symbol, tp->t_offset);
 			if (tp->t_sc == EXTOFF)
-				oprintf("(R%d)", tp->t_reg);
+				fprintf(stderr, "(R%d)", tp->t_reg);
 			break;
 
 		case STATIC:
 		case STATOFF:
-			oprintf(" L%d+%ld", tp->t_label, tp->t_offset);
+			fprintf(stderr, " L%d+%ld", tp->t_label, tp->t_offset);
 			if (tp->t_sc == STATOFF)
-				oprintf("(R%d)", tp->t_reg);
+				fprintf(stderr, "(R%d)", tp->t_reg);
 			break;
 
 		case INDEXED:
-			oprintf(" %ld", tp->t_offset);
-			oprintf("(R%d,R%d)", tp->t_reg, tp->t_xreg);
+			fprintf(stderr, " %ld", tp->t_offset);
+			fprintf(stderr, "(R%d,R%d)", tp->t_reg, tp->t_xreg);
 			break;
 		}
-		oputchar('\n');
+		fputc('\n', stderr);
 		break;
 
 	case IFGOTO:
@@ -247,7 +246,7 @@ PP(struct tnode *tp;)
 		break;
 
 	default:
-		oputchar('\n');
+		fputc('\n', stderr);
 		putsexpr(tp->t_left);
 		if (BINOP(tp->t_op))
 			putsexpr(tp->t_right);
@@ -261,7 +260,6 @@ VOID putexpr(P(const char *) name, P(struct tnode *) tp)
 PP(const char *name;)
 PP(struct tnode *tp;)
 {
-	oprintf("%s\n", name);
+	fprintf(stderr, "%s\n", name);
 	putsexpr(tp);
 }
-#endif

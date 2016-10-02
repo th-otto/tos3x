@@ -39,7 +39,7 @@ PP(int preset;)
 			opdp = opdsave;
 			opp = oprsave;
 			opdontop = opdotsave;
-			return 0;
+			return NULL;
 
 		case IS_TERMINAL:				/* terminal node */
 			continue;
@@ -115,7 +115,7 @@ PP(int preset;)
 				if (!maketree(NACALL))
 				{
 					warning(_("Null expression encountered"));
-					return 0;
+					return NULL;
 					/* goto exprerr; */
 				}
 				continue;

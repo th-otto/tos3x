@@ -62,7 +62,7 @@ PP(int op;)									/* new root operator */
 	{
 		if (!(rtp = (struct tnode *) popopd()))
 			return 0;
-		rtype = (rtp = (struct tnode *) funcref(arrayref(rtp)))->t_type;
+		rtype = (rtp = funcref(arrayref(rtp)))->t_type;
 		PUTEXPR(treedebug, "maketree r", rtp);
 	}
 	if (!(ltp = (struct tnode *) popopd()))
@@ -77,9 +77,9 @@ PP(int op;)									/* new root operator */
 	}
 	if (op != ADDR)
 	{
-		ltp = (struct tnode *) arrayref(ltp);
+		ltp = arrayref(ltp);
 		if (op != CALL && op != NACALL)
-			ltp = (struct tnode *) funcref(ltp);
+			ltp = funcref(ltp);
 	} else
 	{
 		if (ltp->t_op == ADD)			/* there must be a better way... */
@@ -148,7 +148,7 @@ PP(int op;)									/* new root operator */
 	{
 		lconv = ttoconv(ltype);
 		conv = ttoconv(rtype);
-		if (ASGNOP(op) || lconv >= conv || (COMOP(op) &&	/* 4.3 not RELOP */
+		if (ISASGOP(op) || lconv >= conv || (COMOP(op) &&	/* 4.3 not RELOP */
 											ltype == INT && rtype == LONG && rtp->t_op == CLONG))
 		{
 			conv = cvmap[lconv][conv];
@@ -160,7 +160,7 @@ PP(int op;)									/* new root operator */
 			type = rtype;
 		}
 	}
-	if (ASGNOP(op))
+	if (ISASGOP(op))
 	{
 		if ((op == ASSIGN || op == FRETURN) && rtp->t_op != CINT && (conv == INT_PTR || conv == UNSN_PTR))
 		{
@@ -213,9 +213,9 @@ PP(int op;)									/* new root operator */
 		if (conv == BADCONV)
 			error("illegal type conversion");
 		else if (lconv)
-			ltp = (struct tnode *) cvopgen(ltp, type, conv, psize(rtp), op);
+			ltp = cvopgen(ltp, type, conv, psize(rtp), op);
 		else
-			rtp = (struct tnode *) cvopgen(rtp, type, conv, psize(ltp), op);
+			rtp = cvopgen(rtp, type, conv, psize(ltp), op);
 	}
 	if (op == CAST)
 	{
@@ -224,7 +224,7 @@ PP(int op;)									/* new root operator */
 			rtp = tnalloc(TOCHAR, CHAR, 0, 0, rtp, 0L);
 		} else if ((ltype & POINTER) && rtype == INT)
 		{
-			rtp = (struct tnode *) cvopgen(rtp, type, INT_LONG, psize(ltp), op);
+			rtp = cvopgen(rtp, type, INT_LONG, psize(ltp), op);
 		} else if (rtp->t_type != CHAR && !conv)
 		{
 			rtp->t_type = ltp->t_type;

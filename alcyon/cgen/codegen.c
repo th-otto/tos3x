@@ -86,7 +86,9 @@ PP(int reg;)
 					tp = tp->t_left;
 					cookie = FORREG;
 				} else
+				{
 					ccflag = 2;
+				}
 			} else
 			{
 				ccflag = 1;
@@ -202,8 +204,9 @@ PP(int reg;)								/* register to load */
 			{
 				tp = snalloc(type, AUTO, (long) off, 0, 0);
 				if (indexreg(ltp))
+				{
 					tp->t_reg = ltp->t_reg;
-				else
+				} else
 				{
 					r = codegen(ltp, FORREG, AREG(reg));
 					if (ISDREG(r))
@@ -232,7 +235,9 @@ PP(int reg;)								/* register to load */
 						xr = rtp->t_reg;
 						xt = rtp->t_type;
 					} else
+					{
 						xtp = rtp;
+					}
 				} else if ((ISREG(ltp)) && ltp->t_type != CHAR && (lflag || rtp->t_op != ADDR))
 				{
 					xr = ltp->t_reg;
@@ -386,7 +391,7 @@ PP(int reg;)								/* first available register */
 		ltp = tp->t_left;
 		if (cookie == FORCC && ltp->t_op == SYMBOL && (ltp->t_sc == EXTERNAL || ltp->t_sc == STATIC))
 		{
-			warning("function existence test");
+			warning(_("function existence test"));
 			oprintf("move.l #");
 			outaexpr(ltp, A_NOIMMED);
 			oprintf(",-(sp)\ntst.l (sp)+\n");
@@ -402,7 +407,6 @@ PP(int reg;)								/* first available register */
 	case STASSIGN:
 		outstrcpy(codegen(tp->t_left, FORREG, AREG(reg)), codegen(tp->t_right, FORREG, AREG(reg + 1)), tp->t_type);
 		return reg;
-		break;
 
 	case SYMBOL:
 		if (cookie == FOREFF)
@@ -490,9 +494,9 @@ PP(int reg;)								/* first available register */
 	} else
 	{
 		if (tp->t_type != STRUCT)
-			error("no code table for %s", opname[tp->t_op]);
+			error(_("no code table for %s"), opname[tp->t_op]);
 		else
-			error("illegal structure operation");
+			error(_("illegal structure operation"));
 	}
 	return r;
 }
@@ -652,7 +656,7 @@ PP(struct tnode *tp;)
 	case FLOAT:
 		return LONGSIZE;
 	}
-	error("cdsize: invalid type %d", type);
+	error(_("cdsize: invalid type %d"), type);
 	return 0;
 }
 
@@ -664,13 +668,16 @@ PP(struct tnode *tp;)						/* pointer to expression tree */
 
 	nb = 0;
 	if (tp->t_op == SYMBOL && tp->t_sc == STRUCT)
-		error("structure operation not implemented");
-	else if (stacksize)
+	{
+		error(_("structure operation not implemented"));
+	} else if (stacksize)
 	{
 		codegen(tp, FORSTACK, 0);
 		nb = cdsize(tp);
 	} else
+	{
 		codegen(tp, FORSP, 0);
+	}
 	return nb;
 }
 
@@ -734,11 +741,11 @@ PP(struct tnode *tp;)						/* pointer to tree */
  * returns reg result is in
  */
 short codegen(P(struct tnode *) tp, P(int) cookie, P(int) reg)
-PP(struct tnode *tp;)						/* tree pointer */
+PP(register struct tnode *tp;)				/* tree pointer */
 PP(int cookie;)								/* code generation goals */
-PP(int reg;)								/* first available register */
+PP(register int reg;)						/* first available register */
 {
-	register short savestk, ssize, r, i;
+	register short savestk, ssize, i;
 	register struct tnode *rtp;
 
 #ifdef DEBUG
@@ -767,8 +774,9 @@ PP(int reg;)								/* first available register */
 		codegen(tp, FORREG, reg);
 		popstack(ssize);
 		stacksize = savestk;
-		fixresult(tp, cookie, 0);
-		return 0;						/* result in R0 */
+		reg = 0;						/* result in R0 */
+		fixresult(tp, cookie, reg);
+		return reg;
 
 	case COMMA:
 		codegen(tp->t_left, FOREFF, reg);
@@ -793,8 +801,7 @@ PP(int reg;)								/* first available register */
 		if (cookie == FORCC && tp->t_op == SYMBOL && tp->t_sc == REGISTER && ISDREG(tp->t_reg))
 			return reg;
 	}
-	r = ucodegen(tp, cookie, reg);
-	return r;
+	return ucodegen(tp, cookie, reg);
 }
 
 
