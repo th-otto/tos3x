@@ -76,11 +76,8 @@
  * return codes
  */
 
-#define DEVREADY        -1L     /* device ready */
-#define DEVNOTREADY      0L     /* device not ready */
-#define MEDIANOCHANGE    0L     /* media def has not changed */
-#define MEDIAMAYCHANGE   1L     /* media may have changed */
-#define MEDIACHANGE      2L     /* media def has changed */
+#define DEVREADY        -1L    /* device ready */
+#define DEVNOTREADY      0L    /* device not ready */
 
 /*
  * bios data types
@@ -113,36 +110,10 @@ typedef int32_t SSN;
  * Data Structures
  */
 
-/*
- * BPB - Bios Parameter Block
- */
-
-#define BPB struct _bpb_t
-BPB /* bios parameter block */
-{
-	/*  0 */ int16_t recsiz; 	/* sector size in bytes */
-	/*  2 */ int16_t clsiz;		/* cluster size in sectors */
-	/*  4 */ int16_t clsizb; 	/* cluster size in bytes */
-	/*  6 */ int16_t rdlen;		/* root directory length in records */
-	/*  8 */ int16_t fsiz;		/* fat size in records */
-	/* 10 */ int16_t fatrec; 	/* first fat record (of last fat) */
-	/* 12 */ int16_t datrec; 	/* first data record */
-	/* 14 */ int16_t numcl;		/* number of data clusters available */
-	/* 16 */ int16_t b_flags;
-	/* 18 */ 
-};
+#include "../bios/bpb.h"
 
 ERROR login PROTO((BPB *b, int drv));
 
-
-/*
- * bit usage in b_flags for BPB
- */
-
-#define B_16        1		/* device has 16-bit FATs */
-#define B_FIX       2		/* device has fixed media */
-#define DND_LOCKED  0x8000  /* DND may not be scavenged (see     */
-                            /* free_available_dnds() in fsdir.c) */
 
 
 /*
@@ -168,7 +139,7 @@ DMD /* drive media block */
 	/* 26 */ int16_t m_rbm;		 /* recsiz in bytes, mask				 */
 	/* 28 */ int16_t m_clblog;	 /* log (base 2) of clsiz in bytes		 */
 	/* 30 */ OFD    *m_fatofd;	 /* OFD for 'fat file'					 */
-	/* 34 */ uint16_t m_fixed;	 /* fixed media ?						 */
+	/* 34 */ uint16_t m_1fat;	 /* 1 FAT only ?						 */
 	/* 36 */ uint16_t m_unused;
 	/* 38 */ DND 	*m_dtl; 	 /* root of directory tree list 		 */
 	/* 42 */ uint16_t m_16;		 /* 16 bit fat ?						 */

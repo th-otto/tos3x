@@ -6,6 +6,7 @@
 *                NE if initialization failed (no drive attached).
 *
 /* 306de: 00e03ba8 */
+	xdef _flopini
 _flopini:
         clr.l     fd_frb
         lea.l     dsb,a1
@@ -31,10 +32,11 @@ flopini2:
         beq       flopok
 flopini3:
         bra       flopfail
-        move.l    a0,($00000008).w
+* code not reached
+        move.l    a0,(_buserror).w
         movea.l   a1,a7
         movem.l   (a7)+,d7/a6
-flopini4:
+eundev:
         moveq.l   #-15,d0 ; E_UNDEV
         rts
 
@@ -43,9 +45,10 @@ flopini4:
  * XBIOS #8 - Floprd - Read individual sectors from floppy disk.
  */
 /* 306de: 00e03c10 */
+	xdef _floprd
 _floprd:
         tst.w     (_nflops).w
-        beq.s     flopini4
+        beq.s     eundev
         bsr       fdchange
         moveq.l   #-11,d0 ; E_READF
         bsr       frbrdcheck
@@ -92,7 +95,7 @@ floprd4:
         bne.s     floprd5
         move.w    #$0002,(fd_retry).w
         addq.w    #1,(fd_sect).w
-        addi.l    #$00000200,(fd_buffer).w
+        addi.l    #SECTOR_SIZE,(fd_buffer).w
         subq.w    #1,(fd_scount).w
         beq       flopok
         bsr       select1
@@ -128,9 +131,10 @@ fdcerr1:
  * XBIOS #9 - Flopwr - Write individual sectors on a floppy disk.
  */
 /* 306de: 00e03d12 */
+	xdef _flopwrt
 _flopwrt:
         tst.w     (_nflops).w
-        beq.w     flopini4
+        beq.w     eundev
         bsr       fdchange
         moveq.l   #-10,d0 ; E_WRITF
         bsr       frbwrcheck
@@ -140,7 +144,7 @@ _flopwrt:
         or.w      (fd_track).w,d0
         or.w      (fd_side).w,d0
         bne.s     flopwrt1
-        moveq.l   #2,d0
+        moveq.l   #MEDIACHANGE,d0
         bsr       setdchg
 flopwrt1:
         bsr       select
@@ -183,7 +187,7 @@ flopwrt4:
         bne.s     flopwrt5
         move.w    #$0002,(fd_retry).w
         addq.w    #1,(fd_sect).w
-        addi.l    #$00000200,(fd_buffer).w
+        addi.l    #SECTOR_SIZE,(fd_buffer).w
         subq.w    #1,(fd_scount).w
         beq       flopok
         bsr       select1
@@ -206,7 +210,7 @@ _flopfmt:
         cmpi.l    #$87654321,22(a7)
         bne       flopfail
         tst.w     _nflops
-        beq       flopini4
+        beq       eundev
         bsr       fdchange
         moveq.l   #-1,d0
         bsr       frbfmtcheck
@@ -216,7 +220,7 @@ _flopfmt:
         move.w    20(a7),(fd_interlv).w
         move.w    26(a7),(fd_virgin).w
         move.l    8(a7),(fd_secmap).w
-        moveq.l   #2,d0
+        moveq.l   #MEDIACHANGE,d0
         bsr       setdchg
         moveq.l   #3,d0
         cmpi.w    #$000D,(fd_spt).w
@@ -363,30 +367,31 @@ wmult:
  * XBIOS #19 - Flopver - Verify sectors of a floppy disk.
  */
 /* 306de: 00e03ffe */
+	xdef _flopver
 _flopver:
-        tst.w     (_nflops).w
-        beq       flopini4
+        tst.w     (_nflops).w   ; any floppy drives installed?
+        beq       eundev
         bsr       fdchange
-        moveq.l   #-11,d0 ; E_READF
-        bsr       frbfmtcheck
-        bsr       floplock
-        bsr       select
-        bsr       go2track
-        bne       flopfail
-        bsr.s     verify1
-        bra       flopok
+        moveq.l   #-11,d0       ; set default error: E_READF
+        bsr       frbfmtcheck   ; setup FRB if needed
+        bsr       floplock      ; lock floppies, setup parameters
+        bsr       select        ; select floppy
+        bsr       go2track      ; go to track
+        bne       flopfail      ; fail if error
+        bsr.s     verify1       ; do actual verify
+        bra       flopok        ; done
 
 verify1:
-        move.w    #-11,(fd_deferr).w ; E_READF
-        movea.l   (fd_buffer).w,a2
-        addi.l    #$00000200,(fd_buffer).w
+        move.w    #-11,(fd_deferr).w         ; set default error: E_READF
+        movea.l   (fd_buffer).w,a2           ; a2 -> start of bad sector list
+        addi.l    #SECTOR_SIZE,(fd_buffer).w ; skip bad sector list
 verify2:
-        move.w    #$0002,(fd_retry).w
+        move.w    #$0002,(fd_retry).w        ; init sector-retry count
         move.w    #$0084,(a6)
-        move.w    (fd_sect).w,d7
+        move.w    (fd_sect).w,d7             ; set FDC sector register
         bsr       wrfdcd7
 verify3:
-        move.b    (fd_buffer+3).w,($FFFF860D).w
+        move.b    (fd_buffer+3).w,($FFFF860D).w ; set DMA address
         move.b    (fd_buffer+2).w,($FFFF860B).w
         move.b    (fd_buffer+1).w,($FFFF8609).w
         move.w    #$0190,(a6)
@@ -394,42 +399,44 @@ verify3:
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
-        move.w    #$0090,(a6)
+        move.w    #$0090,(a6)                   ; setup for DMA read
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
-        move.w    #$0001,d7
+        move.w    #$0001,d7                     ; set DMA sector count to 1
         bsr       wrfdcd7
-        move.w    #$0080,(a6)
+        move.w    #$0080,(a6)                   ; write READ SECTOR command
         move.w    #$0080,d7
         bsr       wrfdcd7
         move.l    (_hz_200).w,d7
-        add.l     #$0000012C,d7
+        add.l     #300,d7
+*--- wait for command completion
 verify4:
         btst      #5,(MFP_GPIP).w
         beq.s     verify5
         cmp.l     (_hz_200).w,d7
         bhi.s     verify4
-        bsr       fdcreset
+        bsr       fdcreset                      ; reset controller and return error
         bra.s     verify7
 verify5:
-        move.w    #$0090,(a6)
+        move.w    #$0090,(a6)                   ; read DMA error status
         move.w    (a6),d0
         btst      #0,d0
         beq.s     verify7
-        move.w    #$0080,(a6)
+        move.w    #$0080,(a6)                   ; read 1770 status register
         bsr       rdfdcd0
-        bsr       fdcerr
-        and.b     #$1C,d0
+        bsr       fdcerr                        ; set error#
+        and.b     #$1C,d0                       ; check for record-not-found, crc-error, and lost data
         bne.s     verify7
 verify6:
         addq.w    #1,(fd_sect).w
         subq.w    #1,(fd_scount).w
         bne       verify2
-        subi.l    #$00000200,(fd_buffer).w
-        clr.w     (a2)
+        subi.l    #SECTOR_SIZE,(fd_buffer).w
+        clr.w     (a2)                          ; terminate bad sector list
         rts
+*--- read failure: retry or record bad sector
 verify7:
         cmpi.w    #$0001,(fd_retry).w
         bne.s     verify8
@@ -437,7 +444,7 @@ verify7:
 verify8:
         subq.w    #1,(fd_retry).w
         bpl       verify3
-        move.w    (fd_sect).w,(a2)+
+        move.w    (fd_sect).w,(a2)+             ; record bad sector
         bra.s     verify6
 
 /* 306de: 00e04106 */
@@ -530,7 +537,7 @@ floploc3:
 
 /* 306de: 00e04216 */
 flopfail:
-        moveq.l   #1,d0
+        moveq.l   #MEDIAMAYCHANGE,d0
         bsr       setdchg
         move.w    (fd_curerr).w,d0
         ext.l     d0

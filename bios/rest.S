@@ -2,23 +2,6 @@
 #include "header.h"
 #include "tosvars.inc"
 
-/*
- * XBIOS #17 - Random - Random number generator
- */
-/* 306de: 00e05d38 */
-	xdef _random
-_random:
-	rts
-
-
-/*
- * XBIOS #18 - Protobt - Generate a standard boot-sector for a floppy disk.
- */
-/* 306de: 00e05e04 */
-	xdef _protobt
-_protobt:
-		rts
-
 /* 306de: 00e0694a */
 	xdef vdireinit
 vdireinit:

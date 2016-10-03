@@ -5,6 +5,7 @@
 #include "bios.h"
 #include "mem.h"
 #include <toserrno.h>
+#include "../bios/biosdefs.h"
 
 #undef min
 #define min(a,b) (((a) < (b)) ? (a) : (b))
@@ -167,7 +168,7 @@ PP(int drv;)								/*  drive number            */
 
 	dm->m_fatrec = b->fatrec;
 	dm->m_16 = b->b_flags & B_16;		/* set 12 or 16 bit fat flag */
-	dm->m_fixed = b->b_flags & B_FIX;	/* set fixed media flag */
+	dm->m_1fat = b->b_flags & B_1FAT;	/* set fixed media flag */
 	dm->m_clsiz = cs;					/*  set cluster size in sectors */
 	dm->m_clsizb = b->clsizb;			/*    and in bytes      */
 	dm->m_recsiz = rsiz;				/*  set record (sector) size    */
@@ -257,7 +258,7 @@ PP(register BCB *b;)
 			rwabsw(b->b_bufr, 1, b->b_bufrec + dm->m_recoff[typ], drv);
 			
 			/* flush to both fats */
-			if (typ == BT_FAT && !dm->m_fixed)
+			if (typ == BT_FAT && !dm->m_1fat)
 				rwabsw(b->b_bufr, 1, b->b_bufrec + dm->m_recoff[BT_FAT] - dm->m_fsiz, drv);
 
 			b->b_bufdrv = drv;					/* re-validate */

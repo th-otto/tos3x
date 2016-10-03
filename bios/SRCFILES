@@ -3,10 +3,52 @@ BIOS_OBJS = \
 	keytbl$(COUNTRY).o \
 	sounds.o \
 	prtblk.o \
+	blkdev.o \
 	prt.o \
 	memtest.o \
 	chardev.o \
-	blkdev.o \
-	linea.o \
 	rest.o \
+	$(empty)
+
+BIOS_SRCS = \
+	asmdefs.h \
+	bios.h \
+	biosdefs.h \
+	blkdev.h \
+	bpb.h \
+	ctrycodes.h \
+	header.h \
+	ide.h \
+	linea.h \
+	pbdef.h \
+	tosvars.h \
+	startup.S \
+	keytblde.c \
+	sounds.c \
+	prtblk.c \
+	blkdev.c \
+	prt.S \
+	memtest.S \
+	chardev.c \
+	rest.S \
+	biosext.S \
+	vars.S \
+	tosvars.S \
+	dma.inc \
+	floppy.inc \
+	ikbdclock.inc \
+	linea.inc \
+	mmu030.inc \
+	nvram.inc \
+	romcrc.inc \
+	scrdmp.inc \
+	tosvars.inc \
+	$(empty)
+
+
+EXTRA_DIST = \
+	GNUmakefile \
+	Makefile \
+	SRCFILES \
+	optimize.mak \
 	$(empty)

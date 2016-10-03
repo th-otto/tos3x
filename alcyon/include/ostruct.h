@@ -68,6 +68,6 @@ typedef struct _bpb BPB;
  *  flags for BPB
  */
 #define B_16    1       /* device has 16-bit FATs */
-#define B_FIX   2       /* device has fixed media */
+#define B_1FAT  2       /* device has only a single FAT */
 
 #endif /* __OSTRUCT_H__ */

@@ -22,6 +22,8 @@ include SRCFILES
 bdos.a: checklang $(BDOS_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(BDOS_OBJS)
 
+$(BDOS_OBJS) vars.o vdidsp.o: config.h
+
 check:: bdos.o checklang
 	$(AM_V_at)if ! test -f ../roms/tos$(TOSVERSION)$(COUNTRY).img; then \
 		echo "../roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
@@ -41,7 +43,10 @@ check:: bdos.o checklang
 	exit $$status
 
 dist::
-	$(CP) -a $(BDOS_SRCS) GNUmakefile Makefile SRCFILES optimize.mak tos306de.map tos306us.map ../$(DISTDIR)/bdos
+	$(CP) -a $(BDOS_SRCS) $(EXTRA_DIST) ../$(DISTDIR)/bdos
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS) bdos.orig bdos.new
+
+distclean: clean
+	$(RM) config.h

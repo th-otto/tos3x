@@ -29,16 +29,22 @@ typedef	int32_t ERROR;
 typedef int16_t RECNO;             /* record number  */ /* BUG: should be unsigned */
 typedef int32_t LRECNO;            /* record number  */ /* BUG: should be unsigned, but Alcyon does not support unsigned long */
 
-
+#include "biosdefs.h"
 
 /*
  * blkdev.c
  */
+extern int curflop;
+#include "blkdev.h"
+
 VOID bhdv_init PROTO((NOTHING));
-ERROR bhdv_getbpb PROTO((int16_t dev));
-ERROR bhdv_mediach PROTO((int16_t dev));
+BPB *bhdv_getbpb PROTO((int16_t dev));
+int16_t bhdv_mediach PROTO((int16_t dev));
 ERROR bhdv_rwabs PROTO((int16_t rw, char *buf, int16_t cnt, RECNO recnr, int16_t dev, LRECNO lrecnr));
-ERROR bhdv_boot PROTO((NOTHING));
+long random PROTO((NOTHING));
+int16_t bhdv_boot PROTO((NOTHING));
+VOID chdv_init PROTO((NOTHING));
+VOID protobt PROTO((VOIDPTR buf, int32_t serialno, int16_t disktype, int16_t execflag));
 
 
 /*
@@ -81,3 +87,27 @@ int plststat PROTO((NOTHING));
 int prtlst PROTO((int dev, int c));
 int pauxstat PROTO((NOTHING));
 int prtaux PROTO((int dev, int c));
+
+
+/*
+ * floppy.S
+ */
+#define DSB struct dsb
+DSB {
+    uint8_t drivetype;    /* == 8 for HD */
+    uint8_t pad;
+    uint16_t curtrack;
+    uint16_t density;     /* 0 = SD, 3 = DD */
+    uint16_t seekrate;
+};
+int flopini PROTO((VOIDPTR buffer, DSB *dsb, int devno, int unused1, VOIDPTR unused2));
+ERROR floprd PROTO((VOIDPTR buffer, DSB *dsb, int16_t devno, int16_t sectno, int16_t track, int16_t side, int16_t count));
+ERROR flopwrt PROTO((VOIDPTR buffer, DSB *dsb, int16_t devno, int16_t sectno, int16_t track, int16_t side, int16_t count));
+ERROR flopver PROTO((VOIDPTR buffer, DSB *dsb, int16_t devno, int16_t sectno, int16_t track, int16_t side, int16_t count));
+ERROR callcrit PROTO((int16_t err, int16_t dev));
+
+
+/*
+ * misc
+ */
+VOID cpy512 PROTO((const VOIDPTR src, VOIDPTR dst));

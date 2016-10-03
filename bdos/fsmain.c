@@ -229,7 +229,7 @@ PP(VOIDPTR buf;)
 		if (tmp < 0)
 			return ((ERROR) tmp);
 
-		return !(tmp->b_flags & B_FIX);
+		return !(tmp->b_flags & B_1FAT);
 
 	default:							/* No function 1, etc. yet. */
 		return E_INVFN;

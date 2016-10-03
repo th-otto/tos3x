@@ -5,13 +5,13 @@
 * to get the same addresses as when linking the whole ROM
 *
 
+#include "biosdefs.h"
+
 OPNFILES equ 81
 NCURDIR equ 40
 KBBUFSZ equ 80
 SUPSIZ equ 1024
 MAXQUICK equ 5
-SERIAL_BUFSIZE equ 256
-NUMFLOPPPIES equ 2
     
 	bss
 
@@ -74,7 +74,7 @@ scsicmd: ds.b 10
 dmarwflg: ds.b 2
 
 	xdef idebuf
-idebuf: ds.b 512
+idebuf: ds.b SECTOR_SIZE
 
 	ds.l 1 ; unused
 
@@ -237,7 +237,7 @@ fd_curerr: ds.w 1
 flopsregs: ds.l 9
 
 	xdef dsb
-dsb: ds.b 8*NUMFLOPPPIES
+dsb: ds.b 8*NUMFLOPPIES
 	
 	xdef fd_rtryseek
 fd_rtryseek: ds.w 1
@@ -248,7 +248,8 @@ fd_copyp: ds.l 1
 	xdef fd_cscnt
 fd_cscnt: ds.w 1
 
-	ds.l 1
+	memtabrt
+memtabrt: ds.l 1
 	ds.l 1
 	ds.l 1
 	ds.l 1
@@ -290,7 +291,8 @@ old_tik: ds.l 1
 	xdef old_2
 old_2: ds.l 1
 
-	ds.l 1
+	xdef _rseed
+_rseed: ds.l 1
 
 	xdef _prtbdev
 _prtbdev: ds.b 1
@@ -338,7 +340,8 @@ _glbkbchar: ds.l 3*KBBUFSZ
 	xdef _ofdlist
 _ofdlist: ds.l 1
 
-	ds.l 1
+	xdef _fd_mediach
+_fd_mediach: ds.l 1
 
 	xdef _glbcolumn
 _glbcolumn: ds.w 3
@@ -347,7 +350,7 @@ _glbcolumn: ds.w 3
 _prtbwidth: ds.w 1
 	
 	xdef _drivechange
-_drivechange: ds.b NUMFLOPPPIES
+_drivechange: ds.b NUMFLOPPIES
 
 	xdef _rrecno
 _rrecno: ds.w 1
@@ -414,7 +417,8 @@ _ldivr: ds.l 1
 	xdef _ofdbuf
 _ofdbuf: ds.b 70*80
 
-	ds.b $18
+	xdef _bpbsums
+_bpbsums: ds.w BPBSECT*NUMFLOPPIES
 
 	xdef _oscnt
 _oscnt: ds.w 1
@@ -448,10 +452,11 @@ _pbpar: ds.b 30
 	xdef _bakbuf
 _bakbuf: ds.l 3
 
-	ds.b $48
+	xdef _blkdev
+_blkdev: ds.b 36*NUMFLOPPIES
     
 	xdef _secbuf
-_secbuf: ds.b 4*512
+_secbuf: ds.b 4*SECTOR_SIZE
 
 	xdef _osuser
 _osuser: ds.b 1
@@ -491,7 +496,8 @@ _prtbeps: ds.b 1
 	xdef _prtbobuf
 _prtbobuf: ds.b 8
 
-	ds.b 4
+	xdef _fd_err
+_fd_err: ds.w NUMFLOPPIES
     
 	xdef _diruse
 _diruse: ds.b NCURDIR

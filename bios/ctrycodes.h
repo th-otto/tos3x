@@ -71,6 +71,9 @@
 /* Hungary */
 #define CTRY_HU 16
 #define CTRY_hu CTRY_HU
+/* Poland */
+#define CTRY_PL 17
+#define CTRY_pl CTRY_PL
 
 /*
  * The following country codes were not defined by Atari.

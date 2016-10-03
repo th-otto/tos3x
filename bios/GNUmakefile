@@ -26,7 +26,15 @@ bios.a: $(BIOS_OBJS) ${MAKEFILE}
 
 startup.o: startup.S header.h
 
+$(BIOS_OBJS) tosvars.o vars.o: config.h
+
 check::
+
+dist::
+	$(CP) -a $(BIOS_SRCS) $(EXTRA_DIST) ../$(DISTDIR)/bios
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)
+
+distclean: clean
+	$(RM) config.h

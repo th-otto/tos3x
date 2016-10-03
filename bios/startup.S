@@ -12,6 +12,7 @@
 #include "asmdefs.h"
 #include "header.h"
 #include "tosvars.inc"
+#include "biosdefs.h"
 
 
 * ==== Defines ==============================================================
@@ -29,8 +30,6 @@ save_siz equ 238
 /* sizeof(IOREC) */
 IOREC_SIZE equ 14
 
-#define NUMFLOPPIES 2
-
 FASTRAMBASE equ $01000000
 
 #define ACIA_IKBD_BASE $fffffc00
@@ -46,7 +45,6 @@ FASTRAMBASE equ $01000000
 #define SCCB_CTRL SCCB_BASE+0
 #define SCCB_DATA SCCN_BASE+2
 
-#define SERIAL_BUFSIZE 256
 
 *
 * struct dsb {
@@ -2229,7 +2227,8 @@ dwidthtab:        /* number of bytes per screen line, indexed by resolution */
         dc.w      320*4/8,640*2/8,640/8,0,640*4/8,0,1280/8,320*8/8
 
 
-* cpy512(void *src, void *dst)
+* void cpy512(const void *src, void *dst)
+		xdef _cpy512
 _cpy512:
         movea.l   4(a7),a0
         movea.l   8(a7),a1
@@ -2251,7 +2250,8 @@ cpy512l:
  * call the routine installed in system vector hdv_init.
  * By default, this will be bhdv_init
  */
-chdv_init:
+		xdef _chdv_init
+_chdv_init:
         move.l    _hdv_init,-(a7)
         rts
 

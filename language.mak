@@ -4,7 +4,9 @@ gemdos_dbase_de=E3D8DA
 gemdos_dlen_de=39E
 vdidsp_de=E078B4
 bios_tbase_de=E00000
+bios_tlen_de=6476
 bios_dbase_de=E36008
+bios_dlen_de=9D8
 
 gemdos_tbase_us=E1348A
 gemdos_tlen_us=62AC
@@ -51,7 +53,9 @@ gemdos_tlen=$(gemdos_tlen_$(COUNTRY))
 gemdos_dbase=$(gemdos_dbase_$(COUNTRY))
 gemdos_dlen=$(gemdos_dlen_$(COUNTRY))
 bios_tbase=$(bios_tbase_$(COUNTRY))
+bios_tlen=$(bios_tlen_$(COUNTRY))
 bios_dbase=$(bios_dbase_$(COUNTRY))
+bios_dlen=$(bios_dlen_$(COUNTRY))
 
 rombase=$(bios_tbase)
 
