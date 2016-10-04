@@ -1,3 +1,6 @@
+#include "config.h"
+#include "ctrycodes.h"
+
 ZONESIZE equ $20000
 
 /* 306de: 00e05fa4 */
@@ -214,6 +217,16 @@ memtes21:
         clr.l     d0
         rts
 
+#if OS_COUNTRY == CTRY_PL
+memthdr1:
+                                     dc.b 'Test pami',$d3,'ci',13,10
+                                     dc.b 'ST RAM ',27,'p',0
+memthdr2:                            dc.b 13,10,'TT RAM ',27,'p',0
+memtcmsg:                            dc.b 13,10,'Koniec testu pami',$d3,'ci.',13,10,0
+memtkb:                              dc.b ' KB',27,'q',27,'K',0
+memtamsg:                            dc.b 13,10,'!TEST NIEDOKO',$c5,'CZONY.',27,'q',13,10,0
+memtsp:                              dc.b '       ',0
+#else
 memthdr1:
                                      dc.b 'Memory Test:',13,10
                                      dc.b 'ST RAM ',27,'p',0
@@ -222,6 +235,7 @@ memtcmsg:                            dc.b 13,10,'Memory Test Complete.',13,10,0
 memtkb:                              dc.b ' KB',27,'q',27,'K',0
 memtamsg:                            dc.b 13,10,'Memory Test Aborted.',27,'q',13,10,0
 memtsp:                              dc.b '       ',0
+#endif
 		even
 
 mempstr:

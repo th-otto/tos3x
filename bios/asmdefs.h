@@ -53,5 +53,6 @@
                             dc.l addr             /* frestore addr 6888X, 68040-68060 */ 
 
 #define FP0_D0              dc.l $f2006000        /* fmove.l fp0,d0 6888X, 68040-68060 */
+#define D0_FP0              dc.l $f2004000        /* fmove.l d0,fp0 6888X, 68040-68060 */
 
 #define CINVA_IC            dc.w $f498            /* 68040 */

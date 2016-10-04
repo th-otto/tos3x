@@ -26,7 +26,7 @@ _clockvec:
 
 /* 306de: 00e021a4 */
 igetdt:
-        move.b    #$FF,(iclk_ready).w
+        move.b    #-1,(iclk_ready).w
         move.b    #$1C,d1    ; send read clock command
         bsr       ikbd_writeb
         movea.l   (_hz_200).w,a0

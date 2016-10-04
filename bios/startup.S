@@ -185,7 +185,11 @@ _os_conf:               * Flag for PAL version + country
 #ifdef CONF_MULTILANG
     dc.w   OS_CONF_MULTILANG
 #else
+#if OS_COUNTRY == CTRY_PL
+    dc.w   (CTRY_UK<<1)+OS_PAL
+#else
     dc.w   (OS_COUNTRY<<1)+OS_PAL
+#endif
 #endif
 _os_dosdate:
     dc.w   OS_DOSDATE   * os_date, Date of system build in GEMDOS format
@@ -486,8 +490,15 @@ nomemchk:
 
 * detect basic STe/TT DMA sound
 
+#if OS_COUNTRY == CTRY_PL
+		/* apparently a patch that was applied by the maker of the PL version */
+		clr.l     (_shell_p).w
+        movea.w   #_supstkend,a7
+        clr.b     (_has_dmasound).w
+#else
         movea.l   #_supstkend,a7
         clr.b     _has_dmasound
+#endif
         movea.l   a7,a6
         move.l    #nodmasound,(_buserror).w
         clr.w     ($FFFF8900).w
@@ -651,7 +662,11 @@ nofdc:
         movea.l   a7,a3         * save SP
         move.l    #nofpu,(_lineftrap).w
         move.l    #nofpu,(_coprovio).w
+#if OS_COUNTRY == CTRY_PL
+        D0_FP0
+#else
         FP0_D0
+#endif
         move.l    #$00020000,(a0)+
         bra.s     fpudone
 nofpu:
@@ -925,6 +940,43 @@ clockdone:
  */
         movea.l   #atarilogo,a0
         movea.l   (_v_bas_a).w,a1
+#if OS_COUNTRY == CTRY_PL
+		/* apparently a patch that was applied by the maker of the PL version */
+		lea (lineavars).w,a2
+		move.w    (a2),d4   ; LA_PLANES
+		move.w    -2(a2),d5 ; V_BYTES_LIN
+		move.w    d5,d0
+		mulu.w    #$0008,d0
+		adda.w    d0,a1
+        moveq.l   #$0055,d0        ; 86 lines of data
+logocol1:
+        moveq.l   #5,d1            ; 12 bytes of data per line
+        movea.l   a1,a2
+logocol2:
+        move.l    d4,d2
+        move.w    (a0)+,d3
+logocol3:
+        move.w    d3,(a1)+
+        subq.w    #1,d2
+        bne.s     logocol3
+        dbf       d1,logocol2
+        lea.l     0(a2,d5.w),a1
+        dbf       d0,logocol1
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+#else
         move.b    (_sshiftmod).w,d0
         cmp.b     #$02,d0          ; ST-High resolution?
         beq.s     logomono
@@ -955,6 +1007,7 @@ logomon2:
         adda.w    #(1280/8)-12,a1
         dbf       d0,logomon1
 logodone:
+#endif
 
         data
 
@@ -1174,7 +1227,11 @@ copyenv:
 nextenvc:
         move.b    (a0)+,(a1)+
         bpl.s     copyenv
+#if OS_COUNTRY == CTRY_PL
+        move.w    _bootdev,d0
+#else
         move.b    _bootdev,d0      ; infamous old bug accessing _bootdev as byte
+#endif
         add.b     #$41,d0
         move.b    d0,(a2)
         pea.l     gem_env
@@ -1546,7 +1603,7 @@ vbl_monchg:
         movea.l   (_swv_vec).w,a0
         jsr       (a0)
 vbl_nomonchg:
-        jsr       _blink
+        jsr       blink
 * change palette registers
         tst.l     (_colorptr).w
         beq.s     vbl_no_palette
@@ -1628,7 +1685,7 @@ biosxbios:
 bx_sp_ok:
         move.w    (a7)+,d0               * remove the function number from stack
         cmp.w     (a0)+,d0               * Higher than highest number?
-        bge.s     bx_sp_ok               * if not implemented, returns the func number
+        bge.s     bx_ret                 * if not implemented, returns the func number
         move.w    d0,d1                  
         lsl.w     #2,d1                  * function table is 1 LW per number so multiply function number by 4
         move.l    0(a0,d1.w),d1          * get function address
@@ -2314,11 +2371,20 @@ autoscan:
         clr.w     -(a7)
         move.w    #$004A,-(a7)    ; Mshrink to basepage only
         trap      #1
+#if OS_COUNTRY == CTRY_PL
+		/* apparently a patch that was applied by the maker of the PL version */
+		adda.w    #$000C,a7
+        tst.w     d0
+        bne.s     autosca4        ; if Mshrink failed, done
+        move.w    #$0007,-(a7)
+        move.l    (execpath.w),-(a7)
+#else
         addq.w    #6,a7
         tst.w     d0
         bne.s     autosca4        ; if Mshrink failed, done
         move.w    #$0007,-(a7)
         move.l    execpath,-(a7)
+#endif
         move.w    #$004E,-(a7)    ; Fsfirst
         moveq.l   #8,d7
 autosca1:
@@ -2849,12 +2915,124 @@ bcon3i2:
  * Bconout function for device 0 (printer)
  */
 /* 306de: 00e022ee */
+#if OS_COUNTRY == CTRY_PL
+		/* apparently a patch that was applied by the maker of the PL version */
+_bcon0out:
+        btst      #4,(_prtconfig).w  ; Printer configured for output to RS232?
+        bne       _bcon6out
+		lea.l     (_hz_200).w,a0
+		move.l    (a0),d3
+		move.l    d3,d2
+		sub.l     (lst_timeout).w,d3
+		cmpi.l    #1000,d3
+        bcs.s     bcon0o2
+bcon0o1:
+        bsr.s     _bco0stat
+        bmi.s     bcon0o3
+        move.l    (a0),d3
+        sub.l     d2,d3
+        cmpi.l    #6000,d3
+        bcs.s     bcon0o1
+bcon0o2:
+        dc.l      6000             ; == ori.b #$70,d0; most likely bytes forgotten to patch
+        moveq.l   #0,d0
+        rts
+bcon0o3:
+        bsr.s     gpipisr7
+        moveq.l   #7,d1
+        moveq.l   #$c0,d0
+        bsr.s     ongib
+        move.b    #$0F,(a0)
+        move.b    7(a7),(a1)
+        bsr.s     strobeon
+        move.w    (a0),d0
+        move.w    (a0),d0
+        bsr.s     ongib0
+        move.w    d3,sr
+        moveq.l   #-1,d0
+        rts
+
+strobeoff:
+        moveq.l   #14,d1
+ongib0:
+        moveq.l   #$20,d0
+ongib:
+        move.b    d1,(a0)
+        or.b      (a0),d0
+        move.b    d0,(a1)
+        rts
+
+strobeon:
+        moveq.l   #14,d1
+offgib0:
+        moveq.l   #$DF,d0
+offgib:
+        move.b    d1,(a0)
+        and.b     (a0),d0
+        move.b    d0,(a1)
+        rts
+
+
+/*
+ * Bconin function for device 0 (printer)
+ */
+/* 306pl: 0038235a */
+_bcon0in:
+        bsr.s     gpipisr7
+        moveq.l   #7,d1
+        moveq.l   #127,d0
+        bsr.s     offgib
+        bsr.s     strobeoff
+        move.w    d3,sr
+bcon0in1:
+        bsr.s     _bco0stat
+        bmi.s     bcon0in1
+        bsr.s     gpipisr7
+        bsr.s     offgib0
+        move.b    #$0F,(a0)
+        move.b    (a0),d0
+        move.w    d3,sr
+        rts
+
+/*
+ * Bcostat function for device 0 (printer)
+ */
+/* 306pl: 00382378 */
+_bco0stat:
+        andi.b    #$FE,(MFP_DDR).w
+        moveq.l   #0,d0
+        btst      d0,(MFP_GPIP).w
+        bne.s     bco0st1
+        moveq.l   #-1,d0
+bco0st1:
+        rts
+
+strobeo0:
+        bsr.s     gpipisr7
+        bsr.s     strobeoff
+        move.w    d3,sr
+        rts
+
+gpipisr7:
+        lea.l     ($FFFF8800).w,a0
+        lea.l     2(a0),a1
+        move.w    sr,d3
+        ori.w     #$0700,sr
+        rts
+		dc.w -1
+
+#else
+
+/*
+ * Bconout function for device 0 (printer)
+ */
+/* 306de: 00e022ee */
 _bcon0out:
         btst      #4,(_prtconfig).w  ; Printer configured for output to RS232?
         bne       _bcon6out
         move.l    (_hz_200).w,d2
         sub.l     (lst_timeout).w,d2
-        cmpi.l    #$000003E8,d2
+        cmpi.l    #1000,d2
         bcs.s     bcon0o2
         move.l    (_hz_200).w,d2
 bcon0o1:
@@ -2863,7 +3041,7 @@ bcon0o1:
         bne.s     bcon0o3
         move.l    (_hz_200).w,d3
         sub.l     d2,d3
-        cmpi.l    #$00001770,d3
+        cmpi.l    #6000,d3
         blt.s     bcon0o1
 bcon0o2:
         moveq.l   #0,d0
@@ -2930,6 +3108,8 @@ _bco0stat:
         moveq.l   #0,d0
 bco0st1:
         rts
+
+#endif
 
 /*
  * Bconstat function for device 6 (rs232 driven by MFP)
@@ -3199,7 +3379,11 @@ initmfp2:
         move.b    d0,(_snddelay).w
         move.b    d0,(_sndtmp).w
         move.l    d0,(lst_timeout).w
+#if OS_COUNTRY == CTRY_PL
+        bsr       strobeo0
+#else
         bsr       strobeoff
+#endif
         move.b    #$0F,(kb_initial).w
         move.b    #$02,(kb_repeat).w
         lea.l     (ikbdiorec).w,a0
@@ -4892,33 +5076,191 @@ kbdvec28:
         movea.l   (a7)+,a0
         rts
 kbdvec29:
+
+*
+* Country-dependent key translations
+*
+/* 00e035e0 */
+#if OS_COUNTRY == CTRY_US
+* nothing to do
+#endif
+
+#if OS_COUNTRY == CTRY_DE
         cmpi.b    #$1A,d1                       ; convert ALT-udiaresis to @ or backslash
-        bne.s     kbdvec30
+        bne.s     kbdde1
         move.b    #$40,d0
         move.b    (_shifty).w,d2
         andi.b    #$03,d2
         beq       kbdvec42
         move.b    #$5C,d0
         bra       kbdvec42
-kbdvec30:
-        cmpi.b    #$27,d1                       ; convert ALT odiaresis to [ or {
-        bne.s     kbdvec31
+kbdde1:
+        cmpi.b    #$27,d1                       ; convert ALT-odiaresis to [ or {
+        bne.s     kbdde2
         move.b    #$5B,d0
         move.b    (_shifty).w,d2
         andi.b    #$03,d2
         beq       kbdvec42
         move.b    #$7B,d0
         bra       kbdvec42
-kbdvec31:
-        cmpi.b    #$28,d1                       ; convert ALT adiaresis to ] or }
-        bne.s     kbdvec32
+kbdde2:
+        cmpi.b    #$28,d1                       ; convert ALT-adiaresis to ] or }
+        bne.s     kbdde3
         move.b    #$5D,d0
         move.b    (_shifty).w,d2
         andi.b    #$03,d2
         beq       kbdvec42
         move.b    #$7D,d0
         bra       kbdvec42
-kbdvec32:
+kbdde3:
+#endif
+
+#if OS_COUNTRY == CTRY_FR
+        cmpi.b    #$1A,d1                       ; convert ALT-? to [ or {
+        bne.s     kbdfr1
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdfr1:
+        cmpi.b    #$1B,d1                       ; convert ALT-? to ] or }
+        bne.s     kbdfr2
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdfr2:
+        cmpi.b    #$28,d1                       ; convert ALT-? to backslash or 0
+        bne.s     kbdfr3
+        move.b    #$5C,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$00,d0
+        bra       kbdvec42
+kbdfr3:
+        cmpi.b    #$2B,d1                       ; convert ALT-? to @ or tilde
+        bne.s     kbdfr4
+        move.b    #$40,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7E,d0
+        bra       kbdvec42
+kbdfr4:
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+* nothing to do
+#endif
+
+#if OS_COUNTRY == CTRY_ES
+* missing
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+        cmpi.b    #$1A,d1                       ; convert ALT-? to [ or {
+        bne.s     kbdde1
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdde1:
+        cmpi.b    #$1B,d1                       ; convert ALT-? to ] or }
+        bne.s     kbdde2
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdde2:
+        cmpi.b    #$2B,d1                       ; convert ALT-? to degree or tilde
+        bne.s     kbdde3
+        move.b    #$F8,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7E,d0
+        bra       kbdvec42
+kbdde3:
+#endif
+
+#if OS_COUNTRY == CTRY_SV
+        cmpi.b    #$1A,d1                       ; convert ALT-? to [ or {
+        bne.s     kbdsv1
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdsv1:
+        cmpi.b    #$1B,d1                       ; convert ALT-? to ] or }
+        bne.s     kbdsv2
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdsv2:
+        cmpi.b    #$28,d1                       ; convert ALT-? to grave accent or tilde
+        bne.s     kbdsv3
+        move.b    #$60,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7e,d0
+        bra       kbdvec42
+kbdsv3:
+        cmpi.b    #$2B,d1                       ; convert ALT-? to ^ or @
+        bne.s     kbdsv4
+        move.b    #$5E,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$40,d0
+        bra       kbdvec42
+kbdsv4:
+#endif
+
+#if OS_COUNTRY == CTRY_PL
+        cmpi.b    #$1A,d1                       ; convert ALT-udiaresis to @ or backslash
+        bne.s     kbdpl1
+        move.b    #$40,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$5C,d0
+        bra       kbdvec42
+kbdpl1:
+        cmpi.b    #$27,d1                       ; convert ALT-odiaresis to [ or {
+        bne.s     kbdpl2
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdpl2:
+        cmpi.b    #$28,d1                       ; convert ALT-adiaresis to ] or }
+        bne.s     kbdpl3
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdpl3:
+#endif
+
         cmpi.b    #$62,d1                       ; is it an "alt help" signal to dump the screen?
         bne.s     kbdvec33
         addq.w    #1,(_dumpflg).w
@@ -4946,7 +5288,7 @@ kbdvec35:
         move.b    #$00,d2
         move.b    #-$08,d1
         move.b    (_shifty).w,d0
-        andi.b    #-$08,d0
+        andi.b    #$03,d0
         beq       keymous4
         move.b    #-1,d1
         bra       keymous4
@@ -5348,7 +5690,7 @@ _keytbl3:
 /* 306de: 00e03a08 */
 _bioskeys:
         move.l    #_keytblnorm,(_curkeytbl).w
-        move.l    #_keytblshift,(_curkeytbl+4).w
+        move.l    #_keytblshift,(_curkeytblxx+4).w
         move.l    #_keytblcaps,(_curkeytbl+8).w
         rts
 

@@ -36,11 +36,11 @@
 #define CTRY_IT  5
 #define CTRY_it  CTRY_IT
 /* Sweden */
-#define CTRY_SE  6
-#define CTRY_se  CTRY_SE
-/* Sweden (alternative name) */
-#define CTRY_SV  CTRY_SE
+#define CTRY_SV  6
 #define CTRY_sv  CTRY_SV
+/* Sweden (old name) */
+#define CTRY_SE  CTRY_SE
+#define CTRY_se  CTRY_SE
 /* Switzerland (French) */
 #define CTRY_SF  7
 #define CTRY_sf  CTRY_SF

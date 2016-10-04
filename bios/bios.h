@@ -1,3 +1,5 @@
+#include "config.h"
+
 #ifndef __COMPILER_H__
 #include <compiler.h>
 #endif

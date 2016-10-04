@@ -1,13 +1,11 @@
 BIOS_OBJS = \
 	startup.o \
-	keytbl$(COUNTRY).o \
+	keytbl.o \
 	sounds.o \
 	prtblk.o \
 	blkdev.o \
 	prt.o \
 	memtest.o \
-	chardev.o \
-	rest.o \
 	$(empty)
 
 BIOS_SRCS = \
@@ -23,14 +21,12 @@ BIOS_SRCS = \
 	pbdef.h \
 	tosvars.h \
 	startup.S \
-	keytblde.c \
+	keytbl.c \
 	sounds.c \
 	prtblk.c \
 	blkdev.c \
 	prt.S \
 	memtest.S \
-	chardev.c \
-	rest.S \
 	biosext.S \
 	vars.S \
 	tosvars.S \

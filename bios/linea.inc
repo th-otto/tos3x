@@ -268,7 +268,7 @@ LA_CURDEV:     ds.l 1      (lineavars+$0a6)	/* long */
 LA_BLTMODE:    ds.w 1      (lineavars+$0aa)	/* word */
                xdef LA_RSRD3
 LA_RSRD3:      ds.w 1      (lineavars+$0ac)	/* word */
-#if 0
+#if TOSVERSION >= 0x404
 /* TOS 4.04 only: */
                xdef LA_REGQXCOL
 LA_REGQXCOL:   ds.w 240*3  (lineavars+$0ae)	/* 240*3 words */

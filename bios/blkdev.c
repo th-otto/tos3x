@@ -1,6 +1,7 @@
 #include "bios.h"
 #include <toserrno.h>
 #include "tosvars.h"
+#include "ctrycodes.h"
 
 /* read/write flags */
 #define RW_READ             0
@@ -435,6 +436,30 @@ int16_t bhdv_boot(NOTHING)
 	if (nflops != 0)
 	{
 		ret = 2;   /* couldn't load */
+#if OS_COUNTRY == CTRY_PL
+		/* apparently a patch that was applied by the maker of the PL version */
+		asm("cmp.w     (_bootdev).w,d7");
+		asm("ble.s     L9998");
+		/* this is same as call below, optimized to squeeze it in the original bytes */
+		asm("moveq.l   #1,d0");
+		asm("move.w    d0,(a7)");
+		asm("clr.l     -(a7)");
+		asm("move.w    d0,-(a7)");
+		asm("clr.w     -(a7)");
+		asm("clr.l     -(a7)");
+		asm("move.l    (_dskbufp).w,-(a7)");
+		asm("bsr       _floprd");
+		asm("adda.w    #$0010,a7");
+		asm("tst.l     d0");
+		asm("bne.s     L9991");
+		asm("clr.w     d7");
+		asm("bra.s     L9992");
+		asm("L9991");
+		asm("tst.b     _fd_wp");
+		asm("bne.s     L9992");
+		return 3;   /* unreadable */
+		asm("L9992");
+#else
 #ifdef __ALCYON__
 		/* 0L = ugly hack to pass 2 zeroes */
 		if (floprd(dskbufp, NULL, 0, 1, 0L, 1) == 0)
@@ -447,8 +472,12 @@ int16_t bhdv_boot(NOTHING)
 		{
 			return 3;   /* unreadable */
 		}
+#endif
 	} else
 	{
+#if OS_COUNTRY == CTRY_PL
+		asm("L9998:")
+#endif
 		ret = 1;   /* no floppy */
 	}
 	if (ret != 0)

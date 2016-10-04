@@ -42,9 +42,9 @@
 
 /* the PAL/NTSC flag */
 #if OS_COUNTRY == CTRY_US
-#define OS_PAL 1
-#else
 #define OS_PAL 0
+#else
+#define OS_PAL 1
 #endif
 
 #endif /* HEADER_H */

@@ -19,7 +19,7 @@ bios.a: tosvars.o $(BIOS_OBJS) ${MAKEFILE}
 # because on a FAT filesystem, .S cannot be
 # distinguished from .s
 #
-startup.o: startup.S header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc nvram.inc ikbdclock.inc floppy.inc
+startup.o: startup.S config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc nvram.inc ikbdclock.inc floppy.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
@@ -39,20 +39,15 @@ memtest.o: memtest.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-rest.o: rest.S
+bios.o: checklang tosvars.o vars.o $(BIOS_OBJS) biosext.o ${MAKEFILE}
+	$(LD) -u -s -l -o $@ -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o
+
+biosext.o: biosext.S config.h
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-bios.o: checklang tosvars.o vars.o $(BIOS_OBJS) biosext.o ${MAKEFILE}
-	$(LD) -u -s -l -o $@ -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o
-
-biosext.o: biosext.S
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P '-DGTSTART=$$'$(gemdos_tbase) '-DGTLEN=$$'$(gemdos_tlen) $*.S $*.i
-	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
-	$(AM_V_at)${RM} $*.i
-
-$(BIOS_OBJS) tosvars.o vars.o: config.h
+keytbl.o: config.h
 
 check::
 
