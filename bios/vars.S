@@ -248,15 +248,23 @@ fd_copyp: ds.l 1
 	xdef fd_cscnt
 fd_cscnt: ds.w 1
 
-	memtabrt
-memtabrt: ds.l 1
-	ds.l 1
-	ds.l 1
-	ds.l 1
-	ds.l 1
-	ds.l 1
-	ds.l 1
-	ds.w 1
+	xdef memtnext
+memtnext: ds.l 1
+	xdef memtaddr
+memtaddr: ds.l 1
+	xdef memtbot
+memtbot: ds.l 1
+	xdef memtend
+memtend: ds.l 1
+	xdef memttop
+memttop: ds.l 1
+	xdef memtzone
+memtzone: ds.l 1
+	xdef memtsize
+memtsize: ds.l 1
+	
+	xdef memterr
+memterr: ds.w 1
 
 	xdef _dskbuf
 _dskbuf: ds.b 0
