@@ -67,11 +67,11 @@ AES_OBJS7 = \
 	trap14.o \
 	$(empty)
 
-AES_OBJS = $(AES_OBJS1) $(AES_OBJS2) $(AES_OBJS3) $(AES_OBJS4) $(AES_OBJS5) $(AES_OBJS6) $(AES_OBJS6)
+AES_OBJS = $(AES_OBJS1) $(AES_OBJS2) $(AES_OBJS3) $(AES_OBJS4) $(AES_OBJS5) $(AES_OBJS6) $(AES_OBJS7)
 
 AES_SRCS = \
-	gemaints.c \
-	gemaplib.c \
+	gemaints.S \
+	gemaplib.S \
 	gemasync.c \
 	gembase.c \
 	gembind.c \
