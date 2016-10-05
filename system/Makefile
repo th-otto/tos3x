@@ -19,7 +19,7 @@ cache100.prg: $(CACHE100_OBJS) ${MAKEFILE}
 foldr100.prg: $(FOLDR100_OBJS) ${MAKEFILE}
 	$(AM_V_LD)${LD} ${LDFLAGS} -h 7 -o $@ ${FOLDR100_OBJS}
 
-cache100_old.prg: $(CACHE100_OLD_OBJS) ${MAKEFILE}
+cacheold.prg: $(CACHE100_OLD_OBJS) ${MAKEFILE}
 	$(AM_V_LD)${LD} ${LDFLAGS} -h 1 -o $@ ${CACHE100_OLD_OBJS}
 
 check::

@@ -1,3 +1,16 @@
 CACHE100_OBJS = cache100.o
-CACHE100_OLD_OBJS = cache100_old.o
+CACHE100_OLD_OBJS = cacheold.o
 FOLDR100_OBJS = foldr100.o
+
+SRCS = \
+	cache100.S \
+	cacheold.S \
+	foldr100.S \
+	stripex.c \
+	$(empty)
+
+EXTRA_DIST = \
+	GNUmakefile \
+	Makefile \
+	SRCFILES \
+	$(empty)
