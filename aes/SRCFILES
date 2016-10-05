@@ -1,0 +1,128 @@
+AES_OBJS1 = \
+	gemaints.o \
+	gemaplib.o \
+	gemasync.o \
+	gembase.o \
+	gembind.o \
+	gemcli.o \
+	gemctrl.o \
+	$(empty)
+
+AES_OBJS2 = \
+	gemdisp.o \
+	gemevlib.o \
+	gemflag.o \
+	gemfmalt.o \
+	gemfmlib.o \
+	gemfslib.o \
+	gemglobe.o \
+	$(empty)
+
+AES_OBJS3 = \
+	geminit.o  \
+	geminput.o \
+	gemmnlib.o \
+	gemobed.o \
+	gemobjop.o \
+	gempd.o \
+	gemqueue.o \
+	$(empty)
+
+AES_OBJS4 = \
+	gemrom.o \
+	gemrslib.o \
+	gemsclib.o \
+	gemshlib.o \
+	gemwmlib.o \
+	gemrlist.o \
+	romcart.o \
+	gemoblib.o \
+	$(empty)
+
+AES_OBJS5 = \
+	mn_mbar.o \
+	mn_menu.o \
+	mn_popup.o \
+	mn_submn.o \
+	mn_tools.o \
+	mn_index.o \
+	mn_event.o \
+	$(empty)
+
+AES_OBJS6 = \
+	apgrlib.o \
+	apgsxif.o \
+	gemgrlib.o \
+	gemgsxif.o \
+	gsx2.o \
+	jbind.o \
+	$(empty)
+
+AES_OBJS7 = \
+	jdispa.o \
+	jdos.o \
+	large.o \
+	optimize.o \
+	ratrbp.o \
+	trap14.o \
+	$(empty)
+
+AES_OBJS = $(AES_OBJS1) $(AES_OBJS2) $(AES_OBJS3) $(AES_OBJS4) $(AES_OBJS5) $(AES_OBJS6) $(AES_OBJS6)
+
+AES_SRCS = \
+	gemaints.c \
+	gemaplib.c \
+	gemasync.c \
+	gembase.c \
+	gembind.c \
+	gemcli.c \
+	gemctrl.c \
+	gemdisp.c \
+	gemevlib.c \
+	gemflag.c \
+	gemfmalt.c \
+	gemfmlib.c \
+	gemfslib.c \
+	gemglobe.c \
+	geminit.c  \
+	geminput.c \
+	gemmnlib.c \
+	gemobed.c \
+	gemobjop.c \
+	gempd.c \
+	gemqueue.c \
+	gemrom.c \
+	gemrslib.c \
+	gemsclib.c \
+	gemshlib.c \
+	gemwmlib.c \
+	gemrlist.c \
+	romcart.c \
+	gemoblib.c \
+	mn_mbar.c \
+	mn_menu.c \
+	mn_popup.c \
+	mn_submn.c \
+	mn_tools.c \
+	mn_index.c \
+	mn_event.c \
+	apgrlib.S \
+	apgsxif.S \
+	gemgrlib.S \
+	gemgsxif.S \
+	gsx2.S \
+	jbind.S \
+	jdispa.S \
+	jdos.S \
+	large.S \
+	optimize.S \
+	ratrbp.S \
+	trap14.S \
+	$(empty)
+
+EXTRA_DIST = \
+	GNUmakefile \
+	Makefile \
+	SRCFILES \
+	optimize.mak \
+	$(empty)

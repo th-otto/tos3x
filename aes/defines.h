@@ -61,29 +61,28 @@
 /*****************************************************************************/
 /*	DO NOT CHANGE BELOW THIS LINE TO BUILD NEW COUNTRIES		     */
 /*****************************************************************************/
-				/* !!! TIME/DATE ONLY USED IN DESKINF.C !!!  */
-				/*					     */
-				/*					     */
+/* !!! TIME/DATE ONLY USED IN DESKINF.C !!!  */
+
 #if GERMANY|FRENCH|ITALY|SPAIN|SWISSGER|SWISSFRE|MEXICO|TURKEY|DENMARK
 #define EUROTIME 1		/*			European Style       */
 #define EURODATE 1		/*			Date/TimeFlag	     */
-#endif				/*					     */
-				/*					     */
-#if UK				/*					     */
-#define EUROTIME 0		/*					     */
-#define EURODATE 1		/*					     */
-#endif				/*					     */
-				/*					     */
-#if USA				/*					     */
-#define EUROTIME 0		/*					     */
-#define EURODATE 0		/*					     */
-#endif				/*					     */
-				/*					     */
-#if SWEDEN|NORWAY|FINLAND	/*					     */
-#define EUROTIME 1		/*					     */
-#define SWEDDATE 1		/*					     */
-#endif				/*					     */
-				/*					     */
+#endif
+
+#if UK
+#define EUROTIME 0
+#define EURODATE 1
+#endif
+
+#if USA
+#define EUROTIME 0
+#define EURODATE 0
+#endif
+
+#if SWEDEN|NORWAY|FINLAND
+#define EUROTIME 1
+#define SWEDDATE 1
+#endif
+
 /*****************************************************************************/
 
 #define NIL	-1
