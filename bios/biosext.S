@@ -23,155 +23,96 @@
 		xdef _osinit
 		xdef lmul
 * from AES
-		xdef _ui_start
+		xdef gemstart
 
 #if OS_COUNTRY == CTRY_US
 BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $0000641C
-BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $00E1348A
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-line1010    equ $00E078D2
-setblitmode equ $00E07EC6
-getblitmode equ $00E07EEE
-vdireinit   equ $00E068F0
-resetdev    equ $00E0699A
-blink       equ $00E075C0
-_cursconf   equ $00E075F2
-_bcon5out   equ $00E07238
-_bcon2out   equ $00E07244
+DESKTLEN    equ $0000FBCC
 #endif
 
 #if OS_COUNTRY == CTRY_DE
 BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $00006476
-BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $00E134E4
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-line1010    equ $00E0792C
-setblitmode equ $00E07F20
-getblitmode equ $00E07F48
-vdireinit   equ $00E0694A
-resetdev    equ $00E069F4
-blink       equ $00E0761A
-_cursconf   equ $00E0764C
-_bcon5out   equ $00E07292
-_bcon2out   equ $00E0729E
+DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_FR
 BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $00006494
-BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $00E13502
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-line1010    equ $00E0794A
-setblitmode equ $00E07F3E
-getblitmode equ $00E07F66
-vdireinit   equ $00E06968
-resetdev    equ $00E06A12
-blink       equ $00E07638
-_cursconf   equ $00E0766A
-_bcon5out   equ $00E072B0
-_bcon2out   equ $00E072BC
+DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_ES
 BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $000064A2
-BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $00E13510
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-line1010    equ $00E0794A
-setblitmode equ $00E07F3E
-getblitmode equ $00E07F66
-vdireinit   equ $00E06968
-resetdev    equ $00E06A12
-blink       equ $00E07638
-_cursconf   equ $00E0766A
-_bcon5out   equ $00E072BE
-_bcon2out   equ $00E072CA
+DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_IT
 BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $00006484
-BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $00E134F2
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-line1010    equ $00E0792C
-setblitmode equ $00E07F20
-getblitmode equ $00E07F48
-vdireinit   equ $00E0694A
-resetdev    equ $00E069F4
-blink       equ $00E0761A
-_cursconf   equ $00E0764C
-_bcon5out   equ $00E072A0
-_bcon2out   equ $00E072AC
+DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_UK
 BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $0000641C
-BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $00E1348A
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-line1010    equ $00E078D2
-setblitmode equ $00E07EC6
-getblitmode equ $00E07EEE
-vdireinit   equ $00E068F0
-resetdev    equ $00E0699A
-blink       equ $00E075C0
-_cursconf   equ $00E075F2
-_bcon5out   equ $00E07238
-_bcon2out   equ $00E07244
+DESKTLEN    equ $0000FBCC
 #endif
 
 #if OS_COUNTRY == CTRY_SV
 BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $00006494
-BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $00E13502
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-line1010    equ $00E0794A
-setblitmode equ $00E07F3E
-getblitmode equ $00E07F66
-vdireinit   equ $00E06968
-resetdev    equ $00E06A12
-blink       equ $00E07638
-_cursconf   equ $00E0766A
-_bcon5out   equ $00E072B0
-_bcon2out   equ $00E072BC
+DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_PL
 BIOSTBASE   equ $00380000
 BIOSTLEN    equ $00006476
-BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $003934E4
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-line1010    equ $0038792C
-setblitmode equ $00387F20
-getblitmode equ $00387F48
-vdireinit   equ $0038694A
-resetdev    equ $003869F4
-blink       equ $0038761A
-_cursconf   equ $0038764C
-_bcon5out   equ $00387292
-_bcon2out   equ $0038729E
+DESKTLEN    equ $0000FBA2
 #endif
 
-VDITBASE  equ BIOSTBASE+BIOSTLEN
-AESTBASE  equ BDOSTBASE+BDOSTLEN
 
-_ui_start equ AESTBASE
+*
+* these are identical in all versions
+*
+BIOSDLEN    equ $000009D8
+VDITLEN     equ $0000D06E
+VDIDLEN     equ $00006EFA
+BDOSTLEN    equ $000062AC
+BDOSDLEN    equ $0000039E
+AESTLEN     equ $0000CCD6
+AESDLEN     equ $00000000
+DESKDLEN    equ $00000000
+
+*
+* now calculate addresses from above
+*
+VDITBASE  equ BIOSTBASE+BIOSTLEN
+BDOSTBASE equ VDITBASE+VDITLEN
+AESTBASE  equ BDOSTBASE+BDOSTLEN
+DESKTBASE equ AESTBASE+AESTLEN
+ETEXT     equ DESKTBASE+DESKTLEN
+
+BIOSDBASE equ ETEXT
+VDIDBASE  equ BIOSDBASE+BIOSDLEN
+BDOSDBASE equ VDIDBASE+VDIDLEN
+AESDBASE  equ BDOSDBASE+BDOSDLEN
+DESKDBASE equ AESDBASE+AESDLEN
+EDATA     equ DESKDBASE+DESKDLEN
+
+gemstart  equ AESTBASE
+
 _osinit   equ BDOSTBASE+$5588
 lmul      equ BDOSTBASE+$298
+
+line1010    equ VDITBASE+$14B6
+setblitmode equ VDITBASE+$1AAA
+getblitmode equ VDITBASE+$1AD2
+vdireinit   equ VDITBASE+$04D4
+resetdev    equ VDITBASE+$057E
+blink       equ VDITBASE+$11A4
+_cursconf   equ VDITBASE+$11D6
+_bcon5out   equ VDITBASE+$0E1C
+_bcon2out   equ VDITBASE+$0E28

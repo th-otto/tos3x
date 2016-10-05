@@ -207,7 +207,7 @@ os_dummy:
 _ui_mupb:
         dc.l GEM_MUPB_MAGIC
         dc.l _endgembss
-        dc.l _ui_start
+        dc.l gemstart
 zero:
 	    dc.l 0
 

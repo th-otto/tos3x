@@ -24,7 +24,7 @@ startup.o: startup.S config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc 
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-vars.o: vars.S linea.inc
+vars.o: vars.S config.h linea.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i

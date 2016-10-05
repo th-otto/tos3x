@@ -5,6 +5,7 @@
 * to get the same addresses as when linking the whole ROM
 *
 
+#include "config.h"
 #include "biosdefs.h"
 
 OPNFILES equ 81
