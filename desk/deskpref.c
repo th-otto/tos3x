@@ -17,52 +17,52 @@
 #include <deskusa.h>
 #include <extern.h>
 
-EXTERN OBJECT *fm_draw();
+extern OBJECT *fm_draw();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN WINDOW *w_gfirst();
+extern WINDOW *w_gfirst();
 
-EXTERN WINDOW *w_gnext();
+extern WINDOW *w_gnext();
 
-EXTERN BYTE *get_string();
+extern char *get_string();
 
-EXTERN WORD gl_restype;
+extern int16_t gl_restype;
 
-EXTERN WORD d_exit;
+extern int16_t d_exit;
 
-EXTERN WORD font_save;
+extern int16_t font_save;
 
-EXTERN WORD m_st;
+extern int16_t m_st;
 
-EXTERN BYTE restable[];
+extern char restable[];
 
-EXTERN WORD d_maxcolor;
+extern int16_t d_maxcolor;
 
 /*	Set Color and pattern	*/
 
-WORD col_pa_pref()
+int16_t col_pa_pref()
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG WORD ret;
+	register int16_t ret;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	LONG newwin;
+	int32_t newwin;
 
-	LONG newdesk;
+	int32_t newdesk;
 
-	LONG *outpat;
+	int32_t *outpat;
 
-	WORD last,
+	int16_t last,
 	 i,
 	 j;
 
 	obj = get_tree(SSCREEN);
 
 	newdesk = background[0].ob_spec;
-	newwin = (UWORD) windspec;
+	newwin = (uint16_t) windspec;
 	/* set the background pattern */
 	last = ret = obj[DESKPREF].ob_state & SELECTED ? DESKPREF : WINPREF;
 
@@ -130,9 +130,9 @@ WORD col_pa_pref()
 
 	win = winhead;
 
-	if (windspec != (UWORD) newwin)
+	if (windspec != (uint16_t) newwin)
 	{
-		windspec = (UWORD) newwin;
+		windspec = (uint16_t) newwin;
 		while (win)
 		{
 			if (win->w_obj)				/* fixed 7/7/92 */

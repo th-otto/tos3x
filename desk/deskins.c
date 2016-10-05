@@ -24,65 +24,65 @@
 #include <extern.h>
 #include <error.h>
 
-EXTERN BYTE *get_fstring();
+extern char *get_fstring();
 
-EXTERN BYTE *r_slash();
+extern char *r_slash();
 
-EXTERN APP *app_xtype();
+extern APP *app_xtype();
 
-EXTERN APP *app_icon();
+extern APP *app_icon();
 
-EXTERN BYTE toupper();
+extern char toupper();
 
-EXTERN WORD av_icon();
+extern int16_t av_icon();
 
-EXTERN BYTE *scasb();
+extern char *scasb();
 
-EXTERN APP *app_alloc();
+extern APP *app_alloc();
 
-EXTERN BYTE *g_name();
+extern char *g_name();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN OBJECT *get_icon();
+extern OBJECT *get_icon();
 
-EXTERN DIR *get_dir();
+extern DIR *get_dir();
 
-EXTERN BYTE *put_name();
+extern char *put_name();
 
-EXTERN WORD numicon;
+extern int16_t numicon;
 
-EXTERN WINDOW *o_win;
+extern WINDOW *o_win;
 
-EXTERN WORD o_type;
+extern int16_t o_type;
 
-EXTERN WORD o_item;
+extern int16_t o_item;
 
-EXTERN WORD o_status;
+extern int16_t o_status;
 
-EXTERN WORD x_status;
+extern int16_t x_status;
 
-EXTERN WORD s_defdir;
+extern int16_t s_defdir;
 
-EXTERN WORD s_fullpath;
+extern int16_t s_fullpath;
 
-EXTERN WORD tb3[];
+extern int16_t tb3[];
 
-EXTERN BYTE mentable[];
+extern char mentable[];
 
-EXTERN WORD XSelect();					/* cjg 08/06/92 */
+extern int16_t XSelect();					/* cjg 08/06/92 */
 
-EXTERN WORD XDeselect();
+extern int16_t XDeselect();
 
-EXTERN WORD wait_up();
+extern int16_t wait_up();
 
 /*	copy iconblk image	*/
 /*	return the sources type	*/
 
-WORD cp_iblk(number, dest_ciblk)
-REG CICONBLK *dest_ciblk;
+int16_t cp_iblk(number, dest_ciblk)
+register CICONBLK *dest_ciblk;
 
-WORD number;
+int16_t number;
 {
 	OBJECT *obj;
 
@@ -126,11 +126,11 @@ WORD number;
 
 rm_icons()
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG WORD i;
+	register int16_t i;
 
-	WORD found,
+	int16_t found,
 	 collect;
 
 	obj = background;
@@ -161,31 +161,31 @@ rm_icons()
 
 ins_app()
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG APP *app;
+	register APP *app;
 
 	APP *sapp;
 
-	WORD install,
+	int16_t install,
 	 ret,
 	 newapp;
 
-	WORD cont,
+	int16_t cont,
 	 setdir,
 	 dofull,
 	 where;
 
-	WORD type,
+	int16_t type,
 	 sret,
 	 icon,
 	 graphic;
 
-	BYTE *str;
+	char *str;
 
-	BYTE buffer[8];
+	char buffer[8];
 
-	LONG l;
+	int32_t l;
 
 
 	cont = TRUE;
@@ -281,7 +281,7 @@ ins_app()
 		obj[ret].ob_state = SELECTED;
 
 		if (app->a_key)
-			lbintoasc((LONG) app->a_key, buffer);
+			lbintoasc((int32_t) app->a_key, buffer);
 		else
 			buffer[0] = 0;
 
@@ -328,7 +328,7 @@ ins_app()
 							goto ins_4;	/* skip it      */
 					}
 
-					if (sapp->a_key == (UWORD) l)
+					if (sapp->a_key == (uint16_t) l)
 					{
 						if (do1_alert(KEYUSED) == 2)
 							goto ins_3;	/* Cancel   */
@@ -410,7 +410,7 @@ ins_app()
 					strcpy(Nostr, autofile);
 			}
 			/* get the Function key definiton */
-			app->a_key = (UWORD) l;
+			app->a_key = (uint16_t) l;
 
 		}
 		/* OK to install */
@@ -442,43 +442,43 @@ ins_app()
 
 ins_icons()
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG CICONBLK *iblk;
+	register CICONBLK *iblk;
 
 	CICONBLK ciblk;
 
-	REG OBJECT *obj1;
+	register OBJECT *obj1;
 
-	REG WORD type,
+	register int16_t type,
 	 item,
 	 icon,
 	 style;
 
-	WORD ret,
+	int16_t ret,
 	 limit,
 	 redraw,
 	 select,
 	 xitem;
 
-	WORD driver,
+	int16_t driver,
 	 quit,
 	 which;
 
-	BYTE buf1[2];
+	char buf1[2];
 
-	BYTE idbuffer[2];
+	char idbuffer[2];
 
-	BYTE buffer[14];
+	char buffer[14];
 
 	GRECT pt;
 
-	WORD mk_x,
+	int16_t mk_x,
 	 mk_y,
 	 mk_buttons,
 	 mk_kstate;
 
-	LONG saveptr;
+	int32_t saveptr;
 
 	quit = FALSE;
 	xitem = item = o_item;
@@ -697,17 +697,17 @@ ins_icons()
 
 ins_wicon()
 {
-	REG APP *app;
+	register APP *app;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	WORD ret,
+	int16_t ret,
 	 limit,
 	 index,
 	 quit,
 	 itype;
 
-	WORD type,
+	int16_t type,
 	 install,
 	 pref,
 	 status;
@@ -716,18 +716,18 @@ ins_wicon()
 
 	CICONBLK ciblk;
 
-	BYTE buffer[14];
+	char buffer[14];
 
-	BYTE buf2[14];
+	char buf2[14];
 
-	BYTE *str;
+	char *str;
 
-	WORD mk_x,
+	int16_t mk_x,
 	 mk_y,
 	 mk_buttons,
 	 mk_kstate;
 
-	LONG saveptr;
+	int32_t saveptr;
 
 	obj = get_tree(INWICON);
 	limit = numicon;
@@ -929,24 +929,24 @@ ins_wicon()
 
 ins_drive()
 {
-	REG WORD i,
+	register int16_t i,
 	 id;
 
-	WORD install,
+	int16_t install,
 	 free;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	LONG map;
+	int32_t map;
 
-	BYTE *device;
+	char *device;
 
 	bfill(32, 0, dr);
 
 	obj = background;
 	free = FALSE;
 
-	map = (LONG) Drvmap();
+	map = (int32_t) Drvmap();
 	/* let check which one is installed */
 	for (i = 1; i <= maxicon; i++)
 	{
@@ -971,7 +971,7 @@ ins_drive()
 
 	if (cart_init())
 	{
-		if (make_icon((WORD) ('c'), 0, DISK, device) != -1)
+		if (make_icon((int16_t) ('c'), 0, DISK, device) != -1)
 			install = TRUE;
 	}
 
@@ -979,7 +979,7 @@ ins_drive()
 	{
 		if ((!dr[i]) && (map & 0x1))
 		{
-			if (make_icon((WORD) (i + 'A'), 0, DISK, device) != -1)
+			if (make_icon((int16_t) (i + 'A'), 0, DISK, device) != -1)
 				install = TRUE;
 			else
 			{
@@ -1000,7 +1000,7 @@ ins_drive()
 
 cl_delay()
 {
-	LONG i,
+	int32_t i,
 	 j;
 
 	j = 100000;

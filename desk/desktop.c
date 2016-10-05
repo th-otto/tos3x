@@ -30,81 +30,81 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN BYTE *get_fstring();
+extern char *get_fstring();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN WORD pglobal[];
+extern int16_t pglobal[];
 
-EXTERN BYTE *lp_mid;
+extern char *lp_mid;
 
-EXTERN BYTE *lp_start;
+extern char *lp_start;
 
-EXTERN WORD gl_restype;
+extern int16_t gl_restype;
 
-EXTERN WORD gl_rschange;
+extern int16_t gl_rschange;
 
-EXTERN WORD d_exit;
+extern int16_t d_exit;
 
-EXTERN BYTE afile[];
+extern char afile[];
 
-EXTERN BYTE *q_addr;
+extern char *q_addr;
 
-EXTERN WORD gl_ws[];
+extern int16_t gl_ws[];
 
-EXTERN UWORD apsize;
+extern uint16_t apsize;
 
-EXTERN WORD gl_apid;
+extern int16_t gl_apid;
 
-EXTERN WORD gl_hbox;
+extern int16_t gl_hbox;
 
-EXTERN GRECT gl_rfull;
+extern GRECT gl_rfull;
 
-EXTERN WORD do_once;
+extern int16_t do_once;
 
-WORD m_st;								/* machine type flag    */
+int16_t m_st;								/* machine type flag    */
 
-WORD m_cpu;								/* cpu type     */
+int16_t m_cpu;								/* cpu type     */
 
-WORD numicon;							/* the number of icon in the resource   */
+int16_t numicon;							/* the number of icon in the resource   */
 
-BYTE *iconmem;							/* icon data memory address */
+char *iconmem;							/* icon data memory address */
 
-WORD xprint;							/* do it once flag  */
+int16_t xprint;							/* do it once flag  */
 
-BYTE restable[6];						/* resolution table */
+char restable[6];						/* resolution table */
 
 			/* Low , Medium, High, TT Medium, TT High, TT Low */
 
-WORD d_maxcolor;
+int16_t d_maxcolor;
 
 USERBLK chxcache;
 
 CICONBLK *ciconaddr;
 
-WORD ch_xcache()
+int16_t ch_xcache()
 {
 	ch_cache(FALSE);
 	return (0);
 }
 
 
-EXTERN WORD ctldown;
+extern int16_t ctldown;
 
 
 /*	Read in icn file	*/
 
-WORD re_icon()
+int16_t re_icon()
 {
-	REG WORD i;
+	register int16_t i;
 
-	BYTE temp[30];
+	char temp[30];
 
-	LONG *ptr;
+	int32_t *ptr;
 
-	BYTE buf2[18];
+	char buf2[18];
 
-	BYTE *iaddr;
+	char *iaddr;
 
 	LBCOPY(temp, pglobal, 30);			/* save the pglobal */
 
@@ -140,17 +140,17 @@ WORD re_icon()
 /*	Initalize the icon and allocate backid memory	*/
 /*	Change the G_ICON to G_CICON			*/
 
-WORD ini_icon()
+int16_t ini_icon()
 {
-	REG WORD i;
+	register int16_t i;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG IDTYPE *itype;
+	register IDTYPE *itype;
 
 	CICONBLK *icblk;
 
-	backid = Malloc((LONG) (sizeof(IDTYPE) * (maxicon + 1)));
+	backid = Malloc((int32_t) (sizeof(IDTYPE) * (maxicon + 1)));
 
 	if (!backid)
 		return (FALSE);
@@ -169,7 +169,7 @@ WORD ini_icon()
 		itype->i_cicon = *icblk;
 		itype->i_cicon.monoblk.ib_ptext = &itype->i_name[0];
 		obj[i].ob_spec = &itype->i_cicon;
-		itype->i_path = (BYTE *) 0;
+		itype->i_path = (char *) 0;
 	}
 
 	return (TRUE);
@@ -178,11 +178,11 @@ WORD ini_icon()
 /*	Shift the menu	*/
 
 VOID adj_menu(which)
-WORD which;
+int16_t which;
 {
 	OBJECT *obj;
 
-	WORD w,
+	int16_t w,
 	 x,
 	 y;
 
@@ -202,13 +202,13 @@ WORD which;
 
 VOID ini_rsc()
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
 	GRECT pt;
 
 	ICONBLK *iblk;
 
-	WORD w,
+	int16_t w,
 	 i;
 
 	CICONBLK *icblk;
@@ -240,7 +240,7 @@ VOID ini_rsc()
 
 	if (!ciconaddr)						/* 7/10/92 */
 	{
-		if (ciconaddr = Malloc((LONG) (sizeof(CICONBLK) * maxicon)))
+		if (ciconaddr = Malloc((int32_t) (sizeof(CICONBLK) * maxicon)))
 		{
 			for (i = 0; i < maxicon; i++)
 			{
@@ -305,26 +305,26 @@ VOID ini_rsc()
 
 
 
-WORD deskmain()
+int16_t deskmain()
 {
-	REG WORD i;
+	register int16_t i;
 
-	WORD ret;
+	int16_t ret;
 
-	WORD handle,
+	int16_t handle,
 	 x;
 
-	WORD *ptr;
+	int16_t *ptr;
 
-	BYTE temp[30];
+	char temp[30];
 
-	LONG *lptr;
+	int32_t *lptr;
 
 	if (!inf_path[0])					/* Not set up yet       */
 		m_infpath(inf_path);
 
 #if 0
-	ciconaddr = (BYTE *) 0;				/* 7/10/92 */
+	ciconaddr = (char *) 0;				/* 7/10/92 */
 #endif
 
   top:
@@ -335,8 +335,8 @@ WORD deskmain()
 	ret = TRUE;							/* assume everything is OK  */
 	d_exit = L_NOEXIT;
 
-	appnode = (BYTE *) 0;				/* No app buffer yet        */
-	applist = (BYTE *) 0;				/* No app list yet      */
+	appnode = (char *) 0;				/* No app buffer yet        */
+	applist = (char *) 0;				/* No app list yet      */
 	apsize = 0;							/* Initalize app size       */
 
 	desk_wait(TRUE);
@@ -455,7 +455,7 @@ WORD deskmain()
 		if (ciconaddr)					/* 7/10/92  */
 		{
 			Mfree(ciconaddr);
-			ciconaddr = (BYTE *) 0;
+			ciconaddr = (char *) 0;
 		}
 
 		iconaddr = (OBJECT *) 0;
@@ -466,7 +466,7 @@ WORD deskmain()
 			lptr = &ptr[7];
 			*lptr = iconmem;
 			rs_free(temp);
-			iconmem = (BYTE *) 0;
+			iconmem = (char *) 0;
 		}
 		ret = FALSE;					/* resolution change    */
 		inf_path[0] = 0;
@@ -479,9 +479,9 @@ WORD deskmain()
 
 /*	Check the machine type and set res table	*/
 
-WORD ch_machine()
+int16_t ch_machine()
 {
-	LONG value;
+	int32_t value;
 
 	m_st = TRUE;
 	/* _VDO */
@@ -520,8 +520,8 @@ WORD ch_machine()
 }
 
 
-LONG inq_cache(data)
-REG LONG data;
+int32_t inq_cache(data)
+register int32_t data;
 {
 	asm(".dc.w $4e7a,$0002");			/* movec.l cacr,d0        */
 
@@ -535,13 +535,13 @@ REG LONG data;
 /*	Turn on the cache or bitblt 	*/
 
 ch_cache(set)
-WORD set;
+int16_t set;
 {
-	WORD value;
+	int16_t value;
 
-	LONG data;
+	int32_t data;
 
-	WORD temp;
+	int16_t temp;
 
 #if 0									/* take out for sparrow */
 	menu_addr[BITBLT].ob_state &= ~DISABLED;
@@ -610,7 +610,7 @@ WORD set;
 VOID adjdcol(color)
 unsigned int color;
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
 	if (gl_ws[13] > LWHITE)
 		return;
@@ -647,9 +647,9 @@ unsigned int color;
 
 VOID adjobjects()
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	WORD x,
+	int16_t x,
 	 y,
 	 w,
 	 h,

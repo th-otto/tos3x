@@ -11,7 +11,7 @@ include SRCFILES
 
 CPPFLAGS +=
 
-desk.a: tosvars.o $(DESK_OBJS) ${MAKEFILE}
+desk.a: tosvars.o config.h $(DESK_OBJS) ${MAKEFILE}
 	$(RM) $@
 	$(AR) $(ARFLAGS) $@ tosvars.o $(DESK_OBJS1)
 	$(AR) $(ARFLAGS) $@ $(DESK_OBJS2)
@@ -41,7 +41,7 @@ deskext.o: deskext.S config.h
 #### Desktop dependencies
 ##
 
-STDDESK.H = portab.h mobdefs.h defines.h window.h desk$(COUNTRY).h
+STDDESK.H = mobdefs.h defines.h window.h desk$(COUNTRY).h
 GEMDESK.H = extern.h osbind.h gemdefs.h
 
 deskact.o:  $(STDDESK.H) $(GEMDESK.H)

@@ -437,4 +437,3 @@
 #define MFBASE 7  	/* OBJECT in TREE #26 */
 #define WSKIP 12  	/* OBJECT in TREE #17 */
 #define LTOS 4  	/* OBJECT in TREE #13 */
-

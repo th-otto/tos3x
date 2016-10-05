@@ -24,9 +24,9 @@
 #include <extern.h>
 #include <error.h>
 
-EXTERN BYTE *get_fstring();
+extern char *get_fstring();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
 GRECT sizes[] = { 150, 150, 150, 150 };
 OBJECT blank[] = { -1, -1, -1, G_BOX, NONE, NORMAL, 0x000000F0L, 0, 0, 0, 0 };
@@ -36,19 +36,19 @@ OBJECT blank[] = { -1, -1, -1, G_BOX, NONE, NORMAL, 0x000000F0L, 0, 0, 0, 0 };
 winfo(win)
 WINDOW *win;
 {
-	REG WORD i;
+	register int16_t i;
 
-	REG DIR *dir;
+	register DIR *dir;
 
-	UWORD j;
+	uint16_t j;
 
-	LONG sizes;
+	int32_t sizes;
 
-	LONG sizes1;
+	int32_t sizes1;
 
-	BYTE buffer[14];
+	char buffer[14];
 
-	BYTE *type;
+	char *type;
 
 	dir = win->w_memory;
 	j = 0;
@@ -67,13 +67,13 @@ WINDOW *win;
 
 	if (j)								/* some items are selected  */
 	{
-		*((LONG *) & buffer[0]) = sizes1;
-		*((WORD *) & buffer[4]) = j;
+		*((int32_t *) & buffer[0]) = sizes1;
+		*((int16_t *) & buffer[4]) = j;
 		type = get_fstring((j == 1) ? ISEL : ISELS);
 	} else
 	{
-		*((LONG *) & buffer[0]) = sizes;
-		*((WORD *) & buffer[4]) = (WORD) win->w_items;
+		*((int32_t *) & buffer[0]) = sizes;
+		*((int16_t *) & buffer[4]) = (int16_t) win->w_items;
 		type = get_fstring((win->w_items == 1) ? ISTR : ISTRS);
 	}
 
@@ -108,9 +108,9 @@ WINDOW * w_gfirst()
 /*	Update all the windows, change dir path if fails	*/
 
 VOID up_2allwin(path)
-BYTE path[];
+char path[];
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	win = w_gfirst();
 
@@ -134,13 +134,13 @@ BYTE path[];
 /*	If the path has nothing, then update all the windows	*/
 
 up_1allwin(path, full, change)
-BYTE path[];
+char path[];
 
-WORD full;								/* compare full path    */
+int16_t full;								/* compare full path    */
 
-WORD change;
+int16_t change;
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	win = w_gfirst();
 
@@ -171,9 +171,9 @@ WORD change;
 
 
 up_allwin(path, full)
-BYTE path[];
+char path[];
 
-WORD full;
+int16_t full;
 {
 	up_1allwin(path, full, FALSE);
 }
@@ -182,14 +182,14 @@ WORD full;
 
 /* 	Do the actual update of a particular window	*/
 
-WORD up_win(win, mediac)
+int16_t up_win(win, mediac)
 WINDOW *win;
 
-WORD mediac;
+int16_t mediac;
 {
-	BYTE *ptr;
+	char *ptr;
 
-	WORD ret;
+	int16_t ret;
 
 	ptr = win->w_path;
 
@@ -198,8 +198,8 @@ WORD mediac;
 		if (mediac)
 		{
 			desk_wait(TRUE);
-			if (ret = hit_disk((WORD) ptr[0]))
-				mediach((WORD) (ptr[0] - 'A'));
+			if (ret = hit_disk((int16_t) ptr[0]))
+				mediach((int16_t) (ptr[0] - 'A'));
 
 			desk_wait(FALSE);
 
@@ -224,13 +224,13 @@ WORD mediac;
 
 bottop()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	WINDOW *win1;
 
-	WORD item;
+	int16_t item;
 
-	WORD buffer[8];
+	int16_t buffer[8];
 
 	if (win = w_gfirst())
 	{
@@ -252,19 +252,19 @@ bottop()
 
 /*	Allocate memory for window path	*/
 
-WORD path_alloc(level)					/* requested level  */
-WORD level;
+int16_t path_alloc(level)					/* requested level  */
+int16_t level;
 {
-	WORD oldlevel,
+	int16_t oldlevel,
 	 wsize;
 
-	LONG size;
+	int32_t size;
 
-	REG WORD i;
+	register int16_t i;
 
-	REG BYTE *addr;
+	register char *addr;
 
-	BYTE *path;
+	char *path;
 
 	oldlevel = d_level;
 
@@ -274,7 +274,7 @@ WORD level;
 	}
 
 	wsize = (13 * (d_level + 1)) + 3;
-	size = (MAXWIN * 2 * (UWORD) wsize) + 1;
+	size = (MAXWIN * 2 * (uint16_t) wsize) + 1;
 	addr = path = Malloc(size);
 
 	if (path)
@@ -314,7 +314,7 @@ free_path()
 	{
 /*	  form_alert( 1, "[1][ Free Path Memory ][ OK ]" );	*/
 		Mfree(d_path);
-		d_path = (BYTE *) 0;
+		d_path = (char *) 0;
 	}
 }
 
@@ -323,7 +323,7 @@ free_path()
 
 clr_allwin()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	win = w_gfirst();
 
@@ -338,18 +338,18 @@ clr_allwin()
 /*	Clean up and dselect the window objects		*/
 
 clr_xwin(win, infoupdate)
-REG WINDOW *win;
+register WINDOW *win;
 
-WORD infoupdate;
+int16_t infoupdate;
 {
 	OBJECT *obj;
 
-	REG WORD i;
+	register int16_t i;
 
-	WORD change,
+	int16_t change,
 	 ret;
 
-	REG DIR *dir;
+	register DIR *dir;
 
 	GRECT pt;
 
@@ -383,15 +383,15 @@ WORD infoupdate;
 /*	Move the vertical bar	*/
 
 srl_verbar(win, pos)
-REG WINDOW *win;
+register WINDOW *win;
 
-UWORD pos;
+uint16_t pos;
 {
-	LONG l;
+	int32_t l;
 
-	UWORD i;
+	uint16_t i;
 
-	WORD diff,
+	int16_t diff,
 	 dir;
 
 	l = pos * win->w_vvicons;
@@ -421,7 +421,7 @@ UWORD pos;
 		} else
 			l = 0;
 
-		wind_set(win->w_id, WF_VSLIDE, (UWORD) l, 0, 0, 0);
+		wind_set(win->w_id, WF_VSLIDE, (uint16_t) l, 0, 0, 0);
 
 		win->w_obj->ob_y = win->w_work.y;	/* reset at the topmost */
 		win->w_srtitem = i * win->w_icol;
@@ -433,21 +433,21 @@ UWORD pos;
 /*	Move the horizontal bar	*/
 
 srl_hzbar(win, pos)
-REG WINDOW *win;
+register WINDOW *win;
 
-UWORD pos;
+uint16_t pos;
 {
-	LONG l;
+	int32_t l;
 
-	UWORD x,
+	uint16_t x,
 	 w;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG WORD diff,
+	register int16_t diff,
 	 i;
 
-	WORD dir;
+	int16_t dir;
 
 	l = pos * win->w_hvicons;
 	i = l / 1000;
@@ -476,7 +476,7 @@ UWORD pos;
 		} else
 			l = 0;
 
-		wind_set(win->w_id, WF_HSLIDE, (UWORD) l, 0, 0, 0);
+		wind_set(win->w_id, WF_HSLIDE, (uint16_t) l, 0, 0, 0);
 
 		x = win->w_work.x;
 		w = win->w_work.w;
@@ -496,12 +496,12 @@ UWORD pos;
 /*	Scroll the content down		*/
 
 srl_row(win, row, dir)
-REG WINDOW *win;
+register WINDOW *win;
 
-WORD row,
+int16_t row,
  dir;
 {
-	WORD i;
+	int16_t i;
 
 	if (dir == SDOWN)					/* scroll content dowm  */
 	{
@@ -526,11 +526,11 @@ WORD row,
 
 
 srl_col(win, col, dir)
-REG WINDOW *win;
+register WINDOW *win;
 
-REG WORD col;
+register int16_t col;
 
-WORD dir;
+int16_t dir;
 {
 	if (dir == SRIGHT)					/* scroll content right */
 	{
@@ -553,29 +553,29 @@ WORD dir;
 
 /*	Bitblt a window content either up, dowm, left or right	*/
 
-WORD blt_window(win, mode, size)
-REG WINDOW *win;
+int16_t blt_window(win, mode, size)
+register WINDOW *win;
 
-WORD mode,
+int16_t mode,
 	size;
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG WORD x,
+	register int16_t x,
 	 y;
 
-	WORD e_x[12];						/* bitblt rectangle */
+	int16_t e_x[12];						/* bitblt rectangle */
 
-	LONG trash,
+	int32_t trash,
 	 l;
 
-	WORD y1,
+	int16_t y1,
 	 block,
 	 w,
 	 h,
 	 i;
 
-	WORD *ptr;
+	int16_t *ptr;
 
 	GRECT pt;
 
@@ -639,7 +639,7 @@ WORD mode,
 		} else
 			l = 0;
 
-		wind_set(win->w_id, WF_VSLIDE, (UWORD) (l), 0, 0, 0);
+		wind_set(win->w_id, WF_VSLIDE, (uint16_t) (l), 0, 0, 0);
 
 	} else								/* scroll left or right     */
 	{
@@ -688,7 +688,7 @@ WORD mode,
 		} else
 			l = 0;
 
-		wind_set(win->w_id, WF_HSLIDE, (UWORD) l, 0, 0, 0);
+		wind_set(win->w_id, WF_HSLIDE, (uint16_t) l, 0, 0, 0);
 
 	}
 
@@ -703,18 +703,18 @@ WORD mode,
 /*	adjust the scroll bars					*/
 
 view_adjust(win)
-REG WINDOW *win;
+register WINDOW *win;
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG UWORD x,
+	register uint16_t x,
 	 col;
 
-	UWORD row;							/* must be unsigned */
+	uint16_t row;							/* must be unsigned */
 
-	LONG l;
+	int32_t l;
 
-	UWORD i;
+	uint16_t i;
 
 	obj = win->w_obj;
 
@@ -806,10 +806,10 @@ REG WINDOW *win;
 /*	Change the viewing mode, form text to icon or vice verse	*/
 
 sort_show(mode, view)
-WORD mode,
+int16_t mode,
  view;
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	desk_wait(TRUE);
 
@@ -843,29 +843,29 @@ WORD mode,
 view_fixmode(win)
 WINDOW *win;
 {
-	REG WORD x,
+	register int16_t x,
 	 y,
 	 w,
 	 i,
 	 offx;
 
-	WORD h,
+	int16_t h,
 	 limitw,
 	 limith;
 
-	WORD type,
+	int16_t type,
 	 offy;
 
-	WORD len,
+	int16_t len,
 	 col,
 	 row,
 	 doitc;
 
 	CICONBLK *iblk;
 
-	BYTE *text;
+	char *text;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
 	OBJECT *obj1;
 
@@ -965,9 +965,9 @@ WINDOW *win;
 /*	Make this window to be the top one	*/
 
 make_top(win)
-REG WINDOW *win;
+register WINDOW *win;
 {
-	REG WINDOW *winptr;
+	register WINDOW *winptr;
 
 	if (win)
 	{
@@ -996,20 +996,20 @@ REG WINDOW *win;
 
 /*	Allocate a window object	*/
 
-WORD alloc_obj(mode, win)
-WORD mode;
+int16_t alloc_obj(mode, win)
+int16_t mode;
 
-REG WINDOW *win;
+register WINDOW *win;
 {
-	REG WORD i,
+	register int16_t i,
 	 j;
 
-	REG UWORD item;
+	register uint16_t item;
 
-	REG OBJECT *obj1,
+	register OBJECT *obj1,
 	*obj2;
 
-	WORD w,
+	int16_t w,
 	 h,
 	 len;
 
@@ -1017,9 +1017,9 @@ REG WINDOW *win;
 
 	TEDINFO *ted;
 
-	UWORD k;
+	uint16_t k;
 
-	LONG size;
+	int32_t size;
 
 	i = full.w / dicon.w;
 	if (full.w % dicon.w)
@@ -1049,10 +1049,10 @@ REG WINDOW *win;
 	len = strlen(((TEDINFO *) (obj2[TSTYLE].ob_spec))->te_ptext);
 
 	size = 0;
-	size += (UWORD) ((item + 1) * sizeof(OBJECT));
-	size += (UWORD) (item * len);
-	size += (UWORD) (item * sizeof(TEDINFO));
-	size += (UWORD) (item * sizeof(CICONBLK));
+	size += (uint16_t) ((item + 1) * sizeof(OBJECT));
+	size += (uint16_t) (item * len);
+	size += (uint16_t) (item * sizeof(TEDINFO));
+	size += (uint16_t) (item * sizeof(CICONBLK));
 
 	if (win->w_obj = Malloc(size))
 	{
@@ -1090,9 +1090,9 @@ REG WINDOW *win;
 
 ini_windows()
 {
-	REG WORD i;
+	register int16_t i;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	d_level = 4;
 
@@ -1100,9 +1100,9 @@ ini_windows()
 
 	for (i = 0; i < MAXWIN; i++, win++)
 	{
-		win->w_obj = (BYTE *) 0;
-		win->w_path = (BYTE *) 0;		/* window path  */
-		win->w_buf = (BYTE *) 0;
+		win->w_obj = (char *) 0;
+		win->w_path = (char *) 0;		/* window path  */
+		win->w_buf = (char *) 0;
 		win->w_free = FALSE;			/* window is not free yet   */
 		win->w_level = 0;
 		win->w_id = -1;					/* window is not open       */
@@ -1133,7 +1133,7 @@ ini_windows()
 		win->w_free = TRUE;				/* this window is available */
 	}
 
-	winpd[i - 1].w_next = (BYTE *) 0;
+	winpd[i - 1].w_next = (char *) 0;
 	winhead = &winpd[0];
 }
 
@@ -1153,7 +1153,7 @@ WINDOW *win;
 
 WINDOW * alloc_win()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	win = winhead;
 
@@ -1180,9 +1180,9 @@ WINDOW * alloc_win()
 /*	Get the window data structure address according to handle	*/
 
 WINDOW * get_win(handle)
-WORD handle;
+int16_t handle;
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	win = winhead;
 
@@ -1200,10 +1200,10 @@ WORD handle;
 
 /*	Open window	*/
 
-WORD open_window(handle)
-WORD handle;
+int16_t open_window(handle)
+int16_t handle;
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	win = get_win(handle);				/* window's size    */
 	/* open it      */
@@ -1227,11 +1227,11 @@ WORD handle;
 
 /*	Create Window of its full size	*/
 
-WORD create_window()
+int16_t create_window()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	WORD handle;
+	int16_t handle;
 
 	/* Do we have any window pd ?   */
 	if (win = alloc_win())
@@ -1257,7 +1257,7 @@ WINDOW * get_top()
 	return (w_gfirst());
 
 #if UNLINKED
-	WORD handle,
+	int16_t handle,
 	 ret;
 
 	WINDOW *win;
@@ -1277,10 +1277,10 @@ WINDOW * get_top()
 /*	Close and delete a window	*/
 
 close_window(handle, closeit)
-WORD handle,
+int16_t handle,
  closeit;
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	if (closeit)						/* close window     */
 		wind_close(handle);
@@ -1295,7 +1295,7 @@ WORD handle,
 		if (win->w_memory)
 		{
 			Mfree(win->w_memory);
-			win->w_memory = (BYTE *) 0;
+			win->w_memory = (char *) 0;
 		}
 		wind_delete(handle);
 
@@ -1320,9 +1320,9 @@ WORD handle,
 
 free_windows()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	WORD i;
+	int16_t i;
 
 	for (i = 0; i < MAXWIN; i++)
 	{
@@ -1331,7 +1331,7 @@ free_windows()
 		if (win->w_obj)
 		{
 			Mfree(win->w_obj);
-			win->w_obj = (BYTE *) 0;
+			win->w_obj = (char *) 0;
 		}
 
 		/* don't close window, do it at the sh_main */
@@ -1346,15 +1346,15 @@ free_windows()
 /*	This is my own redraw routine		*/
 
 do_redraw(handle, pc, which)
-REG WORD handle;
+register int16_t handle;
 
 GRECT *pc;
 
-WORD which;
+int16_t which;
 {
 	GRECT pt;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
 	WINDOW *win;
 
@@ -1391,7 +1391,7 @@ WORD which;
 
 
 do_xyfix(pc)
-REG GRECT *pc;
+register GRECT *pc;
 {
 	GRECT rect;
 

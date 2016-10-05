@@ -10,25 +10,25 @@
 #include <portab.h>
 #include <struct88.h>
 
-EXTERN WORD gl_wchar;
+extern int16_t gl_wchar;
 
-EXTERN WORD gl_hchar;
+extern int16_t gl_hchar;
 
-EXTERN WORD gl_wbox;
+extern int16_t gl_wbox;
 
-EXTERN WORD gl_hbox;
+extern int16_t gl_hbox;
 
-EXTERN WORD gl_handle;
+extern int16_t gl_handle;
 
-EXTERN WORD pglobal[];
+extern int16_t pglobal[];
 
-EXTERN WORD contrl[];
+extern int16_t contrl[];
 
-EXTERN WORD intin[];
+extern int16_t intin[];
 
-EXTERN WORD ptsin[];
+extern int16_t ptsin[];
 
-EXTERN PD *rlr;
+extern PD *rlr;
 
 
 wind_new()
@@ -38,14 +38,14 @@ wind_new()
 }
 
 
-WORD fsel_exinput(path, selec, button, label)
-BYTE *path,
+int16_t fsel_exinput(path, selec, button, label)
+char *path,
 *selec,
 *label;
 
-WORD *button;
+int16_t *button;
 {
-	WORD ret;
+	int16_t ret;
 
 	ret = fs_input(path, selec, button, label);
 	dsptch();
@@ -53,22 +53,22 @@ WORD *button;
 }
 
 
-WORD rsrc_load(name)
-BYTE *name;
+int16_t rsrc_load(name)
+char *name;
 {
-	WORD ret;
+	int16_t ret;
 
 	ret = rs_load(pglobal, name);
 	dsptch();
 	return (ret);
 }
 
-WORD rsrc_obfix(tree, obj)
-LONG tree;
+int16_t rsrc_obfix(tree, obj)
+int32_t tree;
 
-WORD obj;
+int16_t obj;
 {
-	WORD ret;
+	int16_t ret;
 
 	ret = rs_obfix(tree, obj);
 	dsptch();
@@ -76,14 +76,14 @@ WORD obj;
 }
 
 
-WORD menu_popup(menu, x, y, mdata)
-LONG menu,
+int16_t menu_popup(menu, x, y, mdata)
+int32_t menu,
 	mdata;
 
-WORD x,
+int16_t x,
 	y;
 {
-	WORD ret;
+	int16_t ret;
 
 	ret = mn_popup(rlr->p_pid, menu, x, y, mdata);
 	dsptch();
@@ -91,14 +91,14 @@ WORD x,
 }
 
 
-WORD menu_istart(code, mtree, mmenu, start)
-WORD code,
+int16_t menu_istart(code, mtree, mmenu, start)
+int16_t code,
 	mmenu,
 	start;
 
-LONG mtree;
+int32_t mtree;
 {
-	WORD ret;
+	int16_t ret;
 
 	ret = mn_istart(rlr->p_pid, code, mtree, mmenu, start);
 	dsptch();
@@ -107,11 +107,11 @@ LONG mtree;
 
 
 objc_gclip(tree, which, x, y, rx, ry, w, h)
-LONG tree;
+int32_t tree;
 
-WORD which;
+int16_t which;
 
-WORD *x,
+int16_t *x,
 *y,
 *rx,
 *ry,
@@ -124,9 +124,9 @@ WORD *x,
 
 
 graf_mouse(style, pointer)
-WORD style;
+int16_t style;
 
-BYTE *pointer;
+char *pointer;
 {
 	gr_mouse(style, pointer);
 	dsptch();
@@ -135,7 +135,7 @@ BYTE *pointer;
 /*	show cursor	*/
 
 v_show_c(reset)
-WORD reset;
+int16_t reset;
 {
 	intin[0] = reset;
 	gsx_ncode(122, 0, 1);
@@ -168,9 +168,9 @@ v_enter_cur()
 /*	clipping function	*/
 
 vs_clip(clip_flag, pxyarray)
-WORD clip_flag;
+int16_t clip_flag;
 
-WORD pxyarray[];
+int16_t pxyarray[];
 {
 	intin[0] = clip_flag;
 	ptsin[0] = pxyarray[0];

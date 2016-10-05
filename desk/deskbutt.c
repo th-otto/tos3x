@@ -16,29 +16,29 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN WINDOW *get_win();
+extern WINDOW *get_win();
 
-EXTERN WINDOW *get_top();
+extern WINDOW *get_top();
 
-EXTERN DIR *get_dir();
+extern DIR *get_dir();
 
-EXTERN WINDOW *x_win;
+extern WINDOW *x_win;
 
 /*	Find an empty icon	*/
 
-WORD av_icon()
+int16_t av_icon()
 {
-	REG WORD i,
+	register int16_t i,
 	 k;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	WORD x,
+	int16_t x,
 	 y,
 	 col,
 	 row;
 
-	WORD xcol,
+	int16_t xcol,
 	 xrow,
 	 found;
 
@@ -76,7 +76,7 @@ WORD av_icon()
 				}
 			}
 		  av_1:
-			backid[k].i_path = (BYTE *) 0;
+			backid[k].i_path = (char *) 0;
 			obj[k].ob_flags = NONE;
 			obj[k].ob_state = NORMAL;
 			obj[k].ob_x = x;
@@ -95,9 +95,9 @@ clr_dicons()
 {
 	GRECT pt;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	WORD i;
+	int16_t i;
 
 	obj = background;
 
@@ -115,21 +115,21 @@ clr_dicons()
 /*	Handle the click event		*/
 
 hd_button(clicks, kstate, mx, my)
-WORD clicks,
+int16_t clicks,
  kstate,
  mx,
  my;
 {
-	REG WORD item;
+	register int16_t item;
 
-	WORD xitem,
+	int16_t xitem,
 	 type,
 	 keypress,
 	 state;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	WINDOW *win1;
 

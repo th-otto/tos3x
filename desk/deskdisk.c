@@ -42,13 +42,13 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN LONG trap14();
+extern int32_t trap14();
 
-EXTERN LONG trap13();
+extern int32_t trap13();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN BYTE *get_string();
+extern char *get_string();
 
 #define MAXTRACK	80					/* maximum number of track      */
 #define FC_NUMOBJS	26
@@ -78,23 +78,23 @@ EXTERN BYTE *get_string();
 #define BPB	struct bpb					/* BIOS Parameter Block */
 BPB
 {
-	WORD recsiz;						/* sector size (bytes)      */
+	int16_t recsiz;						/* sector size (bytes)      */
 
-	WORD clsiz;							/* cluster size (sectors)   */
+	int16_t clsiz;							/* cluster size (sectors)   */
 
-	WORD clsizb;						/* cluster size (bytes)     */
+	int16_t clsizb;						/* cluster size (bytes)     */
 
-	WORD rdlen;							/* root directory size (sectors) */
+	int16_t rdlen;							/* root directory size (sectors) */
 
-	WORD fsiz;							/* FAT size (sectors)       */
+	int16_t fsiz;							/* FAT size (sectors)       */
 
-	WORD fatrec;						/* Sector # of second FAT   */
+	int16_t fatrec;						/* Sector # of second FAT   */
 
-	WORD datrec;						/* Sector # of data     */
+	int16_t datrec;						/* Sector # of data     */
 
-	WORD numcl;							/* Number of data clusters  */
+	int16_t numcl;							/* Number of data clusters  */
 
-	WORD b_flags;						/* flags (1 => 16 bit FAT)  */
+	int16_t b_flags;						/* flags (1 => 16 bit FAT)  */
 };
 
 /* The DSB location is returned by getbpb (Xbios 7) and is defined in
@@ -111,7 +111,7 @@ DSB
 {
 	BPB b;								/* BIOS Parameter Block     */
 
-	WORD dntracks,						/* #tracks (cylinders) on dev   */
+	int16_t dntracks,						/* #tracks (cylinders) on dev   */
 	 dnsides,							/* #sides per cylinder      */
 	 dspc,								/* #sectors/cylinder        */
 	 dspt,								/* #sectors/track       */
@@ -120,42 +120,42 @@ DSB
 	char dserial[3];					/* 24-bit volume serial number  */
 };
 
-MLOCAL WORD w_inc;
+MLOCAL int16_t w_inc;
 
-MLOCAL WORD bar_max;					/* in case user copies disk > 80 tracks */
+MLOCAL int16_t bar_max;					/* in case user copies disk > 80 tracks */
 
-MLOCAL WORD ttable[] = { FCCNCL, FCCOPY, FCFORMAT, SRCDRA, SRCDRB, ADRIVE,
+MLOCAL int16_t ttable[] = { FCCNCL, FCCOPY, FCFORMAT, SRCDRA, SRCDRB, ADRIVE,
 	BDRIVE
 };
 
-MLOCAL WORD skew1[MAXSPT * 2] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+MLOCAL int16_t skew1[MAXSPT * 2] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18,
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18
 };
 
-MLOCAL WORD skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+MLOCAL int16_t skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 
 /*	format and copy start	*/
 
 fc_start(source, op)
-BYTE *source;
+char *source;
 
-WORD op;
+int16_t op;
 {
-	REG WORD ret,
+	register int16_t ret,
 	 width;
 
-	WORD i,
+	int16_t i,
 	 field,
 	 operation;
 
-	REG BYTE *destdr;
+	register char *destdr;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	LONG value;
+	int32_t value;
 
 	obj = get_tree(ADFORMAT);
 
@@ -290,49 +290,49 @@ WORD op;
 
 /*	format disk	*/
 
-WORD fc_format(obj)
+int16_t fc_format(obj)
 OBJECT *obj;
 {
-	REG BYTE *bufaddr;
+	register char *bufaddr;
 
-	REG WORD badindex,
+	register int16_t badindex,
 	 ret,
 	 i,
 	 trackno;
 
-	LONG dsb,
+	int32_t dsb,
 	 valuel,
 	 value2;
 
-	WORD devno,
+	int16_t devno,
 	 j,
 	 k,
 	 disktype;
 
-	WORD sideno,
+	int16_t sideno,
 	 curtrk,
 	 skew,
 	 skewi;
 
-	WORD track,
+	int16_t track,
 	 numside,
 	 cl;
 
-	REG WORD *badtable;
+	register int16_t *badtable;
 
-	REG WORD *fat;
+	register int16_t *fat;
 
-	REG BPB *bpbaddr;
+	register BPB *bpbaddr;
 
-	BYTE label1[14];
+	char label1[14];
 
-	BYTE label2[14];
+	char label2[14];
 
-	LONG lbuf[4];
+	int32_t lbuf[4];
 
-	WORD spt;
+	int16_t spt;
 
-	WORD *sktable;
+	int16_t *sktable;
 
 	/* format needs 8k buffer   */
 	if (!(bufaddr = Malloc(FSIZE)))		/* no memory            */
@@ -388,7 +388,7 @@ OBJECT *obj;
 			if (skewi < 0)
 				skewi += spt;
 
-		  fagain:ret = (WORD) (trap14(FORMAT, bufaddr, &sktable[skewi], devno,
+		  fagain:ret = (int16_t) (trap14(FORMAT, bufaddr, &sktable[skewi], devno,
 								 spt, trackno, sideno, INTERLV, MAGIC, VIRGIN));
 
 			if (ret == -16)				/* Bad sectors !    */
@@ -514,36 +514,36 @@ OBJECT *obj;
 fc_copy(obj)
 OBJECT *obj;
 {
-	REG LONG bootbuf,
+	register int32_t bootbuf,
 	 buf;
 
-	LONG bufptr,
+	int32_t bufptr,
 	 bufsize;
 
-	WORD devnos,
+	int16_t devnos,
 	 devnod;
 
-	REG DSB *dsbs,
+	register DSB *dsbs,
 	*dsbd;
 
-	WORD spc,
+	int16_t spc,
 	 bps,
 	 bpc,
 	 disksect,
 	 sectbufs,
 	 leftover;
 
-	WORD checkit,
+	int16_t checkit,
 	 last,
 	 ret;
 
-	WORD dev,
+	int16_t dev,
 	 sectno,
 	 ssect,
 	 dsect,
 	 trkops;
 
-	REG WORD j,
+	register int16_t j,
 	 op,
 	 loop;
 
@@ -570,7 +570,7 @@ OBJECT *obj;
 	bpc = spc * bps;					/* bytes per cylinder      */
 
 	/* buffer at least a track */
-	if ((bufsize = Malloc(0xFFFFFFFFL)) < (LONG) bpc)
+	if ((bufsize = Malloc(0xFFFFFFFFL)) < (int32_t) bpc)
 	{
 		Mfree(bootbuf);
 		goto errmem;
@@ -669,15 +669,15 @@ OBJECT *obj;
 }
 
 fc_rwsec(op, buf, nsect, sect, dev)
-WORD op;
+int16_t op;
 
-LONG buf;
+int32_t buf;
 
-WORD nsect,
+int16_t nsect,
  sect,
  dev;
 {
-	REG WORD ret;
+	register int16_t ret;
 
   rerw:if (ret = trap13(RWABS, op, buf, nsect, sect, dev))
 		if ((ret = do1_alert(FCFAIL)) == 1)	/* retry */
@@ -689,14 +689,14 @@ WORD nsect,
 /*     put in the next cluster number 	*/
 
 clfix(cl, fat)
-unsigned WORD cl;
+unsigned int16_t cl;
 
-unsigned WORD fat[];
+unsigned int16_t fat[];
 {
-	REG unsigned WORD ncl,
+	register unsigned int16_t ncl,
 	 cluster;
 
-	unsigned WORD temp,
+	unsigned int16_t temp,
 	 num;
 
 	num = 0x0FF7;
@@ -727,11 +727,11 @@ unsigned WORD fat[];
 /*	Inc and redraw slider bar	*/
 
 fc_bar(obj, which)
-REG OBJECT *obj;
+register OBJECT *obj;
 
-REG WORD which;
+register int16_t which;
 {
-	REG WORD wid;
+	register int16_t wid;
 
 	which = which ? FCBARB : FCBARA;
 
@@ -750,7 +750,7 @@ REG WORD which;
 fc_draw(obj, which)
 OBJECT *obj;
 
-WORD which;
+int16_t which;
 {
 	GRECT size;
 

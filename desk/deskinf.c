@@ -24,46 +24,46 @@
 #include <extern.h>
 
 
-EXTERN BYTE *scasb();
+extern char *scasb();
 
-EXTERN BYTE *r_slash();
+extern char *r_slash();
 
-EXTERN BYTE *lp_fill();
+extern char *lp_fill();
 
-EXTERN APP *app_alloc();
+extern APP *app_alloc();
 
-EXTERN WORD isdrive();
+extern int16_t isdrive();
 
-EXTERN WORD cart_init();
+extern int16_t cart_init();
 
-EXTERN BYTE *strcpy();
+extern char *strcpy();
 
-EXTERN WINDOW *w_gfirst();
+extern WINDOW *w_gfirst();
 
-EXTERN WINDOW *w_gnext();
+extern WINDOW *w_gnext();
 
 
-EXTERN BYTE mentable[];
+extern char mentable[];
 
-EXTERN APP *applist;
+extern APP *applist;
 
-EXTERN WORD q_change;
+extern int16_t q_change;
 
-EXTERN BYTE *q_addr;
+extern char *q_addr;
 
-EXTERN WORD d_maxcolor;					/* max number of color  */
+extern int16_t d_maxcolor;					/* max number of color  */
 
-EXTERN WORD numicon;
+extern int16_t numicon;
 
-UWORD d_rezword;
+uint16_t d_rezword;
 
-BYTE afile[INFSIZE];
+char afile[INFSIZE];
 
-WORD font_save;
+int16_t font_save;
 
-WORD s_defdir;
+int16_t s_defdir;
 
-WORD s_fullpath;
+int16_t s_fullpath;
 
 #define SAVE_ATARI	128
 
@@ -71,7 +71,7 @@ WORD s_fullpath;
 
 /* Added another 0x00 to the end for VIDITEM object - cjg 07/07/92 */
 /*	Take out two for sparrow */
-BYTE mkeys[MAXMENU] = { 0x4F, 0x53, 0x4C, 0x00, 0x46, 0x42, 0x43, 0x57,
+char mkeys[MAXMENU] = { 0x4F, 0x53, 0x4C, 0x00, 0x46, 0x42, 0x43, 0x57,
 	0x45, 0x58, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x52,
 	0x00, 0x00, 0x4D, 0x56, 0x50
@@ -80,7 +80,7 @@ BYTE mkeys[MAXMENU] = { 0x4F, 0x53, 0x4C, 0x00, 0x46, 0x42, 0x43, 0x57,
 /*	Make inf path	*/
 
 m_infpath(buffer)
-BYTE *buffer;
+char *buffer;
 {
 	strcpy(infpath, buffer);			/* C:\NEWDESK.INF   */
 	buffer[0] = (isdrive() & 0x04) ? 'C' : 'A';
@@ -89,8 +89,8 @@ BYTE *buffer;
 
 /*	Reverse of hex_dig()	*/
 
-BYTE uhex_dig(wd)
-REG WORD wd;
+char uhex_dig(wd)
+register int16_t wd;
 {
 	if ((wd >= 0) && (wd <= 9))
 		return (wd + '0');
@@ -102,10 +102,10 @@ REG WORD wd;
 }
 
 
-BYTE * escan_str(pcurr, ppstr)
-REG BYTE *pcurr;
+char * escan_str(pcurr, ppstr)
+register char *pcurr;
 
-REG BYTE *ppstr;
+register char *ppstr;
 {
 	while (*pcurr == ' ')
 		pcurr++;
@@ -123,12 +123,12 @@ REG BYTE *ppstr;
 	pcurr pointing one space past the end of the four hex digits
 */
 
-BYTE * scan_2(pcurr, pwd)
-REG BYTE *pcurr;
+char * scan_2(pcurr, pwd)
+register char *pcurr;
 
-REG UWORD *pwd;
+register uint16_t *pwd;
 {
-	REG UWORD temp;
+	register uint16_t temp;
 
 	temp = 0x0;
 	temp |= hex_dig(*pcurr++) << 4;
@@ -143,10 +143,10 @@ REG UWORD *pwd;
 
 /*	Reverse of scan_2()	*/
 
-BYTE * save_2(pcurr, wd)
-REG BYTE *pcurr;
+char * save_2(pcurr, wd)
+register char *pcurr;
 
-UWORD wd;
+uint16_t wd;
 {
 	*pcurr++ = uhex_dig((wd >> 4) & 0x000f);
 	*pcurr++ = uhex_dig(wd & 0x000f);
@@ -156,10 +156,10 @@ UWORD wd;
 
 /*	Reverse of scan_str	*/
 
-BYTE * save_str(pcurr, pstr)
-REG BYTE *pcurr;
+char * save_str(pcurr, pstr)
+register char *pcurr;
 
-REG BYTE *pstr;
+register char *pstr;
 {
 	while ((*pstr) && (pstr))
 		*pcurr++ = *pstr++;
@@ -171,23 +171,23 @@ REG BYTE *pstr;
 
 /*	Scan the desktop icon	*/
 
-BYTE * inf_xdesk(pcurr)
-REG BYTE *pcurr;
+char * inf_xdesk(pcurr)
+register char *pcurr;
 {
-	REG WORD ix;
+	register int16_t ix;
 
-	REG WORD id;
+	register int16_t id;
 
-	REG CICONBLK *iblk;
+	register CICONBLK *iblk;
 
 	OBJECT *obj;
 
-	WORD x,
+	int16_t x,
 	 y,
 	 i,
 	 type;
 
-	BYTE buffer[14];
+	char buffer[14];
 
 	type = *pcurr++;
 
@@ -257,7 +257,7 @@ REG BYTE *pcurr;
 	{
 		pcurr = lp_fill(pcurr, &backid[id].i_path);
 		pcurr = escan_str(pcurr, iblk->monoblk.ib_ptext);
-		if (!*((BYTE *) (iblk->monoblk.ib_ptext)))
+		if (!*((char *) (iblk->monoblk.ib_ptext)))
 		{
 			if (type == 'X')
 				save_ext(backid[id].i_path, iblk->monoblk.ib_ptext);
@@ -278,12 +278,12 @@ REG BYTE *pcurr;
 /*	Parse a single line from the DESKTOP.APP file.	*/
 /*	Just scan the application			*/
 
-BYTE * inf_parse(pcurr)
-REG BYTE *pcurr;
+char * inf_parse(pcurr)
+register char *pcurr;
 {
-	REG APP *app;
+	register APP *app;
 
-	REG WORD type;
+	register int16_t type;
 
 	pcurr -= 2;							/* important    */
 
@@ -368,7 +368,7 @@ REG BYTE *pcurr;
  * ++ERS 1/8/93
  */
 
-WORD inf_permute[MAXMENU + 2] = { 0, 1, 2, 3, 4,
+int16_t inf_permute[MAXMENU + 2] = { 0, 1, 2, 3, 4,
 	5, 6, 7, 8, 9,
 	10, 11, 12, 13, 14,
 	15, 16, 17, 18, 19,
@@ -378,27 +378,27 @@ WORD inf_permute[MAXMENU + 2] = { 0, 1, 2, 3, 4,
 };
 
 inf_scan(buffer)
-BYTE *buffer;
+char *buffer;
 {
-	REG WORD i,
+	register int16_t i,
 	 tmp;
 
-	REG WINDOW *pws;
+	register WINDOW *pws;
 
-	REG BYTE *pcurr;
+	register char *pcurr;
 
 	APP *app;
 
-	BYTE *ptmp;
+	char *ptmp;
 
-	WORD envr,
+	int16_t envr,
 	 j;
 
-	LONG stmp;
+	int32_t stmp;
 
-	BYTE temp;
+	char temp;
 
-	BYTE *ptr;
+	char *ptr;
 
 	i = 0;								/* for window index */
 	pcurr = buffer;
@@ -568,13 +568,13 @@ BYTE *buffer;
 
 read_inf()
 {
-	WORD handle;
+	int16_t handle;
 
-	REG LONG size1;
+	register int32_t size1;
 
-	BYTE buffer[20];
+	char buffer[20];
 
-	REG APP *app;
+	register APP *app;
 
 	shel_get(afile, INFSIZE);
 
@@ -591,7 +591,7 @@ read_inf()
 					goto re_1;
 			}
 
-			size1 = Fread(handle, (LONG) INFSIZE, afile);
+			size1 = Fread(handle, (int32_t) INFSIZE, afile);
 			if (size1 == INFSIZE)		/* buffer full  */
 				size1--;
 
@@ -646,8 +646,8 @@ read_inf()
 *	Convert a single hex ASCII digit to a number
 */
 
-WORD hex_dig(achar)
-REG BYTE achar;
+int16_t hex_dig(achar)
+register char achar;
 {
 	if ((achar >= '0') && (achar <= '9'))
 		return (achar - '0');
@@ -659,12 +659,12 @@ REG BYTE achar;
 }
 
 
-BYTE * save_win(win, pcurr)
-REG WINDOW *win;
+char * save_win(win, pcurr)
+register WINDOW *win;
 
-REG BYTE *pcurr;
+register char *pcurr;
 {
-	BYTE *ptmp;
+	char *ptmp;
 
 	*pcurr++ = '#';
 	*pcurr++ = 'W';
@@ -695,35 +695,35 @@ REG BYTE *pcurr;
 
 /*	Save a desktop.inf file		*/
 
-WORD save_inf(todisk)
-WORD todisk;
+int16_t save_inf(todisk)
+int16_t todisk;
 {
-	REG APP *start;
+	register APP *start;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG BYTE *pcurr;
+	register char *pcurr;
 
-	REG WORD envr,
+	register int16_t envr,
 	 i;
 
-	WORD j,
+	int16_t j,
 	 w,
 	 len,
 	 h,
 	 handle;
 
-	BYTE *buf;
+	char *buf;
 
 	APP *app;
 
 	OBJECT *obj;
 
-	LONG size;
+	int32_t size;
 
-	BYTE infname[16];
+	char infname[16];
 
-	BYTE buf1[2];
+	char buf1[2];
 
 	if (size = Malloc(0xFFFFFFFFL))		/* get some memory  */
 	{
@@ -766,9 +766,9 @@ WORD todisk;
 	for (i = 0; i < MAXMENU + 2; i++)
 	{
 		if (inf_permute[i] < 0)
-			pcurr = save_2(pcurr, (UWORD) 0);
+			pcurr = save_2(pcurr, (uint16_t) 0);
 		else
-			pcurr = save_2(pcurr, (UWORD) mentable[inf_permute[i]]);
+			pcurr = save_2(pcurr, (uint16_t) mentable[inf_permute[i]]);
 	}
 	*pcurr++ = '@';
 	*pcurr++ = 0x0d;
@@ -1033,10 +1033,10 @@ WORD todisk;
 				goto if_2;
 		}
 
-		size = Fwrite(handle, (LONG) len, afile);
+		size = Fwrite(handle, (int32_t) len, afile);
 		Fclose(handle);
 		/* check for full disk */
-		if (size < (LONG) len)
+		if (size < (int32_t) len)
 		{
 			buf1[0] = infname[0];
 			buf1[1] = 0;
@@ -1069,13 +1069,13 @@ WORD todisk;
 /*	Position the desktop icon	*/
 
 app_posicon(colx, coly, px, py)
-WORD colx,
+int16_t colx,
  coly;
 
-REG WORD *px,
+register int16_t *px,
 *py;
 {
-	REG WORD x,
+	register int16_t x,
 	 y,
 	 w,
 	 h;
@@ -1091,21 +1091,21 @@ REG WORD *px,
 /*	Transform mouse position into icon position	*/
 
 app_mtoi(newx, newy, px, py)
-WORD newx,
+int16_t newx,
  newy;
 
-REG WORD *px,
+register int16_t *px,
 *py;
 {
-	REG WORD x,
+	register int16_t x,
 	 y,
 	 w,
 	 h;
 
-	WORD xm,
+	int16_t xm,
 	 ym;
 
-	WORD maxx,
+	int16_t maxx,
 	 maxy;
 
 	w = r_dicon.w;
@@ -1145,9 +1145,9 @@ REG WORD *px,
 /*	Put or get color and pattern	*/
 
 tt_color(put)
-WORD put;
+int16_t put;
 {
-	WORD j;
+	int16_t j;
 
 	j = 2;								/* assume more than 4 colors    */
 
@@ -1159,11 +1159,11 @@ WORD put;
 
 	if (put)
 	{
-		windspec = (UWORD) winp[j];
-		background[0].ob_spec = (UWORD) deskp[j];
+		windspec = (uint16_t) winp[j];
+		background[0].ob_spec = (uint16_t) deskp[j];
 	} else
 	{
-		deskp[j] = (UWORD) background[0].ob_spec;
-		winp[j] = (UWORD) windspec;
+		deskp[j] = (uint16_t) background[0].ob_spec;
+		winp[j] = (uint16_t) windspec;
 	}
 }

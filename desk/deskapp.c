@@ -15,19 +15,19 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN BYTE *scasb();
+extern char *scasb();
 
-EXTERN WORD gl_restype;
+extern int16_t gl_restype;
 
-EXTERN WORD gl_rschange;
+extern int16_t gl_rschange;
 
-EXTERN WORD font_save;
+extern int16_t font_save;
 
-EXTERN BYTE *g_name();
+extern char *g_name();
 
 
-WORD app_reschange(res)
-REG WORD res;
+int16_t app_reschange(res)
+register int16_t res;
 {
 	if (res == gl_restype)
 		return (FALSE);
@@ -42,13 +42,13 @@ REG WORD res;
 /*	Find the application's icon type	*/
 
 APP * app_icon(name, type, icon)
-REG BYTE *name;
+register char *name;
 
-WORD type;								/* looking for same type    */
+int16_t type;								/* looking for same type    */
 
-WORD *icon;								/* icon number          */
+int16_t *icon;								/* icon number          */
 {
-	REG APP *app;
+	register APP *app;
 
 	app = applist;
 	*icon = 4;							/* default icon index       */
@@ -95,9 +95,9 @@ WORD *icon;								/* icon number          */
 /*	Free an application node	*/
 
 app_free(app)
-REG APP *app;
+register APP *app;
 {
-	REG APP *list;
+	register APP *list;
 
 	if (app == applist)
 		applist = app->a_next;
@@ -127,7 +127,7 @@ REG APP *app;
 
 APP * app_alloc()
 {
-	REG APP *list;
+	register APP *list;
 
   again:
 	list = (APP *) 0;
@@ -157,11 +157,11 @@ APP * app_alloc()
 /*	Find the actual application type	*/
 
 APP * app_xtype(name, install)
-REG BYTE *name;
+register char *name;
 
-WORD *install;							/* application installed    */
+int16_t *install;							/* application installed    */
 {
-	REG APP *app;
+	register APP *app;
 
 	APP *markapp;
 
@@ -203,10 +203,10 @@ WORD *install;							/* application installed    */
 }
 
 
-WORD x_wildcmp(source, dest)
-BYTE *source;
+int16_t x_wildcmp(source, dest)
+char *source;
 
-BYTE *dest;
+char *dest;
 {
 	if (*source)
 	{
@@ -218,16 +218,16 @@ BYTE *dest;
 	return (FALSE);
 }
 
-WORD ftab[] = { 0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
+int16_t ftab[] = { 0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 	F11, F12, F13, F14, F15, F16, F17, F18, F19, F20
 };
 
 /*	Find the key that matches the application	*/
 
 APP * app_key(key)
-WORD key;
+int16_t key;
 {
-	REG APP *app;
+	register APP *app;
 
 	app = applist;
 

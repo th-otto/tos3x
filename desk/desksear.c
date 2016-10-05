@@ -16,33 +16,33 @@
 #include <error.h>
 #include <extern.h>
 
-EXTERN WINDOW *alloc_win();
+extern WINDOW *alloc_win();
 
-EXTERN WINDOW *w_gfirst();
+extern WINDOW *w_gfirst();
 
-EXTERN WORD f_level;					/* local level counter same as deskdir  */
+extern int16_t f_level;					/* local level counter same as deskdir  */
 
-EXTERN WORD f_rename;					/* window opened?           */
+extern int16_t f_rename;					/* window opened?           */
 
-EXTERN WINDOW *x_win;
+extern WINDOW *x_win;
 
-EXTERN WORD x_type;
+extern int16_t x_type;
 
-EXTERN WORD x_status;
+extern int16_t x_status;
 
 
 /*	Position an item within a window	*/
 
 pos_item(win, newi)
-REG WINDOW *win;
+register WINDOW *win;
 
-WORD newi;
+int16_t newi;
 {
-	REG WORD i,
+	register int16_t i,
 	 j,
 	 k;
 
-	LONG l;
+	int32_t l;
 
 	/******   adjust the vertical bar   ******/
 
@@ -69,7 +69,7 @@ WORD newi;
 		l = 1000;
 
 	win->w_obj->ob_y = win->w_work.y;
-	wind_set(win->w_id, WF_VSLIDE, (UWORD) l, 0, 0, 0);
+	wind_set(win->w_id, WF_VSLIDE, (uint16_t) l, 0, 0, 0);
 
 	/*******  adjust the horizontal bar  ********/
 
@@ -95,7 +95,7 @@ WORD newi;
 	} else
 		l = 1000;
 
-	wind_set(win->w_id, WF_HSLIDE, (UWORD) l, 0, 0, 0);
+	wind_set(win->w_id, WF_HSLIDE, (uint16_t) l, 0, 0, 0);
 	up_2(win);
 }
 
@@ -104,22 +104,22 @@ WORD newi;
 /*	Search a file	*/
 
 sea_file(filename)
-BYTE *filename;
+char *filename;
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG DIR *dir;
+	register DIR *dir;
 
-	REG WORD i;
+	register int16_t i;
 
-	BYTE *str;
+	char *str;
 
-	WORD status,
+	int16_t status,
 	 type,
 	 change,
 	 newi;
 
-	BYTE buffer[16];
+	char buffer[16];
 
 	desk_wait(TRUE);
 
@@ -201,17 +201,17 @@ BYTE *filename;
 
 /*	Recursive search of a file	*/
 
-WORD rec_sea(filename)
-REG BYTE *filename;
+int16_t rec_sea(filename)
+register char *filename;
 {
 	DTA *dtabuf;
 
 	DTA *savedta;
 
-	REG WORD status,
+	register int16_t status,
 	 ret;
 
-	if (!(dtabuf = Malloc((LONG) sizeof(DTA))))
+	if (!(dtabuf = Malloc((int32_t) sizeof(DTA))))
 	{
 		do1_alert(FCNOMEM);
 		return (TRUE);
@@ -289,19 +289,19 @@ REG BYTE *filename;
 /*	Display a window and highlight the items	*/
 
 display(filename)
-BYTE *filename;
+char *filename;
 {
-	LONG size;
+	int32_t size;
 
-	REG BYTE *addr;
+	register char *addr;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG DIR *dir;
+	register DIR *dir;
 
-	REG WORD i;
+	register int16_t i;
 
-	WORD newi,
+	int16_t newi,
 	 ret,
 	 first;
 
@@ -312,7 +312,7 @@ BYTE *filename;
 		Dgetpath(addr, 0);
 		i = strlen(addr) + 20;
 		Mfree(addr);					/* free the memory      */
-		addr = Malloc((LONG) i);
+		addr = Malloc((int32_t) i);
 		addr[0] = Dgetdrv() + 'A';		/* get the default drive    */
 		addr[1] = ':';
 		Dgetpath(&addr[2], 0);
@@ -402,11 +402,11 @@ BYTE *filename;
 /*	Put in wild card in the name string	*/
 
 mass_string(str1)
-BYTE *str1;
+char *str1;
 {
-	REG WORD i;
+	register int16_t i;
 
-	BYTE buffer[6];
+	char buffer[6];
 
 	i = 0;
 

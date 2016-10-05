@@ -4,3 +4,4 @@
 /LONG/int32_t/wg
 /REG/register/wg
 /NULLPTR/NULL/wg
+/EXTERN/extern/wg

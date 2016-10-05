@@ -14,69 +14,25 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
+#include "desktop.h"
 
-EXTERN BYTE *get_fstring();
-
-EXTERN BYTE *lp_fill();
-
-EXTERN WINDOW *get_win();
-
-EXTERN APP *app_icon();
-
-EXTERN OBJECT *get_tree();
-
-EXTERN WORD in_parent();
-
-EXTERN APP *app_xtype();
-
-EXTERN DIR *get_dir();
-
-EXTERN BYTE *put_name();
-
-EXTERN WORD d_display;
-
-EXTERN WORD f_rename;
-
-EXTERN WINDOW *o_win;
-
-EXTERN WORD d_dir;
-
-EXTERN WINDOW *x_win;
-
-EXTERN WORD x_type;
-
-WORD back_update;						/* update background    */
+int16_t back_update;						/* update background    */
 
 /*	Check what kind of object is executable	*/
 /*	Return TRUE if it is 			*/
 
-WORD ch_obj(mx, my, win, item, type)
-WORD mx,
-	my;
-
+int16_t ch_obj(mx, my, win, item, type)
+int16_t mx;
+int16_t my;
 WINDOW **win;
-
-WORD *item;
-
-WORD *type;
+int16_t *item;
+int16_t *type;
 {
-	REG WORD i;
-
+	register int16_t i;
 	DIR *dir;
-
-	WORD install;
-
+	int16_t install;
 	APP *app;
-
-	BYTE *str;
+	char *str;
 
 	if (i_find(mx, my, win, item, type))
 	{
@@ -123,7 +79,7 @@ WORD *type;
 
 /*	Change for UNDO key	*/
 
-WORD ch_undo()
+int16_t ch_undo()
 {
 	if ((Bconstat(2)) && (Bconin(2) == 0x00610000L) && (do1_alert(ABORTCON) == 1))
 		return (FALSE);
@@ -135,31 +91,18 @@ WORD ch_undo()
 /*	Perform a file operation	*/
 
 VOID file_op(dest, mode)
-BYTE *dest;
-
-WORD mode;
+char *dest;
+int16_t mode;
 {
-	REG OBJECT *obj;
-
-	REG WORD ret;
-
-	WORD type,
-	 item,
-	 i;
-
-	WORD keydown;
-
-	LONG ndir,
-	 nfile,
-	 nsize;
-
-	BYTE *source;
-
-	BYTE buffer[2];
-
+	register OBJECT *obj;
+	register int16_t ret;
+	int16_t type, item, i;
+	int16_t keydown;
+	int32_t ndir, nfile, nsize;
+	char *source;
+	char buffer[2];
 	GRECT pt;
-
-	BYTE *which;
+	char *which;
 
 	/* get the key state */
 
@@ -286,23 +229,16 @@ WORD mode;
 
 /*	Build a rectangle that can hold all the selected icons	*/
 
-WORD build_rect(obj, rect, w, h)
-REG OBJECT *obj;
-
-REG GRECT *rect;
-
-WORD w,
-	h;
+int16_t build_rect(obj, rect, w, h)
+register OBJECT *obj;
+register GRECT *rect;
+int16_t w;
+int16_t h;
 {
-	REG WORD i;
-
-	REG WORD minx,
-	 miny;
-
-	REG WORD maxx,
-	 maxy;
-
-	WORD found;
+	register int16_t i;
+	register int16_t minx, miny;
+	register int16_t maxx, maxy;
+	int16_t found;
 
 	minx = full.x + full.w;
 	miny = full.y + full.h;
@@ -350,29 +286,17 @@ WORD w,
 
 /*	Check whose is inside the rect and select the object	*/
 
-WORD chk_rect(win, rect, id)
-REG WINDOW *win;
-
+int16_t chk_rect(win, rect, id)
+register WINDOW *win;
 GRECT *rect;
-
-WORD id;
+int16_t id;
 {
-	REG OBJECT *obj;
-
-	REG WORD i;
-
-	REG WORD minx,
-	 miny,
-	 maxx,
-	 maxy;
-
-	WORD orgx,
-	 orgy,
-	 select;
-
+	register OBJECT *obj;
+	register int16_t i;
+	register int16_t minx, miny, maxx, maxy;
+	int16_t orgx, orgy, select;
 	GRECT pt;
-
-	WORD doit;
+	int16_t doit;
 
 	if (win)
 	{
@@ -437,12 +361,12 @@ WORD id;
 /*	Draw a box	*/
 
 frame(x1, y1, x2, y2)
-WORD x1,
- y1,
- x2,
- y2;
+int16_t x1;
+int16_t y1;
+int16_t x2;
+int16_t y2;
 {
-	WORD points[10];
+	int16_t points[10];
 
 	mice_state(M_OFF);
 	points[0] = points[6] = points[8] = x1;
@@ -458,22 +382,13 @@ WORD x1,
 /*	Draw a box and wait for button to go up		*/
 
 r_box(id, win)
-WORD id;
-
+int16_t id;
 WINDOW *win;
 {
-	REG WORD tmpx,
-	 tmpy;
-
-	REG WORD tmpx1,
-	 tmpy1;
-
-	WORD gr_mkmx,
-	 gr_mkmy;
-
-	WORD gr_mkmstate,
-	 gr_mkkstate;
-
+	register int16_t tmpx, tmpy;
+	register int16_t tmpx1, tmpy1;
+	int16_t gr_mkmx, gr_mkmy;
+	int16_t gr_mkmstate, gr_mkkstate;
 	GRECT rect;
 
 	graf_mkstate(&gr_mkmx, &gr_mkmy, &gr_mkmstate, &gr_mkkstate);
@@ -534,9 +449,9 @@ WINDOW *win;
 
 /*	Return an absolute value	*/
 
-WORD abs(x, y)
-WORD x,
-	y;
+int16_t abs(x, y)
+int16_t x;
+int16_t y;
 {
 	if (x > y)
 		return (x - y);
@@ -548,31 +463,19 @@ WORD x,
 /*	Move icons from window to desktop	*/
 
 win_desk(swin, sitems, ditem, mx, my)
-REG WINDOW *swin;
-
-WORD sitems,
- ditem,
- mx,
- my;
+register WINDOW *swin;
+int16_t sitems;
+int16_t ditem;
+int16_t mx;
+int16_t my;
 {
 	DIR *dir;
-
-	REG WORD i;
-
-	WORD temp,
-	 first,
-	 type,
-	 status,
-	 ntype;
-
-	WORD x,
-	 y;
-
-	BYTE buffer[14];
-
-	BYTE *str;
-
-	BYTE *tail;
+	register int16_t i;
+	int16_t temp, first, type, status, ntype;
+	int16_t x, y;
+	char buffer[14];
+	char *str;
+	char *tail;
 
 	if (!ditem)
 	{
@@ -641,26 +544,18 @@ WORD sitems,
 /*	Move icons from desktop to desktop	*/
 
 desk_desk(sitem, ditem, mx, my)
-WORD sitem;
-
-WORD ditem;
-
-WORD mx,
- my;
+int16_t sitem;
+int16_t ditem;
+int16_t mx;
+int16_t my;
 {
-	REG OBJECT *obj;
-
-	BYTE buffer[14];
-
-	REG BYTE temp1;
-
-	BYTE temp2;
-
+	register OBJECT *obj;
+	char buffer[14];
+	register char temp1;
+	char temp2;
 	GRECT rect;
-
-	WORD sitems;
-
-	BYTE *tail;
+	int16_t sitems;
+	char *tail;
 
 	obj = background;
 
@@ -718,27 +613,15 @@ WORD mx,
 
 /*	Ghost icon initalization	*/
 
-WORD gh_init(obj, disk)
-REG OBJECT *obj;
-
-WORD disk;
+int16_t gh_init(obj, disk)
+register OBJECT *obj;
+int16_t disk;
 {
-	REG WORD *ptr1;
-
-	WORD x,
-	 y,
-	 i,
-	 offx,
-	 offy;
-
-	LONG limit,
-	 j;
-
-	WORD count,
-	 lines;
-
-	WORD *ptr;
-
+	register int16_t *ptr1;
+	int16_t x, y, i, offx, offy;
+	int32_t limit, j;
+	int16_t count, lines;
+	int16_t *ptr;
 	OBJECT *tree;
 
 	if (!(gh_buffer = Malloc(0xFFFFFFFFL)))
@@ -748,7 +631,7 @@ WORD disk;
 
 	j = gh_buffer / 40;					/* 9 vertices x 2 x 2   */
 	/* + 1 ascushion    */
-	limit = (UWORD) obj->ob_tail;
+	limit = (uint16_t) obj->ob_tail;
 
 	if (limit > j)
 		limit = j;
@@ -766,7 +649,7 @@ WORD disk;
 	{
 		if (obj->ob_state & SELECTED)
 		{								/* if inside parent */
-			if (in_parent(tree, (WORD) j + 1))
+			if (in_parent(tree, (int16_t) j + 1))
 			{
 				ptr = (disk) ? d_xywh : f_xywh;
 				x = obj->ob_x;
@@ -792,22 +675,15 @@ WORD disk;
 /*	Draw icons outline	*/
 
 ghost_icon(offx, offy, disk)
-REG WORD offx,
- offy;
-
-WORD disk;
+register int16_t offx;
+register int16_t offy;
+int16_t disk;
 {
-	REG WORD *ptr;
-
-	REG WORD i,
-	 j,
-	 limit;
-
-	WORD lines;
-
-	WORD buffer[4];
-
-	WORD *start;
+	register int16_t *ptr;
+	register int16_t i, j, limit;
+	int16_t lines;
+	int16_t buffer[4];
+	int16_t *start;
 
 	mice_state(M_OFF);
 
@@ -842,53 +718,23 @@ WORD disk;
 
 /*	Handle the holding down button event	*/
 
-WORD hd_down(sitem, stype, swin)
-REG WORD sitem,
-	stype;
-
-REG WINDOW *swin;
+int16_t hd_down(sitem, stype, swin)
+register int16_t sitem;
+register int16_t stype;
+register WINDOW *swin;
 {
-	REG WORD pitem,
-	 state;
-
-	WORD itype,
-	 w,
-	 h,
-	 ret,
-	 exec;
-
-	WORD mx,
-	 my,
-	 kstate,
-	 mstate;
-
-	WORD omx,
-	 omy;
-
-	WORD ditem,
-	 dtype;
-
-	WORD ptype,
-	 pid,
-	 docopy;
-
-	WORD cx,
-	 cy,
-	 offx,
-	 offy,
-	 o1,
-	 o2;
-
+	register int16_t pitem, state;
+	int16_t itype, w, h, ret, exec;
+	int16_t mx, my, kstate, mstate;
+	int16_t omx, omy;
+	int16_t ditem, dtype;
+	int16_t ptype, pid, docopy;
+	int16_t cx, cy, offx, offy, o1, o2;
 	WINDOW *dwin;
-
 	WINDOW *pwin;
-
-	REG OBJECT *pobj;
-
-	REG OBJECT *sobj;
-
+	register OBJECT *pobj;
+	register OBJECT *sobj;
 	GRECT pt;
-
 	GRECT pt2;
 
 	graf_mkstate(&omx, &omy, &mstate, &kstate);
@@ -1123,15 +969,12 @@ REG WINDOW *swin;
 /*	Take action when something is dragged to desktop area	*/
 
 to_desk(ditem, tail)
-WORD ditem;
-
-BYTE *tail;
+int16_t ditem;
+char *tail;
 {
-	BYTE buffer[14];
-
-	WORD ret;
-
-	REG IDTYPE *itype;
+	char buffer[14];
+	int16_t ret;
+	register IDTYPE *itype;
 
 	itype = &backid[ditem];
 
@@ -1169,15 +1012,13 @@ BYTE *tail;
 /*	Take action when something is dragged to window	*/
 
 to_win(sitem, swin, ditem, dwin)
-WORD sitem,
- ditem;
-
-WINDOW *swin,
-*dwin;
+int16_t sitem;
+int16_t ditem;
+WINDOW *swin;
+WINDOW *dwin;
 {
-	REG DIR *dir;
-
-	REG BYTE *temp;
+	register DIR *dir;
+	register char *temp;
 
 	temp = (swin == dwin) ? path3 : dwin->w_buf;
 	strcpy(dwin->w_path, temp);
@@ -1215,17 +1056,14 @@ WINDOW *swin,
 
 /*	make a desktop icon	*/
 
-WORD make_icon(drive, icon, type, text)
-WORD drive,
-	icon,
-	type;
-
-BYTE *text;
+int16_t make_icon(drive, icon, type, text)
+int16_t drive;
+int16_t icon;
+int16_t type;
+char *text;
 {
-	REG WORD id;
-
-	REG IDTYPE *itype;
-
+	register int16_t id;
+	register IDTYPE *itype;
 	OBJECT *obj;
 
 	if ((id = av_icon()) != -1)
@@ -1234,7 +1072,7 @@ BYTE *text;
 		obj = background;
 		cp_iblk(icon, (CICONBLK *) (obj[id].ob_spec));
 		itype->i_type = type;
-		itype->i_cicon.monoblk.ib_char[1] = (BYTE) drive;
+		itype->i_cicon.monoblk.ib_char[1] = (char) drive;
 		itype->i_icon = icon;
 		strcpy(text, (CICONBLK *) (obj[id].ob_spec)->monoblk.ib_ptext);
 	}

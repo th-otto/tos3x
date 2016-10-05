@@ -22,54 +22,54 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN BYTE *get_fstring();
+extern char *get_fstring();
 
-EXTERN WINDOW *w_gfirst();
+extern WINDOW *w_gfirst();
 
-EXTERN WINDOW *get_win();
+extern WINDOW *get_win();
 
-EXTERN WINDOW *get_top();
+extern WINDOW *get_top();
 
-EXTERN WORD do_alert();
+extern int16_t do_alert();
 
-EXTERN WINDOW *get_win();
+extern WINDOW *get_win();
 
-EXTERN BYTE *r_slash();
+extern char *r_slash();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN DIR *get_dir();
+extern DIR *get_dir();
 
-EXTERN BYTE *put_name();
+extern char *put_name();
 
-EXTERN APP *app_xtype();
+extern APP *app_xtype();
 
-EXTERN UWORD st_dchar;
+extern uint16_t st_dchar;
 
-EXTERN WORD numicon;
+extern int16_t numicon;
 
-EXTERN WINDOW *x_win;
+extern WINDOW *x_win;
 
-EXTERN WORD x_status;
+extern int16_t x_status;
 
-EXTERN WORD x_type;
+extern int16_t x_type;
 
-EXTERN WORD back_update;
+extern int16_t back_update;
 
-EXTERN WORD contrl[];
+extern int16_t contrl[];
 
-EXTERN WORD intout[];
+extern int16_t intout[];
 
-EXTERN WORD XSelect();					/* cjg 08/06/92 */
+extern int16_t XSelect();					/* cjg 08/06/92 */
 
-EXTERN WORD XDeselect();
+extern int16_t XDeselect();
 
-EXTERN WORD wait_up();
+extern int16_t wait_up();
 
 /*	Inquire cell size	*/
 
 xvq_chcells(num)
-WORD *num;
+int16_t *num;
 {
 	contrl[5] = 1;
 	gsx_ncode(5, 0, 0);
@@ -81,9 +81,9 @@ WORD *num;
 
 open_def()
 {
-	REG WORD i;
+	register int16_t i;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	win = winpd;
 
@@ -99,9 +99,9 @@ open_def()
 
 
 ch_path(win)
-REG WINDOW *win;
+register WINDOW *win;
 {
-	WORD i,
+	int16_t i,
 	 num,
 	 len;
 
@@ -123,22 +123,22 @@ REG WINDOW *win;
 /*	init -- initalize window	*/
 /*	open -- open a disk		*/
 
-WORD open_subdir(win, icon, opendisk, init, redraw)
-REG WINDOW *win;
+int16_t open_subdir(win, icon, opendisk, init, redraw)
+register WINDOW *win;
 
-WORD icon,
+int16_t icon,
 	opendisk,
 	init,
 	redraw;
 {
-	WORD handle,
+	int16_t handle,
 	 num,
 	 len,
 	 i;
 
-	WORD status;
+	int16_t status;
 
-	BYTE *path;
+	char *path;
 
 	desk_wait(TRUE);
 	status = FALSE;
@@ -186,7 +186,7 @@ WORD icon,
 
 show_item()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	if (x_status)						/* something is selected    */
 		sh_witem();
@@ -208,45 +208,45 @@ sh_witem()
 {
 	DIR dir1;
 
-	REG DIR *dir;
+	register DIR *dir;
 
 	DIR *dir2;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG WORD curri,
+	register int16_t curri,
 	 ret,
 	 which;
 
-	WORD cont,
+	int16_t cont,
 	 changed,
 	 limit;
 
-	WORD opened,
+	int16_t opened,
 	 subtype;
 
-	LONG ndir,
+	int32_t ndir,
 	 nfile,
 	 nsize;
 
-	BYTE buffer[20];
+	char buffer[20];
 
-	BYTE newname[14];
+	char newname[14];
 
-	LONG sizes[4];
+	int32_t sizes[4];
 
-	BYTE *newstr;
+	char *newstr;
 
-	BYTE *oldstr;
+	char *oldstr;
 
-	UWORD len,
+	uint16_t len,
 	 pos;
 
-	BYTE *file;
+	char *file;
 
-	BYTE *savestr;
+	char *savestr;
 
-	WORD mk_x,
+	int16_t mk_x,
 	 mk_y,
 	 mk_buttons,
 	 mk_kstate;
@@ -345,8 +345,8 @@ sh_witem()
 
 		dir = &dir1;
 		len = strlen(file) + 20;		/* file's name length   */
-		newstr = Malloc((LONG) len);
-		oldstr = Malloc((LONG) len);
+		newstr = Malloc((int32_t) len);
+		oldstr = Malloc((int32_t) len);
 
 		if ((!newstr) || (!oldstr))
 		{
@@ -388,8 +388,8 @@ sh_witem()
 			(TEDINFO *) (obj[INFTITLE].ob_spec)->te_ptext = get_fstring(FOLDINFO);
 		} else
 		{
-			*(BYTE *) ((TEDINFO *) (obj[FINFOLDS].ob_spec)->te_ptext) = 0;
-			*(BYTE *) ((TEDINFO *) (obj[FINFILES].ob_spec)->te_ptext) = 0;
+			*(char *) ((TEDINFO *) (obj[FINFOLDS].ob_spec)->te_ptext) = 0;
+			*(char *) ((TEDINFO *) (obj[FINFILES].ob_spec)->te_ptext) = 0;
 			f_str(obj, FISIZE, dir->d_size);
 			(TEDINFO *) (obj[INFTITLE].ob_spec)->te_ptext = get_fstring(FILEINFO);
 		}
@@ -546,17 +546,17 @@ sh_witem()
 /*	Show the info of desktop items	*/
 
 sh_disk(buffer)
-BYTE *buffer;
+char *buffer;
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	LONG ndir,
+	int32_t ndir,
 	 nfile,
 	 nsize;
 
-	BYTE newname[14];
+	char newname[14];
 
-	LONG sizes[4];
+	int32_t sizes[4];
 
 	buffer[1] = 0;
 
@@ -604,13 +604,13 @@ BYTE *buffer;
 /*	Close a path		*/
 
 close_path(win)
-REG WINDOW *win;
+register WINDOW *win;
 {
-	BYTE *ptr;
+	char *ptr;
 
-	WORD item;
+	int16_t item;
 
-	BYTE buffer[14];
+	char buffer[14];
 
 	save_mid(win->w_path, buffer);
 	if (cut_path(win->w_path))			/* close a folder   */
@@ -627,7 +627,7 @@ REG WINDOW *win;
 
 close_top()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
 	if (win = get_top())
 	{
@@ -640,17 +640,17 @@ close_top()
 /*	open an item	*/
 
 open_item(item, type, win)
-REG WORD item;
+register int16_t item;
 
-WORD type;
+int16_t type;
 
 WINDOW *win;
 {
-	BYTE buffer[16];
+	char buffer[16];
 
-	REG IDTYPE *itype;
+	register IDTYPE *itype;
 
-	WORD ret;
+	int16_t ret;
 
 	switch (type)
 	{
@@ -718,19 +718,19 @@ WINDOW *win;
 /*	Open a file, it may be an executable file		*/
 
 open_file(win, item, tail)
-REG WINDOW *win;
+register WINDOW *win;
 
-WORD item;
+int16_t item;
 
-BYTE *tail;
+char *tail;
 {
-	WORD i,
+	int16_t i,
 	 dump,
 	 key;
 
-	REG DIR *dir;
+	register DIR *dir;
 
-	BYTE buffer[14];
+	char buffer[14];
 
 	if (!win)							/* open from the desktop    */
 		exec_file(backid[item].i_path, win, item, tail);
@@ -768,14 +768,14 @@ BYTE *tail;
 
 /*	open a disk icon	*/
 
-WORD open_disk(icon, path, init)
-WORD icon;								/* icon number  */
+int16_t open_disk(icon, path, init)
+int16_t icon;								/* icon number  */
 
-BYTE path[];
+char path[];
 
-WORD init;
+int16_t init;
 {
-	WORD handle;
+	int16_t handle;
 
 	WINDOW *win;
 
@@ -817,11 +817,11 @@ WORD init;
 do_box(win, item, desk, open, openfull)
 WINDOW *win;
 
-WORD item,
+int16_t item,
  desk,
  open;									/* item number, desk icon, open/close */
 
-WORD openfull;
+int16_t openfull;
 {
 	GRECT pc;
 
@@ -854,14 +854,14 @@ WORD openfull;
 
 /*	Does the drive exist	*/
 
-WORD drv_exist(id)
-WORD id;
+int16_t drv_exist(id)
+int16_t id;
 {
-	REG LONG map;
+	register int32_t map;
 
-	WORD handle;
+	int16_t handle;
 
-	map = (LONG) Drvmap();
+	map = (int32_t) Drvmap();
 	handle = id - 'A';
 	map = map >> handle;
 	return ((map & 0x01) ? TRUE : FALSE);
@@ -870,10 +870,10 @@ WORD id;
 
 /*	Check drive and put up alert	*/
 
-WORD ch_drive(id)
-WORD id;
+int16_t ch_drive(id)
+int16_t id;
 {
-	BYTE buffer[4];
+	char buffer[4];
 
 	if (!drv_exist(id))
 	{
@@ -892,22 +892,22 @@ WORD id;
 /*	If new is a NULL pointer then erase the icon if matches	*/
 
 upfdesk(s, new)
-BYTE *s;
+char *s;
 
-REG BYTE *new;
+register char *new;
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG APP *app;
+	register APP *app;
 
-	REG WORD i,
+	register int16_t i,
 	 type;
 
-	WORD install;
+	int16_t install;
 
-	BYTE *ptr;
+	char *ptr;
 
-	BYTE *addr;
+	char *addr;
 
 	obj = background;
 
@@ -932,7 +932,7 @@ REG BYTE *new;
 					{
 						if (type == XDIR)	/* append wild card */
 						{
-							if (addr = Malloc((LONG) (strlen(new) + 10)))
+							if (addr = Malloc((int32_t) (strlen(new) + 10)))
 							{
 								strcpy(new, addr);
 								strcat(wilds, addr);
@@ -977,14 +977,14 @@ REG BYTE *new;
 /*	Locate an item 	*/
 
 locate_item(item, path, file)
-WORD item,
+int16_t item,
  file;
 
-BYTE *path;
+char *path;
 {
-	WORD button;
+	int16_t button;
 
-	BYTE buffer[16];
+	char buffer[16];
 
   l_1:
 	strcpy("C:\\*.*", path1);

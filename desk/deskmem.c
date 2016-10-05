@@ -14,30 +14,30 @@
 #include <extern.h>
 #include <deskusa.h>
 
-BYTE *lp_start;
+char *lp_start;
 
-BYTE *lp_mid;
+char *lp_mid;
 
-BYTE *lp_end;
+char *lp_end;
 
 #define LMSIZE	0x1000L
 
-UWORD apsize;
+uint16_t apsize;
 
 /*	Init the application buffer	*/
 
 apbuf_init()
 {
-	REG UWORD i;
+	register uint16_t i;
 
-	REG APP *app,
+	register APP *app,
 	*app1;
 
 	APP *appsave;
 
 	apsize += APP_NODE;
 
-	if (!(app = Malloc((LONG) (sizeof(APP) * apsize))))
+	if (!(app = Malloc((int32_t) (sizeof(APP) * apsize))))
 		return (FALSE);
 
 	for (i = 0; i < apsize; i++)		/* set up linked array    */
@@ -77,7 +77,7 @@ apbuf_init()
 
 /*	Initalize some memory buffer	*/
 
-WORD mem_init()
+int16_t mem_init()
 {
 	/* Allocate write string buffer */
 
@@ -103,14 +103,14 @@ WORD mem_init()
 
 /*	Fill the path into buffer	*/
 
-BYTE * lp_fill(path, buf)
-REG BYTE *path;
+char * lp_fill(path, buf)
+register char *path;
 
-BYTE **buf;
+char **buf;
 {
-	REG BYTE *ptr;
+	register char *ptr;
 
-	BYTE *ptr1;
+	char *ptr1;
 
 	if (!lp_start)						/* No memory    */
 		goto lp_1;
@@ -121,7 +121,7 @@ BYTE **buf;
 	{
 		if (ptr >= lp_end)				/* end of buffer */
 		{
-		  lp_1:*buf = (BYTE *) 0;
+		  lp_1:*buf = (char *) 0;
 			return (path);
 		}
 
@@ -144,15 +144,15 @@ BYTE **buf;
 
 /*	Do the garbage collection of the buffer		*/
 
-WORD lp_collect()
+int16_t lp_collect()
 {
-	REG WORD i;
+	register int16_t i;
 
-	BYTE *addr;
+	char *addr;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG APP *app;
+	register APP *app;
 
 	addr = Malloc(LMSIZE);				/* 2 k memory   */
 	if (!addr)

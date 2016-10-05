@@ -19,34 +19,34 @@
 #include <error.h>
 #include <extern.h>
 
-EXTERN BYTE *r_slash();
+extern char *r_slash();
 
-EXTERN BYTE *g_name();
+extern char *g_name();
 
-EXTERN APP *app_xtype();
+extern APP *app_xtype();
 
-EXTERN BYTE toupper();
+extern char toupper();
 
-EXTERN BYTE *scasb();
+extern char *scasb();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN WORD d_exit;
+extern int16_t d_exit;
 
-EXTERN WORD s_defdir;
+extern int16_t s_defdir;
 
-EXTERN WORD s_fullpath;
+extern int16_t s_fullpath;
 
-EXTERN WINDOW *x_win;
+extern WINDOW *x_win;
 
-EXTERN WORD x_type;
+extern int16_t x_type;
 
-EXTERN WORD sh_iscart;
+extern int16_t sh_iscart;
 
-EXTERN BYTE *strcpy();
+extern char *strcpy();
 
-WORD xch_tail(ptr, argu, tail)
-BYTE *ptr,
+int16_t xch_tail(ptr, argu, tail)
+char *ptr,
 *argu,
 *tail;
 {
@@ -63,8 +63,8 @@ BYTE *ptr,
 	}
 }
 
-WORD ch_tail(ptr, tail)
-BYTE *ptr,
+int16_t ch_tail(ptr, tail)
+char *ptr,
 *tail;
 {
 	return (xch_tail(ptr, Nostr, tail));
@@ -72,7 +72,7 @@ BYTE *ptr,
 
 
 show_file(file)
-BYTE *file;
+char *file;
 {
 	menu_bar(menu_addr, FALSE);
 	v_hide_c();
@@ -97,12 +97,12 @@ pr_setup()
 
 /*	Print one single file		*/
 
-WORD printit(str)
-BYTE *str;
+int16_t printit(str)
+char *str;
 {
-	BYTE *ptr;
+	char *ptr;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
 	obj = get_tree(PRINTFIL);
 	xinf_sset(obj, PFILE, g_name(str));
@@ -115,12 +115,12 @@ BYTE *str;
 
 print_file()
 {
-	WORD ret,
+	int16_t ret,
 	 type,
 	 print,
 	 ret1;
 
-	BYTE *str;
+	char *str;
 
 	GRECT pt;
 
@@ -171,11 +171,11 @@ print_file()
 
 launch_pref()
 {
-	WORD graphic;
+	int16_t graphic;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	BYTE *ptr;
+	char *ptr;
 
 	obj = get_tree(DLAUNCH);
 	inf_sset(obj, RUNNAME, Nostr);
@@ -206,12 +206,12 @@ launch_pref()
 /*	Set the current directory					*/
 /*	The path should look like A:\FILENAME or A:\FOLDER\FILENAME	*/
 
-WORD set_dir(path)
-REG BYTE path[];
+int16_t set_dir(path)
+register char path[];
 {
-	REG BYTE *ptr;
+	register char *ptr;
 
-	REG WORD ret;
+	register int16_t ret;
 
 	if (path[0] == 'c')
 		return (TRUE);
@@ -224,9 +224,9 @@ REG BYTE path[];
 	{									/* there is drive id    */
 		if (path[1] == ':')
 		{
-			if (hit_disk((WORD) path[0]))
+			if (hit_disk((int16_t) path[0]))
 			{
-				Dsetdrv((WORD) (toupper(path[0]) - 'A'));
+				Dsetdrv((int16_t) (toupper(path[0]) - 'A'));
 				ptr = r_slash(path);
 				if (&path[2] == ptr)
 					ret = Dsetpath(bckslsh);
@@ -248,31 +248,31 @@ REG BYTE path[];
 /*	Run an application include doing dialogue box	*/
 
 exec_file(infile, win, item, intail)
-BYTE *infile;
+char *infile;
 
 WINDOW *win;
 
-WORD item;
+int16_t item;
 
-BYTE *intail;
+char *intail;
 {
-	WORD type,
+	int16_t type,
 	 install,
 	 graphic;
 
-	WORD dofull,
+	int16_t dofull,
 	 setdir,
 	 which;
 
-	REG APP *app;
+	register APP *app;
 
 	OBJECT *obj;
 
-	BYTE buffer[14];
+	char buffer[14];
 
-	BYTE *tail;
+	char *tail;
 
-	BYTE *file;
+	char *file;
 
 	app = app_xtype(infile, &install);
 	type = app->a_type;
@@ -363,11 +363,11 @@ BYTE *intail;
 /*	Run the application	*/
 
 run_it(file, tail, graphic, setdir)
-BYTE *file;
+char *file;
 
-BYTE *tail;
+char *tail;
 
-WORD graphic,
+int16_t graphic,
  setdir;
 {
 	if (m_sfirst(file, 0x31))			/* search the file */

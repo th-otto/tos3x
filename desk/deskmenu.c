@@ -30,82 +30,82 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN WORD mv_desk();
+extern int16_t mv_desk();
 
-EXTERN BYTE *get_fstring();
+extern char *get_fstring();
 
-EXTERN APP *app_key();
+extern APP *app_key();
 
-EXTERN BYTE *get_string();
+extern char *get_string();
 
-EXTERN WINDOW *get_win();
+extern WINDOW *get_win();
 
-EXTERN WINDOW *get_top();
+extern WINDOW *get_top();
 
-EXTERN BYTE *r_slash();
+extern char *r_slash();
 
-EXTERN BYTE toupper();
+extern char toupper();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN WINDOW *w_gfirst();
+extern WINDOW *w_gfirst();
 
-EXTERN WINDOW *w_gnext();
+extern WINDOW *w_gnext();
 
-EXTERN BYTE *g_name();
+extern char *g_name();
 
-EXTERN LONG gl_vdo;
+extern int32_t gl_vdo;
 
-EXTERN WORD m_cpu;
+extern int16_t m_cpu;
 
-EXTERN WORD s_defdir;
+extern int16_t s_defdir;
 
-EXTERN WORD s_fullpath;
+extern int16_t s_fullpath;
 
-EXTERN WORD numicon;
+extern int16_t numicon;
 
-EXTERN WORD gl_restype;
+extern int16_t gl_restype;
 
-EXTERN BYTE afile[];
+extern char afile[];
 
-EXTERN WORD x_status;
+extern int16_t x_status;
 
-EXTERN WORD x_type;
+extern int16_t x_type;
 
-EXTERN BYTE mkeys[];
+extern char mkeys[];
 
-EXTERN BYTE restable[];
+extern char restable[];
 
-EXTERN WORD ftab[];
+extern int16_t ftab[];
 
-EXTERN WORD st_keybd;
+extern int16_t st_keybd;
 
-WORD d_exit;							/* desktop exit flag    */
+int16_t d_exit;							/* desktop exit flag    */
 
-BYTE mentable[MAXMENU];
+char mentable[MAXMENU];
 
-BYTE *keytable;
+char *keytable;
 
-BYTE *contable;
+char *contable;
 
 /*	Alternate keys table	*/
 
 /*	USA|UK|SPAIN|ITALY|SWEDEN	*/
-WORD key1table[] = { 0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
+int16_t key1table[] = { 0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x3200, 0x3100,
 	0x1800, 0x1900, 0x1000, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x1100, 0x2d00, 0x1500, 0x2c00, 0
 };
 
 /*	GERMANY|SWISSFRE|SWISSGER	*/
-WORD key2table[] = { 0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
+int16_t key2table[] = { 0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x3200, 0x3100,
 	0x1800, 0x1900, 0x1000, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x1100, 0x2d00, 0x2c00, 0x1500, 0
 };
 
 /*	FRENCH				*/
-WORD key3table[] = { 0x1000, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
+int16_t key3table[] = { 0x1000, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x2700, 0x3100,
 	0x1800, 0x1900, 0x1e00, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x2c00, 0x2d00, 0x1500, 0x1100, 0
@@ -115,45 +115,45 @@ WORD key3table[] = { 0x1000, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 /*	Control keys table	*/
 
 /*	USA|UK|SPAIN|ITALY|SWEDEN	*/
-WORD con1table[] = { 0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
+int16_t con1table[] = { 0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
 	0x2308, 0x1709, 0x240a, 0x250b, 0x260c, 0x320d, 0x310e,
 	0x180f, 0x1910, 0x1011, 0x1312, 0x1f13, 0x1414, 0x1615,
 	0x2f16, 0x1117, 0x2d18, 0x1519, 0x2c1a, 0
 };
 
 /*	GERMANY|SWISSFRE|SWISSGER 	*/
-WORD con2table[] = { 0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
+int16_t con2table[] = { 0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
 	0x2308, 0x1709, 0x240a, 0x250b, 0x260c, 0x320d, 0x310e,
 	0x180f, 0x1910, 0x1011, 0x1312, 0x1f13, 0x1414, 0x1615,
 	0x2f16, 0x1117, 0x2d18, 0x2c19, 0x151a, 0
 };
 
 /*	FRENCH			*/
-WORD con3table[] = { 0x1001, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
+int16_t con3table[] = { 0x1001, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
 	0x2308, 0x1709, 0x240a, 0x250b, 0x260c, 0x270d, 0x310e,
 	0x180f, 0x1910, 0x1e11, 0x1312, 0x1f13, 0x1414, 0x1615,
 	0x2f16, 0x2c17, 0x2d18, 0x1519, 0x111a, 0
 };
 
 /*	Arrow keys table	*/
-WORD arrowtab[] = { 0x4d36, 0x5032, 0x4838, 0x4b34, 0x4800, 0x5000, 0x4d00,
+int16_t arrowtab[] = { 0x4d36, 0x5032, 0x4838, 0x4b34, 0x4800, 0x5000, 0x4d00,
 	0x4b00, 0
 };
 
 /*	Arrow keys Message	*/
-WORD arrowimg[] = { 5, 1, 0, 4, 2, 3, 7, 6 };
+int16_t arrowimg[] = { 5, 1, 0, 4, 2, 3, 7, 6 };
 
-WORD tb1[] = { NEWFITEM, CLSFITEM, CLSWITEM, BOTTOP, EXTMENU, SELALL, 0 };
-WORD tb2[] = { REMVICON, SEAMENU, SHOWITEM, 0 };
+int16_t tb1[] = { NEWFITEM, CLSFITEM, CLSWITEM, BOTTOP, EXTMENU, SELALL, 0 };
+int16_t tb2[] = { REMVICON, SEAMENU, SHOWITEM, 0 };
 
-WORD xxxview[9] = { ICONITEM, TEXTITEM, 0, NAMEITEM, DATEITEM, SIZEITEM,
+int16_t xxxview[9] = { ICONITEM, TEXTITEM, 0, NAMEITEM, DATEITEM, SIZEITEM,
 	TYPEITEM, NOSORT, 0
 };
 
 /* cjg - added VIDITEM - 07/07/92 		*/
 /*	Moved VIDITEM after set preferences	*/
 /*	Take out BITBLT and PRINTITE		*/
-WORD tb3[MAXMENU] = { OPENITEM, SHOWITEM, SEAMENU, DELMENU, NEWFITEM,
+int16_t tb3[MAXMENU] = { OPENITEM, SHOWITEM, SEAMENU, DELMENU, NEWFITEM,
 	CLSFITEM, CLSWITEM, BOTTOP, SELALL, EXTMENU,
 	FORMITEM, ICONITEM, TEXTITEM, NAMEITEM, DATEITEM,
 	SIZEITEM, TYPEITEM, NOSORT, SIZEFIT, SCOLTYPE,
@@ -163,27 +163,27 @@ WORD tb3[MAXMENU] = { OPENITEM, SHOWITEM, SEAMENU, DELMENU, NEWFITEM,
 
 /*	Alternate Number Table	*/
 
-WORD altnum[] = { 0x7800, 0x7900, 0x7a00, 0x7c00, 0x7d00, 0x7b00, 0 };
+int16_t altnum[] = { 0x7800, 0x7900, 0x7a00, 0x7c00, 0x7d00, 0x7b00, 0 };
 
-WORD o_status;							/* for o_select */
+int16_t o_status;							/* for o_select */
 
 WINDOW *o_win;
 
-WORD o_type;
+int16_t o_type;
 
-WORD o_item;
+int16_t o_item;
 
 
 /*	Change one individual key	*/
 
 ch_key(i)
-WORD i;
+int16_t i;
 {
 	OBJECT *obj;
 
-	REG WORD l;
+	register int16_t l;
 
-	REG BYTE *str;
+	register char *str;
 
 	obj = menu_addr;
 	str = obj[tb3[i]].ob_spec;
@@ -201,7 +201,7 @@ WORD i;
 
 put_keys()
 {
-	REG WORD i;
+	register int16_t i;
 
 	for (i = 0; i < MAXMENU; i++)
 		ch_key(i);
@@ -210,14 +210,14 @@ put_keys()
 
 /*	Loop to find matching array	*/
 
-WORD loop_find(input, table, index)
-WORD input;
+int16_t loop_find(input, table, index)
+int16_t input;
 
-WORD table[];
+int16_t table[];
 
-WORD *index;
+int16_t *index;
 {
-	REG WORD i;
+	register int16_t i;
 
 	i = 0;
 
@@ -239,15 +239,15 @@ WORD *index;
 
 menu_verify()
 {
-	WORD enable;
+	int16_t enable;
 
-	REG WORD i;
+	register int16_t i;
 
 	WINDOW *win;
 
-	WORD type;
+	int16_t type;
 
-	BYTE *str;
+	char *str;
 
 	/* If there is a window opened/closed   */
 
@@ -301,13 +301,13 @@ menu_verify()
 
 sel_all()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG DIR *dir;
+	register DIR *dir;
 
-	REG WORD i;
+	register int16_t i;
 
-	BYTE buffer[14];
+	char buffer[14];
 
 	if (win = w_gfirst())
 	{
@@ -328,21 +328,21 @@ sel_all()
 /*	Handle the keyboard	*/
 
 hd_keybd(key)
-UWORD key;
+uint16_t key;
 {
 	OBJECT *obj;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG WORD item;
+	register int16_t item;
 
-	WORD msgbuff[8];
+	int16_t msgbuff[8];
 
-	BYTE buffer[14];
+	char buffer[14];
 
-	WORD i;
+	int16_t i;
 
-	BYTE *str;
+	char *str;
 
 	APP *app;
 
@@ -522,15 +522,15 @@ UWORD key;
 /*	Set file option		*/
 
 foption(win)
-REG WINDOW *win;
+register WINDOW *win;
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	BYTE buffer[14];
+	char buffer[14];
 
-	BYTE buf2[14];
+	char buf2[14];
 
-	BYTE buf1[14];
+	char buf1[14];
 
 	obj = get_tree(FILEOPTI);
 	save_ext(win->w_path, buf2);
@@ -553,13 +553,13 @@ REG WINDOW *win;
 
 
 do_scroll(msgbuff)
-WORD msgbuff[];
+int16_t msgbuff[];
 {
-	REG WORD act;
+	register int16_t act;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	WORD bdown,
+	int16_t bdown,
 	 x,
 	 y;
 
@@ -597,17 +597,17 @@ WORD msgbuff[];
 /*	Do the option menu	*/
 
 do_opt(msgbuff)
-WORD msgbuff;
+int16_t msgbuff;
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	WORD ret,
+	int16_t ret,
 	 button,
 	 handle;
 
-	BYTE buffer[16];
+	char buffer[16];
 
-	BYTE *str;
+	char *str;
 
 	switch (msgbuff)
 	{
@@ -660,7 +660,7 @@ WORD msgbuff;
 			if (handle > 0)
 			{
 				bfill(INFSIZE, 0, afile);
-				Fread(handle, (LONG) INFSIZE, afile);
+				Fread(handle, (int32_t) INFSIZE, afile);
 				Fclose(handle);
 				if ((afile[0] == '#') && (afile[1] == 'a'))
 				{
@@ -725,9 +725,9 @@ WORD msgbuff;
 /*	Do the sorting menu	*/
 
 do_view(msgbuff)
-WORD msgbuff;
+int16_t msgbuff;
 {
-	WORD mode,
+	int16_t mode,
 	 i;
 
 	switch (msgbuff)
@@ -796,23 +796,23 @@ WORD msgbuff;
 
 /*	Do the file menu	*/
 
-WORD do_file(msgbuff)
-WORD msgbuff;
+int16_t do_file(msgbuff)
+int16_t msgbuff;
 {
 	OBJECT *obj;
 
-	WORD ret,
+	int16_t ret,
 	 type;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	BYTE buffer[14];
+	char buffer[14];
 
-	BYTE buf2[14];
+	char buf2[14];
 
-	BYTE *str;
+	char *str;
 
-	BYTE *str1;
+	char *str1;
 
 	win = get_top();
 
@@ -926,8 +926,8 @@ WORD msgbuff;
 
 /*	Handle Menu	*/
 
-WORD hd_menu(msgbuff)
-REG WORD msgbuff[];
+int16_t hd_menu(msgbuff)
+register int16_t msgbuff[];
 {
 	switch (msgbuff[3])
 	{
@@ -957,15 +957,15 @@ REG WORD msgbuff[];
 /*	Handle all the different message	*/
 
 VOID hd_msg(msgbuff)
-REG WORD msgbuff[];
+register int16_t msgbuff[];
 {
-	REG WORD handle;
+	register int16_t handle;
 
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	WORD shrink,
+	int16_t shrink,
 	 x,
 	 y,
 	 w,
@@ -1101,16 +1101,16 @@ REG WORD msgbuff[];
 
 VOID actions()
 {
-	WORD event,
+	int16_t event,
 	 kstate,
 	 kreturn,
 	 button,
 	 clicks;
 
-	WORD mx,
+	int16_t mx,
 	 my;
 
-	WORD msgbuff[8];
+	int16_t msgbuff[8];
 
 	d_exit = L_NOEXIT;
 
@@ -1141,19 +1141,19 @@ VOID actions()
 
 /*	Find out available memory	*/
 
-LONG av_mem()
+int32_t av_mem()
 {
-	REG BYTE *start;
+	register char *start;
 
-	REG BYTE *addr;
+	register char *addr;
 
-	REG BYTE **new;
+	register char **new;
 
-	LONG total,
+	int32_t total,
 	 size;
 
 	total = 0;
-	start = (BYTE *) 0;
+	start = (char *) 0;
 
 	while (TRUE)
 	{
@@ -1171,7 +1171,7 @@ LONG av_mem()
 		} else
 		{
 			if (start)
-				*new = (BYTE *) 0;
+				*new = (char *) 0;
 			break;
 		}
 	}
@@ -1196,28 +1196,28 @@ LONG av_mem()
 
 av_desk()
 {
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG LONG f;
+	register int32_t f;
 
-	REG WORD fi,
+	register int16_t fi,
 	 i,
 	 menui,
 	 which;
 
-	REG APP *app;
+	register APP *app;
 
-	WORD len;
+	int16_t len;
 
 	APP *xapp;
 
-	BYTE *str;
+	char *str;
 
-	BYTE temp[MAXMENU];
+	char temp[MAXMENU];
 
 	OBJECT *obj1;
 
-	BYTE buf[2];
+	char buf[2];
 
 
 	obj = get_tree(SSYSTEM);
@@ -1248,7 +1248,7 @@ av_desk()
 		obj[DEFFILE].ob_state = SELECTED;
 
 	f_str(obj, SDMEMORY, av_mem());
-	*(BYTE *) ((TEDINFO *) (obj[SDKEY].ob_spec)->te_ptext) = 0;
+	*(char *) ((TEDINFO *) (obj[SDKEY].ob_spec)->te_ptext) = 0;
 
 	/* save the original pointer    */
 	str = (TEDINFO *) (obj[SDFILE].ob_spec)->te_ptext;

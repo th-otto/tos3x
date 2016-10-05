@@ -196,24 +196,24 @@
 
 typedef	struct	app
 {
-	WORD	a_type;		/* file type	*/
-	WORD	a_icon;		/* icon number	*/
-	WORD	a_dicon;	/* document icon*/
-	BYTE	*a_name;	/* app name	*/
-	BYTE	a_doc[14];	/* doc name	*/
-	WORD	a_pref;		/* launch pref	set dir etc */	
-	UWORD	a_key;		/* key definition	*/
-	BYTE	a_argu[ARGULEN];
-	BYTE	*a_next;	/* app pointer	*/
+	int16_t	a_type;		/* file type	*/
+	int16_t	a_icon;		/* icon number	*/
+	int16_t	a_dicon;	/* document icon*/
+	char	*a_name;	/* app name	*/
+	char	a_doc[14];	/* doc name	*/
+	int16_t	a_pref;		/* launch pref	set dir etc */	
+	uint16_t	a_key;		/* key definition	*/
+	char	a_argu[ARGULEN];
+	char	*a_next;	/* app pointer	*/
 } APP;
 
 typedef struct idtype
 {
-	WORD	i_type;
-	WORD	i_icon;
+	int16_t	i_type;
+	int16_t	i_icon;
 	CICONBLK i_cicon;	
 /*	ICONBLK	i_iblk;	*/
-	BYTE	*i_path;
-	BYTE	i_name[14];
+	char	*i_path;
+	char	i_name[14];
 } IDTYPE;
 

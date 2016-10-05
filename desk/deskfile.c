@@ -23,32 +23,32 @@
 #include <error.h>
 #include <extern.h>
 
-EXTERN BYTE *get_fstring();
+extern char *get_fstring();
 
-EXTERN APP *app_icon();
+extern APP *app_icon();
 
-EXTERN BYTE *r_slash();
+extern char *r_slash();
 
-EXTERN BYTE *scasb();
+extern char *scasb();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN WINDOW *w_gfirst();
+extern WINDOW *w_gfirst();
 
-EXTERN BYTE *bldstring();
+extern char *bldstring();
 
-EXTERN BYTE *strcpy();
+extern char *strcpy();
 
 #define CTLC 	3
 
-WORD pri_str(where, ptr)
-WORD where;
+int16_t pri_str(where, ptr)
+int16_t where;
 
-BYTE *ptr;
+char *ptr;
 {
-	LONG c;
+	int32_t c;
 
-	WORD ch;
+	int16_t ch;
 
 	while (*ptr)
 	{
@@ -62,7 +62,7 @@ BYTE *ptr;
 
 		if (Bconstat(2))
 		{
-			ch = (WORD) (c = Bconin(2));
+			ch = (int16_t) (c = Bconin(2));
 			if (ch == CTLC || ch == 'q' || ch == 'Q' || (c & 0x00ff0000L) == 0x00610000)
 				return (FALSE);
 		}
@@ -75,21 +75,21 @@ BYTE *ptr;
 
 pri_win()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG WORD serial;
+	register int16_t serial;
 
-	WORD max,
+	int16_t max,
 	 i,
 	 type;
 
 	DIR *dir;
 
-	BYTE buffer[80];
+	char buffer[80];
 
-	BYTE buf1[10];
+	char buf1[10];
 
-	LONG sizes;
+	int32_t sizes;
 
 	if (win = w_gfirst())
 	{
@@ -117,8 +117,8 @@ pri_win()
 				goto pri_end;
 		}
 
-		*((LONG *) & buf1[0]) = sizes;
-		*((WORD *) & buf1[4]) = (WORD) win->w_items;
+		*((int32_t *) & buf1[0]) = sizes;
+		*((int16_t *) & buf1[4]) = (int16_t) win->w_items;
 
 		merge_str(strcpy(Nextline, buffer) - 1, get_fstring((win->w_items == 1) ? ISTR : ISTRS), buf1);
 
@@ -133,21 +133,21 @@ pri_win()
 /*	Create a new folder on the top window	*/
 
 newfolder(win)
-REG WINDOW *win;
+register WINDOW *win;
 {
-	BYTE namenew[14];
+	char namenew[14];
 
-	BYTE nameold[14];
+	char nameold[14];
 
-	BYTE name[14];
+	char name[14];
 
-	WORD i,
+	int16_t i,
 	 ret,
 	 update;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	BYTE buf[2];
+	char buf[2];
 
 	if (win->w_path[0] == 'c')
 	{
@@ -227,24 +227,24 @@ REG WINDOW *win;
 sort_file(win, mode)
 WINDOW *win;
 
-WORD mode;
+int16_t mode;
 {
-	REG DIR *dir;
+	register DIR *dir;
 
-	REG WORD n;
+	register int16_t n;
 
-	REG WORD gap,
+	register int16_t gap,
 	 i,
 	 j,
 	 ret;
 
 	DIR buff;
 
-	REG DIR *dir2;
+	register DIR *dir2;
 
-	REG DIR *dir1;
+	register DIR *dir1;
 
-	BYTE *ps1,
+	char *ps1,
 	*ps2;
 
 	dir = win->w_memory;
@@ -331,26 +331,26 @@ WORD mode;
 /*	Set up all the files pointer 	*/
 /*	Scroll up or down		*/
 
-WORD set_newview(index, win)
-WORD index;
+int16_t set_newview(index, win)
+int16_t index;
 
-REG WINDOW *win;
+register WINDOW *win;
 {
-	REG WORD i,
+	register int16_t i,
 	 k,
 	 items,
 	 vicons;
 
 	DIR *dir;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
 	OBJECT *obj1;
 
-	WORD len,
+	int16_t len,
 	 type;
 
-	BYTE *text;
+	char *text;
 
 	obj = win->w_obj;					/* get all the icons source */
 	obj->ob_next = 0xFFFF;
@@ -413,22 +413,22 @@ REG WINDOW *win;
 
 /*	Read the files into a window	*/
 
-WORD read_files(win, attr)
-REG WINDOW *win;
+int16_t read_files(win, attr)
+register WINDOW *win;
 
-WORD attr;
+int16_t attr;
 {
-	REG LONG items,
+	register int32_t items,
 	 volume,
 	 sizes;
 
-	REG DIR *addr;
+	register DIR *addr;
 
-	BYTE buffer[14];
+	char buffer[14];
 
-	BYTE *path;
+	char *path;
 
-	WORD ret,
+	int16_t ret,
 	 i;
 
 	items = 0;
@@ -469,7 +469,7 @@ WORD attr;
 	if (win->w_memory)					/* Memory allocated?    */
 	{
 		Mfree(win->w_memory);			/* Free it      */
-		win->w_memory = (BYTE *) 0;
+		win->w_memory = (char *) 0;
 	}
 
 	if (ret == EFILNF)					/* file not found   */
@@ -484,11 +484,11 @@ WORD attr;
 	}
 	/* How many files we can store */
 
-	volume = ((LONG) addr) / (LONG) (sizeof(DIR));
+	volume = ((int32_t) addr) / (int32_t) (sizeof(DIR));
 
 	addr = Malloc(addr);
 
-	win->w_memory = (BYTE *) addr;
+	win->w_memory = (char *) addr;
 
 	if (!volume)
 		goto r_2;
@@ -535,15 +535,15 @@ WORD attr;
 	/* Free up some memory      */
 
 	if (items)
-		Mshrink(win->w_memory, (LONG) ((BYTE *) addr - (BYTE *) win->w_memory));
+		Mshrink(win->w_memory, (int32_t) ((char *) addr - (char *) win->w_memory));
 	else
 	{
 		Mfree(win->w_memory);
-		win->w_memory = (BYTE *) 0;
+		win->w_memory = (char *) 0;
 	}
 
   r_1:
-	win->w_items = (UWORD) items;		/* total number of files    */
+	win->w_items = (uint16_t) items;		/* total number of files    */
 	sort_file(win, s_sort);
 	return (TRUE);
 }

@@ -1,108 +1,190 @@
 /*	EXTERN.H		6/12/89 - 6/13/89	Derek Mui	*/
 /*	Take out some variable	6/28/89					*/
 
-/* EXTERN	WORD	namecon; */	/* name conflict flag		*/
-EXTERN	BYTE	dr[];
-EXTERN	WORD	p_timedate;		/* preserve time and date	*/
+
+char *get_fstring();
+char *get_string();
+char *lp_fill();
+
+APP *app_icon();
+APP *app_key();
+APP *app_xtype();
+APP *app_alloc();
+int32_t av_mem();
+
+OBJECT *get_tree();
+ICONBLK *get_icon();
+int16_t in_parent();
+APP *app_xtype();
+DIR *get_dir();
+char *put_name();
+
+WINDOW *get_win();
+WINDOW *get_top();
+WINDOW *w_gfirst();
+WINDOW *w_gnext();
+
+char *g_name();
+char *r_slash();
+char toupper();
+char *scasb();
+int16_t strlen();					/* cjg 09/21/92 */
+int16_t XDeselect();
 
 
-EXTERN	WINDOW	*ww_win;
+/* extern	int16_t	namecon; */	/* name conflict flag		*/
+extern	char	dr[];
+extern	int16_t	p_timedate;		/* preserve time and date	*/
 
-EXTERN WORD	d_nrows;
-EXTERN WORD	d_level;
-EXTERN BYTE	*d_path;
 
-EXTERN WORD	gl_hchar;
-EXTERN WORD	gl_wchar;
-EXTERN WORD	gl_hbox;
-EXTERN WORD	gl_wbox;
+extern	WINDOW	*ww_win;
 
-EXTERN WORD	gl_nrows;
-EXTERN WORD	gl_ncols;
+extern int16_t	d_nrows;
+extern int16_t	d_level;
+extern char	*d_path;
 
-/* EXTERN WORD	work_in[];	*/	/* Input to GSX parameter array */
-/* EXTERN WORD	work_out[];	*/	/* Output from GSX parameter array */
-EXTERN WORD	pxyarray[];		/* input point array 		*/
+extern int16_t	gl_hchar;
+extern int16_t	gl_wchar;
+extern int16_t	gl_hbox;
+extern int16_t	gl_wbox;
 
-EXTERN WORD	d_xywh[];		/* disk icon pline points	*/
-EXTERN WORD	f_xywh[];		/* file icon pline points	*/
+extern int16_t	gl_nrows;
+extern int16_t	gl_ncols;
 
-EXTERN OBJECT	*menu_addr;		/* menu address			*/
-EXTERN OBJECT	*background;		/* desktop object address	*/	
+/* extern int16_t	work_in[];	*/	/* Input to GSX parameter array */
+/* extern int16_t	work_out[];	*/	/* Output from GSX parameter array */
+extern int16_t	pxyarray[];		/* input point array 		*/
 
-EXTERN GRECT	dicon;		/* desktop icon size			*/
-EXTERN GRECT	r_dicon;	/* real time desktop icon size		*/
-EXTERN OBJECT	*iconaddr;	/* desktop icon dialogue address	*/
-EXTERN WORD	maxicon;	/* max number of desktop icons		*/
+extern int16_t	d_xywh[];		/* disk icon pline points	*/
+extern int16_t	f_xywh[];		/* file icon pline points	*/
 
-EXTERN WORD	i_status;	/* current status TURE or FALSE		*/
+extern OBJECT	*menu_addr;		/* menu address			*/
+extern OBJECT	*background;		/* desktop object address	*/	
 
-/* EXTERN WORD	g_defdrv;	*/ /* save the default drive		*/
+extern GRECT	dicon;		/* desktop icon size			*/
+extern GRECT	r_dicon;	/* real time desktop icon size		*/
+extern OBJECT	*iconaddr;	/* desktop icon dialogue address	*/
+extern int16_t	maxicon;	/* max number of desktop icons		*/
 
-EXTERN LONG	gh_buffer;
+extern int16_t	i_status;	/* current status TURE or FALSE		*/
 
-EXTERN IDTYPE	*backid;	/* background icon type definition	*/
+/* extern int16_t	g_defdrv;	*/ /* save the default drive		*/
 
-EXTERN APP	*appnode;
-EXTERN APP	*appfree;
-EXTERN APP	*applist;
+extern int32_t	gh_buffer;
 
-EXTERN BYTE	path1[];
-EXTERN BYTE	path2[];
-EXTERN BYTE	*path3;
-EXTERN BYTE	inf_path[];
+extern IDTYPE	*backid;	/* background icon type definition	*/
 
-EXTERN DTA	dtabuf;		/* dta buffer	*/
+extern APP	*appnode;
+extern APP	*appfree;
+extern APP	*applist;
 
-EXTERN WINDOW	*warray[];	
+extern char	path1[];
+extern char	path2[];
+extern char	*path3;
+extern char	inf_path[];
+
+extern DTA	dtabuf;		/* dta buffer	*/
+
+extern WINDOW	*warray[];	
 
 
 /*	Variables for the desktop.inf file	*/
 
-EXTERN WORD	s_sort;		/* sort item	*/
-EXTERN WORD	s_view;		/* view item	*/
-EXTERN WORD	ccopy_save;	/* copy ?	*/
-EXTERN WORD	cdele_save;	/* delete ?	*/
-EXTERN WORD	write_save;	/* write ?	*/
-EXTERN WORD	cbit_save;	/* bitblt 	*/
-EXTERN WORD	pref_save;	/* screen pref	*/
-EXTERN WORD	s_cache;	/* cache 	*/
-EXTERN WORD	s_stofit;	/* size to fit	*/
-EXTERN UWORD	windspec;	/* window pattern spec	*/
+extern int16_t	s_sort;		/* sort item	*/
+extern int16_t	s_view;		/* view item	*/
+extern int16_t	ccopy_save;	/* copy ?	*/
+extern int16_t	cdele_save;	/* delete ?	*/
+extern int16_t	write_save;	/* write ?	*/
+extern int16_t	cbit_save;	/* bitblt 	*/
+extern int16_t	pref_save;	/* screen pref	*/
+extern int16_t	s_cache;	/* cache 	*/
+extern int16_t	s_stofit;	/* size to fit	*/
+extern uint16_t	windspec;	/* window pattern spec	*/
 
 /************************************************/
 
-EXTERN BYTE	autofile[];
+extern char	autofile[];
 
-EXTERN BYTE	path2[];
-EXTERN BYTE	g_buffer[];
+extern char	path2[];
+extern char	g_buffer[];
 
-/* EXTERN BYTE	mbuffer[];	*/
+/* extern char	mbuffer[];	*/
 
-EXTERN BYTE	comtail[];
+extern char	comtail[];
 
-EXTERN WINDOW	winpd[];		/* window process structure	*/
-EXTERN WINDOW	*winhead;
-EXTERN GRECT	full;			/* full window size value	*/
+extern WINDOW	winpd[];		/* window process structure	*/
+extern WINDOW	*winhead;
+extern GRECT	full;			/* full window size value	*/
 
-EXTERN GRECT	fobj;		/* file object	*/
+extern GRECT	fobj;		/* file object	*/
 
-EXTERN	WORD	deskp[];
-EXTERN	WORD	winp[];
+extern	int16_t	deskp[];
+extern	int16_t	winp[];
 
-EXTERN	BYTE	wildext[];
-EXTERN	BYTE	infdata[];
-EXTERN	BYTE	infpath[];
-EXTERN	BYTE	wilds[];
-EXTERN	BYTE	icndata[];
-EXTERN	BYTE	noext[];
+extern	char	wildext[];
+extern	char	infdata[];
+extern	char	infpath[];
+extern	char	wilds[];
+extern	char	icndata[];
+extern	char	noext[];
 
-EXTERN	BYTE 	getall[];
-EXTERN	BYTE 	bckslsh[];
-EXTERN	BYTE 	curall[];
-EXTERN	BYTE 	baklvl[];
+extern	char 	getall[];
+extern	char 	bckslsh[];
+extern	char 	curall[];
+extern	char 	baklvl[];
 
-/*	EXTERN	BYTE	Alloc[];	*/
+/*	extern	char	Alloc[];	*/
 
-EXTERN	BYTE	Nextline[];
-EXTERN	BYTE	Nostr[];
+extern	char	Nextline[];
+extern	char	Nostr[];
+
+extern int16_t d_display;
+
+extern int16_t f_rename;
+
+extern WINDOW *o_win;
+
+extern int16_t d_dir;
+
+extern WINDOW *x_win;
+
+extern int16_t x_type;
+
+extern int16_t gl_restype;
+
+extern int16_t gl_rschange;
+
+extern int16_t d_exit;
+
+extern int32_t gl_vdo;
+
+extern int16_t pref_save;
+
+extern int16_t m_cpu;
+
+extern int16_t s_defdir;
+
+extern int16_t s_fullpath;
+
+extern int16_t numicon;
+
+extern int16_t x_status;
+
+extern int16_t x_type;
+
+extern char mkeys[];
+
+extern char restable[];
+
+extern int16_t ftab[];
+
+extern int16_t font_save;
+
+extern int16_t m_st;
+
+extern int16_t tb3[];
+
+extern char mentable[];
+
+extern uint16_t d_rezword;					/* set_mode() value ( system ) */
+

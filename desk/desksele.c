@@ -16,35 +16,35 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN WINDOW *w_gfirst();
+extern WINDOW *w_gfirst();
 
-EXTERN WINDOW *w_gnext();
+extern WINDOW *w_gnext();
 
-EXTERN BYTE *put_name();
+extern char *put_name();
 
-WORD x_status;							/* for x_select         */
+int16_t x_status;							/* for x_select         */
 
-WORD x_index;							/* For x_next and x_first   */
+int16_t x_index;							/* For x_next and x_first   */
 
-WORD x_type;							/* ditto            */
+int16_t x_type;							/* ditto            */
 
 WINDOW *x_win;							/* diito            */
 
-WORD x_cur;								/* x_del            */
+int16_t x_cur;								/* x_del            */
 
-WORD d_dir;								/* count how many folders are selected  */
+int16_t d_dir;								/* count how many folders are selected  */
 
 				/* inside the window            */
 
-EXTERN WORD o_type;
+extern int16_t o_type;
 
-EXTERN WORD o_item;
+extern int16_t o_item;
 
-EXTERN WORD o_status;
+extern int16_t o_status;
 
-EXTERN WINDOW *o_win;
+extern WINDOW *o_win;
 
-EXTERN DIR *get_dir();
+extern DIR *get_dir();
 
 
 /*	Turn off the current selected object	*/
@@ -64,22 +64,22 @@ x_del()
 
 /*	My own object find	*/
 
-WORD m_objfind(obj, mx, my, mode)
-REG OBJECT *obj;
+int16_t m_objfind(obj, mx, my, mode)
+register OBJECT *obj;
 
-REG WORD mx,
+register int16_t mx,
 	my;
 
-WORD mode;								/* TRUE == window mode  */
+int16_t mode;								/* TRUE == window mode  */
 {
-	REG i,
+	register i,
 	 limit;
 
-	WORD status,
+	int16_t status,
 	 offx,
 	 offy;
 
-	WORD x1,
+	int16_t x1,
 	 y1;
 
 	CICONBLK *iblk;
@@ -143,13 +143,13 @@ WORD mode;								/* TRUE == window mode  */
 /*	Find out which object is selected based on the object structures */
 /*	Type can only be DESKICON or WINICON				*/
 
-WORD o_select()
+int16_t o_select()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
-	REG WORD i,
+	register int16_t i,
 	 j;
 
 	o_type = WINICON;					/* Try the window   */
@@ -186,15 +186,15 @@ WORD o_select()
 
 /*	Find out if anything is selected		*/
 
-WORD x_select()
+int16_t x_select()
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG DIR *dir;
+	register DIR *dir;
 
-	REG WORD i;
+	register int16_t i;
 
-	WORD j;
+	int16_t j;
 
 	x_win = (WINDOW *) 0;
 	x_type = DESKICON;
@@ -223,17 +223,17 @@ WORD x_select()
 /*	Extended dir structure search next	*/
 
 x_next(name, type)
-BYTE **name;
+char **name;
 
-WORD *type;
+int16_t *type;
 {
-	REG DIR *dir;
+	register DIR *dir;
 
-	REG WORD i;
+	register int16_t i;
 
-	WORD limit;
+	int16_t limit;
 
-	BYTE *str;
+	char *str;
 
 	if (x_type == WINICON)
 	{
@@ -268,14 +268,14 @@ WORD *type;
 /*	Returns icon type, WINICON, XFILE, DISK, SUBDIR		*/
 /*	Extended dir search first				*/
 
-WORD x_first(name, type)
-BYTE **name;
+int16_t x_first(name, type)
+char **name;
 
-WORD *type;
+int16_t *type;
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG WORD i,
+	register int16_t i,
 	 j;
 
 	DIR *dir;
@@ -315,19 +315,19 @@ WORD *type;
 
 /*	Find out what the user has clicked on based on the mx and my	*/
 
-WORD i_find(mx, my, winout, item, type)
-REG WORD mx,
+int16_t i_find(mx, my, winout, item, type)
+register int16_t mx,
 	my;
 
 WINDOW **winout;
 
-WORD *item;
+int16_t *item;
 
-WORD *type;
+int16_t *type;
 {
-	REG WINDOW *win;
+	register WINDOW *win;
 
-	REG WORD which;
+	register int16_t which;
 
 	win = w_gfirst();
 
@@ -366,14 +366,14 @@ WORD *type;
 
 /*	Search for next selected OBJECT		*/
 
-WORD i_next(start, obj, itemout)
-WORD start;
+int16_t i_next(start, obj, itemout)
+int16_t start;
 
-REG OBJECT *obj;
+register OBJECT *obj;
 
-WORD *itemout;
+int16_t *itemout;
 {
-	REG WORD limit,
+	register int16_t limit,
 	 i;
 
 	limit = obj->ob_tail;
@@ -394,14 +394,14 @@ WORD *itemout;
 /*	Used by x_next only			*/
 
 d_sdesk(name, type)
-BYTE **name;
+char **name;
 
-WORD *type;
+int16_t *type;
 {
-	WORD temp,
+	int16_t temp,
 	 i;
 
-	REG IDTYPE *itype;
+	register IDTYPE *itype;
 
 	while (i_next(x_index, background, &x_index))
 	{

@@ -89,7 +89,7 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN BYTE *get_fstring();
+extern char *get_fstring();
 
 /* trap() is GEMDOS trap #1; trap13() is (obviously) trap 13. */
 
@@ -123,7 +123,7 @@ extern long trap(),
 #define CTLS 19
 #define SPACE 32
 
-EXTERN WORD er_num;						/* no device error number */
+extern int16_t er_num;						/* no device error number */
 
 showfile(fname, mode)
 char *fname;

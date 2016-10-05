@@ -437,4 +437,3 @@
 #define STSVHIGH 5  	/* OBJECT in TREE #24 */
 #define SVTTOK 6  	/* OBJECT in TREE #24 */
 #define SVTTCAN 7  	/* OBJECT in TREE #24 */
-

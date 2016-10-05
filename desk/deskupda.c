@@ -15,34 +15,34 @@
 #include <osbind.h>
 #include <extern.h>
 
-EXTERN BYTE *scasb();
+extern char *scasb();
 
-EXTERN BYTE afile[];
+extern char afile[];
 
-EXTERN BYTE *r_slash();
+extern char *r_slash();
 
-EXTERN BYTE *escan_str();
+extern char *escan_str();
 
-EXTERN BYTE *strcpy();
+extern char *strcpy();
 
-EXTERN BYTE *escan_str();
+extern char *escan_str();
 
-EXTERN BYTE *save_str();
+extern char *save_str();
 
 
-BYTE *q_addr;							/* Inf file address */
+char *q_addr;							/* Inf file address */
 
-WORD q_change;							/* Inf file is changed  */
+int16_t q_change;							/* Inf file is changed  */
 
-BYTE *newbuff;
+char *newbuff;
 
-BYTE q_path[40];
+char q_path[40];
 
 /*	Load in the new inf	*/
 
-WORD q_inf()
+int16_t q_inf()
 {
-	if (q_addr = Malloc((LONG) (INFSIZE)))
+	if (q_addr = Malloc((int32_t) (INFSIZE)))
 	{
 		q_change = FALSE;
 		bfill(INFSIZE, 0, q_addr);
@@ -53,33 +53,33 @@ WORD q_inf()
 
 /*	Search the matching file and modify the inf file	*/
 
-WORD q_sea(old, new)
-BYTE *old;
+int16_t q_sea(old, new)
+char *old;
 
-BYTE *new;
+char *new;
 {
-	REG BYTE *ptr1,
+	register char *ptr1,
 	*copy1,
 	*copy2;
 
-	BYTE *end2,
+	char *end2,
 	*p,
 	*end,
 	*sl;
 
-	REG BYTE temp;
+	register char temp;
 
-	BYTE save;
+	char save;
 
-	WORD alloc,
+	int16_t alloc,
 	 special,
 	 offset;
 
-	BYTE buffer[16];
+	char buffer[16];
 
-	BYTE argu[ARGULEN];
+	char argu[ARGULEN];
 
-	BYTE tmp1,
+	char tmp1,
 	 tmp2;
 
 	copy1 = ptr1 = q_addr;
@@ -141,7 +141,7 @@ BYTE *new;
 			{
 				if (!alloc)
 				{
-					if (copy2 = Malloc((LONG) (INFSIZE)))
+					if (copy2 = Malloc((int32_t) (INFSIZE)))
 					{
 						bfill(INFSIZE, 0, copy2);
 						alloc = TRUE;
@@ -195,7 +195,7 @@ BYTE *new;
 
 q_write()
 {
-	REG WORD handle;
+	register int16_t handle;
 
 	if (q_change)
 	{
@@ -205,7 +205,7 @@ q_write()
 			Fclose(handle);				/* truncates it */
 			if ((handle = Fcreate(inf_path, 0)) > 0)
 			{
-				Fwrite(handle, (LONG) strlen(q_addr), q_addr);
+				Fwrite(handle, (int32_t) strlen(q_addr), q_addr);
 				Fclose(handle);
 			}
 		}

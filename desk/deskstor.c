@@ -16,23 +16,23 @@
 #include <deskusa.h>
 #include <osbind.h>
 
-BYTE dr[32];							/* drives flag          */
+char dr[32];							/* drives flag          */
 
-WORD p_timedate;						/* preserve time and date   */
+int16_t p_timedate;						/* preserve time and date   */
 
 WINDOW *ww_win;							/* for w_gfirst and w_gnext */
 
-WORD d_nrows;							/* number of rows used by show  */
+int16_t d_nrows;							/* number of rows used by show  */
 
-WORD d_level;							/* window path level        */
+int16_t d_level;							/* window path level        */
 
-BYTE *d_path;							/* window path buffer       */
+char *d_path;							/* window path buffer       */
 
-WORD pxyarray[10];						/* input point array        */
+int16_t pxyarray[10];						/* input point array        */
 
-WORD d_xywh[18];						/* disk icon pline points   */
+int16_t d_xywh[18];						/* disk icon pline points   */
 
-WORD f_xywh[18];						/* file icon pline points   */
+int16_t f_xywh[18];						/* file icon pline points   */
 
 OBJECT *menu_addr;						/* menu address         */
 
@@ -44,12 +44,12 @@ GRECT r_dicon;							/* real time desktop icon size  */
 
 OBJECT *iconaddr;						/* desktop icon dialogue address */
 
-WORD maxicon;							/* max number of desktop icons  */
+int16_t maxicon;							/* max number of desktop icons  */
 
-WORD i_status;							/* current status TURE or FALSE */
+int16_t i_status;							/* current status TURE or FALSE */
 
-						/* WORD	g_defdrv;	*//* save the default drive       */
-LONG gh_buffer;							/* ghost icon outline buffer address    */
+						/* int16_t	g_defdrv;	*//* save the default drive       */
+int32_t gh_buffer;							/* ghost icon outline buffer address    */
 
 IDTYPE *backid;							/* background icon type definition  */
 
@@ -65,41 +65,41 @@ WINDOW *warray[MAXWIN];					/* window structure */
 
 /*	Variables for the desktop.inf file	*/
 
-WORD s_sort;							/* sort item    */
+int16_t s_sort;							/* sort item    */
 
-WORD s_view;							/* view item    */
+int16_t s_view;							/* view item    */
 
-WORD ccopy_save;						/* copy ?   */
+int16_t ccopy_save;						/* copy ?   */
 
-WORD cdele_save;						/* delete ? */
+int16_t cdele_save;						/* delete ? */
 
-WORD write_save;						/* write ?  */
+int16_t write_save;						/* write ?  */
 
-WORD cbit_save;							/* bitblt   */
+int16_t cbit_save;							/* bitblt   */
 
-WORD pref_save;							/* screen pref  */
+int16_t pref_save;							/* screen pref  */
 
-WORD s_cache;							/* cache    */
+int16_t s_cache;							/* cache    */
 
-WORD s_stofit;							/* size to fit  */
+int16_t s_stofit;							/* size to fit  */
 
-UWORD windspec;							/* window pattern   */
+uint16_t windspec;							/* window pattern   */
 
 /************************************************/
 
-BYTE autofile[PATHLEN];
+char autofile[PATHLEN];
 
-BYTE path1[PATHLEN];					/* utility path     */
+char path1[PATHLEN];					/* utility path     */
 
-BYTE path2[PATHLEN];
+char path2[PATHLEN];
 
-BYTE *path3;
+char *path3;
 
-BYTE inf_path[PATHLEN];					/* store the inf path   */
+char inf_path[PATHLEN];					/* store the inf path   */
 
-BYTE g_buffer[160];						/* merge string buffer  */
+char g_buffer[160];						/* merge string buffer  */
 
-BYTE comtail[PATHLEN];					/* comtail tail buffer */
+char comtail[PATHLEN];					/* comtail tail buffer */
 
 WINDOW winpd[MAXWIN];					/* window process structure */
 
@@ -109,30 +109,30 @@ GRECT full;								/* full window size value   */
 
 GRECT fobj;								/* file object  */
 
-WORD deskp[3];							/* desktop pattern  */
+int16_t deskp[3];							/* desktop pattern  */
 
-WORD winp[3];							/* window pattern   */
+int16_t winp[3];							/* window pattern   */
 
-BYTE getall[] = "*.*";
+char getall[] = "*.*";
 
-BYTE bckslsh[] = "\\";
+char bckslsh[] = "\\";
 
-BYTE curall[] = ".\\*.*";
+char curall[] = ".\\*.*";
 
-BYTE baklvl[] = ".\\..";
+char baklvl[] = ".\\..";
 
-BYTE wildext[] = "A:\\*.*";
+char wildext[] = "A:\\*.*";
 
-BYTE wilds[] = "\\*.*";
+char wilds[] = "\\*.*";
 
-BYTE noext[] = "*.";
+char noext[] = "*.";
 
-BYTE Nostr[] = "";
+char Nostr[] = "";
 
-BYTE infdata[] = "DESKTOP.INF";
+char infdata[] = "DESKTOP.INF";
 
-BYTE infpath[] = "C:\\NEWDESK.INF";
+char infpath[] = "C:\\NEWDESK.INF";
 
-BYTE icndata[] = "C:\\DESKICON.RSC";
+char icndata[] = "C:\\DESKICON.RSC";
 
-BYTE Nextline[] = "\012\015";
+char Nextline[] = "\012\015";

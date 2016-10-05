@@ -47,19 +47,19 @@
 #include <error.h>
 #include <extern.h>
 
-EXTERN BYTE *get_fstring();
+extern char *get_fstring();
 
-EXTERN char *r_slash();
+extern char *r_slash();
 
-EXTERN char *strcat();
+extern char *strcat();
 
-EXTERN char *strcpy();
+extern char *strcpy();
 
-EXTERN OBJECT *get_tree();
+extern OBJECT *get_tree();
 
-EXTERN BYTE *g_name();
+extern char *g_name();
 
-EXTERN WORD fill_string();
+extern int16_t fill_string();
 
 
 /* "DMA" buffer structure for Fsfirst() and Fsnext().	*/
@@ -119,21 +119,21 @@ int f_rename;
 /*	there is only one destination			*/
 
 dofiles(s, d, code, ndirs, nfiles, tsize, type, multiple)
-BYTE *s,
+char *s,
 *d;
 
-WORD code,
+int16_t code,
  type,
  multiple;
 
-LONG *ndirs,
+int32_t *ndirs,
 *nfiles,
 *tsize;
 {
-	WORD ret,
+	int16_t ret,
 	 trash;
 
-	BYTE buffer[2];
+	char buffer[2];
 
 	if (*d == 'c')
 		return (FALSE);
@@ -264,7 +264,7 @@ LONG *ndirs,
 doright(flag)
 int flag;
 {
-	REG int ret,
+	register int ret,
 	 retmsg;
 
 	char *temp,
@@ -333,7 +333,7 @@ int flag;
 	      upfdesk( fixsrc, fixdst );
 */
 			if (opcode == OP_DELETE)
-				upfdesk(fixsrc, (BYTE *) 0);
+				upfdesk(fixsrc, (char *) 0);
 
 		}
 	}
@@ -358,7 +358,7 @@ int doact()
 
 	DMABUFFER *dumb;
 
-	REG int ret,
+	register int ret,
 	 retmsg;
 
 	int error;
@@ -369,7 +369,7 @@ int doact()
 		return (FALSE);
 	}
 
-	if (!(dumb = (char *) Malloc((LONG) sizeof(DMABUFFER))))
+	if (!(dumb = (char *) Malloc((int32_t) sizeof(DMABUFFER))))
 		goto act_1;
 
 	f_level++;
@@ -490,7 +490,7 @@ int doact()
 							goto mvend;
 						}
 					} else				/* No error */
-						upfdesk(fixsrc, (BYTE *) 0);
+						upfdesk(fixsrc, (char *) 0);
 
 				  clndir:
 					backdir(fixsrc);	/* back one dir */
@@ -541,7 +541,7 @@ int doact()
 							goto mvend;
 						}
 					} else
-						upfdesk(fixsrc, (BYTE *) 0);
+						upfdesk(fixsrc, (char *) 0);
 				  clnfile:
 					backdir(fixsrc);	/* back one dir */
 					srclen -= FILE_LEN;	/* subtract the add lenth */
@@ -599,9 +599,9 @@ countrec()
 
 	DMABUFFER *dumb;
 
-	REG int retmsg;
+	register int retmsg;
 
-	dumb = Malloc((LONG) sizeof(DMABUFFER));
+	dumb = Malloc((int32_t) sizeof(DMABUFFER));
 	if (!dumb)
 	{
 		do1_alert(STFO8DEE);
@@ -667,7 +667,7 @@ countrec()
 wrfile(fstr)
 char *fstr;
 {
-	REG int ret,
+	register int ret,
 	 retmsg;
 
 	int inhand,
@@ -1017,7 +1017,7 @@ deleted()
 			return (FALSE);
 		}
 	} else
-		upfdesk(fixsrc, (BYTE *) 0);
+		upfdesk(fixsrc, (char *) 0);
 
 	if (opcode == OP_DELETE)
 		updatnum(NUMDIR, --numdirs);
@@ -1133,7 +1133,7 @@ char *str;
 
 int flag;
 {
-	REG int ret;
+	register int ret;
 
 	int first,
 	 change;
@@ -1207,7 +1207,7 @@ int change;
 {
 	int but;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
 	obj = get_tree(SAMENAME);
 

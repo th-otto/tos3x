@@ -19,35 +19,35 @@
 #include <error.h>
 #include <extern.h>
 
-EXTERN BYTE *strcat();
+extern char *strcat();
 
-EXTERN BYTE *strcpy();
+extern char *strcpy();
 
-EXTERN BYTE *strscn();
+extern char *strscn();
 
-EXTERN WORD numicon;
+extern int16_t numicon;
 
-EXTERN WORD x_type;
+extern int16_t x_type;
 
-EXTERN WINDOW *x_win;
+extern WINDOW *x_win;
 
-EXTERN WINDOW *w_gfirst();
+extern WINDOW *w_gfirst();
 
-EXTERN WINDOW *w_gnext();
+extern WINDOW *w_gnext();
 
-EXTERN UWORD st_dchar;
+extern uint16_t st_dchar;
 
-EXTERN WORD st_date;
+extern int16_t st_date;
 
-EXTERN WORD st_time;
+extern int16_t st_time;
 
 
-WORD m_sfirst(path, att)
-BYTE *path;
+int16_t m_sfirst(path, att)
+char *path;
 
-WORD att;
+int16_t att;
 {
-	WORD ret;
+	int16_t ret;
 
 	if (*path == 'c')
 		return (!c_sfirst(path));
@@ -64,10 +64,10 @@ WORD att;
 
 /*	Check path length and allocate memory	*/
 
-WORD c_path_alloc(path)
-BYTE *path;
+int16_t c_path_alloc(path)
+char *path;
 {
-	WORD level;
+	int16_t level;
 
 	level = ch_level(path);
 
@@ -82,12 +82,12 @@ BYTE *path;
 }
 
 
-WORD hit_disk(drive)
-WORD drive;
+int16_t hit_disk(drive)
+int16_t drive;
 {
-	BYTE buffer[14];
+	char buffer[14];
 
-	WORD ret;
+	int16_t ret;
 
 	strcpy(wildext, buffer);
 	buffer[0] = drive;
@@ -103,7 +103,7 @@ WORD drive;
 
 
 OBJECT * get_icon(item)
-WORD item;
+int16_t item;
 {
 	if (item >= numicon)
 		item = numicon - 1;
@@ -113,7 +113,7 @@ WORD item;
 
 
 OBJECT * get_tree(item)
-WORD item;
+int16_t item;
 {
 	OBJECT *obj;
 
@@ -123,20 +123,20 @@ WORD item;
 
 
 
-BYTE * get_fstring(item)
-WORD item;
+char * get_fstring(item)
+int16_t item;
 {
-	BYTE **str;
+	char **str;
 
 	rsrc_gaddr(R_FRSTR, item, &str);
 	return (*str);
 }
 
 
-BYTE * get_string(item)
-WORD item;
+char * get_string(item)
+int16_t item;
 {
-	BYTE *str;
+	char *str;
 
 	rsrc_gaddr(R_STRING, item, &str);
 	return (str);
@@ -146,9 +146,9 @@ WORD item;
 DIR * get_dir(win, item)
 WINDOW *win;
 
-WORD item;
+int16_t item;
 {
-	WORD j;
+	int16_t j;
 
 	DIR *dir;
 
@@ -176,10 +176,10 @@ WINDOW *win;
 
 /*	Put a file name into the win path buffer	*/
 
-BYTE * put_name(win, name)
+char * put_name(win, name)
 WINDOW *win;
 
-BYTE *name;
+char *name;
 {
 	strcpy(win->w_path, win->w_buf);
 	rep_path(name, win->w_buf);
@@ -190,10 +190,10 @@ BYTE *name;
 
 /*	Is the child inside the parent visible area?	*/
 
-WORD in_parent(obj, child)
+int16_t in_parent(obj, child)
 OBJECT *obj;
 
-WORD child;
+int16_t child;
 {
 	return (inside(obj[child].ob_x + obj[0].ob_x, obj[child].ob_y + obj[0].ob_y, &obj[0].ob_x));
 }
@@ -201,39 +201,39 @@ WORD child;
 VOID xinf_sset(obj, item, buf1)
 OBJECT *obj;
 
-WORD item;
+int16_t item;
 
-BYTE *buf1;
+char *buf1;
 {
-	BYTE buf2[20];
+	char buf2[20];
 
 	fmt_str(buf1, buf2);
 	inf_sset(obj, item, buf2);
 }
 
 VOID mice_state(state)
-WORD state;
+int16_t state;
 {
-	graf_mouse(state, (BYTE *) 0);
+	graf_mouse(state, (char *) 0);
 }
 
 VOID desk_wait(state)
-WORD state;
+int16_t state;
 {
-	graf_mouse(state ? HOURGLASS : ARROW, (BYTE *) 0);
+	graf_mouse(state ? HOURGLASS : ARROW, (char *) 0);
 }
 
 
 /*	Draw a single field of a dialog box	*/
 
 VOID draw_fld(obj, which)
-REG OBJECT *obj;
+register OBJECT *obj;
 
-WORD which;
+int16_t which;
 {
 	GRECT t;
 
-	WORD x,
+	int16_t x,
 	 y;
 
 	objc_gclip(obj, which, &x, &y, &t.x, &t.y, &t.w, &t.h);
@@ -241,14 +241,14 @@ WORD which;
 }
 
 
-WORD getcookie(cookie, p_value)
-LONG cookie;
+int16_t getcookie(cookie, p_value)
+int32_t cookie;
 
-LONG *p_value;
+int32_t *p_value;
 {
-	LONG *cookjar;
+	int32_t *cookjar;
 
-	cookjar = *(LONG *) (0x5a0);
+	cookjar = *(int32_t *) (0x5a0);
 
 	if (!cookjar)
 		return (FALSE);
@@ -273,16 +273,16 @@ LONG *p_value;
 VOID f_str(obj, item, value)
 OBJECT *obj;
 
-WORD item;
+int16_t item;
 
-LONG value;
+int32_t value;
 {
-	BYTE buffer[14];
+	char buffer[14];
 
-	WORD len1,
+	int16_t len1,
 	 len2;
 
-	BYTE *chrptr;
+	char *chrptr;
 
 	lbintoas(value, buffer);
 	len1 = (TEDINFO *) (obj[item].ob_spec)->te_txtlen;
@@ -290,16 +290,16 @@ LONG value;
 	chrptr = (TEDINFO *) (obj[item].ob_spec)->te_ptext;
 	bfill(len1, ' ', chrptr);
 	len2 = strlen(buffer);
-	strcpy(buffer, chrptr + (LONG) (len1 - len2));
+	strcpy(buffer, chrptr + (int32_t) (len1 - len2));
 }
 
 
 /*	Check the level of depth	*/
 
-WORD ch_level(path)
-BYTE *path;
+int16_t ch_level(path)
+char *path;
 {
-	WORD level;
+	int16_t level;
 
 	level = 0;
 
@@ -314,11 +314,11 @@ BYTE *path;
 
 
 OBJECT * fm_draw(item)
-WORD item;
+int16_t item;
 {
-	REG OBJECT *addr;
+	register OBJECT *addr;
 
-	WORD x,
+	int16_t x,
 	 y,
 	 w,
 	 h;
@@ -333,9 +333,9 @@ WORD item;
 
 VOID wait_msg()
 {
-	BYTE msgbuff[16];
+	char msgbuff[16];
 
-	WORD event,
+	int16_t event,
 	 trash;
 
 	do
@@ -353,7 +353,7 @@ VOID wait_msg()
 }
 
 VOID do_finish(item)
-WORD item;
+int16_t item;
 {
 	GRECT pt;
 
@@ -363,12 +363,12 @@ WORD item;
 }
 
 
-WORD xform_do(obj, which)
+int16_t xform_do(obj, which)
 OBJECT *obj;
 
-WORD which;
+int16_t which;
 {
-	WORD ret;
+	int16_t ret;
 
 	ret = form_do(obj, which) & 0x7FFF;
 	obj[ret].ob_state = NORMAL;
@@ -378,13 +378,13 @@ WORD which;
 
 /*	Form_do	and draw	*/
 
-WORD fmdodraw(item, which)
-WORD item,
+int16_t fmdodraw(item, which)
+int16_t item,
 	which;
 {
 	OBJECT *obj;
 
-	WORD ret;
+	int16_t ret;
 
 	obj = fm_draw(item);
 	ret = xform_do(obj, which);
@@ -397,20 +397,20 @@ WORD item,
 /*	This routine convert binary number to ascii value	*/
 
 VOID lbintoasc(longval, buffer)
-REG LONG longval;
+register int32_t longval;
 
-REG BYTE buffer[];
+register char buffer[];
 {
-	REG WORD i;
+	register int16_t i;
 
-	UWORD digit;
+	uint16_t digit;
 
-	WORD j,
+	int16_t j,
 	 k;
 
-	LONG divten;
+	int32_t divten;
 
-	BYTE buf1[12];
+	char buf1[12];
 
 	i = 0;
 	k = 0;
@@ -434,10 +434,10 @@ REG BYTE buffer[];
 }
 
 
-BYTE * r_slash(path)
-REG BYTE *path;
+char * r_slash(path)
+register char *path;
 {
-	BYTE *start;
+	char *start;
 
 	start = path;
 
@@ -457,16 +457,16 @@ REG BYTE *path;
 
 /*	The path should look like A:\*.*	*/
 
-WORD xcut_path(path, buffer, cut)
-REG BYTE *path;
+int16_t xcut_path(path, buffer, cut)
+register char *path;
 
-BYTE *buffer;
+char *buffer;
 
-WORD cut;
+int16_t cut;
 {
-	WORD i;
+	int16_t i;
 
-	BYTE *chrptr;
+	char *chrptr;
 
 	buffer[0] = 0;
 
@@ -497,10 +497,10 @@ WORD cut;
 /*	Cut one directory inside the path	*/
 /*	The path should look like A:\*.*	*/
 
-WORD cut_path(path)
-REG BYTE *path;
+int16_t cut_path(path)
+register char *path;
 {
-	BYTE buffer[14];
+	char buffer[14];
 
 	return (xcut_path(path, buffer, TRUE));
 }
@@ -510,13 +510,13 @@ REG BYTE *path;
 /*	A:\aaa\*.*  -> A:\aaa\bbb\*.*	*/
 
 VOID cat_path(name, path)
-BYTE *name;
+char *name;
 
-REG BYTE *path;
+register char *path;
 {
-	BYTE buffer[20];
+	char buffer[20];
 
-	BYTE *start;
+	char *start;
 
 	start = path;
 	path = r_slash(path);
@@ -531,9 +531,9 @@ REG BYTE *path;
 /*	A:\aaa\*.* -> A:\aaa\bbb	*/
 
 VOID rep_path(name, path)
-BYTE *name;
+char *name;
 
-BYTE *path;
+char *path;
 {
 	path = r_slash(path);
 	path++;
@@ -543,16 +543,16 @@ BYTE *path;
 
 /*	Perform an alert box message	*/
 
-WORD do_alert(button, item)
-WORD button,
+int16_t do_alert(button, item)
+int16_t button,
 	item;
 {
 	return (form_alert(button, get_string(item)));
 }
 
 
-WORD do1_alert(item)
-WORD item;
+int16_t do1_alert(item)
+int16_t item;
 {
 	return (do_alert(1, item));
 }
@@ -570,11 +570,11 @@ GRECT *rec2;
 
 
 VOID my_itoa(number, pnumstr)
-UWORD number;
+uint16_t number;
 
-REG BYTE *pnumstr;
+register char *pnumstr;
 {
-	REG WORD ii;
+	register int16_t ii;
 
 
 	for (ii = 0; ii < 2; pnumstr[ii++] = '0') ;
@@ -597,11 +597,11 @@ REG BYTE *pnumstr;
 */
 
 VOID fmt_time(time, ptime)
-REG UWORD time;
+register uint16_t time;
 
-REG BYTE *ptime;
+register char *ptime;
 {
-	REG WORD pm,
+	register int16_t pm,
 	 val;
 
 	val = ((time & 0xf800) >> 11) & 0x001f;
@@ -649,9 +649,9 @@ REG BYTE *ptime;
  */
 
 VOID fmt_date(date, pdate)
-UWORD date;
+uint16_t date;
 
-REG BYTE *pdate;
+register char *pdate;
 {
 	switch (st_date)
 	{
@@ -676,27 +676,27 @@ REG BYTE *pdate;
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[6]);
 	}
 
-	pdate[5] = pdate[2] = (BYTE) st_dchar;
+	pdate[5] = pdate[2] = (char) st_dchar;
 }
 
 
 /*	Build string		*/
 
-BYTE * bldstring(dir, dst)
+char * bldstring(dir, dst)
 DIR *dir;
 
-REG BYTE *dst;
+register char *dst;
 {
-	REG BYTE *src;
+	register char *src;
 
-	BYTE buf[14];
+	char buf[14];
 
-	REG WORD i;
+	register int16_t i;
 
-	WORD t,
+	int16_t t,
 	 len;
 
-	BYTE *buffer;
+	char *buffer;
 
 	buffer = buf;
 
@@ -750,11 +750,11 @@ REG BYTE *dst;
 #if 0
 	*dst++ = buffer[0];
 	*dst++ = buffer[1];
-	*dst++ = (BYTE) st_dchar;
+	*dst++ = (char) st_dchar;
 /*	*dst++ = '-';	*/
 	*dst++ = buffer[2];
 	*dst++ = buffer[3];
-	*dst++ = (BYTE) st_dchar;
+	*dst++ = (char) st_dchar;
 /*	*dst++ = '-';	*/
 	*dst++ = buffer[4];
 	*dst++ = buffer[5];
@@ -776,10 +776,10 @@ REG BYTE *dst;
 	return (dst);
 }
 
-BYTE * g_name(file)
-BYTE *file;
+char * g_name(file)
+char *file;
 {
-	BYTE *tail;
+	char *tail;
 
 	tail = r_slash(file);
 	if (*tail == '\\')
@@ -793,9 +793,9 @@ BYTE *file;
 /*	A:\*.*				*/
 
 VOID save_ext(path, buffer)
-BYTE *path;
+char *path;
 
-BYTE *buffer;
+char *buffer;
 {
 	strcpy(g_name(path), buffer);
 }
@@ -804,9 +804,9 @@ BYTE *buffer;
 /*	A:\dir\*.*				*/
 
 VOID save_mid(path, buffer)
-BYTE *path;
+char *path;
 
-BYTE *buffer;
+char *buffer;
 {
 	xcut_path(path, buffer, FALSE);
 }
@@ -815,10 +815,10 @@ BYTE *buffer;
 /*	Check for if the source is the parent of 	*/
 /*	the destination					*/
 
-WORD chk_par(srcptr, dstptr)
-REG BYTE *srcptr;
+int16_t chk_par(srcptr, dstptr)
+register char *srcptr;
 
-REG BYTE *dstptr;
+register char *dstptr;
 {
 	if (*srcptr != *dstptr)				/* Not the same device  */
 		return (TRUE);
@@ -847,12 +847,12 @@ REG BYTE *dstptr;
 }
 
 
-WORD fill_string(string, item)
-BYTE *string;
+int16_t fill_string(string, item)
+char *string;
 
-WORD item;
+int16_t item;
 {
-	BYTE *ptr,
+	char *ptr,
 	*ptr1;
 
 	ptr1 = ptr = g_name(string);
@@ -873,15 +873,15 @@ WORD item;
 /*	change from ascii to binary value	*/
 /*	TRUE is OK otherwise it is FALSE	*/
 
-WORD asctobin(ptr, value)
-BYTE *ptr;
+int16_t asctobin(ptr, value)
+char *ptr;
 
-LONG *value;
+int32_t *value;
 {
-	LONG n,
+	int32_t n,
 	 n1;
 
-	UWORD i;
+	uint16_t i;
 
 	for (n = 0, i = 0, n1 = 0; *ptr; ptr++)
 	{
