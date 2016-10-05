@@ -16,7 +16,7 @@ MAXQUICK equ 5
     
 	bss
 
-*	ds.b $800       ; the system variables go here
+	ds.b $800       ; the system variables go here
 
 	ds.b $40
 
@@ -279,7 +279,14 @@ _height: ds.w 1
 
 	ds.b $1E02
 
-#include "linea.inc"
+	ds.b 910 ; space for negative linea vars
+    xdef lineavars
+lineavars:
+#if TOSVERSION >= 0x404
+	ds.b 4210
+#else
+	ds.b 174
+#endif
 
 	ds.b $85A
 

@@ -1617,7 +1617,7 @@ dsf_udpat( VOID )
 VOID
 vq_color( VOID )
 {
-    (*V_ROUTINES[V_VQCOLOR])();
+    (*LA_ROUTINES[V_VQCOLOR])();
 }
 
 /*
@@ -1626,5 +1626,5 @@ vq_color( VOID )
 VOID
 vs_color( VOID )
 {
-    (*V_ROUTINES[V_VSCOLOR])();
+    (*LA_ROUTINES[V_VSCOLOR])();
 }

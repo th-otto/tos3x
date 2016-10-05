@@ -117,7 +117,7 @@
 #define	    TEXT_BG		la->textBg
 #define	    COPYTRAN		la->copyTran
 #define	    quitfill		la->quitFill
-#define	    V_ROUTINES		la->routines
+#define	    LA_ROUTINES		la->routines
 #define	    CUR_DEV		la->curDev
 #define	    BLT_MODE		la->bltMode
 #define	    REQ_X_COL		la->reqXCol

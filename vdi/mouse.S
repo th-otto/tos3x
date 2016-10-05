@@ -205,7 +205,7 @@ cl_done:	rts
 *******************************************************************************
 
 cur_display:	move.l  _lineAVar,a1		; a0 -> linea var struct
-		move.l	V_ROUTINES(a1),a1	; a1 -> routine vector list
+		move.l	LA_ROUTINES(a1),a1	; a1 -> routine vector list
 		move.l	V_SHOWCUR(a1),a1	; a1 -> display cursor routine
 		jmp	(a1)
 		
@@ -216,7 +216,7 @@ cur_display:	move.l  _lineAVar,a1		; a0 -> linea var struct
 *******************************************************************************
 
 cur_replace:	move.l  _lineAVar,a1		; a0 -> linea var struct
-		move.l	V_ROUTINES(a1),a1	; a1 -> routine vector list
+		move.l	LA_ROUTINES(a1),a1	; a1 -> routine vector list
 		move.l	V_HIDECUR(a1),a1	; a1 -> hide cursor routine
 		jmp	(a1)
 

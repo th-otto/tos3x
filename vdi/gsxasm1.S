@@ -502,7 +502,7 @@ shf_tab:   *    1 2   4       8		; number of planes
 
 
 _ABLINE:	move.l	_lineAVar,a4		; a4 -> base of LineA variables
-		move.l	V_ROUTINES(a4),a5	; load vectrd list of primitives
+		move.l	LA_ROUTINES(a4),a5	; load vectrd list of primitives
 		move.l	V_ABLINE(a5),a5		; vec to vert line primitive
 		jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
 
@@ -518,7 +518,7 @@ ST_ABLINE:	move.l	_lineAVar,a4	; a4 -> base of LineA variables
 
 *   SPECIAL CASE I.	Vertical line segments
 
-		move.l	V_ROUTINES(a4),a5	; load vectrd list of primitives
+		move.l	LA_ROUTINES(a4),a5	; load vectrd list of primitives
 		move.l	V_VLINE(a5),a5		; vec to vert line primitive
 		jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
 
@@ -1048,7 +1048,7 @@ rf_tab:	dc.w	$7FFF,$3FFF,$1FFF,$0FFF	; right fringe list	0:NEW 1:OLD
 
 _HABLINE:
 	move.l	_lineAVar,a4		; a4 -> base of LineA variables
-	move.l	V_ROUTINES(a4),a0	; load vectrd list of primitives
+	move.l	LA_ROUTINES(a4),a0	; load vectrd list of primitives
 	move.l	V_HABLINE(a0),a0	; vec to vert line primitive
 	jmp	(a0)			; sft: "aline"  hrd: "hb_vline"
 
@@ -1090,7 +1090,7 @@ xline:	move.w	d4,d1			; d1 <- X1
 
 hline_select:
 
-	move.l	V_ROUTINES(a4),a5	; load vectored list of primitives
+	move.l	LA_ROUTINES(a4),a5	; load vectored list of primitives
 	move.l	V_HLINE(a5),a5		; vec to h line primitive
 	jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
 

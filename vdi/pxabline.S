@@ -89,7 +89,7 @@ PX_ABLINE:
 	;
 	;   SPECIAL CASE I.	Vertical line segments
 	;
-	move.l	V_ROUTINES(a4),a5	; load vectrd list of primitives
+	move.l	LA_ROUTINES(a4),a5	; load vectrd list of primitives
 	move.l	V_VLINE(a5),a5		; vec to vert line primitive
 	jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
 
@@ -131,7 +131,7 @@ in_order:
 
 	move.w	d1,-(sp)
 	moveq.l	#0,d7			; means pattern is not rotated
-	move.l	V_ROUTINES(a4),a5	; load vectrd list of primitives
+	move.l	LA_ROUTINES(a4),a5	; load vectrd list of primitives
 	move.l	V_HLINE(a5),a5		; vec to vert line primitive
 	jsr	(a5)			; sft: "aline"  hrd: "hb_vline"
 	move.w	(sp)+,d1		; d1 <- mask alignment factor

@@ -73,13 +73,13 @@ init_st_tt_sp( VOID )
 	    cookieVal = cookiePtr[1] >> 16;
 
 	    if (cookieVal == TTCOOKIE) {
-		V_ROUTINES[V_VQCOLOR] = tt_vq_color;
-		V_ROUTINES[V_VSCOLOR] = tt_vs_color;
+		LA_ROUTINES[V_VQCOLOR] = tt_vq_color;
+		LA_ROUTINES[V_VSCOLOR] = tt_vs_color;
 		InitTT();
 	    }
 	    else if (cookieVal > TTCOOKIE && CUR_DEV->palSize != 2) {
-		    V_ROUTINES[V_VQCOLOR] = sp_vq_color;
-		    V_ROUTINES[V_VSCOLOR] = sp_vs_color;
+		    LA_ROUTINES[V_VQCOLOR] = sp_vq_color;
+		    LA_ROUTINES[V_VSCOLOR] = sp_vs_color;
 		    InitSTSpLut();
 		    InitColReqArray();
 	    }

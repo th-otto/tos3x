@@ -24,11 +24,7 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
-
-		.globl	_GETBLT
-		.globl	_SETBLT
-		.globl	rout_init
+#include "lineaequ.inc"
 
 
 *******************************************************************************
@@ -44,10 +40,15 @@
 *									      *
 *******************************************************************************
 
+/* 306de: 00e07f20 */
+		xdef _SETBLT
+		xdef rout_init
 rout_init:
-_SETBLT:	move.l  _lineAVar,a1		; a1 -> linea var struct
+_SETBLT:
+#if TOSVERSION >= 0x404
+		move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.w	d0,_BLT_MODE(a1)	; store present mode selection
-		move.l	CUR_DEV(a1),a0		; a0 -> current device struct
+		move.l	LA_CURDEV(a1),a0		; a0 -> current device struct
 
 
 		;
@@ -59,16 +60,32 @@ _SETBLT:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.l	DEVHARDROUTINES(a0),a2	; a2 -> routine list
 
 
-setblt0:	lea	V_PRIMITIVES(a1),a0	; a0 -> space for primitives
-		move.l	a0,V_ROUTINES(a1)	; pnt to ram based routine list
+setblt0:
+		lea	V_PRIMITIVES(a1),a0	; a0 -> space for primitives
+		move.l	a0,LA_ROUTINES(a1)	; pnt to ram based routine list
 		move.w	#21,d0			; setup the loop count
 
-rCopyLoop:	move.l	(a2)+,(a0)+		; copy vector
+rCopyLoop:
+		move.l	(a2)+,(a0)+		; copy vector
 		dbra	d0,rCopyLoop
 
-		move.l	V_ROUTINES(a1),a1	; a1 -> vector list
+		move.l	LA_ROUTINES(a1),a1	; a1 -> vector list
 		move.l	V_INIT(a1),a1		; a1 -> version of init
-		jsr	(a1)			; 
+		jsr	(a1)
+#else
+        move.w    d0,LA_BLTMODE
+        movea.l   LA_CURDEV+lineavars,a0
+        btst      #0,d0
+        beq.s     setblt0
+        movea.l   LA_ROUTINES,a0
+setblt0:
+        lea.l     LA_USERDEVINIT,a1
+        moveq.l   #9,d0
+rCopyLoop:
+        move.l    (a0)+,(a1)+
+        dbf       d0,rCopyLoop
+        rts
+#endif
 		rts
 
 
@@ -80,10 +97,15 @@ rCopyLoop:	move.l	(a2)+,(a0)+		; copy vector
 *									      *
 *******************************************************************************
 
-_GETBLT:	move.l	a0,-(sp)
+/* 306de: 00e07f48 */
+		xdef _GETBLT
+_GETBLT:
+#if TOSVERSION >= 0x404
+		move.l	a0,-(sp)
 		move.l  _lineAVar,a0		; a0 -> linea var struct
 		move.w	_BLT_MODE(a0),d0
 		move.l	(sp)+,a0
+#else
+        move.w    LA_BLTMODE,d0
+#endif
 		rts
-
-.end

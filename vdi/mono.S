@@ -83,7 +83,7 @@ on_bounds:	move.w	_DESTY(a1),d1		; d1 <- dst Y
 *   d2.w = # of characters
 *   d3.w = _DELY
 
-no_clip:	move.l	V_ROUTINES(a1),a0	; a1 -> routines vector list
+no_clip:	move.l	LA_ROUTINES(a1),a0	; a1 -> routines vector list
 		move.l	V_MONO(a0),a0		; a1 -> version of mono
 		jmp	(a0)
 

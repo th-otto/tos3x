@@ -145,7 +145,7 @@ swap_loop:	move.w	(a0),d1		; d1 <- font form word
 
 
 _put_pix:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	V_ROUTINES(a1),a1	; load vect list of primitives
+		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
 		move.l	V_PUTPIX(a1),a1		; vec to put pix routine
 		jmp	(a1)
 
@@ -222,7 +222,7 @@ ppx_clr:	and.w	d0,(a1)+	; clear the bit.
 *******************************************************************************
 
 _get_pix:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	V_ROUTINES(a1),a1	; load vect list of primitives
+		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
 		move.l	V_GETPIX(a1),a1		; vec to get pix routine
 		jmp	(a1)
 
@@ -706,7 +706,7 @@ ep_ret0:	moveq.l	#0,d0		; return(0). (failure)
 
 _RECTFILL:
 	move.l  _lineAVar,a2		; a2 -> linea var struct
-	move.l	V_ROUTINES(a2),a5	; load vectored list of primitives
+	move.l	LA_ROUTINES(a2),a5	; load vectored list of primitives
 	move.l	V_RECTFILL(a5),a5	; vec to rectangle filler
 	jmp	(a5)
 
@@ -800,7 +800,7 @@ rf_noclip:
 
 select_version:
 
-	move.l	V_ROUTINES(a2),a5	; load vectored list of primitives
+	move.l	LA_ROUTINES(a2),a5	; load vectored list of primitives
 	move.l	V_RECT(a5),a5		; vec to rectangle filler
 	jmp	(a5)			; 
 

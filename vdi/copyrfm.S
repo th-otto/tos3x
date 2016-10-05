@@ -486,7 +486,7 @@ max_save:
 	move.w	d6,D_XMAX(a6)
 	move.w	d7,D_YMAX(a6)
 
-	move.l	V_ROUTINES(a1),a5	; a5 -> routines vector list
+	move.l	LA_ROUTINES(a1),a5	; a5 -> routines vector list
 	move.l	V_BLAST(a5),a5		; a5 -> desired version of blast_man
 	jsr	(a5)			; routine ("blast_man" uses BLASTER)
 

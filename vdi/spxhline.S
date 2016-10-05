@@ -69,7 +69,7 @@ pxh0:
 	add.w	d0,a0			; a0 -> pattern word
 
 	move.l	_lineAVar,a4		; a4 -> base of LineA variables
-	move.l	V_ROUTINES(a4),a1	; load vectrd list of primitives
+	move.l	LA_ROUTINES(a4),a1	; load vectrd list of primitives
 	move.l	V_HLINE(a1),a1		; vec to vert line primitive
 	jmp	(a1)			; sft: "aline"  hrd: "hb_vline"
 

@@ -225,7 +225,7 @@ blank_up:
 	clr.w	d0			; d0 <- Xmin
 	move.w	v_cel_mx(a4),d2		; d2 <- Xmax
 	move.w	d3,d1			; d1 <- Ymax  d3 <- Ymax
-	move.l	V_ROUTINES(a4),a2
+	move.l	LA_ROUTINES(a4),a2
 	move.l	V_BLANK(a2),a2		; a2 -> proper blank routine
 	jmp	(a2)			; fill the vacated space
 
@@ -268,7 +268,7 @@ blank_dn:
 	clr.w	d0			; d0 <- Xmin
 	move.w	v_cel_mx(a4),d2		; d2 <- Xmax
 	move.w	d1,d3			; d1 <- Ymin  d3 <- Ymin
-	move.l	V_ROUTINES(a4),a2
+	move.l	LA_ROUTINES(a4),a2
 	move.l	V_BLANK(a2),a2		; a2 -> proper blank routine
 	jmp	(a2)			; fill the vacated space
 

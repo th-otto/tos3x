@@ -2542,13 +2542,13 @@ _blitmode:
         move.w    d0,d5
         lsr.w     #1,d5
         or.w      #$FFFE,d5
-        jsr       getblitmode
+        jsr       _GETBLT
         move.w    d0,d3
         move.w    4(a7),d0
         bmi.s     blitmod1
         and.w     d5,d0
         or.w      d4,d0
-        jsr       setblitmode
+        jsr       _SETBLT
 blitmod1:
         move.w    d3,d0
         rts

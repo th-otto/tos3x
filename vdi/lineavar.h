@@ -146,6 +146,9 @@ typedef struct vdiVars {
     WORD        vVtRez;             /* vertical resolution of the screen    */
     WORD        bytesLin;	    /* copy of vLinWr for concat            */
 
+/*
+ * the lineavars point here:
+ */
     WORD        vPlanes;	    /* number of video planes               */
     WORD        vLinWr;	            /* number of bytes/video line           */
 
@@ -211,17 +214,19 @@ typedef struct vdiVars {
     WORD        textBg;             /* text background color                */
     WORD        copyTran;           /* cp rstr frm type flag (opaque/trans) */
     WORD        (*quitFill)();      /* ptr to routine for quitting seedfill */
-    WORD	(*UserDevInit)();   /* ptr to user routine before dev_init  */
-    WORD	(*UserEscInit)();   /* ptr to user routine before esc_init  */
-    LONG	reserved2[8];	    /* reserved				    */
+    WORD	(*UserDevInit)();       /* ptr to user routine before dev_init  */
+    WORD	(*UserEscInit)();       /* ptr to user routine before esc_init  */
+    LONG	reserved2[8];	        /* reserved				    */
 
     WORD        (**routines)();     /* ptr to primitives vector list	    */
-    SCREENDEF   *curDev;	    /* ptr to a surrent device structure    */
+    SCREENDEF   *curDev;	        /* ptr to a current device structure    */
     WORD        bltMode;            /* 0: soft BiT BLiT 1: hard BiT BLiT    */
     /*
      * Stuff for 8 plane VDI
      */
     WORD        reserved3;          /* reserved				    */
+
+#if TOSVERSION >= 0x404
     WORD        reqXCol[240][3];    /* extended request color array         */
 
     WORD        *svBlkPtr;          /* points to the proper save block      */
@@ -256,6 +261,7 @@ typedef struct vdiVars {
     LONG	vlColFg;	    /* escape foreground color (long value) */
     LONG	palMap[256];	    /* either a maping of reg's or true val */
     WORD	(*primitives[40])();	/* space to copy vectors into	    */
+#endif
 } VDIVARS;
 
 #endif
