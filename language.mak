@@ -28,14 +28,24 @@ bios_tlen_fr=6494
 bios_dbase_fr=E36026
 bios_dlen_fr=9D8
 
-gemdos_tbase_it=E134E4
+gemdos_tbase_es=E134F2
+gemdos_tlen_es=62AC
+gemdos_dbase_es=E3D8E8
+gemdos_dlen_es=39E
+vdidsp_es=E078E0
+bios_tbase_es=E00000
+bios_tlen_es=64A2
+bios_dbase_es=E36034
+bios_dlen_es=9D8
+
+gemdos_tbase_it=E13602
 gemdos_tlen_it=62AC
-gemdos_dbase_it=E3D8DA
+gemdos_dbase_it=E3D8E8
 gemdos_dlen_it=39E
-vdidsp_it=E078B4
+vdidsp_it=E078C2
 bios_tbase_it=E00000
-bios_tlen_it=6476
-bios_dbase_it=E36008
+bios_tlen_it=6484
+bios_dbase_it=E36016
 bios_dlen_it=9D8
 
 gemdos_tbase_uk=E1348A

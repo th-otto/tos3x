@@ -28,6 +28,9 @@ startup.o: startup.S config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc 
 
 keytbl.o: config.h
 
+prtkeys$(EXEEXT): prtkeys.o
+	$(AM_V_LD)${LD} ${LDFLAGS} -o $@ prtkeys.o
+
 check:: bios.o checklang
 	$(AM_V_at)if ! test -f ../roms/tos$(TOSVERSION)$(COUNTRY).img; then \
 		echo "../roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \

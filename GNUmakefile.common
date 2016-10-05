@@ -1,7 +1,6 @@
 BIN=../bin/
 LIB=../lib/
 INC=../include
-EXEEXT=
 
 DISTDIR=../tmp/tos306de
 
@@ -18,18 +17,19 @@ LIBM_NDX=
 ifeq ($(CROSS),yes)
 
 CROSSPREFIX=m68k-atari-mint-
-
-NATIVECC = gcc
-NATIVECFLAGS = -O -Wall
+EXEEXT=.ttp
+BUILD_EXEEXT=
 
 else
 
 CROSSPREFIX=
-
-NATIVECC = gcc
-NATIVECFLAGS = -O -Wall
+EXEEXT=
+BUILD_EXEEXT=$(EXEEXT)
 
 endif
+
+BUILD_CC = gcc
+BUILD_CFLAGS = -O -Wall
 
 CC = $(CROSSPREFIX)gcc
 LD = $(CC)

@@ -2,7 +2,7 @@ include ../Makefile.common
 include ../Makefile.silent
 include optimize.mak
 
-all: vars.o bdos.a bdos.o
+all: bdos.a bdos.o
 
 include ../config.mak
 include ../language.mak

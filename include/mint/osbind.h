@@ -10,6 +10,9 @@
 #ifndef __COMPILER_H__
 # include <compiler.h>
 #endif
+#ifndef __OSTRUCT_H__
+# include <ostruct.h>
+#endif
 
 extern	long bios PROTO((short code, ...));
 extern	long xbios PROTO((short code, ...));
@@ -40,8 +43,39 @@ __extension__								\
 	);								\
 	retvalue;							\
 })
+
+#define trap_14_wlll(n, a, b, c)					\
+__extension__								\
+({									\
+	register long retvalue __asm__("d0");				\
+	long  _a = (long) (a);						\
+	long  _b = (long) (b);						\
+	long  _c = (long) (c);						\
+	    								\
+	__asm__ volatile						\
+	(								\
+		"movl	%4,sp@-\n\t"					\
+		"movl	%3,sp@-\n\t"					\
+		"movl	%2,sp@-\n\t"					\
+		"movw	%1,sp@-\n\t"					\
+		"trap	#14\n\t"					\
+		"lea	sp@(14),sp "					\
+	: "=r"(retvalue)			/* outputs */		\
+	: "g"(n), "r"(_a), "r"(_b), "r"(_c)     /* inputs  */		\
+	: __CLOBBER_RETURN("d0") "d1", "d2", "a0", "a1", "a2"    /* clobbered regs */	\
+	  AND_MEMORY							\
+	);								\
+	retvalue;							\
+})
+
 #endif
 #endif
+
+#ifndef __GNUC__
+#define trap_1_wwll gemdos
+#define trap_14_wlll xbios
+#endif
+
 
 #define VEC_INQUIRE            (-1L)
 
@@ -73,7 +107,7 @@ __extension__								\
 #define	Mfpint(a,b)	xbios(13,a,b)
 #define	Iorec(a)	xbios(14,a)
 #define	Rsconf(a,b,c,d,e,f)	xbios(15,a,b,c,d,e,f)
-#define	Keytbl(a,b,c)	xbios(16,a,b,c)
+#define	Keytbl(nrml,shft,caps)	(_KEYTAB *)trap_14_wlll((short)(0x10),(long)(nrml), (long)(shft),(long)(caps))
 #define	Random()	xbios(17)
 #define	Protobt(a,b,c,d)	xbios(18,a,b,c,d)
 #define	Flopver(a,b,c,d,e,f,g)	xbios(19,a,b,c,d,e,f,g)

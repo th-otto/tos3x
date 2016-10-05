@@ -79,11 +79,29 @@ _bcon5out   equ $00E072B0
 _bcon2out   equ $00E072BC
 #endif
 
+#if OS_COUNTRY == CTRY_ES
+BIOSTBASE   equ $00E00000
+BIOSTLEN    equ $000064A2
+BIOSDLEN    equ $000009D8
+BDOSTBASE   equ $00E13510
+BDOSTLEN    equ $000062AC
+BDOSDLEN    equ $0000039E
+line1010    equ $00E0794A
+setblitmode equ $00E07F3E
+getblitmode equ $00E07F66
+vdireinit   equ $00E06968
+resetdev    equ $00E06A12
+blink       equ $00E07638
+_cursconf   equ $00E0766A
+_bcon5out   equ $00E072BE
+_bcon2out   equ $00E072CA
+#endif
+
 #if OS_COUNTRY == CTRY_IT
 BIOSTBASE   equ $00E00000
-BIOSTLEN    equ $00006476
+BIOSTLEN    equ $00006484
 BIOSDLEN    equ $000009D8
-BDOSTBASE   equ $00E134E4
+BDOSTBASE   equ $00E134F2
 BDOSTLEN    equ $000062AC
 BDOSDLEN    equ $0000039E
 line1010    equ $00E0792C
@@ -93,8 +111,8 @@ vdireinit   equ $00E0694A
 resetdev    equ $00E069F4
 blink       equ $00E0761A
 _cursconf   equ $00E0764C
-_bcon5out   equ $00E07292
-_bcon2out   equ $00E0729E
+_bcon5out   equ $00E072A0
+_bcon2out   equ $00E072AC
 #endif
 
 #if OS_COUNTRY == CTRY_UK

@@ -2,7 +2,7 @@ include ../Makefile.common
 include ../Makefile.silent
 include optimize.mak
 
-all: bios.a bios.o vars.o
+all: bios.a bios.o
 
 include ../config.mak
 include ../language.mak
@@ -48,6 +48,9 @@ biosext.o: biosext.S config.h
 	$(AM_V_at)${RM} $*.i
 
 keytbl.o: config.h
+
+prtkeys$(EXEEXT): prtkeys.o
+	$(AM_V_LD)${LD} ${LDFLAGS} -o $@ prtkeys.o
 
 check::
 

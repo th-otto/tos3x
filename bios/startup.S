@@ -5080,7 +5080,8 @@ kbdvec29:
 *
 * Country-dependent key translations
 *
-/* 00e035e0 */
+/* 306any; 00e035e0 */
+/* 205any; 00e028a0 */
 #if OS_COUNTRY == CTRY_US
 * nothing to do
 #endif
@@ -5159,37 +5160,82 @@ kbdfr4:
 #endif
 
 #if OS_COUNTRY == CTRY_ES
-* missing
-#endif
-
-#if OS_COUNTRY == CTRY_IT
         cmpi.b    #$1A,d1                       ; convert ALT-? to [ or {
-        bne.s     kbdde1
+        bne.s     kbdes1
         move.b    #$5B,d0
         move.b    (_shifty).w,d2
         andi.b    #$03,d2
         beq       kbdvec42
         move.b    #$7B,d0
         bra       kbdvec42
-kbdde1:
+kbdes1:
         cmpi.b    #$1B,d1                       ; convert ALT-? to ] or }
-        bne.s     kbdde2
+        bne.s     kbdes2
         move.b    #$5D,d0
         move.b    (_shifty).w,d2
         andi.b    #$03,d2
         beq       kbdvec42
         move.b    #$7D,d0
         bra       kbdvec42
-kbdde2:
+kbdes2:
+        cmpi.b    #$2B,d1                       ; convert ALT-? to # or @
+        bne.s     kbdes3
+        move.b    #$23,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$40,d0
+        bra       kbdvec42
+kbdes3:
+        cmpi.b    #$28,d1                       ; convert ALT-? to # or @
+        bne.s     kbdes4
+        move.b    #$81,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$00,d0
+        bra       kbdvec42
+kbdes4:
+        cmpi.b    #$27,d1                       ; convert ALT-? to # or @
+        bne.s     kbdes5
+        move.b    #$00,d0
+        bra       kbdvec42
+kbdes5:
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+        cmpi.b    #$1A,d1                       ; convert ALT-? to [ or {
+        bne.s     kbdit1
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdit1:
+        cmpi.b    #$1B,d1                       ; convert ALT-? to ] or }
+        bne.s     kbdit2
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdit2:
         cmpi.b    #$2B,d1                       ; convert ALT-? to degree or tilde
-        bne.s     kbdde3
+        bne.s     kbdit3
         move.b    #$F8,d0
         move.b    (_shifty).w,d2
         andi.b    #$03,d2
         beq       kbdvec42
         move.b    #$7E,d0
         bra       kbdvec42
-kbdde3:
+kbdit3:
+        cmpi.b    #$60,d1
+        bne.s     kbdit4
+        move.b    #$60,d0
+        bra       kbdvec42
+kbdit4:
 #endif
 
 #if OS_COUNTRY == CTRY_SV

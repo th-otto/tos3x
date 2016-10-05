@@ -70,4 +70,24 @@ typedef struct _bpb BPB;
 #define B_16    1       /* device has 16-bit FATs */
 #define B_1FAT  2       /* device has only a single FAT */
 
+/* Structure returned by Keytbl() */
+typedef struct {
+    char *unshift;	/* pointer to unshifted keys */
+    char *shift;	/* pointer to shifted keys */
+    char *caps;		/* pointer to capslock keys */
+
+    /* Entries below available
+     * when _AKP cookie is present.
+     */
+    char *alt;		/* pointers to alt translation tables */
+    char *altshift;
+    char *altcaps;
+
+   /* Entry below is available
+    * on MilanTOS and as of FreeMiNT 1.16.1
+    */
+    char *altgr;
+
+} _KEYTAB;
+
 #endif /* __OSTRUCT_H__ */
