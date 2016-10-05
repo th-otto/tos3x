@@ -1,3 +1,7 @@
+##
+#### Country definition
+## valid countries are: us de fr es it sv
+
 COUNTRY=de
 TOSVERSION=306
 

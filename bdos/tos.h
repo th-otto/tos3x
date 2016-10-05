@@ -5,7 +5,7 @@
 #include <stdint.h>
 #endif
 
-#define TOSVERSION 0x0306
+#include "config.h"
 
 /* major.minor */
 #if TOSVERSION >= 0x0100
