@@ -43,14 +43,16 @@
 # 
 ###############################################################################
 
-include ../Makefile.common
-include ../Makefile.silent
+top_srcdir=..
+
+include $(top_srcdir)/Makefile.common
+include $(top_srcdir)/Makefile.silent
 include optimize.mak
 
 all: vdi.a vdi.o
 
-include ../config.mak
-include ../language.mak
+include $(top_srcdir)/config.mak
+include $(top_srcdir)/language.mak
 
 include SRCFILES
 
@@ -59,7 +61,7 @@ include SRCFILES
 
 CPPFLAGS +=
 
-vdi.a: tosvars.o config.h $(VDI_OBJS) ${MAKEFILE}
+vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_OBJS) ${MAKEFILE}
 	$(RM) $@
 	$(AR) $(ARFLAGS) $@ tosvars.o $(VDI_OBJS1)
 	$(AR) $(ARFLAGS) $@ $(VDI_OBJS2)
@@ -78,7 +80,257 @@ vdi.a: tosvars.o config.h $(VDI_OBJS) ${MAKEFILE}
 # because on a FAT filesystem, .S cannot be
 # distinguished from .s
 #
-vars.o: vars.S config.h
+vars.o: vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+
+blastman.o: blastman.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+blitinit.o: blitinit.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+copyrfm.o: copyrfm.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+entry.o: entry.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+escape.o: escape.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+gsxasm1.o: gsxasm1.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+gsxasm2.o: gsxasm2.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+jin.o: jin.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+line1010.o: line1010.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+mono.o: mono.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+mouse.o: mouse.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbblit.o: sbblit.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbescape.o: sbescape.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbfrag.o: sbfrag.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbhline.o: sbhline.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbmono.o: sbmono.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbscrn.o: sbscrn.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbtxtblt.o: sbtxtblt.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbvline.o: sbvline.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+textblt.o: textblt.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+vdivar.o: vdivar.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+xfrmform.o: xfrmform.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbsctran.o: sbsctran.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbsctlog.o: sbsctlog.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbscolog.o: sbscolog.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+sbscopaq.o: sbscopaq.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+allgem.o: allgem.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+spxesc.o: spxesc.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+pxmouse.o: pxmouse.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+palette.o: palette.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+blaster.o: blaster.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+hbline.o: hbline.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+hbmono.o: hbmono.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+hbtxtblt.o: hbtxtblt.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+hbrect.o: hbrect.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+hbbitblt.o: hbbitblt.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+hbescape.o: hbescape.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+routines.o: routines.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+colorep.o: colorep.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+spxtblit.o: spxtblit.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+spxoblit.o: spxoblit.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+spxvline.o: spxvline.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+spxhline.o: spxhline.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+pxabline.o: pxabline.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+pxrectfl.o: pxrectfl.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+spxmono.o: spxmono.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+pxtform.o: pxtform.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+hard.o: hard.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+hpxoblit.o: hpxoblit.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+spxtxtbl.o: spxtxtbl.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
@@ -86,9 +338,9 @@ vars.o: vars.S config.h
 vdi.o: checklang tosvars.o vars.o $(STARTUP) $(VDI_OBJS) vdiext.o ${MAKEFILE}
 	$(LD) -u -s -l -o $@ -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o $(VDI_OBJS) vdiext.o
 
-vdiext.o: vdiext.S config.h
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
-	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+vdiext.o: vdiext.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
 check::
@@ -97,4 +349,4 @@ clean:
 	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
 
 distclean: clean
-	$(RM) config.h
+	$(RM) $(top_srcdir)/common/config.h

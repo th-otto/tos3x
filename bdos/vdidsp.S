@@ -2,7 +2,7 @@
 * These 2 functions are referenced by GEMDOS,
 * but are defined elsewhere
 *
-#include "config.h"
+#include "../common/config.h"
 #include "../bios/ctrycodes.h"
 
 	xdef _zeromem

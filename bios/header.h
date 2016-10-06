@@ -8,7 +8,7 @@
 /*
  * config.h should define TOSVERSION and COUNTRY
  */
-#include "config.h"
+#include "../common/config.h"
 #include "ctrycodes.h"
 
 /* the year used in copyright notices */

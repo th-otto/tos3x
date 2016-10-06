@@ -5,16 +5,11 @@
 * to get the same addresses as when linking the whole ROM
 *
 
-#include "config.h"
+#include "../common/config.h"
+#include "../bdos/bdosdefs.h"
 #include "../bios/biosdefs.h"
-#include "aesdefs.h"
+#include "../aes/aesdefs.h"
 
-OPNFILES equ 81
-NCURDIR equ 40
-KBBUFSZ equ 80
-SUPSIZ equ 1024
-MAXQUICK equ 5
-    
 	bss
 
 *	ds.b $800       ; the system variables go here
@@ -280,7 +275,14 @@ _height: ds.w 1
 
 	ds.b $1E02
 
-#include "../bios/linea.inc"
+	ds.b 910 ; space for negative linea vars
+    xdef lineavars
+lineavars:
+#if TOSVERSION >= 0x404
+	ds.b 4210
+#else
+	ds.b 174
+#endif
 
 	ds.b $85A
 
@@ -457,7 +459,9 @@ _run: ds.l 1
     xdef _pbpar
 _pbpar: ds.b 30
 
-	ds.l 1 ; unused
+	xdef _fill
+_fill: ds.b 3
+	even
 
 	xdef _bakbuf
 _bakbuf: ds.l 3

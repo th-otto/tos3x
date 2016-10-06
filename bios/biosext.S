@@ -6,7 +6,7 @@
 * This file is only used when linking a single module,
 * to get the same addresses as when linking the whole ROM
 *
-#include "config.h"
+#include "../common/config.h"
 #include "ctrycodes.h"
 
 * from VDI

@@ -2,7 +2,7 @@ VDI_OBJS1 = blastman.o blitinit.o copyrfm.o entry.o escape.o
 VDI_OBJS2 = gsxasm1.o gsxasm2.o jin.o line1010.o mono.o mouse.o
 VDI_OBJS3 = sbblit.o sbescape.o sbfrag.o sbhline.o sbmono.o sbscrn.o
 VDI_OBJS4 = sbtxtblt.o sbvline.o textblt.o vdivar.o xfrmform.o sbsctran.o
-VDI_OBJS5 = sbsctlog.o sbscolog.o sbscopaq.o allgem.o spxesc.o 	pxmouse.o
+VDI_OBJS5 = sbsctlog.o sbscolog.o sbscopaq.o allgem.o spxesc.o pxmouse.o
 VDI_OBJS6 = palette.o blaster.o hbline.o hbmono.o hbtxtblt.o hbrect.o
 VDI_OBJS7 = hbbitblt.o hbescape.o routines.o colorep.o spxtblit.o spxoblit.o spxvline.o
 VDI_OBJS8 = spxhline.o pxabline.o pxrectfl.o spxmono.o pxtform.o hard.o hpxoblit.o
@@ -83,6 +83,7 @@ VDI_SRCS = \
 	pxtform.S \
 	hard.S \
 	hpxoblit.S \
+	spxtxtbl.S \
 	\
 	cbssdefs.c \
 	font6x6.c \
@@ -101,8 +102,8 @@ VDI_SRCS = \
 	init.c \
 	ttcolor.c \
 	spcolor.c \
-	spxtxtbl.c \
 	trucolor.c \
+	\
 	$(empty)
 
 EXTRA_DIST = \

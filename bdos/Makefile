@@ -1,34 +1,44 @@
-include ../Makefile.common
-include ../Makefile.silent
+top_srcdir=..
+
+include $(top_srcdir)/Makefile.common
+include $(top_srcdir)/Makefile.silent
 include optimize.mak
 
 all: bdos.a bdos.o
 
-include ../config.mak
-include ../language.mak
+include $(top_srcdir)/config.mak
+include $(top_srcdir)/language.mak
 
 include SRCFILES
 
-bdos.a: checklang config.h $(BDOS_OBJS) ${MAKEFILE}
+bdos.a: checklang $(top_srcdir)/common/config.h $(BDOS_OBJS) ${MAKEFILE}
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(BDOS_OBJS1)
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(BDOS_OBJS2)
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(BDOS_OBJS3)
 
-vdidsp.o: vdidsp.S config.h
+vdidsp.o: vdidsp.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-bdos.o: checklang config.h vars.o vdidsp.o $(BDOS_OBJS) ${MAKEFILE}
-	$(LD) -s -o $@ -a $(gemdos_tbase) $(gemdos_dbase) 0 ../bios/tosvars.o vars.o vdidsp.o $(BDOS_OBJS)
+bdos.o: checklang $(top_srcdir)/common/config.h tosvars.o vars.o vdidsp.o $(BDOS_OBJS) ${MAKEFILE}
+	$(LD) -s -o $@ -a $(gemdos_tbase) $(gemdos_dbase) 0 tosvars.o vars.o vdidsp.o $(BDOS_OBJS)
 
-$(BDOS_OBJS) vars.o: config.h
+vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+
+tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
 
 check::
 
 clean:
-	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
+	$(RM) *.o *.a *.i *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
 
 distclean: clean
-	$(RM) config.h
+	$(RM) $(top_srcdir)/common/config.h

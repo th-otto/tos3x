@@ -1,0 +1,8 @@
+SRCS = vars.S tosvars.S
+
+EXTRA_DIST = \
+	GNUmakefile \
+	Makefile \
+	SRCFILES \
+	optimize.mak \
+	$(empty)

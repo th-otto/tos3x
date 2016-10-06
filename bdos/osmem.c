@@ -19,7 +19,6 @@ static MDBLOCK *getosm PROTO((NOTHING));
 
 MDBLOCK ofdbuf[80];
 MDBLOCK *ofdlist;
-#define MAXQUICK 5
 MDBLOCK *root[MAXQUICK];
 #define ofdfree root[4]
 

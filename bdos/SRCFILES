@@ -46,7 +46,6 @@ BDOS_SRCS = \
 	bdosmain.c \
 	sup.c \
 	time.c \
-	vars.S \
 	vdidsp.S \
 	\
 	bios.h \

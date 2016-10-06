@@ -30,10 +30,6 @@
 
 #define SLASH '\\'
 
-#define SUPSIZ 1024     /* common supervisor stack size (in words) */
-#define OPNFILES 81     /* max open files in system */
-#define NCURDIR 40      /* max current directories in use in system */
-#define BLKDEVNUM 16    /* number of block devices supported: A: ... Z: */
 
 #if BLKDEVNUM > 16
 #define drvmask int32_t
@@ -263,9 +259,6 @@ MPB
  */
 extern int16_t bootdev;
 extern BCB *bufl[2];
-
-#define KBBUFSZ 80     /* size of typeahead buffer -- must be power of 2!! */
-#define KBBUFMASK       (KBBUFSZ-1)
 
 extern int32_t glbkbchar[3][KBBUFSZ];	/* The actual typeahead buffer */
 extern int32_t *buptr[3];

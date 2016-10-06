@@ -5,7 +5,8 @@
 #include <stdint.h>
 #endif
 
-#include "config.h"
+#include "../common/config.h"
+#include "bdosdefs.h"
 
 /* major.minor */
 #if TOSVERSION >= 0x0100

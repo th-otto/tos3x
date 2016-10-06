@@ -1,4 +1,4 @@
-#include "config.h"
+#include "../common/config.h"
 #ifndef __COMPILER_H__
 #include <compiler.h>
 #endif

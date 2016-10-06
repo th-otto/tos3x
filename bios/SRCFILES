@@ -28,8 +28,6 @@ BIOS_SRCS = \
 	prt.S \
 	memtest.S \
 	biosext.S \
-	vars.S \
-	tosvars.S \
 	dma.inc \
 	floppy.inc \
 	ikbdclock.inc \

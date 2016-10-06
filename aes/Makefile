@@ -1,11 +1,13 @@
-include ../Makefile.common
-include ../Makefile.silent
+top_srcdir=..
+
+include $(top_srcdir)/Makefile.common
+include $(top_srcdir)/Makefile.silent
 include optimize.mak
 
 all: aes.a aes.o
 
-include ../config.mak
-include ../language.mak
+include $(top_srcdir)/config.mak
+include $(top_srcdir)/language.mak
 
 include SRCFILES
 
@@ -31,15 +33,15 @@ aes.a: tosvars.o $(STARTUP) $(AES_OBJS) ${MAKEFILE}
 # because on a FAT filesystem, .S cannot be
 # distinguished from .s
 #
-vars.o: vars.S config.h linea.inc
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
-	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+vars.o: vars.S $(top_srcdir)/commoon/config.h linea.inc
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
 aes.o: checklang tosvars.o vars.o $(STARTUP) $(AES_OBJS) aesext.o ${MAKEFILE}
 	$(LD) -u -s -l -o $@ -a $(aes_tbase) $(aes_dbase) 0 tosvars.o vars.o $(STARTUP) $(AES_OBJS) aesext.o
 
-aesext.o: aesext.S config.h
+aesext.o: aesext.S $(top_srcdir)/commoon/config.h
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
@@ -114,4 +116,4 @@ clean:
 	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
 
 distclean: clean
-	$(RM) config.h
+	$(RM) $(top_srcdir)/common/config.h

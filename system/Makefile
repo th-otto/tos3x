@@ -26,3 +26,6 @@ check::
 
 clean:
 	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
+
+distclean: clean
+	$(RM) $(top_srcdir)/common/config.h

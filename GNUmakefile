@@ -1,7 +1,7 @@
 include GNUmakefile.common
 include Makefile.silent
 
-SUBDIRS = bios bdos system
+SUBDIRS = common bios bdos system
 
 EXTRA_DIST = \
 	GNUmakefile \

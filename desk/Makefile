@@ -1,17 +1,19 @@
-include ../Makefile.common
-include ../Makefile.silent
+top_srcdir=..
+
+include $(top_srcdir)/Makefile.common
+include $(top_srcdir)/Makefile.silent
 include optimize.mak
 
 all: desk.a desk.o
 
-include ../config.mak
-include ../language.mak
+include $(top_srcdir)/config.mak
+include $(top_srcdir)/language.mak
 
 include SRCFILES
 
 CPPFLAGS +=
 
-desk.a: tosvars.o config.h $(DESK_OBJS) ${MAKEFILE}
+desk.a: tosvars.o $(top_srcdir)/common/config.h $(DESK_OBJS) ${MAKEFILE}
 	$(RM) $@
 	$(AR) $(ARFLAGS) $@ tosvars.o $(DESK_OBJS1)
 	$(AR) $(ARFLAGS) $@ $(DESK_OBJS2)
@@ -24,15 +26,15 @@ desk.a: tosvars.o config.h $(DESK_OBJS) ${MAKEFILE}
 # because on a FAT filesystem, .S cannot be
 # distinguished from .s
 #
-vars.o: vars.S config.h
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
-	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+vars.o: vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
 desk.o: checklang tosvars.o vars.o $(DESK_OBJS) deskext.o ${MAKEFILE}
 	$(LD) -u -s -l -o $@ -a $(desk_tbase) $(desk_dbase) 0 tosvars.o vars.o $(DESK_OBJS) deskext.o
 
-deskext.o: deskext.S config.h
+deskext.o: deskext.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
@@ -73,4 +75,4 @@ clean:
 	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
 
 distclean: clean
-	$(RM) config.h
+	$(RM) $(top_srcdir)/common/config.h
