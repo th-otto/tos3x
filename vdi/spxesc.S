@@ -8,14 +8,10 @@
 * $Log:	$
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-		.globl	_v_bas_ad
-		.globl	spx_cell
-		.globl	spx_blank
-		.globl	spx_neg_cell
-		.globl	spx_scrup
-		.globl	spx_scrdn
+#if VIDEL_SUPPORT
 
 *******************************************************************************
 *	
@@ -36,6 +32,7 @@
 *******************************************************************************
 
             
+		xdef	spx_cell
 spx_cell:	move.w	v_fnt_wr(a4),d2		; d2 <- src width (in bytes)
 		move.w	v_cel_ht(a4),d4
 		subq.w	#1,d4			; d4 <- cell height -1
@@ -53,11 +50,11 @@ spx_cell:	move.w	v_fnt_wr(a4),d2		; d2 <- src width (in bytes)
 		beq	spx_16_cell		; do 16 bits per pixel case
 		blt	spx_8_cell		; do 8 bits per pixel case
 
-;
-; 24/32 bits per pixel case
-;
+*
+* 24/32 bits per pixel case
+*
 new_32_line:	move.w	(a2),d0			; d0 <- font data
-curr_32_line:	lsl.w	d0			; if shifted out bit was set
+curr_32_line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	cell_32_fg		; then splat foreground
 		move.l	d7,(a3)+		; set dst to background color
 		dbra	d5,curr_32_line		; cont with current cell line
@@ -75,15 +72,15 @@ cell_32_fg:	move.l	d6,(a3)+		; set dst to foreground color
 		dbra	d4,new_32_line		; do next line of the cell
 		rts
 
-;
-; 16 bits per pixel case
-;
+*
+* 16 bits per pixel case
+*
 spx_16_cell:	addq.w	#1,d5			; d5 <- cell width
 		add.w	d5,d3			; adjust wrap for postincrmnt
 		add.w	d5,d3			;    for the word case
 		subq.w	#1,d5			; adjust counter back
 new_16_line:	move.w	(a2),d0			; d0 <- font data
-curr_16_line:	lsl.w	d0			; if shifted out bit was set
+curr_16_line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	cell_16_fg		; then splat foreground
 		move.w	d7,(a3)+		; set dst to background color
 		dbra	d5,curr_16_line		; cont with current cell line
@@ -101,16 +98,16 @@ cell_16_fg:	move.w	d6,(a3)+		; set dst to foreground color
 		dbra	d4,new_16_line		; do next line of the cell
 		rts
 
-;
-; 8 bits per pixel case
-;
+*
+* 8 bits per pixel case
+*
 spx_8_cell:	addq.w	#1,d5			; d5 <- cell width
 		lsr.w	#2,d5			; adjust wrap for postincrmnt
 		add.w	d5,d3			;    for the byte case
 		move.w	d1,d5			; restore counter back
 
 new_8_line:	move.w	(a2),d0			; d0 <- font data
-curr_8_line:	lsl.w	d0			; if shifted out bit was set
+curr_8_line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	cell_8_fg		; then splat foreground
 		move.b	d7,(a3)+		; set dst to background color
 		dbra	d5,curr_8_line		; cont with current cell line
@@ -157,6 +154,7 @@ cell_8_fg:	move.b	d6,(a3)+		; set dst to foreground color
 *
 *******************************************************************************
 
+		xdef	spx_scrup
 spx_scrup:
 
 	move.w	v_cel_my(a4),d3		; d3 <- Ymax
@@ -200,6 +198,7 @@ blank_up:
 
 
 
+		xdef	spx_scrdn
 spx_scrdn:
 
 	move.w	v_cel_my(a4),d3		; d3 <- Ymax
@@ -260,6 +259,7 @@ blank_dn:
 *
 *******************************************************************************
 
+		xdef	spx_blank
 spx_blank:	move.w	d0,d4			; d4 <- X min
 		move.w	d2,d5			; d5 <- X max
 		sub.w	d4,d5			; d5 <- span in cells - 1
@@ -294,27 +294,27 @@ spx_blank:	move.w	d0,d4			; d4 <- X min
 		beq	px16BlLine		; branches to 16 bits per pix
 		blt	px8BlLine		; branches to 16 bits per pix
 		
-;
-; Blank out 32 bit case
-;
+*
+* Blank out 32 bit case
+*
 px32BlLine:	move.w	a2,d4			; d4 <- # of pixels to clr - 1
 blankLongs:	move.l	d5,(a3)+		; 
 		dbra	d4,blankLongs
 		add.w	d7,a3			; point into next scanline
 		dbra	d6,px32BlLine		; do next line
 		rts
-;
-; Blank out 16 bit case
-;
+*
+* Blank out 16 bit case
+*
 px16BlLine:	move.w	a2,d4			; d4 <- # of pixels to clr - 1
 blankWords:	move.w	d5,(a3)+		; 
 		dbra	d4,blankWords
 		add.w	d7,a3			; point into next scanline
 		dbra	d6,px16BlLine		; do next line
 		rts
-;
-; Blank out 8 bit case
-;
+*
+* Blank out 8 bit case
+*
 px8BlLine:	move.w	a2,d4			; d4 <- # of pixels to clr - 1
 blankBytes:	move.b	d5,(a3)+		; 
 		dbra	d4,blankBytes
@@ -343,6 +343,7 @@ blankBytes:	move.b	d5,(a3)+		;
 *******************************************************************************
 
 
+		xdef	spx_neg_cell
 spx_neg_cell:	move.w	_v_lin_wr(a4),d4
 		move.w	v_cel_ht(a4),d5
 		subq.w	#1,d5			; for dbra.
@@ -379,7 +380,4 @@ neg_byte:	not.b	(a2)+			; neg curr pix
 		dbra	d5,neg_8_loop		; do next line
 		rts
 
-
-
-
-	.end
+#endif

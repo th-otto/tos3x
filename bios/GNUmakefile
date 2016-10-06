@@ -1,10 +1,11 @@
+top_srcdir=..
+subdir=bios
+
 # 
 # cross compiling
 #
 EVAL_CROSS := case `uname -s` in *MiNT*|*TOS*) echo no;; *) echo yes; esac
 CROSS := $(shell $(EVAL_CROSS))
-
-top_srcdir=..
 
 include $(top_srcdir)/GNUmakefile.common
 include $(top_srcdir)/Makefile.silent
@@ -52,7 +53,7 @@ check:: bios.o checklang
 	exit $$status
 
 dist::
-	$(CP) -a $(BIOS_SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/bios
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

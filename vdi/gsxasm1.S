@@ -35,8 +35,9 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
-.include	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
 
 *		global routines
 		xdef	_ABLINE
@@ -61,7 +62,7 @@
 
 MAX_PLANES	equ	 08		; maximum planes for pixel fragment
 FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
-	.text
+	text
 
 *******************************************************************************
 *******************************************************************************
@@ -711,13 +712,13 @@ wm_tbl:		dc.w	wm0y_nxt-*
 *
 * munged: a0/d0-d3
 *-
-pixfrag:
+pixfrag: ds.b 0
 
-.ifeq	P68030
-		movec.l	cacr,d2			; d2 <- cache control register
+#if P68030
+		CACR_D2				; d2 <- cache control register
 		bset.l	#3,d2			; set "Clr Instr Cache" bit
-		movec.l	d2,cacr			; clear the instruction cache
-.endc
+		D2_CACR				; clear the instruction cache
+#endif
 		subq.w	#1,d3			; d3 <- dbra plane counter
 
 		movem.w	i_tbl(pc),d0-d1/a1	; cache instr data in registers
@@ -1093,5 +1094,3 @@ hline_select:
 	move.l	LA_ROUTINES(a4),a5	; load vectored list of primitives
 	move.l	V_HLINE(a5),a5		; vec to h line primitive
 	jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
-
-	.end

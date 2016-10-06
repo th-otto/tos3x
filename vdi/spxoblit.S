@@ -9,11 +9,10 @@
 *******************************************************************************
 
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-
-		.globl	spx_bitblt
-		.globl	spx_tbitblt
+#if VIDEL_SUPPORT
 
 *       FRAME PARAMETERS
 
@@ -51,11 +50,11 @@ S_YMAX	  equ	-16	; maximum Y: source				    +60
 
 D_ADDR	  equ	-14	; initial destination address			    +62
 D_XMAX	  equ	-10	; maximum X: destination			    +66
-D_YMAX	  equ	-08	; maximum Y: destination			    +68
+D_YMAX	  equ	-8	; maximum Y: destination			    +68
 
-INNER_CT  equ	-06	; blt inner loop initial count			    +70
-DST_WR	  equ	-04	; destination form wrap (in bytes)		    +72
-SRC_WR	  equ	-02	; source form wrap (in bytes)			    +74
+INNER_CT  equ	-6	; blt inner loop initial count			    +70
+DST_WR	  equ	-4	; destination form wrap (in bytes)		    +72
+SRC_WR	  equ	-2	; source form wrap (in bytes)			    +74
 
 
 *******************************************************************************
@@ -116,6 +115,7 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 *		Xmin source, Xmax source, Xmin destination, Xmax destination
 *		rectangle height, rectangle width, number of planes
 *-
+		xdef	spx_bitblt
 spx_bitblt:	tst.w	S_NXPL(a6)	; see if we are doing transparant blit
 		bne	skip0		; if not then skip
 		jmp	spx_tbitblt	; else do transparant blit
@@ -1390,5 +1390,5 @@ oFN8Loop:	move.b	#-1,-(a1)		; D' = all ones
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oFN8Line		; do next line
 		rts	
-		
-	.end
+
+#endif

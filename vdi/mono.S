@@ -26,13 +26,14 @@
 
 *   Mono-spaced text blt
 
-	.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-	.globl	_MONO8XH
+	xdef	_MONO8XH
 
 *  Mono spaced text blt...
 
-	.text
+	text
 
 fail_ret:	moveq	#0,d0		; exit if not byte bnd or clip required
 		rts			; 0 indicates failure
@@ -86,5 +87,3 @@ on_bounds:	move.w	_DESTY(a1),d1		; d1 <- dst Y
 no_clip:	move.l	LA_ROUTINES(a1),a0	; a1 -> routines vector list
 		move.l	V_MONO(a0),a0		; a1 -> version of mono
 		jmp	(a0)
-
-	end

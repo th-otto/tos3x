@@ -38,18 +38,17 @@
 *************************************************************************
 */
 
-#include	"portab.h"
-#include	"fontdef.h"
-#include	"attrdef.h"
-#include	"scrndev.h"
-#include	"vardefs.h"
-#include	"lineavar.h"
-#include	"gsxdef.h"
-#include	"gsxextrn.h"
-#include	"jmptbl.h"
-#include	"proto.h"
+#include "vdi.h"
+#include "fontdef.h"
+#include "attrdef.h"
+#include "scrndev.h"
+#include "vardefs.h"
+#include "lineavar.h"
+#include "gsxdef.h"
+#include "gsxextrn.h"
+#include "jmptbl.h"
 
-WORD	(*jmptb1[])() =
+VOID (*jmptb1[]) PROTO((NOTHING)) =
 {
 	v_opnwk,
 	v_clswk,
@@ -81,7 +80,7 @@ WORD	(*jmptb1[])() =
 	v_locator,
 	v_valuator,
 	v_choice,
-	v_string, 
+	v_string,
 	vswr_mode,
 	vsin_mode,
 	v_nop,
@@ -92,7 +91,7 @@ WORD	(*jmptb1[])() =
 	dst_alignment
 };
 
-WORD	(*jmptb2[])() =
+VOID (*jmptb2[]) PROTO((NOTHING)) =
 {
 	d_opnvwk,
 	d_clsvwk,
@@ -132,85 +131,86 @@ WORD	(*jmptb2[])() =
 *    Screen Driver Entry Point						*
 ************************************************************************/
 
-VOID
-SCREEN( VOID ) 
+VOID SCREEN(NOTHING)
 {
-    REG WORD	    opcode, r, *control;
-    REG ATTRIBUTE   *work_ptr;
+	register int16_t opcode, r, *control;
+	register ATTRIBUTE *work_ptr;
 
-    control = CONTRL;
-    r = *(control+6);
+	control = CONTRL;
+	r = *(control + 6);
 
-    opcode = *control;
+	opcode = *control;
 
-    /* no ints out & no pts out */
+	/* no ints out & no pts out */
 
-    *(control+2) = 0;
-    *(control+4) = 0;
+	*(control + 2) = 0;
+	*(control + 4) = 0;
 
-    FLIP_Y = 0;
+	FLIP_Y = 0;
 
-    if (opcode != 1 && opcode != 100) {
+	if (opcode != 1 && opcode != 100)
+	{
 
-	/* Find the attribute area which matches the handle */
+		/* Find the attribute area which matches the handle */
 
-	work_ptr = &virt_work;
+		work_ptr = &virt_work;
 
-	do {
-	    if (r == work_ptr->handle)
-		goto found_handle;
-	} while ( (work_ptr = work_ptr->next_work) );
+		do
+		{
+			if (r == work_ptr->handle)
+				goto found_handle;
+		} while ((work_ptr = work_ptr->next_work));
 
-	/* handle is invalid if we fall through, so exit */
+		/* handle is invalid if we fall through, so exit */
 
-	return( VOID );
+		return;
 
-	found_handle:
+	  found_handle:
 
-	cur_work = work_ptr;
-	INQ_TAB[19] = CLIP = work_ptr->clip;
-	XMN_CLIP = work_ptr->xmn_clip;
-	YMN_CLIP = work_ptr->ymn_clip;
-	XMX_CLIP = work_ptr->xmx_clip;
-	YMX_CLIP = work_ptr->ymx_clip;
+		cur_work = work_ptr;
+		INQ_TAB[19] = CLIP = work_ptr->clip;
+		XMN_CLIP = work_ptr->xmn_clip;
+		YMN_CLIP = work_ptr->ymn_clip;
+		XMX_CLIP = work_ptr->xmx_clip;
+		YMX_CLIP = work_ptr->ymx_clip;
 
-	WRT_MODE = work_ptr->wrt_mode;
+		WRT_MODE = work_ptr->wrt_mode;
 
-	PATPTR = work_ptr->patptr;
-	PATMSK = work_ptr->patmsk;
+		PATPTR = work_ptr->patptr;
+		PATMSK = work_ptr->patmsk;
 
-	if (work_ptr->fill_style == 4)
-	    MULTIFILL = work_ptr->multifill;
-	else
-	    MULTIFILL = 0;
+		if (work_ptr->fill_style == 4)
+			MULTIFILL = work_ptr->multifill;
+		else
+			MULTIFILL = 0;
 
-	font_ring[2] = work_ptr->loaded_fonts;
+		font_ring[2] = work_ptr->loaded_fonts;
 
-	DEV_TAB[10] = work_ptr->num_fonts;
+		DEV_TAB[10] = work_ptr->num_fonts;
 
-	DDA_INC = work_ptr->dda_inc;
-	T_SCLSTS = work_ptr->t_sclsts;
-	DOUBLE = work_ptr->scaled;
+		DDA_INC = work_ptr->dda_inc;
+		T_SCLSTS = work_ptr->t_sclsts;
+		DOUBLE = work_ptr->scaled;
 
-	CUR_FONT = work_ptr->cur_font;
+		CUR_FONT = work_ptr->cur_font;
 
-	MONO_STATUS = MONOSPACE & CUR_FONT->flags;
-	SCRPT2 = work_ptr->scrpt2;
-	SCRTCHP = work_ptr->scrtchp;
-	STYLE = work_ptr->style;
-	h_align = work_ptr->h_align;
-	v_align = work_ptr->v_align;
-	CHUP = work_ptr->chup;
+		MONO_STATUS = MONOSPACE & CUR_FONT->flags;
+		SCRPT2 = work_ptr->scrpt2;
+		SCRTCHP = work_ptr->scrtchp;
+		STYLE = work_ptr->style;
+		h_align = work_ptr->h_align;
+		v_align = work_ptr->v_align;
+		CHUP = work_ptr->chup;
 
-    } /* end if open work or vwork */
-
-    if ( opcode >= 1 && opcode <= 39 ) {
-	opcode--;
-	(*jmptb1[opcode])();
-    }
-
-    else if ( opcode >= 100 && opcode <= 131 ) {
-	opcode -= 100;
-	(*jmptb2[opcode])();
-    }
+	}
+	/* end if open work or vwork */
+	if (opcode >= 1 && opcode <= 39)
+	{
+		opcode--;
+		(*jmptb1[opcode]) ();
+	} else if (opcode >= 100 && opcode <= 131)
+	{
+		opcode -= 100;
+		(*jmptb2[opcode]) ();
+	}
 }

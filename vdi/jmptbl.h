@@ -22,92 +22,92 @@
 #ifndef _JMPTBL_H_
 #define _JMPTBL_H_
 
-extern    WORD    v_nop();             /*  0   */
+VOID v_nop PROTO((NOTHING));             /*  VDI #0   */
 
-extern    WORD    v_opnwk();           /*  1   */
-extern    WORD    v_clswk();           /*  2   */
-extern    WORD    CLEARMEM();          /*  3   */
-extern    WORD    v_updwk();           /*  4   */
-extern    WORD    CHK_ESC();           /*  5   */
+VOID v_opnwk PROTO((NOTHING));           /*  VDI #1   */
+VOID v_clswk PROTO((NOTHING));           /*  VDI #2   */
+VOID CLEARMEM PROTO((NOTHING));          /*  VDI #3   */
+VOID v_updwk PROTO((NOTHING));           /*  VDI #4   */
+VOID CHK_ESC PROTO((NOTHING));           /*  VDI #5   */
 
-extern    WORD    v_pline();           /*  6   */
-extern    WORD    v_pmarker();         /*  7   */
-extern    WORD    d_gtext();           /*  8   */
-extern    WORD    v_fillarea();        /*  9   */
-extern    WORD    v_cellarray();       /*  10  */
+VOID v_pline PROTO((NOTHING));           /*  VDI #6   */
+VOID v_pmarker PROTO((NOTHING));         /*  VDI #7   */
+VOID d_gtext PROTO((NOTHING));           /*  VDI #8   */
+VOID v_fillarea PROTO((NOTHING));        /*  VDI #9   */
+VOID v_cellarray PROTO((NOTHING));       /*  VDI #10  */
 
-extern    WORD    v_gdp();	       /*  11  */
-extern    WORD    dst_height();        /*  12  */
-extern    WORD    dst_rotation();      /*  13  */
-extern    WORD    vs_color();	       /*  14  */
-extern    WORD    vsl_type();	       /*  15  */
+VOID v_gdp PROTO((NOTHING));             /*  VDI #11  */
+VOID dst_height PROTO((NOTHING));        /*  VDI #12  */
+VOID dst_rotation PROTO((NOTHING));      /*  VDI #13  */
+VOID vs_color PROTO((NOTHING));          /*  VDI #14  */
+VOID vsl_type PROTO((NOTHING));          /*  VDI #15  */
 
-extern    WORD    vsl_width();	       /*  16  */
-extern    WORD    vsl_color();	       /*  17  */
-extern    WORD    vsm_type();	       /*  18  */
-extern    WORD    vsm_height();	       /*  19  */
-extern    WORD    vsm_color();	       /*  20  */
+VOID vsl_width PROTO((NOTHING));         /*  VDI #16  */
+VOID vsl_color PROTO((NOTHING));         /*  VDI #17  */
+VOID vsm_type PROTO((NOTHING));          /*  VDI #18  */
+VOID vsm_height PROTO((NOTHING));        /*  VDI #19  */
+VOID vsm_color PROTO((NOTHING));         /*  VDI #20  */
 
-extern    WORD    dst_font();	       /*  21  */
-extern    WORD    dst_color();	       /*  22  */
-extern    WORD    vsf_interior();      /*  23  */
-extern    WORD    vsf_style();	       /*  24  */
-extern    WORD    vsf_color();	       /*  25  */
+VOID dst_font PROTO((NOTHING));          /*  VDI #21  */
+VOID dst_color PROTO((NOTHING));         /*  VDI #22  */
+VOID vsf_interior PROTO((NOTHING));      /*  VDI #23  */
+VOID vsf_style PROTO((NOTHING));         /*  VDI #24  */
+VOID vsf_color PROTO((NOTHING));         /*  VDI #25  */
 
-extern    WORD    vq_color();	       /*  26  */
-extern    WORD    vq_cellarray();      /*  27  */
-extern    WORD    v_locator();         /*  28  */
-extern    WORD    v_valuator();        /*  29  */
-extern    WORD    v_choice();          /*  30  */
+VOID vq_color PROTO((NOTHING));          /*  VDI #26  */
+VOID vq_cellarray PROTO((NOTHING));      /*  VDI #27  */
+VOID v_locator PROTO((NOTHING));         /*  VDI #28  */
+VOID v_valuator PROTO((NOTHING));        /*  VDI #29  */
+VOID v_choice PROTO((NOTHING));          /*  VDI #30  */
 
-extern    WORD    v_string();          /*  31  */
-extern    WORD    vswr_mode();         /*  32  */
-extern    WORD    vsin_mode();         /*  33  */
-extern    WORD    vql_attr();          /*  35  */
+VOID v_string PROTO((NOTHING));          /*  VDI #31  */
+VOID vswr_mode PROTO((NOTHING));         /*  VDI #32  */
+VOID vsin_mode PROTO((NOTHING));         /*  VDI #33  */
+VOID vql_attr PROTO((NOTHING));          /*  VDI #35  */
 
-extern    WORD    vqm_attr();          /*  36  */
-extern    WORD    vqf_attr();          /*  37  */
-extern    WORD    dqt_attributes();    /*  38  */
-extern    WORD    dst_alignment();     /*  39  */
+VOID vqm_attr PROTO((NOTHING));          /*  VDI #36  */
+VOID vqf_attr PROTO((NOTHING));          /*  VDI #37  */
+VOID dqt_attributes PROTO((NOTHING));    /*  VDI #38  */
+VOID dst_alignment PROTO((NOTHING));     /*  VDI #39  */
 
-extern    WORD    d_opnvwk();          /* 100  */
+VOID d_opnvwk PROTO((NOTHING));          /* VDI #100  */
 
-extern    WORD    d_clsvwk();          /* 101  */
-extern    WORD    vq_extnd();          /* 102  */
-extern    WORD    d_contourfill();     /* 103  */
-extern    WORD    vsf_perimeter();     /* 104  */
-extern    WORD    v_get_pixel();       /* 105  */
+VOID d_clsvwk PROTO((NOTHING));          /* VDI #101  */
+VOID vq_extnd PROTO((NOTHING));          /* VDI #102  */
+VOID d_contourfill PROTO((NOTHING));     /* VDI #103  */
+VOID vsf_perimeter PROTO((NOTHING));     /* VDI #104  */
+VOID v_get_pixel PROTO((NOTHING));       /* VDI #105  */
 
-extern    WORD    dst_style();         /* 106  */
-extern    WORD    dst_point();         /* 107  */
-extern    WORD    vsl_ends();          /* 108  */
-extern    WORD    dro_cpyfm();         /* 109  */
-extern    WORD    TRAN_FM();           /* 110  */
+VOID dst_style PROTO((NOTHING));         /* VDI #106  */
+VOID dst_point PROTO((NOTHING));         /* VDI #107  */
+VOID vsl_ends PROTO((NOTHING));          /* VDI #108  */
+VOID dro_cpyfm PROTO((NOTHING));         /* VDI #109  */
+VOID TRAN_FM PROTO((NOTHING));           /* VDI #110  */
 
-extern    WORD    XFM_CRFM();          /* 111  */
-extern    WORD    dsf_udpat();         /* 112  */
-extern    WORD    vsl_udsty();         /* 113  */
-extern    WORD    dr_recfl();          /* 114  */
-extern    WORD    vqi_mode();          /* 115  */
+VOID XFM_CRFM PROTO((NOTHING));          /* VDI #111  */
+VOID dsf_udpat PROTO((NOTHING));         /* VDI #112  */
+VOID vsl_udsty PROTO((NOTHING));         /* VDI #113  */
+VOID dr_recfl PROTO((NOTHING));          /* VDI #114  */
+VOID vqi_mode PROTO((NOTHING));          /* VDI #115  */
 
-extern    WORD    dqt_extent();        /* 116  */
-extern    WORD    dqt_width();         /* 117  */
-extern    WORD    EX_TIMV();           /* 118  */
-extern    WORD    dt_loadfont();       /* 119  */
-extern    WORD    dt_unloadfont();     /* 120  */
+VOID dqt_extent PROTO((NOTHING));        /* VDI #116  */
+VOID dqt_width PROTO((NOTHING));         /* VDI #117  */
+VOID EX_TIMV PROTO((NOTHING));           /* VDI #118  */
+VOID dt_loadfont PROTO((NOTHING));       /* VDI #119  */
+VOID dt_unloadfont PROTO((NOTHING));     /* VDI #120  */
 
-extern    WORD    drt_cpyfm();         /* 121  */
-extern    WORD    v_show_c();          /* 122  */
-extern    WORD    v_hide_c();          /* 123  */
-extern    WORD    vq_mouse_status();   /* 124  */
-extern    WORD    VEX_BUTV();          /* 125  */
+VOID drt_cpyfm PROTO((NOTHING));         /* VDI #121  */
+VOID v_show_c PROTO((NOTHING));          /* VDI #122  */
+VOID v_hide_c PROTO((NOTHING));          /* VDI #123  */
+VOID vq_mouse_status PROTO((NOTHING));   /* VDI #124  */
+VOID VEX_BUTV PROTO((NOTHING));          /* VDI #125  */
 
-extern    WORD    VEX_MOTV();          /* 126  */
-extern    WORD    VEX_CURV();          /* 127  */
-extern    WORD    vq_key_s();          /* 128  */
-extern    WORD    s_clip();            /* 129  */
-extern    WORD    dqt_name();          /* 130  */
+VOID VEX_MOTV PROTO((NOTHING));          /* VDI #126  */
+VOID VEX_CURV PROTO((NOTHING));          /* VDI #127  */
+VOID vq_key_s PROTO((NOTHING));          /* VDI #128  */
+VOID s_clip PROTO((NOTHING));            /* VDI #129  */
+VOID dqt_name PROTO((NOTHING));          /* VDI #130  */
 
-extern    WORD    dqt_fontinfo();      /* 131  */
+VOID dqt_fontinfo PROTO((NOTHING));      /* VDI #131  */
 
 #endif

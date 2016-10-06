@@ -70,16 +70,36 @@
 #define MAX_MKWD	SIZ_TAB[10]
 #define MAX_MKHT	SIZ_TAB[11]
 
+#define TA_LEFT           0 /* horizontal */
+#define TA_CENTER         1
+#define TA_RIGHT          2
+#define TA_BASE           0 /* vertical */
+#define TA_HALF           1
+#define TA_ASCENT         2
+#define TA_BOTTOM         3
+#define TA_DESCENT        4
+#define TA_TOP            5
+
+#define ALI_LEFT         TA_LEFT
+#define ALI_CENTER       TA_CENTER
+#define ALI_RIGHT        TA_RIGHT
+#define ALI_BASE         TA_BASE
+#define ALI_HALF         TA_HALF
+#define ALI_ASCENT       TA_ASCENT
+#define ALI_BOTTOM       TA_BOTTOM
+#define ALI_DESCENT      TA_DESCENT
+#define ALI_TOP          TA_TOP
+
 #define ABS(x) ((x) >= 0 ? (x) : -(x))
 
 typedef struct fdb {
-    WORD    *data;			/* pointer to image data	    */
-    WORD    width;			/* image width in pixels	    */
-    WORD    height;			/* image height in pixels	    */
-    WORD    wordWidth;			/* image width in words		    */
-    WORD    formatId;			/* 0 mchn, 1 stnd, 2 intrlvd, 3 px  */
-    WORD    planes;			/* # of color bit planes	    */
-    WORD    reserved[3];		/* reserved for future use	    */
+	int16_t    *data;			/* pointer to image data		*/
+	int16_t    width;			/* image width in pixels		*/
+	int16_t    height;			/* image height in pixels		*/
+	int16_t    wordWidth;		/* image width in words 		*/
+	int16_t    formatId;		/* 0 mchn, 1 stnd, 2 intrlvd, 3 px	*/
+	int16_t    planes;			/* # of color bit planes		*/
+	int16_t    reserved[3]; 	/* reserved for future use		*/
 } FDB;
 
 #endif

@@ -1,4 +1,5 @@
 top_srcdir=..
+subdir=desk
 
 # 
 # cross compiling
@@ -16,36 +17,36 @@ LIBS =
 CPPFLAGS = -I$(top_srcdir)/common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-all: aes.a
+all: desk.a
 
 include $(top_srcdir)/config.mak
 include $(top_srcdir)/language.mak
 
 include SRCFILES
 
-aes.a: $(AES_OBJS) ${MAKEFILE}
-	$(AR) $(ARFLAGS) $@ $(AES_OBJS)
+desk.a: $(DESK_OBJS) ${MAKEFILE}
+	$(AR) $(ARFLAGS) $@ $(DESK_OBJS)
 
-check:: aes.o checklang
+check:: desk.o checklang
 	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \
 		echo "$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
 		exit 1; \
 	fi
-	$(AM_V_at)offset=`echo 16 i $(aes_tbase) $(rombase) - p | dc`; \
-	tlen=`echo 16 i $(aes_tlen) p | dc`; \
-	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$tlen of=aes.orig 2> /dev/null; \
-	offset=`echo 16 i $(aes_dbase) $(rombase) - p | dc`; \
-	dlen=`echo 16 i $(aes_dlen) p | dc`; \
-	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$dlen seek=$$tlen of=aes.orig 2> /dev/null; \
+	$(AM_V_at)offset=`echo 16 i $(desk_tbase) $(rombase) - p | dc`; \
+	tlen=`echo 16 i $(desk_tlen) p | dc`; \
+	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$tlen of=desk.orig 2> /dev/null; \
+	offset=`echo 16 i $(desk_dbase) $(rombase) - p | dc`; \
+	dlen=`echo 16 i $(desk_dlen) p | dc`; \
+	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$dlen seek=$$tlen of=desk.orig 2> /dev/null; \
 	total=`echo $$tlen $$dlen + p | dc`; \
-	dd if=$< of=aes.new bs=1 skip=36 count=$$total 2> /dev/null; \
-	cmp aes.orig aes.new; \
+	dd if=$< of=desk.new bs=1 skip=36 count=$$total 2> /dev/null; \
+	cmp desk.orig desk.new; \
 	status=$$?; \
-	$(RM) aes.orig aes.new; \
+	$(RM) desk.orig desk.new; \
 	exit $$status
 
 dist::
-	$(CP) -a $(AES_SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/aes
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

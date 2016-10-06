@@ -9,11 +9,10 @@
 *******************************************************************************
 
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-	.globl	PX_HABLINE
-	.globl	px_fline
-	.globl	spx_hline
+#if VIDEL_SUPPORT
 
 *******************************************************************************
 *******************************************************************************
@@ -49,14 +48,15 @@
 *******************************************************************************
 
 
+	xdef	PX_HABLINE
 PX_HABLINE:
 
 	move.l	_lineAVar,a4		; a4 -> LineA variable base
 	movem.w	_X1(a4),d4-d6		; d4 <- X1   d5 <- Y1   d6 <- X2
 
+	xdef	px_fline
 px_fline:
-	move.w	d4,d7			; means pattern is rotated as though
-					;    it started at X = 0
+	move.w	d4,d7			; means pattern is rotated as though it started at X = 0
 	move.w	d5,d0			; d0 <- Y1
 	and.w	_patmsk(a4),d0		; d0 <- initial pattern index
 	add.w	d0,d0			; d0 <- initial pattern offset
@@ -83,6 +83,7 @@ pxh0:
 *	a0	points to pattern word
 *	a4	points to line A varibale structure
 *-
+	xdef	spx_hline
 spx_hline:
 	move.l	_v_bas_ad,a1		; a1 -> base of screen
 	move.w	_v_lin_wr(a4),d1	; d1 <- dst width (in bytes)
@@ -149,7 +150,7 @@ HLine32Tab:	dc.l	H32M1Line,H32M2Line,H32M3Line,H32M4Line
 * Replace mode (1)
 *-
 H32M1Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H32M1FG			; if cary is set set to foreground
 	move.l	d4,(a1)+		; set to background
 	dbra	d6,H32M1Line		; do next pixel
@@ -164,7 +165,7 @@ H32M1FG:
 * Transparant mode (2)
 *-
 H32M2Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H32M2FG			; if cary is set set to foreground
 	addq.w	#4,a1			; point to next pixel
 	dbra	d6,H32M2Line		; do next pixel
@@ -179,7 +180,7 @@ H32M2FG:
 * XOR mode (3)
 *-
 H32M3Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H32M3FG			; if cary is set set to foreground
 	addq.w	#4,a1			; point to next pixel
 	dbra	d6,H32M3Line		; do next pixel
@@ -194,7 +195,7 @@ H32M3FG:
 * Reverse Transparent mode (4)
 *-
 H32M4Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H32M4FG			; if cary is set set to foreground
 	move.l	d3,(a1)+		; set to foreground
 	dbra	d6,H32M4Line		; do next pixel
@@ -212,7 +213,7 @@ H32M4FG:
 * Replace mode (1)
 *-
 H16M1Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H16M1FG			; if cary is set set to foreground
 	move.w	d4,(a1)+		; set to background
 	dbra	d6,H16M1Line		; do next pixel
@@ -227,7 +228,7 @@ H16M1FG:
 * Transparant mode (2)
 *-
 H16M2Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H16M2FG			; if cary is set set to foreground
 	addq.w	#2,a1			; point to next pixel
 	dbra	d6,H16M2Line		; do next pixel
@@ -242,7 +243,7 @@ H16M2FG:
 * XOR mode (3)
 *-
 H16M3Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H16M3FG			; if cary is set set to foreground
 	addq.w	#2,a1			; point to next pixel
 	dbra	d6,H16M3Line		; do next pixel
@@ -257,7 +258,7 @@ H16M3FG:
 * Reverse Transparent mode (4)
 *-
 H16M4Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H16M4FG			; if cary is set set to foreground
 	move.w	d3,(a1)+		; set to foreground
 	dbra	d6,H16M4Line		; do next pixel
@@ -275,7 +276,7 @@ H16M4FG:
 * Replace mode (1)
 *-
 H8M1Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H8M1FG			; if cary is set set to foreground
 	move.b	d4,(a1)+		; set to background
 	dbra	d6,H8M1Line		; do next pixel
@@ -290,7 +291,7 @@ H8M1FG:
 * Transparant mode (2)
 *-
 H8M2Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H8M2FG			; if cary is set set to foreground
 	addq.w	#1,a1			; point to next pixel
 	dbra	d6,H8M2Line		; do next pixel
@@ -305,7 +306,7 @@ H8M2FG:
 * XOR mode (3)
 *-
 H8M3Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H8M3FG			; if cary is set set to foreground
 	addq.w	#1,a1			; point to next pixel
 	dbra	d6,H8M3Line		; do next pixel
@@ -320,7 +321,7 @@ H8M3FG:
 * Reverse Transparent mode (4)
 *-
 H8M4Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	H8M4FG			; if cary is set set to foreground
 	move.b	d3,(a1)+		; set to foreground
 	dbra	d6,H8M4Line		; do next pixel
@@ -407,3 +408,5 @@ M8MFill:
 
 M8MLeave:
 	rts
+
+#endif

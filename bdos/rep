@@ -5,3 +5,5 @@
 /REG/register/wg
 /NULLPTR/NULL/wg
 /EXTERN/extern/wg
+/MLOCAL/static/w
+/LOCAL/static/w

@@ -25,10 +25,11 @@
 *************************************************************************
 
 
-.include	"lineaequ.s"
-.include 	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
 
-	.globl	hb_rect
+	xdef	hb_rect
 
 *  offsets into the BLASTER register block for the new blit ST
 *
@@ -52,14 +53,14 @@ B_F2_MSK	equ	-16 		; 2nd fringe mask	0:old 1:new
 B_D_NXWD	equ	-14 		; offset to next dst word
 B_D_WRAP	equ	-12 		; wrap from end of one dst line to next
 B_D_ADDR	equ	-10 		; initial dst address
-B_D_SPAN	equ	-06 		; span in words of dst block
-B_HEIGHT	equ	-04 		; pixel height of block
-B_LOGOP		equ	-02 		; ctrl word: src^pat combo & logic op #
-B_SKEW		equ	 00		; ctrl word: flags, pat index & skew
+B_D_SPAN	equ	-6 		; span in words of dst block
+B_HEIGHT	equ	-4 		; pixel height of block
+B_LOGOP		equ	-2 		; ctrl word: src^pat combo & logic op #
+B_SKEW		equ	 0		; ctrl word: flags, pat index & skew
 
 
-BF_PAT		equ  	08		; combo flag: 0:all ones  1:pattern
-BF_SRC		equ  	09		; combo flag: 0:all ones  1:source
+BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
+BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
                      
@@ -67,8 +68,8 @@ BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
-BF_PF		equ  	07		; pre-fetch flag  	 0:false 1:true
-BF_FQ		equ  	06		; flush queue flag 	 0:false 1:true
+BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
+BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
 BM_GO		equ  	$8000		; execution mask	
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
@@ -76,7 +77,7 @@ BM_PF		equ  	$0080		; pre-fetch mask
 BM_FQ		equ  	$0040		; flush queue mask
 
 
- 	.text
+ 	text
 
 *	BLASTER based rectangle fill
 *
@@ -179,7 +180,7 @@ s1b_loop:
 	move.l	a1,B_D_ADDR(a5)
 	move.w	d7,B_HEIGHT(a5)
 
-	ror.l	d5			; what color is this plane ?
+	ror.l	#1,d5			; what color is this plane ?
 	scs	d0
 	and.w	d1,d0			; d0 <- logic op offset:  0=>0  1=>2
 	move.w	0(a4,d0.w),B_LOGOP(a5)  ; load the logic op
@@ -200,12 +201,11 @@ s1b_cont:
 	addq.l	#2,a1			; a1 -> next plane
 	dbra	d6,s1b_loop
 
-.ifeq	P68030
-
-	movec.l	cacr,d6			; d2 <- cache control register
+#if P68030
+	CACR_D6			; d6 <- cache control register
 	bset.l	#11,d6			; set "Clr DATA Cache" bit
-	movec.l	d6,cacr			; clear the data cache
-.endc
+	D6_CACR			; clear the data cache
+#endif
 	rts
 
 
@@ -235,7 +235,7 @@ smb_loop:
 	move.l	a1,B_D_ADDR(a5)
 	move.w	d7,B_HEIGHT(a5)
 
-	ror.l	d5			; what color is this plane ?
+	ror.l	#1,d5			; what color is this plane ?
 	scs	d0
 	and.w	d1,d0			; d0 <- logic op offset: 0=>0  1=>2
 	move.w	0(a4,d0.w),B_LOGOP(a5)	; load the logic op
@@ -256,12 +256,11 @@ smb_cont:
 	addq.l	#2,a1			; a1 -> next dst plane
 	dbra	d6,smb_loop
 
-.ifeq	P68030
-
-	movec.l	cacr,d6			; d2 <- cache control register
+#if P68030
+	CACR_D6			; d26 <- cache control register
 	bset.l	#11,d6			; set "Clr DATA Cache" bit
-	movec.l	d6,cacr			; clear the data cache
-.endc
+	D6_CACR			; clear the data cache
+#endif
 	rts
 
 
@@ -288,7 +287,7 @@ sd1_loop:
 
 	move.l	a1,B_D_ADDR(a5)		 ; start at top of this plane
 
-	ror.l	d5			; what color is this plane ?
+	ror.l	#1,d5			; what color is this plane ?
 	scs	d2
 	and.w	#2,d2			 ; d2 <- logic op offset:  0=>0  1=>2
 	move.w	0(a4,d2.w),B_LOGOP(a5)	 ; load the logic op for this plane
@@ -327,12 +326,9 @@ sd2_cont:
 	addq.l	#2,a1			 ; a1 -> next plane
 	dbra	d6,sd1_loop		 ; do next plane
 
-.ifeq	P68030
-
-	movec.l	cacr,d6			; d2 <- cache control register
+#if P68030
+	CACR_D6			; d2 <- cache control register
 	bset.l	#11,d6			; set "Clr DATA Cache" bit
-	movec.l	d6,cacr			; clear the data cache
-.endc
+	D6_CACR			; clear the data cache
+#endif
 	rts
-
-	.end

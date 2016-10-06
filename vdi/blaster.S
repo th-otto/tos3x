@@ -30,6 +30,14 @@
 *
 *************************************************************************
 
+#include "vdiincld.inc"
+#include "asmdefs.h"
+#include "tosvars.inc"
+
+#include "devequ.inc"
+#include "lineaequ.inc"
+
+
 		xdef	BLASTER
 		xdef	st_blaster
 

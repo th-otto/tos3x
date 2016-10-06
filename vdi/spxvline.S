@@ -9,10 +9,10 @@
 *******************************************************************************
 
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-
-		.globl	spx_vline
+#if VIDEL_SUPPORT
 
 
 *	Soft Vertical Line Code
@@ -24,6 +24,7 @@
 *
 *	a4	pointer to LineA variable base
 
+		xdef	spx_vline
 spx_vline:
  	move.l	_v_bas_ad,a1		; a1 -> base of screen
 	move.w	_v_lin_wr(a4),d1	; d1 <- dst width (in bytes)
@@ -43,7 +44,7 @@ spx0:	moveq.l	#$0F,d5			; d5 <- mod16 mask
 
 	tst.w	_LSTLIN(a4)		; and not last line ...
 	bne	spx1
-;	subq.w	#1,d7			; don't plot last point  (DRI kludge)
+*	subq.w	#1,d7			; don't plot last point  (DRI kludge)
 
 spx1:	move.w	_LN_MASK(a4),d2		; d2 <- line style mask for this line
 	move.w	d2,d3			; d3 <- line style mask for next line
@@ -101,7 +102,7 @@ VLine8Tab:	dc.l	V8M1Line,V8M2Line,V8M3Line,V8M4Line
 * Replace mode (1)
 *-
 V32M1Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V32M1FG			; if cary is set set to foreground
 	move.l	d4,(a1)			; set to background
 	add.w	d1,a1			; point to next pixel
@@ -118,7 +119,7 @@ V32M1FG:
 * Transparent mode (2)
 *-
 V32M2Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V32M2FG			; if cary is set set to foreground
 	add.w	d1,a1			; point to next pixel
 	dbra	d7,V32M2Line		; do nest pixel
@@ -134,7 +135,7 @@ V32M2FG:
 * XOR mode (3)
 *-
 V32M3Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V32M3FG			; if cary is set set to foreground
 	add.w	d1,a1			; point to next pixel
 	dbra	d7,V32M3Line		; do nest pixel
@@ -150,7 +151,7 @@ V32M3FG:
 * Reverse Transparent mode (4)
 *-
 V32M4Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V32M4FG			; if cary is set set to foreground
 	move.l	d3,(a1)			; set to background
 	add.w	d1,a1			; point to next pixel
@@ -169,7 +170,7 @@ V32M4FG:
 * Replace mode (1)
 *-
 V16M1Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V16M1FG			; if cary is set set to foreground
 	move.w	d4,(a1)			; set to background
 	add.w	d1,a1			; point to next pixel
@@ -186,7 +187,7 @@ V16M1FG:
 * Transparent mode (2)
 *-
 V16M2Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V16M2FG			; if cary is set set to foreground
 	add.w	d1,a1			; point to next pixel
 	dbra	d7,V16M2Line		; do nest pixel
@@ -202,7 +203,7 @@ V16M2FG:
 * XOR mode (3)
 *-
 V16M3Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V16M3FG			; if cary is set set to foreground
 	add.w	d1,a1			; point to next pixel
 	dbra	d7,V16M3Line		; do nest pixel
@@ -218,7 +219,7 @@ V16M3FG:
 * Reverse Transparent mode (4)
 *-
 V16M4Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V16M4FG			; if cary is set set to foreground
 	move.w	d3,(a1)			; set to background
 	add.w	d1,a1			; point to next pixel
@@ -237,7 +238,7 @@ V16M4FG:
 * Replace mode (1)
 *-
 V8M1Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V8M1FG			; if cary is set set to foreground
 	move.b	d4,(a1)			; set to background
 	add.w	d1,a1			; point to next pixel
@@ -254,7 +255,7 @@ V8M1FG:
 * Transparent mode (2)
 *-
 V8M2Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V8M2FG			; if cary is set set to foreground
 	add.w	d1,a1			; point to next pixel
 	dbra	d7,V8M2Line		; do nest pixel
@@ -270,7 +271,7 @@ V8M2FG:
 * XOR mode (3)
 *-
 V8M3Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V8M3FG			; if cary is set set to foreground
 	add.w	d1,a1			; point to next pixel
 	dbra	d7,V8M3Line		; do nest pixel
@@ -286,7 +287,7 @@ V8M3FG:
 * Reverse Transparent mode (4)
 *-
 V8M4Line:
-	rol.w	d2			; rotate the line style mask
+	rol.w	#1,d2			; rotate the line style mask
 	bcs	V8M4FG			; if cary is set set to foreground
 	move.b	d3,(a1)			; set to background
 	add.w	d1,a1			; point to next pixel
@@ -298,3 +299,4 @@ V8M4FG:
 	dbra	d7,V8M4Line		; do nest pixel
 	rts
 
+#endif

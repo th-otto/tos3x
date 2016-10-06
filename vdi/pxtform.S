@@ -8,15 +8,16 @@
 * $Log:	pxtform.s,v $
 *******************************************************************************
 
-		.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-		.globl		_diskbuf
-		.globl		_PX_AND_INT_TRAN_FM
+		xref		_dskbuf ; WTF
+		xdef		_PX_AND_INT_TRAN_FM
 
-MF_BAS_AD	equ	00	; memory form base address (0: physical device)
-MF_WD_PIX	equ	04	; form width in pixels (form width in words /16)
-MF_HT_PIX	equ	06	; form height in pixels
-MF_WD_WRD	equ	08	; form width in words
+MF_BAS_AD	equ	0	; memory form base address (0: physical device)
+MF_WD_PIX	equ	4	; form width in pixels (form width in words /16)
+MF_HT_PIX	equ	6	; form height in pixels
+MF_WD_WRD	equ	8	; form width in words
 MF_FORMAT	equ	10	; form format flag (0:device specific 1:stndrd)
 MF_PLANES	equ	12	; number of memory planes
 
@@ -116,14 +117,14 @@ I2P32NxtLine:
 
 I2P32Line:
 	move.w	#15,d1
-	lea	_diskbuf,a2		; a2 -> copy area
+	lea	_dskbuf,a2		; a2 -> copy area
 
 	movem.l	d0/d2/d3/d5/a0-a1,-(sp)
 
 I2P32CpBuf:
 	move.l	(a0)+,(a2)+
 	dbra	d1,I2P32CpBuf
-	lea	_diskbuf,a0		; a0 -> copy of source next 16 pix
+	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
 	
 	bsr	I2P32			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
@@ -158,35 +159,35 @@ I2PL32Loop:
 	move.w	#15,a3		; loop count for 16 pixels
 
 I2PLB32Loop:
-	lsl.l	d0		; shift needed bit into the high word
+	lsl.l	#1,d0		; shift needed bit into the high word
 	move.w	d0,-(sp)	; save for later use
 
 	move.w	d1,d0		; d0 <- 1st 16 pix of 2nd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d1		; d1 <- adjusted word of 2nd plane
 
 	move.w	d2,d0		; d0 <- 1st 16 pix of 3rd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d2		; d1 <- adjusted word of 2nd plane
 
 	move.w	d3,d0		; d0 <- 1st 16 pix of 4th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d3		; d1 <- adjusted word of 4th plane
 
 	move.w	d4,d0		; d0 <- 1st 16 pix of 5th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d4		; d1 <- adjusted word of 5th plane
 
 	move.w	d5,d0		; d0 <- 1st 16 pix of 6th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d5		; d1 <- adjusted word of 6th plane
 
 	move.w	d6,d0		; d0 <- 1st 16 pix of 7th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d6		; d1 <- adjusted word of 7th plane
 
 	move.w	d7,d0		; d0 <- 1st 16 pix of 8th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d7		; d1 <- adjusted word of 8th plane
 
 	swap	d0		; move the neede byte in the low order of d0
@@ -261,14 +262,14 @@ P2I32NxtLine:
 
 P2I32Line:
 	move.w	#15,d1
-	lea	_diskbuf,a2		; a2 -> copy area
+	lea	_dskbuf,a2		; a2 -> copy area
 
 	movem.l	d0/d2/d3/d5/a0-a1,-(sp)
 
 P2I32CpBuf:
 	move.l	(a0)+,(a2)+
 	dbra	d1,P2I32CpBuf
-	lea	_diskbuf,a0		; a0 -> copy of source next 16 pix
+	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
 	
 	bsr	P2I32			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
@@ -306,35 +307,35 @@ P2IL32Loop:
 	move.w	#15,a3		; loop count for 16 pixels
 
 P2IB32Loop:
-	lsl.l	d0		; shift needed bit into the high word
+	lsl.l	#1,d0		; shift needed bit into the high word
 	move.w	d0,-(sp)	; save for later use
 
 	move.w	d1,d0		; d0 <- 1st 16 pix of 2nd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d1		; d1 <- adjusted word of 2nd plane
 
 	move.w	d2,d0		; d0 <- 1st 16 pix of 3rd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d2		; d1 <- adjusted word of 2nd plane
 
 	move.w	d3,d0		; d0 <- 1st 16 pix of 4th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d3		; d1 <- adjusted word of 4th plane
 
 	move.w	d4,d0		; d0 <- 1st 16 pix of 5th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d4		; d1 <- adjusted word of 5th plane
 
 	move.w	d5,d0		; d0 <- 1st 16 pix of 6th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d5		; d1 <- adjusted word of 6th plane
 
 	move.w	d6,d0		; d0 <- 1st 16 pix of 7th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d6		; d1 <- adjusted word of 7th plane
 
 	move.w	d7,d0		; d0 <- 1st 16 pix of 8th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d7		; d1 <- adjusted word of 8th plane
 
 	swap	d0		; move the neede byte in the low order of d0
@@ -364,9 +365,9 @@ P2IB32Loop:
 *******************************************************************************
 ***************** Pixel packed to interleaved 16 plane mode *******************
 *******************************************************************************
-		;
-P2I16NxtLine:	; continue throught to I2P16NxtLine (same code works
-		;
+
+P2I16NxtLine:	ds.b 0 ; continue throught to I2P16NxtLine (same code works
+
 *******************************************************************************
 ***************** Interleaved to pixel packed 16 plane mode *******************
 *******************************************************************************
@@ -376,14 +377,14 @@ I2P16NxtLine:
 
 I2P16Line:
 	move.w	#15,d1
-	lea	_diskbuf,a2		; a2 -> copy area
+	lea	_dskbuf,a2		; a2 -> copy area
 
 	movem.l	d0/d2/d3/d5/a0-a1,-(sp)
 
 I2P16CpBuf:
 	move.w	(a0)+,(a2)+
 	dbra	d1,I2P16CpBuf
-	lea	_diskbuf,a0		; a0 -> copy of source next 16 pix
+	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
 	
 	bsr	I2P16			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
@@ -418,35 +419,35 @@ I2PL16Loop:
 	move.w	#15,a3		; loop count for 16 pixels
 
 I2PLB16Loop:
-	lsl.l	d0		; shift needed bit into the high word
+	lsl.l	#1,d0		; shift needed bit into the high word
 	move.w	d0,-(sp)	; save for later use
 
 	move.w	d1,d0		; d0 <- 1st 16 pix of 2nd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d1		; d1 <- adjusted word of 2nd plane
 
 	move.w	d2,d0		; d0 <- 1st 16 pix of 3rd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d2		; d1 <- adjusted word of 2nd plane
 
 	move.w	d3,d0		; d0 <- 1st 16 pix of 4th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d3		; d1 <- adjusted word of 4th plane
 
 	move.w	d4,d0		; d0 <- 1st 16 pix of 5th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d4		; d1 <- adjusted word of 5th plane
 
 	move.w	d5,d0		; d0 <- 1st 16 pix of 6th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d5		; d1 <- adjusted word of 6th plane
 
 	move.w	d6,d0		; d0 <- 1st 16 pix of 7th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d6		; d1 <- adjusted word of 7th plane
 
 	move.w	d7,d0		; d0 <- 1st 16 pix of 8th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d7		; d1 <- adjusted word of 8th plane
 
 	swap	d0		; move the neede byte in the low order of d0
@@ -475,7 +476,7 @@ I2P8NxtLine:
 	move.w	d3,d5			; d5 <- planar word wrap - 1
 
 I2P8Line:
-	lea	_diskbuf,a2		; a2 -> copy area
+	lea	_dskbuf,a2		; a2 -> copy area
 	movem.l	d0/d2/d3/d5/a0-a1,-(sp)
 
 	move.l	(a0)+,(a2)+		; copy 16 bytes (corresponding pixels)
@@ -483,7 +484,7 @@ I2P8Line:
 	move.l	(a0)+,(a2)+
 	move.l	(a0)+,(a2)+
 
-	lea	_diskbuf,a0		; a0 -> copy of source next 16 pix
+	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
 	
 	bsr	I2P8			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
@@ -516,35 +517,35 @@ I2P8:	move.l	a1,a2		; save the pointer for later use
 	move.w	#15,a3		; loop count for 16 pixels
 
 I2PLB8Loop:
-	lsl.l	d0		; shift needed bit into the high word
+	lsl.l	#1,d0		; shift needed bit into the high word
 	move.w	d0,-(sp)	; save for later use
 
 	move.w	d1,d0		; d0 <- 1st 16 pix of 2nd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d1		; d1 <- adjusted word of 2nd plane
 
 	move.w	d2,d0		; d0 <- 1st 16 pix of 3rd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d2		; d1 <- adjusted word of 2nd plane
 
 	move.w	d3,d0		; d0 <- 1st 16 pix of 4th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d3		; d1 <- adjusted word of 4th plane
 
 	move.w	d4,d0		; d0 <- 1st 16 pix of 5th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d4		; d1 <- adjusted word of 5th plane
 
 	move.w	d5,d0		; d0 <- 1st 16 pix of 6th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d5		; d1 <- adjusted word of 6th plane
 
 	move.w	d6,d0		; d0 <- 1st 16 pix of 7th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d6		; d1 <- adjusted word of 7th plane
 
 	move.w	d7,d0		; d0 <- 1st 16 pix of 8th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d7		; d1 <- adjusted word of 8th plane
 
 	swap	d0		; move the neede byte in the low order of d0
@@ -565,7 +566,7 @@ P2I8NxtLine:
 	move.w	d3,d5			; d5 <- planar word wrap - 1
 
 P2I8Line:
-	lea	_diskbuf,a2		; a2 -> copy area
+	lea	_dskbuf,a2		; a2 -> copy area
 	movem.l	d0/d2/d3/d5/a0-a1,-(sp)
 
 	move.l	(a0)+,(a2)+		; copy 16 bytes (corresponding pixels)
@@ -573,7 +574,7 @@ P2I8Line:
 	move.l	(a0)+,(a2)+
 	move.l	(a0)+,(a2)+
 
-	lea	_diskbuf,a0		; a0 -> copy of source next 16 pix
+	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
 	
 	bsr	P2I8			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
@@ -606,35 +607,35 @@ P2I8:	move.l	a1,a2		; save the pointer for later use
 	move.w	#15,a3		; loop count for 16 pixels
 
 P2ILB8Loop:
-	lsl.l	d0		; shift needed bit into the high word
+	lsl.l	#1,d0		; shift needed bit into the high word
 	move.w	d0,-(sp)	; save for later use
 
 	move.w	d1,d0		; d0 <- 1st 16 pix of 2nd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d1		; d1 <- adjusted word of 2nd plane
 
 	move.w	d2,d0		; d0 <- 1st 16 pix of 3rd plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d2		; d1 <- adjusted word of 2nd plane
 
 	move.w	d3,d0		; d0 <- 1st 16 pix of 4th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d3		; d1 <- adjusted word of 4th plane
 
 	move.w	d4,d0		; d0 <- 1st 16 pix of 5th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d4		; d1 <- adjusted word of 5th plane
 
 	move.w	d5,d0		; d0 <- 1st 16 pix of 6th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d5		; d1 <- adjusted word of 6th plane
 
 	move.w	d6,d0		; d0 <- 1st 16 pix of 7th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d6		; d1 <- adjusted word of 7th plane
 
 	move.w	d7,d0		; d0 <- 1st 16 pix of 8th plane
-	lsl.l	d0		; d0 <- shift another pixel in upper word
+	lsl.l	#1,d0		; d0 <- shift another pixel in upper word
 	move.w	d0,d7		; d1 <- adjusted word of 8th plane
 
 	swap	d0		; move the neede byte in the low order of d0

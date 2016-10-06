@@ -17,43 +17,39 @@
 * 
 *******************************************************************************
 
+#include "vdiincld.inc"
+#include "asmdefs.h"
+#include "tosvars.inc"
+
+#include "devequ.inc"
+#include "lineaequ.inc"
+
+
 *+
 * alone.s - this file should be linked in when building screen.prg.
 *
 * author: Slavik Lozben
 *-
-		.globl	_vblqueue
-		.globl	_v_bas_ad
-		.globl	save_row
-		.globl	con_state
-		.globl	sshiftmd
-		.globl	ringbel
-		.globl	myvq_key_s
-		.globl	kbshift
+		xdef	ringbell
+		xdef	myvq_key_s
+		xdef	_shifty
 
-_vblqueue	.equ	$456
-_v_bas_ad	.equ	$44e
-save_row	.equ	$4ac		; Row from escape Y command
-con_state	.equ	$4a8		; Present state of the conout state machine
-sshiftmd	.equ	$44c
-conterm		.equ	$484
-_sysbase	.equ	$4f2		; -> base of os
 
 *+
 * Return Shift, Control, Alt State
 *-
 myvq_key_s:	move.l	_sysbase,a0	; a0 -> base of os
-		move.l	$24(a0),a0	; a0 -> kbshift
-		move.b	(a0),kbshift	; kbshift <- current shift mode
+		move.l	$24(a0),a0	; a0 -> _shifty
+		move.b	(a0),_shifty	; _shifty <- current shift mode
 		jmp	_vq_key_s	; go to the old guy
 
-kbshift:	dc.w	0
+_shifty:	dc.w	0
 
 *+
 * Ring the bell, and return
 *-
-ringbel:	movea.l	#0,a5
-		btst.b	#$2,conterm	; see if bell is disabled
+ringbell:	movea.l	#0,a5
+		btst.b	#$2,_conterm	; see if bell is disabled
 		beq	rgbel
 	
 		move.l	#bellsnd,-(sp)	; push ptr to data for bell
@@ -62,20 +58,31 @@ ringbel:	movea.l	#0,a5
 		addq.l	#$6,sp		; clean stack
 rgbel:		rts
 
-		.even
-bellsnd:	.dc.b	0,$34
-		.dc.b	1,0
-		.dc.b	2,0
-		.dc.b	3,0
-		.dc.b	4,0
-		.dc.b	5,0
-		.dc.b	6,0
-		.dc.b	7,$FE
-		.dc.b	8,$10		;enable envelope, ch a
-		.dc.b	9,0
-		.dc.b	10,0
-		.dc.b	11,0
-		.dc.b	12,$10
-		.dc.b	13,9		;envelope single attack
-		.dc.b	255,0
-	.end
+		even
+bellsnd:	dc.b	0,$34
+		dc.b	1,0
+		dc.b	2,0
+		dc.b	3,0
+		dc.b	4,0
+		dc.b	5,0
+		dc.b	6,0
+		dc.b	7,$FE
+		dc.b	8,$10		;enable envelope, ch a
+		dc.b	9,0
+		dc.b	10,0
+		dc.b	11,0
+		dc.b	12,$10
+		dc.b	13,9		;envelope single attack
+		dc.b	255,0
+
+	bss
+
+	ds.b 910 ; space for negative linea vars
+    xdef lineavars
+lineavars:
+#if TOSVERSION >= 0x404
+	ds.b 4018
+#else
+	ds.b 2310
+#endif
+

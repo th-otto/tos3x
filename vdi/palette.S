@@ -26,6 +26,8 @@
 * 
 *************************************************************************
 
+#include "vdiincld.inc"
+
 *+
 * pallette.s:
 *
@@ -42,8 +44,8 @@
 *                    hues from level 4, for a total of 222 hues.
 * Register 254 - 255 are loaded with white and black respectively.
 *-
-		.globl	_colors
-	.text
+	xdef	_colors
+	text
 
 _colors:
 *--- 16 standard colors
@@ -345,5 +347,3 @@ _colors:
 *-
 	dc.l	$ffffff			; white
 	dc.l    $000000			; black
-
-	.end

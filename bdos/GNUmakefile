@@ -1,4 +1,5 @@
 top_srcdir=..
+subdir=bdos
 
 # 
 # cross compiling
@@ -45,7 +46,7 @@ check:: bdos.o checklang
 	exit $$status
 
 dist::
-	$(CP) -a $(BDOS_SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/bdos
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS) bdos.orig bdos.new

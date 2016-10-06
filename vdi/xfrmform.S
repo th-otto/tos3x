@@ -23,10 +23,11 @@
 * 
 *******************************************************************************
 
-	.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
 
-	.globl		_TRAN_FM
+	xdef		_TRAN_FM
 
 *******************************************************************************
 *
@@ -76,10 +77,10 @@
 
 
 
-MF_BAS_AD	equ	00	; memory form base address (0: physical device)
-MF_WD_PIX	equ	04	; form width in pixels ( form width in words /16)
-MF_HT_PIX	equ	06	; form height in pixels
-MF_WD_WRD	equ	08	; form width in words
+MF_BAS_AD	equ	0	; memory form base address (0: physical device)
+MF_WD_PIX	equ	4	; form width in pixels ( form width in words /16)
+MF_HT_PIX	equ	6	; form height in pixels
+MF_WD_WRD	equ	8	; form width in words
 MF_FORMAT	equ	10	; form format flag (0:device specific 1:standard)
 MF_PLANES	equ	12	; number of memory planes
 
@@ -88,7 +89,7 @@ MF_PLANES	equ	12	; number of memory planes
 C_MFDB_S	equ	14	; pointer to source MFDB
 C_MFDB_D	equ	18	; pointer to destination MFDB
 
-.page
+	page
 
 
 _TRAN_FM:
@@ -249,6 +250,3 @@ entry11:
 	subq.l	#1,d4
 	bge	loop11
 	rts
-
-
-	end

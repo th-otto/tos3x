@@ -24,10 +24,11 @@
 *******************************************************************************
 
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
 
-		globl	sb_hline,sb_rect,_v_bas_ad
+		xdef	sb_hline,sb_rect
 
 
 *	SOFT VERSION OF HORIZONTAL LINE ROUTINE

@@ -26,14 +26,15 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-	.globl	_GSX_ENTRY
-	.globl	_MAX_VERT
+	xdef	_GSX_ENTRY
+	xdef	_MAX_VERT
 
-	.xdef	ptsin_array
-	.xdef	_FLIP_Y
-	.xdef	_SCREEN
+	xref	ptsin_array
+	xref	_FLIP_Y
+	xref	_SCREEN
 
 
 PTSIN		equ	1024		; PTSIN maximum length:	1024 verticies
@@ -140,6 +141,4 @@ no_ptsin:
 	rts
 
 
-_MAX_VERT:	dc.w	PTSIN
-
-.end
+_MAX_VERT:	dc.w	PTSIN ; unused

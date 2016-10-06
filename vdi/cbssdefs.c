@@ -21,16 +21,16 @@
 *******************************************************************************
 */
 
-#include	"portab.h"
-#include	"fontdef.h"
-#include	"attrdef.h"
-#include	"scrndev.h"
-#include	"lineavar.h"
+#include "vdi.h"
+#include "fontdef.h"
+#include "attrdef.h"
+#include "scrndev.h"
+#include "lineavar.h"
 
 /*
  * Storage declarations for C structures
  */
-	ATTRIBUTE   virt_work;			/* attribute areas for workstations */
+ATTRIBUTE   virt_work;			/* attribute areas for workstations */
 static	VDIVARS	    line1010Vars;
-	WORD        *lineAVar = &line1010Vars.vPlanes;
-	VDIVARS	    *la = &line1010Vars;
+int16_t        *lineAVar = &line1010Vars.vPlanes;
+VDIVARS	    *la = &line1010Vars;

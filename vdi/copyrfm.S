@@ -26,9 +26,10 @@
 * 
 *******************************************************************************
 
-.include		"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-	.globl	_COPY_RFM
+	xdef	_COPY_RFM
 
 *
 *
@@ -41,10 +42,10 @@
 *
 *	MEMORY FORM DEFINITION BLOCK (MFDB) OFFSETS
 
-MF_BAS_AD	equ	00	; memory form base address (0: physical device)
-MF_WD_PIX	equ	04	; form width in pixels (form width in wrds /16)
-MF_HT_PIX	equ	06	; form height in pixels
-MF_WD_WRD	equ	08	; form width in words
+MF_BAS_AD	equ	 0	; memory form base address (0: physical device)
+MF_WD_PIX	equ	 4	; form width in pixels (form width in wrds /16)
+MF_HT_PIX	equ	 6	; form height in pixels
+MF_WD_WRD	equ	 8	; form width in words
 MF_FORMAT	equ	10	; form format flag (0:device specific 1:stndrd)
 MF_PLANES	equ	12	; number of memory planes
 
@@ -55,18 +56,18 @@ C_MFDB_D	equ	18	; pointer to destination MFDB
 
 *	INTIN ARRAY OFFSETS
 
-I_LOG_OP	equ	00	; logic operation code
-I_COL_1		equ	02
-I_COL_0		equ	04
+I_LOG_OP	equ	 0	; logic operation code
+I_COL_1		equ	 2
+I_COL_0		equ	 4
 
 *	PTSIN ARRAY OFFSET
 
-P_XMIN_S	equ	00	; x-coordinate of upper left of src rectangle
-P_YMIN_S	equ	02	; y-coordinate of upper left of src rectangle
-P_XMAX_S	equ	04	; x-coordinate of lower right of src rectangle
-P_YMAX_S	equ	06	; y-coordinate of lower right of src rectangle
+P_XMIN_S	equ	0	; x-coordinate of upper left of src rectangle
+P_YMIN_S	equ	2	; y-coordinate of upper left of src rectangle
+P_XMAX_S	equ	4	; x-coordinate of lower right of src rectangle
+P_YMAX_S	equ	6	; y-coordinate of lower right of src rectangle
 
-P_XMIN_D	equ	08	; x-coordinate of upper left of dest rectangle
+P_XMIN_D	equ	 8	; x-coordinate of upper left of dest rectangle
 P_YMIN_D	equ	10	; y-coordinate of upper left of dest rectangle
 P_XMAX_D	equ	12	; x-coordinate of lower right of dest rectangle
 P_YMAX_D	equ	14	; y-coordinate of lower right of dest rectangle
@@ -113,11 +114,11 @@ S_YMAX		equ	-16	; maximum Y: source			    +60
 
 D_ADDR		equ	-14	; initial destination address		    +62
 D_XMAX		equ	-10	; maximum X: destination		    +66
-D_YMAX		equ	-08	; maximum Y: destination		    +68
+D_YMAX		equ	-8	; maximum Y: destination		    +68
 
-INNER_CT	equ	-06	; blt inner loop initial count		    +70
-DST_WR		equ	-04	; destination form wrap (in bytes)	    +72
-SRC_WR		equ	-02	; source form wrap (in bytes)		    +74
+INNER_CT	equ	-6	; blt inner loop initial count		    +70
+DST_WR		equ	-4	; destination form wrap (in bytes)	    +72
+SRC_WR		equ	-2	; source form wrap (in bytes)		    +74
 
 
 FRAME_LEN	equ	 76
@@ -273,10 +274,12 @@ inverse_transparent_mode:
 	clr.w	FG_COL(a6)		; were only interested in one color
 	move.w	d6,BG_COL(a6)		; save the color of interest
 
+#if VIDEL_SUPPPORT
 	cmp.w	#PIXPACKED,form_id(a1)	; see if we're in px packed
 	bne	the_clipper
 	move.b	#13,OP_TAB+00(a6)	; (NOT S) OR D
 	move.w	d7,FG_COL(a6)
+#endif
 	bra	the_clipper
 
 transparent_mode:
@@ -286,10 +289,12 @@ transparent_mode:
 	clr.w	BG_COL(a6)		; were only interested in one color
 	move.w	d7,FG_COL(a6)		; save the color of interest
 
+#if VIDEL_SUPPPORT
 	cmp.w	#PIXPACKED,form_id(a1)	; see if we're in px packed
 	bne	the_clipper
 	move.b	#7,OP_TAB+00(a6)	; S OR D
 	move.w	d6,BG_COL(a6)
+#endif
 	bra	the_clipper
 
 
@@ -303,9 +308,11 @@ replace_mode:
 	move.b	#03,OP_TAB+02(a6)	; fg:1 bg:0  D' <- S
 	move.b	#15,OP_TAB+03(a6)	; fg:1 bg:1  D' <- 1
 
+#if VIDEL_SUPPPORT
 	cmp.w	#PIXPACKED,form_id(a1)	; see if we're in px packed
 	bne	the_clipper
 	move.b	#3,OP_TAB+00(a6)	; S
+#endif
 	bra	the_clipper
 
 

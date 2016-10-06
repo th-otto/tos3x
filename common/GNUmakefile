@@ -1,4 +1,5 @@
 top_srcdir=..
+subdir=common
 
 all:
 

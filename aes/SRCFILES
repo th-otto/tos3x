@@ -120,6 +120,8 @@ AES_SRCS = \
 	trap14.S \
 	$(empty)
 
+SRCS = $(AES_SRCS)
+
 EXTRA_DIST = \
 	GNUmakefile \
 	Makefile \

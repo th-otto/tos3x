@@ -8,24 +8,20 @@
 * $Log:	mouse.s,v $
 *******************************************************************************
 
-.include	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-		.globl	_STHardList		; orig ST routines blitter
-		.globl	_STSoftList		; orig ST routines no blitter
-		.globl	_PixHardList		; pixel packed routines
-		.globl	_PixSoftList		; pixel packed routines
-		.globl	_SPPixSoftList		; SPARROW routines (hard blit)
-		.globl	_SPPixHardList		; SPARROW routines (hard blit)
+		xdef	_STHardList		; orig ST routines blitter
+		xdef	_STSoftList		; orig ST routines no blitter
 
 
-		.globl	hb_cell,hb_scrup,hb_scrdn,hb_blank,hb_bitblt
-		.globl	hb_mono,hb_rect,hb_vline,hb_hline,hb_text
-		.globl	_tt_vq_color,_tt_vs_color,_init_st_tt_sp
-		.globl	_st_vq_color,_st_vs_color
-		.globl	_sp_vq_color,_sp_vs_color
-		.globl	st_cur_display,st_cur_replace,st_neg_cell
-		.globl	st_move_cursor,ST_ABLINE,ST_HABLINE
-		.globl	ST_PUTPIX,ST_GETPIX
+		xref	hb_cell,hb_scrup,hb_scrdn,hb_blank,hb_bitblt
+		xref	hb_mono,hb_rect,hb_vline,hb_hline,hb_text
+		xref	_tt_vq_color,_tt_vs_color,_init_st_tt_sp
+		xref	_st_vq_color,_st_vs_color
+		xref	st_cur_display,st_cur_replace,st_neg_cell
+		xref	st_move_cursor,ST_ABLINE,ST_HABLINE
+		xref	ST_PUTPIX,ST_GETPIX
 
 _STHardList:	dc.l	hb_cell
 		dc.l	hb_scrup
@@ -50,9 +46,9 @@ _STHardList:	dc.l	hb_cell
 		dc.l	ST_PUTPIX		; output pixel out to screen
 		dc.l	ST_GETPIX		; get pixel value at X,Y
 
-		.globl	sb_cell,sb_scrup,sb_scrdn,sb_blank,sb_bitblt
-		.globl	sb_mono,sb_rect,sb_vline,sb_hline,sb_text
-		.globl	ST_RECTFILL
+		xdef	sb_cell,sb_scrup,sb_scrdn,sb_blank,sb_bitblt
+		xdef	sb_mono,sb_rect,sb_vline,sb_hline,sb_text
+		xdef	ST_RECTFILL
 
 _STSoftList:	dc.l	sb_cell			; cell_xfer subroutine
 		dc.l	sb_scrup		; p_sc_up   subroutine
@@ -77,15 +73,9 @@ _STSoftList:	dc.l	sb_cell			; cell_xfer subroutine
 		dc.l	ST_PUTPIX		; output pixel out to screen
 		dc.l	ST_GETPIX		; get pixel value at X,Y
 
-		.globl  spx_scrup,spx_scrdn
-		.globl	spx_cell,spx_blank,px_cur_display,px_cur_replace
-		.globl	spx_neg_cell,_sp_vq_color,_sp_vs_color,spx_bitblt
-		.globl	_Init16Pal,_Init32Pal,spx_vline,spx_hline,PX_ABLINE
-		.globl	PX_HABLINE,PX_RECTFILL,spx_text,PX_PUTPIX,PX_GETPIX
-		.globl	_vq_32_color,_vs_32_color,_vq_16_color,_vs_16_color
-		.globl	hpx_bitblt
-
-
+#if VIDEL_SUPPORT
+		xdef	_PixHardList		; pixel packed routines
+		xdef	_PixSoftList		; pixel packed routines
 _PixHardList:
 _PixSoftList:	dc.l	spx_cell		; done
 		dc.l	spx_scrup		; done  changed 9/2/92
@@ -109,7 +99,10 @@ _PixSoftList:	dc.l	spx_cell		; done
 		dc.l	PX_RECTFILL		; done
 		dc.l	PX_PUTPIX		; output pixel out to screen
 		dc.l	PX_GETPIX		; get pixel value at X,Y
+#endif
 
+#if VIDEL_SUPPORT
+		xdef	_SPPixSoftList		; SPARROW routines (hard blit)
 _SPPixSoftList:	dc.l	spx_cell		; done
 		dc.l	spx_scrup		; done
 		dc.l	spx_scrdn		; done
@@ -132,7 +125,10 @@ _SPPixSoftList:	dc.l	spx_cell		; done
 		dc.l	PX_RECTFILL		; done
 		dc.l	PX_PUTPIX		; output pixel out to screen
 		dc.l	PX_GETPIX		; get pixel value at X,Y
+#endif
 
+#if VIDEL_SUPPORT
+		xdef	_SPPixHardList		; SPARROW routines (hard blit)
 _SPPixHardList:	dc.l	spx_cell		; done
 		dc.l	spx_scrup		; done
 		dc.l	spx_scrdn		; done
@@ -155,5 +151,4 @@ _SPPixHardList:	dc.l	spx_cell		; done
 		dc.l	PX_RECTFILL		; done
 		dc.l	PX_PUTPIX		; output pixel out to screen
 		dc.l	PX_GETPIX		; get pixel value at X,Y
-
-	.end
+#endif

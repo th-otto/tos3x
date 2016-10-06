@@ -16,41 +16,43 @@
 ********************************************************************************
 */
 
-#include	"portab.h"
-#include	"fontdef.h"
+#include "vdi.h"
+#include "fontdef.h"
+#include "gsxextrn.h"
 
-EXTERN UWORD	off_16x32[], dat_16x32[];
+extern int16_t const off_16x32[];
+extern int16_t const dat_16x32[];
 
-struct font_head f16x32 = {
-	1,			/* WORD  font id		*/
-	20,			/* WORD  point			*/
-	"16x32 system font",	/* BYTE  name[32]		*/
-	0,			/* UWORD first ade		*/
-	255,			/* UWORD last ade		*/
-	26,			/* UWORD top			*/
-	21,			/* UWORD ascent			*/
-	15,			/* UWORD half			*/
-	5,			/* UWORD descent		*/
-	5,			/* UWORD bottom			*/
-	16,			/* UWORD max_char_width		*/
-	16,			/* UWORD max_cell_width		*/
-	3,			/* UWORD left_offset		*/
-	13,			/* UWORD right_offset		*/
-	2,			/* UWORD thicken		*/
-	2,			/* UWORD ul_size		*/
-	0x5555,			/* UWORD lighten		*/
-	0x5555,			/* UWORD skew			*/
-    	STDFORM | MONOSPACE,	/* UWORD flags	 		*/
-	0,			/* UWORD *hor_table		*/
-	off_16x32,		/* UWORD *off_table		*/
-	dat_16x32,		/* UWORD *dat_table		*/
-	512,			/* UWORD form_width		*/
-	32,			/* UWORD form_height		*/
-	0,			/* UWORD *next_font		*/
-	0			/* UWORD next_seg		*/
+struct font_head const f16x32 = {
+	1,			/* int16_t  font id		*/
+	20,			/* int16_t  point			*/
+	"16x32 system font",	/* char  name[32]		*/
+	0,			/* uint16_t first ade		*/
+	255,			/* uint16_t last ade		*/
+	26,			/* uint16_t top			*/
+	21,			/* uint16_t ascent			*/
+	15,			/* uint16_t half			*/
+	5,			/* uint16_t descent		*/
+	5,			/* uint16_t bottom			*/
+	16,			/* uint16_t max_char_width		*/
+	16,			/* uint16_t max_cell_width		*/
+	3,			/* uint16_t left_offset		*/
+	13,			/* uint16_t right_offset		*/
+	2,			/* uint16_t thicken		*/
+	2,			/* uint16_t ul_size		*/
+	0x5555,			/* uint16_t lighten		*/
+	0x5555,			/* uint16_t skew			*/
+    	STDFORM | MONOSPACE,	/* uint16_t flags	 		*/
+	0,			/* uint16_t *hor_table		*/
+	(const uint16_t *)off_16x32,		/* uint16_t *off_table		*/
+	(const uint16_t *)dat_16x32,		/* uint16_t *dat_table		*/
+	512,			/* uint16_t form_width		*/
+	32,			/* uint16_t form_height		*/
+	0,			/* uint16_t *next_font		*/
+	0			/* uint16_t next_seg		*/
 };
 
-UWORD off_16x32[257] = {
+int16_t const off_16x32[257] = {
 	0x0000,0x0010,0x0020,0x0030,0x0040,0x0050,0x0060,0x0070,
 	0x0080,0x0090,0x00A0,0x00B0,0x00C0,0x00D0,0x00E0,0x00F0,
 	0x0100,0x0110,0x0120,0x0130,0x0140,0x0150,0x0160,0x0170,
@@ -86,7 +88,7 @@ UWORD off_16x32[257] = {
 	0x1000
 };
 
-UWORD dat_16x32[8192] = {
+int16_t const dat_16x32[8192] = {
 	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,

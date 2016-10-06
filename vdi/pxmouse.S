@@ -9,11 +9,10 @@
 *******************************************************************************
 
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-
-		.globl	px_cur_display
-		.globl	px_cur_replace
+#if VIDEL_SUPPORT
 
 
 *******************************************************************************
@@ -37,21 +36,22 @@
 ******************************************************************************
                              
 
-C_XHOT		equ	00
-C_YHOT		equ	02
-C_PLANES	equ	04
-C_BGCOL		equ	06
-C_FGCOL		equ	08
+C_XHOT		equ	0
+C_YHOT		equ	2
+C_PLANES	equ	4
+C_BGCOL		equ	6
+C_FGCOL		equ	8
 C_MSKFRM	equ	10
 
-SV_LENX		equ	00
-SV_LENY		equ	01
-SV_ADDR		equ	02
-SV_STAT		equ	06
-SV_BUF		equ	08
+SV_LENX		equ	0
+SV_LENY		equ	1
+SV_ADDR		equ	2
+SV_STAT		equ	6
+SV_BUF		equ	8
 
 F_SAVRDY	equ	0	; save buffer status: 0:empty  1:full
 
+		xdef	px_cur_display
 px_cur_display:	move.l  _lineAVar,a4		; a4 -> linea var struct
 		moveq.l	#0,d3			; d3 <- # columns to shift left
 		move.w	#15,a3			; a3 <- # of cols to blit - 1
@@ -141,28 +141,28 @@ cur_d_8:	tst.w	C_PLANES(a0)		; test writing mode
 		bmi	x_ms8_row		; branch to xor mode
 		bra	s_ms8_row		; branch to standard mode
 
-;
-;	a1.l	points to destination
-;	a2.l	points to save block
-;	a3.w	# of colums to blit in the mouse - 1
-;	a5.l	points to mouse data form (mask data, form data)
-;
-;	d0.l	foreground color
-;	d1.l	background color
-;	d2.w	# of rows to blit in the mouse - 1
-;	d3.w	number of columns to shift left initialy
-;	d7.w	offset to next row in dst
+*
+*	a1.l	points to destination
+*	a2.l	points to save block
+*	a3.w	# of colums to blit in the mouse - 1
+*	a5.l	points to mouse data form (mask data, form data)
+*
+*	d0.l	foreground color
+*	d1.l	background color
+*	d2.w	# of rows to blit in the mouse - 1
+*	d3.w	number of columns to shift left initialy
+*	d7.w	offset to next row in dst
 
-;
-; standard mode 32 bit mode (logic is the same in all pix modes)
-;
-;		FORM   MASK
-;
-;		 0      0	Destination
-;		 0	1	BG color
-;		 1      0	FG color
-;		 1	1	FG color
-;
+*
+* standard mode 32 bit mode (logic is the same in all pix modes)
+*
+*		FORM   MASK
+*
+*		 0      0	Destination
+*		 0	1	BG color
+*		 1      0	FG color
+*		 1	1	FG color
+*
 s_ms32_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
 		lsl.w	d3,d4		; shift to appropriate pos	
@@ -170,16 +170,16 @@ s_ms32_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	a3,d6		; d6 <- column counter - 1
 
 s_ms32_col:	move.l	(a1),(a2)+	; save the dst
-		lsl.w	d5		; shift out the data form
+		lsl.w	#1,d5		; shift out the data form
 		bcc	s_ms32_bg	; branch if we are not setting the fg
-		lsl.w	d4		; shift out the mask form
+		lsl.w	#1,d4		; shift out the mask form
 		move.l	d0,(a1)+	; set the dst with fg color
 		dbra	d6,s_ms32_col	; do next col
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,s_ms32_row	; do next row
 		rts
 	
-s_ms32_bg:	lsl.w	d4		; shift out the mask form
+s_ms32_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	s_ms32_dst	; if mask 0 branch and don't change dst
 		move.l	d1,(a1)+	; set the dst with bg color
 		dbra	d6,s_ms32_col	; do next col
@@ -193,16 +193,16 @@ s_ms32_dst:	addq.l	#4,a1		; advance to next pixel
 		dbra	d2,s_ms32_row	; do next row
 		rts
 
-;
-; XOR mode 32 bit mode (logic is the same in all pix modes)
-;
-;		FORM   MASK
-;
-;		 0      0	Destination
-;		 0	1	BG color
-;		 1      0	invert Destination
-;		 1	1	FG color
-;
+*
+* XOR mode 32 bit mode (logic is the same in all pix modes)
+*
+*		FORM   MASK
+*
+*		 0      0	Destination
+*		 0	1	BG color
+*		 1      0	invert Destination
+*		 1	1	FG color
+*
 x_ms32_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
 		lsl.w	d3,d4		; shift to appropriate pos	
@@ -210,9 +210,9 @@ x_ms32_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	a3,d6		; d6 <- column counter - 1
 
 x_ms32_col:	move.l	(a1),(a2)+	; save the dst
-		lsl.w	d5		; shift out the data form
+		lsl.w	#1,d5		; shift out the data form
 		bcc	x_ms32_bg	; branch if we are not setting the fg
-		lsl.w	d4		; shift out the mask form
+		lsl.w	#1,d4		; shift out the mask form
 		bcs	x_ms32_fg	; branch to set to foreground color
 		not.l	(a1)+		; not the dest
 		dbra	d6,x_ms32_col	; do next col
@@ -226,7 +226,7 @@ x_ms32_fg:	move.l	d0,(a1)+	; set the dst with fg color
 		dbra	d2,x_ms32_row	; do next row
 		rts
 	
-x_ms32_bg:	lsl.w	d4		; shift out the mask form
+x_ms32_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	x_ms32_dst	; if mask 0 branch and don't change dst
 		move.l	d1,(a1)+	; set the dst with bg color
 		dbra	d6,x_ms32_col	; do next col
@@ -240,9 +240,9 @@ x_ms32_dst:	addq.l	#4,a1		; advance to next pixel
 		dbra	d2,x_ms32_row	; do next row
 		rts
 
-;
-; standard mode 16 bit mode
-;
+*
+* standard mode 16 bit mode
+*
 s_ms16_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
 		lsl.w	d3,d4		; shift to appropriate pos	
@@ -250,16 +250,16 @@ s_ms16_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	a3,d6		; d6 <- row counter - 1
 
 s_ms16_col:	move.w	(a1),(a2)+	; save the dst
-		lsl.w	d5		; shift out the data form
+		lsl.w	#1,d5		; shift out the data form
 		bcc	s_ms16_bg	; branch if we are not setting the fg
-		lsl.w	d4		; shift out the mask form
+		lsl.w	#1,d4		; shift out the mask form
 		move.w	d0,(a1)+	; set the dst with fg color
 		dbra	d6,s_ms16_col	; do next col
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,s_ms16_row	; do next row
 		rts
 	
-s_ms16_bg:	lsl.w	d4		; shift out the mask form
+s_ms16_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	s_ms16_dst	; if mask 0 branch and don't change dst
 		move.w	d1,(a1)+	; set the dst with bg color
 		dbra	d6,s_ms16_col	; do next col
@@ -273,9 +273,9 @@ s_ms16_dst:	addq.l	#2,a1		; advance to next pixel
 		dbra	d2,s_ms16_row	; do next row
 		rts
 
-;
-; XOR mode 16 bit mode
-;
+*
+* XOR mode 16 bit mode
+*
 x_ms16_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
 		lsl.w	d3,d4		; shift to appropriate pos	
@@ -283,9 +283,9 @@ x_ms16_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	a3,d6		; d6 <- column counter - 1
 
 x_ms16_col:	move.w	(a1),(a2)+	; save the dst
-		lsl.w	d5		; shift out the data form
+		lsl.w	#1,d5		; shift out the data form
 		bcc	x_ms16_bg	; branch if we are not setting the fg
-		lsl.w	d4		; shift out the mask form
+		lsl.w	#1,d4		; shift out the mask form
 		bcs	x_ms16_fg	; branch to set to foreground color
 		not.w	(a1)+		; not the dest
 		dbra	d6,x_ms16_col	; do next col
@@ -299,7 +299,7 @@ x_ms16_fg:	move.w	d0,(a1)+	; set the dst with fg color
 		dbra	d2,x_ms16_row	; do next row
 		rts
 	
-x_ms16_bg:	lsl.w	d4		; shift out the mask form
+x_ms16_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	x_ms16_dst	; if mask 0 branch and don't change dst
 		move.w	d1,(a1)+	; set the dst with bg color
 		dbra	d6,x_ms16_col	; do next col
@@ -313,9 +313,9 @@ x_ms16_dst:	addq.w	#2,a1		; advance to next pixel
 		dbra	d2,x_ms16_row	; do next row
 		rts
 
-;
-; standard mode 8 bit mode
-;
+*
+* standard mode 8 bit mode
+*
 s_ms8_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
 		lsl.w	d3,d4		; shift to appropriate pos	
@@ -323,16 +323,16 @@ s_ms8_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	a3,d6		; d6 <- row counter - 1
 
 s_ms8_col:	move.b	(a1),(a2)+	; save the dst
-		lsl.w	d5		; shift out the data form
+		lsl.w	#1,d5		; shift out the data form
 		bcc	s_ms8_bg	; branch if we are not setting the fg
-		lsl.w	d4		; shift out the mask form
+		lsl.w	#1,d4		; shift out the mask form
 		move.b	d0,(a1)+	; set the dst with fg color
 		dbra	d6,s_ms8_col	; do next col
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,s_ms8_row	; do next row
 		rts
 	
-s_ms8_bg:	lsl.w	d4		; shift out the mask form
+s_ms8_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	s_ms8_dst	; if mask 0 branch and don't change dst
 		move.b	d1,(a1)+	; set the dst with bg color
 		dbra	d6,s_ms8_col	; do next col
@@ -346,9 +346,9 @@ s_ms8_dst:	addq.l	#1,a1		; advance to next pixel
 		dbra	d2,s_ms8_row	; do next row
 		rts
 
-;
-; XOR mode 8 bit mode
-;
+*
+* XOR mode 8 bit mode
+*
 x_ms8_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
 		lsl.w	d3,d4		; shift to appropriate pos	
@@ -356,9 +356,9 @@ x_ms8_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	a3,d6		; d6 <- column counter - 1
 
 x_ms8_col:	move.b	(a1),(a2)+	; save the dst
-		lsl.w	d5		; shift out the data form
+		lsl.w	#1,d5		; shift out the data form
 		bcc	x_ms8_bg	; branch if we are not setting the fg
-		lsl.w	d4		; shift out the mask form
+		lsl.w	#1,d4		; shift out the mask form
 		bcs	x_ms8_fg	; branch to set to foreground color
 		not.b	(a1)+		; not the dest
 		dbra	d6,x_ms8_col	; do next col
@@ -372,7 +372,7 @@ x_ms8_fg:	move.b	d0,(a1)+	; set the dst with fg color
 		dbra	d2,x_ms8_row	; do next row
 		rts
 	
-x_ms8_bg:	lsl.w	d4		; shift out the mask form
+x_ms8_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	x_ms8_dst	; if mask 0 branch and don't change dst
 		move.b	d1,(a1)+	; set the dst with bg color
 		dbra	d6,x_ms8_col	; do next col
@@ -400,6 +400,7 @@ x_ms8_dst:	addq.l	#1,a1		; advance to next pixel
 *
 *******************************************************************************
 
+		xdef	px_cur_replace
 px_cur_replace:	move.l  _lineAVar,a5		; a5 -> linea var struct
 		bclr.b	#F_SAVRDY,SV_STAT(a2)   ; valid data in buffer?
 		beq	hang_it_up		; 0:nothing saved
@@ -420,14 +421,14 @@ px_cur_replace:	move.l  _lineAVar,a5		; a5 -> linea var struct
 		beq	r_ms16_row		; go to 16 bit cursor replace
 		blt	r_ms8_row		; go to 8 bit cursor replace
 
-;
-;	a0.l	points to the destination
-;	a2.l	point to the save buffer
-;
-;	d0.w	number of columns to blit - 1
-;	d2.w	number of rows to blit - 1
-;	d3.w	offset in bytes to next row
-;	
+*
+*	a0.l	points to the destination
+*	a2.l	point to the save buffer
+*
+*	d0.w	number of columns to blit - 1
+*	d2.w	number of rows to blit - 1
+*	d3.w	offset in bytes to next row
+*	
 
 r_ms32_row:	move.w	d0,d1
 r_ms32_col:	move.l	(a2)+,(a0)+	; save the dst
@@ -449,5 +450,5 @@ r_ms8_col:	move.b	(a2)+,(a0)+	; save the dst
 		add.w	d3,a0		; a0 -> to next row
 		dbra	d2,r_ms8_row	; d0 next row
 		rts
-	
-		.end
+
+#endif

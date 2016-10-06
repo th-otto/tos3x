@@ -34,100 +34,198 @@
 #ifndef _GSXEXTRN_H_
 #define _GSXEXTRN_H_
 
-/* line_a variable structure */
-extern	VDIVARS	*la;
-
-/* Virtual workstation attributes   */
-extern	ATTRIBUTE virt_work;
-
 /* overlay variables */
-extern  WORD    seed_type;      /* indicates the type of fill               */
-extern  LONG    search_color;   /* the color of the border                  */
-extern  WORD    Qbottom;        /* the bottom of the Q (zero)               */
-extern  WORD    Qtop;           /* points top seed + 3                      */
-extern  WORD    *Qptr;	 	/* points to the active point               */
-extern  WORD    Qtmp;
-extern  WORD    Qhole;		/* an empty space in the Q                  */
-extern  WORD    oldy;           /* the previous scan line                   */
-extern  WORD    oldxleft;       /* left end of line at oldy                 */
-extern  WORD    oldxright;      /* right end                                */
-extern  WORD    newxleft;       /* ends of line at oldy +                   */
-extern  WORD    newxright;      /* the current direction                    */
-extern  WORD    xleft;          /* temporary endpoints                      */
-extern  WORD    xright;
-extern  WORD    direction;      /* is next scan line up or down?            */
-extern  WORD    done;           /* is the seed queue full?                  */
-extern  WORD    gotseed;        /* a seed was put in the Q                  */
-extern  WORD    leftoldy;       /* like _oldy. (new seedfill)               */
-extern  WORD    leftdirection;  /* like _direction. (new seedfill)          */
-extern  WORD    leftseed;       /* like _gotseed. (new seedfill)            */
-extern  WORD    h_align;
-extern  WORD    leftcollision;  /* like _collision. (new seedfill)          */
-extern  WORD    v_align;        /* scaler alignments                        */
-extern  WORD    width;
-extern  WORD    collision;      /* seed was removed from Q (new rtn)        */
-extern  WORD    Q[];            /* storage for the seed points (1280)       */
-extern  WORD    height;         /* extent of string set in dqt_extent       */
-extern  WORD    wordx;
-extern  WORD    wordy;          /* add this to each space for interword     */
-extern  WORD    rmword;         /* the number of pixels left over           */
-extern  WORD    rmwordx;
-extern  WORD    rmwordy;        /* add this to use up remainder             */
-extern  WORD    charx;
-extern  WORD    chary;          /* inter-character distance                 */
-extern  WORD    rmchar;         /* number of pixels left over               */
-extern  WORD    rmcharx;
-extern  WORD    rmchary;        /* add this to use up remainder             */
-extern  WORD    FLIP_Y;         /* Non-zero PTSOUT contains magnitudes      */
-extern  WORD    deftxbu[];      /* scratch buf for 8x16 (276 bytes)         */
+extern  int16_t    seed_type;      /* indicates the type of fill               */
+extern  int32_t    search_color;   /* the color of the border                  */
+extern  int16_t    Qbottom;        /* the bottom of the Q (zero)               */
+extern  int16_t    Qtop;           /* points top seed + 3                      */
+extern  int16_t    *Qptr;	 	   /* points to the active point               */
+extern  int16_t    Qtmp;
+extern  int16_t    Qhole;		   /* an empty space in the Q                  */
+#if 0
+extern  int16_t    oldy;           /* the previous scan line                   */
+extern  int16_t    oldxleft;       /* left end of line at oldy                 */
+extern  int16_t    oldxright;      /* right end                                */
+extern  int16_t    newxleft;       /* ends of line at oldy +                   */
+extern  int16_t    newxright;      /* the current direction                    */
+extern  int16_t    xleft;          /* temporary endpoints                      */
+extern  int16_t    xright;
+extern  int16_t    direction;      /* is next scan line up or down?            */
+#endif
+extern  int16_t    done;           /* is the seed queue full?                  */
+#if 0
+extern  int16_t    gotseed;        /* a seed was put in the Q                  */
+extern  int16_t    leftoldy;       /* like _oldy. (new seedfill)               */
+extern  int16_t    leftdirection;  /* like _direction. (new seedfill)          */
+extern  int16_t    leftseed;       /* like _gotseed. (new seedfill)            */
+#endif
+extern  int16_t    h_align;
+#if 0
+extern  int16_t    leftcollision;  /* like _collision. (new seedfill)          */
+#endif
+extern  int16_t    v_align;        /* scaler alignments                        */
+extern  int16_t    width;
+#if 0
+extern  int16_t    collision;      /* seed was removed from Q (new rtn)        */
+#endif
+extern  int16_t    Q[];            /* storage for the seed points (1280)       */
+extern  int16_t    height;         /* extent of string set in dqt_extent       */
+extern  int16_t    wordx;
+extern  int16_t    wordy;          /* add this to each space for interword     */
+extern  int16_t    rmword;         /* the number of pixels left over           */
+extern  int16_t    rmwordx;
+extern  int16_t    rmwordy;        /* add this to use up remainder             */
+extern  int16_t    charx;
+extern  int16_t    chary;          /* inter-character distance                 */
+extern  int16_t    rmchar;         /* number of pixels left over               */
+extern  int16_t    rmcharx;
+extern  int16_t    rmchary;        /* add this to use up remainder             */
+extern  int16_t    FLIP_Y;         /* Non-zero PTSOUT contains magnitudes      */
+extern  int16_t    deftxbu[];      /* scratch buf for 8x16 (276 bytes)         */
+
+extern const SCREENDEF *const devices[];
+
+extern FONT_HEAD const first;      /* The small system font                    */
+extern FONT_HEAD const f8x16;
+extern FONT_HEAD const f8x8;
+extern FONT_HEAD const f16x32;
 
 
-extern  FONT_HEAD   first;      /* The small system font                    */
-extern	FONT_HEAD   ram8x16, ram8x8, ram16x32;
+extern	FONT_HEAD ram8x16;
+extern	FONT_HEAD ram8x8;
+extern	FONT_HEAD ram16x32;
 
-extern  WORD    scrtsiz;
-extern 	WORD	ROM_DEV_TAB[];  /* initial intout array for open work       */
-extern 	WORD	ROM_SIZ_TAB[];  /* initial ptsout array for open work       */
-extern	WORD	ROM_INQ_TAB[];  /* extended inquire values */
-extern	WORD	MAP_COL[], REV_MAP_COL[];
-extern	WORD	LINE_STYLE[];
-extern	WORD 	DITHER[];
-extern  WORD    HAT_0_MSK, HAT_1_MSK;
-extern	WORD	HATCH0[],HATCH1[],OEMPAT[];
-extern	WORD	ROM_UD_PATRN[];
-extern	WORD	SOLID;
-extern	WORD	HOLLOW;
-extern	WORD	DITHRMSK, OEMMSKPAT;
-extern  WORD    m_dot[], m_plus[], m_star[], m_square[], m_cross[], m_dmnd[];
-extern  WORD    plane_mask[];
-extern  WORD    *markhead[];
-extern	LONG	colors[];
+extern int16_t scrtsiz;
+extern int16_t ROM_DEV_TAB[];  /* initial intout array for open work       */
+extern int16_t ROM_SIZ_TAB[];  /* initial ptsout array for open work       */
+extern int16_t ROM_INQ_TAB[];  /* extended inquire values */
+extern int16_t MAP_COL[];
+extern int16_t REV_MAP_COL[];
+extern int16_t LINE_STYLE[];
+extern int16_t DITHER[];
+extern int16_t HAT_0_MSK;
+extern int16_t HAT_1_MSK;
+extern int16_t HATCH0[];
+extern int16_t HATCH1[];
+extern int16_t OEMPAT[];
+extern int16_t ROM_UD_PATRN[];
+extern int16_t SOLID;
+extern int16_t HOLLOW;
+extern int16_t DITHRMSK;
+extern int16_t OEMMSKPAT;
+extern int16_t m_dot[];
+extern int16_t m_plus[];
+extern int16_t m_star[];
+extern int16_t m_square[];
+extern int16_t m_cross[];
+extern int16_t m_dmnd[];
+extern int16_t plane_mask[];
+extern int16_t *markhead[];
+extern int32_t colors[];
 
-/* Assembly Language Support Routines */
-extern	VOID	ABLINE(),   HABLINE(),  CLEARMEM();
-extern	VOID	CHK_ESC(),  INIT_G(),   DINIT_G();
-extern	VOID	CLC_FLIT(), SMUL_DIV(), GSHIFT_S();
-extern  VOID    st_fl_p(),  DIS_CUR(),  GCHC_KEY();
-extern  VOID    HIDE_CU(),  GLOC_KEY(), GCHR_KEY();
-extern  VOID    XFM_CRFM(), XFM_UNDL(), COPY_RFM();
-extern  VOID    VEX_BUTV(), VEX_MOTV(), RECTFILL();
-extern  VOID    TEXT_BLT(), VEX_CURV();
-extern	LONG	get_pix();
+/*
+ * gsxasm1.S
+ */
+VOID ABLINE PROTO((NOTHING));
+VOID HABLINE PROTO((NOTHING));
+int16_t	vec_len PROTO((int16_t, int16_t));
+
+
+/*
+ * gsxasm2.S
+ */
+int32_t	trap PROTO((int16_t, ...));
+int32_t	trap14 PROTO((int16_t, ...));
+int32_t	trap14b PROTO((int16_t, ...));
+int16_t	end_pts PROTO((int16_t xstart, int16_t ystart, int16_t *lptr, int16_t *rptr));
+VOID fill_line PROTO((int16_t, int16_t, int16_t));
+int32_t	get_pix PROTO((NOTHING));
+VOID TRNSFONT PROTO((NOTHING));
+
+
+/*
+ * allgem.S
+ */
+VOID CLEARMEM PROTO((NOTHING));
+VOID CHK_ESC PROTO((NOTHING));
+VOID INIT_G PROTO((NOTHING));
+VOID DINIT_G PROTO((NOTHING));
+VOID CLC_FLIT PROTO((NOTHING));
+int16_t SMUL_DIV PROTO((int16_t, int16_t, int16_t));
+int16_t GSHIFT_S PROTO((NOTHING));
+VOID st_fl_p PROTO((NOTHING));
+
+int16_t GCHC_KEY PROTO((NOTHING));
+VOID HIDE_CU PROTO((NOTHING));
+int16_t GLOC_KEY PROTO((NOTHING));
+int16_t GCHR_KEY PROTO((NOTHING));
+VOID XFM_CRFM PROTO((NOTHING));
+VOID XFM_UNDL PROTO((NOTHING));
+VOID COPY_RFM PROTO((NOTHING));
+VOID VEX_BUTV PROTO((NOTHING));
+VOID VEX_MOTV PROTO((NOTHING));
+VOID RECTFILL PROTO((NOTHING));
+VOID TEXT_BLT PROTO((NOTHING));
+VOID VEX_CURV PROTO((NOTHING));
+VOID esc_init PROTO((NOTHING));
+
+
+/*
+ * mouse.S
+ */
+VOID DIS_CUR PROTO((NOTHING));
+VOID HIDE_CUR PROTO((NOTHING));
+VOID SET_CUR PROTO((int16_t newx, int16_t newy));
+
+
+/*
+ * line1010.S
+ */
+BOOLEAN	retfalse PROTO((NOTHING));
+
+
+/*
+ * pxtform.S
+ */
+VOID PX_AND_INT_TRAN_FM PROTO((NOTHING));
+
+
+/*
+ * spxtxtbl.S
+ */
+VOID cheat_blit PROTO((NOTHING));
+
+
+/*
+ * blitinit.S
+ */
+int16_t GETBLT PROTO((NOTHING));
+
+
+/*
+ * textblt.S
+ */
+VOID TEXT_BL PROTO((NOTHING));
+int16_t	ACT_SIZ PROTO((int16_t));
+int16_t	CLC_DDA PROTO((int16_t, int16_t));
+
 
 /* C Support routines */
-extern	WORD 	isin();
-extern	WORD 	icos();
-extern  WORD	text_init();
-extern  WORD    screen();
-extern  WORD    VEC_LEN();
+int16_t isin PROTO((NOTHING));
+int16_t icos PROTO((NOTHING));
+VOID text_init PROTO((NOTHING));
+int16_t screen PROTO((NOTHING));
+int16_t VEC_LEN PROTO((NOTHING));
 
 
 /* device specific drawing primitives */
-extern	VOID (**STHardList)();	    /* orig ST routines blitter		    */
-extern	VOID (**STSoftList)();	    /* orig ST routines no blitter	    */
-extern	VOID (**PixHardList)();	    /* pixel packed routines		    */
-extern	VOID (**PixSoftList)();	    /* pixel packed routines		    */
-extern	VOID (**SPPixSoftList)();   /* pixel packed routines		    */
-extern	VOID (**SPPixHardList)();   /* SPARROW routines (hard blit)	    */
+extern VOID (*STHardList[]) PROTO((NOTHING));	    /* orig ST routines blitter		    */
+extern VOID (*STSoftList[]) PROTO((NOTHING));	    /* orig ST routines no blitter	    */
+#if VIDEL_SUPPORT
+extern VOID (*PixHardList[]) PROTO((NOTHING));	    /* pixel packed routines		    */
+extern VOID (*PixSoftList[]) PROTO((NOTHING));	    /* pixel packed routines		    */
+extern VOID (*SPPixSoftList[]) PROTO((NOTHING));    /* pixel packed routines		    */
+extern VOID (*SPPixHardList[]) PROTO((NOTHING));    /* SPARROW routines (hard blit)	    */
+#endif
 
 #endif

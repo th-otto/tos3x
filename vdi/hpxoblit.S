@@ -9,11 +9,11 @@
 *******************************************************************************
 
 
-.include	"lineaequ.s"
-.include	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
 
-		.globl	hpx_bitblt
-		.globl	spx_tbitblt
+#if VIDEL_SUPPORT
 
 *       FRAME PARAMETERS
 
@@ -51,11 +51,11 @@ S_YMAX	  equ	-16	; maximum Y: source				    +60
 
 D_ADDR	  equ	-14	; initial destination address			    +62
 D_XMAX	  equ	-10	; maximum X: destination			    +66
-D_YMAX	  equ	-08	; maximum Y: destination			    +68
+D_YMAX	  equ	-8	; maximum Y: destination			    +68
 
-INNER_CT  equ	-06	; blt inner loop initial count			    +70
-DST_WR	  equ	-04	; destination form wrap (in bytes)		    +72
-SRC_WR	  equ	-02	; source form wrap (in bytes)			    +74
+INNER_CT  equ	-6	; blt inner loop initial count			    +70
+DST_WR	  equ	-4	; destination form wrap (in bytes)		    +72
+SRC_WR	  equ	-2	; source form wrap (in bytes)			    +74
 
 
 *  offsets into the BLASTER register block for the new blit ST
@@ -80,14 +80,14 @@ B_F2_MSK	equ	-16 		; 2nd fringe mask	0:old 1:new
 B_D_NXWD	equ	-14 		; offset to next dst word
 B_D_WRAP	equ	-12 		; wrap from end of one dst line to next
 B_D_ADDR	equ	-10 		; initial dst address
-B_D_SPAN	equ	-06 		; span in words of dst block
-B_HEIGHT	equ	-04 		; pixel height of block
-B_LOGOP		equ	-02 		; ctrl word: src^pat combo & logic op #
-B_SKEW		equ	 00		; ctrl word: flags, pat index & skew
+B_D_SPAN	equ	-6 		; span in words of dst block
+B_HEIGHT	equ	-4 		; pixel height of block
+B_LOGOP		equ	-2 		; ctrl word: src^pat combo & logic op #
+B_SKEW		equ	 0		; ctrl word: flags, pat index & skew
 
 
-BF_PAT		equ  	08		; combo flag: 0:all ones  1:pattern
-BF_SRC		equ  	09		; combo flag: 0:all ones  1:source
+BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
+BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
                      
@@ -95,8 +95,8 @@ BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
-BF_PF		equ  	07		; pre-fetch flag  	 0:false 1:true
-BF_FQ		equ  	06		; flush queue flag 	 0:false 1:true
+BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
+BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
 BM_GO		equ  	$8000		; execution mask	
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
@@ -161,6 +161,7 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 *		Xmin source, Xmax source, Xmin destination, Xmax destination
 *		rectangle height, rectangle width, number of planes
 *-
+		xdef	hpx_bitblt
 hpx_bitblt:	
 	tst.w	S_NXPL(a6)		; see if we are doing transparant blit
 	bne	skip0			; if not then skip
@@ -185,19 +186,19 @@ skip0:	move.l	_lineAVar,a3		; a3 -> linea variable structure
 
 	move.w	#2,B_S_NXWD(a5)		; set offset to next src word
 	move.w	S_NXLN(a6),d5		; d5 <- src line wrap (in bytes)
-	lsr.w	d5			; d5 <- src line wrap (in words)
+	lsr.w	#1,d5			; d5 <- src line wrap (in words)
 	sub.w	B_WD(a6),d5		; d5 <- source linewrap - span
 	addq.w	#1,d5			; last word fetch does increment
-	lsl.w	d5			; offset to nxt src line in bytes
+	lsl.w	#1,d5			; offset to nxt src line in bytes
 	move.w	d5,B_S_WRAP(a5)		; wrap from end of one src line to nxt
 	move.l	a0,B_S_ADDR(a5)		; set starting src adr
 	
 	move.w	#2,B_D_NXWD(a5)		; set offset to next dst word
 	move.w	D_NXLN(a6),d5		; d5 <- dst line wrap (in bytes)
-	lsr.w	d5			; d5 <- dst line wrap (in words)
+	lsr.w	#1,d5			; d5 <- dst line wrap (in words)
 	sub.w	B_WD(a6),d5		; d5 <- destination linewrap - span
 	addq.w	#1,d5			; last word fetch does increment
-	lsl.w	d5			; offset to nxt dst line in bytes
+	lsl.w	#1,d5			; offset to nxt dst line in bytes
 	move.w	d5,B_D_WRAP(a5)		; wrap from end of one dst line to nxt
 	move.l	a1,B_D_ADDR(a5)		; set starting dst adr
 		
@@ -218,12 +219,11 @@ blt_p_sync:
 	nop				; this is executed prior to restart
 	bmi	blt_p_sync		; quit if blt had finished
 
-.ifeq	P68030
-
-	movec.l	cacr,d0			; d2 <- cache control register
+#if P68030
+	CACR_D0			; d2 <- cache control register
 	bset.l	#11,d0			; set "Clr DATA Cache" bit
-	movec.l	d0,cacr			; clear the data cache
-.endc
+	D0_CACR			; clear the data cache
+#endif
 
 leave:	rts
 
@@ -248,19 +248,19 @@ do_neg_case:
 
 	move.w	#-2,B_S_NXWD(a5)		; set offset to next src word
 	move.w	S_NXLN(a6),d5		; d5 <- src line wrap (in bytes)
-	lsr.w	d5			; d5 <- src line wrap (in words)
+	lsr.w	#1,d5			; d5 <- src line wrap (in words)
 	sub.w	B_WD(a6),d5		; d5 <- source linewrap - span
-	lsl.w	d5			; offset to nxt src line in bytes
+	lsl.w	#1,d5			; offset to nxt src line in bytes
 	neg.w	d5			; we are going in neg direction
 	move.w	d5,B_S_WRAP(a5)		; wrap from end of one src line to nxt
 	move.l	a0,B_S_ADDR(a5)		; set starting src adr
 	
 	move.w	#-2,B_D_NXWD(a5)	; set offset to next dst word
 	move.w	D_NXLN(a6),d5		; d5 <- dst line wrap (in bytes)
-	lsr.w	d5			; d5 <- dst line wrap (in words)
+	lsr.w	#1,d5			; d5 <- dst line wrap (in words)
 	sub.w	B_WD(a6),d5		; d5 <- destination linewrap - span
 	addq.w	#1,d5			; last word fetch does increment
-	lsl.w	d5			; offset to nxt dst line in bytes
+	lsl.w	#1,d5			; offset to nxt dst line in bytes
 	neg.w	d5			; we are going in neg direction
 	move.w	d5,B_D_WRAP(a5)		; wrap from end of one dst line to nxt
 	move.l	a1,B_D_ADDR(a5)		; set starting dst adr
@@ -282,12 +282,11 @@ blt_n_sync:
 	nop				; this is executed prior to restart
 	bmi	blt_n_sync		; quit if blt had finished
 
-.ifeq	P68030
-
-	movec.l	cacr,d0			; d2 <- cache control register
+#if P68030
+	CACR_D0			; d2 <- cache control register
 	bset.l	#11,d0			; set "Clr DATA Cache" bit
-	movec.l	d0,cacr			; clear the data cache
-.endc
+	D0_CACR			; clear the data cache
+#endif
 	rts
 
-	.end
+#endif

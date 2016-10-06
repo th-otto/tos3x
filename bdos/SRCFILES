@@ -46,7 +46,6 @@ BDOS_SRCS = \
 	bdosmain.c \
 	sup.c \
 	time.c \
-	vdidsp.S \
 	\
 	bios.h \
 	btools.h \
@@ -61,8 +60,11 @@ EXTRA_DIST = \
 	GNUmakefile \
 	Makefile \
 	SRCFILES \
+	vdidsp.S \
 	optimize.mak \
 	tos306de.s \
 	tos306de.map \
 	tos306us.map \
 	$(empty)
+
+SRCS = $(BDOS_SRCS)

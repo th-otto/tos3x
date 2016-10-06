@@ -1,4 +1,5 @@
 top_srcdir=..
+subdir=vdi
 
 # 
 # cross compiling
@@ -45,7 +46,7 @@ check:: vdi.o checklang
 	exit $$status
 
 dist::
-	$(CP) -a $(VDI_SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/vdi
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

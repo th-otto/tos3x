@@ -8,7 +8,10 @@
 * $Log:	sbtxtblt.s,v $
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+
+#if VIDEL_SUPPORT
 
 false	equ	0
 true	equ	$FFFF
@@ -58,7 +61,7 @@ bytswap	equ	false		; if font words are byte swapped!!!!
 *		  right & left offset between top & bottom when italicizing
 *
 *		WEIGHT -				.w
-*		  used by thicken (magnitude of thickness???)
+*		  used by thicken (magnitude of thickness?)
 *
 *		LITEMASK,SKEWMASK -			.w
 *		  for lighter letters
@@ -130,17 +133,14 @@ OUTLINE		equ	4
 SHADOW		equ	5
 
 
-	.globl	pos32Tab
-	.globl	pos16Tab
-	.globl	pos8Tab
-	.globl	 lf_tab
-	.globl	 concat
-	.globl	_v_bas_ad
-	.globl	_ACT_SIZ
-	.globl	spx_text
-	.globl	_cheat_blit
-	.globl  _width
-	.globl	_height
+	xref	pos32Tab
+	xref	pos16Tab
+	xref	pos8Tab
+	xref	lf_tab
+	xref	 concat
+	xref	_ACT_SIZ
+	xref  _width
+	xref	_height
 
 
 *  Big daddy scratch buffer used for rotatin' & replicatin'
@@ -149,7 +149,7 @@ SHADOW		equ	5
 *
 *  font dependent equates (should be found in fonthead)
 
-	.ifeq	test1
+	ifeq	test1
 *  8x16 font data..
 
 l_off	equ	2		; left offset from skew
@@ -157,7 +157,7 @@ r_off	equ	6		; right offset from skew
 form_ht	equ	16		; form height
 mxcelwd	equ	8		; maximum cell width
 
-	.endc
+	endc
 
 
 *  since a character cell may be rotated 90 or 270 deg, the cell height & width
@@ -181,33 +181,33 @@ cell_sz9	equ	cell_wh*cell_hw		;doubled cell size, 90 deg rot.
 
 *  pick the maximum for our buffer..
 
-	.ifge	cell_sz0-cell_sz9
+	ifge	cell_sz0-cell_sz9
 
 cell_siz	equ	cell_sz0
 
-	.endc
+	endc
 
-	.iflt	cell_sz0-cell_sz9
+	iflt	cell_sz0-cell_sz9
 
 cell_siz	equ	cell_sz9
 
-	.endc
+	endc
 
 *  determine maximum horizontal line (from width or height)
 *  which is needed by the Outline function as a buffer (+2 bytes)for
 *  worst case.
 *
-	.ifge	cell_ww-cell_hw
+	ifge	cell_ww-cell_hw
 
 out_add		equ	cell_ww+2
 
-	.endc
+	endc
 
-	.iflt	cell_ww-cell_hw
+	iflt	cell_ww-cell_hw
 
 out_add		equ	cell_hw+2
 
-	.endc
+	endc
 
 *  Total buffer requirements are cel_siz + cel2_siz + out_add
 
@@ -367,6 +367,7 @@ ramlen		equ	-*
 *
 *******************************************************************************
 
+	xdef	spx_text
 spx_text:	link	a5,#ramlen		; allocate local block of ram
 
 		clr.w	swap_tmps(a5)		; temps not swapped yet
@@ -633,7 +634,7 @@ no_out:		move.w	d0,width(a5)
 do_clear:	move.l	a1,-(sp)
 		move.w	d0,d3
 		sub.w	d_next(a5),d3		; count the bottom line
-		lsr.w	d3			; bytes to words
+		lsr.w	#1,d3			; bytes to words
 		moveq	#0,d1
 		bra	replp1
 
@@ -853,19 +854,25 @@ skip3:	add.w	d7,d7			; d7 <- blit span in bytes
 
 	move.w	_v_lin_wr(a6),d6	; d6 <- dst line wrap (in bytes)
 	move.w	_DELX(a6),d7		; d7 <- span in pixels
+#if VIDEL_SUPPORT
 	mulu	byt_per_pix(a6),d7	; d7 <- span in bytes
+#endif
 	sub.w	d7,d6			; d6 <- off to nxt line in dst
 	move.w	d6,a3			; a3 <- off to nxt line in dst
 
 	move.w	_TEXT_FG(a6),d6		; d6 <- foreground color
+#if VIDEL_SUPPORT
 	lsl.w	#2,d6			; make d6 long word offset
 	add.l	#pal_map,d6		; d6 <- desired offset
 	move.l	(a6,d6.w),d6		; d6 <- desired foreground col
+#endif
 
 	move.w	_TEXT_BG(a6),d7		; d7 <- background color
+#if VIDEL_SUPPORT
 	lsl.w	#2,d7			; make d7 long word offset
 	add.l	#pal_map,d7		; d7 <- desired offset
 	move.l	(a6,d7.w),d7		; d7 <- desired background col
+#endif
 
 
 	movem.l	a5-a6,-(sp)		; save registers
@@ -918,7 +925,7 @@ upda_dst:	movem.w	(sp)+,d0-d3
 
 		tst.w	swap_tmps(a5)		; are we swapped
 		beq	upda_ndb		; if yes swap back
-		exg	d1, d3
+		exg	d1,d3
 
 *+
 * end additions
@@ -1069,9 +1076,9 @@ msk0:		move.b	d3,src_wrd(a5)
 
 plane_lp:	move.w	_WRT_MODE(a6),d0	; d0 = 00000000 000xxxxx ,_WRT_MOD
 		lsr.w	forecol(a5)		; this plane's foreground bit -> cy
-		roxl.w	d0
+		roxl.w	#1,d0
 		lsr.w	backcol(a5)
-		roxl.w	d0
+		roxl.w	#1,d0
 
 *
 *  d0.w is index
@@ -1090,12 +1097,12 @@ sp1:		move.b	wrmappin(pc,d0.w),d0
 		bra	no_specl
 
 toptable:
-	.dc.w	top0-cs,top1-cs,top2-cs,top3-cs,top4-cs,top5-cs,top6-cs,top7-cs
-	.dc.w	top8-cs,top9-cs,topa-cs,topb-cs,topc-cs,topd-cs,tope-cs,topf-cs
+	dc.w	top0-cs,top1-cs,top2-cs,top3-cs,top4-cs,top5-cs,top6-cs,top7-cs
+	dc.w	top8-cs,top9-cs,topa-cs,topb-cs,topc-cs,topd-cs,tope-cs,topf-cs
 
 twoptble:
-	.dc.w	twop0-cs,twop1-cs,twop2-cs,twop3-cs,twop4-cs,twop5-cs,twop6-cs,twop7-cs
-	.dc.w	twop8-cs,twop9-cs,twopa-cs,twopb-cs,twopc-cs,twopd-cs,twope-cs,twopf-cs
+	dc.w	twop0-cs,twop1-cs,twop2-cs,twop3-cs,twop4-cs,twop5-cs,twop6-cs,twop7-cs
+	dc.w	twop8-cs,twop9-cs,twopa-cs,twopb-cs,twopc-cs,twopd-cs,twope-cs,twopf-cs
 
 op0	equ	2*0
 op1	equ	2*1
@@ -1118,27 +1125,27 @@ opF	equ	2*15
 *
 *
 *	fb=	00  01  10  11
-wrmappin:	.dc.b	op0,op0,op3,op3		; replace mode
-		.dc.b	op4,op4,op7,op7		; transparent mode
-		.dc.b	op6,op6,op6,op6		; XOR mode
-		.dc.b	op1,op1,o_D,o_D		; inverse transparent mode
+wrmappin:	dc.b	op0,op0,op3,op3		; replace mode
+		dc.b	op4,op4,op7,op7		; transparent mode
+		dc.b	op6,op6,op6,op6		; XOR mode
+		dc.b	op1,op1,o_D,o_D		; inverse transparent mode
 	
-		.dc.b	op0,opF,op0,opF		; mode 0  D' = 0
-		.dc.b	op0,opE,op1,opF		; mode 1  D' = S and D
-		.dc.b	op0,o_D,op2,opF		; mode 2  D' = S and [not D]
-		.dc.b	op0,opC,op3,opF		; mode 3  D' = S	(replace)
-		.dc.b	op0,opB,op4,opF		; mode 4  D' = [not S] and D
-		.dc.b	op0,opA,op5,opF		; mode 5  D' = D
-		.dc.b	op0,op9,op6,opF		; mode 6  D' = S xor D (XOR mode)
-		.dc.b	op0,op8,op7,opF		; mode 7  D' = S or D  (OR mode)
-		.dc.b	op0,op7,op8,opF		; mode 8  D' = not [S or D]
-		.dc.b	op0,op6,op9,opF		; mode 9  D' = not [S xor D]
-		.dc.b	op0,op5,opA,opF		; mode A  D' = not D
-		.dc.b	op0,op4,opB,opF		; mode B  D' = S or [not D]
-		.dc.b	op0,op3,opC,opF		; mode C  D' = not S
-		.dc.b	op0,op2,o_D,opF		; mode D  D' = [not s] or D
-		.dc.b	op0,op1,opE,opF		; mode E  D' = not [S and D]
-		.dc.b	op0,op0,opF,opF		; mode F  D' = 1
+		dc.b	op0,opF,op0,opF		; mode 0  D' = 0
+		dc.b	op0,opE,op1,opF		; mode 1  D' = S and D
+		dc.b	op0,o_D,op2,opF		; mode 2  D' = S and [not D]
+		dc.b	op0,opC,op3,opF		; mode 3  D' = S	(replace)
+		dc.b	op0,opB,op4,opF		; mode 4  D' = [not S] and D
+		dc.b	op0,opA,op5,opF		; mode 5  D' = D
+		dc.b	op0,op9,op6,opF		; mode 6  D' = S xor D (XOR mode)
+		dc.b	op0,op8,op7,opF		; mode 7  D' = S or D  (OR mode)
+		dc.b	op0,op7,op8,opF		; mode 8  D' = not [S or D]
+		dc.b	op0,op6,op9,opF		; mode 9  D' = not [S xor D]
+		dc.b	op0,op5,opA,opF		; mode A  D' = not D
+		dc.b	op0,op4,opB,opF		; mode B  D' = S or [not D]
+		dc.b	op0,op3,opC,opF		; mode C  D' = not S
+		dc.b	op0,op2,o_D,opF		; mode D  D' = [not s] or D
+		dc.b	op0,op1,opE,opF		; mode E  D' = not [S and D]
+		dc.b	op0,op0,opF,opF		; mode F  D' = 1
 
 
 blt_adj:	move.l	-(a0),d0
@@ -1648,7 +1655,7 @@ thknop:		and.w	d2,d1
 		btst.b	#0,skew_msk+1(a5)	; was a skew performed?
 		beq	thk00			; br if not
 		ori.b	#$10,ccr
-		roxr.w	d6
+		roxr.w	#1,d6
 		bcc	thk01
 		move.w	#$8000,d6
 
@@ -1681,7 +1688,7 @@ thk1:		move.w	smear(a5),d6
 		bra	thklpe
 
 thkoplp:	move.l	d1,d0
-		lsr.l	d0
+		lsr.l	#1,d0
 		or.l	d0,d1
 
 thklpe:		dbra	d6,thkoplp
@@ -1771,7 +1778,7 @@ thk5:		tst.w	skew_msk(a5)
 		swap	d7
 		move.w	rite_msk(a5),d7
 		ori.b	#$10,ccr
-		roxr.w	d7
+		roxr.w	#1,d7
 		bcc	thk33
 		move.w	#$8000,d7
 		addq.w	#1,d5
@@ -1781,7 +1788,7 @@ thk33:		cmpi.w	#1,left_msk(a5)
 		subq.w	#1,d5
 	
 thk34:		ori.b	#$10,ccr
-		roxr.w	d6
+		roxr.w	#1,d6
 		bcc	thk31
 		move.w	#$8000,d6
 	
@@ -1854,11 +1861,11 @@ skewop:		rol.w	skew_msk(a5)
 
 		swap	d1
 		move.w	d0,d1			; pack source words into long one (d1)
-		lsr.l	d1
+		lsr.l	#1,d1
 	
 		swap	d2
 		move.w	rite_msk(a5),d2		; pack mask words into long one (d2)
-		lsr.l	d2
+		lsr.l	#1,d2
 		move.w	d2,rite_msk(a5)
 		swap	d2			; unpack mask words
 		move.w	d2,left_msk(a5)
@@ -1917,7 +1924,7 @@ do_shift:	ori	#$10,ccr		; set x bit
 		beq	inc_rite
 	
 		ori	#$10,ccr		; set x bit
-		roxr.w	d0			; rotate in a 1
+		roxr.w	#1,d0			; rotate in a 1
 		move.w	d0,rite_msk(a5)
 
 do_left:	move.w	shif_cnt(a5),d0
@@ -1926,7 +1933,7 @@ do_left:	move.w	shif_cnt(a5),d0
 		move.w	#$8000,rota_msk(a5)	; these are the bits that are good
 	
 no_rota:	move.w	left_msk(a5),d1
-		lsr.w	d1			; rotate in a 0
+		lsr.w	#1,d1			; rotate in a 0
 		beq	wnxt_wrd		; br if mask inoperative, inc addr
 	
 		move.w	d1,left_msk(a5)
@@ -2032,7 +2039,7 @@ rot_xlp:	move.w	(a0),d7
 		beq	rot_nor
 		or.w	d4,d0
 	
-rot_nor:	ror.w	d4
+rot_nor:	ror.w	#1,d4
 		bcc	rot_isrc
 
 rot_ndst:	move.w	d0,(a1)
@@ -2046,7 +2053,7 @@ rot_srt:	dbra	d1,rot_xlp
 		moveq	#0,d0
 		movem.l	(sp)+,a0-a1/d4
 		adda.w	d_next(a5),a1
-		ror.w	d3
+		ror.w	#1,d3
 		bcc	rot_nsrc
 		addq.l	#2,a0
 	
@@ -2062,10 +2069,10 @@ rot_done:	move.l	(sp)+,a1		; reget former destination ptr
 		move.w	d0,height(a5)
 		move.w	d0,_DELY(a6)
 	
-		move.w	tmp_dely(a5), d0	; Must swap tmps too RJG 4/13/85
-		move.w	tmp_delx(a5), tmp_dely(a5)
-		move.w	d0, tmp_delx(a5)
-		move.w	#1, swap_tmps(a5)	
+		move.w	tmp_dely(a5),d0	; Must swap tmps too RJG 4/13/85
+		move.w	tmp_delx(a5),tmp_dely(a5)
+		move.w	d0,tmp_delx(a5)
+		move.w	#1,swap_tmps(a5)	
 	
 		move.w	d_next(a5),d0
 		cmpi.w	#900,_CHUP(a6)
@@ -2105,8 +2112,8 @@ line_lp:	move.w	(a2)+,d0
 		moveq	#0,d5
 		move.w	#15,d4
 
-flip_lp:	lsr.w	d0
-		roxl.w	d5
+flip_lp:	lsr.w	#1,d0
+		roxl.w	#1,d5
 		dbra	d4,flip_lp
 	
 		move.w	d5,-(a1)		; store in buffer pre-decrement
@@ -2289,7 +2296,7 @@ nrepnor:	add.w	d2,d7
 		bcc	o_no_rep
 
 		or.w	d4,d0
-		ror.w	d4
+		ror.w	#1,d4
 
 		bcc	o_no_rep
 		move.w	d0,(a1)+
@@ -2352,7 +2359,7 @@ getdest2:	move.w	(sp)+,d7
 outlin:		lea	(a0,d7.w),a1	; bump mid line to "real" top line
 
 outlin1:	lea	(a1,d7.w),a2	; set up a2 to point to 1 line below current
-		lsr.w	d7		; # of words in horz line
+		lsr.w	#1,d7		; # of words in horz line
 		subq.w	#1,d7		; for "dbra" sweetie
 		move.w	_DELY(a6),d6	; # of vertical lines
 		bra	srt_lin
@@ -2361,27 +2368,27 @@ out_edge:	movem.l	a0-a2/d6-d7,-(sp) ; save ptrs & counters
 		moveq	#0,d5
 		moveq	#0,d6
 		move.l	(a2),d1		; get bottom line/left edge grafix data
-		lsr.l	d1		; clear left-most bit too
+		lsr.l	#1,d1		; clear left-most bit too
 *
 *  within line loop entry point..
 *
 out_loop:	move.l	(a0),d0		; get next top line grafix data
 		move.b	d5,d0		; put bit to left of current data in bit 0
-		ror.l	d0		; now its L 15 14 13 ... 1 0 R X X X...
+		ror.l	#1,d0		; now its L 15 14 13 ... 1 0 R X X X...
 	
 		move.l	(a1),d2		; get current line data
 		move.b	d6,d2		; same trick
 		move.l	d2,d3		; d2 is left-shifted current
-		ror.l	d3		; d3 is 0 shifted current
+		ror.l	#1,d3		; d3 is 0 shifted current
 		move.l	d3,d4
-		ror.l	d4		; d4 is right-shifted current
+		ror.l	#1,d4		; d4 is right-shifted current
 	
 		move.l	d0,d5		; get copy of top line
 		move.l	d0,d6		; get 2nd copy
 		eor.l	d2,d0		; exclusive neighbor #1
 		eor.l	d3,d5		; exclusive neighbor #2
 		eor.l	d4,d6		; exclusive neighbor #3
-		rol.l	d5		; adjust 0 shifted for final
+		rol.l	#1,d5		; adjust 0 shifted for final
 		rol.l	#2,d6		; adjust right shifted too
 		or.l	d5,d0		; form exclusive accumulator
 		or.l	d6,d0
@@ -2391,7 +2398,7 @@ out_loop:	move.l	(a0),d0		; get next top line grafix data
 		eor.l	d2,d1		; exclusive neighbor #4
 		eor.l	d3,d5		; exclusive neighbor #5
 		eor.l	d4,d6		; exclusive neighbor #6
-		rol.l	d5		; adjust 0 shifted for final
+		rol.l	#1,d5		; adjust 0 shifted for final
 		rol.l	#2,d6		; adjust right shifted too
 		or.l	d1,d0
 		or.l	d5,d0
@@ -2412,7 +2419,7 @@ out_loop:	move.l	(a0),d0		; get next top line grafix data
 		addq.l	#2,a2		; advance bottom line to next word
 		move.l	(a2),d1		; get next bottom line grafix data
 		move.b	-1(a2),d1	; same trick as with top line
-		ror.l	d1		; now its L 15 14 13 ... 1 0 R X X X...
+		ror.l	#1,d1		; now its L 15 14 13 ... 1 0 R X X X...
 	
 		move.w	d5,(a1)+
 		move.w	(a0),d5
@@ -2470,16 +2477,20 @@ s_xy2addr:	move.l	sform(a5),a0		; a0 -> strt of srce form (0,0)
 		rts
 
 d_xy2addr:	move.l	_v_bas_ad,a1		; a1 -> strt of dst form (0,0)
+#if VIDEL_SUPPORT
 		mulu	byt_per_pix(a6),d0	; d0 <- x portion of offset
+#endif
 		mulu	_v_lin_wr(a6),d1	; d1 <- y portion of offset
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		add.l	d1,a1			; a1 -> (x,y)
 		rts
 
 
+#if VIDEL_SUPPORT
 *+
 * Wipe out a region specified by extent[8] with text background color.
 *-
+	xdef	_cheat_blit
 _cheat_blit:
 
 	movem.l	d3/d7,-(sp)		; save registers
@@ -2521,13 +2532,16 @@ clipy0:	cmp.w	_YMN_CLIP(a0),d3	; see if lower y < min Y
 	cmp.w	_YMX_CLIP(a0),d3	; see if we are greater than Y max
 	ble	clipDone		; skip if not need to clip
 	move.w	_YMX_CLIP(a0),d3	; clip the Y (set to max Y)
+#endif
 
 clipDone:
 	sub.w	d0,d2			; d2 <- width of string
 	sub.w	d1,d3			; d3 <- height of string
 
 	move.l	_v_bas_ad,a1		; a1 -> strt of dst form (0,0)
+#if VIDEL_SUPPORT
 	mulu	byt_per_pix(a0),d0	; d0 <- x portion of offset
+#endif
 	mulu	_v_lin_wr(a0),d1	; d1 <- y portion of offset
 	add.l	d0,d1			; d1 <- byte offs into mem frm
 	add.l	d1,a1			; a1 -> (x,y)
@@ -2591,4 +2605,4 @@ Line8Loop:
 	movem.l	(sp)+,d3/d7		; restore registers
 	rts
 
-	.end
+#endif

@@ -8,10 +8,8 @@
 * $Log:	sbblit.s,v $
 *******************************************************************************
 
-.include	"lineaequ.s"
-
-
-	.globl	PX_ABLINE
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
 
 *******************************************************************************
@@ -74,6 +72,8 @@
 *******************************************************************************
 
 
+#if VIDEL_SUPPORT
+	xdef	PX_ABLINE
 PX_ABLINE:	
 	move.l	_lineAVar,a4		; a4 -> base of LineA variables
 	moveq.l	#2,d0			; d0 <- XOR writing mode code
@@ -86,17 +86,17 @@ PX_ABLINE:
 	bne	aline			; handle the vertical case seperately
 
 
-	;
-	;   SPECIAL CASE I.	Vertical line segments
-	;
+*
+*   SPECIAL CASE I.	Vertical line segments
+*
 	move.l	LA_ROUTINES(a4),a5	; load vectrd list of primitives
 	move.l	V_VLINE(a5),a5		; vec to vert line primitive
 	jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
 
 
-	;   SPECIAL CASE II.	Horizontal line segment
-	;
-	;   All single point lines (X1=X2, Y1=Y2) will be arrive here
+*   SPECIAL CASE II.	Horizontal line segment
+*
+*   All single point lines (X1=X2, Y1=Y2) will be arrive here
 
 hline:		
 	cmp.w	_WRT_MODE(a4),d0	; the XOR writing mode requires
@@ -136,21 +136,21 @@ in_order:
 	jsr	(a5)			; sft: "aline"  hrd: "hb_vline"
 	move.w	(sp)+,d1		; d1 <- mask alignment factor
 
-	;
-	; Update line pattern mask for next segment (this doesn't really work)
-	;
+*
+* Update line pattern mask for next segment (this doesn't really work)
+*
 	move.w	(a0),d0			; d0 <- original _LN_MASK
 	rol.w	d1,d0			; d0 <- rotated line pattern mask
 	move.w	d0,(a0)			; store rotated _LN_MASK
 	rts
 
-	;
-	;   Process lines of arbitrary slope.
-	;
+*
+*   Process lines of arbitrary slope.
+*
 aline:
-	;
-	; Order the endpoints
-	;
+*
+* Order the endpoints
+*
 no_frag:
 	cmp.w	d4,d6			; X1 must not be greater than X2
 	bge	xy_ok			; if it is, swap the endpoints
@@ -296,7 +296,7 @@ wm8_tbl:	dc.l	    wm8_0y	; replace		dY > dX
 *+
 *	     WRITING MODE 0:  REPLACE			   dY > dX
 *-
-wm32_0y:	rol.w	d2		; cy: next style bit
+wm32_0y:	rol.w	#1,d2		; cy: next style bit
 		bcs	wm32_0yFG	; branch if style bit is set
 		move.l	d1,(a0)		; set to background
 		add.w	a1,a0		; a0 -> next vertical word
@@ -325,7 +325,7 @@ wm32_0y_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 *	     WRITING MODE 3:  REVERSE TRANSPARENT	  dY > dX
 *-
 wm32_3y:	not.w	d2
-wm32_1y:	rol.w	d2		; cy: next style bit
+wm32_1y:	rol.w	#1,d2		; cy: next style bit
 		bcs	wm32_1yFG	; branch if style bit is set
 		add.w	a1,a0		; a0 -> next vertical word
 		tst.w	d4		; epsilon < 0  =>  don't change X
@@ -353,7 +353,7 @@ wm32_1y_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 *-
 
 wm32_2y:	move.l	#-1,d0		; set for XOR mode
-wm32_2yL:	rol.w	d2		; cy: next style bit
+wm32_2yL:	rol.w	#1,d2		; cy: next style bit
 		bcs	wm32_2yFG	; branch if style bit is set
 		add.w	a1,a0		; a0 -> next vertical word
 		tst.w	d4		; epsilon < 0  =>  don't change X
@@ -461,7 +461,7 @@ wm32_2x_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 *+
 *	     WRITING MODE 0:  REPLACE			   dY > dX
 *-
-wm16_0y:	rol.w	d2		; cy: next style bit
+wm16_0y:	rol.w	#1,d2		; cy: next style bit
 		bcs	wm16_0yFG	; branch if style bit is set
 		move.w	d1,(a0)		; set to background
 		add.w	a1,a0		; a0 -> next vertical word
@@ -490,7 +490,7 @@ wm16_0y_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 *	     WRITING MODE 3:  REVERSE TRANSPARENT	  dY > dX
 *-
 wm16_3y:	not.w	d2
-wm16_1y:	rol.w	d2		; cy: next style bit
+wm16_1y:	rol.w	#1,d2		; cy: next style bit
 		bcs	wm16_1yFG	; branch if style bit is set
 		add.w	a1,a0		; a0 -> next vertical word
 		tst.w	d4		; epsilon < 0  =>  don't change X
@@ -518,7 +518,7 @@ wm16_1y_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 *-
 
 wm16_2y:	move.w	#-1,d0		; set for XOR mode
-wm16_2yL:	rol.w	d2		; cy: next style bit
+wm16_2yL:	rol.w	#1,d2		; cy: next style bit
 		bcs	wm16_2yFG	; branch if style bit is set
 		add.w	a1,a0		; a0 -> next vertical word
 		tst.w	d4		; epsilon < 0  =>  don't change X
@@ -626,7 +626,7 @@ wm16_2x_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 *+
 *	     WRITING MODE 0:  REPLACE			   dY > dX
 *-
-wm8_0y:		rol.w	d2		; cy: next style bit
+wm8_0y:		rol.w	#1,d2		; cy: next style bit
 		bcs	wm8_0yFG	; branch if style bit is set
 		move.b	d1,(a0)		; set to background
 		add.w	a1,a0		; a0 -> next vertical word
@@ -655,7 +655,7 @@ wm8_0y_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 *	     WRITING MODE 3:  REVERSE TRANSPARENT	  dY > dX
 *-
 wm8_3y:		not.w	d2
-wm8_1y:		rol.w	d2		; cy: next style bit
+wm8_1y:		rol.w	#1,d2		; cy: next style bit
 		bcs	wm8_1yFG	; branch if style bit is set
 		add.w	a1,a0		; a0 -> next vertical word
 		tst.w	d4		; epsilon < 0  =>  don't change X
@@ -683,7 +683,7 @@ wm8_1y_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 *-
 
 wm8_2y:		move.b	#-1,d0		; set for XOR mode
-wm8_2yL:	rol.w	d2		; cy: next style bit
+wm8_2yL:	rol.w	#1,d2		; cy: next style bit
 		bcs	wm8_2yFG	; branch if style bit is set
 		add.w	a1,a0		; a0 -> next vertical word
 		tst.w	d4		; epsilon < 0  =>  don't change X
@@ -783,3 +783,5 @@ wm8_2xFG:	eor.b	d0,(a0)+	; set to foreground
 wm8_2x_nc:	add.w	d5,d4		; d4 <- epsilon + e1
 		dbra	d7,wm8_2xL	; do next pixel
 		rts
+
+#endif

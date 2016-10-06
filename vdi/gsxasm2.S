@@ -38,7 +38,8 @@
 *************************************************************************
 
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
 
 *		public routines
@@ -61,10 +62,10 @@
 
 *		external routines
 
-		.globl	concat
-		.globl	fline
+		xref	concat
+		xref	fline
 
-	.text
+	text
 
 _trap:		move.l  _lineAVar,a0		; a0 -> linea var struct
 		move.l	(sp)+,retsav(a0)
@@ -153,8 +154,8 @@ PX_PUTPIX:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.l	_PTSIN(a1),a0		; a0 -> PTSIN array
 		move.w	(a0)+,d0		; d0 <- X coordinate
 		move.w	(a0),d1			; d1 <- Y coordinate
-		mulu	_v_lin_wr(a4),d1	; d1 <- y portion of offset
-		mulu	byt_per_pix(d0),d0	; d0 <- x portion of offset
+		mulu	_v_lin_wr(a4),d1	; d1 <- y portion of offset ??? why (a4)?
+*		mulu	byt_per_pix(d0),d0	; d0 <- x portion of offset ??? why (d0)? it is assembled as 68030 instr
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a0		; a0 -> base of screen
 		add.l	d1,a0			; a0 -> (x,y)
@@ -174,7 +175,7 @@ PXPTP8:		move.b	2(a2),(a0)		; splat pixel
 
 
 ST_PUTPIX:	move.l  _lineAVar,a2	; a2 -> linea var struct
-		move.l	_PTSIN(a2),a0	; a0 -> PTSIN array
+		movea.l	_PTSIN(a2),a0	; a0 -> PTSIN array
 		move.w	 (a0),d0	; d0 <- X coordinate
 		move.w	2(a0),d1	; d1 <- Y coordinate
 		bsr	concat		; get physical offset
@@ -221,17 +222,21 @@ ppx_clr:	and.w	d0,(a1)+	; clear the bit.
 *******************************************************************************
 *******************************************************************************
 
-_get_pix:	move.l  _lineAVar,a1		; a1 -> linea var struct
+_get_pix:
+		move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
 		move.l	V_GETPIX(a1),a1		; vec to get pix routine
 		jmp	(a1)
 
-PX_GETPIX:	move.l  _lineAVar,a1		; a1 -> linea var struct
+PX_GETPIX:
+		move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.l	_PTSIN(a1),a0		; a0 -> PTSIN array
 		move.w	(a0)+,d0		; d0 <- X coordinate
 		move.w	(a0),d1			; d1 <- Y coordinate
 		mulu	_v_lin_wr(a1),d1	; d1 <- y portion of offset
+#if VIDEL_SUPPORT
 		mulu	byt_per_pix(a1),d0	; d0 <- x portion of offset
+#endif
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a0		; a0 -> base of screen
 		add.l	d1,a0			; a0 -> (x,y)
@@ -304,6 +309,7 @@ _fill_line:
 	exg	d5,d6			; d4 <- X1  d5 <- Y1  d6 <- X2
 
 	move.l	_lineAVar,a4
+#if VIDEL_SUPPORT
 	cmp.w	#PIXPACKED,form_id(a4)	; see if we are in pix packed mode
 	bne	fillLine0		; if not do interleaved mode
 	jsr	px_fline		; HABLINE entry point for fill_line
@@ -311,6 +317,7 @@ _fill_line:
 	rts
 
 fillLine0:
+#endif
 	jsr	fline			; HABLINE entry point for fill_line
 	movem.l (sp)+,d3-d7/a3-a5       ; restore registers for "C"
 	rts
@@ -344,6 +351,7 @@ fillLine0:
 
 _end_pts:	movem.l d3-d7/a3-a6,-(sp) 	; save registers for "C"
 		move.l  _lineAVar,a6		; a6 -> linea var struct
+#if VIDEL_SUPPORT
 		cmp.w	#PIXPACKED,form_id(a6)	; see if we are pix packe mode
 		bne	end_intrlv_pts
 
@@ -371,7 +379,9 @@ end_pix_pts:	move.l	44(sp),a0		; a0 -> Xleft
 
 		mulu	_v_lin_wr(a6),d1	; d1 <- y portion of offset
 		move.w	d4,d2			; d2 <- X coordinate
+#if VIDEL_SUPPORT
 		mulu	byt_per_pix(a6),d2	; d2 <- x portion of offset
+#endif
 		add.l	d2,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a2		; a2 -> base of screen
 		add.l	d1,a2			; a2 -> (x,y)
@@ -500,6 +510,7 @@ epp_ret0:	movem.l (sp)+,d3-d7/a3-a6	; restore registers for "C"
 *+
 * Interleave case
 *-
+#endif
 end_intrlv_pts:
 		move.w	42(sp),d1		; d1 <- Y coordinate
 		cmp.w	_YMN_CLIP(a6),d1	; return if above viewport Ymin
@@ -907,9 +918,9 @@ _SetMasks:
 	move.l	_lineAVar,a0		; a0 -> linea var struct
 	move.l	4(sp),col_or_mask(a0)	; set the or mask for vs_color
 	move.l	8(sp),col_and_mask(a0)	; set the and mask for vs_color
-; Sparrow only stuff follows
-; 920910 towns changed to or.w from move.w to preserve rest of shift
-;              register
+* Sparrow only stuff follows
+* 920910 towns changed to or.w from move.w to preserve rest of shift
+*              register
 	move.w	12(sp),d0
 	beq	clr_olay		; clear the overlay
 	or.w	#$0200,$FFFF8266	; Set the overlay bit
@@ -917,7 +928,6 @@ _SetMasks:
 clr_olay:
 	and.w	#$fdff,$FFFF8266	; clear bit	
 
-; Sparrow only stuff earlier
+* Sparrow only stuff earlier
 setm_exit:
 	rts
-	.end

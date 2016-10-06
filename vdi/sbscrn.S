@@ -25,20 +25,22 @@
 * 
 *******************************************************************************
 
-		.globl	trans_pos_row
-		.globl	trans_neg_row
-		.globl	transSrPos
-		.globl	transSlPos
-		.globl	transSrNeg
-		.globl	transSlNeg
-		.globl	_copytran		; blit transparant flag
+#include "vdiincld.inc"
 
-		.globl	opaq_pos_row
-		.globl	opaq_neg_row
-		.globl	opaqSrPos
-		.globl	opaqSlPos
-		.globl	opaqSrNeg
-		.globl	opaqSlNeg
+		xdef	trans_pos_row
+		xdef	trans_neg_row
+		xdef	transSrPos
+		xdef	transSlPos
+		xdef	transSrNeg
+		xdef	transSlNeg
+		xdef	_copytran		; blit transparant flag
+
+		xref	opaq_pos_row
+		xref	opaq_neg_row
+		xref	opaqSrPos
+		xref	opaqSlPos
+		xref	opaqSrNeg
+		xref	opaqSlNeg
 
 
 *+
@@ -51,8 +53,11 @@
 *		Atari corp.
 *-
 
-	.globl	set_fringe,get_fringe,d_xy2addr,s_xy2addr
-	.globl	scrn_blt
+	xdef set_fringe
+	xdef get_fringe
+	xdef d_xy2addr
+	xdef s_xy2addr
+	xdef scrn_blt
 
 *       FRAME PARAMETERS
 
@@ -95,22 +100,22 @@ S_YMAX	  equ	-16	; maximum Y: source				    +60
 
 D_ADDR	  equ	-14	; initial destination address			    +62
 D_XMAX	  equ	-10	; maximum X: destination			    +66
-D_YMAX	  equ	-08	; maximum Y: destination			    +68
+D_YMAX	  equ	-8	; maximum Y: destination			    +68
 
-INNER_CT  equ	-06	; blt inner loop initial count			    +70
-DST_WR	  equ	-04	; destination form wrap (in bytes)		    +72
-SRC_WR	  equ	-02	; source form wrap (in bytes)			    +74
+INNER_CT  equ	-6	; blt inner loop initial count			    +70
+DST_WR	  equ	-4	; destination form wrap (in bytes)		    +72
+SRC_WR	  equ	-2	; source form wrap (in bytes)			    +74
 
 ***						   ***
 *** more internal parameters (notice overlap above ***
 ***						   ***
 
-SHFT1	=	-24
-SHFT2	=	-22
-MASK1	=	-20
-MASK2	=	-14
-MASK3	=	-12
-OPAQUE	=	-4
+SHFT1	equ	-24
+SHFT2	equ	-22
+MASK1	equ	-20
+#define MASK2 -14
+MASK3	equ -12
+OPAQUE	equ	-4
 
 
 *+
@@ -520,7 +525,7 @@ csrn2:		tst.w	OPAQUE(a6)		; see if OPAQUE blt flag is on
 
 csrn3:		move.w	#$ffff,d6
 		lsr.w	d2,d6
-		lsr.w	d6
+		lsr.w	#1,d6
 		not.w	d6			; d6 <- MASK1
 		move.w	d6,MASK1(a6)		; save MASK1
 		sub.w	d0,d2			; d1 <- shft SHFT2 (rght shft)
@@ -560,7 +565,7 @@ csln2:		tst.w	OPAQUE(a6)		; see if OPAQUE blt flag is on
 
 csln3:		move.w	#$ffff,d6
 		lsr.w	d2,d6
-		lsr.w	d6
+		lsr.w	#1,d6
 		not.w	d6			; d6 <- MASK1
 		move.w	d6,MASK1(a6)		; save MASK1
 		sub.w	d2,d0			; d2 <- shft SHFT1 (lft shft)
@@ -908,5 +913,3 @@ srNentry:	add.w	d4,a4			; udjust for shift left case
                 swap	d2			; row count is now in low word
 		dbra	d2,srNeg		; do next row
 		rts
-
-	.end

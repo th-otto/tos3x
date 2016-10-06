@@ -25,15 +25,15 @@
 *************************************************************************
 
 
-.include	"lineaequ.s"
-.include	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
 
-		.globl	hb_vline	; make routines available globally
-		.globl	hb_hline
+		xdef	hb_vline	; make routines available globally
+		xdef	hb_hline
 
-		.globl	op_table
-		.globl	BLASTER
-		.globl	_v_bas_ad
+		xdef	op_table
+		xref	BLASTER
 
 B_OFF		equ	 60		; offset to reference register
 
@@ -47,14 +47,14 @@ B_F2_MSK	equ	-16 		; 2nd fringe mask	0:old 1:new
 B_D_NXWD	equ	-14 		; offset to next dst word
 B_D_WRAP	equ	-12 		; wrap from end of one dst line to next
 B_D_ADDR	equ	-10 		; initial dst address
-B_D_SPAN	equ	-06 		; span in words of dst block
-B_HEIGHT	equ	-04 		; pixel height of block
-B_LOGOP		equ	-02 		; ctrl word: src^pat combo & logic op #
-B_SKEW		equ	 00		; ctrl word: flags, pat index & skew
+B_D_SPAN	equ	-6 		; span in words of dst block
+B_HEIGHT	equ	-4 		; pixel height of block
+B_LOGOP		equ	-2 		; ctrl word: src^pat combo & logic op #
+B_SKEW		equ	 0		; ctrl word: flags, pat index & skew
 
 
-BF_PAT		equ  	08		; combo flag: 0:all ones  1:pattern
-BF_SRC		equ  	09		; combo flag: 0:all ones  1:source
+BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
+BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
                      
@@ -62,15 +62,15 @@ BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
-BF_PF		equ  	07		; pre-fetch flag  	 0:false 1:true
-BF_FQ		equ  	06		; flush queue flag 	 0:false 1:true
+BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
+BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
 BM_GO		equ  	$8000		; execution mask	
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
 BM_PF		equ  	$0080		; pre-fetch mask
 BM_FQ		equ  	$0040		; flush queue mask
 
-	.text
+	text
 
 *+
 *	Hard Vertical Line Code
@@ -182,7 +182,7 @@ vl_loop:
 	move.l	a1,B_D_ADDR(a5)		; next plane
 	move.w	d7,B_HEIGHT(a5)		; line height
 
-	ror.l	d5			; what color is this plane ?
+	ror.l	#1,d5			; what color is this plane ?
 	scs	d3
 	and.w	d4,d3
 	move.w	0(a2,d3.w),B_LOGOP(a5)
@@ -203,12 +203,11 @@ vl_cont:
 	addq.w	#2,a1			; a1 -> start of next plane
 	dbra	d0,vl_loop		; do the next plane
 
-.ifeq	P68030
-
-	movec.l	cacr,d0			; d2 <- cache control register
+#if P68030
+	CACR_D0			; d0 <- cache control register
 	bset.l	#11,d0			; set "Clr DATA Cache" bit
-	movec.l	d0,cacr			; clear the data cache
-.endc
+	D0_CACR			; clear the data cache
+#endif
 	rts
 
 
@@ -275,7 +274,7 @@ hl_loop:
 	move.l	a1,B_D_ADDR(a5)		; new dst plane
 	move.w	d6,B_HEIGHT(a5)		; height of 1
 
-	ror.l	d5			; what color is this plane ?
+	ror.l	#1,d5			; what color is this plane ?
 	scs	d2
 	and.w	d3,d2			; d2 <- logic op offset: 0=>0  1=>2
 	move.w	0(a4,d2.w),B_LOGOP(a5)	; load the logic op
@@ -295,12 +294,11 @@ hl_cont:
 	addq.l	#2,a1			; a1 -> next dst plane
 	dbra	d7,hl_loop
 
-.ifeq	P68030
-
-	movec.l	cacr,d7			; d2 <- cache control register
+#if P68030
+	CACR_D7			; d7 <- cache control register
 	bset.l	#11,d7			; set "Clr DATA Cache" bit
-	movec.l	d7,cacr			; clear the data cache
-.endc
+	D7_CACR			; clear the data cache
+#endif
 	rts
 
 
@@ -310,5 +308,3 @@ op_table:  *	 color=0   color=1
 	dc.w	BM_PAT+04,BM_PAT+07	; transparent
 	dc.w	BM_PAT+06,BM_PAT+06	; xor
 	dc.w	BM_PAT+01,BM_PAT+13	; reverse transparent
-
-	.end

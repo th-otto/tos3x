@@ -263,28 +263,26 @@ memtsize: ds.l 1
 	xdef memterr
 memterr: ds.w 1
 
+* disk_buffer plus pad for equated arrays
+* BEWARE: portions also used by VDI
 	xdef _dskbuf
-_dskbuf: ds.b 0
+_dskbuf: ds.b 7730
 
-	ds.b $2c
-	
 	xdef _width
-_width: ds.w 1
+_width: equ _dskbuf+44
 	xdef _height
-_height: ds.w 1
-
-	ds.b $1E02
+_height: equ _dskbuf+46
 
 	ds.b 910 ; space for negative linea vars
     xdef lineavars
 lineavars:
 #if TOSVERSION >= 0x404
-	ds.b 4210
+	ds.b 4018
 #else
-	ds.b 174
+	ds.b 2310
 #endif
 
-	ds.b $85A
+	ds.w 1 ; unused
 
 	xdef biosav
 biosav: ds.l 1

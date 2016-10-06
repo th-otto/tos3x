@@ -54,32 +54,30 @@
 *******************************************************************************
 
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "tosvars.inc"
 
+		xdef	_DIS_CUR	; Global routines declared in this file
+		xdef	_HIDE_CUR
+		xdef	_MOV_CUR
+		xdef	_SET_CUR
+		xdef	_VEX_BUTV
+		xdef	_VEX_MOTV
+		xdef	_VEX_CURV
+		xdef	_XFM_CRFM
+		xdef	_vq_mouse_status
+		xdef	mouse_rel	
+		xdef	scrn_clip
+		xdef	vb_draw
+		xdef	cur_display
+		xdef	cur_replace
+		xdef	st_cur_display
+		xdef	st_cur_replace
+		xdef	rel_pblock	; Global data declared in this file
+		xdef	arrow_cdb
 
-		.globl	_DIS_CUR	; Global routines declared in this file
-		.globl	_HIDE_CUR
-		.globl	_MOV_CUR
-		.globl	_SET_CUR
-		.globl	_VEX_BUTV
-		.globl  _VEX_MOTV
-		.globl	_VEX_CURV
-		.globl	_XFM_CRFM
-		.globl	_vq_mouse_status
-		.globl	mouse_rel	
-		.globl	scrn_clip
-		.globl	vb_draw
-		.globl	cur_display
-		.globl	cur_replace
-		.globl	st_cur_display
-		.globl	st_cur_replace
-		.globl	rel_pblock	; Global data declared in this file
-		.globl	arrow_cdb
-
-		.globl	 concat		; Global routines used
-
-		.globl	_v_bas_ad
-		.globl	_MOUSE_BT
+		xref	concat		; Global routines used
 
 *******************************************************************************
 *
@@ -362,21 +360,21 @@ _VEX_CURV:	move.l  _lineAVar,a1		; a1 -> linea var struct
 ******************************************************************************
                              
 
-C_XHOT		equ	00
-C_YHOT		equ	02
-C_PLANES	equ	04
-C_BGCOL		equ	06
-C_FGCOL		equ	08
+C_XHOT		equ	0
+C_YHOT		equ	2
+C_PLANES	equ	4
+C_BGCOL		equ	6
+C_FGCOL		equ	8
 C_MSKFRM	equ	10
 
-SV_LEN		equ	00
-SV_ADDR		equ	02
-SV_STAT		equ	06
-SV_BUF		equ	08
+SV_LEN		equ	0
+SV_ADDR		equ	2
+SV_STAT		equ	6
+SV_BUF		equ	8
 
-SP_OFF		equ	00
-SP_FG		equ	02
-SP_BG		equ	04
+SP_OFF		equ	0
+SP_FG		equ	2
+SP_BG		equ	4
                              
 RTN_REC	       	equ    	2*4		
 LF_OFF		equ	RTN_REC*1
@@ -484,9 +482,9 @@ shift_lf:	move.w	#16,d6			; compensate for left shift
 		move.l	sp,a5			; for logical fragments
 
 p_loop:		clr.w	d0			; make two bit op_tab index
-		lsr.w	d7
+		lsr.w	#1,d7
 		addx.w	d0,d0			; <bit3> foreground color
-		lsr.w	d4			; <bit2> background color
+		lsr.w	#1,d4			; <bit2> background color
 		roxl.w	#3,d0			; longword aligned table
 
 		add.w	a3,d0
@@ -1054,6 +1052,8 @@ fix_neg:	clr.w	_HIDE_CNT(a5)		; this should never be executed.
 *	intin[5-20]  - 16 words of cursor mask
 *	intin[21-36] - 16 words of cursor data
 
+_DEVTB26 equ _DEV_TAB+26
+
 _XFM_CRFM:	move.l  _lineAVar,a2		; a2 -> linea var struct
 		addq.b	#1,mouse_flag(a2)	; deny access to mouse_cdb
 
@@ -1071,7 +1071,7 @@ _XFM_CRFM:	move.l  _lineAVar,a2		; a2 -> linea var struct
 		move.w	(a0)+,m_planes(a2)	; Save the plane count
 
 		move.w	(a0)+,d0		; d0 <- background/mask color index
-		cmp.w	_DEV_TAB+26(a2),d0
+		cmp.w	_DEVTB26(a2),d0
 		bmi	xfm_bg_col_ok		; if color index is too large
 
 		moveq.l	#1,d0			; clamp it to 1
@@ -1081,7 +1081,7 @@ xfm_bg_col_ok:	move.l	#_MAP_COL,a1		; convert color index to a pixel value
 		move.w	0(a1,d0.w),m_cdb_bg(a2)
 
 		move.w	(a0)+,d0		; d0 <- foreground/form color index
-		cmp.w	_DEV_TAB+26(a2),d0
+		cmp.w	_DEVTB26(a2),d0
 		bmi	xfm_fg_col_ok		; if color index is too large
 
 		moveq.l	#1,d0			; clamp it to 1
@@ -1218,5 +1218,3 @@ arrow_cdb:	dc.w	1,0,1,0,1
 		dc.w	%0000001100000000
 		dc.w	%0000001100000000
 		dc.w	%0000000000000000
-
-		.end

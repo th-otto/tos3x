@@ -9,10 +9,11 @@
 *******************************************************************************
 
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
 
-		.globl	spx_bitblt
+		xdef	spx_bitblt
 
 *       FRAME PARAMETERS
 
@@ -1138,5 +1139,3 @@ oFN8Loop:	move.b	#1,-(a1)		; D' = 1
 		dbra	d7,oFN8Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oFN8Line		; do next line	
-		
-	.end

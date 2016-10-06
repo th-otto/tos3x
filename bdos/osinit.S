@@ -6,7 +6,7 @@
 *
 *****************************************************************************
 
-    xref    vdidsp
+    xref    _GSX_ENTRY
     xref    _osif
     xref    _xterm
     xref    _cinit
@@ -92,12 +92,12 @@ ground_it:
     beq oterm
     cmp.w     #$0073,d0
     bne novdi
-    jsr       vdidsp
+    jsr       _GSX_ENTRY
     rte
 novdi:
     cmp.w     #-1,d0
     bne       nodsp
-    move.l    #vdidsp,d0
+    move.l    #_GSX_ENTRY,d0
     rte
 nodsp:
     move.l  old_2,-(sp)

@@ -20,10 +20,10 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-		globl	 sb_mono
-		globl	_v_bas_ad
+		xdef	 sb_mono
 
 
 *  no clipping to worry about
@@ -280,5 +280,3 @@ xor_lp:
 
 	swap	d2
 	bra	mplan_cont
-
-	end

@@ -31,8 +31,10 @@
 * 
 *************************************************************************
 
-.include	"lineaequ.s"
-.include 	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
+
 *  Offsets into BLASTER parameter block
 
 B_OFF		equ	 60	; offset to reference register
@@ -47,14 +49,14 @@ B_F2_MSK	equ	-16 	; 2nd fringe mask	0:old 1:new
 B_D_NXWD	equ	-14 	; offset to next dst word
 B_D_WRAP	equ	-12 	; wrap from end of one dst line to next
 B_D_ADDR	equ	-10 	; initial dst address
-B_D_SPAN	equ	-06 	; span in words of dst block
-B_HEIGHT	equ	-04 	; pixel height of block
-B_LOGOP		equ	-02 	; ctrl word: src^pat combo & logic op #
-B_SKEW		equ	 00	; ctrl word: flags, pat index & skew
+B_D_SPAN	equ	-6 	; span in words of dst block
+B_HEIGHT	equ	-4 	; pixel height of block
+B_LOGOP		equ	-2 	; ctrl word: src^pat combo & logic op #
+B_SKEW		equ	 0	; ctrl word: flags, pat index & skew
 
 
-BF_PAT		equ  	08	; combo flag: 0:all ones  1:pattern
-BF_SRC		equ  	09	; combo flag: 0:all ones  1:source
+BF_PAT		equ  	8	; combo flag: 0:all ones  1:pattern
+BF_SRC		equ  	9	; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100	; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200	; combo mask: 0:all ones  1:source
                      
@@ -62,8 +64,8 @@ BM_SRC		equ  	$0200	; combo mask: 0:all ones  1:source
 BF_GO		equ  	15	; execution flag         0:false 1:true
 BF_HOG		equ  	14	; hog dma flag		 0:false 1:true
 BF_SM		equ  	13	; smudge flag		 0:false 1:true
-BF_PF		equ  	07	; pre-fetch flag  	 0:false 1:true
-BF_FQ		equ  	06	; flush queue flag 	 0:false 1:true
+BF_PF		equ  	7	; pre-fetch flag  	 0:false 1:true
+BF_FQ		equ  	6	; flush queue flag 	 0:false 1:true
 BM_GO		equ  	$8000	; execution mask	
 BM_HOG		equ  	$4000	; hog dma mask
 BM_SM		equ  	$2000	; smudge mask
@@ -71,15 +73,15 @@ BM_PF		equ  	$0080	; pre-fetch mask
 BM_FQ		equ  	$0040	; flush queue mask
 
 
-	.globl	hb_cell
-	.globl	hb_blank
-	.globl	hb_scrup
-	.globl	hb_scrdn
-	.globl	blank_it
+	xdef	hb_cell
+	xdef	hb_blank
+	xdef	hb_scrup
+	xdef	hb_scrdn
+	xdef	blank_it
 
 *	external variables
 
-	xdef	BLASTER		* first register of bit blt
+	xref	BLASTER		* first register of bit blt
 
 *******************************************************************************
 *	
@@ -163,12 +165,11 @@ char_cont:
 
 	dbra	d2,char_loop			; do the next plane
 
-.ifeq	P68030
-
-	movec.l	cacr,d2			; d2 <- cache control register
+#if P68030
+	CACR_D2			; d2 <- cache control register
 	bset.l	#11,d2			; set "Clr DATA Cache" bit
-	movec.l	d2,cacr			; clear the data cache
-.endc
+	D2_CACR			; clear the data cache
+#endif
 	rts
 
 
@@ -262,12 +263,12 @@ su_sync:
 	nop				; blt restarts after this is executed
 	bmi	su_sync			; quit if blt had already finished
 
-.ifeq	P68030
-
-	movec.l	cacr,d0			; d2 <- cache control register
+#if P68030
+	CACR_D0			; d0 <- cache control register
 	bset.l	#11,d0			; set "Clr data Cache" bit
-	movec.l	d0,cacr			; clear the data cache
-.endc
+	D0_CACR			; clear the data cache
+#endif
+
 
 fu_start:
 
@@ -324,12 +325,12 @@ sd_sync:
 	nop				; blt restarts after this is executed
 	bmi	sd_sync			; quit if blt had already finished
 
-.ifeq	P68030
+#if P68030
 
-	movec.l	cacr,d0			; d2 <- cache control register
+	CACR_D0			; d0 <- cache control register
 	bset.l	#11,d0			; set "Clr Data Cache" bit
-	movec.l	d0,cacr			; clear the data cache
-.endc
+	D0_CACR			; clear the data cache
+#endif
 
 fd_start:
 
@@ -459,11 +460,11 @@ blank_cont:
 	addq.l	#2,a2			; a2 -> start of next plane
 	dbra	d6,blank_loop
 
-.ifeq	P68030
+#if P68030
 
-	movec.l	cacr,d0			; d2 <- cache control register
+	D0_CACR			; d0 <- cache control register
 	bset.l	#11,d0			; set "Clr Data Cache" bit
-	movec.l	d0,cacr			; clear the data cache
-.endc
+	CACR_D0			; clear the data cache
+#endif
 
 	rts

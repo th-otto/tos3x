@@ -18,163 +18,165 @@
 * 
 *******************************************************************************
 
-		;
-		; Routines to do fringes for word aligned blit (positive case)
-		;
-		.globl	op0_tpf,op1_tpf,op2_tpf,op3_tpf
-		.globl	op4_tpf,op5_tpf,op6_tpf,op7_tpf
-		.globl	op8_tpf,op9_tpf,opA_tpf,opB_tpf
-		.globl	opC_tpf,opD_tpf,opE_tpf,opF_tpf
+#include "vdiincld.inc"
+
+*
+* Routines to do fringes for word aligned blit (positive case)
+*
+		xdef	op0_tpf,op1_tpf,op2_tpf,op3_tpf
+		xdef	op4_tpf,op5_tpf,op6_tpf,op7_tpf
+		xdef	op8_tpf,op9_tpf,opA_tpf,opB_tpf
+		xdef	opC_tpf,opD_tpf,opE_tpf,opF_tpf
 
 
-		;
-		; Routines to do inner loop for word aligned blit (pos case)
-		;
-		.globl	op0_tpi,op1_tpi,op2_tpi,op3_tpi
-		.globl	op4_tpi,op5_tpi,op6_tpi,op7_tpi
-		.globl	op8_tpi,op9_tpi,opA_tpi,opB_tpi
-		.globl	opC_tpi,opD_tpi,opE_tpi,opF_tpi
+*
+* Routines to do inner loop for word aligned blit (pos case)
+*
+		xdef	op0_tpi,op1_tpi,op2_tpi,op3_tpi
+		xdef	op4_tpi,op5_tpi,op6_tpi,op7_tpi
+		xdef	op8_tpi,op9_tpi,opA_tpi,opB_tpi
+		xdef	opC_tpi,opD_tpi,opE_tpi,opF_tpi
 
 
-		;
-		; Routines to do fringes for word aligned blit (negative case)
-		;
-		.globl	op0_tnf,op1_tnf,op2_tnf,op3_tnf
-		.globl	op4_tnf,op5_tnf,op6_tnf,op7_tnf
-		.globl	op8_tnf,op9_tnf,opA_tnf,opB_tnf
-		.globl	opC_tnf,opD_tnf,opE_tnf,opF_tnf
+*
+* Routines to do fringes for word aligned blit (negative case)
+*
+		xdef	op0_tnf,op1_tnf,op2_tnf,op3_tnf
+		xdef	op4_tnf,op5_tnf,op6_tnf,op7_tnf
+		xdef	op8_tnf,op9_tnf,opA_tnf,opB_tnf
+		xdef	opC_tnf,opD_tnf,opE_tnf,opF_tnf
 
 
-		;
-		; Routines to do inner loop for word aligned blit (neg case)
-		;
-		.globl	op0_tni,op1_tni,op2_tni,op3_tni
-		.globl	op4_tni,op5_tni,op6_tni,op7_tni
-		.globl	op8_tni,op9_tni,opA_tni,opB_tni
-		.globl	opC_tni,opD_tni,opE_tni,opF_tni
+*
+* Routines to do inner loop for word aligned blit (neg case)
+*
+		xdef	op0_tni,op1_tni,op2_tni,op3_tni
+		xdef	op4_tni,op5_tni,op6_tni,op7_tni
+		xdef	op8_tni,op9_tni,opA_tni,opB_tni
+		xdef	opC_tni,opD_tni,opE_tni,opF_tni
 
 
 *******************************************************************************
 ************** Routines for the unaligned blit transparant case ***************
 *******************************************************************************
 
-		************************************************
-		********** shift right positive case ***********
-		************************************************
+************************************************
+********** shift right positive case ***********
+************************************************
 
-		;
-		; Routines to do fringe0 for unaligned blit (positive case)
-		;
-		.globl	o0Srtpf0,o1Srtpf0,o2Srtpf0,o3Srtpf0
-		.globl	o4Srtpf0,o5Srtpf0,o6Srtpf0,o7Srtpf0
-		.globl	o8Srtpf0,o9Srtpf0,oASrtpf0,oBSrtpf0
-		.globl	oCSrtpf0,oDSrtpf0,oESrtpf0,oFSrtpf0
-
-
-		;
-		; Routines to do inner loop for unaligned blit (pos case)
-		;
-		.globl	op0Srtpi,op1Srtpi,op2Srtpi,op3Srtpi
-		.globl	op4Srtpi,op5Srtpi,op6Srtpi,op7Srtpi
-		.globl	op8Srtpi,op9Srtpi,opASrtpi,opBSrtpi
-		.globl	opCSrtpi,opDSrtpi,opESrtpi,opFSrtpi
-
-		;
-		; Routines to do fringe1 for unaligned blit (positive case)
-		;
-		.globl	o0Srtpf1,o1Srtpf1,o2Srtpf1,o3Srtpf1
-		.globl	o4Srtpf1,o5Srtpf1,o6Srtpf1,o7Srtpf1
-		.globl	o8Srtpf1,o9Srtpf1,oASrtpf1,oBSrtpf1
-		.globl	oCSrtpf1,oDSrtpf1,oESrtpf1,oFSrtpf1
-
-		************************************************
-		********** shift left  positive case ***********
-		************************************************
-
-		;
-		; Routines to do fringe0 for unaligned blit (positive case)
-		;
-		.globl	o0Sltpf0,o1Sltpf0,o2Sltpf0,o3Sltpf0
-		.globl	o4Sltpf0,o5Sltpf0,o6Sltpf0,o7Sltpf0
-		.globl	o8Sltpf0,o9Sltpf0,oASltpf0,oBSltpf0
-		.globl	oCSltpf0,oDSltpf0,oESltpf0,oFSltpf0
+*
+* Routines to do fringe0 for unaligned blit (positive case)
+*
+		xdef	o0Srtpf0,o1Srtpf0,o2Srtpf0,o3Srtpf0
+		xdef	o4Srtpf0,o5Srtpf0,o6Srtpf0,o7Srtpf0
+		xdef	o8Srtpf0,o9Srtpf0,oASrtpf0,oBSrtpf0
+		xdef	oCSrtpf0,oDSrtpf0,oESrtpf0,oFSrtpf0
 
 
-		;
-		; Routines to do inner loop for unaligned blit (pos case)
-		;
-		.globl	op0Sltpi,op1Sltpi,op2Sltpi,op3Sltpi
-		.globl	op4Sltpi,op5Sltpi,op6Sltpi,op7Sltpi
-		.globl	op8Sltpi,op9Sltpi,opASltpi,opBSltpi
-		.globl	opCSltpi,opDSltpi,opESltpi,opFSltpi
+*
+* Routines to do inner loop for unaligned blit (pos case)
+*
+		xdef	op0Srtpi,op1Srtpi,op2Srtpi,op3Srtpi
+		xdef	op4Srtpi,op5Srtpi,op6Srtpi,op7Srtpi
+		xdef	op8Srtpi,op9Srtpi,opASrtpi,opBSrtpi
+		xdef	opCSrtpi,opDSrtpi,opESrtpi,opFSrtpi
 
-		;
-		; Routines to do fringe2 for unaligned blit (positive case)
-		;
-		.globl	o0Sltpf1,o1Sltpf1,o2Sltpf1,o3Sltpf1
-		.globl	o4Sltpf1,o5Sltpf1,o6Sltpf1,o7Sltpf1
-		.globl	o8Sltpf1,o9Sltpf1,oASltpf1,oBSltpf1
-		.globl	oCSltpf1,oDSltpf1,oESltpf1,oFSltpf1
+*
+* Routines to do fringe1 for unaligned blit (positive case)
+*
+		xdef	o0Srtpf1,o1Srtpf1,o2Srtpf1,o3Srtpf1
+		xdef	o4Srtpf1,o5Srtpf1,o6Srtpf1,o7Srtpf1
+		xdef	o8Srtpf1,o9Srtpf1,oASrtpf1,oBSrtpf1
+		xdef	oCSrtpf1,oDSrtpf1,oESrtpf1,oFSrtpf1
 
+************************************************
+********** shift left  positive case ***********
+************************************************
 
-
-		************************************************
-		********** shift left positive case ************
-		************************************************
-
-		;
-		; Routines to do fringe0 for unaligned blit (negative case)
-		;
-		.globl	o0Srtnf0,o1Srtnf0,o2Srtnf0,o3Srtnf0
-		.globl	o4Srtnf0,o5Srtnf0,o6Srtnf0,o7Srtnf0
-		.globl	o8Srtnf0,o9Srtnf0,oASrtnf0,oBSrtnf0
-		.globl	oCSrtnf0,oDSrtnf0,oESrtnf0,oFSrtnf0
+*
+* Routines to do fringe0 for unaligned blit (positive case)
+*
+		xdef	o0Sltpf0,o1Sltpf0,o2Sltpf0,o3Sltpf0
+		xdef	o4Sltpf0,o5Sltpf0,o6Sltpf0,o7Sltpf0
+		xdef	o8Sltpf0,o9Sltpf0,oASltpf0,oBSltpf0
+		xdef	oCSltpf0,oDSltpf0,oESltpf0,oFSltpf0
 
 
-		;
-		; Routines to do inner loop for unaligned blit (neg case)
-		;
-		.globl	op0Srtni,op1Srtni,op2Srtni,op3Srtni
-		.globl	op4Srtni,op5Srtni,op6Srtni,op7Srtni
-		.globl	op8Srtni,op9Srtni,opASrtni,opBSrtni
-		.globl	opCSrtni,opDSrtni,opESrtni,opFSrtni
+*
+* Routines to do inner loop for unaligned blit (pos case)
+*
+		xdef	op0Sltpi,op1Sltpi,op2Sltpi,op3Sltpi
+		xdef	op4Sltpi,op5Sltpi,op6Sltpi,op7Sltpi
+		xdef	op8Sltpi,op9Sltpi,opASltpi,opBSltpi
+		xdef	opCSltpi,opDSltpi,opESltpi,opFSltpi
 
-		;
-		; Routines to do fringe1 for unaligned blit (negative case)
-		;
-		.globl	o0Srtnf1,o1Srtnf1,o2Srtnf1,o3Srtnf1
-		.globl	o4Srtnf1,o5Srtnf1,o6Srtnf1,o7Srtnf1
-		.globl	o8Srtnf1,o9Srtnf1,oASrtnf1,oBSrtnf1
-		.globl	oCSrtnf1,oDSrtnf1,oESrtnf1,oFSrtnf1
-
-		************************************************
-		********** shift left  negative case ***********
-		************************************************
-
-		;
-		; Routines to do fringe0 for unaligned blit (negative case)
-		;
-		.globl	o0Sltnf0,o1Sltnf0,o2Sltnf0,o3Sltnf0
-		.globl	o4Sltnf0,o5Sltnf0,o6Sltnf0,o7Sltnf0
-		.globl	o8Sltnf0,o9Sltnf0,oASltnf0,oBSltnf0
-		.globl	oCSltnf0,oDSltnf0,oESltnf0,oFSltnf0
+*
+* Routines to do fringe2 for unaligned blit (positive case)
+*
+		xdef	o0Sltpf1,o1Sltpf1,o2Sltpf1,o3Sltpf1
+		xdef	o4Sltpf1,o5Sltpf1,o6Sltpf1,o7Sltpf1
+		xdef	o8Sltpf1,o9Sltpf1,oASltpf1,oBSltpf1
+		xdef	oCSltpf1,oDSltpf1,oESltpf1,oFSltpf1
 
 
-		;
-		; Routines to do inner loop for unaligned blit (neg case)
-		;
-		.globl	op0Sltni,op1Sltni,op2Sltni,op3Sltni
-		.globl	op4Sltni,op5Sltni,op6Sltni,op7Sltni
-		.globl	op8Sltni,op9Sltni,opASltni,opBSltni
-		.globl	opCSltni,opDSltni,opESltni,opFSltni
 
-		;
-		; Routines to do fringe2 for unaligned blit (negative case)
-		;
-		.globl	o0Sltnf1,o1Sltnf1,o2Sltnf1,o3Sltnf1
-		.globl	o4Sltnf1,o5Sltnf1,o6Sltnf1,o7Sltnf1
-		.globl	o8Sltnf1,o9Sltnf1,oASltnf1,oBSltnf1
-		.globl	oCSltnf1,oDSltnf1,oESltnf1,oFSltnf1
+************************************************
+********** shift left positive case ************
+************************************************
+
+*
+* Routines to do fringe0 for unaligned blit (negative case)
+*
+		xdef	o0Srtnf0,o1Srtnf0,o2Srtnf0,o3Srtnf0
+		xdef	o4Srtnf0,o5Srtnf0,o6Srtnf0,o7Srtnf0
+		xdef	o8Srtnf0,o9Srtnf0,oASrtnf0,oBSrtnf0
+		xdef	oCSrtnf0,oDSrtnf0,oESrtnf0,oFSrtnf0
+
+
+*
+* Routines to do inner loop for unaligned blit (neg case)
+*
+		xdef	op0Srtni,op1Srtni,op2Srtni,op3Srtni
+		xdef	op4Srtni,op5Srtni,op6Srtni,op7Srtni
+		xdef	op8Srtni,op9Srtni,opASrtni,opBSrtni
+		xdef	opCSrtni,opDSrtni,opESrtni,opFSrtni
+
+*
+* Routines to do fringe1 for unaligned blit (negative case)
+*
+		xdef	o0Srtnf1,o1Srtnf1,o2Srtnf1,o3Srtnf1
+		xdef	o4Srtnf1,o5Srtnf1,o6Srtnf1,o7Srtnf1
+		xdef	o8Srtnf1,o9Srtnf1,oASrtnf1,oBSrtnf1
+		xdef	oCSrtnf1,oDSrtnf1,oESrtnf1,oFSrtnf1
+
+************************************************
+********** shift left  negative case ***********
+************************************************
+
+*
+* Routines to do fringe0 for unaligned blit (negative case)
+*
+		xdef	o0Sltnf0,o1Sltnf0,o2Sltnf0,o3Sltnf0
+		xdef	o4Sltnf0,o5Sltnf0,o6Sltnf0,o7Sltnf0
+		xdef	o8Sltnf0,o9Sltnf0,oASltnf0,oBSltnf0
+		xdef	oCSltnf0,oDSltnf0,oESltnf0,oFSltnf0
+
+
+*
+* Routines to do inner loop for unaligned blit (neg case)
+*
+		xdef	op0Sltni,op1Sltni,op2Sltni,op3Sltni
+		xdef	op4Sltni,op5Sltni,op6Sltni,op7Sltni
+		xdef	op8Sltni,op9Sltni,opASltni,opBSltni
+		xdef	opCSltni,opDSltni,opESltni,opFSltni
+
+*
+* Routines to do fringe2 for unaligned blit (negative case)
+*
+		xdef	o0Sltnf1,o1Sltnf1,o2Sltnf1,o3Sltnf1
+		xdef	o4Sltnf1,o5Sltnf1,o6Sltnf1,o7Sltnf1
+		xdef	o8Sltnf1,o9Sltnf1,oASltnf1,oBSltnf1
+		xdef	oCSltnf1,oDSltnf1,oESltnf1,oFSltnf1
 
 
 *****************************************************************************

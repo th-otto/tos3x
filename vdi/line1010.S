@@ -34,17 +34,18 @@
 * 
 ******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
 		text
 
-		globl	_put_pix,_get_pix,_ABLINE,_HABLINE
-		globl	_RECTFILL,_CLC_FLIT,_COPY_RFM,_TEXT_BLT
-		globl	_v_show_c,_HIDE_CUR,_XFM_CRFM
-		globl	cur_replace,cur_display,KG_BLT,_seedfill
-		globl	line1010
-		globl	_first,_f8x8,_f8x16,_f16x32
-		globl	_retfalse
+		xdef	_put_pix,_get_pix,_ABLINE,_HABLINE
+		xdef	_RECTFILL,_CLC_FLIT,_COPY_RFM,_TEXT_BLT
+		xdef	_v_show_c,_HIDE_CUR,_XFM_CRFM
+		xdef	cur_replace,cur_display,KG_BLT,_seedfill
+		xdef	line1010
+		xdef	_first,_f8x8,_f8x16,_f16x32
+		xdef	_retfalse
 
 
 *************************************************************************
@@ -147,4 +148,3 @@ fonts:		dc.l	_first,_f8x8,_f8x16,_f16x32,0
 
 _retfalse:	moveq	#0,d0		; FALSE => continue seedfill.
 		rts
-		end

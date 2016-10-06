@@ -26,9 +26,14 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "tosvars.inc"
 
-		.globl	sb_cell,sb_scrup,sb_scrdn,sb_blank,_v_bas_ad
+		xdef sb_cell
+		xdef sb_scrup
+		xdef sb_scrdn
+		xdef sb_blank
 
 *******************************************************************************
 *	
@@ -649,5 +654,3 @@ en8:		move.w	a5,d6		; d6 <- word counter
 		bne	bl8loop		; do the next 4 planes
 		addq.l	#2,sp		; clean stack (color was stored on it)
 		rts
-
-	.end

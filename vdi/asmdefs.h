@@ -19,15 +19,28 @@
 /* generate constants for opcodes that are 68010 and above */
 #define CCR_D0        dc.w $42c0            /* move.w ccr,d0 68010-68060 */
 
-#define CACR_D0       dc.l $4e7a0002        /* movec cacr,d0 68020-68060 */
-#define CACR_D1       dc.l $4e7a1002        /* movec cacr,d1 */
+#define CACR_Dn(r)    dc.l $4e7a0002+(r<<12)   /* movec cacr,dn 68020-68060 */
+#define CACR_D0 CACR_Dn(0)
+#define CACR_D1 CACR_Dn(1)
+#define CACR_D2 CACR_Dn(2)
+#define CACR_D3 CACR_Dn(3)
+#define CACR_D4 CACR_Dn(4)
+#define CACR_D5 CACR_Dn(5)
+#define CACR_D6 CACR_Dn(6)
+#define CACR_D7 CACR_Dn(7)
 
 #define PCR_D0        dc.l $4e7a0808        /* movec pcr,d0 68060 */
 #define PCR_D1        dc.l $4e7a1808        /* movec pcr,d1 68060 */
 
-#define D0_CACR       dc.l $4e7b0002        /* movec d0,cacr 68020-68060 */
-#define D1_CACR       dc.l $4e7b1002        /* movec d1,cacr 68020-68060 */
-#define D2_CACR       dc.l $4e7b2002        /* movec d2,cacr 68020-68060 */
+#define Dn_CACR(r)    dc.l $4e7b0002+(r<<12)        /* movec dn,cacr 68020-68060 */
+#define D0_CACR       Dn_CACR(0)
+#define D1_CACR       Dn_CACR(1)
+#define D2_CACR       Dn_CACR(2)
+#define D3_CACR       Dn_CACR(3)
+#define D4_CACR       Dn_CACR(4)
+#define D5_CACR       Dn_CACR(5)
+#define D6_CACR       Dn_CACR(6)
+#define D7_CACR       Dn_CACR(7)
 
 #define D0_VBR        dc.l $4e7b0801        /* movec d0,vbr 68010-68060 */
 #define D0_CAAR       dc.l $4e7b0802        /* movec d0,caar 68020-68030 */

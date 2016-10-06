@@ -175,7 +175,8 @@
 /* copy of _v_lin_wr for concat. */
 #define _bytes_lin		-2
 
-/* _lineAvars poinst here */
+/* _lineAvars points here */
+
 /* number of video planes. */
 #define _v_planes		0
 /* number of bytes/video line. */
@@ -285,17 +286,15 @@
 /* ptr to routine for quitting seedfill. */
 #define _quitfill		118
 /* ptr to user routine before dev_init */
-#define UserDevInit		122
+#define LA_USERDEVINIT		122
 /* ptr to user routine before esc_init */
-#define UserEscInit		126
+#define LA_USERESCINIT		126
 
 /* pointer to drawing primitives vector list */
 #define LA_ROUTINES		162
 /* pointer to current device structure */
 #define LA_CURDEV		166
-#define _BLT_MODE		170
-
-#if TOSVERSION >= 0x404
+#define LA_BLTMODE		170
 
 /* extended request color array */
 #define _REQ_X_COL		174
@@ -321,6 +320,13 @@
 #define _save_stat		1636
 /* save up to 8 planes. 16 longwords / plane */
 #define _save_area	 	1638
+
+#if !VIDEL_SUPPORT
+
+/* space to build circle coordinates */
+#define q_circle		2150
+
+#else
 
 /* space to build circle coordinates */
 #define q_circle		2662

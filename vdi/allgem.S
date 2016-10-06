@@ -8,11 +8,12 @@
 * $Log:	ttgem.s,v $
 *******************************************************************************
 
+#include "vdiincld.inc"
 #include "asmdefs.h"
 #include "tosvars.inc"
 
-#include "lineaequ.inc"
 #include "devequ.inc"
+#include "lineaequ.inc"
 
 
 		xdef	_InitFonts
@@ -47,19 +48,19 @@
 		xref	vb_draw
 
 		xref	arrow_cdb
-		xref	kbshift
+		xref	_shifty
 		xref	rel_pblock
 
 
-CON		=	  2
-DEV		=	CON		; source of key press
-BIOS		=	 13
-BCONSTAT	=	  1
-BCONIN		=	  2
-SETEXC		=	  5
-TICKCAL		=	  6
-XBIOS		=	 14
-BLITMODE	=	$40
+CON		equ	  2
+DEV		equ	CON		; source of key press
+BIOS		equ	 13
+BCONSTAT	equ	  1
+BCONIN		equ	  2
+SETEXC		equ	  5
+TICKCAL		equ	  6
+XBIOS		equ	 14
+BLITMODE	equ	$40
 
 		text
 
@@ -71,7 +72,7 @@ BLITMODE	=	$40
 *
 *******************************************************************************
 
-_GSHIFT_S:	move.b	kbshift,d0	; Get the keyboard state
+_GSHIFT_S:	move.b	_shifty,d0	; Get the keyboard state
 		andi.w	#$000F,d0	; We only want the low 4 bits
 
 * Reuse a rts for these stubed routines
@@ -120,7 +121,9 @@ clear:		move.l	4(sp),a0	; a0 -> start
 		movem.l	d3-d7/a3,-(sp)	; save registers
 
 		move.l  _lineAVar,a3	; a3 -> linea var struct
+#if VIDEL_SUPPORT
 		move.l	pal_map(a3),d1	; d1 <- desired background col
+#endif
 
 		move.l	d1,d2		; store background
 		move.l	d1,d3		;    into d1-d7/a3
@@ -432,11 +435,11 @@ mouse_init:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		lea	xydraw(a1),a0		; init the draw parameter block
 
 		move.w	v_hz_rez(a1),d0		; d0 <- horizontal rez
-		lsr.w	d0			; d0 <- x rez / 2
+		lsr.w	#1,d0			; d0 <- x rez / 2
 		move.w	d0,_GCURX(a1)		; init mouse X position
 
 		move.w	v_vt_rez(a1),d0		; d0 <- vrtical rez
-		lsr.w	d0			; d0 <- y rez / 2
+		lsr.w	#1,d0			; d0 <- y rez / 2
 		move.w	d0,_GCURY(a1)		; init mouse Y position
 
 		move.l	_GCURXY(a1),(a0)+	; to the initial position
@@ -498,9 +501,9 @@ resetdev:
 * device pointer in linea variable structure, then drop through to esc_init().
 *-
 _dev_init:	move.l	_lineAVar,a1			; a1 -> lina var struct
-		tst.l	UserDevInit(a1)			; see if vector set
+		tst.l	LA_USERDEVINIT(a1)			; see if vector set
 		beq	devI4				; branch if not
-		move.l	UserDevInit(a1),a0		; see if vector set
+		move.l	LA_USERDEVINIT(a1),a0		; see if vector set
 		jsr	(a0)				; execute user routine
 
 devI4:		move.l	4(sp),a0			; a0 -> device struct
@@ -512,7 +515,9 @@ devI4:		move.l	4(sp),a0			; a0 -> device struct
 		tst.l	DEVCURROUTINES(a0)		; see if routines set
 		bne	esc_init			; if so don't do it
 
-devI0:		cmp.w	#PIXPACKED,DEVFORMID(a0)	; see if pixel packed
+devI0:
+#if VIDEL_SUPPORT
+		cmp.w	#PIXPACKED,DEVFORMID(a0)	; see if pixel packed
 		bne	devI2				; skip if not
 		cmp.w	#16,DEVPLANES(a0)		; see if FALCON030
 		bne	devI1				; if not init to other
@@ -525,8 +530,10 @@ devI1:		move.l	#_PixSoftList,DEVSOFTROUTINES(a0)
 		move.l	#_PixHardList,DEVHARDROUTINES(a0)
 		move.l	#_PixSoftList,DEVCURROUTINES(a0)
 		bra	esc_init			; init glass TTY
+#endif
 
-devI2:		move.l	#_STSoftList,DEVSOFTROUTINES(a0)
+devI2:
+		move.l	#_STSoftList,DEVSOFTROUTINES(a0)
 		move.l	#_STHardList,DEVHARDROUTINES(a0)
 		move.l	#_STSoftList,DEVCURROUTINES(a0)
 		bra	esc_init			; init glass TTY
@@ -535,9 +542,9 @@ _esc_init:
 esc_init:	jsr	_InitFonts		; copy font headers into ram
 
     		move.l  _lineAVar,a1		; a1 -> linea var struct
-		tst.l	UserEscInit(a1)		; see if vector set
+		tst.l	LA_USERESCINIT(a1)		; see if vector set
 		beq	esc4			; branch if not
-		move.l	UserEscInit(a1),a0	; see if vector set
+		move.l	LA_USERESCINIT(a1),a0	; see if vector set
 		jsr	(a0)			; execute user routine
 
 esc4:		move.l	LA_CURDEV(a1),a0		; a0 -> curr device structure
@@ -550,13 +557,16 @@ esc4:		move.l	LA_CURDEV(a1),a0		; a0 -> curr device structure
 		beq	esc2				; if not then skip
 		move.l	DEVVIDADR(a0),_v_bas_ad		; set video base adr
 
-esc2:		move.w	#0,byt_per_pix(a1)		; assume 0 bytes/pix
+esc2:
+#if VIDEL_SUPPORT
+		move.w	#0,byt_per_pix(a1)		; assume 0 bytes/pix
 		move.w	DEVFORMID(a0),form_id(a1)   	; init mem config flag 
 		cmp.w	#PIXPACKED,DEVFORMID(a0)     	; see if in pix packed
 		bne	esc0
 		move.w	_v_planes(a1),d1	; # of planes
 		lsr.w	#3,d1			; d1 <- # of bytes per pix
 		move.w	d1,byt_per_pix(a1)	; load # bytes per pix
+#endif
 
 esc0:		lea	save_block(a1),a2	; a0 -> save_block
 		cmp.w	#4,_v_planes(a1)	; see if we have > 4 planes
@@ -571,7 +581,9 @@ esc1:		move.l	a2,sv_blk_ptr(a1) 	; init ptr to pnt to save_block
 		move.l  _lineAVar,a1		; a1 -> linea var struct
 		moveq.l	#0,d0
 		move.w	d0,v_col_fg(a1)		; foreground color is all ones
+#if VIDEL_SUPPORT
 		move.l	d0,vl_col_fg(a1)	; set in case we are 32 bit mode
+#endif
 		move.w	d0,v_cur_cx(a1)
 		move.w	d0,v_cur_cy(a1)
 		move.w	d0,v_cur_off(a1)
@@ -579,15 +591,21 @@ esc1:		move.l	a2,sv_blk_ptr(a1) 	; init ptr to pnt to save_block
 
 		not.l	d0
 		move.w	d0,v_col_bg(a1)		; background color is all zeros
+#if VIDEL_SUPPORT
 		move.l	d0,vl_col_bg(a1)	; set in case we are 32 bit mode
+#endif
 
 		move.l	LA_CURDEV(a1),a0		; a0 -> curr device structure
 		tst.w	DEVLOOKUPTABLE(a0)     	; see if there is a lookup tble
 		beq	esc3			; if not then skip
 		not.w	v_col_fg(a1)		; in a lookup table we need
+#if VIDEL_SUPPORT
 		not.l	vl_col_fg(a1)		;	to switch foreground
+#endif
 		not.w	v_col_bg(a1)		;	and background
+#if VIDEL_SUPPORT
 		not.l	vl_col_bg(a1)
+#endif
 
 esc3:		move.l	_v_bas_ad,v_cur_ad(a1)	; home cursor.
 		move.l	#-1,col_and_mask(a1)	; init "and" mask for vs_color
@@ -603,11 +621,11 @@ esc3:		move.l	_v_bas_ad,v_cur_ad(a1)	; home cursor.
 		move.l	#normal_ascii,con_state ; Init conout state machine
 
 		move.w	v_hz_rez(a1),d0		; d0 <- horizontal rez
-		lsr.w	d0			; d0 <- x rez / 2
+		lsr.w	#1,d0			; d0 <- x rez / 2
 		move.w	d0,_GCURX(a1)		; init mouse X position
 
 		move.w	v_vt_rez(a1),d0		; d0 <- vrtical rez
-		lsr.w	d0			; d0 <- y rez / 2
+		lsr.w	#1,d0			; d0 <- y rez / 2
 		move.w	d0,_GCURY(a1)		; init mouse Y position
 
 		move.w	#1,-(sp)		; try set Blit mode to hard
@@ -618,5 +636,3 @@ esc3:		move.l	_v_bas_ad,v_cur_ad(a1)	; home cursor.
 		jsr	_InitDevTabInqTab	; initialize more variables
 
 		bra	_CLEARMEM		; blank screen. ret from there
-
-		.end

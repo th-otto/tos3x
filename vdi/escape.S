@@ -61,8 +61,10 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
-.include	"devequ.s"
+#include "vdiincld.inc"
+#include "devequ.inc"
+#include "lineaequ.inc"
+#include "tosvars.inc"
 
 ldri_escape	equ	19	; last DRI escape = 19.
 
@@ -95,33 +97,29 @@ F_SVPOS		equ	    5	;				1:true
 
 
 
-	xdef	_v_bas_ad	* screen base address
-	xdef	save_row	* saved row in escape Y command
-	xdef	con_state	* state of conout state machine
-
 *	external routines
 
-	xdef	_v_show_c
-	xdef	_v_hide_c
-	xdef	 ringbel
+	xref	_v_show_c
+	xref	_v_hide_c
+	xref	ringbell
 
 
 *	public routines
 
-	.globl	_asc_out
-	.globl	normal_ascii
-	.globl	conout
-        .globl  st_move_cursor
-	.globl	gsx_conout
-	.globl	_con_out
-	.globl	_CHK_ESC
-	.globl	gl_f_init
-	.globl	blank_it
-	.globl	st_neg_cell
-	.globl	esce
-	.globl	escf
+	xdef	_asc_out
+	xdef	normal_ascii
+	xdef	conout
+    xdef  st_move_cursor
+	xdef	gsx_conout
+	xdef	_con_out
+	xdef	_CHK_ESC
+	xdef	gl_f_init
+	xdef	blank_it
+	xdef	st_neg_cell
+	xdef	esce
+	xdef	escf
 
-	.text
+	text
 
 *******************************************************************************
 *									      *
@@ -255,9 +253,9 @@ normal_ascii:
 
 handle_control:
 
-	subq.w	#7, d1			; Range check the character against
+	subq.w	#7,d1			; Range check the character against
 	bmi	exit_conout		; the ones we handle, and exit if out
-	cmp.w	#6, d1			; of range.
+	cmp.w	#6,d1			; of range.
 	bgt	exit_conout
 
 	add.w	d1,d1			; d1 <- offset to the offset
@@ -278,8 +276,8 @@ ctrl_tbl:
 
 do_bell:
 
-	bra	ringbel			; need local variable in ctrl_tbl
-
+	bra	ringbell			; need local variable in ctrl_tbl
+	
 do_tab:
 
 	move.w	v_cur_cx(a4),d0		; d0 <- cursor cell X
@@ -328,7 +326,7 @@ get_row:
 
 	move.w	v_cel_my(a4),d1		; clamp it to the maximum
 
-row_ok:	move.w	d1,save_row		; and save until command complete
+row_ok:	move.w	d1,_save_row		; and save until command complete
 	lea	get_column(pc),a0	; now, fetch the cell X
 	bra	load_state
 
@@ -342,7 +340,7 @@ get_column:
 	move.w	v_cel_mx(a4),d1		; clamp to maximum column
 
 col_ok:	move.w	d1,d0			; d0 <- cell X
-	move.w	save_row,d1		; d1 <- cell Y
+	move.w	_save_row,d1		; d1 <- cell Y
 	bsr	move_cursor		; move cursor
 
 	lea	normal_ascii(pc),a0	; we have what we need.
@@ -357,10 +355,13 @@ col_ok:	move.w	d1,d0			; d0 <- cell X
 get_fg_col:	lea	set_fg_col(pc),a0
 		bra	load_state		; Next char is the FG color
 
-set_fg_col:	lea	pal_map(a4),a0		; a0 -> virtual palette
+set_fg_col:
+#if VIDEL_SUPPORT
+		lea	pal_map(a4),a0		; a0 -> virtual palette
 		sub.w	#'0',d1			; mask out unneeded bits
 		lsl.w	#2,d1			; make d1 long word offset
-		move.l	(a0,d1.w),vl_col_fg(a4)	; set the foreground color.
+		move.l	(a0,d1.w),vl_col_fg(a4)	; set the foreground color. ; BUG; only set FG color for >= 16 planes
+#endif
 		lea	normal_ascii(pc),a0
 		bra	load_state
 
@@ -374,10 +375,13 @@ get_bg_col:	lea	set_bg_col(pc),a0	; Next char is the BG color
 		bra	load_state
 
 
-set_bg_col:	lea	pal_map(a4),a0		; a0 -> virtual palette
+set_bg_col:
+#if VIDEL_SUPPORT
+		lea	pal_map(a4),a0		; a0 -> virtual palette
 		sub.w	#'0',d1			; mask out unneeded bits
 		lsl.w	#2,d1			; make d1 long word offset
-		move.l	(a0,d1.w),vl_col_bg(a4)	; set the background color.
+		move.l	(a0,d1.w),vl_col_bg(a4)	; set the background color. ; BUG; only sets BG color for >= 16 planes
+#endif
 		lea	normal_ascii(pc),a0
 		bra	load_state
 
@@ -1154,10 +1158,12 @@ ascii_out:
 	move.w	v_col_fg(a4),d6		; d6 <- foreground color
 	move.w	v_col_bg(a4),d7		; d7 <- background color
 
+#if VIDEL_SUPPORT
 	cmp.w	#16,_v_planes(a4)	; see if we should use long val for col
 	ble	col_ok2			; if not the just skip
 	move.l	vl_col_fg(a4),d6	; d6 <- foreground color
 	move.l	vl_col_bg(a4),d7	; d7 <- background color
+#endif
 
 col_ok2:
 	btst.b	#F_REVID,v_stat_0(a4)	; test reverse video flag in v_stat_0
@@ -1202,8 +1208,8 @@ end_o_line:
 	clr.w	d1			; scroll from top of screen.
 	movem.l d0/a1,-(sp)		; SAVE ME!!!!!
 	
-;	pea	save_it(pc)		 return to "save_it"
-;	bra	p_sc_up			 do the scroll.
+*	pea	save_it(pc)		 return to "save_it"
+*	bra	p_sc_up			 do the scroll.
 
 	bsr	p_sc_up
 	movem.l (sp)+,d0/a1		; RESTORE ME!
@@ -1221,12 +1227,14 @@ no_scroll:
 
 next_cell:
 	move.l	v_off_ad(a4),a2		; a2 -> offset table
+#if VIDEL_SUPPORT
 	move.w	byt_per_pix(a4),d2	; d2 <- # of bytes per pix
 	beq	word_cell		; if zero means not pix packed
 	mulu	2(a2),d2		; d2 <- offset to next cell
 	adda.l	d2,a1			; a1 -> first cell of next word
 	addq.w	#1,d0			; Xcell of next cell to right
 	bra	disp_cur		; display cursor
+#endif
 
 word_cell:
 
@@ -1396,8 +1404,10 @@ y_clipped:	move.w	d1,d3			; d3 <- clipped Y
 		move.w	d0,d2			; d2 <- clipped X
 
 		move.l	v_off_ad(a4),a2		; a2 -> offset table
+#if VIDEL_SUPPORT
 		move.w	byt_per_pix(a4),d5	; d5 <- # bytes per each pix
 		bne	claddr_pix		; do pixel packed
+#endif
 
 		cmp.w	#16,2(a2)		; see if char cell is word wide
 		bne	claddr1			; bra if cell is 1 byte
@@ -1568,5 +1578,3 @@ gl_f_init:	move.l  _lineAVar,a4		; a4 -> linea var struct
 		move.l	POFF(a0),v_off_ad(a4)	; init font offset ptr.
 
 		rts
-
-	.end

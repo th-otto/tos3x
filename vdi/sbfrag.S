@@ -30,6 +30,7 @@
 *
 *************************************************************************
 
+#include "vdiincld.inc"
 
 SRC_WR		equ	-2
 DST_WR		equ	-4
@@ -43,15 +44,15 @@ P_MASK		equ	-26	; pattern index mask
 F1OP		equ	 8
 F2OP		equ	22
 
-       	.globl 	mode_00,mode_01,mode_02,mode_03,mode_04,mode_05,mode_06,mode_07
-	.globl 	mode_08,mode_09,mode_10,mode_11,mode_12,mode_13,mode_14,mode_15
+    xdef 	mode_00,mode_01,mode_02,mode_03,mode_04,mode_05,mode_06,mode_07
+	xdef 	mode_08,mode_09,mode_10,mode_11,mode_12,mode_13,mode_14,mode_15
 
-	.globl	f0_l2r_rt,f1_l2r_rt,f2_l2r_rt,fl_l2r_rt
-	.globl	f0_l2r_lf,f1_l2r_lf,f2_l2r_lf,fl_l2r_lf
-	.globl	f0_r2l_rt,f1_r2l_rt,f2_r2l_rt,fl_r2l_rt
-	.globl	f0_r2l_lf,f1_r2l_lf,f2_r2l_lf,fl_r2l_lf
+	xdef	f0_l2r_rt,f1_l2r_rt,f2_l2r_rt,fl_l2r_rt
+	xdef	f0_l2r_lf,f1_l2r_lf,f2_l2r_lf,fl_l2r_lf
+	xdef	f0_r2l_rt,f1_r2l_rt,f2_r2l_rt,fl_r2l_rt
+	xdef	f0_r2l_lf,f1_r2l_lf,f2_r2l_lf,fl_r2l_lf
 
-	.globl	f0_left,f0_right,f2_update,f1_dst,f1_drt,f2_dst,p1_update
+	xdef	f0_left,f0_right,f2_update,f1_dst,f1_drt,f2_dst,p1_update
 
 
 * name:
@@ -98,7 +99,7 @@ F2OP		equ	22
 
 	nop
 
-.page
+	page
 
 ***				   ***
 ***   PATTERN PARAMETER UPDATING   ***
@@ -121,7 +122,7 @@ p1_update:
 	jmp	(a5)		; thread to first fringe fragment		 8
 
 
-.page
+	page
 
 ***					       ***
 ***   FIRST FRINGE FRAGMENTS:single transfer   *** 
@@ -143,7 +144,7 @@ f0_right:
 	jmp	F1OP(a2)	; send to DESTINATION via logic op		10
 
 
-.page
+	page
 
 ***			       ***
 ***   FIRST FRINGE FRAGMENTS   *** 
@@ -271,7 +272,7 @@ f0_l2r_lf:
 
 
 
-.page
+	page
 
 ***			     ***
 ***   INNER LOOP FRAGMENTS   ***
@@ -347,7 +348,7 @@ i1_l2r_lf:
 
 
 
-.page
+	page
 
 ***							     ***
 ***   INNER LOOP COUNTER and SECOND FRINGE REQUIRING FETCH   ***
@@ -413,7 +414,7 @@ f2_l2r_lf:
 
 
 
-.page
+	page
 
 ***							     ***
 ***   INNER LOOP COUNTER and SECOND FRINGE REQUIRING FLUSH   ***
@@ -442,7 +443,7 @@ fl_l2r_lf:
 
 
 
-.page
+	page
 
 ***					    ***
 ***   FINAL FRINGE OUTPUT and ROW CONTROL   ***
@@ -480,7 +481,7 @@ f2_end:	rts
 
 
 
-.page
+	page
 
 ***					***
 ***   UNARY ALTERATION OF DESTINATION   ***
@@ -519,7 +520,7 @@ f1_drt:
 
 
 
-.page
+	page
 
 
 ***					     ***
@@ -913,7 +914,3 @@ f1op_15:
 f2op_15:
 	or.w	d6,(a1)
 	bra	f2_drt		; %$#@*!
-
-
-
-	end

@@ -45,43 +45,45 @@
 * 
 *******************************************************************************
 
-.include	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
 
-	.globl	_FindDevice
-	.globl	_SetCurDevice
-	.globl	_GSX_ENTRY
-	.globl	line1010		; for LINE "A".  MSH  4/23/85
-	.globl	_asc_out		; raw con out
-	.globl	conout
-	.globl	_GETBLT
-	.globl	_SETBLT
-	.globl	blink
-	.globl	_jmptb2			; jump table for second set of GDP'S
-	.globl	myvq_key_s
-	.globl	_VsetRGB
+	xref	_FindDevice
+	xref	_SetCurDevice
+	xref	_GSX_ENTRY
+	xref	line1010		; for LINE "A".  MSH  4/23/85
+	xref	_asc_out		; raw con out
+	xref	conout
+	xref	_GETBLT
+	xref	_SETBLT
+	xref	blink
+	xref	_jmptb2			; jump table for second set of GDP'S
+	xref	myvq_key_s
+	xref	_VsetRGB
 
-TRAP2		=	$88
-TRAP14		=	$B8
-LINEA		=	$28
+TRAP2		equ	$88
+TRAP14		equ	$B8
+LINEA		equ	$28
 
 *--- look under "soft" console vectors for system vars
-CONOUT		=	$586		; "soft" conout vector
-ASCIIOUT	=	$592		; "soft" _asc_out vector
-SSHIFTMD	=	$44c		; soft shadow reg
+CONOUT		equ	$586		; "soft" conout vector
+ASCIIOUT	equ	$592		; "soft" _asc_out vector
+SSHIFTMD	equ	$44c		; soft shadow reg
 
-TTSHIFTMD	=	$ff8262		; TT shift mode register
+TTSHIFTMD	equ	$ff8262		; TT shift mode register
 
-GEMDOS		=	$01
-CCONWS		=	$09
-SUPER		=	$20
-PTERMRES	=	$31
+GEMDOS		equ	$01
+CCONWS		equ	$09
+SUPER		equ	$20
+PTERMRES	equ	$31
 
-XBIOS		=	$0E
-LOGBASE		=	$03
-GETREZ		=	$04
-SETSCREEN	=	$05
-CURSCONF	=	$15
-BLITMODE	=	$40
+XBIOS		equ	$0E
+LOGBASE		equ	$03
+GETREZ		equ	$04
+SETSCREEN	equ	$05
+CURSCONF	equ	$15
+BLITMODE	equ	$40
 
 
 gin:	move.w	d0,-(sp)		; doesn't matter what value
@@ -217,12 +219,11 @@ xbios_check:	move.l	USP,a0			; a0 -> USP
 		btst.b	#5,(sp)			; should we use USP or SSP ?
 		beq	user_stack		; use USP if not super mode
 		movea.l	sp,a0			; a0 -> SSP
-.ifeq P68030
+#if P68030
 		addq.w	#8,a0			; a0 -> funct #
-.endc
-.ifne P68030
+#else
 		addq.w	#6,a0			; a0 -> funct #
-.endc
+#endif
 
 user_stack:	cmp.w	#5,(a0)			; check if SetScreen() funct #
 		beq	SetScreen		; call SetScreen() funct
@@ -260,27 +261,25 @@ SS0:		move.w	12(a0),-(sp)		; pass optional argument
 		move.l	6(a0),-(sp)		; pass physical adr
 		move.l	2(a0),-(sp)		; pass logical adr
 		move.w	(a0),-(sp)		; pass function #
-.ifeq P68030
+#if P68030
 		move.w	#0,-(sp)		; vector offset
-.endc
+#endif
 		move.l	#SSComeback,-(sp)	; put return value for rte
-.ifeq P68030
+#if P68030
 		move.w	20(sp),-(sp)		; push old sr
-.endc
-.ifne P68030
+#else
 		move.w	18(sp),-(sp)		; push old sr
-.endc
+#endif
 		ori.w	#$2000,(sp)		; remain in super mode on rte
 		move.l	old_xbios(pc),a0	; go back to the old guy
 		jmp	(a0)
 
 SSComeback:
-.ifeq P68030
+#if P68030
 		add.w	#14,sp			; cleanup stack
-.endc
-.ifne P68030
+#else
 		add.w	#12,sp			; cleanup stack
-.endc
+#endif
 		movem.l	a3-a6/d3-d7,-(sp)	; save registers
 		moveq.l	#0,d0			; clear unneeded bits
 		move.b	SSHIFTMD,d0		; d0 <- desired res
@@ -307,8 +306,8 @@ CursConf:	movem.l	a3-a5/d3-d7,-(sp)	; save registers
 *
 *  BIOS call to test for / configure blitter;
 *
-*    Synopsis:	WORD BlitMode(mode)
-*		WORD mode;
+*    Synopsis:	int16_t BlitMode(mode)
+*		int16_t mode;
 *
 *    If 'mode' is non-negative (greater than or equal to zero) then
 *    set the current graphics mode to 'mode' (see bit field definitions
@@ -406,7 +405,7 @@ SetShift:	move.w	TTSHIFTMD,-(sp)		; save return value
 
 *+
 * SetRGB:    VOID SetRGB(colorNum, count, palettePtr)
-*            WORD colorNum, count;
+*            int16_t colorNum, count;
 *            LONG palettePtr;
 *                 Set the contents of a contiguous set of hardware
 *                 palette registers with the longs pointed to by 'palettePtr'.
@@ -429,6 +428,5 @@ old_xbios:	dc.l	0		; ptr to old bios trap vector
 string:		dc.b	'GEM VDI loaded at 00000000',13,10,0
 tail		equ	string+26
 
-	.bss
+	bss
 NewScreen:	ds.w	350000			; memory for the screen
-	.end

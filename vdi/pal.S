@@ -1,3 +1,5 @@
+#include "vdiincld.inc"
+
 *--- 16 standard colors
     dc.l    $fff         ; 0 white
     dc.l    $f00         ; 1 red

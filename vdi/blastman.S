@@ -7,7 +7,7 @@
 *
 * $Log:	blastman.s,v $
 * Revision 3.3  91/02/13  17:51:35  lozben
-* Entered line ".globl KG_BLT" at the top of the file.
+* Entered line "xdef KG_BLT" at the top of the file.
 * 
 * Revision 3.2  91/02/12  16:00:06  lozben
 * Forgot to include the file "lineaequ.s".
@@ -20,7 +20,9 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+
 
 B_WD		equ	-76	; width of block in pixels
 B_HT		equ	-74	; height of block in pixels
@@ -32,13 +34,13 @@ D_YMIN		equ	-46	; minimum Y: destination
 S_XMAX		equ	-18	; maximum X: source	
 S_YMAX		equ	-16	; maximum Y: source	
 D_XMAX		equ	-10	; maximum X: destination
-D_YMAX		equ	-08	; maximum Y: destination
+D_YMAX		equ	-8	; maximum Y: destination
 
 FRAME_LEN	equ	 76
 
-	.globl	KG_BLT
+	xdef	KG_BLT
 
-	.text
+	text
 
 *  in:
 *	a6.l	points to 76 byte parameter block
@@ -74,5 +76,3 @@ KG_BLT:
 	move.l	LA_ROUTINES(a5),a5	; a5 -> routines vector list
 	move.l	V_BLAST(a5),a5		; a5 -> desired version of blast_man
 	jmp	(a5)			; routine ("blast_man" uses BLASTER)
-
-	.end

@@ -24,6 +24,11 @@
 * 
 *******************************************************************************
 
+#include "vdiincld.inc"
+#include "asmdefs.h"
+#include "tosvars.inc"
+
+#include "devequ.inc"
 #include "lineaequ.inc"
 
 
@@ -47,7 +52,7 @@ rout_init:
 _SETBLT:
 #if TOSVERSION >= 0x404
 		move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.w	d0,_BLT_MODE(a1)	; store present mode selection
+		move.w	d0,LA_BLTMODE(a1)	; store present mode selection
 		move.l	LA_CURDEV(a1),a0		; a0 -> current device struct
 
 
@@ -73,18 +78,17 @@ rCopyLoop:
 		move.l	V_INIT(a1),a1		; a1 -> version of init
 		jsr	(a1)
 #else
-        move.w    d0,LA_BLTMODE
-        movea.l   LA_CURDEV+lineavars,a0
+        move.w    d0,LA_BLTMODE+lineavars
+        movea.l   lineavars+LA_CURDEV,a0
         btst      #0,d0
         beq.s     setblt0
-        movea.l   LA_ROUTINES,a0
+        movea.l   lineavars+LA_ROUTINES,a0
 setblt0:
-        lea.l     LA_USERDEVINIT,a1
+        lea.l     lineavars+LA_USERDEVINIT,a1
         moveq.l   #9,d0
 rCopyLoop:
         move.l    (a0)+,(a1)+
         dbf       d0,rCopyLoop
-        rts
 #endif
 		rts
 
@@ -103,9 +107,9 @@ _GETBLT:
 #if TOSVERSION >= 0x404
 		move.l	a0,-(sp)
 		move.l  _lineAVar,a0		; a0 -> linea var struct
-		move.w	_BLT_MODE(a0),d0
+		move.w	LA_BLTMODE(a0),d0
 		move.l	(sp)+,a0
 #else
-        move.w    LA_BLTMODE,d0
+        move.w    lineavars+LA_BLTMODE,d0
 #endif
 		rts

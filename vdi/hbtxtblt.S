@@ -20,15 +20,12 @@
 * 
 *************************************************************************
 
-.include	"lineaequ.s"
-.include 	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
 
-	.globl	 BLASTER
-	.globl	 hb_text
-
-*   base of Line "A" variables
-
-	.globl	_v_bas_ad
+	xref	 BLASTER
+	xdef	 hb_text
 
 *    Some of Jim Eisenstein's bloody blastman code came in handy here
 *
@@ -55,21 +52,21 @@ B_F2_MSK	equ	-16 		; 2nd fringe mask	0:old 1:new
 B_D_NXWD	equ	-14 		; offset to next dst word
 B_D_WRAP	equ	-12 		; wrap from end of one dst line to next
 B_D_ADDR	equ	-10 		; initial dst address
-B_D_SPAN	equ	-06 		; span in words of dst block
-B_HEIGHT	equ	-04 		; pixel height of block
-B_LOGOP		equ	-02 		; ctrl word: src^pat combo & logic op #
-B_SKEW		equ	 00		; ctrl word: flags, pat index & skew
+B_D_SPAN	equ	-6 		; span in words of dst block
+B_HEIGHT	equ	-4 		; pixel height of block
+B_LOGOP		equ	-2 		; ctrl word: src^pat combo & logic op #
+B_SKEW		equ	 0		; ctrl word: flags, pat index & skew
 
-BF_PAT		equ  	08		; combo flag: 0:all ones  1:pattern
-BF_SRC		equ  	09		; combo flag: 0:all ones  1:source
+BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
+BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
 
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
-BF_PF		equ  	07		; pre-fetch flag  	 0:false 1:true
-BF_FQ		equ  	06		; flush queue flag 	 0:false 1:true
+BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
+BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
 BM_GO		equ  	$8000		; execution mask	
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
@@ -142,7 +139,7 @@ locweigt	equ	-*
 ramlen		equ	-*
 
 
-	.text
+	text
 
 hb_text:
 
@@ -660,7 +657,7 @@ outlin:
 	lea	(a0,d7.w),a1	;bump mid line to "real" top line
 outlin1:
 	lea	(a1,d7.w),a2	;set up a2 to point to 1 line below current
-	lsr.w	d7		;# of words in horz line
+	lsr.w	#1,d7		;# of words in horz line
 	subq.w	#1,d7		;for "dbra" sweetie
 	bra	srt_lin
 out_edge:
@@ -668,28 +665,28 @@ out_edge:
 	moveq	#0,d5
 	moveq	#0,d6
 	move.l	(a2),d1		;get bottom line/left edge grafix data
-	lsr.l	d1		;clear left-most bit too
+	lsr.l	#1,d1		;clear left-most bit too
 *
 *  within line loop entry point..
 *
 out_loop:
 	move.l	(a0),d0		;get next top line grafix data
 	move.b	d5,d0		;put bit to left of current data in bit 0
-	ror.l	d0		;now its L 15 14 13 ... 1 0 R X X X...
+	ror.l	#1,d0		;now its L 15 14 13 ... 1 0 R X X X...
 *
 	move.l	(a1),d2		;get current line data
 	move.b	d6,d2		;same trick
 	move.l	d2,d3		;d2 is left-shifted current
-	ror.l	d3		;d3 is 0 shifted current
+	ror.l	#1,d3		;d3 is 0 shifted current
 	move.l	d3,d4
-	ror.l	d4		;d4 is right-shifted current
+	ror.l	#1,d4		;d4 is right-shifted current
 *
 	move.l	d0,d5		;get copy of top line
 	move.l	d0,d6		;get 2nd copy
 	eor.l	d2,d0		;exclusive neighbor #1
 	eor.l	d3,d5		;exclusive neighbor #2
 	eor.l	d4,d6		;exclusive neighbor #3
-	rol.l	d5		;adjust 0 shifted for final
+	rol.l	#1,d5		;adjust 0 shifted for final
 	rol.l	#2,d6		;adjust right shifted too
 	or.l	d5,d0		;form exclusive accumulator
 	or.l	d6,d0
@@ -699,7 +696,7 @@ out_loop:
 	eor.l	d2,d1		;exclusive neighbor #4
 	eor.l	d3,d5		;exclusive neighbor #5
 	eor.l	d4,d6		;exclusive neighbor #6
-	rol.l	d5		;adjust 0 shifted for final
+	rol.l	#1,d5		;adjust 0 shifted for final
 	rol.l	#2,d6		;adjust right shifted too
 	or.l	d1,d0
 	or.l	d5,d0
@@ -720,7 +717,7 @@ out_loop:
 	addq.l	#2,a2		;advance bottom line to next word
 	move.l	(a2),d1		;get next bottom line grafix data
 	move.b	-1(a2),d1	;same trick as with top line
-	ror.l	d1		;now its L 15 14 13 ... 1 0 R X X X...
+	ror.l	#1,d1		;now its L 15 14 13 ... 1 0 R X X X...
 *
 	move.w	d5,(a1)+
 	move.w	(a0),d5
@@ -848,7 +845,7 @@ rot_xlp:
 	beq	rot_nor			; br if not set
 	or.w	d2,d0			;else, set corresponding destination
 rot_nor:
-	ror.w	d2			;shift destination mask
+	ror.w	#1,d2			;shift destination mask
 	bcc	rot_isrc		;br if not done with destination accum?
 rot_ndst:
 	move.w	d0,(a1)+		;gotta full word--put out to dest
@@ -866,7 +863,7 @@ rot_srt:
 rot_nfrg:
 	movem.l	(sp)+,a0-a1/d7		;reget ptrs & height
 	adda.w	d1,a1			;add dest_next to dest ptr
-	ror.w	d4			;shift source mask
+	ror.w	#1,d4			;shift source mask
 	bcc	rot_nsrc
 	addq.l	#2,a0			;adjust src ptr for next sgl plane wrd
 rot_nsrc:
@@ -910,41 +907,41 @@ line_lp:
 	move.w	-(a2),d4		;pick up source word
 	moveq	#0,d5			;clear horz flip accum
 *
-	lsr.w	d4			;now, h-flip 16 bits
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
+	lsr.w	#1,d4			;now, h-flip 16 bits
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
 *
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
 *
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
 *
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
-	lsr.w	d4
-	roxl.w	d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
+	lsr.w	#1,d4
+	roxl.w	#1,d5
 *
 	move.w	d5,(a1)+		;store in destination
 	dbra	d2,line_lp
@@ -976,7 +973,7 @@ no_rota:
 *
 	bra	scrn_blt		;do blit to screen (last one)
 *
-nxtword:	.dc.b	2,4,0,8,0,0,0,16
+nxtword:	dc.b	2,4,0,8,0,0,0,16
 
 *
 *  Destination is screen, this must be our last blit
@@ -1381,7 +1378,7 @@ save_fringe_masks:
 	moveq	#15,d0
 litelp:
 	move.w	d6,(a5)+
-	ror.w	d6
+	ror.w	#1,d6
 	dbra	d0,litelp
 	lea	28(a5),a5		; a5 -> B_SKEW (BLASTER reference reg)
 *
@@ -1463,12 +1460,11 @@ blt_0_count:
 
 	dbra	d5,blt_0_loop
 
-.ifeq	P68030
-
-	movec.l	cacr,d5			; d2 <- cache control register
+#if P68030
+	CACR_D5			; d2 <- cache control register
 	bset.l	#11,d5			; set "Clr DATA Cache" bit
-	movec.l	d5,cacr			; clear the data cache
-.endc
+	D5_CACR			; clear the data cache
+#endif
 	rts
 
 
@@ -1479,27 +1475,27 @@ blt_0_count:
 *	fb=	00  01  10  11
 
 wrmtab:
-	.dc.b	$0,$0,$3,$3		*replace mode
-	.dc.b	$4,$4,$7,$7		*transparent mode
-	.dc.b	$6,$6,$6,$6		*XOR mode
-	.dc.b	$1,$1,$D,$D		*inverse transparent mode
+	dc.b	$0,$0,$3,$3		*replace mode
+	dc.b	$4,$4,$7,$7		*transparent mode
+	dc.b	$6,$6,$6,$6		*XOR mode
+	dc.b	$1,$1,$D,$D		*inverse transparent mode
 *
-	.dc.b	$0,$F,$0,$F		*mode 0  D' = 0
-	.dc.b	$0,$E,$1,$F		*mode 1  D' = S and D
-	.dc.b	$0,$D,$2,$F		*mode 2  D' = S and [not D]
-	.dc.b	$0,$C,$3,$F		*mode 3  D' = S	(replace)
-	.dc.b	$0,$B,$4,$F		*mode 4  D' = [not S] and D
-	.dc.b	$0,$A,$5,$F		*mode 5  D' = D
-	.dc.b	$0,$9,$6,$F		*mode 6  D' = S xor D (XOR mode)
-	.dc.b	$0,$8,$7,$F		*mode 7  D' = S or D  (OR mode)
-	.dc.b	$0,$7,$8,$F		*mode 8  D' = not [S or D]
-	.dc.b	$0,$6,$9,$F		*mode 9  D' = not [S xor D]
-	.dc.b	$0,$5,$A,$F		*mode A  D' = not D
-	.dc.b	$0,$4,$B,$F		*mode B  D' = S or [not D]
-	.dc.b	$0,$3,$C,$F		*mode C  D' = not S
-	.dc.b	$0,$2,$D,$F		*mode D  D' = [not s] or D
-	.dc.b	$0,$1,$E,$F		*mode E  D' = not [S and D]
-	.dc.b	$0,$0,$F,$F		*mode F  D' = 1
+	dc.b	$0,$F,$0,$F		*mode 0  D' = 0
+	dc.b	$0,$E,$1,$F		*mode 1  D' = S and D
+	dc.b	$0,$D,$2,$F		*mode 2  D' = S and [not D]
+	dc.b	$0,$C,$3,$F		*mode 3  D' = S	(replace)
+	dc.b	$0,$B,$4,$F		*mode 4  D' = [not S] and D
+	dc.b	$0,$A,$5,$F		*mode 5  D' = D
+	dc.b	$0,$9,$6,$F		*mode 6  D' = S xor D (XOR mode)
+	dc.b	$0,$8,$7,$F		*mode 7  D' = S or D  (OR mode)
+	dc.b	$0,$7,$8,$F		*mode 8  D' = not [S or D]
+	dc.b	$0,$6,$9,$F		*mode 9  D' = not [S xor D]
+	dc.b	$0,$5,$A,$F		*mode A  D' = not D
+	dc.b	$0,$4,$B,$F		*mode B  D' = S or [not D]
+	dc.b	$0,$3,$C,$F		*mode C  D' = not S
+	dc.b	$0,$2,$D,$F		*mode D  D' = [not s] or D
+	dc.b	$0,$1,$E,$F		*mode E  D' = not [S and D]
+	dc.b	$0,$0,$F,$F		*mode F  D' = 1
 *
 blt_adj:
 	move.l	-(a0),d0
@@ -1576,7 +1572,7 @@ cas1:
 	beq	cas1a			;br if skew non-zero
 	move.w	#2,B_S_NXWD(a5)
 cas1a:
-	lsr.l	d0
+	lsr.l	#1,d0
 	cmpi.w	#$8000,d0		;lo word = $8000?
 	bne	cas1b			;br over t1 if not
 *
@@ -1608,7 +1604,7 @@ cas2:
 	beq	cas2a			;br if skew non-zero
 	andi.w	#$FFFF-(BM_FQ+BM_PF),d7	;"not" BM_FQ+BM_PF
 cas2a:
-	lsr.l	d0
+	lsr.l	#1,d0
 	cmpi.l	#$10000,d0		;hi word = 0?
 	bcc	cas2b
 	swap	d0
@@ -1641,8 +1637,8 @@ cas3:
 	beq	cas3a			;br if skew non-zero
 	andi.w	#$FFFF-(BM_FQ+BM_PF),d7	;"not" BM_FQ+BM_PF
 cas3a:
-	lsr.l	d0
-	roxr.l	d6			;save carry-out in bit #31
+	lsr.l	#1,d0
+	roxr.l	#1,d6			;save carry-out in bit #31
 	cmpi.l	#$10000,d0		;hi word = 0?
 	bcc	cas3b
 	ext.l	d0			;move $FFFF to hi word
@@ -1653,7 +1649,7 @@ cas3a:
 	ori.w	#BM_PF,d7
 	andi.w	#$FFFF-BM_FQ,d7
 cas3b:
-	lsl.l	d6			;get carry-out
+	lsl.l	#1,d6			;get carry-out
 	bcc	next_sec
 *
 	move.w	#$8000,d0
@@ -1676,7 +1672,7 @@ cas4:
 	beq	cas4a			;br if skew non-zero
 	andi.w	#$FFFF-(BM_FQ+BM_PF),d7	;clear BM_FQ and BM_PF
 cas4a:
-	lsr.l	d0
+	lsr.l	#1,d0
 	bcc	cas4b
 *
 	move.w	#$8000,d0
@@ -1777,7 +1773,7 @@ nrepnor:
 	bcc	o_no_rep
 *
 	or.w	d4,d0
-	ror.w	d4
+	ror.w	#1,d4
 	bcc	o_no_rep
 	move.w	d0,(a1)+
 	clr.w	d0
@@ -1799,5 +1795,3 @@ repdone:
 	movem.l	(sp)+,a0-a1/d3-d7
 	adda.w	d1,a1
 	rts
-
-	.end

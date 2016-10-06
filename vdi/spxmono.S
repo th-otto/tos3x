@@ -8,10 +8,9 @@
 * $Log:	sbmono.s,v $
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-		globl	 spx_mono
-		globl	_v_bas_ad
 
 *******************************************************************************
 *	
@@ -30,6 +29,8 @@
 *
 *******************************************************************************
 
+#if VIDEL_SUPPORT
+		xdef	 spx_mono
 spx_mono:
 	movem.l	a5/a6,-(sp)		; save registers
 
@@ -119,7 +120,7 @@ next_char:
 * Replace mode (1)
 *-
 New32M1Line:	move.w	(a2),d0			; d0 <- font data
-Cur32M1Line:	lsl.w	d0			; if shifted out bit was set
+Cur32M1Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel32M1Fg		; then splat foreground
 		move.l	d6,(a3)+		; set dst to background color
 		dbra	d5,Cur32M1Line		; cont with current cell line
@@ -141,7 +142,7 @@ Cel32M1Fg:	move.l	d4,(a3)+		; set dst to foreground color
 * Transparant mode (2)
 *-
 New32M2Line:	move.w	(a2),d0			; d0 <- font data
-Cur32M2Line:	lsl.w	d0			; if shifted out bit was set
+Cur32M2Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel32M2Fg		; then splat foreground
 		addq.w	#4,a3			; point to next pixel
 		dbra	d5,Cur32M2Line		; cont with current cell line
@@ -163,7 +164,7 @@ Cel32M2Fg:	move.l	d4,(a3)+		; set dst to foreground color
 * XOR mode (3)
 *-
 New32M3Line:	move.w	(a2),d0			; d0 <- font data
-Cur32M3Line:	lsl.w	d0			; if shifted out bit was set
+Cur32M3Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel32M3Fg		; then splat foreground
 		addq.w	#4,a3			; point to next pixel
 		dbra	d5,Cur32M3Line		; cont with current cell line
@@ -185,7 +186,7 @@ Cel32M3Fg:	eori.l	#-1,(a3)+		; XOR with -1
 * Reverse Transparant Mode (4)
 *-
 New32M4Line:	move.w	(a2),d0			; d0 <- font data
-Cur32M4Line:	lsl.w	d0			; if shifted out bit was set
+Cur32M4Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel32M4Fg		; then splat foreground
 		move.l	d6,(a3)+		; set dst to background color
 		dbra	d5,Cur32M4Line		; cont with current cell line
@@ -211,7 +212,7 @@ Cel32M4Fg:	addq.w	#4,a3			; point to next pixel
 * Replace mode (1)
 *-
 New16M1Line:	move.w	(a2),d0			; d0 <- font data
-Cur16M1Line:	lsl.w	d0			; if shifted out bit was set
+Cur16M1Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel16M1Fg		; then splat foreground
 		move.w	d6,(a3)+		; set dst to background color
 		dbra	d5,Cur16M1Line		; cont with current cell line
@@ -233,7 +234,7 @@ Cel16M1Fg:	move.w	d4,(a3)+		; set dst to foreground color
 * Transparant mode (2)
 *-
 New16M2Line:	move.w	(a2),d0			; d0 <- font data
-Cur16M2Line:	lsl.w	d0			; if shifted out bit was set
+Cur16M2Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel16M2Fg		; then splat foreground
 		addq.w	#2,a3			; point to next pixel
 		dbra	d5,Cur16M2Line		; cont with current cell line
@@ -255,7 +256,7 @@ Cel16M2Fg:	move.w	d4,(a3)+		; set dst to foreground color
 * XOR mode (3)
 *-
 New16M3Line:	move.w	(a2),d0			; d0 <- font data
-Cur16M3Line:	lsl.w	d0			; if shifted out bit was set
+Cur16M3Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel16M3Fg		; then splat foreground
 		addq.w	#2,a3			; point to next pixel
 		dbra	d5,Cur16M3Line		; cont with current cell line
@@ -277,7 +278,7 @@ Cel16M3Fg:	eori.w	#-1,(a3)+		; XOR with -1
 * Reverse Transparant Mode (4)
 *-
 New16M4Line:	move.w	(a2),d0			; d0 <- font data
-Cur16M4Line:	lsl.w	d0			; if shifted out bit was set
+Cur16M4Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel16M4Fg		; then splat foreground
 		move.w	d6,(a3)+		; set dst to background color
 		dbra	d5,Cur16M4Line		; cont with current cell line
@@ -303,7 +304,7 @@ Cel16M4Fg:	addq.w	#2,a3			; point to next pixel
 * Replace mode (1)
 *-
 New8M1Line:	move.w	(a2),d0			; d0 <- font data
-Cur8M1Line:	lsl.w	d0			; if shifted out bit was set
+Cur8M1Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel8M1Fg		; then splat foreground
 		move.b	d6,(a3)+		; set dst to background color
 		dbra	d5,Cur8M1Line		; cont with current cell line
@@ -325,7 +326,7 @@ Cel8M1Fg:	move.b	d4,(a3)+		; set dst to foreground color
 * Transparant mode (2)
 *-
 New8M2Line:	move.w	(a2),d0			; d0 <- font data
-Cur8M2Line:	lsl.w	d0			; if shifted out bit was set
+Cur8M2Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel8M2Fg		; then splat foreground
 		addq.w	#1,a3			; point to next pixel
 		dbra	d5,Cur8M2Line		; cont with current cell line
@@ -347,7 +348,7 @@ Cel8M2Fg:	move.b	d4,(a3)+		; set dst to foreground color
 * XOR mode (3)
 *-
 New8M3Line:	move.w	(a2),d0			; d0 <- font data
-Cur8M3Line:	lsl.w	d0			; if shifted out bit was set
+Cur8M3Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel8M3Fg		; then splat foreground
 		addq.w	#1,a3			; point to next pixel
 		dbra	d5,Cur8M3Line		; cont with current cell line
@@ -369,7 +370,7 @@ Cel8M3Fg:	eori.b	#-1,(a3)+		; XOR with -1
 * Reverse Transparant Mode (4)
 *-
 New8M4Line:	move.w	(a2),d0			; d0 <- font data
-Cur8M4Line:	lsl.w	d0			; if shifted out bit was set
+Cur8M4Line:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	Cel8M4Fg		; then splat foreground
 		move.b	d6,(a3)+		; set dst to background color
 		dbra	d5,Cur8M4Line		; cont with current cell line
@@ -386,4 +387,5 @@ Cel8M4Fg:	addq.w	#1,a3			; point to next pixel
 		add.w	a4,a3			; point to next line of dest
 		dbra	d3,New8M4Line		; do next line of the cell
 		rts
-	.end
+
+#endif

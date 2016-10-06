@@ -8,9 +8,10 @@
 * $Log:	mouse.s,v $
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
-	.globl	PX_RECTFILL
+#if VIDEL_SUPPORT
 
 *******************************************************************************
 *******************************************************************************
@@ -49,6 +50,7 @@ rf_null:
 	rts
 
 
+	xdef	PX_RECTFILL
 PX_RECTFILL:
 
 	move.l  _lineAVar,a4		; a4 -> linea var struct
@@ -59,9 +61,9 @@ PX_RECTFILL:
 	tst.w	(a1)+			; a1 -> 1st entry in clipping array
 	beq	rf_noclip		; if no clipping, don't dawdle here.
 
-	;
-	;   Clipping is in effect
-	;
+*
+*   Clipping is in effect
+*
 	movem.w	(a1),d0-d3		; d0<-Xmin d1<-Ymin d2<-Xmax d3<-Ymax
 
 	cmp.w	d0,d4			; X1 < clipping Xmin ?
@@ -98,11 +100,11 @@ rf_ymax:
 
 	move.w	d3,d7			; d7 <- clipped Y2
 
-	;
-	; To maintain compatibility with previous versions of
-	; this routine, the clipped values must be saved to their original
-	; memory locations.
-	;
+*
+* To maintain compatibility with previous versions of
+* this routine, the clipped values must be saved to their original
+* memory locations.
+*
 
 rf_rsave:
 
@@ -126,3 +128,5 @@ rect:	movem.w	d4-d7,-(sp)		; save registers
 	cmp.w	d5,d7			; see if Y1 > Y2
 	bge	rect			; loop back if not
 	rts
+
+#endif

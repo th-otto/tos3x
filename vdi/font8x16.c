@@ -19,16 +19,14 @@
 ********************************************************************************
 */
 
-#include "portab.h"
+#include "vdi.h"
 #include "fontdef.h"
+#include "gsxextrn.h"
 
 
-EXTERN	UWORD	off_8x8[];
+extern int16_t const off_8x8[];
 
-EXTERN	FONT_HEAD ram16x32[];
-
-UWORD dat_8x16[2048] =
-
+int16_t const dat_8x16[2048] =
 {	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x1104,
 	0x0000,0x0000,0x1800,0x3800,0x0000,0x0000,0x0000,0x0000,
@@ -289,33 +287,32 @@ UWORD dat_8x16[2048] =
 
 
 
-struct font_head f8x16 ={
+struct font_head const f8x16 ={
 
-    1,					/*   WORD  font_id	 	*/
-    10,					/*   WORD  point	 	*/
-   "8x16 system font",			/*   BYTE  name[32]	 	*/
-    0,					/*   UWORD first_ade	 	*/
-    255,				/*   UWORD last_ade	 	*/
-    13,					/*   UWORD top		 	*/
-    11,					/*   UWORD ascent	 	*/
-    8,					/*   UWORD half		 	*/
-    2,					/*   UWORD descent	 	*/
-    2,					/*   UWORD bottom	 	*/
-    7,					/*   UWORD max_char_width	*/
-    8,					/*   UWORD max_cell_width	*/
-    1,					/*   UWORD left_offset	 	*/
-    7,					/*   UWORD right_offset	 	*/
-    1,					/*   UWORD thicken	 	*/
-    1,					/*   UWORD ul_size	 	*/
-    0x5555,				/*   UWORD lighten	 	*/
-    0x5555,				/*   UWORD skew		 	*/
-    STDFORM | MONOSPACE,		/*   UWORD flags	 	*/
-    0,					/*   UBYTE *hor_table	 	*/
-    off_8x8,				/*   UWORD *off_table	 	*/
-    dat_8x16,				/*   UWORD *dat_table	 	*/
-    256,				/*   UWORD form_width	 	*/
-    16,					/*   UWORD form_height	 	*/
-    ram16x32,				/*   UWORD *next_font	 	*/
-    0					/*   UWORD next_seg		*/
-
+    1,					/*   int16_t  font_id	 	*/
+    10,					/*   int16_t  point	 	*/
+   "8x16 system font",	/*   char  name[32]	 	*/
+    0,					/*   uint16_t first_ade	 	*/
+    255,				/*   uint16_t last_ade	 	*/
+    13,					/*   uint16_t top		 	*/
+    11,					/*   uint16_t ascent	 	*/
+    8,					/*   uint16_t half		 	*/
+    2,					/*   uint16_t descent	 	*/
+    2,					/*   uint16_t bottom	 	*/
+    7,					/*   uint16_t max_char_width	*/
+    8,					/*   uint16_t max_cell_width	*/
+    1,					/*   uint16_t left_offset	 	*/
+    7,					/*   uint16_t right_offset	 	*/
+    1,					/*   uint16_t thicken	 	*/
+    1,					/*   uint16_t ul_size	 	*/
+    0x5555,				/*   uint16_t lighten	 	*/
+    0x5555,				/*   uint16_t skew		 	*/
+    STDFORM | MONOSPACE,	/*   uint16_t flags	 	*/
+    0,					/*   uint8_t *hor_table	 	*/
+    (const uint16_t *)off_8x8,			/*   uint16_t *off_table	 	*/
+    (const uint16_t *)dat_8x16,			/*   uint16_t *dat_table	 	*/
+    256,				/*   uint16_t form_width	 	*/
+    16,					/*   uint16_t form_height	 	*/
+    &ram16x32,			/*   uint16_t *next_font	 	*/
+    0					/*   uint16_t next_seg		*/
 };

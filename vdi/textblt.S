@@ -27,20 +27,20 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
 
-	globl	_scrtsiz
-
-_scrtsiz:	.dc.w	666	; WUT THE FUT ??$*&@!??
+	xdef _scrtsiz
+_scrtsiz:	dc.w	666	; WUT THE FUT ??$*&@!??
 
 *  entry point for textblt & scaling routine
 *
-	.globl	_TEXT_BL
-	.globl	_ACT_SIZ
-	.globl	_CLC_DDA
+	xdef	_TEXT_BL
+	xdef	_ACT_SIZ
+	xdef	_CLC_DDA
 
-	.text
+	text
 
 *******************************************************************************
 *
@@ -101,7 +101,7 @@ _ACT_SIZ:
 
 	move.l  _lineAVar,a0		; a0 -> linea var struct
 	move.w	4(sp),d1		;get last stacked word to d1 (cx)
-	movem.l	d2-d3, -(sp)		; save c regs
+	movem.l	d2-d3,-(sp)		; save c regs
 	move.w	#32767,d2		;d2 = accumulator = 1/2      (bx)
 	move.w	_DDA_INC(a0),d3		;d3 = dda_inc		     (dx)
 	cmp.w	#$FFFF,d3
@@ -168,5 +168,3 @@ _TEXT_BL:
 	move.l	LA_ROUTINES(a6),a4	; a4 -> list of vectored routines
 	move.l	V_TEXT(a4),a4		; vector to desired text primitive
 	jmp	(a4)
-
-	.end

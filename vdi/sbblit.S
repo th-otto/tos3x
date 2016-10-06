@@ -40,20 +40,22 @@
 * 
 *******************************************************************************
 
-.include	"vdiincld.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
 
-	.globl	sb_bitblt,set_fringe,get_fringe,d_xy2addr,s_xy2addr
-	.globl	scrn_blt,_copytran
+	xdef	sb_bitblt,set_fringe,get_fringe,d_xy2addr,s_xy2addr
+	xdef	scrn_blt,_copytran
 
-	.globl	f0_l2r_rt,f1_l2r_rt,f2_l2r_rt,fl_l2r_rt
-	.globl	f0_l2r_lf,f1_l2r_lf,f2_l2r_lf,fl_l2r_lf
-	.globl	f0_r2l_rt,f1_r2l_rt,f2_r2l_rt,fl_r2l_rt
-	.globl	f0_r2l_lf,f1_r2l_lf,f2_r2l_lf,fl_r2l_lf
+	xdef	f0_l2r_rt,f1_l2r_rt,f2_l2r_rt,fl_l2r_rt
+	xdef	f0_l2r_lf,f1_l2r_lf,f2_l2r_lf,fl_l2r_lf
+	xdef	f0_r2l_rt,f1_r2l_rt,f2_r2l_rt,fl_r2l_rt
+	xdef	f0_r2l_lf,f1_r2l_lf,f2_r2l_lf,fl_r2l_lf
 
-	.globl	f0_left,f0_right,f2_update,f1_dst,f1_drt,f2_dst,p1_update
+	xdef	f0_left,f0_right,f2_update,f1_dst,f1_drt,f2_dst,p1_update
 
-	.globl	mode_00,mode_01,mode_02,mode_03,mode_04,mode_05,mode_06,mode_07
-	.globl	mode_08,mode_09,mode_10,mode_11,mode_12,mode_13,mode_14,mode_15
+	xdef	mode_00,mode_01,mode_02,mode_03,mode_04,mode_05,mode_06,mode_07
+	xdef	mode_08,mode_09,mode_10,mode_11,mode_12,mode_13,mode_14,mode_15
 
 
 
@@ -118,22 +120,17 @@ S_YMAX	  equ	-16	; maximum Y: source				    +60
 
 D_ADDR	  equ	-14	; initial destination address			    +62
 D_XMAX	  equ	-10	; maximum X: destination			    +66
-D_YMAX	  equ	-08	; maximum Y: destination			    +68
+D_YMAX	  equ	-8	; maximum Y: destination			    +68
 
-INNER_CT  equ	-06	; blt inner loop initial count			    +70
-DST_WR	  equ	-04	; destination form wrap (in bytes)		    +72
-SRC_WR	  equ	-02	; source form wrap (in bytes)			    +74
+INNER_CT  equ	-6	; blt inner loop initial count			    +70
+DST_WR	  equ	-4	; destination form wrap (in bytes)		    +72
+SRC_WR	  equ	-2	; source form wrap (in bytes)			    +74
 
 ***						   ***
 *** more internal parameters (notice overlap above ***
 ***						   ***
 
-SHFT1	=	-24
-SHFT2	=	-22
-MASK1	=	-20
-MASK2	=	-14
-MASK3	=	-12
-OPAQUE	=	-4
+OPAQUE	equ	-4
 
 *+
 *  in:	d0.w	X min source
@@ -141,22 +138,18 @@ OPAQUE	=	-4
 *	d4.w	X max source
 *	d6.w	X max destination
 *-
-.ifeq	P68030
+sb_bitblt: ds.b 0
 
-sb_bitblt:
-	;
-	; We are going to compile things in memory later on, so flush the
-	; the instruction cache if we are on a 68030
-	;
-	movec.l	cacr,d5			; d5 <- cache control register
+#if P68030
+*
+* We are going to compile things in memory later on, so flush the
+* the instruction cache if we are on a 68030
+*
+	CACR_D5			; d5 <- cache control register
 	bset.l	#3,d5			; set "Clr Instr Cache" bit
-	movec.l	d5,cacr			; clear the instruction cache
+	D5_CACR			; clear the instruction cache
+#endif
 
-.else
-
-sb_bitblt:
-
-.endc
 	move.l  _lineAVar,a4		; a4 -> linea var struct
 	clr.w	OPAQUE(a6)		; set OPAQUE flag off
 	clr.w	_copytran		; turn blit transparant flag off
@@ -355,13 +348,13 @@ big_fringe:
 	move.w	D_NXWD(a6),d3		; d3 <- destination increment
 
 	btst.l	#2,d5			; r2l case => swap fringes
-	beq	save_addr		; and negate inter word increments
+	beq	ssave_addr		; and negate inter word increments
 
 	swap	d6
 	neg.w	d2
 	neg.w	d3
 
-save_addr:
+ssave_addr:
 
 	move.l	a0,S_ADDR(a6)		; save source address for other planes
 	move.l	a1,D_ADDR(a6)		; save dst address for other planes
@@ -369,8 +362,7 @@ save_addr:
 	asl.w	#3,d5			; d5(07:00) offset to fragment record
 
 	move.l	frag_tab+04(pc,d5.w),a3	; a3 <- thread from op frag to in loop
-	move.l	frag_tab+00(pc,d5.w),a4	; a4 <- thread from update frag to
-					;     1st fringe
+	move.l	frag_tab+00(pc,d5.w),a4	; a4 <- thread from update frag to 1st fringe
 	
 	tst.w	INNER_CT(a6)		; INNER_CT = -1  =>  Destination is 
 	bge	pre_flight		; only one word wide. (a special case)
@@ -386,8 +378,7 @@ save_addr:
 
 	lsr.w	#1,d5			; entries are 4 bytes wide
 	and.w	#$C,d5
-	move.l	solo_tab(pc,d5.w),a4	; a4 <- thread from update frag to
-					;     1st fringe
+	move.l	solo_tab(pc,d5.w),a4	; a4 <- thread from update frag to 1st fringe
 	bra	pre_flight
 
 
@@ -466,8 +457,7 @@ next_plane:
 	move.w	INNER_CT(a6),d5		; d5(15:00) <- inner loop counter
 
 	move.w	#%1000010000100001,d1	; logic ops 15,10,5,0 are special cases
-	btst.l	d0,d1			; where operation is performed
-					;     directly upon
+	btst.l	d0,d1			; where operation is performed directly upon
 	bne	unary_blt		; the dst independent of the source
 
 	tst.l	P_ADDR(a6)		; skip this stuff if no pattern
@@ -816,6 +806,3 @@ sc_plane:
 	dbra	d4,sc_mp_enter
 
 	rts
-
-
-	end

@@ -7,7 +7,7 @@
 *
 * $Log:	sbvline.s,v $
 * Revision 3.2  91/02/13  11:16:18  lozben
-* Entered the statement ".globl	sb_vline".
+* Entered the statement "xdef	sb_vline".
 * 
 * Revision 3.1  91/01/29  11:57:19  lozben
 * Adjusted the code to work with the multiple linea variable structures.
@@ -23,15 +23,15 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
+#include "vdiincld.inc"
+#include "lineaequ.inc"
 
 MAX_PLANES	equ	 8
 FRAG_LEN	equ	MAX_PLANES*4+4
 
 
-	.globl	_v_bas_ad
-	.globl	pixfrag
-	.globl	sb_vline
+	xref	pixfrag
+	xdef	sb_vline
 
 *	Soft Vertical Line Code
 *

@@ -13,10 +13,13 @@
 * *** initial revision ***
 * 
 *************************************************************************
-.include 	"vdiincld.s"
 
-	.globl	hb_bitblt
-	.globl	BLASTER
+#include "vdiincld.inc"
+#include "lineaequ.inc"
+#include "asmdefs.h"
+
+	xdef	hb_bitblt
+	xdef	BLASTER
 
 *       FRAME PARAMETERS
 
@@ -55,11 +58,11 @@ S_YMAX		equ	-16	; maximum Y: source
 
 D_ADDR		equ	-14	; initial destination address
 D_XMAX		equ	-10	; maximum X: destination
-D_YMAX		equ	-08	; maximum Y: destination
+D_YMAX		equ	-8	; maximum Y: destination
 
-INNER_CT	equ	-06	; blt inner loop initial count
-DST_WR		equ	-04	; destination form wrap (in bytes)
-SRC_WR		equ	-02	; source form wrap (in bytes)
+INNER_CT	equ	-6	; blt inner loop initial count
+DST_WR		equ	-4	; destination form wrap (in bytes)
+SRC_WR		equ	-2	; source form wrap (in bytes)
 
 FRAME_LEN	equ	 76
 
@@ -88,14 +91,14 @@ B_F2_MSK	equ	-16 		; 2nd fringe mask	0:old 1:new
 B_D_NXWD	equ	-14 		; offset to next dst word
 B_D_WRAP	equ	-12 		; wrap from end of one dst line to next
 B_D_ADDR	equ	-10 		; initial dst address
-B_D_SPAN	equ	-06 		; span in words of dst block
-B_HEIGHT	equ	-04 		; pixel height of block
-B_LOGOP		equ	-02 		; ctrl word: src^pat combo & logic op #
-B_SKEW		equ	 00		; ctrl word: flags, pat index & skew
+B_D_SPAN	equ	-6 		; span in words of dst block
+B_HEIGHT	equ	-4 		; pixel height of block
+B_LOGOP		equ	-2 		; ctrl word: src^pat combo & logic op #
+B_SKEW		equ	 0		; ctrl word: flags, pat index & skew
 
 
-BF_PAT		equ  	08		; combo flag: 0:all ones  1:pattern
-BF_SRC		equ  	09		; combo flag: 0:all ones  1:source
+BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
+BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
                      
@@ -103,15 +106,15 @@ BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
-BF_PF		equ  	07		; pre-fetch flag  	 0:false 1:true
-BF_FQ		equ  	06		; flush queue flag 	 0:false 1:true
+BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
+BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
 BM_GO		equ  	$8000		; execution mask	
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
 BM_PF		equ  	$0080		; pre-fetch mask
 BM_FQ		equ  	$0040		; flush queue mask
 
-	.text
+	text
 
 * name:		blastman.s
 *
@@ -368,7 +371,7 @@ blt_setup:
 *:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*:*
 
 
-*   T a B l E   f O r   S e T t I n G   b L t   c O n T r O l   F l A g S
+*   T A B L E   F O R   S E T T I N G   B L T   C O N T R O L   F L A G S
 *
 *
 *		      spans  Sx&F>              pre     flush
@@ -517,12 +520,12 @@ blt_0_mono:
 blt_0_count:
 
 	dbra	d5,blt_0_loop
-.ifeq	P68030
+#if P68030
 
-	movec.l	cacr,d5			; d2 <- cache control register
+	CACR_D5					; d5 <- cache control register
 	bset.l	#11,d5			; set "Clr DATA Cache" bit
-	movec.l	d5,cacr			; clear the data cache
-.endc	
+	D5_CACR			; clear the data cache
+#endif
 	rts
 
 
@@ -609,12 +612,10 @@ blt_1_start:
 
 	dbra	d5,blt_1_loop
 
-.ifeq	P68030
+#if P68030
 
-	movec.l	cacr,d5			; d2 <- cache control register
+	CACR_D5			; d5 <- cache control register
 	bset.l	#11,d5			; set "Clr DATA Cache" bit
-	movec.l	d5,cacr			; clear the data cache
-.endc	
+	D5_CACR			; clear the data cache
+#endif
 	rts
-
-	.end

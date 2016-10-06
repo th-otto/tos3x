@@ -27,7 +27,6 @@ BIOS_SRCS = \
 	blkdev.c \
 	prt.S \
 	memtest.S \
-	biosext.S \
 	dma.inc \
 	floppy.inc \
 	ikbdclock.inc \
@@ -45,4 +44,7 @@ EXTRA_DIST = \
 	Makefile \
 	SRCFILES \
 	optimize.mak \
+	biosext.S \
 	$(empty)
+
+SRCS = $(BIOS_SRCS)

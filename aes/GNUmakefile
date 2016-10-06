@@ -1,4 +1,5 @@
 top_srcdir=..
+subdir=aes
 
 # 
 # cross compiling
@@ -45,7 +46,7 @@ check:: aes.o checklang
 	exit $$status
 
 dist::
-	$(CP) -a $(AES_SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/aes
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

@@ -16,24 +16,24 @@
 #include 	"fontdef.h"
 
 typedef struct screendef {
-    BYTE	*name;		    /* device identification (name)	     */
-    WORD	devId;		    /* device id number			     */
-    WORD	planes;		    /* # of planes (bits per pixel)	     */
-    WORD	lineWrap;	    /* # of bytes from 1 scan to next	     */
-    WORD	xRez;		    /* current horizontal resolution	     */
-    WORD	yRez;		    /* current vertical resolution	     */
-    WORD	xSize;		    /* width of one pixel in microns	     */
-    WORD	ySize;		    /* height of one pixel in microns	     */
-    WORD	formId;		    /* scrn form LITERLEAVED, PIXPACKED ...  */
+    const char *name;		    /* device identification (name)	     */
+    int16_t	devId;		    /* device id number			     */
+    int16_t	planes;		    /* # of planes (bits per pixel)	     */
+    int16_t	lineWrap;	    /* # of bytes from 1 scan to next	     */
+    int16_t	xRez;		    /* current horizontal resolution	     */
+    int16_t	yRez;		    /* current vertical resolution	     */
+    int16_t	xSize;		    /* width of one pixel in microns	     */
+    int16_t	ySize;		    /* height of one pixel in microns	     */
+    int16_t	formId;		    /* scrn form LITERLEAVED, PIXPACKED ...  */
     FONT_HEAD	*fntPtr;	    /* points to the default font	     */
-    WORD	maxPen;		    /* # of pens available		     */
-    WORD	colFlag;	    /* color cpability flag		     */
-    WORD	palSize;	    /* palette size (0 = contiguous)	     */
-    WORD	lookupTable;	    /* lookup table supported		     */
-    WORD	(**softRoutines)(); /* drawing primitives done in sofwr      */
-    WORD	(**hardRoutines)(); /* hardware assisted drawing primitives  */
-    WORD	(**curRoutines)();  /* current routines being used	     */
-    BYTE	*vidAdr;	    /* video base address		     */
+    int16_t	maxPen;		    /* # of pens available		     */
+    int16_t	colFlag;	    /* color cpability flag		     */
+    int16_t	palSize;	    /* palette size (0 = contiguous)	     */
+    int16_t	lookupTable;	    /* lookup table supported		     */
+    VOID (**softRoutines) PROTO((NOTHING)); /* drawing primitives done in sofwr      */
+    VOID (**hardRoutines) PROTO((NOTHING)); /* hardware assisted drawing primitives  */
+    VOID (**curRoutines) PROTO((NOTHING));  /* current routines being used	     */
+    char	*vidAdr;	    /* video base address		     */
 } SCREENDEF;
 
 

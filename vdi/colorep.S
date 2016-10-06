@@ -26,29 +26,29 @@
 * 
 *******************************************************************************
 
-.include	"lineaequ.s"
-.include	"vdiincld.s"
+#include "vdiincld.inc"
+#include "asmdefs.h"
+#include "tosvars.inc"
 
-		.globl	_st_vs_color
-		.globl	_st_vq_color
-		.globl _INTIN,_INTOUT,_CONTRL,_v_planes,_REQ_COL,_MAP_COL
+#include "lineaequ.inc"
+#include "devequ.inc"
 
-ifeq PAL4096
+
+#if PAL4096
 FIRST_INT	equ	67
 LAST_INT	equ	934
-endc
-
-ifne PAL4096
+#else
 INTERVAL	equ	143		; 1000/7
 FIRST_INT	equ	142
 LAST_INT	equ	858
 ROUND_UP	equ	72		; INTERVAL/2
-endc
+#endif
 
 
 
 LUT_ADDR	equ	$FF8240		; lookup table address
 
+		xdef	_st_vs_color
 _st_vs_color:
 	move.l  _lineAVar,a2		; a2 -> linea var struct
 	movem.w	d3-d4,-(sp)		; save d3
@@ -94,22 +94,19 @@ hi_check:
 	move.w	#1000,d2		; intensity > 100% => max intensity
 
 
-ifeq PAL4096
-in_bounds:
+in_bounds: ds.b 0
+#if PAL4096
 	mulu	#15,d2			; do the numerator first
 	add.w	#500,d2			; round up
 	divu	#1000,d2		; d2 <- round(% * 15)
-endc
-
-ifne PAL4096
-in_bounds:
+#else
 	add.w	#ROUND_UP,d2		; round up
 	divu	#INTERVAL,d2		; section off into 0 thru 7 (15 for ST+)
-endc
+#endif
 
 	asl.w	#4,d1			; make room for new component
 
-ifeq PAL4096
+#if PAL4096
 	move.w	d5,-(sp)
 	move.w	d2,d5			; d4 <- color xxxx
 	andi.w	#1,d5			; isolate least significant bit
@@ -117,7 +114,7 @@ ifeq PAL4096
 	asr.w	#1,d2			; d2 <- x321 (lut entry shifted by one)
 	or.w	d5,d2			; d2 <- color (bit order 0321)
 	move.w	(sp)+,d5
-endc
+#endif
 
 	or.w	d2,d1			; insert new component
 
@@ -129,11 +126,11 @@ endc
 *
 
 into_lut:
-	lea	_MAP_COL, a0		; Convert color index to a pel value,
-	add.w	d0, d0			; this is the real lut entry we want
-	move.w	(a0, d0.w), d0		; to stuff.
+	lea	_MAP_COL,a0		; Convert color index to a pel value,
+	add.w	d0,d0			; this is the real lut entry we want
+	move.w	(a0,d0.w),d0		; to stuff.
 
-	and.b	d4, d0			; Limit to max pel value.
+	and.b	d4,d0			; Limit to max pel value.
 
 	lea	LUT_ADDR,a0		; a0 -> lookup table
 	add.w	d0,d0			; index into word wide table
@@ -198,6 +195,7 @@ mp0:
 
 
 
+		xdef	_st_vq_color
 _st_vq_color:
 	move.l  _lineAVar,a2		; a2 -> linea var struct
 	move.l	d4,-(sp)
@@ -212,7 +210,7 @@ _st_vq_color:
 
 	move.w	_v_planes(a2),d1		
 	move.b	max_ndx-1(pc,d1.w),d4	; is index in range?
-	cmp.b	d4, d0			; is index in range?
+	cmp.b	d4,d0			; is index in range?
 	bls	in_range
 
 	move.w	#-1,(a0)		; intout(0) <- -1 (index out of range)
@@ -234,7 +232,7 @@ in_range:
 	move.w	(a1)+,(a0)+		; intout(2) <- set green %
 	move.w	(a1),(a0)		; intout(3) <- det blue %
 vqc_out:
-	move.l	(sp)+, d4
+	move.l	(sp)+,d4
 	rts
 
 
@@ -242,11 +240,11 @@ vqc_real:
 	subq.w	#1,d1			; monochrome?
 	beq	vqc_mono		; yes, special case.
 
-	lea	_MAP_COL, a1		; Convert color index to a pel value,
-	add.w	d0, d0			; this is the real lut entry we want
-	move.w	(a1, d0.w), d0		; to stuff.
+	lea	_MAP_COL,a1		; Convert color index to a pel value,
+	add.w	d0,d0			; this is the real lut entry we want
+	move.w	(a1,d0.w),d0		; to stuff.
 
-	and.b	d4, d0			; Limit to max pel value.
+	and.b	d4,d0			; Limit to max pel value.
 
 	lea	LUT_ADDR,a1		; point to hardware look-up table.
 	add.w	d0,d0			; word indexing.
@@ -258,18 +256,16 @@ vqcr_lp:
 	rol.w	#4,d0			; put color field into low nyble.
 	move.w	d0,d2			; d2 <- XXXX XXXX XXX0 321X col component
 
-ifeq PAL4096
+#if PAL4096
 	move.w	d2,d4			; d4 <- XXXX XXXX XXX0 321X col component
 	andi.w	#$e,d2			; d2 <- ____ ____ ____ 321_ col component
 	asr.w	#4,d4			; d4 <- XXXX XXXX XXXX XXX0 col component
 	andi.w	#1,d4			; d4 <- ____ ____ ____ ___0 col component
 	or.w	d4,d2			; d2 <- ____ ____ ____ 3210 bits are proper
 	add.w	d2,d2			; make d2 a word index
-endc
-
-ifne PAL4096
+#else
 	and.w	#$000E,d2		; mask off other fields. (word indexing)
-endc
+#endif
 	move.w	pcnt_tab(pc,d2.w),(a0)+ ; load INTOUT with percent*10.
 	dbra	d1,vqcr_lp
 	bra	vqc_out
@@ -290,15 +286,10 @@ vqcm_cont:
 	bra	vqc_out	
 
 
-ifeq PAL4096
 pcnt_tab:
+#if PAL4096
 	dc.w	0000,0067,0133,0200,0267,0333,0400,0467
 	dc.w	0533,0600,0667,0733,0800,0867,0933,1000
-endc
-
-ifne PAL4096
-pcnt_tab:
+#else
 	dc.w	0000,0142,0285,0428,0571,0714,0857,1000
-endc
-
-	end
+#endif
