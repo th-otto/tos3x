@@ -155,8 +155,10 @@ VOID v_pmarker(NOTHING)
 {
 	int16_t i, j, num_lines, num_vert, x_center, y_center, sav_points[10];
 	int16_t sav_index, sav_color, sav_width, sav_beg, sav_end;
-	int16_t *mrk_ptr, *old_ptsin, scale, num_points, *src_ptr;
-	register int16_t h, *pts_in, *m_ptr;
+	const int16_t *mrk_ptr;
+	int16_t *old_ptsin, scale, num_points, *src_ptr;
+	register int16_t h, *pts_in;
+	register const int16_t *m_ptr;
 	register ATTRIBUTE *work_ptr;
 
 	/* Save the current polyline attributes which will be used. */
@@ -800,7 +802,8 @@ PP(int16_t j;)
 
 VOID st_fl_ptr(NOTHING)
 {
-	register int16_t fi, pm, *pp;
+	register int16_t fi, pm;
+	register const int16_t *pp;
 	register ATTRIBUTE *work_ptr;
 
 	work_ptr = cur_work;

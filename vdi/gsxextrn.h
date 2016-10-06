@@ -96,32 +96,32 @@ extern	FONT_HEAD ram8x8;
 extern	FONT_HEAD ram16x32;
 
 extern int16_t scrtsiz;
-extern int16_t ROM_DEV_TAB[];  /* initial intout array for open work       */
-extern int16_t ROM_SIZ_TAB[];  /* initial ptsout array for open work       */
-extern int16_t ROM_INQ_TAB[];  /* extended inquire values */
-extern int16_t MAP_COL[];
-extern int16_t REV_MAP_COL[];
-extern int16_t LINE_STYLE[];
-extern int16_t DITHER[];
-extern int16_t HAT_0_MSK;
-extern int16_t HAT_1_MSK;
-extern int16_t HATCH0[];
-extern int16_t HATCH1[];
-extern int16_t OEMPAT[];
+extern int16_t const ROM_DEV_TAB[];  /* initial intout array for open work       */
+extern int16_t const ROM_SIZ_TAB[];  /* initial ptsout array for open work       */
+extern int16_t const ROM_INQ_TAB[];  /* extended inquire values */
+extern int16_t const MAP_COL[];
+extern int16_t const REV_MAP_COL[];
+extern int16_t const LINE_STYLE[];
+extern int16_t const DITHER[];
+extern int16_t const HAT_0_MSK;
+extern int16_t const HAT_1_MSK;
+extern int16_t const HATCH0[];
+extern int16_t const HATCH1[];
+extern int16_t const OEMPAT[];
 extern int16_t ROM_UD_PATRN[];
-extern int16_t SOLID;
-extern int16_t HOLLOW;
-extern int16_t DITHRMSK;
-extern int16_t OEMMSKPAT;
-extern int16_t m_dot[];
-extern int16_t m_plus[];
-extern int16_t m_star[];
-extern int16_t m_square[];
-extern int16_t m_cross[];
-extern int16_t m_dmnd[];
-extern int16_t plane_mask[];
-extern int16_t *markhead[];
-extern int32_t colors[];
+extern int16_t const SOLID;
+extern int16_t const HOLLOW;
+extern int16_t const DITHRMSK;
+extern int16_t const OEMMSKPAT;
+extern int16_t const m_dot[];
+extern int16_t const m_plus[];
+extern int16_t const m_star[];
+extern int16_t const m_square[];
+extern int16_t const m_cross[];
+extern int16_t const m_dmnd[];
+extern int16_t const plane_mask[];
+extern const int16_t *const markhead[];
+extern int32_t const colors[];
 
 /*
  * gsxasm1.S

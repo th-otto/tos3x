@@ -38,7 +38,7 @@ typedef struct vdiVars {
     int16_t        sFilCol;
     int16_t        sFillPer;
     int16_t        sPatMsk;
-    int16_t        *sPatPtr;
+    const int16_t *sPatPtr;
     int16_t        _start;
     int16_t        xC;
     int16_t        xRad;
@@ -66,8 +66,8 @@ typedef struct vdiVars {
     int16_t        termCh;             /* 16 bit character info                */
     int16_t        chcMode;            /* the mode of the Choice device        */
     ATTRIBUTE   *curWork;              /* pointer to current works attributes  */
-    const FONT_HEAD   *defFont;              /* pointer to default font head         */
-    const FONT_HEAD   *fontRing[4];          /* ptrs to link list of fnt hdrs        */
+    const FONT_HEAD   *defFont;        /* pointer to default font head         */
+    const FONT_HEAD   *fontRing[4];    /* ptrs to link list of fnt hdrs        */
     int16_t        iniFontCount;       /* # of fonts in the FONT_RING lists    */
     int16_t        lineCW;             /* current line width                   */
     int16_t        locMode;            /* the mode of the Locator device       */
@@ -128,7 +128,7 @@ typedef struct vdiVars {
     int16_t        vFntSt;             /* first ASCII code in font             */
     int16_t        vFntWr;             /* width of font form in bytes          */
     int16_t        vHzRez;             /* horizontal pixel resolution          */
-    int16_t        *vOffAd;            /* address of font offset table         */
+    const int16_t  *vOffAd;            /* address of font offset table         */
 
 /*
  *              bit 0	cursor flash		0:disabled  1:enabled
@@ -177,7 +177,7 @@ typedef struct vdiVars {
     int16_t        x2;                 /* X2 coordinate                        */
     int16_t        y2;                 /* Y2 coordinate                        */
 
-    int16_t        *patPtr;            /* ptr to pattern.                      */
+    const int16_t  *patPtr;            /* ptr to pattern.                      */
     int16_t        patMsk;             /* pattern index. (mask)                */
     int16_t        multiFill;          /* multiplane fill flag. (0 => 1 plane) */
 

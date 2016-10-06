@@ -33,7 +33,10 @@ FONT_HEAD ram8x16, ram8x8, ram16x32;
  */
 VOID v_opnwk(NOTHING)
 {
-	register int16_t i, *sp, *dp, videoMode;
+	register int16_t i;
+	register const int16_t *sp;
+	register int16_t*dp;
+	register int16_t videoMode;
 
 	if (INTIN[0] == SETMODEFLAG)
 	{

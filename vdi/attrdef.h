@@ -33,7 +33,7 @@ typedef struct attribute {
 	int16_t dda_inc;			/* Fraction to be added to the DDA		*/
 	int16_t multifill;			/* Multi-plane fill flag			*/
 	int16_t patmsk; 			/* Current pattern mask 			*/
-	int16_t *patptr;			/* Current pattern pointer			*/
+	const int16_t *patptr;		/* Current pattern pointer			*/
 	int16_t pts_mode;			/* TRUE if height set in points mode	*/
 	int16_t *scrtchp;			/* Pointer to text scratch buffer		*/
 	int16_t scrpt2; 			/* Offset to large text buffer		*/

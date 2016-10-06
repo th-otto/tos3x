@@ -1,4 +1,4 @@
-SRCS = vars.S tosvars.S
+SRCS = vars.S tosvars.S sections.inc
 
 EXTRA_DIST = \
 	GNUmakefile \

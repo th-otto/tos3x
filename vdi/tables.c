@@ -52,13 +52,13 @@
 #include "gsxdef.h"
 #include "styles.h"
 
-int16_t plane_mask[] = {0,   1,   3,   7,  15,  31,  63, 127, 255,
+int16_t const plane_mask[] = {0,   1,   3,   7,  15,  31,  63, 127, 255,
 			255, 255, 255, 255, 255, 255, 255, 255,
 			255, 255, 255, 255, 255, 255, 255, 255,
 			255, 255, 255, 255, 255, 255, 255, 255
 		    };
 
-int16_t ROM_DEV_TAB[45] = {
+int16_t const ROM_DEV_TAB[45] = {
   	319,	/* 0	x resolution			     */
   	199,	/* 1	y resolution			     */
   	0,	/* 2	device precision 0=exact,1=not exact */
@@ -111,7 +111,7 @@ MX_FIL_HAT_INDEX,/* 12	crosshatch patterns		     */
 /* returns text,line and marker sizes in device coordinates */
 /************************************************************/
 
-int16_t  ROM_SIZ_TAB[12] = {
+int16_t const ROM_SIZ_TAB[12] = {
   	0,	/* 0	min char width			*/
   	7,	/* 1	min char height			*/
   	0,	/* 2	max char width			*/
@@ -126,7 +126,7 @@ int16_t  ROM_SIZ_TAB[12] = {
   	88	/* 11	max marker height		*/
 };
 
-int16_t  ROM_INQ_TAB[45] = {
+int16_t const ROM_INQ_TAB[45] = {
   	4,		/*  0  type of alpha/graphic controllers*/
   	MAX_PAL,	/*  1  number of background colors	*/
   	0x1F,		/*  2  text styles supported		*/
@@ -159,21 +159,21 @@ int16_t  ROM_INQ_TAB[45] = {
 /*                                                        */
 /**********************************************************/
 
-int16_t	m_dot[] = { 1, 2, 0, 0, 0, 0 };
+int16_t	const m_dot[] = { 1, 2, 0, 0, 0, 0 };
 
-int16_t	m_plus[] = { 2, 2, 0, -3, 0, 3, 2,-4, 0, 4, 0 };
+int16_t	const m_plus[] = { 2, 2, 0, -3, 0, 3, 2,-4, 0, 4, 0 };
 
-int16_t	m_star[] = { 3, 2, 0, -3, 0, 3, 2, 3, 2, -3, -2, 2, 3, -2, -3, 2};
+int16_t	const m_star[] = { 3, 2, 0, -3, 0, 3, 2, 3, 2, -3, -2, 2, 3, -2, -3, 2};
 
-int16_t	m_square[] = { 1, 5, -4, -3, 4, -3, 4, 3, -4, 3, -4, -3 };
+int16_t	const m_square[] = { 1, 5, -4, -3, 4, -3, 4, 3, -4, 3, -4, -3 };
 
-int16_t	m_cross[] = { 2, 2, -4, -3, 4, 3, 2, -4, 3, 4, -3 };
+int16_t	const m_cross[] = { 2, 2, -4, -3, 4, 3, 2, -4, 3, 4, -3 };
 
-int16_t	m_dmnd[] = { 1, 5, -4, 0, 0, -3, 4, 0, 0, 3, -4, 0 };
+int16_t	const m_dmnd[] = { 1, 5, -4, 0, 0, -3, 4, 0, 0, 3, -4, 0 };
 
-int16_t    *markhead[] = { m_dot, m_plus, m_star, m_square, m_cross, m_dmnd };
+const int16_t *const markhead[] = { m_dot, m_plus, m_star, m_square, m_cross, m_dmnd };
 
-int16_t MAP_COL[] = {
+int16_t const MAP_COL[] = {
     0, 255,   1,   2,   4,   6,   3,   5,   7,   8,   9,  10,  12,  14,  11,  13, 
    16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
    32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
@@ -192,7 +192,7 @@ int16_t MAP_COL[] = {
   240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254,  15
 };
 
-int16_t REV_MAP_COL[] = {
+int16_t const REV_MAP_COL[] = {
     0,   2,   3,   6,   4,   7,   5,   8,   9,  10,  11,  14,  12,  15,  13, 255,
    16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
    32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,

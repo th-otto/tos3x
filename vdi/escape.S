@@ -276,7 +276,7 @@ ctrl_tbl:
 
 do_bell:
 
-	bra	ringbell			; need local variable in ctrl_tbl
+	bra.w	ringbell			; need local variable in ctrl_tbl
 	
 do_tab:
 
