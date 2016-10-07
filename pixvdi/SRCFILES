@@ -1,0 +1,124 @@
+VDI_OBJS1 = blastman.o blitinit.o copyrfm.o entry.o escape.o
+VDI_OBJS2 = gsxasm1.o gsxasm2.o line1010.o mono.o mouse.o
+VDI_OBJS3 = sbblit.o sbescape.o sbfrag.o sbhline.o sbmono.o sbscrn.o
+VDI_OBJS4 = sbtxtblt.o sbvline.o textblt.o vdivar.o xfrmform.o sbsctran.o
+VDI_OBJS5 = sbsctlog.o sbscolog.o sbscopaq.o allgem.o spxesc.o pxmouse.o
+VDI_OBJS6 = palette.o blaster.o hbline.o hbmono.o hbtxtblt.o hbrect.o
+VDI_OBJS7 = hbbitblt.o hbescape.o routines.o colorep.o spxtblit.o spxoblit.o spxvline.o
+VDI_OBJS8 = spxhline.o pxabline.o pxrectfl.o spxmono.o pxtform.o hpxoblit.o
+
+VDI_OBJS9 = cbssdefs.o font6x6.o font8x16.o font8x8.o fnt16x32.o isin.o
+VDI_OBJS10 = jmptbl.o monobj.o monout.o seedfill.o tables.o text.o
+VDI_OBJS11 = devices.o opnwk.o init.o ttcolor.o spcolor.o spxtxtbl.o trucolor.o
+
+
+VDI_OBJS = $(VDI_OBJS1) $(VDI_OBJS2) $(VDI_OBJS3) $(VDI_OBJS4) $(VDI_OBJS5) \
+	   $(VDI_OBJS6) $(VDI_OBJS7) $(VDI_OBJS8) $(VDI_OBJS9) $(VDI_OBJS10) $(VDI_OBJS11)
+
+SCREEN_OBJS = vdivtg.o alone.o jin.o
+
+VDI_SRCS = \
+	attrdef.h \
+	fontdef.h \
+	gsxdef.h \
+	gsxextrn.h \
+	lineavar.h \
+	vdi.h \
+	scrndev.h \
+	styles.h \
+	vardefs.h \
+	asmdefs.h \
+	\
+	devequ.inc \
+	lineaequ.inc \
+	tosvars.inc \
+	vdiincl.inc \
+	\
+	palette.S \
+	blastman.S \
+	blitinit.S \
+	copyrfm.S \
+	entry.S \
+	escape.S \
+	gsxasm1.S \
+	gsxasm2.S \
+	line1010.S \
+	mono.S \
+	mouse.S \
+	sbblit.S \
+	sbescape.S \
+	sbfrag.S \
+	sbhline.S \
+	sbmono.S \
+	sbscrn.S \
+	sbtxtblt.S \
+	sbvline.S \
+	textblt.S \
+	vdivar.S \
+	xfrmform.S \
+	sbsctran.S \
+	sbsctlog.S \
+	sbscolog.S \
+	sbscopaq.S \
+	allgem.S \
+	spxesc.S \
+	pxmouse.S \
+	blaster.S \
+	hbline.S \
+	hbmono.S \
+	hbtxtblt.S \
+	hbrect.S \
+	hbbitblt.S \
+	hbescape.S \
+	routines.S \
+	colorep.S \
+	spxtblit.S \
+	spxoblit.S \
+	spxvline.S \
+	spxhline.S \
+	pxabline.S \
+	pxrectfl.S \
+	spxmono.S \
+	pxtform.S \
+	hard.S \
+	hpxoblit.S \
+	spxtxtbl.S \
+	\
+	cbssdefs.c \
+	font6x6.c \
+	font8x16.c \
+	font8x8.c \
+	fnt16x32.c \
+	isin.c \
+	jmptbl.c \
+	monobj.c \
+	monout.c \
+	seedfill.c \
+	tables.c \
+	text.c \
+	devices.c \
+	opnwk.c \
+	init.c \
+	ttcolor.c \
+	spcolor.c \
+	trucolor.c \
+	\
+	$(empty)
+
+SCREEN_SRCS =  \
+	alone.S \
+	alone.h \
+	jin.S \
+	vdivtg.c \
+	$(empty)
+
+SRCS = $(VDI_SRCS) $(SCREEN_SRCS)
+
+
+EXTRA_DIST = \
+	GNUmakefile \
+	Makefile \
+	SRCFILES \
+	optimize.mak \
+	vdiext.S \
+	$(empty)
