@@ -62,7 +62,7 @@ typedef struct screendef {
 
 #define	DEVICEDEP	0	    /* means we're in device dep mode	    */
 #define STANDARD	1	    /* flag for standard format		    */
-#define INTERLEAVED	2	    /* flag for interlieved planes	    */
+#define INTERLEAVED	2	    /* flag for interleaved planes	    */
 #define PIXPACKED	3	    /* flag for pixel packed		    */
 
 #endif

@@ -245,30 +245,30 @@ _MOV_CUR:
 *  relocated.
 
 vb_draw:	PIXLA(a5)
-		tst.w	lineavars+_HIDE_CNT		; HIDE_CNT semaphore controls
+		tst.w	PIXLV(_HIDE_CNT,a5)		; HIDE_CNT semaphore controls
 		bne	vblank_exit		; access to cur disp routines
 
-		tst.b	lineavars+mouse_flag		; cntrl access to ms frm (CDB)
+		tst.b	PIXLV(mouse_flag,a5)		; cntrl access to ms frm (CDB)
 		bne	vblank_exit
 
-		bclr.b	#0,lineavars+draw_flag	; control access to cursor position
+		bclr.b	#0,PIXLV(draw_flag,a5)	; control access to cursor position
 		beq	vblank_exit		; 1:data valid  0:data invalid
 
 *  RETRIEVE CURSOR X AND Y VIA AN ATOMIC OPERATION: this prevents the
 *  mouse position interrupt service routine from altering position data
 *  while we are in the process of retrieving it.
 
-		move.l	lineavars+xydraw,d1		; d1[31:16] <- cursor X
+		move.l	PIXLV(xydraw),d1		; d1[31:16] <- cursor X
 		move.l	d1,d0			; d1[15:00] <- cursor Y
 		swap	d0			; d0[15:00] <- cursor X
 
 		movem.l	d0-d1/a5,-(sp)		; Save new xy
-		move.l	sv_blk_ptr(a5),a2	; a2 -> save block
+		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
 		bsr	cur_replace		; Undraw old cursor
 		movem.l	(sp)+,d0-d1/a5		; Restore new xy
 
-		move.l	sv_blk_ptr(a5),a2	; a2 -> save block
-		lea	lineavars+mouse_cdb,a0	; a0 -> CDB	
+		lea	PIXLV(mouse_cdb,a5),a0	; a0 -> CDB	
+		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
 		bsr	cur_display		; and draw new cursor
 
 vblank_exit:	rts

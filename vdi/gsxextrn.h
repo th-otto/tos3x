@@ -146,11 +146,11 @@ VOID TRNSFONT PROTO((NOTHING));
 /*
  * allgem.S
  */
-VOID v_nop PROTO((NOTHING));             /*  VDI #0   */
-VOID v_clrwk PROTO((NOTHING));           /*  VDI #3   */
-VOID v_updwk PROTO((NOTHING));           /*  VDI #4   */
-VOID v_cellarray PROTO((NOTHING));       /*  VDI #10  */
-VOID vq_cellarray PROTO((NOTHING));      /*  VDI #27  */
+VOID v_nop PROTO((NOTHING));             /* VDI   #0  */
+VOID v_clrwk PROTO((NOTHING));           /* VDI   #3  */
+VOID v_updwk PROTO((NOTHING));           /* VDI   #4  */
+VOID v_cellarray PROTO((NOTHING));       /* VDI  #10  */
+VOID vq_cellarray PROTO((NOTHING));      /* VDI  #27  */
 VOID INIT_G PROTO((NOTHING));
 VOID DINIT_G PROTO((NOTHING));
 VOID CLC_FLIT PROTO((NOTHING));
@@ -173,7 +173,7 @@ VOID vex_timv PROTO((NOTHING));          /* VDI #118  */
 /*
  * escape.S
  */
-VOID v_escape PROTO((NOTHING));          /*  VDI #5   */
+VOID v_escape PROTO((NOTHING));          /* VDI   #5  */
 
 
 /*

@@ -14,7 +14,7 @@
 		xdef line1010
 		xdef _SETBLT
 		xdef _GETBLT
-		xdef vdireinit
+		xdef esc_init
 		xdef resetdev
 		xdef blink
 		xdef _cursconf
@@ -24,7 +24,7 @@
 line1010    equ VDITBASE+$14B6
 _SETBLT     equ VDITBASE+$1AAA
 _GETBLT     equ VDITBASE+$1AD2
-vdireinit   equ VDITBASE+$04D4
+esc_init    equ VDITBASE+$04D4
 resetdev    equ VDITBASE+$057E
 blink       equ VDITBASE+$11A4
 _cursconf   equ VDITBASE+$11D6

@@ -224,7 +224,7 @@ typedef struct vdiVars {
     /*
      * Stuff for 8 plane VDI
      */
-    int16_t        reserved3;          /* reserved				    */
+    int16_t        f32;                /* reserved; if set, TOS 3.0x uses 16x32 as system font in TT-High */
 
     int16_t        reqXCol[240][3];    /* extended request color array         */
 

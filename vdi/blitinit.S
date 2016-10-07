@@ -50,7 +50,7 @@
 		xdef rout_init
 rout_init:
 _SETBLT:
-#if TOSVERSION >= 0x404
+#if TOSVERSION >= 0x400
 		PIXLA(a1)
 		move.w	d0,PIXLV(LA_BLTMODE,a1)	; store present mode selection
 		move.l	PIXLV(LA_CURDEV,a1),a0		; a0 -> current device struct
@@ -104,7 +104,7 @@ rCopyLoop:
 /* 306de: 00e07f48 */
 		xdef _GETBLT
 _GETBLT:
-#if TOSVERSION >= 0x404
+#if TOSVERSION >= 0x400
 		move.l	a0,-(sp)
 		PIXLA(a0)
 		move.w	PIXLV(LA_BLTMODE,a0),d0

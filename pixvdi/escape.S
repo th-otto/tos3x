@@ -1555,7 +1555,7 @@ escfn102:	move.l	_INTIN(a4),a0
 **			  a0 -> system font header			     **
 *******************************************************************************
 
-gl_f_init:	move.l  _lineAVar,a4		; a4 -> linea var struct
+gl_f_init:	PIXLA(a4)
 		move.w	FRM_HT(a0),d0		; fetch form height.
 		move.w	d0,v_cel_ht(a4)		; init cell height.
 		move.w	_v_lin_wr(a4),d1	; fetch bytes/line.

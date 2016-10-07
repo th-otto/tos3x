@@ -111,7 +111,6 @@ F_SVPOS		equ	    5	;				1:true
     xdef  st_move_cursor
 	xdef	gsx_conout
 	xdef	_v_escape
-	xdef	gl_f_init
 	xdef	blank_it
 	xdef	st_neg_cell
 	xdef	esce
@@ -358,7 +357,7 @@ set_fg_col:
 		lea	pal_map(a4),a0		; a0 -> virtual palette
 		sub.w	#'0',d1			; mask out unneeded bits
 		lsl.w	#2,d1			; make d1 long word offset
-		move.l	(a0,d1.w),vl_col_fg(a4)	; set the foreground color. ; BUG; only set FG color for >= 16 planes
+		move.l	(a0,d1.w),PIXLV(vl_col_fg,a4)	; set the foreground color. ; BUG; only set FG color for >= 16 planes
 #endif
 		lea	normal_ascii(pc),a0
 		bra	load_state
@@ -378,7 +377,7 @@ set_bg_col:
 		lea	pal_map(a4),a0		; a0 -> virtual palette
 		sub.w	#'0',d1			; mask out unneeded bits
 		lsl.w	#2,d1			; make d1 long word offset
-		move.l	(a0,d1.w),vl_col_bg(a4)	; set the background color. ; BUG; only sets BG color for >= 16 planes
+		move.l	(a0,d1.w),PIXLV(vl_col_bg,a4)	; set the background color. ; BUG; only sets BG color for >= 16 planes
 #endif
 		lea	normal_ascii(pc),a0
 		bra	load_state
@@ -1151,10 +1150,10 @@ ascii_out:
 	move.w	lineavars+v_col_bg,d7		; d7 <- background color
 
 #if VIDEL_SUPPORT
-	cmp.w	#16,lineavars+_v_planes	; see if we should use long val for col
+	cmp.w	#16,PIXLV(_v_planes,a4)	; see if we should use long val for col
 	ble	col_ok2			; if not the just skip
-	move.l	vl_col_fg(a4),d6	; d6 <- foreground color
-	move.l	vl_col_bg(a4),d7	; d7 <- background color
+	move.l	PIXLV(vl_col_fg,a4),d6	; d6 <- foreground color
+	move.l	PIXLV(vl_col_bg,a4),d7	; d7 <- background color
 #endif
 
 col_ok2:
@@ -1536,7 +1535,7 @@ neg_byte:	not.b	(a2)
 **		          Install User Defined Font			     **
 *******************************************************************************
 
-escfn102:	move.l	lineavars+_INTIN,a0
+escfn102:	move.l	_INTIN(a4),a0
 		move.l	(a0),a0			; a0 -> font header.
 
 * fall through to inialization sequence
@@ -1547,26 +1546,34 @@ escfn102:	move.l	lineavars+_INTIN,a0
 **			  a0 -> system font header			     **
 *******************************************************************************
 
-gl_f_init:
+	xdef	gl_f_init
+gl_f_init: ds.b 0
+#if TOSVERSION >= 0x400
+		PIXLA(a4)
+O6 equ 0
+#else
+O6 equ 6 ; WTF? why?
+		lea lineavars-O6,a4
+#endif
 		move.w	FRM_HT(a0),d0		; fetch form height.
-		move.w	d0,lineavars+v_cel_ht		; init cell height.
-		move.w	lineavars+_v_lin_wr,d1	; fetch bytes/line.
+		move.w	d0,O6+v_cel_ht(a4)		; init cell height.
+		move.w	O6+_v_lin_wr(a4),d1	; fetch bytes/line.
 		mulu	d0,d1
-		move.w	d1,lineavars+v_cel_wr		; init cell wrap. (obsolete)
+		move.w	d1,O6+v_cel_wr(a4)		; init cell wrap. (obsolete)
 		moveq.l	#0,d1			; clear the hi word of dividend
-		move.w	lineavars+v_vt_rez,d1		; fetch vertical res.
+		move.w	O6+v_vt_rez(a4),d1		; fetch vertical res.
 		divu	d0,d1			; vertical res/cell height.
 		subq.w	#1,d1			; 0 origin.
-		move.w	d1,lineavars+v_cel_my		; init cell max y.
+		move.w	d1,O6+v_cel_my(a4)		; init cell max y.
 		moveq.l	#0,d1			; clear the hi word of dividend
-		move.w	lineavars+v_hz_rez,d1		; fetch horizontal res.
+		move.w	O6+v_hz_rez(a4),d1		; fetch horizontal res.
 		divu	CEL_WD(a0),d1		; horizontal res/cell width.
 		subq.w	#1,d1			; 0 origin.
-		move.w	d1,lineavars+v_cel_mx		; init cell max x.
-		move.w	FRM_WD(a0),lineavars+v_fnt_wr	; init font wrap.
-		move.w	FIRST(a0),lineavars+v_fnt_st	; init font start ADE.
-		move.w	LAST(a0),lineavars+v_fnt_nd	; init font end ADE.
-		move.l	PDAT(a0),lineavars+v_fnt_ad	; init font data ptr.
-		move.l	POFF(a0),lineavars+v_off_ad	; init font offset ptr.
+		move.w	d1,O6+v_cel_mx(a4)		; init cell max x.
+		move.w	FRM_WD(a0),O6+v_fnt_wr(a4)	; init font wrap.
+		move.w	FIRST(a0),O6+v_fnt_st(a4)	; init font start ADE.
+		move.w	LAST(a0),O6+v_fnt_nd(a4)	; init font end ADE.
+		move.l	PDAT(a0),O6+v_fnt_ad(a4)	; init font data ptr.
+		move.l	POFF(a0),O6+v_off_ad(a4)	; init font offset ptr.
 
 		rts

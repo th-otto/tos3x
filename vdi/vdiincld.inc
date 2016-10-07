@@ -32,4 +32,4 @@
 #define PAL4096	0	/* @check@ set to 0 if st mode has a pal of 4096 */
 #endif
 
-#define VIDEL_SUPPORT (TOSVERSION >= 0x404)
+#define VIDEL_SUPPORT (TOSVERSION >= 0x400)

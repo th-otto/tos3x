@@ -12,6 +12,8 @@
 
 * from BIOS
 		xdef ringbell
-
 * hm does not work because of PC-relative fixup overflow
 * ringbell  equ BIOSTBASE+$3B2C+BIOSTLEN-$0000641C
+
+		xdef _zeromem
+_zeromem equ BIOSTBASE+$1680

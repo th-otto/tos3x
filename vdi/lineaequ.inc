@@ -295,6 +295,7 @@
 /* pointer to current device structure */
 #define LA_CURDEV		166
 #define LA_BLTMODE		170
+#define LA_F32			172
 
 /* extended request color array */
 /* #define _REQ_X_COL		174 */
@@ -349,12 +350,12 @@
 #endif
 
 
-#if TOSVERSION >= 0x404
+#if TOSVERSION >= 0x400
 #define LA(r) move.l _lineAVar,r
 #define PIXLA(r) LA(r)
 #define PIXLV(v,r) v(r)
 #else
 #define LA(r) move.l #lineavars,r
 #define PIXLA(r)
-#define PIXLV(v,r) lineavars+v
+#define PIXLV(v,r) v+lineavars
 #endif
