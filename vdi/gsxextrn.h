@@ -146,8 +146,11 @@ VOID TRNSFONT PROTO((NOTHING));
 /*
  * allgem.S
  */
-VOID CLEARMEM PROTO((NOTHING));
-VOID CHK_ESC PROTO((NOTHING));
+VOID v_nop PROTO((NOTHING));             /*  VDI #0   */
+VOID v_clrwk PROTO((NOTHING));           /*  VDI #3   */
+VOID v_updwk PROTO((NOTHING));           /*  VDI #4   */
+VOID v_cellarray PROTO((NOTHING));       /*  VDI #10  */
+VOID vq_cellarray PROTO((NOTHING));      /*  VDI #27  */
 VOID INIT_G PROTO((NOTHING));
 VOID DINIT_G PROTO((NOTHING));
 VOID CLC_FLIT PROTO((NOTHING));
@@ -159,15 +162,18 @@ int16_t GCHC_KEY PROTO((NOTHING));
 VOID HIDE_CU PROTO((NOTHING));
 int16_t GLOC_KEY PROTO((NOTHING));
 int16_t GCHR_KEY PROTO((NOTHING));
-VOID XFM_CRFM PROTO((NOTHING));
 VOID XFM_UNDL PROTO((NOTHING));
 VOID COPY_RFM PROTO((NOTHING));
-VOID VEX_BUTV PROTO((NOTHING));
-VOID VEX_MOTV PROTO((NOTHING));
 VOID RECTFILL PROTO((NOTHING));
 VOID TEXT_BLT PROTO((NOTHING));
-VOID VEX_CURV PROTO((NOTHING));
 VOID esc_init PROTO((NOTHING));
+VOID vex_timv PROTO((NOTHING));          /* VDI #118  */
+
+
+/*
+ * escape.S
+ */
+VOID v_escape PROTO((NOTHING));          /*  VDI #5   */
 
 
 /*
@@ -176,6 +182,11 @@ VOID esc_init PROTO((NOTHING));
 VOID DIS_CUR PROTO((NOTHING));
 VOID HIDE_CUR PROTO((NOTHING));
 VOID SET_CUR PROTO((int16_t newx, int16_t newy));
+VOID vq_mouse PROTO((NOTHING));          /* VDI #124  */
+VOID vsc_form PROTO((NOTHING));          /* VDI #111  */
+VOID vex_butv PROTO((NOTHING));          /* VDI #125  */
+VOID vex_motv PROTO((NOTHING));          /* VDI #126  */
+VOID vex_curv PROTO((NOTHING));          /* VDI #127  */
 
 
 /*

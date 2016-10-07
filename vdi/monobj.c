@@ -526,7 +526,7 @@ VOID vsin_mode(NOTHING)
 /*
  * INQUIRE INPUT MODE:
  */
-VOID vqi_mode(NOTHING)
+VOID vqin_mode(NOTHING)
 {
 	register int16_t *int_out;
 
@@ -593,7 +593,7 @@ VOID vsl_udsty(NOTHING)
 /*
  * Set Clip Region
  */
-VOID s_clip(NOTHING)
+VOID vs_clip(NOTHING)
 {
 	register int16_t *xy, rtemp;
 	register ATTRIBUTE *work_ptr;
@@ -685,7 +685,7 @@ VOID drt_cpyfm(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 
-VOID dr_trn_fm(NOTHING)
+VOID vr_trnfm(NOTHING)
 {
 	register FDB *src, *dst;
 	register int16_t sFormat, dFormat;

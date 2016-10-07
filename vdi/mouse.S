@@ -62,11 +62,11 @@
 		xdef	_HIDE_CUR
 		xdef	_MOV_CUR
 		xdef	_SET_CUR
-		xdef	_VEX_BUTV
-		xdef	_VEX_MOTV
-		xdef	_VEX_CURV
-		xdef	_XFM_CRFM
-		xdef	_vq_mouse_status
+		xdef	_vex_butv
+		xdef	_vex_motv
+		xdef	_vex_curv
+		xdef	_vsc_form
+		xdef	_vq_mouse
 		xdef	mouse_rel	
 		xdef	scrn_clip
 		xdef	vb_draw
@@ -277,7 +277,7 @@ vblank_exit:	rts
 
 *******************************************************************************
 *
-*	_VEX_BUTV	exchange button change vector
+*	_vex_butv	exchange button change vector
 *
 *	entry:	contrl[7], contrl[8]	pointer to user routine
 *	exit:	contrl[9], contrl[10]	pointer to old routine
@@ -285,7 +285,7 @@ vblank_exit:	rts
 *
 *******************************************************************************
 
-_VEX_BUTV:	move.l  _lineAVar,a1		; a1 -> linea var struct
+_vex_butv:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.l	_CONTRL(a1),a0		; point to contrl array
 		move.l	user_but(a1),18(a0)	; store old pointer in contrl
 		move.l	14(a0),user_but(a1)	; store new routine address
@@ -293,7 +293,7 @@ _VEX_BUTV:	move.l  _lineAVar,a1		; a1 -> linea var struct
 
 *******************************************************************************
 *
-*	_VEX_MOTV	exchange coordinate change vector
+*	_vex_motv	exchange coordinate change vector
 *
 *	entry:	contrl[7], contrl[8]	pointer to user routine
 *	exit:	contrl[9], contrl[10]	pointer to old routine
@@ -301,7 +301,7 @@ _VEX_BUTV:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *
 *******************************************************************************
 
-_VEX_MOTV:	move.l  _lineAVar,a1		; a1 -> linea var struct
+_vex_motv:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.l	_CONTRL(a1),a0		; point to contrl array
 		move.l	user_mot(a1),18(a0)	; save old routine pointer
 		move.l	14(a0),user_mot(a1)	; store new routine address
@@ -309,7 +309,7 @@ _VEX_MOTV:	move.l  _lineAVar,a1		; a1 -> linea var struct
 
 *******************************************************************************
 *
-*	_VEX_CURV	exchange cursor draw vector
+*	_vex_curv	exchange cursor draw vector
 *
 *	entry:	contrl[7], contrl[8]	-pointer to user routine
 *	exit:	contrl[9], contrl[10]	_pointer to old routine
@@ -317,7 +317,7 @@ _VEX_MOTV:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *
 *******************************************************************************
 
-_VEX_CURV:	move.l  _lineAVar,a1		; a1 -> linea var struct
+_vex_curv:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.l	_CONTRL(a1),a0		; point to contrl array
 		move.l	user_cur(a1),18(a0)	; save old routine pointer
 		move.l	14(a0),user_cur(a1) 	; store new routine address
@@ -1054,7 +1054,7 @@ fix_neg:	clr.w	_HIDE_CNT(a5)		; this should never be executed.
 
 _DEVTB26 equ _DEV_TAB+26
 
-_XFM_CRFM:	move.l  _lineAVar,a2		; a2 -> linea var struct
+_vsc_form:	move.l  _lineAVar,a2		; a2 -> linea var struct
 		addq.b	#1,mouse_flag(a2)	; deny access to mouse_cdb
 
 		move.l	_INTIN(a2),a0		; a0 -> new cur def block
@@ -1099,7 +1099,7 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 
 *  If invisible, the new cursor form will be displayed immediately upon the 
 *  SHOW operation. If the cursor is currently visible, the new cursor form 
-*  will be displayed at the next vblank. In previous versions of XFM_CRFM, 
+*  will be displayed at the next vblank. In previous versions of vsc_form, 
 *  the new cursor form, if visible, would only be redisplayed at the GCURXY
 *  position only after a mouse interrupt was recieved and processed. In this 
 *  version the new cursor form, if visible, is displayed at the following 
@@ -1149,10 +1149,10 @@ _SET_CUR:	move.l  _lineAVar,a1		; a1 -> linea var struct
 
 *  INQUIRE MOUSE STATUS
 *
-*	Implement vq_mouse_status with atomic retrieval of
+*	Implement vq_mouse with atomic retrieval of
 *	mouse position and button state
 
-_vq_mouse_status:
+_vq_mouse:
 		move.l  _lineAVar,a2		; a2 -> linea var struct
 		move.l	_INTOUT(a2),a0		; a0 -> INTOUT[0]
 		move.l	_PTSOUT(a2),a1		; a1 -> PTSOUT[0]

@@ -46,15 +46,14 @@
 #include "lineavar.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"
-#include "jmptbl.h"
 
 VOID (*jmptb1[]) PROTO((NOTHING)) =
 {
 	v_opnwk,
 	v_clswk,
-	CLEARMEM,
+	v_clrwk,
 	v_nop,
-	CHK_ESC,
+	v_escape,
 	v_pline,
 	v_pmarker,
 	d_gtext,
@@ -84,9 +83,9 @@ VOID (*jmptb1[]) PROTO((NOTHING)) =
 	vswr_mode,
 	vsin_mode,
 	v_nop,
-	vql_attr,
-	vqm_attr,
-	vqf_attr,
+	vql_attributes,
+	vqm_attributes,
+	vqf_attributes,
 	dqt_attributes,
 	dst_alignment
 };
@@ -99,30 +98,30 @@ VOID (*jmptb2[]) PROTO((NOTHING)) =
 	d_contourfill,
 	vsf_perimeter,
 	v_get_pixel,
-	dst_style,
+	vst_effects,
 	dst_point,
 	vsl_ends,
 	dro_cpyfm,
-	dr_trn_fm,
-	XFM_CRFM,
+	vr_trnfm,
+	vsc_form,
 	dsf_udpat,
 	vsl_udsty,
 	dr_recfl,
-	vqi_mode,
+	vqin_mode,
 	dqt_extent,
 	dqt_width,
-	EX_TIMV,
+	vex_timv,
 	dt_loadfont,
 	dt_unloadfont,
 	drt_cpyfm,
 	v_show_c,
 	v_hide_c,
-	vq_mouse_status,
-	VEX_BUTV,
-	VEX_MOTV,
-	VEX_CURV,
+	vq_mouse,
+	vex_butv,
+	vex_motv,
+	vex_curv,
 	vq_key_s,
-	s_clip,
+	vs_clip,
 	dqt_name,
 	dqt_fontinfo
 };

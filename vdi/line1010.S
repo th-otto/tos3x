@@ -41,7 +41,7 @@
 
 		xdef	_put_pix,_get_pix,_ABLINE,_HABLINE
 		xdef	_RECTFILL,_CLC_FLIT,_COPY_RFM,_TEXT_BLT
-		xdef	_v_show_c,_HIDE_CUR,_XFM_CRFM
+		xdef	_v_show_c,_HIDE_CUR,_vsc_form
 		xdef	cur_replace,cur_display,KG_BLT,_seedfill
 		xdef	line1010
 		xdef	_first,_f8x8,_f8x16,_f16x32
@@ -75,7 +75,7 @@ var_base:	move.l	_lineAVar,a0	; return the base address of line 1010.
 *
 atab:		dc.l	var_base,_put_pix,_get_pix,M_ABLINE
 		dc.l	M_HABLINE,M_RECTFILL,M_CLC_FLIT,KG_BLT
-		dc.l	_TEXT_BLT,_v_show_c,_HIDE_CUR,_XFM_CRFM
+		dc.l	_TEXT_BLT,_v_show_c,_HIDE_CUR,_vsc_form
 		dc.l	cur_replace,cur_display,_COPY_RFM,_seedfill
 
 *+

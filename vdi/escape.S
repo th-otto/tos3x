@@ -112,7 +112,7 @@ F_SVPOS		equ	    5	;				1:true
     xdef  st_move_cursor
 	xdef	gsx_conout
 	xdef	_con_out
-	xdef	_CHK_ESC
+	xdef	_v_escape
 	xdef	gl_f_init
 	xdef	blank_it
 	xdef	st_neg_cell
@@ -123,7 +123,7 @@ F_SVPOS		equ	    5	;				1:true
 
 *******************************************************************************
 *									      *
-*	_CHK_ESC:							      *
+*	_v_escape:							      *
 *		This routine decodes the escape functions.		      *
 *									      *
 *		input:	CONTRL[5] = escape function ID.			      *
@@ -140,7 +140,7 @@ F_SVPOS		equ	    5	;				1:true
 *									      *
 *******************************************************************************
 
-_CHK_ESC:
+_v_escape:
 	move.l  _lineAVar,a4		; a4 -> linea var struct
 
 	move.l	_CONTRL(a4),a0		; a0 -> CONTRL array.

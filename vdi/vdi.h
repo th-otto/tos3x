@@ -40,61 +40,64 @@ VOID Init32Pal PROTO((NOTHING));
 VOID InitColReqArray PROTO((NOTHING));
 VOID InitTTLut PROTO((NOTHING));
 
+
 /*
  * isin.c
  */
 int16_t Isin PROTO((int16_t ang));
 int16_t Icos PROTO((int16_t ang));
 
+
 /*
  * jmptbl.c
  */
 VOID SCREEN PROTO((NOTHING));
 
+
 /*
  * monobj.c
  */
-VOID vsl_type PROTO((NOTHING));
-VOID vsl_width PROTO((NOTHING));
-VOID vsl_ends PROTO((NOTHING));
-VOID vsl_color PROTO((NOTHING));
-VOID vsm_height PROTO((NOTHING));
-VOID vsm_type PROTO((NOTHING));
-VOID vsm_color PROTO((NOTHING));
-VOID vsf_interior PROTO((NOTHING));
-VOID vsf_style PROTO((NOTHING));
-VOID vsf_color PROTO((NOTHING));
-VOID v_locator PROTO((NOTHING));
-VOID v_show_c PROTO((NOTHING));
-VOID v_hide_c PROTO((NOTHING));
-VOID v_valuator PROTO((NOTHING));
-VOID v_choice PROTO((NOTHING));
-VOID v_string PROTO((NOTHING));
-VOID vq_key_s PROTO((NOTHING));
-VOID vswr_mode PROTO((NOTHING));
-VOID vsin_mode PROTO((NOTHING));
-VOID vqi_mode PROTO((NOTHING));
-VOID vsf_perimeter PROTO((NOTHING));
-VOID vsl_udsty PROTO((NOTHING));
-VOID s_clip PROTO((NOTHING));
+VOID vsl_type PROTO((NOTHING));          /*  VDI #15  */
+VOID vsl_width PROTO((NOTHING));         /*  VDI #16  */
+VOID vsl_color PROTO((NOTHING));         /*  VDI #17  */
+VOID vsm_type PROTO((NOTHING));          /*  VDI #18  */
+VOID vsm_height PROTO((NOTHING));        /*  VDI #19  */
+VOID vsm_color PROTO((NOTHING));         /*  VDI #20  */
+VOID vsf_interior PROTO((NOTHING));      /*  VDI #23  */
+VOID vsf_style PROTO((NOTHING));         /*  VDI #24  */
+VOID vsf_color PROTO((NOTHING));         /*  VDI #25  */
+VOID v_locator PROTO((NOTHING));         /*  VDI #28  */
+VOID v_valuator PROTO((NOTHING));        /*  VDI #29  */
+VOID v_choice PROTO((NOTHING));          /*  VDI #30  */
+VOID v_string PROTO((NOTHING));          /*  VDI #31  */
+VOID vswr_mode PROTO((NOTHING));         /*  VDI #32  */
+VOID vsin_mode PROTO((NOTHING));         /*  VDI #33  */
+VOID v_show_c PROTO((NOTHING));          /* VDI #122  */
+VOID v_hide_c PROTO((NOTHING));          /* VDI #123  */
+VOID vq_key_s PROTO((NOTHING));          /* VDI #128  */
+VOID vqin_mode PROTO((NOTHING));         /* VDI #115  */
+VOID vsf_perimeter PROTO((NOTHING));     /* VDI #104  */
+VOID vsl_udsty PROTO((NOTHING));         /* VDI #113  */
+VOID vs_clip PROTO((NOTHING));           /* VDI #129  */
 VOID arb_corner PROTO((int16_t *corners, int16_t type));
-VOID dro_cpyfm PROTO((NOTHING));
-VOID drt_cpyfm PROTO((NOTHING));
-VOID dr_trn_fm PROTO((NOTHING));
-VOID dr_recfl PROTO((NOTHING));
+VOID dro_cpyfm PROTO((NOTHING));         /* VDI #109  */
+VOID drt_cpyfm PROTO((NOTHING));         /* VDI #121  */
+VOID vr_trnfm PROTO((NOTHING));          /* VDI #110  */
+VOID dr_recfl PROTO((NOTHING));          /* VDI #114  */
+VOID vsl_ends PROTO((NOTHING));          /* VDI #108  */
 
 /*
  * monout.c
  */
-VOID vq_extnd PROTO((NOTHING));
-VOID v_clswk PROTO((NOTHING));
-VOID v_pline PROTO((NOTHING));
-VOID v_pmarker PROTO((NOTHING));
-VOID v_fillarea PROTO((NOTHING));
-VOID v_gdp PROTO((NOTHING));
-VOID vql_attr PROTO((NOTHING));
-VOID vqm_attr PROTO((NOTHING));
-VOID vqf_attr PROTO((NOTHING));
+VOID vq_extnd PROTO((NOTHING));          /* VDI #102  */
+VOID v_clswk PROTO((NOTHING));           /*  VDI #2   */
+VOID v_pline PROTO((NOTHING));           /*  VDI #6   */
+VOID v_pmarker PROTO((NOTHING));         /*  VDI #7   */
+VOID v_fillarea PROTO((NOTHING));        /*  VDI #9   */
+VOID v_gdp PROTO((NOTHING));             /*  VDI #11  */
+VOID vql_attributes PROTO((NOTHING));    /*  VDI #35  */
+VOID vqm_attributes PROTO((NOTHING));    /*  VDI #36  */
+VOID vqf_attributes PROTO((NOTHING));    /*  VDI #37  */
 VOID pline PROTO((NOTHING));
 BOOLEAN clip_line PROTO((NOTHING));
 int16_t code PROTO((int16_t x,int16_t y));
@@ -116,28 +119,30 @@ VOID r_fa_attr PROTO((NOTHING));
 VOID do_arrow PROTO((NOTHING));
 VOID arrow PROTO((int16_t *xy,int16_t inc));
 VOID init_wk PROTO((NOTHING));
-VOID d_opnvwk PROTO((NOTHING));
-VOID d_clsvwk PROTO((NOTHING));
-VOID dsf_udpat PROTO((NOTHING));
-VOID vq_color PROTO((NOTHING));
-VOID vs_color PROTO((NOTHING));
+VOID d_opnvwk PROTO((NOTHING));          /* VDI #100  */
+VOID d_clsvwk PROTO((NOTHING));          /* VDI #101  */
+VOID dsf_udpat PROTO((NOTHING));         /* VDI #112  */
+VOID vq_color PROTO((NOTHING));          /*  VDI #26  */
+VOID vs_color PROTO((NOTHING));          /*  VDI #14  */
+
 
 /*
  * opnwk.c
  */
-VOID v_opnwk PROTO((NOTHING));
+VOID v_opnwk PROTO((NOTHING));           /*  VDI #1   */
 const SCREENDEF *FindDevice PROTO((int16_t devId));
 VOID SetCurDevice PROTO((int16_t curRez));
 VOID InitFonts PROTO((NOTHING));
 VOID InitDevTabInqTab PROTO((NOTHING));
 
+
 /*
  * seedfill.c
  */
-VOID d_contourfill PROTO((NOTHING));
+VOID d_contourfill PROTO((NOTHING));     /* VDI #103  */
 VOID seedfill PROTO((NOTHING));
 VOID crunch_Q PROTO((NOTHING));
-VOID v_get_pixel PROTO((NOTHING));
+VOID v_get_pixel PROTO((NOTHING));       /* VDI #105  */
 
 /*
  * spcolor.c
@@ -148,25 +153,25 @@ VOID sp_vq_color PROTO((NOTHING));
 /*
  * text.c
  */
-VOID d_gtext PROTO((NOTHING));
+VOID d_gtext PROTO((NOTHING));           /*  VDI #8   */
 VOID text_init PROTO((NOTHING));
-VOID dst_height PROTO((NOTHING));
+VOID dst_height PROTO((NOTHING));        /*  VDI #12  */
 VOID copy_name PROTO((const char *source, char *dest));
 VOID make_header PROTO((NOTHING));
-VOID dst_point PROTO((NOTHING));
-VOID dst_style PROTO((NOTHING));
-VOID dst_alignment PROTO((NOTHING));
-VOID dst_rotation PROTO((NOTHING));
-VOID dst_font PROTO((NOTHING));
-VOID dst_color PROTO((NOTHING));
-VOID dqt_attributes PROTO((NOTHING));
-VOID dqt_extent PROTO((NOTHING));
-VOID dqt_width PROTO((NOTHING));
-VOID dqt_name PROTO((NOTHING));
-VOID dqt_fontinfo PROTO((NOTHING));
+VOID dst_point PROTO((NOTHING));         /* VDI #107  */
+VOID vst_effects PROTO((NOTHING));       /* VDI #106  */
+VOID dst_rotation PROTO((NOTHING));      /*  VDI #13  */
+VOID dst_font PROTO((NOTHING));          /*  VDI #21  */
+VOID dst_color PROTO((NOTHING));         /*  VDI #22  */
+VOID dqt_attributes PROTO((NOTHING));    /*  VDI #38  */
+VOID dst_alignment PROTO((NOTHING));     /*  VDI #39  */
+VOID dqt_extent PROTO((NOTHING));        /* VDI #116  */
+VOID dqt_width PROTO((NOTHING));         /* VDI #117  */
+VOID dqt_name PROTO((NOTHING));          /* VDI #130  */
+VOID dqt_fontinfo PROTO((NOTHING));      /* VDI #131  */
 VOID d_justified PROTO((NOTHING));
-VOID dt_loadfont PROTO((NOTHING));
-VOID dt_unloadfont PROTO((NOTHING));
+VOID dt_loadfont PROTO((NOTHING));       /* VDI #119  */
+VOID dt_unloadfont PROTO((NOTHING));     /* VDI #120  */
 
 /*
  * trucolor.c
@@ -200,4 +205,4 @@ int16_t MONO8XHT PROTO((NOTHING));
 /*
  * xfrmform.S
  */
-VOID TRAN_FM PROTO((NOTHING));           /* 110  */
+VOID TRAN_FM PROTO((NOTHING));

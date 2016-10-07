@@ -109,6 +109,7 @@ VOID vq_extnd(NOTHING)
 
 
 /* CLOSE_WORKSTATION: */
+/* 30de: 00e08c5c */
 VOID v_clswk(NOTHING)
 {
 	ATTRIBUTE *next_work;
@@ -339,7 +340,7 @@ VOID v_gdp(NOTHING)
 
 
 /* INQUIRE CURRENT POLYLINE ATTRIBUTES */
-VOID vql_attr(NOTHING)
+VOID vql_attributes(NOTHING)
 {
 	register int16_t *pointer;
 	register ATTRIBUTE *work_ptr;
@@ -361,7 +362,7 @@ VOID vql_attr(NOTHING)
 
 
 /* INQUIRE CURRENT Polymarker ATTRIBUTES */
-VOID vqm_attr(NOTHING)
+VOID vqm_attributes(NOTHING)
 {
 	register int16_t *pointer;
 	register ATTRIBUTE *work_ptr;
@@ -384,7 +385,7 @@ VOID vqm_attr(NOTHING)
 
 
 /* INQUIRE CURRENT Fill Area ATTRIBUTES */
-VOID vqf_attr(NOTHING)
+VOID vqf_attributes(NOTHING)
 {
 	register int16_t *pointer;
 	register ATTRIBUTE *work_ptr;

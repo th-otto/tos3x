@@ -721,7 +721,7 @@ VOID dst_point(NOTHING)
 }
 
 
-VOID dst_style(NOTHING)
+VOID vst_effects(NOTHING)
 {
 	INTOUT[0] = cur_work->style = INTIN[0] & INQ_TAB[2];
 	CONTRL[4] = 1;

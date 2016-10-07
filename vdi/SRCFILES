@@ -22,7 +22,6 @@ VDI_SRCS = \
 	fontdef.h \
 	gsxdef.h \
 	gsxextrn.h \
-	jmptbl.h \
 	lineavar.h \
 	vdi.h \
 	scrndev.h \
@@ -35,6 +34,7 @@ VDI_SRCS = \
 	tosvars.inc \
 	vdiincl.inc \
 	\
+	palette.S \
 	blastman.S \
 	blitinit.S \
 	copyrfm.S \
@@ -63,7 +63,6 @@ VDI_SRCS = \
 	allgem.S \
 	spxesc.S \
 	pxmouse.S \
-	palette.S \
 	blaster.S \
 	hbline.S \
 	hbmono.S \

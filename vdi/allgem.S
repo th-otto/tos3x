@@ -17,9 +17,9 @@
 
 
 		xdef	_InitFonts
-		xdef	_CLEARMEM
+		xdef	_v_clrwk
    		xdef	_DINIT_G
-   		xdef	_EX_TIMV
+   		xdef	_vex_timv
    		xdef	_GCHC_KEY
    		xdef	_GCHR_KEY
 		xdef	_GLOC_KEY
@@ -37,7 +37,7 @@
 		
 
 		xref	_MOV_CUR	; External Routines called
-		xref	_XFM_CRFM
+		xref	_vsc_form
 		xref	gl_f_init
 		xref	normal_ascii
 
@@ -90,7 +90,8 @@ return:		rts
 *
 *******************************************************************************
 
-_CLEARMEM:	move.l  _lineAVar,a0		; a0 -> linea var struct
+/* 306de: 00e06682 */
+_v_clrwk:	move.l  _lineAVar,a0		; a0 -> linea var struct
                 move.w	_v_planes(a0),d0	; d0 <- # of planes
 		mulu.w	v_hz_rez(a0),d0		; d0 <- (planes) x (hor rez)
 		mulu.w	v_vt_rez(a0),d0		; d0 <- (plns)x(hrez)x(vrt rz)
@@ -169,7 +170,7 @@ clr4:		movem.l	(sp)+,d3-d7/a3	; restore registers
 *
 *	INITIALIZE GRAPHICS	entry: 		none
 *				exit:		none
-*				destroys:	see CLEARMEM
+*				destroys:	see v_clrwk
 *
 *******************************************************************************
 
@@ -192,7 +193,7 @@ _INIT_G:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		bsr	mouse_init		; Init the mouse
 		jsr	escf			; hide alpha cursor
 
-		bra	_CLEARMEM
+		bra	_v_clrwk
 
 
 *******************************************************************************
@@ -203,7 +204,7 @@ _INIT_G:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *
 *******************************************************************************
 
-_EX_TIMV:	move.l  _lineAVar,a1		; a1 -> linea var struct
+_vex_timv:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.l	_CONTRL(a1),a0
 
 		move	SR,-(sp)		; Disable interrupts
@@ -245,7 +246,7 @@ tick_int:	subq.l  #4,sp			; leave some room on the stack
 *
 *	DEINITIALIZE GRAPHICS	entry: 		none
 *				exit:		none
-*				destroys:	a1 + see dinit_mouse, CLEARMEM,
+*				destroys:	a1 + see dinit_mouse, v_clrwk,
 *						esce
 *
 *******************************************************************************
@@ -258,7 +259,7 @@ _DINIT_G:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		addq.l	#8,sp
 
 		bsr	dinit_mouse
-		bsr	_CLEARMEM
+		bsr	_v_clrwk
 		jmp	esce			; Show the alpha cursor. return
 
 
@@ -415,7 +416,7 @@ mouse_init:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		lea	_INTIN(a1),a0		; a0 -> pointer to INTIN array
 		move.l	(a0),-(sp)		; Save the intin pointer and
 		move.l	#arrow_cdb,(a0)		; make it point to the arrow
-		bsr	_XFM_CRFM		; a1 gets clobered here
+		bsr	_vsc_form		; a1 gets clobbered here
 		move.l  _lineAVar,a1		; a1 -> linea var struct
 
 		move.l	(sp)+,_INTIN(a1)	; Restore INTIN pointer
@@ -635,4 +636,4 @@ esc3:		move.l	_v_bas_ad,v_cur_ad(a1)	; home cursor.
 
 		jsr	_InitDevTabInqTab	; initialize more variables
 
-		bra	_CLEARMEM		; blank screen. ret from there
+		bra	_v_clrwk		; blank screen. ret from there

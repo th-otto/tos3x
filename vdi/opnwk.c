@@ -31,6 +31,7 @@ FONT_HEAD ram8x16, ram8x8, ram16x32;
 /* 
  * v_opnwk():	OPEN_WORKSTATION:
  */
+/* 306de: 00e06a76 */
 VOID v_opnwk(NOTHING)
 {
 	register int16_t i;
