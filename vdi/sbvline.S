@@ -45,18 +45,18 @@ FRAG_LEN	equ	MAX_PLANES*4+4
 
 
 sb_vline:	lea	-FRAG_LEN(sp),sp  ; sp -> pixel fragment frame
-		move.w	_v_planes(a4),d3  ; d3 <- number of planes
+		move.w	lineavars+_v_planes,d3  ; d3 <- number of planes
 
 		cmp.w	#MAX_PLANES,d3	; too many planes for the buffer ?
 		bhi	sv_quit		; if so, end prematurely
 
-		cmp.w	_WRT_MODE(a4),d0  ; don't build fragment for XOR mode
+		cmp.w	lineavars+_WRT_MODE,d0  ; don't build fragment for XOR mode
 		beq	sv_nofrag
 
 		move.l	sp,a2		; a2 -> ram for pixel fragment code
 		bsr	pixfrag		 
 
-sv_nofrag:	move.w	_v_planes(a4),d0
+sv_nofrag:	move.w	lineavars+_v_planes,d0
 		add.w	d0,d0		; d0 <- 2 * planes
 
 		move.l	_v_bas_ad,a5	; a5 -> start of destination form
@@ -64,12 +64,12 @@ sv_nofrag:	move.w	_v_planes(a4),d0
 		muls	d0,d6		; d6 <- offset to (X,0)
 		add.l	d6,a5		; a5 -> dst (X,0)
 
-		move.w	_bytes_lin(a4),d1
+		move.w	lineavars+_bytes_lin,d1
 		move.w	d1,d6
 		muls	d5,d6		; d6 <- offset to (0,Y1)
 		add.l	d6,a5		; a5 -> dst (X,Y1)
 
-		move.w	_v_lin_wr(a4),d1  ; d1 <- offset to next line down
+		move.w	lineavars+_v_lin_wr,d1  ; d1 <- offset to next line down
 
 		sub.w	d5,d7		; d7 <- dY: Y2-Y1
 		bge	sv_wrap		; dY<0  => plot from bottom up
@@ -88,23 +88,23 @@ sv_wrap:	move.w	d1,a0		; a0 <- dst wrap when pixel is skipped
 		clr.w	d1
 		bset.l	d4,d1		; d1 <- "OR" mask for X mod16
 
-		move.w	_WRT_MODE(a4),d6  ; d6 <- writing mode code
+		move.w	lineavars+_WRT_MODE,d6  ; d6 <- writing mode code
 		lsl.w	#2,d6
 
 		cmp.w	#8,d6		; if XOR mode ...
 		bne	sv_nxtmask
-		tst.w	_LSTLIN(a4)	; and not last line ...
+		tst.w	lineavars+_LSTLIN	; and not last line ...
 		bne	sv_nxtmask
 
 		subq.w	#1,d7		; don't plot last point  (DRI kludge)
 
-sv_nxtmask:	move.w	_LN_MASK(a4),d2	; d2 <- line style mask for this line
+sv_nxtmask:	move.w	lineavars+_LN_MASK,d2	; d2 <- line style mask for this line
 		move.w	d2,d3		; d3 <- line style mask for next line
 		move.w	d7,d4		; d4 <- dbra pixel counter
 		addq.w	#1,d4		; d4 <- line length
 		and.w	d5,d4		; d4 <- alignment value: LENGTH mod16
 		rol.w	d4,d3		; d3 <- line style mask for next line
-		move.w	d3,_LN_MASK(a4)	; store line style mask for next line
+		move.w	d3,lineavars+_LN_MASK	; store line style mask for next line
 
 		move.l	sv_tbl(pc,d6.w),d6 ; d6[15:00] <-  return thread offset
 		lea	sv_tbl(pc,d6.w),a3 ; a3 <- pixel fragment return thread

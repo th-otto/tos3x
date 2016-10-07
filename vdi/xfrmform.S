@@ -96,8 +96,7 @@ _TRAN_FM:
 
 	movem.l	d0-d4/a0-a2,-(sp)
 
-	move.l  _lineAVar,a0		; a0 -> linea var struct
-	move.l	_CONTRL(a0),a2		; a2 -> control array
+	move.l	lineavars+_CONTRL,a2		; a2 -> control array
 	move.l	C_MFDB_S(a2),a0		; a0 -> source MFDB
 	move.l	C_MFDB_D(a2),a1		; a1 -> destination MFDB
 

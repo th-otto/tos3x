@@ -51,9 +51,9 @@
 rout_init:
 _SETBLT:
 #if TOSVERSION >= 0x404
-		move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.w	d0,LA_BLTMODE(a1)	; store present mode selection
-		move.l	LA_CURDEV(a1),a0		; a0 -> current device struct
+		PIXLA(a1)
+		move.w	d0,PIXLV(LA_BLTMODE,a1)	; store present mode selection
+		move.l	PIXLV(LA_CURDEV,a1),a0		; a0 -> current device struct
 
 
 		;
@@ -67,24 +67,24 @@ _SETBLT:
 
 setblt0:
 		lea	V_PRIMITIVES(a1),a0	; a0 -> space for primitives
-		move.l	a0,LA_ROUTINES(a1)	; pnt to ram based routine list
+		move.l	a0,PIXLV(LA_ROUTINES,a1)	; pnt to ram based routine list
 		move.w	#21,d0			; setup the loop count
 
 rCopyLoop:
 		move.l	(a2)+,(a0)+		; copy vector
 		dbra	d0,rCopyLoop
 
-		move.l	LA_ROUTINES(a1),a1	; a1 -> vector list
+		move.l	PIXLV(LA_ROUTINES,a1),a1	; a1 -> vector list
 		move.l	V_INIT(a1),a1		; a1 -> version of init
 		jsr	(a1)
 #else
-        move.w    d0,LA_BLTMODE+lineavars
-        movea.l   lineavars+LA_CURDEV,a0
+        move.w    d0,PIXLV(LA_BLTMODE,a1)
+        movea.l   PIXLV(LA_CURDEV,a1),a0
         btst      #0,d0
         beq.s     setblt0
-        movea.l   lineavars+LA_ROUTINES,a0
+        movea.l   PIXLV(LA_ROUTINES,a1),a0
 setblt0:
-        lea.l     lineavars+LA_USERDEVINIT,a1
+        lea.l     PIXLV(LA_USERDEVINIT,a1),a1
         moveq.l   #9,d0
 rCopyLoop:
         move.l    (a0)+,(a1)+
@@ -106,10 +106,10 @@ rCopyLoop:
 _GETBLT:
 #if TOSVERSION >= 0x404
 		move.l	a0,-(sp)
-		move.l  _lineAVar,a0		; a0 -> linea var struct
-		move.w	LA_BLTMODE(a0),d0
+		PIXLA(a0)
+		move.w	PIXLV(LA_BLTMODE,a0),d0
 		move.l	(sp)+,a0
 #else
-        move.w    lineavars+LA_BLTMODE,d0
+        move.w    PIXLV(LA_BLTMODE,a0),d0
 #endif
 		rts

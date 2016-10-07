@@ -67,7 +67,8 @@ line1010:	move.l	2(sp),a1	; fetch pc off stack.
 		movem.l	(sp)+,d3-d7/a3-a5 ; for "C".
 la_out:		rte
 *
-var_base:	move.l	_lineAVar,a0	; return the base address of line 1010.
+var_base:
+		LA(a0)
 		move.l	a0,d0		; for "C".
 		lea	fonts,a1	; and a ptr to the first font header.
 		lea	atab,a2		; and a ptr to the array of pointers.
@@ -98,10 +99,10 @@ M_CLC_FLIT:	bsr	set_index
 * Set the color index by checking the bit plane flags then
 * setting the appropriate bits.
 *-
-set_index:	move.l	_lineAVar,a4		; a4 -> LineA variable base
+set_index:	PIXLA(a4)
 		clr.l	d0			; clear color index
-		lea	_FG_BP_1(a4),a3		; a3 -> 1st 4 back plane flags
-		lea	_FG_BP_5(a4),a5		; a5 -> 2nd 4 back plane flags
+		lea	PIXLV(_FG_BP_1,a4),a3		; a3 -> 1st 4 back plane flags
+		lea	PIXLV(_FG_BP_5,a4),a5		; a5 -> 2nd 4 back plane flags
 
 		tst.w	(a3)+
 		beq	bp2
@@ -135,7 +136,7 @@ bp8:		tst.w	(a5)+
 		beq	bp9
 		bset.l	#7,d0
 
-bp9:		move.l	d0,_FG_B_PLANES(a4)	; copy the color index
+bp9:		move.l	d0,PIXLV(_FG_B_PLANES,a4)	; copy the color index
 		rts
 
 

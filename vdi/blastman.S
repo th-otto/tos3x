@@ -72,7 +72,7 @@ KG_BLT:
 	move.w	d6,D_XMAX(a6)
 	move.w	d7,D_YMAX(a6)
 
-        move.l  _lineAVar,a5            ; a5 -> linea var struct
+    PIXLA(a5)
 	move.l	LA_ROUTINES(a5),a5	; a5 -> routines vector list
 	move.l	V_BLAST(a5),a5		; a5 -> desired version of blast_man
 	jmp	(a5)			; routine ("blast_man" uses BLASTER)

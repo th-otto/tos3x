@@ -1228,7 +1228,7 @@ no_scroll:
 next_cell:
 	move.l	v_off_ad(a4),a2		; a2 -> offset table
 #if VIDEL_SUPPORT
-	move.w	byt_per_pix(a4),d2	; d2 <- # of bytes per pix
+	move.w	PIXLV(byt_per_pix,a4),d2	; d2 <- # of bytes per pix
 	beq	word_cell		; if zero means not pix packed
 	mulu	2(a2),d2		; d2 <- offset to next cell
 	adda.l	d2,a1			; a1 -> first cell of next word
@@ -1405,7 +1405,7 @@ y_clipped:	move.w	d1,d3			; d3 <- clipped Y
 
 		move.l	v_off_ad(a4),a2		; a2 -> offset table
 #if VIDEL_SUPPORT
-		move.w	byt_per_pix(a4),d5	; d5 <- # bytes per each pix
+		move.w	PIXLV(byt_per_pix,a4),d5	; d5 <- # bytes per each pix
 		bne	claddr_pix		; do pixel packed
 #endif
 

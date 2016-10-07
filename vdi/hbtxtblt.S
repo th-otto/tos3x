@@ -88,55 +88,30 @@ OUTLINEM	equ	$10
 SHADOWM		equ	$20
 
 
-		offset	0
-
-		ds.w	1	;width of source form (in bytes)
-s_next		equ	-*
-		ds.w	1	;width of destination form (in bytes)
-d_next		equ	-*
-		ds.w	1	;offset to back-up ptr to plane 0 (0,2 or 6)
-prevpln0	equ	-*
-		ds.w	1	;height of area to blit (in scanlines)
-height		equ	-*
-		ds.w	1	;# of planes (1,2, or 4)
-nbrplane	equ	-*
-		ds.w	1	;foreground color temp
-forecol		equ	-*
-		ds.w	1	;background color temp
-backcol		equ	-*
-		ds.w	1	;inverted liten mask (in effect if .NE. 0)
-litemsk		equ	-*
-		ds.w	1	;skew mask (skew in effect if .NE. 0)
-skewmsk		equ	-*
-		ds.w	1	;skew case offset to use if in effect
-skewcase	equ	-*
-		ds.w	1	;currently free buffer (0 or cell_siz)
-buffree		equ	-*
-		ds.w	1	;writing mode
-wrt_mod		equ	-*
-		ds.w	1	;XACC to use for scaling
-tmp_xacc	equ	-*
-		ds.w	1	;computed delx to use for scaling
-tmp_delx	equ	-*
-		ds.w	1	;computed dely to use for scaling
-tmp_dely	equ	-*
-		ds.w	1	;clip adjust value (add) for sourcex,destx
-delsdx		equ	-*
-		ds.w	1	;clip adjust value (add) for sourcey,desty
-delsdy		equ	-*
-		ds.w	1	;clip adjust value (subtract) for delx
-deldelx		equ	-*
-		ds.w	1	;clip adjust value (subtract) for dely
-deldely		equ	-*
-		ds.w	1	;clipping required if -1 (else 0)
-clipon		equ	-*
-		ds.w	1	;local destination y-position
-locdesty	equ	-*
-		ds.w	1	;local destination x-position
-locdestx	equ	-*
-		ds.w	1	;weight to use for bold form expansion
-locweigt	equ	-*
-ramlen		equ	-*
+s_next		equ	-2	;width of source form (in bytes)
+d_next		equ	-4	;width of destination form (in bytes)
+prevpln0	equ	-6	;offset to back-up ptr to plane 0 (0,2 or 6)
+height		equ	-8	;height of area to blit (in scanlines)
+nbrplane	equ	-10	;# of planes (1,2, or 4)
+forecol		equ	-12	;foreground color temp
+backcol		equ	-14	;background color temp
+litemsk		equ	-16	;inverted liten mask (in effect if .NE. 0)
+skewmsk		equ	-18	;skew mask (skew in effect if .NE. 0)
+skewcase	equ	-20	;skew case offset to use if in effect
+buffree		equ	-22	;currently free buffer (0 or cell_siz)
+wrt_mod		equ	-24	;writing mode
+tmp_xacc	equ	-26	;XACC to use for scaling
+tmp_delx	equ	-28	;computed delx to use for scaling
+tmp_dely	equ	-30	;computed dely to use for scaling
+delsdx		equ	-32	;clip adjust value (add) for sourcex,destx
+delsdy		equ	-34	;clip adjust value (add) for sourcey,desty
+deldelx		equ	-36	;clip adjust value (subtract) for delx
+deldely		equ	-38	;clip adjust value (subtract) for dely
+clipon		equ	-40	;clipping required if -1 (else 0)
+locdesty	equ	-42	;local destination y-position
+locdestx	equ	-44	;local destination x-position
+locweigt	equ	-46	;weight to use for bold form expansion
+ramlen		equ	-46
 
 
 	text
@@ -148,9 +123,9 @@ hb_text:
 
 	clr.w	buffree(a4)		;set buffer #0 as free one
 
-	movem.w	_DELX(a6),d5-d6		;d5=_DELX;d6=dely
+	movem.w	lineavars+_DELX,d5-d6		;d5=_DELX;d6=dely
 
-	tst.w	_DOUBLE(a6)		;are we scalin?
+	tst.w	lineavars+_DOUBLE		;are we scalin?
 	beq	adr_nobd		;br if not
 
 *   scaling; calculate _DELX, dely for clip purposes 
@@ -160,8 +135,8 @@ hb_text:
 	addq.l	#2,sp			;restore stack
 	move.w	d0,d6			;copy computed DELY to d5
 
-	move.w	_XACC_DDA(a6),d1		;d1 = dda accum
-	move.w	_DDA_INC(a6),d2		;d2 = dda increment
+	move.w	lineavars+_XACC_DDA,d1		;d1 = dda accum
+	move.w	lineavars+_DDA_INC,d2		;d2 = dda increment
 	moveq	#0,d3			;clear calculated _DELX accumulator
 	move.w	d5,d0			;use original _DELX for loop count
 	bra	clc_n_su		;enter dbra loop
@@ -174,7 +149,7 @@ no_db_wd:
 clc_n_su:
 	dbra	d0,doub_wid
 *
-	btst.b	#0,_T_SCLSTS+1(a6)	;check scaling up or down
+	btst.b	#0,lineavars+_T_SCLSTS+1	;check scaling up or down
 	beq	scal_dwn		;br if scale down
 	add.w	d5,d3			;else, scale up--add iter count
 scal_dwn:
@@ -194,14 +169,14 @@ adr_nobd:
 *
 *  now, get more destination parms for clip purposes
 *
-	move.w	_STYLE(a6),d0		;get style flags
+	move.w	lineavars+_STYLE,d0		;get style flags
 	moveq	#0,d1			;assume no skew offsets
 	btst	#SKEW,d0		;check for skew
 	beq	adr_nosk
-	move.w	_R_OFF(a6),d1
-	add.w	_L_OFF(a6),d1		;d1 = total of left & right offsets
+	move.w	lineavars+_R_OFF,d1
+	add.w	lineavars+_L_OFF,d1		;d1 = total of left & right offsets
 adr_nosk:
-	movem.w	_DESTX(a6),d2-d3	;d2 = _DESTX, d3 = desty
+	movem.w	lineavars+_DESTX,d2-d3	;d2 = _DESTX, d3 = desty
 	movem.w	d2-d3,locdestx(a4)	;save in local
 *
 	clr.w	locweigt(a4)		;assume no local bold form expand
@@ -211,7 +186,7 @@ adr_nosk:
 *
 	btst.l	#THICKEN,d0		;check for boldface
 	beq	adr_notk		;skip if none
-	tst.w	_MONO_STATUS(a6)	;if bold, then in monospaced mode?
+	tst.w	lineavars+_MONO_STATUS	;if bold, then in monospaced mode?
 	beq	do_thik			;if not mono-spaced, add weight
 *
 *    Mono-spaced....
@@ -220,12 +195,12 @@ adr_nosk:
 *  
 	btst.l	#OUTLINE,d0		;is outline on?
 	bne	do_thik			;if so, ignore mono-spaced
-	tst.w	_CHUP(a6)		;is rotate on?
+	tst.w	lineavars+_CHUP		;is rotate on?
 	beq	adr_notk		;if not, mono-space by no form expand
 do_thik:
 *  else, form expand by weight
 *
-	move.w	_WEIGHT(a6),d4
+	move.w	lineavars+_WEIGHT,d4
 	move.w	d4,locweigt(a4)
 	add.w	d4,d5			;d5 = increased computed _DELX
 adr_notk:
@@ -239,7 +214,7 @@ adr_nadj:
 *
 *  now check rotatin'..
 *
-	move.w	_CHUP(a6),d0		;get rotate value
+	move.w	lineavars+_CHUP,d0		;get rotate value
 	beq	chk_clip		;if none, get on with clip
 *
 	cmpi.w	#900,d0			;90 degrees?
@@ -286,12 +261,12 @@ chk_clip:
 	move.l	d0,deldely(a4)	;clear clip adjust values for _DELX,dely
 	move.l	d0,delsdy(a4)	;clear clip adj values for sourcex/y, destx/y
 *
-	tst.w	_CLIP(a6)	;check for clipping engaged
+	tst.w	lineavars+_CLIP	;check for clipping engaged
 	beq	clp_done	;br if not--skip further checking
 *
 *  y -coord clip check..
 *
-	move.w	_YMN_CLIP(a6),d4	;get ymin clip boundary
+	move.w	lineavars+_YMN_CLIP,d4	;get ymin clip boundary
 	cmp.w	d4,d3			;top edge >= Y-MIN?
 	bge	chk_ymx			;br if so, y min ok
 *
@@ -308,7 +283,7 @@ chk_clip:
 	ble	no_blit			;no part within clip window;its gone
 	sub.w	d6,d3			;reget desty
 chk_ymx:
-	move.w	_YMX_CLIP(a6),d4	;get ymax
+	move.w	lineavars+_YMX_CLIP,d4	;get ymax
 	cmp.w	d4,d3			;top edge > Y-MAX?
 	bgt	no_blit			;exit if so,its totally off window
 *
@@ -325,7 +300,7 @@ chk_ymx:
 *  x - coord clip check..
 *
 chk_xmn:
-	move.w	_XMN_CLIP(a6),d4	;get xmin
+	move.w	lineavars+_XMN_CLIP,d4	;get xmin
 	cmp.w	d4,d2			;left edge >= X-MIN?
 	bge	chk_xmx			;br if so, go check X-MAX
 *
@@ -342,7 +317,7 @@ chk_xmn:
 	ble	no_blit
 	sub.w	d5,d2
 chk_xmx:
-	move.w	_XMX_CLIP(a6),d4
+	move.w	lineavars+_XMX_CLIP,d4
 	cmp.w	d4,d2			;left edge > X-MAX?
 	bgt	no_blit			;exit if so, its totally off window
 *
@@ -361,15 +336,15 @@ clp_done:
 *
 *  set up 1st text blit source (always fontform)..
 *
-	move.w	_FWIDTH(a6),s_next(a4)	;1st blit src always fontform
-	move.w	_DELY(a6),height(a4)	;1st blit src always from font
+	move.w	PIXLV(_FWIDTH,a6),s_next(a4)	;1st blit src always fontform
+	move.w	PIXLV(_DELY,a6),height(a4)	;1st blit src always from font
 	clr.w	litemsk(a4)		;assume no liten (only screen blt uses)
 	clr.w	skewmsk(a4)		;assume no skew (only screen blt uses)
 *
 *  init regs for fontform source blit
 *
-	move.w	_SOURCEX(a6),d0		;d0 = fontform SRC X min
-	move.w	_DELX(a6),d3		;get x width
+	move.w	PIXLV(_SOURCEX,a6),d0		;d0 = fontform SRC X min
+	move.w	PIXLV(_DELX,a6),d3		;get x width
 	subq.w	#1,d3			;adjust
 	bmi	no_blit			;can't blit 0 or neg widths
 
@@ -379,21 +354,21 @@ clp_done:
 	move.w	d0,d2			;d2 = SRC X min
 	lsr.w	#4,d2			;/8 = byte # on horz
 	add.w	d2,d2			;force word boundary
-	move.w	_SOURCEY(a6),d5		;get SRC Y min
-	move.w	_DELY(a6),d7
+	move.w	PIXLV(_SOURCEY,a6),d5		;get SRC Y min
+	move.w	PIXLV(_DELY,a6),d7
 	subq.w	#1,d7
 	bmi	no_blit
 
 	add.w	d7,d5			;SRC Y max
-	mulu	_FWIDTH(a6),d5		;d5 = offset due to Y coord
+	mulu	lineavars+_FWIDTH,d5		;d5 = offset due to Y coord
 	movea.l	d5,a0
-	adda.l	_FBASE(a6),a0
+	adda.l	lineavars+_FBASE,a0
 	adda.w	d2,a0			;a0 => source ptr
 *
 *  a0 => src ptr, d0 = src XMIN, d4 = src XMAX, d3 = delx-1, d7 = dely-1
 *         d1 = sum of skew offsets
 *
-	tst.w	_DOUBLE(a6)		;are we scalin'?
+	tst.w	lineavars+_DOUBLE		;are we scalin'?
 	beq	chk_skw			;br if not
 
 .page
@@ -409,7 +384,7 @@ replicat:
 
 	move.w	d7,d5			;we need dely - 1 in d5
 
-	mulu	_FWIDTH(a6),d7		;put source ptr back up at top
+	mulu	lineavars+_FWIDTH,d7		;put source ptr back up at top
 	suba.l	d7,a0			;a0 -> top of character
 *
 	move.w	d0,d2			;sourcex
@@ -417,8 +392,8 @@ replicat:
 *
 	move.w	d3,d1			;get DELX - 1 in d1
 	addq.w	#1,d1			;d1 =  DELX
-	movea.l	_scrtchp(a6),a1		;a1 -> destination; always 1st buffer
-	move.w	_scrpt2(a6),buffree(a4)	;set buffer #2 as free one now
+	movea.l	lineavars+_scrtchp,a1		;a1 -> destination; always 1st buffer
+	move.w	lineavars+_scrpt2,buffree(a4)	;set buffer #2 as free one now
 *
 	move.w	#$8000,d3		;d3=dx
 	move.w	d3,d4			;d4=bp
@@ -433,13 +408,13 @@ noline1:
 	move.w	d1,s_next(a4)		;will be used for source later
 	move.l	a1,a3			;save for use later
 *
-	move.w	_T_SCLSTS(a6),d7
+	move.w	lineavars+_T_SCLSTS,d7
 	roxr.l	#1,d7
 	moveq	#0,d7
 	roxr.l	#1,d7
 *
-	move.w	_FWIDTH(a6),d7
-	move.w	_DDA_INC(a6),d2
+	move.w	lineavars+_FWIDTH,d7
+	move.w	lineavars+_DDA_INC,d2
 	move.w	#32767,d6
 	tst.l	d7
 	bmi	rep_ylop
@@ -460,9 +435,9 @@ y_no_rep:
 	adda.w	d7,a0
 	dbra	d5,rep_ylop
 y_rep_don:
-	move.w	tmp_xacc(a4),_XACC_DDA(a6)
+	move.w	tmp_xacc(a4),lineavars+_XACC_DDA
 repexit1:
-	move.l	_scrtchp(a6),a0		;this destination is now top source
+	move.l	lineavars+_scrtchp,a0		;this destination is now top source
 *
 repexit:
 	move.w	tmp_dely(a4),d7		;get scaled dely
@@ -491,12 +466,12 @@ chk_skw:
 *
 *  see if we need to blit into buffer 1st...
 *
-	move.w	_STYLE(a6),d2		;get style flags in d2
+	move.w	lineavars+_STYLE,d2		;get style flags in d2
 	andi.w	#SKEWM+THICKM+OUTLINEM,d2  ;any of these in effect?
 	beq	chk_rota		;br if not
 *
 chk_chup:
-	tst.w	_CHUP(a6)		;rotation?
+	tst.w	lineavars+_CHUP		;rotation?
 	bne	prebltt			;if so, we must "preblit"
 *
 	cmpi.w	#SKEWM,d2		;skew only?
@@ -515,7 +490,7 @@ prebltt:
 	beq	preblt	
 preskew:
 	move.w	#cas1-skewx,skewcase(a4) ;assume case I
-	move.w	_SKEWMASK(a6),skewmsk(a4) ;save inverted mask
+	move.w	lineavars+_SKEWMASK,skewmsk(a4) ;save inverted mask
 	not.w	skewmsk(a4)		;make it right
 	add.w	d1,d5			;add skew offsets to weight
 *
@@ -540,8 +515,8 @@ outline1:
 	move.w	d6,d_next(a4)
 	move.w	d6,d1			;save 
 	mulu	d7,d6			;d6 = offset to bottom row
-	move.l	_scrtchp(a6),a1		;get destination as 1st buffer
-	adda.w	_scrpt2(a6),a1		;always use buffer #2
+	move.l	lineavars+_scrtchp,a1		;get destination as 1st buffer
+	adda.w	lineavars+_scrpt2,a1		;always use buffer #2
 	clr.w	buffree(a4)		;set-up buffer #1 as free
 *
 	move.l	a1,a2			;save top/left for use by bold routine
@@ -585,7 +560,7 @@ clearb2i:
 	bsr	norm_blt		;stuff to buffer
 	move.w	(sp)+,height(a4)
 *
-	btst.b	#THICKEN,_STYLE+1(a6)
+	btst.b	#THICKEN,lineavars+_STYLE+1
 	beq	skp_bold
 *
 *  do bolding in buffer
@@ -593,10 +568,10 @@ clearb2i:
 *  a2 => top/left of bold buffer
 *
 	move.w	height(a4),d3		;scanline height
-	move.w	_WEIGHT(a6),d1		;boldness
+	move.w	lineavars+_WEIGHT,d1		;boldness
 	subq.w	#1,d1			;d1 = boldness - 1
 *
-	tst.w	_MONO_STATUS(a6)
+	tst.w	lineavars+_MONO_STATUS
 	beq	weightok
 	clr.w	locweigt(a4)
 weightok:
@@ -641,8 +616,8 @@ skp_bold:
 *
 	movem.l	a0/d0/d3-d4/d7,-(sp)
 *
-	move.l	_scrtchp(a6),a0
-	adda.w	_scrpt2(a6),a0		;top of buffer
+	move.l	lineavars+_scrtchp,a0
+	adda.w	lineavars+_scrpt2,a0		;top of buffer
 	move.w	s_next(a4),d7
 	addq.w	#2,height(a4)
 	move.w	height(a4),d6
@@ -750,7 +725,7 @@ chk_rota:
 *   see about rotation...
 *
 *
-	move.w	_CHUP(a6),d5		;get rotation indicator
+	move.w	lineavars+_CHUP,d5		;get rotation indicator
 	beq	no_rota			;br if none
 *
 *
@@ -793,7 +768,7 @@ chk_rota:
 *
 *
 rotation:
-	move.l	_scrtchp(a6),a1		;get buffer for destination
+	move.l	lineavars+_scrtchp,a1		;get buffer for destination
 	add.w	buffree(a4),a1		;use free buffer
 *
 	move.w	locweigt(a4),d4
@@ -982,10 +957,10 @@ nxtword:	dc.b	2,4,0,8,0,0,0,16
 * 
 *
 scrn_blt:
-	move.w	_WRT_MODE(a6),wrt_mod(a4)	;copy current mode to local
+	move.w	lineavars+_WRT_MODE,wrt_mod(a4)	;copy current mode to local
 *
-	move.w	_v_lin_wr(a6),d_next(a4)	;get wrap ready
-	move.w	_v_planes(a6),d1		;plane count
+	move.w	lineavars+_v_lin_wr,d_next(a4)	;get wrap ready
+	move.w	lineavars+_v_planes,d1		;plane count
 	move.w	d1,nbrplane(a4)
 	move.b	nxtword-1(pc,d1.w),d1		;offset to next word
 *
@@ -993,22 +968,22 @@ scrn_blt:
 	subq.w	#2,d1				;back-up value
 	move.w	d1,prevpln0(a4)			;   for skew ptr adjust
 *
-	move.w	_TEXT_FG(a6),forecol(a4)	;set-up colors
-	move.w	_TEXT_BG(a6),backcol(a4)
+	move.w	lineavars+_TEXT_FG,forecol(a4)	;set-up colors
+	move.w	lineavars+_TEXT_BG,backcol(a4)
 *
-	btst.b	#LIGHT,_STYLE+1(a6)		;lite?
+	btst.b	#LIGHT,lineavars+_STYLE+1		;lite?
 	beq	nolite
 *
 *  Bud lite please..
 *
-	move.w	_LITEMASK(a6),d1		 ;get mask
+	move.w	lineavars+_LITEMASK,d1		 ;get mask
 	not.w	d1				 ;was it trivial $FFFF?
 	beq	nolite				 ;  skip if so
 	move.w	d1,litemsk(a4)			 ;else, save inverted mask
 	move.b	#(BM_SRC+BM_PAT)/256,B_LOGOP(a5) ;tell blaster to pattern it
 
 nolite:
-	btst.b	#SKEW,_STYLE+1(a6)		;skew?
+	btst.b	#SKEW,lineavars+_STYLE+1		;skew?
 	beq	noskew
 	tst.w	skewmsk(a4)			;was skew already performed?
 	beq	set_skew			;br if not
@@ -1016,7 +991,7 @@ nolite:
 	bra	noskew
 set_skew:
 	move.w	#cas1-skewx,skewcase(a4)	;assume case I
-	move.w	_SKEWMASK(a6),d1		;save inverted mask
+	move.w	lineavars+_SKEWMASK,d1		;save inverted mask
 	not.w	d1
 	move.w	d1,skewmsk(a4)
 noskew:
@@ -1051,7 +1026,7 @@ noskew:
 *
 	move.l	_v_bas_ad,a1
 	move.w	d2,d5				;d5 = DST X min
-	move.w	_v_planes(a6),d3
+	move.w	lineavars+_v_planes,d3
 	move.b	shf_tab-1(pc,d3.w),d3		;do concat thing
 	andi.w	#$fff0,d5
 
@@ -1059,7 +1034,7 @@ noskew:
 	asr.w	d3,d5				* 04 Feb 87      preserve sign
 
 	move.w	delsdy(a4),d3
-	add.w	d3,_SOURCEY(a6)			* compatibilty with old TEXTBLT
+	add.w	d3,lineavars+_SOURCEY			* compatibilty with old TEXTBLT
 
 	add.w	locdesty(a4),d3
 	add.w	d7,d3
@@ -1083,7 +1058,7 @@ no_clip:
 *
 	move.l	_v_bas_ad,a1
 	move.w	d2,d5				;d5 = DST X min
-	move.w	_v_planes(a6),d3
+	move.w	lineavars+_v_planes,d3
 	move.b	shf_tab-1(pc,d3.w),d3		;do concat thing
 	andi.w	#$fff0,d5
 
@@ -1102,23 +1077,23 @@ no_blit:
 *
 *  adjust line "A" variables after blit is complete..
 *
-	move.w	_DELX(a6),d0
-	tst.w	_DOUBLE(a6)
+	move.w	lineavars+_DELX,d0
+	tst.w	lineavars+_DOUBLE
 	beq	upda_ndb
 	move.w	tmp_delx(a4),d0
-	move.w	tmp_xacc(a4),_XACC_DDA(a6)
+	move.w	tmp_xacc(a4),lineavars+_XACC_DDA
 upda_ndb:
-	btst.b	#OUTLINE,_STYLE+1(a6)
+	btst.b	#OUTLINE,lineavars+_STYLE+1
 	beq	upda_not
 	addq.w	#2,d0
 	bra	upda_xxx	;preserving inconsistency of TEXTBLT
 upda_not:
 	add.w	locweigt(a4),d0
 upda_xxx:
-	move.w	_CHUP(a6),d1
+	move.w	lineavars+_CHUP,d1
 	bne	ck90
 upda_x:
-	add.w	d0,_DESTX(a6)
+	add.w	d0,lineavars+_DESTX
 upda_xx:
 	unlk	a4
 
@@ -1129,17 +1104,17 @@ upda_xx:
 ck90:
 	cmpi.w	#900,d1
 	bne	ck180
-	sub.w	d0,_DESTY(a6)
+	sub.w	d0,lineavars+_DESTY
 	bra	upda_xx
 ck180:
 	cmpi.w	#1800,d1
 	bne	ck270
-	sub.w	d0,_DESTX(a6)
+	sub.w	d0,lineavars+_DESTX
 	bra	upda_xx
 ck270:
 	cmpi.w	#2700,d1
 	bne	upda_x
-	add.w	d0,_DESTY(a6)
+	add.w	d0,lineavars+_DESTY
 	bra	upda_xx
 
 *
@@ -1735,10 +1710,10 @@ cas4b:
 yloop:
 	movem.l	a0-a1/d3-d7,-(sp)		;save some regs
 	clr.w	d0				;clear grafix
-	move.w	_DELX(a6),d5
+	move.w	lineavars+_DELX,d5
 	subq.w	#1,d5				;adjust for dbra
 *
-	move.w	_XACC_DDA(a6),d7
+	move.w	lineavars+_XACC_DDA,d7
 	bra	nextsrc
 innerlp:
 	ror.w	#1,d3

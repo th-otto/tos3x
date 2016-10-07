@@ -72,6 +72,7 @@ BLITMODE	equ	$40
 *
 *******************************************************************************
 
+/* 306de: 00e06676 */
 _GSHIFT_S:	move.b	_shifty,d0	; Get the keyboard state
 		andi.w	#$000F,d0	; We only want the low 4 bits
 
@@ -91,10 +92,10 @@ return:		rts
 *******************************************************************************
 
 /* 306de: 00e06682 */
-_v_clrwk:	move.l  _lineAVar,a0		; a0 -> linea var struct
-                move.w	_v_planes(a0),d0	; d0 <- # of planes
-		mulu.w	v_hz_rez(a0),d0		; d0 <- (planes) x (hor rez)
-		mulu.w	v_vt_rez(a0),d0		; d0 <- (plns)x(hrez)x(vrt rz)
+_v_clrwk:
+                move.w	lineavars+_v_planes,d0	; d0 <- # of planes
+		mulu.w	lineavars+v_hz_rez,d0		; d0 <- (planes) x (hor rez)
+		mulu.w	lineavars+v_vt_rez,d0		; d0 <- (plns)x(hrez)x(vrt rz)
 		lsr.l	#3,d0			; d0 <- # bytes to clr (screen)
 			
 		move.l	_v_bas_ad,-(sp)
@@ -121,7 +122,7 @@ clear:		move.l	4(sp),a0	; a0 -> start
 		move.l	8(sp),a1	; a1 -> end+1
 		movem.l	d3-d7/a3,-(sp)	; save registers
 
-		move.l  _lineAVar,a3	; a3 -> linea var struct
+		PIXLA(a3)
 #if VIDEL_SUPPORT
 		move.l	pal_map(a3),d1	; d1 <- desired background col
 #endif
@@ -174,8 +175,8 @@ clr4:		movem.l	(sp)+,d3-d7/a3	; restore registers
 *
 *******************************************************************************
 
-_INIT_G:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	#return,tim_addr(a1)	; Tick points to rts
+_INIT_G:
+		move.l	#return,lineavars+tim_addr	; Tick points to rts
 
 		move	SR,-(sp)		; Disable interrupts
 		ori.w	#$0700,SR
@@ -185,9 +186,8 @@ _INIT_G:	move.l  _lineAVar,a1		; a1 -> linea var struct
 		move.w	#5,-(sp)		; exchange exception vector
 		trap	#13
 
-		move.l  _lineAVar,a1		; a1 -> linea var struct
 		addq.l	#8,sp			; clean up stack
-		move.l	d0,tim_chain(a1)	; Set up chain before int enabl
+		move.l	d0,lineavars+tim_chain	; Set up chain before int enabl
 		move	(sp)+,SR		; Restore interrupt context
 
 		bsr	mouse_init		; Init the mouse
@@ -204,21 +204,20 @@ _INIT_G:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *
 *******************************************************************************
 
-_vex_timv:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	_CONTRL(a1),a0
+_vex_timv:
+		move.l	lineavars+_CONTRL,a0
 
 		move	SR,-(sp)		; Disable interrupts
 		ori.w	#$0700,SR		; THIS IS PARANOID !
-		move.l	tim_addr(a1),18(a0)
-		move.l	14(a0),tim_addr(a1)
+		move.l	lineavars+tim_addr,18(a0)
+		move.l	14(a0),lineavars+tim_addr
 		move	(sp)+,SR
 
 		move.w	#TICKCAL,-(sp)		; Get ms/tick
 		trap	#BIOS
 		addq.l	#2,sp
 
-		move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	_INTOUT(a1),a0
+		move.l	lineavars+_INTOUT,a0
 		move.w	d0,(a0)
 
 		rts
@@ -234,9 +233,8 @@ _vex_timv:	move.l  _lineAVar,a1		; a1 -> linea var struct
 
 tick_int:	subq.l  #4,sp			; leave some room on the stack
 		movem.l	d0-d7/a0-a6,-(sp)
-		move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	tim_addr(a1),a0		; Invoke user routine
-		move.l	tim_chain(a1),60(sp)	; store chained routine
+		move.l	lineavars+tim_addr,a0		; Invoke user routine
+		move.l	lineavars+tim_chain,60(sp)	; store chained routine
 		jsr	(a0)
 		movem.l	(sp)+,d0-d7/a0-a6
 		rts				; jump to next routine in chain
@@ -251,8 +249,8 @@ tick_int:	subq.l  #4,sp			; leave some room on the stack
 *
 *******************************************************************************
 
-_DINIT_G:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	tim_chain(a1),-(sp)	; reset timer vector
+_DINIT_G:
+		move.l	lineavars+tim_chain,-(sp)	; reset timer vector
 		move.w	#$100,-(sp)
 		move.w	#SETEXC,-(sp)
 		trap	#BIOS
@@ -277,8 +275,8 @@ _DINIT_G:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *				
 *******************************************************************************
 
-_GCHC_KEY:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.w	#1,_TERM_CH(a1)		; return dummy choice per 8086
+_GCHC_KEY:	PIXLA(a1)
+		move.w	#1,lineavars+_TERM_CH		; return dummy choice per 8086
 		moveq.l	#1,d0			; indicate choice value
 		rts
 
@@ -322,15 +320,15 @@ _GCHC_KEY:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *
 *******************************************************************************
 
-_GLOC_KEY:	move.l  _lineAVar,a1		; a1 -> linea var struct
+_GLOC_KEY:
 		moveq.l	#3,d1		; d1 <- mask for updating cur_ms_stat
 
 		move.w	SR,d0
 
 		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
-		move.b	cur_ms_stat(a1),d2	; clearing state change flags indicates
-		and.b	d1,cur_ms_stat(a1)	; that this data has been processed
-		move.l	_GCURXY(a1),_X1(a1)	; X1<-latest X and Y1<-latest Y
+		move.b	lineavars+cur_ms_stat,d2	; clearing state change flags indicates
+		and.b	d1,lineavars+cur_ms_stat	; that this data has been processed
+		move.l	lineavars+_GCURXY,lineavars+_X1	; X1<-latest X and Y1<-latest Y
 		move.w	d0,SR			; >>>>  END ATOM  <<<<
 
 		clr.w	d0		; d0 <- initial status: no change
@@ -349,7 +347,7 @@ test_button:	and.b	#$C0,d2		; test for change in button state
 
 		addq.w	#1,d1		; d1 <- rt button terminator code: 33
 
-button_exit:	move.w	d1,_TERM_CH(a1)	; store the character code
+button_exit:	move.w	d1,lineavars+_TERM_CH	; store the character code
 		addq.w	#1,d0		; status: mouse button pressed
 		rts
 
@@ -388,8 +386,8 @@ _GCHR_KEY:	move.w	#DEV,-(sp)	; see if a character present
 		lsl.w	#8,d1		; d0<07:00> <- ascii code
 		or.w	d1,d0		; d0<15:08> <- scan code
 
-		move.l  _lineAVar,a1	; a1 -> linea var struct
-		move.w	d0,_TERM_CH(a1)	; store character
+		PIXLA(a1)
+		move.w	d0,lineavars+_TERM_CH	; store character
 		moveq.l	#1,d0		; indicate character present
 
 no_char:	rts
@@ -405,45 +403,45 @@ no_char:	rts
 *
 *******************************************************************************
 
-mouse_init:	move.l  _lineAVar,a1		; a1 -> linea var struct
+mouse_init:
 		lea	user_init,a0		; button and motion vectors
-		move.l	a0,user_but(a1)		; default to no action (rts)
-		move.l	a0,user_mot(a1)
-		move.l	#_MOV_CUR,user_cur(a1)	; set up link to vblank display
+		move.l	a0,lineavars+user_but		; default to no action (rts)
+		move.l	a0,lineavars+user_mot
+		move.l	#_MOV_CUR,lineavars+user_cur	; set up link to vblank display
 
 * Initialize the default mouse form (presently the arrow)
 
-		lea	_INTIN(a1),a0		; a0 -> pointer to INTIN array
+		lea	lineavars+_INTIN,a0		; a0 -> pointer to INTIN array
 		move.l	(a0),-(sp)		; Save the intin pointer and
 		move.l	#arrow_cdb,(a0)		; make it point to the arrow
 		bsr	_vsc_form		; a1 gets clobbered here
-		move.l  _lineAVar,a1		; a1 -> linea var struct
+		PIXLA(a1)
 
-		move.l	(sp)+,_INTIN(a1)	; Restore INTIN pointer
+		move.l	(sp)+,lineavars+_INTIN	; Restore INTIN pointer
 
 * initialize mouse/draw status and semaphores
 
 		moveq.l	#0,d0
-		move.w	d0,_MOUSE_BT(a1)	; clear mouse button state
-		move.b	d0,cur_ms_stat(a1)	; clear current mouse status
-		move.b	d0,mouse_flag(a1)	; mouse_cdb is unlocked
-		move.b	#1,_HIDE_CNT(a1)	; don't display cursor form yet
+		move.w	d0,lineavars+_MOUSE_BT	; clear mouse button state
+		move.b	d0,lineavars+cur_ms_stat	; clear current mouse status
+		move.b	d0,lineavars+mouse_flag	; mouse_cdb is unlocked
+		move.b	#1,lineavars+_HIDE_CNT	; don't display cursor form yet
 
 * Initialize communication packet between mouse interrupt service routine
 * and vblank cursor display routine. Insert vblank draw routine into front
 * of vblank queue.
 
-		lea	xydraw(a1),a0		; init the draw parameter block
+		lea	lineavars+xydraw,a0		; init the draw parameter block
 
-		move.w	v_hz_rez(a1),d0		; d0 <- horizontal rez
+		move.w	lineavars+v_hz_rez,d0		; d0 <- horizontal rez
 		lsr.w	#1,d0			; d0 <- x rez / 2
-		move.w	d0,_GCURX(a1)		; init mouse X position
+		move.w	d0,lineavars+_GCURX		; init mouse X position
 
-		move.w	v_vt_rez(a1),d0		; d0 <- vrtical rez
+		move.w	lineavars+v_vt_rez,d0		; d0 <- vrtical rez
 		lsr.w	#1,d0			; d0 <- y rez / 2
-		move.w	d0,_GCURY(a1)		; init mouse Y position
+		move.w	d0,lineavars+_GCURY		; init mouse Y position
 
-		move.l	_GCURXY(a1),(a0)+	; to the initial position
+		move.l	lineavars+_GCURXY,(a0)+	; to the initial position
 		move.b	#1,(a0)			; mark data valid for update
 
 		move.l	_vblqueue,a0		; insert the display routine
@@ -501,14 +499,14 @@ resetdev:
 * dev_init(devPtr). devPtr points to the proper device structure. Init current
 * device pointer in linea variable structure, then drop through to esc_init().
 *-
-_dev_init:	move.l	_lineAVar,a1			; a1 -> lina var struct
-		tst.l	LA_USERDEVINIT(a1)			; see if vector set
+_dev_init:
+		tst.l	lineavars+LA_USERDEVINIT			; see if vector set
 		beq	devI4				; branch if not
-		move.l	LA_USERDEVINIT(a1),a0		; see if vector set
+		move.l	lineavars+LA_USERDEVINIT,a0		; see if vector set
 		jsr	(a0)				; execute user routine
 
-devI4:		move.l	4(sp),a0			; a0 -> device struct
-		move.l	a0,LA_CURDEV(a1)			; init cur dev pointer
+devI4:	move.l	4(sp),a0			; a0 -> device struct
+		move.l	a0,PIXLV(LA_CURDEV,a1)			; init cur dev pointer
 		move.l	#_ram8x16,DEVFNTPTR(a0)		; assume 8x16 sys fnt
 		cmp.w	#400,DEVYREZ(a0)		; check vertical rez
 		bge	devI0				; skip if fnt ok
@@ -527,7 +525,8 @@ devI0:
 		move.l	#_SPPixSoftList,DEVCURROUTINES(a0)
 		bra	esc_init			; init glass TTY
 
-devI1:		move.l	#_PixSoftList,DEVSOFTROUTINES(a0)
+devI1:
+		move.l	#_PixSoftList,DEVSOFTROUTINES(a0)
 		move.l	#_PixHardList,DEVHARDROUTINES(a0)
 		move.l	#_PixSoftList,DEVCURROUTINES(a0)
 		bra	esc_init			; init glass TTY
@@ -542,18 +541,18 @@ devI2:
 _esc_init:
 esc_init:	jsr	_InitFonts		; copy font headers into ram
 
-    		move.l  _lineAVar,a1		; a1 -> linea var struct
-		tst.l	LA_USERESCINIT(a1)		; see if vector set
+    	PIXLA(a1)
+		tst.l	lineavars+LA_USERESCINIT		; see if vector set
 		beq	esc4			; branch if not
-		move.l	LA_USERESCINIT(a1),a0	; see if vector set
+		move.l	lineavars+LA_USERESCINIT,a0	; see if vector set
 		jsr	(a0)			; execute user routine
 
-esc4:		move.l	LA_CURDEV(a1),a0		; a0 -> curr device structure
-		move.w	DEVPLANES(a0),_v_planes(a1)	; set # of planes
-		move.w	DEVLINEWRAP(a0),_v_lin_wr(a1)	; set line wrap
-		move.w	DEVLINEWRAP(a0),_bytes_lin(a1)	; set line wrap
-		move.w	DEVYREZ(a0),v_vt_rez(a1)	; set vertical rez
-		move.w	DEVXREZ(a0),v_hz_rez(a1)	; set horizontal rez
+esc4:		move.l	PIXLV(LA_CURDEV,a1),a0		; a0 -> curr device structure
+		move.w	DEVPLANES(a0),lineavars+_v_planes	; set # of planes
+		move.w	DEVLINEWRAP(a0),lineavars+_v_lin_wr	; set line wrap
+		move.w	DEVLINEWRAP(a0),lineavars+_bytes_lin	; set line wrap
+		move.w	DEVYREZ(a0),lineavars+v_vt_rez	; set vertical rez
+		move.w	DEVXREZ(a0),lineavars+v_hz_rez	; set horizontal rez
 		tst.l	DEVVIDADR(a0)			; see if we need to set
 		beq	esc2				; if not then skip
 		move.l	DEVVIDADR(a0),_v_bas_ad		; set video base adr
@@ -564,70 +563,70 @@ esc2:
 		move.w	DEVFORMID(a0),form_id(a1)   	; init mem config flag 
 		cmp.w	#PIXPACKED,DEVFORMID(a0)     	; see if in pix packed
 		bne	esc0
-		move.w	_v_planes(a1),d1	; # of planes
+		move.w	lineavars+_v_planes,d1	; # of planes
 		lsr.w	#3,d1			; d1 <- # of bytes per pix
 		move.w	d1,byt_per_pix(a1)	; load # bytes per pix
 #endif
 
-esc0:		lea	save_block(a1),a2	; a0 -> save_block
-		cmp.w	#4,_v_planes(a1)	; see if we have > 4 planes
+esc0:		lea	lineavars+save_block,a2	; a0 -> save_block
+		cmp.w	#4,lineavars+_v_planes	; see if we have > 4 planes
 		ble	esc1			; if so point to > save buff
-		lea	_save_block(a1),a2	; a0 -> save_block
+		lea	lineavars+_save_block,a2	; a0 -> save_block
 esc1:		move.l	a2,sv_blk_ptr(a1) 	; init ptr to pnt to save_block
 
 		move.l	DEVFNTPTR(a0),a0	; a0 -> desired system font
 
 		jsr	gl_f_init		; init the glob font variables
 
-		move.l  _lineAVar,a1		; a1 -> linea var struct
+		PIXLA(a1)
 		moveq.l	#0,d0
-		move.w	d0,v_col_fg(a1)		; foreground color is all ones
+		move.w	d0,lineavars+v_col_fg		; foreground color is all ones
 #if VIDEL_SUPPORT
 		move.l	d0,vl_col_fg(a1)	; set in case we are 32 bit mode
 #endif
-		move.w	d0,v_cur_cx(a1)
-		move.w	d0,v_cur_cy(a1)
-		move.w	d0,v_cur_off(a1)
-		move.b	d0,v_delay(a1)		; cursor redisplay interval (immediate)
+		move.w	d0,lineavars+v_cur_cx
+		move.w	d0,lineavars+v_cur_cy
+		move.w	d0,lineavars+v_cur_off
+		move.b	d0,lineavars+v_delay		; cursor redisplay interval (immediate)
 
 		not.l	d0
-		move.w	d0,v_col_bg(a1)		; background color is all zeros
+		move.w	d0,lineavars+v_col_bg		; background color is all zeros
 #if VIDEL_SUPPORT
 		move.l	d0,vl_col_bg(a1)	; set in case we are 32 bit mode
 #endif
 
-		move.l	LA_CURDEV(a1),a0		; a0 -> curr device structure
+		move.l	PIXLV(LA_CURDEV,a1),a0		; a0 -> curr device structure
 		tst.w	DEVLOOKUPTABLE(a0)     	; see if there is a lookup tble
 		beq	esc3			; if not then skip
-		not.w	v_col_fg(a1)		; in a lookup table we need
+		not.w	lineavars+v_col_fg		; in a lookup table we need
 #if VIDEL_SUPPORT
 		not.l	vl_col_fg(a1)		;	to switch foreground
 #endif
-		not.w	v_col_bg(a1)		;	and background
+		not.w	lineavars+v_col_bg		;	and background
 #if VIDEL_SUPPORT
 		not.l	vl_col_bg(a1)
 #endif
 
-esc3:		move.l	_v_bas_ad,v_cur_ad(a1)	; home cursor.
-		move.l	#-1,col_and_mask(a1)	; init "and" mask for vs_color
+esc3:		move.l	_v_bas_ad,lineavars+v_cur_ad	; home cursor.
+		move.l	#-1,lineavars+col_and_mask	; init "and" mask for vs_color
 
 		moveq.l	#1,d0
-		move.b	d0,v_stat_0(a1)		; flash, nowrap, normal video.
-		move.w	d0,disab_cnt(a1)	; cursor disabled 1 level deep.
+		move.b	d0,lineavars+v_stat_0		; flash, nowrap, normal video.
+		move.w	d0,lineavars+disab_cnt	; cursor disabled 1 level deep.
 
 		move.l	#30,d0
-		move.b	d0,v_cur_tim(a1)	;.5 sec blink rate (@60 Hz vbl)
-		move.b	d0,vct_init(a1)		;.5 sec blink rate (@60 Hz vbl)
+		move.b	d0,lineavars+v_cur_tim	;.5 sec blink rate (@60 Hz vbl)
+		move.b	d0,lineavars+vct_init		;.5 sec blink rate (@60 Hz vbl)
 
 		move.l	#normal_ascii,con_state ; Init conout state machine
 
-		move.w	v_hz_rez(a1),d0		; d0 <- horizontal rez
+		move.w	lineavars+v_hz_rez,d0		; d0 <- horizontal rez
 		lsr.w	#1,d0			; d0 <- x rez / 2
-		move.w	d0,_GCURX(a1)		; init mouse X position
+		move.w	d0,lineavars+_GCURX		; init mouse X position
 
-		move.w	v_vt_rez(a1),d0		; d0 <- vrtical rez
+		move.w	lineavars+v_vt_rez,d0		; d0 <- vrtical rez
 		lsr.w	#1,d0			; d0 <- y rez / 2
-		move.w	d0,_GCURY(a1)		; init mouse Y position
+		move.w	d0,lineavars+_GCURY		; init mouse Y position
 
 		move.w	#1,-(sp)		; try set Blit mode to hard
 		move.w	#BLITMODE,-(sp)		; push funct #

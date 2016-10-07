@@ -49,10 +49,10 @@
 sb_hline:
 
 	move.l	_v_bas_ad,a1
-	muls	_bytes_lin(a4),d5		; d5 <- offset to (0,Y)
+	muls	lineavars+_bytes_lin,d5		; d5 <- offset to (0,Y)
 	add.l	d5,a1	
 	move.w	d0,a2			; a2 <- offset between pattern words
-	move.w	_v_planes(a4),d7
+	move.w	lineavars+_v_planes,d7
 	move.w	d7,d0			; d0 <- number of planes
 	add.w	d0,d0			; d0 <- offset between dst words
 	muls	d0,d1			; d1 <- offset to (X,0)
@@ -61,9 +61,9 @@ sb_hline:
 	subq.w	#1,d7			; d7 <- planes-1
 
 	move.l	d2,a3			; a3 <- span - 1 (words)
-	move.l	_FG_B_PLANES(a4),d2	; d2 <- color value
+	move.l	PIXLV(_FG_B_PLANES,a4),d2	; d2 <- color value
 
-	move.w	_WRT_MODE(a4),d1
+	move.w	lineavars+_WRT_MODE,d1
 
 	add.w	d1,d1
 	lea	wrt_tbl(pc,d1.w),a5
@@ -100,7 +100,7 @@ sb_rect:
 
 	link	a6,#-20			; a6 -> local variable space
 
-	move.w	_WRT_MODE(a2),d1
+	move.w	lineavars+_WRT_MODE,d1
 	add.w	d1,d1
 	lea	wrt_tbl(pc,d1.w),a5
 	add.w	(a5),a5			; a5 -> writing mode subroutine
@@ -108,11 +108,11 @@ sb_rect:
 	sub.w	d5,d7			; d7 <- vertical height -1
 
 	move.l	_v_bas_ad,a1
-	move.w	_bytes_lin(a2),d1
+	move.w	lineavars+_bytes_lin,d1
 	muls	d5,d1			; d2 <- offset to (0,Ymin)
 	add.l	d1,a1			; a1 -> (0,Ymin)
 
-	move.w	_v_planes(a2),d1
+	move.w	lineavars+_v_planes,d1
 	muls	d1,d0
 	add.l	d0,d0			; d0 <- offset to (Xmin,0)
 	add.l	d0,a1			; a1 -> (Xmin,Ymin)
@@ -125,21 +125,21 @@ sb_rect:
 	move.w	d2,-(a6)		; save span counter
 
 	move.w	d2,a3			; a3 <- span - 1
-	move.l	_FG_B_PLANES(a2),d2		; a2 <- color index
+	move.l	PIXLV(_FG_B_PLANES,a2),d2		; a2 <- color index
 	move.l	d2,-(a6)		; save color index
 
-	move.w	_v_lin_wr(a2),d3
+	move.w	lineavars+_v_lin_wr,d3
 	sub.w	d0,d3
 	move.w	d3,-(a6)		; save line wrap value
 
-	move.w	_patmsk(a2),d3
+	move.w	lineavars+_patmsk,d3
 	and.w	d3,d5			; d5 <- initial pattern index
 	add.w	d5,d5			; d5 <- initial pattern offset
 	move.w	d5,-(a6)		; save initial pattern offset
 	add.w	d3,d3			; d3 <- maximum pattern offset
 	move.w	d3,-(a6)		; save maximum pattern offset
 
-	move.l	_patptr(a2),a0
+	move.l	lineavars+_patptr,a0
 	move.l	a0,-(a6)		; save pointer to base of pattern
 	add.w	d5,a0			; a0 -> first pattern word
 
@@ -148,7 +148,7 @@ sb_rect:
 	move.w	d1,d7			; d7 <- planes -1
 
 	moveq.l	#0,d1
-	tst.w	_multifill(a2)
+	tst.w	lineavars+_multifill
 	beq	r_poff
 
 	moveq.l	#32,d1

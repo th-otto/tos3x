@@ -18,31 +18,31 @@
 /*****************************************
  *	Non-Overlayable Variables        *
  *****************************************/
-#define angle			-910
-#define beg_ang			-908
-#define CUR_FONT		-906
-#define del_ang			-902
-#define deltay			-900
-#define deltay1			-898
-#define deltay2			-896
-#define end_ang			-894
+/* #define angle			-910 */
+/* #define beg_ang			-908 */
+/* #define CUR_FONT		-906 */
+/* #define del_ang			-902 */
+/* #define deltay			-900 */
+/* #define deltay1			-898 */
+/* #define deltay2			-896 */
+/* #define end_ang			-894 */
 #define fil_intersect		-892
-#define fill_maxy		-890
-#define fill_miny		-888
-#define n_steps			-886
-#define odeltay			-884
-#define s_begsty		-882
-#define s_endsty		-880
-#define s_fil_col		-878
-#define s_fill_per		-876
-#define s_patmsk		-874
-#define s_patptr		-872
-#define start			-868
-#define xc			-866
-#define xrad			-864
-#define y			-862
-#define yc			-860
-#define yrad			-858
+/* #define fill_maxy		-890 */
+/* #define fill_miny		-888 */
+/* #define n_steps			-886 */
+/* #define odeltay			-884 */
+/* #define s_begsty		-882 */
+/* #define s_endsty		-880 */
+/* #define s_fil_col		-878 */
+/* #define s_fill_per		-876 */
+/* #define s_patmsk		-874 */
+/* #define s_patptr		-872 */
+/* #define start			-868 */
+/* #define xc			-866 */
+/* #define xrad			-864 */
+/* #define y			-862 */
+/* #define yc			-860 */
+/* #define yrad			-858 */
 
 
 /* define the mouse form storage area */
@@ -60,7 +60,7 @@
 /* Storage for mouse cursor mask and form */
 #define mask_form		-846
 
-#define _INQ_TAB		-782
+/* #define _INQ_TAB		-782 */
 #define _DEV_TAB		-692
 
 #define _GCURXY			-602
@@ -70,18 +70,18 @@
 #define _HIDE_CNT		-598
 #define _MOUSE_BT		-596
 #define _REQ_COL		-594
-#define _SIZ_TAB		-498
+/* #define _SIZ_TAB		-498 */
 #define _TERM_CH		-468
-#define _chc_mode		-466
+/* #define _chc_mode		-466 */
 /* pointer to current works attributes */
-#define _cur_work		-464
+/* #define _cur_work		-464 */
 /* pointer to default font head */
-#define _def_font		-460
-#define _font_ring		-456
-#define _ini_font_count		-440
-#define _line_cw		-438
-#define _loc_mode		-436
-#define _num_qc_lines		-434
+/* #define _def_font		-460 */
+/* #define _font_ring		-456 */
+/* #define _ini_font_count		-440 */
+/* #define _line_cw		-438 */
+/* #define _loc_mode		-436 */
+/* #define _num_qc_lines		-434 */
 
 /* space to save the return address */
 #define trap14sav		-432
@@ -92,10 +92,10 @@
 /* space to sav ret adr (for reentrency) */
 #define trap14bsav		-420
 
-#define _str_mode		-352
-#define _val_mode		-350
+/* #define _str_mode		-352 */
+/* #define _val_mode		-350 */
 
-#define _MOUSE_ST		-348
+/* #define _MOUSE_ST		-348 */
 /*
  * Current mouse status bits
  *	 bits used as follows
@@ -113,10 +113,10 @@
 #define disab_cnt		-346
 
 
-#define _XYDRAW			-344
+/* #define _XYDRAW			-344 */
 /* x,y communication block. */
 #define  xydraw			-344
-#define _DRAW_FLAG		-340
+/* #define _DRAW_FLAG		-340 */
 /* Non-zero means draw mouse form on vblank */
 #define draw_flag		-340
 
@@ -126,19 +126,19 @@
 
 #define retsav			-338
 /* save area for cursor cell coords */
-#define sav_cxy			-334
+/* #define sav_cxy			-334 */
 /* save area for cursor cell coords X pos */
 #define sav_cx			-334
 /* save area for cursor cell coords Y pos */
 #define sav_cy			-332
 
 #define save_block		-330
-#define save_len		-330
+/* #define save_len		-330 */
 /* screen address of 1st word of plane 0 */
-#define save_addr		-328
-#define save_stat		-324
+/* #define save_addr		-328 */
+/* #define save_stat		-324 */
 /* save up to 4 planes. 16 longwords / plane */
-#define save_area		-322
+/* #define save_area		-322 */
 
 #define tim_addr		-66
 #define tim_chain		-62
@@ -284,7 +284,7 @@
 /* copy raster form type flag. (opaque/trans) */
 #define _COPYTRAN		116
 /* ptr to routine for quitting seedfill. */
-#define _quitfill		118
+/* #define _quitfill		118 */
 /* ptr to user routine before dev_init */
 #define LA_USERDEVINIT		122
 /* ptr to user routine before esc_init */
@@ -297,7 +297,7 @@
 #define LA_BLTMODE		170
 
 /* extended request color array */
-#define _REQ_X_COL		174
+/* #define _REQ_X_COL		174 */
 
 /* points to the proper save block */
 #define sv_blk_ptr		1614
@@ -324,12 +324,12 @@
 #if !VIDEL_SUPPORT
 
 /* space to build circle coordinates */
-#define q_circle		2150
+/* #define q_circle		2150 */
 
 #else
 
 /* space to build circle coordinates */
-#define q_circle		2662
+/* #define q_circle		2662 */
 
 /* ******************* NEW EQUATES ******************* */
 
@@ -346,4 +346,15 @@
 /* all the vectored primitives */
 #define V_PRIMITIVES		3858
 
+#endif
+
+
+#if TOSVERSION >= 0x404
+#define LA(r) move.l _lineAVar,r
+#define PIXLA(r) LA(r)
+#define PIXLV(v,r) v(r)
+#else
+#define LA(r) move.l #lineavars,r
+#define PIXLA(r)
+#define PIXLV(v,r) lineavars+v
 #endif

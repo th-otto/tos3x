@@ -40,31 +40,31 @@ fail_ret:	moveq	#0,d0		; exit if not byte bnd or clip required
 
 *  Entry point here..
 
-_MONO8XH:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.w	_DESTX(a1),d0		; d0 <- dst X
+_MONO8XH:
+		move.w	lineavars+_DESTX,d0		; d0 <- dst X
 		move.w	d0,d2			; d2 <- dst X
 		and.w	#$0007,d2		; this routine is only for
 		bne	fail_ret		; byte alligned characters
 
-on_bounds:	move.w	_DESTY(a1),d1		; d1 <- dst Y
-		move.w	_DELY(a1),d3		; d3 <- dY
+on_bounds:	move.w	lineavars+_DESTY,d1		; d1 <- dst Y
+		move.w	lineavars+_DELY,d3		; d3 <- dY
 
-		move.l	_CONTRL(a1),a0		; a0 -> CONTRL array
+		move.l	lineavars+_CONTRL,a0		; a0 -> CONTRL array
 		move.w	  6(a0),d2		; d2 <- # chars in string
 
-		tst.w	_CLIP(a1)
+		tst.w	lineavars+_CLIP
 		beq	no_clip			; skip clip test if disabled
 
-		move.w	_XMN_CLIP(a1),d5	;8	d5 <- Xmin clip
-		move.w	_YMN_CLIP(a1),d6	;8	d6 <- Ymin clip
-		move.w	_XMX_CLIP(a1),d7	;8	d7 <- Xmax clip
+		move.w	lineavars+_XMN_CLIP,d5	;8	d5 <- Xmin clip
+		move.w	lineavars+_YMN_CLIP,d6	;8	d6 <- Ymin clip
+		move.w	lineavars+_XMX_CLIP,d7	;8	d7 <- Xmax clip
 
 		cmp.w	d6,d1			; str can't extend above Ymin
 		blt	fail_ret		;
 
 		move.w	d1,d4			;4	d4 <- dst Y
 		add.w	d3,d4			;4	d4 <- bottom Y +1
-		cmp.w	_YMX_CLIP(a1),d4	; str can't descend below Ymax
+		cmp.w	lineavars+_YMX_CLIP,d4	; str can't descend below Ymax
 		bge	fail_ret		;8/10
 
 		cmp.w	d5,d0			; str can't extend left of Xmin

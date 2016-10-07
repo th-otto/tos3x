@@ -90,7 +90,6 @@
 *******************************************************************************
 
 mouse_rel:	movem.l	d0-d7/a0-a6,-(sp)
-		move.l  _lineAVar,a2		; a2 -> linea var struct
 
 		move.b	(a0),d0			; get header from mouse buffer
 		move.b	d0,d1			; save it
@@ -104,34 +103,34 @@ mouse_rel:	movem.l	d0-d7/a0-a6,-(sp)
 
 		bset.l	#1,d0
 
-right_up:	move.b	cur_ms_stat(a2),d1	; d1 <- previous mouse state
+right_up:	move.b	lineavars+cur_ms_stat,d1	; d1 <- previous mouse state
 		and.w	#3,d1			; d1 <- prev mouse button state
 		cmp.b	d1,d0			; update just the pstion if btn
 		beq	xy_update		; hasn't chngd since last IRQ
 
 		move.w	d1,-(sp)		; preserve previous mouse state
-		move.l	user_but(a2),a1		; get user routine address
+		move.l	lineavars+user_but,a1		; get user routine address
 		jsr 	(a1)			; call user.
 		move.w	(sp)+,d1		; retrieve back previous state
 
-		move.w	d0,_MOUSE_BT(a2)	; save cur mouse button state
+		move.w	d0,lineavars+_MOUSE_BT	; save cur mouse button state
 
 		eor.b	d0,d1			; compute which buttons changed
 		ror.b	#2,d1			; d1<07:06> <-last ms btn state
 		or.b	d1,d0			; d0<07:06> <-delta btn state
 
-		move.b	d0,cur_ms_stat(a2)	; store new button status byte
+		move.b	d0,lineavars+cur_ms_stat	; store new button status byte
 
 xy_update:	move.b	1(a0),d0		; has mouse position changed ?
 		or.b	2(a0),d0
 		bne	new_coord
 
-		bclr.b	#5,cur_ms_stat(a2)	; no motion: clear motion
+		bclr.b	#5,lineavars+cur_ms_stat	; no motion: clear motion
 		bra	ms_done			; status flag and exit
 
-new_coord:	bset.b	#5,cur_ms_stat(a2)	; motion:set motion status flag
+new_coord:	bset.b	#5,lineavars+cur_ms_stat	; motion:set motion status flag
 
-		move.l	_GCURXY(a2),d0
+		move.l	lineavars+_GCURXY,d0
 		move.l	d0,d1			; d1 <- old mouse cursor Y
 		swap	d0			; d0 <- old mouse cursor X
 
@@ -150,11 +149,11 @@ new_coord:	bset.b	#5,cur_ms_stat(a2)	; motion:set motion status flag
 
 		bsr	scrn_clip		; IS THIS TOO PARANOID ?!
 
-		lea	_GCURXY(a2),a1		; save new cursor position
+		lea	lineavars+_GCURXY,a1		; save new cursor position
 		move.w	d0,(a1)+		; X
 		move.w	d1,(a1)			; Y
 
-		move.l	user_cur(a2),a1
+		move.l	lineavars+user_cur,a1
 		jsr 	(a1)			; call user cur display routine
 
 ms_done:	movem.l	(sp)+,d0-d7/a0-a6
@@ -179,9 +178,9 @@ scrn_clip:	tst.w	d0			; is new_x < 0
 		clr.w	d0
 		bra	cl_y
 
-cl_xmax:	cmp.w	v_hz_rez(a2),d0		; is new_x < max resolution
+cl_xmax:	cmp.w	lineavars+v_hz_rez,d0		; is new_x < max resolution
 		blt	cl_y
-		move.w	v_hz_rez(a2),d0		; clip to max x resolution
+		move.w	lineavars+v_hz_rez,d0		; clip to max x resolution
 		subq.w	#1,d0			; adjust for zero based
 
 cl_y:		tst.w	d1			; is new_y < 0
@@ -189,9 +188,9 @@ cl_y:		tst.w	d1			; is new_y < 0
 		clr.w	d1
 		rts
 
-cl_ymax:	cmp.w	v_vt_rez(a2),d1		; is new_y < max resolution
+cl_ymax:	cmp.w	lineavars+v_vt_rez,d1		; is new_y < max resolution
 		blt	cl_done
-		move.w	v_vt_rez(a2),d1		; clip to max y resolution
+		move.w	lineavars+v_vt_rez,d1		; clip to max y resolution
 		subq.w	#1,d1			; adjust for zero based
 
 cl_done:	rts
@@ -202,7 +201,7 @@ cl_done:	rts
 *
 *******************************************************************************
 
-cur_display:	move.l  _lineAVar,a1		; a0 -> linea var struct
+cur_display:	PIXLA(a1)
 		move.l	LA_ROUTINES(a1),a1	; a1 -> routine vector list
 		move.l	V_SHOWCUR(a1),a1	; a1 -> display cursor routine
 		jmp	(a1)
@@ -213,7 +212,7 @@ cur_display:	move.l  _lineAVar,a1		; a0 -> linea var struct
 *
 *******************************************************************************
 
-cur_replace:	move.l  _lineAVar,a1		; a0 -> linea var struct
+cur_replace:	PIXLA(a1)
 		move.l	LA_ROUTINES(a1),a1	; a1 -> routine vector list
 		move.l	V_HIDECUR(a1),a1	; a1 -> hide cursor routine
 		jmp	(a1)
@@ -227,10 +226,10 @@ cur_replace:	move.l  _lineAVar,a1		; a0 -> linea var struct
 *	d1.w	Y
 
 
-_MOV_CUR:	move.l  _lineAVar,a0	; a0 -> linea var struct
+_MOV_CUR:
 		move.w	SR,-(sp)	; save old status register
 		ori.w	#$0700,SR	; turn off interrupts
-		lea	xydraw(a0),a0
+		lea	lineavars+xydraw,a0
 		move.w	d0,(a0)+	; new X
 		move.w	d1,(a0)+	; new Y
 		bset.b	#0,(a0)		; mark data available
@@ -245,21 +244,21 @@ _MOV_CUR:	move.l  _lineAVar,a0	; a0 -> linea var struct
 *  If either HIDE_CNT or mouse_flag are non-zero, the cursor will not be
 *  relocated.
 
-vb_draw:	move.l  _lineAVar,a5		; a5 -> linea var struct
-		tst.w	_HIDE_CNT(a5)		; HIDE_CNT semaphore controls
+vb_draw:	PIXLA(a5)
+		tst.w	lineavars+_HIDE_CNT		; HIDE_CNT semaphore controls
 		bne	vblank_exit		; access to cur disp routines
 
-		tst.b	mouse_flag(a5)		; cntrl access to ms frm (CDB)
+		tst.b	lineavars+mouse_flag		; cntrl access to ms frm (CDB)
 		bne	vblank_exit
 
-		bclr.b	#0,draw_flag(a5)	; control access to cursor position
+		bclr.b	#0,lineavars+draw_flag	; control access to cursor position
 		beq	vblank_exit		; 1:data valid  0:data invalid
 
 *  RETRIEVE CURSOR X AND Y VIA AN ATOMIC OPERATION: this prevents the
 *  mouse position interrupt service routine from altering position data
 *  while we are in the process of retrieving it.
 
-		move.l	xydraw(a5),d1		; d1[31:16] <- cursor X
+		move.l	lineavars+xydraw,d1		; d1[31:16] <- cursor X
 		move.l	d1,d0			; d1[15:00] <- cursor Y
 		swap	d0			; d0[15:00] <- cursor X
 
@@ -269,7 +268,7 @@ vb_draw:	move.l  _lineAVar,a5		; a5 -> linea var struct
 		movem.l	(sp)+,d0-d1/a5		; Restore new xy
 
 		move.l	sv_blk_ptr(a5),a2	; a2 -> save block
-		lea	mouse_cdb(a5),a0	; a0 -> CDB	
+		lea	lineavars+mouse_cdb,a0	; a0 -> CDB	
 		bsr	cur_display		; and draw new cursor
 
 vblank_exit:	rts
@@ -285,10 +284,10 @@ vblank_exit:	rts
 *
 *******************************************************************************
 
-_vex_butv:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	_CONTRL(a1),a0		; point to contrl array
-		move.l	user_but(a1),18(a0)	; store old pointer in contrl
-		move.l	14(a0),user_but(a1)	; store new routine address
+_vex_butv:
+		move.l	lineavars+_CONTRL,a0		; point to contrl array
+		move.l	lineavars+user_but,18(a0)	; store old pointer in contrl
+		move.l	14(a0),lineavars+user_but	; store new routine address
 		rts
 
 *******************************************************************************
@@ -301,10 +300,10 @@ _vex_butv:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *
 *******************************************************************************
 
-_vex_motv:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	_CONTRL(a1),a0		; point to contrl array
+_vex_motv:
+		move.l	lineavars+_CONTRL,a0		; point to contrl array
 		move.l	user_mot(a1),18(a0)	; save old routine pointer
-		move.l	14(a0),user_mot(a1)	; store new routine address
+		move.l	14(a0),lineavars+user_mot	; store new routine address
 		rts
 
 *******************************************************************************
@@ -317,10 +316,10 @@ _vex_motv:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *
 *******************************************************************************
 
-_vex_curv:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	_CONTRL(a1),a0		; point to contrl array
-		move.l	user_cur(a1),18(a0)	; save old routine pointer
-		move.l	14(a0),user_cur(a1) 	; store new routine address
+_vex_curv:
+		move.l	lineavars+_CONTRL,a0		; point to contrl array
+		move.l	lineavars+user_cur,18(a0)	; save old routine pointer
+		move.l	14(a0),lineavars+user_cur 	; store new routine address
 		rts
 
 
@@ -396,7 +395,7 @@ RT_OFF		equ	RTN_REC*2
 *	d5.w	row counter
 *	d6.w	shift count
 
-st_cur_display:	move.l  _lineAVar,a4		; a4 -> linea var struct
+st_cur_display:	PIXLA(a4)
 		move.w	C_BGCOL(a0),d4		; d4 <- mouse background color
 		move.w	C_FGCOL(a0),d7		; d7 <- mouse foreground color
 
@@ -414,7 +413,7 @@ clip_x:		clr.w	d2			; d2 <- routine offset
 		sub.w	C_XHOT(a0),d0		; d0 <- left side of dst
 		bcs	clip_left
 
-		move.w	v_hz_rez(a4),d3
+		move.w	lineavars+v_hz_rez,d3
 		sub.w	#17,d3			; check for clip
 		cmp	d3,d0			; on right side
 		bhi	clip_right		; 17 is the right value !!!
@@ -433,7 +432,7 @@ clip_y:		sub.w	C_YHOT(a0),d1		; d1 <- hi y : dst block
 		lea	C_MSKFRM(a0),a0		; a0 -> MASK/FORM for cursor
 		bcs	clip_up			; if y<0 clip top of form
 
-		move.w	v_vt_rez(a4),d3		; check for clip at 
+		move.w	lineavars+v_vt_rez,d3		; check for clip at 
 		sub.w	#16,d3			; bottom of screen
 		cmp.w	d3,d1
 		bhi	clip_down
@@ -452,7 +451,7 @@ clip_up:	move.w	d1,d5			; calculate row count
 		bra	get_addr
 
 
-clip_down:	move.w	v_vt_rez(a4),d5		; d5 <- last row on screen + 1
+clip_down:	move.w	lineavars+v_vt_rez,d5		; d5 <- last row on screen + 1
 		sub.w	d1,d5			; d5 <- row count
 
 get_addr:	bsr	concat			; x:d0 y:d1   starting offset 
@@ -472,7 +471,7 @@ shift_lf:	move.w	#16,d6			; compensate for left shift
 *+
 * init logic fragment routines on the stack
 *-
-		move.w	_v_planes(a4),d1
+		move.w	lineavars+_v_planes,d1
 		move.w	d1,d3
 		subq.w	#1,d1			; set up plane counter
 
@@ -517,7 +516,7 @@ init2:		move.l	rtn_tab+00(pc,d2.w),a5	; a5 -> store routine
 		add.w	d3,d3			; d3 <- offset to second word
 
 		swap	d5			; d5 is used as 2 variables
-		move.w	_v_lin_wr(a4),d5	; d5 <- line wrap offset
+		move.w	lineavars+_v_lin_wr,d5	; d5 <- line wrap offset
 		sub.w	d3,d5			; dest ptr has advanced n planes
 
 		move.l	rtn_tab+04(pc,d2.w),a3	; a3 -> entry point 
@@ -750,7 +749,7 @@ F_SAVRDY	equ	0	; save buffer status: 0:empty  1:full
 F_SAVWID	equ	1	; saved line width:   0:word   1:longword
 
 
-st_cur_replace:	move.l  _lineAVar,a5		; a5 -> linea var struct
+st_cur_replace:	PIXLA(a5)
 		bclr.b	#F_SAVRDY,SV_STAT(a2)   ; valid data in buffer?
 		beq	hang_it_up		; 0:nothing saved
 
@@ -758,12 +757,12 @@ st_cur_replace:	move.l  _lineAVar,a5		; a5 -> linea var struct
 		move.w	d4,d2
 		subq.w	#1,d2			; d2 <- adjust counter for dbra
 		moveq.l	#0,d3			; clr garbage in the upper word
-		move.w	_v_lin_wr(a5),d3	; d3 <- dy wrap value
+		move.w	lineavars+_v_lin_wr,d3	; d3 <- dy wrap value
 
 		move.l	SV_ADDR(a2),a0		; a0 -> destination
 		lea	SV_BUF(a2),a1		; a1 -> save buffer
 
-		move.w	_v_planes(a5),d5	; d5 <- rez discriminator
+		move.w	lineavars+_v_planes,d5	; d5 <- rez discriminator
 		cmp.w	#8,d5			; see if we are in 8 plane mode
 		beq	pln_8
 		subq.w	#2,d5
@@ -980,8 +979,8 @@ hang_it_up:	rts
 *   Replace cursor with data in save_block when
 *   HIDE_CNT transitions from 0 to 1
 
-_HIDE_CUR:	move.l  _lineAVar,a5		; a5 -> linea var structww	
-		lea	_HIDE_CNT(a5),a2
+_HIDE_CUR:	PIXLA(a5)
+		lea	lineavars+_HIDE_CNT,a2
 		addq.w	#1,(a2)			; increment hide count
 		cmp.w	#1,(a2)			; count =1 => hide the cursor
 		bne	hid_cur1
@@ -1000,8 +999,8 @@ hid_cur1:	rts
 *   cursor form. If HIDE_CNT < 0 , reset it to 0 but don't
 *   redisplay cursor.
 
-_DIS_CUR:	move.l  _lineAVar,a5		; a5 -> linea var structww
-		cmp.w	#1,_HIDE_CNT(a5)	; If cur is to be redisplayed,
+_DIS_CUR:	PIXLA(a5)
+		cmp.w	#1,lineavars+_HIDE_CNT	; If cur is to be redisplayed,
 		bgt	dec_hide_cnt		; perform the operation prior to
 		blt	fix_neg			; decrementing semaphore to 0
 
@@ -1010,7 +1009,7 @@ _DIS_CUR:	move.l  _lineAVar,a5		; a5 -> linea var structww
 		move.w	SR,d0
 		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
 
-		move.l	_GCURXY(a5),d1		; retrieve of X and Y
+		move.l	lineavars+_GCURXY,d1		; retrieve of X and Y
 
 *   Some renegade programs reposition the mouse cursor by hiding the
 *   cursor, loading new values into GCURXY and showing the cursor.
@@ -1018,7 +1017,7 @@ _DIS_CUR:	move.l  _lineAVar,a5		; a5 -> linea var structww
 *   an unneccessary vblank redraw of the cursor after this routine has 
 *   already displayed it, the draw flag in the draw packet is cleared.
 
-		clr.b	draw_flag(a5)		; mark packet data invalid
+		clr.b	lineavars+draw_flag		; mark packet data invalid
 
 		move.w	d0,SR			; >>>>  END ATOM  <<<<
 
@@ -1026,16 +1025,16 @@ _DIS_CUR:	move.l  _lineAVar,a5		; a5 -> linea var structww
 		swap	d0			; d0 <- X
 
 		move.l	a6,-(sp)
-		lea	mouse_cdb(a5),a0	; a0 -> system CDB
+		lea	lineavars+mouse_cdb,a0	; a0 -> system CDB
 		move.l	sv_blk_ptr(a5),a2	; a2 -> save block
 		bsr	cur_display
-		move.l  _lineAVar,a5		; a5 -> linea var structww	
+		PIXLA(a5)
 		move.l	(sp)+,a6
 
-dec_hide_cnt:	subq.w	#1,_HIDE_CNT(a5)	; decrement the redraw semaphore
+dec_hide_cnt:	subq.w	#1,lineavars+_HIDE_CNT	; decrement the redraw semaphore
 		rts
 
-fix_neg:	clr.w	_HIDE_CNT(a5)		; this should never be executed.
+fix_neg:	clr.w	lineavars+_HIDE_CNT		; this should never be executed.
 		rts				; it's just paranoia in action.
 
 
@@ -1052,45 +1051,45 @@ fix_neg:	clr.w	_HIDE_CNT(a5)		; this should never be executed.
 *	intin[5-20]  - 16 words of cursor mask
 *	intin[21-36] - 16 words of cursor data
 
-_DEVTB26 equ _DEV_TAB+26
+DEV_COL equ _DEV_TAB+26
 
-_vsc_form:	move.l  _lineAVar,a2		; a2 -> linea var struct
-		addq.b	#1,mouse_flag(a2)	; deny access to mouse_cdb
+_vsc_form:
+		addq.b	#1,lineavars+mouse_flag	; deny access to mouse_cdb
 
-		move.l	_INTIN(a2),a0		; a0 -> new cur def block
-		lea	mouse_cdb(a2),a1	; a1 -> cdb buffer 
+		move.l	lineavars+_INTIN,a0		; a0 -> new cur def block
+		lea	lineavars+mouse_cdb,a1	; a1 -> cdb buffer 
 
 		move.w	(a0)+,d0		; Get x hot spot
 		and.w	#$000F,d0		; truncate to < 16
-		move.w	d0,m_pos_hx(a2)		; init hot spot x
+		move.w	d0,lineavars+m_pos_hx		; init hot spot x
 
 		move.w	(a0)+,d0		; get y hot spot
 		and.w	#$000F,d0		; truncate to < 16
-		move.w	d0,m_pos_hy(a2)		; init hot spot y
+		move.w	d0,lineavars+m_pos_hy		; init hot spot y
 
-		move.w	(a0)+,m_planes(a2)	; Save the plane count
+		move.w	(a0)+,lineavars+m_planes	; Save the plane count
 
 		move.w	(a0)+,d0		; d0 <- background/mask color index
-		cmp.w	_DEVTB26(a2),d0
+		cmp.w	lineavars+DEV_COL,d0
 		bmi	xfm_bg_col_ok		; if color index is too large
 
 		moveq.l	#1,d0			; clamp it to 1
 
 xfm_bg_col_ok:	move.l	#_MAP_COL,a1		; convert color index to a pixel value 
 		add.w	d0,d0
-		move.w	0(a1,d0.w),m_cdb_bg(a2)
+		move.w	0(a1,d0.w),lineavars+m_cdb_bg
 
 		move.w	(a0)+,d0		; d0 <- foreground/form color index
-		cmp.w	_DEVTB26(a2),d0
+		cmp.w	lineavars+DEV_COL,d0
 		bmi	xfm_fg_col_ok		; if color index is too large
 
 		moveq.l	#1,d0			; clamp it to 1
 
 xfm_fg_col_ok:	add.w	d0,d0			; convert color index to a pixel value
-		move.w	0(a1,d0.w),m_cdb_fg(a2)
+		move.w	0(a1,d0.w),lineavars+m_cdb_fg
 
 		moveq.l	#15,d0			; mask and data are 16 lines high
-		lea	mask_form(a2),a1
+		lea	lineavars+mask_form,a1
 
 xfm_move_loop:	move.w	(a0)+,(a1)+
 		move.w	30(a0),(a1)+		; interleave mask and form
@@ -1107,17 +1106,17 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 *  with coordinates from GCURXY to maintain behavioral consistancy with
 *  privious systems.
 
-		lea	xydraw(a2),a0		; a0 -> vblank draw packet
+		lea	lineavars+xydraw,a0		; a0 -> vblank draw packet
 
 		move.w	SR,d0
 		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
 
-		move.l	_GCURXY(a2),(a0)+	; setup the vblank draw packet
+		move.l	lineavars+_GCURXY,(a0)+	; setup the vblank draw packet
 		bset.b	#0,(a0)
 
 		move.w	d0,SR			; >>>>  END ATOM  <<<<
 
-		subq.b	#1,mouse_flag(a2)	; unlock mouse_cdb semaphore
+		subq.b	#1,lineavars+mouse_flag	; unlock mouse_cdb semaphore
 
 		rts
 
@@ -1130,14 +1129,14 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 *  vblank draw parameter block. Mark the parameter block data as valid.
 
 
-_SET_CUR:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		lea	xydraw(a1),a0		; a0 -> vblank draw parameter block
+_SET_CUR:
+		lea	lineavars+xydraw,a0		; a0 -> vblank draw parameter block
 		move.l	4(sp),d1		; d1<31:16> <- newX   d1<15:00> <- newY
 
 		move.w	SR,d0
 		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
 
-		move.l	d1,_GCURXY(a1)		; set GCURX and GCURY
+		move.l	d1,lineavars+_GCURXY		; set GCURX and GCURY
 		move.l	d1,(a0)+		; set vblank draw packet
 		bset.b	#0,(a0)			; mark data valid
 
@@ -1153,19 +1152,18 @@ _SET_CUR:	move.l  _lineAVar,a1		; a1 -> linea var struct
 *	mouse position and button state
 
 _vq_mouse:
-		move.l  _lineAVar,a2		; a2 -> linea var struct
-		move.l	_INTOUT(a2),a0		; a0 -> INTOUT[0]
-		move.l	_PTSOUT(a2),a1		; a1 -> PTSOUT[0]
+		move.l	lineavars+_INTOUT,a0		; a0 -> INTOUT[0]
+		move.l	lineavars+_PTSOUT,a1		; a1 -> PTSOUT[0]
 
 		move.w	 SR,d0
 		or.w	 #$0700,SR		; >>>> BEGIN ATOM <<<<
 
-		move.w	_MOUSE_BT(a2),(a0)	; INTOUT[0]   <- button status
-		move.l	_GCURXY(a2),(a1)	; PTSOUT[0-1] <- mouse X and Y
+		move.w	lineavars+_MOUSE_BT,(a0)	; INTOUT[0]   <- button status
+		move.l	lineavars+_GCURXY,(a1)	; PTSOUT[0-1] <- mouse X and Y
 
 		move.w	 d0,SR			; >>>>  END ATOM  <<<<
 
-		move.l	_CONTRL(a2),a0
+		move.l	lineavars+_CONTRL,a0
 		moveq.l	 #1,d0
 		move.w	 d0,4(a0)		; CONTRL[2] <- INTOUT length
 		move.w	 d0,8(a0)		; CONTRL[4] <- PTSOUT length

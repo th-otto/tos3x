@@ -708,39 +708,13 @@ VOID vr_trnfm(NOTHING)
 		case DEVICEDEP:
 		case STANDARD:
 		default:
-#if VIDEL_SUPPORT
-			if (form_id == PIXPACKED)
-			{
-				*cntrlD = (int32_t) src;
-				src->formatId = PIXPACKED;
-				PX_AND_INT_TRAN_FM();
-				src->formatId = DEVICEDEP;
-				*cntrlD = (int32_t) dst;
-			}
-#endif
 			TRAN_FM();
 			break;
 
 		case INTERLEAVED:
-#if VIDEL_SUPPORT
-			if (form_id == PIXPACKED)
-			{
-				src->formatId = PIXPACKED;
-				PX_AND_INT_TRAN_FM();
-				src->formatId = DEVICEDEP;
-			}
-#endif
 			break;
 
 		case PIXPACKED:
-#if VIDEL_SUPPORT
-			if (form_id == INTERLEAVED)
-			{
-				src->formatId = PIXPACKED;
-				PX_AND_INT_TRAN_FM();
-				src->formatId = DEVICEDEP;
-			}
-#endif
 			break;
 		}
 		break;
@@ -753,95 +727,10 @@ VOID vr_trnfm(NOTHING)
 		case STANDARD:
 		default:
 			TRAN_FM();
-#if VIDEL_SUPPORT
-			if (form_id == PIXPACKED)
-#endif
-			{
-				*cntrlS = (int32_t) dst;
-				dst->formatId = INTERLEAVED;
-				PX_AND_INT_TRAN_FM();
-				dst->formatId = DEVICEDEP;
-				*cntrlS = (int32_t) src;
-			}
-			break;
-
-#if VIDEL_SUPPORT
-		case INTERLEAVED:
-			TRAN_FM();
-			break;
-
-		case PIXPACKED:
-			TRAN_FM();
-
-			*cntrlS = (int32_t) dst;
-			dst->formatId = INTERLEAVED;
-			PX_AND_INT_TRAN_FM();
-			dst->formatId = PIXPACKED;
-			*cntrlS = (int32_t) src;
-			break;
-#endif
-		}
-		break;
-
-
-#if VIDEL_SUPPORT
-	case INTERLEAVED:
-		switch (dFormat)
-		{
-		case DEVICEDEP:
-			if (form_id == PIXPACKED)
-				PX_AND_INT_TRAN_FM();
-			break;
-
-		case STANDARD:
-			TRAN_FM();
-			break;
-
-		case INTERLEAVED:
-			break;
-
-		case PIXPACKED:
-			PX_AND_INT_TRAN_FM();
-			break;
-
-		default:
 			break;
 		}
 		break;
-#endif
 
-
-#if VIDEL_SUPPORT
-	case PIXPACKED:
-		switch (dFormat)
-		{
-		case DEVICEDEP:
-			if (form_id == INTERLEAVED)
-				PX_AND_INT_TRAN_FM();
-			break;
-
-		case STANDARD:
-			*cntrlD = (int32_t) src;
-			PX_AND_INT_TRAN_FM();
-			*cntrlD = (int32_t) dst;
-
-			src->formatId = INTERLEAVED;
-			TRAN_FM();
-			src->formatId = PIXPACKED;
-			break;
-
-		case INTERLEAVED:
-			PX_AND_INT_TRAN_FM();
-			break;
-
-		case PIXPACKED:
-			break;
-
-		default:
-			break;
-		}
-		break;
-#endif
 
 	default:
 		break;

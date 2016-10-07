@@ -150,7 +150,7 @@ sb_bitblt: ds.b 0
 	D5_CACR			; clear the instruction cache
 #endif
 
-	move.l  _lineAVar,a4		; a4 -> linea var struct
+	PIXLA(a4)
 	clr.w	OPAQUE(a6)		; set OPAQUE flag off
 	clr.w	_copytran		; turn blit transparant flag off
 

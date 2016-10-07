@@ -50,11 +50,10 @@ LUT_ADDR	equ	$FF8240		; lookup table address
 
 		xdef	_st_vs_color
 _st_vs_color:
-	move.l  _lineAVar,a2		; a2 -> linea var struct
 	movem.w	d3-d4,-(sp)		; save d3
-	move.l	_INTIN(a2),a0
+	move.l	lineavars+_INTIN,a0
 	move.w	(a0)+,d0		; d0 <- color index
-	move.w	_v_planes(a2),d1	; a0 -> first intensity component
+	move.w	lineavars+_v_planes,d1	; a0 -> first intensity component
 
 	move.b	max_ndx-1(pc,d1.w),d4	; is index in range?
 	cmp.b	d4,d0
@@ -63,7 +62,7 @@ _st_vs_color:
 	move.w	d0,d2
 	mulu	#6,d2			; d2 <- offset into lut save areas
 
-	lea	_REQ_COL(a2),a1
+	lea	lineavars+_REQ_COL,a1
 	add.w	d2,a1			; a1 -> component for given index (requePAL4096d)
 
 	subq.w	#1,d1			; d1 <- # planes - 1
@@ -197,18 +196,17 @@ mp0:
 
 		xdef	_st_vq_color
 _st_vq_color:
-	move.l  _lineAVar,a2		; a2 -> linea var struct
 	move.l	d4,-(sp)
-	move.l	_CONTRL(a2),a0
+	move.l	lineavars+_CONTRL,a0
 	move.w	#4,8(a0)		; contrl(4) <- length of intout array = 4
 
-	move.l	_INTIN(a2),a0
+	move.l	lineavars+_INTIN,a0
 	move.w	(a0)+,d0		; d0 <- color index
 	move.w	(a0),d2			; d2 <- color value format flag
 
-	move.l	_INTOUT(a2),a0		; a0 -> output array
+	move.l	lineavars+_INTOUT,a0		; a0 -> output array
 
-	move.w	_v_planes(a2),d1		
+	move.w	lineavars+_v_planes,d1		
 	move.b	max_ndx-1(pc,d1.w),d4	; is index in range?
 	cmp.b	d4,d0			; is index in range?
 	bls	in_range
@@ -224,7 +222,7 @@ in_range:
 	tst.w	d2			; d2:0 => return realized color
 	bne	vqc_real
 
-	lea	_REQ_COL(a2),a1
+	lea	lineavars+_REQ_COL,a1
 	mulu	#6,d0			; d0 <- offset to color components
 	add.w	d0,a1			; a1 -> saved color components for given index
 

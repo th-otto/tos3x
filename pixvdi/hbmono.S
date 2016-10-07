@@ -78,7 +78,7 @@ BM_FQ		equ  	$0040		; flush queue mask
 *-
 hb_mono:
 	move.l	a1,a5		    ;a5 -> line A variable structure
-	add.l	#84,a5		    ;a5 -> _FBASE
+	add.l	#_FBASE,a5		;a5 -> _FBASE
 	lea	BLASTER+B_OFF,a4    ;12	 a4 -> base of bitblt regs
 
 	move.l	(a5)+,a0	    ;12	 a0 -> source form
