@@ -11,19 +11,22 @@
 #include "vdiincld.inc"
 #include "lineaequ.inc"
 
+
 		xdef	_STHardList		; orig ST routines blitter
-		xdef	_STSoftList		; orig ST routines no blitter
-
-
-		xref	hb_cell,hb_scrup,hb_scrdn,hb_blank,hb_bitblt
-		xref	hb_mono,hb_rect,hb_vline,hb_hline,hb_text
-		xref	_tt_vq_color,_tt_vs_color,_init_st_tt_sp
-		xref	_st_vq_color,_st_vs_color
-		xref	st_cur_display,st_cur_replace,st_neg_cell
-		xref	st_move_cursor,ST_ABLINE,ST_HABLINE
-		xref	ST_PUTPIX,ST_GETPIX
-
-_STHardList:	dc.l	hb_cell
+_STHardList: ds.b 0
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+#else
+		dc.l	hb_cell
 		dc.l	hb_scrup
 		dc.l	hb_scrdn
 		dc.l	hb_blank
@@ -33,6 +36,7 @@ _STHardList:	dc.l	hb_cell
 		dc.l	hb_vline
 		dc.l	hb_hline
 		dc.l	hb_text
+#if TOSVERSION >= 0x400
 		dc.l	_st_vq_color
 		dc.l	_st_vs_color
 		dc.l	_init_st_tt_sp
@@ -45,12 +49,12 @@ _STHardList:	dc.l	hb_cell
 		dc.l	ST_RECTFILL
 		dc.l	ST_PUTPIX		; output pixel out to screen
 		dc.l	ST_GETPIX		; get pixel value at X,Y
+#endif
+#endif
 
-		xdef	sb_cell,sb_scrup,sb_scrdn,sb_blank,sb_bitblt
-		xdef	sb_mono,sb_rect,sb_vline,sb_hline,sb_text
-		xdef	ST_RECTFILL
-
-_STSoftList:	dc.l	sb_cell			; cell_xfer subroutine
+		xdef	_STSoftList		; orig ST routines no blitter
+_STSoftList:	ds.b 0
+		dc.l	sb_cell			; cell_xfer subroutine
 		dc.l	sb_scrup		; p_sc_up   subroutine
 		dc.l	sb_scrdn		; p_sc_dn   subroutine
 		dc.l	sb_blank		; blank_it  subroutine
@@ -60,6 +64,7 @@ _STSoftList:	dc.l	sb_cell			; cell_xfer subroutine
 		dc.l	sb_vline		; vline     subroutine
 		dc.l	sb_hline		; _HABLINE  subroutine
 		dc.l	sb_text			; textblt   subroutine
+#if TOSVERSION >= 0x400
 		dc.l	_st_vq_color
 		dc.l	_st_vs_color
 		dc.l	_init_st_tt_sp
@@ -72,6 +77,11 @@ _STSoftList:	dc.l	sb_cell			; cell_xfer subroutine
 		dc.l	ST_RECTFILL
 		dc.l	ST_PUTPIX		; output pixel out to screen
 		dc.l	ST_GETPIX		; get pixel value at X,Y
+#endif
+
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+hb_nop: rts
+#endif
 
 #if VIDEL_SUPPORT
 		xdef	_PixHardList		; pixel packed routines

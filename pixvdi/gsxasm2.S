@@ -46,8 +46,6 @@
 		xdef	_SetOverlay
 		xdef	_SetMasks
 		xdef	_trap
-		xdef	_trap14			; xbios trap
-		xdef	_trap14b		; xbios trap
 		xdef	_end_pts
 		xdef	_fill_line
 		xdef	_get_pix
@@ -67,19 +65,22 @@
 
 	text
 
-_trap:		move.l  _lineAVar,a0		; a0 -> linea var struct
-		move.l	(sp)+,retsav(a0)
+/* 306de: 00e0c0a4 */
+_trap:	PIXLA(a0)
+		move.l	(sp)+,PIXLV(retsav,a0)
 		trap	#1
-		move.l  _lineAVar,a0		; a0 -> linea var struct
-		move.l	retsav(a0),-(sp)
+		PIXLA(a0)
+		move.l	PIXLV(retsav,a0),-(sp)
 		rts
 
 
-_trap14:	move.l  _lineAVar,a0		; a0 -> linea var struct
-		move.l	(sp)+,trap14sav(a0)
+/* 306de: 00e0c0b4 */
+		xdef	_trap14			; xbios trap
+_trap14:	PIXLA(a0)
+		move.l	(sp)+,PIXLV(trap14sav,a0)
 		trap	#14
-		move.l  _lineAVar,a0		; a0 -> linea var struct
-		move.l	trap14sav(a0),-(sp)
+		PIXLA(a0)
+		move.l	PIXLV(trap14sav,a0),-(sp)
 		rts
 
 *+
@@ -87,11 +88,12 @@ _trap14:	move.l  _lineAVar,a0		; a0 -> linea var struct
 * The reason you ask? Those call cause XBIOS calls (i.e. one level of 
 * reentency).
 *-
-_trap14b:	move.l  _lineAVar,a0		; a0 -> linea var struct
-		move.l	(sp)+,trap14bsav(a0)
+		xdef	_trap14b		; xbios trap
+_trap14b:	PIXLA(a0)
+		move.l	(sp)+,PIXLV(trap14bsav,a0)
 		trap	#14
-		move.l  _lineAVar,a0		; a0 -> linea var struct
-		move.l	trap14bsav(a0),-(sp)
+		PIXLA(a0)
+		move.l	PIXLV(trap14bsav,a0),-(sp)
 		rts
 
 *******************************************************************************
@@ -111,13 +113,13 @@ _trap14b:	move.l  _lineAVar,a0		; a0 -> linea var struct
 *******************************************************************************
 
 
-_TRNSFONT:	move.l  _lineAVar,a1	; a1 -> linea var struct
-		move.w	_FWIDTH(a1),d0	; d0 <- Width of a font form
-		mulu.w	_DELY(a1),d0	; d0 <- length of form (bytes)
+_TRNSFONT:	PIXLA(a1)
+		move.w	PIXLV(_FWIDTH,a1),d0	; d0 <- Width of a font form
+		mulu.w	PIXLV(_DELY,a1),d0	; d0 <- length of form (bytes)
 		lsr.w	#1,d0		; d0 <- length of form (words)
 		subq.w	#1,d0		; d0 <- dbra counter
 
-		move.l	_FBASE(a1),a0	; a0 -> font form
+		move.l	PIXLV(_FBASE,a1),a0	; a0 -> font form
 
 swap_loop:	move.w	(a0),d1		; d1 <- font form word
 		ror.w	#8,d1		; swap bytes
@@ -145,23 +147,23 @@ swap_loop:	move.w	(a0),d1		; d1 <- font form word
 *******************************************************************************
 
 
-_put_pix:	move.l  _lineAVar,a1		; a1 -> linea var struct
+_put_pix:	PIXLA(a1)
 		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
 		move.l	V_PUTPIX(a1),a1		; vec to put pix routine
 		jmp	(a1)
 
-PX_PUTPIX:	move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	_PTSIN(a1),a0		; a0 -> PTSIN array
+PX_PUTPIX:	PIXLA(a1)
+		move.l	PIXLV(_PTSIN,a1),a0		; a0 -> PTSIN array
 		move.w	(a0)+,d0		; d0 <- X coordinate
 		move.w	(a0),d1			; d1 <- Y coordinate
-		mulu	_v_lin_wr(a4),d1	; d1 <- y portion of offset ??? why (a4)?
-*		mulu	byt_per_pix(d0),d0	; d0 <- x portion of offset ??? why (d0)? it is assembled as 68030 instr
+		mulu	PIXLV(_v_lin_wr,a4),d1	; d1 <- y portion of offset ??? why (a4)?
+*		mulu	PIXLV(byt_per_pix,d0),d0	; d0 <- x portion of offset ??? why (d0)? it is assembled as 68030 instr
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a0		; a0 -> base of screen
 		add.l	d1,a0			; a0 -> (x,y)
 		moveq.l	#0,d0			; d0 to be used as ret val
-		move.l	_INTIN(a1),a2		; a0 -> INITIN array
-		cmp.w	#16,_v_planes(a4)	; see how many bits per pixel
+		move.l	PIXLV(_INTIN,a1),a2		; a0 -> INITIN array
+		cmp.w	#16,PIXLV(_v_planes,a4)	; see how many bits per pixel ??? why (a4)?
 		beq	PXPTP16			; do 16 bit case
 		blt	PXPTP8			; do 8 bit case
 		move.l	(a2),(a0)		; splat pixel
@@ -174,8 +176,8 @@ PXPTP8:		move.b	2(a2),(a0)		; splat pixel
 		rts
 
 
-ST_PUTPIX:	move.l  _lineAVar,a2	; a2 -> linea var struct
-		movea.l	_PTSIN(a2),a0	; a0 -> PTSIN array
+ST_PUTPIX:	PIXLA(a2)
+		movea.l	PIXLV(_PTSIN,a2),a0	; a0 -> PTSIN array
 		move.w	 (a0),d0	; d0 <- X coordinate
 		move.w	2(a0),d1	; d1 <- Y coordinate
 		bsr	concat		; get physical offset
@@ -188,9 +190,9 @@ ST_PUTPIX:	move.l  _lineAVar,a2	; a2 -> linea var struct
 		move.w	d1,d0		; d0 <- OR mask  (for setting a bit)
 		not.w	d0		; d0 <- AND mask (for clearing a bit)
 
-		move.w	_v_planes(a2),d2	; d2 <- planes
+		move.w	PIXLV(_v_planes,a2),d2	; d2 <- planes
 		subq.w	#1,d2			; d2 <- dbra plane counter
-		move.l	_INTIN(a2),a0		; a0 -> INTIN array
+		move.l	PIXLV(_INTIN,a2),a0		; a0 -> INTIN array
 		move.w	(a0),d3			; d3 <- pixel value
 
 ppx_loop:	ror.w	#1,d3		; rotate pixel bit and put in carry.
@@ -223,25 +225,25 @@ ppx_clr:	and.w	d0,(a1)+	; clear the bit.
 *******************************************************************************
 
 _get_pix:
-		move.l  _lineAVar,a1		; a1 -> linea var struct
+		PIXLA(a1)
 		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
 		move.l	V_GETPIX(a1),a1		; vec to get pix routine
 		jmp	(a1)
 
 PX_GETPIX:
-		move.l  _lineAVar,a1		; a1 -> linea var struct
-		move.l	_PTSIN(a1),a0		; a0 -> PTSIN array
+		PIXLA(a1)
+		move.l	PIXLV(_PTSIN,a1),a0		; a0 -> PTSIN array
 		move.w	(a0)+,d0		; d0 <- X coordinate
 		move.w	(a0),d1			; d1 <- Y coordinate
-		mulu	_v_lin_wr(a1),d1	; d1 <- y portion of offset
+		mulu	PIXLV(_v_lin_wr,a1),d1	; d1 <- y portion of offset
 #if VIDEL_SUPPORT
-		mulu	byt_per_pix(a1),d0	; d0 <- x portion of offset
+		mulu	PIXLV(byt_per_pix,a1),d0	; d0 <- x portion of offset
 #endif
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a0		; a0 -> base of screen
 		add.l	d1,a0			; a0 -> (x,y)
 		moveq.l	#0,d0			; d0 to be used as ret val
-		cmp.w	#16,_v_planes(a1)	; see how many bits per pixel
+		cmp.w	#16,PIXLV(_v_planes,a1)	; see how many bits per pixel
 		beq	PXGTP16			; do 16 bit case
 		blt	PXGTP8			; do 8 bit case
 		move.l	(a0),d0			; d0 <- pixel value
@@ -253,9 +255,9 @@ PXGTP16:	move.w	(a0),d0			; d0 <- pixel value
 PXGTP8:		move.b	(a0),d0
 		rts
 
-ST_GETPIX:	move.l  _lineAVar,a1	; a1 -> linea var struct
+ST_GETPIX:	PIXLA(a1)
 		move.l	d3,-(sp)	; save register for "c"
-		move.l	_PTSIN(a1),a0	; a0 -> PTSIN array
+		move.l	PIXLV(_PTSIN,a1),a0	; a0 -> PTSIN array
 		moveq.l	#0,d0		; return value is a long so clear upper
 		move.w	(a0)+,d0	; d0 <- X coordinate
 		move.w	(a0),d1		; d1 <- Y coordinate
@@ -267,7 +269,7 @@ ST_GETPIX:	move.l  _lineAVar,a1	; a1 -> linea var struct
 		clr.w	d1
 		bset.l	d0,d1		; d1 <- pixel mask corresponding to X
 
-		move.w	_v_planes(a1),d2	; d2 <- planes
+		move.w	PIXLV(_v_planes,a1),d2	; d2 <- planes
 		move.w	d2,d0
 		add.w	d0,d0			; d0 <- off to nxt wrd in plane
 		subq.w	#1,d2			; d2 <- dbra plane counter
@@ -308,9 +310,9 @@ _fill_line:
 	movem.w	36(sp),d4-d6		; d4 <- X1  d5 <- X2  d6 <- Y1
 	exg	d5,d6			; d4 <- X1  d5 <- Y1  d6 <- X2
 
-	move.l	_lineAVar,a4
+	PIXLA(a4)
 #if VIDEL_SUPPORT
-	cmp.w	#PIXPACKED,form_id(a4)	; see if we are in pix packed mode
+	cmp.w	#PIXPACKED,PIXLV(form_id,a4)	; see if we are in pix packed mode
 	bne	fillLine0		; if not do interleaved mode
 	jsr	px_fline		; HABLINE entry point for fill_line
 	movem.l (sp)+,d3-d7/a3-a5       ; restore registers for "C"
@@ -350,7 +352,7 @@ fillLine0:
 *******************************************************************************
 
 _end_pts:	movem.l d3-d7/a3-a6,-(sp) 	; save registers for "C"
-		move.l  _lineAVar,a6		; a6 -> linea var struct
+		PIXLA(a6)
 #if VIDEL_SUPPORT
 		cmp.w	#PIXPACKED,form_id(a6)	; see if we are pix packe mode
 		bne	end_intrlv_pts
@@ -363,31 +365,31 @@ end_pix_pts:	move.l	44(sp),a0		; a0 -> Xleft
 		moveq.l	#0,d0			; initialize return value
 
 		move.w	40(sp),d4		; d4 <- X coordinate
-		cmp.w	_XMN_CLIP(a6),d4	; ret if left of viewport Xmin
+		cmp.w	PIXLV(_XMN_CLIP,a6),d4	; ret if left of viewport Xmin
 		bmi	epp_ret0
-		cmp.w	_XMX_CLIP(a6),d4
+		cmp.w	PIXLV(_XMX_CLIP,a6),d4
 		bgt	epp_ret0		; ret if right of viewport Xmax
 
         	move.w	42(sp),d1		; d1 <- Y coordinate
-		cmp.w	_YMN_CLIP(a6),d1	; return if above viewport Ymin
+		cmp.w	PIXLV(_YMN_CLIP,a6),d1	; return if above viewport Ymin
 		bmi	epp_ret0
-		cmp.w	_YMX_CLIP(a6),d1
+		cmp.w	PIXLV(_YMX_CLIP,a6),d1
 		bgt	epp_ret0		; return if below viewport Ymax
 
-		move.w	_XMN_CLIP(a6),(a0)	; init end X left
-		move.w	_XMX_CLIP(a6),(a1)	; init end X right
+		move.w	PIXLV(_XMN_CLIP,a6),(a0)	; init end X left
+		move.w	PIXLV(_XMX_CLIP,a6),(a1)	; init end X right
 
-		mulu	_v_lin_wr(a6),d1	; d1 <- y portion of offset
+		mulu	PIXLV(_v_lin_wr,a6),d1	; d1 <- y portion of offset
 		move.w	d4,d2			; d2 <- X coordinate
 #if VIDEL_SUPPORT
-		mulu	byt_per_pix(a6),d2	; d2 <- x portion of offset
+		mulu	PIXLV(byt_per_pix,a6),d2	; d2 <- x portion of offset
 #endif
 		add.l	d2,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a2		; a2 -> base of screen
 		add.l	d1,a2			; a2 -> (x,y)
 
 
-		cmp.w	#16,_v_planes(a6)	; see how many bits per pixel
+		cmp.w	#16,PIXLV(_v_planes,a6)	; see how many bits per pixel
 		beq	check16Left		; do 16 bits per pixel case
 		blt	check8Left		; do 8 bits per pixel case
 
@@ -404,7 +406,7 @@ end_pix_pts:	move.l	44(sp),a0		; a0 -> Xleft
 *-
 check32Left:	move.l	(a2),d1			; d1 <- value of current pix
 		move.w	d4,d2			; d2 <- x position
-		move.w	_XMN_CLIP(a6),d3	; d3 <- x minimum position
+		move.w	PIXLV(_XMN_CLIP,a6),d3	; d3 <- x minimum position
 		move.l	a2,a3			; a3 -> current X position
 		addq.l	#4,a3			; adjust for predecrement
 
@@ -418,7 +420,7 @@ l32lSkip:	subq.w	#1,d2			; move one pixel left
 		ble	left32Loop		; if not the loop back
 
 check32Right:	move.w	d4,d2			; d2 <- x position
-		move.w	_XMX_CLIP(a6),d3	; d3 <- x maximum position
+		move.w	PIXLV(_XMX_CLIP,a6),d3	; d3 <- x maximum position
 		move.l	a2,a3			; a3 -> current X position
 
 right32Loop:	cmp.l	(a3)+,d1		; see if color matches
@@ -438,7 +440,7 @@ check16Left:	move.w	(a2),d1			; d1 <- value of current pix
 		swap	d1			; search_color is a long (upper
 		move.w	(a2),d1			; and lower words are equal)
 		move.w	d4,d2			; d2 <- x position
-		move.w	_XMN_CLIP(a6),d3	; d3 <- x minimum position
+		move.w	PIXLV(_XMN_CLIP,a6),d3	; d3 <- x minimum position
 		move.l	a2,a3			; a3 -> current X position
 		addq.l	#2,a3			; adjust for predecrement
 
@@ -452,7 +454,7 @@ l16lSkip:	subq.w	#1,d2			; move one pixel left
 		ble	left16Loop		; if not the loop back
 
 check16Right:	move.w	d4,d2			; d2 <- x position
-		move.w	_XMX_CLIP(a6),d3	; d3 <- x maximum position
+		move.w	PIXLV(_XMX_CLIP,a6),d3	; d3 <- x maximum position
 		move.l	a2,a3			; a3 -> current X position
 
 right16Loop:	cmp.w	(a3)+,d1		; see if color matches
@@ -471,7 +473,7 @@ r16lSkip:	addq.w	#1,d2			; advance x position
 check8Left:	moveq.l	#0,d1			; clear upper bits of long var
 		move.b	(a2),d1			; d1 <- value of current pix
 		move.w	d4,d2			; d2 <- x position
-		move.w	_XMN_CLIP(a6),d3	; d3 <- x minimum position
+		move.w	PIXLV(_XMN_CLIP,a6),d3	; d3 <- x minimum position
 		move.l	a2,a3			; a3 -> current X position
 		addq.l	#4,a3			; adjust for predecrement
 
@@ -485,7 +487,7 @@ l8lSkip:	subq.w	#1,d2			; move one pixel left
 		ble	left8Loop		; if not the loop back
 
 check8Right:	move.w	d4,d2			; d2 <- x position
-		move.w	_XMX_CLIP(a6),d3	; d3 <- x maximum position
+		move.w	PIXLV(_XMX_CLIP,a6),d3	; d3 <- x maximum position
 		move.l	a2,a3			; a3 -> current X position
 
 right8Loop:	cmp.b	(a3)+,d1		; see if color matches
@@ -513,13 +515,13 @@ epp_ret0:	movem.l (sp)+,d3-d7/a3-a6	; restore registers for "C"
 #endif
 end_intrlv_pts:
 		move.w	42(sp),d1		; d1 <- Y coordinate
-		cmp.w	_YMN_CLIP(a6),d1	; return if above viewport Ymin
+		cmp.w	PIXLV(_YMN_CLIP,a6),d1	; return if above viewport Ymin
 		bmi	ep_ret0
-		cmp.w	_YMX_CLIP(a6),d1
+		cmp.w	PIXLV(_YMX_CLIP,a6),d1
 		bgt	ep_ret0			; return if below viewport Ymax
 
 		move.l	_v_bas_ad,a5		; a5 -> start of logical screen
-		move.w	_v_planes(a6),d3	; d3 <- planes
+		move.w	PIXLV(_v_planes,a6),d3	; d3 <- planes
 		move.w	d3,a3
 		add.w	a3,a3			; a3 <- off to nxt wrd in plane
 		subq.w	#1,d3			; d3 <- dbra plane counter
@@ -558,7 +560,7 @@ px_loop:	move.w	-(a5),d4	; d4 <- this plane's word
 
 		move.w	a1,d3			; d3 <- dbra plane counter
 		move.w	40(sp),d7		; d7 <- X coordinate
-		move.w	_XMX_CLIP(a6),d6	; d6 <- X max
+		move.w	PIXLV(_XMX_CLIP,a6),d6	; d6 <- X max
 		move.w	d1,d2			; d2 <- target color of search
 
 
@@ -613,7 +615,7 @@ rt_nedge:	move.l	a2,a5			; a5 -> root wrd of search span
 		subq.w	#1,d7			; d7 <- end Xright
 		move.w	d7,(a4)			; store end Xright
 		move.w	40(sp),d7		; d7 <- initial X
-		move.w	_XMN_CLIP(a6),d6	; d6 <- X min
+		move.w	PIXLV(_XMN_CLIP,a6),d6	; d6 <- X min
 		move.w	a0,d0			; d0 <- initial pixel mask
 
 
@@ -716,7 +718,7 @@ ep_ret0:	moveq.l	#0,d0		; return(0). (failure)
 *******************************************************************************
 
 _RECTFILL:
-	move.l  _lineAVar,a2		; a2 -> linea var struct
+	PIXLA(a2)
 	move.l	LA_ROUTINES(a2),a5	; load vectored list of primitives
 	move.l	V_RECTFILL(a5),a5	; vec to rectangle filler
 	jmp	(a5)
@@ -729,12 +731,11 @@ rf_null:
 
 
 ST_RECTFILL:
-	move.l  _lineAVar,a2		; a2 -> linea var struct
-
-	lea	_X1(a2),a0		; a0 -> rectangle endpoints array
+	PIXLA(a2)
+	lea	PIXLV(_X1,a2),a0		; a0 -> rectangle endpoints array
 	movem.w	(a0),d4-d7		; d4<-X1   d5<-Y1   d6<-X2   d7<-Y2
 
-	lea	_CLIP(a2),a1		; a1 -> clipping flag
+	lea	PIXLV(_CLIP,a2),a1		; a1 -> clipping flag
 	tst.w	(a1)+			; a1 -> 1st entry in clipping array
 	beq	rf_noclip		; if no clipping, don't dawdle here.
 
@@ -830,7 +831,7 @@ select_version:
 
 _SetOverlay:
 	
-	move.l  _lineAVar,a0		; a0 -> linea var struct
+	PIXLA(a0)
 	movem.w	d3-d4,-(sp)		; save registers
 	move.w	8(sp),d0		; d0 <- X1
 	move.w	10(sp),d1		; d1 <- Y1
@@ -843,7 +844,7 @@ _SetOverlay:
 	move.l	_v_bas_ad,a1		; a1 -> strt of dst form (0,0)
 
 	mulu	#2,d0			; d0 <- x portion of offset
-	mulu	_v_lin_wr(a0),d1	; d1 <- y portion of offset
+	mulu	PIXLV(_v_lin_wr,a0),d1	; d1 <- y portion of offset
 	add.l	d0,d1			; d1 <- byte offs into mem frm
 	add.l	d1,a1			; a1 -> (x,y)
 
@@ -851,7 +852,7 @@ _SetOverlay:
 	subq.w	#1,d0			; d0 <- delta X - 1
 	move.w	d3,d1			; d1 <- Y1
 	subq.w	#1,d1			; d1 <- delta Y - 1
-	move.w	_v_lin_wr(a0),d2	; d2 <- screen line wrap in bytes
+	move.w	PIXLV(_v_lin_wr,a0),d2	; d2 <- screen line wrap in bytes
 
 	tst.w	12(sp)			; see if set flag is on
 	bne	ClearFlag		; if not then clear
@@ -915,9 +916,9 @@ SetMask:	dc.w	$0020
 
 
 _SetMasks:
-	move.l	_lineAVar,a0		; a0 -> linea var struct
-	move.l	4(sp),col_or_mask(a0)	; set the or mask for vs_color
-	move.l	8(sp),col_and_mask(a0)	; set the and mask for vs_color
+	PIXLA(a0)
+	move.l	4(sp),PIXLV(col_or_mask,a0)	; set the or mask for vs_color
+	move.l	8(sp),PIXLV(col_and_mask,a0)	; set the and mask for vs_color
 * Sparrow only stuff follows
 * 920910 towns changed to or.w from move.w to preserve rest of shift
 *              register

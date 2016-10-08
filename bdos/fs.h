@@ -273,7 +273,7 @@ extern DMD *drvtbl[BLKDEVNUM];
 extern char diruse[];
 extern drvmask drvsel;
 extern int16_t const logmsk[];
-extern FTAB sft[OPNFILES];
+extern FTAB sft[OPNFILES - NUMSTD];
 extern ERROR rwerr;
 extern int16_t errdrv;
 extern uint16_t time, date;

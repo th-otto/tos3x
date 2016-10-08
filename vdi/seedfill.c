@@ -15,7 +15,7 @@
 * 
 * Revision 3.2  91/01/14  15:46:01  lozben
 * Made changes so the file can work with the latest gsxextrn.h and
-* the new vardefs.h files.
+* the new lineavar.h files.
 * 
 * Revision 3.1  91/01/08  17:06:05  lozben
 * Change declaration int16_t *Qptr to extern int16_t *Qptr.
@@ -45,7 +45,6 @@
 #include "attrdef.h"
 #include "scrndev.h"
 #include "lineavar.h"
-#include "vardefs.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"
 

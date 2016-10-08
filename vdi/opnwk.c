@@ -14,7 +14,6 @@
 #include "fontdef.h"
 #include "attrdef.h"
 #include "scrndev.h"
-#include "vardefs.h"
 #include "lineavar.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"
@@ -25,6 +24,8 @@
 #define		SSHIFT		    * ((char *) 0x44cL)
 #define		SETMODE(a)	    trap14b(5, 0L, 0L, 3, a)
 #define		SETREZ(a)	    trap14b(5, -1L, -1L, a)
+#define		EsetGray(a)	    trap14(86, a)
+#define		EsetBank(a)	    trap14(82, a)
 
 FONT_HEAD ram8x16, ram8x8, ram16x32;
 
@@ -36,7 +37,8 @@ VOID v_opnwk(NOTHING)
 {
 	register int16_t i;
 	register const int16_t *sp;
-	register int16_t*dp;
+	register int16_t *dp;
+#if TOSVERSION >= 0x400
 	register int16_t videoMode;
 
 	if (INTIN[0] == SETMODEFLAG)
@@ -52,6 +54,15 @@ VOID v_opnwk(NOTHING)
 			return;
 		}
 	}
+#endif
+#if TOSVERSION < 0x400
+	register int j;
+	register int count;
+	register int16_t curRez;
+	register int unused;
+	int16_t *old_intin, *old_intout, *old_contrl;
+	int16_t new_contrl[7], new_intin[2], new_intout[4];
+#endif
 
 	/* Move ROM copy of DEV_TAB to RAM */
 	sp = ROM_DEV_TAB;
@@ -65,7 +76,7 @@ VOID v_opnwk(NOTHING)
 	dp = INQ_TAB;
 	for (i = 0; i < 45; i++)
 		*dp++ = *sp++;
-
+	INQ_TAB[14] = MAX_VERT;
 
 	/* Move ROM copy of SIZ_TAB to RAM */
 	sp = ROM_SIZ_TAB;
@@ -81,6 +92,7 @@ VOID v_opnwk(NOTHING)
 	ram16x32 = f16x32;
 	font_ring[1] = &ram8x8;
 
+#if TOSVERSION >= 0x400
 	/*
 	 * init all the device dependant stuff
 	 */
@@ -111,9 +123,208 @@ VOID v_opnwk(NOTHING)
 	INIT_G();
 
 	(*LA_ROUTINES[V_INIT]) ();
+#else
+
+	UNUSED(unused);
+	
+	EsetGray(0);
+	EsetBank(0);
+
+	/*
+	 * init all the device dependant stuff
+	 */
+	curRez = FindDevice();
+	switch (curRez)
+	{
+	case _320x200:
+		DEV_TAB[3] = 556;			/* width of pixel in microns  */
+		DEV_TAB[4] = 556;			/* height of pixel in microns */
+		break;
+
+	case _640x200:
+		DEV_TAB[0] = 640 - 1;		/* X max                      */
+		DEV_TAB[3] = 278;			/* width of pixel in microns  */
+		DEV_TAB[4] = 556;			/* height of pixel in microns */
+		DEV_TAB[13] = 4;			/* # of pens available        */
+		INQ_TAB[4] = 2;				/* number of planes           */
+		break;
+
+	case _640x400:
+		DEV_TAB[0] = 640 - 1;		/* X max                      */
+		DEV_TAB[1] = 400 - 1;		/* Y max                      */
+		DEV_TAB[3] = 278;			/* width of pixel in microns  */
+		DEV_TAB[4] = 278;			/* height of pixel in microns */
+		DEV_TAB[13] = 2;			/* # of pens available        */
+		/* BUG: DEV_TAB[35] (colFlag) not cleared */
+		INQ_TAB[4] = 1;				/* number of planes           */
+		ram8x8.flags &= ~DEFAULT;
+		ram8x16.flags |= DEFAULT;
+		break;
+
+	case _640x480:
+		DEV_TAB[0] = 640 - 1;		/* X max                      */
+		DEV_TAB[1] = 480 - 1;		/* Y max                      */
+		DEV_TAB[3] = 278;			/* width of pixel in microns  */
+		DEV_TAB[4] = 278;			/* height of pixel in microns */
+		ram8x8.flags &= ~DEFAULT;
+		ram8x16.flags |= DEFAULT;
+		break;
+
+	case _1280x960:
+		DEV_TAB[0] = 1280 - 1;		/* X max                      */
+		DEV_TAB[1] = 960 - 1;		/* Y max                      */
+		DEV_TAB[3] = 278;			/* width of pixel in microns  */
+		DEV_TAB[4] = 278;			/* height of pixel in microns */
+		DEV_TAB[13] = 2;			/* # of pens available        */
+		DEV_TAB[35] = 0;			/* color capability flag      */
+		DEV_TAB[39] = 2;			/* palette size               */
+		INQ_TAB[1] = 1;				/* number of background clrs  */
+		INQ_TAB[4] = 1;				/* number of planes           */
+		INQ_TAB[5] = 0;				/* video lookup table         */
+		ram8x8.flags &= ~DEFAULT;
+		if (!F32)
+			ram8x16.flags |= DEFAULT;
+		else
+			ram16x32.flags |= DEFAULT;
+		break;
+	
+	case _320x480:
+		DEV_TAB[1] = 480 - 1;		/* Y max                      */
+		DEV_TAB[3] = 556;			/* width of pixel in microns  */
+		DEV_TAB[4] = 278;			/* height of pixel in microns */
+		DEV_TAB[13] = 256;			/* # of pens available        */
+		INQ_TAB[4] = 8;				/* number of planes           */
+		ram8x8.flags &= ~DEFAULT;
+		ram8x16.flags |= DEFAULT;
+		break;
+	
+	case 3:
+	case 5:
+	default:
+		DEV_TAB[3] = 278;			/* width of pixel in microns  */
+		DEV_TAB[4] = 278;			/* height of pixel in microns */
+		break;
+	}
+	
+	CONTRL[6] = virt_work.handle = 1;
+	cur_work = &virt_work;
+	virt_work.next_work = NULL;
+	
+	line_cw = -1;						/* invalidate curr line width */
+	text_init();						/* initialize the SIZ_TAB info */
+	init_wk();
+
+	/* Input must be initialized here and not in init_wk */
+	loc_mode = 0;						/* default is request mode    */
+	val_mode = 0;						/* default is request mode    */
+	chc_mode = 0;						/* default is request mode    */
+	str_mode = 0;						/* default is request mode    */
+
+	/*
+	 * Install mouse interrupt service routine, vblank draw routine,
+	 * and initialize associated variables and structures. Mouse
+	 * cursor and alpha cursor are initially hidden. Timing vectors
+	 * are also initialized.
+	 */
+	GCURX = DEV_TAB[0] / 2;
+	GCURY = DEV_TAB[1] / 2;
+	INIT_G();
+
+	/*
+	 * Initialize the request color array, and the request extended
+	 * color array. Do it for all banks if there are banks in the
+	 * current video mode.
+	 */
+	old_intin = INTIN;
+	old_intout = INTOUT;
+	old_contrl = CONTRL;
+
+	CONTRL = new_contrl;
+	INTIN = new_intin;
+	INTOUT = new_intout;
+
+	count = DEV_TAB[13];	/* #  pens available  */
+	new_intin[1] = 1;
+	dp = &REQ_COL[0][0];
+	sp = new_intout + 1;
+
+	switch (curRez)
+	{
+	case _320x200:						/* initialize the 2 color arrays to the */
+	case _640x200:						/* values which are stored in the color */
+	case _640x480:						/* lookup table for all 16 banks        */
+
+		for (i = 0; i < 16; i++)
+		{
+			new_intin[0] = i;
+			vq_color();
+			*dp++ = *sp;
+			*dp++ = *(sp + 1);
+			*dp++ = *(sp + 2);
+		}
+
+		dp = &REQ_X_COL[0][0];
+		for (i = 1; i < 16; i++)
+		{
+			EsetBank(i);
+			for (j = 0; j < 16; j++)
+			{
+				new_intin[0] = j;
+				vq_color();
+				*dp++ = sp[0];
+				*dp++ = sp[1];
+				*dp++ = sp[2];
+			}
+		}
+		EsetBank(0);					/* restore to bank 0        */
+		break;
+
+	case _640x400:
+	case _1280x960:
+		for (i = 0; i < count; i++)
+		{
+			new_intin[0] = i;
+			vq_color();
+			*dp++ = sp[0];
+			*dp++ = sp[1];
+			*dp++ = sp[2];
+		}
+		break;
+
+	case _320x480:
+		for (i = 0; i < 16; i++)
+		{
+			new_intin[0] = i;
+			vq_color();
+			*dp++ = sp[0];
+			*dp++ = sp[1];
+			*dp++ = sp[2];
+		}
+
+		/*
+		 * we have > 16 cols so fill the extended color array
+		 */
+		dp = &REQ_X_COL[0][0];
+		for (; i < count; i++)
+		{
+			new_intin[0] = i;
+			vq_color();
+			*dp++ = sp[0];
+			*dp++ = sp[1];
+			*dp++ = sp[2];
+		}
+		break;
+	}
+
+	CONTRL = old_contrl;
+	INTIN = old_intin;
+	INTOUT = old_intout;
+#endif
 }
 
 /*----------------------------------------------------------------------------*/
+
+#if TOSVERSION >= 0x400
 /* 
  * This function is here for soft loaded vdi. We init the workType then find
  * a device out of a set of caned devices. And do a SETREZ (setscreen) call.
@@ -162,7 +373,8 @@ PP(int16_t devId;)
 }
 
 /*----------------------------------------------------------------------------*/
-/* 
+
+/*
  * This function is here for soft loaded vdi. We init the CUR_DEV if we can.
  */
 VOID SetCurDevice(P(int16_t) curRez)
@@ -213,3 +425,5 @@ VOID InitDevTabInqTab(NOTHING)
 	INQ_TAB[4] = dev->planes;			/* number of planes           */
 	INQ_TAB[5] = dev->lookupTable;		/* video lookup table         */
 }
+
+#endif

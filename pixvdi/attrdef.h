@@ -27,51 +27,56 @@
 
 /* Structure to hold data for a virtual workstation */
 typedef struct attribute {
-	int16_t chup;				/* Character Up vector			*/
-	int16_t clip;				/* Clipping Flag				*/
-	const FONT_HEAD *cur_font;	/* Pointer to current font			*/
-	int16_t dda_inc;			/* Fraction to be added to the DDA		*/
-	int16_t multifill;			/* Multi-plane fill flag			*/
-	int16_t patmsk; 			/* Current pattern mask 			*/
-	const int16_t *patptr;		/* Current pattern pointer			*/
-	int16_t pts_mode;			/* TRUE if height set in points mode	*/
-	int16_t *scrtchp;			/* Pointer to text scratch buffer		*/
-	int16_t scrpt2; 			/* Offset to large text buffer		*/
-	int16_t style;				/* Current text style			*/
-	int16_t t_sclsts;			/* TRUE if scaling up			*/
-	int16_t fill_color; 		/* Current fill color (PEL value)		*/
-	int16_t fill_index; 		/* Current fill index			*/
-	int16_t fill_per;			/* TRUE if fill area outlined		*/
-	int16_t fill_style; 		/* Current fill style			*/
-	int16_t h_align;			/* Current text horizontal alignment	*/
-	int16_t handle; 			/* handle for attribute area		*/
-	int16_t line_beg;			/* Beginning line endstyle			*/
-	int16_t line_color; 		/* Current line color (PEL value)		*/
-	int16_t line_end;			/* Ending line endstyle 			*/
-	int16_t line_index; 		/* Current line style			*/
-	int16_t line_width; 		/* Current line width			*/
-	FONT_HEAD *loaded_fonts;	/* Pointer to first loaded font 		*/
-	int16_t mark_color; 		/* Current marker color (PEL value) 	*/
-	int16_t mark_height;		/* Current marker height			*/
-	int16_t mark_index; 		/* Current marker style 			*/
-	int16_t mark_scale; 		/* Current scale factor for marker data */
-	struct attribute *next_work;	/* Pointer to next virtual workstation	*/
-	int16_t num_fonts;			/* Total number of faces available		*/
-	int16_t scaled; 			/* TRUE if font scaled in any way		*/
-	FONT_HEAD scratch_head; 	/* Holder for the doubled font data 	*/
-	int16_t text_color; 		/* Current text color (PEL value)		*/
-	int16_t ud_ls;				/* User defined linestyle			*/
-	int16_t ud_patrn[32*16];	/* User defined pattern 			*/
-	int16_t v_align;			/* Current text vertical alignment		*/
-	int16_t wrt_mode;			/* Current writing mode 			*/
-	int16_t xfm_mode;			/* Transformation mode requested		*/
-	int16_t xmn_clip;			/* Low x point of clipping rectangle	*/
-	int16_t xmx_clip;			/* High x point of clipping rectangle	*/
-	int16_t ymn_clip;			/* Low y point of clipping rectangle	*/
-	int16_t ymx_clip;			/* High y point of clipping rectangle	*/
+	/*   0 */ int16_t chup;				/* Character Up vector			*/
+	/*   2 */ int16_t clip;				/* Clipping Flag				*/
+	/*   4 */ const FONT_HEAD *cur_font;/* Pointer to current font			*/
+	/*   8 */ int16_t dda_inc;			/* Fraction to be added to the DDA		*/
+	/*  10 */ int16_t multifill;		/* Multi-plane fill flag			*/
+	/*  12 */ int16_t patmsk; 			/* Current pattern mask 			*/
+	/*  14 */ const int16_t *patptr;	/* Current pattern pointer			*/
+	/*  18 */ int16_t pts_mode;			/* TRUE if height set in points mode	*/
+	/*  20 */ int16_t *scrtchp;			/* Pointer to text scratch buffer		*/
+	/*  24 */ int16_t scrpt2; 			/* Offset to large text buffer		*/
+	/*  26 */ int16_t style;			/* Current text style			*/
+	/*  28 */ int16_t t_sclsts;			/* TRUE if scaling up			*/
+	/*  30 */ int16_t fill_color; 		/* Current fill color (PEL value)		*/
+	/*  32 */ int16_t fill_index; 		/* Current fill index			*/
+	/*  34 */ int16_t fill_per;			/* TRUE if fill area outlined		*/
+	/*  36 */ int16_t fill_style; 		/* Current fill style			*/
+	/*  38 */ int16_t h_align;			/* Current text horizontal alignment	*/
+	/*  40 */ int16_t handle; 			/* handle for attribute area		*/
+	/*  42 */ int16_t line_beg;			/* Beginning line endstyle			*/
+	/*  44 */ int16_t line_color; 		/* Current line color (PEL value)		*/
+	/*  46 */ int16_t line_end;			/* Ending line endstyle 			*/
+	/*  48 */ int16_t line_index; 		/* Current line style			*/
+	/*  50 */ int16_t line_width; 		/* Current line width			*/
+	/*  52 */ FONT_HEAD *loaded_fonts;	/* Pointer to first loaded font 		*/
+	/*  56 */ int16_t mark_color; 		/* Current marker color (PEL value) 	*/
+	/*  58 */ int16_t mark_height;		/* Current marker height			*/
+	/*  60 */ int16_t mark_index; 		/* Current marker style 			*/
+	/*  62 */ int16_t mark_scale; 		/* Current scale factor for marker data */
+	/*  64 */ struct attribute *next_work;	/* Pointer to next virtual workstation	*/
+	/*  68 */ int16_t num_fonts;		/* Total number of faces available		*/
+	/*  70 */ int16_t scaled; 			/* TRUE if font scaled in any way		*/
+	/*  72 */ FONT_HEAD scratch_head; 	/* Holder for the doubled font data 	*/
+	/* 162 */ int16_t text_color; 		/* Current text color (PEL value)		*/
+	/* 164 */ int16_t ud_ls;			/* User defined linestyle			*/
+#if TOSVERSION >= 0x400
+	/* 166 */ int16_t ud_patrn[32*16];	/* User defined pattern 			*/
+#else
+	/* 166 */ int16_t ud_patrn[21*16];	/* User defined pattern 			*/
+#endif
+	/* 422 */ int16_t v_align;			/* Current text vertical alignment		*/
+	/* 424 */ int16_t wrt_mode;			/* Current writing mode 			*/
+	/* 426 */ int16_t xfm_mode;			/* Transformation mode requested		*/
+	/* 428 */ int16_t xmn_clip;			/* Low x point of clipping rectangle	*/
+	/* 430 */ int16_t xmx_clip;			/* High x point of clipping rectangle	*/
+	/* 432 */ int16_t ymn_clip;			/* Low y point of clipping rectangle	*/
+	/* 434 */ int16_t ymx_clip;			/* High y point of clipping rectangle	*/
+	/* 436 */ 
 } ATTRIBUTE;
 
 /* Virtual workstation attributes   */
-extern	ATTRIBUTE virt_work;
+extern ATTRIBUTE virt_work;
 
 #endif

@@ -39,21 +39,14 @@
 #include "attrdef.h"
 #include "scrndev.h"
 #include "lineavar.h"
-#include "vardefs.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
 #define VIDINFO     (* ((volatile short *) 0xff8262L))	/* video information register */
 #define LUTADR      ((volatile short *) 0xff8400L)	/* look up table address      */
 #define INVERT      2					/* corresponds to invert bit  */
-
-#define	_320x200    0					/* 320x200x4 video mode       */
-#define _640x200    1					/* 640x200x2 video mode       */
-#define _640x400    2					/* 640x400x1 video mode       */
-#define _640x480    4					/* 640x480x4 video mode       */
-#define _1280x960   6					/* 1280x960x1 monochrome mode */
-#define _320x480    7					/* 320x480x8 video mode       */
 #define HYPERMONO   VIDINFO & 0x1000	/* hyper mono mode            */
+
 
 
 /* corresponding gun percentage for each absolute value (0-15) */
@@ -63,7 +56,12 @@ static short pcnt_tab[] = { 0, 67, 133, 200, 267, 333, 400, 467,
 
 /*----------------------------------------------------------------------------*/
 
+#if TOSVERSION >= 0x400
 VOID tt_vs_color(NOTHING)
+#else
+/* 306de: 00e06ea4 */
+VOID vs_color(NOTHING)
+#endif
 {
 	register short *ptr = INTIN;
 	register short *rgb;
@@ -164,7 +162,12 @@ VOID tt_vs_color(NOTHING)
 
 /*----------------------------------------------------------------------------*/
 
+#if TOSVERSION >= 0x400
 VOID tt_vq_color(NOTHING)
+#else
+/* 306de: 00e07052 */
+VOID vq_color(NOTHING)
+#endif
 {
 	register short i, j;
 	register short *ptr = INTIN;		/* col index val      */

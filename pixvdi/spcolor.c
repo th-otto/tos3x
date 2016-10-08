@@ -15,7 +15,6 @@
 #include "attrdef.h"
 #include "scrndev.h"
 #include "lineavar.h"
-#include "vardefs.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"
 

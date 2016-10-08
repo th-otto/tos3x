@@ -26,7 +26,6 @@ VDI_SRCS = \
 	vdi.h \
 	scrndev.h \
 	styles.h \
-	vardefs.h \
 	asmdefs.h \
 	\
 	devequ.inc \

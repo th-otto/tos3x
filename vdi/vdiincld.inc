@@ -27,9 +27,9 @@
 #define P68030	0	/* @check@ set to 1 if we are on a 68030 (else 0) */
 #endif
 #if TOSVERSION >= 0x206
-#define PAL4096	1	/* @check@ set to 0 if st mode has a pal of 4096 */
+#define PAL4096	1	/* @check@ set to 1 if st mode has a pal of 4096 */
 #else
-#define PAL4096	0	/* @check@ set to 0 if st mode has a pal of 4096 */
+#define PAL4096	0	/* @check@ set to 1 if st mode has a pal of 4096 */
 #endif
 
 #define VIDEL_SUPPORT (TOSVERSION >= 0x400)

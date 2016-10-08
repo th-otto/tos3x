@@ -39,20 +39,12 @@
 
 		text
 
-		xdef	_put_pix,_get_pix,_ABLINE,_HABLINE
-		xdef	_RECTFILL,_CLC_FLIT,_COPY_RFM,_TEXT_BLT
-		xdef	_v_show_c,_HIDE_CUR,_vsc_form
-		xdef	cur_replace,cur_display,KG_BLT,_seedfill
-		xdef	line1010
-		xdef	_first,_f8x8,_f8x16,_f16x32
-		xdef	_retfalse
-
-
 *************************************************************************
 *	This routine decodes the "line 1010" instruction to call	*
 *    the appropriate primitive graphics routine.			*
 *************************************************************************
 
+		xdef	line1010
 line1010:	move.l	2(sp),a1	; fetch pc off stack.
 		move.w	(a1),d2		; fetch 1010 instruction.
 		and.w	#$0FFF,d2	; remove the 1010.
@@ -147,5 +139,6 @@ bp9:		move.l	d0,PIXLV(_FG_B_PLANES,a4)	; copy the color index
 fonts:		dc.l	_first,_f8x8,_f8x16,_f16x32,0
 
 
+		xdef	_retfalse
 _retfalse:	moveq	#0,d0		; FALSE => continue seedfill.
 		rts

@@ -258,7 +258,7 @@ vb_draw:	PIXLA(a5)
 *  mouse position interrupt service routine from altering position data
 *  while we are in the process of retrieving it.
 
-		move.l	PIXLV(xydraw),d1		; d1[31:16] <- cursor X
+		move.l	PIXLV(xydraw,a5),d1		; d1[31:16] <- cursor X
 		move.l	d1,d0			; d1[15:00] <- cursor Y
 		swap	d0			; d0[15:00] <- cursor X
 

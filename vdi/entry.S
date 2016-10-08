@@ -139,4 +139,5 @@ no_ptsin:
 	rts
 
 
-_MAX_VERT:	dc.w	PTSIN ; unused
+	xdef _MAX_VERT
+_MAX_VERT:	dc.w	PTSIN

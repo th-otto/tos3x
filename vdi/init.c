@@ -13,7 +13,6 @@
 #include "fontdef.h"
 #include "attrdef.h"
 #include "scrndev.h"
-#include "vardefs.h"
 #include "lineavar.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"
@@ -29,19 +28,14 @@
 #define PIXMASK		    0x200			/* pix control in XGA */
 #define	SSHIFT		    * ((char *) 0x44cL)
 
-#define	_320x200    0					/* 320x200x4 video mode       */
-#define	_640x200    1					/* 640x200x2 video mode       */
-#define	_640x400    2					/* 640x400x1 video mode       */
-#define	_640x480    4					/* 640x480x4 video mode       */
-#define	_1280x960   6					/* 1280x960x1 monochrome mode */
-#define	_320x480    7					/* 320x480x8 video mode       */
-
 #define GetRez()	trap14(4)
-#define	ESetBank(a)	trap14(82, a)
-#define	ESetGray(a)	trap14(86, a)
+#define	EsetBank(a)	trap14(82, a)
+#define	EsetGray(a)	trap14(86, a)
 #define	SETRGB(a, b, c)	trap14(93, a, b, c)
 
 /*----------------------------------------------------------------------------*/
+
+#if TOSVERSION >= 0x400
 
 VOID init_st_tt_sp(NOTHING)
 {
@@ -57,9 +51,9 @@ VOID init_st_tt_sp(NOTHING)
 	cookiePtr = P_COOKIE;
 
 	if (cookiePtr == NULL)				/* no cookie jar (i.e> it's an ST */
+	{
 		InitST();
-
-	else
+	} else
 	{
 		for (; *cookiePtr != 0L; cookiePtr += 2)
 			if (*cookiePtr == _VDO)
@@ -144,15 +138,13 @@ VOID InitST(NOTHING)
 VOID InitTT(NOTHING)
 {
 	register int16_t *sp, *dp, i;
-#if VIDEL_SUPPORT
 	register int j;
-#endif
 	register int temp;
 	int16_t *old_intin, *old_intout, *old_contrl;
 	int16_t new_contrl[7], new_intin[2], new_intout[4];
 
-	ESetGray(0);						/* init to color mode         */
-	ESetBank(0);						/* init to bank zero          */
+	EsetGray(0);						/* init to color mode         */
+	EsetBank(0);						/* init to bank zero          */
 	InitTTLut();						/* initialize color lut       */
 
 	old_intin = INTIN;
@@ -178,7 +170,6 @@ VOID InitTT(NOTHING)
 	case _320x200:						/* initialize the 2 color arrays to the */
 	case _640x200:						/* values which are stored in the color */
 	case _640x480:						/* lookup table for all 16 banks        */
-
 		for (i = 0; i < 16; i++)
 		{
 			new_intin[0] = i;
@@ -188,11 +179,10 @@ VOID InitTT(NOTHING)
 			*dp++ = sp[2];
 		}
 
-#if VIDEL_SUPPORT
 		dp = &REQ_X_COL[0][0];
 		for (i = 1; i < 16; i++)
 		{
-			ESetBank(i);
+			EsetBank(i);
 			for (j = 0; j < 16; j++)
 			{
 				new_intin[0] = j;
@@ -202,8 +192,7 @@ VOID InitTT(NOTHING)
 				*dp++ = sp[2];
 			}
 		}
-		ESetBank(0);					/* restore to bank 0        */
-#endif
+		EsetBank(0);					/* restore to bank 0        */
 		break;
 
 	case _640x400:
@@ -231,7 +220,6 @@ VOID InitTT(NOTHING)
 		/*
 		 * we have > 16 cols so fill the extended color array
 		 */
-#if VIDEL_SUPPORT
 		dp = &REQ_X_COL[0][0];
 		for (; i < temp; i++)
 		{
@@ -241,8 +229,6 @@ VOID InitTT(NOTHING)
 			*dp++ = sp[1];
 			*dp++ = sp[2];
 		}
-#endif
-
 		break;
 	}
 
@@ -410,3 +396,5 @@ VOID InitTTLut(NOTHING)
 		lutPtr[3] = colors[15];			/* set foreground color     */
 	}
 }
+
+#endif /* TOSVERSION >= 0x400 */

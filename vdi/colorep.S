@@ -48,6 +48,7 @@ ROUND_UP	equ	72		; INTERVAL/2
 
 LUT_ADDR	equ	$FF8240		; lookup table address
 
+#if TOSVERSION >= 0x400
 		xdef	_st_vs_color
 _st_vs_color:
 	movem.w	d3-d4,-(sp)		; save d3
@@ -290,4 +291,6 @@ pcnt_tab:
 	dc.w	0533,0600,0667,0733,0800,0867,0933,1000
 #else
 	dc.w	0000,0142,0285,0428,0571,0714,0857,1000
+#endif
+
 #endif

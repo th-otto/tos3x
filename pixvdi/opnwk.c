@@ -14,7 +14,6 @@
 #include "fontdef.h"
 #include "attrdef.h"
 #include "scrndev.h"
-#include "vardefs.h"
 #include "lineavar.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"

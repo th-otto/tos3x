@@ -217,14 +217,19 @@ typedef struct vdiVars {
     int16_t	(*UserEscInit) PROTO((NOTHING));          /* ptr to user routine before esc_init  */
     int32_t	reserved2[8];	           /* reserved				    */
 
+#if TOSVERSION >= 0x400
     VOID        (**routines) PROTO((NOTHING));     /* ptr to primitives vector list	    */
     const SCREENDEF   *curDev;	       /* ptr to a current device structure    */
+#else
+    VOID (**routines) PROTO((NOTHING)); /* hardware assisted drawing primitives  */
+    VOID (**softRoutines) PROTO((NOTHING)); /* drawing primitives done in software   */
+#endif
     int16_t        bltMode;            /* 0: soft BiT BLiT 1: hard BiT BLiT    */
 
     /*
      * Stuff for 8 plane VDI
      */
-    int16_t        reserved3;          /* reserved				    */
+    int16_t        f32;                /* reserved; if set, TOS 3.0x uses 16x32 as system font in TT-High */
 
     int16_t        reqXCol[240][3];    /* extended request color array         */
 
@@ -266,7 +271,135 @@ typedef struct vdiVars {
 #endif
 } VDIVARS;
 
-/* line_a variable structure */
-extern	VDIVARS	*la;
+#if TOSVERSION >= 0x400
 
+/* line_a variable structure */
+extern VDIVARS *la;
+
+#define LV(v) la->v
+
+#else
+
+/* line_a variable structure */
+extern VDIVARS vdivars;
+
+#define LV(v) vdivars.v
+
+#endif
+
+#define     angle		LV(_angle)
+#define     beg_ang		LV(begAng)
+#define     CUR_FONT		LV(curFont)
+#define     del_ang		LV(delAng)
+#define     deltay		LV(deltaY)
+#define     deltay1		LV(deltaY1)
+#define     deltay2		LV(deltaY2)
+#define     end_ang		LV(endAng)
+#define     fil_intersect	LV(filIntersect)
+#define     fill_maxy		LV(fillMaxY)
+#define     fill_miny		LV(fillMinY)
+#define     n_steps		LV(nSteps)
+#define     odeltay		LV(oDeltaY)
+#define     s_begsty		LV(sBegstY)
+#define     s_endsty		LV(sEndstY)
+#define     s_fil_col		LV(sFilCol)
+#define     s_fill_per		LV(sFillPer)
+#define     s_patmsk		LV(sPatMsk)
+#define     s_patptr		LV(sPatPtr)
+#define     start		LV(_start)
+#define     xc			LV(xC)
+#define     xrad		LV(xRad)
+#define     yc			LV(yC)
+#define     yrad		LV(yRad)
+#define	    INQ_TAB		LV(inqTab)
+#define	    DEV_TAB		LV(devTab)
+#define	    GCURX		LV(gCurX)
+#define	    GCURY		LV(gCurY)
+#define	    HIDE_CNT		LV(hideCnt)
+#define	    MOUSE_BT		LV(mouseBt)
+#define	    REQ_COL		LV(reqCol)
+#define	    SIZ_TAB		LV(sizTab)
+#define	    TERM_CH		LV(termCh)
+#define	    chc_mode		LV(chcMode)
+#define	    cur_work		LV(curWork)
+#define	    def_font		LV(defFont)
+#define	    font_ring		LV(fontRing)
+#define	    ini_font_count	LV(iniFontCount)
+#define	    line_cw		LV(lineCW)
+#define	    loc_mode		LV(locMode)
+#define	    num_qc_lines	LV(numQCLines)
+#define	    col_or_mask		LV(colOrMask)
+#define	    col_and_mask	LV(colAndMask)
+#define	    str_mode		LV(strMode)
+#define	    val_mode		LV(valMode)
+#define	    bytes_lin		LV(bytesLin)
+#define	    v_planes		LV(vPlanes)
+#define	    v_lin_wr		LV(vLinWr)
+#define	    CONTRL		LV(contrl)
+#define	    INTIN		LV(intin)
+#define	    PTSIN		LV(ptsin)
+#define	    INTOUT		LV(intout)
+#define	    PTSOUT		LV(ptsout)
+#define	    FG_BP_1		LV(fgBp1)
+#define	    FG_BP_2		LV(fgBp2)
+#define	    FG_BP_3		LV(fgBp3)
+#define	    FG_BP_4		LV(fgBp4)
+#define	    LSTLIN		LV(lstLin)
+#define	    LN_MASK		LV(lnMask)
+#define	    WRT_MODE		LV(wrtMode)
+#define	    X1			LV(x1)
+#define	    Y1			LV(y1)
+#define	    X2			LV(x2)
+#define	    Y2			LV(y2)
+#define	    PATPTR		LV(patPtr)
+#define	    PATMSK		LV(patMsk)
+#define	    MULTIFILL		LV(multiFill)
+#define	    CLIP		LV(clip)
+#define	    XMN_CLIP		LV(xMnClip)
+#define	    YMN_CLIP		LV(yMnClip)
+#define	    XMX_CLIP		LV(xMxClip)
+#define	    YMX_CLIP		LV(yMxClip)
+#define	    XACC_DDA		LV(xAccDda)
+#define	    DDA_INC		LV(ddaInc)
+#define	    T_SCLSTS		LV(tSclsts)
+#define	    MONO_STATUS	        LV(monoStatus)
+#define	    SOURCEX		LV(sourceX)
+#define	    SOURCEY		LV(sourceY)
+#define	    DESTX		LV(destX)
+#define	    DESTY		LV(destY)
+#define	    DELX		LV(delX)
+#define	    DELY		LV(delY)
+#define	    FBASE		LV(fBase)
+#define	    FWIDTH		LV(fWidth)
+#define	    STYLE		LV(style)
+#define	    LITEMASK		LV(liteMask)
+#define	    SKEWMASK		LV(skewMask)
+#define	    WEIGHT		LV(weight)
+#define	    R_OFF		LV(rOff)
+#define	    L_OFF		LV(lOff)
+#define	    DOUBLE		LV(scale)
+#define	    CHUP		LV(chUp)
+#define	    TEXT_FG		LV(textFg)
+#define	    SCRTCHP		LV(scrtchP)
+#define	    SCRPT2		LV(scrPt2)
+#define	    TEXT_BG		LV(textBg)
+#define	    COPYTRAN		LV(copyTran)
+#define	    quitfill		LV(quitFill)
+#define	    LA_ROUTINES		LV(routines)
+#define	    CUR_DEV		LV(curDev)
+#define	    BLT_MODE		LV(bltMode)
+#define	    REQ_X_COL		LV(reqXCol)
+#define	    FG_B_PLANES	        LV(fgBPlanes)
+#define	    FG_BP_5		LV(fgBP5)
+#define	    FG_BP_6		LV(fgBP6)
+#define	    FG_BP_7		LV(fgBP7)
+#define	    FG_BP_8		LV(fgBP8)
+#define	    q_circle		LV(qCircle)
+#define	    byt_per_pix		LV(bytPerPix)
+#define	    form_id		LV(formId)
+#define	    vl_col_bg		LV(vlColBg)
+#define	    vl_col_fg		LV(vlcolFg)
+#define	    pal_map		LV(palMap)
+#define	    V_PRIMITIVES	LV(primitives)
+#define     F32             LV(f32)
 #endif

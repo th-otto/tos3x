@@ -19,7 +19,6 @@
 cart_base  equ   $00fa0000 * Base of ROM port cartridge
 GEM_MUPB_MAGIC equ $87654321
 
-NCOOKIES equ 16
 nvram_rtc_year_offset equ 1980-1968
 
 #define RR_MAGIC    $12123456

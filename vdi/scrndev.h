@@ -13,7 +13,7 @@
 #ifndef _SCRNDEV_H_
 #define _SCRNDEV_H_
 
-#include 	"fontdef.h"
+#include "fontdef.h"
 
 typedef struct screendef {
     const char *name;		    /* device identification (name)	     */
@@ -27,10 +27,10 @@ typedef struct screendef {
     int16_t	formId;		    /* scrn form LITERLEAVED, PIXPACKED ...  */
     FONT_HEAD	*fntPtr;	    /* points to the default font	     */
     int16_t	maxPen;		    /* # of pens available		     */
-    int16_t	colFlag;	    /* color cpability flag		     */
+    int16_t	colFlag;	    /* color capability flag		     */
     int16_t	palSize;	    /* palette size (0 = contiguous)	     */
     int16_t	lookupTable;	    /* lookup table supported		     */
-    VOID (**softRoutines) PROTO((NOTHING)); /* drawing primitives done in sofwr      */
+    VOID (**softRoutines) PROTO((NOTHING)); /* drawing primitives done in software   */
     VOID (**hardRoutines) PROTO((NOTHING)); /* hardware assisted drawing primitives  */
     VOID (**curRoutines) PROTO((NOTHING));  /* current routines being used	     */
     char	*vidAdr;	    /* video base address		     */
@@ -47,6 +47,7 @@ typedef struct screendef {
 #define	V_VLINE		7	    /* vertical line draw routines	    */
 #define	V_HLINE		8	    /* horizontal line draw routines	    */
 #define	V_TEXT		9	    /* text blit routines		    */
+#if TOSVERSION >= 0x400
 #define	V_VQCOLOR	10	    /* color inquire routines		    */
 #define	V_VSCOLOR	11	    /* color set routines		    */
 #define V_INIT		12	    /* init routine called upon openwk	    */
@@ -59,6 +60,7 @@ typedef struct screendef {
 #define V_RECTFILL	19	    /* routine to do rectangle fill	    */
 #define	V_PUTPIX	20	    /* output pixel value to the screen	    */
 #define V_GETPIX	21	    /* get pixel value at (X,Y) of screen   */
+#endif
 
 #define	DEVICEDEP	0	    /* means we're in device dep mode	    */
 #define STANDARD	1	    /* flag for standard format		    */

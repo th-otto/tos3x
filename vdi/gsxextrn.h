@@ -83,7 +83,9 @@ extern  int16_t    rmchary;        /* add this to use up remainder             *
 extern  int16_t    FLIP_Y;         /* Non-zero PTSOUT contains magnitudes      */
 extern  int16_t    deftxbu[];      /* scratch buf for 8x16 (276 bytes)         */
 
+#if TOSVERSION >= 0x400
 extern const SCREENDEF *const devices[];
+#endif
 
 extern FONT_HEAD const first;      /* The small system font                    */
 extern FONT_HEAD const f8x16;

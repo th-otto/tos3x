@@ -12,7 +12,7 @@
 * 
 * Revision 3.1  91/01/14  15:49:11  lozben
 * Made changes so the file can work with the latest gsxextrn.h and
-* the new vardefs.h files.
+* the new lineavar.h files.
 * 
 * Revision 3.0  91/01/03  15:12:50  lozben
 * New generation VDI
@@ -50,7 +50,6 @@
 #include "attrdef.h"
 #include "scrndev.h"
 #include "lineavar.h"
-#include "vardefs.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
@@ -425,7 +424,9 @@ VOID pline(NOTHING)
 			if (clip_line())
 				ABLINE();
 		} else
+		{
 			ABLINE();
+		}
 	}
 }
 
@@ -1674,12 +1675,16 @@ VOID dsf_udpat(NOTHING)
 }
 
 
+#if TOSVERSION >= 0x400
+
 /*
  * go to the proper inquire color routine
  */
 VOID vq_color(NOTHING)
 {
+#ifdef TODO
 	(*LA_ROUTINES[V_VQCOLOR]) ();
+#endif
 }
 
 
@@ -1688,5 +1693,9 @@ VOID vq_color(NOTHING)
  */
 VOID vs_color(NOTHING)
 {
+#ifdef TODO
 	(*LA_ROUTINES[V_VSCOLOR]) ();
+#endif
 }
+
+#endif

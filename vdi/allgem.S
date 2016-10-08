@@ -16,7 +16,6 @@
 #include "lineaequ.inc"
 
 
-
 CON		equ	  2
 DEV		equ	CON		; source of key press
 BIOS		equ	 13
@@ -667,7 +666,7 @@ esc1:	move.l	a2,PIXLV(sv_blk_ptr,a1) 	; init ptr to pnt to save_block
 		move.b	d0,PIXLV(v_delay,a1)		; cursor redisplay interval (immediate)
 
 		not.l	d0
-		move.w	d0,PIXLV(v_col_bg,a1)		; background color is all zeros
+		move.w	d0,PIXLV(v_col_bg,a1)		; background color is all ones
 #if VIDEL_SUPPORT
 		move.l	d0,PIXLV(vl_col_bg,a1)	; set in case we are 32 bit mode
 #endif
@@ -725,14 +724,14 @@ _esc_init:
         move.b    _sshiftmod,d0
         bsr       rezinit
         lea.l     _f8x8,a0
-        move.l    #save_block+lineavars,PIXLV(sv_blk_ptr,a1)
+        move.l    #lineavars+(save_block),PIXLV(sv_blk_ptr,a1)
         cmp.w     #1,d0
         ble.s     esc2
         lea.l     _f8x16,a0
         cmp.w     #6,d0
         blt.s     esc2	; see if we have > 4 planes
         beq.s     esc1
-        move.l    #_save_block+lineavars,PIXLV(sv_blk_ptr,a1)			; if so point to > save buff
+        move.l    #lineavars+(_save_block),PIXLV(sv_blk_ptr,a1)			; if so point to > save buff
         bra.s     esc2
 esc1:
         tst.w     PIXLV(LA_F32,a1)

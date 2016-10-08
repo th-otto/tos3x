@@ -26,7 +26,7 @@ int16_t const logmsk[] = { 0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047,
  *  sft -
  */
 
-FTAB sft[OPNFILES];
+FTAB sft[OPNFILES - NUMSTD];
 
 
 /*

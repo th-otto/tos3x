@@ -2,10 +2,11 @@
 #include "fontdef.h"
 #include "attrdef.h"
 #include "scrndev.h"
-#include "vardefs.h"
 #include "lineavar.h"
 #include "gsxdef.h"
 #include "gsxextrn.h"
+
+#if TOSVERSION >= 0x400
 
 static SCREENDEF const devSTLow  = {
 			    "ST LOW", 2, 4, 160, 320,
@@ -111,3 +112,5 @@ const SCREENDEF *const devices[]	= {
 			&_dev320x200x8,
 			NULL	
 	    };
+
+#endif

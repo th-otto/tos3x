@@ -26,7 +26,21 @@ typedef int16_t BOOLEAN;
 #define VIDEL_SUPPORT (TOSVERSION >= 0x400)
 
 
-#include	"scrndev.h"
+#include "scrndev.h"
+
+#define	_320x200    0					/* 320x200x4 video mode       */
+#define _640x200    1					/* 640x200x2 video mode       */
+#define _640x400    2					/* 640x400x1 video mode       */
+#define _640x480    4					/* 640x480x4 video mode       */
+#define _1280x960   6					/* 1280x960x1 monochrome mode */
+#define _320x480    7					/* 320x480x8 video mode       */
+
+
+/*
+ * entry.S
+ */
+extern int16_t const MAX_VERT;
+
 
 /*
  * init.c
@@ -130,10 +144,14 @@ VOID vs_color PROTO((NOTHING));          /* VDI  #14  */
  * opnwk.c
  */
 VOID v_opnwk PROTO((NOTHING));           /* VDI   #1  */
+#if TOSVERSION >= 0x400
 const SCREENDEF *FindDevice PROTO((int16_t devId));
 VOID SetCurDevice PROTO((int16_t curRez));
 VOID InitFonts PROTO((NOTHING));
 VOID InitDevTabInqTab PROTO((NOTHING));
+#else
+int16_t FindDevice PROTO((NOTHING));
+#endif
 
 
 /*

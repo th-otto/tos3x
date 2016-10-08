@@ -14,3 +14,5 @@
 #define MEDIAMAYCHANGE   1
 /* media def has changed */
 #define MEDIACHANGE      2
+
+#define NCOOKIES 16

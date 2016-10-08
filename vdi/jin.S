@@ -50,7 +50,6 @@
 #include "asmdefs.h"
 
 	xref	_FindDevice
-	xref	_SetCurDevice
 	xref	_GSX_ENTRY
 	xref	line1010		; for LINE "A".  MSH  4/23/85
 	xref	_asc_out		; raw con out
@@ -283,9 +282,11 @@ SSComeback:
 		movem.l	a3-a6/d3-d7,-(sp)	; save registers
 		moveq.l	#0,d0			; clear unneeded bits
 		move.b	SSHIFTMD,d0		; d0 <- desired res
+#if TOSVERSION >= 0x400
 		move.w	d0,-(sp)		; pass rez parameter on stack
 		jsr	_SetCurDevice		; set to desired device
 		addq.w	#2,sp			; cleanup stack
+#endif
 		jsr	esc_init		; inititalize glass tty
 		movem.l	(sp)+,a3-a6/d3-d7	; restore registers
 		rte				; go back to caller
@@ -395,9 +396,11 @@ SetShift:	move.w	TTSHIFTMD,-(sp)		; save return value
 		and.w	#7,d0			; mask off unwanted bits
 		move.b	d0,SSHIFTMD		; set software shadow
 		movem.l	a3-a6/d3-d7,-(sp)	; save registers
+#if TOSVERSION >= 0x400
 		move.w	d0,-(sp)		; pass rez parameter on stack
 		jsr	_SetCurDevice		; set to desired device
 		addq.w	#2,sp			; cleanup stack
+#endif
 		jsr	esc_init		; re-init
 		movem.l	(sp)+,a3-a6/d3-d7	; restore registers
 		move.w	(sp)+,d0		; d0 <- gets old shft mode val

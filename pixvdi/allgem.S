@@ -16,42 +16,6 @@
 #include "lineaequ.inc"
 
 
-		xdef	_InitFonts
-		xdef	_v_clrwk
-   		xdef	_DINIT_G
-   		xdef	_vex_timv
-   		xdef	_GCHC_KEY
-   		xdef	_GCHR_KEY
-		xdef	_GLOC_KEY
-		xdef	_GSHIFT_S
-   		xdef	_INIT_G
-		xdef	_v_cellarray
-		xdef	_v_nop
-		xdef	_vq_cellarray
-		xdef	esc_init
-		xdef	_esc_init
-		xdef	_dev_init
-
-		xref	rout_init
-		xref	_SETBLT
-		
-
-		xref	_MOV_CUR	; External Routines called
-		xref	_vsc_form
-		xref	gl_f_init
-		xref	normal_ascii
-
-
-		xref	esce
-		xref	escf
-		xref	mouse_rel
-		xref	vb_draw
-
-		xref	arrow_cdb
-		xref	_shifty
-		xref	rel_pblock
-
-
 CON		equ	  2
 DEV		equ	CON		; source of key press
 BIOS		equ	 13
@@ -76,13 +40,17 @@ DEFREZ    equ 6
 *******************************************************************************
 
 /* 306de: 00e06676 */
+		xdef	_GSHIFT_S
 _GSHIFT_S:	move.b	_shifty,d0	; Get the keyboard state
 		andi.w	#$000F,d0	; We only want the low 4 bits
 
 * Reuse a rts for these stubed routines
-_v_cellarray:
-_v_nop:
-_vq_cellarray:
+		xdef	_v_cellarray
+_v_cellarray: ds.b 0
+		xdef	_v_nop
+_v_nop: ds.b 0
+		xdef	_vq_cellarray
+_vq_cellarray: ds.b 0
 return:		rts
 
 *******************************************************************************
@@ -94,6 +62,7 @@ return:		rts
 *******************************************************************************
 
 /* 306de: 00e06682 */
+		xdef	_v_clrwk
 _v_clrwk: PIXLA(a0)
 #if TOSVERSION < 0x400
 		move.l    d0,-(a7)
@@ -187,6 +156,7 @@ clr4:		movem.l	(sp)+,d3-d7/a3	; restore registers
 *
 *******************************************************************************
 
+   		xdef	_INIT_G
 _INIT_G:	PIXLA(a1)
 		move.l	#return,PIXLV(tim_addr,a1)	; Tick points to rts
 
@@ -218,6 +188,7 @@ _INIT_G:	PIXLA(a1)
 *******************************************************************************
 
 /* 306de: 00e066e6 */
+   		xdef	_vex_timv
 _vex_timv:	PIXLA(a1)
 		move.l	PIXLV(_CONTRL,a1),a0
 
@@ -347,6 +318,7 @@ tick_int:
 *******************************************************************************
 
 /* 306de: 00e06806 */
+   		xdef	_DINIT_G
 _DINIT_G:	PIXLA(a1)
 		move.l	PIXLV(tim_chain,a1),-(sp)	; reset timer vector
 		move.w	#$100,-(sp)
@@ -373,6 +345,7 @@ _DINIT_G:	PIXLA(a1)
 *				
 *******************************************************************************
 
+   		xdef	_GCHC_KEY
 _GCHC_KEY:	PIXLA(a1)
 		move.w	#1,PIXLV(_TERM_CH,a1)		; return dummy choice per 8086
 		moveq.l	#1,d0			; indicate choice value
@@ -419,6 +392,7 @@ _GCHC_KEY:	PIXLA(a1)
 *******************************************************************************
 
 /* 306de: 00e06830 */
+		xdef	_GLOC_KEY
 _GLOC_KEY:	PIXLA(a1)
 		moveq.l	#3,d1		; d1 <- mask for updating cur_ms_stat
 
@@ -468,6 +442,7 @@ key_stat:	move.w	 d0,-(sp)	; preserve mouse status
 *******************************************************************************
 
 /* 306de: 00e0687e */
+   		xdef	_GCHR_KEY
 _GCHR_KEY:	move.w	#DEV,-(sp)	; see if a character present
 		move.w	#BCONSTAT,-(sp)
 		trap	#BIOS
@@ -503,6 +478,7 @@ no_char:	rts
 *
 *******************************************************************************
 
+/* 306de: 00e068ac */
 mouse_init:
 		PIXLA(a1)
 		lea	user_init,a0		; button and motion vectors
@@ -534,6 +510,7 @@ mouse_init:
 
 		lea	PIXLV(xydraw,a1),a0		; init the draw parameter block
 
+#if TOSVERSION >= 0x400
 		move.w	PIXLV(v_hz_rez,a1),d0		; d0 <- horizontal rez
 		lsr.w	#1,d0			; d0 <- x rez / 2
 		move.w	d0,PIXLV(_GCURX,a1)		; init mouse X position
@@ -541,6 +518,7 @@ mouse_init:
 		move.w	PIXLV(v_vt_rez,a1),d0		; d0 <- vrtical rez
 		lsr.w	#1,d0			; d0 <- y rez / 2
 		move.w	d0,PIXLV(_GCURY,a1)		; init mouse Y position
+#endif
 
 		move.l	PIXLV(_GCURXY,a1),(a0)+	; to the initial position
 		move.b	#1,(a0)			; mark data valid for update
@@ -569,6 +547,7 @@ user_init:	rts
 *
 *******************************************************************************
 
+/* 306de: 00e06932 */
 dinit_mouse:	move.l	_vblqueue,a0	; remove draw routine from vblank queue
 		clr.l	(a0)
 
@@ -586,15 +565,13 @@ dinit_mouse:	move.l	_vblqueue,a0	; remove draw routine from vblank queue
 *			    escape initialization 			      *
 *******************************************************************************
 
-/* 306de: 00e069f4 */
-	xdef resetdev
-resetdev:
-	rts
+#if TOSVERSION >= 0x400
 
 *+
 * dev_init(devPtr). devPtr points to the proper device structure. Init current
 * device pointer in linea variable structure, then drop through to esc_init().
 *-
+		xdef	_dev_init
 _dev_init: PIXLA(a1)
 		tst.l	PIXLV(LA_USERDEVINIT,a1)			; see if vector set
 		beq	devI4				; branch if not
@@ -634,7 +611,8 @@ devI2:
 		move.l	#_STSoftList,DEVCURROUTINES(a0)
 		bra	esc_init			; init glass TTY
 
-/* 306de: 00e0694a */
+		xdef	esc_init
+		xdef	_esc_init
 _esc_init:
 esc_init:
 		jsr	_InitFonts		; copy font headers into ram
@@ -678,7 +656,7 @@ esc1:	move.l	a2,PIXLV(sv_blk_ptr,a1) 	; init ptr to pnt to save_block
 
 		PIXLA(a1)
 		moveq.l	#0,d0
-		move.w	d0,PIXLV(v_col_fg,a1)		; foreground color is all ones
+		move.w	d0,PIXLV(v_col_fg,a1)		; foreground color is all zeroes
 #if VIDEL_SUPPORT
 		move.l	d0,vl_col_fg(a1)	; set in case we are 32 bit mode
 #endif
@@ -688,7 +666,7 @@ esc1:	move.l	a2,PIXLV(sv_blk_ptr,a1) 	; init ptr to pnt to save_block
 		move.b	d0,PIXLV(v_delay,a1)		; cursor redisplay interval (immediate)
 
 		not.l	d0
-		move.w	d0,PIXLV(v_col_bg,a1)		; background color is all zeros
+		move.w	d0,PIXLV(v_col_bg,a1)		; background color is all ones
 #if VIDEL_SUPPORT
 		move.l	d0,PIXLV(vl_col_bg,a1)	; set in case we are 32 bit mode
 #endif
@@ -734,3 +712,77 @@ esc3:		move.l	_v_bas_ad,PIXLV(v_cur_ad,a1)	; home cursor.
 		jsr	_InitDevTabInqTab	; initialize more variables
 
 		bra	_v_clrwk		; blank screen. ret from there
+
+#else
+
+/* 306de: 00e0694a */
+		xdef	esc_init
+		xdef	_esc_init
+esc_init:
+_esc_init:
+        moveq.l   #0,d0
+        move.b    _sshiftmod,d0
+        bsr       rezinit
+        lea.l     _f8x8,a0
+        move.l    #save_block+lineavars,PIXLV(sv_blk_ptr,a1)
+        cmp.w     #1,d0
+        ble.s     esc2
+        lea.l     _f8x16,a0
+        cmp.w     #6,d0
+        blt.s     esc2	; see if we have > 4 planes
+        beq.s     esc1
+        move.l    #_save_block+lineavars,PIXLV(sv_blk_ptr,a1)			; if so point to > save buff
+        bra.s     esc2
+esc1:
+        tst.w     PIXLV(LA_F32,a1)
+        beq.s     esc2
+        lea.l     _f16x32,a0
+esc2:
+        bsr       gl_f_init
+        clr.w     d0
+        move.w    d0,PIXLV(v_col_bg,a1)		; background color is all zeroes
+        move.w    d0,PIXLV(v_cur_cx,a1)
+        move.w    d0,PIXLV(v_cur_cy,a1)
+        move.w    d0,PIXLV(v_cur_off,a1)
+        move.b    d0,PIXLV(v_delay,a1)		; cursor redisplay interval (immediate)
+        not.w     d0
+        move.w    d0,PIXLV(v_col_fg,a1)		; foreground color is all ones
+        move.l    _v_bas_ad,PIXLV(v_cur_ad,a1)	; home cursor.
+        moveq.l   #1,d0
+        move.b    d0,PIXLV(v_stat_0,a1)		; flash, nowrap, normal video.
+        move.w    d0,PIXLV(disab_cnt,a1)	; cursor disabled 1 level deep.
+        moveq.l   #30,d0
+        move.b    d0,PIXLV(v_cur_tim,a1)	;.5 sec blink rate (@60 Hz vbl)
+        move.b    d0,PIXLV(vct_init,a1)		;.5 sec blink rate (@60 Hz vbl)
+        move.l    #normal_ascii,con_state
+        bra       _v_clrwk
+
+/* 306de: 00e069f4 */
+		xdef resetdev
+resetdev:
+        move.l    #_STSoftList,PIXLV(LA_CURDEV,a1)
+        move.l    #_STHardList,PIXLV(LA_ROUTINES,a1)
+        jmp       _SETBLT
+
+rezinit:
+        lsl.w     #3,d0
+        lea.l     reztab(pc,d0.w),a0
+        move.w    (a0)+,PIXLV(_v_planes,a1)
+        move.w    (a0),PIXLV(_v_lin_wr,a1)
+        move.w    (a0)+,PIXLV(_bytes_lin,a1)
+        move.w    (a0)+,PIXLV(v_vt_rez,a1)
+        move.w    (a0),PIXLV(v_hz_rez,a1)
+        lsr.w     #3,d0
+        rts
+
+reztab:
+		dc.w  4,160,200,320
+		dc.w  2,160,200,640
+		dc.w  1,80,400,640
+		dc.w  0,0,0,0
+		dc.w  4,320,480,640
+		dc.w  0,0,0,0
+		dc.w  1,160,960,1280
+		dc.w  8,320,480,320
+
+#endif

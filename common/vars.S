@@ -14,7 +14,7 @@
 
 *	ds.b $800       ; the system variables go here
 
-	ds.b $40
+	ds.b $40 ; seems to be unused
 
 	xdef gem_env
 gem_env: ds.b 12
@@ -29,7 +29,7 @@ _trap_save_area: ds.b 0         * End of Save storage
 oshdr: ds.b 6+64
 
 	xdef cookies
-cookies: ds.l 16*2
+cookies: ds.l NCOOKIES*2
 
 	xdef _bootpref
 _bootpref: ds.w 1
@@ -273,7 +273,8 @@ _width: equ _dskbuf+44
 	xdef _height
 _height: equ _dskbuf+46
 
-	ds.b 910 ; space for negative linea vars
+	xdef _vdivars
+_vdivars: ds.b 910 ; space for negative linea vars
     xdef lineavars
 lineavars:
 #if TOSVERSION >= 0x404
@@ -342,7 +343,7 @@ _prtboval: ds.w 4
 	xdef _root
 _root: ds.l MAXQUICK
 
-	ds.b $3c
+	ds.b 60
 
 	xdef _glbkbchar
 _glbkbchar: ds.l 3*KBBUFSZ
@@ -392,7 +393,8 @@ _prtbp2: ds.l 1
 	xdef _prtbchunk
 _prtbchunk: ds.w 1
 
-	ds.b $1b4
+	xdef _virt_work
+_virt_work: ds.b 436
 
 	xdef _prtbp1
 _prtbp1: ds.l 1
@@ -433,7 +435,8 @@ _bpbsums: ds.w BPBSECT*NUMFLOPPIES
 	xdef _oscnt
 _oscnt: ds.w 1
 
-	ds.b $5a
+	xdef _ram8x8
+_ram8x8: ds.b 90
 
 	xdef _rwerr
 _rwerr: ds.l 1
@@ -445,14 +448,16 @@ _prtbrval: ds.w 1
 _pmd: ds.l 3
 
 	xdef _sft
-_sft: ds.b 10*OPNFILES
+_sft: ds.b 10*(OPNFILES-6)
 
-	ds.b 30
+	xdef _ram16x32
+_ram16x32: ds.b 90
 	
 	xdef _run
 _run: ds.l 1
 
-	ds.b $5a
+	xdef _ram8x16
+_ram8x16: ds.b 90
     
     xdef _pbpar
 _pbpar: ds.b 30
