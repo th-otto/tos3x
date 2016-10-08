@@ -28,8 +28,8 @@ static int rval;						/* relocation value */
 static int lpflg;
 static int lastopr;						/* last token was operator when set */
 
-static struct it *piop, *pitr;
-static short iop, itr;
+static struct it *pitr;
+static short itr;
 static struct it opstk[OPSTLEN];			/* operator stack */
 static struct it tree[TREELEN];				/* operand stack */
 
@@ -200,7 +200,9 @@ static VOID collapse(NOTHING)
 	register short rv1, rv2, topr, i, bos, low;
 	register union iival tv1;
 	union iival tv2;
-
+	register struct it *piop;
+	register short iop;
+	
 	bos = 0;
   exct1:
 	if (itr >= 3)
@@ -390,7 +392,6 @@ PP(int dprc;)
 		if (!prcnt)						/* no left parens */
 			break;
 		return PRP;
-
 	}
 	return PEE;							/* end of expression */
 }
@@ -400,6 +401,8 @@ VOID expr(P(aexpr) iploc)
 PP(aexpr iploc;)
 {
 	register short i, ipr;
+	register struct it *piop;
+	register short iop;
 
 	extflg = starmul = iop = lpflg = 0;
 	piop = &opstk[0];
@@ -547,7 +550,7 @@ PP(int acksc;)
 	cksc = acksc;
 	if (isalnum(cksc))
 		return 0;
-	return strindex("_~*.@$%\'", cksc) != -1 ? 0 : 1;
+	return strindex("_~*.@$%\'", cksc) >= 0 ? 0 : 1;
 }
 
 
@@ -562,7 +565,7 @@ VOID p1gi(NOTHING)
 {
 	if (fcflg)							/* used item so must pass it */
 		gterm(TRUE);
-	if (!fcflg && ckspc(fchr) == 1)
+	if (!fcflg && ckspc(fchr))
 	{
 		fcflg = 1;						/* just pass first character */
 		itype = ITSP;					/* special char */
