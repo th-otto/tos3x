@@ -41,8 +41,29 @@
 #include "asmdefs.h"
 #include "tosvars.inc"
 
-MAX_PLANES	equ	 08		; maximum planes for pixel fragment
+MAX_PLANES	equ	 8		; maximum planes for pixel fragment
 FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
+
+
+#if TOSVERSION >= 0x400
+#define V_FUNC(func,la,r) \
+	move.l	LV(LA_ROUTINES,la),r \
+	move.l	func(r),r
+#else
+#define V_FUNC(func,la,r) \
+	move.l	LV((LA_USERDEVINIT)+func,la),r
+#endif
+
+#define V_CALL(func,la,r) \
+		V_FUNC(func,la,r) \
+		jsr (r)
+#define V_JUMP(func,la,r) \
+		V_FUNC(func,la,r) \
+		jmp (r)
+
+/* _v_planes == 0; stupid as68 does not optimize it */
+#define _V_PLANES
+
 	text
 
 *******************************************************************************
@@ -156,12 +177,15 @@ vl_out:		rts
 *******************************************************************************
 *******************************************************************************
 
-x1		equ	0
+/* x1		equ	0 */
+/* stupid as68 does not optimize it away */
+#define x1
 y1		equ	2
 x2		equ	4
 y2		equ	6
 
 
+/* 306de: 00e07a9a */
 		xdef	_CLC_FLIT
 _CLC_FLIT:
 		PIXLA(a2)
@@ -335,6 +359,7 @@ bs_out:		rts
 *******************************************************************************
 *******************************************************************************
 
+/* 306de: 00e07bbe */
 		xdef	_SMUL_DIV
 _SMUL_DIV:	moveq.l	#1,d1		; d1 <- positive increment
 		move.w	6(sp),d0
@@ -404,8 +429,15 @@ smd_4:		move.l	(sp)+,d3
 *******************************************************************************
 *******************************************************************************
 
+/* 306de: 00e07bf0 */
 		xdef	 concat
-concat:	movem.l	d2-d3/a0,-(sp)
+concat:
+#if TOSVERSION < 0x400
+	move.w	d2,-(a7)
+	move.w	d3,-(a7)
+#else
+	movem.l	d2-d3/a0,-(sp)
+#endif
 
 	PIXLA(a0)
 	muls	PIXLV(_bytes_lin,a0),d1	; d1 <- offset to (0,Y)
@@ -421,7 +453,12 @@ concat:	movem.l	d2-d3/a0,-(sp)
 
 	and.w	#$000F,d0		; d0 <- X mod 16
 
+#if TOSVERSION < 0x400
+	move.w	(a7)+,d3
+	move.w	(a7)+,d2
+#else
 	movem.l	(sp)+,d2-d3/a0
+#endif
 	rts
 
 shf_tab:   *    1 2   4       8		; number of planes
@@ -493,22 +530,21 @@ shf_tab:   *    1 2   4       8		; number of planes
 		xdef	_ABLINE
 _ABLINE:
 		PIXLA(a4)
-		move.l	LA_ROUTINES(a4),a5	; load vectrd list of primitives
-		move.l	V_ABLINE(a5),a5		; vec to vert line primitive
-		jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
+		V_JUMP(V_ABLINE,a4,a5)		; vec to vert line primitive
 #endif
 
 #if TOSVERSION >= 0x400
 		xdef	ST_ABLINE
 ST_ABLINE:
 #else
+/* 306de: 00e07c22 */
 		xdef	_ABLINE
 _ABLINE:
 #endif
-		PIXLA(a4)
+		LA(a4)
 		moveq.l	#2,d0		; d0 <- XOR writing mode code
 
-		movem.w	PIXLV(_X1,a4),d4-d7	; d4<-X1  d5<-Y1  d6<-X2  d7<-Y2
+		movem.w	LV(_X1,a4),d4-d7	; d4<-X1  d5<-Y1  d6<-X2  d7<-Y2
 		cmp.w	d5,d7		; handle the horizontal case seperately
 		beq	hline		; (also handles single points)
 
@@ -517,9 +553,7 @@ _ABLINE:
 
 *   SPECIAL CASE I.	Vertical line segments
 
-		move.l	LA_ROUTINES(a4),a5	; load vectrd list of primitives
-		move.l	V_VLINE(a5),a5		; vec to vert line primitive
-		jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
+		V_JUMP(V_VLINE,a4,a5)		; vec to vert line primitive
 
 
 
@@ -528,10 +562,10 @@ _ABLINE:
 *   All single point lines (X1=X2, Y1=Y2) will be arrive here
 
 
-hline:		cmp.w	PIXLV(_WRT_MODE,a4),d0	; the XOR writing mode requires
+hline:		cmp.w	LV(_WRT_MODE,a4),d0	; the XOR writing mode requires
 		bne	no_trunk	; special endpoint treatment
 
-		tst.w	PIXLV(_LSTLIN,a4)	; If this isn't the last line and
+		tst.w	LV(_LSTLIN,a4)	; If this isn't the last line and
 		bne	no_trunk	; the line is longer than one point,
 		cmp.w	d4,d6		; truncate the line at the X2 vertex
 		beq	no_trunk	; (DRI: "works most of the time")
@@ -539,7 +573,7 @@ hline:		cmp.w	PIXLV(_WRT_MODE,a4),d0	; the XOR writing mode requires
 
 rt_trunk:	subq.w	#2,d6		; d6 <- Xmax-2
 lf_trunk:	addq.w	#1,d6		; d6 <- Xmin+1 or Xmax-1
-		move.w	d6,PIXLV(_X2,a4)	; must stay compatible with last rev
+		move.w	d6,LV(_X2,a4)	; must stay compatible with last rev
 
 no_trunk:	cmp.w	d4,d6		; X1 must not be greater than X2
 		bge	in_order	; if it is, swap the endpoints
@@ -551,7 +585,7 @@ in_order:	move.w	d6,d1		; d1 <-  Xmax
 		addq.w	#1,d1		; d1 <-  Xmax-Xmin+1
 		and.w	#$000F,d1	; d1 <- (Xmax-Xmin+1) mod 16
 
-		lea	PIXLV(_LN_MASK,a4),a0	; a0 -> line style pattern
+		lea	LV(_LN_MASK,a4),a0	; a0 -> line style pattern
 		clr.w	d0		; d0 <- offset to next pattern plane
 
 		move.w	d1,-(sp)
@@ -572,11 +606,11 @@ in_order:	move.w	d6,d1		; d1 <-  Xmax
 
 aline:		lea	-FRAG_LEN(sp),sp  ; sp -> pixel fragment frame
 
-		move.w	PIXLV(_v_planes,a4),d3  ; d3 <- number of planes
+		move.w	LV(_V_PLANES,a4),d3  ; d3 <- number of planes
 		cmp.w	#MAX_PLANES,d3	  ; too many planes for the buffer ?
 		bhi	al_quit		  ; if so, end prematurely
 
-		cmp.w	PIXLV(_WRT_MODE,a4),d0  ; don't build fragment for XOR mode
+		cmp.w	LV(_WRT_MODE,a4),d0  ; don't build fragment for XOR mode
 		beq	no_frag
 
 		move.l	sp,a2		  ; a2 -> ram for pixel fragment code
@@ -602,17 +636,17 @@ xy_ok:		sub.w	d4,d6		; d6 <- dX
 		bset.l	d0,d1		; d1 <- OR mask
 
 		move.l	_v_bas_ad,a0		; a0 <- video base address
-		move.w	PIXLV(_v_planes,a4),d3	; d3 <- plane count
+		move.w	LV(_V_PLANES,a4),d3	; d3 <- plane count
 		add.w	d3,d3			; d3 <- off to nxt wrd in plane
 
-		move.w	PIXLV(_bytes_lin,a4),d2	; d2 <- width of screen
+		move.w	LV(_bytes_lin,a4),d2	; d2 <- width of screen
 		muls	d5,d2			; d2 <- offset to Y
 		add.l	d2,a0			; a0 -> line containing Y
 		asr.w	#4,d4			; d4 <- word offset to X
 		muls	d3,d4			; d4 <- offset to Xmin
 		add.l	d4,a0			; a0 -> word containing (Xmin,Y)
 
-		move.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- vertical offset
+		move.w	LV(_v_lin_wr,a4),d0	; d0 <- vertical offset
 
 		sub.w	d5,d7		; d7 <- dY
 		bge	dy_ge_0		; if dY<0, adjust related parameters
@@ -634,18 +668,18 @@ dmax_dmin:	move.w	d6,d4		; d4 <- dMin
 		move.w	d4,d6		; d6 <- 2dMax -dMin
 		sub.w	d7,d6		; d6 <- e2             2dMin - 2dMax
 
-		move.w	PIXLV(_WRT_MODE,a4),d0	; d0 <- writing mode code
+		move.w	LV(_WRT_MODE,a4),d0	; d0 <- writing mode code
 		lsl.w	#2,d0
 		add.w	d0,a5		; a5 <- offset for particular mode
 
 		subq.w	#8,d0		; if XOR mode ...
 		bne	al_nxtmask
-		tst.w	PIXLV(_LSTLIN,a4)	; and not last line ...
+		tst.w	LV(_LSTLIN,a4)	; and not last line ...
 		bne	al_nxtmask
 
 		subq.w	#1,d7		; DRI kludge: don't plot last point
 
-al_nxtmask:	lea	PIXLV(_LN_MASK,a4),a3	; a3 -> line style mask
+al_nxtmask:	lea	LV(_LN_MASK,a4),a3	; a3 -> line style mask
 		move.w	(a3),d0		; d0 <- line style mask
 		move.w	d7,d2		; d2 <- dbra pixel counter
 		addq.w	#1,d2		; d2 <- pixels in line
@@ -722,7 +756,7 @@ pixfrag: ds.b 0
 
 		movem.w	i_tbl(pc),d0-d1/a1	; cache instr data in registers
 		move.l	a2,a0			; a0 <- working PC
-		move.l	PIXLV(_FG_B_PLANES,a4),d2	; a1 -> bitplane color array
+		move.l	LV(_FG_B_PLANES,a4),d2	; a1 -> bitplane color array
 
 pf_loop:	roxr.l	#1,d2			; get color for this plane
 		bcs	pf_or			; 0 => AND   1 => OR
@@ -1052,9 +1086,7 @@ rf_tab:	dc.w	$7FFF,$3FFF,$1FFF,$0FFF	; right fringe list	0:NEW 1:OLD
 		xdef	_HABLINE
 _HABLINE:
 	PIXLA(a4)
-	move.l	LA_ROUTINES(a4),a0	; load vectrd list of primitives
-	move.l	V_HABLINE(a0),a0	; vec to vert line primitive
-	jmp	(a0)			; sft: "aline"  hrd: "hb_vline"
+	V_JUMP(V_HABLINE,a4,a0)	; vec to vert line primitive
 #endif
 
 #if TOSVERSION >= 0x400
@@ -1064,17 +1096,17 @@ ST_HABLINE:
 		xdef	_HABLINE
 _HABLINE:
 #endif
-	PIXLA(a4)
-	movem.w	PIXLV(_X1,a4),d4-d6		; d4 <- X1   d5 <- Y1   d6 <- X2
+	LA(a4)
+	movem.w	LV(_X1,a4),d4-d6		; d4 <- X1   d5 <- Y1   d6 <- X2
 
 		xdef	 fline
 fline:	move.w	d5,d0			; d0 <- Y1
-	and.w	PIXLV(_patmsk,a4),d0		; d0 <- initial pattern index
+	and.w	LV(_patmsk,a4),d0		; d0 <- initial pattern index
 	add.w	d0,d0			; d0 <- initial pattern offset
-	move.l	PIXLV(_patptr,a4),a0		; a0 -> start of pattern
+	move.l	LV(_patptr,a4),a0		; a0 -> start of pattern
 	add.w	d0,a0			; a0 -> pattern word
 
-	tst.w	PIXLV(_multifill,a4)		; d0 <- offset to next pattern plane
+	tst.w	LV(_multifill,a4)		; d0 <- offset to next pattern plane
 	sne	d0			; d0 <- 00: single plane pattern
 	and.w	#32,d0			; d0 <- 32: multiple plane pattern
 
@@ -1101,6 +1133,4 @@ xline:	move.w	d4,d1			; d1 <- X1
 
 hline_select:
 
-	move.l	LA_ROUTINES(a4),a5	; load vectored list of primitives
-	move.l	V_HLINE(a5),a5		; vec to h line primitive
-	jmp	(a5)			; sft: "aline"  hrd: "hb_vline"
+	V_JUMP(V_HLINE,a4,a5)		; vec to h line primitive
