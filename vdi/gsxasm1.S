@@ -1093,6 +1093,7 @@ _HABLINE:
 		xdef	ST_HABLINE
 ST_HABLINE:
 #else
+/* 306de: 00e07ed4 */
 		xdef	_HABLINE
 _HABLINE:
 #endif
