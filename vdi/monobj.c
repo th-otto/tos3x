@@ -54,8 +54,9 @@
 
 /*--------------------------------------------------------------------------*/
 /*
- * S_LINE_TYPE: 
+ * VDI #15 - vsl_type - Set the line type
  */
+/* 306de: 00e081e6 */
 VOID vsl_type(NOTHING)
 {
 	register int16_t li;
@@ -71,8 +72,9 @@ VOID vsl_type(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /* 
- * S_LINE_WIDTH:
+ * VDI #16 - vsl_width - Set polyline width
  */
+/* 306de: 00e08230 */
 VOID vsl_width(NOTHING)
 {
 	register int16_t w,
@@ -100,15 +102,13 @@ VOID vsl_width(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * S_END_STYLE:
+ * VDI #108 - vsl_ends - Set polyline end styles
  */
+/* 306de: 00e082ec */
 VOID vsl_ends(NOTHING)
 {
-	register int16_t lb,
-	 le;
-
+	register int16_t lb, le;
 	register int16_t *pointer;
-
 	register ATTRIBUTE *work_ptr;
 
 	*(CONTRL + 4) = 2;
@@ -130,7 +130,7 @@ VOID vsl_ends(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /* 
- * S_LINE_COLOR:
+ * VDI #17 - vsl_color - Set polyline color index
  */
 VOID vsl_color(NOTHING)
 {
@@ -148,8 +148,9 @@ VOID vsl_color(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /* 
- * S_MARKER_SCALE
+ * VDI #19 - vsm_height - Set polymarker height
  */
+/* 306de: 00e0833c */
 VOID vsm_height(NOTHING)
 {
 	register int16_t h, *pts_out;
@@ -179,8 +180,9 @@ VOID vsm_height(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * S_MARK_TYPE
+ * VDI #18 - vsm_type - Set polymarker type
  */
+/* 306de: 00e083c8 */
 VOID vsm_type(NOTHING)
 {
 	register int16_t i;
@@ -193,8 +195,9 @@ VOID vsm_type(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * S_MARK_COLOR
+ * VDI #20 - vsm_color - Set polymarker color index
  */
+/* 306de: 00e08418 */
 VOID vsm_color(NOTHING)
 {
 	register int16_t i;
@@ -208,15 +211,16 @@ VOID vsm_color(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * S_FILL_STYLE:
+ * VDI #23 - vsf_interior - Set fill interior style
  */
+/* 306de: 00e0846e */
 VOID vsf_interior(NOTHING)
 {
 	register int16_t fs;
 
 	CONTRL[4] = 1;
 	fs = *INTIN;
-	if ((fs > MX_FIL_STYLE) || (fs < 0))
+	if (fs > MX_FIL_STYLE || fs < 0)
 		fs = 0;
 	*INTOUT = cur_work->fill_style = fs;
 	st_fl_ptr();
@@ -224,8 +228,9 @@ VOID vsf_interior(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /* 
- * S_FILL_INDEX:
+ * VDI #24 - vsf_style - Set fill style index
  */
+/* 306de: 00e084ba */
 VOID vsf_style(NOTHING)
 {
 	register int16_t fi;
@@ -237,11 +242,11 @@ VOID vsf_style(NOTHING)
 
 	if (work_ptr->fill_style == 2)
 	{
-		if ((fi > MX_FIL_PAT_INDEX) || (fi < 1))
+		if (fi > MX_FIL_PAT_INDEX || fi < 1)
 			fi = 1;
 	} else
 	{
-		if ((fi > MX_FIL_HAT_INDEX) || (fi < 1))
+		if (fi > MX_FIL_HAT_INDEX || fi < 1)
 			fi = 1;
 	}
 
@@ -252,7 +257,7 @@ VOID vsf_style(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * S_FILL_COLOR:
+ * VDI #25 - vsf_color - Set fill color index
  */
 VOID vsf_color(NOTHING)
 {
@@ -269,8 +274,9 @@ VOID vsf_color(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * LOCATOR_INPUT
+ * VDI #28 - v_locator - Input locator
  */
+/* 306de: 00e08572 */
 VOID v_locator(NOTHING)
 {
 	register int16_t motion, button;
@@ -309,8 +315,6 @@ VOID v_locator(NOTHING)
 
 		HIDE_CUR();						/* always hide cursor     */
 	}
-
-
 	else								/* Sample mode        */
 	{
 		motion = 0;
@@ -350,8 +354,9 @@ VOID v_locator(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * SHOW CURSOR
+ * VDI #122 - v_show_c - Show Cursor
  */
+/* 306de: 00e0868e */
 VOID v_show_c(NOTHING)
 {
 	/* DIS_CUR will trash all registers but FP and SP */
@@ -364,8 +369,9 @@ VOID v_show_c(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * HIDE CURSOR
+ * VDI #123 - v_hide_c - Hide cursor
  */
+/* 306de: 00e086b6 */
 VOID v_hide_c(NOTHING)
 {
 	HIDE_CUR();
@@ -375,9 +381,9 @@ VOID v_hide_c(NOTHING)
 /*
  * RETURN MOUSE BUTTON STATUS
  *
- * vq_mouse_status() - has been changed to an assembly file, to allow for
- *                     atomic access to mouse parameter block.
- * vq_mouse_status() 
+ * vq_mouse() - has been changed to an assembly file, to allow for
+ *              atomic access to mouse parameter block.
+ * vq_mouse() 
  * {
  *    register int16_t *pointer;
  *
@@ -392,18 +398,21 @@ VOID v_hide_c(NOTHING)
  *    *pointer   = GCURY;
  * }
  */
+
 /*--------------------------------------------------------------------------*/
 /* 
- * VALUATOR_INPUT: 
+ * VDI #29 - v_valuator - Input valuator
  */
+/* 306de: 00e086c4 */
 VOID v_valuator(NOTHING)
 {
 }
 
 /*--------------------------------------------------------------------------*/
 /*
- * CHOICE_INPUT:
+ * VDI #30 - v_choice - Input choice
  */
+/* 306de: 00e086cc */
 VOID v_choice(NOTHING)
 {
 	int16_t i;
@@ -426,12 +435,21 @@ VOID v_choice(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * STRING_INPUT:
+ * VDI #31 - v_string - Input string
  */
+/* 306de: 00e08756 */
 VOID v_string(NOTHING)
 {
-	int16_t i, j, mask;
+	int16_t i;
+	int16_t j;
+#if TOSVERSION < 0x400
+	int unused;
+#endif
+	int16_t mask;
 
+#if TOSVERSION < 0x400
+	UNUSED(unused);
+#endif
 	mask = 0x00ff;
 	j = *INTIN;
 	if (j < 0)
@@ -461,8 +479,9 @@ VOID v_string(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * Return Shift, Control, Alt State
+ * VDI #128 - vq_key_s - Return Shift, Control, Alt State
  */
+/* 306de: 00e08836 */
 VOID vq_key_s(NOTHING)
 {
 	CONTRL[4] = 1;
@@ -471,8 +490,9 @@ VOID vq_key_s(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * SET_WRITING_MODE:
+ * VDI #32 - vswr_mode - Set writing mode
  */
+/* 306de: 00e0885a */
 VOID vswr_mode(NOTHING)
 {
 	register int16_t wm;
@@ -487,8 +507,9 @@ VOID vswr_mode(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * SET_INPUT_MODE:
+ * VDI #33 - vsin_mode - Set input mode
  */
+/* 306de: 00e088b4 */
 VOID vsin_mode(NOTHING)
 {
 	register int16_t i,	*int_in;
@@ -523,8 +544,9 @@ VOID vsin_mode(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * INQUIRE INPUT MODE:
+ * VDI #115 - vqin_mode - Inquire Input Mode
  */
+/* 306de: 00e08920 */
 VOID vqin_mode(NOTHING)
 {
 	register int16_t *int_out;
@@ -557,12 +579,17 @@ VOID vqin_mode(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * ST_FILLPERIMETER:
+ * VDI #104 - vsf_perimeter - Set fill perimeter visibility
  */
+/* 306de: 00e08984 */
 VOID vsf_perimeter(NOTHING)
 {
 	register int16_t *int_out;
 	register ATTRIBUTE *work_ptr;
+#if TOSVERSION < 0x400
+	register int unused;
+	UNUSED(unused);
+#endif
 
 	work_ptr = cur_work;
 	int_out = INTOUT;
@@ -581,8 +608,9 @@ VOID vsf_perimeter(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /* 
- * ST_UD_LINE_STYLE:
+ * VDI #113 - vsl_udsty - Set user-defined line style pattern
  */
+/* 306de: 00e089ca */
 VOID vsl_udsty(NOTHING)
 {
 	cur_work->ud_ls = *INTIN;
@@ -590,12 +618,21 @@ VOID vsl_udsty(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 /*
- * Set Clip Region
+ * VDI #129 - vs_clip - Set Clip Region
  */
+/* 306de: 00e089e2 */
 VOID vs_clip(NOTHING)
 {
-	register int16_t *xy, rtemp;
+	register int16_t *xy;
+#if TOSVERSION < 0x400
+	register int unused;
+#endif
+	register int16_t rtemp;
 	register ATTRIBUTE *work_ptr;
+
+#if TOSVERSION < 0x400
+	UNUSED(unused);
+#endif
 
 	work_ptr = cur_work;
 	if ((work_ptr->clip = *INTIN) != 0)
@@ -625,6 +662,8 @@ VOID vs_clip(NOTHING)
 }
 
 /*--------------------------------------------------------------------------*/
+
+/* 306de: 00e08a86 */
 VOID arb_corner(P(int16_t *) corners, P(int16_t) type)
 PP(int16_t *corners;)
 PP(int16_t type;)
@@ -645,7 +684,6 @@ PP(int16_t type;)
 	}
 
 
-
 	/* End if:  "x" values need to be swapped. */
 	/* Fix y values based on whether traditional (ll, ur) or raster-op */
 	/* (ul, lr) format is desired.                                     */
@@ -664,6 +702,10 @@ PP(int16_t type;)
 
 /*--------------------------------------------------------------------------*/
 
+/*
+ * VDI #109 - vro_cpyfm - Copy raster, opaque
+ */
+/* 306de: 00e08ad2 */
 VOID dro_cpyfm(NOTHING)
 {
 	arb_corner(PTSIN, ULLR);
@@ -674,6 +716,10 @@ VOID dro_cpyfm(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 
+/*
+ * VDI #121 - vrt_cpyfm - Copy raster, transparent
+ */
+/* 306de: 00e08b04 */
 VOID drt_cpyfm(NOTHING)
 {
 	arb_corner(PTSIN, ULLR);
@@ -684,6 +730,10 @@ VOID drt_cpyfm(NOTHING)
 
 /*--------------------------------------------------------------------------*/
 
+#if VIDEL_SUPPORT
+/*
+ * VDI #110 - vr_trnfm - Transform form
+ */
 VOID vr_trnfm(NOTHING)
 {
 	register FDB *src, *dst;
@@ -718,7 +768,6 @@ VOID vr_trnfm(NOTHING)
 		}
 		break;
 
-
 	case STANDARD:
 		switch (dFormat)
 		{
@@ -730,15 +779,18 @@ VOID vr_trnfm(NOTHING)
 		}
 		break;
 
-
 	default:
 		break;
 	}
-
 }
+#endif
 
 /*--------------------------------------------------------------------------*/
 
+/*
+ * VDI #114 - vr_recfl - Fill rectangle
+ */
+/* 306de: 00e08b3c */
 VOID dr_recfl(NOTHING)
 {
 	register int16_t *pts_in;

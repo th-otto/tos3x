@@ -67,7 +67,6 @@
 		xdef	_vex_motv
 		xdef	_vex_curv
 		xdef	_vsc_form
-		xdef	_vq_mouse
 		xdef	mouse_rel	
 		xdef	scrn_clip
 		xdef	vb_draw
@@ -1167,11 +1166,14 @@ _SET_CUR: PIXLA(a1)
 
 
 
-*  INQUIRE MOUSE STATUS
-*
-*	Implement vq_mouse with atomic retrieval of
-*	mouse position and button state
-
+/*
+ * VDI #124 - vq_mouse - Inquire Mouse Status
+ *
+ *	Implement vq_mouse with atomic retrieval of
+ *	mouse position and button state
+ */
+/* 306de: 00e0c918 */
+		xdef	_vq_mouse
 _vq_mouse:
 		PIXLA(a2)
 		move.l	PIXLV(_INTOUT,a2),a0		; a0 -> INTOUT[0]
@@ -1222,7 +1224,7 @@ arrow_cdb:	dc.w	1,0,1,0,1
                           
 * arrow data              
 
-	       	dc.w  	%0000000000000000
+       	dc.w  	%0000000000000000
 		dc.w	%0100000000000000
 		dc.w	%0110000000000000
 		dc.w	%0111000000000000

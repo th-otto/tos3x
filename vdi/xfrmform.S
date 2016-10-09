@@ -28,8 +28,6 @@
 #include "lineaequ.inc"
 
 
-	xdef		_TRAN_FM
-
 *******************************************************************************
 *
 * name:	_r_trnfm
@@ -93,7 +91,17 @@ C_MFDB_D	equ	18	; pointer to destination MFDB
 	page
 
 
+#if VIDEL_SUPPORT
+	xdef		_TRAN_FM
 _TRAN_FM:
+#else
+/*
+ * VDI #110 - vr_trnfm - Transform form
+ */
+/* 306de: 00e0d25a */
+	xdef _vr_trnfm
+_vr_trnfm:
+#endif
 
 	movem.l	d0-d4/a0-a2,-(sp)
 

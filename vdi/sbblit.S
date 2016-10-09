@@ -16,7 +16,7 @@
 * Found a way not to put a nop. Look at comment 2.6 & label sb_blit.
 * 
 * Revision 2.6  91/07/26  11:34:51  lozben
-* Added a nop in fron of a ".ifeq" directive. There is a bug in the assembler.
+* Added a nop in front of a ".ifeq" directive. There is a bug in the assembler.
 * You can't have ".ifeq" directive on the same line as a label.
 * 
 * Revision 2.5  91/07/08  16:29:23  lozben
@@ -139,6 +139,7 @@ OPAQUE	equ	-4
 *	d4.w	X max source
 *	d6.w	X max destination
 *-
+/* 306de: 00e0d300 */
 sb_bitblt: ds.b 0
 
 #if P68030
