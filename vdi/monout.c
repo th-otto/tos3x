@@ -1682,9 +1682,7 @@ VOID dsf_udpat(NOTHING)
  */
 VOID vq_color(NOTHING)
 {
-#ifdef TODO
 	(*LA_ROUTINES[V_VQCOLOR]) ();
-#endif
 }
 
 
@@ -1693,9 +1691,7 @@ VOID vq_color(NOTHING)
  */
 VOID vs_color(NOTHING)
 {
-#ifdef TODO
 	(*LA_ROUTINES[V_VSCOLOR]) ();
-#endif
 }
 
 #endif

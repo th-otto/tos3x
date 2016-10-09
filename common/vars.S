@@ -9,6 +9,8 @@
 #include "../bdos/bdosdefs.h"
 #include "../bios/biosdefs.h"
 #include "../aes/aesdefs.h"
+#include "../vdi/vdidefs.h"
+#include "../vdi/lineaequ.inc"
 
 	bss
 
@@ -277,11 +279,15 @@ _height: equ _dskbuf+46
 _vdivars: ds.b 910 ; space for negative linea vars
     xdef lineavars
 lineavars:
-#if TOSVERSION >= 0x404
+#if TOSVERSION >= 0x400
 	ds.b 4018
 #else
 	ds.b 2310
 #endif
+	xdef _reqCol
+_reqCol equ lineavars+(_REQ_COL)
+	xdef _reqXCol
+_reqXCol equ lineavars+(_REQ_X_COL)
 
 	ds.w 1 ; unused
 

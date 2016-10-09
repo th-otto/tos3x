@@ -26,7 +26,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "lineaequ.inc"
 #include "tosvars.inc"
 
@@ -55,14 +56,14 @@
 
             
 sb_cell:	move.l	a4,-(sp)		; save a4
-		move.w	lineavars+_v_planes,d1	; d1 <- number of planes
+		move.w	PIXLV(_v_planes,a4),d1	; d1 <- number of planes
 		subq.w	#1,d1			; d1 <- dbra plane counter
-		move.w	lineavars+v_fnt_wr,d2		; d2 <- src width (in bytes)
-		move.w	lineavars+_v_lin_wr,d3	; d3 <- dst width (in bytes)
-		move.w	lineavars+v_cel_ht,d4
+		move.w	PIXLV(v_fnt_wr,a4),d2		; d2 <- src width (in bytes)
+		move.w	PIXLV(_v_lin_wr,a4),d3	; d3 <- dst width (in bytes)
+		move.w	PIXLV(v_cel_ht,a4),d4
 		subq.w	#1,d4			; d4 <- cell height -1
 		move.l	a1,a5			; a5 -> 1st byte of destination
-		move.l	lineavars+v_off_ad,a2		; a2 -> offset table
+		move.l	PIXLV(v_off_ad,a4),a2		; a2 -> offset table
 		cmp.w	#16,2(a2)		; see if char cell is word wide
 		lea	blk_byte,a4		; assume 8 bit wide font
 		bne	blk_next		; branch if not ?
@@ -195,24 +196,24 @@ word_i:		move.w	(a2),d5		; d5 <- character word
 
 sb_scrup:
 
-	move.w	lineavars+v_cel_my,d3		; d3 <- Ymax
+	move.w	PIXLV(v_cel_my,a4),d3		; d3 <- Ymax
 	move.w	d3,d7
 	sub.w	d1,d7			; d7 <- height of region in cells -1
 	beq	blank_up
 
-	mulu	lineavars+v_cel_ht,d7		; d7 <- scroll region height
+	mulu	PIXLV(v_cel_ht,a4),d7		; d7 <- scroll region height
 
-	move.w	lineavars+v_cel_ht,d0		; d0 <- cell height
+	move.w	PIXLV(v_cel_ht,a4),d0		; d0 <- cell height
 	mulu.w	d0,d1
-	mulu.w	lineavars+_v_lin_wr,d0	; d0 <- cell wrap
-	mulu.w	lineavars+_v_lin_wr,d1	; d1 <- offset to (0,Ymin)
+	mulu.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- cell wrap
+	mulu.w	PIXLV(_v_lin_wr,a4),d1	; d1 <- offset to (0,Ymin)
 
 	move.l	_v_bas_ad,a3		; a3 -> base of screen
 	add.l	d1,a3			; a3 -> scroll dst: Ymin
 	move.l	a3,a2
 	add.l	d0,a2			; a2 -> scroll src: Ymin+1
 
-	move.w	lineavars+_v_lin_wr,d0	; d0 <- bytes per line
+	move.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- bytes per line
 	lsr.w	#4,d0			; d0 <- iterations per line
 	mulu	d0,d7			; d7 <- total iterations
 	subq.w	#1,d7			; d7 <- dbra loop counter
@@ -228,7 +229,7 @@ loop_up:
 blank_up:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	lineavars+v_cel_mx,d2		; d2 <- Xmax
+	move.w	PIXLV(v_cel_mx,a4),d2		; d2 <- Xmax
 	move.w	d3,d1			; d1 <- Ymax  d3 <- Ymax
 	move.l	LA_ROUTINES(a4),a2
 	move.l	V_BLANK(a2),a2		; a2 -> proper blank routine
@@ -238,24 +239,24 @@ blank_up:
 
 sb_scrdn:
 
-	move.w	lineavars+v_cel_my,d3		; d3 <- Ymax
+	move.w	PIXLV(v_cel_my,a4),d3		; d3 <- Ymax
 	move.w	d3,d7
 	sub.w	d1,d7			; d7 <- height of region in cells -1
 	beq	blank_dn
 
-	mulu	lineavars+v_cel_ht,d7		; d7 <- scroll region pixel height
+	mulu	PIXLV(v_cel_ht,a4),d7		; d7 <- scroll region pixel height
 
-	move.w	lineavars+v_cel_ht,d0		; d0 <- cell height
+	move.w	PIXLV(v_cel_ht,a4),d0		; d0 <- cell height
 	mulu.w	d0,d3
-	mulu.w	lineavars+_v_lin_wr,d0	; d0 <- cell wrap
-	mulu.w	lineavars+_v_lin_wr,d3	; d3 <- offset to (0,Ymin)
+	mulu.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- cell wrap
+	mulu.w	PIXLV(_v_lin_wr,a4),d3	; d3 <- offset to (0,Ymin)
 
 	move.l	_v_bas_ad,a2		; a2 -> base of screen
 	add.l	d3,a2			; a2 -> scroll src: 1st word of Ymax
 	move.l	a2,a3
 	add.w	d0,a3			; a3 -> scroll dst: 1st word of Ymax+1
 
-	move.w	lineavars+_v_lin_wr,d0	; d0 <- bytes per line
+	move.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- bytes per line
 	lsr.w	#4,d0			; d0 <- iterations per line
 	mulu	d0,d7			; d7 <- total iterations
 	subq.w	#1,d7			; d7 <- dbra loop counter
@@ -271,7 +272,7 @@ loop_dn:
 blank_dn:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	lineavars+v_cel_mx,d2		; d2 <- Xmax
+	move.w	PIXLV(v_cel_mx,a4),d2		; d2 <- Xmax
 	move.w	d1,d3			; d1 <- Ymin  d3 <- Ymin
 	move.l	LA_ROUTINES(a4),a2
 	move.l	V_BLANK(a2),a2		; a2 -> proper blank routine
@@ -320,7 +321,7 @@ sb_blank:
 
 	clr.w	d0
 	add.w	#1,d0			; adjust for word wide font (x += 1)
-	move.l	lineavars+v_off_ad,a2		; a2 -> offset table
+	move.l	PIXLV(v_off_ad,a4),a2		; a2 -> offset table
 	cmp.w	#16,2(a2)		; see if char cell is word wide
 	beq	blank_words		; then don't adjust to word offset
 
@@ -340,14 +341,14 @@ blank_words:
 	add.b	d5,d5			; 1 dst word  =:00  <>:FF
 	roxl.w	#3,d0			; d0 <- offset into fringe table
 
-	move.w	lineavars+v_cel_ht,d7		; d7 <- current cell height
+	move.w	PIXLV(v_cel_ht,a4),d7		; d7 <- current cell height
 	mulu.w	d1,d7			; d7 <- (cell height) * (Y top)
-	mulu.w	lineavars+_v_lin_wr,d7	; d7 <- offset to top of row at Ymin
+	mulu.w	PIXLV(_v_lin_wr,a4),d7	; d7 <- offset to top of row at Ymin
 
 	move.l	_v_bas_ad,a2		; a2 -> base of screen
 	add.l	d7,a2			; a2 -> top of row at Ymin
 
-	move.w	lineavars+_v_planes,d6	; d6 <- number of planes
+	move.w	PIXLV(_v_planes,a4),d6	; d6 <- number of planes
 	add.w	d6,d6			; make d6 word offset
 	move.w	log2_tab(pc,d6.w),d6	; d6 <- log2(planes)
 	add.w	d4,d4			; d4 <- byte offset to Xmin word
@@ -369,19 +370,19 @@ blank_words:
 	add.w	d0,d0			; d0 <- span of one plane in bytes
 	lsl.w	d6,d0			; d0 <- width of span in bytes
 	neg.w	d0
-	add.w	lineavars+_v_lin_wr,d0
+	add.w	PIXLV(_v_lin_wr,a4),d0
 	move.w	d0,a3			; a3 <- wrap
 
 	sub.w	d1,d3			; d3 <- height-1 in cells
 	addq.w	#1,d3			; d3 <- height in cells
-	mulu	lineavars+v_cel_ht,d3		; d3 <- height in pixels
+	mulu	PIXLV(v_cel_ht,a4),d3		; d3 <- height in pixels
 	move.w	d3,d7
 
 	add.w	d6,d6			; choose fragment based on plane count
 	add.w	d6,d6
 	move.l	brtn_tab(pc,d6.w),a0
 
-	move.w	lineavars+v_col_bg,d6		; d6 <- background color
+	move.w	PIXLV(v_col_bg,a4),d6		; d6 <- background color
 	jsr	(a0)
 
 	movem.l	(sp)+,d0-d3/a0-a1

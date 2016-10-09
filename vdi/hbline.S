@@ -25,7 +25,8 @@
 *************************************************************************
 
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
@@ -93,7 +94,7 @@ hb_vline:
 	bset.l	d4,d0			; d0 <- pixel mask   0:DST 1:LINE
 	move.w	d0,B_F1_MSK(a5)		; load the fringe mask
 
-	move.w	lineavars+_v_planes,d0	; d0 <- planes
+	move.w	PIXLV(_v_planes,a4),d0	; d0 <- planes
 	move.w	d0,d1
 	add.w	d1,d1			; d1 <- offset between words
 	subq.w	#1,d0			; d0 <- dbra plane counter
@@ -103,15 +104,15 @@ hb_vline:
 	muls	d6,d1			; d1 <- byte offset to X
 	add.l	d1,a1			; a1 -> dst (X,0)
 
-	move.w	lineavars+_bytes_lin,d2		; d2 <- screen width
+	move.w	PIXLV(_bytes_lin,a4),d2		; d2 <- screen width
 	muls	d5,d2			; d2 <- offset to (0,Y1)
 	add.l	d2,a1			; a1 -> (X,Y1)
 
 	moveq.l	#7,d2			; d2 <- dbra loop counter
 
-	move.w	lineavars+_v_lin_wr,d1	; d1 <- offset between lines
+	move.w	PIXLV(_v_lin_wr,a4),d1	; d1 <- offset between lines
 
-	lea	lineavars+_LN_MASK,a3		; a3 -> line style mask
+	lea	PIXLV(_LN_MASK,a4),a3		; a3 -> line style mask
 	move.w	(a3),d3			; d3 <- line style mask
 
 	sub.w	d5,d7			; d7 <- dY
@@ -154,13 +155,13 @@ vl_wrap:
 	addq.w	#1,d7			; d7  <- dY+1: height
 
 	lea	op_table,a2
-	move.w	lineavars+_WRT_MODE,d1	; d1 <- writing mode
+	move.w	PIXLV(_WRT_MODE,a4),d1	; d1 <- writing mode
 	lsl.w	#2,d1			; d1 <- offset into main table
 	add.w	d1,a2			; a2 -> op code table for this mode
 
 	subq.w	#8,d1			; if it's XOR mode ...
 	bne	vl_newmask		
-	tst.w	lineavars+_LSTLIN		; and it's not the last line ...
+	tst.w	PIXLV(_LSTLIN,a4)		; and it's not the last line ...
 	bne	vl_newmask
 
 	subq.w	#1,d7			; don't plot last pixel
@@ -246,7 +247,7 @@ hb_hline:
 	move.w	d2,(a3)+		; load B_D_NXWD
 
 	move.l	_v_bas_ad,a1		; a1 -> start of dst form
-	muls	lineavars+_bytes_lin,d5	; d5 <- offset to 1st row of dst
+	muls	PIXLV(_bytes_lin,a4),d5	; d5 <- offset to 1st row of dst
 	add.l	d5,a1			; a1 -> row containing line
 
 	muls	d2,d1			; d1 <- offset to word containing X1
@@ -255,7 +256,7 @@ hb_hline:
 	lea	B_PATTERN(a5),a2	; a2 -> 1st pattern register
         move.l  PIXLV(_FG_B_PLANES,a4),d5	; d5 <- color index
 
-	move.w	lineavars+_WRT_MODE,d2	; d2 <- writing mode (0-3)
+	move.w	PIXLV(_WRT_MODE,a4),d2	; d2 <- writing mode (0-3)
 	add.w	d2,d2
 	add.w	d2,d2			; d2 <- offset to writing mode table
 	lea	op_table(pc),a4		; a4 -> 1st logic op table

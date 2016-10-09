@@ -317,7 +317,24 @@ extern VDIVARS vdivars;
 #define	    GCURY		LV(gCurY)
 #define	    HIDE_CNT		LV(hideCnt)
 #define	    MOUSE_BT		LV(mouseBt)
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+/*
+ * workaround some strange address calculations when accessing lineavars.reqCol;
+ * generates code like
+ *   ... (calculate offset)
+ *   move.l offset,r
+ *   add.l  #lineavars,r
+ *   add.l  offsetof(linevars.reqCol),r
+ * instead of
+ *   ... (calculate offset)
+ *   move.l offset,r
+ *   add.l  #lineavars+offsetof(linevars.reqCol),r
+ */
+#define	    REQ_COL		reqCol
+extern int16_t reqCol[16][3];
+#else
 #define	    REQ_COL		LV(reqCol)
+#endif
 #define	    SIZ_TAB		LV(sizTab)
 #define	    TERM_CH		LV(termCh)
 #define	    chc_mode		LV(chcMode)
@@ -388,7 +405,15 @@ extern VDIVARS vdivars;
 #define	    LA_ROUTINES		LV(routines)
 #define	    CUR_DEV		LV(curDev)
 #define	    BLT_MODE		LV(bltMode)
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+/*
+ * same workaround as for reqCol above
+ */
+#define	    REQ_X_COL		reqXCol
+extern int16_t reqXCol[240][3];
+#else
 #define	    REQ_X_COL		LV(reqXCol)
+#endif
 #define	    FG_B_PLANES	        LV(fgBPlanes)
 #define	    FG_BP_5		LV(fgBP5)
 #define	    FG_BP_6		LV(fgBP6)

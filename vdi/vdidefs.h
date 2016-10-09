@@ -1,12 +1,10 @@
 /*
- ********************************  vdiincld.s  *********************************
+ ********************************  vdidefs.h  *********************************
  *
- * $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/vdiincld.s,v $
  * =============================================================================
  * $Author: lozben $	$Date: 91/01/03 15:22:56 $     $Locker:  $
  * =============================================================================
  *
- * $Log:	vdiincld.s,v $
  * Revision 3.0  91/01/03  15:22:56  lozben
  * New generation VDI
  * 
@@ -27,9 +25,9 @@
 #define P68030	0	/* @check@ set to 1 if we are on a 68030 (else 0) */
 #endif
 #if TOSVERSION >= 0x206
-#define PAL4096	1	/* @check@ set to 1 if st mode has a pal of 4096 */
+#define	MAX_PAL		4096	/* palette size                     */
 #else
-#define PAL4096	0	/* @check@ set to 1 if st mode has a pal of 4096 */
+#define MAX_PAL		512	/* palette size                     */
 #endif
 
 #define VIDEL_SUPPORT (TOSVERSION >= 0x400)

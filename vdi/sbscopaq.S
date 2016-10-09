@@ -16,7 +16,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 
 *
 * Entry routines for opaque byte aligned blits

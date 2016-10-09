@@ -16,7 +16,7 @@
 #include "fontdef.h"
 
 typedef struct screendef {
-    const char *name;		    /* device identification (name)	     */
+    const char *name;		/* device identification (name)	     */
     int16_t	devId;		    /* device id number			     */
     int16_t	planes;		    /* # of planes (bits per pixel)	     */
     int16_t	lineWrap;	    /* # of bytes from 1 scan to next	     */
@@ -25,7 +25,7 @@ typedef struct screendef {
     int16_t	xSize;		    /* width of one pixel in microns	     */
     int16_t	ySize;		    /* height of one pixel in microns	     */
     int16_t	formId;		    /* scrn form LITERLEAVED, PIXPACKED ...  */
-    FONT_HEAD	*fntPtr;	    /* points to the default font	     */
+    FONT_HEAD *fntPtr;	    /* points to the default font	     */
     int16_t	maxPen;		    /* # of pens available		     */
     int16_t	colFlag;	    /* color capability flag		     */
     int16_t	palSize;	    /* palette size (0 = contiguous)	     */

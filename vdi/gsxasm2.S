@@ -38,34 +38,15 @@
 *************************************************************************
 
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "lineaequ.inc"
 
 
-*		public routines
-		xdef	_SetOverlay
-		xdef	_SetMasks
-		xdef	_trap
-		xdef	_end_pts
-		xdef	_fill_line
-		xdef	_get_pix
-		xdef	_put_pix
-		xdef	PX_GETPIX
-		xdef	PX_PUTPIX
-		xdef	ST_GETPIX
-		xdef	ST_PUTPIX
-		xdef	_RECTFILL
-		xdef	ST_RECTFILL
-		xdef	_TRNSFONT
-
-*		external routines
-
-		xref	concat
-		xref	fline
-
-	text
+		text
 
 /* 306de: 00e0c0a4 */
+		xdef	_trap
 _trap:	PIXLA(a0)
 		move.l	(sp)+,PIXLV(retsav,a0)
 		trap	#1
@@ -112,8 +93,9 @@ _trap14b:	PIXLA(a0)
 *									      *
 *******************************************************************************
 
-
-_TRNSFONT:	PIXLA(a1)
+		xdef	_TRNSFONT
+_TRNSFONT:
+		PIXLA(a1)
 		move.w	PIXLV(_FWIDTH,a1),d0	; d0 <- Width of a font form
 		mulu.w	PIXLV(_DELY,a1),d0	; d0 <- length of form (bytes)
 		lsr.w	#1,d0		; d0 <- length of form (words)
@@ -146,12 +128,16 @@ swap_loop:	move.w	(a0),d1		; d1 <- font form word
 *******************************************************************************
 *******************************************************************************
 
-
-_put_pix:	PIXLA(a1)
+#if TOSVERSION >= 0x400
+		xdef	_put_pix
+_put_pix:
+		PIXLA(a1)
 		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
 		move.l	V_PUTPIX(a1),a1		; vec to put pix routine
 		jmp	(a1)
+#endif
 
+#if VIDEL_SUPPORT
 PX_PUTPIX:	PIXLA(a1)
 		move.l	PIXLV(_PTSIN,a1),a0		; a0 -> PTSIN array
 		move.w	(a0)+,d0		; d0 <- X coordinate
@@ -174,9 +160,17 @@ PXPTP16:	move.w	(a2),(a0)		; splat pixel
 
 PXPTP8:		move.b	2(a2),(a0)		; splat pixel
 		rts
+#endif
 
 
-ST_PUTPIX:	PIXLA(a2)
+#if TOSVERSION >= 0x400
+		xdef ST_PUTPIX
+ST_PUTPIX:
+#else
+		xdef	_put_pix
+_put_pix:
+#endif
+		PIXLA(a2)
 		movea.l	PIXLV(_PTSIN,a2),a0	; a0 -> PTSIN array
 		move.w	 (a0),d0	; d0 <- X coordinate
 		move.w	2(a0),d1	; d1 <- Y coordinate
@@ -224,21 +218,23 @@ ppx_clr:	and.w	d0,(a1)+	; clear the bit.
 *******************************************************************************
 *******************************************************************************
 
+#if TOSVERSION >= 0x400
+		xdef	_get_pix
 _get_pix:
 		PIXLA(a1)
 		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
 		move.l	V_GETPIX(a1),a1		; vec to get pix routine
 		jmp	(a1)
+#endif
 
+#if VIDEL_SUPPORT
 PX_GETPIX:
 		PIXLA(a1)
 		move.l	PIXLV(_PTSIN,a1),a0		; a0 -> PTSIN array
 		move.w	(a0)+,d0		; d0 <- X coordinate
 		move.w	(a0),d1			; d1 <- Y coordinate
 		mulu	PIXLV(_v_lin_wr,a1),d1	; d1 <- y portion of offset
-#if VIDEL_SUPPORT
 		mulu	PIXLV(byt_per_pix,a1),d0	; d0 <- x portion of offset
-#endif
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a0		; a0 -> base of screen
 		add.l	d1,a0			; a0 -> (x,y)
@@ -254,8 +250,16 @@ PXGTP16:	move.w	(a0),d0			; d0 <- pixel value
 
 PXGTP8:		move.b	(a0),d0
 		rts
+#endif
 
-ST_GETPIX:	PIXLA(a1)
+#if TOSVERSION >= 0x400
+		xdef ST_GETPIX
+ST_GETPIX:
+#else
+		xdef	_get_pix
+_get_pix:
+#endif
+		PIXLA(a1)
 		move.l	d3,-(sp)	; save register for "c"
 		move.l	PIXLV(_PTSIN,a1),a0	; a0 -> PTSIN array
 		moveq.l	#0,d0		; return value is a long so clear upper
@@ -305,6 +309,7 @@ gpx_loop:	move.w	-(a0),d3	; d3 <- current plane word
 *******************************************************************************
 
 
+		xdef	_fill_line
 _fill_line:
 	movem.l d3-d7/a3-a5,-(sp)       ; save registers for "C"
 	movem.w	36(sp),d4-d6		; d4 <- X1  d5 <- X2  d6 <- Y1
@@ -351,6 +356,7 @@ fillLine0:
 *******************************************************************************
 *******************************************************************************
 
+		xdef	_end_pts
 _end_pts:	movem.l d3-d7/a3-a6,-(sp) 	; save registers for "C"
 		PIXLA(a6)
 #if VIDEL_SUPPORT
@@ -717,11 +723,15 @@ ep_ret0:	moveq.l	#0,d0		; return(0). (failure)
 *******************************************************************************
 *******************************************************************************
 
+#if TOSVERSION >= 0x400
+		xdef	_RECTFILL
 _RECTFILL:
 	PIXLA(a2)
 	move.l	LA_ROUTINES(a2),a5	; load vectored list of primitives
 	move.l	V_RECTFILL(a5),a5	; vec to rectangle filler
 	jmp	(a5)
+#endif
+
 
 
 rf_null:
@@ -730,7 +740,13 @@ rf_null:
 	rts
 
 
+#if TOSVERSION >= 0x400
+		xdef	ST_RECTFILL
 ST_RECTFILL:
+#else
+		xdef	_RECTFILL
+_RECTFILL:
+#endif
 	PIXLA(a2)
 	lea	PIXLV(_X1,a2),a0		; a0 -> rectangle endpoints array
 	movem.w	(a0),d4-d7		; d4<-X1   d5<-Y1   d6<-X2   d7<-Y2
@@ -814,7 +830,7 @@ select_version:
 
 	move.l	LA_ROUTINES(a2),a5	; load vectored list of primitives
 	move.l	V_RECT(a5),a5		; vec to rectangle filler
-	jmp	(a5)			; 
+	jmp	(a5)
 
 
 ******************************************************************************
@@ -829,6 +845,7 @@ select_version:
 *									     *
 ******************************************************************************
 
+		xdef	_SetOverlay
 _SetOverlay:
 	
 	PIXLA(a0)
@@ -915,6 +932,7 @@ SetMask:	dc.w	$0020
 ******************************************************************************
 
 
+		xdef	_SetMasks
 _SetMasks:
 	PIXLA(a0)
 	move.l	4(sp),PIXLV(col_or_mask,a0)	; set the or mask for vs_color

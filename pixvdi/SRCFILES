@@ -18,6 +18,7 @@ VDI_OBJS = $(VDI_OBJS1) $(VDI_OBJS2) $(VDI_OBJS3) $(VDI_OBJS4) $(VDI_OBJS5) \
 SCREEN_OBJS = vdivtg.o alone.o jin.o
 
 VDI_SRCS = \
+	vdidefs.h \
 	attrdef.h \
 	fontdef.h \
 	gsxdef.h \
@@ -31,7 +32,6 @@ VDI_SRCS = \
 	devequ.inc \
 	lineaequ.inc \
 	tosvars.inc \
-	vdiincl.inc \
 	\
 	palette.S \
 	blastman.S \

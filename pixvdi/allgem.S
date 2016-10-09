@@ -8,7 +8,8 @@
 * $Log:	ttgem.s,v $
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "asmdefs.h"
 #include "tosvars.inc"
 
@@ -724,14 +725,14 @@ _esc_init:
         move.b    _sshiftmod,d0
         bsr       rezinit
         lea.l     _f8x8,a0
-        move.l    #save_block+lineavars,PIXLV(sv_blk_ptr,a1)
+        move.l    #lineavars+(save_block),PIXLV(sv_blk_ptr,a1)
         cmp.w     #1,d0
         ble.s     esc2
         lea.l     _f8x16,a0
         cmp.w     #6,d0
         blt.s     esc2	; see if we have > 4 planes
         beq.s     esc1
-        move.l    #_save_block+lineavars,PIXLV(sv_blk_ptr,a1)			; if so point to > save buff
+        move.l    #lineavars+(_save_block),PIXLV(sv_blk_ptr,a1)			; if so point to > save buff
         bra.s     esc2
 esc1:
         tst.w     PIXLV(LA_F32,a1)

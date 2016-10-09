@@ -25,7 +25,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 
 		xdef	trans_pos_row
 		xdef	trans_neg_row

@@ -121,7 +121,7 @@ extern int16_t const m_star[];
 extern int16_t const m_square[];
 extern int16_t const m_cross[];
 extern int16_t const m_dmnd[];
-extern int16_t const plane_mask[];
+extern int16_t const tplane_mask[];
 extern const int16_t *const markhead[];
 extern int32_t const colors[];
 

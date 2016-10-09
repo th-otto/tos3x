@@ -1,5 +1,5 @@
-VDI_OBJS1 = palette.o allgem.o opnwk.o ttcolor.o escape.o blastman.o blitinit.o copyrfm.o
-VDI_OBJS2 = entry.o gsxasm1.o gsxasm2.o line1010.o mono.o mouse.o
+VDI_OBJS1 = palette.o allgem.o opnwk.o ttcolor.o escape.o entry.o blastman.o blitinit.o copyrfm.o
+VDI_OBJS2 = gsxasm1.o gsxasm2.o line1010.o mono.o mouse.o
 VDI_OBJS3 = sbblit.o sbescape.o sbfrag.o sbhline.o sbmono.o sbscrn.o
 VDI_OBJS4 = sbtxtblt.o sbvline.o textblt.o vdivar.o xfrmform.o sbsctran.o
 VDI_OBJS5 = sbsctlog.o sbscolog.o sbscopaq.o monout.o
@@ -18,6 +18,7 @@ VDI_OBJS = $(VDI_OBJS1) $(VDI_OBJS2) $(VDI_OBJS3) $(VDI_OBJS4) $(VDI_OBJS5) \
 SCREEN_OBJS = vdivtg.o alone.o jin.o
 
 VDI_SRCS = \
+	vdidefs.h \
 	attrdef.h \
 	fontdef.h \
 	gsxdef.h \
@@ -31,7 +32,6 @@ VDI_SRCS = \
 	devequ.inc \
 	lineaequ.inc \
 	tosvars.inc \
-	vdiincl.inc \
 	\
 	palette.S \
 	allgem.S \

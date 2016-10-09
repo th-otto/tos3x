@@ -23,9 +23,7 @@ typedef int16_t BOOLEAN;
 #  define UNUSED(x) ((void)(x))
 #endif
 
-#define VIDEL_SUPPORT (TOSVERSION >= 0x400)
-
-
+#include "vdidefs.h"
 #include "scrndev.h"
 
 #define	_320x200    0					/* 320x200x4 video mode       */

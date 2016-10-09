@@ -20,7 +20,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "lineaequ.inc"
 
 		xdef	 sb_mono
@@ -38,10 +39,10 @@ sb_mono:
 	movem.l	a5-a6,-(sp)	; save a5 and a6 
 	movea.l	a1,a5		; a5 -. line A variable structure
 
-	muls	lineavars+_bytes_lin,d1	; d1 <- Y offset
+	muls	PIXLV(_bytes_lin,a5),d1	; d1 <- Y offset
 	asr.w	#4,d0			; d0 <- word offset to X
 	subx.w	d4,d4			; d4 <- 0000=>even byte  FFFF=>odd byte
-	muls	lineavars+_v_planes,d0	; d0 <- X offset /2
+	muls	PIXLV(_v_planes,a5),d0	; d0 <- X offset /2
 	add.w	d4,d4			; cy:0=>even byte cy:1=>odd byte
 	addx.l	d0,d0			; d0 <- byte offset to X
 
@@ -49,11 +50,11 @@ sb_mono:
 	add.l	d0,a1			; a1 -> screen destination
 	add.l	d1,a1
 
-	move.l	lineavars+_FBASE,a0		; a0 -> source form base address
-	move.w	lineavars+_FWIDTH,d0		; d0 <- source form width
-	move.l	lineavars+_INTIN,a2		; a2 -> character string
-	move.w	lineavars+_v_lin_wr,d1	; d1 <- screen form width
-	move.w	lineavars+_WRT_MODE,d4	; d4 <- writing mode
+	move.l	PIXLV(_FBASE,a5),a0		; a0 -> source form base address
+	move.w	PIXLV(_FWIDTH,a5),d0		; d0 <- source form width
+	move.l	PIXLV(_INTIN,a5),a2		; a2 -> character string
+	move.w	PIXLV(_v_lin_wr,a5),d1	; d1 <- screen form width
+	move.w	PIXLV(_WRT_MODE,a5),d4	; d4 <- writing mode
 	add.w	d4,d4			; d4 <- writing mode index
 
 	dbra	d3,next_char		; d3 <- character height dbra counter
@@ -76,8 +77,8 @@ mchar_lp:
 	move.l	a1,-(sp)		; save screen destination on stack
 	move.w	(a2)+,d5		; d5 <- next character from string
 	lea	0(a0,d5.w),a3		; a3 -> top-most grfx byt for cur char
-	move.w	 lineavars+_TEXT_FG,d6	; d6 <- foreground color
-	move.w	lineavars+_v_planes,d5	; d5 <- plane count
+	move.w	 PIXLV(_TEXT_FG,a5),d6	; d6 <- foreground color
+	move.w	PIXLV(_v_planes,a5),d5	; d5 <- plane count
 	bra	next_plane
 
 mplan_lp:
@@ -109,7 +110,7 @@ next_plane:
 	btst.l	#0,d7		; word fault ?
 	bne	next_char	; if not, use other half of current word
 
-	move.w	lineavars+_v_planes,d7	; d7 <- number of planes
+	move.w	PIXLV(_v_planes,a5),d7	; d7 <- number of planes
 	subq.w	#1,d7			; d7 <-	number of planes -1
 	add.w	d7,d7			; d7 <- offset to 1st plane of nxt byte
 	add.w	d7,a1			; a1 -> next char position

@@ -52,7 +52,7 @@
 #include "gsxdef.h"
 #include "styles.h"
 
-int16_t const plane_mask[] = {
+int16_t const tplane_mask[] = {
 #if TOSVERSION >= 0x400
 	0,
 #endif

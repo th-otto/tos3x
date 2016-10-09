@@ -8,7 +8,8 @@
 * $Log:	ttgem.s,v $
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "asmdefs.h"
 #include "tosvars.inc"
 

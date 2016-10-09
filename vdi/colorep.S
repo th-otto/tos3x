@@ -13,7 +13,7 @@
 * New generation VDI
 * 
 * Revision 2.4  90/03/01  11:32:22  lozben
-* Moved STE equate into vdiincld.s file.
+* Moved STE equate into vdidefs.h file.
 * 
 * Revision 2.3  90/02/26  17:38:12  lozben
 * Fixed the code to work with turbo assembler.
@@ -26,7 +26,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "asmdefs.h"
 #include "tosvars.inc"
 
@@ -34,7 +35,7 @@
 #include "devequ.inc"
 
 
-#if PAL4096
+#if MAX_PAL >= 4096
 FIRST_INT	equ	67
 LAST_INT	equ	934
 #else
@@ -51,10 +52,11 @@ LUT_ADDR	equ	$FF8240		; lookup table address
 #if TOSVERSION >= 0x400
 		xdef	_st_vs_color
 _st_vs_color:
+	PIXLA(a2)
 	movem.w	d3-d4,-(sp)		; save d3
-	move.l	lineavars+_INTIN,a0
+	move.l	PIXLV(_INTIN,a2),a0
 	move.w	(a0)+,d0		; d0 <- color index
-	move.w	lineavars+_v_planes,d1	; a0 -> first intensity component
+	move.w	PIXLV(_v_planes,a2),d1	; a0 -> first intensity component
 
 	move.b	max_ndx-1(pc,d1.w),d4	; is index in range?
 	cmp.b	d4,d0
@@ -63,8 +65,8 @@ _st_vs_color:
 	move.w	d0,d2
 	mulu	#6,d2			; d2 <- offset into lut save areas
 
-	lea	lineavars+_REQ_COL,a1
-	add.w	d2,a1			; a1 -> component for given index (requePAL4096d)
+	lea	PIXLV(_REQ_COL,a2),a1
+	add.w	d2,a1			; a1 -> component for given index (requested)
 
 	subq.w	#1,d1			; d1 <- # planes - 1
 	beq	monochrome		; don't deal with monochrome case
@@ -95,7 +97,7 @@ hi_check:
 
 
 in_bounds: ds.b 0
-#if PAL4096
+#if MAX_PAL >= 4096
 	mulu	#15,d2			; do the numerator first
 	add.w	#500,d2			; round up
 	divu	#1000,d2		; d2 <- round(% * 15)
@@ -106,7 +108,7 @@ in_bounds: ds.b 0
 
 	asl.w	#4,d1			; make room for new component
 
-#if PAL4096
+#if MAX_PAL >= 4096
 	move.w	d5,-(sp)
 	move.w	d2,d5			; d4 <- color xxxx
 	andi.w	#1,d5			; isolate least significant bit
@@ -198,16 +200,16 @@ mp0:
 		xdef	_st_vq_color
 _st_vq_color:
 	move.l	d4,-(sp)
-	move.l	lineavars+_CONTRL,a0
+	move.l	PIXLV(_CONTRL,a2),a0
 	move.w	#4,8(a0)		; contrl(4) <- length of intout array = 4
 
-	move.l	lineavars+_INTIN,a0
+	move.l	PIXLV(_INTIN,a2),a0
 	move.w	(a0)+,d0		; d0 <- color index
 	move.w	(a0),d2			; d2 <- color value format flag
 
-	move.l	lineavars+_INTOUT,a0		; a0 -> output array
+	move.l	PIXLV(_INTOUT,a2),a0		; a0 -> output array
 
-	move.w	lineavars+_v_planes,d1		
+	move.w	PIXLV(_v_planes,a2),d1		
 	move.b	max_ndx-1(pc,d1.w),d4	; is index in range?
 	cmp.b	d4,d0			; is index in range?
 	bls	in_range
@@ -223,7 +225,7 @@ in_range:
 	tst.w	d2			; d2:0 => return realized color
 	bne	vqc_real
 
-	lea	lineavars+_REQ_COL,a1
+	lea	PIXLV(_REQ_COL,a2),a1
 	mulu	#6,d0			; d0 <- offset to color components
 	add.w	d0,a1			; a1 -> saved color components for given index
 
@@ -255,7 +257,7 @@ vqcr_lp:
 	rol.w	#4,d0			; put color field into low nyble.
 	move.w	d0,d2			; d2 <- XXXX XXXX XXX0 321X col component
 
-#if PAL4096
+#if MAX_PAL >= 4096
 	move.w	d2,d4			; d4 <- XXXX XXXX XXX0 321X col component
 	andi.w	#$e,d2			; d2 <- ____ ____ ____ 321_ col component
 	asr.w	#4,d4			; d4 <- XXXX XXXX XXXX XXX0 col component
@@ -285,12 +287,13 @@ vqcm_cont:
 	bra	vqc_out	
 
 
+/* duplicate; also in ttcolor.c */
 pcnt_tab:
-#if PAL4096
-	dc.w	0000,0067,0133,0200,0267,0333,0400,0467
-	dc.w	0533,0600,0667,0733,0800,0867,0933,1000
+#if MAX_PAL >= 4096
+	dc.w	0,67,133,200,267,333,400,467
+	dc.w	533,600,667,733,800,867,933,1000
 #else
-	dc.w	0000,0142,0285,0428,0571,0714,0857,1000
+	dc.w	0,142,285,428,571,714,857,1000
 #endif
 
 #endif

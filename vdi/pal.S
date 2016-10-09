@@ -1,4 +1,5 @@
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 
 *--- 16 standard colors
     dc.l    $fff         ; 0 white

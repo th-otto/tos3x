@@ -48,9 +48,17 @@
 #define HYPERMONO   VIDINFO & 0x1000	/* hyper mono mode            */
 
 
+#if TOSVERSION < 0x400
+/* duplicate; also in tables.c */
+static int16_t const plane_mask[] = {
+	0, 1,   3,   7,  15,  31,  63, 127, 255,
+};
+#endif
+
 
 /* corresponding gun percentage for each absolute value (0-15) */
-static short pcnt_tab[] = { 0, 67, 133, 200, 267, 333, 400, 467,
+static short const pcnt_tab[] = {
+	0, 67, 133, 200, 267, 333, 400, 467,
 	533, 600, 667, 733, 800, 867, 933, 1000
 };
 
@@ -78,7 +86,7 @@ VOID vs_color(NOTHING)
 		return;
 
 	/* assume we don't want the extended color array */
-	rgb = &REQ_COL[pen][0];
+	rgb = REQ_COL + pen;
 
 	switch (mode)
 	{

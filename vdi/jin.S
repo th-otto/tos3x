@@ -27,7 +27,7 @@
 * address of _GSX_ENTRY. It's an undocumented call (GDOS uses it).
 * 
 * Revision 2.5  90/03/01  11:31:04  lozben
-* Moved TT equate into vdiincld.s file.
+* Moved TT equate into vdidefs.h file.
 * 
 * Revision 2.4  90/02/16  12:22:58  lozben
 * Fixed some of the code so that it can be assembled with mas.
@@ -45,7 +45,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "lineaequ.inc"
 #include "asmdefs.h"
 

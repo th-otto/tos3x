@@ -34,7 +34,6 @@
 #ifndef _GSXDEF_H_
 #define _GSXDEF_H_
 
-#define	MAX_PAL		4096	/* @check@ palette size                     */
 #define BLTPRFRM	5000	/* @check@ blit performance	            */
 				/* TT 16 mghz = 5000 (assume cache is on)   */
 				/* ST  8 mghz = 1000 (software performance) */

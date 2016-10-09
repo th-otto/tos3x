@@ -30,7 +30,8 @@
 *
 *************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 
 SRC_WR		equ	-2
 DST_WR		equ	-4

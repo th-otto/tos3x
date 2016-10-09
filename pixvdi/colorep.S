@@ -13,7 +13,7 @@
 * New generation VDI
 * 
 * Revision 2.4  90/03/01  11:32:22  lozben
-* Moved STE equate into vdiincld.s file.
+* Moved STE equate into vdidefs.h file.
 * 
 * Revision 2.3  90/02/26  17:38:12  lozben
 * Fixed the code to work with turbo assembler.
@@ -26,7 +26,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "asmdefs.h"
 #include "tosvars.inc"
 
@@ -34,7 +35,7 @@
 #include "devequ.inc"
 
 
-#if PAL4096
+#if MAX_PAL >= 4096
 FIRST_INT	equ	67
 LAST_INT	equ	934
 #else
@@ -48,11 +49,12 @@ ROUND_UP	equ	72		; INTERVAL/2
 
 LUT_ADDR	equ	$FF8240		; lookup table address
 
+#if TOSVERSION >= 0x400
 		xdef	_st_vs_color
 _st_vs_color:
-	move.l  _lineAVar,a2		; a2 -> linea var struct
+	PIXLA(a2)
 	movem.w	d3-d4,-(sp)		; save d3
-	move.l	_INTIN(a2),a0
+	move.l	PIXLV(_INTIN,a2),a0
 	move.w	(a0)+,d0		; d0 <- color index
 	move.w	_v_planes(a2),d1	; a0 -> first intensity component
 

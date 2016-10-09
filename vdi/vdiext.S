@@ -7,6 +7,7 @@
 * to get the same addresses as when linking the whole ROM
 *
 #include "../common/config.h"
+#include "vdidefs.h"
 #include "../bios/ctrycodes.h"
 #include "../common/sections.inc"
 

@@ -17,7 +17,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "asmdefs.h"
 #include "tosvars.inc"
 
@@ -134,7 +135,8 @@ zerom4:
 
 	bss
 
-	ds.b 910 ; space for negative linea vars
+	xdef _vdivars
+_vdivars: ds.b 910 ; space for negative linea vars
     xdef lineavars
 lineavars:
 #if TOSVERSION >= 0x400
@@ -143,3 +145,9 @@ lineavars:
 	ds.b 2310
 #endif
 
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+	xdef _reqCol
+_reqCol equ lineavars+(_REQ_COL)
+	xdef _reqXCol
+_reqXCol equ lineavars+(_REQ_X_COL)
+#endif

@@ -34,7 +34,8 @@
 * 
 ******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "lineaequ.inc"
 
 		text

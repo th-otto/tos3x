@@ -110,7 +110,7 @@ VOID seedfill(NOTHING)
 		/* Anding with the mask is only necessary when the driver supports */
 		/* move than one resolution.                       */
 
-		search_color = (int32_t) (MAP_COL[search_color] & plane_mask[v_planes]);
+		search_color = (int32_t) (MAP_COL[search_color] & tplane_mask[v_planes]);
 #if VIDEL_SUPPORT
 		search_color = pal_map[search_color];
 #endif

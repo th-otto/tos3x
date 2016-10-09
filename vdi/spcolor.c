@@ -35,7 +35,7 @@ VOID sp_vs_color(NOTHING)
 	if (v_planes > 8)
 		j = 255;						/* 255 is the most pens allowed   */
 	else
-		j = plane_mask[v_planes];		/* j = max pen allowed            */
+		j = tplane_mask[v_planes];		/* j = max pen allowed            */
 
 
 	if ((pen = *ptr++) > j)				/* is col in range                */
@@ -105,7 +105,7 @@ VOID sp_vq_color(NOTHING)
 	if (v_planes > 8)
 		j = 255;						/* 255 is the most pens allowed   */
 	else
-		j = plane_mask[v_planes];		/* j = max pen allowed            */
+		j = tplane_mask[v_planes];		/* j = max pen allowed            */
 
 	if ((pen = *ptr++) > j)
 	{									/* col ndx in range ?             */

@@ -298,7 +298,7 @@
 #define LA_F32			172
 
 /* extended request color array */
-/* #define _REQ_X_COL		174 */
+#define _REQ_X_COL		174
 
 /* points to the proper save block */
 #define sv_blk_ptr		1614
@@ -359,3 +359,4 @@
 #define PIXLA(r)
 #define PIXLV(v,r) lineavars+(v)
 #endif
+#define LV(v,r) v(r)

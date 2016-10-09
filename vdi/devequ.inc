@@ -70,6 +70,7 @@
 #define V_HLINE			32
 /* text blit routines */
 #define V_TEXT			36
+#if TOSVERSION >= 0x400
 /* color inquire routines */
 #define V_VQCOLOR		40
 /* color set routines */
@@ -94,6 +95,7 @@
 #define V_PUTPIX		80
 /* get pixel value at (X,Y) of screen */
 #define V_GETPIX		84
+#endif
 
 
 /* means we're in device dep mode */

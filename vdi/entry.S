@@ -26,7 +26,8 @@
 * 
 *******************************************************************************
 
-#include "vdiincld.inc"
+#include "../common/config.h"
+#include "vdidefs.h"
 #include "lineaequ.inc"
 
 	xdef	_GSX_ENTRY
@@ -67,7 +68,8 @@ _GSX_ENTRY:
 	movem.l	d1-d7/a0-a6,-(sp)	; Save the callers registers
 
 	move.l	d1,a0			; a0 -> caller's parameter block
-	lea	lineavars+local_pb,a1		; a1 -> local parameter block
+	PIXLA(a2)
+	lea	PIXLV(local_pb,a2),a1		; a1 -> local parameter block
 	lea	ptsin_array,a3		; a3 -> local ptsin array
 
 *   make a local copy of the pointers in the caller's parameter block
@@ -130,7 +132,8 @@ no_ptsin:
 
 *   Restore the vertex count in the callers control array
 
-	move.l	lineavars+_CONTRL,a0		; a0 -> CONTRL
+	PIXLA(a2)
+	move.l	PIXLV(_CONTRL,a2),a0		; a0 -> CONTRL
 	move.w	(sp)+,2(a0)		; restore original array length
 
 	movem.l	(sp)+,d1-d7/a0-a6	; Restore the callers registers
