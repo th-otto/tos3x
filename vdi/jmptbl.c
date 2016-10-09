@@ -46,6 +46,7 @@
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
+/* 306de: 00e3d65e */
 VOID (*jmptb1[]) PROTO((NOTHING)) =
 {
 	v_opnwk,
@@ -89,6 +90,7 @@ VOID (*jmptb1[]) PROTO((NOTHING)) =
 	dst_alignment
 };
 
+/* 306de: 00e3d6fa */
 VOID (*jmptb2[]) PROTO((NOTHING)) =
 {
 	d_opnvwk,
@@ -126,9 +128,10 @@ VOID (*jmptb2[]) PROTO((NOTHING)) =
 };
 
 /************************************************************************
-*    Screen Driver Entry Point						*
-************************************************************************/
+ *    Screen Driver Entry Point
+ ************************************************************************/
 
+/* 306de: 00e07fa2 */
 VOID SCREEN(NOTHING)
 {
 	register int16_t opcode, r, *control;

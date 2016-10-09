@@ -27,11 +27,10 @@
 		bss
 		even
 
-		xdef	_dskbuf
-		comm _dskbuf,7730	     * disk_buffer plus pad for equated arrays
+	xdef _dskbuf
+_dskbuf: ds.b 7730
 
-		xdef	_fill_buffer
-_fill_buffer	equ	_dskbuf     * must be 512 words or equates will fail
+#define _fill_buffer _dskbuf
 
 SIZE_FONT_HEAD	equ	90	     * size of font_head structure in FONTDEF.H
 

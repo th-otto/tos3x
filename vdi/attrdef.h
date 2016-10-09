@@ -64,7 +64,7 @@ typedef struct attribute {
 #if TOSVERSION >= 0x400
 	/* 166 */ int16_t ud_patrn[32*16];	/* User defined pattern 			*/
 #else
-	/* 166 */ int16_t ud_patrn[21*16];	/* User defined pattern 			*/
+	/* 166 */ int16_t ud_patrn[8*16];	/* User defined pattern 			*/
 #endif
 	/* 422 */ int16_t v_align;			/* Current text vertical alignment		*/
 	/* 424 */ int16_t wrt_mode;			/* Current writing mode 			*/
