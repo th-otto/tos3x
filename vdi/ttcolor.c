@@ -86,7 +86,7 @@ VOID vs_color(NOTHING)
 		return;
 
 	/* assume we don't want the extended color array */
-	rgb = REQ_COL + pen;
+	rgb = &REQ_COL[pen][0];
 
 	switch (mode)
 	{

@@ -270,10 +270,16 @@ memterr: ds.w 1
 	xdef _dskbuf
 _dskbuf: ds.b 7730
 
+		xdef	_fill_buffer
+_fill_buffer	equ	_dskbuf
 	xdef _width
-_width: equ _dskbuf+44
+_width: equ _fill_buffer+44
 	xdef _height
-_height: equ _dskbuf+46
+_height: equ _fill_buffer+46
+		xdef	_FLIP_Y
+_FLIP_Y		equ	_fill_buffer+68		; Non-zero PTSOUT contains magnitudes
+		xdef	ptsin_array
+ptsin_array	equ	_fill_buffer+250	; copy of ptsin[] (4096 bytes)
 
 	xdef _vdivars
 _vdivars: ds.b 910 ; space for negative linea vars

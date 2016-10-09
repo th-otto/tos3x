@@ -26,12 +26,11 @@
 
 		bss
 		even
+
 		xdef	_dskbuf
+		comm _dskbuf,7730	     * disk_buffer plus pad for equated arrays
+
 		xdef	_fill_buffer
-		xdef	ptsin_array
-
-_dskbuf: ds.b 7730	     * disk_buffer plus pad for equated arrays
-
 _fill_buffer	equ	_dskbuf     * must be 512 words or equates will fail
 
 SIZE_FONT_HEAD	equ	90	     * size of font_head structure in FONTDEF.H
@@ -80,6 +79,7 @@ SIZE_FONT_HEAD	equ	90	     * size of font_head structure in FONTDEF.H
 		xdef	_xleft
 		xdef	_xright
 		xdef	_copytran
+		xdef	ptsin_array
 		xdef	fringe0
 		xdef	innerLoop
 		xdef	fringe1

@@ -30,13 +30,6 @@
 #include "vdidefs.h"
 #include "lineaequ.inc"
 
-	xdef	_GSX_ENTRY
-	xdef	_MAX_VERT
-
-	xref	ptsin_array
-	xref	_FLIP_Y
-	xref	_SCREEN
-
 
 PTSIN		equ	1024		; PTSIN maximum length:	1024 verticies
 
@@ -63,6 +56,8 @@ PTSIN		equ	1024		; PTSIN maximum length:	1024 verticies
 *
 *******************************************************************************
 
+/* 306de: 00e078b4 */
+	xdef	_GSX_ENTRY
 _GSX_ENTRY:
 
 	movem.l	d1-d7/a0-a6,-(sp)	; Save the callers registers
