@@ -355,7 +355,7 @@
 #define PIXLA(r) LA(r)
 #define PIXLV(v,r) v(r)
 #else
-#define LA(r) move.l #lineavars,r
+#define LA(r) lea lineavars,r
 #define PIXLA(r)
 #define PIXLV(v,r) lineavars+(v)
 #endif

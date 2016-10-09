@@ -63,8 +63,10 @@ FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
 *******************************************************************************
 *******************************************************************************
 
+/* 306de: 00e07a38 */
 		xdef	_vec_len
-_vec_len:	move.w	4(sp),d0	; d0 <- dX
+_vec_len:
+		move.w	4(sp),d0	; d0 <- dX
 		muls	d0,d0		; d0 <- dX**2
 		move.w	6(sp),d1	; d1 <- dY
 		muls	d1,d1		; d1 <- dY**2

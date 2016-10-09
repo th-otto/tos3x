@@ -39,12 +39,11 @@ D_YMAX		equ	-8	; maximum Y: destination
 
 FRAME_LEN	equ	 76
 
-	xdef	KG_BLT
-
 	text
 
 *  in:
 *	a6.l	points to 76 byte parameter block
+	xdef	KG_BLT
 KG_BLT:
 
 	add.w	#FRAME_LEN,a6		; a6 -> top of frame

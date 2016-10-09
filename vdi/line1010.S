@@ -92,10 +92,12 @@ M_CLC_FLIT:	bsr	set_index
 * Set the color index by checking the bit plane flags then
 * setting the appropriate bits.
 *-
-set_index:	PIXLA(a4)
+/* 306de: 00e079ca */
+set_index:
+		LA(a4)
 		clr.l	d0			; clear color index
-		lea	PIXLV(_FG_BP_1,a4),a3		; a3 -> 1st 4 back plane flags
-		lea	PIXLV(_FG_BP_5,a4),a5		; a5 -> 2nd 4 back plane flags
+		lea	LV(_FG_BP_1,a4),a3		; a3 -> 1st 4 back plane flags
+		lea	LV(_FG_BP_5,a4),a5		; a5 -> 2nd 4 back plane flags
 
 		tst.w	(a3)+
 		beq	bp2
@@ -129,7 +131,7 @@ bp8:		tst.w	(a5)+
 		beq	bp9
 		bset.l	#7,d0
 
-bp9:		move.l	d0,PIXLV(_FG_B_PLANES,a4)	; copy the color index
+bp9:		move.l	d0,LV(_FG_B_PLANES,a4)	; copy the color index
 		rts
 
 
@@ -137,6 +139,7 @@ bp9:		move.l	d0,PIXLV(_FG_B_PLANES,a4)	; copy the color index
 *+
 * pointer to system fonts
 *-
+/* 306de: 00e07a20 */
 fonts:		dc.l	_first,_f8x8,_f8x16,_f16x32,0
 
 
