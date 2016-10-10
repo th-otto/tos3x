@@ -129,10 +129,10 @@ hb_cell:
 	move.w	chr_skew(pc,d0.w),d0		; d0 <- SKEW word
 
 	move.w	PIXLV(v_fnt_wr,a4),B_S_WRAP(a5)	;
-	move.w	PIXLV(_v_lin_wr,a4),B_D_WRAP(a5)	;
+	move.w	PIXLV(v_lin_wr,a4),B_D_WRAP(a5)	;
 
 	move.w	PIXLV(v_cel_ht,a4),d1			; d1 <- height
-	move.w	PIXLV(_v_planes,a4),d2
+	move.w	PIXLV(v_planes,a4),d2
 	subq.w	#1,d2				; d2 <- dbra plane counter
 	moveq.l	#BF_GO-8,d4			; d4 -> BLASTER GO flag
 
@@ -207,7 +207,7 @@ chr_op:		dc.w	BM_SRC+00,BM_SRC+12,BM_SRC+03,BM_SRC+15
 *
 * 
 *  in:  d1.w	   cell Y of region top
-*	v_cel_mx   cell Y of region bottom
+*	v_celmx   cell Y of region bottom
 *	_BV_SCRUP  points to desired version of scroll up routine
 *	_BV_SCRDN  points to desired version of scroll down routine
 *
@@ -242,7 +242,7 @@ hb_scrup:
 
 	asr.w	#1,d5			; d5 <- span (words)
 
-	move.w	PIXLV(v_cel_my,a4),d3		; d3 <- maximum cell Y
+	move.w	PIXLV(v_celmy,a4),d3		; d3 <- maximum cell Y
 	move.w	d3,d2
 	sub.w	d1,d2			; d2 <- number of rows to blt
 	ble	fu_start		; catch degenerate case
@@ -274,7 +274,7 @@ su_sync:
 fu_start:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	PIXLV(v_cel_mx,a4),d2		; d2 <- Xmax
+	move.w	PIXLV(v_celmx,a4),d2		; d2 <- Xmax
 	move.w	d3,d1			; d1 <- Ymax  d3 <- Ymax
 	jmp	blank_it		; fill the vacated space
 
@@ -289,7 +289,7 @@ hb_scrdn:
 
 	move.w	PIXLV(v_cel_wr,a4),d5		; d5 <- cell wrap (bytes)
 	move.w	d5,d4
-	move.w	PIXLV(v_cel_my,a4),d3		; d3 <- maximum cell Y
+	move.w	PIXLV(v_celmy,a4),d3		; d3 <- maximum cell Y
 	mulu	d3,d4			; d4 <- offset to top of last row
 
 	move.l	_v_bas_ad,a3		; a3 -> base of screen
@@ -336,7 +336,7 @@ sd_sync:
 fd_start:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	PIXLV(v_cel_mx,a4),d2		; d2 <- Xmax
+	move.w	PIXLV(v_celmx,a4),d2		; d2 <- Xmax
 	move.w	d1,d3			; d1 <- Ymin  d3 <- Ymin
 	jmp	blank_it		; fill the vacated space
 
@@ -407,7 +407,7 @@ hb_blank:
 	move.l	_v_bas_ad,a2		; a2 -> base of screen
 	add.l	d7,a2			; a2 -> top of row at Ymin
 
-	move.w	PIXLV(_v_planes,a4),d6	; d6 <- number of planes
+	move.w	PIXLV(v_planes,a4),d6	; d6 <- number of planes
 	move.w	d6,d7
 	add.w	d7,d7			; d7 <- offset between words (in bytes)
 	move.w	d7,(a5)+		; load B_D_NXWD
@@ -418,7 +418,7 @@ hb_blank:
 	move.w	d5,d4			; d4 <- SPAN -1
 	mulu	d7,d4			; d4 <- actual width of span - NXWD
 	neg.w	d4
-	add.w	PIXLV(_v_lin_wr,a4),d4	; d4 <- WRAP
+	add.w	PIXLV(v_lin_wr,a4),d4	; d4 <- WRAP
 	move.w	d4,(a5)+		; load B_D_WRAP
 
 	move.l	a2,(a5)+		; load B_D_ADDR

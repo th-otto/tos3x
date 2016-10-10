@@ -42,30 +42,30 @@ fail_ret:	moveq	#0,d0		; exit if not byte bnd or clip required
 *  Entry point here..
 
 _MONO8XH: PIXLA(a1)
-		move.w	PIXLV(_DESTX,a1),d0		; d0 <- dst X
+		move.w	PIXLV(DESTX,a1),d0		; d0 <- dst X
 		move.w	d0,d2			; d2 <- dst X
 		and.w	#$0007,d2		; this routine is only for
 		bne	fail_ret		; byte alligned characters
 
-on_bounds:	move.w	PIXLV(_DESTY,a1),d1		; d1 <- dst Y
-		move.w	PIXLV(_DELY,a1),d3		; d3 <- dY
+on_bounds:	move.w	PIXLV(DESTY,a1),d1		; d1 <- dst Y
+		move.w	PIXLV(DELY,a1),d3		; d3 <- dY
 
-		move.l	PIXLV(_CONTRL,a1),a0		; a0 -> CONTRL array
+		move.l	PIXLV(CONTRL,a1),a0		; a0 -> CONTRL array
 		move.w	  6(a0),d2		; d2 <- # chars in string
 
-		tst.w	PIXLV(_CLIP,a1)
+		tst.w	PIXLV(CLIP,a1)
 		beq	no_clip			; skip clip test if disabled
 
-		move.w	PIXLV(_XMN_CLIP,a1),d5	;8	d5 <- Xmin clip
-		move.w	PIXLV(_YMN_CLIP,a1),d6	;8	d6 <- Ymin clip
-		move.w	PIXLV(_XMX_CLIP,a1),d7	;8	d7 <- Xmax clip
+		move.w	PIXLV(XMN_CLIP,a1),d5	;8	d5 <- Xmin clip
+		move.w	PIXLV(YMN_CLIP,a1),d6	;8	d6 <- Ymin clip
+		move.w	PIXLV(XMX_CLIP,a1),d7	;8	d7 <- Xmax clip
 
 		cmp.w	d6,d1			; str can't extend above Ymin
 		blt	fail_ret		;
 
 		move.w	d1,d4			;4	d4 <- dst Y
 		add.w	d3,d4			;4	d4 <- bottom Y +1
-		cmp.w	PIXLV(_YMX_CLIP,a1),d4	; str can't descend below Ymax
+		cmp.w	PIXLV(YMX_CLIP,a1),d4	; str can't descend below Ymax
 		bge	fail_ret		;8/10
 
 		cmp.w	d5,d0			; str can't extend left of Xmin
@@ -80,10 +80,10 @@ on_bounds:	move.w	PIXLV(_DESTY,a1),d1		; d1 <- dst Y
 
 *  no clipping to worry about
 *
-*   d0.w = _DESTX
-*   d1.w = _DESTY
+*   d0.w = DESTX
+*   d1.w = DESTY
 *   d2.w = # of characters
-*   d3.w = _DELY
+*   d3.w = DELY
 
 no_clip:	move.l	LA_ROUTINES(a1),a0	; a1 -> routines vector list
 		move.l	V_MONO(a0),a0		; a1 -> version of mono

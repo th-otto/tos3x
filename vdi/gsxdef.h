@@ -56,18 +56,18 @@
 #define ARROWED 1
 #define CIRCLED 2
 
-#define xres		DEV_TAB[0]
-#define yres		DEV_TAB[1]
-#define xsize		DEV_TAB[3]
-#define ysize		DEV_TAB[4]
+#define xres		LV(DEV_TAB)[0]
+#define yres		LV(DEV_TAB)[1]
+#define xsize		LV(DEV_TAB)[3]
+#define ysize		LV(DEV_TAB)[4]
 
-#define	DEF_LWID	SIZ_TAB[4]
-#define	DEF_CHHT	SIZ_TAB[1]
-#define	DEF_CHWT	SIZ_TAB[0]
-#define DEF_MKWD	SIZ_TAB[8]
-#define DEF_MKHT	SIZ_TAB[9]
-#define MAX_MKWD	SIZ_TAB[10]
-#define MAX_MKHT	SIZ_TAB[11]
+#define	DEF_LWID	LV(SIZ_TAB)[4]
+#define	DEF_CHHT	LV(SIZ_TAB)[1]
+#define	DEF_CHWT	LV(SIZ_TAB)[0]
+#define DEF_MKWD	LV(SIZ_TAB)[8]
+#define DEF_MKHT	LV(SIZ_TAB)[9]
+#define MAX_MKWD	LV(SIZ_TAB)[10]
+#define MAX_MKHT	LV(SIZ_TAB)[11]
 
 #define TA_LEFT           0 /* horizontal */
 #define TA_CENTER         1

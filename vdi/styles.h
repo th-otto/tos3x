@@ -132,7 +132,7 @@ int16_t const HATCH1[96] = {
 0xFFFF, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080, 0x8080
 };
 
-int16_t const HOLLOW = 0;
-int16_t const SOLID = 0xFFFF;
+int16_t const HOLLOW[1] = { 0 };
+int16_t const SOLID[1] = { 0xFFFF };
 
 #endif

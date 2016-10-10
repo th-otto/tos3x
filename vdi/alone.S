@@ -135,19 +135,4 @@ zerom4:
 
 	bss
 
-	xdef _vdivars
-_vdivars: ds.b 910 ; space for negative linea vars
-    xdef lineavars
-lineavars:
-#if TOSVERSION >= 0x400
-	ds.b 4018
-#else
-	ds.b 2310
-#endif
-
-#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
-	xdef _reqCol
-_reqCol equ lineavars+(_REQ_COL)
-	xdef _reqXCol
-_reqXCol equ lineavars+(_REQ_X_COL)
-#endif
+#include "vdivar.S"

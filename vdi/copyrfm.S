@@ -124,7 +124,7 @@ SRC_WR		equ	-2	; source form wrap (in bytes)		    +74
 
 FRAME_LEN	equ	 76
 
-DEV_COL		equ	 _DEV_TAB+26	; offset in _DEV_TAB to number of colors
+DEV_COL		equ	 DEV_TAB+26	; offset in _DEV_TAB to number of colors
 PAT_FLAG	equ	  4	; flag:1 SRCE and PATTERN   flag:0 SOURCE only
 
 _COPY_RFM:
@@ -135,7 +135,7 @@ _COPY_RFM:
 *   test for legal logic ops and set color (if op 16)
 
 	PIXLA(a1)
-	move.l	PIXLV(_INTIN,a1),a2		; a2 -> INTIN array
+	move.l	PIXLV(INTIN,a1),a2		; a2 -> INTIN array
 	move.w	I_LOG_OP(a2),d2		; d2 <- logic op #
 
 
@@ -146,9 +146,9 @@ _COPY_RFM:
 	bclr	#PAT_FLAG,d2		; check pat flag and revert to log op #
 	beq	no_pattern
 
-	move.l	PIXLV(_patptr,a1),a3
+	move.l	PIXLV(patptr,a1),a3
 	moveq	#0,d0			; next plane pattern offset default.
-	tst.w	PIXLV(_multifill,a1)		; multi-plane pattern?
+	tst.w	PIXLV(multifill,a1)		; multi-plane pattern?
 	beq	pat_parm		; no, set up the parameter.
 	moveq	#32,d0			; yes, next plane pat offset = 32.
 
@@ -164,7 +164,7 @@ no_pattern:
 
 *   setup planes for each MFDB
 
-	move.l	PIXLV(_CONTRL,a1),a3		; a3 -> CONTRL array
+	move.l	PIXLV(CONTRL,a1),a3		; a3 -> CONTRL array
 
 	move.l	C_MFDB_S(a3),a5		; a5 -> source MFDB
 	move.l	C_MFDB_D(a3),a4		; a4 -> destination MFDB
@@ -176,8 +176,8 @@ src_form:
 	bne	src_calc
 
 	move.l	_v_bas_ad,d6
-	move.w	PIXLV(_v_planes,a1),d0	; source form is screen
-	move.w	PIXLV(_v_lin_wr,a1),d4
+	move.w	PIXLV(v_planes,a1),d0	; source form is screen
+	move.w	PIXLV(v_lin_wr,a1),d4
 	bra	dst_form
 
 src_calc:
@@ -194,8 +194,8 @@ dst_form:
 	bne	dst_calc
 
 	move.l	_v_bas_ad,d7
-	move.w	PIXLV(_v_planes,a1),d1
-	move.w	PIXLV(_v_lin_wr,a1),d5
+	move.w	PIXLV(v_planes,a1),d1
+	move.w	PIXLV(v_lin_wr,a1),d5
 	bra	compare
 
 dst_calc:
@@ -222,7 +222,7 @@ compare:
 	moveq.l	#2,d4			; d4 <- next plane offset (source)
 	moveq.l	#2,d5			; d5 <- next plane offset (destination)
 
-	tst.w	PIXLV(_COPYTRAN,a1)
+	tst.w	PIXLV(COPYTRAN,a1)
 	beq	standard_ops
 
 
@@ -352,9 +352,9 @@ the_clipper:
 
 *   stoke up the stack frame
 
-	move.l	PIXLV(_PTSIN,a1),a2		; a2 -> PTSIN array
+	move.l	PIXLV(PTSIN,a1),a2		; a2 -> PTSIN array
 
-	tst.w	PIXLV(_CLIP,a1)
+	tst.w	PIXLV(CLIP,a1)
 	beq	dont_clip		; if clipping disabled, skip the clip
 
 	tst.l	MF_BAS_AD(a4)		; if dst isn't screen, don't clip
@@ -397,7 +397,7 @@ clip_it:
 
 	move.w	P_XMIN_S(a2),d0
 	move.w	P_XMIN_D(a2),d2
-	move.w	PIXLV(_XMN_CLIP,a1),d4
+	move.w	PIXLV(XMN_CLIP,a1),d4
 
 	cmp.w	d4,d2			; Xmin dst < Xmin clip => clip Xmin dst
 	bge	xmin_clipped		; Xmin dst > Xmin clip => branch
@@ -418,7 +418,7 @@ xmin_clipped:
 	sub.w	d0,d6			; d6 <- Dx Source
 	add.w	d2,d6			; d6 <- Xmax destination
 
-	move.w	PIXLV(_XMX_CLIP,a1),d4
+	move.w	PIXLV(XMX_CLIP,a1),d4
 
 	cmp.w	d4,d6			; Xmax dst > Xmax clip => clip Xmax dst
 	ble	xmax_clipped		; Xmax dst < Xmax clip => branch
@@ -432,7 +432,7 @@ xmax_clipped:
 
 	move.w	P_YMIN_S(a2),d1
 	move.w	P_YMIN_D(a2),d3
-	move.w	PIXLV(_YMN_CLIP,a1),d4
+	move.w	PIXLV(YMN_CLIP,a1),d4
 
 	cmp.w	d4,d3			; Ymin dst < Ymin clip => clip Ymin
 	bge	ymin_clipped
@@ -453,7 +453,7 @@ ymin_clipped:
 	sub.w	d1,d7			; d7 <- Dy Source
 	add.w	d3,d7			; d7 <- Ymax destination
 
-	move.w	PIXLV(_YMX_CLIP,a1),d4
+	move.w	PIXLV(YMX_CLIP,a1),d4
 
 	cmp.w	d4,d7			; is Ymax dest > Ymax clip => clip Ymax
 	ble	ymax_clipped
@@ -501,7 +501,7 @@ max_save:
 bad_parameter:
 
 	PIXLA(a1)
-	move.l	PIXLV(_CONTRL,a1),a0
+	move.l	PIXLV(CONTRL,a1),a0
 	clr.w	4(a0)			; number of output verticies
 	clr.w	8(a0)			; length of intout array
 

@@ -112,7 +112,7 @@ O6 equ 6 ; WTF? why?
 /* v_stat_0+O6 == 0; stupid as68 does not optimize it */
 #define V_STAT_0 
 #define V_FUNC(func,la,r) \
-	move.l	LV((LA_USERDEVINIT)+O6+func,la),r
+	move.l	LV((USERDEVINIT)+O6+func,la),r
 #define PIXL6(r) lea lineavars-O6,r
 #endif
 
@@ -146,7 +146,7 @@ O6 equ 6 ; WTF? why?
 	xdef	_v_escape
 _v_escape:
 	PIXL6(a4)
-	move.l	LV((_CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
+	move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
 	move.w	10(a0),d0		; d0 <- ID.
 	cmp.w	#ldri_escape,d0 	; compare with DRI limit.
 	bhi	ce_more			; if ID > last DRI escape, branch.
@@ -193,9 +193,9 @@ ce_more:
 v_offset:
 
 	bsr	hide_cursor		; INTIN+00 = Y displacement on cursor
-	move.l	LV((_INTIN)+O6,a4),a0
+	move.l	LV((INTIN)+O6,a4),a0
 	move.w	(a0),d0
-	mulu	LV((_v_lin_wr)+O6,a4),d0
+	mulu	LV((v_lin_wr)+O6,a4),d0
 	move.w	d0,LV((v_cur_off)+O6,a4)	; d0 <- additional cursor y offset.
 	bra	show_cursor		; show cursor.
 
@@ -300,10 +300,10 @@ do_bell:
 	
 do_tab:
 
-	move.w	LV((v_cur_cx)+O6,a4),d0		; d0 <- cursor cell X
+	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- cursor cell X
 	andi.w	#$FFF8,d0		; d0 <- previous 8 cell boundry
 	addq.w	#8,d0			; d0 <- next 8 cell boundry
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- cursor cell Y
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- cursor cell Y
 	bra	move_cursor
 
 
@@ -341,10 +341,10 @@ exit_conout:
 get_row:
 
 	sub.w	#$20,d1			; Remove space bias
-	cmp.w	LV((v_cel_my)+O6,a4),d1		; d1 <- maximum row number
+	cmp.w	LV((v_celmy)+O6,a4),d1		; d1 <- maximum row number
 	bls	row_ok			; if value is too large ...
 
-	move.w	LV((v_cel_my)+O6,a4),d1		; clamp it to the maximum
+	move.w	LV((v_celmy)+O6,a4),d1		; clamp it to the maximum
 
 row_ok:	move.w	d1,_save_row		; and save until command complete
 	lea	get_column(pc),a0	; now, fetch the cell X
@@ -354,10 +354,10 @@ row_ok:	move.w	d1,_save_row		; and save until command complete
 get_column:
 
 	sub.w	#$20,d1			; Remove space bias
-	cmp.w	LV((v_cel_mx)+O6,a4),d1		; d1 <- maximum column number
+	cmp.w	LV((v_celmx)+O6,a4),d1		; d1 <- maximum column number
 	bls	col_ok
 
-	move.w	LV((v_cel_mx)+O6,a4),d1		; clamp to maximum column
+	move.w	LV((v_celmx)+O6,a4),d1		; clamp to maximum column
 
 col_ok:	move.w	d1,d0			; d0 <- cell X
 	move.w	_save_row,d1		; d1 <- cell Y
@@ -488,14 +488,14 @@ b2w_tbl:
 *******************************************************************************
 
 /* 306de: 00e073e6 */
-vq_chcells:		move.l	LV((_CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
+vq_chcells:		move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
 		move.w	#2,8(a0)		; 2 integers are returned.
 
-		move.l	LV((_INTOUT)+O6,a4),a0		; a0 -> INTOUT array.
-		move.w	LV((v_cel_mx)+O6,a4),d0		; d0 <- cell Xmax (zero based)
+		move.l	LV((INTOUT)+O6,a4),a0		; a0 -> INTOUT array.
+		move.w	LV((v_celmx)+O6,a4),d0		; d0 <- cell Xmax (zero based)
 		addq.w	#1,d0			; d0 <- number of columns
 		move.w	d0,2(a0)
-		move.w	LV((v_cel_my)+O6,a4),d0		; d0 <- cell Ymax (zero based)
+		move.w	LV((v_celmy)+O6,a4),d0		; d0 <- cell Ymax (zero based)
 		addq.w	#1,d0			; d0 <- number of rows
 		move.w	d0,(a0)
 
@@ -554,11 +554,11 @@ escE:		bsr	escH			; home cursor.
 
 /* 306de: 00e07420 */
 escA:
-v_curup:		move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current cursor Y
+v_curup:		move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor Y
 		beq	esc_exit		; if top of screen, do nothing
 
 up_cursor:	subq.w	#1,d1			; d1 <- Y of previous line
-		move.w	LV((v_cur_cx)+O6,a4),d0		; d0 <- current cursor X
+		move.w	LV((v_curcx)+O6,a4),d0		; d0 <- current cursor X
 		bra	move_cursor		; update cursor pos and globals
 
 
@@ -570,12 +570,12 @@ up_cursor:	subq.w	#1,d1			; d1 <- Y of previous line
 
 /* 306de: 00e07430 */
 escB:
-v_curdown:		move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current cursor Y
-		cmp.w	LV((v_cel_my)+O6,a4),d1
+v_curdown:		move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor Y
+		cmp.w	LV((v_celmy)+O6,a4),d1
 		beq	esc_exit		; if bottom of scrn, do nothing
 
 down_cursor:	addq.w	#1,d1			; d1 <- Y of next line
-		move.w	LV((v_cur_cx)+O6,a4),d0		; d0 <- current cursor X
+		move.w	LV((v_curcx)+O6,a4),d0		; d0 <- current cursor X
 		bra	move_cursor		; update cursor pos and globals
 
 
@@ -589,12 +589,12 @@ down_cursor:	addq.w	#1,d1			; d1 <- Y of next line
 escC:
 v_curright:
 
-	move.w	LV((v_cur_cx)+O6,a4),d0		; d0 <- current cursor X.
-	cmp.w	LV((v_cel_mx)+O6,a4),d0
+	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- current cursor X.
+	cmp.w	LV((v_celmx)+O6,a4),d0
 	beq	esc_exit		; if right edge of screen, do nothing.
 
 	addq.w	#1,d0			; d0 <- next X position right
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current cursor Y.
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor Y.
 	bra	move_cursor		; update cursor position and globals.
 
 
@@ -608,11 +608,11 @@ v_curright:
 escD:
 v_curleft:
 
-	move.w	LV((v_cur_cx)+O6,a4),d0		; d0 <- current cursor X.
+	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- current cursor X.
 	beq	esc_exit		; if left edge of screen, do nothing.
 
 	subq.w	#1,d0			; d0 <- next X position left
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current cursor Y.
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor Y.
 	bra	move_cursor		; update cursor position and globals.
 
 
@@ -648,7 +648,7 @@ v_eeos:
 *    d1 <- current cursor Y
 *    d2 <- maximum cursor X
 
-	move.w	LV((v_cel_my)+O6,a4),d3		; d3 <- maximum cursor Y
+	move.w	LV((v_celmy)+O6,a4),d3		; d3 <- maximum cursor Y
 	cmp.w	d3,d1			; if already on last line, exit.
 	beq	esc_exit	
 
@@ -665,9 +665,9 @@ v_eeos:
 
 /* 306de: 00e07482 */
 escK:
-v_eeol:	move.w	LV((v_cur_cx)+O6,a4),d0		; d0 <- current cursor X
-		move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current line Y
-		move.w	LV((v_cel_mx)+O6,a4),d2		; d2 <- right most X
+v_eeol:	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- current cursor X
+		move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current line Y
+		move.w	LV((v_celmx)+O6,a4),d2		; d2 <- right most X
 		move.w	d1,d3			; d3 <- current line Y
 		bra	erase_region
 
@@ -680,7 +680,7 @@ v_eeol:	move.w	LV((v_cur_cx)+O6,a4),d0		; d0 <- current cursor X
 /* 306de: 00e07494 */
 vs_curaddress:
 
-	move.l	LV((_INTIN)+O6,a4),a0		; a0 -> INTIN array
+	move.l	LV((INTIN)+O6,a4),a0		; a0 -> INTIN array
 	move.w	(a0),d1			; d1 <- row number
 	subq.w	#1,d1			; d1 <- Y (zero origin)
 	move.w	2(a0),d0		; d0 <- column number
@@ -696,9 +696,9 @@ vs_curaddress:
 /* 306de: 00e074a6 */
 vs_curtext:
 
-	move.l	LV((_CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
+	move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
 	move.w	6(a0),d0		; d0 <- character count.
-	move.l	LV((_INTIN)+O6,a4),a0		; a0 -> character array.
+	move.l	LV((INTIN)+O6,a4),a0		; a0 -> character array.
 	bra	ef12_lend
 
 ef12_loop:
@@ -747,13 +747,13 @@ v_rvoff:	bclr.b	#F_REVID,LV(V_STAT_0,a4)		; clr reverse bit in v_stat_0
 /* 306de: 00e074d4 */
 vq_curaddress:
 
-	move.l	LV((_CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
+	move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
 	move.w	#2,8(a0)		; 2 integers are returned.
-	move.l	LV((_INTOUT)+O6,a4),a0		; a0 -> INTOUT array.
-	move.w	LV((v_cur_cy)+O6,a4),d0		; d0 <- cell Y (zero based)
+	move.l	LV((INTOUT)+O6,a4),a0		; a0 -> INTOUT array.
+	move.w	LV((v_curcy)+O6,a4),d0		; d0 <- cell Y (zero based)
 	addq.w	#1,d0			; d0 <- row number
 	move.w	d0,(a0)+		; return row number.
-	move.w	LV((v_cur_cx)+O6,a4),d0		; d0 <- cell X (zero based)
+	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- cell X (zero based)
 	addq.w	#1,d0			; d0 <- column number
 	move.w	d0,(a0)			; return column number.
 	rts
@@ -768,9 +768,9 @@ vq_curaddress:
 vq_tabstatus:
 
 	moveq.l	#1,d0
-	move.l	LV((_CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
+	move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
 	move.w	d0,8(a0)		; 1 integer is returned.
-	move.l	LV((_INTOUT)+O6,a4),a0		; a0 -> INTOUT array.
+	move.l	LV((INTOUT)+O6,a4),a0		; a0 -> INTOUT array.
 	move.w	d0,(a0)			; 1 => there is a mouse.
 	rts
 
@@ -783,7 +783,7 @@ vq_tabstatus:
 /* 306de: 00e07506 */
 v_dspcur:
 
-	movea.l	LV((_INTIN)+O6,a4),a0		; a0 -> INTIN array.
+	movea.l	LV((INTIN)+O6,a4),a0		; a0 -> INTIN array.
 	clr.w	(a0)			; INTIN(0)<- 0 =>  show regardless.
 	jmp	_v_show_c		; show graphic cursor.
 
@@ -811,7 +811,7 @@ v_rmcur:
 
 escI:
 
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current cursor Y
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor Y
 	bne	up_cursor		; if not at top, move cursor up 1 line
 
 	bsr.s	hide_cursor
@@ -827,13 +827,13 @@ escI:
 escL:
 
 	bsr	hide_cursor
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- Ymin of scroll region
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- Ymin of scroll region
 	bsr	p_sc_dn			; scroll down 1 line. insert blank line
 
 start_o_line:
 
 	clr.w	d0			; d0 <- X of beginning of line
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current Y
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current Y
 	bsr	move_cursor
 	bra	show_cursor
 
@@ -846,7 +846,7 @@ start_o_line:
 escM:
 
 	bsr	hide_cursor		; hide cursor.
-	move.w	LV((v_cur_cy)+O6,a4),d1		; line to begin scrolling up.
+	move.w	LV((v_curcy)+O6,a4),d1		; line to begin scrolling up.
 	bsr	p_sc_up			; scroll up 1 line & blank bottom line.
 	bra	start_o_line
 
@@ -858,12 +858,12 @@ escM:
 
 escd:
 
-	move.w	LV((v_cur_cy)+O6,a4),d3		; if were on the first line...
+	move.w	LV((v_curcy)+O6,a4),d3		; if were on the first line...
 	beq	esco			; erase from beginning of line. return
 
 	clr.w	d0			; d0 <- Xmin (left sideof screen)
 	clr.w	d1			; d1 <- Ymin (top of screen)
-	move.w	LV((v_cel_mx)+O6,a4),d2		; d2 <- Xmax (right side of screen)
+	move.w	LV((v_celmx)+O6,a4),d2		; d2 <- Xmax (right side of screen)
 	subq.w	#1,d3			; d3 <- Ymax (line above the cursor)
 
 	bsr	erase_region		; erase screen above cursor
@@ -935,7 +935,7 @@ hide_cursor:
 *******************************************************************************
 
 escj:		bset.b	#F_SVPOS,LV(V_STAT_0,a4)	; set "pos saved" status bit.
-		move.l	LV((v_cur_cx)+O6,a4),LV((xydraw)+O6,a4)
+		move.l	LV((v_curcx)+O6,a4),LV((xydraw)+O6,a4)
 
 escj_exit:	rts
 
@@ -963,8 +963,8 @@ esck:
 escl:
 
 	clr.w	d0
-	move.w	LV((v_cur_cy)+O6,a4),d1
-	move.w	LV((v_cel_mx)+O6,a4),d2
+	move.w	LV((v_curcy)+O6,a4),d1
+	move.w	LV((v_celmx)+O6,a4),d2
 	move.w	d1,d3
 	bsr	erase_region		; blank whole line.
 
@@ -979,8 +979,8 @@ escl:
 esco:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- Y of line to erase
-	move.w	LV((v_cur_cx)+O6,a4),d2		; d2 <- Xmax
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- Y of line to erase
+	move.w	LV((v_curcx)+O6,a4),d2		; d2 <- Xmax
 	move.w	d1,d3			; d3 <- Y of same line
 
 erase_region:
@@ -1020,7 +1020,7 @@ escw:
 ascii_cr:
 
 	clr.w	d0			; d0 <- X of beginning of line
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current Y
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current Y
 	bra	move_cursor		; move_cursor does CRITICAL SECTION
 
 
@@ -1031,8 +1031,8 @@ ascii_cr:
 /* 306de: 00e07602 */
 ascii_lf:
 
-	move.w	LV((v_cur_cy)+O6,a4),d1		; d1 <- current cursor y.
-	cmp.w	LV((v_cel_my)+O6,a4),d1		; at bottom of screen?
+	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor y.
+	cmp.w	LV((v_celmy)+O6,a4),d1		; at bottom of screen?
 	bne	down_cursor		; no, move cursor down one line
 
 	bsr	hide_cursor
@@ -1066,7 +1066,7 @@ ascii_lf:
 *   cursor.
 *
 *   To cause the cursor to be redisplayed, the main routine should load 
-*   v_cur_ct with the value in v_delay. CSTATE flag should be clear. The
+*   v_curct with the value in v_delay. CSTATE flag should be clear. The
 *   cursor will be displayed only after there has been no activity for at
 *   least v_delay-1 frames. Thus, excessive redisplaying of the cursor is
 *   avoided.
@@ -1206,7 +1206,7 @@ ascii_out:
 	move.w	LV((v_col_bg)+O6,a4),d7		; d7 <- background color
 
 #if VIDEL_SUPPORT
-	cmp.w	#16,LV((_v_planes)+O6,a4)	; see if we should use long val for col
+	cmp.w	#16,LV((v_planes)+O6,a4)	; see if we should use long val for col
 	ble	col_ok2			; if not the just skip
 	move.l	LV((vl_col_fg)+O6,a4),d6	; d6 <- foreground color
 	move.l	LV((vl_col_bg)+O6,a4),d7	; d7 <- background color
@@ -1228,10 +1228,10 @@ put_char:
 *   update cursor position to next cell position
 *   perform carriage return and line feed if necessary
 
-	move.w	LV((v_cur_cx)+O6,a4),d0
-	move.w	LV((v_cur_cy)+O6,a4),d1
+	move.w	LV((v_curcx)+O6,a4),d0
+	move.w	LV((v_curcy)+O6,a4),d1
 
-	cmp.w	LV((v_cel_mx)+O6,a4),d0		; are we at right edge ?
+	cmp.w	LV((v_celmx)+O6,a4),d0		; are we at right edge ?
 	blt	next_cell		; no => increment cell ptr
 
 end_o_line:
@@ -1245,15 +1245,15 @@ end_o_line:
 #endif
 	move.l	_v_bas_ad,a1		; a1 -> base of screen
 
-	cmp.w	LV((v_cel_my)+O6,a4),d1		; is it time to scroll ? 
+	cmp.w	LV((v_celmy)+O6,a4),d1		; is it time to scroll ? 
 	blt	no_scroll
 
-	move.w	d1,LV((v_cur_cy)+O6,a4)		; save the cursor Y coordinate
+	move.w	d1,LV((v_curcy)+O6,a4)		; save the cursor Y coordinate
 #if TOSVERSION < 0x400
 	mulu.w	d2,d1
 #else
 	mulu	LV((v_cel_ht)+O6,a4),d1		; d1 <- (cell height) * (cursor Y pos)
-	mulu	LV((_v_lin_wr)+O6,a4),d1	; d1 <-  offset to start of last line
+	mulu	LV((v_lin_wr)+O6,a4),d1	; d1 <-  offset to start of last line
 #endif
 	add.l	d1,a1			; a1 -> beginning of last line
 
@@ -1277,7 +1277,7 @@ no_scroll:
 #else
 	move.w	d1,d2			; d2 <- Y of next line
 	mulu	LV((v_cel_ht)+O6,a4),d2		; d1 <- (cell height) * (cursor Y pos)
-	mulu	LV((_v_lin_wr)+O6,a4),d2	; d1 <-  offset to start of last line
+	mulu	LV((v_lin_wr)+O6,a4),d2	; d1 <-  offset to start of last line
 #endif
 	add.l	d2,a1			; a1 -> next line
 	bra	disp_cur
@@ -1299,7 +1299,7 @@ word_cell:
 	cmp.w	#16,2(a2)		; see if char cell is word wide
 	bne	byte_cell		; if not inc a1 by one (byte)
 	addq.w	#1,d0			; Xcell of next cell to right
-	move.w	LV((_v_planes)+O6,a4),d2
+	move.w	LV((v_planes)+O6,a4),d2
 	add.w	d2,d2
 	lea	(a1,d2.w),a1		; a1 -> first cell of next word
 	bra	disp_cur		; display cursor
@@ -1313,17 +1313,17 @@ byte_cell:
 
 next_word:
 
-	move.w	LV((_v_planes)+O6,a4),d2
+	move.w	LV((v_planes)+O6,a4),d2
 	add.w	d2,d2
 	lea	-2(a1,d2.w),a1		; a1 -> first cell of next word
 
 disp_cur:
 
-	move.w	d1,LV((v_cur_cy)+O6,a4)		; update the cursor Y coordinate
+	move.w	d1,LV((v_curcy)+O6,a4)		; update the cursor Y coordinate
 
 save_it:
 
-	move.w	d0,LV((v_cur_cx)+O6,a4)		; update the cursor X coordinate
+	move.w	d0,LV((v_curcx)+O6,a4)		; update the cursor X coordinate
 	move.l	a1,LV((v_cur_ad)+O6,a4)		; update cursor address
 	
 
@@ -1371,7 +1371,7 @@ out_of_bounds:
 *
 * 
 *  in:		d1.w	   cell Y of region top
-*		v_cel_mx   cell Y of region bottom
+*		v_celmx   cell Y of region bottom
 *		V_SCRUP	   points to desired version of scroll up routine
 *		V_SCRDN	   points to desired version of scroll down routine
 *
@@ -1432,7 +1432,7 @@ blank_it:
 
 * check bounds against screen limits
 
-cell_addr:	move.w	LV((v_cel_mx)+O6,a4),d2
+cell_addr:	move.w	LV((v_celmx)+O6,a4),d2
 		tst.w	d0			; test for negative x
 		bge	clip_x
 		moveq.l	#0,d0
@@ -1442,7 +1442,7 @@ clip_x:		cmp.w	d0,d2
 		bpl	x_clipped
 		move.w	d2,d0			; d0 <- clipped x
 
-x_clipped:	move.w	LV((v_cel_my)+O6,a4),d2
+x_clipped:	move.w	LV((v_celmy)+O6,a4),d2
 		tst.w	d1			; test for negative y
 		bge	clip_y
 		moveq.l	#0,d1
@@ -1458,7 +1458,7 @@ y_clipped:	move.w	d1,d3			; d3 <- clipped Y
 		mulu	LV((v_cel_wr)+O6,a4),d3	; d3 <- offset to row Y	
 #else
 		mulu	LV((v_cel_ht)+O6,a4),d3
-		mulu	LV((_v_lin_wr)+O6,a4),d3	; d3 <- offset to row Y	
+		mulu	LV((v_lin_wr)+O6,a4),d3	; d3 <- offset to row Y	
 #endif
 
 		move.w	d0,d2			; d2 <- clipped X
@@ -1475,7 +1475,7 @@ y_clipped:	move.w	d1,d3			; d3 <- clipped Y
 
 claddr1:	bclr.l	#0,d2			; d2 <- word boundry X
 		sne	d4			; d4 <- 0 if X even else <- FF
-		mulu	LV((_v_planes)+O6,a4),d2	; d2 <- offset in bytes to X
+		mulu	LV((v_planes)+O6,a4),d2	; d2 <- offset in bytes to X
 		add.b	d4,d4			; X was even => cy:0 else cy:1
 		addx.l	d3,d2			; d2 <- total offset to X
 
@@ -1543,8 +1543,8 @@ move_cursor:
 
 invisible:	bsr	cell_addr		; get new clipped cursor pos
 
-		move.w	d0,LV((v_cur_cx)+O6,a4)		; save new cursor X
-		move.w	d1,LV((v_cur_cy)+O6,a4)		; save new cursor Y
+		move.w	d0,LV((v_curcx)+O6,a4)		; save new cursor X
+		move.w	d1,LV((v_curcy)+O6,a4)		; save new cursor Y
 		move.l	a1,LV((v_cur_ad)+O6,a4)		; save new cursor address
 
 		bra	show_alpha		; << END CRITICAL SECTION >>
@@ -1586,10 +1586,10 @@ st_neg_cell:
 	xdef	neg_cell
 neg_cell:
 #endif
-		move.w	LV((_v_lin_wr)+O6,a4),d4
+		move.w	LV((v_lin_wr)+O6,a4),d4
 		move.w	LV((v_cel_ht)+O6,a4),d5
 		subq.w	#1,d5			; for dbra.
-		move.w	LV((_v_planes)+O6,a4),d7
+		move.w	LV((v_planes)+O6,a4),d7
 		subq.w	#1,d7			; for dbra.
 
 plane_loop:	move.l	a1,a2			; a2 -> top of curr dest plane
@@ -1623,7 +1623,7 @@ neg_byte:	not.b	(a2)
 *******************************************************************************
 
 /* 306de: 00e07858 */
-v_fontinit:	move.l	LV((_INTIN)+O6,a4),a0
+v_fontinit:	move.l	LV((INTIN)+O6,a4),a0
 		move.l	(a0),a0			; a0 -> font header.
 
 * fall through to initialization sequence
@@ -1640,19 +1640,19 @@ gl_f_init: ds.b 0
 		PIXL6(a4)
 		move.w	FRM_HT(a0),d0		; fetch form height.
 		move.w	d0,LV((v_cel_ht)+O6,a4)		; init cell height.
-		move.w	LV((_v_lin_wr)+O6,a4),d1	; fetch bytes/line.
+		move.w	LV((v_lin_wr)+O6,a4),d1	; fetch bytes/line.
 		mulu	d0,d1
 		move.w	d1,LV((v_cel_wr)+O6,a4)		; init cell wrap. (obsolete)
 		moveq.l	#0,d1			; clear the hi word of dividend
 		move.w	LV((v_vt_rez)+O6,a4),d1		; fetch vertical res.
 		divu	d0,d1			; vertical res/cell height.
 		subq.w	#1,d1			; 0 origin.
-		move.w	d1,LV((v_cel_my)+O6,a4)		; init cell max y.
+		move.w	d1,LV((v_celmy)+O6,a4)		; init cell max y.
 		moveq.l	#0,d1			; clear the hi word of dividend
 		move.w	LV((v_hz_rez)+O6,a4),d1		; fetch horizontal res.
 		divu	CEL_WD(a0),d1		; horizontal res/cell width.
 		subq.w	#1,d1			; 0 origin.
-		move.w	d1,LV((v_cel_mx)+O6,a4)		; init cell max x.
+		move.w	d1,LV((v_celmx)+O6,a4)		; init cell max x.
 		move.w	FRM_WD(a0),LV((v_fnt_wr)+O6,a4)	; init font wrap.
 		move.w	FIRST(a0),LV((v_fnt_st)+O6,a4)	; init font start ADE.
 		move.w	LAST(a0),LV((v_fnt_nd)+O6,a4)	; init font end ADE.

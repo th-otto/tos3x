@@ -31,3 +31,8 @@
 #endif
 
 #define VIDEL_SUPPORT (TOSVERSION >= 0x400)
+
+/*
+ * see lineavar.h for explanation
+ */
+#define LINEA_HACK (TOSVERSION < 0x400)

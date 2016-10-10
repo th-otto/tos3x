@@ -137,7 +137,7 @@ VOID SCREEN(NOTHING)
 	register int16_t opcode, r, *control;
 	register ATTRIBUTE *work_ptr;
 
-	control = CONTRL;
+	control = LV(CONTRL);
 	r = *(control + 6);
 
 	opcode = *control;
@@ -151,7 +151,6 @@ VOID SCREEN(NOTHING)
 
 	if (opcode != 1 && opcode != 100)
 	{
-
 		/* Find the attribute area which matches the handle */
 
 		work_ptr = &virt_work;
@@ -168,40 +167,40 @@ VOID SCREEN(NOTHING)
 
 	  found_handle:
 
-		cur_work = work_ptr;
-		INQ_TAB[19] = CLIP = work_ptr->clip;
-		XMN_CLIP = work_ptr->xmn_clip;
-		YMN_CLIP = work_ptr->ymn_clip;
-		XMX_CLIP = work_ptr->xmx_clip;
-		YMX_CLIP = work_ptr->ymx_clip;
+		LV(cur_work) = work_ptr;
+		LV(INQ_TAB)[19] = LV(CLIP) = work_ptr->clip;
+		LV(XMN_CLIP) = work_ptr->xmn_clip;
+		LV(YMN_CLIP) = work_ptr->ymn_clip;
+		LV(XMX_CLIP) = work_ptr->xmx_clip;
+		LV(YMX_CLIP) = work_ptr->ymx_clip;
 
-		WRT_MODE = work_ptr->wrt_mode;
+		LV(WRT_MODE) = work_ptr->wrt_mode;
 
-		PATPTR = work_ptr->patptr;
-		PATMSK = work_ptr->patmsk;
+		LV(patptr) = work_ptr->patptr;
+		LV(patmsk) = work_ptr->patmsk;
 
 		if (work_ptr->fill_style == 4)
-			MULTIFILL = work_ptr->multifill;
+			LV(multifill) = work_ptr->multifill;
 		else
-			MULTIFILL = 0;
+			LV(multifill) = 0;
 
-		font_ring[2] = work_ptr->loaded_fonts;
+		LV(font_ring)[2] = work_ptr->loaded_fonts;
 
-		DEV_TAB[10] = work_ptr->num_fonts;
+		LV(DEV_TAB)[10] = work_ptr->num_fonts;
 
-		DDA_INC = work_ptr->dda_inc;
-		T_SCLSTS = work_ptr->t_sclsts;
-		DOUBLE = work_ptr->scaled;
+		LV(DDA_INC) = work_ptr->dda_inc;
+		LV(T_SCLSTS) = work_ptr->t_sclsts;
+		LV(SCALE) = work_ptr->scaled;
 
-		CUR_FONT = work_ptr->cur_font;
+		LV(CUR_FONT) = work_ptr->cur_font;
 
-		MONO_STATUS = MONOSPACE & CUR_FONT->flags;
-		SCRPT2 = work_ptr->scrpt2;
-		SCRTCHP = work_ptr->scrtchp;
-		STYLE = work_ptr->style;
+		LV(MONO_STATUS) = MONOSPACE & LV(CUR_FONT)->flags;
+		LV(scrpt2) = work_ptr->scrpt2;
+		LV(scrtchp) = work_ptr->scrtchp;
+		LV(STYLE) = work_ptr->style;
 		h_align = work_ptr->h_align;
 		v_align = work_ptr->v_align;
-		CHUP = work_ptr->chup;
+		LV(CHUP) = work_ptr->chup;
 
 	}
 	/* end if open work or vwork */

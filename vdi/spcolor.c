@@ -25,17 +25,17 @@
 
 VOID sp_vs_color(NOTHING)
 {
-	register int16_t *ptr = INTIN;
+	register int16_t *ptr = LV(INTIN);
 	register int16_t *rgb;
 	register int16_t j, pen;
 	register int16_t temp;
 	register int32_t total;
 	int32_t RGB;
 
-	if (v_planes > 8)
+	if (LV(v_planes) > 8)
 		j = 255;						/* 255 is the most pens allowed   */
 	else
-		j = tplane_mask[v_planes];		/* j = max pen allowed            */
+		j = tplane_mask[LV(v_planes)];		/* j = max pen allowed            */
 
 
 	if ((pen = *ptr++) > j)				/* is col in range                */
@@ -45,9 +45,9 @@ VOID sp_vs_color(NOTHING)
 	 * point to the proper color array
 	 */
 	if (pen > 15)
-		rgb = &REQ_X_COL[pen - 16][0];	/* use extended col array         */
+		rgb = &LV(REQ_X_COL)[pen - 16][0];	/* use extended col array         */
 	else
-		rgb = &REQ_COL[pen][0];
+		rgb = &LV(REQ_COL)[pen][0];
 
 
 	pen = (MAP_COL[pen] & j);			/* get lut offset                 */
@@ -55,7 +55,7 @@ VOID sp_vs_color(NOTHING)
 	*rgb++ = *ptr++;					/* copy RED, GREEN, components    */
 	*rgb++ = *ptr++;					/* into the request col array     */
 	*rgb = *ptr;
-	ptr = INTIN + 1;					/* point to red comp              */
+	ptr = LV(INTIN) + 1;					/* point to red comp              */
 
 	/*
 	 * load RGB values into LUT
@@ -91,21 +91,21 @@ VOID sp_vs_color(NOTHING)
 VOID sp_vq_color(NOTHING)
 {
 	register int16_t i, j;
-	register int16_t *ptr = INTIN;		/* col index val      */
+	register int16_t *ptr = LV(INTIN);		/* col index val      */
 	register int16_t *rgb;
-	register int16_t *out = INTOUT;
+	register int16_t *out = LV(INTOUT);
 	register int16_t pen;
 	register int16_t temp;
 	int32_t RGB;
 
 	UNUSED(i);
 	
-	CONTRL[4] = 4;						/* # of output ints               */
+	LV(CONTRL)[4] = 4;					/* # of output ints               */
 
-	if (v_planes > 8)
+	if (LV(v_planes) > 8)
 		j = 255;						/* 255 is the most pens allowed   */
 	else
-		j = tplane_mask[v_planes];		/* j = max pen allowed            */
+		j = tplane_mask[LV(v_planes)];		/* j = max pen allowed            */
 
 	if ((pen = *ptr++) > j)
 	{									/* col ndx in range ?             */
@@ -119,9 +119,9 @@ VOID sp_vq_color(NOTHING)
 	 * point to the proper color array
 	 */
 	if (pen > 15)
-		rgb = &REQ_X_COL[pen - 16][0];	/* use extended col array         */
+		rgb = &LV(REQ_X_COL)[pen - 16][0];	/* use extended col array         */
 	else
-		rgb = &REQ_COL[pen][0];
+		rgb = &LV(REQ_COL)[pen][0];
 
 	pen = (MAP_COL[pen] & j);
 

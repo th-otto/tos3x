@@ -96,8 +96,8 @@ M_CLC_FLIT:	bsr	set_index
 set_index:
 		LA(a4)
 		clr.l	d0			; clear color index
-		lea	LV(_FG_BP_1,a4),a3		; a3 -> 1st 4 back plane flags
-		lea	LV(_FG_BP_5,a4),a5		; a5 -> 2nd 4 back plane flags
+		lea	LV(FG_BP_1,a4),a3		; a3 -> 1st 4 back plane flags
+		lea	LV(FG_BP_5,a4),a5		; a5 -> 2nd 4 back plane flags
 
 		tst.w	(a3)+
 		beq	bp2
@@ -131,7 +131,7 @@ bp8:		tst.w	(a5)+
 		beq	bp9
 		bset.l	#7,d0
 
-bp9:		move.l	d0,LV(_FG_B_PLANES,a4)	; copy the color index
+bp9:		move.l	d0,LV(FG_B_PLANES,a4)	; copy the color index
 		rts
 
 

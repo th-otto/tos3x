@@ -110,7 +110,7 @@ right_up:	move.b	PIXLV(cur_ms_stat,a2),d1	; d1 <- previous mouse state
 		jsr 	(a1)			; call user.
 		move.w	(sp)+,d1		; retrieve back previous state
 
-		move.w	d0,PIXLV(_MOUSE_BT,a2)	; save cur mouse button state
+		move.w	d0,PIXLV(MOUSE_BT,a2)	; save cur mouse button state
 
 		eor.b	d0,d1			; compute which buttons changed
 		ror.b	#2,d1			; d1<07:06> <-last ms btn state
@@ -127,7 +127,7 @@ xy_update:	move.b	1(a0),d0		; has mouse position changed ?
 
 new_coord:	bset.b	#5,PIXLV(cur_ms_stat,a2)	; motion:set motion status flag
 
-		move.l	PIXLV(_GCURXY,a2),d0
+		move.l	PIXLV(GCURXY,a2),d0
 		move.l	d0,d1			; d1 <- old mouse cursor Y
 		swap	d0			; d0 <- old mouse cursor X
 
@@ -146,7 +146,7 @@ new_coord:	bset.b	#5,PIXLV(cur_ms_stat,a2)	; motion:set motion status flag
 
 		bsr	scrn_clip		; IS THIS TOO PARANOID ?!
 
-		lea	PIXLV(_GCURXY,a2),a1		; save new cursor position
+		lea	PIXLV(GCURXY,a2),a1		; save new cursor position
 		move.w	d0,(a1)+		; X
 		move.w	d1,(a1)			; Y
 
@@ -250,7 +250,7 @@ _MOV_CUR: PIXLA(a0)
 *  relocated.
 
 vb_draw:	PIXLA(a5)
-		tst.w	PIXLV(_HIDE_CNT,a5)		; HIDE_CNT semaphore controls
+		tst.w	PIXLV(HIDE_CNT,a5)		; HIDE_CNT semaphore controls
 		bne	vblank_exit		; access to cur disp routines
 
 		tst.b	PIXLV(mouse_flag,a5)		; cntrl access to ms frm (CDB)
@@ -290,7 +290,7 @@ vblank_exit:	rts
 *******************************************************************************
 
 _vex_butv: PIXLA(a1)
-		move.l	PIXLV(_CONTRL,a1),a0		; point to contrl array
+		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
 		move.l	PIXLV(user_but,a1),18(a0)	; store old pointer in contrl
 		move.l	14(a0),PIXLV(user_but,a1)	; store new routine address
 		rts
@@ -306,7 +306,7 @@ _vex_butv: PIXLA(a1)
 *******************************************************************************
 
 _vex_motv: PIXLA(a1)
-		move.l	PIXLV(_CONTRL,a1),a0		; point to contrl array
+		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
 		move.l	PIXLV(user_mot,a1),18(a0)	; save old routine pointer
 		move.l	14(a0),PIXLV(user_mot,a1)	; store new routine address
 		rts
@@ -322,7 +322,7 @@ _vex_motv: PIXLA(a1)
 *******************************************************************************
 
 _vex_curv: PIXLA(a1)
-		move.l	PIXLV(_CONTRL,a1),a0		; point to contrl array
+		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
 		move.l	PIXLV(user_cur,a1),18(a0)	; save old routine pointer
 		move.l	14(a0),PIXLV(user_cur,a1) 	; store new routine address
 		rts
@@ -484,7 +484,7 @@ shift_lf:	move.w	#16,d6			; compensate for left shift
 *+
 * init logic fragment routines on the stack
 *-
-		move.w	PIXLV(_v_planes,a4),d1
+		move.w	PIXLV(v_planes,a4),d1
 		move.w	d1,d3
 		subq.w	#1,d1			; set up plane counter
 
@@ -529,7 +529,7 @@ init2:		move.l	rtn_tab+00(pc,d2.w),a5	; a5 -> store routine
 		add.w	d3,d3			; d3 <- offset to second word
 
 		swap	d5			; d5 is used as 2 variables
-		move.w	PIXLV(_v_lin_wr,a4),d5	; d5 <- line wrap offset
+		move.w	PIXLV(v_lin_wr,a4),d5	; d5 <- line wrap offset
 		sub.w	d3,d5			; dest ptr has advanced n planes
 
 		move.l	rtn_tab+04(pc,d2.w),a3	; a3 -> entry point 
@@ -754,7 +754,7 @@ x_fg1bg1:	eor.l	d0,d2		; D' <- [D xor F] or M
 *		SV_LEN	number of lines to be returned
 *		SV_STAT	status and format of save buffer
 *
-*	_v_planes	number of planes in destination
+*	v_planes	number of planes in destination
 *	_v_line_wr	line wrap (byte width of form)
 *
 
@@ -778,12 +778,12 @@ cur_replace:
 		move.w	d4,d2
 		subq.w	#1,d2			; d2 <- adjust counter for dbra
 		moveq.l	#0,d3			; clr garbage in the upper word
-		move.w	PIXLV(_v_lin_wr,a5),d3	; d3 <- dy wrap value
+		move.w	PIXLV(v_lin_wr,a5),d3	; d3 <- dy wrap value
 
 		move.l	SV_ADDR(a2),a0		; a0 -> destination
 		lea	SV_BUF(a2),a1		; a1 -> save buffer
 
-		move.w	PIXLV(_v_planes,a5),d5	; d5 <- rez discriminator
+		move.w	PIXLV(v_planes,a5),d5	; d5 <- rez discriminator
 		cmp.w	#8,d5			; see if we are in 8 plane mode
 		beq	pln_8
 		subq.w	#2,d5
@@ -1001,7 +1001,7 @@ hang_it_up:	rts
 *   HIDE_CNT transitions from 0 to 1
 
 _HIDE_CUR:	PIXLA(a5)
-		lea	PIXLV(_HIDE_CNT,a5),a2
+		lea	PIXLV(HIDE_CNT,a5),a2
 		addq.w	#1,(a2)			; increment hide count
 		cmp.w	#1,(a2)			; count =1 => hide the cursor
 		bne	hid_cur1
@@ -1021,7 +1021,7 @@ hid_cur1:	rts
 *   redisplay cursor.
 
 _DIS_CUR:	PIXLA(a5)
-		cmp.w	#1,PIXLV(_HIDE_CNT,a5)	; If cur is to be redisplayed,
+		cmp.w	#1,PIXLV(HIDE_CNT,a5)	; If cur is to be redisplayed,
 		bgt	dec_hide_cnt		; perform the operation prior to
 		blt	fix_neg			; decrementing semaphore to 0
 
@@ -1030,7 +1030,7 @@ _DIS_CUR:	PIXLA(a5)
 		move.w	SR,d0
 		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
 
-		move.l	PIXLV(_GCURXY,a5),d1		; retrieve of X and Y
+		move.l	PIXLV(GCURXY,a5),d1		; retrieve of X and Y
 
 *   Some renegade programs reposition the mouse cursor by hiding the
 *   cursor, loading new values into GCURXY and showing the cursor.
@@ -1052,10 +1052,10 @@ _DIS_CUR:	PIXLA(a5)
 		PIXLA(a5)
 		move.l	(sp)+,a6
 
-dec_hide_cnt:	subq.w	#1,PIXLV(_HIDE_CNT,a5)	; decrement the redraw semaphore
+dec_hide_cnt:	subq.w	#1,PIXLV(HIDE_CNT,a5)	; decrement the redraw semaphore
 		rts
 
-fix_neg:	clr.w	PIXLV(_HIDE_CNT,a5)		; this should never be executed.
+fix_neg:	clr.w	PIXLV(HIDE_CNT,a5)		; this should never be executed.
 		rts				; it's just paranoia in action.
 
 
@@ -1072,20 +1072,20 @@ fix_neg:	clr.w	PIXLV(_HIDE_CNT,a5)		; this should never be executed.
 *	intin[5-20]  - 16 words of cursor mask
 *	intin[21-36] - 16 words of cursor data
 
-DEV_COL equ _DEV_TAB+26
+DEV_COL equ DEV_TAB+26
 
 _vsc_form: PIXLA(a2)
 		addq.b	#1,PIXLV(mouse_flag,a2)	; deny access to mouse_cdb
-		move.l	PIXLV(_INTIN,a2),a0		; a0 -> new cur def block
+		move.l	PIXLV(INTIN,a2),a0		; a0 -> new cur def block
 		lea	PIXLV(mouse_cdb,a2),a1	; a1 -> cdb buffer 
 
 		move.w	(a0)+,d0		; Get x hot spot
 		and.w	#$000F,d0		; truncate to < 16
-		move.w	d0,PIXLV(m_pos_hx,a2)		; init hot spot x
+		move.w	d0,PIXLV(m_poshx,a2)		; init hot spot x
 
 		move.w	(a0)+,d0		; get y hot spot
 		and.w	#$000F,d0		; truncate to < 16
-		move.w	d0,PIXLV(m_pos_hy,a2)		; init hot spot y
+		move.w	d0,PIXLV(m_poshy,a2)		; init hot spot y
 
 		move.w	(a0)+,PIXLV(m_planes,a2)	; Save the plane count
 
@@ -1131,7 +1131,7 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 		move.w	SR,d0
 		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
 
-		move.l	PIXLV(_GCURXY,a2),(a0)+	; setup the vblank draw packet
+		move.l	PIXLV(GCURXY,a2),(a0)+	; setup the vblank draw packet
 		bset.b	#0,(a0)
 
 		move.w	d0,SR			; >>>>  END ATOM  <<<<
@@ -1156,7 +1156,7 @@ _SET_CUR: PIXLA(a1)
 		move.w	SR,d0
 		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
 
-		move.l	d1,PIXLV(_GCURXY,a1)		; set GCURX and GCURY
+		move.l	d1,PIXLV(GCURXY,a1)		; set GCURX and GCURY
 		move.l	d1,(a0)+		; set vblank draw packet
 		bset.b	#0,(a0)			; mark data valid
 
@@ -1176,18 +1176,18 @@ _SET_CUR: PIXLA(a1)
 		xdef	_vq_mouse
 _vq_mouse:
 		PIXLA(a2)
-		move.l	PIXLV(_INTOUT,a2),a0		; a0 -> INTOUT[0]
-		move.l	PIXLV(_PTSOUT,a2),a1		; a1 -> PTSOUT[0]
+		move.l	PIXLV(INTOUT,a2),a0		; a0 -> INTOUT[0]
+		move.l	PIXLV(PTSOUT,a2),a1		; a1 -> PTSOUT[0]
 
 		move.w	 SR,d0
 		or.w	 #$0700,SR		; >>>> BEGIN ATOM <<<<
 
-		move.w	PIXLV(_MOUSE_BT,a2),(a0)	; INTOUT[0]   <- button status
-		move.l	PIXLV(_GCURXY,a2),(a1)	; PTSOUT[0-1] <- mouse X and Y
+		move.w	PIXLV(MOUSE_BT,a2),(a0)	; INTOUT[0]   <- button status
+		move.l	PIXLV(GCURXY,a2),(a1)	; PTSOUT[0-1] <- mouse X and Y
 
 		move.w	 d0,SR			; >>>>  END ATOM  <<<<
 
-		move.l	PIXLV(_CONTRL,a2),a0
+		move.l	PIXLV(CONTRL,a2),a0
 		moveq.l	 #1,d0
 		move.w	 d0,4(a0)		; CONTRL[2] <- INTOUT length
 		move.w	 d0,8(a0)		; CONTRL[4] <- PTSOUT length

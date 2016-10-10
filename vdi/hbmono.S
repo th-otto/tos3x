@@ -71,25 +71,25 @@ BM_FQ		equ  	$0040		; flush queue mask
 *-
 *  Mono-spaced text blt; no clipping to worry about
 *
-*   d0.w =  _DESTX
-*   d1.w =  _DESTY
+*   d0.w =  DESTX
+*   d1.w =  DESTY
 *   d2.w =  # of characters
-*   d3.w =  _DELY
+*   d3.w =  DELY
 *   a1   =  line A variable reference base
 *-
 hb_mono:
 	move.l	a1,a5		    ;a5 -> line A variable structure
-	add.l	#_FBASE,a5		;a5 -> _FBASE
+	add.l	#FBASE,a5		;a5 -> FBASE
 	lea	BLASTER+B_OFF,a4    ;12	 a4 -> base of bitblt regs
 
 	move.l	(a5)+,a0	    ;12	 a0 -> source form
-	move.w	(a5),B_S_WRAP(a4)   ;16	 load src form width     ( _FWIDTH   )
-	move.w	-86(a5),d7	    ;12	 d7 <- dst form width	 ( _v_lin_wr )
+	move.w	(a5),B_S_WRAP(a4)   ;16	 load src form width     ( FWIDTH   )
+	move.w	-86(a5),d7	    ;12	 d7 <- dst form width	 ( v_lin_wr )
 	move.w	d7,B_D_WRAP(a4)	    ;20	 load dst form width
-	muls	-90(a5),d1	    ;79> d1 <- offset to dst Ymin( _bytes_lin)
-	move.l	-80(a5),a2	    ;12	 a2 -> ascii char string ( _INTIN    )
-	move.w	-52(a5),d4	    ;12	 d4 <- writing mode      ( _WRT_MOD  )
-	move.w	-88(a5),d5	    ;12	 d5 <- number of planes  ( _v_planes )
+	muls	-90(a5),d1	    ;79> d1 <- offset to dst Ymin( bytes_lin)
+	move.l	-80(a5),a2	    ;12	 a2 -> ascii char string ( INTIN    )
+	move.w	-52(a5),d4	    ;12	 d4 <- writing mode      ( WRT_MOD  )
+	move.w	-88(a5),d5	    ;12	 d5 <- number of planes  ( v_planes )
 	subq.w	#1,d5		    ; 4	 d5 <- dbra plane counter
 
 	move.b	shf_tab(pc,d5.w),d7 ;12	 d7 <- horizontal shift factor
@@ -101,7 +101,7 @@ hb_mono:
 	addx.l	d0,d1		    ; 8	 d1 <- X offset + Y offset + x flag
 	add.l	_v_bas_ad,d1	    ;22	 d1 -> start of dst
 
-	move.w	18(a5),d6	    ;12	 d6 <- foreground color  ( _TEXT_FG  )
+	move.w	18(a5),d6	    ;12	 d6 <- foreground color  ( TEXT_FG  )
 	move.w	#1,B_D_SPAN(a4)	    ;16	 span of 1 word
 	move.w	#BM_SRC,B_LOGOP(a4) ;16  source and no pattern
 

@@ -71,7 +71,7 @@ VOID tt_vs_color(NOTHING)
 VOID vs_color(NOTHING)
 #endif
 {
-	register short *ptr = INTIN;
+	register short *ptr = LV(INTIN);
 	register short *rgb;
 	register short j, pen;
 	register short mode = (VIDINFO >> 8) & 7;	/* get video info     */
@@ -79,14 +79,14 @@ VOID vs_color(NOTHING)
 	register short total;
 
 
-	j = plane_mask[v_planes];			/* max pen allowed    */
+	j = plane_mask[LV(v_planes)];			/* max pen allowed    */
 
 
 	if ((pen = *ptr++) > j)				/* is col in range    */
 		return;
 
 	/* assume we don't want the extended color array */
-	rgb = &REQ_COL[pen][0];
+	rgb = &LV(REQ_COL)[pen][0];
 
 	switch (mode)
 	{
@@ -96,7 +96,7 @@ VOID vs_color(NOTHING)
 
 		temp = (VIDINFO & 15) << 4;		/* temp = bank * 16   */
 		if (temp != 0)
-			rgb = &REQ_X_COL[temp + pen - 16][0];	/* rgb -> extnded ary */
+			rgb = &LV(REQ_X_COL)[temp + pen - 16][0];	/* rgb -> extnded ary */
 
 		pen = (MAP_COL[pen] & j) + temp;	/* get lut offset     */
 		break;
@@ -116,7 +116,7 @@ VOID vs_color(NOTHING)
 
 	case _320x480:
 		if (pen > 15)
-			rgb = &REQ_X_COL[pen - 16][0];	/* rgb -> extended col array  */
+			rgb = &LV(REQ_X_COL)[pen - 16][0];	/* rgb -> extended col array  */
 
 		pen = MAP_COL[pen];				/* get lut offset                 */
 		break;
@@ -125,7 +125,7 @@ VOID vs_color(NOTHING)
 	*rgb++ = *ptr++;					/* copy RED, GREEN, components    */
 	*rgb++ = *ptr++;					/* into the request col array     */
 	*rgb = *ptr;
-	ptr = INTIN + 1;					/* point to red comp              */
+	ptr = LV(INTIN) + 1;					/* point to red comp              */
 
 
 	if (mode == _1280x960)
@@ -178,16 +178,16 @@ VOID vq_color(NOTHING)
 #endif
 {
 	register short i, j;
-	register short *ptr = INTIN;		/* col index val      */
+	register short *ptr = LV(INTIN);		/* col index val      */
 	register short *rgb;
-	register short *out = INTOUT;
+	register short *out = LV(INTOUT);
 	register short mode = (VIDINFO >> 8) & 7;	/* get video mode     */
 	register short pen;
 	register short temp;
 
-	CONTRL[4] = 4;						/* # of output ints   */
+	LV(CONTRL)[4] = 4;						/* # of output ints   */
 
-	j = plane_mask[v_planes];			/* max pen allowed    */
+	j = plane_mask[LV(v_planes)];			/* max pen allowed    */
 
 	if ((pen = *ptr++) > j)
 	{									/* col ndx in range ? */
@@ -198,7 +198,7 @@ VOID vq_color(NOTHING)
 	*out++ = pen;
 
 	/* assume we don't want the extended color array */
-	rgb = &REQ_COL[pen][0];
+	rgb = &LV(REQ_COL)[pen][0];
 
 
 	switch (mode)
@@ -215,7 +215,7 @@ VOID vq_color(NOTHING)
 
 	case _320x480:
 		if (pen > 15)
-			rgb = &REQ_X_COL[pen - 16][0];
+			rgb = &LV(REQ_X_COL)[pen - 16][0];
 
 		pen = (MAP_COL[pen] & j);
 		break;
@@ -223,7 +223,7 @@ VOID vq_color(NOTHING)
 	default:
 		i = (VIDINFO & 15) << 4;		/* i = bank * 16      */
 		if (i != 0)
-			rgb = &REQ_X_COL[i + pen - 16][0];
+			rgb = &LV(REQ_X_COL)[i + pen - 16][0];
 
 		pen = (MAP_COL[pen] & j) + i;
 	}

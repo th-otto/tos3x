@@ -31,7 +31,9 @@
  * Storage declarations for C structures
  */
 ATTRIBUTE virt_work;			/* attribute areas for workstations */
+#if !LINEA_HACK
 VDIVARS	vdivars;
+#endif
 #if TOSVERSION >= 0x400
 int16_t *lineAVar = &vdivars.vPlanes; /* accessed by asm code only */
 VDIVARS	*la = &vdiars; /* accessed by C code only */

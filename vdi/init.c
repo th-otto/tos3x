@@ -43,7 +43,7 @@ VOID init_st_tt_sp(NOTHING)
 #if VIDEL_SUPPORT
 	register int32_t *palMapPtr, i;
 
-	palMapPtr = pal_map;
+	palMapPtr = LV(pal_map);
 	for (i = 0; i < 256; i++)
 		*palMapPtr++ = i;				/* mapping is one to one for pens */
 #endif
@@ -71,7 +71,7 @@ VOID init_st_tt_sp(NOTHING)
 				LA_ROUTINES[V_VQCOLOR] = tt_vq_color;
 				LA_ROUTINES[V_VSCOLOR] = tt_vs_color;
 				InitTT();
-			} else if (cookieVal > TTCOOKIE && CUR_DEV->palSize != 2)
+			} else if (cookieVal > TTCOOKIE && LV(LA_CURDEV)->palSize != 2)
 			{
 				LA_ROUTINES[V_VQCOLOR] = sp_vq_color;
 				LA_ROUTINES[V_VSCOLOR] = sp_vs_color;
@@ -100,26 +100,26 @@ VOID InitST(NOTHING)
 
 	if (GetRez() == _640x400)
 	{
-		DEV_TAB[35] = 0;				/* color capability           */
-		DEV_TAB[39] = 2;				/* palette size               */
-		INQ_TAB[1] = 1;					/* number of background clrs  */
-		INQ_TAB[5] = 0;					/* video lookup table         */
+		LV(DEV_TAB)[35] = 0;				/* color capability           */
+		LV(DEV_TAB)[39] = 2;				/* palette size               */
+		LV(INQ_TAB)[1] = 1;					/* number of background clrs  */
+		LV(INQ_TAB)[5] = 0;					/* video lookup table         */
 	}
 
 	/* set up the REQ_COL array */
-	old_intin = INTIN;
-	old_intout = INTOUT;
-	old_contrl = CONTRL;
+	old_intin = LV(INTIN);
+	old_intout = LV(INTOUT);
+	old_contrl = LV(CONTRL);
 
-	CONTRL = new_contrl;
-	INTIN = new_intin;
-	INTOUT = new_intout;
+	LV(CONTRL) = new_contrl;
+	LV(INTIN) = new_intin;
+	LV(INTOUT) = new_intout;
 
 	new_intin[1] = 1;
-	dp = &REQ_COL[0][0];
+	dp = &LV(REQ_COL)[0][0];
 	sp = new_intout + 1;
 
-	for (i = 0; i < DEV_TAB[13]; i++)
+	for (i = 0; i < LV(DEV_TAB)[13]; i++)
 	{
 		new_intin[0] = i;
 		vq_color();
@@ -128,9 +128,9 @@ VOID InitST(NOTHING)
 		*dp++ = *(sp + 2);
 	}
 
-	CONTRL = old_contrl;
-	INTIN = old_intin;
-	INTOUT = old_intout;
+	LV(CONTRL) = old_contrl;
+	LV(INTIN) = old_intin;
+	LV(INTOUT) = old_intout;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -147,17 +147,17 @@ VOID InitTT(NOTHING)
 	EsetBank(0);						/* init to bank zero          */
 	InitTTLut();						/* initialize color lut       */
 
-	old_intin = INTIN;
-	old_intout = INTOUT;
-	old_contrl = CONTRL;
+	old_intin = LV(INTIN);
+	old_intout = LV(INTOUT);
+	old_contrl = LV(CONTRL);
 
-	CONTRL = new_contrl;
-	INTIN = new_intin;
-	INTOUT = new_intout;
-	temp = DEV_TAB[13];					/* temp <- #  pens available  */
+	LV(CONTRL) = new_contrl;
+	LV(INTIN) = new_intin;
+	LV(INTOUT) = new_intout;
+	temp = LV(DEV_TAB)[13];					/* temp <- #  pens available  */
 
 	new_intin[1] = 1;
-	dp = &REQ_COL[0][0];
+	dp = &LV(REQ_COL)[0][0];
 	sp = new_intout + 1;
 
 	/*
@@ -179,7 +179,7 @@ VOID InitTT(NOTHING)
 			*dp++ = sp[2];
 		}
 
-		dp = &REQ_X_COL[0][0];
+		dp = &LV(REQ_X_COL)[0][0];
 		for (i = 1; i < 16; i++)
 		{
 			EsetBank(i);
@@ -220,7 +220,7 @@ VOID InitTT(NOTHING)
 		/*
 		 * we have > 16 cols so fill the extended color array
 		 */
-		dp = &REQ_X_COL[0][0];
+		dp = &LV(REQ_X_COL)[0][0];
 		for (; i < temp; i++)
 		{
 			new_intin[0] = i;
@@ -232,9 +232,9 @@ VOID InitTT(NOTHING)
 		break;
 	}
 
-	CONTRL = old_contrl;
-	INTIN = old_intin;
-	INTOUT = old_intout;
+	LV(CONTRL) = old_contrl;
+	LV(INTIN) = old_intin;
+	LV(INTOUT) = old_intout;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -243,12 +243,12 @@ VOID InitSTSpLut(NOTHING)
 {
 	register int16_t count;
 
-	count = (CUR_DEV->maxPen > 16) ? 256 : 16;
+	count = (LV(LA_CURDEV)->maxPen > 16) ? 256 : 16;
 	SETRGB(0, count, colors);
 
-	if (CUR_DEV->planes == 1)
+	if (LV(LA_CURDEV)->planes == 1)
 		SETRGB(1, 1, colors + 15);
-	else if (CUR_DEV->planes == 2)
+	else if (LV(LA_CURDEV)->planes == 2)
 		SETRGB(3, 1, colors + 15);
 }
 
@@ -264,7 +264,7 @@ VOID Init16Pal(NOTHING)
 	register int16_t i, temp, *palMapPtr;
 	register volatile int16_t *lutPtr;
 
-	palMapPtr = pal_map;
+	palMapPtr = LV(pal_map);
 	for (i = 0; i < 256; i++)
 	{
 		R = G = B = colors[i];
@@ -319,7 +319,7 @@ VOID Init32Pal(NOTHING)
 	register int32_t R, G, B, *palMapPtr;
 	register int16_t i, temp;
 
-	palMapPtr = pal_map;
+	palMapPtr = LV(pal_map);
 	for (i = 0; i < 256; i++)
 		*palMapPtr++ = R | G | B;
 
@@ -339,16 +339,16 @@ VOID InitColReqArray(NOTHING)
 	int16_t new_contrl[7], new_intin[2], new_intout[4];
 
 	/* set up the REQ_COL array */
-	old_intin = INTIN;
-	old_intout = INTOUT;
-	old_contrl = CONTRL;
+	old_intin = LV(INTIN);
+	old_intout = LV(INTOUT);
+	old_contrl = LV(CONTRL);
 
-	CONTRL = new_contrl;
-	INTIN = new_intin;
-	INTOUT = new_intout;
+	LV(CONTRL) = new_contrl;
+	LV(INTIN) = new_intin;
+	LV(INTOUT) = new_intout;
 
 	new_intin[1] = 1;
-	dp = &REQ_COL[0][0];
+	dp = &LV(REQ_COL)[0][0];
 	sp = new_intout + 1;
 
 	for (i = 0; i < 16; i++)
@@ -361,8 +361,8 @@ VOID InitColReqArray(NOTHING)
 	}
 
 #if VIDEL_SUPPORT
-	dp = &REQ_X_COL[0][0];
-	temp = DEV_TAB[13];					/* temp <- #  pens available  */
+	dp = &LV(REQ_X_COL)[0][0];
+	temp = LV(DEV_TAB)[13];					/* temp <- #  pens available  */
 	for (; i < temp; i++)
 	{
 		new_intin[0] = i;
@@ -373,9 +373,9 @@ VOID InitColReqArray(NOTHING)
 	}
 #endif
 
-	CONTRL = old_contrl;
-	INTIN = old_intin;
-	INTOUT = old_intout;
+	LV(CONTRL) = old_contrl;
+	LV(INTIN) = old_intin;
+	LV(INTOUT) = old_intout;
 }
 
 /*----------------------------------------------------------------------------*/

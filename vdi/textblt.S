@@ -62,7 +62,7 @@ _CLC_DDA:
 	cmp.w	d1,d0			;if actual =< requested
 	ble	clc_smal		;  then scale down
 
-	move.w	#1,PIXLV(_T_SCLSTS,a0)	;set enlarge indicator
+	move.w	#1,PIXLV(T_SCLSTS,a0)	;set enlarge indicator
 	sub.w	d1,d0
 	cmp.w	d1,d0			;larger than 2x?
 	blt	smal_ok			;br if not
@@ -71,7 +71,7 @@ clc_big:
 	rts
 
 clc_smal:
-	clr.w	PIXLV(_T_SCLSTS,a0)		;clear enlarge indicator (scale down)
+	clr.w	PIXLV(T_SCLSTS,a0)		;clear enlarge indicator (scale down)
 	tst.w	d0			;check requested size
 	bne	smal_ok			;br if non-zero
 	moveq	#1,d0			;if 0 then make it 1 (minimum value)
@@ -87,8 +87,8 @@ smal_ok:
 *  Actual sizer routine
 *
 *  entry:
-*	_DDA_INC  = dda increment value
-*	_T_SCLSTS = scaling up or down flag (0 if down, 1 if up)
+*	DDA_INC  = dda increment value
+*	T_SCLSTS = scaling up or down flag (0 if down, 1 if up)
 *
 *    4(sp) = pixel size to be scaled
 *
@@ -104,7 +104,7 @@ _ACT_SIZ:
 	move.w	4(sp),d1		;get last stacked word to d1 (cx)
 	movem.l	d2-d3,-(sp)		; save c regs
 	move.w	#32767,d2		;d2 = accumulator = 1/2      (bx)
-	move.w	PIXLV(_DDA_INC,a0),d3		;d3 = dda_inc		     (dx)
+	move.w	PIXLV(DDA_INC,a0),d3		;d3 = dda_inc		     (dx)
 	cmp.w	#$FFFF,d3
 	beq	siz_doub
 
@@ -112,7 +112,7 @@ _ACT_SIZ:
 	subq.w	#1,d1			;zero adjust DELY count
 	bmi	siz_0			;if it was 0, just exit
 
-	btst.b	#0,PIXLV(1+(_T_SCLSTS),a0)	;check for shrink
+	btst.b	#0,PIXLV(1+(T_SCLSTS),a0)	;check for shrink
 	beq	sz_sm_lp		;br if so
 
 sz_lp:	add.w	d3,d2			;else, enlarge

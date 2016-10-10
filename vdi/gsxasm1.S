@@ -51,7 +51,7 @@ FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
 	move.l	func(r),r
 #else
 #define V_FUNC(func,la,r) \
-	move.l	LV((LA_USERDEVINIT)+func,la),r
+	move.l	LV((USERDEVINIT)+func,la),r
 #endif
 
 #define V_CALL(func,la,r) \
@@ -61,8 +61,8 @@ FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
 		V_FUNC(func,la,r) \
 		jmp (r)
 
-/* _v_planes == 0; stupid as68 does not optimize it */
-#define _V_PLANES
+/* v_planes == 0; stupid as68 does not optimize it */
+#define V_PLANES
 
 	text
 
@@ -191,11 +191,11 @@ y2		equ	6
 		xdef	_CLC_FLIT
 _CLC_FLIT:
 		PIXLA(a2)
-		move.l	PIXLV(_CONTRL,a2),a0
+		move.l	PIXLV(CONTRL,a2),a0
 		move.w	2(a0),d0	; d0 <- number of vectors
 		subq.w	#1,d0		; d0 <- dbra counter
 
-		move.l	PIXLV(_PTSIN,a2),a0		; a0 -> array of vertices
+		move.l	PIXLV(PTSIN,a2),a0		; a0 -> array of vertices
 		lea	_fill_buffer,a1		; a1 -> array of X coordinates
 		clr.w	PIXLV(fil_intersect,a2)	; init cnt of fill intrsctions
 
@@ -204,7 +204,7 @@ flit_lp:	move.w	y2(a0),d1	; d1 <- Y coordinate of 2nd endpoint
 		sub.w	d2,d1		; d1 <- dY
 		beq	no_fill_int	; Ignore Horizantal Vectors
 
-		move.w	PIXLV(_Y1,a2),d3	; d3 <- scanline Y
+		move.w	PIXLV(Y1,a2),d3	; d3 <- scanline Y
 		move.w	d3,d4
 		sub.w	d2,d4		; d4 <- dY1
 		sub.w	y2(a0),d3	; d3 <- dY2
@@ -260,11 +260,11 @@ sfi_cont:	lea	_fill_buffer,a0		; a0 -> list of intersections
 		move.w	PIXLV(fil_intersect,a2),d0
 		asr.w	#1,d0			; d0 <- number of x-pairs.
 		subq.w	#1,d0			; d0 <- dbra counter
-		tst.w	PIXLV(_CLIP,a2)		; is clipping on?
+		tst.w	PIXLV(CLIP,a2)		; is clipping on?
 		bne	dr_clip			; yes, branch.
 
-draw_lp:	move.w	(a1)+,PIXLV(_X1,a2)	; grab a pair of X intersections.
-		move.w	(a1)+,PIXLV(_X2,a2)
+draw_lp:	move.w	(a1)+,PIXLV(X1,a2)	; grab a pair of X intersections.
+		move.w	(a1)+,PIXLV(X2,a2)
 		move.w	d0,-(sp)	; save the count
 		move.l	a1,-(sp)	; save the pointer
 		bsr	_HABLINE	; fill between X's.
@@ -275,27 +275,27 @@ draw_lp:	move.w	(a1)+,PIXLV(_X1,a2)	; grab a pair of X intersections.
 		rts
 
 
-dr_clip:	move.w	(a1)+,PIXLV(_X1,a2)		; grab a pair of X intrsections
-		move.w	(a1)+,PIXLV(_X2,a2)
-		move.w	PIXLV(_XMN_CLIP,a2),d1	; clip X pair to minimum
-		move.w	PIXLV(_X1,a2),d2
-		move.w	PIXLV(_X2,a2),d3
+dr_clip:	move.w	(a1)+,PIXLV(X1,a2)		; grab a pair of X intrsections
+		move.w	(a1)+,PIXLV(X2,a2)
+		move.w	PIXLV(XMN_CLIP,a2),d1	; clip X pair to minimum
+		move.w	PIXLV(X1,a2),d2
+		move.w	PIXLV(X2,a2),d3
 		cmp.w	d1,d2		; is X1 < MINIMUM X ?
 		bge	drc_1		; if so, check for a total eclipse
 
 		cmp.w	d1,d3		; is X2 < minimum X ?
 		blt	drc_end		; if so, segment is totally obscured
 
-		move.w	d1,PIXLV(_X1,a2)		; clip X1 to minimum
+		move.w	d1,PIXLV(X1,a2)		; clip X1 to minimum
 
-drc_1:		move.w	PIXLV(_XMX_CLIP,a2),d1	; clip X pair to maximum
+drc_1:		move.w	PIXLV(XMX_CLIP,a2),d1	; clip X pair to maximum
 		cmp.w	d1,d3			; is X2 > maximum X ?
 		ble	drc_2			; no => draw segment
 
 		cmp.w	d1,d2		; is X1 > maximum X ?
 		bgt	drc_end		; if so, segment is totally obscured
 
-		move.w	d1,PIXLV(_X2,a2)	; clip X2 to maximum
+		move.w	d1,PIXLV(X2,a2)	; clip X2 to maximum
 
 drc_2:		move.w	d0,-(sp)	; save the dbra count
 		move.l	a1,-(sp)	; save the pointer to the point list
@@ -442,9 +442,9 @@ concat:
 #endif
 
 	PIXLA(a0)
-	muls	PIXLV(_bytes_lin,a0),d1	; d1 <- offset to (0,Y)
+	muls	PIXLV(bytes_lin,a0),d1	; d1 <- offset to (0,Y)
 
-	move.w	PIXLV(_v_planes,a0),d3
+	move.w	PIXLV(v_planes,a0),d3
 	move.b	shf_tab-1(pc,d3.w),d3	; d3 <- shift factor for plane adjust
 
 	move.w	d0,d2			; d2[15:00] <- signed X
@@ -473,9 +473,9 @@ shf_tab:   *    1 2   4       8		; number of planes
 **									     **
 **	ABLINE								     **
 **		 							     **
-**	  This routine draws a line between (_X1,_Y1) and (_X2,_Y2) using    **
-**	  Bresenham's algorithm. The line is modified by the _LN_MASK and    **
-**	  _WRT_MODE variables. This routine handles all 3 video resolutions  **
+**	  This routine draws a line between (X1,Y1) and (X2,Y2) using    **
+**	  Bresenham's algorithm. The line is modified by the LN_MASK and     **
+**	  WRT_MODE variables. This routine handles all 3 video resolutions  **
 **									     **
 **	Note:								     **
 **									     **
@@ -486,10 +486,10 @@ shf_tab:   *    1 2   4       8		; number of planes
 **									     **
 **	input:								     **
 **									     **
-**	   _X1,_Y1,_X2,_Y2 = coordinates.				     **
-**	         _v_planes = number of video planes. (resolution)	     **
-**	          _LN_MASK = line mask. (for dashed/dotted lines)	     **
-**	         _WRT_MODE = writing mode.			  	     **
+**	   X1,Y1,X2,Y2 = coordinates.				     **
+**	         v_planes = number of video planes. (resolution)	     **
+**	          LN_MASK = line mask. (for dashed/dotted lines)	     **
+**	         WRT_MODE = writing mode.			  	     **
 **									     **
 **			     0 => replace mode.				     **
 **			     1 => or mode.				     **
@@ -498,7 +498,7 @@ shf_tab:   *    1 2   4       8		; number of planes
 **									     **
 **	output:								     **
 **									     **
-**	  _LN_MASK rotated to proper alignment with ( _X2,_Y2 ).	     **
+**	  LN_MASK rotated to proper alignment with ( X2,Y2 ).	     **
 **									     **
 **									     **
 **	destroys:							     **
@@ -546,7 +546,7 @@ _ABLINE:
 		LA(a4)
 		moveq.l	#2,d0		; d0 <- XOR writing mode code
 
-		movem.w	LV(_X1,a4),d4-d7	; d4<-X1  d5<-Y1  d6<-X2  d7<-Y2
+		movem.w	LV(X1,a4),d4-d7	; d4<-X1  d5<-Y1  d6<-X2  d7<-Y2
 		cmp.w	d5,d7		; handle the horizontal case seperately
 		beq	hline		; (also handles single points)
 
@@ -564,10 +564,10 @@ _ABLINE:
 *   All single point lines (X1=X2, Y1=Y2) will be arrive here
 
 
-hline:		cmp.w	LV(_WRT_MODE,a4),d0	; the XOR writing mode requires
+hline:		cmp.w	LV(WRT_MODE,a4),d0	; the XOR writing mode requires
 		bne	no_trunk	; special endpoint treatment
 
-		tst.w	LV(_LSTLIN,a4)	; If this isn't the last line and
+		tst.w	LV(LSTLIN,a4)	; If this isn't the last line and
 		bne	no_trunk	; the line is longer than one point,
 		cmp.w	d4,d6		; truncate the line at the X2 vertex
 		beq	no_trunk	; (DRI: "works most of the time")
@@ -575,7 +575,7 @@ hline:		cmp.w	LV(_WRT_MODE,a4),d0	; the XOR writing mode requires
 
 rt_trunk:	subq.w	#2,d6		; d6 <- Xmax-2
 lf_trunk:	addq.w	#1,d6		; d6 <- Xmin+1 or Xmax-1
-		move.w	d6,LV(_X2,a4)	; must stay compatible with last rev
+		move.w	d6,LV(X2,a4)	; must stay compatible with last rev
 
 no_trunk:	cmp.w	d4,d6		; X1 must not be greater than X2
 		bge	in_order	; if it is, swap the endpoints
@@ -587,7 +587,7 @@ in_order:	move.w	d6,d1		; d1 <-  Xmax
 		addq.w	#1,d1		; d1 <-  Xmax-Xmin+1
 		and.w	#$000F,d1	; d1 <- (Xmax-Xmin+1) mod 16
 
-		lea	LV(_LN_MASK,a4),a0	; a0 -> line style pattern
+		lea	LV(LN_MASK,a4),a0	; a0 -> line style pattern
 		clr.w	d0		; d0 <- offset to next pattern plane
 
 		move.w	d1,-(sp)
@@ -596,9 +596,9 @@ in_order:	move.w	d6,d1		; d1 <-  Xmax
 
 *   Update line pattern mask for next segment (this doesn't really work)
 
-		move.w	(a0),d0		; d0 <- original _LN_MASK
+		move.w	(a0),d0		; d0 <- original LN_MASK
 		rol.w	d1,d0		; d0 <- rotated line pattern mask
-		move.w	d0,(a0)		; store rotated _LN_MASK
+		move.w	d0,(a0)		; store rotated LN_MASK
 
 		rts
 
@@ -608,11 +608,11 @@ in_order:	move.w	d6,d1		; d1 <-  Xmax
 
 aline:		lea	-FRAG_LEN(sp),sp  ; sp -> pixel fragment frame
 
-		move.w	LV(_V_PLANES,a4),d3  ; d3 <- number of planes
+		move.w	LV(V_PLANES,a4),d3  ; d3 <- number of planes
 		cmp.w	#MAX_PLANES,d3	  ; too many planes for the buffer ?
 		bhi	al_quit		  ; if so, end prematurely
 
-		cmp.w	LV(_WRT_MODE,a4),d0  ; don't build fragment for XOR mode
+		cmp.w	LV(WRT_MODE,a4),d0  ; don't build fragment for XOR mode
 		beq	no_frag
 
 		move.l	sp,a2		  ; a2 -> ram for pixel fragment code
@@ -638,17 +638,17 @@ xy_ok:		sub.w	d4,d6		; d6 <- dX
 		bset.l	d0,d1		; d1 <- OR mask
 
 		move.l	_v_bas_ad,a0		; a0 <- video base address
-		move.w	LV(_V_PLANES,a4),d3	; d3 <- plane count
+		move.w	LV(V_PLANES,a4),d3	; d3 <- plane count
 		add.w	d3,d3			; d3 <- off to nxt wrd in plane
 
-		move.w	LV(_bytes_lin,a4),d2	; d2 <- width of screen
+		move.w	LV(bytes_lin,a4),d2	; d2 <- width of screen
 		muls	d5,d2			; d2 <- offset to Y
 		add.l	d2,a0			; a0 -> line containing Y
 		asr.w	#4,d4			; d4 <- word offset to X
 		muls	d3,d4			; d4 <- offset to Xmin
 		add.l	d4,a0			; a0 -> word containing (Xmin,Y)
 
-		move.w	LV(_v_lin_wr,a4),d0	; d0 <- vertical offset
+		move.w	LV(v_lin_wr,a4),d0	; d0 <- vertical offset
 
 		sub.w	d5,d7		; d7 <- dY
 		bge	dy_ge_0		; if dY<0, adjust related parameters
@@ -670,18 +670,18 @@ dmax_dmin:	move.w	d6,d4		; d4 <- dMin
 		move.w	d4,d6		; d6 <- 2dMax -dMin
 		sub.w	d7,d6		; d6 <- e2             2dMin - 2dMax
 
-		move.w	LV(_WRT_MODE,a4),d0	; d0 <- writing mode code
+		move.w	LV(WRT_MODE,a4),d0	; d0 <- writing mode code
 		lsl.w	#2,d0
 		add.w	d0,a5		; a5 <- offset for particular mode
 
 		subq.w	#8,d0		; if XOR mode ...
 		bne	al_nxtmask
-		tst.w	LV(_LSTLIN,a4)	; and not last line ...
+		tst.w	LV(LSTLIN,a4)	; and not last line ...
 		bne	al_nxtmask
 
 		subq.w	#1,d7		; DRI kludge: don't plot last point
 
-al_nxtmask:	lea	LV(_LN_MASK,a4),a3	; a3 -> line style mask
+al_nxtmask:	lea	LV(LN_MASK,a4),a3	; a3 -> line style mask
 		move.w	(a3),d0		; d0 <- line style mask
 		move.w	d7,d2		; d2 <- dbra pixel counter
 		addq.w	#1,d2		; d2 <- pixels in line
@@ -731,7 +731,7 @@ wm_tbl:		dc.w	wm0y_nxt-*
 
 *+
 *   Build a fragment of code in ram that plots a pixel of the color specified
-*   by the _FG_B_PLANES. The parameters passed into the fragment at run-time
+*   by the FG_B_PLANES. The parameters passed into the fragment at run-time
 *   will be:
 *
 *	a3	thread from fragment back to master routine
@@ -758,7 +758,7 @@ pixfrag: ds.b 0
 
 		movem.w	i_tbl(pc),d0-d1/a1	; cache instr data in registers
 		move.l	a2,a0			; a0 <- working PC
-		move.l	LV(_FG_B_PLANES,a4),d2	; a1 -> bitplane color array
+		move.l	LV(FG_B_PLANES,a4),d2	; a1 -> bitplane color array
 
 pf_loop:	roxr.l	#1,d2			; get color for this plane
 		bcs	pf_or			; 0 => AND   1 => OR
@@ -1056,10 +1056,10 @@ wm2x_nc:	add.w	d5,d4		; d4 <- epsilon + e1		      4
 **	input:		X1 = minimum X of line	     (assumed to be clipped) **
 **			X2 = maximum X of line	     (assumed to be clipped) **
 **			Y1 = row that line is on     (assumed to be clipped) **
-**		    PATMSK = index mask for pattern			     **
-**		    PATPTR = pointer to start of pattern		     **
-**		 _v_planes = number of video planes			     **
-**		 _WRT_MODE = writing mode				     **
+**		    patmsk = index mask for pattern			     **
+**		    patptr = pointer to start of pattern		     **
+**		 v_planes = number of video planes			     **
+**		 WRT_MODE = writing mode				     **
 **									     **
 **			      0 => replace mode.			     **
 **			      1 => transparent mode.			     **
@@ -1100,16 +1100,16 @@ ST_HABLINE:
 _HABLINE:
 #endif
 	LA(a4)
-	movem.w	LV(_X1,a4),d4-d6		; d4 <- X1   d5 <- Y1   d6 <- X2
+	movem.w	LV(X1,a4),d4-d6		; d4 <- X1   d5 <- Y1   d6 <- X2
 
 		xdef	 fline
 fline:	move.w	d5,d0			; d0 <- Y1
-	and.w	LV(_patmsk,a4),d0		; d0 <- initial pattern index
+	and.w	LV(patmsk,a4),d0		; d0 <- initial pattern index
 	add.w	d0,d0			; d0 <- initial pattern offset
-	move.l	LV(_patptr,a4),a0		; a0 -> start of pattern
+	move.l	LV(patptr,a4),a0		; a0 -> start of pattern
 	add.w	d0,a0			; a0 -> pattern word
 
-	tst.w	LV(_multifill,a4)		; d0 <- offset to next pattern plane
+	tst.w	LV(multifill,a4)		; d0 <- offset to next pattern plane
 	sne	d0			; d0 <- 00: single plane pattern
 	and.w	#32,d0			; d0 <- 32: multiple plane pattern
 

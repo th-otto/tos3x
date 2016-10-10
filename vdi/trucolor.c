@@ -27,7 +27,7 @@
 
 VOID vs_32_color(NOTHING)
 {
-	register int16_t *ptr = INTIN;
+	register int16_t *ptr = LV(INTIN);
 	register int16_t *rgb;
 	register int16_t pen;
 	register int16_t temp;
@@ -40,9 +40,9 @@ VOID vs_32_color(NOTHING)
 	 * point to the proper color array
 	 */
 	if (pen > 15)
-		rgb = &REQ_X_COL[pen - 16][0];	/* use extended col array         */
+		rgb = &LV(REQ_X_COL)[pen - 16][0];	/* use extended col array         */
 	else
-		rgb = &REQ_COL[pen][0];
+		rgb = &LV(REQ_COL)[pen][0];
 
 
 	pen = MAP_COL[pen];					/* get lut offset                 */
@@ -50,7 +50,7 @@ VOID vs_32_color(NOTHING)
 	*rgb++ = *ptr++;					/* copy RED, GREEN, components    */
 	*rgb++ = *ptr++;					/* into the request col array     */
 	*rgb = *ptr;
-	ptr = INTIN + 1;					/* point to red comp              */
+	ptr = LV(INTIN) + 1;					/* point to red comp              */
 
 
 	/*
@@ -86,7 +86,7 @@ VOID vs_32_color(NOTHING)
 	total |= value;						/* value has the blue component   */
 
 #if VIDEL_SUPPORT
-	pal_map[pen] = total;				/* set the virtual RGB            */
+	LV(pal_map)[pen] = total;				/* set the virtual RGB            */
 #endif
 }
 
@@ -95,9 +95,9 @@ VOID vs_32_color(NOTHING)
 VOID vq_32_color(NOTHING)
 {
 	register int16_t i;
-	register int16_t *ptr = INTIN;		/* col index val      */
+	register int16_t *ptr = LV(INTIN);		/* col index val      */
 	register int16_t *rgb;
-	register int16_t *out = INTOUT;
+	register int16_t *out = LV(INTOUT);
 	register int16_t pen;
 #if VIDEL_SUPPORT
 	register int32_t temp;
@@ -105,7 +105,7 @@ VOID vq_32_color(NOTHING)
 
 	UNUSED(i);
 	
-	CONTRL[4] = 4;						/* # of output ints               */
+	LV(CONTRL)[4] = 4;						/* # of output ints               */
 
 	if ((pen = *ptr++) > 255)
 	{									/* col ndx in range ?             */
@@ -119,24 +119,24 @@ VOID vq_32_color(NOTHING)
 	 * point to the proper color array
 	 */
 	if (pen > 15)
-		rgb = &REQ_X_COL[pen - 16][0];	/* use ext col array  */
+		rgb = &LV(REQ_X_COL)[pen - 16][0];	/* use ext col array  */
 	else
-		rgb = &REQ_COL[pen][0];
+		rgb = &LV(REQ_COL)[pen][0];
 
 	pen = MAP_COL[pen];
 
 #if VIDEL_SUPPORT
 	if (*ptr--)
 	{									/* return col val set */
-		temp = pal_map[pen];
+		temp = LV(pal_map)[pen];
 		temp = (temp >> 16) & GUNMAX32;
 		*out++ = SMUL_DIV((int16_t) temp, 1000, GUNMAX32);	/* get red component  */
 
-		temp = pal_map[pen];
+		temp = LV(pal_map)[pen];
 		temp = (temp >> 8) & GUNMAX32;
 		*out++ = SMUL_DIV((int16_t) temp, 1000, GUNMAX32);	/* get green compont  */
 
-		temp = pal_map[pen];
+		temp = LV(pal_map)[pen];
 		temp &= GUNMAX32;
 		*out++ = SMUL_DIV((int16_t) temp, 1000, GUNMAX32);	/* get blue component */
 	} else
@@ -152,7 +152,7 @@ VOID vq_32_color(NOTHING)
 
 VOID vs_16_color(NOTHING)
 {
-	register int16_t *ptr = INTIN;
+	register int16_t *ptr = LV(INTIN);
 	register int16_t *rgb;
 	register int16_t pen;
 	register int16_t temp, maxGrVal;
@@ -165,9 +165,9 @@ VOID vs_16_color(NOTHING)
 	 * point to the proper color array
 	 */
 	if (pen > 15)
-		rgb = &REQ_X_COL[pen - 16][0];	/* use extended col array         */
+		rgb = &LV(REQ_X_COL)[pen - 16][0];	/* use extended col array         */
 	else
-		rgb = &REQ_COL[pen][0];
+		rgb = &LV(REQ_COL)[pen][0];
 
 
 	pen = MAP_COL[pen];					/* get lut offset                 */
@@ -175,7 +175,7 @@ VOID vs_16_color(NOTHING)
 	*rgb++ = *ptr++;					/* copy RED, GREEN, components    */
 	*rgb++ = *ptr++;					/* into the request col array     */
 	*rgb = *ptr;
-	ptr = INTIN + 1;					/* point to red comp              */
+	ptr = LV(INTIN) + 1;					/* point to red comp              */
 
 	/*
 	 * load RGB values into LUT
@@ -217,11 +217,11 @@ VOID vs_16_color(NOTHING)
 	value = SMUL_DIV(temp, GUNMAX16, 1000);	/* value gets the gun value       */
 	total |= value;						/* value has the blue component   */
 
-	total |= col_or_mask;				/* or in a predefined value       */
-	total &= col_and_mask;				/* and in a predefined value      */
+	total |= LV(col_or_mask);				/* or in a predefined value       */
+	total &= LV(col_and_mask);				/* and in a predefined value      */
 
 #if VIDEL_SUPPORT
-	ptr = pal_map + pen;
+	ptr = LV(pal_map) + pen;
 	*ptr++ = (int16_t) total;			/* set the virtual RGB            */
 	*ptr = (int16_t) total;				/* just in case 1st word is used  */
 #endif
@@ -232,9 +232,9 @@ VOID vs_16_color(NOTHING)
 VOID vq_16_color(NOTHING)
 {
 	register int16_t i;
-	register int16_t *ptr = INTIN;		/* col index val      */
+	register int16_t *ptr = LV(INTIN);		/* col index val      */
 	register int16_t *rgb;
-	register int16_t *out = INTOUT;
+	register int16_t *out = LV(INTOUT);
 	register int16_t pen;
 #if VIDEL_SUPPORT
 	register int16_t maxGrVal;
@@ -243,7 +243,7 @@ VOID vq_16_color(NOTHING)
 
 	UNUSED(i);
 	
-	CONTRL[4] = 4;						/* # of output ints               */
+	LV(CONTRL)[4] = 4;						/* # of output ints               */
 
 	if ((pen = *ptr++) > 255)
 	{									/* col ndx in range ?             */
@@ -257,20 +257,20 @@ VOID vq_16_color(NOTHING)
 	 * point to the proper color array
 	 */
 	if (pen > 15)
-		rgb = &REQ_X_COL[pen - 16][0];	/* use ext col array  */
+		rgb = &LV(REQ_X_COL)[pen - 16][0];	/* use ext col array  */
 	else
-		rgb = &REQ_COL[pen][0];
+		rgb = &LV(REQ_COL)[pen][0];
 
 	pen = MAP_COL[pen];
 
 #if VIDEL_SUPPORT
 	if (*ptr--)
 	{									/* return col val set */
-		temp = pal_map[pen];
+		temp = LV(pal_map)[pen];
 		temp = (temp >> 11) & GUNMAX16;	/* adjust for sign    */
 		*out++ = SMUL_DIV((int16_t) temp, 1000, GUNMAX16);	/* get red component  */
 
-		temp = pal_map[pen];
+		temp = LV(pal_map)[pen];
 		maxGrVal = GUNMAX16;
 		if (SPSHIFTMODE & PIXMASK)
 		{
@@ -281,7 +281,7 @@ VOID vq_16_color(NOTHING)
 
 		*out++ = SMUL_DIV((int16_t) temp, 1000, maxGrVal);	/* get green compont  */
 
-		temp = pal_map[pen];
+		temp = LV(pal_map)[pen];
 		temp &= GUNMAX16;
 		*out++ = SMUL_DIV((int16_t) temp, 1000, GUNMAX16);	/* get blue component */
 	} else

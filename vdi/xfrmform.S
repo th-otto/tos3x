@@ -68,7 +68,7 @@
 *
 *  in:
 *
-*	_CONTRL		address of control array (word wide)
+*	CONTRL		address of control array (word wide)
 *
 *	control(07-08)	address of source MFDB
 *	control(09-10)	address of destination MFDB
@@ -106,7 +106,7 @@ _vr_trnfm:
 	movem.l	d0-d4/a0-a2,-(sp)
 
 	PIXLA(a0)
-	move.l	PIXLV(_CONTRL,a0),a2		; a2 -> control array
+	move.l	PIXLV(CONTRL,a0),a2		; a2 -> control array
 	move.l	C_MFDB_S(a2),a0		; a0 -> source MFDB
 	move.l	C_MFDB_D(a2),a1		; a1 -> destination MFDB
 

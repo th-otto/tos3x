@@ -17,7 +17,7 @@
 * New generation VDI
 * 
 * Revision 2.3  90/02/23  18:20:53  lozben
-* We now use _FG_B_PLANES as our color index instead of _FG_BP_{0-7}.
+* We now use FG_B_PLANES as our color index instead of _FG_BP_{0-7}.
 * 
 * Revision 2.2  89/02/27  17:45:17  lozben
 * *** initial revision ***
@@ -110,20 +110,20 @@ hb_rect:
 	addq.w	#1,d7			; d7 <- height
 
 	move.l	_v_bas_ad,a1		; a1 -> start of dst form
-	muls	PIXLV(_bytes_lin,a2),d5	; d5 <- offset to 1st row of dst
+	muls	PIXLV(bytes_lin,a2),d5	; d5 <- offset to 1st row of dst
 	add.l	d5,a1			; a1 -> 1st row of dst rectangle
 
-	move.w	PIXLV(_v_planes,a2),d3	; d3 <- planes
+	move.w	PIXLV(v_planes,a2),d3	; d3 <- planes
 	move.w	d3,d6
 	subq.w	#1,d6			; d6 <- dbra plane counter
 
 	add.w	d3,d3			; d3 <- offset between words in plane
 	move.w	d3,(a4)+		; load B_D_NXWD
 
-	muls	d3,d0			; d0 <- offset to word containing _X1
+	muls	d3,d0			; d0 <- offset to word containing X1
 	add.l	d0,a1			; a1 -> 1st word of dst rectangle
 
-	move.w	PIXLV(_v_lin_wr,a2),d2	; d2 <- bytes per line
+	move.w	PIXLV(v_lin_wr,a2),d2	; d2 <- bytes per line
 	mulu	d1,d3			; d3 <- (SPAN-1) * NXWD
 	sub.w	d3,d2			; d2 <- dst wrap
 	move.w	d2,(a4)+		; load B_D_WRAP
@@ -132,13 +132,13 @@ hb_rect:
 	move.w	d1,B_D_SPAN(a5)
 
 	lea	op_table,a4		; a4 -> 1st logic op table
-	move.w	PIXLV(_WRT_MODE,a2),d0	; d0 <- writing mode (0-3)
+	move.w	PIXLV(WRT_MODE,a2),d0	; d0 <- writing mode (0-3)
 	add.w	d0,d0
 	add.w	d0,d0			; d0 <- offset to writing mode table
 	add.w	d0,a4			; a4 -> writing mode table
 
-	move.l	PIXLV(_patptr,a2),a0		; a0 -> start of pattern
-	move.w	PIXLV(_patmsk,a2),d0		; d0 <- pattern index mask
+	move.l	PIXLV(patptr,a2),a0		; a0 -> start of pattern
+	move.w	PIXLV(patmsk,a2),d0		; d0 <- pattern index mask
 
 	moveq.l	#15,d3			; d3 <- F mask, hi limit, & dbra count
 
@@ -153,10 +153,10 @@ hb_rect:
 	lsl.w	#8,d4			; d4[11:08] <- initial pattern index
 	or.w	#BM_GO,d4		; d4 <- SKEW word
 
-	tst.w	PIXLV(_multifill,a2)		; handle multi-plane fill seperately
+	tst.w	PIXLV(multifill,a2)		; handle multi-plane fill seperately
 	bne	rf_multi
 
-        move.l  PIXLV(_FG_B_PLANES,a2),d5	; d5 <- color index
+        move.l  PIXLV(FG_B_PLANES,a2),d5	; d5 <- color index
 
 *
 *  CASE I:  Standard monoplane patterns ( mask: 0, 1, 3, 7, 15 )
@@ -279,7 +279,7 @@ rf_dgen:
 	move.w	d7,a3			 ; a3 <- copy of line counter
 	move.w	#BM_GO,d1		 ; d1 <- SKEW template
 
-	tst.w	PIXLV(_multifill,a2)
+	tst.w	PIXLV(multifill,a2)
 	sne	d3			 ; d3 <- either xx00 or xxFF
 	and.w	#32,d3			 ; d3 <- offset to next pattern plane
 	lea	B_PATTERN(a5),a2	 ; a2 -> first pattern register

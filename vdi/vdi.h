@@ -112,7 +112,6 @@ VOID vqm_attributes PROTO((NOTHING));    /* VDI #36   */
 VOID vqf_attributes PROTO((NOTHING));    /* VDI #37   */
 VOID pline PROTO((NOTHING));
 BOOLEAN clip_line PROTO((NOTHING));
-int16_t code PROTO((int16_t x,int16_t y));
 VOID plygn PROTO((NOTHING));
 VOID gdp_rbox PROTO((NOTHING));
 VOID gdp_arc PROTO((NOTHING));

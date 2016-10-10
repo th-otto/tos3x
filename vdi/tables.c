@@ -177,7 +177,9 @@ int16_t	const m_cross[] = { 2, 2, -4, -3, 4, 3, 2, -4, 3, 4, -3 };
 
 int16_t	const m_dmnd[] = { 1, 5, -4, 0, 0, -3, 4, 0, 0, 3, -4, 0 };
 
+#if TOSVERSION >= 0x400
 const int16_t *const markhead[] = { m_dot, m_plus, m_star, m_square, m_cross, m_dmnd };
+#endif
 
 /* 306de: 00e3d25e */
 int16_t const MAP_COL[] = {

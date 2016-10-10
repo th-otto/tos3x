@@ -60,7 +60,7 @@ BOOLEAN get_seed PROTO((int16_t xin, int16_t yin, int16_t *xleftout, int16_t *xr
 
 VOID d_contourfill(NOTHING)
 {
-	quitfill = &retfalse;
+	LV(quitfill) = retfalse;
 	seedfill();
 }
 
@@ -86,17 +86,17 @@ VOID seedfill(NOTHING)
 	q = Q;
 
 	Qptr = &qPtr;
-	xleft = PTSIN[0];
-	oldy = PTSIN[1];
+	xleft = LV(PTSIN)[0];
+	oldy = LV(PTSIN)[1];
 
-	if (xleft < XMN_CLIP || xleft > XMX_CLIP || oldy < YMN_CLIP || oldy > YMX_CLIP)
+	if (xleft < LV(XMN_CLIP) || xleft > LV(XMX_CLIP) || oldy < LV(YMN_CLIP) || oldy > LV(YMX_CLIP))
 		return;
 
-	search_color = (int32_t) INTIN[0];
+	search_color = LV(INTIN)[0];
 
 	/* Range check the color and convert the index to a pixel value */
 
-	if (search_color >= DEV_TAB[13])
+	if (search_color >= LV(DEV_TAB)[13])
 		return;
 
 	else if (search_color < 0)
@@ -110,7 +110,7 @@ VOID seedfill(NOTHING)
 		/* Anding with the mask is only necessary when the driver supports */
 		/* move than one resolution.                       */
 
-		search_color = (int32_t) (MAP_COL[search_color] & tplane_mask[v_planes]);
+		search_color = (int32_t) (MAP_COL[search_color] & tplane_mask[LV(v_planes)]);
 #if VIDEL_SUPPORT
 		search_color = pal_map[search_color];
 #endif
@@ -118,9 +118,9 @@ VOID seedfill(NOTHING)
 	}
 
 	/* Initialize the line drawing parameters */
-	FG_B_PLANES = cur_work->fill_color;
+	FG_B_PLANES = LV(cur_work)->fill_color;
 
-	LSTLIN = FALSE;
+	LV(LSTLIN) = FALSE;
 
 	gotseed = end_pts(xleft, oldy, &oldxleft, &oldxright);
 
@@ -206,13 +206,13 @@ VOID crunch_Q(NOTHING)
 	register int16_t *q = Q;
 	register int16_t qTop = Qtop;
 
-	while ((q[qTop - 3] == EMPTY) && (qTop > Qbottom))
+	while (q[qTop - 3] == EMPTY && qTop > Qbottom)
 		qTop -= 3;
 
 	if (*Qptr >= qTop)
 	{
 		*Qptr = Qbottom;
-		done = (*quitfill) ();			/* quitfill is set via LINE "A"  */
+		done = (*LV(quitfill)) ();			/* quitfill is set via LINE "A"  */
 	}
 
 	Qtop = qTop;
@@ -293,14 +293,14 @@ VOID v_get_pixel(NOTHING)
 	pel = get_pix();
 
 #if VIDEL_SUPPORT
-	tmpPtr = (int32_t *)(int_out = INTOUT);
+	tmpPtr = (int32_t *)(int_out = LV(INTOUT));
 
-	if (form_id == PIXPACKED && v_planes > 8)
+	if (form_id == PIXPACKED && LV(v_planes) > 8)
 	{
 		*tmpPtr = pel;
 	} else
 #else
-	int_out = INTOUT;
+	int_out = LV(INTOUT);
 #endif
 	{
 		*int_out++ = pel;
@@ -308,10 +308,10 @@ VOID v_get_pixel(NOTHING)
 		/*
 		 * Correct the pel value for the # of planes so it is a standard value
 		 */
-		if ((INQ_TAB[4] == 1 && pel == 1) || (INQ_TAB[4] == 2 && pel == 3) || (INQ_TAB[4] == 4 && pel == 15))
+		if ((LV(INQ_TAB)[4] == 1 && pel == 1) || (LV(INQ_TAB)[4] == 2 && pel == 3) || (LV(INQ_TAB)[4] == 4 && pel == 15))
 			pel = 255;
 
 		*int_out = REV_MAP_COL[pel];
-		CONTRL[4] = 2;
+		LV(CONTRL)[4] = 2;
 	}
 }

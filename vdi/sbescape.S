@@ -56,10 +56,10 @@
 
             
 sb_cell:	move.l	a4,-(sp)		; save a4
-		move.w	PIXLV(_v_planes,a4),d1	; d1 <- number of planes
+		move.w	PIXLV(v_planes,a4),d1	; d1 <- number of planes
 		subq.w	#1,d1			; d1 <- dbra plane counter
 		move.w	PIXLV(v_fnt_wr,a4),d2		; d2 <- src width (in bytes)
-		move.w	PIXLV(_v_lin_wr,a4),d3	; d3 <- dst width (in bytes)
+		move.w	PIXLV(v_lin_wr,a4),d3	; d3 <- dst width (in bytes)
 		move.w	PIXLV(v_cel_ht,a4),d4
 		subq.w	#1,d4			; d4 <- cell height -1
 		move.l	a1,a5			; a5 -> 1st byte of destination
@@ -186,7 +186,7 @@ word_i:		move.w	(a2),d5		; d5 <- character word
 *
 * 
 *  in:  d1.w	   cell Y of region top
-*	v_cel_my   cell Y of region bottom
+*	v_celmy   cell Y of region bottom
 *
 *
 *  munged:	d0-d7/a2-a3
@@ -196,7 +196,7 @@ word_i:		move.w	(a2),d5		; d5 <- character word
 
 sb_scrup:
 
-	move.w	PIXLV(v_cel_my,a4),d3		; d3 <- Ymax
+	move.w	PIXLV(v_celmy,a4),d3		; d3 <- Ymax
 	move.w	d3,d7
 	sub.w	d1,d7			; d7 <- height of region in cells -1
 	beq	blank_up
@@ -205,15 +205,15 @@ sb_scrup:
 
 	move.w	PIXLV(v_cel_ht,a4),d0		; d0 <- cell height
 	mulu.w	d0,d1
-	mulu.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- cell wrap
-	mulu.w	PIXLV(_v_lin_wr,a4),d1	; d1 <- offset to (0,Ymin)
+	mulu.w	PIXLV(v_lin_wr,a4),d0	; d0 <- cell wrap
+	mulu.w	PIXLV(v_lin_wr,a4),d1	; d1 <- offset to (0,Ymin)
 
 	move.l	_v_bas_ad,a3		; a3 -> base of screen
 	add.l	d1,a3			; a3 -> scroll dst: Ymin
 	move.l	a3,a2
 	add.l	d0,a2			; a2 -> scroll src: Ymin+1
 
-	move.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- bytes per line
+	move.w	PIXLV(v_lin_wr,a4),d0	; d0 <- bytes per line
 	lsr.w	#4,d0			; d0 <- iterations per line
 	mulu	d0,d7			; d7 <- total iterations
 	subq.w	#1,d7			; d7 <- dbra loop counter
@@ -229,7 +229,7 @@ loop_up:
 blank_up:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	PIXLV(v_cel_mx,a4),d2		; d2 <- Xmax
+	move.w	PIXLV(v_celmx,a4),d2		; d2 <- Xmax
 	move.w	d3,d1			; d1 <- Ymax  d3 <- Ymax
 	move.l	LA_ROUTINES(a4),a2
 	move.l	V_BLANK(a2),a2		; a2 -> proper blank routine
@@ -239,7 +239,7 @@ blank_up:
 
 sb_scrdn:
 
-	move.w	PIXLV(v_cel_my,a4),d3		; d3 <- Ymax
+	move.w	PIXLV(v_celmy,a4),d3		; d3 <- Ymax
 	move.w	d3,d7
 	sub.w	d1,d7			; d7 <- height of region in cells -1
 	beq	blank_dn
@@ -248,15 +248,15 @@ sb_scrdn:
 
 	move.w	PIXLV(v_cel_ht,a4),d0		; d0 <- cell height
 	mulu.w	d0,d3
-	mulu.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- cell wrap
-	mulu.w	PIXLV(_v_lin_wr,a4),d3	; d3 <- offset to (0,Ymin)
+	mulu.w	PIXLV(v_lin_wr,a4),d0	; d0 <- cell wrap
+	mulu.w	PIXLV(v_lin_wr,a4),d3	; d3 <- offset to (0,Ymin)
 
 	move.l	_v_bas_ad,a2		; a2 -> base of screen
 	add.l	d3,a2			; a2 -> scroll src: 1st word of Ymax
 	move.l	a2,a3
 	add.w	d0,a3			; a3 -> scroll dst: 1st word of Ymax+1
 
-	move.w	PIXLV(_v_lin_wr,a4),d0	; d0 <- bytes per line
+	move.w	PIXLV(v_lin_wr,a4),d0	; d0 <- bytes per line
 	lsr.w	#4,d0			; d0 <- iterations per line
 	mulu	d0,d7			; d7 <- total iterations
 	subq.w	#1,d7			; d7 <- dbra loop counter
@@ -272,7 +272,7 @@ loop_dn:
 blank_dn:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	PIXLV(v_cel_mx,a4),d2		; d2 <- Xmax
+	move.w	PIXLV(v_celmx,a4),d2		; d2 <- Xmax
 	move.w	d1,d3			; d1 <- Ymin  d3 <- Ymin
 	move.l	LA_ROUTINES(a4),a2
 	move.l	V_BLANK(a2),a2		; a2 -> proper blank routine
@@ -343,12 +343,12 @@ blank_words:
 
 	move.w	PIXLV(v_cel_ht,a4),d7		; d7 <- current cell height
 	mulu.w	d1,d7			; d7 <- (cell height) * (Y top)
-	mulu.w	PIXLV(_v_lin_wr,a4),d7	; d7 <- offset to top of row at Ymin
+	mulu.w	PIXLV(v_lin_wr,a4),d7	; d7 <- offset to top of row at Ymin
 
 	move.l	_v_bas_ad,a2		; a2 -> base of screen
 	add.l	d7,a2			; a2 -> top of row at Ymin
 
-	move.w	PIXLV(_v_planes,a4),d6	; d6 <- number of planes
+	move.w	PIXLV(v_planes,a4),d6	; d6 <- number of planes
 	add.w	d6,d6			; make d6 word offset
 	move.w	log2_tab(pc,d6.w),d6	; d6 <- log2(planes)
 	add.w	d4,d4			; d4 <- byte offset to Xmin word
@@ -370,7 +370,7 @@ blank_words:
 	add.w	d0,d0			; d0 <- span of one plane in bytes
 	lsl.w	d6,d0			; d0 <- width of span in bytes
 	neg.w	d0
-	add.w	PIXLV(_v_lin_wr,a4),d0
+	add.w	PIXLV(v_lin_wr,a4),d0
 	move.w	d0,a3			; a3 <- wrap
 
 	sub.w	d1,d3			; d3 <- height-1 in cells

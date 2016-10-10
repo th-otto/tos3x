@@ -31,7 +31,7 @@
 #include "lineaequ.inc"
 
 
-PTSIN		equ	1024		; PTSIN maximum length:	1024 verticies
+max_vert		equ	1024		; PTSIN maximum length:	1024 verticies
 
 
 *******************************************************************************
@@ -84,7 +84,7 @@ _GSX_ENTRY:
 	move.w	d0,-(sp)	 ; save copy since driver may alter original
 	beq	no_ptsin	 ; no entries to copy
 
-	move.w	#PTSIN,d1	 ; d1 <- maximum length of ptsin array  (words)
+	move.w	#max_vert,d1	 ; d1 <- maximum length of ptsin array  (words)
 	cmp.w	d1,d0		 ; is it more than we have room for?
 	ble	ptsin_ok	 ; no, transfer this number
 
@@ -128,7 +128,7 @@ no_ptsin:
 *   Restore the vertex count in the callers control array
 
 	PIXLA(a2)
-	move.l	PIXLV(_CONTRL,a2),a0		; a0 -> CONTRL
+	move.l	PIXLV(CONTRL,a2),a0		; a0 -> CONTRL
 	move.w	(sp)+,2(a0)		; restore original array length
 
 	movem.l	(sp)+,d1-d7/a0-a6	; Restore the callers registers
@@ -138,4 +138,4 @@ no_ptsin:
 
 
 	xdef _MAX_VERT
-_MAX_VERT:	dc.w	PTSIN
+_MAX_VERT:	dc.w	max_vert

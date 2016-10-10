@@ -53,13 +53,22 @@
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
-#define X_MALLOC 0x48
-#define X_MFREE 0x49
+#define Malloc(size) trap(0x48, (long)(size))
+#define Mfree(ptr) trap(0x49, ptr)
 #define SPSHIFTMODE	    (* ((int16_t *) 0xff8266L))	/* sparrow shift mode */
 #define PIXMASK		    0x200			/* pix control in XGA */
 
+#if TOSVERSION < 0x400
+const int16_t *const markhead[] = { m_dot, m_plus, m_star, m_square, m_cross, m_dmnd };
+#endif
 
-/* EXTENDED INQUIRE */
+int16_t code PROTO((int16_t x,int16_t y));
+
+
+/*
+ * VDI #102 - vq_extnd - Extended inquire function
+ */
+/* 306de: 00e08b94 */
 VOID vq_extnd(NOTHING)
 {
 	register int16_t i;
@@ -71,78 +80,83 @@ VOID vq_extnd(NOTHING)
 
 	FLIP_Y = 1;
 
-	dp = PTSOUT;
+	dp = LV(PTSOUT);
 
-	if (*(INTIN) == 0)
+	if (LV(INTIN)[0] == 0)
 	{
-		sp = SIZ_TAB;
+		sp = LV(SIZ_TAB);
 		for (i = 0; i < 12; i++)
 			*dp++ = *sp++;
 
-		sp = DEV_TAB;
+		sp = LV(DEV_TAB);
 	} else
 	{
-		*dp++ = XMN_CLIP;				/* PTSOUT[0] */
-		*dp++ = YMN_CLIP;				/* PTSOUT[1] */
-		*dp++ = XMX_CLIP;				/* PTSOUT[2] */
-		*dp++ = YMX_CLIP;				/* PTSOUT[3] */
+		*dp++ = LV(XMN_CLIP);				/* PTSOUT[0] */
+		*dp++ = LV(YMN_CLIP);				/* PTSOUT[1] */
+		*dp++ = LV(XMX_CLIP);				/* PTSOUT[2] */
+		*dp++ = LV(YMX_CLIP);				/* PTSOUT[3] */
 
 		for (i = 4; i < 12; i++)
 			*dp++ = 0;
 
-		sp = INQ_TAB;
+		sp = LV(INQ_TAB);
 	}
 
-	dp = INTOUT;
+	dp = LV(INTOUT);
 	for (i = 0; i < 45; i++)
 		*dp++ = *sp++;
 
-	if (*(INTIN))						/* if extended inquire is requested */
+	if (LV(INTIN)[0])						/* if extended inquire is requested */
 	{
 		if (GETBLT() & 1)
-			INTOUT[6] = 5000;			/*     BiT BLiT performance = 5000  */
+			LV(INTOUT)[6] = 5000;			/*     BiT BLiT performance = 5000  */
 		else
-			INTOUT[6] = BLTPRFRM;		/*     non BiT BLiT performance     */
+			LV(INTOUT)[6] = BLTPRFRM;		/*     non BiT BLiT performance     */
 	}
 }
 
 
-/* CLOSE_WORKSTATION: */
-/* 30de: 00e08c5c */
+/*
+ * VDI #2 - v_clswk - Close workstation
+ */
+/* 306de: 00e08c5c */
 VOID v_clswk(NOTHING)
 {
 	ATTRIBUTE *next_work;
 
 	if (virt_work.next_work != NULL)
 	{									/* Are there VWs to close */
-		cur_work = virt_work.next_work;
+		LV(cur_work) = virt_work.next_work;
 		do
 		{
-			next_work = cur_work->next_work;
-			trap(X_MFREE, cur_work);
-		} while ((cur_work = next_work));
+			next_work = LV(cur_work)->next_work;
+			Mfree(LV(cur_work));
+		} while ((LV(cur_work) = next_work));
 	}
 
 	DINIT_G();
 }
 
 
-/* POLYLINE: */
+/*
+ * VDI #6 - v_pline - Polyline
+ */
+/* 306de: 00e08ca4 */
 VOID v_pline(NOTHING)
 {
 	register int16_t l;
 	register ATTRIBUTE *work_ptr;
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 	l = work_ptr->line_index;
-	LN_MASK = (l < 6) ? LINE_STYLE[l] : work_ptr->ud_ls;
+	LV(LN_MASK) = (l < 6) ? LINE_STYLE[l] : work_ptr->ud_ls;
 
-	FG_B_PLANES = work_ptr->line_color;
+	LV(FG_B_PLANES) = work_ptr->line_color;
 
 	if (work_ptr->line_width == 1)
 	{
 		pline();
-		work_ptr = cur_work;
+		work_ptr = LV(cur_work);
 		if ((work_ptr->line_beg | work_ptr->line_end) & ARROWED)
 			do_arrow();
 	} else
@@ -150,20 +164,31 @@ VOID v_pline(NOTHING)
 }
 
 
-/* POLYMARKER: */
+/*
+ * VDI #7 - v_pmarker - Polymarker
+ */
+/* 306de: 00e08d14 */
 VOID v_pmarker(NOTHING)
 {
 	int16_t i, j, num_lines, num_vert, x_center, y_center, sav_points[10];
 	int16_t sav_index, sav_color, sav_width, sav_beg, sav_end;
+#if TOSVERSION < 0x400
+	int unused;
+#endif
 	const int16_t *mrk_ptr;
-	int16_t *old_ptsin, scale, num_points, *src_ptr;
+	int16_t *old_ptsin;
+	int16_t scale, num_points, *src_ptr;
 	register int16_t h, *pts_in;
 	register const int16_t *m_ptr;
 	register ATTRIBUTE *work_ptr;
 
+#if TOSVERSION < 0x400
+	UNUSED(unused);
+#endif
+
 	/* Save the current polyline attributes which will be used. */
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 	sav_index = work_ptr->line_index;
 	sav_color = work_ptr->line_color;
 	sav_width = work_ptr->line_width;
@@ -177,15 +202,15 @@ VOID v_pmarker(NOTHING)
 	work_ptr->line_width = 1;
 	work_ptr->line_beg = 0;
 	work_ptr->line_end = 0;
-	CLIP = 1;
+	LV(CLIP) = 1;
 
 	scale = work_ptr->mark_scale;
 
 	/* Copy the PTSIN pointer since we will be doing polylines */
 
 	num_vert = CONTRL[1];
-	src_ptr = old_ptsin = PTSIN;
-	PTSIN = sav_points;
+	src_ptr = old_ptsin = LV(PTSIN);
+	LV(PTSIN) = sav_points;
 
 	/* Loop over the number of points. */
 
@@ -197,7 +222,7 @@ VOID v_pmarker(NOTHING)
 		src_ptr = pts_in;
 
 		/* Get the pointer to the appropriate marker type definition. */
-		m_ptr = markhead[cur_work->mark_index];
+		m_ptr = markhead[LV(cur_work)->mark_index];
 		num_lines = *m_ptr++;
 
 		/* Loop over the number of polylines which define the marker. */
@@ -225,11 +250,11 @@ VOID v_pmarker(NOTHING)
 
 	/* Restore the PTSIN pointer */
 
-	PTSIN = old_ptsin;
+	LV(PTSIN) = old_ptsin;
 
 	/* Restore the current polyline attributes. */
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 	work_ptr->line_index = sav_index;
 	work_ptr->line_color = sav_color;
 	work_ptr->line_width = sav_width;
@@ -238,14 +263,20 @@ VOID v_pmarker(NOTHING)
 }
 
 
-/* FILLED_AREA: */
+/*
+ * VDI #9 - v_fillarea - Filled area
+ */
+/* 306de: 00e08e5a */
 VOID v_fillarea(NOTHING)
 {
 	plygn();
 }
 
 
-/*  GDP: */
+/*
+ * VDI #5 - v_gdp - Graphic drawing primitives
+ */
+/* 306de: 00e08e66 */
 VOID v_gdp(NOTHING)
 {
 	int16_t i, ltmp_end, rtmp_end;
@@ -253,8 +284,8 @@ VOID v_gdp(NOTHING)
 	register ATTRIBUTE *work_ptr;
 
 	i = *(CONTRL + 5);
-	xy_pointer = PTSIN;
-	work_ptr = cur_work;
+	xy_pointer = LV(PTSIN);
+	work_ptr = LV(cur_work);
 
 	if ((i > 0) && (i < 11))
 	{
@@ -263,11 +294,11 @@ VOID v_gdp(NOTHING)
 		{
 		case 0:						/* GDP BAR - converted to alpha 2 RJG 12-1-84 */
 			dr_recfl();
-			if (cur_work->fill_per == TRUE)
+			if (LV(cur_work)->fill_per == TRUE)
 			{
-				LN_MASK = 0xffff;
+				LV(LN_MASK) = 0xffff;
 
-				xy_pointer = PTSIN;
+				xy_pointer = LV(PTSIN);
 				*(xy_pointer + 5) = *(xy_pointer + 7) = *(xy_pointer + 3);
 				*(xy_pointer + 3) = *(xy_pointer + 9) = *(xy_pointer + 1);
 				*(xy_pointer + 4) = *(xy_pointer + 2);
@@ -285,27 +316,27 @@ VOID v_gdp(NOTHING)
 			break;
 
 		case 3:						/* GDP CIRCLE */
-			xc = *xy_pointer;
-			yc = *(xy_pointer + 1);
-			xrad = *(xy_pointer + 4);
-			yrad = SMUL_DIV(xrad, xsize, ysize);
-			del_ang = 3600;
-			beg_ang = 0;
-			end_ang = 3600;
+			LV(xc) = *xy_pointer;
+			LV(yc) = *(xy_pointer + 1);
+			LV(xrad) = *(xy_pointer + 4);
+			LV(yrad) = SMUL_DIV(LV(xrad), xsize, ysize);
+			LV(del_ang) = 3600;
+			LV(beg_ang) = 0;
+			LV(end_ang) = 3600;
 			clc_nsteps();
 			clc_arc();
 			break;
 
 		case 4:						/* GDP ELLIPSE */
-			xc = *xy_pointer;
-			yc = *(xy_pointer + 1);
-			xrad = *(xy_pointer + 2);
-			yrad = *(xy_pointer + 3);
+			LV(xc) = *xy_pointer;
+			LV(yc) = *(xy_pointer + 1);
+			LV(xrad) = *(xy_pointer + 2);
+			LV(yrad) = *(xy_pointer + 3);
 			if (work_ptr->xfm_mode < 2)
-				yrad = yres - yrad;
-			del_ang = 3600;
-			beg_ang = 0;
-			end_ang = 0;
+				LV(yrad) = yres - LV(yrad);
+			LV(del_ang) = 3600;
+			LV(beg_ang) = 0;
+			LV(end_ang) = 0;
 			clc_nsteps();
 			clc_arc();
 			break;
@@ -321,7 +352,7 @@ VOID v_gdp(NOTHING)
 			rtmp_end = work_ptr->line_end;
 			work_ptr->line_end = SQUARED;
 			gdp_rbox();
-			work_ptr = cur_work;
+			work_ptr = LV(cur_work);
 			work_ptr->line_beg = ltmp_end;
 			work_ptr->line_end = rtmp_end;
 			break;
@@ -338,19 +369,22 @@ VOID v_gdp(NOTHING)
 }
 
 
-/* INQUIRE CURRENT POLYLINE ATTRIBUTES */
+/*
+ * VDI #35 - vql_attributes - Inquire Current Polyline Attributes
+ */
+/* 306de: 00e09016 */
 VOID vql_attributes(NOTHING)
 {
 	register int16_t *pointer;
 	register ATTRIBUTE *work_ptr;
 
-	pointer = INTOUT;
-	work_ptr = cur_work;
+	pointer = LV(INTOUT);
+	work_ptr = LV(cur_work);
 	*pointer++ = work_ptr->line_index + 1;
 	*pointer++ = REV_MAP_COL[work_ptr->line_color];
-	*pointer = WRT_MODE + 1;
+	*pointer = LV(WRT_MODE) + 1;
 
-	pointer = PTSOUT;
+	pointer = LV(PTSOUT);
 	*pointer++ = work_ptr->line_width;
 	*pointer = 0;
 
@@ -360,19 +394,22 @@ VOID vql_attributes(NOTHING)
 }
 
 
-/* INQUIRE CURRENT Polymarker ATTRIBUTES */
+/*
+ * VDI #36 - vqm_attributes - Inquire Current Polymarker Attributes
+ */
+/* 306de: 00e09072 */
 VOID vqm_attributes(NOTHING)
 {
 	register int16_t *pointer;
 	register ATTRIBUTE *work_ptr;
 
-	pointer = INTOUT;
-	work_ptr = cur_work;
+	pointer = LV(INTOUT);
+	work_ptr = LV(cur_work);
 	*pointer++ = work_ptr->mark_index;
 	*pointer++ = REV_MAP_COL[work_ptr->mark_color];
-	*pointer = WRT_MODE + 1;
+	*pointer = LV(WRT_MODE) + 1;
 
-	pointer = PTSOUT;
+	pointer = LV(PTSOUT);
 	*pointer++ = 0;
 	*pointer = work_ptr->mark_height;
 
@@ -383,18 +420,21 @@ VOID vqm_attributes(NOTHING)
 }
 
 
-/* INQUIRE CURRENT Fill Area ATTRIBUTES */
+/*
+ * VDI #37 - vqm_attributes - Inquire Current Fill Area Attributes
+ */
+/* 306de: 00e090d2 */
 VOID vqf_attributes(NOTHING)
 {
 	register int16_t *pointer;
 	register ATTRIBUTE *work_ptr;
 
-	pointer = INTOUT;
-	work_ptr = cur_work;
+	pointer = LV(INTOUT);
+	work_ptr = LV(cur_work);
 	*pointer++ = work_ptr->fill_style;
 	*pointer++ = REV_MAP_COL[work_ptr->fill_color];
 	*pointer++ = work_ptr->fill_index + 1;
-	*pointer++ = WRT_MODE + 1;
+	*pointer++ = LV(WRT_MODE) + 1;
 	*pointer = work_ptr->fill_per;
 
 	*(CONTRL + 4) = 5;
@@ -406,20 +446,20 @@ VOID pline(NOTHING)
 	int16_t i, *old_pointer;
 	register int16_t *pointer;
 
-	LSTLIN = FALSE;
-	old_pointer = PTSIN;
+	LV(LSTLIN) = FALSE;
+	old_pointer = LV(PTSIN);
 	for (i = (*(CONTRL + 1) - 1); i > 0; i--)
 	{
 		if (i == 1)
-			LSTLIN = TRUE;
+			LV(LSTLIN) = TRUE;
 
 		pointer = old_pointer;
-		X1 = *pointer++;
-		Y1 = *pointer++;
-		X2 = *pointer;
-		Y2 = *(pointer + 1);
+		LV(X1) = *pointer++;
+		LV(Y1) = *pointer++;
+		LV(X2) = *pointer;
+		LV(Y2) = *(pointer + 1);
 		old_pointer = pointer;
-		if (CLIP)
+		if (LV(CLIP))
 		{
 			if (clip_line())
 				ABLINE();
@@ -431,13 +471,19 @@ VOID pline(NOTHING)
 }
 
 
+/* 306de: 00e091ae */
 BOOLEAN clip_line(NOTHING)
 {
+#if TOSVERSION < 0x400 /* only registe declaration different */
+	int16_t _deltaX, _deltaY;
+	int16_t x1y1_clip_flag, x2y2_clip_flag, line_clip_flag;
+#else
 	register int16_t _deltaX, _deltaY;
-	register int16_t x1y1_clip_flag, x2y2_clip_flag, line_clip_flag;
+	register register int16_t x1y1_clip_flag, x2y2_clip_flag, line_clip_flag;
+#endif
 	register int16_t *x, *y;
 
-	while ((x1y1_clip_flag = code(X1, Y1)) | (x2y2_clip_flag = code(X2, Y2)))
+	while ((x1y1_clip_flag = code(LV(X1), LV(Y1))) | (x2y2_clip_flag = code(LV(X2), LV(Y2))))
 	{
 		if ((x1y1_clip_flag & x2y2_clip_flag))
 			return FALSE;
@@ -445,34 +491,34 @@ BOOLEAN clip_line(NOTHING)
 		if (x1y1_clip_flag)
 		{
 			line_clip_flag = x1y1_clip_flag;
-			x = &X1;
-			y = &Y1;
+			x = &LV(X1);
+			y = &LV(Y1);
 		} else
 		{
 			line_clip_flag = x2y2_clip_flag;
-			x = &X2;
-			y = &Y2;
+			x = &LV(X2);
+			y = &LV(Y2);
 		}
 
-		_deltaX = X2 - X1;
-		_deltaY = Y2 - Y1;
+		_deltaX = LV(X2) - LV(X1);
+		_deltaY = LV(Y2) - LV(Y1);
 
 		if (line_clip_flag & 1)
 		{								/* left ? */
-			*y = Y1 + SMUL_DIV(_deltaY, (XMN_CLIP - X1), _deltaX);
-			*x = XMN_CLIP;
+			*y = LV(Y1) + SMUL_DIV(_deltaY, (LV(XMN_CLIP) - LV(X1)), _deltaX);
+			*x = LV(XMN_CLIP);
 		} else if (line_clip_flag & 2)
 		{								/* right ? */
-			*y = Y1 + SMUL_DIV(_deltaY, (XMX_CLIP - X1), _deltaX);
-			*x = XMX_CLIP;
+			*y = LV(Y1) + SMUL_DIV(_deltaY, (LV(XMX_CLIP) - LV(X1)), _deltaX);
+			*x = LV(XMX_CLIP);
 		} else if (line_clip_flag & 4)
 		{								/* top ? */
-			*x = X1 + SMUL_DIV(_deltaX, (YMN_CLIP - Y1), _deltaY);
-			*y = YMN_CLIP;
+			*x = LV(X1) + SMUL_DIV(_deltaX, (LV(YMN_CLIP) - LV(Y1)), _deltaY);
+			*y = LV(YMN_CLIP);
 		} else if (line_clip_flag & 8)
 		{								/* bottom ? */
-			*x = X1 + SMUL_DIV(_deltaX, (YMX_CLIP - Y1), _deltaY);
-			*y = YMX_CLIP;
+			*x = LV(X1) + SMUL_DIV(_deltaX, (LV(YMX_CLIP) - LV(Y1)), _deltaY);
+			*y = LV(YMX_CLIP);
 		}
 	}
 
@@ -480,6 +526,7 @@ BOOLEAN clip_line(NOTHING)
 }
 
 
+/* 306de: 00e0932a */
 int16_t code(P(int16_t ) x, P(int16_t ) y)
 PP(int16_t x;)
 PP(int16_t y;)
@@ -488,13 +535,13 @@ PP(int16_t y;)
 
 	clip_flag = 0;
 
-	if (x < XMN_CLIP)
+	if (x < LV(XMN_CLIP))
 		clip_flag = 1;
-	else if (x > XMX_CLIP)
+	else if (x > LV(XMX_CLIP))
 		clip_flag = 2;
-	if (y < YMN_CLIP)
+	if (y < LV(YMN_CLIP))
 		clip_flag += 4;
-	else if (y > YMX_CLIP)
+	else if (y > LV(YMX_CLIP))
 		clip_flag += 8;
 
 	return clip_flag;
@@ -505,54 +552,54 @@ VOID plygn(NOTHING)
 {
 	register int16_t *pointer, i, k;
 
-	FG_B_PLANES = cur_work->fill_color;
+	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
 
-	LSTLIN = FALSE;
+	LV(LSTLIN) = FALSE;
 
-	pointer = PTSIN;
+	pointer = LV(PTSIN);
 	pointer++;
 
-	fill_maxy = fill_miny = *pointer++;
+	LV(fill_maxy) = LV(fill_miny) = *pointer++;
 	pointer++;
 
 	for (i = (*(CONTRL + 1) - 1); i > 0; i--)
 	{
 		k = *pointer++;
 		pointer++;
-		if (k < fill_miny)
-			fill_miny = k;
-		else if (k > fill_maxy)
-			fill_maxy = k;
+		if (k < LV(fill_miny))
+			LV(fill_miny) = k;
+		else if (k > LV(fill_maxy))
+			LV(fill_maxy) = k;
 	}
-	if (CLIP)
+	if (LV(CLIP))
 	{
-		if (fill_miny < YMN_CLIP)
+		if (LV(fill_miny) < LV(YMN_CLIP))
 		{
-			if (fill_maxy >= YMN_CLIP)	/* plygon starts before clip */
-				fill_miny = YMN_CLIP - 1;	/* plygon partial overlap */
+			if (LV(fill_maxy) >= LV(YMN_CLIP))	/* plygon starts before clip */
+				LV(fill_miny) = LV(YMN_CLIP) - 1;	/* plygon partial overlap */
 			else						/* see fix 1.2 */
 				return;					/* plygon entirely before clip */
 		}
-		if (fill_maxy > YMX_CLIP)
+		if (LV(fill_maxy) > LV(YMX_CLIP))
 		{
-			if (fill_miny <= YMX_CLIP)	/* plygon ends after clip */
-				fill_maxy = YMX_CLIP;	/* plygon partial overlap */
+			if (LV(fill_miny) <= LV(YMX_CLIP))	/* plygon ends after clip */
+				LV(fill_maxy) = LV(YMX_CLIP);	/* plygon partial overlap */
 			else
 				return;					/* plygon entirely after clip */
 		}
 	}
 	k = *(CONTRL + 1) * 2;
-	pointer = PTSIN;
+	pointer = LV(PTSIN);
 	*(pointer + k) = *pointer;
 	*(pointer + k + 1) = *(pointer + 1);
-	for (Y1 = fill_maxy; Y1 > fill_miny; Y1--)
+	for (LV(Y1) = LV(fill_maxy); LV(Y1) > LV(fill_miny); LV(Y1)--)
 	{
-		fil_intersect = 0;
+		LV(fil_intersect) = 0;
 		CLC_FLIT();
 	}
-	if (cur_work->fill_per == TRUE)
+	if (LV(cur_work)->fill_per == TRUE)
 	{
-		LN_MASK = 0xffff;
+		LV(LN_MASK) = 0xffff;
 		(*(CONTRL + 1))++;
 		pline();
 	}
@@ -567,72 +614,72 @@ VOID gdp_rbox(NOTHING)
 	register ATTRIBUTE *work_ptr;
 
 #ifndef __ALCYON__
-	pointer = PTSIN; /* BUG: not initialized here */
+	pointer = LV(PTSIN); /* BUG: not initialized here */
 #endif
 	arb_corner(pointer, LLUR);
 
-	pointer = PTSIN;
-	X1 = *pointer++;
-	Y1 = *pointer++;
-	X2 = *pointer++;
-	Y2 = *pointer;
+	pointer = LV(PTSIN);
+	LV(X1) = *pointer++;
+	LV(Y1) = *pointer++;
+	LV(X2) = *pointer++;
+	LV(Y2) = *pointer;
 
-	rdeltax = (X2 - X1) / 2;
-	rdeltay = (Y1 - Y2) / 2;
+	rdeltax = (LV(X2) - LV(X1)) / 2;
+	rdeltay = (LV(Y1) - LV(Y2)) / 2;
 
-	xrad = xres >> 6;
-	if (xrad > rdeltax)
-		xrad = rdeltax;
+	LV(xrad) = xres >> 6;
+	if (LV(xrad) > rdeltax)
+		LV(xrad) = rdeltax;
 
-	yrad = SMUL_DIV(xrad, xsize, ysize);
-	if (yrad > rdeltay)
-		yrad = rdeltay;
+	LV(yrad) = SMUL_DIV(LV(xrad), xsize, ysize);
+	if (LV(yrad) > rdeltay)
+		LV(yrad) = rdeltay;
 
-	pointer = PTSIN;
+	pointer = LV(PTSIN);
 	*pointer++ = 0;
-	*pointer++ = yrad;
+	*pointer++ = LV(yrad);
 
-	*pointer++ = SMUL_DIV(12539, xrad, 32767);	/* Icos(675) = 12539 */
-	*pointer++ = SMUL_DIV(30271, yrad, 32767);	/* Isin(675) = 30271 */
-	*pointer++ = SMUL_DIV(23170, xrad, 32767);	/* Icos(450) = 23170 */
-	*pointer++ = SMUL_DIV(23170, yrad, 32767);	/* Isin(450) = 23170 */
-	*pointer++ = SMUL_DIV(30271, xrad, 32767);	/* Icos(225) = 30271 */
-	*pointer++ = SMUL_DIV(12539, yrad, 32767);	/* Isin(225) = 12539 */
+	*pointer++ = SMUL_DIV(12539, LV(xrad), 32767);	/* Icos(675) = 12539 */
+	*pointer++ = SMUL_DIV(30271, LV(yrad), 32767);	/* Isin(675) = 30271 */
+	*pointer++ = SMUL_DIV(23170, LV(xrad), 32767);	/* Icos(450) = 23170 */
+	*pointer++ = SMUL_DIV(23170, LV(yrad), 32767);	/* Isin(450) = 23170 */
+	*pointer++ = SMUL_DIV(30271, LV(xrad), 32767);	/* Icos(225) = 30271 */
+	*pointer++ = SMUL_DIV(12539, LV(yrad), 32767);	/* Isin(225) = 12539 */
 
-	*pointer++ = xrad;
+	*pointer++ = LV(xrad);
 	*pointer = 0;
 
-	pointer = PTSIN;
-	xc = X2 - xrad;
-	yc = Y1 - yrad;
+	pointer = LV(PTSIN);
+	LV(xc) = LV(X2) - LV(xrad);
+	LV(yc) = LV(Y1) - LV(yrad);
 	j = 10;
 	for (i = 9; i >= 0; i--)
 	{
-		*(pointer + j + 1) = yc + *(pointer + i--);
-		*(pointer + j) = xc + *(pointer + i);
+		*(pointer + j + 1) = LV(yc) + *(pointer + i--);
+		*(pointer + j) = LV(xc) + *(pointer + i);
 		j += 2;
 	}
-	xc = X1 + xrad;
+	LV(xc) = LV(X1) + LV(xrad);
 	j = 20;
 	for (i = 0; i < 10; i++)
 	{
-		*(pointer + j++) = xc - *(pointer + i++);
-		*(pointer + j++) = yc + *(pointer + i);
+		*(pointer + j++) = LV(xc) - *(pointer + i++);
+		*(pointer + j++) = LV(yc) + *(pointer + i);
 	}
-	yc = Y2 + yrad;
+	LV(yc) = LV(Y2) + LV(yrad);
 	j = 30;
 	for (i = 9; i >= 0; i--)
 	{
-		*(pointer + j + 1) = yc - *(pointer + i--);
-		*(pointer + j) = xc - *(pointer + i);
+		*(pointer + j + 1) = LV(yc) - *(pointer + i--);
+		*(pointer + j) = LV(xc) - *(pointer + i);
 		j += 2;
 	}
-	xc = X2 - xrad;
+	LV(xc) = LV(X2) - LV(xrad);
 	j = 0;
 	for (i = 0; i < 10; i++)
 	{
-		*(pointer + j++) = xc + *(pointer + i++);
-		*(pointer + j++) = yc - *(pointer + i);
+		*(pointer + j++) = LV(xc) + *(pointer + i++);
+		*(pointer + j++) = LV(yc) - *(pointer + i);
 	}
 	*(pointer + 40) = *pointer;
 	*(pointer + 41) = *(pointer + 1);
@@ -641,11 +688,11 @@ VOID gdp_rbox(NOTHING)
 	*(pointer + 1) = 21;
 	if (*(pointer + 5) == 8)
 	{
-		work_ptr = cur_work;
+		work_ptr = LV(cur_work);
 		i = work_ptr->line_index;
-		LN_MASK = (i < 6) ? LINE_STYLE[i] : work_ptr->ud_ls;
+		LV(LN_MASK) = (i < 6) ? LINE_STYLE[i] : work_ptr->ud_ls;
 
-		FG_B_PLANES = work_ptr->line_color;
+		LV(FG_B_PLANES) = work_ptr->line_color;
 
 		if (work_ptr->line_width == 1)
 		{
@@ -665,45 +712,45 @@ VOID gdp_arc(NOTHING)
 {
 	register int16_t *pointer;
 
-	pointer = INTIN;
+	pointer = LV(INTIN);
 
-	beg_ang = *pointer++;
-	end_ang = *pointer;
-	del_ang = end_ang - beg_ang;
-	if (del_ang < 0)
-		del_ang += 3600;
+	LV(beg_ang) = *pointer++;
+	LV(end_ang) = *pointer;
+	LV(del_ang) = LV(end_ang) - LV(beg_ang);
+	if (LV(del_ang) < 0)
+		LV(del_ang) += 3600;
 
-	pointer = PTSIN;
-	xrad = *(pointer + 6);
-	yrad = SMUL_DIV(xrad, xsize, ysize);
+	pointer = LV(PTSIN);
+	LV(xrad) = *(pointer + 6);
+	LV(yrad) = SMUL_DIV(LV(xrad), xsize, ysize);
 	clc_nsteps();
 
 #if 9 /* removed 5/1/86 LT */
 
-	n_steps = SMUL_DIV(del_ang, n_steps, 3600);
-	if (n_steps == 0)
+	LV(n_steps) = SMUL_DIV(LV(del_ang), LV(n_steps), 3600);
+	if (LV(n_steps) == 0)
 		return;
 #endif
 
-	xc = *pointer++;
-	yc = *pointer;
+	LV(xc) = *pointer++;
+	LV(yc) = *pointer;
 	clc_arc();
 }
 
 
 VOID clc_nsteps(NOTHING)
 {
-	if (xrad > yrad)
-		n_steps = xrad;
+	if (LV(xrad) > LV(yrad))
+		LV(n_steps) = LV(xrad);
 	else
-		n_steps = yrad;
-	n_steps = n_steps >> 2;
-	if (n_steps < MIN_ARC_CT)
-		n_steps = MIN_ARC_CT;
+		LV(n_steps) = LV(yrad);
+	LV(n_steps) = LV(n_steps) >> 2;
+	if (LV(n_steps) < MIN_ARC_CT)
+		LV(n_steps) = MIN_ARC_CT;
 	else
 	{
-		if (n_steps > MAX_ARC_CT)
-			n_steps = MAX_ARC_CT;
+		if (LV(n_steps) > MAX_ARC_CT)
+			LV(n_steps) = MAX_ARC_CT;
 	}
 }
 
@@ -712,25 +759,25 @@ VOID gdp_ell(NOTHING)
 {
 	register int16_t *pointer;
 
-	pointer = INTIN;
-	beg_ang = *pointer++;
-	end_ang = *pointer;
-	del_ang = end_ang - beg_ang;
-	if (del_ang < 0)
-		del_ang += 3600;
+	pointer = LV(INTIN);
+	LV(beg_ang) = *pointer++;
+	LV(end_ang) = *pointer;
+	LV(del_ang) = LV(end_ang) - LV(beg_ang);
+	if (LV(del_ang) < 0)
+		LV(del_ang) += 3600;
 
-	pointer = PTSIN;
-	xc = *pointer++;
-	yc = *pointer++;
-	xrad = *pointer++;
-	yrad = *pointer;
-	if (cur_work->xfm_mode < 2)
-		yrad = yres - yrad;
+	pointer = LV(PTSIN);
+	LV(xc) = *pointer++;
+	LV(yc) = *pointer++;
+	LV(xrad) = *pointer++;
+	LV(yrad) = *pointer;
+	if (LV(cur_work)->xfm_mode < 2)
+		LV(yrad) = yres - LV(yrad);
 	clc_nsteps();
 
 #if 0 /*  removed 5/1/86 LT */
-	n_steps = SMUL_DIV(del_ang, n_steps, 3600);
-	if (n_steps == 0)
+	LV(n_steps) = SMUL_DIV(LV(del_ang), LV(n_steps), 3600);
+	if (LV(n_steps) == 0)
 		return;
 #endif
 
@@ -743,24 +790,24 @@ VOID clc_arc(NOTHING)
 	int16_t i, j;
 	register int16_t *cntl_ptr, *xy_ptr;
 
-	if (CLIP)
+	if (LV(CLIP))
 	{
-		if (((xc + xrad) < XMN_CLIP) || ((xc - xrad) > XMX_CLIP) ||
-			((yc + yrad) < YMN_CLIP) || ((yc - yrad) > YMX_CLIP))
+		if (((LV(xc) + LV(xrad)) < LV(XMN_CLIP)) || ((LV(xc) - LV(xrad)) > LV(XMX_CLIP)) ||
+			((LV(yc) + LV(yrad)) < LV(YMN_CLIP)) || ((LV(yc) - LV(yrad)) > LV(YMX_CLIP)))
 			return;
 	}
-	start = angle = beg_ang;
+	LV(start) = LV(angle) = LV(beg_ang);
 	i = j = 0;
 	Calc_pts(j);
-	for (i = 1; i < n_steps; i++)
+	for (i = 1; i < LV(n_steps); i++)
 	{
 		j += 2;
-		angle = SMUL_DIV(del_ang, i, n_steps) + start;
+		LV(angle) = SMUL_DIV(LV(del_ang), i, LV(n_steps)) + LV(start);
 		Calc_pts(j);
 	}
 	j += 2;
-	i = n_steps;
-	angle = end_ang;
+	i = LV(n_steps);
+	LV(angle) = LV(end_ang);
 	Calc_pts(j);
 
 /*----------------------------------------------------------------------*/
@@ -769,16 +816,16 @@ VOID clc_arc(NOTHING)
 /*----------------------------------------------------------------------*/
 
 	cntl_ptr = CONTRL;
-	xy_ptr = PTSIN;
+	xy_ptr = LV(PTSIN);
 
-	*(cntl_ptr + 1) = n_steps + 1;		/* since loop in Clc_arc starts at 0 */
+	*(cntl_ptr + 1) = LV(n_steps) + 1;		/* since loop in Clc_arc starts at 0 */
 	if ((*(cntl_ptr + 5) == 3) || (*(cntl_ptr + 5) == 7))	/* pie wedge */
 	{
-		n_steps++;
+		LV(n_steps)++;
 		j += 2;
-		*(xy_ptr + j) = xc;
-		*(xy_ptr + j + 1) = yc;
-		*(cntl_ptr + 1) = n_steps + 1;
+		*(xy_ptr + j) = LV(xc);
+		*(xy_ptr + j + 1) = LV(yc);
+		*(cntl_ptr + 1) = LV(n_steps) + 1;
 	}
 	if ((*(cntl_ptr + 5) == 2) || (*(cntl_ptr + 5) == 6))	/* open arc */
 		v_pline();
@@ -794,10 +841,10 @@ PP(int16_t j;)
 	int16_t k;
 	register int16_t *pointer;
 
-	pointer = PTSIN;
-	k = SMUL_DIV(Icos(angle), xrad, 32767) + xc;
+	pointer = LV(PTSIN);
+	k = SMUL_DIV(Icos(LV(angle)), LV(xrad), 32767) + LV(xc);
 	*(pointer + j) = k;
-	k = yc - SMUL_DIV(Isin(angle), yrad, 32767);	/*FOR RASTER CORDS. */
+	k = LV(yc) - SMUL_DIV(Isin(LV(angle)), LV(yrad), 32767);	/*FOR RASTER CORDS. */
 	*(pointer + j + 1) = k;
 }
 
@@ -808,17 +855,17 @@ VOID st_fl_ptr(NOTHING)
 	register const int16_t *pp;
 	register ATTRIBUTE *work_ptr;
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 	fi = work_ptr->fill_index;
 	pm = 0;
 	switch (work_ptr->fill_style)
 	{
 	case 0:
-		pp = &HOLLOW;
+		pp = HOLLOW;
 		break;
 
 	case 1:
-		pp = &SOLID;
+		pp = SOLID;
 		break;
 
 	case 2:
@@ -866,17 +913,17 @@ VOID cir_dda(NOTHING)
 
 	/* Calculate the number of vertical pixels required. */
 
-	d = cur_work->line_width;
-	num_qc_lines = (d * xsize / ysize) / 2 + 1;
+	d = LV(cur_work)->line_width;
+	LV(num_qc_lines) = (d * xsize / ysize) / 2 + 1;
 
 	/* Initialize the circle DDA.  "y" is set to the radius. */
-	line_cw = d;
+	LV(line_cw) = d;
 	y = (d + 1) / 2;
 	x = 0;
 	d = 3 - 2 * y;
 
-	xptr = &q_circle[x];
-	yptr = &q_circle[y];
+	xptr = &LV(q_circle)[x];
+	yptr = &LV(q_circle)[y];
 
 	/* Do an octant, starting at north.  The values for the next octant */
 	/* (clockwise) will be filled by transposing x and y.               */
@@ -899,13 +946,13 @@ VOID cir_dda(NOTHING)
 	}
 
 	if (x == y)
-		q_circle[x] = x;
+		LV(q_circle)[x] = x;
 
 	/* Fake a pixel averaging when converting to non-1:1 aspect ratio. */
 	if (xsize > ysize)
 	{
 
-		d = x = (line_cw + 1) / 2;
+		d = x = (LV(line_cw) + 1) / 2;
 		i = x * xsize / ysize;
 
 		for (; i > 0; i--)
@@ -913,25 +960,26 @@ VOID cir_dda(NOTHING)
 			y = i * ysize / xsize;
 
 			if (y == d)
-				q_circle[i] = q_circle[x];
-			else
+			{
+				LV(q_circle)[i] = LV(q_circle)[x];
+			} else
 			{
 				d = y;
 				x -= 1;
-				q_circle[i] = q_circle[x];
+				LV(q_circle)[i] = LV(q_circle)[x];
 			}
 		}
 	} else
 	{
 		x = 1;
-		yptr = q_circle + 1;
+		yptr = LV(q_circle) + 1;
 
-		for (i = 1; i <= num_qc_lines; i++)
+		for (i = 1; i <= LV(num_qc_lines); i++)
 		{
 			y = i * ysize / xsize;
 			d = 0;
 
-			xptr = &q_circle[x];
+			xptr = &LV(q_circle)[x];
 
 			for (j = x; j <= y; j++)
 				d += *xptr++;
@@ -956,8 +1004,8 @@ VOID wline(NOTHING)
 	if ((numpts = *(CONTRL + 1)) < 2)
 		return;
 
-	work_ptr = cur_work;
-	if (work_ptr->line_width != line_cw)
+	work_ptr = LV(cur_work);
+	if (work_ptr->line_width != LV(line_cw))
 		cir_dda();
 
 	/* If the ends are arrowed, output them. */
@@ -969,14 +1017,14 @@ VOID wline(NOTHING)
 
 	/* Initialize the starting point for the loop. */
 
-	old_ptsin = pointer = PTSIN;
+	old_ptsin = pointer = LV(PTSIN);
 	wx1 = *pointer++;
 	wy1 = *pointer++;
 	src_ptr = pointer;
 
 	/* If the end style for the first point is not squared, output a circle. */
 
-	if (s_begsty != SQUARED)
+	if (LV(s_begsty) != SQUARED)
 		do_circ(wx1, wy1);
 
 	/* Loop over the number of points passed in. */
@@ -1004,14 +1052,14 @@ VOID wline(NOTHING)
 
 		if (vx == 0)
 		{
-			vx = q_circle[0];
+			vx = LV(q_circle)[0];
 			vy = 0;
 		}
 		/* End if:  vertical. */
 		else if (vy == 0)
 		{
 			vx = 0;
-			vy = num_qc_lines - 1;
+			vy = LV(num_qc_lines) - 1;
 		}
 		/* End else if:  horizontal. */
 		else
@@ -1029,7 +1077,7 @@ VOID wline(NOTHING)
 
 		*(CONTRL + 1) = 4;
 
-		PTSIN = pointer = box;
+		LV(PTSIN) = pointer = box;
 
 		x = wx1;
 		y = wy1;
@@ -1053,12 +1101,12 @@ VOID wline(NOTHING)
 
 		/* restore the PTSIN pointer */
 
-		PTSIN = old_ptsin;
+		LV(PTSIN) = old_ptsin;
 
 		/* If the terminal point of the line segment is an internal joint, */
 		/* output a filled circle.                                         */
 
-		if ((i < numpts - 1) || (s_endsty != SQUARED))
+		if ((i < numpts - 1) || (LV(s_endsty) != SQUARED))
 			do_circ(wx2, wy2);
 
 		/* The line segment end point becomes the starting point for the next */
@@ -1084,7 +1132,7 @@ PP(int16_t *py;)
 	vx = px;
 	vy = py;
 
-	pcircle = q_circle;
+	pcircle = LV(q_circle);
 
 	/* Mirror transform the vector so that it is in the first quadrant. */
 
@@ -1121,7 +1169,7 @@ PP(int16_t *py;)
 			break;
 
 		/* Step to the next pixel. */
-		if (v == num_qc_lines - 1)
+		if (v == LV(num_qc_lines) - 1)
 		{
 			if (u == 1)
 				break;
@@ -1189,37 +1237,36 @@ PP(int16_t cx;)
 PP(int16_t cy;)
 {
 	int16_t k;
-
 	register int16_t *pointer;
 
 	/* Only perform the act if the circle has radius. */
 
-	if (num_qc_lines > 0)
+	if (LV(num_qc_lines) > 0)
 	{
 		/* Do the horizontal line through the center of the circle. */
-		pointer = q_circle;
-		X1 = cx - *pointer;
-		X2 = cx + *pointer;
-		Y1 = Y2 = cy;
+		pointer = LV(q_circle);
+		LV(X1) = cx - *pointer;
+		LV(X2) = cx + *pointer;
+		LV(Y1) = LV(Y2) = cy;
 
 		/* Do the upper and lower semi-circles. */
-		for (k = 1; k <= num_qc_lines; k++)
+		for (k = 1; k <= LV(num_qc_lines); k++)
 		{
 			/* Upper semi-circle. */
-			pointer = &q_circle[k];
-			X1 = cx - *pointer;
-			X2 = cx + *pointer;
-			Y1 = Y2 = cy - k + 1;
+			pointer = &LV(q_circle)[k];
+			LV(X1) = cx - *pointer;
+			LV(X2) = cx + *pointer;
+			LV(Y1) = LV(Y2) = cy - k + 1;
 			if (clip_line())
 			{
 				ABLINE();
-				pointer = &q_circle[k];
+				pointer = &LV(q_circle)[k];
 			}
 
 			/* Lower semi-circle. */
-			X1 = cx - *pointer;
-			X2 = cx + *pointer;
-			Y1 = Y2 = cy + k - 1;
+			LV(X1) = cx - *pointer;
+			LV(X2) = cx + *pointer;
+			LV(Y1) = LV(Y2) = cy + k - 1;
 			if (clip_line())
 				ABLINE();
 		}								/* End for. */
@@ -1233,18 +1280,18 @@ VOID s_fa_attr(NOTHING)
 
 	/* Set up the fill area attribute environment. */
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 
-	LN_MASK = LINE_STYLE[0];
-	s_fil_col = work_ptr->fill_color;
+	LV(LN_MASK) = LINE_STYLE[0];
+	LV(s_fil_col) = work_ptr->fill_color;
 	work_ptr->fill_color = work_ptr->line_color;
-	s_fill_per = work_ptr->fill_per;
+	LV(s_fill_per) = work_ptr->fill_per;
 	work_ptr->fill_per = TRUE;
-	PATPTR = &SOLID;
-	PATMSK = 0;
-	MULTIFILL = 0;						/* jde 25sep85 */
-	s_begsty = work_ptr->line_beg;
-	s_endsty = work_ptr->line_end;
+	LV(patptr) = SOLID;
+	LV(patmsk) = 0;
+	LV(multifill) = 0;						/* jde 25sep85 */
+	LV(s_begsty) = work_ptr->line_beg;
+	LV(s_endsty) = work_ptr->line_end;
 	work_ptr->line_beg = SQUARED;
 	work_ptr->line_end = SQUARED;
 
@@ -1257,12 +1304,12 @@ VOID r_fa_attr(NOTHING)
 
 	/* Restore the fill area attribute environment. */
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 
-	work_ptr->fill_color = s_fil_col;
-	work_ptr->fill_per = s_fill_per;
-	work_ptr->line_beg = s_begsty;
-	work_ptr->line_end = s_endsty;
+	work_ptr->fill_color = LV(s_fil_col);
+	work_ptr->fill_per = LV(s_fill_per);
+	work_ptr->line_beg = LV(s_begsty);
+	work_ptr->line_end = LV(s_endsty);
 }										/* End "r_fa_attr". */
 
 
@@ -1279,24 +1326,24 @@ VOID do_arrow(NOTHING)
 	/* starting point of the polyline in case two calls to "arrow" are    */
 	/* necessary.                                                         */
 
-	pts_in = PTSIN;
+	pts_in = LV(PTSIN);
 	new_x_start = x_start = *pts_in;
 	new_y_start = y_start = *(pts_in + 1);
 
-	if (s_begsty & ARROWED)
+	if (LV(s_begsty) & ARROWED)
 	{
 		arrow(pts_in, 2);
-		pts_in = PTSIN;					/* arrow calls plygn which trashes regs */
+		pts_in = LV(PTSIN);					/* arrow calls plygn which trashes regs */
 		new_x_start = *pts_in;
 		new_y_start = *(pts_in + 1);
 	}
 	/* End if:  beginning point is arrowed. */
-	if (s_endsty & ARROWED)
+	if (LV(s_endsty) & ARROWED)
 	{
 		*pts_in = x_start;
 		*(pts_in + 1) = y_start;
 		arrow((pts_in + 2 ** (CONTRL + 1) - 2), -2);
-		pts_in = PTSIN;					/* arrow calls plygn which trashes regs */
+		pts_in = LV(PTSIN);					/* arrow calls plygn which trashes regs */
 		*pts_in = new_x_start;
 		*(pts_in + 1) = new_y_start;
 	}
@@ -1321,7 +1368,7 @@ PP(int16_t inc;)
 
 	/* Set up the arrow-head length and width as a function of line width. */
 
-	temp = cur_work->line_width;
+	temp = LV(cur_work)->line_width;
 	arrow_wid = (arrow_len = (temp == 1) ? 8 : 3 * temp - 1) / 2;
 
 	/* Initialize the beginning pointer. */
@@ -1381,7 +1428,7 @@ PP(int16_t inc;)
 	sav_contrl = *(ptr1 + 1);
 
 	/* Build a polygon to send to plygn.  Build into a local array first since */
-	/* xy will probably be pointing to the PTSIN array.                        */
+	/* xy will probably be pointing to the LV(PTSIN) array.                        */
 
 	*(ptr1 + 1) = 3;
 	ptr1 = triangle;
@@ -1393,10 +1440,10 @@ PP(int16_t inc;)
 	*(ptr1 + 4) = *ptr2;
 	*(ptr1 + 5) = *(ptr2 + 1);
 
-	old_ptsin = PTSIN;
-	PTSIN = ptr1;
+	old_ptsin = LV(PTSIN);
+	LV(PTSIN) = ptr1;
 	plygn();
-	PTSIN = old_ptsin;
+	LV(PTSIN) = old_ptsin;
 
 	/* Restore the vertex count. */
 
@@ -1424,15 +1471,15 @@ VOID init_wk(NOTHING)
 	register int16_t *pointer, *src_ptr;
 	register ATTRIBUTE *work_ptr;
 
-	pointer = INTIN;
+	pointer = LV(INTIN);
 	pointer++;
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 
 	l = *pointer++;						/* INTIN[1] */
 	work_ptr->line_index = ((l > MX_LN_STYLE) || (l < 0)) ? 0 : l - 1;
 
 	l = *pointer++;						/* INTIN[2] */
-	if ((l >= DEV_TAB[13]) || (l < 0))
+	if ((l >= LV(DEV_TAB)[13]) || (l < 0))
 		l = 1;
 	work_ptr->line_color = MAP_COL[l];
 
@@ -1440,7 +1487,7 @@ VOID init_wk(NOTHING)
 	work_ptr->mark_index = ((l >= MAX_MARK_INDEX) || (l < 0)) ? 2 : l;
 
 	l = *pointer++;						/* INTIN[4] */
-	if ((l >= DEV_TAB[13]) || (l < 0))
+	if ((l >= LV(DEV_TAB)[13]) || (l < 0))
 		l = 1;
 	work_ptr->mark_color = MAP_COL[l];
 
@@ -1449,7 +1496,7 @@ VOID init_wk(NOTHING)
 	pointer++;							/* INTIN[5] */
 
 	l = *pointer++;						/* INTIN[6] */
-	if ((l >= DEV_TAB[13]) || (l < 0))
+	if ((l >= LV(DEV_TAB)[13]) || (l < 0))
 		l = 1;
 	work_ptr->text_color = MAP_COL[l];
 
@@ -1467,7 +1514,7 @@ VOID init_wk(NOTHING)
 	work_ptr->fill_index = l;
 
 	l = *pointer++;						/* INTIN[9] */
-	if ((l >= DEV_TAB[13]) || (l < 0))
+	if ((l >= LV(DEV_TAB)[13]) || (l < 0))
 		l = 1;
 	work_ptr->fill_color = MAP_COL[l];
 
@@ -1484,18 +1531,18 @@ VOID init_wk(NOTHING)
 
 	work_ptr->xmn_clip = 0;
 	work_ptr->ymn_clip = 0;
-	work_ptr->xmx_clip = DEV_TAB[0];
-	work_ptr->ymx_clip = DEV_TAB[1];
+	work_ptr->xmx_clip = LV(DEV_TAB)[0];
+	work_ptr->ymx_clip = LV(DEV_TAB)[1];
 	work_ptr->clip = 0;
 
-	work_ptr->cur_font = def_font;
+	work_ptr->cur_font = LV(def_font);
 
 	work_ptr->loaded_fonts = NULL;
 
 	work_ptr->scrpt2 = scrtsiz;
 	work_ptr->scrtchp = deftxbu;
 
-	work_ptr->num_fonts = ini_font_count;
+	work_ptr->num_fonts = LV(ini_font_count);
 
 	work_ptr->style = 0;				/* reset special effects */
 	work_ptr->scaled = FALSE;
@@ -1520,13 +1567,13 @@ VOID init_wk(NOTHING)
 	*(pointer + 2) = 6;
 	*(pointer + 4) = 45;
 
-	pointer = INTOUT;
-	src_ptr = DEV_TAB;
+	pointer = LV(INTOUT);
+	src_ptr = LV(DEV_TAB);
 	for (l = 0; l < 45; l++)
 		*pointer++ = *src_ptr++;
 
-	pointer = PTSOUT;
-	src_ptr = SIZ_TAB;
+	pointer = LV(PTSOUT);
+	src_ptr = LV(SIZ_TAB);
 	for (l = 0; l < 12; l++)
 		*pointer++ = *src_ptr++;
 
@@ -1541,7 +1588,7 @@ VOID d_opnvwk(NOTHING)
 
 	/* Allocate the memory for a virtual workstation.  If none available, exit */
 
-	new_work = (ATTRIBUTE *) trap(X_MALLOC, (int32_t) (sizeof(ATTRIBUTE)));
+	new_work = (ATTRIBUTE *) Malloc(sizeof(ATTRIBUTE));
 
 	if (new_work == NULL)
 	{									/* No work available */
@@ -1561,7 +1608,7 @@ VOID d_opnvwk(NOTHING)
 	}
 
 	/* slot found, Insert the workstation here */
-	cur_work = new_work;
+	LV(cur_work) = new_work;
 	new_work->next_work = work_ptr->next_work;
 	work_ptr->next_work = new_work;
 	new_work->handle = CONTRL[6] = handle;
@@ -1577,7 +1624,7 @@ VOID d_clsvwk(NOTHING)
 
 	/* cur_work points to workstation to deallocate, find who points to me */
 
-	handle = cur_work->handle;
+	handle = LV(cur_work)->handle;
 
 	if (handle == 1)					/* Can't close physical this way */
 		return;
@@ -1585,8 +1632,8 @@ VOID d_clsvwk(NOTHING)
 	for (work_ptr = &virt_work; handle != work_ptr->next_work->handle; work_ptr = work_ptr->next_work)
 		;
 
-	work_ptr->next_work = cur_work->next_work;
-	trap(X_MFREE, cur_work);
+	work_ptr->next_work = LV(cur_work)->next_work;
+	Mfree(LV(cur_work));
 }
 
 
@@ -1598,10 +1645,10 @@ VOID dsf_udpat(NOTHING)
 #endif
 	register ATTRIBUTE *work_ptr;
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 	count = CONTRL[3];
 
-	sp = INTIN;
+	sp = LV(INTIN);
 	dp = &work_ptr->ud_patrn[0];
 
 	if (count == 16)
@@ -1609,7 +1656,7 @@ VOID dsf_udpat(NOTHING)
 		work_ptr->multifill = 0;		/* Single Plane Pattern */
 		for (i = 0; i < count; i++)
 			*dp++ = *sp++;
-	} else if (count == (v_planes * 16) 
+	} else if (count == (LV(v_planes) * 16) 
 #if VIDEL_SUPPORT
 		&& form_id != PIXPACKED
 #endif
@@ -1623,7 +1670,7 @@ VOID dsf_udpat(NOTHING)
 	{
 		work_ptr->multifill = 0;		/* init to Invalid Multi-plane       */
 
-		switch (v_planes)
+		switch (LV(v_planes))
 		{
 		case 8:						/* this mode is not implemented yet */
 			break;
@@ -1659,7 +1706,7 @@ VOID dsf_udpat(NOTHING)
 			break;
 
 		case 32:
-			if (count == (v_planes * 16))
+			if (count == (LV(v_planes) * 16))
 			{
 				work_ptr->multifill = 1;	/* Valid Multi-plane pattern */
 				for (i = 0; i < count; i++)

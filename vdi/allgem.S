@@ -68,7 +68,7 @@ _v_clrwk: PIXLA(a0)
 #if TOSVERSION < 0x400
 		move.l    d0,-(a7)
 #endif
-        move.w	PIXLV(_v_planes,a0),d0	; d0 <- # of planes
+        move.w	PIXLV(v_planes,a0),d0	; d0 <- # of planes
 		mulu.w	PIXLV(v_hz_rez,a0),d0		; d0 <- (planes) x (hor rez)
 		mulu.w	PIXLV(v_vt_rez,a0),d0		; d0 <- (plns)x(hrez)x(vrt rz)
 		lsr.l	#3,d0			; d0 <- # bytes to clr (screen)
@@ -191,7 +191,7 @@ _INIT_G:	PIXLA(a1)
 /* 306de: 00e066e6 */
    		xdef	_vex_timv
 _vex_timv:	PIXLA(a1)
-		move.l	PIXLV(_CONTRL,a1),a0
+		move.l	PIXLV(CONTRL,a1),a0
 
 		move	SR,-(sp)		; Disable interrupts
 		ori.w	#$0700,SR		; THIS IS PARANOID !
@@ -204,7 +204,7 @@ _vex_timv:	PIXLA(a1)
 		addq.l	#2,sp
 
 		PIXLA(a1)
-		move.l	PIXLV(_INTOUT,a1),a0
+		move.l	PIXLV(INTOUT,a1),a0
 		move.w	d0,(a0)
 
 		rts
@@ -217,10 +217,10 @@ devtab:    dc.w 0,0,0,1,2,0,4,0,6,7,0
 
 		xdef _FindDevice
 _FindDevice:
-
+		PIXLA(a2)
         moveq.l   #0,d0
         move.b    _sshiftmod,d0 ; sshiftmod
-        movea.l   $00003A22,a0 ; LA_INTIN
+        movea.l   PIXLV(INTIN,a2),a0
         move.w    (a0),d1
         cmp.w     #STAYINDEV,d1 
         beq.s     FindDev3
@@ -348,7 +348,7 @@ _DINIT_G:	PIXLA(a1)
 
    		xdef	_GCHC_KEY
 _GCHC_KEY:	PIXLA(a1)
-		move.w	#1,PIXLV(_TERM_CH,a1)		; return dummy choice per 8086
+		move.w	#1,PIXLV(TERM_CH,a1)		; return dummy choice per 8086
 		moveq.l	#1,d0			; indicate choice value
 		rts
 
@@ -368,18 +368,18 @@ _GCHC_KEY:	PIXLA(a1)
 *
 *		1	- button or key pressed
 *
-*  			   _TERM_CH = 16 bit char info
+*  			   TERM_CH = 16 bit char info
 *
 *		2 	- new coordinates
 *
-*			   _X1 = new X
-*			   _Y1 = new Y
+*			   X1 = new X
+*			   Y1 = new Y
 *
 *		3	- button or key pressed and new coordinates
 *			
-*			   _TERM_CH = 16 bit char info
-*			   _X1 = new X
-*			   _Y1 = new Y
+*			   TERM_CH = 16 bit char info
+*			   X1 = new X
+*			   Y1 = new Y
 *
 * 	NOTE:	THIS ROUTINE REPORTS THE LAST CHANGE IN BUTTON STATE 
 *		RATHER THAN REPORTING THE BUTTON STATE ITSELF. THE
@@ -402,7 +402,7 @@ _GLOC_KEY:	PIXLA(a1)
 		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
 		move.b	PIXLV(cur_ms_stat,a1),d2	; clearing state change flags indicates
 		and.b	d1,PIXLV(cur_ms_stat,a1)	; that this data has been processed
-		move.l	PIXLV(_GCURXY,a1),PIXLV(_X1,a1)	; X1<-latest X and Y1<-latest Y
+		move.l	PIXLV(GCURXY,a1),PIXLV(X1,a1)	; X1<-latest X and Y1<-latest Y
 		move.w	d0,SR			; >>>>  END ATOM  <<<<
 
 		clr.w	d0		; d0 <- initial status: no change
@@ -421,7 +421,7 @@ test_button:	and.b	#$C0,d2		; test for change in button state
 
 		addq.w	#1,d1		; d1 <- rt button terminator code: 33
 
-button_exit:	move.w	d1,PIXLV(_TERM_CH,a1)	; store the character code
+button_exit:	move.w	d1,PIXLV(TERM_CH,a1)	; store the character code
 		addq.w	#1,d0		; status: mouse button pressed
 		rts
 
@@ -438,7 +438,7 @@ key_stat:	move.w	 d0,-(sp)	; preserve mouse status
 *			exit:  d0=1	key pressed
 *			       d0=0	nothing happened
 *
-*			_TERM_CH		16 bit char info
+*			TERM_CH		16 bit char info
 *
 *******************************************************************************
 
@@ -463,7 +463,7 @@ _GCHR_KEY:	move.w	#DEV,-(sp)	; see if a character present
 		or.w	d1,d0		; d0<15:08> <- scan code
 
 		PIXLA(a1)
-		move.w	d0,PIXLV(_TERM_CH,a1)	; store character
+		move.w	d0,PIXLV(TERM_CH,a1)	; store character
 		moveq.l	#1,d0		; indicate character present
 
 no_char:	rts
@@ -475,7 +475,7 @@ no_char:	rts
 *
 *  on entry:
 *
-*     _GCURXY	initial XY position of mouse cursor
+*     GCURXY	initial XY position of mouse cursor
 *
 *******************************************************************************
 
@@ -489,21 +489,21 @@ mouse_init:
 
 * Initialize the default mouse form (presently the arrow)
 
-		lea	PIXLV(_INTIN,a1),a0		; a0 -> pointer to INTIN array
+		lea	PIXLV(INTIN,a1),a0		; a0 -> pointer to INTIN array
 		move.l	(a0),-(sp)		; Save the intin pointer and
 		move.l	#arrow_cdb,(a0)		; make it point to the arrow
 		bsr	_vsc_form		; a1 gets clobbered here
 		PIXLA(a1)
 
-		move.l	(sp)+,PIXLV(_INTIN,a1)	; Restore INTIN pointer
+		move.l	(sp)+,PIXLV(INTIN,a1)	; Restore INTIN pointer
 
 * initialize mouse/draw status and semaphores
 
 		moveq.l	#0,d0
-		move.w	d0,PIXLV(_MOUSE_BT,a1)	; clear mouse button state
+		move.w	d0,PIXLV(MOUSE_BT,a1)	; clear mouse button state
 		move.b	d0,PIXLV(cur_ms_stat,a1)	; clear current mouse status
 		move.b	d0,PIXLV(mouse_flag,a1)	; mouse_cdb is unlocked
-		move.b	#1,PIXLV(_HIDE_CNT,a1)	; don't display cursor form yet
+		move.b	#1,PIXLV(HIDE_CNT,a1)	; don't display cursor form yet
 
 * Initialize communication packet between mouse interrupt service routine
 * and vblank cursor display routine. Insert vblank draw routine into front
@@ -514,14 +514,14 @@ mouse_init:
 #if TOSVERSION >= 0x400
 		move.w	PIXLV(v_hz_rez,a1),d0		; d0 <- horizontal rez
 		lsr.w	#1,d0			; d0 <- x rez / 2
-		move.w	d0,PIXLV(_GCURX,a1)		; init mouse X position
+		move.w	d0,PIXLV(GCURX,a1)		; init mouse X position
 
 		move.w	PIXLV(v_vt_rez,a1),d0		; d0 <- vrtical rez
 		lsr.w	#1,d0			; d0 <- y rez / 2
-		move.w	d0,PIXLV(_GCURY,a1)		; init mouse Y position
+		move.w	d0,PIXLV(GCURY,a1)		; init mouse Y position
 #endif
 
-		move.l	PIXLV(_GCURXY,a1),(a0)+	; to the initial position
+		move.l	PIXLV(GCURXY,a1),(a0)+	; to the initial position
 		move.b	#1,(a0)			; mark data valid for update
 
 		move.l	_vblqueue,a0		; insert the display routine
@@ -568,15 +568,15 @@ dinit_mouse:	move.l	_vblqueue,a0	; remove draw routine from vblank queue
 
 #if TOSVERSION >= 0x400
 
-*+
-* dev_init(devPtr). devPtr points to the proper device structure. Init current
-* device pointer in linea variable structure, then drop through to esc_init().
-*-
+/*
+ * dev_init(devPtr). devPtr points to the proper device structure. Init current
+ * device pointer in linea variable structure, then drop through to esc_init().
+ */
 		xdef	_dev_init
 _dev_init: PIXLA(a1)
-		tst.l	PIXLV(LA_USERDEVINIT,a1)			; see if vector set
+		tst.l	PIXLV(USERDEVINIT,a1)			; see if vector set
 		beq	devI4				; branch if not
-		move.l	PIXLV(LA_USERDEVINIT,a1),a0		; see if vector set
+		move.l	PIXLV(USERDEVINIT,a1),a0		; see if vector set
 		jsr	(a0)				; execute user routine
 
 devI4:	move.l	4(sp),a0			; a0 -> device struct
@@ -619,15 +619,15 @@ esc_init:
 		jsr	_InitFonts		; copy font headers into ram
 
     	PIXLA(a1)
-		tst.l	PIXLV(LA_USERESCINIT,a1)		; see if vector set
+		tst.l	PIXLV(USERESCINIT,a1)		; see if vector set
 		beq	esc4			; branch if not
-		move.l	PIXLV(LA_USERESCINIT,a1),a0	; see if vector set
+		move.l	PIXLV(USERESCINIT,a1),a0	; see if vector set
 		jsr	(a0)			; execute user routine
 
 esc4:		move.l	PIXLV(LA_CURDEV,a1),a0		; a0 -> curr device structure
-		move.w	DEVPLANES(a0),PIXLV(_v_planes,a1)	; set # of planes
-		move.w	DEVLINEWRAP(a0),PIXLV(_v_lin_wr,a1)	; set line wrap
-		move.w	DEVLINEWRAP(a0),PIXLV(_bytes_lin,a1)	; set line wrap
+		move.w	DEVPLANES(a0),PIXLV(v_planes,a1)	; set # of planes
+		move.w	DEVLINEWRAP(a0),PIXLV(v_lin_wr,a1)	; set line wrap
+		move.w	DEVLINEWRAP(a0),PIXLV(bytes_lin,a1)	; set line wrap
 		move.w	DEVYREZ(a0),PIXLV(v_vt_rez,a1)	; set vertical rez
 		move.w	DEVXREZ(a0),PIXLV(v_hz_rez,a1)	; set horizontal rez
 		tst.l	DEVVIDADR(a0)			; see if we need to set
@@ -640,15 +640,15 @@ esc2:
 		move.w	DEVFORMID(a0),form_id(a1)   	; init mem config flag 
 		cmp.w	#PIXPACKED,DEVFORMID(a0)     	; see if in pix packed
 		bne	esc0
-		move.w	PIXLV(_v_planes,a1),d1	; # of planes
+		move.w	PIXLV(v_planes,a1),d1	; # of planes
 		lsr.w	#3,d1			; d1 <- # of bytes per pix
 		move.w	d1,PIXLV(byt_per_pix,a1)	; load # bytes per pix
 #endif
 
 esc0:		lea	PIXLV(save_block,a1),a2	; a0 -> save_block
-		cmp.w	#4,PIXLV(_v_planes,a1)	; see if we have > 4 planes
+		cmp.w	#4,PIXLV(v_planes,a1)	; see if we have > 4 planes
 		ble	esc1			; if so point to > save buff
-		lea	PIXLV(_save_block,a1),a2	; a0 -> save_block
+		lea	PIXLV(sav8_block,a1),a2	; a0 -> save_block
 esc1:	move.l	a2,PIXLV(sv_blk_ptr,a1) 	; init ptr to pnt to save_block
 
 		move.l	DEVFNTPTR(a0),a0	; a0 -> desired system font
@@ -661,8 +661,8 @@ esc1:	move.l	a2,PIXLV(sv_blk_ptr,a1) 	; init ptr to pnt to save_block
 #if VIDEL_SUPPORT
 		move.l	d0,vl_col_fg(a1)	; set in case we are 32 bit mode
 #endif
-		move.w	d0,PIXLV(v_cur_cx,a1)
-		move.w	d0,PIXLV(v_cur_cy,a1)
+		move.w	d0,PIXLV(v_curcx,a1)
+		move.w	d0,PIXLV(v_curcy,a1)
 		move.w	d0,PIXLV(v_cur_off,a1)
 		move.b	d0,PIXLV(v_delay,a1)		; cursor redisplay interval (immediate)
 
@@ -699,11 +699,11 @@ esc3:		move.l	_v_bas_ad,PIXLV(v_cur_ad,a1)	; home cursor.
 
 		move.w	PIXLV(v_hz_rez,a1),d0		; d0 <- horizontal rez
 		lsr.w	#1,d0			; d0 <- x rez / 2
-		move.w	d0,PIXLV(_GCURX,a1)		; init mouse X position
+		move.w	d0,PIXLV(GCURX,a1)		; init mouse X position
 
 		move.w	PIXLV(v_vt_rez,a1),d0		; d0 <- vrtical rez
 		lsr.w	#1,d0			; d0 <- y rez / 2
-		move.w	d0,PIXLV(_GCURY,a1)		; init mouse Y position
+		move.w	d0,PIXLV(GCURY,a1)		; init mouse Y position
 
 		move.w	#1,-(sp)		; try set Blit mode to hard
 		move.w	#BLITMODE,-(sp)		; push funct #
@@ -732,7 +732,7 @@ _esc_init:
         cmp.w     #6,d0
         blt.s     esc2	; see if we have > 4 planes
         beq.s     esc1
-        move.l    #lineavars+(_save_block),PIXLV(sv_blk_ptr,a1)			; if so point to > save buff
+        move.l    #lineavars+(sav8_block),PIXLV(sv_blk_ptr,a1)			; if so point to > save buff
         bra.s     esc2
 esc1:
         tst.w     PIXLV(LA_F32,a1)
@@ -742,8 +742,8 @@ esc2:
         bsr       gl_f_init
         clr.w     d0
         move.w    d0,PIXLV(v_col_bg,a1)		; background color is all zeroes
-        move.w    d0,PIXLV(v_cur_cx,a1)
-        move.w    d0,PIXLV(v_cur_cy,a1)
+        move.w    d0,PIXLV(v_curcx,a1)
+        move.w    d0,PIXLV(v_curcy,a1)
         move.w    d0,PIXLV(v_cur_off,a1)
         move.b    d0,PIXLV(v_delay,a1)		; cursor redisplay interval (immediate)
         not.w     d0
@@ -761,16 +761,16 @@ esc2:
 /* 306de: 00e069f4 */
 		xdef resetdev
 resetdev:
-        move.l    #_STSoftList,PIXLV(LA_CURDEV,a1)
+        move.l    #_STSoftList,PIXLV(LA_SOFTROUTINES,a1)
         move.l    #_STHardList,PIXLV(LA_ROUTINES,a1)
         jmp       _SETBLT
 
 rezinit:
         lsl.w     #3,d0
         lea.l     reztab(pc,d0.w),a0
-        move.w    (a0)+,PIXLV(_v_planes,a1)
-        move.w    (a0),PIXLV(_v_lin_wr,a1)
-        move.w    (a0)+,PIXLV(_bytes_lin,a1)
+        move.w    (a0)+,PIXLV(v_planes,a1)
+        move.w    (a0),PIXLV(v_lin_wr,a1)
+        move.w    (a0)+,PIXLV(bytes_lin,a1)
         move.w    (a0)+,PIXLV(v_vt_rez,a1)
         move.w    (a0),PIXLV(v_hz_rez,a1)
         lsr.w     #3,d0

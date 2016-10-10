@@ -41,16 +41,16 @@ VOID v_opnwk(NOTHING)
 #if TOSVERSION >= 0x400
 	register int16_t videoMode;
 
-	if (INTIN[0] == SETMODEFLAG)
+	if (LV(INTIN)[0] == SETMODEFLAG)
 	{
 		videoMode = SETMODE(-1);		/* get current video mode    */
-		if (videoMode != PTSOUT[0])		/* see if cur mode != dsred  */
-			SETMODE(PTSOUT[0]);			/* set the video to new mode */
+		if (videoMode != LV(PTSOUT)[0])		/* see if cur mode != dsred  */
+			SETMODE(LV(PTSOUT)[0]);			/* set the video to new mode */
 	} else
 	{
-		if (FindDevice(INTIN[0]) == NULL)
+		if (FindDevice(LV(INTIN)[0]) == NULL)
 		{
-			CONTRL[6] = 0;				/* unsuccessfull in opening  */
+			LV(CONTRL)[6] = 0;				/* unsuccessfull in opening  */
 			return;
 		}
 	}
@@ -66,21 +66,21 @@ VOID v_opnwk(NOTHING)
 
 	/* Move ROM copy of DEV_TAB to RAM */
 	sp = ROM_DEV_TAB;
-	dp = DEV_TAB;
+	dp = LV(DEV_TAB);
 	for (i = 0; i < 45; i++)
 		*dp++ = *sp++;
 
 
 	/* Move ROM copy of DEV_TAB to RAM */
 	sp = ROM_INQ_TAB;
-	dp = INQ_TAB;
+	dp = LV(INQ_TAB);
 	for (i = 0; i < 45; i++)
 		*dp++ = *sp++;
-	INQ_TAB[14] = MAX_VERT;
+	LV(INQ_TAB)[14] = MAX_VERT;
 
 	/* Move ROM copy of SIZ_TAB to RAM */
 	sp = ROM_SIZ_TAB;
-	dp = SIZ_TAB;
+	dp = LV(SIZ_TAB);
 	for (i = 0; i < 12; i++)
 		*dp++ = *sp++;
 
@@ -98,21 +98,21 @@ VOID v_opnwk(NOTHING)
 	 */
 	InitDevTabInqTab();
 
-	CUR_DEV->fntPtr->flags |= DEFAULT;
+	LV(LA_CURDEV)->fntPtr->flags |= DEFAULT;
 
-	CONTRL[6] = virt_work.handle = 1;
-	cur_work = &virt_work;
+	LV(CONTRL)[6] = virt_work.handle = 1;
+	LV(cur_work) = &virt_work;
 	virt_work.next_work = NULL;
 
-	line_cw = -1;						/* invalidate curr line width */
+	LV(line_cw) = -1;					/* invalidate curr line width */
 	text_init();						/* initialize the SIZ_TAB info */
 	init_wk();
 
 	/* Input must be initialized here and not in init_wk */
-	loc_mode = 0;						/* default is request mode    */
-	val_mode = 0;						/* default is request mode    */
-	chc_mode = 0;						/* default is request mode    */
-	str_mode = 0;						/* default is request mode    */
+	LV(loc_mode) = 0;					/* default is request mode    */
+	LV(val_mode) = 0;					/* default is request mode    */
+	LV(chc_mode) = 0;					/* default is request mode    */
+	LV(str_mode) = 0;					/* default is request mode    */
 
 	/*
 	 * Install mouse interrupt service routine, vblank draw routine,
@@ -137,63 +137,63 @@ VOID v_opnwk(NOTHING)
 	switch (curRez)
 	{
 	case _320x200:
-		DEV_TAB[3] = 556;			/* width of pixel in microns  */
-		DEV_TAB[4] = 556;			/* height of pixel in microns */
+		LV(DEV_TAB)[3] = 556;			/* width of pixel in microns  */
+		LV(DEV_TAB)[4] = 556;			/* height of pixel in microns */
 		break;
 
 	case _640x200:
-		DEV_TAB[0] = 640 - 1;		/* X max                      */
-		DEV_TAB[3] = 278;			/* width of pixel in microns  */
-		DEV_TAB[4] = 556;			/* height of pixel in microns */
-		DEV_TAB[13] = 4;			/* # of pens available        */
-		INQ_TAB[4] = 2;				/* number of planes           */
+		LV(DEV_TAB)[0] = 640 - 1;		/* X max                      */
+		LV(DEV_TAB)[3] = 278;			/* width of pixel in microns  */
+		LV(DEV_TAB)[4] = 556;			/* height of pixel in microns */
+		LV(DEV_TAB)[13] = 4;			/* # of pens available        */
+		LV(INQ_TAB)[4] = 2;				/* number of planes           */
 		break;
 
 	case _640x400:
-		DEV_TAB[0] = 640 - 1;		/* X max                      */
-		DEV_TAB[1] = 400 - 1;		/* Y max                      */
-		DEV_TAB[3] = 278;			/* width of pixel in microns  */
-		DEV_TAB[4] = 278;			/* height of pixel in microns */
-		DEV_TAB[13] = 2;			/* # of pens available        */
+		LV(DEV_TAB)[0] = 640 - 1;		/* X max                      */
+		LV(DEV_TAB)[1] = 400 - 1;		/* Y max                      */
+		LV(DEV_TAB)[3] = 278;			/* width of pixel in microns  */
+		LV(DEV_TAB)[4] = 278;			/* height of pixel in microns */
+		LV(DEV_TAB)[13] = 2;			/* # of pens available        */
 		/* BUG: DEV_TAB[35] (colFlag) not cleared */
-		INQ_TAB[4] = 1;				/* number of planes           */
+		LV(INQ_TAB)[4] = 1;				/* number of planes           */
 		ram8x8.flags &= ~DEFAULT;
 		ram8x16.flags |= DEFAULT;
 		break;
 
 	case _640x480:
-		DEV_TAB[0] = 640 - 1;		/* X max                      */
-		DEV_TAB[1] = 480 - 1;		/* Y max                      */
-		DEV_TAB[3] = 278;			/* width of pixel in microns  */
-		DEV_TAB[4] = 278;			/* height of pixel in microns */
+		LV(DEV_TAB)[0] = 640 - 1;		/* X max                      */
+		LV(DEV_TAB)[1] = 480 - 1;		/* Y max                      */
+		LV(DEV_TAB)[3] = 278;			/* width of pixel in microns  */
+		LV(DEV_TAB)[4] = 278;			/* height of pixel in microns */
 		ram8x8.flags &= ~DEFAULT;
 		ram8x16.flags |= DEFAULT;
 		break;
 
 	case _1280x960:
-		DEV_TAB[0] = 1280 - 1;		/* X max                      */
-		DEV_TAB[1] = 960 - 1;		/* Y max                      */
-		DEV_TAB[3] = 278;			/* width of pixel in microns  */
-		DEV_TAB[4] = 278;			/* height of pixel in microns */
-		DEV_TAB[13] = 2;			/* # of pens available        */
-		DEV_TAB[35] = 0;			/* color capability flag      */
-		DEV_TAB[39] = 2;			/* palette size               */
-		INQ_TAB[1] = 1;				/* number of background clrs  */
-		INQ_TAB[4] = 1;				/* number of planes           */
-		INQ_TAB[5] = 0;				/* video lookup table         */
+		LV(DEV_TAB)[0] = 1280 - 1;		/* X max                      */
+		LV(DEV_TAB)[1] = 960 - 1;		/* Y max                      */
+		LV(DEV_TAB)[3] = 278;			/* width of pixel in microns  */
+		LV(DEV_TAB)[4] = 278;			/* height of pixel in microns */
+		LV(DEV_TAB)[13] = 2;			/* # of pens available        */
+		LV(DEV_TAB)[35] = 0;			/* color capability flag      */
+		LV(DEV_TAB)[39] = 2;			/* palette size               */
+		LV(INQ_TAB)[1] = 1;				/* number of background clrs  */
+		LV(INQ_TAB)[4] = 1;				/* number of planes           */
+		LV(INQ_TAB)[5] = 0;				/* video lookup table         */
 		ram8x8.flags &= ~DEFAULT;
-		if (!F32)
+		if (!LV(LA_F32))
 			ram8x16.flags |= DEFAULT;
 		else
 			ram16x32.flags |= DEFAULT;
 		break;
 	
 	case _320x480:
-		DEV_TAB[1] = 480 - 1;		/* Y max                      */
-		DEV_TAB[3] = 556;			/* width of pixel in microns  */
-		DEV_TAB[4] = 278;			/* height of pixel in microns */
-		DEV_TAB[13] = 256;			/* # of pens available        */
-		INQ_TAB[4] = 8;				/* number of planes           */
+		LV(DEV_TAB)[1] = 480 - 1;		/* Y max                      */
+		LV(DEV_TAB)[3] = 556;			/* width of pixel in microns  */
+		LV(DEV_TAB)[4] = 278;			/* height of pixel in microns */
+		LV(DEV_TAB)[13] = 256;			/* # of pens available        */
+		LV(INQ_TAB)[4] = 8;				/* number of planes           */
 		ram8x8.flags &= ~DEFAULT;
 		ram8x16.flags |= DEFAULT;
 		break;
@@ -201,24 +201,24 @@ VOID v_opnwk(NOTHING)
 	case 3:
 	case 5:
 	default:
-		DEV_TAB[3] = 278;			/* width of pixel in microns  */
-		DEV_TAB[4] = 278;			/* height of pixel in microns */
+		LV(DEV_TAB)[3] = 278;			/* width of pixel in microns  */
+		LV(DEV_TAB)[4] = 278;			/* height of pixel in microns */
 		break;
 	}
 	
-	CONTRL[6] = virt_work.handle = 1;
-	cur_work = &virt_work;
+	LV(CONTRL)[6] = virt_work.handle = 1;
+	LV(cur_work) = &virt_work;
 	virt_work.next_work = NULL;
 	
-	line_cw = -1;						/* invalidate curr line width */
+	LV(line_cw) = -1;					/* invalidate curr line width */
 	text_init();						/* initialize the SIZ_TAB info */
 	init_wk();
 
 	/* Input must be initialized here and not in init_wk */
-	loc_mode = 0;						/* default is request mode    */
-	val_mode = 0;						/* default is request mode    */
-	chc_mode = 0;						/* default is request mode    */
-	str_mode = 0;						/* default is request mode    */
+	LV(loc_mode) = 0;					/* default is request mode    */
+	LV(val_mode) = 0;					/* default is request mode    */
+	LV(chc_mode) = 0;					/* default is request mode    */
+	LV(str_mode) = 0;					/* default is request mode    */
 
 	/*
 	 * Install mouse interrupt service routine, vblank draw routine,
@@ -226,8 +226,8 @@ VOID v_opnwk(NOTHING)
 	 * cursor and alpha cursor are initially hidden. Timing vectors
 	 * are also initialized.
 	 */
-	GCURX = DEV_TAB[0] / 2;
-	GCURY = DEV_TAB[1] / 2;
+	LV(GCURX) = LV(DEV_TAB)[0] / 2;
+	LV(GCURY) = LV(DEV_TAB)[1] / 2;
 	INIT_G();
 
 	/*
@@ -235,17 +235,17 @@ VOID v_opnwk(NOTHING)
 	 * color array. Do it for all banks if there are banks in the
 	 * current video mode.
 	 */
-	old_intin = INTIN;
-	old_intout = INTOUT;
-	old_contrl = CONTRL;
+	old_intin = LV(INTIN);
+	old_intout = LV(INTOUT);
+	old_contrl = LV(CONTRL);
 
-	CONTRL = new_contrl;
-	INTIN = new_intin;
-	INTOUT = new_intout;
+	LV(CONTRL) = new_contrl;
+	LV(INTIN) = new_intin;
+	LV(INTOUT) = new_intout;
 
-	count = DEV_TAB[13];	/* #  pens available  */
+	count = LV(DEV_TAB)[13];	/* #  pens available  */
 	new_intin[1] = 1;
-	dp = &REQ_COL[0][0];
+	dp = &LV(REQ_COL)[0][0];
 	sp = new_intout + 1;
 
 	switch (curRez)
@@ -263,7 +263,7 @@ VOID v_opnwk(NOTHING)
 			*dp++ = *(sp + 2);
 		}
 
-		dp = &REQ_X_COL[0][0];
+		dp = &LV(REQ_X_COL)[0][0];
 		for (i = 1; i < 16; i++)
 		{
 			EsetBank(i);
@@ -304,7 +304,7 @@ VOID v_opnwk(NOTHING)
 		/*
 		 * we have > 16 cols so fill the extended color array
 		 */
-		dp = &REQ_X_COL[0][0];
+		dp = &LV(REQ_X_COL)[0][0];
 		for (; i < count; i++)
 		{
 			new_intin[0] = i;
@@ -316,9 +316,9 @@ VOID v_opnwk(NOTHING)
 		break;
 	}
 
-	CONTRL = old_contrl;
-	INTIN = old_intin;
-	INTOUT = old_intout;
+	LV(CONTRL) = old_contrl;
+	LV(INTIN) = old_intin;
+	LV(INTOUT) = old_intout;
 #endif
 }
 
@@ -340,11 +340,11 @@ PP(int16_t devId;)
 	if (devId == DEFAULTDEV)
 	{
 		dev = devices[DEFAULTDEV];
-		CUR_DEV = dev;
+		LV(LA_CURDEV) = dev;
 		SETREZ(curRez);					/* get into default res      */
 	} else if (devId == STAYINDEV)
 	{
-		dev = CUR_DEV;
+		dev = LV(LA_CURDEV);
 	} else
 	{
 		for (i = 0, dev = devices[0];; dev = devices[++i])
@@ -352,13 +352,13 @@ PP(int16_t devId;)
 			if (dev == NULL)
 			{
 				dev = devices[DEFAULTDEV];
-				CUR_DEV = dev;
+				LV(LA_CURDEV) = dev;
 				curRez = dev->devId - 2;	/* set to defaul rez         */
 				SETREZ(curRez);			/* get into default res      */
 				break;
 			} else if (dev->devId == devId)
 			{
-				CUR_DEV = dev;
+				LV(LA_CURDEV) = dev;
 
 				if (curRez <= 8)		/* test if rez exists        */
 					SETREZ(curRez);		/* get into desired res      */
@@ -375,7 +375,7 @@ PP(int16_t devId;)
 /*----------------------------------------------------------------------------*/
 
 /*
- * This function is here for soft loaded vdi. We init the CUR_DEV if we can.
+ * This function is here for soft loaded vdi. We init the LA_CURDEV if we can.
  */
 VOID SetCurDevice(P(int16_t) curRez)
 PP(int16_t curRez;)
@@ -388,7 +388,7 @@ PP(int16_t curRez;)
 	{
 		if (dev->devId == devId)
 		{
-			CUR_DEV = dev;
+			LV(LA_CURDEV) = dev;
 			break;						/* found the proper dev      */
 		}
 	}
@@ -412,18 +412,18 @@ VOID InitDevTabInqTab(NOTHING)
 {
 	register const SCREENDEF *dev;
 
-	dev = CUR_DEV;						/* init current dev pointer   */
+	dev = LV(LA_CURDEV);						/* init current dev pointer   */
 
-	DEV_TAB[0] = dev->xRez - 1;			/* X max                      */
-	DEV_TAB[1] = dev->yRez - 1;			/* Y max                      */
-	DEV_TAB[3] = dev->xSize;			/* width of pixel in microns  */
-	DEV_TAB[4] = dev->ySize;			/* height of pixel in microns */
-	DEV_TAB[13] = dev->maxPen;			/* # of pens available        */
-	DEV_TAB[35] = dev->colFlag;			/* color capability flag      */
-	DEV_TAB[39] = dev->palSize;			/* palette size               */
-	INQ_TAB[1] = dev->palSize;			/* number of background clrs  */
-	INQ_TAB[4] = dev->planes;			/* number of planes           */
-	INQ_TAB[5] = dev->lookupTable;		/* video lookup table         */
+	LV(DEV_TAB)[0] = dev->xRez - 1;			/* X max                      */
+	LV(DEV_TAB)[1] = dev->yRez - 1;			/* Y max                      */
+	LV(DEV_TAB)[3] = dev->xSize;			/* width of pixel in microns  */
+	LV(DEV_TAB)[4] = dev->ySize;			/* height of pixel in microns */
+	LV(DEV_TAB)[13] = dev->maxPen;			/* # of pens available        */
+	LV(DEV_TAB)[35] = dev->colFlag;			/* color capability flag      */
+	LV(DEV_TAB)[39] = dev->palSize;			/* palette size               */
+	LV(INQ_TAB)[1] = dev->palSize;			/* number of background clrs  */
+	LV(INQ_TAB)[4] = dev->planes;			/* number of planes           */
+	LV(INQ_TAB)[5] = dev->lookupTable;		/* video lookup table         */
 }
 
 #endif

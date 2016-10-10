@@ -69,39 +69,39 @@ VOID d_gtext(NOTHING)
 	register const struct font_head *fnt_ptr;
 	register int16_t *pointer;
 
-	if ((count = CONTRL[3]) > 0)
+	if ((count = LV(CONTRL)[3]) > 0)
 	{
-		oldWrtMode = WRT_MODE;
+		oldWrtMode = LV(WRT_MODE);
 
-		fnt_ptr = CUR_FONT;				/* Get current font pointer in register */
+		fnt_ptr = LV(CUR_FONT);				/* Get current font pointer in register */
 
-		if ((justified = (*CONTRL == 11)))
+		if ((justified = (*LV(CONTRL) == 11)))
 			monotest = -1;
 		else
-			monotest = STYLE;
+			monotest = LV(STYLE);
 
-		if (STYLE & THICKEN)
-			WEIGHT = fnt_ptr->thicken;
+		if (LV(STYLE) & THICKEN)
+			LV(WEIGHT) = fnt_ptr->thicken;
 
-		if (STYLE & LIGHT)
-			LITEMASK = fnt_ptr->lighten;
+		if (LV(STYLE) & LIGHT)
+			LV(LITEMASK) = fnt_ptr->lighten;
 
-		if (STYLE & SKEW)
+		if (LV(STYLE) & SKEW)
 		{
-			L_OFF = fnt_ptr->left_offset;
-			R_OFF = fnt_ptr->right_offset;
-			SKEWMASK = fnt_ptr->skew;
+			LV(L_OFF) = fnt_ptr->left_offset;
+			LV(R_OFF) = fnt_ptr->right_offset;
+			LV(SKEWMASK) = fnt_ptr->skew;
 		} else
 		{
-			L_OFF = 0;
-			R_OFF = 0;
+			LV(L_OFF) = 0;
+			LV(R_OFF) = 0;
 		}
 
 
 /*  adjust the origin to the inside of the outlined character		*/
 /*  jde 29aug85								*/
 
-		if (STYLE & OUTLINE)
+		if (LV(STYLE) & OUTLINE)
 			olin = 1;
 		else
 			olin = 0;
@@ -115,7 +115,7 @@ VOID d_gtext(NOTHING)
 		if (							/* (fnt_ptr->font_id == 1) && */
 			   (fnt_ptr->bottom <= fnt_ptr->ul_size))
 
-			if (DOUBLE && (DDA_INC == 0xFFFF))
+			if (LV(SCALE) && (LV(DDA_INC) == 0xFFFF))
 				ulin = -1;
 			else
 				ulin = 0;
@@ -124,8 +124,8 @@ VOID d_gtext(NOTHING)
 			ulin = 1;
 
 
-		FBASE = fnt_ptr->dat_table;
-		FWIDTH = fnt_ptr->form_width;
+		LV(FBASE) = fnt_ptr->dat_table;
+		LV(FWIDTH) = fnt_ptr->form_width;
 
 		monotest |= h_align;
 
@@ -138,11 +138,11 @@ VOID d_gtext(NOTHING)
 		case 1:						/* center justified */
 			if (!justified)
 			{							/* width pre-set if GDP */
-				old_ptr = PTSOUT;
-				PTSOUT = extent;
+				old_ptr = LV(PTSOUT);
+				LV(PTSOUT) = extent;
 				dqt_extent();
-				PTSOUT = old_ptr;
-				*(CONTRL + 2) = 0;
+				LV(PTSOUT) = old_ptr;
+				LV(CONTRL)[2] = 0;
 			}
 			delh = width / 2 - olin;	/* jde 29aug85      */
 			break;
@@ -150,11 +150,11 @@ VOID d_gtext(NOTHING)
 		case 2:						/* right justified  */
 			if (!justified)
 			{							/* width pre-set if GDP */
-				old_ptr = PTSOUT;
-				PTSOUT = extent;
+				old_ptr = LV(PTSOUT);
+				LV(PTSOUT) = extent;
 				dqt_extent();
-				PTSOUT = old_ptr;
-				*(CONTRL + 2) = 0;
+				LV(PTSOUT) = old_ptr;
+				LV(CONTRL)[2] = 0;
 			}
 			delh = width - (olin << 1);	/* jde 29aug85      */
 			break;
@@ -166,7 +166,7 @@ VOID d_gtext(NOTHING)
 #endif
 		}
 
-		if (STYLE & SKEW)
+		if (LV(STYLE) & SKEW)
 		{
 			d1 = fnt_ptr->left_offset;
 			d2 = fnt_ptr->right_offset;
@@ -216,10 +216,10 @@ VOID d_gtext(NOTHING)
 		}
 
 
-		pointer = PTSIN;
-		monotest |= CHUP;
+		pointer = LV(PTSIN);
+		monotest |= LV(CHUP);
 
-		switch (CHUP)
+		switch (LV(CHUP))
 		{
 #ifndef __ALCYON__
 		default:
@@ -257,19 +257,19 @@ VOID d_gtext(NOTHING)
 		}
 
 
-		TEXT_FG = cur_work->text_color;
+		LV(TEXT_FG) = LV(cur_work)->text_color;
 
-		DELY = fnt_ptr->form_height;
+		LV(DELY) = fnt_ptr->form_height;
 
-		if (!((!DOUBLE) && (monotest == 0) && (MONOSPACE & fnt_ptr->flags)
+		if (!((!LV(SCALE)) && (monotest == 0) && (MONOSPACE & fnt_ptr->flags)
 			  && (fnt_ptr->max_cell_width == 8) && MONO8XHT()))
 		{
 
-			XACC_DDA = 32767;			/* reinit the horizontal dda */
+			LV(XACC_DDA) = 32767;			/* reinit the horizontal dda */
 
 			for (j = 0; j < count; j++)
 			{
-				temp = INTIN[j];
+				temp = LV(INTIN)[j];
 
 				/* If character is out of range for this font make it a "?" */
 
@@ -278,11 +278,11 @@ VOID d_gtext(NOTHING)
 
 				temp -= fnt_ptr->first_ade;
 
-				SOURCEX = fnt_ptr->off_table[temp];
-				DELX = fnt_ptr->off_table[temp + 1] - SOURCEX;
+				LV(SOURCEX) = fnt_ptr->off_table[temp];
+				LV(DELX) = fnt_ptr->off_table[temp + 1] - LV(SOURCEX);
 
-				SOURCEY = 0;
-				DELY = fnt_ptr->form_height;
+				LV(SOURCEY) = 0;
+				LV(DELY) = fnt_ptr->form_height;
 
 #if VIDEL_SUPPORT
 				/*
@@ -294,21 +294,21 @@ VOID d_gtext(NOTHING)
 				 * with text background and blit in transparent mode instead
 				 * of replace mode.
 				 */
-				if ((STYLE & SKEW) && WRT_MODE == 0 &&
+				if ((LV(STYLE) & SKEW) && LV(WRT_MODE) == 0 &&
 					form_id == PIXPACKED &&
-					CHUP == 0)
+					LV(CHUP) == 0)
 				{
-					old_ptr = PTSOUT;
-					PTSOUT = extent;
+					old_ptr = LV(PTSOUT);
+					LV(PTSOUT) = extent;
 					dqt_extent();
-					PTSOUT = old_ptr;
+					LV(PTSOUT) = old_ptr;
 					cheat_blit();		/* clear out an area with txt bg */
-					WRT_MODE = 1;		/* make writing mode transparant */
+					LV(WRT_MODE) = 1;		/* make writing mode transparant */
 				}
 #endif
 				TEXT_BLT();
 
-				fnt_ptr = CUR_FONT;		/* restore reg var */
+				fnt_ptr = LV(CUR_FONT);		/* restore reg var */
 
 				if (justified)
 				{
@@ -320,7 +320,7 @@ VOID d_gtext(NOTHING)
 						DESTY += rmchary;
 						rmchar--;
 					}
-					if (INTIN[j] == 32)
+					if (LV(INTIN)[j] == 32)
 					{
 						DESTX += wordx;
 						DESTY += wordy;
@@ -338,63 +338,63 @@ VOID d_gtext(NOTHING)
 
 			}							/* for j */
 
-			if (STYLE & UNDER)
+			if (LV(STYLE) & UNDER)
 			{
-				X1 = startx;
-				Y1 = starty;
+				LV(X1) = startx;
+				LV(Y1) = starty;
 
-				if (CHUP % 1800 == 0)
+				if (LV(CHUP) % 1800 == 0)
 				{
-					X2 = DESTX;
-					Y2 = Y1;
+					LV(X2) = DESTX;
+					LV(Y2) = LV(Y1);
 				} else
 				{
-					X2 = X1;
-					Y2 = DESTY;
+					LV(X2) = LV(X1);
+					LV(Y2) = DESTY;
 				}
-				if (STYLE & LIGHT)
-					LN_MASK = CUR_FONT->lighten;
+				if (LV(STYLE) & LIGHT)
+					LV(LN_MASK) = LV(CUR_FONT)->lighten;
 				else
-					LN_MASK = 0xffff;
+					LV(LN_MASK) = 0xffff;
 
-				FG_B_PLANES = TEXT_FG;
+				LV(FG_B_PLANES) = LV(TEXT_FG);
 
-				count = CUR_FONT->ul_size;
+				count = LV(CUR_FONT)->ul_size;
 				for (i = 0; i < count; i++)
 				{
-					if (CLIP)
+					if (LV(CLIP))
 					{
-						tx1 = X1;
-						tx2 = X2;
-						ty1 = Y1;
-						ty2 = Y2;
+						tx1 = LV(X1);
+						tx2 = LV(X2);
+						ty1 = LV(Y1);
+						ty2 = LV(Y2);
 
 						if (clip_line())
 							ABLINE();
 
-						X1 = tx1;
-						X2 = tx2;
-						Y1 = ty1;
-						Y2 = ty2;
+						LV(X1) = tx1;
+						LV(X2) = tx2;
+						LV(Y1) = ty1;
+						LV(Y2) = ty2;
 					} else
 					{
 						ABLINE();
 					}
 					
-					X1 += xfact;
-					X2 += xfact;
-					Y1 += yfact;
-					Y2 += yfact;
+					LV(X1) += xfact;
+					LV(X2) += xfact;
+					LV(Y1) += yfact;
+					LV(Y2) += yfact;
 
-					if (LN_MASK & 1)
-						LN_MASK = (LN_MASK >> 1) | 0x8000;
+					if (LV(LN_MASK) & 1)
+						LV(LN_MASK) = (LV(LN_MASK) >> 1) | 0x8000;
 					else
-						LN_MASK = LN_MASK >> 1;
-				}						/* End for */
-			}							/* End if underline */
-		}								/* end if MONOBLT */
-		WRT_MODE = oldWrtMode;
-	}									/* if CONTRL[3] */
+						LV(LN_MASK) = LV(LN_MASK) >> 1;
+				}
+			}
+		}
+		LV(WRT_MODE) = oldWrtMode;
+	}
 }
 
 
@@ -404,21 +404,21 @@ VOID text_init(NOTHING)
 	int16_t id_save;
 	register const struct font_head *fnt_ptr, **chain_ptr;
 
-	SIZ_TAB[0] = 32767;
-	SIZ_TAB[1] = 32767;
-	SIZ_TAB[2] = 0;
-	SIZ_TAB[3] = 0;
+	LV(SIZ_TAB)[0] = 32767;
+	LV(SIZ_TAB)[1] = 32767;
+	LV(SIZ_TAB)[2] = 0;
+	LV(SIZ_TAB)[3] = 0;
 
 	/* Initialize the font ring.  font_ring[1] is setup before entering here */
 	/* since it contains the font which varies with the screen resolution.   */
 
-	font_ring[0] = &first;
-	font_ring[2] = NULL;
-	font_ring[3] = NULL;
+	LV(font_ring)[0] = &first;
+	LV(font_ring)[2] = NULL;
+	LV(font_ring)[3] = NULL;
 
 	id_save = first.font_id;
 
-	chain_ptr = font_ring;
+	chain_ptr = LV(font_ring);
 	i = 0;
 	j = 0;
 	while ((fnt_ptr = *chain_ptr++))
@@ -426,7 +426,7 @@ VOID text_init(NOTHING)
 		do
 		{
 			if (fnt_ptr->flags & DEFAULT)	/* If default save pointer */
-				def_font = fnt_ptr;
+				LV(def_font) = fnt_ptr;
 
 			if (fnt_ptr->font_id != id_save)
 			{							/* If new font count */
@@ -437,36 +437,36 @@ VOID text_init(NOTHING)
 			if (fnt_ptr->font_id == 1)
 			{							/* Update SIZ_TAB if system font */
 
-				if (SIZ_TAB[0] > fnt_ptr->max_char_width)
-					SIZ_TAB[0] = fnt_ptr->max_char_width;
+				if (LV(SIZ_TAB)[0] > fnt_ptr->max_char_width)
+					LV(SIZ_TAB)[0] = fnt_ptr->max_char_width;
 
-				if (SIZ_TAB[1] > fnt_ptr->top)
-					SIZ_TAB[1] = fnt_ptr->top;
+				if (LV(SIZ_TAB)[1] > fnt_ptr->top)
+					LV(SIZ_TAB)[1] = fnt_ptr->top;
 
-				if (SIZ_TAB[2] < fnt_ptr->max_char_width)
-					SIZ_TAB[2] = fnt_ptr->max_char_width;
+				if (LV(SIZ_TAB)[2] < fnt_ptr->max_char_width)
+					LV(SIZ_TAB)[2] = fnt_ptr->max_char_width;
 
-				if (SIZ_TAB[3] < fnt_ptr->top)
-					SIZ_TAB[3] = fnt_ptr->top;
+				if (LV(SIZ_TAB)[3] < fnt_ptr->top)
+					LV(SIZ_TAB)[3] = fnt_ptr->top;
 				i++;					/* Increment count of heights */
 
 			}
 			/* end if system font */
 			if (!(fnt_ptr->flags & STDFORM))
 			{
-				FBASE = fnt_ptr->dat_table;
-				FWIDTH = fnt_ptr->form_width;
-				DELY = fnt_ptr->form_height;
+				LV(FBASE) = fnt_ptr->dat_table;
+				LV(FWIDTH) = fnt_ptr->form_width;
+				LV(DELY) = fnt_ptr->form_height;
 				TRNSFONT();
 			}
 
 		} while ((fnt_ptr = fnt_ptr->next_font));
 	}
 
-	DEV_TAB[5] = i;						/* number of sizes */
-	ini_font_count = DEV_TAB[10] = ++j;	/* number of faces */
+	LV(DEV_TAB)[5] = i;						/* number of sizes */
+	LV(ini_font_count) = LV(DEV_TAB)[10] = ++j;	/* number of faces */
 
-	CUR_FONT = def_font;
+	LV(CUR_FONT) = LV(def_font);
 }
 
 
@@ -476,12 +476,12 @@ VOID dst_height(NOTHING)
 	register const struct font_head *test_font, *single_font;
 	register int16_t *pointer, font_id, test_height;
 
-	font_id = CUR_FONT->font_id;
-	cur_work->pts_mode = FALSE;
+	font_id = LV(CUR_FONT)->font_id;
+	LV(cur_work)->pts_mode = FALSE;
 
 	/* Find the smallest font in the requested face */
 
-	chain_ptr = font_ring;
+	chain_ptr = LV(font_ring);
 
 	while ((test_font = *chain_ptr++))
 	{
@@ -495,9 +495,9 @@ VOID dst_height(NOTHING)
   find_height:
 
 	single_font = test_font;
-	test_height = PTSIN[1];
-	if (cur_work->xfm_mode == 0)		/* If NDC transformation, swap y coordinate */
-		test_height = DEV_TAB[1] + 1 - test_height;
+	test_height = LV(PTSIN)[1];
+	if (LV(cur_work)->xfm_mode == 0)		/* If NDC transformation, swap y coordinate */
+		test_height = LV(DEV_TAB)[1] + 1 - test_height;
 
 	/* Traverse the chains and find the font closest to the size requested. */
 
@@ -514,21 +514,21 @@ VOID dst_height(NOTHING)
 
 	/* Set up environment for this font in the non-scaled case */
 
-	cur_work->cur_font = CUR_FONT = single_font;
-	cur_work->scaled = FALSE;
+	LV(cur_work)->cur_font = LV(CUR_FONT) = single_font;
+	LV(cur_work)->scaled = FALSE;
 
 	if (single_font->top != test_height)
 	{
 
-		DDA_INC = cur_work->dda_inc = CLC_DDA(single_font->top, test_height);
-		cur_work->t_sclsts = T_SCLSTS;
+		LV(DDA_INC) = LV(cur_work)->dda_inc = CLC_DDA(single_font->top, test_height);
+		LV(cur_work)->t_sclsts = LV(T_SCLSTS);
 		make_header();
-		single_font = CUR_FONT;
+		single_font = LV(CUR_FONT);
 	}
 
-	CONTRL[2] = 2;
+	LV(CONTRL)[2] = 2;
 
-	pointer = PTSOUT;
+	pointer = LV(PTSOUT);
 	*pointer++ = single_font->max_char_width;
 	*pointer++ = test_height = single_font->top;
 	*pointer++ = single_font->max_cell_width;
@@ -559,7 +559,7 @@ VOID make_header(NOTHING)
 	register const FONT_HEAD *source_font;
 	register FONT_HEAD *dest_font;
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 	source_font = work_ptr->cur_font;
 	dest_font = &work_ptr->scratch_head;
 
@@ -575,7 +575,7 @@ VOID make_header(NOTHING)
 /*  compressed code jde 10-sep-85					*/
 /*									*/
 #if 0
-    if(DDA_INC == 0xFFFF)
+    if(LV(DDA_INC) == 0xFFFF)
 	{
 		dest_font->top            = source_font->top * 2 + 1;
 		dest_font->ascent         = source_font->ascent * 2 + 1;
@@ -604,7 +604,7 @@ VOID make_header(NOTHING)
     }
 #endif
 
-	if (DDA_INC == 0xFFFF)
+	if (LV(DDA_INC) == 0xFFFF)
 	{
 		dest_font->top = source_font->top * 2 + 1;
 		dest_font->ascent = source_font->ascent * 2 + 1;
@@ -638,7 +638,7 @@ VOID make_header(NOTHING)
 	dest_font->form_height = source_font->form_height;
 
 	work_ptr->scaled = TRUE;
-	work_ptr->cur_font = CUR_FONT = dest_font;
+	work_ptr->cur_font = LV(CUR_FONT) = dest_font;
 }
 
 
@@ -649,12 +649,12 @@ VOID dst_point(NOTHING)
 	register const struct font_head *test_font, *single_font;
 	register int16_t *pointer, test_height, Height;
 
-	font_id = CUR_FONT->font_id;
-	cur_work->pts_mode = TRUE;
+	font_id = LV(CUR_FONT)->font_id;
+	LV(cur_work)->pts_mode = TRUE;
 
 	/* Find the smallest font in the requested face */
 
-	chain_ptr = font_ring;
+	chain_ptr = LV(font_ring);
 
 	while ((test_font = *chain_ptr++))
 	{
@@ -668,7 +668,7 @@ VOID dst_point(NOTHING)
   find_height:
 
 	double_font = single_font = test_font;
-	test_height = INTIN[0];
+	test_height = LV(INTIN)[0];
 
 	/* Traverse the chains and find the font closest to the size requested */
 	/* and closest to half the size requested.                 */
@@ -688,8 +688,8 @@ VOID dst_point(NOTHING)
 
 	/* Set up environment for this font in the non-scaled case */
 
-	CUR_FONT = cur_work->cur_font = single_font;
-	cur_work->scaled = FALSE;
+	LV(CUR_FONT) = LV(cur_work)->cur_font = single_font;
+	LV(cur_work)->scaled = FALSE;
 
 	if (single_font->point != test_height)
 	{
@@ -697,21 +697,21 @@ VOID dst_point(NOTHING)
 
 		if ((Height > single_font->point) && (Height <= test_height))
 		{
-			DDA_INC = cur_work->dda_inc = 0xFFFF;
-			cur_work->t_sclsts = 1;
-			cur_work->cur_font = double_font;
+			LV(DDA_INC) = LV(cur_work)->dda_inc = 0xFFFF;
+			LV(cur_work)->t_sclsts = 1;
+			LV(cur_work)->cur_font = double_font;
 			make_header();
-			single_font = CUR_FONT;
+			single_font = LV(CUR_FONT);
 		}
 	}
 
-	pointer = CONTRL;
+	pointer = LV(CONTRL);
 	*(pointer + 4) = 1;
 	*(pointer + 2) = 2;
 
-	INTOUT[0] = single_font->point;
+	LV(INTOUT)[0] = single_font->point;
 
-	pointer = PTSOUT;
+	pointer = LV(PTSOUT);
 	*pointer++ = single_font->max_char_width;
 	*pointer++ = test_height = single_font->top;
 	*pointer++ = single_font->max_cell_width;
@@ -722,8 +722,8 @@ VOID dst_point(NOTHING)
 
 VOID vst_effects(NOTHING)
 {
-	INTOUT[0] = cur_work->style = INTIN[0] & INQ_TAB[2];
-	CONTRL[4] = 1;
+	LV(INTOUT)[0] = LV(cur_work)->style = LV(INTIN)[0] & LV(INQ_TAB)[2];
+	LV(CONTRL)[4] = 1;
 }
 
 
@@ -735,9 +735,9 @@ VOID dst_alignment(NOTHING)
 
 	register ATTRIBUTE *work_ptr;
 
-	work_ptr = cur_work;
-	int_in = INTIN;
-	int_out = INTOUT;
+	work_ptr = LV(cur_work);
+	int_in = LV(INTIN);
+	int_out = LV(INTOUT);
 	a = *int_in++;
 	if (a < 0 || a > 2)
 		a = 0;
@@ -748,14 +748,14 @@ VOID dst_alignment(NOTHING)
 		a = 0;
 	work_ptr->v_align = *int_out = a;
 
-	CONTRL[4] = 2;
+	LV(CONTRL)[4] = 2;
 }
 
 
 VOID dst_rotation(NOTHING)
 {
-	INTOUT[0] = cur_work->chup = ((INTIN[0] + 450) / 900) * 900;
-	CONTRL[4] = 1;
+	LV(INTOUT)[0] = LV(cur_work)->chup = ((LV(INTIN)[0] + 450) / 900) * 900;
+	LV(CONTRL)[4] = 1;
 }
 
 
@@ -765,12 +765,12 @@ VOID dst_font(NOTHING)
 	register int16_t face;
 	register const struct font_head *test_font, **chain_ptr;
 
-	test_font = CUR_FONT;
+	test_font = LV(CUR_FONT);
 	point = test_font->point;
 	dummy[1] = test_font->top;
-	face = INTIN[0];
+	face = LV(INTIN)[0];
 
-	chain_ptr = font_ring;
+	chain_ptr = LV(font_ring);
 
 	while ((test_font = *chain_ptr++))
 	{
@@ -790,26 +790,26 @@ VOID dst_font(NOTHING)
 
 	/* Call down to the set text height routine to get the proper size */
 
-	cur_work->cur_font = CUR_FONT = test_font;
+	LV(cur_work)->cur_font = LV(CUR_FONT) = test_font;
 
-	old_intin = INTIN;
-	old_ptsin = PTSIN;
-	old_ptsout = PTSOUT;
-	INTIN = &point;
-	PTSIN = PTSOUT = dummy;
+	old_intin = LV(INTIN);
+	old_ptsin = LV(PTSIN);
+	old_ptsout = LV(PTSOUT);
+	LV(INTIN) = &point;
+	LV(PTSIN) = LV(PTSOUT) = dummy;
 
-	if (cur_work->pts_mode)
+	if (LV(cur_work)->pts_mode)
 		dst_point();
 	else
 		dst_height();
 
-	INTIN = old_intin;
-	PTSIN = old_ptsin;
-	PTSOUT = old_ptsout;
+	LV(INTIN) = old_intin;
+	LV(PTSIN) = old_ptsin;
+	LV(PTSOUT) = old_ptsout;
 
-	CONTRL[2] = 0;
-	CONTRL[4] = 1;
-	INTOUT[0] = CUR_FONT->font_id;
+	LV(CONTRL)[2] = 0;
+	LV(CONTRL)[4] = 1;
+	LV(INTOUT)[0] = LV(CUR_FONT)->font_id;
 }
 
 
@@ -817,14 +817,14 @@ VOID dst_color(NOTHING)
 {
 	register int16_t r;
 
-	r = INTIN[0];
-	if ((r >= DEV_TAB[13]) || (r < 0))
+	r = LV(INTIN)[0];
+	if ((r >= LV(DEV_TAB)[13]) || (r < 0))
 		r = 1;
 
-	CONTRL[4] = 1;
-	INTOUT[0] = r;
+	LV(CONTRL)[4] = 1;
+	LV(INTOUT)[0] = r;
 
-	cur_work->text_color = MAP_COL[r];
+	LV(cur_work)->text_color = MAP_COL[r];
 }
 
 
@@ -834,10 +834,10 @@ VOID dqt_attributes(NOTHING)
 	register const FONT_HEAD *fnt_ptr;
 	register ATTRIBUTE *work_ptr;
 
-	work_ptr = cur_work;
-	fnt_ptr = CUR_FONT;
+	work_ptr = LV(cur_work);
+	fnt_ptr = LV(CUR_FONT);
 
-	pointer = INTOUT;
+	pointer = LV(INTOUT);
 	*pointer++ = fnt_ptr->font_id;		/* INTOUT[0] */
 	*pointer++ = REV_MAP_COL[work_ptr->text_color];	/* INTOUT[1] */
 	*pointer++ = work_ptr->chup;		/* INTOUT[2] */
@@ -845,13 +845,13 @@ VOID dqt_attributes(NOTHING)
 	*pointer++ = work_ptr->v_align;		/* INTOUT[4] */
 	*pointer = work_ptr->wrt_mode;		/* INTOUT[5] */
 
-	pointer = PTSOUT;
+	pointer = LV(PTSOUT);
 	*pointer++ = fnt_ptr->max_char_width;
 	*pointer++ = temp = fnt_ptr->top;
 	*pointer++ = fnt_ptr->max_cell_width;
 	*pointer = temp + fnt_ptr->bottom + 1;
 
-	pointer = CONTRL;
+	pointer = LV(CONTRL);
 	*(pointer + 2) = 2;
 	*(pointer + 4) = 6;
 
@@ -867,12 +867,12 @@ VOID dqt_extent(NOTHING)
 
 	int16_t cnt;
 
-	fnt_ptr = CUR_FONT;
-	pointer = INTIN;
+	fnt_ptr = LV(CUR_FONT);
+	pointer = LV(INTIN);
 
 	width = 0;
 	table_start = fnt_ptr->first_ade;
-	cnt = CONTRL[3];
+	cnt = LV(CONTRL)[3];
 
 	for (i = 0; i < cnt; i++)
 	{
@@ -882,35 +882,35 @@ VOID dqt_extent(NOTHING)
 
 
 
-	if (DOUBLE)
+	if (SCALE)
 	{
-		if (DDA_INC == 0xFFFF)
+		if (LV(DDA_INC) == 0xFFFF)
 			width *= 2;
 		else
 			width = ACT_SIZ(width);
 	}
 	
-	if ((STYLE & THICKEN) && !(fnt_ptr->flags & MONOSPACE))
+	if ((LV(STYLE) & THICKEN) && !(fnt_ptr->flags & MONOSPACE))
 		width += cnt * fnt_ptr->thicken;
 
-	if (STYLE & SKEW)
+	if (LV(STYLE) & SKEW)
 		width += fnt_ptr->left_offset + fnt_ptr->right_offset;
 
 
 	height = fnt_ptr->top + fnt_ptr->bottom + 1;
 
 
-	if (STYLE & OUTLINE)
+	if (LV(STYLE) & OUTLINE)
 	{									/* include OUTLINE in calculations. jde 23aug85 */
 		width += cnt * 2;				/* OUTLINE is always a one pixel outline        */
 		height += 2;
 	}
 
 
-	CONTRL[2] = 4;
+	LV(CONTRL)[2] = 4;
 
-	pointer = PTSOUT;
-	switch (CHUP)
+	pointer = LV(PTSOUT);
+	switch (LV(CHUP))
 	{
 	case 0:
 		*pointer++ = 0;
@@ -966,25 +966,26 @@ VOID dqt_width(NOTHING)
 	register int16_t *pointer;
 	register const struct font_head *fnt_ptr;
 
-	fnt_ptr = CUR_FONT;
-	pointer = PTSOUT;
+	fnt_ptr = LV(CUR_FONT);
+	pointer = LV(PTSOUT);
 
 	/* Set that there is no horizontal offset */
 
 	*(pointer + 2) = 0;
 	*(pointer + 4) = 0;
 
-	k = INTIN[0];
+	k = LV(INTIN)[0];
 	if ((k < fnt_ptr->first_ade) || (k > fnt_ptr->last_ade))
-		INTOUT[0] = -1;
-	else
 	{
-		INTOUT[0] = k;
+		LV(INTOUT)[0] = -1;
+	} else
+	{
+		LV(INTOUT)[0] = k;
 		k -= fnt_ptr->first_ade;
 		*(pointer) = fnt_ptr->off_table[k + 1] - fnt_ptr->off_table[k];
-		if (DOUBLE)
+		if (SCALE)
 		{
-			if (DDA_INC == 0xFFFF)
+			if (LV(DDA_INC) == 0xFFFF)
 				*pointer *= 2;
 			else
 				*pointer = ACT_SIZ(*pointer);
@@ -997,7 +998,7 @@ VOID dqt_width(NOTHING)
 		}
 	}
 
-	pointer = CONTRL;
+	pointer = LV(CONTRL);
 	*(pointer + 2) = 3;
 	*(pointer + 4) = 1;
 	FLIP_Y = 1;
@@ -1013,8 +1014,8 @@ VOID dqt_name(NOTHING)
 	int16_t font_id;
 	const struct font_head **chain_ptr;
 
-	element = INTIN[0];
-	chain_ptr = font_ring;
+	element = LV(INTIN)[0];
+	chain_ptr = LV(font_ring);
 	i = 0;
 	font_id = -1;
 
@@ -1037,7 +1038,7 @@ VOID dqt_name(NOTHING)
 
   found_element:
 
-	int_out = INTOUT;
+	int_out = LV(INTOUT);
 	*int_out++ = tmp_font->font_id;
 	for (i = 1, name = tmp_font->name; (*int_out++ = *name++); i++)
 		;
@@ -1046,7 +1047,7 @@ VOID dqt_name(NOTHING)
 		*int_out++ = 0;
 		i++;
 	}
-	CONTRL[4] = 33;
+	LV(CONTRL)[4] = 33;
 
 }
 
@@ -1056,24 +1057,24 @@ VOID dqt_fontinfo(NOTHING)
 	register int16_t *pointer;
 	register const struct font_head *fnt_ptr;
 
-	fnt_ptr = CUR_FONT;
+	fnt_ptr = LV(CUR_FONT);
 
-	pointer = INTOUT;
+	pointer = LV(INTOUT);
 	*pointer++ = fnt_ptr->first_ade;
 	*pointer = fnt_ptr->last_ade;
 
-	pointer = PTSOUT;
+	pointer = LV(PTSOUT);
 	*pointer++ = fnt_ptr->max_cell_width;
 	*pointer++ = fnt_ptr->bottom;
 
-	if (STYLE & THICKEN)
+	if (LV(STYLE) & THICKEN)
 		*pointer++ = fnt_ptr->thicken;
 	else
 		*pointer++ = 0;
 
 	*pointer++ = fnt_ptr->descent;
 
-	if (STYLE & SKEW)
+	if (LV(STYLE) & SKEW)
 	{
 		*pointer++ = fnt_ptr->left_offset;
 		*pointer++ = fnt_ptr->half;
@@ -1089,7 +1090,7 @@ VOID dqt_fontinfo(NOTHING)
 	*pointer++ = 0;
 	*pointer = fnt_ptr->top;
 
-	pointer = CONTRL;
+	pointer = LV(CONTRL);
 	*(pointer + 2) = 5;
 	*(pointer + 4) = 2;
 	FLIP_Y = 1;
@@ -1105,26 +1106,26 @@ VOID d_justified(NOTHING)
 	register int16_t i, direction, delword, delchar;
 	register int16_t *pointer;
 
-	pointer = (CONTRL + 3);
+	pointer = &LV(CONTRL)[3];
 	cnt = *pointer = (sav_cnt = *pointer) - 2;
 
-	pointer = INTIN;
+	pointer = LV(INTIN);
 	interword = *pointer++;
 	interchar = *pointer++;
 
-	old_intin = INTIN;
-	INTIN = pointer;
-	old_ptsout = PTSOUT;
-	PTSOUT = extent;
+	old_intin = LV(INTIN);
+	LV(INTIN) = pointer;
+	old_ptsout = LV(PTSOUT);
+	LV(PTSOUT) = extent;
 
 	for (i = 0, spaces = 0; i < cnt; i++)
 		if (*(pointer++) == 32)
 			spaces++;
 
 	dqt_extent();
-	CONTRL[2] = 0;
+	LV(CONTRL)[2] = 0;
 
-	max_x = PTSIN[2];
+	max_x = LV(PTSIN)[2];
 
 	if (interword && spaces)
 	{
@@ -1140,7 +1141,7 @@ VOID d_justified(NOTHING)
 
 		if (interchar)
 		{
-			expand = CUR_FONT->max_cell_width / 2;
+			expand = LV(CUR_FONT)->max_cell_width / 2;
 			if (delword > expand)
 			{
 				delword = expand;
@@ -1154,7 +1155,7 @@ VOID d_justified(NOTHING)
 			width += (delword * spaces) + (rmword * direction);
 		}
 
-		switch (CHUP)
+		switch (LV(CHUP))
 		{
 		case 0:
 			wordx = delword;
@@ -1200,7 +1201,7 @@ VOID d_justified(NOTHING)
 		} else
 			direction = 1;
 
-		switch (CHUP)
+		switch (LV(CHUP))
 		{
 		case 0:
 			charx = delchar;
@@ -1238,9 +1239,9 @@ VOID d_justified(NOTHING)
 
 	d_gtext();
 
-	CONTRL[2] = sav_cnt;
-	PTSOUT = old_ptsout;
-	INTIN = old_intin;
+	LV(CONTRL)[2] = sav_cnt;
+	LV(PTSOUT) = old_ptsout;
+	LV(INTIN) = old_intin;
 }
 
 
@@ -1252,15 +1253,15 @@ VOID dt_loadfont(NOTHING)
 
 	/* Init some common variables */
 
-	work_ptr = cur_work;
-	control = CONTRL;
+	work_ptr = LV(cur_work);
+	control = LV(CONTRL);
 	*(control + 4) = 1;
 
 	/* You only get one chance to load fonts.  If fonts are linked in, exit  */
 
 	if (work_ptr->loaded_fonts)
 	{
-		INTOUT[0] = 0;
+		LV(INTOUT)[0] = 0;
 		return;
 	}
 
@@ -1296,9 +1297,9 @@ VOID dt_loadfont(NOTHING)
 
 		if (!(first_font->flags & STDFORM))
 		{
-			FBASE = first_font->dat_table;
-			FWIDTH = first_font->form_width;
-			DELY = first_font->form_height;
+			LV(FBASE) = first_font->dat_table;
+			LV(FWIDTH) = first_font->form_width;
+			LV(DELY) = first_font->form_height;
 			TRNSFONT();
 			first_font->flags ^= STDFORM;
 		}
@@ -1307,7 +1308,7 @@ VOID dt_loadfont(NOTHING)
 	/* Update the device table count of faces. */
 
 	work_ptr->num_fonts += count;
-	INTOUT[0] = count;
+	LV(INTOUT)[0] = count;
 }
 
 
@@ -1317,11 +1318,11 @@ VOID dt_unloadfont(NOTHING)
 
 	/* Since we always unload all fonts, this is easy. */
 
-	work_ptr = cur_work;
+	work_ptr = LV(cur_work);
 	work_ptr->loaded_fonts = NULL;		/* No fonts installed */
 
 	work_ptr->scrpt2 = scrtsiz;			/* Reset pointers to default buffers */
 	work_ptr->scrtchp = deftxbu;
 
-	work_ptr->num_fonts = ini_font_count;	/* Reset font count to default */
+	work_ptr->num_fonts = LV(ini_font_count);	/* Reset font count to default */
 }
