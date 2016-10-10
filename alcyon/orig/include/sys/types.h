@@ -9,6 +9,11 @@
 #define __INTPTR_TYPE__ long
 #endif
 typedef __INTPTR_TYPE__ __intptr_t;
+#ifdef __ALCYON__
+typedef __INTPTR_TYPE__ __uintptr_t;
+#else
+typedef unsigned __INTPTR_TYPE__ __uintptr_t;
+#endif
 
 typedef int mode_t;
 typedef int pid_t;
