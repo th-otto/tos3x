@@ -36,3 +36,5 @@
  * see lineavar.h for explanation
  */
 #define LINEA_HACK (TOSVERSION < 0x400)
+
+#define BINEXACT 1

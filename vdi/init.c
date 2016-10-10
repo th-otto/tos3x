@@ -68,13 +68,13 @@ VOID init_st_tt_sp(NOTHING)
 
 			if (cookieVal == TTCOOKIE)
 			{
-				LA_ROUTINES[V_VQCOLOR] = tt_vq_color;
-				LA_ROUTINES[V_VSCOLOR] = tt_vs_color;
+				LV(LA_ROUTINES)[V_VQCOLOR] = tt_vq_color;
+				LV(LA_ROUTINES)[V_VSCOLOR] = tt_vs_color;
 				InitTT();
 			} else if (cookieVal > TTCOOKIE && LV(LA_CURDEV)->palSize != 2)
 			{
-				LA_ROUTINES[V_VQCOLOR] = sp_vq_color;
-				LA_ROUTINES[V_VSCOLOR] = sp_vs_color;
+				LV(LA_ROUTINES)[V_VQCOLOR] = sp_vq_color;
+				LV(LA_ROUTINES)[V_VSCOLOR] = sp_vs_color;
 				InitSTSpLut();
 				InitColReqArray();
 			} else
@@ -264,7 +264,10 @@ VOID Init16Pal(NOTHING)
 	register int16_t i, temp, *palMapPtr;
 	register volatile int16_t *lutPtr;
 
-	palMapPtr = LV(pal_map);
+	/*
+	 * BUG: thats nonsense; pal_map has 32-bit entries
+	 */
+	palMapPtr = (int16_t *)LV(pal_map);
 	for (i = 0; i < 256; i++)
 	{
 		R = G = B = colors[i];
@@ -318,7 +321,9 @@ VOID Init32Pal(NOTHING)
 {
 	register int32_t R, G, B, *palMapPtr;
 	register int16_t i, temp;
-
+	
+	/* BUG: R, G, B, temp were used uninitialized */
+	R = G = B = temp = 0;
 	palMapPtr = LV(pal_map);
 	for (i = 0; i < 256; i++)
 		*palMapPtr++ = R | G | B;

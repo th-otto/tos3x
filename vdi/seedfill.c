@@ -112,13 +112,13 @@ VOID seedfill(NOTHING)
 
 		search_color = (int32_t) (MAP_COL[search_color] & tplane_mask[LV(v_planes)]);
 #if VIDEL_SUPPORT
-		search_color = pal_map[search_color];
+		search_color = LV(pal_map)[search_color];
 #endif
 		seed_type = 0;
 	}
 
 	/* Initialize the line drawing parameters */
-	FG_B_PLANES = LV(cur_work)->fill_color;
+	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
 
 	LV(LSTLIN) = FALSE;
 
@@ -295,7 +295,7 @@ VOID v_get_pixel(NOTHING)
 #if VIDEL_SUPPORT
 	tmpPtr = (int32_t *)(int_out = LV(INTOUT));
 
-	if (form_id == PIXPACKED && LV(v_planes) > 8)
+	if (LV(form_id) == PIXPACKED && LV(v_planes) > 8)
 	{
 		*tmpPtr = pel;
 	} else

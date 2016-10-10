@@ -246,7 +246,7 @@ typedef struct vdiVars {
 	LAEXT int32_t	resrvd2[8];		         /* reserved				    */
 
 #if TOSVERSION >= 0x400
-	LAEXT VOID        (**LA_ROUTINES) PROTO((NOTHING));     /* ptr to primitives vector list	    */
+	LAEXT VOID (**LA_ROUTINES) PROTO((NOTHING));     /* ptr to primitives vector list	    */
 	LAEXT const SCREENDEF   *LA_CURDEV;	     /* ptr to a current device structure    */
 #else
 	LAEXT VOID (**LA_ROUTINES) PROTO((NOTHING)); /* hardware assisted drawing primitives  */
@@ -295,7 +295,7 @@ typedef struct vdiVars {
 	LAEXT int32_t	vl_col_bg;	               /* escape background color (long value) */
 	LAEXT int32_t	vl_col_fg;	               /* escape foreground color (long value) */
 	LAEXT int32_t	pal_map[256];	           /* either a mapping of reg's or true val */
-	LAEXT int16_t	(*V_PRIMITIVES[40])();	   /* space to copy vectors into	    */
+	LAEXT int16_t	(*V_PRIMITIVES[40]) PROTO((NOTHING));	   /* space to copy vectors into	    */
 #endif
 
 #if !LINEA_HACK

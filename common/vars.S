@@ -269,11 +269,6 @@ memterr: ds.w 1
 * BEWARE: portions also used by VDI
 #include "../vdi/vdivar.S"
 
-	xdef _reqCol
-_reqCol equ lineavars+(_REQ_COL)
-	xdef _reqXCol
-_reqXCol equ lineavars+(_REQ_X_COL)
-
 	ds.w 1 ; unused
 
 	xdef biosav

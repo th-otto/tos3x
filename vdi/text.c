@@ -226,31 +226,31 @@ VOID d_gtext(NOTHING)
 			/* BUG: undefined values used below */
 #endif
 		case 0:
-			startx = DESTX = *(pointer) - delh - olin;
-			starty = (DESTY = *(pointer + 1) - delv - olin) + fnt_ptr->top + fnt_ptr->ul_size + ulin;
+			startx = LV(DESTX) = *(pointer) - delh - olin;
+			starty = (LV(DESTY) = *(pointer + 1) - delv - olin) + fnt_ptr->top + fnt_ptr->ul_size + ulin;
 			xfact = 0;
 			yfact = 1;
 			break;
 
 		case 900:
-			startx = (DESTX = *(pointer) - delv - olin) + fnt_ptr->top + fnt_ptr->ul_size + ulin;
-			starty = DESTY = *(pointer + 1) + delh + olin + 1;	/* +1 jde */
+			startx = (LV(DESTX) = *(pointer) - delv - olin) + fnt_ptr->top + fnt_ptr->ul_size + ulin;
+			starty = LV(DESTY) = *(pointer + 1) + delh + olin + 1;	/* +1 jde */
 			xfact = 1;
 			yfact = 0;
 			break;
 
 		case 1800:
-			startx = DESTX = *(pointer) + delh + olin + 1;	/* +1 jde */
-			DESTY = *(pointer + 1) - ((fnt_ptr->top + fnt_ptr->bottom) - delv) - olin;
-			starty = (DESTY + fnt_ptr->bottom) - (fnt_ptr->ul_size + ulin);
+			startx = LV(DESTX) = *(pointer) + delh + olin + 1;	/* +1 jde */
+			LV(DESTY) = *(pointer + 1) - ((fnt_ptr->top + fnt_ptr->bottom) - delv) - olin;
+			starty = (LV(DESTY) + fnt_ptr->bottom) - (fnt_ptr->ul_size + ulin);
 			xfact = 0;
 			yfact = -1;
 			break;
 
 		case 2700:
-			DESTX = *pointer - ((fnt_ptr->top + fnt_ptr->bottom) - delv) - olin;
-			startx = (DESTX + fnt_ptr->bottom) - (fnt_ptr->ul_size + ulin);
-			starty = DESTY = *(pointer + 1) - delh - olin;
+			LV(DESTX) = *pointer - ((fnt_ptr->top + fnt_ptr->bottom) - delv) - olin;
+			startx = (LV(DESTX) + fnt_ptr->bottom) - (fnt_ptr->ul_size + ulin);
+			starty = LV(DESTY) = *(pointer + 1) - delh - olin;
 			xfact = -1;
 			yfact = 0;
 			break;
@@ -295,7 +295,7 @@ VOID d_gtext(NOTHING)
 				 * of replace mode.
 				 */
 				if ((LV(STYLE) & SKEW) && LV(WRT_MODE) == 0 &&
-					form_id == PIXPACKED &&
+					LV(form_id) == PIXPACKED &&
 					LV(CHUP) == 0)
 				{
 					old_ptr = LV(PTSOUT);
@@ -312,29 +312,29 @@ VOID d_gtext(NOTHING)
 
 				if (justified)
 				{
-					DESTX += charx;
-					DESTY += chary;
+					LV(DESTX) += charx;
+					LV(DESTY) += chary;
 					if (rmchar)
 					{
-						DESTX += rmcharx;
-						DESTY += rmchary;
+						LV(DESTX) += rmcharx;
+						LV(DESTY) += rmchary;
 						rmchar--;
 					}
 					if (LV(INTIN)[j] == 32)
 					{
-						DESTX += wordx;
-						DESTY += wordy;
+						LV(DESTX) += wordx;
+						LV(DESTY) += wordy;
 						if (rmword)
 						{
-							DESTX += rmwordx;
-							DESTY += rmwordy;
+							LV(DESTX) += rmwordx;
+							LV(DESTY) += rmwordy;
 							rmword--;
 						}
 					}
 				}
 				/* end if justified */
 				if (fnt_ptr->flags & HORZ_OFF)
-					DESTX += fnt_ptr->hor_table[temp];
+					LV(DESTX) += fnt_ptr->hor_table[temp];
 
 			}							/* for j */
 
@@ -345,12 +345,12 @@ VOID d_gtext(NOTHING)
 
 				if (LV(CHUP) % 1800 == 0)
 				{
-					LV(X2) = DESTX;
+					LV(X2) = LV(DESTX);
 					LV(Y2) = LV(Y1);
 				} else
 				{
 					LV(X2) = LV(X1);
-					LV(Y2) = DESTY;
+					LV(Y2) = LV(DESTY);
 				}
 				if (LV(STYLE) & LIGHT)
 					LV(LN_MASK) = LV(CUR_FONT)->lighten;
@@ -882,7 +882,7 @@ VOID dqt_extent(NOTHING)
 
 
 
-	if (SCALE)
+	if (LV(SCALE))
 	{
 		if (LV(DDA_INC) == 0xFFFF)
 			width *= 2;
@@ -983,7 +983,7 @@ VOID dqt_width(NOTHING)
 		LV(INTOUT)[0] = k;
 		k -= fnt_ptr->first_ade;
 		*(pointer) = fnt_ptr->off_table[k + 1] - fnt_ptr->off_table[k];
-		if (SCALE)
+		if (LV(SCALE))
 		{
 			if (LV(DDA_INC) == 0xFFFF)
 				*pointer *= 2;

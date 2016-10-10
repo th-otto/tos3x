@@ -79,7 +79,11 @@ VOID vs_color(NOTHING)
 	register short total;
 
 
+#if TOSVERSION >= 0x400
+	j = tplane_mask[LV(v_planes)];			/* max pen allowed    */
+#else
 	j = plane_mask[LV(v_planes)];			/* max pen allowed    */
+#endif
 
 
 	if ((pen = *ptr++) > j)				/* is col in range    */
@@ -187,7 +191,11 @@ VOID vq_color(NOTHING)
 
 	LV(CONTRL)[4] = 4;						/* # of output ints   */
 
+#if TOSVERSION >= 0x400
+	j = tplane_mask[LV(v_planes)];			/* max pen allowed    */
+#else
 	j = plane_mask[LV(v_planes)];			/* max pen allowed    */
+#endif
 
 	if ((pen = *ptr++) > j)
 	{									/* col ndx in range ? */

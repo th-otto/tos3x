@@ -112,7 +112,7 @@ _ACT_SIZ:
 	subq.w	#1,d1			;zero adjust DELY count
 	bmi	siz_0			;if it was 0, just exit
 
-	btst.b	#0,PIXLV(1+(T_SCLSTS),a0)	;check for shrink
+	btst.b	#0,PIXLV((T_SCLSTS)+1,a0)	;check for shrink
 	beq	sz_sm_lp		;br if so
 
 sz_lp:	add.w	d3,d2			;else, enlarge

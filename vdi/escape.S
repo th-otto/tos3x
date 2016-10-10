@@ -319,7 +319,11 @@ esc_ch1:
 	bmi	exit_conout		; value. Exit if invalid.
 
 	cmp.w	#12,d1			; If in the range A-M go handle
+#if BINEXACT & (TOSVERSION < 0x400)
 	ble.s	range_A2M
+#else
+	ble		range_A2M
+#endif
 
 	cmp.w	#24,d1			; <esc> Y is direct cursor addressing
 	bne.s	check_low_case		; and takes 2 additional characters
@@ -1237,7 +1241,11 @@ put_char:
 end_o_line:
 
 	btst.b	#F_CEOL,LV(V_STAT_0,a4)	; wrap or overwrite ?
+#if BINEXACT & (TOSVERSION < 0x400)
 	beq.s	show_alpha		; overwrite: stay put
+#else
+	beq		show_alpha		; overwrite: stay put
+#endif
 
 	clr.w	d0			; d0 <- X of first cell in line
 #if TOSVERSION < 0x400

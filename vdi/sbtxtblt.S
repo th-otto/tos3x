@@ -368,7 +368,7 @@ doub_wid:	add.w	d0,d1
 		bcc	no_db_wd
 		addq.w	#1,d3
 
-no_db_wd:	btst.b	#0,PIXLV(1+(T_SCLSTS),a6)
+no_db_wd:	btst.b	#0,PIXLV((T_SCLSTS)+1,a6)
 		beq	clc_n_su
 		addq.w	#1,d3
 
@@ -385,7 +385,7 @@ clc_n_su:	dbra	d2,doub_wid
 		beq	upda_dst
 
 adr_nodb:	clr.w	smear(a5)		; in case no thicken init
-		btst.b	#THICKEN,PIXLV(1+(STYLE),a6)
+		btst.b	#THICKEN,PIXLV((STYLE)+1,a6)
 		beq	adr_notk
 		move.w	PIXLV(WEIGHT,a6),d4
 		bne	adr_th1
@@ -396,12 +396,12 @@ adr_th1:	tst.w	PIXLV(MONO_STATUS,a6)	; skip source expand
 
 		add.w	d4,d1			; we'll smear this amount (DELX=DELX+WEIGHT)
 
-adr_notk:	btst.b	#SKEW,PIXLV(1+(STYLE),a6)	; skewin'?
+adr_notk:	btst.b	#SKEW,PIXLV((STYLE)+1,a6)	; skewin'?
 		beq	adr_nosk		; skip DELX adjust if not
 
 		add.w	d6,d1			; DELX = DELX + L_OFF + R_OFF
 
-adr_nosk:	btst.b	#OUTLINE,PIXLV(1+(STYLE),a6)	; outlinin'?
+adr_nosk:	btst.b	#OUTLINE,PIXLV((STYLE)+1,a6)	; outlinin'?
 		beq	adr_nout
 		addq.w	#2,d1			; outline is 2 wider
 		addq.w	#2,d3			; and 2 taller
@@ -549,7 +549,7 @@ preblt:		move.w	PIXLV(SOURCEX,a6),d0
 		move.w	PIXLV(DELX,a6),d0		; char width
 		move.w	PIXLV(WEIGHT,a6),d1		; thicken amount
 
-		btst.b	#THICKEN,PIXLV(1+(STYLE),a6)	; smear?
+		btst.b	#THICKEN,PIXLV((STYLE)+1,a6)	; smear?
 		beq	no_smear		; br if no
 
 		add.w	d1,d0			; add adjusted WEIGHT to DELX
@@ -646,7 +646,7 @@ no_mode:	move.w	d_next(a5),d7		; reset the source to the buffer
 *+
 *  outline additions
 *-
-		btst.b	#OUTLINE,PIXLV(1+(STYLE),a6)	; check outline
+		btst.b	#OUTLINE,PIXLV((STYLE)+1,a6)	; check outline
 		beq	skip_out		; br to skip outline code
 
 		ext.l	d7
@@ -676,7 +676,7 @@ do_clip1:
 *	change SOURCEX, SOURCEY, DELX, DELY
 *	based on DESTX, DESTY (UL corner of destination)
 *
-do_clip:	btst.b	#THICKEN,PIXLV(1+(STYLE),a6)
+do_clip:	btst.b	#THICKEN,PIXLV((STYLE)+1,a6)
 		beq	no_thik
 		move.w	PIXLV(WEIGHT,a6),d0
 		tst.w	PIXLV(MONO_STATUS,a6)
@@ -835,12 +835,12 @@ upda_dst:	movem.w	(sp)+,d0-d3
 *+
 * end additions
 *-
-upda_ndb:	btst.b	#OUTLINE,PIXLV(1+(STYLE),a6)	; adjust new horz position
+upda_ndb:	btst.b	#OUTLINE,PIXLV((STYLE)+1,a6)	; adjust new horz position
 		beq	upda_not		; by expanded outline form
 		addq.w	#2,d1			; if outline in effect
 		addq.w	#2,d3
 
-upda_not:	btst.b	#THICKEN,PIXLV(1+(STYLE),a6)
+upda_not:	btst.b	#THICKEN,PIXLV((STYLE)+1,a6)
 		beq	upda_ntk
 		tst.w	PIXLV(MONO_STATUS,a6)
 		bne	upda_ntk
@@ -1150,7 +1150,7 @@ no_specl:	move.w	left_msk(a5),d2		; get the first mask
 *-
 		rts				; back to norm_blt caller
 
-more_pl:	btst.b	#SKEW,PIXLV(1+(STYLE),a6)	; only skew screws up other planes
+more_pl:	btst.b	#SKEW,PIXLV((STYLE)+1,a6)	; only skew screws up other planes
 		beq	plane_lp		; br to short init if not skew
 		bra	norm_blt		; else, do big init
 
@@ -1312,7 +1312,7 @@ lef_don:	move.w	rite_msk(a5),d2		; load the mask we need
 	
 		rol.w	lite_msk(a5)
 	
-		btst.b	#SKEW,PIXLV(1+(STYLE),a6)
+		btst.b	#SKEW,PIXLV((STYLE)+1,a6)
 		bne	skewopw
 		bra	mlt_left
 
@@ -1395,7 +1395,7 @@ rite_don:	move.w	rite_msk(a5),d2		; load the mask we need
 	
 		rol.w	lite_msk(a5)
 	
-		btst.b	#SKEW,PIXLV(1+(STYLE),a6)
+		btst.b	#SKEW,PIXLV((STYLE)+1,a6)
 		bne	skewopw
 		bra	mlt_rite
 

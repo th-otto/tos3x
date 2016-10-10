@@ -35,6 +35,6 @@ ATTRIBUTE virt_work;			/* attribute areas for workstations */
 VDIVARS	vdivars;
 #endif
 #if TOSVERSION >= 0x400
-int16_t *lineAVar = &vdivars.vPlanes; /* accessed by asm code only */
-VDIVARS	*la = &vdiars; /* accessed by C code only */
+int16_t *lineAVar = &vdivars.v_planes; /* accessed by asm code only */
+VDIVARS	*la = &vdivars; /* accessed by C code only */
 #endif

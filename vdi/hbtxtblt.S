@@ -150,7 +150,7 @@ no_db_wd:
 clc_n_su:
 	dbra	d0,doub_wid
 *
-	btst.b	#0,PIXLV(1+(T_SCLSTS),a6)	;check scaling up or down
+	btst.b	#0,PIXLV((T_SCLSTS)+1,a6)	;check scaling up or down
 	beq	scal_dwn		;br if scale down
 	add.w	d5,d3			;else, scale up--add iter count
 scal_dwn:
@@ -561,7 +561,7 @@ clearb2i:
 	bsr	norm_blt		;stuff to buffer
 	move.w	(sp)+,height(a4)
 *
-	btst.b	#THICKEN,PIXLV(1+(STYLE),a6)
+	btst.b	#THICKEN,PIXLV((STYLE)+1,a6)
 	beq	skp_bold
 *
 *  do bolding in buffer
@@ -972,7 +972,7 @@ scrn_blt:
 	move.w	PIXLV(TEXT_FG,a6),forecol(a4)	;set-up colors
 	move.w	PIXLV(TEXT_BG,a6),backcol(a4)
 *
-	btst.b	#LIGHT,PIXLV(1+(STYLE),a6)		;lite?
+	btst.b	#LIGHT,PIXLV((STYLE)+1,a6)		;lite?
 	beq	nolite
 *
 *  Bud lite please..
@@ -984,7 +984,7 @@ scrn_blt:
 	move.b	#(BM_SRC+BM_PAT)/256,B_LOGOP(a5) ;tell blaster to pattern it
 
 nolite:
-	btst.b	#SKEW,PIXLV(1+(STYLE),a6)		;skew?
+	btst.b	#SKEW,PIXLV((STYLE)+1,a6)		;skew?
 	beq	noskew
 	tst.w	skewmsk(a4)			;was skew already performed?
 	beq	set_skew			;br if not
@@ -1084,7 +1084,7 @@ no_blit:
 	move.w	tmp_delx(a4),d0
 	move.w	tmp_xacc(a4),PIXLV(XACC_DDA,a6)
 upda_ndb:
-	btst.b	#OUTLINE,PIXLV(1+(STYLE),a6)
+	btst.b	#OUTLINE,PIXLV((STYLE)+1,a6)
 	beq	upda_not
 	addq.w	#2,d0
 	bra	upda_xxx	;preserving inconsistency of TEXTBLT

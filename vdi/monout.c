@@ -74,7 +74,7 @@ VOID vq_extnd(NOTHING)
 	register int16_t i;
 	register int16_t *dp, *sp;
 
-	dp = CONTRL;
+	dp = LV(CONTRL);
 	*(dp + 2) = 6;
 	*(dp + 4) = 45;
 
@@ -172,7 +172,7 @@ VOID v_pmarker(NOTHING)
 {
 	int16_t i, j, num_lines, num_vert, x_center, y_center, sav_points[10];
 	int16_t sav_index, sav_color, sav_width, sav_beg, sav_end;
-#if TOSVERSION < 0x400
+#if BINEXACT & (TOSVERSION < 0x400)
 	int unused;
 #endif
 	const int16_t *mrk_ptr;
@@ -182,7 +182,7 @@ VOID v_pmarker(NOTHING)
 	register const int16_t *m_ptr;
 	register ATTRIBUTE *work_ptr;
 
-#if TOSVERSION < 0x400
+#if BINEXACT & (TOSVERSION < 0x400)
 	UNUSED(unused);
 #endif
 
@@ -208,7 +208,7 @@ VOID v_pmarker(NOTHING)
 
 	/* Copy the PTSIN pointer since we will be doing polylines */
 
-	num_vert = CONTRL[1];
+	num_vert = LV(CONTRL)[1];
 	src_ptr = old_ptsin = LV(PTSIN);
 	LV(PTSIN) = sav_points;
 
@@ -230,7 +230,7 @@ VOID v_pmarker(NOTHING)
 		for (j = 0; j < num_lines; j++)
 		{
 
-			num_points = CONTRL[1] = *m_ptr++;	/* How many points?  Get them.  */
+			num_points = LV(CONTRL)[1] = *m_ptr++;	/* How many points?  Get them.  */
 
 			pts_in = sav_points;
 			for (h = 0; h < num_points; h++)
@@ -274,7 +274,7 @@ VOID v_fillarea(NOTHING)
 
 
 /*
- * VDI #5 - v_gdp - Graphic drawing primitives
+ * VDI #11 - v_gdp - Graphic drawing primitives
  */
 /* 306de: 00e08e66 */
 VOID v_gdp(NOTHING)
@@ -283,11 +283,11 @@ VOID v_gdp(NOTHING)
 	register int16_t *xy_pointer;
 	register ATTRIBUTE *work_ptr;
 
-	i = *(CONTRL + 5);
+	i = LV(CONTRL)[5];
 	xy_pointer = LV(PTSIN);
 	work_ptr = LV(cur_work);
 
-	if ((i > 0) && (i < 11))
+	if (i > 0 && i < 11)
 	{
 		i--;
 		switch (i)
@@ -304,7 +304,7 @@ VOID v_gdp(NOTHING)
 				*(xy_pointer + 4) = *(xy_pointer + 2);
 				*(xy_pointer + 6) = *(xy_pointer + 8) = *(xy_pointer);
 
-				*(CONTRL + 1) = 5;
+				LV(CONTRL)[1] = 5;
 
 				pline();
 			}
@@ -363,7 +363,9 @@ VOID v_gdp(NOTHING)
 
 		case 9:						/* GDP Justified Text */
 			d_justified();
+#if !BINEXACT
 			break;
+#endif
 		}
 	}
 }
@@ -388,7 +390,7 @@ VOID vql_attributes(NOTHING)
 	*pointer++ = work_ptr->line_width;
 	*pointer = 0;
 
-	pointer = CONTRL;
+	pointer = LV(CONTRL);
 	*(pointer + 2) = 1;
 	*(pointer + 4) = 3;
 }
@@ -413,7 +415,7 @@ VOID vqm_attributes(NOTHING)
 	*pointer++ = 0;
 	*pointer = work_ptr->mark_height;
 
-	pointer = CONTRL;
+	pointer = LV(CONTRL);
 	*(pointer + 4) = 3;
 	*(pointer + 2) = 1;
 	FLIP_Y = 1;
@@ -437,7 +439,7 @@ VOID vqf_attributes(NOTHING)
 	*pointer++ = LV(WRT_MODE) + 1;
 	*pointer = work_ptr->fill_per;
 
-	*(CONTRL + 4) = 5;
+	LV(CONTRL)[4] = 5;
 }
 
 
@@ -448,7 +450,7 @@ VOID pline(NOTHING)
 
 	LV(LSTLIN) = FALSE;
 	old_pointer = LV(PTSIN);
-	for (i = (*(CONTRL + 1) - 1); i > 0; i--)
+	for (i = (LV(CONTRL)[1] - 1); i > 0; i--)
 	{
 		if (i == 1)
 			LV(LSTLIN) = TRUE;
@@ -474,12 +476,12 @@ VOID pline(NOTHING)
 /* 306de: 00e091ae */
 BOOLEAN clip_line(NOTHING)
 {
-#if TOSVERSION < 0x400 /* only registe declaration different */
+#if BINEXACT & (TOSVERSION < 0x400) /* only register declaration different */
 	int16_t _deltaX, _deltaY;
 	int16_t x1y1_clip_flag, x2y2_clip_flag, line_clip_flag;
 #else
 	register int16_t _deltaX, _deltaY;
-	register register int16_t x1y1_clip_flag, x2y2_clip_flag, line_clip_flag;
+	register int16_t x1y1_clip_flag, x2y2_clip_flag, line_clip_flag;
 #endif
 	register int16_t *x, *y;
 
@@ -548,9 +550,16 @@ PP(int16_t y;)
 }
 
 
+/* 306de: 00e09382 */
 VOID plygn(NOTHING)
 {
 	register int16_t *pointer, i, k;
+#if BINEXACT & (TOSVERSION < 0x400)
+	register int unused1;
+	int unused2;
+	UNUSED(unused1);
+	UNUSED(unused2);
+#endif
 
 	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
 
@@ -562,7 +571,7 @@ VOID plygn(NOTHING)
 	LV(fill_maxy) = LV(fill_miny) = *pointer++;
 	pointer++;
 
-	for (i = (*(CONTRL + 1) - 1); i > 0; i--)
+	for (i = (LV(CONTRL)[1] - 1); i > 0; i--)
 	{
 		k = *pointer++;
 		pointer++;
@@ -588,7 +597,7 @@ VOID plygn(NOTHING)
 				return;					/* plygon entirely after clip */
 		}
 	}
-	k = *(CONTRL + 1) * 2;
+	k = LV(CONTRL)[1] * 2;
 	pointer = LV(PTSIN);
 	*(pointer + k) = *pointer;
 	*(pointer + k + 1) = *(pointer + 1);
@@ -600,12 +609,17 @@ VOID plygn(NOTHING)
 	if (LV(cur_work)->fill_per == TRUE)
 	{
 		LV(LN_MASK) = 0xffff;
-		(*(CONTRL + 1))++;
+		LV(CONTRL)[1]++;
 		pline();
 	}
 }
 
 
+/*
+ * VDI #11,8 - v_rbox - Rounded rectangle
+ * VDI #11,9 - v_rfbox - Filled rounded rectangle
+ */
+/* 306de: 00e094e2 */
 VOID gdp_rbox(NOTHING)
 {
 	register int16_t i, j;
@@ -684,7 +698,7 @@ VOID gdp_rbox(NOTHING)
 	*(pointer + 40) = *pointer;
 	*(pointer + 41) = *(pointer + 1);
 
-	pointer = CONTRL;
+	pointer = LV(CONTRL);
 	*(pointer + 1) = 21;
 	if (*(pointer + 5) == 8)
 	{
@@ -708,6 +722,10 @@ VOID gdp_rbox(NOTHING)
 }
 
 
+/*
+ * VDI #11,2 - v_arc - Draw a circular arc
+ */
+/* 306de: 00e09824 */
 VOID gdp_arc(NOTHING)
 {
 	register int16_t *pointer;
@@ -725,7 +743,7 @@ VOID gdp_arc(NOTHING)
 	LV(yrad) = SMUL_DIV(LV(xrad), xsize, ysize);
 	clc_nsteps();
 
-#if 9 /* removed 5/1/86 LT */
+#if 0 /* removed 5/1/86 LT */
 
 	LV(n_steps) = SMUL_DIV(LV(del_ang), LV(n_steps), 3600);
 	if (LV(n_steps) == 0)
@@ -755,6 +773,11 @@ VOID clc_nsteps(NOTHING)
 }
 
 
+/*
+ * VDI #11,6 - v_ellarc - Elliptical arc
+ * VDI #11,7 - v_ellpie - Elliptical pie
+ */
+/* 306de: 00e0990a */
 VOID gdp_ell(NOTHING)
 {
 	register int16_t *pointer;
@@ -815,7 +838,7 @@ VOID clc_arc(NOTHING)
 /* nothing because loop should close circle.				*/
 /*----------------------------------------------------------------------*/
 
-	cntl_ptr = CONTRL;
+	cntl_ptr = LV(CONTRL);
 	xy_ptr = LV(PTSIN);
 
 	*(cntl_ptr + 1) = LV(n_steps) + 1;		/* since loop in Clc_arc starts at 0 */
@@ -893,8 +916,8 @@ VOID st_fl_ptr(NOTHING)
 	case 4:
 		pm = 0x000f;
 		pp = &work_ptr->ud_patrn[0];
+#if !BINEXACT
 		break;
-#ifndef __ALCYON__
 	default:
 		/* BUG: illegal values for fill_style set patptr to undefined pointer pp */
 		return;
@@ -908,8 +931,17 @@ VOID st_fl_ptr(NOTHING)
 /* Moved the circle DDA code that was in vsl_width() here. */
 VOID cir_dda(NOTHING)
 {
+#if BINEXACT & (TOSVERSION < 0x400)
+	int unused1;
+	int unused2;
+#endif
 	int16_t i, j;
 	register int16_t *xptr, *yptr, x, y, d;
+
+#if BINEXACT & (TOSVERSION < 0x400)
+	UNUSED(unused1);
+	UNUSED(unused2);
+#endif
 
 	/* Calculate the number of vertical pixels required. */
 
@@ -991,17 +1023,25 @@ VOID cir_dda(NOTHING)
 }
 
 
+/* 306de: 00e09e1e */
 VOID wline(NOTHING)
 {
 	int16_t i, k, box[10];							/* box two high to close polygon */
 	int16_t numpts, wx1, wy1, wx2, wy2, vx, vy;
+#if BINEXACT & (TOSVERSION < 0x400)
+	int unused1;
+#endif
 	int16_t *old_ptsin, *src_ptr;
 	register int16_t *pointer, x, y, d, d2;
 	register ATTRIBUTE *work_ptr;
 
+#if BINEXACT & (TOSVERSION < 0x400)
+	UNUSED(unused1);
+#endif
+
 	/* Don't attempt wide lining on a degenerate polyline */
 
-	if ((numpts = *(CONTRL + 1)) < 2)
+	if ((numpts = LV(CONTRL)[1]) < 2)
 		return;
 
 	work_ptr = LV(cur_work);
@@ -1075,7 +1115,7 @@ VOID wline(NOTHING)
 
 		/* Prepare the control and points parameters for the polygon call. */
 
-		*(CONTRL + 1) = 4;
+		LV(CONTRL)[1] = 4;
 
 		LV(PTSIN) = pointer = box;
 
@@ -1122,13 +1162,20 @@ VOID wline(NOTHING)
 }
 
 
+/* 306de: 00e0a010 */
 VOID perp_off(P(int16_t *) px, P(int16_t *) py)
 PP(int16_t *px;)
 PP(int16_t *py;)
 {
 	register int16_t *vx, *vy, *pcircle, u, v;
+#if BINEXACT & (TOSVERSION < 0x400)
+	int unused1;
+#endif
 	int16_t x, y, quad, magnitude, min_val, x_val, y_val;
 
+#if BINEXACT & (TOSVERSION < 0x400)
+	UNUSED(unused1);
+#endif
 	vx = px;
 	vy = py;
 
@@ -1197,6 +1244,7 @@ PP(int16_t *py;)
 }
 
 
+/* 306de: 00e0a154 */
 VOID quad_xform(P(int) quad, P(int) x, P(int) y, P(int16_t *) tx, P(int16_t *) ty)
 PP(int quad;)
 PP(int x;)
@@ -1232,6 +1280,7 @@ PP(int16_t *ty;)
 }										/* End "quad_xform". */
 
 
+/* 306de: 00e0a1cc */
 VOID do_circ(P(int16_t) cx, P(int16_t) cy)
 PP(int16_t cx;)
 PP(int16_t cy;)
@@ -1274,6 +1323,7 @@ PP(int16_t cy;)
 }										/* End "do_circ". */
 
 
+/* 306de: 00e0a2ca */
 VOID s_fa_attr(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1298,6 +1348,7 @@ VOID s_fa_attr(NOTHING)
 }										/* End "s_fa_attr". */
 
 
+/* 306de: 00e0a336 */
 VOID r_fa_attr(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1313,6 +1364,7 @@ VOID r_fa_attr(NOTHING)
 }										/* End "r_fa_attr". */
 
 
+/* 306de: 00e0a36e */
 VOID do_arrow(NOTHING)
 {
 	int16_t x_start, y_start, new_x_start, new_y_start;
@@ -1342,7 +1394,7 @@ VOID do_arrow(NOTHING)
 	{
 		*pts_in = x_start;
 		*(pts_in + 1) = y_start;
-		arrow((pts_in + 2 ** (CONTRL + 1) - 2), -2);
+		arrow((pts_in + 2 * LV(CONTRL)[1] - 2), -2);
 		pts_in = LV(PTSIN);					/* arrow calls plygn which trashes regs */
 		*pts_in = new_x_start;
 		*(pts_in + 1) = new_y_start;
@@ -1355,6 +1407,7 @@ VOID do_arrow(NOTHING)
 }										/* End "do_arrow". */
 
 
+/* 306de: 00e0a40a */
 VOID arrow(P(int16_t *) xy, P(int16_t) inc)
 PP(int16_t *xy;)
 PP(int16_t inc;)
@@ -1378,7 +1431,7 @@ PP(int16_t inc;)
 	/* Find the first point which is not so close to the end point that it */
 	/* will be obscured by the arrowhead.                                  */
 
-	temp = *(CONTRL + 1);
+	temp = LV(CONTRL)[1];
 #ifndef __ALCYON__
 	line_len = 0; /* BUG: used uninitialized below for nptsin < 1 */
 	dx = dy = 0;
@@ -1424,7 +1477,7 @@ PP(int16_t inc;)
 
 	/* Save the vertice count */
 
-	ptr1 = CONTRL;
+	ptr1 = LV(CONTRL);
 	sav_contrl = *(ptr1 + 1);
 
 	/* Build a polygon to send to plygn.  Build into a local array first since */
@@ -1447,7 +1500,7 @@ PP(int16_t inc;)
 
 	/* Restore the vertex count. */
 
-	*(CONTRL + 1) = sav_contrl;
+	LV(CONTRL)[1] = sav_contrl;
 
 	/* Adjust the end point and all points skipped. */
 
@@ -1465,6 +1518,7 @@ PP(int16_t inc;)
 }										/* End "arrow". */
 
 
+/* 306de: 00e0a676 */
 VOID init_wk(NOTHING)
 {
 	register int16_t l;
@@ -1563,7 +1617,7 @@ VOID init_wk(NOTHING)
 
 	work_ptr->ud_ls = LINE_STYLE[0];
 
-	pointer = CONTRL;
+	pointer = LV(CONTRL);
 	*(pointer + 2) = 6;
 	*(pointer + 4) = 45;
 
@@ -1581,6 +1635,10 @@ VOID init_wk(NOTHING)
 }
 
 
+/*
+ * VDI #100 - v_opnvwk - Open virtual screen workstation
+ */
+/* 306de: 00e0a886 */
 VOID d_opnvwk(NOTHING)
 {
 	register int16_t handle;
@@ -1592,7 +1650,7 @@ VOID d_opnvwk(NOTHING)
 
 	if (new_work == NULL)
 	{									/* No work available */
-		CONTRL[6] = 0;
+		LV(CONTRL)[6] = 0;
 		return;
 	}
 
@@ -1611,12 +1669,16 @@ VOID d_opnvwk(NOTHING)
 	LV(cur_work) = new_work;
 	new_work->next_work = work_ptr->next_work;
 	work_ptr->next_work = new_work;
-	new_work->handle = CONTRL[6] = handle;
+	new_work->handle = LV(CONTRL)[6] = handle;
 
 	init_wk();
 }
 
 
+/*
+ * VDI #101 - v_clsvwk - Close virtual screen workstation
+ */
+/* 306de: 00e0a900 */
 VOID d_clsvwk(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1637,6 +1699,10 @@ VOID d_clsvwk(NOTHING)
 }
 
 
+/*
+ * VDI #112 - vsf_udpat - Set user-defined fill-pattern
+ */
+/* 306de: 00e0a956 */
 VOID dsf_udpat(NOTHING)
 {
 	register int16_t *sp, *dp, i, count;
@@ -1646,8 +1712,9 @@ VOID dsf_udpat(NOTHING)
 	register ATTRIBUTE *work_ptr;
 
 	work_ptr = LV(cur_work);
-	count = CONTRL[3];
+	count = LV(CONTRL)[3];
 
+#if VIDEL_SUPPORT
 	sp = LV(INTIN);
 	dp = &work_ptr->ud_patrn[0];
 
@@ -1656,17 +1723,12 @@ VOID dsf_udpat(NOTHING)
 		work_ptr->multifill = 0;		/* Single Plane Pattern */
 		for (i = 0; i < count; i++)
 			*dp++ = *sp++;
-	} else if (count == (LV(v_planes) * 16) 
-#if VIDEL_SUPPORT
-		&& form_id != PIXPACKED
-#endif
-		)
+	} else if (count == (LV(v_planes) * 16) && LV(form_id) != PIXPACKED)
 	{
 		work_ptr->multifill = 1;		/* Valid Multi-plane pattern */
 		for (i = 0; i < count; i++)
 			*dp++ = *sp++;
-#if VIDEL_SUPPORT
-	} else if (form_id == PIXPACKED)
+	} else if (LV(form_id) == PIXPACKED)
 	{
 		work_ptr->multifill = 0;		/* init to Invalid Multi-plane       */
 
@@ -1702,7 +1764,6 @@ VOID dsf_udpat(NOTHING)
 					*dp++ = red | green | blue;
 				}
 			}
-
 			break;
 
 		case 32:
@@ -1712,13 +1773,29 @@ VOID dsf_udpat(NOTHING)
 				for (i = 0; i < count; i++)
 					*dp++ = *sp++;
 			}
-
 			break;
-
-
 		}
+	}
+#else
+	if (count == 16)
+	{
+		work_ptr->multifill = 0;		/* Single Plane Pattern */
+	} else if (count == (LV(INQ_TAB)[4] * 16))
+	{
+		work_ptr->multifill = 1;		/* Valid Multi-plane pattern */
+	} else
+	{
+#if BINEXACT
+		return 0;
+#else
+		return;
 #endif
 	}
+	sp = LV(INTIN);
+	dp = &work_ptr->ud_patrn[0];
+	for (i = 0; i < count; i++)
+		*dp++ = *sp++;
+#endif
 }
 
 
@@ -1729,7 +1806,7 @@ VOID dsf_udpat(NOTHING)
  */
 VOID vq_color(NOTHING)
 {
-	(*LA_ROUTINES[V_VQCOLOR]) ();
+	(*LV(LA_ROUTINES)[V_VQCOLOR]) ();
 }
 
 
@@ -1738,7 +1815,7 @@ VOID vq_color(NOTHING)
  */
 VOID vs_color(NOTHING)
 {
-	(*LA_ROUTINES[V_VSCOLOR]) ();
+	(*LV(LA_ROUTINES)[V_VSCOLOR]) ();
 }
 
 #endif

@@ -57,9 +57,9 @@ _SETBLT:
 		move.l	PIXLV(LA_CURDEV,a1),a0		; a0 -> current device struct
 
 
-		;
-		; Init routines vector list pointer
-		;
+		/*
+		 * Init routines vector list pointer
+		 */
 		move.l	DEVSOFTROUTINES(a0),a2	; a2 -> routine list
 		btst.l	#0,d0
 		beq	setblt0

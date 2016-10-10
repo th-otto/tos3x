@@ -90,7 +90,7 @@ VOID v_opnwk(NOTHING)
 	ram8x8 = f8x8;
 	ram8x16 = f8x16;
 	ram16x32 = f16x32;
-	font_ring[1] = &ram8x8;
+	LV(font_ring)[1] = &ram8x8;
 
 #if TOSVERSION >= 0x400
 	/*
@@ -122,7 +122,7 @@ VOID v_opnwk(NOTHING)
 	 */
 	INIT_G();
 
-	(*LA_ROUTINES[V_INIT]) ();
+	(*LV(LA_ROUTINES)[V_INIT]) ();
 #else
 
 	UNUSED(unused);
