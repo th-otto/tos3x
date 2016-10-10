@@ -217,10 +217,11 @@ char const brtab[][2] = {
 };
 
 /* turns !x>y into x<=y */
-short const invrel[] = { NEQUALS, EQUALS, LESSEQ, LESS, GREATEQ, GREAT };
+/*                        EQUALS,  NEQUALS, GREAT,  GREATEQ, LESS,    LESSEQ  */
+short const invrel[] = {  NEQUALS, EQUALS,  LESSEQ, LESS,    GREATEQ, GREAT };
 
 /* turns x>y into y<=x */
-short const swaprel[] = { EQUALS, NEQUALS, LESS, LESSEQ, GREAT, GREATEQ };
+short const swaprel[] = { EQUALS,  NEQUALS, LESS,   LESSEQ,  GREAT,   GREATEQ };
 
 /* code skeleton built-in strings */
 const char *const strtab[] = {

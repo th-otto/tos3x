@@ -741,7 +741,7 @@ PP(struct tnode *tp;)						/* pointer to tree */
  * returns reg result is in
  */
 short codegen(P(struct tnode *) tp, P(int) cookie, P(int) reg)
-PP(register struct tnode *tp;)				/* tree pointer */
+PP(struct tnode *tp;)						/* tree pointer */
 PP(int cookie;)								/* code generation goals */
 PP(register int reg;)						/* first available register */
 {

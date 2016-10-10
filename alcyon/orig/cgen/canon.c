@@ -764,7 +764,7 @@ PP(struct tnode *ntp;)
 		return 1;
 	if (constant(tp, &lconst))
 		return 0;
-	return (tp->t_su > ntp->t_su);
+	return tp->t_su > ntp->t_su;
 }
 
 
