@@ -97,7 +97,7 @@ static SCREENDEF const _dev320x200x8 = {
 			    STHardList, STSoftList, NULL
 			};
 
-const SCREENDEF *const devices[]	= {
+const SCREENDEF *const devices[] = {
 			&devSTLow, &devSTMed, &devSTHigh,
 			&devTTLow, &devTTMed, &devTTHigh,
 #if VIDEL_SUPPORT

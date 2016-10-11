@@ -105,7 +105,7 @@ VOID vq_32_color(NOTHING)
 
 	UNUSED(i);
 	
-	LV(CONTRL)[4] = 4;						/* # of output ints               */
+	NINTOUT = 4;						/* # of output ints               */
 
 	if ((pen = *ptr++) > 255)
 	{									/* col ndx in range ?             */
@@ -243,7 +243,7 @@ VOID vq_16_color(NOTHING)
 
 	UNUSED(i);
 	
-	LV(CONTRL)[4] = 4;						/* # of output ints               */
+	NINTOUT = 4;						/* # of output ints               */
 
 	if ((pen = *ptr++) > 255)
 	{									/* col ndx in range ?             */

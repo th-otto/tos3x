@@ -33,8 +33,19 @@
 #define VIDEL_SUPPORT (TOSVERSION >= 0x400)
 
 /*
+ * used to mark some strange looking code segments
+ * that are needed to create a binary equivalent image
+ * of the TOS ROMs
+ */
+#define BINEXACT 1
+
+/*
+ * used to mark code changes due to
+ * multiple linea variable structures feature
+ */
+#define MULTI_LINEA (TOSVERSION >= 0x400)
+
+/*
  * see lineavar.h for explanation
  */
-#define LINEA_HACK (TOSVERSION < 0x400)
-
-#define BINEXACT 1
+#define LINEA_HACK (BINEXACT & (!MULTI_LINEA))

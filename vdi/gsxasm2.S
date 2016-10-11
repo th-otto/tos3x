@@ -64,11 +64,11 @@ _trap14:	PIXLA(a0)
 		move.l	PIXLV(trap14sav,a0),-(sp)
 		rts
 
-*+
-* Same as above except we use this for SetScreen, and SetMode calls.
-* The reason you ask? Those call cause XBIOS calls (i.e. one level of 
-* reentency).
-*-
+/*
+ * Same as above except we use this for SetScreen, and SetMode calls.
+ * The reason you ask? Those call cause XBIOS calls (i.e. one level of 
+ * reentency).
+ */
 		xdef	_trap14b		; xbios trap
 _trap14b:	PIXLA(a0)
 		move.l	(sp)+,PIXLV(trapb14sav,a0)
@@ -138,18 +138,28 @@ _put_pix:
 #endif
 
 #if VIDEL_SUPPORT
-PX_PUTPIX:	PIXLA(a1)
+PX_PUTPIX:
+		PIXLA(a1)
 		move.l	PIXLV(PTSIN,a1),a0		; a0 -> PTSIN array
 		move.w	(a0)+,d0		; d0 <- X coordinate
 		move.w	(a0),d1			; d1 <- Y coordinate
+#if BINEXACT
 		mulu	PIXLV(v_lin_wr,a4),d1	; d1 <- y portion of offset ??? why (a4)?
-*		mulu	PIXLV(byt_per_pix,d0),d0	; d0 <- x portion of offset ??? why (d0)? it is assembled as 68030 instr
+		dc.w $c0f0,$01a0,$0b06     ; mulu	PIXLV(byt_per_pix,d0),d0	; d0 <- x portion of offset ??? why (d0)? it is assembled as 68030 instr
+#else
+		mulu	PIXLV(v_lin_wr,a1),d1	; d1 <- y portion of offset
+		mulu	PIXLV(byt_per_pix,a1),d0	; d0 <- x portion of offset
+#endif
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a0		; a0 -> base of screen
 		add.l	d1,a0			; a0 -> (x,y)
 		moveq.l	#0,d0			; d0 to be used as ret val
-		move.l	PIXLV(INTIN,a1),a2		; a0 -> INITIN array
+		move.l	PIXLV(INTIN,a1),a2		; a0 -> INTIN array
+#if BINEXACT
 		cmp.w	#16,PIXLV(v_planes,a4)	; see how many bits per pixel ??? why (a4)?
+#else
+		cmp.w	#16,PIXLV(v_planes,a1)	; see how many bits per pixel
+#endif
 		beq	PXPTP16			; do 16 bit case
 		blt	PXPTP8			; do 8 bit case
 		move.l	(a2),(a0)		; splat pixel

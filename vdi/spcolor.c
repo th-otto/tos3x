@@ -100,7 +100,7 @@ VOID sp_vq_color(NOTHING)
 
 	UNUSED(i);
 	
-	LV(CONTRL)[4] = 4;					/* # of output ints               */
+	NINTOUT = 4;					/* # of output ints               */
 
 	if (LV(v_planes) > 8)
 		j = 255;						/* 255 is the most pens allowed   */

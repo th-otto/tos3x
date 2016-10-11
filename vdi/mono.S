@@ -30,8 +30,6 @@
 #include "vdidefs.h"
 #include "lineaequ.inc"
 
-	xdef	_MONO8XH
-
 *  Mono spaced text blt...
 
 	text
@@ -41,7 +39,8 @@ fail_ret:	moveq	#0,d0		; exit if not byte bnd or clip required
 
 *  Entry point here..
 
-_MONO8XH: PIXLA(a1)
+	xdef	_MONO8XHT
+_MONO8XHT: PIXLA(a1)
 		move.w	PIXLV(DESTX,a1),d0		; d0 <- dst X
 		move.w	d0,d2			; d2 <- dst X
 		and.w	#$0007,d2		; this routine is only for

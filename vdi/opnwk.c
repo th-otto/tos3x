@@ -33,6 +33,7 @@ FONT_HEAD ram8x16, ram8x8, ram16x32;
  * v_opnwk():	OPEN_WORKSTATION:
  */
 /* 306de: 00e06a76 */
+/* 404: 00e10c72 */
 VOID v_opnwk(NOTHING)
 {
 	register int16_t i;
@@ -329,6 +330,7 @@ VOID v_opnwk(NOTHING)
  * This function is here for soft loaded vdi. We init the workType then find
  * a device out of a set of caned devices. And do a SETREZ (setscreen) call.
  */
+/* 404: 00e10e4a */
 const SCREENDEF *FindDevice(P(int16_t) devId)
 PP(int16_t devId;)
 {

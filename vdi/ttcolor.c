@@ -189,7 +189,7 @@ VOID vq_color(NOTHING)
 	register short pen;
 	register short temp;
 
-	LV(CONTRL)[4] = 4;						/* # of output ints   */
+	NINTOUT = 4;						/* # of output ints   */
 
 #if TOSVERSION >= 0x400
 	j = tplane_mask[LV(v_planes)];			/* max pen allowed    */

@@ -312,6 +312,6 @@ VOID v_get_pixel(NOTHING)
 			pel = 255;
 
 		*int_out = REV_MAP_COL[pel];
-		LV(CONTRL)[4] = 2;
+		NINTOUT = 2;
 	}
 }

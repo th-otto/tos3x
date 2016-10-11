@@ -302,12 +302,19 @@ typedef struct vdiVars {
 } VDIVARS;
 #endif
 
-#undef LAEXR
+#undef LAEXT
 
 
 #if TOSVERSION >= 0x400
 
 /* line_a variable structure */
+/*
+ * That does not make much sense.
+ * la is an initialized variable, thus part of the data segment
+ * and thus in ROM and can never be changed.
+ * These indirect accesses just produce quite some more code
+ * and take extra time.
+ */
 extern VDIVARS *la;
 
 #define LV(v) la->v
@@ -328,5 +335,10 @@ extern VDIVARS vdivars;
 #endif
 
 #endif
+
+#define NPTSIN  LV(CONTRL)[1]
+#define NPTSOUT LV(CONTRL)[2]
+#define NINTIN  LV(CONTRL)[3]
+#define NINTOUT LV(CONTRL)[4]
 
 #endif /* _LINEAVAR_H_ */

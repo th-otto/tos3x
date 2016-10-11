@@ -48,7 +48,14 @@
 #include "gsxextrn.h"
 
 
+VOID copy_name PROTO((const char *source, char *dest));
+VOID make_header PROTO((NOTHING));
 
+
+/*
+ * VDI #8 - v_gtext - Graphic text
+ */
+/* 306de: 00e0a9b2 */
 VOID d_gtext(NOTHING)
 {
 	int16_t monotest;
@@ -64,18 +71,22 @@ VOID d_gtext(NOTHING)
 	int16_t extent[8];
 	int16_t *old_ptr;
 	int16_t justified;
+#if TOSVERSION >= 0x400
 	int16_t oldWrtMode;
+#endif
 	int16_t temp;
 	register const struct font_head *fnt_ptr;
 	register int16_t *pointer;
 
-	if ((count = LV(CONTRL)[3]) > 0)
+	if ((count = NINTIN) > 0)
 	{
+#if TOSVERSION >= 0x400
 		oldWrtMode = LV(WRT_MODE);
+#endif
 
 		fnt_ptr = LV(CUR_FONT);				/* Get current font pointer in register */
 
-		if ((justified = (*LV(CONTRL) == 11)))
+		if ((justified = (LV(CONTRL)[0] == 11)))
 			monotest = -1;
 		else
 			monotest = LV(STYLE);
@@ -112,17 +123,29 @@ VOID d_gtext(NOTHING)
 /*  jde 06sep85								*/
 /*  Now checks all fonts, not just system.				*/
 
-		if (							/* (fnt_ptr->font_id == 1) && */
-			   (fnt_ptr->bottom <= fnt_ptr->ul_size))
-
+		if (
+			/* fnt_ptr->font_id == 1 && */
+#if BINEXACT & (TOSVERSION < 0x400)
+			/*
+			 * strange cast; without it produces
+			 *  clr.w d0
+			 *  move 48(a5),d0
+			 * but comparison is done unsigned anyway
+			 */
+			(int)fnt_ptr->bottom <= fnt_ptr->ul_size
+#else
+			fnt_ptr->bottom <= fnt_ptr->ul_size
+#endif
+			)
+		{
 			if (LV(SCALE) && (LV(DDA_INC) == 0xFFFF))
 				ulin = -1;
 			else
 				ulin = 0;
-
-		else
+		} else
+		{
 			ulin = 1;
-
+		}
 
 		LV(FBASE) = fnt_ptr->dat_table;
 		LV(FWIDTH) = fnt_ptr->form_width;
@@ -142,7 +165,7 @@ VOID d_gtext(NOTHING)
 				LV(PTSOUT) = extent;
 				dqt_extent();
 				LV(PTSOUT) = old_ptr;
-				LV(CONTRL)[2] = 0;
+				NPTSOUT = 0;
 			}
 			delh = width / 2 - olin;	/* jde 29aug85      */
 			break;
@@ -154,11 +177,11 @@ VOID d_gtext(NOTHING)
 				LV(PTSOUT) = extent;
 				dqt_extent();
 				LV(PTSOUT) = old_ptr;
-				LV(CONTRL)[2] = 0;
+				NPTSOUT = 0;
 			}
 			delh = width - (olin << 1);	/* jde 29aug85      */
+#if !BINEXACT
 			break;
-#ifndef __ALCYON__
 		default:
 			/* BUG: undefined values used below */
 			delh = 0;
@@ -175,7 +198,6 @@ VOID d_gtext(NOTHING)
 			d1 = 0;
 			d2 = 0;
 		}
-
 
 		switch (v_align)
 		{
@@ -207,7 +229,7 @@ VOID d_gtext(NOTHING)
 			delv = 0;
 			delh += d1 + d2;
 			break;
-#ifndef __ALCYON__
+#if !BINEXACT
 		default:
 			/* BUG: undefined values used below */
 			delv = 0;
@@ -221,7 +243,7 @@ VOID d_gtext(NOTHING)
 
 		switch (LV(CHUP))
 		{
-#ifndef __ALCYON__
+#if !BINEXACT
 		default:
 			/* BUG: undefined values used below */
 #endif
@@ -393,11 +415,14 @@ VOID d_gtext(NOTHING)
 				}
 			}
 		}
+#if TOSVERSION >= 0x400
 		LV(WRT_MODE) = oldWrtMode;
+#endif
 	}
 }
 
 
+/* 306de: 00e0b094 */
 VOID text_init(NOTHING)
 {
 	int16_t i, j;
@@ -470,6 +495,10 @@ VOID text_init(NOTHING)
 }
 
 
+/*
+ * VDI #12 - vst_height - Set character height, absolute mode
+ */
+/* 306de: 00e0b1c8 */
 VOID dst_height(NOTHING)
 {
 	const struct font_head **chain_ptr;
@@ -526,7 +555,7 @@ VOID dst_height(NOTHING)
 		single_font = LV(CUR_FONT);
 	}
 
-	LV(CONTRL)[2] = 2;
+	NPTSOUT = 2;
 
 	pointer = LV(PTSOUT);
 	*pointer++ = single_font->max_char_width;
@@ -537,6 +566,7 @@ VOID dst_height(NOTHING)
 }
 
 
+/* 306de: 00e0b2e6 */
 VOID copy_name(P(const char *) source, P(char *) dest)
 PP(const char *source;)
 PP(char *dest;)
@@ -553,6 +583,7 @@ PP(char *dest;)
 }
 
 
+/* 306de: 00e0b30e */
 VOID make_header(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -723,7 +754,7 @@ VOID dst_point(NOTHING)
 VOID vst_effects(NOTHING)
 {
 	LV(INTOUT)[0] = LV(cur_work)->style = LV(INTIN)[0] & LV(INQ_TAB)[2];
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 }
 
 
@@ -748,14 +779,14 @@ VOID dst_alignment(NOTHING)
 		a = 0;
 	work_ptr->v_align = *int_out = a;
 
-	LV(CONTRL)[4] = 2;
+	NINTOUT = 2;
 }
 
 
 VOID dst_rotation(NOTHING)
 {
 	LV(INTOUT)[0] = LV(cur_work)->chup = ((LV(INTIN)[0] + 450) / 900) * 900;
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 }
 
 
@@ -807,8 +838,8 @@ VOID dst_font(NOTHING)
 	LV(PTSIN) = old_ptsin;
 	LV(PTSOUT) = old_ptsout;
 
-	LV(CONTRL)[2] = 0;
-	LV(CONTRL)[4] = 1;
+	NPTSOUT = 0;
+	NINTOUT = 1;
 	LV(INTOUT)[0] = LV(CUR_FONT)->font_id;
 }
 
@@ -821,7 +852,7 @@ VOID dst_color(NOTHING)
 	if ((r >= LV(DEV_TAB)[13]) || (r < 0))
 		r = 1;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 	LV(INTOUT)[0] = r;
 
 	LV(cur_work)->text_color = MAP_COL[r];
@@ -872,7 +903,7 @@ VOID dqt_extent(NOTHING)
 
 	width = 0;
 	table_start = fnt_ptr->first_ade;
-	cnt = LV(CONTRL)[3];
+	cnt = NINTIN;
 
 	for (i = 0; i < cnt; i++)
 	{
@@ -907,7 +938,7 @@ VOID dqt_extent(NOTHING)
 	}
 
 
-	LV(CONTRL)[2] = 4;
+	NPTSOUT = 4;
 
 	pointer = LV(PTSOUT);
 	switch (LV(CHUP))
@@ -1047,8 +1078,7 @@ VOID dqt_name(NOTHING)
 		*int_out++ = 0;
 		i++;
 	}
-	LV(CONTRL)[4] = 33;
-
+	NINTOUT = 33;
 }
 
 
@@ -1106,7 +1136,7 @@ VOID d_justified(NOTHING)
 	register int16_t i, direction, delword, delchar;
 	register int16_t *pointer;
 
-	pointer = &LV(CONTRL)[3];
+	pointer = &NINTIN;
 	cnt = *pointer = (sav_cnt = *pointer) - 2;
 
 	pointer = LV(INTIN);
@@ -1123,7 +1153,7 @@ VOID d_justified(NOTHING)
 			spaces++;
 
 	dqt_extent();
-	LV(CONTRL)[2] = 0;
+	NPTSOUT = 0;
 
 	max_x = LV(PTSIN)[2];
 
@@ -1239,7 +1269,7 @@ VOID d_justified(NOTHING)
 
 	d_gtext();
 
-	LV(CONTRL)[2] = sav_cnt;
+	NPTSOUT = sav_cnt;
 	LV(PTSOUT) = old_ptsout;
 	LV(INTIN) = old_intin;
 }

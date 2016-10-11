@@ -1,10 +1,17 @@
-#include "../common/config.h"
+#include "vdidefs.h"
 
 #ifndef __COMPILER_H__
 #include <compiler.h>
 #endif
 #ifndef __STDINT_H__
 #include <stdint.h>
+#endif
+
+#if BINEXACT
+#  ifndef __ALCYON__
+#    undef BINEXACT
+#    define BINEXACT 0
+#  endif
 #endif
 
 #ifdef __GNUC__
@@ -23,7 +30,6 @@ typedef int16_t BOOLEAN;
 #  define UNUSED(x) ((void)(x))
 #endif
 
-#include "vdidefs.h"
 #include "scrndev.h"
 
 #define	_320x200    0					/* 320x200x4 video mode       */
@@ -91,12 +97,13 @@ VOID vqin_mode PROTO((NOTHING));         /* VDI #115  */
 VOID vsf_perimeter PROTO((NOTHING));     /* VDI #104  */
 VOID vsl_udsty PROTO((NOTHING));         /* VDI #113  */
 VOID vs_clip PROTO((NOTHING));           /* VDI #129  */
-VOID arb_corner PROTO((int16_t *corners, int16_t type));
 VOID dro_cpyfm PROTO((NOTHING));         /* VDI #109  */
 VOID drt_cpyfm PROTO((NOTHING));         /* VDI #121  */
 VOID vr_trnfm PROTO((NOTHING));          /* VDI #110  */
 VOID dr_recfl PROTO((NOTHING));          /* VDI #114  */
 VOID vsl_ends PROTO((NOTHING));          /* VDI #108  */
+VOID arb_corner PROTO((int16_t *corners, int16_t type));
+
 
 /*
  * monout.c
@@ -147,7 +154,7 @@ VOID SetCurDevice PROTO((int16_t curRez));
 VOID InitFonts PROTO((NOTHING));
 VOID InitDevTabInqTab PROTO((NOTHING));
 #else
-int16_t FindDevice PROTO((NOTHING));
+int16_t FindDevice PROTO((NOTHING)); /* in allgem.S */
 #endif
 
 
@@ -159,11 +166,13 @@ VOID seedfill PROTO((NOTHING));
 VOID crunch_Q PROTO((NOTHING));
 VOID v_get_pixel PROTO((NOTHING));       /* VDI #105  */
 
+
 /*
  * spcolor.c
  */
 VOID sp_vs_color PROTO((NOTHING));
 VOID sp_vq_color PROTO((NOTHING));
+
 
 /*
  * text.c
@@ -171,8 +180,6 @@ VOID sp_vq_color PROTO((NOTHING));
 VOID d_gtext PROTO((NOTHING));           /* VDI #8    */
 VOID text_init PROTO((NOTHING));
 VOID dst_height PROTO((NOTHING));        /* VDI #12   */
-VOID copy_name PROTO((const char *source, char *dest));
-VOID make_header PROTO((NOTHING));
 VOID dst_point PROTO((NOTHING));         /* VDI #107  */
 VOID vst_effects PROTO((NOTHING));       /* VDI #106  */
 VOID dst_rotation PROTO((NOTHING));      /* VDI #13   */
@@ -187,6 +194,7 @@ VOID dqt_fontinfo PROTO((NOTHING));      /* VDI #131  */
 VOID d_justified PROTO((NOTHING));
 VOID dt_loadfont PROTO((NOTHING));       /* VDI #119  */
 VOID dt_unloadfont PROTO((NOTHING));     /* VDI #120  */
+
 
 /*
  * trucolor.c

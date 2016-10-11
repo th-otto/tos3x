@@ -61,7 +61,7 @@ VOID vsl_type(NOTHING)
 {
 	register int16_t li;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 
 	li = LV(INTIN)[0] - 1;
 	if ((li >= MX_LN_STYLE) || (li < 0))
@@ -94,7 +94,7 @@ VOID vsl_width(NOTHING)
 
 	/* Set the line width internals and return parameters */
 
-	LV(CONTRL)[2] = 1;
+	NPTSOUT = 1;
 	pts_out = LV(PTSOUT);
 	*pts_out++ = LV(cur_work)->line_width = w;
 	*pts_out = 0;
@@ -111,7 +111,7 @@ VOID vsl_ends(NOTHING)
 	register int16_t *pointer;
 	register ATTRIBUTE *work_ptr;
 
-	LV(CONTRL)[4] = 2;
+	NINTOUT = 2;
 
 	pointer = LV(INTIN);
 	lb = *pointer++;
@@ -136,7 +136,7 @@ VOID vsl_color(NOTHING)
 {
 	register int16_t lc;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 	lc = LV(INTIN)[0];
 
 	if ((lc >= LV(DEV_TAB)[13]) || (lc < 0))
@@ -171,7 +171,7 @@ VOID vsm_height(NOTHING)
 	work_ptr->mark_height = h;
 	h = (h + DEF_MKHT / 2) / DEF_MKHT;
 	work_ptr->mark_scale = h;
-	LV(CONTRL)[2] = 1;
+	NPTSOUT = 1;
 	pts_out = LV(PTSOUT);
 	*pts_out++ = h * DEF_MKWD;
 	*pts_out = h * DEF_MKHT;
@@ -190,7 +190,7 @@ VOID vsm_type(NOTHING)
 	i = LV(INTIN)[0] - 1;
 	i = ((i >= MAX_MARK_INDEX) || (i < 0)) ? 2 : i;
 	LV(INTOUT)[0] = (LV(cur_work)->mark_index = i) + 1;
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -206,7 +206,7 @@ VOID vsm_color(NOTHING)
 	i = ((i >= LV(DEV_TAB)[13]) || (i < 0)) ? 1 : i;
 	LV(INTOUT)[0] = i;
 	LV(cur_work)->mark_color = MAP_COL[i];
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -218,7 +218,7 @@ VOID vsf_interior(NOTHING)
 {
 	register int16_t fs;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 	fs = LV(INTIN)[0];
 	if (fs > MX_FIL_STYLE || fs < 0)
 		fs = 0;
@@ -236,7 +236,7 @@ VOID vsf_style(NOTHING)
 	register int16_t fi;
 	register ATTRIBUTE *work_ptr;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 	fi = LV(INTIN)[0];
 	work_ptr = LV(cur_work);
 
@@ -263,7 +263,7 @@ VOID vsf_color(NOTHING)
 {
 	register int16_t fc;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 	fc = LV(INTIN)[0];
 	if ((fc >= LV(DEV_TAB)[13]) || (fc < 0))
 		fc = 1;
@@ -419,14 +419,14 @@ VOID v_choice(NOTHING)
 
 	if (LV(chc_mode) == 0)
 	{
-		LV(CONTRL)[4] = 1;
+		NINTOUT = 1;
 		while (GCHC_KEY() != 1)
 			;
 		LV(INTOUT)[0] = LV(TERM_CH) & 0x00ff;
 	} else
 	{
 		i = GCHC_KEY();
-		LV(CONTRL)[4] = i;
+		NINTOUT = i;
 		if (i == 1)
 			LV(INTOUT)[0] = LV(TERM_CH) & 0x00ff;
 		else if (i == 2)
@@ -469,13 +469,13 @@ VOID v_string(NOTHING)
 		}
 		if (LV(TERM_CH) == 0x000d)
 			--i;
-		LV(CONTRL)[4] = i;
+		NINTOUT = i;
 	} else								/* Sample mode */
 	{
 		i = 0;
 		while ((i < j) && (GCHR_KEY() != 0))	/* jde 12-aug-85 */
 			LV(INTOUT)[i++] = LV(TERM_CH) & mask;
-		LV(CONTRL)[4] = i;
+		NINTOUT = i;
 	}
 }
 
@@ -486,7 +486,7 @@ VOID v_string(NOTHING)
 /* 306de: 00e08836 */
 VOID vq_key_s(NOTHING)
 {
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 	LV(INTOUT)[0] = GSHIFT_S();
 }
 
@@ -499,7 +499,7 @@ VOID vswr_mode(NOTHING)
 {
 	register int16_t wm;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 	wm = LV(INTIN)[0] - 1;
 	if ((wm > MAX_MODE) | (wm < 0))
 		wm = 0;
@@ -516,7 +516,7 @@ VOID vsin_mode(NOTHING)
 {
 	register int16_t i,	*int_in;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 
 	int_in = LV(INTIN);
 	LV(INTOUT)[0] = i = *(int_in + 1);
@@ -553,7 +553,7 @@ VOID vqin_mode(NOTHING)
 {
 	register int16_t *int_out;
 
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 
 	int_out = LV(INTOUT);
 	switch (LV(INTIN)[0])
@@ -605,7 +605,7 @@ VOID vsf_perimeter(NOTHING)
 		*(int_out) = 1;
 		work_ptr->fill_per = TRUE;
 	}
-	LV(CONTRL)[4] = 1;
+	NINTOUT = 1;
 }
 
 /*--------------------------------------------------------------------------*/

@@ -138,14 +138,14 @@ VOID SCREEN(NOTHING)
 	register ATTRIBUTE *work_ptr;
 
 	control = LV(CONTRL);
-	r = *(control + 6);
+	r = control[6];
 
-	opcode = *control;
+	opcode = control[0];
 
 	/* no ints out & no pts out */
 
-	*(control + 2) = 0;
-	*(control + 4) = 0;
+	control[2] = 0;
+	control[4] = 0;
 
 	FLIP_Y = 0;
 

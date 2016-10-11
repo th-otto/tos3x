@@ -31,11 +31,6 @@
 #include "lineaequ.inc"
 #include "tosvars.inc"
 
-		xdef sb_cell
-		xdef sb_scrup
-		xdef sb_scrdn
-		xdef sb_blank
-
 *******************************************************************************
 *	
 * name: sb_cell (soft blt version)
@@ -55,6 +50,7 @@
 *******************************************************************************
 
             
+		xdef sb_cell
 sb_cell:	move.l	a4,-(sp)		; save a4
 		move.w	PIXLV(v_planes,a4),d1	; d1 <- number of planes
 		subq.w	#1,d1			; d1 <- dbra plane counter
@@ -194,8 +190,8 @@ word_i:		move.w	(a2),d5		; d5 <- character word
 *
 *******************************************************************************
 
+		xdef sb_scrup
 sb_scrup:
-
 	move.w	PIXLV(v_celmy,a4),d3		; d3 <- Ymax
 	move.w	d3,d7
 	sub.w	d1,d7			; d7 <- height of region in cells -1
@@ -237,8 +233,8 @@ blank_up:
 
 
 
+		xdef sb_scrdn
 sb_scrdn:
-
 	move.w	PIXLV(v_celmy,a4),d3		; d3 <- Ymax
 	move.w	d3,d7
 	sub.w	d1,d7			; d7 <- height of region in cells -1
@@ -312,8 +308,8 @@ blank_tab: *    fringe masks		*   odd      odd  multi word
 	dc.w	$00FF,$FFFF		*   1	     1        1
 
 
+		xdef sb_blank
 sb_blank:
-
 	movem.l	d0-d3/a0-a1,-(sp)
 
 	move.w	d0,d4			; d4 <- X min

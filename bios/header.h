@@ -21,6 +21,11 @@
  * - OS_DOSDATE: the build date in GEMDOS format
  */
 
+#if TOSVERSION >= 0x0404
+#define OS_DATE $03081993
+#define OS_DOSDATE $1A68
+#else
+
 #if TOSVERSION >= 0x0306
 #define OS_DATE $09241991
 #define OS_DOSDATE $1738
@@ -29,12 +34,13 @@
 /* TOS version 2.08 is 2.06 for the ST-book */
 #if TOSVERSION >= 0x0208
 #define OS_DATE $03101992
-#define OS_DOSDATE $186a
+#define OS_DOSDATE $186A
 #else
 
 #if TOSVERSION >= 0x0206
 #define OS_DATE $11141991
-#define OS_DOSDATE $176e
+#define OS_DOSDATE $176E
+#endif
 #endif
 #endif
 #endif

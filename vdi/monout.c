@@ -208,7 +208,7 @@ VOID v_pmarker(NOTHING)
 
 	/* Copy the PTSIN pointer since we will be doing polylines */
 
-	num_vert = LV(CONTRL)[1];
+	num_vert = NPTSIN;
 	src_ptr = old_ptsin = LV(PTSIN);
 	LV(PTSIN) = sav_points;
 
@@ -230,7 +230,7 @@ VOID v_pmarker(NOTHING)
 		for (j = 0; j < num_lines; j++)
 		{
 
-			num_points = LV(CONTRL)[1] = *m_ptr++;	/* How many points?  Get them.  */
+			num_points = NPTSIN = *m_ptr++;	/* How many points?  Get them.  */
 
 			pts_in = sav_points;
 			for (h = 0; h < num_points; h++)
@@ -304,7 +304,7 @@ VOID v_gdp(NOTHING)
 				*(xy_pointer + 4) = *(xy_pointer + 2);
 				*(xy_pointer + 6) = *(xy_pointer + 8) = *(xy_pointer);
 
-				LV(CONTRL)[1] = 5;
+				NPTSIN = 5;
 
 				pline();
 			}
@@ -439,7 +439,7 @@ VOID vqf_attributes(NOTHING)
 	*pointer++ = LV(WRT_MODE) + 1;
 	*pointer = work_ptr->fill_per;
 
-	LV(CONTRL)[4] = 5;
+	NINTOUT = 5;
 }
 
 
@@ -450,7 +450,7 @@ VOID pline(NOTHING)
 
 	LV(LSTLIN) = FALSE;
 	old_pointer = LV(PTSIN);
-	for (i = (LV(CONTRL)[1] - 1); i > 0; i--)
+	for (i = (NPTSIN - 1); i > 0; i--)
 	{
 		if (i == 1)
 			LV(LSTLIN) = TRUE;
@@ -571,7 +571,7 @@ VOID plygn(NOTHING)
 	LV(fill_maxy) = LV(fill_miny) = *pointer++;
 	pointer++;
 
-	for (i = (LV(CONTRL)[1] - 1); i > 0; i--)
+	for (i = (NPTSIN - 1); i > 0; i--)
 	{
 		k = *pointer++;
 		pointer++;
@@ -597,7 +597,7 @@ VOID plygn(NOTHING)
 				return;					/* plygon entirely after clip */
 		}
 	}
-	k = LV(CONTRL)[1] * 2;
+	k = NPTSIN * 2;
 	pointer = LV(PTSIN);
 	*(pointer + k) = *pointer;
 	*(pointer + k + 1) = *(pointer + 1);
@@ -609,7 +609,7 @@ VOID plygn(NOTHING)
 	if (LV(cur_work)->fill_per == TRUE)
 	{
 		LV(LN_MASK) = 0xffff;
-		LV(CONTRL)[1]++;
+		NPTSIN++;
 		pline();
 	}
 }
@@ -1041,7 +1041,7 @@ VOID wline(NOTHING)
 
 	/* Don't attempt wide lining on a degenerate polyline */
 
-	if ((numpts = LV(CONTRL)[1]) < 2)
+	if ((numpts = NPTSIN) < 2)
 		return;
 
 	work_ptr = LV(cur_work);
@@ -1115,7 +1115,7 @@ VOID wline(NOTHING)
 
 		/* Prepare the control and points parameters for the polygon call. */
 
-		LV(CONTRL)[1] = 4;
+		NPTSIN = 4;
 
 		LV(PTSIN) = pointer = box;
 
@@ -1394,7 +1394,7 @@ VOID do_arrow(NOTHING)
 	{
 		*pts_in = x_start;
 		*(pts_in + 1) = y_start;
-		arrow((pts_in + 2 * LV(CONTRL)[1] - 2), -2);
+		arrow((pts_in + 2 * NPTSIN - 2), -2);
 		pts_in = LV(PTSIN);					/* arrow calls plygn which trashes regs */
 		*pts_in = new_x_start;
 		*(pts_in + 1) = new_y_start;
@@ -1431,8 +1431,8 @@ PP(int16_t inc;)
 	/* Find the first point which is not so close to the end point that it */
 	/* will be obscured by the arrowhead.                                  */
 
-	temp = LV(CONTRL)[1];
-#ifndef __ALCYON__
+	temp = NPTSIN;
+#if !BINEXACT
 	line_len = 0; /* BUG: used uninitialized below for nptsin < 1 */
 	dx = dy = 0;
 #endif
@@ -1478,7 +1478,7 @@ PP(int16_t inc;)
 	/* Save the vertice count */
 
 	ptr1 = LV(CONTRL);
-	sav_contrl = *(ptr1 + 1);
+	sav_contrl = ptr1[1];		/* number of vertices */
 
 	/* Build a polygon to send to plygn.  Build into a local array first since */
 	/* xy will probably be pointing to the LV(PTSIN) array.                        */
@@ -1500,7 +1500,7 @@ PP(int16_t inc;)
 
 	/* Restore the vertex count. */
 
-	LV(CONTRL)[1] = sav_contrl;
+	NPTSIN = sav_contrl;
 
 	/* Adjust the end point and all points skipped. */
 
@@ -1712,7 +1712,7 @@ VOID dsf_udpat(NOTHING)
 	register ATTRIBUTE *work_ptr;
 
 	work_ptr = LV(cur_work);
-	count = LV(CONTRL)[3];
+	count = NINTIN;
 
 #if VIDEL_SUPPORT
 	sp = LV(INTIN);
