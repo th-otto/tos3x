@@ -4,9 +4,13 @@
 /*		Copyright 1985 Atari Corp.				*/
 /************************************************************************/
 
-extern	long	bios();
-extern	long	xbios();
-extern	long	gemdos();
+#ifndef __COMPILER_H__
+#include <compiler.h>
+#endif
+
+long gemdos PROTO ((short code, ...));
+long bios PROTO ((short code, ...));
+long xbios PROTO ((short code, ...));
 
 /*	BIOS	(trap13)	*/
 #define	Bconstat(a)	bios(1,a)

@@ -10,9 +10,6 @@
 *
 *	Calling Sequence:
 *		fid = open(fname,mode)
-*		fid = opena(fname,mode)
-*		fid = openb(fname,mode)
-*		fid = _open(fname,mode,type);
 *
 *	Where:
 *		fname	is the address of a null terminated file name.
@@ -20,7 +17,6 @@
 *				0 => READ access only
 *				1 => WRITE access only
 *				2 => Both READ and WRITE
-*		type	is 0 for ASCII files, 1 for BINARY
 *
 *
 *****************************************************************************/

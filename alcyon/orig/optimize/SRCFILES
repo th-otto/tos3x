@@ -1,1 +1,2 @@
-OPTIMIZE_OBJS = optimize.o
+OPTIMIZE_OBJS = optimize.o osbind.o xomain.o
+FIXNOPS_OBJS = fixnops.o

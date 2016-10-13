@@ -116,7 +116,7 @@ _memset:
 fillit:	move.b	d1,(a0)+			*	move a byte
 	dbra	d0,fillit			*	Continue
 filldone: clr.l	d0				*	always return 0
-	rts					*
+	rts
 
 *
 *	Index function to find out if a particular character is in a string.

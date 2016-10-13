@@ -29,7 +29,7 @@
 
 #define lseek bug_lseek
 #include <osif.h>
-#include "lib.h"
+#include "../libsrc/lib.h"
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -63,8 +63,9 @@ PP(int len;)								/* Command length */
 	register char *p;						/* Another "" */
 	register char c;						/* Character temp */
 	FD *pfd;							/* File Desc temp */
-
+	
 	char tmpbuf[30];					/* Filename temp */
+	int j;
 
 	/* -> first free location */
 	argv2 = argv = (char **)sbrk(0);
@@ -124,87 +125,104 @@ PP(int len;)								/* Command length */
 #endif
 		} else
 		{
+#if 0
 			/* How many characters? */
 			for (i = 0; !ISWHITE(s[i]); )
 			{
-#if 0
 				i++;
-#else
 				asm("dc.w $de7c,$0001");
-#endif
 			}
 			/* If last is space, make it a null for C */
 			if (s[i])
 				s[i++] = '\0';
-			/* Now do i/o scan */
-			switch (*s)
-			{
-			case '<':
-				/* Redirecting input */
-				close(STDIN);
-				if (opena(s + 1, O_RDONLY) != STDIN)
-					_err("Cannot open ", s + 1);
-				break;
-
-			case '>':
-				/* Redirecting output */
-				close(STDOUT);
-				if (s[1] == '>')
-				{
-					/* Appending, try to open old */
-					/* BUG: lseek not declared, but returns long not int */
-					if (opena(s + 2, O_WRONLY) != STDOUT || -1 == lseek(STDOUT, 0L, SEEK_END))
-						_err("Cannot append ", s + 1);
-				} else
-				{
-					/* Try to open new */
-					if (creata(s + 1, 0) != STDOUT)
-						_err("Cannot create ", s + 1);
-				}
-				break;
-
-			default:
-
-				if (strchr(s, '?') ||	/* Wild */
-					strchr(s, '*'))		/* Cards? */
-				{
-					/* Use unused channel */
-					pfd = _getccb(STDERR + 1);
-					/* Use buffer for DMA */
-#if 1 /* BUG: original library contained call to __BDOS */
-					__BDOS(SETDMA, (long)(pfd->buffer));
 #else
-					__OSIF(SETDMA, pfd->buffer);
+			asm("clr.w     d7");
+			asm("bra.w     L9001");
+			asm("L9000:");
+			asm("dc.w $de7c,$0001");
+			asm("L9001:");
+			asm("move.w    d7,d0");
+			asm("ext.l     d0");
+			asm("move.b    0(a5,d0.l),d0");
+			asm("ext.w     d0");
+			asm("ext.l     d0");
+			asm("tst.l     d0");
+			asm("beq.w     L9002");
+			asm("move.w    d7,d0");
+			asm("ext.l     d0");
+			asm("move.b    0(a5,d0.l),d0");
+			asm("ext.w     d0");
+			asm("ext.l     d0");
+			asm("add.l     #___atab,d0");
+			asm("movea.l   d0,a0");
+			asm("btst      #5,(a0)");
+			asm("beq.s     L9000");
+			asm("L9002:");
+			/* If last is space, make it a null for C */
+			asm("move.w    d7,d0");
+			asm("ext.l     d0");
+			asm("tst.b     0(a5,d0.l)");
+			asm("beq.w     L9003");
+			asm("movea.w   d7,a0");
+			asm("adda.l    a5,a0");
+			asm("clr.b     (a0)");
+			asm("dc.w $de7c,$0001");
+			asm("L9003:");
 #endif
-					/* Do the search */
-					c = __open(STDERR + 1, s, SEARCHF);
-					if (c == 0xff)
-						_err(s, ": No match");
-					/* Do search next's */
-					while (c != 0xff)
-					{
-						/* Convert file to ascii */
-						_toasc(pfd, c, tmpbuf);
-						/* Allocate area */
-						p = _salloc(strlen(tmpbuf) + 1);
-						/* Move in filename */
-						strcpy(p, tmpbuf);
-						/* Add this file to argv */
-						addargv(p);
-						c = __open(STDERR + 1, s, SEARCHN);
-					}
-				} else
+			/* Now do i/o scan */
+			if (strchr(s, '?') ||	/* Wild */
+				strchr(s, '*'))		/* Cards? */
+			{
+				/* Use unused channel */
+				pfd = _getccb(STDERR + 1);
+				/* Use buffer for DMA */
+				__OSIF(SETDMA, pfd->buffer);
+				/* Do the search */
+				c = (char)__open(STDERR + 1, s, SEARCHF);
+				if (c == 0xff)
+					_err(s, ": No match");
+				for (j = strlen(s); j != 0; j--)
 				{
-					/* save in argv */
-					addargv(s);
+					if (strchr("\\:", *((j - 1) + s)) != NULL)
+						break;
 				}
+				/* Do search next's */
+				while (c != 0xff)
+				{
+					/* Convert file to ascii */
+					_toasc(pfd, c, tmpbuf);
+					/* Allocate area */
+					p = _salloc(strlen(tmpbuf) + j + 1);
+					/* Move in filename */
+					strncpy(p, s, j);
+#if 0
+					p[j] = '\0';
+#else
+				asm("movea.w   -36(a6),a0");
+				asm("adda.l    a4,a0");
+				asm("clr.b     (a0)");
+#endif
+					strcat(p, tmpbuf);
+					/* Add this file to argv */
+					addargv(p);
+					c = (char)__open(STDERR + 1, s, SEARCHN);
+				}
+			} else
+			{
+				/* save in argv */
+				addargv(s);
 			}
 		}
 	}
 	/* Insure terminator */
 	addargv(NULL);
 	/* Back off by 1 */
+#if 0
 	argc--;
+#else
+	asm("dc.w $0479,$0001");
+	asm("dc.l L1");
+#endif
 	/* Allocate the pointers */
 	if (brk((VOIDPTR)argv2) == -1)
 		_err("Stack Overflow", "");
@@ -225,13 +243,9 @@ PP(const char *s2;)
 	/* And filename */
 	strcat(buf, s2);
 	/* + Newline */
-	strcat(buf, "\r\n$");
+	strcat(buf, "\r\n");
 	/* output directly to CON: */
-#if 1 /* BUG: original library contained call to __BDOS */
-	__BDOS(C_WRITESTR, (long)(buf));
-#else
 	__OSIF(C_WRITESTR, buf);
-#endif
 	/* And fail hard */
 	exit(-1);
 }
@@ -244,12 +258,54 @@ PP(const char *s2;)
 static VOID addargv(P(register char *) ptr)
 PP(register char *ptr;)							/* -> Argument string to add */
 {
+	register char *s;
+	
+	if (ptr)
+	{
+		s = ptr;
+#if 0
+		for (; (*s = toupper(*s)); )
+		{
+			s++;
+		}
+#else
+				asm("bra.w     L8000");
+				asm("L7999:");
+				asm("dc.w $d9fc,0,1");
+				asm("L8000:");
+				asm("move.b    (a4),d0");
+				asm("ext.w     d0");
+				asm("ext.l     d0");
+				asm("add.l     #___atab,d0");
+				asm("movea.l   d0,a0");
+				asm("btst      #3,(a0)");
+				asm("beq.w     L8001");
+				asm("move.b    (a4),d0");
+				asm("ext.w     d0");
+				asm("add.w     #$0020,d0");
+				asm("bra.w     L8002");
+				asm("L8001:");
+				asm("move.b    (a4),d0");
+				asm("ext.w     d0");
+				asm("L8002:");
+				asm("ext.w     d0");
+				asm("move.b    d0,(a4)");
+				asm("bne.s     L7999");
+#endif
+	}
 	/* Load pointer */
 	*argv2 = ptr;
+#if 0
 	/* More room from heap */
 	argv2++;
 	/* Increment arg count */
 	argc++;
+#else
+	asm("dc.w $06b9");
+	asm("dc.l 4,L2");
+	asm("dc.w $0679,1");
+	asm("dc.l L1");
+#endif
 }
 
 /*****************************************************************************/

@@ -8,3 +8,14 @@
   }
 
 - change continue in some for loops into goto start of loop
+
+
+- a few programs in the original developer kit (e.g. optimize.prg)
+  had a symbol table. Since, due to the way the linker works, it is
+  almost impossible to reproduce a symbol table in the same
+  order, it has been stripped from the binary in order to be able
+  to compare the output files.
+
+- some programs had additional zeroes at the end of the relocation
+  table (maybe padding from the CPM pip command). These have been
+  dropped in order to be able to compare the output files.
