@@ -89,6 +89,9 @@ SIZE_FONT_HEAD	equ	90	     * size of font_head structure in FONTDEF.H
 
 
 _seed_type	equ	_fill_buffer+00		; indicates the type of fill
+#if !VIDEL_SUPPORT
+_search_color	equ	_fill_buffer+02		; the color of the border
+#endif
 _Qbottom	equ	_fill_buffer+04	 	; the bottom of the Q (zero)
 _Qtop		equ	_fill_buffer+06	 	; points top seed +3
 _Qptr		equ	_fill_buffer+08	 	; points to the active point
@@ -112,7 +115,9 @@ _leftcollision	equ	_fill_buffer+40 	; like _collision. (new seedfill)
 _v_align	equ	_fill_buffer+42		; scaler alignments
 _width		equ	_fill_buffer+44
 _collision	equ	_fill_buffer+42  	; seed was removed from Q (new rtn)
+#if VIDEL_SUPPORT
 _search_color	equ	_fill_buffer+44		; the color of the border
+#endif
 _Q		equ	_fill_buffer+48	 	; storage for the seed points (1280)
 _height		equ	_fill_buffer+46		; extent of string set in dqt_extent
 _wordx		equ	_fill_buffer+48

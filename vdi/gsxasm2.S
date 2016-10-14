@@ -42,6 +42,22 @@
 #include "vdidefs.h"
 #include "lineaequ.inc"
 
+#if TOSVERSION >= 0x400
+#define V_FUNC(func,la,r) \
+	move.l	PIXLV(LA_ROUTINES,la),r \
+	move.l	func(r),r
+#else
+#define V_FUNC(func,la,r) \
+	move.l	PIXLV((USERDEVINIT)+func,la),r
+#endif
+
+#define V_CALL(func,la,r) \
+		V_FUNC(func,la,r) \
+		jsr (r)
+#define V_JUMP(func,la,r) \
+		V_FUNC(func,la,r) \
+		jmp (r)
+
 
 		text
 
@@ -135,9 +151,7 @@ swap_loop:	move.w	(a0),d1		; d1 <- font form word
 		xdef	_put_pix
 _put_pix:
 		PIXLA(a1)
-		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
-		move.l	V_PUTPIX(a1),a1		; vec to put pix routine
-		jmp	(a1)
+		V_JUMP(V_PUTPIX,a1,a1)		; vec to put pix routine
 #endif
 
 #if VIDEL_SUPPORT
@@ -180,6 +194,7 @@ PXPTP8:		move.b	2(a2),(a0)		; splat pixel
 		xdef ST_PUTPIX
 ST_PUTPIX:
 #else
+/* 306de: 00e0c0e6 */
 		xdef	_put_pix
 _put_pix:
 #endif
@@ -235,9 +250,7 @@ ppx_clr:	and.w	d0,(a1)+	; clear the bit.
 		xdef	_get_pix
 _get_pix:
 		PIXLA(a1)
-		move.l	LA_ROUTINES(a1),a1	; load vect list of primitives
-		move.l	V_GETPIX(a1),a1		; vec to get pix routine
-		jmp	(a1)
+		V_JUMP(V_GETPIX,a1,a1)		; vec to get pix routine
 #endif
 
 #if VIDEL_SUPPORT
@@ -269,13 +282,16 @@ PXGTP8:		move.b	(a0),d0
 		xdef ST_GETPIX
 ST_GETPIX:
 #else
+/* 306de: 00e0c12e */
 		xdef	_get_pix
 _get_pix:
 #endif
 		PIXLA(a1)
 		move.l	d3,-(sp)	; save register for "c"
 		move.l	PIXLV(PTSIN,a1),a0	; a0 -> PTSIN array
+#if VIDEL_SUPPORT
 		moveq.l	#0,d0		; return value is a long so clear upper
+#endif
 		move.w	(a0)+,d0	; d0 <- X coordinate
 		move.w	(a0),d1		; d1 <- Y coordinate
 		bsr	concat		; get physical offset
@@ -328,9 +344,9 @@ _fill_line:
 	movem.w	36(sp),d4-d6		; d4 <- X1  d5 <- X2  d6 <- Y1
 	exg	d5,d6			; d4 <- X1  d5 <- Y1  d6 <- X2
 
-	PIXLA(a4)
+	LA(a4)
 #if VIDEL_SUPPORT
-	cmp.w	#PIXPACKED,PIXLV(form_id,a4)	; see if we are in pix packed mode
+	cmp.w	#PIXPACKED,LV(form_id,a4)	; see if we are in pix packed mode
 	bne	fillLine0		; if not do interleaved mode
 	jsr	px_fline		; HABLINE entry point for fill_line
 	movem.l (sp)+,d3-d7/a3-a5       ; restore registers for "C"
@@ -344,34 +360,42 @@ fillLine0:
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	_end_pts							     **
-**									     **
-**	This routine finds the endpoints of a horizontaly contiguous	     **
-**	section of solid color ( used by the _seed_fill routine )	     **
-**									     **
-**	input:	4(sp) = X start						     **
-**		6(sp) = Y start						     **
-**		8(sp) = ptr to endXleft.				     **
-**	       12(sp) = ptr to endXright				     **
-**									     **
-**	output:								     **
-**									     **
-**	     endXleft = X of left endpoint of solid color		     **
-**	    endXright = X of right endpoint of solid color		     **
-**	           d0 = success flag					     **
-**									     **
-**		        0 => no endpoints or X start on edge		     **
-**			1 => endpoints found				     **
-**									     **
-**	destroys: d0-d2/a0-a2						     **
-**									     **
+**                                                                           **
+**      end_pts(int16_t xstart, int16_t ystart, int16_t *lptr, int16_t *rptr)**
+**                                                                           **
+**      This routine finds the endpoints of a horizontaly contiguous         **
+**      section of solid color ( used by the _seed_fill routine )            **
+**                                                                           **
+**      input:  4(sp) = X start                                              **
+**              6(sp) = Y start                                              **
+**              8(sp) = ptr to endXleft.                                     **
+**             12(sp) = ptr to endXright                                     **
+**                                                                           **
+**      output:                                                              **
+**                                                                           **
+**           endXleft = X of left endpoint of solid color                    **
+**          endXright = X of right endpoint of solid color                   **
+**                 d0 = success flag                                         **
+**                                                                           **
+**                      0 => no endpoints or X start on edge                 **
+**                      1 => endpoints found                                 **
+**                                                                           **
+**      destroys: d0-d2/a0-a2                                                **
+**                                                                           **
 *******************************************************************************
 *******************************************************************************
 
 		xdef	_end_pts
-_end_pts:	movem.l d3-d7/a3-a6,-(sp) 	; save registers for "C"
+_end_pts:
+#if MULTI_LINEA
+		movem.l d3-d7/a3-a6,-(sp) 	; save registers for "C"
 		PIXLA(a6)
+vars set 40
+#else
+		movem.l d3-d7/a3-a5,-(sp) 	; save registers for "C"
+		PIXLA(a6)
+vars set 36
+#endif
 #if VIDEL_SUPPORT
 		cmp.w	#PIXPACKED,form_id(a6)	; see if we are pix packe mode
 		bne	end_intrlv_pts
@@ -379,17 +403,18 @@ _end_pts:	movem.l d3-d7/a3-a6,-(sp) 	; save registers for "C"
 *+
 * Pixel packed case
 *-
-end_pix_pts:	move.l	44(sp),a0		; a0 -> Xleft
-		move.l	48(sp),a1		; a1 -> Xright
+end_pix_pts:
+		move.l	vars+4(sp),a0		; a0 -> Xleft
+		move.l	vars+8(sp),a1		; a1 -> Xright
 		moveq.l	#0,d0			; initialize return value
 
-		move.w	40(sp),d4		; d4 <- X coordinate
+		move.w	vars+0(sp),d4		; d4 <- X coordinate
 		cmp.w	PIXLV(XMN_CLIP,a6),d4	; ret if left of viewport Xmin
 		bmi	epp_ret0
 		cmp.w	PIXLV(XMX_CLIP,a6),d4
 		bgt	epp_ret0		; ret if right of viewport Xmax
 
-        	move.w	42(sp),d1		; d1 <- Y coordinate
+        move.w	vars+2(sp),d1		; d1 <- Y coordinate
 		cmp.w	PIXLV(YMN_CLIP,a6),d1	; return if above viewport Ymin
 		bmi	epp_ret0
 		cmp.w	PIXLV(YMX_CLIP,a6),d1
@@ -455,7 +480,8 @@ r32lSkip:	addq.w	#1,d2			; advance x position
 *+
 * 16 bit case
 *-
-check16Left:	move.w	(a2),d1			; d1 <- value of current pix
+check16Left:
+		move.w	(a2),d1			; d1 <- value of current pix
 		swap	d1			; search_color is a long (upper
 		move.w	(a2),d1			; and lower words are equal)
 		move.w	d4,d2			; d2 <- x position
@@ -525,7 +551,12 @@ epp_ret1:	move.w	_seed_type,d0
 
 		eor.w	#1,d0			; ret seg not of search color
 
-epp_ret0:	movem.l (sp)+,d3-d7/a3-a6	; restore registers for "C"
+epp_ret0:
+#if MULTI_LINEA
+		movem.l (sp)+,d3-d7/a3-a6	; restore registers for "C"
+#else
+		movem.l (sp)+,d3-d7/a3-a5	; restore registers for "C"
+#endif
 		rts
 
 *+
@@ -533,7 +564,7 @@ epp_ret0:	movem.l (sp)+,d3-d7/a3-a6	; restore registers for "C"
 *-
 #endif
 end_intrlv_pts:
-		move.w	42(sp),d1		; d1 <- Y coordinate
+		move.w	vars+2(sp),d1		; d1 <- Y coordinate
 		cmp.w	PIXLV(YMN_CLIP,a6),d1	; return if above viewport Ymin
 		bmi	ep_ret0
 		cmp.w	PIXLV(YMX_CLIP,a6),d1
@@ -544,7 +575,7 @@ end_intrlv_pts:
 		move.w	d3,a3
 		add.w	a3,a3			; a3 <- off to nxt wrd in plane
 		subq.w	#1,d3			; d3 <- dbra plane counter
-		move.w	40(sp),d0		; d0 <- X coordinate
+		move.w	vars+0(sp),d0		; d0 <- X coordinate
 
 		bsr	concat			; d1<-physical off d0<-X mod 16
 		add.l	d1,a5			; a5 -> word containing (X,Y)
@@ -578,7 +609,7 @@ px_loop:	move.w	-(a5),d4	; d4 <- this plane's word
 		dbra	d3,px_loop	; do the next plane
 
 		move.w	a1,d3			; d3 <- dbra plane counter
-		move.w	40(sp),d7		; d7 <- X coordinate
+		move.w	vars+0(sp),d7		; d7 <- X coordinate
 		move.w	PIXLV(XMX_CLIP,a6),d6	; d6 <- X max
 		move.w	d1,d2			; d2 <- target color of search
 
@@ -630,10 +661,10 @@ rnpx_loop:	move.w	-(a5),d4	; d4 <- this plane's word
 
 
 rt_nedge:	move.l	a2,a5			; a5 -> root wrd of search span
-		move.l	48(sp),a4		; a4 -> end Xright
+		move.l	vars+8(sp),a4		; a4 -> end Xright
 		subq.w	#1,d7			; d7 <- end Xright
 		move.w	d7,(a4)			; store end Xright
-		move.w	40(sp),d7		; d7 <- initial X
+		move.w	vars+0(sp),d7		; d7 <- initial X
 		move.w	PIXLV(XMN_CLIP,a6),d6	; d6 <- X min
 		move.w	a0,d0			; d0 <- initial pixel mask
 
@@ -682,24 +713,39 @@ lnpx_loop:	move.w	-(a5),d4	; d4 <- this plane's word
 		bra	lnedg_loop
 
 
-lt_nedge:	addq.w	#1,d7		; d7 <- minimum X of span
-		move.l	44(sp),a4	; a4 -> end Xleft
+lt_nedge:
+		addq.w	#1,d7		; d7 <- minimum X of span
+		move.l	vars+4(sp),a4	; a4 -> end Xleft
 		move.w	d7,(a4)		; store end Xleft
 
 		move.w	_seed_type,d0
+#if VIDEL_SUPPORT
 		and.l	#$FFFF,d2	; clear upper word of long variable
 		cmp.l	_search_color,d2
+#else
+		cmp.w	_search_color,d2
+#endif
 		beq	ep_is_search	; return segment is of search color
 
 		eor.w	#1,d0		; return segment not of search color
 
-ep_is_search:	eor.w	#0,d0		; what the fuck is this ?
+ep_is_search:
+		eor.w	#0,d0		; what the fuck is this ?
+#if MULTI_LINEA
 		movem.l (sp)+,d3-d7/a3-a6 ; restore registers for "C"
+#else
+		movem.l (sp)+,d3-d7/a3-a5 ; restore registers for "C"
+#endif
 		rts
 
 
-ep_ret0:	moveq.l	#0,d0		; return(0). (failure)
+ep_ret0:
+		moveq.l	#0,d0		; return(0). (failure)
+#if MULTI_LINEA
 		movem.l (sp)+,d3-d7/a3-a6 ; restore registers for "C"
+#else
+		movem.l (sp)+,d3-d7/a3-a5 ; restore registers for "C"
+#endif
 		rts
 
 
@@ -740,9 +786,7 @@ ep_ret0:	moveq.l	#0,d0		; return(0). (failure)
 		xdef	_RECTFILL
 _RECTFILL:
 	PIXLA(a2)
-	move.l	LA_ROUTINES(a2),a5	; load vectored list of primitives
-	move.l	V_RECTFILL(a5),a5	; vec to rectangle filler
-	jmp	(a5)
+	V_JUMP(V_RECTFILL,a2,a5)	; vec to rectangle filler
 #endif
 
 
@@ -757,14 +801,15 @@ rf_null:
 		xdef	ST_RECTFILL
 ST_RECTFILL:
 #else
+/* 306de: 00e0c28a */
 		xdef	_RECTFILL
 _RECTFILL:
 #endif
-	PIXLA(a2)
-	lea	PIXLV(X1,a2),a0		; a0 -> rectangle endpoints array
+	LA(a2)
+	lea	LV(X1,a2),a0		; a0 -> rectangle endpoints array
 	movem.w	(a0),d4-d7		; d4<-X1   d5<-Y1   d6<-X2   d7<-Y2
 
-	lea	PIXLV(CLIP,a2),a1		; a1 -> clipping flag
+	lea	LV(CLIP,a2),a1		; a1 -> clipping flag
 	tst.w	(a1)+			; a1 -> 1st entry in clipping array
 	beq	rf_noclip		; if no clipping, don't dawdle here.
 
@@ -841,9 +886,7 @@ rf_noclip:
 
 select_version:
 
-	move.l	LA_ROUTINES(a2),a5	; load vectored list of primitives
-	move.l	V_RECT(a5),a5		; vec to rectangle filler
-	jmp	(a5)
+	V_JUMP(V_RECT,a2,a5)		; vec to rectangle filler
 
 
 ******************************************************************************
@@ -858,6 +901,7 @@ select_version:
 *									     *
 ******************************************************************************
 
+#if VIDEL_SUPPORT
 		xdef	_SetOverlay
 _SetOverlay:
 	
@@ -964,3 +1008,4 @@ clr_olay:
 setm_exit:
 	rts
 
+#endif /* VIDEL_SUPPORT */

@@ -355,7 +355,7 @@
 #endif
 
 
-#if TOSVERSION >= 0x400
+#if MULTI_LINEA
 #define LA(r) move.l _lineAVar,r
 #define PIXLA(r) LA(r)
 #define PIXLV(v,r) v(r)

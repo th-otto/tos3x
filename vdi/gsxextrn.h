@@ -36,7 +36,11 @@
 
 /* overlay variables */
 extern  int16_t    seed_type;      /* indicates the type of fill               */
+#if VIDEL_SUPPORT
 extern  int32_t    search_color;   /* the color of the border                  */
+#else
+extern  int16_t    search_color;   /* the color of the border                  */
+#endif
 extern  int16_t    Qbottom;        /* the bottom of the Q (zero)               */
 extern  int16_t    Qtop;           /* points top seed + 3                      */
 extern  int16_t    *Qptr;	 	   /* points to the active point               */
