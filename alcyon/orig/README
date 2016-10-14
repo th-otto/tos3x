@@ -19,3 +19,46 @@
 - some programs had additional zeroes at the end of the relocation
   table (maybe padding from the CPM pip command). These have been
   dropped in order to be able to compare the output files.
+
+- at a few places, short assembler statements are included, to
+  work around code differences for files that were apparently compiled
+  with a slightly different compiler than the one in the package.
+
+
+Finished:
+	- cp68.ttp (proprocessor)
+	- c068.ttp (C parser)
+	- c168.ttp (C code generator)
+	- optimize.ttp (peephole optimizer)
+	- link68.ttp (original CPM linker)
+	- relmod.ttp (convert output of link68 to GEMDOS format)
+	- nm68.ttp (symbol print utility)
+	- size68.ttp (utility to print section sizes)
+
+Missing:
+	- ar68.ttp (archive utility)
+	- aln.ttp (Atari's version of linker)
+	- mac.ttp (Madmac macro assembler)
+	- doindex.ttp (create symbol index for aln)
+	- prgflags.ttp (utility to manipulate program header flags)
+	- prgflags.prg (utility to manipulate program header flags, GEM version)
+	- sid.prg (symbolic debugger)
+	- dump.ttp (utility to dump contents of file as hex)
+	- find.ttp
+	- batch.ttp
+	- command.tos
+	- command.prg
+	- chkdisk3.prg
+	- conv65.ttp
+	- rcs.prg (Resource construction set)
+	- make.tos (make utitity; PD replacement provided)
+	- rm.prg (remove files, builtin in most shells)
+	- wait.prg
+	- low.prg
+	- high.prg
+
+Obsolete:
+	- fered.prg (text editor)
+	- me.ttp (text editor)
+	- kermit.prg (file transfer utitlity)
+	- oldmas.ttp (Pure C assmbler)

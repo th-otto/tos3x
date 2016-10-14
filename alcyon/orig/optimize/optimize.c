@@ -11,7 +11,7 @@ typedef struct
     short     d_time;          /* packed time           */
     short     d_date;          /* packed date           */
     long      d_length;        /* filesize              */
-    char      d_fname[12];     /* file name             */
+    char      d_fname[12];     /* file name             */ /* BUG: no space for terminating 0 */
 } DTA;
 
 #include <osbind.h>
@@ -29,6 +29,15 @@ typedef struct
 #define _(x) x
 
 #define MAXPATH 256
+
+/*
+ * these 2 defines are somehow needed to give the external
+ * symbols a different name, so that the linker assigns
+ * the common symbols in the correct order
+ */
+#define in_hndl numstr4
+#define bra_total tmp_ine
+
 
 char numstr[10];
 int clr1_total;
@@ -65,7 +74,7 @@ char *endmem;
 int num1;
 int num2;
 char regnum;
-char hexstr[8];
+char hexstr[9];
 
 
 long filesize PROTO((const char *name));
@@ -225,6 +234,9 @@ PP(char **argv;)
 	asm("_etoa equ 0");
 	asm("xdef _ftoa");
 	asm("_ftoa equ 0");
+	asm(" xref _trap");
+	asm(" xdef _trap");
+	asm("___BDOS equ _trap");
 #endif
 	if (argc < 2)
 		usage();
@@ -918,7 +930,7 @@ VOID imov1_op(NOTHING)
 						{
 							++in_ind;
 						}
-						++imov_total;
+						++imov1_total;
 					}
 				}
 			}
@@ -1313,7 +1325,7 @@ VOID mv2pea2(NOTHING)
 							ADDC(')');
 							nextline();
 							i = nxt_line - 2; /* assumes CR/LF */
-							++mv1_total;
+							++mv2_total;
 						}
 					}
 				}
@@ -1463,12 +1475,12 @@ BOOLEAN add4munch(NOTHING)
 		(i + in_buff)[-2] != 's' ||
 		(i + in_buff)[-1] != 'p')
 		goto fail;
-	if ((nxt_line + in_buff)[0] == 'a' &&
-		(nxt_line + in_buff)[1] == 'd' /* &&
-		(nxt_line + in_buff)[2] == 'd' */
+	if ((in_buff + nxt_line)[0] == 'a' &&
+		(in_buff + nxt_line)[1] == 'd' /* &&
+		(in_buff + nxt_line)[2] == 'd' */
 		)
 	{
-		if ((nxt_line + in_buff)[3] == 'q')
+		if ((in_buff + nxt_line)[3] == 'q')
 		{
 			/* addq can only be 2,4,6,8 */
 			if ((in_buff + nxt_line)[8] == '8' || (in_buff + nxt_line)[8] == '6')
@@ -1499,7 +1511,7 @@ BOOLEAN add4munch(NOTHING)
 			if (strlen(numstr) != strlen(numstr1))
 				goto fail;
 			for (j = strlen(numstr1) - 1; j >= 0; --j)
-				*(in_buff + (i + j)) = *(j + numstr);
+				*(in_buff + (i + j)) = *(j + numstr1);
 		}
 		goto ok;
 	} else
@@ -1562,12 +1574,12 @@ BOOLEAN addinrange(NOTHING)
 		(i + in_buff)[-2] != 's' ||
 		(i + in_buff)[-1] != 'p')
 		goto fail;
-	if ((nxt_line + in_buff)[0] == 'a' &&
-		(nxt_line + in_buff)[1] == 'd' /* &&
-		(nxt_line + in_buff)[2] == 'd' */
+	if ((in_buff + nxt_line)[0] == 'a' &&
+		(in_buff + nxt_line)[1] == 'd' /* &&
+		(in_buff + nxt_line)[2] == 'd' */
 		)
 	{
-		if ((nxt_line + in_buff)[3] == 'q')
+		if ((in_buff + nxt_line)[3] == 'q')
 		{
 			/* addq can only be 2,4,6,8 */
 			if ((in_buff + nxt_line)[8] == '8')
@@ -1598,7 +1610,7 @@ BOOLEAN addinrange(NOTHING)
 			if (strlen(numstr) != strlen(numstr1))
 				goto fail;
 			for (j = strlen(numstr1) - 1; j >= 0; --j)
-				*(in_buff + (i + j)) = *(j + numstr);
+				*(in_buff + (i + j)) = *(j + numstr1);
 		}
 		goto ok;
 	} else

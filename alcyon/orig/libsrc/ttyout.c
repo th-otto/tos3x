@@ -31,13 +31,23 @@ PP(register const char *buf;)			/* -> 1st char output      */
 	for (ii = 0, cp = buf; ii < count; ++ii)	/* Check for internal '$'  */
 		if (buf[ii] == '$')				/* Found one?          */
 		{
+#ifdef BUGGY_BDOS
+			if (*cp != '$')				/* If '$' not at start     */
+				__BDOS(C_WRITESTR, cp);	/* Print the string    */
+			__BDOS(CONOUT, (long)'$');		/* And output the '$'      */
+#else
 			if (*cp != '$')				/* If '$' not at start     */
 				__OSIF(C_WRITESTR, cp);	/* Print the string    */
 			__OSIF(CONOUT, '$');		/* And output the '$'      */
+#endif
 			cp = &buf[ii + 1];			/* Reset start of string   */
 		}
 	if (cp != &buf[ii])					/* Assuming we haven't yet */
+#ifdef BUGGY_BDOS
+		__BDOS(C_WRITESTR, cp);			/* Output the rest     */
+#else
 		__OSIF(C_WRITESTR, cp);			/* Output the rest     */
+#endif
 
 	return count;						/* return original count   */
 }

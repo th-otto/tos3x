@@ -6,6 +6,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifdef __ALCYON__
 #  define UNUSED(x)
@@ -133,6 +134,7 @@ int malloc_debug PROTO((NOTHING));
 
 VOID ___atab PROTO((NOTHING));
 
+int _strcmp PROTO((const char *s1, const char *s2));
 #define strcasecmp _strcmp
 
 long readl PROTO((int fd, char *buf, long lnum));

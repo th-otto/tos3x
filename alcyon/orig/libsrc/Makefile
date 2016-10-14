@@ -8,7 +8,7 @@ include optimize.mak
 
 STARTUPS = ${CRT0} crtg.o gemst0.o gemst1.o gemst2.o gemst3.o gemst4.o gemst8k.o gemsta.o
 
-all:: ${LIBC} ${LIBC_NDX} ${LIBM} ${LIBM_NDX} ${OPTIONOBJS} ${STARTUPS} srcfiles.sh
+all:: ${LIBC} ${LIBC_NDX} liba.a ${LIBM} ${LIBM_NDX} ${OPTIONOBJS} ${STARTUPS} srcfiles.sh
 
 ${LIBC}: $(OBJS) ${OPTIONOBJS} ${MAKEFILE}
 	$(AM_V_at)$(RM) $@
@@ -34,7 +34,7 @@ ${LIBC}: $(OBJS) ${OPTIONOBJS} ${MAKEFILE}
 
 # library with all objects, including optional and runtime,
 # for use by analyze tool
-FIXOBJS = fixxopen.o fixlst.o fixwrtc.o fixwrite.o
+FIXOBJS = fixxopen.o fixlst.o fixwrtc.o fixwrite.o bugtty.o
 liba.a: ${LIBC} ${OPTIONOBJS} ${STARTUPS} $(FIXOBJS) $(MCOBJS) $(MAOBJS)
 	cp $< $@
 	$(AR) $(ARFLAGS) $@ ${STARTUPS}
@@ -50,6 +50,7 @@ liba.a: ${LIBC} ${OPTIONOBJS} ${STARTUPS} $(FIXOBJS) $(MCOBJS) $(MAOBJS)
 
 fixxopen.o: fixxopen.c xopen.c
 fixlst.o: fixlst.c lstout.c
+bugtty.o: bugtty.c ttyout.c
 fixwrtc.o: fixwrtc.c wrtchr.c
 fixwrite.o: fixwrite.c write.c
 

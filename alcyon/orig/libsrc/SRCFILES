@@ -46,7 +46,7 @@ COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${CO
 
 AOBJS1=abort.o aldiv.o almul.o alrem.o lmul.o lrem.o uldiv.o setjmp.o
 
-AOBJS2=xsignal.o salloc.o stkcpy.o ldiv.o blivot.o trap.o bios.o xbios.o gemdos.o
+AOBJS2=xsignal.o salloc.o stkcpy.o ldiv.o blivot.o trap.o osbind.o
 
 AOBJS=${AOBJS1} ${AOBJS2}
 

@@ -20,4 +20,4 @@ check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i.ttp ../bin/$$i.ttp; done
 
 clean:
-	$(RM) *.o *.a $(PROGRAMS)
+	$(RM) *.o *.a *.rel *.mod $(PROGRAMS)

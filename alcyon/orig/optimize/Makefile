@@ -10,6 +10,7 @@ include SRCFILES
 include optimize.mak
 
 LIB1OBJS = \
+	$(LIBSRC)osbind.o \
 	$(LIBSRC)lmul.o \
 	$(LIBSRC)trap.o \
 	$(LIBSRC)xread.o \
@@ -23,7 +24,7 @@ LIB1OBJS = \
 	$(LIBSRC)strncpy.o \
 	$(LIBSRC)strcat.o \
 	$(LIBSRC)fixxopen.o \
-	$(LIBSRC)ttyout.o \
+	$(LIBSRC)bugtty.o \
 	$(LIBSRC)fixlst.o \
 	$(LIBSRC)fixwrtc.o \
 	$(LIBSRC)writebin.o \
@@ -66,13 +67,13 @@ STARTUP = gemst0.o
 
 # symbols etoa and ftoa are unresolved
 optimize$(EXEEXT): $(OPTIMIZE_OBJS) ${MAKEFILE}
-	$(AM_V_LD)$(LD) $(LDFLAGS) -s -h 7 -o $@ $(STARTUP) optimize.o osbind.o $(LIB1OBJS) xomain.o $(LIB2OBJS)
+	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(STARTUP) optimize.o $(LIB1OBJS) xomain.o $(LIB2OBJS)
 
 
 optimize.rel: $(OPTIMIZE_OBJS) optimize.lnk ${MAKEFILE}
 	$(CP) $(LIBSRC)$(STARTUP) $(LIBSRC)$(LIBC) $(LIBOBJS) .
 	$(RM) $@
-	$(LINK68) [s,un,co[optimize.lnk]]
+	$(LINK68) [un,co[optimize.lnk]]
 	$(RM) $(STARTUP) $(LIBC)
 
 #optimize$(EXEEXT): optimize.rel
@@ -89,12 +90,21 @@ fixnops$(EXEEXT): fixnops.c
 	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
 	$(AM_V_LD)$(LD) $(LDFLAGS) -o $@ crt0.o $(FIXNOPS_OBJS) $(LIBS)
 
+#
+# all the ugly sed scripts are only neccessary to get a binary identical version.
+# The code produced by the included compiler is not wrong,
+# but apparently the program included in the package was compiled
+# by an older version.
+# Most of the fixes are assembler related (suppressing optimizing
+# of add immediate to addq), some are code generator related
+# (current version prefers to use address registers as index)
+#
 optimize.o: optimize.c fixnops$(EXEEXT)
 	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
 	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
 	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
 	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}
-	sed -e 's/add.l #2,(sp)/dc.w 1687,0,2/' \
+	$(AM_V_at)sed -e 's/add.l #2,(sp)/dc.w 1687,0,2/' \
 	    -e '/move.l \(_[a-z_]*\),R8/N' \
 	    -e '/move.l \(_[a-z_]*\),R8\nadd.l \(_[a-z_]*\),R8/N' \
 	    -e 's/move.l \(_[a-z_]*\),R8\nadd.l \(_[a-z_]*\),R8\ntst.b (R8)/dc.w 8313\ndc.l \1\ndc.w 8761\ndc.l \2\ndc.w 18992,6144/' \
@@ -142,7 +152,7 @@ xomain.o: xomain.c fixnops$(EXEEXT)
 	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
 	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
 	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}
-	sed -e '/move \(-[0-9]*\)(R14),R8/N' \
+	$(AM_V_at)sed -e '/move \(-[0-9]*\)(R14),R8/N' \
 	    -e 's/move \(-[0-9]*\)(R14),R8\nmove.b -1(R13,R8),R0/dc.w 12334,\1,36988,1,18624,4149,2048/' \
 	    -e 's/sub #\([0-9]*\),\(-[0-9]*\)(R14)/dc.w 1134,\1,\2/' \
 	    -e 's/add #\([0-9]*\),\(-[0-9]*\)(R14)/dc.w 1646,\1,\2/' \
@@ -160,4 +170,4 @@ check::
 	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
 
 clean:
-	$(RM) *.o *.a *.i *.1 *.2 $(PROGRAMS) fixnops$(EXEEXT)
+	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) fixnops$(EXEEXT)

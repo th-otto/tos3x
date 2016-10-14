@@ -78,10 +78,10 @@ PP(int len;)								/* Command length */
 		while (*s && isspace((UBYTE)*s))
 		{
 			/* kludge alert: should be s++, but couldnt convince assembler to not optimize it to addq */
-#if 0
-			s++;
-#else
+#ifdef __ALCYON__
 			asm("adda.l #1,a5");
+#else
+			s++;
 #endif
 		}
 		/* End of line? */
@@ -93,9 +93,7 @@ PP(int len;)								/* Command length */
 			/* Quoted string */
 			/* Find next */
 			/* kludge alert: see above */
-#if 0
-			p = strchr(s + 1, c);
-#else
+#ifdef __ALCYON__
 			asm("move.b    d6,d0");
 			asm("ext.w     d0");
 			asm("move.w    d0,(a7)");
@@ -104,17 +102,15 @@ PP(int len;)								/* Command length */
 			asm("jsr _strchr");
 			asm("addq.l    #4,a7");
 			asm("move.l d0,a4");
+#else
+			p = strchr(s + 1, c);
 #endif
 			if (p == NULL)
 				_err(s, ": unmatched quote");
 			/* Compute length */
 			i = (long) p - (long)s;
 			/* kludge alert: see above */
-#if 0
-			s[i++] = '\0';
-			/* Add to arg list */
-			addargv(s + 1);
-#else
+#ifdef __ALCYON__
 			asm("movea.w   d7,a0");
 			asm("adda.l    a5,a0");
 			asm("clr.b     (a0)");
@@ -122,20 +118,14 @@ PP(int len;)								/* Command length */
 			asm("move.l    a5,(a7)");
 			asm("dc.w $0697,$0000,$0001");
 			asm("jsr _addargv");
+#else
+			s[i++] = '\0';
+			/* Add to arg list */
+			addargv(s + 1);
 #endif
 		} else
 		{
-#if 0
-			/* How many characters? */
-			for (i = 0; !ISWHITE(s[i]); )
-			{
-				i++;
-				asm("dc.w $de7c,$0001");
-			}
-			/* If last is space, make it a null for C */
-			if (s[i])
-				s[i++] = '\0';
-#else
+#ifdef __ALCYON__
 			asm("clr.w     d7");
 			asm("bra.w     L9001");
 			asm("L9000:");
@@ -168,6 +158,16 @@ PP(int len;)								/* Command length */
 			asm("clr.b     (a0)");
 			asm("dc.w $de7c,$0001");
 			asm("L9003:");
+#else
+			/* How many characters? */
+			for (i = 0; !ISWHITE(s[i]); )
+			{
+				i++;
+				asm("dc.w $de7c,$0001");
+			}
+			/* If last is space, make it a null for C */
+			if (s[i])
+				s[i++] = '\0';
 #endif
 			/* Now do i/o scan */
 			if (strchr(s, '?') ||	/* Wild */
@@ -195,12 +195,12 @@ PP(int len;)								/* Command length */
 					p = _salloc(strlen(tmpbuf) + j + 1);
 					/* Move in filename */
 					strncpy(p, s, j);
-#if 0
-					p[j] = '\0';
-#else
+#ifdef __ALCYON__
 				asm("movea.w   -36(a6),a0");
 				asm("adda.l    a4,a0");
 				asm("clr.b     (a0)");
+#else
+					p[j] = '\0';
 #endif
 					strcat(p, tmpbuf);
 					/* Add this file to argv */
@@ -217,11 +217,11 @@ PP(int len;)								/* Command length */
 	/* Insure terminator */
 	addargv(NULL);
 	/* Back off by 1 */
-#if 0
-	argc--;
-#else
+#ifdef __ALCYON__
 	asm("dc.w $0479,$0001");
 	asm("dc.l L1");
+#else
+	argc--;
 #endif
 	/* Allocate the pointers */
 	if (brk((VOIDPTR)argv2) == -1)
@@ -263,12 +263,7 @@ PP(register char *ptr;)							/* -> Argument string to add */
 	if (ptr)
 	{
 		s = ptr;
-#if 0
-		for (; (*s = toupper(*s)); )
-		{
-			s++;
-		}
-#else
+#ifdef __ALCYON__
 				asm("bra.w     L8000");
 				asm("L7999:");
 				asm("dc.w $d9fc,0,1");
@@ -291,20 +286,25 @@ PP(register char *ptr;)							/* -> Argument string to add */
 				asm("ext.w     d0");
 				asm("move.b    d0,(a4)");
 				asm("bne.s     L7999");
+#else
+		for (; (*s = toupper(*s)); )
+		{
+			s++;
+		}
 #endif
 	}
 	/* Load pointer */
 	*argv2 = ptr;
-#if 0
+#ifdef __ALCYON__
+	asm("dc.w $06b9");
+	asm("dc.l 4,L3");
+	asm("dc.w $0679,1");
+	asm("dc.l L1");
+#else
 	/* More room from heap */
 	argv2++;
 	/* Increment arg count */
 	argc++;
-#else
-	asm("dc.w $06b9");
-	asm("dc.l 4,L2");
-	asm("dc.w $0679,1");
-	asm("dc.l L1");
 #endif
 }
 
