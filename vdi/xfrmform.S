@@ -76,7 +76,8 @@
 
 
 
-MF_BAS_AD	equ	0	; memory form base address (0: physical device)
+/* memory form base address (0: physical device) */
+#define MF_BAS_AD
 MF_WD_PIX	equ	4	; form width in pixels ( form width in words /16)
 MF_HT_PIX	equ	6	; form height in pixels
 MF_WD_WRD	equ	8	; form width in words
@@ -112,7 +113,9 @@ _vr_trnfm:
 
 	moveq.l	#0,d0			; clear the high word
 	move.w	MF_PLANES(a0),d0	; d0 <- # planes
+#if (TOSVERSION >= 0x400) | (!BINEXACT)
 	move.w	d0,d3			; d3 <- # planes
+#endif
 	move.w	MF_HT_PIX(a0),d1	; d1 <- # lines
 	move.w	MF_WD_WRD(a0),d2	; d2 <- planar word wrap
 
@@ -159,7 +162,11 @@ do_it:
 
 xfrm_in_place:
 
+#if (TOSVERSION >= 0x400) | (!BINEXACT)
 	cmp.w	#1,d3			; see if we have > 1 plane
+#else
+	cmp.w	#1,MF_PLANES(a0)			; see if we have > 1 plane
+#endif
 	beq	quit			; do nothing for one plane
 	bsr	in_place
 
