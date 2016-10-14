@@ -45,7 +45,7 @@ MAX_PLANES	equ	 8		; maximum planes for pixel fragment
 FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
 
 
-#if TOSVERSION >= 0x400
+#if MULTI_LINEA
 #define V_FUNC(func,la,r) \
 	move.l	LV(LA_ROUTINES,la),r \
 	move.l	func(r),r

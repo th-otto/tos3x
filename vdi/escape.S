@@ -100,7 +100,7 @@ F_SVPOS		equ	    5	;				1:true
 
 	text
 
-#if TOSVERSION >= 0x400
+#if MULTI_LINEA
 #define PIXL6(r) PIXLA(r)
 O6 equ 0
 #define V_STAT_0 v_stat_0

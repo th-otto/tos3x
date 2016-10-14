@@ -32,6 +32,23 @@
 #include "lineaequ.inc"
 
 
+#if MULTI_LINEA
+#define V_FUNC(func,la,r) \
+	move.l	LV(LA_ROUTINES,la),r \
+	move.l	func(r),r
+#else
+#define V_FUNC(func,la,r) \
+	move.l	(lineavars+USERDEVINIT)+func,r
+#endif
+
+#define V_CALL(func,la,r) \
+		V_FUNC(func,la,r) \
+		jsr (r)
+#define V_JUMP(func,la,r) \
+		V_FUNC(func,la,r) \
+		jmp (r)
+
+
 	xdef _scrtsiz
 _scrtsiz:	dc.w	666	; WUT THE FUT ??$*&@!??
 
@@ -55,6 +72,7 @@ _scrtsiz:	dc.w	666	; WUT THE FUT ??$*&@!??
 *
 *******************************************************************************
 
+/* 306de: 00e0bfb4 */
 _CLC_DDA:
 	PIXLA(a0)
 	move.w	6(sp),d0		;d0 = requested size (dx)
@@ -98,6 +116,7 @@ smal_ok:
 *
 *******************************************************************************
 
+/* 306de: 00e0bfe6 */
 _ACT_SIZ:
 
 	PIXLA(a0)
@@ -162,10 +181,8 @@ sz_sm_2:
 *					*
 *****************************************
 
+/* 306de: 00e0c038 */
 _TEXT_BL:
-
 	movem.l	a5-a6,-(sp)
-	PIXLA(a6)
-	move.l	LA_ROUTINES(a6),a4	; a4 -> list of vectored routines
-	move.l	V_TEXT(a4),a4		; vector to desired text primitive
-	jmp	(a4)
+	LA(a6)
+	V_JUMP(V_TEXT,a6,a4)
