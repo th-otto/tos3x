@@ -13,12 +13,12 @@
 * New generation VDI
 * 
 * Revision 2.3  90/02/09  18:53:17  lozben
-* We don't use V_CEL_WD flag any more. Now the code looks at the
+* We don't use v_cel_wr flag any more. Now the code looks at the
 * offset table to determine if cell width is 8 or 16 bits.
 * 
 * Revision 2.2  89/04/14  15:21:01  lozben
 * Changed sb_cell() and sb_blank() to be able to deal with
-* word wide characters (cells). Also made other chahges to 
+* word wide characters (cells). Also made other changes to 
 * sb_blank() so that it can deal with 8 planes.
 * 
 * Revision 2.1  89/02/21  17:25:42  kbad
@@ -30,6 +30,26 @@
 #include "vdidefs.h"
 #include "lineaequ.inc"
 #include "tosvars.inc"
+
+#if MULTI_LINEA
+#define PIXL6(r) PIXLA(r)
+O6 equ 0
+#define V_FUNC(func,la,r) \
+	move.l	LV((LA_ROUTINES)+O6,la),r \
+	move.l	func(r),r
+#else
+O6 equ 6 ; WTF? why?
+#define V_FUNC(func,la,r) \
+	move.l	LV((USERDEVINIT)+O6+func,la),r
+#define PIXL6(r) lea lineavars-O6,r
+#endif
+
+#define V_CALL(func,la,r) \
+		V_FUNC(func,la,r) \
+		jsr (r)
+#define V_JUMP(func,la,r) \
+		V_FUNC(func,la,r) \
+		jmp (r)
 
 *******************************************************************************
 *	
@@ -49,17 +69,19 @@
 *
 *******************************************************************************
 
-            
+
+/* 306de: 00e0da98 */            
 		xdef sb_cell
-sb_cell:	move.l	a4,-(sp)		; save a4
-		move.w	PIXLV(v_planes,a4),d1	; d1 <- number of planes
+sb_cell:
+		move.l	a4,-(sp)		; save a4
+		move.w	LV((v_planes)+O6,a4),d1	; d1 <- number of planes
 		subq.w	#1,d1			; d1 <- dbra plane counter
-		move.w	PIXLV(v_fnt_wr,a4),d2		; d2 <- src width (in bytes)
-		move.w	PIXLV(v_lin_wr,a4),d3	; d3 <- dst width (in bytes)
-		move.w	PIXLV(v_cel_ht,a4),d4
+		move.w	LV((v_fnt_wr)+O6,a4),d2		; d2 <- src width (in bytes)
+		move.w	LV((v_lin_wr)+O6,a4),d3	; d3 <- dst width (in bytes)
+		move.w	LV((v_cel_ht)+O6,a4),d4
 		subq.w	#1,d4			; d4 <- cell height -1
 		move.l	a1,a5			; a5 -> 1st byte of destination
-		move.l	PIXLV(v_off_ad,a4),a2		; a2 -> offset table
+		move.l	LV((v_off_ad)+O6,a4),a2		; a2 -> offset table
 		cmp.w	#16,2(a2)		; see if char cell is word wide
 		lea	blk_byte,a4		; assume 8 bit wide font
 		bne	blk_next		; branch if not ?
@@ -190,26 +212,36 @@ word_i:		move.w	(a2),d5		; d5 <- character word
 *
 *******************************************************************************
 
+/* 306de: 00e0db90 */
 		xdef sb_scrup
 sb_scrup:
-	move.w	PIXLV(v_celmy,a4),d3		; d3 <- Ymax
+	move.w	LV((v_celmy)+O6,a4),d3		; d3 <- Ymax
 	move.w	d3,d7
 	sub.w	d1,d7			; d7 <- height of region in cells -1
 	beq	blank_up
 
-	mulu	PIXLV(v_cel_ht,a4),d7		; d7 <- scroll region height
+	mulu	LV((v_cel_ht)+O6,a4),d7		; d7 <- scroll region height
 
-	move.w	PIXLV(v_cel_ht,a4),d0		; d0 <- cell height
+#if TOSVERSION >= 0x400
+	move.w	LV((v_cel_ht)+O6,a4),d0		; d0 <- cell height
 	mulu.w	d0,d1
-	mulu.w	PIXLV(v_lin_wr,a4),d0	; d0 <- cell wrap
-	mulu.w	PIXLV(v_lin_wr,a4),d1	; d1 <- offset to (0,Ymin)
+	mulu.w	LV((v_lin_wr)+O6,a4),d0	; d0 <- cell wrap
+	mulu.w	LV((v_lin_wr)+O6,a4),d1	; d1 <- offset to (0,Ymin)
 
 	move.l	_v_bas_ad,a3		; a3 -> base of screen
 	add.l	d1,a3			; a3 -> scroll dst: Ymin
 	move.l	a3,a2
 	add.l	d0,a2			; a2 -> scroll src: Ymin+1
+#else
+	move.w	LV((v_cel_wr)+O6,a4),d0
+	mulu.w	d0,d1
+	move.l	_v_bas_ad,a3		; a3 -> base of screen
+	add.l	d1,a3			; a3 -> scroll dst: Ymin
+	move.l	a3,a2
+	adda.w	d0,a2			; a2 -> scroll src: Ymin+1
+#endif
 
-	move.w	PIXLV(v_lin_wr,a4),d0	; d0 <- bytes per line
+	move.w	LV((v_lin_wr)+O6,a4),d0	; d0 <- bytes per line
 	lsr.w	#4,d0			; d0 <- iterations per line
 	mulu	d0,d7			; d7 <- total iterations
 	subq.w	#1,d7			; d7 <- dbra loop counter
@@ -225,34 +257,46 @@ loop_up:
 blank_up:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	PIXLV(v_celmx,a4),d2		; d2 <- Xmax
+	move.w	LV((v_celmx)+O6,a4),d2		; d2 <- Xmax
 	move.w	d3,d1			; d1 <- Ymax  d3 <- Ymax
-	move.l	LA_ROUTINES(a4),a2
-	move.l	V_BLANK(a2),a2		; a2 -> proper blank routine
-	jmp	(a2)			; fill the vacated space
+	V_JUMP(V_BLANK,a4,a2)	; fill the vacated space
 
 
-
+/* 306de: 00e0dbd4 */
 		xdef sb_scrdn
 sb_scrdn:
-	move.w	PIXLV(v_celmy,a4),d3		; d3 <- Ymax
+	move.w	LV((v_celmy)+O6,a4),d3		; d3 <- Ymax
 	move.w	d3,d7
 	sub.w	d1,d7			; d7 <- height of region in cells -1
 	beq	blank_dn
 
-	mulu	PIXLV(v_cel_ht,a4),d7		; d7 <- scroll region pixel height
+	mulu	LV((v_cel_ht)+O6,a4),d7		; d7 <- scroll region pixel height
 
-	move.w	PIXLV(v_cel_ht,a4),d0		; d0 <- cell height
+#if TOSVERSION >= 0x400
+	move.w	LV((v_cel_ht)+O6,a4),d0		; d0 <- cell height
 	mulu.w	d0,d3
-	mulu.w	PIXLV(v_lin_wr,a4),d0	; d0 <- cell wrap
-	mulu.w	PIXLV(v_lin_wr,a4),d3	; d3 <- offset to (0,Ymin)
+	mulu.w	LV((v_lin_wr)+O6,a4),d0	; d0 <- cell wrap
+	mulu.w	LV((v_lin_wr)+O6,a4),d3	; d3 <- offset to (0,Ymin)
 
 	move.l	_v_bas_ad,a2		; a2 -> base of screen
 	add.l	d3,a2			; a2 -> scroll src: 1st word of Ymax
 	move.l	a2,a3
-	add.w	d0,a3			; a3 -> scroll dst: 1st word of Ymax+1
+#if BINEXACT
+	add.w	d0,a3			; a3 -> scroll dst: 1st word of Ymax+1 BUG: should be add.l
+#else
+	add.l	d0,a3			; a3 -> scroll dst: 1st word of Ymax+1
+#endif
+#else
+	move.w	LV((v_cel_wr)+O6,a4),d0 ; d0 <- cell wrap
+	mulu.w	d0,d3
+	move.l	_v_bas_ad,a2		; a2 -> base of screen
 
-	move.w	PIXLV(v_lin_wr,a4),d0	; d0 <- bytes per line
+	add.l	d3,a2			; a2 -> scroll src: 1st word of Ymax
+	move.l	a2,a3
+	add.w	d0,a3			; a3 -> scroll dst: 1st word of Ymax+1
+#endif
+
+	move.w	LV((v_lin_wr)+O6,a4),d0	; d0 <- bytes per line
 	lsr.w	#4,d0			; d0 <- iterations per line
 	mulu	d0,d7			; d7 <- total iterations
 	subq.w	#1,d7			; d7 <- dbra loop counter
@@ -268,11 +312,9 @@ loop_dn:
 blank_dn:
 
 	clr.w	d0			; d0 <- Xmin
-	move.w	PIXLV(v_celmx,a4),d2		; d2 <- Xmax
+	move.w	LV((v_celmx)+O6,a4),d2		; d2 <- Xmax
 	move.w	d1,d3			; d1 <- Ymin  d3 <- Ymin
-	move.l	LA_ROUTINES(a4),a2
-	move.l	V_BLANK(a2),a2		; a2 -> proper blank routine
-	jmp	(a2)			; fill the vacated space
+	V_JUMP(V_BLANK,a4,a2)		; fill the vacated space
 
 
 *******************************************************************************
@@ -308,6 +350,7 @@ blank_tab: *    fringe masks		*   odd      odd  multi word
 	dc.w	$00FF,$FFFF		*   1	     1        1
 
 
+/* 306de: 00e0dc38 */
 		xdef sb_blank
 sb_blank:
 	movem.l	d0-d3/a0-a1,-(sp)
@@ -317,7 +360,7 @@ sb_blank:
 
 	clr.w	d0
 	add.w	#1,d0			; adjust for word wide font (x += 1)
-	move.l	PIXLV(v_off_ad,a4),a2		; a2 -> offset table
+	move.l	LV((v_off_ad)+O6,a4),a2		; a2 -> offset table
 	cmp.w	#16,2(a2)		; see if char cell is word wide
 	beq	blank_words		; then don't adjust to word offset
 
@@ -337,14 +380,19 @@ blank_words:
 	add.b	d5,d5			; 1 dst word  =:00  <>:FF
 	roxl.w	#3,d0			; d0 <- offset into fringe table
 
-	move.w	PIXLV(v_cel_ht,a4),d7		; d7 <- current cell height
+#if TOSVERSION >= 0x400
+	move.w	LV((v_cel_ht)+O6,a4),d7		; d7 <- current cell height
 	mulu.w	d1,d7			; d7 <- (cell height) * (Y top)
-	mulu.w	PIXLV(v_lin_wr,a4),d7	; d7 <- offset to top of row at Ymin
+	mulu.w	LV((v_lin_wr)+O6,a4),d7	; d7 <- offset to top of row at Ymin
+#else
+	move.w	LV((v_cel_wr)+O6,a4),d7 ; d7 <- cell wrap
+	mulu.w	d1,d7
+#endif
 
 	move.l	_v_bas_ad,a2		; a2 -> base of screen
 	add.l	d7,a2			; a2 -> top of row at Ymin
 
-	move.w	PIXLV(v_planes,a4),d6	; d6 <- number of planes
+	move.w	LV((v_planes)+O6,a4),d6	; d6 <- number of planes
 	add.w	d6,d6			; make d6 word offset
 	move.w	log2_tab(pc,d6.w),d6	; d6 <- log2(planes)
 	add.w	d4,d4			; d4 <- byte offset to Xmin word
@@ -366,19 +414,19 @@ blank_words:
 	add.w	d0,d0			; d0 <- span of one plane in bytes
 	lsl.w	d6,d0			; d0 <- width of span in bytes
 	neg.w	d0
-	add.w	PIXLV(v_lin_wr,a4),d0
+	add.w	LV((v_lin_wr)+O6,a4),d0
 	move.w	d0,a3			; a3 <- wrap
 
 	sub.w	d1,d3			; d3 <- height-1 in cells
 	addq.w	#1,d3			; d3 <- height in cells
-	mulu	PIXLV(v_cel_ht,a4),d3		; d3 <- height in pixels
+	mulu	LV((v_cel_ht)+O6,a4),d3		; d3 <- height in pixels
 	move.w	d3,d7
 
 	add.w	d6,d6			; choose fragment based on plane count
 	add.w	d6,d6
 	move.l	brtn_tab(pc,d6.w),a0
 
-	move.w	PIXLV(v_col_bg,a4),d6		; d6 <- background color
+	move.w	LV((v_col_bg)+O6,a4),d6		; d6 <- background color
 	jsr	(a0)
 
 	movem.l	(sp)+,d0-d3/a0-a1

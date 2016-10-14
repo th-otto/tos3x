@@ -45,7 +45,7 @@
 * Fixed the code to work with turbo assembler.
 * 
 * Revision 2.3  90/02/09  18:37:59  lozben
-* We don't use V_CEL_WD flag any more. Now the code looks at the
+* We don't use v_cel_wr flag any more. Now the code looks at the
 * offset table to determine if cell width is 8 or 16 bits. Also
 * fixed a bug in calculating the relative character position in
 * the font offset table.
