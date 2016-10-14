@@ -368,6 +368,21 @@ text.o: text.c
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s
 	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
 
+#
+# sed: optimizer seems to have missed an sub.l #8,(sp) in seedfill()
+#
+#seedfill.o: seedfill.c
+#	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
+#	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
+#	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
+#	$(AM_V_at)sed -e 's/sub.l #8,(sp)/dc.w 20887/' \
+#	    -e 's/sub.l #6,(sp)/dc.w 23959/' \
+#	    $*.s > $*.1; mv $*.1 $*.s
+#	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}
+#	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s
+#	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
+
+
 screen.prg: checklang $(SCREEN_OBJS) $(VDI_OBJS) ${MAKEFILE}
 	$(LD) -s -l -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_OBJS)
 

@@ -162,8 +162,6 @@ int16_t FindDevice PROTO((NOTHING)); /* in allgem.S */
  * seedfill.c
  */
 VOID d_contourfill PROTO((NOTHING));     /* VDI #103  */
-VOID seedfill PROTO((NOTHING));
-VOID crunch_Q PROTO((NOTHING));
 VOID v_get_pixel PROTO((NOTHING));       /* VDI #105  */
 
 

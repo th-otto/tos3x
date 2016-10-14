@@ -56,8 +56,14 @@
 
 
 BOOLEAN get_seed PROTO((int16_t xin, int16_t yin, int16_t *xleftout, int16_t *xrightout, BOOLEAN *collide));
+VOID seedfill PROTO((NOTHING));
+VOID crunch_Q PROTO((NOTHING));
 
 
+/*
+ * VDI #103 - v_contourfill - Countour fill
+ */
+/* 306de: 00e0cc8a */
 VOID d_contourfill(NOTHING)
 {
 	LV(quitfill) = retfalse;
@@ -110,9 +116,15 @@ VOID seedfill(NOTHING)
 		/* Anding with the mask is only necessary when the driver supports */
 		/* move than one resolution.                       */
 
-		search_color = (int32_t) (MAP_COL[search_color] & tplane_mask[LV(v_planes)]);
 #if VIDEL_SUPPORT
+		search_color = MAP_COL[search_color] & tplane_mask[LV(v_planes)];
 		search_color = LV(pal_map)[search_color];
+#else
+		search_color = MAP_COL[search_color] & tplane_mask[LV(INQ_TAB)[4]
+#if TOSVERSION < 0x400
+		- 1
+#endif
+		];
 #endif
 		seed_type = 0;
 	}
@@ -201,6 +213,7 @@ VOID seedfill(NOTHING)
 /*
  * move Qtop down to remove unused seeds
  */
+/* 306de: 00e0d042 */
 VOID crunch_Q(NOTHING)
 {
 	register int16_t *q = Q;
@@ -219,6 +232,7 @@ VOID crunch_Q(NOTHING)
 }
 
 
+/* 306de: 00e0d0a6 */
 BOOLEAN get_seed(P(int16_t) xin, P(int16_t) yin, P(int16_t *) xleftout, P(int16_t *) xrightout, P(BOOLEAN *) collide)
 PP(register int16_t xin;)
 PP(register int16_t yin;)
@@ -280,11 +294,17 @@ PP(BOOLEAN *collide;)
 }
 
 
+/*
+ * VDI #105 - v_get_pixel - Get pixel
+ */
+/* 306de: 00e0d1ec */
 VOID v_get_pixel(NOTHING)
 {
-	register int32_t pel;
 #if VIDEL_SUPPORT
+	register int32_t pel;
 	register int32_t *tmpPtr;
+#else
+	register int16_t pel;
 #endif
 	register int16_t *int_out;
 

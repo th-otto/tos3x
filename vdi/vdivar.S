@@ -117,8 +117,10 @@ _width		equ	_fill_buffer+44
 _collision	equ	_fill_buffer+42  	; seed was removed from Q (new rtn)
 #if VIDEL_SUPPORT
 _search_color	equ	_fill_buffer+44		; the color of the border
-#endif
 _Q		equ	_fill_buffer+48	 	; storage for the seed points (1280)
+#else
+_Q		equ	_fill_buffer+44	 	; storage for the seed points (1280)
+#endif
 _height		equ	_fill_buffer+46		; extent of string set in dqt_extent
 _wordx		equ	_fill_buffer+48
 _wordy		equ	_fill_buffer+50		; add this to each space for interword

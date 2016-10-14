@@ -55,12 +55,12 @@ _MONO8XHT:
 
 on_bounds:
 		move.w	(a5),d1		; d1 <- dst Y
-		move.w	DELY-DESTY(a5),d3		; d3 <- dY
+		move.w	(DELY)-DESTY(a5),d3		; d3 <- dY
 
-		move.l	CONTRL-DESTY(a5),a0		; a0 -> CONTRL array
+		move.l	(CONTRL)-DESTY(a5),a0		; a0 -> CONTRL array
 		move.w	  6(a0),d2		; d2 <- # chars in string
 
-		lea CLIP-DESTY(a5),a5
+		lea (CLIP)-DESTY(a5),a5
 		tst.w	(a5)+
 		beq	no_clip			; skip clip test if disabled
 
@@ -94,7 +94,7 @@ on_bounds:
 
 no_clip:
 		lea.l	lineavars+FBASE,a5	; a5 -> font form
-		move.l	USERDEVINIT+V_MONO-FBASE(a5),a4		; a4 -> version of mono
+		move.l	(USERDEVINIT)+(V_MONO)-FBASE(a5),a4		; a4 -> version of mono
 		jmp	(a4)
 
 #else

@@ -145,7 +145,11 @@ int32_t	trap14 PROTO((int16_t, ...));
 int32_t	trap14b PROTO((int16_t, ...));
 int16_t	end_pts PROTO((int16_t xstart, int16_t ystart, int16_t *lptr, int16_t *rptr));
 VOID fill_line PROTO((int16_t, int16_t, int16_t));
+#if VIDEL_SUPPORT
 int32_t	get_pix PROTO((NOTHING));
+#else
+int16_t	get_pix PROTO((NOTHING));
+#endif
 VOID TRNSFONT PROTO((NOTHING));
 
 
