@@ -29,7 +29,8 @@
 #include "lineaequ.inc"
 
 
-		xdef	sb_hline,sb_rect
+/* v_planes == 0; stupid as68 does not optimize it */
+#define V_PLANES
 
 
 *	SOFT VERSION OF HORIZONTAL LINE ROUTINE
@@ -47,13 +48,15 @@
 *	a4	points to line A variables base address  ( v_planes )
 
 
+/* 306de: 00e0de24 */
+	xdef sb_hline
 sb_hline:
 
 	move.l	_v_bas_ad,a1
-	muls	PIXLV(bytes_lin,a4),d5		; d5 <- offset to (0,Y)
+	muls	LV(bytes_lin,a4),d5		; d5 <- offset to (0,Y)
 	add.l	d5,a1	
 	move.w	d0,a2			; a2 <- offset between pattern words
-	move.w	PIXLV(v_planes,a4),d7
+	move.w	LV(V_PLANES,a4),d7
 	move.w	d7,d0			; d0 <- number of planes
 	add.w	d0,d0			; d0 <- offset between dst words
 	muls	d0,d1			; d1 <- offset to (X,0)
@@ -62,9 +65,9 @@ sb_hline:
 	subq.w	#1,d7			; d7 <- planes-1
 
 	move.l	d2,a3			; a3 <- span - 1 (words)
-	move.l	PIXLV(FG_B_PLANES,a4),d2	; d2 <- color value
+	move.l	LV(FG_B_PLANES,a4),d2	; d2 <- color value
 
-	move.w	PIXLV(WRT_MODE,a4),d1
+	move.w	LV(WRT_MODE,a4),d1
 
 	add.w	d1,d1
 	lea	wrt_tbl(pc,d1.w),a5
@@ -97,11 +100,13 @@ wrt_tbl:
 *
 *	a2	pointer to LineA variables
 
+/* 306de: 00e0de5a */
+		xdef	sb_rect
 sb_rect:
 
 	link	a6,#-20			; a6 -> local variable space
 
-	move.w	PIXLV(WRT_MODE,a2),d1
+	move.w	LV(WRT_MODE,a2),d1
 	add.w	d1,d1
 	lea	wrt_tbl(pc,d1.w),a5
 	add.w	(a5),a5			; a5 -> writing mode subroutine
@@ -109,11 +114,11 @@ sb_rect:
 	sub.w	d5,d7			; d7 <- vertical height -1
 
 	move.l	_v_bas_ad,a1
-	move.w	PIXLV(bytes_lin,a2),d1
+	move.w	LV(bytes_lin,a2),d1
 	muls	d5,d1			; d2 <- offset to (0,Ymin)
 	add.l	d1,a1			; a1 -> (0,Ymin)
 
-	move.w	PIXLV(v_planes,a2),d1
+	move.w	LV(V_PLANES,a2),d1
 	muls	d1,d0
 	add.l	d0,d0			; d0 <- offset to (Xmin,0)
 	add.l	d0,a1			; a1 -> (Xmin,Ymin)
@@ -126,21 +131,21 @@ sb_rect:
 	move.w	d2,-(a6)		; save span counter
 
 	move.w	d2,a3			; a3 <- span - 1
-	move.l	PIXLV(FG_B_PLANES,a2),d2		; a2 <- color index
+	move.l	LV(FG_B_PLANES,a2),d2		; a2 <- color index
 	move.l	d2,-(a6)		; save color index
 
-	move.w	PIXLV(v_lin_wr,a2),d3
+	move.w	LV(v_lin_wr,a2),d3
 	sub.w	d0,d3
 	move.w	d3,-(a6)		; save line wrap value
 
-	move.w	PIXLV(patmsk,a2),d3
+	move.w	LV(patmsk,a2),d3
 	and.w	d3,d5			; d5 <- initial pattern index
 	add.w	d5,d5			; d5 <- initial pattern offset
 	move.w	d5,-(a6)		; save initial pattern offset
 	add.w	d3,d3			; d3 <- maximum pattern offset
 	move.w	d3,-(a6)		; save maximum pattern offset
 
-	move.l	PIXLV(patptr,a2),a0
+	move.l	LV(patptr,a2),a0
 	move.l	a0,-(a6)		; save pointer to base of pattern
 	add.w	d5,a0			; a0 -> first pattern word
 
@@ -149,7 +154,7 @@ sb_rect:
 	move.w	d1,d7			; d7 <- planes -1
 
 	moveq.l	#0,d1
-	tst.w	PIXLV(multifill,a2)
+	tst.w	LV(multifill,a2)
 	beq	r_poff
 
 	moveq.l	#32,d1
