@@ -98,7 +98,7 @@ F2OP		equ	22
 *	INNER_CT	inner loop count
 *
 
-	nop
+	nop /* WUT? */
 
 	page
 
@@ -106,6 +106,7 @@ F2OP		equ	22
 ***   PATTERN PARAMETER UPDATING   ***
 ***				   ***
 
+/* 306de: 00e0d750 */
 p1_update:
 
 	swap	d7		; d7(15:00) <- raw pattern index pointer	 4
