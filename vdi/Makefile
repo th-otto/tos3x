@@ -355,6 +355,19 @@ vdiext.o: vdiext.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
+#
+# sed: optimizer seems to have missed an add.l #4,(sp) in make_header()
+#
+text.o: text.c
+	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
+	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
+	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
+	$(AM_V_at)sed -e 's/add.l #4,(sp)/dc.w 22679/' \
+	    $*.s > $*.1; mv $*.1 $*.s
+	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s
+	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
+
 screen.prg: checklang $(SCREEN_OBJS) $(VDI_OBJS) ${MAKEFILE}
 	$(LD) -s -l -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_OBJS)
 
