@@ -859,6 +859,7 @@ VOID imoveop(NOTHING)
  *     move.l #yx,-(sp)
  *     with stack correction for 2 bytes
  */
+/* unussed */
 VOID imov1_op(NOTHING)
 {
 	int i;
