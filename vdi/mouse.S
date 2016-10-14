@@ -59,21 +59,6 @@
 #include "lineaequ.inc"
 #include "tosvars.inc"
 
-		xdef	_DIS_CUR	; Global routines declared in this file
-		xdef	_HIDE_CUR
-		xdef	_MOV_CUR
-		xdef	_SET_CUR
-		xdef	_vex_butv
-		xdef	_vex_motv
-		xdef	_vex_curv
-		xdef	_vsc_form
-		xdef	mouse_rel	
-		xdef	scrn_clip
-		xdef	vb_draw
-		xdef	rel_pblock	; Global data declared in this file
-		xdef	arrow_cdb
-
-		xref	concat		; Global routines used
 
 *******************************************************************************
 *
@@ -85,6 +70,8 @@
 *
 *******************************************************************************
 
+/* 306de: 00e0c300 */
+		xdef	mouse_rel	
 mouse_rel:	movem.l	d0-d7/a0-a6,-(sp)
 		PIXLA(a2)
 
@@ -141,8 +128,8 @@ new_coord:	bset.b	#5,PIXLV(cur_ms_stat,a2)	; motion:set motion status flag
 
 		bsr	scrn_clip		; clip X and Y to screen
 
-		move.l	user_mot(a2),a1
-               	jsr 	(a1)			; call user motion routine
+		move.l	PIXLV(user_mot,a2),a1
+        jsr 	(a1)			; call user motion routine
 
 		bsr	scrn_clip		; IS THIS TOO PARANOID ?!
 
@@ -170,6 +157,7 @@ ms_done:	movem.l	(sp)+,d0-d7/a0-a6
 *
 *******************************************************************************
 
+		/* xdef	scrn_clip */
 scrn_clip:	tst.w	d0			; is new_x < 0
 		bge	cl_xmax
 		clr.w	d0
@@ -230,7 +218,8 @@ cur_replace:
 *  iN:	d0.w	X
 *	d1.w	Y
 
-
+/* 306de: 00e0c3d8 */
+		xdef	_MOV_CUR
 _MOV_CUR: PIXLA(a0)
 		move.w	SR,-(sp)	; save old status register
 		ori.w	#$0700,SR	; turn off interrupts
@@ -249,6 +238,7 @@ _MOV_CUR: PIXLA(a0)
 *  If either HIDE_CNT or mouse_flag are non-zero, the cursor will not be
 *  relocated.
 
+		xdef	vb_draw
 vb_draw:	PIXLA(a5)
 		tst.w	PIXLV(HIDE_CNT,a5)		; HIDE_CNT semaphore controls
 		bne	vblank_exit		; access to cur disp routines
@@ -267,10 +257,18 @@ vb_draw:	PIXLA(a5)
 		move.l	d1,d0			; d1[15:00] <- cursor Y
 		swap	d0			; d0[15:00] <- cursor X
 
+#if MULTI_LINEA
 		movem.l	d0-d1/a5,-(sp)		; Save new xy
+#else
+		movem.w	d0-d1,-(sp)		; Save new xy
+#endif
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
 		bsr	cur_replace		; Undraw old cursor
+#if MULTI_LINEA
 		movem.l	(sp)+,d0-d1/a5		; Restore new xy
+#else
+		movem.w	(sp)+,d0-d1			; Restore new xy
+#endif
 
 		lea	PIXLV(mouse_cdb,a5),a0	; a0 -> CDB	
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
@@ -281,7 +279,7 @@ vblank_exit:	rts
 
 *******************************************************************************
 *
-*	_vex_butv	exchange button change vector
+*	VDI #125 - vex_butv - exchange button change vector
 *
 *	entry:	contrl[7], contrl[8]	pointer to user routine
 *	exit:	contrl[9], contrl[10]	pointer to old routine
@@ -289,6 +287,8 @@ vblank_exit:	rts
 *
 *******************************************************************************
 
+/* 306de: 00e0c436 */
+		xdef	_vex_butv
 _vex_butv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
 		move.l	PIXLV(user_but,a1),18(a0)	; store old pointer in contrl
@@ -297,7 +297,7 @@ _vex_butv: PIXLA(a1)
 
 *******************************************************************************
 *
-*	_vex_motv	exchange coordinate change vector
+*	VDI #126 - vex_motv - exchange coordinate change vector
 *
 *	entry:	contrl[7], contrl[8]	pointer to user routine
 *	exit:	contrl[9], contrl[10]	pointer to old routine
@@ -305,6 +305,8 @@ _vex_butv: PIXLA(a1)
 *
 *******************************************************************************
 
+/* 306de: 00e0c44e */
+		xdef	_vex_motv
 _vex_motv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
 		move.l	PIXLV(user_mot,a1),18(a0)	; save old routine pointer
@@ -313,7 +315,7 @@ _vex_motv: PIXLA(a1)
 
 *******************************************************************************
 *
-*	_vex_curv	exchange cursor draw vector
+*	VDI #127 - vex_curv - exchange cursor draw vector
 *
 *	entry:	contrl[7], contrl[8]	-pointer to user routine
 *	exit:	contrl[9], contrl[10]	_pointer to old routine
@@ -321,6 +323,8 @@ _vex_motv: PIXLA(a1)
 *
 *******************************************************************************
 
+/* 306de: 00e0c466 */
+		xdef	_vex_curv
 _vex_curv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
 		move.l	PIXLV(user_cur,a1),18(a0)	; save old routine pointer
@@ -364,14 +368,16 @@ _vex_curv: PIXLA(a1)
 ******************************************************************************
                              
 
-C_XHOT		equ	0
+/* == 0 */
+#define C_XHOT
 C_YHOT		equ	2
 C_PLANES	equ	4
 C_BGCOL		equ	6
 C_FGCOL		equ	8
 C_MSKFRM	equ	10
 
-SV_LEN		equ	0
+/* == 0 */
+#define SV_LEN
 SV_ADDR		equ	2
 SV_STAT		equ	6
 SV_BUF		equ	8
@@ -1000,6 +1006,8 @@ hang_it_up:	rts
 *   Replace cursor with data in save_block when
 *   HIDE_CNT transitions from 0 to 1
 
+/* 306de: 00e0c7fe */
+		xdef	_HIDE_CUR
 _HIDE_CUR:	PIXLA(a5)
 		lea	PIXLV(HIDE_CNT,a5),a2
 		addq.w	#1,(a2)			; increment hide count
@@ -1020,6 +1028,8 @@ hid_cur1:	rts
 *   cursor form. If HIDE_CNT < 0 , reset it to 0 but don't
 *   redisplay cursor.
 
+/* 306de: 00e0c81c */
+		xdef	_DIS_CUR
 _DIS_CUR:	PIXLA(a5)
 		cmp.w	#1,PIXLV(HIDE_CNT,a5)	; If cur is to be redisplayed,
 		bgt	dec_hide_cnt		; perform the operation prior to
@@ -1059,7 +1069,7 @@ fix_neg:	clr.w	PIXLV(HIDE_CNT,a5)		; this should never be executed.
 		rts				; it's just paranoia in action.
 
 
-*  TRANSFORM CURSOR FORM
+*  VDI #111 - vsc_form - Transform Cursor Form
 *
 *  transform user defined cursor to device specific format
 *
@@ -1074,6 +1084,8 @@ fix_neg:	clr.w	PIXLV(HIDE_CNT,a5)		; this should never be executed.
 
 DEV_COL equ DEV_TAB+26
 
+/* 306de: 00e0c864 */
+		xdef	_vsc_form
 _vsc_form: PIXLA(a2)
 		addq.b	#1,PIXLV(mouse_flag,a2)	; deny access to mouse_cdb
 		move.l	PIXLV(INTIN,a2),a0		; a0 -> new cur def block
@@ -1148,7 +1160,8 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 *  Set a new cursor position atomically. Update both GCURXY and the
 *  vblank draw parameter block. Mark the parameter block data as valid.
 
-
+/* 306de: 00e0c8f8 */
+		xdef	_SET_CUR
 _SET_CUR: PIXLA(a1)
 		lea	PIXLV(xydraw,a1),a0		; a0 -> vblank draw parameter block
 		move.l	4(sp),d1		; d1<31:16> <- newX   d1<15:00> <- newY
@@ -1196,7 +1209,7 @@ _vq_mouse:
 
 
 * paramater block for a relative mouse BIOS call
-
+		xdef	rel_pblock
 rel_pblock:	dc.b	0	; Y=0 at the top of the screen
 		dc.b	0	; Generate interrupts on make and break
 		dc.b	1	; Mouse X threshold
@@ -1204,6 +1217,7 @@ rel_pblock:	dc.b	0	; Y=0 at the top of the screen
 
 * arrow cursor
 
+		xdef	arrow_cdb
 arrow_cdb:	dc.w	1,0,1,0,1    
 		dc.w	%1100000000000000
 		dc.w	%1110000000000000

@@ -182,7 +182,9 @@ _INIT_G:	PIXLA(a1)
 
 *******************************************************************************
 *
-*	EXCHANGE TIMER VECTOR	entry: 		new vector in CONTRL[7-8]
+*	VDI #118 - vex_timv - Exchange timer interrupt vector
+*
+*   entry: 		new vector in CONTRL[7-8]
 *				exit:		old vector in CONTRL[9-10]
 *				destroys:	a0/a1
 *

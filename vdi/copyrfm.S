@@ -30,7 +30,6 @@
 #include "vdidefs.h"
 #include "lineaequ.inc"
 
-	xdef	_COPY_RFM
 
 *
 *
@@ -127,6 +126,8 @@ FRAME_LEN	equ	 76
 DEV_COL		equ	 DEV_TAB+26	; offset in _DEV_TAB to number of colors
 PAT_FLAG	equ	  4	; flag:1 SRCE and PATTERN   flag:0 SOURCE only
 
+/* 306de: 00e0c998 */
+	xdef	_COPY_RFM
 _COPY_RFM:
 
 	movem.l	d0-d7/a0-a5,-(sp)

@@ -1,6 +1,6 @@
 VDI_OBJS1 = palette.o allgem.o opnwk.o ttcolor.o escape.o entry.o line1010.o
 VDI_OBJS2 = gsxasm1.o blitinit.o routines.o jmptbl.o isin.o monobj.o monout.o
-VDI_OBJS3 = text.o textblt.o mono.o gsxasm2.o mouse.o blastman.o copyrfm.o sbblit.o
+VDI_OBJS3 = text.o textblt.o mono.o gsxasm2.o mouse.o copyrfm.o blastman.o sbblit.o
 VDI_OBJS4 = sbescape.o sbfrag.o sbhline.o sbmono.o sbscrn.o sbtxtblt.o sbvline.o
 VDI_OBJS5 = vdivar.o xfrmform.o sbsctran.o sbsctlog.o sbscolog.o
 VDI_OBJS6 = sbscopaq.o blaster.o hbline.o hbmono.o hbtxtblt.o
