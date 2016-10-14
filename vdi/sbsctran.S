@@ -20,7 +20,7 @@
 #include "vdidefs.h"
 
 *
-* Entry routines for transparant byte aligned blits
+* Entry routines for transparent byte aligned blits
 * (screen format)
 *
 		xdef	trans_pos_row
@@ -28,7 +28,7 @@
 
 
 *
-* Entry routines for transparant non aligned blits
+* Entry routines for transparent non aligned blits
 * (screen format)
 *
 		xdef	transSrPos
@@ -82,7 +82,7 @@
 		xdef	opC_tni,opD_tni,opE_tni,opF_tni
 
 *******************************************************************************
-************** Routines for the unaligned blit transparant case ***************
+************** Routines for the unaligned blit transparent case ***************
 *******************************************************************************
 
 ************************************************
@@ -207,7 +207,7 @@ INNER_CT  equ	-6	; blt inner loop initial count			    +70
 
 *******************************************************************************
 *******************************************************************************
-*************************** Copy Raster Transparant ***************************
+*************************** Copy Raster Transparent ***************************
 *******************************************************************************
 *******************************************************************************
 

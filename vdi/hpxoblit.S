@@ -164,9 +164,9 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 *-
 		xdef	hpx_bitblt
 hpx_bitblt:	
-	tst.w	S_NXPL(a6)		; see if we are doing transparant blit
+	tst.w	S_NXPL(a6)		; see if we are doing transparent blit
 	bne	skip0			; if not then skip
-	jmp	spx_tbitblt		; else do transparant blit
+	jmp	spx_tbitblt		; else do transparent blit
 
 skip0:	move.l	_lineAVar,a3		; a3 -> linea variable structure
 	lea	BLASTER+B_OFF,a5	; a5 -> SKEW (bit blt reference reg)

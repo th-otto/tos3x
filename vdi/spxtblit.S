@@ -608,7 +608,7 @@ o6P32Sk1:	add.w	a2,a0			; a0 -> to next line in src
 		rts
 
 *+
-* D' = S OR D (transparant mode)
+* D' = S OR D (transparent mode)
 *-
 o7P32Loop:	swap	d0			; save count for # of lines - 1
 		move.w	(a0)+,d0		; d0 <- S (for left fringe)
@@ -975,7 +975,7 @@ oCP32Sk1:	add.w	a2,a0			; a0 -> to next line in src
 		rts
 
 *+
-* D' = (NOT S) OR D reverse transparant
+* D' = (NOT S) OR D reverse transparent
 *-
 oDP32Loop:	swap	d0			; save count for # of lines - 1
 		move.w	(a0)+,d0		; d0 <- S (for left fringe)
@@ -1509,7 +1509,7 @@ o6P16Sk1:	add.w	a2,a0			; a0 -> to next line in src
 		rts
 
 *+
-* D' = S OR D (transparant mode)
+* D' = S OR D (transparent mode)
 *-
 o7P16Loop:	swap	d0			; save count for # of lines - 1
 		move.w	(a0)+,d0		; d0 <- S (for left fringe)
@@ -1876,7 +1876,7 @@ oCP16Sk1:	add.w	a2,a0			; a0 -> to next line in src
 		rts
 
 *+
-* D' = (NOT S) OR D reverse transparant
+* D' = (NOT S) OR D reverse transparent
 *-
 oDP16Loop:	swap	d0			; save count for # of lines - 1
 		move.w	(a0)+,d0		; d0 <- S (for left fringe)
@@ -2410,7 +2410,7 @@ o6P8Sk1:	add.w	a2,a0			; a0 -> to next line in src
 		rts
 
 *+
-* D' = S OR D (transparant mode)
+* D' = S OR D (transparent mode)
 *-
 o7P8Loop:	swap	d0			; save count for # of lines - 1
 		move.w	(a0)+,d0		; d0 <- S (for left fringe)
@@ -2777,7 +2777,7 @@ oCP8Sk1:	add.w	a2,a0			; a0 -> to next line in src
 		rts
 
 *+
-* D' = (NOT S) OR D reverse transparant
+* D' = (NOT S) OR D reverse transparent
 *-
 oDP8Loop:	swap	d0			; save count for # of lines - 1
 		move.w	(a0)+,d0		; d0 <- S (for left fringe)

@@ -28,7 +28,7 @@
 
 
 *
-* Entry routines for transparant non aligned blits
+* Entry routines for transparent non aligned blits
 * (screen format)
 *
 		xdef	opaqSrPos

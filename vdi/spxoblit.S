@@ -117,9 +117,9 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 *		rectangle height, rectangle width, number of planes
 *-
 		xdef	spx_bitblt
-spx_bitblt:	tst.w	S_NXPL(a6)	; see if we are doing transparant blit
+spx_bitblt:	tst.w	S_NXPL(a6)	; see if we are doing transparent blit
 		bne	skip0		; if not then skip
-		jmp	spx_tbitblt	; else do transparant blit
+		jmp	spx_tbitblt	; else do transparent blit
 skip0:		move.l	_lineAVar,a3	; a3 -> linea variable structure
 		move.w	S_YMIN(a6),d1	; d1 <- Ymin source
 		bsr	s_xy2addr	; a0 -> start of source block

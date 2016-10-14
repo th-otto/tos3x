@@ -14,7 +14,7 @@
 * New generation VDI
 * 
 * Revision 2.4  91/07/08  16:26:22  lozben
-* Made changes so that we can perform new TRANSPARANT and OPAQUE
+* Made changes so that we can perform new TRANSPARENT and OPAQUE
 * blit operations (we created new better routines).
 * 
 * Revision 2.3  90/01/11  12:24:15  lozben
@@ -34,7 +34,6 @@
 		xdef	transSlPos
 		xdef	transSrNeg
 		xdef	transSlNeg
-		xdef	_copytran		; blit transparant flag
 
 		xref	opaq_pos_row
 		xref	opaq_neg_row
@@ -42,6 +41,15 @@
 		xref	opaqSlPos
 		xref	opaqSrNeg
 		xref	opaqSlNeg
+
+
+/*
+ * We now use _copytran in the overlay variable space rather than
+ * _COPYTRAN a linea structure variable.
+ */
+#if TOSVERSION >= 0x400
+# define _COPYTRAN _copytran
+#endif
 
 
 *+
@@ -53,12 +61,6 @@
 * author:	Slavik Lozben
 *		Atari corp.
 *-
-
-	xdef set_fringe
-	xdef get_fringe
-	xdef d_xy2addr
-	xdef s_xy2addr
-	xdef scrn_blt
 
 *       FRAME PARAMETERS
 
@@ -123,6 +125,7 @@ OPAQUE	equ	-4
 *  in:		d4.w	words in source - 1
 *		d6.w	words in destination - 1
 *-
+	xdef scrn_blt
 scrn_blt:	move.w	d4,d2		; d2 <- will later get inner loop count
 
 		move.w	D_NXWD(a6),d5	; d5 <- next word increment (l2r src)
@@ -210,10 +213,10 @@ setup:		subq.w	#1,d2
 		bmi	neg_setup
 
 		sub.w	d4,a5		; adjust for n - 1 planes
-		tst.w	_copytran	; see if blit transparanat flag is on
+		tst.w	_COPYTRAN	; see if blit transparent flag is on
 		beq	setup1		; if not do regular blit
 		subq.w	#2,a4		; adjust for 1 plane
-		jmp	trans_pos_row	; go to transparant blit
+		jmp	trans_pos_row	; go to transparent blit
 
 setup1:		sub.w	d4,a4		; adjust for n - 1 planes
 		tst.w	OPAQUE(a6)	; see if we are doing OPAQUE blit
@@ -228,11 +231,11 @@ gotoPosRow:	lea	PTow1(pc,d0.w),a3
 
 neg_setup:	add.w	d4,a1		; adjust for predecrement
 		add.w	d4,a5		; adjust for n planes
-		tst.w	_copytran	; see if blit transparanat flag is on
+		tst.w	_COPYTRAN	; see if blit transparent flag is on
 		beq	setup2		; if not do regular blit
 		addq.w	#2,a4		; adjust for n planes
 		addq.w	#2,a0		; adjust for predecrement
-		jmp	trans_neg_row	; go to transparant blit
+		jmp	trans_neg_row	; go to transparent blit
 
 setup2:		add.w	d4,a4		; adjust for n planes
 		add.w	d4,a0		; adjust for predecrement
@@ -361,8 +364,8 @@ unaligned:	move.w	PLANE_CT(a6),d4
 * Blits any number of planes. As long as the're in ST screen format and,
 * Source and Destination are pixel aligned.
 *-
-shiftSetup:	tst.w	_copytran		; see if blit transp flag is on
-		bne	trShiftSetup		; if so do transparant blit
+shiftSetup:	tst.w	_COPYTRAN		; see if blit transparent flag is on
+		bne	trShiftSetup		; if so do transparent blit
 		subq.w	#2,d2			; subtract last fringe + 1
 		tst.w	OPAQUE(a6)		; see if doing general PAQUE
 		bne	shiftS0			; if so skip multiplying
@@ -428,7 +431,7 @@ shiftPos:	move.w	S_XMIN(a6),d0		; d0 <- source x min
 * case shift right positive
 *-
 csrp0:		lea	srPentry(pc),a3		; a3 -> entry routine for blit
-		tst.w	_copytran		; see if blt trnsprnt flg is on
+		tst.w	_COPYTRAN		; see if blit transparent flg is on
 		beq	csrp2			; if not then skip
 		lea	transSrPos,a3		; a3 -> trns entry for blit
 
@@ -467,7 +470,7 @@ csrp1:		add.w	d4,a5			; adjust offset to nxt dst wrd
 * case shift left positive
 *-
 cslp0:		lea	slPentry(pc),a3		; a3 -> entry routine for blit
-		tst.w	_copytran		; see if blt trnsprnt flg is on
+		tst.w	_COPYTRAN		; see if blit transparent flg is on
 		beq	cslp2			; if not then skip
 		lea	transSlPos,a3		; a3 -> trns entry for blit
 
@@ -516,7 +519,7 @@ shiftNeg:	move.w	S_XMAX(a6),d0		; d0 <- source x max
 * case shift right negative
 *-
 csrn0:		lea	srNentry(pc),a3		; a3 -> entry routine for blit
-		tst.w	_copytran		; see if blt trnsprnt flg is on
+		tst.w	_COPYTRAN		; see if blit transparent flg is on
 		beq	csrn2			; if not then skip
 		lea	transSrNeg,a3		; a3 -> trns entry for blit
 
@@ -556,7 +559,7 @@ csrn1:		add.w	#16,d1			; d1 <- D_XMIN mod 16
 * case shift left negative
 *-
 csln0:		lea	slNentry(pc),a3		; a3 -> entry routine for blit
-		tst.w	_copytran		; see if blt trnsprnt flg is on
+		tst.w	_COPYTRAN		; see if blit transparent flg is on
 		beq	csln2			; if not then skip
 		lea	transSlNeg,a3		; a3 -> trns entry for blit
 

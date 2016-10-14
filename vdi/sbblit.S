@@ -45,18 +45,13 @@
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
-	xdef	sb_bitblt,set_fringe,get_fringe,d_xy2addr,s_xy2addr
-	xdef	scrn_blt,_copytran
-
-	xdef	f0_l2r_rt,f1_l2r_rt,f2_l2r_rt,fl_l2r_rt
-	xdef	f0_l2r_lf,f1_l2r_lf,f2_l2r_lf,fl_l2r_lf
-	xdef	f0_r2l_rt,f1_r2l_rt,f2_r2l_rt,fl_r2l_rt
-	xdef	f0_r2l_lf,f1_r2l_lf,f2_r2l_lf,fl_r2l_lf
-
-	xdef	f0_left,f0_right,f2_update,f1_dst,f1_drt,f2_dst,p1_update
-
-	xdef	mode_00,mode_01,mode_02,mode_03,mode_04,mode_05,mode_06,mode_07
-	xdef	mode_08,mode_09,mode_10,mode_11,mode_12,mode_13,mode_14,mode_15
+/*
+ * We now use _copytran in the overlay variable space rather than
+ * _COPYTRAN a linea structure variable.
+ */
+#if TOSVERSION >= 0x400
+# define _COPYTRAN _copytran
+#endif
 
 
 
@@ -133,20 +128,21 @@ SRC_WR	  equ	-2	; source form wrap (in bytes)			    +74
 
 OPAQUE	equ	-4
 
-*+
-*  in:	d0.w	X min source
-*	d2.w	X min destination
-*	d4.w	X max source
-*	d6.w	X max destination
-*-
+/*
+ *  in:	d0.w	X min source
+ *	d2.w	X min destination
+ *	d4.w	X max source
+ *	d6.w	X max destination
+ */
 /* 306de: 00e0d300 */
+	xdef sb_bitblt
 sb_bitblt: ds.b 0
 
 #if P68030
-*
-* We are going to compile things in memory later on, so flush the
-* the instruction cache if we are on a 68030
-*
+/*
+ * We are going to compile things in memory later on, so flush the
+ * the instruction cache if we are on a 68030
+ */
 	CACR_D5			; d5 <- cache control register
 	bset.l	#3,d5			; set "Clr Instr Cache" bit
 	D5_CACR			; clear the instruction cache
@@ -154,7 +150,7 @@ sb_bitblt: ds.b 0
 
 	PIXLA(a4)
 	clr.w	OPAQUE(a6)		; set OPAQUE flag off
-	clr.w	_copytran		; turn blit transparant flag off
+	clr.w	_COPYTRAN		; turn blit transparent flag off
 
 	moveq.l	#$0F,d5			; d5 <- mod 16 mask
 
@@ -172,6 +168,7 @@ sb_bitblt: ds.b 0
 	sub.w	d2,d6			; d6 <- # destination words - 1
 
 	move.w	d4,d5
+
 	sub.w	d6,d5			; d5 <- # src. words - # dst. words 
 
 	sub.w	d3,d1			; d1 <- (Sxmin mod 16) - (Dxmin mod 16)	
@@ -179,7 +176,7 @@ sb_bitblt: ds.b 0
 	move.w	d4,d7			; and both src and dst occupy
 	add.w	d6,d7			; three or more words apiece ...
 	cmp.w	#4,d7
-	bcs	std_blt
+	bcs.s	std_blt
 
 	tst.l	P_ADDR(a6)		; and no pattern is involved ...
 	bne	std_blt			; do the special word aligned blt
@@ -210,9 +207,9 @@ opaque_blt:
 trns_blt:
 	cmp.w	#2,S_NXWD(a6)		; see if next source word is word away
 	bne	sbBl0			; if not do other more general case
-	cmp.w	#0,S_NXPL(a6)		; see if doing transparant blit
+	tst.w	S_NXPL(a6)		; see if doing transparent blit
 	bne	sbBl0			; if so do fast non tearing blit
-	move.w	#-1,_copytran		; turn blit transparant flag on
+	move.w	#-1,_COPYTRAN		; turn blit transparent flag on
 	jmp	scrn_blt
 
 sbBl0:	tst	d1			; see if S and D are pixel aligned
@@ -545,6 +542,7 @@ call_unary:
 *	d6(15:00)	left fringe mask
 *	d6(31:16)	right fringe mask
 
+	xdef get_fringe
 get_fringe:
 
 *   right mask first
@@ -625,6 +623,7 @@ fr_r_mask:
 *******************************************************************************
 
 
+	xdef	s_xy2addr
 s_xy2addr:
 
 	move.l	S_FORM(a6),a0		; a0 -> start of source form (0,0)
@@ -642,6 +641,7 @@ s_xy2addr:
 
 
 
+	xdef d_xy2addr
 d_xy2addr:
 
 	move.l	D_FORM(a6),a1		; a0 -> start of destination form (0,0)
@@ -719,6 +719,7 @@ l2r_t2b:
 	neg.w	d6			; d6 <- DST_WR (l2r)
 
 
+	xdef set_fringe
 set_fringe:
 
 	move.w	d5,d2			; d2 <- src inter word increment

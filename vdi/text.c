@@ -325,7 +325,7 @@ VOID d_gtext(NOTHING)
 					dqt_extent();
 					LV(PTSOUT) = old_ptr;
 					cheat_blit();		/* clear out an area with txt bg */
-					LV(WRT_MODE) = 1;		/* make writing mode transparant */
+					LV(WRT_MODE) = 1;		/* make writing mode transparent */
 				}
 #endif
 				TEXT_BLT();
