@@ -64,6 +64,7 @@ _trap14:	PIXLA(a0)
 		move.l	PIXLV(trap14sav,a0),-(sp)
 		rts
 
+#if TOSVERSION >= 0x400
 /*
  * Same as above except we use this for SetScreen, and SetMode calls.
  * The reason you ask? Those call cause XBIOS calls (i.e. one level of 
@@ -76,6 +77,7 @@ _trap14b:	PIXLA(a0)
 		PIXLA(a0)
 		move.l	PIXLV(trapb14sav,a0),-(sp)
 		rts
+#endif
 
 *******************************************************************************
 *									      *
@@ -93,6 +95,7 @@ _trap14b:	PIXLA(a0)
 *									      *
 *******************************************************************************
 
+/* 306de: 00e0c0c4 */
 		xdef	_TRNSFONT
 _TRNSFONT:
 		PIXLA(a1)

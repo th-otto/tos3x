@@ -34,19 +34,79 @@
 
 	text
 
-fail_ret:	moveq	#0,d0		; exit if not byte bnd or clip required
+fail_ret:
+#if TOSVERSION < 0x400
+		movea.l   (a7)+,a5
+#endif
+		moveq	#0,d0		; exit if not byte bnd or clip required
 		rts			; 0 indicates failure
 
 *  Entry point here..
-
+/* 306de: 00e0c050 */
 	xdef	_MONO8XHT
-_MONO8XHT: PIXLA(a1)
+_MONO8XHT:
+#if TOSVERSION < 0x400
+		move.l    a5,-(a7)
+	    lea lineavars+DESTX,a5
+		move.w	(a5)+,d0		; d0 <- dst X
+		move.w	d0,d2			; d2 <- dst X
+		and.w	#$0007,d2		; this routine is only for
+		bne	fail_ret		; byte alligned characters
+
+on_bounds:
+		move.w	(a5),d1		; d1 <- dst Y
+		move.w	DELY-DESTY(a5),d3		; d3 <- dY
+
+		move.l	CONTRL-DESTY(a5),a0		; a0 -> CONTRL array
+		move.w	  6(a0),d2		; d2 <- # chars in string
+
+		lea CLIP-DESTY(a5),a5
+		tst.w	(a5)+
+		beq	no_clip			; skip clip test if disabled
+
+		move.w	(a5)+,d5	;8	d5 <- Xmin clip
+		move.w	(a5)+,d6	;8	d6 <- Ymin clip
+		move.w	(a5)+,d7	;8	d7 <- Xmax clip
+
+		cmp.w	d6,d1			; str can't extend above Ymin
+		blt	fail_ret		;
+
+		move.w	d1,d4			;4	d4 <- dst Y
+		add.w	d3,d4			;4	d4 <- bottom Y +1
+		cmp.w	(a5),d4	; str can't descend below Ymax
+		bge	fail_ret		;8/10
+
+		cmp.w	d5,d0			; str can't extend left of Xmin
+		blt	fail_ret		;8/10
+
+		move.w	d2,d4			; d4 <- number of characters
+		lsl.w	#3,d4			; d4 <- width of str in pixels
+		add.w	d0,d4			; d4 <- rightmost X +1
+		cmp.w	d7,d4			; str can't extend right of Xmax
+		bge	fail_ret		;8/10
+
+*  no clipping to worry about
+*
+*   d0.w = DESTX
+*   d1.w = DESTY
+*   d2.w = # of characters
+*   d3.w = DELY
+
+no_clip:
+		lea.l	lineavars+FBASE,a5	; a5 -> font form
+		move.l	USERDEVINIT+V_MONO-FBASE(a5),a4		; a4 -> version of mono
+		jmp	(a4)
+
+#else
+
+	    PIXLA(a1)
 		move.w	PIXLV(DESTX,a1),d0		; d0 <- dst X
 		move.w	d0,d2			; d2 <- dst X
 		and.w	#$0007,d2		; this routine is only for
 		bne	fail_ret		; byte alligned characters
 
-on_bounds:	move.w	PIXLV(DESTY,a1),d1		; d1 <- dst Y
+on_bounds:
+		move.w	PIXLV(DESTY,a1),d1		; d1 <- dst Y
 		move.w	PIXLV(DELY,a1),d3		; d3 <- dY
 
 		move.l	PIXLV(CONTRL,a1),a0		; a0 -> CONTRL array
@@ -76,7 +136,6 @@ on_bounds:	move.w	PIXLV(DESTY,a1),d1		; d1 <- dst Y
 		cmp.w	d7,d4			; str can't extend right of Xmax
 		bge	fail_ret		;8/10
 
-
 *  no clipping to worry about
 *
 *   d0.w = DESTX
@@ -84,6 +143,11 @@ on_bounds:	move.w	PIXLV(DESTY,a1),d1		; d1 <- dst Y
 *   d2.w = # of characters
 *   d3.w = DELY
 
-no_clip:	move.l	LA_ROUTINES(a1),a0	; a1 -> routines vector list
+no_clip:
+		move.l	LA_ROUTINES(a1),a0	; a1 -> routines vector list
 		move.l	V_MONO(a0),a0		; a1 -> version of mono
 		jmp	(a0)
+
+#endif
+
+
