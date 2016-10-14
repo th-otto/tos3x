@@ -25,6 +25,23 @@
 #include "lineaequ.inc"
 
 
+#if MULTI_LINEA
+#define V_FUNC(func,la,r) \
+	move.l	LV(LA_ROUTINES,la),r \
+	move.l	func(r),r
+#else
+#define V_FUNC(func,la,r) \
+	move.l	PIXLV((USERDEVINIT)+func,la),r
+#endif
+
+#define V_CALL(func,la,r) \
+		V_FUNC(func,la,r) \
+		jsr (r)
+#define V_JUMP(func,la,r) \
+		V_FUNC(func,la,r) \
+		jmp (r)
+
+
 B_WD		equ	-76	; width of block in pixels
 B_HT		equ	-74	; height of block in pixels
 
@@ -41,6 +58,7 @@ FRAME_LEN	equ	 76
 
 	text
 
+/* 306de: 00e0cc46 */
 *  in:
 *	a6.l	points to 76 byte parameter block
 	xdef	KG_BLT
@@ -73,6 +91,4 @@ KG_BLT:
 	move.w	d7,D_YMAX(a6)
 
     PIXLA(a5)
-	move.l	LA_ROUTINES(a5),a5	; a5 -> routines vector list
-	move.l	V_BLAST(a5),a5		; a5 -> desired version of blast_man
-	jmp	(a5)			; routine ("blast_man" uses BLASTER)
+	V_JUMP(V_BLAST,a5,a5)		; a5 -> desired version of blast_man
