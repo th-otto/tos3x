@@ -31,6 +31,23 @@
 #include "lineaequ.inc"
 
 
+#if MULTI_LINEA
+#define V_FUNC(func,la,r) \
+	move.l	LV(LA_ROUTINES,la),r \
+	move.l	func(r),r
+#else
+#define V_FUNC(func,la,r) \
+	move.l	PIXLV((USERDEVINIT)+func,la),r
+#endif
+
+#define V_CALL(func,la,r) \
+		V_FUNC(func,la,r) \
+		jsr (r)
+#define V_JUMP(func,la,r) \
+		V_FUNC(func,la,r) \
+		jmp (r)
+
+
 *
 *
 * title:	copy_rfm
@@ -42,7 +59,8 @@
 *
 *	MEMORY FORM DEFINITION BLOCK (MFDB) OFFSETS
 
-MF_BAS_AD	equ	 0	; memory form base address (0: physical device)
+/* memory form base address (0: physical device) */
+#define MF_BAS_AD
 MF_WD_PIX	equ	 4	; form width in pixels (form width in wrds /16)
 MF_HT_PIX	equ	 6	; form height in pixels
 MF_WD_WRD	equ	 8	; form width in words
@@ -56,13 +74,15 @@ C_MFDB_D	equ	18	; pointer to destination MFDB
 
 *	INTIN ARRAY OFFSETS
 
-I_LOG_OP	equ	 0	; logic operation code
+/* logic operation code == 0 */
+#define I_LOG_OP
 I_COL_1		equ	 2
 I_COL_0		equ	 4
 
 *	PTSIN ARRAY OFFSET
 
-P_XMIN_S	equ	0	; x-coordinate of upper left of src rectangle
+/* x-coordinate of upper left of src rectangle */
+#define P_XMIN_S
 P_YMIN_S	equ	2	; y-coordinate of upper left of src rectangle
 P_XMAX_S	equ	4	; x-coordinate of lower right of src rectangle
 P_YMAX_S	equ	6	; y-coordinate of lower right of src rectangle
@@ -143,7 +163,7 @@ _COPY_RFM:
 *   pattern ?
 
 
-	movea.l	#0,a3
+	movea.w	#0,a3
 	bclr	#PAT_FLAG,d2		; check pat flag and revert to log op #
 	beq	no_pattern
 
@@ -208,6 +228,11 @@ dst_calc:
 
 
 compare:
+#if TOSVERSION < 0x400
+	move.l    #$00000116,d3   ; WUT ???
+	btst      d1,d3
+	beq       bad_parameter
+#endif
 
 	move.w	d1,PLANE_CT(a6)		; save the total plane count
 	add.w	d0,d0			; for dev dependent forms NXWD=2*planes
@@ -495,9 +520,7 @@ max_save:
 	move.w	d6,D_XMAX(a6)
 	move.w	d7,D_YMAX(a6)
 
-	move.l	LA_ROUTINES(a1),a5	; a5 -> routines vector list
-	move.l	V_BLAST(a5),a5		; a5 -> desired version of blast_man
-	jsr	(a5)			; routine ("blast_man" uses BLASTER)
+	V_CALL(V_BLAST,a1,a5)		; a5 -> desired version of blast_man (uses BLASTER)
 
 bad_parameter:
 
