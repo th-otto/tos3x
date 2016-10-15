@@ -24,7 +24,21 @@
 #include "vdidefs.h"
 #include "lineaequ.inc"
 
-		xdef	 sb_mono
+
+/*
+ * in TOS versions before 4.00, the routines below
+ * are called with a5 pointing to the font base.
+ * In TOS 4.x, they are called with a1 pointing to the
+ * linea reference base.
+ */
+
+#if TOSVERSION >= 0x400
+OF equ 0
+OF4 equ 0
+#else
+OF equ -FBASE
+OF4 equ -FBASE-4
+#endif
 
 
 *  no clipping to worry about
@@ -35,14 +49,20 @@
 *   d3.w =  DELY
 *   a1   =  line A variable reference base
 
+/* 306de: 00e0e104 */
+		xdef	 sb_mono
 sb_mono:
+#if TOSVERSION >= 0x400
 	movem.l	a5-a6,-(sp)	; save a5 and a6 
 	movea.l	a1,a5		; a5 -. line A variable structure
+#else
+	move.l	a6,-(sp)	; save a6 
+#endif
 
-	muls	PIXLV(bytes_lin,a5),d1	; d1 <- Y offset
+	muls	LV((bytes_lin)+OF,a5),d1	; d1 <- Y offset
 	asr.w	#4,d0			; d0 <- word offset to X
 	subx.w	d4,d4			; d4 <- 0000=>even byte  FFFF=>odd byte
-	muls	PIXLV(v_planes,a5),d0	; d0 <- X offset /2
+	muls	LV((v_planes)+OF,a5),d0	; d0 <- X offset /2
 	add.w	d4,d4			; cy:0=>even byte cy:1=>odd byte
 	addx.l	d0,d0			; d0 <- byte offset to X
 
@@ -50,15 +70,24 @@ sb_mono:
 	add.l	d0,a1			; a1 -> screen destination
 	add.l	d1,a1
 
-	move.l	PIXLV(FBASE,a5),a0		; a0 -> source form base address
-	move.w	PIXLV(FWIDTH,a5),d0		; d0 <- source form width
-	move.l	PIXLV(INTIN,a5),a2		; a2 -> character string
-	move.w	PIXLV(v_lin_wr,a5),d1	; d1 <- screen form width
-	move.w	PIXLV(WRT_MODE,a5),d4	; d4 <- writing mode
+#if TOSVERSION >= 0x400
+	move.l	LV((FBASE)+OF,a5),a0		; a0 -> source form base address
+	move.w	LV((FWIDTH)+OF4,a5),d0		; d0 <- source form width
+#else
+	move.l  (a5)+,a0
+	move.w	(a5),d0						; d0 <- source form width
+#endif
+	move.l	LV((INTIN)+OF4,a5),a2		; a2 -> character string
+	move.w	LV((v_lin_wr)+OF4,a5),d1	; d1 <- screen form width
+	move.w	LV((WRT_MODE)+OF4,a5),d4	; d4 <- writing mode
 	add.w	d4,d4			; d4 <- writing mode index
 
 	dbra	d3,next_char		; d3 <- character height dbra counter
+#if TOSVERSION >= 0x400
 	movem.l	(sp)+,a5-a6		; restore a5 and a6 
+#else
+	/* BUG: a5+a6 not restored -> crash */
+#endif
 	rts				; quit on null height
 	
 
@@ -77,8 +106,8 @@ mchar_lp:
 	move.l	a1,-(sp)		; save screen destination on stack
 	move.w	(a2)+,d5		; d5 <- next character from string
 	lea	0(a0,d5.w),a3		; a3 -> top-most grfx byt for cur char
-	move.w	 PIXLV(TEXT_FG,a5),d6	; d6 <- foreground color
-	move.w	PIXLV(v_planes,a5),d5	; d5 <- plane count
+	move.w	 LV((TEXT_FG)+OF4,a5),d6	; d6 <- foreground color
+	move.w	LV((v_planes)+OF4,a5),d5	; d5 <- plane count
 	bra	next_plane
 
 mplan_lp:
@@ -110,7 +139,7 @@ next_plane:
 	btst.l	#0,d7		; word fault ?
 	bne	next_char	; if not, use other half of current word
 
-	move.w	PIXLV(v_planes,a5),d7	; d7 <- number of planes
+	move.w	LV((v_planes)+OF4,a5),d7	; d7 <- number of planes
 	subq.w	#1,d7			; d7 <-	number of planes -1
 	add.w	d7,d7			; d7 <- offset to 1st plane of nxt byte
 	add.w	d7,a1			; a1 -> next char position
@@ -120,7 +149,12 @@ next_char:
 	dbra	d2,mchar_lp		; do next character
 
 	moveq.l	#1,d0			; exit blit with success code in d0
+#if TOSVERSION >= 0x400
 	movem.l	(sp)+,a5-a6		; restore a5 and a6 
+#else
+	move.l	(sp)+,a6		; restore a6 
+	move.l	(sp)+,a5		; restore a5 (it was saved by our caller in mono.s)
+#endif
 	rts
 
 

@@ -19,8 +19,19 @@
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
-	xdef	 BLASTER
-	xdef	 hb_mono
+/*
+ * in TOS versions before 4.00, the routines below
+ * are called with a5 pointing to the font base.
+ * In TOS 4.x, they are called with a1 pointing to the
+ * linea reference base.
+ */
+
+#if TOSVERSION >= 0x400
+OF equ 0
+#else
+OF equ FBASE
+#endif
+
 
 *
 *  note:  base address = BLASTER+B_OFF
@@ -77,6 +88,7 @@ BM_FQ		equ  	$0040		; flush queue mask
 *   d3.w =  DELY
 *   a1   =  line A variable reference base
 *-
+	xdef	 hb_mono
 hb_mono:
 	move.l	a1,a5		    ;a5 -> line A variable structure
 	add.l	#FBASE,a5		;a5 -> FBASE
