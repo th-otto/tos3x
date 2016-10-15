@@ -939,7 +939,11 @@ hide_cursor:
 *******************************************************************************
 
 escj:		bset.b	#F_SVPOS,LV(V_STAT_0,a4)	; set "pos saved" status bit.
-		move.l	LV((v_curcx)+O6,a4),LV((xydraw)+O6,a4)
+#if TOSVERSION >= 0x400
+		move.l	LV((v_curcx)+O6,a4),LV((xydraw)+O6,a4) ; hm, bug? why xydraw?
+#else
+		move.l	LV((v_curcx)+O6,a4),LV((sav_cxy)+O6,a4)
+#endif
 
 escj_exit:	rts
 
