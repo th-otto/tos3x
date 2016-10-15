@@ -3,7 +3,7 @@ VDI_OBJS2 = font6x6.o font8x8.o font8x16.o fnt16x32.o tables.o
 VDI_OBJS3 = escape.o entry.o line1010.o gsxasm1.o blitinit.o routines.o jmptbl.o
 VDI_OBJS4 = isin.o monobj.o monout.o text.o textblt.o mono.o gsxasm2.o mouse.o
 VDI_OBJS5 = copyrfm.o blastman.o seedfill.o xfrmform.o sbblit.o sbfrag.o sbescape.o
-VDI_OBJS6 = sbhline.o sbvline.o sbmono.o sbtxtblt.o sbscrn.o vdivar.o
+VDI_OBJS6 = sbhline.o sbvline.o sbmono.o sbtxtblt.o sbscrn.o
 VDI_OBJS7 = sbsctran.o sbsctlog.o sbscolog.o sbscopaq.o
 
 VDI_OBJS8 = blaster.o hbline.o hbmono.o hbtxtblt.o hbrect.o hbbitblt.o

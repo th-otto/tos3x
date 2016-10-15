@@ -13,8 +13,11 @@
 
 * from BIOS
 		xdef ringbell
-* hm does not work because of PC-relative fixup overflow
-* ringbell  equ BIOSTBASE+$3B2C+BIOSTLEN-$0000641C
-
+* This strange looking equate is needed because the symbol
+* is accessed by a relative branch
+		text
+ringbell ds.b 0
+ringbell  equ $3B2C+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
+		
 		xdef _zeromem
 _zeromem equ BIOSTBASE+$1680
