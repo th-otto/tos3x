@@ -18,6 +18,8 @@
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
+#if VIDEL_SUPPORT /* whole file */
+
 #define GUNMAX32	    255				/* 32 bits per pix    */
 #define GUNMAX16	    31				/* 16 bits per pix    */
 #define SPSHIFTMODE	    (* ((int16_t *) 0xff8266))	/* sparrow shift mode */
@@ -85,9 +87,7 @@ VOID vs_32_color(NOTHING)
 	value = SMUL_DIV(temp, GUNMAX32, 1000);	/* value gets the gun value       */
 	total |= value;						/* value has the blue component   */
 
-#if VIDEL_SUPPORT
 	LV(pal_map)[pen] = total;				/* set the virtual RGB            */
-#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -99,9 +99,7 @@ VOID vq_32_color(NOTHING)
 	register int16_t *rgb;
 	register int16_t *out = LV(INTOUT);
 	register int16_t pen;
-#if VIDEL_SUPPORT
 	register int32_t temp;
-#endif
 
 	UNUSED(i);
 	
@@ -125,7 +123,6 @@ VOID vq_32_color(NOTHING)
 
 	pen = MAP_COL[pen];
 
-#if VIDEL_SUPPORT
 	if (*ptr--)
 	{									/* return col val set */
 		temp = LV(pal_map)[pen];
@@ -140,7 +137,6 @@ VOID vq_32_color(NOTHING)
 		temp &= GUNMAX32;
 		*out++ = SMUL_DIV((int16_t) temp, 1000, GUNMAX32);	/* get blue component */
 	} else
-#endif
 	{									/* ret val requested  */
 		*out++ = *rgb++;				/* get red component  */
 		*out++ = *rgb++;				/* get green compont  */
@@ -220,11 +216,9 @@ VOID vs_16_color(NOTHING)
 	total |= LV(col_or_mask);				/* or in a predefined value       */
 	total &= LV(col_and_mask);				/* and in a predefined value      */
 
-#if VIDEL_SUPPORT
 	ptr = LV(pal_map) + pen;
 	*ptr++ = (int16_t) total;			/* set the virtual RGB            */
 	*ptr = (int16_t) total;				/* just in case 1st word is used  */
-#endif
 }
 
 /*----------------------------------------------------------------------------*/
@@ -236,10 +230,8 @@ VOID vq_16_color(NOTHING)
 	register int16_t *rgb;
 	register int16_t *out = LV(INTOUT);
 	register int16_t pen;
-#if VIDEL_SUPPORT
 	register int16_t maxGrVal;
 	register int32_t temp;
-#endif
 
 	UNUSED(i);
 	
@@ -263,7 +255,6 @@ VOID vq_16_color(NOTHING)
 
 	pen = MAP_COL[pen];
 
-#if VIDEL_SUPPORT
 	if (*ptr--)
 	{									/* return col val set */
 		temp = LV(pal_map)[pen];
@@ -285,10 +276,11 @@ VOID vq_16_color(NOTHING)
 		temp &= GUNMAX16;
 		*out++ = SMUL_DIV((int16_t) temp, 1000, GUNMAX16);	/* get blue component */
 	} else
-#endif
 	{									/* ret val requested  */
 		*out++ = *rgb++;				/* get red component  */
 		*out++ = *rgb++;				/* get green compont  */
 		*out = *rgb;					/* get blue component */
 	}
 }
+
+#endif /* VIDEL_SUPPORT */

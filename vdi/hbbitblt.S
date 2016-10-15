@@ -19,8 +19,9 @@
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
-	xdef	hb_bitblt
-	xdef	BLASTER
+#if BLITTER_SUPPORT /* whole file */
+
+	xref	BLASTER
 
 *       FRAME PARAMETERS
 
@@ -164,6 +165,7 @@ fr_rt_mask:
 	dc.w	$FFFF
 
 
+	xdef	hb_bitblt
 hb_bitblt:
 
 	lea	BLASTER+B_OFF,a5	; a5 -> SKEW (bit blt reference reg)
@@ -620,3 +622,5 @@ blt_1_start:
 	D5_CACR			; clear the data cache
 #endif
 	rts
+
+#endif /* BLITTER_SUPPORT */

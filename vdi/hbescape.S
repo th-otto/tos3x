@@ -36,6 +36,8 @@
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
+#if BLITTER_SUPPORT /* whole file */
+
 *  Offsets into BLASTER parameter block
 
 B_OFF		equ	 60	; offset to reference register
@@ -74,11 +76,7 @@ BM_PF		equ  	$0080	; pre-fetch mask
 BM_FQ		equ  	$0040	; flush queue mask
 
 
-	xdef	hb_cell
-	xdef	hb_blank
-	xdef	hb_scrup
-	xdef	hb_scrdn
-	xdef	blank_it
+	xref	blank_it
 
 *	external variables
 
@@ -109,6 +107,7 @@ BM_FQ		equ  	$0040	; flush queue mask
 *******************************************************************************
 
             
+	xdef	hb_cell
 hb_cell:
 
 	lea	BLASTER+B_OFF,a5		; a5 -> B_SKEW (reference reg)
@@ -216,6 +215,7 @@ chr_op:		dc.w	BM_SRC+00,BM_SRC+12,BM_SRC+03,BM_SRC+15
 *
 *******************************************************************************
 
+	xdef	hb_scrup
 hb_scrup:
 
 	lea	BLASTER+B_OFF+B_S_NXWD,a5
@@ -279,6 +279,7 @@ fu_start:
 	jmp	blank_it		; fill the vacated space
 
 
+	xdef	hb_scrdn
 hb_scrdn:
 
 	lea	BLASTER+B_OFF+B_S_NXWD,a5
@@ -379,6 +380,7 @@ blank_tab: *    fringe masks		*   odd      odd  multi word
 
 
 
+	xdef	hb_blank
 hb_blank:
 
 	lea	BLASTER+B_OFF+B_F1_MSK,a5
@@ -469,3 +471,5 @@ blank_cont:
 #endif
 
 	rts
+
+#endif /* BLITTER_SUPPORT */

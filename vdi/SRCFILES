@@ -1,14 +1,15 @@
-VDI_OBJS1 = palette.o allgem.o opnwk.o ttcolor.o escape.o entry.o line1010.o
-VDI_OBJS2 = gsxasm1.o blitinit.o routines.o jmptbl.o isin.o monobj.o monout.o
-VDI_OBJS3 = text.o textblt.o mono.o gsxasm2.o mouse.o copyrfm.o blastman.o
-VDI_OBJS4 = seedfill.o xfrmform.o sbblit.o sbfrag.o sbescape.o sbhline.o sbvline.o sbmono.o
-VDI_OBJS5 = sbtxtblt.o sbscrn.o vdivar.o sbsctran.o sbsctlog.o sbscolog.o
-VDI_OBJS6 = sbscopaq.o blaster.o hbline.o hbmono.o hbtxtblt.o
-VDI_OBJS7 = hbrect.o hbbitblt.o
-VDI_OBJS8 = hbescape.o colorep.o
+VDI_OBJS1 = palette.o allgem.o opnwk.o ttcolor.o
+VDI_OBJS2 = font6x6.o font8x8.o font8x16.o fnt16x32.o tables.o
+VDI_OBJS3 = escape.o entry.o line1010.o gsxasm1.o blitinit.o routines.o jmptbl.o
+VDI_OBJS4 = isin.o monobj.o monout.o text.o textblt.o mono.o gsxasm2.o mouse.o
+VDI_OBJS5 = copyrfm.o blastman.o seedfill.o xfrmform.o sbblit.o sbfrag.o sbescape.o
+VDI_OBJS6 = sbhline.o sbvline.o sbmono.o sbtxtblt.o sbscrn.o vdivar.o
+VDI_OBJS7 = sbsctran.o sbsctlog.o sbscolog.o sbscopaq.o
 
-VDI_OBJS9 = cbssdefs.o font6x6.o font8x16.o font8x8.o fnt16x32.o
-VDI_OBJS10 = tables.o
+VDI_OBJS8 = blaster.o hbline.o hbmono.o hbtxtblt.o hbrect.o hbbitblt.o
+VDI_OBJS9 = hbescape.o colorep.o
+
+VDI_OBJS10 = cbssdefs.o
 VDI_OBJS11 = devices.o init.o spcolor.o trucolor.o
 
 

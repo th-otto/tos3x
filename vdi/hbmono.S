@@ -19,6 +19,9 @@
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
+#if BLITTER_SUPPORT /* whole file */
+
+
 /*
  * in TOS versions before 4.00, the routines below
  * are called with a5 pointing to the font base.
@@ -244,3 +247,5 @@ char1st:
 
 	moveq.l	#1,d0		;4	exit blit with success code in d0
 	rts			;16
+
+#endif /* BLITTER_SUPPORT */

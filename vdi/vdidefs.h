@@ -32,6 +32,8 @@
 
 #define VIDEL_SUPPORT (TOSVERSION >= 0x400)
 
+#define BLITTER_SUPPORT ((TOSVERSION < 0x300) | (TOSVERSION >= 0x400))
+
 /*
  * used to mark some strange looking code segments
  * that are needed to create a binary equivalent image

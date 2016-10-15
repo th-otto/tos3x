@@ -30,10 +30,8 @@
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
-		xdef	hb_vline	; make routines available globally
-		xdef	hb_hline
+#if BLITTER_SUPPORT /* whole file */
 
-		xdef	op_table
 		xref	BLASTER
 
 B_OFF		equ	 60		; offset to reference register
@@ -84,6 +82,7 @@ BM_FQ		equ  	$0040		; flush queue mask
 *
 *	a4	pointer to LineA variable base
 *-
+		xdef	hb_vline
 hb_vline:
 
 	lea	BLASTER+B_OFF,a5	; a5 -> BLASTER reference register
@@ -226,6 +225,7 @@ vl_cont:
 *	a0	points to 1st pattern word
 *	a4	points to line A variables base address  (v_planes)
 *-
+		xdef	hb_hline
 hb_hline:
 
 	lea	BLASTER+B_OFF,a5	; a5 -> bit blt reference register
@@ -303,9 +303,12 @@ hl_cont:
 	rts
 
 
+		xdef	op_table
 op_table:  *	 color=0   color=1
 
 	dc.w	BM_PAT+00,BM_PAT+03	; replace
 	dc.w	BM_PAT+04,BM_PAT+07	; transparent
 	dc.w	BM_PAT+06,BM_PAT+06	; xor
 	dc.w	BM_PAT+01,BM_PAT+13	; reverse transparent
+
+#endif /* BLITTER_SUPPORT */

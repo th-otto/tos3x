@@ -18,6 +18,8 @@
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
+#if VIDEL_SUPPORT /* whole file */
+
 #define	SETRGB(a, b, c)	    trap14(93, a, b, c)
 #define GETRGB(a, b, c)	    trap14(94, a, b, c)
 
@@ -144,3 +146,5 @@ VOID sp_vq_color(NOTHING)
 		*out = *rgb;					/* get blue component */
 	}
 }
+
+#endif /* VIDEL_SUPPORT */

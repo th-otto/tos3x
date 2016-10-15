@@ -25,6 +25,8 @@
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
+#if BLITTER_SUPPORT /* whole file */
+
 	xref	 BLASTER
 	xdef	 hb_text
 
@@ -1771,3 +1773,5 @@ repdone:
 	movem.l	(sp)+,a0-a1/d3-d7
 	adda.w	d1,a1
 	rts
+
+#endif /* BLITTER_SUPPORT */

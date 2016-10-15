@@ -15,18 +15,7 @@
 
 		xdef	_STHardList		; orig ST routines blitter
 _STHardList: ds.b 0
-#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
-		dc.l	hb_nop
-		dc.l	hb_nop
-		dc.l	hb_nop
-		dc.l	hb_nop
-		dc.l	hb_nop
-		dc.l	hb_nop
-		dc.l	hb_nop
-		dc.l	hb_nop
-		dc.l	hb_nop
-		dc.l	hb_nop
-#else
+#if BLITTER_SUPPORT
 		dc.l	hb_cell
 		dc.l	hb_scrup
 		dc.l	hb_scrdn
@@ -37,6 +26,18 @@ _STHardList: ds.b 0
 		dc.l	hb_vline
 		dc.l	hb_hline
 		dc.l	hb_text
+#else
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+		dc.l	hb_nop
+#endif
 #if TOSVERSION >= 0x400
 		dc.l	_st_vq_color
 		dc.l	_st_vs_color
@@ -50,7 +51,6 @@ _STHardList: ds.b 0
 		dc.l	ST_RECTFILL
 		dc.l	ST_PUTPIX		; output pixel out to screen
 		dc.l	ST_GETPIX		; get pixel value at X,Y
-#endif
 #endif
 
 		xdef	_STSoftList		; orig ST routines no blitter
@@ -80,7 +80,7 @@ _STSoftList:	ds.b 0
 		dc.l	ST_GETPIX		; get pixel value at X,Y
 #endif
 
-#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+#if !BLITTER_SUPPORT
 hb_nop: rts
 #endif
 

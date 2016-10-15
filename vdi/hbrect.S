@@ -30,7 +30,8 @@
 #include "lineaequ.inc"
 #include "asmdefs.h"
 
-	xdef	hb_rect
+#if BLITTER_SUPPORT /* whole file */
+
 
 *  offsets into the BLASTER register block for the new blit ST
 *
@@ -94,6 +95,7 @@ BM_FQ		equ  	$0040		; flush queue mask
 *
 *	a2	pointer to LineA variables
 
+	xdef	hb_rect
 hb_rect:
 
 	exg	d1,d2			; d2 <- span - 1, d1 becomes scratch
@@ -333,3 +335,5 @@ sd2_cont:
 	D6_CACR			; clear the data cache
 #endif
 	rts
+
+#endif /* BLITTER_SUPPORT */

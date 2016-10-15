@@ -52,7 +52,16 @@ sb_vline:	lea	-FRAG_LEN(sp),sp  ; sp -> pixel fragment frame
 		move.w	LV(V_PLANES,a4),d3  ; d3 <- number of planes
 
 		cmp.w	#MAX_PLANES,d3	; too many planes for the buffer ?
+#ifdef __ASSEMBLER__
+/*
+ * stupid as68 fails to optimize this forward branch
+ * stupid gnu as does not recognize that the branch
+ * will be just in range when converted to short
+ */
+		bhi	sv_quit		; if so, end prematurely
+#else
 		bhi.s	sv_quit		; if so, end prematurely
+#endif
 
 		cmp.w	LV(WRT_MODE,a4),d0  ; don't build fragment for XOR mode
 		beq	sv_nofrag
