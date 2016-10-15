@@ -38,17 +38,15 @@
 #include "vdidefs.h"
 #include "lineaequ.inc"
 
-false	equ	0
-true	equ	$FFFF
+/* v_planes == 0; stupid as68 does not optimize it */
+#define V_PLANES
 
 *    conditional assembly switches..
 *
 *    should all be false for production version
 
-test0	equ	false	; if test program access of internal variables
-test1	equ	false		; if using very large fonts (else, 8x16)
-test2	equ	false		; if using initialized ram (.data) else, .bss
-bytswap	equ	false		; if font words are byte swapped!!!!
+#define test1	0	/* if using very large fonts (else, 8x16) */
+
 
 *
 *    end conditional assembly switches
@@ -158,12 +156,6 @@ OUTLINE		equ	4
 SHADOW		equ	5
 
 
-	xdef	sb_text
-
-	xref	 lf_tab
-	xref	 concat
-	xref	_ACT_SIZ
-
 
 *  Big daddy scratch buffer used for rotatin' & replicatin'
 *
@@ -171,15 +163,15 @@ SHADOW		equ	5
 *
 *  font dependent equates (should be found in fonthead)
 
-	ifeq	test1
+#if !test1
 *  8x16 font data..
 
-l_off	equ	2		; left offset from skew
-r_off	equ	6		; right offset from skew
-form_ht	equ	16		; form height
-mxcelwd	equ	8		; maximum cell width
+#define l_off	2		/* left offset from skew */
+#define r_off	6		/* right offset from skew */
+#define form_ht	16		/* form height */
+#define mxcelwd	8		/* maximum cell width */
 
-	endc
+#endif
 
 
 *  since a character cell may be rotated 90 or 270 deg, the cell height & width
@@ -193,47 +185,35 @@ mxcelwd	equ	8		; maximum cell width
 *
 *  Text Cell buffer dimension calculations..
 
-cell_ww	equ	(((2*(l_off+r_off+mxcelwd))+3+15)/16)*2
-cell_wh	equ	(2*(l_off+r_off+mxcelwd))+2
-cell_hh	equ	(2*form_ht)+2
-cell_hw	equ	(((2*form_ht)+3+15)/16)*2
+#define cell_ww	(((2*(l_off+r_off+mxcelwd))+3+15)/16)*2
+#define cell_wh	(2*(l_off+r_off+mxcelwd))+2
+#define cell_hh	(2*form_ht)+2
+#define cell_hw	(((2*form_ht)+3+15)/16)*2
 
-cell_sz0	equ	cell_ww*cell_hh		;doubled cell size, no rotation
-cell_sz9	equ	cell_wh*cell_hw		;doubled cell size, 90 deg rot.
+#define cell_sz0	cell_ww*cell_hh		/* doubled cell size, no rotation */
+#define cell_sz9	cell_wh*cell_hw		/* doubled cell size, 90 deg rot. */
 
 *  pick the maximum for our buffer..
 
-	ifge	cell_sz0-cell_sz9
-
-cell_siz	equ	cell_sz0
-
-	endc
-
-	iflt	cell_sz0-cell_sz9
-
-cell_siz	equ	cell_sz9
-
-	endc
+#if cell_sz0 >= cell_sz9
+#define cell_siz	cell_sz0
+#else
+#define cell_siz	cell_sz9
+#endif
 
 *  determine maximum horizontal line (from width or height)
 *  which is needed by the Outline function as a buffer (+2 bytes)for
 *  worst case.
 *
-	ifge	cell_ww-cell_hw
-
-out_add		equ	cell_ww+2
-
-	endc
-
-	iflt	cell_ww-cell_hw
-
-out_add		equ	cell_hw+2
-
-	endc
+#if cell_ww >= cell_hw
+#define out_add	(cell_ww+2)
+#else
+#define out_add	(cell_hw+2)
+#endif
 
 *  Total buffer requirements are cel_siz + cel2_siz + out_add
 
-buf_siz	equ	cell_siz+cell_siz+out_add	;total byte requirement
+#define buf_siz	cell_siz+cell_siz+out_add	/* total byte requirement */
 
 
 *  for other fonts, above formulae examples should be used
@@ -329,24 +309,26 @@ ramlen		equ	-84
 *
 *******************************************************************************
 
+/* 306de: 00e0e236 */
+	xdef	sb_text
 sb_text:	link	a5,#ramlen		; allocate local block of ram
 
 		clr.w	swap_tmps(a5)		; temps not swapped yet
-		move.w	PIXLV(STYLE,a6),-(sp)
-		move.w	PIXLV(WRT_MODE,a6),-(sp)
-		move.w	PIXLV(SKEWMASK,a6),-(sp)
+		move.w	LV(STYLE,a6),-(sp)
+		move.w	LV(WRT_MODE,a6),-(sp)
+		move.w	LV(SKEWMASK,a6),-(sp)
 
-		move.w	PIXLV(DESTX,a6),d0
-		move.w	PIXLV(DESTY,a6),d2
-		move.w	PIXLV(DELX,a6),d1
-		move.w	PIXLV(DELY,a6),d3
+		move.w	LV(DESTX,a6),d0
+		move.w	LV(DESTY,a6),d2
+		move.w	LV(DELX,a6),d1
+		move.w	LV(DELY,a6),d3
 
-		move.w	PIXLV(L_OFF,a6),d6
-		add.w	PIXLV(R_OFF,a6),d6		; we never use them separately
+		move.w	LV(L_OFF,a6),d6
+		add.w	LV(R_OFF,a6),d6		; we never use them separately
 
 		movem.w	d0-d3,-(sp)
 		clr.w	buffree(a5)		; indicate low buffer is free
-		tst.w	PIXLV(SCALE,a6)		;  doubling?
+		tst.w	LV(SCALE,a6)		;  doubling?
 		beq	adr_nodb		; br if no
 
 		move.w	d0,-(sp)		; push DESTX
@@ -358,8 +340,8 @@ sb_text:	link	a5,#ramlen		; allocate local block of ram
 		move.w	d0,d3			; set new DELY
 		move.w	d0,tmp_dely(a5)		; save in temp for replication use
 		move.w	(sp)+,d2		; DELX to d2
-		move.w	PIXLV(XACC_DDA,a6),d1	; get xacc_dda to d1
-		move.w	PIXLV(DDA_INC,a6),d0		; dda_inc to d0
+		move.w	LV(XACC_DDA,a6),d1	; get xacc_dda to d1
+		move.w	LV(DDA_INC,a6),d0		; dda_inc to d0
 		move.w	d3,-(sp)		; save new DELY
 		moveq	#0,d3			; d3 = 0
 		bra	clc_n_su
@@ -368,7 +350,7 @@ doub_wid:	add.w	d0,d1
 		bcc	no_db_wd
 		addq.w	#1,d3
 
-no_db_wd:	btst.b	#0,PIXLV((T_SCLSTS)+1,a6)
+no_db_wd:	btst.b	#0,LV((T_SCLSTS)+1,a6)
 		beq	clc_n_su
 		addq.w	#1,d3
 
@@ -385,28 +367,28 @@ clc_n_su:	dbra	d2,doub_wid
 		beq	upda_dst
 
 adr_nodb:	clr.w	smear(a5)		; in case no thicken init
-		btst.b	#THICKEN,PIXLV((STYLE)+1,a6)
+		btst.b	#THICKEN,LV((STYLE)+1,a6)
 		beq	adr_notk
-		move.w	PIXLV(WEIGHT,a6),d4
+		move.w	LV(WEIGHT,a6),d4
 		bne	adr_th1
-		and.w	#$FFFF-THICKM,PIXLV(STYLE,a6) ; cancel thicken if WEIGHT=0
+		and.w	#$FFFF-THICKM,LV(STYLE,a6) ; cancel thicken if WEIGHT=0
 
-adr_th1:	tst.w	PIXLV(MONO_STATUS,a6)	; skip source expand
+adr_th1:	tst.w	LV(MONO_STATUS,a6)	; skip source expand
 		bne	adr_notk		; if monospaced font
 
 		add.w	d4,d1			; we'll smear this amount (DELX=DELX+WEIGHT)
 
-adr_notk:	btst.b	#SKEW,PIXLV((STYLE)+1,a6)	; skewin'?
+adr_notk:	btst.b	#SKEW,LV((STYLE)+1,a6)	; skewin'?
 		beq	adr_nosk		; skip DELX adjust if not
 
 		add.w	d6,d1			; DELX = DELX + L_OFF + R_OFF
 
-adr_nosk:	btst.b	#OUTLINE,PIXLV((STYLE)+1,a6)	; outlinin'?
+adr_nosk:	btst.b	#OUTLINE,LV((STYLE)+1,a6)	; outlinin'?
 		beq	adr_nout
 		addq.w	#2,d1			; outline is 2 wider
 		addq.w	#2,d3			; and 2 taller
 
-adr_nout:	move.w	PIXLV(CHUP,a6),d4		; get rotate degree-tenths
+adr_nout:	move.w	LV(CHUP,a6),d4		; get rotate degree-tenths
 		beq	chk_clip		; skip rotate adjust if not rotatin'
 *
 *  rotatin'
@@ -417,7 +399,7 @@ add90:		cmp.w	#900,d4			; 90 degrees?
 *  90 degrees
 *
 		sub.w	d1,d2			; move up by DELX
-		move.w	d2,PIXLV(DESTY,a6)		; DESTY = DESTY - DELX
+		move.w	d2,LV(DESTY,a6)		; DESTY = DESTY - DELX
 		exg	d1,d3			; DELX <-> DELY (swap x & y to check clipping)
 		bra	chk_clip
 
@@ -428,7 +410,7 @@ add180:		cmp.w	#1800,d4		; 180 degrees?
 *  180 degrees
 *
 		sub.w	d1,d0			; DESTX = DESTX - DELX (move right by DELX)
-		move.w	d0,PIXLV(DESTX,a6)
+		move.w	d0,LV(DESTX,a6)
 		bra	chk_clip
 
 *
@@ -444,13 +426,13 @@ add270:		exg	d1,d3			; DELX <-> DELY
 *
 *
 chk_clip:	moveq	#0,d5			; clear clip flag (assume no clip)
-		tst.w	PIXLV(CLIP,a6)		; clip requested?
+		tst.w	LV(CLIP,a6)		; clip requested?
 		beq	clp_done		; no, skip over clip-stuff
 
 *
 *  y -coord clip check..
 *
-		cmp.w	PIXLV(YMN_CLIP,a6),d2		; top edge >= Y-MIN?
+		cmp.w	LV(YMN_CLIP,a6),d2		; top edge >= Y-MIN?
 		bge	chk_ymx			; br if so, min ok
 
 *
@@ -458,16 +440,16 @@ chk_clip:	moveq	#0,d5			; clear clip flag (assume no clip)
 *
 		add.w	d3,d2			; DESTY = DESTY + DELY
 		addq.w	#1,d5			; set clip indicator
-		cmp.w	PIXLV(YMN_CLIP,a6),d2	; bottom edge > Y-MIN?
+		cmp.w	LV(YMN_CLIP,a6),d2	; bottom edge > Y-MIN?
 		bgt	chk_xmn			; br to x check if so, still got a piece in window
 		bra	upda_dst		; else, skip further ado & exit, its gone
 
-chk_ymx:	cmp.w	PIXLV(YMX_CLIP,a6),d2	; top edge > Y-MAX?
+chk_ymx:	cmp.w	LV(YMX_CLIP,a6),d2	; top edge > Y-MAX?
 		bgt	upda_dst		; br to exit if so, its totally off window
 
 		add.w	d3,d2			; DESTY = DESTY + DELY
 		subq.w	#1,d2			; DESTY 0 based
-		sub.w	PIXLV(YMX_CLIP,a6),d2	; bottom edge <= Y-MAX
+		sub.w	LV(YMX_CLIP,a6),d2	; bottom edge <= Y-MAX
 		ble	chk_xmn			; br if so, y-coord wholly within window
 *
 *  partial clipping of bottom portion..
@@ -477,7 +459,7 @@ chk_ymx:	cmp.w	PIXLV(YMX_CLIP,a6),d2	; top edge > Y-MAX?
 *
 *  x - coord clip check..
 *
-chk_xmn:	cmp.w	PIXLV(XMN_CLIP,a6),d0		; left edge >= X-MIN?
+chk_xmn:	cmp.w	LV(XMN_CLIP,a6),d0		; left edge >= X-MIN?
 		bge	chk_xmx			; br if so, go check X-MAX
 
 *
@@ -485,36 +467,36 @@ chk_xmn:	cmp.w	PIXLV(XMN_CLIP,a6),d0		; left edge >= X-MIN?
 *
 		add.w	d1,d0			; DESTX = DESTX + DELX
 		addq.w	#1,d5			; must clip in x
-		cmp.w	PIXLV(XMN_CLIP,a6),d0		; right edge > X-MIN?
+		cmp.w	LV(XMN_CLIP,a6),d0		; right edge > X-MIN?
 		bgt	clp_done		; br if so, some stuff still in window
 		bra	upda_dst		; else, totally off screen, exit
 
-chk_xmx:	cmp.w	PIXLV(XMX_CLIP,a6),d0		; left edge > X-MAX?
+chk_xmx:	cmp.w	LV(XMX_CLIP,a6),d0		; left edge > X-MAX?
 		bgt	upda_dst		; br to exit if so, its totally off window
 
 		add.w	d1,d0			; DESTX = DESTX + DELX
 		subq.w	#1,d0			; DESTX 0 based
-		cmp.w	PIXLV(XMX_CLIP,a6),d0	; right edge <= X-MAX?
+		cmp.w	LV(XMX_CLIP,a6),d0	; right edge <= X-MAX?
 		ble	clp_done		; br if so, no x-clip
 		addq.w	#1,d5			; set clip indicator
 *
 *  clip check done..
 *
-clp_done:	move.w	PIXLV(FWIDTH,a6),s_next(a5)	; add this to go down one line
-		move.l	PIXLV(FBASE,a6),sform(a5)	; start of font
-		tst.w	PIXLV(SCALE,a6)		; scaling goin' on
+clp_done:	move.w	LV(FWIDTH,a6),s_next(a5)	; add this to go down one line
+		move.l	LV(FBASE,a6),sform(a5)	; start of font
+		tst.w	LV(SCALE,a6)		; scaling goin' on
 		beq	chk_skw			; br to skip if not
 		movem.l	d0-d7,-(sp)		; perform scaling 1st
 		bsr	replicat		; so other special effects
 		movem.l	(sp)+,d0-d7		; look better
 
-chk_skw:	move.w	PIXLV(STYLE,a6),d1
+chk_skw:	move.w	LV(STYLE,a6),d1
 		andi.w	#SKEWM+THICKM+OUTLINEM,d1 ; skew, thicken, or outline special effects
 		beq	chk_rota		; br if not, skip preblt into buffer
 *
 *  thicken or skew or outline in effect..
 *
-chk_chup:	tst.w	PIXLV(CHUP,a6)		; we may have to preblt into buffer
+chk_chup:	tst.w	LV(CHUP,a6)		; we may have to preblt into buffer
 		bne	preblt			; br to preblt if rotation in effect
 
 		btst	#SKEW,d1		; skew bit set in STYLE?
@@ -527,7 +509,7 @@ preskew:	btst	#OUTLINE,d1		; outlining?
 *
 *  preblt into buffer..
 *
-preblt:		move.w	PIXLV(SOURCEX,a6),d0
+preblt:		move.w	LV(SOURCEX,a6),d0
 		move.w	d0,d2
 		andi.w	#$000F,d2
 		move.w	d2,tsdad(a5)		; save source dot address
@@ -535,8 +517,8 @@ preblt:		move.w	PIXLV(SOURCEX,a6),d0
 		lsr.w	#4,d0			; make byte address
 		add.w	d0,d0			; make even-byte address (word aligned)
 
-		move.w	PIXLV(SOURCEY,a6),d2		; d2 <- source y
-		move.w	PIXLV(DELY,a6),height(a5)
+		move.w	LV(SOURCEY,a6),d2		; d2 <- source y
+		move.w	LV(DELY,a6),height(a5)
 		add.w	height(a5),d2		; d2 <- bottom of source + 1
 		subq.w	#1,d2			; d2 <- bottom of source     (0 based)
 
@@ -546,10 +528,10 @@ preblt:		move.w	PIXLV(SOURCEX,a6),d0
 		adda.w	d0,a0			; a0 -> font source for top of char
 		adda.l	d2,a0			; a0 -> font source for bottom of char
 
-		move.w	PIXLV(DELX,a6),d0		; char width
-		move.w	PIXLV(WEIGHT,a6),d1		; thicken amount
+		move.w	LV(DELX,a6),d0		; char width
+		move.w	LV(WEIGHT,a6),d1		; thicken amount
 
-		btst.b	#THICKEN,PIXLV((STYLE)+1,a6)	; smear?
+		btst.b	#THICKEN,LV((STYLE)+1,a6)	; smear?
 		beq	no_smear		; br if no
 
 		add.w	d1,d0			; add adjusted WEIGHT to DELX
@@ -559,13 +541,13 @@ preblt:		move.w	PIXLV(SOURCEX,a6),d0
 *  outline code..
 *-
 no_smear:	clr.w	tddad(a5)
-		move.w	PIXLV(DELY,a6),d1
-		move.w	PIXLV(STYLE,a6),d2
+		move.w	LV(DELY,a6),d1
+		move.w	LV(STYLE,a6),d2
 		btst	#OUTLINE,d2		; check for outline mode
 		beq	no_out
 		addq.w	#3,d0			; add 3 pixels to delx (1 left, 2 right)
 		addq.w	#1,tddad(a5)		; make leftmost column blank
-		addq.w	#2,PIXLV(DELY,a6)		; add 2 rows (outline adds 2 to ht & wd)
+		addq.w	#2,LV(DELY,a6)		; add 2 rows (outline adds 2 to ht & wd)
 		addq.w	#3,d1			; add 3 rows for buffer clear (line buf)
 
 *+
@@ -574,7 +556,7 @@ no_smear:	clr.w	tddad(a5)
 no_out:		move.w	d0,width(a5)
 		add.w	d6,d0			; we moved to d6
 
-		move.w	d0,PIXLV(DELX,a6)		; now the char is bigger
+		move.w	d0,LV(DELX,a6)		; now the char is bigger
 		lsr.w	#4,d0
 		add.w	d0,d0
 		addq.w	#2,d0			; this is the dest width in bytes
@@ -610,7 +592,7 @@ replp1:		dbra	d3,replp
 		btst	#OUTLINE,d2
 		beq	no_clear
 		subq.w	#3,width(a5)
-		subq.w	#1,PIXLV(DELX,a6)
+		subq.w	#1,LV(DELX,a6)
 		add.w	d_next(a5),d0
 
 *+
@@ -618,21 +600,21 @@ replp1:		dbra	d3,replp
 *-
 no_clear:	adda.w	d0,a1			; start at the bottom
 
-		move.w	PIXLV(WRT_MODE,a6),-(sp)
-		move.w	PIXLV(STYLE,a6),-(sp)
+		move.w	LV(WRT_MODE,a6),-(sp)
+		move.w	LV(STYLE,a6),-(sp)
 
-		move.w	#7,PIXLV(WRT_MODE,a6)	; replace mode for this blt
+		move.w	#7,LV(WRT_MODE,a6)	; replace mode for this blt
 
 		move.w	#1,forecol(a5)		; foreground 1 for this blt
 		clr.w	backcol(a5)		; background 0 for this blt
 		move.w	#1,nbrplane(a5)		; 1 plane, natch
 		move.w	#2,nextwrd(a5)		; plane offset is 2
-		andi.w	#SKEWM+THICKM,PIXLV(STYLE,a6)	; only do thicken & skew
+		andi.w	#SKEWM+THICKM,LV(STYLE,a6)	; only do thicken & skew
 
 		bsr	norm_blt		; blt source into buffer
 
-		move.w	(sp)+,PIXLV(STYLE,a6)
-		move.w	(sp)+,PIXLV(WRT_MODE,a6)
+		move.w	(sp)+,LV(STYLE,a6)
+		move.w	(sp)+,LV(WRT_MODE,a6)
 
 		move.l	(sp)+,a1		; reget old destination ptr
 
@@ -646,7 +628,7 @@ no_mode:	move.w	d_next(a5),d7		; reset the source to the buffer
 *+
 *  outline additions
 *-
-		btst.b	#OUTLINE,PIXLV((STYLE)+1,a6)	; check outline
+		btst.b	#OUTLINE,LV((STYLE)+1,a6)	; check outline
 		beq	skip_out		; br to skip outline code
 
 		ext.l	d7
@@ -656,14 +638,14 @@ no_mode:	move.w	d_next(a5),d7		; reset the source to the buffer
 *+
 *  end additions
 *-
-skip_out:	clr.w	PIXLV(SOURCEX,a6)
-		clr.w	PIXLV(SOURCEY,a6)
-		andi.w	#$FFFF-(SKEWM+THICKM),PIXLV(STYLE,a6)	; cancel effects
+skip_out:	clr.w	LV(SOURCEX,a6)
+		clr.w	LV(SOURCEY,a6)
+		andi.w	#$FFFF-(SKEWM+THICKM),LV(STYLE,a6)	; cancel effects
 *
 *  Preblt is done
 *
 skw_nrot:
-chk_rota:	tst.w	PIXLV(CHUP,a6)
+chk_rota:	tst.w	LV(CHUP,a6)
 		beq	chk_db
 
 		bsr	rotation		; perform rotation if 90, 180, or 270
@@ -676,76 +658,76 @@ do_clip1:
 *	change SOURCEX, SOURCEY, DELX, DELY
 *	based on DESTX, DESTY (UL corner of destination)
 *
-do_clip:	btst.b	#THICKEN,PIXLV((STYLE)+1,a6)
+do_clip:	btst.b	#THICKEN,LV((STYLE)+1,a6)
 		beq	no_thik
-		move.w	PIXLV(WEIGHT,a6),d0
-		tst.w	PIXLV(MONO_STATUS,a6)
+		move.w	LV(WEIGHT,a6),d0
+		tst.w	LV(MONO_STATUS,a6)
 		bne	do_cl_nt
-		add.w	d0,PIXLV(DELX,a6)
+		add.w	d0,LV(DELX,a6)
 
 do_cl_nt:	move.w	d0,smear(a5)
 
-no_thik:	tst.w	PIXLV(CLIP,a6)		; clip requested?
+no_thik:	tst.w	LV(CLIP,a6)		; clip requested?
 		beq	scrn_blt		; br to skip clip if not
 
-		move.w	PIXLV(DESTY,a6),d0
-		cmp.w	PIXLV(YMN_CLIP,a6),d0
+		move.w	LV(DESTY,a6),d0
+		cmp.w	LV(YMN_CLIP,a6),d0
 		bge	ymn_fine
-		add.w	PIXLV(DELY,a6),d0
-		cmp.w	PIXLV(YMN_CLIP,a6),d0
+		add.w	LV(DELY,a6),d0
+		cmp.w	LV(YMN_CLIP,a6),d0
 		ble	upda_dst
 
-mn_clipy:	sub.w	PIXLV(YMN_CLIP,a6),d0
-		move.w	PIXLV(DELY,a6),d1
-		move.w	d0,PIXLV(DELY,a6)
+mn_clipy:	sub.w	LV(YMN_CLIP,a6),d0
+		move.w	LV(DELY,a6),d1
+		move.w	d0,LV(DELY,a6)
 		sub.w	d0,d1
-		add.w	d1,PIXLV(SOURCEY,a6)
-		move.w	PIXLV(YMN_CLIP,a6),d0
-		move.w	d0,PIXLV(DESTY,a6)
+		add.w	d1,LV(SOURCEY,a6)
+		move.w	LV(YMN_CLIP,a6),d0
+		move.w	d0,LV(DESTY,a6)
 
-ymn_fine:	cmp.w	PIXLV(YMX_CLIP,a6),d0
+ymn_fine:	cmp.w	LV(YMX_CLIP,a6),d0
 		bgt	upda_dst
 
-mx_clipy:	add.w	PIXLV(DELY,a6),d0
+mx_clipy:	add.w	LV(DELY,a6),d0
 		subq.w	#1,d0			; make 0 relative
-		cmp.w	PIXLV(YMX_CLIP,a6),d0
+		cmp.w	LV(YMX_CLIP,a6),d0
 		ble	ymx_fine
 
 *+
 * clip y
 *-
-		sub.w	PIXLV(YMX_CLIP,a6),d0
-		sub.w	d0,PIXLV(DELY,a6)
+		sub.w	LV(YMX_CLIP,a6),d0
+		sub.w	d0,LV(DELY,a6)
 
-ymx_fine:	move.w	PIXLV(DESTX,a6),d0
-		cmp.w	PIXLV(XMN_CLIP,a6),d0
+ymx_fine:	move.w	LV(DESTX,a6),d0
+		cmp.w	LV(XMN_CLIP,a6),d0
 		bge	xmn_fine
-		add.w	PIXLV(DELX,a6),d0
-		cmp.w	PIXLV(XMN_CLIP,a6),d0
+		add.w	LV(DELX,a6),d0
+		cmp.w	LV(XMN_CLIP,a6),d0
 		ble	upda_dst
 *+
 * clip x
 *-
-mn_clipx:	sub.w	PIXLV(XMN_CLIP,a6),d0
-		move.w	PIXLV(DELX,a6),d1
-		move.w	d0,PIXLV(DELX,a6)
+mn_clipx:	sub.w	LV(XMN_CLIP,a6),d0
+		move.w	LV(DELX,a6),d1
+		move.w	d0,LV(DELX,a6)
 		sub.w	d0,d1
-		add.w	d1,PIXLV(SOURCEX,a6)
-		move.w	PIXLV(XMN_CLIP,a6),d0
-		move.w	d0,PIXLV(DESTX,a6)
+		add.w	d1,LV(SOURCEX,a6)
+		move.w	LV(XMN_CLIP,a6),d0
+		move.w	d0,LV(DESTX,a6)
 
-xmn_fine:	cmp.w	PIXLV(XMX_CLIP,a6),d0
+xmn_fine:	cmp.w	LV(XMX_CLIP,a6),d0
 		bgt	upda_dst
 
-mx_clipx:	add.w	PIXLV(DELX,a6),d0
+mx_clipx:	add.w	LV(DELX,a6),d0
 		subq.w	#1,d0			; make 0 relative
-		cmp.w	PIXLV(XMX_CLIP,a6),d0
+		cmp.w	LV(XMX_CLIP,a6),d0
 		ble	xmx_fine
 *+
 * clip x
 *-
-		sub.w	PIXLV(XMX_CLIP,a6),d0
-		sub.w	d0,PIXLV(DELX,a6)
+		sub.w	LV(XMX_CLIP,a6),d0
+		sub.w	d0,LV(DELX,a6)
 
 xmx_fine:	bra	scrn_blt
 
@@ -761,23 +743,23 @@ nxtword:	dc.b	2,4,0,8,0,0,0,16
 *	put a block defined by s_form, SOURCEX, SOURCEY, DELX, DELY
 *	out to screen
 *
-scrn_blt:	move.w	PIXLV(TEXT_FG,a6),forecol(a5) ; copy foreground color to temp
-		move.w	PIXLV(TEXT_BG,a6),backcol(a5) ; likewise for background
-		move.w	PIXLV(v_planes,a6),d0	; d0 <- # of planes
+scrn_blt:	move.w	LV(TEXT_FG,a6),forecol(a5) ; copy foreground color to temp
+		move.w	LV(TEXT_BG,a6),backcol(a5) ; likewise for background
+		move.w	LV(V_PLANES,a6),d0	; d0 <- # of planes
 		move.w	d0,nbrplane(a5)		; save locally
 		move.b	nxtword-1(pc,d0.w),d0	; d0 <- offset  (assumed:hi byte=0)
 		move.w	d0,nextwrd(a5)		; save locally
 
-		move.w	PIXLV(SOURCEX,a6),d0		; d0 <- character X
+		move.w	LV(SOURCEX,a6),d0		; d0 <- character X
 		move.w	d0,d2
 		andi.w	#$0F,d2			; d2 <- offset within word to character
 		move.w	d2,tsdad(a5)		; save source dot address
 		lsr.w	#4,d0
 		add.w	d0,d0			; d0 <- word alligned offset to char
 
-		move.w	PIXLV(DELY,a6),d2
+		move.w	LV(DELY,a6),d2
 		move.w	d2,height(a5)		; height <- del Y
-		add.w	PIXLV(SOURCEY,a6),d2		; d2 <- source Y + del Y
+		add.w	LV(SOURCEY,a6),d2		; d2 <- source Y + del Y
 		subq.w	#1,d2			; d2 <- Y offset to bottom of char
 		mulu	s_next(a5),d2		; d2 <- byte offset to bottom of char
 
@@ -787,13 +769,13 @@ scrn_blt:	move.w	PIXLV(TEXT_FG,a6),forecol(a5) ; copy foreground color to temp
 		adda.w	d0,a0			; a0 -> top of character
 		adda.l	d2,a0			; a0 -> bottom of character
 
-		move.w	PIXLV(DELX,a6),width(a5)
+		move.w	LV(DELX,a6),width(a5)
 
-		move.w	PIXLV(DESTY,a6),d1
-		add.w	PIXLV(DELY,a6),d1
+		move.w	LV(DESTY,a6),d1
+		add.w	LV(DELY,a6),d1
 		subq.w	#1,d1			; we draw from bottom up
 
-		move.w	PIXLV(DESTX,a6),d0
+		move.w	LV(DESTX,a6),d0
 
 		jsr	concat			; get memory address & dot address
 *+
@@ -804,26 +786,26 @@ scrn_blt:	move.w	PIXLV(TEXT_FG,a6),forecol(a5) ; copy foreground color to temp
 
 		move.w	d0,tddad(a5)		; save dot address
 
-		move.w	PIXLV(v_lin_wr,a6),d0
+		move.w	LV(v_lin_wr,a6),d0
 		neg.w	d0
 		move.w	d0,d_next(a5)
 
 		bsr	norm_blt
 
 upda_dst:	movem.w	(sp)+,d0-d3
-		move.w	d0,PIXLV(DESTX,a6)
-		move.w	d1,PIXLV(DELX,a6)
-		move.w	d2,PIXLV(DESTY,a6)
-		move.w	d3,PIXLV(DELY,a6)		; may have changed these for clipping
+		move.w	d0,LV(DESTX,a6)
+		move.w	d1,LV(DELX,a6)
+		move.w	d2,LV(DESTY,a6)
+		move.w	d3,LV(DELY,a6)		; may have changed these for clipping
 
-		move.w	(sp)+,PIXLV(SKEWMASK,a6)
-		move.w	(sp)+,PIXLV(WRT_MODE,a6)
-		move.w	(sp)+,PIXLV(STYLE,a6)
+		move.w	(sp)+,LV(SKEWMASK,a6)
+		move.w	(sp)+,LV(WRT_MODE,a6)
+		move.w	(sp)+,LV(STYLE,a6)
 
-		tst.w	PIXLV(SCALE,a6)		; set up dest address
+		tst.w	LV(SCALE,a6)		; set up dest address
 		beq	upda_ndb
 
-		move.w	tmp_xacc(a5),PIXLV(XACC_DDA,a6) ; save new XACC_DDA
+		move.w	tmp_xacc(a5),LV(XACC_DDA,a6) ; save new XACC_DDA
 
 		move.w	tmp_delx(a5),d1		;get actual char width
 		move.w	tmp_dely(a5),d3		;get actual char height
@@ -835,33 +817,33 @@ upda_dst:	movem.w	(sp)+,d0-d3
 *+
 * end additions
 *-
-upda_ndb:	btst.b	#OUTLINE,PIXLV((STYLE)+1,a6)	; adjust new horz position
+upda_ndb:	btst.b	#OUTLINE,LV((STYLE)+1,a6)	; adjust new horz position
 		beq	upda_not		; by expanded outline form
 		addq.w	#2,d1			; if outline in effect
 		addq.w	#2,d3
 
-upda_not:	btst.b	#THICKEN,PIXLV((STYLE)+1,a6)
+upda_not:	btst.b	#THICKEN,LV((STYLE)+1,a6)
 		beq	upda_ntk
-		tst.w	PIXLV(MONO_STATUS,a6)
+		tst.w	LV(MONO_STATUS,a6)
 		bne	upda_ntk
-		add.w	PIXLV(WEIGHT,a6),d1		; we smeared this amount
+		add.w	LV(WEIGHT,a6),d1		; we smeared this amount
 
-upda_ntk:	move.w	PIXLV(CHUP,a6),d0
+upda_ntk:	move.w	LV(CHUP,a6),d0
 		bne	ck90
-		add.w	d1,PIXLV(DESTX,a6)		; move left by DELX
+		add.w	d1,LV(DESTX,a6)		; move left by DELX
 		bra	blt_done
 
 ck90:		cmpi.w	#900,d0
 		bne	ck180
-		sub.w	d1,PIXLV(DESTY,a6)		; move up by DELX
+		sub.w	d1,LV(DESTY,a6)		; move up by DELX
 		bra	blt_done
 
 ck180:		cmpi.w	#1800,d0
 		bne	ck270
-		sub.w	d1,PIXLV(DESTX,a6)		; move right by DELX
+		sub.w	d1,LV(DESTX,a6)		; move right by DELX
 		bra	blt_done
 
-ck270:		add.w	d1,PIXLV(DESTY,a6)		; move down by DELX
+ck270:		add.w	d1,LV(DESTY,a6)		; move down by DELX
 
 
 blt_done:	unlk	a5
@@ -979,7 +961,7 @@ msk_done:	move.w	d3,dest_wrd(a5)
 msk0:		move.b	d3,src_wrd(a5)
 		move.b	d3,src_wrd+1(a5)
 
-plane_lp:	move.w	PIXLV(WRT_MODE,a6),d0	; d0 = 00000000 000xxxxx ,WRT_MODE
+plane_lp:	move.w	LV(WRT_MODE,a6),d0	; d0 = 00000000 000xxxxx ,WRT_MODE
 		lsr.w	forecol(a5)		; this plane's foreground bit -> cy
 		roxl.w	#1,d0
 		lsr.w	backcol(a5)
@@ -997,7 +979,7 @@ sp1:		move.b	wrmappin(pc,d0.w),d0
 *
 *  Do special effects..
 *
-		move.w	PIXLV(STYLE,a6),d0		; special effects mask
+		move.w	LV(STYLE,a6),d0		; special effects mask
 		bne	do_specl
 		bra	no_specl
 
@@ -1053,12 +1035,17 @@ wrmappin:	dc.b	op0,op0,op3,op3		; replace mode
 		dc.b	op0,op0,opF,opF		; mode F  D' = 1
 
 
+/* easteregg alert... */
 blt_adj:	move.l	-(a0),d0
 		neg.w	-(a1)
 		moveq.l	#$65,d3
 		movea.l	(a3),a0
 		moveq.l	#$61,d2
 		subq.w	#2,-(a7)
+#if BINEXACT
+		dc.w $6100,$0073,$206c,$6f76,$6500,$0071,$2042,$6500
+		dc.w $005d,$2048,$6100,$005c,$6c00,$0061,$6700,$0016
+#else
 		bsr	blt_adj+$81
 		movea.l	$6F76(a4),a0
 		bcs	blt_adj+$87
@@ -1068,6 +1055,7 @@ blt_adj:	move.l	-(a0),d0
 		bsr	blt_adj+$7E
 		bge	blt_adj+$87
 		beq	blt_adj+$40
+#endif
 		rts
 
 
@@ -1077,7 +1065,7 @@ do_specl:	btst.l	#LIGHT,d0
 *+
 *  Light special effect..
 *-
-		move.w	PIXLV(LITEMASK,a6),lite_msk(a5)	; reload the mask for this char
+		move.w	LV(LITEMASK,a6),lite_msk(a5)	; reload the mask for this char
 		move.w	special(a5),litejmp(a5)	; endpoint of light routine
 		move.w	#liteop-cs,special(a5)	; insert this in the loop
 
@@ -1110,7 +1098,7 @@ no_thick:	btst.l	#SKEW,d0
 *+
 *  Skew special effect..
 *-
-		move.w	PIXLV(SKEWMASK,a6),skew_msk(a5)	; reload mask for this char
+		move.w	LV(SKEWMASK,a6),skew_msk(a5)	; reload mask for this char
 		move.w	special(a5),skewjmp(a5)
 		move.w	#skewop-cs,special(a5)
 	
@@ -1150,7 +1138,7 @@ no_specl:	move.w	left_msk(a5),d2		; get the first mask
 *-
 		rts				; back to norm_blt caller
 
-more_pl:	btst.b	#SKEW,PIXLV((STYLE)+1,a6)	; only skew screws up other planes
+more_pl:	btst.b	#SKEW,LV((STYLE)+1,a6)	; only skew screws up other planes
 		beq	plane_lp		; br to short init if not skew
 		bra	norm_blt		; else, do big init
 
@@ -1312,7 +1300,7 @@ lef_don:	move.w	rite_msk(a5),d2		; load the mask we need
 	
 		rol.w	lite_msk(a5)
 	
-		btst.b	#SKEW,PIXLV((STYLE)+1,a6)
+		btst.b	#SKEW,LV((STYLE)+1,a6)
 		bne	skewopw
 		bra	mlt_left
 
@@ -1395,7 +1383,7 @@ rite_don:	move.w	rite_msk(a5),d2		; load the mask we need
 	
 		rol.w	lite_msk(a5)
 	
-		btst.b	#SKEW,PIXLV((STYLE)+1,a6)
+		btst.b	#SKEW,LV((STYLE)+1,a6)
 		bne	skewopw
 		bra	mlt_rite
 
@@ -1877,7 +1865,7 @@ wnxt_wrd:	move.w	#$FFFF,left_msk(a5)	; ran out of word
 *
 *	rotation in 90 degree increments
 *
-rotation:	move.w	PIXLV(SOURCEX,a6),d1
+rotation:	move.w	LV(SOURCEX,a6),d1
 		move.w	d1,d2
 		andi.w	#$0F,d2
 		move.w	d2,tsdad(a5)		; save source dot address
@@ -1887,15 +1875,15 @@ rotation:	move.w	PIXLV(SOURCEX,a6),d1
 		movea.l	sform(a5),a0
 		adda.w	d1,a0			; a0 -> source
 	
-		move.w	PIXLV(DELX,a6),width(a5)
-		move.w	PIXLV(SOURCEY,a6),d0		; d0
-		move.w	PIXLV(DELY,a6),d1		; d1
+		move.w	LV(DELX,a6),width(a5)
+		move.w	LV(SOURCEY,a6),d0		; d0
+		move.w	LV(DELY,a6),d1		; d1
 		move.w	d1,height(a5)
 		move.w	s_next(a5),d2		; d2
 	
 		bsr	getdest			; get destination in a1
 	
-		move.w	PIXLV(CHUP,a6),d6		; keep CHUP around for a while
+		move.w	LV(CHUP,a6),d6		; keep CHUP around for a while
 		cmpi.w	#1800,d6
 		beq	upsd_dwn
 
@@ -1908,7 +1896,7 @@ rot90:		cmpi.w	#900,d6
 		mulu	d2,d0			; get mem address of start corner
 		adda.l	d0,a0			; 04 Nov 86   HANDLE FORMS > 32k
 
-top_src:	move.w	PIXLV(DELY,a6),d0
+top_src:	move.w	LV(DELY,a6),d0
 		lsr.w	#4,d0
 		add.w	d0,d0
 		addq.w	#2,d0			; form width is height / 8 + 1
@@ -1920,7 +1908,7 @@ top_src:	move.w	PIXLV(DELY,a6),d0
 		beq	top_dwn			; top down is good programmin'
 	
 		neg.w	d_next(a5)		; bottom working up
-		move.w	PIXLV(DELX,a6),d1		; d1 <- height
+		move.w	LV(DELX,a6),d1		; d1 <- height
 		subq.w	#1,d1			; d1 <- height -1
 		mulu	d1,d0			; d0 <- offset to bottom of char dst
 		adda.l	d0,a1			; HANDLE DST > 32k
@@ -1967,12 +1955,12 @@ rot_nsrc:	dbra	d2,rot_ylp
 
 rot_done:	move.l	(sp)+,a1		; reget former destination ptr
 
-		move.w	PIXLV(DELX,a6),d0
-		move.w	PIXLV(DELY,a6),d1
+		move.w	LV(DELX,a6),d0
+		move.w	LV(DELY,a6),d1
 		move.w	d1,width(a5)
-		move.w	d1,PIXLV(DELX,a6)
+		move.w	d1,LV(DELX,a6)
 		move.w	d0,height(a5)
-		move.w	d0,PIXLV(DELY,a6)
+		move.w	d0,LV(DELY,a6)
 	
 		move.w	tmp_dely(a5),d0	; Must swap tmps too RJG 4/13/85
 		move.w	tmp_delx(a5),tmp_dely(a5)
@@ -1980,15 +1968,15 @@ rot_done:	move.l	(sp)+,a1		; reget former destination ptr
 		move.w	#1,swap_tmps(a5)	
 	
 		move.w	d_next(a5),d0
-		cmpi.w	#900,PIXLV(CHUP,a6)
+		cmpi.w	#900,LV(CHUP,a6)
 		bne	rot_nneg
 		neg.w	d0
 
 rot_nneg:	move.w	d0,s_next(a5)
 
-repexit:	clr.w	PIXLV(SOURCEX,a6)
+repexit:	clr.w	LV(SOURCEX,a6)
 
-		clr.w	PIXLV(SOURCEY,a6)
+		clr.w	LV(SOURCEY,a6)
 		move.l	a1,sform(a5)
 		rts
 	
@@ -2033,12 +2021,12 @@ strtflip:	dbra	d1,upsd_lp
 		move.l	(sp)+,a1		; reget former destination ptr
 	
 		move.l	a1,sform(a5)
-		move.w	PIXLV(SOURCEX,a6),d0
-		add.w	PIXLV(DELX,a6),d0
+		move.w	LV(SOURCEX,a6),d0
+		add.w	LV(DELX,a6),d0
 		neg.w	d0
 		andi.w	#$F,d0			; location of last bit in original
-		move.w	d0,PIXLV(SOURCEX,a6)
-		clr.w	PIXLV(SOURCEY,a6)
+		move.w	d0,LV(SOURCEX,a6)
+		clr.w	LV(SOURCEY,a6)
 		rts
 
 *************************************************
@@ -2046,7 +2034,7 @@ strtflip:	dbra	d1,upsd_lp
 *	replication by two
 *
 *
-replicat:	move.w	PIXLV(SOURCEX,a6),d0
+replicat:	move.w	LV(SOURCEX,a6),d0
 		move.w	d0,d4
 		andi.w	#$0F,d0			; d0 <- source dot address
 		move.w	d0,tsdad(a5)
@@ -2054,7 +2042,7 @@ replicat:	move.w	PIXLV(SOURCEX,a6),d0
 		lsr.w	#4,d4			
 		add.w	d4,d4			; d4 <- offset to 1st word of char
 
-		move.w	PIXLV(SOURCEY,a6),d0
+		move.w	LV(SOURCEY,a6),d0
 		mulu	s_next(a5),d0		; d0 <- offset to bottom of form
 
 		movea.l	sform(a5),a0		; HANDLE FORMS > 32k
@@ -2066,8 +2054,8 @@ replicat:	move.w	PIXLV(SOURCEX,a6),d0
 		move.w	d3,d4			; d4
 		lsr.w	d2,d3
 
-		move.w	PIXLV(DELY,a6),d2
-		move.w	PIXLV(DELX,a6),d1
+		move.w	LV(DELY,a6),d2
+		move.w	LV(DELX,a6),d1
 
 		move.w	d2,height(a5)		; d2 <- # of rows to duplicate
 		move.w	d1,width(a5)
@@ -2084,13 +2072,13 @@ noline:		lsr.w	#3,d1
 noline1:	move.w	d1,d_next(a5)
 		move.l	a1,a3			; save for use later
 	
-		move.w	PIXLV(T_SCLSTS,a6),d7
+		move.w	LV(T_SCLSTS,a6),d7
 		roxr.l	#1,d7
 		moveq	#0,d7
 		roxr.l	#1,d7
 	
 		move.w	s_next(a5),d7
-		move.w	PIXLV(DDA_INC,a6),d2
+		move.w	LV(DDA_INC,a6),d2
 		move.w	height(a5),d5
 		subq.w	#1,d5
 		move.w	#32767,d6
@@ -2113,9 +2101,9 @@ y_no_rep:	bsr	yloop
 		adda.w	d7,a0
 		dbra	d5,rep_ylop
 
-y_rep_don:	move.w	PIXLV(DELX,a6),d2
-		move.w	PIXLV(XACC_DDA,a6),d1
-		move.w	PIXLV(DDA_INC,a6),d0
+y_rep_don:	move.w	LV(DELX,a6),d2
+		move.w	LV(XACC_DDA,a6),d1
+		move.w	LV(DDA_INC,a6),d0
 		moveq	#0,d3
 		bra	nrpndoub		; enter at end of dbra.
 
@@ -2128,13 +2116,13 @@ nrepdoub:	tst.l	d7
 		addq.w	#1,d3
 
 nrpndoub:	dbra	d2,repwidcl
-		move.w	d1,PIXLV(XACC_DDA,a6)
-		move.w	d3,PIXLV(DELX,a6)
-		move.w	tmp_dely(a5),PIXLV(DELY,a6)
+		move.w	d1,LV(XACC_DDA,a6)
+		move.w	d3,LV(DELX,a6)
+		move.w	tmp_dely(a5),LV(DELY,a6)
 		move.w	d_next(a5),d1
 		move.w	d1,s_next(a5)
 
-repexit1:	move.l	PIXLV(scrtchp,a6),a1		; this one guaranteed former dest
+repexit1:	move.l	LV(scrtchp,a6),a1		; this one guaranteed former dest
 		bra	repexit
 
 ***************************************************
@@ -2170,7 +2158,7 @@ yloop:		movem.l	a0-a1/d3-d7,-(sp)	; save some regs
 		move.w	width(a5),d5
 		subq.w	#1,d5			; adjust for dbra
 
-		move.w	PIXLV(XACC_DDA,a6),d7
+		move.w	LV(XACC_DDA,a6),d7
 		bra	nextsrc
 
 innerlp:	ror.w	#1,d3
@@ -2236,7 +2224,7 @@ repdone:	move.w	d0,(a1)
 *	all other regs preserved
 *
 getdest:	move.w	d7,-(sp)
-		move.l	PIXLV(scrtchp,a6),a1
+		move.l	LV(scrtchp,a6),a1
 		move.w	buffree(a5),d7
 		beq	getdest1
 
@@ -2244,7 +2232,7 @@ getdest:	move.w	d7,-(sp)
 		clr.w	buffree(a5)
 		bra	getdest2
 
-getdest1:	move.w	PIXLV(scrpt2,a6),buffree(a5)
+getdest1:	move.w	LV(scrpt2,a6),buffree(a5)
 
 getdest2:	move.w	(sp)+,d7
 		rts
@@ -2266,8 +2254,8 @@ outlin:		lea	(a0,d7.w),a1	; bump mid line to "real" top line
 outlin1:	lea	(a1,d7.w),a2	; set up a2 to point to 1 line below current
 		lsr.w	#1,d7		; # of words in horz line
 		subq.w	#1,d7		; for "dbra" sweetie
-		move.w	PIXLV(DELY,a6),d6	; # of vertical lines
-		bra	srt_lin
+		move.w	LV(DELY,a6),d6	; # of vertical lines
+		bra.s	srt_lin
 
 out_edge:	movem.l	a0-a2/d6-d7,-(sp) ; save ptrs & counters
 		moveq	#0,d5

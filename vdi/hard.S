@@ -18,17 +18,18 @@
 * symboles problem.
 *-
 
-	xref	sb_cell
-	xref	sb_scrup
-	xref	sb_scrdn
-	xref	sb_blank
-	xref	sb_bitblt
-	xref	sb_mono
-	xref	sb_rect
-	xref	sb_vline
-	xref	sb_hline
-	xref	sb_text
-	xref	_f16x32
+	xdef	sb_cell
+	xdef	sb_scrup
+	xdef	sb_scrdn
+	xdef	sb_blank
+	xdef	sb_bitblt
+	xdef	sb_mono
+	xdef	sb_rect
+	xdef	sb_vline
+	xdef	sb_hline
+	xdef	sb_text
+	xdef	_f16x32
+
 	xref	_off_8x8
 	xref	_dat_8x16
 

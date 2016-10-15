@@ -355,6 +355,13 @@
 #endif
 
 
+/*
+ * Macros for accessing linea variables:
+ * LA: load address register with lineavar variable base
+ * LV: access through base register
+ * PIXLA: load address register with lineavar variable base if MULTI_LINEA, no-op otherwise
+ * PIXLV: access through base register if MULTI_LINEA, absolute otherwise
+ */
 #if MULTI_LINEA
 #define LA(r) move.l _lineAVar,r
 #define PIXLA(r) LA(r)

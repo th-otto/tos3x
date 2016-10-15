@@ -14,17 +14,11 @@
 
 #if VIDEL_SUPPORT
 
-false	equ	0
-true	equ	$FFFF
-
 *    conditional assembly switches..
 *
 *    should all be false for production version
 
-test0	equ	false	; if test program access of internal variables
-test1	equ	false		; if using very large fonts (else, 8x16)
-test2	equ	false		; if using initialized ram (.data) else, .bss
-bytswap	equ	false		; if font words are byte swapped!!!!
+#define test1	0		/* if using very large fonts (else, 8x16) */
 
 *
 *    end conditional assembly switches
@@ -150,15 +144,15 @@ SHADOW		equ	5
 *
 *  font dependent equates (should be found in fonthead)
 
-	ifeq	test1
+#if !test1
 *  8x16 font data..
 
-l_off	equ	2		; left offset from skew
-r_off	equ	6		; right offset from skew
-form_ht	equ	16		; form height
-mxcelwd	equ	8		; maximum cell width
+#define l_off	2		/* left offset from skew */
+#define r_off	6		/* right offset from skew */
+#define form_ht	16		/* form height */
+#define mxcelwd	8		/* maximum cell width */
 
-	endc
+#endif
 
 
 *  since a character cell may be rotated 90 or 270 deg, the cell height & width
@@ -172,47 +166,35 @@ mxcelwd	equ	8		; maximum cell width
 *
 *  Text Cell buffer dimension calculations..
 
-cell_ww	equ	(((2*(l_off+r_off+mxcelwd))+3+15)/16)*2
-cell_wh	equ	(2*(l_off+r_off+mxcelwd))+2
-cell_hh	equ	(2*form_ht)+2
-cell_hw	equ	(((2*form_ht)+3+15)/16)*2
+#define cell_ww	(((2*(l_off+r_off+mxcelwd))+3+15)/16)*2
+#define cell_wh	(2*(l_off+r_off+mxcelwd))+2
+#define cell_hh	(2*form_ht)+2
+#define cell_hw	(((2*form_ht)+3+15)/16)*2
 
-cell_sz0	equ	cell_ww*cell_hh		;doubled cell size, no rotation
-cell_sz9	equ	cell_wh*cell_hw		;doubled cell size, 90 deg rot.
+#define cell_sz0	cell_ww*cell_hh		/* doubled cell size, no rotation */
+#define cell_sz9	cell_wh*cell_hw		/* doubled cell size, 90 deg rot. */
 
 *  pick the maximum for our buffer..
 
-	ifge	cell_sz0-cell_sz9
-
-cell_siz	equ	cell_sz0
-
-	endc
-
-	iflt	cell_sz0-cell_sz9
-
-cell_siz	equ	cell_sz9
-
-	endc
+#if cell_sz0 >= cell_sz9
+#define cell_siz	cell_sz0
+#else
+#define cell_siz	cell_sz9
+#endif
 
 *  determine maximum horizontal line (from width or height)
 *  which is needed by the Outline function as a buffer (+2 bytes)for
 *  worst case.
 *
-	ifge	cell_ww-cell_hw
-
-out_add		equ	cell_ww+2
-
-	endc
-
-	iflt	cell_ww-cell_hw
-
-out_add		equ	cell_hw+2
-
-	endc
+#if cell_ww >= cell_hw
+#define out_add	(cell_ww+2)
+#else
+#define out_add	(cell_hw+2)
+#endif
 
 *  Total buffer requirements are cel_siz + cel2_siz + out_add
 
-buf_siz	equ	cell_siz+cell_siz+out_add	;total byte requirement
+#define buf_siz	cell_siz+cell_siz+out_add	/* total byte requirement */
 
 
 *  for other fonts, above formulae examples should be used
@@ -238,121 +220,65 @@ _scrpt1		equ	0
 *
 *	Local Variables..
 
-		offset	0
-
-*  labels follow storage instead preceed so negative offsets
-*  produced are correct
-
-		ds.w	1	; currently free buffer (0 or cell_siz)
-buffree		equ	-*
-
-		ds.l	1	; start of source form
-sform		equ	-*
-		ds.l	1	; start of destination form
-dform		equ	-*
-
-		ds.w	1	; width of source form (formerly s_width)
-s_next		equ	-*
-		ds.w	1	; width of dest form (new, formerly v_lin_wr)
-d_next		equ	-*
-
-		ds.w	1	; width of area in pixels
-width		equ	-*
-		ds.w	1	; height of area in pixels
-height		equ	-*
-
-
-		ds.w	1	; SRC dot addr (pix address, 0-15 word offset)
-tsdad		equ	-*
-
-		ds.w	1	; destination dot address
-tddad		equ	-*
-
-		ds.w	1	; # full words 'tween fringes (DST)
-dest_wrd	equ	-*
-		ds.w	1	; # full words 'tween fringes (SRC, prethicken)
-src_wrd		equ	-*
-		ds.w	1	; right fringe mask, before thicken
-thk_msk		equ	-*
-		ds.w	1	; 
-rite_msk	equ	-*
-		ds.w	1	; fringes of destination to be affected
-left_msk	equ	-*
-		ds.w	1	; overlap between words in inner loop
-rota_msk	equ	-*
-		ds.w	1	; shift count for use by lf/rt shift routines
-shif_cnt	equ	-*
+buffree		equ	-2	; currently free buffer (0 or cell_siz)
+sform		equ	-6	; start of source form
+dform		equ	-10	; start of destination form
+s_next		equ	-12	; width of source form (formerly s_width)
+d_next		equ	-14	; width of dest form (new, formerly v_lin_wr)
+width		equ	-16	; width of area in pixels
+height		equ	-18	; height of area in pixels
+tsdad		equ	-20	; SRC dot addr (pix address, 0-15 word offset)
+tddad		equ	-22	; destination dot address
+dest_wrd	equ	-24	; # full words 'tween fringes (DST)
+src_wrd		equ	-26	; # full words 'tween fringes (SRC, prethicken)
+thk_msk		equ	-28	; right fringe mask, before thicken
+rite_msk	equ	-30
+left_msk	equ	-32	; fringes of destination to be affected
+rota_msk	equ	-34	; overlap between words in inner loop
+shif_cnt	equ	-36	; shift count for use by lf/rt shift routines
 
 *    Indirect jump vectors for threaded BLT
 
-		ds.w	1	; vector for inner BLT loop (sgl, dbl, etc)
-blttype		equ	-*
+blttype		equ	-38	; vector for inner BLT loop (sgl, dbl, etc)
 
 *  Vectors that may contain a toptable entry..
 
-		ds.w	1	; vector for pixel operation routine
-logicop		equ	-*
-		ds.w	1	; vector for logic op / special FX (sgl or dbl)
-special		equ	-*
-		ds.w	1	; vector for word special effects - fringe case
-specwf		equ	-*
-
-		ds.w	1	; vector for function after thicken
-thknjmp		equ	-*
-		ds.w	1	; vector for function after light
-litejmp		equ	-*
-		ds.w	1	; vector for function after skew
-skewjmp		equ	-*
-
-		ds.w	1	; vector for word fringe function after thicken
-thknjpwf	equ	-*
-		ds.w	1	; vector for word fringe function after light
-litejpwf	equ	-*
+logicop		equ	-40	; vector for pixel operation routine
+special		equ	-42	; vector for logic op / special FX (sgl or dbl)
+specwf		equ	-44	; vector for word special effects - fringe case
+thknjmp		equ	-46	; vector for function after thicken
+litejmp		equ	-48	; vector for function after light
+skewjmp		equ	-50	; vector for function after skew
+thknjpwf	equ	-52	; vector for word fringe function after thicken
+litejpwf	equ	-54	; vector for word fringe function after light
 
 *  Vectors that may contain twoptable entries...
 
-		ds.w	1	; vector for word special EFX (multi_lf or _rt)
-specw		equ	-*
-
-		ds.w	1	; vector for word function after thicken
-thknjpw		equ	-*
-		ds.w	1	; vector for word function after light
-litejpw		equ	-*
+specw		equ	-56	; vector for word special EFX (multi_lf or _rt)
+thknjpw		equ	-58	; vector for word function after thicken
+litejpw		equ	-60	; vector for word function after light
 
 *  Masks..
 
-		ds.w	1	; amount to increase width
-smear		equ	-*
-		ds.w	1	; AND with this to get light effect
-lite_msk	equ	-*
-		ds.w	1	; rotate this to check shift
-skew_msk	equ	-*
-		ds.w	1	; overflow for word thicken
-thknover	equ	-*
+smear		equ	-62	; amount to increase width
+lite_msk	equ	-64	; AND with this to get light effect
+skew_msk	equ	-66	; rotate this to check shift
+thknover	equ	-68	; overflow for word thicken
 
 *  color temp & # of planes
 
-		ds.w	1	; foreground color temp
-forecol		equ	-*
-		ds.w	1	; background color temp
-backcol		equ	-*
-		ds.w	1	; # of planes
-nbrplane	equ	-*
-		ds.w	1	; offset to next word in same
-nextwrd		equ	-*
+forecol		equ	-70	; foreground color temp
+backcol		equ	-72	; background color temp
+nbrplane	equ	-74	; # of planes
+nextwrd		equ	-76	; offset to next word in same
 
 *  arbitrary scale of text temps..
 
-		ds.w	1	; temp DELX used by arbitrary scale of text
-tmp_delx	equ	-*
-		ds.w	1	; temp DELY
-tmp_dely	equ	-*
-		ds.w	1	; Non zero if we had to swap temps
-swap_tmps	equ	-*
-		ds.w	1	; XACC_DDA temp
-tmp_xacc	equ	-*
-ramlen		equ	-*
-*		ds.w	1	; dummy for dummy assemblers
+tmp_delx	equ	-78	; temp DELX used by arbitrary scale of text
+tmp_dely	equ	-80	; temp DELY
+swap_tmps	equ	-82	; Non zero if we had to swap temps
+tmp_xacc	equ	-84	; XACC_DDA temp
+ramlen		equ	-84
 
 		text
 
