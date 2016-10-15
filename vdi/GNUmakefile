@@ -42,7 +42,7 @@ check:: vdi.o checklang
 	dd if=$< of=vdi.new bs=1 skip=36 count=$$total 2> /dev/null; \
 	cmp vdi.orig vdi.new; \
 	status=$$?; \
-	: $(RM) vdi.orig vdi.new; \
+	$(RM) vdi.orig vdi.new; \
 	exit $$status
 
 dist::
