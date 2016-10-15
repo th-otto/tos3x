@@ -28,8 +28,6 @@
 #include "../common/config.h"
 #include "vdidefs.h"
 
-		xdef	trans_pos_row
-		xdef	trans_neg_row
 		xdef	transSrPos
 		xdef	transSlPos
 		xdef	transSrNeg
@@ -125,6 +123,7 @@ OPAQUE	equ	-4
 *  in:		d4.w	words in source - 1
 *		d6.w	words in destination - 1
 *-
+/* 306de: 00e0f184 */
 	xdef scrn_blt
 scrn_blt:	move.w	d4,d2		; d2 <- will later get inner loop count
 
@@ -357,7 +356,7 @@ neg_row:	dbra	d7,f1_neg	; do next row
 
 unaligned:	move.w	PLANE_CT(a6),d4
 		beq	leave			; on zero planes just get out
-		move.l	#0,a2			; clear out the whole register
+		movea.w	#0,a2			; clear out the whole register
 		move.w	d4,a2			; a2 <- number of planes
 		subq.w	#1,a2			; adjust the counter
 *+
@@ -547,7 +546,7 @@ csrn3:		move.w	#$ffff,d6
 		move.w	d6,MASK2(a6)		; save MASK2
 		clr.w	MASK3(a6)		; save MASK3
 		sub.w	d4,a5			; adjust offset to nxt dst wrd
-		bra 	unlgnSetup
+		bra.s 	unlgnSetup
 		
 csrn1:		add.w	#16,d1			; d1 <- D_XMIN mod 16
 		move.w	d6,MASK2(a6)		; save MASK2

@@ -23,8 +23,6 @@
 * Entry routines for transparent byte aligned blits
 * (screen format)
 *
-		xdef	trans_pos_row
-		xdef	trans_neg_row
 
 
 *
@@ -228,6 +226,8 @@ INNER_CT  equ	-6	; blt inner loop initial count			    +70
 *		d7	row count
 *-
 
+/* 306de: 00e0f774 */
+		xdef trans_pos_row
 trans_pos_row:	move.w	a2,d2			; d2 <- planes - 1
 		exg	d4,a3			; save a3 to restore later
 		exg	d5,a4			; save a4 to restore later
@@ -278,7 +278,8 @@ tpri_op:
 
 
 
-
+/* 306de: 00e0f84a */
+		xdef	trans_neg_row
 trans_neg_row:	move.w	a2,d2			; d2 <- planes - 1
 		exg	d4,a3			; save a3 to restore later
 		exg	d5,a4			; save a4 to restore later
