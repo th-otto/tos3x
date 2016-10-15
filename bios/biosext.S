@@ -7,7 +7,7 @@
 * to get the same addresses as when linking the whole ROM
 *
 #include "../common/config.h"
-#include "ctrycodes.h"
+#include "../common/ctrycodes.h"
 #include "../common/sections.inc"
 
 * from VDI

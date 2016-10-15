@@ -8,7 +8,7 @@
 *
 #include "../common/config.h"
 #include "vdidefs.h"
-#include "../bios/ctrycodes.h"
+#include "../common/ctrycodes.h"
 #include "../common/sections.inc"
 
 * from BIOS

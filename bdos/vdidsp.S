@@ -3,7 +3,7 @@
 * but are defined elsewhere
 *
 #include "../common/config.h"
-#include "../bios/ctrycodes.h"
+#include "../common/ctrycodes.h"
 
 	xdef _zeromem
 	xdef _GSX_ENTRY

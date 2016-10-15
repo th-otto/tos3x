@@ -22,7 +22,7 @@
 #include "vdi.h"
 #include "fontdef.h"
 #include "gsxextrn.h"
-#include "../bios/ctrycodes.h"
+#include "../common/ctrycodes.h"
 
 
 extern int16_t const off_8x8[];
