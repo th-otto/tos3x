@@ -1,3 +1,54 @@
+* Directory Structure
+
+bin:
+  Prebuild binaries of tools used in the build process. These are
+  essentially identical to the ones from the developer kit, with 
+  modifications as described in alcyon/README. Sources of almost
+  all of these tools are found in the alcyon directory.
+
+include:
+  Include files for the C compiler. Only a few of them are actually
+  needed for TOS itself, most of them are only needed to build the
+  tools.
+
+lib:
+  Prebuild libraries and startup files.
+
+doc:
+  Some unsorted documentation.
+
+bios:
+  Source of the BIOS part of TOS.
+
+vdi:
+  Source of the VDI part of TOS.
+
+bdos:
+  Source of the GEMDOS part of TOS.
+
+aes:
+  Source of the AES part of TOS.
+
+desk:
+  Source of the TOS desktop application.
+
+common:
+  Shared include files for the above components.
+
+system:
+  Source of some small Atari tools.
+
+alcyon:
+  Source of the (modified) tools of the Alcyon
+  C compiler & tools, as used to compile TOS.
+
+alcyon/orig:
+  Source of the tools of the Alcyon
+  C compiler & tools, that compile to binary identical
+  versions of the ones found in the developer kit.
+
+
+
 - Assembler sources are written in a format that is accepted
   both by as68 and by the GNU assembler with the --mri option.
   If you have to use a different assembler, they might need

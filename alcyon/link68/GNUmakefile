@@ -19,6 +19,9 @@ link68$(EXEEXT): $(LINK_OBJS)
 relmod$(EXEEXT): $(RELMOD_OBJS)
 	$(AM_V_LD)$(LD) $(RELMOD_OBJS) $(LDFLAGS) -o $@
 
+install: all
+	$(CP) $(PROGRAMS) $(BIN)
+
 check::
 
 cp68.rel:: link68$(EXEEXT)

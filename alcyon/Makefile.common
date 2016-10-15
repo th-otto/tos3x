@@ -18,6 +18,8 @@ ARFLAGS = -r
 RANLIB = ${BIN}doindex${EXEEXT}
 
 LD=${BIN}aln${EXEEXT}
+LINK68=${BIN}link68${EXEEXT}
+RELMOD=${BIN}relmod${EXEEXT}
 CRT0=crt0.o
 LIBC=libc.a
 LIBC_NDX=libc.ndx

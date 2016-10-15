@@ -2,9 +2,14 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
+#include <cout.h>
 #include <sendc68.h>
 
 #define _(x) x
+
+#define FALSE 0
+#define TRUE 1
 
 #define INBSIZE 16384L
 
@@ -84,12 +89,12 @@ PP(int flag;)
 
 
 
-static VOID randw(P(long) l)
+static VOID copybytes(P(long) l)
 PP(long l;)
 {
 	while (l > INBSIZE)
 	{
-		randw(INBSIZE);
+		copybytes(INBSIZE);
 		l -= INBSIZE;
 	}
 	fread(buf, 1, (size_t) l, infil);
@@ -97,7 +102,7 @@ PP(long l;)
 }
 
 
-static long lrandw(NOTHING)
+static long copy32be(NOTHING)
 {
 	long l;
 	l = get32be(infil);
@@ -106,7 +111,8 @@ static long lrandw(NOTHING)
 }
 
 
-static VOID relmod(NOTHING)
+static int relmod(P(const char *) fname)
+PP(const char *fname;)
 {
 	long header[4];
 	long ipos;
@@ -114,45 +120,83 @@ static VOID relmod(NOTHING)
 	int i;
 	short w;
 	long diff;
+	unsigned short magic;
+	unsigned short rlbflag;
 	
-	randw(2L);
+	magic = get16be(infil);
 	for (i = 0; i < 4; i++)
 	{
-		header[i] = lrandw();
+		header[i] = get32be(infil);
 	}
-	randw(10L);
-	randw(header[0] + header[1] + header[3]);
-	ipos = opos = 0;
-	w = get16be(infil);
-	for (; !feof(infil); ipos += 2)
+	if (magic == MAGIC)
 	{
-		w &= RBMASK;
-		if (w == LUPPER)
+		put16be(MAGIC, outfil);
+		for (i = 0; i < 4; i++)
 		{
-			w = get16be(infil);
-			w = (w - 1) & RBMASK;
-			if (w < BRELOC)
-			{
-				if (opos == 0)
-				{
-					put32be(ipos, outfil);
-				} else
-				{
-					diff = ipos - opos;
-					while (diff > 254)
-					{
-						diff -= 254;
-						fputc(1, outfil);
-					}
-					fputc((char)diff, outfil);
-				}
-				opos = ipos;
-			}
-			ipos += 2;
+			put32be(header[i], outfil);
 		}
-		w = get16be(infil);
+		copybytes(10L);
+	} else if (magic == MAGIC1)
+	{
+		put16be(MAGIC1, outfil);
+		for (i = 0; i < 4; i++)
+		{
+			put32be(header[i], outfil);
+		}
+		copy32be(); /* copy text start address */
+		copy32be(); /* copy entry address */
+		rlbflag = get16be(infil);
+		if (!rlbflag)
+			fprintf(stderr, _("%s: warning: absolute file with relocations\n"), fname);
+		put16be(1, outfil);
+		copy32be(); /* copy data start address */
+		copy32be(); /* copy bss start address */
+	} else
+	{
+		fprintf(stderr, _("%s: unknown magic $%04x\n"), fname, magic);
+		return FALSE;
 	}
-	fputc(0, outfil);
+	
+	/*
+	 * copy text, data and symbols
+	 */
+	copybytes(header[0] + header[1] + header[3]);
+
+	if (magic == MAGIC)
+	{
+		ipos = opos = 0;
+		w = get16be(infil);
+		for (; !feof(infil); ipos += 2)
+		{
+			w &= RBMASK;
+			if (w == LUPPER)
+			{
+				w = get16be(infil);
+				w = (w - 1) & RBMASK;
+				if (w < BRELOC)
+				{
+					if (opos == 0)
+					{
+						put32be(ipos, outfil);
+					} else
+					{
+						diff = ipos - opos;
+						while (diff > 254)
+						{
+							diff -= 254;
+							fputc(1, outfil);
+						}
+						fputc((char)diff, outfil);
+					}
+					opos = ipos;
+				}
+				ipos += 2;
+			}
+			w = get16be(infil);
+		}
+		fputc(0, outfil);
+	}
+	return TRUE;
 }
 
 
@@ -164,6 +208,8 @@ PP(char **argv;)
 	char ifilnam[128];
 	char ofilnam[128];
 	char *arg;
+	int ret;
+	int status;
 	
 	if (argc == 1)
 	{
@@ -171,6 +217,7 @@ PP(char **argv;)
 		puts(_("Usage: relmod [-]inputfile[.68k] [outputfile[.prg]] ...\n"));
 		return EXIT_FAILURE;
 	}
+	status = EXIT_SUCCESS;
 	for (i = 1; i < argc; )
 	{
 		arg = argv[i];
@@ -200,10 +247,15 @@ PP(char **argv;)
 			fprintf(stderr, _("Cannot create: %s\n"), ofilnam);
 			continue;
 		}
-		relmod();
+		ret = relmod(ifilnam);
 		fclose(infil);
 		fclose(outfil);
+		if (ret == FALSE)
+		{
+			unlink(ofilnam);
+			status = EXIT_FAILURE;
+		}
 	}
 	
-	return EXIT_SUCCESS;
+	return status;
 }

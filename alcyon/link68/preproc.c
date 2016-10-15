@@ -544,8 +544,9 @@ static VOID globops(NOTHING)
 		opnum = readop(tokenval);		/* which one is it? */
 
 		if (opnum == ABSOLUTE)
+		{
 			absflg = TRUE;				/* absolute load    */
-		else if (opnum == BSSBASE)
+		} else if (opnum == BSSBASE)
 		{
 			Bflag++;
 			bssstart = scannum();
@@ -566,28 +567,38 @@ static VOID globops(NOTHING)
 			}
 			break;						/* leave loop -- return */
 		} else if (opnum == CHAINED)
+		{
 			chnflg = TRUE;
-		else if (opnum == IGNORE)
+		} else if (opnum == IGNORE)
+		{
 			ignflg = TRUE;
-		else if (opnum == LOCALS)
+		} else if (opnum == LOCALS)
+		{
 			locsflg = TRUE;
-		else if (opnum == MAP)
+		} else if (opnum == MAP)
+		{
 			mapflg = TRUE;
-		else if (opnum == NOLOCALS)
+		} else if (opnum == NOLOCALS)
+		{
 			locsflg = FALSE;
-		else if (opnum == SYMBOLS)
+		} else if (opnum == SYMBOLS)
+		{
 			symflg = TRUE;
-		else if (opnum == TEMPFILES)
+		} else if (opnum == TEMPFILES)
+		{
 			tdrvscan();					/* drive for temp files */
-		else if (opnum == TEXTBASE)
+		} else if (opnum == TEXTBASE)
 		{
 			Zflag++;
 			textstart = scannum();
 		} else if (opnum == UNDEFINED)
+		{
 			udfflg = TRUE;				/* allow undefineds */
-		else
+		} else
+		{
 			fatalx(TRUE, _("unrecognized or misplaced option name: \"%s\"\n"), tokenval);	/* goodbye  */
-
+		}
+		
 		if ((tokenum = scan()) == COMMA)
 			tokenum = scan();			/* skip over comma  */
 		else if (tokenum != RBRACK)		/* better be a ']'  */
