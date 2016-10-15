@@ -228,13 +228,19 @@ INNER_CT  equ	-6	; blt inner loop initial count			    +70
 *		d7	row count
 *-
 
+/* 306de: 00e12c60 */
 opaq_pos_row:	move.w	a2,d2			; d2 <- planes - 1
 		exg	d4,a3			; save a3 to restore later
 		exg	d5,a4			; save a4 to restore later
 		lea	fringe0,a3		; a3 -> fr1 space for compile
 		lea	innerLoop,a4		; a4 -> inner loop space
 
-opr_loop:	moveq.l	#0,d0			; select log op based on curr
+opr_loop:
+#if TOSVERSION >= 0x400
+		moveq.l	#0,d0			; select log op based on curr
+#else
+		clr.w d0			; select log op based on curr
+#endif
 		lsr.w	FG_COL(a6)		; bg and fg color for given
 		addx.w	d0,d0			; plane log ops (wd wide)
 		lsr.w	BG_COL(a6)		; loc sequentially in OP_TAB as

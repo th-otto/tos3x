@@ -173,7 +173,7 @@
 
 *
 * Routines to do fringe2 for unaligned blit (negative case)
-*y
+*
 		xdef	o0Slonf1,o1Slonf1,o2Slonf1,o3Slonf1
 		xdef	o4Slonf1,o5Slonf1,o6Slonf1,o7Slonf1
 		xdef	o8Slonf1,o9Slonf1,oASlonf1,oBSlonf1
@@ -185,6 +185,7 @@
 ***********  word aligned blit going into positive directions  **************
 *****************************************************************************
 
+/* 306de: 00e115ea */
 *+
 * D' = 0
 *-
