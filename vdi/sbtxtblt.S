@@ -219,7 +219,7 @@ SHADOW		equ	5
 *  for other fonts, above formulae examples should be used
 *  to determine  cell_siz  &  buf_siz to allocate a scratch buffer
 *
-*  _TEXT_BL expects variables scratchp & scrpt2 to be initialized as follows:
+*  _TEXT_BLT expects variables scratchp & scrpt2 to be initialized as follows:
 *
 *   scrtchp	is a long word pointer to the base of a buffer with at least
 *				buf_siz bytes available for scratch use

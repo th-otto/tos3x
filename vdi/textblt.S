@@ -54,7 +54,7 @@ _scrtsiz:	dc.w	666	; WUT THE FUT ??$*&@!??
 
 *  entry point for textblt & scaling routine
 *
-	xdef	_TEXT_BL
+	xdef	_TEXT_BLT
 	xdef	_ACT_SIZ
 	xdef	_CLC_DDA
 
@@ -182,7 +182,7 @@ sz_sm_2:
 *****************************************
 
 /* 306de: 00e0c038 */
-_TEXT_BL:
+_TEXT_BLT:
 	movem.l	a5-a6,-(sp)
 	LA(a6)
 	V_JUMP(V_TEXT,a6,a4)

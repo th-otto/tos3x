@@ -1,57 +1,56 @@
+#if TOSVERSION == 0x306
+
 BTLEN_US    equ $0000641C
 
+/*
+ * length of BIOS text segment is different due to some extra
+ * code for ALT-scancode mappings
+ */
 #if OS_COUNTRY == CTRY_US
-BIOSTBASE   equ $00E00000
 BIOSTLEN    equ BTLEN_US
 DESKTLEN    equ $0000FBCC
 #endif
 
 #if OS_COUNTRY == CTRY_DE
-BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $00006476
 DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_FR
-BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $00006494
 DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_ES
-BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $000064A2
 DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_IT
-BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $00006484
 DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_UK
-BIOSTBASE   equ $00E00000
 BIOSTLEN    equ BTLEN_US
 DESKTLEN    equ $0000FBCC
 #endif
 
 #if OS_COUNTRY == CTRY_SV
-BIOSTBASE   equ $00E00000
 BIOSTLEN    equ $00006494
 DESKTLEN    equ $0000FBA2
 #endif
 
 #if OS_COUNTRY == CTRY_PL
-BIOSTBASE   equ $00380000
+#define BIOSTBASE   $00380000
 BIOSTLEN    equ $00006476
 DESKTLEN    equ $0000FBA2
 #endif
 
 
-*
-* these are identical in all versions
-*
+/*
+ * these are identical in all language versions
+ */
 BIOSDLEN    equ $000009D8
 VDITLEN     equ $0000D06E
 VDIDLEN     equ $00006EFA
@@ -61,9 +60,45 @@ AESTLEN     equ $0000CCD6
 AESDLEN     equ $000006D8
 DESKDLEN    equ $00000000
 
-*
-* now calculate addresses from above
-*
+#endif /* TOSVERSION == 0x306 */
+
+
+#if TOSVERSION == 0x206
+
+BTLEN_US    equ $0000603A
+
+#if OS_COUNTRY == CTRY_US
+BIOSTLEN    equ BTLEN_US
+DESKTLEN    equ $0000FBFC
+#endif
+
+#if OS_COUNTRY == CTRY_DE
+BIOSTLEN    equ $00006094
+DESKTLEN    equ $0000FBA2
+#endif
+
+/*
+ * these are identical in all language versions
+ */
+BIOSDLEN    equ $00000000
+VDITLEN     equ $0000999A
+VDIDLEN     equ $00000000
+BDOSTLEN    equ $000062FC
+BDOSDLEN    equ $00000000
+AESTLEN     equ $0000CCD6
+AESDLEN     equ $00000000
+DESKDLEN    equ $00000000
+
+#endif /* TOSVERSION == 0x206 */
+
+#ifndef BIOSTBASE
+#define BIOSTBASE $00E00000
+#endif
+
+
+/*
+ * now calculate addresses from above
+ */
 VDITBASE  equ BIOSTBASE+BIOSTLEN
 BDOSTBASE equ VDITBASE+VDITLEN
 AESTBASE  equ BDOSTBASE+BDOSTLEN

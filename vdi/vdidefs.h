@@ -19,17 +19,27 @@
 /*
  * This is an include file for other .s files.
  */
-#if TOSVERSION >= 0x300
-#define P68030	1	/* @check@ set to 1 if we are on a 68030 (else 0) */
-#else
-#define P68030	0	/* @check@ set to 1 if we are on a 68030 (else 0) */
-#endif
+
+/*
+ * set to 1 if we are on a 68010+ with 8-byte trap exception frames
+ */
+#define P68010  (TOSVERSION >= 0x300)
+
+/*
+ * set to 1 if we are on a 68030+ (else 0)
+ * Used when invalidating caches might be neccessary
+ */
+#define P68030  (TOSVERSION >= 0x300)
+
 #if TOSVERSION >= 0x206
 #define	MAX_PAL		4096	/* palette size                     */
 #else
-#define MAX_PAL		512	/* palette size                     */
+#define MAX_PAL		512	    /* palette size                     */
 #endif
 
+/*
+ * set to 1 for supporting pixel-packed VIDEL modes, including hicolor and truecolor
+ */
 #define VIDEL_SUPPORT (TOSVERSION >= 0x400)
 
 #define BLITTER_SUPPORT ((TOSVERSION < 0x300) | (TOSVERSION >= 0x400))

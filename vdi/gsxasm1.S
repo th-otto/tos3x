@@ -558,6 +558,9 @@ _ABLINE:
 		V_JUMP(V_VLINE,a4,a5)		; vec to vert line primitive
 
 
+#include "hbvline.S"
+
+
 
 *   SPECIAL CASE II.	Horizontal line segment
 *
@@ -1137,3 +1140,5 @@ xline:	move.w	d4,d1			; d1 <- X1
 hline_select:
 
 	V_JUMP(V_HLINE,a4,a5)		; vec to h line primitive
+
+#include "hbhline.S"

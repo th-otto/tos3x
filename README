@@ -38,14 +38,16 @@ common:
 system:
   Source of some small Atari tools.
 
+listings:
+  Working versions of disassembler listings of various TOS versions.
+
 alcyon:
   Source of the (modified) tools of the Alcyon
   C compiler & tools, as used to compile TOS.
 
 alcyon/orig:
-  Source of the tools of the Alcyon
-  C compiler & tools, that compile to binary identical
-  versions of the ones found in the developer kit.
+  Source of the tools of the Alcyon C compiler & tools, that compile to binary
+  identical versions of the ones found in the developer kit.
 
 
 
@@ -54,12 +56,20 @@ alcyon/orig:
   If you have to use a different assembler, they might need
   conversion.
 
+- All comments in assembly files are in C-style. The makefile
+  preprocesses them before passing them to the assembler. This
+  avoid problems with different types of comment delimiters in
+  different assemblers, and also works around some bugs of
+  the conditional assembly directives of as68. It also allows
+  using the same files defining some key constants to be
+  used for both assembler and C.
+
 - Don't put comments after constants that are used in assembler
   expressions. Since it is a K&R preprocessor, the spaces between
   the constant and the comment will make it to the source, and
   the assembler does not like spaces in operands.
 
-- Assembliing the assembler sources in the bios directory with
+- Assembling the assembler sources in the bios directory with
   the original as68 from the developer kit will not work, mostly
   because it does not support abs.w addressing mode, but also due
   to numerous bugs. Either use the fixed version from the bin
