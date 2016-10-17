@@ -2,6 +2,7 @@
  * XBIOS #14 - Scrdmp - Dump screen to printer.
  */
 /* 306de: 00e01450 */
+/* 206de: 00e0130c */
         xdef _scrdmp
 _scrdmp:
         movea.l   _scr_dmp,a0
@@ -13,6 +14,7 @@ _scrdmp:
  * default function for system variable scr_dmp/dump_vec
  */
 /* 306de: 00e01462 */
+/* 206de: 00e0131e */
 	xdef _bscr_dump
 _bscr_dump:
         move.l    (_v_bas_ad).w,(_pbdef).w /* pbdef.pb_pb_scrptr */

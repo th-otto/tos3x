@@ -24,7 +24,8 @@ nvram_rtc_year_offset equ 1980-1968
 #define RR_MAGIC    $12123456
 #define RR_CHKSUM   $5678
 
-save_siz equ 238
+nlevels  equ 5
+save_siz equ nlevels*46+8
 
 /* sizeof(IOREC) */
 IOREC_SIZE equ 14
@@ -159,6 +160,7 @@ v_bas_l   equ $FFFF820d
 vme_mask  equ $FFFF8E0D
 sys_mask  equ $FFFF8E01
 
+palette   equ $FFFF8240
 v_shf_mod equ $FFFF8260
 shift_tt  equ $FFFF8262
 
@@ -373,7 +375,7 @@ notpal:
  * next, set up the palette(s)
  */
 
-        lea.l     ($FFFF8240).w,a1
+        lea.l     (palette).w,a1
         move.w    #$000F,d0
         lea.l     dflt_pal(pc),a0
 initpal:
@@ -1255,6 +1257,7 @@ flushCaches:
  * Convert a privileged 'MOVE SR,...' to 'MOVE CCR,...'
  */
 /* 306de: 00e0060a */
+/* 206de: 00e00638 */
 _int_priv:
         movem.l   d0-d2,-(a7)      * saving some registers while we test
         move.l    a1,-(a7)
@@ -1376,7 +1379,7 @@ clockdone:
  * Draw the Atari logo.
  */
         movea.l   #atarilogo,a0
-        movea.l   (_v_bas_a).w,a1
+        movea.l   (_v_bas_ad).w,a1
 #if OS_COUNTRY == CTRY_PL
 		/* apparently a patch that was applied by the maker of the PL version */
 		lea (lineavars).w,a2
@@ -1784,6 +1787,7 @@ ikbdres:
  * It will also hack Line A variables to enable extended VDI video modes.
  */
 /* 306de: 00e0098a */
+/* 206de: 00e00962 */
 diskboot:
         moveq.l   #3,d0
         bsr       _run_cartridge_applications
@@ -1801,6 +1805,7 @@ nodiskboot:
 
 
 /* 306de: 00e009a2 */
+/* 206de: 00e0097a */
 dmaboot:
         move.l    #80*200,d7
         cmp.l     _hz_200,d7                /* is the system running for > 80s? */
@@ -2019,6 +2024,7 @@ scanextrom:lea (STBOOK_EXTROM).l,a0
         bra.s     cartext2
 #endif
 /* 306de: 00e00bbc */
+/* 206de: 00e00b68 */
 _run_cartridge_applications:
         lea     cart_base,a0
 cartext2:
@@ -2042,6 +2048,7 @@ cartover:
         rts
 
 /* 306de: 00e00bee */
+/* 206de: 00e00b9a */
 bios_unimpl:
 		rts
 
@@ -2080,6 +2087,7 @@ memchk2:
  *
  */
 /* 306de: 00e00c06 */
+/* 206de: 00e00bb2 */
 memchk:
         cmpi.l    #$752019F3,(_memvalid).w     /* test memory configuration validation, check first magic number */
         bne.s     memchk3                      /* (mismatched -- return NE) */
@@ -2094,6 +2102,7 @@ memchk3:
  *  Sort of corresponding to the GSX spec.
  */
 /* 306de: 00e00c24 */
+/* 206de: 00e00bd0 */
 dflt_pal:
 		dc.w $0fff     /* 0 white */
 		dc.w $0f00     /* 1 red */
@@ -2114,8 +2123,17 @@ dflt_pal:
 
 /*
  * Int 0x68 - HBL interrupt
+ * hbl - force caller to IPL
+ * Oh-well:      "Yeah, it sucks, but it works" (--lt)
+ *
+ * Note:         Hacks caller's IPL to 3 (if it was 0). This is
+ *               a kludge against fascist programs and certain
+ *               debuggers that insist on starting processes up
+ *               at IPL 0.
+ *
  */
 /* 306de: 00e00c44 */
+/* 206de: 00e00bf0 */
 int_hbl:
         move.w    d0,-(a7)            /* save d0 */
         move.w    2(a7),d0            /* get status register from stack */
@@ -2132,6 +2150,7 @@ is_ipl:
  * no video resolution change is done.
  */
 /* 306de: 00e00c5a */
+/* 206de: 00e00c06 */
 int_vbl:
         addq.l    #1,_frclock         /* increase num of happened ints */
         subq.w    #1,_vblsem          /* check vbl semaphore */
@@ -2139,20 +2158,23 @@ int_vbl:
         movem.l   d0-d7/a0-a6,-(a7)   /* save registers */
         addq.l    #1,_vbclock         /* count number of VBL interrupts */
 
+/* ------ Call deferred interrupt vectors */
 /* vblqueue */
-        move.w    _nvbls,d7
-        beq       vbl_no_queue
-        subq.l    #1,d7
-        movea.l   (_vblqueue).w,a0
+        move.w    _nvbls,d7                 /* d7 = # of deferred vblank vectors */
+        beq       vbl_no_queue              /* (punt if no vectors) */
+        subq.l    #1,d7                     /* turn into DBRA count */
+        movea.l   (_vblqueue).w,a0          /* a0 -> vectors */
 vbl_loop:
-        movea.l   (a0)+,a1
-        cmpa.w    #$0000,a1
+        movea.l   (a0)+,a1                  /* a1 -> deferred vector */
+        cmpa.w    #$0000,a1                 /* if(a1 == NULL) continue; */
         beq.s     vbl_next
-        movem.l   d7/a0,-(a7)
-        jsr       (a1)
-        movem.l   (a7)+,d7/a0
-vbl_next:
-        dbf       d7,vbl_loop
+        movem.l   d7/a0,-(a7)               /* save registers */
+        jsr       (a1)                      /* call routine */
+        movem.l   (a7)+,d7/a0               /* restore registers */
+vbl_next:                  
+        dbf       d7,vbl_loop               /* loop for more vectors */
+
+#if !STBOOK
         move.b    (MFP_GPIP).w,d1
         tst.b     _has_dmasound
         beq.s     nomoncheck
@@ -2161,7 +2183,7 @@ vbl_next:
         move.w    sr,-(a7)
         ori.w     #$0700,sr
 moncheck:
-        move.b    ($FFFF8901).w,d0
+        move.b    ((sndmactl)+1).w,d0
         move.b    (MFP_GPIP).w,d1
         btst      #7,d1
         sne       d1
@@ -2170,95 +2192,162 @@ moncheck:
         sne       d2
         cmp.b     d1,d2
         bne.s     moncheck
-        cmp.b     ($FFFF8901).w,d0
+        cmp.b     ((sndmactl)+1).w,d0
         bne.s     moncheck
         move.w    (a7)+,sr
         btst      #0,d0
         beq.s     nomoncheck
         not.b     d1
 nomoncheck:
+#if TOSVERSION < 0x300
+		move.b    (v_shf_mod).w,d0
+		and.b     #3,d0
+		cmp.b     #2,d0
+		bge.s     vbl_wasmono
+#else
         move.b    (shift_tt).w,d0
         and.b     #$07,d0
         cmp.b     #$06,d0
-        beq.s     vbl_wastthigh
+        beq.s     vbl_wasmono
+#endif
         btst      #7,d1
         bne.s     vbl_nomonchg
         bsr       dovsync
+#if TOSVERSION < 0x300
+		move.b    #2,d0
+#else
         move.b    #$06,d0
+#endif
         bra.s     vbl_monchg
-vbl_wastthigh:
+vbl_wasmono:
         btst      #7,d1
         beq.s     vbl_nomonchg
         move.b    (_defshiftmod).w,d0
+#if TOSVERSION < 0x300
+		cmp.b     #2,d0
+		blt.s     vbl_monchg
+#else
         cmp.b     #$06,d0
         bne.s     vbl_monchg
+#endif
         clr.b     d0
 vbl_monchg:
         move.b    d0,(_sshiftmod).w
+#if TOSVERSION < 0x300
+		move.b    d0,(v_shf_mod).w
+#else
         move.b    (shift_tt).w,d1
         and.b     #$F8,d1
         or.b      d0,d1
         move.b    d1,(shift_tt).w
+#endif
         movea.l   (_swv_vec).w,a0
         jsr       (a0)
 vbl_nomonchg:
-        jsr       blink
-/* change palette registers */
-        tst.l     (_colorptr).w
+#endif /* !STBOOK */
+        jsr       blink								/* blink cursor */
+/* --- reload color palettes */
+
+        tst.l     (_colorptr).w						/* reload color palettes, if(colorptr != NULL).... */
         beq.s     vbl_no_palette
-        movea.l   (_colorptr).w,a0
-        lea.l     ($FFFF8240).w,a1
-        move.w    #$0007,d1
+        movea.l   (_colorptr).w,a0					/* a0 -> user's color base */
+        lea.l     (palette).w,a1					/* a1 -> hardware palette base */
+        move.w    #7,d1								/* d0 = count */
 vbl_palette_loop:
         move.l    (a0)+,(a1)+
         dbf       d1,vbl_palette_loop
         clr.l     (_colorptr).w
 vbl_no_palette:
-/* set new video address */
+/* --- reload display base register */
         tst.l     (_screenpt).w
         beq.s     vbl_no_screenpt
         move.l    (_screenpt).w,(_v_bas_ad).w
         move.b    (_v_bas_ad+2).w,(v_bas_m).w
         move.b    (_v_bas_ad+1).w,(v_bas_h).w
-        move.b    (_v_bas_ad+3).w,(v_bas_l).w         /* BUG: no test that 820d actually exists */
+        move.b    (_v_bas_ad+3).w,(v_bas_l).w       /* BUG: no test that 820d actually exists */
 vbl_no_screenpt:
         bsr       _flopvbl
 vbl_no_queue:
 /* screen hardcopy */
-        tst.w     (_dumpflg).w
+        tst.w     (_dumpflg).w						/* monitor screen dump flag - printscreen active? */
         bne.s     vbl_no_dump
         bsr       _scrdmp
 vbl_no_dump:
-        movem.l   (a7)+,d0-d7/a0-a6
+        movem.l   (a7)+,d0-d7/a0-a6					/* restore registers & return (and a handy RTE) */
 vbl_end:
-        addq.w    #1,_vblsem
+        addq.w    #1,_vblsem						/* V(vblsem) [release vblank] */
 
 /* 306de: 00e00d78 */
+/* 206de: 00e00d1a */
 just_rte:
         rte
 
+/*
+ * XBIOS #37 - Vsync - wait for next vblank
+ */
 /* 306de: 00e00d7a */
+/* 206de: 00e00d1c */
 _vsync:
         move.w    sr,-(a7)
-        andi.w    #$FBFF,sr
-        move.l    _frclock,d0
+        andi.w    #$FBFF,sr							/* enable vbl interrupts */
+        move.l    _frclock,d0						/* d0 = frame clock */
 vsyncwait:
-        cmp.l     _frclock,d0
+        cmp.l     _frclock,d0						/* wait for clock to change */
         beq.s     vsyncwait
         move.w    (a7)+,sr
         rts
 
+/*
+ * _callcrit - critical error handler binding for C
+ * Falls-into:   critret
+ * (screwy way to save two bytes....)
+ *
+ */
 /* 306de: 00e00d92 */
+/* 206de: 00e00d34 */
 		xdef _callcrit
 _callcrit:
         move.l    _etv_critic,-(a7)
+/*
+ * critret - default critical error handler
+ * Loads -1 into D0 and returns
+ *
+ */
 critret:
         moveq.l   #-1,d0
         rts
 
+/*
+ * trp13h - GEMDOS BIOS trap handler (trap 13)
+ * trp14h - Atari BIOS extensions (trap 14)
+ * traph  - trap handler
+ *
+ * On the stack:
+ *       From super-             From user
+ *       visor mode:             mode:
+ *       -----------             ------------
+ *       N(sp) args              N(usp) args
+ *       6(sp) func#             6(usp) func#
+ *       2(sp) ret               2(ssp) ret
+ *        (sp) SR                 (ssp) SR
+ *
+ * Returns:      anything in D0
+ * Uses:         d0-d2/a0-a2
+ * Keeps:        C registers
+ *
+ * Notes         BIOS traps are re-entrant to 'nlevels' (declared near the
+ *               beginning of this file).  Attempts to recurse more than
+ *               'nlevels' will probably result in a crash.
+ *
+ *               BIOS calls may be made from user mode.  (This differs from
+ *               the current GEMDOS spec, which states that BIOS traps are
+ *               available from supervisor mode only).
+ *
+ */
 /* ==== Trap 14 - XBIOS entry point ========================================= */
 
 /* 306de: 00e00d9c */
+/* 206de: 00e00d3e */
 _xbiostrap:
         lea.l     xbios_vecs(pc),a0
         bra.s     biosxbios
@@ -2266,6 +2355,7 @@ _xbiostrap:
 /* ==== Trap 13 - BIOS entry point ========================================== */
 
 /* 306de: 00e00da2 */
+/* 206de: 00e00d44 */
 _biostrap:
         lea.l     bios_vecs(pc),a0
 
@@ -2275,8 +2365,12 @@ biosxbios:
         move.w    (a7)+,d0               /* Status register -> d0 */
         move.w    d0,-(a1)               /* and save in save_area */
         move.l    (a7)+,-(a1)            /* save return address */
-        tst.w     (a7)+                  /* skip format word; BUG: no test for _longframe */
-        movem.l   d3-d7/a3-a7,-(a1)      /* regs, including stack pointer */
+#if !P68010 | !BINEXACT
+        tst.w     (_longframe).w
+        beq.s     traph2
+#endif
+        tst.w     (a7)+                  /* skip format word */
+traph2: movem.l   d3-d7/a3-a7,-(a1)      /* regs, including stack pointer */
         move.l    a1,_savptr
         btst      #13,d0                 /* were we in user mode? */
         bne.s     bx_sp_ok               /* yes, the sp already points to the arguments */
@@ -2288,37 +2382,57 @@ bx_sp_ok:
         move.w    d0,d1                  
         lsl.w     #2,d1                  /* function table is 1 LW per number so multiply function number by 4 */
         move.l    0(a0,d1.w),d1          /* get function address */
+#if TOSVERSION >= 0x300
         bclr      #0,d1                  /* indirect call? */
         movea.l   d1,a0
-        beq.s     bx_notindirect         
+        beq.s     bx_notindirect
+#else
+        movea.l   d1,a0                  /* (quick and dirty test-for-negative) */
+        bpl.s     bx_notindirect         /* points to code */
+#endif
         movea.l   (a0),a0                /* call indirect through system variable */
 bx_notindirect:
-        suba.l    a5,a5
-        jsr       (a0)
+        suba.l    a5,a5                  /* a5 -> zero page */
+        jsr       (a0)                   /* call BIOS/XBIOS function */
 bx_ret:
         movea.l   _savptr,a1
         movem.l   (a1)+,d3-d7/a3-a7      /* Get regs back, including sp */
-        clr.w     -(a7)                  /* push NULL format word; BUG: no test for _longframe */
-        move.l    (a1)+,-(a7)            /* return adress */
+#if !P68010 | !BINEXACT
+        tst.w     (_longframe).w
+        beq.s     trph3
+#endif
+        clr.w     -(a7)                  /* push NULL format word */
+trph3:  move.l    (a1)+,-(a7)            /* return adress */
         move.w    (a1)+,-(a7)            /* sr */
         move.l    a1,_savptr
         rte                              /* return with return value in D0 */
 
+/* ------ jump table for BIOS functions: */
+/* 306de: 00e00dfa */
+/* 206de: 00e00da4 */
+#if TOSVERSION < 0x300
+#define INDIRECT $80000000
+#else
+#define INDIRECT 1
+#endif
 bios_vecs:
         dc.w 12
         dc.l _getmpb
         dc.l _bbconstat
         dc.l _bbconin
         dc.l _bbconout
-        dc.l _hdv_rw+1 /* Rwabs */
+        dc.l _hdv_rw+INDIRECT /* Rwabs */
         dc.l _setexc
         dc.l _tickcal
-        dc.l _hdv_bpb+1 /* Getbpb */
+        dc.l _hdv_bpb+INDIRECT /* Getbpb */
         dc.l _bbcostat
-        dc.l _hdv_mediach+1 /* Mediach */
+        dc.l _hdv_mediach+INDIRECT /* Mediach */
         dc.l _drvmap
         dc.l _kbshift
 
+/* ------ jump table for XBIOS functions: */
+/* 306de: 00e00e2c */
+/* 206de: 00e00dd6 */
 xbios_vecs:
         dc.w (xbvecsend-xbios_vecs)/4
         dc.l _initmouse
@@ -2367,8 +2481,16 @@ xbios_vecs:
         dc.l _dmawrite
         dc.l _bconmap
         dc.l bios_unimpl
+#if NVRAM_SUPPORT
         dc.l _nvmaccess
-        dc.l bios_unimpl /* Waketime */
+#else
+        dc.l bios_unimpl
+#endif
+#if (TOSVERSION >= 0x200) & (TOSVERSION < 0x300)
+        dc.l _waketime
+#else
+        dc.l bios_unimpl
+#endif
         dc.l bios_unimpl
         dc.l bios_unimpl
         dc.l bios_unimpl
@@ -2386,6 +2508,7 @@ xbios_vecs:
         dc.l bios_unimpl
         dc.l bios_unimpl
         dc.l _blitmode
+#if TOSVERSION >= 0x300
         dc.l bios_unimpl
         dc.l bios_unimpl
         dc.l bios_unimpl
@@ -2417,8 +2540,10 @@ xbios_vecs:
         dc.l bios_unimpl
         dc.l bios_unimpl
         dc.l bios_unimpl
+#endif
 xbvecsend:
 
+#if TOSVERSION >= 0x300
 /* unknown: 00e00fae; seems to be unused */
         btst      #0,1(a7)
         bne.s     bx_notodd
@@ -2433,6 +2558,7 @@ rw_ret:
 #endif
         move.l    (a7)+,d0
         jmp       bx_ret
+#endif
 
 
 /*
@@ -2445,10 +2571,19 @@ rw_ret:
  * with GEMDOS get/set supervisor mode call.
  */
 /* 306de: 00e00fd0 */
+/* 206de: 00e00edc */
 _supexec:
         movea.l   4(a7),a0
         jmp       (a0)
 
+
+/*
+ * Character device I/O
+ *
+ * No check is made for "bogus" device numbers.  A wierd device
+ * number will result in a crash.
+ *
+ */
 
 /*
  * BIOS #1 - Bconstat - Status of input device
@@ -2462,6 +2597,7 @@ _supexec:
  *   0  device is not ready
  */
 /* 306de: 00e00fd6 */
+/* 206de: 00e00ee2 */
 _bbconstat:
         lea.l     (_bconstat_vec).w,a0
         moveq.l   #0,d1 /* offsetof(MAPTAB, Bconstat) */
@@ -2482,6 +2618,7 @@ _bbconstat:
  * returns the character in the low byte.
  */
 /* 306de: 00e00fde */
+/* 206de: 00e00eea */
 _bbconin:
         lea.l     (_bconin_vec).w,a0
         moveq.l   #4,d1 /* offsetof(MAPTAB, Bconin) */
@@ -2495,6 +2632,7 @@ _bbconin:
  * 0    device is not ready
  */
 /* 306de: 00e00fe6 */
+/* 206de: 00e00ef2 */
 _bbcostat:
         lea.l     (_bcostat_vec).w,a0
         moveq.l   #8,d1 /* offsetof(MAPTAB, Bcostat) */
@@ -2504,12 +2642,13 @@ _bbcostat:
  * BIOS #3 - Bconout - Print character to output device
  */
 /* 306de: 00e00fee */
+/* 206de: 00e00efa */
 _bbconout:
         lea.l     (_bconout_vec).w,a0
         moveq.l   #12,d1 /* offsetof(MAPTAB, Bconout) */
 
 doxconxx:
-        move.w    4(a7),d0
+        move.w    4(a7),d0            /* get device number */
         cmp.w     #$0005,d0
         bls.s     doxconstd
         subq.l    #6,d0
@@ -2526,12 +2665,27 @@ doxconret:
         moveq.l   #0,d0
         rts
 doxconstd:
-        lsl.w     #2,d0
-        movea.l   0(a0,d0.w),a0
-        jmp       (a0)
+        lsl.w     #2,d0             /* turn into longword index */
+        movea.l   0(a0,d0.w),a0     /* get address of handler */
+        jmp       (a0)              /* jump to it */
 
 
+/*
+ * Jump tables for
+ *       0 - lst: (printer)
+ *       1 - aux: (rs232)
+ *       2 - con: (screen)
+ *       3 - Atari midi
+ *       4 - Atari keyboard (output only)
+ *       5 - raw console output (bypass vt52 pressure cooker)
+ *
+ * No range checking is performed.  If a bogus device number
+ * is passed to the BIOS' character I/O handler, the system
+ * will crash to become funky duex.
+ *
+ */
 /* 306de: 00e01024 */
+/* 206de: 00e00f30 */
 tconstat:
         dc.l      bios_unimpl
         dc.l      _bcon6stat    /* BIOS device 1 (AUX) defaults to RS232 port */
@@ -2552,7 +2706,7 @@ tconstat:
         dc.l      _bco0stat
         dc.l      _bco6stat     /* BIOS device 1 (AUX) defaults to RS232 port */
         dc.l      _bco2stat
-        dc.l      _bco4stat /* BUG compatibility with early TOS versions: MIDI(3) and KBD(4) are swapped */
+        dc.l      _bco4stat     /* BUG compatibility with early TOS versions: MIDI(3) and KBD(4) are swapped */
         dc.l      _bco3stat
         dc.l      bios_unimpl
         dc.l      bios_unimpl
@@ -2576,6 +2730,7 @@ tconstat:
  * present.
  */
 /* 306de: 00e010a4 */
+/* 206de: 00e00fb0 */
 _drvmap:
         move.l    (_drvbits).w,d0
         rts
@@ -2596,6 +2751,7 @@ _drvmap:
  *              flag is -1, then only the inquiry is done.
  */
 /* 306de: 00e010aa */
+/* 206de: 00e00fb6 */
 _kbshift:
         moveq.l   #0,d0
         move.b    (_shifty).w,d0
@@ -2617,18 +2773,23 @@ kbshift1:
  *
  */
 /* 306de: 00e010bc */
+/* 206de: 00e00fc8 */
 _getmpb:
         movea.l   4(a7),a0
         lea.l     (_themd).w,a1
+/* --- initialize MPB: */
         move.l    a1,(a0)            /* mp_mfl = &themd; */
         clr.l     4(a0)              /* mp_mal = NULL; */
         clr.l     8(a0)              /* mp_rover = NULL; */
+/* ---- initialize MD: */
         clr.l     (a1)               /* themd.m_link = NULL; */
         move.l    (_membot).w,4(a1)  /* themd.m_start = membot; */
         move.l    (_memtop).w,d0
         sub.l     (_membot).w,d0
         move.l    d0,8(a1)           /* themd.m_length = memtop - membot; */
         clr.l     12(a1)             /* themd.m_own = NULL; */
+
+#if TOSVERSION >= 0x300
         cmpi.l    #$1357BD13,_ramvalid
         bne.s     getmpb1
         cmpi.l    #FASTRAMBASE,_ramtop
@@ -2642,28 +2803,41 @@ _getmpb:
         move.l    d0,8(a2)           /* altmd.m_length = ramtop - base address of fast mem */
         clr.l     12(a2)             /* altmd.m_own = NULL; */
 getmpb1:
+#endif
+
         rts
 
 /*
  * BIOS #5 - Setexc - set exception vector
+ * Synopsis:     setexc(vecno, addr)
+ *               If 'addr' < 0, the vector is not set.
+ *
+ *               Extended vectors ($100 though $107) are located in the
+ *               first eight longwords of BSS, at $400. This is for
+ *               convienience -- they could really be located anywhere.
+ *
+ * Returns:      D0.L = original vector value
+ *
  */
 /* 306de: 00e01124 */
+/* 206de: 00e00ff4 */
 _setexc:
-        move.w    4(a7),d0
-        lsl.w     #2,d0
-        suba.l    a0,a0
-        lea.l     0(a0,d0.w),a0
-        move.l    (a0),d0
-        move.l    6(a7),d1
-        bmi.s     setexc1
-        move.l    d1,(a0)
+        move.w    4(a7),d0          /* d0 = vector # */
+        lsl.w     #2,d0             /* turn into longword index */
+        suba.l    a0,a0             
+        lea.l     0(a0,d0.w),a0     /* a0 -> vector */
+        move.l    (a0),d0           /* d0 = current vector address */
+        move.l    6(a7),d1          /* d1 = what_to_change_it_to */
+        bmi.s     setexc1           /* punt if (d1 < 0) */
+        move.l    d1,(a0)           /* set vector address */
 setexc1:
         rts
 
 /*
- * BIOS #6 - Tickcal - Time between two systemtimer calls
+ * BIOS #6 - Tickcal - return system timer calibration value (in ms)
  */
 /* 306de: 00e0113c */
+/* 206de: 00e0100c */
 _tickcal:
         moveq.l   #0,d0
         move.w    (_timer_ms).w,d0
@@ -2675,11 +2849,12 @@ _tickcal:
  * (at the beginning of the next vblank).
  */
 /* 306de: 00e01144 */
+/* 206de: 00e01014 */
 _physbase:
-        moveq.l   #0,d0
-        move.b    (v_bas_h).w,d0
+        moveq.l   #0,d0             /* cleanup pointer-to-be */
+        move.b    (v_bas_h).w,d0    /* load and shift bits 16..23 */
         lsl.w     #8,d0
-        move.b    (v_bas_m).w,d0
+        move.b    (v_bas_m).w,d0    /* load and shift bits 8..15 */
         lsl.l     #8,d0
         tst.b     STEFlag
         bne.s     physbas1
@@ -2693,8 +2868,9 @@ physbas1:
  * This is the location that GSX uses when drawing to the screen.
  */
 /* 306de: 00e01160 */
+/* 206de: 00e01030 */
 _logbase:
-        move.l    (_v_bas_a).w,d0
+        move.l    (_v_bas_ad).w,d0
         rts
 
 /*
@@ -2703,10 +2879,21 @@ _logbase:
  * Returns 0, 1, 2, 4, 5 or 6.
  */
 /* 306de: 00e01166 */
+/* 206de: 00e01036 */
 _getrez:
         moveq.l   #0,d0
+#if STBOOK
+        move.b    (_sshiftmod).w,d0         /* get screen rezolution */
+        and.b     #3,d0                     /* strip garbage bits */
+#else
+#if TOSVERSION < 0x300
+		move.b    (v_shf_mod).w,d0          /* get screen rezolution */
+        and.b     #3,d0                     /* strip garbage bits */
+#else
         move.b    (shift_tt).w,d0
         and.b     #$07,d0
+#endif
+#endif
         rts
 
 /*
@@ -2719,25 +2906,31 @@ _getrez:
  * the cursor is homed, and the VT52 terminal emulator state is reset.
  */
 /* 306de: 00e01172 */
+/* 206de: 00e01042 */
 _vsetscreen:
         tst.l     4(a7)
         bmi.s     nosetl
-        move.l    4(a7),(_v_bas_a).w
+        move.l    4(a7),(_v_bas_ad).w
 nosetl:
         tst.l     8(a7)
         bmi.s     nosetp
         move.b    9(a7),(v_bas_h).w
         move.b    10(a7),(v_bas_m).w
         move.b    11(a7),(v_bas_l).w         /* BUG: no test that 820d actually exists */
+/* --- set screen resolution (clears the screen, clobbers the cursor): */
 nosetp:
         tst.w     12(a7)
         bmi.s     nosetr
         bsr       dovsync
         move.b    13(a7),(_sshiftmod).w
+#if TOSVERSION >= 0x300
         move.b    (shift_tt).w,d0
         and.b     #$F8,d0
         or.b      13(a7),d0
         move.b    d0,(shift_tt).w
+#else
+        move.b    (_sshiftmod).w,(v_shf_mod).w /*set hardware location */
+#endif
         clr.w     (_vblsem).w
         jsr       esc_init
         move.w    #$0001,(_vblsem).w
@@ -2752,6 +2945,7 @@ nosetr:
  * place at the beginning of the next vertical blank interrupt.
  */
 /* 306de: 00e011c8 */
+/* 206de: 00e0108e */
 _setpalette:
         move.l    4(a7),(_colorptr).w     /* next VBL will do this */
         rts
@@ -2766,11 +2960,12 @@ _setpalette:
  * Return the old color.
  */
 /* 306de: 00e011d0 */
+/* 206de: 00e01096 */
 _setcolor:
         move.w    4(a7),d1
         add.w     d1,d1
         and.w     #$001F,d1
-        lea.l     ($FFFF8240).w,a0
+        lea.l     (palette).w,a0
         move.w    0(a0,d1.w),d0
         tst.b     STEFlag
         beq.s     setcol1
@@ -2793,6 +2988,7 @@ setcol3:
  * the function will return.
  */
 /* 306de: 00e01202 */
+/* 206de: 00e010c8 */
 _puntaes:
         movea.l   _os_magic(pc),a0
         cmpi.l    #$87654321,(a0)
@@ -2805,10 +3001,21 @@ puntaes1:
         rts
 
 
+/*
+ * _term - terminate current process
+ * Called-by:    Uncaught traps (bus errors, and so on)
+ * Saves:        processor state (in a bailout area)
+ */
 /* 306de: 00e0121c */
+/* 206de: 00e010e2 */
 any_vec:
+#if !P68010
+		jsr       (savp_2).l                /* stack PC */
+savp_2:
+#endif
 /* dump the registers, including SSP */
         movem.l   d0-d7/a0-a7,(_proc_dregs).w
+#if P68010
         move.l    2(a7),(_proc_enum).w
 /* get the exception number from the format word */
         move.w    6(a7),d0
@@ -2816,6 +3023,7 @@ any_vec:
         asr.w     #2,d0
 /* dump the exception number */
         move.b    d0,(_proc_enum).w
+#endif
 /* dump the correct value for USP */
         move.l    usp,a0
         move.l    a0,(_proc_usp).w
@@ -2840,7 +3048,11 @@ any_vec1:
         bra       _main
 drawbombs:
         move.b    (_sshiftmod).w,d7
+#if TOSVERSION >= 0x300
         and.w     #$0007,d7
+#else
+        and.w     #$0003,d7
+#endif
         add.w     d7,d7
         moveq.l   #0,d0
         move.b    (v_bas_h).w,d0
@@ -2922,21 +3134,30 @@ autoname:                      dc.b '*.PRG',0
  * autoexec PRGs from AUTO folder
  */
 /* 306de: 00e0133c */
+/* 206de: 00e011f6 */
 autoexec:
         move.l    #$000Bffff,-(a7)
         trap      #13              /* Kbshift(-1) */
         addq.l    #4,a7     
         btst      #2,d0            /* Control pressed? */
         bne.s     autoexe2        /* yes, skip autoexec */
+#if TOSVERSION < 0x300
+        move.l    (_drvbits).w,d0           /* d0 - active dev vector */
+        move.w    _bootdev,d1               /* d1 - dev# to exec from */
+        btst      d1,d0                     /* is the dev alive? */
+        beq.s     autoq                     /* (no -- so punt) */
+#endif
         lea.l     autopath(pc),a0
         lea.l     autoname(pc),a1
         move.l    (a7)+,savepc
         move.l    a0,(execpath).w
         move.l    a1,(execname).w
-        move.l    (_drvbits).w,d0
-        move.w    _bootdev,d1
-        btst      d1,d0
-        beq.s     autoexe1
+#if TOSVERSION >= 0x300
+        move.l    (_drvbits).w,d0           /* d0 - active dev vector */
+        move.w    _bootdev,d1               /* d1 - dev# to exec from */
+        btst      d1,d0                     /* is the dev alive? */
+        beq.s     autoexe1                  /* (no -- so punt) */
+#endif
         lea.l     emptystr(pc),a0
         move.l    a0,-(a7)
         move.l    a0,-(a7)
@@ -3031,6 +3252,8 @@ autosca4:
 		text
 
 /* --- what it is: */
+/* 306de: 00e014f6 */
+/* 206de: 00e013b2 */
 bombimage:        dc.w $0600,$2900,$0080,$4840,$11f0,$01f0,$07fc,$0ffe,$0dfe,$1fff,$1fef,$0fee,$0fde,$07fc,$03f8,$00e0
 
 
@@ -3048,6 +3271,7 @@ waitev:
         beq.s     waitev
         jmp       (a6)
 #else
+/* 206de: 00e013d2 */
 waitvbl:    lea       (MFP_TBDR).w,a0               /* a0 -> timer B data register */
             lea       (MFP_TBCR).w,a1               /* a1 -> timer B control register */
             bclr      #0,(MFP_IERA).w               /* disable IRQ of timer B */
@@ -3082,6 +3306,7 @@ dovsync:
  * versions of Atari TOS.
  */
 /* 306de: 00e01530 */
+/* 206de: 00e01408 */
 run_reset_resident:
         movea.l   _phystop,a0
 run_res1:
@@ -3114,6 +3339,7 @@ run_res3:
  * (Time in the low word, date in the high word).
  */
 /* 306de: 00e0156e */
+/* 206de: 00e01446 */
 _gettime:
         lea.l     rdttclock,a3
         lea.l     igetdt,a4
@@ -3126,6 +3352,7 @@ _gettime:
  * date in the high word).
  */
 /* 306de: 00e0157c */
+/* 206de: 00e01454 */
 _settime:
         move.w    4(a7),_date
         move.w    6(a7),_time
@@ -3143,6 +3370,7 @@ gsettim1:
  * copy sysbase into memory and patch it
  */
 /* 306de: 00e015a2 */
+/* 206de: 00e0147a */
 instoshdr:
         lea.l     _os_entry(pc),a0
         lea.l     oshdr+6,a1
@@ -3166,6 +3394,7 @@ braop:
  * XBIOS #40 - Blitmode
  */
 /* 306de: 00e015dc */
+/* 206de: 00e014b4 */
 _blitmode:
         bsr.s     blittest
         move.w    d0,d4
@@ -3187,6 +3416,7 @@ blitmod1:
  * blittest - test if the blitter is installed
  */
 /* 306de: 00e01604 */
+/* 206de: 00e014dc */
 blittest:
         move.w    sr,d1
         move.w    #$0000,d0
@@ -3204,19 +3434,41 @@ noblitter:
         rts
 
 /* 306de: 00e0162e */
+/* 206de: 00e01506 */
 mfpdelay:
-        bsr.s     tttimerc
-ttdelay1:
+        bsr.s     timerc
+mfpdela1:
+#if TOSVERSION < 0x300
+        btst      #5,(MFP_IPRA).w               /* did timer a fire? */
+        beq.s     mfpdela1                      /* wait more if not */
+        clr.b     (MFP_TACR).w                  /* stop timer a */
+#else
         btst      #5,(MFP_IPRB+(TTMFP_REGS-MFP_REGS)).w
-        beq.s     ttdelay1
+        beq.s     mfpdela1
+#endif
         rts
 
 /*
- * (re-)program TT MFP Timer C
+ * (re-)program TT-MFP Timer C or MFP Timer A
  * Input: D0: initial counter (low byte) + (divisor<<8)
  */
 /* 306de: 00e0163a */
-tttimerc:
+/* 206de: 00e01516 */
+timerc:
+#if TOSVERSION < 0x300
+		move    sr,-(sp)
+        ori       #$700,sr
+        clr.b     (MFP_TACR).w                  /* timer A control register */
+        bclr      #5,(MFP_IERA).w               /* disable timer A */
+        move.b    #$df,(ipra).w             /* clear a pending timer A interrupt */
+        bclr      #5,(MFP_IMRA).w               /* mask the timer A interrupt */
+        bset      #5,(MFP_IERA).w               /* enable timer A */
+        move      (sp)+,sr
+        move.b    d0,(MFP_TADR).w               /* set timer a data register */
+        ror.w     #8,d0
+        move.b    d0,(MFP_TACR).w               /* set timer a control register */
+        rol.w     #8,d0
+#else
         movem.w   d0-d1,-(a7)
         move.w    sr,-(a7)
         ori.w     #$0700,sr
@@ -3234,6 +3486,7 @@ tttimerc:
         move.b    d1,(MFP_TCDCR+(TTMFP_REGS-MFP_REGS)).w /* Set Timer C mode */
         move.w    (a7)+,sr
         movem.w   (a7)+,d0-d1
+#endif
         rts
 
 /*
@@ -3249,6 +3502,7 @@ tttimerc:
  *
  */
 /* 306de: 00e01680 */
+/* 206de: 00e01548 */
 		xdef _zeromem
 _zeromem:
         movea.l   4(a7),a0	/* a0 -> start */
@@ -3303,6 +3557,7 @@ zerom4:
 /*
  * XBIOS #80 - EsetShift
  */
+#if TOSVERSION >= 0x300
 /* 306de: 00e01756 */
 _esetshift:
         bsr       dovsync
@@ -3458,6 +3713,7 @@ esetsm1:
         move.b    d1,(shift_tt).w
 esetsm2:
         rts
+#endif
 
 
 #include "dma.inc"

@@ -13,6 +13,7 @@
  * Older TOS (192k images) do not have a checksum.
  */
 /* 306de: 00e01724 */
+/* 206de: 00e015b4 */
 check_rom_crc:
         movea.l   4(a7),a0
         move.l    8(a7),d2

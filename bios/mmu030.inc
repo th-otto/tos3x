@@ -1,7 +1,7 @@
 /* #include "asmdefs.h" */
 /* #include "tosvars.inc" */
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300)
 
 mmutable_ram equ $700 /* CPU root table in memory */
 
