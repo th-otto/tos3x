@@ -8,17 +8,17 @@ rtc_sec         equ $fffffc20
 /* 306de: 00e01ef0 */
 #if NVRAM_SUPPORT
 ngetdt:
-        bsr       detect_nvram
+        bsr       checkRTC
         bcs.s     inittc2
         move.b    #$0D,(NVRAM_ADDR_REG).w /* select register D */
         move.b    (NVRAM_DATA_REG).w,d0
         btst      #7,d0                   /* is RAM & time valid? */
         bne.s     inittc1                 /* yes */
         move.l    #$12C80000,-(a7)        /* (9<<9)+(6<<5)+8 */
-        bsr       wrttclock
+        bsr       writeRTCTime
         addq.w    #4,a7
 inittc1:
-        bsr.s     rdttclock
+        bsr.s     readRTCTime
         cmp.l     #$FFFFFFFF,d0
         beq.s     inittc2
         moveq.l   #0,d0
@@ -30,8 +30,8 @@ inittc2:
  * and updates GEMDOS variables from it
  */
 /* 306de: 00e01f20 */
-rdttclock:
-        bsr       detect_nvram
+readRTCTime:
+        bsr       checkRTC
         bcs.s     inittc2
         move.b    #$0D,(NVRAM_ADDR_REG).w /* select register D */
         btst      #7,(NVRAM_DATA_REG).w   /* is RAM & time valid? */
@@ -81,8 +81,8 @@ rdttc2:
  * write date & time to TT clock
  */
 /* 306de: 00e01fc6 */
-wrttclock:
-        bsr       detect_nvram
+writeRTCTime:
+        bsr       checkRTC
         bcs       inittc2
         move.l    4(a7),d0
         move.b    #$0B,(NVRAM_ADDR_REG).w /* select register B */
@@ -116,7 +116,7 @@ wrttclock:
         rts
 
 /* 306de: 00e0205e */
-detect_nvram:
+checkRTC:
         movea.l   a7,a0
         movea.l   (_buserror).w,a1
         move.l    #nvramfail,(_buserror).w

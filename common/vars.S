@@ -65,8 +65,8 @@ execfname: ds.b 32
 	xdef _pbdef
 _pbdef: ds.b 30
 
-	xdef nextacsi
-nextacsi: ds.l 1
+	xdef lastacstm
+lastacstm: ds.l 1
 
 	xdef scsicmd
 scsicmd: ds.b 10

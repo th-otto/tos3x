@@ -9,6 +9,28 @@ ide_headn  equ $FFF00019
 ide_comst  equ $FFF0001D
 ide_stat2  equ $FFF00039
 
+/**************************************************************************
+ * DMAREAD.S from the AHDI source                                         *
+ **************************************************************************/
+/*
+ * dmaread() - read from a DMA device.
+ * dmawrite() - write to a DMA device.
+ *
+ * LONG	sectnum		$4(sp).l
+ * WORD	count		$8(sp).w
+ * BYTE	*buf		$a(sp).l	$b(sp)=high $c(sp)=mid $d(sp)=low
+ * WORD	pdev		$e(sp).w
+ *
+ * Returns 0 if successful.
+ * Returns a negative number if failure:
+ *	EUNDEV (-15L) if unknown device (bad dev number)
+ *	EREADF (-11L) if read failure
+ *	EWRITF (-10L) if write failure
+ *	       (-1L)  if timed-out
+ *
+ * Comments:
+ *	ACSI, SCSI and IDE-AT drives are supported.
+ */
 /*
  * XBIOS #42 - DMAread
  */
@@ -16,7 +38,7 @@ ide_stat2  equ $FFF00039
 /* 206de: 00e015e6 */
 _dmaread:
         move.b    #$00,dmarwflg
-        move.w    #$0008,d1
+        move.w    #$0008,d1     /* d1 = opcode for READ */
         bra.s     dmarw
 /*
  * XBIOS #43 - DMAwrite
@@ -25,73 +47,77 @@ _dmaread:
 /* 206de: 00e015f4 */
 _dmawrite:
         move.b    #$01,dmarwflg
-        move.w    #$000A,d1
+        move.w    #$000A,d1     /* d1 = opcode for WRITE */
 dmarw:
-        cmpi.w    #$0010,14(a7) /* devno <= 16? */
-        bhi       dmaundev      /* no, fail */
-        cmpi.w    #$000F,14(a7) /* devno <= 15? */
-        bhi.s     dmarw2        /* no, goto ide case */
-        lea.l     scsicmd,a0
-        move.b    d1,(a0)+      /* command */
-        move.b    5(a7),(a0)+   /* sector>>16 */
-        move.b    6(a7),(a0)+   /* sector>>8 */
-        move.b    7(a7),(a0)+   /* sector */
-        move.b    9(a7),(a0)+   /* count */
-        clr.b     (a0)          /* flags */
-        move.w    14(a7),d0     /* get device */
+        cmpi.w    #$0010,14(a7) /* unit# > IDE-AT unit# 16? */
+        bhi       dmaundev      /* if so, return unknown device */
+        cmpi.w    #$000F,14(a7) /* an IDE-AT unit? */
+        bhi.s     dmarw2        /* if so, talk IDE-AT */
+        lea.l     scsicmd,a0    /* a0 -> beginning of command block */
+        move.b    d1,(a0)+      /* byte 0 = opcode */
+        move.b    5(a7),(a0)+   /* byte 1 = msb of logical block addr */
+        move.b    6(a7),(a0)+   /* byte 2 = logical block addr */
+        move.b    7(a7),(a0)+   /* byte 3 = lsb of logical block addr */
+        move.b    9(a7),(a0)+   /* byte 4 = transfer length (in blocks) */
+        clr.b     (a0)          /* byte 5 = control byte */
+        move.w    14(a7),d0     /* d0 = physical unit number */
 #if TOSVERSION >= 0x300
         moveq.l   #0,d1
         move.w    8(a7),d1      /* get count */
         lsl.l     #8,d1
         add.l     d1,d1         /* d1 = transfer size (sector count * 512) */
 #endif
-        moveq.l   #6,d2
-        movea.l   10(a7),a0
-        tst.b     dmarwflg
-        bne.s     dmarw1
-        bsr       dodmaread
+        moveq.l   #6,d2         /* d2 = length of command */
+        movea.l   10(a7),a0     /* a0 = buffer */
+        tst.b     dmarwflg      /* read or write? */
+        bne.s     dmarw1        /* it's a write */
+        bsr       dodmaread     /* send a receive data command */
         bra       dmarw7
 dmarw1:
-        bsr       dodmawrite
-        bra       dmarw7
-dmabuserr:
-        movea.l   a1,a7
-        move.l    a0,(_buserror).w
+        bsr       dodmawrite    /* send a write data command */
+        bra       dmarw7        /* branch will take place for non-IDE drives */
+/*
+ * Before doing anything with the IDE bus, make sure it's there.
+ * (The label noide is before at just because it fits better.)
+ */
+noide:
+        movea.l   a1,a7         /* got the bus error on IDEASR; */
+        move.l    a0,(_buserror).w  /* restore vector & sp, return EUNDEV */
         bra       dmaundev
 dmarw2:
         movea.l   (_buserror).w,a0
         movea.l   a7,a1
-        move.l    #dmabuserr,(_buserror).w
-        tst.b     ide_stat2
-        movea.l   a1,a7
-        move.l    a0,(_buserror).w
-        move.b    15(a7),d0
-        bsr       iderdy
-        beq       dmaundev
-        moveq.l   #2,d0
-        add.l     (_hz_200).w,d0
+        move.l    #noide,(_buserror).w
+        tst.b     ide_stat2     /* read a register to probe for IDE bus */
+        movea.l   a1,a7         /* hey! no bus error! */
+        move.l    a0,(_buserror).w /* restore vector & sp and continue. */
+        move.b    15(a7),d0     /* IDE unit# */
+        bsr       iderdy        /* wait for drive to be ready */
+        beq       dmaundev      /* if drive never gets ready, return with unknown device else */
+        moveq.l   #2,d0         /* D_IDENTIFY delay required by Conner drives */
+        add.l     (_hz_200).w,d0 /* between power on and identify() */
 dmarw3:
         cmp.l     (_hz_200).w,d0
         bcc.s     dmarw3
 
-        pea.l     idebuf
-        move.w    18(a7),-(a7)
-        bsr       ideidentify
+        pea.l     idebuf        /* scratch buffer for drive parameters */
+        move.w    18(a7),-(a7)  /* IDE unit# */
+        bsr       ideidentify   /* identify() */
         addq.w    #6,a7
-        tst.w     d0
-        bmi       dmaret
-        bne.s     dmarw8
-        moveq.l   #2,d0
-        add.l     (_hz_200).w,d0
+        tst.w     d0            /* successful? */
+        bmi       dmaret        /* if timed-out, return */
+        bne.s     dmarw8        /* if error, return with error code else can do read or write */
+        moveq.l   #2,d0         /* D_IDENTIFY delay required by Conner drives */
+        add.l     (_hz_200).w,d0 /* between identify() and r/w */
 dmarw4:
         cmp.l     (_hz_200).w,d0
         bcc.s     dmarw4
 
 #if TOSVERSION >= 0x300
         lea.l     idebuf,a0
-        move.w    12(a0),-(a7)
-        move.w    6(a0),-(a7)
-        move.w    18(a7),-(a7)
+        move.w    12(a0),-(a7)  /* # of sectors per track */
+        move.w    6(a0),-(a7)   /* # of heads */
+        move.w    18(a7),-(a7)  /* physical unit # */
         bsr       idecount
         addq.w    #6,a7
         tst.w     d0
@@ -99,29 +125,29 @@ dmarw4:
         bne.s     dmarw8
         lea.l     idebuf,a0
 #else
-	pea       idebuf                  /* beginning of _identify() data */
-	bsr       _gcparm                   /* get drive current parameters */
-	addq.w    #4,sp                     /* clean up stack */
+	pea       idebuf        /* beginning of _identify() data */
+	bsr       _gcparm       /* get drive current parameters */
+	addq.w    #4,sp         /* clean up stack */
 #endif
-        move.w    14(a7),-(a7)   /* device number */
+        move.w    14(a7),-(a7)   /* physical unit # */
         move.l    12(a7),-(a7)   /* buffer */
         move.w    14(a7),-(a7)   /* count */
-        move.l    12(a7),-(a7)   /* start sector number */
+        move.l    12(a7),-(a7)   /* logical block address */
 #if TOSVERSION >= 0x300
         move.w    12(a0),-(a7)   /* device number of sectors */
         move.w    6(a0),-(a7)    /* device number of heads */
 #else
-        move.w    d2,-(sp)                  /* # sectors per track */
-        move.w    d1,-(sp)                  /* # data heads */
+        move.w    d2,-(sp)       /* # sectors per track */
+        move.w    d1,-(sp)       /* # data heads */
 #endif
-        tst.b     dmarwflg
+        tst.b     dmarwflg       /* read or write? */
         bne.s     dmarw5
-        bsr       ideread
+        bsr       ideread        /* read sectors */
         bra.s     dmarw6
 dmarw5:
-        bsr       idewrite
+        bsr       idewrite       /* write sectors */
 dmarw6:
-        adda.w    #$0010,a7
+        adda.w    #16,a7
 dmarw7:
 #if P68030
         move.w    sr,-(a7)
@@ -131,52 +157,79 @@ dmarw7:
         D1_CACR
         move.w    (a7)+,sr
 #endif
-        tst.w     d0
-        ble.s     dmaret
+        tst.w     d0             /* successful? */
+        ble.s     dmaret         /* if no error or timed-out, return else */
 dmarw8:
-        moveq.l   #-11,d0 /* E_READF */
+        moveq.l   #-11,d0        /* assume it's a read error E_READF */
         tst.b     dmarwflg
         beq.s     dmaret
-        moveq.l   #-10,d0 /* E_WRITF */
+        moveq.l   #-10,d0        /* else, it's a write error E_WRITF */
 dmaret:
         rts
 dmaundev:
-        moveq.l   #-15,d0 /* E_UNDEV */
+        moveq.l   #-15,d0        /* E_UNDEV */
         bra.s     dmaret
 
+/*
+ * dorcmd() - send a command which will receive data from the target
+ *
+ * Passed:
+ *	d0.w = physical unit number
+ *	d2.w = command length (NCMD or LCMD)
+ *	a0.l = buffer address
+ */
 /* 306de: 00e019ba */
 /* 206de: 00e016f6 */
 dodmaread:
 #if TOSVERSION >= 0x300
         cmp.w     #$0007,d0
         bls.s     domdmar1
-        bsr       scsiread
+        bsr       scsiread       /* it's an SCSI device */
         rts
 domdmar1:
 #endif
-        bsr       acsiread
+        bsr       rcvacsi        /* it's an ACSI device */
         rts
 
+/*
+ * dowcmd() - send a command which will write data to the target
+ *
+ * Passed:
+ *	d0.w = physical unit number
+ *	d2.w = command length (NCMD or LCMD)
+ *	a0.l = buffer address
+ */
 /* 306de: 00e019cc */
 /* 206de: 00e016fa */
 dodmawrite:
 #if TOSVERSION >= 0x300
         cmp.w     #$0007,d0
         bls.s     dodmaw1
-        bsr       scsiwrite
+        bsr       scsiwrite       /* it's an SCSI device */
         rts
 dodmaw1:
 #endif
-        bsr       acsiwrite
+        bsr       wrtacsi        /* it's an ACSI device */
         rts
 
+/*
+ * LONG _qdone() - Wait for command byte handshake
+ * LONG _fdone() - Wait for operation complete
+ * Passed:	nothing
+ *
+ * Returns:	EQ: no time-out
+ *		MI: time-out condition
+ *
+ * Uses:		D0
+ *
+ */
 /* 306de: 00e019de */
 /* 206de: 00e01700 */
-dmadelay:
-        move.l    #600,d0
+_fdone:
+        move.l    #600,d0                   /* ACLTMOUT */
         bra.s     dmadel2
-dmadel1:
-        moveq.l   #20,d0
+_qdone:
+        moveq.l   #20,d0                    /* ACSTMOUT */
 dmadel2:
 #if TOSVERSION < 0x300
 	move.l    d0,-(sp)                  /* save timeout value */
@@ -188,21 +241,32 @@ sdelay: cmp.l     (_hz_200).w,d0
 #endif
         add.l     (_hz_200).w,d0
 dmadel3:
-        cmp.l     (_hz_200).w,d0
-        bcs.s     dmaerr
-        btst      #5,(MFP_GPIP).w
-        bne.s     dmadel3
-        moveq.l   #0,d0
+        cmp.l     (_hz_200).w,d0            /* time-out? */
+        bcs.s     dmaerr                    /* (i give up, return NE) */
+        btst      #5,(MFP_GPIP).w           /* interrupt? */
+        bne.s     dmadel3                   /* (not yet) */
+        moveq.l   #0,d0                     /* return EQ (no time-out) */
         rts
 dmaerr:
         moveq.l   #-1,d0
         rts
 
+/*
+ * Wait for end of SASI command
+ *
+ * Passed:	d1 value to be written to wdl
+ *
+ * Returns:	EQ: success (error code in D0.W)
+ *		MI: time-out (-1 in D0.W)
+ *		NE: failure (SASI error code in D0.W)
+ *
+ * Uses:		d0
+ */
 /* 306de: 00e01a02 */
 /* 206de: 00e01734 */
-acsiabort:
-        bsr.s     dmadelay
-        bmi.s     acsiab1
+_endcmd:
+        bsr.s     _fdone                    /* wait for operation complete */
+        bmi.s     acsiab1                   /* (timed-out, so complain) */
 #if P68030
         move.w    sr,-(a7)
         ori.w     #$0700,sr
@@ -212,16 +276,20 @@ acsiabort:
         move.w    (a7)+,sr
 #endif
         move.w    d1,($FFFF8606).w
-        move.w    ($FFFF8604).w,d0
-        and.w     #$00FF,d0
+        move.w    ($FFFF8604).w,d0          /* get the result */
+        and.w     #$00FF,d0                 /* (clean it up) if non-0 should do a RequestSense command to learn more */
 acsiab1:
-        move.l    (_hz_200).w,nextacsi
-        addq.l    #2,nextacsi
+        move.l    (_hz_200).w,lastacstm     /* update controller last accessed time */
+        addq.l    #2,lastacstm              /* lastacstm = _hz_200 + 2; */
         rts
 
+/*
+ *  Handle command time-out
+ *  Unlock DMA chip and return completion status
+ */
 /* 306de: 00e01a36 */
 /* 206de: 00e01754 */
-acsiend:
+_hdone:
         move.w    #$0080,($FFFF8606).w      /* Landon's code seems to presume we put $80 there */
 #if (TOSVERSION >= 0x300) | !BINEXACT
         clr.w     (_flock).w                /* NOW, signal that we are done */
@@ -237,96 +305,139 @@ acsiend:
 /* 306de: 00e01a42 */
 /* 206de: 00e01760 */
 acsibeg:
-        move.l    d0,-(a7)
-        move.l    nextacsi,d0
+        move.l    d0,-(a7)                  /* preserve d0 */
+        move.l    lastacstm,d0              /* d0 = controller last accessed time */
 acsibeg1:
-        cmp.l     (_hz_200).w,d0
-        bcc.s     acsibeg1
-        move.l    (a7)+,d0
+        cmp.l     (_hz_200).w,d0            /* while (_hz_200 <= lastacstm) */
+        bcc.s     acsibeg1                  /* wait() */
+        move.l    (a7)+,d0                  /* restore d0 */
         rts
 
+/*
+ * rcvacsi() - send a ACSI command which receives data from target.
+ *
+ * Passed:
+ *	d0.w = physical unit number
+ *	d2.w = command length (NCMD or LCMD)
+ *	a0.l = buffer address
+ */
 /* 306de: 00e01a54 */
 /* 206de: 00e01772 */
-acsiread:
-        movea.l   (_buserror).w,a1
+rcvacsi:
+        movea.l   (_buserror).w,a1          /* check to see if the ACSI bus actually exists! Needed for prototype PADs */
         movea.l   a7,a2
         move.l    #acsierr,(_buserror).w
-        tst.w     ($FFFF8606).w
-        move.l    a1,(_buserror).w
+        tst.w     ($FFFF8606).w             /* harmless or bus erorr */
+        move.l    a1,(_buserror).w          /* no bus error - restore & continue */
         movea.l   a2,a7
-        st        (_flock).w
-        bsr.s     acsibeg
-        movea.w   #$8604,a1
-        bsr       setdmaaddr
-        move.w    #$0190,2(a1)
+        st        (_flock).w                /* lock FIFO */
+        bsr.s     acsibeg                   /* delay if necessary */
+        movea.w   #$8604,a1                 /* a1 = pointer to DMA chip */
+        bsr       setdmaaddr                /* set DMA pointer */
+        move.w    #$0190,2(a1)              /* WDL	; toggle DMA chip to direction */
         bsr       shortdelay
-        move.w    #$0090,2(a1)
+        move.w    #$0090,2(a1)              /* WDL	;  for receiving data */
         bsr       shortdelay
-        bsr       setacnt
-        lea.l     scsicmd,a0
-        moveq.l   #0,d1
-        bsr.s     acsistat
-        bra.s     acsiend
+        bsr       setacnt                   /* set DMA count */
+        lea.l     scsicmd,a0                /* a0 = address of command block */
+        moveq.l   #0,d1                     /* direction of DMA is IN */
+        bsr.s     sblkacsi                  /* send the command block */
+        bra.s     _hdone                    /* cleanup after IRQ */
 
+/*
+ * wrtacsi() - send an ACSI command which will write data to the target
+ *
+ * Passed:
+ *	d0.w = physical unit number
+ *	d2.w = command length (NCMD or LCMD)
+ *	a0.l = buffer address
+ */
 /* 306de: 00e01a9e */
 /* 206de: 00e017bc */
-acsiwrite:
-        movea.l   (_buserror).w,a1
+wrtacsi:
+        movea.l   (_buserror).w,a1          /* check to see if the ACSI bus actually exists! Needed for prototype PADs */
         movea.l   a7,a2
         move.l    #acsierr,(_buserror).w
-        tst.w     ($FFFF8604).w
-        move.l    a1,(_buserror).w
+        tst.w     ($FFFF8604).w             /* harmless or bus erorr */
+        move.l    a1,(_buserror).w          /* no bus error - restore & continue */
         movea.l   a2,a7
-        st        (_flock).w
+        st        (_flock).w                /* lock FIFO */
         bsr.s     acsibeg
-        movea.w   #$8604,a1
-        bsr.s     setdmaaddr
-        move.w    #$0090,2(a1)
+        movea.w   #$8604,a1                 /* a1 = pointer to DMA chip */
+        bsr.s     setdmaaddr                /* set DMA pointer */
+        move.w    #$0090,2(a1)              /* WDL	; toggle DMA chip for "send" */
         bsr       shortdelay
-        move.w    #$0190,2(a1)
+        move.w    #$0190,2(a1)              /* WDL */
         bsr       shortdelay
-        bsr.s     setacnt
-        move.l    #$00000100,d1
-        bsr.s     acsistat
-        bra       acsiend
+        bsr.s     setacnt                   /* set DMA count */
+        move.l    #$00000100,d1             /* d1 = direction of DMA is OUT */
+        bsr.s     sblkacsi                  /* send the command block */
+        bra       _hdone                    /* cleanup after IRQ */
 
+/*
+ * You get to this label if there is a bus error when probing for
+ * the ACSI bus: it's meant for prototype PADs, which don't
+ * have an ACSI DMA chip.
+ */
 /* 306de: 00e01ae4 */
 /* 206de: 00e01800 */
 acsierr:
-        moveq.l   #-15,d0 /* E_UNDEV */
+        moveq.l   #-15,d0                   /* return E_UNDEV */
         movea.l   a2,a7
         move.l    a1,(_buserror).w
         rts
 
+/*
+ * sblkacsi() - send command block
+ *
+ * Passed:
+ *	d0.w = physical unit number
+ *	d1.l = direction of DMA ($0000 for IN or $0100 for OUT)
+ *	d2.w = command length (NCMD or LCMD)
+ *	a1.l = pointer to DMA chip
+ *
+ * Returns:
+ *	d0.l =  0 if successful
+ *	d0.l = -1 if time-out
+ *
+ * Trashes:
+ *	d0, d1, d2, a2
+ */
 /* 306de: 00e01aee */
 /* 206de: 00e0180a */
-acsistat:
-        move.b    #$88,d1
-        move.w    d1,2(a1)
-        move.b    #$8A,d1
+sblkacsi:
+        move.b    #$88,d1                       /* next byte is the opcode */
+        move.w    d1,2(a1)                      /* WDL */
+        move.b    #$8A,d1                       /* following bytes are operands */
         lea.l     scsicmd,a2
-        lsl.b     #5,d0
-        or.b      d0,(a2)
+        lsl.b     #5,d0                         /* shift unit number into place */
+        or.b      d0,(a2)                       /* first command byte = unit # | opcode */
         subq.w    #2,d2
 acsista1:
+        swap      d1                            /* d1.hw = operand */
+        move.b    (a2)+,d1                      /* d1.lw = tells controller next byte */
         swap      d1
-        move.b    (a2)+,d1
+        move.l    d1,(a1)                       /* WDCWDL */
+        bsr       _qdone
+        bmi.s     acsista2                      /* if time-out, returns */
+        dbf       d2,acsista1                   /* else send rest of command block */
+        move.w    d1,2(a1)                      /* WDL - get ready to send control byte */
+        move.b    #$00,d1                       /* signal sending control byte */
+        swap      d1                            /* d1.hw = control byte */
+        move.b    (a2),d1                       /* d1.lw = tells controller it's end */
         swap      d1
         move.l    d1,(a1)
-        bsr       dmadel1
-        bmi.s     acsista2
-        dbf       d2,acsista1
-        move.w    d1,2(a1)
-        move.b    #$00,d1
-        swap      d1
-        move.b    (a2),d1
-        swap      d1
-        move.l    d1,(a1)
-        move.b    #$8A,d1
-        bsr       acsiabort
+        move.b    #$8A,d1                       /* d1 = wdl value */
+        bsr       _endcmd                       /* wait for command completion */
 acsista2:
         rts
 
+/*
+ * setadma() - set the ACSI DMA pointer
+ *
+ * Passed:
+ *	a0.l = buffer address
+ */
 /* 306de: 00e01b32 */
 /* 206de: 00e0184e */
 setdmaaddr:
@@ -337,6 +448,12 @@ setdmaaddr:
         addq.l    #4,a7
         rts
 
+/*
+ * setacnt() - set the ACSI DMA counter
+ *
+ * Passed:
+ *	a1.l = pointer to DMA chip
+ */
 /* 306de: 00e01b4a */
 /* 206de: 00e01866 */
 setacnt:
@@ -359,8 +476,8 @@ setacnt:
 /* 306de: 00e01b56 */
 /* 206de: 00e0186c */
 shortdelay:
-        tst.b     (MFP_GPIP).w
-        tst.b     (MFP_GPIP).w
+        tst.b     (MFP_GPIP).w              /* delay for 1 microsec */
+        tst.b     (MFP_GPIP).w              /* this amounts to 16 16Mhz clocks */
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
         rts
@@ -575,24 +692,27 @@ ldelaytime:
 #endif
 
 
+/*
+ * Wait for status to come back
+ */
 /* 306de: 00e01d30 */
 /* 206de: 00e0187e */
 idestat:
-        move.l    #2000,d0
-        add.l     (_hz_200).w,d0
+        move.l    #2000,d0                      /* d0 = time-out limit (D_WORST) */
+        add.l     (_hz_200).w,d0                /* d0 = expiration time */
 idestat1:
-        btst      #5,(MFP_GPIP).w
-        beq.s     idestat2
-        cmp.l     (_hz_200).w,d0
-        bhi.s     idestat1
-        moveq.l   #-1,d0
+        btst      #5,(MFP_GPIP).w               /* interrupt? */
+        beq.s     idestat2                      /* if so, out of the loop */
+        cmp.l     (_hz_200).w,d0                /* time-out? */
+        bhi.s     idestat1                      /* if not, wait some more */
+        moveq.l   #-1,d0                        /* else, return time-out */
         bra.s     idestat4
 idestat2:
         moveq.l   #0,d0
-        move.b    ide_comst,d0 /* read status register */
-        btst      #0,d0        /* error occured? */
-        bne.s     idestat3     /* yes, ho read error */
-        btst      #3,d0        /* data request ready? */
+        move.b    ide_comst,d0                  /* read status register */
+        btst      #0,d0                         /* error occured? */
+        bne.s     idestat3                      /* yes, ho read error */
+        btst      #3,d0                         /* data request ready? */
         bne.s     idestat4
         moveq.l   #0,d0
         bra.s     idestat4
@@ -601,53 +721,89 @@ idestat3:
 idestat4:
         rts
 
+/*
+ * ideread() - reads from 1 to 256 sectors as specified in the Task File,
+ *		beginning at the specified sector.
+ *	   - sector count equal to 0 requests 256 sectors.
+ *
+ * ideread(nhd, nspt, sectnum, count, buf, pdev)
+ * WORD	nhd/*		4(sp).w		; # of data heads on pdev
+ * WORD	nspt/*		6(sp).w		; # of physical sectors per track
+ * LONG	sectnum/*	8(sp).l		; logical block address
+ * WORD	count/*		$c(sp).w	; # of sectors to read
+ * BYTE	*buf/*		$e(sp).l	; $f(sp)=high $10(sp)=mid $11(sp)=low
+ * WORD	pdev/*		$12(sp).w	; physical device number
+ */
 /* 306de: 00e01d6c */
 /* 206de: 00e018ba */
 ideread:
-        bsr       idechs
-        movea.l   14(a7),a0
-        move.b    13(a7),ide_seccn
-        move.w    12(a7),d1
-        subq.w    #1,d1
-        move.b    #$00,ide_stat2
-        move.b    #$20,ide_comst
+        bsr       idechs                    /* set physical address */
+        movea.l   14(a7),a0                 /* a0 -> buffer to read into */
+        move.b    13(a7),ide_seccn          /* set sector count */
+        move.w    12(a7),d1                 /* d1.w = # of sectors to read */
+        subq.w    #1,d1                     /* dbra likes one less */
+        move.b    #$00,ide_stat2            /* enable interrupt */
+        move.b    #$20,ide_comst            /* set command code IDEREAD */
 iderd1:
-        bsr.s     idestat
-        tst.w     d0
-        bmi.s     iderd2
-        btst      #3,d0
-        beq.s     iderd2
-        bsr       iderdsec
-        dbf       d1,iderd1
-        moveq.l   #0,d0
+        bsr.s     idestat                   /* wait for interrupt */
+        tst.w     d0                        /* successful? */
+        bmi.s     iderd2                    /* if timed-out, return */
+        btst      #3,d0                     /* DRQ? */
+        beq.s     iderd2                    /* if not, return */
+        bsr       iderdsec                  /* fill sector buffer */
+        dbf       d1,iderd1                 /* more to read? */
+        moveq.l   #0,d0                     /* everything's fine */
 iderd2:
         rts
 
+/*
+ * idewrite() - writes from 1 to 256 sectors as specified in the Task File,
+ *		beginning at the specified sector.
+ *	    - sector count equal to 0 requests 256 sectors.
+ *
+ * idewrite(nhd, nspt, sectnum, count, buf, pdev)
+ * WORD	nhd  		4(sp).w		; # of data heads on pdev
+ * WORD	nspt		6(sp).w		; # of physical sectors per track
+ * LONG	sectnum		8(sp).l		; logical block address
+ * WORD	count		$c(sp).w	; # sectors to read
+ * BYTE	*buf		$e(sp).l	; $f(sp)=high $10(sp)=mid $11(sp)=low
+ * WORD	pdev		$12(sp).w	; physical device number
+ */
 /* 306de: 00e01daa */
 /* 206de: 00e018f8 */
 idewrite:
-        bsr.s     idechs
-        movea.l   14(a7),a0
-        move.b    13(a7),ide_seccn
-        move.w    12(a7),d1
-        subq.w    #1,d1
-        move.b    #$00,ide_stat2
-        move.b    #$30,ide_comst
+        bsr.s     idechs                    /* set physical address */
+        movea.l   14(a7),a0                 /* a0 -> buffer to write from */
+        move.b    13(a7),ide_seccn          /* set sector count */
+        move.w    12(a7),d1                 /* d1.w = # of sectors to read */
+        subq.w    #1,d1                     /* dbra likes one less */
+        move.b    #$00,ide_stat2            /* enable interrupt */
+        move.b    #$30,ide_comst            /* set command code IDEWRITE */
 idewr1:
-        btst      #3,ide_stat2
-        beq.s     idewr1
+        btst      #3,ide_stat2              /* DRQ? */
+        beq.s     idewr1                    /* if not, wait longer */
 idewr2:
-        bsr       idewrsec
-        bsr       idestat
-        tst.w     d0
-        bmi.s     idewr3
-        btst      #3,d0
-        beq.s     idewr3
-        dbf       d1,idewr2
-        moveq.l   #0,d0
+        bsr       idewrsec                  /* fill sector buffer */
+        bsr       idestat                   /* wait for interrupt */
+        tst.w     d0                        /* successful? */
+        bmi.s     idewr3                    /* if timed-out, return */
+        btst      #3,d0                     /* DRQ? */
+        beq.s     idewr3                    /* if not, return */
+        dbf       d1,idewr2                 /* else go transfer data */
+        moveq.l   #0,d0                     /* everything's fine */
 idewr3:
         rts
 
+/*
+ * set_dhcs() - convert a logical block address into a physical address.
+ *	     - set drive #, head #, cylinder # and sector # in task file.
+ *
+ * Passed:
+ *	8(sp).w = nhd = # of data heads
+ *	$a(sp).w = nspt = # of physical sectors per track
+ *	$c(sp).l = logical block address
+ *	$16(sp).w = physical unit #
+ */
 /* 306de: 00e01df2 */
 /* 206de: 00e01940 */
 idechs:
@@ -658,7 +814,7 @@ idechs:
         divu.w    d2,d1            /* calc cylinder # */
         move.b    d1,ide_zylow     /* write cylinder low */
         lsr.l     #8,d1
-        move.b    d1,ide_zyhigh     /* write cylinder high */
+        move.b    d1,ide_zyhigh    /* write cylinder high */
         lsr.l     #8,d1            /* d1 now remainder of division above */
         divu.w    d0,d1            /* calc head # */
         move.w    22(a7),d0        /* get device number */
@@ -674,16 +830,16 @@ idechs:
 #if TOSVERSION >= 0x300
 /* 306de: 00e01e32 */
 idecount:
-        move.w    4(a7),d0
-        andi.b    #$07,d0
-        lsl.w     #4,d0
+        move.w    4(a7),d0         /* d0 = physical unit # */
+        andi.b    #$07,d0          /* mask off flags (if any) */
+        lsl.w     #4,d0            /* shift unit # to place */
         move.b    d0,ide_headn     /* select device */
         move.w    6(a7),d0
         subq.b    #1,d0
         or.b      d0,ide_headn     /* select head */
         move.b    9(a7),ide_seccn  /* select sector count */
-        move.b    #$00,ide_stat2
-        move.b    #$91,ide_comst
+        move.b    #$00,ide_stat2   /* enable interrupt */
+        move.b    #$91,ide_comst   /* set command code INITIALIZE DEVICE PARAMETERS */
         bra       idestat
 #endif
 
@@ -699,24 +855,27 @@ idecount:
 /* 206de: 00e01980 */
 ideidentify:
         move.w    4(a7),d0         /* get device */
-        andi.b    #$07,d0
-        lsl.b     #4,d0
+        andi.b    #$07,d0          /* mask off flags (if any) */
+        lsl.b     #4,d0            /* shift unit # to place */
         move.b    d0,ide_headn     /* select device */
         movea.l   6(a7),a0
-        move.b    #$00,ide_stat2
+        move.b    #$00,ide_stat2   /* enable interrupt */
         move.b    #$EC,ide_comst   /* send ATA IDENTIFY command */
-        bsr       idestat
-        tst.w     d0
-        bmi.s     ideiden1
-        btst      #3,d0
-        beq.s     ideiden1
+        bsr       idestat          /* wait for interrupt */
+        tst.w     d0               /* successful? */
+        bmi.s     ideiden1         /* if timed-out, return */
+        btst      #3,d0            /* DRQ? */
+        beq.s     ideiden1         /* if not, return with error */
         bsr.s     iderdsec         /* read the identify packet */
         moveq.l   #0,d0
 ideiden1:
         rts
 
 /*
- * read 1 sector from IDE data register
+ * readbuf() - reads 512 bytes (128 longs) of data into sector buffer.
+ *
+ * Passed:
+ *	a0.l = buffer to store data read from sector buffer
  */
 /* 306de: 00e01ea2 */
 /* 206de: 00e019b8 */
@@ -743,7 +902,10 @@ rb0:    move.w    (a1),(a0)+                /* read data from bus */
         rts
 
 /*
- * write 1 sector to IDE data register
+ * wrtbuf() - writes 512 bytes (128 longs) of data to sector buffer.
+ *
+ * Passed:
+ *	a0.l = buffer with data to write to sector buffer
  */
 /* 306de: 00e01eb2 */
 /* 206de: 00e019d6 */
@@ -781,21 +943,21 @@ wb0:    move.w    (a0)+,(a1)                /* write data to bus */
 /* 306de: 00e01ec2 */
 /* 206de: 00e019f4 */
 iderdy:
-        andi.b    #$07,d0
-        lsl.b     #4,d0
+        andi.b    #$07,d0          /* mask off flags (if any) */
+        lsl.b     #4,d0            /* shift unit # to place */
         move.b    d0,ide_headn     /* select device */
 #if TOSVERSION >= 0x300
-        move.l    #1000,d0
+        move.l    #1000,d0         /* set up timer IDERDY */
         add.l     (_hz_200).w,d0
 iderdy1:
         btst      #6,ide_stat2     /* status drive ready? */
         bne.s     iderdy2          /* yes, report ok */
 #else
-        move.b    #$50,d1                   /* ready status */
-        move.l    #5*200,d0                 /* set up timer IDERDY */
+        move.b    #$50,d1          /* ready status */
+        move.l    #5*200,d0        /* set up timer IDERDY */
         add.l     (_hz_200).w,d0
-ir0:    cmp.b     ide_stat2,d1          /* is drive ready and not busy? */
-        beq.s     iderdy2               /* if so, return with drive ready */
+ir0:    cmp.b     ide_stat2,d1     /* is drive ready and not busy? */
+        beq.s     iderdy2          /* if so, return with drive ready */
 #endif
         cmp.l     (_hz_200).w,d0   /* timeout reached? */
         bcc.s     iderdy1          /* no, try again */

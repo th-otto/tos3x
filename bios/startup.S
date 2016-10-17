@@ -2908,32 +2908,34 @@ _getrez:
 /* 306de: 00e01172 */
 /* 206de: 00e01042 */
 _vsetscreen:
-        tst.l     4(a7)
-        bmi.s     nosetl
+/* --- set logical location: */
+        tst.l     4(a7)                      /* if(logloc < 0) then ignore it */
+        bmi.s     nosetl                     
         move.l    4(a7),(_v_bas_ad).w
 nosetl:
-        tst.l     8(a7)
+/* --- set physical location: */
+        tst.l     8(a7)                      /* if(physloc < 0) then ignore it */
         bmi.s     nosetp
         move.b    9(a7),(v_bas_h).w
         move.b    10(a7),(v_bas_m).w
         move.b    11(a7),(v_bas_l).w         /* BUG: no test that 820d actually exists */
-/* --- set screen resolution (clears the screen, clobbers the cursor): */
 nosetp:
-        tst.w     12(a7)
+/* --- set screen resolution (clears the screen, clobbers the cursor): */
+        tst.w     12(a7)                     /* if(rez < 0) then ignore it */
         bmi.s     nosetr
-        bsr       dovsync
-        move.b    13(a7),(_sshiftmod).w
+        bsr       dovsync                    /* wait for start of vertical-blank */
+        move.b    13(a7),(_sshiftmod).w      /* set software shadow */
 #if TOSVERSION >= 0x300
-        move.b    (shift_tt).w,d0
+        move.b    (shift_tt).w,d0            /* set hardware location */
         and.b     #$F8,d0
         or.b      13(a7),d0
         move.b    d0,(shift_tt).w
 #else
-        move.b    (_sshiftmod).w,(v_shf_mod).w /*set hardware location */
+        move.b    (_sshiftmod).w,(v_shf_mod).w /* set hardware location */
 #endif
-        clr.w     (_vblsem).w
-        jsr       esc_init
-        move.w    #$0001,(_vblsem).w
+        clr.w     (_vblsem).w                /* disable vblank processing */
+        jsr       esc_init                   /* re-initialize glass tty routines */
+        move.w    #$0001,(_vblsem).w         /* re-enable vblanks */
 nosetr:
         rts
 
@@ -2962,21 +2964,21 @@ _setpalette:
 /* 306de: 00e011d0 */
 /* 206de: 00e01096 */
 _setcolor:
-        move.w    4(a7),d1
-        add.w     d1,d1
-        and.w     #$001F,d1
-        lea.l     (palette).w,a0
-        move.w    0(a0,d1.w),d0
+        move.w    4(a7),d1                   /* get color number */
+        add.w     d1,d1                      /* turn into word index */
+        and.w     #$001F,d1                  /* force color range (prevent buserr) */
+        lea.l     (palette).w,a0             /* a0 -> base of palette memory */
+        move.w    0(a0,d1.w),d0              /* return old color */
         tst.b     STEFlag
         beq.s     setcol1
-        and.w     #$0777,d0
+        and.w     #$0777,d0                  /* mask dirty bits */
         bra.s     setcol2
 setcol1:
         and.w     #$0FFF,d0
 setcol2:
-        tst.w     6(a7)
-        bmi.s     setcol3
-        move.w    6(a7),0(a0,d1.w)
+        tst.w     6(a7)                      /* if new color is <0, don't set it */
+        bmi.s     setcol3                    /* (punt) */
+        move.w    6(a7),0(a0,d1.w)           /* set new color */
 setcol3:
         rts
 
@@ -2990,13 +2992,13 @@ setcol3:
 /* 306de: 00e01202 */
 /* 206de: 00e010c8 */
 _puntaes:
-        movea.l   _os_magic(pc),a0
-        cmpi.l    #$87654321,(a0)
-        bne.s     puntaes1
-        cmpa.l    (_phystop).w,a0
-        bge.s     puntaes1
-        clr.l     (a0)
-        bra       _main
+        movea.l   _os_magic(pc),a0           /* get pointer to magic */
+        cmpi.l    #$87654321,(a0)            /* is the magic still there? */
+        bne.s     puntaes1                   /* no -- just return */
+        cmpa.l    (_phystop).w,a0            /* is it in ROM? */
+        bge.s     puntaes1                   /* yes -- we can't do anything about it */
+        clr.l     (a0)                       /* clobber AES! */
+        bra       _main                      /* restart the system */
 puntaes1:
         rts
 
@@ -3012,6 +3014,7 @@ any_vec:
 #if !P68010
 		jsr       (savp_2).l                /* stack PC */
 savp_2:
+		move.l    (sp)+,(_proc_enum).w      /* save bogus PC + exception number */
 #endif
 /* dump the registers, including SSP */
         movem.l   d0-d7/a0-a7,(_proc_dregs).w
@@ -3036,16 +3039,28 @@ any_vec1:
         dbf       d0,any_vec1
 /* magic value */
         move.l    #$12345678,(_proc_lives).w
+
+/* --- draw an appropriate number of 'shrooms on the screen: */
         moveq.l   #0,d1
         move.b    (_proc_enum).w,d1
         subq.w    #1,d1
         bsr.s     drawbombs
 /* restore a sane stack (should have probably been done before calling subroutine above) */
-        move.l    #save_beg+save_siz,(_savptr).w
-        move.w    #$FFFF,-(a7)
-        move.w    #$004C,-(a7) /* Pterm */
+        move.l    #save_beg+save_siz,(_savptr).w        /* clobber BIOS top level */
+        move.w    #-1,-(a7)                             /* "error" return condition */
+        move.w    #$004C,-(a7)                          /* Pterm */
         trap      #1
         bra       _main
+
+/*
+ * do_shroom - draw little mushroom clouds on the screen
+ *  Passed:      d1.w = #shrooms to draw (DBRA count)
+ *  Returns:     some shrooms on display
+ *  Uses:        d0-d7/a0-a2
+ *
+ *  Discussion:  The graphics ain't all that great.   And this is silly.
+ *
+ */
 drawbombs:
         move.b    (_sshiftmod).w,d7
 #if TOSVERSION >= 0x300
@@ -3053,8 +3068,8 @@ drawbombs:
 #else
         and.w     #$0003,d7
 #endif
-        add.w     d7,d7
-        moveq.l   #0,d0
+        add.w     d7,d7                      /* d7 = rez index */
+        moveq.l   #0,d0                     
         move.b    (v_bas_h).w,d0
         lsl.w     #8,d0
         move.b    (v_bas_m).w,d0
@@ -3063,7 +3078,7 @@ drawbombs:
         bne.s     drawbo1
         move.b    (v_bas_l).w,d0
 drawbo1:
-        movea.l   d0,a0
+        movea.l   d0,a0                      /* a0 -> base of mem to draw at */
         cmp.w     #$0006,d7
         blt.s     drawbo2
         adda.l    #80*960,a0
@@ -3071,19 +3086,19 @@ drawbo1:
 drawbo2:
         adda.w    #50*320,a0
 drawbo3:
-        lea.l     bombimage,a1
-        move.w    #$000F,d6
+        lea.l     bombimage,a1               /* a1 -> source from */
+        move.w    #$000F,d6                  /* d6 = scanline count */
 drawbo4:
-        move.w    d1,d2
-        movea.l   a0,a2
+        move.w    d1,d2                      /* d2 = # to draw on this line */
+        movea.l   a0,a2                      /* safe ptr to beg of line */
 drawbo5:
-        move.w    dplanetab(pc,d7.w),d5
+        move.w    dplanetab(pc,d7.w),d5      /* d5 = #words to replicate */
 drawbo6:
-        move.w    (a1),(a0)+
+        move.w    (a1),(a0)+                 
         dbf       d5,drawbo6
-        dbf       d2,drawbo5
-        addq.w    #2,a1
-        adda.w    dwidthtab(pc,d7.w),a2
+        dbf       d2,drawbo5                 /* another, on the same line */
+        addq.w    #2,a1                      /* next source word */
+        adda.w    dwidthtab(pc,d7.w),a2      /* next dest line */
         movea.l   a2,a0
         dbf       d6,drawbo4
         moveq.l   #29,d7
@@ -3097,7 +3112,14 @@ dwidthtab:        /* number of bytes per screen line, indexed by resolution */
         dc.w      320*4/8,640*2/8,640/8,0,640*4/8,0,1280/8,320*8/8
 
 
-/* void cpy512(const void *src, void *dst) */
+/*
+ * _fastcpy - "fast" 512-byte copy
+ * Synopsis:     void cpy512(const void *src, void *dst)
+ *
+ *               Used by _rwabs to fake disk DMA to odd addresses.  Therefore,
+ *               disk I/O on odd addresses is very slow.  Lose, lose.
+ *
+ */
 		xdef _cpy512
 _cpy512:
         movea.l   4(a7),a0
@@ -3131,7 +3153,19 @@ autoname:                      dc.b '*.PRG',0
 
 
 /*
- * autoexec PRGs from AUTO folder
+ * _auto - exec auto-startup files in the appropriate subdirectory
+ * _auto1 - exec (with filename args)
+ * Passed:       a0 -> full filespec (pathname)
+ *               a1 -> filename part of filespec
+ *               _drvbits: bit vector of active drives
+ *               _bootdev: contains device to exec from
+ *
+ * Returns:      nothing
+ *
+ * Note:         If _drvbits%%_bootdev is zero, _auto simply quits (since
+ *               the device isn't active....)
+ *
+ * Uses:         everything
  */
 /* 306de: 00e0133c */
 /* 206de: 00e011f6 */
@@ -3145,11 +3179,11 @@ autoexec:
         move.l    (_drvbits).w,d0           /* d0 - active dev vector */
         move.w    _bootdev,d1               /* d1 - dev# to exec from */
         btst      d1,d0                     /* is the dev alive? */
-        beq.s     autoq                     /* (no -- so punt) */
+        beq.s     autoexe2                  /* (no -- so punt) */
 #endif
         lea.l     autopath(pc),a0
         lea.l     autoname(pc),a1
-        move.l    (a7)+,savepc
+_auto1: move.l    (a7)+,savepc              /* return addr (used by execlr) */
         move.l    a0,(execpath).w
         move.l    a1,(execname).w
 #if TOSVERSION >= 0x300
@@ -3159,65 +3193,87 @@ autoexec:
         beq.s     autoexe1                  /* (no -- so punt) */
 #endif
         lea.l     emptystr(pc),a0
-        move.l    a0,-(a7)
-        move.l    a0,-(a7)
-        move.l    a0,-(a7)
-        move.w    #$0005,-(a7)
+        move.l    a0,-(a7)                  /* null environment */
+        move.l    a0,-(a7)                  /* null command tail */
+        move.l    a0,-(a7)                  /* null shell name */
+        move.w    #$0005,-(a7)              
         move.w    #$004B,-(a7)
-        trap      #1
-        adda.w    #$0010,a7
+        trap      #1                        /* Pexec(5) Create basepage */
+        adda.w    #16,a7
         movea.l   d0,a0
-        move.l    #autoscan,8(a0) /* set bp->p_tbase */
-        move.l    a3,-(a7)
-        move.l    d0,-(a7)
-        move.l    a3,-(a7)
+        move.l    #autoscan,8(a0)           /* set bp->p_tbase */
+        move.l    a3,-(a7)                  /* null environment */
+        move.l    d0,-(a7)                  /* -> PSP */
+        move.l    a3,-(a7)                  /* null shell name */
         move.w    #$0004,-(a7)
         move.w    #$004B,-(a7)
-        trap      #1              /* Pexec(Just go), execute the autoscan routine */
-        adda.w    #$0010,a7
+        trap      #1                        /* Pexec(Just go), execute the autoscan routine */
+        adda.w    #16,a7
 autoexe1:
         move.l    savepc,-(a7)
 autoexe2:
         rts
 
+/*
+ * ST Book has another ROMDISK in the 2nd 256kb of the ROM
+ * which is mapped as drive 'P'.
+ */
+#if STBOOK
+autoerom:   lea       autopROM(pc),a0        /* -> path */
+            lea       autopROM+8(pc),a1      /* -> filename */
+            bra.s     _auto1
+
+autopROM:   dc.b      'P:\AUTO\*.PRG',0
+            dc.l      $12345678,$9abcdef0
+#endif
+
+/*
+ * fauto - exec'd by _auto to do autostartup
+ *
+ * Passed:       pathname -> path part of filespec
+ *               filename -> file path of filespec
+ *
+ */
 autoscan:
         clr.l     -(a7)
         move.w    #$0020,-(a7)
         trap      #1              /* Super */
         addq.w    #6,a7
         movea.l   d0,a4
-        movea.l   4(a7),a6        /* get ptr to Basepage */
-        lea.l     256(a6),a7      /* set stack to end of commandline */
-        move.l    #$00000100,-(a7) /* sizeof(PD) */
+
+/* ---- free up some memory */
+        movea.l   4(a7),a6                      /* get ptr to Basepage */
+        lea.l     256(a6),a7                    /* set stack to end of commandline */
+        move.l    #$00000100,-(a7)              /* sizeof(PD) */
         move.l    a6,-(a7)
         clr.w     -(a7)
-        move.w    #$004A,-(a7)    /* Mshrink to basepage only */
+        move.w    #$004A,-(a7)                  /* Mshrink to basepage only */
         trap      #1
 #if OS_COUNTRY == CTRY_PL
 		/* apparently a patch that was applied by the maker of the PL version */
 		adda.w    #$000C,a7
         tst.w     d0
-        bne.s     autosca4        /* if Mshrink failed, done */
+        bne.s     autosca4                      /* if Mshrink failed, done */
         move.w    #$0007,-(a7)
         move.l    (execpath.w),-(a7)
 #else
         addq.w    #6,a7
         tst.w     d0
-        bne.s     autosca4        /* if Mshrink failed, done */
-        move.w    #$0007,-(a7)
-        move.l    execpath,-(a7)
+        bne.s     autosca4                      /* if Mshrink failed, done */
+        move.w    #$0007,-(a7)                  /* find r/o+hidden+system files */
+        move.l    execpath,-(a7)                /* -> filename (on input) */
 #endif
-        move.w    #$004E,-(a7)    /* Fsfirst */
+        move.w    #$004E,-(a7)                  /* Fsfirst */
         moveq.l   #8,d7
 autosca1:
-        pea.l     execdta
+        pea.l     execdta                       /* setup DTA (for search) */
         move.w    #$001A,-(a7)
-        trap      #1              /* Fsetdta */
+        trap      #1                            /* Fsetdta */
         addq.w    #6,a7
         trap      #1
         adda.w    d7,a7
-        tst.w     d0              /* Path found? */
-        bne.s     autosca4        /* no, done */
+        tst.w     d0                            /* Path found? */
+        bne.s     autosca4                      /* no, done */
 /* copy path of autofolder, and append found name to it */
         movea.l   execpath,a0
         movea.l   execname,a2
@@ -3231,19 +3287,27 @@ autosca3:
         move.b    (a0)+,(a1)+
         bne.s     autosca3
 /* execute the program */
-        pea.l     emptystr(pc)
-        pea.l     emptystr(pc)
-        pea.l     execfname
+        pea.l     emptystr(pc)                  /* null enviroment */
+        pea.l     emptystr(pc)                  /* no command tail */
+        pea.l     execfname                     /* -> file to exec */
         clr.w     -(a7)
         move.w    #$004B,-(a7)
-        trap      #1              /* Pexec(Load&Go) */
+        trap      #1                            /* Pexec(Load&Go) */
         adda.w    #$0010,a7
         moveq.l   #2,d7
-        move.w    #$004F,-(a7)    /* Fsnext */
+        move.w    #$004F,-(a7)                  /* Fsnext */
         bra.s     autosca1
+
+/*
+ * The first GEMDOS process can never terminate.
+ * This is not a good feature.
+ * Kludge around it - re-initialize the stack
+ * and return to the guy who called us to begin with.
+ *
+ */
 autosca4:
-        lea.l     _supstkend,a7
-        move.l    savepc,-(a7)
+        lea.l     _supstkend,a7                /* setup supervisor stack */
+        move.l    savepc,-(a7)                 /* get return addr */
         rts
 
 
@@ -3272,9 +3336,9 @@ waitev:
         jmp       (a6)
 #else
 /* 206de: 00e013d2 */
-waitvbl:    lea       (MFP_TBDR).w,a0               /* a0 -> timer B data register */
-            lea       (MFP_TBCR).w,a1               /* a1 -> timer B control register */
-            bclr      #0,(MFP_IERA).w               /* disable IRQ of timer B */
+waitvbl:    lea       (MFP_TBDR).w,a0           /* a0 -> timer B data register */
+            lea       (MFP_TBCR).w,a1           /* a1 -> timer B control register */
+            bclr      #0,(MFP_IERA).w           /* disable IRQ of timer B */
             moveq     #1,d4                     /* wait for the timer to expire */
             clr.b     (a1)                      /* stop timer B */
             move.b    #$f0,(a0)                 /* event every 240 scan lines */
@@ -3308,26 +3372,26 @@ dovsync:
 /* 306de: 00e01530 */
 /* 206de: 00e01408 */
 run_reset_resident:
-        movea.l   _phystop,a0
+        movea.l   _phystop,a0                   /* start at the top of the address space */
 run_res1:
-        suba.w    #$0200,a0
-        cmpa.w    #$0400,a0
-        bls.s     run_res3
-        cmpi.l    #RR_MAGIC,(a0)
-        bne.s     run_res1
-        cmpa.l    4(a0),a0
-        bne.s     run_res1
+        suba.w    #$0200,a0                     
+        cmpa.w    #$0400,a0                     /* reach the lower bottom? */
+        bls.s     run_res3                      /* (bail out) */
+        cmpi.l    #RR_MAGIC,(a0)                /* check for magic */
+        bne.s     run_res1                      /* (no magic -> next block) */
+        cmpa.l    4(a0),a0                      /* second long is equal the base address of the block? */
+        bne.s     run_res1                      /* (no -> next block) */
         clr.w     d0
         movea.l   a0,a1
-        move.w    #$00FF,d1
+        move.w    #$00FF,d1                     /* checksum over 256 words */
 run_res2:
         add.w     (a1)+,d0
         dbf       d1,run_res2
-        cmp.w     #RR_CHKSUM,d0
-        bne.s     run_res1
-        move.l    a0,-(a7)
-        jsr       8(a0)
-        movea.l   (a7)+,a0
+        cmp.w     #RR_CHKSUM,d0                 /* magic checksum? */
+        bne.s     run_res1                      /* (no -> next block) */
+        move.l    a0,-(a7)                      /* save current address */
+        jsr       8(a0)                         /* call code block */
+        movea.l   (a7)+,a0                      /* continue with next block */
         bra.s     run_res1
 run_res3:
         rts
@@ -3341,7 +3405,7 @@ run_res3:
 /* 306de: 00e0156e */
 /* 206de: 00e01446 */
 _gettime:
-        lea.l     rdttclock,a3
+        lea.l     readRTCTime,a3
         lea.l     igetdt,a4
         bra.s     gsettime
 
@@ -3356,10 +3420,10 @@ _gettime:
 _settime:
         move.w    4(a7),_date
         move.w    6(a7),_time
-        lea.l     wrttclock,a3
+        lea.l     writeRTCTime,a3
         lea.l     isetdt,a4
 gsettime:
-        bsr       detect_nvram
+        bsr       checkRTC
         bcc.s     gsettim1
         movea.l   a4,a3
 gsettim1:
@@ -3378,11 +3442,11 @@ instoshdr:
 instos1:
         move.b    0(a0,d0.w),0(a1,d0.w)
         dbf       d0,instos1
-        move.w    jmpop(pc),-6(a1) /* ? BUG? the jmpop there is short abs jump */
-        move.l    4(a1),-4(a1)
-        move.w    braop(pc),(a1)
-        move.w    30(a1),28(a1) /* ??? oshdr.os_conf = oshdr.os_dosdate */
-        move.l    a1,_sysbase
+        move.w    jmpop(pc),-6(a1)              /* copy JMP instruction just before */
+        move.l    4(a1),-4(a1)                  /* copy ROM reseth into this JMP; BUG: the jmpop before is a short abs jump */
+        move.w    braop(pc),(a1)                /* patch BRA at the beginning of sysbase copy to hit the JMP */
+        move.w    30(a1),28(a1)                 /* copy os_date into os_conf WTF? */
+        move.l    a1,_sysbase                   /* set new sysbase pointer */
         rts
 jmpop:
         jmp       ($00000000).w
@@ -3392,22 +3456,25 @@ braop:
 
 /*
  * XBIOS #40 - Blitmode
+ *
+ * Returns: d0.w - bit 0 - blitter enabled
+ *                 bit 1 - blitter available
  */
 /* 306de: 00e015dc */
 /* 206de: 00e014b4 */
 _blitmode:
-        bsr.s     blittest
-        move.w    d0,d4
+        bsr.s     blittest                      /* test if blitter is installed */
+        move.w    d0,d4                         /* d4 = blitter status */
         move.w    d0,d5
         lsr.w     #1,d5
-        or.w      #$FFFE,d5
+        or.w      #$FFFE,d5                     /* d5 = blitter enable mask */
         jsr       _GETBLT
-        move.w    d0,d3
-        move.w    4(a7),d0
-        bmi.s     blitmod1
-        and.w     d5,d0
-        or.w      d4,d0
-        jsr       _SETBLT
+        move.w    d0,d3                         /* d3 = blitter active */
+        move.w    4(a7),d0                      /* new blitter status */
+        bmi.s     blitmod1                      /* <0 just return the status */
+        and.w     d5,d0                         /* mask blitter status out */
+        or.w      d4,d0                         /* or'd blitter available status */
+        jsr       _SETBLT                       /* disable/enable blitter */
 blitmod1:
         move.w    d3,d0
         rts
@@ -3419,20 +3486,23 @@ blitmod1:
 /* 206de: 00e014dc */
 blittest:
         move.w    sr,d1
-        move.w    #$0000,d0
+        move.w    #0,d0                         /* d0 = 0 -> blitter not installed */
         suba.l    a0,a0
         movea.l   a7,a2
         ori.w     #$0700,sr
         movea.l   _buserror(a0),a1
         move.l    #noblitter,_buserror(a0)
         tst.w     $ffff8a00(a0)
-        moveq.l   #2,d0
+        moveq.l   #2,d0                         /* d0 = 2 -> blitter installed */
 noblitter:
         move.l    a1,_buserror(a0)
         move.w    d1,sr
         movea.l   a2,a7
         rts
 
+/*
+ * delay for a little bit via timer a in the mfp, or timer c in the ttmfp
+ */
 /* 306de: 00e0162e */
 /* 206de: 00e01506 */
 mfpdelay:
@@ -3592,7 +3662,7 @@ _esetbank:
         and.w     #$000F,d0
         tst.w     4(a7)
         bmi.s     esetb1
-        move.b    5(a7),($FFFF8263).w
+        move.b    5(a7),(shift_tt+1).w
 esetb1:
         rts
 
@@ -3664,7 +3734,7 @@ _egetpalette:
         move.w    d0,d1
 egetpal1:
         movea.l   8(a7),a1
-        lea.l     -31744(a0),a0
+        lea.l     $ffff8400(a0),a0
         bra.s     egetpal3
 egetpal2:
         move.w    (a0)+,(a1)+
