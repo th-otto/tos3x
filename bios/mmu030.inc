@@ -1,7 +1,9 @@
-* #include "asmdefs.h"
-* #include "tosvars.inc"
+/* #include "asmdefs.h" */
+/* #include "tosvars.inc" */
 
-mmutable_ram equ $700 ; CPU root table in memory
+#if TOSVERSION >= 0x300
+
+mmutable_ram equ $700 /* CPU root table in memory */
 
 /*
  * pmmu tree
@@ -118,12 +120,14 @@ mmurom_table:
 mmuromend:
 
 mmu_crp:
-        dc.l                      $80000002,mmutable_ram; no limit, short desc, addr $700
+        dc.l                      $80000002,mmutable_ram /* no limit, short desc, addr $700 */
 mmu_tc:
-        dc.l                      $80f04445 ; enable, pagesize 32k, IS=0, TIA=4, TIB=4, TIC=4, TID=5
+        dc.l                      $80f04445 /* enable, pagesize 32k, IS=0, TIA=4, TIB=4, TIC=4, TID=5 */
 mmu_tt0:
-        dc.l                      $017e8107 ; for 0x01000000-0x7fffffff, caching allowed
+        dc.l                      $017e8107 /* for 0x01000000-0x7fffffff, caching allowed */
 mmu_tt1:
-        dc.l                      $807e8507 ; for 0x80000000-0xfeffffff, *caching inhibited*
+        dc.l                      $807e8507 /* for 0x80000000-0xfeffffff, *caching inhibited* */
 
 	text
+
+#endif /* TOSVERSION >= 0x300 */

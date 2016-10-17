@@ -33,16 +33,18 @@ oshdr: ds.b 6+64
 	xdef cookies
 cookies: ds.l NCOOKIES*2
 
+#if (TOSVERSION >= 0x300)
 	xdef _bootpref
 _bootpref: ds.w 1
 
 	xdef _altmd
 _altmd: ds.l 4
+#endif
 
 	xdef _has_dmasound
 _has_dmasound: ds.b 1
-	xdef _has_microwire
-_has_microwire: ds.b 1
+	xdef STEFlag
+STEFlag: ds.b 1
 	xdef __sbss
 __sbss: ds.b 0
 

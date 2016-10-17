@@ -1,10 +1,10 @@
-*
-* flopini - initialize floppies
-* int flopini(void *buffer, DSB *dsb, int devno)
-*
-* Returns:       EQ if initialization succeeded (drive attached).
-*                NE if initialization failed (no drive attached).
-*
+/*
+ * flopini - initialize floppies
+ * int flopini(void *buffer, DSB *dsb, int devno)
+ *
+ * Returns:       EQ if initialization succeeded (drive attached).
+ *                NE if initialization failed (no drive attached).
+ */
 /* 306de: 00e03ba8 */
 	xdef _flopini
 _flopini:
@@ -32,12 +32,12 @@ flopini2:
         beq       flopok
 flopini3:
         bra       flopfail
-* code not reached
+/* code not reached */
         move.l    a0,(_buserror).w
         movea.l   a1,a7
         movem.l   (a7)+,d7/a6
 eundev:
-        moveq.l   #-15,d0 ; E_UNDEV
+        moveq.l   #-15,d0 /* E_UNDEV */
         rts
 
 
@@ -50,7 +50,7 @@ _floprd:
         tst.w     (_nflops).w
         beq.s     eundev
         bsr       fdchange
-        moveq.l   #-11,d0 ; E_READF
+        moveq.l   #-11,d0 /* E_READF */
         bsr       frbrdcheck
         bsr       floplock
 floprd1:
@@ -59,7 +59,7 @@ floprd1:
         bcs       flopfail
         bne       floprd6
 floprd2:
-        move.w    #-1,fd_curerr ; E_ERR
+        move.w    #-1,fd_curerr /* E_ERR */
         move.w    #$0190,(a6)
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
@@ -112,13 +112,13 @@ floprd7:
         bra       flopfail
 
 fdcerr:
-        moveq.l   #-13,d1 ; E_WRPRO
+        moveq.l   #-13,d1 /* E_WRPRO */
         btst      #6,d0
         bne.s     fdcerr1
-        moveq.l   #-8,d1  ; E_SEEK
+        moveq.l   #-8,d1  /* E_SEEK */
         btst      #4,d0
         bne.s     fdcerr1
-        moveq.l   #-4,d1  ; E_CRC
+        moveq.l   #-4,d1  /* E_CRC */
         btst      #3,d0
         bne.s     fdcerr1
         move.w    (fd_deferr).w,d1
@@ -136,7 +136,7 @@ _flopwrt:
         tst.w     (_nflops).w
         beq.w     eundev
         bsr       fdchange
-        moveq.l   #-10,d0 ; E_WRITF
+        moveq.l   #-10,d0 /* E_WRITF */
         bsr       frbwrcheck
         bsr       floplock
         move.w    (fd_sect).w,d0
@@ -245,7 +245,7 @@ flopfmt1:
         bra       flopfail
 
 fmtrack:
-        move.w    #-10,(fd_deferr).w ; E_WRITF
+        move.w    #-10,(fd_deferr).w /* E_WRITF */
         movea.l   (fd_buffer).w,a2
         movea.l   (fd_secmap).w,a3
         moveq.l   #119,d1
@@ -369,29 +369,29 @@ wmult:
 /* 306de: 00e03ffe */
 	xdef _flopver
 _flopver:
-        tst.w     (_nflops).w   ; any floppy drives installed?
+        tst.w     (_nflops).w   /* any floppy drives installed? */
         beq       eundev
         bsr       fdchange
-        moveq.l   #-11,d0       ; set default error: E_READF
-        bsr       frbfmtcheck   ; setup FRB if needed
-        bsr       floplock      ; lock floppies, setup parameters
-        bsr       select        ; select floppy
-        bsr       go2track      ; go to track
-        bne       flopfail      ; fail if error
-        bsr.s     verify1       ; do actual verify
-        bra       flopok        ; done
+        moveq.l   #-11,d0       /* set default error: E_READF */
+        bsr       frbfmtcheck   /* setup FRB if needed */
+        bsr       floplock      /* lock floppies, setup parameters */
+        bsr       select        /* select floppy */
+        bsr       go2track      /* go to track */
+        bne       flopfail      /* fail if error */
+        bsr.s     verify1       /* do actual verify */
+        bra       flopok        /* done */
 
 verify1:
-        move.w    #-11,(fd_deferr).w         ; set default error: E_READF
-        movea.l   (fd_buffer).w,a2           ; a2 -> start of bad sector list
-        addi.l    #SECTOR_SIZE,(fd_buffer).w ; skip bad sector list
+        move.w    #-11,(fd_deferr).w         /* set default error: E_READF */
+        movea.l   (fd_buffer).w,a2           /* a2 -> start of bad sector list */
+        addi.l    #SECTOR_SIZE,(fd_buffer).w /* skip bad sector list */
 verify2:
-        move.w    #$0002,(fd_retry).w        ; init sector-retry count
+        move.w    #$0002,(fd_retry).w        /* init sector-retry count */
         move.w    #$0084,(a6)
-        move.w    (fd_sect).w,d7             ; set FDC sector register
+        move.w    (fd_sect).w,d7             /* set FDC sector register */
         bsr       wrfdcd7
 verify3:
-        move.b    (fd_buffer+3).w,($FFFF860D).w ; set DMA address
+        move.b    (fd_buffer+3).w,($FFFF860D).w /* set DMA address */
         move.b    (fd_buffer+2).w,($FFFF860B).w
         move.b    (fd_buffer+1).w,($FFFF8609).w
         move.w    #$0190,(a6)
@@ -399,14 +399,14 @@ verify3:
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
-        move.w    #$0090,(a6)                   ; setup for DMA read
+        move.w    #$0090,(a6)                   /* setup for DMA read */
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
-        move.w    #$0001,d7                     ; set DMA sector count to 1
+        move.w    #$0001,d7                     /* set DMA sector count to 1 */
         bsr       wrfdcd7
-        move.w    #$0080,(a6)                   ; write READ SECTOR command
+        move.w    #$0080,(a6)                   /* write READ SECTOR command */
         move.w    #$0080,d7
         bsr       wrfdcd7
         move.l    (_hz_200).w,d7
@@ -417,24 +417,24 @@ verify4:
         beq.s     verify5
         cmp.l     (_hz_200).w,d7
         bhi.s     verify4
-        bsr       fdcreset                      ; reset controller and return error
+        bsr       fdcreset                      /* reset controller and return error */
         bra.s     verify7
 verify5:
-        move.w    #$0090,(a6)                   ; read DMA error status
+        move.w    #$0090,(a6)                   /* read DMA error status */
         move.w    (a6),d0
         btst      #0,d0
         beq.s     verify7
-        move.w    #$0080,(a6)                   ; read 1770 status register
+        move.w    #$0080,(a6)                   /* read 1770 status register */
         bsr       rdfdcd0
-        bsr       fdcerr                        ; set error#
-        and.b     #$1C,d0                       ; check for record-not-found, crc-error, and lost data
+        bsr       fdcerr                        /* set error# */
+        and.b     #$1C,d0                       /* check for record-not-found, crc-error, and lost data */
         bne.s     verify7
 verify6:
         addq.w    #1,(fd_sect).w
         subq.w    #1,(fd_scount).w
         bne       verify2
         subi.l    #SECTOR_SIZE,(fd_buffer).w
-        clr.w     (a2)                          ; terminate bad sector list
+        clr.w     (a2)                          /* terminate bad sector list */
         rts
 *--- read failure: retry or record bad sector
 verify7:
@@ -444,7 +444,7 @@ verify7:
 verify8:
         subq.w    #1,(fd_retry).w
         bpl       verify3
-        move.w    (fd_sect).w,(a2)+             ; record bad sector
+        move.w    (fd_sect).w,(a2)+             /* record bad sector */
         bra.s     verify6
 
 /* 306de: 00e04106 */
@@ -547,7 +547,7 @@ flopok:
         clr.l     d0
 flopok1:
         move.l    d0,-(a7)
-        bsr       flush_cache_all_030
+        bsr       flushCaches
         move.w    #$0086,(a6)
         move.w    fd_curtrack(a1),d7
         bsr       wrfdcd7
@@ -573,14 +573,14 @@ flopok2:
 hardseek:
         move.w    fd_track,d7
 hardsee1:
-        move.w    #-6,fd_curerr ; E_SEEK
+        move.w    #-6,fd_curerr /* E_SEEK */
         move.w    #$0086,(a6)
         bsr       wrfdcd7
         move.w    #$0010,d6
         bra       flopcmds
 
 reseek:
-        move.w    #-6,fd_curerr ; E_SEEK
+        move.w    #-6,fd_curerr /* E_SEEK */
         bsr.s     restore
         bne.s     go2trret
         clr.w     fd_curtrack(a1)
@@ -635,9 +635,11 @@ restore:
 restore1:
         rts
 
-*--- seek rate conversion table for HD mode
-* HD is using twice the clock speed (16MHz instead of 8MHz) for the FDC,
-* so the FDC has to seek "slower"
+/*
+ *--- seek rate conversion table for HD mode
+ * HD is using twice the clock speed (16MHz instead of 8MHz) for the FDC,
+ * so the FDC has to seek "slower"
+ */
 dseekrt:      dc.b 1,1,0,0
 
 
@@ -683,7 +685,7 @@ fdcreset:
         bsr.s     wrfdcd7
         move.w    d0,-(a7)
         move.w    #$0114,d0
-        bsr       ttdelayc
+        bsr       mfpdelay
         move.w    (a7)+,d0
         bsr.s     rdfdcd7
         rts
@@ -754,7 +756,7 @@ rdfdcd0:
 rwdelay:
         move.w    d0,-(a7)
         move.w    #$0119,d0
-        bsr       ttdelayc
+        bsr       mfpdelay
         move.w    (a7)+,d0
         rts
 
@@ -816,17 +818,17 @@ floprat2:
         ext.l     d0
         rts
 
-* Floprate(dev, -2): set HD drivetype
+/* Floprate(dev, -2): set HD drivetype */
 floprat3:
         move.b    #$08,(a1)
         moveq.l   #0,d0
         rts
-* Floprate(dev, -3): set DD drivetype
+/* Floprate(dev, -3): set DD drivetype */
 floprat4:
         clr.b     (a1)
         moveq.l   #0,d0
         rts
-* Floprate(dev, -4): query drivetype
+/* Floprate(dev, -4): query drivetype */
 floprat5:
         tst.b     (a1)
         sne       d0
@@ -839,7 +841,7 @@ frbbackcopy:
         move.w    fd_cscnt,d1
         beq.s     frbback2
         move.l    d0,-(a7)
-        bsr       flush_cache_all_030
+        bsr       flushCaches
         move.l    (a7)+,d0
         clr.w     fd_cscnt
         movea.l   fd_copyp,a0
@@ -893,7 +895,7 @@ getfrb:
 getfrb1:
         tst.l     (a0)
         beq.s     getfrb4
-        cmpi.l    #$5F465242,(a0)+ ; '_FRB'
+        cmpi.l    #$5F465242,(a0)+ /* '_FRB' */
         beq.s     getfrb2
         addq.l    #4,a0
         bra.s     getfrb1
@@ -903,7 +905,7 @@ getfrb3:
         rts
 getfrb4:
         addq.l    #8,a7
-        moveq.l   #-12,d0 ; E_GENRL
+        moveq.l   #-12,d0 /* E_GENRL */
         rts
 
 

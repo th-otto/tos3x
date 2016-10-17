@@ -16,3 +16,7 @@
 #define MEDIACHANGE      2
 
 #define NCOOKIES 16
+
+#define STBOOK ((TOSVERSION >= 0x207) & (TOSVERSION <= 0x208))
+
+#define MSTECLK ((TOSVERSION >= 0x200) & (TOSVERSION < 0x300))

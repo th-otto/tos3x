@@ -219,7 +219,7 @@ xbios_check:	move.l	USP,a0			; a0 -> USP
 		btst.b	#5,(sp)			; should we use USP or SSP ?
 		beq	user_stack		; use USP if not super mode
 		movea.l	sp,a0			; a0 -> SSP
-#if P68030
+#if P68010
 		addq.w	#8,a0			; a0 -> funct #
 #else
 		addq.w	#6,a0			; a0 -> funct #
@@ -261,11 +261,11 @@ SS0:		move.w	12(a0),-(sp)		; pass optional argument
 		move.l	6(a0),-(sp)		; pass physical adr
 		move.l	2(a0),-(sp)		; pass logical adr
 		move.w	(a0),-(sp)		; pass function #
-#if P68030
+#if P68010
 		move.w	#0,-(sp)		; vector offset
 #endif
 		move.l	#SSComeback,-(sp)	; put return value for rte
-#if P68030
+#if P68010
 		move.w	20(sp),-(sp)		; push old sr
 #else
 		move.w	18(sp),-(sp)		; push old sr
@@ -275,7 +275,7 @@ SS0:		move.w	12(a0),-(sp)		; pass optional argument
 		jmp	(a0)
 
 SSComeback:
-#if P68030
+#if P68010
 		add.w	#14,sp			; cleanup stack
 #else
 		add.w	#12,sp			; cleanup stack

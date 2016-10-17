@@ -24,8 +24,8 @@ include $(top_srcdir)/config.mak
 
 include SRCFILES
 
-vdi.a: $(VDI_OBJS) ${MAKEFILE}
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS)
+vdi.a: $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS)
 
 check:: vdi.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \

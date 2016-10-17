@@ -22,24 +22,23 @@ include SRCFILES
 
 CPPFLAGS +=
 
-vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_OBJS) ${MAKEFILE}
+vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
 	$(RM) $@
-	$(AR) $(ARFLAGS) $@ tosvars.o $(VDI_OBJS1)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS2)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS3)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS4)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS5)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS6)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS7)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS8)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS9)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS10)
-	$(AR) $(ARFLAGS) $@ $(VDI_OBJS11)
+	$(AR) $(ARFLAGS) $@ tosvars.o $(VDI_$(TOSVERSION)_OBJS1)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS2)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS3)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS4)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS5)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS6)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS7)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS8)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS9)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS10)
 
-vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_OBJS) ${MAKEFILE}
-	$(LD) -o $@ -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_OBJS)
+vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
+	$(LD) -s -o $@ -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_$(TOSVERSION)_OBJS)
 
-vdi.rel: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_OBJS) vdi.lnk $(top_srcdir)/common/sections.mak ${MAKEFILE}
+vdi.rel: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_$(TOSVERSION)_OBJS) vdi.lnk $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(RM) $@
 	$(LINK68) [abs,textbase[$(vdi_tbase)],database[$(vdi_dbase)],bssbase[0],co[vdi.lnk]]
 
@@ -349,8 +348,8 @@ text.o: text.c
 #	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
 
 
-screen.prg: $(SCREEN_OBJS) $(VDI_OBJS) ${MAKEFILE}
-	$(LD) -s -l -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_OBJS)
+screen.prg: $(SCREEN_OBJS) $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
+	$(LD) -s -l -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_$(TOSVERSION)_OBJS)
 
 check::
 

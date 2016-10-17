@@ -127,7 +127,13 @@ extern int16_t const m_cross[];
 extern int16_t const m_dmnd[];
 extern int16_t const tplane_mask[];
 extern const int16_t *const markhead[];
+#if VIDEL_SUPPORT
 extern int32_t const colors[];
+#else
+#if PLANES8
+extern int16_t const colors[];
+#endif
+#endif
 
 /*
  * gsxasm1.S

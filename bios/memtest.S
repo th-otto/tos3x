@@ -42,13 +42,13 @@ memtes2:
         beq.s     memtes3
         move.w    #$0058,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, 'X')
+        trap      #13         /* Bconout(2, 'X') */
         addq.w    #6,a7
         bra.s     memtes4
 memtes3:
         move.w    #$002D,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '-')
+        trap      #13         /* Bconout(2, '-') */
         addq.w    #6,a7
 memtes4:
         clr.w     memterr
@@ -61,13 +61,13 @@ memtes5:
 memtes6:
         move.w    #$0008,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '\b')
+        trap      #13         /* Bconout(2, '\b') */
         addq.w    #6,a7
         dbf       d7,memtes6
         move.l    (a7)+,d7
         move.w    #$0020,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, ' ')
+        trap      #13         /* Bconout(2, ' ') */
         addq.w    #6,a7
         move.l    _phystop,d0
         asr.l     #8,d0
@@ -111,13 +111,13 @@ memtes9a:
         beq.s     memtes10
         move.w    #$0058,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, 'X')
+        trap      #13         /* Bconout(2, 'X') */
         addq.w    #6,a7
         bra.s     memtes11
 memtes10:
         move.w    #$002D,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '-')
+        trap      #13         /* Bconout(2, '-') */
         addq.w    #6,a7
 memtes11:
         clr.w     memterr
@@ -130,13 +130,13 @@ memtes12:
 memtes13:
         move.w    #$0008,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '\b')
+        trap      #13         /* Bconout(2, '\b') */
         addq.w    #6,a7
         dbf       d7,memtes13
         move.l    (a7)+,d7
         move.w    #$0020,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, ' ')
+        trap      #13         /* Bconout(2, ' ') */
         addq.w    #6,a7
         move.l    _ramtop,d0
         sub.l     #$01000000,d0
@@ -201,7 +201,7 @@ memtes19:
 memtes20:
         move.w    #$0020,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, ' ')
+        trap      #13         /* Bconout(2, ' ') */
         addq.w    #6,a7
         subq.l    #1,d7
         bne.s     memtes20
@@ -209,7 +209,7 @@ memtes20:
 memtes21:
         move.w    #$0008,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '\b')
+        trap      #13         /* Bconout(2, '\b') */
         addq.w    #6,a7
         subq.l    #1,d7
         bne.s     memtes21
@@ -324,23 +324,23 @@ prtdec1:
         bne.s     prtdec2
         move.w    #$0036,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '6')
+        trap      #13         /* Bconout(2, '6') */
         addq.w    #6,a7
         move.w    #$0035,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '5')
+        trap      #13         /* Bconout(2, '5') */
         addq.w    #6,a7
         move.w    #$0035,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '5')
+        trap      #13         /* Bconout(2, '5') */
         addq.w    #6,a7
         move.w    #$0033,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '3')
+        trap      #13         /* Bconout(2, '3') */
         addq.w    #6,a7
         move.w    #$0036,-(a7)
         move.l    #$00030002,-(a7)
-        trap      #13         ; Bconout(2, '6')
+        trap      #13         /* Bconout(2, '6') */
         addq.w    #6,a7
         bra.s     prtdec6
 prtdec2:

@@ -250,6 +250,7 @@ FindDev2:
 FindDev3:
         bsr       esc_init
 FindDev4:
+#if PLANES8 & !VIDEL_SUPPORT
         pea.l     _colors
         move.w    #$0100,-(a7)
         move.w    #$0000,-(a7)
@@ -265,6 +266,7 @@ FindDev4:
         trap      #14 ; EsetColor(3, colors[15])
         addq.w    #6,a7
 FindDev5:
+#endif
         cmpi.b    #$02,_sshiftmod
         bne.s     FindDev6
         move.w    #$0000,-(a7)

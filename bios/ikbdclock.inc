@@ -27,7 +27,7 @@ _clockvec:
 /* 306de: 00e021a4 */
 igetdt:
         move.b    #-1,(iclk_ready).w
-        move.b    #$1C,d1    ; send read clock command
+        move.b    #$1C,d1    /* send read clock command */
         bsr       ikbd_writeb
         movea.l   (_hz_200).w,a0
         adda.w    #$00C8,a0
@@ -47,36 +47,36 @@ isetdt:
         lea.l     iclkbuf+6,a0
         move.l    (iclkwtime).w,d2
         move.b    d2,d0
-        andi.b    #$1F,d0  ; write seconds
+        andi.b    #$1F,d0  /* write seconds */
         asl.b     #1,d0
         bsr.s     bcdput
-        lsr.l     #5,d2    ; write minutes
+        lsr.l     #5,d2    /* write minutes */
         move.b    d2,d0
         andi.b    #$3F,d0
         bsr.s     bcdput
-        lsr.l     #6,d2    ; write hour
+        lsr.l     #6,d2    /* write hour */
         move.b    d2,d0
         andi.b    #$1F,d0
         bsr.s     bcdput
-        lsr.l     #5,d2    ; write day of month
+        lsr.l     #5,d2    /* write day of month */
         move.b    d2,d0
         andi.b    #$1F,d0
         bsr.s     bcdput
-        lsr.l     #5,d2    ; write month
+        lsr.l     #5,d2    /* write month */
         move.b    d2,d0
         andi.b    #$0F,d0
         bsr.s     bcdput
-        lsr.l     #4,d2    ; write year
+        lsr.l     #4,d2    /* write year */
         move.b    d2,d0
         andi.b    #$7F,d0
         bsr.s     bcdput
         addi.b    #$80,(a0)
-        move.b    #$1B,d1    ; send set clock command
+        move.b    #$1B,d1    /* send set clock command */
         bsr       ikbd_writeb
         moveq.l   #5,d3
         lea.l     iclkbuf,a2
         bsr       ikbdws1
-        move.b    #$1C,d1    ; send read clock command
+        move.b    #$1C,d1    /* send read clock command */
         bsr       ikbd_writeb
         rts
 

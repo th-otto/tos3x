@@ -42,7 +42,15 @@
  */
 #define VIDEL_SUPPORT (TOSVERSION >= 0x400)
 
+/*
+ * set to 1 for supporting hardware accelerated blitter routines
+ */
 #define BLITTER_SUPPORT ((TOSVERSION < 0x300) | (TOSVERSION >= 0x400))
+
+/*
+ * set to 1 for supporting 8 planes interleaved video modes
+ */
+#define PLANES8 (TOSVERSION >= 0x300)
 
 /*
  * used to mark some strange looking code segments

@@ -14,22 +14,22 @@ _dmawrite:
         move.b    #$01,dmarwflg
         move.w    #$000A,d1
 dmarw:
-        cmpi.w    #$0010,14(a7) ; devno <= 16?
-        bhi       dmaundev      ; no, fail
-        cmpi.w    #$000F,14(a7) ; devno <= 15?
-        bhi.s     dmarw2        ; no, goto ide case
+        cmpi.w    #$0010,14(a7) /* devno <= 16? */
+        bhi       dmaundev      /* no, fail */
+        cmpi.w    #$000F,14(a7) /* devno <= 15? */
+        bhi.s     dmarw2        /* no, goto ide case */
         lea.l     scsicmd,a0
-        move.b    d1,(a0)+      ; command
-        move.b    5(a7),(a0)+   ; sector>>16
-        move.b    6(a7),(a0)+   ; sector>>8
-        move.b    7(a7),(a0)+   ; sector
-        move.b    9(a7),(a0)+   ; count
-        clr.b     (a0)          ; flags
-        move.w    14(a7),d0     ; get device
+        move.b    d1,(a0)+      /* command */
+        move.b    5(a7),(a0)+   /* sector>>16 */
+        move.b    6(a7),(a0)+   /* sector>>8 */
+        move.b    7(a7),(a0)+   /* sector */
+        move.b    9(a7),(a0)+   /* count */
+        clr.b     (a0)          /* flags */
+        move.w    14(a7),d0     /* get device */
         moveq.l   #0,d1
-        move.w    8(a7),d1      ; get count
+        move.w    8(a7),d1      /* get count */
         lsl.l     #8,d1
-        add.l     d1,d1         ; d1 = transfer size (sector count * 512)
+        add.l     d1,d1         /* d1 = transfer size (sector count * 512) */
         moveq.l   #6,d2
         movea.l   10(a7),a0
         tst.b     dmarwflg
@@ -80,12 +80,12 @@ dmarw4:
         bmi.s     dmaret
         bne.s     dmarw8
         lea.l     idebuf,a0
-        move.w    14(a7),-(a7)   ; device number
-        move.l    12(a7),-(a7)   ; buffer
-        move.w    14(a7),-(a7)   ; count
-        move.l    12(a7),-(a7)   ; start sector number
-        move.w    12(a0),-(a7)   ; device number of sectors
-        move.w    6(a0),-(a7)    ; device number of heads
+        move.w    14(a7),-(a7)   /* device number */
+        move.l    12(a7),-(a7)   /* buffer */
+        move.w    14(a7),-(a7)   /* count */
+        move.l    12(a7),-(a7)   /* start sector number */
+        move.w    12(a0),-(a7)   /* device number of sectors */
+        move.w    6(a0),-(a7)    /* device number of heads */
         tst.b     dmarwflg
         bne.s     dmarw5
         bsr       ideread
@@ -104,14 +104,14 @@ dmarw7:
         tst.w     d0
         ble.s     dmaret
 dmarw8:
-        moveq.l   #-11,d0 ; E_READF
+        moveq.l   #-11,d0 /* E_READF */
         tst.b     dmarwflg
         beq.s     dmaret
-        moveq.l   #-10,d0 ; E_WRITF
+        moveq.l   #-10,d0 /* E_WRITF */
 dmaret:
         rts
 dmaundev:
-        moveq.l   #-15,d0 ; E_UNDEV
+        moveq.l   #-15,d0 /* E_UNDEV */
         bra.s     dmaret
 
 /* 306de: 00e019ba */
@@ -232,7 +232,7 @@ acsiwrite:
 
 /* 306de: 00e01ae4 */
 acsierr:
-        moveq.l   #-15,d0 ; E_UNDEV
+        moveq.l   #-15,d0 /* E_UNDEV */
         movea.l   a2,a7
         move.l    a1,(_buserror).w
         rts
@@ -308,7 +308,7 @@ scsird1:
         bsr       sdelaytime
         bsr       scsibsy
         bmi.s     scsird2
-        btst      #3,10(a2) ; phase match?
+        btst      #3,10(a2) /* phase match? */
         beq       scsiabort
         move.b    (a2),(a1)+
         bsr       scsiack
@@ -334,7 +334,7 @@ scsiwr1:
         bsr       sdelaytime
         bsr       scsibsy
         bmi.s     scsiwr2
-        btst      #3,10(a2) ; phase match?
+        btst      #3,10(a2) /* phase match? */
         beq       scsiabort
         move.b    (a1)+,(a2)
         bsr       scsiack
@@ -370,7 +370,7 @@ scsisen2:
 scsiphase:
         bsr       sdelaytime
 scsipha1:
-        btst      #6,($FFFF8789).w ; BSY set?
+        btst      #6,($FFFF8789).w /* BSY set? */
         beq.s     scsipha2
         cmp.l     (a0),d1
         bhi.s     scsipha1
@@ -388,7 +388,7 @@ scsipha2:
         andi.b    #$F7,($FFFF8783).w
         bsr       sdelaytime
 scsipha3:
-        btst      #6,($FFFF8789).w ; BSY set?
+        btst      #6,($FFFF8789).w /* BSY set? */
         bne.s     scsipha5
         cmp.l     (a0),d1
         bhi.s     scsipha3
@@ -432,7 +432,7 @@ scsiab3:
 
 /* 00e01cb8 */
 scsibsy:
-        btst      #5,($FFFF8789).w  ; data transfer pending?
+        btst      #5,($FFFF8789).w  /* data transfer pending? */
         bne.s     scsibsy1
         cmp.l     (a0),d1
         bhi.s     scsibsy
@@ -445,9 +445,9 @@ scsibsy2:
 
 /* 00e01ccc */
 scsiack:
-        ori.b     #$11,($FFFF8783).w ; assert ACK
+        ori.b     #$11,($FFFF8783).w /* assert ACK */
 scsiack1:
-        btst      #5,($FFFF8789).w  ; data transfer pending?
+        btst      #5,($FFFF8789).w  /* data transfer pending? */
         beq.s     scsiack2
         cmp.l     (a0),d1
         bhi.s     scsiack1
@@ -456,7 +456,7 @@ scsiack1:
 scsiack2:
         moveq.l   #0,d0
 scsiack3:
-        andi.b    #$EF,($FFFF8783).w ; de-assert ACK
+        andi.b    #$EF,($FFFF8783).w /* de-assert ACK */
         rts
 
 /* 306de: 00e01cec */
@@ -472,7 +472,7 @@ scsiwrb1:
 
 /* 306de: 00e01cfe */
 scsirst:
-        move.b    #$80,($FFFF8783).w  ; assert RST
+        move.b    #$80,($FFFF8783).w  /* assert RST */
         bsr.s     sdelaytime
 scsirst1:
         cmp.l     (a0),d1
@@ -511,15 +511,15 @@ idestat1:
         bra.s     idestat4
 idestat2:
         moveq.l   #0,d0
-        move.b    $FFF0001D,d0 ; read status register
-        btst      #0,d0        ; error occured?
-        bne.s     idestat3     ; yes, ho read error
-        btst      #3,d0        ; data request ready?
+        move.b    $FFF0001D,d0 /* read status register */
+        btst      #0,d0        /* error occured? */
+        bne.s     idestat3     /* yes, ho read error */
+        btst      #3,d0        /* data request ready? */
         bne.s     idestat4
         moveq.l   #0,d0
         bra.s     idestat4
 idestat3:
-        move.b    $FFF00005,d0 ; read error register
+        move.b    $FFF00005,d0 /* read error register */
 idestat4:
         rts
 
@@ -570,24 +570,24 @@ idewr3:
 
 /* 306de: 00e01df2 */
 idechs:
-        move.l    12(a7),d1        ; get sector number
-        move.w    8(a7),d2         ; get number of heads
-        move.w    10(a7),d0        ; get number of sectors
-        mulu.w    d0,d2            ; calc number of sectors / cylinder
-        divu.w    d2,d1            ; calc cylinder #
-        move.b    d1,$FFF00011     ; write cylinder low
+        move.l    12(a7),d1        /* get sector number */
+        move.w    8(a7),d2         /* get number of heads */
+        move.w    10(a7),d0        /* get number of sectors */
+        mulu.w    d0,d2            /* calc number of sectors / cylinder */
+        divu.w    d2,d1            /* calc cylinder # */
+        move.b    d1,$FFF00011     /* write cylinder low */
         lsr.l     #8,d1
-        move.b    d1,$FFF00015     ; write cylinder high
-        lsr.l     #8,d1            ; d1 now remainder of division above
-        divu.w    d0,d1            ; calc head #
-        move.w    22(a7),d0        ; get device number
+        move.b    d1,$FFF00015     /* write cylinder high */
+        lsr.l     #8,d1            /* d1 now remainder of division above */
+        divu.w    d0,d1            /* calc head # */
+        move.w    22(a7),d0        /* get device number */
         andi.b    #$07,d0
         lsl.b     #4,d0
         or.b      d0,d1
-        move.b    d1,$FFF00019     ; select device & head
+        move.b    d1,$FFF00019     /* select device & head */
         swap      d1
         addq.w    #1,d1
-        move.b    d1,$FFF0000D     ; write sector number
+        move.b    d1,$FFF0000D     /* write sector number */
         rts
 
 /* 306de: 00e01e32 */
@@ -595,30 +595,30 @@ idecount:
         move.w    4(a7),d0
         andi.b    #$07,d0
         lsl.w     #4,d0
-        move.b    d0,$FFF00019     ; select device
+        move.b    d0,$FFF00019     /* select device */
         move.w    6(a7),d0
         subq.b    #1,d0
-        or.b      d0,$FFF00019     ; select head
-        move.b    9(a7),$FFF00009  ; select sector count
+        or.b      d0,$FFF00019     /* select head */
+        move.b    9(a7),$FFF00009  /* select sector count */
         move.b    #$00,$FFF00039
         move.b    #$91,$FFF0001D
         bra       idestat
 
 /* 306de: 00e01e6a */
 ideidentify:
-        move.w    4(a7),d0         ; get device
+        move.w    4(a7),d0         /* get device */
         andi.b    #$07,d0
         lsl.b     #4,d0
-        move.b    d0,$FFF00019     ; select device
+        move.b    d0,$FFF00019     /* select device */
         movea.l   6(a7),a0
         move.b    #$00,$FFF00039
-        move.b    #$EC,$FFF0001D   ; send ATA IDENTIFY command
+        move.b    #$EC,$FFF0001D   /* send ATA IDENTIFY command */
         bsr       idestat
         tst.w     d0
         bmi.s     ideiden1
         btst      #3,d0
         beq.s     ideiden1
-        bsr.s     iderdsec         ; read the identify packet
+        bsr.s     iderdsec         /* read the identify packet */
         moveq.l   #0,d0
 ideiden1:
         rts
@@ -654,15 +654,15 @@ idewrs1:
 iderdy:
         andi.b    #$07,d0
         lsl.b     #4,d0
-        move.b    d0,$FFF00019     ; select device
+        move.b    d0,$FFF00019     /* select device */
         move.l    #1000,d0
         add.l     (_hz_200).w,d0
 iderdy1:
-        btst      #6,$FFF00039     ; status drive ready?
-        bne.s     iderdy2          ; yes, report ok
-        cmp.l     (_hz_200).w,d0   ; timeout reached?
-        bcc.s     iderdy1          ; no, try again
-        moveq.l   #0,d0            ; report failure
+        btst      #6,$FFF00039     /* status drive ready? */
+        bne.s     iderdy2          /* yes, report ok */
+        cmp.l     (_hz_200).w,d0   /* timeout reached? */
+        bcc.s     iderdy1          /* no, try again */
+        moveq.l   #0,d0            /* report failure */
         rts
 iderdy2:
         moveq.l   #1,d0

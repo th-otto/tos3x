@@ -328,7 +328,6 @@ sd_sync:
 	bmi	sd_sync			; quit if blt had already finished
 
 #if P68030
-
 	CACR_D0			; d0 <- cache control register
 	bset.l	#11,d0			; set "Clr Data Cache" bit
 	D0_CACR			; clear the data cache
@@ -464,7 +463,6 @@ blank_cont:
 	dbra	d6,blank_loop
 
 #if P68030
-
 	D0_CACR			; d0 <- cache control register
 	bset.l	#11,d0			; set "Clr Data Cache" bit
 	CACR_D0			; clear the data cache
