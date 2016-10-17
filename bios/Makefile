@@ -7,7 +7,7 @@ include optimize.mak
 all: bios.a bios.o
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
@@ -46,10 +46,10 @@ memtest.o: memtest.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-bios.o: checklang tosvars.o vars.o $(BIOS_OBJS) biosext.o ${MAKEFILE}
+bios.o: tosvars.o vars.o $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(LD) -u -s -l -o $@ -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o
 
-biosext.o: biosext.S $(top_srcdir)/common/config.h
+biosext.o: biosext.S $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i

@@ -1,10 +1,12 @@
 # nasty workaround to avoid backslash at end-of-line
 BS=\${empty}
+QBS=\\${empty}
 
 BIN=..\bin${BS}
 LIB=..\lib${BS}
 INC=..\include${BS}
 EXEEXT=.ttp
+BUILD_EXEEXT=$(EXEEXT)
 ALNPATH=${LIB}
 export ALNPATH
 
@@ -20,6 +22,7 @@ RANLIB = ${BIN}doindex${EXEEXT}
 LD=${BIN}aln${EXEEXT}
 LINK68=${BIN}link68${EXEEXT}
 RELMOD=${BIN}relmod${EXEEXT}
+CPP=${BIN}cp68${EXEEXT} ${CPPFLAGS} -P
 CRT0=crt0.o
 LIBC=libc.a
 LIBC_NDX=libc.ndx
@@ -65,7 +68,7 @@ RUN_OPTIMIZE_ = ${RUN_OPTIMIZE_1}
 	$(AM_V_AS)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s
 
 .S.o:
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.S $*.i
+	$(AM_V_AS)${CPP} $*.S $(CPPOUT) $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 

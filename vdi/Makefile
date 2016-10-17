@@ -1,47 +1,6 @@
-################################  makevdi  ####################################
 #
-# $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/makevdi,v $
-# =============================================================================
-# $Author: lozben $	$Date: 91/08/06 21:31:04 $     $Locker:  $
-# =============================================================================
+# Makefile for VDI
 #
-# $Log:	makevdi,v $
-# Revision 3.0  91/08/06  21:31:04  lozben
-# New generation VDI
-# 
-# Revision 2.11  91/07/26  12:08:28  lozben
-# Made sbblit.s dependent on vdiincld.s.
-# 
-# Revision 2.10  91/07/08  16:37:19  lozben
-# Added new files - sbscolog.s, sbsctlog.s sbsctran.s sbscopaq.s
-# 
-# Revision 2.9  90/06/13  18:06:32  lozben
-# Added the -3 (68030 option) flag for the assembler.
-# 
-# Revision 2.8  90/03/01  12:38:02  lozben
-# We now grep for comment "@check@" in relevant files before
-# finishing the target. Also added "vdiincld.s" as one of the
-# dependencies for some of the files.
-# 
-# Revision 2.7  90/02/28  11:41:19  lozben
-# Fixed some typo errors.
-# 
-# Revision 2.6  90/02/27  16:20:53  lozben
-# Made changes so that the makefile works for the ST and TT vdi.
-# 
-# Revision 2.5  90/02/20  12:33:18  lozben
-# Added fnt16x32.c to the list of files.
-# 
-# Revision 2.4  90/01/29  18:40:21  lozben
-# Added sbscrn.s to the list of .s files.
-# 
-# Revision 2.3  90/01/19  12:14:01  lozben
-# Deleted sbtxt32.s from make file. It's a duplicate os sbtxtblt.s
-# 
-# Revision 2.2  90/01/19  11:57:15  lozben
-# *** Initial Revision ***
-# 
-###############################################################################
 
 top_srcdir=..
 
@@ -54,7 +13,7 @@ PROGRAMS = screen.prg
 all: vdi.a vdi.o $(PROGRAMS)
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
@@ -77,10 +36,10 @@ vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(VDI_OBJS10)
 	$(AR) $(ARFLAGS) $@ $(VDI_OBJS11)
 
-vdi.o: checklang tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_OBJS) ${MAKEFILE}
+vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_OBJS) ${MAKEFILE}
 	$(LD) -o $@ -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_OBJS)
 
-vdi.rel: checklang tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_OBJS) vdi.lnk ${MAKEFILE}
+vdi.rel: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_OBJS) vdi.lnk $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(RM) $@
 	$(LINK68) [abs,textbase[$(vdi_tbase)],database[$(vdi_dbase)],bssbase[0],co[vdi.lnk]]
 
@@ -357,7 +316,7 @@ spxtxtbl.o: spxtxtbl.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-vdiext.o: vdiext.S
+vdiext.o: vdiext.S $(top_srcdir)/common/sections.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
@@ -390,7 +349,7 @@ text.o: text.c
 #	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
 
 
-screen.prg: checklang $(SCREEN_OBJS) $(VDI_OBJS) ${MAKEFILE}
+screen.prg: $(SCREEN_OBJS) $(VDI_OBJS) ${MAKEFILE}
 	$(LD) -s -l -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_OBJS)
 
 check::

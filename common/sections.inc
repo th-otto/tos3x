@@ -1,114 +1,186 @@
-#if TOSVERSION == 0x306
+#include "../common/config.h"
+#include "../common/ctrycodes.h"
 
-BTLEN_US    equ $0000641C
+#if TOSVERSION == 0x306
 
 /*
  * length of BIOS text segment is different due to some extra
  * code for ALT-scancode mappings
  */
+
+/*
+ * length of BIOS text segment of the US version,
+ * which does not have any extra code
+ */
+#define BTLEN_US    $0000641C
+#define DTLEN_US    $0000FBCC
+
+
 #if OS_COUNTRY == CTRY_US
-BIOSTLEN    equ BTLEN_US
-DESKTLEN    equ $0000FBCC
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
 #endif
 
 #if OS_COUNTRY == CTRY_DE
-BIOSTLEN    equ $00006476
-DESKTLEN    equ $0000FBA2
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$2A
 #endif
 
 #if OS_COUNTRY == CTRY_FR
-BIOSTLEN    equ $00006494
-DESKTLEN    equ $0000FBA2
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$2A
 #endif
 
 #if OS_COUNTRY == CTRY_ES
-BIOSTLEN    equ $000064A2
-DESKTLEN    equ $0000FBA2
+#define BIOSTLEN    BTLEN_US+$86
+#define DESKTLEN    DTLEN_US-$2A
 #endif
 
 #if OS_COUNTRY == CTRY_IT
-BIOSTLEN    equ $00006484
-DESKTLEN    equ $0000FBA2
+#define BIOSTLEN    BTLEN_US+$68
+#define DESKTLEN    DTLEN_US-$2A
 #endif
 
 #if OS_COUNTRY == CTRY_UK
-BIOSTLEN    equ BTLEN_US
-DESKTLEN    equ $0000FBCC
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
 #endif
 
 #if OS_COUNTRY == CTRY_SV
-BIOSTLEN    equ $00006494
-DESKTLEN    equ $0000FBA2
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$2A
 #endif
 
 #if OS_COUNTRY == CTRY_PL
 #define BIOSTBASE   $00380000
-BIOSTLEN    equ $00006476
-DESKTLEN    equ $0000FBA2
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$2A
 #endif
 
 
 /*
  * these are identical in all language versions
  */
-BIOSDLEN    equ $000009D8
-VDITLEN     equ $0000D06E
-VDIDLEN     equ $00006EFA
-BDOSTLEN    equ $000062AC
-BDOSDLEN    equ $0000039E
-AESTLEN     equ $0000CCD6
-AESDLEN     equ $000006D8
-DESKDLEN    equ $00000000
+#define BIOSDLEN    $000009D8
+#define VDITLEN     $0000D06E
+#define VDIDLEN     $00006EFA
+#define BDOSTLEN    $000062AC
+#define BDOSDLEN    $0000039E
+#define AESTLEN     $0000CCD6
+#define AESDLEN     $000006D8
+#define DESKDLEN    $00000000
 
 #endif /* TOSVERSION == 0x306 */
 
 
 #if TOSVERSION == 0x206
 
-BTLEN_US    equ $0000603A
+#define BTLEN_US    $0000603A
+#define DTLEN_US    $0000FBFC
 
 #if OS_COUNTRY == CTRY_US
-BIOSTLEN    equ BTLEN_US
-DESKTLEN    equ $0000FBFC
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
 #endif
 
 #if OS_COUNTRY == CTRY_DE
-BIOSTLEN    equ $00006094
-DESKTLEN    equ $0000FBA2
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_FR
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_ES
+#define BIOSTLEN    BTLEN_US+$86
+#define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+#define BIOSTLEN    BTLEN_US+$68
+#define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
 #endif
 
 /*
  * these are identical in all language versions
  */
-BIOSDLEN    equ $00000000
-VDITLEN     equ $0000999A
-VDIDLEN     equ $00000000
-BDOSTLEN    equ $000062FC
-BDOSDLEN    equ $00000000
-AESTLEN     equ $0000CCD6
-AESDLEN     equ $00000000
-DESKDLEN    equ $00000000
+#define BIOSDLEN    $00000000
+#define VDITLEN     $0000999A
+#define VDIDLEN     $00000000
+#define BDOSTLEN    $000062FC
+#define BDOSDLEN    $00000000
+#define AESTLEN     $0000CCD6
+#define AESDLEN     $00000000
+#define DESKDLEN    $00000000
 
 #endif /* TOSVERSION == 0x206 */
 
 #ifndef BIOSTBASE
-#define BIOSTBASE $00E00000
+#define BIOSTBASE   $00E00000
 #endif
 
 
 /*
  * now calculate addresses from above
  */
-VDITBASE  equ BIOSTBASE+BIOSTLEN
-BDOSTBASE equ VDITBASE+VDITLEN
-AESTBASE  equ BDOSTBASE+BDOSTLEN
-DESKTBASE equ AESTBASE+AESTLEN
-ETEXT     equ DESKTBASE+DESKTLEN
+#define VDITBASE  BIOSTBASE+BIOSTLEN
+#define BDOSTBASE VDITBASE+VDITLEN
+#define AESTBASE  BDOSTBASE+BDOSTLEN
+#define DESKTBASE AESTBASE+AESTLEN
+#define ETEXT     DESKTBASE+DESKTLEN
 
-BIOSDBASE equ ETEXT
-VDIDBASE  equ BIOSDBASE+BIOSDLEN
-BDOSDBASE equ VDIDBASE+VDIDLEN
-AESDBASE  equ BDOSDBASE+BDOSDLEN
-DESKDBASE equ AESDBASE+AESDLEN
-EDATA     equ DESKDBASE+DESKDLEN
+#define BIOSDBASE ETEXT
+#define VDIDBASE  BIOSDBASE+BIOSDLEN
+#define BDOSDBASE VDIDBASE+VDIDLEN
+#define AESDBASE  BDOSDBASE+BDOSDLEN
+#define DESKDBASE AESDBASE+AESDLEN
+#define EDATA     DESKDBASE+DESKDLEN
 
+#ifdef __MAKEFILE__
+
+/*
+ * the output of this is fed through bc
+ */
+ibase=16
+obase=10
+
+bios_tbase=BIOSTBASE
+bios_tlen=BIOSTLEN
+bios_dbase=BIOSDBASE
+bios_dlen=BIOSDLEN
+vdi_tbase=VDITBASE
+vdi_tlen=VDITLEN
+vdi_dbase=VDIDBASE
+vdi_dlen=VDIDLEN
+bdos_tbase=BDOSTBASE
+bdos_tlen=BDOSTLEN
+bdos_dbase=BDOSDBASE
+bdos_dlen=BDOSDLEN
+
+rombase=BIOSTBASE
+
+print "bios_tbase=", bios_tbase, "\n"
+print "bios_tlen=", bios_tlen, "\n"
+print "bios_dbase=", bios_dbase, "\n"
+print "bios_dlen=", bios_dlen, "\n"
+print "vdi_tbase=", vdi_tbase, "\n"
+print "vdi_tlen=", vdi_tlen, "\n"
+print "vdi_dbase=", vdi_dbase, "\n"
+print "vdi_dlen=", vdi_dlen, "\n"
+print "bdos_tbase=", bdos_tbase, "\n"
+print "bdos_tlen=", bdos_tlen, "\n"
+print "bdos_dbase=", bdos_dbase, "\n"
+print "bdos_dlen=", bdos_dlen, "\n"
+
+print "rombase=", rombase, "\n"
+
+quit
+
+#endif

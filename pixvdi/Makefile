@@ -54,7 +54,7 @@ PROGRAMS = screen.prg
 all: vdi.a vdi.o $(PROGRAMS)
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
@@ -347,15 +347,15 @@ spxtxtbl.o: spxtxtbl.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-vdi.o: checklang tosvars.o vars.o $(VDI_OBJS) vdiext.o ${MAKEFILE}
+vdi.o: tosvars.o vars.o $(VDI_OBJS) vdiext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(LD) -u -s -l -o $@ -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o $(VDI_OBJS) vdiext.o
 
-vdiext.o: vdiext.S $(top_srcdir)/common/config.h
+vdiext.o: vdiext.S $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
-screen.prg: checklang $(SCREEN_OBJS) $(VDI_OBJS) ${MAKEFILE}
+screen.prg: $(SCREEN_OBJS) $(VDI_OBJS) ${MAKEFILE}
 	$(LD) -s -l -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_OBJS)
 
 check::

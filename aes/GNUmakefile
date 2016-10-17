@@ -20,14 +20,14 @@ CFLAGS = $(OPTS) $(WARN)
 all: aes.a
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
 aes.a: $(AES_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(AES_OBJS)
 
-check:: aes.o checklang
+check:: aes.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \
 		echo "$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
 		exit 1; \

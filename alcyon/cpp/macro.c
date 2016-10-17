@@ -800,7 +800,7 @@ PP(int nd;)
 	}
 	if (!Eflag)
 	{
-		if ((outbuf = fopen(dest, "w")) == NULL)
+		if ((outbuf = fopen(dest, "wb")) == NULL)
 		{
 			error(_("can't creat %s\n"), dest);
 			return FALSE;

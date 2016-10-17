@@ -13,6 +13,7 @@
 
 /* from BIOS */
 		xdef ringbell
+		xdef _zeromem
 		text
 ringbell ds.b 0
 /*
@@ -21,16 +22,10 @@ ringbell ds.b 0
  */
 #if TOSVERSION == 0x306
 ringbell  equ $3B2C+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
-		
-		xdef _zeromem
 _zeromem equ BIOSTBASE+$1680
-
 #endif
 
 #if TOSVERSION == 0x206
 ringbell  equ $374A+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
-		
-		xdef _zeromem
 _zeromem equ BIOSTBASE+$1548
-
 #endif

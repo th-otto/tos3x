@@ -18,25 +18,25 @@ CFLAGS = $(OPTS) $(WARN)
 all: $(top_srcdir)/common/config.h vars.o bdos.a
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
-bdos.a: checklang $(BDOS_OBJS) ${MAKEFILE}
+bdos.a: $(BDOS_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(BDOS_OBJS)
 
 $(BDOS_OBJS) vars.o vdidsp.o: $(top_srcdir)/common/config.h
 
-check:: bdos.o checklang
+check:: bdos.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \
 		echo "$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
 		exit 1; \
 	fi
-	$(AM_V_at)offset=`echo 16 i $(gemdos_tbase) $(rombase) - p | dc`; \
-	tlen=`echo 16 i $(gemdos_tlen) p | dc`; \
+	$(AM_V_at)offset=`echo 16 i $(bdos_tbase) $(rombase) - p | dc`; \
+	tlen=`echo 16 i $(bdos_tlen) p | dc`; \
 	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$tlen of=bdos.orig 2> /dev/null; \
-	offset=`echo 16 i $(gemdos_dbase) $(rombase) - p | dc`; \
-	dlen=`echo 16 i $(gemdos_dlen) p | dc`; \
+	offset=`echo 16 i $(bdos_dbase) $(rombase) - p | dc`; \
+	dlen=`echo 16 i $(bdos_dlen) p | dc`; \
 	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$dlen seek=$$tlen of=bdos.orig 2> /dev/null; \
 	total=`echo $$tlen $$dlen + p | dc`; \
 	dd if=$< of=bdos.new bs=1 skip=36 count=$$total 2> /dev/null; \

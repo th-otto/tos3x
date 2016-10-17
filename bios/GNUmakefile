@@ -20,7 +20,7 @@ CFLAGS = $(OPTS) $(WARN)
 all: bios.a
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
@@ -34,7 +34,7 @@ keytbl.o: $(top_srcdir)/common/config.h
 prtkeys$(EXEEXT): prtkeys.o
 	$(AM_V_LD)${LD} ${LDFLAGS} -o $@ prtkeys.o
 
-check:: bios.o checklang
+check:: bios.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \
 		echo "$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
 		exit 1; \

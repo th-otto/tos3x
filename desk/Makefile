@@ -7,7 +7,7 @@ include optimize.mak
 all: desk.a desk.o
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
@@ -36,10 +36,10 @@ tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
-desk.o: checklang tosvars.o vars.o $(DESK_OBJS) deskext.o ${MAKEFILE}
+desk.o: tosvars.o vars.o $(DESK_OBJS) deskext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(LD) -u -s -l -o $@ -a $(desk_tbase) $(desk_dbase) 0 tosvars.o vars.o $(DESK_OBJS) deskext.o
 
-deskext.o: deskext.S $(top_srcdir)/common/config.h
+deskext.o: deskext.S $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i

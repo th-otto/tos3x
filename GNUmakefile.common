@@ -11,6 +11,8 @@ LIBC_NDX=
 LIBM=libm.a
 LIBM_NDX=
 
+QBS=\${empty}
+
 #
 # target and host compiler
 # 
@@ -32,6 +34,8 @@ BUILD_CC = gcc
 BUILD_CFLAGS = -O -Wall
 
 CC = $(CROSSPREFIX)gcc
+CPP = $(CROSSPREFIX)gcc -xc $(CPPFLAGS) -E -P
+CPPOUT = -o
 LD = $(CC)
 AS = $(CROSSPREFIX)as --mri
 AR = $(CROSSPREFIX)ar

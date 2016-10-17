@@ -4,36 +4,13 @@
 *
 #include "../common/config.h"
 #include "../common/ctrycodes.h"
+#include "../common/sections.inc"
 
 	xdef _zeromem
 	xdef _GSX_ENTRY
 
-#if OS_COUNTRY == CTRY_US
-_zeromem equ $00E01680
-_GSX_ENTRY   equ $00E0785A
+#if TOSVERSION == 0x306
+_zeromem equ BIOSTBASE+$1680
+_GSX_ENTRY   equ VDITBASE+$143E
 #endif
 
-#if OS_COUNTRY == CTRY_DE
-_zeromem equ $00E01680
-_GSX_ENTRY   equ $00E078B4
-#endif
-
-#if OS_COUNTRY == CTRY_FR
-_zeromem equ $00E01680
-_GSX_ENTRY   equ $00E078D2
-#endif
-
-#if OS_COUNTRY == CTRY_UK
-_zeromem equ $00E01680
-_GSX_ENTRY   equ $00E0785A
-#endif
-
-#if OS_COUNTRY == CTRY_SV
-_zeromem equ $00E01680
-_GSX_ENTRY   equ $00E078D2
-#endif
-
-#if OS_COUNTRY == CTRY_PL
-_zeromem equ $00381680
-_GSX_ENTRY   equ $003878B4
-#endif

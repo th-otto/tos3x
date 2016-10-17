@@ -1,7 +1,7 @@
 top_srcdir=..
 subdir=common
 
-all:
+all: $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
@@ -13,4 +13,4 @@ dist::
 clean::
 
 distclean: clean
-	$(RM) $(top_srcdir)/common/config.h
+	$(RM) config.h sections.mak

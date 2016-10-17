@@ -20,14 +20,14 @@ CFLAGS = $(OPTS) $(WARN)
 all: desk.a
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
 desk.a: $(DESK_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(DESK_OBJS)
 
-check:: desk.o checklang
+check:: desk.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \
 		echo "$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
 		exit 1; \

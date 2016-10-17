@@ -7,7 +7,7 @@ include optimize.mak
 all: aes.a aes.o
 
 include $(top_srcdir)/config.mak
-include $(top_srcdir)/language.mak
+-include $(top_srcdir)/common/sections.mak
 
 include SRCFILES
 
@@ -43,7 +43,7 @@ tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
-aes.o: checklang tosvars.o vars.o $(STARTUP) $(AES_OBJS) aesext.o ${MAKEFILE}
+aes.o: tosvars.o vars.o $(STARTUP) $(AES_OBJS) aesext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(LD) -u -s -l -o $@ -a $(aes_tbase) $(aes_dbase) 0 tosvars.o vars.o $(STARTUP) $(AES_OBJS) aesext.o
 
 aesext.o: aesext.S $(top_srcdir)/commoon/config.h
