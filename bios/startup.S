@@ -115,7 +115,7 @@ BCONMAP_START_HANDLE equ 6
 
 /* Memory */
         xref memchk
-        
+
 /* BIOS C part */
 /*        xref _biosmain     / * BIOS C entry point */
 
@@ -189,7 +189,7 @@ psgwr     equ $FFFF8802
         xref  _root
         xref  _shifty
         xref  _run
-		
+
 _os_entry:
     bra.s   _main       /* os_entry, branch to _main */
 os_version:
@@ -293,7 +293,7 @@ nodiag:
         TO_TTR0(zero)        /* first we initialise the TTRs (ACRs on a 68ec030) */
         TO_TTR1(zero)
         FRESTORE(zero)
-        
+
         btst      #0,(scu_gp1).w			/* memconfig valid? */
         beq.s     noreset
 #endif
@@ -302,7 +302,7 @@ nodiag:
 memcret:
         bne.s      noreset
         move.b    (memctrl).w,(memconf).w  /* initialize memory controller */
-        
+
 #if STBOOK
 			move.w    (STConfig).w,d0           /* Configuration on ST Book */
             cmp.b     #$fc,d0                   /* power pressed while the ST Book is closed? */
@@ -357,7 +357,7 @@ meminit:
         move.b    #$C0,2(a0) /* Port A+B = output */
         move.b    #$0E,(a0)  /* select Port A */
         move.b    #$07,2(a0) /* deselect floppy drives */
-        
+
 #if TOSVERSION >= 0x300
         move.b    #$01,(v_syncmod).w /* set video sync */
 #else
@@ -502,7 +502,7 @@ domemchk:
  */
         move.w    #$0005,d6           /* assume 2MB board */
         move.b    #$0A,(memconf).w  /* set memory controller for 8MB */
-        moveq.l   #0,d0               
+        moveq.l   #0,d0
         move.l    d0,($00001008).w    /* zero out test addresses */
         move.l    d0,($0000100C).w
         move.l    #$06161964,d0       /* write test value #1 to an address */
@@ -536,7 +536,7 @@ set_2MB:
         move.l    a0,(_buserror).w
         move.w    #$FB55,d3           /* d3.w = difference between adjacent stored values */
         move.l    #$00020000,d7       /* d7 = address of first memory test zone & gap between memory test zones */
-                                        
+
         movea.l   d7,a0               /* a0 = address of current test zone */
 next_zone:
         movea.l   a0,a1               /* a1 -> memory being tested */
@@ -550,7 +550,7 @@ store_mem:
         movea.l   a0,a1               /* a1 -> test area */
         moveq.l   #42,d1              /* loop count */
 check_mem:
-        cmp.w     -(a1),d0            
+        cmp.w     -(a1),d0
         bne.s     st_ramsize_done   /* miscompare, ram invalid, exit */
         clr.w     (a1)                /* else zero it out */
         add.w     d3,d0               /* update for next compare */
@@ -587,7 +587,7 @@ clrmem:
         move.l    #$237698AA,(_memval2).w  /* set memval2 to ok */
         move.l    #$5555AAAA,(_memval3).w  /* set memval3 to ok */
 
-/* 
+/*
  * We must set the FastRAM refresh rate before we use it. The
  * rate is set by writing a "don't care" value to an address in
  * the range 0xffd00000-0xffd000ff; the low-order byte of the
@@ -820,7 +820,7 @@ clrscr:
         cmpi.l    #GEM_MUPB_MAGIC,(a0)
         beq.s     gemok
         lea.l     _os_beg,a0
-gemok:  
+gemok:
         move.l    4(a0),(_end_os).w
         move.l    8(a0),(_exec_os).w
 
@@ -1205,7 +1205,7 @@ moncolor:
 /*
  * initialize video
  */
-        bsr       blittest                
+        bsr       blittest
         jsr       resetdev                /* linaA blitter/no-blitter table init */
         jsr       esc_init                /* clear screen, initialize cursor */
         move.l    #_main,(_swv_vec).w     /* RESET system on monitor change */
@@ -1378,7 +1378,7 @@ clockdone:
 #endif
 
 
-/* 
+/*
  * Draw the Atari logo.
  */
         movea.l   #atarilogo,a0
@@ -1584,7 +1584,7 @@ notlow:
         trap      #13             /* Bconout(2, col) */
         addq.w    #6,a7
 
-#if TOSVERSION < 0x300 
+#if TOSVERSION < 0x300
         cmpi.l    #80*200,_hz_200       /* system running for >80s? */
         bcc       ptch_term             /* (then no ROM CRC check) */
 #endif
@@ -1707,9 +1707,9 @@ ptcht2:     adda.l    d1,a0                    /* increment the exception number
 #endif
 
 /* boot eventually from a block device (floppy or harddisk) */
-        bsr       diskboot                     
+        bsr       diskboot
 /* memory test and attempt to boot from SCSI/ACSI */
-        bsr       dmaboot                      
+        bsr       dmaboot
 /* run resident programs */
         bsr       run_reset_resident
         tst.w     _cmdload                     /* load shell from disk? */
@@ -1744,7 +1744,7 @@ nextenvc:
         move.b    _bootdev,d0                  /* compute drive#, and shove it (infamous old bug accessing _bootdev as byte) */
 #endif
         add.b     #$41,d0
-        move.b    d0,(a2)                      
+        move.b    d0,(a2)
         pea.l     gem_env                      /* push address of environment string */
         pea.l     emptystr                     /* no arguments */
         pea.l     emptystr(pc)                 /* null shell name (in ROM, after all) */
@@ -1817,7 +1817,7 @@ dmaboot:
 dmaloop:
         cmpa.w    #$0000,a5                 /* memtest done? */
         bne       skipsp                    /* (yes) */
-        bsr       memtest                   
+        bsr       memtest
         movea.w   d0,a5                     /* memtest done? */
         beq       dmawait                   /* (no) */
         move.w    #$001B,-(a7)
@@ -1999,7 +1999,7 @@ doboot:
         movea.l   (_dskbufp).w,a0
         move.l    #$444D4172,d3          /* 'DMAr' */
         move.w    d4,d7                  /* d4 -> pdev */
-        asl.w     #5,d7                  
+        asl.w     #5,d7
         move.w    (_bootpref).w,d5
 #if !STBOOK
         move.l    d4,-(a7)
@@ -2173,7 +2173,7 @@ vbl_loop:
         movem.l   d7/a0,-(a7)               /* save registers */
         jsr       (a1)                      /* call routine */
         movem.l   (a7)+,d7/a0               /* restore registers */
-vbl_next:                  
+vbl_next:
         dbf       d7,vbl_loop               /* loop for more vectors */
 
 #if !STBOOK
@@ -2381,7 +2381,7 @@ bx_sp_ok:
         move.w    (a7)+,d0               /* remove the function number from stack */
         cmp.w     (a0)+,d0               /* Higher than highest number? */
         bge.s     bx_ret                 /* if not implemented, returns the func number */
-        move.w    d0,d1                  
+        move.w    d0,d1
         lsl.w     #2,d1                  /* function table is 1 LW per number so multiply function number by 4 */
         move.l    0(a0,d1.w),d1          /* get function address */
 #if TOSVERSION >= 0x300
@@ -2826,7 +2826,7 @@ getmpb1:
 _setexc:
         move.w    4(a7),d0          /* d0 = vector # */
         lsl.w     #2,d0             /* turn into longword index */
-        suba.l    a0,a0             
+        suba.l    a0,a0
         lea.l     0(a0,d0.w),a0     /* a0 -> vector */
         move.l    (a0),d0           /* d0 = current vector address */
         move.l    6(a7),d1          /* d1 = what_to_change_it_to */
@@ -2912,7 +2912,7 @@ _getrez:
 _vsetscreen:
 /* --- set logical location: */
         tst.l     4(a7)                      /* if(logloc < 0) then ignore it */
-        bmi.s     nosetl                     
+        bmi.s     nosetl
         move.l    4(a7),(_v_bas_ad).w
 nosetl:
 /* --- set physical location: */
@@ -3071,7 +3071,7 @@ drawbombs:
         and.w     #$0003,d7
 #endif
         add.w     d7,d7                      /* d7 = rez index */
-        moveq.l   #0,d0                     
+        moveq.l   #0,d0
         move.b    (v_bas_h).w,d0
         lsl.w     #8,d0
         move.b    (v_bas_m).w,d0
@@ -3096,7 +3096,7 @@ drawbo4:
 drawbo5:
         move.w    dplanetab(pc,d7.w),d5      /* d5 = #words to replicate */
 drawbo6:
-        move.w    (a1),(a0)+                 
+        move.w    (a1),(a0)+
         dbf       d5,drawbo6
         dbf       d2,drawbo5                 /* another, on the same line */
         addq.w    #2,a1                      /* next source word */
@@ -3174,7 +3174,7 @@ autoname:                      dc.b '*.PRG',0
 autoexec:
         move.l    #$000Bffff,-(a7)
         trap      #13              /* Kbshift(-1) */
-        addq.l    #4,a7     
+        addq.l    #4,a7
         btst      #2,d0            /* Control pressed? */
         bne.s     autoexe2        /* yes, skip autoexec */
 #if TOSVERSION < 0x300
@@ -3198,7 +3198,7 @@ _auto1: move.l    (a7)+,savepc              /* return addr (used by execlr) */
         move.l    a0,-(a7)                  /* null environment */
         move.l    a0,-(a7)                  /* null command tail */
         move.l    a0,-(a7)                  /* null shell name */
-        move.w    #$0005,-(a7)              
+        move.w    #$0005,-(a7)
         move.w    #$004B,-(a7)
         trap      #1                        /* Pexec(5) Create basepage */
         adda.w    #16,a7
@@ -3376,7 +3376,7 @@ dovsync:
 run_reset_resident:
         movea.l   _phystop,a0                   /* start at the top of the address space */
 run_res1:
-        suba.w    #$0200,a0                     
+        suba.w    #$0200,a0
         cmpa.w    #$0400,a0                     /* reach the lower bottom? */
         bls.s     run_res3                      /* (bail out) */
         cmpi.l    #RR_MAGIC,(a0)                /* check for magic */
@@ -4095,7 +4095,7 @@ bcon0o2:
         move.l    (_hz_200).w,(lst_timeout).w   /* record time of last timeout */
         rts
 bcon0o3:
-        move.w    sr,d3                         
+        move.w    sr,d3
         ori.w     #$0700,sr                     /* protect upcoming switching of the port setting */
         moveq.l   #7,d1                         /* get current io enable register contents */
         bsr       gientry
@@ -4106,7 +4106,7 @@ bcon0o3:
         move.w    6(a7),d0                      /* retrieve byte to be sent and... */
         move.b    #$8F,d1                       /* write out byte to parallel port */
         bsr       gientry
-        move.w    sr,-(a7)                      
+        move.w    sr,-(a7)
         ori.w     #$0700,sr
         bsr.s     strobeon
         bsr.s     strobeon
@@ -4201,7 +4201,7 @@ bcon6in1:
         bpl.s     bcon6in2                      /* underflow? */
         add.w     size(a0),d0
 bcon6in2:
-        cmp.w     low(a0),d0                    
+        cmp.w     low(a0),d0
         bgt.s     bcon6in3
         tst.b     highwater(a0)                 /* high-water flag already set? */
         beq.s     bcon6in3
@@ -4375,12 +4375,12 @@ _bcon2in:
         beq.s     bcon2in2                      /* yes */
 /* check for wrap of pointer */
         addq.w    #4,d1                         /* i=h+4 */
-        cmp.w     size(a0),d1                 
+        cmp.w     size(a0),d1
         bcs.s     bcon2in1                      /* no... */
         moveq.l   #0,d1                         /* wrap pointer */
 bcon2in1:
         movea.l   buf(a0),a1                    /* get base address of buffer */
-        and.l     #$0000FFFF,d1                 
+        and.l     #$0000FFFF,d1
         move.l    0(a1,d1.l),d0                 /* get character */
         move.w    d1,head(a0)                   /* store new head pointer to buffer */
 bcon2in2:
@@ -4409,7 +4409,7 @@ _bco2stat:
  *                2.  clear all enable and pending bits in the ierx and iprx       *
  *                         registers                                               *
  *                3.  check the inerrupt in-service registers and loop till        *
- *                         clear                                                   * 
+ *                         clear                                                   *
  *                4.  init the aer register bits as desired (default = 11111111)   *
  *                5.  init the ddr register bits as desired (default = 10000000)   *
  *                6.  clear the gpip register                                      *
@@ -4614,7 +4614,7 @@ copymem:
         dbf       d0,copymem
         rts
 
-ikbdtable:                
+ikbdtable:
         dc.l      ikbdbuf
         dc.w      SERIAL_BUFSIZE,0,0,64,192
 miditable:
@@ -4694,19 +4694,19 @@ settimer:
         movea.l   #iert,a3                      /* mask off the timer's interrupt enable bit */
         movea.l   #imrmt,a2
         bsr.s     mskreg
-        
+
         movea.l   #iprt,a3                      /* mask off the timer's interrupt pending bit */
         movea.l   #imrmt,a2
         bsr.s     mskreg
-        
+
         movea.l   #isrt,a3                      /* mask off the timer's interrupt inservice bit */
         movea.l   #imrmt,a2
         bsr.s     mskreg
-        
+
         movea.l   #tcrtab,a3                    /* mask off the timer's control bits */
         movea.l   #tcrmsk,a2
         bsr.s     mskreg
-        
+
         exg       a3,a1                         /* save address pointer for restoring control */
         lea.l     tdrtab,a3                     /* initialize the timer data register */
         moveq.l   #0,d3                         /* to prevent false effective address generation */
@@ -4717,7 +4717,7 @@ settim1:
         bne.s     settim1
         exg       a3,a1                         /* grab that register address back */
         or.b      d1,(a3)                       /* mask the timer control register value */
-        
+
         movem.l   (a7)+,d0-d4/a0-a3             /* restore all registers that were saved */
         rts
 
@@ -4913,10 +4913,10 @@ rcvrint:
 rcvrint1:
         move.b    MFP_RSR-MFP_REGS(a2),rcv(a0)  /* do the required rsr read before the udr read! */
         move.b    MFP_UDR-MFP_REGS(a2),d0       /* get incoming data byte */
-        
+
         btst      #0,ctr(a0)                    /* is the rs232 mode xon/xoff? */
         beq.s     rcvrint3                      /* no... so process normally */
-        
+
         cmpi.b    #$13,d0                       /* is the data an "xoff" signal? */
         bne.s     rcvrint2                      /* no...now check for xon */
         move.b    #-1,xoff(a0)                  /* set to halted transmission to host */
@@ -4989,7 +4989,7 @@ ctsint:
         movem.l   d0-d1/a0-a2,-(a7)             /* save affected registers */
         lea.l     (rs232iorec).w,a0             /* point to current output buffer record */
         lea.l     (MFP_REGS).w,a2               /* set mfp chip address pointer */
-        
+
         btst      #1,ctr(a0)                    /* are we using CTS/RTS flow control? */
         beq.s     ctsint2                       /* no... */
         btst      #2,(a2)                       /* CTS already active? */
@@ -5020,7 +5020,7 @@ rxerror:
 rxerror1:
         move.b    MFP_RSR-MFP_REGS(a0),rs232iorec+rcv /* receiver status register */
         move.b    MFP_UDR-MFP_REGS(a0),d0       /* dummy read of data register */
-        move.b    #$F7,MFP_ISRA-MFP_REGS(a0)    
+        move.b    #$F7,MFP_ISRA-MFP_REGS(a0)
         movem.l   (a7)+,d0/a0                   /* restore all registers */
         rte
 
@@ -5088,7 +5088,7 @@ iorecp1:
 /* 306de: 00e029dc */
 /* 206de: 00e026a6 */
 iorecget:
-        move.w    head(a0),d1                   
+        move.w    head(a0),d1
         cmp.w     tail(a0),d1                   /* head-index = tail-index? */
         beq.s     iorecget                      /* empty? wait... */
         bsr.s     wrapin
@@ -5201,7 +5201,7 @@ rs6conf2:
 /*
  *      first we grab the old ucs,rsr,tsr,scr contents
  */
-        movep.l   MFP_UCR-MFP_REGS(a2),d7       
+        movep.l   MFP_UCR-MFP_REGS(a2),d7
         move.w    6(a7),d0                      /* if -1 then don't change */
         cmp.w     #$0003,d0
         bhi.s     rs6conf6
@@ -5209,10 +5209,10 @@ rs6conf2:
         moveq.l   #1,d0                         /* set flag for handshake */
 rs6conf3:
         cmp.b     ctr(a0),d0                    /* state unchanged? => continue */
-        beq.s     rs6conf6                      
+        beq.s     rs6conf6
         move.w    d0,-(a7)                      /* save new handshake state */
         tst.b     xoff(a0)                      /* xon flag set? */
-        beq.s     rs6conf4                      
+        beq.s     rs6conf4
         clr.b     xoff(a0)                      /* clear xon flag */
         bsr       iorecout                      /* transmit xon to continue */
 rs6conf4:
@@ -5274,14 +5274,14 @@ bcondevs:
         dc.l      _bcon6out
         dc.l      _rs6conf
         dc.l      rs232iorec
-        
+
         dc.l      _bcon7stat                    /* Dev 7: "Modem 2" - SCC Channel B */
         dc.l      _bcon7in
         dc.l      _bco7stat
         dc.l      _bcon7out
         dc.l      _rs7conf
         dc.l      mdm2iorec
-        
+
 #if TTMFP_SUPPORT
         dc.l      _bcon8stat                    /* Dev 8: "Serial 1" - TT MFP */
         dc.l      _bcon8in
@@ -5293,7 +5293,7 @@ rs232devs equ 4
 #else
 rs232devs equ 3
 #endif
-        
+
         dc.l      _bcon9stat                    /* Dev 8/9: "Serial 2" - SCC Channel A */
         dc.l      _bcon9in
         dc.l      _bco9stat
@@ -5359,7 +5359,7 @@ bconmap1:
 /* 306de: 00e02c38 */
 /* 206de: 00e028ea */
 initdevstables:
-        lea.l     (bcmap_devs).w,a0        
+        lea.l     (bcmap_devs).w,a0
         move.l    a0,(bcmap_root+0).w     /* bcmap_root.maptab */
 #if TTMFP_SUPPORT
         move.w    #rs232devs,(bcmap_root+4).w /* bcmap_root.maptabsize */
@@ -5891,7 +5891,7 @@ _bcon9out:
 /* 206de: 00e02c52 */
 sccistat:
         moveq.l   #0,d0                         /* set result to false */
-        lea.l     head(a0),a1                
+        lea.l     head(a0),a1
         lea.l     tail(a0),a0
         cmpm.w    (a0)+,(a1)+                   /* buffer empty test */
         beq.s     sccist1
@@ -5932,7 +5932,7 @@ sccin:
         tst.b     highwater(a0)                 /* high-water flag already set? */
         beq.s     sccin2                        /* no...exit... */
         move.w    tail(a0),d0
-        sub.w     head(a0),d0                   
+        sub.w     head(a0),d0
         bpl.s     sccin1                        /* underflow? */
         add.w     size(a0),d0                   /* + size */
 sccin1:
@@ -5946,11 +5946,11 @@ sccin2:
 scccont:
         clr.b     highwater(a0)                 /* clear high-water flag */
         btst      #0,ctr(a0)                    /* is the rs232 mode xon/xoff? */
-        beq.s     scccont1                    
+        beq.s     scccont1
         move.b    #$11,xonoffc(a0)              /* "xon" */
         bra.s     sccxout0
 scccont1:
-        move.b    wr5(a0),d0                 
+        move.b    wr5(a0),d0
         bset      #1,d0                         /* set RTS */
         move.b    d0,wr5(a0)
         move.b    #$05,(a2)                     /* select scc register #5 */
@@ -6006,7 +6006,7 @@ _rs7conf:
         lea.l     (mdm2iorec).w,a0              /* point to current output buffer record */
         lea.l     (SCCB_BASE).w,a2
 sccconf:
-        moveq.l   #0,d0                         
+        moveq.l   #0,d0
         cmpi.w    #-2,4(a7)                     /* -2 = return last baudrate */
         bne.s     sccconf1
         move.b    baudrate(a0),d0               /* last baudrate */
@@ -6113,10 +6113,10 @@ scccon11:
         btst      #3,d0
         beq.s     scccon12
         bset      #4,wr5(a0)                    /* set "Tx Enable" */
-        bne.s     scccon13                      
+        bne.s     scccon13
         move.b    #$05,(a2)                     /* select scc register #5 */
         move.b    wr5(a0),(a2)                  /* write "Transmit Parameters and Controls" register */
-        bra.s     scccon13                      
+        bra.s     scccon13
 scccon12:
         bclr      #4,wr5(a0)                    /* clear "Tx Enable" */
         beq.s     scccon13
@@ -6248,7 +6248,7 @@ aciaread:
 begin_packet:
         subi.b    #$F6,d0               /* generate table index */
         andi.l    #$000000FF,d0
-        lea.l     ikbd_state_table,a3   
+        lea.l     ikbd_state_table,a3
         move.b    0(a3,d0.w),(ikbdstate).w /* set ikbd state */
         lea.l     kbd_length_table,a3
         move.b    0(a3,d0.w),(kbdlength).w /* set number expected bytes to follow */
@@ -6292,7 +6292,7 @@ in_packet:
         tst.b     (kbdlength).w       /* packet complete? */
         bne.s     in_pack2            /* no */
 in_pack1:
-        move.l    a0,-(a7)            
+        move.l    a0,-(a7)
         jsr       (a2)                /* call packet handler */
         addq.w    #4,a7
         clr.b     (ikbdstate).w       /* reset ikbd state */
@@ -6367,7 +6367,7 @@ kbdvec7:
         move.b    d1,(_shifty).w
         move.l    a0,-(a7)
         moveq.l   #0,d1                         /* clear ascii code reg */
-        move.w    d1,d0         
+        move.w    d1,d0
         move.b    kb_altnum+1,d0                /* get entered ascii code */
         move.w    #-1,kb_altnum
         bra       kbdvec44
@@ -6870,7 +6870,7 @@ _midivec:
         cmp.w     size(a0),d1                   /* check to see if buffer should wrap */
         bcs.s     midivec1                      /* no... */
         moveq.l   #0,d1                         /* wrap pointer */
-midivec1: 
+midivec1:
         cmp.w     head(a0),d1                   /* head=tail? */
         beq.s     midivec2                      /* yes */
         movea.l   buf(a0),a2                    /* get buffer pointer */
@@ -6896,7 +6896,7 @@ keymous1:
 keymous2:
         bset      d3,(_shifty).w                /* it's a set button action (set code) */
 keymous3:
-        moveq.l   #0,d1                        
+        moveq.l   #0,d1
         moveq.l   #0,d2
 /* finish up at the actual pseudo mouse routine */
 keymous4:
@@ -6921,7 +6921,7 @@ mousekey:  dc.b      $47,$c7,$52,$d2
 /* 206de: 00e03466 */
 coldboot:
         move.w    #$2700,sr                 /* disable all IRQSR */
-        
+
 #if STBOOK
             move.l    ($0004).w,(_buserror).w /* a bus error triggers a reset */
             movea.w   #$000c,a0         /* start erasing from $c on */
@@ -7120,7 +7120,7 @@ offbit:
         moveq.l   #14,d1                        /* get ready to read in the port a contents */
         move.l    d2,-(a7)
         bsr.s     gientry                       /* go get it... */
-        move.l    (a7)+,d2           
+        move.l    (a7)+,d2
         and.b     d2,d0                         /* turn bit(s) off */
         move.b    #$8E,d1                       /* setup to write to port a */
         bsr.s     gientry                       /* go set it and return */
@@ -7567,18 +7567,18 @@ soundirq:
         movea.l   d0,a0                         /* ptr to a0 */
         move.b    (_snddelay).w,d0              /* check delay timer */
         beq.s     soundir1                      /* br over delay timer update if not on */
-        
+
         subq.b    #1,d0                         /* tick off delay timer */
         move.b    d0,(_snddelay).w              /* save new */
         bra.s     soundir7                      /* skip sound update this time */
 soundir1:
         move.b    (a0)+,d0                      /* pick up next sound command */
         bmi.s     soundir3                      /* if minus, go do special */
-        
+
         move.b    d0,(psgsel).w                 /* else, register load command--select this */
         cmpi.b    #$07,d0                       /* reg. 7 selected? */
         bne.s     soundir2                      /* br if no */
-        
+
         move.b    (a0)+,d1                      /* get data to write to reg 7 */
         andi.b    #$3F,d1                       /* always leave i/o port settings alone */
         move.b    (psgsel).w,d0                 /* get mixer contents */
@@ -7586,7 +7586,7 @@ soundir1:
         or.b      d1,d0                         /* generate new setting */
         move.b    d0,(psgwr).w                  /* write data */
         bra.s     soundir1                      /* go for next command */
-        
+
 soundir2:
         move.b    (a0)+,(psgwr).w               /* write next byte as data directly to reg */
         bra.s     soundir1                      /* go for next command */
@@ -7594,7 +7594,7 @@ soundir2:
 soundir3:
         addq.b    #1,d0                         /* was command 255? */
         bpl.s     soundir5                      /* br if yes--set delay timer */
-        
+
         cmpi.b    #$81,d0                       /* was command 128 (before increment) */
         bne.s     soundir4                      /* br if not */
 /*  command 128 */
@@ -7696,13 +7696,13 @@ soundir8:
 
 
 		bss
-		
+
 		xdef gem_env
 		comm gem_env,12
-		
+
 		xdef save_beg
 		comm save_beg,save_siz
-		
+
 		xdef oshdr
 		comm oshdr,70 /* 6+48+16 */
 
@@ -7712,26 +7712,26 @@ cooksize equ NCOOKIES*2*4
 
 		xdef _has_dmasound
 		comm _has_dmasound,1
-		
+
 		xdef STEFlag
 		comm STEFlag,1
-		
+
 		xdef privinst
 		comm privinst,8
 
 		xdef _pbdef
 		comm _pbdef,30
-		
+
 		xdef midiiorec
 		comm midiiorec,14
 		xdef midibuf
 		comm midibuf,SERIAL_BUFSIZE
-		
+
 		xdef ikbdiorec
 		comm ikbdiorec,14
 		xdef ikbdbuf
 		comm ikbdbuf,128
-		
+
 		xdef _kbdvecs
 		comm _kbdvecs,42
 

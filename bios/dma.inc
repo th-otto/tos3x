@@ -294,7 +294,7 @@ _hdone:
 #if (TOSVERSION >= 0x300) | !BINEXACT
         clr.w     (_flock).w                /* NOW, signal that we are done */
 #else
-        sf        (flock).w                 /* NOW, signal that we are done */
+        sf        (_flock).w                /* NOW, signal that we are done */
 #endif
         rts
 
