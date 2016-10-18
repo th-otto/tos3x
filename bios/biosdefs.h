@@ -38,6 +38,10 @@
 
 #define MSTECLK ((TOSVERSION >= 0x200) & (TOSVERSION < 0x300))
 
+#define TTMFP_SUPPORT ((TOSVERSION >= 0x300) & (TOSVERSION < 0x400))
+
+#define SCC_SUPPORT ((TOSVERSION >= 0x300) & (TOSVERSION < 0x400))
+
 /*
  * used to mark some strange looking code segments
  * that are needed to create a binary equivalent image

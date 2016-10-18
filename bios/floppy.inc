@@ -716,12 +716,12 @@ select1:
 setporta:
         move.w    sr,-(a7)
         ori.w     #$0700,sr
-        move.b    #$0E,($FFFF8800).w
-        move.b    ($FFFF8800).w,d1
+        move.b    #$0E,(psgsel).w
+        move.b    (psgsel).w,d1
         move.b    d1,d2
         and.b     #$F8,d1
         or.b      d0,d1
-        move.b    d1,($FFFF8802).w
+        move.b    d1,(psgwr).w
         move.w    (a7)+,sr
         rts
 
