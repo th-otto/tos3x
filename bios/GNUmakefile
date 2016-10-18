@@ -35,28 +35,16 @@ prtkeys$(EXEEXT): prtkeys.o
 	$(AM_V_LD)${LD} ${LDFLAGS} -o $@ prtkeys.o
 
 check:: bios.o $(top_srcdir)/common/sections.mak
-	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \
-		echo "$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
-		exit 1; \
-	fi
 	$(AM_V_at)offset=`echo 16 i $(bios_tbase) $(rombase) - p | dc`; \
-	tlen=`echo 16 i $(bios_tlen) p | dc`; \
-	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$tlen of=bios.orig 2> /dev/null; \
-	offset=`echo 16 i $(bios_dbase) $(rombase) - p | dc`; \
-	dlen=`echo 16 i $(bios_dlen) p | dc`; \
-	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$dlen seek=$$tlen of=bios.orig 2> /dev/null; \
-	total=`echo $$tlen $$dlen + p | dc`; \
-	dd if=$< of=bios.new bs=1 skip=36 count=$$total 2> /dev/null; \
-	cmp bios.orig bios.new; \
-	status=$$?; \
-	$(RM) bios.orig bios.new; \
-	exit $$status
+	$(CMP) $(CMPL) -x --ignore-initial=$$offset:0x24 --offsets=0x$(rombase):0x24 --bytes=0x$(bios_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $<
+	$(AM_V_at)offset=`echo 16 i $(bios_dbase) $(rombase) - p | dc`; \
+	offset2=`echo 16 i $(bios_tlen) 24 + p | dc`; \
+	$(CMP) $(CMPL) -x --ignore-initial=$$offset:$$offset2 --offsets=0x$(rombase):0x24 --bytes=0x$(bios_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $<
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a $(PROGRAMS)
+	$(RM) *.o *.a $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
-	$(RM) $(top_srcdir)/common/config.h

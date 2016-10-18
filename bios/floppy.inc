@@ -1038,13 +1038,14 @@ hdselect3:  move      sr,d2                     /* save status register */
 fdcreset:
             move.w    #$0080,(a6)               /* execute 1770 "reset" command */
             move.w    #$00D0,d7
-            bsr.s     wrfdcd7
 #if TOSVERSION >= 0x300
+            bsr.s     wrfdcd7
             move.w    d0,-(a7)
             move.w    #$0114,d0
             bsr       mfpdelay
             move.w    (a7)+,d0
 #else
+            bsr       wrfdcd7
             move.w    #2,d0
 r1770a:     move.b    (MFP_TCDR).w,d1           /* wait for 1770 to stop convulsing */
 r1770b:     cmp.b     (MFP_TCDR).w,d1

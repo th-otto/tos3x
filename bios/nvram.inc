@@ -363,7 +363,7 @@ writeRTCTime:bsr      checkRTC
             bcs       no_RTC_found
             lea       (rtcbufa).w,a1
             movea.w   4(sp),a2
-            bsr       calcRTCWeekday
+            bsr       rtcwday
             move.b    d0,6(a1)
             move.w    6(sp),d1
             move.w    d1,d0

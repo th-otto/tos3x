@@ -307,10 +307,10 @@ memcret:
 			move.w    (STConfig).w,d0           /* Configuration on ST Book */
             cmp.b     #$fc,d0                   /* power pressed while the ST Book is closed? */
             beq.s     reset2b                   /* yes => do not execute reset vector */
-            move.w    (tt_mcu+4).l,d0           /* ST Book: ??? */
+            move.w    tt_mcu+4,d0               /* ST Book: ??? */
             and.b     #6,d0                     /* check bit 1 & 2 */
             bne.s     reset2c
-reset2b:    clr.l     (resvalid).l
+reset2b:    clr.l     resvalid
 reset2c:
 #endif
 
@@ -370,7 +370,7 @@ notpal:
 #if STBOOK
 		 	move.b    #2,(v_shf_mod).w          /* Switch to 640x400x1 */
             move.b    #$80,(lcdPowerControl).w  /* LCD display on */
-            tst.w     (tt_mcu).l                /* ST Book: ??? */
+            tst.w     tt_mcu                    /* ST Book: ??? */
 #endif
 #endif
 
@@ -411,15 +411,15 @@ memcret2:
             move.l    #$400000,d5               /* d5 -> physical top of memory (4Mb) */
             move.l    #$6161964,d0              /* 16th June 1964... */
             move.l    #$3251987,d1              /* 25th March 1987... */
-            move.l    d0,($300010).l
-            move.l    d1,($300014).l
-            cmp.l     ($300010).l,d0            /* test if 4MB is actually installed */
+            move.l    d0,$300010
+            move.l    d1,$300014
+            cmp.l     $300010,d0                /* test if 4MB is actually installed */
             bne.s     ret_2a
-            cmp.l     ($300014).l,d1
+            cmp.l     $300014,d1
             beq.s     ret_2b
 ret_2a:     move.l    #$100000,d5               /* d5 -> physical top of memory (1Mb) */
 
-ret_2b:     lea       ($8000).l,sp
+ret_2b:     lea       $8000,sp
 
 #else
 #if TOSVERSION < 0x300
@@ -429,7 +429,7 @@ ret_2b:     lea       ($8000).l,sp
             move.b    #$a,(memconf).w			/* default: setup controller for 2Mb/2Mb */
 
             movea.w   #$8,a0
-            lea       ($200008).l,a1			/* + 2Mb */
+            lea       $200008,a1				/* + 2Mb */
             clr.w     d0
 chkpatloop: move.w    d0,(a0)+					/* fill 512-8 bytes with a test pattern */
             move.w    d0,(a1)+
@@ -673,14 +673,14 @@ nomemchk:
             lea       _rts(pc),a4               /* a4 -> handy RTS */
 
 /* --- setup 64 vectors: */
-            lea       (coldboot).l,a1           /* a1 -> during boot all exception trigger a coldboot, which erases all memory and resets */
-            lea       (_buserror).w,a0       /* a0 -> interrupt RAM */
+            lea       coldboot,a1               /* a1 -> during boot all exception trigger a coldboot, which erases all memory and resets */
+            lea       (_buserror).w,a0          /* a0 -> interrupt RAM */
             move.w    #$3f,d0                   /* d0 = count */
 sei1:       move.l    a1,(a0)+                  /* write vector */
             dbra      d0,sei1                   /* (loop to write more vectors) */
-            move.l    a3,(_zerodiv).w   /* divide-by-zero vector -> rte */
+            move.l    a3,(_zerodiv).w           /* divide-by-zero vector -> rte */
 
-            move.l    a3,(_lvl7vec).w          /* level #7 interrupt -> rte (power exception in a ST Book) */
+            move.l    a3,(_lvl7vec).w           /* level #7 interrupt -> rte (power exception in a ST Book) */
             moveq     #6,d0
             lea       (_lvl1vec).w,a1
 sei2:       move.l    #_rte,(a1)+               /* level #1 ... level #6 to RTE */
@@ -893,31 +893,31 @@ cpuexit:
         sne       (_longframe+1).w
 
 #if STBOOK
-            move.l    #$5F56444F,(a0)+             /* setup VDO cookie: Video hardware */
+            move.l    #$5F56444F,(a0)+          /* setup VDO cookie: Video hardware */
             move.l    #$10001,(a0)+             /* 1,1 => Atari STE, ST-Book */
-            move.l    #$5F4D4348,(a0)+             /* setup MCH cookie: Machine type */
+            move.l    #$5F4D4348,(a0)+          /* setup MCH cookie: Machine type */
             move.l    #$10001,(a0)+             /* 1,1 => Atari STE, ST-Book */
 
             move.b    #$7f,d0
-            tst.b     (STEFlag).l
+            tst.b     STEFlag
             bne.s     cooSTE
-            move.l    #$5F535749,(a0)+             /* setup SWI cookie: DIP configuration switches */
+            move.l    #$5F535749,(a0)+          /* setup SWI cookie: DIP configuration switches */
             moveq     #0,d0
             move.w    (STConfig).w,d0
             lsr.w     #8,d0
             move.l    d0,(a0)+                  /* all DIP switches as a bit mask 0..7 */
-cooSTE:  moveq     #3,d1                     /* bit 0: PSG, bit 1: 8-bit DMA */
-            move.l    #$5F534E44,(a0)+             /* setup SND cookie: Sound hardware */
+cooSTE:     moveq     #3,d1                     /* bit 0: PSG, bit 1: 8-bit DMA */
+            move.l    #$5F534E44,(a0)+          /* setup SND cookie: Sound hardware */
             btst      #7,d0                     /* DIP switch 7 on? */
-            bne.s     cooSND                 /* (punt) */
+            bne.s     cooSND                    /* (punt) */
             bclr      #1,d1                     /* no 8-bit DMA sound */
-cooSND:  move.l    d1,(a0)+
+cooSND:     move.l    d1,(a0)+
             btst      #6,d0                     /* DIP switch 6 on? */
-            bne.s     cooFDC                 /* (punt - no HD floppy) */
-            move.b    #8,(dsb0).l               /* select HD density for drive A */
+            bne.s     cooFDC                    /* (punt - no HD floppy) */
+            move.b    #8,dsb0                   /* select HD density for drive A */
             move.l    #'_FDC',(a0)+             /* setup FDC cookie: Floppy disk controller */
             move.l    #$1415443,(a0)+           /* 'FDC' | (1 << 24) */
-cooFDC:  move.l    #$5F465055,(a0)+             /* Setup FPU cookie: Type of the FPU */
+cooFDC:     move.l    #$5F465055,(a0)+             /* Setup FPU cookie: Type of the FPU */
             moveq     #0,d7                     /* 0 = no FPU */
             suba.w    #$24,sp
             move.l    (_lineftrap).w,(sp)
@@ -944,8 +944,8 @@ cooFDC:  move.l    #$5F465055,(a0)+             /* Setup FPU cookie: Type of the
             clr.l     -(sp)
             movea.l   sp,a2
             frestore  (sp)
-cooFPU2: move.l    #$20000,d7                /* 0x20000 = 68881 or 68882 as co-processor (Exact type unknown) */
-cooFPU:  movea.l   a2,sp
+cooFPU2:    move.l    #$20000,d7                /* 0x20000 = 68881 or 68882 as co-processor (Exact type unknown) */
+cooFPU:     movea.l   a2,sp
             addq.w    #4,sp
             move.l    (sp)+,(_lineftrap).w
             move.l    (sp)+,(coprocexception).w
@@ -962,20 +962,20 @@ cooFPU:  movea.l   a2,sp
             move.l    #cooFPU3,(_buserror).w
             move.w    (FPStat).w,d0
             bset      #0,-3(a0)                 /* SFP004 present */
-cooFPU3: move.l    a1,(_buserror).w
+cooFPU3:    move.l    a1,(_buserror).w
             movea.l   a2,sp
 #else
 
 #if TOSVERSION < 0x300
-			tst.b     (STEFlag).l               /* no STE hardware available? */
-			beq.s     cooMCH                 /* (correct) */
+			tst.b     STEFlag                   /* no STE hardware available? */
+			beq.s     cooVDO                    /* (correct) */
 			move.l    #$5F56444F,(a0)+
 			clr.l     (a0)+                     /* 0,0 = Atari ST (260 ST, 520 ST, 1040 ST, Mega ST, ...) */
 			move.l    #$5F4D4348,(a0)+
 			clr.l     (a0)+                     /* 0,0 = Atari ST */
 			bra.s     cooSWI
 
-cooVDO:	move.l    #$5F56444F,(a0)+
+cooVDO:	    move.l    #$5F56444F,(a0)+
 			move.l    #$10000,(a0)+             /* 1,0 = STE Shifter */
 
 			move.l    #$10000,d0                /* x = $00 = regular STE */
@@ -988,7 +988,7 @@ cooVDO:	move.l    #$5F56444F,(a0)+
 cooMCH1:	clr.w     d0
 			movea.l   a2,sp
 			move.l    #cooMCH2,(_buserror).w
-			tst.b     (ide_stat2).l
+			tst.b     ide_stat2
 			move.w    #8,d0                     /* x = $08 = STE with IDE (unknown machine) */
 cooMCH2:	move.l    a1,(_buserror).w
 			movea.l   a2,sp
@@ -1004,7 +1004,7 @@ cooMCH2:	move.l    a1,(_buserror).w
 #endif
 #endif
 
-        move.b    #$7F,d0
+cooSWI: move.b    #$7F,d0
         tst.b     STEFlag
         bne.s     nomicro
         move.l    #$5F535749,(a0)+ /* '_SWI' */
@@ -1086,7 +1086,7 @@ frbdone:
 #if !STBOOK
         lea.l     just_rte(pc),a3
         lea.l     bios_unimpl(pc),a4
-        lea.l     any_vec(pc),a1       * default to exception handler displaying bombs
+        lea.l     any_vec(pc),a1            /* default to exception handler displaying bombs */
 #if !P68010
 		adda.l    #$2000000,a1				/* exception number in top 8 bits of the address */
 #endif
@@ -1099,24 +1099,24 @@ initexc:
 #endif
         dbf       d0,initexc
 
-        move.l    a3,(_zerodiv).w      * ignore zero divide
-        move.l    a3,(_lvl7vec).w      * ignore NMI
+        move.l    a3,(_zerodiv).w      /* ignore zero divide */
+        move.l    a3,(_lvl7vec).w      /* ignore NMI */
 
         moveq.l   #6,d0
         lea.l     (_lvl1vec).w,a1
 initauto:
-        move.l    #just_rte,(a1)+      * ignore auto vectors
+        move.l    #just_rte,(a1)+      /* ignore auto vectors */
         dbf       d0,initauto
 
         move.l    #int_vbl,(_lvl4vec).w
         move.l    #int_hbl,(_lvl2vec).w
-        move.l    a3,(_trap2vec).w     * ignore GEM trap for now
+        move.l    a3,(_trap2vec).w     /* ignore GEM trap for now */
         move.l    #_biostrap,(_trap13vec).w
         move.l    #_xbiostrap,(_trap14vec).w
         move.l    #line1010,(_lineatrap).w
-        move.l    a4,(_etv_timer).w    * no timer yet
+        move.l    a4,(_etv_timer).w    /* no timer yet */
         move.l    #critret,(_etv_critic).w
-        move.l    a4,(_etv_term).w     * no user defined function
+        move.l    a4,(_etv_term).w     /* no user defined function */
         lea.l     (_vbl_list).w,a0
         move.l    a0,(_vblqueue).w
         move.w    #7,d0
@@ -1197,10 +1197,10 @@ setvb1:     move.b    d1,(v_shf_mod).w          /* set rez hardware register */
         bne.s     moncolor
         moveq.l   #6,d1                     /* Switch to 1280x960x1 */
 moncolor:
-        move.b    d1,(shift_tt).w   * set TT shifter video mode
+        move.b    d1,(shift_tt).w   /* set TT shifter video mode */
 #endif
 #endif
-        move.b    d1,(_sshiftmod).w  * .. and also system var
+        move.b    d1,(_sshiftmod).w  /* .. and also system var */
 
 /*
  * initialize video
@@ -1262,15 +1262,15 @@ flushCaches:
 /* 306de: 00e0060a */
 /* 206de: 00e00638 */
 _int_priv:
-        movem.l   d0-d2,-(a7)      * saving some registers while we test
+        movem.l   d0-d2,-(a7)      /* saving some registers while we test */
         move.l    a1,-(a7)
         move.l    a0,-(a7)
-        movea.l   22(a7),a0        * the offending address
-        move.w    (a0),d0          * the offending instruction
-        move.w    d0,d1            * save for later tests
-        and.w     #$FFC0,d0        * isolate move from SR opcode
-        cmp.w     #$40C0,d0        * we don't care where "To" was
-        bne       pi_back          * Not a MOVE SR,XX instruction
+        movea.l   22(a7),a0        /* the offending address */
+        move.w    (a0),d0          /* the offending instruction */
+        move.w    d0,d1            /* save for later tests */
+        and.w     #$FFC0,d0        /* isolate move from SR opcode */
+        cmp.w     #$40C0,d0        /* we don't care where "To" was */
+        bne       pi_back          /* Not a MOVE SR,XX instruction */
         move.l    #$30004E71,privinst.w   /* move.w d0,d0; nop */
         move.l    #$4E714E75,(privinst+4).w /* nop; rts */
         move.w    d1,d0
@@ -1282,30 +1282,30 @@ _int_priv:
         and.w     #$0038,d0        /* <ea> mode (bit 3..5) */
         lsl.w     #3,d0
         or.w      d0,privinst.w    /* insert the destination addressing mode */
-        moveq.l   #2,d2            * skip that many instruction bytes
-        cmp.w     #$0180,d0        * is it indexed?
+        moveq.l   #2,d2            /* skip that many instruction bytes */
+        cmp.w     #$0180,d0        /* is it indexed? */
         beq       pi_back          /* not supported -> _term */
-        tst.w     d0               * is it data-register direct?
-        beq.s     int_p4           * yes go execute it
-        cmp.w     #$0140,d0        * is it d(An)?
-        beq.s     int_p2           * yes
-        cmp.w     #$01C0,d0        * is it absolute?
+        tst.w     d0               /* is it data-register direct? */
+        beq.s     int_p4           /* yes go execute it */
+        cmp.w     #$0140,d0        /* is it d(An)? */
+        beq.s     int_p2           /* yes */
+        cmp.w     #$01C0,d0        /* is it absolute? */
         bne.s     int_p3
 /* <ea> = (xxx).l or (xxx).w */
-        and.w     #$0007,d1        * is it absolute short?
-        beq.s     int_p1           * yes, skip
-        addq.w    #2,d2            * 2 more bytes of instruction
-        move.w    4(a0),(privinst+4).w * copy lower 16 bits of address
+        and.w     #$0007,d1        /* is it absolute short? */
+        beq.s     int_p1           /* yes, skip */
+        addq.w    #2,d2            /* 2 more bytes of instruction */
+        move.w    4(a0),(privinst+4).w /* copy lower 16 bits of address */
 int_p1:
-        addq.w    #2,d2            * 2 more bytes of instruction
-        move.w    2(a0),(privinst+2).w * copy remaining 16 bits of address
+        addq.w    #2,d2            /* 2 more bytes of instruction */
+        move.w    2(a0),(privinst+2).w /* copy remaining 16 bits of address */
         bra.s     int_p5
 /* <ea> = d16(An) */
 int_p2:
-        addq.w    #2,d2            * 2 more bytes of instruction
-        move.w    2(a0),(privinst+2).w * copy displacement
+        addq.w    #2,d2            /* 2 more bytes of instruction */
+        move.w    2(a0),(privinst+2).w /* copy displacement */
 int_p3:
-        and.w     #$0007,d1        * is USP affected?
+        and.w     #$0007,d1        /* is USP affected? */
         cmp.w     #$0007,d1
         bne.s     int_p5           /* no -> regular destination ea */
 /* <ea> = d16(A7) or d8(A7,Dn) */
@@ -1330,7 +1330,7 @@ int_p4:
 #if TOSVERSION >= 0x300
         bsr       flushCaches
 #endif
-        lea.l     20(a7),a0           * a0 = address of SR from stack frame
+        lea.l     20(a7),a0           /* a0 = address of SR from stack frame */
         movem.l   8(a7),d0-d2
         jsr       privinst.w          /* execute: MOVE (A0),Dn; NOP; NOP; RTS */
         movea.l   (a7)+,a0
@@ -1338,7 +1338,7 @@ int_p4:
         adda.w    #$000C,a7           /* skip d0-d2, because they have already been restored */
         rte
 int_p5:
-        add.l     d2,22(a7)           * adjust return PC by number of bytes to skip
+        add.l     d2,22(a7)           /* adjust return PC by number of bytes to skip */
 #if TOSVERSION >= 0x300
         bsr       flushCaches
 #endif
@@ -2022,7 +2022,8 @@ doboot:
  * typebit(d0): application type bit number which must be set to 1 to match
  */
 #if STBOOK
-scanextrom:lea (STBOOK_EXTROM).l,a0
+scanextrom:
+        lea STBOOK_EXTROM,a0
         bra.s     cartext2
 #endif
 /* 306de: 00e00bbc */
@@ -3014,9 +3015,9 @@ puntaes1:
 /* 206de: 00e010e2 */
 any_vec:
 #if !P68010
-		jsr       (savp_2).l                /* stack PC */
+		jsr       savp_2                     /* stack PC */
 savp_2:
-		move.l    (sp)+,(_proc_enum).w      /* save bogus PC + exception number */
+		move.l    (sp)+,(_proc_enum).w       /* save bogus PC + exception number */
 #endif
 /* dump the registers, including SSP */
         movem.l   d0-d7/a0-a7,(_proc_dregs).w
@@ -3550,7 +3551,7 @@ timerc:
         ori       #$700,sr
         clr.b     (MFP_TACR).w                  /* timer A control register */
         bclr      #5,(MFP_IERA).w               /* disable timer A */
-        move.b    #$df,(ipra).w             /* clear a pending timer A interrupt */
+        move.b    #$df,(MFP_IPRA).w             /* clear a pending timer A interrupt */
         bclr      #5,(MFP_IMRA).w               /* mask the timer A interrupt */
         bset      #5,(MFP_IERA).w               /* enable timer A */
         move      (sp)+,sr
@@ -5361,10 +5362,8 @@ bconmap1:
 initdevstables:
         lea.l     (bcmap_devs).w,a0
         move.l    a0,(bcmap_root+0).w     /* bcmap_root.maptab */
-#if TTMFP_SUPPORT
         move.w    #rs232devs,(bcmap_root+4).w /* bcmap_root.maptabsize */
-#else
-        move.w    #rs232devs,(bdevcount).w
+#if !TTMFP_SUPPORT
         moveq     #1,d0                         /* only MFP RS232 is available */
         movea.l   sp,a1
         movea.l   (_buserror).w,a2
@@ -5374,7 +5373,7 @@ initdevstables:
 initdevnoscc:
         movea.l  a1,sp
         move.l    a2,(_buserror).w
-        move.w    d0,(bdevcount).w
+        move.w    d0,(bcmap_root+4).w
 #endif
         lea.l     bcondevs(pc),a1
         move.w    #rs232devs*6-1,d0
@@ -6279,7 +6278,7 @@ in_packet:
         asl.w     #1,d2
         add.b     (ikbdstate).w,d2
         subq.b    #1,d2
-        asl.w     #2,d2 /* d2 now (ikbdstate - 1) * 12 */
+        asl.w     #2,d2               /* d2 now (ikbdstate - 1) * 12 */
         movea.l   0(a2,d2.w),a0       /* get start of buffer */
         movea.l   4(a2,d2.w),a1       /* get end of buffer */
         movea.l   8(a2,d2.w),a2       /* get packet handler address */
@@ -6934,9 +6933,9 @@ coldboo3:   move.l    d0,(a0)+
 
 #else
 #if TOSVERSION < 0x300
-			move.w    #5,d0
+			move.w    #(coldbend-coldboor)/4-1,d0
 			lea       coldboor(pc),a0
-			movea.w   #(coldbend-coldboor)/4-1,d0,a1
+			movea.w   #$000c,a1
 coldboo1:	move.l    (a0)+,(a1)+				/* copy erase routine to $000c... */
 			dbra      d0,coldboo1
 			jmp       ($000c).w
@@ -7386,6 +7385,7 @@ dosound1:
 
 
 /*************************************************************************
+ *                                                                       *
  * XBIOS #33 - Setprt - Initialize the printer.                          *
  *                                                                       *
  *               SET/RETURN PRINTER CONFIGURATION WORD                   *
@@ -7409,6 +7409,7 @@ setprt1:
 
 
 /*************************************************************************
+ *                                                                       *
  * XBIOS #35 - Kbrate - Set the auto-repeat rate of the keyboard.        *
  *                                                                       *
  *               SET/RETURN KEY REPEAT VALUES                            *
@@ -7440,6 +7441,7 @@ kbrate1:
 
 
 /*************************************************************************
+ *                                                                       *
  * XBIOS #34 - Kbdvbase - Return a pointer to the IKBD (intelligent      *
  *      keyboard), and MIDI interrupt vectors.                           *
  *                                                                       *

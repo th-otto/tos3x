@@ -33,10 +33,10 @@ oshdr: ds.b 6+64
 	xdef cookies
 cookies: ds.l NCOOKIES*2
 
-#if (TOSVERSION >= 0x300)
 	xdef _bootpref
 _bootpref: ds.w 1
 
+#if (TOSVERSION >= 0x300)
 	xdef _altmd
 _altmd: ds.l 4
 #endif
@@ -78,6 +78,15 @@ dmarwflg: ds.b 2
 idebuf: ds.b SECTOR_SIZE
 
 	ds.l 1 ; unused
+
+#if MSTECLK
+    xdef rtcbufa
+rtcbufa: ds.b 13
+    xdef rtcbufb
+rtcbufb: ds.b 13
+	xdef waketimeAlarm
+waketimeAlarm: ds.l 1
+#endif
 
 	xdef rs232ibuf
 rs232ibuf: ds.b SERIAL_BUFSIZE

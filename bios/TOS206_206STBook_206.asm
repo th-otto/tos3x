@@ -503,7 +503,7 @@ IF ROM_TOS206
 			clr.b     (v_bas_l).w               ; clear the low byte again
 			tst.w     (palette).w               ; access the color palette
 			tst.b     (v_bas_l).w
-nostedetect:sne       (STEFlag).l               ; <>0 => no STE hardware available
+nostedetect:            sne       (STEFlag).l               ; <>0 => no STE hardware available
 ELSE
 			sf        (STEFlag).l				; no STE hardware available
 ENDIF
@@ -691,7 +691,7 @@ ELSE
 
 IF ROM_TOS206
 			tst.b     (STEFlag).l               ; no STE hardware available?
-			beq.s     cookieMCH                 ; (correct)
+			beq.s     cookieVDO                 ; (correct)
 			move.l    #'_VDO',(a0)+
 			clr.l     (a0)+                     ; 0,0 = Atari ST (260 ST, 520 ST, 1040 ST, Mega ST, ...)
 			move.l    #'_MCH',(a0)+

@@ -45,6 +45,8 @@ MKDIR_P = $(MKDIR) -p
 SED   = sed
 AWK   = awk
 
+CMP   = $(top_srcdir)/tools/cmprom$(BUILD_EXEEXT)
+
 # Wether to run the optimizer pass.
 # the default is evaluated by RUN_OPTIMIZE_,
 # which must be either ${RUN_OPTIMIZE_0} or ${RUN_OPTIMIZE_1}.

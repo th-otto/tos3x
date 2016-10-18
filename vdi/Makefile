@@ -354,7 +354,6 @@ screen.prg: $(SCREEN_OBJS) $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
 check::
 
 clean:
-	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
+	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
-	$(RM) $(top_srcdir)/common/config.h

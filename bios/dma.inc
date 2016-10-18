@@ -947,16 +947,17 @@ iderdy:
         lsl.b     #4,d0            /* shift unit # to place */
         move.b    d0,ide_headn     /* select device */
 #if TOSVERSION >= 0x300
-        move.l    #1000,d0         /* set up timer IDERDY */
+        move.l    #1000,d0        /* set up timer IDERDY */
         add.l     (_hz_200).w,d0
 iderdy1:
         btst      #6,ide_stat2     /* status drive ready? */
         bne.s     iderdy2          /* yes, report ok */
 #else
         move.b    #$50,d1          /* ready status */
-        move.l    #5*200,d0        /* set up timer IDERDY */
+        move.l    #1000,d0         /* set up timer IDERDY */
         add.l     (_hz_200).w,d0
-ir0:    cmp.b     ide_stat2,d1     /* is drive ready and not busy? */
+iderdy1:
+        cmp.b     ide_stat2,d1     /* is drive ready and not busy? */
         beq.s     iderdy2          /* if so, return with drive ready */
 #endif
         cmp.l     (_hz_200).w,d0   /* timeout reached? */

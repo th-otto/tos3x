@@ -27,6 +27,6 @@ dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a $(PROGRAMS) $(top_srcdir)/common/config.h
+	$(RM) *.o *.a $(PROGRAMS)
 
 distclean: clean
