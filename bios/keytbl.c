@@ -69,6 +69,7 @@ uint8_t const keytblcaps[128] = {
 
 #if OS_COUNTRY == CTRY_DE
 /* 306de: 00e3676c */
+/* 206de: 00e32bb6 */
 uint8_t const keytblnorm[128] = {
        0, 0x1b,  '1',  '2',  '3',  '4',  '5',  '6',
      '7',  '8',  '9',  '0', 0x9e, '\'', 0x08, 0x09,
@@ -89,6 +90,7 @@ uint8_t const keytblnorm[128] = {
 };
 
 /* 306de: 00e367ec */
+/* 206de: 00e32c36 */
 uint8_t const keytblshift[128] = {
        0, 0x1b,  '!',  '"', 0xdd,  '$',  '%',  '&',
      '/',  '(',  ')',  '=',  '?',  '`', 0x08, 0x09,
@@ -109,6 +111,7 @@ uint8_t const keytblshift[128] = {
 };
 
 /* 306de: 00e3686c */
+/* 206de: 00e32cb6 */
 uint8_t const keytblcaps[128] = {
        0, 0x1b,  '1',  '2',  '3',  '4',  '5',  '6',
      '7',  '8',  '9',  '0', 0x9e, '\'', 0x08, 0x09,

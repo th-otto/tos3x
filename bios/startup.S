@@ -4098,14 +4098,14 @@ bcon0o3:
         move.w    sr,d3                         
         ori.w     #$0700,sr                     /* protect upcoming switching of the port setting */
         moveq.l   #7,d1                         /* get current io enable register contents */
-        bsr       giaccess
+        bsr       gientry
         ori.b     #$80,d0                       /* set port b for output */
         move.b    #$87,d1                       /* set to write to io enable */
-        bsr       giaccess
+        bsr       gientry
         move.w    d3,sr                         /* restore status register */
         move.w    6(a7),d0                      /* retrieve byte to be sent and... */
         move.b    #$8F,d1                       /* write out byte to parallel port */
-        bsr       giaccess
+        bsr       gientry
         move.w    sr,-(a7)                      
         ori.w     #$0700,sr
         bsr.s     strobeon
@@ -4117,11 +4117,11 @@ bcon0o3:
 
 strobeoff:
         moveq.l   #32,d2
-        bra       ongibit
+        bra       onbit
 
 strobeon:
         move.b    #$DF,d2
-        bra       offgibit
+        bra       offbit
 
 
 /*
@@ -4131,10 +4131,10 @@ strobeon:
 /* 206de: 00e0209a */
 _bcon0in:
         moveq.l   #7,d1                         /* get current io enable register contents */
-        bsr       giaccess
+        bsr       gientry
         andi.b    #$7F,d0                       /* set port b for input */
         move.b    #$87,d1                       /* set to write to io enable */
-        bsr       giaccess
+        bsr       gientry
         bsr.s     strobeoff                     /* busy off! */
 bcon0in1:
         bsr.s     _bco0stat                     /* go get parallel port status */
@@ -4142,7 +4142,7 @@ bcon0in1:
         bne.s     bcon0in1                      /* loop till high... */
         bsr.s     strobeon
         moveq.l   #15,d1                        /* init to use gientry routine to read */
-        bra       giaccess                      /* now get the byte from the parallel port */
+        bra       gientry                       /* now get the byte from the parallel port */
 
 /**************************************************************************
  *                                                                        *
@@ -6369,7 +6369,7 @@ kbdvec7:
         moveq.l   #0,d1                         /* clear ascii code reg */
         move.w    d1,d0         
         move.b    kb_altnum+1,d0                /* get entered ascii code */
-        move.w    #$FFFF,kb_altnum
+        move.w    #-1,kb_altnum
         bra       kbdvec44
 kbdvec8:
         cmpi.b    #$3A,d0                       /* CAPS LOCK pressed? */
@@ -6417,7 +6417,7 @@ kbdvec15:
         jsr       (a1)
         movem.l   (a7)+,d0-d2/a0-a2
 kbdvec16:
-        move.l    a0,-(a7)
+        move.l    a0,-(a7)                      /* store ikbdiorec pointer */
         moveq.l   #0,d1
         move.b    d0,d1
         movea.l   (_curkeytbl).w,a0
@@ -6505,6 +6505,7 @@ kbdvec29:
  * Country-dependent key translations
  */
 /* 306any: 00e035e0 */
+/* 206any: 00e0323a */
 /* 205any: 00e028a0 */
 #if OS_COUNTRY == CTRY_US
 /* nothing to do */
@@ -6850,6 +6851,7 @@ kbdvec47:
  * default function for system variable kcl_hook
  */
 /* 306de: 00e0378a */
+/* 206de: 00e033e4 */
 _do_keyclick:
         move.l    #_clicksnd,(_sndtable).w
         move.b    #$00,(_snddelay).w
@@ -6857,71 +6859,76 @@ _do_keyclick:
 
 /* 306de: 00e0379a */
 midiread:
-        movea.l   (midivec).w,a2
-        jmp       (a2)
+        movea.l   (midivec).w,a2                /* get contents of midivec for indirect branch */
+        jmp       (a2)                          /* jump to midi interrupt handler */
 
 /* 306de: 00e037a0 */
+/* 206de: 00e033fa */
 _midivec:
-        move.w    tail(a0),d1
-        addq.w    #1,d1
-        cmp.w     size(a0),d1
-        bcs.s     midivec1
-        moveq.l   #0,d1
-midivec1:
-        cmp.w     head(a0),d1
-        beq.s     midivec2
-        movea.l   buf(a0),a2
+        move.w    tail(a0),d1                   /* get current tail pointer offset */
+        addq.w    #1,d1                         /* index = tail + 1 */
+        cmp.w     size(a0),d1                   /* check to see if buffer should wrap */
+        bcs.s     midivec1                      /* no... */
+        moveq.l   #0,d1                         /* wrap pointer */
+midivec1: 
+        cmp.w     head(a0),d1                   /* head=tail? */
+        beq.s     midivec2                      /* yes */
+        movea.l   buf(a0),a2                    /* get buffer pointer */
         and.l     #$0000FFFF,d1
-        move.b    d0,0(a2,d1.l)
-        move.w    d1,tail(a0)
+        move.b    d0,0(a2,d1.l)                 /* store the data */
+        move.w    d1,tail(a0)                   /* store the new buftail pointer */
 midivec2:
         rts
 
 
 /* 306de: 00e037c6 */
+/* 206de: 00e03420 */
 keymouse:
-        moveq.l   #5,d3
-        btst      #4,d1
-        beq.s     keymous1
-        moveq.l   #6,d3
+        moveq.l   #5,d3                         /* pre-init to "keyboard" right mouse button */
+        btst      #4,d1                         /* see if it is a left or right button... */
+        beq.s     keymous1                      /* it's a right button ($47/$c7) */
+        moveq.l   #6,d3                         /* it's a left button ($52/$d2) */
 keymous1:
-        btst      #7,d1
-        beq.s     keymous2
-        bclr      d3,(_shifty).w
-        bra.s     keymous3
+        btst      #7,d1                         /* see if it is a make or break action */
+        beq.s     keymous2                      /* it's a set button action (make code) */
+        bclr      d3,(_shifty).w                /* it's a clear button action (break code) */
+        bra.s     keymous3                      /* go to further pre-init action... */
 keymous2:
-        bset      d3,(_shifty).w
+        bset      d3,(_shifty).w                /* it's a set button action (set code) */
 keymous3:
-        moveq.l   #0,d1
+        moveq.l   #0,d1                        
         moveq.l   #0,d2
+/* finish up at the actual pseudo mouse routine */
 keymous4:
-        lea.l     (buttonbuf).w,a0
-        movea.l   (mousevec).w,a2
+        lea.l     (buttonbuf).w,a0              /* point to key-emulating mouse buffer */
+        movea.l   (mousevec).w,a2               /* grab mouse interrupt vector */
         clr.l     d0
-        move.b    (_shifty).w,d0
-        lsr.b     #5,d0
-        addi.b    #$F8,d0
-        move.b    d0,(a0)
-        move.b    d1,1(a0)
-        move.b    d2,2(a0)
+        move.b    (_shifty).w,d0                /* get current button status */
+        lsr.b     #5,d0                         /* shift right button bit to 'd0' */
+        addi.b    #$F8,d0                       /* add relative mouse header */
+        move.b    d0,(a0)                       /* store in first byte of record header */
+        move.b    d1,1(a0)                      /* store x value in second byte of record buffer */
+        move.b    d2,2(a0)                      /* store y value in third byte of record buffer */
         jsr       (a2)
-        movea.l   (a7)+,a0
+        movea.l   (a7)+,a0                      /* restore ikbdiorec pointer */
         rts
 
 /* scancode that send mouse packets */
 mousekey:  dc.b      $47,$c7,$52,$d2
 
 
+/* 306de: 00e0380c */
+/* 206de: 00e03466 */
 coldboot:
         move.w    #$2700,sr                 /* disable all IRQSR */
         
 #if STBOOK
-            move.l    ($0004).w,(_buserror).w /*a bus error triggers a reset */
+            move.l    ($0004).w,(_buserror).w /* a bus error triggers a reset */
             movea.w   #$000c,a0         /* start erasing from $c on */
             moveq     #0,d0
             move.l    #$3fffc,d1                /* erase 1MB */
-coldboo2: move.l    d0,(a0)+
-            dbra      d1,coldboo2
+coldboo3:   move.l    d0,(a0)+
+            dbra      d1,coldboo3
             movea.l   ($0004).w,a0              /* jump into the ROM to reset the system */
             jmp       (a0)
 
@@ -6929,7 +6936,7 @@ coldboo2: move.l    d0,(a0)+
 #if TOSVERSION < 0x300
 			move.w    #5,d0
 			lea       coldboor(pc),a0
-			movea.w   #$000c,a1
+			movea.w   #(coldbend-coldboor)/4-1,d0,a1
 coldboo1:	move.l    (a0)+,(a1)+				/* copy erase routine to $000c... */
 			dbra      d0,coldboo1
 			jmp       ($000c).w
@@ -6943,6 +6950,7 @@ coldbool:	move.l    d0,(a0)+
 			move.l    d0,(a0)+
 			bra.s     coldbool
 coldbooe:nop
+coldbend:  ds.b 0
 
 #else
         move.l    #$00000808,d0
@@ -6953,15 +6961,15 @@ coldbooe:nop
         TO_TTR0(zero2)
         TO_TTR1(zero2)
 /* copy erase routine to low memory */
-        move.w    #(coldbend-coldboo2)/4-1,d0
-        lea.l     coldboo2(pc),a0
+        move.w    #(coldbend-coldboor)/4-1,d0
+        lea.l     coldboor(pc),a0
         movea.w   #$00c,a1
 coldboo1:
         move.l    (a0)+,(a1)+
         dbf       d0,coldboo1
         jmp       ($0000000C).w
 /* clear ST memory until buserror */
-coldboo2:
+coldboor:
         lea.l     coldboo4(pc),a0
         move.l    a0,(_buserror).w
         lea.l     coldboo6(pc),a0
@@ -6993,157 +7001,283 @@ zero2:  dc.l 0
 #endif
 
 
-/*
- * XBIOS #28 - Giaccess - Permit access to the registers of the GI sound chip. 
- */
+/*************************************************************************
+ * XBIOS #28 - Giaccess - Permit access to the registers of the GI       *
+ *       sound chip.                                                     *
+ *                                                                       *
+ *       protocol for accessing a gi sound chip register                 *
+ *                                                                       *
+ *       this bios call must be accessed in supervisor state             *
+ *       because it affects the 'sr' register                            *
+ *                                                                       *
+ *       entry                                                           *
+ *                                                                       *
+ *       word    giaccess(data,register)                                 *
+ *       word    data,register                                           *
+ *                                                                       *
+ *               data -- data register read/write date                   *
+ *               register -- chip register to select                     *
+ *               d1 = #$0000     selects read operation of the register  *
+ *               d1 = #$80 .or .xx       selects write xx to register    *
+ *               example write to portb - $80 .or. $0f = $8f             *
+ *                                                                       *
+ *       exit                                                            *
+ *       read operations                                                 *
+ *       d0.b -- data register contains byte of date                     *
+ *       write operations                                                *
+ *       d0.b -- data register contains a verification of written data   *
+ *                                                                       *
+ *************************************************************************/
 /* 306de: 00e0387e */
+/* 206de: 00e03498 */
 _giaccess:
         move.w    4(a7),d0
         move.w    6(a7),d1
-giaccess:
+gientry:
         move.w    sr,-(a7)
         ori.w     #$0700,sr
-        movem.l   d1-d2/a0,-(a7)
-        lea.l     (psgsel).w,a0
-        move.b    d1,d2
-        andi.b    #$0F,d1
-        move.b    d1,(a0)
-        asl.b     #1,d2
-        bcc.s     giacces1
-        move.b    d0,2(a0)
+        movem.l   d1-d2/a0,-(a7)                /* save affected registers */
+        lea.l     (psgsel).w,a0                 /* init desired gi register addr */
+        move.b    d1,d2                         /* make a copy to test for read or write */
+        andi.b    #$0F,d1                       /* turn off any extraneous bits */
+        move.b    d1,(a0)                       /* select register */
+        asl.b     #1,d2                         /* shift once for carry bit detection */
+        bcc.s     giacces1                      /* carry clear, so do a read operation */
+        move.b    d0,2(a0)                      /* init the memory location */
 giacces1:
-        moveq.l   #0,d0
-        move.b    (a0),d0
-        movem.l   (a7)+,d1-d2/a0
+        moveq.l   #0,d0                         /* clear our register */
+        move.b    (a0),d0                       /* grab the data from the gi register */
+        movem.l   (a7)+,d1-d2/a0                /* restore affected registers */
         move.w    (a7)+,sr
         rts
 
 
+/*********************************************************************
+ *       routine to turn on the dtr signal                           *
+ *********************************************************************/
 dtron:
         move.b    #$EF,d2
-        bra.s     offgibit
+        bra.s     offbit
 
-/*
- * XBIOS #30 - Ongibit - Set individual bits in the port A register of the GI sound chip. 
- */
+/*********************************************************************
+ * XBIOS #30 - Ongibit - Set individual bits in the port A register  *
+ * of the GI sound chip.                                             *
+ *                                                                   *
+ *       routine to set any bit in the gi port a area                *
+ *                                                                   *
+ *       entry                                                       *
+ *                                                                   *
+ *       word    ongibit(bitnum)                                     *
+ *       word    bitnum                                              *
+ *                                                                   *
+ *               bitnum - byte size mask with desired bit set to "1" *
+ *                                                                   *
+ *********************************************************************/
 /* 306de: 00e038b6 */
+/* 206de: 00e034d0 */
 _ongibit:
         moveq.l   #0,d2
         move.w    4(a7),d2
-ongibit:
+onbit:
         movem.l   d0-d2,-(a7)
         move.w    sr,-(a7)
         ori.w     #$0700,sr
-        moveq.l   #14,d1
+        moveq.l   #14,d1                        /* get ready to read in the port a contents */
         move.l    d2,-(a7)
-        bsr.s     giaccess
+        bsr.s     gientry                       /* go get it... */
         move.l    (a7)+,d2
-        or.b      d2,d0
-        move.b    #$8E,d1
-        bsr.s     giaccess
+        or.b      d2,d0                         /* set bit(s) on */
+        move.b    #$8E,d1                       /* setup to write to port a */
+        bsr.s     gientry                       /* go set it and return */
         move.w    (a7)+,sr
         movem.l   (a7)+,d0-d2
         rts
 
 
-/*
- * XBIOS #29 - Offgibit - Clear individual bits in the port A register of the GI sound chip. 
- */
+/*********************************************************************
+ * XBIOS #29 - Offgibit - Clear individual bits in the port A        *
+ * register of the GI sound chip.                                    *
+ *                                                                   *
+ *       routine to clear any bit in the gi port a area              *
+ *                                                                   *
+ *       entry                                                       *
+ *                                                                   *
+ *       word    offgibit(bitnum)                                    *
+ *       word    bitnum                                              *
+ *                                                                   *
+ *               bitnum - byte size mask with desired bit set to "0" *
+ *                                                                   *
+ *********************************************************************/
 /* 306de: 00e038de */
+/* 206de: 00e034f8 */
 _offgibit:
         moveq.l   #0,d2
         move.w    4(a7),d2
-offgibit:
+offbit:
         movem.l   d0-d2,-(a7)
         move.w    sr,-(a7)
         ori.w     #$0700,sr
-        moveq.l   #14,d1
+        moveq.l   #14,d1                        /* get ready to read in the port a contents */
         move.l    d2,-(a7)
-        bsr.s     giaccess
-        move.l    (a7)+,d2
-        and.b     d2,d0
-        move.b    #$8E,d1
-        bsr.s     giaccess
+        bsr.s     gientry                       /* go get it... */
+        move.l    (a7)+,d2           
+        and.b     d2,d0                         /* turn bit(s) off */
+        move.b    #$8E,d1                       /* setup to write to port a */
+        bsr.s     gientry                       /* go set it and return */
         move.w    (a7)+,sr
         movem.l   (a7)+,d0-d2
         rts
 
 
-/*
- * XBIOS #0 - Initmouse - Initializes the mouse handler. 
- */
+/*************************************************************************
+ * XBIOS #0 - Initmouse - Initializes the mouse handler.                 *
+ *                                                                       *
+ *               EXTENDED RBP BIOS TIMER INIT CALL                       *
+ *                                                                       *
+ *       entry:                                                          *
+ *                                                                       *
+ *       word    initmous(type,param,intvec)                             *
+ *       word    type                                                    *
+ *       long    param,initvec                                           *
+ *                                                                       *
+ *               type - key/abs/rel/off  mouse function requested        *
+ *                       4/  2/  1/  0   value                           *
+ *               param - address of parameter block                      *
+ *               intvec - mouse interrupt vector                         *
+ *                                                                       *
+ *                                                                       *
+ *       parameter block definition:                                     *
+ *                                                                       *
+ *       byte 0 - y=0 at top/bottom if non-zero then y=0 at bottom       *
+ *               otherwise y=0 at top                                    *
+ *       byte 1 - parameter for set mouse buttons command                *
+ *       byte 2 - x threshold/scale/delta parameter                      *
+ *       byte 3 - y threshold/scale/delta parameter                      *
+ *                                                                       *
+ *       the following bytes are required for the absolute mode only     *
+ *                                                                       *
+ *       byte 4 - xmsb for absolute mouse maximum position               *
+ *       byte 5 - xlsb for absolute mouse maximum position               *
+ *       byte 6 - ymsb for absolute mouse maximum position               *
+ *       byte 7 - ylsb for absolute mouse maximum position               *
+ *       byte 8 - xmsb for absolute mouse initial position               *
+ *       byte 9 - xlsb for absolute mouse initial position               *
+ *       byte a - ymsb for absolute mouse initial position               *
+ *       byte b - ylsb for absolute mouse initial position               *
+ *                                                                       *
+ *************************************************************************/
+
 /* 306de: 00e03906 */
+/* 206de: 00e03520 */
+/* first we determine if the init is for a absolute, relative or keycode */
+/* mouse action. */
 _initmouse:
-        tst.w     4(a7)
-        beq.s     initmou1
-        move.l    10(a7),(mousevec).w
+        tst.w     4(a7)                         /* turn mouse off? */
+        beq.s     initmou1                      /* yes...disable mouse */
+        move.l    10(a7),(mousevec).w           /* init the mouse interrupt vector */
         movea.l   6(a7),a3
-        cmpi.w    #$0001,4(a7)
-        beq.s     initmou2
-        cmpi.w    #$0002,4(a7)
-        beq.s     initmou3
-        cmpi.w    #$0004,4(a7)
-        beq.s     initmou4
-        moveq.l   #0,d0
+        cmpi.w    #1,4(a7)                      /* relative mouse request? */
+        beq.s     initmou2                      /* yes... */
+        cmpi.w    #2,4(a7)                      /* absolute mouse request? */
+        beq.s     initmou3                      /* yes... */
+        cmpi.w    #4,4(a7)                      /* keycode mouse request? */
+        beq.s     initmou4                      /* yes... */
+        moveq.l   #0,d0                         /* error condition returned -- improper request */
         rts
 initmou1:
-        moveq.l   #18,d1
+        moveq.l   #$12,d1                       /* disable mouse */
         bsr       ikbd_writeb
-        move.l    #imrts,(mousevec).w
+        move.l    #imrts,(mousevec).w           /* re-init the mouse interrupt vector */
         bra.s     initmou5
 initmou2:
-        lea.l     (initmbuf).w,a2
-        move.b    #$08,(a2)+
-        move.b    #$0B,(a2)+
+        lea.l     (initmbuf).w,a2               /* set transfer buffer pointer */
+        move.b    #$08,(a2)+                    /* set to relative mouse */
+        move.b    #$0B,(a2)+                    /* set relative mouse threshold x,y */
         bsr.s     setmouse
-        moveq.l   #6,d3
-        lea.l     (initmbuf).w,a2
-        bsr       ikbdws1
+        moveq.l   #6,d3                         /* set length of the string -1 to transfer */
+        lea.l     (initmbuf).w,a2               /* set transfer buffer pointer */
+        bsr       ikbdws1                       /* do transfer to ikbd */
         bra.s     initmou5
+
 initmou3:
-        lea.l     (initmbuf).w,a2
-        move.b    #$09,(a2)+
-        move.b    4(a3),(a2)+
-        move.b    5(a3),(a2)+
-        move.b    6(a3),(a2)+
-        move.b    7(a3),(a2)+
-        move.b    #$0C,(a2)+
+        lea.l     (initmbuf).w,a2               /* set transfer buffer pointer */
+        move.b    #$09,(a2)+                    /* set to absolute mouse */
+        move.b    4(a3),(a2)+                   /* set xmsb max */
+        move.b    5(a3),(a2)+                   /* set xlsb max */
+        move.b    6(a3),(a2)+                   /* set ymsb max */
+        move.b    7(a3),(a2)+                   /* set ylsb max */
+        move.b    #$0C,(a2)+                    /* set absolute mouse scale */
         bsr.s     setmouse
-        move.b    #$0E,(a2)+
-        move.b    #$00,(a2)+
-        move.b    8(a3),(a2)+
-        move.b    9(a3),(a2)+
-        move.b    10(a3),(a2)+
-        move.b    11(a3),(a2)+
-        moveq.l   #16,d3
-        lea.l     (initmbuf).w,a2
-        bsr       ikbdws1
+        move.b    #$0E,(a2)+                    /* load initial absolute mouse position */
+        move.b    #$00,(a2)+                    /* filler load */
+        move.b    8(a3),(a2)+                   /* initial xmsb absolute mouse position */
+        move.b    9(a3),(a2)+                   /* initial xlsb absolute mouse position */
+        move.b    10(a3),(a2)+                  /* initial ymsb absolute mouse position */
+        move.b    11(a3),(a2)+                  /* initial ylsb absolute mouse position */
+        moveq.l   #16,d3                        /* set length of string -1 to transfer */
+        lea.l     (initmbuf).w,a2               /* set transfer buffer pointer */
+        bsr       ikbdws1                       /* do transfer to ikbd */
         bra.s     initmou5
+
 initmou4:
-        lea.l     (initmbuf).w,a2
-        move.b    #$0A,(a2)+
+        lea.l     (initmbuf).w,a2               /* set transfer buffer pointer */
+        move.b    #$0A,(a2)+                    /* set to mouse keycode mode */
         bsr.s     setmouse
-        moveq.l   #5,d3
-        lea.l     (initmbuf).w,a2
-        bsr       ikbdws1
+        moveq.l   #5,d3                         /* set length of string -1 to transfer */
+        lea.l     (initmbuf).w,a2               /* set transfer buffer pointer */
+        bsr       ikbdws1                       /* do transfer to ikbd */
 initmou5:
-        moveq.l   #-1,d0
+        moveq.l   #-1,d0                        /* set to true to indicate good init */
         rts
 
 setmouse:
-        move.b    2(a3),(a2)+
-        move.b    3(a3),(a2)+
-        moveq.l   #16,d1
-        sub.b     (a3),d1
+        move.b    2(a3),(a2)+                   /* set x threshold/scale/delta */
+        move.b    3(a3),(a2)+                   /* set y threshold/scale/delta */
+        moveq.l   #16,d1                        /* setup to determine if top/bottom */
+        sub.b     (a3),d1                       /* set y=0 at ? */
         move.b    d1,(a2)+
-        move.b    #$07,(a2)+
-        move.b    1(a3),(a2)+
+        move.b    #$07,(a2)+                    /* set mouse button action */
+        move.b    1(a3),(a2)+                   /* mouse button parameter */
         rts
 
-/*
- * XBIOS #31 - Xbtimer - Initialize the timer in the MFP chip.
- */
+/*************************************************************************
+ * XBIOS #31 - Xbtimer - Initialize the timer in the MFP chip.           *
+ *                                                                       *
+ *               EXTENDED RBP BIOS TIMER INIT CALL                       *
+ *                                                                       *
+ *       entry:                                                          *
+ *                                                                       *
+ *       void    xbtimer(id,control,data,intvec)                         *
+ *       word    id,control,data                                         *
+ *       long    intvec                                                  *
+ *                                                                       *
+ *               intvec - timer interrupt vector                         *
+ *               control - timer's control setting                       *
+ *               data - timer's data register setting                    *
+ *               id - timer id   a-0, b-1, c-2, d-3                      *
+ *                                                                       *
+ *       Special Note:                                                   *
+ *                                                                       *
+ *       In the interest of preserving as many features for the user     *
+ *       in the future, timer A should be reserved for the end-user      *
+ *       or independent software vendor's application program.  System   *
+ *       software or those application needing just a "tick" should      *
+ *       constrain themselves to timer C, which is adequate for delay    *
+ *       and other timing uses.  Future hardware may or may not bring    *
+ *       out the timer A input line out...giving software developers     *
+ *       another useful aspect of the machine to utilize.                *
+ *                                                                       *
+ *       The recommended usage of the timers is as follows:              *
+ *                                                                       *
+ *       Timer A - Reserved for end-users and stand-alone applications.  *
+ *       Timer B - Reserved for screen graphics, primarily.              *
+ *       Timer C - Reserved for system timing (GSX,GEM,DESKTOP,ET.AL).   *
+ *       Timer D - Reserved for baud rate control of RS-232 port,        *
+ *                the interrupt vector is available to anyone.           *
+ *                                                                       *
+ *************************************************************************/
 /* 306de: 00e039ce */
+/* 206de: 00e035e8 */
 _xbtimer:
         moveq.l   #0,d0
         moveq.l   #0,d1
@@ -7151,14 +7285,14 @@ _xbtimer:
         move.w    4(a7),d0
         move.w    6(a7),d1
         move.w    8(a7),d2
-        bsr       settimer
-        tst.l     10(a7)
+        bsr       settimer                      /* setup the timer */
+        tst.l     10(a7)                        /* if <0 then skip and exit */
         bmi.s     imrts
-        movea.l   10(a7),a2
-        moveq.l   #0,d1
-        lea.l     xbtimtab(pc),a1
-        andi.l    #$000000FF,d0
-        move.b    0(a1,d0.w),d0
+        movea.l   10(a7),a2                     /* setup for initint call */
+        moveq.l   #0,d1                         /* clear long */
+        lea.l     xbtimtab(pc),a1               /* point to timer -> interrupt # translation tab */
+        andi.l    #$000000FF,d0                 /* mask off the highest three bytes in register */
+        move.b    0(a1,d0.w),d0                 /* setup for initint call */
         bsr       initint
 imrts:
         rts
@@ -7166,10 +7300,29 @@ imrts:
 xbtimtab:  dc.b 13,8,5,4
 
 
-/*
- * XBIOS #16 - Keytbl - Define the mapping table for the keyboard scancodes to key-codes.
- */
+/*************************************************************************
+ * XBIOS #16 - Keytbl - Define the mapping table for the keyboard        *
+ * scancodes to key-codes.                                               *
+ *                                                                       *
+ *               KEYBOARD TRANSLATION TABLE CHANGE CALL                  *
+ *                                                                       *
+ *       entry:                                                          *
+ *                                                                       *
+ *       long    keytrans(unshift,shift,capslock)                        *
+ *       long    unshift,shift,capslock                                  *
+ *                                                                       *
+ *               -1 signifies no change to vector                        *
+ *                                                                       *
+ *       exit:                                                           *
+ *               d0.l - returns pointer to beginning of                  *
+ *                       key translation address pointers                *
+ *               order of pointers is:                                   *
+ *               unshifted,shifted,caps-locked                           *
+ *               Note:  buffer space for each table should $80!!         *
+ *                                                                       *
+ *************************************************************************/
 /* 306de: 00e03a08 */
+/* 206de: 00e03622 */
 _keytbl:
         tst.l     4(a7)
         bmi.s     _keytbl1
@@ -7187,84 +7340,173 @@ _keytbl3:
         rts
 
 
-/*
- * XBIOS #24 - Bioskeys - Reinitialize keyboard.
- */
+/*************************************************************************
+ * XBIOS #24 - Bioskeys - Reinitialize keyboard.                         *
+ *                                                                       *
+ *               RESTORE BIOS KEYBOARD TRANSLATION TABLE                 *
+ *                                                                       *
+ *       entry:                                                          *
+ *                                                                       *
+ *       void    bioskeys()                                              *
+ *                                                                       *
+ *                                                                       *
+ *************************************************************************/
 /* 306de: 00e03a08 */
+/* 206de: 00e0364e */
 _bioskeys:
         move.l    #_keytblnorm,(_curkeytbl).w
-        move.l    #_keytblshift,(_curkeytblxx+4).w
+        move.l    #_keytblshift,(_curkeytbl+4).w
         move.l    #_keytblcaps,(_curkeytbl+8).w
+#if TOSVERSION < 0x300
+		clr.b     (kb_key_last).w
+#endif
         rts
 
-/*
- * XBIOS #32 - Dosound - Program the sound generator (PSG). 
- */
+/*************************************************************************
+ *                                                                       *
+ * XBIOS #32 - Dosound - Program the sound generator (PSG).              *
+ *                                                                       *
+ *       entry:                                                          *
+ *                                                                       *
+ *       void    dosound(ptr)                                            *
+ *       long    ptr     points to start of sound interpreter table      *
+ *                                                                       *
+ *                                                                       *
+ *************************************************************************/
 /* 306de: 00e03a4e */
+/* 206de: 00e0366c */
 _dosound:
-        move.l    (_sndtable).w,d0
-        move.l    4(a7),d1
-        bmi.s     dosound1
-        move.l    d1,(_sndtable).w
-        clr.b     (_snddelay).w
+        move.l    (_sndtable).w,d0              /* return current status in D0.L */
+        move.l    4(a7),d1                      /* if new ptr < 0, then just return */
+        bmi.s     dosound1                      /* (invalid ptr, so return) */
+        move.l    d1,(_sndtable).w              /* setup new sound ptr */
+        clr.b     (_snddelay).w                 /* zap sound timer register */
 dosound1:
         rts
 
 
-/*
- * XBIOS #33 - Setprt - Initialize the printer.
- */
+/*************************************************************************
+ * XBIOS #33 - Setprt - Initialize the printer.                          *
+ *                                                                       *
+ *               SET/RETURN PRINTER CONFIGURATION WORD                   *
+ *                                                                       *
+ *       entry:                                                          *
+ *                                                                       *
+ *       word    setptr(pconfig)                                         *
+ *       word    pconfig sets/gets printer information word              *
+ *                                                                       *
+ *                                                                       *
+ *************************************************************************/
 /* 306de: 00e03a62 */
+/* 206de: 00e03680 */
 _setprt:
-        move.w    (_prtconfig).w,d0
-        tst.w     4(a7)
-        bmi.s     setprt1
-        move.w    4(a7),(_prtconfig).w
+        move.w    (_prtconfig).w,d0             /* get current config word before we change it */
+        tst.w     4(a7)                         /* see if we don't change the word */
+        bmi.s     setprt1                       /* don't set printer word */
+        move.w    4(a7),(_prtconfig).w          /* set printer config word */
 setprt1:
         rts
 
 
-/*
- * XBIOS #35 - Kbrate - Set the auto-repeat rate of the keyboard.
- */
+/*************************************************************************
+ * XBIOS #35 - Kbrate - Set the auto-repeat rate of the keyboard.        *
+ *                                                                       *
+ *               SET/RETURN KEY REPEAT VALUES                            *
+ *                                                                       *
+ *       entry:                                                          *
+ *                                                                       *
+ *       word    kbrate(initial,repeat)                                  *
+ *       word    initial,repeat                                          *
+ *                                                                       *
+ *       initial determines the number of 50 hz cycles to wait before    *
+ *       a keyrepeat is to commence.  repeat determines the interval     *
+ *       between keyrepeats after the initial pause.                     *
+ *                                                                       *
+ *************************************************************************/
 /* 306de: 00e03a74 */
+/* 206de: 00e03692 */
 _kbrate:
-        move.w    (kb_initial).w,d0
-        tst.w     4(a7)
-        bmi.s     kbrate1
-        move.w    4(a7),d1
-        move.b    d1,(kb_initial).w
-        tst.w     6(a7)
-        bmi.s     kbrate1
-        move.w    6(a7),d1
-        move.b    d1,(kb_repeat).w
+        move.w    (kb_initial).w,d0             /* get current initial/repeat values */
+        tst.w     4(a7)                         /* see if we don't change the word */
+        bmi.s     kbrate1                       /* don't set key repeat values */
+        move.w    4(a7),d1                      /* set key repeat values */
+        move.b    d1,(kb_initial).w             /* set initial delay */
+        tst.w     6(a7)                         /* see if we don't change the word */
+        bmi.s     kbrate1                       /* don't set key repeat values */
+        move.w    6(a7),d1                      /* set key repeat values */
+        move.b    d1,(kb_repeat).w              /* set subsequent delay */
 kbrate1:
         rts
 
 
-/*
- * XBIOS #34 - Kbdvbase - Return a pointer to the IKBD (intelligent keyboard), and MIDI interrupt vectors.
- */
+/*************************************************************************
+ * XBIOS #34 - Kbdvbase - Return a pointer to the IKBD (intelligent      *
+ *      keyboard), and MIDI interrupt vectors.                           *
+ *                                                                       *
+ *               RETURN POINTER TO IKBD/MIDI INTERRUPT VECTORS           *
+ *                                                                       *
+ *       entry:                                                          *
+ *                                                                       *
+ *       long    ikbdvecs()                                              *
+ *               returns a pointer to the midi interrupt vector and      *
+ *               ikbd subsystem interrupt vector table.  the table       *
+ *               structure is as follows:                                *
+ *                                                                       *
+ *       midivec         ds.l    1       midi interrupt handler vector   *
+ *       vkbderr         ds.l    1       keyboard error handler address  *
+ *       vmiderr         ds.l    1       midi error handler address      *
+ *       statintvec      ds.l    1       ikbd status interrupt vector    *
+ *       msintvec        ds.l    1       mouse interrupt vector          *
+ *       clkintvec       ds.l    1       realtime clk interrupt vector   *
+ *       joyintvec       ds.l    1       joystick interrupt vector       *
+ *                                                                       *
+ *       note:   msintvec is modified via the initmouse system function  *
+ *               call.  since gem uses this vector, modifying it can be  *
+ *               fatal while running under gem.  clkintvec is used by    *
+ *               gemdos.  its pre-inited vector must be restored for     *
+ *               proper gemdos operation.  Caveat hacker!                *
+ *                                                                       *
+ *                                                                       *
+ *************************************************************************/
 /* 306de: 00e03a96 */
+/* 206de: 00e036b4 */
 _kbdvbase:
         move.l    #_kbdvecs+4,d0
         rts
 
-/***********************
- * Timer C interrupt
- ***********************/
+/*************************************************************************
+ *                                                                       *
+ *       C Timer interrupt routine to process the PSG sound table        *
+ *                                                                       *
+ *************************************************************************/
+/* (lmd)
+ * timercint - timer c interrupt handler
+ * divide 200 Hz interrupt frequency to 50 hz, and do:
+ *       sound handler processing
+ *       key-repeat processing
+ *       control-g bell and keyclick if enabled via sound handler
+ *       system timer-tick handoff
+ *       updates:        tc_rot (every tick)
+ *
+ *       imports:        etv_timer (timer handoff vector)
+ *                       _timr_ms (timer calibration value)
+ *
+ */
 /* 306de: 00e03a9e */
+/* 206de: 00e036bc */
 timercint:
-        addq.l    #1,_hz_200
-/*        rol.b     _tim_c_sieve */
-/* workaround for as68 which does not handle rol.b ea */
-        dc.w $e7f9
-        dc.l _tim_c_sieve
-        bpl.s     timerci3
+        addq.l    #1,_hz_200                    /* increment raw tick counter */
+        rol.w     _tim_c_sieve                  /* rotate divisor bits */
+        bpl.s     timerci3                      /* if not 4th interrupt, then return */
         movem.l   d0-d7/a0-a6,-(a7)
-        bsr.s     soundirq
-        btst      #1,(_conterm).w
-        beq.s     timerci2
+
+        bsr.s     soundirq                      /* process sounds */
+
+        btst      #1,(_conterm).w               /* check for key repeat enabled */
+        beq.s     timerci2                      /* not enabled */
+
+/* process for repeat key function first because it can affect the sound */
+/* table if enabled and the user is 'using'... */
         tst.b     (kb_key_last).w
         beq.s     timerci2
         tst.b     (kb_ticks).w
@@ -7277,92 +7519,175 @@ timerci1:
         move.b    (kb_repeat).w,(kb_delay).w
         move.b    (kb_key_last).w,d0
         lea.l     (ikbdiorec).w,a0
-        bsr       kbdvec15
+        bsr       kbdvec15                      /* repeat key stroke and stuff into buffer */
+/* (lmd)
+ * Call system timer vector
+ * (first guy in the system daisy-chain)
+ */
 timerci2:
-        move.w    (_timer_ms).w,-(a7)
-        movea.l   (_etv_timer).w,a0
-        jsr       (a0)
-        addq.w    #2,a7
+        move.w    (_timer_ms).w,-(a7)           /* push #ms/tick */
+        movea.l   (_etv_timer).w,a0             /* get vector */
+        jsr       (a0)                          /* call it */
+        addq.w    #2,a7                         /* cleanup stack */
         movem.l   (a7)+,d0-d7/a0-a6
 timerci3:
-        move.b    #$DF,($FFFFFA11).w
+        move.b    #$DF,(MFP_ISRB).w             /* clear the interrupt channel */
         rte
 
-/* Sound interrupt routine */
-/* Called from timer C irq */
+/*********************************************************
+ *
+ *  Quick & dirty sound stuff
+ *
+ *
+ *  Programmed by Dave Staugas
+ *                14 Mar 1985
+ *
+ *
+ *
+ *
+ *********************************************************
+ *
+ *
+ *
+ *
+ *  To start a sound, load the 32-bit address of the
+ *                       byte stream for that sound in 32-bit
+ *                       "cursnd", & zero the 8-bit "timer"
+ *
+ *
+ *
+ *
+ *   Sound interrupt routine
+ *   Called from timer C irq
+ */
 soundirq:
         movem.l   d0-d1/a0,-(a7)
-        move.l    (_sndtable).w,d0
-        beq.s     soundir7
-        movea.l   d0,a0
-        move.b    (_snddelay).w,d0
-        beq.s     soundir1
-        subq.b    #1,d0
-        move.b    d0,(_snddelay).w
-        bra.s     soundir7
+        move.l    (_sndtable).w,d0              /* get current sound ptr */
+        beq.s     soundir7                      /* br to exit if zero, inactive */
+        movea.l   d0,a0                         /* ptr to a0 */
+        move.b    (_snddelay).w,d0              /* check delay timer */
+        beq.s     soundir1                      /* br over delay timer update if not on */
+        
+        subq.b    #1,d0                         /* tick off delay timer */
+        move.b    d0,(_snddelay).w              /* save new */
+        bra.s     soundir7                      /* skip sound update this time */
 soundir1:
-        move.b    (a0)+,d0
-        bmi.s     soundir3
-        move.b    d0,(psgsel).w
-        cmpi.b    #$07,d0
-        bne.s     soundir2
-        move.b    (a0)+,d1
-        andi.b    #$3F,d1
-        move.b    (psgsel).w,d0
-        andi.b    #$C0,d0
-        or.b      d1,d0
-        move.b    d0,(psgwr).w
-        bra.s     soundir1
-soundir2
-        move.b    (a0)+,(psgwr).w
-        bra.s     soundir1
+        move.b    (a0)+,d0                      /* pick up next sound command */
+        bmi.s     soundir3                      /* if minus, go do special */
+        
+        move.b    d0,(psgsel).w                 /* else, register load command--select this */
+        cmpi.b    #$07,d0                       /* reg. 7 selected? */
+        bne.s     soundir2                      /* br if no */
+        
+        move.b    (a0)+,d1                      /* get data to write to reg 7 */
+        andi.b    #$3F,d1                       /* always leave i/o port settings alone */
+        move.b    (psgsel).w,d0                 /* get mixer contents */
+        andi.b    #$C0,d0                       /* mask off non-useful info... */
+        or.b      d1,d0                         /* generate new setting */
+        move.b    d0,(psgwr).w                  /* write data */
+        bra.s     soundir1                      /* go for next command */
+        
+soundir2:
+        move.b    (a0)+,(psgwr).w               /* write next byte as data directly to reg */
+        bra.s     soundir1                      /* go for next command */
+/*  special case command */
 soundir3:
-        addq.b    #1,d0
-        bpl.s     soundir5
-        cmpi.b    #$81,d0
-        bne.s     soundir4
-        move.b    (a0)+,(_sndtmp).w
-        bra.s     soundir1
+        addq.b    #1,d0                         /* was command 255? */
+        bpl.s     soundir5                      /* br if yes--set delay timer */
+        
+        cmpi.b    #$81,d0                       /* was command 128 (before increment) */
+        bne.s     soundir4                      /* br if not */
+/*  command 128 */
+        move.b    (a0)+,(_sndtmp).w             /* 128--set aux data from next byte in stream */
+        bra.s     soundir1                      /* go for next command */
+/*  command > 128 */
 soundir4:
-        cmpi.b    #$82,d0
-        bne.s     soundir5
-        move.b    (a0)+,(psgsel).w
-        move.b    (a0)+,d0
-        add.b     d0,(_sndtmp).w
-        move.b    (a0)+,d0
-        move.b    (_sndtmp).w,(psgwr).w
-        cmp.b     (_sndtmp).w,d0
-        beq.s     soundir6
-        subq.w    #4,a0
-        bra.s     soundir6
+        cmpi.b    #$82,d0                       /* command greater than 129 */
+        bne.s     soundir5                      /* br if yes--must be set timer */
+/*  command 129 */
+        move.b    (a0)+,(psgsel).w              /* 129--select register */
+        move.b    (a0)+,d0                      /* get increment step (signed) */
+        add.b     d0,(_sndtmp).w                /* add to aux data */
+        move.b    (a0)+,d0                      /* terminating value */
+        move.b    (_sndtmp).w,(psgwr).w         /* load reg from data in auxd */
+        cmp.b     (_sndtmp).w,d0                /* reached end of cycle? */
+        beq.s     soundir6                      /* br if so */
+/*  still within loop, reset sound pointer to iterate for next irq */
+        subq.w    #4,a0                         /* back up sound ptr to repeat this command */
+        bra.s     soundir6                      /* update ptr & exit */
+/*  set delay timer */
 soundir5:
-        move.b    (a0)+,(_snddelay).w
-        bne.s     soundir6
-        movea.w   #$0000,a0
+        move.b    (a0)+,(_snddelay).w           /* set delay timer from next byter in stream */
+        bne.s     soundir6                      /* if non-zero real delay here */
+        movea.w   #0,a0                         /* else, sound terminator--set ptr to null */
 soundir6:
-        move.l    a0,(_sndtable).w
+        move.l    a0,(_sndtable).w              /* update sound ptr */
 soundir7:
-        movem.l   (a7)+,d0-d1/a0
+        movem.l   (a7)+,d0-d1/a0                /* pop stack & exit */
         rts
+
+/*
+ * sound data...
+ *
+ *
+ * format:
+ *
+ *      sound data usually is found in byte pairs, the first of which is the command
+ *      and the second is the argument.  However, some commands take on more than
+ *      1 argument
+ *
+ *      cmd     function        argument(s)
+ *      00      load reg0       data0
+ *      01      load reg1       data0
+ *      02      load reg2       data0
+ *      03      load reg3       data0
+ *      04      load reg4       data0
+ *      05      load reg5       data0
+ *      06      load reg6       data0
+ *      07      load reg7       data0   note: b7 & b6 forced set for all data to r...
+ *      08      load reg8       data0
+ *      09      load reg9       data0
+ *      0A      load reg10      data0
+ *      0B      load reg11      data0
+ *      0C      load reg12      data0
+ *      0D      load reg13      data0
+ *
+ *
+ *      80      init temp w/    data0
+ *
+ *      81      loop defined
+ *              by 3 args       data0 as register to load using temp
+ *                              data1 as increment/decrement (signed) of temp
+ *                              data2 as loop terminator value of temp
+ *
+ *      82-FF   set delay
+ *              timer           data0 is # of counts till next update
+ *                                      note: if data0 = 0, sound is terminated
+ *
+ *
+ *
+ */
 
 /*********************************************************
  * VT52 emulator callback for the bell sound
  *********************************************************/
 /* 306de: 00e03b86 */
+/* 206de: 00e037a4 */
 ringbell:
-        btst      #2,(_conterm).w
-        beq.s     soundir8
+        btst      #2,(_conterm).w               /* console bell enabled? */
+        beq.s     soundir8                      /* (no sound) */
         movea.l   _bell_hook,a0
-        jsr       (a0)
+        jsr       (a0)                          /* go through the bell vector */
         rts
 
 /*
  * default function for system variable bell_hook
  */
 /* 306de: 00e03b98 */
+/* 206de: 00e037b6 */
 _do_bell:
-        move.l    #_bellsnd,(_sndtable).w
-        move.b    #$00,(_snddelay).w
+        move.l    #_bellsnd,(_sndtable).w       /* sound data for console bell */
+        move.b    #$00,(_snddelay).w            /* enable sound timer */
 soundir8:
         rts
 
