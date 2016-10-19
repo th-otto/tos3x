@@ -37,7 +37,7 @@ vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_$(TOSVERSION)_OBJS) ${MAKEF
 
 vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
 	# sections.mak might have just been generated, make sure it is reread
-	$(MAKE) single
+	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single:
 	$(LD) -s -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_$(TOSVERSION)_OBJS)
@@ -89,7 +89,7 @@ escape.o: escape.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-gsxasm1.o: gsxasm1.S
+gsxasm1.o: gsxasm1.S hbhline.inc hbvline.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i

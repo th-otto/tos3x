@@ -48,7 +48,7 @@ memtest.o: memtest.S
 
 bios.o: tosvars.o vars.o $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	# sections.mak might have just been generated, make sure it is reread
-	$(MAKE) single
+	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single:
 	$(LD) -u -s -l -o bios.o -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o

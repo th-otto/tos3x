@@ -24,7 +24,7 @@ vdidsp.o: vdidsp.S $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.i
 
 bdos.o: $(top_srcdir)/common/config.h tosvars.o vars.o vdidsp.o $(top_srcdir)/common/sections.mak $(BDOS_OBJS) ${MAKEFILE}
 	# sections.mak might have just been generated, make sure it is reread
-	$(MAKE) single
+	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single:
 	$(LD) -s -o bdos.o -a $(bdos_tbase) $(bdos_dbase) 0 tosvars.o vars.o vdidsp.o $(BDOS_OBJS)
