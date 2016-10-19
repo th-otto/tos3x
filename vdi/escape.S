@@ -1,64 +1,49 @@
 ********************************  escape.s  ***********************************
 *
-* $Revision: 3.4 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/escape.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/02/19 15:30:42 $     $Locker: lozben $
+* $Author: lozben $	$Date: 91/02/19 15:30:42 $
 * =============================================================================
 *
-* $Log:	escape.s,v $
 * Revision 3.4  91/02/19  15:30:42  lozben
 * Made the file work with multiple linea var structures.
-* 
+*
 * Revision 3.3  91/02/12  16:39:49  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.2  91/01/31  11:39:12  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
-* Revision 3.1  91/01/25  16:25:13  lozben
-* Adjusted the code to work with the multiple linea variable structures.
-* 
-* $Log:	escape.s,v $
-* Revision 3.4  91/02/19  15:30:42  lozben
-* Made the file work with multiple linea var structures.
-* 
-* Revision 3.3  91/02/12  16:39:49  lozben
-* Adjusted the code to work with the multiple linea variable structures.
-* 
-* Revision 3.2  91/01/31  11:39:12  lozben
-* Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:07:06  lozben
 * New generation VDI
-* 
+*
 * Revision 2.7  90/10/10  13:03:23  lozben
 * Fixed a bug in set foreground and background (esc b and c) routines.
 * The routines subtracted 32 from the input. They no longer do that..
-* 
+*
 * Revision 2.6  90/07/16  16:38:06  lozben
 * Added negative clipping in cell_addr().
-* 
+*
 * Revision 2.5  90/03/14  20:33:41  lozben
 * Optimized (for speed) the neg_cell() routine.
-* 
+*
 * Revision 2.4  90/02/26  17:39:03  lozben
 * Fixed the code to work with turbo assembler.
-* 
+*
 * Revision 2.3  90/02/09  18:37:59  lozben
 * We don't use v_cel_wr flag any more. Now the code looks at the
 * offset table to determine if cell width is 8 or 16 bits. Also
 * fixed a bug in calculating the relative character position in
 * the font offset table.
-* 
+*
 * Revision 2.2  90/01/18  15:53:03  lozben
 * Moved hb_cell(), hb_scrup(), hb_scrdn(), hb_rect() into another file.
 * The idea is to have all the hard blit code in independent files.
 * Also Made changes to be able to deal with wordwide monospaced
 * font.
-* 
+*
 * Revision 2.1  89/02/21  17:19:03  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -82,7 +67,7 @@ FRM_WD		equ	80
 FRM_HT		equ	82
 
 M_CFLASH	equ	$0001	; cursor flash			0:disabled
-F_CFLASH	equ	    0	;				1:enabled	
+F_CFLASH	equ	    0	;				1:enabled
 M_CSTATE	equ	$0002	; cursor flash state		0:off
 F_CSTATE	equ	    1	; 				1:on
 
@@ -110,7 +95,7 @@ O6 equ 0
 #else
 O6 equ 6 ; WTF? why?
 /* v_stat_0+O6 == 0; stupid as68 does not optimize it */
-#define V_STAT_0 
+#define V_STAT_0
 #define V_FUNC(func,la,r) \
 	move.l	LV((USERDEVINIT)+O6+func,la),r
 #define PIXL6(r) lea lineavars-O6,r
@@ -189,7 +174,7 @@ ce_more:
 
 	rts
 
-		
+
 v_offset:
 
 	bsr	hide_cursor		; INTIN+00 = Y displacement on cursor
@@ -251,7 +236,7 @@ normal_ascii:
 	bge	ascii_out		; go print it.
 
 
-*   We handle the following control characters as special. 
+*   We handle the following control characters as special.
 *   All others are thrown away.
 *
 *	 7 = bell
@@ -297,7 +282,7 @@ ctrl_tbl:
 do_bell:
 
 	bra.w	ringbell			; need local variable in ctrl_tbl
-	
+
 do_tab:
 
 	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- cursor cell X
@@ -372,8 +357,8 @@ col_ok:	move.w	d1,d0			; d0 <- cell X
 
 
 *******************************************************************************
-**	escape b.							     **
-**			     Set Foreground Color.			     **
+**	escape b.
+**			     Set Foreground Color.
 *******************************************************************************
 
 get_fg_col:	lea	set_fg_col(pc),a0
@@ -382,19 +367,19 @@ get_fg_col:	lea	set_fg_col(pc),a0
 set_fg_col:
 #if VIDEL_SUPPORT
 		lea	pal_map(a4),a0		; a0 -> virtual palette
-		sub.w	#'0',d1			; mask out unneeded bits
+		sub.w	#'0',d1			; mask out unneeded bits; WTF; old bug reintroduced, see revision 2.7 above
 		lsl.w	#2,d1			; make d1 long word offset
 		move.l	(a0,d1.w),LV((vl_col_fg)+O6,a4)	; set the foreground color. ; BUG: only sets FG color for >= 16 planes
 #else
-		move.w	d1,LV((v_col_fg)+O6,a4)	; set the foreground color. ; BUG: d1 is ASCII code, not color index
+		move.w	d1,LV((v_col_fg)+O6,a4)	; set the foreground color.
 #endif
 		lea	normal_ascii(pc),a0
 		bra	load_state
 
 
 *******************************************************************************
-**	escape c.							     **
-**			     Set Background Color.			     **
+**	escape c.
+**			     Set Background Color.
 *******************************************************************************
 
 get_bg_col:	lea	set_bg_col(pc),a0	; Next char is the BG color
@@ -404,11 +389,11 @@ get_bg_col:	lea	set_bg_col(pc),a0	; Next char is the BG color
 set_bg_col:
 #if VIDEL_SUPPORT
 		lea	pal_map(a4),a0		; a0 -> virtual palette
-		sub.w	#'0',d1			; mask out unneeded bits
+		sub.w	#'0',d1			; mask out unneeded bits; WTF; old bug reintroduced, see revision 2.7 above
 		lsl.w	#2,d1			; make d1 long word offset
 		move.l	(a0,d1.w),LV((vl_col_bg)+O6,a4)	; set the background color. ; BUG; only sets BG color for >= 16 planes
 #else
-		move.w	d1,LV((v_col_bg)+O6,a4)	; set the foreground color. ; BUG: d1 is ASCII code, not color index
+		move.w	d1,LV((v_col_bg)+O6,a4)	; set the foreground color.
 #endif
 		lea	normal_ascii(pc),a0
 		bra	load_state
@@ -423,7 +408,7 @@ check_low_case:
 
 	cmp.w	#21,d1
 	ble	range_b2w
-	
+
 	rts
 
 
@@ -486,9 +471,9 @@ b2w_tbl:
 
 
 *******************************************************************************
-**	escape function 1.						     **
-**									     **
-**		   Inquire Addressable Alpha Character Cells.		     **
+**	escape function 1.
+**
+**		   Inquire Addressable Alpha Character Cells.
 *******************************************************************************
 
 /* 306de: 00e073e6 */
@@ -509,8 +494,8 @@ esc_exit:	rts
 
 
 *******************************************************************************
-**	escape function 17.						     **
-**				    Hardcopy.				     **
+**	escape function 17.
+**				    Hardcopy.
 *******************************************************************************
 
 /* 306de: 00e07408 */
@@ -522,8 +507,8 @@ vq_hardcopy:	move.w	#20,-(sp)		; Invoke bios
 
 
 *******************************************************************************
-**	escape function 3.						     **
-**				Enter Alpha Mode.			     **
+**	escape function 3.
+**				Enter Alpha Mode.
 *******************************************************************************
 
 /* 306de: 00e07412 */
@@ -532,8 +517,8 @@ v_enter_cur:		bsr	escE			; clear and home.
 
 
 *******************************************************************************
-**	escape function 2.						     **
-**				 Exit Alpha Mode.			     **
+**	escape function 2.
+**				 Exit Alpha Mode.
 *******************************************************************************
 
 /* 306de: 00e07418 */
@@ -542,8 +527,8 @@ v_exit_cur:		bsr	hide_cursor		; cursor hidden upon exit
 
 
 *******************************************************************************
-**	escape E.							     **
-**			 Clear Screen and Home Cursor.			     **
+**	escape E.
+**			 Clear Screen and Home Cursor.
 *******************************************************************************
 
 escE:		bsr	escH			; home cursor.
@@ -551,9 +536,9 @@ escE:		bsr	escH			; home cursor.
 
 
 *******************************************************************************
-**	escape A.							     **
-**	escape function 4.						     **
-**				Alpha Cursor Up.			     **
+**	escape A.
+**	escape function 4.
+**				Alpha Cursor Up.
 *******************************************************************************
 
 /* 306de: 00e07420 */
@@ -567,9 +552,9 @@ up_cursor:	subq.w	#1,d1			; d1 <- Y of previous line
 
 
 *******************************************************************************
-**	escape B.							     **
-**	escape function 5.						     **
-**				Alpha Cursor Down.			     **
+**	escape B.
+**	escape function 5.
+**				Alpha Cursor Down.
 *******************************************************************************
 
 /* 306de: 00e07430 */
@@ -584,9 +569,9 @@ down_cursor:	addq.w	#1,d1			; d1 <- Y of next line
 
 
 *******************************************************************************
-**	escape C.							     **
-**	escape function 6.						     **
-**				Alpha Cursor Right.			     **
+**	escape C.
+**	escape function 6.
+**				Alpha Cursor Right.
 *******************************************************************************
 
 /* 306de: 00e07444 */
@@ -603,9 +588,9 @@ v_curright:
 
 
 *******************************************************************************
-**	escape D.							     **
-**	escape function 7.						     **
-**				Alpha Cursor Left.			     **
+**	escape D.
+**	escape function 7.
+**				Alpha Cursor Left.
 *******************************************************************************
 
 /* 306de: 00e07458 */
@@ -621,9 +606,9 @@ v_curleft:
 
 
 *******************************************************************************
-**	escape H.							     **
-**	escape function 8.						     **
-**			        Home Alpha Cursor.			     **
+**	escape H.
+**	escape function 8.
+**			        Home Alpha Cursor.
 *******************************************************************************
 
 /* 306de: 00e07468 */
@@ -636,9 +621,9 @@ v_curhome:
 
 
 *******************************************************************************
-**	escape J.							     **
-**	escape function 9.						     **
-**			     Erase to End of Screen.			     **
+**	escape J.
+**	escape function 9.
+**			     Erase to End of Screen.
 *******************************************************************************
 
 /* 306de: 00e07470 */
@@ -654,7 +639,7 @@ v_eeos:
 
 	move.w	LV((v_celmy)+O6,a4),d3		; d3 <- maximum cursor Y
 	cmp.w	d3,d1			; if already on last line, exit.
-	beq	esc_exit	
+	beq	esc_exit
 
 	clr.w	d0			; d0 <- region Xmin
 	addq.w	#1,d1			; d1 <- Y of next line down
@@ -662,9 +647,9 @@ v_eeos:
 
 
 *******************************************************************************
-**	escape K.							     **
-**	escape function 10.						     **
-**			     Erase to End of Line.			     **
+**	escape K.
+**	escape function 10.
+**			     Erase to End of Line.
 *******************************************************************************
 
 /* 306de: 00e07482 */
@@ -677,8 +662,8 @@ v_eeol:	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- current cursor X
 
 
 *******************************************************************************
-**	escape function 11.						     **
-**			     Set Cursor Position.			     **
+**	escape function 11.
+**			     Set Cursor Position.
 *******************************************************************************
 
 /* 306de: 00e07494 */
@@ -693,8 +678,8 @@ vs_curaddress:
 
 
 *******************************************************************************
-**	escape function 12.						     **
-**				 Output Text.				     **
+**	escape function 12.
+**				 Output Text.
 *******************************************************************************
 
 /* 306de: 00e074a6 */
@@ -720,21 +705,21 @@ ef12_lend:
 
 
 *******************************************************************************
-**	escape p.							     **
-**	escape function 13.						     **
-**			       Reverse Video On.			     **
+**	escape p.
+**	escape function 13.
+**			       Reverse Video On.
 *******************************************************************************
 
 /* 306de: 00e074c8 */
 escp:
 v_rvon:	bset.b	#F_REVID,LV(V_STAT_0,a4)	 ; set reverse bit in v_stat_0
-		rts	
+		rts
 
 
 *******************************************************************************
-**	escape q.							     **
-**	escape function 14.						     **
-**			       Reverse Video Off.			     **
+**	escape q.
+**	escape function 14.
+**			       Reverse Video Off.
 *******************************************************************************
 
 /* 306de: 00e074ce */
@@ -744,8 +729,8 @@ v_rvoff:	bclr.b	#F_REVID,LV(V_STAT_0,a4)		; clr reverse bit in v_stat_0
 
 
 *******************************************************************************
-**	escape function 15.						     **
-**			    Inquire Cursor Position.			     **
+**	escape function 15.
+**			    Inquire Cursor Position.
 *******************************************************************************
 
 /* 306de: 00e074d4 */
@@ -764,8 +749,8 @@ vq_curaddress:
 
 
 *******************************************************************************
-**	escape function 16.						     **
-**			    Inquire Tablet Status.			     **
+**	escape function 16.
+**			    Inquire Tablet Status.
 *******************************************************************************
 
 /* 306de: 00e074f4 */
@@ -780,8 +765,8 @@ vq_tabstatus:
 
 
 *******************************************************************************
-**	escape function 18.						     **
-**			     Place Graphic Cursor.			     **
+**	escape function 18.
+**			     Place Graphic Cursor.
 *******************************************************************************
 
 /* 306de: 00e07506 */
@@ -793,8 +778,8 @@ v_dspcur:
 
 
 *******************************************************************************
-**	escape function 19.						     **
-**			    Remove Graphic Cursor.			     **
+**	escape function 19.
+**			    Remove Graphic Cursor.
 *******************************************************************************
 
 /* 306de: 00e07512 */
@@ -809,8 +794,8 @@ v_rmcur:
 
 
 *******************************************************************************
-*	escape I.							     **
-*				 Reverse Index.				     **
+*	escape I.
+*				 Reverse Index.
 *******************************************************************************
 
 escI:
@@ -824,8 +809,8 @@ escI:
 
 
 *******************************************************************************
-**	escape L.							     **
-**				 Insert Line.				     **
+**	escape L.
+**				 Insert Line.
 *******************************************************************************
 
 escL:
@@ -843,8 +828,8 @@ start_o_line:
 
 
 *******************************************************************************
-**	escape M.							     **
-**				 Delete Line.				     **
+**	escape M.
+**				 Delete Line.
 *******************************************************************************
 
 escM:
@@ -856,8 +841,8 @@ escM:
 
 
 *******************************************************************************
-**	escape d.							     **
-**			Erase from Beginning of Page.			     **
+**	escape d.
+**			Erase from Beginning of Page.
 *******************************************************************************
 
 escd:
@@ -875,7 +860,7 @@ escd:
 
 
 *******************************************************************************
-**			Enable Cursor (counted depth).			     **
+**			Enable Cursor (counted depth).
 *******************************************************************************
 
 /* 306de: 00e07562 */
@@ -883,7 +868,7 @@ show_cursor:
 
 	move.w	LV((disab_cnt)+O6,a4),d0	; old count=0  =>  cursor is visible
 	beq	show_exit
-	
+
 	subq.w	#1,d0			; new count=0  =>  redisplay cursor
 	beq	enable_it
 
@@ -895,8 +880,8 @@ show_exit:
 
 
 *******************************************************************************
-**	escape e.							     **
-**			Enable Cursor (always).				     **
+**	escape e.
+**			Enable Cursor (always).
 *******************************************************************************
 
 	xdef	esce
@@ -909,12 +894,12 @@ enable_it:
 
 	move.w	#1,LV((disab_cnt)+O6,a4)	; set up for cursor redisplay
 	move.l	LV((v_cur_ad)+O6,a4),a1		; a1 -> current cursor position
-	bra	show_alpha		
+	bra	show_alpha
 
 
 *******************************************************************************
-**	escape f.							     **
-**			  Disable Cursor (counted depth).		     **
+**	escape f.
+**			  Disable Cursor (counted depth).
 *******************************************************************************
 
 	xdef	escf
@@ -934,8 +919,8 @@ hide_cursor:
 
 
 *******************************************************************************
-**	escape j.							     **
-**			     Save Cursor Position.			     **
+**	escape j.
+**			     Save Cursor Position.
 *******************************************************************************
 
 escj:		bset.b	#F_SVPOS,LV(V_STAT_0,a4)	; set "pos saved" status bit.
@@ -949,8 +934,8 @@ escj_exit:	rts
 
 
 *******************************************************************************
-**	escape k.							     **
-**			    Restore Cursor Position.			     **
+**	escape k.
+**			    Restore Cursor Position.
 *******************************************************************************
 
 esck:
@@ -964,8 +949,8 @@ esck:
 
 
 *******************************************************************************
-**	escape l.							     **
-**				Erase Entire Line.			     **
+**	escape l.
+**				Erase Entire Line.
 *******************************************************************************
 
 escl:
@@ -980,8 +965,8 @@ escl:
 
 
 *******************************************************************************
-**	escape o.							     **
-**			  Erase from Beginning of Line.			     **
+**	escape o.
+**			  Erase from Beginning of Line.
 *******************************************************************************
 
 esco:
@@ -999,8 +984,8 @@ erase_region:
 
 
 *******************************************************************************
-**	escape v.							     **
-**			      Wrap at End of Line.			     **
+**	escape v.
+**			      Wrap at End of Line.
 *******************************************************************************
 
 escv:
@@ -1010,8 +995,8 @@ escv:
 
 
 *******************************************************************************
-**	escape w.							     **
-**			    Overwrite at End of Line.			     **
+**	escape w.
+**			    Overwrite at End of Line.
 *******************************************************************************
 
 escw:
@@ -1021,7 +1006,7 @@ escw:
 
 
 *******************************************************************************
-**				Carriage Return.			     **
+**				Carriage Return.
 *******************************************************************************
 
 /* 306de: 00e075f8 */
@@ -1033,7 +1018,7 @@ ascii_cr:
 
 
 *******************************************************************************
-**				  Line Feed.				     **
+**				  Line Feed.
 *******************************************************************************
 
 /* 306de: 00e07602 */
@@ -1050,7 +1035,7 @@ ascii_lf:
 
 
 *******************************************************************************
-**			cursor blink interrupt routine.			     **
+**			cursor blink interrupt routine.
 *******************************************************************************
 
 *   If dsply_cnt is non-zero, the cursor is not processed
@@ -1062,7 +1047,7 @@ ascii_lf:
 *   CSTATE reflects the actual state of the alpha cursor. When main line
 *   code erases the cursor, this flag should reflect the change.
 *
-*   Main line code should NOT redisplay the cursor. The interrupt routine 
+*   Main line code should NOT redisplay the cursor. The interrupt routine
 *   has sole responsibility for displaying the cursor whether flashing
 *   or static.
 *
@@ -1073,7 +1058,7 @@ ascii_lf:
 *   If the count becomes zero, arrangements must be made to redisplay the
 *   cursor.
 *
-*   To cause the cursor to be redisplayed, the main routine should load 
+*   To cause the cursor to be redisplayed, the main routine should load
 *   v_curct with the value in v_delay. CSTATE flag should be clear. The
 *   cursor will be displayed only after there has been no activity for at
 *   least v_delay-1 frames. Thus, excessive redisplaying of the cursor is
@@ -1086,7 +1071,7 @@ blink:	PIXL6(a4)
 
 	tst.w	LV((disab_cnt)+O6,a4)
 	bne	bl_exit			  ; if cursor is hidden, exit
-	
+
 	subq.b	#1,LV((v_cur_tim)+O6,a4)	  ; decrement cursor activity timer.
 	bne	bl_exit			  ; if <> 0, do not process.
 
@@ -1181,7 +1166,7 @@ getdelay:
 *
 * name:	ascii_out
 *
-* purpose:	this routine interfaces with the BIOS.	                     
+* purpose:	this routine interfaces with the BIOS.
 *		it prints an ascii character on the screen as if
 *		there was a dumb terminal in here
 *
@@ -1191,7 +1176,7 @@ getdelay:
 *******************************************************************************
 
 /* 306de: 00e076a4 */
-ascii_out:	
+ascii_out:
 	PIXL6(a4)
 	cmp.w	LV((v_fnt_st)+O6,a4),d1		; test against minimum
 	bcs	out_of_bounds
@@ -1224,7 +1209,7 @@ col_ok2:
 	btst.b	#F_REVID,LV(V_STAT_0,a4)	; test reverse video flag in v_stat_0
 	beq	put_char
 	exg	d6,d7			; reverse fore and background colours
-            
+
 put_char:
 
 	addq.w	#1,LV((disab_cnt)+O6,a4)	; <<< BEGIN CRITICAL SECTION >>>
@@ -1257,7 +1242,7 @@ end_o_line:
 #endif
 	move.l	_v_bas_ad,a1		; a1 -> base of screen
 
-	cmp.w	LV((v_celmy)+O6,a4),d1		; is it time to scroll ? 
+	cmp.w	LV((v_celmy)+O6,a4),d1		; is it time to scroll ?
 	blt	no_scroll
 
 	move.w	d1,LV((v_curcy)+O6,a4)		; save the cursor Y coordinate
@@ -1337,7 +1322,7 @@ save_it:
 
 	move.w	d0,LV((v_curcx)+O6,a4)		; update the cursor X coordinate
 	move.l	a1,LV((v_cur_ad)+O6,a4)		; update cursor address
-	
+
 
 show_alpha:
 
@@ -1381,7 +1366,7 @@ out_of_bounds:
 *		the previous source region is "erased" by filling with the
 *		background color.
 *
-* 
+*
 *  in:		d1.w	   cell Y of region top
 *		v_celmx   cell Y of region bottom
 *		V_SCRUP	   points to desired version of scroll up routine
@@ -1425,7 +1410,7 @@ blank_it:
 * name:		cell_addr
 *
 *
-* purpose:	convert cell X,Y to a screen address. also clip cartesian 
+* purpose:	convert cell X,Y to a screen address. also clip cartesian
 *          	coordinates to the limits of the current screen.
 *
 *
@@ -1459,7 +1444,7 @@ x_clipped:	move.w	LV((v_celmy)+O6,a4),d2
 		bge	clip_y
 		moveq.l	#0,d1
 		bra	y_clipped
-		
+
 clip_y:		cmp.w	d1,d2
 		bpl	y_clipped
 		move.w	d2,d1			; d1 <- clipped Y
@@ -1467,10 +1452,10 @@ clip_y:		cmp.w	d1,d2
 
 y_clipped:	move.w	d1,d3			; d3 <- clipped Y
 #if TOSVERSION < 0x400
-		mulu	LV((v_cel_wr)+O6,a4),d3	; d3 <- offset to row Y	
+		mulu	LV((v_cel_wr)+O6,a4),d3	; d3 <- offset to row Y
 #else
 		mulu	LV((v_cel_ht)+O6,a4),d3
-		mulu	LV((v_lin_wr)+O6,a4),d3	; d3 <- offset to row Y	
+		mulu	LV((v_lin_wr)+O6,a4),d3	; d3 <- offset to row Y
 #endif
 
 		move.w	d0,d2			; d2 <- clipped X
@@ -1514,7 +1499,7 @@ claddr_pix:	mulu	2(a2),d2		; d2 <- # of pixels into line
 *
 * purpose:	move the cursor and update global parameters
 *		erase the old cursor (if necessary) and draw new
-*		cursor (if necessary) 
+*		cursor (if necessary)
 *
 * in:		d0.w	new cell X coordinate
 *		d1.w	new cell Y coordinate
@@ -1526,12 +1511,12 @@ move_cursor:
 #endif
 
 *******************************************************************************
-*	                           
+*
 * name:		st_move_cursor (also works with pixel packed)
-*                            
+*
 * purpose:	move the cursor and update global parameters
 *		erase the old cursor (if necessary) and draw new
-*		cursor (if necessary) 
+*		cursor (if necessary)
 *
 * in:		d0.w	new cell X coordinate
 *		d1.w	new cell Y coordinate
@@ -1573,13 +1558,13 @@ neg_cell:
 #endif
 
 *******************************************************************************
-*	
+*
 * name:		st_neg_cell
 *
-* purpose:	This routine negates the contents of an arbitrarily tall 
+* purpose:	This routine negates the contents of an arbitrarily tall
 *		byte/word wide cell composed of an arbitrary number of
 *		(atari styled) bit-planes. cursor display can be
-*		acomplished via this procedure. since a second 
+*		acomplished via this procedure. since a second
 *		negation restores the original cell condition, there is
 *		no need to save	the contents beneath the cursor block.
 *
@@ -1629,9 +1614,9 @@ neg_byte:	not.b	(a2)
 
 
 *******************************************************************************
-**	escape function 102.						     **
-**									     **
-**		          Install User Defined Font			     **
+**	escape function 102.
+**
+**		          Install User Defined Font
 *******************************************************************************
 
 /* 306de: 00e07858 */
@@ -1641,9 +1626,9 @@ v_fontinit:	move.l	LV((INTIN)+O6,a4),a0
 * fall through to initialization sequence
 
 *******************************************************************************
-**		     Font Globals Initialization Routine		     **
-**									     **
-**			  a0 -> system font header			     **
+**		     Font Globals Initialization Routine
+**
+**			  a0 -> system font header
 *******************************************************************************
 
 /* 306de: 00e0785e */

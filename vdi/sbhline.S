@@ -1,26 +1,24 @@
 *********************************  sbhline.s  *********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbhline.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/01/30 15:06:09 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/30 15:06:09 $
 * =============================================================================
 *
-* $Log:	sbhline.s,v $
 * Revision 3.1  91/01/30  15:06:09  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:17:13  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  89/05/16  13:04:11  lozben
 * Fixed sb_hline() and sb_rect() to work in the 8 plane mode.
-* 
+*
 * Revision 2.1  89/02/21  17:26:06  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 * Revision 1.1  87/11/20  15:17:18  lozben
 * Initial revision
-* 
+*
 *******************************************************************************
 
 
@@ -54,7 +52,7 @@ sb_hline:
 
 	move.l	_v_bas_ad,a1
 	muls	LV(bytes_lin,a4),d5		; d5 <- offset to (0,Y)
-	add.l	d5,a1	
+	add.l	d5,a1
 	move.w	d0,a2			; a2 <- offset between pattern words
 	move.w	LV(V_PLANES,a4),d7
 	move.w	d7,d0			; d0 <- number of planes
@@ -65,7 +63,9 @@ sb_hline:
 	subq.w	#1,d7			; d7 <- planes-1
 
 	move.l	d2,a3			; a3 <- span - 1 (words)
+#if PLANES8
 	move.l	LV(FG_B_PLANES,a4),d2	; d2 <- color value
+#endif
 
 	move.w	LV(WRT_MODE,a4),d1
 
@@ -131,7 +131,9 @@ sb_rect:
 	move.w	d2,-(a6)		; save span counter
 
 	move.w	d2,a3			; a3 <- span - 1
+#if PLANES8
 	move.l	LV(FG_B_PLANES,a2),d2		; a2 <- color index
+#endif
 	move.l	d2,-(a6)		; save color index
 
 	move.w	LV(v_lin_wr,a2),d3
@@ -265,7 +267,7 @@ xor_md:	add.w	d0,a4			; a4 -> next word in bitplane
 xor_rf:	move.w	d6,d1			; d1 <- mask
 	and.w	d3,d1			; d1 <- masked pattern
 	add.w	d0,a4			; a4 -> next dst word
-	eor.w	d1,(a4)	
+	eor.w	d1,(a4)
 
 xor_nx:	dbra	d7,xor_lp
 
@@ -387,7 +389,7 @@ rxp1:	not.w	d3			; d3 <- inverted pattern
 *  0 in pattern is transparent
 
 xp0_lf:	move.w	d4,d1			; d1 <- mask
-	not.w	d1			; 
+	not.w	d1			;
 	or.w	d3,d1			; d1 <- masked pattern
 	and.w	d1,(a1)+		; set left fringe: a1 -> next bitplane
 	dbra	d5,xp0_2t
@@ -398,14 +400,14 @@ xp0_2t:	subq.w	#1,d5
 	bcs	xp0_rf			; catch two word case
 
 xp0_md:	add.w	d0,a4			; a4 -> next word in bitplane
-	and.w	d3,(a4)	
+	and.w	d3,(a4)
 	dbra	d5,xp0_md
 
 xp0_rf:	move.w	d6,d1			; d1 <- pattern
 	not.w	d1
 	or.w	d3,d1			; d1 <- masked pattern
 	add.w	d0,a4			; a4 -> next dst word
-	and.w	d1,(a4)	
+	and.w	d1,(a4)
 
 	rts
 

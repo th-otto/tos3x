@@ -1,23 +1,21 @@
 ****************************  hbtxtblt.s  *******************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/hbtxtblt.s,v $
 * =======================================================================
-* $Author: lozben $	$Date: 91/02/01 15:30:42 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/01 15:30:42 $
 * =======================================================================
 *
-* $Log:	hbtxtblt.s,v $
 * Revision 3.1  91/02/01  15:30:42  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:11:07  lozben
 * New generation VDI
-* 
+*
 * Revision 2.3  90/03/01  18:19:10  lozben
 * Changed some syntax to work with the turbo assembler.
-* 
+*
 * Revision 2.2  89/02/27  17:45:19  lozben
 * *** initial revision ***
-* 
+*
 *************************************************************************
 
 #include "../common/config.h"
@@ -70,7 +68,7 @@ BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
 BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
 BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
-BM_GO		equ  	$8000		; execution mask	
+BM_GO		equ  	$8000		; execution mask
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
 BM_PF		equ  	$0080		; pre-fetch mask
@@ -131,7 +129,7 @@ hb_text:
 	tst.w	PIXLV(SCALE,a6)		;are we scalin?
 	beq	adr_nobd		;br if not
 
-*   scaling; calculate DELX, dely for clip purposes 
+*   scaling; calculate DELX, dely for clip purposes
 
 	move.w	d6,-(sp)		;pass DELY on stack to ACT_SIZ
 	jsr	_ACT_SIZ		;find scaled dely in d0 (leaves d6 be)
@@ -195,7 +193,7 @@ adr_nosk:
 *    Mono-spaced....
 *  for compatibilty with textblt, mono-spaced must be ignored if outlined
 *  or rotated..
-*  
+*
 	btst.l	#OUTLINE,d0		;is outline on?
 	bne	do_thik			;if so, ignore mono-spaced
 	tst.w	PIXLV(CHUP,a6)		;is rotate on?
@@ -253,7 +251,7 @@ exgxy:
 *
 *	old	new
 *	---	---
-*	d0	d2	destx	
+*	d0	d2	destx
 *	d1	d5	DELX
 *	d2	d3	desty
 *	d3	d6	dely
@@ -490,7 +488,7 @@ nt_skewo:
 	bra	preskew
 prebltt:
 	btst	#SKEW,d2
-	beq	preblt	
+	beq	preblt
 preskew:
 	move.w	#cas1-skewx,skewcase(a4) ;assume case I
 	move.w	PIXLV(SKEWMASK,a6),skewmsk(a4) ;save inverted mask
@@ -516,7 +514,7 @@ outline1:
 	lsr.w	#4,d6
 	add.w	d6,d6			;d6 = # of bytes wide (word boundry)
 	move.w	d6,d_next(a4)
-	move.w	d6,d1			;save 
+	move.w	d6,d1			;save
 	mulu	d7,d6			;d6 = offset to bottom row
 	move.l	PIXLV(scrtchp,a6),a1		;get destination as 1st buffer
 	adda.w	PIXLV(scrpt2,a6),a1		;always use buffer #2
@@ -624,7 +622,7 @@ skp_bold:
 	move.w	s_next(a4),d7
 	addq.w	#2,height(a4)
 	move.w	height(a4),d6
-	
+
 *   Outline the contents of buffer
 *
 *  a0 -> top line of buffer (to be used as temp line buffer, assumed cleared)
@@ -781,7 +779,7 @@ rotation:
 	cmpi.w	#1800,d5		;upside down rotation?
 	beq	upsd_dwn		;br if so
 rot90:
-	move.w	d7,d1			;d1 = dely - 1 
+	move.w	d7,d1			;d1 = dely - 1
 	add.w	#16,d1			;add 15 to dely
 	lsr.w	#4,d1			;# of bytes needed for wrap
 	add.w	d1,d1			;force word boundary
@@ -830,7 +828,7 @@ rot_ndst:
 	moveq	#0,d0			;clear accum
 	suba.w	d6,a0			;subtract source_next to source ptr
 	dbra	d7,rot_xlp		;inner loop on source height
-	bra	rot_nfrg		;skip fringe save	
+	bra	rot_nfrg		;skip fringe save
 rot_isrc:
 	suba.w	d6,a0			;subtract source_next to source ptr
 rot_srt:
@@ -856,7 +854,7 @@ rot_done:
 	move.w	d7,height(a4)		;save new height
 	subq.w	#1,d7
 	clr.w	d0			;new src XMIN is leftmost (0)
-	move.w	d0,d4			;form new src XMAX 
+	move.w	d0,d4			;form new src XMAX
 	add.w	d3,d4			;  using new delx-1
 *
 	bra	no_rota
@@ -868,7 +866,7 @@ upsd_dwn:
 	add.w	d4,locdestx(a4)		;adjust horz position
 	move.w	d0,d1
 	andi.w	#$F,d1
-	add.w	d3,d1			;d1 = delx - 1 
+	add.w	d3,d1			;d1 = delx - 1
 	add.w	#16,d1			;add 15 to delx
 	lsr.w	#3,d1			;# of bytes needed for wrap
 	andi.w	#$FFFE,d1		;force word boundary
@@ -957,7 +955,7 @@ nxtword:	dc.b	2,4,0,8,0,0,0,16
 *  Destination is screen, this must be our last blit
 *
 *  a0 => src ptr, d0 = src XMIN, d4 = src XMAX, d3 = delx-1, d7 = dely-1
-* 
+*
 *
 scrn_blt:
 	move.w	PIXLV(WRT_MODE,a6),wrt_mod(a4)	;copy current mode to local
@@ -1046,7 +1044,7 @@ noskew:
 	adda.w	d5,a1				* a1 -> bottom word of char dst
 
 	addq.w	#1,d7
-	move.w	d7,height(a4)		
+	move.w	d7,height(a4)
 	bra	blit_mon
 
 shf_tab:
@@ -1152,7 +1150,7 @@ ck270:
 *	litemsk(a4)	<-inverted liten mask (=0 if no liten)
 *	skewmsk(a4)	<-skew mask (1=shift or %0000000000000000 if none)
 *	skewcase(a4)	<-assume cas1
-*	
+*
 *
 *	B_S_NXWD(a5)	<- 2 for monochrome sources
 *	B_D_NXWD(a5)	<- 2, 4 or 8 for screen rez destinations
@@ -1166,7 +1164,7 @@ ck270:
 
 fr_lf_mask:
 
-	dc.w	$0000	
+	dc.w	$0000
 
 fr_rt_mask:
 
@@ -1196,7 +1194,7 @@ norm_blt:
 *
 	move.w	d2,d5			; d5 <- D_XMIN
 	and.w	d1,d5			; d5 <- D_XMIN mod16
-	move.w	d5,d7			; d7 <- D_XMIN mod16	
+	move.w	d5,d7			; d7 <- D_XMIN mod16
 	add.w	d5,d5			; d5 <- offset into mask table
 	move.w	fr_lf_mask(pc,d5.w),d3
 	not.w	d3
@@ -1536,7 +1534,7 @@ mo_skew:
 
 *
 dolast:
-	add.w	height(a4),d4	
+	add.w	height(a4),d4
 	bra	blt_0_count
 *
 *
@@ -1554,7 +1552,7 @@ cas1a:
 	cmpi.w	#$8000,d0		;lo word = $8000?
 	bne	cas1b			;br over t1 if not
 *
-	ori.w	#BM_FQ,d7		
+	ori.w	#BM_FQ,d7
 	move.w	B_D_WRAP(a5),d6
 	sub.w	B_D_NXWD(a5),d6
 	move.w	d6,B_D_WRAP(a5)
@@ -1600,7 +1598,7 @@ cas2b:
 	sub.w	B_D_NXWD(a5),d6
 	move.w	d6,B_D_WRAP(a5)
 	addq.w	#1,B_D_SPAN(a5)
-	ori.w	#BM_FQ+BM_PF,d7		
+	ori.w	#BM_FQ+BM_PF,d7
 	move.w	d7,d6
 	andi.w	#$F,d6
 	bne	next_sec
@@ -1635,7 +1633,7 @@ cas3b:
 	sub.w	B_D_NXWD(a5),d6
 	move.w	d6,B_D_WRAP(a5)
 	addq.w	#1,B_D_SPAN(a5)
-	ori.w	#BM_FQ+BM_PF,d7		
+	ori.w	#BM_FQ+BM_PF,d7
 	move.w	d7,d6
 	andi.w	#$000F,d6
 	bne	next_sec
@@ -1659,7 +1657,7 @@ cas4a:
 	move.w	d6,B_D_WRAP(a5)
 	addq.w	#1,B_D_SPAN(a5)
 	andi.w	#$FFFF-BM_PF,d7
-	ori.w	#BM_FQ,d7		
+	ori.w	#BM_FQ,d7
 cas4b:
 	cmpi.l	#$10000,d0		;hi word = 0?
 	bcc	next_sec
@@ -1698,7 +1696,7 @@ cas4b:
 *  reg use:  	d0 = grafix build		bx
 *		d1 = d_next			n/a
 *		d2 = DDA_INC			di
-*		d3 = source bitmask		dx 
+*		d3 = source bitmask		dx
 *		d4 = dest bitmask		bp
 *		d5 = width			cx
 *		d6 = temp			n/a

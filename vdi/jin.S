@@ -1,48 +1,46 @@
 ***********************************  jin.s  ***********************************
 *
-* $Revision: 3.3 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/jin.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 14:14:48 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 14:14:48 $
 * =============================================================================
 *
-* $Log:	jin.s,v $
 * Revision 3.3  91/08/06  14:14:48  lozben
 * Made some changes to the xbios trap handler. We now preserve the
 * registers that the caller needs to be preserved.
-* 
+*
 * Revision 3.2  91/07/29  14:46:34  lozben
 * Made adjustments in vdi_check().
-* 
+*
 * Revision 3.1  91/02/19  15:29:43  lozben
 * Made the file work with multiple linea var structures.
-* 
+*
 * Revision 3.0  91/01/03  15:11:56  lozben
 * New generation VDI
-* 
+*
 * Revision 2.7  90/04/30  18:07:29  lozben
 * Fixed a bug in CursConf(). It did not cleanup the stack.
-* 
+*
 * Revision 2.6  90/04/27  15:09:10  lozben
 * Trap 2 handler now handles code of -1 in d0. This call returns the
 * address of _GSX_ENTRY. It's an undocumented call (GDOS uses it).
-* 
+*
 * Revision 2.5  90/03/01  11:31:04  lozben
 * Moved TT equate into vdidefs.h file.
-* 
+*
 * Revision 2.4  90/02/16  12:22:58  lozben
 * Fixed some of the code so that it can be assembled with mas.
-* 
+*
 * Revision 2.3  89/10/26  15:27:42  lozben
 * Added SetShift() for the TT. This routine must be intercepted
 * to call esc_init().
-* 
+*
 * Revision 2.2  89/04/13  19:47:48  lozben
 * Fixed SetScreen() to set rez before going back to the old
 * guy (original XBIOS trap vector). Also added equate for TT.
-* 
+*
 * Revision 2.1  89/02/21  17:23:11  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -342,7 +340,7 @@ BlitMode:	move.w	d3,-(sp)	; save d3
 		move.w	d0,d1		; save blt chip status
 		move.w	d0,d2		; save blt chip status
 		lsr.w	#1,d2		; blit chip installed mask (0 or 1)
-		or.w	#$fffe,d2	
+		or.w	#$fffe,d2
 		jsr	_GETBLT		; get current blit mode
 		move.w	d0,d3		;    into a safe register
 		move.w	2(a0),d0	; get request mode
@@ -423,7 +421,7 @@ SetRGB:		move.l	6(a0),-(sp)		; push palettPtr
 		move.w	2(a0),-(sp)		; push colorNum
 		jsr	_VsetRGB		; call actual function
 		addq.w	#8,sp			; cleanup stack
-		rte	
+		rte
 
 save_return:	dc.l	0		; store return adr for set screen
 save_sr:	dc.w	0		; space for saving statuse register

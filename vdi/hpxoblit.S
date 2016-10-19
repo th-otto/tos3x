@@ -1,11 +1,9 @@
 *********************************  sbblit.s  **********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbblit.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 17:34:28 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 17:34:28 $
 * =============================================================================
 *
-* $Log:	sbblit.s,v $
 *******************************************************************************
 
 
@@ -67,7 +65,7 @@ SRC_WR	  equ	-2	; source form wrap (in bytes)			    +74
 *	"address register indirect" instruction rather than an
 *	"address register indirect with displacement" instruction,
 *	4 cycles are saved per access
-*	
+*
 
 B_OFF		equ	 60		; offset to reference register
 
@@ -91,14 +89,14 @@ BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
 BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
-                     
-                     
+
+
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
 BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
 BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
-BM_GO		equ  	$8000		; execution mask	
+BM_GO		equ  	$8000		; execution mask
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
 BM_PF		equ  	$0080		; pre-fetch mask
@@ -106,28 +104,28 @@ BM_FQ		equ  	$0040		; flush queue mask
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	s_xy2addr:							     **
-**									     **
-**		input:	d0.w =  x coordinate				     **
-**			d1.w =  y coordinate				     **
-**			a3.l -> line variable structure			     **
-**			a6.l -> frame					     **
-**									     **
-**		output:	a0.l -> address of word containing x,y		     **
-**									     **
-**									     **
-**	d_xy2addr:							     **
-**									     **
-**		input:	d0.w =  x coordinate.				     **
-**			d1.w =  y coordinate.				     **
-**			a3.l -> line variable structure			     **
-**			a6.l -> frame					     **
-**									     **
-**		output:	a1.l -> address of word containing x,y		     **
-**									     **
-**		destroys: d0,d1						     **
-**									     **
+**
+**	s_xy2addr:
+**
+**		input:	d0.w =  x coordinate
+**			d1.w =  y coordinate
+**			a3.l -> line variable structure
+**			a6.l -> frame
+**
+**		output:	a0.l -> address of word containing x,y
+**
+**
+**	d_xy2addr:
+**
+**		input:	d0.w =  x coordinate.
+**			d1.w =  y coordinate.
+**			a3.l -> line variable structure
+**			a6.l -> frame
+**
+**		output:	a1.l -> address of word containing x,y
+**
+**		destroys: d0,d1
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -144,7 +142,7 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		add.l	d1,a1			; a0 -> (x,y)
 		rts
-	
+
 
 *+
 * purpose:	set up parameters for bitblt and thread together the
@@ -163,7 +161,7 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 *		rectangle height, rectangle width, number of planes
 *-
 		xdef	hpx_bitblt
-hpx_bitblt:	
+hpx_bitblt:
 	tst.w	S_NXPL(a6)		; see if we are doing transparent blit
 	bne	skip0			; if not then skip
 	jmp	spx_tbitblt		; else do transparent blit
@@ -193,7 +191,7 @@ skip0:	move.l	_lineAVar,a3		; a3 -> linea variable structure
 	lsl.w	#1,d5			; offset to nxt src line in bytes
 	move.w	d5,B_S_WRAP(a5)		; wrap from end of one src line to nxt
 	move.l	a0,B_S_ADDR(a5)		; set starting src adr
-	
+
 	move.w	#2,B_D_NXWD(a5)		; set offset to next dst word
 	move.w	D_NXLN(a6),d5		; d5 <- dst line wrap (in bytes)
 	lsr.w	#1,d5			; d5 <- dst line wrap (in words)
@@ -202,11 +200,11 @@ skip0:	move.l	_lineAVar,a3		; a3 -> linea variable structure
 	lsl.w	#1,d5			; offset to nxt dst line in bytes
 	move.w	d5,B_D_WRAP(a5)		; wrap from end of one dst line to nxt
 	move.l	a1,B_D_ADDR(a5)		; set starting dst adr
-		
+
 	move.w	#-1,B_F1_MSK(a5)	; set up the 1st fringe mask
 	move.w	#-1,B_CT_MSK(a5)	; set up the center mask
 	move.w	#-1,B_F2_MSK(a5)	; set up the 2nd fringe mask
-		
+
 	move.b	#2,B_LOGOP(a5)			; set halftone op to source
 	move.b	OP_TAB(a6),B_LOGOP+1(a5)	; set the blit logic op
 
@@ -255,7 +253,7 @@ do_neg_case:
 	neg.w	d5			; we are going in neg direction
 	move.w	d5,B_S_WRAP(a5)		; wrap from end of one src line to nxt
 	move.l	a0,B_S_ADDR(a5)		; set starting src adr
-	
+
 	move.w	#-2,B_D_NXWD(a5)	; set offset to next dst word
 	move.w	D_NXLN(a6),d5		; d5 <- dst line wrap (in bytes)
 	lsr.w	#1,d5			; d5 <- dst line wrap (in words)
@@ -265,11 +263,11 @@ do_neg_case:
 	neg.w	d5			; we are going in neg direction
 	move.w	d5,B_D_WRAP(a5)		; wrap from end of one dst line to nxt
 	move.l	a1,B_D_ADDR(a5)		; set starting dst adr
-		
+
 	move.w	#-1,B_F1_MSK(a5)	; set up the 1st fringe mask
 	move.w	#-1,B_CT_MSK(a5)	; set up the center mask
 	move.w	#-1,B_F2_MSK(a5)	; set up the 2nd fringe mask
-		
+
 	move.b	#2,B_LOGOP(a5)			; set halftone op to source
 	move.b	OP_TAB(a6),B_LOGOP+1(a5)	; set the blit logic op
 

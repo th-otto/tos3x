@@ -1,29 +1,27 @@
 *********************************  mouse.s  ***********************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/copyrfm.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/29 11:50:53 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/29 11:50:53 $
 * =============================================================================
 *
-* $Log:	copyrfm.s,v $
 * Revision 3.2  91/07/29  11:50:53  lozben
 * Fixed some bugs.
-* 
+*
 * Revision 3.1  91/02/08  16:44:24  lozben
 * Adjusted the code to work with multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:06:41  lozben
 * New generation VDI
-* 
+*
 * Revision 2.3  90/02/16  12:22:10  lozben
 * Fixed some of the code so that it can be assembled with mas.
-* 
+*
 * Revision 2.2  89/05/19  17:42:02  lozben
 * Fixed the setup to check for 8 planes as well as 4, 2, and 1.
-* 
+*
 * Revision 2.1  89/02/21  17:18:45  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -96,7 +94,7 @@ P_YMAX_D	equ	14	; y-coordinate of lower right of dest rectangle
 *       FRAME PARAMETERS
 
 B_WD		equ	-76	; width of block in pixels		    +00
-B_HT		equ	-74	; height of block in pixels		    +02 
+B_HT		equ	-74	; height of block in pixels		    +02
 
 PLANE_CT	equ	-72	; number of consequitive planes to blt	    +04
 
@@ -279,7 +277,7 @@ col_0_ok:
 
 	moveq.l	#1,d7			; if out of range, revert to index 1
 
-col_1_ok:	
+col_1_ok:
 
 	add.w	d7,d7			; d7 <- offset into color map
 	move.w	(a0,d7.w),d7		; d7 <- foreground color
@@ -359,7 +357,7 @@ xor_mode:
 standard_ops:
 
 	cmp.w	#16,d2			; test validity of logic op code
-	bcc	bad_parameter	
+	bcc	bad_parameter
 
 	cmp.w	d0,d1
 	bne	bad_parameter		; planes must be equal in number
@@ -417,7 +415,7 @@ dont_clip:
 	bra	max_save
 
 
-clip_it:	
+clip_it:
 
 ***   clip Xmin source and destination to window
 
@@ -465,7 +463,7 @@ xmax_clipped:
 
 	exg	d4,d3			; d1 <- Ymin dest = Ymin clip
 	sub.w	d3,d4			; d4 <- -(amount clipped in Y)
-	sub.w	d4,d1			; d0 <- adjusted source Ymin 
+	sub.w	d4,d1			; d0 <- adjusted source Ymin
 
 ymin_clipped:
 
@@ -492,7 +490,7 @@ ymax_clipped:
 *   match source and destination rectangles
 
 	move.w	d6,d4
-	sub.w	d2,d4			; d4 <- Dx 
+	sub.w	d2,d4			; d4 <- Dx
 
 	move.w	d4,B_WD(a6)
 	addq.w	#1,B_WD(a6)		; block width
@@ -502,7 +500,7 @@ ymax_clipped:
 
 
 	move.w	d7,d5
-	sub.w	d3,d5			; d5 <- Dy 
+	sub.w	d3,d5			; d5 <- Dy
 
 	move.w	d5,B_HT(a6)
 	addq.w	#1,B_HT(a6)		; block height

@@ -29,10 +29,19 @@
 #undef GEMDOS
 #define GEMDOS 0x0019
 #endif
+#if TOSVERSION >= 0x0206
+#undef GEMDOS
+#define GEMDOS 0x0020
+#endif
+#if TOSVERSION >= 0x0301
+#undef GEMDOS
+#define GEMDOS 0x0019
+#endif
 #if TOSVERSION >= 0x0306
 #undef GEMDOS
 #define GEMDOS 0x0020
 #endif
+
 
 
 #ifdef __GNUC__

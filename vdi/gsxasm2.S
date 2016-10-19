@@ -1,40 +1,38 @@
 ***************************  gsxasm2.s  *********************************
 *
-* $Revision: 3.3 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/gsxasm2.s,v $
 * =======================================================================
-* $Author: lozben $	$Date: 91/02/15 11:46:42 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/15 11:46:42 $
 * =======================================================================
 *
-* $Log:	gsxasm2.s,v $
 * Revision 3.3  91/02/15  11:46:42  lozben
 * Restored the linea var structure pointer stored in the adr register in
 * the trap binding routines. The actual trap clobered the adr reg.
-* 
+*
 * Revision 3.2  91/02/14  18:11:11  lozben
 * Forgot to reference some of the variables of the line a var struct ptr.
-* 
+*
 * Revision 3.1  91/01/30  14:44:36  lozben
 * Adjusted the code to work the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:09:59  lozben
 * New generation VDI
-* 
+*
 * Revision 2.5  90/06/13  11:35:09  lozben
 * Created a trap 14 binding (_trap14() routine).
-* 
+*
 * Revision 2.4  90/02/14  16:21:28  lozben
 * Functions which are called by seedfill() don't clobber "C" registers anymore.
-* 
+*
 * Revision 2.3  89/05/16  16:22:16  lozben
 * Changed setup for sb_rect(), d1 and d2 registers have been swapped.
-* 
+*
 * Revision 2.2  89/02/27  17:35:13  lozben
 * Moved hb_rect() into another file. The idea is to have
 * all the hard blit code in independent files.
-* 
+*
 * Revision 2.1  89/02/21  17:22:17  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *************************************************************************
 
 
@@ -83,7 +81,7 @@ _trap14:	PIXLA(a0)
 #if TOSVERSION >= 0x400
 /*
  * Same as above except we use this for SetScreen, and SetMode calls.
- * The reason you ask? Those call cause XBIOS calls (i.e. one level of 
+ * The reason you ask? Those call cause XBIOS calls (i.e. one level of
  * reentency).
  */
 		xdef	_trap14b		; xbios trap
@@ -131,19 +129,19 @@ swap_loop:	move.w	(a0),d1		; d1 <- font form word
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	_put_pix:							     **
-**									     **
-**	This routine plots a pixel for anybody (even BASIC)		     **
-**									     **
-**	input:	INTIN(0) = pixel value					     **
-**		PTSIN(0) = X coordinate				     **
-**		PTSIN(1) = Y coordinate				     **
-**									     **
-**	output: none							     **
-**									     **
-**	destroys: d0-d3/a0-a2						     **
-**									     **
+**
+**	_put_pix:
+**
+**	This routine plots a pixel for anybody (even BASIC)
+**
+**	input:	INTIN(0) = pixel value
+**		PTSIN(0) = X coordinate
+**		PTSIN(1) = Y coordinate
+**
+**	output: none
+**
+**	destroys: d0-d3/a0-a2
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -231,18 +229,18 @@ ppx_clr:	and.w	d0,(a1)+	; clear the bit.
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	_ST_GETPIX:							     **
-**									     **
-**	This routine gets a pixel for anybody (even BASIC)		     **
-**									     **
-**	input:		PTSIN[0] = X coordinate			     **
-**			PTSIN[1] = Y coordinate			     **
-**									     **
-**	output:	       d0 = pixel value					     **
-**									     **
-**	destroys:      d0-d2/a0-a1					     **
-**									     **
+**
+**	_ST_GETPIX:
+**
+**	This routine gets a pixel for anybody (even BASIC)
+**
+**	input:		PTSIN[0] = X coordinate
+**			PTSIN[1] = Y coordinate
+**
+**	output:	       d0 = pixel value
+**
+**	destroys:      d0-d2/a0-a1
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -321,19 +319,19 @@ gpx_loop:	move.w	-(a0),d3	; d3 <- current plane word
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	_fill_line							     **
-**									     **
-**	This routine fills a line for "seedfill" using HABLINE		     **
-**									     **
-**	input:	36(sp) = X left						     **
-**		38(sp) = X right					     **
-**		40(sp) = Y						     **
-**									     **
-**	output: filled line						     **
-**									     **
-**	destroys: a0-a2 						     **
-**									     **
+**
+**	_fill_line
+**
+**	This routine fills a line for "seedfill" using HABLINE
+**
+**	input:	36(sp) = X left
+**		38(sp) = X right
+**		40(sp) = Y
+**
+**	output: filled line
+**
+**	destroys: a0-a2
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -360,28 +358,28 @@ fillLine0:
 
 *******************************************************************************
 *******************************************************************************
-**                                                                           **
-**      end_pts(int16_t xstart, int16_t ystart, int16_t *lptr, int16_t *rptr)**
-**                                                                           **
-**      This routine finds the endpoints of a horizontaly contiguous         **
-**      section of solid color ( used by the _seed_fill routine )            **
-**                                                                           **
-**      input:  4(sp) = X start                                              **
-**              6(sp) = Y start                                              **
-**              8(sp) = ptr to endXleft.                                     **
-**             12(sp) = ptr to endXright                                     **
-**                                                                           **
-**      output:                                                              **
-**                                                                           **
-**           endXleft = X of left endpoint of solid color                    **
-**          endXright = X of right endpoint of solid color                   **
-**                 d0 = success flag                                         **
-**                                                                           **
-**                      0 => no endpoints or X start on edge                 **
-**                      1 => endpoints found                                 **
-**                                                                           **
-**      destroys: d0-d2/a0-a2                                                **
-**                                                                           **
+**
+**      end_pts(int16_t xstart, int16_t ystart, int16_t *lptr, int16_t *rptr)
+**
+**      This routine finds the endpoints of a horizontaly contiguous
+**      section of solid color ( used by the _seed_fill routine )
+**
+**      input:  4(sp) = X start
+**              6(sp) = Y start
+**              8(sp) = ptr to endXleft.
+**             12(sp) = ptr to endXright
+**
+**      output:
+**
+**           endXleft = X of left endpoint of solid color
+**          endXright = X of right endpoint of solid color
+**                 d0 = success flag
+**
+**                      0 => no endpoints or X start on edge
+**                      1 => endpoints found
+**
+**      destroys: d0-d2/a0-a2
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -754,31 +752,31 @@ ep_ret0:
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	_RECTFILL							     **
-**									     **
-**	This routine fills a rectangular area of the screen with a	     **
-**	pattern.							     **
-**									     **
-**	input:	X1	  = X upper left corner				     **
-**		Y1	  = Y upper left corner				     **
-**		X2	  = X lower right corner			     **
-**		Y2	  = Y lower right corner			     **
-**		CLIP	  = clipping flag (0 => no clipping)		     **
-**		XMN_CLIP = X clipping minimum				     **
-**		XMX_CLIP = X clipping maximum				     **
-**		YMN_CLIP = Y clipping minimum				     **
-**		YMX_CLIP = Y clipping maximum				     **
-**	    WRT_MODE = writing mode (0-3)				     **
-**		V_RECT    = vector to rectangle filler			     **
-**									     **
-**									     **
-**									     **
-**	Notes:								     **
-**									     **
-**	 X1,Y1,X2,Y2 are contiguous words				     **
-**	 CLIP,XMN_CLIP,YMN_CLIP,XMX_CLIP,YMX_CLIP are contiguous words  **
-**									     **
+**
+**	_RECTFILL
+**
+**	This routine fills a rectangular area of the screen with a
+**	pattern.
+**
+**	input:	X1	  = X upper left corner
+**		Y1	  = Y upper left corner
+**		X2	  = X lower right corner
+**		Y2	  = Y lower right corner
+**		CLIP	  = clipping flag (0 => no clipping)
+**		XMN_CLIP = X clipping minimum
+**		XMX_CLIP = X clipping maximum
+**		YMN_CLIP = Y clipping minimum
+**		YMX_CLIP = Y clipping maximum
+**	    WRT_MODE = writing mode (0-3)
+**		V_RECT    = vector to rectangle filler
+**
+**
+**
+**	Notes:
+**
+**	 X1,Y1,X2,Y2 are contiguous words
+**	 CLIP,XMN_CLIP,YMN_CLIP,XMX_CLIP,YMX_CLIP are contiguous words
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -839,7 +837,7 @@ rf_yclip:
 	cmp.w	d1,d5			; Y1 < clipping Ymin ?
 	bge	rf_ymax			; no  => Y1 is in bounds
 	cmp.w	d1,d7			; Y2 < clipping Ymin ?
-	blt	rf_null			; yes => null rectangle 
+	blt	rf_null			; yes => null rectangle
 
 	move.w	d1,d5			; d5 <- clipped Y1
 
@@ -848,7 +846,7 @@ rf_ymax:
 	cmp.w	d3,d7			; Y2 > clipping Ymax ?
 	ble	rf_rsave		; no  => Y2 is in bounds
 	cmp.w	d3,d5			; Y1 > clipping Ymax ?
-	bgt	rf_null			; yes => null rectangle 
+	bgt	rf_null			; yes => null rectangle
 
 	move.w	d3,d7			; d7 <- clipped Y2
 
@@ -904,7 +902,7 @@ select_version:
 #if VIDEL_SUPPORT
 		xdef	_SetOverlay
 _SetOverlay:
-	
+
 	PIXLA(a0)
 	movem.w	d3-d4,-(sp)		; save registers
 	move.w	8(sp),d0		; d0 <- X1
@@ -954,7 +952,7 @@ ClearLine:
 ClearLoop:
 	and.w	d4,(a2)+		; splat text background
 	dbra	d3,ClearLoop		; do next pixel
-	add.w	d2,a1			; a1 -> to next line	
+	add.w	d2,a1			; a1 -> to next line
 	dbra	d1,ClearLine		; do next line
 	movem.w	(sp)+,d3-d4		; restore registers
 	rts
@@ -966,7 +964,7 @@ SetLine:
 SetLoop:
 	or.w	d4,(a2)+		; splat text background
 	dbra	d3,SetLoop		; do next pixel
-	add.w	d2,a1			; a1 -> to next line	
+	add.w	d2,a1			; a1 -> to next line
 	dbra	d1,SetLine		; do next line
 	movem.w	(sp)+,d3-d4		; restore registers
 	rts
@@ -1002,7 +1000,7 @@ _SetMasks:
 	or.w	#$0200,$FFFF8266	; Set the overlay bit
 	bra	setm_exit
 clr_olay:
-	and.w	#$fdff,$FFFF8266	; clear bit	
+	and.w	#$fdff,$FFFF8266	; clear bit
 
 * Sparrow only stuff earlier
 setm_exit:

@@ -1,11 +1,9 @@
 **********************************  pxtform.s  ********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/xfrmform.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/01/28 18:07:18 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/28 18:07:18 $
 * =============================================================================
 *
-* $Log:	pxtform.s,v $
 *******************************************************************************
 
 #include "../common/config.h"
@@ -104,7 +102,7 @@ I2P_TRAN_FM:
 	move.w	MF_WD_WRD(a0),d3	; d3 <- planar word wrap
 	subq.w	#1,d3			; adjust for dbra
 
-	move.w	MF_PLANES(a0),d7	; d7 <- # of planes to transform	
+	move.w	MF_PLANES(a0),d7	; d7 <- # of planes to transform
 	move.l	MF_BAS_AD(a0),a0	; a0 -> source data
 	move.l	MF_BAS_AD(a1),a1	; a1 -> destination data
 
@@ -126,7 +124,7 @@ I2P32CpBuf:
 	move.l	(a0)+,(a2)+
 	dbra	d1,I2P32CpBuf
 	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
-	
+
 	bsr	I2P32			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
 
@@ -139,7 +137,7 @@ I2P32CpBuf:
 *+
 *
 *	transform 16 pixels from interleaved bit planes to pixel packed form.
-*	
+*
 *
 *	a0	points to source
 *	a1	points to dest
@@ -194,7 +192,7 @@ I2PLB32Loop:
 	swap	d0		; move the neede byte in the low order of d0
 	move.b	d0,(a1)		; store pixel packed byte for the needed pix
 	addq.l	#4,a1
-	
+
 	move.w	(sp)+,d0	; d0 <- 1st plane (shifted)
 	subq.w	#1,a3		; see if we are done with the sixteen pixelx
 	cmpa.w	#0,a3
@@ -249,7 +247,7 @@ P2I_TRAN_FM:
 	move.w	MF_WD_WRD(a0),d3	; d3 <- planar word wrap
 	subq.w	#1,d3			; adjust for dbra
 
-	move.w	MF_PLANES(a0),d7	; d7 <- # of planes to transform	
+	move.w	MF_PLANES(a0),d7	; d7 <- # of planes to transform
 	move.l	MF_BAS_AD(a0),a0	; a0 -> source data
 	move.l	MF_BAS_AD(a1),a1	; a1 -> destination data
 
@@ -271,7 +269,7 @@ P2I32CpBuf:
 	move.l	(a0)+,(a2)+
 	dbra	d1,P2I32CpBuf
 	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
-	
+
 	bsr	P2I32			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
 
@@ -342,7 +340,7 @@ P2IB32Loop:
 	swap	d0		; move the neede byte in the low order of d0
 	move.b	d0,(a1)		; store pixel packed byte for the needed pix
 	addq.l	#2,a1
-	
+
 	move.w	(sp)+,d0	; d0 <- 1st plane (shifted)
 	subq.w	#1,a3		; see if we are done with the sixteen pixelx
 	cmpa.w	#0,a3
@@ -353,7 +351,7 @@ P2IB32Loop:
 	cmpa.w	#0,a4
 	bge	P2IL32Loop	; loop back
 
-	
+
 	add.w	#28,a0		; a0 -> to the next 8 pixels
 	move.l	a2,a1		; a1 -> dest
 	addq.w	#1,a1		; we are going to work with 2nd byte
@@ -386,7 +384,7 @@ I2P16CpBuf:
 	move.w	(a0)+,(a2)+
 	dbra	d1,I2P16CpBuf
 	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
-	
+
 	bsr	I2P16			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
 
@@ -399,7 +397,7 @@ I2P16CpBuf:
 *+
 *
 *	transform 16 pixels from interleaved bit planes to pixel packed form.
-*	
+*
 *
 *	a0	points to source
 *	a1	points to dest
@@ -454,7 +452,7 @@ I2PLB16Loop:
 	swap	d0		; move the neede byte in the low order of d0
 	move.b	d0,(a1)		; store pixel packed byte for the needed pix
 	addq.l	#2,a1
-	
+
 	move.w	(sp)+,d0	; d0 <- 1st plane (shifted)
 	subq.w	#1,a3		; see if we are done with the sixteen pixelx
 	cmpa.w	#0,a3
@@ -486,7 +484,7 @@ I2P8Line:
 	move.l	(a0)+,(a2)+
 
 	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
-	
+
 	bsr	I2P8			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
 
@@ -499,7 +497,7 @@ I2P8Line:
 *+
 *
 *	transform 16 pixels from interleaved bit planes to pixel packed form.
-*	
+*
 *
 *	a0	points to source
 *	a1	points to dest
@@ -551,7 +549,7 @@ I2PLB8Loop:
 
 	swap	d0		; move the neede byte in the low order of d0
 	move.b	d0,(a1)+	; store pixel packed byte for the needed pix
-	
+
 	move.w	(sp)+,d0	; d0 <- 1st plane (shifted)
 	subq.w	#1,a3		; see if we are done with the sixteen pixels
 	cmpa.w	#0,a3
@@ -576,7 +574,7 @@ P2I8Line:
 	move.l	(a0)+,(a2)+
 
 	lea	_dskbuf,a0		; a0 -> copy of source next 16 pix
-	
+
 	bsr	P2I8			; transform the next 16 pixels
 	movem.l	(sp)+,d0/d2/d3/d5/a0-a1
 
@@ -589,7 +587,7 @@ P2I8Line:
 *+
 *
 *	transform 16 pixels from  pixel packed form to interleaved bit planes
-*	
+*
 *
 *	a0	points to source
 *	a1	points to dest
@@ -641,7 +639,7 @@ P2ILB8Loop:
 
 	swap	d0		; move the neede byte in the low order of d0
 	move.b	d0,(a1)+	; store pixel packed byte for the needed pix
-	
+
 	move.w	(sp)+,d0	; d0 <- 1st plane (shifted)
 	subq.w	#1,a3		; see if we are done with the sixteen pixels
 	cmpa.w	#0,a3

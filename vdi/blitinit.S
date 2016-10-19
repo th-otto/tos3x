@@ -1,27 +1,25 @@
 *********************************  blitinit.s  ********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/blitinit.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/02/01 15:29:25 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/01 15:29:25 $
 * =============================================================================
 *
-* $Log:	blitinit.s,v $
 * Revision 3.1  91/02/01  15:29:25  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:06:21  lozben
 * New generation VDI
-* 
+*
 * Revision 2.3  90/03/01  11:33:51  lozben
 * Did conditional assembly for hardblit vectors.
-* 
+*
 * Revision 2.2  89/04/13  19:32:37  lozben
 * Got rid of conditional assembly which forced hard
 * text blit, it was not needed.
-* 
+*
 * Revision 2.1  89/02/21  17:18:31  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"

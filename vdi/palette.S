@@ -1,29 +1,27 @@
 *****************************  palette.s  *******************************
 *
-* $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/palette.s,v $
 * =======================================================================
-* $Author: lozben $	$Date: 91/01/03 15:14:02 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/03 15:14:02 $
 * =======================================================================
 *
-* $Log:	palette.s,v $
 * Revision 3.0  91/01/03  15:14:02  lozben
 * New generation VDI
-* 
+*
 * Revision 2.5  90/06/22  18:15:57  lozben
 * In the first 16 entrees we changed some of the old values of "6's"
 * to new values of "9's", This helps for the human eyes to notice the
 * different intenciies in some of the pens.
-* 
+*
 * Revision 2.4  89/08/15  13:11:26  lozben
 * Changed some of the inittial color settings. Doubled some values
 * since the range has doubled (4 bits per gun now).
-* 
+*
 * Revision 2.3  89/07/28  15:03:57  lozben
 * Deleted old and unused data.
-* 
+*
 * Revision 2.2  89/03/01  16:55:59  lozben
 * *** Initial Revision ***
-* 
+*
 *************************************************************************
 
 #include "../common/config.h"
@@ -33,7 +31,7 @@
 * pallette.s:
 *
 * This is the new color initialization table. The LUT hardware registers
-* should be initialized to these at power up. 
+* should be initialized to these at power up.
 *
 * Registers   0 - 15 standard settings
 * Registers  16 - 31 are initialized to 16 shades of gray. Register 16 being

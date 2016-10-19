@@ -1,11 +1,9 @@
 *********************************  spxhline.s  ********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbblit.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 17:34:28 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 17:34:28 $
 * =============================================================================
 *
-* $Log:	sbblit.s,v $
 *******************************************************************************
 
 
@@ -17,34 +15,34 @@
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	HABLINE								     **
-**									     **
-**	This routine draws a line between (X1,Y1) and (X2,Y1) using the	     **
-**	BLASTER hardware bit blt.					     **
-**	The line has attributes of color, pattern, and writing mode	     **
-**									     **
-**	Note that 2 entry points are provided for ABLINE		     **
-**									     **
-**	input:		X1 = minimum X of line	     (assumed to be clipped) **
-**			X2 = maximum X of line	     (assumed to be clipped) **
-**			Y1 = row that line is on     (assumed to be clipped) **
-**		    patmsk = index mask for pattern			     **
-**		    patptr = pointer to start of pattern		     **
-**		 v_planes = number of video planes			     **
-**		 WRT_MODE = writing mode				     **
-**									     **
-**			      0 => replace mode.			     **
-**			      1 => transparent mode.			     **
-**			      2 => xor mode.				     **
-**			      3 => reverse transparent mode.		     **
-**									     **
-**		 V_HLINE = pointer to horizontal line primitive		     **
-**									     **
-**	output:	  nothing is returned					     **
-**									     **
-**	destroys: everything						     **
-**									     **
+**
+**	HABLINE
+**
+**	This routine draws a line between (X1,Y1) and (X2,Y1) using the
+**	BLASTER hardware bit blt.
+**	The line has attributes of color, pattern, and writing mode
+**
+**	Note that 2 entry points are provided for ABLINE
+**
+**	input:		X1 = minimum X of line	     (assumed to be clipped)
+**			X2 = maximum X of line	     (assumed to be clipped)
+**			Y1 = row that line is on     (assumed to be clipped)
+**		    patmsk = index mask for pattern
+**		    patptr = pointer to start of pattern
+**		 v_planes = number of video planes
+**		 WRT_MODE = writing mode
+**
+**			      0 => replace mode.
+**			      1 => transparent mode.
+**			      2 => xor mode.
+**			      3 => reverse transparent mode.
+**
+**		 V_HLINE = pointer to horizontal line primitive
+**
+**	output:	  nothing is returned
+**
+**	destroys: everything
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -110,7 +108,7 @@ spx_hline:
 	add.l	#pal_map,d3		; d3 <- desired offset
 	move.l	(a4,d3.w),d3		; d3 <- desired foreground col
 	move.l	pal_map(a4),d4		; d4 <- desired background col
-	
+
 	cmp.w	#16,v_planes(a4)	; see how many bits per pixel
 	beq	spx16Tab		; do 16 bits per pixel case
 	blt	spx8Tab			; do 8 bits per pixel case
@@ -121,7 +119,7 @@ spx16Tab:
 	lea	HLine16Tab,a2		; a2 -> table of 16 bit routines
 	bra	tab_set
 
-spx8Tab:	
+spx8Tab:
 	lea	HLine8Tab,a2		; a2 -> table of 8 bit routines
 
 tab_set:

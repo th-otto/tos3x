@@ -1,29 +1,27 @@
 *******************************  sbescape.s  **********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbescape.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/01/31 12:04:31 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/31 12:04:31 $
 * =============================================================================
 *
-* $Log:	sbescape.s,v $
 * Revision 3.1  91/01/31  12:04:31  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:16:31  lozben
 * New generation VDI
-* 
+*
 * Revision 2.3  90/02/09  18:53:17  lozben
 * We don't use v_cel_wr flag any more. Now the code looks at the
 * offset table to determine if cell width is 8 or 16 bits.
-* 
+*
 * Revision 2.2  89/04/14  15:21:01  lozben
 * Changed sb_cell() and sb_blank() to be able to deal with
-* word wide characters (cells). Also made other changes to 
+* word wide characters (cells). Also made other changes to
 * sb_blank() so that it can deal with 8 planes.
-* 
+*
 * Revision 2.1  89/02/21  17:25:42  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -52,7 +50,7 @@ O6 equ 6 ; WTF? why?
 		jmp (r)
 
 *******************************************************************************
-*	
+*
 * name: sb_cell (soft blt version)
 *
 * purpose:  This routine performs a byte aligned block transfer for the
@@ -62,15 +60,15 @@ O6 equ 6 ; WTF? why?
 *
 * in:	a0.l	points to contiguous source block (1 byte wide)
 *	a1.l	points to destination (1st plane, top of block)
-*	d6.w	foreground 
-*	d7.w	background 
+*	d6.w	foreground
+*	d7.w	background
 *
 * damaged:	a2-a3/a5/d0-d7
 *
 *******************************************************************************
 
 
-/* 306de: 00e0da98 */            
+/* 306de: 00e0da98 */
 		xdef sb_cell
 sb_cell:
 		move.l	a4,-(sp)		; save a4
@@ -134,7 +132,7 @@ byte_1:		move.b	d5,(a3)
 byte_invert:	move.l	a0,a2		; a2 -> single plane character cell
 byte_i:		move.b	(a2),d5		; d5 <- character byte
 		not.b	d5		; d5 <- inverted character byte
-		move.b	d5,(a3)	
+		move.b	d5,(a3)
 		adda.w	d2,a2		; a2 -> next row of character form
 		adda.w	d3,a3		; a3 -> next row of destination
 		dbra	d0,byte_i
@@ -142,7 +140,7 @@ byte_i:		move.b	(a2),d5		; d5 <- character byte
 		dbra	d1,blk_next
 		move.l	(sp)+,a4	; restore a4
 		rts
-                   
+
 
 *+
 * The routine below deal with word wide font
@@ -175,7 +173,7 @@ word_1:		move.w	d5,(a3)
 word_invert:	move.l	a0,a2		; a2 -> single plane character cell
 word_i:		move.w	(a2),d5		; d5 <- character word
 		not.w	d5		; d5 <- inverted character word
-		move.w	d5,(a3)	
+		move.w	d5,(a3)
 		adda.w	d2,a2		; a2 -> next row of character form
 		adda.w	d3,a3		; a3 -> next row of destination
 		dbra	d0,word_i
@@ -202,13 +200,13 @@ word_i:		move.w	(a2),d5		; d5 <- character word
 *   After the copy is performed, any non-overlapping area of the previous
 *   source region is "erased" by filling with the background color.
 *
-* 
+*
 *  in:  d1.w	   cell Y of region top
 *	v_celmy   cell Y of region bottom
 *
 *
 *  munged:	d0-d7/a2-a3
-*		
+*
 *
 *******************************************************************************
 
@@ -337,7 +335,7 @@ blank_dn:
 *
 *******************************************************************************
 
-blank_tab: *    fringe masks		*   odd      odd  multi word 
+blank_tab: *    fringe masks		*   odd      odd  multi word
 *	   *      lf    rt		*  Xmin     Xmax     SPAN
 
        	dc.w   	$FF00,$0000		*   0	     0        0
@@ -441,7 +439,7 @@ log2_tab:	dc.w	0,0,1,0,2,0,0,0,3
 * in:
 *	a2	points to 1st word of destination
 *	a3	offset from last word of one line to first word of next line
-*	a5	span (in words) of 1 destination plane 
+*	a5	span (in words) of 1 destination plane
 *
 *	d4	left mask   1:fill 0:dst
 *	d5	right mask  1:fill 0:dst
@@ -509,9 +507,9 @@ en11:	move.w	a5,d6			; d6 <- reinited word count
 * in:
 *	a2	points to 1st word of destination
 *	a3	offset from last word of one line to first word of next line
-*	a5	span (in words) of 1 destination plane 
+*	a5	span (in words) of 1 destination plane
 *
-*	d4	left mask   0:dst 1:fill 
+*	d4	left mask   0:dst 1:fill
 *	d5	right mask  0:dst 1:fill
 *	d6	color
 *	d7	height
@@ -520,9 +518,9 @@ blank2:	lsr.w	#1,d6			; cy: plane 0 color
 	subx.l	d0,d0			; d0[31:16] <- 0000:cy=0 or FFFF:cy=1
 	lsr.w	#1,d6			; cy: plane 1 color
 	subx.w	d0,d0			; d0[15:00] <- 0000:cy=0 or FFFF:cy=1
-	
+
 	move.l	d0,a0			; a0 <- fill value
-	move.l	d0,d2			
+	move.l	d0,d2
 	and.l	d4,d0			; d0 <-  left fringe fill value
 	and.l	d5,d2			; d2 <- right fringe fill value
 	not.l	d4			; d4 <-  left fringe mask  0:fill 1:dst
@@ -561,7 +559,7 @@ en2:	move.w	a5,d6			; d6 <- word counter
 * in:
 *	a2	points to 1st word of destination
 *	a3	offset from last word of one line to first word of next line
-*	a5	span (in words) of destination plane 
+*	a5	span (in words) of destination plane
 *
 *	d4	left mask   0:dst 1:fill
 *	d5	right mask  0:dst 1:fill
@@ -627,7 +625,7 @@ en4:	move.w	a5,d6			; d6 <- word counter
 * in:
 *	a2	points to 1st word of destination
 *	a3	offset from last word of one line to first word of next line
-*	a5	span (in words) of destination plane 
+*	a5	span (in words) of destination plane
 *
 *	d4	left mask   0:dst 1:fill
 *	d5	right mask  0:dst 1:fill

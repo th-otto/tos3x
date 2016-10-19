@@ -1,11 +1,9 @@
 ********************************* pxmouse.s ***********************************
 *
-* $Revision: 3.3 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/mouse.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/30 12:18:47 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/30 12:18:47 $
 * =============================================================================
 *
-* $Log:	mouse.s,v $
 *******************************************************************************
 
 
@@ -17,10 +15,10 @@
 
 
 *******************************************************************************
-*	                           
+*
 * name:		px_cur_display
-*                            
-* purpose:      this routine BLiTs a "cursor" to the destination by 
+*
+* purpose:      this routine BLiTs a "cursor" to the destination by
 *		combining a background color form, foreground color form,
 *		and destination: There are two forms. each form is blt'ed
 *		in transparent mode. The logic operation is based upon the
@@ -31,11 +29,11 @@
 *
 *		d0.w		cursor x
 *		d1.w		cursor y
-* 
+*
 *		clobbered:	everything
 *
 ******************************************************************************
-                             
+
 
 C_XHOT		equ	0
 C_YHOT		equ	2
@@ -82,7 +80,7 @@ clip_y:		lea	C_MSKFRM(a0),a5		; a4 -> MASK/FORM for cursor
 
 clip_up:	move.w	d1,d2			; setup reg for blit routines
 		add.w	#15,d2			; d2 <- # of rows to blit - 1
-		move.w	d1,d4			; 
+		move.w	d1,d4			;
 		neg.w	d4			; d4 <- # of rows offset
 		lsl.w	#2,d4			; make d4 long word offset
 		add.w	d4,a5			; a4 -> off into mouse data form
@@ -101,14 +99,14 @@ clip_done:	move.w	v_lin_wr(a4),d7	; d4 <- screen line wrap
 		mulu.w	d7,d1			; d1 <- line wrap * Y position
 		mulu.w	byt_per_pix(a4),d0	; d0 <- line wrap * X position
 		add.l	d0,d1			; (X,Y) offset into screen
-		move.l	_v_bas_ad,a1		
+		move.l	_v_bas_ad,a1
 		adda.l	d1,a1			; a1 -> dst
 
 		move.w	a3,d4			; d4 <- # of columns to blit - 1
 		addq.w	#1,d4			; d4 <- # of columns to blit
 		mulu.w	byt_per_pix(a4),d4	; d4 <- # of bytes cur takes up
 		sub.w	d4,d7			; d7 <- off to next row in dst
-		
+
 		move.l	a1,SV_ADDR(a2)		; save area: origin of material
 		move.b	d2,SV_LENY(a2)		; save number of rows - 1
 		move.w	a3,d4			; d4 <- number of columns - 1
@@ -133,7 +131,7 @@ clip_done:	move.w	v_lin_wr(a4),d7	; d4 <- screen line wrap
 cur_d_32:	tst.w	C_PLANES(a0)		; test writing mode
 		bmi	x_ms32_row		; branch to xor mode
 		bra	s_ms32_row		; branch to standard mode
-		
+
 cur_d_16:	tst.w	C_PLANES(a0)		; test writing mode
 		bmi	x_ms16_row		; branch to xor mode
 		bra	s_ms16_row		; branch to standard mode
@@ -166,8 +164,8 @@ cur_d_8:	tst.w	C_PLANES(a0)		; test writing mode
 *
 s_ms32_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
-		lsl.w	d3,d4		; shift to appropriate pos	
-		lsl.w	d3,d5		; shift to appropriate pos	
+		lsl.w	d3,d4		; shift to appropriate pos
+		lsl.w	d3,d5		; shift to appropriate pos
 		move.w	a3,d6		; d6 <- column counter - 1
 
 s_ms32_col:	move.l	(a1),(a2)+	; save the dst
@@ -179,7 +177,7 @@ s_ms32_col:	move.l	(a1),(a2)+	; save the dst
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,s_ms32_row	; do next row
 		rts
-	
+
 s_ms32_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	s_ms32_dst	; if mask 0 branch and don't change dst
 		move.l	d1,(a1)+	; set the dst with bg color
@@ -206,8 +204,8 @@ s_ms32_dst:	addq.l	#4,a1		; advance to next pixel
 *
 x_ms32_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
-		lsl.w	d3,d4		; shift to appropriate pos	
-		lsl.w	d3,d5		; shift to appropriate pos	
+		lsl.w	d3,d4		; shift to appropriate pos
+		lsl.w	d3,d5		; shift to appropriate pos
 		move.w	a3,d6		; d6 <- column counter - 1
 
 x_ms32_col:	move.l	(a1),(a2)+	; save the dst
@@ -226,7 +224,7 @@ x_ms32_fg:	move.l	d0,(a1)+	; set the dst with fg color
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,x_ms32_row	; do next row
 		rts
-	
+
 x_ms32_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	x_ms32_dst	; if mask 0 branch and don't change dst
 		move.l	d1,(a1)+	; set the dst with bg color
@@ -246,8 +244,8 @@ x_ms32_dst:	addq.l	#4,a1		; advance to next pixel
 *
 s_ms16_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
-		lsl.w	d3,d4		; shift to appropriate pos	
-		lsl.w	d3,d5		; shift to appropriate pos	
+		lsl.w	d3,d4		; shift to appropriate pos
+		lsl.w	d3,d5		; shift to appropriate pos
 		move.w	a3,d6		; d6 <- row counter - 1
 
 s_ms16_col:	move.w	(a1),(a2)+	; save the dst
@@ -259,7 +257,7 @@ s_ms16_col:	move.w	(a1),(a2)+	; save the dst
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,s_ms16_row	; do next row
 		rts
-	
+
 s_ms16_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	s_ms16_dst	; if mask 0 branch and don't change dst
 		move.w	d1,(a1)+	; set the dst with bg color
@@ -279,8 +277,8 @@ s_ms16_dst:	addq.l	#2,a1		; advance to next pixel
 *
 x_ms16_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
-		lsl.w	d3,d4		; shift to appropriate pos	
-		lsl.w	d3,d5		; shift to appropriate pos	
+		lsl.w	d3,d4		; shift to appropriate pos
+		lsl.w	d3,d5		; shift to appropriate pos
 		move.w	a3,d6		; d6 <- column counter - 1
 
 x_ms16_col:	move.w	(a1),(a2)+	; save the dst
@@ -299,7 +297,7 @@ x_ms16_fg:	move.w	d0,(a1)+	; set the dst with fg color
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,x_ms16_row	; do next row
 		rts
-	
+
 x_ms16_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	x_ms16_dst	; if mask 0 branch and don't change dst
 		move.w	d1,(a1)+	; set the dst with bg color
@@ -319,8 +317,8 @@ x_ms16_dst:	addq.w	#2,a1		; advance to next pixel
 *
 s_ms8_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
-		lsl.w	d3,d4		; shift to appropriate pos	
-		lsl.w	d3,d5		; shift to appropriate pos	
+		lsl.w	d3,d4		; shift to appropriate pos
+		lsl.w	d3,d5		; shift to appropriate pos
 		move.w	a3,d6		; d6 <- row counter - 1
 
 s_ms8_col:	move.b	(a1),(a2)+	; save the dst
@@ -332,7 +330,7 @@ s_ms8_col:	move.b	(a1),(a2)+	; save the dst
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,s_ms8_row	; do next row
 		rts
-	
+
 s_ms8_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	s_ms8_dst	; if mask 0 branch and don't change dst
 		move.b	d1,(a1)+	; set the dst with bg color
@@ -352,8 +350,8 @@ s_ms8_dst:	addq.l	#1,a1		; advance to next pixel
 *
 x_ms8_row:	move.w	(a5)+,d4	; d4 <- mask word
 		move.w	(a5)+,d5	; d5 <- data word
-		lsl.w	d3,d4		; shift to appropriate pos	
-		lsl.w	d3,d5		; shift to appropriate pos	
+		lsl.w	d3,d4		; shift to appropriate pos
+		lsl.w	d3,d5		; shift to appropriate pos
 		move.w	a3,d6		; d6 <- column counter - 1
 
 x_ms8_col:	move.b	(a1),(a2)+	; save the dst
@@ -372,7 +370,7 @@ x_ms8_fg:	move.b	d0,(a1)+	; set the dst with fg color
 		add.w	d7,a1		; a1 -> to next row
 		dbra	d2,x_ms8_row	; do next row
 		rts
-	
+
 x_ms8_bg:	lsl.w	#1,d4		; shift out the mask form
 		bcc	x_ms8_dst	; if mask 0 branch and don't change dst
 		move.b	d1,(a1)+	; set the dst with bg color
@@ -429,7 +427,7 @@ px_cur_replace:	move.l  _lineAVar,a5		; a5 -> linea var struct
 *	d0.w	number of columns to blit - 1
 *	d2.w	number of rows to blit - 1
 *	d3.w	offset in bytes to next row
-*	
+*
 
 r_ms32_row:	move.w	d0,d1
 r_ms32_col:	move.l	(a2)+,(a0)+	; save the dst
@@ -437,14 +435,14 @@ r_ms32_col:	move.l	(a2)+,(a0)+	; save the dst
 		add.w	d3,a0		; a0 -> to next row
 		dbra	d2,r_ms32_row	; d0 next row
 hang_it_up:	rts
-	
+
 r_ms16_row:	move.w	d0,d1
 r_ms16_col:	move.w	(a2)+,(a0)+	; save the dst
 		dbra	d1,r_ms16_col	; do next col
 		add.w	d3,a0		; a0 -> to next row
 		dbra	d2,r_ms16_row	; d0 next row
 		rts
-	
+
 r_ms8_row:	move.w	d0,d1
 r_ms8_col:	move.b	(a2)+,(a0)+	; save the dst
 		dbra	d1,r_ms8_col	; do next col

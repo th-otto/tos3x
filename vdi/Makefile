@@ -339,6 +339,7 @@ text.o: text.c
 
 #
 # sed: optimizer seems to have missed an sub.l #8,(sp) in seedfill()
+# (edit: seedfill.s was not run through optimizer)
 #
 #seedfill.o: seedfill.c
 #	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i

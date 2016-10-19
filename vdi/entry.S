@@ -1,29 +1,27 @@
 *********************************  entry.s  ***********************************
 *
-* $Revision: 3.3 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/entry.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/02/14 17:57:44 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/14 17:57:44 $
 * =============================================================================
 *
-* $Log:	entry.s,v $
 * Revision 3.3  91/02/14  17:57:44  lozben
 * We forgot to reference the local_pb of a linea structure pointer.
-* 
+*
 * Revision 3.2  91/02/13  10:36:41  lozben
 * Forgot to include "lineaequ.s".
-* 
+*
 * Revision 3.1  91/02/11  13:25:55  lozben
 * Adjusted the code to work with the multiple linea variablestructures.
-* 
+*
 * Revision 3.0  91/01/03  15:07:00  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  90/12/05  13:47:32  lozben
 * Changed PTSIN from 512 to 1024.
-* 
+*
 * Revision 2.1  89/02/21  17:18:57  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -113,7 +111,7 @@ ptsin_loop:
 	move.l	(a4)+,(a3)+
 	move.l	(a4)+,(a3)+
 
-dec_count:				
+dec_count:
 
 	dbra	d0,ptsin_loop		; d0 contains count ((# of verts) / (8))
 

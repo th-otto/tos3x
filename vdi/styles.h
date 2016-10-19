@@ -1,28 +1,26 @@
 /*
-*********************************  styles.h  **********************************
-*
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/styles.h,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/07/30 14:15:12 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	styles.h,v $
-* Revision 3.1  91/07/30  14:15:12  lozben
-* Change spelling of MK to MSK.
-* 
-* Revision 3.0  91/01/03  15:19:07  lozben
-* New generation VDI
-* 
-* Revision 2.2  89/06/30  17:19:59  lozben
-* Adjusted the declaration LINE_STYLE[]. The name was spelled
-* different in three different files (we lucked out because it
-* wasn't the first 8 characters, which make up the symbol name).
-* 
-* Revision 2.1  89/02/21  17:28:14  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-*******************************************************************************
-*/
+ *********************************  styles.h  **********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/07/30 14:15:12 $
+ * =============================================================================
+ *
+ * Revision 3.1  91/07/30  14:15:12  lozben
+ * Change spelling of MK to MSK.
+ * 
+ * Revision 3.0  91/01/03  15:19:07  lozben
+ * New generation VDI
+ * 
+ * Revision 2.2  89/06/30  17:19:59  lozben
+ * Adjusted the declaration LINE_STYLE[]. The name was spelled
+ * different in three different files (we lucked out because it
+ * wasn't the first 8 characters, which make up the symbol name).
+ * 
+ * Revision 2.1  89/02/21  17:28:14  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ *******************************************************************************
+ */
 #ifndef _STYLES_H_
 #define _STYLES_H_
 

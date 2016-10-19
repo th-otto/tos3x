@@ -1,11 +1,9 @@
 *********************************  spxvline.s  ********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbblit.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 17:34:28 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 17:34:28 $
 * =============================================================================
 *
-* $Log:	sbblit.s,v $
 *******************************************************************************
 
 #include "../common/config.h"
@@ -15,67 +13,67 @@
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	ABLINE								     **
-**		 							     **
-**	  This routine draws a line between (X1,Y1) and (X2,Y2) using       **
-**	  Bresenham's algorithm. The line is modified by the LN_MASK and    **
-**	  WRT_MODE variables. This routine handles all 3 video resolutions  **
-**									     **
-**	Note:								     **
-**									     **
-**	  For line-drawing in VDI, the background color is fixed as 0	     **
-**	  (i.e., there is no user-settable background color). This fact	     **
-**	  allows coding short-cuts in the implementation of "replace" and    **
-**	  "not" modes, resulting in faster execution of their inner loops.   **
-**									     **
-**	input:								     **
-**									     **
-**	   X1,Y1,X2,Y2 = coordinates.				     **
-**	         v_planes = number of video planes. (resolution)	     **
-**	          LN_MASK = line mask. (for dashed/dotted lines)	     **
-**	         WRT_MODE = writing mode.			  	     **
-**									     **
-**			     0 => replace mode.				     **
-**			     1 => or mode.				     **
-**			     2 => xor mode.				     **
-**			     3 => not or mode.				     **
-**									     **
-**	output:								     **
-**									     **
-**	  LN_MASK rotated to proper alignment with ( X2,Y2 ).	     **
-**									     **
-**									     **
-**	destroys:							     **
-**									     **
-**	    everything.							     **
-**									     **
-**	FEATURES:							     **
-**									     **
-**	 o In the horizontal case, the pattern is not alligned prior to	     **
-**	   the line being drawn, hence the pattern isn't in phase with	     **
-**	   the pattern in the succeeding line. In any case, the entire	     **
-**	   method for aligning horizontal patterns is incorrect.	     **
-**									     **
-**	 o The pattern is always implemented starting at the minimum vertex  **
-**	   regardless of the intended direction of line segment. hence,      **
-**	   patterns in consecutive segments are likely not to dovetail or    **
-**	   to have a reversed pattern.					     **
-**									     **
-**	 o The procedure for preventing the endpoints in consecutive	     **
-**	   segments that are XORed to the destination from cancelling 	     **
-**	   is incorrectly implemented. The current method eliminates the     **
-**	   last point at the maximum vertex regardless of the order of	     **
-**	   the entered verticies (or direction of the preceeding segment).   **
-**									     **
-**									     **
+**
+**	ABLINE
+**
+**	  This routine draws a line between (X1,Y1) and (X2,Y2) using
+**	  Bresenham's algorithm. The line is modified by the LN_MASK and
+**	  WRT_MODE variables. This routine handles all 3 video resolutions
+**
+**	Note:
+**
+**	  For line-drawing in VDI, the background color is fixed as 0
+**	  (i.e., there is no user-settable background color). This fact
+**	  allows coding short-cuts in the implementation of "replace" and
+**	  "not" modes, resulting in faster execution of their inner loops.
+**
+**	input:
+**
+**	   X1,Y1,X2,Y2 = coordinates.
+**	         v_planes = number of video planes. (resolution)
+**	          LN_MASK = line mask. (for dashed/dotted lines)
+**	         WRT_MODE = writing mode.
+**
+**			     0 => replace mode.
+**			     1 => or mode.
+**			     2 => xor mode.
+**			     3 => not or mode.
+**
+**	output:
+**
+**	  LN_MASK rotated to proper alignment with ( X2,Y2 ).
+**
+**
+**	destroys:
+**
+**	    everything.
+**
+**	FEATURES:
+**
+**	 o In the horizontal case, the pattern is not alligned prior to
+**	   the line being drawn, hence the pattern isn't in phase with
+**	   the pattern in the succeeding line. In any case, the entire
+**	   method for aligning horizontal patterns is incorrect.
+**
+**	 o The pattern is always implemented starting at the minimum vertex
+**	   regardless of the intended direction of line segment. hence,
+**	   patterns in consecutive segments are likely not to dovetail or
+**	   to have a reversed pattern.
+**
+**	 o The procedure for preventing the endpoints in consecutive
+**	   segments that are XORed to the destination from cancelling
+**	   is incorrectly implemented. The current method eliminates the
+**	   last point at the maximum vertex regardless of the order of
+**	   the entered verticies (or direction of the preceeding segment).
+**
+**
 *******************************************************************************
 *******************************************************************************
 
 
 #if VIDEL_SUPPORT
 	xdef	PX_ABLINE
-PX_ABLINE:	
+PX_ABLINE:
 	move.l	_lineAVar,a4		; a4 -> base of LineA variables
 	moveq.l	#2,d0			; d0 <- XOR writing mode code
 
@@ -99,7 +97,7 @@ PX_ABLINE:
 *
 *   All single point lines (X1=X2, Y1=Y2) will be arrive here
 
-hline:		
+hline:
 	cmp.w	WRT_MODE(a4),d0	; the XOR writing mode requires
 	bne	no_trunk		; special endpoint treatment
 
@@ -109,7 +107,7 @@ hline:
 	beq	no_trunk		; (DRI: "works most of the time")
 	blt	lf_trunk
 
-rt_trunk:	
+rt_trunk:
 	subq.w	#2,d6			; d6 <- Xmax-2
 lf_trunk:
 	addq.w	#1,d6			; d6 <- Xmin+1 or Xmax-1
@@ -120,8 +118,8 @@ no_trunk:
 	bge	in_order		; if it is, swap the endpoints
 
 	exg	d4,d6			; d4<-X2  d6<-X1
-		
-in_order:	
+
+in_order:
 	move.w	d6,d1			; d1 <-  Xmax
 	sub.w	d4,d1			; d1 <-  Xmax-Xmin
 	addq.w	#1,d1			; d1 <-  Xmax-Xmin+1
@@ -179,8 +177,8 @@ xy_ok:	sub.w	d4,d6			; d6 <- dX
 
 	neg.w	d7			; d7 <- positive dY
 	neg.w	d0			; d0 <- negative Yinc
-	
-dy_ge_0:	
+
+dy_ge_0:
 	move.w	d0,a1			; a1 <- Yinc
 	cmp.w	d6,d7			; which delta is larger?
 	bgt	dmax_dmin		; adjust if dX is larger than dY
@@ -188,7 +186,7 @@ dy_ge_0:
 	exg	d6,d7			; d6 <- dY (dMin)   d7 <- dX (dMax)
 	lea	16(a5),a5		; a5 <- offset to records for dX>dY
 
-dmax_dmin:	
+dmax_dmin:
 	move.w	d6,d4			; d4 <- dMin
 	add.w	d4,d4			; d4 <- 2dMin
 	move.w	d4,d5			; d5 <- e1
@@ -207,7 +205,7 @@ dmax_dmin:
 
 	subq.w	#1,d7			; DRI kludge: don't plot last point
 
-al_nxtmask:	
+al_nxtmask:
 
 	lea	LN_MASK(a4),a3		; a3 -> line style mask
 	move.w	(a3),d0			; d0 <- line style mask
@@ -279,7 +277,7 @@ wm8_tbl:	dc.l	    wm8_0y	; replace		dY > dX
 *+
 *		a4   points to line A variable struct
 *		a1 = offset to next line in Y
-*		a0 = ptr to destination 
+*		a0 = ptr to destination
 *
 *		d7 = dbra pixel counter
 *		d6 = e2

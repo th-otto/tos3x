@@ -1,17 +1,15 @@
 ****************************  hbmono.s  *********************************
 *
-* $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/hbmono.s,v $
 * =======================================================================
-* $Author: lozben $	$Date: 91/01/03 15:10:56 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/03 15:10:56 $
 * =======================================================================
 *
-* $Log:	hbmono.s,v $
 * Revision 3.0  91/01/03  15:10:56  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  89/02/27  17:45:15  lozben
 * *** initial revision ***
-* 
+*
 *************************************************************************
 
 #include "../common/config.h"
@@ -43,7 +41,7 @@ OF equ FBASE
 *	"address register indirect" instruction rather than an
 *	"address register indirect with displacement" instruction,
 *	4 cycles are saved per access
-*	
+*
 
 B_OFF		equ	 60		; offset to reference register
 
@@ -67,14 +65,14 @@ BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
 BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
-                     
-                     
+
+
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
 BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
 BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
-BM_GO		equ  	$8000		; execution mask	
+BM_GO		equ  	$8000		; execution mask
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
 BM_PF		equ  	$0080		; pre-fetch mask

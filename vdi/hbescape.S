@@ -1,34 +1,32 @@
 ****************************  hbescape.s  *******************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/hbescape.s,v $
 * =======================================================================
-* $Author: lozben $	$Date: 91/02/13 18:06:35 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/13 18:06:35 $
 * =======================================================================
 *
-* $Log:	hbescape.s,v $
 * Revision 3.2  91/02/13  18:06:35  lozben
 * Adjusted the spelling of some of the linea equates to correspond to the ones
 * in the lineaequ.s file.
-* 
+*
 * Revision 3.1  91/01/31  15:59:03  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:10:36  lozben
 * New generation VDI
-* 
+*
 * Revision 2.5  90/03/06  14:58:00  lozben
 * Changed "move.l #$FF,dx" to "moveq.l #-1,dx" at one time it was
 * "moveq.l #$FF,dx".
-* 
+*
 * Revision 2.4  90/02/26  17:38:50  lozben
 * Fixed the code to work with turbo assembler.
-* 
+*
 * Revision 2.3  90/02/20  15:16:12  lozben
 * Changed "bra blank_it" to "jmp blank_it".
-* 
+*
 * Revision 2.2  89/02/27  17:45:10  lozben
 * *** initial revision ***
-* 
+*
 *************************************************************************
 
 #include "../common/config.h"
@@ -62,14 +60,14 @@ BF_PAT		equ  	8	; combo flag: 0:all ones  1:pattern
 BF_SRC		equ  	9	; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100	; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200	; combo mask: 0:all ones  1:source
-                     
-                     
+
+
 BF_GO		equ  	15	; execution flag         0:false 1:true
 BF_HOG		equ  	14	; hog dma flag		 0:false 1:true
 BF_SM		equ  	13	; smudge flag		 0:false 1:true
 BF_PF		equ  	7	; pre-fetch flag  	 0:false 1:true
 BF_FQ		equ  	6	; flush queue flag 	 0:false 1:true
-BM_GO		equ  	$8000	; execution mask	
+BM_GO		equ  	$8000	; execution mask
 BM_HOG		equ  	$4000	; hog dma mask
 BM_SM		equ  	$2000	; smudge mask
 BM_PF		equ  	$0080	; pre-fetch mask
@@ -83,22 +81,22 @@ BM_FQ		equ  	$0040	; flush queue mask
 	xref	BLASTER		* first register of bit blt
 
 *******************************************************************************
-*	
+*
 * name:	 	hb_cell
 *
 * author:	j.d.eisenstein
 *
 * purpose:
 *
-*	This routine performs a byte aligned block transfer for the purpose of 
+*	This routine performs a byte aligned block transfer for the purpose of
 *	manipulating monospaced byte-wide text. the routine maps an single
 *	plane, arbitrarilly tall, byte-wide image to a multi-plane bit map.
 *	All transfers are byte aligned. Hardware BitBlt is employed.
 *
 * in:	a0.l	points to character source
 *	a1.l	points to destination (1st plane, top of block)
-*	d6.w	foreground 
-*	d7.w	background 
+*	d6.w	foreground
+*	d7.w	background
 *
 *
 *  mutated registers:	a2/d0-d4/d6-d7
@@ -106,7 +104,7 @@ BM_FQ		equ  	$0040	; flush queue mask
 *
 *******************************************************************************
 
-            
+
 	xdef	hb_cell
 hb_cell:
 
@@ -184,7 +182,7 @@ chr_skew:	dc.w	BM_GO+BM_HOG+00
 		dc.w	BM_GO+BM_HOG+08
 		dc.w	BM_GO+BM_HOG+08
 		dc.w	BM_GO+BM_HOG+00
-	
+
 chr_op:		dc.w	BM_SRC+00,BM_SRC+12,BM_SRC+03,BM_SRC+15
 
 
@@ -204,7 +202,7 @@ chr_op:		dc.w	BM_SRC+00,BM_SRC+12,BM_SRC+03,BM_SRC+15
 *   After the copy is performed, any non-overlapping area of the previous
 *   source region is "erased" by filling with the background color.
 *
-* 
+*
 *  in:  d1.w	   cell Y of region top
 *	v_celmx   cell Y of region bottom
 *	_BV_SCRUP  points to desired version of scroll up routine
@@ -365,14 +363,14 @@ fd_start:
 *******************************************************************************
 
 
-blank_tab: *    fringe masks		*   odd      odd  multi word 
+blank_tab: *    fringe masks		*   odd      odd  multi word
 *	   *      rt    lf		*  Xmin     Xmax     SPAN
 
 	dc.w	$0000,$FF00		*   0	     0        0
 	dc.w	$FF00,$FFFF		*   0	     0        1
 	dc.w	$0000,$FFFF		*   0	     1        0
 	dc.w	$FFFF,$FFFF		*   0	     1        1
-	dc.w	$0000,$0000		*   1	     0        0 ** undefined **
+	dc.w	$0000,$0000		*   1	     0        0   undefined
 	dc.w	$FF00,$00FF		*   1	     0        1
 	dc.w	$0000,$00FF		*   1	     1        0
 	dc.w	$FFFF,$00FF		*   1	     1        1

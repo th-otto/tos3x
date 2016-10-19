@@ -1,27 +1,25 @@
 **********************************  mono.s  ***********************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/mono.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/30 12:12:48 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/30 12:12:48 $
 * =============================================================================
 *
-* $Log:	mono.s,v $
 * Revision 3.2  91/07/30  12:12:48  lozben
 * Cleaned up the code.
-* 
+*
 * Revision 3.1  91/01/28  17:26:40  lozben
 * Adjusted the code to work with the muultiple linea variable structure.
-* 
+*
 * Revision 3.0  91/01/03  15:12:36  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  89/04/14  14:42:57  lozben
 * Moved hb_mono() into another file. The idea is to have
 * all the hard blit code in independent files.
-* 
+*
 * Revision 2.1  89/02/21  17:23:41  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 *   Mono-spaced text blt

@@ -1,12 +1,10 @@
 /*
  *******************************  lineaequ.s  *********************************
  *
- * $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/lineaequ.s,v $
  * ============================================================================
- * $Author: lozben $	$Date: 91/07/29 14:55:44 $     $Locker:  $
+ * $Author: lozben $	$Date: 91/07/29 14:55:44 $
  * ============================================================================
  *
- * $Log:	lineaequ.s,v $
  * Revision 3.1  91/07/29  14:55:44  lozben
  * Created this file of needed equates for the new multitasking vdi.
  *

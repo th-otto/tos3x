@@ -1,30 +1,28 @@
 ***********************************  txtblt.s  ********************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/textblt.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/02/12 17:03:43 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/12 17:03:43 $
 * =============================================================================
 *
-* $Log:	textblt.s,v $
 * Revision 3.2  91/02/12  17:03:43  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.1  91/01/28  18:24:01  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:19:45  lozben
 * New generation VDI
-* 
+*
 * Revision 2.3  90/03/09  12:48:01  lozben
 * Made _scrtsiz 666 word to accomodate the 16x32 system font.
-* 
+*
 * Revision 2.2  89/04/14  15:37:19  lozben
 * Moved hb_text() into another file. The idea is to have all
 * the hard blit code in independent files.
-* 
+*
 * Revision 2.1  89/02/21  17:28:44  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -112,7 +110,7 @@ smal_ok:
 *
 *  exit:
 *    d0    = actual size after scaling
-*	destroyed: d0.w,d1.w 
+*	destroyed: d0.w,d1.w
 *
 *******************************************************************************
 

@@ -1,29 +1,27 @@
 ******************************  colorep.s  ************************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/colorep.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/01/24 18:44:53 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/24 18:44:53 $
 * =============================================================================
 *
-* $Log:	colorep.s,v $
 * Revision 3.1  91/01/24  18:44:53  lozben
 * Adjusted the code to work with the multiple linea variable structure.
-* 
+*
 * Revision 3.0  91/01/03  15:06:33  lozben
 * New generation VDI
-* 
+*
 * Revision 2.4  90/03/01  11:32:22  lozben
 * Moved STE equate into vdidefs.h file.
-* 
+*
 * Revision 2.3  90/02/26  17:38:12  lozben
 * Fixed the code to work with turbo assembler.
-* 
+*
 * Revision 2.2  89/04/13  19:54:15  lozben
 * Added conditional for st+. We now have more bits per gun to play with
-* 
+*
 * Revision 2.1  89/02/21  17:18:38  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -209,7 +207,7 @@ _st_vq_color:
 
 	move.l	PIXLV(INTOUT,a2),a0		; a0 -> output array
 
-	move.w	PIXLV(v_planes,a2),d1		
+	move.w	PIXLV(v_planes,a2),d1
 	move.b	max_ndx-1(pc,d1.w),d4	; is index in range?
 	cmp.b	d4,d0			; is index in range?
 	bls	in_range
@@ -284,7 +282,7 @@ vqcm_cont:
 	move.w	d1,(a0)+		; load INTOUT.
 	move.w	d1,(a0)+
 	move.w	d1,(a0)
-	bra	vqc_out	
+	bra	vqc_out
 
 
 /* duplicate; also in ttcolor.c */

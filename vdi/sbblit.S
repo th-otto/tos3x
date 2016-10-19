@@ -1,43 +1,41 @@
 *********************************  sbblit.s  **********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbblit.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 17:34:28 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 17:34:28 $
 * =============================================================================
 *
-* $Log:	sbblit.s,v $
 * Revision 3.1  91/08/06  17:34:28  lozben
 * Made changes so the code could work with multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/08/06  17:15:30  lozben
 * New generation VDI
-* 
+*
 * Revision 2.7  91/07/26  12:07:25  lozben
 * Found a way not to put a nop. Look at comment 2.6 & label sb_blit.
-* 
+*
 * Revision 2.6  91/07/26  11:34:51  lozben
 * Added a nop in front of a ".ifeq" directive. There is a bug in the assembler.
 * You can't have ".ifeq" directive on the same line as a label.
-* 
+*
 * Revision 2.5  91/07/08  16:29:23  lozben
 * We now set COPYTRAN and OPAQUE flags when appropriate.
-* 
+*
 * Revision 2.4  90/02/16  12:24:52  lozben
 * Fixed some of the code so that it can be assembled with mas.
-* 
+*
 * Revision 2.3  90/01/11  12:20:28  lozben
 * Added code to check for the case of unaligned src to dst copy (Atari
 * ST/TT screen memory format). If check turns out to be true go to new
 * special case code.
-* 
+*
 * Revision 2.2  89/12/07  12:12:04  lozben
 * Added code to make a call to scrn_wrd_blt in proper cases. The routine
 * does a fast source to destination blit, which is on the same pixel
 * boundaries.
-* 
+*
 * Revision 2.1  89/02/21  17:24:32  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -155,7 +153,7 @@ sb_bitblt: ds.b 0
 	moveq.l	#$0F,d5			; d5 <- mod 16 mask
 
 	move.w	d0,d1
-	and.w	d5,d1			; d1 <- Xmin src mod 16 
+	and.w	d5,d1			; d1 <- Xmin src mod 16
 	move.w	d2,d3
 	and.w	d5,d3			; d3 <- Xmin dst mod 16
 
@@ -169,9 +167,9 @@ sb_bitblt: ds.b 0
 
 	move.w	d4,d5
 
-	sub.w	d6,d5			; d5 <- # src. words - # dst. words 
+	sub.w	d6,d5			; d5 <- # src. words - # dst. words
 
-	sub.w	d3,d1			; d1 <- (Sxmin mod 16) - (Dxmin mod 16)	
+	sub.w	d3,d1			; d1 <- (Sxmin mod 16) - (Dxmin mod 16)
 
 	move.w	d4,d7			; and both src and dst occupy
 	add.w	d6,d7			; three or more words apiece ...
@@ -194,9 +192,9 @@ sb_bitblt: ds.b 0
 	cmp.w	#2,S_NXPL(a6)		; see if we are in ST interleaved plns
 	bne	trns_blt		; if not, do other cases
 
-	tst.l	FG_COL(a6)		; and fore and back colors are 0 ... 
-	bne	opaque_blt	
-	cmp.b	#03,OP_TAB(a6)		; and D'<- S is the logic operation ...	
+	tst.l	FG_COL(a6)		; and fore and back colors are 0 ...
+	bne	opaque_blt
+	cmp.b	#03,OP_TAB(a6)		; and D'<- S is the logic operation ...
 	bne	opaque_blt
 	jmp	scrn_blt		; do fast non tearing blit
 
@@ -234,16 +232,16 @@ std_blt:
 *
 *			bit  1     actual shift direction:
 *
-*				   1: opposite of logical shift 
+*				   1: opposite of logical shift
 *				   0: same direction as shift
 *
 *
 *			bit  2	   blt direction		r2l:1 l2r:0
 *
 *			bit  3    source width : destination width
-*				   
+*
 *				   0: source words =  destination words
-*				   1: source words <> destination words 
+*				   1: source words <> destination words
 *
 *		note: width delta is either 1 word or 0 words
 
@@ -269,8 +267,8 @@ std_blt:
 
 	neg.w	d4			; d4 <- positive shift value
 	addq.w	#1,d5			; Smod16-Dmod16 < 0 => logical rt shift
-		
-act_shift:	
+
+act_shift:
 
 	cmp.w	#8,d4
 	blt	start_addr
@@ -362,8 +360,8 @@ ssave_addr:
 
 	move.l	frag_tab+04(pc,d5.w),a3	; a3 <- thread from op frag to in loop
 	move.l	frag_tab+00(pc,d5.w),a4	; a4 <- thread from update frag to 1st fringe
-	
-	tst.w	INNER_CT(a6)		; INNER_CT = -1  =>  Destination is 
+
+	tst.w	INNER_CT(a6)		; INNER_CT = -1  =>  Destination is
 	bge	pre_flight		; only one word wide. (a special case)
 
 	move.l	d6,d0
@@ -372,7 +370,7 @@ ssave_addr:
 
 	lea	f2_update,a3		; a3 <- thread that bypasses 2nd fringe
 
-	btst.l	#6,d5			
+	btst.l	#6,d5
 	bne	pre_flight		; skip if source is 2 words wide
 
 	lsr.w	#1,d5			; entries are 4 bytes wide
@@ -389,13 +387,13 @@ solo_tab:
 	dc.l	f0_left			;    reverse logical rt physical left
 
 
-                                                   
+
 *	0000:l2rf1fll  0001:l2rf0f2r  0010:l2rf1flr  0011:l2rf0f2l
 *	0100:r2lf0f2l  0101:r2lf1flr  0110:r2lf0f2r  0111:r2lf1fll
 *	1000:l2rf1f2l  1001:l2rf0flr  1010:l2rf1f2r  1011:l2rf0fll
 *	1100:r2lf1f2l  1101:r2lf0flr  1110:r2lf1f2r  1111:r2lf0fll
-                                                   
-frag_tab:                                          
+
+frag_tab:
 *		    a4        a3
 
 	dc.l	f1_l2r_lf,fl_l2r_lf	; l2rf1fll
@@ -569,7 +567,7 @@ get_fringe:
 
 fr_l_mask:
 
-	dc.w	$0000	
+	dc.w	$0000
 
 fr_r_mask:
 
@@ -594,31 +592,31 @@ fr_r_mask:
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	s_xy2addr:							     **
-**									     **
-**		input:	d0.w =  x coordinate.				     **
-**			d1.w =  y coordinate.				     **
-**			a6.l -> frame					     **
-**									     **
-**		output:	d3.w =  line wrap (in bytes)			     **
-**			a0.l -> address of word containing x,y		     **
-**									     **
-**									     **
-**	d_xy2addr:							     **
-**									     **
-**		input:	d0.w =  x coordinate.				     **
-**			d1.w =  y coordinate.				     **
-**			a6.l -> frame					     **
-**									     **
-**		output: d3.w =  line wrap (in bytes)			     **
-**			a1.l -> address of word containing x,y		     **
-**									     **
-**									     **
-**	        physical offset =  (y*bytes_per_line) + (x/16)*word_offset   **
-**									     **
-**		destroys: d0,d1						     **
-**									     **
+**
+**	s_xy2addr:
+**
+**		input:	d0.w =  x coordinate.
+**			d1.w =  y coordinate.
+**			a6.l -> frame
+**
+**		output:	d3.w =  line wrap (in bytes)
+**			a0.l -> address of word containing x,y
+**
+**
+**	d_xy2addr:
+**
+**		input:	d0.w =  x coordinate.
+**			d1.w =  y coordinate.
+**			a6.l -> frame
+**
+**		output: d3.w =  line wrap (in bytes)
+**			a1.l -> address of word containing x,y
+**
+**
+**	        physical offset =  (y*bytes_per_line) + (x/16)*word_offset
+**
+**		destroys: d0,d1
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -738,7 +736,7 @@ set_fringe:
 fringe_ok:
 
 
-*   set up word to word increment values  
+*   set up word to word increment values
 
 	move.l	a0,S_ADDR(a6)		; save src address for other planes
 	move.l	a1,D_ADDR(a6)		; save dst address for other planes
@@ -799,7 +797,7 @@ sc_mp_enter:
 	move.l	S_ADDR(a6),a0	; advance to next plane
 	move.l	D_ADDR(a6),a1
 	add.w	S_NXPL(a6),a0
-	add.w	D_NXPL(a6),a1	
+	add.w	D_NXPL(a6),a1
 	move.l	a0,S_ADDR(a6)
 	move.l	a1,D_ADDR(a6)
 

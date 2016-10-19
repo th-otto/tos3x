@@ -1,26 +1,24 @@
 /*
-********************************* attrdef.h ***********************************
-*
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/attrdef.h,v $
-* =============================================================================
-* $Author: lozben $ $Date: 91/01/04 12:20:40 $	   $Locker:  $
-* =============================================================================
-*
-* $Log: attrdef.h,v $
-* Revision 3.1	91/01/04  12:20:40	lozben
-* Typedefed structure attribute to ATTRIBUTE.
-* 
-* Revision 3.0	91/01/03  15:05:57	lozben
-* New generation VDI
-* 
-* Revision 2.2	90/04/24  15:51:14	lozben
-* Expanded the user defined pattern array from a 4x16 to an 8x16.
-* 
-* Revision 2.1	89/02/21  17:28:19	kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-*******************************************************************************
-*/
+ ********************************* attrdef.h ***********************************
+ *
+ * =============================================================================
+ * $Author: lozben $ $Date: 91/01/04 12:20:40 $
+ * =============================================================================
+ *
+ * Revision 3.1	91/01/04  12:20:40	lozben
+ * Typedefed structure attribute to ATTRIBUTE.
+ * 
+ * Revision 3.0	91/01/03  15:05:57	lozben
+ * New generation VDI
+ * 
+ * Revision 2.2	90/04/24  15:51:14	lozben
+ * Expanded the user defined pattern array from a 4x16 to an 8x16.
+ * 
+ * Revision 2.1	89/02/21  17:28:19	kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ *******************************************************************************
+ */
 
 #ifndef _ATTRDEF_H_
 #define _ATTRDEF_H_

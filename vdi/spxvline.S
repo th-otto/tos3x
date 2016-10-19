@@ -1,11 +1,9 @@
 *********************************  spxvline.s  ********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbblit.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 17:34:28 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 17:34:28 $
 * =============================================================================
 *
-* $Log:	sbblit.s,v $
 *******************************************************************************
 
 
@@ -61,7 +59,7 @@ spx1:	move.w	LN_MASK(a4),d2		; d2 <- line style mask for this line
 	add.l	#pal_map,d3		; d3 <- desired offset
 	move.l	(a4,d3.w),d3		; d3 <- desired foreground col
 	move.l	pal_map(a4),d4		; d4 <- desired background col
-	
+
 	cmp.w	#16,v_planes(a4)	; see how many bits per pixel
 	beq	spx16Tab		; do 16 bits per pixel case
 	blt	spx8Tab			; do 8 bits per pixel case
@@ -72,7 +70,7 @@ spx16Tab:
 	lea	VLine16Tab,a2		; a2 -> table of 16 bit routines
 	bra	tab_set
 
-spx8Tab:	
+spx8Tab:
 	lea	VLine8Tab,a2		; a2 -> table of 8 bit routines
 
 tab_set:

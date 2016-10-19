@@ -1,42 +1,30 @@
 /*
-******************* Revision Control System *****************************
-*
-* $Author: lozben $
-* =======================================================================
-*
-* $Date: 91/01/18 19:04:53 $
-* =======================================================================
-*
-* $Locker:  $
-* =======================================================================
-*
-* $Log:	jmptbl.c,v $
-* Revision 3.2  91/01/18  19:04:53  lozben
-* Changed cur_font to CUR_FONT.
-* 
-* Revision 3.1  91/01/10  17:37:41  lozben
-* Made patptr, patmsk, multifill, scrpt2, and scrtchp uppercase, beacause
-* there was a name conflict with the defines and the attribute structure.
-* 
-* Revision 3.0  91/01/03  15:12:02  lozben
-* New generation VDI
-* 
-* Revision 2.1  89/02/21  17:23:19  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  87/11/20  15:16:00  lozben
-* Initial revision
-* 
-* =======================================================================
-*
-* $Revision: 3.2 $
-* =======================================================================
-*
-* $Source: /u/lozben/projects/vdi/mtaskvdi/RCS/jmptbl.c,v $
-* =======================================================================
-*
-*************************************************************************
-*/
+ ******************* jmptbl.c ********************************************
+ *
+ * $Author: lozben $
+ * =======================================================================
+ *
+ * $Date: 91/01/18 19:04:53 $
+ * =======================================================================
+ *
+ * Revision 3.2  91/01/18  19:04:53  lozben
+ * Changed cur_font to CUR_FONT.
+ * 
+ * Revision 3.1  91/01/10  17:37:41  lozben
+ * Made patptr, patmsk, multifill, scrpt2, and scrtchp uppercase, beacause
+ * there was a name conflict with the defines and the attribute structure.
+ * 
+ * Revision 3.0  91/01/03  15:12:02  lozben
+ * New generation VDI
+ * 
+ * Revision 2.1  89/02/21  17:23:19  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  87/11/20  15:16:00  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 
 #include "vdi.h"
 #include "fontdef.h"

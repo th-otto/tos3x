@@ -1,17 +1,15 @@
 ****************************  hbbitblt.s  *******************************
 *
-* $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/hbbitblt.s,v $
 * =======================================================================
-* $Author: lozben $	$Date: 91/01/03 15:10:24 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/03 15:10:24 $
 * =======================================================================
 *
-* $Log:	hbbitblt.s,v $
 * Revision 3.0  91/01/03  15:10:24  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  89/02/27  17:45:02  lozben
 * *** initial revision ***
-* 
+*
 *************************************************************************
 
 #include "../common/config.h"
@@ -55,8 +53,8 @@ P_MASK		equ	-26	; pattern index mask
 P_INDX		equ	-24	; initial pattern index
 
 S_ADDR		equ	-22	; initial source address
-S_XMAX		equ	-18	; maximum X: source	
-S_YMAX		equ	-16	; maximum Y: source	
+S_XMAX		equ	-18	; maximum X: source
+S_YMAX		equ	-16	; maximum Y: source
 
 D_ADDR		equ	-14	; initial destination address
 D_XMAX		equ	-10	; maximum X: destination
@@ -79,7 +77,7 @@ FRAME_LEN	equ	 76
 *	"address register indirect" instruction rather than an
 *	"address register indirect with displacement" instruction,
 *	4 cycles are saved per access
-*	
+*
 
 B_OFF		equ	 60		; offset to reference register
 
@@ -103,14 +101,14 @@ BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
 BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
-                     
-                     
+
+
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
 BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
 BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
-BM_GO		equ  	$8000		; execution mask	
+BM_GO		equ  	$8000		; execution mask
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
 BM_PF		equ  	$0080		; pre-fetch mask
@@ -143,7 +141,7 @@ BM_FQ		equ  	$0040		; flush queue mask
 
 fr_lf_mask:
 
-	dc.w	$0000	
+	dc.w	$0000
 
 fr_rt_mask:
 
@@ -176,7 +174,7 @@ hb_bitblt:
 
 	move.w	d2,d5			; d5 <- D_XMIN
 	and.w	d1,d5			; d5 <- D_XMIN mod16
-	move.w	d5,d7			; d7 <- D_XMIN mod16	
+	move.w	d5,d7			; d7 <- D_XMIN mod16
 	add.w	d5,d5			; d5 <- offset into mask table
 	move.w	fr_lf_mask(pc,d5.w),d3
 	not.w	d3
@@ -198,10 +196,10 @@ hb_bitblt:
 
 *  convert X parameters to word displacements
 
-	lsr.w	#4,d0			; d0 <- S_XMIN / 16	
-	lsr.w	#4,d4			; d4 <- S_XMAX / 16	
-	lsr.w	#4,d2			; d2 <- D_XMIN / 16	
-	lsr.w	#4,d6			; d6 <- D_XMAX / 16	
+	lsr.w	#4,d0			; d0 <- S_XMIN / 16
+	lsr.w	#4,d4			; d4 <- S_XMAX / 16
+	lsr.w	#4,d2			; d2 <- D_XMIN / 16
+	lsr.w	#4,d6			; d6 <- D_XMAX / 16
 
 
 b2t_r2l:
@@ -215,7 +213,7 @@ b2t_r2l:
 	sub.w	d0,d4			; d4 <- S_SPAN-1
 
 	muls	S_NXWD(a6),d1		; d1 <- S_XMAX/16 * S_NXWD
-	
+
 	move.w	S_YMAX(a6),d5
 	muls	S_NXLN(a6),d5		; d5 <- YMAX * S_NXLN
 
@@ -258,7 +256,7 @@ fringe_ok:
 	bge	save_fringe_masks	; else		  => b2t r2l
 
 
-t2b_l2r:	
+t2b_l2r:
 
 *  SRC addr > DST addr
 *  calculate minimum base addresses
@@ -455,7 +453,7 @@ not_insane:
 	move.w	P_INDX(a6),d0		; if pattern is combined with source,
 	and.w	#$000F,d0		; include initial pattern index in
 	rol.w	#8,d0			; B_SKEW control word
-       	or.w	d0,d7	
+       	or.w	d0,d7
 
 	move.w	P_NXPL(a6),d0		; d0 <- offset to subsequent planes
 	bne	blt_0_multi		; if pattern is mono plane ...
@@ -476,7 +474,7 @@ blt_0_loop:
 
 	clr.w	d6			; select logic op based on current
 	lsr.w	#1,d3			; background and foreground color for
-	addx.w	d6,d6			; the given plane. logic ops are held 
+	addx.w	d6,d6			; the given plane. logic ops are held
 	lsr.w	#1,d2			; in OP_TAB as f0:b0 f0:b1 f1:b0 f1:b1
 	addx.w	d6,d6			; hi byte of B_LOGOP is not altered.
 
@@ -539,7 +537,7 @@ blt_0_count:
 blast_1:
 
 	move.w	P_NXLN(a6),d0
-	
+
 	move.w	P_INDX(a6),d1		; calculate initial index value.
 	muls	d0,d1
 	move.w	d1,P_INDX(a6)
@@ -563,7 +561,7 @@ blt_1_loop:
 
 	clr.w	d6			; select logic op based on current
 	lsr.w	#1,d3			; background and foreground color for
-	addx.w	d6,d6			; the given plane. logic ops are held 
+	addx.w	d6,d6			; the given plane. logic ops are held
 	lsr.w	#1,d2			; in OP_TAB as f0:b0 f0:b1 f1:b0 f1:b1
 	addx.w	d6,d6			; hi byte of B_LOGOP is not altered.
 
@@ -592,7 +590,7 @@ blt_1_next:
 *******************************************************************************
 
 blt_1_sync:
-	
+
 	nop				; allow for interrupts to break through
 	tas	(a5)			; restart the BLASTER
 	bmi	blt_1_sync

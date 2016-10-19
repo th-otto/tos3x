@@ -6,27 +6,14 @@
 * $Date: 91/01/03 15:16:56 $
 * =======================================================================
 *
-* $Locker:  $
-* =======================================================================
-*
-* $Log:	sbfrag.s,v $
 * Revision 3.0  91/01/03  15:16:56  lozben
 * New generation VDI
-* 
+*
 * Revision 2.1  89/02/21  17:25:52  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 * Revision 1.1  87/11/20  15:17:11  lozben
 * Initial revision
-* 
-*
-* =======================================================================
-*
-* $Revision: 3.0 $
-* =======================================================================
-*
-* $Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbfrag.s,v $
-* =======================================================================
 *
 *************************************************************************
 
@@ -127,7 +114,7 @@ p1_update:
 	page
 
 ***					       ***
-***   FIRST FRINGE FRAGMENTS:single transfer   *** 
+***   FIRST FRINGE FRAGMENTS:single transfer   ***
 ***					       ***
 
 
@@ -149,7 +136,7 @@ f0_right:
 	page
 
 ***			       ***
-***   FIRST FRINGE FRAGMENTS   *** 
+***   FIRST FRINGE FRAGMENTS   ***
 ***			       ***
 
 
@@ -379,7 +366,7 @@ f2_r2l_lf:
 
   	move.l	d1,d0		; d0(31:16) <- next to last SOURCE word		 4
   	move.w	(a0),d0		; d0(15:00) <- last SOURCE word			 8
-  
+
   	rol.l	d4,d0		; d0(15:00) <- alligned SRC: new|old	      8-24
 
 	bra	f2_out		; send fringe to DESTINATION			10
@@ -394,7 +381,7 @@ f2_l2r_rt:
 
   	move.l	d1,d0		; d0(31:16) <- next to last SOURCE word		 4
   	move.w	(a0),d0		; d0(15:00) <- last SOURCE word			 8
-  
+
   	ror.l	d4,d0		; d0(15:00) <- alligned SRC: old|new	      8-24
 
 	bra	f2_out		; send fringe to DESTINATION			10
@@ -474,7 +461,7 @@ f2_update:
 
   	adda.w	SRC_WR(a6),a0	; a0 -> last word of next line: SRC		16
   	adda.w	DST_WR(a6),a1	; a1 -> last word of next line: DST		16
-  
+
 	jmp	(a4)		; thread to first fringe fragment		 8
 
 
@@ -514,7 +501,7 @@ f1_drt:
 	swap	d5		;						 4
 
   	adda.w	DST_WR(a6),a1	; a1 -> initial word of next line: DST		16
-  
+
 	jmp	(a4)		; thread to first fringe fragment		 8
 
 
@@ -621,7 +608,7 @@ mode_02:
 	and.w	d7,d0		; S and P					 4
 f1op_02:
 	not.w	d0
-	and.w	d6,d0	
+	and.w	d6,d0
 	or.w	d0,(a1)		; D' <- not {[not S] or D}
 	eor.w	d6,(a1)
 	jmp	(a3)
@@ -631,7 +618,7 @@ f1op_02:
 	and.w	d7,d0		; S and P					 4
 f2op_02:
 	not.w	d0
-	and.w	d6,d0	
+	and.w	d6,d0
 	or.w	d0,(a1)		; D' <- not {[not S] or D}
 	eor.w	d6,(a1)
 	bra	f2_rtn
@@ -690,7 +677,7 @@ f2op_04:
 
 
 mode_05:			* dummy label. Never called!!!!
-	
+
 
 	and.w	d7,d0		; S and P					 4
 mode_06:

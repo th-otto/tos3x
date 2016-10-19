@@ -1,27 +1,25 @@
 *****************************  hbrect.s  ********************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/hbrect.s,v $
 * =======================================================================
-* $Author: lozben $	$Date: 91/02/13 18:22:42 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/13 18:22:42 $
 * =======================================================================
 *
-* $Log:	hbrect.s,v $
 * Revision 3.2  91/02/13  18:22:42  lozben
 * Adjusted the spelling of some of the linea equates to correspond
 * the ones  in the lineaequ.s file.
-* 
+*
 * Revision 3.1  91/01/31  16:38:40  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:11:01  lozben
 * New generation VDI
-* 
+*
 * Revision 2.3  90/02/23  18:20:53  lozben
 * We now use FG_B_PLANES as our color index instead of _FG_BP_{0-7}.
-* 
+*
 * Revision 2.2  89/02/27  17:45:17  lozben
 * *** initial revision ***
-* 
+*
 *************************************************************************
 
 
@@ -41,7 +39,7 @@
 *	"address register indirect" instruction rather than an
 *	"address register indirect with displacement" instruction,
 *	4 cycles are saved per access
-*	
+*
 
 B_OFF		equ	 60		; offset to reference register
 
@@ -65,14 +63,14 @@ BF_PAT		equ  	8		; combo flag: 0:all ones  1:pattern
 BF_SRC		equ  	9		; combo flag: 0:all ones  1:source
 BM_PAT		equ  	$0100		; combo mask: 0:all ones  1:pattern
 BM_SRC		equ  	$0200		; combo mask: 0:all ones  1:source
-                     
-                     
+
+
 BF_GO		equ  	15		; execution flag         0:false 1:true
 BF_HOG		equ  	14		; hog dma flag		 0:false 1:true
 BF_SM		equ  	13		; smudge flag		 0:false 1:true
 BF_PF		equ  	7		; pre-fetch flag  	 0:false 1:true
 BF_FQ		equ  	6		; flush queue flag 	 0:false 1:true
-BM_GO		equ  	$8000		; execution mask	
+BM_GO		equ  	$8000		; execution mask
 BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
 BM_PF		equ  	$0080		; pre-fetch mask
@@ -158,7 +156,9 @@ hb_rect:
 	tst.w	PIXLV(multifill,a2)		; handle multi-plane fill seperately
 	bne	rf_multi
 
-        move.l  PIXLV(FG_B_PLANES,a2),d5	; d5 <- color index
+#if PLANES8
+    move.l  PIXLV(FG_B_PLANES,a2),d5	; d5 <- color index
+#endif
 
 *
 *  CASE I:  Standard monoplane patterns ( mask: 0, 1, 3, 7, 15 )
@@ -269,7 +269,7 @@ smb_cont:
 
 
 *
-*  CASE III.	All degenerate cases arrive here. Rectangles are filled 
+*  CASE III.	All degenerate cases arrive here. Rectangles are filled
 *		line by line and plane by plane.
 
 rf_dgen:

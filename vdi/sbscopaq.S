@@ -1,19 +1,17 @@
 ********************************  sbscopaq.s  *********************************
 *
-* $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbscopaq.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 20:21:17 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 20:21:17 $
 * =============================================================================
 *
-* $Log:	sbscopaq.s,v $
 * Revision 3.0  91/08/06  20:21:17  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  91/07/08  15:56:12  lozben
 * File screated by Slavik Lozben. This file contains the new
 * OPAQUE blit routine. The assumtion is such that we are dealing with
 * ST interleaved screen memory format.
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -347,16 +345,16 @@ onri_op:
 *                    Do word aligned blit positive direction		      *
 *******************************************************************************
 
-f1_pos0:	lea	f1_pos1,a2	; a2 <- return address 
+f1_pos0:	lea	f1_pos1,a2	; a2 <- return address
 		jmp	fringe0		; do left fringe
 
 f1_pos1:	move.w	a3,d4 		; width - 2 in words (1 plane)
-		lea	sc_pos1,a2	; a2 <- return address 
+		lea	sc_pos1,a2	; a2 <- return address
 sc_pos0:	jmp	innerLoop	; blit inner words
 sc_pos1:	dbra	d4,sc_pos0	; fetsch next source word
 
 		exg	d6,d3		; d6 <- d3 fringe mask
-		lea	f2_pos,a2	; a2 <- return address 
+		lea	f2_pos,a2	; a2 <- return address
 		jmp	fringe0		; do right fringe (same code)
 f2_pos:		exg	d6,d3		; d6 <- original fringe mask
 

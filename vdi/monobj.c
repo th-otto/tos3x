@@ -1,48 +1,46 @@
 /*
-********************************** monobj.c ***********************************
-*
-* $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/monobj.c,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/01/03 15:12:41 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	monobj.c,v $
-* Revision 3.0  91/01/03  15:12:41  lozben
-* New generation VDI
-* 
-* Revision 2.2  89/05/16  12:55:28  lozben
-* Functions that used to initialize FG_BP_[1,2,3,4], now
-* initialize FG_B_PLANES instead. FG_B_PLANES is set to the current
-* color index before a drawing primitive is called.
-* 
-* Revision 2.1  89/02/21  17:23:50  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.7  88/05/05  12:17:01  lozben
-* Put back vq_mouse_status() routine, then commented it out, so that people
-* could see what it used to look like in "C".
-* 
-* Revision 1.6  88/04/28  17:25:59  eisen
-* Removed the initialization in vrq_locator because it seemed to affect
-* compatibility with previous versions.
-* 
-* Revision 1.5  88/04/25  17:18:51  eisen
-* Changed v_locator to call SET_CUR(x, y). SET_CUR sets the GCURX, GCURY and
-* vblank draw packet position to x,y. SET_CUR(x, y) alters system variables
-* atomically.
-* 
-* Revision 1.4  88/04/19  17:19:57  eisen
-* *** empty log message ***
-* 
-* Revision 1.2  88/04/19  12:34:34  lozben
-* vq_mouse_status has been changed to an asembly routine, to allow
-* for atomic access to mouse parameter block.
-* 
-* Revision 1.1  87/11/20  15:16:23  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ ********************************** monobj.c ***********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/01/03 15:12:41 $
+ * =============================================================================
+ *
+ * Revision 3.0  91/01/03  15:12:41  lozben
+ * New generation VDI
+ * 
+ * Revision 2.2  89/05/16  12:55:28  lozben
+ * Functions that used to initialize FG_BP_[1,2,3,4], now
+ * initialize FG_B_PLANES instead. FG_B_PLANES is set to the current
+ * color index before a drawing primitive is called.
+ * 
+ * Revision 2.1  89/02/21  17:23:50  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.7  88/05/05  12:17:01  lozben
+ * Put back vq_mouse_status() routine, then commented it out, so that people
+ * could see what it used to look like in "C".
+ * 
+ * Revision 1.6  88/04/28  17:25:59  eisen
+ * Removed the initialization in vrq_locator because it seemed to affect
+ * compatibility with previous versions.
+ * 
+ * Revision 1.5  88/04/25  17:18:51  eisen
+ * Changed v_locator to call SET_CUR(x, y). SET_CUR sets the GCURX, GCURY and
+ * vblank draw packet position to x,y. SET_CUR(x, y) alters system variables
+ * atomically.
+ * 
+ * Revision 1.4  88/04/19  17:19:57  eisen
+ * *** empty log message ***
+ * 
+ * Revision 1.2  88/04/19  12:34:34  lozben
+ * vq_mouse_status has been changed to an asembly routine, to allow
+ * for atomic access to mouse parameter block.
+ * 
+ * Revision 1.1  87/11/20  15:16:23  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 
 #include "vdi.h"
 #include "fontdef.h"
@@ -800,7 +798,9 @@ VOID dr_recfl(NOTHING)
 	/* Perform arbitrary corner fix-ups and invoke the rectangle fill routine */
 
 	arb_corner(LV(PTSIN), ULLR);
+#if PLANES8
 	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
+#endif
 
 	pts_in = LV(PTSIN);
 	LV(X1) = *pts_in++;

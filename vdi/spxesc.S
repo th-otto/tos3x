@@ -1,11 +1,9 @@
 ********************************  spxesc.s  ***********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbescape.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/01/31 12:04:31 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/31 12:04:31 $
 * =============================================================================
 *
-* $Log:	$
 *******************************************************************************
 
 #include "../common/config.h"
@@ -15,7 +13,7 @@
 #if VIDEL_SUPPORT
 
 *******************************************************************************
-*	
+*
 * name: spx_cell (soft blt version for pixel pact architecture)
 *
 * purpose:  This routine performs a byte aligned block transfer for the
@@ -25,14 +23,14 @@
 *
 * in:	a0.l	points to contiguous source block (1 byte wide)
 *	a1.l	points to destination (1st plane, top of block)
-*	d6.l	foreground 
-*	d7.l	background 
+*	d6.l	foreground
+*	d7.l	background
 *
 * damaged:	a2-a3/a5/d0-d7
 *
 *******************************************************************************
 
-            
+
 		xdef	spx_cell
 spx_cell:	move.w	v_fnt_wr(a4),d2		; d2 <- src width (in bytes)
 		move.w	v_cel_ht(a4),d4
@@ -145,13 +143,13 @@ cell_8_fg:	move.b	d6,(a3)+		; set dst to foreground color
 *   After the copy is performed, any non-overlapping area of the previous
 *   source region is "erased" by filling with the background color.
 *
-* 
+*
 *  in:  d1.w	   cell Y of region top
 *	v_celmy   cell Y of region bottom
 *
 *
 *  munged:	d0-d7/a2-a3
-*		
+*
 *
 *******************************************************************************
 
@@ -294,12 +292,12 @@ spx_blank:	move.w	d0,d4			; d4 <- X min
 		cmp.w	#16,v_planes(a4)	; see how many bits per pixel
 		beq	px16BlLine		; branches to 16 bits per pix
 		blt	px8BlLine		; branches to 16 bits per pix
-		
+
 *
 * Blank out 32 bit case
 *
 px32BlLine:	move.w	a2,d4			; d4 <- # of pixels to clr - 1
-blankLongs:	move.l	d5,(a3)+		; 
+blankLongs:	move.l	d5,(a3)+		;
 		dbra	d4,blankLongs
 		add.w	d7,a3			; point into next scanline
 		dbra	d6,px32BlLine		; do next line
@@ -308,7 +306,7 @@ blankLongs:	move.l	d5,(a3)+		;
 * Blank out 16 bit case
 *
 px16BlLine:	move.w	a2,d4			; d4 <- # of pixels to clr - 1
-blankWords:	move.w	d5,(a3)+		; 
+blankWords:	move.w	d5,(a3)+		;
 		dbra	d4,blankWords
 		add.w	d7,a3			; point into next scanline
 		dbra	d6,px16BlLine		; do next line
@@ -317,7 +315,7 @@ blankWords:	move.w	d5,(a3)+		;
 * Blank out 8 bit case
 *
 px8BlLine:	move.w	a2,d4			; d4 <- # of pixels to clr - 1
-blankBytes:	move.b	d5,(a3)+		; 
+blankBytes:	move.b	d5,(a3)+		;
 		dbra	d4,blankBytes
 		add.w	d7,a3			; point into next scanline
 		dbra	d6,px8BlLine		; do next line
@@ -326,13 +324,13 @@ blankBytes:	move.b	d5,(a3)+		;
 
 
 *******************************************************************************
-*	
+*
 * name:		spx_neg_cell
 *
-* purpose:	This routine negates the contents of an arbitrarily tall 
+* purpose:	This routine negates the contents of an arbitrarily tall
 *		byte/word wide cell composed of an arbitrary number of
 *		(atari styled) bit-planes. cursor display can be
-*		acomplished via this procedure. since a second 
+*		acomplished via this procedure. since a second
 *		negation restores the original cell condition, there is
 *		no need to save	the contents beneath the cursor block.
 *

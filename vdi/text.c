@@ -1,43 +1,41 @@
 /*
-**********************************  text.c  ***********************************
-*
-* $Revision: 3.3 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/text.c,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/07/30 15:49:16 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	text.c,v $
-* Revision 3.3  91/07/30  15:49:16  lozben
-* Chaged the typecasting of control in loadfont.
-* 
-* Revision 3.2  91/01/22  16:33:12  lozben
-* Made changes so the file can work with the latest include files.
-* 
-* Revision 3.1  91/01/14  18:46:11  lozben
-* Deleted all the extern declarations which are defined in gsxextrn.h.
-* 
-* Revision 3.0  91/01/03  15:19:18  lozben
-* New generation VDI
-* 
-* Revision 2.3  89/06/19  14:38:52  kbad
-* Changed v_gtext() to set FG_B_PLANES (color index) instead of FG_BP_{1,2,3,4},
-* four word that represent the color index.
-* 
-* Revision 2.2  89/06/19  14:34:56  kbad
-* Check underline on all fonts, not just system.
-* 
-* Revision 2.1  89/02/21  17:28:23  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.2  88/03/09  16:27:10  lozben
-* Fixed a bug in vqt_extent; used to return wrong points when string was
-* rotated 270 degrees.
-* 
-* Revision 1.1  87/11/20  15:18:27  lozben
-* Initial revision
-* 
-*******************************************************************************
-*/
+ **********************************  text.c  ***********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/07/30 15:49:16 $
+ * =============================================================================
+ *
+ * Revision 3.3  91/07/30  15:49:16  lozben
+ * Chaged the typecasting of control in loadfont.
+ * 
+ * Revision 3.2  91/01/22  16:33:12  lozben
+ * Made changes so the file can work with the latest include files.
+ * 
+ * Revision 3.1  91/01/14  18:46:11  lozben
+ * Deleted all the extern declarations which are defined in gsxextrn.h.
+ * 
+ * Revision 3.0  91/01/03  15:19:18  lozben
+ * New generation VDI
+ * 
+ * Revision 2.3  89/06/19  14:38:52  kbad
+ * Changed v_gtext() to set FG_B_PLANES (color index) instead of FG_BP_{1,2,3,4},
+ * four word that represent the color index.
+ * 
+ * Revision 2.2  89/06/19  14:34:56  kbad
+ * Check underline on all fonts, not just system.
+ * 
+ * Revision 2.1  89/02/21  17:28:23  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.2  88/03/09  16:27:10  lozben
+ * Fixed a bug in vqt_extent; used to return wrong points when string was
+ * rotated 270 degrees.
+ * 
+ * Revision 1.1  87/11/20  15:18:27  lozben
+ * Initial revision
+ * 
+ *******************************************************************************
+ */
 
 #include "vdi.h"
 #include "fontdef.h"
@@ -379,7 +377,9 @@ VOID d_gtext(NOTHING)
 				else
 					LV(LN_MASK) = 0xffff;
 
+#if PLANES8
 				LV(FG_B_PLANES) = LV(TEXT_FG);
+#endif
 
 				count = LV(CUR_FONT)->ul_size;
 				for (i = 0; i < count; i++)
@@ -1259,6 +1259,9 @@ VOID d_justified(NOTHING)
 			rmwordx = 0;
 			rmwordy = direction;
 			break;
+#if BINEXACT
+			asm("ds.b 0"); /* prevent superfluous bra from being removed */
+#endif
 		}
 	} else
 	{

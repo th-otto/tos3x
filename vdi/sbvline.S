@@ -1,26 +1,24 @@
 *********************************  sbvline.s  *********************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbvline.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/02/13 11:16:18 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/13 11:16:18 $
 * =============================================================================
 *
-* $Log:	sbvline.s,v $
 * Revision 3.2  91/02/13  11:16:18  lozben
 * Entered the statement "xdef	sb_vline".
-* 
+*
 * Revision 3.1  91/01/29  11:57:19  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:18:54  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  89/05/16  16:00:27  lozben
 * Fixed sbvline to work in 8 planes.
-* 
+*
 * Revision 2.1  89/02/21  17:28:05  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -67,7 +65,7 @@ sb_vline:	lea	-FRAG_LEN(sp),sp  ; sp -> pixel fragment frame
 		beq	sv_nofrag
 
 		move.l	sp,a2		; a2 -> ram for pixel fragment code
-		bsr	pixfrag		 
+		bsr	pixfrag
 
 sv_nofrag:	move.w	LV(V_PLANES,a4),d0
 		add.w	d0,d0		; d0 <- 2 * planes

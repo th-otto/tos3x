@@ -1,38 +1,36 @@
 ********************************  gsxasm1.s  **********************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/gsxasm1.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/02/13 11:37:39 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/13 11:37:39 $
 * =============================================================================
 *
-* $Log:	gsxasm1.s,v $
 * Revision 3.2  91/02/13  11:37:39  lozben
 * Adjusted the code to work with the multiple linea variable structures..
-* 
+*
 * Revision 3.1  91/02/07  18:35:38  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:09:28  lozben
 * New generation VDI
-* 
+*
 * Revision 2.5  90/05/03  16:36:03  lozben
 * Added conditional code in pixfrag() to clear the instruction cache
 * if one is available. We do this because we compile code on the stack.
-* 
+*
 * Revision 2.4  90/02/16  12:22:34  lozben
 * Fixed some of the code so that it can be assembled with mas.
-* 
+*
 * Revision 2.3  89/05/16  13:01:52  lozben
 * Changed pix_frag() to deal with a color index (FG_B_PLANES) instead
 * of dealing with back plane flags (FG_BP_[1,2,3,4]).
-* 
+*
 * Revision 2.2  89/04/13  20:14:48  lozben
 * Moved hb_vline(), hb_hline() into another file. The idea
 * is to have all the hard blit code in independent files.
-* 
+*
 * Revision 2.1  89/02/21  17:21:12  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -68,19 +66,19 @@ FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	_vec_len							     **	
-**									     **
-**		This routine computes the length of a vector using the       **
-**		formula: SQRT( dX**2 + dY**2 )				     **
-**									     **
-**		input:	4(sp) = dX					     **
-**			6(sp) = dY					     **
-**									     **
-**		output: d0 = SQRT( dX**2 + dY**2 )			     **
-**									     **
-**		destroys: d0-d4						     **
-**									     **
+**
+**	_vec_len
+**
+**		This routine computes the length of a vector using the
+**		formula: SQRT( dX**2 + dY**2 )
+**
+**		input:	4(sp) = dX
+**			6(sp) = dY
+**
+**		output: d0 = SQRT( dX**2 + dY**2 )
+**
+**		destroys: d0-d4
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -127,7 +125,7 @@ bds_end:	asr.w	#1,d2		; d2 <- exponent/2  (square root)
 
 srch_lp:	move.w	d2,d1		; d1 <- upper bound
 		sub.w	d3,d1		; d1 <- upper bound - lower bound
-		cmp.w	#1,d1		; 
+		cmp.w	#1,d1		;
 		beq	srch_end	; quit when the delta is 1
 
 		asr.w	#1,d1		; d1 <- half the difference
@@ -156,24 +154,24 @@ vl_out:		rts
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	_CLC_FLIT							     **
-**									     **
-**		This routine calculates the fill intersections for a list of **
-**	vectors.  The x-intersection of each vector with the scan-line of    **
-**	interest is calculated and inserted into a buffer which is then      **
-**	sorted in ascending order.  The resulting array of x-values are then **
-**	pulled out pair-wise and used as inputs to "_HABLINE".		     **
-**									     **
-**		input:	CONTRL[1] = number of vectors.			     **
-**			PTSIN[]   = array of vertices.			     **
-**			Y1        = scan-line to calculate intersections for **
-**									     **
-**		output: fil_int  = number of intersections.		     **
-**			fill_buf  = array of x-values.			     **
-**									     **
-**		destroys: everything.					     **
-**									     **
+**
+**	_CLC_FLIT
+**
+**		This routine calculates the fill intersections for a list of
+**	vectors.  The x-intersection of each vector with the scan-line of
+**	interest is calculated and inserted into a buffer which is then
+**	sorted in ascending order.  The resulting array of x-values are then
+**	pulled out pair-wise and used as inputs to "_HABLINE".
+**
+**		input:	CONTRL[1] = number of vectors.
+**			PTSIN[]   = array of vertices.
+**			Y1        = scan-line to calculate intersections for
+**
+**		output: fil_int  = number of intersections.
+**			fill_buf  = array of x-values.
+**
+**		destroys: everything.
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -309,19 +307,19 @@ drc_end:	dbra	d0,dr_clip
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	bub_sort							     **
-**									     **
-**		This routine bubble-sorts an array of words into ascending   **
-**		order.							     **
-**									     **
-**		input:	a0 = ptr to start of array.			     **
-**			d0 = number of words in array.	(unsigned word)	     **
-**									     **
-**		output: a1 = ptr to start of sorted array.		     **
-**									     **
-**		destroys: d0-d2/a0-a1					     **
-**									     **
+**
+**	bub_sort
+**
+**		This routine bubble-sorts an array of words into ascending
+**		order.
+**
+**		input:	a0 = ptr to start of array.
+**			d0 = number of words in array.	(unsigned word)
+**
+**		output: a1 = ptr to start of sorted array.
+**
+**		destroys: d0-d2/a0-a1
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -350,14 +348,14 @@ bs_out:		rts
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**  smul_div (m1,m2,d1)							     **
-**								     	     **
-**	( ( M1 * M2 ) / D1 ) + 1					     **
-**	M1 = signed 16 bit integer					     **
-**	M2 = unsigned 15 bit integer					     **
-**	D1 = signed 16 bit integer					     **
-**									     **
+**
+**  smul_div (m1,m2,d1)
+**
+**	( ( M1 * M2 ) / D1 ) + 1
+**	M1 = signed 16 bit integer
+**	M2 = unsigned 15 bit integer
+**	D1 = signed 16 bit integer
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -397,37 +395,37 @@ smd_4:		move.l	(sp)+,d3
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	comments:							     **
-**									     **
-**	  Two bugs have been found and fixed in this 68000 implementation    **
-**	  of these VDI line-drawing routines.  Both bugs were due to	     **
-**	  entering "HABLINE" from "ABLINE" on horizontal lines.		     **
-**									     **
-**	    1) the XOR mode patch was not applied.			     **
-**	    2) LN_MASK was not rotated to align with X2 on exit.	     **
-**									     **
+**
+**	comments:
+**
+**	  Two bugs have been found and fixed in this 68000 implementation
+**	  of these VDI line-drawing routines.  Both bugs were due to
+**	  entering "HABLINE" from "ABLINE" on horizontal lines.
+**
+**	    1) the XOR mode patch was not applied.
+**	    2) LN_MASK was not rotated to align with X2 on exit.
+**
 *******************************************************************************
 *******************************************************************************
 
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	concat								     **
-**									     **
-**	  This routine converts (by "concatenating") Y and X coordinates     **
-**	  into the physical address and bit index into that word	     **
-**									     **
-**	  input:	d0.w = signed X coordinate.			     **
-**			d1.w = signed Y coordinate.			     **
-**									     **
-**	  output:	d0.w = bit index into word    (X mod 16)	     **
-**			d1.l = address offset				     **
-**			       (Y * bytes_per_line) + (X & Xmask) >> Xshift  **
-**									     **
-**	  destroys: 	nothing.					     **
-**									     **
+**
+**	concat
+**
+**	  This routine converts (by "concatenating") Y and X coordinates
+**	  into the physical address and bit index into that word
+**
+**	  input:	d0.w = signed X coordinate.
+**			d1.w = signed Y coordinate.
+**
+**	  output:	d0.w = bit index into word    (X mod 16)
+**			d1.l = address offset
+**			       (Y * bytes_per_line) + (X & Xmask) >> Xshift
+**
+**	  destroys: 	nothing.
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -470,60 +468,60 @@ shf_tab:   *    1 2   4       8		; number of planes
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	ABLINE								     **
-**		 							     **
-**	  This routine draws a line between (X1,Y1) and (X2,Y2) using    **
-**	  Bresenham's algorithm. The line is modified by the LN_MASK and     **
-**	  WRT_MODE variables. This routine handles all 3 video resolutions  **
-**									     **
-**	Note:								     **
-**									     **
-**	  For line-drawing in VDI, the background color is fixed as 0	     **
-**	  (i.e., there is no user-settable background color). This fact	     **
-**	  allows coding short-cuts in the implementation of "replace" and    **
-**	  "not" modes, resulting in faster execution of their inner loops.   **
-**									     **
-**	input:								     **
-**									     **
-**	   X1,Y1,X2,Y2 = coordinates.				     **
-**	         v_planes = number of video planes. (resolution)	     **
-**	          LN_MASK = line mask. (for dashed/dotted lines)	     **
-**	         WRT_MODE = writing mode.			  	     **
-**									     **
-**			     0 => replace mode.				     **
-**			     1 => or mode.				     **
-**			     2 => xor mode.				     **
-**			     3 => not or mode.				     **
-**									     **
-**	output:								     **
-**									     **
-**	  LN_MASK rotated to proper alignment with ( X2,Y2 ).	     **
-**									     **
-**									     **
-**	destroys:							     **
-**									     **
-**	    everything.							     **
-**									     **
-**	FEATURES:							     **
-**									     **
-**	 o In the horizontal case, the pattern is not alligned prior to	     **
-**	   the line being drawn, hence the pattern isn't in phase with	     **
-**	   the pattern in the succeeding line. In any case, the entire	     **
-**	   method for aligning horizontal patterns is incorrect.	     **
-**									     **
-**	 o The pattern is always implemented starting at the minimum vertex  **
-**	   regardless of the intended direction of line segment. hence,      **
-**	   patterns in consecutive segments are likely not to dovetail or    **
-**	   to have a reversed pattern.					     **
-**									     **
-**	 o The procedure for preventing the endpoints in consecutive	     **
-**	   segments that are XORed to the destination from cancelling 	     **
-**	   is incorrectly implemented. The current method eliminates the     **
-**	   last point at the maximum vertex regardless of the order of	     **
-**	   the entered verticies (or direction of the preceeding segment).   **
-**									     **
-**									     **
+**
+**	ABLINE
+**
+**	  This routine draws a line between (X1,Y1) and (X2,Y2) using
+**	  Bresenham's algorithm. The line is modified by the LN_MASK and
+**	  WRT_MODE variables. This routine handles all 3 video resolutions
+**
+**	Note:
+**
+**	  For line-drawing in VDI, the background color is fixed as 0
+**	  (i.e., there is no user-settable background color). This fact
+**	  allows coding short-cuts in the implementation of "replace" and
+**	  "not" modes, resulting in faster execution of their inner loops.
+**
+**	input:
+**
+**	   X1,Y1,X2,Y2 = coordinates.
+**	         v_planes = number of video planes. (resolution)
+**	          LN_MASK = line mask. (for dashed/dotted lines)
+**	         WRT_MODE = writing mode.
+**
+**			     0 => replace mode.
+**			     1 => or mode.
+**			     2 => xor mode.
+**			     3 => not or mode.
+**
+**	output:
+**
+**	  LN_MASK rotated to proper alignment with ( X2,Y2 ).
+**
+**
+**	destroys:
+**
+**	    everything.
+**
+**	FEATURES:
+**
+**	 o In the horizontal case, the pattern is not alligned prior to
+**	   the line being drawn, hence the pattern isn't in phase with
+**	   the pattern in the succeeding line. In any case, the entire
+**	   method for aligning horizontal patterns is incorrect.
+**
+**	 o The pattern is always implemented starting at the minimum vertex
+**	   regardless of the intended direction of line segment. hence,
+**	   patterns in consecutive segments are likely not to dovetail or
+**	   to have a reversed pattern.
+**
+**	 o The procedure for preventing the endpoints in consecutive
+**	   segments that are XORed to the destination from cancelling
+**	   is incorrectly implemented. The current method eliminates the
+**	   last point at the maximum vertex regardless of the order of
+**	   the entered verticies (or direction of the preceeding segment).
+**
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -584,7 +582,7 @@ no_trunk:	cmp.w	d4,d6		; X1 must not be greater than X2
 		bge	in_order	; if it is, swap the endpoints
 
 		exg	d4,d6		; d4<-X2  d6<-X1
-		
+
 in_order:	move.w	d6,d1		; d1 <-  Xmax
 		sub.w	d4,d1		; d1 <-  Xmax-Xmin
 		addq.w	#1,d1		; d1 <-  Xmax-Xmin+1
@@ -658,7 +656,7 @@ xy_ok:		sub.w	d4,d6		; d6 <- dX
 
 		neg.w	d7		; d7 <- positive dY
 		neg.w	d0		; d0 <- negative Yinc
-	
+
 dy_ge_0:	move.w	d0,a1		; a1 <- Yinc
 		cmp.w	d6,d7		; which delta is larger?
 		bgt	dmax_dmin	; adjust if dX is larger than dY
@@ -761,7 +759,9 @@ pixfrag: ds.b 0
 
 		movem.w	i_tbl(pc),d0-d1/a1	; cache instr data in registers
 		move.l	a2,a0			; a0 <- working PC
+#if PLANES8
 		move.l	LV(FG_B_PLANES,a4),d2	; a1 -> bitplane color array
+#endif
 
 pf_loop:	roxr.l	#1,d2			; get color for this plane
 		bcs	pf_or			; 0 => AND   1 => OR
@@ -792,7 +792,7 @@ i_tbl:		and.w	d0,(a5)+
 *		a3 = thread back from color pixel fragment	(modes 0,1,2)
 *		a2 = thread into color pixel fragment 		(modes 0,1,2)
 *		a1 = offset to next line in Y
-*		a0 = ptr to destination 
+*		a0 = ptr to destination
 *
 *		d7 = dbra pixel counter
 *		d6 = e2
@@ -835,7 +835,7 @@ wm0y_nxt:	add.w	a1,a0		; a0 -> next vertical word	      8
 		ror.w	#1,d0		; rotate the clr pixel mask	      8
 		ror.w	#1,d1		; rotate the set pixel mask	      8
 		bcc	wm0y_nf		; branch if no word fault	   10/8
-	
+
 		add.w	d3,a0		; a0 -> next horizontal word	      8
 
 wm0y_nf:	add.w	d6,d4		; d4 <- epsilon + e2		      4
@@ -870,7 +870,7 @@ wm1y_nxt:	add.w	a1,a0		; a0 -> next vertical word	      8
 		ror.w	#1,d0		; rotate the clr pixel mask	      8
 		ror.w	#1,d1		; rotate the set pixel mask	      8
 		bcc	wm1y_nf		; branch if no word fault	   10/8
-	
+
 		add.w	d3,a0		; a0 -> next horizontal word	      8
 
 wm1y_nf:	add.w	d6,d4		; d4 <- epsilon + e2		      4
@@ -911,7 +911,7 @@ wm2y_nxt:	add.w	a1,a0		; a0 -> next vertical word	      8
 
 		ror.w	#1,d1		; rotate the set pixel mask	      8
 		bcc	wm2y_nf		; branch if no word fault	   10/8
-	
+
 		add.w	d3,a0		; a0 -> next horizontal word	      8
 
 wm2y_nf:	add.w	d6,d4		; d4 <- epsilon + e2		      4
@@ -1047,34 +1047,34 @@ wm2x_nc:	add.w	d5,d4		; d4 <- epsilon + e1		      4
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	HABLINE								     **
-**									     **
-**	This routine draws a line between (X1,Y1) and (X2,Y1) using the	     **
-**	BLASTER hardware bit blt.					     **
-**	The line has attributes of color, pattern, and writing mode	     **
-**									     **
-**	Note that 2 entry points are provided for ABLINE		     **
-**									     **
-**	input:		X1 = minimum X of line	     (assumed to be clipped) **
-**			X2 = maximum X of line	     (assumed to be clipped) **
-**			Y1 = row that line is on     (assumed to be clipped) **
-**		    patmsk = index mask for pattern			     **
-**		    patptr = pointer to start of pattern		     **
-**		 v_planes = number of video planes			     **
-**		 WRT_MODE = writing mode				     **
-**									     **
-**			      0 => replace mode.			     **
-**			      1 => transparent mode.			     **
-**			      2 => xor mode.				     **
-**			      3 => reverse transparent mode.		     **
-**									     **
-**		 V_HLINE = pointer to horizontal line primitive		     **
-**									     **
-**	output:	  nothing is returned					     **
-**									     **
-**	destroys: everything						     **
-**									     **
+**
+**	HABLINE
+**
+**	This routine draws a line between (X1,Y1) and (X2,Y1) using the
+**	BLASTER hardware bit blt.
+**	The line has attributes of color, pattern, and writing mode
+**
+**	Note that 2 entry points are provided for ABLINE
+**
+**	input:		X1 = minimum X of line	     (assumed to be clipped)
+**			X2 = maximum X of line	     (assumed to be clipped)
+**			Y1 = row that line is on     (assumed to be clipped)
+**		    patmsk = index mask for pattern
+**		    patptr = pointer to start of pattern
+**		 v_planes = number of video planes
+**		 WRT_MODE = writing mode
+**
+**			      0 => replace mode.
+**			      1 => transparent mode.
+**			      2 => xor mode.
+**			      3 => reverse transparent mode.
+**
+**		 V_HLINE = pointer to horizontal line primitive
+**
+**	output:	  nothing is returned
+**
+**	destroys: everything
+**
 *******************************************************************************
 *******************************************************************************
 

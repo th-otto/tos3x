@@ -1,21 +1,19 @@
 ********************************  sbscolog.s  *********************************
 *
-* $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbscolog.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 20:19:42 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 20:19:42 $
 * =============================================================================
 *
-* $Log:	sbscolog.s,v $
 * Revision 3.0  91/08/06  20:19:42  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  91/07/08  14:55:58  lozben
 * File created by Slavik Lozben. This file contains the OPAQUE
 * logical operation routines which are used by the main calling
 * routines to perform Source to Destination blits. The assumtion
 * is such that we are dealing with the ST interleved screen memory
 * format.
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -435,7 +433,7 @@ op7_opi:	move.w	(a0)+,d0	; d0 <- S
 op8_opi:	move.w	(a0)+,d0	; d0 <- S
 		or.w	d0,(a1)		; (a1) <- S OR D
 		not.w	(a1)+		; D' <- NOT [S OR D]
-		
+
 *+
 * D' = NOT [S XOR D]
 *-
@@ -455,7 +453,7 @@ opA_opi:	not.w	(a1)+		; D' <- NOT D
 *-
 		dc.w	opC_opi-opB_opi-3
 opB_opi:	move.w	(a0)+,d0	; d0 <- S
-		not.w	(a1)		; 
+		not.w	(a1)		;
 		or.w	d0,(a1)+	; D' <- S OR [NOT D]
 
 *+
@@ -765,7 +763,7 @@ opA_oni:	not.w	-(a1)		; D' <- NOT D
 *-
 		dc.w	opC_oni-opB_oni-3
 opB_oni:	move.w	-(a0),d0	; d0 <- S
-		not.w	-(a1)		; 
+		not.w	-(a1)		;
 		or.w	d0,(a1)		; D' <- S OR [NOT D]
 
 *+
@@ -1944,7 +1942,7 @@ op9Slopi:	move.w	(a0)+,d0		; d0 <- source word
 		eor.w	d1,d0			; d0 <- S XOR D
 		not.w	d0			; d0 <- NOT [S XOR D]
 		move.w	d0,(a1)+		; D  <- NOT [S XOR D]
-		
+
 *+
 * D' = NOT D
 *-
@@ -3516,7 +3514,7 @@ op9Sroni:	move.w	-(a0),d0		; d0 <- source word
 		eor.w	d1,d0			; d0 <- S XOR D
 		not.w	d0			; d0 <- NOT [S XOR D]
 		move.w	d0,(a1)			; D  <- NOT [S XOR D]
-		
+
 *+
 * D' = NOT D
 *-

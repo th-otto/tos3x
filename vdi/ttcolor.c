@@ -1,38 +1,36 @@
 /*
-******************************** ttcolor.c *************************************
-*
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/ttcolor.c,v $
-* ==============================================================================
-* $Author: lozben $	$Date: 91/07/30 16:39:20 $     $Locker:  $
-* ==============================================================================
-*
-* $Log:	ttcolor.c,v $
-* Revision 3.1  91/07/30  16:39:20  lozben
-* Made changes to work with the new linea variable structure.
-* 
-* Revision 3.0  91/01/03  15:20:00  lozben
-* New generation VDI
-* 
-* Revision 2.6  90/06/12  16:43:21  lozben
-* We now map each bank to its own request color area (rezes that have banks).
-* 
-* Revision 2.5  90/05/31  17:46:48  lozben
-* Changed the code so that each bank has its own request color array.
-* This makes sence only in the 320x200, 640x200, 640x480 video modes.
-* 
-* Revision 2.4  90/02/05  17:07:35  lozben
-* Added code to look at the inverse bit in the 640x400x1 mode.
-* 
-* Revision 2.3  89/07/28  21:20:03  lozben
-* We now always (almost always) use MAP_COL[] instead of when the pen is
-* less than 16. Made it so VDI does not know about the togle bit in 640x400
-* duochrome mode.
-* 
-* Revision 2.2  89/04/14  18:49:23  lozben
-* *** Initial Revision ***
-* 
-********************************************************************************
-*/
+ ******************************** ttcolor.c *************************************
+ *
+ * ==============================================================================
+ * $Author: lozben $	$Date: 91/07/30 16:39:20 $
+ * ==============================================================================
+ *
+ * Revision 3.1  91/07/30  16:39:20  lozben
+ * Made changes to work with the new linea variable structure.
+ * 
+ * Revision 3.0  91/01/03  15:20:00  lozben
+ * New generation VDI
+ * 
+ * Revision 2.6  90/06/12  16:43:21  lozben
+ * We now map each bank to its own request color area (rezes that have banks).
+ * 
+ * Revision 2.5  90/05/31  17:46:48  lozben
+ * Changed the code so that each bank has its own request color array.
+ * This makes sence only in the 320x200, 640x200, 640x480 video modes.
+ * 
+ * Revision 2.4  90/02/05  17:07:35  lozben
+ * Added code to look at the inverse bit in the 640x400x1 mode.
+ * 
+ * Revision 2.3  89/07/28  21:20:03  lozben
+ * We now always (almost always) use MAP_COL[] instead of when the pen is
+ * less than 16. Made it so VDI does not know about the togle bit in 640x400
+ * duochrome mode.
+ * 
+ * Revision 2.2  89/04/14  18:49:23  lozben
+ * *** Initial Revision ***
+ * 
+ ********************************************************************************
+ */
 
 #include "vdi.h"
 #include "fontdef.h"
@@ -98,9 +96,11 @@ VOID vs_color(NOTHING)
 	case _640x200:
 	case _640x480:
 
+#if PLANES8
 		temp = (VIDINFO & 15) << 4;		/* temp = bank * 16   */
 		if (temp != 0)
 			rgb = &LV(REQ_X_COL)[temp + pen - 16][0];	/* rgb -> extnded ary */
+#endif
 
 		pen = (MAP_COL[pen] & j) + temp;	/* get lut offset     */
 		break;
@@ -119,8 +119,10 @@ VOID vs_color(NOTHING)
 
 
 	case _320x480:
+#if PLANES8
 		if (pen > 15)
 			rgb = &LV(REQ_X_COL)[pen - 16][0];	/* rgb -> extended col array  */
+#endif
 
 		pen = MAP_COL[pen];				/* get lut offset                 */
 		break;
@@ -222,16 +224,20 @@ VOID vq_color(NOTHING)
 		break;
 
 	case _320x480:
+#if PLANES8
 		if (pen > 15)
 			rgb = &LV(REQ_X_COL)[pen - 16][0];
+#endif
 
 		pen = (MAP_COL[pen] & j);
 		break;
 
 	default:
+#if PLANES8
 		i = (VIDINFO & 15) << 4;		/* i = bank * 16      */
 		if (i != 0)
 			rgb = &LV(REQ_X_COL)[i + pen - 16][0];
+#endif
 
 		pen = (MAP_COL[pen] & j) + i;
 	}

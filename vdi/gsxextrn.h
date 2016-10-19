@@ -1,35 +1,33 @@
 /*
-********************************  gsxextrn.h  *********************************
-*
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/gsxextrn.h,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/09/10 19:55:20 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	gsxextrn.h,v $
-* Revision 3.2  91/09/10  19:55:20  lozben
-* Deleted the extern definition for _q_circle.
-* 
-* Revision 3.1  91/07/29  14:38:48  lozben
-* Declared all the needed externals.
-* 
-* Revision 3.0  91/01/03  15:10:20  lozben
-* New generation VDI
-* 
-* Revision 2.3  89/06/30  17:15:46  lozben
-* Adjusted the declaration LINE_STYLE[] the name was spelled
-* different in three different files (we lucked out because
-* it wasn't the first 8 characters, which makeup the symbol name).
-* 
-* Revision 2.2  89/05/16  16:09:30  lozben
-* Added declarations for FG_B_PLANES & REQ_X_COL, deleted
-* declarations for FG_BP_[1,2,3,4].
-* 
-* Revision 2.1  89/02/21  17:23:01  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-*******************************************************************************
-*/
+ ********************************  gsxextrn.h  *********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/09/10 19:55:20 $
+ * =============================================================================
+ *
+ * Revision 3.2  91/09/10  19:55:20  lozben
+ * Deleted the extern definition for _q_circle.
+ * 
+ * Revision 3.1  91/07/29  14:38:48  lozben
+ * Declared all the needed externals.
+ * 
+ * Revision 3.0  91/01/03  15:10:20  lozben
+ * New generation VDI
+ * 
+ * Revision 2.3  89/06/30  17:15:46  lozben
+ * Adjusted the declaration LINE_STYLE[] the name was spelled
+ * different in three different files (we lucked out because
+ * it wasn't the first 8 characters, which makeup the symbol name).
+ * 
+ * Revision 2.2  89/05/16  16:09:30  lozben
+ * Added declarations for FG_B_PLANES & REQ_X_COL, deleted
+ * declarations for FG_BP_[1,2,3,4].
+ * 
+ * Revision 2.1  89/02/21  17:23:01  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ *******************************************************************************
+ */
 
 #ifndef _GSXEXTRN_H_
 #define _GSXEXTRN_H_
@@ -91,10 +89,13 @@ extern  int16_t    deftxbu[];      /* scratch buf for 8x16 (276 bytes)         *
 extern const SCREENDEF *const devices[];
 #endif
 
-extern FONT_HEAD const first;      /* The small system font                    */
+extern FONT_HEAD const f6x6;      /* The small system font                    */
 extern FONT_HEAD const f8x16;
 extern FONT_HEAD const f8x8;
+#if PLANES8
 extern FONT_HEAD const f16x32;
+#endif
+#define first f6x6
 
 
 extern	FONT_HEAD ram8x16;

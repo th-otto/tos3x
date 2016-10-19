@@ -1,27 +1,25 @@
 /*******************************  vdivar.s  ***********************************
  *
- * $Revision: 3.4 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/vdivar.s,v $
  * ============================================================================
- * $Author: lozben $	$Date: 91/09/10 19:58:36 $     $Locker:  $
+ * $Author: lozben $	$Date: 91/09/10 19:58:36 $
  * ============================================================================
  *
- * $Log:	vdivar.s,v $
  * Revision 3.4  91/09/10  19:58:36  lozben
  * Deleted the _q_circle declaration from the overlay variable space.
- * 
+ *
  * Revision 3.3  91/08/06  20:32:02  lozben
  * Added variables _copytran, fringe0, innerLoop, fringe1
- * 
+ *
  * Revision 3.2  91/07/30  17:44:44  lozben
  * Made some minor adjustments to work with all the vdi files that use this
  * variable space.
- * 
+ *
  * Revision 3.1  91/01/16  12:13:10  lozben
  * Deleted all the non overlay variables (linea var struct).
- * 
+ *
  * Revision 3.0  91/01/03  15:23:20  lozben
  * New generation VDI
- * 
+ *
  ******************************************************************************/
 
 #include "../common/config.h"

@@ -2,12 +2,10 @@
 *******************************  cbssdefs.c  **********************************
 *
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/cbssdefs.c,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/29 11:44:43 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/29 11:44:43 $
 * =============================================================================
 *
-* $Log:	cbssdefs.c,v $
 * Revision 3.1  91/07/29  11:44:43  lozben
 * Declared vdivars structure and a pointer to it and another pointer
 * that point to one of the structures elements.

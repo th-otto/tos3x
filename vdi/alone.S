@@ -1,20 +1,18 @@
 **********************************  alone.s  **********************************
 *
-* $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/alone.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/01/03 15:04:53 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/03 15:04:53 $
 * =============================================================================
 *
-* $Log:	alone.s,v $
 * Revision 3.0  91/01/03  15:04:53  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  90/02/16  12:20:32  lozben
 * Fixed some of the code so that it can be assembled with mas.
-* 
+*
 * Revision 2.1  89/02/21  17:17:43  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -52,7 +50,7 @@ _shifty:	dc.w	0
 ringbell:	movea.l	#0,a5
 		btst.b	#$2,_conterm	; see if bell is disabled
 		beq	rgbel
-	
+
 		move.l	#bellsnd,-(sp)	; push ptr to data for bell
 		move.w	#32,-(sp)	; push func #
 		trap	#14		; xbios

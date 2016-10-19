@@ -1,11 +1,9 @@
 *********************************  sbblit.s  **********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbblit.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 17:34:28 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 17:34:28 $
 * =============================================================================
 *
-* $Log:	sbblit.s,v $
 *******************************************************************************
 
 
@@ -60,28 +58,28 @@ SRC_WR	  equ	-2	; source form wrap (in bytes)			    +74
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	s_xy2addr:							     **
-**									     **
-**		input:	d0.w =  x coordinate				     **
-**			d1.w =  y coordinate				     **
-**			a3.l -> line variable structure			     **
-**			a6.l -> frame					     **
-**									     **
-**		output:	a0.l -> address of word containing x,y		     **
-**									     **
-**									     **
-**	d_xy2addr:							     **
-**									     **
-**		input:	d0.w =  x coordinate.				     **
-**			d1.w =  y coordinate.				     **
-**			a3.l -> line variable structure			     **
-**			a6.l -> frame					     **
-**									     **
-**		output:	a1.l -> address of word containing x,y		     **
-**									     **
-**		destroys: d0,d1						     **
-**									     **
+**
+**	s_xy2addr:
+**
+**		input:	d0.w =  x coordinate
+**			d1.w =  y coordinate
+**			a3.l -> line variable structure
+**			a6.l -> frame
+**
+**		output:	a0.l -> address of word containing x,y
+**
+**
+**	d_xy2addr:
+**
+**		input:	d0.w =  x coordinate.
+**			d1.w =  y coordinate.
+**			a3.l -> line variable structure
+**			a6.l -> frame
+**
+**		output:	a1.l -> address of word containing x,y
+**
+**		destroys: d0,d1
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -98,7 +96,7 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		add.l	d1,a1			; a0 -> (x,y)
 		rts
-	
+
 
 *+
 * purpose:	set up parameters for bitblt and thread together the
@@ -157,7 +155,7 @@ spx8PTab:	lea	pos8Tab,a3		; a3 -> table of 8 bit routines
 tab_set0:	moveq.l	#0,d7			; clear for later use
 		move.b	OP_TAB(a6),d7		; d7 <- logic op for the blit
 		lsl.w	#2,d7			; d7 <- offset into the table
-		move.l	(a3,d7.w),a3		; a3 -> to the desired routine	
+		move.l	(a3,d7.w),a3		; a3 -> to the desired routine
 		jmp	(a3)
 
 pos32Tab:	dc.l	o0P32Line,o1P32Line,o2P32Line,o3P32Line
@@ -260,7 +258,7 @@ o0P32Line:	move.w	d3,d7			; d7 <- # pixels to blit - 1
 o0P32Loop:	clr.l	(a1)+			; D <- 0
 		dbra	d7,o0P32Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
-		dbra	d1,o0P32Line		; do next line	
+		dbra	d1,o0P32Line		; do next line
 		rts
 
 *+
@@ -272,7 +270,7 @@ o1P32Loop:	move.l	(a0)+,d2		; d2 <- S
 		dbra	d7,o1P32Loop		; do inner loop
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
-		dbra	d1,o1P32Line		; do next line	
+		dbra	d1,o1P32Line		; do next line
 		rts
 
 *+
@@ -285,7 +283,7 @@ o2P32Loop:	not.l	(a1)			; D' = NOT D
 		dbra	d7,o2P32Loop		; do inner loop
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
-		dbra	d1,o2P32Line		; do next line	
+		dbra	d1,o2P32Line		; do next line
 		rts
 
 *+
@@ -296,7 +294,7 @@ o3P32Loop:	move.l	(a0)+,(a1)+		; D' = S
 		dbra	d7,o3P32Loop		; do inner loop
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
-		dbra	d1,o3P32Line		; do next line	
+		dbra	d1,o3P32Line		; do next line
 		rts
 
 *+
@@ -309,14 +307,14 @@ o4P32Loop:	move.l	(a0)+,d2		; d2 <- S
 		dbra	d7,o4P32Loop		; do inner loop
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
-		dbra	d1,o4P32Line		; do next line	
+		dbra	d1,o4P32Line		; do next line
 		rts
 
 *+
 * D' = D
 *-
 o5P32Line:	rts
-	
+
 *+
 * D' = S XOR D
 *-
@@ -327,7 +325,7 @@ o6P32Loop:	move.l	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o6P32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR D
@@ -339,7 +337,7 @@ o7P32Loop:	move.l	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o7P32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S OR D]
@@ -352,7 +350,7 @@ o8P32Loop:	move.l	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o8P32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S XOR D]
@@ -365,7 +363,7 @@ o9P32Loop:	move.l	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o9P32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT D
@@ -375,7 +373,7 @@ oAP32Loop:	not.l	(a1)+			; D' = NOT D
 		dbra	d7,o3P32Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oAP32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR [NOT D]
@@ -388,7 +386,7 @@ oBP32Loop:	not.l	(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oBP32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT S
@@ -401,7 +399,7 @@ oCP32Loop:	move.l	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oCP32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] OR D
@@ -414,7 +412,7 @@ oDP32Loop:	move.l	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oDP32Line		; do next line
-		rts		
+		rts
 
 *+
 * NOT [S AND D]
@@ -427,7 +425,7 @@ oEP32Loop:	move.l	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oEP32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = 1
@@ -437,8 +435,8 @@ oFP32Loop:	move.l	#-1,(a1)+		; D' = all ones
 		dbra	d7,oFP32Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oFP32Line		; do next line
-		rts	
-		
+		rts
+
 ******************************************************************************
 ************************** 16 bit case positive case *************************
 ******************************************************************************
@@ -451,7 +449,7 @@ o0P16Loop:	clr.w	(a1)+			; D <- 0
 		dbra	d7,o0P16Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o0P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND D
@@ -463,7 +461,7 @@ o1P16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o1P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND [NOT D]
@@ -476,7 +474,7 @@ o2P16Loop:	not.w	(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o2P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S (Replace Mode)
@@ -487,7 +485,7 @@ o3P16Loop:	move.w	(a0)+,(a1)+		; D' = S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o3P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] AND D (Erase Mode)
@@ -500,13 +498,13 @@ o4P16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o4P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = D
 *-
 o5P16Line:	rts
-	
+
 *+
 * D' = S XOR D
 *-
@@ -517,7 +515,7 @@ o6P16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o6P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR D
@@ -529,7 +527,7 @@ o7P16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o7P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S OR D]
@@ -542,7 +540,7 @@ o8P16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o8P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S XOR D]
@@ -555,7 +553,7 @@ o9P16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o9P16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT D
@@ -565,7 +563,7 @@ oAP16Loop:	not.w	(a1)+			; D' = NOT D
 		dbra	d7,o3P16Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oAP16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR [NOT D]
@@ -578,7 +576,7 @@ oBP16Loop:	not.w	(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oBP16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT S
@@ -591,7 +589,7 @@ oCP16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oCP16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] OR D
@@ -604,7 +602,7 @@ oDP16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oDP16Line		; do next line
-		rts		
+		rts
 
 *+
 * NOT [S AND D]
@@ -617,7 +615,7 @@ oEP16Loop:	move.w	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oEP16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = 1
@@ -627,7 +625,7 @@ oFP16Loop:	move.w	#-1,(a1)+		; D' = all ones
 		dbra	d7,oFP16Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oFP16Line		; do next line
-		rts	
+		rts
 
 ******************************************************************************
 ************************** 8 bit case positive case **************************
@@ -641,7 +639,7 @@ o0P8Loop:	clr.b	(a1)+			; D <- 0
 		dbra	d7,o0P8Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o0P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND D
@@ -653,7 +651,7 @@ o1P8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o1P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND [NOT D]
@@ -666,7 +664,7 @@ o2P8Loop:	not.b	(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o2P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S (Replace Mode)
@@ -677,7 +675,7 @@ o3P8Loop:	move.b	(a0)+,(a1)+		; D' = S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o3P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] AND D (Erase Mode)
@@ -690,13 +688,13 @@ o4P8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o4P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = D
 *-
 o5P8Line:	rts
-	
+
 *+
 * D' = S XOR D
 *-
@@ -707,7 +705,7 @@ o6P8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o6P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR D
@@ -719,7 +717,7 @@ o7P8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o7P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S OR D]
@@ -732,7 +730,7 @@ o8P8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o8P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S XOR D]
@@ -745,7 +743,7 @@ o9P8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o9P8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT D
@@ -755,7 +753,7 @@ oAP8Loop:	not.b	(a1)+			; D' = NOT D
 		dbra	d7,o3P8Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oAP8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR [NOT D]
@@ -768,7 +766,7 @@ oBP8Loop:	not.b	(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oBP8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT S
@@ -781,7 +779,7 @@ oCP8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oCP8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] OR D
@@ -794,7 +792,7 @@ oDP8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oDP8Line		; do next line
-		rts		
+		rts
 
 *+
 * NOT [S AND D]
@@ -807,7 +805,7 @@ oEP8Loop:	move.b	(a0)+,d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oEP8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = 1
@@ -817,8 +815,8 @@ oFP8Loop:	move.b	#-1,(a1)+		; D' = all ones
 		dbra	d7,oFP8Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oFP8Line		; do next line
-		rts	
-		
+		rts
+
 ******************************************************************************
 ******************************* Negative cases *******************************
 ******************************************************************************
@@ -834,7 +832,7 @@ o0N32Loop:	clr.l	-(a1)			; D <- 0
 		dbra	d7,o0N32Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o0N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND D
@@ -846,7 +844,7 @@ o1N32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o1N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND [NOT D]
@@ -859,7 +857,7 @@ o2N32Loop:	not.l	-(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o2N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S (Replace Mode)
@@ -870,7 +868,7 @@ o3N32Loop:	move.l	-(a0),-(a1)		; D' = S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o3N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] AND D (Erase Mode)
@@ -883,13 +881,13 @@ o4N32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o4N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = D
 *-
 o5N32Line:	rts
-	
+
 *+
 * D' = S XOR D
 *-
@@ -900,7 +898,7 @@ o6N32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o6N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR D
@@ -912,7 +910,7 @@ o7N32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o7N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S OR D]
@@ -925,7 +923,7 @@ o8N32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o8N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S XOR D]
@@ -938,7 +936,7 @@ o9N32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o9N32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT D
@@ -948,7 +946,7 @@ oAN32Loop:	not.l	-(a1)			; D' = NOT D
 		dbra	d7,o3N32Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oAN32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR [NOT D]
@@ -961,7 +959,7 @@ oBN32Loop:	not.l	-(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oBN32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT S
@@ -974,7 +972,7 @@ oCN32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oCN32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] OR D
@@ -987,7 +985,7 @@ oDN32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oDN32Line		; do next line
-		rts		
+		rts
 
 *+
 * NOT [S AND D]
@@ -1000,7 +998,7 @@ oEN32Loop:	move.l	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oEN32Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = 1
@@ -1010,8 +1008,8 @@ oFN32Loop:	move.l	#-1,-(a1)		; D' = all ones
 		dbra	d7,oFN32Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oFN32Line		; do next line
-		rts	
-		
+		rts
+
 ******************************************************************************
 ************************** 16 bit case negative case *************************
 ******************************************************************************
@@ -1024,7 +1022,7 @@ o0N16Loop:	clr.w	-(a1)			; D <- 0
 		dbra	d7,o0N16Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o0N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND D
@@ -1036,7 +1034,7 @@ o1N16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o1N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND [NOT D]
@@ -1049,7 +1047,7 @@ o2N16Loop:	not.w	-(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o2N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S (Replace Mode)
@@ -1060,7 +1058,7 @@ o3N16Loop:	move.w	-(a0),-(a1)		; D' = S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o3N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] AND D (Erase Mode)
@@ -1073,13 +1071,13 @@ o4N16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o4N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = D
 *-
 o5N16Line:	rts
-	
+
 *+
 * D' = S XOR D
 *-
@@ -1090,7 +1088,7 @@ o6N16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o6N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR D
@@ -1102,7 +1100,7 @@ o7N16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o7N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S OR D]
@@ -1115,7 +1113,7 @@ o8N16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o8N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S XOR D]
@@ -1128,7 +1126,7 @@ o9N16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o9N16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT D
@@ -1138,7 +1136,7 @@ oAN16Loop:	not.w	-(a1)			; D' = NOT D
 		dbra	d7,o3N16Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oAN16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR [NOT D]
@@ -1151,7 +1149,7 @@ oBN16Loop:	not.w	-(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oBN16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT S
@@ -1164,7 +1162,7 @@ oCN16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oCN16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] OR D
@@ -1177,7 +1175,7 @@ oDN16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oDN16Line		; do next line
-		rts		
+		rts
 
 *+
 * NOT [S AND D]
@@ -1190,7 +1188,7 @@ oEN16Loop:	move.w	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oEN16Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = 1
@@ -1200,8 +1198,8 @@ oFN16Loop:	move.w	#-1,-(a1)		; D' = all ones
 		dbra	d7,oFN16Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oFN16Line		; do next line
-		rts	
-		
+		rts
+
 ******************************************************************************
 ************************** 8 bit case negative case **************************
 ******************************************************************************
@@ -1214,7 +1212,7 @@ o0N8Loop:	clr.b	-(a1)			; D <- 0
 		dbra	d7,o0N8Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o0N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND D
@@ -1226,7 +1224,7 @@ o1N8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o1N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S AND [NOT D]
@@ -1239,7 +1237,7 @@ o2N8Loop:	not.b	-(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o2N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S (Replace Mode)
@@ -1250,7 +1248,7 @@ o3N8Loop:	move.b	-(a0),-(a1)		; D' = S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o3N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] AND D (Erase Mode)
@@ -1263,13 +1261,13 @@ o4N8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o4N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = D
 *-
 o5N8Line:	rts
-	
+
 *+
 * D' = S XOR D
 *-
@@ -1280,7 +1278,7 @@ o6N8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o6N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR D
@@ -1292,7 +1290,7 @@ o7N8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o7N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S OR D]
@@ -1305,7 +1303,7 @@ o8N8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o8N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT [S XOR D]
@@ -1318,7 +1316,7 @@ o9N8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,o9N8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT D
@@ -1328,7 +1326,7 @@ oAN8Loop:	not.b	-(a1)			; D' = NOT D
 		dbra	d7,o3N8Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oAN8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = S OR [NOT D]
@@ -1341,7 +1339,7 @@ oBN8Loop:	not.b	-(a1)			; D' = NOT D
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oBN8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = NOT S
@@ -1354,7 +1352,7 @@ oCN8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oCN8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = [NOT S] OR D
@@ -1367,7 +1365,7 @@ oDN8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oDN8Line		; do next line
-		rts		
+		rts
 
 *+
 * NOT [S AND D]
@@ -1380,7 +1378,7 @@ oEN8Loop:	move.b	-(a0),d2		; d2 <- S
 		add.w	d5,a0			; a0 -> to next source line
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oEN8Line		; do next line
-		rts	
+		rts
 
 *+
 * D' = 1
@@ -1390,6 +1388,6 @@ oFN8Loop:	move.b	#-1,-(a1)		; D' = all ones
 		dbra	d7,oFN8Loop		; do inner loop
 		add.w	d6,a1			; a1 -> to next dest line
 		dbra	d1,oFN8Line		; do next line
-		rts	
+		rts
 
 #endif

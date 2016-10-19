@@ -1,37 +1,35 @@
 *******************************  line1010.s  *********************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/line1010.s,v $
 * ============================================================================
-* $Author: lozben $	$Date: 91/07/29 14:49:28 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/29 14:49:28 $
 * ============================================================================
 *
-* $Log:	line1010.s,v $
 * Revision 3.2  91/07/29  14:49:28  lozben
 * Got rid of some useless equates.
-* 
+*
 * Revision 3.1  91/02/08  17:29:59  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:12:12  lozben
 * New generation VDI
-* 
+*
 * Revision 2.5  90/02/16  12:23:08  lozben
 * Fixed some of the code so that it can be assembled with mas.
-* 
+*
 * Revision 2.4  89/10/10  14:55:40  lozben
 * Fixed a bug. HABLINE() was not vectored properly.
-* 
+*
 * Revision 2.3  89/07/11  16:01:24  lozben
 * Added 16x32 system font to the font list
-* 
+*
 * Revision 2.2  89/05/23  16:49:45  lozben
 * Revectored all the lineA routines which used to use bit plane
 * flags. Now the flags are used to set a color index then old
 * routines are called.
-* 
+*
 * Revision 2.1  89/02/21  17:23:31  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 ******************************************************************************
 
 #include "../common/config.h"
@@ -97,41 +95,46 @@ set_index:
 		LA(a4)
 		clr.l	d0			; clear color index
 		lea	LV(FG_BP_1,a4),a3		; a3 -> 1st 4 back plane flags
+#if PLANES8
 		lea	LV(FG_BP_5,a4),a5		; a5 -> 2nd 4 back plane flags
+#endif
 
 		tst.w	(a3)+
 		beq	bp2
 		bset.l	#0,d0
 
-bp2:		tst.w	(a3)+
+bp2:	tst.w	(a3)+
 		beq	bp3
 		bset.l	#1,d0
 
-bp3:		tst.w	(a3)+
+bp3:	tst.w	(a3)+
 		beq	bp4
 		bset.l	#2,d0
 
-bp4:		tst.w	(a3)+
+bp4:	tst.w	(a3)+
 		beq	bp5
 		bset.l	#3,d0
 
-bp5:		tst.w	(a5)+
+bp5:	tst.w	(a5)+
 		beq	bp6
 		bset.l	#4,d0
 
-bp6:		tst.w	(a5)+
+bp6:	tst.w	(a5)+
 		beq	bp7
 		bset.l	#5,d0
 
-bp7:		tst.w	(a5)+
+bp7:	tst.w	(a5)+
 		beq	bp8
 		bset.l	#6,d0
 
-bp8:		tst.w	(a5)+
+bp8:	tst.w	(a5)+
 		beq	bp9
 		bset.l	#7,d0
 
-bp9:		move.l	d0,LV(FG_B_PLANES,a4)	; copy the color index
+bp9:
+#if PLANES8
+		move.l	d0,LV(FG_B_PLANES,a4)	; copy the color index
+#endif
 		rts
 
 
@@ -140,7 +143,13 @@ bp9:		move.l	d0,LV(FG_B_PLANES,a4)	; copy the color index
 * pointer to system fonts
 *-
 /* 306de: 00e07a20 */
-fonts:		dc.l	_first,_f8x8,_f8x16,_f16x32,0
+fonts:	dc.l	_f6x6
+		dc.l	_f8x8
+		dc.l	_f8x16
+#if PLANES8
+		dc.l	_f16x32
+#endif
+		dc.l	0
 
 
 		xdef	_retfalse

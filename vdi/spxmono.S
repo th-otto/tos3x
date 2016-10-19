@@ -1,11 +1,9 @@
 ********************************  spxmono.s  **********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbmono.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/30 12:53:40 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/30 12:53:40 $
 * =============================================================================
 *
-* $Log:	sbmono.s,v $
 *******************************************************************************
 
 #include "../common/config.h"
@@ -14,7 +12,7 @@
 
 
 *******************************************************************************
-*	
+*
 * purpose:  This routine performs a byte aligned block transfer for the
 *           purpose of manipulating monospaced byte-wide text. the routine
 *           maps an single plane arbitrarilly long byte-wide image to a
@@ -70,7 +68,7 @@ spx16Tab:
 	lea	Mono16Tab,a6		; a6 -> table of 16 bit routines
 	bra	tab_set
 
-spx8Tab:	
+spx8Tab:
 	lea	Mono8Tab,a6		; a6 -> table of 8 bit routines
 
 tab_set:

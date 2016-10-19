@@ -1,28 +1,26 @@
 *********************************  sbscrn.s  **********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbscrn.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 20:05:51 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 20:05:51 $
 * =============================================================================
 *
-* $Log:	sbscrn.s,v $
 * Revision 3.1  91/08/06  20:05:51  lozben
 * We now use _copytran in the overlay variable space rather than
 * _COPYTRAN a linea structure variable.
-* 
+*
 * Revision 3.0  91/08/06  19:34:05  lozben
 * New generation VDI
-* 
+*
 * Revision 2.4  91/07/08  16:26:22  lozben
 * Made changes so that we can perform new TRANSPARENT and OPAQUE
 * blit operations (we created new better routines).
-* 
+*
 * Revision 2.3  90/01/11  12:24:15  lozben
 * Added routine to do unaligned src to dst blit. Memory is interleaved.
-* 
+*
 * Revision 2.2  89/12/07  14:42:37  lozben
 * *** Initial Revision ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -172,7 +170,7 @@ set_fringe:	move.w	d4,a4		; source wrap       (SRC_WR)
 		move.w	D_XMIN(a6),d7	; min X dst
 		and.w	#15,d6		; d6 <- Xmin src mod 16
 		and.w	#15,d7		; d7 <- Xmin src mod 16
-		sub.w	d6,d7		; d7 <- (Sxmin mod 16) - (Dxmin mod 16)	
+		sub.w	d6,d7		; d7 <- (Sxmin mod 16) - (Dxmin mod 16)
 		bne	unaligned	; do unaligned blit
 
 		bsr	get_fringe
@@ -300,7 +298,7 @@ leave:		rts
 *+
 * Neg case
 *-
-f1_neg:		move.w	a2,d5		; d5 <- planes - 1	
+f1_neg:		move.w	a2,d5		; d5 <- planes - 1
 f1_neg_loop:	move.w	-(a0),d0	; d0 <- 1st SOURCE word
 		move.w	-(a1),d1	; d1 <- 1st DESTINATION word
 		eor.w	d1,d0		;
@@ -496,7 +494,7 @@ cslp3:		move.w	#$ffff,d6
 		not.w	d6			; d6 <- MASK3
 		move.w	d6,MASK3(a6)		; save MASK3
 		bra 	unlgnSetup
-		
+
 cslp1:		sub.w	d4,a5			; adjust offset to nxt dst wrd
 		neg.w	d1
 		lsl.w	d1,d6			; clear out the needed bits
@@ -513,7 +511,7 @@ shiftNeg:	move.w	S_XMAX(a6),d0		; d0 <- source x max
 		and.w	#15,d2			; d2 <- strt pix in the wrd dst
 		cmp.w	d0,d2
 		blt	csln0			; if > 0 do shift left
-		
+
 *+
 * case shift right negative
 *-
@@ -547,7 +545,7 @@ csrn3:		move.w	#$ffff,d6
 		clr.w	MASK3(a6)		; save MASK3
 		sub.w	d4,a5			; adjust offset to nxt dst wrd
 		bra.s 	unlgnSetup
-		
+
 csrn1:		add.w	#16,d1			; d1 <- D_XMIN mod 16
 		move.w	d6,MASK2(a6)		; save MASK2
 		lsr.w	d1,d6			; d6 <- MASK3
@@ -585,7 +583,7 @@ csln3:		move.w	#$ffff,d6
 		move.w	d6,MASK2(a6)		; save MASK2
 		clr.w	MASK3(a6)		; save MASK3
 		bra 	unlgnSetup
-		
+
 csln1:		add.w	d4,a5			; adjust offset to nxt dst wrd
 		neg	d1
 		move.w	d6,MASK2(a6)		; save MASK2

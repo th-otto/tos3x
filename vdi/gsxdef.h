@@ -1,36 +1,34 @@
 /*
-*********************************  gsxdef.h  **********************************
-*
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/gsxdef.h,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/07/29 14:30:19 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	gsxdef.h,v $
-* Revision 3.1  91/07/29  14:30:19  lozben
-* Created ABS() macro.
-* 
-* Revision 3.0  91/01/03  15:10:14  lozben
-* New generation VDI
-* 
-* Revision 2.5  90/04/03  13:55:13  lozben
-* Added a "#define BLTPRFRM". The number reflects (not really) the blit
-* performance.
-* 
-* Revision 2.4  90/03/01  12:20:30  lozben
-* Added a comment to look for on the line which is system dependent.
-* 
-* Revision 2.3  89/07/28  21:28:14  lozben
-* Dleted "#define MAX_COL", not used any more.
-* 
-* Revision 2.2  89/04/13  20:28:03  lozben
-* Added define MAX_PAL (size of the palette)
-* 
-* Revision 2.1  89/02/21  17:22:56  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-*******************************************************************************
-*/
+ *********************************  gsxdef.h  **********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/07/29 14:30:19 $
+ * =============================================================================
+ *
+ * Revision 3.1  91/07/29  14:30:19  lozben
+ * Created ABS() macro.
+ * 
+ * Revision 3.0  91/01/03  15:10:14  lozben
+ * New generation VDI
+ * 
+ * Revision 2.5  90/04/03  13:55:13  lozben
+ * Added a "#define BLTPRFRM". The number reflects (not really) the blit
+ * performance.
+ * 
+ * Revision 2.4  90/03/01  12:20:30  lozben
+ * Added a comment to look for on the line which is system dependent.
+ * 
+ * Revision 2.3  89/07/28  21:28:14  lozben
+ * Dleted "#define MAX_COL", not used any more.
+ * 
+ * Revision 2.2  89/04/13  20:28:03  lozben
+ * Added define MAX_PAL (size of the palette)
+ * 
+ * Revision 2.1  89/02/21  17:22:56  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ *******************************************************************************
+ */
 #ifndef _GSXDEF_H_
 #define _GSXDEF_H_
 

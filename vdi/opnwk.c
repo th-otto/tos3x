@@ -1,14 +1,12 @@
 /*
-********************************  opnwk.c   ***********************************
-*
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/ttc.c,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/07/30 15:52:15 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	ttc.c,v $
-*******************************************************************************
-*/
+ ********************************  opnwk.c   ***********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/07/30 15:52:15 $
+ * =============================================================================
+ *
+ *******************************************************************************
+ */
 
 #include "vdi.h"
 #include "fontdef.h"
@@ -127,6 +125,7 @@ VOID v_opnwk(NOTHING)
 #else
 
 	UNUSED(unused);
+	UNUSED(j);
 	
 	EsetGray(0);
 	EsetBank(0);
@@ -162,6 +161,7 @@ VOID v_opnwk(NOTHING)
 		ram8x16.flags |= DEFAULT;
 		break;
 
+#if PLANES8
 	case _640x480:
 		LV(DEV_TAB)[0] = 640 - 1;		/* X max                      */
 		LV(DEV_TAB)[1] = 480 - 1;		/* Y max                      */
@@ -198,6 +198,7 @@ VOID v_opnwk(NOTHING)
 		ram8x8.flags &= ~DEFAULT;
 		ram8x16.flags |= DEFAULT;
 		break;
+#endif
 	
 	case 3:
 	case 5:
@@ -264,6 +265,7 @@ VOID v_opnwk(NOTHING)
 			*dp++ = *(sp + 2);
 		}
 
+#if PLANES8
 		dp = &LV(REQ_X_COL)[0][0];
 		for (i = 1; i < 16; i++)
 		{
@@ -278,6 +280,7 @@ VOID v_opnwk(NOTHING)
 			}
 		}
 		EsetBank(0);					/* restore to bank 0        */
+#endif
 		break;
 
 	case _640x400:
@@ -292,6 +295,7 @@ VOID v_opnwk(NOTHING)
 		}
 		break;
 
+#if PLANES8
 	case _320x480:
 		for (i = 0; i < 16; i++)
 		{
@@ -315,6 +319,7 @@ VOID v_opnwk(NOTHING)
 			*dp++ = sp[2];
 		}
 		break;
+#endif
 	}
 
 	LV(CONTRL) = old_contrl;

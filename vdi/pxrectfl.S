@@ -1,11 +1,9 @@
-******************************** routines.s ***********************************
+******************************** pxrectf.s ************************************
 *
-* $Revision: 3.3 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/mouse.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/30 12:18:47 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/30 12:18:47 $
 * =============================================================================
 *
-* $Log:	mouse.s,v $
 *******************************************************************************
 
 #include "../common/config.h"
@@ -88,7 +86,7 @@ rf_yclip:
 	cmp.w	d1,d5			; Y1 < clipping Ymin ?
 	bge	rf_ymax			; no  => Y1 is in bounds
 	cmp.w	d1,d7			; Y2 < clipping Ymin ?
-	blt	rf_null			; yes => null rectangle 
+	blt	rf_null			; yes => null rectangle
 
 	move.w	d1,d5			; d5 <- clipped Y1
 
@@ -97,7 +95,7 @@ rf_ymax:
 	cmp.w	d3,d7			; Y2 > clipping Ymax ?
 	ble	rf_rsave		; no  => Y2 is in bounds
 	cmp.w	d3,d5			; Y1 > clipping Ymax ?
-	bgt	rf_null			; yes => null rectangle 
+	bgt	rf_null			; yes => null rectangle
 
 	move.w	d3,d7			; d7 <- clipped Y2
 

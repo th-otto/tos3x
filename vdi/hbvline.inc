@@ -1,11 +1,9 @@
 ****************************  hbline.s  ********************************
 *
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/hbline.s,v $
 * =======================================================================
-* $Author: lozben $	$Date: 91/02/13 18:34:26 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/13 18:34:26 $
 * =======================================================================
 *
-* $Log:	hbline.s,v $
 * Revision 3.2  91/02/13  18:34:26  lozben
 * Adjusted the spelling of some of the linea equates to correspond
 * to the ones in the lineaequ.s file.
@@ -34,7 +32,9 @@
 
 		xref	BLASTER
 
-B_OFF		equ	 60		; offset to reference register
+#ifndef B_OFF /* must match definitions in hbhline.inc */
+/* offset to reference register */
+#define B_OFF		 60
 
 B_PATTERN	equ	-60 		; pattern register file
 B_S_NXWD	equ	-28 		; offset to next src word
@@ -68,6 +68,7 @@ BM_HOG		equ  	$4000		; hog dma mask
 BM_SM		equ  	$2000		; smudge mask
 BM_PF		equ  	$0080		; pre-fetch mask
 BM_FQ		equ  	$0040		; flush queue mask
+#endif
 
 	text
 

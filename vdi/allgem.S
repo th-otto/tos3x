@@ -1,11 +1,9 @@
 *********************************  allgem.s  ***********************************
 *
-* $Revision: 3.5 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/ttgem.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/30 16:01:22 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/30 16:01:22 $
 * =============================================================================
 *
-* $Log:	ttgem.s,v $
 *******************************************************************************
 
 #include "../common/config.h"
@@ -72,7 +70,7 @@ _v_clrwk: PIXLA(a0)
 		mulu.w	PIXLV(v_hz_rez,a0),d0		; d0 <- (planes) x (hor rez)
 		mulu.w	PIXLV(v_vt_rez,a0),d0		; d0 <- (plns)x(hrez)x(vrt rz)
 		lsr.l	#3,d0			; d0 <- # bytes to clr (screen)
-			
+
 		move.l	_v_bas_ad,-(sp)
 		add.l	d0,(sp)			; ending addr
 		move.l	_v_bas_ad,-(sp)		; starting address
@@ -224,7 +222,7 @@ _FindDevice:
         move.b    _sshiftmod,d0 ; sshiftmod
         movea.l   PIXLV(INTIN,a2),a0
         move.w    (a0),d1
-        cmp.w     #STAYINDEV,d1 
+        cmp.w     #STAYINDEV,d1
         beq.s     FindDev3
         cmp.w     #DEFREZ,d0
         beq.s     FindDev3
@@ -347,7 +345,7 @@ _DINIT_G:	PIXLA(a1)
 *				      2	 button pressed
 *
 *				TERM_CH	 16 bit char info
-*				
+*
 *******************************************************************************
 
    		xdef	_GCHC_KEY
@@ -380,18 +378,18 @@ _GCHC_KEY:	PIXLA(a1)
 *			   Y1 = new Y
 *
 *		3	- button or key pressed and new coordinates
-*			
+*
 *			   TERM_CH = 16 bit char info
 *			   X1 = new X
 *			   Y1 = new Y
 *
-* 	NOTE:	THIS ROUTINE REPORTS THE LAST CHANGE IN BUTTON STATE 
+* 	NOTE:	THIS ROUTINE REPORTS THE LAST CHANGE IN BUTTON STATE
 *		RATHER THAN REPORTING THE BUTTON STATE ITSELF. THE
 *		BUTTON STATE CHANGE FLAGS AND MOTION FLAG ARE CLEARED
-*		ON EXIT SO THAT SUBSEQUENT CALLS TO THE ROUTINE WILL NOT 
+*		ON EXIT SO THAT SUBSEQUENT CALLS TO THE ROUTINE WILL NOT
 *		YIELD DUPLICATE REPORTS OF THE SAME EVENT. WHEN USING THIS
-*		ROUTINE TO POLL THE MOUSE FOR A PARTICULAR CONDITION, THE 
-*		FIRST CALL MAY NOT RETURN CURRENT BUTTON CHANGE STATE DATA 
+*		ROUTINE TO POLL THE MOUSE FOR A PARTICULAR CONDITION, THE
+*		FIRST CALL MAY NOT RETURN CURRENT BUTTON CHANGE STATE DATA
 *		BUT IT WILL INITIALIZE THE SYSTEM FOR SUBSEQUENT CALLS.
 *
 *******************************************************************************
@@ -565,7 +563,7 @@ dinit_mouse:	move.l	_vblqueue,a0	; remove draw routine from vblank queue
 
 		rts
 
-	
+
 *******************************************************************************
 *			    escape initialization 			      *
 *******************************************************************************
@@ -641,7 +639,7 @@ esc4:		move.l	PIXLV(LA_CURDEV,a1),a0		; a0 -> curr device structure
 esc2:
 #if VIDEL_SUPPORT
 		move.w	#0,byt_per_pix(a1)		; assume 0 bytes/pix
-		move.w	DEVFORMID(a0),form_id(a1)   	; init mem config flag 
+		move.w	DEVFORMID(a0),form_id(a1)   	; init mem config flag
 		cmp.w	#PIXPACKED,DEVFORMID(a0)     	; see if in pix packed
 		bne	esc0
 		move.w	PIXLV(v_planes,a1),d1	; # of planes
@@ -721,10 +719,12 @@ esc3:		move.l	_v_bas_ad,PIXLV(v_cur_ad,a1)	; home cursor.
 #else
 
 /* 306de: 00e0694a */
+/* 206de: 00e072ca */
 		xdef	esc_init
 		xdef	_esc_init
 esc_init:
 _esc_init:
+#if PLANES8
         moveq.l   #0,d0
         move.b    _sshiftmod,d0
         bsr       rezinit
@@ -743,6 +743,23 @@ esc1:
         beq.s     esc2
         lea.l     _f16x32,a0
 esc2:
+#else
+        move.b    _sshiftmod,d0
+        moveq.l   #3,d1
+        and.w     d1,d0
+        cmp.w     d1,d0
+        bne.s     esc0
+        moveq.l   #2,d0
+esc0:
+		move.w    d0,-(a7)
+        bsr       rezinit
+        lea.l     _f8x8,a0
+        move.w    (a7)+,d0
+        cmp.w     #2,d0
+        bne.s     esc1
+        lea.l     _f8x16,a0
+esc1:
+#endif
         bsr       gl_f_init
         clr.w     d0
         move.w    d0,PIXLV(v_col_bg,a1)		; background color is all zeroes
@@ -763,6 +780,7 @@ esc2:
         bra       _v_clrwk
 
 /* 306de: 00e069f4 */
+/* 206de: 00e07354 */
 		xdef resetdev
 resetdev:
         move.l    #_STSoftList,PIXLV(LA_SOFTROUTINES,a1)

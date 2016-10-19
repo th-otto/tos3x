@@ -1,23 +1,21 @@
 *******************************  blastman.s  **********************************
 *
-* $Revision: 3.3 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/blastman.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/02/13 17:51:35 $     $Locker:  $
+* $Author: lozben $	$Date: 91/02/13 17:51:35 $
 * =============================================================================
 *
-* $Log:	blastman.s,v $
 * Revision 3.3  91/02/13  17:51:35  lozben
 * Entered line "xdef KG_BLT" at the top of the file.
-* 
+*
 * Revision 3.2  91/02/12  16:00:06  lozben
 * Forgot to include the file "lineaequ.s".
-* 
+*
 * Revision 3.1  91/01/23  12:36:15  lozben
 * All the linea vars are now referenced off a linea struct pointer.
-* 
+*
 * Revision 3.0  91/01/03  15:06:17  lozben
 * New generation VDI
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -49,8 +47,8 @@ S_XMIN		equ	-62	; minimum X: source
 S_YMIN		equ	-60	; minimum Y: source
 D_XMIN		equ	-48	; minimum X: destination
 D_YMIN		equ	-46	; minimum Y: destination
-S_XMAX		equ	-18	; maximum X: source	
-S_YMAX		equ	-16	; maximum Y: source	
+S_XMAX		equ	-18	; maximum X: source
+S_YMAX		equ	-16	; maximum Y: source
 D_XMAX		equ	-10	; maximum X: destination
 D_YMAX		equ	-8	; maximum Y: destination
 

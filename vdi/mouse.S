@@ -1,56 +1,54 @@
 *********************************  mouse.s  ***********************************
 *
-* $Revision: 3.3 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/mouse.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/30 12:18:47 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/30 12:18:47 $
 * =============================================================================
 *
-* $Log:	mouse.s,v $
 * Revision 3.3  91/07/30  12:18:47  lozben
 * Fixed some bugs created as a result of new linea var structure.
-* 
+*
 * Revision 3.2  91/02/08  17:18:35  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.1  91/01/28  16:48:21  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:13:27  lozben
 * New generation VDI
-* 
+*
 * Revision 2.9  90/07/17  14:24:43  lozben
 * Fixed a bug in cur_diplay(). XOR mode was not working.
-* 
+*
 * Revision 2.8  90/02/16  12:23:15  lozben
 * Fixed some of the code so that it can be assembled with mas.
-* 
+*
 * Revision 2.7  89/10/17  16:38:32  lozben
 * Sped up the mouse code in cur_display.
-* 
+*
 * Revision 2.6  89/05/19  17:43:24  lozben
 * Fixed a bug in curr_replace. It was intorduced while expanding the code
 * to 8 planes. The wrap value value in the register was not extended to long.
-* 
+*
 * Revision 2.5  89/05/15  18:15:02  lozben
 * Fixed cur_replace() routine. Mouse background was sometimes
 * drawn with a wrong color.
-* 
+*
 * Revision 2.4  89/05/04  18:24:02  lozben
 * Made mouse code faster. It now draws all planes at a time.
-* 
+*
 * Revision 2.3  89/04/24  18:03:35  lozben
 * Changed cur_replace() to deal with 8 plane case. Also started
 * using variable v_vt_rez, v_hz_rez instead of DEVTAB[0], DEVTAB[1].
-* This way when you set rez esc_init also initializes clipping 
+* This way when you set rez esc_init also initializes clipping
 * boundaries for the mouse cursor.
-* 
+*
 * Revision 2.2  89/04/14  14:38:12  lozben
 * Mouse now gets cliped if it's on the sixteenth pixel away from
 * the right edge. It wasn't clipped before and it should have been.
-* 
+*
 * Revision 2.1  89/02/21  17:24:32  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 
@@ -71,7 +69,7 @@
 *******************************************************************************
 
 /* 306de: 00e0c300 */
-		xdef	mouse_rel	
+		xdef	mouse_rel
 mouse_rel:	movem.l	d0-d7/a0-a6,-(sp)
 		PIXLA(a2)
 
@@ -194,7 +192,7 @@ cur_display:
 		move.l	V_SHOWCUR(a1),a1	; a1 -> display cursor routine
 		jmp	(a1)
 #endif
-		
+
 *******************************************************************************
 *
 * cur_replace - go to the proper cursor hide routine
@@ -233,7 +231,7 @@ _MOV_CUR: PIXLA(a0)
 
 *  V-BLANK CURSOR REDRAW
 *
-*  If the draw packet flag is set, The cursor form is removed from its 
+*  If the draw packet flag is set, The cursor form is removed from its
 *  prior location and redrawn in at the position specified in the draw packet.
 *  If either HIDE_CNT or mouse_flag are non-zero, the cursor will not be
 *  relocated.
@@ -262,7 +260,9 @@ vb_draw:	PIXLA(a5)
 #else
 		movem.w	d0-d1,-(sp)		; Save new xy
 #endif
+#if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
+#endif
 		bsr	cur_replace		; Undraw old cursor
 #if MULTI_LINEA
 		movem.l	(sp)+,d0-d1/a5		; Restore new xy
@@ -270,8 +270,10 @@ vb_draw:	PIXLA(a5)
 		movem.w	(sp)+,d0-d1			; Restore new xy
 #endif
 
-		lea	PIXLV(mouse_cdb,a5),a0	; a0 -> CDB	
+		lea	PIXLV(mouse_cdb,a5),a0	; a0 -> CDB
+#if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
+#endif
 		bsr	cur_display		; and draw new cursor
 
 vblank_exit:	rts
@@ -333,10 +335,10 @@ _vex_curv: PIXLA(a1)
 
 
 *******************************************************************************
-*	                           
+*
 * name:	st_cur_display
-*                            
-* purpose:      this routine BLiTs a "cursor" to the destination by 
+*
+* purpose:      this routine BLiTs a "cursor" to the destination by
 *		combining a background color form, foreground color form,
 *		and destination: There are two forms. each form is blt'ed
 *		in transparent mode. The logic operation is based upon the
@@ -362,11 +364,11 @@ _vex_curv: PIXLA(a1)
 *
 *		d0.w		cursor x
 *		d1.w		cursor y
-* 
+*
 *		clobbered:	everything
 *
 ******************************************************************************
-                             
+
 
 /* == 0 */
 #define C_XHOT
@@ -385,8 +387,8 @@ SV_BUF		equ	8
 SP_OFF		equ	0
 SP_FG		equ	2
 SP_BG		equ	4
-                             
-RTN_REC	       	equ    	2*4		
+
+RTN_REC	       	equ    	2*4
 LF_OFF		equ	RTN_REC*1
 RT_OFF		equ	RTN_REC*2
 
@@ -442,7 +444,7 @@ clip_x:		clr.w	d2			; d2 <- routine offset
 
 
 clip_left:	add.w	#16,d0			; get address of right word
-		moveq.l	#LF_OFF,d2		; d2 indexes left 
+		moveq.l	#LF_OFF,d2		; d2 indexes left
 		bra	clip_y			; clip routine addresses
 
 clip_right:	moveq.l	#RT_OFF,d2		; d2 indexes to rt clip addr
@@ -451,7 +453,7 @@ clip_y:		sub.w	C_YHOT(a0),d1		; d1 <- hi y : dst block
 		lea	C_MSKFRM(a0),a0		; a0 -> MASK/FORM for cursor
 		bcs	clip_up			; if y<0 clip top of form
 
-		move.w	PIXLV(v_vt_rez,a4),d3		; check for clip at 
+		move.w	PIXLV(v_vt_rez,a4),d3		; check for clip at
 		sub.w	#16,d3			; bottom of screen
 		cmp.w	d3,d1
 		bhi	clip_down
@@ -464,7 +466,7 @@ clip_up:	move.w	d1,d5			; calculate row count
 		add.w	#16,d5
 
 		asl.w	#2,d1			; a0 -> first visible row
-		suba.w	d1,a0			; of MASK/FORM 
+		suba.w	d1,a0			; of MASK/FORM
 
 		clr.w	d1			; ymin=0
 		bra	get_addr
@@ -473,7 +475,7 @@ clip_up:	move.w	d1,d5			; calculate row count
 clip_down:	move.w	PIXLV(v_vt_rez,a4),d5		; d5 <- last row on screen + 1
 		sub.w	d1,d5			; d5 <- row count
 
-get_addr:	bsr	concat			; x:d0 y:d1   starting offset 
+get_addr:	bsr	concat			; x:d0 y:d1   starting offset
 
 		move.l	_v_bas_ad,a1
 		adda.l	d1,a1			; a1 -> dst
@@ -511,7 +513,7 @@ p_loop:		clr.w	d0			; make two bit op_tab index
 
 
 *   6.	init:
-*		
+*
 *		a. save area address
 *		b. save area length (per plane)
 *		c. use table to load fetch/store pointers
@@ -522,7 +524,7 @@ init:		move.w	d5,d6			; d6 <- row count
 		tst.w	d2			; see if are saving long words
 		bne	init2
 		add.w	d6,d6			; make d6 long word offset
-		
+
 init2:		move.l	rtn_tab+00(pc,d2.w),a5	; a5 -> store routine
 
 		move.l	a1,SV_ADDR(a2)		; save area: origin of material
@@ -538,7 +540,7 @@ init2:		move.l	rtn_tab+00(pc,d2.w),a5	; a5 -> store routine
 		move.w	PIXLV(v_lin_wr,a4),d5	; d5 <- line wrap offset
 		sub.w	d3,d5			; dest ptr has advanced n planes
 
-		move.l	rtn_tab+04(pc,d2.w),a3	; a3 -> entry point 
+		move.l	rtn_tab+04(pc,d2.w),a3	; a3 -> entry point
 		jmp	(a3)
 
 op_tab:		dc.l	s_fg0bg0,s_fg0bg1,s_fg1bg0,s_fg1bg1	; standard
@@ -605,7 +607,7 @@ enter_lw:	dbra	d7,fetch_lw
 		adda.w	d5,a1			; advance dest pointer
 
 r_lw_entry:	swap	d5			; restore row counter
-		dbra	d5,r_lw_loop                  
+		dbra	d5,r_lw_loop
 		move.l	a4,sp			; restore sp
 		rts
 *+
@@ -639,7 +641,7 @@ enter_rt:	dbra	d7,fetch_rt
 		adda.w	d5,a1			; advance dest pointer
 
 r_rt_entry:	swap	d5			; restore row counter
-		dbra	d5,r_rt_loop                  
+		dbra	d5,r_rt_loop
 		move.l	a4,sp			; restore sp
 		rts
 *+
@@ -675,7 +677,7 @@ enter_lf:	dbra	d7,fetch_lf
 		adda.w	d5,a1			; advance dest pointer
 
 r_lf_entry:	swap	d5			; restore row counter
-		dbra	d5,r_lf_loop                  
+		dbra	d5,r_lf_loop
 		move.l	a4,sp			; restore sp
 		rts
 
@@ -699,10 +701,10 @@ r_lf_entry:	swap	d5			; restore row counter
 
 s_fg0bg0:	move.l	d0,d4
 		or.l	d1,d4			* D' <- D and [not [M or F]]
-		not.l	d4		
+		not.l	d4
 		and.l	d4,d2
 		jmp	(a5)
-	
+
 s_fg0bg1:	or.l	d0,d2			* D' <- D or M and [not F]
 		not.l	d1
 		and.l	d1,d2
@@ -717,7 +719,7 @@ s_fg1bg0:	not.l	d0			* D' <- D and [not M] or F
 
 s_fg1bg1:	or.l	d0,d2			* D' <- D or M or F
 		or.l	d1,d2
-		jmp	(a5)	
+		jmp	(a5)
 
 
 
@@ -730,9 +732,9 @@ s_fg1bg1:	or.l	d0,d2			* D' <- D or M or F
 *
 
 x_fg0bg0:	eor.l	d1,d2		; D' <- [D xor F] and [not M]
-		not.l	d0		
+		not.l	d0
 		and.l	d0,d2
-		not.l	d0		
+		not.l	d0
 		jmp	(a5)
 
 x_fg0bg1:	or.l	d0,d2		; D' <- [D or M] xor F
@@ -747,7 +749,7 @@ x_fg1bg0:	not.l	d0		; D' <- [D and [not M]] xor F
 
 x_fg1bg1:	eor.l	d0,d2		; D' <- [D xor F] or M
 		or.l	d1,d2
-		jmp	(a5)	
+		jmp	(a5)
 
 
 
@@ -876,7 +878,7 @@ pln_4:		move.l	a0,a5			; a5 -> current line in plane 1
 * 4 plane: word wide
 *
 		move.l	a1,a2
-		add.w	d4,a2			; a2 -> 2nd plane	
+		add.w	d4,a2			; a2 -> 2nd plane
 		move.l	a2,a3
 		add.w	d4,a3			; a3 -> 3rd plane
 		move.l	a3,a4
@@ -897,7 +899,7 @@ pl4_wd_loop:	move.w	(a1)+,(a0)+		; store 1st plane
 *
 pl4_lw_enter:	add.w	d4,d4			; d4 <- plane offset
 		move.l	a1,a2			; set up pointers to each plane
-		add.w	d4,a2	
+		add.w	d4,a2
 		move.l	a2,a3
 		add.w	d4,a3
 		move.l	a3,a4
@@ -930,7 +932,7 @@ pln_8:		move.l	a0,d1			; d1 -> current line in plane 1
 * 8 plane: word wide
 *
 		move.l	a1,a2
-		add.w	d4,a2			; a2 -> 2nd plane	
+		add.w	d4,a2			; a2 -> 2nd plane
 		move.l	a2,a3
 		add.w	d4,a3			; a3 -> 3rd plane
 		move.l	a3,a4
@@ -963,7 +965,7 @@ pl8_wd_loop:	move.w	(a1)+,(a0)+		; store 1st plane
 *
 pl8_lw_enter:	add.w	d4,d4			; d4 <- plane offset
 		move.l	a1,a2
-		add.w	d4,a2			; a2 -> 2nd plane	
+		add.w	d4,a2			; a2 -> 2nd plane
 		move.l	a2,a3
 		add.w	d4,a3			; a3 -> 3rd plane
 		move.l	a3,a4
@@ -1013,9 +1015,11 @@ _HIDE_CUR:	PIXLA(a5)
 		addq.w	#1,(a2)			; increment hide count
 		cmp.w	#1,(a2)			; count =1 => hide the cursor
 		bne	hid_cur1
-	
+
 		move.l	a6,-(sp)
+#if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
+#endif
 		bsr	cur_replace		; turn it off
 		move.l	(sp)+,a6
 
@@ -1024,7 +1028,7 @@ hid_cur1:	rts
 
 * DISPLAY CURSOR
 *
-*   Decrement HIDE_CNT. On transition from 1 to 0, redisplay 
+*   Decrement HIDE_CNT. On transition from 1 to 0, redisplay
 *   cursor form. If HIDE_CNT < 0 , reset it to 0 but don't
 *   redisplay cursor.
 
@@ -1044,8 +1048,8 @@ _DIS_CUR:	PIXLA(a5)
 
 *   Some renegade programs reposition the mouse cursor by hiding the
 *   cursor, loading new values into GCURXY and showing the cursor.
-*   To accomodate this established expectation as well as avoiding 
-*   an unneccessary vblank redraw of the cursor after this routine has 
+*   To accomodate this established expectation as well as avoiding
+*   an unneccessary vblank redraw of the cursor after this routine has
 *   already displayed it, the draw flag in the draw packet is cleared.
 
 		clr.b	PIXLV(draw_flag,a5)		; mark packet data invalid
@@ -1057,7 +1061,9 @@ _DIS_CUR:	PIXLA(a5)
 
 		move.l	a6,-(sp)
 		lea	PIXLV(mouse_cdb,a5),a0	; a0 -> system CDB
+#if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
+#endif
 		bsr	cur_display
 		PIXLA(a5)
 		move.l	(sp)+,a6
@@ -1089,7 +1095,7 @@ DEV_COL equ DEV_TAB+26
 _vsc_form: PIXLA(a2)
 		addq.b	#1,PIXLV(mouse_flag,a2)	; deny access to mouse_cdb
 		move.l	PIXLV(INTIN,a2),a0		; a0 -> new cur def block
-		lea	PIXLV(mouse_cdb,a2),a1	; a1 -> cdb buffer 
+		lea	PIXLV(mouse_cdb,a2),a1	; a1 -> cdb buffer
 
 		move.w	(a0)+,d0		; Get x hot spot
 		and.w	#$000F,d0		; truncate to < 16
@@ -1107,7 +1113,7 @@ _vsc_form: PIXLA(a2)
 
 		moveq.l	#1,d0			; clamp it to 1
 
-xfm_bg_col_ok:	move.l	#_MAP_COL,a1		; convert color index to a pixel value 
+xfm_bg_col_ok:	move.l	#_MAP_COL,a1		; convert color index to a pixel value
 		add.w	d0,d0
 		move.w	0(a1,d0.w),PIXLV(m_cdb_bg,a2)
 
@@ -1128,13 +1134,13 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 		dbra	d0,xfm_move_loop
 
 
-*  If invisible, the new cursor form will be displayed immediately upon the 
-*  SHOW operation. If the cursor is currently visible, the new cursor form 
-*  will be displayed at the next vblank. In previous versions of vsc_form, 
+*  If invisible, the new cursor form will be displayed immediately upon the
+*  SHOW operation. If the cursor is currently visible, the new cursor form
+*  will be displayed at the next vblank. In previous versions of vsc_form,
 *  the new cursor form, if visible, would only be redisplayed at the GCURXY
-*  position only after a mouse interrupt was recieved and processed. In this 
-*  version the new cursor form, if visible, is displayed at the following 
-*  vblank regardless of new mouse events. The vblank draw packet is loaded 
+*  position only after a mouse interrupt was recieved and processed. In this
+*  version the new cursor form, if visible, is displayed at the following
+*  vblank regardless of new mouse events. The vblank draw packet is loaded
 *  with coordinates from GCURXY to maintain behavioral consistancy with
 *  privious systems.
 
@@ -1218,7 +1224,7 @@ rel_pblock:	dc.b	0	; Y=0 at the top of the screen
 * arrow cursor
 
 		xdef	arrow_cdb
-arrow_cdb:	dc.w	1,0,1,0,1    
+arrow_cdb:	dc.w	1,0,1,0,1
 		dc.w	%1100000000000000
 		dc.w	%1110000000000000
 		dc.w	%1111000000000000
@@ -1235,8 +1241,8 @@ arrow_cdb:	dc.w	1,0,1,0,1
 		dc.w	%1000011110000000
 		dc.w	%0000011110000000
 		dc.w	%0000001110000000
-                          
-* arrow data              
+
+* arrow data
 
        	dc.w  	%0000000000000000
 		dc.w	%0100000000000000

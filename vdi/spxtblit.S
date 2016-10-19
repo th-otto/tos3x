@@ -1,11 +1,9 @@
 *********************************  spxtblit.s  ********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbblit.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 17:34:28 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 17:34:28 $
 * =============================================================================
 *
-* $Log:	sbblit.s,v $
 *******************************************************************************
 
 
@@ -61,28 +59,28 @@ SRC_WR	  equ	-2	; source form wrap (in bytes)			    +74
 
 *******************************************************************************
 *******************************************************************************
-**									     **
-**	s_xy2addr:							     **
-**									     **
-**		input:	d0.w =  x coordinate				     **
-**			d1.w =  y coordinate				     **
-**			a3.l -> line variable structure			     **
-**			a6.l -> frame					     **
-**									     **
-**		output:	a0.l -> address of the word containing x,y	     **
-**									     **
-**									     **
-**	d_xy2addr:							     **
-**									     **
-**		input:	d0.w =  x coordinate.				     **
-**			d1.w =  y coordinate.				     **
-**			a3.l -> line variable structure			     **
-**			a6.l -> frame					     **
-**									     **
-**		output:	a1.l -> address of byte containing x,y		     **
-**									     **
-**		destroys: d0,d1						     **
-**									     **
+**
+**	s_xy2addr:
+**
+**		input:	d0.w =  x coordinate
+**			d1.w =  y coordinate
+**			a3.l -> line variable structure
+**			a6.l -> frame
+**
+**		output:	a0.l -> address of the word containing x,y
+**
+**
+**	d_xy2addr:
+**
+**		input:	d0.w =  x coordinate.
+**			d1.w =  y coordinate.
+**			a3.l -> line variable structure
+**			a6.l -> frame
+**
+**		output:	a1.l -> address of byte containing x,y
+**
+**		destroys: d0,d1
+**
 *******************************************************************************
 *******************************************************************************
 
@@ -101,7 +99,7 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 		add.l	d0,d1			; d1 <- byte offs into mem frm
 		add.l	d1,a1			; a0 -> (x,y)
 		rts
-	
+
 
 *+
 * purpose:	set up parameters for bitblt and thread together the
@@ -272,7 +270,7 @@ o0P32En1:	dbra	d2,o0P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o0P32RFr:	move.l	d7,(a1)+		; set dst to background color
 o0P32En2:	dbra	d4,o0P32RFr		; do next pixel
 
@@ -328,7 +326,7 @@ o1P32En1:	dbra	d2,o1P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o1P32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o1P32RFg		; then splat foreground
 		and.l	d7,(a1)+		; D' = S AND D
@@ -394,7 +392,7 @@ o2P32En1:	dbra	d2,o2P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o2P32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o2P32RFg		; then splat foreground
 		not.l	(a1)			; D' = NOT D
@@ -458,7 +456,7 @@ o3P32En1:	dbra	d2,o3P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o3P32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o3P32RFg		; then splat foreground
 		move.l	d7,(a1)+		; set dst to background color
@@ -523,7 +521,7 @@ o4P32En1:	dbra	d2,o4P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o4P32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o4P32RFg		; then splat foreground
 		and.l	d7,(a1)+		; D' = (NOT S) AND D
@@ -592,7 +590,7 @@ o6P32En1:	dbra	d2,o6P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o6P32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o6P32RFg		; then splat foreground
 		addq.w	#4,a1			; point to next pixel
@@ -654,7 +652,7 @@ o7P32En1:	dbra	d2,o7P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o7P32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o7P32RFg		; then splat foreground
 		addq.l	#4,a1			; advance D by one pixel
@@ -720,7 +718,7 @@ o8P32En1:	dbra	d2,o8P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o8P32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o8P32RFg		; then splat foreground
 		or.l	d7,(a1)			; D' = S or D
@@ -788,7 +786,7 @@ o9P32En1:	dbra	d2,o9P32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o9P32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o9P32RFg		; then splat foreground
 		eor.l	d7,(a1)			; D' = S eor D
@@ -832,7 +830,7 @@ oAP32En1:	dbra	d2,oAP32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oAP32RFr:	not.l	(a1)+			; D' = NOT D
 oAP32En2:	dbra	d4,oAP32RFr		; do next pixel
 
@@ -892,7 +890,7 @@ oBP32En1:	dbra	d2,oBP32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oBP32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oBP32RFg		; then splat foreground
 		not.l	(a1)			; D' = NOT D
@@ -959,7 +957,7 @@ oCP32En1:	dbra	d2,oCP32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oCP32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oCP32RFg		; then splat foreground
 		move.l	d7,(a1)+		; set dst to background color
@@ -1021,7 +1019,7 @@ oDP32En1:	dbra	d2,oDP32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oDP32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oDP32RFg		; then splat foreground
 		move.l	d7,(a1)+		; set dst to background color
@@ -1087,7 +1085,7 @@ oEP32En1:	dbra	d2,oEP32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oEP32RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oEP32RFg		; then splat foreground
 		and.l	d7,(a1)			; D' = S and D
@@ -1132,7 +1130,7 @@ oFP32En1:	dbra	d2,oFP32Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oFP32RFr:	move.l	d7,(a1)+		; set dst to background color
 oFP32En2:	dbra	d4,oFP32RFr		; do next pixel
 
@@ -1173,7 +1171,7 @@ o0P16En1:	dbra	d2,o0P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o0P16RFr:	move.w	d7,(a1)+		; set dst to background color
 o0P16En2:	dbra	d4,o0P16RFr		; do next pixel
 
@@ -1229,7 +1227,7 @@ o1P16En1:	dbra	d2,o1P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o1P16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o1P16RFg		; then splat foreground
 		and.w	d7,(a1)+		; D' = S AND D
@@ -1295,7 +1293,7 @@ o2P16En1:	dbra	d2,o2P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o2P16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o2P16RFg		; then splat foreground
 		not.w	(a1)			; D' = NOT D
@@ -1359,7 +1357,7 @@ o3P16En1:	dbra	d2,o3P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o3P16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o3P16RFg		; then splat foreground
 		move.w	d7,(a1)+		; set dst to background color
@@ -1424,7 +1422,7 @@ o4P16En1:	dbra	d2,o4P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o4P16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o4P16RFg		; then splat foreground
 		and.w	d7,(a1)+		; D' = (NOT S) AND D
@@ -1493,7 +1491,7 @@ o6P16En1:	dbra	d2,o6P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o6P16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o6P16RFg		; then splat foreground
 		addq.w	#2,a1			; point to next pixel
@@ -1555,7 +1553,7 @@ o7P16En1:	dbra	d2,o7P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o7P16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o7P16RFg		; then splat foreground
 		addq.w	#2,a1			; advance D by one pixel
@@ -1621,7 +1619,7 @@ o8P16En1:	dbra	d2,o8P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o8P16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o8P16RFg		; then splat foreground
 		or.w	d7,(a1)			; D' = S or D
@@ -1689,7 +1687,7 @@ o9P16En1:	dbra	d2,o9P16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o9P16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o9P16RFg		; then splat foreground
 		eor.w	d7,(a1)			; D' = S eor D
@@ -1733,7 +1731,7 @@ oAP16En1:	dbra	d2,oAP16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oAP16RFr:	not.w	(a1)+			; D' = NOT D
 oAP16En2:	dbra	d4,oAP16RFr		; do next pixel
 
@@ -1793,7 +1791,7 @@ oBP16En1:	dbra	d2,oBP16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oBP16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oBP16RFg		; then splat foreground
 		not.w	(a1)			; D' = NOT D
@@ -1860,7 +1858,7 @@ oCP16En1:	dbra	d2,oCP16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oCP16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oCP16RFg		; then splat foreground
 		move.w	d7,(a1)+		; set dst to background color
@@ -1922,7 +1920,7 @@ oDP16En1:	dbra	d2,oDP16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oDP16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oDP16RFg		; then splat foreground
 		move.w	d7,(a1)+		; set dst to background color
@@ -1988,7 +1986,7 @@ oEP16En1:	dbra	d2,oEP16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oEP16RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oEP16RFg		; then splat foreground
 		and.w	d7,(a1)			; D' = S and D
@@ -2033,7 +2031,7 @@ oFP16En1:	dbra	d2,oFP16Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oFP16RFr:	move.w 	d7,(a1)+		; set dst to background color
 oFP16En2:	dbra	d4,oFP16RFr		; do next pixel
 
@@ -2074,7 +2072,7 @@ o0P8En1:	dbra	d2,o0P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o0P8RFr:	move.b	d7,(a1)+		; set dst to background color
 o0P8En2:	dbra	d4,o0P8RFr		; do next pixel
 
@@ -2130,7 +2128,7 @@ o1P8En1:	dbra	d2,o1P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o1P8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o1P8RFg			; then splat foreground
 		and.b	d7,(a1)+		; D' = S AND D
@@ -2196,7 +2194,7 @@ o2P8En1:	dbra	d2,o2P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o2P8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o2P8RFg			; then splat foreground
 		not.b	(a1)			; D' = NOT D
@@ -2260,7 +2258,7 @@ o3P8En1:	dbra	d2,o3P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o3P8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o3P8RFg			; then splat foreground
 		move.b	d7,(a1)+		; set dst to background color
@@ -2325,7 +2323,7 @@ o4P8En1:	dbra	d2,o4P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o4P8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o4P8RFg			; then splat foreground
 		and.b	d7,(a1)+		; D' = (NOT S) AND D
@@ -2394,7 +2392,7 @@ o6P8En1:	dbra	d2,o6P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o6P8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o6P8RFg			; then splat foreground
 		addq.w	#1,a1			; point to next pixel
@@ -2456,7 +2454,7 @@ o7P8En1:	dbra	d2,o7P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o7P8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o7P8RFg			; then splat foreground
 		addq.l	#1,a1			; advance D by one pixel
@@ -2522,7 +2520,7 @@ o8P8En1:	dbra	d2,o8P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o8P8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o8P8RFg			; then splat foreground
 		or.b	d7,(a1)			; D' = S or D
@@ -2590,7 +2588,7 @@ o9P8En1:	dbra	d2,o9P8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 o9P8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	o9P8RFg			; then splat foreground
 		eor.b	d7,(a1)			; D' = S eor D
@@ -2634,7 +2632,7 @@ oAP8En1:	dbra	d2,oAP8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oAP8RFr:	not.b	(a1)+			; D' = NOT D
 oAP8En2:	dbra	d4,oAP8RFr		; do next pixel
 
@@ -2694,7 +2692,7 @@ oBP8En1:	dbra	d2,oBP8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oBP8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oBP8RFg			; then splat foreground
 		not.b	(a1)			; D' = NOT D
@@ -2761,7 +2759,7 @@ oCP8En1:	dbra	d2,oCP8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oCP8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oCP8RFg			; then splat foreground
 		move.b	d7,(a1)+		; set dst to background color
@@ -2823,7 +2821,7 @@ oDP8En1:	dbra	d2,oDP8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oDP8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oDP8RFg			; then splat foreground
 		move.b	d7,(a1)+		; set dst to background color
@@ -2889,7 +2887,7 @@ oEP8En1:	dbra	d2,oEP8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oEP8RFr:	lsl.w	#1,d0			; if shifted out bit was set
 		bcs	oEP8RFg			; then splat foreground
 		and.b	d7,(a1)			; D' = S and D
@@ -2934,7 +2932,7 @@ oFP8En1:	dbra	d2,oFP8Line		; do next set of 16 pixels
 
 *
 * do right fringe
-*		
+*
 oFP8RFr:	move.b 	d7,(a1)+		; set dst to background color
 oFP8En2:	dbra	d4,oFP8RFr		; do next pixel
 

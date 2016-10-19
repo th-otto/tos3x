@@ -1,47 +1,45 @@
 /*
-*******************************  tables.c  ************************************
-*
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/tables.c,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/07/30 15:30:49 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	tables.c,v $
-* Revision 3.1  91/07/30  15:30:49  lozben
-* Added table markhead[].
-* 
-* Revision 3.0  91/01/03  15:19:12  lozben
-* New generation VDI
-* 
-* Revision 2.7  90/04/03  13:50:05  lozben
-* The rom_inq_tab now has BLTPRFRM define in the table. It is a define for the
-* blit performance. It used to be just hardwired to a 1000.
-* 
-* Revision 2.6  90/03/09  18:24:48  lozben
-* Added to plane_mask[], so it can mask up to 8 planes.
-* 
-* Revision 2.5  89/08/18  15:05:00  lozben
-* Adjusted some of the mappings.
-* 
-* Revision 2.4  89/08/17  15:54:10  lozben
-* Changed ROM_MAP_COL[] and ROM_REV_MAP_COL[] back to MAP_COL[] and
-* REV_MAP_COL[]. Also changed these tables back to word tables and
-* adjusted some of the mappings.
-* 
-* Revision 2.3  89/07/28  21:23:39  lozben
-* Changed MAP_COL[] and REV_MAP_COL[] into rom tables and increased them
-* to 256. (these are byte tables - alcyon has no provision for unsigned char;
-* keep that in mind.).
-* 
-* Revision 2.2  89/04/14  15:25:36  lozben
-* Changed constants for number of colors to choose from (512) to a
-* define MAX_PAL.
-* 
-* Revision 2.1  89/02/21  17:28:19  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-*******************************************************************************
-*/
+ *******************************  tables.c  ************************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/07/30 15:30:49 $
+ * =============================================================================
+ *
+ * Revision 3.1  91/07/30  15:30:49  lozben
+ * Added table markhead[].
+ * 
+ * Revision 3.0  91/01/03  15:19:12  lozben
+ * New generation VDI
+ * 
+ * Revision 2.7  90/04/03  13:50:05  lozben
+ * The rom_inq_tab now has BLTPRFRM define in the table. It is a define for the
+ * blit performance. It used to be just hardwired to a 1000.
+ * 
+ * Revision 2.6  90/03/09  18:24:48  lozben
+ * Added to plane_mask[], so it can mask up to 8 planes.
+ * 
+ * Revision 2.5  89/08/18  15:05:00  lozben
+ * Adjusted some of the mappings.
+ * 
+ * Revision 2.4  89/08/17  15:54:10  lozben
+ * Changed ROM_MAP_COL[] and ROM_REV_MAP_COL[] back to MAP_COL[] and
+ * REV_MAP_COL[]. Also changed these tables back to word tables and
+ * adjusted some of the mappings.
+ * 
+ * Revision 2.3  89/07/28  21:23:39  lozben
+ * Changed MAP_COL[] and REV_MAP_COL[] into rom tables and increased them
+ * to 256. (these are byte tables - alcyon has no provision for unsigned char;
+ * keep that in mind.).
+ * 
+ * Revision 2.2  89/04/14  15:25:36  lozben
+ * Changed constants for number of colors to choose from (512) to a
+ * define MAX_PAL.
+ * 
+ * Revision 2.1  89/02/21  17:28:19  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ *******************************************************************************
+ */
 /************************************************************/
 /*                                                          */
 /*              DEV, SIZ, INQ tables converted to 'c'       */

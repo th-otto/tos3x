@@ -1,26 +1,24 @@
 *********************************  xfrmform.s  ********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/xfrmform.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/01/28 18:07:18 $     $Locker:  $
+* $Author: lozben $	$Date: 91/01/28 18:07:18 $
 * =============================================================================
 *
-* $Log:	xfrmform.s,v $
 * Revision 3.1  91/01/28  18:07:18  lozben
 * Adjusted the code to work with the multiple linea variable structures.
-* 
+*
 * Revision 3.0  91/01/03  15:23:38  lozben
 * New generation VDI
-* 
+*
 * Revision 2.3  90/07/17  15:07:10  lozben
 * in_place() now skips the one plane mode.
-* 
+*
 * Revision 2.2  90/07/13  15:36:26  lozben
 * Fixed in_place() and out_of_place() to handle higher rezes.
-* 
+*
 * Revision 2.1  89/02/21  17:29:35  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -61,7 +59,7 @@
 *	it is assumed that the destination form is large enough to receive
 *	the transformed source.
 *
-*	
+*
 * author:	jim eisenstein
 *
 * parameters
@@ -142,7 +140,7 @@ di_2_dd:
 
 	clr.w	MF_FORMAT(a1)		; device dependent format flag (dest)
 
-	mulu	d2,d1			; d1 <- length of DI plane	
+	mulu	d2,d1			; d1 <- length of DI plane
 
 *					; d0 <- members per group (length of DI plane)
 	exg	d0,d1			; d1 <- number of groups  (# of planes)
@@ -185,7 +183,7 @@ quit:	movem.l	(sp)+,d0-d4/a0-a2
 *
 *			DD -> DI		       DI -> DD
 *
-*	members:  length of plane in words	     # of planes 
+*	members:  length of plane in words	     # of planes
 *	groups:	       # of planes 	        length of plane in words
 
 
@@ -193,7 +191,7 @@ in_place:
 
 	dbra	d1,entry02		; iteration count <- number of units - 1
 	rts				; if number was 0, return now
-	
+
 loop02:
 	clr.l	d2			; initialize count accumulator
 	move	d1,d4			; initialize iteration counter
@@ -240,7 +238,7 @@ entry02:
 *	d0.w	number of members in group  (destination)
 *	d1.w	number of groups	    (destination)
 
-	
+
 
 
 out_of_place:

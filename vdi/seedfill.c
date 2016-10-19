@@ -1,44 +1,42 @@
 /*
-********************************  seedfill.c  *********************************
-*
-* $Revision: 3.4 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/seedfill.c,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/08/06 20:38:12 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	seedfill.c,v $
-* Revision 3.4  91/08/06  20:38:12  lozben
-* We now look at entry 255 of REV_MAP_COL to get a pen value of one.
-* 
-* Revision 3.3  91/01/22  13:34:15  lozben
-* Changed label start to START because there was a name conflict.
-* 
-* Revision 3.2  91/01/14  15:46:01  lozben
-* Made changes so the file can work with the latest gsxextrn.h and
-* the new lineavar.h files.
-* 
-* Revision 3.1  91/01/08  17:06:05  lozben
-* Change declaration int16_t *Qptr to extern int16_t *Qptr.
-* 
-* Revision 3.0  91/01/03  15:19:00  lozben
-* New generation VDI
-* 
-* Revision 2.4  90/02/14  16:15:30  lozben
-* Optimized the code.
-* 
-* Revision 2.3  89/07/13  17:51:29  lozben
-* Enlarged the buffer size to accomodate new rez (1280x960).
-* 
-* Revision 2.2  89/05/16  12:59:45  lozben
-* Seedfill used to initialize FG_BP_[1,2,3,4], now initializes
-* FG_B_PLANES instead. FG_B_PLANES is set to the current color
-* index.
-* 
-* Revision 2.1  89/02/21  17:28:09  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-*******************************************************************************
-*/
+ ********************************  seedfill.c  *********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/08/06 20:38:12 $
+ * =============================================================================
+ *
+ * Revision 3.4  91/08/06  20:38:12  lozben
+ * We now look at entry 255 of REV_MAP_COL to get a pen value of one.
+ * 
+ * Revision 3.3  91/01/22  13:34:15  lozben
+ * Changed label start to START because there was a name conflict.
+ * 
+ * Revision 3.2  91/01/14  15:46:01  lozben
+ * Made changes so the file can work with the latest gsxextrn.h and
+ * the new lineavar.h files.
+ * 
+ * Revision 3.1  91/01/08  17:06:05  lozben
+ * Change declaration int16_t *Qptr to extern int16_t *Qptr.
+ * 
+ * Revision 3.0  91/01/03  15:19:00  lozben
+ * New generation VDI
+ * 
+ * Revision 2.4  90/02/14  16:15:30  lozben
+ * Optimized the code.
+ * 
+ * Revision 2.3  89/07/13  17:51:29  lozben
+ * Enlarged the buffer size to accomodate new rez (1280x960).
+ * 
+ * Revision 2.2  89/05/16  12:59:45  lozben
+ * Seedfill used to initialize FG_BP_[1,2,3,4], now initializes
+ * FG_B_PLANES instead. FG_B_PLANES is set to the current color
+ * index.
+ * 
+ * Revision 2.1  89/02/21  17:28:09  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ *******************************************************************************
+ */
 
 #include "vdi.h"
 #include "fontdef.h"
@@ -130,7 +128,9 @@ VOID seedfill(NOTHING)
 	}
 
 	/* Initialize the line drawing parameters */
+#if PLANES8
 	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
+#endif
 
 	LV(LSTLIN) = FALSE;
 

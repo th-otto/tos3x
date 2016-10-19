@@ -1,21 +1,19 @@
 ********************************  sbsctlog.s  *********************************
 *
-* $Revision: 3.0 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbsctlog.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/08/06 20:21:45 $     $Locker:  $
+* $Author: lozben $	$Date: 91/08/06 20:21:45 $
 * =============================================================================
 *
-* $Log:	sbsctlog.s,v $
 * Revision 3.0  91/08/06  20:21:45  lozben
 * New generation VDI
-* 
+*
 * Revision 2.2  91/07/08  15:51:16  lozben
 * File created by Slavik Lozben. This file contains the TRANPARANT
 * logical operation routines which are use by the main calling
 * routines to perform Source to Destination blits. The assumtion
 * is such that we are dealing with the ST interleaved screen memory
 * format.
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -449,7 +447,7 @@ opA_tpi:	not.w	(a1)+		; D' <- NOT D
 * D' = S OR [NOT D]
 *-
 		dc.w	opC_tpi-opB_tpi-3
-opB_tpi:	not.w	(a1)		; 
+opB_tpi:	not.w	(a1)		;
 		or.w	d0,(a1)+	; D' <- S OR [NOT D]
 
 *+
@@ -751,7 +749,7 @@ opA_tni:	not.w	-(a1)		; D' <- NOT D
 * D' = S OR [NOT D]
 *-
 		dc.w	opC_tni-opB_tni-3
-opB_tni:	not.w	-(a1)		; 
+opB_tni:	not.w	-(a1)		;
 		or.w	d0,(a1)		; D' <- S OR [NOT D]
 
 *+
@@ -1898,7 +1896,7 @@ op9Sltpi:	move.w	(a0),d0			; d0 <- source word
 		eor.w	d1,d0			; d0 <- S XOR D
 		not.w	d0			; d0 <- NOT [S XOR D]
 		move.w	d0,(a1)+		; D  <- NOT [S XOR D]
-		
+
 *+
 * D' = NOT D
 *-
@@ -3440,7 +3438,7 @@ op9Srtni:	move.w	(a0),d0			; d0 <- source word
 		eor.w	d1,d0			; d0 <- S XOR D
 		not.w	d0			; d0 <- NOT [S XOR D]
 		move.w	d0,(a1)			; D  <- NOT [S XOR D]
-		
+
 *+
 * D' = NOT D
 *-

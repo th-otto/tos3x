@@ -1,23 +1,21 @@
 *********************************  sbmono.s  **********************************
 *
-* $Revision: 3.1 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/sbmono.s,v $
 * =============================================================================
-* $Author: lozben $	$Date: 91/07/30 12:53:40 $     $Locker:  $
+* $Author: lozben $	$Date: 91/07/30 12:53:40 $
 * =============================================================================
 *
-* $Log:	sbmono.s,v $
 * Revision 3.1  91/07/30  12:53:40  lozben
 * Changed some absolute offsets to equate offsets.
-* 
+*
 * Revision 3.0  91/01/03  15:17:23  lozben
 * New generation VDI
-* 
+*
 * Revision 2.1  89/02/21  17:26:13  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
+*
 * Revision 1.1  87/11/20  15:17:24  lozben
 * Initial revision
-* 
+*
 *******************************************************************************
 
 #include "../common/config.h"
@@ -53,10 +51,10 @@ OF4 equ -FBASE-4
 		xdef	 sb_mono
 sb_mono:
 #if TOSVERSION >= 0x400
-	movem.l	a5-a6,-(sp)	; save a5 and a6 
+	movem.l	a5-a6,-(sp)	; save a5 and a6
 	movea.l	a1,a5		; a5 -. line A variable structure
 #else
-	move.l	a6,-(sp)	; save a6 
+	move.l	a6,-(sp)	; save a6
 #endif
 
 	muls	LV((bytes_lin)+OF,a5),d1	; d1 <- Y offset
@@ -84,12 +82,12 @@ sb_mono:
 
 	dbra	d3,next_char		; d3 <- character height dbra counter
 #if TOSVERSION >= 0x400
-	movem.l	(sp)+,a5-a6		; restore a5 and a6 
+	movem.l	(sp)+,a5-a6		; restore a5 and a6
 #else
 	/* BUG: a5+a6 not restored -> crash */
 #endif
 	rts				; quit on null height
-	
+
 
 *	a0   -> source form base
 *	a1   -> screen destination
@@ -150,9 +148,9 @@ next_char:
 
 	moveq.l	#1,d0			; exit blit with success code in d0
 #if TOSVERSION >= 0x400
-	movem.l	(sp)+,a5-a6		; restore a5 and a6 
+	movem.l	(sp)+,a5-a6		; restore a5 and a6
 #else
-	move.l	(sp)+,a6		; restore a6 
+	move.l	(sp)+,a6		; restore a6
 	move.l	(sp)+,a5		; restore a5 (it was saved by our caller in mono.s)
 #endif
 	rts

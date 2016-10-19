@@ -1,48 +1,46 @@
 /*
-**********************************  monout.c  *********************************
-*
-* $Revision: 3.2 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/monout.c,v $
-* =============================================================================
-* $Author: lozben $	$Date: 91/01/22 15:58:35 $     $Locker:  $
-* =============================================================================
-*
-* $Log:	monout.c,v $
-* Revision 3.2  91/01/22  15:58:35  lozben
-* Changed some of the code to work with the latest include files.
-* 
-* Revision 3.1  91/01/14  15:49:11  lozben
-* Made changes so the file can work with the latest gsxextrn.h and
-* the new lineavar.h files.
-* 
-* Revision 3.0  91/01/03  15:12:50  lozben
-* New generation VDI
-* 
-* Revision 2.6  90/05/31  18:23:44  lozben
-* Fixed v_opnvwk(). There used to be a bug while adding a new work station
-* in the middle of the linked list.
-* 
-* Revision 2.5  90/04/03  13:45:09  lozben
-* Added a constant of BLTPRFRM in the inquire call. It used to be hardwired to
-* a 1000.
-* 
-* Revision 2.4  89/08/18  18:33:53  lozben
-* Got rid of all the call to Icos() and Isin() with constant parameters.
-* 
-* Revision 2.3  89/07/28  14:38:25  lozben
-* Changed circ_dda() to deal with modes where each pixel is larger
-* in the x direction than in the y. Also changed do_circ() do draw
-* more rounded wide line edges.
-* 
-* Revision 2.2  89/05/16  12:57:39  lozben
-* Functions that used to initialize FG_BP_[1,2,3,4], now
-* initialize FG_B_PLANES instead. FG_B_PLANES is set to the current
-* color index before a drawing primitive is called.
-* 
-* Revision 2.1  89/02/21  17:24:00  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-*
-*******************************************************************************
-*/
+ **********************************  monout.c  *********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/01/22 15:58:35 $
+ * =============================================================================
+ *
+ * Revision 3.2  91/01/22  15:58:35  lozben
+ * Changed some of the code to work with the latest include files.
+ * 
+ * Revision 3.1  91/01/14  15:49:11  lozben
+ * Made changes so the file can work with the latest gsxextrn.h and
+ * the new lineavar.h files.
+ * 
+ * Revision 3.0  91/01/03  15:12:50  lozben
+ * New generation VDI
+ * 
+ * Revision 2.6  90/05/31  18:23:44  lozben
+ * Fixed v_opnvwk(). There used to be a bug while adding a new work station
+ * in the middle of the linked list.
+ * 
+ * Revision 2.5  90/04/03  13:45:09  lozben
+ * Added a constant of BLTPRFRM in the inquire call. It used to be hardwired to
+ * a 1000.
+ * 
+ * Revision 2.4  89/08/18  18:33:53  lozben
+ * Got rid of all the call to Icos() and Isin() with constant parameters.
+ * 
+ * Revision 2.3  89/07/28  14:38:25  lozben
+ * Changed circ_dda() to deal with modes where each pixel is larger
+ * in the x direction than in the y. Also changed do_circ() do draw
+ * more rounded wide line edges.
+ * 
+ * Revision 2.2  89/05/16  12:57:39  lozben
+ * Functions that used to initialize FG_BP_[1,2,3,4], now
+ * initialize FG_B_PLANES instead. FG_B_PLANES is set to the current
+ * color index before a drawing primitive is called.
+ * 
+ * Revision 2.1  89/02/21  17:24:00  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ *
+ *******************************************************************************
+ */
 
 
 #include "vdi.h"
@@ -63,6 +61,13 @@ const int16_t *const markhead[] = { m_dot, m_plus, m_star, m_square, m_cross, m_
 #endif
 
 int16_t code PROTO((int16_t x,int16_t y));
+
+#if !PLANES8
+int16_t q_circle[80];
+#define Q_CIRCLE q_circle
+#else
+#define Q_CIRCLE LV(q_circle)
+#endif
 
 
 /*
@@ -151,7 +156,9 @@ VOID v_pline(NOTHING)
 	l = work_ptr->line_index;
 	LV(LN_MASK) = (l < 6) ? LINE_STYLE[l] : work_ptr->ud_ls;
 
+#if PLANES8
 	LV(FG_B_PLANES) = work_ptr->line_color;
+#endif
 
 	if (work_ptr->line_width == 1)
 	{
@@ -561,7 +568,9 @@ VOID plygn(NOTHING)
 	UNUSED(unused2);
 #endif
 
+#if PLANES8
 	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
+#endif
 
 	LV(LSTLIN) = FALSE;
 
@@ -706,7 +715,9 @@ VOID gdp_rbox(NOTHING)
 		i = work_ptr->line_index;
 		LV(LN_MASK) = (i < 6) ? LINE_STYLE[i] : work_ptr->ud_ls;
 
+#if PLANES8
 		LV(FG_B_PLANES) = work_ptr->line_color;
+#endif
 
 		if (work_ptr->line_width == 1)
 		{
@@ -954,8 +965,8 @@ VOID cir_dda(NOTHING)
 	x = 0;
 	d = 3 - 2 * y;
 
-	xptr = &LV(q_circle)[x];
-	yptr = &LV(q_circle)[y];
+	xptr = &Q_CIRCLE[x];
+	yptr = &Q_CIRCLE[y];
 
 	/* Do an octant, starting at north.  The values for the next octant */
 	/* (clockwise) will be filled by transposing x and y.               */
@@ -978,7 +989,7 @@ VOID cir_dda(NOTHING)
 	}
 
 	if (x == y)
-		LV(q_circle)[x] = x;
+		Q_CIRCLE[x] = x;
 
 	/* Fake a pixel averaging when converting to non-1:1 aspect ratio. */
 	if (xsize > ysize)
@@ -993,25 +1004,25 @@ VOID cir_dda(NOTHING)
 
 			if (y == d)
 			{
-				LV(q_circle)[i] = LV(q_circle)[x];
+				Q_CIRCLE[i] = Q_CIRCLE[x];
 			} else
 			{
 				d = y;
 				x -= 1;
-				LV(q_circle)[i] = LV(q_circle)[x];
+				Q_CIRCLE[i] = Q_CIRCLE[x];
 			}
 		}
 	} else
 	{
 		x = 1;
-		yptr = LV(q_circle) + 1;
+		yptr = Q_CIRCLE + 1;
 
 		for (i = 1; i <= LV(num_qc_lines); i++)
 		{
 			y = i * ysize / xsize;
 			d = 0;
 
-			xptr = &LV(q_circle)[x];
+			xptr = &Q_CIRCLE[x];
 
 			for (j = x; j <= y; j++)
 				d += *xptr++;
@@ -1092,7 +1103,7 @@ VOID wline(NOTHING)
 
 		if (vx == 0)
 		{
-			vx = LV(q_circle)[0];
+			vx = Q_CIRCLE[0];
 			vy = 0;
 		}
 		/* End if:  vertical. */
@@ -1179,7 +1190,7 @@ PP(int16_t *py;)
 	vx = px;
 	vy = py;
 
-	pcircle = LV(q_circle);
+	pcircle = Q_CIRCLE;
 
 	/* Mirror transform the vector so that it is in the first quadrant. */
 
@@ -1293,7 +1304,7 @@ PP(int16_t cy;)
 	if (LV(num_qc_lines) > 0)
 	{
 		/* Do the horizontal line through the center of the circle. */
-		pointer = LV(q_circle);
+		pointer = Q_CIRCLE;
 		LV(X1) = cx - *pointer;
 		LV(X2) = cx + *pointer;
 		LV(Y1) = LV(Y2) = cy;
@@ -1302,14 +1313,14 @@ PP(int16_t cy;)
 		for (k = 1; k <= LV(num_qc_lines); k++)
 		{
 			/* Upper semi-circle. */
-			pointer = &LV(q_circle)[k];
+			pointer = &Q_CIRCLE[k];
 			LV(X1) = cx - *pointer;
 			LV(X2) = cx + *pointer;
 			LV(Y1) = LV(Y2) = cy - k + 1;
 			if (clip_line())
 			{
 				ABLINE();
-				pointer = &LV(q_circle)[k];
+				pointer = &Q_CIRCLE[k];
 			}
 
 			/* Lower semi-circle. */
