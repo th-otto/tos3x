@@ -8,7 +8,7 @@
 *
 * $Log: attrdef.h,v $
 * Revision 3.1	91/01/04  12:20:40	lozben
-* Typedefed structure atribute to ATTRIBUTE.
+* Typedefed structure attribute to ATTRIBUTE.
 * 
 * Revision 3.0	91/01/03  15:05:57	lozben
 * New generation VDI
@@ -61,15 +61,7 @@ typedef struct attribute {
 	/*  72 */ FONT_HEAD scratch_head; 	/* Holder for the doubled font data 	*/
 	/* 162 */ int16_t text_color; 		/* Current text color (PEL value)		*/
 	/* 164 */ int16_t ud_ls;			/* User defined linestyle			*/
-#if VIDEL_SUPPORT
-	/* 166 */ int16_t ud_patrn[32*16];	/* User defined pattern 			*/
-#else
-#if PLANES8
-	/* 166 */ int16_t ud_patrn[8*16];	/* User defined pattern 			*/
-#else
-	/* 166 */ int16_t ud_patrn[4*16];	/* User defined pattern 			*/
-#endif
-#endif
+	/* 166 */ int16_t ud_patrn[MU_PLANES*16];	/* User defined pattern 			*/
 	/* 1190/422/294 */ int16_t v_align;			/* Current text vertical alignment		*/
 	/* 1192/424/296 */ int16_t wrt_mode;		/* Current writing mode 			    */
 	/* 1194/426/298 */ int16_t xfm_mode;		/* Transformation mode requested		*/

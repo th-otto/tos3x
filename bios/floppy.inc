@@ -80,7 +80,7 @@ eundev:
 #if STBOOK
 checkfdc:   addq.w    #1,(_flock).w             /* lock floppies (allow 'recursion') */
             movem.l   d0-d7/a6,-(sp)
-            lea       (fifo).w,a6
+            lea       (DMA_CTRL).w,a6
             move.w    #$82,(a6)                 /* setup 1770 track register */
             moveq     #0,d7
             bsr       wrfdcd7
@@ -90,14 +90,14 @@ checkfdc:   addq.w    #1,(_flock).w             /* lock floppies (allow 'recursi
             move.w    #$82,(a6)                 /* read 1770 track register */
             bsr       rdfdcd0
             move.b    d0,d1                     /* not equal to 0? */
-            bne.s     checkfdc2
+            bne.s     checkfd2
             move.w    #$84,(a6)                 /* read 1770 sector register */
             bsr       rdfdcd0
             subq.w    #1,(_flock).w             /* unlock floppies */
             tst.b     d1                        /* track register wrong? */
-            bne.s     checkfdc2
+            bne.s     checkfd2
             cmp.b     #$ff,d0                   /* sector register wrong? */
-checkfdc2:  movem.l   (sp)+,d0-d7/a6
+checkfd2:   movem.l   (sp)+,d0-d7/a6
             eori      #4,sr                     /* flip Z bit (return NE if bit is zero) */
             rts
 #endif
@@ -668,6 +668,7 @@ verify8:
  * Deselects floppies after the motor stops
  */
 /* 306de: 00e04106 */
+/* 206de: 00e03cfe */
 _flopvbl:
 #if TOSVERSION >= 0x300
         tst.w     (_nflops).w                   /* any floppy drives installed? */
@@ -679,7 +680,7 @@ _flopvbl:
         bne.s     flopvbl5                      /* (yes, so don't touch them) */
 #if STBOOK
         bsr       checkfdc
-        beq.s     fvblr
+        beq.s     flopvbl5
 #endif
 /* --- write-protect monitor: */
         move.l    (_frclock).w,d0               /* check a drive every 8 jiffies */
@@ -859,7 +860,7 @@ hardsee1:
  */
 reseek:
         move.w    #-6,fd_curerr                 /* set "seek error" E_SEEK */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | STBOOK
         bsr.s     restore                       /* restore head */
         bne.s     go2trret                      /* (punt if home fails) */
 #else
@@ -1019,11 +1020,11 @@ flopcmd3:
  */
 #if STBOOK
 hdselect:   tst.w     d0                        /* if != 0 then select HD */
-            bne.s     hdselect2
+            bne.s     hdselec2
             clr.b     d0                        /* SD mode */
-            bra.s     hdselect3
-hdselect2:  move.b    #$80,d0                   /* HD mode is bit 7 in PORT A on the sound chip */
-hdselect3:  move      sr,d2                     /* save status register */
+            bra.s     hdselec3
+hdselec2:   move.b    #$80,d0                   /* HD mode is bit 7 in PORT A on the sound chip */
+hdselec3:   move      sr,d2                     /* save status register */
             move.b    #14,(psgsel).w            /* select port on GI chip */
             move.b    (psgsel).w,d1             /* get current bits */
             bclr      #7,d1                     /* clear HD bit */

@@ -74,6 +74,17 @@
 #define LINEA_HACK (BINEXACT & (!MULTI_LINEA))
 
 
+#if VIDEL_SUPPORT
+#define MU_PLANES 32
+#else
+#if PLANES8
+#define MU_PLANES 8
+#else
+#define MU_PLANES 4
+#endif
+#endif
+
+
 /*
  * size of the "overlay" area
  */

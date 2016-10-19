@@ -144,7 +144,11 @@ BCONMAP_START_HANDLE equ 6
 
 scu_gp1   equ $FFFF8E09
 memconf   equ $FFFF8001
+#if STBOOK
+tt_mcu    equ $00D00000
+#else
 tt_mcu    equ $FFD00000
+#endif
 v_syncmod equ $FFFF820A
 sndmactl  equ $FFFF8900
 mwmask    equ $FFFF8924
@@ -163,6 +167,13 @@ shift_tt  equ $FFFF8262
 
 psgsel    equ $FFFF8800
 psgwr     equ $FFFF8802
+
+STConfig  equ $FFFF9200
+
+FPStat    equ $FFFFFA40
+
+LcdPControl equ $FFFF827F
+
 
 /* =========================================================================== */
 /* ==== TEXT segment (TOS image) ============================================= */
@@ -190,7 +201,11 @@ psgwr     equ $FFFF8802
 _os_entry:
     bra.s   _main       /* os_entry, branch to _main */
 os_version:
+#if STBOOK
+    dc.w    $0206       /* wtf? why 2.06? */
+#else
     dc.w    ATOSVERSION  /* os_version, TOS version */
+#endif
 reseth:
     dc.l    _main       /* reseth, pointer to reset handler */
 _os_beg:
@@ -303,6 +318,13 @@ memcret:
         bne.s      noreset
         move.b    (memctrl).w,(memconf).w  /* initialize memory controller */
 
+resetvec:
+/*
+ * Check, if we should jump to a reset vector after warmboot
+ * The high byte of resvector must be zero,
+ * it must be even, and cannot be entirely zero.
+ */
+
 #if STBOOK
 			move.w    (STConfig).w,d0           /* Configuration on ST Book */
             cmp.b     #$fc,d0                   /* power pressed while the ST Book is closed? */
@@ -314,13 +336,6 @@ reset2b:    clr.l     resvalid
 reset2c:
 #endif
 
-/*
- * Check, if we should jump to a reset vector after warmboot
- * The high byte of resvector must be zero,
- * it must be even, and cannot be entirely zero.
- */
-
-resetvec:
         cmpi.l   #$31415926,(resvalid).w  /* Jump to resetvector? */
         bne.s    noreset                /* No --> noreset */
         move.l   (resvector).w,d0       /* Yes: old resvec to d0 */
@@ -369,7 +384,7 @@ ret_1b:     move.b    #2,(v_syncmod).w          /* yes -- twiddle to 50hz */
 notpal:
 #if STBOOK
 		 	move.b    #2,(v_shf_mod).w          /* Switch to 640x400x1 */
-            move.b    #$80,(lcdPowerControl).w  /* LCD display on */
+            move.b    #$80,(LcdPControl).w      /* LCD display on */
             tst.w     tt_mcu                    /* ST Book: ??? */
 #endif
 #endif
@@ -672,8 +687,8 @@ nomemchk:
  *  and "extended" trap vectors are initialized appropriately.
  *
  */
-            lea       _rte(pc),a3               /* a3 -> handy RTE */
-            lea       _rts(pc),a4               /* a4 -> handy RTS */
+            lea       just_rte(pc),a3           /* a3 -> handy RTE */
+            lea       bios_unimpl(pc),a4        /* a4 -> handy RTS */
 
 /* --- setup 64 vectors: */
             lea       coldboot,a1               /* a1 -> during boot all exception trigger a coldboot, which erases all memory and resets */
@@ -686,19 +701,19 @@ sei1:       move.l    a1,(a0)+                  /* write vector */
             move.l    a3,(_lvl7vec).w           /* level #7 interrupt -> rte (power exception in a ST Book) */
             moveq     #6,d0
             lea       (_lvl1vec).w,a1
-sei2:       move.l    #_rte,(a1)+               /* level #1 ... level #6 to RTE */
+sei2:       move.l    #just_rte,(a1)+           /* level #1 ... level #6 to RTE */
             dbra      d0,sei2
 
 /* --- install OS interrupt vectors: */
-            move.l    #int_vbl,(_lvl4vec).w    /* vblank handler */
-            move.l    #int_hbl,(_lvl2vec).w    /* hblank handler */
-            move.l    a3,(_trap2vec).w        /* (empty) trap#2 handler */
-            move.l    #_biostrap,(_trap13ve).w     /* trap #13 handler */
-            move.l    #_xbiostrap,(_trap14vec).w    /* trap #14 handler */
-            move.l    #line1010,(_lineatrap).w /*line 1010 handler */
-            move.l    a4,(_etv_timer).w          /* default timer-tick vector -> rts */
-            move.l    #_critret,(_etv_critic).w  /* default critical error handler */
-            move.l    a4,(_etv_term).w           /* default terminal vector -> rts */
+            move.l    #int_vbl,(_lvl4vec).w       /* vblank handler */
+            move.l    #int_hbl,(_lvl2vec).w       /* hblank handler */
+            move.l    a3,(_trap2vec).w            /* (empty) trap#2 handler */
+            move.l    #_biostrap,(_trap13ve).w    /* trap #13 handler */
+            move.l    #_xbiostrap,(_trap14vec).w  /* trap #14 handler */
+            move.l    #line1010,(_lineatrap).w    /* line 1010 handler */
+            move.l    a4,(_etv_timer).w           /* default timer-tick vector -> rts */
+            move.l    #critret,(_etv_critic).w    /* default critical error handler */
+            move.l    a4,(_etv_term).w            /* default terminal vector -> rts */
 
 /*
  *  Setup the vblank deferred vector list.
@@ -713,7 +728,7 @@ avbl:       clr.l     (a0)+                     /* one at a time */
             dbra      d0,avbl
 
             lea       tconstat,a0
-            movea.w   #xconstat,a1
+            movea.w   #_bconstat_vec,a1
             moveq     #31,d0
 tconl:      move.l    (a0)+,(a1)+
             dbra      d0,tconl
@@ -917,18 +932,18 @@ cooSTE:     moveq     #3,d1                     /* bit 0: PSG, bit 1: 8-bit DMA 
 cooSND:     move.l    d1,(a0)+
             btst      #6,d0                     /* DIP switch 6 on? */
             bne.s     cooFDC                    /* (punt - no HD floppy) */
-            move.b    #8,dsb0                   /* select HD density for drive A */
+            move.b    #8,dsb                    /* select HD density for drive A */
             move.l    #'_FDC',(a0)+             /* setup FDC cookie: Floppy disk controller */
             move.l    #$1415443,(a0)+           /* 'FDC' | (1 << 24) */
 cooFDC:     move.l    #$5F465055,(a0)+             /* Setup FPU cookie: Type of the FPU */
             moveq     #0,d7                     /* 0 = no FPU */
             suba.w    #$24,sp
             move.l    (_lineftrap).w,(sp)
-            move.l    (coprocexception).w,4(sp)
+            move.l    (_coprovio).w,4(sp)
             move.l    #cooFPU,(_lineftrap).w
-            move.l    #cooFPU,(coprocexception).w
+            move.l    #cooFPU,(_coprovio).w
             lea       8(sp),a1
-            movea.w   #ffcp_unorderedcond,a2
+            movea.w   #_cpunordered,a2
             move.l    #cooFPU2,d0
             move.l    (a2),(a1)+
             move.l    d0,(a2)+
@@ -946,19 +961,19 @@ cooFDC:     move.l    #$5F465055,(a0)+             /* Setup FPU cookie: Type of 
             move.l    d0,(a2)+
             clr.l     -(sp)
             movea.l   sp,a2
-            frestore  (sp)
+            FRESTSP
 cooFPU2:    move.l    #$20000,d7                /* 0x20000 = 68881 or 68882 as co-processor (Exact type unknown) */
 cooFPU:     movea.l   a2,sp
             addq.w    #4,sp
             move.l    (sp)+,(_lineftrap).w
-            move.l    (sp)+,(coprocexception).w
-            move.l    (sp)+,(ffcp_unorderedcond).w
-            move.l    (sp)+,(ffcp_inexactresult).w
-            move.l    (sp)+,(ffcp_divzero).w
-            move.l    (sp)+,(ffcp_underflow).w
-            move.l    (sp)+,(ffcp_operanderror).w
-            move.l    (sp)+,(ffcp_inexactresult).w
-            move.l    (sp)+,(ffcp_divzero).w
+            move.l    (sp)+,(_coprovio).w
+            move.l    (sp)+,(_cpunordered).w
+            move.l    (sp)+,(_cpinexact).w
+            move.l    (sp)+,(_cpdivzero).w
+            move.l    (sp)+,(_cpunderflow).w
+            move.l    (sp)+,(_cpoperror).w
+            move.l    (sp)+,(_cpinexact).w
+            move.l    (sp)+,(_cpdivzero).w
             move.l    d7,(a0)+
             movea.l   (_buserror).w,a1
             movea.l   sp,a2
@@ -1012,7 +1027,7 @@ cooSWI: move.b    #$7F,d0
         bne.s     nomicro
         move.l    #$5F535749,(a0)+ /* '_SWI' */
         moveq.l   #0,d0
-        move.w    ($FFFF9200).w,d0
+        move.w    (STConfig).w,d0
         lsr.w     #8,d0
         move.l    d0,(a0)+
 nomicro:
@@ -1111,15 +1126,15 @@ initauto:
         move.l    #just_rte,(a1)+      /* ignore auto vectors */
         dbf       d0,initauto
 
-        move.l    #int_vbl,(_lvl4vec).w
-        move.l    #int_hbl,(_lvl2vec).w
-        move.l    a3,(_trap2vec).w     /* ignore GEM trap for now */
-        move.l    #_biostrap,(_trap13vec).w
+        move.l    #int_vbl,(_lvl4vec).w      /* vblank handler */
+        move.l    #int_hbl,(_lvl2vec).w      /* hblank handler */
+        move.l    a3,(_trap2vec).w           /* ignore GEM trap for now */
+        move.l    #_biostrap,(_trap13vec).w  
         move.l    #_xbiostrap,(_trap14vec).w
         move.l    #line1010,(_lineatrap).w
-        move.l    a4,(_etv_timer).w    /* no timer yet */
-        move.l    #critret,(_etv_critic).w
-        move.l    a4,(_etv_term).w     /* no user defined function */
+        move.l    a4,(_etv_timer).w          /* no timer yet */
+        move.l    #critret,(_etv_critic).w   /* default critical error handler */
+        move.l    a4,(_etv_term).w           /* no user defined function */
         lea.l     (_vbl_list).w,a0
         move.l    a0,(_vblqueue).w
         move.w    #7,d0
@@ -1176,8 +1191,8 @@ ikbdwait:
 #if STBOOK
             bsr       scanextrom
 
-            move.b    #$80,(lcdPowerControl).w  /* LCD display on */
-            move.b    #$80,(lcdPowerControlShadow).w /* LCD display shadow register */
+            move.b    #$80,(LcdPControl).w      /* LCD display on */
+            move.b    #$80,(LcdPShadow).w       /* LCD display shadow register */
             moveq     #2,d1                     /* Switch to 640x400x1 */
             lea       setvb1(pc),a6
             bra       waitvbl
@@ -1982,8 +1997,10 @@ nextdev:
 	    move.w    gem_env,d4
         addq.w    #1,d4                     /* increment next device */
         move.w    d4,gem_env
-        cmpi.b    #$ff,dmaDevList(pc,d4.w)  /* end of the device list? */
-        bne.s     dmaBoot2                  /* no -> continue with the next one */
+        /* cmpi.b    #$ff,dmaDevList(pc,d4.w)  / * end of the device list? */
+        dc.w $0c3b,$00ff         /* work around as68 bug with addressing mode above */
+        dc.w dmaDevList-*+2+$4000       
+        bne.s     confdone                  /* no -> continue with the next one */
 #else
         addq.w    #1,d4
         move.w    d4,d0
@@ -2000,6 +2017,7 @@ nodmaboot:
 #if STBOOK
 /* boot order of DMA devices, $ff terminates the list */
 dmaDevList: dc.b      16,17,0,1,2,3,4,5,6,7,-1
+        even
 #endif
 
 doboot:
@@ -2029,6 +2047,7 @@ doboot:
  * typebit(d0): application type bit number which must be set to 1 to match
  */
 #if STBOOK
+#define STBOOK_EXTROM _os_entry+$40000
 scanextrom:
         lea STBOOK_EXTROM,a0
         bra.s     cartext2
@@ -2166,6 +2185,7 @@ is_ipl:
  */
 /* 306de: 00e00c5a */
 /* 206de: 00e00c06 */
+/* 208de: 00e00baa */
 int_vbl:
         addq.l    #1,_frclock         /* increase num of happened ints */
         subq.w    #1,_vblsem          /* check vbl semaphore */
@@ -2176,7 +2196,11 @@ int_vbl:
 /* ------ Call deferred interrupt vectors */
 /* vblqueue */
         move.w    _nvbls,d7                 /* d7 = # of deferred vblank vectors */
+#if STBOOK
+        beq.s     vbl_no_queue              /* (punt if no vectors) */
+#else
         beq       vbl_no_queue              /* (punt if no vectors) */
+#endif
         subq.l    #1,d7                     /* turn into DBRA count */
         movea.l   (_vblqueue).w,a0          /* a0 -> vectors */
 vbl_loop:
@@ -3186,15 +3210,19 @@ autoname:                      dc.b '*.PRG',0
 /* 206de: 00e011f6 */
 autoexec:
         move.l    #$000Bffff,-(a7)
-        trap      #13              /* Kbshift(-1) */
+        trap      #13                       /* Kbshift(-1) */
         addq.l    #4,a7
-        btst      #2,d0            /* Control pressed? */
-        bne.s     autoexe2        /* yes, skip autoexec */
+        btst      #2,d0                     /* Control pressed? */
+        bne.s     autoexe2                  /* yes, skip autoexec */
 #if TOSVERSION < 0x300
         move.l    (_drvbits).w,d0           /* d0 - active dev vector */
         move.w    _bootdev,d1               /* d1 - dev# to exec from */
         btst      d1,d0                     /* is the dev alive? */
-        beq.s     autoexe1                  /* (no -- so punt) */
+#if STBOOK | !BINEXACT
+        beq.s     autoexe2                  /* (no -- so punt) */
+#else
+        beq.s     autoexe1                  /* (no -- so punt) BUG: wrong label used here */
+#endif
 #endif
         lea.l     autopath(pc),a0
         lea.l     autoname(pc),a1
@@ -5797,7 +5825,11 @@ sccstat:
         btst      #5,d0                         /* CTS? */
         seq       xoff(a0)
         beq.s     sccstat1
+#if STBOOK
+        bsr       sccout
+#else
         bsr.s     sccout
+#endif
 sccstat1:
         move.b    #$00,(a2)                     /* select scc register #0 */
         move.b    #$10,(a2)                     /* write "Reset Ext/Status Interrupts" */

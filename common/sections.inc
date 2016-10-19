@@ -111,7 +111,7 @@
 /*
  * these are identical in all language versions
  */
-#define BIOSDLEN    $00000000
+#define BIOSDLEN    $00000888
 #define VDITLEN     $0000999A
 #define VDIDLEN     $00000000
 #define BDOSTLEN    $000062FC
@@ -122,6 +122,57 @@
 
 #endif /* TOSVERSION == 0x206 */
 
+
+#if TOSVERSION == 0x208
+
+#define BTLEN_US    $00005FEA
+#define DTLEN_US    $0000FBFC
+
+#if OS_COUNTRY == CTRY_US
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
+#endif
+
+#if OS_COUNTRY == CTRY_DE
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_FR
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_ES
+#define BIOSTLEN    BTLEN_US+$86
+#define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+#define BIOSTLEN    BTLEN_US+$68
+#define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
+#endif
+
+/*
+ * these are identical in all language versions
+ */
+#define BIOSDLEN    $00000888
+#define VDITLEN     $0000999A
+#define VDIDLEN     $00000000
+#define BDOSTLEN    $000062FC
+#define BDOSDLEN    $00000000
+#define AESTLEN     $0000CCD6
+#define AESDLEN     $00000000
+#define DESKDLEN    $00000000
+
+#endif /* TOSVERSION == 0x208 */
+
+
 #ifndef BIOSTBASE
 #define BIOSTBASE   $00E00000
 #endif
@@ -129,6 +180,7 @@
 
 /*
  * now calculate addresses from above
+ * The order of all TOS versions is BIOS, VDI, GEMDOS, AES, DESK
  */
 #define VDITBASE  BIOSTBASE+BIOSTLEN
 #define BDOSTBASE VDITBASE+VDITLEN

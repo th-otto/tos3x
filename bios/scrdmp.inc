@@ -28,7 +28,7 @@ _bscr_dump:
         move.w    6(a0,d0.w),(_pbdef+8).w       /* pbdef.pb_height */
         clr.w     (_pbdef+10).w                 /* pbdef.pb_left */
         clr.w     (_pbdef+12).w                 /* pbdef.pb_right */
-        move.l    #$FFFF8240,(_pbdef+18).w      /* pbdef.pb_colptr */
+        move.l    #palette,(_pbdef+18).w        /* pbdef.pb_colptr */
         clr.w     (_pbdef+26).w                 /* pbdef.pb_mask; BUG: pb_mask is long (pointer) */
 /* draft or final mode */
         move.w    (_prtconfig).w,d1

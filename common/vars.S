@@ -18,6 +18,10 @@
 
 	ds.b $40 /* seems to be unused */
 
+#if STBOOK
+	ds.b 164 /* seems to be unused */
+#endif
+
 	xdef gem_env
 gem_env: ds.b 12
 
@@ -395,15 +399,7 @@ _prtbp2: ds.l 1
 _prtbchunk: ds.w 1
 
 	xdef _virt_work
-#if VIDEL_SUPPORT
-_virt_work: ds.b 180+32*16*2
-#else
-#if PLANES8
-_virt_work: ds.b 180+8*16*2
-#else
-_virt_work: ds.b 180+4*16*2
-#endif
-#endif
+_virt_work: ds.b 180+MU_PLANES*16*2
 
 	xdef _prtbp1
 _prtbp1: ds.l 1
@@ -614,7 +610,7 @@ _beptr: ds.l 3
 	xdef _endvdibss
 _endvdibss: ds.b 0
 
-	ds.b $63E6
+	ds.b $63E6       /* AES + desktop; not yet finished */
 
 /* This label is referenced by the GEM_MUPB structure */
 	xdef _endgembss

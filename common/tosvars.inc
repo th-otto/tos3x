@@ -11,6 +11,11 @@ _tracetrap      equ $024
 _lineatrap      equ $028
 _lineftrap      equ $02c
 _coprovio       equ $034
+_cpunordered    equ $0c0
+_cpinexact      equ $0c4
+_cpdivzero      equ $0c8
+_cpunderflow    equ $0cc
+_cpoperror      equ $0d0
 
 /* ==== Auto-Vector Interrupts =============================================== */
 
@@ -186,6 +191,7 @@ _ramvalid       equ $5a8      /* validates ramtop if $1357BD13 */
 _bell_hook      equ $5ac      /* pointer to routine for system bell */
 _kcl_hook       equ $5b0      /* pointer to routine for system keyclick */
 
+LcdPShadow      equ $889      /* STBook: shadow of LcdPowerControl ($FFFF827F) */
 
 
 MFP_REGS        equ $fffffa01

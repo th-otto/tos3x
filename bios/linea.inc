@@ -142,6 +142,7 @@ V_REZ_VT:      ds.w 1      (lineavars-$004)	/* word */
 V_BYTES_LIN:   ds.w 1      (lineavars-$002)	/* word */
 
 /* 306de: $3a1a */
+/* 206de: $2904 */
                xdef lineavars
 lineavars:     ds.b 0
                xdef LA_PLANES
