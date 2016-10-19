@@ -50,3 +50,13 @@
 #ifndef BINEXACT
 #define BINEXACT 1
 #endif
+
+
+/*
+ * number of extra entries in bconmap table
+ */
+#if TTMFP_SUPPORT
+#define rs232devs 4
+#else
+#define rs232devs 3
+#endif

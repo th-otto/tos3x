@@ -61,19 +61,23 @@ typedef struct attribute {
 	/*  72 */ FONT_HEAD scratch_head; 	/* Holder for the doubled font data 	*/
 	/* 162 */ int16_t text_color; 		/* Current text color (PEL value)		*/
 	/* 164 */ int16_t ud_ls;			/* User defined linestyle			*/
-#if TOSVERSION >= 0x400
+#if VIDEL_SUPPORT
 	/* 166 */ int16_t ud_patrn[32*16];	/* User defined pattern 			*/
 #else
+#if PLANES8
 	/* 166 */ int16_t ud_patrn[8*16];	/* User defined pattern 			*/
+#else
+	/* 166 */ int16_t ud_patrn[4*16];	/* User defined pattern 			*/
 #endif
-	/* 422 */ int16_t v_align;			/* Current text vertical alignment		*/
-	/* 424 */ int16_t wrt_mode;			/* Current writing mode 			*/
-	/* 426 */ int16_t xfm_mode;			/* Transformation mode requested		*/
-	/* 428 */ int16_t xmn_clip;			/* Low x point of clipping rectangle	*/
-	/* 430 */ int16_t xmx_clip;			/* High x point of clipping rectangle	*/
-	/* 432 */ int16_t ymn_clip;			/* Low y point of clipping rectangle	*/
-	/* 434 */ int16_t ymx_clip;			/* High y point of clipping rectangle	*/
-	/* 436 */ 
+#endif
+	/* 1190/422/294 */ int16_t v_align;			/* Current text vertical alignment		*/
+	/* 1192/424/296 */ int16_t wrt_mode;		/* Current writing mode 			    */
+	/* 1194/426/298 */ int16_t xfm_mode;		/* Transformation mode requested		*/
+	/* 1196/428/300 */ int16_t xmn_clip;		/* Low x point of clipping rectangle	*/
+	/* 1198/430/302 */ int16_t xmx_clip;		/* High x point of clipping rectangle	*/
+	/* 1200/432/304 */ int16_t ymn_clip;		/* Low y point of clipping rectangle	*/
+	/* 1202/434/306 */ int16_t ymx_clip;		/* High y point of clipping rectangle	*/
+	/* 1204/436/308 */ 
 } ATTRIBUTE;
 
 /* Virtual workstation attributes   */

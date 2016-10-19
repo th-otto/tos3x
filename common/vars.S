@@ -1,9 +1,9 @@
-*
-* common variables
-*
-* This file is only used when linking a single module,
-* to get the same addresses as when linking the whole ROM
-*
+/*
+ * common variables
+ *
+ * This file is only used when linking a single module,
+ * to get the same addresses as when linking the whole ROM
+ */
 
 #include "../common/config.h"
 #include "../bdos/bdosdefs.h"
@@ -14,18 +14,18 @@
 
 	bss
 
-*	ds.b $800       ; the system variables go here
+	ds.b $800       /* the system variables go here */
 
-	ds.b $40 ; seems to be unused
+	ds.b $40 /* seems to be unused */
 
 	xdef gem_env
 gem_env: ds.b 12
 
-* save area for trap13/14.
+/* save area for trap13/14. */
     xdef save_beg
 save_beg: ds.b   238
     xdef _trap_save_area
-_trap_save_area: ds.b 0         * End of Save storage
+_trap_save_area: ds.b 0         /* End of Save storage */
 
 	xdef oshdr
 oshdr: ds.b 6+64
@@ -77,7 +77,7 @@ dmarwflg: ds.b 2
 	xdef idebuf
 idebuf: ds.b SECTOR_SIZE
 
-	ds.l 1 ; unused
+	ds.l 1 /* unused */
 
 #if MSTECLK
     xdef rtcbufa
@@ -130,7 +130,7 @@ iclkrtime: ds.l 1
 iclkwtime: ds.l 1
 	
 	xdef iclkbuf
-iclkbuf: ds.b 6      ; buffer for writing time packet to IKBD
+iclkbuf: ds.b 6      /* buffer for writing time packet to IKBD */
 
 	xdef buttonbuf
 buttonbuf: ds.b 3
@@ -181,14 +181,16 @@ iclk_ready: ds.w 1
 bcmap_root: ds.b 16
 
 	xdef bcmap_devs
-bcmap_devs: ds.l 4*6
+bcmap_devs: ds.l 4*6 /* should be 3 for 2.06 but isnt */
 
+#if TTMFP_SUPPORT
 	xdef mdm3ibuf
 mdm3ibuf: ds.b SERIAL_BUFSIZE
 	xdef mdm3obuf
 mdm3obuf: ds.b SERIAL_BUFSIZE
 	xdef mdm3iorec
 mdm3iorec: ds.b 2*14+8
+#endif
 
 	xdef mdm4ibuf
 mdm4ibuf: ds.b SERIAL_BUFSIZE
@@ -276,16 +278,18 @@ memtsize: ds.l 1
 	xdef memterr
 memterr: ds.w 1
 
-* disk_buffer plus pad for equated arrays
-* BEWARE: portions also used by VDI
+/*
+ * disk_buffer plus pad for equated arrays
+ * BEWARE: portions also used by VDI (the "overlay area")
+ */
 #include "../vdi/vdivar.S"
 
-	ds.w 1 ; unused
+	ds.w 1 /* unused */
 
 	xdef biosav
 biosav: ds.l 1
 
-	ds.l 1 ; unused
+	ds.l 1 /* unused */
 
 	xdef savesr
 savesr: ds.w 1
@@ -391,7 +395,15 @@ _prtbp2: ds.l 1
 _prtbchunk: ds.w 1
 
 	xdef _virt_work
-_virt_work: ds.b 436
+#if VIDEL_SUPPORT
+_virt_work: ds.b 180+32*16*2
+#else
+#if PLANES8
+_virt_work: ds.b 180+8*16*2
+#else
+_virt_work: ds.b 180+4*16*2
+#endif
+#endif
 
 	xdef _prtbp1
 _prtbp1: ds.l 1
@@ -447,8 +459,10 @@ _pmd: ds.l 3
 	xdef _sft
 _sft: ds.b 10*(OPNFILES-6)
 
+#if TOSVERSION >= 0x300
 	xdef _ram16x32
 _ram16x32: ds.b 90
+#endif
 	
 	xdef _run
 _run: ds.l 1
@@ -517,7 +531,7 @@ _fd_err: ds.w NUMFLOPPIES
 _diruse: ds.b NCURDIR
 
 	xdef _drvtbl
-_drvtbl: ds.l 16
+_drvtbl: ds.l BLKDEVNUM
 
 	xdef _drvsel
 _drvsel: ds.w 1
@@ -596,15 +610,16 @@ _prtbbol: ds.b 1
     xdef _beptr
 _beptr: ds.l 3
 
-* This label is referenced by the OSHEADER
+/* This label is referenced by the OSHEADER */
 	xdef _endvdibss
 _endvdibss: ds.b 0
 
 	ds.b $63E6
 
-* This label is referenced by the GEM_MUPB structure
+/* This label is referenced by the GEM_MUPB structure */
 	xdef _endgembss
 _endgembss: ds.b 0
 
+/* This label is referenced by the BIOS initialization */
 	xdef __ebss
 __ebss: ds.b 0

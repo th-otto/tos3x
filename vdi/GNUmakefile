@@ -28,22 +28,11 @@ vdi.a: $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS)
 
 check:: vdi.o $(top_srcdir)/common/sections.mak
-	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \
-		echo "$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
-		exit 1; \
-	fi
-	$(AM_V_at)offset=`echo 16 i $(vdi_tbase) $(rombase) - p | dc`; \
-	tlen=`echo 16 i $(vdi_tlen) p | dc`; \
-	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$tlen of=vdi.orig 2> /dev/null; \
-	offset=`echo 16 i $(vdi_dbase) $(rombase) - p | dc`; \
-	dlen=`echo 16 i $(vdi_dlen) p | dc`; \
-	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$dlen seek=$$tlen of=vdi.orig 2> /dev/null; \
-	total=`echo $$tlen $$dlen + p | dc`; \
-	dd if=$< of=vdi.new bs=1 skip=36 count=$$total 2> /dev/null; \
-	cmp vdi.orig vdi.new; \
-	status=$$?; \
-	$(RM) vdi.orig vdi.new; \
-	exit $$status
+	$(AM_V_at)offset=`echo 16 i 10 o $(vdi_tbase) $(rombase) - p | dc`; \
+	$(CMP) $(CMPL) -x --ignore-initial=0x$$offset:0x24 --offsets=0x$(vdi_tbase):0 --bytes=0x$(vdi_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $<
+	$(AM_V_at)offset=`echo 16 i 10 o $(vdi_dbase) $(rombase) - p | dc`; \
+	offset2=`echo 16 i 10 o $(vdi_tlen) 24 + p | dc`; \
+	$(CMP) $(CMPL) -x --ignore-initial=0x$$offset:0x$$offset2 --offsets=0x$(vdi_dbase):0x$(vdi_tlen) --bytes=0x$(vdi_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $<
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)

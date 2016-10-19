@@ -93,7 +93,11 @@ dmarw2:
         move.l    a0,(_buserror).w /* restore vector & sp and continue. */
         move.b    15(a7),d0     /* IDE unit# */
         bsr       iderdy        /* wait for drive to be ready */
+#if P68030
         beq       dmaundev      /* if drive never gets ready, return with unknown device else */
+#else
+        beq.s     dmaundev      /* if drive never gets ready, return with unknown device else */
+#endif
         moveq.l   #2,d0         /* D_IDENTIFY delay required by Conner drives */
         add.l     (_hz_200).w,d0 /* between power on and identify() */
 dmarw3:
@@ -105,7 +109,11 @@ dmarw3:
         bsr       ideidentify   /* identify() */
         addq.w    #6,a7
         tst.w     d0            /* successful? */
+#if TOSVERSION >= 0x300
         bmi       dmaret        /* if timed-out, return */
+#else
+        bmi.s     dmaret        /* if timed-out, return */
+#endif
         bne.s     dmarw8        /* if error, return with error code else can do read or write */
         moveq.l   #2,d0         /* D_IDENTIFY delay required by Conner drives */
         add.l     (_hz_200).w,d0 /* between identify() and r/w */
@@ -187,8 +195,10 @@ dodmaread:
         bsr       scsiread       /* it's an SCSI device */
         rts
 domdmar1:
-#endif
         bsr       rcvacsi        /* it's an ACSI device */
+#else
+        bsr.s     rcvacsi        /* it's an ACSI device */
+#endif
         rts
 
 /*
@@ -368,7 +378,11 @@ wrtacsi:
         move.w    #$0090,2(a1)              /* WDL	; toggle DMA chip for "send" */
         bsr       shortdelay
         move.w    #$0190,2(a1)              /* WDL */
+#if TOSVERSION >= 0x300
         bsr       shortdelay
+#else
+        bsr.s     shortdelay
+#endif
         bsr.s     setacnt                   /* set DMA count */
         move.l    #$00000100,d1             /* d1 = direction of DMA is OUT */
         bsr.s     sblkacsi                  /* send the command block */
@@ -986,7 +1000,7 @@ _gcparm:    movea.l   4(sp),a0                  /* a0 -> data buffer */
             move.l    a0,-(sp)
             pea       cp2024
             move.w    #6,-(sp)
-            bsr       strcmp                    /* compare model# with "CP2024" */
+            bsr.s     strcmp                    /* compare model# with "CP2024" */
             adda.w    #$a,sp                    /* clean up stack */
             tst.w     d0                        /* is unit the CP2024 (Kato 20Mb)? */
             bne.s     gcp0                      /* if not, handle the normal way else return default values of CP2024 */

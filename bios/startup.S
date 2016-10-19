@@ -11,7 +11,7 @@
 
 #include "asmdefs.h"
 #include "header.h"
-#include "tosvars.inc"
+#include "../common/tosvars.inc"
 #include "biosdefs.h"
 
 
@@ -112,9 +112,6 @@ EXTIOREC_SIZE equ 2*IOREC_SIZE+8
 BCONMAP_START_HANDLE equ 6
 
 /* ==== References =========================================================== */
-
-/* Memory */
-        xref memchk
 
 /* BIOS C part */
 /*        xref _biosmain     / * BIOS C entry point */
@@ -233,8 +230,6 @@ _ui_mupb:
         dc.l GEM_MUPB_MAGIC
         dc.l _endgembss
         dc.l gemstart
-zero:
-	    dc.l 0
 
 		text
 
@@ -281,6 +276,11 @@ nodiag:
  * disable the instruction/data caches
  */
 #if TOSVERSION >= 0x300
+        data
+zero:
+	    dc.l 0
+		text
+
         move.l  #$00000808,d0     /* clear & disable instruction/data caches on */
         D0_CACR              /*  68020-60 (even though bit usage differs!) */
 
@@ -361,11 +361,11 @@ meminit:
 #if TOSVERSION >= 0x300
         move.b    #$01,(v_syncmod).w /* set video sync */
 #else
-            btst      #0,_os_conf+1          /* check bit: configured for 50hz? */
+            btst      #0,_os_conf+1             /* check bit: configured for 50hz? */
             beq.s     notpal                    /* (nope -- we're good ol' NTSC) */
             lea       ret_1b(pc),a6
             bra       waitvbl                   /* a short delay for PAL */
-ret_1b:     move.b    #2,(v_syncmod).w             /* yes -- twiddle to 50hz */
+ret_1b:     move.b    #2,(v_syncmod).w          /* yes -- twiddle to 50hz */
 notpal:
 #if STBOOK
 		 	move.b    #2,(v_shf_mod).w          /* Switch to 640x400x1 */
@@ -394,11 +394,14 @@ initpal:
         beq.s      domemchk
 #endif
 
-        move.b    (memctrl).w,d6
+        move.b    (memctrl).w,d6                /* d6 = memory controller configuration */
+#if TOSVERSION < 0x300
+        move.b    d6,(memconf).w                /* setup memory controller configuration register */
+#endif
 
-        move.l    (_phystop).w,d5
-        lea       memcret2(pc),a6
-        bra       memchk
+        move.l    (_phystop).w,d5               /* d5 -> (possible) top of physical mem */
+        lea       memcret2(pc),a6               /* load return address */
+        bra       memchk                        /* check if the memory configuration is valid */
 memcret2:
         beq       nomemchk
 
@@ -456,19 +459,19 @@ chkmemloop: lsr.w     #2,d6						/* shift memory configuration down by a bank (b
             movea.l   d7,a0						/* + 512/256Kb bytes */
             addq.l    #8,a0
             lea       chkmem3(pc),a4
-            bra       memchk
+            bra       memchk0
 chkmem3:    beq.s     chkmem7					/* bank is not working => */
 
             movea.l   d7,a0
             adda.l    d7,a0						/* + 1024/512Kb byte */
             addq.l    #8,a0
             lea       chkmem4(pc),a4
-            bra       memchk
+            bra       memchk0
 chkmem4:    beq.s     chkmem6					/* bank has 512Kb of memory => */
 
             movea.w   #$8,a0					/* + 0 bytes */
             lea       chkmem5(pc),a4
-            bra       memchk
+            bra       memchk0
 chkmem5:    bne.s     chkmem7					/* bank is empty => */
 
             addq.w    #4,d6						/* 4+4 = 1000 2Mb bank size */
@@ -1352,7 +1355,11 @@ pi_back:
         movea.l   (a7)+,a0
         movea.l   (a7)+,a1
         movem.l   (a7)+,d0-d2
-        jmp       any_vec             /* illegal instruction => _term */
+#if TOSVERSION < 0x300
+        jmp       any_vec+$08000000             /* illegal instruction => _term; $80000000 to get exception number in high byte */
+#else
+        jmp       any_vec            /* illegal instruction => _term */
+#endif
 
 biosinit:
 		jsr       _osinit            /* initialize DOS */
@@ -2067,8 +2074,10 @@ bios_unimpl:
  *       Uses:           d0.w, a1
  *       Called-by:      Coldstart memory-sizing routine.
  */
-/* 306: unused */
+#if TOSVERSION < 0x300
 memchk0:
+#endif
+/* 306: unused */
         adda.l    d1,a0         /* a0 -> memory to check */
         clr.w     d0            /* zap pattern seed */
         lea.l     504(a0),a1    /* a1 -> ending address */
@@ -2091,6 +2100,9 @@ memchk2:
  */
 /* 306de: 00e00c06 */
 /* 206de: 00e00bb2 */
+#if TOSVERSION >= 0x300
+memchk0:
+#endif
 memchk:
         cmpi.l    #$752019F3,(_memvalid).w     /* test memory configuration validation, check first magic number */
         bne.s     memchk3                      /* (mismatched -- return NE) */
@@ -3182,7 +3194,7 @@ autoexec:
         move.l    (_drvbits).w,d0           /* d0 - active dev vector */
         move.w    _bootdev,d1               /* d1 - dev# to exec from */
         btst      d1,d0                     /* is the dev alive? */
-        beq.s     autoexe2                  /* (no -- so punt) */
+        beq.s     autoexe1                  /* (no -- so punt) */
 #endif
         lea.l     autopath(pc),a0
         lea.l     autoname(pc),a1
@@ -3927,10 +3939,9 @@ _bcon3in:
         moveq.l   #0,d1                         /* wrap pointer */
 bcon3i1:
         movea.l   buf(a0),a1                    /* get base address of buffer */
+        and.l     #$0000FFFF,d1
 #if TOSVERSION < 0x300
         moveq     #0,d0
-#else
-        and.l     #$0000FFFF,d1
 #endif
         move.b    0(a1,d1.l),d0                 /* get character */
         move.w    d1,head(a0)                   /* store new head pointer to buffer record */
@@ -5290,9 +5301,6 @@ bcondevs:
         dc.l      _bcon8out
         dc.l      _rs8conf
         dc.l      mdm3iorec
-rs232devs equ 4
-#else
-rs232devs equ 3
 #endif
 
         dc.l      _bcon9stat                    /* Dev 8/9: "Serial 2" - SCC Channel A */
@@ -5470,6 +5478,7 @@ _rs8conf:
 #endif
 
 
+/* 206de: 00e02950 */
 sccinit:
         move.b    (a1)+,d0                      /* SCC register number */
         bmi.s     sccinit1                      /* end of the register list? => exit */
@@ -5518,6 +5527,7 @@ nolan:
         rts
 
 /* 306de: 00e02d4c */
+/* 206de: 00e029aa */
 initscc:
         movea.l   (_buserror).w,a0
         movea.l   a7,a1

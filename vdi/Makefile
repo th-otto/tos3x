@@ -36,7 +36,11 @@ vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_$(TOSVERSION)_OBJS) ${MAKEF
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS10)
 
 vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
-	$(LD) -s -o $@ -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_$(TOSVERSION)_OBJS)
+	# sections.mak might have just been generated, make sure it is reread
+	$(MAKE) single
+
+single:
+	$(LD) -s -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_$(TOSVERSION)_OBJS)
 
 vdi.rel: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_$(TOSVERSION)_OBJS) vdi.lnk $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(RM) $@

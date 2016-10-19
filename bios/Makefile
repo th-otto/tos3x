@@ -47,7 +47,11 @@ memtest.o: memtest.S
 	$(AM_V_at)${RM} $*.i
 
 bios.o: tosvars.o vars.o $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
-	$(LD) -u -s -l -o $@ -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o
+	# sections.mak might have just been generated, make sure it is reread
+	$(MAKE) single
+
+single:
+	$(LD) -u -s -l -o bios.o -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o
 
 biosext.o: biosext.S $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i

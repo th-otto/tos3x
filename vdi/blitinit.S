@@ -27,7 +27,7 @@
 #include "../common/config.h"
 #include "vdidefs.h"
 #include "asmdefs.h"
-#include "tosvars.inc"
+#include "../common/tosvars.inc"
 
 #include "devequ.inc"
 #include "lineaequ.inc"

@@ -65,7 +65,7 @@
 #include "vdidefs.h"
 #include "devequ.inc"
 #include "lineaequ.inc"
-#include "tosvars.inc"
+#include "../common/tosvars.inc"
 
 ldri_escape	equ	19	; last DRI escape = 19.
 

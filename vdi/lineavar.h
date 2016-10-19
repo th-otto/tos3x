@@ -254,6 +254,8 @@ typedef struct vdiVars {
 #endif
 	LAEXT int16_t        BLT_MODE;           /* 0: soft BiT BLiT 1: hard BiT BLiT    */
 
+#if PLANES8
+
     /*
      * Stuff for 8 plane VDI
      */
@@ -297,6 +299,8 @@ typedef struct vdiVars {
 	LAEXT int32_t	pal_map[256];	           /* either a mapping of reg's or true val */
 	LAEXT int16_t	(*V_PRIMITIVES[40]) PROTO((NOTHING));	   /* space to copy vectors into	    */
 #endif
+
+#endif /* PLANES8 */
 
 #if !LINEA_HACK
 } VDIVARS;

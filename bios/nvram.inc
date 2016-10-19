@@ -246,7 +246,7 @@ nvmsum1:
 #if MSTECLK
 
 /* 206de: 00e01a96 */
-ngetdt: bsr       checkRTC
+ngetdt: bsr.s     checkRTC
         bcs.s     ngetdt2
         bsr.s     readRTCTime
         cmp.l     #-1,d0

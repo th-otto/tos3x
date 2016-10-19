@@ -300,6 +300,9 @@
 #define LA_SOFTROUTINES		166
 #endif
 #define BLT_MODE		170
+
+#if PLANES8
+
 #define LA_F32			172
 
 /* extended request color array */
@@ -329,7 +332,7 @@
 
 #if !VIDEL_SUPPORT
 
-/* space to build circle coordinates */
+/* space to build circle coordinates (80 words) */
 #define q_circle		2150
 
 #else
@@ -354,6 +357,7 @@
 
 #endif
 
+#endif
 
 /*
  * Macros for accessing linea variables:

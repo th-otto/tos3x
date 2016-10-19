@@ -859,8 +859,13 @@ hardsee1:
  */
 reseek:
         move.w    #-6,fd_curerr                 /* set "seek error" E_SEEK */
+#if TOSVERSION >= 0x300
         bsr.s     restore                       /* restore head */
         bne.s     go2trret                      /* (punt if home fails) */
+#else
+        bsr       restore                       /* restore head */
+        bne       go2trret                      /* (punt if home fails) */
+#endif
         clr.w     fd_curtrack(a1)               /* current track = 0 */
         move.w    #$0082,(a6)                   /* set "current track" reg on 1770 */
         clr.w     d7
@@ -901,7 +906,7 @@ go2trac2:
 	move.w    d0,fd_density(a1)
         bsr       hdselect                      /* select SD/HD mode of floppy */
 #else
-#if TOSVERSION < 0x200
+#if TOSVERSION < 0x300
 	move.w    d0,fd_density(a1)
 	tst.b     STEFlag                       /* no STE hardware available? */
 	bne.s     go2trc2b                      /* (correct) */

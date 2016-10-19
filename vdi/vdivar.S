@@ -1,28 +1,28 @@
-*******************************  vdivar.s  ***********************************
-*
-* $Revision: 3.4 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/vdivar.s,v $
-* ============================================================================
-* $Author: lozben $	$Date: 91/09/10 19:58:36 $     $Locker:  $
-* ============================================================================
-*
-* $Log:	vdivar.s,v $
-* Revision 3.4  91/09/10  19:58:36  lozben
-* Deleted the _q_circle declaration from the overlay variable space.
-* 
-* Revision 3.3  91/08/06  20:32:02  lozben
-* Added variables _copytran, fringe0, innerLoop, fringe1
-* 
-* Revision 3.2  91/07/30  17:44:44  lozben
-* Made some minor adjustments to work with all the vdi files that use this
-* variable space.
-* 
-* Revision 3.1  91/01/16  12:13:10  lozben
-* Deleted all the non overlay variables (linea var struct).
-* 
-* Revision 3.0  91/01/03  15:23:20  lozben
-* New generation VDI
-* 
-******************************************************************************
+/*******************************  vdivar.s  ***********************************
+ *
+ * $Revision: 3.4 $	$Source: /u/lozben/projects/vdi/mtaskvdi/RCS/vdivar.s,v $
+ * ============================================================================
+ * $Author: lozben $	$Date: 91/09/10 19:58:36 $     $Locker:  $
+ * ============================================================================
+ *
+ * $Log:	vdivar.s,v $
+ * Revision 3.4  91/09/10  19:58:36  lozben
+ * Deleted the _q_circle declaration from the overlay variable space.
+ * 
+ * Revision 3.3  91/08/06  20:32:02  lozben
+ * Added variables _copytran, fringe0, innerLoop, fringe1
+ * 
+ * Revision 3.2  91/07/30  17:44:44  lozben
+ * Made some minor adjustments to work with all the vdi files that use this
+ * variable space.
+ * 
+ * Revision 3.1  91/01/16  12:13:10  lozben
+ * Deleted all the non overlay variables (linea var struct).
+ * 
+ * Revision 3.0  91/01/03  15:23:20  lozben
+ * New generation VDI
+ * 
+ ******************************************************************************/
 
 #include "../common/config.h"
 #include "vdidefs.h"
@@ -32,14 +32,14 @@
 		even
 
 	xdef _dskbuf
-_dskbuf: ds.b 7730
+_dskbuf: ds.b OVLSIZE
 
 #define _fill_buffer _dskbuf
 
 SIZE_FONT_HEAD	equ	90	     * size of font_head structure in FONTDEF.H
 
 *****************************************
-*	Overlayable Variables           *
+*	Overlayable Variables               *
 *****************************************
 
 		xdef	_FLIP_Y
@@ -147,7 +147,11 @@ lineavars:
 #if TOSVERSION >= 0x400
 	ds.b 4018
 #else
+#if TOSVERSION >= 0x300
 	ds.b 2310
+#else
+	ds.b 172
+#endif
 #endif
 
 #if LINEA_HACK
@@ -463,6 +467,9 @@ _LA_SOFTROUTINES: equ lineavars+(LA_SOFTROUTINES)
 #endif
 	xdef _BLT_MODE
 _BLT_MODE: equ lineavars+(BLT_MODE)
+
+#if PLANES8
+
 	xdef _LA_F32
 _LA_F32: equ lineavars+(LA_F32)
 	xdef _REQ_X_COL
@@ -502,6 +509,8 @@ _vl_col_fg: equ lineavars+(vl_col_fg)
 _pal_map: equ lineavars+(pal_map)
 	xdef _V_PRIMITIVES
 _V_primitives: equ lineavars+(V_PRIMITIVES)
-#endif
+#endif /* VIDEL_SUPPORT */
 
-#endif
+#endif /* PLANES8 */
+
+#endif /* LINEA_HACK */
