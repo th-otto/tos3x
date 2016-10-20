@@ -279,15 +279,15 @@ vb_draw:	PIXLA(a5)
 vblank_exit:	rts
 
 
-*******************************************************************************
-*
-*	VDI #125 - vex_butv - exchange button change vector
-*
-*	entry:	contrl[7], contrl[8]	pointer to user routine
-*	exit:	contrl[9], contrl[10]	pointer to old routine
-*	destroys: a0-a1
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ * VDI #125 - vex_butv - exchange button change vector
+ *
+ *	entry:	contrl[7], contrl[8]	pointer to user routine
+ *	exit:	contrl[9], contrl[10]	pointer to old routine
+ *	destroys: a0-a1
+ *
+ *******************************************************************************/
 
 /* 306de: 00e0c436 */
 		xdef	_vex_butv
@@ -297,15 +297,15 @@ _vex_butv: PIXLA(a1)
 		move.l	14(a0),PIXLV(user_but,a1)	; store new routine address
 		rts
 
-*******************************************************************************
-*
-*	VDI #126 - vex_motv - exchange coordinate change vector
-*
-*	entry:	contrl[7], contrl[8]	pointer to user routine
-*	exit:	contrl[9], contrl[10]	pointer to old routine
-*	destroy: a0-a1
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ * VDI #126 - vex_motv - exchange coordinate change vector
+ *
+ *	entry:	contrl[7], contrl[8]	pointer to user routine
+ *	exit:	contrl[9], contrl[10]	pointer to old routine
+ *	destroy: a0-a1
+ *
+ *******************************************************************************/
 
 /* 306de: 00e0c44e */
 		xdef	_vex_motv
@@ -315,15 +315,15 @@ _vex_motv: PIXLA(a1)
 		move.l	14(a0),PIXLV(user_mot,a1)	; store new routine address
 		rts
 
-*******************************************************************************
-*
-*	VDI #127 - vex_curv - exchange cursor draw vector
-*
-*	entry:	contrl[7], contrl[8]	-pointer to user routine
-*	exit:	contrl[9], contrl[10]	_pointer to old routine
-*	destroy: a0
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ * VDI #127 - vex_curv - exchange cursor draw vector
+ *
+ *	entry:	contrl[7], contrl[8]	-pointer to user routine
+ *	exit:	contrl[9], contrl[10]	_pointer to old routine
+ *	destroy: a0
+ *
+ *******************************************************************************/
 
 /* 306de: 00e0c466 */
 		xdef	_vex_curv
@@ -1075,19 +1075,20 @@ fix_neg:	clr.w	PIXLV(HIDE_CNT,a5)		; this should never be executed.
 		rts				; it's just paranoia in action.
 
 
-*  VDI #111 - vsc_form - Transform Cursor Form
-*
-*  transform user defined cursor to device specific format
-*
-*  in:
-*	intin[0]     - X coordinate of hot spot
-*	intin[1]     - Y coordinate of hot spot
-*	intin[2]     - reserved for future use. must be 1
-*	intin[3]     - Mask color index
-*	intin[4]     - Data color index
-*	intin[5-20]  - 16 words of cursor mask
-*	intin[21-36] - 16 words of cursor data
-
+/*
+ * VDI #111 - vsc_form - Transform Cursor Form
+ *
+ *  transform user defined cursor to device specific format
+ *
+ *  in:
+ *	intin[0]     - X coordinate of hot spot
+ *	intin[1]     - Y coordinate of hot spot
+ *	intin[2]     - reserved for future use. must be 1
+ *	intin[3]     - Mask color index
+ *	intin[4]     - Data color index
+ *	intin[5-20]  - 16 words of cursor mask
+ *	intin[21-36] - 16 words of cursor data
+ */
 DEV_COL equ DEV_TAB+26
 
 /* 306de: 00e0c864 */

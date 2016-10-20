@@ -55,6 +55,7 @@ max_vert		equ	MAX_PTSIN		; PTSIN maximum length:	1024 verticies
 *******************************************************************************
 
 /* 306de: 00e078b4 */
+/* 206de: 00e068c8 */
 	xdef	_GSX_ENTRY
 _GSX_ENTRY:
 
@@ -134,8 +135,9 @@ no_ptsin:
 
 	rts
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION < 0x300) & BINEXACT
+	data
+#endif
 	xdef _MAX_VERT
 _MAX_VERT:
 	dc.w	max_vert
-#endif

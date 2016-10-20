@@ -178,15 +178,15 @@ _INIT_G:	PIXLA(a1)
 		bra	_v_clrwk
 
 
-*******************************************************************************
-*
-*	VDI #118 - vex_timv - Exchange timer interrupt vector
-*
-*   entry: 		new vector in CONTRL[7-8]
-*				exit:		old vector in CONTRL[9-10]
-*				destroys:	a0/a1
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ * VDI #118 - vex_timv - Exchange timer interrupt vector
+ *
+ *   entry: 		new vector in CONTRL[7-8]
+ *				exit:		old vector in CONTRL[9-10]
+ *				destroys:	a0/a1
+ *
+ *******************************************************************************/
 
 /* 306de: 00e066e6 */
    		xdef	_vex_timv
@@ -213,9 +213,19 @@ _vex_timv:	PIXLA(a1)
 
 #if TOSVERSION < 0x400
 
+/*
+ * Falcon TOS uses C function,
+ * with a device table
+ */
+		xdef _FindDevice
+
+#if TOSVERSION >= 0x300
+
+/*
+ * TOS version, using a small table
+ */
 devtab:    dc.w 0,0,0,1,2,0,4,0,6,7,0
 
-		xdef _FindDevice
 _FindDevice:
 		PIXLA(a2)
         moveq.l   #0,d0
@@ -281,6 +291,96 @@ FindDev6:
         moveq.l   #0,d0
         move.b    _sshiftmod,d0
         rts
+
+#else
+
+/*
+ * old Version for ST compatible modes only
+ */
+_FindDevice:
+		move.w    #$0004,-(a7)
+        trap      #14         /* Getrez() */
+        addq.l    #2,a7
+        move.b    d0,d2
+        cmp.b     #2,d2                         /* current res = mono? */
+        beq.s     FindDev5                      /* yes, can't be changed */
+		PIXLA(a2)
+        move.l    PIXLV(INTIN,a2),a0
+        move.w    (a0),d0
+        cmp.w     #STAYINDEV,d0
+        bne.s     FindDev1
+        tst.b     d2
+        beq.s     FindDev2
+        bra.s     FindDev4
+FindDev1:
+        cmp.w     #$0003,d0                     /* switch to medium res? */
+        beq.s     FindDev3                      /* yes */
+        tst.b     d2                            /* current res = low? */
+        beq.s     FindDev2                      /* yes, no need to change */
+/* switch to low resolution */
+        clr.w     -(a7)
+        moveq.l   #-1,d0
+        move.l    d0,-(a7)
+        move.l    d0,-(a7)
+        move.w    #$0005,-(a7)                  /* Setscreen(-1, -1, 0) */
+        trap      #14
+        lea.l     12(a7),a7
+FindDev2:
+        pea.l     paltab16
+        move.w    #$0006,-(a7)
+        trap      #14                           /* Setpalette */
+        addq.l    #6,a7
+        moveq.l   #1,d0
+        rts
+/* switch to medium resolution */
+FindDev3:
+        moveq.l   #1,d0                         
+        cmp.b     d0,d2                         /* current res == medium? */
+        beq.s     FindDev4                      /* yes, no need to change */
+        move.w    d0,-(a7)
+        moveq.l   #-1,d0
+        move.l    d0,-(a7)
+        move.l    d0,-(a7)
+        move.w    #$0005,-(a7)
+        trap      #14                           /* Setscreen(-1, -1, 1) */
+        lea.l     12(a7),a7
+FindDev4:
+        pea.l     paltab4
+        move.w    #$0006,-(a7)
+        trap      #14                           /* Setpalette */
+        addq.l    #6,a7
+        moveq.l   #2,d0
+        rts
+FindDev5:
+        pea.l     paltab4
+        move.w    #$0006,-(a7)
+        trap      #14                           /* Setpalette */
+        addq.l    #6,a7
+        moveq.l   #3,d0
+        rts
+		
+paltab4:  dc.w $0fff
+          dc.w $0f00
+          dc.w $00f0
+          dc.w $0000
+paltab16  dc.w $0fff
+          dc.w $0f00
+          dc.w $00f0
+          dc.w $0ff0
+          dc.w $000f
+          dc.w $0f0f
+          dc.w $00ff
+          dc.w $0555
+          dc.w $0333
+          dc.w $0f33
+          dc.w $03f3
+          dc.w $0ff3
+          dc.w $033f
+          dc.w $0f3f
+          dc.w $03ff
+          dc.w $0000
+
+#endif
 
 #endif
 
@@ -795,17 +895,21 @@ rezinit:
         move.w    (a0)+,PIXLV(bytes_lin,a1)
         move.w    (a0)+,PIXLV(v_vt_rez,a1)
         move.w    (a0),PIXLV(v_hz_rez,a1)
+#if TOSVERSION >= 0x300
         lsr.w     #3,d0
+#endif
         rts
 
 reztab:
 		dc.w  4,160,200,320
 		dc.w  2,160,200,640
 		dc.w  1,80,400,640
+#if PLANES8
 		dc.w  0,0,0,0
 		dc.w  4,320,480,640
 		dc.w  0,0,0,0
 		dc.w  1,160,960,1280
 		dc.w  8,320,480,320
+#endif
 
 #endif

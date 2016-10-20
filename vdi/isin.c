@@ -26,7 +26,7 @@
 /*---------------------------------------------------------------------------*/
 /* Sines of angles 1 - 90 degrees normalized between 0-32767.		     */
 
-static int16_t sin_tbl[92] = {
+static int16_t const sin_tbl[92] = {
 	0, 572, 1144, 1716, 2286, 2856, 3425, 3993,
 	4560, 5126, 5690, 6252, 6813, 7371, 7927, 8481,
 	9032, 9580, 10126, 10668, 11207, 11743, 12275, 12803,
@@ -42,15 +42,18 @@ static int16_t sin_tbl[92] = {
 };
 
 /*---------------------------------------------------------------------------*/
+
 /* 
  * Returns integer sin between -32767 - 32767. Uses integer
  * lookup table sintable^[]. Expects angle in tenths of degree 0 - 3600.
  * Assumes positive angles only.
  */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 int16_t Isin(P(int16_t) ang)
 PP(register int16_t ang;)
 {
-	register int16_t index, remainder, tmpsin, *ptr;
+	register int16_t index, remainder, tmpsin;
+	register const int16_t *ptr;
 	register int16_t quadrant;			/* 0-3 = 1st, 2nd, 3rd, 4th. */
 
 	ptr = sin_tbl;
@@ -80,7 +83,7 @@ PP(register int16_t ang;)
 	case 4:
 		ang -= TWOPI;
 		break;
-	};
+	}
 
 	index = ang / 10;
 	remainder = ang % 10;
@@ -93,8 +96,9 @@ PP(register int16_t ang;)
 	if (quadrant > 1)
 		tmpsin = -tmpsin;
 
-	return (tmpsin);
+	return tmpsin;
 }
+
 
 /*---------------------------------------------------------------------------*/
 /*
@@ -110,3 +114,73 @@ PP(int16_t ang;)
 
 	return Isin(ang);
 }
+
+#else
+
+int16_t Isin(P(int16_t) ang)
+PP(int16_t ang;)
+{
+	int unused;
+	int16_t index, remainder, tmpsin;
+	int16_t quadrant;			/* 0-3 = 1st, 2nd, 3rd, 4th. */
+
+	while (ang > 3600)
+		ang -= 3600;
+
+	quadrant = ang / HALFPI;
+	unused = 1;
+	
+	switch (quadrant)
+	{
+	case 0:
+		break;
+
+	case 1:
+		ang = PI - ang;
+		break;
+
+	case 2:
+		ang -= PI;
+		break;
+
+	case 3:
+		ang = TWOPI - ang;
+		break;
+
+	case 4:
+		ang -= TWOPI;
+		break;
+	}
+
+	index = ang / 10;
+	remainder = ang % 10;
+	tmpsin = sin_tbl[index];
+
+	/* add interpolation. */
+	if (remainder != 0)
+		tmpsin += ((sin_tbl[index + 1] - tmpsin) * remainder) / 10;
+
+	if (quadrant > 1)
+		tmpsin = -tmpsin;
+
+	UNUSED(unused);
+	
+	return tmpsin;
+}
+
+/*---------------------------------------------------------------------------*/
+/*
+ * return integer cos between -32767 and 32767.
+ */
+int16_t Icos(P(int16_t) ang)
+PP(int16_t ang;)
+{
+	ang = ang + HALFPI;
+
+	if (ang > TWOPI)
+		ang -= TWOPI;
+
+	return Isin(ang);
+}
+
+#endif

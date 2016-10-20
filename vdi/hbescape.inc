@@ -180,7 +180,7 @@ p_sc_up:
 	xdef	hb_scrup
 hb_scrup:
 
-	lea	BLASTER+B_OFF+B_S_NXWD,a5
+	lea	BLASTER+(B_S_NXWD+B_OFF),a5
 
 	moveq.l	#$02,d6
 	move.w	d6,(a5)+		; load B_S_NXWD
@@ -253,7 +253,7 @@ p_sc_dn:
 	xdef	hb_scrdn
 hb_scrdn:
 
-	lea	BLASTER+B_OFF+B_S_NXWD,a5
+	lea	BLASTER+(B_S_NXWD+B_OFF),a5
 
 	moveq.l	#-02,d6
 	move.w	d6,(a5)+		; B_S_NXWD = -2 (next word to the left)
@@ -362,7 +362,7 @@ blank_it:
 	xdef	hb_blank
 hb_blank:
 
-	lea	BLASTER+B_OFF+B_F1_MSK,a5
+	lea	BLASTER+(B_F1_MSK+B_OFF),a5
 
 	move.w	d0,d4			; d4 <- X min
 	move.w	d2,d5			; d5 <- X max

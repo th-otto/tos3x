@@ -144,7 +144,7 @@ typedef struct vdiVars {
 	LAEXT int16_t        v_col_bg;           /* character cell text background color */
 	LAEXT int16_t        v_col_fg;           /* character cell text foreground color */
 	LAEXT int16_t        *v_cur_ad;          /* cursor address                       */
-	LAEXT int16_t        v_cur_off;          /* byte ofsset to cur from screen base  */
+	LAEXT int16_t        v_cur_off;          /* byte offset to cursor from screen base  */
 	LAEXT int16_t        v_curcx;            /* cursor cell X position               */
 	LAEXT int16_t        v_curcy;            /* cursor cell Y position               */
 	LAEXT char           vct_init;           /* v_cur_tim reload value.              */

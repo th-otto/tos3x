@@ -794,12 +794,21 @@ VOID vr_trnfm(NOTHING)
 VOID dr_recfl(NOTHING)
 {
 	register int16_t *pts_in;
+#if !PLANES8
+	register int16_t color;
+#endif
 
 	/* Perform arbitrary corner fix-ups and invoke the rectangle fill routine */
 
 	arb_corner(LV(PTSIN), ULLR);
 #if PLANES8
 	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
+#else
+	color = LV(cur_work)->fill_color;
+	LV(FG_BP_1) = color & 0x01;
+	LV(FG_BP_2) = color & 0x02;
+	LV(FG_BP_3) = color & 0x04;
+	LV(FG_BP_4) = color & 0x08;
 #endif
 
 	pts_in = LV(PTSIN);

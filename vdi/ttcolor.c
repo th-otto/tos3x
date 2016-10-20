@@ -62,6 +62,9 @@ static short const pcnt_tab[] = {
 
 /*----------------------------------------------------------------------------*/
 
+/*
+ * VDI #14 - vs_color - Set color representation
+ */
 #if TOSVERSION >= 0x400
 VOID tt_vs_color(NOTHING)
 #else
@@ -176,6 +179,9 @@ VOID vs_color(NOTHING)
 
 /*----------------------------------------------------------------------------*/
 
+/*
+ * VDI #26 - vq_color - Inquire color representation
+ */
 #if TOSVERSION >= 0x400
 VOID tt_vq_color(NOTHING)
 #else

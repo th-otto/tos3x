@@ -12,7 +12,8 @@ TOSVERSION=306
 
 
 $(top_srcdir)/common/config.h: $(top_srcdir)/config.mak ${MAKEFILE}
-	$(AM_V_GEN)echo '#define TOSVERSION 0x$(TOSVERSION)' > $@
+	$(AM_V_GEN)echo '/* automatically generated - DO NOT EDIT */' > $@
+	$(AM_V_at)echo '#define TOSVERSION 0x$(TOSVERSION)' >> $@
 	$(AM_V_at)echo '#define ATOSVERSION $$$(TOSVERSION)' >> $@
 	$(AM_V_at)echo '#define OS_COUNTRY CTRY_$(COUNTRY)' >> $@
 

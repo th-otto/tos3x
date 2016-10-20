@@ -30,8 +30,9 @@ FONT_HEAD ram8x16, ram8x8, ram16x32;
 /* 
  * v_opnwk():	OPEN_WORKSTATION:
  */
+/* 404:   00e10c72 */
 /* 306de: 00e06a76 */
-/* 404: 00e10c72 */
+/* 206de: 00e0807e */
 VOID v_opnwk(NOTHING)
 {
 	register int16_t i;
@@ -55,12 +56,17 @@ VOID v_opnwk(NOTHING)
 	}
 #endif
 #if TOSVERSION < 0x400
+#if TOSVERSION >= 0x300
 	register int j;
 	register int count;
 	register int16_t curRez;
 	register int unused;
+#endif
 	int16_t *old_intin, *old_intout, *old_contrl;
 	int16_t new_contrl[7], new_intin[2], new_intout[4];
+#if TOSVERSION < 0x300
+	int16_t curRez;
+#endif
 #endif
 
 	/* Move ROM copy of DEV_TAB to RAM */
@@ -70,7 +76,7 @@ VOID v_opnwk(NOTHING)
 		*dp++ = *sp++;
 
 
-	/* Move ROM copy of DEV_TAB to RAM */
+	/* Move ROM copy of INQ_TAB to RAM */
 	sp = ROM_INQ_TAB;
 	dp = LV(INQ_TAB);
 	for (i = 0; i < 45; i++)
@@ -126,9 +132,9 @@ VOID v_opnwk(NOTHING)
 	(*LV(LA_ROUTINES)[V_INIT]) ();
 #else
 
-	UNUSED(unused);
-	UNUSED(j);
 	
+#if TOSVERSION >= 0x300
+	UNUSED(unused);
 	EsetGray(0);
 	EsetBank(0);
 
@@ -163,7 +169,6 @@ VOID v_opnwk(NOTHING)
 		ram8x16.flags |= DEFAULT;
 		break;
 
-#if PLANES8
 	case _640x480:
 		LV(DEV_TAB)[0] = 640 - 1;		/* X max                      */
 		LV(DEV_TAB)[1] = 480 - 1;		/* Y max                      */
@@ -200,7 +205,6 @@ VOID v_opnwk(NOTHING)
 		ram8x8.flags &= ~DEFAULT;
 		ram8x16.flags |= DEFAULT;
 		break;
-#endif
 	
 	case 3:
 	case 5:
@@ -209,6 +213,40 @@ VOID v_opnwk(NOTHING)
 		LV(DEV_TAB)[4] = 278;			/* height of pixel in microns */
 		break;
 	}
+
+#else
+
+	/*
+	 * old Version for ST compatible modes only
+	 */
+
+	/*
+	 * init all the device dependant stuff
+	 */
+	curRez = FindDevice();
+	if (curRez == 2)                    /* did we switch to medium resolution? */
+	{
+		LV(DEV_TAB)[0] = 640 - 1;		/* X max                      */
+		LV(DEV_TAB)[3] = 169;			/* width of pixel in microns  */
+		LV(DEV_TAB)[13] = 4;			/* # of pens available        */
+		LV(INQ_TAB)[4] = 2;				/* number of planes           */
+	} else if (curRez == 3)             /* did we switch to high resolution? */
+	{
+		LV(DEV_TAB)[0] = 640 - 1;		/* X max                      */
+		LV(DEV_TAB)[1] = 400 - 1;		/* Y max                      */
+		LV(DEV_TAB)[3] = 372;			/* width of pixel in microns  */
+		LV(DEV_TAB)[13] = 2;			/* # of pens available        */
+		LV(DEV_TAB)[35] = 0;			/* color capability flag      */
+		LV(DEV_TAB)[39] = 2;			/* number of colors available */
+		LV(INQ_TAB)[1] = 1;				/* number of color levels     */
+		LV(INQ_TAB)[4] = 1;				/* number of planes           */
+		LV(INQ_TAB)[5] = 0;				/* no CLUT                    */
+		ram8x8.point = 9;
+		ram8x16.point = 10;
+		ram8x8.flags ^= DEFAULT;
+		ram8x16.flags |= DEFAULT;
+	}
+#endif
 	
 	LV(CONTRL)[6] = virt_work.handle = 1;
 	LV(cur_work) = &virt_work;
@@ -247,11 +285,14 @@ VOID v_opnwk(NOTHING)
 	LV(INTIN) = new_intin;
 	LV(INTOUT) = new_intout;
 
+#if TOSVERSION >= 0x300
 	count = LV(DEV_TAB)[13];	/* #  pens available  */
+#endif
 	new_intin[1] = 1;
 	dp = &LV(REQ_COL)[0][0];
 	sp = new_intout + 1;
 
+#if TOSVERSION >= 0x300
 	switch (curRez)
 	{
 	case _320x200:						/* initialize the 2 color arrays to the */
@@ -324,6 +365,17 @@ VOID v_opnwk(NOTHING)
 #endif
 	}
 
+#else
+	for (i = 0; i < LV(DEV_TAB)[13]; i++)
+	{
+		new_intin[0] = i;
+		vq_color();
+		*dp++ = *sp;
+		*dp++ = *(sp + 1);
+		*dp++ = *(sp + 2);
+	}
+#endif
+
 	LV(CONTRL) = old_contrl;
 	LV(INTIN) = old_intin;
 	LV(INTOUT) = old_intout;
@@ -337,7 +389,7 @@ VOID v_opnwk(NOTHING)
  * This function is here for soft loaded vdi. We init the workType then find
  * a device out of a set of caned devices. And do a SETREZ (setscreen) call.
  */
-/* 404: 00e10e4a */
+/* 404:   00e10e4a */
 const SCREENDEF *FindDevice(P(int16_t) devId)
 PP(int16_t devId;)
 {

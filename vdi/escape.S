@@ -176,6 +176,9 @@ ce_more:
 	rts
 
 
+/*
+ * VDI #5,101 - v_offset - Set screen offset
+ */
 v_offset:
 
 	bsr	hide_cursor		; INTIN+00 = Y displacement on cursor
@@ -189,7 +192,7 @@ v_offset:
 *    This console out routine doesn't interpret control characters,
 *    it just prints them.
 
-/* 306de: 00e0729e */
+/* 306de: 00e07292 */
 /* 206de: 00e06100 */
 	xdef	_asc_out
 _asc_out: ds.b 0
