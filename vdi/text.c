@@ -380,6 +380,12 @@ VOID d_gtext(NOTHING)
 
 #if PLANES8
 				LV(FG_B_PLANES) = LV(TEXT_FG);
+#else
+				temp = LV(TEXT_FG);
+				LV(FG_BP_1) = temp & 0x01;
+				LV(FG_BP_2) = temp & 0x02;
+				LV(FG_BP_3) = temp & 0x04;
+				LV(FG_BP_4) = temp & 0x08;
 #endif
 
 				count = LV(CUR_FONT)->ul_size;
@@ -424,6 +430,7 @@ VOID d_gtext(NOTHING)
 
 
 /* 306de: 00e0b094 */
+/* 206de: 00e0a82a */
 VOID text_init(NOTHING)
 {
 	int16_t i, j;
@@ -500,6 +507,7 @@ VOID text_init(NOTHING)
  * VDI #12 - vst_height - Set character height, absolute mode
  */
 /* 306de: 00e0b1c8 */
+/* 206de: 00e0a95e */
 VOID dst_height(NOTHING)
 {
 	const struct font_head **chain_ptr;
@@ -568,6 +576,7 @@ VOID dst_height(NOTHING)
 
 
 /* 306de: 00e0b2e6 */
+/* 206de: 00e0aa7c */
 VOID copy_name(P(const char *) source, P(char *) dest)
 PP(const char *source;)
 PP(char *dest;)
@@ -585,6 +594,7 @@ PP(char *dest;)
 
 
 /* 306de: 00e0b30e */
+/* 206de: 00e0aaa4 */
 VOID make_header(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -678,6 +688,7 @@ VOID make_header(NOTHING)
  * VDI #107 - vst_point - Set character height, points mode
  */
 /* 306de: 00e0b45e */
+/* 206de: 00e0abf4 */
 VOID dst_point(NOTHING)
 {
 	int16_t font_id;
@@ -760,6 +771,7 @@ VOID dst_point(NOTHING)
  * VDI #106 - vst_effects - Set graphic text special effects
  */
 /* 306de: 00e0b5a4 */
+/* 206de: 00e0ad3a */
 VOID vst_effects(NOTHING)
 {
 	LV(INTOUT)[0] = LV(cur_work)->style = LV(INTIN)[0] & LV(INQ_TAB)[2];
@@ -771,6 +783,7 @@ VOID vst_effects(NOTHING)
  * VDI #39 - vst_alignment - Set graphic text alignment
  */
 /* 306de: 00e0b5d8 */
+/* 206de: 00e0ad6e */
 VOID dst_alignment(NOTHING)
 {
 	register int16_t a, *int_out, *int_in;
@@ -799,6 +812,7 @@ VOID dst_alignment(NOTHING)
  * VDI #13 - vst_rotation - Set character baseline vector
  */
 /* 306de: 00e0b634 */
+/* 206de: 00e0adca */
 VOID dst_rotation(NOTHING)
 {
 	LV(INTOUT)[0] = LV(cur_work)->chup = ((LV(INTIN)[0] + 450) / 900) * 900;
@@ -810,6 +824,7 @@ VOID dst_rotation(NOTHING)
  * VDI #21 - vst_font - Set text face
  */
 /* 306de: 00e0b66e */
+/* 206de: 00e0ae04 */
 VOID dst_font(NOTHING)
 {
 	int16_t *old_intin, point, *old_ptsout, dummy[4], *old_ptsin;
@@ -868,6 +883,7 @@ VOID dst_font(NOTHING)
  * VDI #22 - vst_color - Set graphic text color index
  */
 /* 306de: 00e0b752 */
+/* 206de: 00e0aee8 */
 VOID dst_color(NOTHING)
 {
 	register int16_t r;
@@ -887,6 +903,7 @@ VOID dst_color(NOTHING)
  * VDI #38 - vqt_attributes - Inquire current graphic text attributes
  */
 /* 306de: 00e0b7a2 */
+/* 206de: 00e0af38 */
 VOID dqt_attributes(NOTHING)
 {
 	register int16_t *pointer, temp;
@@ -922,6 +939,7 @@ VOID dqt_attributes(NOTHING)
  * VDI #116 - vqt_extent - Inquire text extent
  */
 /* 306de: 00e0b81c */
+/* 206de: 00e0afb2 */
 VOID dqt_extent(NOTHING)
 {
 	register int16_t i, chr, table_start;
@@ -1026,6 +1044,7 @@ VOID dqt_extent(NOTHING)
  * VDI #117 - vqt_width - Inquire character cell width
  */
 /* 306de: 00e0b9d8 */
+/* 206de: 00e0b16e */
 VOID dqt_width(NOTHING)
 {
 	register int16_t k;
@@ -1075,6 +1094,7 @@ VOID dqt_width(NOTHING)
  * VDI #130 - vqt_name - Inquire face name and index
  */
 /* 306de: 00e0bab0 */
+/* 206de: 00e0b246 */
 VOID dqt_name(NOTHING)
 {
 	register int16_t i, element;
@@ -1125,6 +1145,7 @@ VOID dqt_name(NOTHING)
  * VDI #131 - vqt_fontinfo - Inquire current face information
  */
 /* 306de: 00e0bb40 */
+/* 206de: 00e0b2d6 */
 VOID dqt_fontinfo(NOTHING)
 {
 	register int16_t *pointer;
@@ -1174,6 +1195,7 @@ VOID dqt_fontinfo(NOTHING)
  * VDI #11,10 - v_justified - Justified graphics text
  */
 /* 306de: 00e0bbce */
+/* 206de: 00e0b364 */
 VOID d_justified(NOTHING)
 {
 	int16_t spaces;
@@ -1333,6 +1355,7 @@ VOID d_justified(NOTHING)
  * VDI #119 - vst_load_fonts - Load fonts
  */
 /* 306de: 00e0beea */
+/* 206de: 00e0b680 */
 VOID dt_loadfont(NOTHING)
 {
 	register int16_t id, count, *control;
@@ -1404,6 +1427,7 @@ VOID dt_loadfont(NOTHING)
  * VDI #120 - vst_unload_fonts - Unload fonts
  */
 /* 306de: 00e0bf7e */
+/* 206de: 00e0b714 */
 VOID dt_unloadfont(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;

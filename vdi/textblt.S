@@ -48,13 +48,16 @@
 
 
 	xdef _scrtsiz
+#if TOSVERSION >= 0x300
 _scrtsiz:	dc.w	666	; WUT THE FUT ??$*&@!??
+#else
+_scrtsiz:	dc.w	204	; WUT THE FUT ??$*&@!??
+#endif
 
 *  entry point for textblt & scaling routine
 *
 	xdef	_TEXT_BLT
 	xdef	_ACT_SIZ
-	xdef	_CLC_DDA
 
 	text
 
@@ -71,6 +74,8 @@ _scrtsiz:	dc.w	666	; WUT THE FUT ??$*&@!??
 *******************************************************************************
 
 /* 306de: 00e0bfb4 */
+/* 206de: 00e0b74a */
+	xdef	_CLC_DDA
 _CLC_DDA:
 	PIXLA(a0)
 	move.w	6(sp),d0		;d0 = requested size (dx)
@@ -115,6 +120,7 @@ smal_ok:
 *******************************************************************************
 
 /* 306de: 00e0bfe6 */
+/* 206de: 00e0b77c */
 _ACT_SIZ:
 
 	PIXLA(a0)
@@ -180,6 +186,7 @@ sz_sm_2:
 *****************************************
 
 /* 306de: 00e0c038 */
+/* 206de: 00e0b7ce */
 _TEXT_BLT:
 	movem.l	a5-a6,-(sp)
 	LA(a6)
