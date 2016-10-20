@@ -88,7 +88,9 @@ VOID v_opnwk(NOTHING)
 	 */
 	ram8x8 = f8x8;
 	ram8x16 = f8x16;
+#if PLANES8
 	ram16x32 = f16x32;
+#endif
 	LV(font_ring)[1] = &ram8x8;
 
 #if TOSVERSION >= 0x400
@@ -410,7 +412,9 @@ VOID InitFonts(NOTHING)
 	 */
 	ram8x8 = f8x8;
 	ram8x16 = f8x16;
+#if PLANES8
 	ram16x32 = f16x32;
+#endif
 }
 
 /*----------------------------------------------------------------------------*/

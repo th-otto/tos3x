@@ -26,10 +26,7 @@
 	xdef	sb_vline
 	xdef	sb_hline
 	xdef	sb_text
-	xdef	_f16x32
 
-	xref	_off_8x8
-	xref	_dat_8x16
 
 sb_cell:
 sb_scrup:
@@ -42,8 +39,12 @@ sb_vline:
 sb_hline:
 sb_text:	rts
 
-_f16x32:
+#if PLANES8
+	xdef	_f16x32
+	xref	_off_8x8
+	xref	_dat_8x16
 
+_f16x32:
 	dc.w	1					; int16_t  font_id
 	dc.w	10					; int16_t  point
 	dc.b	'8x16 system font                '	; char  name[32]
@@ -70,5 +71,4 @@ _f16x32:
 	dc.w	16					; uint16_t form_height
 	dc.l	0					; uint16_t *next_font
 	dc.w	0					; uint16_t next_seg
-
-
+#endif
