@@ -11,6 +11,9 @@
  ******************************************************************************
  */
 
+#ifndef LINEAEQU_INC
+#define LINEAEQU_INC
+
 #include "devequ.inc"
 
 /*****************************************
@@ -374,3 +377,13 @@
 #define PIXLV(v,r) lineavars+(v)
 #endif
 #define LV(v,r) v(r)
+
+
+#if BLITTER_SUPPORT
+
+/* first register of bit blt */
+#define BLASTER	$FF8A00
+
+#endif
+
+#endif /* LINEAEQU_INC */

@@ -43,7 +43,12 @@ typedef int16_t BOOLEAN;
 /*
  * entry.S
  */
+#if TOSVERSION >= 0x300
+/* PTSIN maximum length */
 extern int16_t const MAX_VERT;
+#else
+#define MAX_VERT MAX_PTSIN
+#endif
 
 
 /*

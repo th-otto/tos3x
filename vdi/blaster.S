@@ -29,10 +29,7 @@
 
 #if BLITTER_SUPPORT
 
-		xdef	BLASTER
 		xdef	st_blaster
-
-BLASTER		equ	$FF8A00
 
 st_blaster:	rts
 

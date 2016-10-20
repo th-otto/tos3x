@@ -38,12 +38,6 @@
 
 #include "blaster.inc"
 
-	xref	blank_it
-
-*	external variables
-
-	xref	BLASTER		* first register of bit blt
-
 *******************************************************************************
 *
 * name:	 	hb_cell

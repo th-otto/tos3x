@@ -25,7 +25,6 @@
 
 #if BLITTER_SUPPORT /* whole file */
 
-	xref	 BLASTER
 	xdef	 hb_text
 
 *    Some of Jim Eisenstein's bloody blastman code came in handy here

@@ -132,11 +132,19 @@ _rmcharx	equ	_fill_buffer+64
 _rmchary	equ	_fill_buffer+66		; add this to use up remainder
 _FLIP_Y		equ	_fill_buffer+68		; Non-zero PTSOUT contains magnitudes
 _copytran	equ	_fill_buffer+72		;
+#if TOSVERSION >= 0x300
 ptsin_array	equ	_fill_buffer+250	; copy of ptsin[] (4096 bytes)
 fringe0		equ	_fill_buffer+1000	; area to compile routines in
 innerLoop	equ	_fill_buffer+2000	; area to compile routines in
 fringe1		equ	_fill_buffer+3000	; area to compile routines in
 _deftxbu	equ	_fill_buffer+4500	; scratch buf for 8x16 (276 bytes)
+#else
+ptsin_array	equ	_fill_buffer+768	; copy of ptsin[] (4096 bytes)
+fringe0		equ	_fill_buffer+1000	; area to compile routines in
+innerLoop	equ	_fill_buffer+2000	; area to compile routines in
+fringe1		equ	_fill_buffer+3000	; area to compile routines in
+_deftxbu	equ	_fill_buffer+4500	; scratch buf for 8x16 (276 bytes)
+#endif
 
 	xdef _vdivars
 _vdivars: ds.b 910 ; space for negative linea vars

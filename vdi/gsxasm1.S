@@ -39,8 +39,12 @@
 #include "asmdefs.h"
 #include "../common/tosvars.inc"
 
+#if PLANES8
 MAX_PLANES	equ	 8		; maximum planes for pixel fragment
-FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
+#else
+MAX_PLANES	equ	 4		; maximum planes for pixel fragment
+#endif
+FRAG_LEN	equ  MAX_PLANES*4+4 ; space for fragment of 16 planes
 
 
 #if MULTI_LINEA
@@ -60,7 +64,11 @@ FRAG_LEN	equ	 MAX_PLANES*4+4 ; space for fragment of 16 planes
 		jmp (r)
 
 /* v_planes == 0; stupid as68 does not optimize it */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define V_PLANES
+#else
+#define V_PLANES v_planes
+#endif
 
 	text
 
@@ -177,13 +185,21 @@ vl_out:		rts
 
 #define _fill_buffer _dskbuf
 
-/* x1		equ	0 */
 /* stupid as68 does not optimize it away */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define x1
+#else
+#define x1  0
+#endif
 y1		equ	2
 x2		equ	4
 y2		equ	6
 
+
+#if !PLANES8
+		xdef	M_CLC_FLIT
+M_CLC_FLIT: ds.b 0
+#endif
 
 /* 306de: 00e07a9a */
 		xdef	_CLC_FLIT
@@ -539,7 +555,11 @@ ST_ABLINE:
 #else
 /* 306de: 00e07c22 */
 		xdef	_ABLINE
-_ABLINE:
+_ABLINE: ds.b 0
+#if !PLANES8
+		xdef	M_ABLINE
+M_ABLINE: ds.b 0
+#endif
 #endif
 		LA(a4)
 		moveq.l	#2,d0		; d0 <- XOR writing mode code
@@ -610,7 +630,11 @@ in_order:	move.w	d6,d1		; d1 <-  Xmax
 aline:		lea	-FRAG_LEN(sp),sp  ; sp -> pixel fragment frame
 
 		move.w	LV(V_PLANES,a4),d3  ; d3 <- number of planes
+#if TOSVERSION < 0x300
+		cmp.w	#8,d3	  ; too many planes for the buffer ? BUG: MAX_PLANES is 4
+#else
 		cmp.w	#MAX_PLANES,d3	  ; too many planes for the buffer ?
+#endif
 		bhi	al_quit		  ; if so, end prematurely
 
 		cmp.w	LV(WRT_MODE,a4),d0  ; don't build fragment for XOR mode
@@ -710,7 +734,7 @@ al_quit:	lea	FRAG_LEN(sp),sp	   ; clean up the stack
 *   The absolute address of the table entry plus the word offset at that
 *   entry becomes the absolute address of the writing mode entry point.
 
-wm_tbl:		dc.w	wm0y_nxt-*
+wm_tbl:	dc.w	wm0y_nxt-*
 		dc.w	    wm0y-*	; replace		dY > dX
 		dc.w	wm1y_nxt-*
 		dc.w	    wm1y-*	; transparent		dY > dX
@@ -757,27 +781,44 @@ pixfrag: ds.b 0
 #endif
 		subq.w	#1,d3			; d3 <- dbra plane counter
 
+#if PLANES8
 		movem.w	i_tbl(pc),d0-d1/a1	; cache instr data in registers
 		move.l	a2,a0			; a0 <- working PC
-#if PLANES8
 		move.l	LV(FG_B_PLANES,a4),d2	; a1 -> bitplane color array
+
+pf_loop:
+		roxr.l	#1,d2			; get color for this plane
+		bcs	pf_or			; 0 => AND   1 => OR
+#else
+		movem.w	i_tbl(pc),d0-d2	; cache instr data in registers
+		move.l	a2,a0			; a0 <- working PC
+		lea.l     FG_BP_1(a4),a1
+pf_loop:
+		tst.w     (a1)+
+		bne       pf_or
 #endif
 
-pf_loop:	roxr.l	#1,d2			; get color for this plane
-		bcs	pf_or			; 0 => AND   1 => OR
-
-pf_and:		move.w	d0,(a0)+		; load: and.w d0,(a5)+ SET BIT
+pf_and:	move.w	d0,(a0)+		; load: and.w d0,(a5)+ SET BIT
 		dbra	d3,pf_loop
 
+#if PLANES8
 		move.w	a1,(a0)+		; load: jmp (a3) RETURN THREAD
+#else
+		move.w	d2,(a0)+		; load: jmp (a3) RETURN THREAD
+#endif
 		rts
 
-pf_or:		move.w	d1,(a0)+		; load: or.w d1,(a5)+ CLEAR BIT
+pf_or:	move.w	d1,(a0)+		; load: or.w d1,(a5)+ CLEAR BIT
 		dbra	d3,pf_loop
 
+#if PLANES8
 		move.w	a1,(a0)+		; load: jmp (a3) RETURN THREAD
+#else
+		move.w	d2,(a0)+		; load: jmp (a3) RETURN THREAD
+#endif
 
 		rts
+
 
 *	     Table of Instructions.
 
@@ -1044,6 +1085,15 @@ wm2x_nc:	add.w	d5,d4		; d4 <- epsilon + e1		      4
 		rts
 
 
+#if BLITTER_SUPPORT & (TOSVERSION < 0x300)
+		xdef	op_table
+op_table:  *	 color=0   color=1
+
+	dc.w	BM_PAT+00,BM_PAT+03	; replace
+	dc.w	BM_PAT+04,BM_PAT+07	; transparent
+	dc.w	BM_PAT+06,BM_PAT+06	; xor
+	dc.w	BM_PAT+01,BM_PAT+13	; reverse transparent
+#endif
 
 *******************************************************************************
 *******************************************************************************
@@ -1100,7 +1150,11 @@ ST_HABLINE:
 #else
 /* 306de: 00e07ed4 */
 		xdef	_HABLINE
-_HABLINE:
+_HABLINE: ds.b 0
+#if !PLANES8
+		xdef	M_HABLINE
+M_HABLINE: ds.b 0
+#endif
 #endif
 	LA(a4)
 	movem.w	LV(X1,a4),d4-d6		; d4 <- X1   d5 <- Y1   d6 <- X2

@@ -93,3 +93,12 @@
 #else
 #define OVLSIZE 3890
 #endif
+
+/*
+ * PTSIN maximum length
+ */
+#if TOSVERSION >= 0x300
+#define MAX_PTSIN 1024
+#else
+#define MAX_PTSIN 512
+#endif

@@ -70,20 +70,25 @@ atab:		dc.l	var_base,_put_pix,_get_pix,M_ABLINE
 		dc.l	_TEXT_BLT,_v_show_c,_HIDE_CUR,_vsc_form
 		dc.l	cur_replace,cur_display,_COPY_RFM,_seedfill
 
+#if PLANES8
 *+
 *  These routines set the color index then go to the primitives.
 *  We are stuck using bit plane flags for backward compatibility.
 *-
-M_ABLINE:	bsr	set_index
+M_ABLINE:
+		bsr	set_index
 		jmp	_ABLINE
 
-M_HABLINE:	bsr	set_index
+M_HABLINE:
+		bsr	set_index
 		jmp	_HABLINE
 
-M_RECTFILL:	bsr	set_index
+M_RECTFILL:
+		bsr	set_index
 		jmp	_RECTFILL
 
-M_CLC_FLIT:	bsr	set_index
+M_CLC_FLIT:
+		bsr	set_index
 		jmp	_CLC_FLIT
 
 *+
@@ -95,9 +100,7 @@ set_index:
 		LA(a4)
 		clr.l	d0			; clear color index
 		lea	LV(FG_BP_1,a4),a3		; a3 -> 1st 4 back plane flags
-#if PLANES8
 		lea	LV(FG_BP_5,a4),a5		; a5 -> 2nd 4 back plane flags
-#endif
 
 		tst.w	(a3)+
 		beq	bp2
@@ -132,11 +135,10 @@ bp8:	tst.w	(a5)+
 		bset.l	#7,d0
 
 bp9:
-#if PLANES8
 		move.l	d0,LV(FG_B_PLANES,a4)	; copy the color index
-#endif
 		rts
 
+#endif
 
 
 *+

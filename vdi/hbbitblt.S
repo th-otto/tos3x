@@ -19,8 +19,6 @@
 
 #if BLITTER_SUPPORT /* whole file */
 
-	xref	BLASTER
-
 *       FRAME PARAMETERS
 
 B_WD		equ	-76	; width of block in pixels

@@ -801,7 +801,11 @@ ST_RECTFILL:
 #else
 /* 306de: 00e0c28a */
 		xdef	_RECTFILL
-_RECTFILL:
+_RECTFILL: ds.b 0
+#if !PLANES8
+		xdef	M_RECTFILL
+M_RECTFILL: ds.b 0
+#endif
 #endif
 	LA(a2)
 	lea	LV(X1,a2),a0		; a0 -> rectangle endpoints array

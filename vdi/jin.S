@@ -365,21 +365,21 @@ Bmd_1:		move.w	d3,d0		; return "old" blit mode
 *
 *-
 
-BLASTER	equ	$ffff8a00
-
 _TEST_BLT:	move.l	a0,-(sp)	; save a0 (BlitMode uses it)
 		move.w	sr,d1		; save IPL
 		move.w	#0,d0		; D0 = 0, assume no chip
 		movea.l #0,a0		; A0 -> zero
 		move.l	sp,a2		; A2 = SP on entry
 
+#if BLITTER_SUPPORT
 		or.w	#$0700,sr	; turn off interrupts
 		move.l	8(a0),a1	; A1 -> old bus error handler
 		move.l	#TB_e,8(a0)	; install temp bus error handler
-		tst.w	BLASTER(a0)	; touch blitter
+		tst.w	BLASTER		; touch blitter
 		moveq	#2,d0		; no bus error: indicate chip exists
 
 TB_e:		move.l	a1,8(a0)	; restore original bus error vector
+#endif
 		move.w	d1,sr		; restore IPL
 
 		move.l	a2,sp		; restore SP

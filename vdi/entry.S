@@ -17,7 +17,7 @@
 * New generation VDI
 *
 * Revision 2.2  90/12/05  13:47:32  lozben
-* Changed PTSIN from 512 to 1024.
+* Changed MAX_VERT from 512 to 1024.
 *
 * Revision 2.1  89/02/21  17:18:57  kbad
 * *** TOS 1.4  FINAL RELEASE VERSION ***
@@ -29,7 +29,7 @@
 #include "lineaequ.inc"
 
 
-max_vert		equ	1024		; PTSIN maximum length:	1024 verticies
+max_vert		equ	MAX_PTSIN		; PTSIN maximum length:	1024 verticies
 
 
 *******************************************************************************
@@ -134,6 +134,8 @@ no_ptsin:
 
 	rts
 
-
+#if TOSVERSION >= 0x300
 	xdef _MAX_VERT
-_MAX_VERT:	dc.w	max_vert
+_MAX_VERT:
+	dc.w	max_vert
+#endif
