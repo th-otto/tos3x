@@ -104,7 +104,7 @@ jin.o: jin.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-alone.o: alone.S
+alone.o: alone.S vdivar.S
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i

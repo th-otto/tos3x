@@ -143,7 +143,7 @@ ptsin_array	equ	_fill_buffer+768	; copy of ptsin[] (4096 bytes)
 fringe0		equ	_fill_buffer+1000	; area to compile routines in
 innerLoop	equ	_fill_buffer+2000	; area to compile routines in
 fringe1		equ	_fill_buffer+3000	; area to compile routines in
-_deftxbu	equ	_fill_buffer+4500	; scratch buf for 8x16 (276 bytes)
+_deftxbu	equ	_fill_buffer+236	; scratch buf for 8x16 (276 bytes)
 #endif
 
 	xdef _vdivars
@@ -258,6 +258,7 @@ _line_cw: equ lineavars+(line_cw)
 _loc_mode: equ lineavars+(loc_mode)
 	xdef _num_qc_lines
 _num_qc_lines: equ lineavars+(num_qc_lines)
+#if TOSVERSION >= 0x300
 	xdef _trap14sav
 _trap14sav: equ lineavars+(trap14sav)
 	xdef _col_or_mask
@@ -268,6 +269,10 @@ _col_and_mask: equ lineavars+(col_and_mask)
 _trapb14sav: equ lineavars+(trapb14sav)
 	xdef _resrvd0
 _resrvd0: equ lineavars+(resrvd0)
+#else
+	xdef _q_circle
+_q_circle: equ lineavars+(q_circle)
+#endif
 	xdef _str_mode
 _str_mode: equ lineavars+(str_mode)
 	xdef _val_mode

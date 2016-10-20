@@ -69,6 +69,7 @@ _trap:	PIXLA(a0)
 		rts
 
 
+#if TOSVERSION >= 0x300
 /* 306de: 00e0c0b4 */
 		xdef	_trap14			; xbios trap
 _trap14:	PIXLA(a0)
@@ -77,6 +78,7 @@ _trap14:	PIXLA(a0)
 		PIXLA(a0)
 		move.l	PIXLV(trap14sav,a0),-(sp)
 		rts
+#endif
 
 #if TOSVERSION >= 0x400
 /*

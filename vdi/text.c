@@ -54,6 +54,7 @@ VOID make_header PROTO((NOTHING));
  * VDI #8 - v_gtext - Graphic text
  */
 /* 306de: 00e0a9b2 */
+/* 206de: 00e0a114 */
 VOID d_gtext(NOTHING)
 {
 	int16_t monotest;

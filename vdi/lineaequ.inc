@@ -84,6 +84,7 @@
 #define loc_mode		-436
 #define num_qc_lines		-434
 
+#if TOSVERSION >= 0x300
 /* space to save the return address */
 #define trap14sav		-432
 /* some modes this is ored in VS_COLOR */
@@ -93,6 +94,9 @@
 /* space to sav ret adr (for reentrency) */
 #define trapb14sav		-420
 #define resrvd0			-416
+#else
+#define q_circle                -432
+#endif
 
 #define str_mode		-352
 #define val_mode		-350

@@ -1,3 +1,6 @@
-monout_OPTIMIZE=0
+monout_306_OPTIMIZE=0
+monout_206_OPTIMIZE=1
+monout_208_OPTIMIZE=1
+monout_OPTIMIZE=$(monout_$(TOSVERSION)_OPTIMIZE)
 text_OPTIMIZE=1
 seedfill_OPTIMIZE=0

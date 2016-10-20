@@ -62,18 +62,13 @@ const int16_t *const markhead[] = { m_dot, m_plus, m_star, m_square, m_cross, m_
 
 int16_t code PROTO((int16_t x,int16_t y));
 
-#if !PLANES8
-int16_t q_circle[80];
-#define Q_CIRCLE q_circle
-#else
-#define Q_CIRCLE LV(q_circle)
-#endif
 
 
 /*
  * VDI #102 - vq_extnd - Extended inquire function
  */
 /* 306de: 00e08b94 */
+/* 206de: 00e082b2 */
 VOID vq_extnd(NOTHING)
 {
 	register int16_t i;
@@ -125,6 +120,7 @@ VOID vq_extnd(NOTHING)
  * VDI #2 - v_clswk - Close workstation
  */
 /* 306de: 00e08c5c */
+/* 206de: 00e0837a */
 VOID v_clswk(NOTHING)
 {
 	ATTRIBUTE *next_work;
@@ -147,6 +143,7 @@ VOID v_clswk(NOTHING)
  * VDI #6 - v_pline - Polyline
  */
 /* 306de: 00e08ca4 */
+/* 206de: 00e083c2 */
 VOID v_pline(NOTHING)
 {
 	register int16_t l;
@@ -158,6 +155,12 @@ VOID v_pline(NOTHING)
 
 #if PLANES8
 	LV(FG_B_PLANES) = work_ptr->line_color;
+#else
+	l = work_ptr->line_color;
+	LV(FG_BP_1) = l & 0x01;
+	LV(FG_BP_2) = l & 0x02;
+	LV(FG_BP_3) = l & 0x04;
+	LV(FG_BP_4) = l & 0x08;
 #endif
 
 	if (work_ptr->line_width == 1)
@@ -167,7 +170,9 @@ VOID v_pline(NOTHING)
 		if ((work_ptr->line_beg | work_ptr->line_end) & ARROWED)
 			do_arrow();
 	} else
+	{
 		wline();
+	}
 }
 
 
@@ -175,6 +180,7 @@ VOID v_pline(NOTHING)
  * VDI #7 - v_pmarker - Polymarker
  */
 /* 306de: 00e08d14 */
+/* 206de: 00e0845c */
 VOID v_pmarker(NOTHING)
 {
 	int16_t i, j, num_lines, num_vert, x_center, y_center, sav_points[10];
@@ -274,6 +280,7 @@ VOID v_pmarker(NOTHING)
  * VDI #9 - v_fillarea - Filled area
  */
 /* 306de: 00e08e5a */
+/* 206de: 00e085a2 */
 VOID v_fillarea(NOTHING)
 {
 	plygn();
@@ -284,6 +291,7 @@ VOID v_fillarea(NOTHING)
  * VDI #11 - v_gdp - Graphic drawing primitives
  */
 /* 306de: 00e08e66 */
+/* 206de: 00e085ae */
 VOID v_gdp(NOTHING)
 {
 	int16_t i, ltmp_end, rtmp_end;
@@ -382,6 +390,7 @@ VOID v_gdp(NOTHING)
  * VDI #35 - vql_attributes - Inquire Current Polyline Attributes
  */
 /* 306de: 00e09016 */
+/* 206de: 00e0875e */
 VOID vql_attributes(NOTHING)
 {
 	register int16_t *pointer;
@@ -407,6 +416,7 @@ VOID vql_attributes(NOTHING)
  * VDI #36 - vqm_attributes - Inquire Current Polymarker Attributes
  */
 /* 306de: 00e09072 */
+/* 206de: 00e087ba */
 VOID vqm_attributes(NOTHING)
 {
 	register int16_t *pointer;
@@ -433,6 +443,7 @@ VOID vqm_attributes(NOTHING)
  * VDI #37 - vqm_attributes - Inquire Current Fill Area Attributes
  */
 /* 306de: 00e090d2 */
+/* 206de: 00e0881a */
 VOID vqf_attributes(NOTHING)
 {
 	register int16_t *pointer;
@@ -481,6 +492,7 @@ VOID pline(NOTHING)
 
 
 /* 306de: 00e091ae */
+/* 206de: 00e088f6 */
 BOOLEAN clip_line(NOTHING)
 {
 #if BINEXACT & (TOSVERSION < 0x400) /* only register declaration different */
@@ -536,6 +548,7 @@ BOOLEAN clip_line(NOTHING)
 
 
 /* 306de: 00e0932a */
+/* 206de: 00e08a72 */
 int16_t code(P(int16_t ) x, P(int16_t ) y)
 PP(int16_t x;)
 PP(int16_t y;)
@@ -558,6 +571,7 @@ PP(int16_t y;)
 
 
 /* 306de: 00e09382 */
+/* 206de: 00e08aca */
 VOID plygn(NOTHING)
 {
 	register int16_t *pointer, i, k;
@@ -570,6 +584,12 @@ VOID plygn(NOTHING)
 
 #if PLANES8
 	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
+#else
+	i = LV(cur_work)->fill_color;
+	LV(FG_BP_1) = i & 0x01;
+	LV(FG_BP_2) = i & 0x02;
+	LV(FG_BP_3) = i & 0x04;
+	LV(FG_BP_4) = i & 0x08;
 #endif
 
 	LV(LSTLIN) = FALSE;
@@ -629,6 +649,7 @@ VOID plygn(NOTHING)
  * VDI #11,9 - v_rfbox - Filled rounded rectangle
  */
 /* 306de: 00e094e2 */
+/* 206de: 00e08c52 */
 VOID gdp_rbox(NOTHING)
 {
 	register int16_t i, j;
@@ -662,12 +683,21 @@ VOID gdp_rbox(NOTHING)
 	*pointer++ = 0;
 	*pointer++ = LV(yrad);
 
+#if TOSVERSION >= 0x300
 	*pointer++ = SMUL_DIV(12539, LV(xrad), 32767);	/* Icos(675) = 12539 */
 	*pointer++ = SMUL_DIV(30271, LV(yrad), 32767);	/* Isin(675) = 30271 */
 	*pointer++ = SMUL_DIV(23170, LV(xrad), 32767);	/* Icos(450) = 23170 */
 	*pointer++ = SMUL_DIV(23170, LV(yrad), 32767);	/* Isin(450) = 23170 */
 	*pointer++ = SMUL_DIV(30271, LV(xrad), 32767);	/* Icos(225) = 30271 */
 	*pointer++ = SMUL_DIV(12539, LV(yrad), 32767);	/* Isin(225) = 12539 */
+#else
+	*pointer++ = SMUL_DIV(Icos(675), LV(xrad), 32767);
+	*pointer++ = SMUL_DIV(Isin(675), LV(yrad), 32767);
+	*pointer++ = SMUL_DIV(Icos(450), LV(xrad), 32767);
+	*pointer++ = SMUL_DIV(Isin(450), LV(yrad), 32767);
+	*pointer++ = SMUL_DIV(Icos(225), LV(xrad), 32767);
+	*pointer++ = SMUL_DIV(Isin(225), LV(yrad), 32767);
+#endif
 
 	*pointer++ = LV(xrad);
 	*pointer = 0;
@@ -717,6 +747,12 @@ VOID gdp_rbox(NOTHING)
 
 #if PLANES8
 		LV(FG_B_PLANES) = work_ptr->line_color;
+#else
+		i = work_ptr->line_color;
+		LV(FG_BP_1) = i & 0x01;
+		LV(FG_BP_2) = i & 0x02;
+		LV(FG_BP_3) = i & 0x04;
+		LV(FG_BP_4) = i & 0x08;
 #endif
 
 		if (work_ptr->line_width == 1)
@@ -737,6 +773,7 @@ VOID gdp_rbox(NOTHING)
  * VDI #11,2 - v_arc - Draw a circular arc
  */
 /* 306de: 00e09824 */
+/* 206de: 00e08ffc */
 VOID gdp_arc(NOTHING)
 {
 	register int16_t *pointer;
@@ -789,6 +826,7 @@ VOID clc_nsteps(NOTHING)
  * VDI #11,7 - v_ellpie - Elliptical pie
  */
 /* 306de: 00e0990a */
+/* 206de: 00e090e2 */
 VOID gdp_ell(NOTHING)
 {
 	register int16_t *pointer;
@@ -965,8 +1003,8 @@ VOID cir_dda(NOTHING)
 	x = 0;
 	d = 3 - 2 * y;
 
-	xptr = &Q_CIRCLE[x];
-	yptr = &Q_CIRCLE[y];
+	xptr = &q_circle[x];
+	yptr = &q_circle[y];
 
 	/* Do an octant, starting at north.  The values for the next octant */
 	/* (clockwise) will be filled by transposing x and y.               */
@@ -989,12 +1027,12 @@ VOID cir_dda(NOTHING)
 	}
 
 	if (x == y)
-		Q_CIRCLE[x] = x;
+		q_circle[x] = x;
 
+#if TOSVERSION >= 0x300
 	/* Fake a pixel averaging when converting to non-1:1 aspect ratio. */
 	if (xsize > ysize)
 	{
-
 		d = x = (LV(line_cw) + 1) / 2;
 		i = x * xsize / ysize;
 
@@ -1004,25 +1042,25 @@ VOID cir_dda(NOTHING)
 
 			if (y == d)
 			{
-				Q_CIRCLE[i] = Q_CIRCLE[x];
+				q_circle[i] = q_circle[x];
 			} else
 			{
 				d = y;
 				x -= 1;
-				Q_CIRCLE[i] = Q_CIRCLE[x];
+				q_circle[i] = q_circle[x];
 			}
 		}
 	} else
 	{
 		x = 1;
-		yptr = Q_CIRCLE + 1;
+		yptr = q_circle + 1;
 
 		for (i = 1; i <= LV(num_qc_lines); i++)
 		{
 			y = i * ysize / xsize;
 			d = 0;
 
-			xptr = &Q_CIRCLE[x];
+			xptr = &q_circle[x];
 
 			for (j = x; j <= y; j++)
 				d += *xptr++;
@@ -1031,10 +1069,28 @@ VOID cir_dda(NOTHING)
 			x = y + 1;
 		}
 	}
+#else
+	for (x = 0, yptr = LV(q_circle), i = 0; i < LV(num_qc_lines); i++)
+	{
+		y = (i << 1) + 1;
+		y = y * ysize / xsize;
+		y = y / 2;
+
+		d = 0;
+
+		xptr = &LV(q_circle)[x];
+		for (j = x; j <= y; j++)
+			d += *xptr++;
+
+		*yptr++ = d / (y - x + 1);
+		x = y + 1;
+	}
+#endif
 }
 
 
 /* 306de: 00e09e1e */
+/* 206de: 00e0956c */
 VOID wline(NOTHING)
 {
 	int16_t i, k, box[10];							/* box two high to close polygon */
@@ -1103,7 +1159,7 @@ VOID wline(NOTHING)
 
 		if (vx == 0)
 		{
-			vx = Q_CIRCLE[0];
+			vx = q_circle[0];
 			vy = 0;
 		}
 		/* End if:  vertical. */
@@ -1174,6 +1230,7 @@ VOID wline(NOTHING)
 
 
 /* 306de: 00e0a010 */
+/* 206de: 00e09756 */
 VOID perp_off(P(int16_t *) px, P(int16_t *) py)
 PP(int16_t *px;)
 PP(int16_t *py;)
@@ -1190,7 +1247,7 @@ PP(int16_t *py;)
 	vx = px;
 	vy = py;
 
-	pcircle = Q_CIRCLE;
+	pcircle = q_circle;
 
 	/* Mirror transform the vector so that it is in the first quadrant. */
 
@@ -1256,6 +1313,7 @@ PP(int16_t *py;)
 
 
 /* 306de: 00e0a154 */
+/* 206de: 00e09896 */
 VOID quad_xform(P(int) quad, P(int) x, P(int) y, P(int16_t *) tx, P(int16_t *) ty)
 PP(int quad;)
 PP(int x;)
@@ -1274,7 +1332,10 @@ PP(int16_t *ty;)
 	case 3:
 		*tx = -x;
 		break;
-	}									/* End switch. */
+#if (TOSVERSION == 0x206) & BINEXACT
+		asm("ds.b 0"); /* hmpf, optimizer seems to have missed to remove superfluous bra */
+#endif
+	}
 
 	switch (quad)
 	{
@@ -1286,12 +1347,15 @@ PP(int16_t *ty;)
 	case 3:
 	case 4:
 		*ty = -y;
+#if (TOSVERSION != 0x206) | !BINEXACT /* hmpf */
 		break;
-	}									/* End switch. */
-}										/* End "quad_xform". */
+#endif
+	}
+}
 
 
 /* 306de: 00e0a1cc */
+/* 206de: 00e0990c */
 VOID do_circ(P(int16_t) cx, P(int16_t) cy)
 PP(int16_t cx;)
 PP(int16_t cy;)
@@ -1304,37 +1368,54 @@ PP(int16_t cy;)
 	if (LV(num_qc_lines) > 0)
 	{
 		/* Do the horizontal line through the center of the circle. */
-		pointer = Q_CIRCLE;
+		pointer = q_circle;
 		LV(X1) = cx - *pointer;
 		LV(X2) = cx + *pointer;
 		LV(Y1) = LV(Y2) = cy;
 
+#if TOSVERSION < 0x300
+		if (clip_line())
+			ABLINE();
+#endif
 		/* Do the upper and lower semi-circles. */
+#if TOSVERSION >= 0x300
 		for (k = 1; k <= LV(num_qc_lines); k++)
+#else
+		for (k = 1; k < LV(num_qc_lines); k++)
+#endif
 		{
 			/* Upper semi-circle. */
-			pointer = &Q_CIRCLE[k];
+			pointer = &q_circle[k];
 			LV(X1) = cx - *pointer;
 			LV(X2) = cx + *pointer;
+#if TOSVERSION >= 0x300
 			LV(Y1) = LV(Y2) = cy - k + 1;
+#else
+			LV(Y1) = LV(Y2) = cy - k;
+#endif
 			if (clip_line())
 			{
 				ABLINE();
-				pointer = &Q_CIRCLE[k];
+				pointer = &q_circle[k];
 			}
 
 			/* Lower semi-circle. */
 			LV(X1) = cx - *pointer;
 			LV(X2) = cx + *pointer;
+#if TOSVERSION >= 0x300
 			LV(Y1) = LV(Y2) = cy + k - 1;
+#else
+			LV(Y1) = LV(Y2) = cy + k;
+#endif
 			if (clip_line())
 				ABLINE();
-		}								/* End for. */
-	}									/* End if:  circle has positive radius. */
-}										/* End "do_circ". */
+		}
+	}
+}
 
 
 /* 306de: 00e0a2ca */
+/* 206de: 00e09a14 */
 VOID s_fa_attr(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1360,6 +1441,7 @@ VOID s_fa_attr(NOTHING)
 
 
 /* 306de: 00e0a336 */
+/* 206de: 00e09a80 */
 VOID r_fa_attr(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1376,6 +1458,7 @@ VOID r_fa_attr(NOTHING)
 
 
 /* 306de: 00e0a36e */
+/* 206de: 00e09ab8 */
 VOID do_arrow(NOTHING)
 {
 	int16_t x_start, y_start, new_x_start, new_y_start;
@@ -1419,6 +1502,7 @@ VOID do_arrow(NOTHING)
 
 
 /* 306de: 00e0a40a */
+/* 206de: 00e09b54 */
 VOID arrow(P(int16_t *) xy, P(int16_t) inc)
 PP(int16_t *xy;)
 PP(int16_t inc;)
@@ -1530,6 +1614,7 @@ PP(int16_t inc;)
 
 
 /* 306de: 00e0a676 */
+/* 206de: 00e09dc0 */
 VOID init_wk(NOTHING)
 {
 	register int16_t l;
@@ -1650,6 +1735,7 @@ VOID init_wk(NOTHING)
  * VDI #100 - v_opnvwk - Open virtual screen workstation
  */
 /* 306de: 00e0a886 */
+/* 206de: 00e09fd0 */
 VOID d_opnvwk(NOTHING)
 {
 	register int16_t handle;
@@ -1667,9 +1753,14 @@ VOID d_opnvwk(NOTHING)
 
 	/* Now find a free handle */
 
+#if TOSVERSION >= 0x300
 	handle = 2;
+#else
+	handle = 1;
+#endif
 	work_ptr = &virt_work;
 
+#if TOSVERSION >= 0x300
 	while (work_ptr->next_work != NULL && handle == work_ptr->next_work->handle)
 	{
 		handle++;
@@ -1680,6 +1771,28 @@ VOID d_opnvwk(NOTHING)
 	LV(cur_work) = new_work;
 	new_work->next_work = work_ptr->next_work;
 	work_ptr->next_work = new_work;
+#else
+	while (handle == work_ptr->handle)
+	{
+		handle++;
+		if (work_ptr->next_work == NULL)
+			break;
+		work_ptr = work_ptr->next_work;
+	}
+	if (work_ptr->next_work == NULL)
+	{
+		LV(cur_work) = work_ptr->next_work = new_work;
+		new_work->next_work = NULL;
+	} else
+	{
+		register ATTRIBUTE *tmp;
+		
+		tmp = work_ptr->next_work;
+		LV(cur_work) = work_ptr->next_work = new_work;
+		new_work->next_work = tmp;
+	}
+#endif
+
 	new_work->handle = LV(CONTRL)[6] = handle;
 
 	init_wk();
@@ -1690,6 +1803,7 @@ VOID d_opnvwk(NOTHING)
  * VDI #101 - v_clsvwk - Close virtual screen workstation
  */
 /* 306de: 00e0a900 */
+/* 206de: 00e0a062 */
 VOID d_clsvwk(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1714,6 +1828,7 @@ VOID d_clsvwk(NOTHING)
  * VDI #112 - vsf_udpat - Set user-defined fill-pattern
  */
 /* 306de: 00e0a956 */
+/* 206de: 00e0a0b8 */
 VOID dsf_udpat(NOTHING)
 {
 	register int16_t *sp, *dp, i, count;

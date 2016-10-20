@@ -99,12 +99,16 @@ typedef struct vdiVars {
 	LAEXT int16_t        loc_mode;           /* the mode of the Locator device       */
 	LAEXT int16_t        num_qc_lines;       /* # of line in the quarter circle      */
 
+#if TOSVERSION >= 0x300
 	LAEXT int32_t        trap14sav;	         /* space to save the return address     */
 	LAEXT int32_t        col_or_mask;        /* some modes this is ored in VS_COLOR  */
 	LAEXT int32_t        col_and_mask;       /* some modes this is anded in VS_COLOR */
 	LAEXT int32_t	     trapb14sav;	     /* space to sav ret adr (for reentrency)*/
-
 	LAEXT int16_t	     resrvd0[32];	     /* reserved				    */
+#else
+	LAEXT int16_t	q_circle[40];	         /* space to build circle coordinates    */
+#endif
+
 	LAEXT int16_t        str_mode;           /* the mode of the String device        */
 	LAEXT int16_t        val_mode;           /* the mode of the Valuator device      */
 	LAEXT char           cur_ms_stat;        /* Current mouse status                 */

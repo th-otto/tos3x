@@ -32,9 +32,16 @@
 #ifndef _GSXDEF_H_
 #define _GSXDEF_H_
 
-#define BLTPRFRM	5000	/* @check@ blit performance	            */
-				/* TT 16 mghz = 5000 (assume cache is on)   */
-				/* ST  8 mghz = 1000 (software performance) */
+/*
+ * Blit perfomance:
+ * TT 16 mghz = 5000 (assume cache is on)
+ * ST  8 mghz = 1000 (software performance)
+ */
+#if TOSVERSION >= 0x300
+#define BLTPRFRM	5000
+#else
+#define BLTPRFRM	1000
+#endif
 
 #define MX_LN_STYLE		7
 #define MX_LN_WIDTH		40
