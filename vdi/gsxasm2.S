@@ -60,6 +60,7 @@
 		text
 
 /* 306de: 00e0c0a4 */
+/* 206de: 00e0c414 */
 		xdef	_trap
 _trap:	PIXLA(a0)
 		move.l	(sp)+,PIXLV(retsav,a0)
@@ -112,6 +113,7 @@ _trap14b:	PIXLA(a0)
 *******************************************************************************
 
 /* 306de: 00e0c0c4 */
+/* 206de: 00e0c424 */
 		xdef	_TRNSFONT
 _TRNSFONT:
 		PIXLA(a1)
@@ -195,6 +197,7 @@ PXPTP8:		move.b	2(a2),(a0)		; splat pixel
 ST_PUTPIX:
 #else
 /* 306de: 00e0c0e6 */
+/* 206de: 00e0c446 */
 		xdef	_put_pix
 _put_pix:
 #endif
@@ -283,11 +286,14 @@ PXGTP8:		move.b	(a0),d0
 ST_GETPIX:
 #else
 /* 306de: 00e0c12e */
+/* 206de: 00e0c48e */
 		xdef	_get_pix
 _get_pix:
 #endif
 		PIXLA(a1)
+#if (TOSVERSION >= 0x300) | !BINEXACT
 		move.l	d3,-(sp)	; save register for "c"
+#endif
 		move.l	PIXLV(PTSIN,a1),a0	; a0 -> PTSIN array
 #if VIDEL_SUPPORT
 		moveq.l	#0,d0		; return value is a long so clear upper
@@ -315,7 +321,9 @@ gpx_loop:	move.w	-(a0),d3	; d3 <- current plane word
 		add.b	d3,d3		; set carry flag to bit value
 		addx.w	d0,d0		; shift in latest bit
 		dbra	d2,gpx_loop
+#if (TOSVERSION >= 0x300) | !BINEXACT
 		move.l	(sp)+,d3	; restore register for "c"
+#endif
 		rts
 
 
@@ -340,8 +348,12 @@ gpx_loop:	move.w	-(a0),d3	; d3 <- current plane word
 
 		xdef	_fill_line
 _fill_line:
+#if (TOSVERSION >= 0x300) | !BINEXACT
 	movem.l d3-d7/a3-a5,-(sp)       ; save registers for "C"
 	movem.w	36(sp),d4-d6		; d4 <- X1  d5 <- X2  d6 <- Y1
+#else
+	movem.w	4(sp),d4-d6		; d4 <- X1  d5 <- X2  d6 <- Y1
+#endif
 	exg	d5,d6			; d4 <- X1  d5 <- Y1  d6 <- X2
 
 	LA(a4)
@@ -354,9 +366,13 @@ _fill_line:
 
 fillLine0:
 #endif
+#if (TOSVERSION >= 0x300) | !BINEXACT
 	jsr	fline			; HABLINE entry point for fill_line
 	movem.l (sp)+,d3-d7/a3-a5       ; restore registers for "C"
 	rts
+#else
+    bra fline
+#endif
 
 *******************************************************************************
 *******************************************************************************
@@ -386,15 +402,19 @@ fillLine0:
 *******************************************************************************
 
 		xdef	_end_pts
-_end_pts:
+_end_pts: ds.b 0
 #if MULTI_LINEA
 		movem.l d3-d7/a3-a6,-(sp) 	; save registers for "C"
-		PIXLA(a6)
 vars set 40
-#else
-		movem.l d3-d7/a3-a5,-(sp) 	; save registers for "C"
 		PIXLA(a6)
+#else
+#if (TOSVERSION >= 0x300) | !BINEXACT
+		movem.l d3-d7/a3-a5,-(sp) 	; save registers for "C"
 vars set 36
+#else
+vars set 4
+#endif
+		PIXLA(a6)
 #endif
 #if VIDEL_SUPPORT
 		cmp.w	#PIXPACKED,form_id(a6)	; see if we are pix packe mode
@@ -425,9 +445,7 @@ end_pix_pts:
 
 		mulu	PIXLV(v_lin_wr,a6),d1	; d1 <- y portion of offset
 		move.w	d4,d2			; d2 <- X coordinate
-#if VIDEL_SUPPORT
 		mulu	PIXLV(byt_per_pix,a6),d2	; d2 <- x portion of offset
-#endif
 		add.l	d2,d1			; d1 <- byte offs into mem frm
 		move.l	_v_bas_ad,a2		; a2 -> base of screen
 		add.l	d1,a2			; a2 -> (x,y)
@@ -555,7 +573,9 @@ epp_ret0:
 #if MULTI_LINEA
 		movem.l (sp)+,d3-d7/a3-a6	; restore registers for "C"
 #else
+#if (TOSVERSION >= 0x300) | !BINEXACT
 		movem.l (sp)+,d3-d7/a3-a5	; restore registers for "C"
+#endif
 #endif
 		rts
 
@@ -734,7 +754,9 @@ ep_is_search:
 #if MULTI_LINEA
 		movem.l (sp)+,d3-d7/a3-a6 ; restore registers for "C"
 #else
+#if (TOSVERSION >= 0x300) | !BINEXACT
 		movem.l (sp)+,d3-d7/a3-a5 ; restore registers for "C"
+#endif
 #endif
 		rts
 
@@ -744,7 +766,9 @@ ep_ret0:
 #if MULTI_LINEA
 		movem.l (sp)+,d3-d7/a3-a6 ; restore registers for "C"
 #else
+#if (TOSVERSION >= 0x300) | !BINEXACT
 		movem.l (sp)+,d3-d7/a3-a5 ; restore registers for "C"
+#endif
 #endif
 		rts
 
@@ -868,6 +892,8 @@ rf_noclip:
 
 	move.w	d4,d0			; d0 <- X1
 	asr.w	#4,d0			; d0 <- word containing X1
+
+#if TOSVERSION >= 0x300  /* d1/d2 swapped in older versions */
 	move.w	d6,d2			; d2 <- X2
 	asr.w	#4,d2			; d2 <- word containing X2
 
@@ -884,6 +910,24 @@ rf_noclip:
 	not.w	d6			; d6 <- right fringe mask (0:Dst 1:Src)
 
 	sub.w	d0,d2			; d2 <- span -1 of rectangle in words
+#else
+	move.w	d6,d1			; d2 <- X2
+	asr.w	#4,d1			; d2 <- word containing X2
+
+	lea	lf_tab,a1		; a1 -> left fringe mask table
+	moveq.l	#$0F,d2			; d1 <- mod 16 mask
+
+	and.w	d2,d4			; d4 <- X1 mod 16
+	add.w	d4,d4			; d4 <- offset into fringe table
+	move.w	0(a1,d4.w),d4		; d4 <- left fringe mask  (0:Dst 1:Src)
+
+	and.w	d2,d6			; d6 <- X2 mod 16
+	add.w	d6,d6			; d6 <- offset into right fringe table
+	move.w	2(a1,d6.w),d6		; d6 <- inverted right fringe mask
+	not.w	d6			; d6 <- right fringe mask (0:Dst 1:Src)
+
+	sub.w	d0,d1			; d2 <- span -1 of rectangle in words
+#endif
 	bne	select_version		; 1 word span =>  merge lf & rt masks
 
 	and.w	d6,d4			; d4 <- single fringe mask

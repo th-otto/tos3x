@@ -48,10 +48,13 @@
 *
 *	a2	pointer to LineA variables
 
+/* 206de: 00e0c644 */
 	xdef	hb_rect
 hb_rect:
 
+#if TOSVERSION >= 0x300
 	exg	d1,d2			; d2 <- span - 1, d1 becomes scratch
+#endif
 	lea	BLASTER+B_OFF,a5	; a5 -> bit blt reference register
 	clr.w	B_S_NXWD(a5)		; proceed from left to right
 
@@ -65,10 +68,10 @@ hb_rect:
 	addq.w	#1,d7			; d7 <- height
 
 	move.l	_v_bas_ad,a1		; a1 -> start of dst form
-	muls	PIXLV(bytes_lin,a2),d5	; d5 <- offset to 1st row of dst
+	muls	LV(bytes_lin,a2),d5	; d5 <- offset to 1st row of dst
 	add.l	d5,a1			; a1 -> 1st row of dst rectangle
 
-	move.w	PIXLV(v_planes,a2),d3	; d3 <- planes
+	move.w	LV(v_planes,a2),d3	; d3 <- planes
 	move.w	d3,d6
 	subq.w	#1,d6			; d6 <- dbra plane counter
 
@@ -78,7 +81,7 @@ hb_rect:
 	muls	d3,d0			; d0 <- offset to word containing X1
 	add.l	d0,a1			; a1 -> 1st word of dst rectangle
 
-	move.w	PIXLV(v_lin_wr,a2),d2	; d2 <- bytes per line
+	move.w	LV(v_lin_wr,a2),d2	; d2 <- bytes per line
 	mulu	d1,d3			; d3 <- (SPAN-1) * NXWD
 	sub.w	d3,d2			; d2 <- dst wrap
 	move.w	d2,(a4)+		; load B_D_WRAP
@@ -87,13 +90,16 @@ hb_rect:
 	move.w	d1,B_D_SPAN(a5)
 
 	lea	op_table,a4		; a4 -> 1st logic op table
-	move.w	PIXLV(WRT_MODE,a2),d0	; d0 <- writing mode (0-3)
+	move.w	LV(WRT_MODE,a2),d0	; d0 <- writing mode (0-3)
 	add.w	d0,d0
 	add.w	d0,d0			; d0 <- offset to writing mode table
 	add.w	d0,a4			; a4 -> writing mode table
 
-	move.l	PIXLV(patptr,a2),a0		; a0 -> start of pattern
-	move.w	PIXLV(patmsk,a2),d0		; d0 <- pattern index mask
+#if !PLANES8
+	lea.l   LV(FG_BP_1,a2),a3
+#endif
+	move.l	LV(patptr,a2),a0		; a0 -> start of pattern
+	move.w	LV(patmsk,a2),d0		; d0 <- pattern index mask
 
 	moveq.l	#15,d3			; d3 <- F mask, hi limit, & dbra count
 
@@ -108,11 +114,11 @@ hb_rect:
 	lsl.w	#8,d4			; d4[11:08] <- initial pattern index
 	or.w	#BM_GO,d4		; d4 <- SKEW word
 
-	tst.w	PIXLV(multifill,a2)		; handle multi-plane fill seperately
+	tst.w	LV(multifill,a2)		; handle multi-plane fill seperately
 	bne	rf_multi
 
 #if PLANES8
-    move.l  PIXLV(FG_B_PLANES,a2),d5	; d5 <- color index
+    move.l  LV(FG_B_PLANES,a2),d5	; d5 <- color index
 #endif
 
 *
@@ -138,8 +144,13 @@ s1b_loop:
 	move.l	a1,B_D_ADDR(a5)
 	move.w	d7,B_HEIGHT(a5)
 
+#if PLANES8
 	ror.l	#1,d5			; what color is this plane ?
 	scs	d0
+#else
+    tst.w     (a3)+
+    sne       d0
+#endif
 	and.w	d1,d0			; d0 <- logic op offset:  0=>0  1=>2
 	move.w	0(a4,d0.w),B_LOGOP(a5)  ; load the logic op
 
@@ -193,8 +204,13 @@ smb_loop:
 	move.l	a1,B_D_ADDR(a5)
 	move.w	d7,B_HEIGHT(a5)
 
+#if PLANES8
 	ror.l	#1,d5			; what color is this plane ?
 	scs	d0
+#else
+    tst.w     (a3)+
+    sne       d0
+#endif
 	and.w	d1,d0			; d0 <- logic op offset: 0=>0  1=>2
 	move.w	0(a4,d0.w),B_LOGOP(a5)	; load the logic op
 
@@ -233,10 +249,14 @@ rf_dgen:
 	add.w	d0,d0			 ; d0 <- pattern offset mask
 	add.w	d4,d4			 ; d4 <- initial pattern offset
 	subq.w	#1,d7			 ; d7 <- height-1 (dbra counter)
+#if PLANES8
 	move.w	d7,a3			 ; a3 <- copy of line counter
+#else
+    move.w  d7,d5            ; d5 <- copy of line counter
+#endif
 	move.w	#BM_GO,d1		 ; d1 <- SKEW template
 
-	tst.w	PIXLV(multifill,a2)
+	tst.w	LV(multifill,a2)
 	sne	d3			 ; d3 <- either xx00 or xxFF
 	and.w	#32,d3			 ; d3 <- offset to next pattern plane
 	lea	B_PATTERN(a5),a2	 ; a2 -> first pattern register
@@ -245,8 +265,13 @@ sd1_loop:
 
 	move.l	a1,B_D_ADDR(a5)		 ; start at top of this plane
 
+#if PLANES8
 	ror.l	#1,d5			; what color is this plane ?
 	scs	d2
+#else
+    tst.w     (a3)+
+    sne       d2
+#endif
 	and.w	#2,d2			 ; d2 <- logic op offset:  0=>0  1=>2
 	move.w	0(a4,d2.w),B_LOGOP(a5)	 ; load the logic op for this plane
 
@@ -279,7 +304,11 @@ sd2_cont:
 	dbra	d7,sd2_loop		 ; do next line in this plane
 
 
+#if PLANE8
 	move.w	a3,d7			 ; d7 <- reset line counter
+#else
+	move.w	d5,d7			 ; d7 <- reset line counter
+#endif
 	add.w	d3,a0			 ; a0 -> start of next pattern plane
 	addq.l	#2,a1			 ; a1 -> next plane
 	dbra	d6,sd1_loop		 ; do next plane

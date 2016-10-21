@@ -69,6 +69,7 @@
 *******************************************************************************
 
 /* 306de: 00e0c300 */
+/* 206de: 00e0c79a */
 		xdef	mouse_rel
 mouse_rel:	movem.l	d0-d7/a0-a6,-(sp)
 		PIXLA(a2)
@@ -161,22 +162,38 @@ scrn_clip:	tst.w	d0			; is new_x < 0
 		clr.w	d0
 		bra	cl_y
 
-cl_xmax:	cmp.w	PIXLV(v_hz_rez,a2),d0		; is new_x < max resolution
+cl_xmax:
+#if TOSVERSION >= 0x300
+		cmp.w	PIXLV(v_hz_rez,a2),d0		; is new_x < max resolution
 		blt	cl_y
 		move.w	PIXLV(v_hz_rez,a2),d0		; clip to max x resolution
 		subq.w	#1,d0			; adjust for zero based
+#else
+		cmp.w	PIXLV((INQ_TAB)+90,a2),d0		; is new_x < max resolution
+		ble	cl_y
+		move.w	PIXLV((INQ_TAB)+90,a2),d0		; clip to max x resolution
+#endif
 
-cl_y:		tst.w	d1			; is new_y < 0
+cl_y:
+		tst.w	d1			; is new_y < 0
 		bge	cl_ymax
 		clr.w	d1
 		rts
 
-cl_ymax:	cmp.w	PIXLV(v_vt_rez,a2),d1		; is new_y < max resolution
+cl_ymax:
+#if TOSVERSION >= 0x300
+		cmp.w	PIXLV(v_vt_rez,a2),d1		; is new_y < max resolution
 		blt	cl_done
 		move.w	PIXLV(v_vt_rez,a2),d1		; clip to max y resolution
 		subq.w	#1,d1			; adjust for zero based
+#else
+		cmp.w	PIXLV((INQ_TAB)+92,a2),d1		; is new_y < max resolution
+		ble	cl_done
+		move.w	PIXLV((INQ_TAB)+92,a2),d1		; clip to max y resolution
+#endif
 
-cl_done:	rts
+cl_done:
+		rts
 
 *******************************************************************************
 *
@@ -217,6 +234,7 @@ cur_replace:
 *	d1.w	Y
 
 /* 306de: 00e0c3d8 */
+/* 206de: 00e0c86e */
 		xdef	_MOV_CUR
 _MOV_CUR: PIXLA(a0)
 		move.w	SR,-(sp)	; save old status register
@@ -262,6 +280,10 @@ vb_draw:	PIXLA(a5)
 #endif
 #if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
+#else
+#if TOSVERSION < 0x300
+		lea     PIXLV(save_block,a5),a2
+#endif
 #endif
 		bsr	cur_replace		; Undraw old cursor
 #if MULTI_LINEA
@@ -273,6 +295,10 @@ vb_draw:	PIXLA(a5)
 		lea	PIXLV(mouse_cdb,a5),a0	; a0 -> CDB
 #if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
+#else
+#if TOSVERSION < 0x300
+		lea     PIXLV(save_block,a5),a2
+#endif
 #endif
 		bsr	cur_display		; and draw new cursor
 
@@ -290,6 +316,7 @@ vblank_exit:	rts
  *******************************************************************************/
 
 /* 306de: 00e0c436 */
+/* 206de: 00e0c8cc */
 		xdef	_vex_butv
 _vex_butv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
@@ -308,6 +335,7 @@ _vex_butv: PIXLA(a1)
  *******************************************************************************/
 
 /* 306de: 00e0c44e */
+/* 206de: 00e0c8e4 */
 		xdef	_vex_motv
 _vex_motv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
@@ -326,6 +354,7 @@ _vex_motv: PIXLA(a1)
  *******************************************************************************/
 
 /* 306de: 00e0c466 */
+/* 206de: 00e0c8fc */
 		xdef	_vex_curv
 _vex_curv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		; point to contrl array
@@ -370,16 +399,22 @@ _vex_curv: PIXLA(a1)
 ******************************************************************************
 
 
-/* == 0 */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define C_XHOT
+#else
+#define C_XHOT 0
+#endif
 C_YHOT		equ	2
 C_PLANES	equ	4
 C_BGCOL		equ	6
 C_FGCOL		equ	8
 C_MSKFRM	equ	10
 
-/* == 0 */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define SV_LEN
+#else
+#define SV_LEN  0
+#endif
 SV_ADDR		equ	2
 SV_STAT		equ	6
 SV_BUF		equ	8
@@ -413,10 +448,12 @@ RT_OFF		equ	RTN_REC*2
 st_cur_display:
 #else
 /* 306de: 00e0c47e */
+/* 206de: 00e0c914 */
 		xdef	cur_display
 cur_display:
 #endif
 		PIXLA(a4)
+#if TOSVERSION >= 0x300
 		move.w	C_BGCOL(a0),d4		; d4 <- mouse background color
 		move.w	C_FGCOL(a0),d7		; d7 <- mouse foreground color
 
@@ -426,8 +463,19 @@ cur_display:
 
 		move.w	#16,a3			; a3 <- offset to extended ops
 
-
-clip_x:		clr.w	d2			; d2 <- routine offset
+clip_x:
+		clr.w	d2			; d2 <- routine offset
+#else
+		move.w	C_BGCOL(a0),-(a7)		; d4 <- mouse background color
+		move.w	C_FGCOL(a0),-(a7)		; d7 <- mouse foreground color
+		clr.w	d2			; d2 <- routine offset
+		tst.w	C_PLANES(a0)		; unless plane count < 0
+		bge	clip_x
+		moveq	#16,d2			; a3 <- offset to extended ops
+clip_x:
+        move.w    d2,-(a7)
+		clr.w	d2
+#endif
 
 		bclr.b	#F_SAVWID,SV_STAT(a2)	; default to word wide format
 
@@ -435,7 +483,11 @@ clip_x:		clr.w	d2			; d2 <- routine offset
 		bcs	clip_left
 
 		move.w	PIXLV(v_hz_rez,a4),d3
+#if TOSVERSION >= 0x300
 		sub.w	#17,d3			; check for clip
+#else
+		sub.w	#15,d3			; check for clip
+#endif
 		cmp	d3,d0			; on right side
 		bhi	clip_right		; 17 is the right value !!!
 
@@ -453,8 +505,13 @@ clip_y:		sub.w	C_YHOT(a0),d1		; d1 <- hi y : dst block
 		lea	C_MSKFRM(a0),a0		; a0 -> MASK/FORM for cursor
 		bcs	clip_up			; if y<0 clip top of form
 
+#if TOSVERSION >= 0x300
 		move.w	PIXLV(v_vt_rez,a4),d3		; check for clip at
 		sub.w	#16,d3			; bottom of screen
+#else
+		move.w	PIXLV((INQ_TAB)+92,a4),d3		; check for clip at
+		sub.w	#15,d3			; bottom of screen
+#endif
 		cmp.w	d3,d1
 		bhi	clip_down
 
@@ -472,8 +529,15 @@ clip_up:	move.w	d1,d5			; calculate row count
 		bra	get_addr
 
 
-clip_down:	move.w	PIXLV(v_vt_rez,a4),d5		; d5 <- last row on screen + 1
+clip_down:
+#if TOSVERSION >= 0x300
+		move.w	PIXLV(v_vt_rez,a4),d5		; d5 <- last row on screen + 1
 		sub.w	d1,d5			; d5 <- row count
+#else
+		move.w	PIXLV((INQ_TAB)+92,a4),d5		; d5 <- last row on screen
+		sub.w	d1,d5
+		addq.w  #1,d5			; d5 <- row count
+#endif
 
 get_addr:	bsr	concat			; x:d0 y:d1   starting offset
 
@@ -484,7 +548,10 @@ get_addr:	bsr	concat			; x:d0 y:d1   starting offset
 *+
 * init shift count
 *-
-shift_lf:	move.w	#16,d6			; compensate for left shift
+shift_lf:
+
+#if TOSVERSION >= 0x300
+		move.w	#16,d6			; compensate for left shift
 		sub.w	d0,d6			; d6 <- shift count left
 		swap	d6
 
@@ -543,7 +610,7 @@ init2:		move.l	rtn_tab+00(pc,d2.w),a5	; a5 -> store routine
 		move.l	rtn_tab+04(pc,d2.w),a3	; a3 -> entry point
 		jmp	(a3)
 
-op_tab:		dc.l	s_fg0bg0,s_fg0bg1,s_fg1bg0,s_fg1bg1	; standard
+op_tab:	dc.l	s_fg0bg0,s_fg0bg1,s_fg1bg0,s_fg1bg1	; standard
 		dc.l	x_fg0bg0,x_fg0bg1,x_fg1bg0,x_fg1bg1	; extended
 
 rtn_tab:	dc.l	store_lw,r_lw_entry
@@ -611,7 +678,7 @@ r_lw_entry:	swap	d5			; restore row counter
 		move.l	a4,sp			; restore sp
 		rts
 *+
-* row controller for fetsching right word only
+* row controller for fetching right word only
 *-
 r_rt_loop:	swap	d6			; restore shift factor
 		moveq.l	#0,d0			; pad background form with 0's
@@ -645,7 +712,7 @@ r_rt_entry:	swap	d5			; restore row counter
 		move.l	a4,sp			; restore sp
 		rts
 *+
-* row controller for fetsching left word only
+* row controller for fetching left word only
 *-
 r_lf_loop:	swap	d6			; restore shift factor
 		moveq.l	#0,d0			; pad background form with 0's
@@ -751,6 +818,175 @@ x_fg1bg1:	eor.l	d0,d2		; D' <- [D xor F] or M
 		or.l	d1,d2
 		jmp	(a5)
 
+#else /* old version */
+
+        lea.l     r_lf_loop,a3
+        move.w    d0,d6
+        cmp.w     #8,d6
+        bcs.s     init2
+        lea.l     r_rt_loop,a3
+        move.w    #16,d6
+        sub.w     d0,d6
+init2:
+        movea.l   rtn_tab(pc,d2.w),a5
+        movea.l   rtn_tab+4(pc,d2.w),a6
+        move.w    PIXLV(v_planes,a4),d2
+        move.w    d2,d3
+        add.w     d3,d3
+        move.w    PIXLV(v_lin_wr,a4),d4
+        move.l    a1,SV_ADDR(a2)
+        move.w    d5,SV_LEN(a2)
+        bset      #0,SV_STAT(a2)
+        lea.l     SV_BUF(a2),a2
+        move.l    a1,d7
+        move.w    d5,d1
+        bra.s     p_loop1
+
+rtn_tab:
+        dc.l      store_lw,r_lw_entry
+        dc.l      store_rt,r_rt_entry
+        dc.l      store_lf,r_lf_entry
+
+p_loop:
+        clr.w     d0
+        lsr.w     2(a7)
+        addx.w    d0,d0
+        lsr.w     4(a7)
+        roxl.w    #3,d0
+        add.w     0(a7),d0
+        movea.l   op_tab(pc,d0.w),a4
+        movem.l   d1-d2,-(a7)
+        jsr       (a6)
+        movem.l   (a7)+,d1-d2
+        move.w    d1,d5
+        lsl.w     #2,d5
+        suba.w    d5,a0
+        move.w    d1,d5
+        addq.l    #2,d7
+        movea.l   d7,a1
+p_loop1:
+        dbf       d2,p_loop
+        addq.l    #6,a7
+        rts
+
+op_tab:
+        dc.l      s_fg0bg0
+        dc.l      s_fg0bg1
+        dc.l      s_fg1bg0
+        dc.l      s_fg1bg1
+        dc.l      x_fg0bg0
+        dc.l      x_fg0bg1
+        dc.l      x_fg1bg0
+        dc.l      x_fg1bg1
+
+r_lw_loop:
+        move.w    (a1),d2
+        swap      d2
+        move.w    0(a1,d3.w),d2
+        move.l    d2,(a2)+
+        jmp       (a3)
+
+store_lw:
+        move.w    d2,0(a1,d3.w)
+        swap      d2
+        move.w    d2,(a1)
+        adda.w    d4,a1
+r_lw_entry:
+        dbf       d5,r_lw_loop
+        rts
+
+fetch_rt:
+        move.w    (a1),d2
+        move.w    d2,(a2)+
+        jmp       (a3)
+
+store_rt:
+        move.w    d2,(a1)
+        adda.w    d4,a1
+r_rt_entry:
+        dbf       d5,fetch_rt
+        rts
+
+fetch_lf:
+        move.w    (a1),d2
+        move.w    d2,(a2)+
+        swap      d2
+        jmp       (a3)
+store_lf:
+        swap      d2
+        move.w    d2,(a1)
+        adda.w    d4,a1
+r_lf_entry:
+        dbf       d5,fetch_lf
+        rts
+
+r_rt_loop:
+        moveq.l   #0,d0
+        move.w    (a0)+,d0
+        rol.l     d6,d0
+        moveq.l   #0,d1
+        move.w    (a0)+,d1
+        rol.l     d6,d1
+        jmp       (a4)
+
+r_lf_loop:
+        moveq.l   #0,d0
+        move.w    (a0)+,d0
+        swap      d0
+        ror.l     d6,d0
+        moveq.l   #0,d1
+        move.w    (a0)+,d1
+        swap      d1
+        ror.l     d6,d1
+        jmp       (a4)
+
+s_fg0bg0:
+        or.l      d1,d0
+        not.l     d0
+        and.l     d0,d2
+        jmp       (a5)
+
+s_fg0bg1:
+        or.l      d0,d2
+        not.l     d1
+        and.l     d1,d2
+        jmp       (a5)
+
+s_fg1bg0:
+        not.l     d0
+        and.l     d0,d2
+        or.l      d1,d2
+        jmp       (a5)
+
+s_fg1bg1:
+        or.l      d0,d2
+        or.l      d1,d2
+        jmp       (a5)
+
+x_fg0bg0:
+        eor.l     d1,d2
+        not.l     d0
+        and.l     d0,d2
+        jmp       (a5)
+
+x_fg0bg1:
+        or.l      d0,d2
+        eor.l     d1,d2
+        jmp       (a5)
+
+x_fg1bg0:
+        not.l     d0
+        and.l     d0,d2
+        eor.l     d1,d2
+        jmp       (a5)
+
+x_fg1bg1:
+        eor.l     d0,d2
+        or.l      d1,d2
+        jmp       (a5)
+
+#endif
+
 
 
 * purpose:	replace cursor with data in save area.
@@ -775,6 +1011,7 @@ F_SAVWID	equ	1	; saved line width:   0:word   1:longword
 st_cur_replace:
 #else
 /* 306de: 00e0c694 */
+/* 206de: 00e0cae6 */
 		xdef cur_replace
 cur_replace:
 #endif
@@ -785,15 +1022,19 @@ cur_replace:
 		move.w	SV_LEN(a2),d4		; d4 <- lines per plane
 		move.w	d4,d2
 		subq.w	#1,d2			; d2 <- adjust counter for dbra
+#if TOSVERSION >= 0x300
 		moveq.l	#0,d3			; clr garbage in the upper word
+#endif
 		move.w	PIXLV(v_lin_wr,a5),d3	; d3 <- dy wrap value
 
 		move.l	SV_ADDR(a2),a0		; a0 -> destination
 		lea	SV_BUF(a2),a1		; a1 -> save buffer
 
 		move.w	PIXLV(v_planes,a5),d5	; d5 <- rez discriminator
+#if PLANES8
 		cmp.w	#8,d5			; see if we are in 8 plane mode
 		beq	pln_8
+#endif
 		subq.w	#2,d5
 		bhi	pln_4
 		beq	pln_2
@@ -850,9 +1091,16 @@ pl2_wd_loop:	move.w	(a1)+,(a0)+		; store plane 1
 *
 * 2 plane: long word
 *
-pl2_lw_enter:	add.w	d4,d4			; d4 <- plane offset
+pl2_lw_enter:
+#if TOSVERSION >= 0x300
+		add.w	d4,d4			; d4 <- plane offset
 		move.l	a1,a2
 		add.w	d4,a2			; a2 -> second plane (longword)
+#else
+		move.l	a1,a2
+		add.w	d4,a2
+		add.w	d4,a2			; a2 -> second plane (longword)
+#endif
 
 pl2_lw_loop:	move.w	(a1)+,(a0)+		; 1st plane, hi word
 		move.w	(a2)+,(a0)+		; 2nd plane, hi word
@@ -918,6 +1166,7 @@ pl4_lw_loop:	move.w 	(a1)+,(a0)+		; 1st plane, hi word
 	       	dbra   	d2,pl4_lw_loop
 
 
+#if PLANES8
 		rts
 
 *********************************************************
@@ -998,8 +1247,10 @@ pl8_lw_loop:	move.w 	(a1)+,(a0)+		; 1st plane, hi word
 		add.l	d3,d1
 		move.l	d1,a0			; a0 -> next line
 	       	dbra   	d2,pl8_lw_loop
+#endif
 
-hang_it_up:	rts
+hang_it_up:
+	rts
 
 
 * HIDE CURSOR
@@ -1009,6 +1260,7 @@ hang_it_up:	rts
 *   HIDE_CNT transitions from 0 to 1
 
 /* 306de: 00e0c7fe */
+/* 206de: 00e0cbb6 */
 		xdef	_HIDE_CUR
 _HIDE_CUR:	PIXLA(a5)
 		lea	PIXLV(HIDE_CNT,a5),a2
@@ -1019,6 +1271,10 @@ _HIDE_CUR:	PIXLA(a5)
 		move.l	a6,-(sp)
 #if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
+#else
+#if TOSVERSION < 0x300
+		lea     PIXLV(save_block,a5),a2
+#endif
 #endif
 		bsr	cur_replace		; turn it off
 		move.l	(sp)+,a6
@@ -1033,6 +1289,7 @@ hid_cur1:	rts
 *   redisplay cursor.
 
 /* 306de: 00e0c81c */
+/* 206de: 00e0cbd4 */
 		xdef	_DIS_CUR
 _DIS_CUR:	PIXLA(a5)
 		cmp.w	#1,PIXLV(HIDE_CNT,a5)	; If cur is to be redisplayed,
@@ -1063,6 +1320,10 @@ _DIS_CUR:	PIXLA(a5)
 		lea	PIXLV(mouse_cdb,a5),a0	; a0 -> system CDB
 #if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	; a2 -> save block
+#else
+#if TOSVERSION < 0x300
+		lea     PIXLV(save_block,a5),a2
+#endif
 #endif
 		bsr	cur_display
 		PIXLA(a5)
@@ -1092,6 +1353,7 @@ fix_neg:	clr.w	PIXLV(HIDE_CNT,a5)		; this should never be executed.
 DEV_COL equ DEV_TAB+26
 
 /* 306de: 00e0c864 */
+/* 206de: 00e0cc1c */
 		xdef	_vsc_form
 _vsc_form: PIXLA(a2)
 		addq.b	#1,PIXLV(mouse_flag,a2)	; deny access to mouse_cdb
@@ -1168,6 +1430,7 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 *  vblank draw parameter block. Mark the parameter block data as valid.
 
 /* 306de: 00e0c8f8 */
+/* 206de: 00e0ccb0 */
 		xdef	_SET_CUR
 _SET_CUR: PIXLA(a1)
 		lea	PIXLV(xydraw,a1),a0		; a0 -> vblank draw parameter block
@@ -1193,6 +1456,7 @@ _SET_CUR: PIXLA(a1)
  *	mouse position and button state
  */
 /* 306de: 00e0c918 */
+/* 206de: 00e0ccd0 */
 		xdef	_vq_mouse
 _vq_mouse:
 		PIXLA(a2)
