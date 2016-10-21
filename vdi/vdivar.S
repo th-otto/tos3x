@@ -43,10 +43,6 @@ SIZE_FONT_HEAD	equ	90	     * size of font_head structure in FONTDEF.H
 		xdef	_FLIP_Y
 		xdef	_Q
 		xdef	_Qbottom
-		xdef	_Qhole
-		xdef	_Qptr
-		xdef	_Qtmp
-		xdef	_Qtop
 		xdef	_charx
 		xdef	_chary
 		xdef	_collision
@@ -91,10 +87,21 @@ _seed_type	equ	_fill_buffer+00		; indicates the type of fill
 _search_color	equ	_fill_buffer+02		; the color of the border
 #endif
 _Qbottom	equ	_fill_buffer+04	 	; the bottom of the Q (zero)
+#if TOSVERSION >= 0x300
+		xdef	_Qtop
 _Qtop		equ	_fill_buffer+06	 	; points top seed +3
+		xdef	_Qptr
 _Qptr		equ	_fill_buffer+08	 	; points to the active point
-_Qtmp		equ	_fill_buffer+10
-_Qhole		equ	_fill_buffer+12		; an empty space in the Q
+#else
+		xdef	_qTop
+_qTop		equ	_fill_buffer+06	 	; points top seed +3
+		xdef	_qPtr
+_qPtr		equ	_fill_buffer+08	 	; points to the active point
+		xdef	_qTmp
+_qTmp		equ	_fill_buffer+10
+		xdef	_qHole
+_qHole		equ	_fill_buffer+12		; an empty space in the Q
+#endif
 _oldy		equ	_fill_buffer+14		; the previous scan line
 _oldxleft	equ	_fill_buffer+16		; left end of line at oldy
 _oldxright	equ	_fill_buffer+18		; right end

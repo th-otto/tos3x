@@ -40,11 +40,16 @@ extern  int32_t    search_color;   /* the color of the border                  *
 extern  int16_t    search_color;   /* the color of the border                  */
 #endif
 extern  int16_t    Qbottom;        /* the bottom of the Q (zero)               */
+#if TOSVERSION >= 0x300
 extern  int16_t    Qtop;           /* points top seed + 3                      */
 extern  int16_t    *Qptr;	 	   /* points to the active point               */
-extern  int16_t    Qtmp;
-extern  int16_t    Qhole;		   /* an empty space in the Q                  */
-#if 0
+#else
+extern  int16_t    qPtr;	 	   /* points to the active point               */
+extern  int16_t    qTmp;
+extern  int16_t    qTop;           /* points top seed + 3                      */
+#endif
+#if TOSVERSION < 0x300
+extern  int16_t    qHole;		   /* an empty space in the Q                  */
 extern  int16_t    oldy;           /* the previous scan line                   */
 extern  int16_t    oldxleft;       /* left end of line at oldy                 */
 extern  int16_t    oldxright;      /* right end                                */
@@ -55,19 +60,19 @@ extern  int16_t    xright;
 extern  int16_t    direction;      /* is next scan line up or down?            */
 #endif
 extern  int16_t    done;           /* is the seed queue full?                  */
-#if 0
+#if TOSVERSION < 0x300
 extern  int16_t    gotseed;        /* a seed was put in the Q                  */
 extern  int16_t    leftoldy;       /* like _oldy. (new seedfill)               */
 extern  int16_t    leftdirection;  /* like _direction. (new seedfill)          */
 extern  int16_t    leftseed;       /* like _gotseed. (new seedfill)            */
 #endif
 extern  int16_t    h_align;
-#if 0
+#if TOSVERSION < 0x300
 extern  int16_t    leftcollision;  /* like _collision. (new seedfill)          */
 #endif
 extern  int16_t    v_align;        /* scaler alignments                        */
 extern  int16_t    width;
-#if 0
+#if TOSVERSION < 0x300
 extern  int16_t    collision;      /* seed was removed from Q (new rtn)        */
 #endif
 extern  int16_t    Q[];            /* storage for the seed points (1280)       */

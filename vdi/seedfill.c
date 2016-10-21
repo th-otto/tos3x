@@ -49,8 +49,12 @@
 #define EMPTY   	0xffff
 #define DOWN_FLAG 	0x8000
 #define NOFLAG(v) 	(v & 0x7FFF)
-#define QSIZE 		3*1281
-#define QMAX		QSIZE-3
+#if TOSVERSION >= 0x300
+#define QSIZE 		(3 * (1280 + 1)) /* depends on largest possible screen resolution */
+#else
+#define QSIZE 		(3 * (640 + 1))
+#endif
+#define QMAX		(QSIZE - 3)
 
 
 BOOLEAN get_seed PROTO((int16_t xin, int16_t yin, int16_t *xleftout, int16_t *xrightout, BOOLEAN *collide));
@@ -62,6 +66,7 @@ VOID crunch_Q PROTO((NOTHING));
  * VDI #103 - v_contourfill - Countour fill
  */
 /* 306de: 00e0cc8a */
+/* 206de: 00e0d2de */
 VOID d_contourfill(NOTHING)
 {
 	LV(quitfill) = retfalse;
@@ -71,6 +76,7 @@ VOID d_contourfill(NOTHING)
 
 VOID seedfill(NOTHING)
 {
+#if TOSVERSION >= 0x300
 	register int16_t *q;
 	register BOOLEAN gotseed, leftseed;
 	register int16_t leftoldy;			/* the previous scan line tmp   */
@@ -83,13 +89,22 @@ VOID seedfill(NOTHING)
 	int16_t newxleft;					/* ends of line at oldy +       */
 	int16_t newxright;					/*     the current direction    */
 	int16_t xleft;						/* temporary endpoints          */
-	int16_t xright;						/*                              */
+	int16_t xright;
 
 	BOOLEAN collision, leftcollision;
 
 	q = Q;
 
 	Qptr = &qPtr;
+#define Qptr0 *Qptr
+#else
+	/* in TOS prior to 3.x, all those variables are in the "overlay" area */
+	register int16_t color;
+#define q Q
+#define Qptr0 qPtr
+#define Qtop qTop
+#endif
+
 	xleft = LV(PTSIN)[0];
 	oldy = LV(PTSIN)[1];
 
@@ -130,6 +145,12 @@ VOID seedfill(NOTHING)
 	/* Initialize the line drawing parameters */
 #if PLANES8
 	LV(FG_B_PLANES) = LV(cur_work)->fill_color;
+#else
+	color = LV(cur_work)->fill_color;
+	LV(FG_BP_1) = color & 0x01;
+	LV(FG_BP_2) = color & 0x02;
+	LV(FG_BP_3) = color & 0x04;
+	LV(FG_BP_4) = color & 0x08;
 #endif
 
 	LV(LSTLIN) = FALSE;
@@ -214,35 +235,51 @@ VOID seedfill(NOTHING)
  * move Qtop down to remove unused seeds
  */
 /* 306de: 00e0d042 */
+/* 206de: 00e0d7be */
 VOID crunch_Q(NOTHING)
 {
+#if TOSVERSION >= 0x300
 	register int16_t *q = Q;
 	register int16_t qTop = Qtop;
+#endif
 
 	while (q[qTop - 3] == EMPTY && qTop > Qbottom)
 		qTop -= 3;
 
-	if (*Qptr >= qTop)
+	if (Qptr0 >= qTop)
 	{
-		*Qptr = Qbottom;
+		Qptr0 = Qbottom;
 		done = (*LV(quitfill)) ();			/* quitfill is set via LINE "A"  */
 	}
 
+#if TOSVERSION >= 0x300
 	Qtop = qTop;
+#endif
 }
 
 
 /* 306de: 00e0d0a6 */
+/* 206de: 00e0d818 */
 BOOLEAN get_seed(P(int16_t) xin, P(int16_t) yin, P(int16_t *) xleftout, P(int16_t *) xrightout, P(BOOLEAN *) collide)
+#if TOSVERSION >= 0x300
 PP(register int16_t xin;)
 PP(register int16_t yin;)
 PP(register int16_t *xleftout;)
 PP(register int16_t *xrightout;)
 PP(BOOLEAN *collide;)
+#else
+PP(int16_t xin;)
+PP(int16_t yin;)
+PP(int16_t *xleftout;)
+PP(int16_t *xrightout;)
+PP(BOOLEAN *collide;)
+#endif
 {
+#if TOSVERSION >= 0x300
 	register int16_t qTmp;
 	register int16_t qHole;				/* an empty space in the Q      */
 	register int16_t *q = Q;
+#endif
 
 	*collide = FALSE;
 	if (done)
@@ -255,7 +292,6 @@ PP(BOOLEAN *collide;)
 	{
 		for (qTmp = Qbottom, qHole = EMPTY; qTmp < Qtop; qTmp += 3)
 		{
-
 			/* we ran into another seed so remove it and fill the line */
 			if ((q[qTmp + 1] == *xleftout) && (q[qTmp] != EMPTY) && ((q[qTmp] ^ DOWN_FLAG) == yin))
 			{
@@ -298,6 +334,7 @@ PP(BOOLEAN *collide;)
  * VDI #105 - v_get_pixel - Get pixel
  */
 /* 306de: 00e0d1ec */
+/* 206de: 00e0d9d4 */
 VOID v_get_pixel(NOTHING)
 {
 #if VIDEL_SUPPORT
@@ -328,8 +365,13 @@ VOID v_get_pixel(NOTHING)
 		/*
 		 * Correct the pel value for the # of planes so it is a standard value
 		 */
+#if PLANES8
 		if ((LV(INQ_TAB)[4] == 1 && pel == 1) || (LV(INQ_TAB)[4] == 2 && pel == 3) || (LV(INQ_TAB)[4] == 4 && pel == 15))
 			pel = 255;
+#else
+		if ((LV(INQ_TAB)[4] == 1 && pel != 0) || (LV(INQ_TAB)[4] == 2 && pel == 3))
+			pel = 15;
+#endif
 
 		*int_out = REV_MAP_COL[pel];
 		NINTOUT = 2;
