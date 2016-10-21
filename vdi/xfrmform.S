@@ -26,56 +26,61 @@
 #include "lineaequ.inc"
 
 
-*******************************************************************************
-*
-* name:	_r_trnfm
-*
-* purpose:
-*
-*	transform a device independent memory form into a device dependent form
-*	or vice versa. device independent forms are composed of planes of
-*	contiguous memory while device dependent forms are constructed from
-*	shuffled planes where corresponding words from sequential planes are
-*	contiguous.
-*
-*
-*		device independent		 device dependent
-*
-*		P0W0 P0W1 ... P0Wn		P0W0 P1W0 ... PmW0
-*		P1W0 P1W1 ... P1Wn		P0W1 P1W1 ... PmW1
-*		      .				      .
-*		      .		      <---->	      .
-*		      .				      .
-*		PmW0 PmW1 ... PmWn		P0Wn P1Wn ... PmWn
-*
-*
-*	transformation can be performed in place or the transformation may
-*	be created at another location. note that inplace transformations
-*	take considerably longer to perform.
-*
-*	source and destination MEMORY FORM DEFINITION BLOCKS are input.
-*	the format of the destination is opposite that of the provided source.
-*
-*	it is assumed that the destination form is large enough to receive
-*	the transformed source.
-*
-*
-* author:	jim eisenstein
-*
-* parameters
-*
-*  in:
-*
-*	CONTRL		address of control array (word wide)
-*
-*	control(07-08)	address of source MFDB
-*	control(09-10)	address of destination MFDB
-
-
+/*******************************************************************************
+ *
+ * VDI #110 - vr_trnfm - Transform form
+ *
+ * name:	_r_trnfm
+ *
+ * purpose:
+ *
+ *	transform a device independent memory form into a device dependent form
+ *	or vice versa. device independent forms are composed of planes of
+ *	contiguous memory while device dependent forms are constructed from
+ *	shuffled planes where corresponding words from sequential planes are
+ *	contiguous.
+ *
+ *
+ *		device independent		 device dependent
+ *
+ *		P0W0 P0W1 ... P0Wn		P0W0 P1W0 ... PmW0
+ *		P1W0 P1W1 ... P1Wn		P0W1 P1W1 ... PmW1
+ *		      .				      .
+ *		      .		      <---->	      .
+ *		      .				      .
+ *		PmW0 PmW1 ... PmWn		P0Wn P1Wn ... PmWn
+ *
+ *
+ *	transformation can be performed in place or the transformation may
+ *	be created at another location. note that inplace transformations
+ *	take considerably longer to perform.
+ *
+ *	source and destination MEMORY FORM DEFINITION BLOCKS are input.
+ *	the format of the destination is opposite that of the provided source.
+ *
+ *	it is assumed that the destination form is large enough to receive
+ *	the transformed source.
+ *
+ *
+ * author:	jim eisenstein
+ *
+ * parameters
+ *
+ *  in:
+ *
+ *	CONTRL		address of control array (word wide)
+ *
+ *	control(07-08)	address of source MFDB
+ *	control(09-10)	address of destination MFDB
+ */
 
 
 /* memory form base address (0: physical device) */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define MF_BAS_AD
+#else
+#define MF_BAS_AD 0
+#endif
 MF_WD_PIX	equ	4	; form width in pixels ( form width in words /16)
 MF_HT_PIX	equ	6	; form height in pixels
 MF_WD_WRD	equ	8	; form width in words
@@ -94,10 +99,8 @@ C_MFDB_D	equ	18	; pointer to destination MFDB
 	xdef		_TRAN_FM
 _TRAN_FM:
 #else
-/*
- * VDI #110 - vr_trnfm - Transform form
- */
 /* 306de: 00e0d25a */
+/* 206de: 00e0da2e */
 	xdef _vr_trnfm
 _vr_trnfm:
 #endif
@@ -109,7 +112,9 @@ _vr_trnfm:
 	move.l	C_MFDB_S(a2),a0		; a0 -> source MFDB
 	move.l	C_MFDB_D(a2),a1		; a1 -> destination MFDB
 
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	moveq.l	#0,d0			; clear the high word
+#endif
 	move.w	MF_PLANES(a0),d0	; d0 <- # planes
 #if (TOSVERSION >= 0x400) | (!BINEXACT)
 	move.w	d0,d3			; d3 <- # planes
@@ -160,12 +165,14 @@ do_it:
 
 xfrm_in_place:
 
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 #if (TOSVERSION >= 0x400) | (!BINEXACT)
 	cmp.w	#1,d3			; see if we have > 1 plane
 #else
 	cmp.w	#1,MF_PLANES(a0)			; see if we have > 1 plane
 #endif
 	beq	quit			; do nothing for one plane
+#endif
 	bsr	in_place
 
 quit:	movem.l	(sp)+,d0-d4/a0-a2
@@ -189,23 +196,37 @@ quit:	movem.l	(sp)+,d0-d4/a0-a2
 
 in_place:
 
-	dbra	d1,entry02		; iteration count <- number of units - 1
+	dbra	d1,entry02		; iteration count <- number of units - 1; BUG FOR >= 3.00: only decrements word
 	rts				; if number was 0, return now
 
 loop02:
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	clr.l	d2			; initialize count accumulator
+#else
+	clr.w	d2			; initialize count accumulator
+#endif
 	move	d1,d4			; initialize iteration counter
 	bra	entry01
 
 loop01:
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	add.l	d0,a0			; a0 <- a1 + (2*d0) + 2
 	lea	2(a0,d0.l),a0		; a0 -> element to be repositioned
+#else
+	add.w	d0,a0			; a0 <- a1 + (2*d0) + 2
+	lea	2(a0,d0.w),a0		; a0 -> element to be repositioned
+#endif
 	move.w	(a0),d7			; save element in d7
 
 	move.l	a0,a1			; a1 -> source in transfer
 	move.l	a0,a2			; a2 -> destination in transfer
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	add.l	d0,d2			; d2 <- length of transfer
 	move.l	d2,d3			; d3 <- loop counter
+#else
+	add.w	d0,d2			; d2 <- length of transfer
+	move.w	d2,d3			; d3 <- loop counter
+#endif
 	bra	entry00
 
 loop00:
@@ -213,8 +234,12 @@ loop00:
 	move.w	-(a1),(a2)		; move word to the right
 
 entry00:
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	subq.l	#1,d3
 	bge	loop00
+#else
+	dbf	d3,loop00
+#endif
 	move.w	d7,(a1)			; store target element to new home
 
 entry01:
@@ -242,25 +267,46 @@ entry02:
 
 
 out_of_place:
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	move.l	d1,d4			; d4 <- pass counter
 	add.l	d1,d1			; d0 <- offset to next member word (in bytes)
+#else
+	move.w	d1,d4			; d4 <- pass counter
+	add.w	d1,d1			; d0 <- offset to next member word (in bytes)
+#endif
 	bra	entry11
 
 loop11:
 	move.l	a1,a2			; a2 <- working destination pointer
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	move.l	d0,d3			; d3 <- repeat counter
+#else
+	move.w	d0,d3			; d3 <- repeat counter
+#endif
 	bra	entry10
 
 loop10:
 	move.w	(a0)+,(a2)		; destination <- source. advance source ptr
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	add.l	d1,a2			; advance destination ptr
+#else
+	add.w	d1,a2			; advance destination ptr
+#endif
 
 entry10:
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	subq.l	#1,d3
 	bge	loop10
+#else
+	dbf	d3,loop10
+#endif
 	lea	2(a1),a1		; start another pass
 
 entry11:
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	subq.l	#1,d4
 	bge	loop11
+#else
+	dbf	d4,loop11
+#endif
 	rts

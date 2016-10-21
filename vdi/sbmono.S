@@ -48,6 +48,7 @@ OF4 equ -FBASE-4
 *   a1   =  line A variable reference base
 
 /* 306de: 00e0e104 */
+/* 206de: 00e0e9ba */
 		xdef	 sb_mono
 sb_mono:
 #if TOSVERSION >= 0x400

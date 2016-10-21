@@ -37,7 +37,11 @@
 #include "lineaequ.inc"
 
 /* v_planes == 0; stupid as68 does not optimize it */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define V_PLANES
+#else
+#define V_PLANES 0
+#endif
 
 *    conditional assembly switches..
 *
@@ -308,6 +312,7 @@ ramlen		equ	-84
 *******************************************************************************
 
 /* 306de: 00e0e236 */
+/* 206de: 00e0eaec */
 	xdef	sb_text
 sb_text:	link	a5,#ramlen		; allocate local block of ram
 
@@ -732,7 +737,10 @@ xmx_fine:	bra	scrn_blt
 *+
 *  Offset to next word in same plane
 *-
-nxtword:	dc.b	2,4,0,8,0,0,0,16
+nxtword:	dc.b	2,4,0,8
+#if PLANES8
+            dc.b    0,0,0,16
+#endif
 
 **************************************************
 *
@@ -741,6 +749,7 @@ nxtword:	dc.b	2,4,0,8,0,0,0,16
 *	put a block defined by s_form, SOURCEX, SOURCEY, DELX, DELY
 *	out to screen
 *
+/* 206de: 00e0ee5a */
 scrn_blt:	move.w	LV(TEXT_FG,a6),forecol(a5) ; copy foreground color to temp
 		move.w	LV(TEXT_BG,a6),backcol(a5) ; likewise for background
 		move.w	LV(V_PLANES,a6),d0	; d0 <- # of planes
@@ -1041,8 +1050,12 @@ blt_adj:	move.l	-(a0),d0
 		moveq.l	#$61,d2
 		subq.w	#2,-(a7)
 #if BINEXACT
+#if TOSVERSION >= 0x300 /* the assembler messed it up... */
 		dc.w $6100,$0073,$206c,$6f76,$6500,$0071,$2042,$6500
 		dc.w $005d,$2048,$6100,$005c,$6c00,$0061,$6700,$0016
+#else
+		dc.w $6173,$206c,$6f76,$6573,$2042,$6561,$2048,$6162,$6c69,$6720
+#endif
 #else
 		bsr	blt_adj+$81
 		movea.l	$6F76(a4),a0
@@ -2253,7 +2266,11 @@ outlin1:	lea	(a1,d7.w),a2	; set up a2 to point to 1 line below current
 		lsr.w	#1,d7		; # of words in horz line
 		subq.w	#1,d7		; for "dbra" sweetie
 		move.w	LV(DELY,a6),d6	; # of vertical lines
+#if (TOSVERSION < 0x300) & BINEXACT
+		bra.w	srt_lin
+#else
 		bra.s	srt_lin
+#endif
 
 out_edge:	movem.l	a0-a2/d6-d7,-(sp) ; save ptrs & counters
 		moveq	#0,d5

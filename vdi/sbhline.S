@@ -28,7 +28,11 @@
 
 
 /* v_planes == 0; stupid as68 does not optimize it */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define V_PLANES
+#else
+#define V_PLANES 0
+#endif
 
 
 *	SOFT VERSION OF HORIZONTAL LINE ROUTINE
@@ -47,6 +51,7 @@
 
 
 /* 306de: 00e0de24 */
+/* 206de: 00e0e6d2 */
 	xdef sb_hline
 sb_hline:
 
@@ -62,9 +67,11 @@ sb_hline:
 
 	subq.w	#1,d7			; d7 <- planes-1
 
-	move.l	d2,a3			; a3 <- span - 1 (words)
 #if PLANES8
+	move.l	d2,a3			; a3 <- span - 1 (words)
 	move.l	LV(FG_B_PLANES,a4),d2	; d2 <- color value
+#else
+	lea     LV(FG_BP_1,a4),a3
 #endif
 
 	move.w	LV(WRT_MODE,a4),d1
@@ -101,40 +108,52 @@ wrt_tbl:
 *	a2	pointer to LineA variables
 
 /* 306de: 00e0de5a */
+/* 206de: 00e0e708 */
 		xdef	sb_rect
 sb_rect:
 
 	link	a6,#-20			; a6 -> local variable space
 
-	move.w	LV(WRT_MODE,a2),d1
-	add.w	d1,d1
-	lea	wrt_tbl(pc,d1.w),a5
+#if TOSVERSION >= 0x300 /* d1/d2 swapped in older versions */
+#define D1 d1
+#define D2 d2
+#else
+#define D1 d2
+#define D2 d1
+#endif
+
+	move.w	LV(WRT_MODE,a2),D1
+	add.w	D1,D1
+	lea	wrt_tbl(pc,D1.w),a5
 	add.w	(a5),a5			; a5 -> writing mode subroutine
 
 	sub.w	d5,d7			; d7 <- vertical height -1
 
 	move.l	_v_bas_ad,a1
-	move.w	LV(bytes_lin,a2),d1
-	muls	d5,d1			; d2 <- offset to (0,Ymin)
-	add.l	d1,a1			; a1 -> (0,Ymin)
+	move.w	LV(bytes_lin,a2),D1
+	muls	d5,D1			; d2 <- offset to (0,Ymin)
+	add.l	D1,a1			; a1 -> (0,Ymin)
 
-	move.w	LV(V_PLANES,a2),d1
-	muls	d1,d0
+	move.w	LV(V_PLANES,a2),D1
+	muls	D1,d0
 	add.l	d0,d0			; d0 <- offset to (Xmin,0)
 	add.l	d0,a1			; a1 -> (Xmin,Ymin)
 
-	move.w	d1,d0
+	move.w	D1,d0
 	add.w	d0,d0			; d0 <- offset between dst words
 
-	subq.w	#1,d1			; d2 <- planes - 1
-	move.w	d1,-(a6)		; save plane counter
-	move.w	d2,-(a6)		; save span counter
+	subq.w	#1,D1			; d2 <- planes - 1
+	move.w	D1,-(a6)		; save plane counter
+	move.w	D2,-(a6)		; save span counter
 
-	move.w	d2,a3			; a3 <- span - 1
 #if PLANES8
-	move.l	LV(FG_B_PLANES,a2),d2		; a2 <- color index
+	move.w	D2,a3			; a3 <- span - 1
+	move.l	LV(FG_B_PLANES,a2),D2		; a2 <- color index
+	move.l	D2,-(a6)		; save color index
+#else
+	lea     LV(FG_BP_1,a2),a3
+	move.l	a3,-(a6)		; save color table
 #endif
-	move.l	d2,-(a6)		; save color index
 
 	move.w	LV(v_lin_wr,a2),d3
 	sub.w	d0,d3
@@ -153,7 +172,10 @@ sb_rect:
 
 	move.w	d7,-(a6)		; save vertical line counter
 
-	move.w	d1,d7			; d7 <- planes -1
+	move.w	D1,d7			; d7 <- planes -1
+#if TOSVERSION < 0x300
+	move.w  D2,D1
+#endif
 
 	moveq.l	#0,d1
 	tst.w	LV(multifill,a2)
@@ -162,6 +184,9 @@ sb_rect:
 	moveq.l	#32,d1
 
 r_poff:	move.l	d1,a2			; a2 <- offset between pattern words
+
+#undef D1
+#undef D2
 
 
 * in:
@@ -211,8 +236,13 @@ r_save:	move.w	d3,(a6)+		; save updated offset
 
 	add.w	   d3,a0		; a0 -> next pattern word
 	add.w	(a6)+,a1		; a1 -> next horizontal line
+#if PLANES8
 	move.l	(a6)+,d2		; d2 <- color index
 	move.w	(a6)+,a3		; a3 <- span -1
+#else
+	move.l	(a6)+,a3		; 
+	move.w	(a6)+,d2		; d2 <- color index
+#endif
 	move.w	(a6)+,d7		; d7 <- planes -1
 
 	lea	-20(a6),a6		; a6 -> bottom of parameter block
@@ -243,11 +273,16 @@ r_exit:	lea	18(a6),a6		; a6 -> top of parameter block
 *	d7	planes-1
 
 
+#if PLANES8 /* a3/d2 swapped in older versions */
+#define A3 a3
+#else
+#define A3 d2
+#endif
 
 xor_mode:
 
 xor_lp:	move.l	a1,a4			; a4 -> working dst pointer
-	move.w	a3,d5			; d5 <- span counter
+	move.w	A3,d5			; d5 <- span counter
 	move.w	(a0),d3			; d3 <- current pattern
 	add.w	a2,a0			; a0 -> next pattern word
 
@@ -282,12 +317,17 @@ rep_mode:
 	not.w	d6
 
 rep_lp:	move.l	a1,a4			; a4 -> working dst pointer
-	move.w	a3,d5			; d5 <- span counter
+	move.w	A3,d5			; d5 <- span counter
 	move.w	(a0),d3			; d3 <- current pattern
 	add.w	a2,a0			; a0 -> next pattern word
 
+#if PLANES8
 	roxr.w	#1,d2
 	bcs	re1_lf
+#else
+    tst.w (a3)+
+	bne	re1_lf
+#endif
 
 re0_lf:	move.w	d4,d1			; d1 <- inverted mask
 	and.w	d1,(a1)+		; set left fringe: a1 -> next bitplane
@@ -346,12 +386,17 @@ re1_nx:	dbra	d7,rep_lp
 xpr_mode:
 
 xpr_lp:	move.l	a1,a4			; a4 -> working dst pointer
-	move.w	a3,d5			; d5 <- span counter
+	move.w	A3,d5			; d5 <- span counter
 	move.w	(a0),d3			; d3 <- current pattern
 	add.w	a2,a0			; a0 -> next pattern word
 
+#if PLANES8
 	roxr.w	#1,d2			; choose procedure for this bitplane
 	bcs	xpr1			; based on the current bitplane color
+#else
+	tst.w (a3)+			; choose procedure for this bitplane
+	bne	xpr1			; based on the current bitplane color
+#endif
 
 xpr0:	not.w	d3			; d3 <- inverted pattern
 	bsr	xp0_lf			; 1 in original pattern maps to 0
@@ -368,12 +413,17 @@ rxp_mode:
 rxp_lp:
 
 	move.l	a1,a4			; a4 -> working dst pointer
-	move.w	a3,d5			; d5 <- span counter
+	move.w	A3,d5			; d5 <- span counter
 	move.w	(a0),d3			; d3 <- current pattern
 	add.w	a2,a0			; a0 -> next pattern word
 
+#if PLANES8
 	roxr.w	#1,d2			; choose procedure for this bitplane
 	bcs	rxp1			; based on the current bitplane color
+#else
+	tst.w (a3)+			; choose procedure for this bitplane
+	bne	rxp1			; based on the current bitplane color
+#endif
 
 rxp0:	bsr	xp0_lf			; 0 in pattern maps to 0 in DST
 	dbra	d7,rxp_lp		; 1 in pattern is transparent
@@ -383,6 +433,8 @@ rxp1:	not.w	d3			; d3 <- inverted pattern
 	bsr	xp1_lf			; 0 in original pattern maps to 1
 	dbra	d7,rxp_lp		; 1 in original pattern is transparent
 	rts
+
+#undef A3
 
 
 *  1 in pattern maps to 0 in destination

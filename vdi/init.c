@@ -33,7 +33,7 @@
 
 /*----------------------------------------------------------------------------*/
 
-#if TOSVERSION >= 0x400
+#if TOSVERSION >= 0x400 /* whole file */
 
 VOID init_st_tt_sp(NOTHING)
 {

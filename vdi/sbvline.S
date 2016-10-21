@@ -53,11 +53,16 @@ FRAG_LEN	equ  MAX_PLANES*4+4 ; space for fragment of 16 planes
 
 
 /* 306de: 00e0e006 */
+/* 206de: 00e0e8b6 */
 	xdef	sb_vline
 sb_vline:	lea	-FRAG_LEN(sp),sp  ; sp -> pixel fragment frame
 		move.w	LV(V_PLANES,a4),d3  ; d3 <- number of planes
 
+#if TOSVERSION < 0x300
+		cmp.w	#8,d3	  ; too many planes for the buffer ? BUG: MAX_PLANES is 4
+#else
 		cmp.w	#MAX_PLANES,d3	; too many planes for the buffer ?
+#endif
 #ifdef __GNUC__
 /*
  * stupid as68 fails to optimize this forward branch

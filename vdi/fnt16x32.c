@@ -19,6 +19,8 @@
 #include "gsxextrn.h"
 #include "../common/ctrycodes.h"
 
+#if PLANES8
+
 extern int16_t const off_16x32[];
 extern int16_t const dat_16x32[];
 
@@ -1113,3 +1115,5 @@ int16_t const dat_16x32[8192] = {
 	0x0000,0x0000,0x0000,0x0000,0x01C0,0x0000,0x0000,0x0000,
 	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000
 };
+
+#endif

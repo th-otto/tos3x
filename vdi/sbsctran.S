@@ -17,6 +17,8 @@
 #include "../common/config.h"
 #include "vdidefs.h"
 
+#if TOSVERSION >= 0x300 /* whole file */
+
 *
 * Entry routines for transparent byte aligned blits
 * (screen format)
@@ -913,3 +915,5 @@ slFr1N:		swap	d6			; mask1 is now in low word
 tSlNentry:	swap	d2			; row count is now in low word
 		dbra	d2,slNeg		; do nxt row
 		rts
+
+#endif

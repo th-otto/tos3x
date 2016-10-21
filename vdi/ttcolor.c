@@ -40,6 +40,8 @@
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
+#if PLANES8 /* whole file, 2.x uses assembler version */
+
 #define VIDINFO     (* ((volatile short *) 0xff8262L))	/* video information register */
 #define LUTADR      ((volatile short *) 0xff8400L)	/* look up table address      */
 #define INVERT      2					/* corresponds to invert bit  */
@@ -298,3 +300,5 @@ VOID vq_color(NOTHING)
 		*out = *rgb;					/* get blue component */
 	}
 }
+
+#endif

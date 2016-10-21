@@ -87,6 +87,7 @@ OPAQUE	equ	-4
  *	d6.w	X max destination
  */
 /* 306de: 00e0d300 */
+/* 206de: 00e0dd2e */
 	xdef sb_bitblt
 sb_bitblt: ds.b 0
 
@@ -101,8 +102,10 @@ sb_bitblt: ds.b 0
 #endif
 
 	PIXLA(a4)
+#if TOSVERSION >= 0x300
 	clr.w	OPAQUE(a6)		; set OPAQUE flag off
 	clr.w	_COPYTRAN		; turn blit transparent flag off
+#endif
 
 	moveq.l	#$0F,d5			; d5 <- mod 16 mask
 
@@ -125,8 +128,21 @@ sb_bitblt: ds.b 0
 
 	sub.w	d3,d1			; d1 <- (Sxmin mod 16) - (Dxmin mod 16)
 
+#if TOSVERSION < 0x300
+    bne	std_blt
+	tst.l	FG_COL(a6)		; and fore and back colors are 0 ...
+	bne	std_blt
+	cmp.b	#03,OP_TAB(a6)		; and D'<- S is the logic operation ...
+	bne	std_blt
 	move.w	d4,d7			; and both src and dst occupy
 	add.w	d6,d7			; three or more words apiece ...
+	cmp.w	#4,d7
+	bcs.s	std_blt
+	tst.l	P_ADDR(a6)		; and no pattern is involved ...
+	beq word_blt			; do the special word aligned blt
+
+#else
+
 	cmp.w	#4,d7
 	bcs.s	std_blt
 
@@ -167,6 +183,8 @@ trns_blt:
 sbBl0:	tst	d1			; see if S and D are pixel aligned
 	bne	std_blt			; if Xmin src mod16 = Xmin DST mod16 ..
 	bra	word_blt		; if so do pixel aligned blit D' <- S
+
+#endif
 
 
 std_blt:
@@ -608,7 +626,6 @@ d_xy2addr:
 	add.l	d1,a1			; a1 -> word containing (x,y)
 
 	rts
-
 
 
 

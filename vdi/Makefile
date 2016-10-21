@@ -24,7 +24,7 @@ CPPFLAGS +=
 
 vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
 	$(RM) $@
-	$(AR) $(ARFLAGS) $@ tosvars.o $(VDI_$(TOSVERSION)_OBJS1)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS1)
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS2)
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS3)
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS4)
@@ -40,7 +40,7 @@ vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/com
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single:
-	$(LD) -u -s -l -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_$(TOSVERSION)_OBJS)
+	$(LD) -s -l -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_$(TOSVERSION)_OBJS)
 
 vdi.rel: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_$(TOSVERSION)_OBJS) vdi.lnk $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(RM) $@
@@ -314,6 +314,11 @@ spxtxtbl.o: spxtxtbl.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
+stcolor.o: stcolor.S
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+
 vdiext.o: vdiext.S $(top_srcdir)/common/sections.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
@@ -350,7 +355,7 @@ text.o: text.c
 
 
 screen.prg: $(SCREEN_OBJS) $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
-	$(LD) -s -l -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_$(TOSVERSION)_OBJS)
+	$(LD) -s -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_$(TOSVERSION)_OBJS)
 
 check::
 

@@ -19,6 +19,8 @@
 #include "../common/config.h"
 #include "vdidefs.h"
 
+#if TOSVERSION >= 0x300 /* whole file */
+
 *
 * Routines to do fringes for word aligned blit (positive case)
 *
@@ -3942,3 +3944,5 @@ oFSronf1:	or.w	d7,-(a1)		; set the dst wrd
 
 		dc.w	0
 oGSronf1:	nop
+
+#endif

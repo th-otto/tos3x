@@ -17,6 +17,8 @@
 #include "../common/config.h"
 #include "vdidefs.h"
 
+#if TOSVERSION >= 0x300 /* whole file */
+
 *
 * Entry routines for opaque byte aligned blits
 * (screen format)
@@ -912,3 +914,5 @@ oSlNentry:	neg.w	d4			; make d4 pos
 		swap	d2			; row count is now in low word
 		dbra	d2,slNeg
 		rts
+
+#endif

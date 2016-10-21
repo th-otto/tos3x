@@ -69,9 +69,12 @@ O6 equ 6 ; WTF? why?
 
 
 /* 306de: 00e0da98 */
+/* 206de: 00e0e45c */
 		xdef sb_cell
 sb_cell:
+#if TOSVERSION >= 0x300
 		move.l	a4,-(sp)		; save a4
+#endif
 		move.w	LV((v_planes)+O6,a4),d1	; d1 <- number of planes
 		subq.w	#1,d1			; d1 <- dbra plane counter
 		move.w	LV((v_fnt_wr)+O6,a4),d2		; d2 <- src width (in bytes)
@@ -79,13 +82,15 @@ sb_cell:
 		move.w	LV((v_cel_ht)+O6,a4),d4
 		subq.w	#1,d4			; d4 <- cell height -1
 		move.l	a1,a5			; a5 -> 1st byte of destination
+#if TOSVERSION >= 0x300
 		move.l	LV((v_off_ad)+O6,a4),a2		; a2 -> offset table
 		cmp.w	#16,2(a2)		; see if char cell is word wide
 		lea	blk_byte,a4		; assume 8 bit wide font
 		bne	blk_next		; branch if not ?
 		lea	blk_word,a4		; it's 16 bit wide font
-
-blk_next:	move.l	a5,a3		; a3 -> dst plane
+#endif
+blk_next:
+		move.l	a5,a3		; a3 -> dst plane
 		move.w	d4,d0		; d0 <- dbra row counter
 
 		clr.w	d5
@@ -94,11 +99,17 @@ blk_next:	move.l	a5,a3		; a3 -> dst plane
 		lsr.w	#1,d7		; extract background color bit
 		roxl.w	#3,d5		; d5 <- offset to fragment addr
 
+#if TOSVERSION >= 0x300
 		move.l	(a4,d5.w),a2	; a2 -> to fragment
+#else
+		move.l	blk_byte(pc,d5.w),a2	; a2 -> to fragment
+#endif
 		jmp	(a2)
 
 blk_byte:	dc.l	byte_zero,byte_invert,byte_normal,byte_ones
+#if TOSVERSION >= 0x300
 blk_word:	dc.l	word_zero,word_invert,word_normal,word_ones
+#endif
 
 
 *+
@@ -111,7 +122,9 @@ byte_n:		move.b	(a2),(a3)	; move character byte
 		dbra	d0,byte_n
 		addq.l	#2,a5		; a5 -> 1st row of next dst plane
 		dbra	d1,blk_next
+#if TOSVERSION >= 0x300
 		move.l	(sp)+,a4	; restore a4
+#endif
 		rts
 
 
@@ -125,7 +138,9 @@ byte_1:		move.b	d5,(a3)
 		dbra	d0,byte_1
 		addq.l	#2,a5		; a5 -> 1st row of next dst plane
 		dbra	d1,blk_next
+#if TOSVERSION >= 0x300
 		move.l	(sp)+,a4	; restore a4
+#endif
 		rts
 
 
@@ -138,10 +153,13 @@ byte_i:		move.b	(a2),d5		; d5 <- character byte
 		dbra	d0,byte_i
 		addq.l	#2,a5		; a5 -> 1st row of next dst plane
 		dbra	d1,blk_next
+#if TOSVERSION >= 0x300
 		move.l	(sp)+,a4	; restore a4
+#endif
 		rts
 
 
+#if TOSVERSION >= 0x300
 *+
 * The routine below deal with word wide font
 *-
@@ -182,6 +200,7 @@ word_i:		move.w	(a2),d5		; d5 <- character word
 		move.l	(sp)+,a4	; restore a4
 		rts
 
+#endif
 
 *******************************************************************************
 *
@@ -211,6 +230,7 @@ word_i:		move.w	(a2),d5		; d5 <- character word
 *******************************************************************************
 
 /* 306de: 00e0db90 */
+/* 206de: 00e0e4da */
 		xdef sb_scrup
 sb_scrup:
 	move.w	LV((v_celmy)+O6,a4),d3		; d3 <- Ymax
@@ -261,6 +281,7 @@ blank_up:
 
 
 /* 306de: 00e0dbd4 */
+/* 206de: 00e0e51e */
 		xdef sb_scrdn
 sb_scrdn:
 	move.w	LV((v_celmy)+O6,a4),d3		; d3 <- Ymax
@@ -349,6 +370,7 @@ blank_tab: *    fringe masks		*   odd      odd  multi word
 
 
 /* 306de: 00e0dc38 */
+/* 206de: 00e0e582 */
 		xdef sb_blank
 sb_blank:
 	movem.l	d0-d3/a0-a1,-(sp)
@@ -357,12 +379,14 @@ sb_blank:
 	move.w	d2,d5			; d5 <- X max
 
 	clr.w	d0
+#if TOSVERSION >= 0x300
 	add.w	#1,d0			; adjust for word wide font (x += 1)
 	move.l	LV((v_off_ad)+O6,a4),a2		; a2 -> offset table
 	cmp.w	#16,2(a2)		; see if char cell is word wide
 	beq	blank_words		; then don't adjust to word offset
 
 	sub.w	#1,d0			; adjust for byte wide font (x -= 1)
+#endif
 	lsr.w	#1,d4			; d4 <- word offset to Xmin
 	addx.w	d0,d0
 	lsr.w	#1,d5			; d5 <- word offset to Xmax
@@ -391,8 +415,12 @@ blank_words:
 	add.l	d7,a2			; a2 -> top of row at Ymin
 
 	move.w	LV((v_planes)+O6,a4),d6	; d6 <- number of planes
+#if PLANES8
 	add.w	d6,d6			; make d6 word offset
 	move.w	log2_tab(pc,d6.w),d6	; d6 <- log2(planes)
+#else
+	lsr.w     #1,d6     /* d6 <- log2(planes) (works only for planes 1,2,4) */
+#endif
 	add.w	d4,d4			; d4 <- byte offset to Xmin word
 	lsl.w	d6,d4			; d4 <- offset to Xmin (bytes)
 	add.w	d4,a2			; a2 -> start of dst
@@ -431,8 +459,11 @@ blank_words:
 	rts
 
 
-brtn_tab:	dc.l	blank1,blank2,blank4,blank8
+brtn_tab:	dc.l	blank1,blank2,blank4
+#if PLANES8
+            dc.l    blank8
 log2_tab:	dc.w	0,0,1,0,2,0,0,0,3
+#endif
 
 * Blank out a 1 plane region in your choice of colors
 *
@@ -632,6 +663,7 @@ en4:	move.w	a5,d6			; d6 <- word counter
 *	d6	color
 *	d7	height
 
+#if PLANES8
 blank8:		move.w	d6,-(sp)	; save color on the stack
 		bset	#31,d6		; flag for second 4 planes
 
@@ -697,3 +729,5 @@ en8:		move.w	a5,d6		; d6 <- word counter
 		bne	bl8loop		; do the next 4 planes
 		addq.l	#2,sp		; clean stack (color was stored on it)
 		rts
+
+#endif
