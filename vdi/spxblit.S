@@ -12,31 +12,9 @@
 #include "lineaequ.inc"
 
 
+#include "sbframe.inc"
+
 		xdef	spx_bitblt
-
-*       FRAME PARAMETERS
-
-B_WD	  equ	-76	; width of block in pixels			    +00
-B_HT	  equ	-74	; height of block in pixels			    +02
-PLANE_CT  equ	-72	; number of consequitive planes to blt		    +04
-
-FG_COL	  equ	-70	; foreground color (logic op table index:hi bit)    +06
-BG_COL	  equ	-68	; background color (logic op table index:lo bit)    +08
-OP_TAB	  equ	-66	; logic ops for all fore and background combos	    +10
-
-S_XMIN	  equ	-62	; minimum X: source				    +14
-S_YMIN	  equ	-60	; minimum Y: source				    +16
-S_FORM	  equ	-58	; source form base address			    +18
-S_NXWD	  equ	-54	; offset to next word in line  (in bytes)	    +22
-S_NXLN	  equ	-52	; offset to next line in plane (in bytes)	    +24
-S_NXPL	  equ	-50	; offset to next plane from start of current plane  +26
-
-D_XMIN	  equ	-48	; minimum X: destination			    +28
-D_YMIN	  equ	-46	; minimum Y: destination			    +30
-D_FORM	  equ	-44	; destination form base address			    +32
-D_NXWD	  equ	-40	; offset to next word in line  (in bytes)	    +36
-D_NXLN	  equ	-38	; offset to next line in plane (in bytes)	    +38
-D_NXPL	  equ	-36	; offset to next plane from start of current plane  +40
 
 OPAQUE	=	-4
 

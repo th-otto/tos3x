@@ -20,14 +20,7 @@
 #include "../common/config.h"
 #include "vdidefs.h"
 
-SRC_WR		equ	-2
-DST_WR		equ	-4
-INNER_CT	equ	-6
-
-P_ADDR		equ	-34	; address of pattern buffer
-P_NXLN		equ	-30	; offset to next line in pattern  (in bytes)
-P_NXPL		equ	-28	; offset to next plane in pattern (in bytes)
-P_MASK		equ	-26	; pattern index mask
+#include "sbframe.inc"
 
 F1OP		equ	 8
 F2OP		equ	22

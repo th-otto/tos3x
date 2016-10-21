@@ -58,7 +58,11 @@
 *	MEMORY FORM DEFINITION BLOCK (MFDB) OFFSETS
 
 /* memory form base address (0: physical device) */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define MF_BAS_AD
+#else
+#define MF_BAS_AD 0
+#endif
 MF_WD_PIX	equ	 4	; form width in pixels (form width in wrds /16)
 MF_HT_PIX	equ	 6	; form height in pixels
 MF_WD_WRD	equ	 8	; form width in words
@@ -72,15 +76,22 @@ C_MFDB_D	equ	18	; pointer to destination MFDB
 
 *	INTIN ARRAY OFFSETS
 
-/* logic operation code == 0 */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define I_LOG_OP
+#else
+#define I_LOG_OP 0
+#endif
 I_COL_1		equ	 2
 I_COL_0		equ	 4
 
 *	PTSIN ARRAY OFFSET
 
 /* x-coordinate of upper left of src rectangle */
+#if (TOSVERSION >= 0x300) | !BINEXACT
 #define P_XMIN_S
+#else
+#define P_XMIN_S 0
+#endif
 P_YMIN_S	equ	2	; y-coordinate of upper left of src rectangle
 P_XMAX_S	equ	4	; x-coordinate of lower right of src rectangle
 P_YMAX_S	equ	6	; y-coordinate of lower right of src rectangle
@@ -90,61 +101,13 @@ P_YMIN_D	equ	10	; y-coordinate of upper left of dest rectangle
 P_XMAX_D	equ	12	; x-coordinate of lower right of dest rectangle
 P_YMAX_D	equ	14	; y-coordinate of lower right of dest rectangle
 
-
-*       FRAME PARAMETERS
-
-B_WD		equ	-76	; width of block in pixels		    +00
-B_HT		equ	-74	; height of block in pixels		    +02
-
-PLANE_CT	equ	-72	; number of consequitive planes to blt	    +04
-
-FG_COL		equ	-70	; fg color (logic op table index:hi bit)    +06
-BG_COL		equ	-68	; bg color (logic op table index:lo bit)    +08
-OP_TAB		equ	-66	; logic ops for all fg and bg combos	    +10
-S_XMIN		equ	-62	; minimum X: source			    +14
-S_YMIN		equ	-60	; minimum Y: source			    +16
-S_FORM		equ	-58	; source form base address		    +18
-S_NXWD		equ	-54	; offset to next word in line  (in bytes)   +22
-S_NXLN		equ	-52	; offset to next line in plane (in bytes)   +24
-S_NXPL		equ	-50	; off to nxt plane from strt of cur plane   +26
-
-D_XMIN		equ	-48	; minimum X: destination		    +28
-D_YMIN		equ	-46	; minimum Y: destination		    +30
-D_FORM		equ	-44	; destination form base address		    +32
-D_NXWD		equ	-40	; offset to next word in line  (in bytes)   +36
-D_NXLN		equ	-38	; offset to next line in plane (in bytes)   +38
-D_NXPL		equ	-36	; offs to nxt plane from strt of cur plane  +40
-
-P_ADDR		equ	-34	; address of pattern buffer  (0:no pattern) +42
-P_NXLN		equ	-30	; offset to next line in pattern (in bytes) +46
-P_NXPL		equ	-28	; offset to nxt plane in pattern (in bytes) +48
-P_MASK		equ	-26	; pattern index mask			    +50
-
-***					    ***
-***   these parameters are internally set   ***
-***					    ***
-
-P_INDX		equ	-24	; initial pattern index			    +52
-
-S_ADDR		equ	-22	; initial source address 		    +54
-S_XMAX		equ	-18	; maximum X: source			    +58
-S_YMAX		equ	-16	; maximum Y: source			    +60
-
-D_ADDR		equ	-14	; initial destination address		    +62
-D_XMAX		equ	-10	; maximum X: destination		    +66
-D_YMAX		equ	-8	; maximum Y: destination		    +68
-
-INNER_CT	equ	-6	; blt inner loop initial count		    +70
-DST_WR		equ	-4	; destination form wrap (in bytes)	    +72
-SRC_WR		equ	-2	; source form wrap (in bytes)		    +74
-
-
-FRAME_LEN	equ	 76
+#include "sbframe.inc"
 
 DEV_COL		equ	 DEV_TAB+26	; offset in _DEV_TAB to number of colors
 PAT_FLAG	equ	  4	; flag:1 SRCE and PATTERN   flag:0 SOURCE only
 
 /* 306de: 00e0c998 */
+/* 206de: 00e0cd50 */
 	xdef	_COPY_RFM
 _COPY_RFM:
 
@@ -161,7 +124,11 @@ _COPY_RFM:
 *   pattern ?
 
 
-	movea.w	#0,a3
+#if TOSVERSION >= 0x300
+	movea.w	#0,a3               /* hm, not really an improvement to below... */
+#else
+	suba.l  a3,a3
+#endif
 	bclr	#PAT_FLAG,d2		; check pat flag and revert to log op #
 	beq	no_pattern
 
@@ -227,7 +194,11 @@ dst_calc:
 
 compare:
 #if TOSVERSION < 0x400
-	move.l    #$00000116,d3   ; WUT ???
+#if TOSVERSION >= 0x300
+	move.l    #278,d3   ; WUT ???
+#else
+	moveq.l   #22,d3   ; WUT ???
+#endif
 	btst      d1,d3
 	beq       bad_parameter
 #endif

@@ -40,23 +40,12 @@
 		jmp (r)
 
 
-B_WD		equ	-76	; width of block in pixels
-B_HT		equ	-74	; height of block in pixels
-
-S_XMIN		equ	-62	; minimum X: source
-S_YMIN		equ	-60	; minimum Y: source
-D_XMIN		equ	-48	; minimum X: destination
-D_YMIN		equ	-46	; minimum Y: destination
-S_XMAX		equ	-18	; maximum X: source
-S_YMAX		equ	-16	; maximum Y: source
-D_XMAX		equ	-10	; maximum X: destination
-D_YMAX		equ	-8	; maximum Y: destination
-
-FRAME_LEN	equ	 76
+#include "sbframe.inc"
 
 	text
 
 /* 306de: 00e0cc46 */
+/* 206de: 00e0d004 */
 *  in:
 *	a6.l	points to 76 byte parameter block
 	xdef	KG_BLT
@@ -90,3 +79,7 @@ KG_BLT:
 
     PIXLA(a5)
 	V_JUMP(V_BLAST,a5,a5)		; a5 -> desired version of blast_man
+
+#if TOSVERSION < 0x300
+	dc.b 'JIM LOVES JENEANE',0
+#endif

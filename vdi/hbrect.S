@@ -304,7 +304,7 @@ sd2_cont:
 	dbra	d7,sd2_loop		 ; do next line in this plane
 
 
-#if PLANE8
+#if PLANES8
 	move.w	a3,d7			 ; d7 <- reset line counter
 #else
 	move.w	d5,d7			 ; d7 <- reset line counter

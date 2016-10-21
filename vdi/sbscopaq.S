@@ -196,12 +196,7 @@
 		xdef	oCSlonf1,oDSlonf1,oESlonf1,oFSlonf1
 
 
-
-PLANE_CT  equ	-72	; number of consequitive planes to blt		    +04
-FG_COL	  equ	-70	; foreground color (logic op table index:hi bit)    +06
-BG_COL	  equ	-68	; background color (logic op table index:lo bit)    +08
-OP_TAB	  equ	-66	; logic ops for all fore and background combos	    +10
-INNER_CT  equ	-6	; blt inner loop initial count			    +70
+#include "sbframe.inc"
 
 *******************************************************************************
 *******************************************************************************

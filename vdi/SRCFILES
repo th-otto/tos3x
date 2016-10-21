@@ -19,11 +19,11 @@ VDI_206_OBJS1 = escape.o palette.o entry.o line1010.o gsxasm1.o
 VDI_206_OBJS2 = font6x6.o font8x8.o font8x16.o fnt16x32.o tables.o
 VDI_206_OBJS3 = allgem.o blitinit.o routines.o jmptbl.o isin.o monobj.o
 VDI_206_OBJS4 = opnwk.o monout.o text.o textblt.o hbtxtblt.o
-VDI_206_OBJS5 = mono.o hbmono.o gsxasm2.o hbrect.o mouse.o ttcolor.o
+VDI_206_OBJS5 = mono.o hbmono.o gsxasm2.o hbrect.o mouse.o
 VDI_206_OBJS6 = copyrfm.o blastman.o hbbitblt.o seedfill.o xfrmform.o sbblit.o sbfrag.o
 VDI_206_OBJS7 = sbescape.o sbhline.o sbvline.o sbmono.o sbtxtblt.o sbscrn.o
 VDI_206_OBJS8 = sbsctran.o sbsctlog.o sbscolog.o sbscopaq.o
-VDI_206_OBJS9 = blaster.o colorep.o cbssdefs.o
+VDI_206_OBJS9 = blaster.o colorep.o cbssdefs.o ttcolor.o
 VDI_206_OBJS10 = devices.o init.o spcolor.o trucolor.o
 
 VDI_206_OBJS = $(VDI_206_OBJS1) $(VDI_206_OBJS2) $(VDI_206_OBJS3) $(VDI_206_OBJS4) $(VDI_206_OBJS5) \
@@ -76,6 +76,7 @@ VDI_SRCS = \
 	sbscopaq.S \
 	blaster.S \
 	blaster.inc \
+	sbframe.inc \
 	hbhline.inc \
 	hbvline.inc \
 	hbmono.S \
