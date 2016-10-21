@@ -354,8 +354,13 @@ text.o: text.c
 #	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
 
 
-screen.prg: $(SCREEN_OBJS) $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
-	$(LD) -s -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_$(TOSVERSION)_OBJS)
+screen.prg: $(SCREEN_OBJS) $(VDI_$(TOSVERSION)_OBJS) lmul.o ${MAKEFILE}
+	$(LD) -s -o $@ $(SCREEN_OBJS) tosvars.o $(VDI_$(TOSVERSION)_OBJS) lmul.o
+
+lmul.o: ../bdos/lmul.S
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
 
 check::
 
