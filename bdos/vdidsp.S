@@ -1,7 +1,7 @@
-*
-* These 2 functions are referenced by GEMDOS,
-* but are defined elsewhere
-*
+/*
+ * These 2 functions are referenced by GEMDOS,
+ * but are defined elsewhere
+ */
 #include "../common/config.h"
 #include "../common/ctrycodes.h"
 #include "../common/sections.inc"

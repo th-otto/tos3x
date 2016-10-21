@@ -27,6 +27,11 @@ osinit.o: osinit.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
+lmul.o: lmul.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
 bdos.o: $(top_srcdir)/common/config.h tosvars.o vars.o vdidsp.o $(top_srcdir)/common/sections.mak $(BDOS_OBJS) ${MAKEFILE}
 	# sections.mak might have just been generated, make sure it is reread
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
