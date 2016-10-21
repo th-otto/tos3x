@@ -31,6 +31,9 @@ VDI_206_OBJS = $(VDI_206_OBJS1) $(VDI_206_OBJS2) $(VDI_206_OBJS3) $(VDI_206_OBJS
 
 SCREEN_OBJS = vdivtg.o alone.o jin.o
 
+VDI_OBJS = $(VDI_$(TOSVERSION)_OBJS)
+
+
 VDI_SRCS = \
 	vdidefs.h \
 	attrdef.h \

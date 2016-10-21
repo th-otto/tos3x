@@ -163,11 +163,11 @@
  */
 #define BIOSDLEN    $00000888
 #define VDITLEN     $0000999A
-#define VDIDLEN     $00000000
+#define VDIDLEN     $00002846
 #define BDOSTLEN    $000062FC
-#define BDOSDLEN    $00000000
+#define BDOSDLEN    $0000039E
 #define AESTLEN     $0000CCD6
-#define AESDLEN     $00000000
+#define AESDLEN     $000006D8
 #define DESKDLEN    $00000000
 
 #endif /* TOSVERSION == 0x208 */

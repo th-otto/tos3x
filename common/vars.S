@@ -12,6 +12,11 @@
 #include "../vdi/vdidefs.h"
 #include "../vdi/lineaequ.inc"
 
+#define V(name,t,size) \
+	xdef name \
+name: ds.t size
+#define S(t,size) ds.t size
+
 	bss
 
 	ds.b $800       /* the system variables go here */
@@ -428,11 +433,13 @@ _prtbinvert: ds.w 1
 	xdef _prtbink
 _prtbink: ds.w 1
 
-	xdef _ldivr
-_ldivr: ds.l 1
-
-	xdef _ofdbuf
-_ofdbuf: ds.b 70*80
+#if STBOOK
+	V(_ofdbuf,b,70*80)
+	V(_ldivr,l,1)
+#else
+	V(_ldivr,l,1)
+	V(_ofdbuf,b,70*80)
+#endif
 
 	xdef _bpbsums
 _bpbsums: ds.w BPBSECT*NUMFLOPPIES
@@ -469,12 +476,18 @@ _ram8x16: ds.b 90
     xdef _pbpar
 _pbpar: ds.b 30
 
-	xdef _fill
-_fill: ds.b 3
+#if !STBOOK
+	V(_fill,b,3)
 	even
+#endif
 
 	xdef _bakbuf
 _bakbuf: ds.l 3
+
+#if STBOOK
+	V(_fill,b,3)
+	even
+#endif
 
 	xdef _blkdev
 _blkdev: ds.b 36*NUMFLOPPIES
