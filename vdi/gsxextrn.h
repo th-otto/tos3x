@@ -105,7 +105,9 @@ extern FONT_HEAD const f16x32;
 
 extern	FONT_HEAD ram8x16;
 extern	FONT_HEAD ram8x8;
+#if PLANES8
 extern	FONT_HEAD ram16x32;
+#endif
 
 extern int16_t scrtsiz;
 extern int16_t const ROM_DEV_TAB[];  /* initial intout array for open work       */

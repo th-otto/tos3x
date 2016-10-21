@@ -54,7 +54,10 @@ int16_t const tplane_mask[] = {
 #if TOSVERSION >= 0x400
 	0,
 #endif
-	1,   3,   7,  15,  31,  63, 127, 255,
+	1,   3,   7,  15,
+#if PLANES8
+	31,  63, 127, 255,
+#endif
 #if VIDEL_SUPPORT
 	255, 255, 255, 255, 255, 255, 255, 255,
 	255, 255, 255, 255, 255, 255, 255, 255,
@@ -63,51 +66,55 @@ int16_t const tplane_mask[] = {
 };
 
 int16_t const ROM_DEV_TAB[45] = {
-  	320-1,	/* 0	x resolution			     */
-  	200-1,	/* 1	y resolution			     */
-  	0,	/* 2	device precision 0=exact,1=not exact */
-  	338,	/* 3	width of pixel			     */
-  	372,	/* 4	heigth of pixel			     */
-  	1,	/* 5	character sizes			     */
-   MX_LN_STYLE,	/* 6	linestyles		       	     */
+	320-1,	/* 0	x resolution			     */
+	200-1,	/* 1	y resolution			     */
+	0,	/* 2	device precision 0=exact,1=not exact */
+	338,	/* 3	width of pixel			     */
+	372,	/* 4	heigth of pixel			     */
+	1,	/* 5	character sizes			     */
+	MX_LN_STYLE,	/* 6	linestyles		       	     */
 	0,	/* 7	linewidth			     */
-  	6,	/* 8	marker types			     */
-  	8,	/* 9	marker size			     */
-  	1,	/* 10	text font			     */
-MX_FIL_PAT_INDEX,/* 11	area patterns			     */
-MX_FIL_HAT_INDEX,/* 12	crosshatch patterns		     */
-  	16,	/* 13	colors at one time		     */
-  	10,	/* 14	number of GDP's			     */
-  	1,	/* 15	GDP bar				     */
-  	2,	/* 16	GDP arc				     */
-  	3,	/* 17	GDP pic				     */
-  	4,	/* 18	GDP circle			     */
-  	5,	/* 19	GDP ellipse			     */
-  	6,	/* 20	GDP elliptical arc		     */
-  	7,	/* 21	GDP elliptical pie		     */
-  	8,	/* 22	GDP rounded rectangle		     */
-  	9,	/* 23	GDP filled rounded rectangle	     */
-  	10,	/* 24	GDP #justified text		     */
-  	3,	/* 25	GDP #1				     */
-  	0,	/* 26	GDP #2				     */
-  	3,	/* 27	GDP #3				     */
-  	3,	/* 28	GDP #4				     */
-  	3,	/* 29	GDP #5				     */
-  	0,	/* 30	GDP #6				     */
-  	3,	/* 31	GDP #7				     */
-  	0,	/* 32	GDP #8				     */
-  	3,	/* 33	GDP #9				     */
-  	2,	/* 34	GDP #10				     */
-  	1,	/* 35	Color capability		     */
-  	1,	/* 36	Text Rotation			     */
-  	1,	/* 37	Polygonfill			     */		
-  	0,	/* 38	Cell Array			     */
+	6,	/* 8	marker types			     */
+	8,	/* 9	marker size			     */
+	1,	/* 10	text font			     */
+	MX_FIL_PAT_INDEX,/* 11	area patterns			     */
+	MX_FIL_HAT_INDEX,/* 12	crosshatch patterns		     */
+	16,	/* 13	colors at one time		     */
+	10,	/* 14	number of GDP's			     */
+	1,	/* 15	GDP bar				     */
+	2,	/* 16	GDP arc				     */
+	3,	/* 17	GDP pic				     */
+	4,	/* 18	GDP circle			     */
+	5,	/* 19	GDP ellipse			     */
+	6,	/* 20	GDP elliptical arc		     */
+	7,	/* 21	GDP elliptical pie		     */
+	8,	/* 22	GDP rounded rectangle		     */
+	9,	/* 23	GDP filled rounded rectangle	     */
+	10,	/* 24	GDP #justified text		     */
+	3,	/* 25	GDP #1				     */
+	0,	/* 26	GDP #2				     */
+	3,	/* 27	GDP #3				     */
+	3,	/* 28	GDP #4				     */
+	3,	/* 29	GDP #5				     */
+	0,	/* 30	GDP #6				     */
+	3,	/* 31	GDP #7				     */
+	0,	/* 32	GDP #8				     */
+	3,	/* 33	GDP #9				     */
+	2,	/* 34	GDP #10				     */
+	1,	/* 35	Color capability		     */
+	1,	/* 36	Text Rotation			     */
+	1,	/* 37	Polygonfill			     */		
+	0,	/* 38	Cell Array			     */
+#if TOSVERSION >= 0x300
 	MAX_PAL,/* 39	Pallette size			     */
-  	2,	/* 40	# of locator devices 1 = mouse       */
-  	1,	/* 41	# of valuator devices		     */
-  	1,	/* 42	# of choice devices		     */
-  	1,	/* 43	# of string devices		     */
-  	2	/* 44	Workstation Type 2 = out/in	     */
+#else
+	0,	/* 39	Pallette size			     */
+#endif
+	2,	/* 40	# of locator devices 1 = mouse       */
+	1,	/* 41	# of valuator devices		     */
+	1,	/* 42	# of choice devices		     */
+	1,	/* 43	# of string devices		     */
+	2	/* 44	Workstation Type 2 = out/in	     */
 };
 
 /************************************************************/ 
@@ -116,45 +123,49 @@ MX_FIL_HAT_INDEX,/* 12	crosshatch patterns		     */
 /************************************************************/
 
 int16_t const ROM_SIZ_TAB[12] = {
-  	0,	/* 0	min char width			*/
-  	7,	/* 1	min char height			*/
-  	0,	/* 2	max char width			*/
-  	7,	/* 3	max char height			*/
-  	1,	/* 4	min line width			*/
-  	0,	/* 5	reserved 0			*/
-   MX_LN_WIDTH,	/* 6	max line width			*/
-  	0,	/* 7	reserved 0			*/
-  	15,	/* 8	min marker width		*/
-  	11,	/* 9	min marker height		*/
-  	120,	/* 10	max marker width		*/
-  	88	/* 11	max marker height		*/
+	0,	/* 0	min char width			*/
+	7,	/* 1	min char height			*/
+	0,	/* 2	max char width			*/
+	7,	/* 3	max char height			*/
+	1,	/* 4	min line width			*/
+	0,	/* 5	reserved 0			*/
+	MX_LN_WIDTH,	/* 6	max line width			*/
+	0,	/* 7	reserved 0			*/
+	15,	/* 8	min marker width		*/
+	11,	/* 9	min marker height		*/
+	120,	/* 10	max marker width		*/
+	88	/* 11	max marker height		*/
 };
 
 int16_t const ROM_INQ_TAB[45] = {
-  	4,		/*  0  type of alpha/graphic controllers*/
-  	MAX_PAL,	/*  1  number of background colors	*/
-  	0x1F,		/*  2  text styles supported		*/
-  	0,		/*  3  scale rasters = false		*/
-  	4,		/*  4  number of planes			*/
-  	1,		/*  5  video lookup table		*/
-  	BLTPRFRM,	/*  6  performance factor????		*/
-  	1,		/*  7  contour fill capability		*/
-  	1,		/*  8  character rotation capability    */
-  	4,		/*  9  number of writing modes		*/
-  	2,		/*  10 highest input mode		*/
-  	1,		/*  11 text alignment flag		*/
-  	0,		/*  12 Inking capability		*/
-  	0,		/*  13 rubber banding			*/
-  	0, /* MAX_VERT */	/*  14 maximum vertices			*/
-  	-1,		/*  15 maximum intin			*/
-  	2,		/*  16 number of buttons on MOUSE	*/
-  	0,		/*  17 styles for wide lines            */
+	4,		/*  0  type of alpha/graphic controllers*/
+#if TOSVERSION >= 0x300
+	MAX_PAL,	/*  1  number of background colors	*/
+#else
+	0,		/*  1  number of background colors	*/
+#endif
+	0x1F,		/*  2  text styles supported		*/
+	0,		/*  3  scale rasters = false		*/
+	4,		/*  4  number of planes			*/
+	1,		/*  5  video lookup table		*/
+	BLTPRFRM,	/*  6  performance factor????		*/
+	1,		/*  7  contour fill capability		*/
+	1,		/*  8  character rotation capability    */
+	4,		/*  9  number of writing modes		*/
+	2,		/*  10 highest input mode		*/
+	1,		/*  11 text alignment flag		*/
+	0,		/*  12 Inking capability		*/
+	0,		/*  13 rubber banding			*/
+	0, /* MAX_VERT */	/*  14 maximum vertices			*/
+	-1,		/*  15 maximum intin			*/
+	2,		/*  16 number of buttons on MOUSE	*/
+	0,		/*  17 styles for wide lines            */
 	0,		/*  18 writing modes for wide lines     */
 	0,		/*  19 filled in with clipping flag     */
 	0,0,0,0,0,
-  	0,0,0,0,0,0,0,0,
-  	0,0,0,0,0,0,0,0,
-  	0,0,0,0
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0
 };
 
 /**********************************************************/
@@ -167,7 +178,7 @@ int16_t	const m_dot[] = { 1, 2, 0, 0, 0, 0 };
 
 int16_t	const m_plus[] = { 2, 2, 0, -3, 0, 3, 2,-4, 0, 4, 0 };
 
-int16_t	const m_star[] = { 3, 2, 0, -3, 0, 3, 2, 3, 2, -3, -2, 2, 3, -2, -3, 2};
+int16_t	const m_star[] = { 3, 2, 0, -3, 0, 3, 2, 3, 2, -3, -2, 2, 3, -2, -3, 2 };
 
 int16_t	const m_square[] = { 1, 5, -4, -3, 4, -3, 4, 3, -4, 3, -4, -3 };
 
@@ -180,8 +191,10 @@ const int16_t *const markhead[] = { m_dot, m_plus, m_star, m_square, m_cross, m_
 #endif
 
 /* 306de: 00e3d25e */
+/* 206de: 00e353b4 */
 int16_t const MAP_COL[] = {
-    0, 255,   1,   2,   4,   6,   3,   5,   7,   8,   9,  10,  12,  14,  11,  13, 
+#if PLANES8
+    0, 255,   1,   2,   4,   6,   3,   5,   7,   8,   9,  10,  12,  14,  11,  13,
    16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
    32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
    48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,
@@ -197,11 +210,17 @@ int16_t const MAP_COL[] = {
   208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
   224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
   240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254,  15
+#else
+    0,  15,   1,   2,   4,   6,   3,   5,   7,   8,   9,  10,  12,  14,  11,  13
+#endif
 };
 
 /* 306de: 00e3d45e */
+/* 206de: 00e353d4 */
 int16_t const REV_MAP_COL[] = {
-    0,   2,   3,   6,   4,   7,   5,   8,   9,  10,  11,  14,  12,  15,  13, 255,
+    0,   2,   3,   6,   4,   7,   5,   8,   9,  10,  11,  14,  12,  15,  13,
+#if PLANES8
+   255,
    16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
    32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
    48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,
@@ -216,5 +235,7 @@ int16_t const REV_MAP_COL[] = {
   192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
   208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
   224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-  240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254,   1
+  240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254,
+#endif
+  1
 };

@@ -30,7 +30,6 @@ extern int16_t const dat_first[];
 
 
 struct font_head const f6x6 = {
-
     1,					/*   int16_t  font_id		*/
     8,					/*   int16_t  point		*/
    "6x6 system font",	/*   char  name[32]		*/
@@ -57,7 +56,6 @@ struct font_head const f6x6 = {
     6,					/*   uint16_t form_height		*/
     0,					/*   uint16_t *next_font		*/
     0					/*   uint16_t next_seg		*/
-
 };
 
 

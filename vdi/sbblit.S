@@ -143,6 +143,8 @@ sb_bitblt: ds.b 0
 
 #else
 
+	move.w	d4,d7			; and both src and dst occupy
+	add.w	d6,d7			; three or more words apiece ...
 	cmp.w	#4,d7
 	bcs.s	std_blt
 

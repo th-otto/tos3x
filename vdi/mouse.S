@@ -482,10 +482,11 @@ clip_x:
 		sub.w	C_XHOT(a0),d0		; d0 <- left side of dst
 		bcs	clip_left
 
-		move.w	PIXLV(v_hz_rez,a4),d3
 #if TOSVERSION >= 0x300
+		move.w	PIXLV(v_hz_rez,a4),d3
 		sub.w	#17,d3			; check for clip
 #else
+		move.w	PIXLV((INQ_TAB)+90,a4),d3
 		sub.w	#15,d3			; check for clip
 #endif
 		cmp	d3,d0			; on right side

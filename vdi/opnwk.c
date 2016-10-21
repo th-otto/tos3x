@@ -25,7 +25,11 @@
 #define		EsetGray(a)	    trap14(86, a)
 #define		EsetBank(a)	    trap14(82, a)
 
-FONT_HEAD ram8x16, ram8x8, ram16x32;
+FONT_HEAD ram8x16;
+FONT_HEAD ram8x8;
+#if PLANES8
+FONT_HEAD ram16x32;
+#endif
 
 /* 
  * v_opnwk():	OPEN_WORKSTATION:
