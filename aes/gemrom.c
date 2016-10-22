@@ -43,66 +43,66 @@
 #include <obdefs.h>
 #include <taddr.h>
 
-EXTERN LONG dos_alloc();
+extern int32_t dos_alloc();
 
-EXTERN WORD dos_open();
+extern int16_t dos_open();
 
-EXTERN WORD dos_read();
+extern int16_t dos_read();
 
-EXTERN WORD dos_close();
+extern int16_t dos_close();
 
-EXTERN VOID do_rsfix();
+extern VOID do_rsfix();
 
-EXTERN LONG rs_global;
+extern int32_t rs_global;
 
-EXTERN LONG rs_hdr;
+extern int32_t rs_hdr;
 
-EXTERN WORD diskin;
+extern int16_t diskin;
 
-EXTERN WORD DOS_ERR;
+extern int16_t DOS_ERR;
 
-GLOBAL LONG gemptr;						/* GEM's rsc pointer        */
+GLOBAL int32_t gemptr;						/* GEM's rsc pointer        */
 
-GLOBAL LONG deskptr;					/* DESKTOP'S rsc pointer    */
+GLOBAL int32_t deskptr;					/* DESKTOP'S rsc pointer    */
 
-GLOBAL LONG infptr;
+GLOBAL int32_t infptr;
 
-GLOBAL UWORD infsize;
+GLOBAL uint16_t infsize;
 
-GLOBAL UWORD gemsize;
+GLOBAL uint16_t gemsize;
 
-GLOBAL UWORD desksize;
+GLOBAL uint16_t desksize;
 
-GLOBAL LONG gl_pglue;
+GLOBAL int32_t gl_pglue;
 
-GLOBAL WORD nodesk;
+GLOBAL int16_t nodesk;
 
-GLOBAL WORD nogem;
+GLOBAL int16_t nogem;
 
-GLOBAL WORD st_lang;					/* Language code    */
+GLOBAL int16_t st_lang;					/* Language code    */
 
-GLOBAL UWORD st_time;					/* time code        */
+GLOBAL uint16_t st_time;					/* time code        */
 
-GLOBAL UWORD st_date;
+GLOBAL uint16_t st_date;
 
-GLOBAL UWORD st_dchar;
+GLOBAL uint16_t st_dchar;
 
-GLOBAL WORD st_keybd;
+GLOBAL int16_t st_keybd;
 
-MLOCAL UWORD *tosrsc;
+static uint16_t *tosrsc;
 
-EXTERN BYTE USARSC[];					/* USA, UK  */
+extern char USARSC[];					/* USA, UK  */
 
-EXTERN BYTE GRMRSC[];					/* GERMAN   */
+extern char GRMRSC[];					/* GERMAN   */
 
-EXTERN BYTE FRERSC[];					/* FRENCH   */
+extern char FRERSC[];					/* FRENCH   */
 
-EXTERN BYTE ITARSC[];					/* ITALIAN  */
+extern char ITARSC[];					/* ITALIAN  */
 
-								/*EXTERN	BYTE	SWERSC[];*//* SWEDISH  */
-EXTERN BYTE SPARSC[];					/* SPANISH  */
+								/*extern	char	SWERSC[];*//* SWEDISH  */
+extern char SPARSC[];					/* SPANISH  */
 
-MLOCAL BYTE *TIMETABLE[] = {			/* Eurotime, Eurodate and seperator */
+static char *TIMETABLE[] = {			/* Eurotime, Eurodate and seperator */
 	0, 0, '/',							/* USA  */
 	1, 1, '.',							/* GERMANY  */
 	1, 1, '/',							/* FRENCH   */
@@ -112,7 +112,7 @@ MLOCAL BYTE *TIMETABLE[] = {			/* Eurotime, Eurodate and seperator */
 	1, 2, '-'							/* SWEDEN,NORWAY,FINLAND */
 };
 
-MLOCAL BYTE *RSCTABLE[] = {
+static char *RSCTABLE[] = {
 	USARSC,								/* USA, UK  */
 	GRMRSC,								/* GERMAN   */
 	FRERSC,								/* FRENCH   */
@@ -125,12 +125,12 @@ MLOCAL BYTE *RSCTABLE[] = {
 
 				/* do this whenever the Gem or  */
 				/* desktop is ready     */
-WORD rom_ram(which, pointer)
-REG LONG pointer;
+int16_t rom_ram(which, pointer)
+register int32_t pointer;
 {
-	WORD size;
+	int16_t size;
 
-	REG WORD doit;
+	register int16_t doit;
 
 	if (which == 3)						/* read in desktop.inf      */
 	{
@@ -185,16 +185,16 @@ rsc_free()
 
 rsc_read()
 {
-	UWORD size;
+	uint16_t size;
 
-	REG UWORD *intptr;
+	register uint16_t *intptr;
 
-	BYTE *a,
+	char *a,
 	*b;
 
-	LONG value;
+	int32_t value;
 
-	WORD code;
+	int16_t code;
 
 	/* The value is defined as  */
 	/* X, X, LANGUAGE, KEYVBOARD    */
@@ -219,7 +219,7 @@ rsc_read()
 	st_dchar = TIMETABLE[code];
 
 	/* The IDT format is as follow              */
-	/* HIGH WORD  |          LOW WORD           */
+	/* HIGH int16_t  |          LOW int16_t           */
 	/* 31 - 16    | 15-12      11-8           7-0 bit   */
 	/* Reserved   | st_time    st_date        st_char   */
 	/*          0 12 hour  0  MM-DD-YY          */
@@ -237,7 +237,7 @@ rsc_read()
 
 	tosrsc = RSCTABLE[st_lang];
 
-	if (!(gl_pglue = dos_alloc((LONG) tosrsc[2])))
+	if (!(gl_pglue = dos_alloc((int32_t) tosrsc[2])))
 	{
 		trap(9, "Unable to install AES resource!\r\n");
 		return (FALSE);
@@ -256,9 +256,9 @@ rsc_read()
 	}
 
 	intptr = gl_pglue;
-	gemptr = (LONG) (gl_pglue + 10);	/* now fix the resource   */
-	deskptr = (LONG) (gl_pglue + intptr[0]);
-	infptr = (LONG) (gl_pglue + intptr[1]);
+	gemptr = (int32_t) (gl_pglue + 10);	/* now fix the resource   */
+	deskptr = (int32_t) (gl_pglue + intptr[0]);
+	infptr = (int32_t) (gl_pglue + intptr[1]);
 	gemsize = intptr[0];
 	desksize = intptr[1] - intptr[0];
 	infsize = intptr[2] - intptr[1];

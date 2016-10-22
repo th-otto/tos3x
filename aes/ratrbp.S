@@ -34,31 +34,7 @@
 
 *	interface for rats to gsx on 68	K
 
-	.text
-
-	.globl	_gl_button
-	.globl	_far_bchange
-	.globl	_bchange
-	.globl	_b_delay
-	.globl	_far_mchange
-	.globl	_mchange
-	.globl	_drawrat
-	.globl  _drwaddr
-	.globl	_forkq
-	.globl	_justretf
-	.globl	_tiksav
-	.globl	_tikaddr
-	.globl	_tchange
-	.globl	_tikcod
-	.globl	_NUM_TICK
-	.globl	_CMP_TICK
-	.globl	_delay
-
-	.globl	_gl_btrue
-	.globl	_gl_bdelay
-	.globl	_gl_bdesired
-	.globl	_gl_bpend
-	.globl	_bchange
+	text
 
 *
 *
@@ -68,6 +44,7 @@
 *	  interrupts should be off and in supervisor mode
 *	  calls b_click in geminput.c
 *
+	xdef	_far_bchange
 _far_bchange:
 	move.l	a7,gstksave		; save stack, paranoid code
 	lea.l	gstack,a7
@@ -125,8 +102,9 @@ bout1:
 *	  called far with interrupts off
 *	  d0 = xposition, d1 = yposition in absolute pixels
 *
+	xdef	_far_mchange
 _far_mchange:
-	move.l	a7, gstksave		; save stack
+	move.l	a7,gstksave		; save stack
 	lea.l 	gstack,a7
 	movem.l d0-d2/a0-a2,-(sp)	; save regs that C will crunch
 
@@ -146,6 +124,7 @@ _far_mchange:
 *
 *	  call gsx with absolute x and y to draw cursor
 *
+	xdef	_drawrat
 _drawrat:
 	move.w	4(a7),d0		; xrat
 	move.w	6(a7),d1		; yrat
@@ -154,6 +133,7 @@ _drawrat:
 
 *
 *
+	xdef	_justretf
 _justretf:
 	rts
 
@@ -163,8 +143,9 @@ _justretf:
 *	called far with interrupts disabled
 *	 do not need to save registers
 *
+	xdef	_tikcod
 _tikcod:
-	move.l	a7, tstksave		; save stack
+	move.l	a7,tstksave		; save stack
 	lea.l 	tstack,a7
 	addq.l	#1,TICKS		; bump up the absolute clock
 	tst.l	_CMP_TICK		; are we timing now?
@@ -203,6 +184,7 @@ tpollmb:
 
 *	b_delay( amnt )
 
+	xdef	_b_delay
 _b_delay:
 	move.w	4(sp),d0		; get the amnt
 	tst.w	_gl_bdelay
@@ -234,32 +216,38 @@ bdout1:
 * No dispatching here!
 *
 
+	xdef	_delay
 _delay:
 	move.l	4(sp),d0
 	beq.b	xdelay
 	add.l	TICKS,d0
-delay:	cmp.l	TICKS,d0		; updated by system timer interrupt
+delay:
+	cmp.l	TICKS,d0		; updated by system timer interrupt
 	bcc.b	delay			; busy-wait...
-xdelay:	rts
+xdelay:
+	rts
 
 
-	.bss
-	.even
+	bss
+	even
 
 * addr in gsx in rat draw routine
 
-_drwaddr:	.ds.l	1		; initialized to _justretf
-_tikaddr:	.ds.l	1		; initialized to _tikcod
-gstksave:	.ds.l	1
-tstksave:	.ds.l	1
-_tiksav:	.ds.l	1		; addr in gsx driver of tick service
-_NUM_TICK:	.ds.l	1
-_CMP_TICK:	.ds.l	1
-TICKS:		.ds.l	1		; absolute number of ticks NOT GLOBAL!
+	xdef  _drwaddr
+_drwaddr:	ds.l	1		; initialized to _justretf
+	xdef	_tikaddr
+_tikaddr:	ds.l	1		; initialized to _tikcod
+gstksave:	ds.l	1
+tstksave:	ds.l	1
+	xdef	_tiksav
+_tiksav:	ds.l	1		; addr in gsx driver of tick service
+	xdef	_NUM_TICK
+_NUM_TICK:	ds.l	1
+	xdef	_CMP_TICK
+_CMP_TICK:	ds.l	1
+TICKS:		ds.l	1		; absolute number of ticks NOT GLOBAL!
 
-		.ds.l	23		; gsx stack for mouse
-gstack:		.ds.l	1
-		.ds.l	23		; tick stack
-tstack:		.ds.l	1
-
-	.end
+		ds.l	23		; gsx stack for mouse
+gstack:		ds.l	1
+		ds.l	23		; tick stack
+tstack:		ds.l	1

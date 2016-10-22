@@ -1,77 +1,16 @@
-AES_OBJS1 = \
-	gemaints.o \
-	gemaplib.o \
-	gemasync.o \
-	gembase.o \
-	gembind.o \
-	gemcli.o \
-	gemctrl.o \
-	$(empty)
-
-AES_OBJS2 = \
-	gemdisp.o \
-	gemevlib.o \
-	gemflag.o \
-	gemfmalt.o \
-	gemfmlib.o \
-	gemfslib.o \
-	gemglobe.o \
-	$(empty)
-
-AES_OBJS3 = \
-	geminit.o  \
-	geminput.o \
-	gemmnlib.o \
-	gemobed.o \
-	gemobjop.o \
-	gempd.o \
-	gemqueue.o \
-	$(empty)
-
-AES_OBJS4 = \
-	gemrom.o \
-	gemrslib.o \
-	gemsclib.o \
-	gemshlib.o \
-	gemwmlib.o \
-	gemrlist.o \
-	romcart.o \
-	gemoblib.o \
-	$(empty)
-
-AES_OBJS5 = \
-	mn_mbar.o \
-	mn_menu.o \
-	mn_popup.o \
-	mn_submn.o \
-	mn_tools.o \
-	mn_index.o \
-	mn_event.o \
-	$(empty)
-
-AES_OBJS6 = \
-	apgrlib.o \
-	apgsxif.o \
-	gemgrlib.o \
-	gemgsxif.o \
-	gsx2.o \
-	jbind.o \
-	$(empty)
-
-AES_OBJS7 = \
-	jdispa.o \
-	jdos.o \
-	large.o \
-	optimize.o \
-	ratrbp.o \
-	trap14.o \
-	$(empty)
+AES_OBJS1 = gemjstrt.o apgrlib.o apgsxif.o gemgrlib.o gemgsxif.o gsx2.o jbind.o
+AES_OBJS2 = jdispa.o jdos.o large.o optimize.o ratrbp.o trap14.o
+AES_OBJS3 = gemaints.o gemaplib.o gemasync.o gembase.o gembind.o gemcli.o gemctrl.o
+AES_OBJS4 = gemdisp.o gemevlib.o gemflag.o gemfmalt.o gemfmlib.o gemfslib.o gemglobe.o
+AES_OBJS5 = geminit.o geminput.o gemmnlib.o gemobed.o gemobjop.o gempd.o gemqueue.o
+AES_OBJS6 = gemrom.o gemrslib.o gemsclib.o gemshlib.o gemwmlib.o gemrlist.o romcart.o gemoblib.o
+AES_OBJS7 = mn_mbar.o mn_menu.o mn_popup.o mn_submn.o mn_tools.o mn_index.o mn_event.o
 
 AES_OBJS = $(AES_OBJS1) $(AES_OBJS2) $(AES_OBJS3) $(AES_OBJS4) $(AES_OBJS5) $(AES_OBJS6) $(AES_OBJS7)
 
 AES_SRCS = \
-	gemaints.S \
-	gemaplib.S \
+	gemaints.c \
+	gemaplib.c \
 	gemasync.c \
 	gembase.c \
 	gembind.c \
@@ -118,6 +57,7 @@ AES_SRCS = \
 	optimize.S \
 	ratrbp.S \
 	trap14.S \
+	gemjstrt.S \
 	$(empty)
 
 SRCS = $(AES_SRCS)

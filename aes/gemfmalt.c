@@ -61,75 +61,26 @@
 #define INTER_WSPACE 2
 #define INTER_HSPACE 0
 
-						/* in GSXIF.C       */
-EXTERN VOID bb_restore();
-
-EXTERN VOID bb_save();
-
-						/* in OBLIB.C       */
-EXTERN WORD ob_add();
-
-EXTERN VOID ob_draw();
-
-						/* in OBED.C        */
-EXTERN VOID ob_actxywh();
-
-						/* in RSLIB.C       */
-EXTERN VOID rs_obfix();
-
-EXTERN GRECT gl_rcenter;
-
-EXTERN LONG ad_sysglo;
-
-EXTERN LONG ad_armice;
-
-GLOBAL BYTE gl_nils[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-
-EXTERN WS gl_ws;
-
-EXTERN UWORD gl_alrtcol;
-
-EXTERN WORD gl_hbox;
-
-EXTERN WORD gl_hchar;
-
-EXTERN WORD gl_wchar;
-
-EXTERN WORD gl_width;
-
-EXTERN WORD gl_ncols;
-
-EXTERN WORD gl_moff;					/* CHANGED 5/10 LKW */
+GLOBAL char const gl_nils[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 
 /*
-*	Routine to break a string into smaller strings.  Breaks occur
-*	whenever an | or a ] is encountered.
-*/
-WORD fm_strbrk(tree, palstr, stroff, pcurr_id, pnitem, pmaxlen)
-LONG tree;
-
-LONG palstr;
-
-WORD stroff;
-
-WORD *pcurr_id;
-
-WORD *pnitem;
-
-WORD *pmaxlen;
+ *	Routine to break a string into smaller strings.  Breaks occur
+ *	whenever an | or a ] is encountered.
+ */
+int16_t fm_strbrk(P(OBJPTR) tree, P(intptr_t) palstr, P(int16_t) stroff, P(int16_t *) pcurr_id, P(int16_t *) pnitem, P(int16_t *) pmaxlen)
+PP(OBJPTR tree;)
+PP(intptr_t palstr;)
+PP(int16_t stroff;)
+PP(int16_t *pcurr_id;)
+PP(int16_t *pnitem;)
+PP(int16_t *pmaxlen;)
 {
-	REG WORD nitem,
-	 curr_id;
-
-	REG WORD len,
-	 maxlen;
-
-	REG BYTE tmp;
-
-	LONG pstr;
-
-	WORD nxttmp;
+	register int16_t nitem, curr_id;
+	register int16_t len, maxlen;
+	register char tmp;
+	int32_t pstr;
+	int16_t nxttmp;
 
 	nitem = maxlen = 0;
 	curr_id = *pcurr_id;
@@ -193,34 +144,30 @@ WORD *pmaxlen;
 
 
 /*
-*	Routine to parse a string into an icon #, multiple message
-*	strings, and multiple button strings.  For example,
-*
-*		[0][This is some text|for the screen.][Ok|Cancel]
-*		0123456
-*
-*	becomes:
-*		icon# = 0;
-*		1st msg line = This is some text
-*		2nd msg line = for the screen.
-*		1st button = Ok
-*		2nd button = Cancel
-*/
+ *	Routine to parse a string into an icon #, multiple message
+ *	strings, and multiple button strings.  For example,
+ *
+ *		[0][This is some text|for the screen.][Ok|Cancel]
+ *		0123456
+ *
+ *	becomes:
+ *		icon# = 0;
+ *		1st msg line = This is some text
+ *		2nd msg line = for the screen.
+ *		1st button = Ok
+ *		2nd button = Cancel
+ */
 
-fm_parse(tree, palstr, picnum, pnummsg, plenmsg, pnumbut, plenbut)
-LONG tree;
-
-REG LONG palstr;
-
-WORD *picnum;
-
-WORD *pnummsg,
-*plenmsg;
-
-WORD *pnumbut,
-*plenbut;
+VOID fm_parse(P(OBJPTR) tree, P(intptr_t) palstr, P(int16_t *) picnum, P(int16_t *) pnummsg, P(int16_t *) plenmsg, P(int16_t *) pnumbut, P(int16_t *) plenbut)
+PP(OBJPTR tree;)
+PP(register intptr_t palstr;)
+PP(int16_t *picnum;)
+PP(int16_t *pnummsg;)
+PP(int16_t *plenmsg;)
+PP(int16_t *pnumbut;)
+PP(int16_t *plenbut;)
 {
-	WORD curr_id;
+	int16_t curr_id;
 
 	*picnum = LBGET(palstr + 1) - '0';
 	curr_id = 4;
@@ -230,28 +177,19 @@ WORD *pnumbut,
 	*plenbut += 1;
 }
 
-VOID fm_build(tree, haveicon, nummsg, mlenmsg, numbut, mlenbut)
-REG LONG tree;
 
-WORD haveicon;
-
-WORD nummsg,
-	mlenmsg;
-
-WORD numbut,
-	mlenbut;
+VOID fm_build(P(OBJPTR) tree, P(int16_t) haveicon, P(int16_t) nummsg, P(int16_t) mlenmsg, P(int16_t) numbut, P(int16_t) mlenbut)
+P(register int32_t tree;)
+P(int16_t haveicon;)
+P(int16_t nummsg;)
+P(int16_t mlenmsg;)
+P(int16_t numbut;)
+P(int16_t mlenbut;)
 {
-	REG WORD i,
-	 j;
-
-	GRECT al,
-	 ic;
-
-	GRECT bt,
-	 ms;
-
-	WORD icw,
-	 ich;
+	register int16_t i, j;
+	GRECT al, ic;
+	GRECT bt, ms;
+	int16_t icw, ich;
 
 	icw = 4;
 	ich = 4;
@@ -323,40 +261,20 @@ WORD numbut,
 }
 
 
-WORD fm_alert(defbut, palstr)
-WORD defbut;
-
-LONG palstr;
+int16_t fm_alert(P(int16_t) defbut, P(intptr_t) palstr)
+PP(int16_t defbut;)
+PP(intptr_t palstr;)
 {
-	REG WORD i;
-
-	REG LONG tree;
-
-	WORD inm,
-	 nummsg,
-	 mlenmsg,
-	 numbut,
-	 mlenbut;
-
-	LONG plong,
-	 addr;
-
-	GRECT d,
-	 t;
-
-	WORD ratalert;						/* CHANGED 5/10 LKW */
-
-	WORD x,
-	 y;									/* save the button height */
-
-	WORD x1,
-	 y1,
-	 w,
-	 h;
-
-	UWORD color;
-
-	LONG spec;
+	register int16_t i;
+	register int32_t tree;
+	int16_t inm, nummsg, mlenmsg, numbut, mlenbut;
+	int32_t plong, addr;
+	GRECT d, t;
+	int16_t ratalert;						/* CHANGED 5/10 LKW */
+	int16_t x, y;							/* save the button height */
+	int16_t x1, y1, w, h;
+	uint16_t color;
+	int32_t spec;
 
 	/* 7/16/92        */
 

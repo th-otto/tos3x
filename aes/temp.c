@@ -1,26 +1,26 @@
 /*	Change code to compensate 3D objects	*/
 
-WORD gr_slidebox(tree, parent, obj, isvert)
-REG LONG tree;
+int16_t gr_slidebox(tree, parent, obj, isvert)
+register int32_t tree;
 
-WORD parent;
+int16_t parent;
 
-WORD obj;
+int16_t obj;
 
-WORD isvert;
+int16_t isvert;
 {
-	REG GRECT *pt,
+	register GRECT *pt,
 	*pc;								/* new pointer for Reg Opt  */
 
 	GRECT t,
 	 c;
 
-	REG WORD divnd,
+	register int16_t divnd,
 	 divis;
 
 	OBJECT *objc;
 
-	WORD pflags,
+	int16_t pflags,
 	 cflags;
 
 	pt = &t;

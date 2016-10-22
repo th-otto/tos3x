@@ -22,70 +22,71 @@
 
 typedef struct wsstr
 {
-	WORD		ws_xres;
-	WORD		ws_yres;
-	WORD		ws_noscale;
-	WORD		ws_wpixel;
-	WORD		ws_hpixel;
-	WORD		ws_ncheights;
-	WORD		ws_nlntypes;
-	WORD		ws_nlnwidths;
-	WORD		ws_nmktypes;
-	WORD		ws_nmksizes;
-	WORD		ws_nfaces;
-	WORD		ws_npatts;
-	WORD		ws_nhatchs;
-	WORD		ws_ncolors;
-	WORD		ws_ngdps;
-	WORD		ws_supgdps[10];
-	WORD		ws_attgdps[10];
-	WORD		ws_color;
-	WORD		ws_rotate;
-	WORD		ws_fill;
-	WORD		ws_cell;
-	WORD		ws_npals;
-	WORD		ws_nloc;
-	WORD		ws_nval;
-	WORD		ws_nchoice;
-	WORD		ws_nstring;
-	WORD		ws_type;
-	WORD		ws_pts0;
-	WORD		ws_chminh;
-	WORD		ws_pts2;
-	WORD		ws_chmaxh;
-	WORD		ws_lnminw;
-	WORD		ws_pts5;
-	WORD		ws_lnmaxw;
-	WORD		ws_pts7;
-	WORD		ws_pts8;
-	WORD		ws_mkminw;
-	WORD		ws_pts10;
-	WORD		ws_mkmaxw;
+	int16_t		ws_xres;
+	int16_t		ws_yres;
+	int16_t		ws_noscale;
+	int16_t		ws_wpixel;
+	int16_t		ws_hpixel;
+	int16_t		ws_ncheights;
+	int16_t		ws_nlntypes;
+	int16_t		ws_nlnwidths;
+	int16_t		ws_nmktypes;
+	int16_t		ws_nmksizes;
+	int16_t		ws_nfaces;
+	int16_t		ws_npatts;
+	int16_t		ws_nhatchs;
+	int16_t		ws_ncolors;
+	int16_t		ws_ngdps;
+	int16_t		ws_supgdps[10];
+	int16_t		ws_attgdps[10];
+	int16_t		ws_color;
+	int16_t		ws_rotate;
+	int16_t		ws_fill;
+	int16_t		ws_cell;
+	int16_t		ws_npals;
+	int16_t		ws_nloc;
+	int16_t		ws_nval;
+	int16_t		ws_nchoice;
+	int16_t		ws_nstring;
+	int16_t		ws_type;
+	int16_t		ws_pts0;
+	int16_t		ws_chminh;
+	int16_t		ws_pts2;
+	int16_t		ws_chmaxh;
+	int16_t		ws_lnminw;
+	int16_t		ws_pts5;
+	int16_t		ws_lnmaxw;
+	int16_t		ws_pts7;
+	int16_t		ws_pts8;
+	int16_t		ws_mkminw;
+	int16_t		ws_pts10;
+	int16_t		ws_mkmaxw;
 } WS;
 
+extern WS gl_ws;
 
 typedef struct fdbstr
 {
-	LONG		fd_addr;
-	WORD		fd_w;
-	WORD		fd_h;
-	WORD		fd_wdwidth;
-	WORD		fd_stand;
-	WORD		fd_nplanes;
-	WORD		fd_r1;
-	WORD		fd_r2;
-	WORD		fd_r3;
+	int32_t		fd_addr;
+	int16_t		fd_w;
+	int16_t		fd_h;
+	int16_t		fd_wdwidth;
+	int16_t		fd_stand;
+	int16_t		fd_nplanes;
+	int16_t		fd_r1;
+	int16_t		fd_r2;
+	int16_t		fd_r3;
 } FDB;
 
 
 typedef struct mfstr
 {
-	WORD	mf_xhot;
-	WORD	mf_yhot;
-	WORD	mf_nplanes;
-	WORD	mf_fg;
-	WORD	mf_bg;
-	WORD	mf_mask[16];
-	WORD	mf_data[16];
-} MFORM ;
+	int16_t	mf_xhot;
+	int16_t	mf_yhot;
+	int16_t	mf_nplanes;
+	int16_t	mf_fg;
+	int16_t	mf_bg;
+	int16_t	mf_mask[16];
+	int16_t	mf_data[16];
+} MFORM;
 

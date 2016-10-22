@@ -79,137 +79,17 @@
 #define MBDOWN 0x0001
 #define BELL 0x07						/* bell         */
 
-EXTERN LONG ad_armice;
-
-EXTERN PD *pstart();
-
-						/* in INPUT88.C     */
-EXTERN WORD os_mchg();
-
-						/* in EVLIB.C       */
-EXTERN WORD ev_mesag();
-
-EXTERN WORD ev_multi();
-
-/*EXTERN WORD	ev_timer();*/
-						/* ratrbp.s     */
-EXTERN VOID delay();
-
-EXTERN WINDOW *srchwp();				/* in WMLIB.C       */
-
-EXTERN WORD w_getsize();
-
-EXTERN WORD w_bldactive();
-
-EXTERN WORD w_setactive();
-
-EXTERN WORD topw;
-
-EXTERN LONG newdesk;
-
-EXTERN WORD newroot;
-
-						/* in GEMINIT.C     */
-EXTERN LONG ad_stdesk;
-
-EXTERN VOID w_union();
-
-EXTERN VOID w_clipdraw();
-
-						/* in PD88.C        */
-EXTERN PD *fpdnm();
-
-						/* in GSXIF.C       */
-EXTERN WORD bb_screen();
-
-						/* in           */
-EXTERN WORD dsptch();
-
-EXTERN LONG gl_mntree;
-
-EXTERN WORD gl_mnpid;
-
-EXTERN WORD gl_dacnt;
-
-EXTERN WORD gl_dabase;
-
-EXTERN WORD desk_pid[];
-
-EXTERN WORD gl_wchar;
-
-EXTERN WORD gl_hchar;
-
-EXTERN WORD gl_wbox;
-
-EXTERN WORD gl_hbox;
-
-EXTERN WORD gl_width;
-
-EXTERN WORD gl_height;
-
-EXTERN GRECT gl_rfull;
-
-EXTERN GRECT gl_rmenu;
-
-EXTERN WORD button,
- xrat,
- yrat;
-
-EXTERN GRECT gl_rmnactv;
-
-EXTERN GRECT gl_rscreen;
-
-EXTERN GRECT ctrl;
-
-EXTERN THEGLO D;
-
-EXTERN WORD gl_moff;
-
-EXTERN WORD gl_mouse;
-
-
-EXTERN WORD gl_dclick;					/* gemevlib.c - double click speed  */
-
-EXTERN WORD gl_ticktime;				/* gemevlib.c - MS per tick     */
-
-EXTERN PD *gl_cowner;
-
-EXTERN PD *gl_mowner;
-
-EXTERN PD *gl_kowner;
-
-EXTERN WORD button;
-
-EXTERN WORD xrat,
- yrat;
-
-GLOBAL WORD ml_ocnt;
-
-MLOCAL LONG ml_mnhold;
-
-MLOCAL GRECT ml_ctrl;
-
-MLOCAL PD *ml_pmown,
-*ml_pkown;
-
-EXTERN PD *ctl_pd;
-
-GLOBAL WORD tmpmoff;
-
-GLOBAL WORD tmpmon;
-
-GLOBAL MOBLK gl_ctwait;
-
-GLOBAL WORD appl_msg[8];
-
-WORD deskwind;							/* added 7/25/91 window handle of DESKTOP   */
-
-WORD rets[6];							/* added 2/4/87     */
+int16_t tmpmoff;
+int16_t tmpmon;
+MOBLK gl_ctwait;
+int16_t appl_msg[8];
+int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
+int16_t rets[6];							/* added 2/4/87     */
 
 						/* used to convert from */
 						/*   window object # to */
 						/*   window message code */
-GLOBAL WORD gl_wa[] = {
+int16_t const gl_wa[] = {
 	WA_UPLINE,
 	WA_DNLINE,
 	WA_UPPAGE,
@@ -223,18 +103,16 @@ GLOBAL WORD gl_wa[] = {
 
 
 /*
-*	Send message and wait for the mouse button to come up
-*/
-VOID ct_msgup(message, owner, wh, m1, m2, m3, m4)
-WORD message;
-
-WORD owner,
-	wh;
-
-WORD m1,
-	m2,
-	m3,
-	m4;
+ *	Send message and wait for the mouse button to come up
+ */
+VOID ct_msgup(P(int16_t) message, P(int16_t) owner, P(int16_t) wh, P(int16_t) m1, P(int16_t) m2, P(int16_t) m3, P(int16_t) m4)
+PP(int16_t message;)
+PP(int16_t owner;)
+PP(int16_t wh;)
+PP(int16_t m1;)
+PP(int16_t m2;)
+PP(int16_t m3;)
+PP(int16_t m4;)
 {
 	if (message)
 		ap_sendmsg(appl_msg, message, owner, wh, m1, m2, m3, m4);
@@ -245,45 +123,23 @@ WORD m1,
 }
 
 
-VOID hctl_window(w_handle, mx, my)
-REG WORD w_handle;
-
-WORD mx,
-	my;
+VOID hctl_window(P(int16_t) w_handle, P(int16_t) mx, P(int16_t) my)
+PP(register int16_t w_handle;)
+PP(int16_t mx;)
+PP(int16_t my;)
 {
-	GRECT t,
-	 f;
-
-	WORD x,
-	 y,
-	 w,
-	 h;
-
-	WORD wm,
-	 hm;
-
-	REG WORD kind,
-	 gadget;
-
-	WORD xelev,
-	 yelev;
-
-	REG WORD message,
-	 cpt;
-
-	LONG tree;
-
-	REG WINDOW *pwin;
-
-	WORD rets[6];
-
-	LONG bwait;
-
+	GRECT t, f;
+	int16_t x, y, w, h;
+	int16_t wm, hm;
+	register int16_t kind, gadget;
+	int16_t xelev, yelev;
+	register int16_t message, cpt;
+	OBJPTR tree;
+	register WINDOW *pwin;
+	int16_t rets[6];
+	int32_t bwait;
 	PD *p;
-
-	WORD selst,
-	 nrmst,
-	 dummy;
+	int16_t selst, nrmst, dummy;
 
 	pwin = srchwp(w_handle);
 
@@ -420,7 +276,7 @@ WORD mx,
 				if (cpt)
 				{						/* Only delay 1st time through */
 					cpt = FALSE;
-					delay((LONG) (gl_dclick));
+					delay((int32_t) (gl_dclick));
 				}
 
 			} while (button & 1);		/* button is global */
@@ -458,11 +314,11 @@ WORD mx,
 }
 
 
-WORD hctl_button(mx, my)
-REG WORD mx,
-	my;
+int16_t hctl_button(P(int16_t) mx, P(int16_t) my)
+PP(register int16_t mx;)
+PP(register int16_t my;)
 {
-	REG WORD wh;
+	register int16_t wh;
 
 	/* find out which wind. */
 	/*   the mouse clicked  */
@@ -473,20 +329,14 @@ REG WORD mx,
 }
 
 
-WORD hctl_rect(mx, my)
-WORD mx,
-	my;
+int16_t hctl_rect(P(int16_t) mx, P(int16_t) my)
+PP(int16_t mx;)
+PP(int16_t my;)
 {
-	WORD title,
-	 item;
-
-	REG WORD owner,
-	 mesag;
-
-	LONG *ptree;
-
-	WORD pmenu,
-	 keyret;
+	int16_t title, item;
+	register int16_t owner, mesag;
+	OBJPTR *ptree;
+	int16_t pmenu, keyret;
 
 	if ((gl_mntree != 0x0L) && (inside(mx, my, &gl_rmnactv)))
 	{
@@ -520,8 +370,8 @@ WORD mx,
  * Hctl_msg() - handle messages received by control manager
  *		(currently only redraw message is handled)
  */
-VOID hctl_msg(msgbuf)
-WORD msgbuf[];
+VOID hctl_msg(P(int16_t *) msgbuf)
+PP(int16_t *msgbuf;)
 {
 	if (msgbuf[0] == WM_REDRAW)
 		drawdesk(msgbuf[4], msgbuf[5], msgbuf[6], msgbuf[7]);
@@ -532,20 +382,16 @@ WORD msgbuf[];
  * Drawdesk() - redraw portion of DESKTOP specified by the 
  *		given rectangle
  */
-VOID drawdesk(x, y, w, h)
-WORD x,
-	y,
-	w,
-	h;
+VOID drawdesk(P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
+PP(int16_t x;)
+PP(int16_t y;)
+PP(int16_t w;)
+PP(int16_t h;)
 {
-	GRECT t1,
-	 t2;
-
-	WORD temp[4];
-
+	GRECT t1, t2;
+	int16_t temp[4];
 	OBJECT *tree;
-
-	WORD stobj;
+	int16_t stobj;
 
 	gsx_moff();
 	wm_update(TRUE);
@@ -580,14 +426,14 @@ WORD x,
 	gsx_mon();
 }
 
-/*
-*	Control change of ownership to this rectangle and this process
-*	Doing the control rectangle first is important.
-*/
-VOID ct_chgown(ppd, pr)
-PD *ppd;
 
-GRECT *pr;
+/*
+ *	Control change of ownership to this rectangle and this process
+ *	Doing the control rectangle first is important.
+ */
+VOID ct_chgown(P(PD *) ppd, P(GRECT *) pr)
+PP(PD *ppd;)
+PP(GRECT *pr;)
 {
 
 	rc_copy(pr, &ctrl);					/* set_ctrl(pr), copy the rect  */
@@ -617,13 +463,11 @@ GRECT *pr;
 *	the system.
 */
 
-WORD ctlmgr()
+int16_t ctlmgr(NOTHING)
 {
-	REG WORD ev_which;
-
-	WORD rets[6];
-
-	WORD msgbuf[8];
+	register int16_t ev_which;
+	int16_t rets[6];
+	int16_t msgbuf[8];
 
 	/* set defaults for     */
 	/*  multi wait      */
@@ -670,22 +514,21 @@ WORD ctlmgr()
 
 
 /*
-*	Create a process for the Screen Control Manager and start him 
-*	executing. Also do all the initialization that is required.  
-*	Also zero out the desk accessory count.
-*/
+ *	Create a process for the Screen Control Manager and start him 
+ *	executing. Also do all the initialization that is required.  
+ *	Also zero out the desk accessory count.
+ */
 
-PD * ictlmgr(pid)
-WORD pid;
+PD *ictlmgr(P(int16_t) pid)
+PP(int16_t pid;)
 {
 	PD *px;
-
-	REG LONG ldaddr;
+	register int32_t ldaddr;
 
 	gl_dacnt = 0;
 	gl_dabase = 0;
 	/* figure out load addr */
-	ldaddr = LLCS() + ((LONG) & ctlmgr);
+	ldaddr = LLCS() + ((int32_t) & ctlmgr);
 	/* create process to    */
 	/* execute it       */
 	return (pstart(&ctlmgr, "SCRENMGR.LOC", ldaddr));
@@ -695,10 +538,9 @@ WORD pid;
 /*	New routine to force arrow mouse and show mouse when it is over	*/
 /*	the menu bar or there is an alert box	3/05/86			*/
 
-WORD ctlmouse(mon)
-WORD mon;
+int16_t ctlmouse(P(int16_t) mon)
+PP(int16_t mon;)
 {
-
 	if (mon)							/* turn on and show the mouse   */
 	{
 		getmouse();
@@ -735,10 +577,9 @@ WORD mon;
 /*	0 = end mouse control	*/
 /*	1 = mouse control	*/
 
-VOID take_ownership(beg_ownit)
-WORD beg_ownit;
+VOID take_ownership(P(int16_t) beg_ownit)
+PP(int16_t beg_ownit;)
 {
-
 	if (beg_ownit)
 	{
 		wm_update(TRUE);

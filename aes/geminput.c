@@ -56,77 +56,15 @@
 
 #define MB_DOWN 0x01
 
-EXTERN WORD justretf();
 
-						/* in DOSIF.A86     */
-EXTERN VOID drawrat();
-
-						/* in PD88.C        */
-EXTERN PD *fpdnm();
-
-						/* in GSXIF.C       */
-EXTERN VOID gsx_mfset();
-
-EXTERN VOID gsx_moff();
-
-EXTERN VOID gsx_mon();
-
-						/* in WMLIB.C       */
-EXTERN VOID wm_start();
-
-
-EXTERN WORD gl_play;					/* in gemaplib.c    */
-
-EXTERN WORD ptsout[];
-
-						/* in INPUT88.C     */
-
-						/* in SHLIB.C       */
-EXTERN WORD sh_tographic();
-
-						/* in GSXIF.C       */
-EXTERN LONG CMP_TICK;
-
-EXTERN LONG NUM_TICK;
-
-EXTERN WORD gl_width;
-
-EXTERN WORD gl_height;
-
-EXTERN GRECT gl_rfull;
-
-EXTERN GRECT gl_rmenu;
-
-EXTERN WORD gl_wbox;
-
-EXTERN WORD gl_hbox;
-
-EXTERN WORD intin[];
-
-EXTERN WORD ptsin[];
-
-
-EXTERN MOBLK gl_ctwait;					/* MOBLK telling if menu */
-
-						/*   bar is waiting */
-						/*   to be entered or   */
-						/*   exited by ctrl mgr */
-EXTERN LONG gl_mntree;
-
-GLOBAL WORD kchange();
-
-GLOBAL WORD mchange();
-
-GLOBAL WORD bchange();
-
-GLOBAL WORD button,
+GLOBAL int16_t button,
  xrat,
  yrat,
  kstate,
  mclick,
  mtrans;
 
-GLOBAL WORD pr_button,
+GLOBAL int16_t pr_button,
  pr_xrat,
  pr_yrat,
  pr_mclick;
@@ -147,52 +85,46 @@ GLOBAL PD *ctl_pd;						/* screen manager proces */
 GLOBAL GRECT ctrl;						/* current control rect. */
 
 
-GLOBAL WORD gl_bclick;					/* # of times into the  */
+GLOBAL int16_t gl_bclick;					/* # of times into the  */
 
 						/*   desired button     */
 						/*   state      */
-GLOBAL WORD gl_bpend;					/* number of pending    */
+GLOBAL int16_t gl_bpend;					/* number of pending    */
 
 						/*   events desiring    */
 						/*   more than a single */
 						/*   clicks     */
-GLOBAL WORD gl_button;
+GLOBAL int16_t gl_button;
 
-GLOBAL WORD gl_bdesired;				/* the current desired  */
-
-						/*   button state   */
-GLOBAL WORD gl_btrue;					/* the current true */
+GLOBAL int16_t gl_bdesired;				/* the current desired  */
 
 						/*   button state   */
-GLOBAL WORD gl_bdelay;					/* the current amount   */
+GLOBAL int16_t gl_btrue;					/* the current true */
+
+						/*   button state   */
+GLOBAL int16_t gl_bdelay;					/* the current amount   */
 
 						/*   of time before the */
 						/*   button event is    */
 						/*   considered finished */
 
-EXTERN WORD gl_dclick;					/* # of ticks to wait   */
+extern int16_t gl_dclick;					/* # of ticks to wait   */
 
 						/*   to see if a second */
 						/*   click will occur   */
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
 
 /*	Check if the current click will transfer mouse ownership	*/
 
 PD * mowner(new)
-WORD new;
+int16_t new;
 {
-	WORD wh;
-
-	REG WORD mx,
-	 my;
-
+	int16_t wh;
+	register int16_t mx, my;
 	PD *m;
-
-	WINDOW *wp,
-	*srchwp();
-
+	WINDOW *wp;
 	GRECT t;
 
 	m = gl_mowner;
@@ -245,8 +177,8 @@ WORD new;
 *	or +1 if it is over the active window.
 */
 
-WORD chk_ctrl(mx, my)
-REG WORD mx,
+int16_t chk_ctrl(mx, my)
+register int16_t mx,
 	my;
 {
 	/* if inside ctrl rect  */
@@ -273,7 +205,7 @@ REG WORD mx,
 */
 
 b_click(state)
-REG WORD state;
+register int16_t state;
 {
 	/* ignore it unless it  */
 	/*   represents a change */
@@ -328,7 +260,7 @@ REG WORD state;
 */
 
 b_delay(amnt)
-WORD amnt;
+int16_t amnt;
 {
 	/* see if we have a     */
 	/*   delay for mouse    */
@@ -430,9 +362,9 @@ PD *kp;
 *	EnQueue a character on a circular keyboard buffer.
 */
 VOID nq(ch, qptr)
-UWORD ch;
+uint16_t ch;
 
-REG CQUEUE *qptr;
+register CQUEUE *qptr;
 {
 	if (qptr->c_cnt < KBD_SIZE)
 	{
@@ -448,10 +380,10 @@ REG CQUEUE *qptr;
 /*
 *	DeQueue a a character from a circular keyboard buffer.
 */
-UWORD dq(qptr)
-REG CQUEUE *qptr;
+uint16_t dq(qptr)
+register CQUEUE *qptr;
 {
-	REG WORD q2;
+	register int16_t q2;
 
 	qptr->c_cnt--;
 	q2 = qptr->c_front++;
@@ -477,22 +409,21 @@ VOID fq()
 /*	evinsert is in the gemasync.c	*/
 
 VOID evremove(e, ret)
-REG EVB *e;
+register EVB *e;
 
-UWORD ret;
+uint16_t ret;
 {
 	/* unlinked this EVB, and aret() */
-	e->e_return |= (UWORD) ret;			/* will remove and free the EVB */
+	e->e_return |= (uint16_t) ret;			/* will remove and free the EVB */
 	e->e_pred->e_link = e->e_link;
 	if (e->e_link)
 		e->e_link->e_pred = e->e_pred;
 	zombie(e);
 }
 
-WORD kchange(ch, kstat)
-UWORD ch;
-
-WORD kstat;
+int16_t kchange(ch, kstat)
+int16_t ch;
+int16_t kstat;
 {
 	kstate = kstat;
 	if (ch)
@@ -503,13 +434,13 @@ WORD kstat;
 post_keybd(p, ch)
 PD *p;
 
-UWORD ch;
+uint16_t ch;
 {
-	REG CDA *c;
+	register CDA *c;
 
-	REG EVB *e;
+	register EVB *e;
 
-	REG CQUEUE *qptr;
+	register CQUEUE *qptr;
 
 	c = p->p_cda;
 	/* if anyone waiting ?  */
@@ -539,9 +470,8 @@ UWORD ch;
 /*	forker will come here		*/
 
 VOID bchange(new, clicks)
-WORD new;
-
-WORD clicks;
+int16_t new;
+int16_t clicks;
 {
 
 	gl_mowner = mowner(new);			/*   not own the mouse  */
@@ -570,12 +500,12 @@ WORD clicks;
 }
 
 
-WORD downorup(new, buparm)
-WORD new;
+int16_t downorup(new, buparm)
+int16_t new;
 
-REG LONG buparm;
+register int32_t buparm;
 {
-	REG WORD flag,
+	register int16_t flag,
 	 mask,
 	 val;
 
@@ -591,16 +521,16 @@ REG LONG buparm;
 post_button(p, new, clks)
 PD *p;
 
-WORD new;
+int16_t new;
 
-REG WORD clks;
+register int16_t clks;
 {
-	REG CDA *c;
+	register CDA *c;
 
-	REG EVB *e1,
+	register EVB *e1,
 	*e;
 
-	REG UWORD clicks;
+	register uint16_t clicks;
 
 	c = p->p_cda;
 	for (e = c->c_bsleep; e; e = e1)
@@ -626,14 +556,12 @@ REG WORD clks;
 
 /*	forker of mouse change		*/
 
-WORD mchange(rx1, ry1)
-REG WORD rx1;
-
-REG WORD ry1;
+VOID mchange(rx1, ry1)
+register int16_t rx1;
+register int16_t ry1;
 {
-	WORD rx;
-
-	WORD ry;
+	int16_t rx;
+	int16_t ry;
 
 	/* zero out button wait */
 	/*   if mouse moves more */
@@ -676,14 +604,14 @@ REG WORD ry1;
 
 
 post_mouse(p, grx, gry)
-REG PD *p;
+register PD *p;
 
-WORD grx,
+int16_t grx,
  gry;
 {
-	REG EVB *e;
+	register EVB *e;
 
-	REG EVB *e1;
+	register EVB *e1;
 
 	/* check event list to  */
 	/*   signal waiting pr's */
@@ -696,10 +624,10 @@ WORD grx,
 }
 
 
-WORD inorout(e, rx, ry)
-REG EVB *e;
+int16_t inorout(e, rx, ry)
+register EVB *e;
 
-REG WORD rx,
+register int16_t rx,
 	ry;
 {
 	MOBLK mo;
@@ -719,7 +647,7 @@ REG WORD rx,
 /*	wait for keybd input	*/
 
 VOID akbin(e, addr)
-REG EVB *e;
+register EVB *e;
 {
 	/* find vcb to input,   */
 	/*   point c at it  */
@@ -727,7 +655,7 @@ REG EVB *e;
 	{
 		/* another satisfied    */
 		/*   customer       */
-		e->e_return = (UWORD) dq(&cda->c_q);
+		e->e_return = (uint16_t) dq(&cda->c_q);
 		zombie(e);
 	} else								/* time to zzzzz... */
 		evinsert(e, &cda->c_iiowait);
@@ -738,11 +666,11 @@ REG EVB *e;
 /*	wait for timer		*/
 
 VOID adelay(e, c)
-REG EVB *e;
+register EVB *e;
 
-REG LONG c;								/* # of ticks to wait  */
+register int32_t c;								/* # of ticks to wait  */
 {
-	REG EVB *p,
+	register EVB *p,
 	*q;
 
 	if (c == 0x0L)
@@ -774,22 +702,22 @@ REG LONG c;								/* # of ticks to wait  */
 
 
 	e->e_flag |= EVDELAY;
-	q = (BYTE *) & dlr - elinkoff;
+	q = (char *) & dlr - elinkoff;
 	for (p = dlr; p; p = (q = p)->e_link)
 	{
-		if (c <= (LONG) p->e_parm)
+		if (c <= (int32_t) p->e_parm)
 			break;
-		c -= (LONG) p->e_parm;
+		c -= (int32_t) p->e_parm;
 	}
 	e->e_pred = q;
 	q->e_link = e;
-	e->e_parm = (LONG) c;
+	e->e_parm = (int32_t) c;
 	e->e_link = p;
 	if (p)
 	{
-		c = (LONG) p->e_parm - c;
+		c = (int32_t) p->e_parm - c;
 		p->e_pred = e;
-		p->e_parm = (LONG) c;
+		p->e_parm = (int32_t) c;
 	}
 	sti();
 }
@@ -798,12 +726,12 @@ REG LONG c;								/* # of ticks to wait  */
 #if UNLINKED
 /*	wait for button		*/
 
-WORD abutton(e, p)
-REG EVB *e;
+int16_t abutton(e, p)
+register EVB *e;
 
-REG LONG p;
+register int32_t p;
 {
-	REG WORD bclicks;
+	register int16_t bclicks;
 
 
 	if (downorup(button, p))
@@ -829,9 +757,9 @@ REG LONG p;
 /*	wait for mouse rectangle	*/
 
 VOID amouse(e, pmo)
-REG EVB *e;
+register EVB *e;
 
-LONG pmo;
+int32_t pmo;
 {
 	MOBLK mob;
 

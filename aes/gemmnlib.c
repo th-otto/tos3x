@@ -45,69 +45,69 @@
 #include <taddr.h>
 #include <gemlib.h>
 						/* in BB.C      */
-EXTERN VOID bb_restore();
+extern VOID bb_restore();
 
-EXTERN VOID bb_save();
+extern VOID bb_save();
 
 						/* in EVLIB.C       */
-EXTERN WORD ev_multi();
+extern int16_t ev_multi();
 
 						/* in GSXIF.C       */
-EXTERN VOID gsx_mxmy();
+extern VOID gsx_mxmy();
 
 						/* in OBLIB.C       */
-EXTERN WORD ob_find();
+extern int16_t ob_find();
 
-EXTERN VOID ob_draw();
+extern VOID ob_draw();
 
-EXTERN VOID ob_change();
+extern VOID ob_change();
 
 						/* in OBED.C        */
-EXTERN VOID ob_actxywh();
+extern VOID ob_actxywh();
 
-EXTERN WORD gl_moff;
+extern int16_t gl_moff;
 
-EXTERN WORD gl_width;
+extern int16_t gl_width;
 
-EXTERN WORD gl_height;
+extern int16_t gl_height;
 
-EXTERN WORD gl_wbox;
+extern int16_t gl_wbox;
 
-EXTERN WORD gl_hbox;
+extern int16_t gl_hbox;
 
-EXTERN GRECT gl_rzero;
+extern GRECT gl_rzero;
 
-EXTERN GRECT gl_rmenu;
+extern GRECT gl_rmenu;
 
-EXTERN WORD gl_wchar;
+extern int16_t gl_wchar;
 
-EXTERN WORD gl_hchar;
+extern int16_t gl_hchar;
 
-EXTERN WORD appl_msg[];
+extern int16_t appl_msg[];
 
-EXTERN PD *ctl_pd;
+extern PD *ctl_pd;
 
-EXTERN PD *gl_mowner;
+extern PD *gl_mowner;
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
-EXTERN MOBLK gl_ctwait;
+extern MOBLK gl_ctwait;
 
-GLOBAL LONG gl_mntree;
+GLOBAL int32_t gl_mntree;
 
-GLOBAL LONG gl_mnpid;
+GLOBAL int32_t gl_mnpid;
 
 GLOBAL GRECT gl_rmnactv;
 
-GLOBAL LONG desk_acc[NUM_DESKACC];
+GLOBAL int32_t desk_acc[NUM_DESKACC];
 
-GLOBAL WORD desk_pid[NUM_DESKACC];
+GLOBAL int16_t desk_pid[NUM_DESKACC];
 
-GLOBAL WORD gl_dacnt;
+GLOBAL int16_t gl_dacnt;
 
-GLOBAL WORD gl_dabase;
+GLOBAL int16_t gl_dabase;
 
-GLOBAL WORD gl_dabox;
+GLOBAL int16_t gl_dabox;
 
 #if 0
 /*
@@ -115,13 +115,13 @@ GLOBAL WORD gl_dabox;
 */
 
 VOID rect_change(tree, prmob, iob, x)
-LONG tree;
+int32_t tree;
 
 MOBLK *prmob;
 
-WORD iob;
+int16_t iob;
 
-WORD x;
+int16_t x;
 {
 	ob_actxywh(tree, iob, &prmob->m_x);
 	prmob->m_out = x;
@@ -137,20 +137,20 @@ WORD x;
 *	is set.
 */
 
-UWORD do_chg(tree, iitem, chgvalue, dochg, dodraw, chkdisabled)
-REG LONG tree;							/* tree that holds item */
+uint16_t do_chg(tree, iitem, chgvalue, dochg, dodraw, chkdisabled)
+register int32_t tree;							/* tree that holds item */
 
-WORD iitem;								/* item to affect   */
+int16_t iitem;								/* item to affect   */
 
-REG UWORD chgvalue;						/* bit value to change  */
+register uint16_t chgvalue;						/* bit value to change  */
 
-WORD dochg;								/* set or reset value   */
+int16_t dochg;								/* set or reset value   */
 
-WORD dodraw;							/* draw resulting change */
+int16_t dodraw;							/* draw resulting change */
 
-WORD chkdisabled;						/* only if item enabled */
+int16_t chkdisabled;						/* only if item enabled */
 {
-	REG UWORD curr_state;
+	register uint16_t curr_state;
 
 	curr_state = LWGET(OB_STATE(iitem));
 	if ((chkdisabled) && (curr_state & DISABLED))
@@ -173,14 +173,14 @@ WORD chkdisabled;						/* only if item enabled */
 *	Routine to set and reset values of certain items if they
 *	are not the current item
 */
-WORD menu_set(tree, last_item, cur_item, setit)
-LONG tree;
+int16_t menu_set(tree, last_item, cur_item, setit)
+int32_t tree;
 
-REG WORD last_item;
+register int16_t last_item;
 
-WORD cur_item;
+int16_t cur_item;
 
-WORD setit;
+int16_t setit;
 {
 	if ((last_item != NIL) && (last_item != cur_item))
 	{
@@ -197,11 +197,11 @@ WORD setit;
 */
 
 VOID menu_sr(saveit, tree, imenu)
-WORD saveit;
+int16_t saveit;
 
-LONG tree;
+int32_t tree;
 
-WORD imenu;
+int16_t imenu;
 {
 	GRECT t;
 
@@ -221,12 +221,12 @@ WORD imenu;
 *	underneath the menu and drawing in the proper menu sub-tree.
 */
 
-WORD menu_down(tree, ititle)
-REG LONG tree;
+int16_t menu_down(tree, ititle)
+register int32_t tree;
 
-REG WORD ititle;
+register int16_t ititle;
 {
-	REG WORD imenu,
+	register int16_t imenu,
 	 i;
 
 	/* correlate title #    */
@@ -247,37 +247,37 @@ REG WORD ititle;
 }
 
 
-WORD mn_do(ptitle, pitem)
-WORD *ptitle,
+int16_t mn_do(ptitle, pitem)
+int16_t *ptitle,
 *pitem;
 {
-	REG LONG tree;
+	register int32_t tree;
 
-	LONG buparm;
+	int32_t buparm;
 
-	WORD mnu_flags,
+	int16_t mnu_flags,
 	 done;
 
-	REG WORD cur_menu,
+	register int16_t cur_menu,
 	 cur_item,
 	 last_menu,
 	 last_item;
 
-	WORD cur_title,
+	int16_t cur_title,
 	 flag,
 	 last_title;
 
-	UWORD ev_which;
+	uint16_t ev_which;
 
 	MOBLK p1mor,
 	 p2mor;
 
-	WORD menu_state,
+	int16_t menu_state,
 	 rect;
 
-	WORD rets[6];
+	int16_t rets[6];
 
-	WORD curstate;
+	int16_t curstate;
 
 	tree = gl_mntree;
 	/* initially wait to    */
@@ -401,17 +401,17 @@ WORD *ptitle,
 *	global variable gl_mntree which is used in CTLMGR88.C is also
 *	set or reset.
 */
-WORD mn_bar(tree, showit)
-REG LONG tree;
+int16_t mn_bar(tree, showit)
+register int32_t tree;
 
-WORD showit;
+int16_t showit;
 {
-	REG WORD i,
+	register int16_t i,
 	 ob,
 	 h,
 	 cnt;
 
-	LONG spec;
+	int32_t spec;
 
 	if (showit)
 	{
@@ -476,7 +476,7 @@ WORD showit;
 */
 VOID mn_clsda()
 {
-	REG WORD i;
+	register int16_t i;
 
 	for (i = 0; i < gl_dacnt; i++)
 		ap_sendmsg(appl_msg, AC_CLOSE, desk_pid[i], i, 0x0L, 0x0L);
@@ -488,12 +488,12 @@ VOID mn_clsda()
 *	The return value is the object index of the menu item that
 *	was added.
 */
-WORD mn_register(pid, pstr)
-REG WORD pid;
+int16_t mn_register(pid, pstr)
+register int16_t pid;
 
-REG LONG pstr;
+register int32_t pstr;
 {
-	BYTE tmpname[13];
+	char tmpname[13];
 
 	/* use this to name */
 	/*   our process    */
@@ -526,9 +526,9 @@ GRECT *n;								/* new rect */
 {
 	PD *p;
 
-	REG EVB *e;
+	register EVB *e;
 
-	WORD *p1,
+	int16_t *p1,
 	*p2;
 
 	p = ctl_pd;

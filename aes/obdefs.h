@@ -25,12 +25,13 @@
 
 #define ROOT 0
 #define NIL -1
-						/* keybd states		*/
+
+/* keybd states		*/
 #define K_RSHIFT 0x0001
 #define K_LSHIFT 0x0002
 #define K_CTRL 0x0004
 #define K_ALT 0x00008
-						/* max string length	*/
+/* max string length	*/
 #define MAX_LEN 81
 						/* max depth of search	*/
 						/*   or draw for objects*/
@@ -191,17 +192,17 @@
 
 OBJECT
 {
-	WORD		ob_next;	/* -> object's next sibling	*/
-	WORD		ob_head;	/* -> head of object's children */
-	WORD		ob_tail;	/* -> tail of object's children */
-	UWORD		ob_type;	/* type of object- BOX, CHAR,...*/
-	UWORD		ob_flags;	/* flags			*/
-	UWORD		ob_state;	/* state- SELECTED, OPEN, ...	*/
-	LONG		ob_spec;	/* "out"- -> anything else	*/
-	WORD		ob_x;		/* upper left corner of object	*/
-	WORD		ob_y;		/* upper left corner of object	*/
-	WORD		ob_width;	/* width of obj			*/
-	WORD		ob_height;	/* height of obj		*/
+	int16_t		ob_next;	/* -> object's next sibling	*/
+	int16_t		ob_head;	/* -> head of object's children */
+	int16_t		ob_tail;	/* -> tail of object's children */
+	uint16_t		ob_type;	/* type of object- BOX, CHAR,...*/
+	uint16_t		ob_flags;	/* flags			*/
+	uint16_t		ob_state;	/* state- SELECTED, OPEN, ...	*/
+	int32_t		ob_spec;	/* "out"- -> anything else	*/
+	int16_t		ob_x;		/* upper left corner of object	*/
+	int16_t		ob_y;		/* upper left corner of object	*/
+	int16_t		ob_width;	/* width of obj			*/
+	int16_t		ob_height;	/* height of obj		*/
 };
 
 #define ORECT	struct orect
@@ -209,10 +210,10 @@ OBJECT
 ORECT
 {
 	ORECT	*o_link;
-	WORD	o_x;
-	WORD	o_y;
-	WORD	o_w;
-	WORD	o_h;
+	int16_t	o_x;
+	int16_t	o_y;
+	int16_t	o_w;
+	int16_t	o_h;
 } ;
 
 
@@ -220,10 +221,10 @@ ORECT
 
 GRECT
 {
-	WORD	g_x;
-	WORD	g_y;
-	WORD	g_w;
-	WORD	g_h;
+	int16_t	g_x;
+	int16_t	g_y;
+	int16_t	g_w;
+	int16_t	g_h;
 } ;
 
 
@@ -231,17 +232,17 @@ GRECT
 
 TEDINFO
 {
-	LONG		te_ptext;	/* ptr to text (must be 1st)	*/
-	LONG		te_ptmplt;	/* ptr to template		*/
-	LONG		te_pvalid;	/* ptr to validation chrs.	*/
-	WORD		te_font;	/* font				*/
-	WORD		te_junk1;	/* junk word			*/
-	WORD		te_just;	/* justification- left, right...*/
-	WORD		te_color;	/* color information word	*/
-	WORD		te_junk2;	/* junk word			*/
-	WORD		te_thickness;	/* border thickness		*/
-	WORD		te_txtlen;	/* length of text string	*/
-	WORD		te_tmplen;	/* length of template string	*/
+	int32_t		te_ptext;	/* ptr to text (must be 1st)	*/
+	int32_t		te_ptmplt;	/* ptr to template		*/
+	int32_t		te_pvalid;	/* ptr to validation chrs.	*/
+	int16_t		te_font;	/* font				*/
+	int16_t		te_junk1;	/* junk word			*/
+	int16_t		te_just;	/* justification- left, right...*/
+	int16_t		te_color;	/* color information word	*/
+	int16_t		te_junk2;	/* junk word			*/
+	int16_t		te_thickness;	/* border thickness		*/
+	int16_t		te_txtlen;	/* length of text string	*/
+	int16_t		te_tmplen;	/* length of template string	*/
 };
 
 
@@ -249,52 +250,52 @@ TEDINFO
 
 ICONBLK
 {
-	LONG	ib_pmask;
-	LONG	ib_pdata;
-	LONG	ib_ptext;
-	WORD	ib_char;
-	WORD	ib_xchar;
-	WORD	ib_ychar;
-	WORD	ib_xicon;
-	WORD	ib_yicon;
-	WORD	ib_wicon;
-	WORD	ib_hicon;
-	WORD	ib_xtext;
-	WORD	ib_ytext;
-	WORD	ib_wtext;
-	WORD	ib_htext;
+	int32_t	ib_pmask;
+	int32_t	ib_pdata;
+	int32_t	ib_ptext;
+	int16_t	ib_char;
+	int16_t	ib_xchar;
+	int16_t	ib_ychar;
+	int16_t	ib_xicon;
+	int16_t	ib_yicon;
+	int16_t	ib_wicon;
+	int16_t	ib_hicon;
+	int16_t	ib_xtext;
+	int16_t	ib_ytext;
+	int16_t	ib_wtext;
+	int16_t	ib_htext;
 };
 
 #define BITBLK struct bit_block
 
 BITBLK
 {
-	LONG	bi_pdata;		/* ptr to bit forms data	*/
-	WORD	bi_wb;			/* width of form in bytes	*/
-	WORD	bi_hl;			/* height in lines		*/
-	WORD	bi_x;			/* source x in bit form		*/
-	WORD	bi_y;			/* source y in bit form		*/
-	WORD	bi_color;		/* fg color of blt 		*/
+	int32_t	bi_pdata;		/* ptr to bit forms data	*/
+	int16_t	bi_wb;			/* width of form in bytes	*/
+	int16_t	bi_hl;			/* height in lines		*/
+	int16_t	bi_x;			/* source x in bit form		*/
+	int16_t	bi_y;			/* source y in bit form		*/
+	int16_t	bi_color;		/* fg color of blt 		*/
 };
 
 
 #define USERBLK struct user_blk
 USERBLK
 {
-	LONG	ub_code;
-	LONG	ub_parm;
+	int32_t	ub_code;
+	int32_t	ub_parm;
 };
 
 #define PARMBLK struct parm_blk
 PARMBLK
 {
-	LONG	pb_tree;
-	WORD	pb_obj;
-	WORD	pb_prevstate;
-	WORD	pb_currstate;
-	WORD	pb_x, pb_y, pb_w, pb_h;
-	WORD	pb_xc, pb_yc, pb_wc, pb_hc;
-	LONG	pb_parm;
+	int32_t	pb_tree;
+	int16_t	pb_obj;
+	int16_t	pb_prevstate;
+	int16_t	pb_currstate;
+	int16_t	pb_x, pb_y, pb_w, pb_h;
+	int16_t	pb_xc, pb_yc, pb_wc, pb_hc;
+	int32_t	pb_parm;
 };
 
 

@@ -13,7 +13,7 @@
 * *** TOS 1.4  FINAL RELEASE VERSION ***
 * 
 * Revision 1.7  88/10/10  18:36:19  kbad
-* left out .globl declaration for gemstart label.  Urk.
+* left out xdef declaration for gemstart label.  Urk.
 * 
 * Revision 1.6  88/09/20  12:39:21  kbad
 * Added gemstart: label for start of AES (for new partial-link build)
@@ -52,57 +52,29 @@
 *	Change the uda_size	7/16/92		D.Mui
 *	Added default res for sparrow 7/21/92	D.Mui
 
-	.text
+	text
 
 uda_size	equ	2074		* 74 + STACK_SIZE of 500 x 4
 init_size	equ	uda_size - 2	* 0 relative
 gloamnt		equ	2355		* sizeof(THEGLO) / 4
 fsize		equ	100		* size of linef handler in bytes+ a little fat
 *
-fline		equ	0		* 1-line "F" included
+#define fline		0		/* 1-line "F" included */
 *					* 0-line "F" not included
-dodowarn	equ	0		* 1=>do the warning
-*					* 0=>no warning
+#define dodowarn	0		/* 1=>do the warning, 0=>no warning */
 
-	.globl	_d_rezword
-	.globl	_main
-	.globl	_D		* static data, gl_uda 1st
-	.globl	_trap
-	.globl	_DOS_ERR
-	.globl	_DOS_AX
-	.globl	_justretf
-	.globl	_drwaddr
-	.globl	_tikcod
-	.globl	_tikaddr
-	.globl	_gl_restype
-	.globl	_gl_rschange
-	.globl	_size_theglo
-	.globl	_ad_envrn
-	.globl	_diskin		* added 08/2/8/85
-*	.globl	_g_wsend
-	.globl	_autoexec	
-	.globl	_sh_doexec	* added 4/29/88
-	.globl	_sh_iscart
-	.globl	_sh_isgem
-	.globl	_sh_gem
-	.globl	gemstart
 *
-ifne	dodowarn
-	.globl	_dowarn	
-endc
 *
-ifne	fline
-	.globl	_linef
-endc
 *
 *
 *  Must be first object file in link statement
 *
 *	Do setblock call to free up memory
 *
+	xdef	gemstart
 gemstart:
 	move.l	a7,a5		* save stack
-	move.l	#ustak, a7	* switch stacks, dos needs a user stack 
+	move.l	#ustak,a7	* switch stacks, dos needs a user stack 
 	move.l	4(a5),a5	* basepage address
 *	or.l	#7,$28(a5)	* prgflags in basepage
 	move.l	$c(a5),d0	* textlen
@@ -142,7 +114,7 @@ gemstart:
 
 * section changed 8/9/90 AKP
 	move.l	(a0),d0			* get last long to d0
-	clr.b	d0			* clear last byte so it's "don't care"
+	clr.b	d0			    /* clear last byte so it's "don't care" */
 	cmp.l	#$5c000000,d0		* check for "\00"
 	bne.b	not_ours
 	move.b	#'C',-2(a0)		* make it PATH=0C:\00
@@ -163,13 +135,13 @@ sh_start:
 	clr.w	_sh_iscart
 	move.w	#$82,_d_rezword		* default resolution for sparrow
 
-ifne	dodowarn
+#if dodowarn
 	clr.w	_dowarn			* This variable may or may not exist
-endc
+#endif
 *
 *		 LINE "F"
 *
-ifne	fline
+#if fline
 	move.b	$2c,d0
 	beq	nolinef		* linef vector already installed
 	move.l	#fsize,-(a7)
@@ -185,7 +157,7 @@ lop:
 	move.l	d0,$2c		* install ram linef vector
 nolinef:
 	nop
-endc
+#endif
 
 	move.w  #1,_diskin	* added 08/28/85
 *	clr.w	_g_wsend
@@ -282,6 +254,7 @@ beg1:
 
 *
 *
+	xdef	_trap
 _trap:	
 	move.l	(sp)+,retsav
 	clr.w	_DOS_ERR
@@ -297,18 +270,20 @@ oktrap:
 	rts
 *
 *
-	.bss
+	bss
 
-retsav:		.ds.l	1
+retsav:		ds.l	1
 
 * screen resolution 1=default, 2=320x200, 3=640x200, 4=640x400
 
-_gl_restype:	.ds.w	1
-_gl_rschange:	.ds.w	1
-		.ds.l	32
-ustak:		.ds.l	1
-_diskin:	.ds.w	1	* added
-dummycmd:	.ds.w	1
-execmode:	.ds.w	1
-execflags:	.ds.l	1
-	.end
+	xdef	_gl_restype
+_gl_restype:	ds.w	1
+	xdef	_gl_rschange
+_gl_rschange:	ds.w	1
+		ds.l	32
+ustak:		ds.l	1
+	xdef	_diskin		* added 08/2/8/85
+_diskin:	ds.w	1	* added
+dummycmd:	ds.w	1
+execmode:	ds.w	1
+execflags:	ds.l	1

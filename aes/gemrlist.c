@@ -19,25 +19,25 @@ extern MEMHDR *rmhead,
 /*
  * newrect() - allocate a RLIST structure for a new rectangle
  *	     - return a pointer to an available RLIST structure 
- *	       or return NULLPTR if none is available.
+ *	       or return NULL if none is available.
  *
  */
 RLIST *newrect()
 {
-	REG RLIST *rp;						/* pointer to RLIST structure */
+	register RLIST *rp;						/* pointer to RLIST structure */
 
 	MEMHDR *mp;							/* pointer to memory header */
 
-	REG WORD i;							/* counter */
+	register int16_t i;							/* counter */
 
 	for (mp = rmhead; mp && mp->numused == NUMRECT; mp = mp->mnext)
 		;
 
 	if (!mp)
 	{
-		if ((mp = (MEMHDR *) Malloc((LONG) (NUMRECT * sizeof(RLIST) + sizeof(MEMHDR)))) == NULLPTR)
+		if ((mp = (MEMHDR *) Malloc((int32_t) (NUMRECT * sizeof(RLIST) + sizeof(MEMHDR)))) == NULL)
 		{
-			return (NULLPTR);
+			return (NULL);
 		} else
 		{
 			/* init RLIST structures as available */
@@ -48,7 +48,7 @@ RLIST *newrect()
 			}
 
 			rmtail->mnext = mp;
-			mp->mnext = NULLPTR;
+			mp->mnext = NULL;
 			rmtail = mp;
 			rmtail->numused = 1;
 			rp = (RLIST *) (rmtail + 1);
@@ -62,7 +62,7 @@ RLIST *newrect()
 	}
 
 	rp->rstatus.rused = TRUE;
-	rp->rnext = NULLPTR;
+	rp->rnext = NULL;
 	return (rp);
 }
 
@@ -82,11 +82,11 @@ RLIST *rp;								/* ptr to rectangle to be deleted */
 
 char *rlist;							/* ptr (or address of ptr) to head of rect. list */
 {
-	REG MEMHDR *prvmp,
+	register MEMHDR *prvmp,
 	*curmp,
 	*nxtmp;								/* memory blocks pointers */
 
-	REG RLIST *currp;					/* ptr into current rectangle */
+	register RLIST *currp;					/* ptr into current rectangle */
 
 	RLIST **rl1;						/* addr of ptr to rect. list head */
 
@@ -129,10 +129,10 @@ char *rlist;							/* ptr (or address of ptr) to head of rect. list */
 
 	if (rmhead != rmtail)
 	{
-		prvmp = nxtmp = NULLPTR;
+		prvmp = nxtmp = NULL;
 		curmp = rmhead;
 
-		while (curmp != NULLPTR)
+		while (curmp != NULL)
 		{
 
 			nxtmp = curmp->mnext;
@@ -170,12 +170,12 @@ char *rlist;							/* ptr (or address of ptr) to head of rect. list */
 /*
  * Genrlist() - generate (non-optimized) rectangle list for given window.
  *	      - return pointer to rectangle list if successful.
- *	      - return NULLPTR if an error occurred.
+ *	      - return NULL if an error occurred.
  */
 RLIST *genrlist(handle, area)
-UWORD handle;							/* window handle */
+uint16_t handle;							/* window handle */
 
-WORD area;								/* WF_WORKXYWH: generate rectangle list of work area */
+int16_t area;								/* WF_WORKXYWH: generate rectangle list of work area */
 
 			/* WF_CURRXYWH: generate rectangle list of whole window */
 {
@@ -187,9 +187,9 @@ WORD area;								/* WF_WORKXYWH: generate rectangle list of work area */
 
 	RLIST *rnextrp;						/* ptr to next rectangle in rectangle list */
 
-	REG RLIST *currp;					/* ptr to current rectangle in rectangle list */
+	register RLIST *currp;					/* ptr to current rectangle in rectangle list */
 
-	UWORD hv_piece;						/* flag for new rectangles found */
+	uint16_t hv_piece;						/* flag for new rectangles found */
 
 	WINDOW *srchwp();
 
@@ -199,8 +199,8 @@ WORD area;								/* WF_WORKXYWH: generate rectangle list of work area */
 	 * if cannot locate window in database, or no RLIST 
 	 * structure is available, return with an error. 
 	 */
-	if ((wp = srchwp(handle)) == NULLPTR || (rlist = newrect()) == NULLPTR)
-		return NULLPTR;
+	if ((wp = srchwp(handle)) == NULL || (rlist = newrect()) == NULL)
+		return NULL;
 
 	/* initialize rectangle list */
 	if (area == WF_WORKXYWH)
@@ -221,7 +221,7 @@ WORD area;								/* WF_WORKXYWH: generate rectangle list of work area */
 		wrect.g_h += SHADOW;
 
 		rnextrp = rlist;				/* start from beginning of rect list */
-		while ((currp = rnextrp) != NULLPTR)
+		while ((currp = rnextrp) != NULL)
 		{
 			rnextrp = currp->rnext;
 			if (brkrect(&wrect, &(currp->rect), &hv_piece))
@@ -232,7 +232,7 @@ WORD area;								/* WF_WORKXYWH: generate rectangle list of work area */
 	}
 
 	/* optimize the rectangle list */
-	for (currp = rlist; currp != NULLPTR; currp = currp->rnext)
+	for (currp = rlist; currp != NULL; currp = currp->rnext)
 	{
 
 		rnextrp = currp->rnext;
@@ -262,11 +262,11 @@ WORD area;								/* WF_WORKXYWH: generate rectangle list of work area */
  *	     - return FALSE if the top rect does not break 
  *	       the bottom rect
  */
-WORD brkrect(trect, brect, hv_pc)
+int16_t brkrect(trect, brect, hv_pc)
 GRECT *trect,
 *brect;									/* ptrs to top and bottom rectangles */
 
-UWORD *hv_pc;
+uint16_t *hv_pc;
 {
 	/* check if the top rect breaks the bottom rect */
 	if ((trect->g_x < brect->g_x + brect->g_w) &&
@@ -301,8 +301,8 @@ UWORD *hv_pc;
  *	      - return TRUE if everything is fine or
  *		return FALSE if there is an error
  */
-WORD chgrlist(hv_pc, cutrect, oldrp, rlist)
-UWORD hv_pc;							/* mask */
+int16_t chgrlist(hv_pc, cutrect, oldrp, rlist)
+uint16_t hv_pc;							/* mask */
 
 GRECT *cutrect;							/* ptr to the cutting rectangle */
 
@@ -318,7 +318,7 @@ RLIST **rlist;							/* addr of ptr to beginning of rectangle list */
 
 	RLIST *currp;						/* ptr to current rectangle in expansion */
 
-	UWORD pc;							/* counter */
+	uint16_t pc;							/* counter */
 
 	RLIST *mkrect();
 
@@ -336,14 +336,14 @@ RLIST **rlist;							/* addr of ptr to beginning of rectangle list */
 		 */
 
 		old = (GRECT *) & (oldrp->rect);
-		currp = xrlist = NULLPTR;
+		currp = xrlist = NULL;
 
 		/* generate a rectangle for each piece */
 		for (pc = TOP; pc <= BOTTOM; pc <<= 1)
 		{
 			if (hv_pc & pc)
 			{
-				if ((nrp = mkrect(pc, cutrect, old)) == NULLPTR)
+				if ((nrp = mkrect(pc, cutrect, old)) == NULL)
 					return FALSE;
 
 				if (xrlist)
@@ -370,23 +370,23 @@ RLIST **rlist;							/* addr of ptr to beginning of rectangle list */
  *	      bottom window specified by the flag
  *	    - return pointer to RLIST structure that contains
  *	      the rectangle
- *	    - return NULLPTR if no RLIST structure is available
+ *	    - return NULL if no RLIST structure is available
  */
 RLIST *mkrect(pc, trect, brect)
-UWORD pc;								/* flag */
+uint16_t pc;								/* flag */
 
-REG GRECT *trect;						/* ptr to rectangle of window on top */
+register GRECT *trect;						/* ptr to rectangle of window on top */
 
-REG GRECT *brect;						/* ptr to rectangle of window at the bottom */
+register GRECT *brect;						/* ptr to rectangle of window at the bottom */
 {
 	RLIST *rp;							/* ptr to RLIST strucuture of new rectangle */
 
-	REG GRECT *nrect;					/* ptr to new rectangle */
+	register GRECT *nrect;					/* ptr to new rectangle */
 
 	RLIST *newrect();
 
-	if ((rp = newrect()) == NULLPTR)
-		return NULLPTR;
+	if ((rp = newrect()) == NULL)
+		return NULL;
 
 	nrect = (GRECT *) & (rp->rect);
 
@@ -428,7 +428,7 @@ REG GRECT *brect;						/* ptr to rectangle of window at the bottom */
  *	     - return TRUE if there is a merge
  *	     - return FALSE if there is no merge
  */
-WORD mrgrect(rp1, rp2)
+int16_t mrgrect(rp1, rp2)
 RLIST *rp1,
 *rp2;									/* ptrs to the 2 rectangles */
 {

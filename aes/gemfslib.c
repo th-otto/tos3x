@@ -108,77 +108,77 @@
 
 typedef struct fstruct
 {
-	BYTE snames[LEN_FSNAME];
+	char snames[LEN_FSNAME];
 } FSTRUCT;
 
-EXTERN BYTE toupper();
+extern char toupper();
 
-EXTERN BYTE *dos_alloc();
+extern char *dos_alloc();
 
-EXTERN LONG rs_str();
+extern int32_t rs_str();
 
-EXTERN BYTE *dos_avail();
+extern char *dos_avail();
 
-EXTERN WORD DOS_AX;
+extern int16_t DOS_AX;
 
-EXTERN LONG trap();
+extern int32_t trap();
 
-EXTERN LONG trap13();
+extern int32_t trap13();
 
-EXTERN WS gl_ws;
+extern WS gl_ws;
 
-EXTERN GRECT gl_rcenter;
+extern GRECT gl_rcenter;
 
-EXTERN LONG ad_sysglo;
+extern int32_t ad_sysglo;
 
-EXTERN LONG ad_armice;
+extern int32_t ad_armice;
 
-EXTERN LONG ad_hgmice;
+extern int32_t ad_hgmice;
 
-EXTERN WORD gl_hbox;
+extern int16_t gl_hbox;
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
-EXTERN WORD gl_button;					/* cjg */
+extern int16_t gl_button;					/* cjg */
 
 
 GLOBAL GRECT gl_rfs;
 
-GLOBAL LONG ad_fstree;
+GLOBAL int32_t ad_fstree;
 
-GLOBAL BYTE *ad_fpath;
+GLOBAL char *ad_fpath;
 
-GLOBAL LONG ad_title;
+GLOBAL int32_t ad_title;
 
-GLOBAL LONG ad_select;
+GLOBAL int32_t ad_select;
 
 GLOBAL FSTRUCT *ad_fsnames;
 
-GLOBAL WORD fs_first;					/* first enter the file selector */
+GLOBAL int16_t fs_first;					/* first enter the file selector */
 
-GLOBAL UWORD fs_topptr;
+GLOBAL uint16_t fs_topptr;
 
-GLOBAL UWORD fs_count;
+GLOBAL uint16_t fs_count;
 
-GLOBAL LONG fs_fnum;					/* max file allowed */
+GLOBAL int32_t fs_fnum;					/* max file allowed */
 
-GLOBAL BYTE *ad_fsdta;
+GLOBAL char *ad_fsdta;
 
-GLOBAL BYTE wildstr[] = "*.*";
+GLOBAL char wildstr[] = "*.*";
 
-GLOBAL BYTE wslstr[] = "\\*.*";
+GLOBAL char wslstr[] = "\\*.*";
 
-MLOCAL BYTE fsname[40];
+static char fsname[40];
 
-MLOCAL BYTE fcopy[40];
+static char fcopy[40];
 
-MLOCAL BYTE *pathcopy;					/* path copy    */
+static char *pathcopy;					/* path copy    */
 
-MLOCAL WORD defdrv;
+static int16_t defdrv;
 
 typedef struct pathstruct
 {
-	BYTE pxname[128];
+	char pxname[128];
 } PATHSTRUCT;
 
 GLOBAL PATHSTRUCT *pxpath;
@@ -187,12 +187,11 @@ GLOBAL PATHSTRUCT *pxpath;
 /*
 *	Routine to back off the end of a file string.
 */
-BYTE * fs_back(pstr)
-REG BYTE *pstr;
+char * fs_back(pstr)
+register char *pstr;
 {
-	REG BYTE *pend;
-
-	REG WORD i;
+	register char *pend;
+	register int16_t i;
 
 	i = strlen(pstr);					/* find the end of string   */
 	pend = pstr + i;
@@ -226,59 +225,59 @@ REG BYTE *pstr;
 *	Add the label parameter
 */
 
-WORD fs_input(pipath, pisel, pbutton, lstring)
-BYTE *pipath;
+int16_t fs_input(pipath, pisel, pbutton, lstring)
+char *pipath;
 
-LONG pisel;
+int32_t pisel;
 
-WORD *pbutton;
+int16_t *pbutton;
 
-BYTE *lstring;
+char *lstring;
 {
-	REG UWORD i,
+	register uint16_t i,
 	 j;
 
-	WORD label,
+	int16_t label,
 	 last,
 	 ret;
 
-	REG LONG tree;
+	register int32_t tree;
 
-	LONG addr,
+	int32_t addr,
 	 mul,
 	 savedta,
 	 savepath;
 
-	UWORD botptr,
+	uint16_t botptr,
 	 count,
 	 value;
 
-	WORD xoff,
+	int16_t xoff,
 	 yoff,
 	 mx,
 	 my,
 	 bret;
 
-	BYTE dirbuffer[122];
+	char dirbuffer[122];
 
-	BYTE *chrptr;
+	char *chrptr;
 
-	BYTE scopy[16];
+	char scopy[16];
 
-	BYTE chr;
+	char chr;
 
-	WORD curdrv,
+	int16_t curdrv,
 	 savedrv;
 
-	LONG **lgptr;
+	int32_t **lgptr;
 
 	GRECT clip;
 
-	WORD firstry;
+	int16_t firstry;
 
 	OBJECT *xtree;						/* cjg */
 
-	WORD newend,
+	int16_t newend,
 	 oldend;
 
 /*
@@ -291,12 +290,12 @@ BYTE *lstring;
 	fs_first = TRUE;					/* first enter      */
 	last = F1NAME;						/* last selected file   */
 
-	defdrv = (WORD) dos_gdrv();			/* get the default drive */
+	defdrv = (int16_t) dos_gdrv();			/* get the default drive */
 	savedrv = defdrv;
 
 	curdrv = defdrv + DRIVEA;
 	/* save for default dr  */
-	pxpath = dos_alloc((LONG) ((WORD) LPATH * (WORD) (DEVICES + 1)));
+	pxpath = dos_alloc((int32_t) ((int16_t) LPATH * (int16_t) (DEVICES + 1)));
 
 	if (!pxpath)
 		goto bye2;
@@ -309,9 +308,9 @@ BYTE *lstring;
 	/* get all the memory   */
 	mul = dos_avail();
 	/*  LEN_FSNAMES;    */
-	fs_fnum = mul / (LONG) LEN_FSNAME;
+	fs_fnum = mul / (int32_t) LEN_FSNAME;
 
-	if ((!mul) || (fs_fnum < (LONG) NM_NAMES))
+	if ((!mul) || (fs_fnum < (int32_t) NM_NAMES))
 	{
 		dos_free(ad_fsdta);
 	  bye:dos_free(pxpath);
@@ -323,7 +322,7 @@ BYTE *lstring;
 
 	savepath = pxpath;					/* save the address */
 	pathcopy = savepath;
-	pxpath = savepath + (WORD) LPATH;
+	pxpath = savepath + (int16_t) LPATH;
 
 	fm_dial(FMD_START, &gl_rcenter, &gl_rfs);
 
@@ -372,11 +371,11 @@ BYTE *lstring;
 
 	fmt_str(pisel, scopy);
 
-	strcpy(pipath, ad_fpath);			/* make a copy      */
+	xstrpcpy(pipath, ad_fpath);			/* make a copy      */
 
 	pathcopy[0] = defdrv + 'A';			/* Backup path      */
 	pathcopy[1] = ':';
-	strcpy(wslstr, &pathcopy[2]);
+	xstrpcpy(wslstr, &pathcopy[2]);
 
 	count = 0;
 	fs_topptr = 0;
@@ -410,7 +409,7 @@ BYTE *lstring;
 			take_ownership(FALSE);
 			if (count > NM_NAMES)
 			{
-				mul = ((LONG) (count - NM_NAMES)) * (LONG) (value);
+				mul = ((int32_t) (count - NM_NAMES)) * (int32_t) (value);
 				if (fs_topptr != (mul / 1000))
 				{
 					fs_topptr = mul / 1000;
@@ -445,7 +444,7 @@ BYTE *lstring;
 				break;
 			}
 
-			if ((WORD) (fs_topptr - value) >= 0)
+			if ((int16_t) (fs_topptr - value) >= 0)
 				fs_topptr -= value;
 			else
 				fs_topptr = 0;
@@ -475,41 +474,41 @@ BYTE *lstring;
 			gsx_sclip(&gl_rfs);
 
 			*(fs_back(ad_fpath)) = 0;	/* back to last path    */
-			strcpy(ad_title, fs_back(ad_fpath) + 1);
+			xstrpcpy(ad_title, fs_back(ad_fpath) + 1);
 
 			/* fall through     */
 		case FDIRECTORY:
 		  rdir:
 			if (!*ad_fpath)
-				strcpy(pathcopy, ad_fpath);
+				xstrpcpy(pathcopy, ad_fpath);
 
-			strcpy(fs_back(ad_fpath), &fcopy[0]);
+			xstrpcpy(fs_back(ad_fpath), &fcopy[0]);
 			/* extension OK ?   */
 			if ((fcopy[0] == '\\') && (fcopy[1]))
-				strcpy(fcopy, fsname);	/* yes          */
+				xstrpcpy(fcopy, fsname);	/* yes          */
 
 			if (fcopy[0] != '\\')		/* any slash ?      */
 			{
 				fsname[0] = '\\';
-				strcpy(fcopy, fsname + 1);
+				xstrpcpy(fcopy, fsname + 1);
 			}
 
 			if (!fcopy[1])				/* if no extension  */
 			{
-				strcpy(wslstr, &fsname[0]);
-				strcat(wildstr, ad_fpath);
+				xstrpcpy(wslstr, &fsname[0]);
+				xstrpcat(wildstr, ad_fpath);
 			}
 
 			if (r_dir(ad_fpath, scopy, &count))
 			{
-				strcpy(ad_fpath, pathcopy);	/* copy current dir */
+				xstrpcpy(ad_fpath, pathcopy);	/* copy current dir */
 				if (count > NM_NAMES)	/* more than 9 items    */
 					botptr = count - NM_NAMES;
 				else
 					botptr = 0;
 			} else
 			{
-			  rdir5:strcpy(pathcopy, ad_fpath);
+			  rdir5:xstrpcpy(pathcopy, ad_fpath);
 				ob_draw(tree, FDIRECTORY, MAX_DEPTH);
 				if (firstry)
 				{
@@ -525,7 +524,7 @@ BYTE *lstring;
 				ob_change(tree, curdrv, NORMAL, TRUE);
 
 			if (*(ad_fpath + 1) == ':')	/* if there a drive */
-				defdrv = (WORD) (*ad_fpath - 'A');
+				defdrv = (int16_t) (*ad_fpath - 'A');
 
 			curdrv = defdrv + DRIVEA;
 
@@ -580,7 +579,7 @@ BYTE *lstring;
 		case DRIVEP:
 			curdrv = ret;
 			i = (ret - DRIVEA);			/* get the drive */
-			*ad_fpath = (BYTE) (i + 'A');	/* stuff into the path */
+			*ad_fpath = (char) (i + 'A');	/* stuff into the path */
 			*(ad_fpath + 1) = ':';
 			if (!dos_gdir(i + 1, ad_fpath + 2))
 				goto fs1;
@@ -605,12 +604,12 @@ BYTE *lstring;
 			{
 				unfmt_str(addr, fs_back(ad_fpath) + 1);
 			  fs1:
-				strcat(&fsname[0], ad_fpath);
+				xstrpcat(&fsname[0], ad_fpath);
 				goto rdir;
 			} else /* must be a file   */ if (chr)
 			{							/* clean up the last selected */
 				ob_change(tree, last, NORMAL, TRUE);
-				strcpy(addr, LLGET(LLGET(OB_SPEC(FSELECTION))));
+				xstrpcpy(addr, LLGET(LLGET(OB_SPEC(FSELECTION))));
 				ob_change(tree, ret, SELECTED, TRUE);
 				ob_draw(tree, FSELECTION, MAX_DEPTH);
 				last = ret;
@@ -654,7 +653,7 @@ BYTE *lstring;
 	dos_free(ad_fsdta);
 	dos_free(ad_fsnames);
 	dos_free(savepath);
-	strcpy(ad_fpath, pipath);
+	xstrpcpy(ad_fpath, pipath);
 	unfmt_str(ad_select, pisel);
 
 	if ((*pbutton = inf_what(tree, OK, CANCEL)) == -1)
@@ -672,23 +671,23 @@ BYTE *lstring;
 
 /*	read in a directory	*/
 
-WORD r_dir(path, select, count)
-BYTE *path;
+int16_t r_dir(path, select, count)
+char *path;
 
-BYTE *select;
+char *select;
 
-REG UWORD *count;
+register uint16_t *count;
 {
-	LONG tree,
+	int32_t tree,
 	 addr;
 
-	REG WORD status,
+	register int16_t status,
 	 i;
 
-	LONG h,
+	int32_t h,
 	 h1;
 
-	BYTE filename[16];
+	char filename[16];
 
 	gsx_mfset(ad_hgmice);
 
@@ -723,7 +722,7 @@ REG UWORD *count;
 			h -= (ADJ3DPIX << 1);
 	}
 	LWSET(OB_Y(FSVELEV), 0);			/* move it to the top     */
-	LWSET(OB_HEIGHT(FSVELEV), (UWORD) h);	/* height of the elevator */
+	LWSET(OB_HEIGHT(FSVELEV), (uint16_t) h);	/* height of the elevator */
 	r_sfiles(0, 0);						/* show form the top      */
 	status = TRUE;
 
@@ -738,31 +737,31 @@ REG UWORD *count;
 /*	for easy coding and redraw the count will return   */
 /*	the actual number of files		           */
 
-WORD r_files(path, select, count, filename)
-REG BYTE *path;							/*5 */
+int16_t r_files(path, select, count, filename)
+register char *path;							/*5 */
 
-BYTE *select;
+char *select;
 
-WORD *count;
+int16_t *count;
 
-REG BYTE *filename;						/*4 */
+register char *filename;						/*4 */
 {
-	REG WORD i;							/*8 */
+	register int16_t i;							/*8 */
 
-	LONG j;								/*2 */
+	int32_t j;								/*2 */
 
-	REG LONG k;							/*4 */
+	register int32_t k;							/*4 */
 
-	WORD ret /*3 *//*,len */ ;
+	int16_t ret /*3 *//*,len */ ;
 
-/*		LONG	temp,addr;*/
-	BYTE *chrptr;						/*7 */
+/*		int32_t	temp,addr;*/
+	char *chrptr;						/*7 */
 
-	REG FSTRUCT *fsnames;
+	register FSTRUCT *fsnames;
 
-	REG WORD drvid;						/*4 */
+	register int16_t drvid;						/*4 */
 
-/*		BYTE	save;*/
+/*		char	save;*/
 
 	fsnames = ad_fsnames;
 
@@ -772,7 +771,7 @@ REG BYTE *filename;						/*4 */
 	if (*(path + 1) == ':')
 	{
 		*path = toupper(*path);
-		drvid = (WORD) (*path - 'A');
+		drvid = (int16_t) (*path - 'A');
 	} else
 		drvid = defdrv;
 
@@ -792,18 +791,18 @@ REG BYTE *filename;						/*4 */
 	if (*chrptr == '\\')				/* path exists, point at filename */
 		chrptr++;
 
-	if (strlen(chrptr) > 12)			/* 9/5/90       */
+	if ((int)strlen(chrptr) > 12)			/* 9/5/90       */
 		chrptr[12] = 0;
 
-	strcpy(chrptr, filename);			/* save the file name   */
-	strcpy(wildstr, chrptr);			/* this is the dir  */
+	xstrpcpy(chrptr, filename);			/* save the file name   */
+	xstrpcpy(wildstr, chrptr);			/* this is the dir  */
 	dos_sdta(ad_fsdta);
 	/* look for all sub dir */
 	if (!(ret = dos_sfirst(path, 0x37)))
 	{									/* error        */
 		if (DOS_AX != E_NOFILES)		/* it is not no files   */
 		{
-			strcpy(filename, chrptr);	/* then return      */
+			xstrpcpy(filename, chrptr);	/* then return      */
 			return (FALSE);
 		}
 	}
@@ -815,11 +814,11 @@ REG BYTE *filename;						/*4 */
 	/* time             */
 
 	for (i = 0; i < NM_NAMES; i++)
-		strcpy(" ", &fsnames[i].snames[0]);
+		xstrpcpy(" ", &fsnames[i].snames[0]);
 
 	i = 0;
 	/* look for directory   */
-	while ((ret) && ((UWORD) (i) < fs_fnum))
+	while ((ret) && ((uint16_t) (i) < fs_fnum))
 	{
 		if (ad_fsdta[21] & (F_HIDDEN | F_SYSTEM))
 			goto rfile2;
@@ -846,7 +845,7 @@ REG BYTE *filename;						/*4 */
 	if (i)
 		r_sort(fsnames, i);
 
-	strcpy(filename, chrptr);			/* restore file name    */
+	xstrpcpy(filename, chrptr);			/* restore file name    */
 
 	*count = i;
 
@@ -854,17 +853,17 @@ REG BYTE *filename;						/*4 */
 }
 
 
-WORD r_sort(buffer, count)
-REG FSTRUCT(*buffer)[];
+int16_t r_sort(buffer, count)
+register FSTRUCT(*buffer)[];
 
-WORD count;
+int16_t count;
 {
-	REG WORD gap,
+	register int16_t gap,
 	 i,
 	 j,
 	 k;
 
-	BYTE tmp[LEN_FSNAME];
+	char tmp[LEN_FSNAME];
 
 	for (gap = count / 2; gap > 0; gap /= 2)
 	{
@@ -887,15 +886,15 @@ WORD count;
 /*	show files and update the scroll bar	*/
 
 r_sfiles(index, ratio)
-UWORD index,
+uint16_t index,
  ratio;
 {
-	REG WORD label,
+	register int16_t label,
 	 i;
 
-	REG LONG tree;
+	register int32_t tree;
 
-	LONG addr,
+	int32_t addr,
 	 h,
 	 h1,
 	 h3;
@@ -921,7 +920,7 @@ UWORD index,
 	if (ratio == 1 || ratio == NM_NAMES)
 	{
 		if (fs_count > NM_NAMES)
-			h = ((h - h1) * h3) / (LONG) ((fs_count - NM_NAMES));
+			h = ((h - h1) * h3) / (int32_t) ((fs_count - NM_NAMES));
 		else
 			h = 0;
 	} else
@@ -937,9 +936,9 @@ UWORD index,
 /*	do the fs_sset and ob_draw	*/
 
 VOID fs_draw(index, path, addr1, addr2)
-WORD index;
+int16_t index;
 
-LONG path,
+int32_t path,
 	addr1,
 	addr2;
 {
@@ -952,14 +951,14 @@ LONG path,
 
 VOID ini_fsel()
 {
-	WORD x,
+	int16_t x,
 	 y,
 	 i,
 	 j,
 	 w,
 	 h;
 
-	REG OBJECT *obj;
+	register OBJECT *obj;
 
 	OBJECT *tree;
 
@@ -1029,7 +1028,7 @@ VOID ini_fsel()
 }
 
 
-WORD FXWait()
+int16_t FXWait()
 {
 	do
 	{
@@ -1038,14 +1037,14 @@ WORD FXWait()
 }
 
 
-WORD FXSelect(tree, obj)
+int16_t FXSelect(tree, obj)
 OBJECT *tree;
 
-WORD obj;
+int16_t obj;
 {
 	GRECT rect;
 
-	WORD dummy;
+	int16_t dummy;
 
 	tree[obj].ob_state |= SELECTED;
 	rect = *(GRECT *) & tree[(obj)].ob_x;
@@ -1055,14 +1054,14 @@ WORD obj;
 }
 
 
-WORD FXDeselect(tree, obj)
+int16_t FXDeselect(tree, obj)
 OBJECT *tree;
 
-WORD obj;
+int16_t obj;
 {
 	GRECT rect;
 
-	WORD dummy;
+	int16_t dummy;
 
 	tree[obj].ob_state &= ~SELECTED;
 	rect = *(GRECT *) & tree[(obj)].ob_x;

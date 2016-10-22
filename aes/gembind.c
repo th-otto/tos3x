@@ -20,9 +20,9 @@
 #include <gemusa.h>
 
 
-MLOCAL WORD gl_dspcnt;
+static int16_t gl_dspcnt;
 
-MLOCAL LONG ad_rso;
+static int32_t ad_rso;
 
 MFORM gl_cmform;						/* current aes mouse form   */
 
@@ -34,57 +34,22 @@ MFORM gl_omform;						/* old aes mouse form       */
 #define INT_OUT LLGET(pcrys_blk+12)
 #define ADDR_IN LLGET(pcrys_blk+16)
 #define ADDR_OUT LLGET(pcrys_blk+20)
-						/* in GSXIF.C       */
-EXTERN WORD gl_wchar;
-
-EXTERN WORD gl_hchar;
-
-EXTERN WORD gl_wbox;
-
-EXTERN WORD gl_hbox;
-
-EXTERN WORD gl_handle;
-
-EXTERN LONG ad_sysglo;
-
-EXTERN GRECT gl_rfull;
-
-EXTERN LONG ad_fsel;
-
-EXTERN THEGLO D;
-
-EXTERN BYTE *maddr;
-
-EXTERN WORD gl_apid;
-
-EXTERN WORD pglobal[];
 
 
-UWORD crysbind(opcode, pglobal, int_in, int_out, addr_in)
-WORD opcode;
-
-REG LONG pglobal;
-
-REG UWORD int_in[];
-
-REG UWORD int_out[];
-
-REG LONG addr_in[];
+uint16_t crysbind(P(int16_t) opcode, P(intptr_t) pglobal, P(uint16_t *) int_in, P(uint16_t *) int_out, P(VOIDPTR *) addr_in)
+PP(int16_t opcode;)
+PP(register intptr_t pglobal;)
+PP(register uint16_t *int_in;)
+PP(register uint16_t *int_out;)
+PP(register VOIDPTR *addr_in;)
 {
-	LONG tmparm;
-
-	LONG buparm;
-
-	LONG lmaddr;
-
-	LONG tree;
-
-	REG WORD ret;
-
+	intptr_t tmparm;
+	intptr_t buparm;
+	intptr_t lmaddr;
+	intptr_t tree;
+	register int16_t ret;
 	MFORM *mform;
-
-	WORD i,
-	 offset;
+	int16_t i, offset;
 
 	ret = TRUE;
 
@@ -353,17 +318,17 @@ REG LONG addr_in[];
 		ret = sh_put(SH_PDATA, SH_LEN);
 		break;
 	case SHEL_FIND:
-		ret = sh_find(SH_PATH, NULLPTR);
+		ret = sh_find(SH_PATH, NULL);
 		break;
 	case SHEL_ENVRN:
 		ret = sh_envrn(SH_PATH, SH_SRCH);
 		break;
 	default:
-		fm_show(ALRTNOFUNC, NULLPTR, 1);
+		fm_show(ALRTNOFUNC, NULL, 1);
 		ret = -1;
 		break;
 	}
-	return (ret);
+	return ret;
 }
 
 
@@ -374,16 +339,13 @@ REG LONG addr_in[];
 *	routine.
 */
 
-VOID xif(pcrys_blk)
-LONG pcrys_blk;
+VOID xif(P(intptr_t) pcrys_blk)
+PP(intptr_t pcrys_blk;)
 {
-	UWORD control[C_SIZE];
-
-	UWORD int_in[I_SIZE];
-
-	UWORD int_out[O_SIZE];
-
-	LONG addr_in[AI_SIZE];
+	uint16_t control[C_SIZE];
+	uint16_t int_in[I_SIZE];
+	uint16_t int_out[O_SIZE];
+	VOIDPTR addr_in[AI_SIZE];
 
 	LWCOPY(ADDR(&control[0]), CONTROL, C_SIZE);
 

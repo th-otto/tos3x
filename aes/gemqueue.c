@@ -38,22 +38,22 @@
 #include <obdefs.h>
 #include <gemlib.h>
 						/* in PD88.C        */
-EXTERN PD *fpdnm();
+extern PD *fpdnm();
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
 
 VOID doq(donq, p, m)
-WORD donq;
+int16_t donq;
 
-REG PD *p;
+register PD *p;
 
 QPB *m;
 {
-	REG WORD n,
+	register int16_t n,
 	 index;
 
-	REG WORD *om,
+	register int16_t *om,
 	*nm;
 
 	n = m->qpb_cnt;
@@ -65,7 +65,7 @@ QPB *m;
 		/*   matching msg and   */
 		/*   union the redraw   */
 		/*   rects together */
-		nm = (WORD *) & p->p_queue[p->p_qindex];
+		nm = (int16_t *) & p->p_queue[p->p_qindex];
 
 		if (nm[0] == AC_CLOSED)
 			p->p_stat |= PS_TRYSUSPEND;
@@ -75,7 +75,7 @@ QPB *m;
 			index = 0;
 			while ((index < p->p_qindex) && (n))
 			{
-				om = (WORD *) & p->p_queue[index];
+				om = (int16_t *) & p->p_queue[index];
 				if ((om[0] == WM_REDRAW) && (nm[3] == om[3]))
 				{
 					rc_union(&nm[4], &om[4]);
@@ -96,23 +96,23 @@ QPB *m;
 
 
 VOID aqueue(isqwrite, e, lm)
-WORD isqwrite;
+int16_t isqwrite;
 
-REG EVB *e;
+register EVB *e;
 
-LONG lm;
+int32_t lm;
 {
-	REG PD *p;
+	register PD *p;
 
-	REG QPB *m;
+	register QPB *m;
 
 	EVB **ppe;
 
-	WORD qready;
+	int16_t qready;
 
 	m = (QPB *) lm;
 
-	p = fpdnm(NULLPTR, m->qpb_pid);
+	p = fpdnm(NULL, m->qpb_pid);
 
 	if (isqwrite)
 		qready = (m->qpb_cnt <= (QUEUE_SIZE - p->p_qindex));

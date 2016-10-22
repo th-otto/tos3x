@@ -16,7 +16,7 @@
 #define WF_DCOLOR 19	/* set default element color words  */
 /*
  * New wind_set call for setting window element colors:
- * wind_set( WORD w_id, WORD field, WORD element, WORD tcolor, WORD bcolor);
+ * wind_set( int16_t w_id, int16_t field, int16_t element, int16_t tcolor, int16_t bcolor);
  *
  * field: WF_COLOR set object color words for window element by handle
  * field: WF_DCOLOR set default object color words for window element

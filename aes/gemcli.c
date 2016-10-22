@@ -52,60 +52,20 @@
 #define WOPEN 1
 #define RWOPEN 2
 #define TEXTBASE 8
-						/* in PD88.C        */
-EXTERN PD *pstart();
 
-						/* in DISPA88.A86   */
-EXTERN VOID gotopgm();
-
-						/* in DOSIF.A86     */
-EXTERN VOID pgmld();
-
-EXTERN WORD DOS_ERR;
-
-EXTERN LONG dos_avail();
-
-EXTERN LONG dos_alloc();
-
-						/* in GEMRSLIB.C    */
-EXTERN BYTE *rs_str();
-
-EXTERN LONG ad_shcmd;
-
-EXTERN THEGLO D;
-
-EXTERN WORD isdrive();
-
-EXTERN WORD cart_init();
-
-EXTERN WORD ld_cartacc();
-
-EXTERN VOID pinit();
-
-EXTERN WORD diskin;						/* in gemjstrt.s    */
-
-GLOBAL ACCPD *gl_pacc[MAX_ACCS];		/* total of 6 desk acc, 1 from rom  */
-
-GLOBAL WORD gl_naccs;
-
-GLOBAL BYTE *gl_adacc[MAX_ACCS];		/* addresses of accessories */
-
-EXTERN WORD DOS_AX;
-
-GLOBAL BYTE *sys_adacc;
-
-GLOBAL BYTE stacc[] = "\\*.ACC";
-
-WORD used_acc;							/* currently number of acc  */
-
-EXTERN PD *slr;
+ACCPD *gl_pacc[MAX_ACCS];		/* total of 6 desk acc, 1 from rom  */
+int16_t gl_naccs;
+char *gl_adacc[MAX_ACCS];		/* addresses of accessories */
+char *sys_adacc;
+char const stacc[] = "\\*.ACC";
+int16_t used_acc;							/* currently number of acc  */
 
 
 /*	Make sure everybody is on the suspend list before going on	*/
 
-release()
+VOID release(NOTHING)
 {
-	REG PD *p;
+	register PD *p;
 
 	while (TRUE)
 	{
@@ -149,9 +109,9 @@ release()
 
 /*	Give everyone a chance to run, at least once	*/
 
-all_run()
+VOID all_run(NOTHING)
 {
-	WORD i;
+	int16_t i;
 
 	for (i = 0; i < used_acc; i++)
 		dsptch();
@@ -169,20 +129,16 @@ all_run()
 *	decremented by the size of the accessory image.  If the
 *	accessory is too big to fit it will be not be loaded.
 */
-WORD sndcli(pfilespec, acc)
-REG BYTE *pfilespec;
-
-WORD acc;
+int16_t sndcli(P(char *) pfilespec, P(int16_t) acc)
+PP(register char *pfilespec;)
+PP(int16_t acc;)
 {
-	REG WORD handle;
-
-	WORD err_ret;
-
-	LONG ldaddr;
-
+	register int16_t handle;
+	int16_t err_ret;
+	int32_t ldaddr;
 	PD *p;
 
-	strcpy(pfilespec, &D.s_cmd[0]);
+	xstrpcpy(pfilespec, &D.s_cmd[0]);
 	handle = dos_open(ad_shcmd, ROPEN);
 	if (!DOS_ERR)
 	{									/* allocate PD memory for accessory */
@@ -214,31 +170,24 @@ WORD acc;
 
 
 /*
-*	Routine to load in desk accessory's.  Files by the name of *.ACC
-*	will be loaded, if there is sufficient room for them in the system.
-*	If SYSTEM.ACC is not zero, it is treated as the beginning of a
-*	desk accessory in system rom and is executed.
-*	The cartridge is searched for *.ACC and each one is executed.
-*	If there is any space left, *.ACC etc. are then loaded from disk.
-*	It will first try the hard disk, if there is no acc files then it
-*	will go back to the boot drive.
-*/
+ *	Routine to load in desk accessory's.  Files by the name of *.ACC
+ *	will be loaded, if there is sufficient room for them in the system.
+ *	If SYSTEM.ACC is not zero, it is treated as the beginning of a
+ *	desk accessory in system rom and is executed.
+ *	The cartridge is searched for *.ACC and each one is executed.
+ *	If there is any space left, *.ACC etc. are then loaded from disk.
+ *	It will first try the hard disk, if there is no acc files then it
+ *	will go back to the boot drive.
+ */
 
-
-VOID ldaccs()
+VOID ldaccs(NOTHING)
 {
-	REG WORD i;
-
-	WORD ret;
-
-	BYTE *psp;
-
-	WORD defdrv;
-
-	BYTE tempadds[50];
-
-	BYTE *name;
-
+	register int16_t i;
+	int16_t ret;
+	char *psp;
+	int16_t defdrv;
+	char tempadds[50];
+	char *name;
 
 	gl_naccs = 0;
 	used_acc = 0;
@@ -276,11 +225,11 @@ VOID ldaccs()
 	}
 }
 
-free_accs()
-{
-	REG WORD i;
 
-	REG BYTE *ptmp;
+VOID free_accs(NOTHING)
+{
+	register int16_t i;
+	register char *ptmp;
 
 	if (sys_adacc)
 	{
@@ -297,21 +246,17 @@ free_accs()
 	}
 }
 
-WORD cre_aproc()
+
+int16_t cre_aproc(NOTHING)
 {
-	REG PD *ppd;
-
+	register PD *ppd;
 	UDA *puda;
-
 	CDA *pcda;
+	register EVB *pevb;
+	register ACCPD *paccpd;
+	register int16_t i;
 
-	REG EVB *pevb;
-
-	REG ACCPD *paccpd;
-
-	REG WORD i;
-
-	paccpd = (ACCPD *) dos_alloc((ULONG) sizeof(ACCPD));
+	paccpd = (ACCPD *) dos_alloc((uint32_t) sizeof(ACCPD));
 	if (paccpd)
 	{
 		bfill(sizeof(ACCPD), 0, paccpd);

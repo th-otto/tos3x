@@ -43,36 +43,14 @@
 #include <obdefs.h>
 #include <gemlib.h>
 
-EXTERN PD *mowner();
+int16_t tbutton;
+int16_t wwait;
 
-EXTERN VOID dsptch();
-
-EXTERN VOID aqerr();					/* in QUEUE88.C     */
-
-EXTERN VOID aqrd();
-
-EXTERN VOID aqwrt();
-
-EXTERN WORD button;
-
-EXTERN WORD gl_bpend;
-
-EXTERN WORD xrat;
-
-EXTERN WORD yrat;
-
-EXTERN LONG CMP_TICK;
-
-EXTERN LONG NUM_TICK;
-
-GLOBAL WORD tbutton;
-
-WORD wwait;
 
 #if UNLINKED
-EVB * get_evb()
+EVB *get_evb(NOTHING)
 {
-	REG EVB *e;
+	register EVB *e;
 
 	if (e = eul)
 	{
@@ -83,17 +61,15 @@ EVB * get_evb()
 }
 #endif
 
-VOID evinsert(e, root)
-REG EVB *e;
-
-EVB **root;
+VOID evinsert(P(EVB *) e, P(EVB **) root)
+PP(register EVB *e;)
+PP(EVB **root;)
 {
-	REG EVB *p,
-	*q;
+	register EVB *p, *q;
 
 	/* insert event block   */
 	/*   on list        */
-	q = (BYTE *) root - elinkoff;
+	q = (char *) root - elinkoff;
 	p = *root;
 	e->e_pred = q;
 	q->e_link = e;
@@ -102,10 +78,11 @@ EVB **root;
 		p->e_pred = e;
 }
 
-VOID takeoff(p)
-REG EVB *p;
+
+VOID takeoff(P(EVB *) p)
+PP(register EVB *p;)
 {
-	REG LONG c;
+	register int32_t c;
 
 	/* take event p off */
 	/* e_link list, must    */
@@ -116,17 +93,18 @@ REG EVB *p;
 		p->e_link->e_pred = p->e_pred;
 		if (p->e_flag & EVDELAY)
 		{
-			c = (LONG) p->e_link->e_parm;
-			c += (LONG) p->e_parm;
-			p->e_link->e_parm = (LONG) c;
+			c = (int32_t) p->e_link->e_parm;
+			c += (int32_t) p->e_parm;
+			p->e_link->e_parm = (int32_t) c;
 		}
 	}
 	p->e_nextp = eul;
 	eul = p;
 }
 
-EVSPEC mwait(mask)
-EVSPEC mask;
+
+EVSPEC mwait(P(EVSPEC) mask)
+PP(EVSPEC mask;)
 {
 	rlr->p_evwait = mask;
 	if (!(mask & rlr->p_evflg))
@@ -139,18 +117,14 @@ EVSPEC mask;
 	return (rlr->p_evflg);
 }
 
-EVSPEC iasync(afunc, aparm)
-WORD afunc;
 
-REG LONG aparm;
+EVSPEC iasync(P(int16_t) afunc, P(intptr_t) aparm)
+PP(int16_t afunc;)
+PP(register intptr_t aparm;)
 {
-	REG EVB *e;
-
-	REG EVB *p,
-	*q;
-
+	register EVB *e;
+	register EVB *p, *q;
 	MOBLK mob;
-
 
 	/* e = get_evb();   */
 	if (e = eul)
@@ -161,7 +135,7 @@ REG LONG aparm;
 
 	e->e_nextp = rlr->p_evlist;			/* link the EVB to the  */
 	rlr->p_evlist = e;					/* PD evlist        */
-	e->e_pd = (BYTE *) rlr;
+	e->e_pd = (char *) rlr;
 	e->e_flag = e->e_pred = 0;
 	/* find a free bit in   */
 	/*   in the mask    */
@@ -209,13 +183,13 @@ REG LONG aparm;
 
 
 		e->e_flag |= EVDELAY;
-		q = (BYTE *) & dlr - elinkoff;
+		q = (char *) & dlr - elinkoff;
 
 		for (p = dlr; p; p = (q = p)->e_link)
 		{
-			if (aparm <= (LONG) p->e_parm)
+			if (aparm <= (int32_t) p->e_parm)
 				break;
-			aparm -= (LONG) p->e_parm;
+			aparm -= (int32_t) p->e_parm;
 		}
 
 		e->e_pred = q;
@@ -225,9 +199,9 @@ REG LONG aparm;
 
 		if (p)
 		{
-			aparm = (LONG) p->e_parm - aparm;
+			aparm = (int32_t) p->e_parm - aparm;
 			p->e_pred = e;
-			p->e_parm = (LONG) aparm;
+			p->e_parm = (int32_t) aparm;
 		}
 		sti();
 
@@ -243,7 +217,7 @@ REG LONG aparm;
 		{
 			/* another satisfied    */
 			/*   customer       */
-			e->e_return = (UWORD) dq(&cda->c_q);
+			e->e_return = (uint16_t) dq(&cda->c_q);
 			zombie(e);
 		} else							/* time to zzzzz... */
 			evinsert(e, &cda->c_iiowait);
@@ -299,15 +273,11 @@ REG LONG aparm;
 }
 
 
-UWORD aret(mask)
-REG EVSPEC mask;
+uint16_t aret(P(EVSPEC) mask)
+PP(register EVSPEC mask;)
 {
-	REG EVB *p,
-	*q,
-	*pz;
-
-	UWORD erret;
-
+	register EVB *p, *q, *pz;
+	uint16_t erret;
 
 	/* first find the event */
 	/*   on the process list */
@@ -345,16 +315,13 @@ REG EVSPEC mask;
 }
 
 
-EVSPEC acancel(m)
-EVSPEC m;
+EVSPEC acancel(P(EVSPEC) m)
+P(EVSPEC m;)
 {
-	REG EVSPEC m1;						/* mask of items not    */
-
+	register EVSPEC m1;						/* mask of items not    */
 	/*   cancelled      */
-	REG WORD f;
-
-	REG EVB *p,
-	*q;
+	register int16_t f;
+	register EVB *p, *q;
 
 	for (p = rlr->p_cda->c_bsleep; p; p = p->p_link)
 	{

@@ -40,21 +40,21 @@
 #define CA_ISPARM 0x80000000L
 #define TEXTBASE 8
 
-EXTERN BYTE *dos_exec();
+extern char *dos_exec();
 
-EXTERN WORD wildcmp();
+extern int16_t wildcmp();
 
-EXTERN VOID pstart();
+extern VOID pstart();
 
-EXTERN VOID gotopgm();
+extern VOID gotopgm();
 
-EXTERN WORD cre_aproc();
+extern int16_t cre_aproc();
 
-EXTERN WORD DOS_AX;
+extern int16_t DOS_AX;
 
-EXTERN BYTE *g_name();
+extern char *g_name();
 
-EXTERN BYTE dtabuf[];					/* dta buffer   */
+extern char dtabuf[];					/* dta buffer   */
 
 
 #define CARTNODE struct cartnode
@@ -62,22 +62,22 @@ CARTNODE
 {
 	CARTNODE *c_next;
 
-	LONG *c_init;
+	int32_t *c_init;
 
-	LONG *c_code;
+	int32_t *c_code;
 
-	WORD c_time;
+	int16_t c_time;
 
-	WORD c_date;
+	int16_t c_date;
 
-	LONG c_size;
+	int32_t c_size;
 
-	BYTE c_name[14];
+	char c_name[14];
 };
 
 GLOBAL CARTNODE *cart_ptr;
 
-GLOBAL BYTE *cart_dta;
+GLOBAL char *cart_dta;
 
 
 
@@ -90,18 +90,18 @@ cart_init()
 		return (TRUE);
 	} else
 	{
-		cart_ptr = NULLPTR;
+		cart_ptr = NULL;
 		return (FALSE);
 	}
 }
 
 
 CARTNODE * cart_find(fill)
-WORD fill;
+int16_t fill;
 {
-	REG BYTE *pdta;
+	register char *pdta;
 
-	REG CARTNODE *pcart;
+	register CARTNODE *pcart;
 
 	if (cart_ptr)
 	{
@@ -116,21 +116,21 @@ WORD fill;
 		cart_ptr = cart_ptr->c_next;	/* point to next    */
 		return (pcart);
 	}
-	return (NULLPTR);
+	return (NULL);
 }
 
 
-WORD cart_sfirst(pdta, attr)
-BYTE *pdta;
+int16_t cart_sfirst(pdta, attr)
+char *pdta;
 
-WORD attr;
+int16_t attr;
 {
 	cart_dta = pdta;
 	cart_init();
 	return (cart_snext());
 }
 
-WORD cart_snext()
+int16_t cart_snext()
 {
 	if (cart_find(TRUE))
 		return (TRUE);
@@ -141,13 +141,13 @@ WORD cart_snext()
 	}
 }
 
-WORD ld_cartacc()
+int16_t ld_cartacc()
 {
-	REG BYTE *psp;
+	register char *psp;
 
-	REG CARTNODE *pcart;
+	register CARTNODE *pcart;
 
-	REG WORD num_load;
+	register int16_t num_load;
 
 	cart_init();
 	num_load = 0;
@@ -168,13 +168,13 @@ WORD ld_cartacc()
 	return (num_load);
 }
 
-WORD cart_exec(pcmd, ptail)
-BYTE *pcmd,
+int16_t cart_exec(pcmd, ptail)
+char *pcmd,
 *ptail;
 {
-	REG BYTE *psp;
+	register char *psp;
 
-	REG CARTNODE *pcart;
+	register CARTNODE *pcart;
 
 	cart_init();
 
@@ -186,16 +186,16 @@ BYTE *pcmd,
 	psp = dos_exec("", 5, ptail);
 	LLSET(&psp[TEXTBASE], pcart->c_code);
 	dos_exec("", 4, psp);
-	dos_free(*(LONG *) (&psp[0x2c]));
+	dos_free(*(int32_t *) (&psp[0x2c]));
 	dos_free(psp);
 	return (TRUE);
 }
 
 
-WORD c_sfirst(path)
-BYTE *path;
+int16_t c_sfirst(path)
+char *path;
 {
-	BYTE *file;
+	char *file;
 
 	CARTNODE *pcart;
 

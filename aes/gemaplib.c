@@ -1,12 +1,11 @@
 /*
 *************************************************************************
-*			Revision Control System
+*                       Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemaplib.c,v $
+*  $Revision: 2.2 $     $Source: /u2/MRS/osrevisions/aes/gemaplib.c,v $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:20:33 $	$Locker: kbad $
+*  $Author: mui $       $Date: 89/04/26 18:20:33 $
 * =======================================================================
-*  $Log:	gemaplib.c,v $
 * Revision 2.2  89/04/26  18:20:33  mui
 * TT
 * 
@@ -18,34 +17,33 @@
 * 
 *************************************************************************
 */
-/*	Fix the ap_tplay, so after it finished, it stay where it is	*/
-/*	4/17/86			Derek Mui				*/
-/*	Fix at ap_tplay	4/8/86			Derek Mui		*/
-/*	Kludge at ap_tplay 3/11/86 - 3/12/86	Derek Mui		*/
-/*	Fix the ap_trec 03/10/86		Derek Mui		*/
-/*	1.1		03/20/85		Lowell Webster		*/
-/*	Reg Opt		03/09/85		Derek Mui		*/
-/*	GEMAPLIB.C	03/15/84 - 02/09/85	Lee Lorenzen		*/
-/*	Fix at ap_trecd to fix the length  4/5/90	D.Mui		*/
-/*	Add ap_init, ap_exit and rd_mymsg	4/3/91		D.Mui	*/
-/*	Fix at rd_mymsg for set setting the buffer clear flag 4/15/91	*/
-/*	New version number			7/7/92		D.Mui	*/
+/*      Fix the ap_tplay, so after it finished, it stay where it is     */
+/*      4/17/86                 Derek Mui                               */
+/*      Fix at ap_tplay 4/8/86                  Derek Mui               */
+/*      Kludge at ap_tplay 3/11/86 - 3/12/86    Derek Mui               */
+/*      Fix the ap_trec 03/10/86                Derek Mui               */
+/*      1.1             03/20/85                Lowell Webster          */
+/*      Reg Opt         03/09/85                Derek Mui               */
+/*      GEMAPLIB.C      03/15/84 - 02/09/85     Lee Lorenzen            */
+/*      Fix at ap_trecd to fix the length  4/5/90       D.Mui           */
+/*      Add ap_init, ap_exit and rd_mymsg       4/3/91          D.Mui   */
+/*      Fix at rd_mymsg for set setting the buffer clear flag 4/15/91   */
+/*      New version number                      7/7/92          D.Mui   */
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
+*       -------------------------------------------------------------
+*       GEM Application Environment Services              Version 1.1
+*       Serial No.  XXXX-0000-654321              All Rights Reserved
+*       Copyright (C) 1985                      Digital Research Inc.
+*       -------------------------------------------------------------
 */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
-#include <funcdef.h>
+#include "aes.h"
+#include "obdefs.h"
+#include "struct88.h"
+#include "baspag88.h"
+#include "gemlib.h"
+#include "funcdef.h"
 
 
 #define TCHNG 0
@@ -53,67 +51,21 @@
 #define MCHNG 2
 #define KCHNG 3
 
-						/* in ASYNC88.C     */
-EXTERN EVSPEC iasync();
-
-EXTERN VOID mwait();
-
-EXTERN WORD aret();
-
-						/* in PD88.C        */
-EXTERN PD *fpdnm();
-
-EXTERN WORD tchange();
-
-EXTERN WORD bchange();
-
-EXTERN WORD mchange();
-
-EXTERN WORD kchange();
-
-EXTERN WORD gl_ticktime;
-
-EXTERN LONG drwaddr;
-
-EXTERN WORD justretf();
-
-EXTERN LONG old_mcode;
-
-EXTERN WORD xrat;
-
-EXTERN WORD yrat;
-
-EXTERN WORD intin[];
-
-EXTERN WORD ptsin[];
-
-EXTERN WORD gl_nplanes;
-
-EXTERN THEGLO D;
-
-GLOBAL WORD gl_bvdisk;
-
-GLOBAL WORD gl_bvhard;
-
-GLOBAL WORD gl_recd;
-
-GLOBAL WORD gl_rlen;
-
-GLOBAL LONG gl_rbuf;
-
-GLOBAL WORD gl_play;					/* 3/11/86  */
-
-GLOBAL LONG gl_store;					/* 3/11/86  */
-
-GLOBAL WORD gl_mx;						/* 3/12/86  */
-
-GLOBAL WORD gl_my;						/* 3/12/86  */
+int16_t gl_bvdisk;
+int16_t gl_bvhard;
+int16_t gl_recd;
+int16_t gl_rlen;
+int32_t gl_rbuf;
+int16_t gl_play;					/* 3/11/86  */
+int32_t gl_store;				/* 3/11/86  */
+int16_t gl_mx;					/* 3/12/86  */
+int16_t gl_my;					/* 3/12/86  */
 
 
 /*	Application Init	*/
 
-WORD ap_init(pglobal)
-LONG pglobal;
+int16_t ap_init(P(intptr_t) pglobal)
+PP(intptr_t pglobal;)
 {
 	LLSET(pglobal, 0x03400001L);		/* version 3.40     */
 	LWSET(pglobal + 4, rlr->p_pid);
@@ -128,7 +80,7 @@ LONG pglobal;
 
 /*	Application Exit	*/
 
-WORD ap_exit()
+int16_t ap_exit(NOTHING)
 {
 	mn_clsda();
 	if (rlr->p_qindex)
@@ -143,8 +95,8 @@ WORD ap_exit()
 
 /*	Read the internal process message	*/
 
-WORD rd_mymsg(buffer)
-BYTE *buffer;
+int16_t rd_mymsg(P(VOIDPTR) buffer)
+PP(VOIDPTR buffer;)
 {
 	if (rlr->p_message[0])				/* there is a message   */
 	{
@@ -159,14 +111,11 @@ BYTE *buffer;
 /*
 *	APplication READ or WRITE
 */
-WORD ap_rdwr(code, id, length, pbuff)
-WORD code;
-
-WORD id;
-
-WORD length;
-
-LONG pbuff;
+int16_t ap_rdwr(P(int16_t) code, P(int16_t) id, P(int16_t) length, P(intptr_t) pbuff)
+PP(int16_t code;)
+PP(int16_t id;)
+PP(int16_t length;)
+PP(intptr_t pbuff;)
 {
 	/* use id,len,pbuff */
 	/*   on stack as a QPB  */
@@ -178,12 +127,11 @@ LONG pbuff;
 /*
 *	APplication FIND
 */
-WORD ap_find(pname)
-LONG pname;
+int16_t ap_find(P(intptr_t) pname)
+PP(intptr_t pname;)
 {
-	REG PD *p;
-
-	BYTE temp[9];
+	register PD *p;
+	char temp[9];
 
 	LSTCPY(ADDR(&temp[0]), pname);
 
@@ -197,18 +145,14 @@ LONG pname;
 /*
 *	Application Tape Player
 */
-VOID ap_tplay(pbuff, length, scale)
-REG LONG pbuff;
-
-WORD length;
-
-WORD scale;
+VOID ap_tplay(P(intptr_t) pbuff, P(int16_t) length, P(int16_t) scale)
+P(register intptr_t pbuff;)
+P(int16_t length;)
+P(int16_t scale;)
 {
-	REG WORD i;
-
+	register int16_t i;
 	FPD f;
-
-	LONG ad_f;
+	int32_t ad_f;
 
 	ad_f = &f;
 	dsptch();							/* dispatch everybody   */
@@ -224,8 +168,7 @@ WORD scale;
 		/* convert it to machine */
 		/*   specific form  */
 
-
-		switch (((WORD) (f.f_code)))
+		switch (((int16_t) (f.f_code)))
 		{
 		case TCHNG:
 			ev_timer((f.f_data * 100L) / scale);
@@ -241,14 +184,14 @@ WORD scale;
 				gsx_ncode(MOT_VECX, 0x0L);	/* movement       */
 				m_lptr2(&gl_store);
 			}
-			f.f_code = &mchange;
+			f.f_code = mchange;
 			gl_play = TRUE;
 			break;
 		case BCHNG:
-			f.f_code = &bchange;
+			f.f_code = bchange;
 			break;
 		case KCHNG:
-			f.f_code = &kchange;
+			f.f_code = kchange;
 			break;
 		}
 		/* play it      */
@@ -283,22 +226,19 @@ WORD scale;
 
 		gl_play = FALSE;
 	}
-}										/* ap_tplay */
+}
 
 
 /*
 *	APplication Tape RECorDer
 */
-WORD ap_trecd(pbuff, length)
-REG LONG pbuff;
-
-REG WORD length;
+int16_t ap_trecd(P(intptr_t) pbuff, P(int16_t) length)
+PP(register intptr_t pbuff;)
+PP(register int16_t length;)
 {
-	REG WORD i;
-
-	REG LONG code;
-
-	BYTE *trash;
+	register int16_t i;
+	register int32_t code;
+	F_CODE trash;
 
 	/* start recording in   */
 	/*   forker()       */
@@ -317,30 +257,28 @@ REG WORD length;
 	gl_recd = FALSE;
 	length = length - gl_rlen;			/* Fixed 4/5/90     */
 	gl_rlen = 0;
-/*	length = ((WORD)(gl_rbuf - pbuff)) / sizeof(FPD);	*/
+/*	length = ((int16_t)(gl_rbuf - pbuff)) / sizeof(FPD);	*/
 	gl_rbuf = 0x0L;
 	sti();
-	/* convert to machine   */
-	/*   independent    */
-	/*   recording      */
+	/* convert to machine independent recording */
 	for (i = 0; i < length; i++)
 	{
 		code = 0x0L;
-		trash = LLGET(pbuff);
-		if (trash == &tchange)
+		trash = (F_CODE) LLGET(pbuff);
+		if (trash == tchange)
 		{
-			code = TCHNG;				/*    WORD is changed to LONG   */
-/*	    LLSET(pbuff+sizeof(LONG *), LLGET(pbuff+sizeof(LONG *)) * 
+			code = TCHNG;				/*    int16_t is changed to int32_t   */
+/*	    LLSET(pbuff+sizeof(int32_t *), LLGET(pbuff+sizeof(int32_t *)) * 
 			gl_ticktime);	*/
 		}
-		if (trash == &mchange)
+		if (trash == mchange)
 			code = MCHNG;
-		if (trash == &kchange)
+		if (trash == kchange)
 			code = KCHNG;
-		if (trash == &bchange)
+		if (trash == bchange)
 			code = BCHNG;
 		LLSET(pbuff, code);
 		pbuff += sizeof(FPD);
 	}
-	return (length);
-}										/* ap_trecd */
+	return length;
+}

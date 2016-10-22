@@ -42,20 +42,20 @@
 
 typedef struct rssofln
 {
-	WORD	rss_offset;
-	WORD	rss_length;
+	int16_t	rss_offset;
+	int16_t	rss_length;
 }RSSOFLN;
 
 typedef struct imofln			/* image block structure	*/
 {
-	WORD	rim_offset;
-	WORD	rim_length;
+	int16_t	rim_offset;
+	int16_t	rim_length;
 }IMOFLN;
 
 typedef struct rstree
 {
-	WORD	rst_first;
-	WORD	rst_count;
+	int16_t	rst_first;
+	int16_t	rst_count;
 }RSTREE;
 
 #define RES_TREE	8		/* # of long tree pointers	*/
@@ -92,24 +92,24 @@ typedef struct rstree
 
 typedef struct rshdr
 {
-	WORD		rsh_vrsn;	/* must same order as RT_	*/
-	WORD		rsh_object;
-	WORD		rsh_tedinfo;
-	WORD		rsh_iconblk;	/* list of ICONBLKS		*/
-	WORD		rsh_bitblk;
-	WORD		rsh_frstr;	
-	WORD		rsh_string;
-	WORD		rsh_imdata;	/* image data			*/
-	WORD		rsh_frimg;	
-	WORD		rsh_trindex;
-	WORD		rsh_nobs;	/* counts of various structs	*/
-	WORD		rsh_ntree;
-	WORD		rsh_nted;
-	WORD		rsh_nib;
-	WORD		rsh_nbb;
-	WORD		rsh_nstring;
-	WORD		rsh_nimages;
-	WORD		rsh_rssize;	/* total bytes in resource	*/
+	int16_t		rsh_vrsn;	/* must same order as RT_	*/
+	int16_t		rsh_object;
+	int16_t		rsh_tedinfo;
+	int16_t		rsh_iconblk;	/* list of ICONBLKS		*/
+	int16_t		rsh_bitblk;
+	int16_t		rsh_frstr;	
+	int16_t		rsh_string;
+	int16_t		rsh_imdata;	/* image data			*/
+	int16_t		rsh_frimg;	
+	int16_t		rsh_trindex;
+	int16_t		rsh_nobs;	/* counts of various structs	*/
+	int16_t		rsh_ntree;
+	int16_t		rsh_nted;
+	int16_t		rsh_nib;
+	int16_t		rsh_nbb;
+	int16_t		rsh_nstring;
+	int16_t		rsh_nimages;
+	int16_t		rsh_rssize;	/* total bytes in resource	*/
 }RSHDR;
 
 

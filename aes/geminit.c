@@ -137,227 +137,87 @@
 
 #define CACHE_ON	0x00003919L
 #define CACHE_OFF	0x00000808L
-#define LONGFRAME	*(WORD *)(0x59eL)
+#define LONGFRAME	*(int16_t *)(0x59eL)
 
-EXTERN BYTE *save_2();
+extern int16_t xrat;
 
-EXTERN BYTE *dos_alloc();
+extern int16_t yrat;
 
-EXTERN WORD dos_open();
+extern int16_t gl_rschange;
 
-EXTERN WORD dos_read();
+extern int16_t gl_restype;
 
-EXTERN WORD dos_close();
+extern int16_t DOS_ERR;
 
-EXTERN WORD dos_sdrv();
+extern int16_t gl_ncols;
 
-EXTERN WORD isdrive();
+extern int16_t gl_nrows;
 
-EXTERN WORD app_reschange();
+extern int16_t gl_hchar;
 
-EXTERN BYTE *scan_2();
+extern int16_t gl_wchar;
 
-EXTERN BYTE *escan_str();
+extern int16_t gl_height;
 
-EXTERN WORD rom_ram();
+extern int16_t gl_hbox;
 
-EXTERN WORD sh_get();
+extern int16_t diskin;						/* in gemjstrt.s    */
 
-EXTERN WORD sh_put();
+extern int32_t ad_shcmd;
 
-EXTERN WORD xrat;
+extern int32_t ad_shtail;
 
-EXTERN WORD yrat;
+extern int16_t sh_gem;
 
-EXTERN WORD gl_rschange;
+extern int16_t sh_doexec;
 
-EXTERN WORD gl_restype;
+extern char infdata[];
 
-EXTERN WORD DOS_ERR;
-
-EXTERN WORD gl_ncols;
-
-EXTERN WORD gl_nrows;
-
-EXTERN WORD gl_hchar;
-
-EXTERN WORD gl_wchar;
-
-EXTERN WORD gl_height;
-
-EXTERN WORD gl_hbox;
-
-EXTERN WORD diskin;						/* in gemjstrt.s    */
-
-EXTERN LONG ad_shcmd;
-
-EXTERN LONG ad_shtail;
-
-EXTERN WORD sh_gem;
-
-EXTERN WORD sh_doexec;
-
-EXTERN BYTE infdata[];
-
-EXTERN LONG ad_intin;
+extern int32_t ad_intin;
 
 #define ARROW 0
 #define HGLASS 2
 
-						/* in DOSIF.A86     */
-EXTERN cli();
 
-EXTERN sti();
-
-EXTERN takecpm();
-
-EXTERN givecpm();
-
-						/* in GEMCTRL.C     */
-EXTERN PD *ictlmgr();
-
-						/* in GEMCLI.C      */
-EXTERN VOID ldaccs();
-
-						/* in SHLIB.C       */
-EXTERN VOID sh_main();
-
-EXTERN UWORD d_rezword;
-
-EXTERN WORD gl_recd;
-
-EXTERN WORD gl_rlen;
-
-EXTERN LONG gl_rbuf;
-
-EXTERN PD *gl_mowner;
-
-EXTERN PD *gl_kowner;
-
-EXTERN PD *ctl_pd;
-
-EXTERN LONG ad_shcmd;
-
-EXTERN LONG ad_shtail;
-
-EXTERN LONG ad_path;
-
-EXTERN LONG ad_windspb;
-
-EXTERN WORD intin[];
-
-EXTERN WORD ptsout[];
-
-EXTERN WORD intout[];
-
-EXTERN WORD hdr_buff[];
-
-
-EXTERN TEDINFO edblk;
-
-EXTERN BITBLK bi;
-
-EXTERN ICONBLK ib;
-
-EXTERN WORD gl_bclick;
-
-EXTERN WORD gl_bdesired;
-
-EXTERN WORD gl_btrue;
-
-EXTERN WORD gl_bdelay;
-
-EXTERN LONG tikaddr;
-
-EXTERN LONG tiksav;
-
-EXTERN WORD gl_ticktime;
-
-EXTERN THEGLO D;
-
-EXTERN WS gl_ws;
-
-EXTERN LONG gl_mlen;
-
-EXTERN FDB gl_tmp;
-
-EXTERN WORD gl_nplanes;
-
-EXTERN MFORM gl_cmform;
-
-EXTERN MFORM gl_omform;
-
-GLOBAL WORD do_once;
-
-GLOBAL EVB evx;
-
-GLOBAL LONG gl_vdo;
-
-GLOBAL LONG ad_sysglo;
-
-GLOBAL LONG ad_armice;
-
-GLOBAL LONG ad_hgmice;
-
-GLOBAL LONG ad_stdesk;
-
-GLOBAL LONG ad_fsel;
-
-GLOBAL LONG drawstk;
-
-GLOBAL WORD er_num;						/* for output.s */
-
-GLOBAL WORD no_aes;						/* gembind.s    */
-
-GLOBAL WORD sh_up;						/* is the sh_start being ran yet ? */
-
-GLOBAL WORD autoexec;					/* autoexec a file ?    */
-
-GLOBAL BYTE g_autoboot[128];
-
-GLOBAL WORD g_flag;
-
-GLOBAL WORD ctldown;					/* ctrl key down ?  */
-
+int16_t do_once;
+EVB evx;
+int32_t gl_vdo;
+int32_t ad_sysglo;
+int32_t ad_armice;
+int32_t ad_hgmice;
+int32_t ad_stdesk;
+int32_t ad_fsel;
+int32_t drawstk;
+int16_t er_num;						/* for output.s */
+int16_t no_aes;						/* gembind.s    */
+int16_t sh_up;						/* is the sh_start being ran yet ? */
+int16_t autoexec;					/* autoexec a file ?    */
+char g_autoboot[128];
+int16_t g_flag;
+int16_t ctldown;					/* ctrl key down ?  */
 /* 8/1/92 */
-GLOBAL UWORD act3dtxt;					/* look of 3D activator text */
-
-GLOBAL UWORD act3dface;					/* selected look of 3D activator */
-
-GLOBAL UWORD ind3dtxt;					/* look of 3D indicator text */
-
-GLOBAL UWORD ind3dface;					/* selected look of 3D indicators */
-
-GLOBAL UWORD gl_indbutcol;				/* indicator button color */
-
-GLOBAL UWORD gl_actbutcol;				/* activator button color */
-
-GLOBAL UWORD gl_alrtcol;				/* alert background color */
-
-GLOBAL WORD crt_error;					/* critical error handler semaphore     */
-
+uint16_t act3dtxt;					/* look of 3D activator text */
+uint16_t act3dface;					/* selected look of 3D activator */
+uint16_t ind3dtxt;					/* look of 3D indicator text */
+uint16_t ind3dface;					/* selected look of 3D indicators */
+uint16_t gl_indbutcol;				/* indicator button color */
+uint16_t gl_actbutcol;				/* activator button color */
+uint16_t gl_alrtcol;				/* alert background color */
+int16_t crt_error;					/* critical error handler semaphore     */
 				/* set in jbind.s, checked by dispatcher    */
+int16_t adeskp[3];					/* desktop colors & backgrounds */
+int16_t awinp[3];					/* window colors & backgrounds */
 
-GLOBAL WORD adeskp[3];					/* desktop colors & backgrounds */
 
-GLOBAL WORD awinp[3];					/* window colors & backgrounds */
-
-EXTERN BYTE *strcpy();					/* optimize.s   */
-
-EXTERN BYTE *sh_name();					/* gemshlib.c   */
-
-EXTERN WORD do_cdir();					/* jdos.s   */
-
-MLOCAL BYTE autopath[128];
+static char autopath[128];
 
 #if DOWARNING
-GLOBAL WORD dowarn;
+BOOLEAN dowarn;
 #endif
 
-EXTERN WORD button;
-
-
 #ifdef ACC_DELAY
+
+VOID accs_init PROTO((NOTHING));
 
 /* The AES startup code should wait for all accessories to finish initializing
  * before it starts the first main process running.  To determine that all
@@ -372,22 +232,13 @@ EXTERN WORD button;
  * Thus, we can loop until all accessories have a blocked waiting for a
  * message event with the following code:
  */
-extern PD *fpdnm();						/* given name and/or pid, return the PD */
-
-extern sh_tographic();
-
-accs_init()
+VOID accs_init(NOTHING)
 {
 	PD *pd;
-
-	REG EVB *e,
-	*ce;
-
-	REG CDA *c;
-
+	register EVB *e, *ce;
+	register CDA *c;
 	BOOLEAN notdone;
-
-	REG WORD pid;
+	register int16_t pid;
 
 	sh_tographic();
 	do
@@ -399,7 +250,7 @@ accs_init()
 
 		/* look at all accessory EVB lists (ctlmgr==0, screenmgr==1) */
 		pid = 2;
-		pd = fpdnm(NULLPTR, pid);
+		pd = fpdnm(NULL, pid);
 		while (pd)
 		{
 			c = pd->p_cda;
@@ -426,11 +277,11 @@ accs_init()
 				/* found one w/ no message blocks, or w/ NO event blocks */
 				/* fall out and let 'em run */
 				notdone = TRUE;
-				pd = NULLPTR;
+				pd = NULL;
 			} else
 			{
 				/* this guy had a message block, try the next pd */
-				pd = fpdnm(NULLPTR, ++pid);
+				pd = fpdnm(NULL, ++pid);
 			}
 		}
 
@@ -441,7 +292,7 @@ accs_init()
 
 /*	Set the resolution	*/
 
-VOID setres()
+VOID setres(NOTHING)
 {
 	int mode;
 
@@ -455,22 +306,15 @@ VOID setres()
 }
 
 
-main()
+VOID main(NOTHING)
 {
-	REG WORD i;
-
-	LONG tmpadbi;
-
-	LONG tree;
-
-	REG THEGLO *DGLO;
-
+	register int16_t i;
+	int32_t tmpadbi;
+	int32_t tree;
+	register THEGLO *DGLO;
 	PD *slr;
-
-	REG BYTE *apath;
-
+	register char *apath;
 	DGLO = &D;
-
 
 	er_num = ALRT04CRT;					/* output.s     */
 	no_aes = ALRTNOFUN;					/* for gembind.s    */
@@ -510,7 +354,7 @@ main()
 	/*   to heads of event  */
 	/*   list and thread    */
 	/*   list       */
-	elinkoff = (BYTE *) & evx.e_link - (BYTE *) & evx;
+	elinkoff = (char *) & evx.e_link - (char *) & evx;
 	/* link up all the evb's */
 	/*   to the event unused */
 	/*   list       */
@@ -724,7 +568,7 @@ main()
 #endif
 		/* change to dir of autoboot    */
 		apath = &autopath[0];
-		strcpy(g_autoboot, apath);
+		xstrpcpy(g_autoboot, apath);
 		*(sh_name(apath)) = 0;			/* change path\filename to path */
 		do_cdir(apath[0] - 'A', apath);
 
@@ -767,10 +611,9 @@ main()
 
 /*	process init	*/
 
-VOID pinit(ppd, pcda)
-REG PD *ppd;
-
-CDA *pcda;
+VOID pinit((PD *) ppd, P(CDA *) pcda)
+PP(register PD *ppd;)
+(CDA *pcda;)
 {
 	ppd->p_cda = pcda;
 	ppd->p_qaddr = &ppd->p_queue[0];
@@ -779,11 +622,11 @@ CDA *pcda;
 }
 
 
-LONG set_cache(newcacr)
-REG LONG newcacr;
+int32_t set_cache(P(int32_t) newcacr)
+PP(register int32_t newcacr;)
 {
-	asm(".dc.w $4e7a,$0002");			/* movec.l cacr,d0  */
-	asm(".dc.w $4e7b,$7002");			/* movec.l d7,cacr  */
+	asm("dc.w $4e7a,$0002");			/* movec.l cacr,d0  */
+	asm("dc.w $4e7b,$7002");			/* movec.l d7,cacr  */
 }
 
 /*
@@ -793,26 +636,16 @@ REG LONG newcacr;
 *
 * ++ERS 1/14/93: also read the preferred desktop backgrounds
 */
-WORD pred_dinf()
+int16_t pred_dinf(NOTHING)
 {
-	WORD res;
-
-	WORD cache;
-
-	REG WORD bsize,
-	 fh,
-	 change,
-	 cont;
-
-	BYTE *pbuf;
-
-	REG BYTE *temp;
-
-	WORD defdrv;
-
-	BYTE *chrptr;
-
-	WORD i;
+	int16_t res;
+	int16_t cache;
+	register int16_t bsize, fh, change, cont;
+	char *pbuf;
+	register char *temp;
+	int16_t defdrv;
+	char *chrptr;
+	int16_t i;
 
 	gl_vdo = 0x0L;
 	/* _VDO *//* 7/17/92 */
@@ -820,7 +653,7 @@ WORD pred_dinf()
 
 
 	g_autoboot[0] = 0;
-	pbuf = dos_alloc((LONG) SIZE_AFILE);
+	pbuf = dos_alloc((int32_t) SIZE_AFILE);
 	change = FALSE;
 	sh_get(pbuf, SIZE_AFILE);
 
@@ -953,12 +786,12 @@ WORD pred_dinf()
 
 /*     Save 25 columns and full height of the screen memory	*/
 
-WORD gsx_malloc()
+int16_t gsx_malloc(NOTHING)
 {
-	LONG len;
+	int32_t len;
 
 	gsx_fix(&gl_tmp, 0x0L, 0x0L);
-	len = (LONG) ((UWORD) gl_wchar) * (LONG) 25 *(LONG) ((UWORD) gl_height) * (LONG) ((UWORD) gl_nplanes);
+	len = (int32_t) ((uint16_t) gl_wchar) * (int32_t) 25 *(int32_t) ((uint16_t) gl_height) * (int32_t) ((uint16_t) gl_nplanes);
 
 	len = len / 8;
 	gl_mlen = len;
@@ -975,7 +808,7 @@ WORD gsx_malloc()
 /*	return TRUE if HARD DISK	*/
 /*	Doesn't NEED to return anything -- 881109 kbad */
 
-set_defdrv()
+VOID set_defdrv(NOTHING)
 {
 /* This fugly statement gets drvbits, masks drive C,
 *  and does a GEMDOS Setdrive to drive A (0) if C doesn't exist,
@@ -983,7 +816,7 @@ set_defdrv()
 */
 	dos_sdrv((isdrive() & 0x04) >> 1);
 /*
-*	WORD	ret;
+*	int16_t	ret;
 *	if (isdrive() & 0x04)
 *	{
 *	  dos_sdrv(0x02);
@@ -998,8 +831,8 @@ set_defdrv()
 }
 
 
-WORD gsx_xmfset(pmfnew)
-LONG pmfnew;
+int16_t gsx_xmfset(P(int32_t) pmfnew)
+PP(int32_t pmfnew;)
 {
 	gsx_moff();
 	LWCOPY(ad_intin, pmfnew, 37);
@@ -1008,8 +841,8 @@ LONG pmfnew;
 }
 
 
-WORD gsx_mfset(pmfnew)
-LONG pmfnew;
+int16_t gsx_mfset(P(int32_t) pmfnew)
+PP(int32_t pmfnew;)
 {
 	gsx_moff();
 	gl_omform = gl_cmform;
@@ -1022,13 +855,11 @@ LONG pmfnew;
 
 /*	Graf mouse		*/
 
-VOID gr_mouse(mkind, grmaddr)
-REG WORD mkind;
-
-MFORM *grmaddr;
+VOID gr_mouse(P(int16_t) mkind, P(MFORM *) grmaddr))
+PP(register int16_t mkind;)
+PP(MFORM *grmaddr;)
 {
-	LONG maddr;
-
+	int32_t maddr;
 	MFORM omform;
 
 	if (mkind > 255)
@@ -1071,32 +902,18 @@ MFORM *grmaddr;
 
 /*	Change code to compensate 3D objects	*/
 
-WORD gr_slidebox(tree, parent, obj, isvert)
-REG LONG tree;
-
-WORD parent;
-
-WORD obj;
-
-WORD isvert;
+int16_t gr_slidebox(P(OBJPTR) tree, P(int16_t) parent, P(int16_t) obj, P(int16_t) isvert))
+PP(register OBJPTR tree;)
+PP(int16_t parent;)
+PP(int16_t obj;)
+PP(int16_t isvert;)
 {
-	REG GRECT *pt,
-	*pc;								/* new pointer for Reg Opt  */
-
-	GRECT t,
-	 c;
-
-	REG LONG divnd,
-	 divis;
-
+	register GRECT *pt,	*pc;		/* new pointer for Reg Opt  */
+	GRECT t, c;
+	register int32_t divnd, divis;
 	OBJECT *objc;
-
-	WORD pflags,
-	 cflags;
-
-	WORD ret,
-	 setxy,
-	 setwh;
+	int16_t pflags, cflags;
+	int16_t ret, setxy, setwh;
 
 	pt = &t;
 	pc = &c;
@@ -1169,17 +986,15 @@ WORD isvert;
 *	mouse moves into or out of the specified rectangle.
 */
 
-WORD gr_stilldn(out, x, y, w, h)
-WORD out,
-	x,
-	y,
-	w,
-	h;
+int16_t gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h))
+PP(int16_t out;)
+PP(int16_t x;)
+PP(int16_t y;)
+PP(int16_t w;)
+PP(int16_t h;)
 {
-/*	WORD		rets[6];*/
-	WORD status;
+	int16_t status;
 
-/*	WORD		state;	*/
 	/* compiler had better  */
 	/*   put the values out, */
 	/*   x, y, w, h in the  */
@@ -1214,16 +1029,15 @@ WORD out,
 *	mouse moves into or out of the specified rectangle.
 */
 
-WORD gr_stilldn(out, x, y, w, h)
-WORD out,
-	x,
-	y,
-	w,
-	h;
+int16_t gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h))
+PP(int16_t out;)
+PP(int16_t x;)
+PP(int16_t y;)
+PP(int16_t w;)
+PP(int16_t h;)
 {
-	WORD rets[6];
-
-	WORD event;
+	int16_t rets[6];
+	int16_t event;
 
 	/* compiler had better  */
 	/*   put the values out, */
@@ -1233,7 +1047,7 @@ WORD out,
 	/*   MOBLK      */
 	while (1)
 	{
-		event = ev_multi(MU_BUTTON | MU_M1 | MU_TIMER, &out, NULLPTR, 0x0L, 0x00010100L, 0x0L, &rets[0]);	/* 01ff00L */
+		event = ev_multi(MU_BUTTON | MU_M1 | MU_TIMER, &out, NULL, 0x0L, 0x00010100L, 0x0L, &rets[0]);	/* 01ff00L */
 
 		if (event & MU_BUTTON)			/* button up */
 			return (FALSE);
@@ -1247,5 +1061,5 @@ WORD out,
 				return (FALSE);
 		}
 	}
-}										/* gr_stilldn */
+}
 #endif

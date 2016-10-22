@@ -75,7 +75,7 @@
 /* EXTERNS
  * ================================================================
  */
-EXTERN BYTE *dos_alloc();
+extern char *dos_alloc();
 
 /* Must be declared here, or else redeclarations occur */
 PNODE_PTR FindProcess();
@@ -101,29 +101,29 @@ PNODE_PTR IndexList;					/* Head ptr for process structures */
  * Find the Index ID this submenu is assigned to based upon
  * the current Process ID#, the OBJECT tree and the menu object.
  *
- * IN: WORD    id;    -  Process id
+ * IN: int16_t    id;    -  Process id
  *     OBJECT *itree  -  tree that we are looking for
- *     WORD    menu   -  menu object that we are looking for.
+ *     int16_t    menu   -  menu object that we are looking for.
  *
- * OUT: WORD - SUCCESS - return the Index ID, if found
+ * OUT: int16_t - SUCCESS - return the Index ID, if found
  *             FAILURE - return 0
  */
-WORD FindIndex(id, itree, imenu)
-WORD id;								/* Process id */
+int16_t FindIndex(id, itree, imenu)
+int16_t id;								/* Process id */
 
 OBJECT *itree;							/* ptr to the tree that we are looking for */
 
-WORD imenu;								/* the menu object that we are looking for */
+int16_t imenu;								/* the menu object that we are looking for */
 {
-	REG WORD i;							/* Used as a counter */
+	register int16_t i;							/* Used as a counter */
 
-	REG INDEX_PTR IndexPtr;				/* Pointer to the current Index structure  */
+	register INDEX_PTR IndexPtr;				/* Pointer to the current Index structure  */
 
-	REG CNODE_PTR CurPtr;				/* Pointer to the current Cluster structure */
+	register CNODE_PTR CurPtr;				/* Pointer to the current Cluster structure */
 
 	PNODE_PTR ProcPtr;					/* Pointer to the current Process structure */
 
-	if ((ProcPtr = FindProcess(id)) == NULLPTR)	/* Look for the process node */
+	if ((ProcPtr = FindProcess(id)) == NULL)	/* Look for the process node */
 		return (0);
 
 	if (!PCOUNT(ProcPtr))				/* No Nodes are active       */
@@ -158,38 +158,38 @@ WORD imenu;								/* the menu object that we are looking for */
  * Gets a new index number ( 1-254 ) for this process so that it
  * can attach a submenu to a menu item.
  *
- * IN: WORD   id;    - Process id
+ * IN: int16_t   id;    - Process id
  *     OBJECT *itree - The submenu tree to attach
- *     WORD   menu   - The menu object to attach
+ *     int16_t   menu   - The menu object to attach
  *
- * OUT: WORD - SUCCESS - return an Index ID from ( 1 - 254 ).
+ * OUT: int16_t - SUCCESS - return an Index ID from ( 1 - 254 ).
  *             FAILURE - return 0 for an error or if there are no
  *                       more index id's available.
  */
-WORD Get_New_Index(id, itree, imenu)
-WORD id;								/* Process id              */
+int16_t Get_New_Index(id, itree, imenu)
+int16_t id;								/* Process id              */
 
 OBJECT *itree;							/* the submenu tree to attach      */
 
-WORD imenu;								/* the menu object to attach       */
+int16_t imenu;								/* the menu object to attach       */
 {
 	OBJECT *tree;						/* OBJECT tree ( for the defines   */
 
-	REG INDEX_PTR IndexPtr;				/* Pointer to the Index structure  */
+	register INDEX_PTR IndexPtr;				/* Pointer to the Index structure  */
 
-	REG PNODE_PTR ProcPtr;				/* Pointer to the process structure */
+	register PNODE_PTR ProcPtr;				/* Pointer to the process structure */
 
-	WORD Index;							/* The available Index ID!         */
+	int16_t Index;							/* The available Index ID!         */
 
-	if ((ProcPtr = FindProcess(id)) == NULLPTR)	/* Look for the process node */
+	if ((ProcPtr = FindProcess(id)) == NULL)	/* Look for the process node */
 	{
-		if ((ProcPtr = GetNewProc(id)) == NULLPTR)	/* Create a new process node */
+		if ((ProcPtr = GetNewProc(id)) == NULL)	/* Create a new process node */
 			return (0);					/* Return a 0 index ( error ) */
 	}
 	if ((Index = GetNewID(ProcPtr)) == NULL)	/* Get an Index ID!          */
 		return (0);						/* No more- sorry            */
 
-	if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) == NULLPTR)	/* Get the pntr         */
+	if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) == NULL)	/* Get the pntr         */
 		return (0);
 
 	ActiveTree(itree);					/* fill the struct      */
@@ -213,20 +213,20 @@ WORD imenu;								/* the menu object to attach       */
  * Initialize a new process structure.
  * 
  * IN:  PNODE_PTR CurPtr - ptr to the process structure to init.
- *      WORD      pid    - Process ID to put into the struct.
+ *      int16_t      pid    - Process ID to put into the struct.
  *
  * OUT: void
  */
 VOID InitProcess(CurPtr, id)
-REG PNODE_PTR CurPtr;					/* ptr to the process node    */
+register PNODE_PTR CurPtr;					/* ptr to the process node    */
 
-WORD id;								/* process id for the node    */
+int16_t id;								/* process id for the node    */
 {
-	REG CNODE_PTR CPtr;					/* Ptr to cluster             */
+	register CNODE_PTR CPtr;					/* Ptr to cluster             */
 
 	PID(CurPtr) = id;					/* Install the new process id */
 	PCOUNT(CurPtr) = 0;					/* Clear the # of IDs used    */
-	PNEXT(CurPtr) = NULLPTR;			/* Clear ptr to next process  */
+	PNEXT(CurPtr) = NULL;			/* Clear ptr to next process  */
 
 	CPtr = &PCLUSTER(CurPtr);			/* Get pointer to cluster     */
 	InitCluster(CPtr);					/* Initialize the cluster     */
@@ -238,24 +238,24 @@ WORD id;								/* process id for the node    */
  * ================================================================
  * Given a process id, we look in the IndexList linked list for
  * that process. Return a pointer to that node if found, otherwise
- * return NULLPTR
+ * return NULL
  *
- * IN:  WORD id - Process ID to look for.
+ * IN:  int16_t id - Process ID to look for.
  * 
  * OUT: SUCCESS - return a pointer to the process structure.
  *      FAILURE - return NULLPTR.
  */
 PNODE_PTR FindProcess(id)
-WORD id;								/* process id to look for       */
+int16_t id;								/* process id to look for       */
 {
-	REG PNODE_PTR CurPtr;				/* Ptr to Current Process struct */
+	register PNODE_PTR CurPtr;				/* Ptr to Current Process struct */
 
 	CurPtr = IndexList;					/* Set it to the head */
 
 	while (CurPtr && (PID(CurPtr) != id))	/* Go through till the end     */
 		CurPtr = PNEXT(CurPtr);			/* or, until we find the pid   */
 
-	return (CurPtr);					/* Return either NULLPTR or ptr */
+	return (CurPtr);					/* Return either NULL or ptr */
 }
 
 
@@ -264,17 +264,17 @@ WORD id;								/* process id to look for       */
  * ================================================================
  * Given a pid, allocate a new Process structure and initialize it.
  * SUCCESS - return a pointer to this node.
- * FAILURE - return NULLPTR
+ * FAILURE - return NULL
  */
 PNODE_PTR GetNewProc(id)
-WORD id;								/* process id to use      */
+int16_t id;								/* process id to use      */
 {
-	REG PNODE_PTR CurPtr;				/* Ptr to Current Process */
+	register PNODE_PTR CurPtr;				/* Ptr to Current Process */
 
-	REG PNODE_PTR NewPtr;				/* Ptr to New Process     */
+	register PNODE_PTR NewPtr;				/* Ptr to New Process     */
 
 	/* Allocate memory for a new process structure */
-	if ((NewPtr = (PNODE_PTR) dos_alloc((LONG) sizeof(PNODE))) > NULLPTR)
+	if ((NewPtr = (PNODE_PTR) dos_alloc((int32_t) sizeof(PNODE))) > NULL)
 	{
 		InitProcess(NewPtr, id);
 
@@ -313,20 +313,20 @@ VOID mn_new(VOID)
  * and Cluster Structures.  Fix up the pointers in the linked list
  * if necessary.
  *
- * IN:  WORD id - the process id to free up.
+ * IN:  int16_t id - the process id to free up.
  *
  * OUT: void
  */
 VOID mn_free(id)
-WORD id;								/* process id to free up */
+int16_t id;								/* process id to free up */
 {
-	REG PNODE_PTR CurPtr;				/* ptr to current process */
+	register PNODE_PTR CurPtr;				/* ptr to current process */
 
-	REG PNODE_PTR PrevPtr;				/* ptr to previous proc  */
+	register PNODE_PTR PrevPtr;				/* ptr to previous proc  */
 
 	if (IndexList)						/* Test the head list    */
 	{
-		if ((CurPtr = FindProcess(id)) > NULLPTR)	/* Find the process!     */
+		if ((CurPtr = FindProcess(id)) > NULL)	/* Find the process!     */
 		{								/* YES! found the process */
 			if (CurPtr == IndexList)	/* Check if its the head */
 			{							/* Its the first structure, so */
@@ -362,13 +362,13 @@ WORD id;								/* process id to free up */
  * OUT: void
  */
 VOID InitCluster(CurPtr)
-REG CNODE_PTR CurPtr;					/* ptr to the current cluster */
+register CNODE_PTR CurPtr;					/* ptr to the current cluster */
 {
-	REG WORD i;							/* Counter            */
+	register int16_t i;							/* Counter            */
 
-	REG INDEX_PTR IndexPtr;				/* Ptr to Index structure     */
+	register INDEX_PTR IndexPtr;				/* Ptr to Index structure     */
 
-	CNEXT(CurPtr) = NULLPTR;			/* Clear ptr to next cluster  */
+	CNEXT(CurPtr) = NULL;			/* Clear ptr to next cluster  */
 	for (i = 0; i < CMAX; i++)			/* Init each index node       */
 	{
 		IndexPtr = &CTABLE(CurPtr)[i];	/* Get index node pointer */
@@ -376,7 +376,7 @@ REG CNODE_PTR CurPtr;					/* ptr to the current cluster */
 		{								/* and update the vars    */
 			INDEX_STATUS(IndexPtr) = FALSE;	/* FALSE - unused         */
 			INDEX_ID(IndexPtr) = 0;		/* Clear the rest of the  */
-			INDEX_TREE(IndexPtr) = NULLPTR;	/* variables...           */
+			INDEX_TREE(IndexPtr) = NULL;	/* variables...           */
 			INDEX_MENU(IndexPtr) = NIL;
 			INDEX_OBJ(IndexPtr) = NIL;
 			INDEX_FLAGSCROLL(IndexPtr) = FALSE;
@@ -390,13 +390,13 @@ REG CNODE_PTR CurPtr;					/* ptr to the current cluster */
 /* GetNewCluster()
  * ================================================================
  * Allocates memory for a new CNODE and returns a pointer to it.
- * returns NULLPTR if FAILURE.
+ * returns NULL if FAILURE.
  */
 CNODE_PTR GetNewCluster(VOID)
 {
-	REG CNODE_PTR NewPtr;				/* Ptr to the new cluster */
+	register CNODE_PTR NewPtr;				/* Ptr to the new cluster */
 
-	if ((NewPtr = (CNODE_PTR) dos_alloc((LONG) sizeof(CNODE))) > NULLPTR)
+	if ((NewPtr = (CNODE_PTR) dos_alloc((int32_t) sizeof(CNODE))) > NULL)
 		InitCluster(NewPtr);
 	return (NewPtr);
 }
@@ -420,11 +420,11 @@ CNODE_PTR GetNewCluster(VOID)
 VOID FreeClusters(ProcPtr)
 PNODE_PTR ProcPtr;						/* ptr to the process node           */
 {
-	REG CNODE_PTR CurPtr;				/* Pointer to current Cluster        */
+	register CNODE_PTR CurPtr;				/* Pointer to current Cluster        */
 
-	REG CNODE_PTR PrevPtr;				/* Pointer to Previous Cluster       */
+	register CNODE_PTR PrevPtr;				/* Pointer to Previous Cluster       */
 
-	REG CNODE_PTR BasePtr;				/* Pointer to the base cluster       */
+	register CNODE_PTR BasePtr;				/* Pointer to the base cluster       */
 
 	/* Which is the un-freeable cluster  */
 	/* contained in the process structure */
@@ -438,7 +438,7 @@ PNODE_PTR ProcPtr;						/* ptr to the process node           */
 			PrevPtr = CurPtr;			/* so that we can free up the last   */
 			CurPtr = CNEXT(CurPtr);		/* cluster in use.                   */
 		}
-		CNEXT(PrevPtr) = NULLPTR;		/* Clear pointer pting to this node  */
+		CNEXT(PrevPtr) = NULL;		/* Clear pointer pting to this node  */
 		dos_free(CurPtr);				/* And delete it.                    */
 	}
 
@@ -466,18 +466,18 @@ PNODE_PTR ProcPtr;						/* ptr to the process node           */
  * SUCCESS - return the id number.
  * FAILURE - return 0
  */
-WORD GetNewID(ProcPtr)
+int16_t GetNewID(ProcPtr)
 PNODE_PTR ProcPtr;						/* ptr to the process node  */
 {
-	REG CNODE_PTR CurPtr;				/* ptr to Current Cluster   */
+	register CNODE_PTR CurPtr;				/* ptr to Current Cluster   */
 
 	CNODE_PTR PrevPtr;					/* ptr to previous Cluster  */
 
-	WORD CurID;							/* Current ID           */
+	int16_t CurID;							/* Current ID           */
 
-	WORD i;								/* Counter...           */
+	int16_t i;								/* Counter...           */
 
-	REG INDEX_PTR IndexPtr;				/* ptr to current Index node */
+	register INDEX_PTR IndexPtr;				/* ptr to current Index node */
 
 	CurID = MIN_INDEX - 1;
 
@@ -513,7 +513,7 @@ PNODE_PTR ProcPtr;						/* ptr to the process node  */
 				/* If we got this far, then we ran out of room in the cluster
 				 * and need to allocate a new cluster.
 				 */
-				if ((CurPtr = GetNewCluster()) == NULLPTR)	/* error */
+				if ((CurPtr = GetNewCluster()) == NULL)	/* error */
 					return (0);
 				CNEXT(PrevPtr) = CurPtr;	/* Attach the cluster onto the end */
 				PrevPtr = CurPtr;		/* and reset the previous ptr.    */
@@ -532,7 +532,7 @@ PNODE_PTR ProcPtr;						/* ptr to the process node  */
  * If the index isn't found, return NULLPTR.
  *
  * IN: PNODE_PTR ProcPtr - Ptr to the process structure.
- *     WORD      index   - The Index ID that we are looking for
+ *     int16_t      index   - The Index ID that we are looking for
  *
  * OUT: INDEX_PTR - SUCCESS - found it! return the pointer to it.
  *                - FAILURE - return NULLPTR.
@@ -540,16 +540,16 @@ PNODE_PTR ProcPtr;						/* ptr to the process node  */
 INDEX_PTR GetIndexPtr(ProcPtr, index)
 PNODE_PTR ProcPtr;						/* ptr to the process node  */
 
-WORD index;								/* Index ID to look for     */
+int16_t index;								/* Index ID to look for     */
 {
-	REG CNODE_PTR CurPtr;				/* Ptr to current Cluster   */
+	register CNODE_PTR CurPtr;				/* Ptr to current Cluster   */
 
-	REG INDEX_PTR IndexPtr;				/* Ptr to the Index         */
+	register INDEX_PTR IndexPtr;				/* Ptr to the Index         */
 
-	REG WORD i;							/* Used as a counter        */
+	register int16_t i;							/* Used as a counter        */
 
 	if (!PCOUNT(ProcPtr))				/* If no active nodes, exit */
-		return ((INDEX_PTR) NULLPTR);	/* So return NULLPTR        */
+		return ((INDEX_PTR) NULL);	/* So return NULL        */
 
 	CurPtr = &PCLUSTER(ProcPtr);		/* Get pointer to 1st cluster */
 	while (CurPtr)
@@ -565,7 +565,7 @@ WORD index;								/* Index ID to look for     */
 		}
 		CurPtr = CNEXT(CurPtr);			/* Go to the next cluster,if any */
 	}
-	return ((INDEX_PTR) NULLPTR);
+	return ((INDEX_PTR) NULL);
 }
 
 
@@ -582,7 +582,7 @@ WORD index;								/* Index ID to look for     */
  * mark the node as INACTIVE.
  *
  * IN: PNODE_PTR ProcPtr - Pointer to the process structure
- *     WORD      index   - Index ID to delete
+ *     int16_t      index   - Index ID to delete
  *     BOOLEAN   flag    - FALSE - Decrement the count first, if zero
  * 			           then delete the structure.
  *			 - TRUE  - Disregard the count and immediately
@@ -593,15 +593,15 @@ WORD index;								/* Index ID to look for     */
 VOID DeleteIndex(ProcPtr, index, flag)
 PNODE_PTR ProcPtr;						/* ptr to process node     */
 
-WORD index;								/* Index ID to delete      */
+int16_t index;								/* Index ID to delete      */
 
 BOOLEAN flag;							/* See above description... */
 {
-	REG INDEX_PTR IndexPtr;				/* Ptr to Index structure  */
+	register INDEX_PTR IndexPtr;				/* Ptr to Index structure  */
 
 	if (ProcPtr)						/* Make sure its valid     */
 	{
-		if ((IndexPtr = GetIndexPtr(ProcPtr, index)) > NULLPTR)	/* Get ptr to Index struct */
+		if ((IndexPtr = GetIndexPtr(ProcPtr, index)) > NULL)	/* Get ptr to Index struct */
 		{
 			if (!flag)					/* FALSE! - decrement first */
 			{

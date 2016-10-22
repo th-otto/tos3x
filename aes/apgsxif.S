@@ -26,100 +26,93 @@
 * 	Assemble with MAS 900801 kbad
 *	Change at gsx_start to do inquire of number planes 7/7/92	D.Mui
 
-	.globl	_vst_cli,_v_pline,_vrt_cpy,_vro_cpy
-	.globl	_vrn_trn,_vst_height,_vsl_width,_vr_recfl
-	.globl	_gsx2,_gsx_moff,_gsx_mon,_gsx_ncode,_gsx_1code,_LBWMOV
-
-	.globl	_xrat,_yrat,_button
-
-	.globl	_gl_width
-	.comm	_gl_width,2
-	.globl	_gl_heigh
-	.comm	_gl_heigh,2
-	.globl	_gl_nrows
-	.comm	_gl_nrows,2
-	.globl	_gl_ncols
-	.comm	_gl_ncols,2
-	.globl	_gl_wchar
-	.comm	_gl_wchar,2
-	.globl	_gl_hchar
-	.comm	_gl_hchar,2
-	.globl	_gl_wscha
-	.comm	_gl_wscha,2
-	.globl	_gl_hscha
-	.comm	_gl_hscha,2
-	.globl	_gl_wptsc
-	.comm	_gl_wptsc,2
-	.globl	_gl_hptsc
-	.comm	_gl_hptsc,2
-	.globl	_gl_wspts
-	.comm	_gl_wspts,2
-	.globl	_gl_hspts
-	.comm	_gl_hspts,2
-	.globl	_gl_wbox
-	.comm	_gl_wbox,2
-	.globl	_gl_hbox
-	.comm	_gl_hbox,2
-	.globl	_gl_xclip
-	.comm	_gl_xclip,2
-	.globl	_gl_yclip
-	.comm	_gl_yclip,2
-	.globl	_gl_wclip
-	.comm	_gl_wclip,2
-	.globl	_gl_hclip
-	.comm	_gl_hclip,2
-	.globl	_gl_nplan
-	.comm	_gl_nplan,2
-	.globl	_gl_handl
-	.comm	_gl_handl,2
-	.globl	_gl_src
-	.comm	_gl_src,20
-	.globl	_gl_dst
-	.comm	_gl_dst,20
-	.globl	_gl_ws
-	.comm	_gl_ws,114
-	.globl	_contrl
-	.comm	_contrl,24
-	.globl	_intin
-	.comm	_intin,256
-	.globl	_ptsin
-	.comm	_ptsin,40
-	.globl	_intout
-	.comm	_intout,20
-	.globl	_ptsout
-	.comm	_ptsout,20
-	.globl	_ad_intin
-	.comm	_ad_intin,4
-	.globl	_gl_mode
-	.comm	_gl_mode,2
-	.globl	_gl_mask
-	.comm	_gl_mask,2
-	.globl	_gl_tcolo
-	.comm	_gl_tcolo,2
-	.globl	_gl_lcolo
-	.comm	_gl_lcolo,2
-	.globl	_gl_fis
-	.comm	_gl_fis,2
-	.globl	_gl_patt
-	.comm	_gl_patt,2
-	.globl	_gl_font
-	.comm	_gl_font,2
-	.globl	_gl_rscre
-	.comm	_gl_rscre,8
-	.globl	_gl_rfull
-	.comm	_gl_rfull,8
-	.globl	_gl_rzero
-	.comm	_gl_rzero,8
-	.globl	_gl_rcent
-	.comm	_gl_rcent,8
-	.globl	_gl_rmenu
-	.comm	_gl_rmenu,8
+	xdef	_gl_width
+	comm	_gl_width,2
+	xdef	_gl_height
+	comm	_gl_height,2
+	xdef	_gl_nrows
+	comm	_gl_nrows,2
+	xdef	_gl_ncols
+	comm	_gl_ncols,2
+	xdef	_gl_wchar
+	comm	_gl_wchar,2
+	xdef	_gl_hchar
+	comm	_gl_hchar,2
+	xdef	_gl_wscha
+	comm	_gl_wscha,2
+	xdef	_gl_hscha
+	comm	_gl_hscha,2
+	xdef	_gl_wptsc
+	comm	_gl_wptsc,2
+	xdef	_gl_hptsc
+	comm	_gl_hptsc,2
+	xdef	_gl_wspts
+	comm	_gl_wspts,2
+	xdef	_gl_hspts
+	comm	_gl_hspts,2
+	xdef	_gl_wbox
+	comm	_gl_wbox,2
+	xdef	_gl_hbox
+	comm	_gl_hbox,2
+	xdef	_gl_xclip
+	comm	_gl_xclip,2
+	xdef	_gl_yclip
+	comm	_gl_yclip,2
+	xdef	_gl_wclip
+	comm	_gl_wclip,2
+	xdef	_gl_hclip
+	comm	_gl_hclip,2
+	xdef	_gl_nplan
+	comm	_gl_nplan,2
+	xdef	_gl_handl
+	comm	_gl_handl,2
+	xdef	_gl_src
+	comm	_gl_src,20
+	xdef	_gl_dst
+	comm	_gl_dst,20
+	xdef	_gl_ws
+	comm	_gl_ws,114
+	xdef	_contrl
+	comm	_contrl,24
+	xdef	_intin
+	comm	_intin,256
+	xdef	_ptsin
+	comm	_ptsin,40
+	xdef	_intout
+	comm	_intout,20
+	xdef	_ptsout
+	comm	_ptsout,20
+	xdef	_ad_intin
+	comm	_ad_intin,4
+	xdef	_gl_mode
+	comm	_gl_mode,2
+	xdef	_gl_mask
+	comm	_gl_mask,2
+	xdef	_gl_tcolo
+	comm	_gl_tcolo,2
+	xdef	_gl_lcolo
+	comm	_gl_lcolo,2
+	xdef	_gl_fis
+	comm	_gl_fis,2
+	xdef	_gl_patt
+	comm	_gl_patt,2
+	xdef	_gl_font
+	comm	_gl_font,2
+	xdef	_gl_rscre
+	comm	_gl_rscre,8
+	xdef	_gl_rfull
+	comm	_gl_rfull,8
+	xdef	_gl_rzero
+	comm	_gl_rzero,8
+	xdef	_gl_rcent
+	comm	_gl_rcent,8
+	xdef	_gl_rmenu
+	comm	_gl_rmenu,8
 	
 IBM	equ	3
 SMALL	equ	5
 
 
-	.globl _gsx_scli
 
 *  call:
 *
@@ -130,7 +123,8 @@ SMALL	equ	5
 *  in:
 *	sp+04	pt
 
-_gsx_scli:
+	xdef _gsx_sclip
+_gsx_sclip:
 
 	move.l	4(sp),a0		; a0 -> pt
 	move.l	a0,a1			; a1 -> pt
@@ -170,7 +164,6 @@ L4:	move.w	d0,-(sp)
 
 
 
-	.globl _gsx_gcli
 
 *  call:
 *
@@ -179,7 +172,8 @@ L4:	move.w	d0,-(sp)
 *  in:
 *	sp+04	pt	long pointer to GRECT
 
-_gsx_gcli:
+	xdef _gsx_gclip
+_gsx_gclip:
 
 	move.l	4(sp),a0		; a0 -> pt
 	move.w	_gl_xclip,(a0)+		; pt->g_x <- gl_xclip
@@ -189,7 +183,7 @@ _gsx_gcli:
 	rts
 
 
-	.globl _gsx_chkc
+	xdef _gsx_chkc
 
 *  call:
 *
@@ -235,7 +229,7 @@ L10:	moveq.l	#0,d0			; return(FALSE)
 
 
 
-	.globl	_gsx_plin
+	xdef	_gsx_plin
 
 *  call:
 *
@@ -275,7 +269,7 @@ L13:	subq.w	#1,d2			; for (i=0; i<cnt; i++)
 
 
 
-	.globl	_gsx_clin
+	xdef	_gsx_clin
 
 *  call:
 *
@@ -301,7 +295,7 @@ _gsx_clin:
 
 	rts
 
-	.globl _gsx_attr
+	xdef _gsx_attr
 
 *  call:
 *
@@ -365,7 +359,7 @@ L21:	move.w	(sp)+,(a3)		; restore intin[0]
 	rts
 
 
-	.globl _gsx_bxpt
+	xdef _gsx_bxpt
 
 *  call:
 *
@@ -398,7 +392,7 @@ _gsx_bxpt:
 	rts
 
 
-	.globl	_gsx_box
+	xdef	_gsx_box
 
 *  call:
 *
@@ -421,7 +415,7 @@ _gsx_box:
 
 
 
-	.globl _gsx_fix
+	xdef _gsx_fix
 
 *  call:
 *
@@ -474,7 +468,7 @@ L29:	move.w	(a0)+,d0		; d0 <- wb
 
 
 
-	.globl	_gsx_blt
+	xdef	_gsx_blt
 
 *  call:
 *
@@ -549,10 +543,10 @@ _gsx_blt:
 	cmp.w	#-1,(a3)
 	beq	L32			; *CS* from bne
 
-	jsr	_vrt_cpy
+	jsr	_vrt_cpyfm
 	bra	L33
 	
-L32:	jsr	_vro_cpy
+L32:	jsr	_vro_cpyfm
 
 L33:	jsr	_gsx_mon		; show cursor
 
@@ -562,7 +556,7 @@ L33:	jsr	_gsx_mon		; show cursor
 
 
 
-	.globl _bb_scree
+	xdef _bb_scree
 
 *  call:
 *
@@ -597,7 +591,7 @@ _bb_scree:
 	rts
 
 
-	.globl _gsx_tran
+	xdef _gsx_tran
 
 *  call:
 *
@@ -635,7 +629,7 @@ _gsx_tran:
 
 	pea	(a5)			; push gl_dst
 	pea	(a4)			; push gl_src
-	jsr	_vrn_trn
+	jsr	_vrn_trnfm
 
 	lea	32(sp),sp
 	movem.l	(sp)+,a3-a5
@@ -643,7 +637,7 @@ _gsx_tran:
 
 
 
-	.globl _gsx_star
+	xdef _gsx_star
 
 *  call:
 *
@@ -675,7 +669,7 @@ _gsx_star:
 	move.w	(a3)+,d4
 	addq.w	#1,d4
 	move.w	d4,_gl_hclip
-	move.w	d4,_gl_heigh		; d4 = gl_height
+	move.w	d4,_gl_height		; d4 = gl_height
 
 	lea	_intin,a0
 	move.w	#1,(a0)			; intin[0] = 1
@@ -794,7 +788,7 @@ x_x1:	pea	$000F0007		;  (sp) <- 15
 
 
 
-	.globl _bb_fill
+	xdef _bb_fill
 
 *  call:
 *
@@ -871,8 +865,6 @@ L42:	lea	_ptsin,a0
 
 
 
-	.globl	_gsx_tcal
-
 *  call:
 *
 *	gsx_tcalc(font, ptext, ptextw, ptexth, pnumchs)
@@ -915,7 +907,8 @@ L42:	lea	_ptsin,a0
 *	ptexth  =  hc
 *       pnumchs =  number of characters
 
-_gsx_tcal:
+	xdef	_gsx_tcalc
+_gsx_tcalc:
 
 	lea	4(sp),a0
 	movem.l	d3/a3-a5,-(sp)
@@ -971,7 +964,6 @@ L49:	move.w	d0,(a5)			; set pnumchs
 
 
 
-	.globl	_gsx_tblt
 
 *  call:
 *
@@ -983,6 +975,7 @@ L49:	move.w	d0,(a5)			; set pnumchs
 *	  +08	y	word
 *	  +10	tb_nc	word
 
+	xdef	_gsx_tblt
 _gsx_tblt:
 
 	lea	4(sp),a0		; a0 -> parameter list
@@ -1044,7 +1037,7 @@ T51:	dc.l	_gl_hspts,_gl_hscha,_gl_wscha,_gl_hspts,_gl_wspts,_gl_ws+92
 
 
 
-	.globl _gsx_xbox
+	xdef _gsx_xbox
 
 *  call:
 *
@@ -1074,7 +1067,7 @@ _gsx_xbox:
 	rts
 
 
-	.globl _gsx_xcbo
+	xdef _gsx_xcbo
 
 *  call:
 *
@@ -1138,7 +1131,7 @@ _gsx_xcbo:
 
 
 
-	.globl	_gsx_xline
+	xdef	_gsx_xline
 
 *  calling sequence:
 *
@@ -1200,601 +1193,3 @@ L67:	cmp.w	20+4(sp),d3			; if counter < ptscount, loop
 
 quit:	movem.l	(sp)+,d3-d6/a3			; d6 is included to be
 	rts					; compatible with gsx_xcbox bra
-
-
- 
-*\*	APGSXIF.C	05/06/84 - 02/04/85	Lee Lorenzen		*\
-*\*	Reg Opt		03/08/85 - 03/09/85	Derek Mui		*\
-*\*	Crunching	4/10/86			Derek Mui		*\
-*\*	Fix at gsx_xbox	6/11/86			Derek Mui		*\
-*
-*\*
-**	-------------------------------------------------------------
-**	GEM Application Environment Services		  Version 1.0
-**	Serial No.  XXXX-0000-654321		  All Rights Reserved
-**	Copyright (C) 1985			Digital Research Inc.
-**	-------------------------------------------------------------
-**\
-*
-*#include <portab.h>
-*#include <machine.h>
-*#include <obdefs.h>
-*#include <gsxdefs.h>
-*#include <bind.h>
-*#include <funcdef.h>
-*
-*#define ORGADDR 0x0L
-*						/* in GSXBIND.C		*\
-*#define vsf_interior( x )	gsx_1code(S_FILL_STYLE, x)
-*#define vsl_type( x )		gsx_1code(S_LINE_TYPE, x)
-*#define vsf_style( x )		gsx_1code(S_FILL_INDEX, x)
-*#define vsf_color( x )		gsx_1code(S_FILL_COLOR, x)
-*#define vsl_udsty( x )		gsx_1code(ST_UD_LINE_STYLE, x)
-*						/* in OPTIMIZE.C	*\
-*EXTERN WORD	max();
-*EXTERN WORD	min();
-*
-*EXTERN WORD	xrat, yrat, button;
-*
-*GLOBAL WORD	gl_width;
-*GLOBAL WORD	gl_height;
-*
-*GLOBAL WORD	gl_nrows;
-*GLOBAL WORD	gl_ncols;
-*
-*GLOBAL WORD	gl_wchar;
-*GLOBAL WORD	gl_hchar;
-*
-*GLOBAL WORD	gl_wschar;
-*GLOBAL WORD	gl_hschar;
-*
-*GLOBAL WORD	gl_wptschar;
-*GLOBAL WORD	gl_hptschar;
-*
-*GLOBAL WORD	gl_wsptschar;
-*GLOBAL WORD	gl_hsptschar;
-*
-*GLOBAL WORD	gl_wbox;
-*GLOBAL WORD	gl_hbox;
-*
-*GLOBAL WORD	gl_xclip;
-*GLOBAL WORD	gl_yclip;
-*GLOBAL WORD	gl_wclip;
-*GLOBAL WORD	gl_hclip;
-*
-*GLOBAL WORD 	gl_nplanes;
-*GLOBAL WORD 	gl_handle;
-*
-*GLOBAL FDB		gl_src;
-*GLOBAL FDB		gl_dst;
-*
-*GLOBAL WS		gl_ws;
-*GLOBAL WORD		contrl[12];
-*GLOBAL WORD		intin[128];
-*GLOBAL WORD		ptsin[20];
-*GLOBAL WORD		intout[10];
-*GLOBAL WORD		ptsout[10];
-*
-*GLOBAL LONG		ad_intin;
-*
-*GLOBAL WORD		gl_mode;
-*GLOBAL WORD		gl_mask;
-*GLOBAL WORD		gl_tcolor;
-*GLOBAL WORD		gl_lcolor;
-*GLOBAL WORD		gl_fis;
-*GLOBAL WORD		gl_patt;
-*GLOBAL WORD		gl_font;
-*
-*GLOBAL GRECT		gl_rscreen;
-*GLOBAL GRECT		gl_rfull;
-*GLOBAL GRECT		gl_rzero;
-*GLOBAL GRECT		gl_rcenter;
-*GLOBAL GRECT		gl_rmenu;
-*
-*
-*	VOID
-*gsx_sclip(pt)
-*	GRECT		*pt;
-*{
-*	REG WORD	*ppts;
-*	ppts = &ptsin[0];
-*
-*	r_get(pt, &gl_xclip, &gl_yclip, &gl_wclip, &gl_hclip);
-*
-*	if ( gl_wclip && gl_hclip )
-*	{
-*	  ppts[0] = gl_xclip;
-*	  ppts[1] = gl_yclip;
-*	  ppts[2] = gl_xclip + gl_wclip - 1;
-*	  ppts[3] = gl_yclip + gl_hclip - 1;
-*	  vst_clip( TRUE, &ppts[0]);
-*	}
-*	else
-*	  vst_clip( FALSE, &ppts[0]);
-*	return( TRUE );
-*}
-*
-*
-*	VOID
-*gsx_gclip(pt)
-*	GRECT		*pt;
-*{
-*	r_set(pt, gl_xclip, gl_yclip, gl_wclip, gl_hclip);
-*}
-*
-*
-*	WORD
-*gsx_chkclip(pt)
-*	REG GRECT		*pt;
-*{
-*						/* if clipping is on	*\
-*	if (gl_wclip && gl_hclip)
-*	{
-* 	  if ((pt->g_y + pt->g_h) < gl_yclip)
-*	    return(FALSE);			/* all above	*\
-*	  if ((pt->g_x + pt->g_w) < gl_xclip) 
-*	    return(FALSE);			/* all left	*\
-*	  if ((gl_yclip + gl_hclip) <= pt->g_y)
-*	    return(FALSE);			/* all below	*\
-*	  if ((gl_xclip + gl_wclip) <= pt->g_x)
-*	    return(FALSE);			/* all right	*\
-*	}
-*	return(TRUE);
-*}
-*
-*
-*	VOID
-*gsx_pline(offx, offy, cnt, pts)
-*	WORD		offx, offy;
-*	REG WORD		cnt;
-*	REG WORD		*pts;
-*{
-*	REG WORD		i, j;
-*
-*	for (i=0; i<cnt; i++)
-*	{
-*	  j = i * 2;
-*	  ptsin[j] = offx + pts[j];
-*	  ptsin[j+1] = offy + pts[j+1];
-*	}
-*
-*	gsx_xline( cnt, &ptsin[0]);
-*}
-*
-*						/* in DRAWLINE.A86	*\
-*	VOID
-*gsx_cline(x1, y1, x2, y2)
-*	UWORD		x1, y1, x2, y2;
-*{
-*	WORD		x, y, w, h;
-*
-*	gsx_moff();
-*	v_pline( 2, &x1 );
-*	gsx_mon();
-*}
-*
-*	VOID
-*gsx_attr(text, mode, color)
-*	UWORD		text;
-*	REG UWORD		mode, color;
-*{
-*	REG WORD		tmp;
-*	REG WORD		*pcntr;
-*	pcntr = &contrl[0];
-*
-*	tmp = intin[0];
-*	pcntr[1] = 0;
-*	pcntr[3] = 1;
-*	pcntr[6] = gl_handle;
-*	if (mode != gl_mode)
-*	{
-*	  pcntr[0] = SET_WRITING_MODE;
-*	  intin[0] = gl_mode = mode;
-*	  gsx2();
-*	}
-*	pcntr[0] = FALSE;
-*	if (text)
-*	{
-*	  if (color != gl_tcolor)
-*	  {
-*	    pcntr[0] = S_TEXT_COLOR;
-*	    gl_tcolor = color;
-*	  }
-*	}	
-*	else
-*	{
-*	  if (color != gl_lcolor)
-*	  {
-*	    pcntr[0] = S_LINE_COLOR;
-*	    gl_lcolor = color;
-*	  }
-*	}
-*	if (pcntr[0])
-*	{
-*	  intin[0] = color;
-*	  gsx2();
-*	}
-*	intin[0] = tmp;
-*}
-*
-*
-*	VOID
-*gsx_bxpts(pt)
-*	REG GRECT		*pt;
-*{
-*	REG WORD		*ppts;
-*	ppts = &ptsin[0];
-*
-*	ppts[0] = pt->g_x;
-*	ppts[1] = pt->g_y;
-*	ppts[2] = pt->g_x + pt->g_w - 1;
-*	ppts[3] = pt->g_y;
-*\*	ppts[4] = pt->g_x + pt->g_w - 1;	*\
-*	ppts[4] = ppts[2];
-*	ppts[5] = pt->g_y + pt->g_h - 1;
-*	ppts[6] = pt->g_x;
-*\*	ppts[7] = pt->g_y + pt->g_h - 1;	*\
-*	ppts[7] = ppts[5];
-*	ppts[8] = pt->g_x;
-*	ppts[9] = pt->g_y;
-*}
-*
-*
-*	VOID
-*gsx_box(pt)
-*	GRECT		*pt;
-*{
-*	gsx_bxpts(pt);
-*	v_pline( 5, &ptsin[0] );
-*}
-*
-*
-*	VOID
-*gsx_xbox(pt)
-*	GRECT		*pt;
-*{
-*
-*	gsx_bxpts(pt);
-*	gsx_xline( 4, &ptsin[0] );
-*	ptsin[2] = ptsin[6];		/* fix the clipping problem of *\
-*	ptsin[3] = ptsin[7] - 1;	/* xbox		*\
-*	gsx_xline( 2, &ptsin[0] );
-*}
-*
-*
-*
-*	VOID
-*gsx_xcbox(pt)
-*	REG GRECT		*pt;
-*{
-*	REG WORD		wa, ha;
-*	REG WORD		*ppts;
-*	ppts = &ptsin[0];
-*
-*	wa = 2 * gl_wbox;
-*	ha = 2 * gl_hbox;
-*	ppts[0] = pt->g_x;
-*	ppts[1] = pt->g_y + ha;
-*	ppts[2] = pt->g_x;
-*	ppts[3] = pt->g_y;
-*	ppts[4] = pt->g_x + wa;
-*	ppts[5] = pt->g_y;
-*	gsx_xline( 3, &ppts[0] );
-*	ppts[0] = pt->g_x + pt->g_w - wa;
-*	ppts[1] = pt->g_y;
-*	ppts[2] = pt->g_x + pt->g_w - 1;
-*	ppts[3] = pt->g_y;
-*\*	ppts[4] = pt->g_x + pt->g_w - 1;	*\
-*	ppts[4] = ppts[2];
-*	ppts[5] = pt->g_y + ha;
-*	gsx_xline( 3, &ppts[0] );
-*	ppts[0] = pt->g_x + pt->g_w - 1;
-*	ppts[1] = pt->g_y + pt->g_h - ha;
-*\*	ppts[2] = pt->g_x + pt->g_w - 1;	*\
-*	ppts[2] = ppts[0];
-*	ppts[3] = pt->g_y + pt->g_h - 1;
-*	ppts[4] = pt->g_x + pt->g_w - wa;
-*\*	ppts[5] = pt->g_y + pt->g_h - 1;	*\
-*	ppts[5] = ppts[3];
-*	gsx_xline( 3, &ppts[0] );
-*	ppts[0] = pt->g_x + wa;
-*	ppts[1] = pt->g_y + pt->g_h - 1;
-*	ppts[2] = pt->g_x;
-*\*	ppts[3] = pt->g_y + pt->g_h - 1;	*\
-*	ppts[3] = ppts[1];
-*	ppts[4] = pt->g_x;
-*	ppts[5] = pt->g_y + pt->g_h - ha;
-*	gsx_xline( 3, &ppts[0] );
-*}
-*
-*
-*gsx_fix(pfd, theaddr, wb, h)
-*	REG FDB			*pfd;
-*	REG LONG		theaddr;
-*	REG WORD		wb;
-*	WORD		h;
-*{
-*	if (theaddr == ORGADDR)
-*	{
-*	  pfd->fd_w = gl_ws.ws_xres + 1;
-*	  pfd->fd_wdwidth = pfd->fd_w / 16;
-*	  pfd->fd_h = gl_ws.ws_yres + 1;
-*	  pfd->fd_nplanes = gl_nplanes;
-*	}
-*	else
-*	{
-*	  pfd->fd_wdwidth = wb / 2;
-*	  pfd->fd_w = wb * 8;
-*	  pfd->fd_h = h;
-*	  pfd->fd_nplanes = 1;
-*	}
-*	pfd->fd_stand = FALSE;
-*	pfd->fd_addr = theaddr;
-*}
-*
-*	WORD
-*gsx_blt(saddr, sx, sy, swb, daddr, dx, dy, dwb, w, h, rule, fgcolor, bgcolor)
-*	LONG		saddr;
-*	REG UWORD		sx, sy, swb;
-*	LONG		daddr;
-*	REG UWORD		dx, dy;
-*	UWORD		dwb, w, h, rule;
-*	WORD		fgcolor, bgcolor;
-*{
-*	REG WORD		*ppts;
-*	ppts = &ptsin[0];
-*
-*	gsx_fix(&gl_src, saddr, swb, h);
-*	gsx_fix(&gl_dst, daddr, dwb, h);
-*
-*	gsx_moff();
-*	ppts[0] = sx;
-*	ppts[1] = sy;
-*	ppts[2] = sx + w - 1;
-*	ppts[3] = sy + h - 1;
-*	ppts[4] = dx;
-*	ppts[5] = dy;
-*	ppts[6] = dx + w - 1;
-*	ppts[7] = dy + h - 1 ;
-*	if (fgcolor == -1)
-*	  vro_cpyfm( rule, &ppts[0], &gl_src, &gl_dst);
-*	else
-*	  vrt_cpyfm( rule, &ppts[0], &gl_src, &gl_dst, fgcolor, bgcolor);
-*	gsx_mon();
-*}
-*
-*
-*	WORD
-*bb_screen(scrule, scsx, scsy, scdx, scdy, scw, sch)
-*	WORD		scrule, scsx, scsy, scdx, scdy, scw, sch;
-*{
-*	gsx_blt(0x0L, scsx, scsy, 0, 
-*		0x0L, scdx, scdy, 0,
-*		scw, sch, scrule, -1, -1);
-*}
-*
-*
-*	WORD
-*gsx_trans(saddr, swb, daddr, dwb, h, fg, bg)
-*	LONG		saddr;
-*	UWORD		swb;
-*	LONG		daddr;
-*	UWORD		dwb;
-*	REG UWORD		h;
-*	WORD		fg, bg;
-*{
-*	gsx_fix(&gl_src, saddr, swb, h);
-*	gl_src.fd_stand = TRUE;
-*	gl_src.fd_nplanes = 1;
-*
-*	gsx_fix(&gl_dst, daddr, dwb, h);
-*	vrn_trnfm( &gl_src, &gl_dst );
-*}
-*
-*
-*	WORD
-*gsx_start()
-*{
-*	WORD			dummy;
-*
-*						/* force update		*\
-*	gl_mode = gl_mask = gl_tcolor = gl_lcolor = -1;
-*	gl_fis = gl_patt = gl_font = -1;
-*	gl_xclip = 0;
-*	gl_yclip = 0;
-*	gl_width = gl_wclip = gl_ws.ws_xres + 1;
-*	gl_height = gl_hclip = gl_ws.ws_yres + 1;
-*
-*	intin[0] = 1;
-*	gsx_ncode( 102, 0, 1 );
-*	gl_nplanes = intout[4];
-*
-*	/* The driver may have more than two fonts.  The large font *\
-*	/* to the services is the default font in the driver.  This *\
-*	/* font will give us 80 chars across the screen in all but  *\
-*	/* 320 pels in x, when it will be the 40 column font.	    *\
-*
-*	gsx_ncode(38, 0, 0);		/* inquire text attributes	*\
-*	gl_wptschar = ptsout[0];
-*	gl_ws.ws_chmaxh = gl_hptschar = ptsout[1];
-*	gl_wchar = ptsout[2];
-*	gl_hchar = ptsout[3];
-*
-*	vst_height( gl_ws.ws_chminh, &gl_wsptschar, &gl_hsptschar, 
-*				&gl_wschar, &gl_hschar );
-*
-*	vst_height( gl_ws.ws_chmaxh, &dummy, &dummy, &dummy, &dummy);
-*
-*	gl_ncols = gl_width / gl_wchar;
-*	gl_nrows = gl_height / gl_hchar;
-*	gl_hbox = gl_hchar + 3;
-*	gl_wbox = (gl_hbox * gl_ws.ws_hpixel) / gl_ws.ws_wpixel;
-*	/*   7/26/89	*/
-*	if ( gl_wbox < ( gl_wchar + 2 )
-*	  gl_wbox = gl_wchar + 2;	
-*	vsl_type( 7 );
-*	vsl_width( 1 );
-*	vsl_udsty( 0xffff );
-*	r_set(&gl_rscreen, 0, 0, gl_width, gl_height);
-*	r_set(&gl_rfull, 0, gl_hbox, gl_width, (gl_height - gl_hbox));
-*	r_set(&gl_rzero, 0, 0, 0, 0);
-*	r_set(&gl_rcenter, (gl_width-gl_wbox)/2, (gl_height-(2*gl_hbox))/2, 
-*			gl_wbox, gl_hbox);
-*	r_set(&gl_rmenu, 0, 0, gl_width, gl_hbox);
-*	ad_intin = ADDR(&intin[0]);
-*}
-*
-*
-*	VOID
-*bb_fill(mode, fis, patt, hx, hy, hw, hh)
-*	WORD		mode, fis;
-*	REG WORD		patt, hx, hy, hw, hh;
-*{
-*	REG WORD		*ppts;
-*	ppts = &ptsin[0];
-*
-*	gsx_fix(&gl_dst, 0x0L, 0, 0);
-*	ppts[0] = hx;
-*	ppts[1] = hy;
-*	ppts[2] = hx + hw - 1;
-*	ppts[3] = hy + hh - 1;
-*
-*	gsx_attr(TRUE, mode, gl_tcolor);
-*	if (fis != gl_fis)
-*	{
-*	  vsf_interior( fis);
-*	  gl_fis = fis;
-*	}
-*	if (patt != gl_patt)
-*	{
-*	  vsf_style( patt );
-*	  gl_patt = patt;
-*	}
-*	vr_recfl( &ppts[0], &gl_dst );
-*}
-*
-*
-*	UWORD
-*ch_width(fn)
-*	REG WORD		fn;
-*{
-*	if (fn == IBM)
-*	  return(gl_wchar);
-*	if (fn == SMALL)
-*	  return(gl_wschar);
-*	return(0);
-*}
-*
-*
-*
-*	UWORD
-*ch_height(fn)
-*	REG WORD		fn;
-*{
-*	if (fn == IBM)
-*	  return(gl_hchar);
-*	if (fn == SMALL)
-*	  return(gl_hschar);
-*	return(0);
-*}
-*
-*	WORD
-*gsx_tcalc(font, ptext, ptextw, ptexth, pnumchs)
-*	REG WORD		font;
-*	LONG		ptext;
-*	REG WORD		*ptextw;
-*	REG WORD		*ptexth;
-*	REG WORD		*pnumchs;
-*{
-*	REG WORD		wc;
-*	REG WORD		hc;
-*
-*	wc = ch_width(font);
-*	hc = ch_height(font);
-*						/* figure out the	*\
-*						/*   width of the text	*\
-*						/*   string in pixels	*\
-*
-*	*pnumchs = LBWMOV(ad_intin, ptext);
-*	*ptextw = min(*ptextw, *pnumchs * wc );
-*						/* figure out the height*\
-*						/*   of the text	*\
-*	*ptexth = min(*ptexth, hc );
-*	if (*ptexth / hc)
-*	  *pnumchs = min(*pnumchs, *ptextw / wc );
-*	else
-*	  *pnumchs = 0;
-*}  /* gsx_tcalc *\
-*
-*
-*	WORD
-*gsx_tblt(tb_f, x, y, tb_nc)
-*	REG WORD		tb_f;
-*	REG WORD		x, y;
-*	WORD		tb_nc;
-*{
-*	WORD		i;
-*	REG WORD		pts_height;
-*
-*	if (tb_f == IBM)
-*	{
-*	  if (tb_f != gl_font)
-*	  {
-*	    vst_height(gl_ws.ws_chmaxh, &gl_wptschar, &gl_hptschar, 
-*				&gl_wchar, &gl_hchar );
-*	    gl_font = tb_f;
-*	  }
-*	  y += gl_hptschar;
-*	}
-*
-*	if (tb_f == SMALL)
-*	{
-*	  if (tb_f != gl_font)
-*	  {
-*	    vst_height( gl_ws.ws_chminh, &gl_wsptschar, &gl_hsptschar, 
-*				&gl_wschar, &gl_hschar );
-*	    gl_font = tb_f;
-*	  }
-*	  y += gl_hsptschar;
-*	}
-*
-*	contrl[0] = 8;		/* TEXT *\
-*	contrl[1] = 1;
-*	contrl[6] = gl_handle;
-*	ptsin[0] = x;
-*	ptsin[1] = y;
-*	contrl[3] = tb_nc;
-*	gsx2();
-*}
-*
-*
-*
-*	VOID
-*gsx_xline( ptscount, ppoints )
-*	WORD		ptscount;
-*	REG WORD		*ppoints;
-*{
-*	static	WORD	hztltbl[2] = { 0x5555, 0xaaaa };
-*	static  WORD	verttbl[4] = { 0x5555, 0xaaaa, 0xaaaa, 0x5555 };
-*	REG WORD		*linexy;
-*	REG WORD		st, i;
-*
-*	for ( i = 1; i < ptscount; i++ )
-*	{
-*	  if ( *ppoints == *(ppoints + 2) )
-*	  {
-*	    st = verttbl[( (( *ppoints) & 1) | ((*(ppoints + 1) & 1 ) << 1))];
-*	  }	
-*	  else
-*	  {
-*	    linexy = ( *ppoints < *( ppoints + 2 )) ? ppoints : ppoints + 2;
-*	    st = hztltbl[( *(linexy + 1) & 1)];
-*	  }
-*	  vsl_udsty( st );
-*	  v_pline( 2, ppoints );
-*	  ppoints += 2;
-*	}
-*	vsl_udsty( 0xffff );
-*}	
-*
-*

@@ -33,57 +33,21 @@
 
 * --Crystal function numbers.
 *
-CRYSTAL1 =	200			; Call Crystal function.
-CRYSTAL2 =	201			; Call dispatch.
-TRP2VEC	 =	$88
+CRYSTAL1 equ	200			; Call Crystal function.
+CRYSTAL2 equ	201			; Call dispatch.
+TRP2VEC	 equ	$88
 *
 * --DOS.C error flag conventions.
 *
-ERROR	=	1
-NOERR	=	0
+ERROR	equ	1
+NOERR	equ	0
 *
 *
-	.text
-*
-* --Externally defined.
-*
-*	.globl	_super
-	.globl	_sti
-	.globl	_cli
-	.globl	_rlr
-*	.globl	_dr_code	; desktop
-	.globl	_DOS_ERR
-	.globl	_DOS_AX		; changed
-	.globl	_eralert	; fmalt
-*
-* --Internally defined.
-*
-*	.globl	_drawaddr
-*	.globl	_supret
-*	.globl	_far_draw
-	.globl	_takecpm
-	.globl	_givecpm
-	.globl	_retake
-	.globl	_back
-	.globl	_dos_exec
-	.globl	_savsup
-	.globl	_takeerr
-	.globl	_giveerr
-	.globl	_crit_err
-	.globl  _err_trap
-	.globl	_drawstk	; deskglob
-	.globl	errsave
-	.globl	_crt_error	; used by gemdisp.c:disp
-	.globl	_deskerr
-	.globl	_desknoerr
-*
-*
-	.globl	lmul
-	.globl	ldiv
-	.globl	_ldivr
+	text
 
 *
 *
+	xdef	_givecpm
 _givecpm:
 	move.l	_SAV2TRP,TRP2VEC	; Restore Trap 2 vector.
 	rts
@@ -91,6 +55,7 @@ _givecpm:
 *
 * --Grab trap 2 so we can do our own system reset if the program wants to.
 *
+	xdef	_takecpm
 _takecpm:
 	move.l	TRP2VEC,_SAV2TRP	; Save current Trap 2 vector.
 	move.l	#_grptrp,TRP2VEC	; Replace vector with ours.
@@ -98,6 +63,7 @@ _takecpm:
 *
 *	retake gem trap and error trap after execing a program
 *
+	xdef	_retake
 _retake:
 	move.l	#_grptrp,TRP2VEC	; Replace vector with ours.
 	move.l	#_err_trap,d0		; set ours
@@ -114,25 +80,29 @@ call_err:
 	addq	#8,a7
 	rts
 
+	xdef	_giveerr
 _giveerr:
 	move.l	_crit_err,d0
 	bra	call_err
 
 *
+	xdef	_takeerr
 _takeerr:
 	move.l	#-1,d0			; get the old one
 	bsr	call_err
-	move.l	d0, _crit_err
+	move.l	d0,_crit_err
 	move.l	#_err_trap,d0		; set ours
 	bra	call_err
 	
+	xdef	_deskerr
 _deskerr:
 	move.l	#-1,d0			; get the old one
 	bsr	call_err
-	move.l	d0, _dk_err
+	move.l	d0,_dk_err
 	move.l	#_dk_trap,d0		; set ours
 	bra	call_err
 
+	xdef	_desknoerr
 _desknoerr:
 	move.l	_dk_err,d0
 	bra	call_err
@@ -149,6 +119,7 @@ d_out:
 *
 *	ASSUME CALLING PROCESS HAS ENOUGH STACK
 *
+	xdef  _err_trap
 _err_trap:
 	move.w	#1,_crt_error		; set flag for dispatcher
 	move.l	_rlr,a0			; get the current rlr
@@ -209,6 +180,7 @@ er_1:
 *
 *	set DOS_ERR 
 *
+	xdef	_dos_exec
 _dos_exec:
 	jsr	_cli
 	move.l	_rlr,a0
@@ -236,8 +208,8 @@ _dos_exec:
 	clr.w	_DOS_ERR
 	tst.w	d0
 	beq	exok
-	move.w	#1, _DOS_ERR		; set error condition
-	move.w	d0, _DOS_AX		; error code changed
+	move.w	#1,_DOS_ERR		; set error condition
+	move.w	d0,_DOS_AX		; error code changed
 exok:
 	rts
 
@@ -256,6 +228,7 @@ exok:
 * ========================================================
 *
 *
+	xdef	lmul
 lmul:
 	link	a6,#-4
 	clr.w	d2
@@ -294,6 +267,7 @@ L4:
 * ==							==
 * ========================================================
 *
+	xdef	ldiv
 ldiv:
 	link	a6,#-2
 	movem.l	d2-d7,-(sp)
@@ -395,6 +369,7 @@ _grptrp:
 * Return here when loaded program is finished.
 **********************************************
 *
+	xdef	_back
 _back:	clr.w	-(sp)
 	move.w	#$4c,-(sp)
 	trap	#1
@@ -465,6 +440,7 @@ super1:
 *	Return from Crystal call 
 *\/////////////////////////////////////////////
 *
+*	xdef	_supret
 *_supret:
 *	move.w	4(a7),d0		; Get return passed from super().
 *
@@ -490,6 +466,7 @@ super1:
 *
 * ==========================================
 *
+*	xdef	_far_draw
 *_far_draw:
 *	move.l	4(a7),d0		; get addr of pb
 *	move.l	a7,drawsp
@@ -502,31 +479,35 @@ super1:
 *
 *
 *
-	.data
-	.even
-_err_tbl:	.dc.b	4,1,1,2,1,1,2,2,4,2,2,2,0,3,4,2,6
+	data
+	even
+_err_tbl:	dc.b	4,1,1,2,1,1,2,2,4,2,2,2,0,3,4,2,6
 
-	.bss
-	.even
+	bss
+	even
 
-_crit_err:	.ds.l	1
-_dk_err:	.ds.l	1
-savestk:	.ds.l	1
+	xdef	_crit_err
+_crit_err:	ds.l	1
+_dk_err:	ds.l	1
+savestk:	ds.l	1
 
 *
 * Save current trap 2 vector.
 *
-_SAV2TRP:	.ds.l	1
+_SAV2TRP:	ds.l	1
 *
-_savsup:	.ds.l	1
+	xdef	_savsup
+_savsup:	ds.l	1
 *
-*_drawaddr:	.ds.l	1		; initialized to _far_draw
-drawsp:		.ds.l	1
+*	xdef	_drawaddr
+*_drawaddr:	ds.l	1		; initialized to _far_draw
+drawsp:		ds.l	1
 *
-_ldivr:		.ds.l	1
+	xdef	_ldivr
+_ldivr:		ds.l	1
 *
-errsave:	.ds.l	1
+	xdef	errsave
+errsave:	ds.l	1
 
-		.ds.l	400		; lots of space for errors
-errstk:		.ds.l	1
-	.end
+		ds.l	400		; lots of space for errors
+errstk:		ds.l	1

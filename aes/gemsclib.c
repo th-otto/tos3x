@@ -36,18 +36,18 @@
 #include <obdefs.h>
 #include <gemlib.h>
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
 
-WORD sc_read(pscrap)
-LONG pscrap;
+int16_t sc_read(pscrap)
+int32_t pscrap;
 {
 	LSTCPY(pscrap, &D.g_scrap[0]);
 }
 
 
-WORD sc_write(pscrap)
-LONG pscrap;
+int16_t sc_write(pscrap)
+int32_t pscrap;
 {
 	LSTCPY(&D.g_scrap[0], pscrap);
 }

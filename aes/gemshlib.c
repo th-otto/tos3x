@@ -125,135 +125,37 @@
 #define CMD_PRINT  0xFD
 #define CMD_TYPE   0xFE
 
-EXTERN WORD gl_bpend;					/* in geminput.c    */
-
-EXTERN WORD strlen();
-
-						/* in FMLIB.C       */
-EXTERN WORD fm_error();
-
-						/* in AINTS88.C     */
-
-EXTERN VOID dos_exec();					/* in DOS.C     */
-
-EXTERN LONG trap();
-
-EXTERN VOID dos_sdta();
-
-EXTERN WORD dos_sfirst();
-
-EXTERN WORD DOS_AX;
-
-EXTERN WORD DOS_ERR;
-
-EXTERN WORD cli();						/* in DOSIF.A86     */
-
-EXTERN WORD sti();
-
-EXTERN WORD takeerr();
-
-EXTERN WORD giveerr();
-
-EXTERN WORD retake();
-
-						/* in GSXIF.C       */
-EXTERN WORD gsx_init();
-
-EXTERN WORD gsx_graphic();
-
-EXTERN WORD gsx_wsclose();
-
-EXTERN WORD gsx_malloc();
-
-EXTERN WORD gsx_mfree();
-
-						/* in RSLIB.C       */
-EXTERN BYTE *rs_str();
-
-EXTERN BYTE *fs_back();
-
-						/* in GSXIF.C       */
-EXTERN WORD gl_handle;
-
-EXTERN WORD gl_width;
-
-EXTERN WORD gl_height;
-
-EXTERN WORD gl_wchar;
-
-EXTERN WORD gl_hchar;
-
-EXTERN WORD gl_wbox;
-
-EXTERN WORD gl_hbox;
-
-EXTERN WORD gl_nplanes;
-
-EXTERN GRECT gl_rscreen;
-
-EXTERN GRECT gl_rfull;
-
-EXTERN GRECT gl_rmenu;
-
-EXTERN WORD adeskp[];					/* in GEMINIT.C     */
-
-EXTERN WORD awinp[];
-
-EXTERN LONG tikaddr;
-
-EXTERN LONG tiksav;
-
-EXTERN WORD gl_ticktime;
-
-EXTERN LONG ad_sysglo;
-
-EXTERN LONG ad_stdesk;
-
-EXTERN LONG ad_armice;
-
-EXTERN LONG ad_hgmice;
-
-EXTERN WORD gl_rschange;
-
-EXTERN THEGLO D;
-
-EXTERN PD *gl_mowner;
-
-EXTERN PD *gl_kowner;
-
-EXTERN PD *gl_cowner;
-
-GLOBAL WORD sh_doexec;					/* if TRUE then do an an exec   */
+GLOBAL int16_t sh_doexec;					/* if TRUE then do an an exec   */
 
 					/* on the current command   */
 					/* else exit and return to DOS  */
 
-GLOBAL WORD sh_isgem;					/* used to signal if the curren */
+GLOBAL int16_t sh_isgem;					/* used to signal if the curren */
 
 					/* tly running appl is a GEM app */
 
-GLOBAL WORD sh_gem;						/* same as above for previously */
+GLOBAL int16_t sh_gem;						/* same as above for previously */
 
 					/* running DOS app.     */
 
-GLOBAL LONG ad_envrn;
+GLOBAL int32_t ad_envrn;
 
-GLOBAL LONG ad_shcmd;
+GLOBAL int32_t ad_shcmd;
 
-GLOBAL LONG ad_shtail;
+GLOBAL int32_t ad_shtail;
 
-GLOBAL WORD sh_iscart;					/* cart program     */
+GLOBAL int16_t sh_iscart;					/* cart program     */
 
-GLOBAL LONG ad_path;
+GLOBAL int32_t ad_path;
 
-GLOBAL LONG ad_pfile;
+GLOBAL int32_t ad_pfile;
 
-GLOBAL BYTE temp[50];
+GLOBAL char temp[50];
 
 /*	Application reads in the command that invokes it	*/
 
-WORD sh_read(pcmd, ptail)
-LONG pcmd,
+int16_t sh_read(pcmd, ptail)
+int32_t pcmd,
 	ptail;
 {
 	LBCOPY(pcmd, ad_shcmd, CMDLEN);
@@ -275,12 +177,12 @@ LONG pcmd,
 /*   isover = 2  then run over AES and DESKTOP	*/
 
 
-WORD sh_write(doex, isgem, isover, pcmd, ptail)
-WORD doex,
+int16_t sh_write(doex, isgem, isover, pcmd, ptail)
+int16_t doex,
 	isgem,
 	isover;
 
-LONG pcmd,
+int32_t pcmd,
 	ptail;
 {
 	if (doex > 1)
@@ -299,10 +201,10 @@ LONG pcmd,
 *	Used by the DESKTOP to recall 1024 bytes worth of previously
 *	'put' desktop-context information.
 */
-WORD sh_get(pbuffer, len)
-LONG pbuffer;
+int16_t sh_get(pbuffer, len)
+int32_t pbuffer;
 
-WORD len;
+int16_t len;
 {
 	LBCOPY(pbuffer, &D.s_save[0], len);
 	return (TRUE);
@@ -313,10 +215,10 @@ WORD len;
 *	Used by the DESKTOP to save away 1024 bytes worth of desktop-
 *	context information.
 */
-WORD sh_put(pdata, len)
-LONG pdata;
+int16_t sh_put(pdata, len)
+int32_t pdata;
 
-WORD len;
+int16_t len;
 {
 	LBCOPY(&D.s_save[0], pdata, len);
 	return (TRUE);
@@ -328,7 +230,7 @@ WORD len;
 *	running of a GEM-based graphic application.
 */
 
-WORD sh_tographic()
+int16_t sh_tographic()
 {
 	cli();
 	retake();							/* retake the gem trap  */
@@ -348,7 +250,7 @@ WORD sh_tographic()
 *	Convert the screen and system back to alpha-mode in preparation
 *	for the running of a DOS-based character application.
 */
-WORD sh_toalpha()
+int16_t sh_toalpha()
 {
 	gsx_mfset(ad_armice);				/* put mouse to arrow   */
 
@@ -369,17 +271,17 @@ WORD sh_toalpha()
 */
 
 VOID sh_draw(lcmd, start, depth)
-REG BYTE lcmd[];
+register char lcmd[];
 
-WORD start;
+int16_t start;
 
-WORD depth;
+int16_t depth;
 {
-	REG LONG tree;
+	register int32_t tree;
 
-	REG WORD c;
+	register int16_t c;
 
-	REG BYTE *cmdptr;
+	register char *cmdptr;
 
 	if (sh_gem)
 	{
@@ -401,9 +303,9 @@ WORD depth;
 */
 
 sh_show(lcmd)
-LONG lcmd;
+int32_t lcmd;
 {
-	REG WORD i;
+	register int16_t i;
 
 	for (i = 1; i < 3; i++)
 		sh_draw(lcmd, i, 0);
@@ -414,10 +316,10 @@ LONG lcmd;
 *	Routine to take a full path, and scan back from the end to 
 *	find the starting byte of the particular filename
 */
-BYTE * sh_name(ppath)
-BYTE *ppath;
+char * sh_name(ppath)
+char *ppath;
 {
-	REG BYTE *pname;
+	register char *pname;
 
 	pname = ppath;
 	while (*pname++)
@@ -435,18 +337,18 @@ BYTE *ppath;
 *	Search for a particular string in the DOS environment and return
 *	a long pointer to the character after the string if it is found. 
 *	*psrch includes the '=' character.
-*	Otherwise, return a NULLPTR in ppath.
+*	Otherwise, return a NULL in ppath.
 */
 VOID sh_envrn(ppath, psrch)
-REG LONG *ppath;						/* output pointer   */
+register int32_t *ppath;						/* output pointer   */
 
-BYTE psrch[];
+char psrch[];
 {
-	REG BYTE *chrptr;
+	register char *chrptr;
 
-	REG BYTE *byteptr;
+	register char *byteptr;
 
-	chrptr = (BYTE *) ad_envrn;
+	chrptr = (char *) ad_envrn;
 	/* double nulls to end  */
 	while ((*chrptr) || (*(chrptr + 1)))
 	{
@@ -481,22 +383,22 @@ BYTE psrch[];
 *	(unless munged by HINSTALL or an auto folder program)
 */
 
-WORD sh_path(whichone, dp, pname)
-WORD whichone;
+int16_t sh_path(whichone, dp, pname)
+int16_t whichone;
 
-REG BYTE *dp;
+register char *dp;
 
-REG BYTE *pname;
+register char *pname;
 {
-	REG BYTE last;
+	register char last;
 
-	REG BYTE *lp;
+	register char *lp;
 
-	REG WORD i;
+	register int16_t i;
 
-	LONG temp;
+	int32_t temp;
 
-	WORD oldpath = FALSE;
+	int16_t oldpath = FALSE;
 
 	/* find PATH= in the    */
 	/*   environment which  */
@@ -570,8 +472,8 @@ REG BYTE *pname;
 }
 
 
-WORD sh_search(routine)
-REG WORD(*routine) ();
+int16_t sh_search(routine)
+register int16_t(*routine) ();
 {
 	if (routine)
 		(*routine) (ad_path);
@@ -586,29 +488,29 @@ REG WORD(*routine) ();
 *	the filespec that is looking for.
 */
 
-WORD sh_find(pspec, routine)
-REG LONG pspec;
+int16_t sh_find(pspec, routine)
+register int32_t pspec;
 
-REG WORD(*routine) ();
+register int16_t(*routine) ();
 {
-	REG WORD path,
+	register int16_t path,
 	 found = 0;
 
-	REG BYTE *pname;
+	register char *pname;
 
-	BYTE tmpname[14];
+	char tmpname[14];
 
-	LONG savedta;
+	int32_t savedta;
 
 
 	savedta = trap(0x2F);				/* Fgetdta()        */
 	dos_sdta(&D.g_loc1[0]);				/* use this     */
 
 	pname = sh_name(pspec);				/* get the file name    */
-	strcpy(pname, &tmpname[0]);			/* copy it      */
+	xstrpcpy(pname, &tmpname[0]);			/* copy it      */
 
 	pname = sh_name(ad_shcmd);			/* first look in program's dir  */
-	path = (WORD) (pname - ad_shcmd);
+	path = (int16_t) (pname - ad_shcmd);
 	pname = &tmpname[0];
 	if (path)
 	{									/* if a path exists */
@@ -619,7 +521,7 @@ REG WORD(*routine) ();
 	if (!found)
 	{									/* if not found there, look cwd */
 		path = 0;
-		strcpy(pspec, ad_path);
+		xstrpcpy(pspec, ad_path);
 		do
 		{
 			found = sh_search(routine);
@@ -629,7 +531,7 @@ REG WORD(*routine) ();
 	}
 
 	if (found)							/* if file found    */
-		strcpy(ad_path, pspec);			/* return full filespec */
+		xstrpcpy(ad_path, pspec);			/* return full filespec */
 
 	dos_sdta(savedta);					/* restore DTA      */
 	return (found);
@@ -640,27 +542,17 @@ REG WORD(*routine) ();
 
 sh_main()
 {
-	REG WORD ret;
-
-	WORD i,
-	 reschange;
-
-	REG LONG tree;
-
-	REG THEGLO *DGLO;
-
-	BYTE *fname;
-
-	REG BYTE *chrptr;
-
-	BYTE tempchr;
-
+	register int16_t ret;
+	int16_t i, reschange;
+	register int32_t tree;
+	register THEGLO *DGLO;
+	char *fname;
+	register char *chrptr;
+	char tempchr;
 	PD *temprlr;
 
 	DGLO = &D;
-
 	tree = ad_stdesk;					/* sh draw box              */
-
 	reschange = FALSE;					/* no resolution change     */
 
 	do

@@ -4,9 +4,9 @@
 * =======================================================================
 *  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/struct88.h,v $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:30:56 $	$Locker: kbad $
+*  $Author: mui $	$Date: 89/04/26 18:30:56 $
 * =======================================================================
-*  $Log:	struct88.h,v $
+*
 * Revision 2.2  89/04/26  18:30:56  mui
 * TT
 * 
@@ -44,7 +44,7 @@
 #define SPB	struct spb		/* sync parameter block 	*/
 #define FPD	struct fpd		/* fork process descriptor 	*/
 
-typedef UWORD	EVSPEC;
+typedef uint16_t	EVSPEC;
 
 #define NUM_ACCS 1			/* for atari in rom		*/
 #define NUM_PDS (NUM_ACCS + 2)		/* acc's + ctrlpd + dos appl.	*/
@@ -58,23 +58,24 @@ typedef UWORD	EVSPEC;
 
 CQUEUE
 {
-	WORD	c_buff[KBD_SIZE];
-	WORD	c_front;
-	WORD	c_rear;
-	WORD	c_cnt;
+	/*  0 */	int16_t	c_buff[KBD_SIZE];
+	/* 16 */	int16_t	c_front;
+	/* 18 */	int16_t	c_rear;
+	/* 20 */	int16_t	c_cnt;
+	/* 22 */
 };
 
 
 MFORM
 {
-	WORD	mf_xhot;
-	WORD	mf_yhot;
-	WORD	mf_nplanes;
-	WORD	mf_fg;
-	WORD	mf_bg;
-	WORD	mf_mask[16];
-	WORD	mf_data[16];
-} ;
+	int16_t	mf_xhot;
+	int16_t	mf_yhot;
+	int16_t	mf_nplanes;
+	int16_t	mf_fg;
+	int16_t	mf_bg;
+	int16_t	mf_mask[16];
+	int16_t	mf_data[16];
+};
 
 
 #define C_KOWNER 0x0001
@@ -82,11 +83,12 @@ MFORM
 
 CDA
 {
-	UWORD	c_flags;
-	EVB	*c_iiowait;	/* Waiting for Input		*/
-	EVB	*c_msleep;	/* wait for mouse rect		*/
-	EVB	*c_bsleep;	/* wait for button		*/
-	CQUEUE	c_q;		/* input queue 			*/
+	/*  0 */	uint16_t	c_flags;
+	/*  2 */	EVB	*c_iiowait;	/* Waiting for Input		*/
+	/*  6 */	EVB	*c_msleep;	/* wait for mouse rect		*/
+	/* 10 */	EVB	*c_bsleep;	/* wait for button		*/
+	/* 14 */	CQUEUE	c_q;		/* input queue 			*/
+	/* 36 */
 };
 
 
@@ -96,32 +98,33 @@ CDA
 
 UDA
 {
-	WORD	u_insuper;		/* in supervisor flag		*/ 
-	ULONG	u_regs[15];		/* d0-d7, a0-a6			*/
-	ULONG	*u_spsuper;		/* supervisor stack 		*/
-	ULONG	*u_spuser;		/* user stack 			*/
-	ULONG	u_super[STACK1_SIZE];
-	ULONG	u_supstk;
+	/*    0 */	int16_t		u_insuper;		/* in supervisor flag	*/ 
+	/*    2 */	uint32_t	u_regs[15];		/* d0-d7, a0-a6			*/
+	/*   62 */	uint32_t	*u_spsuper;		/* supervisor stack 	*/
+	/*   66 */	uint32_t	*u_spuser;		/* user stack 			*/
+	/*   70 */	uint32_t	u_super[STACK1_SIZE];
+	/* 2070 */	uint32_t	u_supstk;
+	/* 2074 */
 };
 
 UDA2
 {
-	WORD	u_insuper;		/* in supervisor flag		*/ 
-	ULONG	u_regs[15];		/* d0-d7, a0-a6			*/
-	ULONG	*u_spsuper;		/* supervisor stack 		*/
-	ULONG	*u_spuser;		/* user stack 			*/
-	ULONG	u_super[STACK2_SIZE];
-	ULONG	u_supstk;
+	int16_t		u_insuper;		/* in supervisor flag		*/ 
+	uint32_t	u_regs[15];		/* d0-d7, a0-a6			*/
+	uint32_t	*u_spsuper;		/* supervisor stack 		*/
+	uint32_t	*u_spuser;		/* user stack 			*/
+	uint32_t	u_super[STACK2_SIZE];
+	uint32_t	u_supstk;
 };
 
 UDA3
 {
-	WORD	u_insuper;		/* in supervisor flag		*/ 
-	ULONG	u_regs[15];		/* d0-d7, a0-a6			*/
-	ULONG	*u_spsuper;		/* supervisor stack 		*/
-	ULONG	*u_spuser;		/* user stack 			*/
-	ULONG	u_super[STACK3_SIZE];
-	ULONG	u_supstk;
+	int16_t	u_insuper;		/* in supervisor flag		*/ 
+	uint32_t	u_regs[15];		/* d0-d7, a0-a6			*/
+	uint32_t	*u_spsuper;		/* supervisor stack 		*/
+	uint32_t	*u_spuser;		/* user stack 			*/
+	uint32_t	u_super[STACK3_SIZE];
+	uint32_t	u_supstk;
 };
 
 
@@ -135,11 +138,11 @@ EVB		/* event block structure */
 	EVB	*e_nextp;	/* link to next EVB on PD event list	*/
 	EVB	*e_link;	/* link to next EVB on CDA event chain	*/
 	EVB	*e_pred;	/* link to prev EVB on CDA event chain	*/
-	BYTE	*e_pd;		/* owner PD (data for fork)		*/
-	LONG	e_parm;		/* parameter for request event		*/
-	WORD	e_flag;		/* look to above defines		*/
+	char	*e_pd;		/* owner PD (data for fork)		*/
+	int32_t	e_parm;		/* parameter for request event		*/
+	int16_t	e_flag;		/* look to above defines		*/
 	EVSPEC	e_mask;		/* mask for event notification		*/
-	LONG	e_return;	/* e_mask correspond to p_evbits	*/ 
+	int32_t	e_return;	/* e_mask correspond to p_evbits	*/ 
 };				/* e_return return number of clicks	*/
 				/* character or button state		*/
 
@@ -158,52 +161,56 @@ EVB		/* event block structure */
 
 PD 
 {
-	PD	*p_link;	/* link to other process	*/
-	PD	*p_thread;	/* I don't think it is used	*/
-	UDA	*p_uda;		/* store the machine's status	*/
+	/*  0 */	PD	*p_link;	/* link to other process	*/
+	/*  4 */	PD	*p_thread;	/* I don't think it is used	*/
+	/*  8 */	UDA	*p_uda;		/* store the machine's status	*/
 
-	BYTE	p_name[8];	/* processor name		*/
+	/* 12 */	char	p_name[8];	/* processor name		*/
 
-	CDA	*p_cda;		/* Tells what we are waiting 	*/
-	LONG	p_ldaddr;	/* long address of load		*/
-	WORD 	p_pid;		/* process id number		*/
-	WORD	p_stat;		/* PS_RUN or PS_MWAIT		*/
+	/* 20 */	CDA	*p_cda;		/* Tells what we are waiting 	*/
+	/* 24 */	int32_t	p_ldaddr;	/* long address of load		*/
+	/* 28 */	int16_t 	p_pid;		/* process id number		*/
+	/* 30 */	int16_t	p_stat;		/* PS_RUN or PS_MWAIT		*/
 
-	EVSPEC	p_evbits;	/* event bits in use 8 max EVB	*/
-	EVSPEC	p_evwait;	/* event wait mask 		*/
-	EVSPEC	p_evflg;	/* EVB that satisified		*/
-	WORD	p_message[10];
-	MFORM	p_mouse;
-	EVB	*p_evlist;	/* link to EVB			*/
-	EVB	*p_qdq;
-	EVB	*p_qnq;
-	LONG	p_qaddr;	/* message queue pointer	*/
-	WORD	p_qindex;	/* message queue index		*/
-	BYTE	p_queue[QUEUE_SIZE];
+	/* 32 */	EVSPEC	p_evbits;	/* event bits in use 8 max EVB	*/
+	/* 34 */	EVSPEC	p_evwait;	/* event wait mask 		*/
+	/* 36 */	EVSPEC	p_evflg;	/* EVB that satisified		*/
+	/* 38 */	int16_t	p_message[10];
+	/* 58 */	MFORM	p_mouse;
+	/*132 */	EVB	*p_evlist;	/* link to EVB			*/
+	/*136 */	EVB	*p_qdq;
+	/*140 */	EVB	*p_qnq;
+	/*144 */	int32_t	p_qaddr;	/* message queue pointer	*/
+	/*148 */	int16_t	p_qindex;	/* message queue index		*/
+	/*150 */	char	p_queue[QUEUE_SIZE];
+	/*406 */
 };
 
 
 
 QPB
 {
-	WORD	qpb_pid;
-	WORD	qpb_cnt;
-	LONG	qpb_buf;
+	int16_t	qpb_pid;
+	int16_t	qpb_cnt;
+	int32_t	qpb_buf;
 };
 
 
 SPB				/* AMUTEX control block	*/
 {
-	WORD	sy_tas;		/* semaphore				*/
-	PD	*sy_owner;	/* owner's PD address			*/
-	EVB	*sy_wait;	/* EVB that is waiting for the screen	*/
+	/*  0 */	int16_t	sy_tas;		/* semaphore				*/
+	/*  2 */	PD	*sy_owner;	/* owner's PD address			*/
+	/*  6 */	EVB	*sy_wait;	/* EVB that is waiting for the screen	*/
+	/* 10 */
 };
 
 
+typedef VOID (*FCODE) PROTO((int16_t p1, int16_t p2));      /* pointer to function used by forkq() */
+
 FPD
 {
-	WORD	(*f_code)();
-	LONG	f_data;
+	FCODE f_code;
+	int32_t	f_data;
 };
 
 

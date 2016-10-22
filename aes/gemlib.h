@@ -69,11 +69,11 @@
 
 typedef struct moblk
 {
-	WORD		m_out;
-	WORD		m_x;
-	WORD		m_y;
-	WORD		m_w;
-	WORD		m_h;
+	int16_t		m_out;
+	int16_t		m_x;
+	int16_t		m_y;
+	int16_t		m_w;
+	int16_t		m_h;
 } MOBLK ;
 
 
@@ -178,20 +178,20 @@ typedef struct moblk
 
 typedef struct rssofln
 {
-	WORD	rss_offset;
-	WORD	rss_length;
+	int16_t	rss_offset;
+	int16_t	rss_length;
 }RSSOFLN;
 
 typedef struct imofln			/* image block structure	*/
 {
-	WORD	rim_offset;
-	WORD	rim_length;
+	int16_t	rim_offset;
+	int16_t	rim_length;
 }IMOFLN;
 
 typedef struct rstree
 {
-	WORD	rst_first;
-	WORD	rst_count;
+	int16_t	rst_first;
+	int16_t	rst_count;
 }RSTREE;
 
 #define RES_TREE	8		/* # of long tree pointers	*/
@@ -228,24 +228,24 @@ typedef struct rstree
 
 typedef struct rshdr
 {
-	WORD		rsh_vrsn;	/* must same order as RT_	*/
-	WORD		rsh_object;
-	WORD		rsh_tedinfo;
-	WORD		rsh_iconblk;	/* list of ICONBLKS		*/
-	WORD		rsh_bitblk;
-	WORD		rsh_frstr;	
-	WORD		rsh_string;
-	WORD		rsh_imdata;	/* image data			*/
-	WORD		rsh_frimg;	
-	WORD		rsh_trindex;
-	WORD		rsh_nobs;	/* counts of various structs	*/
-	WORD		rsh_ntree;
-	WORD		rsh_nted;
-	WORD		rsh_nib;
-	WORD		rsh_nbb;
-	WORD		rsh_nstring;
-	WORD		rsh_nimages;
-	WORD		rsh_rssize;	/* total bytes in resource	*/
+	int16_t		rsh_vrsn;	/* must same order as RT_	*/
+	int16_t		rsh_object;
+	int16_t		rsh_tedinfo;
+	int16_t		rsh_iconblk;	/* list of ICONBLKS		*/
+	int16_t		rsh_bitblk;
+	int16_t		rsh_frstr;	
+	int16_t		rsh_string;
+	int16_t		rsh_imdata;	/* image data			*/
+	int16_t		rsh_frimg;	
+	int16_t		rsh_trindex;
+	int16_t		rsh_nobs;	/* counts of various structs	*/
+	int16_t		rsh_ntree;
+	int16_t		rsh_nted;
+	int16_t		rsh_nib;
+	int16_t		rsh_nbb;
+	int16_t		rsh_nstring;
+	int16_t		rsh_nimages;
+	int16_t		rsh_rssize;	/* total bytes in resource	*/
 }RSHDR;
 
 
@@ -379,13 +379,13 @@ typedef	struct	window {
 	unsigned opened : 1;	/* bit 1 -> 1: window is currently opened */
     } status;			/* window status */
     PD	    *owner;		/* owner of this window */
-    UWORD   mowner;		/* mouse owner of this window */
-    UWORD   handle;		/* window handle */
-    UWORD   kind;		/* flag for components of window */
+    uint16_t   mowner;		/* mouse owner of this window */
+    uint16_t   handle;		/* window handle */
+    uint16_t   kind;		/* flag for components of window */
     OBJECT  *aesobj;		/* for use in AES */
     OBJECT  obj[MAXOBJ];	/* definition of each object */
-    WORD    tcolor[MAXOBJ];	/* object colors if window is topped */
-    WORD    bcolor[MAXOBJ];	/* object colors if window is in background */
+    int16_t    tcolor[MAXOBJ];	/* object colors if window is topped */
+    int16_t    bcolor[MAXOBJ];	/* object colors if window is in background */
     TEDINFO ttxt;		/* title bar text */
     TEDINFO itxt;		/* info line text */
     TEDINFO mtxt;		/* menu bar text */
@@ -396,17 +396,17 @@ typedef	struct	window {
     RLIST   *nxywh;		/* next rect in rectangle list */
 				/* slider positions and sizes are in 1-1000
 				   range and relative to the scroll bar */
-    UWORD   hslpos;		/* horizontal slider position */
-    UWORD   vslpos;		/* vertical slider position */
-    UWORD   hslsz;		/* horizontal slider size */
-    UWORD   vslsz;		/* vertical slider size */
-    UWORD   ontop;		/* handle # of window on top */
-    UWORD   under;		/* handle # of window under */
-    UWORD   nxthndl;		/* next handle # in used */
-    UWORD   parent;		/* handle # of parent window */
-    UWORD   child;		/* handle # of 1st child window */
-    UWORD   type;		/* window's characteristics	*/
-    UWORD   sibling;		/* handle # of next sibling window */
+    uint16_t   hslpos;		/* horizontal slider position */
+    uint16_t   vslpos;		/* vertical slider position */
+    uint16_t   hslsz;		/* horizontal slider size */
+    uint16_t   vslsz;		/* vertical slider size */
+    uint16_t   ontop;		/* handle # of window on top */
+    uint16_t   under;		/* handle # of window under */
+    uint16_t   nxthndl;		/* next handle # in used */
+    uint16_t   parent;		/* handle # of parent window */
+    uint16_t   child;		/* handle # of 1st child window */
+    uint16_t   type;		/* window's characteristics	*/
+    uint16_t   sibling;		/* handle # of next sibling window */
     MEMHDR  *wwhere;		/* ptr to memory this WINDOW resides in */
     struct  window *wnext;	/* ptr to next WINDOW in database */
 } WINDOW;
@@ -464,35 +464,35 @@ typedef	struct	window {
 #define THEGLO struct glstr
 THEGLO
 {
-/* GLOBAL */ UDA	g_uda;			/* must be first */
-/* GLOBAL */ UDA2	g_2uda;
-/* GLOBAL */ UDA3	g_3uda;
-/* GLOBAL */ PD		g_pd[NUM_PDS];
-/* GLOBAL */ CDA	g_cda[NUM_PDS];
-/* GLOBAL */ EVB	g_evb[NUM_EVBS];
+	UDA	g_uda;			/* must be first */
+	UDA2	g_2uda;
+	UDA3	g_3uda;
+	PD		g_pd[NUM_PDS];
+	CDA	g_cda[NUM_PDS];
+	EVB	g_evb[NUM_EVBS];
 
-/* GLOBAL */ FPD	g_fpdx[NFORKS];
-/* GLOBAL  ORECT 	g_olist[NUM_ORECT]; */
+	FPD	g_fpdx[NFORKS];
+	/* ORECT 	g_olist[NUM_ORECT]; */
 
-/* GLOBAL */ BYTE	g_rawstr[MAX_LEN];	/* used in gemoblib.s	*/
-/* GLOBAL */ BYTE	g_tmpstr[MAX_LEN];	/* used in gemoblib.s	*/
-/* GLOBAL */ BYTE	g_valstr[MAX_LEN];	/* used in gembind.s	*/
-/* GLOBAL */ BYTE	g_fmtstr[MAX_LEN];	/* used in gemoblib.s	*/
+	char	g_rawstr[MAX_LEN];	/* used in gemoblib.s	*/
+	char	g_tmpstr[MAX_LEN];	/* used in gemoblib.s	*/
+	char	g_valstr[MAX_LEN];	/* used in gembind.s	*/
+	char	g_fmtstr[MAX_LEN];	/* used in gemoblib.s	*/
 
-/* GLOBAL */ BYTE	g_loc1[256];		/* MAX alert length	*/
-/* GLOBAL */ BYTE	g_loc2[256];
+	char	g_loc1[256];		/* MAX alert length	*/
+	char	g_loc2[256];
 
-/* GLOBAL */ WORD	g_scrap[82];
+	int16_t	g_scrap[82];
 
-/* GLOBAL */ BYTE	g_dir[CMDLEN];		/* changed from 82 to 128 */
+	char	g_dir[CMDLEN];		/* changed from 82 to 128 */
 
-/* GLOBAL */ UWORD	g_sysglo[G_SIZE];
+	uint16_t	g_sysglo[G_SIZE];
 
-/* GLOBAL */ BYTE	g_path[CMDLEN];		/* new element		*/
+	char	g_path[CMDLEN];		/* new element		*/
 
-/* GLOBAL */ BYTE	s_cmd[CMDLEN];
-/* GLOBAL */ BYTE	s_save[SIZE_AFILE];	/* SIZE_AFILE		*/
-/* GLOBAL */ BYTE	s_tail[CMDLEN];
+	char	s_cmd[CMDLEN];
+	char	s_save[SIZE_AFILE];	/* SIZE_AFILE		*/
+	char	s_tail[CMDLEN];
 
-/* GLOBAL  WINDOW	w_win[NUM_WIN];*/
+	/* WINDOW	w_win[NUM_WIN]; */
 };

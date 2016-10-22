@@ -59,50 +59,27 @@
 #define BACKTAB 0x0F00					/* backtab      */
 #define RETURN 0x1C0D					/* carriage return  */
 
-#if ATARI
 #define ENTER 0x720D					/* enter key on keypad  */
-#endif
-						/* in WMLIB.C       */
-EXTERN VOID w_drawchange();
-
-						/* in GEMRSLIB.C    */
-EXTERN BYTE *rs_str();
-
-EXTERN WORD gl_width;
-
-EXTERN WORD gl_height;
-
-EXTERN GRECT gl_rfull;
-
-EXTERN GRECT gl_rscreen;
-
-EXTERN GRECT ctrl;
-
-EXTERN WORD gl_hbox;
-
-EXTERN WORD mtrans;
-
-EXTERN LONG ad_sysglo;
-
-EXTERN THEGLO D;
 
 
-MLOCAL WORD ml_alrt[] = { ALRT00CRT, ALRT01CRT, ALRT02CRT, ALRT03CRT, ALRT04CRT,
+static int16_t const ml_alrt[] = { ALRT00CRT, ALRT01CRT, ALRT02CRT, ALRT03CRT, ALRT04CRT,
 	ALRT05CRT, ALRTDSWAP
 };
-MLOCAL WORD ml_pwlv[] = { 0x0102, 0x0102, 0x0102, 0x0101, 0x0002, 0x0001, 0x0101 };
+static int16_t const ml_pwlv[] = { 0x0102, 0x0102, 0x0102, 0x0101, 0x0002, 0x0001, 0x0101 };
 
 /*	This routine has been move to gemctrl.c		*/
 /*	and renamed to take_ownership			*/
 
 #if UNLINKED
+
+VOID fm_own PROTO((int16_t beg_ownit));
+
 /*	0 = end mouse control	*/
 /*	1 = mouse control	*/
 
-VOID fm_own(beg_ownit)
-WORD beg_ownit;
+VOID fm_own(P(int16_t) beg_ownit)
+PP(int16_t beg_ownit;)
 {
-
 	if (beg_ownit)
 	{
 		wm_update(TRUE);
@@ -136,19 +113,13 @@ WORD beg_ownit;
 /************************************************************************/
 /* f i n d _ o b j							*/
 /************************************************************************/
-WORD find_obj(tree, start_obj, which)
-REG LONG tree;
-
-WORD start_obj;
-
-WORD which;
+int16_t find_obj(P(OBJPTR) tree, P(int16_t) start_obj, P(int16_t) which)
+PP(register int32_t tree;)
+PP(int16_t start_obj;)
+PP(int16_t which;)
 {
-	REG WORD obj,
-	 flag,
-	 theflag,
-	 inc;
-
-	WORD last_obj;
+	register int16_t obj, flag, theflag, inc;
+	int16_t last_obj;
 
 	obj = 0;
 	flag = EDITABLE;
@@ -193,16 +164,13 @@ WORD which;
 
 
 
-WORD fm_keybd(tree, obj, pchar, pnew_obj)
-LONG tree;
-
-WORD obj;
-
-WORD *pchar;
-
-WORD *pnew_obj;
+int16_t fm_keybd(P(OBJPTR) tree, P(int16_t) obj, P(int16_t *) pchar, P(int16_t *) pnew_obj)
+PP(OBJPTR tree;)
+PP(int16_t obj;)
+PP(int16_t *pchar;)
+PP(int16_t *pnew_obj;)
 {
-	REG WORD direction;
+	register int16_t direction;
 
 	/* handle character */
 	direction = -1;
@@ -239,29 +207,17 @@ WORD *pnew_obj;
 
 
 
-WORD fm_button(tree, new_obj, clks, pnew_obj)
-REG LONG tree;
-
-REG WORD new_obj;
-
-WORD clks;
-
-WORD *pnew_obj;
+int16_t fm_button(P(OBJPTR) tree, P(int16_t) new_obj, P(int16_t) clks, P(int16_t *) pnew_obj)
+PP(register OBJPTR tree;)
+PP(register int16_t new_obj;)
+PP(int16_t clks;)
+PP(int16_t *pnew_obj;)
 {
-	REG WORD tobj;
-
-	WORD orword;
-
-	WORD parent,
-	 state,
-	 flags;
-
-	WORD cont,
-	 tstate,
-	 tflags;
-
-	WORD rets[6];
-
+	register int16_t tobj;
+	int16_t orword;
+	int16_t parent, state, flags;
+	int16_t cont, tstate, tflags;
+	int16_t rets[6];
 	cont = TRUE;
 	orword = 0x0;
 
@@ -328,25 +284,19 @@ WORD *pnew_obj;
 
 
 /*
-*	ForM DO routine to allow the user to interactively fill out a 
-*	form.  The cursor is placed at the starting field.  This routine
-*	returns the object that caused the exit to occur
-*/
-WORD fm_do(tree, start_fld)
-REG LONG tree;
-
-WORD start_fld;
+ *	ForM DO routine to allow the user to interactively fill out a 
+ *	form.  The cursor is placed at the starting field.  This routine
+ *	returns the object that caused the exit to occur
+ */
+int16_t fm_do(P(OBJPTR) tree, P(int16_t) start_fld)
+PP(register OBJPTR tree;)
+PP(int16_t start_fld;)
 {
-	REG WORD edit_obj,
-	 cont;
-
-	WORD next_obj;
-
-	WORD which;
-
-	WORD idx;
-
-	WORD rets[6];
+	register int16_t edit_obj, cont;
+	int16_t next_obj;
+	int16_t which;
+	int16_t idx;
+	int16_t rets[6];
 
 	/* grab ownership of    */
 	/*   screen and mouse   */
@@ -385,7 +335,7 @@ WORD start_fld;
 			ob_edit(tree, edit_obj, 0, &idx, EDINIT);
 		}
 		/* wait for mouse or key */
-		which = ev_multi(MU_KEYBD | MU_BUTTON, NULLPTR, NULLPTR, 0x0L, 0x0002ff01L, 0x0L, &rets[0]);
+		which = ev_multi(MU_KEYBD | MU_BUTTON, NULL, NULL, 0x0L, 0x0002ff01L, 0x0L, &rets[0]);
 		/* handle keyboard event */
 		if (which & MU_KEYBD)
 		{
@@ -427,12 +377,10 @@ WORD start_fld;
 *	Form DIALogue routine to handle visual effects of drawing and
 *	undrawing a dialogue
 */
-VOID fm_dial(fmd_type, pi, pt)
-REG WORD fmd_type;
-
-REG GRECT *pi;
-
-REG GRECT *pt;
+VOID fm_dial(P(int16_t) fmd_type, P(GRECT *) pi, P(GRECT *) pt)
+PP(register int16_t fmd_type;)
+PP(register GRECT *pi;)
+PP(register GRECT *pt;)
 {
 	/* adjust tree position */
 	gsx_sclip(&gl_rscreen);
@@ -463,18 +411,14 @@ REG GRECT *pt;
 }
 
 
-WORD fm_show(string, pwd, level)
-WORD string;
-
-UWORD *pwd;
-
-WORD level;
+int16_t fm_show(P(int16_t) string, P(int16_t *) pwd, P(int16_t) level)
+PP(int16_t string;)
+PP(uint16_t *pwd;)
+PP(int16_t level;)
 {
-	WORD ret;
-
-	BYTE *alert;
-
-	REG BYTE *ad_alert;
+	int16_t ret;
+	char *alert;
+	register char *ad_alert;
 
 	ad_alert = alert = rs_str(string);
 	if (pwd)
@@ -482,20 +426,17 @@ WORD level;
 		merge_str(&D.g_loc2[0], alert, pwd);
 		ad_alert = &D.g_loc2[0];
 	}
-	return (fm_alert(level, ad_alert));
+	return fm_alert(level, ad_alert);
 }
 
 
-				/* TRO 9/20/84  - entered from dosif    */
-				/* when a DOS error occurs      */
-WORD eralert(n, d)
-WORD n;									/* n = alert #, 0-5     */
-
-WORD d;									/* d = drive code, 0=A  */
+/* TRO 9/20/84  - entered from dosif when a DOS error occurs      */
+int16_t eralert(P(int16_t) n, P(int16_t) d)
+PP(int16_t n;)									/* n = alert #, 0-5     */
+PP(int16_t d;)									/* d = drive code, 0=A  */
 {
-	WORD *pdrive_let;
-
-	WORD drive_let;
+	int16_t *pdrive_let;
+	int16_t drive_let;
 
 	pdrive_let = &drive_let;
 	drive_let = (d + 'A') << 8;			/* make it a 2 char string! */
@@ -503,22 +444,19 @@ WORD d;									/* d = drive code, 0=A  */
 	/* which alert          */
 	return (fm_show(ml_alrt[n],
 					/* string to copy in (or null)  */
-					(ml_pwlv[n] & 0xff00) ? &pdrive_let : NULLPTR,
+					(ml_pwlv[n] & 0xff00) ? &pdrive_let : NULL,
 					/* icon to use          */
 					ml_pwlv[n] & 0x00ff) != 1);
-
 }
 
 
-WORD fm_error(n)
-WORD n;									/* n = dos error number */
+int16_t fm_error(P(int16_t) n)
+PP(int16_t n;)									/* n = dos error number */
 {
-	REG WORD string;
-
+	register int16_t string;
 
 	if (n > 63)							/* nothing for xtal errors */
 		return (FALSE);
-
 
 	switch (n)
 	{
@@ -545,5 +483,5 @@ WORD n;									/* n = dos error number */
 		string = ALRTXXERR;
 	}
 
-	return (fm_show(string, (string == ALRTXXERR) ? &n : NULLPTR, 1) != 1);
+	return fm_show(string, (string == ALRTXXERR) ? &n : NULL, 1) != 1;
 }

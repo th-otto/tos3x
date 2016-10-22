@@ -39,4 +39,3 @@
 #define DRIVEP 25  	/* OBJECT in TREE #0 */
 #define FLABEL 1  	/* OBJECT in TREE #0 */
 #define DRVBOX 9  	/* OBJECT in TREE #0 */
-

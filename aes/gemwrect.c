@@ -41,14 +41,14 @@
 #define RIGHT 2
 #define BOTTOM 3
 						/* in OPTIMIZE.C    */
-EXTERN WORD min();
+extern int16_t min();
 
-EXTERN WORD max();
+extern int16_t max();
 
 						/* in WMLIB.C       */
-EXTERN WORD w_getsize();
+extern int16_t w_getsize();
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
 GLOBAL ORECT *rul;
 
@@ -57,7 +57,7 @@ GLOBAL ORECT gl_mkrect;
 #if UNLINKED
 or_start()
 {
-	REG WORD i;
+	register int16_t i;
 
 	rul = (ORECT *) 0;
 	for (i = 0; i < NUM_ORECT; i++)
@@ -80,12 +80,12 @@ ORECT * get_orect()
 
 
 ORECT * mkpiece(tlrb, new, old)
-WORD tlrb;
+int16_t tlrb;
 
-REG ORECT *new,
+register ORECT *new,
 *old;
 {
-	REG ORECT *rl;
+	register ORECT *rl;
 
 	rl = get_orect();
 	rl->o_link = old;
@@ -118,14 +118,14 @@ REG ORECT *new,
 
 
 ORECT * brkrct(new, r, p)
-REG ORECT *new,
+register ORECT *new,
 *r;
 
-REG ORECT *p;
+register ORECT *p;
 {
-	REG WORD i;
+	register int16_t i;
 
-	WORD have_piece[4];
+	int16_t have_piece[4];
 
 	/* break up rectangle r */
 	/*   based on new,  */
@@ -158,18 +158,18 @@ REG ORECT *p;
 
 
 VOID mkrect(tree, wh, junkx, junky)
-LONG tree;
+int32_t tree;
 
-WORD wh;
+int16_t wh;
 
-WORD junkx,
+int16_t junkx,
 	junky;
 {
-	REG WINDOW *pwin;
+	register WINDOW *pwin;
 
 	ORECT *new;
 
-	REG ORECT *r,
+	register ORECT *r,
 	*p;
 
 	pwin = &D.w_win[wh];
@@ -198,18 +198,18 @@ WORD junkx,
 
 
 VOID newrect(tree, wh, junkx, junky)
-LONG tree;
+int32_t tree;
 
-WORD wh;
+int16_t wh;
 
-WORD junkx,
+int16_t junkx,
 	junky;
 {
-	REG WINDOW *pwin;
+	register WINDOW *pwin;
 
 	ORECT *r0;
 
-	REG ORECT *new,
+	register ORECT *new,
 	*r;
 
 	pwin = &D.w_win[wh];

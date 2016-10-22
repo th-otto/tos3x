@@ -1,9 +1,8 @@
 /*	Functions.c				7/14/92		D.Mui		*/
 
-#include <portab.h>
-#include <machine.h>
-#include <taddr.h>
-#include <obdefs.h>
+#include "aes.h"
+#include "taddr.h"
+#include "obdefs.h"
 
 
 
@@ -11,13 +10,13 @@
 *	the end of the string.
 */
 
-BYTE * scasb(p, b)
-REG BYTE *p;
-
-REG BYTE b;
+const char *scasb(const char *p, char b)
+PP(register const char *p;)
+PP(register char b;)
 {
-	for (; *p && *p != b; p++) ;
-	return (p);
+	for (; *p && *p != b; p++)
+		;
+	return p;
 }
 
 
@@ -27,13 +26,12 @@ REG BYTE b;
 *	in an x,y,w,h block (grect)
 */
 
-r_get(pxywh, px, py, pw, ph)
-REG WORD *pxywh;
-
-WORD *px,
-*py,
-*pw,
-*ph;
+VOID r_get(P(int16_t *) pxywh, P(int16_t *) px, P(int16_t *) py, P(int16_t *) pw, P(int16_t *) ph)
+PP(register int16_t *pxywh;)
+PP(int16_t *px;)
+PP(int16_t *py;)
+PP(int16_t *pw;)
+PP(int16_t *ph;)
 {
 	*px = pxywh[0];
 	*py = pxywh[1];
@@ -46,13 +44,12 @@ WORD *px,
 *	values passed in.
 */
 
-r_set(pxywh, x, y, w, h)
-REG WORD *pxywh;
-
-WORD x,
- y,
- w,
- h;
+VOID r_set(P(int16_t *) pxywh, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
+PP(register int16_t *pxywh;)
+PP(int16_t x;)
+PP(int16_t y;)
+PP(int16_t w;)
+PP(int16_t h;)
 {
 	pxywh[0] = x;
 	pxywh[1] = y;
@@ -60,12 +57,12 @@ WORD x,
 	pxywh[3] = h;
 }
 
+
 /* 	Copy src xywh block to dest xywh block.		*/
 
-rc_copy(psxywh, pdxywh)
-REG WORD *psxywh;
-
-REG WORD *pdxywh;
+VOID rc_copy(P(int16_t *) psxywh, P(int16_t *) pdxywh)
+PP(register int16_t *psxywh;)
+PP(register int16_t *pdxywh;)
 {
 	*pdxywh++ = *psxywh++;
 	*pdxywh++ = *psxywh++;
@@ -76,27 +73,26 @@ REG WORD *pdxywh;
 
 /* 	Return true if the x,y position is within the grect	*/
 
-UWORD inside(x, y, pt)
-REG WORD x,
-	y;
-
-REG GRECT *pt;
+uint16_t inside(P(int16_t) x, P(int16_t) y, P(const GRECT *) pt)
+PP(register int16_t x;)
+PP(register int16_t y;)
+PP(register const GRECT *pt;)
 {
 	if ((x >= pt->g_x) && (y >= pt->g_y) && (x < pt->g_x + pt->g_w) && (y < pt->g_y + pt->g_h))
 		return (TRUE);
 	else
 		return (FALSE);
-}										/* inside */
+}
 
 
 
 /* 	Returns true if the two grects are equal.	*/
 
-WORD rc_equal(p1, p2)
-REG WORD *p1,
-*p2;
+int16_t rc_equal(P(const int16_t *) p1, P(const int16_t *) p2)
+PP(register const int16_t *p1;)
+PP(register const int16_t *p2;)
 {
-	REG WORD i;
+	register int16_t i;
 
 	for (i = 0; i < 4; i++)
 	{
@@ -112,14 +108,11 @@ REG WORD *p1,
 *	is greater than x and the height is greater than y.
 */
 
-WORD rc_intersect(p1, p2)
-REG GRECT *p1,
-*p2;
+int16_t rc_intersect(P(const GRECT *) p1, P(GRECT *) p2)
+PP(register const GRECT *p1;)
+PP(register GRECT *p2;)
 {
-	REG WORD tx,
-	 ty,
-	 tw,
-	 th;
+	register int16_t tx, ty, tw, th;
 
 	tw = min(p2->g_x + p2->g_w, p1->g_x + p1->g_w);
 	th = min(p2->g_y + p2->g_h, p1->g_y + p1->g_h);
@@ -136,14 +129,11 @@ REG GRECT *p1,
 /* 	Returns the union of two rectangles in ptr2.	*/
 /*	Don't pass in 0s in x,y,w,h 			*/
 
-VOID rc_union(p1, p2)
-REG GRECT *p1,
-*p2;
+VOID rc_union(P(const GRECT *) p1, P(GRECT *) p2)
+PP(register const GRECT *p1;)
+PP(register GRECT *p2;)
 {
-	REG WORD tx,
-	 ty,
-	 tw,
-	 th;
+	register int16_t tx, ty, tw, th;
 
 	tw = max(p1->g_x + p1->g_w, p2->g_x + p2->g_w);
 	th = max(p1->g_y + p1->g_h, p2->g_y + p2->g_h);
@@ -161,10 +151,9 @@ REG GRECT *p1,
 *	constraining box.
 */
 
-rc_constrain(pc, pt)
-REG GRECT *pc;
-
-REG GRECT *pt;
+VOID rc_constrain(P(const GRECT *) pc, P(GRECT *) pt)
+PP(register const GRECT *pc;)
+PP(register GRECT *pt;)
 {
 	if (pt->g_x < pc->g_x)
 		pt->g_x = pc->g_x;
@@ -181,11 +170,10 @@ REG GRECT *pt;
 
 /* 	move bytes from source to dest for a count of N	*/
 
-VOID movs(num, ps, pd)
-REG WORD num;
-
-REG BYTE *ps,
-*pd;
+VOID movs(P(int16_t) num, P(oonst char *) ps, P(char *) pd)
+PP(register int16_t num;)
+PP(register oonst char *ps;)
+PP(register char *pd;)
 {
 	do
 		*pd++ = *ps++;
@@ -195,9 +183,9 @@ REG BYTE *ps,
 
 /* 	Returns minimum value of two words	*/
 
-WORD min(a, b)
-WORD a,
-	b;
+int16_t min(P(int16_t) a, P(int16_t) b)
+PP(int16_t a;)
+PP(int16_t b;)
 {
 	return ((a < b) ? a : b);
 }
@@ -205,9 +193,9 @@ WORD a,
 
 /* 	Returns maximum value of two words	*/
 
-WORD max(a, b)
-WORD a,
-	b;
+int16_t max(P(int16_t) a, P(int16_t) b)
+PP(int16_t a;)
+PP(int16_t b;)
 {
 	return ((a > b) ? a : b);
 }
@@ -216,12 +204,10 @@ WORD a,
 
 /* 	Copy the byte passed in to the dest pointer for a count of N	*/
 
-VOID bfill(num, bval, addr)
-REG WORD num;
-
-REG BYTE bval;
-
-REG BYTE *addr;
+VOID bfill(P(int16_t) num, P(char) bval, P(char *) addr)
+PP(register int16_t num;)
+register char bval;)
+PP(register char *addr;)
 {
 	while (num)
 	{
@@ -233,8 +219,8 @@ REG BYTE *addr;
 
 /* 	Return upper case value		*/
 
-BYTE toupper(ch)
-REG BYTE ch;
+char toupper(P(char) ch)
+PP(register char ch;)
 {
 	if ((ch >= 'a') && (ch <= 'z'))
 		return (ch - 32);
@@ -245,22 +231,22 @@ REG BYTE ch;
 
 /*	Length of a string	*/
 
-WORD strlen(p1)
-REG BYTE *p1;
+size_t strlen(P(const char *) p1)
+PP(register const char *p1;)
 {
-	REG WORD len;
+	register int16_t len;
 
 	len = 0;
 	while (*p1++)
 		len++;
 
-	return (len);
+	return len;
 }
 
 
-WORD strcmp(p1, p2)
-REG BYTE *p1,
-*p2;
+int strcmp(P(const char *) p1, P(const char *) p2)
+PP(register const char *p1;)
+PP(register const char *p2;)
 {
 	while (*p1)
 	{
@@ -274,24 +260,24 @@ REG BYTE *p1,
 
 
 
-BYTE * strcpy(ps, pd)
-REG BYTE *ps,
-*pd;
+char *xstrpcpy(ps, pd)
+register const char *ps;
+register char *pd;
 {
 	while (*pd++ = *ps++)
 		;
-	return (pd);
+	return pd;
 }
 
 
-/* 	copy the src to destination untill we are out of characters
+/* 	copy the src to destination until we are out of characters
 *	or we get a char match.
 */
 
-BYTE * strscn(ps, pd, stop)
-REG BYTE *ps,
-*pd,
-	stop;
+char * strscn(P(const char *) ps, P(char *) pd, P(char) stop)
+PP(register const char *ps;)
+PP(register char *pd;)
+PP(register char stop;)
 {
 	while ((*ps) && (*ps != stop))
 		*pd++ = *ps++;
@@ -299,9 +285,9 @@ REG BYTE *ps,
 }
 
 
-BYTE * strcat(ps, pd)
-REG BYTE *ps,
-*pd;
+char *xstrpcat(P(const char *) ps, P(char *) pd)
+PP(register const char *ps;
+PP(register char *pd;)
 {
 	while (*pd)
 		pd++;
@@ -317,16 +303,16 @@ REG BYTE *ps,
 *	Returns	- <0 if(str1<str2), 0 if(str1=str2), >0 if(str1>str2)
 */
 
-WORD strchk(s, t)
-REG BYTE s[],
-	t[];
+int16_t strchk(P(const char *) s, P(const char *) t)
+PP(register const char *s;)
+PP(register const char *s;)
 {
-	REG WORD i;
+	register int16_t i;
 
 	i = 0;
 	while (s[i] == t[i])
-		if (s[i++] == NULL)
-			return (0);
+		if (s[i++] == 0)
+			return 0;
 	return (s[i] - t[i]);
 }
 
@@ -335,13 +321,11 @@ REG BYTE s[],
 /*
 *	Strip out period and turn into raw data.
 */
-VOID									/* 9/4/90   */
-fmt_str(instr, outstr)
-REG BYTE *instr;
-
-REG BYTE *outstr;
+VOID fmt_str(P(const char *) instr, P(char *) outstr)
+PP(register const char *instr;)
+PP(register char *outstr;)
 {
-	WORD i;
+	int16_t i;
 
 	for (i = 0; i < 8; i++)
 	{
@@ -367,17 +351,14 @@ REG BYTE *outstr;
 
 
 /*
-*	Insert in period and make into true data.
-*/
-VOID									/* 9/4/90   */
-unfmt_str(instr, outstr)
-REG BYTE *instr;
-
-REG BYTE *outstr;
+ *	Insert in period and make into true data.
+ */
+VOID unfmt_str(P(const char *) instr, P(char *) outstr)
+PP(register const char *instr;)
+PP(register char *outstr;)
 {
-	WORD i;
-
-	BYTE temp;
+	int16_t i;
+	char temp;
 
 	for (i = 0; i < 8; i++)
 	{
@@ -404,23 +385,19 @@ REG BYTE *outstr;
 
 
 /* 	Copy the long in the ob_spec field to the callers variable
-*	ptext.  Next copy the string located at the ob_spec long to the
-*	callers pstr.  Finally copy the length of the tedinfo string
-*	to the callers ptxtlen.
-*/
+ *	ptext.  Next copy the string located at the ob_spec long to the
+ *	callers pstr.  Finally copy the length of the tedinfo string
+ *	to the callers ptxtlen.
+ */
 
-VOID fs_sset(tree, obj, pstr, ptext, ptxtlen)
-LONG tree;
-
-WORD obj;
-
-LONG pstr;
-
-REG LONG *ptext;
-
-WORD *ptxtlen;
+VOID fs_sset(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) pstr, P(char **) ptext, P(int16_t *) ptxtlen)
+PP(int32_t tree;)
+PP(int16_t obj;)
+PP(int32_t pstr;)
+PP(register char **ptext;)
+PP(int16_t *ptxtlen;)
 {
-	REG LONG spec;
+	register int32_t spec;
 
 	*ptext = LLGET(spec = LLGET(OB_SPEC(obj)));
 	LSTCPY(*ptext, pstr);
@@ -428,29 +405,24 @@ WORD *ptxtlen;
 }
 
 
-VOID inf_sset(tree, obj, pstr)
-LONG tree;
-
-WORD obj;
-
-BYTE *pstr;
+VOID inf_sset(P(OBJPTR) tree, P(int16_t) obj, P(char *) pstr)
+P(OBJPTR tree;)
+P(int16_t obj;)
+P(char *pstr;)
 {
-	LONG text;
-
-	WORD txtlen;
+	int32_t text;
+	int16_t txtlen;
 
 	fs_sset(tree, obj, ADDR(pstr), &text, &txtlen);
 }
 
 
-VOID fs_sget(tree, obj, pstr)
-LONG tree;
-
-WORD obj;
-
-LONG pstr;
+VOID fs_sget(P(OBJPTR) tree, P(int16_t) obj, P(intptr_t) pstr)
+PP(OBJPTR tree;)
+PP(int16_t obj;)
+PP(intptr_t pstr;)
 {
-	LONG ptext;
+	int32_t ptext;
 
 	ptext = LLGET(LLGET(OB_SPEC(obj)));
 	LSTCPY(pstr, ptext);
@@ -463,12 +435,10 @@ LONG pstr;
 *	The function inf_sget was the same as fs_sget.
 */
 
-VOID inf_sget(tree, obj, pstr)
-LONG tree;
-
-WORD obj;
-
-BYTE *pstr;
+VOID inf_sget(P(OBJPTR) tree, P(int16_t) obj, P(char * pstr)
+PP(OBJPTR tree;)
+PP(int16_t obj;)
+PP(char *pstr;)
 {
 	fs_sget(tree, obj, ADDR(pstr));
 }
@@ -480,16 +450,13 @@ BYTE *pstr;
 *	'falsestate'
 */
 
-VOID inf_fldset(tree, obj, testfld, testbit, truestate, falsestate)
-LONG tree;
-
-WORD obj;
-
-UWORD testfld,
-	testbit;
-
-UWORD truestate,
-	falsestate;
+VOID inf_fldset(P(OBJPTR) tree, P(int16_t) obj, P(uint16_t) testfld, P(uint16_t) testbit, P(uint16_t) truestate, P(uint16_t) falsestate)
+PP(OBJPTR tree;)
+PP(int16_t obj;)
+PP(uint16_t testfld;)
+PP(uint16_t testbit;)
+PP(uint16_t truestate;)
+PP(uint16_t falsestate;)
 {
 	LWSET(OB_STATE(obj), (testfld & testbit) ? truestate : falsestate);
 }
@@ -499,36 +466,33 @@ UWORD truestate,
 *		that is selected or -1 if no objects are selected.
 */
 
-WORD inf_gindex(tree, baseobj, numobj)
-LONG tree;
-
-WORD baseobj;
-
-WORD numobj;
+int16_t inf_gindex(P(OBJPTR) tree, P(int16_t) baseobj, P(int16_t) numobj)
+PP(OBJPTR tree;)
+PP(int16_t baseobj;)
+PP(int16_t numobj;)
 {
-	WORD retobj;
+	int16_t retobj;
 
 	for (retobj = 0; retobj < numobj; retobj++)
 	{
 		if (LWGET(OB_STATE(baseobj + retobj)) & SELECTED)
 			return (retobj);
 	}
-	return (-1);
+	return NIL;
 }
 
 
 /*
-*	Return 0 if cancel was selected, 1 if okay was selected, -1 if
-*	nothing was selected.
-*/
+ *	Return 0 if cancel was selected, 1 if okay was selected, -1 if
+ *	nothing was selected.
+ */
 
-WORD inf_what(tree, ok, cncl)
-REG LONG tree;
-
-REG WORD ok,
-	cncl;
+int16_t inf_what(P(OBJPTR) tree, P(int16_t) ok, P(int16_t) cncl)
+PP(register OBJPTR tree;)
+PP(register int16_t ok;)
+PP(register int16_t cncl;)
 {
-	REG WORD field;
+	register int16_t field;
 
 	field = inf_gindex(tree, ok, 2);
 
@@ -542,27 +506,18 @@ REG WORD ok,
 
 
 
-WORD merge_str(pdst, ptmp, parms)
-REG BYTE *pdst;
-
-REG BYTE *ptmp;
-
-UWORD parms[];
+int16_t merge_str(P(char *) pdst, P(char *) ptmp, P(uint16_t *) parms)
+PP(register char *pdst;)
+PP(register char *ptmp;)
+PP(uint16_t *parms;)
 {
-	REG WORD num;
-
-	WORD do_value;
-
-	BYTE lholder[12];
-
-	REG BYTE *pnum;
-
-	BYTE *psrc;
-
-	REG LONG lvalue,
-	 divten;
-
-	WORD digit;
+	register int16_t num;
+	int16_t do_value;
+	char lholder[12];
+	register char *pnum;
+	char *psrc;
+	register int32_t lvalue, divten;
+	int16_t digit;
 
 	num = 0;
 	while (*ptmp)
@@ -579,7 +534,7 @@ UWORD parms[];
 				*pdst++ = '%';
 				break;
 			case 'L':
-				lvalue = *((LONG *) & parms[num]);
+				lvalue = *((int32_t *) & parms[num]);
 				num += 2;
 				do_value = TRUE;
 				break;
@@ -589,7 +544,7 @@ UWORD parms[];
 				do_value = TRUE;
 				break;
 			case 'S':
-				psrc = (BYTE *) parms[num];
+				psrc = (char *) parms[num];
 				num += 2;
 				while (*psrc)
 					*pdst++ = *psrc++;
@@ -601,7 +556,7 @@ UWORD parms[];
 				while (lvalue)
 				{
 					divten = lvalue / 10;
-					digit = (WORD) lvalue - (divten * 10);
+					digit = (int16_t) lvalue - (divten * 10);
 					*pnum++ = '0' + digit;
 					lvalue = divten;
 				}
@@ -620,10 +575,9 @@ UWORD parms[];
 
 
 
-WORD wildcmp(pwild, ptest)
-REG BYTE *pwild;
-
-REG BYTE *ptest;
+int16_t wildcmp(P(const char *) pwild, P(const char *) ptest)
+PP(register const char *pwild;)
+PP(register const char *ptest;)
 {
 	while ((*ptest) && (*pwild))
 	{

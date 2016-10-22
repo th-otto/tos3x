@@ -71,39 +71,39 @@
 #define BYTESPACE 0x20					/* ascii space in bytes */
 
 						/* in GSXIF or APGSXIF  */
-EXTERN VOID gsx_gclip();
+extern VOID gsx_gclip();
 
-EXTERN VOID gsx_sclip();
+extern VOID gsx_sclip();
 
-EXTERN WORD gl_wchar;
+extern int16_t gl_wchar;
 
-EXTERN WORD gl_hchar;
+extern int16_t gl_hchar;
 
-EXTERN WORD gl_wbox;
+extern int16_t gl_wbox;
 
-EXTERN WORD gl_hbox;
+extern int16_t gl_hbox;
 
-EXTERN WORD gl_width;
+extern int16_t gl_width;
 
-EXTERN WORD gl_height;
+extern int16_t gl_height;
 
-EXTERN TEDINFO edblk;
+extern TEDINFO edblk;
 
-EXTERN BYTE *rs_str();
+extern char *rs_str();
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
 #if UNLINKED
-WORD ob_getsp(tree, obj, pted)
-REG LONG tree;
+int16_t ob_getsp(tree, obj, pted)
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
 TEDINFO *pted;
 {
-	WORD flags;
+	int16_t flags;
 
-	REG LONG spec;
+	register int32_t spec;
 
 	flags = LWGET(OB_FLAGS(obj));
 	spec = LLGET(OB_SPEC(obj));
@@ -116,21 +116,21 @@ TEDINFO *pted;
 
 
 VOID ob_center(tree, pt)
-LONG tree;
+int32_t tree;
 
 GRECT *pt;
 {
-	REG WORD xd,
+	register int16_t xd,
 	 yd,
 	 wd,
 	 hd;
 
-	REG LONG plong;
+	register int32_t plong;
 
-	WORD iword,
+	int16_t iword,
 	 th;
 
-	LONG ilong;
+	int32_t ilong;
 
 	GRECT rec;
 
@@ -172,12 +172,12 @@ GRECT *pt;
 *	during field entry the cursor will jump to the first 
 *	raw string underscore after that character.
 */
-WORD scan_to_end(pstr, idx, chr)
-REG BYTE *pstr;
+int16_t scan_to_end(pstr, idx, chr)
+register char *pstr;
 
-REG WORD idx;
+register int16_t idx;
 
-BYTE chr;
+char chr;
 {
 	while ((*pstr) && (*pstr != chr))
 	{
@@ -192,16 +192,15 @@ BYTE chr;
 *	Routine to insert a character in a string by
 */
 VOID ins_char(str, pos, chr, tot_len)
-REG BYTE *str;
+register char *str;
 
-WORD pos;
+int16_t pos;
 
-BYTE chr;
+char chr;
 
-REG WORD tot_len;
+register int16_t tot_len;
 {
-	REG WORD ii,
-	 len;
+	register int16_t ii, len;
 
 	len = strlen(str);
 
@@ -220,12 +219,12 @@ REG WORD tot_len;
 *       for the position that was input (in raw string relative numbers).
 *       The returned position will always be right before an '_'.
 */
-WORD find_pos(str, pos)
-REG BYTE *str;
+int16_t find_pos(str, pos)
+register char *str;
 
-REG WORD pos;
+register int16_t pos;
 {
-	REG WORD i;
+	register int16_t i;
 
 
 	for (i = 0; pos > 0; i++)
@@ -251,17 +250,17 @@ REG WORD pos;
 }
 
 VOID pxl_rect(tree, obj, ch_pos, pt)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
-WORD ch_pos;
+int16_t ch_pos;
 
-REG GRECT *pt;
+register GRECT *pt;
 {
 	GRECT o;
 
-	WORD numchs;
+	int16_t numchs;
 
 	ob_actxywh(tree, obj, &o);
 	numchs = gr_just(edblk.te_just, edblk.te_font, edblk.te_ptmplt, o.g_w, o.g_h, &o);
@@ -276,12 +275,12 @@ REG GRECT *pt;
 *	Routine to redraw the cursor or the field being editted.
 */
 VOID curfld(tree, obj, new_pos, dist)
-LONG tree;
+int32_t tree;
 
-WORD obj,
+int16_t obj,
 	new_pos;
 
-WORD dist;
+int16_t dist;
 {
 	GRECT oc,
 	 t;
@@ -315,12 +314,12 @@ WORD dist;
 *	range.  The character ranges are
 *	stored as enumerated characters (xyz) or ranges (x..z)
 */
-WORD instr(chr, str)
-REG BYTE chr;
+int16_t instr(chr, str)
+register char chr;
 
-REG BYTE *str;
+register char *str;
 {
-	REG BYTE test1,
+	register char test1,
 	 test2;
 
 	while (*str)
@@ -342,14 +341,14 @@ REG BYTE *str;
 *	Routine to verify that the character matches the validation
 *	string.  If necessary, upshift it.
 */
-WORD check(in_char, valchar)
-REG BYTE *in_char;
+int16_t check(in_char, valchar)
+register char *in_char;
 
-BYTE valchar;
+char valchar;
 {
-	REG WORD upcase;
+	register int16_t upcase;
 
-	REG WORD rstr;
+	register int16_t rstr;
 
 	upcase = TRUE;
 	rstr = -1;
@@ -410,12 +409,12 @@ BYTE valchar;
 *	string.  The start is determined by the InDeX position given.
 */
 VOID ob_stfn(idx, pstart, pfinish)
-WORD idx;
+int16_t idx;
 
-WORD *pstart,
+int16_t *pstart,
 *pfinish;
 {
-	REG THEGLO *DGLO;
+	register THEGLO *DGLO;
 
 	DGLO = &D;
 	*pstart = find_pos(&DGLO->g_tmpstr[0], idx);
@@ -423,38 +422,38 @@ WORD *pstart,
 }
 
 
-WORD ob_delit(idx)
-WORD idx;
+int16_t ob_delit(idx)
+int16_t idx;
 {
-	REG THEGLO *DGLO;
+	register THEGLO *DGLO;
 
 	DGLO = &D;
 	if (DGLO->g_rawstr[idx])
 	{
-		strcpy(&DGLO->g_rawstr[idx + 1], &DGLO->g_rawstr[idx]);
+		xstrpcpy(&DGLO->g_rawstr[idx + 1], &DGLO->g_rawstr[idx]);
 		return (FALSE);
 	}
 	return (TRUE);
 }
 
 
-WORD ob_edit(tree, obj, in_char, idx, kind)
-REG LONG tree;
+int16_t ob_edit(tree, obj, in_char, idx, kind)
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
-WORD in_char;
+int16_t in_char;
 
-REG WORD *idx;							/* rel. to raw data */
+register int16_t *idx;							/* rel. to raw data */
 
-WORD kind;
+int16_t kind;
 {
-	REG LONG spec;
+	register int32_t spec;
 
-	REG WORD tmp_back,
+	register int16_t tmp_back,
 	 cur_pos;
 
-	WORD pos,
+	int16_t pos,
 	 len,
 	 flags,
 	 dist;
@@ -463,18 +462,18 @@ WORD kind;
 	 c,
 	 oc;
 
-	WORD ii,
+	int16_t ii,
 	 no_redraw,
 	 start;
 
-	WORD finish,
+	int16_t finish,
 	 nstart,
 	 nfinish;
 
-	BYTE bin_char,
+	char bin_char,
 	*pstr;
 
-	REG THEGLO *DGLO;
+	register THEGLO *DGLO;
 
 	DGLO = &D;
 
@@ -545,7 +544,7 @@ WORD kind;
 				*idx -= 1;
 			break;
 		case RIGHT:
-			if (*idx < strlen(&DGLO->g_rawstr[0]))
+			if (*idx < (int)strlen(&DGLO->g_rawstr[0]))
 				*idx += 1;
 			break;
 		default:

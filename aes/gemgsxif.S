@@ -23,51 +23,37 @@
 *	Fix	1/21/87			Derek Mui, J.Eisenstein
 *	Fix at gsx_mret	4/28/1988	D.Mui	
 *	Remove gsx_mfset	5/8/91	D.Mui
-*	Add gsx_wsop for six resolutions 4/25/89	D.Mui
+*	Add gsx_wsopen for six resolutions 4/25/89	D.Mui
 * 	Assemble with MAS 900801 kbad
-*	Check for sparrow resolution at gsx_wsop	7/19/92	D.Mui	
+*	Check for sparrow resolution at gsx_wsopen	7/19/92	D.Mui	
 
-	.globl	_gl_vdo,_d_rezword		
-	.globl	_gsx_fix,_gsx_sta,_dos_all,_dos_fre
-	.globl	_far_mchange,_far_bchange,_gsx2
-	.globl	 iioff,iooff,pooff,pioff
-
-	.globl	_gl_restype,_gl_rsch,_drwaddr,_xrat,_yrat,_button
-	.globl	_gl_width,_gl_heigh,_gl_nrows,_gl_ncols,_gl_wchar
-	.globl	_gl_hchar,_gl_wscha,_gl_hscha,_gl_wptsc,_gl_hptsc
-	.globl	_gl_wspts,_gl_hspts,_gl_wbox,_gl_hbox,_gl_xclip
-	.globl	_gl_yclip,_gl_wclip,_gl_hclip,_gl_nplan,_gl_handl
-	.globl	_gl_src,_gl_dst,_gl_ws
-
-	.globl	_contrl,_intin,_ptsin,_intout,_ptsout,_ad_intin
-
-	.globl	_gl_tmp
-	.comm	_gl_tmp,20
-	.globl	_old_mcod
-	.comm 	_old_mcod,4
-	.globl	_old_bcod
-	.comm	_old_bcod,4
-	.globl	_gl_moff
-	.comm	_gl_moff,2
-	.globl	_gl_mlen
-	.comm	_gl_mlen,4
-	.globl	_gl_graph
-	.comm	_gl_graph,2
-	.globl	_gl_mouse
-	.comm	_gl_mouse,2
+	xdef	_gl_tmp
+	comm	_gl_tmp,20
+	xdef	_old_mcod
+	comm 	_old_mcod,4
+	xdef	_old_bcod
+	comm	_old_bcod,4
+	xdef	_gl_moff
+	comm	_gl_moff,2
+	xdef	_gl_mlen
+	comm	_gl_mlen,4
+	xdef	_gl_graph
+	comm	_gl_graph,2
+	xdef	_gl_mouse
+	comm	_gl_mouse,2
 
 
-GSX_MFS	.equ	 0*3
-V_OPNWK	.equ	 1*3
-VST_CLP	.equ	 2*3
-VST_HGT	.equ	 3*3
-VR_RECT	.equ	 4*3
-VRO_CPY	.equ	 5*3
-VRT_CPY	.equ	 6*3
-VSL_WID	.equ	 7*3
+GSX_MFS	equ	 0*3
+V_OPNWK	equ	 1*3
+VST_CLP	equ	 2*3
+VST_HGT	equ	 3*3
+VR_RECT	equ	 4*3
+VRO_CPY	equ	 5*3
+VRT_CPY	equ	 6*3
+VSL_WID	equ	 7*3
 
 
-*	.globl _gsx_malloc
+*	xdef _gsx_malloc
 *
 *_gsx_malloc:
 *
@@ -86,9 +72,9 @@ VSL_WID	.equ	 7*3
 
 
 
-	.globl _gsx_mfre
+	xdef _gsx_mfree
 
-_gsx_mfre:
+_gsx_mfree:
 	tst.l	_gl_tmp			; Fix 8/3/92
 	beq	g1
 	move.l	_gl_tmp,-(sp)		; Fix 1/20/87
@@ -99,7 +85,7 @@ g1:
 
 
 
-	.globl _gsx_mret
+	xdef _gsx_mret
 
 *  in:
 *	sp+04	pmaddr
@@ -115,7 +101,7 @@ _gsx_mret:
 
 
 
-	.globl _gsx_ncode
+	xdef _gsx_ncode
 
 *  in:
 *	sp+04	code
@@ -137,7 +123,7 @@ _gsx_ncode:
 
 
 
-	.globl _gsx_1code
+	xdef _gsx_1code
 
 *  in:
 *	sp+04	code
@@ -156,12 +142,12 @@ _gsx_1code:
 
 
 
-	.globl _gsx_init
+	xdef _gsx_init
 
 _gsx_init:
 
-	bsr	_gsx_wsop
-	jsr	_gsx_sta
+	bsr	_gsx_wsopen
+	jsr	_gsx_start
 	bsr	setmb
 
 	moveq.l	#124,d0			; code 124 => vq_mouse
@@ -176,7 +162,7 @@ _gsx_init:
 
 
 
-	.globl _gsx_grap
+	xdef _gsx_grap
 
 *  in:
 *	sp+04	tographic
@@ -197,7 +183,7 @@ _gsx_grap:
 setmb:	pea	_drwaddr
 	pea	_far_mchange
 	pea	_far_bchange
-	bsr	_gsx_setm
+	bsr	_gsx_setmb
 	lea	12(sp),sp
 
 L8:	rts
@@ -205,14 +191,14 @@ L8:	rts
 
 L9:	moveq.l	#3,d0
 	bsr	escape
-	bra	_gsx_rese
+	bra	_gsx_resetmb
 
 
 
 
-	.globl _v_hardco
+	xdef _v_hardcopy
 
-_v_hardco:
+_v_hardcopy:
 
 	moveq.l	#17,d0
 	bra	escape
@@ -220,7 +206,7 @@ _v_hardco:
 
 
 
-	.globl _gsx_esca
+	xdef _gsx_esca
 
 *  in:
 *	sp+04	esc_code
@@ -237,9 +223,9 @@ escape:	move.w	d0,_contrl+10
 
 *****	 Open physical work station for 6 resoultions	*****
 
-	.globl _gsx_wsop
+	xdef _gsx_wsopen
 
-_gsx_wsop:
+_gsx_wsopen:
 
 	lea	_intin,a1
 	move.l	a1,a2			; a2 -> intin[0]
@@ -318,7 +304,7 @@ L22:	clr.w	_gl_rsch	; gl_rschange  <- FALSE
 
 
 
-	.globl _gsx_wscl
+	xdef _gsx_wscl
 
 _gsx_wscl:
 
@@ -327,7 +313,7 @@ _gsx_wscl:
 
 
 
-	.globl _ratinit
+	xdef _ratinit
 
 _ratinit:
 
@@ -340,7 +326,7 @@ _ratinit:
 	rts
 
 
-	.globl _bb_set
+	xdef _bb_set
 
 *  call:
 *
@@ -422,7 +408,7 @@ _bb_set:
 
 
 
-	.globl _bb_save
+	xdef _bb_save
 
 *  call:
 *
@@ -452,7 +438,7 @@ _bb_save:
 
 
 
-	.globl _bb_resto
+	xdef _bb_resto
 
 *  call:
 *
@@ -482,14 +468,14 @@ _bb_resto:
 
 
 
-	.globl _gsx_setm
+	xdef _gsx_setmb
 
 *  in:
 *	sp+04	boff
 *	  +08	moff
 *	  +12	pdrwaddr	*** not used ***
 
-_gsx_setm:
+_gsx_setmb:
 
 	move.l	4(sp),_contrl+14	; contrl[7-8] <- new button vector
 	moveq.l	#125,d0
@@ -505,9 +491,8 @@ _gsx_setm:
 
 
 
-	.globl _gsx_rese
-
-_gsx_rese:
+	xdef _gsx_resetmb
+_gsx_resetmb:
 
 	move.l	_old_bcod,_contrl+14		; reset button vector
 	moveq.l	#125,d0
@@ -518,7 +503,7 @@ _gsx_rese:
 
 
 
-	.globl _gsx_tick
+	xdef _gsx_tick
 
 *  in:
 *	sp+04	 tcode
@@ -538,7 +523,7 @@ _gsx_tick:
 	rts
 
 
-*	.globl _gsx_mfse
+*	xdef _gsx_mfse
 
 *  in:
 *	sp+04	pmfnew
@@ -562,7 +547,7 @@ _gsx_tick:
 
 
 
-	.globl _gsx_mxmy
+	xdef _gsx_mxmy
 
 *  in:
 *	sp+04	*pmx
@@ -579,7 +564,7 @@ _gsx_mxmy:
 
 
 
-	.globl _gsx_butt
+	xdef _gsx_butt
 
 _gsx_butt:
 
@@ -588,8 +573,8 @@ _gsx_butt:
 
 
 
-	.globl _gsx_moff
-	.globl _ratexit
+	xdef _gsx_moff
+	xdef _ratexit
 
 _ratexit:
 _gsx_moff:
@@ -607,7 +592,7 @@ L35:	add.w	#1,_gl_moff
 
 
 
-	.globl _gsx_mon
+	xdef _gsx_mon
 
 _gsx_mon:
 
@@ -626,13 +611,13 @@ L37:	rts
 
 
 
-	.globl _v_opnwk
 
 *  in:
 *	sp+04	pwork_in
 *	sp+08	phandle
 *	sp+12	pwork_out
 
+	xdef _v_opnwk
 _v_opnwk:
 
 	move.l	04(sp),iioff		; _intin array is pwork_in
@@ -654,12 +639,11 @@ _v_opnwk:
 
 
 
-	.globl _v_pline
-
 *  in:
 *	sp+04	count
 *	sp+06	pxyarray
 
+	xdef _v_pline
 _v_pline:
 
 	lea	4(sp),a0
@@ -673,7 +657,7 @@ _v_pline:
 
 
 
-	.globl _vst_clip
+	xdef _vst_clip
 
 *  in:
 *	sp+04	clip_flag
@@ -688,7 +672,6 @@ _vst_clip:
 	bra	vdi_call
 
 
-	.globl _vst_heig
 
 *  in:
 *	sp+04	height
@@ -697,7 +680,8 @@ _vst_clip:
 *	  +14	pcell_wi
 *	  +18	pcell_he
 
-_vst_heig:
+	xdef _vst_height
+_vst_height:
 
 	lea	_ptsin,a1
 	clr.w	      (a1)+		; ptsin[0] <- 0
@@ -721,12 +705,11 @@ _vst_heig:
 
 
 
-	.globl _vr_recfl
-
 *  in:
 *	sp+04	pxyarray
 *	sp+08	pdesMFDB
 
+	xdef _vr_recfl
 _vr_recfl:
 
 	lea	4(sp),a0
@@ -738,7 +721,6 @@ _vr_recfl:
 
 
 
-	.globl _vro_cpyf
 
 *  in:
 *	sp+04	wr_mode
@@ -746,6 +728,7 @@ _vr_recfl:
 *	  +10	psrcMFDB
 *	  +14	pdesMFDB
 
+	xdef _vro_cpyf
 _vro_cpyf:
 
 	lea	4(sp),a0		; a0 -> parameters on stack
@@ -758,7 +741,6 @@ _vro_cpyf:
 
 
 
-	.globl _vrt_cpyf
 
 *  in:
 *	sp+04	wr_mode
@@ -768,7 +750,8 @@ _vro_cpyf:
 *	  +18	fgcolor
 *	  +20	bgcolor
 
-_vrt_cpyf:
+	xdef _vrt_cpyfm
+_vrt_cpyfm:
 
 	lea	  4(sp),a0		; a0 -> parameters on stack
 	lea	 _intin,a2		; a2 -> intin array
@@ -783,7 +766,7 @@ _vrt_cpyf:
 
 
 
-	.globl _vrn_trnf
+	xdef _vrn_trnf
 
 *  in:
 *	sp+04	psrcMFDB
@@ -799,7 +782,7 @@ _vrn_trnf:
 
 
 
-	.globl _vsl_width
+	xdef _vsl_width
 
 *  in:
 *	sp+04	width
@@ -882,569 +865,6 @@ vdi_list:
 
 
 restable:
-	.dc.w	0, 2, 5, 7, 3, 4, 6, 8, 9
+	dc.w	0,2,5,7,3,4,6,8,9
 restype:
-	.dc.w	0, 1, 1, 1, 2, 3, 4, 5, 6
-
-
-*\*	GEMGSXIF.C	05/06/84 - 02/17/85	Lee Lorenzen		*\
-*\*	68k		02/20/85 - 03/25/85	Lowell Webster		*\
-*\*	Reg Opt		03/09/85		Derek Mui		*\
-*\*	speed bee	05/14/85		jim eisenstein		*\
-*\*	Comment something out	07/11/85	Derek Mui		*\
-*\*	6 resolutions	1/30/86			Derek Mui		*\
-*\*	At gsx_wsopen, at gsx_malloc					*\
-*\*	Store mouse addr at gsx_mfset	2/28/86	Derek Mui		*\
-*\*	New flag to tell if the mouse is really on 3/3/86	D.Mui	*\
-*\*	Take out save mouse address		1/7/87	Derek Mui	*\
-*
-*\*
-**	-------------------------------------------------------------
-**	GEM Application Environment Services		  Version 1.1
-**	Serial No.  XXXX-0000-654321		  All Rights Reserved
-**	Copyright (C) 1985			Digital Research Inc.
-**	-------------------------------------------------------------
-**\
-*
-*#include <portab.h>
-*#include <machine.h>
-*#include <obdefs.h>
-*#include <gsxdefs.h>
-*#include <bind.h>
-*#include <funcdef.h>
-*
-*
-*\*
-**	Calls used in Crystal:
-**
-**	vsf_interior();
-**	vr_recfl();
-**	vst_height(); 
-**	vsl_type();
-**	vsl_udsty();
-**	vsl_width();
-**	v_pline();
-**	vst_clip();
-**	vex_butv();
-**	vex_motv();
-**	vex_curv();
-**	vex_timv();
-**	vr_cpyfm();
-**	v_opnwk();
-**	v_clswk();
-**	vq_extnd();
-**	v_clsvwk( handle )
-**	v_opnvwk( pwork_in, phandle, pwork_out )
-**\
-*
-*#if LINKED
-*EXTERN	WORD	gl_restype;
-*EXTERN WORD	gl_rschange;
-*#endif
-*						/* in GEMDOS.C		*\
-*EXTERN LONG	dos_alloc();
-*EXTERN WORD	dos_free();
-*						/* in DOSIF.A86		*\
-*EXTERN WORD	justretf();
-*						/* in GSX2.A86		*\
-*EXTERN		gsx2();
-*EXTERN		i_ptsin();
-*EXTERN		i_intin();
-*EXTERN		i_ptsout();
-*EXTERN		i_intout();
-*EXTERN		i_ptr();
-*EXTERN		i_ptr2();
-*EXTERN		i_lptr1();	
-*EXTERN		m_lptr2();
-*						/* in OPTIMIZE.C	*\
-*EXTERN WORD	max();
-*EXTERN WORD	min();
-*						/* in DOSIF.A86		*\
-*EXTERN WORD	far_bcha();
-*EXTERN WORD	far_mcha();
-*EXTERN VOID	drawrat();
-*EXTERN LONG	drwaddr;
-*						/* in APGSXIF.C		*\
-*EXTERN WORD	xrat, yrat, button;
-*
-*EXTERN WORD	gl_width;
-*EXTERN WORD	gl_height;
-*
-*EXTERN WORD	gl_nrows;
-*EXTERN WORD	gl_ncols;
-*
-*EXTERN WORD	gl_wchar;
-*EXTERN WORD	gl_hchar;
-*
-*EXTERN WORD	gl_wschar;
-*EXTERN WORD	gl_hschar;
-*
-*EXTERN WORD	gl_wptschar;
-*EXTERN WORD	gl_hptschar;
-*
-*EXTERN WORD	gl_wsptschar;
-*EXTERN WORD	gl_hsptschar;
-*
-*EXTERN WORD	gl_wbox;
-*EXTERN WORD	gl_hbox;
-*
-*EXTERN WORD	gl_xclip;
-*EXTERN WORD	gl_yclip;
-*EXTERN WORD	gl_wclip;
-*EXTERN WORD	gl_hclip;
-*
-*EXTERN WORD	gl_nplanes;
-*EXTERN	WORD 	gl_handle;
-*
-*EXTERN FDB		gl_src;
-*EXTERN FDB		gl_dst;
-*
-*EXTERN WS		gl_ws;
-*EXTERN WORD		contrl[];
-*EXTERN WORD		intin[];
-*EXTERN WORD		ptsin[];
-*EXTERN WORD		intout[];
-*EXTERN WORD		ptsout[];
-*EXTERN LONG		ad_intin;
-*
-*GLOBAL FDB		gl_tmp;
-*
-*GLOBAL LONG		old_mcode;
-*GLOBAL LONG		old_bcode;
-*GLOBAL WORD		gl_moff;		/* counting semaphore	*\
-*						/*  == 0 implies ON	*\
-*						/*  >  0 implies OFF	*\
-*GLOBAL LONG		gl_mlen;
-*GLOBAL WORD		gl_graphic;
-*
-*
-*GLOBAL	WORD		gl_mouse;	/* mouse on flag		*\
-*
-*
-*
-*	WORD
-*gsx_mfree()
-*{
-*	dos_free(gl_tmp.fd_addr);
-*}
-*
-*
-*	VOID
-*gsx_mret(pmaddr, pmlen)
-*	LONG		*pmaddr;
-*	LONG		*pmlen;
-*{
-*	*pmaddr = gl_tmp.fd_addr;
-*	*pmlen = gl_mlen;
-*}
-*
-*gsx_ncode(code, n, m)
-*	WORD		code;
-*	WORD		n, m;
-*{
-*	REG WORD		*pctrl;
-*	pctrl = &contrl[0];
-*
-*	pctrl[0] = code;
-*	pctrl[1] = n;
-*	pctrl[3] = m;
-*	pctrl[6] = gl_handle;
-*	gsx2();
-*}
-*
-*
-*gsx_1code(code, value)
-*	WORD		code;
-*	WORD		value;
-*{
-*	intin[0] = value;
-*	gsx_ncode(code, 0, 1);
-*}
-*
-*
-*	WORD
-*gsx_init()
-*{
-*	gsx_wsopen();
-*	gsx_start();
-*	gsx_setmb(&far_bcha, &far_mcha, &drwaddr);
-*	gsx_ncode(MOUSE_ST, 0, 0);
-*	xrat = ptsout[0];
-*	yrat = ptsout[1];
-*}
-*
-*
-*	WORD
-*gsx_graphic(tographic)
-*	REG WORD		tographic;
-*{
-*	if (gl_graphic != tographic)
-*	{
-*	  gl_graphic = tographic;
-*	  if (gl_graphic)
-*	  {
-*	    gsx_escapes(2);
-*	    gsx_setmb(&far_bcha, &far_mcha, &drwaddr);
-*	  }
-*	  else
-*	  {
-*	    gsx_escapes(3);
-*	    gsx_resetmb();
-*	  }
-*	}
-*}
-*
-*	VOID
-*gsx_escapes(esc_code)
-*	WORD	esc_code;
-*{
-*	contrl[5] = esc_code;
-*	gsx_ncode(5, 0, 0);
-*}
-*
-*	VOID
-*v_hardcopy()
-*{
-*	gsx_escapes(17);
-*}
-*
-*
-*	VOID
-*gsx_wsclose()
-*{
-*	gsx_ncode(CLOSE_WORKSTATION, 0, 0);
-*}
-*
-*	WORD
-*ratinit()
-*{
-*	gsx_1code(SHOW_CUR, 0);
-*	gl_moff = 0;
-*}
-*
-*
-*	WORD
-*ratexit()
-*{
-*	gsx_moff();
-*}
-*
-*
-*bb_set(sx, sy, sw, sh, pts1, pts2, pfd, psrc, pdst)
-*	REG WORD		sx, sy, sw, sh;
-*	REG WORD		*pts1, *pts2;
-*	FDB		*pfd;
-*	FDB		*psrc, *pdst;
-*{
-*	WORD		oldsx;
-*
-*						/* get on word boundary	*\
-*	oldsx = sx;
-*	sx = (sx / 16) * 16;
-*	sw = ( ((oldsx - sx) + (sw + 15)) / 16 ) * 16;
-*
-*	gl_tmp.fd_stand = TRUE;
-*	gl_tmp.fd_wdwidth = sw / 16;
-*	gl_tmp.fd_w = sw;
-*	gl_tmp.fd_h = sh;
-*	
-*	gsx_moff();
-*	pts1[0] = sx;
-*	pts1[1] = sy;
-*	pts1[2] = sx + sw - 1;
-*	pts1[3] = sy + sh - 1;
-*	pts2[0] = 0;
-*	pts2[1] = 0;
-*	pts2[2] = sw - 1;
-*	pts2[3] = sh - 1 ;
-*
-*	gsx_fix(pfd, 0, 0, 0, 0);
-*	vro_cpyfm( S_ONLY, &ptsin[0], psrc, pdst );
-*	gsx_mon();
-*}
-*
-*
-*	VOID
-*bb_save(ps)
-*	REG GRECT		*ps;
-*{	
-*	bb_set(ps->g_x, ps->g_y, ps->g_w, ps->g_h, &ptsin[0], &ptsin[4], 
-*		&gl_src, &gl_src, &gl_tmp);
-*}
-*
-*
-*	VOID
-*bb_restore(pr)
-*	REG GRECT		*pr;
-*{
-*	bb_set(pr->g_x, pr->g_y, pr->g_w, pr->g_h, &ptsin[4], &ptsin[0], 
-*		&gl_dst, &gl_tmp, &gl_dst);
-*}
-*
-*
-*	WORD
-*gsx_setmb(boff, moff, pdrwaddr)
-*	UWORD		*boff, *moff;
-*	LONG		*pdrwaddr;
-*{
-*	i_lptr1( boff, 0x0 );	
-*	gsx_ncode(BUT_VECX, 0, 0);
-*	m_lptr2( &old_bcode );
-*
-*	i_lptr1( moff, 0x0 );	
-*	gsx_ncode(MOT_VECX, 0, 0);
-*	m_lptr2( &old_mcode );
-*
-*\*	i_lptr1( justretf, 0x0 );	
-*	gsx_ncode(CUR_VECX, 0, 0);
-*	m_lptr2( pdrwaddr );		don't intercept draw vector *\
-*}
-*
-*
-*	WORD
-*gsx_resetmb()
-*{
-*	i_lptr1( old_bcode );	
-*	gsx_ncode(BUT_VECX, 0, 0);
-*
-*	i_lptr1( old_mcode );
-*	gsx_ncode(MOT_VECX, 0, 0);
-*
-*\*	i_lptr1( drwaddr );	
-*	gsx_ncode(CUR_VECX, 0, 0);     dont' replace cursor draw vector *\
-*}
-*
-*	WORD
-*gsx_tick(tcode, ptsave)
-*	LONG		tcode;
-*	LONG		*ptsave;
-*{
-*	i_lptr1( tcode );	
-*	gsx_ncode(TIM_VECX, 0, 0);
-*	m_lptr2( ptsave );
-*	return(intout[0]);
-*}
-*
-*
-*	WORD
-*gsx_mfset(pmfnew)
-*	LONG		pmfnew;
-*{
-*	gsx_moff();
-*	LWCOPY(ad_intin, pmfnew, 37);
-* 	gsx_ncode(ST_CUR_FORM, 0, 37);
-*	gsx_mon();
-*}
-*
-*
-*	VOID
-*gsx_mxmy(pmx, pmy)
-*	WORD		*pmx, *pmy;
-*{
-*	*pmx = xrat;
-*	*pmy = yrat;
-*}
-*
-*
-*	WORD
-*gsx_button()
-*{
-*	return( button );
-*}
-*
-*\*
-*	WORD
-*gsx_kstate()
-*{
-*	gsx_ncode(KEY_SHST, 0, 0);
-*	return(intout[0]);
-*}
-**\
-*
-*	VOID
-*gsx_moff()
-*{
-*	if (!gl_moff)
-*	{
-*	  gsx_ncode(HIDE_CUR, 0, 0);
-*	  gl_mouse = FALSE;
-*	}
-*
-*	gl_moff++;
-*}
-*
-*
-*	VOID
-*gsx_mon()
-*{
-*	gl_moff--;
-*	if (!gl_moff)
-*	{
-*	  gsx_1code(SHOW_CUR, 1);
-*	  gl_mouse = TRUE ;
-*	}
-*}
-*
-*
-*\*
-*	WORD
-*gsx_char()
-*{
-*	REG WORD		*pintin;
-*	REG WORD		*pintout;
-*	pintin = &intin[0];
-*	pintout = &intout[0];
-*
-*	pintin[0] = 4;
-*	pintin[1] = 2;
-*	gsx_ncode(33, 0, 2);
-*
-*
-*	pintin[0] = -1;
-*	pintin[1] = FALSE;
-*	gsx_ncode(31, FALSE, 2);
-*	if (contrl[4])
-*	  return(pintout[0]);
-*	else
-*	  return(0);
-*
-*}
-**\
-*
-*	WORD
-*v_opnwk( pwork_in, phandle, pwork_out )
-*	WORD	*pwork_in;
-*REG	WORD	*pwork_out;
-*	WORD	*phandle;
-*{
-*	WORD	*ptsptr;
-*
-*	ptsptr = pwork_out + 45;
-*	i_ptsout( ptsptr );	/* set ptsout to work_out array *\
-*	i_intin( pwork_in );	/* set intin to point to callers data  *\
-*	i_intout( pwork_out );	/* set intout to point to callers data *\
-*	gsx_ncode(OPEN_WORKSTATION, 0, 11);
-*
-*	*phandle = contrl[6];	
-*	i_intin( &intin );
-*	i_intout( &intout );
-* 	i_ptsin( &ptsin );
-*	i_ptsout( &ptsout );
-*}
-*
-*	WORD
-*v_pline( count, pxyarray )
-*	WORD	count;
-*	WORD	*pxyarray;
-*{
-*	i_ptsin( pxyarray );
-*	gsx_ncode(POLYLINE, count, 0);
-*	i_ptsin( &ptsin );
-*}
-*
-*
-*	WORD
-*vst_clip( clip_flag, pxyarray )
-*	REG WORD	clip_flag;
-*	WORD	*pxyarray;
-*{
-*	WORD		tmp, value;
-*
-*	value = ( clip_flag != 0 ) ? 2 : 0;
-*	i_ptsin( pxyarray );
-*	intin[0] = clip_flag;
-*	gsx_ncode(TEXT_CLIP, value, 1);
-*	i_ptsin(&ptsin);
-*}
-*
-*
-*vst_height( height, pchr_width, pchr_height, pcell_width, pcell_height )
-*	WORD	height;
-*	WORD	*pchr_width;
-*	WORD	*pchr_height;
-*	WORD	*pcell_width;
-*	WORD	*pcell_height;
-*{
-*	REG WORD		*ppts;
-*	ppts = &ptsout[0];
-*
-*	ptsin[0] = 0;
-*	ptsin[1] = height;
-*	gsx_ncode(CHAR_HEIGHT, 1, 0);
-*	*pchr_width = ppts[0];
-*	*pchr_height = ppts[1];
-*	*pcell_width = ppts[2];
-*	*pcell_height = ppts[3];
-*}
-*
-*
-*	VOID
-*vr_recfl( pxyarray, pdesMFDB )
-*	WORD	*pxyarray;
-*	WORD	*pdesMFDB;
-*{
-*	i_ptr( pdesMFDB );
-*	i_ptsin( pxyarray );
-*	gsx_ncode(FILL_RECTANGLE, 2, 1);
-*	i_ptsin( &ptsin );
-*}
-*
-*
-*	VOID
-*vro_cpyfm( wr_mode, pxyarray, psrcMFDB, pdesMFDB, )
-*	WORD	wr_mode;
-*	WORD	*pxyarray;
-*	WORD	*psrcMFDB;
-*	WORD	*pdesMFDB;
-*{
-*	intin[0] = wr_mode;
-*	i_ptr( psrcMFDB );
-*	i_ptr2( pdesMFDB );
-*	i_ptsin( pxyarray );
-*	gsx_ncode(COPY_RASTER_FORM, 4, 1);
-*	i_ptsin( &ptsin );
-*}
-*
-*
-*    WORD
-*vrt_cpyfm( wr_mode, pxyarray, psrcMFDB, pdesMFDB, fgcolor, bgcolor )
-*	WORD    wr_mode;
-*	WORD    *pxyarray;
-*	WORD    *psrcMFDB;
-*	WORD    *pdesMFDB;
-*	WORD	fgcolor, bgcolor;
-*{
-*	REG WORD		*pintin;
-*	pintin = &intin[0];
-*
-*	pintin[0] = wr_mode;
-*	pintin[1] = fgcolor;
-*	pintin[2] = bgcolor;
-*	i_ptr( psrcMFDB );
-*	i_ptr2( pdesMFDB );
-*	i_ptsin( pxyarray );
-*	gsx_ncode(121, 4, 3);
-*	i_ptsin( &ptsin );
-*}
-*
-*
-*	VOID
-*vrn_trnfm( psrcMFDB, pdesMFDB )
-*	WORD	*psrcMFDB;
-*	WORD	*pdesMFDB;
-*{
-*	i_ptr( psrcMFDB );
-*	i_ptr2( pdesMFDB );
-*	gsx_ncode(TRANSFORM_FORM, 0, 0);
-*}
-*
-*
-*	VOID
-*vsl_width( width )
-*	WORD	width;
-*{
-*	ptsin[0] = width;
-*	ptsin[1] = 0;
-*	gsx_ncode(S_LINE_WIDTH, 1, 0);
-*}
-*
+	dc.w	0,1,1,1,2,3,4,5,6

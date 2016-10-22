@@ -38,37 +38,17 @@
 #include <baspag88.h>
 #include <obdefs.h>
 #include <gemlib.h>
-						/* in ASYNC88.C     */
-EXTERN VOID evinsert();
-
-						/* in AINTS88.C     */
-EXTERN VOID zombie();
-
-EXTERN LONG NUM_TICK;					/* number of ticks  */
-
-						/*   since last sample  */
-						/*   while someone was  */
-						/*   waiting        */
-EXTERN LONG CMP_TICK;					/* indicates to tick    */
-
-						/*   handler how much   */
-						/*   time to wait before */
-						/*   sending the first  */
-						/*   tchange        */
 
 
-EXTERN LONG ad_windspb;					/* window sync block    */
-
-
-VOID tchange(c)
-REG LONG c;								/* number of ticks that */
-
-						/*   have gone by   */
+VOID tchange(P(int16_t) p1, P(int16_t) p2)
+PP(int16_t p1;)
+PP(int16_t p2;)
 {
-	REG EVB *d;
+	register int32_t c;	/* number of ticks that have gone by  */
+	register EVB *d;
+	register int32_t c1;
 
-	REG LONG c1;
-
+	c = *((int32_t *)&p1);
 	/* pull pd's off the    */
 	/*   delay list that    */
 	/*   have waited long   */
@@ -107,10 +87,9 @@ REG LONG c;								/* number of ticks that */
 
 
 
-WORD tak_flag(sy)
-REG SPB *sy;
+int16_t tak_flag(P(SPB *) sy)
+PP(register SPB *sy;)
 {
-
 	sy->sy_tas++;						/* count up     */
 
 	/* if we didn't already */
@@ -143,10 +122,9 @@ REG SPB *sy;
 /*	right to access	the controlled area. 	*/
 
 
-VOID amutex(e, sy)
-REG EVB *e;
-
-SPB *sy;
+VOID amutex(P(EVB *) e, P(SPB *) sy)
+PP(register EVB *e;)
+PP(SPB *sy;)
 {
 	if (tak_flag(sy))					/* it owns it so do it  */
 		zombie(e);
@@ -155,10 +133,11 @@ SPB *sy;
 }										/* then wait        */
 
 
-VOID unsync(sy)
-REG SPB *sy;
+
+VOID unsync(P(SPB *) sy)
+PP(register SPB *sy;)
 {
-	REG EVB *p;
+	register EVB *p;
 
 	/* internal unsync must */
 	/* be in dispatcher */

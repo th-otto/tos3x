@@ -32,9 +32,9 @@
  * ======================================================================
  */
 /* IN GEMOBLIB.C */
-EXTERN VOID ob_draw();
+extern VOID ob_draw();
 
-EXTERN VOID gsx_sclip();
+extern VOID gsx_sclip();
 
 
 
@@ -66,7 +66,7 @@ GRECT *rect;
 VOID rc_2xy(r, pxy)
 GRECT *r;
 
-WORD *pxy;
+int16_t *pxy;
 {
 	*(GRECT *) pxy = *r;
 	pxy[2] += r->g_x - 1;

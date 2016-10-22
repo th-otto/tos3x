@@ -26,45 +26,31 @@
 *
 * assemble with MAS 900801 kbad
 
-FIS_PATTERN	=	2
-FIS_HOLLOW	=	0
-FIS_SOLID	=	1
-IP_HOLLOW	=	0
-IP_SOLID	=	7
-S_FILL_COLOR	=	25
-MD_REPLACE	=	1
-MD_TRANS	=	2
-TE_CNTR		=	2
-TE_RIGHT	=	1
-SELECTED	=	1
-SMALL		=	5
+FIS_PATTERN	equ	2
+FIS_HOLLOW	equ	0
+FIS_SOLID	equ	1
+IP_HOLLOW	equ	0
+IP_SOLID	equ	7
+S_FILL_COLOR	equ	25
+MD_REPLACE	equ	1
+MD_TRANS	equ	2
+TE_CNTR		equ	2
+TE_RIGHT	equ	1
+SELECTED	equ	1
+SMALL		equ	5
 
 *
 *
-	.globl	_gsx_1co
-	.globl	_gsx_blt
-	.globl	_gsx_mof
-	.globl	_gsx_mon
-	.globl	_gsx_tca
-	.globl	_gsx_tbl
-	.globl	_gsx_scl
-	.globl	_gsx_gcl
-
-	.globl	_gl_width
-	.globl	_gl_heig
-	
-	.globl	_intin
-
-	.text
+	text
 
 *************************************************************************
 *
 *		gr_inside(pt,th)
 *
 *************************************************************************
-	.globl	_gr_insi
+	xdef	_gr_inside
 
-_gr_insi:
+_gr_inside:
 	move.l	4(sp),a0		; a0 contains grect pointer
 	move.w	8(sp),d1		; d1 contains "th"
 	add	d1,(a0)+		; pt->g_x += th
@@ -80,7 +66,7 @@ _gr_insi:
 *
 **************************************************************************
 
-	.globl	_gr_rect
+	xdef	_gr_rect
 
 _gr_rect:
 	movem.l	d3-d5/a3-a3,-(sp)
@@ -122,7 +108,7 @@ L22:	move.w	d3,-(sp)
 *
 *************************************************************************
 
-	.globl	_gr_just
+	xdef	_gr_just
 
 _gr_just:
 	movem.l	d0-d7/a3-a3,-(sp)
@@ -138,14 +124,14 @@ _gr_just:
 	move.l	a1,-(sp)
 	move.l	48+8(sp),-(sp)		; push ptext
 	move.w	52+6(sp),-(sp)		; push font
-	jsr	_gsx_tca
+	jsr	_gsx_tcalc
 	lea	18(sp),sp
 	sub	6(a3),d7		; h -= pt->g_h
 	ble	L31
 	move	d7,d5			; d5 = temp height
 	addq	#1,d5			
 	ext.l	d5
-	asr	d5
+	asr	#1,d5
 	add	d5,2(a3)		; pt->g_y += (h + 1)/2
 L31:
 	sub	4(a3),d6		; w -= pt->g_w;
@@ -155,7 +141,7 @@ L31:
 	move	d6,d5
 	addq	#1,d5
 	ext.l	d5
-	asr	d5
+	asr	#1,d5
 	add	d5,(a3)			; pt->g_x += (w+1)/2
 	bra	L32
 L33:	cmp.w	#TE_RIGHT,d3
@@ -178,8 +164,7 @@ L32:
 *	Routine to draw a string of graphic text
 *
 ************************************************************************
-	.globl	_gr_gtext
-
+	xdef	_gr_gtext
 _gr_gtext:
 	movem.l	d0-d1/a3,-(sp)		; save a3 and make room for
 *					; a grect
@@ -199,7 +184,7 @@ _gr_gtext:
 	move.w	d0,-(sp)
 	move.l	(a3),-(sp)		; push t.g_x and t.g_y
 	move.w	18+6(sp),-(sp)		; push	font
-	jsr	_gsx_tbl
+	jsr	_gsx_tblt
 	addq.l	#8,sp
 L41:	movem.l	(sp)+,d0-d1/a3		; restore a3
 	rts
@@ -219,7 +204,7 @@ L41:	movem.l	(sp)+,d0-d1/a3		; restore a3
 *	and inside color from a single color information word
 *
 **************************************************************************
-	.globl	_gr_crac
+	xdef	_gr_crac
 
 _gr_crac:
 	move.w	4(sp),d0		; d0 contains color
@@ -271,7 +256,7 @@ L52:	and	#$0f,d2
 *
 ************************************************************************
 
-	.globl	_gr_gico
+	xdef	_gr_gico
 
 _gr_gico:
 	movem.l	d3-d7/a3-a4,-(sp)	; 28 bytes 
@@ -319,7 +304,7 @@ L63:
 	move.w	(a3),-(sp)		; push pi
 	add	d6,(sp)			; add chx
 	move.w	#SMALL,-(sp)
-	jsr	_gsx_tbl
+	jsr	_gsx_tblt
 	addq.l	#8,sp
 L64:	move.w	#MD_TRANS,-(sp)
 	move.l	a4,-(sp)
@@ -373,7 +358,7 @@ make_call:
 *	attribute settings
 **************************************************************************
 
-	.globl	_gr_box
+	xdef	_gr_box
 
 _gr_box:
 	movem.l	d3/a3-a4,-(sp)		; save some needed registers
@@ -397,7 +382,7 @@ L75:	move.l	(a3),(a4)		; copy grect t to grect n
 	move.l	4(a3),4(a4)
 	move.w	d3,-(sp)		; push th
 	move.l	a4,-(sp)		; push &n
-	jsr	_gr_insi
+	jsr	_gr_inside
 	jsr	_gsx_box		; gsx_box(&n) n's already on stack
 	addq.l	#6,sp
 	tst.w	d3
@@ -407,251 +392,3 @@ L71:
 	lea	16(sp),sp		; don't need local grects anymore
 	movem.l	(sp)+,d3/a3-a4
 	rts
-	
-*\*	APGRLIB.C	4/11/84 - 02/03/85	Gregg Morris		*\
-*\*	for 68k		03/06/85 - 03/09/85	Lowell Webster		*\
-*\*	Reg Opt		03/09/85		Derek Mui		*\
-*
-*\*
-**	-------------------------------------------------------------
-**	GEM Application Environment Services		  Version 1.0
-**	Serial No.  XXXX-0000-654321		  All Rights Reserved
-**	Copyright (C) 1985			Digital Research Inc.
-**	-------------------------------------------------------------
-**\
-*
-*#include <portab.h>
-*#include <machine.h>
-*#include <obdefs.h>
-*#include <funcdef.h>
-*						/* in GSXBIND.C		*\
-*#define vsf_color( x )		gsx_1code(S_FILL_COLOR, x)
-*						/* in GSX.EXE		*\
-*EXTERN VOID	gsx_blt();
-*EXTERN VOID	gsx_moff();
-*EXTERN VOID	gsx_mon();
-*EXTERN VOID	gsx_tcalc();
-*EXTERN VOID	gsx_tblt();
-*EXTERN VOID	gsx_sclip();
-*EXTERN VOID	gsx_gclip();
-*
-*EXTERN WORD	gl_width;
-*EXTERN WORD	gl_height;
-*
-*EXTERN WORD	intin[];
-*
-*gr_inside(pt, th)
-*REG	GRECT		*pt;
-*REG	WORD		th;
-*{
-*	pt->g_x += th;
-*	pt->g_y += th;
-*	pt->g_w -= ( 2 * th );
-*	pt->g_h -= ( 2 * th );
-*}
-*
-*
-*\************************************************************************\
-*\* g r _ r e c t							*\
-*\************************************************************************\
-*	VOID
-*gr_rect(icolor, ipattern, pt)
-*	UWORD		icolor;
-*	REG UWORD		ipattern;
-*	REG GRECT		*pt;
-*{
-*	REG WORD		fis;
-*
-*	fis = FIS_PATTERN;
-*	if (ipattern == IP_HOLLOW)
-*	  fis = FIS_HOLLOW;
-*	else if (ipattern == IP_SOLID)
-*	  fis = FIS_SOLID;
-*
-*	vsf_color(icolor);
-*	bb_fill(MD_REPLACE, fis, ipattern, 
-*	  	pt->g_x, pt->g_y, pt->g_w, pt->g_h);
-*}
-*
-*
-*\*
-**	Routine to adjust the x,y starting point of a text string
-**	to account for its justification.  The number of characters
-**	in the string is also returned.
-**\
-*	WORD
-*gr_just(just, font, ptext, w, h, pt)
-*	WORD		just;
-*	WORD		font;
-*	LONG		ptext;
-*	REG WORD		w, h;
-*	REG GRECT		*pt;
-*{
-*	WORD		numchs;
-*						/* figure out the	*\
-*						/*   width of the text	*\
-*						/*   string in pixels	*\
-*	gsx_tcalc(font, ptext, &pt->g_w, &pt->g_h, &numchs);
-*
-*	h -= pt->g_h;
-*	if ( h > 0 )				/* check height		*\
-*	  pt->g_y += (h + 1) / 2;
-*
-*	w -= pt->g_w;
-*	if ( w > 0 )
-*	{
-*	  switch(just)
-*	  {
-*	    case TE_CNTR:			/* center text in	*\
-*						/*   rectangle		*\
-*		pt->g_x += (w + 1) / 2;
-*		break;	
-*	    case TE_RIGHT:			/* right justify	*\
-*		pt->g_x += w;
-*		break;
-*	  } /* switch *\
-*	}
-*
-*	return(numchs);
-*}
-*
-*
-*\*
-**	Routine to draw a string of graphic text.
-**\
-*	VOID
-*gr_gtext(just, font, ptext, pt, tmode)
-*	WORD		just;
-*	WORD		font;
-*	LONG		ptext;
-*	GRECT		*pt;
-*	WORD		tmode;
-*{
-*	WORD		numchs;
-*	GRECT		t;
-*						/* figure out where &	*\
-*						/*   how to put out	*\
-*						/*   the text		*\
-*	rc_copy(pt, &t);
-*	numchs = gr_just(just, font, ptext, t.g_w, t.g_h, &t);
-*	if (numchs > 0)
-*	  gsx_tblt(font, t.g_x, t.g_y, numchs);
-*}
-*
-*
-*
-*\*
-**	Routine to crack out the border color, text color, inside pattern,
-**	and inside color from a single color information word.
-**\
-*	VOID
-*gr_crack(color, pbc, ptc, pip, pic, pmd)
-*	REG UWORD		color;
-*	WORD		*pbc, *ptc, *pic;
-*	REG WORD		*pip, *pmd;
-*{
-*						/* 4 bit encoded border	*\
-*						/*   color 		*\
-*	*pbc = (LHIBT(color) >> 4) & 0x0f;
-*						/* 4 bit encoded text	*\
-*						/*   color		*\
-*	*ptc = LHIBT(color) & 0x0f;
-*						/* 3 bit encoded pattern*\
-*	*pip = (LLOBT(color) >> 4) & 0x0f;
-*						/* 4th bit used to set	*\
-*						/*   text writing mode	*\
-*	if (*pip & 0x08)
-*	{
-*	  *pip &= 0x07;
-*	  *pmd = MD_REPLACE;
-*	}
-*	else
-*	  *pmd = MD_TRANS;
-*						/* 4 bit encoded inside	*\
-*						/*   color		*\
-*	*pic = LLOBT(color) & 0x0f;
-*}
-*
-*
-*\*
-**	Routine to draw an icon, which is a graphic image with a text
-**	string underneath it.
-**\
-*	VOID
-*gr_gicon(state, pmask, pdata, ptext, ch, chx, chy, pi, pt)
-*	REG WORD		state;
-*	LONG		pmask;
-*	LONG		pdata;
-*	LONG		ptext;
-*	REG WORD		ch;
-*	WORD		chx, chy;
-*	REG GRECT		*pi;
-*	REG GRECT		*pt;
-*{
-*	REG WORD		fgcol, bgcol, tmp;
-*						/* crack the color/char	*\
-*						/*   definition word	*\
-*	fgcol = (ch >> 12) & 0x000f;
-*	bgcol = (ch >> 8) & 0x000f;
-*	ch &= 0x0ff;
-*						/* invert if selected	*\
-*	if (state & SELECTED)
-*	{
-*	  tmp = fgcol;	
-*	  fgcol = bgcol;
-*	  bgcol = tmp;
-*	}
-*						/* do mask unless its on*\
-*						/* a white background	*\
-*	if ( !( (state & WHITEBAK) && (bgcol == WHITE) ) )
-*	{
-*	  gsx_blt(pmask, 0, 0, pi->g_w/8, 0x0L, pi->g_x, pi->g_y, 
-*			gl_width/8, pi->g_w, pi->g_h, MD_TRANS,
-*			bgcol, fgcol); 
-*	  gr_rect(bgcol, IP_SOLID, pt);
-*	}
-*						/* draw the data	*\
-*	gsx_blt(pdata, 0, 0, pi->g_w/8, 0x0L, pi->g_x, pi->g_y, 
-*			gl_width/8, pi->g_w, pi->g_h, MD_TRANS,
-*			fgcol, bgcol); 
-*						/* draw the character	*\
-*	gsx_attr(TRUE, MD_TRANS, fgcol);
-*	if ( ch )
-*	{
-*	  intin[0] = ch;
-*	  gsx_tblt(SMALL, pi->g_x+chx, pi->g_y+chy, 1);
-*	}
-*						/* draw the label	*\
-*	gr_gtext(TE_CNTR, SMALL, ptext, pt, MD_TRANS);
-*}
-*
-*
-*\*
-**	Routine to draw a box of a certain thickness using the current
-**	attribute settings
-**\
-*	VOID
-*gr_box(x, y, w, h, th)
-*	WORD		x, y, w, h;
-*	REG WORD		th;
-*{
-*	GRECT		t, n;
-*
-*	r_set(&t, x, y, w, h);
-*	if (th != 0)
-*	{
-*	  if (th < 0)
-*	    th--;
-*	  gsx_moff();
-*	  do
-*	  {
-*	    th += (th > 0) ? -1 : 1;
-*	    rc_copy(&t, &n);
-*	    gr_inside(&n, th);
-*	    gsx_box(&n);
-*	  } while (th != 0);
-*	  gsx_mon();
-*	}
-*}
-*
-*

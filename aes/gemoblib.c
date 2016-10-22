@@ -33,22 +33,22 @@
 /*****************************************************************/
 /*                   COLOR ICON DECLARATIONS                     */
 /*****************************************************************/
-WORD *fix_mono(),
+int16_t *fix_mono(),
 *fix_res();
 
-WORD gl_colmask[128];					/* global mask used by color icons */
+int16_t gl_colmask[128];					/* global mask used by color icons */
 
 				/* WARNING:  The size of this array has been */
 				/* set to 128 words and no bound checking is */
 				/* done by the code currently.  This can  */
 				/* handle icons of 64 by 64 pixels.       */
 
-EXTERN WORD gl_nplanes;					/* number of planes in current res */
+extern int16_t gl_nplanes;					/* number of planes in current res */
 
-EXTERN FDB gl_src,
+extern FDB gl_src,
  gl_dst;
 
-EXTERN WORD ptsin[];
+extern int16_t ptsin[];
 
 /* This is the color table of RGB values that VDI expects in pixel-
  * packed mode (This whole table can be moved to a separate file).
@@ -56,7 +56,7 @@ EXTERN WORD ptsin[];
  * converted to 5 bit values.  The original values are from VDI's 
  * palette settings.
  */
-WORD rgb_tab[] = { 0xFFDF,
+int16_t rgb_tab[] = { 0xFFDF,
 	0xF800, 0x7C0, 0xFFC0, 0x1F, 0xF81F, 0x7DF, 0xB596, 0x8410, 0xA000, 0x500,
 	0xA500, 0x14, 0xA014, 0x514, 0x0, 0xFFDF, 0xE71C, 0xD69A, 0xC618, 0xB596,
 	0xA514, 0x9492, 0x8410, 0x738E, 0x630C, 0x528A, 0x4208, 0x3186, 0x2104, 0x1082,
@@ -85,40 +85,40 @@ WORD rgb_tab[] = { 0xFFDF,
 	0x4180, 0x4100, 0x4080, 0xFFDF, 0x0
 };
 
-EXTERN WORD reverse();
+extern int16_t reverse();
 
-EXTERN expand_data();
+extern expand_data();
 
 /******************** END COLOR *******************************/
 
 						/* in GSXBIND.C     */
 #define vsf_color( x )		gsx_1code(S_FILL_COLOR, x)
 
-EXTERN VOID gsx_moff();
+extern VOID gsx_moff();
 
-EXTERN VOID gsx_mon();
+extern VOID gsx_mon();
 
-EXTERN WORD gsx_chkclip();
+extern int16_t gsx_chkclip();
 
-EXTERN WORD gl_width;
+extern int16_t gl_width;
 
-EXTERN WORD gl_height;
+extern int16_t gl_height;
 
-EXTERN WORD gl_wclip;
+extern int16_t gl_wclip;
 
-EXTERN WORD gl_hclip;
+extern int16_t gl_hclip;
 
-EXTERN WORD gl_wchar;
+extern int16_t gl_wchar;
 
-EXTERN WORD gl_hchar;
+extern int16_t gl_hchar;
 
-EXTERN LONG ad_intin;
+extern int32_t ad_intin;
 
-EXTERN WORD intin[];
+extern int16_t intin[];
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
-EXTERN WORD gl_ws[];
+extern int16_t gl_ws[];
 
 GLOBAL TEDINFO edblk;
 
@@ -127,21 +127,21 @@ GLOBAL BITBLK bi;
 GLOBAL ICONBLK ib;
 
 /* July 30 1992 - ml. 3D-look options */
-EXTERN UWORD ind3dtxt,
+extern uint16_t ind3dtxt,
  ind3dface,
  act3dtxt,
  act3dface;
 
 /* June 24 1992 - ml. Button and alert background colors */
-EXTERN UWORD gl_indbutcol,
+extern uint16_t gl_indbutcol,
  gl_actbutcol,
  gl_alrtcol;
 
 
 
 
-UWORD far_call(fcode, fdata) WORD(*fcode) ();
-LONG fdata;
+uint16_t far_call(fcode, fdata) int16_t(*fcode) ();
+int32_t fdata;
 {
 	return ((*fcode) (fdata));
 }
@@ -152,8 +152,8 @@ LONG fdata;
  *	Routine to get or set object extension settings
  *
  */
-WORD ob_sysvar(mode, which, inval1, inval2, outval1, outval2)
-UWORD mode,
+int16_t ob_sysvar(mode, which, inval1, inval2, outval1, outval2)
+uint16_t mode,
 	which,
 	inval1,
 	inval2,
@@ -256,21 +256,21 @@ UWORD mode,
 *	template string build a formatted string.
 */
 VOID ob_format(just, raw_str, tmpl_str, fmt_str)
-WORD just;
+int16_t just;
 
-BYTE *raw_str,
+char *raw_str,
 *tmpl_str,
 *fmt_str;
 {
-	REG BYTE *pfbeg,
+	register char *pfbeg,
 	*ptbeg,
 	*prbeg;
 
-	BYTE *pfend,
+	char *pfend,
 	*ptend,
 	*prend;
 
-	REG WORD inc,
+	register int16_t inc,
 	 ptlen,
 	 prlen;
 
@@ -322,18 +322,18 @@ BYTE *raw_str,
 *	routine.
 */
 
-WORD ob_user(tree, obj, pt, spec, curr_state, new_state)
-LONG tree;
+int16_t ob_user(tree, obj, pt, spec, curr_state, new_state)
+int32_t tree;
 
-WORD obj;
+int16_t obj;
 
 GRECT *pt;
 
-LONG spec;
+int32_t spec;
 
-WORD curr_state;
+int16_t curr_state;
 
-WORD new_state;
+int16_t new_state;
 {
 	PARMBLK pb;
 
@@ -353,17 +353,17 @@ WORD new_state;
  *  Draw highlights around a rectangle depending on its state
  */
 VOID draw_hi(prect, state, clip, th, icol)
-REG GRECT *prect;						/* object rectangle */
+register GRECT *prect;						/* object rectangle */
 
-WORD state;								/* NORMAL or SELECTED */
+int16_t state;								/* NORMAL or SELECTED */
 
-WORD clip;								/* 1: set clipping rect to object itself */
+int16_t clip;								/* 1: set clipping rect to object itself */
 
-WORD th;								/* thickness of rectangle */
+int16_t th;								/* thickness of rectangle */
 
-WORD icol;								/* interior color */
+int16_t icol;								/* interior color */
 {
-	WORD pts[12],
+	int16_t pts[12],
 	 col;
 
 	GRECT r;
@@ -455,16 +455,16 @@ WORD icol;								/* interior color */
  * 1110	    13  light cyan
  * 1111	    1	black
  */
-WORD xor16(col)
-WORD col;
+int16_t xor16(col)
+int16_t col;
 {
-	static WORD xor16tab[] = {
+	static int16_t xor16tab[] = {
 /*  WHITE, BLACK, RED,   GREEN,    BLUE,    CYAN, YELLOW, MAGENTA */
 		BLACK, WHITE, LCYAN, LMAGENTA, LYELLOW, LRED, LBLUE, LGREEN,
 /*  LWHITE, LBLACK, LRED, LGREEN,  LBLUE,  LCYAN, LYELLOW, LMAGENTA */
 		LBLACK, LWHITE, CYAN, MAGENTA, YELLOW, RED, BLUE, GREEN
 	};
-	static WORD xor4tab[] = { BLACK, WHITE, GREEN, RED };
+	static int16_t xor4tab[] = { BLACK, WHITE, GREEN, RED };
 
 	if (col >= 16 || col >= gl_ws[13])	/* ws_ncolors */
 		col = WHITE;
@@ -486,13 +486,13 @@ WORD col;
  *
  * (used by just_draw() and ob_change())
  */
-WORD xor_ok(type, flags, spec)
-WORD type,
+int16_t xor_ok(type, flags, spec)
+int16_t type,
 	flags;
 
-LONG spec;
+int32_t spec;
 {
-	WORD i,
+	int16_t i,
 	 tcol,
 	 icol;
 
@@ -530,38 +530,38 @@ LONG spec;
 *	Routine to draw an object from an object tree.
 */
 VOID just_draw(tree, obj, sx, sy)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
-REG WORD sx,
+register int16_t sx,
 	sy;
 {
-	WORD bcol,
+	int16_t bcol,
 	 tcol,
 	 ipat,
 	 icol,
 	 tmode,
 	 th;
 
-	WORD state,
+	int16_t state,
 	 obtype,
 	 len,
 	 flags;
 
-	WORD tmpx,
+	int16_t tmpx,
 	 tmpy,
 	 tmpth,
 	 thick;
 
-	LONG spec;
+	int32_t spec;
 
-	BYTE ch;
+	char ch;
 
 	GRECT t,
 	 c;
 
-	REG GRECT *pt;
+	register GRECT *pt;
 
 	BITBLK bi;
 
@@ -569,7 +569,7 @@ REG WORD sx,
 
 	TEDINFO edblk;
 
-	UWORD mvtxt,
+	uint16_t mvtxt,
 	 chcol,
 	 three_d;
 
@@ -997,15 +997,15 @@ REG WORD sx,
 *	Object draw routine that walks tree and draws appropriate objects.
 */
 VOID ob_draw(tree, obj, depth)
-REG LONG tree;
+register int32_t tree;
 
-WORD obj,
+int16_t obj,
 	depth;
 {
-	WORD last,
+	int16_t last,
 	 pobj;
 
-	WORD sx,
+	int16_t sx,
 	 sy;
 
 	last = (obj == ROOT) ? NIL : LWGET(OB_NEXT(obj));
@@ -1033,31 +1033,31 @@ WORD obj,
 /************************************************************************/
 /* o b _ f i n d							*/
 /************************************************************************/
-WORD ob_find(tree, currobj, depth, mx, my)
-REG LONG tree;
+int16_t ob_find(tree, currobj, depth, mx, my)
+register int32_t tree;
 
-REG WORD currobj;
+register int16_t currobj;
 
-REG WORD depth;
+register int16_t depth;
 
-WORD mx,
+int16_t mx,
 	my;
 {
-	WORD lastfound,
+	int16_t lastfound,
 	 dummy;
 
-	WORD dosibs,
+	int16_t dosibs,
 	 done,
 	 state;
 
 	GRECT t,
 	 o;
 
-	WORD parent,
+	int16_t parent,
 	 childobj,
 	 flags;
 
-	REG GRECT *pt;
+	register GRECT *pt;
 
 	pt = &t;
 
@@ -1128,14 +1128,14 @@ WORD mx,
 *	It is also initialized.
 */
 VOID ob_add(tree, parent, child)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD parent,
+register int16_t parent,
 	child;
 {
-	REG WORD lastkid;
+	register int16_t lastkid;
 
-	REG LONG ptail;
+	register int32_t ptail;
 
 	if ((parent != NIL) && (child != NIL))
 	{
@@ -1160,16 +1160,16 @@ REG WORD parent,
 *	Routine to delete an object from the tree.
 */
 VOID ob_delete(tree, obj)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 {
-	REG WORD parent;
+	register int16_t parent;
 
-	WORD prev,
+	int16_t prev,
 	 nextsib;
 
-	REG LONG ptail,
+	register int32_t ptail,
 	 phead;
 
 	if (obj != ROOT)
@@ -1218,18 +1218,18 @@ REG WORD obj;
 *	is the tail of the list.
 */
 VOID ob_order(tree, mov_obj, new_pos)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD mov_obj;
+register int16_t mov_obj;
 
-WORD new_pos;
+int16_t new_pos;
 {
-	REG WORD parent;
+	register int16_t parent;
 
-	WORD chg_obj,
+	int16_t chg_obj,
 	 ii;
 
-	REG LONG phead,
+	register int32_t phead,
 	 pnext,
 	 pmove;
 
@@ -1278,26 +1278,26 @@ WORD new_pos;
 *	object using the current clip rectangle.
 */
 VOID ob_change(tree, obj, new_state, redraw)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
-UWORD new_state;
+uint16_t new_state;
 
-WORD redraw;
+int16_t redraw;
 {
-	WORD flags,
+	int16_t flags,
 	 obtype,
 	 th,
 	 thick;
 
 	GRECT t;
 
-	UWORD curr_state;
+	uint16_t curr_state;
 
-	LONG spec;
+	int32_t spec;
 
-	REG GRECT *pt;
+	register GRECT *pt;
 
 	pt = &t;
 
@@ -1328,7 +1328,7 @@ WORD redraw;
 			 * the image must be redrawn by just_draw().  If they're selected,
 			 * just_draw() does the XOR box before redrawing the image.
 			 */
-			WORD xok = xor_ok(obtype, flags, spec);
+			int16_t xok = xor_ok(obtype, flags, spec);
 
 			if (xok || (obtype == G_IMAGE && !(new_state & SELECTED)))
 			{
@@ -1348,12 +1348,12 @@ WORD redraw;
 
 
 
-UWORD ob_fs(tree, ob, pflag)
-LONG tree;
+uint16_t ob_fs(tree, ob, pflag)
+int32_t tree;
 
-WORD ob;
+int16_t ob;
 
-WORD *pflag;
+int16_t *pflag;
 {
 	*pflag = LWGET(OB_FLAGS(ob));
 	return (LWGET(OB_STATE(ob)));
@@ -1364,14 +1364,14 @@ WORD *pflag;
 /* o b _ a c t x y w h							*/
 /************************************************************************/
 VOID ob_actxywh(tree, obj, pt)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
-REG GRECT *pt;
+register GRECT *pt;
 {
 #ifndef NO_OB_GCLIP
-	WORD x,
+	int16_t x,
 	 y;
 
 	ob_gclip(tree, obj, &x, &y, &pt->g_x, &pt->g_y, &pt->g_w, &pt->g_h);
@@ -1387,9 +1387,9 @@ REG GRECT *pt;
 /* o b _ r e l x y w h							*/
 /************************************************************************/
 VOID ob_relxywh(tree, obj, pt)
-LONG tree;
+int32_t tree;
 
-WORD obj;
+int16_t obj;
 
 GRECT *pt;
 {
@@ -1398,9 +1398,9 @@ GRECT *pt;
 
 
 VOID ob_setxywh(tree, obj, pt)
-LONG tree;
+int32_t tree;
 
-WORD obj;
+int16_t obj;
 
 GRECT *pt;
 {
@@ -1414,11 +1414,11 @@ GRECT *pt;
 *	of all the objects parents up to and including the root.
 */
 VOID ob_offset(tree, obj, pxoff, pyoff)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
-REG WORD *pxoff,
+register int16_t *pxoff,
 *pyoff;
 {
 	*pxoff = *pyoff = 0;
@@ -1440,11 +1440,11 @@ REG WORD *pxoff,
  * to get the clip rectangle.
  */
 VOID ob_dxywh(tree, obj, pdx, pdy, pdw, pdh)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
-WORD *pdx,
+int16_t *pdx,
 *pdy,
 *pdw,
 *pdh;
@@ -1468,11 +1468,11 @@ WORD *pdx,
  * Return a clip rectangle describing an object's screen coordinates.
  */
 VOID ob_gclip(tree, obj, pxoff, pyoff, pxcl, pycl, pwcl, phcl)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 
-WORD *pxoff,
+int16_t *pxoff,
 *pyoff,
 *pxcl,
 *pycl,
@@ -1481,14 +1481,14 @@ WORD *pxoff,
 {
 	GRECT r;
 
-	LONG spec;
+	int32_t spec;
 
-	WORD state,
+	int16_t state,
 	 type,
 	 flags,
 	 border;
 
-	WORD x,
+	int16_t x,
 	 y,
 	 off3d,
 	 offset;
@@ -1536,14 +1536,14 @@ WORD *pxoff,
 *	us.  If we are the first child or we have no parent then
 *	return NIL.
 */
-WORD get_prev(tree, parent, obj)
-REG LONG tree;
+int16_t get_prev(tree, parent, obj)
+register int32_t tree;
 
-WORD parent;
+int16_t parent;
 
-REG WORD obj;
+register int16_t obj;
 {
-	REG WORD prev,
+	register int16_t prev,
 	 nobj,
 	 pobj;
 
@@ -1630,26 +1630,26 @@ int planes;
  *	icons for different resolutions.
  */
 VOID gr_cicon(state, pmask, pdata, ptext, ch, chx, chy, pi, pt, cicon)
-REG WORD state;
+register int16_t state;
 
-LONG pmask;
+int32_t pmask;
 
-LONG pdata;
+int32_t pdata;
 
-BYTE *ptext;
+char *ptext;
 
-REG WORD ch;
+register int16_t ch;
 
-WORD chx,
+int16_t chx,
 	chy;
 
-REG GRECT *pi;
+register GRECT *pi;
 
-REG GRECT *pt;
+register GRECT *pt;
 
 CICONBLK *cicon;
 {
-	REG WORD fgcol,
+	register int16_t fgcol,
 	 bgcol,
 	 tmp;
 
@@ -1767,26 +1767,26 @@ CICONBLK *cicon;
  *	number of planes is passed in and the source and destination MFDB's
  *	had that value set correctly.  Otherwise, it is the same code.
  */
-WORD gsx_cblt(saddr, sx, sy, swb, daddr, dx, dy, dwb, w, h, rule, numplanes)
-LONG saddr;
+int16_t gsx_cblt(saddr, sx, sy, swb, daddr, dx, dy, dwb, w, h, rule, numplanes)
+int32_t saddr;
 
-REG UWORD sx,
+register uint16_t sx,
 	sy,
 	swb;
 
-LONG daddr;
+int32_t daddr;
 
-REG UWORD dx,
+register uint16_t dx,
 	dy;
 
-UWORD dwb,
+uint16_t dwb,
 	w,
 	h,
 	rule;
 
-WORD numplanes;
+int16_t numplanes;
 {
-	WORD *ppts;
+	int16_t *ppts;
 
 	ppts = &ptsin[0];
 
@@ -1815,10 +1815,10 @@ WORD numplanes;
  *	the data.  Note that this does not check the limits of the gl_mask.
  */
 convert_mask(mask, gl_mask, width, height)
-WORD *mask,
+int16_t *mask,
 *gl_mask;
 
-WORD width,
+int16_t width,
  height;
 {
 	int i,
@@ -1845,16 +1845,16 @@ WORD width,
 /* FIX_MONO()
  * Do fixups on the monochrome icon then pass back a ptr to the next part.
  */
-WORD *fix_mono(ptr, plane_size, tot_res)
-WORD *ptr;
+int16_t *fix_mono(ptr, plane_size, tot_res)
+int16_t *ptr;
 
 long *plane_size;
 
-WORD *tot_res;
+int16_t *tot_res;
 {
 	long *temp;
 
-	WORD width,
+	int16_t width,
 	 height;
 
 	long size;
@@ -1862,7 +1862,7 @@ WORD *tot_res;
 	width = ptr[11];
 	height = ptr[12];
 	temp = &ptr[17];
-	*tot_res = (WORD) * temp;
+	*tot_res = (int16_t) * temp;
 	*plane_size = size = (long) ((width / 16) * height * 2);
 	temp = &ptr[2];
 	*temp = &ptr[19];					/* data */
@@ -1878,8 +1878,8 @@ WORD *tot_res;
  * Does fixups on the resolution dependent color icons.  Returns
  * a pointer past the last icon fixed up.
  */
-WORD *fix_res(ptr, mono_size, next_res)
-WORD *ptr;
+int16_t *fix_res(ptr, mono_size, next_res)
+int16_t *ptr;
 
 long mono_size;
 
@@ -1888,7 +1888,7 @@ long *next_res;
 	long *temp,
 	*end;
 
-	WORD select;
+	int16_t select;
 
 	*next_res = &ptr[9];
 
@@ -1916,7 +1916,7 @@ long *next_res;
  * Does fixups on the pointers in the color icon structures.
  */
 fixup_cicon(ptr, tot_icons, carray)
-WORD *ptr;
+int16_t *ptr;
 
 int tot_icons;
 
@@ -1963,12 +1963,12 @@ CICONBLK **carray;
  */
 
 VOID get_color_rsc(cicondata)
-BYTE *cicondata;
+char *cicondata;
 {
 	CICONBLK *ptr,
 	**array_ptr;
 
-	WORD totalicons;
+	int16_t totalicons;
 
 	array_ptr = (CICONBLK **) cicondata;
 	totalicons = 0;
@@ -1990,18 +1990,18 @@ BYTE *cicondata;
  * BUG FIX - pass in the number of planes instead of using the global
  *	dlf - 7/14/92
  */
-WORD my_trans(saddr, swb, daddr, dwb, h, nplanes)
-LONG saddr;
+int16_t my_trans(saddr, swb, daddr, dwb, h, nplanes)
+int32_t saddr;
 
-UWORD swb;
+uint16_t swb;
 
-LONG daddr;
+int32_t daddr;
 
-UWORD dwb;
+uint16_t dwb;
 
-REG UWORD h;
+register uint16_t h;
 
-UWORD nplanes;
+uint16_t nplanes;
 {
 	gsx_fix(&gl_src, saddr, swb, h);
 	gl_src.fd_stand = TRUE;
@@ -2038,11 +2038,11 @@ CICONBLK **carray;
 	int w,
 	 h;
 
-	WORD *databuffer,
+	int16_t *databuffer,
 	*selbuffer,
 	*tempbuffer;
 
-	LONG tot_size;
+	int32_t tot_size;
 
 	for (i = 0; i < tot_icons; i++)
 	{
@@ -2059,8 +2059,8 @@ CICONBLK **carray;
 			/* if not same size, allocate bigger buffers and expand */
 			if (ctemp->num_planes != gl_nplanes)
 			{
-				tempbuffer = (WORD *) Malloc(tot_size);
-				databuffer = (WORD *) Malloc(tot_size);
+				tempbuffer = (int16_t *) Malloc(tot_size);
+				databuffer = (int16_t *) Malloc(tot_size);
 				if (!tempbuffer || !databuffer)
 				{
 					ciconblk->mainlist = 0L;
@@ -2071,7 +2071,7 @@ CICONBLK **carray;
 				ctemp->col_data = databuffer;
 				if (ctemp->sel_data)
 				{
-					selbuffer = (WORD *) Malloc(tot_size);
+					selbuffer = (int16_t *) Malloc(tot_size);
 					if (selbuffer)
 					{
 						expand_data(ctemp->sel_data, tempbuffer, ctemp->sel_mask, ctemp->num_planes, gl_nplanes, w, h);
@@ -2083,7 +2083,7 @@ CICONBLK **carray;
 			} else
 			{							/* just allocate same size, copy over because */
 				/* we don't want to transform form in place */
-				databuffer = (WORD *) Malloc(tot_size);
+				databuffer = (int16_t *) Malloc(tot_size);
 				if (!databuffer)
 				{
 					ciconblk->mainlist = 0L;
@@ -2093,7 +2093,7 @@ CICONBLK **carray;
 				ctemp->col_data = databuffer;
 				if (ctemp->sel_data)
 				{
-					selbuffer = (WORD *) Malloc(tot_size);
+					selbuffer = (int16_t *) Malloc(tot_size);
 					if (selbuffer)
 					{
 						my_trans(ctemp->sel_data, w / 8, selbuffer, w / 8, h, gl_nplanes);
@@ -2122,7 +2122,7 @@ CICONBLK **carray;
 
 	CICON *ctemp;
 
-	WORD tot_icons;
+	int16_t tot_icons;
 
 	ptr = carray;
 	tot_icons = 0;
@@ -2159,7 +2159,7 @@ CICONBLK **carray;
  *	reversed indexes) with RGB.
  */
 tran_check(saddr, daddr, mask, w, h, nplanes)
-BYTE *saddr,
+char *saddr,
 *daddr,
 *mask;
 
@@ -2171,9 +2171,9 @@ int w,
 	 no_longs,
 	 i;
 
-	WORD *wptr;
+	int16_t *wptr;
 
-	LONG *lptr;
+	int32_t *lptr;
 
 	my_trans(saddr, w / 8, daddr, w / 8, h, nplanes);
 
@@ -2227,10 +2227,10 @@ int index;
 }
 #endif
 
-WORD get_rgb(index)
-WORD index;
+int16_t get_rgb(index)
+int16_t index;
 {
-	WORD rindex;						/* reversed bits of index */
+	int16_t rindex;						/* reversed bits of index */
 
 	rindex = reverse(index);
 
@@ -2252,7 +2252,7 @@ WORD index;
  * NOTE:  This has been optimized in  an assembly file.
  */
 expand_data(saddr, daddr, mask, splanes, dplanes, w, h)
-BYTE *saddr,
+char *saddr,
 *daddr,
 *mask;
 
@@ -2268,7 +2268,7 @@ int splanes,
 	register i,
 	 n;
 
-	register BYTE *stemp,
+	register char *stemp,
 	*dtemp;
 
 	plane_size = w / 8 * h;

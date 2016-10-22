@@ -33,24 +33,9 @@
 *	Use MAC to assemble	6/28/90		D.Mui
 * assemble with MAS 900801 kbad
 
-	.text
+	text
 
-	.globl	_savestate
-	.globl	_switchto
-	.globl	_indisp
-	.globl	_gotopgm
-	.globl	_cli
-	.globl	_sti
-	.globl	_hcli
-	.globl	_hsti
-	.globl	_dsptch
-	.globl	_disp
-	.globl	_psetup
-	.globl	_rlr
-	.globl	_back
-
-
-longframe	= $59e			; BIOS system variable...
+longframe	equ $59e			; BIOS system variable...
 
 
 *****************************************************************
@@ -60,6 +45,7 @@ longframe	= $59e			; BIOS system variable...
 *
 * disable interrupts and save state
 *
+	xdef	_cli
 _cli:
 	move	sr,savsr		; save it
 	or	#$700,sr
@@ -68,6 +54,7 @@ _cli:
 *
 * enable interrupts and restore state
 *
+	xdef	_sti
 _sti:
 	move	savsr,sr
 	rts
@@ -75,6 +62,7 @@ _sti:
 *
 * "hard" disable interrupts, no save
 *
+	xdef	_hcli
 _hcli:
 	or	#$700,sr
 	rts
@@ -82,6 +70,7 @@ _hcli:
 *
 * "hard" enable interrupts
 *
+	xdef	_hsti
 _hsti:
 	and	#$f8ff,sr
 	rts
@@ -95,6 +84,7 @@ _hsti:
 * OR fix stack frame then push the sr if CPU uses long frames.	*
 *								*
 *****************************************************************
+	xdef	_dsptch
 _dsptch:
 	tas	_indisp			; be atomic
 	beq.b	dsp1			; if clear, enter with _indisp set
@@ -112,6 +102,7 @@ dsp2:	move	sr,-(sp)		; and finish the stack frame with sr
 *
 * Now save the context of the machine
 *
+	xdef	_savestate
 _savestate:
 	move	sr,srsave		; save interrupts
 	or	#$700,sr		; turn them off
@@ -152,6 +143,7 @@ _savestate:
 *
 *
 
+	xdef	_switchto
 _switchto:
 	move	sr,srsave
 	or	#$700,sr		; no interrupts while on bogus stack!
@@ -170,6 +162,7 @@ _switchto:
 * _gotopgm:							*
 *	Run an accessory and not giving him the basepage	*
 *****************************************************************
+	xdef	_gotopgm
 _gotopgm:
 	move	sr,savsr		; save sr
 	or	#$700,SR		; turn interrupts off
@@ -193,6 +186,7 @@ g_1:	move.l	8(a0),-(sp)		; get beg of text on our sp
 *	Set up a process' stack frame in preparation		*
 *	for an RTE that will start this process executing.	*
 *****************************************************************
+	xdef	_psetup
 _psetup:
 	move	sr,psetsr		; save interrupts
 	or	#$700,sr		; turn them off
@@ -213,14 +207,12 @@ p_1:	move.l	d0,-(a2)		; predecrement and store val on stack
 *****************************************************************
 * BSS for this module						*
 *****************************************************************
-	.bss
-	.even
-_savea0:	.ds.l	1
-srsave:		.ds.w	1		; for savestate
-savsr:		.ds.w	1		; for _cli and _si
-psetsr:		.ds.w	1		; for psetup
+	bss
+	even
+_savea0:	ds.l	1
+srsave:		ds.w	1		; for savestate
+savsr:		ds.w	1		; for _cli and _si
+psetsr:		ds.w	1		; for psetup
 *
-		.ds.l	160		; 640 bytes ????
-dspstk:		.ds.l	1
-*
-	.end
+		ds.l	160		; 640 bytes ????
+dspstk:		ds.l	1

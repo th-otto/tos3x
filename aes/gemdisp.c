@@ -61,46 +61,15 @@
  ****************************************************************/
 
 PD *dpd;								/* critical error process   */
-
-EXTERN WORD crt_error;
-
-						/* gemflag.c    */
-EXTERN WORD tchange();
-
-						/* geminput.c   */
-EXTERN WORD kchange();
-
-EXTERN PD *gl_kowner;
-
-EXTERN WORD kstate;
-
-						/* gemaplib.c   */
-EXTERN WORD gl_recd;
-
-EXTERN WORD gl_rlen;
-
-EXTERN LONG gl_rbuf;
-
-						/* apgsxif.s    */
-EXTERN WORD intin[];
-
-EXTERN WORD intout[];
-
-EXTERN WORD contrl[];
-
-						/* gemglobe.c   */
-EXTERN THEGLO D;
-
 PD *slr;
-
-EXTERN WORD wwait;
 
 /****************************************************************/
 
-VOID forkq(fcode, fdata) WORD(*fcode) ();
-LONG fdata;
+VOID forkq(P(FCODE) fcode, P(int32_t) fdata)
+PP(FCODE fcode;)
+PP(int32_t fdata;)
 {
-	REG FPD *f;
+	register FPD *f;
 
 	/* q a fork process,    */
 	/*   enter with ints OFF */
@@ -121,11 +90,10 @@ LONG fdata;
 }
 
 
-VOID disp_act(p)
-REG PD *p;
+VOID disp_act(P(PD *) p)
+PP(register PD *p;)
 {
-	REG PD *pq,
-	*q;
+	register PD *pq, *q;
 
 	/* process is ready,    */
 	/*   so put him on RLR  */
@@ -141,10 +109,10 @@ REG PD *p;
 
 /*	Suspend the process	*/
 
-VOID suspend_act(p)
-REG PD *p;
+VOID suspend_act(P(PD *) p)
+PP(register PD *p;)
 {
-	REG PD *q;
+	register PD *q;
 
 	p->p_stat = PS_SUSPENDED;
 	p->p_link = slr;
@@ -152,11 +120,11 @@ REG PD *p;
 }
 
 
-VOID forker()
+VOID forker(NOTHING)
 {
-	REG FPD *f;
-	REG PD *oldrl;
-	REG LONG amt;
+	register FPD *f;
+	register PD *oldrl;
+	register int32_t amt;
 
 	infork = 1;
 	oldrl = rlr;
@@ -183,10 +151,10 @@ VOID forker()
 				/*   then coalesce them */
 				/*   else record the    */
 				/*   event      */
-				if ((f->f_code == &tchange) && (LLGET(gl_rbuf - sizeof(FPD)) == &tchange))
+				if ((f->f_code == tchange) && (LLGET(gl_rbuf - sizeof(FPD)) == tchange))
 				{
-					amt = f->f_data + LLGET(gl_rbuf - sizeof(LONG));
-					LLSET(gl_rbuf - sizeof(LONG), amt);
+					amt = f->f_data + LLGET(gl_rbuf - sizeof(int32_t));
+					LLSET(gl_rbuf - sizeof(int32_t), amt);
 				} else
 				{
 					LBCOPY(gl_rbuf, ADDR(f), sizeof(FPD));
@@ -203,10 +171,10 @@ VOID forker()
 }
 
 
-VOID chkkbd()
+VOID chkkbd(NOTHING)
 {
-	REG WORD achar, kstat;
-	REG WORD *pintin;
+	register int16_t achar, kstat;
+	register int16_t *pintin;
 
 	gsx_ncode(KEY_SHST, 0x0L);
 	kstat = intout[0];
@@ -247,10 +215,10 @@ VOID chkkbd()
  * Machine state is saved before this routine is entered!	*
  ****************************************************************/
 
-VOID disp()
+VOID disp(NOTHING)
 {
-	REG PD *p;
-	REG PD *p1;
+	register PD *p;
+	register PD *p1;
 
 	/* take the process p   */
 	/*   off the ready list */
@@ -284,9 +252,8 @@ VOID disp()
 	}
 
 	wwait = FALSE;
-	/* run through and  */
-	/*   execute all the    */
-  d_1:									/*   fork processes */
+	/* run through and execute all the fork processes */
+  d_1:
 	do
 	{
 		forker();

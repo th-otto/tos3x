@@ -43,7 +43,7 @@ GLOBAL THEGLO D;
 /*
  *	return size in words of struct THEGLO
  */
-WORD size_theglo()
+int16_t size_theglo()
 {
 	return (sizeof(THEGLO) / 2);
 }

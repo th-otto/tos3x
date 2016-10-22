@@ -61,46 +61,6 @@
 #include <mn_tools.h>
 
 
-/* EXTERNS
- * ================================================================
- */
-/* in MN_EVENT.C */
-
-EXTERN WORD MenuBar_Mode;
-
-EXTERN BYTE *dos_alloc();
-
-EXTERN BYTE UpText[];
-
-EXTERN BYTE DownText[];
-
-
-/* in MN_INDEX.C */
-EXTERN PNODE_PTR IndexList;
-
-
-/* in GEMBIND.C */
-EXTERN VOID ob_delete();
-
-EXTERN VOID ob_add();
-
-
-/* in APGSXIF.S */
-EXTERN GRECT gl_rfull;					/* GRECT of the full window area */
-
-EXTERN WORD gl_hchar;
-
-EXTERN WORD gl_wchar;
-
-
-/* in OPTIMIZE.C */
-EXTERN BYTE *strcpy();
-
-EXTERN WORD min();
-
-/* must be declared here, or redeclarations occur */
-MENU_PTR GetMenuPtr();
-
 /* GLOBALS
  * ================================================================
  */
@@ -109,7 +69,7 @@ MENU_PTR MenuList;						/* Pointer to the head of the linked list */
 				  /* that contains the structures of the    */
 				  /* menus that are to be displayed, such as */
 				  /* the ObRect, blit buffer etc...         */
-WORD MAX_MENU_HEIGHT;					/* The menu height we start scrolling     */
+int16_t MAX_MENU_HEIGHT;					/* The menu height we start scrolling     */
 
 
 /* FUNCTIONS
@@ -127,19 +87,19 @@ WORD MAX_MENU_HEIGHT;					/* The menu height we start scrolling     */
  * remove the malloc'ed memory that this call creates.
  *
  * IN: OBJECT *tree  - the tree in question
- *     WORD   Parent - the menu object
+ *     int16_t   Parent - the menu object
  *
  * OUT: SUCCESS - returns a Menu ID ranging from 1 - 32767
  *      FAILURE - returns 0
  */
-WORD Menu_Insert(tree, Parent)
+int16_t Menu_Insert(tree, Parent)
 OBJECT *tree;							/* tree in question      */
 
-WORD Parent;							/* The menu object       */
+int16_t Parent;							/* The menu object       */
 {
-	WORD MenuID;						/* the Menu ID #         */
+	int16_t MenuID;						/* the Menu ID #         */
 
-	REG MENU_PTR MenuPtr;				/* ptr to the Menu Node  */
+	register MENU_PTR MenuPtr;				/* ptr to the Menu Node  */
 
 	if ((MenuID = GetNewMenu()) > NULL)	/* Get a new Menu ID     */
 	{									/* Yes!              */
@@ -167,16 +127,16 @@ WORD Parent;							/* The menu object       */
  * ================================================================
  * Deletes the given MenuID from the linked list.
  *
- * IN: WORD MenuID - The Menu ID of the node we want to delete
+ * IN: int16_t MenuID - The Menu ID of the node we want to delete
  *
  * OUT: VOID
  */
 VOID Menu_Delete(MenuID)
-WORD MenuID;							/* MenuID of node to delete */
+int16_t MenuID;							/* MenuID of node to delete */
 {
-	REG MENU_PTR ptr;					/* Temp Menu Ptr    */
+	register MENU_PTR ptr;					/* Temp Menu Ptr    */
 
-	REG MENU_PTR MenuPtr;				/* Current Menu Ptr */
+	register MENU_PTR MenuPtr;				/* Current Menu Ptr */
 
 	if ((MenuPtr = GetMenuPtr(MenuID)) > NULL)	/* Get the Ptr to the node */
 	{									/* YUP!                   */
@@ -224,8 +184,8 @@ VOID mn_init(VOID)
 	/* These are required to make the menu system work and strut its stuff */
 	Init_Delays();
 	SetMaxHeight(INIT_MAX_HEIGHT);
-	MenuList = NULLPTR;					/* Clear out the Master Menu Node Pointer */
-	IndexList = NULLPTR;				/* Clear the SubMenu Index Master Pointer */
+	MenuList = NULL;					/* Clear out the Master Menu Node Pointer */
+	IndexList = NULL;				/* Clear the SubMenu Index Master Pointer */
 	MenuBar_Mode = 0;					/* 8/3/92 */
 }
 
@@ -247,7 +207,7 @@ VOID mn_init(VOID)
  * OUT: VOID
  */
 VOID InitMenuNode(MenuPtr)
-REG MENU_PTR MenuPtr;					/* ptr to the Menu Node */
+register MENU_PTR MenuPtr;					/* ptr to the Menu Node */
 {
 	MMENU_ID(MenuPtr) = NIL;
 	MTREE(MenuPtr) = NULL;
@@ -277,9 +237,9 @@ REG MENU_PTR MenuPtr;					/* ptr to the Menu Node */
 	MB_FLAG(MenuPtr) = NONE;
 	MB_TXT(MenuPtr)[0] = '\0';
 
-	MBUFFER(MenuPtr) = NULLPTR;
-	MPREV(MenuPtr) = NULLPTR;
-	MNEXT(MenuPtr) = NULLPTR;
+	MBUFFER(MenuPtr) = NULL;
+	MPREV(MenuPtr) = NULL;
+	MNEXT(MenuPtr) = NULL;
 
 	MSCROLL(MenuPtr) = FALSE;
 }
@@ -295,16 +255,16 @@ REG MENU_PTR MenuPtr;					/* ptr to the Menu Node */
  * OUT: SUCCESS - A Menu ID ranging from 1 to 32767
  *      FAILURE - 0 error
  */
-WORD GetNewMenu(VOID)
+int16_t GetNewMenu(VOID)
 {
-	REG MENU_PTR ptr;					/* Ptr to a temp node           */
+	register MENU_PTR ptr;					/* Ptr to a temp node           */
 
-	REG MENU_PTR newptr;				/* Ptr to the New malloced node */
+	register MENU_PTR newptr;				/* Ptr to the New malloced node */
 
-	WORD MenuID;						/* The New Menu ID for the node */
+	int16_t MenuID;						/* The New Menu ID for the node */
 
 	/* Malloc a new node!           */
-	if ((newptr = (MENU_PTR) dos_alloc((LONG) sizeof(MENU_NODE))) == NULL)
+	if ((newptr = (MENU_PTR) dos_alloc((int32_t) sizeof(MENU_NODE))) == NULL)
 		return (NULL);					/* error - no memory for menuid! */
 
 	if ((MenuID = FindNewMenuID()) == NULL)	/* Get us a new and unused ID!   */
@@ -342,11 +302,11 @@ WORD GetNewMenu(VOID)
  * OUT: Returns the Menu ID - returns 1 if this is the first menu.
  *      Returns 0 if there is an error. ie - > 32767 menu ids
  */
-WORD FindNewMenuID(VOID)
+int16_t FindNewMenuID(VOID)
 {
-	REG MENU_PTR ptr;					/* Temp Menu Node Pointer        */
+	register MENU_PTR ptr;					/* Temp Menu Node Pointer        */
 
-	WORD MenuID;						/* A variable menu ID            */
+	int16_t MenuID;						/* A variable menu ID            */
 
 	ptr = MenuList;						/* Set the temp to the head      */
 
@@ -371,17 +331,17 @@ WORD FindNewMenuID(VOID)
 /* GetMenuPtr()
  * ================================================================
  * Looks for a MenuID in the MenuList and returns a MenuPtr to it.
- * returns NULLPTR if the MenuID can't be found.
+ * returns NULL if the MenuID can't be found.
  *
- * IN:  WORD MenuID - The menu id that we are looking for.
+ * IN:  int16_t MenuID - The menu id that we are looking for.
  *
  * OUT: MENU_PTR - SUCCESS - returns a pointer to the node.
  *                 FAILURE - returns NULLPTR.
  */
 MENU_PTR GetMenuPtr(MenuID)
-WORD MenuID;							/* the menu id we want...    */
+int16_t MenuID;							/* the menu id we want...    */
 {
-	REG MENU_PTR ptr;					/* Temp Pointer              */
+	register MENU_PTR ptr;					/* Temp Pointer              */
 
 	ptr = MenuList;						/* Set us to the head.       */
 
@@ -391,7 +351,7 @@ WORD MenuID;							/* the menu id we want...    */
 	while (ptr)							/* Go through the linked list */
 	{									/* checking menu ids. If fnd */
 		if (MMENU_ID(ptr) == MenuID)	/* return it! otherwise we'll */
-			break;						/* evntually return NULLPTR  */
+			break;						/* evntually return NULL  */
 		ptr = MNEXT(ptr);
 	}
 	return (ptr);
@@ -417,9 +377,9 @@ WORD MenuID;							/* the menu id we want...    */
  * OUT: VOID
  */
 VOID CheckMenuHeight(MenuPtr)
-REG MENU_PTR MenuPtr;					/* ptr to the Menu Node   */
+register MENU_PTR MenuPtr;					/* ptr to the Menu Node   */
 {
-	REG OBJECT *tree;
+	register OBJECT *tree;
 
 	ActiveTree(MTREE(MenuPtr));
 
@@ -440,16 +400,16 @@ REG MENU_PTR MenuPtr;					/* ptr to the Menu Node   */
  * IN:  MENU_PTR MenuPtr - Ptr to the menu node in question
  * OUT: returns the number of menu items in this menu.
  */
-WORD CountMenuItems(MenuPtr)
-REG MENU_PTR MenuPtr;					/* ptr to the Menu Node */
+int16_t CountMenuItems(MenuPtr)
+register MENU_PTR MenuPtr;					/* ptr to the Menu Node */
 {
-	REG OBJECT *tree;					/* tree to count on     */
+	register OBJECT *tree;					/* tree to count on     */
 
-	REG WORD parent;					/* menu object      */
+	register int16_t parent;					/* menu object      */
 
-	WORD NumItems;						/* Num Items in picture. */
+	int16_t NumItems;						/* Num Items in picture. */
 
-	WORD obj;
+	int16_t obj;
 
 	ActiveTree(MTREE(MenuPtr));
 	parent = MPARENT(MenuPtr);
@@ -473,25 +433,25 @@ REG MENU_PTR MenuPtr;					/* ptr to the Menu Node */
  * scroll arrows showing.
  *
  * IN: MENU_PTR MenuPtr   - the menu ptr in question
- *     WORD     start_obj - the menu item that we should have at the top.
+ *     int16_t     start_obj - the menu item that we should have at the top.
  *     BOOLEAN  adjust_flag -  TRUE - take into account the start obj.
  *
  * OUT: VOID
  */
 VOID SetMenuHeight(MenuPtr, start_obj, adjust_flag)
-REG MENU_PTR MenuPtr;					/* ptr to the menu node    */
+register MENU_PTR MenuPtr;					/* ptr to the menu node    */
 
-WORD start_obj;							/* menu item at the top    */
+int16_t start_obj;							/* menu item at the top    */
 
 BOOLEAN adjust_flag;					/* see above...            */
 {
-	REG OBJECT *tree;					/* object tree in question */
+	register OBJECT *tree;					/* object tree in question */
 
-	REG WORD obj;						/* temp object             */
+	register int16_t obj;						/* temp object             */
 
-	WORD parent;						/* menu object             */
+	int16_t parent;						/* menu object             */
 
-	WORD offset_obj,
+	int16_t offset_obj,
 	 temp;								/* Offset menu item        */
 
 	ActiveTree(MTREE(MenuPtr));
@@ -613,17 +573,17 @@ BOOLEAN adjust_flag;					/* see above...            */
  * OUT: VOID
  */
 VOID RestoreMenu(MenuPtr)
-REG MENU_PTR MenuPtr;					/* ptr to the menu node... */
+register MENU_PTR MenuPtr;					/* ptr to the menu node... */
 {
-	REG OBJECT *tree;					/* the tree to set this to */
+	register OBJECT *tree;					/* the tree to set this to */
 
-	REG WORD obj;						/* temp object             */
+	register int16_t obj;						/* temp object             */
 
-	WORD parent;						/* The menu object         */
+	int16_t parent;						/* The menu object         */
 
-	WORD count;							/* The # of items          */
+	int16_t count;							/* The # of items          */
 
-	WORD temp;
+	int16_t temp;
 
 	ActiveTree(MTREE(MenuPtr));
 	parent = MPARENT(MenuPtr);
@@ -705,11 +665,11 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node... */
  * 	      of the screen.
  */
 VOID AdjustMenuPosition(MenuPtr, xpos, ypos, rect, Horizontal_Flag, Vertical_Flag)
-REG MENU_PTR MenuPtr;					/* ptr to the Menu Node         */
+register MENU_PTR MenuPtr;					/* ptr to the Menu Node         */
 
-WORD xpos;								/* xpos that we originally want */
+int16_t xpos;								/* xpos that we originally want */
 
-WORD ypos;								/* ypos that we originally want */
+int16_t ypos;								/* ypos that we originally want */
 
 GRECT *rect;							/* GRECT of the button          */
 
@@ -717,13 +677,13 @@ BOOLEAN Horizontal_Flag;				/* See above...         */
 
 BOOLEAN Vertical_Flag;					/* See above...         */
 {
-	REG OBJECT *tree;					/* Local tree variable   */
+	register OBJECT *tree;					/* Local tree variable   */
 
-	REG WORD parent;					/* menu object           */
+	register int16_t parent;					/* menu object           */
 
-	WORD tempx;							/* temp x and y positions */
+	int16_t tempx;							/* temp x and y positions */
 
-	WORD tempy;
+	int16_t tempy;
 
 	ActiveTree(MTREE(MenuPtr));			/* Set the tree...     */
 	parent = MPARENT(MenuPtr);			/* get the menu object */
@@ -788,20 +748,20 @@ BOOLEAN Vertical_Flag;					/* See above...         */
  * This routine scrolls by adding and deleting objects on the fly.
  *
  * IN: MENU_PTR MenuPtr - Ptr to the menu node in question.
- *     WORD     start_obj - the menu item that we want on top
+ *     int16_t     start_obj - the menu item that we want on top
  *
  * OUT: VOID
  */
 VOID MenuScrollAdjust(MenuPtr, start_obj)
-REG MENU_PTR MenuPtr;					/* ptr to the menu node in question */
+register MENU_PTR MenuPtr;					/* ptr to the menu node in question */
 
-WORD start_obj;							/* the menu item that we want on top */
+int16_t start_obj;							/* the menu item that we want on top */
 {
-	REG WORD obj;						/* temp obj variable       */
+	register int16_t obj;						/* temp obj variable       */
 
-	WORD offset_obj;					/* the offset/start object */
+	int16_t offset_obj;					/* the offset/start object */
 
-	WORD new_bottom;					/* the new bottom object   */
+	int16_t new_bottom;					/* the new bottom object   */
 
 	/* Restore the text that occupied the original menu items, if required */
 	PopArrowText(MenuPtr);
@@ -872,10 +832,10 @@ WORD start_obj;							/* the menu item that we want on top */
  * OUT: VOID
  */
 VOID PushArrowText(MenuPtr)
-REG MENU_PTR MenuPtr;					/* ptr to the menu node in question */
+register MENU_PTR MenuPtr;					/* ptr to the menu node in question */
 {
 
-	REG WORD obj;						/* temp obj variable  */
+	register int16_t obj;						/* temp obj variable  */
 
 	/* Set the Up ARROW if the first object is not the FIRST_CHILD */
 	obj = MTOP_OBJ(MenuPtr);
@@ -888,8 +848,8 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node in question */
 		MTREE(MenuPtr)[obj].ob_flags &= ~SUBMENU;
 
 		/* AES version - src,dst */
-		strcpy((BYTE *) MTREE(MenuPtr)[obj].ob_spec, &MTOP_TXT(MenuPtr)[0]);
-		strcpy(&UpText[0], (BYTE *) MTREE(MenuPtr)[obj].ob_spec);
+		xstrpcpy((char *) MTREE(MenuPtr)[obj].ob_spec, &MTOP_TXT(MenuPtr)[0]);
+		xstrpcpy(&UpText[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
 	}
 
 	/* Set the down ARROW if the last object is not MLAST_CHILD */
@@ -905,8 +865,8 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node in question */
 		if (MLASTFLAG(MenuPtr))			/* CJG 01/13/92 */
 			MTREE(MenuPtr)[obj].ob_flags |= LASTOB;
 		/* AES version - src,dst */
-		strcpy((BYTE *) MTREE(MenuPtr)[obj].ob_spec, &MB_TXT(MenuPtr)[0]);
-		strcpy(&DownText[0], (BYTE *) MTREE(MenuPtr)[obj].ob_spec);
+		xstrpcpy((char *) MTREE(MenuPtr)[obj].ob_spec, &MB_TXT(MenuPtr)[0]);
+		xstrpcpy(&DownText[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
 	}
 }
 
@@ -921,14 +881,14 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node in question */
  * OUT: VOID
  */
 VOID PopArrowText(MenuPtr)
-REG MENU_PTR MenuPtr;					/* ptr to the menu node */
+register MENU_PTR MenuPtr;					/* ptr to the menu node */
 {
-	REG WORD obj;						/* temp object variable */
+	register int16_t obj;						/* temp object variable */
 
 	/* Restore the text underneath the UP ARROW */
 	if ((obj = MTOP_OBJ(MenuPtr)) != MSCROLL(MenuPtr))
 	{
-		strcpy(&MTOP_TXT(MenuPtr)[0], (BYTE *) MTREE(MenuPtr)[obj].ob_spec);
+		xstrpcpy(&MTOP_TXT(MenuPtr)[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
 		MTREE(MenuPtr)[obj].ob_state = MTOP_STATE(MenuPtr);
 		MTREE(MenuPtr)[obj].ob_flags = MTOP_FLAG(MenuPtr);
 	}
@@ -937,7 +897,7 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node */
 	if ((obj = MB_OBJ(MenuPtr)) != MLAST_CHILD(MenuPtr))
 	{
 		MTREE(MenuPtr)[obj].ob_flags = NONE;
-		strcpy(&MB_TXT(MenuPtr)[0], (BYTE *) MTREE(MenuPtr)[obj].ob_spec);
+		xstrpcpy(&MB_TXT(MenuPtr)[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
 		MTREE(MenuPtr)[obj].ob_state = MB_STATE(MenuPtr);
 		MTREE(MenuPtr)[obj].ob_flags = MB_FLAG(MenuPtr);
 	}
@@ -952,10 +912,10 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node */
  * IN:    < 0 - will return the current value.
  * OUT: returns the value that we set it to.
  */
-WORD SetMaxHeight(height)
-WORD height;
+int16_t SetMaxHeight(height)
+int16_t height;
 {
-	WORD max_height;
+	int16_t max_height;
 
 	if (height < 0)
 		return (MAX_MENU_HEIGHT);

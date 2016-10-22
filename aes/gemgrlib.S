@@ -26,41 +26,7 @@
 * assemble with MAS 900801 kbad
 *	Took out gr_slidebox
 
-	.globl	_rlr
-	.globl	_drl
-	.globl	_nrl
-	.globl	_eul
-	.globl	_dlr
-	.globl	_zlr
-	.globl	_elinkof
-	.globl	_indisp
-	.globl	_infork
-	.globl	_fpt
-	.globl	_fph
-	.globl	_fpcnt
-	.globl	_wind_sp
-	.globl	_cda
-	.globl	_curpid
-	.globl	_gl_rscreen
-	.globl	_gl_rzero
-	.globl	_xrat
-	.globl	_yrat
-	.globl	_button
-	.globl	_kstate
-*	.globl	_gr_still
-*
-*
-*
-*
-*   Globals that must be from the include files
-*
-	.globl	_ev_mult,_gsx_scl,_gsx_att,_gsx_mxm,_gsx_xcb,_gsx_xbo
-	.globl	_gsx_mof,_gsx_mon,_rc_equa,_wm_upda,_rc_cons,_ob_actx
-	.globl	_ob_chan,_ob_relx,_mul_div
-*
-*
-*
-	.text
+	text
 *
 *
 *
@@ -83,7 +49,6 @@ steploc:
 	rts
 *
 *
-	.globl _gr_stepc
 *
 *
 *
@@ -98,7 +63,8 @@ steploc:
 *		.l	*pystep	+28
 *	exit:	none
 *
-_gr_stepc:
+	xdef _gr_stepcalc
+_gr_stepcalc:
 	movem.l	a3-a5,-(sp)		;+12
 	lea	12+8(sp),a0		;a0 => &pt
 *
@@ -194,10 +160,10 @@ ptrpsh:
 *	exit:	none
 *
 *
-	.globl _gr_growb
 *
 *
-_gr_growb:
+	xdef _gr_growbox
+_gr_growbox:
 	movem.l	d2-d7/a4-a6,-(sp)	;+36 reserve 12 bytes & d5-d7/a4-a6
 	bsr	grshcalc
 *
@@ -256,11 +222,11 @@ lab41:
 *	exit:	none
 *
 *
-	.globl _gr_shrin
 *
 *
 *
-_gr_shrin:
+	xdef _gr_shrinkbox
+_gr_shrinkbox:
 	movem.l	d2-d7/a4-a6,-(sp)	;+36 reserve 12 bytes & d5-d7/a4-a6
 	bsr	grshcalc		;call gr_stepcalc just like growbox
 *
@@ -303,7 +269,6 @@ lab46:
 *
 *
 *
-	.globl _gr_xor
 *
 *
 *
@@ -319,6 +284,7 @@ lab46:
 *		.w	dowdht	+20
 *	exit:	none
 *
+	xdef _gr_xor
 _gr_xor:
 	movem.l	d4-d7,-(sp)		;+16
 	lea	16+4(sp),a0		;a0 -> clipped
@@ -389,7 +355,7 @@ lab19:
 *
 *
 *
-	.globl _gr_movebox
+	xdef _gr_movebox
 *
 *
 _gr_movebox:
@@ -468,7 +434,7 @@ lab36:
 *
 *
 *
-	.globl _gr_scale
+*   gr_scale
 *
 *
 *				offset from sp at entry
@@ -481,6 +447,7 @@ lab36:
 *	exit:	none
 *
 *
+	xdef _gr_scale
 _gr_scale:
 	movem.l d4-d7/a4-a6,-(sp)	;+28 we need regs!
 *
@@ -572,10 +539,10 @@ lab10:
 *
 *
 *
-	.globl _gr_watch
 *
 *
-_gr_watch:
+	xdef _gr_watchbox
+_gr_watchbox:
 	movem.l	d2-d7/a5-a6,-(sp)	;+32 reserve 8 bytes & d4-d7/a5-a6
 	lea	32+4(sp),a0
 	move.l	(a0)+,a5		;a5 -> tree
@@ -613,10 +580,10 @@ lab50:
 	move.l	-(a6),-(sp)		;+64 parms 2 3  t.g_x, t.g_y
 	move.w	d7,-(sp)		;+66 parm 1 out
 *
-	jsr	_gr_still		;gr_still(out,t.g_x,t.g_y,t.g_w,t.g_h)
+	jsr	_gr_stilldn		;gr_stilldn(out,t.g_x,t.g_y,t.g_w,t.g_h)
 	adda.w	#20,sp			;+46
 	tst.w	d0
-	bne	lab50			;while(gr_still());
+	bne	lab50			;while(gr_stilldn());
 *
 	move.w	d7,d0			;return(out)
 	adda.w	#22,sp			;+24
@@ -648,7 +615,8 @@ lab50:
 *
 *	exit:	d0.w	= 1 (true)	=0 (false)
 *
-*_gr_still:
+*	xdef	_gr_stilldn
+*_gr_stilldn:
 	suba.w	#12,sp		;+12 make room on stack for 6 words: &rets[6]
 	move.l	sp,-(sp)	;+16 parm 7 &rets[0]
 	clr.l	-(sp)		;+20 parm 6 0x0L
@@ -673,7 +641,7 @@ lab50:
 *
 *
 *
-	.globl _gr_draw
+* gr_draw
 *
 *
 *
@@ -695,6 +663,7 @@ lab50:
 *
 *
 *
+	xdef _gr_draw
 _gr_draw:
 	movem.l	d0-d1/d7/a4-a5,-(sp)	;+20 save d7/a4-a5 & reserve 8 bytes
 	movem.l	20+2(sp),d7/a4-a5
@@ -744,11 +713,7 @@ ofdrawon:
 *
 *
 *
-	.globl _gr_wait
-*
-*
-*
-*
+*	gr_wait
 *
 *				offset from sp at entry
 *
@@ -760,6 +725,7 @@ ofdrawon:
 *	exit:	d0 = down
 *
 *
+	xdef _gr_wait
 _gr_wait:
 	movem.l	d5-d7/a4-a5,-(sp)	;+20
 	movem.l	20+4(sp),d5/a4-a5	;a5 -> &po
@@ -795,13 +761,13 @@ ez_glr0:
 *
 *
 *
-	.globl _gr_setup
 *
 *	entry:	.w	color	+4
 *
 *	exit:	none
 *
 *
+	xdef _gr_setup
 _gr_setup:
 ez_glrsr:
 	move.l	#_gl_rscreen,-(sp)	;+4  parm 1 &gl_rscreen
@@ -813,22 +779,16 @@ ez_glrsr:
 	jsr	_gsx_att		;    gsx_attr(FALSE, MD_XOR, color);
 	addq.l	#8,sp
 	rts
-*
-*
-*
-*
+
 *
 *
 *	gr_rubbox
-*
-*
 *
 *   Stretch the free corner of a XOR box(w,h) that is pinned at
 *   another corner based on mouse movement until the button comes
 *   up.  This is also called a rubber-band box.
 *
 *
-	.globl _gr_rubbo
 *
 *				offset from sp at entry
 *
@@ -844,6 +804,7 @@ ez_glrsr:
 *
 *	exit:	none
 *
+	xdef _gr_rubbo
 _gr_rubbo:
 	lea	16(sp),a0	;a0 -> phend
 	move.l	(a0),-(sp)	;+4 parm 7 phend
@@ -866,7 +827,6 @@ _gr_rubbo:
 *   up.  Also draw a second box offset from the stretching box.
 *
 *
-	.globl _gr_rubwind
 *
 *	locals:	.w   o  o.g_x		-32
 *		.w	o.g_y		-30
@@ -892,6 +852,7 @@ _gr_rubbo:
 *
 *	exit:	none
 *
+	xdef _gr_rubwind
 _gr_rubwind:
 	movem.l	d3-d6/a3-a6,-(sp) ;+32 reserve 8 bytes of local & d5-d6/a3-a6
 	move.w	#1,-(sp)	;+34 parm 1 TRUE
@@ -968,7 +929,6 @@ wdhtlp:
 *	rectangle.
 *
 *
-	.globl _gr_dragbox
 *
 *
 *
@@ -1002,6 +962,7 @@ wdhtlp:
 *
 *
 *
+	xdef _gr_dragbox
 _gr_dragbox:
 	movem.l	d2-d7/a4-a6,-(sp)	;+36 reserve 20 bytes & d6-d7/a4-a6 
 	movem.l	36+4(sp),d6-d7/a4-a6	;d6[31:16] = w; d6[15:00] = h
@@ -1114,7 +1075,7 @@ d0bigger:
 	rts
 *
 *
-	.globl _gr_clamp
+*   _gr_clamp
 *
 *
 *				offset from sp at entry
@@ -1132,6 +1093,7 @@ d0bigger:
 *
 *
 *
+	xdef _gr_clamp
 _gr_clamp:
 	subq.l	#4,sp		;+4  make room on stack for local mx, my
 	pea	4-2(sp)		;+8  parm 2 &my
@@ -1164,10 +1126,10 @@ _gr_clamp:
 *	exit:	none
 *
 *
-	.globl _gr_mksta
 *
 *
-_gr_mksta:
+	xdef _gr_mkstate
+_gr_mkstate:
 	lea	mklist(pc),a0	;2
 	lea	4(sp),a1	;4
 	moveq	#3,d0		;5
@@ -1182,437 +1144,8 @@ mkstatlp:
 *
 *
 mklist:
-	.dc.l	_xrat
-	.dc.l	_yrat
-	.dc.l	_button
-	.dc.l	_kstate
-*
-
-
-
-*\*	GEMGRLIB.C	4/11/84 - 01/07/85	Gregg Morris		*\
-*\*	Reg Opt		03/08/85 - 04/26/85	Derek Mui		*\
-*
-*\*
-**	-------------------------------------------------------------
-**	GEM Application Environment Services		  Version 1.1
-**	Serial No.  XXXX-0000-654321		  All Rights Reserved
-**	Copyright (C) 1985			Digital Research Inc.
-**	-------------------------------------------------------------
-**\
-*
-*#include <portab.h>
-*#include <machine.h>
-*#include <struct88.h>
-*#include <baspag88.h>
-*#include <obdefs.h>
-*#include <gemlib.h>
-*						/* in GSX.EXE		*\
-*EXTERN VOID	gsx_moff();
-*EXTERN VOID	gsx_mon();
-*
-*EXTERN GRECT	gl_rscreen;
-*EXTERN GRECT	gl_rzero;
-*
-*EXTERN WORD	xrat, yrat, button, kstate;
-*
-*\*
-**	Routine to watch the mouse while the button is down and
-**	it stays inside/outside of the specified rectangle.
-**	Return TRUE as long as the mouse is down.  Block until the
-**	mouse moves into or out of the specified rectangle.
-**\
-*
-*	WORD
-*gr_stilldn(out, x, y, w, h)
-*	WORD		out, x, y, w, h;
-*{
-*	WORD		rets[6];
-*					/* compiler had better	*\
-*					/*   put the values out,*\
-*					/*   x, y, w, h in the	*\
-*					/*   right order on the	*\
-*					/*   stack to form a	*\
-*					/*   MOBLK		*\
-*	if ( MU_BUTTON & ev_multi(MU_BUTTON | MU_M1, &out, NULLPTR, 0x0L,
-*			0x00010100L, 0x0L, &rets[0]) )	/* 01ff00L *\
-*	  return(FALSE);
-*	return(TRUE);
-*} /* gr_stilldn *\
-*
-*
-*gr_setup(color)
-*	WORD		color;
-*{
-*	gsx_sclip(&gl_rscreen);
-*	gsx_attr(FALSE, MD_XOR, color);
-*}
-*
-*
-*gr_clamp(xorigin, yorigin, wmin, hmin, pneww, pnewh)
-*	WORD		xorigin, yorigin;
-*	WORD		wmin, hmin;
-*	WORD		*pneww, *pnewh;
-*{
-*	WORD		mx, my;
-*
-*	gsx_mxmy(&mx, &my);
-*	*pneww = max(mx - xorigin + 1, wmin);
-*	*pnewh = max(my - yorigin + 1, hmin);
-*}
-*
-*
-*gr_scale(xdist, ydist, pcnt, pxstep, pystep)
-*	REG WORD		xdist, ydist;
-*	WORD		*pcnt;
-*	REG WORD		*pxstep, *pystep;
-*{
-*	REG WORD		i;
-*	REG WORD		dist;
-*
-*
-*	gr_setup(BLACK);
-*
-*	dist = (xdist + ydist) / 2;
-*
-*	for(i=0; dist; i++)
-*	  dist /= 2;
-*
-*	if (*pcnt = i)
-*	{
-*	  *pxstep = max(1, xdist / i);
-*	  *pystep = max(1, ydist / i);
-*	}
-*	else
-*	  *pxstep = *pystep = 1;
-*}
-*
-*
-*gr_stepcalc(orgw, orgh, pt, pcx, pcy, pcnt, pxstep, pystep)
-*	WORD		orgw, orgh;
-*	REG GRECT		*pt;
-*	REG WORD		*pcx, *pcy;
-*	WORD		*pcnt, *pxstep, *pystep;
-*{
-*	*pcx = (pt->g_w/2) - (orgw/2);
-*	*pcy = (pt->g_h/2) - (orgh/2);
-*
-*	gr_scale(*pcx, *pcy, pcnt, pxstep, pystep);
-*
-*	*pcx += pt->g_x;
-*	*pcy += pt->g_y;
-*}
-*
-*
-*gr_xor(clipped, cnt, cx, cy, cw, ch, xstep, ystep, dowdht)
-*	WORD		clipped;
-*	WORD		cnt;
-*	WORD		cx, cy, cw, ch;
-*	REG WORD		xstep, ystep;
-*	WORD		dowdht;
-*{
-*	do
-*	{
-*	  if (clipped)
-*	    gsx_xcbox(&cx);
-*	  else
-*	    gsx_xbox(&cx);
-*	  cx -= xstep;
-*	  cy -= ystep;
-*	  if (dowdht)
-*	  {
-*	    cw += (2 * xstep);
-*	    ch += (2 * ystep);
-*	  }
-*	} while (cnt--);
-*}
-*
-*
-*	VOID
-*gr_draw(have2box, po, poff)
-*	WORD		have2box;
-*	REG GRECT		*po;
-*	REG GRECT		*poff;
-*{
-*	GRECT		t;
-*
-*	gsx_xbox(po);
-*	if (have2box)
-*	{
-*	  r_set(&t, po->g_x + poff->g_x, po->g_y + poff->g_y,
-*		      po->g_w + poff->g_w, po->g_h + poff->g_h );
-*	  gsx_xbox(&t);
-*	}
-*}
-*
-*
-*	WORD
-*gr_wait(po, poff, mx, my)
-*	REG GRECT		*po;
-*	REG GRECT		*poff;
-*	WORD		mx, my;
-*{
-*	REG WORD		have2box;
-*	REG WORD		down;
-*
-*	have2box = !rc_equal(&gl_rzero, poff);
-*						/* draw old		*\
-*	gsx_moff();
-*	gr_draw(have2box, po, poff);
-*	gsx_mon();
-*						/* wait for change	*\
-*	down = gr_stilldn(TRUE, mx, my, 1, 1);
-*						/* erase old		*\
-*	gsx_moff();
-*	gr_draw(have2box, po, poff);
-*	gsx_mon();
-*						/* return exit event	*\
-*	return(down);
-*}
-*
-*
-*\*
-**	Stretch the free corner of an XOR box(w,h) that is pinned at
-**	another corner based on mouse movement until the button comes
-**	up.  Also draw a second box offset from the stretching box.
-**\
-*
-*	VOID
-*gr_rubwind(xorigin, yorigin, wmin, hmin, poff, pwend, phend)
-*	WORD		xorigin, yorigin;
-*	WORD		wmin, hmin;
-*	GRECT		*poff;
-*	WORD		*pwend, *phend;
-*{
-*	WORD		have2box, down;
-*	GRECT		o;
-*
-*	wm_update(TRUE);
-*	gr_setup(BLACK);
-*
-*	r_set(&o, xorigin, yorigin, 0, 0);
-*						/* clamp size of rubber	*\
-*						/*   box to no smaller	*\
-*						/*   than wmin, hmin	*\
-*	do
-*	{
-*	  gr_clamp(o.g_x, o.g_y, wmin, hmin, &o.g_w, &o.g_h);
-*	  down = gr_wait(&o, poff, o.g_x+o.g_w-1, o.g_y+o.g_h-1);
-*	} while (down);
-*	*pwend = o.g_w;
-*	*phend = o.g_h;
-*	wm_update(FALSE);
-*} /* gr_rubwind *\
-*
-*
-*
-*\*
-**	Stretch the free corner of a XOR box(w,h) that is pinned at
-**	another corner based on mouse movement until the button comes
-**	up.  This is also called a rubber-band box.
-**\
-*	VOID
-*gr_rubbox(xorigin, yorigin, wmin, hmin, pwend, phend)
-*	WORD		xorigin, yorigin;
-*	WORD		wmin, hmin;
-*	WORD		*pwend, *phend;
-*{
-*	gr_rubwind(xorigin, yorigin, wmin, hmin, &gl_rzero, pwend, phend);
-*}
-*
-*
-*
-*\*
-**	Drag a moving XOR box(w,h) that tracks relative to the mouse
-**	until the button comes up.  The starting x and y represent
-**	the location of the upper left hand corner of the rectangle
-**	relative to the mouse position.  This relative distance should
-**	be maintained.  A constraining rectangle is also given.  The
-**	box should not be able to be dragged out of the contraining
-**	rectangle.
-**\
-*	VOID
-*gr_dragbox(w, h, sx, sy, pc, pdx, pdy)
-*	WORD		w, h;
-*	REG WORD		sx, sy;
-*	GRECT		*pc;
-*	WORD		*pdx, *pdy;
-*{
-*	WORD		offx, offy, down;
-*	GRECT		o;
-*	WORD		mx, my;
-*
-*
-*	wm_update(TRUE);
-*	gr_setup(BLACK);
-*
-*	gr_clamp(sx+1, sy+1, 0, 0, &offx, &offy);
-*	r_set(&o, sx, sy, w, h);
-*
-*						/* get box's x,y from	*\
-*						/*   mouse's x,y then	*\
-*						/*   constrain result	*\
-*	do
-*	{
-*	  gsx_mxmy(&mx, &my);
-*	  o.g_x = mx - offx;
-*	  o.g_y = my - offy;
-*	  rc_constrain(pc, &o);
-*	  down = gr_wait(&o, &gl_rzero, mx, my);
-*	} while (down);
-*	*pdx = o.g_x;
-*	*pdy = o.g_y;
-*	wm_update(FALSE);
-*} /* gr_dragbox *\
-*
-*
-*\*
-**	Draw a moving XOR box(w,h) that moves from a point whose upper
-**	left corner is at src_x, src_y to a point at dst_x, dst_y
-**\
-*	VOID
-*gr_movebox(w, h, srcx, srcy, dstx, dsty)
-*	WORD		w, h;
-*	REG WORD		srcx, srcy;
-*	WORD		dstx, dsty;
-*{
-*	REG WORD		i;
-*	REG WORD		signx, signy;
-*	WORD		cnt, xstep, ystep;
-*
-*	signx = (srcx < dstx) ? -1 : 1;
-*	signy = (srcy < dsty) ? -1 : 1;
-*
-*	gr_scale(signx*(srcx-dstx), signy*(srcy-dsty), &cnt, &xstep, &ystep);
-*
-*	gsx_moff();
-*	for (i=0; i<2; i++)
-*	  gr_xor(FALSE, cnt, srcx,srcy, w,h, signx*xstep, signy*ystep, FALSE);
-*	gsx_mon();
-*} /* gr_movebox *\
-*
-*
-*\*
-**	Draw an small box that moves from the origin x,y to a spot
-**	centered within the rectangle and then expands to match the
-**	size of the rectangle.
-**\
-*
-*	VOID
-*gr_growbox(po, pt)
-*	REG GRECT		*po;
-*	GRECT		*pt;
-*{
-*	REG WORD		i;
-*	WORD		cx, cy;
-*	WORD		cnt, xstep, ystep;
-*
-*	gr_stepcalc(po->g_w, po->g_h, pt, &cx, &cy, &cnt, &xstep, &ystep);
-*	gr_movebox(po->g_w, po->g_h, po->g_x, po->g_y, cx, cy);
-*	gsx_moff();
-*	for (i=0; i<2; i++)
-*	  gr_xor(TRUE, cnt, cx, cy, po->g_w, po->g_h, xstep, ystep, TRUE);
-*	gsx_mon();
-*} /* gr_growbox *\
-*
-*
-*\*
-**	Draw a box that shrinks from the rectangle given down around
-**	a small box centered within the rectangle and then moves to the
-**	origin point.
-**\
-*	VOID
-*gr_shrinkbox(po, pt)
-*	REG GRECT		*po;
-*	REG GRECT		*pt;
-*{
-*	REG WORD		i;
-*	WORD		cx, cy;
-*	WORD		cnt, xstep, ystep;
-*
-*	gr_stepcalc(po->g_w, po->g_h, pt, &cx, &cy, &cnt, &xstep, &ystep);
-*	gsx_moff();
-*	for (i=0; i<2; i++)
-*	  gr_xor(TRUE, cnt, pt->g_x, pt->g_y, pt->g_w, pt->g_h, 
-*			-xstep, -ystep, TRUE);
-*	gsx_mon();
-*	gr_movebox(po->g_w, po->g_h, cx, cy, po->g_x, po->g_y);
-*} /* gr_shrinkbox *\
-*
-*
-*
-*	WORD
-*gr_watchbox(tree, obj, instate, outstate)
-*	REG LONG		tree;
-*	REG WORD		obj;
-*	WORD		instate;
-*	WORD		outstate;
-*{
-*	REG WORD		out;
-*	REG WORD		state;
-*	GRECT		t;
-*
-*	gsx_sclip(&gl_rscreen);
-*	ob_actxywh(tree, obj, &t);
-*	
-*	out = FALSE;
-*	do
-*	{
-*	  state = (out) ? outstate : instate;
-*	  ob_change(tree, obj, state, TRUE);
-*	  out = !out;
-*	} while( gr_stilldn(out, t.g_x, t.g_y, t.g_w, t.g_h) );
-*
-*	return( out );
-*}
-*
-*\*   CHANGED	*\
-*	WORD
-*gr_slidebox(tree, parent, obj, isvert)
-*	REG LONG		tree;
-*	WORD		parent;
-*	WORD		obj;
-*	WORD		isvert;
-*{
-*	REG GRECT	*pt, *pc;	/* new pointer for Reg Opt	*\
-*	GRECT		t, c;
-*	REG WORD		divnd, divis;
-*
-*	pt = &t;
-*	pc = &c;
-*
-*	ob_actxywh(tree, parent, pc);
-*	ob_relxywh(tree, obj, pt);
-*\*	gr_dragbox(t.g_w, t.g_h, t.g_x + c.g_x, t.g_y + c.g_y, 
-*			&c, &t.g_x, &t.g_y); 	*\
-*
-*	gr_dragbox(pt->g_w, pt->g_h, pt->g_x + pc->g_x, pt->g_y + pc->g_y, 
-*			pc, &pt->g_x, &pt->g_y); 
-*
-*	if ( isvert )
-*	{
-*	  divnd = pt->g_y - pc->g_y;
-*	  divis = pc->g_h - pt->g_h;
-*	}
-*	else
-*	{
-*	  divnd = pt->g_x - pc->g_x;
-*	  divis = pc->g_w - pt->g_w;
-*	}
-*	if (divis)
-*	  return( mul_div( divnd, 1000, divis) );
-*	else
-*	  return(0);
-*}
-*
-*
-*	VOID
-*gr_mkstate(pmx, pmy, pmstat, pkstat)
-*	WORD		*pmx, *pmy, *pmstat, *pkstat;
-*{
-*	*pmx = xrat;
-*	*pmy = yrat;
-*	*pmstat = button;
-*	*pkstat = kstate;
-*}
+	dc.l	_xrat
+	dc.l	_yrat
+	dc.l	_button
+	dc.l	_kstate
 *

@@ -16,31 +16,31 @@
 typedef struct _menu
 {
    OBJECT *mn_tree;		/* Object tree of the menu */
-   WORD   mn_menu;		/* Parent of the menu items*/
-   WORD   mn_item;		/* Starting menu item      */
-   WORD   mn_scroll;		/* scroll flag for the menu*/
-   WORD   mn_keystate;		/* Key State 		   */
+   int16_t   mn_menu;		/* Parent of the menu items*/
+   int16_t   mn_item;		/* Starting menu item      */
+   int16_t   mn_scroll;		/* scroll flag for the menu*/
+   int16_t   mn_keystate;		/* Key State 		   */
 }MENU;
 
 
 /* Structure for the Menu Settings */
 typedef struct _mn_set
 {
-   LONG   Display;		/* The display delay      */
-   LONG   Drag;			/* The drag delay         */
-   LONG   Delay;		/* The Arrow Delay        */
-   LONG   Speed;		/* The scroll speed delay */
-   WORD   Height;		/* The menu scroll height */
+   int32_t   Display;		/* The display delay      */
+   int32_t   Drag;			/* The drag delay         */
+   int32_t   Delay;		/* The Arrow Delay        */
+   int32_t   Speed;		/* The scroll speed delay */
+   int16_t   Height;		/* The menu scroll height */
 }MN_SET;
 
 
 
 typedef struct _mrets
 {
-  WORD x;
-  WORD y;
-  WORD buttons;
-  WORD kstate;
+  int16_t x;
+  int16_t y;
+  int16_t buttons;
+  int16_t kstate;
 }MRETS;
 
 #if 0
@@ -61,11 +61,11 @@ typedef struct fdbstr
 #if 0     /* Found in AES.H */
 typedef struct _moblk
 {
-  WORD m_x;
-  WORD m_y;
-  WORD m_w;
-  WORD m_h;
-  WORD m_out;
+  int16_t m_x;
+  int16_t m_y;
+  int16_t m_w;
+  int16_t m_h;
+  int16_t m_out;
 }MOBLK;
 #endif
 
@@ -94,8 +94,8 @@ typedef struct sColorword
 
 typedef struct sObInfo
 {
-	BYTE		letter;
-	BYTE border;	/* signed */
+	char		letter;
+	char border;	/* signed */
 	Colorword	c;
 } ObInfo;
 
@@ -111,12 +111,12 @@ typedef struct sObInfo
 typedef struct _index_info
 {
     BOOLEAN  status;	      /* 0 - InActive, 1 - Active   */
-    WORD     index;	      /* Index ID for this node     */
+    int16_t     index;	      /* Index ID for this node     */
     OBJECT  *subtree;	      /* The OBJECT tree            */
-    WORD     menu;	      /* The menu object ( parent ) */
-    WORD     start_obj;	      /* The starting menu item     */
+    int16_t     menu;	      /* The menu object ( parent ) */
+    int16_t     start_obj;	      /* The starting menu item     */
     BOOLEAN  scroll_flag;     /* TRUE - scroll if >18 items */
-    WORD     count;	      /* The # of times this menu is attached. */
+    int16_t     count;	      /* The # of times this menu is attached. */
 }INDEX_NODE, *INDEX_PTR;
 
 #define INDEX_STATUS( ptr )    ptr->status
@@ -149,8 +149,8 @@ typedef struct _cnode
 /* Index Process Structure */
 typedef struct _proc_node
 {
-    WORD	       pid;
-    WORD	       num;		/* Number of nodes in use       */
+    int16_t	       pid;
+    int16_t	       num;		/* Number of nodes in use       */
     CNODE              cluster;		/* First CLUSTER_MAX group	*/
     struct _proc_node *pnext;		/* pointer to next process node */
 }PNODE, *PNODE_PTR;
@@ -169,36 +169,36 @@ typedef struct _proc_node
  */
 typedef struct _menu_node
 {
-	UWORD   MenuID;	 	 /* Menu ID # 			  */
+	uint16_t   MenuID;	 	 /* Menu ID # 			  */
 	OBJECT  *tree_ptr;	 /* Pointer to object tree data   */
 
-        WORD	StartItem;	 /* Start Menu Item = Default == 1*/
-	WORD    NumItems;	 /* Num Items in menu 		  */
+        int16_t	StartItem;	 /* Start Menu Item = Default == 1*/
+	int16_t    NumItems;	 /* Num Items in menu 		  */
 
 	GRECT   rect;		 /* GRECT of Menu in pixels...    */
-	WORD    offset;		 /* Offset into the menu ( SCROLL)*/
+	int16_t    offset;		 /* Offset into the menu ( SCROLL)*/
 
-	WORD	Parent;		 /* Parent object in tree...	  */
-	WORD	FirstChild;	 /* First object in tree...       */
-	WORD    LastChild;	 /* Last object in tree...        */
-	UWORD   LastFlag;   	 /* ObFlag of Last Child	  */
+	int16_t	Parent;		 /* Parent object in tree...	  */
+	int16_t	FirstChild;	 /* First object in tree...       */
+	int16_t    LastChild;	 /* Last object in tree...        */
+	uint16_t   LastFlag;   	 /* ObFlag of Last Child	  */
 
-	WORD	TopObject;	 /* Top object in Scroll Menu...  */
-	UWORD   TopState;   	 /* Top item's object state.      */
-	UWORD	TopFlag;	 /* Top items object flag	  */
-	BYTE    TopText[ 128 ];	 /* Top item's ObString()	  */
+	int16_t	TopObject;	 /* Top object in Scroll Menu...  */
+	uint16_t   TopState;   	 /* Top item's object state.      */
+	uint16_t	TopFlag;	 /* Top items object flag	  */
+	char    TopText[ 128 ];	 /* Top item's ObString()	  */
 
-	WORD    BObject;    	 /* Bottom object in Scroll Menu  */
-	UWORD   BState;	 	 /* Bottom item's object state    */
-	UWORD   BFlag;		 /* Bottom item's object flag     */
-	BYTE    BText[128]; 	 /* Bottom item's ObString()      */
+	int16_t    BObject;    	 /* Bottom object in Scroll Menu  */
+	uint16_t   BState;	 	 /* Bottom item's object state    */
+	uint16_t   BFlag;		 /* Bottom item's object flag     */
+	char    BText[128]; 	 /* Bottom item's ObString()      */
 
-	LONG    *buffer;	 /* Pointer to redraw buffer...   */
+	int32_t    *buffer;	 /* Pointer to redraw buffer...   */
 	struct _menu_node *mprev; /* Ptr to Previous SubMenu       */
 
 	struct _menu_node *mnext; /* Ptr to Next Linked Menu_Node  */
 
-	WORD    mscroll;	  /* scroll flag */
+	int16_t    mscroll;	  /* scroll flag */
 } MENU_NODE, *MENU_PTR;
 
 

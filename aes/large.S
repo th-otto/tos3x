@@ -32,13 +32,8 @@
 *	Use MAC to assemble	6/28/90		D.Mui
 * assemble with MAS 900801 kbad
 
-	.text
+	text
 *
-	.globl	_LBCOPY
-	.globl  _LWCOPY
-	.globl	_LSTCPY
-	.globl	_LBWMOV
-	.globl _expand_data
 
 saddr	equ $08	; -> a4
 daddr	equ $0c	; -> a5
@@ -60,6 +55,7 @@ h	equ $1a
 * Also, data outside the mask must be set to 0.
 *
 * stack offsets after link:
+	xdef _expand_data
 _expand_data:
 	link	a6,#0
 	movem.l	d4-d7/a4-a5,-(sp)
@@ -140,6 +136,7 @@ ret:	movem.l	(sp)+,d4-d7/a4-a5
 *	len = LSTCPY(src,dst)
 *		BYTE	*src,dst;
 *
+	xdef	_LSTCPY
 _LSTCPY:
 	move.l	8(a7),a0	; source
 	move.l	4(a7),a1	; destination
@@ -158,6 +155,7 @@ lst1:
 *	len = LBWMOV(dst,src)
 *		BYTE	*dst,src;
 *
+	xdef	_LBWMOV
 _LBWMOV:
 	move.l	8(a7),a0	; source
 	move.l	4(a7),a1	; destination
@@ -188,6 +186,7 @@ lbw2:
 * ================================================
 *
 *
+	xdef  _LWCOPY
 _LWCOPY:
 *
 	move.l	4(a7),a0		; Get address of destination.
@@ -222,6 +221,7 @@ lwend:
 *	Screen will show duplication of selected area in new choosen location.
 *
 *
+	xdef	_LBCOPY
 _LBCOPY:
 *
 	movem.l	4(a7),a0-a1	; A0 = Destination   A1 = Source.
@@ -257,4 +257,3 @@ ent100:	subq.w	#1,d0
 lbcend:
 	rts
 *
-	.end

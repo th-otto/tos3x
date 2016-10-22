@@ -47,48 +47,20 @@
 #include <gemlib.h>
 
 
-EXTERN PD *mowner();
+int16_t const gl_dcrates[5] = { 450, 330, 275, 220, 165 };
 
-EXTERN EVSPEC iasync();
-
-EXTERN EVSPEC acancel();
-
-EXTERN EVSPEC aret();
-
-EXTERN EVSPEC mwait();
-
-EXTERN WORD xrat,
- yrat,
- button,
- kstate,
- mclick,
- mtrans;
-
-EXTERN WORD pr_button,
- pr_xrat,
- pr_yrat,
- pr_mclick;
-
-EXTERN PD *gl_mowner;
-
-EXTERN WORD tbutton;
-
-GLOBAL WORD gl_dcrates[5] = { 450, 330, 275, 220, 165 };
-
-GLOBAL WORD gl_dcindex;
-
-GLOBAL WORD gl_dclick;
-
-GLOBAL WORD gl_ticktime;
+int16_t gl_dcindex;
+int16_t gl_dclick;
+int16_t gl_ticktime;
 
 
 
 /*
-*	Stuff the return array with the mouse x, y, button, and keyboard
-*	state.
-*/
-VOID ev_rets(rets)
-REG WORD rets[];
+ *	Stuff the return array with the mouse x, y, button, and keyboard
+ *	state.
+ */
+VOID ev_rets(P(int16_t *) rets)
+PP(register int16_t *rets;)
 {
 	if (mtrans)
 	{
@@ -107,18 +79,17 @@ REG WORD rets[];
 
 
 /*
-*	Routine to block for a certain async event and return a
-*	single return code.
-*/
-WORD ev_block(code, lvalue)
-WORD code;
-
-LONG lvalue;
+ *	Routine to block for a certain async event and return a
+ *	single return code.
+ */
+int16_t ev_block(P(int16_t) code, P(intptr_t) lvalue)
+PP(int16_t code;)
+PP(intptr_t lvalue;)
 {
 	EVSPEC msk;
 
 	mwait(msk = iasync(code, lvalue));
-	return (aret(msk));
+	return aret(msk);
 }
 
 
@@ -126,31 +97,27 @@ LONG lvalue;
 /*
 *	Wait for a key to be ready at the keyboard and return it. 
 */
-UWORD ev_keybd()
+uint16_t ev_keybd(NOTHING)
 {
-	return (ev_block(AKBIN, 0x0L));
+	return ev_block(AKBIN, 0x0L);
 }
 
 
 /*
-*	Wait for the mouse buttons to reach the state where:
-*		((bmask & (bstate ^ button)) == 0) != bflag
-*	Clicks is how many times to wait for it to reach the state, but
-*	the routine should return how many times it actually reached the
-*	state before some time interval.
-*/
-UWORD ev_button(bflgclks, bmask, bstate, rets)
-WORD bflgclks;
-
-UWORD bmask;
-
-UWORD bstate;
-
-WORD rets[];
+ *	Wait for the mouse buttons to reach the state where:
+ *		((bmask & (bstate ^ button)) == 0) != bflag
+ *	Clicks is how many times to wait for it to reach the state, but
+ *	the routine should return how many times it actually reached the
+ *	state before some time interval.
+ */
+uint16_t ev_button(P(int16_t) bflgclks, P(uint16_t) bmask, P(uint16_t) bstate, P(int16_t *) rets)
+PP(int16_t bflgclks;)
+PP(uint16_t bmask;)
+PP(uint16_t bstate;)
+PP(int16_t *rets;)
 {
-	WORD ret;
-
-	LONG parm;
+	int16_t ret;
+	int32_t parm;
 
 	parm = HW(bflgclks) | LW((bmask << 8) | bstate);
 	ret = ev_block(ABUTTON, parm);
@@ -160,14 +127,13 @@ WORD rets[];
 
 
 /*
-*	Wait for the mouse to leave or enter a specified rectangle.
-*/
-UWORD ev_mouse(pmo, rets)
-MOBLK *pmo;
-
-WORD rets[];
+ *	Wait for the mouse to leave or enter a specified rectangle.
+ */
+uint16_t ev_mouse(P(MOBLK *)pmo, P(int16_t *) rets)
+PP(MOBLK *pmo;)
+PP(int16_t *rets;)
 {
-	WORD ret;
+	int16_t ret;
 
 	ret = ev_block(AMOUSE, ADDR(pmo));
 	ev_rets(&rets[0]);
@@ -177,11 +143,11 @@ WORD rets[];
 
 
 /*
-*	Wait for a message to be received in applications message pipe.
-*	Then read it into pbuff.
-*/
-WORD ev_mesag(pbuff)
-LONG pbuff;
+ *	Wait for a message to be received in applications message pipe.
+ *	Then read it into pbuff.
+ */
+int16_t ev_mesag(P(intptr_t) pbuff)
+PP(intptr_t pbuff;)
 {
 	if (rlr->p_qindex > 0)
 		return (ap_rdwr(AQRD, rlr->p_pid, 16, pbuff));
@@ -196,19 +162,19 @@ LONG pbuff;
 
 
 /*
-*	Wait the specified time to be completed.
-*/
-WORD ev_timer(count)
-LONG count;
+ *	Wait the specified time to be completed.
+ */
+int16_t ev_timer(P(int32_t) count)
+P(int32_t count;)
 {
-	return (ev_block(ADELAY, count / gl_ticktime));
+	return ev_block(ADELAY, count / gl_ticktime);
 }
 
 /*
 *	Used by ev_multi() to check on mouse rectangle events
 */
-WORD ev_mchk(pmo)
-REG MOBLK *pmo;
+int16_t ev_mchk(P(MOBLK *) pmo)
+PP(register MOBLK *pmo;)
 {
 	if ((rlr == gl_mowner) && (pmo->m_out != inside(xrat, yrat, &pmo->m_x)))
 		return (TRUE);
@@ -218,57 +184,37 @@ REG MOBLK *pmo;
 
 
 /*
-*	Do a multi-wait on the specified events.
-*/
-WORD ev_multi(flags, pmo1, pmo2, tmcount, buparm, mebuff, prets)
-REG WORD flags;
-
-REG MOBLK *pmo1;
-
-MOBLK *pmo2;
-
-LONG tmcount;
-
-LONG buparm;
-
-LONG mebuff;
-
-REG WORD prets[];
+ *	Do a multi-wait on the specified events.
+ */
+int16_t ev_multi(P(int16_t) flags, P(MOBLK *) pmo1, P(MOBLK *) pmo2, P(int32_t) tmcount, P(intptr_t) buparm, P(intptr_t) mebuff, P(int16_t *) prets)
+PP(register int16_t flags;)
+PP(register MOBLK *pmo1;)
+PP(MOBLK *pmo2;)
+PP(int32_t tmcount;)
+PP(intptr_t buparm;)
+PP(intptr_t mebuff;)
+PP(register int16_t *prets;)
 {
 	QPB m;
+	EVSPEC wmask, kbmsk, bumsk, m1msk, m2msk, qrmsk, tmmsk;
+	register EVSPEC which;
+	register int16_t what;
+	register CQUEUE *pc;
 
-	EVSPEC wmask,
-	 kbmsk,
-	 bumsk,
-	 m1msk,
-	 m2msk,
-	 qrmsk,
-	 tmmsk;
-
-	REG EVSPEC which;
-
-	REG WORD what;
-
-	REG CQUEUE *pc;
-
-	/* say nothing has  */
-	/*   happened yet   */
+	/* say nothing has happened yet   */
 	what = wmask = kbmsk = bumsk = m1msk = m2msk = qrmsk = tmmsk = 0x0;
-	/* do a pre-check for a */
-	/*   keystroke & then   */
-	/*   clear out the forkq */
+	/* do a pre-check for a keystroke & then clear out the forkq */
 	chkkbd();
 	forker();
 
 	/*   a keystroke    */
 	if (flags & MU_KEYBD)
 	{
-		/* if a character is    */
-		/*   ready then get it  */
+		/* if a character is ready then get it  */
 		pc = &rlr->p_cda->c_q;
 		if (pc->c_cnt)
 		{
-			prets[4] = (UWORD) dq(pc);
+			prets[4] = dq(pc);
 			what |= MU_KEYBD;
 		}
 	}
@@ -373,12 +319,12 @@ REG WORD prets[];
 	{
 		if (which & kbmsk)
 		{
-			prets[4] = (UWORD) aret(kbmsk);
+			prets[4] = (uint16_t) aret(kbmsk);
 			what |= MU_KEYBD;
 		}
 		if (which & bumsk)
 		{
-			prets[5] = (UWORD) aret(bumsk);
+			prets[5] = (uint16_t) aret(bumsk);
 			prets[2] = tbutton;
 			what |= MU_BUTTON;
 		}
@@ -410,11 +356,11 @@ REG WORD prets[];
 
 
 /*
-*	Wait for a key to be ready at the keyboard and return it. 
-*/
-WORD ev_dclick(rate, setit)
-WORD rate,
-	setit;
+ *	Wait for a key to be ready at the keyboard and return it. 
+ */
+int16_t ev_dclick(P(int16_t) rate, P(int16_t) setit)
+PP(int16_t rate;)
+PP(int16_t setit;)
 {
 	if (setit)
 	{
@@ -422,5 +368,5 @@ WORD rate,
 		gl_dclick = gl_dcrates[gl_dcindex] / gl_ticktime;
 	}
 
-	return (gl_dcindex);
+	return gl_dcindex;
 }

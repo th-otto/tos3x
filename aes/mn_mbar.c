@@ -60,69 +60,69 @@
 #include <osbind.h>
 #include <mn_tools.h>
 
-EXTERN WORD gl_mnpid;
+extern int16_t gl_mnpid;
 
-EXTERN WORD gl_hbox;
+extern int16_t gl_hbox;
 
-EXTERN WORD gl_dabox;					/* obj # of the acc menu box    */
+extern int16_t gl_dabox;					/* obj # of the acc menu box    */
 
-EXTERN WORD gl_dacnt;					/* # of ACC ids */
+extern int16_t gl_dacnt;					/* # of ACC ids */
 
 /* EXTERNS
  * ================================================================
  */
 
 /* MN_MENU.C */
-EXTERN WORD Menu_Insert();
+extern int16_t Menu_Insert();
 
-EXTERN VOID Menu_Delete();
+extern VOID Menu_Delete();
 
-EXTERN MENU_PTR GetMenuPtr();
+extern MENU_PTR GetMenuPtr();
 
-EXTERN VOID CheckMenuHeight();
+extern VOID CheckMenuHeight();
 
-EXTERN VOID RestoreMenu();
+extern VOID RestoreMenu();
 
 
 /* MN_POPUP.C */
-EXTERN BOOLEAN mn_popup();
+extern BOOLEAN mn_popup();
 
-EXTERN VOID AssignMenuData();
+extern VOID AssignMenuData();
 
 
 /* in TOOLS.C */
-EXTERN VOID ObjcDraw();
+extern VOID ObjcDraw();
 
-EXTERN VOID gsx_sclip();
+extern VOID gsx_sclip();
 
-EXTERN GRECT gl_rzero;
+extern GRECT gl_rzero;
 
-EXTERN VOID ob_actxywh();
+extern VOID ob_actxywh();
 
-EXTERN LONG gl_mntree;
+extern int32_t gl_mntree;
 
-EXTERN WORD mu_set();
+extern int16_t mu_set();
 
-EXTERN WORD xdo_chg();
+extern int16_t xdo_chg();
 
 
-EXTERN BOOLEAN rc_intersect();			/* cjg 09/22/92 */
+extern BOOLEAN rc_intersect();			/* cjg 09/22/92 */
 
-EXTERN GRECT gl_rfull;
+extern GRECT gl_rfull;
 
-EXTERN VOID ob_actxywh();
+extern VOID ob_actxywh();
 
 /*	Save and set mouse accordingly	*/
 
 VOID mn_mouse(save)
-WORD save;
+int16_t save;
 {
 	if (save)
 	{
-		gr_mouse(258, (BYTE *) 0);		/* save mouse */
-		gr_mouse(ARROW, (BYTE *) 0);
+		gr_mouse(258, (char *) 0);		/* save mouse */
+		gr_mouse(ARROW, (char *) 0);
 	} else								/* restore mouse */
-		gr_mouse(259, (BYTE *) 0);
+		gr_mouse(259, (char *) 0);
 }
 
 /*
@@ -130,13 +130,13 @@ WORD save;
 */
 
 VOID rect_change(tree, prmob, iob, x)
-LONG tree;
+int32_t tree;
 
 MOBLK *prmob;
 
-WORD iob;
+int16_t iob;
 
-WORD x;
+int16_t x;
 {
 	ob_offset(tree, iob, &prmob->m_x, &prmob->m_y);
 	prmob->m_w = LWGET(OB_WIDTH(iob));
@@ -153,11 +153,11 @@ WORD x;
 */
 
 VOID mu_save(saveit, tree, imenu)
-WORD saveit;
+int16_t saveit;
 
-LONG tree;
+int32_t tree;
 
-WORD imenu;
+int16_t imenu;
 {
 	GRECT t;
 
@@ -188,19 +188,19 @@ WORD imenu;
 *	underneath the menu and drawing in the proper menu sub-tree.
 */
 
-WORD menu_down(tree, ititle, itree)
-REG LONG tree;
+int16_t menu_down(tree, ititle, itree)
+register int32_t tree;
 
-WORD ititle;
+int16_t ititle;
 
 OBJECT **itree;
 {
-	REG OBJECT *newtree;
+	register OBJECT *newtree;
 
-	REG WORD newimenu,
+	register int16_t newimenu,
 	 i;
 
-	WORD imenu;
+	int16_t imenu;
 
 	GRECT clip;
 
@@ -255,7 +255,7 @@ OBJECT *gl_mtree;						/* The menubar object tree ( ROOT ) */
 
 MENU_PTR gl_menuptr;					/* MENU_PTR for the drop-down menu  */
 
-WORD buparm;
+int16_t buparm;
 
 
 /* FUNCTIONS
@@ -281,21 +281,21 @@ WORD buparm;
  *
  *      BOOLEAN TRUE  - The user clicked on an active menu item.
  *
- *	WORD    *ptitle: returns the menu title of the 1st level menu	 
+ *	int16_t    *ptitle: returns the menu title of the 1st level menu	 
  *	OBJECT **ptree:	returns the object tree of the menu selected
- *	WORD    *pmenu:  returns the menu object number selected
- *	WORD    *pitem:  returns the menu item object number selected
+ *	int16_t    *pmenu:  returns the menu object number selected
+ *	int16_t    *pitem:  returns the menu item object number selected
  */
 BOOLEAN mn_hdo(ptitle, ptree, pmenu, pitem, keyret)
-WORD *ptitle;							/* returns the menu title       */
+int16_t *ptitle;							/* returns the menu title       */
 
 OBJECT **ptree;							/* returns the object tree...   */
 
-WORD *pmenu;							/* returns the menu object      */
+int16_t *pmenu;							/* returns the menu object      */
 
-WORD *pitem;							/* returns the menu item        */
+int16_t *pitem;							/* returns the menu item        */
 
-WORD *keyret;							/* returns the keystate - shift,ctrl */
+int16_t *keyret;							/* returns the keystate - shift,ctrl */
 {
 	MENU Menu;							/* Input  Menu Values    */
 
@@ -305,57 +305,57 @@ WORD *keyret;							/* returns the keystate - shift,ctrl */
 
 	OBJECT *tree;						/* ptr to the tree       */
 
-	WORD menu_state,
+	int16_t menu_state,
 	 wall;
 
-	WORD cur_title,
+	int16_t cur_title,
 	 cur_state,
 	 cur_menu,
 	 cur_item;
 
-	WORD last_title,
+	int16_t last_title,
 	 last_menu;
 
-	WORD dummy;
+	int16_t dummy;
 
 	BOOLEAN done;
 
 	BOOLEAN flag;
 
-	WORD NewMenuID;						/* Menu ID of menu displayed.       */
+	int16_t NewMenuID;						/* Menu ID of menu displayed.       */
 
-	REG MENU_PTR MenuPtr;				/* Pointer to menu node structures  */
+	register MENU_PTR MenuPtr;				/* Pointer to menu node structures  */
 
 	BOOLEAN output;						/* TRUE/FALSE for valid result      */
 
 	OBJECT *newtree;					/* tree ptr of popup menu       */
 
-	WORD obj;
+	int16_t obj;
 
-	WORD title_object;
+	int16_t title_object;
 
 	/* evnt_multi() variables */
-	WORD button;
+	int16_t button;
 
-	WORD mflags;
+	int16_t mflags;
 
-	UWORD ev_which;
+	uint16_t ev_which;
 
 	MOBLK m1,
 	 m2;
 
-	WORD keycode,
+	int16_t keycode,
 	 nclicks;
 
 	MRETS mk;
 
-	WORD i,
+	int16_t i,
 	 tail;
 
-	WORD curobj,
+	int16_t curobj,
 	 rets[6];
 
-	LONG bflags;
+	int32_t bflags;
 
 	MN_SET MValueNew;					/* CUrrent Popup/SubMenu Parameters */
 
@@ -513,7 +513,7 @@ WORD *keyret;							/* returns the keystate - shift,ctrl */
 		}
 
 		rect_change(tree, &m1, wall, flag);
-		bflags = ((LONG) (1) << 16);
+		bflags = ((int32_t) (1) << 16);
 		bflags += (1 << 8) + buparm;
 		ev_which = ev_multi(mflags, &m1, &m2, 0x0L,	/* timer */
 							bflags, 0x0L, &rets[0]);
@@ -771,20 +771,20 @@ WORD *keyret;							/* returns the keystate - shift,ctrl */
  *			 tree can be switched.
  * 
  */
-WORD GetObjMenu(tree, ititle, itree)
+int16_t GetObjMenu(tree, ititle, itree)
 OBJECT *tree;							/* ptr to the tree we want      */
 
-WORD ititle;							/* the title of the menu we want */
+int16_t ititle;							/* the title of the menu we want */
 
 OBJECT **itree;							/* return the menu item...      */
 {
-	WORD imenu;
+	int16_t imenu;
 
-	WORD i;
+	int16_t i;
 
 	OBJECT *newtree;
 
-	WORD newimenu;
+	int16_t newimenu;
 
 	imenu = ObHead(ObTail(ROOT));
 	for (i = ititle - THEACTIVE; i > 1; i--)

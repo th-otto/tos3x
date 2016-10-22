@@ -50,66 +50,6 @@
 #include <mn_tools.h>
 
 
-/* EXTERNS
- * ================================================================
- */
-
-/* in MN_MENU.C */
-EXTERN WORD Menu_Insert();
-
-EXTERN VOID Menu_Delete();
-
-EXTERN VOID CheckMenuHeight();
-
-EXTERN VOID RestoreMenu();
-
-EXTERN VOID AdjustMenuPosition();
-
-EXTERN MENU_PTR GetMenuPtr();
-
-EXTERN MENU_PTR MenuList;
-
-
-/* in MN_EVENT.C */
-EXTERN LONG EvntSubMenu();
-
-EXTERN BOOLEAN Pop_Blit();
-
-
-/* in MN_POPUP.C */
-EXTERN VOID AssignMenuData();
-
-
-/* in MN_INDEX.C */
-EXTERN WORD FindIndex();
-
-EXTERN WORD Get_New_Index();
-
-EXTERN PNODE_PTR FindProcess();
-
-EXTERN INDEX_PTR GetIndexPtr();
-
-EXTERN VOID DeleteIndex();
-
-
-/* in GEMOBLIB.C */
-EXTERN VOID ob_offset();
-
-/* in OPTIMIZE.S */
-EXTERN WORD strlen();
-
-EXTERN BOOLEAN rc_intersect();			/* cjg 09/22/92 */
-
-/* in APGSXIF.S */
-EXTERN WORD gl_wchar;
-
-EXTERN GRECT gl_rfull;
-
-
-EXTERN VOID ObjcDraw();
-
-EXTERN VOID ob_gclip();					/* cjg 09/22/92 */
-
 /* PROTOTYPES
  * ================================================================
  */
@@ -120,14 +60,14 @@ MENU_PTR ShowSubMenu();
 /* GLOBALS
  * ================================================================
  */
-LONG SUBMENU_DELAY;						/* Delay time for submenus to appear. ( ms ) */
+int32_t SUBMENU_DELAY;						/* Delay time for submenus to appear. ( ms ) */
 
-LONG SUBDRAG_DELAY;						/* Delay time for submenus to go active( ms )
+int32_t SUBDRAG_DELAY;						/* Delay time for submenus to go active( ms )
 										 * as the user drags the mouse to the menu.
 										 */
-LONG SCROLL_DELAY;						/* Delay time to scroll menu items ( ms ) */
+int32_t SCROLL_DELAY;						/* Delay time to scroll menu items ( ms ) */
 
-LONG ARROW_DELAY;						/* Delay time to start scroll ( ms )      */
+int32_t ARROW_DELAY;						/* Delay time to start scroll ( ms )      */
 
 
 /* FUNCTIONS
@@ -156,18 +96,18 @@ LONG ARROW_DELAY;						/* Delay time to start scroll ( ms )      */
  *	       RETURNS in D0 - start item
  * RETURN == FALSE == ERROR
  */
-WORD mn_istart(id, flag, tree, menu, item)
-WORD id;								/* Process id */
+int16_t mn_istart(id, flag, tree, menu, item)
+int16_t id;								/* Process id */
 
-WORD flag;								/* Set or Get */
+int16_t flag;								/* Set or Get */
 
 OBJECT *tree;							/* Tree of the submenu */
 
-WORD menu;								/* Menu object of the submenu   */
+int16_t menu;								/* Menu object of the submenu   */
 
-WORD item;								/* Starting item of the submenu */
+int16_t item;								/* Starting item of the submenu */
 {
-	WORD result;
+	int16_t result;
 
 	switch (flag)
 	{
@@ -192,26 +132,26 @@ WORD item;								/* Starting item of the submenu */
  * ================================================================
  * Sets the start item of an already attached menu.
  *
- * IN: WORD   id       Process id
+ * IN: int16_t   id       Process id
  *     OBJECT *itree   The tree of the menu
- *     WORD   imenu    The menu object ( parent ) of the menu
- *     WORD   start    The start object to align the menu with.
+ *     int16_t   imenu    The menu object ( parent ) of the menu
+ *     int16_t   start    The start object to align the menu with.
  *
  * OUT: Returns the starting menu item
  *      0 - FAILURE 
  */
-WORD mn_iset(id, itree, imenu, start_obj)
-WORD id;								/* Process id              */
+int16_t mn_iset(id, itree, imenu, start_obj)
+int16_t id;								/* Process id              */
 
 OBJECT *itree;							/* the tree of the menu        */
 
-WORD imenu;								/* the menu object of the menu */
+int16_t imenu;								/* the menu object of the menu */
 
-WORD start_obj;							/* the start obj of the menu   */
+int16_t start_obj;							/* the start obj of the menu   */
 {
-	WORD Index;							/* The Index ID                */
+	int16_t Index;							/* The Index ID                */
 
-	REG INDEX_PTR IndexPtr;				/* Ptr to the Index Node       */
+	register INDEX_PTR IndexPtr;				/* Ptr to the Index Node       */
 
 	PNODE_PTR ProcPtr;					/* ptr to the process node     */
 
@@ -243,25 +183,25 @@ WORD start_obj;							/* the start obj of the menu   */
  * ================================================================
  * Get the start menu item object number of an attached menu.
  *
- * IN: WORD    id    - Process id 
+ * IN: int16_t    id    - Process id 
  *     OBJECT *tree  - the tree of the attached menu
- *     WORD    imenu - the menu object( parent ) of the attach menu
+ *     int16_t    imenu - the menu object( parent ) of the attach menu
  *
  * OUT:SUCCESS - returns the start object of this menu.
  *     FAILURE - returns 0
  */
-WORD mn_iget(id, tree, imenu)
-WORD id;								/* Process id               */
+int16_t mn_iget(id, tree, imenu)
+int16_t id;								/* Process id               */
 
 OBJECT *tree;							/* the tree of the attached menu    */
 
-WORD imenu;								/* the menu obj of the attached menu */
+int16_t imenu;								/* the menu obj of the attached menu */
 {
-	WORD Index;							/* Temp Index ID           */
+	int16_t Index;							/* Temp Index ID           */
 
-	WORD output;						/* return this startobj    */
+	int16_t output;						/* return this startobj    */
 
-	REG INDEX_PTR IndexPtr;				/* ptr to the Index node   */
+	register INDEX_PTR IndexPtr;				/* ptr to the Index node   */
 
 	PNODE_PTR ProcPtr;					/* ptr to the process node */
 
@@ -287,13 +227,13 @@ WORD imenu;								/* the menu obj of the attached menu */
  * Attach, remove, change a submenu that is attached to a menu item.
  * Also, Inquire if a menu has a submenu attached.
  *
- * IN: WORD id  - Process id  
- *     WORD flag - 0 - INQUIRE
+ * IN: int16_t id  - Process id  
+ *     int16_t flag - 0 - INQUIRE
  *                 1 - ATTACH, REMOVE, CHANGE
  *		   2 - REMOVE
  *     OBJECT *tree  - the object tree of the menu item
  *		       that we are inquiring about.
- *     WORD   item   - the menu item that we are inquiring about
+ *     int16_t   item   - the menu item that we are inquiring about
  *
  *     MENU   *Menu  - (flag==1) - The submenu that we are going to attach.
  *			         - If ( *Menu == NULL ), the submenu attached
@@ -308,17 +248,17 @@ WORD imenu;								/* the menu obj of the attached menu */
  *	
  */
 BOOLEAN mn_attach(id, flag, tree, item, Menu)
-WORD id;
+int16_t id;
 
-WORD flag;
+int16_t flag;
 
 OBJECT *tree;
 
-WORD item;
+int16_t item;
 
 MENU *Menu;
 {
-	WORD result;
+	int16_t result;
 
 	result = FALSE;
 	switch (flag)
@@ -332,7 +272,7 @@ MENU *Menu;
 		break;
 
 	case 2:							/* REMOVE */
-		result = mn_setmn(id, tree, item, NULLPTR);
+		result = mn_setmn(id, tree, item, NULL);
 		break;
 
 	default:
@@ -348,7 +288,7 @@ MENU *Menu;
  * Attach a submenu to a menu item.
  *
  * 1) if a submenu is already attached, detach the submenu.
- * 2) if the tree to attach is NULLPTR, then don't attach a new menu.
+ * 2) if the tree to attach is NULL, then don't attach a new menu.
  *    NOTE: This is one way of clearing out an attached submenu.
  * 3) if the tree is valid, then:
  *    1) the character '0x03'(Right Arrow) is placed ( ARROW_OFFSET )
@@ -358,27 +298,27 @@ MENU *Menu;
  * 4) Scroll-Flag ->  TRUE - if num items > 18, will scroll
  *		      FALSE - don't scroll ever
  *
- * IN:  WORD   id     -    Process id
+ * IN:  int16_t   id     -    Process id
  *      OBJECT *tree  -	   Tree that will have a submenu attached.
- *	WORD   item   -	   the menu item that will have a submenu attached.
+ *	int16_t   item   -	   the menu item that will have a submenu attached.
  *      OBJECT *itree -    the tree that will be attached.
- *      WORD   imenu  -	   the menu object that will be attached.
+ *      int16_t   imenu  -	   the menu object that will be attached.
  *
  * OUT: TRUE  - SUCCESS
  *      FALSE - FAILURE
  */
 BOOLEAN mn_setmn(id, tree, item, Menu)
-WORD id;								/* Process id                 */
+int16_t id;								/* Process id                 */
 
 OBJECT *tree;							/* tree that will have a submenu attached */
 
-WORD item;								/* the menu item that will have a menu    */
+int16_t item;								/* the menu item that will have a menu    */
 
 MENU *Menu;
 {
-	REG UWORD Index;					/* the Extend Object Type         */
+	register uint16_t Index;					/* the Extend Object Type         */
 
-	REG INDEX_PTR IndexPtr;				/* temp ptr to the index node     */
+	register INDEX_PTR IndexPtr;				/* temp ptr to the index node     */
 
 	MENU MData;
 
@@ -396,36 +336,36 @@ MENU *Menu;
 		/* This menu item already has something attached, so delete it */
 		DetachSubMenu(id, tree, item);
 
-		/* If the Menu == NULLPTR, we really wanted to just remove
+		/* If the Menu == NULL, we really wanted to just remove
 		 * the submenu, so return TRUE! SUCCESS
 		 */
-		if (Menu == NULLPTR)
+		if (Menu == NULL)
 			return (TRUE);
 	}
 
 	/* Make sure the menu structure is not NULL */
-	if (Menu == NULLPTR)
+	if (Menu == NULL)
 		return (FALSE);
 
 
 	/* Check if the tree and menu have been used before for another
 	 * menu item. Try to get the id for that one.
 	 */
-	Index = (WORD) FindIndex(id, Menu->mn_tree, Menu->mn_menu);
+	Index = (int16_t) FindIndex(id, Menu->mn_tree, Menu->mn_menu);
 
 	/* Now, attach the new submenu to the menu item in question */
 	if (!Index)							/* Need to get a new menu ID! */
-		Index = (WORD) Get_New_Index(id, Menu->mn_tree, Menu->mn_menu);
+		Index = (int16_t) Get_New_Index(id, Menu->mn_tree, Menu->mn_menu);
 
 	if (Index)
 	{
-		ObString(item)[strlen(ObString(item)) - ARROW_OFFSET] = RIGHT_ARROW;
+		ObString(item)[(int)strlen(ObString(item)) - ARROW_OFFSET] = RIGHT_ARROW;
 		ObType(item) |= (Index << 8);
 		MakeSubMenu(item);
 
 		if ((ProcPtr = FindProcess(id)) > NULL)
 		{
-			if ((IndexPtr = GetIndexPtr(ProcPtr, (WORD) Index)) > NULL)
+			if ((IndexPtr = GetIndexPtr(ProcPtr, (int16_t) Index)) > NULL)
 			{
 				INDEX_COUNT(IndexPtr) += 1;	/* Up the count */
 				INDEX_FLAGSCROLL(IndexPtr) = Menu->mn_scroll;
@@ -447,39 +387,39 @@ MENU *Menu;
  * ================================================================
  * Checks to see if a submenu is attached to a specific menu item.
  *
- * IN: WORD   id    - process id
+ * IN: int16_t   id    - process id
  *     OBJECT *tree - the tree to see if something is attached to it.
- *     WORD   item - the menu item that might have something attached
+ *     int16_t   item - the menu item that might have something attached
  *                    to it...
  *
  * OUT:    FALSE if there is an error
  *         TRUE - returns the tree, parent, item and scroll status in Menu.
  */
 BOOLEAN mn_getmn(id, tree, item, Menu)
-WORD id;								/* Process id             */
+int16_t id;								/* Process id             */
 
 OBJECT *tree;							/* the tree we want to check  */
 
-WORD item;								/* the menu item  for above   */
+int16_t item;								/* the menu item  for above   */
 
 MENU *Menu;
 {
 	PNODE_PTR ProcPtr;					/* ptr to the process node  */
 
-	UWORD type;							/* the extended object type */
+	uint16_t type;							/* the extended object type */
 
-	WORD Index;							/* the Index ID ( temp )    */
+	int16_t Index;							/* the Index ID ( temp )    */
 
-	REG INDEX_PTR IndexPtr;				/* ptr to the index node... */
+	register INDEX_PTR IndexPtr;				/* ptr to the index node... */
 
 	BOOLEAN flag;						/* SUCCESS or FAILUE        */
 
 	flag = FALSE;
 	if (IsG_String(item) && IsSubMenu(item))
 	{
-		if (ObString(item)[strlen(ObString(item)) - ARROW_OFFSET] == RIGHT_ARROW)
+		if (ObString(item)[(int)strlen(ObString(item)) - ARROW_OFFSET] == RIGHT_ARROW)
 		{
-			Index = (WORD) ((ObType(item) & 0xFF00) >> 8);
+			Index = (int16_t) ((ObType(item) & 0xFF00) >> 8);
 			if ((ProcPtr = FindProcess(id)) > NULL)
 			{
 				if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) > NULL)
@@ -504,32 +444,32 @@ MENU *Menu;
  * Detach the submenu attached to this menu item and free up the
  * memory used for the node.
  *
- * IN: WORD   id    - Process id
+ * IN: int16_t   id    - Process id
  *     OBJECT *tree - the tree of the menu
- *     WORD   item  - the menu item that has the subtree attached.
+ *     int16_t   item  - the menu item that has the subtree attached.
  *
  * OUT: void
  */
 VOID DetachSubMenu(id, tree, item)
-WORD id;								/* Process id            */
+int16_t id;								/* Process id            */
 
 OBJECT *tree;							/* the tree fo the menu...   */
 
-WORD item;								/* see above...          */
+int16_t item;								/* see above...          */
 {
-	UWORD type;							/* the Extended Object Types */
+	uint16_t type;							/* the Extended Object Types */
 
-	WORD Index;							/* Index ID!             */
+	int16_t Index;							/* Index ID!             */
 
 	PNODE_PTR ProcPtr;					/* ptr to the process node   */
 
 	if (IsG_String(item) && IsSubMenu(item))
 	{
 		/* Clear the character where the arrow is located. */
-		ObString(item)[strlen(ObString(item)) - ARROW_OFFSET] = ' ';
+		ObString(item)[(int)strlen(ObString(item)) - ARROW_OFFSET] = ' ';
 
 		/* Get the index id node */
-		Index = (WORD) ((ObType(item) & 0xFF00) >> 8);
+		Index = (int16_t) ((ObType(item) & 0xFF00) >> 8);
 
 		ObType(item) &= 0x00FF;			/* Clear out the extended object type */
 
@@ -548,33 +488,33 @@ WORD item;								/* see above...          */
  * Checks the Menu item for a RIGHT_ARROW ( ARROW OFFSET )
  * characters in from the end and that the menu_id returned is valid.
  *
- * IN: WORD     id      - Process id
+ * IN: int16_t     id      - Process id
  *     MENU_PTR MenuPtr - ptr to the Menu Node structure
- *     WORD     obj     - the menu item
+ *     int16_t     obj     - the menu item
  *     MENU_PTR SubMenuPtr -
  *
  * OUT:     NULL - for not a submenu or invalid submenu
  *          MENU_PTR - A valid MenuPtr.
  */
 BOOLEAN CheckForSubMenu(id, tree, obj, SubMenuPtr)
-WORD id;								/* Process id           */
+int16_t id;								/* Process id           */
 
 OBJECT *tree;
 
-WORD obj;								/* the object to check for      */
+int16_t obj;								/* the object to check for      */
 
 MENU_PTR SubMenuPtr;					/* ptr to the submenu - if valid */
 {
-	REG UWORD MenuIndex;				/* extended object type */
+	register uint16_t MenuIndex;				/* extended object type */
 
-	REG INDEX_PTR NewMenuPtr;			/* ptr to Index Node   */
+	register INDEX_PTR NewMenuPtr;			/* ptr to Index Node   */
 
 	PNODE_PTR ProcPtr;					/* ptr to process node */
 
 
 	if (IsG_String(obj) && IsEnabled(obj) && IsSubMenu(obj))
 	{
-		if (ObString(obj)[strlen(ObString(obj)) - ARROW_OFFSET] == RIGHT_ARROW)
+		if (ObString(obj)[(int)strlen(ObString(obj)) - ARROW_OFFSET] == RIGHT_ARROW)
 		{
 			if ((MenuIndex = (ObType(obj) >> 8)) > NULL)
 			{
@@ -584,7 +524,7 @@ MENU_PTR SubMenuPtr;					/* ptr to the submenu - if valid */
 					/* Check for a valid ptr to an Index Structure. */
 					if ((ProcPtr = FindProcess(id)) > NULL)
 					{
-						if ((NewMenuPtr = GetIndexPtr(ProcPtr, (WORD) MenuIndex)) > NULL)
+						if ((NewMenuPtr = GetIndexPtr(ProcPtr, (int16_t) MenuIndex)) > NULL)
 						{
 							/* Make sure the number of displayed submenus does not
 							 * exceed the MAX_LEVEL Limit
@@ -609,31 +549,31 @@ MENU_PTR SubMenuPtr;					/* ptr to the submenu - if valid */
  * RETURNS: NULL if not valid - or if the blit fails.
  *          MenuPTR if valid or SUCCESS
  *
- * IN: WORD     id      - Process id
+ * IN: int16_t     id      - Process id
  *     MENU_PTR MenuPtr - ptr to the Menu Node
- *     WORD  obj         - menu item
+ *     int16_t  obj         - menu item
  *
  * OUT: return the ptr to the submenu displayed.
- *      NULLPTR if a FAILURE.
+ *      NULL if a FAILURE.
  */
 MENU_PTR DoSubMenu(id, tree, obj)
-WORD id;								/* Process id             */
+int16_t id;								/* Process id             */
 
 OBJECT *tree;
 
-WORD obj;								/* menu item we pop with      */
+int16_t obj;								/* menu item we pop with      */
 {
 	MENU_PTR SubPopPtr;					/* The MenuPtr of the Submenu */
 
-	UWORD type;							/* The type of the menu item  */
+	uint16_t type;							/* The type of the menu item  */
 
-	WORD MenuIndex;						/* The Submenu Menu ID        */
+	int16_t MenuIndex;						/* The Submenu Menu ID        */
 
 	GRECT rect;							/* Rect of the Menu item      */
 
-	REG WORD xpos;						/* xpos, ypos of new submenu  */
+	register int16_t xpos;						/* xpos, ypos of new submenu  */
 
-	WORD ypos;
+	int16_t ypos;
 
 	SubPopPtr = (MENU_PTR) NULL;
 
@@ -645,7 +585,7 @@ WORD obj;								/* menu item we pop with      */
 		/* We won't check for a valid menuid here, since the
 		 * CheckForSubMenu() routines already did that.
 		 */
-		MenuIndex = (WORD) (ObType(obj) >> 8);
+		MenuIndex = (int16_t) (ObType(obj) >> 8);
 
 		/* Calculate the position of where to display the submenu. */
 		xpos = rect.g_x + rect.g_w - 1 - gl_wchar;
@@ -667,47 +607,47 @@ WORD obj;								/* menu item we pop with      */
  * we can pop it to the left.
  * ADJUSTPOSITION will have to be modified to accomodate that.
  *
- * IN:   WORD  id;	    - Process id
- *       WORD  MenuIndex    - The Index ID!
- *       WORD  xpos,ypos    - the xpos and ypos
+ * IN:   int16_t  id;	    - Process id
+ *       int16_t  MenuIndex    - The Index ID!
+ *       int16_t  xpos,ypos    - the xpos and ypos
  *       GRECT *rect      - rect of the button used to display the menu.
  *
  * OUT:  MENU_PTR - returns a pointer for SUCCESS
- *                - NULLPTR for FAILURE
+ *                - NULL for FAILURE
  */
 MENU_PTR ShowSubMenu(id, MenuIndex, xpos, ypos, rect)
-WORD id;								/* Process id            */
+int16_t id;								/* Process id            */
 
-WORD MenuIndex;							/* the Index # we look for   */
+int16_t MenuIndex;							/* the Index # we look for   */
 
-WORD xpos;								/* xpos to pop the menu up to */
+int16_t xpos;								/* xpos to pop the menu up to */
 
-WORD ypos;								/* ypos to pop the menu up to */
+int16_t ypos;								/* ypos to pop the menu up to */
 
 GRECT *rect;							/* rect of the button        */
 {
-	REG OBJECT *tree;					/* temp tree          */
+	register OBJECT *tree;					/* temp tree          */
 
-	REG INDEX_PTR IndexPtr;				/* ptr to the Index Node  */
+	register INDEX_PTR IndexPtr;				/* ptr to the Index Node  */
 
-	REG MENU_PTR MenuPtr;				/* ptr to the menu Node   */
+	register MENU_PTR MenuPtr;				/* ptr to the menu Node   */
 
 	OBJECT *newtree;					/* temp tree          */
 
-	WORD NewMenuID;						/* the new menu id    */
+	int16_t NewMenuID;						/* the new menu id    */
 
 	PNODE_PTR ProcPtr;					/* ptr to the process node */
 
 	if ((ProcPtr = FindProcess(id)) == NULL)	/* Find the process */
-		return ((MENU_PTR) NULLPTR);
+		return ((MENU_PTR) NULL);
 
 	if ((IndexPtr = GetIndexPtr(ProcPtr, MenuIndex)) == NULL)	/* Get the index ptr */
-		return ((MENU_PTR) NULLPTR);
+		return ((MENU_PTR) NULL);
 
 	newtree = INDEX_TREE(IndexPtr);		/* get the new tree */
 	/* and insert it!   */
 	if ((NewMenuID = Menu_Insert(newtree, INDEX_MENU(IndexPtr))) == NULL)
-		return ((MENU_PTR) NULLPTR);
+		return ((MENU_PTR) NULL);
 
 	if ((MenuPtr = GetMenuPtr(NewMenuID)) > NULL)	/* get Menu Ptr     */
 	{									/* set start obj    */
@@ -758,7 +698,7 @@ GRECT *rect;							/* rect of the button        */
  * OUT: VOID
  */
 VOID HideSubMenu(MenuPtr)
-REG MENU_PTR MenuPtr;					/* ptr to the menu node */
+register MENU_PTR MenuPtr;					/* ptr to the menu node */
 {
 	if (MenuPtr)
 	{
@@ -783,7 +723,7 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node */
  */
 VOID Init_Delays(VOID)
 {
-	LONG dummy;
+	int32_t dummy;
 
 	SetDragDelay(INIT_DRAG_DELAY, &dummy);
 	SetDisplayDelay(INIT_DISPLAY_DELAY, &dummy);
@@ -801,14 +741,14 @@ VOID Init_Delays(VOID)
  *	  5ms      = 1 tick
  *        200ticks = 1 sec
  *
- * IN: Milliseconds ( LONG )     1000ms == 1 sec.
+ * IN: Milliseconds ( int32_t )     1000ms == 1 sec.
  *     < 0L - will return the current value.
  * OUT: returns the current value set to.
  */
 VOID SetDisplayDelay(ms, oldvalue)
-LONG ms;
+int32_t ms;
 
-LONG *oldvalue;
+int32_t *oldvalue;
 {
 	if (ms >= 0L)
 		SUBMENU_DELAY = ms;
@@ -825,14 +765,14 @@ LONG *oldvalue;
  *	  5ms      = 1 tick
  *        200ticks = 1 sec
  *
- * IN: Milliseconds ( LONG )     1000ms == 1 sec.
+ * IN: Milliseconds ( int32_t )     1000ms == 1 sec.
  *     < 0L - will return the current value.
  * OUT: returns the value that we set it to.
  */
 VOID SetDragDelay(ms, oldvalue)
-LONG ms;
+int32_t ms;
 
-LONG *oldvalue;
+int32_t *oldvalue;
 {
 	if (ms >= 0L)
 		SUBDRAG_DELAY = ms;
@@ -845,14 +785,14 @@ LONG *oldvalue;
  * ================================================================
  * Set the time delay the menu scrolls, per menu item,
  * once scrolling occurs.
- * IN: Milliseconds ( LONG )     1000ms == 1 sec.
+ * IN: Milliseconds ( int32_t )     1000ms == 1 sec.
  *     < 0L - will return the current value.
  * OUT: returns the value that we set it to.
  */
 VOID SetScrollDelay(ms, oldvalue)
-LONG ms;
+int32_t ms;
 
-LONG *oldvalue;
+int32_t *oldvalue;
 {
 	if (ms >= 0L)
 		SCROLL_DELAY = ms;
@@ -863,14 +803,14 @@ LONG *oldvalue;
 /* SetArrowDelay()
  * ================================================================
  * Set the time delay when the menu starts to scroll
- * IN: Milliseconds ( LONG )     1000ms == 1 sec.
+ * IN: Milliseconds ( int32_t )     1000ms == 1 sec.
  *     < 0L - will return the current value.
  * OUT: returns the value that we set it to.
  */
 VOID SetArrowDelay(ms, oldvalue)
-LONG ms;
+int32_t ms;
 
-LONG *oldvalue;
+int32_t *oldvalue;
 {
 	if (ms >= 0L)
 		ARROW_DELAY = ms;
@@ -885,11 +825,11 @@ LONG *oldvalue;
  *		if any setting is < 0, ignore setting
  */
 VOID mn_settings(flag, Values)
-WORD flag;
+int16_t flag;
 
 MN_SET *Values;
 {
-	LONG dummy;
+	int32_t dummy;
 
 	switch (flag)
 	{

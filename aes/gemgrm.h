@@ -1,4 +1,4 @@
-#define ALRT00CR 14  	/* STRING */
+xy#define ALRT00CR 14  	/* STRING */
 #define ALRT01CR 15  	/* STRING */
 #define ALRT02CR 16  	/* STRING */
 #define ALRT03CR 17  	/* STRING */

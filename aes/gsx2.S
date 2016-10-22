@@ -36,38 +36,13 @@
 *	Use MAC to assemble			6/28/90		D.Mui
 * assemble with MAS 900801 kbad
 
-	.globl	_gsx2
-*	.globl	_umul_div
-	.globl	_mul_div
-	.globl	_MUL_DIV
-	.globl	_i_ptsin
-	.globl	_i_intin
-	.globl	_i_intout
-	.globl	_i_ptsout
-	.globl	_i_ptr
-	.globl	_i_ptr2
-	.globl	_i_lptr1
-	.globl	_m_lptr2
 
-	.globl	pblock
-	.globl	iioff
-	.globl	pioff
-	.globl	iooff
-	.globl	pooff
-
-	.globl	_contrl
-	.globl	_intin
-	.globl	_ptsin
-	.globl	_intout
-	.globl	_ptsout
-
-
-
+	xdef	_gsx2
 _gsx2:
 	lea	pblock,a0	; a0 -> pblock
 	move.l	#_contrl,(a0)	; set up control array pointer
 	move.l	a0,d1		; d1 -> pblock
-	moveq.l	#115, d0	; d0 <- VDI opcode
+	moveq.l	#115,d0	; d0 <- VDI opcode
 	trap	#2
 	rts
 
@@ -77,7 +52,9 @@ _gsx2:
 *	sp+06	m2
 *	sp+08	d1
 
+	xdef	_MUL_DIV
 _MUL_DIV:
+	xdef	_mul_div
 _mul_div:
 
 	move.w	6(sp),d0	;	 m2
@@ -95,6 +72,7 @@ md_1:	subq.w	#1,d0		;  ((m1*2*m2)/d1)-1
 	rts
 
 
+*	xdef	_umul_div
 *_umul_div:
 *
 *	move.w	6(sp),d0	;         m2
@@ -106,43 +84,51 @@ md_1:	subq.w	#1,d0		;  ((m1*2*m2)/d1)-1
 *	rts
 
 
+	xdef	_i_ptsin
 _i_ptsin:
 
 	move.l	4(sp),pioff
 	rts
 
 
+	xdef	_i_intin
 _i_intin:
 
 	move.l	4(sp),iioff
 	rts
 
 
+	xdef	_i_ptsout
 _i_ptsout:
 
 	move.l	4(sp),pooff
 	rts
 
 
+	xdef	_i_intout
 _i_intout:
 
 	move.l	4(sp),iooff
 	rts
 
 
+	xdef	_i_ptr
 _i_ptr:
+	xdef	_i_lptr1
 _i_lptr1:
 
 	move.l	4(sp),_contrl+14
 	rts
 
 
+	xdef	_i_ptr2
 _i_ptr2:
 
 	move.l	4(sp),_contrl+18
 	rts
 
 
+	xdef	_m_lptr2
 _m_lptr2:
 
 	move.l	4(sp),a0
@@ -151,11 +137,16 @@ _m_lptr2:
 
 
 
-	.bss
+	bss
 
-pblock:	.ds.l	1
-iioff:	.ds.l	1
-pioff:	.ds.l	1
-iooff:	.ds.l	1
-pooff:	.ds.l	1
+	xdef	pblock
+pblock:	ds.l	1
+	xdef	iioff
+iioff:	ds.l	1
+	xdef	pioff
+pioff:	ds.l	1
+	xdef	iooff
+iooff:	ds.l	1
+	xdef	pooff
+pooff:	ds.l	1
 

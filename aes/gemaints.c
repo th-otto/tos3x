@@ -31,19 +31,19 @@
 *	-------------------------------------------------------------
 */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "taddr.h"
+#include "obdefs.h"
+#include "struct88.h"
+#include "baspag88.h"
+#include "obdefs.h"
+#include "gemlib.h"
 
-VOID signal(e)
-EVB *e;
+
+VOID signal(P(EVB *) e)
+PP(EVB *e;)
 {
-	REG PD *p,
-	*p1,
-	*q1;
+	register PD *p, *p1, *q1;
 
 	p = (PD *) e->e_pd;
 	p->p_evflg |= e->e_mask;
@@ -67,15 +67,15 @@ EVB *e;
 }
 
 
-VOID zombie(e)
-REG EVB *e;
+VOID zombie(P(EVB *) e)
+PP(register EVB *e;)
 {
 	/* must be called with  */
 	/*   dispatching off    */
 	e->e_link = zlr;
 	if (zlr)
 		zlr->e_pred = e;
-	e->e_pred = (BYTE *) & zlr - elinkoff;
+	e->e_pred = (char *) & zlr - elinkoff;
 	zlr = e;
 	e->e_flag = COMPLETE;
 	signal(e);

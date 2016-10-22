@@ -25,27 +25,27 @@
 
 typedef struct window
 {
-	WORD		w_flags;
-	WORD		w_owner;
-	WORD		w_kind;
-	LONG		w_pname;
-	LONG		w_pinfo;
-	WORD		w_xfull;
-	WORD		w_yfull;
-	WORD		w_wfull;
-	WORD		w_hfull;
-	WORD		w_xwork;
-	WORD		w_ywork;
-	WORD		w_wwork;
-	WORD		w_hwork;
-	WORD		w_xprev;
-	WORD		w_yprev;
-	WORD		w_wprev;
-	WORD		w_hprev;
-	WORD		w_hslide;
-	WORD		w_vslide;
-	WORD		w_hslsiz;
-	WORD		w_vslsiz;
+	int16_t		w_flags;
+	int16_t		w_owner;
+	int16_t		w_kind;
+	int32_t		w_pname;
+	int32_t		w_pinfo;
+	int16_t		w_xfull;
+	int16_t		w_yfull;
+	int16_t		w_wfull;
+	int16_t		w_hfull;
+	int16_t		w_xwork;
+	int16_t		w_ywork;
+	int16_t		w_wwork;
+	int16_t		w_hwork;
+	int16_t		w_xprev;
+	int16_t		w_yprev;
+	int16_t		w_wprev;
+	int16_t		w_hprev;
+	int16_t		w_hslide;
+	int16_t		w_vslide;
+	int16_t		w_hslsiz;
+	int16_t		w_vslsiz;
 	ORECT		*w_rlist;	/* owner rect. list	*/
 	ORECT		*w_rnext;	/* used for search first*/
 					/*   search next	*/

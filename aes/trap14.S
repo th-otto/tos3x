@@ -43,38 +43,32 @@
 *	Fix at mediach at remove extra slash at the beginning 4/5/91 D.Mui
 
 
-	.globl _trap14
-	.globl _trap13
-	.globl _gr_mouse
-	.globl _trp13
-	.globl _trp14
-	.globl _getmouse
-	.globl _putmouse
-	.globl _LBCOPY
-	.globl _mediach
-	.globl _maddr		; used by gembind:graf_mouse as a flag
+	text
 
-	.text
-
+	xdef _trap13
 _trap13:
+	xdef _trp13
 _trp13:
-	move.l	(sp)+, trp13ret
+	move.l	(sp)+,trp13ret
 	trap	#13
-	move.l	trp13ret, -(sp)
+	move.l	trp13ret,-(sp)
 	rts
 
 
+	xdef _trap14
 _trap14:
+	xdef _trp14
 _trp14:
-	move.l	(sp)+, trp14ret
+	move.l	(sp)+,trp14ret
 	trap	#14
-	move.l	trp14ret, -(sp)
+	move.l	trp14ret,-(sp)
 	rts
 
 
+	xdef _getmouse
 _getmouse:
-	.dc.w	$A000
-	suba.l	#$358,a0
+	dc.w	$A000
+	suba.l	#$358,a0        ; WTF
 	move.l	a0,_maddr		; save the mouse block address
 	lea	mform,a1		; destination
 	move.w	#36,d0			; size ( - 1 for dbra )
@@ -83,6 +77,7 @@ getmcp:
 	dbra	d0,getmcp
 	rts
 
+	xdef _putmouse
 _putmouse:
 	lea	mform,a0		; from our form
 	move.l	_maddr,a1		; back to the line-a
@@ -122,6 +117,7 @@ putmcp:
 
 
 
+	xdef _mediach
 _mediach:
 	move.w	4(sp),d0
 	move.w	d0,mydev
@@ -243,18 +239,17 @@ dooldr:	move.l	oldrwabs,a0	; changed from oldmediach to oldrwabs
 *									*
 *************************************************************************
 
-	.bss
-	.even
+	bss
+	even
 
-fspec:		.ds.b	8		; file to look for (doesn't matter)
-mydev:		.ds.w	1
-oldgetbpb:	.ds.l	1
-oldmediach:	.ds.l	1
-oldrwabs:	.ds.l	1
-		.ds.l	1
-_maddr:		.ds.l	1
-mform:		.ds.w	37
-trp13ret:	.ds.l	1
-trp14ret:	.ds.l	1
-
-	.end
+fspec:		ds.b	8		; file to look for (doesn't matter)
+mydev:		ds.w	1
+oldgetbpb:	ds.l	1
+oldmediach:	ds.l	1
+oldrwabs:	ds.l	1
+		ds.l	1
+	xdef _maddr		; used by gembind:graf_mouse as a flag
+_maddr:		ds.l	1
+mform:		ds.w	37
+trp13ret:	ds.l	1
+trp14ret:	ds.l	1

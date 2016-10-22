@@ -36,67 +36,25 @@
 * assemble with MAS 900801 kbad
 
 *
-OB_FLAGS	=	$8
-OB_STATE	=	$a
-OB_SPEC		=	$c
-OB_SIZE		=	$18
+OB_FLAGS	equ	$8
+OB_STATE	equ	$a
+OB_SPEC		equ	$c
+OB_SIZE		equ	$18
 *
-TEDTXTLEN	=	$18
+TEDTXTLEN	equ	$18
 *
-PERCENT		=	$25
-CAP_L		=	$4c
-CAP_W		=	$57
-CAP_S		=	$53
-DOT		=	$2e
-SPACE		=	$20
-QUEST		=	$3f
-STAR		=	$2a
+PERCENT		equ	$25
+CAP_L		equ	$4c
+CAP_W		equ	$57
+CAP_S		equ	$53
+DOT		equ	$2e
+SPACE		equ	$20
+QUEST		equ	$3f
+STAR		equ	$2a
 
-* --
-* external variables
-* --
-	.globl _gl_wchar
-	.globl _gl_hchar
-	.globl _r_get
+	text
 
-* --
-* internal defined routines
-* --
-	.globl	_r_get
-	.globl	_r_set
-	.globl _rc_copy
-	.globl _rc_equal
-	.globl _rc_inter
-	.globl _rc_union
-	.globl _rc_const
-	.globl _movs
-	.globl _min
-	.globl _max
-	.globl _inside
-	.globl _strlen
-	.globl _strcmp
-	.globl _strcpy
-	.globl _strscn
-	.globl _strchk
-	.globl _toupper
-	.globl _fmt_str
-	.globl _unfmt_st
-	.globl _fs_sset
-	.globl _inf_sset
-	.globl _fs_sget
-	.globl _inf_sget
-	.globl _inf_fldset
-	.globl _inf_gind
-	.globl _inf_what
-	.globl _merge_st
-	.globl _strcat
-	.globl _bfill
-	.globl _wildcmp
-	.globl _scasb
-	.globl	_reverse
-
-	.text
-
+	xdef	_reverse
 _reverse:
  	move.l	d3,-(sp)		; Save d3 since we clobber it
 	move.w	8(sp),d3		; d3 = source
@@ -121,6 +79,7 @@ nextbit:
 *				int	*xywhptr;
 *				int	*xptr,*yptr,*wptr,*hptr;
 * --
+	xdef	_r_get
 _r_get:
 	movem.l	a3-a4,-(sp)	; save a3,a4
 	movem.l	12(sp),a0-a4	; a0 -> grect , a1->x, a2->y, a3->w, a4->h
@@ -139,6 +98,7 @@ _r_get:
 *				int	*xywhptr;
 *				int	x,y,w,h;
 * --
+	xdef	_r_set
 _r_set:
 	movem.l	4(sp),a0-a2	; a0 -> grect, a1 = x and y, a2 = w and h
 	movem.l	a1-a2,(a0)	; set x and y and w and h
@@ -152,6 +112,7 @@ _r_set:
 *				GRECt	*srcxywh,*dstxywh;
 *
 * --
+	xdef _rc_copy
 _rc_copy:
 	movem.l	4(sp),a0-a1	; a0 ->src, a1 ->dest
 	move.l	(a0)+,(a1)+	; set x and y
@@ -166,6 +127,7 @@ _rc_copy:
 *				int	x,y;
 *				GRECT	*ptr1;
 * --
+	xdef _inside
 _inside:
 	movem.w	4(sp),d0-d1	; d0 = x, d1 = y
 	move.l	8(sp),a0	; a0 -> grect
@@ -190,6 +152,7 @@ _inside:
 *		C binding:	rc_equal(ptr1,ptr2);
 *				int	*ptr1,ptr2*
 * --
+	xdef _rc_equal
 _rc_equal:
 	movem.l	4(sp),a0-a1	; a0 -> grect 1, a1 -> grect 2
 	cmpm.l	(a0)+,(a1)+	; are the x and y equal
@@ -207,7 +170,8 @@ _rc_equal:
 *				GRECT	*ptr1,*ptr2;
 *
 * --
-_rc_inter:
+	xdef _rc_intersect
+_rc_intersect:
 	movem.l	4(sp),a0-a1	; a0 = grect 1, a1 = grect 2
 	move.w	(a1),d0		; d0 = x2
 	cmp.w	(a0),d0		; If (x1 < x2)
@@ -257,6 +221,7 @@ int4:
 *				GRECT	*ptr1,*ptr2;
 *
 * --
+	xdef _rc_union
 _rc_union:
 	movem.l	4(sp),a0-a1	; a0 = ptr block 1, a1 = ptr block 2
 	move.w	(a1),d0		; d0 = x2
@@ -303,6 +268,7 @@ uni4:
 *		C binding:	r_constrain(const_ptr,xywhptr);
 *				GRECT	*const_ptr,*xywhptr;
 * --
+	xdef _rc_const
 _rc_const:
 	movem.l	4(sp),a0-a1	; a0 -> x of constrain rect, a1 -> grect
 	move.w	(a0),d0		; d0 = const_x
@@ -340,6 +306,7 @@ rc_done:
 *				int	count;
 *				byte	*src,*dst;
 * --
+	xdef _movs
 _movs:
 	move.w	4(sp),d0	; count
 	movem.l	6(sp),a0-a1	; a0 -> source, a1 -> dest
@@ -356,6 +323,7 @@ stmovs:
 *		C binding:	min(a,b);
 *				int	a,b;
 * --
+	xdef _min
 _min:
 	move.w	4(sp),d0	; d0 = a
 	cmp.w	6(sp),d0	; if (a < b)
@@ -368,6 +336,7 @@ _min:
 *		C binding:	max(a,b);
 *				int	a,b;
 * --
+	xdef _max
 _max:
 	move.w	4(sp),d0	; d0 = a
 	cmp.w	6(sp),d0	; if (a > b)
@@ -385,6 +354,7 @@ genret:
 *				byte	byte;
 *				byte	*dest;
 * --
+	xdef _bfill
 _bfill:
 	move.w	4(sp),d0	; d0 = count
 	move.b	7(sp),d1	; d1 = byte
@@ -402,6 +372,7 @@ bfout:
 *		C binding:	toupper(chr);
 *				byte	chr;
 * --
+	xdef _toupper
 _toupper:
 	move.b	5(sp),d0	; d0 = chr
 	ext.w	d0		; extend to word
@@ -420,6 +391,7 @@ toupout:
 *		C binding:	word	strlen(ptr);
 *					byte	*ptr;
 * --
+	xdef _strlen
 _strlen:
 	move.l	4(sp),a0	; a0 -> string
 	clr.w	d0
@@ -435,6 +407,7 @@ strnxt:
 *		C binding:	word	strcmp(ptr1,ptr2);
 *					byte	*ptr1,*ptr2;
 * --
+	xdef _strcmp
 _strcmp:
 	movem.l 4(sp),a0-a1	; a0 ->string1, a1 ->string2
 cmpnxt:
@@ -450,11 +423,12 @@ cmp1:
 
 * --
 *
-* strcpy	dito dito
-*		C binding:	byte	*strcpy(src,dst);
+* xstrpcpy	dito dito
+*		C binding:	byte	*xstrpcpy(src,dst);
 *					byte	*src,*dst;
 * --
-_strcpy:
+	xdef _xstrpcpy
+_xstrpcpy:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
 cpynxt:
 	move.b	(a0)+,(a1)+	; dst = src
@@ -469,6 +443,7 @@ cpynxt:
 *					byte	*src,*dst,stopchar;
 *
 * --
+	xdef _strscn
 _strscn:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
 	move.b	13(sp),d0	; d0 = char
@@ -482,10 +457,11 @@ scnxt:
 
 * --
 *
-* strcat	dito dito dito
-*		C binding:	byte	*strcat(src,dst);
+* xstrpcat	dito dito dito
+*		C binding:	byte	*xstrpcat(src,dst);
 * --
-_strcat:
+	xdef _xstrpcat
+_xstrpcat:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
 catend:
 	tst.b	(a1)+		; if (not at end of dst string)
@@ -507,6 +483,7 @@ catscn:
 *					byte	*ptr,byte;
 *
 * --
+	xdef _scasb
 _scasb:
 	move.l	4(sp),a1	; a1 -> string
 	move.b	9(sp),d0	; d0 = byte
@@ -528,6 +505,7 @@ scanxt:
 *					byte	*str1,*str2;
 *
 * --
+	xdef _strchk
 _strchk:
 	movem.l	4(sp),a0-a1	; a0 -> string 1, a1 -> string 2
 	clr.w	d0		; init to strings equal
@@ -554,6 +532,7 @@ chkout:
 *		C binding:	fmt_str(src,dst);
 *					byte	*src,*dst;
 * --
+	xdef _fmt_str
 _fmt_str:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
 	move.w	#7,d0		; init for filename
@@ -587,7 +566,8 @@ fmt2:
 *		C binding:	unfmt_str(src,dst);
 *				byte	*src,*dst;
 * --
-_unfmt_st:
+	xdef _unfmt_str
+_unfmt_str:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
 	move.w	#7,d0		; init for filename
 unfnxt:
@@ -622,6 +602,7 @@ unfout:
 *					long	tree,pstr,*ptext;
 *					word	obj,*ptxtlen;
 * --
+	xdef _fs_sset
 _fs_sset:
 	move.l	14(sp),a1	; a1 -> ptext
 *
@@ -649,6 +630,7 @@ _fs_sset:
 *		C binding:	inf_sset(tree,obj,pstr,&text,&txtlen);
 *
 * --
+	xdef _inf_sset
 _inf_sset:
 	link	a6,#-8		; room for temp variables
 	pea	-6(a6)		; addr of txtlen	(-6)
@@ -670,7 +652,9 @@ _inf_sset:
 *				long	tree,dst;
 *				word	obj;
 * --
+	xdef _inf_sget
 _inf_sget:
+	xdef _fs_sget
 _fs_sget:
 	move.l	#OB_SPEC,a0	; a0 = offset to ob_spec
 	bsr	get_addr
@@ -685,13 +669,14 @@ _fs_sget:
 
 
 * --
-* f_fldset	This routine is used to set an objects flags based on 
+* inff_fldset	This routine is used to set an objects flags based on 
 *		the outcome of a 'and' operation.  The word is set to
 *		the 'truestate' if the operation is true else set to
 *		'falsestate'
 *	C binding: inf_fldset(tree,obj,tstfld,tstbit,truestate,falsestate);
 *
 * --
+	xdef _inf_fldset
 _inf_fldset:
 	move.l	#OB_STATE,a0	; a0 = offset to ob_state
 	bsr	get_addr
@@ -716,7 +701,8 @@ inf1:
 *					word	baseobj,n;
 *					long	tree;
 * --
-_inf_gind:
+	xdef _inf_gindex
+_inf_gindex:
 	move.l	#OB_STATE+1,a0	; a0 = offset to byte to test
 	bsr	get_addr
 *
@@ -745,6 +731,7 @@ gindout:
 *					word	ok,cancel;
 *					long	tree;
 * --
+	xdef _inf_what
 _inf_what:
 	move.w	#2,-(sp)	; sp = 2
 	move.w	10(sp),-(sp)	; sp = ok
@@ -785,9 +772,10 @@ genrts:
 * --
 
 * PARMS	=	7*4
-PARMS	=	28		; fixed 8/1/92
+PARMS	equ	28		; fixed 8/1/92
 
-_merge_st:
+	xdef _merge_st
+_merge_str:
 	movem.l	d3-d6/a3-a5,-(sp)	; save d3,d4,d5,d6,a3,a4,a5
 	movem.l	PARMS+4(sp),a3-a5	; a3 -> dest, a4 -> src, a5 -> parms
 	clr.w	d3			; d3 = parms[] index
@@ -882,6 +870,7 @@ merout:
 *					byte	*pwild,*ptest;
 * --
 
+	xdef _wildcmp
 _wildcmp:
 	movem.l 4(sp),a0-a1	; a0-> pwild, a1 -> ptest
 wildnxt:
@@ -946,566 +935,3 @@ get_addr:
 	add.l	d0,a0		; a0 -> desired word or long
 	rts
 
-
-*	OPTIMIZE.C	1/25/84 - 01/27/85	Lee Jay Lorenzen	*\
-*	reg op 68k	2/10/85 - 04/03/85	LKW			*\
-*	remove mid,cmps 06/10/85		Mike Schmal		*\
-*		bit_num	06/10/85		Mike Schmal		*\
-*	Fix the bfill	4/3/86			Derek Mui		*\
-*
-*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-**\
-*
-*#include <portab.h>
-*#include <machine.h>
-*#include <taddr.h>
-*#include <obdefs.h>
-*
-*
-*EXTERN WORD	gl_wchar;
-*EXTERN WORD	gl_hchar;
-*
-*
-*r_get(pxywh, px, py, pw, ph)
-*	REG WORD	*pxywh;
-*	WORD		*px, *py, *pw, *ph;
-*{
-*	*px = pxywh[0];
-*	*py = pxywh[1];
-*	*pw = pxywh[2];
-*	*ph = pxywh[3];
-*}
-*
-*
-*
-*r_set(pxywh, x, y, w, h)
-*	REG WORD	*pxywh;
-*	WORD		x, y, w, h;
-*{
-*	pxywh[0] = x;
-*	pxywh[1] = y;
-*	pxywh[2] = w;
-*	pxywh[3] = h;
-*}
-*
-*
-*rc_constrain(pc, pt)
-*	REG GRECT	*pc;
-*	REG GRECT	*pt;
-*{
-*	  if (pt->g_x < pc->g_x)
-*	    pt->g_x = pc->g_x;
-*	  if (pt->g_y < pc->g_y)
-*	    pt->g_y = pc->g_y;
-*	  if ((pt->g_x + pt->g_w) > (pc->g_x + pc->g_w))
-*	    pt->g_x = (pc->g_x + pc->g_w) - pt->g_w;
-*	  if ((pt->g_y + pt->g_h) > (pc->g_y + pc->g_h))
-*	    pt->g_y = (pc->g_y + pc->g_h) - pt->g_h;
-*}
-*
-*
-*rc_copy(psxywh, pdxywh)
-*	REG WORD	*psxywh;
-*	REG WORD	*pdxywh;
-*{
-*	*pdxywh++ = *psxywh++;
-*	*pdxywh++ = *psxywh++;
-*	*pdxywh++ = *psxywh++;
-*	*pdxywh++ = *psxywh++;
-*}
-*
-*
-*	VOID
-*rc_union(p1, p2)
-*	REG GRECT	*p1, *p2;
-*{
-*	REG WORD	tx, ty, tw, th;
-*
-*	tw = max(p1->g_x + p1->g_w, p2->g_x + p2->g_w);
-*	th = max(p1->g_y + p1->g_h, p2->g_y + p2->g_h);
-*	tx = min(p1->g_x, p2->g_x);
-*	ty = min(p1->g_y, p2->g_y);
-*	p2->g_x = tx;
-*	p2->g_y = ty;
-*	p2->g_w = tw - tx;
-*	p2->g_h = th - ty;
-*}
-*
-*
-*	WORD
-*rc_intersect(p1, p2)
-*	REG GRECT	*p1, *p2;
-*{
-*	REG WORD	tx, ty, tw, th;
-*
-*	tw = min(p2->g_x + p2->g_w, p1->g_x + p1->g_w);
-*	th = min(p2->g_y + p2->g_h, p1->g_y + p1->g_h);
-*	tx = max(p2->g_x, p1->g_x);
-*	ty = max(p2->g_y, p1->g_y);
-*	p2->g_x = tx;
-*	p2->g_y = ty;
-*	p2->g_w = tw - tx;
-*	p2->g_h = th - ty;
-*	return( (tw > tx) && (th > ty) );
-*}
-*
-*
-*	UWORD
-*inside(x, y, pt)
-*	REG WORD	x, y;
-*	REG GRECT	*pt;
-*{
-*	if ( (x >= pt->g_x) && (y >= pt->g_y) &&
-*	     (x < pt->g_x + pt->g_w) && (y < pt->g_y + pt->g_h) )
-*	  return(TRUE);
-*	else
-*	  return(FALSE);
-*} /* inside *\
-*
-*
-*	WORD
-*rc_equal(p1, p2)
-*	REG WORD	*p1, *p2;
-*{
-*	REG WORD	i;
-*
-*	for(i=0; i<4; i++)
-*	{
-*	  if (*p1++ != *p2++)
-*	    return(FALSE);
-*	}
-*	return(TRUE);
-*}
-*
-*
-*	VOID
-*movs(num, ps, pd)
-*	REG WORD	num;
-*	REG BYTE	*ps, *pd;
-*{
-*	do
-*	  *pd++ = *ps++;
-*	while (--num);
-*}
-*
-*
-*	WORD
-*min(a, b)
-*	WORD		a, b;
-*{
-*	return( (a < b) ? a : b );
-*}
-*
-*
-*	WORD
-*max(a, b)
-*	WORD		a, b;
-*{
-*	return( (a > b) ? a : b );
-*}
-*
-*
-*
-*	VOID
-*bfill(num, bval, addr)
-*	REG WORD	num;
-*	REG BYTE	bval;
-*	REG BYTE	*addr;
-*{
-*	while(num)
-*	{
-*	  *addr++ = bval;
-*	  num --;
-*	}
-*}
-*
-*
-*	BYTE
-*toupper(ch)
-*	REG BYTE	ch;
-*{
-*	if ( (ch >= 'a') &&
-*	     (ch <= 'z') )
-*	  return(ch - 32);
-*	else
-*	  return(ch);
-*}
-*
-*	BYTE
-**scasb(p, b)
-*	REG BYTE		*p;
-*	REG BYTE		b;
-*{
-*	for(; *p && *p != b; p++);
-*	return (p);
-*}
-*
-*	WORD
-*strlen(p1)
-*	REG BYTE	*p1;
-*{
-*	REG WORD	len;
-*
-*	len = 0;
-*	while( *p1++ )
-*	  len++;
-*
-*	return(len);
-*}
-*
-*
-*	WORD
-*strcmp(p1, p2)
-*	REG BYTE	*p1, *p2;
-*{
-*	while(*p1)
-*	{
-*	  if (*p1++ != *p2++)
-*	    return(FALSE);
-*	}
-*	if (*p2)
-*	  return(FALSE);
-*	return(TRUE);
-*}
-*
-*
-*\*
-**	Return <0 if s<t, 0 if s==t, >0 if s>t
-**\
-*
-*	WORD
-*strchk(s, t)
-*	REG BYTE	s[], t[];
-*{
-*	REG WORD	i;
-*
-*	i = 0;
-*	while( s[i] == t[i] )
-*	  if (s[i++] == NULL)
-*	    return(0);
-*	return(s[i] - t[i]);
-*}
-*
-*
-*	BYTE
-**strcpy(ps, pd)
-*	REG BYTE	*ps, *pd;
-*{
-*	while(*pd++ = *ps++)
-*	  ;
-*	return(pd);
-*}
-*
-*
-*	BYTE
-**strscn(ps, pd, stop)
-*	REG BYTE	*ps, *pd, stop;
-*{
-*	while ( (*ps) &&
-*		(*ps != stop) )
-*	  *pd++ = *ps++;
-*	return(pd);
-*}
-*
-*
-*	BYTE
-**strcat(ps, pd)
-*	REG BYTE	*ps, *pd;
-*{
-*	while(*pd)
-*	  pd++;
-*	while(*pd++ = *ps++)
-*	  ;
-*	return(pd);
-*}
-*
-*
-*\*
-**	Strip out period and turn into raw data.
-**\
-*	VOID
-*fmt_str(instr, outstr)
-*	REG BYTE	*instr, *outstr;
-*{
-*	REG WORD	count;
-*	REG BYTE	*pstr;
-*
-*	pstr = instr;
-*	while( (*pstr) && (*pstr != '.') )
-*	  *outstr++ = *pstr++;
-*	if (*pstr)
-*	{
-*	  count = 8 - (pstr - instr);
-*	  while ( count-- )
-*	    *outstr++ = ' ';
-*	  pstr++;
-*	  while (*pstr)
-*	    *outstr++ = *pstr++;
-*	}
-*	*outstr = NULL;
-*}
-*
-*
-*\*
-**	Insert in period and make into true data.
-**\
-*	VOID
-*unfmt_str(instr, outstr)
-*	REG BYTE	*instr, *outstr;
-*{
-*	REG BYTE	*pstr, temp;
-*
-*	pstr = instr;
-*	while( (*pstr) && ((pstr - instr) < 8) )
-*	{
-*	  temp = *pstr++;
-*	  if (temp != ' ')
-*	    *outstr++ = temp;
-*	}
-*	if (*pstr)
-*	{
-*	  *outstr++ = '.';
-*	  while (*pstr)
-*	    *outstr++ = *pstr++;
-*	}
-*	*outstr = NULL;
-*}
-*
-*
-*	VOID
-*fs_sset(tree, obj, pstr, ptext, ptxtlen)
-*	LONG		tree;
-*	WORD		obj;
-*	LONG		pstr;
-*	REG LONG	*ptext;
-*	WORD		*ptxtlen;
-*{
-*	REG LONG	spec;
-*
-*	*ptext = LLGET( spec = LLGET(OB_SPEC(obj)) );
-*	LSTCPY(*ptext, pstr);
-*	*ptxtlen = LWGET( spec + 24 );
-*}
-*
-*
-*	VOID
-*inf_sset(tree, obj, pstr)
-*	LONG		tree;
-*	WORD		obj;
-*	BYTE		*pstr;
-*{
-*	LONG		text;
-*	WORD		txtlen;
-*
-*	fs_sset(tree, obj, ADDR(pstr), &text, &txtlen);
-*}
-*
-*
-*	VOID
-*fs_sget(tree, obj, pstr)
-*	LONG		tree;
-*	WORD		obj;
-*	LONG		pstr;
-*{
-*	LONG		ptext;
-*
-*	ptext = LLGET( LLGET(OB_SPEC(obj)) );
-*	LSTCPY(pstr, ptext);
-*}
-*
-*
-*	VOID
-*inf_sget(tree, obj, pstr)
-*	LONG		tree;
-*	WORD		obj;
-*	BYTE		*pstr;
-*{
-*	fs_sget(tree, obj, ADDR(pstr));
-*}
-*
-*
-*	VOID
-*inf_fldset(tree, obj, testfld, testbit, truestate, falsestate)
-*	LONG		tree;
-*	WORD		obj;
-*	UWORD		testfld, testbit;
-*	UWORD		truestate, falsestate;
-*{
-*	LWSET(OB_STATE(obj), (testfld & testbit) ? truestate : falsestate);
-*}
-*
-*
-*	WORD
-*inf_gindex(tree, baseobj, numobj)
-*	LONG		tree;
-*	WORD		baseobj;
-*	WORD		numobj;
-*{
-*	WORD		retobj;
-*
-*	for (retobj=0; retobj < numobj; retobj++)
-*	{
-*	  if (LWGET(OB_STATE(baseobj+retobj)) & SELECTED)
-*	    return(retobj);
-*	}
-*	return(-1);
-*}
-*
-*
-*\*
-**	Return 0 if cancel was selected, 1 if okay was selected, -1 if
-**	nothing was selected.
-**\
-*
-*	WORD
-*inf_what(tree, ok, cncl)
-*	REG LONG		tree;
-*	REG WORD		ok, cncl;
-*{
-*	REG WORD		field;
-*
-*	field = inf_gindex(tree, ok, 2);
-*
-*	if (field != -1)
-*	{
-*	  LWSET(OB_STATE(ok + field), NORMAL);
-*	  field = (field == 0);
-*	}
-*	return(field);
-*}
-*
-*
-*	WORD
-*merge_str(pdst, ptmp, parms)
-*	REG BYTE	*pdst;
-*	REG BYTE	*ptmp;
-*	UWORD		parms[];	
-*{
-*	REG WORD		num;
-*	WORD		do_value;
-*	BYTE		lholder[12];
-*	REG BYTE		*pnum;
-*	BYTE		*psrc;
-*	REG LONG		lvalue, divten;
-*	WORD		digit;
-*
-*	num = 0;
-*	while(*ptmp)
-*	{
-*	  if (*ptmp != '%')
-*	    *pdst++ = *ptmp++;
-*	  else
-*	  {
-*	    ptmp++;
-*	    do_value = FALSE;
-*	    switch(*ptmp++)
-*	    {
-*	      case '%':
-*		*pdst++ = '%';
-*		break;
-*	      case 'L':
-*		lvalue = *((LONG *) &parms[num]);
-*		num += 2;
-*		do_value = TRUE;
-*		break;
-*	      case 'W':
-*		lvalue = parms[num];
-*#if MC68K
-*		num += 2;
-*#endif
-*#if I8086
-*		num++;
-*#endif
-*		do_value = TRUE;
-*		break;
-*	      case 'S':
-*		psrc = (BYTE *) parms[num]; 
-*#if MC68K
-*		num += 2;
-*#endif
-*#if I8086
-*		num++;
-*#endif
-*		while(*psrc)
-*		  *pdst++ = *psrc++;
-*		break;
-*	    }
-*	    if (do_value)
-*	    {
-*	      pnum = &lholder[0];
-*	      while(lvalue)
-*	      {
-*		divten = lvalue / 10;
-*		digit = (WORD) lvalue - (divten * 10);
-*		*pnum++ = '0' + digit;
-*		lvalue = divten;
-*	      }
-*	      if (pnum == &lholder[0])
-*		*pdst++ = '0';
-*	      else
-*	      {
-*		while(pnum != &lholder[0])
-*		  *pdst++ = *--pnum;
-*	      }
-*	    }
-*	  }
-*	}
-*	*pdst = NULL;
-*}
-*
-*
-*	WORD
-*wildcmp(pwild, ptest)
-*	REG BYTE		*pwild;
-*	REG BYTE		*ptest;
-*{
-*	while( (*ptest) && 
-*	       (*pwild) )
-*	{
-*	  if (*pwild == '?')
-*	  {
-*	     pwild++;
-*	     if (*ptest != '.')
-*	       ptest++;
-*	  }
-*	  else
-*	  {
-*	    if (*pwild == '*')
-*	    {
-*	      if (*ptest != '.')
-*		ptest++;
-*	      else		
-*		pwild++;
-*	    }
-*	    else
-*	    {
-*	      if (*ptest == *pwild)
-*	      {
-*	        pwild++;
-*	        ptest++;
-*	      }
-*	      else
-*	        return(FALSE);
-*	    }
-*	  }
-*	}
-*						/* eat up remaining 	*\
-*						/*   wildcard chars	*\
-*	while( (*pwild == '*') ||
-*	       (*pwild == '?') ||
-*	       (*pwild == '.') )
-*	  pwild++;
-*						/* if any part of wild-	*\
-*						/*   card or test is	*\
-*						/*   left then no match	*\
-*	if ( (*pwild) ||
-*	     (*ptest) )
-*	  return(FALSE);
-*	else
-*	  return(TRUE);
-*}

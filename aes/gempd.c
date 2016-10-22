@@ -38,26 +38,26 @@
 #include <obdefs.h>
 #include <gemlib.h>
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
-EXTERN WORD gl_naccs;
+extern int16_t gl_naccs;
 
-EXTERN ACCPD *gl_pacc[];
+extern ACCPD *gl_pacc[];
 
-WORD fapd(pname, pid, ppd)
-BYTE *pname;
+int16_t fapd(pname, pid, ppd)
+char *pname;
 
-WORD pid;
+int16_t pid;
 
-REG PD *ppd;
+register PD *ppd;
 {
-	REG WORD ret;
+	register int16_t ret;
 
-	BYTE temp[9];
+	char temp[9];
 
 	ret = FALSE;
 	temp[8] = NULL;
-	if (pname != NULLPTR)
+	if (pname != NULL)
 	{
 		movs(8, ppd->p_name, &temp[0]);
 		ret = strcmp(pname, &temp[0]);
@@ -67,11 +67,11 @@ REG PD *ppd;
 }
 
 PD * fpdnm(pname, pid)
-BYTE *pname;
+char *pname;
 
-UWORD pid;
+uint16_t pid;
 {
-	REG WORD i;
+	register int16_t i;
 
 	PD *ppd;
 
@@ -85,7 +85,7 @@ UWORD pid;
 		if (fapd(pname, pid, &gl_pacc[i]->ac_pd))
 			return (&gl_pacc[i]->ac_pd);
 	}
-	return (NULLPTR);
+	return (NULL);
 }
 
 PD * getpd()
@@ -123,7 +123,7 @@ PD * getpd()
 VOID p_nameit(p, pname)
 PD *p;
 
-BYTE *pname;
+char *pname;
 {
 	bfill(8, ' ', &p->p_name[0]);
 	strscn(pname, &p->p_name[0], '.');
@@ -131,13 +131,13 @@ BYTE *pname;
 
 
 PD * pstart(pcode, pfilespec, ldaddr)
-BYTE *pcode;
+char *pcode;
 
-BYTE *pfilespec;
+char *pfilespec;
 
-LONG ldaddr;
+int32_t ldaddr;
 {
-	REG PD *px;
+	register PD *px;
 
 	/* create process to    */
 	/*   execute it     */
@@ -163,7 +163,7 @@ VOID insert_process(pi, root)
 PD *pi,
 **root;
 {
-	REG PD *p,
+	register PD *p,
 	*q;
 
 	/* find the end     */

@@ -20,7 +20,7 @@
 */
 /*	DOS.H		4/18/84 - 9/07/84	Lee Lorenzen		*/
 
-#define STDIN 0x0000
+#define STDIN  0x0000
 #define STDOUT 0x0001
 #define STDERR 0x0002
 #define STDAUX 0x0003
@@ -56,15 +56,15 @@
 
 typedef struct exec_blk
 {
-	WORD		eb_segenv;
-	LONG		eb_pcmdln;
-	LONG		eb_pfcb1;
-	LONG		eb_pfcb2;
+	int16_t		eb_segenv;
+	int32_t		eb_pcmdln;
+	int32_t		eb_pfcb1;
+	int32_t		eb_pfcb2;
 } EXEC_BLK;
 
 
 typedef struct over_blk
 {
-	WORD		ob_seglod;
-	WORD		ob_relfac;
+	int16_t		ob_seglod;
+	int16_t		ob_relfac;
 } OVER_BLK;

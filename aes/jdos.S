@@ -1,41 +1,41 @@
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/jdos.s,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:28:39 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	jdos.s,v $
-* Revision 2.2  89/04/26  18:28:39  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:30:41  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.3  88/07/01  16:22:43  mui
-* move dos_space C code to deskinf.c
-* 
-* Revision 1.2  88/07/01 15:50:13  mui
-* comment out dos_space
-*
-* Revision 1.1  88/06/02  12:35:45  lozben
-* Initial revision
-* 
-*************************************************************************
-*	.title	'GEMDOS Bindings for AES/Desktop'
-*	Bug fixed 2/5/87
-*	Added global definition	11/30/87	D.Mui
-*	Add do_cdir		1/28/88		D.Mui
-*	Use MAC to assemble	6/29/90		D.Mui
-* assemble with MAS 900801 kbad
-
-*----------------
-*
-*  Edit History
-*
-*  2-Feb-1987 lmd	Converted from stupid C code.  Original size
-*			was $57E text, $2 data.
-*
+/*************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/jdos.s,v $
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:28:39 $	$Locker: kbad $
+ * =======================================================================
+ *  $Log:	jdos.s,v $
+ * Revision 2.2  89/04/26  18:28:39  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:30:41  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.3  88/07/01  16:22:43  mui
+ * move dos_space C code to deskinf.c
+ * 
+ * Revision 1.2  88/07/01 15:50:13  mui
+ * comment out dos_space
+ *
+ * Revision 1.1  88/06/02  12:35:45  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ *	.title	'GEMDOS Bindings for AES/Desktop'
+ *	Bug fixed 2/5/87
+ *	Added global definition	11/30/87	D.Mui
+ *	Add do_cdir		1/28/88		D.Mui
+ *	Use MAC to assemble	6/29/90		D.Mui
+ * assemble with MAS 900801 kbad
+ 
+ *----------------
+ *
+ *  Edit History
+ *
+ *  2-Feb-1987 lmd	Converted from stupid C code.  Original size
+ *			was $57E text, $2 data.
+ */
 
 
 *----------------
@@ -43,136 +43,103 @@
 *  Exports
 *
 
-*	.globl	_trap		; replace old trap() call
-	.globl	_isdrive
-	.globl	_pgmld
-*	.globl	_bellout
-	.globl	_dos_sfirst
-	.globl	_dos_snext
-	.globl	_dos_open
-	.globl	_dos_read
-	.globl	_dos_write
-	.globl	_dos_lseek
-	.globl	_dos_gdir
-	.globl	_dos_mkdir
-	.globl	_dos_set
-	.globl	_dos_label
-*	.globl	_dos_space
-	.globl	_dos_rename
-	.globl	_dos_alloc
-	.globl	_dos_avail
-	.globl	_chrout
-	.globl	_rawcon
-	.globl	_prt_chr
-	.globl	_dos_gdrv
-	.globl	_dos_sdta
-	.globl	_dos_close
-	.globl	_dos_chdir
-	.globl	_dos_sdrv
-	.globl	_dos_chmod
-	.globl	_dos_delete
-	.globl	_dos_rmdir
-	.globl	_dos_create
-	.globl	_dos_free
-	.globl	_DOS_AX
-	.globl	_DOS_ERR
-	.globl	_do_cdir
+*	xdef	_trap		; replace old trap() call
+	xdef	_isdrive
+	xdef	_pgmld
+*	xdef	_bellout
+	xdef	_dos_sfirst
+	xdef	_dos_snext
+	xdef	_dos_open
+	xdef	_dos_read
+	xdef	_dos_write
+	xdef	_dos_lseek
+	xdef	_dos_gdir
+	xdef	_dos_mkdir
+	xdef	_dos_set
+	xdef	_dos_label
+*	xdef	_dos_space
+	xdef	_dos_rename
+	xdef	_dos_alloc
+	xdef	_dos_avail
+	xdef	_chrout
+	xdef	_rawcon
+	xdef	_prt_chr
+	xdef	_dos_gdrv
+	xdef	_dos_sdta
+	xdef	_dos_close
+	xdef	_dos_chdir
+	xdef	_dos_sdrv
+	xdef	_dos_chmod
+	xdef	_dos_delete
+	xdef	_dos_rmdir
+	xdef	_dos_create
+	xdef	_dos_free
+	xdef	_DOS_AX
+	xdef	_DOS_ERR
+	xdef	_do_cdir
 
 *----------------
 *
 *  Imports
 *
-	.comm _DOS_AX,2
-	.comm _DOS_ERR,2
+	comm _DOS_AX,2
+	comm _DOS_ERR,2
 
 
-*	.NLIST
 *----------------
 *
-*  Error Codes
+*  PC/DOS Error Codes
 *
-E_OK	= 0
-ERROR	= -1
-EDRVNR	= -2
-EUNCMD	= -3
-E_CRC	= -4
-EBADRQ	= -5
-E_SEEK	= -6
-EMEDIA	= -7
-ESECNF	= -8
-EPAPER	= -9
-EWRITF	= -10
-EREADF	= -11
-EGENRL	= -12
-EWRPRO	= -13
-E_CHNG	= -14
-EUNDEV	= -15
-EBADSF	= -16
-EOTHER	= -17
-EINVFN	= -32
-EFILNF	= -33
-EPTHNF	= -34
-ENHNDL	= -35
-EACCDN	= -36
-EIHNDL	= -37
-EIMBA	= -40
-EDRIVE	= -46
-ENMFIL	= -49
-ERANGE	= -64
-EINTRN	= -65
-EPLFMT	= -66
-EGSBF	= -67
-
-E_BADFUNC	= 1
-E_FILENOTFND	= 2
-E_PATHNOTFND	= 3
-E_NOHANDLES	= 4
-E_NOACCESS	= 5
-E_BADHANDLE	= 6
-E_MEMBLKERR	= 7
-E_NOMEMORY	= 8
-E_BADMEMBLK	= 9
-E_BADENVIR	= 10
-E_BADFORMAT	= 11
-E_BADACCESS	= 12
-E_BADDATA	= 13
-E_BADDRIVE	= 15
-E_NODELDIR	= 16
-E_NOTDEVICE	= 17
-E_NOFILES	= 18
+E_BADFUNC	equ 1
+E_FILENOTFND	equ 2
+E_PATHNOTFND	equ 3
+E_NOHANDLES	equ 4
+E_NOACCESS	equ 5
+E_BADHANDLE	equ 6
+E_MEMBLKERR	equ 7
+E_NOMEMORY	equ 8
+E_BADMEMBLK	equ 9
+E_BADENVIR	equ 10
+E_BADFORMAT	equ 11
+E_BADACCESS	equ 12
+E_BADDATA	equ 13
+E_BADDRIVE	equ 15
+E_NODELDIR	equ 16
+E_NOTDEVICE	equ 17
+E_NOFILES	equ 18
 
 
 *----------------
 *
 *  Dos function numbers
 *
-X_TABOUT	= $02
-X_PRTOUT	= $05
-X_RAWCON	= $06
-X_SETDRV	= $0E
-X_GETDRV	= $19
-X_SETDTA	= $1A
-X_GETFREE	= $36
-X_MKDIR		= $39
-X_RMDIR		= $3A
-X_CHDIR		= $3B
-X_CREAT		= $3C
-X_OPEN		= $3D
-X_CLOSE		= $3E
-X_READ		= $3F
-X_WRITE		= $40
-X_UNLINK	= $41
-X_LSEEK		= $42
-X_CHMOD		= $43
-X_GETDIR	= $47
-X_MALLOC	= $48
-X_MFREE		= $49
-X_SETBLOCK	= $4A
-X_EXEC		= $4B
-X_SFIRST	= $4E
-X_SNEXT		= $4F
-X_RENAME	= $56
-X_GSDTOF	= $57
+X_TABOUT	equ $02
+X_PRTOUT	equ $05
+X_RAWCON	equ $06
+X_SETDRV	equ $0E
+X_GETDRV	equ $19
+X_SETDTA	equ $1A
+X_GETFREE	equ $36
+X_MKDIR		equ $39
+X_RMDIR		equ $3A
+X_CHDIR		equ $3B
+X_CREAT		equ $3C
+X_OPEN		equ $3D
+X_CLOSE		equ $3E
+X_READ		equ $3F
+X_WRITE		equ $40
+X_UNLINK	equ $41
+X_LSEEK		equ $42
+X_CHMOD		equ $43
+X_GETDIR	equ $47
+X_MALLOC	equ $48
+X_MFREE		equ $49
+X_SETBLOCK	equ $4A
+X_EXEC		equ $4B
+X_SFIRST	equ $4E
+X_SNEXT		equ $4F
+X_RENAME	equ $56
+X_GSDTOF	equ $57
 *	.LIST
 
 
@@ -293,7 +260,7 @@ TRUE:	moveq	#1,d0
 *  	ret = trap(X_SFIRST,pspec,attr);
 *  	if (!ret)
 *  	  return(TRUE);
-*  	if ( ret == ENMFIL || ret == EFILNF )
+*  	if ( ret == E_NMFIL || ret == E_FILNF )
 *  	{
 *  	  DOS_AX = E_NOFILES;
 *  	  return(FALSE);
@@ -315,9 +282,9 @@ _dos_sfirst:
 sfsn:	tst.w	d0			; if (d0 == 0) return TRUE;
 	beq	TRUE
 
-	cmp.w	#ENMFIL,d0		; if (d0 == ENMFIL ||
+	cmp.w	#E_NMFIL,d0		; if (d0 == E_NMFIL ||
 	beq.b	sf_1
-	cmp.w	#EFILNF,d0		;     d0 == EFILNF)
+	cmp.w	#E_FILNF,d0		;     d0 == E_FILNF)
 	bne.b	sf_2
 sf_1:	move.w	#E_NOFILES,_DOS_AX	;    DOS_AX = E_NOFILES;
 sf_2:	bra	FALSE			; return FALSE
@@ -331,7 +298,7 @@ sf_2:	bra	FALSE			; return FALSE
 *  	ret = trap(X_SNEXT);
 *  	if (!ret)
 *  	  return(TRUE);
-*  	if ( ret == ENMFIL || ret == EFILNF )
+*  	if ( ret == E_NMFIL || ret == E_FILNF )
 *  	{
 *  	  DOS_AX = E_NOFILES;
 *  	  return(FALSE);
@@ -355,7 +322,7 @@ _dos_snext:
 *  	LONG		ret;
 *  
 *  	ret = trap(X_OPEN,pname,access);
-*  	if (ret == EFILNF)
+*  	if (ret == E_FILNF)
 *  	  DOS_AX = E_FILENOTFND;
 *  	if (DOS_ERR)
 *  	  return(FALSE);
@@ -373,7 +340,7 @@ _dos_open:
 	bsr	jtrap
 	addq	#8,sp
 
-	cmp.w	#EFILNF,d0
+	cmp.w	#E_FILNF,d0
 	bne.b	open_1
 	move.w	#E_FILENOTFND,_DOS_AX
 
@@ -478,7 +445,7 @@ _dos_gdir:
 *  	LONG	ret;
 *  
 *  	ret = trap(X_MKDIR,path);
-*  	if (ret == EACCDN)
+*  	if (ret == E_ACCDN)
 *  	  DOS_AX = E_NOACCESS;
 *  	return( !DOS_ERR );
 *  }
@@ -492,7 +459,7 @@ _dos_mkdir:
 	bsr	jtrap
 	addq	#6,sp
 
-	cmp.w	#EACCDN,d0
+	cmp.w	#E_ACCDN,d0
 	bne.b	mkd_1
 	move.w	#E_NOACCESS,_DOS_AX
 mkd_1:	move.w	d1,d0			; return (!DOS_ERR)
@@ -547,7 +514,7 @@ _dos_set:
 *  	ret = trap(X_SFIRST,path,0x08);
 *  	if (!ret)
 *  	{
-*  	  strcpy(&buf[30],plabel);
+*  	  xstrpcpy(&buf[30],plabel);
 *  	  return(TRUE);
 *  	}
 *  	else
@@ -560,8 +527,8 @@ _dos_set:
 *		    8	    10
 *	 .cargs #8, .drive .plabel
 *
-la_buf	=	-(44)
-la_path	=	-(44+8)
+la_buf	equ	-(44)
+la_path	equ	-(44+8)
 _dos_label:
 	link	a6,#la_path		; make room for args
 
@@ -600,7 +567,7 @@ la_err:	moveq	#1,d0
 	bra	FALSE
 
 la_string:	dc.b	':\*.*',0
-		.EVEN
+		even
 
 
 
@@ -779,9 +746,9 @@ generic:
 	move.l	retaddr,a0		; load return address
 	jmp	(a0)			; ... anvd return
 
-	.BSS
+	bss
 retaddr:	ds.l	1		; saved return address
-	.TEXT
+	text
 
 
 
@@ -821,5 +788,5 @@ _do_cdir:
 
 
 
-    .BSS
+    BSS
 tr_retsave: ds.l	1

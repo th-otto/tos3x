@@ -44,64 +44,64 @@
  */
 
 /* MN_MENU.C */
-EXTERN WORD Menu_Insert();
+extern int16_t Menu_Insert();
 
-EXTERN VOID Menu_Delete();
+extern VOID Menu_Delete();
 
-EXTERN MENU_PTR GetMenuPtr();
+extern MENU_PTR GetMenuPtr();
 
-EXTERN VOID CheckMenuHeight();
+extern VOID CheckMenuHeight();
 
-EXTERN WORD CountMenuItems();
+extern int16_t CountMenuItems();
 
-EXTERN VOID RestoreMenu();
+extern VOID RestoreMenu();
 
-EXTERN VOID AdjustMenuPosition();
+extern VOID AdjustMenuPosition();
 
 
 /* MN_EVENT.C */
-EXTERN LONG EvntSubMenu();
+extern int32_t EvntSubMenu();
 
-EXTERN BOOLEAN Pop_Blit();
+extern BOOLEAN Pop_Blit();
 
-EXTERN WORD gl_button;
+extern int16_t gl_button;
 
-EXTERN OBJECT *CurTree;
+extern OBJECT *CurTree;
 
-EXTERN WORD CurMenu;
+extern int16_t CurMenu;
 
-EXTERN WORD CurObject;
+extern int16_t CurObject;
 
-EXTERN WORD CurScroll;
+extern int16_t CurScroll;
 
-EXTERN WORD CurKeyState;
+extern int16_t CurKeyState;
 
 /* MN_MBAR.C */
-EXTERN BOOLEAN MenuBar_Mode;
+extern BOOLEAN MenuBar_Mode;
 
-EXTERN MENU_PTR gl_menuptr;
+extern MENU_PTR gl_menuptr;
 
 
 /* in MN_TOOLS.C */
-EXTERN VOID ObjcDraw();
+extern VOID ObjcDraw();
 
 /* in DESKIF.S */
-EXTERN WORD wm_update();
+extern int16_t wm_update();
 
 /* in OPTIMIZE.S */
-EXTERN BOOLEAN min();
+extern BOOLEAN min();
 
-EXTERN BOOLEAN rc_intersect();			/* cjg 09/22/92 */
+extern BOOLEAN rc_intersect();			/* cjg 09/22/92 */
 
 /* GEMOBLIB.C */
 
 /* APGSXIF.S */
-EXTERN VOID gsx_sclip();
+extern VOID gsx_sclip();
 
-EXTERN GRECT gl_rfull;
+extern GRECT gl_rfull;
 
 
-EXTERN VOID ob_gclip();					/* cjg 09/22/92 */
+extern VOID ob_gclip();					/* cjg 09/22/92 */
 
 /* GLOBALS
  * ================================================================
@@ -120,10 +120,10 @@ EXTERN VOID ob_gclip();					/* cjg 09/22/92 */
  *          is compatible with the menubar routines. There shouldn't
  *          be any interference with them.
  * 
- * IN:  WORD   id        Process id
+ * IN:  int16_t   id        Process id
  *      MENU   *Menu     Contains the tree, menu, start item and scroll flag
- *      WORD   xpos      The xpos we want the menu to start on
- *      WORD   ypos      The ypos we want the menu to start on
+ *      int16_t   xpos      The xpos we want the menu to start on
+ *      int16_t   ypos      The ypos we want the menu to start on
  *	MENU   *MData    Returns the tree, menu, item and scroll flag
  *			 of the submenu that was selected.
  *
@@ -134,23 +134,23 @@ EXTERN VOID ob_gclip();					/* cjg 09/22/92 */
  *		menu item, or clicked outside of any menu.
  */
 BOOLEAN mn_popup(id, Menu, xpos, ypos, MData)
-WORD id;								/* Process id            */
+int16_t id;								/* Process id            */
 
 MENU *Menu;								/* the Input Menu Structure  */
 
-WORD xpos;								/* the xpos that we want to start */
+int16_t xpos;								/* the xpos that we want to start */
 
-WORD ypos;								/* the ypos that we want to start */
+int16_t ypos;								/* the ypos that we want to start */
 
 MENU *MData;							/* the output menu structure     */
 {
-	REG OBJECT *tree;
+	register OBJECT *tree;
 
-	REG MENU_PTR MenuPtr;				/* Ptr to the Menu Node      */
+	register MENU_PTR MenuPtr;				/* Ptr to the Menu Node      */
 
-	WORD MenuID;						/* The menu id for the menu node */
+	int16_t MenuID;						/* The menu id for the menu node */
 
-	LONG obj;							/* return value from evnt_submenu */
+	int32_t obj;							/* return value from evnt_submenu */
 
 	GRECT rect;							/* GRECT for dummy variable      */
 
@@ -279,16 +279,16 @@ MENU *MData;							/* the output menu structure     */
  * menu structure right before it will be displayed.
  *
  * IN: MENU_PTR MenuPtr - the ptr to the menu node in question.
- *     WORD     start_obj - the start menu object we want to begin with
+ *     int16_t     start_obj - the start menu object we want to begin with
  *
  * OUT: VOID
  */
 VOID AssignMenuData(MenuPtr, start_obj)
-REG MENU_PTR MenuPtr;					/* the ptr to the menu node */
+register MENU_PTR MenuPtr;					/* the ptr to the menu node */
 
-WORD start_obj;							/* the obj we want on top   */
+int16_t start_obj;							/* the obj we want on top   */
 {
-	REG OBJECT *tree;
+	register OBJECT *tree;
 
 	ActiveTree(MTREE(MenuPtr));
 
@@ -320,16 +320,16 @@ WORD start_obj;							/* the obj we want on top   */
 
 
 #if 0
-WORD my_btest()
+int16_t my_btest()
 {
-	LONG bflags;
+	int32_t bflags;
 
 	MOBLK m1,
 	 m2;
 
-	WORD rets[6];
+	int16_t rets[6];
 
-	bflags = ((LONG) (1) << 16);
+	bflags = ((int32_t) (1) << 16);
 	bflags += (1 << 8) + 0x0L;
 
 	ev_multi(MU_BUTTON | MU_TIMER, &m1, &m2, 0x0L,	/* timer */

@@ -69,82 +69,82 @@
  * ================================================================
  */
 
-EXTERN BYTE *dos_alloc();
+extern char *dos_alloc();
 
 /* MN_MENU.C */
-EXTERN VOID MenuScrollAdjust();
+extern VOID MenuScrollAdjust();
 
-EXTERN WORD MAX_MENU_HEIGHT;
+extern int16_t MAX_MENU_HEIGHT;
 
 /* MN_SUBMN.C*/
-EXTERN BOOLEAN CheckForSubMenu();
+extern BOOLEAN CheckForSubMenu();
 
-EXTERN MENU_PTR DoSubMenu();
+extern MENU_PTR DoSubMenu();
 
-EXTERN VOID HideSubMenu();
+extern VOID HideSubMenu();
 
-EXTERN LONG SUBMENU_DELAY;				/* Menu Display Delay       */
+extern int32_t SUBMENU_DELAY;				/* Menu Display Delay       */
 
-EXTERN LONG SUBDRAG_DELAY;				/* Drag mouse to Menu Delay */
+extern int32_t SUBDRAG_DELAY;				/* Drag mouse to Menu Delay */
 
-EXTERN LONG SCROLL_DELAY;				/* scrolling delay */
+extern int32_t SCROLL_DELAY;				/* scrolling delay */
 
-EXTERN LONG ARROW_DELAY;				/* start scrolling delay */
+extern int32_t ARROW_DELAY;				/* start scrolling delay */
 
 
 /* MN_MBAR.C*/
-/*EXTERN BOOLEAN	Menu_Set();*/
+/*extern BOOLEAN	Menu_Set();*/
 
-EXTERN BOOLEAN MenuBar_Mode;
+extern BOOLEAN MenuBar_Mode;
 
-EXTERN GRECT ActiveRect;
+extern GRECT ActiveRect;
 
-EXTERN GRECT TitleRect;
+extern GRECT TitleRect;
 
-EXTERN OBJECT *gl_mtree;
+extern OBJECT *gl_mtree;
 
-EXTERN WORD buparm;
+extern int16_t buparm;
 
 /* OPTIMIZE.S */
-EXTERN WORD strcmp();
+extern int16_t strcmp();
 
-EXTERN BOOLEAN rc_intersect();
+extern BOOLEAN rc_intersect();
 
-EXTERN BOOLEAN inside();
+extern BOOLEAN inside();
 
 
 /* GEMOBLIB.C */
-EXTERN VOID ob_actxywh();
+extern VOID ob_actxywh();
 
-EXTERN VOID ob_find();
+extern VOID ob_find();
 
 
 /* MN_TOOLS.C */
-EXTERN VOID ObjcDraw();
+extern VOID ObjcDraw();
 
-EXTERN VOID rc_2xy();
-
-
-EXTERN VOID ev_timer();
-
-EXTERN WORD gl_hchar;
-
-EXTERN GRECT gl_rfull;
-
-EXTERN GRECT gl_rscreen;
-
-EXTERN GRECT gl_rzero;
-
-EXTERN VOID gsx_sclip();
-
-EXTERN WORD gl_nplanes;
-
-EXTERN VOID gsx_mon();
-
-EXTERN VOID gsx_moff();
+extern VOID rc_2xy();
 
 
-EXTERN VOID ob_gclip();					/* cjg 09/22/92 */
+extern VOID ev_timer();
+
+extern int16_t gl_hchar;
+
+extern GRECT gl_rfull;
+
+extern GRECT gl_rscreen;
+
+extern GRECT gl_rzero;
+
+extern VOID gsx_sclip();
+
+extern int16_t gl_nplanes;
+
+extern VOID gsx_mon();
+
+extern VOID gsx_moff();
+
+
+extern VOID ob_gclip();					/* cjg 09/22/92 */
 
 /* PROTOTYPES
  * ================================================================
@@ -153,27 +153,27 @@ EXTERN VOID ob_gclip();					/* cjg 09/22/92 */
 /* GLOBALS
  * ================================================================
  */
-BYTE UpText[4] = { 0x20, 0x20, 0x01, 0x0 };	/* Up ARROW menu text  */
-BYTE DownText[4] = { 0x20, 0x20, 0x02, 0x0 };	/* Down Arrow menu text */
+char UpText[4] = { 0x20, 0x20, 0x01, 0x0 };	/* Up ARROW menu text  */
+char DownText[4] = { 0x20, 0x20, 0x02, 0x0 };	/* Down Arrow menu text */
 
 OBJECT *CurTree;						/* Global Tree selected                   */
 
-WORD CurMenu;							/* Global Menu selected                   */
+int16_t CurMenu;							/* Global Menu selected                   */
 
-WORD CurObject;							/* Global Menu Object Selected        */
+int16_t CurObject;							/* Global Menu Object Selected        */
 
-WORD CurScroll;							/* Global Menu Scroll Flag            */
+int16_t CurScroll;							/* Global Menu Scroll Flag            */
 
-WORD CurKeyState;						/* Global Key State Flag          */
+int16_t CurKeyState;						/* Global Key State Flag          */
 
-WORD locount;							/* evnt_multi low-word timer     */
+int16_t locount;							/* evnt_multi low-word timer     */
 
-WORD hicount;							/* evnt_multi hi-word timer      */
+int16_t hicount;							/* evnt_multi hi-word timer      */
 
-LONG CycleTimeHz;						/* Start time in 200hz - 5ms ticks for
+int32_t CycleTimeHz;						/* Start time in 200hz - 5ms ticks for
 										 * updating the mouse drag rectangle.
 										 */
-WORD OldX,
+int16_t OldX,
  OldY;									/* These are used in conjunction with
 										 * the CycleTimeHz for determining
 										 * if the mouse should exit the drag.
@@ -188,21 +188,21 @@ BOOLEAN UpDownFlag;						/* Used to determine if the mouse moved
 
 /*	Customized of do_chg 	*/
 
-UWORD xdo_chg(tree, iitem, chgvalue, dochg, dodraw, usetrap)
+uint16_t xdo_chg(tree, iitem, chgvalue, dochg, dodraw, usetrap)
 OBJECT *tree;							/* tree that holds item */
 
-WORD iitem;								/* item to affect   */
+int16_t iitem;								/* item to affect   */
 
-REG UWORD chgvalue;						/* bit value to change  */
+register uint16_t chgvalue;						/* bit value to change  */
 
-WORD dochg;								/* set or reset value   */
+int16_t dochg;								/* set or reset value   */
 
-WORD dodraw;							/* draw resulting change */
+int16_t dodraw;							/* draw resulting change */
 
 						/* only if item enabled */
-WORD usetrap;
+int16_t usetrap;
 {
-	REG UWORD curr_state;
+	register uint16_t curr_state;
 
 	curr_state = tree[iitem].ob_state;
 
@@ -230,12 +230,12 @@ WORD usetrap;
 *	are not the current item
 */
 
-WORD mu_set(tree, last_item, cur_item, setit, usetrap)
+int16_t mu_set(tree, last_item, cur_item, setit, usetrap)
 OBJECT *tree;
 
-REG WORD last_item;
+register int16_t last_item;
 
-WORD cur_item,
+int16_t cur_item,
 	setit,
 	usetrap;
 {
@@ -258,24 +258,24 @@ WORD cur_item,
  * IN: MENU_PTR MenuPtr - The pointer to the active menu structure.
  * OUT: -1L	- Clicked outside of any menus.
  *      -2L     - Clicked in a previous menu.
- *      LONG Num - HIGH WORD - LOW WORD
+ *      int32_t Num - HIGH int16_t - LOW int16_t
  *		    MENU ID     MENU OBJECT
  *      If the Menu ID is valid, but the menu object is -1,
  *      then the user clicked on a disabled menu item.
  *      Use MenuChoice() ( it may be changed ) to see wot was clicked on.
  */
-LONG EvntSubMenu(id, MenuPtr)
-WORD id;								/* Process id         */
+int32_t EvntSubMenu(id, MenuPtr)
+int16_t id;								/* Process id         */
 
-REG MENU_PTR MenuPtr;					/* ptr to the menu node   */
+register MENU_PTR MenuPtr;					/* ptr to the menu node   */
 {
-	REG OBJECT *tree;
+	register OBJECT *tree;
 
-	WORD cur_obj;						/* object mouse is over   */
+	int16_t cur_obj;						/* object mouse is over   */
 
-	WORD old_obj;						/* old object             */
+	int16_t old_obj;						/* old object             */
 
-	REG MENU_PTR SubMenuPtr;			/* Pointer to SubMenu     */
+	register MENU_PTR SubMenuPtr;			/* Pointer to SubMenu     */
 
 	GRECT SubRect;						/* GRECT of active Submenu */
 
@@ -297,33 +297,33 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node   */
 										 */
 	MRETS mk;							/* Mouse Structure - Graf_mkstate()  */
 
-	LONG result;						/* Result to return with             */
+	int32_t result;						/* Result to return with             */
 
 	BOOLEAN done = FALSE;				/* Completion flag               */
 
-	WORD event;							/* evnt_multi event              */
+	int16_t event;							/* evnt_multi event              */
 
-	WORD scancode;						/* evnt_multi scan code returned     */
+	int16_t scancode;						/* evnt_multi scan code returned     */
 
-	WORD nclicks;						/* evnt_multi nclicks returns        */
+	int16_t nclicks;						/* evnt_multi nclicks returns        */
 
 	MOBLK m1;							/* evnt_multi M1 Mouse Rectangle     */
 
 	MOBLK m2;							/* evnt_multi M1 Mouse Rectangle     */
 
-	UWORD mn_mask;						/* event multi mask          */
+	uint16_t mn_mask;						/* event multi mask          */
 
-	WORD title;
+	int16_t title;
 
-	WORD title_state;
+	int16_t title_state;
 
-	WORD buff[6];
+	int16_t buff[6];
 
-	LONG tmparm,
+	int32_t tmparm,
 	 lbuparm;
 
 
-	/* INITIALIZE LOCAL VARIABLES */
+	/* INITIALIZE static VARIABLES */
 	result = -1L;						/* Init return obj     */
 	old_obj = NIL;						/* Init old object     */
 	done = FALSE;
@@ -412,8 +412,8 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node   */
 					mn_mask = MU_BUTTON | MU_M1 | MU_M2 | MU_TIMER;
 
 					/* Set to TIME_SAMPLE increments */
-					locount = (WORD) (TIME_SAMPLE & 0x0000ffffL);
-					hicount = (WORD) (TIME_SAMPLE >> 16);
+					locount = (int16_t) (TIME_SAMPLE & 0x0000ffffL);
+					hicount = (int16_t) (TIME_SAMPLE >> 16);
 					CycleTimeHz = 0L;
 
 					/* Get the SubMenu Rectangle ENTER */
@@ -910,21 +910,21 @@ REG MENU_PTR MenuPtr;					/* ptr to the menu node   */
  * Handles MU_M1 events
  */
 VOID M1_Event(id, MenuPtr, old_obj, cur_obj, SubMenuPtr, MenuDelayFlag, MenuDragFlag, mn_mask, m1, m2, mk, MenuObject)
-WORD id;								/* Process id */
+int16_t id;								/* Process id */
 
 MENU_PTR MenuPtr;
 
-WORD *old_obj;
+int16_t *old_obj;
 
-WORD *cur_obj;
+int16_t *cur_obj;
 
 MENU_PTR SubMenuPtr;
 
-WORD *MenuDelayFlag;
+int16_t *MenuDelayFlag;
 
-WORD *MenuDragFlag;
+int16_t *MenuDragFlag;
 
-WORD *mn_mask;
+int16_t *mn_mask;
 
 MOBLK *m1;
 
@@ -947,11 +947,11 @@ BOOLEAN *MenuObject;
  * evnt_multi mask and timer values.
  */
 VOID ClearDelays(MenuDelayFlag, MenuDragFlag, mn_mask)
-WORD *MenuDelayFlag;
+int16_t *MenuDelayFlag;
 
-WORD *MenuDragFlag;
+int16_t *MenuDragFlag;
 
-WORD *mn_mask;
+int16_t *mn_mask;
 {
 	*MenuDelayFlag = FALSE;
 	*MenuDragFlag = FALSE;
@@ -969,23 +969,23 @@ WORD *mn_mask;
  */
 VOID
 ItemHandler(id, MenuPtr, cur_obj, old_obj, SubMenuPtr, MenuDelayFlag, MenuDragFlag, mn_mask, MenuObject, m1, m2, mk)
-WORD id;								/* Process id         */
+int16_t id;								/* Process id         */
 
-REG MENU_PTR MenuPtr;					/* ptr to the menu node   */
+register MENU_PTR MenuPtr;					/* ptr to the menu node   */
 
-WORD cur_obj;
+int16_t cur_obj;
 
-WORD old_obj;
+int16_t old_obj;
 
 MENU_PTR SubMenuPtr;					/* Pointer to the SubMenu */
 
-WORD *MenuDelayFlag;
+int16_t *MenuDelayFlag;
 
-WORD *MenuDragFlag;
+int16_t *MenuDragFlag;
 
-WORD *mn_mask;
+int16_t *mn_mask;
 
-WORD *MenuObject;
+int16_t *MenuObject;
 
 MOBLK *m1;
 
@@ -1014,8 +1014,8 @@ MRETS *mk;
 			if (!(*MenuDelayFlag) && CheckForSubMenu(id, MTREE(MenuPtr), cur_obj, SubMenuPtr))
 			{
 				*mn_mask = MU_BUTTON | MU_M1 | MU_TIMER;
-				locount = (WORD) (SUBMENU_DELAY & 0x0000ffffL);
-				hicount = (WORD) (SUBMENU_DELAY >> 16);
+				locount = (int16_t) (SUBMENU_DELAY & 0x0000ffffL);
+				hicount = (int16_t) (SUBMENU_DELAY >> 16);
 				*MenuDelayFlag = TRUE;
 				*MenuDragFlag = FALSE;
 				*MenuObject = cur_obj;
@@ -1091,30 +1091,30 @@ MRETS *mk;
  * menu node structure.
  *
  * IN: MENU_PTR MenuPtr - ptr to the menu node
- *     WORD flag         - FALSE - Blit to the buffer
+ *     int16_t flag         - FALSE - Blit to the buffer
  *			   TRUE  - blit FROM the bufffer to the scrn.
  *
  * OUT: TRUE - SUCCESS
  *      FALSE - FAILURE
  */
 BOOLEAN Pop_Blit(MenuPtr, flag)
-REG MENU_PTR MenuPtr;					/* ptr to the menu node        */
+register MENU_PTR MenuPtr;					/* ptr to the menu node        */
 
-WORD flag;								/* Blit To/From buffer and scrn */
+int16_t flag;								/* Blit To/From buffer and scrn */
 {
-	REG OBJECT *tree;					/* the tree in question        */
+	register OBJECT *tree;					/* the tree in question        */
 
-	LONG location = 0L;					/* variable to save us an MFDB */
+	int32_t location = 0L;					/* variable to save us an MFDB */
 
-	LONG size;							/* size to blit...             */
+	int32_t size;							/* size to blit...             */
 
-	WORD pxy[8];						/* clipping array              */
+	int16_t pxy[8];						/* clipping array              */
 
 	FDB ObjMFDB;						/* MFDB                        */
 
 	GRECT clip;							/* Clipping rectangle ( GRECT ) */
 
-	WORD dummy;
+	int16_t dummy;
 
 	ActiveTree(MTREE(MenuPtr));
 
@@ -1133,7 +1133,7 @@ WORD flag;								/* Blit To/From buffer and scrn */
 
 	if (!flag)							/* Screen to Buffer    */
 	{									/* Malloc buffer...    */
-		size = (LONG) ((LONG) ((LONG) (((LONG) clip.g_w + 15L) / 16L) * 2L) * (LONG) clip.g_h * (LONG) gl_nplanes);
+		size = (int32_t) ((int32_t) ((int32_t) (((int32_t) clip.g_w + 15L) / 16L) * 2L) * (int32_t) clip.g_h * (int32_t) gl_nplanes);
 
 		MBUFFER(MenuPtr) = dos_alloc(size);
 	}
@@ -1167,7 +1167,7 @@ WORD flag;								/* Blit To/From buffer and scrn */
 		pxy[0] = pxy[1] = 0;			/* set the source    */
 		pxy[2] = clip.g_w - 1;
 		pxy[3] = clip.g_h - 1;
-		rc_2xy(&clip, (WORD *) & pxy[4]);	/* set the dest    */
+		rc_2xy(&clip, (int16_t *) & pxy[4]);	/* set the dest    */
 		vro_cpyf(3, pxy, &ObjMFDB, (FDB *) & location);
 
 		if (MBUFFER(MenuPtr))			/* Clear the buffer  */
@@ -1193,7 +1193,7 @@ WORD flag;								/* Blit To/From buffer and scrn */
  * Check if the user is clicking on the UP or DOWN arrow
  *
  * IN: MENU_PTR MenuPtr - ptr to the menu node in question
- *     WORD  cur_obj     - the object to check.
+ *     int16_t  cur_obj     - the object to check.
  * OUT: TRUE - This is an active UP or DOWN arrow
  *      FALSE - Nope - this isn't an UP or DOWN arrow
  *
@@ -1201,11 +1201,11 @@ WORD flag;								/* Blit To/From buffer and scrn */
  *             the bottom menu item must be a Down arrow.
  */
 BOOLEAN ArrowCheck(MenuPtr, tree, cur_obj)
-REG MENU_PTR MenuPtr;					/* ptr to menu node   */
+register MENU_PTR MenuPtr;					/* ptr to menu node   */
 
 OBJECT *tree;
 
-REG WORD cur_obj;						/* the object to check */
+register int16_t cur_obj;						/* the object to check */
 {
 
 	if ((cur_obj != NIL) &&				/* Check for NIL pointer */
@@ -1230,25 +1230,25 @@ REG WORD cur_obj;						/* the object to check */
  * up or down arrows.
  *
  * IN: MENU_PTR MenuPtr - the menu node in question ( a ptr to )
- *     WORD     cur_obj - the menu item the user is clicking on.
+ *     int16_t     cur_obj - the menu item the user is clicking on.
  * OUT: TRUE/FALSE - hmmm...does it really matter?
  */
 BOOLEAN ArrowScroll(MenuPtr, cur_obj)
-REG MENU_PTR MenuPtr;					/* ptr to the menu node     */
+register MENU_PTR MenuPtr;					/* ptr to the menu node     */
 
-REG WORD cur_obj;						/* the obj being clicked on */
+register int16_t cur_obj;						/* the obj being clicked on */
 {
-	REG GRECT clip;						/* the blit clip rectangle  */
+	register GRECT clip;						/* the blit clip rectangle  */
 
 	MRETS mk;							/* the mouse structure      */
 
 	GRECT rect;							/* temp GRECT           */
 
-	WORD pxy[12];						/* blit array           */
+	int16_t pxy[12];						/* blit array           */
 
-	LONG location = 0L;					/* saves us one MFDB        */
+	int32_t location = 0L;					/* saves us one MFDB        */
 
-	WORD Direction;						/* direction variable       */
+	int16_t Direction;						/* direction variable       */
 
 	BOOLEAN DrawFlag;					/* Do the Redraw!       */
 
@@ -1258,29 +1258,29 @@ REG WORD cur_obj;						/* the obj being clicked on */
 
 	BOOLEAN DelayFlag;					/* Do the scroll delay      */
 
-	WORD dummy;
+	int16_t dummy;
 
-	WORD done;
+	int16_t done;
 
-	WORD event;							/* evnt_multi event              */
+	int16_t event;							/* evnt_multi event              */
 
-	WORD scancode;						/* evnt_multi scan code returned     */
+	int16_t scancode;						/* evnt_multi scan code returned     */
 
-	WORD nclicks;						/* evnt_multi nclicks returns        */
+	int16_t nclicks;						/* evnt_multi nclicks returns        */
 
 	MOBLK m1;							/* evnt_multi M1 Mouse Rectangle     */
 
-	WORD mn_mask;						/* event multi mask              */
+	int16_t mn_mask;						/* event multi mask              */
 
-	WORD locount;						/* event multi timer - locount       */
+	int16_t locount;						/* event multi timer - locount       */
 
-	WORD hicount;						/* event multi timer - hicount       */
+	int16_t hicount;						/* event multi timer - hicount       */
 
-	WORD buff[6];
+	int16_t buff[6];
 
-	WORD button;
+	int16_t button;
 
-	WORD rets[4];
+	int16_t rets[4];
 
 
 	DelayFlag = TRUE;					/* Do the delay just once   */
@@ -1355,7 +1355,7 @@ REG WORD cur_obj;						/* the obj being clicked on */
 
 			rc_intersect(&gl_rfull, &clip);	/* Setup the Source rectangle */
 			rect = clip;
-			rc_2xy(&clip, (WORD *) & pxy[0]);
+			rc_2xy(&clip, (int16_t *) & pxy[0]);
 
 			if (Direction == UP_ARROW)	/* Setup DESTINATIN Rectangle */
 				clip.g_y += gl_hchar;	/* Either UP....         */
@@ -1364,7 +1364,7 @@ REG WORD cur_obj;						/* the obj being clicked on */
 				clip.g_y -= gl_hchar;
 
 			rc_intersect(&gl_rfull, &clip);	/* Clip to the desktop       */
-			rc_2xy(&clip, (WORD *) & pxy[4]);
+			rc_2xy(&clip, (int16_t *) & pxy[4]);
 
 			clip = rect;				/* setup clipping rectangle  */
 			rc_intersect(&gl_rfull, &clip);
@@ -1423,8 +1423,8 @@ REG WORD cur_obj;						/* the obj being clicked on */
 			/* This is the delay when we are already scrolling */
 			if (!DelayFlag)
 			{
-				locount = (WORD) (SCROLL_DELAY & 0x0000ffffL);
-				hicount = (WORD) (SCROLL_DELAY >> 16);
+				locount = (int16_t) (SCROLL_DELAY & 0x0000ffffL);
+				hicount = (int16_t) (SCROLL_DELAY >> 16);
 			}
 		} else
 		{
@@ -1444,13 +1444,13 @@ REG WORD cur_obj;						/* the obj being clicked on */
 		 */
 		if (DelayFlag)
 		{
-			locount = (WORD) (ARROW_DELAY & 0x0000ffffL);
-			hicount = (WORD) (ARROW_DELAY >> 16);
+			locount = (int16_t) (ARROW_DELAY & 0x0000ffffL);
+			hicount = (int16_t) (ARROW_DELAY >> 16);
 			DelayFlag = FALSE;
 		}
 
 		event = ev_multi(mn_mask, &m1, 0L,
-						 (LONG) (HW(hicount) + LW(locount)), (LONG) (HW(1) | LW((1 << 8) | button)), 0x0L, &buff[0]);
+						 (int32_t) (HW(hicount) + LW(locount)), (int32_t) (HW(1) | LW((1 << 8) | button)), 0x0L, &buff[0]);
 
 		mk.x = buff[0];
 		mk.y = buff[1];
@@ -1493,17 +1493,17 @@ REG WORD cur_obj;						/* the obj being clicked on */
  * newly displayed submenu.
  *
  * IN: GRECT *DragRect - The new bounding rectangle for the drag.
- *     WORD  mx,my     - The mouse position
+ *     int16_t  mx,my     - The mouse position
  *     GRECT *SubRect  - The target submenu GRECT 
  */
 VOID SetDRect(DragRect, mx, my, SubRect)
-REG GRECT *DragRect;					/* the new bounding rect for the drag */
+register GRECT *DragRect;					/* the new bounding rect for the drag */
 
-REG WORD mx;							/* the xpos of the mouse          */
+register int16_t mx;							/* the xpos of the mouse          */
 
-REG WORD my;							/* ;the ypos of the mouse         */
+register int16_t my;							/* ;the ypos of the mouse         */
 
-REG GRECT *SubRect;						/* the target submenu GRECT...        */
+register GRECT *SubRect;						/* the target submenu GRECT...        */
 {
 
 	/* Handle the HORIZONTAL Position of the rectangle */
@@ -1536,14 +1536,14 @@ REG GRECT *SubRect;						/* the target submenu GRECT...        */
  * 
  * IN:  MRETS *mk - mouse structure
  *      MENU_PTR MenuPtr - the menu that we want to check if we're over.
- * OUT: WORD - the object that the mouse is over.
+ * OUT: int16_t - the object that the mouse is over.
  */
-WORD GetMouseState(mk, MenuPtr)
-REG MRETS *mk;							/* ptr to the mouse structure     */
+int16_t GetMouseState(mk, MenuPtr)
+register MRETS *mk;							/* ptr to the mouse structure     */
 
-REG MENU_PTR MenuPtr;					/* ptr to the node we want checked */
+register MENU_PTR MenuPtr;					/* ptr to the node we want checked */
 {
-	REG WORD cur_obj;
+	register int16_t cur_obj;
 
 	cur_obj = ob_find(MTREE(MenuPtr), MPARENT(MenuPtr), 1, mk->x, mk->y);
 
@@ -1561,7 +1561,7 @@ REG MENU_PTR MenuPtr;					/* ptr to the node we want checked */
  * we can miss the key button click.
  */
 BOOLEAN CheckButton(button, mk)
-WORD button;
+int16_t button;
 
 MRETS *mk;
 {

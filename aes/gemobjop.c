@@ -44,7 +44,7 @@
 
 #define	TED_THICKNESS	22
 
-EXTERN WS gl_ws;
+extern WS gl_ws;
 
 /*
 * ob_sst	Routine to set the user variables pspec, pstate, ptype,
@@ -55,25 +55,25 @@ EXTERN WS gl_ws;
 *
 */
 
-BYTE ob_sst(tree, obj, pspec, pstate, ptype, pflags, pt, pth)
-LONG tree;
+char ob_sst(tree, obj, pspec, pstate, ptype, pflags, pt, pth)
+int32_t tree;
 
-WORD obj;
+int16_t obj;
 
-REG LONG *pspec;
+register int32_t *pspec;
 
-WORD *pstate,
+int16_t *pstate,
 *ptype;
 
-REG WORD *pflags;
+register int16_t *pflags;
 
 GRECT *pt;
 
-WORD *pth;
+int16_t *pth;
 {
-	REG WORD th;
+	register int16_t th;
 
-	REG OBJECT *tmp;
+	register OBJECT *tmp;
 
 	tmp = OB_NEXT(obj);
 
@@ -108,7 +108,7 @@ WORD *pth;
 	case G_BOX:						/* for these use object thickness */
 	case G_BOXCHAR:
 	case G_IBOX:
-		th = LBYTE2(((BYTE *) pspec));
+		th = LBYTE2(((char *) pspec));
 		break;
 
 	case G_BUTTON:						/* for a button make thicker */
@@ -128,27 +128,27 @@ WORD *pth;
 	/* returns object border/text color */
 	/* or the 3byte of the pointer to a */
 	/* tedinfo structure (real helpfull) */
-	return (LBYTE3(((BYTE *) pspec)));
+	return (LBYTE3(((char *) pspec)));
 }
 
 
 VOID everyobj(tree, this, last, routine, startx, starty, maxdep)
-REG LONG tree;
+register int32_t tree;
 
-REG WORD this,
+register int16_t this,
 	last;
 
-WORD(*routine) ();
-WORD startx,
+int16_t(*routine) ();
+int16_t startx,
  starty;
 
-WORD maxdep;
+int16_t maxdep;
 {
-	REG WORD tmp1;
+	register int16_t tmp1;
 
-	REG WORD depth;
+	register int16_t depth;
 
-	WORD x[8],
+	int16_t x[8],
 	 y[8];
 
 	x[0] = startx;
@@ -211,12 +211,12 @@ WORD maxdep;
 *	idea is to walk to the end of our siblings and return
 *	our parent.  If object is the root then return NIL as parent.
 */
-WORD get_par(tree, obj)
-REG LONG tree;
+int16_t get_par(tree, obj)
+register int32_t tree;
 
-REG WORD obj;
+register int16_t obj;
 {
-	REG WORD pobj;
+	register int16_t pobj;
 
 	pobj = obj;
 

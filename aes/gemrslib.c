@@ -84,43 +84,43 @@
 #define APP_LO2RESV (rs_global + 18)
 
 					/* in DOS.C         */
-EXTERN WORD dos_open();
+extern int16_t dos_open();
 
-EXTERN LONG dos_lseek();
+extern int32_t dos_lseek();
 
-EXTERN WORD dos_read();
+extern int16_t dos_read();
 
-EXTERN WORD dos_close();
+extern int16_t dos_close();
 
-EXTERN LONG dos_alloc();
+extern int32_t dos_alloc();
 
-EXTERN WORD dos_free();
+extern int16_t dos_free();
 
-EXTERN WORD fm_error();
+extern int16_t fm_error();
 
-EXTERN LONG ad_shcmd;
+extern int32_t ad_shcmd;
 
-EXTERN LONG ad_sysglo;
+extern int32_t ad_sysglo;
 
-EXTERN WORD DOS_ERR;
+extern int16_t DOS_ERR;
 
-EXTERN WORD DOS_AX;
+extern int16_t DOS_AX;
 
-EXTERN WORD gl_width;
+extern int16_t gl_width;
 
-EXTERN WORD gl_wchar;
+extern int16_t gl_wchar;
 
-EXTERN WORD gl_hchar;
+extern int16_t gl_hchar;
 
-EXTERN THEGLO D;
+extern THEGLO D;
 
-EXTERN PD *rlr;
+extern PD *rlr;
 
-LONG rs_hdr;
+int32_t rs_hdr;
 
-LONG rs_global;
+int32_t rs_global;
 
-UWORD hdr_buff[HDR_LENGTH / 2];
+uint16_t hdr_buff[HDR_LENGTH / 2];
 
 
 /*
@@ -129,11 +129,11 @@ UWORD hdr_buff[HDR_LENGTH / 2];
 *	full screen width. 
 */
 VOID fix_chpos(pfix, ifx)
-LONG pfix;
+int32_t pfix;
 
-WORD ifx;
+int16_t ifx;
 {
-	REG WORD cpos,
+	register int16_t cpos,
 	 coffset;
 
 	cpos = LWGET(pfix);
@@ -152,14 +152,14 @@ WORD ifx;
 /* rs_obfix								*/
 /************************************************************************/
 VOID rs_obfix(tree, curob)
-LONG tree;
+int32_t tree;
 
-WORD curob;
+int16_t curob;
 {
-	REG WORD i,
+	register int16_t i,
 	 val;
 
-	REG LONG p;
+	register int32_t p;
 
 	/* set X,Y,W,H with */
 	/*   fixch, use val */
@@ -170,27 +170,27 @@ WORD curob;
 	val = TRUE;
 	for (i = 0; i < 4; i++)
 	{
-		fix_chpos(p + (LONG) (2 * i), val);
+		fix_chpos(p + (int32_t) (2 * i), val);
 		val = !val;
 	}
 }
 
 
-BYTE * rs_str(stnum)
+char * rs_str(stnum)
 {
-	LONG ad_string;
+	int32_t ad_string;
 
 	rs_gaddr(ad_sysglo, R_STRING, stnum, &ad_string);
 	LSTCPY(&D.g_loc1[0], ad_string);
 	return (&D.g_loc1[0]);
 }
 
-LONG get_sub(rsindex, rtype, rsize)
-WORD rsindex,
+int32_t get_sub(rsindex, rtype, rsize)
+int16_t rsindex,
 	rtype,
 	rsize;
 {
-	UWORD offset;
+	uint16_t offset;
 
 	offset = LWGET(rs_hdr + LW(rtype * 2));
 	/* get base of objects  */
@@ -202,26 +202,22 @@ WORD rsindex,
 /*
  *	return address of given type and index, INTERNAL ROUTINE
 */
-LONG get_addr(rstype, rsindex)
-REG UWORD rstype;
+int32_t get_addr(rstype, rsindex)
+register uint16_t rstype;
 
-REG UWORD rsindex;
+register uint16_t rsindex;
 {
-	REG LONG psubstruct;
-
-	REG WORD size;
-
-	REG WORD rt;
-
-	WORD valid;
-
-	UWORD junk;
+	register int32_t psubstruct;
+	register int16_t size;
+	register int16_t rt;
+	int16_t valid;
+	uint16_t junk;
 
 	valid = TRUE;
 	switch (rstype)
 	{
 	case R_TREE:
-#if ALCYON
+#ifdef __ALCYON__
 		junk = LW(rsindex * 4);
 		return (LLGET(LLGET(APP_LOPNAME) + junk));
 #else
@@ -264,16 +260,16 @@ REG UWORD rsindex;
 		else
 			return (RIB_PTEXT);
 	case R_STRING:
-		return (LLGET(get_sub(rsindex, RT_FREESTR, sizeof(LONG))));
+		return (LLGET(get_sub(rsindex, RT_FREESTR, sizeof(int32_t))));
 	case R_IMAGEDATA:
-		return (LLGET(get_sub(rsindex, RT_FREEIMG, sizeof(LONG))));
+		return (LLGET(get_sub(rsindex, RT_FREEIMG, sizeof(int32_t))));
 	case R_FRSTR:
 		rt = RT_FREESTR;
-		size = sizeof(LONG);
+		size = sizeof(int32_t);
 		break;
 	case R_FRIMG:
 		rt = RT_FREEIMG;
-		size = sizeof(LONG);
+		size = sizeof(int32_t);
 		break;
 	default:
 		valid = FALSE;
@@ -288,11 +284,11 @@ REG UWORD rsindex;
 
 fix_trindex()
 {
-	REG WORD ii;
+	register int16_t ii;
 
-	REG LONG ptreebase;
+	register int32_t ptreebase;
 
-	ptreebase = get_sub(0, RT_TRINDEX, sizeof(LONG));
+	ptreebase = get_sub(0, RT_TRINDEX, sizeof(int32_t));
 	LLSET(APP_LOPNAME, ptreebase);
 
 	for (ii = NUM_TREE - 1; ii >= 0; ii--)
@@ -304,14 +300,14 @@ fix_trindex()
 
 VOID fix_cicon()
 {
-	LONG *ctable;
+	int32_t *ctable;
 
-	UWORD *header;
+	uint16_t *header;
 
 	header = rs_hdr;
 	if (header[RT_VRSN] & 0x0004)		/* if extended type */
 	{
-		ctable = rs_hdr + (LONG) header[RS_SIZE];
+		ctable = rs_hdr + (int32_t) header[RS_SIZE];
 		if (ctable[1] && (ctable[1] != -1))
 			get_colo_rsc(ctable[1] + rs_hdr);
 	}
@@ -322,21 +318,21 @@ VOID fix_cicon()
 
 VOID fix_objects()
 {
-	REG WORD ii;
+	register int16_t ii;
 
-	REG WORD obtype;
+	register int16_t obtype;
 
-	REG LONG psubstruct;
+	register int32_t psubstruct;
 
-	LONG *ctable;
+	int32_t *ctable;
 
-	UWORD *header;
+	uint16_t *header;
 
 	header = rs_hdr;
 
 	if (header[RT_VRSN] & 0x0004)
 	{
-		ctable = rs_hdr + (LONG) header[RS_SIZE];
+		ctable = rs_hdr + (int32_t) header[RS_SIZE];
 		ctable = ctable[1] + rs_hdr;
 	} else
 		ctable = 0x0L;
@@ -347,7 +343,7 @@ VOID fix_objects()
 		rs_obfix(psubstruct, 0);
 		obtype = (LWGET(ROB_TYPE) & 0x00ff);
 		if ((obtype == G_CICON) && ctable)
-			*((LONG *) ROB_SPEC) = ctable[*((LONG *) (ROB_SPEC))];
+			*((int32_t *) ROB_SPEC) = ctable[*((int32_t *) (ROB_SPEC))];
 
 		if ((obtype != G_BOX) && (obtype != G_IBOX) && (obtype != G_BOXCHAR) && (obtype != G_CICON))
 			fix_long(ROB_SPEC);
@@ -357,14 +353,9 @@ VOID fix_objects()
 
 fix_tedinfo()
 {
-	REG WORD ii,
-	 i;
-
-	REG LONG psubstruct;
-
-	LONG tl[2],
-	 ls[2];
-
+	register int16_t ii, i;
+	register int32_t psubstruct;
+	int32_t tl[2], ls[2];
 
 	for (ii = NUM_TI - 1; ii >= 0; ii--)
 	{
@@ -389,31 +380,30 @@ fix_tedinfo()
 	}
 }
 
-WORD fix_nptrs(cnt, type)
-WORD cnt;
 
-WORD type;
+int16_t fix_nptrs(cnt, type)
+int16_t cnt;
+int16_t type;
 {
-	REG WORD i;
+	register int16_t i;
 
 	for (i = cnt; i >= 0; i--)
 		fix_long(get_addr(type, i));
 }
 
 
-WORD fix_ptr(type, index)
-WORD type;
-
-WORD index;
+int16_t fix_ptr(type, index)
+int16_t type;
+int16_t index;
 {
 	return (fix_long(get_addr(type, index)));
 }
 
 
-WORD fix_long(plong)
-REG LONG plong;
+int16_t fix_long(plong)
+register int32_t plong;
 {
-	REG LONG lngval;
+	register int32_t lngval;
 
 	lngval = LLGET(plong);
 	if (lngval != -1L)
@@ -430,7 +420,7 @@ REG LONG plong;
 *	routines
 */
 VOID rs_sglobe(pglobal)
-LONG pglobal;
+int32_t pglobal;
 {
 	rs_global = pglobal;
 	rs_hdr = LLGET(APP_LO1RESV);
@@ -440,12 +430,12 @@ LONG pglobal;
 /*
 *	Free the memory associated with a particular resource load.
 */
-WORD rs_free(pglobal)
-LONG pglobal;
+int16_t rs_free(pglobal)
+int32_t pglobal;
 {
-	UWORD *header;
+	uint16_t *header;
 
-	LONG *ctable;
+	int32_t *ctable;
 
 	rs_sglobe(pglobal);					/* set global values */
 
@@ -453,7 +443,7 @@ LONG pglobal;
 
 	if (header[RT_VRSN] & 0x0004)		/* extended format */
 	{
-		ctable = rs_hdr + (LONG) header[RS_SIZE];
+		ctable = rs_hdr + (int32_t) header[RS_SIZE];
 		if (ctable[1] && (ctable[1] != -1))
 		{
 			ctable = ctable[1] + rs_hdr;
@@ -471,14 +461,14 @@ LONG pglobal;
 *	Get a particular ADDRess out of a resource file that has been
 *	loaded into memory.
 */
-WORD rs_gaddr(pglobal, rtype, rindex, rsaddr)
-LONG pglobal;
+int16_t rs_gaddr(pglobal, rtype, rindex, rsaddr)
+int32_t pglobal;
 
-UWORD rtype;
+uint16_t rtype;
 
-UWORD rindex;
+uint16_t rindex;
 
-REG LONG *rsaddr;
+register int32_t *rsaddr;
 {
 	rs_sglobe(pglobal);
 
@@ -492,15 +482,15 @@ REG LONG *rsaddr;
 *	loaded into memory.
 */
 VOID rs_saddr(pglobal, rtype, rindex, rsaddr)
-LONG pglobal;
+int32_t pglobal;
 
-UWORD rtype;
+uint16_t rtype;
 
-UWORD rindex;
+uint16_t rindex;
 
-LONG rsaddr;
+int32_t rsaddr;
 {
-	REG LONG psubstruct;
+	register int32_t psubstruct;
 
 	rs_sglobe(pglobal);
 
@@ -520,21 +510,21 @@ LONG rsaddr;
 *	case of the GEM resource file this workstation will not have
 *	been loaded into memory yet.
 */
-WORD rs_readit(pglobal, rsfname)
-LONG pglobal;
+int16_t rs_readit(pglobal, rsfname)
+int32_t pglobal;
 
-LONG rsfname;
+int32_t rsfname;
 {
-	REG UWORD fd,
+	register uint16_t fd,
 	 ret;
 
-	LONG rslsize;
+	int32_t rslsize;
 
-	BYTE rspath[128];
+	char rspath[128];
 
 	/* make sure its there  */
 	LSTCPY(rspath, rsfname);
-	if (!sh_find(rspath, NULLPTR))
+	if (!sh_find(rspath, NULL))
 		return (FALSE);
 	/* init global      */
 	rs_global = pglobal;
@@ -553,13 +543,13 @@ LONG rsfname;
 		if (hdr_buff[RT_VRSN] & 0x0004)	/* New format?      */
 		{								/* seek to the 1st entry */
 			/* of the table     */
-			if (dos_lseek(fd, SMODE, (LONG) (hdr_buff[RS_SIZE])) != hdr_buff[RS_SIZE])
+			if (dos_lseek(fd, SMODE, (int32_t) (hdr_buff[RS_SIZE])) != hdr_buff[RS_SIZE])
 			{
 				ret = FALSE;
 				goto rs_exit;
 			}
 			/* read the size    */
-			dos_read(fd, sizeof(LONG), &rslsize);
+			dos_read(fd, sizeof(int32_t), &rslsize);
 			if (DOS_ERR)
 				goto rs_end;
 
@@ -574,7 +564,7 @@ LONG rsfname;
 			trap(X_READ, fd, rslsize, rs_hdr);
 /*	    dos_read(fd, rslsize, rs_hdr);	*/
 			if (!DOS_ERR)
-				do_rsfix(rs_hdr, (UWORD) rslsize);	/* do all the fixups    */
+				do_rsfix(rs_hdr, (uint16_t) rslsize);	/* do all the fixups    */
 		}
 	}
 
@@ -589,11 +579,11 @@ LONG rsfname;
 /* do all the fixups. rs_hdr must be initialized	*/
 
 VOID do_rsfix(hdr, size)
-LONG hdr;
+int32_t hdr;
 
-WORD size;
+int16_t size;
 {
-	REG WORD ibcnt;
+	register int16_t ibcnt;
 
 	LLSET(APP_LO1RESV, hdr);
 	LWSET(APP_LO2RESV, size);
@@ -621,7 +611,7 @@ WORD size;
 */
 
 VOID rs_fixit(pglobal)
-LONG pglobal;
+int32_t pglobal;
 {
 	rs_sglobe(pglobal);
 	fix_objects();
@@ -631,12 +621,12 @@ LONG pglobal;
 /*
 *	RS_LOAD		mega resource load
 */
-WORD rs_load(pglobal, rsfname)
-REG LONG pglobal;
+int16_t rs_load(pglobal, rsfname)
+register int32_t pglobal;
 
-LONG rsfname;
+int32_t rsfname;
 {
-	REG WORD ret;
+	register int16_t ret;
 
 	ret = rs_readit(pglobal, rsfname);
 	if (ret)

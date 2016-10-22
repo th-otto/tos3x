@@ -33,28 +33,28 @@
 #include <machine.h>
 #include <struct88.h>
 
-GLOBAL PD *rlr,
-*drl,
-*nrl;
+PD *rlr;
+PD *drl;
+PD *nrl;
 
-GLOBAL EVB *eul,
-*dlr,
-*zlr;
+EVB *eul;
+EVB *dlr;
+EVB *zlr;
 
-GLOBAL LONG elinkoff;
+int32_t elinkoff;
 
-/*	GLOBAL BYTE	dodisp;		*/
-GLOBAL BYTE indisp;
+/*	char	dodisp;		*/
+char indisp;
 
-GLOBAL BYTE infork;
+char infork;
 
-GLOBAL WORD fpt,
- fph,
- fpcnt;									/* forkq tail, head,    */
+int16_t fpt;
+int16_t fph;
+int16_t fpcnt;									/* forkq tail, head,    */
 
 						/*   count      */
-GLOBAL SPB wind_spb;
+SPB wind_spb;
 
-GLOBAL CDA *cda;
+CDA *cda;
 
-GLOBAL WORD curpid;
+int16_t curpid;
