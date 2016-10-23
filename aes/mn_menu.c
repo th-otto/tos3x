@@ -69,7 +69,21 @@ MENU_PTR MenuList;						/* Pointer to the head of the linked list */
 				  /* that contains the structures of the    */
 				  /* menus that are to be displayed, such as */
 				  /* the ObRect, blit buffer etc...         */
-int16_t MAX_MENU_HEIGHT;					/* The menu height we start scrolling     */
+static int16_t MAX_MENU_HEIGHT;					/* The menu height we start scrolling     */
+
+
+/* PROTOTYPES
+ * ================================================================
+ */
+
+
+VOID InitMenuNode PROTO((MENU_PTR MenuPtr));
+int16_t GetNewMenu PROTO((NOTHING));
+int16_t FindNewMenuID PROTO((NOTHING));
+VOID SetMenuHeight PROTO((MENU_PTR MenuPtr, int16_t start_obj, BOOLEAN adjust_flag));
+VOID PushArrowText PROTO((MENU_PTR MenuPtr));
+VOID PopArrowText PROTO((MENU_PTR MenuPtr));
+
 
 
 /* FUNCTIONS
@@ -92,13 +106,11 @@ int16_t MAX_MENU_HEIGHT;					/* The menu height we start scrolling     */
  * OUT: SUCCESS - returns a Menu ID ranging from 1 - 32767
  *      FAILURE - returns 0
  */
-int16_t Menu_Insert(tree, Parent)
-OBJECT *tree;							/* tree in question      */
-
-int16_t Parent;							/* The menu object       */
+int16_t Menu_Insert(P(OBJECT *) tree, P(int16_t) Parent)
+PP(OBJECT *tree;)							/* tree in question      */
+PP(int16_t Parent;)							/* The menu object       */
 {
 	int16_t MenuID;						/* the Menu ID #         */
-
 	register MENU_PTR MenuPtr;				/* ptr to the Menu Node  */
 
 	if ((MenuID = GetNewMenu()) > NULL)	/* Get a new Menu ID     */
@@ -131,11 +143,10 @@ int16_t Parent;							/* The menu object       */
  *
  * OUT: VOID
  */
-VOID Menu_Delete(MenuID)
-int16_t MenuID;							/* MenuID of node to delete */
+VOID Menu_Delete(P(int16_t) MenuID)
+PP(int16_t MenuID;)							/* MenuID of node to delete */
 {
 	register MENU_PTR ptr;					/* Temp Menu Ptr    */
-
 	register MENU_PTR MenuPtr;				/* Current Menu Ptr */
 
 	if ((MenuPtr = GetMenuPtr(MenuID)) > NULL)	/* Get the Ptr to the node */
@@ -179,7 +190,7 @@ int16_t MenuID;							/* MenuID of node to delete */
  * IN: VOID
  * OUT: VOID
  */
-VOID mn_init(VOID)
+VOID mn_init(NOTHING)
 {
 	/* These are required to make the menu system work and strut its stuff */
 	Init_Delays();
@@ -206,8 +217,8 @@ VOID mn_init(VOID)
  *
  * OUT: VOID
  */
-VOID InitMenuNode(MenuPtr)
-register MENU_PTR MenuPtr;					/* ptr to the Menu Node */
+VOID InitMenuNode(P(MENU_PTR) MenuPtr)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the Menu Node */
 {
 	MMENU_ID(MenuPtr) = NIL;
 	MTREE(MenuPtr) = NULL;
@@ -255,12 +266,10 @@ register MENU_PTR MenuPtr;					/* ptr to the Menu Node */
  * OUT: SUCCESS - A Menu ID ranging from 1 to 32767
  *      FAILURE - 0 error
  */
-int16_t GetNewMenu(VOID)
+int16_t GetNewMenu(NOTHING)
 {
 	register MENU_PTR ptr;					/* Ptr to a temp node           */
-
 	register MENU_PTR newptr;				/* Ptr to the New malloced node */
-
 	int16_t MenuID;						/* The New Menu ID for the node */
 
 	/* Malloc a new node!           */
@@ -302,12 +311,10 @@ int16_t GetNewMenu(VOID)
  * OUT: Returns the Menu ID - returns 1 if this is the first menu.
  *      Returns 0 if there is an error. ie - > 32767 menu ids
  */
-int16_t FindNewMenuID(VOID)
+int16_t FindNewMenuID(NOTHING)
 {
 	register MENU_PTR ptr;					/* Temp Menu Node Pointer        */
-
 	int16_t MenuID;						/* A variable menu ID            */
-
 	ptr = MenuList;						/* Set the temp to the head      */
 
 	if (ptr == NULL)					/* This is the first Menu Node!  */
@@ -338,8 +345,8 @@ int16_t FindNewMenuID(VOID)
  * OUT: MENU_PTR - SUCCESS - returns a pointer to the node.
  *                 FAILURE - returns NULLPTR.
  */
-MENU_PTR GetMenuPtr(MenuID)
-int16_t MenuID;							/* the menu id we want...    */
+MENU_PTR GetMenuPtr(P(int16_t) MenuID)
+PP(int16_t MenuID;)							/* the menu id we want...    */
 {
 	register MENU_PTR ptr;					/* Temp Pointer              */
 
@@ -376,8 +383,8 @@ int16_t MenuID;							/* the menu id we want...    */
  * IN: MENU_PTR MenuPtr - The ptr to the Menu Node that we need to check.
  * OUT: VOID
  */
-VOID CheckMenuHeight(MenuPtr)
-register MENU_PTR MenuPtr;					/* ptr to the Menu Node   */
+VOID CheckMenuHeight(P(MENU_PTR) MenuPtr)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the Menu Node   */
 {
 	register OBJECT *tree;
 
@@ -400,15 +407,12 @@ register MENU_PTR MenuPtr;					/* ptr to the Menu Node   */
  * IN:  MENU_PTR MenuPtr - Ptr to the menu node in question
  * OUT: returns the number of menu items in this menu.
  */
-int16_t CountMenuItems(MenuPtr)
-register MENU_PTR MenuPtr;					/* ptr to the Menu Node */
+int16_t CountMenuItems(P(MENU_PTR) MenuPtr)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the Menu Node */
 {
 	register OBJECT *tree;					/* tree to count on     */
-
 	register int16_t parent;					/* menu object      */
-
 	int16_t NumItems;						/* Num Items in picture. */
-
 	int16_t obj;
 
 	ActiveTree(MTREE(MenuPtr));
@@ -438,21 +442,15 @@ register MENU_PTR MenuPtr;					/* ptr to the Menu Node */
  *
  * OUT: VOID
  */
-VOID SetMenuHeight(MenuPtr, start_obj, adjust_flag)
-register MENU_PTR MenuPtr;					/* ptr to the menu node    */
-
-int16_t start_obj;							/* menu item at the top    */
-
-BOOLEAN adjust_flag;					/* see above...            */
+VOID SetMenuHeight(P(MENU_PTR) MenuPtr, P(int16_t) start_obj, P(BOOLEAN) adjust_flag)
+PP(register MENU_PTR MenuPtr;)				/* ptr to the menu node    */
+PP(int16_t start_obj;)						/* menu item at the top    */
+PP(BOOLEAN adjust_flag;)					/* see above...            */
 {
-	register OBJECT *tree;					/* object tree in question */
-
-	register int16_t obj;						/* temp object             */
-
+	register OBJECT *tree;				/* object tree in question */
+	register int16_t obj;				/* temp object             */
 	int16_t parent;						/* menu object             */
-
-	int16_t offset_obj,
-	 temp;								/* Offset menu item        */
+	int16_t offset_obj, temp;			/* Offset menu item        */
 
 	ActiveTree(MTREE(MenuPtr));
 	parent = MPARENT(MenuPtr);
@@ -572,17 +570,13 @@ BOOLEAN adjust_flag;					/* see above...            */
  * IN:  MENU_PTR MenuPtr - Pointer to the menu node in question.
  * OUT: VOID
  */
-VOID RestoreMenu(MenuPtr)
-register MENU_PTR MenuPtr;					/* ptr to the menu node... */
+VOID RestoreMenu(P(MENU_PTR) MenuPtr)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node... */
 {
 	register OBJECT *tree;					/* the tree to set this to */
-
 	register int16_t obj;						/* temp object             */
-
 	int16_t parent;						/* The menu object         */
-
 	int16_t count;							/* The # of items          */
-
 	int16_t temp;
 
 	ActiveTree(MTREE(MenuPtr));
@@ -664,25 +658,17 @@ register MENU_PTR MenuPtr;					/* ptr to the menu node... */
  *	      The menu is adjusted downwards if it exceeds the top 
  * 	      of the screen.
  */
-VOID AdjustMenuPosition(MenuPtr, xpos, ypos, rect, Horizontal_Flag, Vertical_Flag)
-register MENU_PTR MenuPtr;					/* ptr to the Menu Node         */
-
-int16_t xpos;								/* xpos that we originally want */
-
-int16_t ypos;								/* ypos that we originally want */
-
-GRECT *rect;							/* GRECT of the button          */
-
-BOOLEAN Horizontal_Flag;				/* See above...         */
-
-BOOLEAN Vertical_Flag;					/* See above...         */
+VOID AdjustMenuPositio(P(MENU_PTR) MenuPtr, P(int16_t) xpos, P(int16_t) ypos, P(GRECT *) rect, P(BOOLEAN) Horizontal_Flag, P(BOOLEAN) Vertical_Flag)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the Menu Node         */
+PP(int16_t xpos;)								/* xpos that we originally want */
+PP(int16_t ypos;)								/* ypos that we originally want */
+PP(GRECT *rect;)							/* GRECT of the button          */
+PP(BOOLEAN Horizontal_Flag;)				/* See above...         */
+PP(BOOLEAN Vertical_Flag;)					/* See above...         */
 {
 	register OBJECT *tree;					/* Local tree variable   */
-
 	register int16_t parent;					/* menu object           */
-
 	int16_t tempx;							/* temp x and y positions */
-
 	int16_t tempy;
 
 	ActiveTree(MTREE(MenuPtr));			/* Set the tree...     */
@@ -752,15 +738,12 @@ BOOLEAN Vertical_Flag;					/* See above...         */
  *
  * OUT: VOID
  */
-VOID MenuScrollAdjust(MenuPtr, start_obj)
-register MENU_PTR MenuPtr;					/* ptr to the menu node in question */
-
-int16_t start_obj;							/* the menu item that we want on top */
+VOID MenuScrollAdjust(P(MENU_PTR) MenuPtr, P(int16_t) start_obj)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node in question */
+PP(int16_t start_obj;)							/* the menu item that we want on top */
 {
 	register int16_t obj;						/* temp obj variable       */
-
 	int16_t offset_obj;					/* the offset/start object */
-
 	int16_t new_bottom;					/* the new bottom object   */
 
 	/* Restore the text that occupied the original menu items, if required */
@@ -831,10 +814,9 @@ int16_t start_obj;							/* the menu item that we want on top */
  *
  * OUT: VOID
  */
-VOID PushArrowText(MenuPtr)
-register MENU_PTR MenuPtr;					/* ptr to the menu node in question */
+VOID PushArrowText(P(MENU_PTR) MenuPtr)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node in question */
 {
-
 	register int16_t obj;						/* temp obj variable  */
 
 	/* Set the Up ARROW if the first object is not the FIRST_CHILD */
@@ -880,8 +862,8 @@ register MENU_PTR MenuPtr;					/* ptr to the menu node in question */
  *
  * OUT: VOID
  */
-VOID PopArrowText(MenuPtr)
-register MENU_PTR MenuPtr;					/* ptr to the menu node */
+VOID PopArrowText(P(MENU_PTR) MenuPtr)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node */
 {
 	register int16_t obj;						/* temp object variable */
 
@@ -912,8 +894,8 @@ register MENU_PTR MenuPtr;					/* ptr to the menu node */
  * IN:    < 0 - will return the current value.
  * OUT: returns the value that we set it to.
  */
-int16_t SetMaxHeight(height)
-int16_t height;
+int16_t SetMaxHeight(P(int16_t) height)
+PP(int16_t height;)
 {
 	int16_t max_height;
 

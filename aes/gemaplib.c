@@ -111,14 +111,13 @@ PP(VOIDPTR buffer;)
 /*
 *	APplication READ or WRITE
 */
-int16_t ap_rdwr(P(int16_t) code, P(int16_t) id, P(int16_t) length, P(intptr_t) pbuff)
+int16_t ap_rdwr(P(int16_t) code, P(int16_t) id, P(int16_t) length, P(int16_t *) pbuff)
 PP(int16_t code;)
 PP(int16_t id;)
 PP(int16_t length;)
-PP(intptr_t pbuff;)
+PP(int16_t *pbuff;)
 {
-	/* use id,len,pbuff */
-	/*   on stack as a QPB  */
+	/* use id,len,pbuff on stack as a QPB  */
 	ev_block(code, ADDR(&id));
 }
 

@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.4 $	$Source: /u2/MRS/osrevisions/aes/gemshlib.c,v $
+*  $Author: kbad $	$Date: 89/06/15 15:29:51 $
 * =======================================================================
-*  $Author: kbad $	$Date: 89/06/15 15:29:51 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemshlib.c,v $
+*
 * Revision 2.4  89/06/15  15:29:51  kbad
 * fix sh_name so that it doesn't overshoot the string it's looking at.
 * 
@@ -125,38 +123,47 @@
 #define CMD_PRINT  0xFD
 #define CMD_TYPE   0xFE
 
-GLOBAL int16_t sh_doexec;					/* if TRUE then do an an exec   */
+/* if TRUE then do an an exec on the current command else exit and return to DOS  */
+int16_t sh_doexec;
 
-					/* on the current command   */
-					/* else exit and return to DOS  */
+/* used to signal if the curren tly running appl is a GEM app */
+int16_t sh_isgem;
 
-GLOBAL int16_t sh_isgem;					/* used to signal if the curren */
+/* same as above for previously running DOS app.     */
+int16_t sh_gem;
 
-					/* tly running appl is a GEM app */
+char *ad_envrn;
 
-GLOBAL int16_t sh_gem;						/* same as above for previously */
+char *ad_shcmd;
 
-					/* running DOS app.     */
+char *ad_shtail;
 
-GLOBAL int32_t ad_envrn;
+/* cart program     */
+int16_t sh_iscart;
 
-GLOBAL int32_t ad_shcmd;
+char *ad_path;
 
-GLOBAL int32_t ad_shtail;
+char *ad_pfile; /* unused */
 
-GLOBAL int16_t sh_iscart;					/* cart program     */
+char temp[50]; /* WTF */
 
-GLOBAL int32_t ad_path;
 
-GLOBAL int32_t ad_pfile;
+VOID sh_show PROTO((char *lcmd));
+BOOLEAN sh_path PROTO((int16_t whichone, char *dp, char *pname));
+int16_t sh_search PROTO((SHFIND_PROC routine));
 
-GLOBAL char temp[50];
 
-/*	Application reads in the command that invokes it	*/
 
-int16_t sh_read(pcmd, ptail)
-int32_t pcmd,
-	ptail;
+
+/*
+ * AES #120 - shel_read - Read command line parameters of the application.
+ *
+ * Application reads in the command that invokes it
+ */
+
+int16_t sh_read(P(char *) pcmd, P(char *) ptail)
+PP(char *pcmd;)
+PP(char *ptail;)
 {
 	LBCOPY(pcmd, ad_shcmd, CMDLEN);
 	LBCOPY(ptail, ad_shtail, CMDLEN);
@@ -164,26 +171,28 @@ int32_t pcmd,
 }
 
 
-/*  Routine to set the next application to run 	*/
-/*   doexec = 0 exits and return to desktop	*/
-/*   doexec = 1 runs another application	*/
-/*					      	*/
-/*   isgem = 0   then run in character mode	*/
-/*   isgem = 1   them run in graphic mode	*/
-/*						*/
-/*           isover is useless			*/
-/*   isover = 0  then run above DESKTOP		*/
-/*   isover = 1  then run over DESKTOP		*/
-/*   isover = 2  then run over AES and DESKTOP	*/
-
-
-int16_t sh_write(doex, isgem, isover, pcmd, ptail)
-int16_t doex,
-	isgem,
-	isover;
-
-int32_t pcmd,
-	ptail;
+/*
+ * AES #121 - shel_write - Launch another application
+ *
+ * Routine to set the next application to run
+ *
+ *   doexec = 0 exits and return to desktop
+ *   doexec = 1 runs another application
+ *
+ *   isgem = 0   then run in character mode
+ *   isgem = 1   them run in graphic mode
+ *
+ *           isover is useless
+ *   isover = 0  then run above DESKTOP
+ *   isover = 1  then run over DESKTOP
+ *   isover = 2  then run over AES and DESKTOP
+ */
+int16_t sh_write(P(int16_t) doex, P(int16_t) isgem, P(int16_t) isover, P(char *) pcmd, P(char *) ptail)
+PP(int16_t doex;)
+PP(int16_t isgem;)
+PP(int16_t isover;)
+PP(char *pcmd;)
+PP(char *ptail;)
 {
 	if (doex > 1)
 		return (FALSE);
@@ -197,14 +206,16 @@ int32_t pcmd,
 	return (TRUE);						/* for the future   */
 }
 
-/*
-*	Used by the DESKTOP to recall 1024 bytes worth of previously
-*	'put' desktop-context information.
-*/
-int16_t sh_get(pbuffer, len)
-int32_t pbuffer;
 
-int16_t len;
+/*
+ * AES #122 - shel_get - Read from the GEM environment buffer. 
+ *
+ *	Used by the DESKTOP to recall 1024 bytes worth of previously
+ *	'put' desktop-context information.
+ */
+int16_t sh_get(P(char *) pbuffer, P(int16_t) len)
+PP(char *pbuffer;)
+PP(int16_t len;)
 {
 	LBCOPY(pbuffer, &D.s_save[0], len);
 	return (TRUE);
@@ -212,13 +223,14 @@ int16_t len;
 
 
 /*
-*	Used by the DESKTOP to save away 1024 bytes worth of desktop-
-*	context information.
-*/
-int16_t sh_put(pdata, len)
-int32_t pdata;
-
-int16_t len;
+ * AES #123 - shel_put - Writes to the GEM environment buffer.
+ *
+ *	Used by the DESKTOP to save away 1024 bytes worth of desktop-
+ *	context information.
+ */
+int16_t sh_put(P(const char *) pdata, P(int16_t) len)
+PP(char *pdata;)
+PP(int16_t len;)
 {
 	LBCOPY(&D.s_save[0], pdata, len);
 	return (TRUE);
@@ -226,11 +238,10 @@ int16_t len;
 
 
 /*
-*	Convert the screen to graphics-mode in preparation for the 
-*	running of a GEM-based graphic application.
-*/
-
-int16_t sh_tographic()
+ *	Convert the screen to graphics-mode in preparation for the 
+ *	running of a GEM-based graphic application.
+ */
+BOOLEAN sh_tographic(NOTHING)
 {
 	cli();
 	retake();							/* retake the gem trap  */
@@ -247,10 +258,10 @@ int16_t sh_tographic()
 
 
 /*
-*	Convert the screen and system back to alpha-mode in preparation
-*	for the running of a DOS-based character application.
-*/
-int16_t sh_toalpha()
+ *	Convert the screen and system back to alpha-mode in preparation
+ *	for the running of a DOS-based character application.
+ */
+BOOLEAN sh_toalpha(NOTHING)
 {
 	gsx_mfset(ad_armice);				/* put mouse to arrow   */
 
@@ -267,20 +278,15 @@ int16_t sh_toalpha()
 
 
 /*
-*	Routine called everytime dos_find has another path to search
-*/
-
-VOID sh_draw(lcmd, start, depth)
-register char lcmd[];
-
-int16_t start;
-
-int16_t depth;
+ *	Routine called everytime dos_find has another path to search
+ */
+VOID sh_draw(P(char *) lcmd, P(int16_t) start, P(int16_t) depth)
+PP(register char *lcmd;)
+PP(int16_t start;)
+PP(int16_t depth;)
 {
-	register int32_t tree;
-
+	register LPTREE tree;
 	register int16_t c;
-
 	register char *cmdptr;
 
 	if (sh_gem)
@@ -288,7 +294,7 @@ int16_t depth;
 		gsx_sclip(&gl_rscreen);
 
 		cmdptr = lcmd;
-		while (c = *cmdptr)
+		while ((c = *cmdptr))
 			*cmdptr++ = toupper(c);
 
 		tree = ad_stdesk;
@@ -299,11 +305,10 @@ int16_t depth;
 
 
 /*
-*	Routine called everytime dos_find has another path to search
-*/
-
-sh_show(lcmd)
-int32_t lcmd;
+ * Routine called everytime dos_find has another path to search
+ */
+VOID sh_show(P(char *) lcmd)
+PP(char *lcmd;)
 {
 	register int16_t i;
 
@@ -313,11 +318,11 @@ int32_t lcmd;
 
 
 /*
-*	Routine to take a full path, and scan back from the end to 
-*	find the starting byte of the particular filename
-*/
-char * sh_name(ppath)
-char *ppath;
+ *	Routine to take a full path, and scan back from the end to 
+ *	find the starting byte of the particular filename
+ */
+char *sh_name(P(char *) ppath)
+PP(char *ppath;)
 {
 	register char *pname;
 
@@ -333,22 +338,23 @@ char *ppath;
 	return (++pname);
 }
 
-/*
-*	Search for a particular string in the DOS environment and return
-*	a long pointer to the character after the string if it is found. 
-*	*psrch includes the '=' character.
-*	Otherwise, return a NULL in ppath.
-*/
-VOID sh_envrn(ppath, psrch)
-register int32_t *ppath;						/* output pointer   */
 
-char psrch[];
+/*
+ * AES #125 - shel_envrn - Obtains value of environmental variables
+ *
+ *	Search for a particular string in the DOS environment and return
+ *	a long pointer to the character after the string if it is found. 
+ *	*psrch includes the '=' character.
+ *	Otherwise, return a NULL in ppath.
+ */
+VOID sh_envrn(P(char **) ppath, P(const char *) psrch)
+PP(register char **ppath;)						/* output pointer   */
+PP(const char *psrch;)
 {
 	register char *chrptr;
+	register const char *byteptr;
 
-	register char *byteptr;
-
-	chrptr = (char *) ad_envrn;
+	chrptr = ad_envrn;
 	/* double nulls to end  */
 	while ((*chrptr) || (*(chrptr + 1)))
 	{
@@ -367,43 +373,34 @@ char psrch[];
 		}
 	}
 
-	*ppath = 0x0L;						/* failed, return null  */
+	*ppath = NULL;						/* failed, return null  */
 	return;
 }
 
 
 /*
-*	Search first, search next style routine to pick up each path
-*	in the PATH= portion of the DOS environment.  It returns the
-*	next higher number to look for until there are no more
-*	paths to find.
-*
-*	gemjstrt.s sets the path to PATH=0C:\000 if drive C exists,
-*	otherwise it's the default  PATH=0A:\000
-*	(unless munged by HINSTALL or an auto folder program)
-*/
+ *	Search first, search next style routine to pick up each path
+ *	in the PATH= portion of the DOS environment.  It returns the
+ *	next higher number to look for until there are no more
+ *	paths to find.
+ *
+ *	gemjstrt.s sets the path to PATH=0C:\000 if drive C exists,
+ *	otherwise it's the default  PATH=0A:\000
+ *	(unless munged by HINSTALL or an auto folder program)
+ */
 
-int16_t sh_path(whichone, dp, pname)
+BOOLEAN sh_path(int16_t whichone, char *dp, char *pname)
 int16_t whichone;
-
 register char *dp;
-
 register char *pname;
 {
 	register char last;
-
-	register char *lp;
-
+	register const char *lp;
 	register int16_t i;
-
-	int32_t temp;
-
+	const char *temp;
 	int16_t oldpath = FALSE;
 
-	/* find PATH= in the    */
-	/*   environment which  */
-	/*   is a double null-  */
-	/*   terminated string  */
+	/* find PATH= in the environment which is a double null-terminated string */
 	sh_envrn(&temp, "PATH=");
 
 	if (!temp)
@@ -411,11 +408,11 @@ register char *pname;
 
 	lp = temp;
 
-/* This kludge, er, section of code maintains compatibility with
-*	the old style PATH=\0<path>\0, to support folks who run an auto-
-*	folder environment-setter, and use the old-style PATH environment.
-* (880825 kbad)
-*/
+	/* This kludge, er, section of code maintains compatibility with
+	 *	the old style PATH=\0<path>\0, to support folks who run an auto-
+	 *	folder environment-setter, and use the old-style PATH environment.
+	 * (880825 kbad)
+	 */
 	if (!*lp)							/* look for old type env */
 	{									/* by looking for key   */
 		while (*(++lp))					/* after PATH=\0    */
@@ -427,10 +424,9 @@ register char *pname;
 		lp = temp;						/* so munge the null    */
 		*lp = ';';
 	}
-/* end compatibility code ----------------				*/
+	/* end compatibility code ----------------				*/
 
-	/* if found count in to */
-	/*   appropriate path   */
+	/* if found count in to appropriate path   */
 
 	last = *lp;
 	for (i = whichone; i > 0; i--)
@@ -451,12 +447,12 @@ register char *pname;
 		last = *lp++;
 		*dp++ = last;
 	}
-/* NOTE: this next test means that null pathnames in the PATH env. var
-* 	will be treated as ROOT rather than CURRENT directory.  Current
-*	diretory in the path must be denoted by an explicit '.' e.g.:
-	*	PATH=.;A:\000 (880825 kbad)
-*//* see if extra slash   */
-	/*   is needed      */
+	/* NOTE: this next test means that null pathnames in the PATH env. var
+	 * 	will be treated as ROOT rather than CURRENT directory.  Current
+	 *	diretory in the path must be denoted by an explicit '.' e.g.:
+	 *	PATH=.;A:\000 (880825 kbad)
+	 */
+	/* see if extra slash is needed */
 	if ((last != '\\') && (last != ':'))
 		*dp++ = '\\';
 	/* append file name */
@@ -466,42 +462,38 @@ register char *pname;
 	if (oldpath)
 		*(char *) temp = '\0';			/* (for compatibility)  */
 
-	/* make whichone refer  */
-	/*   to next path   */
+	/* make whichone refer to next path */
 	return (whichone + 1);
 }
 
 
-int16_t sh_search(routine)
-register int16_t(*routine) ();
+int16_t sh_search(P(SHFIND_PROC) routine)
+PP(register SHFIND_PROC routine;)
 {
 	if (routine)
 		(*routine) (ad_path);
 
-	return (dos_sfirst(ad_path, F_RDONLY | F_HIDDEN | F_SYSTEM));
+	return dos_sfirst(ad_path, F_RDONLY | F_HIDDEN | F_SYSTEM);
 }
 
+
 /*
-*	Routine to verify that a file is present.  It first looks in the
-*	current directory and then looks down the search path.  Before
-*	it looks at each point it firsts call the passed-in routine with
-*	the filespec that is looking for.
-*/
-
-int16_t sh_find(pspec, routine)
-register int32_t pspec;
-
-register int16_t(*routine) ();
+ * AES #124 - shel_find - Find a file. 
+ *
+ *	Routine to verify that a file is present.  It first looks in the
+ *	current directory and then looks down the search path.  Before
+ *	it looks at each point it firsts call the passed-in routine with
+ *	the filespec that is looking for.
+ */
+int16_t sh_find(intptr_t pspec, SHFIND_PROC routine)
+register intptr_t pspec;
+register SHFIND_PROC routine;
 {
-	register int16_t path,
-	 found = 0;
-
+	register int16_t path;
+	register BOOLEAN found = FALSE;
 	register char *pname;
-
 	char tmpname[14];
-
 	int32_t savedta;
-
 
 	savedta = trap(0x2F);				/* Fgetdta()        */
 	dos_sdta(&D.g_loc1[0]);				/* use this     */
@@ -540,7 +532,7 @@ register int16_t(*routine) ();
 
 /*	AES's Shell	*/
 
-sh_main()
+VOID sh_main(NOTHING)
 {
 	register int16_t ret;
 	int16_t i, reschange;
@@ -582,8 +574,8 @@ sh_main()
 		{
 			DGLO->s_tail[0] = strlen(&DGLO->s_tail[1]);
 			sh_draw(ad_shcmd, 0, 1);
-			sh_doexec = FALSE;			/* always go back to    */
-			sh_isgem = TRUE;			/* desktop      */
+			sh_doexec = FALSE;			/* always go back to desktop */
+			sh_isgem = TRUE;
 			cart_exec(sh_name(ad_shcmd), ad_shtail);	/* only filename!  */
 			DGLO->s_tail[0] = NULL;
 			sh_iscart = FALSE;
@@ -601,9 +593,11 @@ sh_main()
 			else
 				LLSET(ad_stdesk + 12, 0x00001143L);
 #else
-/*    ++ ERS 1/14/93: use gl_nplanes to determine resolution, and set	*/
-/*	the desktop background and color from the values we read from	*/
-/*	desktop.inf							*/
+			/*
+			 * ++ ERS 1/14/93: use gl_nplanes to determine resolution, and set
+			 *	the desktop background and color from the values we read from
+			 *	desktop.inf
+			 */
 			if (gl_nplanes == 1)
 				i = 0;
 			else if (gl_nplanes == 2)
@@ -622,11 +616,10 @@ sh_main()
 		} /* turn on graphic  */
 		else
 		{								/* run application  */
-
-/*	As of 10/21/88, sh_main no longer uses sh_find to find the	*/
-/*	program to launch.  Instead the full pathname is written to the	*/
-/*	global command string by desksupp:do_aopen().  Also, we do	*/
-/*	not change directory to the dir. of the app being launched.	*/
+			/*	As of 10/21/88, sh_main no longer uses sh_find to find the	*/
+			/*	program to launch.  Instead the full pathname is written to the	*/
+			/*	global command string by desksupp:do_aopen().  Also, we do	*/
+			/*	not change directory to the dir. of the app being launched.	*/
 
 			fname = sh_name(ad_shcmd);
 			sh_draw(fname, 0, 1);
@@ -639,7 +632,7 @@ sh_main()
 			dos_exec(ad_shcmd, 0, ad_shtail);
 			/* clean the name   */
 			p_nameit(temprlr, ".");
-/*	    mn_free( temprlr->p_pid );	*/
+			/* mn_free( temprlr->p_pid ); */
 
 			if (sh_gem)
 			{

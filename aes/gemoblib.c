@@ -32,7 +32,7 @@
 
 int16_t xor16 PROTO((int16_t col));
 int16_t xor_ok PROTO((int16_t type, int16_t flags, int16_t spec));
-VOID just_draw PROTO((OBJPTR tree, int16_t obj, int16_t sx, int16_t sy));
+VOID just_draw PROTO((LPTREE tree, int16_t obj, int16_t sx, int16_t sy));
 VOID convert_mask PROTO((int16_t *mask, int16_t *gl_mask, int16_t width, int16_t height));
 CICONBLK *fix_mono PROTO((CICONBLK *ptr, long *plane_size, int *tot_res));
 CICON *fix_res PROTO((CICON *ptr, long mono_size, CICON ***next_res));
@@ -275,8 +275,8 @@ PP(char *fmt_str;)
  *	routine.
  */
 
-int16_t ob_user(P(OBJPTR) tree, P(int16_t) obj, GRECT *pt, P(intptr_t) userblk, P(int16_t) curr_state, int16_t int16_t) new_state)
-PP(OBJPTR tree;)
+int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, GRECT *pt, P(intptr_t) userblk, P(int16_t) curr_state, int16_t int16_t) new_state)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(GRECT *pt;)
 PP(intptr_t userblk;)
@@ -469,8 +469,8 @@ PP(intptr_t spec;)
 /*
  *	Routine to draw an object from an object tree.
  */
-VOID just_draw(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) sx, P(int16_t) sy)
-PP(register OBJPTR tree;)
+VOID just_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) sx, P(int16_t) sy)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(register int16_t sx;)
 PP(register int16_t sy;)
@@ -910,8 +910,8 @@ PP(register int16_t sy;)
 /*
  *	Object draw routine that walks tree and draws appropriate objects.
  */
-VOID ob_draw(OBJPTR tree, int16_t obj, int16_t depth)
-PP(register OBJPTR tree;)
+VOID ob_draw(LPTREE tree, int16_t obj, int16_t depth)
+PP(register LPTREE tree;)
 PP(int16_t obj;)
 PP(int16_t depth;)
 {
@@ -943,8 +943,8 @@ PP(int16_t depth;)
 /************************************************************************/
 /* o b _ f i n d							*/
 /************************************************************************/
-int16_t ob_find(OBJPTR tree, int16_t currobj, int16_t depth, int16_t mx, int16_t my)
-register OBJPTR tree;
+int16_t ob_find(LPTREE tree, int16_t currobj, int16_t depth, int16_t mx, int16_t my)
+register LPTREE tree;
 register int16_t currobj;
 register int16_t depth;
 int16_t mx;
@@ -1022,13 +1022,13 @@ int16_t my;
  *	is added at the end of the parent's current sibling list.
  *	It is also initialized.
  */
-VOID ob_add(P(OBJPTR) tree, P(int16_t) parent, P(int16_t) child)
-PP(register OBJPTR tree;)
+VOID ob_add(P(LPTREE) tree, P(int16_t) parent, P(int16_t) child)
+PP(register LPTREE tree;)
 PP(register int16_t parent;)
 PP(register int16_t child;)
 {
 	register int16_t lastkid;
-	register OBJPTR ptail;
+	register LPTREE ptail;
 
 	if (parent != NIL && child != NIL)
 	{
@@ -1051,13 +1051,13 @@ PP(register int16_t child;)
  *	Routine to delete an object from the tree.
  */
 /* BUG: doesnt return FALSE as documented */
-VOID ob_delete(P(OBJPTR) tree, P(int16_t) obj)
-PP(register OBJPTR tree;)
+VOID ob_delete(P(LPTREE) tree, P(int16_t) obj)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 {
 	register int16_t parent;
 	int16_t prev, nextsib;
-	register OBJPTR ptail, phead;
+	register LPTREE ptail, phead;
 
 	if (obj != ROOT)
 	{
@@ -1095,8 +1095,8 @@ PP(register int16_t obj;)
  *	is the tail of the list.
  */
 /* BUG: doesnt return FALSE as documented */
-VOID ob_order(P(OBJPTR) tree, P(int16_t) mov_obj, P(int16_t) new_pos)
-PP(register OBJPTR tree;)
+VOID ob_order(P(LPTREE) tree, P(int16_t) mov_obj, P(int16_t) new_pos)
+PP(register LPTREE tree;)
 PP(register int16_t mov_obj;)
 PP(int16_t new_pos;)
 {
@@ -1148,8 +1148,8 @@ PP(int16_t new_pos;)
  *	object using the current clip rectangle.
  */
 /* BUG: doesnt return FALSE as documented */
-VOID ob_change(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) new_state, P(int16_t) redraw)
-PP(register OBJPTR tree;)
+VOID ob_change(P(LPTREE) tree, P(int16_t) obj, P(int16_t) new_state, P(int16_t) redraw)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(uint16_t new_state;)
 PP(int16_t redraw;)
@@ -1208,8 +1208,8 @@ PP(int16_t redraw;)
 
 
 
-uint16_t ob_fs(P(OBJPTR) tree, P(int16_t) ob, P(int16_t) pflag)
-PP(OBJPTR tree;)
+uint16_t ob_fs(P(LPTREE) tree, P(int16_t) ob, P(int16_t) pflag)
+PP(LPTREE tree;)
 PP(int16_t ob;)
 PP(int16_t *pflag;)
 {
@@ -1221,8 +1221,8 @@ PP(int16_t *pflag;)
 /************************************************************************/
 /* o b _ a c t x y w h							*/
 /************************************************************************/
-VOID ob_actxywh(P(OBJPTR) tree, P(int16_t) obj, P(GRECT *) pt)
-PP(register OBJPTR tree;)
+VOID ob_actxywh(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(register GRECT *pt;)
 {
@@ -1241,8 +1241,8 @@ PP(register GRECT *pt;)
 /************************************************************************/
 /* o b _ r e l x y w h							*/
 /************************************************************************/
-VOID ob_relxywh(P(OBJPTR) tree, P(int16_t) obj, P(GRECT *)pt)
-PP(OBJPTR tree;)
+VOID ob_relxywh(P(LPTREE) tree, P(int16_t) obj, P(GRECT *)pt)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(GRECT *pt;)
 {
@@ -1250,8 +1250,8 @@ PP(GRECT *pt;)
 }
 
 
-VOID ob_setxywh(P(OBJPTR) tree, P(int16_t) obj, P(GRECT *) pt)
-PP(int32_t tree;)
+VOID ob_setxywh(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(GRECT *pt;)
 {
@@ -1264,8 +1264,8 @@ PP(GRECT *pt;)
  *	to the physical screen.  This involves accumulating the offsets
  *	of all the objects parents up to and including the root.
  */
-VOID ob_offset(P(OBJPTR) tree, P(int16_t) obj, P(int16_t *) pxoff, P(int16_t *) pyoff)
-PP(register OBJPTR tree;)
+VOID ob_offset(P(LPTREE) tree, P(int16_t) obj, P(int16_t *) pxoff, P(int16_t *) pyoff)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(register int16_t *pxoff;)
 PP(register int16_t *pyoff;)
@@ -1287,8 +1287,8 @@ PP(register int16_t *pyoff;)
  * numbers that you add to the x, y, w, h in the OBJECT
  * to get the clip rectangle.
  */
-VOID ob_dxywh(OBJPTR tree, int16_t obj, int16_t *pdx, int16_t *pdy, int16_t *pdw, int16_t *pdh)
-PP(register OBJPTR tree;)
+VOID ob_dxywh(LPTREE tree, int16_t obj, int16_t *pdx, int16_t *pdy, int16_t *pdw, int16_t *pdh)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(int16_t *pdx;)
 PP(int16_t *pdy;)
@@ -1312,8 +1312,8 @@ PP(int16_t *pdh;)
 /*
  * Return a clip rectangle describing an object's screen coordinates.
  */
-VOID ob_gclip(P(OBJPTR) tree, P(int16_t) obj, P(int16_t *) pxoff, P(int16_t *) pyoff, P(int16_t *) pxcl, P(int16_t *) pycl, P(int16_t *) pwcl, P(int16_t *) phcl)
-PP(register OBJPTR tree;)
+VOID ob_gclip(P(LPTREE) tree, P(int16_t) obj, P(int16_t *) pxoff, P(int16_t *) pyoff, P(int16_t *) pxcl, P(int16_t *) pycl, P(int16_t *) pwcl, P(int16_t *) phcl)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(int16_t *pxoff;)
 PP(int16_t *pyoff;)
@@ -1370,8 +1370,8 @@ PP(int16_t *phcl;)
  *	us.  If we are the first child or we have no parent then
  *	return NIL.
  */
-int16_t get_prev(P(OBJPTR) tree, P(int16_t) parent, P(int16_t) obj)
-PP(register OBJPTR tree;)
+int16_t get_prev(P(LPTREE) tree, P(int16_t) parent, P(int16_t) obj)
+PP(register LPTREE tree;)
 PP(int16_t parent;)
 PP(register int16_t obj;)
 {

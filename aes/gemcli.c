@@ -247,7 +247,7 @@ VOID free_accs(NOTHING)
 }
 
 
-int16_t cre_aproc(NOTHING)
+BOOLEAN cre_aproc(NOTHING)
 {
 	register PD *ppd;
 	UDA *puda;

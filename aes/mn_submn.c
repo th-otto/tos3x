@@ -53,7 +53,6 @@
 /* PROTOTYPES
  * ================================================================
  */
-MENU_PTR ShowSubMenu();
 
 
 
@@ -70,13 +69,35 @@ int32_t SCROLL_DELAY;						/* Delay time to scroll menu items ( ms ) */
 int32_t ARROW_DELAY;						/* Delay time to start scroll ( ms )      */
 
 
+/* PROTOTYPES
+ * ================================================================
+ */
+int16_t mn_iset PROTO((int16_t id, OBJECT *itree, int16_t imenu, int16_t start_obj));
+int16_t mn_iget PROTO((int16_t id, OBJECT *tree, int16_t imenu));
+BOOLEAN mn_setmn PROTO((int16_t id, OBJECT *tree, int16_t item, MENU *Menu));
+BOOLEAN mn_getmn PROTO((int16_t id, OBJECT *tree, int16_t item, MENU *Menu));
+VOID DetachSubMenu PROTO((int16_t id, OBJECT *tree, int16_t item));
+MENU_PTR ShowSubMenu PROTO((int16_t id, int16_t MenuIndex, int16_t xpos, int16_t ypos, GRECT *rect));
+VOID SetDisplayDelay PROTO((int32_t ms, int32_t *oldvalue));
+VOID SetDragDelay PROTO((int32_t ms, int32_t *oldvalue));
+VOID SetScrollDelay PROTO((int32_t ms, int32_t *oldvalue));
+VOID SetArrowDelay PROTO((int32_t ms, int32_t *oldvalue));
+BOOLEAN CountLevel PROTO((NOTHING));
+
+
+
+
+
 /* FUNCTIONS
  * ================================================================
  */
 
 
 
-/* mn_istart()
+/*
+ * AES #38 - menu_istart - Align a submenu entry. 
+ *
+ * mn_istart()
  * ================================================================
  * Sets and Gets the start item of an attached submenu.
  *
@@ -84,7 +105,7 @@ int32_t ARROW_DELAY;						/* Delay time to start scroll ( ms )      */
  *	       Requires - Menu->mn_tree
  *			- Menu->mn_menu
  *			- place-holder
-
+ *
  *	       RETURNS in D0 - start item
  *
  *
@@ -96,16 +117,12 @@ int32_t ARROW_DELAY;						/* Delay time to start scroll ( ms )      */
  *	       RETURNS in D0 - start item
  * RETURN == FALSE == ERROR
  */
-int16_t mn_istart(id, flag, tree, menu, item)
-int16_t id;								/* Process id */
-
-int16_t flag;								/* Set or Get */
-
-OBJECT *tree;							/* Tree of the submenu */
-
-int16_t menu;								/* Menu object of the submenu   */
-
-int16_t item;								/* Starting item of the submenu */
+int16_t mn_istart(P(int16_t) id, P(int16_t) flag, P(OBJECT *) tree, P(int16_t) menu, P(int16_t) item)
+PP(int16_t id;)								/* Process id */
+PP(int16_t flag;)								/* Set or Get */
+PP(OBJECT *tree;)							/* Tree of the submenu */
+PP(int16_t menu;)								/* Menu object of the submenu   */
+PP(int16_t item;)								/* Starting item of the submenu */
 {
 	int16_t result;
 
@@ -140,21 +157,15 @@ int16_t item;								/* Starting item of the submenu */
  * OUT: Returns the starting menu item
  *      0 - FAILURE 
  */
-int16_t mn_iset(id, itree, imenu, start_obj)
-int16_t id;								/* Process id              */
-
-OBJECT *itree;							/* the tree of the menu        */
-
-int16_t imenu;								/* the menu object of the menu */
-
-int16_t start_obj;							/* the start obj of the menu   */
+int16_t mn_iset(P(int16_t) id, P(OBJECT *) itree, P(int16_t) imenu, P(int16_t) start_obj)
+PP(int16_t id;)								/* Process id              */
+PP(OBJECT *itree;)							/* the tree of the menu        */
+PP(int16_t imenu;)								/* the menu object of the menu */
+PP(int16_t start_obj;)							/* the start obj of the menu   */
 {
 	int16_t Index;							/* The Index ID                */
-
 	register INDEX_PTR IndexPtr;				/* Ptr to the Index Node       */
-
 	PNODE_PTR ProcPtr;					/* ptr to the process node     */
-
 	OBJECT *tree;
 
 	/* Get the pointer to the process node */
@@ -190,19 +201,14 @@ int16_t start_obj;							/* the start obj of the menu   */
  * OUT:SUCCESS - returns the start object of this menu.
  *     FAILURE - returns 0
  */
-int16_t mn_iget(id, tree, imenu)
-int16_t id;								/* Process id               */
-
-OBJECT *tree;							/* the tree of the attached menu    */
-
-int16_t imenu;								/* the menu obj of the attached menu */
+int16_t mn_iget(P(int16_t) id, P(OBJECT *) tree, P(int16_t) imenu)
+PP(int16_t id;)								/* Process id               */
+PP(OBJECT *tree;)							/* the tree of the attached menu    */
+PP(int16_t imenu;)								/* the menu obj of the attached menu */
 {
 	int16_t Index;							/* Temp Index ID           */
-
 	int16_t output;						/* return this startobj    */
-
 	register INDEX_PTR IndexPtr;				/* ptr to the Index node   */
-
 	PNODE_PTR ProcPtr;					/* ptr to the process node */
 
 	output = 0;
@@ -222,7 +228,10 @@ int16_t imenu;								/* the menu obj of the attached menu */
 }
 
 
-/* mn_attach()
+/*
+ * AES #37 - menu_attach - Add, alter, delete or obtain information about a submenu.
+ *
+ * mn_attach()
  * ================================================================
  * Attach, remove, change a submenu that is attached to a menu item.
  * Also, Inquire if a menu has a submenu attached.
@@ -247,16 +256,12 @@ int16_t imenu;								/* the menu obj of the attached menu */
  *		  FALSE - failure
  *	
  */
-BOOLEAN mn_attach(id, flag, tree, item, Menu)
-int16_t id;
-
-int16_t flag;
-
-OBJECT *tree;
-
-int16_t item;
-
-MENU *Menu;
+BOOLEAN mn_attach(P(int16_t) id, P(int16_t) flag, P(OBJECT *) tree, P(int16_t) item, P(MENU *) Menu)
+PP(int16_t id;)
+PP(int16_t flag;)
+PP(OBJECT *tree;)
+PP(int16_t item;)
+PP(MENU *Menu;)
 {
 	int16_t result;
 
@@ -307,23 +312,16 @@ MENU *Menu;
  * OUT: TRUE  - SUCCESS
  *      FALSE - FAILURE
  */
-BOOLEAN mn_setmn(id, tree, item, Menu)
-int16_t id;								/* Process id                 */
-
-OBJECT *tree;							/* tree that will have a submenu attached */
-
-int16_t item;								/* the menu item that will have a menu    */
-
-MENU *Menu;
+BOOLEAN mn_setmn(P(int16_t) id, P(OBJECT *) tree, P(int16_t) item, P(MENU *) Menu)
+PP(int16_t id;)								/* Process id                 */
+PP(OBJECT *tree;)							/* tree that will have a submenu attached */
+PP(int16_t item;)								/* the menu item that will have a menu    */
+PP(MENU *Menu;)
 {
 	register uint16_t Index;					/* the Extend Object Type         */
-
 	register INDEX_PTR IndexPtr;				/* temp ptr to the index node     */
-
 	MENU MData;
-
 	BOOLEAN flag;						/* test flag for reuse of menu    */
-
 	PNODE_PTR ProcPtr;					/* ptr to the process node        */
 
 	/* Check that the menu item is a G_STRING */
@@ -351,11 +349,11 @@ MENU *Menu;
 	/* Check if the tree and menu have been used before for another
 	 * menu item. Try to get the id for that one.
 	 */
-	Index = (int16_t) FindIndex(id, Menu->mn_tree, Menu->mn_menu);
+	Index = FindIndex(id, Menu->mn_tree, Menu->mn_menu);
 
 	/* Now, attach the new submenu to the menu item in question */
 	if (!Index)							/* Need to get a new menu ID! */
-		Index = (int16_t) Get_New_Index(id, Menu->mn_tree, Menu->mn_menu);
+		Index = Get_New_Index(id, Menu->mn_tree, Menu->mn_menu);
 
 	if (Index)
 	{
@@ -395,23 +393,16 @@ MENU *Menu;
  * OUT:    FALSE if there is an error
  *         TRUE - returns the tree, parent, item and scroll status in Menu.
  */
-BOOLEAN mn_getmn(id, tree, item, Menu)
-int16_t id;								/* Process id             */
-
-OBJECT *tree;							/* the tree we want to check  */
-
-int16_t item;								/* the menu item  for above   */
-
-MENU *Menu;
+BOOLEAN mn_getmn(P(int16_t) id, P(OBJECT *) tree, P(int16_t) item, P(MENU *) Menu)
+PP(int16_t id;)								/* Process id             */
+PP(OBJECT *tree;)							/* the tree we want to check  */
+PP(int16_t item;)								/* the menu item  for above   */
+PP(MENU *Menu;)
 {
 	PNODE_PTR ProcPtr;					/* ptr to the process node  */
-
 	uint16_t type;							/* the extended object type */
-
 	int16_t Index;							/* the Index ID ( temp )    */
-
 	register INDEX_PTR IndexPtr;				/* ptr to the index node... */
-
 	BOOLEAN flag;						/* SUCCESS or FAILUE        */
 
 	flag = FALSE;
@@ -450,17 +441,13 @@ MENU *Menu;
  *
  * OUT: void
  */
-VOID DetachSubMenu(id, tree, item)
-int16_t id;								/* Process id            */
-
-OBJECT *tree;							/* the tree fo the menu...   */
-
-int16_t item;								/* see above...          */
+VOID DetachSubMenu(P(int16_t) id, P(OBJECT *) tree, P(int16_t) item)
+PP(int16_t id;)								/* Process id            */
+PP(OBJECT *tree;)							/* the tree fo the menu...   */
+PP(int16_t item;)								/* see above...          */
 {
 	uint16_t type;							/* the Extended Object Types */
-
 	int16_t Index;							/* Index ID!             */
-
 	PNODE_PTR ProcPtr;					/* ptr to the process node   */
 
 	if (IsG_String(item) && IsSubMenu(item))
@@ -496,19 +483,14 @@ int16_t item;								/* see above...          */
  * OUT:     NULL - for not a submenu or invalid submenu
  *          MENU_PTR - A valid MenuPtr.
  */
-BOOLEAN CheckForSubMenu(id, tree, obj, SubMenuPtr)
-int16_t id;								/* Process id           */
-
-OBJECT *tree;
-
-int16_t obj;								/* the object to check for      */
-
-MENU_PTR SubMenuPtr;					/* ptr to the submenu - if valid */
+BOOLEAN CheckForSubMenu(P(int16_t) id, P(OBJECT *) tree, P(int16_t) obj, P(MENU_PTR) SubMenuPtr)
+PP(int16_t id;)								/* Process id           */
+PP(OBJECT *tree;)
+PP(int16_t obj;)								/* the object to check for      */
+PP(MENU_PTR SubMenuPtr;)					/* ptr to the submenu - if valid */
 {
 	register uint16_t MenuIndex;				/* extended object type */
-
 	register INDEX_PTR NewMenuPtr;			/* ptr to Index Node   */
-
 	PNODE_PTR ProcPtr;					/* ptr to process node */
 
 
@@ -556,23 +538,16 @@ MENU_PTR SubMenuPtr;					/* ptr to the submenu - if valid */
  * OUT: return the ptr to the submenu displayed.
  *      NULL if a FAILURE.
  */
-MENU_PTR DoSubMenu(id, tree, obj)
-int16_t id;								/* Process id             */
-
-OBJECT *tree;
-
-int16_t obj;								/* menu item we pop with      */
+MENU_PTR DoSubMenu(P(int16_t= id, P(OBJECT *) tree, P(int16_t) obj)
+PP(int16_t id;)								/* Process id             */
+PP(OBJECT *tree;)
+PP(int16_t obj;)								/* menu item we pop with      */
 {
 	MENU_PTR SubPopPtr;					/* The MenuPtr of the Submenu */
-
 	uint16_t type;							/* The type of the menu item  */
-
 	int16_t MenuIndex;						/* The Submenu Menu ID        */
-
 	GRECT rect;							/* Rect of the Menu item      */
-
 	register int16_t xpos;						/* xpos, ypos of new submenu  */
-
 	int16_t ypos;
 
 	SubPopPtr = (MENU_PTR) NULL;
@@ -615,27 +590,18 @@ int16_t obj;								/* menu item we pop with      */
  * OUT:  MENU_PTR - returns a pointer for SUCCESS
  *                - NULL for FAILURE
  */
-MENU_PTR ShowSubMenu(id, MenuIndex, xpos, ypos, rect)
-int16_t id;								/* Process id            */
-
-int16_t MenuIndex;							/* the Index # we look for   */
-
-int16_t xpos;								/* xpos to pop the menu up to */
-
-int16_t ypos;								/* ypos to pop the menu up to */
-
-GRECT *rect;							/* rect of the button        */
+MENU_PTR ShowSubMenu(P(int16_t) id, P(int16_t) MenuIndex, P(int16_t) xpos, P(int16_t) ypos, P(GRECT *) rect)
+PP(int16_t id;)								/* Process id            */
+PP(int16_t MenuIndex;)							/* the Index # we look for   */
+PP(int16_t xpos;)								/* xpos to pop the menu up to */
+PP(int16_t ypos;)								/* ypos to pop the menu up to */
+PP(GRECT *rect;)							/* rect of the button        */
 {
 	register OBJECT *tree;					/* temp tree          */
-
 	register INDEX_PTR IndexPtr;				/* ptr to the Index Node  */
-
 	register MENU_PTR MenuPtr;				/* ptr to the menu Node   */
-
 	OBJECT *newtree;					/* temp tree          */
-
 	int16_t NewMenuID;						/* the new menu id    */
-
 	PNODE_PTR ProcPtr;					/* ptr to the process node */
 
 	if ((ProcPtr = FindProcess(id)) == NULL)	/* Find the process */
@@ -697,8 +663,8 @@ GRECT *rect;							/* rect of the button        */
  *
  * OUT: VOID
  */
-VOID HideSubMenu(MenuPtr)
-register MENU_PTR MenuPtr;					/* ptr to the menu node */
+VOID HideSubMenu(P(MENU_PTR) MenuPtr)
+PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node */
 {
 	if (MenuPtr)
 	{
@@ -721,7 +687,7 @@ register MENU_PTR MenuPtr;					/* ptr to the menu node */
  * This routine is called in the beginning as an init routine.
  * It should be inside an INIT_SYSTEM call...
  */
-VOID Init_Delays(VOID)
+VOID Init_Delays(NOTHING)
 {
 	int32_t dummy;
 
@@ -745,10 +711,9 @@ VOID Init_Delays(VOID)
  *     < 0L - will return the current value.
  * OUT: returns the current value set to.
  */
-VOID SetDisplayDelay(ms, oldvalue)
-int32_t ms;
-
-int32_t *oldvalue;
+VOID SetDisplayDelay(P(int32_t) ms, P(int32_t *) oldvalue)
+PP(int32_t ms;)
+PP(int32_t *oldvalue;)
 {
 	if (ms >= 0L)
 		SUBMENU_DELAY = ms;
@@ -769,10 +734,9 @@ int32_t *oldvalue;
  *     < 0L - will return the current value.
  * OUT: returns the value that we set it to.
  */
-VOID SetDragDelay(ms, oldvalue)
-int32_t ms;
-
-int32_t *oldvalue;
+VOID SetDragDelay(P(int32_t) ms, P(int32_t *) oldvalue)
+PP(int32_t ms;)
+PP(int32_t *oldvalue;)
 {
 	if (ms >= 0L)
 		SUBDRAG_DELAY = ms;
@@ -789,10 +753,9 @@ int32_t *oldvalue;
  *     < 0L - will return the current value.
  * OUT: returns the value that we set it to.
  */
-VOID SetScrollDelay(ms, oldvalue)
-int32_t ms;
-
-int32_t *oldvalue;
+VOID SetScrollDelay(P(int32_t) ms, P(int32_t *) oldvalue)
+PP(int32_t ms;)
+PP(int32_t *oldvalue;)
 {
 	if (ms >= 0L)
 		SCROLL_DELAY = ms;
@@ -807,10 +770,9 @@ int32_t *oldvalue;
  *     < 0L - will return the current value.
  * OUT: returns the value that we set it to.
  */
-VOID SetArrowDelay(ms, oldvalue)
-int32_t ms;
-
-int32_t *oldvalue;
+VOID SetArrowDelay(P(int32_t) ms, P(int32_t *) oldvalue)
+PP(int32_t ms;)
+PP(int32_t *oldvalue;)
 {
 	if (ms >= 0L)
 		ARROW_DELAY = ms;
@@ -818,16 +780,18 @@ int32_t *oldvalue;
 }
 
 
-/* menu_settings()
+/*
+ * AES #39 - menu_settings - Set or inquire popup/submenu parameters. 
+ *
+ * menu_settings()
  * ================================================================
  * flag == 0    GET SETTINGS
  * flag == 1    SET SETTINGS
  *		if any setting is < 0, ignore setting
  */
-VOID mn_settings(flag, Values)
-int16_t flag;
-
-MN_SET *Values;
+VOID mn_settings(P(int16_t) flag, P(MN_SET *) Values)
+PP(int16_t flag;)
+PP(MN_SET *Values;)
 {
 	int32_t dummy;
 
@@ -870,10 +834,9 @@ MN_SET *Values;
  * Count the Number of submenus displayed, including this one.
  * Return TRUE if the count is less than or equal to the limit. MAX_LEVEL
  */
-BOOLEAN CountLevel(VOID)
+BOOLEAN CountLevel(NOTHING)
 {
 	int count;
-
 	MENU_PTR curptr;
 
 	count = 0;

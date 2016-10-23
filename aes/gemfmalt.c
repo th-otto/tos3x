@@ -68,8 +68,8 @@ GLOBAL char const gl_nils[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
  *	Routine to break a string into smaller strings.  Breaks occur
  *	whenever an | or a ] is encountered.
  */
-int16_t fm_strbrk(P(OBJPTR) tree, P(intptr_t) palstr, P(int16_t) stroff, P(int16_t *) pcurr_id, P(int16_t *) pnitem, P(int16_t *) pmaxlen)
-PP(OBJPTR tree;)
+int16_t fm_strbrk(P(LPTREE) tree, P(intptr_t) palstr, P(int16_t) stroff, P(int16_t *) pcurr_id, P(int16_t *) pnitem, P(int16_t *) pmaxlen)
+PP(LPTREE tree;)
 PP(intptr_t palstr;)
 PP(int16_t stroff;)
 PP(int16_t *pcurr_id;)
@@ -158,8 +158,8 @@ PP(int16_t *pmaxlen;)
  *		2nd button = Cancel
  */
 
-VOID fm_parse(P(OBJPTR) tree, P(intptr_t) palstr, P(int16_t *) picnum, P(int16_t *) pnummsg, P(int16_t *) plenmsg, P(int16_t *) pnumbut, P(int16_t *) plenbut)
-PP(OBJPTR tree;)
+VOID fm_parse(P(LPTREE) tree, P(intptr_t) palstr, P(int16_t *) picnum, P(int16_t *) pnummsg, P(int16_t *) plenmsg, P(int16_t *) pnumbut, P(int16_t *) plenbut)
+PP(LPTREE tree;)
 PP(register intptr_t palstr;)
 PP(int16_t *picnum;)
 PP(int16_t *pnummsg;)
@@ -178,7 +178,7 @@ PP(int16_t *plenbut;)
 }
 
 
-VOID fm_build(P(OBJPTR) tree, P(int16_t) haveicon, P(int16_t) nummsg, P(int16_t) mlenmsg, P(int16_t) numbut, P(int16_t) mlenbut)
+VOID fm_build(P(LPTREE) tree, P(int16_t) haveicon, P(int16_t) nummsg, P(int16_t) mlenmsg, P(int16_t) numbut, P(int16_t) mlenbut)
 P(register int32_t tree;)
 P(int16_t haveicon;)
 P(int16_t nummsg;)

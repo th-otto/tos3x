@@ -126,15 +126,6 @@ main()
 			size = Fread(handle, memory, address);
 			Fclose(handle);
 
-#if 0
-			if ((!i) || (i == 1))
-			{
-				intptr = address;
-				intptr += RSH_SIZE;		/* get the size  */
-				size = (long) (*intptr);
-			}
-#endif
-
 			if (size & 0x1)				/* on the odd boundary */
 				size += 5;
 			else
@@ -167,7 +158,7 @@ main()
 		size = address - top;
 
 		Cconws("Writing ");
-		Cconws(outfile);				/* i = 5 */
+		Cconws(outfile);
 		Cconws("\012\015");
 
 		memory = Fwrite(handle, size, top + 2);

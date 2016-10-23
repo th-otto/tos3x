@@ -24,91 +24,40 @@
 #define NO3D	0
 #define IS3D	1
 
-/* in GEMFLAG.C */
-extern int16_t unsync();
-
-extern int16_t tak_flag();
-
-/* in GSXIF.C */
-extern int16_t gsx_gclip();
-
-extern int16_t gsx_sclip();
-
-extern VOID gsx_mret();
-
-extern VOID gsx_moff();
-
-extern VOID gsx_mon();
-
-extern VOID gsx_attr();
-
-extern VOID gsx_1code();
-
-/* in GEMGRLIB.S */
-extern int16_t gr_stilldn();
-
-/* in GEMOBLIB.C */
-extern VOID ob_actxywh();
-
-extern VOID ob_add();
-
-extern VOID ob_draw();
-
-extern int32_t ad_stdesk;
-
-extern int16_t ml_ocnt;
-
-extern PD *ctl_pd;
-
-extern PD *gl_mowner;
-
-extern int32_t gl_mntree;
-
-extern int16_t gl_wchar,
- gl_hchar;								/* char size in pixels */
-
-extern int16_t gl_wbox,
- gl_hbox;								/* char box size in pixels */
-
-extern int16_t gl_width,
- gl_height;
-
-extern GRECT gl_rfull;
-
-extern GRECT gl_rscreen;
-
-extern int16_t deskwind;					/* DESKTOP window handle */
-
-
 int16_t phanwind;							/* PHANTOM window handle */
-
-int16_t hparts,
- vparts;								/* window elements masks */
-
+int16_t hparts, vparts;						/* window elements masks */
 int16_t wtcolor[MAXOBJ];					/* topped window object colors  */
-
 int16_t wbcolor[MAXOBJ];					/* background window object colors */
-
-int32_t newdesk;							/* address of new DESKTOP */
-
+LPTREE newdesk;								/* address of new DESKTOP */
 int16_t newroot;							/* root object of new DESKTOP */
-
-WINDOW *hashtbl[NUMWIN];				/* window structures hash table */
-
+WINDOW *hashtbl[NUMWIN];					/* window structures hash table */
 int16_t hhead;								/* ascending handle # linked list */
-
-int16_t topw,
- botw;									/* top and bottom window handles */
-
-MEMHDR *wmhead,
-*wmtail;								/* window memory linked list */
-
-MEMHDR *rmhead,
-*rmtail;								/* rect lists memory linked list */
-
+int16_t topw, botw;							/* top and bottom window handles */
+MEMHDR *wmhead, *wmtail;					/* window memory linked list */
+MEMHDR *rmhead, *rmtail;					/* rect lists memory linked list */
 int16_t wind_msg[8];						/* buffer to store window messages */
+intptr_t ad_windspb;
 
-int32_t ad_windspb;
+
+BOOLEAN wm_start PROTO((NOTHING));
+WINDOW *newwp PROTO((NOTHING));
+int16_t newhndl PROTO((WINDOW *nwp));
+VOID storewp PROTO((WINDOW *wp));
+int16_t totop PROTO((int16_t handle, int16_t caller));
+int16_t tobot PROTO((int16_t handle));
+VOID activate PROTO((WINDOW *wp, int16_t topped));
+VOID setcol PROTO((WINDOW *wp, int16_t ndx, int16_t topped));
+VOID w_adjust PROTO((WINDOW *wp, GRECT *rect));
+VOID w_clipdraw PROTO((WINDOW *wp, int obj, GRECT *pc));
+VOID w_drawchange PROTO((GRECT *dirty, uint16_t skip, uint16_t stop));
+VOID w_bld PROTO((WINDOW *wp, int ob, int type, int parent, intptr_t spec, int16_t is3d));
+VOID w_obrect PROTO((WINDOW *wp, int ob, int obx, int oby, int obw, int obh));
+VOID w_rect PROTO((GRECT *raddr, int gx, int gy, int gw, int gh));
+VOID w_ted PROTO((TEDINFO *tedaddr, char *ptext, int just, int color));
+
+
+
+
 
 
 /*
@@ -118,7 +67,7 @@ int32_t ad_windspb;
  *		window color defaults don't get munched when apps are
  *		launched; etc.
  */
-VOID wm_init()
+VOID wm_init(NOTHING)
 {
 	register int16_t i;							/* counter */
 
@@ -139,17 +88,12 @@ VOID wm_init()
  *		of the window manager.
  *	      - returns TRUE (1) if successful, and FALSE (0) if not.
  */
-int16_t wm_start()
+BOOLEAN wm_start(NOTHING)
 {
 	register WINDOW *wp;						/* pointer to window structure */
-
 	register RLIST *rp;						/* pointer to RLIST structure */
-
 	register int i;							/* counter */
-
 	GRECT windsiz;
-
-	WINDOW *srchwp();
 
 	/* Allocate memory for memory header and window structures */
 	if ((wmhead = (MEMHDR *) Malloc((int32_t) (NUMWIN * sizeof(WINDOW) + sizeof(MEMHDR)))) == NULL)
@@ -164,7 +108,7 @@ int16_t wm_start()
 	{
 		wp->status.used = FALSE;		/* window structure is available */
 		wp->wwhere = wmhead;			/* remember where it resides in */
-		hashtbl[i] = NULL;			/* initialize hash table entries */
+		hashtbl[i] = NULL;				/* initialize hash table entries */
 	}
 
 	topw = botw = NIL;					/* no opened window yet */
@@ -210,24 +154,20 @@ int16_t wm_start()
 
 
 /*
+ * AES #100 - wind_create - Initializes a new window 
+ *
  * Wm_create() - allocates the application's full-size window and 
  *		 returns the window's handle.
  *	       - returns FAILURE (-1) if no handle is available or
  *		 if an error occurred.
  */
-int16_t wm_create(kind, rect)
-uint16_t kind;								/* kind of window to be created */
-
-register GRECT *rect;						/* x, y, width and height of full size window */
+int16_t wm_create(P(uint16_t) kind, P(GRECT *) rect)
+PP(uint16_t kind;)								/* kind of window to be created */
+PP(register GRECT *rect;)						/* x, y, width and height of full size window */
 {
 	register int i;							/* counter */
-
-	register int16_t *tc,
-	*bc;								/* pointers to color array */
-
+	register int16_t *tc, *bc;				/* pointers to color array */
 	register WINDOW *wp;						/* pointer to window structure */
-
-	WINDOW *newwp();
 
 	/* find next available window structure and handle  */
 	/* if none available, return with a FAILURE     */
@@ -372,24 +312,19 @@ register GRECT *rect;						/* x, y, width and height of full size window */
 
 
 /*
+ * AES #101 - wind_open - Open window
+ *
  * Wm_open() - opens a window in its given size and location.
  *	     - returns FALSE (0) if given handle is invalid,
  *	       or if window has already been opened.
  *	     - returns TRUE (1) if everything is fine.
  */
-int16_t wm_open(handle, rect)
-int16_t handle;							/* handle of window to be opened */
-
-register GRECT *rect;						/* x, y, width and height of opened window */
+int16_t wm_open(P(int16_t) handle, P(GRECT *) rect)
+PP(int16_t handle;)							/* handle of window to be opened */
+PP(register GRECT *rect;)						/* x, y, width and height of opened window */
 {
-	register WINDOW *wp;						/* pointer to window structure */
-
-	WINDOW *srchwp();
-
-	int16_t ret,
-	 x,
-	 w,
-	 h;									/* return code */
+	register WINDOW *wp;					/* pointer to window structure */
+	int16_t ret, x, w, h;					/* return code */
 
 	/* if window structure can't be found or window already opened,
 	   return error */
@@ -419,18 +354,18 @@ register GRECT *rect;						/* x, y, width and height of opened window */
 
 
 /*
+ * AES #102 - wind_close - Close window
+ *
  * Wm_close() - closes an opened window
  *	      - returns FALSE (0) if given handle is invalid,
  *	        or if window has already been closed.
  *	      - returns TRUE (1) if everything is fine.
  *
  */
-int16_t wm_close(handle)
-int16_t handle;							/* handle of window to be closed */
+int16_t wm_close(P(int16_t) handle)
+PP(int16_t handle;)							/* handle of window to be closed */
 {
-	register WINDOW *wp,
-	*wp1;								/* pointers to window structure */
-
+	register WINDOW *wp, *wp1;			/* pointers to window structure */
 	GRECT dirty;						/* rectangle of dirty area */
 
 	if ((wp = srchwp(handle)) == NULL || !wp->status.opened)
@@ -489,23 +424,19 @@ int16_t handle;							/* handle of window to be closed */
 
 
 /*
+ * AES #103 - wind_delete - Delete window
+ *
  * Wm_delete() - closes the window if it is not already closed,
  *		 and frees the window structure.
  *	       - returns FALSE (0) if given handle is invalid.
  *	       - returns TRUE (1) if everything is fine.
  *
  */
-int16_t wm_delete(handle)
-int16_t handle;							/* handle of window to be deleted */
+int16_t wm_delete(P(int16_t) handle)
+PP(int16_t handle;)							/* handle of window to be deleted */
 {
-	WINDOW *srchwp();
-
-	register WINDOW *wp,
-	*wp1,
-	*wp2;								/* pointers to window structures */
-
+	register WINDOW *wp, *wp1, *wp2;	/* pointers to window structures */
 	MEMHDR *mp;							/* pointer to memory header */
-
 	int bucket;							/* index into hash table */
 
 	if ((wp = srchwp(handle)) == NULL)
@@ -590,31 +521,22 @@ int16_t handle;							/* handle of window to be deleted */
 
 
 /*
+ * AES #105 - wind_get - Obtains various properties of a window.
+ *
  * Wm_get() - returns information of window in the given array
  *	    - returns FALSE (0) if given handle is invalid
  *	    - returns TRUE (1) if everything is fine
  *
  */
-int16_t wm_get(handle, field, ow, iw)
-register int16_t handle;						/* window handle */
-
-int16_t field;								/* flag to identify what info to be returned */
-
-register int16_t ow[];							/* return values */
-
-int16_t iw[];
+int16_t wm_get(P(int16_t) handle, P(int16_t) field, P(int16_t *)ow, P(const int16_t *) iw)
+PP(register int16_t handle;)						/* window handle */
+PP(int16_t field;)								/* flag to identify what info to be returned */
+PP(register int16_t *ow;)							/* return values */
+PP(const int16_t *iw;)
 {
-	int ret,
-	 i;
-
+	int ret, i;
 	register WINDOW *wp;
-
 	register GRECT *r;
-
-	WINDOW *srchwp();
-
-	RLIST *genrlist();
-
 
 	if ((field == WF_DCOLOR) || (field == WF_TOP) || (field == WF_SCREEN) || (field == WF_BOTTOM))
 		goto wg_1;
@@ -754,37 +676,25 @@ int16_t iw[];
 
 
 /*
+ * AES #106 - wind_set - Alter various window attributes.
+ *
  * Wm_set() - changes information of a window
  *	    - returns FALSE (0) if given handle is invalid
  *	    - returns TRUE (1) if everything is fine
  *
  */
-int16_t wm_set(handle, field, iw)
-register int16_t handle;						/* window handle */
-
-register int16_t field;							/* flag to identify what info to be changed */
-
-register int16_t iw[];							/* values to change to */
+int16_t wm_set(P(int16_t) handle, P(int16_t field), P(const int16_t *) iw)
+PP(register int16_t handle;)						/* window handle */
+PP(register int16_t field;)							/* flag to identify what info to be changed */
+PP(register const int16_t *iw;)							/* values to change to */
 {
 	register WINDOW *wp;						/* pointer to window structure */
-
-	WINDOW *srchwp();
-
-	int ret,
-	 obj;
-
+	int ret, obj;
 	long blen;
-
 	uint16_t sz;
-
-	register int16_t *r,
-	*r1,
-	 i;
-
+	register int16_t *r, *r1, i;
 	register OBJECT *work;
-
-	GRECT rect,
-	 rect1;
+	GRECT rect, rect1;
 
 	if ((field == WF_NEWDESK) || (field == WF_DCOLOR))
 		goto ws_1;
@@ -996,13 +906,14 @@ register int16_t iw[];							/* values to change to */
 
 
 /*
+ * AES #106 - wind_find - Find the ID of a window at the given coordinates.
+ *
  * Wm_find() - finds which window is under the mouse's x, y position
  *
  */
-int16_t wm_find(mx, my)
-int mx;									/* mouse's x position */
-
-int my;									/* mouse's y position */
+int16_t wm_find(P(int) mx, P(int) my)
+PP(int mx;)									/* mouse's x position */
+PP(int my;)									/* mouse's y position */
 {
 	register WINDOW *wp;						/* pointer to window structure */
 
@@ -1017,6 +928,8 @@ int my;									/* mouse's y position */
 
 
 /*
+ * AES #107 - wind_update - Blocks or releases screen operations.
+ *
  * Wm_update() - locks or unlocks the current state of the window 
  *		 tree while an application is responding to a 
  *		 window update message in his message pipe or is 
@@ -1024,8 +937,8 @@ int my;									/* mouse's y position */
  *		 his current rectangle list.
  *
  */
-int16_t wm_update(code)
-int code;								/* flag for the call's function */
+int16_t wm_update(P(int) code)
+PP(int code;)								/* flag for the call's function */
 {
 	if (code < 2)
 	{
@@ -1047,41 +960,29 @@ int code;								/* flag for the call's function */
 
 
 /*
- * Wm_calc() - calculates the x, y coordinates and width, height of a
- *		window's border area or work area
+ * AES #108 - wind_calc - Calculates the limits or the total space requirement of a window 
  *
+ *	Given a width and height of a Work Area and the Kind of window
+ *	desired calculate the required window size including the 
+ *	Border Area.  or...  Given the width and height of a window
+ *	including the Border Area and the Kind of window desired, calculate
+ *	the result size of the window Work Area.
  */
-int16_t wm_calc(type, kind, ix, iy, iw, ih, ox, oy, ow, oh)
-int type;								/* the type of calculation to perform */
-
-int kind;								/* components present in the window */
-
-int ix;									/* input x-coordinate of window */
-
-int iy;									/* input y-coordinate of window */
-
-int iw;									/* input width of window */
-
-int ih;									/* input height of window */
-
-int *ox;								/* output x-coordinate of work/border area */
-
-int *oy;								/* output y-coordinate of work/border area */
-
-int *ow;								/* output width of work/border area */
-
-int *oh;								/* output height of work/border area */
+int16_t wm_calc(P(int16_t) type, P(int16_t) kind, P(int16_t) ix, P(int16_t) iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh)
+PP(int16_t type;)								/* the type of calculation to perform */
+PP(int16_t kind;)								/* components present in the window */
+PP(int16_t ix;)									/* input x-coordinate of window */
+PP(int16_t iy;)									/* input y-coordinate of window */
+PP(int16_t iw;)									/* input width of window */
+PP(int16_t ih;)									/* input height of window */
+PP(int16_t *ox;)								/* output x-coordinate of work/border area */
+PP(int16_t *oy;)								/* output y-coordinate of work/border area */
+PP(int16_t *ow;)								/* output width of work/border area */
+PP(int16_t *oh;)								/* output height of work/border area */
 {
-	register int16_t tb,
-	 bb,
-	 lb,
-	 rb;
-
-	register int16_t yinc,
-	 xinc;
-
-	int hparts,
-	 vparts;
+	register int16_t tb, bb, lb, rb;
+	register int16_t yinc, xinc;
+	int hparts, vparts;
 
 	tb = bb = rb = 0;
 	lb = 1;
@@ -1142,25 +1043,14 @@ int *oh;								/* output height of work/border area */
  *	      area
  *
  */
-VOID wm_min(kind, ow, oh)
-register int16_t kind;							/* coamponents present in the window */
-
-int16_t *ow;								/* output width of work/border area */
-
-int16_t *oh;								/* output height of work/border area */
+VOID wm_min(P(int16_t) kind, P(int16_t *) ow, P(int16_t *)oh)
+PP(register int16_t kind;)							/* coamponents present in the window */
+PP(int16_t *ow;)								/* output width of work/border area */
+PP(int16_t *oh;)								/* output height of work/border area */
 {
-	register int16_t w1,
-	 w2,
-	 w3,
-	 h1,
-	 h2,
-	 h3;
-
-	register int16_t yinc,
-	 xinc;
-
-	int16_t hparts,
-	 vparts;
+	register int16_t w1, w2, w3, h1, h2, h3;
+	register int16_t yinc, xinc;
+	int16_t hparts, vparts;
 
 	w1 = w2 = w3 = h1 = h2 = h3 = 1;
 
@@ -1234,7 +1124,9 @@ int16_t *oh;								/* output height of work/border area */
 }
 
 
-/*	
+/*
+ * AES #109 - wind_new - Close all windows.
+ *
  * Wm_new() - Delete all the window structures and clean 
  *	      up the window update semaphore.  This 
  *	      routine is very critical, so don't call 
@@ -1248,10 +1140,9 @@ int16_t *oh;								/* output height of work/border area */
  * future multitasking system.
  *	
  */
-int16_t wm_new()
+int16_t wm_new(NOTHING)
 {
 	register SPB *sy;
-
 	register MEMHDR *mp;						/* pointer to memory header */
 
 	/* Free all window structures */
@@ -1265,7 +1156,7 @@ int16_t wm_new()
 	wm_start();							/* reinit all data structures */
 
 	ml_ocnt = 0;						/* reset the semaphore */
-	gl_mntree = 0x0L;					/* reset menu tree */
+	gl_mntree = NULL;					/* reset menu tree */
 	gl_mowner = ctl_pd;					/* reset mouse owner */
 
 	sy = ad_windspb;
@@ -1287,12 +1178,10 @@ int16_t wm_new()
  * structure or NULL if none is available.
  *
  */
-WINDOW *newwp()
+WINDOW *newwp(NOTHING)
 {
 	WINDOW *wp;							/* pointer to window structure */
-
 	MEMHDR *mp;							/* pointer to memory header */
-
 	int i;								/* count */
 
 	if (wmtail->numused == NUMWIN)
@@ -1335,14 +1224,11 @@ WINDOW *newwp()
  * none is available.
  *
  */
-int16_t newhndl(nwp)
-register WINDOW *nwp;						/* pointer to new window structure */
+int16_t newhndl(P(WINDOW *) nwp)
+PP(register WINDOW *nwp;)						/* pointer to new window structure */
 {
 	register WINDOW *wp,
 	*nxtwp;								/* pointers to window structure */
-
-	WINDOW *srchwp();
-
 	int found;
 
 	/*
@@ -1389,8 +1275,8 @@ register WINDOW *nwp;						/* pointer to new window structure */
  * of window structures.
  *
  */
-VOID storewp(wp)
-WINDOW *wp;
+VOID storewp(P(WINDOW *) wp)
+PP(WINDOW *wp;)
 {
 	int bucket;							/* bucket number in hash table */
 
@@ -1408,13 +1294,11 @@ WINDOW *wp;
  * handle, or NULL if the window structure is not found.
  *
  */
-WINDOW *srchwp(handle)
-int handle;
+WINDOW *srchwp(P(int) handle)
+PP(int handle;)
 {
 	WINDOW *wp;							/* pointer to window structure */
-
 	int bucket;							/* bucket number in hash table */
-
 	wp = NULL;						/* assume no window structure */
 
 	/* look for window structure only if handle is valid */
@@ -1434,26 +1318,17 @@ int handle;
  *	     (if there is one.)
  *
  */
-int16_t totop(handle, caller)
-int16_t handle;							/* handle of window to be topped */
+int16_t totop(P(int16_t) handle, P(int16_t) caller)
+PP(int16_t handle;)							/* handle of window to be topped */
 
-int16_t caller;							/* WMOPEN: called by wm_open() */
-
+PP(int16_t caller;)							/* WMOPEN: called by wm_open() */
 			/* WMCLOSE: called by wm_close()  */
 			/* WMSET: called by wm_set()  */
 {
 	register WINDOW *ntwp;
-
-	WINDOW *onwp,
-	*unwp,
-	*twp;
-
-	int16_t nxtw,
-	 i;
-
-	GRECT obscured,
-	 inter,
-	 ontop;
+	WINDOW *onwp, *unwp, *twp;
+	int16_t nxtw, i;
+	GRECT obscured, inter, ontop;
 
 	twp = NULL;
 
@@ -1546,16 +1421,11 @@ int16_t caller;							/* WMOPEN: called by wm_open() */
  *	     window at all times, and does not count in this function
  *
  */
-int16_t tobot(handle)
-int16_t handle;							/* handle of window to be bottmed */
+int16_t tobot(P(int16_t) handle)
+PP(int16_t handle;)							/* handle of window to be bottmed */
 {
-	register WINDOW *nbwp,
-	*onbwp,
-	*unnbwp;
-
-	WINDOW *bwp,
-	*onnbwp;
-
+	register WINDOW *nbwp, *onbwp, *unnbwp;
+	WINDOW *bwp, *onnbwp;
 	GRECT dirty;
 
 	/* search for window structure of the given handle */
@@ -1610,17 +1480,14 @@ int16_t handle;							/* handle of window to be bottmed */
  * Activate() - change appearance of window components depending on
  *		whether it is active (topped) or not.
  */
-VOID activate(wp, topped)
-register WINDOW *wp;							/* pointer to window structure to be modified */
-
-int16_t topped;							/* YES: activate window components */
+VOID activate(P(WINDOW *) wp, P(int16_t) topped)
+PP(register WINDOW *wp;)							/* pointer to window structure to be modified */
+PP(int16_t topped;)							/* YES: activate window components */
 
 			/* NO:  deactivate window components */
 {
 	register int16_t kind;						/* window kind */
-
-	int16_t hparts,
-	 vparts;
+	int16_t hparts, vparts;
 
 	if (!(kind = wp->kind))
 		return;
@@ -1713,12 +1580,10 @@ int16_t topped;							/* YES: activate window components */
 /*
  * Setcol() - set the color of an object.
  */
-VOID setcol(wp, ndx, topped)
-register WINDOW *wp;							/* pointer to window structure */
-
-int16_t ndx;								/* index into object structure */
-
-int16_t topped;							/* YES: top window color */
+VOID setcol(P(WINDOW *) wp, P(int16_t) ndx, P(int16_t) topped)
+PP(register WINDOW *wp;)							/* pointer to window structure */
+PP(int16_t ndx;)								/* index into object structure */
+PP(int16_t topped;)							/* YES: top window color */
 {
 	if ((wp->obj[ndx].ob_type & 0x00ff) == G_BOXTEXT)
 	{
@@ -1742,36 +1607,22 @@ int16_t topped;							/* YES: top window color */
  * W_adjust() - adjust x, y, w and h of each component in the 
  *		given window with the window's x, y, w and h.
  */
-VOID w_adjust(wp, rect)
-register WINDOW *wp;							/* pointer to window structure */
-
-register GRECT *rect;						/* pointer to window's coords and dimensions */
+VOID w_adjust(P(WINDOW *) wp, P(GRECT *) rect)
+PP(register WINDOW *wp;)							/* pointer to window structure */
+PP(register GRECT *rect;)						/* pointer to window's coords and dimensions */
 {
 	int ulx;							/* x offset from upper left corner */
-
 	int uly;							/* y offset from upper left corner */
-
 	int urx;							/* x offset from upper right corner */
-
 	int ury;							/* y offset from upper right corner */
-
 	int llx;							/* x offset from lower left corner */
-
 	int lly;							/* y offset from lower left corner */
-
 	int lrx;							/* x offset from lower right corner */
-
 	int lry;							/* y offset from lower right corner */
-
-	int inx,
-	 iny;								/* x and y increments */
-
+	int inx, iny;						/* x and y increments */
 	int blen;							/* length of base bar */
-
 	int sz;								/* slider size */
-
-	int w3dbox,
-	 h3dbox;
+	int w3dbox, h3dbox;
 
 	/***
      *
@@ -1967,36 +1818,22 @@ register GRECT *rect;						/* pointer to window's coords and dimensions */
  * W_adjust() - adjust x, y, w and h of each component in the 
  *		given window with the window's x, y, w and h.
  */
-VOID w_adjust(wp, rect)
-register WINDOW *wp;							/* pointer to window structure */
-
-register GRECT *rect;						/* pointer to window's coords and dimensions */
+VOID w_adjust(P(WINDOW *) wp, P(GRECT *) rect)
+PP(register WINDOW *wp;)							/* pointer to window structure */
+PP(register GRECT *rect;)						/* pointer to window's coords and dimensions */
 {
 	int ulx;							/* x offset from upper left corner */
-
 	int uly;							/* y offset from upper left corner */
-
 	int urx;							/* x offset from upper right corner */
-
 	int ury;							/* y offset from upper right corner */
-
 	int llx;							/* x offset from lower left corner */
-
 	int lly;							/* y offset from lower left corner */
-
 	int lrx;							/* x offset from lower right corner */
-
 	int lry;							/* y offset from lower right corner */
-
-	int inx,
-	 iny;								/* x and y increments */
-
+	int inx, iny;						/* x and y increments */
 	int blen;							/* length of base bar */
-
 	int sz;								/* slider size */
-
-	int w3dbox,
-	 h3dbox;
+	int w3dbox, h3dbox;
 
 	/***
      *
@@ -2186,19 +2023,14 @@ register GRECT *rect;						/* pointer to window's coords and dimensions */
  *		  clipping rectangle passed in, and draw the
  *		  object specified.
  */
-VOID w_clipdraw(wp, obj, pc)
-WINDOW *wp;								/* pointer to window structure */
-
-int obj;								/* object to be drawn */
-
-GRECT *pc;								/* pointer to clipping rectangle */
+VOID w_clipdraw(P(WINDOW *) wp, P(int) obj, P(GRECT *) pc)
+PP(WINDOW *wp;)								/* pointer to window structure */
+PP(int obj;)								/* object to be drawn */
+PP(GRECT *pc;)								/* pointer to clipping rectangle */
 {
 	register RLIST *rl;
-
 	GRECT rclip;
-
-	RLIST *genrlist(),
-	*rlist;
+	RLIST *rlist;
 
 	gsx_moff();
 	wm_update(TRUE);
@@ -2231,16 +2063,13 @@ GRECT *pc;								/* pointer to clipping rectangle */
  *		    intersects with the dirty area, and send
  *		    redraw messages to those windows
  */
-VOID w_drawchange(dirty, skip, stop)
-GRECT *dirty;							/* rectangle of dirty area */
-
-uint16_t skip,
-	stop;								/* window to be skipped */
+VOID w_drawchange(P(GRECT *) dirty, P(uint16_t) skip, P(uint16_t) stop)
+PP(GRECT *dirty;)							/* rectangle of dirty area */
+PP(uint16_t skip;)
+PP(uint16_t stop;)								/* window to be skipped */
 {
 	uint16_t handle;						/* window handle */
-
 	GRECT exposed;						/* area to be drawn */
-
 	WINDOW *wp;							/* pointer to window structure */
 
 	for (handle = botw; handle != stop; handle = wp->ontop)
@@ -2278,17 +2107,13 @@ uint16_t skip,
  *		tree of the window structure.
  *
  */
-VOID w_bld(wp, ob, type, parent, spec, is3d)
-WINDOW *wp;
-
-register int ob;
-
-int type,
-	parent;
-
-long spec;
-
-int16_t is3d;
+VOID w_bld(P(WINDOW *) wp, P(int) ob, P(int) type, P(int) parent, P(intptr_t) spec, P(int16_t) is3d)
+PP(WINDOW *wp;)
+PP(register int ob;)
+PP(int type;)
+PP(int parent;)
+PP(intptr_t spec;)
+PP(int16_t is3d;)
 {
 	register OBJECT *obaddr;
 
@@ -2308,15 +2133,13 @@ int16_t is3d;
 }
 
 
-VOID w_obrect(wp, ob, obx, oby, obw, obh)
-WINDOW *wp;
-
-int ob;
-
-int obx,
-	oby,
-	obw,
-	obh;
+VOID w_obrect(P(WINDOW *) wp, P(int) ob, P(int) obx, P(int) oby, P(int) obw, P(int) obh)
+PP(WINDOW *wp;)
+PP(int ob;)
+PP(int obx;)
+PP(int oby;)
+PP(int obw;)
+PP(int obh;)
 {
 	register OBJECT *obaddr;
 
@@ -2328,13 +2151,12 @@ int obx,
 }
 
 
-VOID w_rect(raddr, gx, gy, gw, gh)
-register GRECT *raddr;
-
-int gx,
-	gy,
-	gw,
-	gh;
+VOID w_rect(P(GRECT *) raddr, P(int) gx, P(int) gy, P(int) gw, P(int) gh)
+PP(register GRECT *raddr;)
+PP(int gx;)
+PP(int gy;)
+PP(int gw;)
+PP(int gh;)
 {
 	raddr->g_x = gx;
 	raddr->g_y = gy;
@@ -2343,13 +2165,11 @@ int gx,
 }
 
 
-VOID w_ted(tedaddr, ptext, just, color)
-register TEDINFO *tedaddr;
-
-char *ptext;
-
-int just,
-	color;
+VOID w_ted(P(TEDINFO *) tedaddr, P(char *) ptext, P(int) just, P(int) color)
+PP(register TEDINFO *tedaddr;)
+PP(char *ptext;)
+PP(int just;)
+PP(int color;)
 {
 	tedaddr->te_ptext = ptext;
 	tedaddr->te_just = just;
@@ -2364,12 +2184,10 @@ int just,
 /*
  * W_setactive() - set control rectangle and mouse owner
  */
-VOID w_setactive()
+VOID w_setactive(NOTHING)
 {
 	GRECT d;
-
-	WINDOW *wp,
-	*srchwp();
+	WINDOW *wp;
 
 	wp = srchwp(topw);
 	d = *(GRECT *) & (wp->obj[W_WORK].ob_x);
@@ -2380,17 +2198,15 @@ VOID w_setactive()
 /* 
  * Ap_sendmsg() - send message to current process
  */
-VOID ap_sendmsg(ap_msg, type, towhom, w3, w4, w5, w6, w7)
-register int16_t ap_msg[];
-
-int16_t type,
-	towhom;
-
-int16_t w3,
-	w4,
-	w5,
-	w6,
-	w7;
+VOID ap_sendmsg(P(int16_t *) ap_msg, P(int16_t) type, P(int16_t) towhom, P(int16_t) w3, P(int16_t) w4, P(int16_t) w5, P(int16_t) w6, P(int16_t) w7)
+PP(register int16_t *ap_msg;)
+PP(int16_t type;)
+PP(int16_t towhom;)
+PP(int16_t w3;)
+PP(int16_t w4;)
+PP(int16_t w5;)
+PP(int16_t w6;)
+PP(int16_t w7;)
 {
 	ap_msg[0] = type;
 	ap_msg[1] = rlr->p_pid;

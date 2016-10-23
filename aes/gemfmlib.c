@@ -111,8 +111,8 @@ PP(int16_t beg_ownit;)
 /************************************************************************/
 /* f i n d _ o b j							*/
 /************************************************************************/
-int16_t find_obj(P(OBJPTR) tree, P(int16_t) start_obj, P(int16_t) which)
-PP(register int32_t tree;)
+int16_t find_obj(P(LPTREE) tree, P(int16_t) start_obj, P(int16_t) which)
+PP(register LPTREE tree;)
 PP(int16_t start_obj;)
 PP(int16_t which;)
 {
@@ -162,8 +162,8 @@ PP(int16_t which;)
 
 
 
-int16_t fm_keybd(P(OBJPTR) tree, P(int16_t) obj, P(int16_t *) pchar, P(int16_t *) pnew_obj)
-PP(OBJPTR tree;)
+int16_t fm_keybd(P(LPTREE) tree, P(int16_t) obj, P(int16_t *) pchar, P(int16_t *) pnew_obj)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(int16_t *pchar;)
 PP(int16_t *pnew_obj;)
@@ -205,8 +205,8 @@ PP(int16_t *pnew_obj;)
 
 
 
-int16_t fm_button(P(OBJPTR) tree, P(int16_t) new_obj, P(int16_t) clks, P(int16_t *) pnew_obj)
-PP(register OBJPTR tree;)
+int16_t fm_button(P(LPTREE) tree, P(int16_t) new_obj, P(int16_t) clks, P(int16_t *) pnew_obj)
+PP(register LPTREE tree;)
 PP(register int16_t new_obj;)
 PP(int16_t clks;)
 PP(int16_t *pnew_obj;)
@@ -286,8 +286,8 @@ PP(int16_t *pnew_obj;)
  *	form.  The cursor is placed at the starting field.  This routine
  *	returns the object that caused the exit to occur
  */
-int16_t fm_do(P(OBJPTR) tree, P(int16_t) start_fld)
-PP(register OBJPTR tree;)
+int16_t fm_do(P(LPTREE) tree, P(int16_t) start_fld)
+PP(register LPTREE tree;)
 PP(int16_t start_fld;)
 {
 	register int16_t edit_obj, cont;

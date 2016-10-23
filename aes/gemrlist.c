@@ -16,6 +16,8 @@
 BOOLEAN brkrect PROTO((GRECT *trect, GRECT *brect, uint16_t *hv_pc));
 BOOLEAN chgrlist PROTO((uint16_t hv_pc, GRECT *cutrect, RLIST *oldrp, RLIST **rlist));
 BOOLEAN mrgrect PROTO((RLIST *rp1, RLIST *rp2));
+static RLIST *mkrect PROTO((uint16_t pc, GRECT *trect, GRECT *brect));
+static RLIST *newrect PROTO((NOTHING));
 
 
 
@@ -25,7 +27,7 @@ BOOLEAN mrgrect PROTO((RLIST *rp1, RLIST *rp2));
  *	       or return NULL if none is available.
  *
  */
-RLIST *newrect(NOTHING)
+static RLIST *newrect(NOTHING)
 {
 	register RLIST *rp;						/* pointer to RLIST structure */
 	MEMHDR *mp;							/* pointer to memory header */
@@ -347,18 +349,18 @@ PP(RLIST **rlist;)							/* addr of ptr to beginning of rectangle list */
  *	      the rectangle
  *	    - return NULL if no RLIST structure is available
  */
-RLIST *mkrect(uint16_t pc, GRECT *trect, GRECT *brect)
+static RLIST *mkrect(uint16_t pc, GRECT *trect, GRECT *brect)
 PP(uint16_t pc;)								/* flag */
 PP(register GRECT *trect;)						/* ptr to rectangle of window on top */
 PP(register GRECT *brect;)						/* ptr to rectangle of window at the bottom */
 {
-	RLIST *rp;							/* ptr to RLIST strucuture of new rectangle */
-	register GRECT *nrect;					/* ptr to new rectangle */
+	RLIST *rp;									/* ptr to RLIST strucuture of new rectangle */
+	register GRECT *nrect;						/* ptr to new rectangle */
 
 	if ((rp = newrect()) == NULL)
 		return NULL;
 
-	nrect = (GRECT *) & (rp->rect);
+	nrect = &rp->rect;
 
 	/* do common calculations */
 	nrect->g_x = brect->g_x;

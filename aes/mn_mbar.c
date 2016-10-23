@@ -65,31 +65,65 @@ extern int16_t gl_mnpid;
 #endif
 
 
+/* GLOBALS
+ * ================================================================
+ */
+
+/* These are globals used by evnt_submenu() found in evntmenu.c
+ * The globals are used to help evnt_submenu() work for both popup menus
+ * and the menubar.
+ *
+ * These are set just by the 1st level dropdown just before entering
+ * menu_popup() in the routine mn_hdo().
+ */
+GRECT ActiveRect;						/* GRECT for the Menubar ACTIVE area */
+
+GRECT TitleRect;						/* GRECT for the active Title       */
+
+BOOLEAN MenuBar_Mode;					/* TRUE - Use code for the menubar  */
+
+OBJECT *gl_mtree;						/* The menubar object tree ( ROOT ) */
+
+MENU_PTR gl_menuptr;					/* MENU_PTR for the drop-down menu  */
+
+/* PROTOTYPES
+ * ================================================================
+ */
+
+VOID mn_mouse PROTO((BOOLEAN save));
+VOID mu_save PROTO((BOOLEAN saveit, LPTREE tree, int16_t imenu));
+int16_t GetObjMenu PROTO((OBJECT *tree, int16_t ititle, OBJECT **itree));
+
+
+/* FUNCTIONS
+ * ================================================================
+ */
+
 /*	Save and set mouse accordingly	*/
 
-VOID mn_mouse(save)
-int16_t save;
+VOID mn_mouse(P(BOOLEAN) save)
+PP(BOOLEAN save;)
 {
 	if (save)
 	{
 		gr_mouse(258, (char *) 0);		/* save mouse */
 		gr_mouse(ARROW, (char *) 0);
 	} else								/* restore mouse */
+	{
 		gr_mouse(259, (char *) 0);
+	}
 }
 
+
 /*
-*	Change a mouse-wait rectangle based on an object's size.
-*/
+ *	Change a mouse-wait rectangle based on an object's size.
+ */
 
-VOID rect_change(tree, prmob, iob, x)
-int32_t tree;
-
-MOBLK *prmob;
-
-int16_t iob;
-
-int16_t x;
+VOID rect_change(P(LPTREE) tree, P(MOBLK *) prmob, P(int16_t) iob, P(int16_t) x)
+PP(LPTREE tree;)
+PP(MOBLK *prmob;)
+PP(int16_t iob;)
+PP(int16_t x;)
 {
 	ob_offset(tree, iob, &prmob->m_x, &prmob->m_y);
 	prmob->m_w = LWGET(OB_WIDTH(iob));
@@ -105,12 +139,10 @@ int16_t x;
 *	down.
 */
 
-VOID mu_save(saveit, tree, imenu)
-int16_t saveit;
-
-int32_t tree;
-
-int16_t imenu;
+VOID mu_save(P(BOOLEAN) saveit, P(LPTREE) tree, P(int16_t) imenu)
+PP(BOOLEAN saveit;)
+PP(LPTREE tree;)
+PP(int16_t imenu;)
 {
 	GRECT t;
 
@@ -141,22 +173,15 @@ int16_t imenu;
 *	underneath the menu and drawing in the proper menu sub-tree.
 */
 
-int16_t menu_down(tree, ititle, itree)
-register int32_t tree;
-
-int16_t ititle;
-
-OBJECT **itree;
+kint16_t menu_downP(LPTREE) tree, P(int16_t) ititle, P(OBJECT **) itree)
+PP(register LPTREE tree;)
+PP(int16_t ititle;)
+PP(OBJECT **itree;)
 {
 	register OBJECT *newtree;
-
-	register int16_t newimenu,
-	 i;
-
+	register int16_t newimenu, i;
 	int16_t imenu;
-
 	GRECT clip;
-
 
 	/* correlate title # to menu subtree #  */
 	imenu = LWGET(OB_HEAD(THEMENUS));
@@ -187,30 +212,6 @@ OBJECT **itree;
 
 
 
-/* GLOBALS
- * ================================================================
- */
-
-/* These are globals used by evnt_submenu() found in evntmenu.c
- * The globals are used to help evnt_submenu() work for both popup menus
- * and the menubar.
- *
- * These are set just by the 1st level dropdown just before entering
- * menu_popup() in the routine mn_hdo().
- */
-GRECT ActiveRect;						/* GRECT for the Menubar ACTIVE area */
-
-GRECT TitleRect;						/* GRECT for the active Title       */
-
-BOOLEAN MenuBar_Mode;					/* TRUE - Use code for the menubar  */
-
-OBJECT *gl_mtree;						/* The menubar object tree ( ROOT ) */
-
-MENU_PTR gl_menuptr;					/* MENU_PTR for the drop-down menu  */
-
-int16_t buparm;
-
-
 /* FUNCTIONS
  * ================================================================
  */
@@ -239,79 +240,40 @@ int16_t buparm;
  *	int16_t    *pmenu:  returns the menu object number selected
  *	int16_t    *pitem:  returns the menu item object number selected
  */
-BOOLEAN mn_hdo(ptitle, ptree, pmenu, pitem, keyret)
-int16_t *ptitle;							/* returns the menu title       */
-
-OBJECT **ptree;							/* returns the object tree...   */
-
-int16_t *pmenu;							/* returns the menu object      */
-
-int16_t *pitem;							/* returns the menu item        */
-
-int16_t *keyret;							/* returns the keystate - shift,ctrl */
+BOOLEAN mn_hdo(P(int16_t *) ptitle, P(OBJECT **) ptree, P(int16_t *) pmenu, P(int16_t *) pitem, P(int16_t *) keyret)
+PP(int16_t *ptitle;)							/* returns the menu title       */
+PP(OBJECT **ptree;)							/* returns the object tree...   */
+PP(int16_t *pmenu;)							/* returns the menu object      */
+PP(int16_t *pitem;)							/* returns the menu item        */
+PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 {
 	MENU Menu;							/* Input  Menu Values    */
-
 	MENU MData;							/* Output Menu Values    */
-
 	OBJECT *objs;
-
 	OBJECT *tree;						/* ptr to the tree       */
-
-	int16_t menu_state,
-	 wall;
-
-	int16_t cur_title,
-	 cur_state,
-	 cur_menu,
-	 cur_item;
-
-	int16_t last_title,
-	 last_menu;
-
+	int16_t menu_state, wall;
+	int16_t cur_title, cur_state, cur_menu, cur_item;
+	int16_t last_title, last_menu;
 	int16_t dummy;
-
 	BOOLEAN done;
-
 	BOOLEAN flag;
-
 	int16_t NewMenuID;						/* Menu ID of menu displayed.       */
-
 	register MENU_PTR MenuPtr;				/* Pointer to menu node structures  */
-
 	BOOLEAN output;						/* TRUE/FALSE for valid result      */
-
 	OBJECT *newtree;					/* tree ptr of popup menu       */
-
 	int16_t obj;
-
 	int16_t title_object;
-
 	/* evnt_multi() variables */
 	int16_t button;
-
 	int16_t mflags;
-
 	uint16_t ev_which;
-
-	MOBLK m1,
-	 m2;
-
-	int16_t keycode,
-	 nclicks;
-
+	MOBLK m1, m2;
+	int16_t keycode, nclicks;
 	MRETS mk;
-
-	int16_t i,
-	 tail;
-
-	int16_t curobj,
-	 rets[6];
-
+	int16_t i, tail;
+	int16_t curobj, rets[6];
 	int32_t bflags;
-
 	MN_SET MValueNew;					/* CUrrent Popup/SubMenu Parameters */
-
 	MN_SET MValueOld;					/* Old Parameters           */
 
 	/* Initialize several key variables */
@@ -431,7 +393,6 @@ int16_t *keyret;							/* returns the keystate - shift,ctrl */
 
 		}
 	}
-
 
 	while (!done)
 	{
@@ -724,19 +685,14 @@ int16_t *keyret;							/* returns the keystate - shift,ctrl */
  *			 tree can be switched.
  * 
  */
-int16_t GetObjMenu(tree, ititle, itree)
-OBJECT *tree;							/* ptr to the tree we want      */
-
-int16_t ititle;							/* the title of the menu we want */
-
-OBJECT **itree;							/* return the menu item...      */
+int16_t GetObjMenu(P(OBJECT *) tree, P(int16_t) ititle, P(OBJECT **) itree)
+PP(OBJECT *tree;)							/* ptr to the tree we want      */
+PP(int16_t ititle;)							/* the title of the menu we want */
+PP(OBJECT **itree;)							/* return the menu item...      */
 {
 	int16_t imenu;
-
 	int16_t i;
-
 	OBJECT *newtree;
-
 	int16_t newimenu;
 
 	imenu = ObHead(ObTail(ROOT));

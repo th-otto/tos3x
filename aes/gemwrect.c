@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemwrect.c,v $
+*  $Author: mui $	$Date: 89/04/26 18:27:35 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:27:35 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemwrect.c,v $
+*
 * Revision 2.2  89/04/26  18:27:35  mui
 * TT
 * 
@@ -40,22 +38,20 @@
 #define LEFT 1
 #define RIGHT 2
 #define BOTTOM 3
-						/* in OPTIMIZE.C    */
-extern int16_t min();
 
-extern int16_t max();
+ORECT *rul;
+ORECT gl_mkrect;
 
-						/* in WMLIB.C       */
-extern int16_t w_getsize();
 
-extern THEGLO D;
+ORECT *get_orect PROTO((NOTHING));
+ORECT *mkpiece PROTO((int16_t tlrb, ORECT *new, ORECT *old));
+ORECT *brkrct PROTO((ORECT *new, ORECT *r, ORECT *p));
+static VOID mkrect PROTO((LPTREE tree, int16_t wh, int16_t junkx, int16_t junky));
 
-GLOBAL ORECT *rul;
 
-GLOBAL ORECT gl_mkrect;
 
 #if UNLINKED
-or_start()
+VOID or_start(NOTHING)
 {
 	register int16_t i;
 
@@ -69,7 +65,7 @@ or_start()
 }
 #endif
 
-ORECT * get_orect()
+ORECT *get_orect(NOTHING)
 {
 	ORECT *po;
 
@@ -79,11 +75,10 @@ ORECT * get_orect()
 }
 
 
-ORECT * mkpiece(tlrb, new, old)
-int16_t tlrb;
-
-register ORECT *new,
-*old;
+ORECT *mkpiece(P(int16_t) tlrb, P(ORECT *) new, P(ORECT *) old)
+PP(int16_t tlrb;)
+PP(register ORECT *new;)
+PP(register ORECT *old;)
 {
 	register ORECT *rl;
 
@@ -117,26 +112,19 @@ register ORECT *new,
 }
 
 
-ORECT * brkrct(new, r, p)
-register ORECT *new,
-*r;
-
-register ORECT *p;
+ORECT *brkrct(P(ORECT *) new, P(ORECT *) r, P(ORECT *) p)
+PP(register ORECT *new;)
+PP(register ORECT *r;)
+PP(register ORECT *p;)
 {
 	register int16_t i;
-
 	int16_t have_piece[4];
 
-	/* break up rectangle r */
-	/*   based on new,  */
-	/*   adding new orects  */
-	/*   to list p      */
+	/* break up rectangle r based on new, adding new orects to list p */
 	if ((new->o_x < r->o_x + r->o_w) &&
 		(new->o_x + new->o_w > r->o_x) && (new->o_y < r->o_y + r->o_h) && (new->o_y + new->o_h > r->o_y))
 	{
-		/* there was overlap    */
-		/*   so we need new */
-		/*   rectangles     */
+		/* there was overlap so we need new rectangles */
 		have_piece[TOP] = (new->o_y > r->o_y);
 		have_piece[LEFT] = (new->o_x > r->o_x);
 		have_piece[RIGHT] = (new->o_x + new->o_w < r->o_x + r->o_w);
@@ -157,28 +145,20 @@ register ORECT *p;
 }
 
 
-VOID mkrect(tree, wh, junkx, junky)
-int32_t tree;
-
-int16_t wh;
-
-int16_t junkx,
-	junky;
+static VOID mkrect(P(LPTREE) tree, P(int16_t) wh, P(int16_t) junkx, P(int16_t) junky)
+PP(LPTREE tree;)
+PP(int16_t wh;)
+PP(int16_t junkx;)
+PP(int16_t junky;)
 {
 	register WINDOW *pwin;
-
 	ORECT *new;
-
-	register ORECT *r,
-	*p;
+	register ORECT *r, *p;
 
 	pwin = &D.w_win[wh];
-	/* get the new rect */
-	/*   that is used for   */
-	/*   breaking other     */
-	/*   this windows rects */
+	/* get the new rect that is used for breaking other this windows rects */
 	new = &gl_mkrect;
-	/*          */
+	
 	r = (p = &pwin->w_rlist)->o_link;
 	/* redo rectangle list  */
 	while (r)
@@ -197,51 +177,42 @@ int16_t junkx,
 
 
 
-VOID newrect(tree, wh, junkx, junky)
-int32_t tree;
+VOID newrect PROTO((LPTREE tree, int16_t wh, int16_t junkx, int16_t junky));
 
-int16_t wh;
-
-int16_t junkx,
-	junky;
+/* old, unused function */
+VOID newrect(P(LPTREE) tree, P(int16_t) wh, P(int16_t) junkx, P(int16_t) junky)
+PP(LPTREE tree;)
+PP(int16_t wh;)
+PP(int16_t junkx;)
+PP(int16_t junky;)
 {
 	register WINDOW *pwin;
-
 	ORECT *r0;
-
-	register ORECT *new,
-	*r;
+	register ORECT *new, *r;
 
 	pwin = &D.w_win[wh];
 	r0 = pwin->w_rlist;
 	/* dump rectangle list  */
 	if (r0)
 	{
-		for (r = r0; r->o_link; r = r->o_link) ;
+		for (r = r0; r->o_link; r = r->o_link)
+			;
 		r->o_link = rul;
 		rul = r0;
 	}
-	/* zero the rectangle   */
-	/*   list       */
+	/* zero the rectangle list */
 	pwin->w_rlist = 0x0;
-	/* start out with no    */
-	/*   broken rectangles  */
+	/* start out with no broken rectangles  */
 	pwin->w_flags &= ~VF_BROKEN;
-	/* if no size then  */
-	/*   return     */
+	/* if no size then return     */
 	w_getsize(WS_TRUE, wh, &gl_mkrect.o_x);
 	if (!(gl_mkrect.o_w && gl_mkrect.o_h))
 		return;
-	/* init. a global orect */
-	/*   for use during     */
-	/*   mkrect calls   */
+	/* init. a global orect for use during mkrect calls */
 	gl_mkrect.o_link = (ORECT *) 0x0;
-	/* break other window's */
-	/*   rects with our     */
-	/*   current rect   */
+	/* break other window's rects with our current rect */
 	everyobj(tree, ROOT, wh, mkrect, 0, 0, MAX_DEPTH);
-	/* get an orect in this */
-	/*   windows list   */
+	/* get an orect in this windows list   */
 	new = get_orect();
 	new->o_link = (ORECT *) 0x0;
 	w_getsize(WS_TRUE, wh, &new->o_x);

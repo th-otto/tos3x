@@ -263,10 +263,12 @@ extern BOOLEAN dowarn;
 #endif
 
 /*
- * Should really be OBJECT *.
- * This definition is an old relict from the x86 version.
+ * Should really be OBJECT *, as it was in the original DRI version.
+ * Someone messed it up and declared it as long in the Atari version.
+ * Even worse, that type was not even used anymore, and all source
+ * files changes instead.
  */
-typedef intptr_t OBJPTR;
+typedef intptr_t LPTREE;
 
 VOID setres PROTO((NOTHING));
 VOID main PROTO((NOTHING));
@@ -305,13 +307,13 @@ char *strscn PROTO((const char *src, char *dst, char stp));
 int16_t strchk PROTO((const char *s, const char *t));
 VOID fmt_str PROTO((const char *instr, char *outstr));
 VOID unfmt_str PROTO((const char *instr, char *outstr));
-VOID fs_sset PROTO((OBJPTR tree, int16_t obj, char *pstr, char **ptext, int16_t *ptxtlen));
-VOID inf_sset PROTO((OBJPTR tree, int16_t obj, char *pstr));
-VOID fs_sget PROTO((OBJPTR tree, int16_t obj, intptr_t pstr));
-VOID inf_sget PROTO((OBJPTR tree, int16_t obj, char *pstr));
-VOID inf_fldset PROTO((OBJPTR tree, int16_t obj, uint16_t testfld, uint16_t testbit, uint16_t truestate, uint16_t falsestate));
-int16_t inf_gindex PROTO((OBJPTR tree, int16_t baseobj, int16_t numobj));
-int16_t inf_what PROTO((OBJPTR tree, int16_t ok, int16_t cncl));
+VOID fs_sset PROTO((LPTREE tree, int16_t obj, char *pstr, char **ptext, int16_t *ptxtlen));
+VOID inf_sset PROTO((LPTREE tree, int16_t obj, char *pstr));
+VOID fs_sget PROTO((LPTREE tree, int16_t obj, intptr_t pstr));
+VOID inf_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
+VOID inf_fldset PROTO((LPTREE tree, int16_t obj, uint16_t testfld, uint16_t testbit, uint16_t truestate, uint16_t falsestate));
+int16_t inf_gindex PROTO((LPTREE tree, int16_t baseobj, int16_t numobj));
+int16_t inf_what PROTO((LPTREE tree, int16_t ok, int16_t cncl));
 int16_t merge_str PROTO((char *pdst, char *ptmp, uint16_t *parms));
 int16_t wildcmp PROTO((const char *pwild, const char *ptest));
 
@@ -338,7 +340,7 @@ extern int16_t gl_my;					/* 3/12/86  */
 int16_t ap_init PROTO((intptr_t pglobal));
 int16_t ap_exit PROTO((NOTHING));
 int16_t rd_mymsg PROTO((VOIDPTR buffer));
-int16_t ap_rdwr PROTO((int16_t code, int16_t id, int16_t length, intptr_t pbuff));
+int16_t ap_rdwr PROTO((int16_t code, int16_t id, int16_t length, int16_t *pbuff));
 int16_t ap_find PROTO((intptr_t pname));
 VOID ap_tplay PROTO((intptr_t pbuff, int16_t length, int16_t scale));
 int16_t ap_trecd PROTO((intptr_t pbuff, int16_t length));
@@ -399,7 +401,7 @@ VOID all_run PROTO((NOTHING));
 int16_t sndcli PROTO((char *pfilespec, int16_t acc));
 VOID ldaccs PROTO((NOTHING));
 VOID free_accs PROTO((NOTHING));
-int16_t cre_aproc PROTO((NOTHING));
+BOOLEAN cre_aproc PROTO((NOTHING));
 
 /*
  * gemctrl.c
@@ -410,6 +412,7 @@ extern MOBLK gl_ctwait;
 extern int16_t appl_msg[8];
 extern int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
 extern int16_t rets[6];							/* added 2/4/87     */
+extern int16_t ml_ocnt;
 
 VOID ct_msgup PROTO((int16_t message, int16_t owner, int16_t wh, int16_t m1, int16_t m2, int16_t m3, int16_t m4));
 VOID hctl_window PROTO((int16_t w_handle, int16_t mx, int16_t my));
@@ -444,7 +447,7 @@ extern int16_t gl_dclick;
 extern int16_t gl_ticktime;
 
 VOID ev_rets PROTO((int16_t *rets));
-int16_t ev_block PROTO((int16_t code, int32_t lvalue));
+int16_t ev_block PROTO((int16_t code, intptr_t lvalue));
 uint16_t ev_keybd PROTO((NOTHING));
 uint16_t ev_button PROTO((int16_t bflgclks, uint16_t bmask, uint16_t bstate, int16_t *rets));
 uint16_t ev_mouse PROTO((MOBLK *pmo, int16_t *rets));
@@ -462,19 +465,19 @@ VOID tchange PROTO((int16_t p1, int16_t p2));
 int16_t tak_flag PROTO((SPB *sy));
 VOID amutex PROTO((EVB *e, SPB *sy));
 VOID unsync PROTO((SPB *sy));
-int16_t fm_strbrk PROTO((OBJPTR tree, intptr_t palstr, int16_t stroff, int16_t *pcurr_id, int16_t *pnitem, int16_t *pmaxlen));
-VOID fm_parse PROTO((OBJPTR tree, intptr_t palstr, int16_t *picnum, int16_t *pnummsg, int16_t *plenmsg, int16_t *pnumbut, int16_t *plenbut));
-VOID fm_build PROTO((OBJPTR tree, int16_t haveicon, int16_t nummsg, int16_t mlenmsg, int16_t numbut, int16_t mlenbut));
+int16_t fm_strbrk PROTO((LPTREE tree, intptr_t palstr, int16_t stroff, int16_t *pcurr_id, int16_t *pnitem, int16_t *pmaxlen));
+VOID fm_parse PROTO((LPTREE tree, intptr_t palstr, int16_t *picnum, int16_t *pnummsg, int16_t *plenmsg, int16_t *pnumbut, int16_t *plenbut));
+VOID fm_build PROTO((LPTREE tree, int16_t haveicon, int16_t nummsg, int16_t mlenmsg, int16_t numbut, int16_t mlenbut));
 int16_t fm_alert PROTO((int16_t defbut, intptr_t palstr));
 
 
 /*
  * gemfmlib.c
  */
-int16_t find_obj PROTO((OBJPTR tree, int16_t start_obj, int16_t which));
-int16_t fm_keybd PROTO((OBJPTR tree, int16_t obj, int16_t *pchar, int16_t *pnew_obj));
-int16_t fm_button PROTO((OBJPTR tree, int16_t new_obj, int16_t clks, int16_t *pnew_obj));
-int16_t fm_do PROTO((OBJPTR tree, int16_t start_fld));
+int16_t find_obj PROTO((LPTREE tree, int16_t start_obj, int16_t which));
+int16_t fm_keybd PROTO((LPTREE tree, int16_t obj, int16_t *pchar, int16_t *pnew_obj));
+int16_t fm_button PROTO((LPTREE tree, int16_t new_obj, int16_t clks, int16_t *pnew_obj));
+int16_t fm_do PROTO((LPTREE tree, int16_t start_fld));
 VOID fm_dial PROTO((int16_t fmd_type, GRECT *pi, GRECT *pt));
 int16_t fm_show PROTO((int16_t string, int16_t *pwd, int16_t level));
 int16_t eralert PROTO((int16_t n, int16_t d));
@@ -553,7 +556,7 @@ int16_t inorout PROTO((EVB *e, int16_t rx, int16_t ry));
 /*
  * gemmnlib.c
  */
-extern OBJPTR gl_mntree;
+extern LPTREE gl_mntree;
 /* BUG: accessed as short, but allocated as long */
 #if !BINEXACT
 extern int16_t gl_mnpid;
@@ -565,41 +568,44 @@ extern int16_t gl_dacnt;
 extern int16_t gl_dabase;
 extern int16_t gl_dabox;
 
-uint16_t do_chg PROTO((OBJPTR tree, int16_t iitem, uint16_t chgvalue, int16_t dochg, int16_t dodraw, int16_t chkdisabled));
-int16_t menu_set PROTO((OBJPTR tree, int16_t last_item, int16_t cur_item, int16_t setit));
-VOID menu_sr PROTO((int16_t saveit, OBJPTR tree, int16_t imenu));
-int16_t menu_down PROTO((OBJPTR tree, int16_t ititle));
+uint16_t do_chg PROTO((LPTREE tree, int16_t iitem, uint16_t chgvalue, int16_t dochg, int16_t dodraw, int16_t chkdisabled));
+int16_t menu_set PROTO((LPTREE tree, int16_t last_item, int16_t cur_item, int16_t setit));
+VOID menu_sr PROTO((int16_t saveit, LPTREE tree, int16_t imenu));
+#if !SUBMENUS
+int16_t menu_down PROTO((LPTREE tree, int16_t ititle));
+#endif
 int16_t mn_do PROTO((int16_t *ptitle, int16_t *pitem));
-int16_t mn_bar PROTO((OBJPTR tree, int16_t showit));
-int16_t mn_bar PROTO((OBJPTR tree, int16_t showit));
+int16_t mn_bar PROTO((LPTREE tree, int16_t showit));
+int16_t mn_bar PROTO((LPTREE tree, int16_t showit));
 VOID mn_clsda PROTO((NOTHING));
 int16_t mn_register PROTO((int16_t pid, char *pstr));
 VOID ch_wrect PROTO((GRECT *r, GRECT *n));
+VOID rect_change PROTO((LPTREE tree, MOBLK *prmob, int16_t iob, int16_t x));
 
 
 /*
  * gemobed.c
  */
-int16_t ob_getsp PROTO((OBJPTR tree, int16_t obj, TEDINFO *pted));
-VOID ob_center PROTO((OBJPTR tree, GRECT *pt));
+int16_t ob_getsp PROTO((LPTREE tree, int16_t obj, TEDINFO *pted));
+VOID ob_center PROTO((LPTREE tree, GRECT *pt));
 int16_t scan_to_end PROTO((char *pstr, int16_t idx, char chr));
 VOID ins_char PROTO((char *str, int16_t pos, char chr, int16_t tot_len));
 int16_t find_pos PROTO((char *str, int16_t pos));
-VOID pxl_rect PROTO((OBJPTR tree, int16_t obj, int16_t ch_pos, GRECT *pt));
-VOID curfld PROTO((OBJPTR tree, int16_t obj, int16_t new_pos, int16_t dist));
+VOID pxl_rect PROTO((LPTREE tree, int16_t obj, int16_t ch_pos, GRECT *pt));
+VOID curfld PROTO((LPTREE tree, int16_t obj, int16_t new_pos, int16_t dist));
 int16_t instr PROTO((char chr, const char *str));
 int16_t check PROTO((const char *in_char, char valchar));
 VOID ob_stfn PROTO((int16_t idx, int16_t *pstart, int16_t *pfinish));
 int16_t ob_delit PROTO((int16_t idx));
-int16_t ob_edit PROTO((OBJPTR tree, int16_t obj, int16_t in_char, int16_t *idx, int16_t kind));
+int16_t ob_edit PROTO((LPTREE tree, int16_t obj, int16_t in_char, int16_t *idx, int16_t kind));
 
 /*
  * gemobjop.c
  */
-char ob_sst PROTO((OBJPTR tree, int16_t obj, intptr_t *pspec, int16_t *pstate, int16_t *ptype, int16_t *pflags, GRECT *pt, int16_t *pth));
-typedef VOID (*EVERYOBJ_CALLBACK) PROTO((OBJPTR tree, int16_t obj, int16_t sx, int16_t sy));
-VOID everyobj PROTO((OBJPTR tree, int16_t this, int16_t last, EVERYOBJ_CALLBACK routine, int16_t startx, int16_t starty, int16_t maxdep));
-int16_t get_par PROTO((OBJPTR tree, int16_t obj));
+char ob_sst PROTO((LPTREE tree, int16_t obj, intptr_t *pspec, int16_t *pstate, int16_t *ptype, int16_t *pflags, GRECT *pt, int16_t *pth));
+typedef VOID (*EVERYOBJ_CALLBACK) PROTO((LPTREE tree, int16_t obj, int16_t sx, int16_t sy));
+VOID everyobj PROTO((LPTREE tree, int16_t this, int16_t last, EVERYOBJ_CALLBACK routine, int16_t startx, int16_t starty, int16_t maxdep));
+int16_t get_par PROTO((LPTREE tree, int16_t obj));
 
 
 /*
@@ -611,22 +617,22 @@ extern ICONBLK ib;
 
 int16_t ob_sysvar PROTO((uint16_t mode, uint16_t which, uint16_t inval1, uint16_t inval2, uint16_t *outval1, uint16_t outval2));
 VOID ob_format PROTO((int16_t just, char *raw_str, char *tmpl_str, char *fmt_str));
-int16_t ob_user PROTO((OBJPTR tree, int16_t obj, GRECT *pt, intptr_t userblk, int16_t curr_state, int16_t new_state));
+int16_t ob_user PROTO((LPTREE tree, int16_t obj, GRECT *pt, intptr_t userblk, int16_t curr_state, int16_t new_state));
 VOID draw_hi PROTO((GRECT *prect, int16_t state, int16_t clip, int16_t th, int16_t icol));
-VOID ob_draw PROTO((OBJPTR tree, int16_t obj, int16_t depth));
-int16_t ob_find PROTO((OBJPTR tree, int16_t currobj, int16_t depth, int16_t mx, int16_t my));
-VOID ob_add PROTO((OBJPTR tree, int16_t parent, int16_t child));
-VOID ob_delete PROTO((OBJPTR tree, int16_t obj));
-VOID ob_order PROTO((OBJPTR tree, int16_t mov_obj, int16_t new_pos));
-VOID ob_change PROTO((OBJPTR tree, int16_t obj, int16_t new_state, int16_t redraw));
-uint16_t ob_fs PROTO((OBJPTR tree, int16_t ob, int16_t pflag));
-VOID ob_actxywh PROTO((OBJPTR tree, int16_t obj, GRECT *pt));
-VOID ob_relxywh PROTO((OBJPTR tree, int16_t obj, GRECT *pt));
-VOID ob_setxywh PROTO((OBJPTR tree, int16_t obj, GRECT *pt));
-VOID ob_offset PROTO((OBJPTR tree, int16_t obj, int16_t *pxoff, int16_t *pyoff));
-VOID ob_dxywh PROTO((OBJPTR tree, int16_t obj, int16_t *pdx, int16_t *pdy, int16_t *pdw, int16_t *pdh));
-VOID ob_gclip PROTO((OBJPTR tree, int16_t obj, int16_t *pxoff, int16_t *pyoff, int16_t *pxcl, int16_t *pycl, int16_t *pwcl, int16_t *phcl));
-int16_t get_prev PROTO((OBJPTR tree, int16_t parent, int16_t obj));
+VOID ob_draw PROTO((LPTREE tree, int16_t obj, int16_t depth));
+int16_t ob_find PROTO((LPTREE tree, int16_t currobj, int16_t depth, int16_t mx, int16_t my));
+VOID ob_add PROTO((LPTREE tree, int16_t parent, int16_t child));
+VOID ob_delete PROTO((LPTREE tree, int16_t obj));
+VOID ob_order PROTO((LPTREE tree, int16_t mov_obj, int16_t new_pos));
+VOID ob_change PROTO((LPTREE tree, int16_t obj, int16_t new_state, int16_t redraw));
+uint16_t ob_fs PROTO((LPTREE tree, int16_t ob, int16_t pflag));
+VOID ob_actxywh PROTO((LPTREE tree, int16_t obj, GRECT *pt));
+VOID ob_relxywh PROTO((LPTREE tree, int16_t obj, GRECT *pt));
+VOID ob_setxywh PROTO((LPTREE tree, int16_t obj, GRECT *pt));
+VOID ob_offset PROTO((LPTREE tree, int16_t obj, int16_t *pxoff, int16_t *pyoff));
+VOID ob_dxywh PROTO((LPTREE tree, int16_t obj, int16_t *pdx, int16_t *pdy, int16_t *pdw, int16_t *pdh));
+VOID ob_gclip PROTO((LPTREE tree, int16_t obj, int16_t *pxoff, int16_t *pyoff, int16_t *pxcl, int16_t *pycl, int16_t *pwcl, int16_t *phcl));
+int16_t get_prev PROTO((LPTREE tree, int16_t parent, int16_t obj));
 CICON *match_planes PROTO((CICON *iconlist, int planes));
 CICON *find_eq_or_less PROTO((CICON *iconlist, int planes));
 VOID gr_cicon PROTO((int16_t state, int16_t *pmask, int16_t *pdata, const char *ptext, int16_t ch, int16_t chx, int16_t chy, GRECT *pi, GRECT *pt, CICONBLK *cicon));
@@ -664,7 +670,7 @@ VOID gr_rubbox PROTO((int16_t xorigin, int16_t yorigin, int16_t wmin, int16_t hm
 VOID gr_rubwind PROTO((int16_t xorigin, int16_t yorigin, int16_t wmin, int16_t hmin, int16_t *poff, int16_t *pwend, int16_t *phend));
 VOID gr_dragbox PROTO((int16_t w, int16_t h, int16_t sx, int16_t sy, int16_t *pc, int16_t *pdx, int16_t *pdy));
 VOID gr_clamp PROTO((int16_t xorigin, int16_t yorigin, int16_t wmin, int16_t hmin, int16_t *pneww, int16_t *pnewh));
-int16_t gr_slidebox PROTO((OBJPTR tree, int16_t parent, int16_t obj, int16_t isvert));
+int16_t gr_slidebox PROTO((LPTREE tree, int16_t parent, int16_t obj, int16_t isvert));
 VOID gr_mkstate PROTO((int16_t *pmx, int16_t *pmy, int16_t *pmstat, int16_t *pkstat));
 
 /*
@@ -758,10 +764,8 @@ VOID aqueue PROTO((BOOLEAN isqwrite, EVB *e, int32_t lm));
 /*
  * gemrlist.c
  */
-RLIST *newrect PROTO((NOTHING));
 BOOLEAN delrect PROTO((RLIST *rp, VOIDPTR rlist));
 RLIST *genrlist PROTO((uint16_t handle, uint16_t area));
-RLIST *mkrect PROTO((uint16_t pc, GRECT *trect, GRECT *brect));
 
 
 /*
@@ -793,7 +797,7 @@ VOID rsc_read PROTO((NOTHING));
 extern RSHDR *rs_hdr;
 extern intptr_t rs_global;
 
-VOID rs_obfix PROTO((OBJPTR tree, P(int16_t) curob));
+VOID rs_obfix PROTO((LPTREE tree, P(int16_t) curob));
 char *rs_str PROTO((int16_t stnum));
 int16_t rs_free PROTO((intptr_t pglobal));
 int16_t rs_gaddr PROTO((intptr_t pglobal, uint16_t rtype, uint16_t rindex, VOIDPTR *rsaddr));
@@ -810,11 +814,65 @@ int16_t sc_read PROTO((char *pscrap));
 int16_t sc_write PROTO((const char *pscrap));
 
 
+/*
+ * gemshlib.c
+ */
+
+extern int16_t sh_doexec;
+extern int16_t sh_isgem;
+extern int16_t sh_gem;
+extern char *ad_envrn;
+extern char *ad_shcmd;
+extern char *ad_shtail;
+extern int16_t sh_iscart;
+extern char *ad_path;
+
+int16_t sh_read PROTO((char *pcmd, char *ptail));
+int16_t sh_write PROTO((int16_t doex, int16_t isgem, int16_t isover, char *pcmd, char *ptail));
+int16_t sh_get PROTO((char *pbuffer, int16_t len));
+int16_t sh_put PROTO((const char *pdata, int16_t len));
+BOOLEAN sh_tographic PROTO((NOTHING));
+BOOLEAN sh_toalpha PROTO((NOTHING));
+VOID sh_draw PROTO((char *lcmd, int16_t start, int16_t depth));
+char *sh_name PROTO((char *ppath));
+VOID sh_envrn PROTO((char **ppath, const char *psrch));
+typedef VOID (*SHFIND_PROC) PROTO((const char *path));
+int16_t sh_find PROTO((intptr_t pspec, SHFIND_PROC routine));
+VOID sh_main PROTO((NOTHING));
+
+
+/*
+ * gemwmlib.c
+ */
+extern int16_t newroot;							/* root object of new DESKTOP */
+extern int16_t topw;
+extern MEMHDR *rmhead, *rmtail;					/* rect lists memory linked list */
+extern intptr_t ad_windspb;
+
+VOID wm_init PROTO((NOTHING));
+int16_t wm_create PROTO((uint16_t kind, GRECT *rect));
+int16_t wm_open PROTO((int16_t handle, GRECT *rect));
+int16_t wm_close PROTO((int16_t handle));
+int16_t wm_delete PROTO((int16_t handle));
+int16_t wm_get PROTO((int16_t handle, int16_t field, int16_t *ow, const int16_t *iw));
+int16_t wm_set PROTO((int16_t handle, int16_t field, const int16_t *iw));
+int16_t wm_find PROTO((int mx, int my));
+int16_t wm_update PROTO((int code));
+int16_t wm_calc PROTO((int16_t type, int16_t kind, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh));
+VOID wm_min PROTO((int16_t kind, int16_t *ow, int16_t *oh));
+WINDOW *srchwp PROTO((int handle));
+VOID w_setactive PROTO((NOTHING));
+VOID ap_sendmsg PROTO((int16_t *ap_msg, int16_t type, int16_t towhom, int16_t w3, int16_t w4, int16_t w5, int16_t w6, int16_t w7));
+
+
+/*
+ * gemwmrect.c
+ */
 
 /*
  * jdos.S
  */
-extern int16_t DOS_ERR;
+extern BOOLEAN DOS_ERR;
 extern int16_t DOS_AX;
 
 int dos_open PROTO((const char *name, int mode));
@@ -823,3 +881,22 @@ int dos_read PROTO((int fd, long size, VOIDPTR buf));
 int dos_close PROTO((int fd));
 VOIDPTR dos_alloc PROTO((long size));
 int dos_free PROTO((VOIDPTR ptr));
+
+
+/*
+ * mn_index.c
+ */
+VOID mn_new PROTO((NOTHING));
+VOID mn_free PROTO((int16_t id));
+
+
+/*
+ * mn_mbar.c
+ */
+BOOLEAN mn_hdo PROTO((int16_t *ptitle, OBJECT **ptree, int16_t *pmenu, int16_t *pitem, int16_t *keyret));
+
+
+/*
+ * mn_menu.c
+ */
+VOID mn_init PROTO((NOTHING));

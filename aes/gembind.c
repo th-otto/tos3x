@@ -18,6 +18,9 @@
 #include <gemlib.h>
 #include <crysbind.h>
 #include <gemusa.h>
+#if SUBMENUS
+#include "mn_tools.h"
+#endif
 
 
 static int16_t gl_dspcnt;
@@ -127,6 +130,7 @@ PP(register intptr_t *addr_in;)
 	case MENU_REGISTER:
 		ret = mn_register(MM_PID, MM_PSTR);
 		break;
+#if SUBMENUS
 		/* 5/14/92  */
 	case MENU_POPUP:
 		ret = mn_popup(rlr->p_pid, M_MENU, M_XPOS, M_YPOS, M_MDATA);
@@ -140,6 +144,7 @@ PP(register intptr_t *addr_in;)
 	case MENU_SETTING:
 		mn_settings(M_FLAG, M_MENU);
 		break;
+#endif
 	
 	/* Object Manager   */
 	case OBJC_ADD:

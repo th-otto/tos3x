@@ -839,8 +839,8 @@ PP(MFORM *grmaddr;)
  * Change code to compensate 3D objects
  */
 
-int16_t gr_slidebox(P(OBJPTR) tree, P(int16_t) parent, P(int16_t) obj, P(int16_t) isvert))
-PP(register OBJPTR tree;)
+int16_t gr_slidebox(P(LPTREE) tree, P(int16_t) parent, P(int16_t) obj, P(int16_t) isvert))
+PP(register LPTREE tree;)
 PP(int16_t parent;)
 PP(int16_t obj;)
 PP(int16_t isvert;)

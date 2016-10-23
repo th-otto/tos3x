@@ -39,70 +39,6 @@
 #include <mn_tools.h>
 
 
-/* EXTERNS
- * ================================================================
- */
-
-/* MN_MENU.C */
-extern int16_t Menu_Insert();
-
-extern VOID Menu_Delete();
-
-extern MENU_PTR GetMenuPtr();
-
-extern VOID CheckMenuHeight();
-
-extern int16_t CountMenuItems();
-
-extern VOID RestoreMenu();
-
-extern VOID AdjustMenuPosition();
-
-
-/* MN_EVENT.C */
-extern int32_t EvntSubMenu();
-
-extern BOOLEAN Pop_Blit();
-
-extern int16_t gl_button;
-
-extern OBJECT *CurTree;
-
-extern int16_t CurMenu;
-
-extern int16_t CurObject;
-
-extern int16_t CurScroll;
-
-extern int16_t CurKeyState;
-
-/* MN_MBAR.C */
-extern BOOLEAN MenuBar_Mode;
-
-extern MENU_PTR gl_menuptr;
-
-
-/* in MN_TOOLS.C */
-extern VOID ObjcDraw();
-
-/* in DESKIF.S */
-extern int16_t wm_update();
-
-/* in OPTIMIZE.S */
-extern BOOLEAN min();
-
-extern BOOLEAN rc_intersect();			/* cjg 09/22/92 */
-
-/* GEMOBLIB.C */
-
-/* APGSXIF.S */
-extern VOID gsx_sclip();
-
-extern GRECT gl_rfull;
-
-
-extern VOID ob_gclip();					/* cjg 09/22/92 */
-
 /* GLOBALS
  * ================================================================
  */
@@ -112,7 +48,10 @@ extern VOID ob_gclip();					/* cjg 09/22/92 */
  */
 
 
-/* mn_popup()
+/*
+ * AES #36 - menu_popup - Take over the display and handling of a popup menu. 
+ *
+ * mn_popup()
  * ================================================================
  * Displays a First Level Popup Menu.
  * 
@@ -133,31 +72,20 @@ extern VOID ob_gclip();					/* cjg 09/22/92 */
  *	      - FALSE means that the user clicked either on a disabled
  *		menu item, or clicked outside of any menu.
  */
-BOOLEAN mn_popup(id, Menu, xpos, ypos, MData)
-int16_t id;								/* Process id            */
-
-MENU *Menu;								/* the Input Menu Structure  */
-
-int16_t xpos;								/* the xpos that we want to start */
-
-int16_t ypos;								/* the ypos that we want to start */
-
-MENU *MData;							/* the output menu structure     */
+BOOLEAN mn_popup(P(int16_t) id, P(MENU *) Menu, P(int16_t) xpos, P(int16_t) ypos, P(MENU *) MData)
+PP(int16_t id;)								/* Process id            */
+PP(MENU *Menu;)								/* the Input Menu Structure  */
+PP(int16_t xpos;)								/* the xpos that we want to start */
+PP(int16_t ypos;)								/* the ypos that we want to start */
+PP(MENU *MData;)							/* the output menu structure     */
 {
 	register OBJECT *tree;
-
 	register MENU_PTR MenuPtr;				/* Ptr to the Menu Node      */
-
 	int16_t MenuID;						/* The menu id for the menu node */
-
 	int32_t obj;							/* return value from evnt_submenu */
-
 	GRECT rect;							/* GRECT for dummy variable      */
-
 	BOOLEAN flag = FALSE;				/* VALID/INVALID variable        */
-
 	MRETS mk;
-
 	flag = FALSE;						/* Set to Invalid return data    */
 
 	ActiveTree(Menu->mn_tree);
@@ -283,10 +211,9 @@ MENU *MData;							/* the output menu structure     */
  *
  * OUT: VOID
  */
-VOID AssignMenuData(MenuPtr, start_obj)
-register MENU_PTR MenuPtr;					/* the ptr to the menu node */
-
-int16_t start_obj;							/* the obj we want on top   */
+VOID AssignMenuData(P(MENU_PTR) MenuPtr, P(int16_t) start_obj)
+PP(register MENU_PTR MenuPtr;)					/* the ptr to the menu node */
+PP(int16_t start_obj;)							/* the obj we want on top   */
 {
 	register OBJECT *tree;
 
@@ -317,24 +244,3 @@ int16_t start_obj;							/* the obj we want on top   */
 
 	MSCROLL(MenuPtr) = FALSE;
 }
-
-
-#if 0
-int16_t my_btest()
-{
-	int32_t bflags;
-
-	MOBLK m1,
-	 m2;
-
-	int16_t rets[6];
-
-	bflags = ((int32_t) (1) << 16);
-	bflags += (1 << 8) + 0x0L;
-
-	ev_multi(MU_BUTTON | MU_TIMER, &m1, &m2, 0x0L,	/* timer */
-			 bflags, 0x0L, &rets[0]);
-
-	return (rets[2]);
-}
-#endif

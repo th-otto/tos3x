@@ -28,16 +28,6 @@
 #include <mn_tools.h>
 
 
-/* EXTERNS
- * ======================================================================
- */
-/* IN GEMOBLIB.C */
-extern VOID ob_draw();
-
-extern VOID gsx_sclip();
-
-
-
 /* FUNCTIONS
  * ======================================================================
  */
@@ -47,12 +37,10 @@ extern VOID gsx_sclip();
 /* ObjcDraw()
  * ======================================================================
  */
-VOID ObjcDraw(tree, obj, rect)
-OBJECT *tree;
-
-int obj;
-
-GRECT *rect;
+VOID ObjcDraw(P(OBJECT *) tree, P(int) obj, P(GRECT *) rect)
+PP(OBJECT *tree;)
+PP(int obj;)
+PP(GRECT *rect;)
 {
 	gsx_sclip(rect);
 	ob_draw(tree, obj, MAX_DEPTH);
@@ -63,10 +51,9 @@ GRECT *rect;
 /* rc_2xy()
  * ================================================================
  */
-VOID rc_2xy(r, pxy)
-GRECT *r;
-
-int16_t *pxy;
+VOID rc_2xy(P(GRECT *) r, P(int16_t *) pxy)
+PP(GRECT *r;)
+PP(int16_t *pxy;)
 {
 	*(GRECT *) pxy = *r;
 	pxy[2] += r->g_x - 1;

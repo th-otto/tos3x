@@ -69,8 +69,8 @@
 #define BYTESPACE 0x20					/* ascii space in bytes */
 
 #if UNLINKED
-int16_t ob_getsp(P(OBJPTR) tree, P(int16_t) obj, P(TEDINFO *) pted)
-PP(register OBJPTR tree;)
+int16_t ob_getsp(P(LPTREE) tree, P(int16_t) obj, P(TEDINFO *) pted)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(TEDINFO *pted;)
 {
@@ -87,8 +87,8 @@ PP(TEDINFO *pted;)
 
 
 
-VOID ob_center(P(OBJPTR) tree, P(GRECT) *pt)
-PP(OBJPTR tree;)
+VOID ob_center(P(LPTREE) tree, P(GRECT) *pt)
+PP(LPTREE tree;)
 PP(GRECT *pt;)
 {
 	register int16_t xd, yd, wd, hd;
@@ -206,8 +206,8 @@ PP(register int16_t pos;)
 }
 
 
-VOID pxl_rect(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) ch_pos, P(GRECT *) pt)
-PP(register OBJPTR tree;)
+VOID pxl_rect(P(LPTREE) tree, P(int16_t) obj, P(int16_t) ch_pos, P(GRECT *) pt)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(int16_t ch_pos;)
 PP(register GRECT *pt;)
@@ -227,8 +227,8 @@ PP(register GRECT *pt;)
 /*
 *	Routine to redraw the cursor or the field being editted.
 */
-VOID curfld(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) new_pos, P(int16_t) dist)
-PP(OBJPTR tree;)
+VOID curfld(P(LPTREE) tree, P(int16_t) obj, P(int16_t) new_pos, P(int16_t) dist)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(int16_t new_pos;)
 PP(int16_t dist;)
@@ -382,8 +382,8 @@ PP(int16_t idx;)
 }
 
 
-int16_t ob_edit(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) in_char, P(int16_t *) idx, P(int16_t) kind)
-PP(register OBJPTR tree;)
+int16_t ob_edit(P(LPTREE) tree, P(int16_t) obj, P(int16_t) in_char, P(int16_t *) idx, P(int16_t) kind)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(int16_t in_char;)
 PP(register int16_t *idx;)							/* rel. to raw data */

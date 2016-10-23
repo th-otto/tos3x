@@ -88,6 +88,7 @@ MOBLK gl_ctwait;
 int16_t appl_msg[8];
 int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
 int16_t rets[6];							/* added 2/4/87     */
+int16_t ml_ocnt;
 
 						/* used to convert from */
 						/*   window object # to */
@@ -137,7 +138,7 @@ PP(int16_t my;)
 	register int16_t kind, gadget;
 	int16_t xelev, yelev;
 	register int16_t message, cpt;
-	OBJPTR tree;
+	LPTREE tree;
 	register WINDOW *pwin;
 	int16_t rets[6];
 	int32_t bwait;
@@ -338,7 +339,7 @@ PP(int16_t my;)
 {
 	int16_t title, item;
 	register int16_t owner, mesag;
-	OBJPTR *ptree;
+	LPTREE ptree;
 	int16_t pmenu, keyret;
 
 	if ((gl_mntree != 0x0L) && (inside(mx, my, &gl_rmnactv)))
@@ -346,9 +347,7 @@ PP(int16_t my;)
 		mesag = 0;
 		if (mn_hdo(&title, &ptree, &pmenu, &item, &keyret))
 		{
-			/* check system menu:   */
-			/*  title == 1st menu   */
-			/*  && item == deskacc  */
+			/* check system menu: title == 1st menu && item == deskacc */
 			if ((gl_dacnt) && (title == THEDESK) && (item >= gl_dabase))
 			{
 				item -= gl_dabase;
@@ -361,9 +360,7 @@ PP(int16_t my;)
 				mesag = MN_SELECTED;
 			}
 		}
-		/* application menu */
-		/*   item has been  */
-		/*   selected so send it */
+		/* application menu item has been selected so send it */
 		ct_msgup(mesag, owner, title, item, ptree, pmenu);
 	}
 }

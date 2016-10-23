@@ -186,7 +186,7 @@ QPB
 {
 	int16_t	qpb_pid;
 	int16_t	qpb_cnt;
-	int32_t	qpb_buf;
+	VOIDPTR qpb_buf;
 };
 
 

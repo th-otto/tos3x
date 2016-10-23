@@ -43,7 +43,7 @@
 #include <taddr.h>
 #include <gemlib.h>
 
-OBJPTR gl_mntree;
+LPTREE gl_mntree;
 #if BINEXACT
 int32_t gl_mnpid;
 #else
@@ -57,16 +57,16 @@ int16_t gl_dabase;
 int16_t gl_dabox;
 
 
-#if 0
+#if !SUBMENUS
 /*
  *	Change a mouse-wait rectangle based on an object's size.
  */
 
-VOID rect_change(tree, prmob, iob, x)
-OBJPTR tree;
-MOBLK *prmob;
-int16_t iob;
-int16_t x;
+VOID rect_change(P(LPTREE) tree, P(MOBLK *) prmob, P(int16_t) iob, P(int16_t) x)
+PP(LPTREE tree;)
+PP(MOBLK *prmob;)
+PP(int16_t iob;)
+PP(int16_t x;)
 {
 	ob_actxywh(tree, iob, &prmob->m_x);
 	prmob->m_out = x;
@@ -82,8 +82,8 @@ int16_t x;
 *	is set.
 */
 
-uint16_t do_chg(P(OBJPTR) tree, P(int16_t) iitem, P(uint16_t) chgvalue, P(int16_t) dochg, P(int16_t) dodraw, P(int16_t) chkdisabled)
-PP(register OBJPTR tree;)						/* tree that holds item */
+uint16_t do_chg(P(LPTREE) tree, P(int16_t) iitem, P(uint16_t) chgvalue, P(int16_t) dochg, P(int16_t) dodraw, P(int16_t) chkdisabled)
+PP(register LPTREE tree;)						/* tree that holds item */
 PP(int16_t iitem;)								/* item to affect   */
 PP(register uint16_t chgvalue;)					/* bit value to change  */
 PP(int16_t dochg;)								/* set or reset value   */
@@ -113,8 +113,8 @@ PP(int16_t chkdisabled;)						/* only if item enabled */
  *	Routine to set and reset values of certain items if they
  *	are not the current item
  */
-int16_t menu_set(P(OBJPTR) tree, P(int16_t) last_item, P(int16_t) cur_item, P(int16_t) setit)
-PP(OBJPTR tree;)
+int16_t menu_set(P(LPTREE) tree, P(int16_t) last_item, P(int16_t) cur_item, P(int16_t) setit)
+PP(LPTREE tree;)
 PP(register int16_t last_item;)
 PP(int16_t cur_item;)
 PP(int16_t setit;)
@@ -132,9 +132,9 @@ PP(int16_t setit;)
  *	the data that was underneath the menu before it was pulled
  *	down.
  */
-VOID menu_sr(P(int16_t) saveit, P(OBJPTR) tree, P(int16_t) imenu)
+VOID menu_sr(P(int16_t) saveit, P(LPTREE) tree, P(int16_t) imenu)
 PP(int16_t saveit;)
-PP(OBJPTR tree;)
+PP(LPTREE tree;)
 PP(int16_t imenu;)
 {
 	GRECT t;
@@ -150,13 +150,14 @@ PP(int16_t imenu;)
 		bb_restore(&t);
 }
 
+
 /*
  *	Routine to pull a menu down.  This involves saving the data
  *	underneath the menu and drawing in the proper menu sub-tree.
  */
-
-int16_t menu_down(P(OBJPTR) tree, P(int16_t) ititle)
-PP(register OBJPTR tree;)
+#if !SUBMENUS
+int16_t menu_down(P(LPTREE) tree, P(int16_t) ititle)
+PP(register LPTREE tree;)
 PP(register int16_t ititle;)
 {
 	register int16_t imenu, i;
@@ -173,8 +174,9 @@ PP(register int16_t ititle;)
 		/* draw all items in menu */
 		ob_draw(tree, imenu, MAX_DEPTH);
 	}
-	return (imenu);
+	return imenu;
 }
+#endif
 
 
 int16_t mn_do(P(int16_t *) ptitle, P(int16_t *) pitem)
@@ -317,8 +319,8 @@ PP(int16_t *pitem;)
  *	set or reset.
  */
 /* 306de: 00E1F098 */
-int16_t mn_bar(P(OBJPTR) tree, P(int16_t) showit)
-PP(register OBJPTR tree;)
+int16_t mn_bar(P(LPTREE) tree, P(int16_t) showit)
+PP(register LPTREE tree;)
 PP(int16_t showit;)
 {
 	register int16_t i, ob, h, cnt;

@@ -53,8 +53,8 @@
 *
 */
 
-char ob_sst(P(OBJPTR) tree, P(int16_t) obj, P(intptr_t *) pspec, P(int16_t *) pstate, P(int16_t *) ptype, P(int16_t *) pflags, P(GRECT *) pt, P(int16_t *) apth)
-PP(OBJPTR tree;)
+char ob_sst(P(LPTREE) tree, P(int16_t) obj, P(intptr_t *) pspec, P(int16_t *) pstate, P(int16_t *) ptype, P(int16_t *) pflags, P(GRECT *) pt, P(int16_t *) apth)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(register intptr_t *pspec;)
 PP(int16_t *pstate;)
@@ -123,8 +123,8 @@ PP(int16_t *pth;)
 }
 
 
-VOID everyobj(P(OBJPTR) tree, P(int16_t) this, P(int16_t) last, P(EVERYOBJ_CALLBACK) routine, P(int16_t) startx, P(int16_t) starty, P(int16_t) maxdep)
-PP(register OBJPTR tree;)
+VOID everyobj(P(LPTREE) tree, P(int16_t) this, P(int16_t) last, P(EVERYOBJ_CALLBACK) routine, P(int16_t) startx, P(int16_t) starty, P(int16_t) maxdep)
+PP(register LPTREE tree;)
 PP(register int16_t this;)
 PP(register int16_t last;)
 PP(EVERYOBJ_CALLBACK routine;)
@@ -196,8 +196,8 @@ PP(int16_t maxdep;)
 *	idea is to walk to the end of our siblings and return
 *	our parent.  If object is the root then return NIL as parent.
 */
-int16_t get_par(P(OBJPTR) tree, P(int16_t) obj)
-PP(register OBJPTR tree;)
+int16_t get_par(P(LPTREE) tree, P(int16_t) obj)
+PP(register LPTREE tree;)
 PP(register int16_t obj;)
 {
 	register int16_t pobj;

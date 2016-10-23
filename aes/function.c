@@ -390,8 +390,8 @@ PP(register char *outstr;)
  *	to the callers ptxtlen.
  */
 
-VOID fs_sset(P(OBJPTR) tree, P(int16_t) obj, P(char *) pstr, P(char **) ptext, P(int16_t *) ptxtlen)
-PP(OBJPTR tree;)
+VOID fs_sset(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr, P(char **) ptext, P(int16_t *) ptxtlen)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(char *pstr;)
 PP(register char **ptext;)
@@ -405,8 +405,8 @@ PP(int16_t *ptxtlen;)
 }
 
 
-VOID inf_sset(P(OBJPTR) tree, P(int16_t) obj, P(char *) pstr)
-P(OBJPTR tree;)
+VOID inf_sset(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr)
+P(LPTREE tree;)
 P(int16_t obj;)
 P(char *pstr;)
 {
@@ -417,8 +417,8 @@ P(char *pstr;)
 }
 
 
-VOID fs_sget(P(OBJPTR) tree, P(int16_t) obj, P(intptr_t) pstr)
-PP(OBJPTR tree;)
+VOID fs_sget(P(LPTREE) tree, P(int16_t) obj, P(intptr_t) pstr)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(intptr_t pstr;)
 {
@@ -435,8 +435,8 @@ PP(intptr_t pstr;)
 *	The function inf_sget was the same as fs_sget.
 */
 
-VOID inf_sget(P(OBJPTR) tree, P(int16_t) obj, P(char * pstr)
-PP(OBJPTR tree;)
+VOID inf_sget(P(LPTREE) tree, P(int16_t) obj, P(char * pstr)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(char *pstr;)
 {
@@ -450,8 +450,8 @@ PP(char *pstr;)
 *	'falsestate'
 */
 
-VOID inf_fldset(P(OBJPTR) tree, P(int16_t) obj, P(uint16_t) testfld, P(uint16_t) testbit, P(uint16_t) truestate, P(uint16_t) falsestate)
-PP(OBJPTR tree;)
+VOID inf_fldset(P(LPTREE) tree, P(int16_t) obj, P(uint16_t) testfld, P(uint16_t) testbit, P(uint16_t) truestate, P(uint16_t) falsestate)
+PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(uint16_t testfld;)
 PP(uint16_t testbit;)
@@ -466,8 +466,8 @@ PP(uint16_t falsestate;)
 *		that is selected or -1 if no objects are selected.
 */
 
-int16_t inf_gindex(P(OBJPTR) tree, P(int16_t) baseobj, P(int16_t) numobj)
-PP(OBJPTR tree;)
+int16_t inf_gindex(P(LPTREE) tree, P(int16_t) baseobj, P(int16_t) numobj)
+PP(LPTREE tree;)
 PP(int16_t baseobj;)
 PP(int16_t numobj;)
 {
@@ -487,8 +487,8 @@ PP(int16_t numobj;)
  *	nothing was selected.
  */
 
-int16_t inf_what(P(OBJPTR) tree, P(int16_t) ok, P(int16_t) cncl)
-PP(register OBJPTR tree;)
+int16_t inf_what(P(LPTREE) tree, P(int16_t) ok, P(int16_t) cncl)
+PP(register LPTREE tree;)
 PP(register int16_t ok;)
 PP(register int16_t cncl;)
 {

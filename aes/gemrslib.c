@@ -124,8 +124,8 @@ PP(int16_t ifx;)
  *
  * rs_obfix
  ************************************************************************/
-VOID rs_obfix(P(OBJPTR) tree, P(int16_t) curob)
-PP(OBJPTR tree;)
+VOID rs_obfix(P(LPTREE) tree, P(int16_t) curob)
+PP(LPTREE tree;)
 PP(int16_t curob;)
 {
 	register int16_t i, val;

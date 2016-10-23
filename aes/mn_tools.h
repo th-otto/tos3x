@@ -395,3 +395,94 @@ typedef struct _menu_node
 /* these are defined or should have been defined in gemlib etc */
 #define BEG_MCTRL	3
 #define END_MCTRL	2
+
+
+
+/*
+ * mn_event.c
+ */
+extern char const UpText[];
+extern char const DownText[];
+
+OBJECT *CurTree;
+int16_t CurMenu;
+int16_t CurObject;
+int16_t CurScroll;
+int16_t CurKeyState;
+
+uint16_t xdo_chg PROTO((OBJECT *tree, int16_t iitem, uint16_t chgvalue, int16_t dochg, int16_t dodraw, int16_t usetrap));
+int16_t mu_set PROTO((OBJECT *tree, int16_t last_item, int16_t cur_item, int16_t setit, int16_t usetrap));
+int32_t EvntSubMenu PROTO((int16_t id, MENU_PTR MenuPtr));
+BOOLEAN Pop_Blit PROTO((MENU_PTR MenuPtr, int16_t flag));
+
+
+/*
+ * mn_index.c
+ */
+extern PNODE_PTR IndexList;
+
+int16_t FindIndex PROTO((int16_t id, OBJECT *itree, int16_t imenu));
+int16_t Get_New_Index PROTO((int16_t id, OBJECT *itree, int16_t imenu));
+PNODE_PTR FindProcess PROTO((int16_t id));
+INDEX_PTR GetIndexPtr PROTO((PNODE_PTR ProcPtr, int16_t index));
+VOID DeleteIndex PROTO((PNODE_PTR ProcPtr, int16_t index, BOOLEAN flag));
+
+/*
+ * mn_mbar.c
+ */
+extern GRECT ActiveRect;
+extern GRECT TitleRect;
+extern BOOLEAN MenuBar_Mode;
+extern OBJECT *gl_mtree;
+extern MENU_PTR gl_menuptr;					/* MENU_PTR for the drop-down menu  */
+
+int16_t menu_down PROTO((LPTREE tree, int16_t ititle, OBJECT **itree));
+
+
+/*
+ * mn_menu.c
+ */
+extern MENU_PTR MenuList;
+
+int16_t Menu_Insert PROTO((OBJECT *tree, int16_t Parent));
+VOID Menu_Delete PROTO((int16_t MenuID));
+MENU_PTR GetMenuPtr PROTO((int16_t MenuID));
+VOID CheckMenuHeight PROTO((MENU_PTR MenuPtr));
+int16_t CountMenuItems PROTO((MENU_PTR MenuPtr));
+VOID RestoreMenu PROTO((MENU_PTR MenuPtr));
+VOID AdjustMenuPosition PROTO((MENU_PTR MenuPtr, int16_t xpos, int16_t ypos, GRECT *rect, BOOLEAN Horizontal_Flag, BOOLEAN Vertical_Flag));
+VOID MenuScrollAdjust PROTO((MENU_PTR MenuPtr, int16_t start_obj));
+int16_t SetMaxHeight PROTO((int16_t height));
+
+
+/*
+ * mn_popup.c
+ */
+BOOLEAN mn_popup PROTO((int16_t id, MENU *Menu, int16_t xpos, int16_t ypos, MENU *MData));
+VOID AssignMenuData PROTO((MENU_PTR MenuPtr, int16_t start_obj));
+
+
+/*
+ * mn_submenu.c
+ */
+extern int32_t SUBMENU_DELAY;			/* Delay time for submenus to appear. ( ms ) */
+extern int32_t SUBDRAG_DELAY;			/* Delay time for submenus to go active( ms )
+										 * as the user drags the mouse to the menu.
+										 */
+extern int32_t SCROLL_DELAY;			/* Delay time to scroll menu items ( ms ) */
+extern int32_t ARROW_DELAY;				/* Delay time to start scroll ( ms )      */
+
+int16_t mn_istart PROTO((int16_t id, int16_t flag, OBJECT *tree, int16_t menu, int16_t item));
+BOOLEAN mn_attach PROTO((int16_t id, int16_t flag, OBJECT *tree, int16_t item, MENU *Menu));
+BOOLEAN CheckForSubMenu PROTO((int16_t id, OBJECT *tree, int16_t obj, MENU_PTR SubMenuPtr));
+MENU_PTR DoSubMenu PROTO((int16_t id, OBJECT *tree, int16_t obj));
+VOID HideSubMenu PROTO((MENU_PTR MenuPtr));
+VOID Init_Delays PROTO((NOTHING));
+VOID mn_settings PROTO((int16_t flag, MN_SET *Values));
+
+
+/*
+ * mn_tools.c
+ */
+VOID ObjcDraw PROTO((OBJECT *tree, int obj, GRECT *rect));
+VOID rc_2xy PROTO((GRECT *r, int16_t *pxy));
