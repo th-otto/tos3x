@@ -1,1 +1,1 @@
-SRCS = cmprom.c
+SRCS = cmprom.c newglue.c

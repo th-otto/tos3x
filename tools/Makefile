@@ -6,7 +6,10 @@ include $(top_srcdir)/Makefile.silent
 
 LIBS = $(LIBC)
 
-PROGRAMS = cmprom$(BUILD_EXEEXT)
+PROGRAMS = newglue$(BUILD_EXEEXT)
+
+# didnt bother to port this to alcyon
+#PROGRAMS += cmprom$(BUILD_EXEEXT)
 
 all: $(PROGRAMS)
 
@@ -15,8 +18,11 @@ include $(top_srcdir)/config.mak
 
 include SRCFILES
 
-cmprom$(BUILD_EXEEXT): cmprom.o ${MAKEFILE}
-	$(LD) -s -l -o $@ $(CRT0) cmprom.o $(LIBS)
+cmprom$(BUILD_EXEEXT): cmprom.o
+	$(LD) -u -o $@ $(CRT0) $< $(LIBS)
+
+newglue$(BUILD_EXEEXT): newglue.o
+	$(LD) -u -o $@ $(CRT0) $< $(LIBS)
 
 check::
 
