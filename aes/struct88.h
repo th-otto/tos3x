@@ -32,6 +32,9 @@
 *	-------------------------------------------------------------
 */
 
+#ifndef STRUCT88_H
+#define STRUCT88_H
+
 #define PD	struct pd		/* process descriptor		*/
 #define UDA	struct uda		/* user stack data area		*/
 #define UDA2	struct uda2		/* user stack data area		*/
@@ -46,15 +49,6 @@
 
 typedef uint16_t	EVSPEC;
 
-#define NUM_ACCS 1			/* for atari in rom		*/
-#define NUM_PDS (NUM_ACCS + 2)		/* acc's + ctrlpd + dos appl.	*/
-#define NUM_EVBS (NUM_PDS * 5)		/* 5 * the number of PDs	*/
-#define MAX_ACCS 6			/* for atari, from disk		*/
-#define EVB_PROC 5			/* for atari, number of EVB per process */
-
-#define KBD_SIZE 8
-#define QUEUE_SIZE 256
-#define NFORKS 96
 
 CQUEUE
 {
@@ -234,3 +228,5 @@ ACCPD
 #define AKBIN 5
 #define AMOUSE 6
 #define ABUTTON 7
+
+#endif /* STRUCT88_H */

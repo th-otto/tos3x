@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.4 $	$Source: /u2/MRS/osrevisions/aes/geminit.c,v $
+*  $Author: kbad $	$Date: 89/07/28 13:04:59 $
 * =======================================================================
-*  $Author: kbad $	$Date: 89/07/28 13:04:59 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	geminit.c,v $
+*
 * Revision 2.4  89/07/28  13:04:59  kbad
 * Added accs_init(), but there are still some strange interactions with
 * the critical error handler, so it is bracketed by #ifdef ACC_DELAY.
@@ -130,50 +128,10 @@
 #include <vdidefs.h>
 #include <mode.h>
 
-#define DOWARNING	0					/* Do we need initial warning box ?          */
-				/* There is also a flag in Gemjstrt.s:       */
-				/* 'dodowarn', which must be set along       */
-				/* with the value of DOWARNING               */
 
 #define CACHE_ON	0x00003919L
 #define CACHE_OFF	0x00000808L
 #define LONGFRAME	*(int16_t *)(0x59eL)
-
-extern int16_t xrat;
-
-extern int16_t yrat;
-
-extern int16_t gl_rschange;
-
-extern int16_t gl_restype;
-
-extern int16_t DOS_ERR;
-
-extern int16_t gl_ncols;
-
-extern int16_t gl_nrows;
-
-extern int16_t gl_hchar;
-
-extern int16_t gl_wchar;
-
-extern int16_t gl_height;
-
-extern int16_t gl_hbox;
-
-extern int16_t diskin;						/* in gemjstrt.s    */
-
-extern int32_t ad_shcmd;
-
-extern int32_t ad_shtail;
-
-extern int16_t sh_gem;
-
-extern int16_t sh_doexec;
-
-extern char infdata[];
-
-extern int32_t ad_intin;
 
 #define ARROW 0
 #define HGLASS 2
@@ -181,13 +139,13 @@ extern int32_t ad_intin;
 
 int16_t do_once;
 EVB evx;
-int32_t gl_vdo;
-int32_t ad_sysglo;
-int32_t ad_armice;
-int32_t ad_hgmice;
-int32_t ad_stdesk;
-int32_t ad_fsel;
-int32_t drawstk;
+intptr_t gl_vdo;
+intptr_t ad_sysglo;
+intptr_t ad_armice;
+intptr_t ad_hgmice;
+intptr_t ad_stdesk;
+intptr_t ad_fsel;
+intptr_t drawstk;
 int16_t er_num;						/* for output.s */
 int16_t no_aes;						/* gembind.s    */
 int16_t sh_up;						/* is the sh_start being ran yet ? */
@@ -319,7 +277,6 @@ VOID main(NOTHING)
 	er_num = ALRT04CRT;					/* output.s     */
 	no_aes = ALRTNOFUN;					/* for gembind.s    */
 
-
 	/****************************************/
 	/*      ini_dlongs();       */
 	/****************************************/
@@ -350,22 +307,16 @@ VOID main(NOTHING)
 	gl_recd = FALSE;
 	gl_rlen = 0;
 	gl_rbuf = 0x0L;
-	/* initialize pointers  */
-	/*   to heads of event  */
-	/*   list and thread    */
-	/*   list       */
+	/* initialize pointers to heads of event list and thread list       */
 	elinkoff = (char *) & evx.e_link - (char *) & evx;
-	/* link up all the evb's */
-	/*   to the event unused */
-	/*   list       */
+	/* link up all the evb's to the event unused list       */
 	eul = 0;
 	for (i = 0; i < NUM_EVBS; i++)
 	{
 		DGLO->g_evb[i].e_nextp = eul;
 		eul = &DGLO->g_evb[i];
 	}
-	/* initialize list  */
-	/*   and unused lists   */
+	/* initialize list and unused lists   */
 
 	drl = 0;
 	nrl = 0;
@@ -429,22 +380,17 @@ VOID main(NOTHING)
 		ldaccs();						/* load in accessories  */
 
 	pred_dinf();						/* pre read the inf */
-	/* get the resolution   */
-	/* and the auto boot    */
-	/* name         */
 
-	/* load gem resource    */
-	/*   and fix it up  */
-	/*   before we go   */
+	/* get the resolution and the auto boot name         */
 
+	/* load gem resource and fix it up before we go   */
 
 	/* load all desk acc's  */
 
 	/* init button stuff    */
 	set_defdrv();						/* set default drive    */
 
-	/* do gsx open work */
-	/*   station        */
+	/* do gsx open work station        */
 	gsx_init();
 
 	/* 8/1/92   */
@@ -499,13 +445,11 @@ VOID main(NOTHING)
 	/* get st_desk ptr  */
 	rs_gaddr(ad_sysglo, R_TREE, SCREEN, &ad_stdesk);
 	tree = ad_stdesk;
-	/* fix up the GEM rsc.  */
-	/*   file now that we   */
-	/*   have an open WS    */
+	/* fix up the GEM rsc. file now that we have an open WS    */
 
-/* This code is also in gemshlib, but it belongs here so that the correct
- * default GEM backdrop pattern is set for accessories and autoboot app.
- */
+	/* This code is also in gemshlib, but it belongs here so that the correct
+	 * default GEM backdrop pattern is set for accessories and autoboot app.
+	 */
 	i = trp14(4);
 	if (i != 2 && i != 6)				/* set solid pattern in color modes */
 		LLSET(ad_stdesk + 12, 0x00001173L);
@@ -518,7 +462,7 @@ VOID main(NOTHING)
 	ini_fsel();
 
 	/* startup gem libs */
-/*	fs_start();*/
+	/* fs_start(); */
 
 	for (i = 0; i < 3; i++)
 		LWSET(OB_WIDTH(i), (gl_wchar * gl_ncols));
@@ -529,8 +473,8 @@ VOID main(NOTHING)
 
 	rs_gaddr(ad_sysglo, R_STRING, FSTRING, &ad_fsel);
 
-	indisp = FALSE;						/* init in dispatch semaphore   */
-	/* to not indisp        */
+	indisp = FALSE;						/* init in dispatch semaphore to not indisp        */
+
 #if DOWARNING
 	if (!dowarn)
 	{
@@ -609,11 +553,12 @@ VOID main(NOTHING)
 	sti();
 }
 
+
 /*	process init	*/
 
 VOID pinit((PD *) ppd, P(CDA *) pcda)
 PP(register PD *ppd;)
-(CDA *pcda;)
+PP(CDA *pcda;)
 {
 	ppd->p_cda = pcda;
 	ppd->p_qaddr = &ppd->p_queue[0];
@@ -815,19 +760,6 @@ VOID set_defdrv(NOTHING)
 *  or to C (2) if it does exist.  Don't ask.  It had to be shrunk.
 */
 	dos_sdrv((isdrive() & 0x04) >> 1);
-/*
-*	int16_t	ret;
-*	if (isdrive() & 0x04)
-*	{
-*	  dos_sdrv(0x02);
-*	  return(TRUE);
-*	}
-*	else
-*	{
-*	  dos_sdrv(0x0);
-*	  return(FALSE);
-*	}	
-*/
 }
 
 
@@ -841,8 +773,8 @@ PP(int32_t pmfnew;)
 }
 
 
-int16_t gsx_mfset(P(int32_t) pmfnew)
-PP(int32_t pmfnew;)
+int16_t gsx_mfset(P(MFORM *) pmfnew)
+PP(MFORM *pmfnew;)
 {
 	gsx_moff();
 	gl_omform = gl_cmform;
@@ -900,7 +832,12 @@ PP(MFORM *grmaddr;)
 	}
 }
 
-/*	Change code to compensate 3D objects	*/
+
+/*
+ * AES #71 - graf_slidebox - Graphics slide box
+ *
+ * Change code to compensate 3D objects
+ */
 
 int16_t gr_slidebox(P(OBJPTR) tree, P(int16_t) parent, P(int16_t) obj, P(int16_t) isvert))
 PP(register OBJPTR tree;)
@@ -908,6 +845,7 @@ PP(int16_t parent;)
 PP(int16_t obj;)
 PP(int16_t isvert;)
 {
+#if AES3D
 	register GRECT *pt,	*pc;		/* new pointer for Reg Opt  */
 	GRECT t, c;
 	register int32_t divnd, divis;
@@ -926,7 +864,7 @@ PP(int16_t isvert;)
 	pflags = objc[parent].ob_flags;
 	cflags = objc[obj].ob_flags;
 
-	if ((pflags & IS3DOBJ))
+	if (pflags & IS3DOBJ)
 		pflags = 1;
 	else
 		pflags = 0;
@@ -976,6 +914,32 @@ PP(int16_t isvert;)
 		return (ret);
 	} else
 		return (0);
+#else
+	register GRECT *pt, *pc;						/* new pointer for Reg Opt  */
+	GRECT t, c;
+	register WORD divnd, divis;
+
+	pt = &t;
+	pc = &c;
+
+	ob_actxywh(tree, parent, pc);
+	ob_relxywh(tree, obj, pt);
+	gr_dragbox(pt->g_w, pt->g_h, pt->g_x + pc->g_x, pt->g_y + pc->g_y, pc, &pt->g_x, &pt->g_y);
+
+	if (isvert)
+	{
+		divnd = pt->g_y - pc->g_y;
+		divis = pc->g_h - pt->g_h;
+	} else
+	{
+		divnd = pt->g_x - pc->g_x;
+		divis = pc->g_w - pt->g_w;
+	}
+	if (divis)
+		return mul_div(divnd, 1000, divis);
+	else
+		return (0);
+#endif
 }
 
 
@@ -995,12 +959,10 @@ PP(int16_t h;)
 {
 	int16_t status;
 
-	/* compiler had better  */
-	/*   put the values out, */
-	/*   x, y, w, h in the  */
-	/*   right order on the */
-	/*   stack to form a    */
-	/*   MOBLK      */
+	/*
+	 * compiler had better put the values out, x, y, w, h in the 
+	 * right order on the stack to form a MOBLK
+	 */
 	while (TRUE)
 	{
 		forker();
@@ -1018,7 +980,7 @@ PP(int16_t h;)
 		}
 	}
 	return (status);
-}										/* gr_stilldn */
+}
 
 
 #if 0

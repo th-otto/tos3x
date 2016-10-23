@@ -20,7 +20,7 @@ typedef struct _menu
    int16_t   mn_item;		/* Starting menu item      */
    int16_t   mn_scroll;		/* scroll flag for the menu*/
    int16_t   mn_keystate;		/* Key State 		   */
-}MENU;
+} MENU;
 
 
 /* Structure for the Menu Settings */
@@ -31,7 +31,7 @@ typedef struct _mn_set
    int32_t   Delay;		/* The Arrow Delay        */
    int32_t   Speed;		/* The scroll speed delay */
    int16_t   Height;		/* The menu scroll height */
-}MN_SET;
+} MN_SET;
 
 
 
@@ -41,33 +41,7 @@ typedef struct _mrets
   int16_t y;
   int16_t buttons;
   int16_t kstate;
-}MRETS;
-
-#if 0
-typedef struct fdbstr
-{
-	long		fd_addr;
-	int		fd_w;
-	int		fd_h;
-	int		fd_wdwidth;
-	int		fd_stand;
-	int		fd_nplanes;
-	int		fd_r1;
-	int		fd_r2;
-	int		fd_r3;
-} FDB;
-#endif
-
-#if 0     /* Found in AES.H */
-typedef struct _moblk
-{
-  int16_t m_x;
-  int16_t m_y;
-  int16_t m_w;
-  int16_t m_h;
-  int16_t m_out;
-}MOBLK;
-#endif
+} MRETS;
 
 /*
  * Object bitfield structures
@@ -117,7 +91,7 @@ typedef struct _index_info
     int16_t     start_obj;	      /* The starting menu item     */
     BOOLEAN  scroll_flag;     /* TRUE - scroll if >18 items */
     int16_t     count;	      /* The # of times this menu is attached. */
-}INDEX_NODE, *INDEX_PTR;
+} INDEX_NODE, *INDEX_PTR;
 
 #define INDEX_STATUS( ptr )    ptr->status
 #define INDEX_ID( ptr )        ptr->index
@@ -140,7 +114,7 @@ typedef struct _cnode
 {
     INDEX_NODE    ctable[ CMAX ];  /* First Cluster       */
     struct _cnode *cnext;          /* ptr to next cluster */
-}CNODE, *CNODE_PTR;
+} CNODE, *CNODE_PTR;
 
 #define CTABLE( ptr )   ptr->ctable
 #define CNEXT( ptr )    ptr->cnext
@@ -153,7 +127,7 @@ typedef struct _proc_node
     int16_t	       num;		/* Number of nodes in use       */
     CNODE              cluster;		/* First CLUSTER_MAX group	*/
     struct _proc_node *pnext;		/* pointer to next process node */
-}PNODE, *PNODE_PTR;
+} PNODE, *PNODE_PTR;
 
 #define PID( ptr )	  ptr->pid
 #define PCOUNT( ptr )	  ptr->num

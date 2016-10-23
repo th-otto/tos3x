@@ -60,57 +60,10 @@
 #include <osbind.h>
 #include <mn_tools.h>
 
+#if BINEXACT
 extern int16_t gl_mnpid;
+#endif
 
-extern int16_t gl_hbox;
-
-extern int16_t gl_dabox;					/* obj # of the acc menu box    */
-
-extern int16_t gl_dacnt;					/* # of ACC ids */
-
-/* EXTERNS
- * ================================================================
- */
-
-/* MN_MENU.C */
-extern int16_t Menu_Insert();
-
-extern VOID Menu_Delete();
-
-extern MENU_PTR GetMenuPtr();
-
-extern VOID CheckMenuHeight();
-
-extern VOID RestoreMenu();
-
-
-/* MN_POPUP.C */
-extern BOOLEAN mn_popup();
-
-extern VOID AssignMenuData();
-
-
-/* in TOOLS.C */
-extern VOID ObjcDraw();
-
-extern VOID gsx_sclip();
-
-extern GRECT gl_rzero;
-
-extern VOID ob_actxywh();
-
-extern int32_t gl_mntree;
-
-extern int16_t mu_set();
-
-extern int16_t xdo_chg();
-
-
-extern BOOLEAN rc_intersect();			/* cjg 09/22/92 */
-
-extern GRECT gl_rfull;
-
-extern VOID ob_actxywh();
 
 /*	Save and set mouse accordingly	*/
 

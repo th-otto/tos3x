@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemlib.h,v $
+*  $Author: mui $	$Date: 89/04/26 18:25:02 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:25:02 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemlib.h,v $
+*
 * Revision 2.2  89/04/26  18:25:02  mui
 * TT
 * 
@@ -34,54 +32,23 @@
 /*	Change these defines and you have to change those in		*/
 /*	deskapp.h							*/
 
+#ifndef GEMLIB_H
+#define GEMLIB_H 1
+
 #define NUM_ANODES 32				/* # of appl. nodes	*/
-#define PATH_LEN 121				/* define maximum path	*/
-						/*   length		*/
-#define SAVE_ATARI 128				/* atari specific bytes */
-						/*  in DESKTOP.INF file */
-						/* size of DESKTOP.INF	*/
-						/*   file		*/
+#define PATH_LEN 121				/* define maximum path length */
+#define SAVE_ATARI 128				/* atari specific bytes in DESKTOP.INF file size of DESKTOP.INF	file */
 
 #define EXTENSION  6
-						/* size of DESKTOP.INF	*/
-						/*   file		*/
 
+/* size of DESKTOP.INF file */
 #define SIZE_AFILE ((NUM_ANODES*PATH_LEN)+(NUM_ANODES*EXTENSION)+SAVE_ATARI )	
 						
 /***********************************************************************/
 #define CMDLEN 128
 
-#define RES3	3
-#define RES4	4
-#define RES5	5
-						/* mu_flags		*/
-#define MU_KEYBD 0x0001	
-#define MU_BUTTON 0x0002
-#define MU_M1 0x0004
-#define MU_M2 0x0008
-#define MU_MESAG 0x0010
-#define MU_TIMER 0x0020
-
-#define M_OFF	256
-#define M_ON	257
-#define ARROW	0
-
-
-typedef struct moblk
-{
-	int16_t		m_out;
-	int16_t		m_x;
-	int16_t		m_y;
-	int16_t		m_w;
-	int16_t		m_h;
-} MOBLK ;
-
-
 /*	MENULIB.H	05/04/84 - 11/01/84	Lowell Webster	*/
 
-#define NUM_DESKACC 6
-#define WID_DESKACC 21
-	
 #define MTH 1					/* menu thickness	*/
 
 #define THESCREEN 0
@@ -112,27 +79,6 @@ typedef struct moblk
 
 #define SCR_MGR 0x0001			/* pid of the screen manager*/
 
-#define AP_MSG 		0
-#define MN_SELECTED 	10
-
-#define WM_REDRAW 	20
-#define WM_TOPPED 	21
-#define WM_CLOSED 	22
-#define WM_FULLED 	23
-#define WM_ARROWED 	24
-#define WM_HSLID 	25
-#define WM_VSLID 	26
-#define WM_SIZED 	27
-#define WM_MOVED 	28
-#define WM_UNTOPPED	30
-#define WM_ONTOP	31
-
-#define AC_OPEN 	40
-#define AC_CLOSE 	41
-
-#define CT_UPDATE 50
-
-
 /*	FORMLIB.H	05/05/84 - 10/16/84	Gregg Morris		*/
 
 #define FMD_START 0
@@ -140,34 +86,25 @@ typedef struct moblk
 #define FMD_SHRINK 2
 #define FMD_FINISH 3
 
-/*	SCRPLIB.H	05/05/84 - 01/05/85	Lee Lorenzen		*/
-
 /*	FSELLIB.H	05/05/84 - 01/07/85	Lee Lorenzen		*/
 
-#define RET_CODE int_out[0]
+typedef struct rssofln
+{
+	int16_t	rss_offset;
+	int16_t	rss_length;
+} RSSOFLN;
 
-#define FS_IPATH addr_in[0]
-#define FS_ISEL addr_in[1]
+typedef struct imofln			/* image block structure	*/
+{
+	int16_t	rim_offset;
+	int16_t	rim_length;
+} IMOFLN;
 
-#define FS_BUTTON int_out[1]
-
-#define NM_FILES 100
-
-
-/*	RSRCLIB.H	05/05/84 - 09/13/84	Lowell Webster		*/
-
-#define OP_VERSION control[0]
-#define OP_CODE control[1]
-#define OP_ID control[2]
-#define OP_FLAGS control[3]
-#define RET_CODE int_out[0]
-
-#define RS_PFNAME addr_in[0]		/* rs_init, 			*/
-#define RS_TYPE int_in[0]
-#define RS_INDEX int_in[1]
-#define RS_INADDR addr_in[0]
-#define RS_OUTADDR addr_out[0]		
-
+typedef struct rstree
+{
+	int16_t	rst_first;
+	int16_t	rst_count;
+} RSTREE;
 
 #define RMODE_RD 0
 #define RMODE_WR 1
@@ -176,28 +113,10 @@ typedef struct moblk
 #define SMODE 0				/* seek mode is absolute offset	*/
 #define F_ATTR 0			/* file attribute for creating	*/
 
-typedef struct rssofln
-{
-	int16_t	rss_offset;
-	int16_t	rss_length;
-}RSSOFLN;
+/* # of long tree pointers reserved in the global array */
+#define RES_TREE	8
 
-typedef struct imofln			/* image block structure	*/
-{
-	int16_t	rim_offset;
-	int16_t	rim_length;
-}IMOFLN;
-
-typedef struct rstree
-{
-	int16_t	rst_first;
-	int16_t	rst_count;
-}RSTREE;
-
-#define RES_TREE	8		/* # of long tree pointers	*/
-					/*  reserved in the global array*/
-
-			/* these must coincide w/ rshdr */
+/* these must coincide w/ rshdr */
 #define RT_VRSN 0
 #define RT_OB 1
 #define RT_TEDINFO 2
@@ -211,64 +130,19 @@ typedef struct rstree
 
 #define NUM_RTYPES 10
 
-#define R_NOBS 10
-#define R_NTREE 11
-#define R_NTED 12
-#define R_NICON 13
-#define R_NBITBLK 14
-#define R_NSTRING 15
-#define R_IMAGES 16
+#define RT_NOBS 10
+#define RT_NTREE 11
+#define RT_NTED 12
+#define RT_NICON 13
+#define RT_NBITBLK 14
+#define RT_NSTRING 15
+#define RT_IMAGES 16
 
 #define NUM_RN 7
 
-#define RS_SIZE 17				/* NUM_RTYPES + NUM_RN	*/
+#define RS_SIZE (NUM_RTYPES + NUM_RN)
 
-#define HDR_LENGTH (RS_SIZE + 1) * 2		/* in bytes	*/
-
-
-typedef struct rshdr
-{
-	int16_t		rsh_vrsn;	/* must same order as RT_	*/
-	int16_t		rsh_object;
-	int16_t		rsh_tedinfo;
-	int16_t		rsh_iconblk;	/* list of ICONBLKS		*/
-	int16_t		rsh_bitblk;
-	int16_t		rsh_frstr;	
-	int16_t		rsh_string;
-	int16_t		rsh_imdata;	/* image data			*/
-	int16_t		rsh_frimg;	
-	int16_t		rsh_trindex;
-	int16_t		rsh_nobs;	/* counts of various structs	*/
-	int16_t		rsh_ntree;
-	int16_t		rsh_nted;
-	int16_t		rsh_nib;
-	int16_t		rsh_nbb;
-	int16_t		rsh_nstring;
-	int16_t		rsh_nimages;
-	int16_t		rsh_rssize;	/* total bytes in resource	*/
-}RSHDR;
-
-
-/* type definitions for use by an application when calling	*/
-/*  rsrc_gaddr and rsrc_saddr					*/
-
-#define R_TREE 0
-#define R_OBJECT 1
-#define R_TEDINFO 2
-#define R_ICONBLK 3
-#define R_BITBLK 4
-#define R_STRING 5		/* gets pointer to free strings	*/
-#define R_IMAGEDATA 6		/* gets pointer to free images	*/
-#define R_OBSPEC 7
-#define R_TEPTEXT 8		/* sub ptrs in TEDINFO	*/
-#define R_TEPTMPLT 9
-#define R_TEPVALID 10
-#define R_IBPMASK 11		/* sub ptrs in ICONBLK	*/
-#define R_IBPDATA 12
-#define R_IBPTEXT 13
-#define R_BIPDATA 14		/* sub ptrs in BITBLK	*/
-#define R_FRSTR 15		/* gets addr of ptr to free strings	*/
-#define R_FRIMG 16		/* gets addr of ptr to free images	*/
+#define HDR_LENGTH ((RS_SIZE + 1) * 2)		/* in bytes	*/
 
 
 /*	WINDLIB.H	05/05/84 - 01/26/85	Lee Lorenzen		*/
@@ -279,26 +153,6 @@ typedef struct rshdr
 #define WS_WORK 3
 #define WS_TRUE 4
 
-#define XFULL 0
-#define YFULL gl_hbox
-#define WFULL gl_width
-#define HFULL (gl_height - gl_hbox)
-
-/* Bit mask for window components */
-#define NAME	0x0001
-#define CLOSER	0x0002
-#define FULLER	0x0004
-#define MOVER	0x0008
-#define INFO	0x0010
-#define SIZER	0x0020
-#define UPARROW 0x0040
-#define DNARROW 0x0080
-#define VSLIDE	0x0100
-#define LFARROW 0x0200
-#define RTARROW 0x0400
-#define HSLIDE	0x0800
-/* Added Jul 23 91 for new window manager - ml. */
-#define MNBAR	0x1000
 
 
 #define	TPARTS	(NAME|CLOSER|FULLER|MOVER)
@@ -308,7 +162,6 @@ typedef struct rshdr
 
 #define	HASHSIZ	8		/* size of hash table */
 #define	NUMWIN	8		/* # window structures per block of memory */
-#define	MAXOBJ	20		/* maximum number of objects in a window */
 #define	NUMRECT	80		/* # RLISTs per block of memory allocated */
 #define	SHADOW	2		/* thickness of drop shadow in pixels */
 #define	BORDER	0		/* # pixels taken up by border around obj */
@@ -342,6 +195,7 @@ typedef struct rshdr
 #define	W_HSLIDE    17		/* horizontal slider background */
 #define	W_HELEV	    18		/* horizontal slider thumb/elevator */
 #define	W_MNBAR	    19		/* menu bar (added Jul 23 91 - ml.) */
+#define	MAXOBJ	    20		/* maximum number of objects in a window */
 
 
 /* Callers of totop() */
@@ -411,50 +265,7 @@ typedef	struct	window {
     struct  window *wnext;	/* ptr to next WINDOW in database */
 } WINDOW;
 
-
-#define WC_BORDER   0
-#define WC_WORK	    1
-
-
-#define WF_KIND		1
-#define WF_NAME		2
-#define WF_INFO		3
-#define WF_WORKXYWH	4
-#define WF_CURRXYWH	5
-#define WF_PREVXYWH	6
-#define WF_FULLXYWH	7
-#define WF_HSLIDE	8
-#define WF_VSLIDE	9
-#define WF_TOP      	10
-#define WF_FIRSTXYWH 	11
-#define WF_NEXTXYWH 	12
-#define WF_RESVD   	13
-#define WF_NEWDESK 	14
-#define WF_HSLSIZE   	15
-#define WF_VSLSIZE   	16
-#define WF_SCREEN   	17
-/* window color settings added 900227 - kbad */
-#define WF_COLOR	18	/* set window element by handle */
-#define WF_DCOLOR	19	/* set default element */
-
-/* added Jul 23 91 for menu bar in window - ml. */
-#define	WF_OWNER	20
-
-/* added Feb 25 92 to allow bottoming window - ml. */
-#define WF_BEVENT	24
-#define	WF_BOTTOM	25
-
-#define	WF_MENUBAR	99
-
-						/* arrow message	*/
-#define WA_UPPAGE 0
-#define WA_DNPAGE 1
-#define WA_UPLINE 2
-#define WA_DNLINE 3
-#define WA_LFPAGE 4
-#define WA_RTPAGE 5
-#define WA_LFLINE 6
-#define WA_RTLINE 7
+#define	ADJ3DPIX    2	/* pixel adjustment for 3D objects */
 
 
 #define G_SIZE 15
@@ -482,7 +293,7 @@ THEGLO
 	char	g_loc1[256];		/* MAX alert length	*/
 	char	g_loc2[256];
 
-	int16_t	g_scrap[82];
+	char    g_scrap[164]; /* was: WORD[82]... */
 
 	char	g_dir[CMDLEN];		/* changed from 82 to 128 */
 
@@ -496,3 +307,5 @@ THEGLO
 
 	/* WINDOW	w_win[NUM_WIN]; */
 };
+
+#endif /* GEMLIB_H */

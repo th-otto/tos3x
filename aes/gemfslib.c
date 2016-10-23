@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemfslib.c,v $
+*  $Author: mui $	$Date: 89/04/26 18:23:06 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:23:06 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemfslib.c,v $
+*
 * Revision 2.2  89/04/26  18:23:06  mui
 * TT
 * 
@@ -111,69 +109,24 @@ typedef struct fstruct
 	char snames[LEN_FSNAME];
 } FSTRUCT;
 
-extern char toupper();
+GRECT gl_rfs;
+int32_t ad_fstree;
+char *ad_fpath;
+int32_t ad_title;
+int32_t ad_select;
+FSTRUCT *ad_fsnames;
+int16_t fs_first;					/* first enter the file selector */
+uint16_t fs_topptr;
+uint16_t fs_count;
+int32_t fs_fnum;					/* max file allowed */
+char *ad_fsdta;
 
-extern char *dos_alloc();
-
-extern int32_t rs_str();
-
-extern char *dos_avail();
-
-extern int16_t DOS_AX;
-
-extern int32_t trap();
-
-extern int32_t trap13();
-
-extern WS gl_ws;
-
-extern GRECT gl_rcenter;
-
-extern int32_t ad_sysglo;
-
-extern int32_t ad_armice;
-
-extern int32_t ad_hgmice;
-
-extern int16_t gl_hbox;
-
-extern THEGLO D;
-
-extern int16_t gl_button;					/* cjg */
-
-
-GLOBAL GRECT gl_rfs;
-
-GLOBAL int32_t ad_fstree;
-
-GLOBAL char *ad_fpath;
-
-GLOBAL int32_t ad_title;
-
-GLOBAL int32_t ad_select;
-
-GLOBAL FSTRUCT *ad_fsnames;
-
-GLOBAL int16_t fs_first;					/* first enter the file selector */
-
-GLOBAL uint16_t fs_topptr;
-
-GLOBAL uint16_t fs_count;
-
-GLOBAL int32_t fs_fnum;					/* max file allowed */
-
-GLOBAL char *ad_fsdta;
-
-GLOBAL char wildstr[] = "*.*";
-
-GLOBAL char wslstr[] = "\\*.*";
+char const wildstr[] = "*.*";
+char const wslstr[] = "\\*.*";
 
 static char fsname[40];
-
 static char fcopy[40];
-
 static char *pathcopy;					/* path copy    */
-
 static int16_t defdrv;
 
 typedef struct pathstruct
@@ -181,14 +134,28 @@ typedef struct pathstruct
 	char pxname[128];
 } PATHSTRUCT;
 
-GLOBAL PATHSTRUCT *pxpath;
+PATHSTRUCT *pxpath;
+
+
+char *fs_back PROTO((char *pstr));
+int16_t r_dir PROTO((char *path, char *select, uint16_t *count));
+int16_t r_files PROTO((char *path, char *select, int16_t *count, char *filename));
+int16_t r_sort PROTO((FSTRUCT **buffer, int16_t count));
+VOID r_sfiles PROTO((uint16_t index, uint16_t ratio));
+VOID fs_draw PROTO((int16_t index, char *path, char *addr1, char *addr2));
+int16_t FXWait PROTO((NOTHING));
+int16_t FXSelect PROTO((OBJECT *tree, int16_t obj));
+int16_t FXDeselect PROTO((OBJECT *tree, int16_t obj));
+
+
+
 
 
 /*
-*	Routine to back off the end of a file string.
-*/
-char * fs_back(pstr)
-register char *pstr;
+ *	Routine to back off the end of a file string.
+ */
+char *fs_back(P(char *) pstr)
+PP(register char *pstr;)
 {
 	register char *pend;
 	register int16_t i;
@@ -225,64 +192,32 @@ register char *pstr;
 *	Add the label parameter
 */
 
-int16_t fs_input(pipath, pisel, pbutton, lstring)
-char *pipath;
-
-int32_t pisel;
-
-int16_t *pbutton;
-
-char *lstring;
+int16_t fs_input(P(char *) pipath, P(intptr_t) pisel, P(int16_t *) pbutton, P(char *) lstring)
+PP(char *pipath;)
+PP(intptr_t pisel;)
+PP(int16_t *pbutton;)
+PP(char *lstring;)
 {
-	register uint16_t i,
-	 j;
-
-	int16_t label,
-	 last,
-	 ret;
-
+	register uint16_t i, j;
+	int16_t label, last, ret;
 	register int32_t tree;
-
-	int32_t addr,
-	 mul,
-	 savedta,
-	 savepath;
-
-	uint16_t botptr,
-	 count,
-	 value;
-
-	int16_t xoff,
-	 yoff,
-	 mx,
-	 my,
-	 bret;
-
+	int32_t addr, mul, savedta, savepath;
+	uint16_t botptr, count, value;
+	int16_t xoff, yoff, mx, my, bret;
 	char dirbuffer[122];
-
 	char *chrptr;
-
 	char scopy[16];
-
 	char chr;
-
-	int16_t curdrv,
-	 savedrv;
-
+	int16_t curdrv, savedrv;
 	int32_t **lgptr;
-
 	GRECT clip;
-
 	int16_t firstry;
-
 	OBJECT *xtree;						/* cjg */
+	int16_t newend, oldend;
 
-	int16_t newend,
-	 oldend;
-
-/*
-*	Start up the file selector by initializing the fs_tree
-*/
+	/*
+	 *	Start up the file selector by initializing the fs_tree
+	 */
 	rs_gaddr(ad_sysglo, R_TREE, SELECTOR, &ad_fstree);
 	ob_center(ad_fstree, &gl_rfs);
 
@@ -345,7 +280,6 @@ char *lstring;
 		LWSET(OB_STATE(i), (count & j) ? NORMAL : DISABLED);
 		j = j << 1;
 	}
-
 
 	label = F1NAME;						/* clean up the files   */
 
@@ -671,22 +605,14 @@ char *lstring;
 
 /*	read in a directory	*/
 
-int16_t r_dir(path, select, count)
-char *path;
-
-char *select;
-
-register uint16_t *count;
+int16_t r_dir(P(char *) path, P(char *) select, P(uint16_t *) count)
+PP(char *path;)
+PP(char *select;)
+PP(register uint16_t *count;)
 {
-	int32_t tree,
-	 addr;
-
-	register int16_t status,
-	 i;
-
-	int32_t h,
-	 h1;
-
+	int32_t tree, addr;
+	register int16_t status, i;
+	int32_t h, h1;
 	char filename[16];
 
 	gsx_mfset(ad_hgmice);
@@ -737,31 +663,19 @@ register uint16_t *count;
 /*	for easy coding and redraw the count will return   */
 /*	the actual number of files		           */
 
-int16_t r_files(path, select, count, filename)
-register char *path;							/*5 */
-
-char *select;
-
-int16_t *count;
-
-register char *filename;						/*4 */
+int16_t r_files(P(char *) path, P(char *) select, P(int16_t *) count, P(char *) filename)
+PP(register char *path;)
+PP(char *select;)
+PP(int16_t *count;)
+PP(register char *filename;)
 {
-	register int16_t i;							/*8 */
-
-	int32_t j;								/*2 */
-
-	register int32_t k;							/*4 */
-
-	int16_t ret /*3 *//*,len */ ;
-
-/*		int32_t	temp,addr;*/
-	char *chrptr;						/*7 */
-
+	register int16_t i;
+	int32_t j;
+	register int32_t k;
+	int16_t ret;
+	char *chrptr;
 	register FSTRUCT *fsnames;
-
-	register int16_t drvid;						/*4 */
-
-/*		char	save;*/
+	register int16_t drvid;
 
 	fsnames = ad_fsnames;
 
@@ -853,16 +767,11 @@ register char *filename;						/*4 */
 }
 
 
-int16_t r_sort(buffer, count)
-register FSTRUCT(*buffer)[];
-
-int16_t count;
+int16_t r_sort(P(FSTRUCT **) buffer, P(int16_t) count)
+PP(register FSTRUCT **buffer;)
+PP(int16_t count;)
 {
-	register int16_t gap,
-	 i,
-	 j,
-	 k;
-
+	register int16_t gap, i, j, k;
 	char tmp[LEN_FSNAME];
 
 	for (gap = count / 2; gap > 0; gap /= 2)
@@ -885,19 +794,13 @@ int16_t count;
 
 /*	show files and update the scroll bar	*/
 
-r_sfiles(index, ratio)
-uint16_t index,
- ratio;
+VOID r_sfiles(P(uint16_t) index, P(uint16_t) ratio)
+PP(uint16_t index;)
+PP(uint16_t ratio;)
 {
-	register int16_t label,
-	 i;
-
+	register int16_t label, i;
 	register int32_t tree;
-
-	int32_t addr,
-	 h,
-	 h1,
-	 h3;
+	int32_t addr, h, h1, h3;
 
 	label = F1NAME;
 	tree = ad_fstree;
@@ -935,12 +838,11 @@ uint16_t index,
 
 /*	do the fs_sset and ob_draw	*/
 
-VOID fs_draw(index, path, addr1, addr2)
-int16_t index;
-
-int32_t path,
-	addr1,
-	addr2;
+VOID fs_draw(P(int16_t) index, P(char *) path, P(char *) addr1, P(char *) addr2)
+PP(int16_t index;)
+PP(char *path;)
+PP(char *addr1;)
+PP(char *addr2;)
 {
 	fs_sset(ad_fstree, index, path, addr1, addr2);
 	ob_draw(ad_fstree, index, MAX_DEPTH);
@@ -949,17 +851,10 @@ int32_t path,
 
 /*	Adjust all the drive boxes	*/
 
-VOID ini_fsel()
+VOID ini_fsel(NOTHING)
 {
-	int16_t x,
-	 y,
-	 i,
-	 j,
-	 w,
-	 h;
-
+	int16_t x, y, i, j, w, h;
 	register OBJECT *obj;
-
 	OBJECT *tree;
 
 	rs_gaddr(ad_sysglo, R_TREE, SELECTOR, &tree);
@@ -1028,7 +923,7 @@ VOID ini_fsel()
 }
 
 
-int16_t FXWait()
+int16_t FXWait(NOTHING)
 {
 	do
 	{
@@ -1037,13 +932,11 @@ int16_t FXWait()
 }
 
 
-int16_t FXSelect(tree, obj)
-OBJECT *tree;
-
-int16_t obj;
+int16_t FXSelect(P(OBJECT *) tree, P(int16_t) obj)
+PP(OBJECT *tree;)
+PP(int16_t obj;)
 {
 	GRECT rect;
-
 	int16_t dummy;
 
 	tree[obj].ob_state |= SELECTED;
@@ -1054,13 +947,11 @@ int16_t obj;
 }
 
 
-int16_t FXDeselect(tree, obj)
-OBJECT *tree;
-
-int16_t obj;
+int16_t FXDeselect(P(OBJECT *) tree, P(int16_t) obj)
+PP(OBJECT *tree;)
+PP(int16_t obj;)
 {
 	GRECT rect;
-
 	int16_t dummy;
 
 	tree[obj].ob_state &= ~SELECTED;

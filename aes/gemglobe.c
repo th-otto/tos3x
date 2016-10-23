@@ -38,12 +38,12 @@
 #include <gemusa.h>
 #include <gemlib.h>
 
-GLOBAL THEGLO D;
+THEGLO D;
 
 /*
  *	return size in words of struct THEGLO
  */
-int16_t size_theglo()
+int16_t size_theglo(NOTHING)
 {
-	return (sizeof(THEGLO) / 2);
+	return sizeof(THEGLO) / 2;
 }

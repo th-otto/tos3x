@@ -27,6 +27,49 @@
 * 	Assemble with MAS 900801 kbad
 *	Check for sparrow resolution at gsx_wsopen	7/19/92	D.Mui	
 
+/*	GEMGSXIF.C	05/06/84 - 02/17/85	Lee Lorenzen		*/
+/*	68k		02/20/85 - 03/25/85	Lowell Webster		*/
+/*	Reg Opt		03/09/85		Derek Mui		*/
+/*	speed bee	05/14/85		jim eisenstein		*/
+/*	Comment something out	07/11/85	Derek Mui		*/
+/*	6 resolutions	1/30/86			Derek Mui		*/
+/*	At gsx_wsopen, at gsx_malloc					*/
+/*	Store mouse addr at gsx_mfset	2/28/86	Derek Mui		*/
+/*	New flag to tell if the mouse is really on 3/3/86	D.Mui	*/
+/*	Take out save mouse address		1/7/87	Derek Mui	*/
+
+/*
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
+
+/*
+ *	Calls used in Crystal:
+ *
+ *	vsf_interior();
+ *	vr_recfl();
+ *	vst_height(); 
+ *	vsl_type();
+ *	vsl_udsty();
+ *	vsl_width();
+ *	v_pline();
+ *	vst_clip();
+ *	vex_butv();
+ *	vex_motv();
+ *	vex_curv();
+ *	vex_timv();
+ *	vr_cpyfm();
+ *	v_opnwk();
+ *	v_clswk();
+ *	vq_extnd();
+ *	v_clsvwk( handle )
+ *	v_opnvwk( pwork_in, phandle, pwork_out )
+ */
+
+
 	xdef	_gl_tmp
 	comm	_gl_tmp,20
 	xdef	_old_mcod
@@ -41,6 +84,8 @@
 	comm	_gl_graph,2
 	xdef	_gl_mouse
 	comm	_gl_mouse,2
+
+#define CCODE 0
 
 
 GSX_MFS	equ	 0*3
@@ -64,7 +109,7 @@ VSL_WID	equ	 7*3
 *
 *	move.l	#$00003400,_gl_mlen
 *	pea	 $3400
-*	jsr	_dos_all
+*	jsr	_dos_alloc
 *	move.l	 d0,_gl_tmp
 *
 *	lea	16(sp),sp		; clean up stack
@@ -72,8 +117,14 @@ VSL_WID	equ	 7*3
 
 
 
+#if CCODE
+VOID gsx_mfree(NOTHING)
+{
+	if (gl_tmp.fd_addr)
+		dos_free(gl_tmp.fd_addr);
+}
+#endif
 	xdef _gsx_mfree
-
 _gsx_mfree:
 	tst.l	_gl_tmp			; Fix 8/3/92
 	beq	g1
@@ -85,12 +136,14 @@ g1:
 
 
 
+#if CCODE
+VOID gsx_mret(VOIDPTR *pmaddr, size_t *pmlen)
+{
+	*pmaddr = gl_tmp.fd_addr;
+	*pmlen = gl_mlen;
+}
+#endif
 	xdef _gsx_mret
-
-*  in:
-*	sp+04	pmaddr
-*	sp+08	pmlen
-
 _gsx_mret:
 
 	move.l	4(sp),a0
@@ -101,13 +154,21 @@ _gsx_mret:
 
 
 
+#if CCODE
+VOID gsx_ncode(WORD code, WORD n, WORD m)
+{
+	REG WORD *pctrl;
+
+	pctrl = &contrl[0];
+
+	pctrl[0] = code;
+	pctrl[1] = n;
+	pctrl[3] = m;
+	pctrl[6] = gl_handle;
+	gsx2();
+}
+#endif
 	xdef _gsx_ncode
-
-*  in:
-*	sp+04	code
-*	  +06	n
-*	  +08	m
-
 _gsx_ncode:
 
 	lea	4(sp),a0
@@ -123,12 +184,14 @@ _gsx_ncode:
 
 
 
+#if CCODE
+VOID gsx_1code(WORD code, WORD value)
+{
+	intin[0] = value;
+	gsx_ncode(code, 0, 1);
+}
+#endif
 	xdef _gsx_1code
-
-*  in:
-*	sp+04	code
-*	  +06	value
-
 _gsx_1code:
 
 	move.w  6(sp),_intin
@@ -142,8 +205,18 @@ _gsx_1code:
 
 
 
+#if CCODE
+VOID gsx_init(NOTHNG)
+{
+	gsx_wsopen();
+	gsx_start();
+	gsx_setmb(&far_bcha, &far_mcha, &drwaddr);
+	gsx_ncode(MOUSE_ST, 0, 0);
+	xrat = ptsout[0];
+	yrat = ptsout[1];
+}
+#endif
 	xdef _gsx_init
-
 _gsx_init:
 
 	bsr	_gsx_wsopen
@@ -162,11 +235,25 @@ _gsx_init:
 
 
 
+#if CCODE
+VOID gsx_graphic(BOOLEAN tographic)
+{
+	if (gl_graphic != tographic)
+	{
+		gl_graphic = tographic;
+		if (gl_graphic)
+		{
+			gsx_escapes(2);
+			gsx_setmb(&far_bcha, &far_mcha, &drwaddr);
+		} else
+		{
+			gsx_escapes(3);
+			gsx_resetmb();
+		}
+	}
+}
+#endif
 	xdef _gsx_grap
-
-*  in:
-*	sp+04	tographic
-
 _gsx_grap:
 
 	move.w	4(sp),d0
@@ -196,8 +283,13 @@ L9:	moveq.l	#3,d0
 
 
 
+#if CCODE
+VOID v_hardcopy(NOTHING)
+{
+	gsx_escapes(17);
+}
+#endif
 	xdef _v_hardcopy
-
 _v_hardcopy:
 
 	moveq.l	#17,d0
@@ -206,11 +298,14 @@ _v_hardcopy:
 
 
 
+#if CCODE
+VOID gsx_escapes(WORD esc_code)
+{
+	contrl[5] = esc_code;
+	gsx_ncode(5, 0, 0);
+}
+#endif
 	xdef _gsx_esca
-
-*  in:
-*	sp+04	esc_code
-
 _gsx_esca:
 
 	move.w	4(sp),d0
@@ -221,10 +316,9 @@ escape:	move.w	d0,_contrl+10
 
 
 
-*****	 Open physical work station for 6 resoultions	*****
+*****	 Open physical work station for 6 resolutions	*****
 
 	xdef _gsx_wsopen
-
 _gsx_wsopen:
 
 	lea	_intin,a1
@@ -304,8 +398,13 @@ L22:	clr.w	_gl_rsch	; gl_rschange  <- FALSE
 
 
 
+#if CCODE
+VOID gsx_wsclose(NOTHING)
+{
+	gsx_ncode(CLOSE_WORKSTATION, 0, 0);
+}
+#endif
 	xdef _gsx_wscl
-
 _gsx_wscl:
 
 	moveq.l	#002,d0			; code 002 => v_clswk
@@ -313,8 +412,14 @@ _gsx_wscl:
 
 
 
+#if CCODE
+VOID ratinit(NOTHING)
+{
+	gsx_1code(SHOW_CUR, 0);
+	gl_moff = 0;
+}
+#endif
 	xdef _ratinit
-
 _ratinit:
 
 	clr.w	     -(sp)
@@ -326,23 +431,37 @@ _ratinit:
 	rts
 
 
+#if CCODE
+VOID bb_set(WORD sx, WORD sy, WORD sw, WORD sh, WORD *pts1, WORD *pts2, FDB *pfd, FDB *psrc, FDB *pdst)
+{
+	WORD oldsx;
+
+	/* get on word boundary */
+	oldsx = sx;
+	sx = (sx / 16) * 16;
+	sw = (((oldsx - sx) + (sw + 15)) / 16) * 16;
+
+	gl_tmp.fd_stand = TRUE;
+	gl_tmp.fd_wdwidth = sw / 16;
+	gl_tmp.fd_w = sw;
+	gl_tmp.fd_h = sh;
+
+	gsx_moff();
+	pts1[0] = sx;
+	pts1[1] = sy;
+	pts1[2] = sx + sw - 1;
+	pts1[3] = sy + sh - 1;
+	pts2[0] = 0;
+	pts2[1] = 0;
+	pts2[2] = sw - 1;
+	pts2[3] = sh - 1;
+
+	gsx_fix(pfd, 0, 0, 0, 0);
+	vro_cpyfm(S_ONLY, &ptsin[0], psrc, pdst);
+	gsx_mon();
+}
+#endif
 	xdef _bb_set
-
-*  call:
-*
-*	bb_set (sx, sy, sw, sh, pts1, pts2, pfd, psrc, pdst)
-*
-*  in:
-*	sp+04	 sx		word
-*	  +06	 sy		word
-*	  +08	 sw		word
-*	  +10	 sh		word
-*	  +12	*pts1		points to word array
-*	  +16	*pts2		points to word array
-*	  +20	*pfd		points to MFDB
-*	  +24	*psrc		points to MFDB
-*	  +28	*pdst		points to MFDB
-
 _bb_set:
 
 	lea	4(sp),a0		; a0 -> stack resident parameters
@@ -408,16 +527,13 @@ _bb_set:
 
 
 
+#if CCODE
+VOID bb_save(GRECT *ps)
+{
+	bb_set(ps->g_x, ps->g_y, ps->g_w, ps->g_h, &ptsin[0], &ptsin[4], &gl_src, &gl_src, &gl_tmp);
+}
+#endif
 	xdef _bb_save
-
-*  call:
-*
-*	bb_save (ps->g_x, ps->g_y, ps->g_w, ps->g_h, &ptsin[0], &ptsin[4].
-*		 &gl_src, &gl_src, &gl_tmp)
-*
-*  in:
-*	sp+04	ps
-
 _bb_save:
 
 	pea	_gl_tmp
@@ -439,15 +555,6 @@ _bb_save:
 
 
 	xdef _bb_resto
-
-*  call:
-*
-*	bb_restore (pr->g_x, pr->g_y, pr->g_w, pr->g_h, &ptsin[4], &ptsin[0].
-*		    &gl_dst, &gl_tmp, &gl_dst)
-*
-*  in:
-*	sp+04	pr
-
 _bb_resto:
 
 	lea	_gl_dst,a1
@@ -468,13 +575,23 @@ _bb_resto:
 
 
 
+#if CCODE
+WORD gsx_setmb(UWORD *boff, UWORD *moff, VOIDPTR *pdrwaddr)
+{
+	i_lptr1(boff, 0x0);
+	gsx_ncode(BUT_VECX, 0, 0);
+	m_lptr2(&old_bcode);
+
+	i_lptr1(moff, 0x0);
+	gsx_ncode(MOT_VECX, 0, 0);
+	m_lptr2(&old_mcode);
+
+/*	i_lptr1( justretf, 0x0 );	
+	gsx_ncode(CUR_VECX, 0, 0);
+	m_lptr2( pdrwaddr );		don't intercept draw vector */
+}
+#endif
 	xdef _gsx_setmb
-
-*  in:
-*	sp+04	boff
-*	  +08	moff
-*	  +12	pdrwaddr	*** not used ***
-
 _gsx_setmb:
 
 	move.l	4(sp),_contrl+14	; contrl[7-8] <- new button vector
@@ -491,6 +608,19 @@ _gsx_setmb:
 
 
 
+#if CCODE
+VOID gsx_resetmb(NOTHING)
+{
+	i_lptr1(old_bcode);
+	gsx_ncode(BUT_VECX, 0, 0);
+
+	i_lptr1(old_mcode);
+	gsx_ncode(MOT_VECX, 0, 0);
+
+/*	i_lptr1( drwaddr );	
+	gsx_ncode(CUR_VECX, 0, 0);     dont' replace cursor draw vector */
+}
+#endif
 	xdef _gsx_resetmb
 _gsx_resetmb:
 
@@ -503,12 +633,16 @@ _gsx_resetmb:
 
 
 
+#if CCODE
+WORD gsx_tick(intptr_t tcode, intptr_t *ptsave)
+{
+	i_lptr1(tcode);
+	gsx_ncode(TIM_VECX, 0, 0);
+	m_lptr2(ptsave);
+	return (intout[0]);
+}
+#endif
 	xdef _gsx_tick
-
-*  in:
-*	sp+04	 tcode
-*	  +08	*ptsave
-
 _gsx_tick:
 
 	move.l	4(sp),_contrl+14
@@ -523,36 +657,16 @@ _gsx_tick:
 	rts
 
 
-*	xdef _gsx_mfse
-
-*  in:
-*	sp+04	pmfnew
-
-*_gsx_mfse:
-
-*	bsr	_gsx_moff		; hide mouse cursor
-
-*	moveq.l	#36,d0			; number of words
-*	move.l	4(sp),a0		; source
-*	move.l	_ad_intin,a1		; destination
 
 
-*L32:	move.w	(a0)+,(a1)+		; load mouse form into intin array
-*	dbra	d0,L32
-
-*	moveq.l	#GSX_MFS,d0
-*	bsr	vdi_call
-
-*	bra	_gsx_mon		; show mouse cursor
-
-
-
+#if CCODE
+VOID gsx_mxmy(WORD *pmx, WORD *pmy)
+{
+	*pmx = xrat;
+	*pmy = yrat;
+}
+#endif
 	xdef _gsx_mxmy
-
-*  in:
-*	sp+04	*pmx
-*	  +08	*pmy
-
 _gsx_mxmy:
 
 	lea	4(sp),a0
@@ -564,8 +678,13 @@ _gsx_mxmy:
 
 
 
+#if CCODE
+WORD gsx_button(NOTHING)
+{
+	return (button);
+}
+#endif
 	xdef _gsx_butt
-
 _gsx_butt:
 
 	move.w	_button,d0
@@ -573,9 +692,24 @@ _gsx_butt:
 
 
 
+#if CCODE
+VOID ratexit(NOTHING)
+{
+	gsx_moff();
+}
+VOID gsx_moff(NOTHING)
+{
+	if (!gl_moff)
+	{
+		gsx_ncode(HIDE_CUR, 0, 0);
+		gl_mouse = FALSE;
+	}
+
+	gl_moff++;
+}
+#endif
 	xdef _gsx_moff
 	xdef _ratexit
-
 _ratexit:
 _gsx_moff:
 
@@ -592,8 +726,18 @@ L35:	add.w	#1,_gl_moff
 
 
 
+#if CCODE
+VOID gsx_mon(NOTHING)
+{
+	gl_moff--;
+	if (!gl_moff)
+	{
+		gsx_1code(SHOW_CUR, 1);
+		gl_mouse = TRUE;
+	}
+}
+#endif
 	xdef _gsx_mon
-
 _gsx_mon:
 
 	moveq.l	#1,d0
@@ -611,12 +755,59 @@ L37:	rts
 
 
 
+#if CCODE
+/* unused */
+WORD gsx_kstate(NOTHING)
+{
+	gsx_ncode(KEY_SHST, 0, 0);
+	return(intout[0]);
+}
+#endif
 
-*  in:
-*	sp+04	pwork_in
-*	sp+08	phandle
-*	sp+12	pwork_out
 
+#if CCODE
+/* unused */
+WORD gsx_char(NOTHING)
+{
+	REG WORD		*pintin;
+	REG WORD		*pintout;
+	pintin = &intin[0];
+	pintout = &intout[0];
+
+	pintin[0] = 4;
+	pintin[1] = 2;
+	gsx_ncode(33, 0, 2);
+
+	pintin[0] = -1;
+	pintin[1] = FALSE;
+	gsx_ncode(31, FALSE, 2);
+	if (contrl[4])
+	  return(pintout[0]);
+	else
+	  return(0);
+
+}
+#endif
+
+
+#if CCODE
+WORD v_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
+{
+	WORD *ptsptr;
+
+	ptsptr = pwork_out + 45;
+	i_ptsout(ptsptr);					/* set ptsout to work_out array */
+	i_intin(pwork_in);					/* set intin to point to callers data  */
+	i_intout(pwork_out);				/* set intout to point to callers data */
+	gsx_ncode(OPEN_WORKSTATION, 0, 11);
+
+	*phandle = contrl[6];
+	i_intin(&intin);
+	i_intout(&intout);
+	i_ptsin(&ptsin);
+	i_ptsout(&ptsout);
+}
+#endif
 	xdef _v_opnwk
 _v_opnwk:
 
@@ -639,10 +830,14 @@ _v_opnwk:
 
 
 
-*  in:
-*	sp+04	count
-*	sp+06	pxyarray
-
+#if CCODE
+VOID v_pline(WORD count, WORD *pxyarray)
+{
+	i_ptsin(pxyarray);
+	gsx_ncode(POLYLINE, count, 0);
+	i_ptsin(&ptsin);
+}
+#endif
 	xdef _v_pline
 _v_pline:
 
@@ -657,12 +852,19 @@ _v_pline:
 
 
 
+#if CCODE
+VOID vst_clip(WORD clip_flag, WORD pxyarray)
+{
+	WORD tmp, value;
+
+	value = (clip_flag != 0) ? 2 : 0;
+	i_ptsin(pxyarray);
+	intin[0] = clip_flag;
+	gsx_ncode(TEXT_CLIP, value, 1);
+	i_ptsin(&ptsin);
+}
+#endif
 	xdef _vst_clip
-
-*  in:
-*	sp+04	clip_flag
-*	sp+06	pxyarray
-
 _vst_clip:
 
 	lea	4(sp),a0
@@ -673,13 +875,22 @@ _vst_clip:
 
 
 
-*  in:
-*	sp+04	height
-*	  +06	pchr_wid
-*	  +10	pchr_hei
-*	  +14	pcell_wi
-*	  +18	pcell_he
+#if CCODE
+VOID vst_height(WORD height, WORD *pchr_width, WORD *pchr_height, WORD *pcell_width, WORD *pcell_height)
+{
+	REG WORD *ppts;
 
+	ppts = &ptsout[0];
+
+	ptsin[0] = 0;
+	ptsin[1] = height;
+	gsx_ncode(CHAR_HEIGHT, 1, 0);
+	*pchr_width = ppts[0];
+	*pchr_height = ppts[1];
+	*pcell_width = ppts[2];
+	*pcell_height = ppts[3];
+}
+#endif
 	xdef _vst_height
 _vst_height:
 
@@ -705,10 +916,15 @@ _vst_height:
 
 
 
-*  in:
-*	sp+04	pxyarray
-*	sp+08	pdesMFDB
-
+#if CCODE
+VOID vr_recfl(WORD *pxyarray, FDB *pdesMFDB) /* ??? why MFDB ??? */
+{
+	i_ptr(pdesMFDB);
+	i_ptsin(pxyarray);
+	gsx_ncode(FILL_RECTANGLE, 2, 1);
+	i_ptsin(&ptsin);
+}
+#endif
 	xdef _vr_recfl
 _vr_recfl:
 
@@ -722,12 +938,17 @@ _vr_recfl:
 
 
 
-*  in:
-*	sp+04	wr_mode
-*	  +06	pxyarray
-*	  +10	psrcMFDB
-*	  +14	pdesMFDB
-
+#if CCODE
+VOID vro_cpyfm(WORD wr_mode, WORD *pxyarray, WORD *psrcMFDB, WORD *pdesMFDB)
+{
+	intin[0] = wr_mode;
+	i_ptr(psrcMFDB);
+	i_ptr2(pdesMFDB);
+	i_ptsin(pxyarray);
+	gsx_ncode(COPY_RASTER_FORM, 4, 1);
+	i_ptsin(&ptsin);
+}
+#endif
 	xdef _vro_cpyf
 _vro_cpyf:
 
@@ -742,14 +963,23 @@ _vro_cpyf:
 
 
 
-*  in:
-*	sp+04	wr_mode
-*	  +06	pxyarray
-*	  +10	psrcMFDB
-*	  +14	pdesMFDB
-*	  +18	fgcolor
-*	  +20	bgcolor
+#if CCODE
+VOID vrt_cpyfm(WORD wr_mode, WORD *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, WORD fgcolor, WORD bgcolor)
+{
+	REG WORD *pintin;
 
+	pintin = &intin[0];
+
+	pintin[0] = wr_mode;
+	pintin[1] = fgcolor;
+	pintin[2] = bgcolor;
+	i_ptr(psrcMFDB);
+	i_ptr2(pdesMFDB);
+	i_ptsin(pxyarray);
+	gsx_ncode(121, 4, 3);
+	i_ptsin(&ptsin);
+}
+#endif
 	xdef _vrt_cpyfm
 _vrt_cpyfm:
 
@@ -766,12 +996,16 @@ _vrt_cpyfm:
 
 
 
+#if CCODE
+VOID vrn_trnfm(FDB *psrcMFDB, FDB *pdesMFDB)
+{
+	i_ptr(psrcMFDB);
+	i_ptr2(pdesMFDB);
+	gsx_ncode(TRANSFORM_FORM, 0, 0);
+}
+#endif
+
 	xdef _vrn_trnf
-
-*  in:
-*	sp+04	psrcMFDB
-*	  +08	pdesMFDB
-
 _vrn_trnf:
 
 	lea	 4(sp),a0		; a0 -> stack parameters
@@ -782,13 +1016,16 @@ _vrn_trnf:
 
 
 
+#if CCODE
+VOID vsl_width(WORD width)
+{
+	ptsin[0] = width;
+	ptsin[1] = 0;
+	gsx_ncode(S_LINE_WIDTH, 1, 0);
+}
+#endif
 	xdef _vsl_width
-
-*  in:
-*	sp+04	width
-
 _vsl_width:
-
 	lea	_ptsin,a1
 	move.w	4(sp),(a1)+		; ptsin[0] <- width
 	clr.w	      (a1)		; ptsin[1] <- 0
@@ -803,7 +1040,6 @@ _vsl_width:
 *	a0	pointer to SRC and DST MFDBs
 
 mfdb_load:
-
 	lea	_contrl+14,a1		; a1 -> contrl[7]
 	move.l (a0)+,(a1)+		; contrl[7] -> SRC MFDB
 	move.l (a0)+,(a1)+		; contrl[8] -> DST MFDB
@@ -813,9 +1049,7 @@ mfdb_load:
 
 * in:
 *	a0	pointer to ptsin array
-
 set_pioff:
-
 	move.l	(a0)+,pioff
 	rts
 

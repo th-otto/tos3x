@@ -28,6 +28,9 @@ MFORM gl_cmform;						/* current aes mouse form   */
 
 MFORM gl_omform;						/* old aes mouse form       */
 
+uint16_t crysbind PROTO((int16_t opcode, intptr_t pglobal, uint16_t *int_in, uint16_t *int_out, intptr_t *addr_in));
+
+
 #define CONTROL LLGET(pcrys_blk)
 #define GLOBAL LLGET(pcrys_blk+4)
 #define INT_IN LLGET(pcrys_blk+8)
@@ -36,12 +39,12 @@ MFORM gl_omform;						/* old aes mouse form       */
 #define ADDR_OUT LLGET(pcrys_blk+20)
 
 
-uint16_t crysbind(P(int16_t) opcode, P(intptr_t) pglobal, P(uint16_t *) int_in, P(uint16_t *) int_out, P(VOIDPTR *) addr_in)
+uint16_t crysbind(P(int16_t) opcode, P(intptr_t) pglobal, P(uint16_t *) int_in, P(uint16_t *) int_out, P(intptr_t *) addr_in)
 PP(int16_t opcode;)
 PP(register intptr_t pglobal;)
 PP(register uint16_t *int_in;)
 PP(register uint16_t *int_out;)
-PP(register VOIDPTR *addr_in;)
+PP(register intptr_t *addr_in;)
 {
 	intptr_t tmparm;
 	intptr_t buparm;
@@ -55,7 +58,8 @@ PP(register VOIDPTR *addr_in;)
 
 	switch (opcode)
 	{
-	case APPL_INIT:					/* Application Manager  */
+	/* Application Manager  */
+	case APPL_INIT:
 		ret = ap_init(pglobal);
 		break;
 	case APPL_READ:
@@ -76,7 +80,9 @@ PP(register VOIDPTR *addr_in;)
 	case APPL_EXIT:
 		ap_exit();
 		break;
-	case EVNT_KEYBD:					/* Event Manager */
+	
+	/* Event Manager */
+	case EVNT_KEYBD:
 		ret = ev_keybd();
 		break;
 	case EVNT_BUTTON:
@@ -101,14 +107,13 @@ PP(register VOIDPTR *addr_in;)
 		ret = ev_dclick(EV_DCRATE, EV_DCSETIT);
 		break;
 
-	case MENU_BAR:						/* Menu Manager */
+	/* Menu Manager */
+	case MENU_BAR:
 		mn_bar(MM_ITREE, SHOW_IT);
 		break;
-
 	case MENU_ICHECK:
 		do_chg(MM_ITREE, ITEM_NUM, CHECKED, CHECK_IT, FALSE, FALSE);
 		break;
-
 	case MENU_IENABLE:
 		do_chg(MM_ITREE, (ITEM_NUM & 0x7FFF), DISABLED, !ENABLE_IT, ((ITEM_NUM & 0x8000) != 0x0), FALSE);
 		break;
@@ -123,20 +128,21 @@ PP(register VOIDPTR *addr_in;)
 		ret = mn_register(MM_PID, MM_PSTR);
 		break;
 		/* 5/14/92  */
-	case MN_POPUP:
+	case MENU_POPUP:
 		ret = mn_popup(rlr->p_pid, M_MENU, M_XPOS, M_YPOS, M_MDATA);
 		break;
-	case MN_ATTACH:
+	case MENU_ATTACH:
 		ret = mn_attach(rlr->p_pid, M_FLAG, M_TREE, M_ITEM, M_MDATA);
 		break;
-	case MN_ISTART:
+	case MENU_ISTART:
 		ret = mn_istart(rlr->p_pid, M_FLAG, M_TREE, M_MENU2, M_ITEM2);
 		break;
-	case MN_SETTING:
+	case MENU_SETTING:
 		mn_settings(M_FLAG, M_MENU);
 		break;
-
-	case OBJC_ADD:						/* Object Manager   */
+	
+	/* Object Manager   */
+	case OBJC_ADD:
 		ob_add(OB_TREE, OB_PARENT, OB_CHILD);
 		break;
 	case OBJC_DELETE:
@@ -170,9 +176,11 @@ PP(register VOIDPTR *addr_in;)
 	case OBJC_SYSVAR:
 		ret = ob_sysvar(OB_MODE, OB_WHICH, OB_I1, OB_I2, &OB_O1, &OB_O2);
 		break;
-	 /**/ case FORM_DO:				/* Form Manager */
+	
+	/* Form Manager */
+	case FORM_DO:
 		ret = fm_do(FM_FORM, FM_START);
-		break;
+		break;	
 	case FORM_DIAL:
 		fm_dial(FM_TYPE, &FM_IX, &FM_X);
 		break;
@@ -195,7 +203,8 @@ PP(register VOIDPTR *addr_in;)
 		gsx_sclip(&gl_rfull);
 		ret = fm_button(FM_FORM, FM_OBJ, FM_CLKS, &FM_ONXTOB);
 		break;
-		/* Graphics Manager         */
+	
+	/* Graphics Manager         */
 	case GRAF_RUBBOX:
 		gr_rubbox(GR_I1, GR_I2, GR_I3, GR_I4, &GR_O1, &GR_O2);
 		break;
@@ -230,19 +239,16 @@ PP(register VOIDPTR *addr_in;)
 			ctlmouse(0);
 			maddr = 1;
 		}
-
 		gr_mouse(GR_MNUMBER, GR_MADDR);
-
 		if (maddr)
 			ctlmouse(1);
-
 		break;
 
 	case GRAF_MKSTATE:
 		ret = gr_mkstate(&GR_MX, &GR_MY, &GR_MSTATE, &GR_KSTATE);
 		break;
-		/* Scrap Manager    */
-
+	
+	/* Scrap Manager    */
 	case SCRP_READ:
 		sc_read(SC_PATH);
 		break;
@@ -257,7 +263,7 @@ PP(register VOIDPTR *addr_in;)
 		ret = fs_input(FS_IPATH, FS_ISEL, &FS_BUTTON, FS_LABEL);
 		break;
 
-		/* Window Manager       */
+	/* Window Manager       */
 	case WIND_CREATE:
 		ret = wm_create(WM_KIND, &WM_WX);
 		break;
@@ -289,7 +295,8 @@ PP(register VOIDPTR *addr_in;)
 		ret = wm_new();
 		break;
 
-	case RSRC_LOAD:					/* Resource Manager */
+	/* Resource Manager */
+	case RSRC_LOAD:
 		ret = rs_load(pglobal, RS_PFNAME);
 		break;
 	case RSRC_FREE:
@@ -304,7 +311,8 @@ PP(register VOIDPTR *addr_in;)
 	case RSRC_OBFIX:
 		ret = rs_obfix(RS_TREE, RS_OBJ);
 		break;
-		/* Shell Manager    */
+	
+	/* Shell Manager    */
 	case SHEL_READ:
 		ret = sh_read(SH_PCMD, SH_PTAIL);
 		break;
@@ -323,6 +331,7 @@ PP(register VOIDPTR *addr_in;)
 	case SHEL_ENVRN:
 		ret = sh_envrn(SH_PATH, SH_SRCH);
 		break;
+
 	default:
 		fm_show(ALRTNOFUNC, NULL, 1);
 		ret = -1;
@@ -333,11 +342,11 @@ PP(register VOIDPTR *addr_in;)
 
 
 /*
-*	Routine that copies input parameters into local buffers,
-*	calls the appropriate routine via a case statement, copies
-*	return parameters from local buffers, and returns to the
-*	routine.
-*/
+ *	Routine that copies input parameters into local buffers,
+ *	calls the appropriate routine via a case statement, copies
+ *	return parameters from local buffers, and returns to the
+ *	routine.
+ */
 
 VOID xif(P(intptr_t) pcrys_blk)
 PP(intptr_t pcrys_blk;)
@@ -345,7 +354,7 @@ PP(intptr_t pcrys_blk;)
 	uint16_t control[C_SIZE];
 	uint16_t int_in[I_SIZE];
 	uint16_t int_out[O_SIZE];
-	VOIDPTR addr_in[AI_SIZE];
+	intptr_t addr_in[AI_SIZE];
 
 	LWCOPY(ADDR(&control[0]), CONTROL, C_SIZE);
 
@@ -353,12 +362,15 @@ PP(intptr_t pcrys_blk;)
 		LWCOPY(ADDR(&int_in[0]), INT_IN, IN_LEN);
 
 	if (AIN_LEN)
-		LWCOPY(ADDR(&addr_in[0]), ADDR_IN, AIN_LEN * 2);
+		LWCOPY(ADDR(&addr_in[0]), ADDR_IN, AIN_LEN * (sizeof(intptr_t) / 2));
 
 	int_out[0] = crysbind(OP_CODE, GLOBAL, &int_in[0], &int_out[0], &addr_in[0]);
 	if (OUT_LEN)
 		LWCOPY(INT_OUT, &int_out[0], OUT_LEN);
 
+	/*
+	 * rsrc_gaddr() is the only function that returns an address parameter
+	 */
 	if (OP_CODE == RSRC_GADDR)
 		LLSET(ADDR_OUT, ad_rso);
 }

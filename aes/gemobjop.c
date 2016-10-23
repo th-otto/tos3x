@@ -44,8 +44,6 @@
 
 #define	TED_THICKNESS	22
 
-extern WS gl_ws;
-
 /*
 * ob_sst	Routine to set the user variables pspec, pstate, ptype,
 *		pflags, pt, pth.
@@ -55,24 +53,17 @@ extern WS gl_ws;
 *
 */
 
-char ob_sst(tree, obj, pspec, pstate, ptype, pflags, pt, pth)
-int32_t tree;
-
-int16_t obj;
-
-register int32_t *pspec;
-
-int16_t *pstate,
-*ptype;
-
-register int16_t *pflags;
-
-GRECT *pt;
-
-int16_t *pth;
+char ob_sst(P(OBJPTR) tree, P(int16_t) obj, P(intptr_t *) pspec, P(int16_t *) pstate, P(int16_t *) ptype, P(int16_t *) pflags, P(GRECT *) pt, P(int16_t *) apth)
+PP(OBJPTR tree;)
+PP(int16_t obj;)
+PP(register intptr_t *pspec;)
+PP(int16_t *pstate;)
+PP(int16_t *ptype;)
+PP(register int16_t *pflags;)
+PP(GRECT *pt;)
+PP(int16_t *pth;)
 {
 	register int16_t th;
-
 	register OBJECT *tmp;
 
 	tmp = OB_NEXT(obj);
@@ -132,24 +123,18 @@ int16_t *pth;
 }
 
 
-VOID everyobj(tree, this, last, routine, startx, starty, maxdep)
-register int32_t tree;
-
-register int16_t this,
-	last;
-
-int16_t(*routine) ();
-int16_t startx,
- starty;
-
-int16_t maxdep;
+VOID everyobj(P(OBJPTR) tree, P(int16_t) this, P(int16_t) last, P(EVERYOBJ_CALLBACK) routine, P(int16_t) startx, P(int16_t) starty, P(int16_t) maxdep)
+PP(register OBJPTR tree;)
+PP(register int16_t this;)
+PP(register int16_t last;)
+PP(EVERYOBJ_CALLBACK routine;)
+PP(int16_t startx;)
+PP(int16_t starty;)
+PP(int16_t maxdep;)
 {
 	register int16_t tmp1;
-
 	register int16_t depth;
-
-	int16_t x[8],
-	 y[8];
+	int16_t x[8], y[8];
 
 	x[0] = startx;
 	y[0] = starty;
@@ -211,10 +196,9 @@ int16_t maxdep;
 *	idea is to walk to the end of our siblings and return
 *	our parent.  If object is the root then return NIL as parent.
 */
-int16_t get_par(tree, obj)
-register int32_t tree;
-
-register int16_t obj;
+int16_t get_par(P(OBJPTR) tree, P(int16_t) obj)
+PP(register OBJPTR tree;)
+PP(register int16_t obj;)
 {
 	register int16_t pobj;
 

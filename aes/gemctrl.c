@@ -73,6 +73,9 @@
 #include <gemlib.h>
 #include <funcdef.h>
 
+#if BINEXACT
+extern int16_t gl_mnpid;
+#endif
 
 #define THEDESK 3
 

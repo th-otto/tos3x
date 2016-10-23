@@ -96,3 +96,6 @@
  * will be inferred from the COUNTRY Makefile variable.
  */
 #define OS_CONF_MULTILANG 0xff
+
+#define CTRY_any OS_CONF_MULTILANG
+#define CTRY_ANY OS_CONF_MULTILANG

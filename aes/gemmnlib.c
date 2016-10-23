@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemmnlib.c,v $
+*  $Author: mui $	$Date: 89/04/26 18:25:14 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:25:14 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemmnlib.c,v $
+*
 * Revision 2.2  89/04/26  18:25:14  mui
 * TT
 * 
@@ -44,83 +42,30 @@
 #include <obdefs.h>
 #include <taddr.h>
 #include <gemlib.h>
-						/* in BB.C      */
-extern VOID bb_restore();
 
-extern VOID bb_save();
+OBJPTR gl_mntree;
+#if BINEXACT
+int32_t gl_mnpid;
+#else
+int16_t gl_mnpid;
+#endif
+GRECT gl_rmnactv;
+int32_t desk_acc[MAX_ACCS];
+int16_t desk_pid[MAX_ACCS];
+int16_t gl_dacnt;
+int16_t gl_dabase;
+int16_t gl_dabox;
 
-						/* in EVLIB.C       */
-extern int16_t ev_multi();
-
-						/* in GSXIF.C       */
-extern VOID gsx_mxmy();
-
-						/* in OBLIB.C       */
-extern int16_t ob_find();
-
-extern VOID ob_draw();
-
-extern VOID ob_change();
-
-						/* in OBED.C        */
-extern VOID ob_actxywh();
-
-extern int16_t gl_moff;
-
-extern int16_t gl_width;
-
-extern int16_t gl_height;
-
-extern int16_t gl_wbox;
-
-extern int16_t gl_hbox;
-
-extern GRECT gl_rzero;
-
-extern GRECT gl_rmenu;
-
-extern int16_t gl_wchar;
-
-extern int16_t gl_hchar;
-
-extern int16_t appl_msg[];
-
-extern PD *ctl_pd;
-
-extern PD *gl_mowner;
-
-extern THEGLO D;
-
-extern MOBLK gl_ctwait;
-
-GLOBAL int32_t gl_mntree;
-
-GLOBAL int32_t gl_mnpid;
-
-GLOBAL GRECT gl_rmnactv;
-
-GLOBAL int32_t desk_acc[NUM_DESKACC];
-
-GLOBAL int16_t desk_pid[NUM_DESKACC];
-
-GLOBAL int16_t gl_dacnt;
-
-GLOBAL int16_t gl_dabase;
-
-GLOBAL int16_t gl_dabox;
 
 #if 0
 /*
-*	Change a mouse-wait rectangle based on an object's size.
-*/
+ *	Change a mouse-wait rectangle based on an object's size.
+ */
 
 VOID rect_change(tree, prmob, iob, x)
-int32_t tree;
-
+OBJPTR tree;
 MOBLK *prmob;
-
 int16_t iob;
-
 int16_t x;
 {
 	ob_actxywh(tree, iob, &prmob->m_x);
@@ -137,18 +82,13 @@ int16_t x;
 *	is set.
 */
 
-uint16_t do_chg(tree, iitem, chgvalue, dochg, dodraw, chkdisabled)
-register int32_t tree;							/* tree that holds item */
-
-int16_t iitem;								/* item to affect   */
-
-register uint16_t chgvalue;						/* bit value to change  */
-
-int16_t dochg;								/* set or reset value   */
-
-int16_t dodraw;							/* draw resulting change */
-
-int16_t chkdisabled;						/* only if item enabled */
+uint16_t do_chg(P(OBJPTR) tree, P(int16_t) iitem, P(uint16_t) chgvalue, P(int16_t) dochg, P(int16_t) dodraw, P(int16_t) chkdisabled)
+PP(register OBJPTR tree;)						/* tree that holds item */
+PP(int16_t iitem;)								/* item to affect   */
+PP(register uint16_t chgvalue;)					/* bit value to change  */
+PP(int16_t dochg;)								/* set or reset value   */
+PP(int16_t dodraw;)								/* draw resulting change */
+PP(int16_t chkdisabled;)						/* only if item enabled */
 {
 	register uint16_t curr_state;
 
@@ -170,17 +110,14 @@ int16_t chkdisabled;						/* only if item enabled */
 
 #if 0
 /*
-*	Routine to set and reset values of certain items if they
-*	are not the current item
-*/
-int16_t menu_set(tree, last_item, cur_item, setit)
-int32_t tree;
-
-register int16_t last_item;
-
-int16_t cur_item;
-
-int16_t setit;
+ *	Routine to set and reset values of certain items if they
+ *	are not the current item
+ */
+int16_t menu_set(P(OBJPTR) tree, P(int16_t) last_item, P(int16_t) cur_item, P(int16_t) setit)
+PP(OBJPTR tree;)
+PP(register int16_t last_item;)
+PP(int16_t cur_item;)
+PP(int16_t setit;)
 {
 	if ((last_item != NIL) && (last_item != cur_item))
 	{
@@ -190,18 +127,15 @@ int16_t setit;
 }
 
 /*
-*	Routine to save or restore the portion of the screen underneath
-*	a menu tree.  This involves BLTing out and back
-*	the data that was underneath the menu before it was pulled
-*	down.
-*/
-
-VOID menu_sr(saveit, tree, imenu)
-int16_t saveit;
-
-int32_t tree;
-
-int16_t imenu;
+ *	Routine to save or restore the portion of the screen underneath
+ *	a menu tree.  This involves BLTing out and back
+ *	the data that was underneath the menu before it was pulled
+ *	down.
+ */
+VOID menu_sr(P(int16_t) saveit, P(OBJPTR) tree, P(int16_t) imenu)
+PP(int16_t saveit;)
+PP(OBJPTR tree;)
+PP(int16_t imenu;)
 {
 	GRECT t;
 
@@ -217,28 +151,24 @@ int16_t imenu;
 }
 
 /*
-*	Routine to pull a menu down.  This involves saving the data
-*	underneath the menu and drawing in the proper menu sub-tree.
-*/
+ *	Routine to pull a menu down.  This involves saving the data
+ *	underneath the menu and drawing in the proper menu sub-tree.
+ */
 
-int16_t menu_down(tree, ititle)
-register int32_t tree;
-
-register int16_t ititle;
+int16_t menu_down(P(OBJPTR) tree, P(int16_t) ititle)
+PP(register OBJPTR tree;)
+PP(register int16_t ititle;)
 {
-	register int16_t imenu,
-	 i;
+	register int16_t imenu, i;
 
-	/* correlate title #    */
-	/*   to menu subtree #  */
+	/* correlate title # to menu subtree #  */
 	imenu = LWGET(OB_HEAD(THEMENUS));
 	for (i = ititle - THEACTIVE; i > 1; i--)
 		imenu = LWGET(OB_NEXT(imenu));
 	/* draw title selected  */
 	if (do_chg(tree, ititle, SELECTED, TRUE, TRUE, TRUE))
 	{
-		/* save area underneath */
-		/*   the menu       */
+		/* save area underneath the menu       */
 		menu_sr(TRUE, tree, imenu);
 		/* draw all items in menu */
 		ob_draw(tree, imenu, MAX_DEPTH);
@@ -247,36 +177,19 @@ register int16_t ititle;
 }
 
 
-int16_t mn_do(ptitle, pitem)
-int16_t *ptitle,
-*pitem;
+int16_t mn_do(P(int16_t *) ptitle, P(int16_t *) pitem)
+PP(int16_t *ptitle;)
+PP(int16_t *pitem;)
 {
 	register int32_t tree;
-
-	int32_t buparm;
-
-	int16_t mnu_flags,
-	 done;
-
-	register int16_t cur_menu,
-	 cur_item,
-	 last_menu,
-	 last_item;
-
-	int16_t cur_title,
-	 flag,
-	 last_title;
-
+	intptr_t buparm;
+	int16_t mnu_flags, done;
+	register int16_t cur_menu, cur_item, last_menu, last_item;
+	int16_t cur_title, flag, last_title;
 	uint16_t ev_which;
-
-	MOBLK p1mor,
-	 p2mor;
-
-	int16_t menu_state,
-	 rect;
-
+	MOBLK p1mor, p2mor;
+	int16_t menu_state, rect;
 	int16_t rets[6];
-
 	int16_t curstate;
 
 	tree = gl_mntree;
@@ -369,7 +282,8 @@ int16_t *ptitle,
 				cur_menu = menu_down(tree, cur_title);
 			menu_set(tree, cur_item, last_item, TRUE);
 		}
-	}									/* while (!done) */
+	}
+	
 	/* decide what should   */
 	/*   be cleaned up and  */
 	/*   returned       */
@@ -395,22 +309,19 @@ int16_t *ptitle,
 }
 #endif
 
+
 /*
-*	Routine to display the menu bar.  Clipping is turned completely
-*	off so that this operation will be as fast as possible.  The
-*	global variable gl_mntree which is used in CTLMGR88.C is also
-*	set or reset.
-*/
-int16_t mn_bar(tree, showit)
-register int32_t tree;
-
-int16_t showit;
+ *	Routine to display the menu bar.  Clipping is turned completely
+ *	off so that this operation will be as fast as possible.  The
+ *	global variable gl_mntree which is used in CTLMGR88.C is also
+ *	set or reset.
+ */
+/* 306de: 00E1F098 */
+int16_t mn_bar(P(OBJPTR) tree, P(int16_t) showit)
+PP(register OBJPTR tree;)
+PP(int16_t showit;)
 {
-	register int16_t i,
-	 ob,
-	 h,
-	 cnt;
-
+	register int16_t i, ob, h, cnt;
 	int32_t spec;
 
 	if (showit)
@@ -423,6 +334,11 @@ int16_t showit;
 		ch_wrect(&gl_ctwait.m_x, &gl_rmnactv);
 
 		rc_copy(&gl_rmnactv, &gl_ctwait.m_x);
+		/*
+		 * BUG: gl_mnpid delcared as long but accessed as short;
+		 * this will be sign-extended here, causing users to always
+		 * use 0 as menu owner
+		 */
 		gl_mnpid = rlr->p_pid;
 		gl_dabox = LWGET(OB_HEAD(THEMENUS));
 		LWSET(OB_HEAD(gl_dabox), NIL);
@@ -462,9 +378,7 @@ int16_t showit;
 
 		rc_copy(&gl_rmenu, &gl_ctwait.m_x);
 	}
-	/* make ctlmgr fix up   */
-	/*   the size of rect   */
-	/*   its waiting for    */
+	/* make ctlmgr fix up the size of rect its waiting for */
 /*	gl_fakemsg++;			*/
 	post_button(ctl_pd, 0x0000, 1);
 	dsptch();
@@ -474,7 +388,7 @@ int16_t showit;
 *	Routine to tell desk accessories that the currently running
 *	application is about to terminate.
 */
-VOID mn_clsda()
+VOID mn_clsda(NOTHING)
 {
 	register int16_t i;
 
@@ -484,14 +398,13 @@ VOID mn_clsda()
 
 
 /*
-*	Routine to register a desk accessory item on the menu bar.
-*	The return value is the object index of the menu item that
-*	was added.
-*/
-int16_t mn_register(pid, pstr)
-register int16_t pid;
-
-register int32_t pstr;
+ *	Routine to register a desk accessory item on the menu bar.
+ *	The return value is the object index of the menu item that
+ *	was added.
+ */
+int16_t mn_register(P(int16_t) pid, P(char *) pstr)
+PP(register int16_t pid;)
+PP(register intptr_t pstr;)
 {
 	char tmpname[13];
 
@@ -505,7 +418,7 @@ register int32_t pstr;
 	} else
 	{
 		/* add desk acc. if room */
-		if (gl_dacnt < NUM_DESKACC)
+		if (gl_dacnt < MAX_ACCS)
 		{
 			desk_pid[gl_dacnt] = pid;
 			desk_acc[gl_dacnt] = pstr;
@@ -519,17 +432,13 @@ register int32_t pstr;
 
 /*	Change the waiting rectangle for new menu bar	*/
 
-ch_wrect(r, n)
-GRECT *r;								/* old rect */
-
-GRECT *n;								/* new rect */
+VOID ch_wrect(P(GRECT *) r, P(GRECT *) n)
+PP(GRECT *r;)								/* old rect */
+PP(GRECT *n;)								/* new rect */
 {
 	PD *p;
-
 	register EVB *e;
-
-	int16_t *p1,
-	*p2;
+	int16_t *p1, *p2;
 
 	p = ctl_pd;
 

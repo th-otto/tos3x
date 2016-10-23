@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/obdefs.h,v $
+*  $Author: mui $	$Date: 89/04/26 18:29:21 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:29:21 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	obdefs.h,v $
+*
 * Revision 2.2  89/04/26  18:29:21  mui
 * TT
 * 
@@ -22,6 +20,9 @@
 /*	Add 3D definitons		7/7/92	D.Mui			*/
 /*	Add another set of 3D definitons	8/1/92	D.Mui		*/
 /*	LK3DIND	etc							*/	
+
+#ifndef OBDEFS_H
+#define OBDEFS_H
 
 #define ROOT 0
 #define NIL -1
@@ -45,27 +46,20 @@
 #define IP_5PATT 5
 #define IP_6PATT 6
 #define IP_SOLID 7
-						/* system foreground and*/
-						/*   background rules	*/
-						/*   but transparent	*/
-#define SYS_FG 0x1100
 
-#define WTS_FG 0x11a1				/* window title selected*/
-						/*   using pattern 2 &	*/
-						/*   replace mode text 	*/
-#define WTN_FG 0x1100				/* window title normal	*/
-						/* gsx modes		*/
 #define MD_REPLACE 1
 #define MD_TRANS 2
 #define MD_XOR 3
 #define MD_ERASE 4
-						/* gsx styles		*/
+
+/* gsx styles		*/
 #define FIS_HOLLOW 0
 #define FIS_SOLID 1
 #define FIS_PATTERN 2
 #define FIS_HATCH 3
 #define FIS_USER 4
-						/* bit blt rules	*/
+
+/* bit blt rules	*/
 #define ALL_WHITE 0
 #define S_AND_D 1
 #define S_ONLY 3
@@ -75,7 +69,8 @@
 #define D_INVERT 10
 #define NOTS_OR_D 13
 #define ALL_BLACK 15
-						/* font types		*/
+
+/* font types		*/
 #define IBM 3
 #define SMALL 5
 
@@ -118,21 +113,7 @@
 #define A3DFBOXTEXT	((X_3DACT << 8) | G_FBOXTEXT)
 #endif
 
-/* 3D-object options for look-and-feel */
-#define	OPT1	1
-#define	OPT2	2
-#define	OPT3	3
-#define	OPT4	4
-#define	OPT5	5
-
-/* 6-18-92 - ml.    Object mode for ob_xtend */
-#define	LK3DIND	    1	/* look of 3D indicators */
-#define	LK3DACT	    2	/* look of 3D action objects */
-#define	BUTCOL	    3	/* color of buttons */
-
-/* #define	ALRTCOL	    4	*/ /* color of alert background */
-
-						/* Object flags		 */
+/* Object flags		 */
 #define NONE 0x0
 #define SELECTABLE 0x1
 #define DEFAULT 0x2
@@ -146,7 +127,8 @@
 #define	IS3DOBJ	 0x200		/* set for any 3D object */
 #define	IS3DACT	 0x400		/* 0 for indicator, 1 for activator */
 #define SUBMENU	0x800
-						/* Object states	*/
+
+/* Object states	*/
 #define NORMAL 0x0
 #define SELECTED 0x1
 #define CROSSED 0x2
@@ -154,12 +136,10 @@
 #define DISABLED 0x8
 #define OUTLINED 0x10
 #define SHADOWED 0x20
-#if 0
 #define DRAW3D	0x40
-#endif
 #define WHITEBAK 0x80
 
-						/* Object colors	*/
+/* Object colors	*/
 #define WHITE 0
 #define BLACK 1
 #define RED 2
@@ -179,13 +159,12 @@
 
 /* 7-30-92 - ml.    3D objects */
 
-#define	ADJ3DPIX    2	/* pixel adjustment for 3D objects */
 #define	LK3DIND	    1	/* change look of 3D indicators */
 #define	LK3DACT	    2	/* change look of 3D action objects */
 #define	INDBUTCOL   3	/* change color of buttons */
 #define	ACTBUTCOL   4	/* change color of buttons */
 #define	ALRTCOL	    5	/* change color of alert background */
-#define AD3DVALUE   6
+#define AD3DVALUE   6	/* get pixel adjustment for 3D objects */
 
 
 #define OBJECT struct object
@@ -195,10 +174,10 @@ OBJECT
 	int16_t		ob_next;	/* -> object's next sibling	*/
 	int16_t		ob_head;	/* -> head of object's children */
 	int16_t		ob_tail;	/* -> tail of object's children */
-	uint16_t		ob_type;	/* type of object- BOX, CHAR,...*/
-	uint16_t		ob_flags;	/* flags			*/
-	uint16_t		ob_state;	/* state- SELECTED, OPEN, ...	*/
-	int32_t		ob_spec;	/* "out"- -> anything else	*/
+	uint16_t	ob_type;	/* type of object- BOX, CHAR,...*/
+	uint16_t	ob_flags;	/* flags			*/
+	uint16_t	ob_state;	/* state- SELECTED, OPEN, ...	*/
+	intptr_t	ob_spec;	/* "out"- -> anything else	*/
 	int16_t		ob_x;		/* upper left corner of object	*/
 	int16_t		ob_y;		/* upper left corner of object	*/
 	int16_t		ob_width;	/* width of obj			*/
@@ -214,7 +193,7 @@ ORECT
 	int16_t	o_y;
 	int16_t	o_w;
 	int16_t	o_h;
-} ;
+};
 
 
 #define GRECT	struct grect
@@ -225,16 +204,16 @@ GRECT
 	int16_t	g_y;
 	int16_t	g_w;
 	int16_t	g_h;
-} ;
+};
 
 
 #define TEDINFO struct text_edinfo
 
 TEDINFO
 {
-	int32_t		te_ptext;	/* ptr to text (must be 1st)	*/
-	int32_t		te_ptmplt;	/* ptr to template		*/
-	int32_t		te_pvalid;	/* ptr to validation chrs.	*/
+	intptr_t	te_ptext;	/* ptr to text (must be 1st)	*/
+	intptr_t	te_ptmplt;	/* ptr to template		*/
+	intptr_t	te_pvalid;	/* ptr to validation chrs.	*/
 	int16_t		te_font;	/* font				*/
 	int16_t		te_junk1;	/* junk word			*/
 	int16_t		te_just;	/* justification- left, right...*/
@@ -250,9 +229,9 @@ TEDINFO
 
 ICONBLK
 {
-	int32_t	ib_pmask;
-	int32_t	ib_pdata;
-	int32_t	ib_ptext;
+	int16_t	*ib_pmask;
+	int16_t	*ib_pdata;
+	int16_t	*ib_ptext;
 	int16_t	ib_char;
 	int16_t	ib_xchar;
 	int16_t	ib_ychar;
@@ -270,7 +249,7 @@ ICONBLK
 
 BITBLK
 {
-	int32_t	bi_pdata;		/* ptr to bit forms data	*/
+	int16_t *bi_pdata;		/* ptr to bit forms data	*/
 	int16_t	bi_wb;			/* width of form in bytes	*/
 	int16_t	bi_hl;			/* height in lines		*/
 	int16_t	bi_x;			/* source x in bit form		*/
@@ -282,29 +261,29 @@ BITBLK
 #define USERBLK struct user_blk
 USERBLK
 {
-	int32_t	ub_code;
-	int32_t	ub_parm;
+	intptr_t	ub_code;
+	intptr_t	ub_parm;
 };
 
 #define PARMBLK struct parm_blk
 PARMBLK
 {
-	int32_t	pb_tree;
+	OBJECT  *pb_tree;
 	int16_t	pb_obj;
 	int16_t	pb_prevstate;
 	int16_t	pb_currstate;
 	int16_t	pb_x, pb_y, pb_w, pb_h;
 	int16_t	pb_xc, pb_yc, pb_wc, pb_hc;
-	int32_t	pb_parm;
+	intptr_t	pb_parm;
 };
 
 
 typedef struct cicon_data {
-    int num_planes;
-    int *col_data;
-    int *mask;
-    int *sel_data;
-    int *sel_mask;
+    int16_t num_planes;
+    int16_t *col_data;
+    int16_t *col_mask;
+    int16_t *sel_data;
+    int16_t *sel_mask;
     struct cicon_data *next_res;
 } CICON;
 
@@ -321,3 +300,158 @@ typedef struct cicon_blk {
 #define TE_LEFT 0
 #define TE_RIGHT 1
 #define TE_CNTR 2
+
+typedef struct rshdr
+{
+	uint16_t		rsh_vrsn;	/* must same order as RT_	*/
+	uint16_t		rsh_object;
+	uint16_t		rsh_tedinfo;
+	uint16_t		rsh_iconblk;	/* list of ICONBLKS		*/
+	uint16_t		rsh_bitblk;
+	uint16_t		rsh_frstr;	
+	uint16_t		rsh_string;
+	uint16_t		rsh_imdata;	/* image data			*/
+	uint16_t		rsh_frimg;	
+	uint16_t		rsh_trindex;
+	uint16_t		rsh_nobs;	/* counts of various structs	*/
+	uint16_t		rsh_ntree;
+	uint16_t		rsh_nted;
+	uint16_t		rsh_nib;
+	uint16_t		rsh_nbb;
+	uint16_t		rsh_nstring;
+	uint16_t		rsh_nimages;
+	uint16_t		rsh_rssize;	/* total bytes in resource	*/
+} RSHDR;
+
+
+/*
+ * type definitions for use by an application when calling
+ * rsrc_gaddr and rsrc_saddr
+ */
+
+#define R_TREE 0
+#define R_OBJECT 1
+#define R_TEDINFO 2
+#define R_ICONBLK 3
+#define R_BITBLK 4
+#define R_STRING 5		/* gets pointer to free strings	*/
+#define R_IMAGEDATA 6	/* gets pointer to free images	*/
+#define R_OBSPEC 7
+#define R_TEPTEXT 8		/* sub ptrs in TEDINFO	*/
+#define R_TEPTMPLT 9
+#define R_TEPVALID 10
+#define R_IBPMASK 11	/* sub ptrs in ICONBLK	*/
+#define R_IBPDATA 12
+#define R_IBPTEXT 13
+#define R_BIPDATA 14	/* sub ptrs in BITBLK	*/
+#define R_FRSTR 15		/* gets addr of ptr to free strings	*/
+#define R_FRIMG 16		/* gets addr of ptr to free images	*/
+
+
+#define WC_BORDER   0
+#define WC_WORK	    1
+
+
+#define WF_KIND		1
+#define WF_NAME		2
+#define WF_INFO		3
+#define WF_WORKXYWH	4
+#define WF_CURRXYWH	5
+#define WF_PREVXYWH	6
+#define WF_FULLXYWH	7
+#define WF_HSLIDE	8
+#define WF_VSLIDE	9
+#define WF_TOP      	10
+#define WF_FIRSTXYWH 	11
+#define WF_NEXTXYWH 	12
+#define WF_RESVD   	13
+#define WF_NEWDESK 	14
+#define WF_HSLSIZE   	15
+#define WF_VSLSIZE   	16
+#define WF_SCREEN   	17
+/* window color settings added 900227 - kbad */
+#define WF_COLOR	18	/* set window element by handle */
+#define WF_DCOLOR	19	/* set default element */
+
+/* added Jul 23 91 for menu bar in window - ml. */
+#define	WF_OWNER	20
+
+/* added Feb 25 92 to allow bottoming window - ml. */
+#define WF_BEVENT	24
+#define	WF_BOTTOM	25
+
+/* arrow message	*/
+#define WA_UPPAGE 0
+#define WA_DNPAGE 1
+#define WA_UPLINE 2
+#define WA_DNLINE 3
+#define WA_LFPAGE 4
+#define WA_RTPAGE 5
+#define WA_LFLINE 6
+#define WA_RTLINE 7
+
+/* Bit mask for window components */
+#define NAME	0x0001
+#define CLOSER	0x0002
+#define FULLER	0x0004
+#define MOVER	0x0008
+#define INFO	0x0010
+#define SIZER	0x0020
+#define UPARROW 0x0040
+#define DNARROW 0x0080
+#define VSLIDE	0x0100
+#define LFARROW 0x0200
+#define RTARROW 0x0400
+#define HSLIDE	0x0800
+/* Added Jul 23 91 for new window manager - ml. */
+#define MNBAR	0x1000
+
+/* mu_flags		*/
+#define MU_KEYBD 0x0001	
+#define MU_BUTTON 0x0002
+#define MU_M1 0x0004
+#define MU_M2 0x0008
+#define MU_MESAG 0x0010
+#define MU_TIMER 0x0020
+
+#define FMD_START 0
+#define FMD_GROW 1
+#define FMD_SHRINK 2
+#define FMD_FINISH 3
+
+#define M_OFF 256
+#define M_ON 257
+#define ARROW	0
+
+typedef struct moblk
+{
+	int16_t		m_out;
+	int16_t		m_x;
+	int16_t		m_y;
+	int16_t		m_w;
+	int16_t		m_h;
+} MOBLK;
+
+#define MN_SELECTED 10
+
+#define WM_REDRAW 	20
+#define WM_TOPPED 	21
+#define WM_CLOSED 	22
+#define WM_FULLED 	23
+#define WM_ARROWED 	24
+#define WM_HSLID 	25
+#define WM_VSLID 	26
+#define WM_SIZED 	27
+#define WM_MOVED 	28
+#define WM_UNTOPPED	30
+#define WM_ONTOP	31
+
+#define AC_OPEN 	40
+#define AC_CLOSE 	41
+
+#define CT_UPDATE 50
+#define CT_MOVE 51
+#define CT_NEWTOP 52
+
+
+#endif

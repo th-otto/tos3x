@@ -1,11 +1,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/apgrlib.s,v $
+*  $Author: mui $	$Date: 89/04/26 18:06:25 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:06:25 $	$Locker: mui $
-* =======================================================================
-*  $Log:	apgrlib.s,v $
+*
 * Revision 2.2  89/04/26  18:06:25  mui
 * *** empty log message ***
 * 
@@ -16,6 +14,21 @@
 * Initial revision
 * 
 *************************************************************************
+
+/*	APGRLIB.C	4/11/84 - 02/03/85	Gregg Morris		*/
+/*	for 68k		03/06/85 - 03/09/85	Lowell Webster		*/
+/*	Reg Opt		03/09/85		Derek Mui		*/
+
+/*
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.0
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
+
+#define CCODE 0
+
 *
 *
 *		Apgrlib.s
@@ -25,6 +38,7 @@
 *
 *
 * assemble with MAS 900801 kbad
+
 
 FIS_PATTERN	equ	2
 FIS_HOLLOW	equ	0
@@ -48,8 +62,16 @@ SMALL		equ	5
 *		gr_inside(pt,th)
 *
 *************************************************************************
+#if CCODE
+VOID gr_inside(GRECT *pt, WORD th)
+{
+	pt->g_x += th;
+	pt->g_y += th;
+	pt->g_w -= (2 * th);
+	pt->g_h -= (2 * th);
+}
+#endif
 	xdef	_gr_inside
-
 _gr_inside:
 	move.l	4(sp),a0		; a0 contains grect pointer
 	move.w	8(sp),d1		; d1 contains "th"
@@ -66,8 +88,22 @@ _gr_inside:
 *
 **************************************************************************
 
-	xdef	_gr_rect
+#if CCODE
+VOID gr_rect(UWORD icolor, UWORD ipattern, GRECT *pt)
+{
+	REG WORD fis;
 
+	fis = FIS_PATTERN;
+	if (ipattern == IP_HOLLOW)
+		fis = FIS_HOLLOW;
+	else if (ipattern == IP_SOLID)
+		fis = FIS_SOLID;
+
+	vsf_color(icolor);
+	bb_fill(MD_REPLACE, fis, ipattern, pt->g_x, pt->g_y, pt->g_w, pt->g_h);
+}
+#endif
+	xdef	_gr_rect
 _gr_rect:
 	movem.l	d3-d5/a3-a3,-(sp)
 	movem.w	16+4(sp),d3-d4		; d3 = icolor,d4 = pattern
@@ -95,21 +131,44 @@ L22:	move.w	d3,-(sp)
 *************************************************************************
 *
 *		gr_just
-*	4(sp) = just
-*	6(sp) = font
-*	8(sp) = ptext
-*      12(sp) = w
-*      14(sp) = h
-*      16(sp) = pt
-*
-*	Routine to adjust the x,y starting point of a text string
-* 	to account for its justification.  The number of characters
-*	in the string is also returned.
 *
 *************************************************************************
+/*
+ *	Routine to adjust the x,y starting point of a text string
+ *	to account for its justification.  The number of characters
+ *	in the string is also returned.
+ */
+#if CCODE
+WORD gr_just(WORD just, WORD font, const char *ptext, WORD w, WORD h, GRECT *pt)
+{
+	WORD numchs;
 
+	/* figure out the width of the text string in pixels   */
+	gsx_tcalc(font, ptext, &pt->g_w, &pt->g_h, &numchs);
+
+	h -= pt->g_h;
+	if (h > 0)							/* check height     */
+		pt->g_y += (h + 1) / 2;
+
+	w -= pt->g_w;
+	if (w > 0)
+	{
+		switch (just)
+		{
+		case TE_CNTR:					/* center text in   */
+			/*   rectangle      */
+			pt->g_x += (w + 1) / 2;
+			break;
+		case TE_RIGHT:					/* right justify    */
+			pt->g_x += w;
+			break;
+		}								/* switch */
+	}
+
+	return (numchs);
+}
+#endif
 	xdef	_gr_just
-
 _gr_just:
 	movem.l	d0-d7/a3-a3,-(sp)
 	move.w	36+4(sp),d3		; pop off "just" into d3
@@ -155,15 +214,26 @@ L32:
 *
 *	gr_gtext
 *
-*	4(sp) = just
-*	6(sp) = font
-* 	8(sp) = ptext
-*	12(sp) = pt
-*	16(sp) = tmode
-*
-*	Routine to draw a string of graphic text
-*
 ************************************************************************
+/*
+ *	Routine to draw a string of graphic text.
+ */
+#if CCODE
+VOID gr_gtext(WORD just, WORD font, const char *ptext, GRECT *pt, WORD tmode)
+{
+	WORD numchs;
+
+	GRECT t;
+
+	/* figure out where &   */
+	/*   how to put out */
+	/*   the text       */
+	rc_copy(pt, &t);
+	numchs = gr_just(just, font, ptext, t.g_w, t.g_h, &t);
+	if (numchs > 0)
+		gsx_tblt(font, t.g_x, t.g_y, numchs);
+}
+#endif
 	xdef	_gr_gtext
 _gr_gtext:
 	movem.l	d0-d1/a3,-(sp)		; save a3 and make room for
@@ -193,20 +263,35 @@ L41:	movem.l	(sp)+,d0-d1/a3		; restore a3
 *
 *		gr_crack(color,pbc,ptc,pip,pic,pmd)
 *
-*		4(sp) = color
-*		6(sp) = pbc
-*		10(sp)= ptc
-*		14(sp)= pip
-*		18(sp)= pic
-*		22(sp)= pmd
-*
-*	Routine to crack out the border color,text color,inside pattern,
-*	and inside color from a single color information word
-*
 **************************************************************************
-	xdef	_gr_crac
-
-_gr_crac:
+/*
+ *	Routine to crack out the border color, text color, inside pattern,
+ *	and inside color from a single color information word.
+ */
+#if CCODE
+VOID gr_crack(UWORD color, WORD *pbc, WORD *ptc, WORD *pip, WORD *pic, WORD *pmd)
+{
+	/* 4 bit encoded border color      */
+	*pbc = (LHIBT(color) >> 4) & 0x0f;
+	/* 4 bit encoded text color      */
+	*ptc = LHIBT(color) & 0x0f;
+	/* 3 bit encoded pattern */
+	*pip = (LLOBT(color) >> 4) & 0x0f;
+	/* 4th bit used to set text writing mode  */
+	if (*pip & 0x08)
+	{
+		*pip &= 0x07;
+		*pmd = MD_REPLACE;
+	} else
+	{
+		*pmd = MD_TRANS;
+	}
+	/* 4 bit encoded inside color      */
+	*pic = LLOBT(color) & 0x0f;
+}
+#endif
+	xdef	_gr_crack
+_gr_crack:
 	move.w	4(sp),d0		; d0 contains color
 	move.l	6(sp),a0		; a0 <- pbc
 	move.w	d0,d1
@@ -236,28 +321,53 @@ L52:	and	#$0f,d2
 	move.l	18(sp),a1
 	move.w	d2,(a1)			; *pic = LLOBT(color) & 0x0f
 	rts
-*
+
 ************************************************************************
 *
 *	gr_icon(state,pmask,pdata,ptext,ch,chx,chy,pi,pt)
-*		
-*	 4(sp)	= state
-*	 6(sp) 	= pmask
-*	10(sp)	= pdata
-*	14(sp)	= ptext
-*	18(sp) 	= ch
-*	20(sp) 	= chx
-*	22(sp)	= chy
-*	24(sp)	= pi
-*	28(sp) 	= pt
-*
-*	Routine to draw an icon, which is a graphic image with a text
-*	string underneath it.
 *
 ************************************************************************
+/*
+ *	Routine to draw an icon, which is a graphic image with a text
+ *	string underneath it.
+ */
+#if CCODE
+VOID gr_gicon(WORD state, int16_t *pmask, int16_t *pdata, const char *ptext, WORD ch, WORD chx, WORD chy, GRECT *pi, GRECT *pt)
+{
+	REG WORD fgcol, bgcol, tmp;
 
+	/* crack the color/chardefinition word    */
+	fgcol = (ch >> 12) & 0x000f;
+	bgcol = (ch >> 8) & 0x000f;
+	ch &= 0x0ff;
+	/* invert if selected   */
+	if (state & SELECTED)
+	{
+		tmp = fgcol;
+		fgcol = bgcol;
+		bgcol = tmp;
+	}
+	/* do mask unless its on a white background   */
+	if (!((state & WHITEBAK) && (bgcol == WHITE)))
+	{
+		gsx_blt(pmask, 0, 0, pi->g_w / 8, 0x0L, pi->g_x, pi->g_y,
+				gl_width / 8, pi->g_w, pi->g_h, MD_TRANS, bgcol, fgcol);
+		gr_rect(bgcol, IP_SOLID, pt);
+	}
+	/* draw the data    */
+	gsx_blt(pdata, 0, 0, pi->g_w / 8, 0x0L, pi->g_x, pi->g_y, gl_width / 8, pi->g_w, pi->g_h, MD_TRANS, fgcol, bgcol);
+	/* draw the character   */
+	gsx_attr(TRUE, MD_TRANS, fgcol);
+	if (ch)
+	{
+		intin[0] = ch;
+		gsx_tblt(SMALL, pi->g_x + chx, pi->g_y + chy, 1);
+	}
+	/* draw the label   */
+	gr_gtext(TE_CNTR, SMALL, ptext, pt, MD_TRANS);
+}
+#endif
 	xdef	_gr_gico
-
 _gr_gico:
 	movem.l	d3-d7/a3-a4,-(sp)	; 28 bytes 
 	movem.w	28+18(sp),d5-d7		; d5 <- ch,d6-chx,d7-chy
@@ -348,18 +458,35 @@ make_call:
 *
 *	gr_box(x,y,w,h,th)
 *
-*	 4(sp) = x
-*	 6(sp) = y
-*	 8(sp) = w
-* 	10(sp) = h
-* 	12(sp) = th
-*
-*	Routine to draw a box of a certain thickness using the current
-*	attribute settings
 **************************************************************************
+/*
+ *	Routine to draw a box of a certain thickness using the current
+ *	attribute settings
+ */
+#if CCODE
+VOID gr_box(WORD x, WORD y, WORD w, WORD h, WORD th)
+{
+	GRECT t, n;
+
+	r_set(&t, x, y, w, h);
+	if (th != 0)
+	{
+		if (th < 0)
+			th--;
+		gsx_moff();
+		do
+		{
+			th += (th > 0) ? -1 : 1;
+			rc_copy(&t, &n);
+			gr_inside(&n, th);
+			gsx_box(&n);
+		} while (th != 0);
+		gsx_mon();
+	}
+}
+#endif
 
 	xdef	_gr_box
-
 _gr_box:
 	movem.l	d3/a3-a4,-(sp)		; save some needed registers
 	sub.l	#16,sp			; need 8 bytes for local grects

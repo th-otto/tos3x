@@ -20,8 +20,9 @@
 */
 /*	TADDR.H		04/11/84 - 09/11/84	Gregg Morris		*/
 
-#define NIL -1
-#define ROOT 0
+#ifndef TADDR_H
+#define TADDR_H 1
+
 #define OB_NEXT(x) (tree + (x) * sizeof(OBJECT) + 0)
 #define OB_HEAD(x) (tree + (x) * sizeof(OBJECT) + 2)
 #define OB_TAIL(x) (tree + (x) * sizeof(OBJECT) + 4)
@@ -33,3 +34,5 @@
 #define OB_Y(x) (tree + (x) * sizeof(OBJECT) + 18)
 #define OB_WIDTH(x) (tree + (x) * sizeof(OBJECT) + 20)
 #define OB_HEIGHT(x) (tree + (x) * sizeof(OBJECT) + 22)
+
+#endif

@@ -170,9 +170,9 @@ PP(register GRECT *pt;)
 
 /* 	move bytes from source to dest for a count of N	*/
 
-VOID movs(P(int16_t) num, P(oonst char *) ps, P(char *) pd)
+VOID movs(P(int16_t) num, P(const char *) ps, P(char *) pd)
 PP(register int16_t num;)
-PP(register oonst char *ps;)
+PP(register const char *ps;)
 PP(register char *pd;)
 {
 	do
@@ -219,7 +219,7 @@ PP(register char *addr;)
 
 /* 	Return upper case value		*/
 
-char toupper(P(char) ch)
+int toupper(P(int) ch)
 PP(register char ch;)
 {
 	if ((ch >= 'a') && (ch <= 'z'))
@@ -390,10 +390,10 @@ PP(register char *outstr;)
  *	to the callers ptxtlen.
  */
 
-VOID fs_sset(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) pstr, P(char **) ptext, P(int16_t *) ptxtlen)
-PP(int32_t tree;)
+VOID fs_sset(P(OBJPTR) tree, P(int16_t) obj, P(char *) pstr, P(char **) ptext, P(int16_t *) ptxtlen)
+PP(OBJPTR tree;)
 PP(int16_t obj;)
-PP(int32_t pstr;)
+PP(char *pstr;)
 PP(register char **ptext;)
 PP(int16_t *ptxtlen;)
 {

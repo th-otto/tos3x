@@ -13,8 +13,11 @@
 #include <gemlib.h>
 #include <osbind.h>
 
-extern MEMHDR *rmhead,
-*rmtail;								/* rect lists memory linked list */
+BOOLEAN brkrect PROTO((GRECT *trect, GRECT *brect, uint16_t *hv_pc));
+BOOLEAN chgrlist PROTO((uint16_t hv_pc, GRECT *cutrect, RLIST *oldrp, RLIST **rlist));
+BOOLEAN mrgrect PROTO((RLIST *rp1, RLIST *rp2));
+
+
 
 /*
  * newrect() - allocate a RLIST structure for a new rectangle
@@ -22,12 +25,10 @@ extern MEMHDR *rmhead,
  *	       or return NULL if none is available.
  *
  */
-RLIST *newrect()
+RLIST *newrect(NOTHING)
 {
 	register RLIST *rp;						/* pointer to RLIST structure */
-
 	MEMHDR *mp;							/* pointer to memory header */
-
 	register int16_t i;							/* counter */
 
 	for (mp = rmhead; mp && mp->numused == NUMRECT; mp = mp->mnext)
@@ -77,17 +78,12 @@ RLIST *newrect()
  *		(rlist would be of type RLIST **).
  *
  */
-VOID delrect(rp, rlist)
-RLIST *rp;								/* ptr to rectangle to be deleted */
-
-char *rlist;							/* ptr (or address of ptr) to head of rect. list */
+BOOLEAN delrect(P(RLIST *)rp, P(VOIDPTR) rlist)
+PP(RLIST *rp;)								/* ptr to rectangle to be deleted */
+PP(VOIDPTR rlist;)							/* ptr (or address of ptr) to head of rect. list */
 {
-	register MEMHDR *prvmp,
-	*curmp,
-	*nxtmp;								/* memory blocks pointers */
-
+	register MEMHDR *prvmp,	*curmp,	*nxtmp;								/* memory blocks pointers */
 	register RLIST *currp;					/* ptr into current rectangle */
-
 	RLIST **rl1;						/* addr of ptr to rect. list head */
 
 	if (rp)
@@ -172,28 +168,17 @@ char *rlist;							/* ptr (or address of ptr) to head of rect. list */
  *	      - return pointer to rectangle list if successful.
  *	      - return NULL if an error occurred.
  */
-RLIST *genrlist(handle, area)
-uint16_t handle;							/* window handle */
-
-int16_t area;								/* WF_WORKXYWH: generate rectangle list of work area */
-
+RLIST *genrlist(uint16_t handle, uint16_t area)
+PP(uint16_t handle;)							/* window handle */
+PP(int16_t area;)								/* WF_WORKXYWH: generate rectangle list of work area */
 			/* WF_CURRXYWH: generate rectangle list of whole window */
 {
 	WINDOW *wp;							/* ptr to current window structure */
-
 	GRECT wrect;						/* rectangle of current window */
-
 	RLIST *rlist;						/* ptr to beginning of rectangle list */
-
 	RLIST *rnextrp;						/* ptr to next rectangle in rectangle list */
-
 	register RLIST *currp;					/* ptr to current rectangle in rectangle list */
-
 	uint16_t hv_piece;						/* flag for new rectangles found */
-
-	WINDOW *srchwp();
-
-	RLIST *newrect();
 
 	/*
 	 * if cannot locate window in database, or no RLIST 
@@ -262,11 +247,10 @@ int16_t area;								/* WF_WORKXYWH: generate rectangle list of work area */
  *	     - return FALSE if the top rect does not break 
  *	       the bottom rect
  */
-int16_t brkrect(trect, brect, hv_pc)
-GRECT *trect,
-*brect;									/* ptrs to top and bottom rectangles */
-
-uint16_t *hv_pc;
+BOOLEAN brkrect(GRECT *trect, GRECT *brect, uint16_t *hv_pc)
+PP(GRECT *trect;)
+PP(GRECT *brect;)									/* ptrs to top and bottom rectangles */
+PP(uint16_t *hv_pc;)
 {
 	/* check if the top rect breaks the bottom rect */
 	if ((trect->g_x < brect->g_x + brect->g_w) &&
@@ -301,26 +285,17 @@ uint16_t *hv_pc;
  *	      - return TRUE if everything is fine or
  *		return FALSE if there is an error
  */
-int16_t chgrlist(hv_pc, cutrect, oldrp, rlist)
-uint16_t hv_pc;							/* mask */
-
-GRECT *cutrect;							/* ptr to the cutting rectangle */
-
-RLIST *oldrp;							/* ptr to rectangle to be replaced */
-
-RLIST **rlist;							/* addr of ptr to beginning of rectangle list */
+BOOLEAN chgrlist(P(uint16_t) hv_pc, P(GRECT *) cutrect, P(RLIST *) oldrp, P(RLIST **) rlist)
+PP(uint16_t hv_pc;)							/* mask */
+PP(GRECT *cutrect;)							/* ptr to the cutting rectangle */
+PP(RLIST *oldrp;)							/* ptr to rectangle to be replaced */
+PP(RLIST **rlist;)							/* addr of ptr to beginning of rectangle list */
 {
 	GRECT *old;							/* ptr to old rectangle */
-
 	RLIST *xrlist;						/* ptr to the rectangle list expansion */
-
 	RLIST *nrp;							/* ptr to new rectangle generated */
-
 	RLIST *currp;						/* ptr to current rectangle in expansion */
-
 	uint16_t pc;							/* counter */
-
-	RLIST *mkrect();
 
 	/*
 	 * If given rectangle is entirely covered, just delete it 
@@ -372,18 +347,13 @@ RLIST **rlist;							/* addr of ptr to beginning of rectangle list */
  *	      the rectangle
  *	    - return NULL if no RLIST structure is available
  */
-RLIST *mkrect(pc, trect, brect)
-uint16_t pc;								/* flag */
-
-register GRECT *trect;						/* ptr to rectangle of window on top */
-
-register GRECT *brect;						/* ptr to rectangle of window at the bottom */
+RLIST *mkrect(uint16_t pc, GRECT *trect, GRECT *brect)
+PP(uint16_t pc;)								/* flag */
+PP(register GRECT *trect;)						/* ptr to rectangle of window on top */
+PP(register GRECT *brect;)						/* ptr to rectangle of window at the bottom */
 {
 	RLIST *rp;							/* ptr to RLIST strucuture of new rectangle */
-
 	register GRECT *nrect;					/* ptr to new rectangle */
-
-	RLIST *newrect();
 
 	if ((rp = newrect()) == NULL)
 		return NULL;
@@ -428,12 +398,11 @@ register GRECT *brect;						/* ptr to rectangle of window at the bottom */
  *	     - return TRUE if there is a merge
  *	     - return FALSE if there is no merge
  */
-int16_t mrgrect(rp1, rp2)
-RLIST *rp1,
-*rp2;									/* ptrs to the 2 rectangles */
+BOOLEAN mrgrect(P(RLIST *) rp1, P(RLIST *) rp2)
+PP(RLIST *rp1;)
+PP(RLIST *rp2;)									/* ptrs to the 2 rectangles */
 {
-	GRECT *gr1,
-	*gr2;
+	GRECT *gr1, *gr2;
 
 	gr1 = (GRECT *) & (rp1->rect);
 	gr2 = (GRECT *) & (rp2->rect);

@@ -55,9 +55,9 @@ int16_t gl_bvdisk;
 int16_t gl_bvhard;
 int16_t gl_recd;
 int16_t gl_rlen;
-int32_t gl_rbuf;
+intptr_t gl_rbuf;
 int16_t gl_play;					/* 3/11/86  */
-int32_t gl_store;				/* 3/11/86  */
+intptr_t gl_store;				/* 3/11/86  */
 int16_t gl_mx;					/* 3/12/86  */
 int16_t gl_my;					/* 3/12/86  */
 
@@ -152,7 +152,7 @@ P(int16_t scale;)
 {
 	register int16_t i;
 	FPD f;
-	int32_t ad_f;
+	intptr_t ad_f;
 
 	ad_f = &f;
 	dsptch();							/* dispatch everybody   */
@@ -237,8 +237,8 @@ PP(register intptr_t pbuff;)
 PP(register int16_t length;)
 {
 	register int16_t i;
-	register int32_t code;
-	F_CODE trash;
+	register intptr_t code;
+	FCODE trash;
 
 	/* start recording in   */
 	/*   forker()       */
@@ -264,7 +264,7 @@ PP(register int16_t length;)
 	for (i = 0; i < length; i++)
 	{
 		code = 0x0L;
-		trash = (F_CODE) LLGET(pbuff);
+		trash = (FCODE) LLGET(pbuff);
 		if (trash == tchange)
 		{
 			code = TCHNG;				/*    int16_t is changed to int32_t   */

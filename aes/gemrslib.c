@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.3 $	$Source: /u2/MRS/osrevisions/aes/gemrslib.c,v $
+*  $Author: mui $	$Date: 89/04/26 18:26:37 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:26:37 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemrslib.c,v $
+*
 * Revision 2.3  89/04/26  18:26:37  mui
 * TT
 * 
@@ -44,97 +42,70 @@
 *	-------------------------------------------------------------
 */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
 
 #define X_READ	0x3F
 
-#define NUM_OBS LWGET(rs_hdr + 2*R_NOBS)
-#define NUM_TREE LWGET(rs_hdr + 2*R_NTREE)
-#define NUM_TI LWGET(rs_hdr + 2*R_NTED)
-#define NUM_IB LWGET(rs_hdr + 2*R_NICON)
-#define NUM_BB LWGET(rs_hdr + 2*R_NBITBLK)
-#define NUM_FRSTR LWGET(rs_hdr + 2*R_NSTRING)
-#define NUM_FRIMG LWGET(rs_hdr + 2*R_IMAGES)
+#define NUM_OBS LWGET((intptr_t)rs_hdr + 2*RT_NOBS)
+#define NUM_TREE LWGET((intptr_t)rs_hdr + 2*RT_NTREE)
+#define NUM_TI LWGET((intptr_t)rs_hdr + 2*RT_NTED)
+#define NUM_IB LWGET((intptr_t)rs_hdr + 2*RT_NICON)
+#define NUM_BB LWGET((intptr_t)rs_hdr + 2*RT_NBITBLK)
+#define NUM_FRSTR LWGET((intptr_t)rs_hdr + 2*RT_NSTRING)
+#define NUM_FRIMG LWGET((intptr_t)rs_hdr + 2*RT_IMAGES)
 
-#define ROB_TYPE (psubstruct + 6)		/* Long pointer in OBJECT   */
+#define ROB_TYPE ((intptr_t)psubstruct + 6)		/* Long pointer in OBJECT   */
 #define ROB_SPEC (psubstruct + 12)		/* Long pointer in OBJECT   */
 
-#define RTE_PTEXT (psubstruct + 0)		/* Long pointers in TEDINFO */
-#define RTE_PTMPLT (psubstruct + 4)
-#define RTE_PVALID (psubstruct + 8)
-#define RTE_TXTLEN (psubstruct + 24)
-#define RTE_TMPLEN (psubstruct + 26)
+#define RTE_PTEXT ((intptr_t)psubstruct + 0)		/* Long pointers in TEDINFO */
+#define RTE_PTMPLT ((intptr_t)psubstruct + 4)
+#define RTE_PVALID ((intptr_t)psubstruct + 8)
+#define RTE_TXTLEN ((intptr_t)psubstruct + 24)
+#define RTE_TMPLEN ((intptr_t)psubstruct + 26)
 
-#define RIB_PMASK (psubstruct + 0)		/* Long pointers in ICONBLK */
-#define RIB_PDATA (psubstruct + 4)
-#define RIB_PTEXT (psubstruct + 8)
+#define RIB_PMASK ((intptr_t)psubstruct + 0)		/* Long pointers in ICONBLK */
+#define RIB_PDATA ((intptr_t)psubstruct + 4)
+#define RIB_PTEXT ((intptr_t)psubstruct + 8)
 
-#define RBI_PDATA (psubstruct + 0)		/* Long pointer in BITBLK   */
-#define RBI_WB (psubstruct + 4)
-#define RBI_HL (psubstruct + 6)
-					/* in global array      */
-#define APP_LOPNAME (rs_global + 10)
-#define APP_LO1RESV (rs_global + 14)
-#define APP_LO2RESV (rs_global + 18)
+#define RBI_PDATA ((intptr_t)psubstruct + 0)		/* Long pointer in BITBLK   */
+#define RBI_WB ((intptr_t)psubstruct + 4)
+#define RBI_HL ((intptr_t)psubstruct + 6)
 
-					/* in DOS.C         */
-extern int16_t dos_open();
+/* in global array      */
+#define APP_LOPNAME ((intptr_t)rs_global + 10)
+#define APP_LO1RESV ((intptr_t)rs_global + 14)
+#define APP_LO2RESV ((intptr_t)rs_global + 18)
 
-extern int32_t dos_lseek();
-
-extern int16_t dos_read();
-
-extern int16_t dos_close();
-
-extern int32_t dos_alloc();
-
-extern int16_t dos_free();
-
-extern int16_t fm_error();
-
-extern int32_t ad_shcmd;
-
-extern int32_t ad_sysglo;
-
-extern int16_t DOS_ERR;
-
-extern int16_t DOS_AX;
-
-extern int16_t gl_width;
-
-extern int16_t gl_wchar;
-
-extern int16_t gl_hchar;
-
-extern THEGLO D;
-
-extern PD *rlr;
-
-int32_t rs_hdr;
-
-int32_t rs_global;
-
+RSHDR *rs_hdr;
+intptr_t rs_global;
 uint16_t hdr_buff[HDR_LENGTH / 2];
 
 
-/*
-*	Fix up a character position, from offset,row/col to a pixel value.
-*	If column or width is 80 then convert to rightmost column or 
-*	full screen width. 
-*/
-VOID fix_chpos(pfix, ifx)
-int32_t pfix;
+VOID fix_chpos PROTO((intptr_t pfix, int16_t ifx));
+intptr_t get_sub PROTO((int16_t rsindex, int16_t rtype, int16_t rsize));
+intptr_t get_addr PROTO((uint16_t rstype, uint16_t rsindex));
+VOID fix_trindex PROTO((NOTHING));
+VOID fix_cicon PROTO((NOTHING));
+VOID fix_objects PROTO((NOTHING));
+VOID fix_tedinfo PROTO((NOTHING));
+int16_t fix_nptrs PROTO((int16_t cnt, int16_t type));
+int16_t fix_ptr PROTO((int16_t type, int16_t index));
+int16_t fix_long PROTO((intptr_t plong));
+VOID rs_sglobe PROTO((intptr_t pglobal));
+int16_t rs_readit PROTO((intptr_t pglobal, const char *rsfname));
 
-int16_t ifx;
+
+
+
+/*
+ *	Fix up a character position, from offset,row/col to a pixel value.
+ *	If column or width is 80 then convert to rightmost column or 
+ *	full screen width. 
+ */
+VOID fix_chpos(intptr_t pfix, int16_t ifx)
+PP(intptr_t pfix;)
+PP(int16_t ifx;)
 {
-	register int16_t cpos,
-	 coffset;
+	register int16_t cpos, coffset;
 
 	cpos = LWGET(pfix);
 	coffset = (cpos >> 8) & 0x00ff;
@@ -148,66 +119,62 @@ int16_t ifx;
 }
 
 
-/************************************************************************/
-/* rs_obfix								*/
-/************************************************************************/
-VOID rs_obfix(tree, curob)
-int32_t tree;
-
-int16_t curob;
+/************************************************************************
+ * AES #114 - rsrc_obfix - Resource object fix
+ *
+ * rs_obfix
+ ************************************************************************/
+VOID rs_obfix(P(OBJPTR) tree, P(int16_t) curob)
+PP(OBJPTR tree;)
+PP(int16_t curob;)
 {
-	register int16_t i,
-	 val;
+	register int16_t i, val;
+	register inttptr_t p;
 
-	register int32_t p;
-
-	/* set X,Y,W,H with */
-	/*   fixch, use val */
-	/*   to alternate TRUEs */
-	/*   and FALSEs     */
+	/* set X,Y,W,H with fixch, use val to alternate TRUEs and FALSEs */
 	p = OB_X(curob);
 
 	val = TRUE;
 	for (i = 0; i < 4; i++)
 	{
-		fix_chpos(p + (int32_t) (2 * i), val);
+		fix_chpos(p + (intptr_t) (2 * i), val);
 		val = !val;
 	}
 }
 
 
-char * rs_str(stnum)
+char *rs_str(P(int16_t) stnum)
+PP(int16_t stnum;)
 {
-	int32_t ad_string;
+	VOIDPTR ad_string;
 
 	rs_gaddr(ad_sysglo, R_STRING, stnum, &ad_string);
-	LSTCPY(&D.g_loc1[0], ad_string);
-	return (&D.g_loc1[0]);
+	LSTCPY(D.g_loc1, ad_string);
+	return D.g_loc1;
 }
 
-int32_t get_sub(rsindex, rtype, rsize)
-int16_t rsindex,
-	rtype,
-	rsize;
+
+intptr_t get_sub(P(int16_t) rsindex, P(int16_t) rtype, P(int16_t) rsize)
+PP(int16_t rsindex;)
+PP(int16_t rtype;)
+PP(int16_t rsize;)
 {
 	uint16_t offset;
 
-	offset = LWGET(rs_hdr + LW(rtype * 2));
-	/* get base of objects  */
-	/*   and then index in  */
-	return (rs_hdr + LW(offset) + LW(rsize * rsindex));
+	offset = LWGET((intptr_t)rs_hdr + LW(rtype * 2));
+	/* get base of objects and then index in  */
+	return (intptr_t)rs_hdr + LW(offset) + LW(rsize * rsindex);
 }
 
 
 /*
  *	return address of given type and index, INTERNAL ROUTINE
-*/
-int32_t get_addr(rstype, rsindex)
-register uint16_t rstype;
-
-register uint16_t rsindex;
+ */
+intptr_t get_addr(P(uint16_t) rstype, P(uint16_t) rsindex)
+PP(register uint16_t rstype;)
+PP(register uint16_t rsindex;)
 {
-	register int32_t psubstruct;
+	register intptr_t psubstruct;
 	register int16_t size;
 	register int16_t rt;
 	int16_t valid;
@@ -249,7 +216,7 @@ register uint16_t rsindex;
 	case R_TEPVALID:
 		psubstruct = get_addr(R_TEDINFO, rsindex);
 		if (rstype == R_TEPTMPLT)
-			return (RTE_PTMPLT);
+			return RTE_PTMPLT;
 		else
 			return (RTE_PVALID);
 	case R_IBPDATA:
@@ -265,11 +232,11 @@ register uint16_t rsindex;
 		return (LLGET(get_sub(rsindex, RT_FREEIMG, sizeof(int32_t))));
 	case R_FRSTR:
 		rt = RT_FREESTR;
-		size = sizeof(int32_t);
+		size = sizeof(intptr_t);
 		break;
 	case R_FRIMG:
 		rt = RT_FREEIMG;
-		size = sizeof(int32_t);
+		size = sizeof(intptr_t);
 		break;
 	default:
 		valid = FALSE;
@@ -279,13 +246,12 @@ register uint16_t rsindex;
 		return (get_sub(rsindex, rt, size));
 	else
 		return (-1L);
-}										/* get_addr() */
+}
 
 
-fix_trindex()
+VOID fix_trindex(NOTHING)
 {
 	register int16_t ii;
-
 	register int32_t ptreebase;
 
 	ptreebase = get_sub(0, RT_TRINDEX, sizeof(int32_t));
@@ -298,45 +264,42 @@ fix_trindex()
 
 /*	Fix up the G_ICON table		*/
 
-VOID fix_cicon()
+VOID fix_cicon(NOTHING)
 {
 	int32_t *ctable;
-
-	uint16_t *header;
+	RSHDR *header;
 
 	header = rs_hdr;
-	if (header[RT_VRSN] & 0x0004)		/* if extended type */
+	if (header->rsh_vrsn & 0x0004)		/* if extended type */
 	{
-		ctable = rs_hdr + (int32_t) header[RS_SIZE];
+		ctable = (intptr_t *)((intptr_t)rs_hdr + (intptr_t) header[RS_SIZE]);
 		if (ctable[1] && (ctable[1] != -1))
-			get_colo_rsc(ctable[1] + rs_hdr);
+			get_color_rsc((CICONBLK **)(ctable[1] + (intptr_t)rs_hdr));
 	}
 }
 
 
 /*	Fix up the objects including color icons	*/
 
-VOID fix_objects()
+VOID fix_objects(NOTHING)
 {
 	register int16_t ii;
-
 	register int16_t obtype;
-
-	register int32_t psubstruct;
-
-	int32_t *ctable;
-
-	uint16_t *header;
+	register intptr_t psubstruct;
+	intptr_t *ctable;
+	RSHDR *header;
 
 	header = rs_hdr;
 
-	if (header[RT_VRSN] & 0x0004)
+	if (header->rsh_vrsn & 0x0004)
 	{
-		ctable = rs_hdr + (int32_t) header[RS_SIZE];
-		ctable = ctable[1] + rs_hdr;
+		ctable = (intptr_t *)((intptr_t)rs_hdr + (intptr_t) header->rsh_rssize);
+		ctable = (intptr_t *)(ctable[1] + (intptr_t)rs_hdr);
 	} else
-		ctable = 0x0L;
-
+	{
+		ctable = NULL;
+	}
+	
 	for (ii = NUM_OBS - 1; ii >= 0; ii--)
 	{
 		psubstruct = get_addr(R_OBJECT, ii);
@@ -351,7 +314,7 @@ VOID fix_objects()
 }
 
 
-fix_tedinfo()
+VOID fix_tedinfo(NOTHING)
 {
 	register int16_t ii, i;
 	register int32_t psubstruct;
@@ -381,9 +344,9 @@ fix_tedinfo()
 }
 
 
-int16_t fix_nptrs(cnt, type)
-int16_t cnt;
-int16_t type;
+int16_t fix_nptrs(P(int16_t) cnt, P(int16_t) type)
+PP(int16_t cnt;)
+PP(int16_t type;)
 {
 	register int16_t i;
 
@@ -392,105 +355,103 @@ int16_t type;
 }
 
 
-int16_t fix_ptr(type, index)
-int16_t type;
-int16_t index;
+int16_t fix_ptr(P(int16_t) type, P(int16_t) index)
+PP(int16_t type;)
+PP(int16_t index;)
 {
-	return (fix_long(get_addr(type, index)));
+	return fix_long(get_addr(type, index));
 }
 
 
-int16_t fix_long(plong)
-register int32_t plong;
+int16_t fix_long(P(intptr_t) plong)
+PP(register intptr_t plong;)
 {
-	register int32_t lngval;
+	register intptr_t lngval;
 
 	lngval = LLGET(plong);
 	if (lngval != -1L)
 	{
-		LLSET(plong, rs_hdr + lngval);
-		return (TRUE);
+		LLSET(plong, (intptr_t)rs_hdr + lngval);
+		return TRUE;
 	} else
-		return (FALSE);
+		return FALSE;
 }
 
 
 /*
-*	Set global addresses that are used by the resource library sub-
-*	routines
-*/
-VOID rs_sglobe(pglobal)
-int32_t pglobal;
+ *	Set global addresses that are used by the resource library sub-
+ *	routines
+ */
+VOID rs_sglobe(P(intptr_t) pglobal)
+PP(intptr_t pglobal;)
 {
 	rs_global = pglobal;
-	rs_hdr = LLGET(APP_LO1RESV);
+	rs_hdr = (RSHDR *)LLGET(APP_LO1RESV);
 }
 
 
 /*
-*	Free the memory associated with a particular resource load.
-*/
-int16_t rs_free(pglobal)
-int32_t pglobal;
+ * AES #111 - rsrc_free - Resource free
+ *
+ *	Free the memory associated with a particular resource load.
+ */
+int16_t rs_free(intptr_t pglobal)
+intptr_t pglobal;
 {
-	uint16_t *header;
-
-	int32_t *ctable;
+	RSHDR *header;
+	intptr_t *ctable;
 
 	rs_sglobe(pglobal);					/* set global values */
 
 	header = rs_hdr;
 
-	if (header[RT_VRSN] & 0x0004)		/* extended format */
+	if (header->rsh_vrsn & 0x0004)		/* extended format */
 	{
-		ctable = rs_hdr + (int32_t) header[RS_SIZE];
+		ctable = (intptr_t *)((intptr_t)rs_hdr + (int32_t) header->rsh_rssize);
 		if (ctable[1] && (ctable[1] != -1))
 		{
-			ctable = ctable[1] + rs_hdr;
-			free_cicon(ctable);
+			ctable = (intptr_t *)(ctable[1] + (intptr_t)rs_hdr);
+			free_cicon((CICONBLK **)ctable);
 		}
 	}
 
-	dos_free(rs_hdr);
-	return (!DOS_ERR);
-
-}										/* rs_free() */
+	dos_free((VOIDPTR)rs_hdr);
+	return !DOS_ERR;
+}
 
 
 /*
-*	Get a particular ADDRess out of a resource file that has been
-*	loaded into memory.
-*/
-int16_t rs_gaddr(pglobal, rtype, rindex, rsaddr)
-int32_t pglobal;
-
+ * AES #112 - rsrc_gaddr - Resource get address
+ *
+ *	Get a particular ADDRess out of a resource file that has been
+ *	loaded into memory.
+ */
+int16_t rs_gaddr(intptr_t pglobal, uint16_t rtype, uint16_t rindex, VOIDPTR *rsaddr)
+intptr_t pglobal;
 uint16_t rtype;
-
 uint16_t rindex;
-
-register int32_t *rsaddr;
+register VOIDPTR *rsaddr;
 {
 	rs_sglobe(pglobal);
 
 	*rsaddr = get_addr(rtype, rindex);
 	return (*rsaddr != -1L);
-}										/* rs_gaddr() */
+}
 
 
 /*
-*	Set a particular ADDRess in a resource file that has been
-*	loaded into memory.
-*/
-VOID rs_saddr(pglobal, rtype, rindex, rsaddr)
-int32_t pglobal;
-
-uint16_t rtype;
-
-uint16_t rindex;
-
-int32_t rsaddr;
+ * AES #113 - rsrc_saddr - Resource store address
+ *
+ *	Set a particular ADDRess in a resource file that has been
+ *	loaded into memory.
+ */
+VOID rs_saddr(P(intptr_t) pglobal, P(uint16_t) rtype, P(uint16_t) rindex, P(intptr_t) rsaddr)
+PP(intptr_t pglobal;)
+PP(uint16_t rtype;)
+PP(uint16_t rindex;)
+PP(intptr_t rsaddr;)
 {
-	register int32_t psubstruct;
+	register intptr_t psubstruct;
 
 	rs_sglobe(pglobal);
 
@@ -501,25 +462,21 @@ int32_t rsaddr;
 		return (TRUE);
 	} else
 		return (FALSE);
-}										/* rs_saddr() */
+}
 
 
 /*
-*	Read resource file into memory and fix everything up except the
-*	x,y,w,h, parts which depend upon a GSX open workstation.  In the
-*	case of the GEM resource file this workstation will not have
-*	been loaded into memory yet.
-*/
-int16_t rs_readit(pglobal, rsfname)
-int32_t pglobal;
-
-int32_t rsfname;
+ *	Read resource file into memory and fix everything up except the
+ *	x,y,w,h, parts which depend upon a GSX open workstation.  In the
+ *	case of the GEM resource file this workstation will not have
+ *	been loaded into memory yet.
+ */
+int16_t rs_readit(P(intptr_t) pglobal, P(const char *) rsfname)
+PP(intptr_t pglobal;)
+PP(const char *rsfname;)
 {
-	register uint16_t fd,
-	 ret;
-
+	register uint16_t fd, ret;
 	int32_t rslsize;
-
 	char rspath[128];
 
 	/* make sure its there  */
@@ -528,14 +485,12 @@ int32_t rsfname;
 		return (FALSE);
 	/* init global      */
 	rs_global = pglobal;
-	/* open then file and   */
-	/*   read the header    */
+	/* open then file and read the header    */
 	fd = dos_open(rspath, RMODE_RD);
 	if (!DOS_ERR)
 		dos_read(fd, HDR_LENGTH, ADDR(&hdr_buff[0]));
 
-	/* read in resource and */
-	/*   interpret it   */
+	/* read in resource and interpret it   */
 	if (!DOS_ERR)
 	{
 		/* get size of resource */
@@ -554,17 +509,21 @@ int32_t rsfname;
 				goto rs_end;
 
 		} else
+		{
 			rslsize = hdr_buff[RS_SIZE];
+		}
 		/* allocate memory  */
-		rs_hdr = dos_alloc(rslsize);
+		rs_hdr = (RSHDR *)dos_alloc(rslsize);
 
 		if (!DOS_ERR)
 		{
-			dos_lseek(fd, SMODE, 0x0L);	/* read it all in   */
+			/* read it all in   */
+			dos_lseek(fd, SMODE, 0x0L);
+			/* WTF why use trap() here, not dos_read */
 			trap(X_READ, fd, rslsize, rs_hdr);
-/*	    dos_read(fd, rslsize, rs_hdr);	*/
+			/* dos_read(fd, rslsize, rs_hdr); */
 			if (!DOS_ERR)
-				do_rsfix(rs_hdr, (uint16_t) rslsize);	/* do all the fixups    */
+				do_rsfix((intptr_t) rs_hdr, (uint16_t) rslsize);	/* do all the fixups    */
 		}
 	}
 
@@ -578,18 +537,15 @@ int32_t rsfname;
 
 /* do all the fixups. rs_hdr must be initialized	*/
 
-VOID do_rsfix(hdr, size)
-int32_t hdr;
-
-int16_t size;
+VOID do_rsfix(P(intptr_t) hdr, P(int16_t) size)
+PP(intptr_t hdr;)
+PP(int16_t size;)
 {
 	register int16_t ibcnt;
 
 	LLSET(APP_LO1RESV, hdr);
 	LWSET(APP_LO2RESV, size);
-	/* xfer RT_TRINDEX to global    */
-	/*   and turn all offsets from  */
-	/*   base of file into pointers */
+	/* xfer RT_TRINDEX to global and turn all offsets from base of file into pointers */
 
 	fix_cicon();						/* fix color icon       */
 	fix_trindex();
@@ -605,13 +561,13 @@ int16_t size;
 
 
 /*
-*	Fix up objects separately so that we can read GEM resource before we
-*	do an open workstation, then once we know the character sizes we
-*	can fix up the objects accordingly.
-*/
+ *	Fix up objects separately so that we can read GEM resource before we
+ *	do an open workstation, then once we know the character sizes we
+ *	can fix up the objects accordingly.
+ */
 
-VOID rs_fixit(pglobal)
-int32_t pglobal;
+VOID rs_fixit(P(intptr_t) pglobal)
+PP(intptr_t pglobal;)
 {
 	rs_sglobe(pglobal);
 	fix_objects();
@@ -619,17 +575,17 @@ int32_t pglobal;
 
 
 /*
-*	RS_LOAD		mega resource load
-*/
-int16_t rs_load(pglobal, rsfname)
-register int32_t pglobal;
-
-int32_t rsfname;
+ * AES #110 - rsrc_load - Resource load
+ *	RS_LOAD		mega resource load
+ */
+int16_t rs_load(P(intptr_t) pglobal, P(const char *) rsfname)
+PP(register intptr_t pglobal;)
+PP(const char *rsfname;)
 {
 	register int16_t ret;
 
 	ret = rs_readit(pglobal, rsfname);
 	if (ret)
 		rs_fixit(pglobal);
-	return (ret);
+	return ret;
 }

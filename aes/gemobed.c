@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemobed.c,v $
+*  $Author: mui $	$Date: 89/04/26 18:25:25 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:25:25 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemobed.c,v $
+*
 * Revision 2.2  89/04/26  18:25:25  mui
 * TT
 * 
@@ -70,40 +68,14 @@
 
 #define BYTESPACE 0x20					/* ascii space in bytes */
 
-						/* in GSXIF or APGSXIF  */
-extern VOID gsx_gclip();
-
-extern VOID gsx_sclip();
-
-extern int16_t gl_wchar;
-
-extern int16_t gl_hchar;
-
-extern int16_t gl_wbox;
-
-extern int16_t gl_hbox;
-
-extern int16_t gl_width;
-
-extern int16_t gl_height;
-
-extern TEDINFO edblk;
-
-extern char *rs_str();
-
-extern THEGLO D;
-
 #if UNLINKED
-int16_t ob_getsp(tree, obj, pted)
-register int32_t tree;
-
-register int16_t obj;
-
-TEDINFO *pted;
+int16_t ob_getsp(P(OBJPTR) tree, P(int16_t) obj, P(TEDINFO *) pted)
+PP(register OBJPTR tree;)
+PP(register int16_t obj;)
+PP(TEDINFO *pted;)
 {
 	int16_t flags;
-
-	register int32_t spec;
+	register inttptr_t spec;
 
 	flags = LWGET(OB_FLAGS(obj));
 	spec = LLGET(OB_SPEC(obj));
@@ -115,23 +87,14 @@ TEDINFO *pted;
 
 
 
-VOID ob_center(tree, pt)
-int32_t tree;
-
-GRECT *pt;
+VOID ob_center(P(OBJPTR) tree, P(GRECT) *pt)
+PP(OBJPTR tree;)
+PP(GRECT *pt;)
 {
-	register int16_t xd,
-	 yd,
-	 wd,
-	 hd;
-
-	register int32_t plong;
-
-	int16_t iword,
-	 th;
-
+	register int16_t xd, yd, wd, hd;
+	register intptr_t plong;
+	int16_t iword, th;
 	int32_t ilong;
-
 	GRECT rec;
 
 	plong = OB_X(ROOT);
@@ -172,12 +135,10 @@ GRECT *pt;
 *	during field entry the cursor will jump to the first 
 *	raw string underscore after that character.
 */
-int16_t scan_to_end(pstr, idx, chr)
-register char *pstr;
-
-register int16_t idx;
-
-char chr;
+int16_t scan_to_end(P(char *) pstr, P(int16_t) idx, P(char) chr)
+PP(register char *pstr;)
+PP(register int16_t idx;)
+PP(char chr;)
 {
 	while ((*pstr) && (*pstr != chr))
 	{
@@ -191,14 +152,11 @@ char chr;
 /*
 *	Routine to insert a character in a string by
 */
-VOID ins_char(str, pos, chr, tot_len)
-register char *str;
-
-int16_t pos;
-
-char chr;
-
-register int16_t tot_len;
+VOID ins_char(P(char *) str, P(int16_t) pos, P(char) chr, P(int16_t) tot_len)
+PP(register char *str;)
+PP(int16_t pos;)
+PP(char chr;)
+PP(register int16_t tot_len;)
 {
 	register int16_t ii, len;
 
@@ -219,13 +177,11 @@ register int16_t tot_len;
 *       for the position that was input (in raw string relative numbers).
 *       The returned position will always be right before an '_'.
 */
-int16_t find_pos(str, pos)
-register char *str;
-
-register int16_t pos;
+int16_t find_pos(P(char *) str, P(int16_t) pos)
+PP(register char *str;)
+PP(register int16_t pos;)
 {
 	register int16_t i;
-
 
 	for (i = 0; pos > 0; i++)
 	{
@@ -249,17 +205,14 @@ register int16_t pos;
 	return (i);
 }
 
-VOID pxl_rect(tree, obj, ch_pos, pt)
-register int32_t tree;
 
-register int16_t obj;
-
-int16_t ch_pos;
-
-register GRECT *pt;
+VOID pxl_rect(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) ch_pos, P(GRECT *) pt)
+PP(register OBJPTR tree;)
+PP(register int16_t obj;)
+PP(int16_t ch_pos;)
+PP(register GRECT *pt;)
 {
 	GRECT o;
-
 	int16_t numchs;
 
 	ob_actxywh(tree, obj, &o);
@@ -274,16 +227,13 @@ register GRECT *pt;
 /*
 *	Routine to redraw the cursor or the field being editted.
 */
-VOID curfld(tree, obj, new_pos, dist)
-int32_t tree;
-
-int16_t obj,
-	new_pos;
-
-int16_t dist;
+VOID curfld(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) new_pos, P(int16_t) dist)
+PP(OBJPTR tree;)
+PP(int16_t obj;)
+PP(int16_t new_pos;)
+PP(int16_t dist;)
 {
-	GRECT oc,
-	 t;
+	GRECT oc, t;
 
 	pxl_rect(tree, obj, new_pos, &t);
 	if (dist)
@@ -314,13 +264,11 @@ int16_t dist;
 *	range.  The character ranges are
 *	stored as enumerated characters (xyz) or ranges (x..z)
 */
-int16_t instr(chr, str)
-register char chr;
-
-register char *str;
+int16_t instr(P(char) chr, P(const char *) str)
+PP(register char chr;)
+PP(register char *str;)
 {
-	register char test1,
-	 test2;
+	register char test1, test2;
 
 	while (*str)
 	{
@@ -341,13 +289,11 @@ register char *str;
 *	Routine to verify that the character matches the validation
 *	string.  If necessary, upshift it.
 */
-int16_t check(in_char, valchar)
-register char *in_char;
-
-char valchar;
+int16_t check(P(const char *) in_char, P(char) valchar)
+PP(register const char *in_char;)
+PP(char valchar;)
 {
 	register int16_t upcase;
-
 	register int16_t rstr;
 
 	upcase = TRUE;
@@ -408,11 +354,10 @@ char valchar;
 *	Find STart and FiNish of a raw string relative to the template
 *	string.  The start is determined by the InDeX position given.
 */
-VOID ob_stfn(idx, pstart, pfinish)
-int16_t idx;
-
-int16_t *pstart,
-*pfinish;
+VOID ob_stfn(P(int16_t) idx, P(int16_t *) pstart, P(int16_t *) pfinish)
+PP(int16_t idx;)
+PP(int16_t *pstart;)
+PP(int16_t *pfinish;)
 {
 	register THEGLO *DGLO;
 
@@ -422,8 +367,8 @@ int16_t *pstart,
 }
 
 
-int16_t ob_delit(idx)
-int16_t idx;
+int16_t ob_delit(P(int16_t) idx)
+PP(int16_t idx;)
 {
 	register THEGLO *DGLO;
 
@@ -437,42 +382,20 @@ int16_t idx;
 }
 
 
-int16_t ob_edit(tree, obj, in_char, idx, kind)
-register int32_t tree;
-
-register int16_t obj;
-
-int16_t in_char;
-
-register int16_t *idx;							/* rel. to raw data */
-
-int16_t kind;
+int16_t ob_edit(P(OBJPTR) tree, P(int16_t) obj, P(int16_t) in_char, P(int16_t *) idx, P(int16_t) kind)
+PP(register OBJPTR tree;)
+PP(register int16_t obj;)
+PP(int16_t in_char;)
+PP(register int16_t *idx;)							/* rel. to raw data */
+PP(int16_t kind;)
 {
 	register int32_t spec;
-
-	register int16_t tmp_back,
-	 cur_pos;
-
-	int16_t pos,
-	 len,
-	 flags,
-	 dist;
-
-	GRECT t,
-	 c,
-	 oc;
-
-	int16_t ii,
-	 no_redraw,
-	 start;
-
-	int16_t finish,
-	 nstart,
-	 nfinish;
-
-	char bin_char,
-	*pstr;
-
+	register int16_t tmp_back, cur_pos;
+	int16_t pos, len, flags, dist;
+	GRECT t, c, oc;
+	int16_t ii, no_redraw, start;
+	int16_t finish, nstart, nfinish;
+	char bin_char, *pstr;
 	register THEGLO *DGLO;
 
 	DGLO = &D;

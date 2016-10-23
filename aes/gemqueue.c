@@ -37,34 +37,25 @@
 #include <baspag88.h>
 #include <obdefs.h>
 #include <gemlib.h>
-						/* in PD88.C        */
-extern PD *fpdnm();
-
-extern THEGLO D;
 
 
-VOID doq(donq, p, m)
-int16_t donq;
+VOID doq PROTO((int16_t donq, PD *p, QPB *m));
 
-register PD *p;
 
-QPB *m;
+
+VOID doq(P(int16_t) donq, P(PD *) p, P(QPB *) m)
+PP(int16_t donq;)
+PP(register PD *p;)
+PP(QPB *m;)
 {
-	register int16_t n,
-	 index;
-
-	register int16_t *om,
-	*nm;
+	register int16_t n, index;
+	register int16_t *om, *nm;
 
 	n = m->qpb_cnt;
 	if (donq)
 	{
 		LBCOPY(p->p_qaddr + p->p_qindex, m->qpb_buf, n);
-		/* if its a redraw msg  */
-		/*   try to find a  */
-		/*   matching msg and   */
-		/*   union the redraw   */
-		/*   rects together */
+		/* if its a redraw msg try to find a matching msg and union the redraw rects together */
 		nm = (int16_t *) & p->p_queue[p->p_qindex];
 
 		if (nm[0] == AC_CLOSED)
@@ -95,19 +86,14 @@ QPB *m;
 }
 
 
-VOID aqueue(isqwrite, e, lm)
-int16_t isqwrite;
-
-register EVB *e;
-
-int32_t lm;
+VOID aqueue(P(BOOLEAN) isqwrite, P(EVB *) e, intptr_t lm)
+PP(BOOLEAN isqwrite;)
+PP(register EVB *e;)
+PP(intptr_t lm;)
 {
 	register PD *p;
-
 	register QPB *m;
-
 	EVB **ppe;
-
 	int16_t qready;
 
 	m = (QPB *) lm;

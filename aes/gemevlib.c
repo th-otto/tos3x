@@ -50,6 +50,7 @@
 int16_t const gl_dcrates[5] = { 450, 330, 275, 220, 165 };
 
 int16_t gl_dcindex;
+/* # of ticks to wait to see if a second click will occur   */
 int16_t gl_dclick;
 int16_t gl_ticktime;
 

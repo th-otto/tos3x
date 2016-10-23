@@ -1,14 +1,14 @@
 ##
+#### TOS version
+## currently 3.06, 2.06 and 2.08 is supported
+
+TOSVERSION=306
+
+##
 #### Country definition
 ## valid countries are: us de fr es it sv
 
 COUNTRY=de
-
-##
-#### TOS version
-## currently only 3.06 is supported
-
-TOSVERSION=306
 
 
 $(top_srcdir)/common/config.h: $(top_srcdir)/config.mak ${MAKEFILE}

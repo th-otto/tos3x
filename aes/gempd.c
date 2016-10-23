@@ -38,21 +38,18 @@
 #include <obdefs.h>
 #include <gemlib.h>
 
-extern THEGLO D;
 
-extern int16_t gl_naccs;
+int16_t fapd PROTO((const char *pname, int16_t pid, PD *ppd));
+PD *getpd PROTO((NOTHING));
 
-extern ACCPD *gl_pacc[];
 
-int16_t fapd(pname, pid, ppd)
-char *pname;
 
-int16_t pid;
-
-register PD *ppd;
+int16_t fapd(P(const char *) pname, P(int16_t) pid, P(PD *) ppd)
+PP(const char *pname;)
+PP(int16_t pid;)
+PP(register PD *ppd;)
 {
 	register int16_t ret;
-
 	char temp[9];
 
 	ret = FALSE;
@@ -66,13 +63,12 @@ register PD *ppd;
 	return (ret);
 }
 
-PD * fpdnm(pname, pid)
-char *pname;
 
-uint16_t pid;
+PD *fpdnm(P(const char *) pname, P(uint16_t) pid)
+PP(const char *pname;)
+PP(uint16_t pid;)
 {
 	register int16_t i;
-
 	PD *ppd;
 
 	for (i = 0; i < NUM_PDS; i++)
@@ -88,7 +84,8 @@ uint16_t pid;
 	return (NULL);
 }
 
-PD * getpd()
+
+PD *getpd(NOTHING)
 {
 	PD *p;
 
@@ -101,9 +98,7 @@ PD * getpd()
 		p = &gl_pacc[gl_naccs]->ac_pd;
 		p->p_pid = NUM_PDS + gl_naccs++;
 	}
-	/* initialize his DS&SS */
-	/*   registers so   */
-	/*   stproc works   */
+	/* initialize his DS&SS registers so stproc works   */
 	/* setdsss(p->p_uda);   */
 /*	setdsss(puda)
 *		UDA	*puda;
@@ -120,27 +115,24 @@ PD * getpd()
 }
 
 
-VOID p_nameit(p, pname)
-PD *p;
-
-char *pname;
+VOID p_nameit(P(PD *) p, P(const char *) pname)
+PP(PD *p;)
+PP(const char *pname;)
 {
 	bfill(8, ' ', &p->p_name[0]);
 	strscn(pname, &p->p_name[0], '.');
 }
 
 
-PD * pstart(pcode, pfilespec, ldaddr)
-char *pcode;
 
-char *pfilespec;
-
-int32_t ldaddr;
+PD *pstart(P(VOIDPTR) pcode, P(const char *) pfilespec, P(intptr_t) ldaddr)
+PP(VOIDPTR pcode;)
+PP(const char *pfilespec;)
+PP(intptr_t ldaddr;)
 {
 	register PD *px;
 
-	/* create process to    */
-	/*   execute it     */
+	/* create process to execute it */
 	px = getpd();
 	px->p_ldaddr = ldaddr;
 	/* copy in name of file */
@@ -155,19 +147,19 @@ int32_t ldaddr;
 	return (px);
 }
 
+
 #if UNLINKED
 
-						/* put pd pi into list  */
-						/*   *root at the end   */
-VOID insert_process(pi, root)
-PD *pi,
-**root;
+/* put pd pi into list *root at the end   */
+VOID insert_process(P(PD *) pi, P(PD **) root)
+PP(PD *pi;)
+PP(PD **root;)
 {
-	register PD *p,
-	*q;
+	register PD *p, *q;
 
 	/* find the end     */
-	for (p = (q = (PD *) root)->p_link; p; p = (q = p)->p_link) ;
+	for (p = (q = (PD *)root)->p_link; p; p = (q = p)->p_link)
+		;
 	/* link him in      */
 	pi->p_link = p;
 	q->p_link = pi;

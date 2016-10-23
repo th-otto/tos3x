@@ -61,7 +61,6 @@ fsize		equ	100		* size of linef handler in bytes+ a little fat
 *
 #define fline		0		/* 1-line "F" included */
 *					* 0-line "F" not included
-#define dodowarn	0		/* 1=>do the warning, 0=>no warning */
 
 *
 *
@@ -135,7 +134,7 @@ sh_start:
 	clr.w	_sh_iscart
 	move.w	#$82,_d_rezword		* default resolution for sparrow
 
-#if dodowarn
+#if DOWARNING
 	clr.w	_dowarn			* This variable may or may not exist
 #endif
 *

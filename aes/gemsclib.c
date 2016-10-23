@@ -36,18 +36,22 @@
 #include <obdefs.h>
 #include <gemlib.h>
 
-extern THEGLO D;
 
-
-int16_t sc_read(pscrap)
-int32_t pscrap;
+/*
+ * AES #80 - scrp_read - Scrap read
+ */
+int16_t sc_read(P(char *) pscrap)
+PP(char *pscrap;)
 {
 	LSTCPY(pscrap, &D.g_scrap[0]);
 }
 
 
-int16_t sc_write(pscrap)
-int32_t pscrap;
+/*
+ * AES #81 - scrp_write - Scrap write
+ */
+int16_t sc_write(P(const char *) pscrap)
+PP(const char *pscrap;)
 {
 	LSTCPY(&D.g_scrap[0], pscrap);
 }

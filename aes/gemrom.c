@@ -2,11 +2,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemrom.c,v $
+*  $Author: mui $	$Date: 89/04/26 18:26:27 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:26:27 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemrom.c,v $
+*
 * Revision 2.2  89/04/26  18:26:27  mui
 * TT
 * 
@@ -43,66 +41,42 @@
 #include <obdefs.h>
 #include <taddr.h>
 
-extern int32_t dos_alloc();
+RSHDR *gemptr;		/* GEM's rsc pointer        */
+RSHDR *deskptr;		/* DESKTOP'S rsc pointer    */
+char *infptr;
+uint16_t infsize;
+uint16_t gemsize;
+uint16_t desksize;
+VOIDPTR gl_pglue;
+BOOLEAN nodesk;
+BOOLEAN nogem;
+int16_t st_lang;		/* Language code    */
+uint16_t st_time;		/* time code        */
+uint16_t st_date;
+uint16_t st_dchar;
+int16_t st_keybd;
 
-extern int16_t dos_open();
+/*
+ * points to the built-in resource data.
+ * tosrsc[0] = offset to start of desktop resource header
+ * tosrsc[1] = offset to start of desktop.inf
+ * tosrsc[2] = total size of data
+ * tosrsc[3] reserved
+ * tosrsc[4] reserved
+ * The gem resource header follows those fields
+ */
+static const uint16_t *tosrsc;
 
-extern int16_t dos_read();
+extern uint16_t const USARSC[];			/* USA, UK  */
+extern uint16_t const GRMRSC[];			/* GERMAN   */
+extern uint16_t const FRERSC[];			/* FRENCH   */
+extern uint16_t const ITARSC[];			/* ITALIAN  */
+#if 0
+extern uint16_t const SWERSC[];			/* SWEDISH  */
+#endif
+extern uint16_t const SPARSC[];				/* SPANISH  */
 
-extern int16_t dos_close();
-
-extern VOID do_rsfix();
-
-extern int32_t rs_global;
-
-extern int32_t rs_hdr;
-
-extern int16_t diskin;
-
-extern int16_t DOS_ERR;
-
-GLOBAL int32_t gemptr;						/* GEM's rsc pointer        */
-
-GLOBAL int32_t deskptr;					/* DESKTOP'S rsc pointer    */
-
-GLOBAL int32_t infptr;
-
-GLOBAL uint16_t infsize;
-
-GLOBAL uint16_t gemsize;
-
-GLOBAL uint16_t desksize;
-
-GLOBAL int32_t gl_pglue;
-
-GLOBAL int16_t nodesk;
-
-GLOBAL int16_t nogem;
-
-GLOBAL int16_t st_lang;					/* Language code    */
-
-GLOBAL uint16_t st_time;					/* time code        */
-
-GLOBAL uint16_t st_date;
-
-GLOBAL uint16_t st_dchar;
-
-GLOBAL int16_t st_keybd;
-
-static uint16_t *tosrsc;
-
-extern char USARSC[];					/* USA, UK  */
-
-extern char GRMRSC[];					/* GERMAN   */
-
-extern char FRERSC[];					/* FRENCH   */
-
-extern char ITARSC[];					/* ITALIAN  */
-
-								/*extern	char	SWERSC[];*//* SWEDISH  */
-extern char SPARSC[];					/* SPANISH  */
-
-static char *TIMETABLE[] = {			/* Eurotime, Eurodate and seperator */
+static char const TIMETABLE[] = {		/* Eurotime, Eurodate and separator */
 	0, 0, '/',							/* USA  */
 	1, 1, '.',							/* GERMANY  */
 	1, 1, '/',							/* FRENCH   */
@@ -112,7 +86,7 @@ static char *TIMETABLE[] = {			/* Eurotime, Eurodate and seperator */
 	1, 2, '-'							/* SWEDEN,NORWAY,FINLAND */
 };
 
-static char *RSCTABLE[] = {
+static const uint16_t *const RSCTABLE[] = {
 	USARSC,								/* USA, UK  */
 	GRMRSC,								/* GERMAN   */
 	FRERSC,								/* FRENCH   */
@@ -123,26 +97,26 @@ static char *RSCTABLE[] = {
 };
 
 
-				/* do this whenever the Gem or  */
-				/* desktop is ready     */
-int16_t rom_ram(which, pointer)
-register int32_t pointer;
+/* do this whenever the Gem or desktop is ready */
+int16_t rom_ram(P(int) which, P(intptr_t) pointer)
+PP(int which;)
+PP(register intptr_t pointer;)
 {
 	int16_t size;
-
-	register int16_t doit;
+	register BOOLEAN doit;
 
 	if (which == 3)						/* read in desktop.inf      */
 	{
-		LBCOPY(pointer, infptr, infsize);
-		return (infsize);
+		LBCOPY((VOIDPTR)pointer, infptr, infsize);
+		return infsize;
 	}
 
 	rs_global = pointer;
 	doit = TRUE;
 
-	if (!which)							/* read in gem rsc      */
+	if (!which)
 	{
+		/* read in gem rsc */
 		if (nogem)
 			doit = FALSE;
 		else
@@ -152,6 +126,7 @@ register int32_t pointer;
 		size = gemsize;
 	} else
 	{
+		/* read in desktop rsc */
 		if (nodesk)
 			doit = FALSE;
 		else
@@ -173,27 +148,24 @@ register int32_t pointer;
 }
 
 
-rsc_free()
+VOID rsc_free(NOTHING)
 {
 	dos_free(gl_pglue);
-	gemptr = 0x0L;
-	deskptr = 0x0L;
+	gemptr = NULL;
+	deskptr = NULL;
+	/* infptr should also be nullified, just in case... */
 }
 
 
 /*	Read in the resource file	*/
 
-rsc_read()
+VOID rsc_read(NOTHING)
 {
 	uint16_t size;
-
-	register uint16_t *intptr;
-
-	char *a,
-	*b;
-
+	register const uint16_t *intptr;
+	const char *a;
+	char *b;
 	int32_t value;
-
 	int16_t code;
 
 	/* The value is defined as  */
@@ -204,8 +176,10 @@ rsc_read()
 		st_keybd = value & 0x00FFL;
 		st_lang = (value >> 8) & 0x00FFL;	/* get the keyboard preferences */
 	} else
+	{
 		st_keybd = st_lang = 0;
-
+	}
+	
 	if ((st_keybd > 8) || (st_keybd < 0))
 		st_keybd = 0;
 
@@ -246,8 +220,8 @@ rsc_read()
 	intptr = tosrsc;
 
 	size = intptr[2];
-	a = tosrsc;
-	b = gl_pglue;
+	a = (const char *)tosrsc;
+	b = (char *)gl_pglue;
 
 	while (size)
 	{
@@ -255,13 +229,13 @@ rsc_read()
 		size--;
 	}
 
-	intptr = gl_pglue;
-	gemptr = (int32_t) (gl_pglue + 10);	/* now fix the resource   */
-	deskptr = (int32_t) (gl_pglue + intptr[0]);
-	infptr = (int32_t) (gl_pglue + intptr[1]);
-	gemsize = intptr[0];
+	intptr = (const uint16_t *)gl_pglue;
+	gemptr = (RSHDR *) ((char *)gl_pglue + 10);	/* now fix the resource   */
+	deskptr = (RSHDR *) ((char *)gl_pglue + intptr[0]);
+	infptr = (char *) ((char *)gl_pglue + intptr[1]);
+	gemsize = intptr[0];    /* BUG: that includes the size of the GLUE header */
 	desksize = intptr[1] - intptr[0];
 	infsize = intptr[2] - intptr[1];
-	nodesk = 0;
-	nogem = 0;
+	nodesk = FALSE;
+	nogem = FALSE;
 }

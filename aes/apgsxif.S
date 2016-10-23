@@ -18,6 +18,18 @@
 * Revision 1.1  88/06/02  12:26:09  lozben
 * Initial revision
 * 
+/*	APGSXIF.C	05/06/84 - 02/04/85	Lee Lorenzen		*/
+/*	Reg Opt		03/08/85 - 03/09/85	Derek Mui		*/
+/*	Crunching	4/10/86			Derek Mui		*/
+/*	Fix at gsx_xbox	6/11/86			Derek Mui		*/
+
+/*
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.0
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 *************************************************************************
 *
 *	Crunched 	2/2/87 		JE
@@ -25,6 +37,8 @@
 *	Change at gsx_start for new pixel ratio	7/26/89	D.Mui
 * 	Assemble with MAS 900801 kbad
 *	Change at gsx_start to do inquire of number planes 7/7/92	D.Mui
+
+#define CCODE 0
 
 	xdef	_gl_width
 	comm	_gl_width,2
@@ -114,15 +128,27 @@ SMALL	equ	5
 
 
 
-*  call:
-*
-*	gsx_sclip(pt)
-*
-*		pt	pointer to GRECT
-*
-*  in:
-*	sp+04	pt
+#if CCODE
+VOID gsx_sclip(GRECT *pt)
+{
+	REG WORD *ppts;
 
+	ppts = &ptsin[0];
+
+	r_get(pt, &gl_xclip, &gl_yclip, &gl_wclip, &gl_hclip);
+
+	if (gl_wclip && gl_hclip)
+	{
+		ppts[0] = gl_xclip;
+		ppts[1] = gl_yclip;
+		ppts[2] = gl_xclip + gl_wclip - 1;
+		ppts[3] = gl_yclip + gl_hclip - 1;
+		vst_clip(TRUE, &ppts[0]);
+	} else
+		vst_clip(FALSE, &ppts[0]);
+	return (TRUE);
+}
+#endif
 	xdef _gsx_sclip
 _gsx_sclip:
 
@@ -165,13 +191,12 @@ L4:	move.w	d0,-(sp)
 
 
 
-*  call:
-*
-*	gsx_gcli(pt)
-*
-*  in:
-*	sp+04	pt	long pointer to GRECT
-
+#if CCODE
+VOID gsx_gclip(GRECT *pt)
+{
+	r_set(pt, gl_xclip, gl_yclip, gl_wclip, gl_hclip);
+}
+#endif
 	xdef _gsx_gclip
 _gsx_gclip:
 
@@ -183,15 +208,25 @@ _gsx_gclip:
 	rts
 
 
+#if CCODE
+BOOLEAN gsx_chkclip(GRECT *pt)
+{
+	/* if clipping is on    */
+	if (gl_wclip && gl_hclip)
+	{
+		if ((pt->g_y + pt->g_h) < gl_yclip)
+			return (FALSE);				/* all above    */
+		if ((pt->g_x + pt->g_w) < gl_xclip)
+			return (FALSE);				/* all left */
+		if ((gl_yclip + gl_hclip) <= pt->g_y)
+			return (FALSE);				/* all below    */
+		if ((gl_xclip + gl_wclip) <= pt->g_x)
+			return (FALSE);				/* all right    */
+	}
+	return (TRUE);
+}
+#endif
 	xdef _gsx_chkc
-
-*  call:
-*
-*	gsx_chkc(pt)
-*
-*  in:
-*	sp+04	pt	long pointer to GRECT
-
 _gsx_chkc:
 
 	move.w	_gl_wclip,d1		; d1 <- gl_wclip
@@ -229,18 +264,22 @@ L10:	moveq.l	#0,d0			; return(FALSE)
 
 
 
+#if CCODE
+VOID gsx_pline(WORD offx, WORD offy, WORD cnt, WORD pts)
+{
+	REG WORD i, j;
+
+	for (i = 0; i < cnt; i++)
+	{
+		j = i * 2;
+		ptsin[j] = offx + pts[j];
+		ptsin[j + 1] = offy + pts[j + 1];
+	}
+
+	gsx_xline(cnt, &ptsin[0]);
+}
+#endif
 	xdef	_gsx_plin
-
-*  call:
-*
-*	gsx_pline(xoff, yoff, cnt, pts)
-*
-*  in:
-*	sp+04	xoff		word
-*	  +06	yoff		word
-*	  +08	cnt		word	number of points
-*	  +10	pts		long 	pointer to array of points
-
 _gsx_plin:
 
 	lea	4(sp),a0
@@ -269,18 +308,17 @@ L13:	subq.w	#1,d2			; for (i=0; i<cnt; i++)
 
 
 
+#if CCODE
+VOID gsx_cline(UWORD x1, UWORD y1, UWORD x2, UWORD y2)
+{
+	WORD x, y, w, h;
+
+	gsx_moff();
+	v_pline(2, &x1);
+	gsx_mon();
+}
+#endif
 	xdef	_gsx_clin
-
-*  call:
-*
-*	gsx_cline(x1, y1, x2, y2)
-*
-*  in:
-*	sp+04	x1		word
-*	  +06	y1		word
-*	  +08	x2		word
-*	  +10	y2		word
-
 _gsx_clin:
 
 	jsr	_gsx_moff
@@ -295,17 +333,51 @@ _gsx_clin:
 
 	rts
 
+
+
+#if CCODE
+VOID gsx_attr(UWORD text, UWORD mode, UWORD color)
+{
+	REG WORD tmp;
+	REG WORD *pcntr;
+
+	pcntr = &contrl[0];
+
+	tmp = intin[0];
+	pcntr[1] = 0;
+	pcntr[3] = 1;
+	pcntr[6] = gl_handle;
+	if (mode != gl_mode)
+	{
+		pcntr[0] = SET_WRITING_MODE;
+		intin[0] = gl_mode = mode;
+		gsx2();
+	}
+	pcntr[0] = FALSE;
+	if (text)
+	{
+		if (color != gl_tcolor)
+		{
+			pcntr[0] = S_TEXT_COLOR;
+			gl_tcolor = color;
+		}
+	} else
+	{
+		if (color != gl_lcolor)
+		{
+			pcntr[0] = S_LINE_COLOR;
+			gl_lcolor = color;
+		}
+	}
+	if (pcntr[0])
+	{
+		intin[0] = color;
+		gsx2();
+	}
+	intin[0] = tmp;
+}
+#endif
 	xdef _gsx_attr
-
-*  call:
-*
-*	gsx_attr(text, mode, color)
-*
-*  in:
-*	sp+04	text		word
-*	  +06	mode		word
-*	  +08	color		word
-
 _gsx_attr:
 
 	lea	4(sp),a0		; a0 -> parameters
@@ -359,15 +431,29 @@ L21:	move.w	(sp)+,(a3)		; restore intin[0]
 	rts
 
 
+
+#if CCODE
+VOID gsx_bxpts(GRECT *pt)
+{
+	REG WORD *ppts;
+
+	ppts = &ptsin[0];
+
+	ppts[0] = pt->g_x;
+	ppts[1] = pt->g_y;
+	ppts[2] = pt->g_x + pt->g_w - 1;
+	ppts[3] = pt->g_y;
+/*	ppts[4] = pt->g_x + pt->g_w - 1;	*/
+	ppts[4] = ppts[2];
+	ppts[5] = pt->g_y + pt->g_h - 1;
+	ppts[6] = pt->g_x;
+/*	ppts[7] = pt->g_y + pt->g_h - 1;	*/
+	ppts[7] = ppts[5];
+	ppts[8] = pt->g_x;
+	ppts[9] = pt->g_y;
+}
+#endif
 	xdef _gsx_bxpt
-
-*  call:
-*
-*	gsx_bxpt(pt)
-*
-*  in:
-*	sp+04	pt	long pointer to GRECT
-
 _gsx_bxpt:
 
 	move.l	4(sp),a0		; a0 -> GRECT
@@ -392,15 +478,14 @@ _gsx_bxpt:
 	rts
 
 
+#if CCODE
+VOID gsx_box(GRECT *pt)
+{
+	gsx_bxpts(pt);
+	v_pline(5, &ptsin[0]);
+}
+#endif
 	xdef	_gsx_box
-
-*  call:
-*
-*	gsx_box(pt)
-*
-*  in:
-*	sp+04	pt	long pointer to GRECT
-
 _gsx_box:
 
 	move.l	4(sp),-(sp)
@@ -415,18 +500,27 @@ _gsx_box:
 
 
 
+#if CCODE
+VOID gsx_fix(FDB *pfd, int16_t *theaddr, WORD wb, WORD h)
+{
+	if (theaddr == ORGADDR)
+	{
+		pfd->fd_w = gl_ws.ws_xres + 1;
+		pfd->fd_wdwidth = pfd->fd_w / 16;
+		pfd->fd_h = gl_ws.ws_yres + 1;
+		pfd->fd_nplanes = gl_nplanes;
+	} else
+	{
+		pfd->fd_wdwidth = wb / 2;
+		pfd->fd_w = wb * 8;
+		pfd->fd_h = h;
+		pfd->fd_nplanes = 1;
+	}
+	pfd->fd_stand = FALSE;
+	pfd->fd_addr = theaddr;
+}
+#endif
 	xdef _gsx_fix
-
-*  call:
-*
-*	gsx_fix(pfd, theaddr, wb, h)
-*
-*  in:
-*	sp+04	    pfd		long pointer to MFDB
-*	  +08   theaddr		long
-*	  +12	     wb		word
-*	  +14	      h		word
-
 _gsx_fix:
 
 	lea	4(sp),a0
@@ -468,27 +562,53 @@ L29:	move.w	(a0)+,d0		; d0 <- wb
 
 
 
+/*
+ *  call:
+ *
+ *     gsx_blt(saddr, sx, sy, swb, daddr, dx, dy, dwb, w, h, rule, fgcol, bgcol)
+ *
+ *  in:
+ *	sp+04	saddr		long
+ *	  +08	   sx		word
+ *	  +10	   sy		word
+ *	  +12	  swb		word
+ *	  +14	daddr		long
+ *	  +18	   dx		word
+ *	  +20	   dy		word
+ *	  +22	  dwb		word
+ *	  +24	    w		word
+ *	  +26	    h		word
+ *	  +28	 rule		word
+ *	  +30	fgcol		word
+ *	  +32	bgcol		word
+ */
+#if CCODE
+WORD gsx_blt(int16_t *saddr, UWORD sx, UWORD sy, UWORD swb, int16_t *daddr, UWORD dx, UWORD dy, UWORD dwb, UWORD w, UWORD h, UWORD rule, WORD fgcolor, WORD bgcolor)
+{
+	REG WORD *ppts;
+
+	ppts = &ptsin[0];
+
+	gsx_fix(&gl_src, saddr, swb, h);
+	gsx_fix(&gl_dst, daddr, dwb, h);
+
+	gsx_moff();
+	ppts[0] = sx;
+	ppts[1] = sy;
+	ppts[2] = sx + w - 1;
+	ppts[3] = sy + h - 1;
+	ppts[4] = dx;
+	ppts[5] = dy;
+	ppts[6] = dx + w - 1;
+	ppts[7] = dy + h - 1;
+	if (fgcolor == -1)
+		vro_cpyfm(rule, &ppts[0], &gl_src, &gl_dst);
+	else
+		vrt_cpyfm(rule, &ppts[0], &gl_src, &gl_dst, fgcolor, bgcolor);
+	gsx_mon();
+}
+#endif
 	xdef	_gsx_blt
-
-*  call:
-*
-*     gsx_blt(saddr, sx, sy, swb, daddr, dx, dy, dwb, w, h, rule, fgcol, bgcol)
-*
-*  in:
-*	sp+04	saddr		long
-*	  +08	   sx		word
-*	  +10	   sy		word
-*	  +12	  swb		word
-*	  +14	daddr		long
-*	  +18	   dx		word
-*	  +20	   dy		word
-*	  +22	  dwb		word
-*	  +24	    w		word
-*	  +26	    h		word
-*	  +28	 rule		word
-*	  +30	fgcol		word
-*	  +32	bgcol		word
-
 _gsx_blt:
 
 	movem.l	d3-d4/a3-a5,-(sp)
@@ -556,21 +676,13 @@ L33:	jsr	_gsx_mon		; show cursor
 
 
 
+#if CCODE
+VOID bb_screen(WORD scrule, WORD scsx, WORD scsy, WORD scdx, WORD scdy, WORD scw, WORD sch)
+{
+	gsx_blt(0x0L, scsx, scsy, 0, 0x0L, scdx, scdy, 0, scw, sch, scrule, -1, -1);
+}
+#endif
 	xdef _bb_scree
-
-*  call:
-*
-*	bb_screen(scrule, scsx, scsy, scdx, scdy, scw, sch)
-*
-*  in:
-*	sp+04	scrule		word
-*         +06	scsx		word
-*         +08	scsy		word
-*         +10	scdx		word
-*         +12	scdy		word
-*         +14	scw		word
-*         +16	sch		word
-
 _bb_scree:
 
 	lea	14(sp),a0		; a0 -> scw
@@ -591,19 +703,19 @@ _bb_scree:
 	rts
 
 
+
+#if CCODE
+VOID gsx_trans(int16_t *saddr, UWORD swb, int16_t *daddr, UWORD dwb, UWORD h, WORD fg, WORD bg)
+{
+	gsx_fix(&gl_src, saddr, swb, h);
+	gl_src.fd_stand = TRUE;
+	gl_src.fd_nplanes = 1;
+
+	gsx_fix(&gl_dst, daddr, dwb, h);
+	vrn_trnfm(&gl_src, &gl_dst);
+}
+#endif
 	xdef _gsx_tran
-
-*  call:
-*
-*	gsx_trans(saddr, swb, daddr, dwb, h)
-*
-*  in:
-*	sp+04	saddr		long
-*	sp+08	  swb		word (unsigned)
-*	sp+10	daddr		long
-*	sp+14	  dwb		word (unsigned)
-*	sp+16	    h		word
-
 _gsx_tran:
 
 	movem.l a3-a5,-(sp)
@@ -637,13 +749,59 @@ _gsx_tran:
 
 
 
-	xdef _gsx_star
+#if CCODE
+VOID gsx_start(NOTHING)
+{
+	WORD dummy;
 
-*  call:
-*
-*	gsx_start()
+	/* force update     */
+	gl_mode = gl_mask = gl_tcolor = gl_lcolor = -1;
+	gl_fis = gl_patt = gl_font = -1;
+	gl_xclip = 0;
+	gl_yclip = 0;
+	gl_width = gl_wclip = gl_ws.ws_xres + 1;
+	gl_height = gl_hclip = gl_ws.ws_yres + 1;
 
-_gsx_star:
+	intin[0] = 1;
+	gsx_ncode(102, 0, 1); /* vq_extnd(1) */
+	gl_nplanes = intout[4];
+
+	/* The driver may have more than two fonts.  The large font */
+	/* to the services is the default font in the driver.  This */
+	/* font will give us 80 chars across the screen in all but  */
+	/* 320 pels in x, when it will be the 40 column font.       */
+
+	gsx_ncode(38, 0, 0);				/* inquire text attributes vqt_attributes  */
+	gl_wptschar = ptsout[0];
+	gl_ws.ws_chmaxh = gl_hptschar = ptsout[1];
+	gl_wchar = ptsout[2];
+	gl_hchar = ptsout[3];
+
+	vst_height(gl_ws.ws_chminh, &gl_wsptschar, &gl_hsptschar, &gl_wschar, &gl_hschar);
+
+	vst_height(gl_ws.ws_chmaxh, &dummy, &dummy, &dummy, &dummy);
+
+	gl_ncols = gl_width / gl_wchar;
+	gl_nrows = gl_height / gl_hchar;
+	gl_hbox = gl_hchar + 3;
+	gl_wbox = (gl_hbox * gl_ws.ws_hpixel) / gl_ws.ws_wpixel;
+	/*   7/26/89    */
+	if (gl_wbox < (gl_wchar + 2))
+		gl_wbox = gl_wchar + 2;
+	vsl_type(7);
+	vsl_width(1);
+	vsl_udsty(0xffff);
+	r_set(&gl_rscreen, 0, 0, gl_width, gl_height);
+	r_set(&gl_rfull, 0, gl_hbox, gl_width, (gl_height - gl_hbox));
+	r_set(&gl_rzero, 0, 0, 0, 0);
+	r_set(&gl_rcenter, (gl_width - gl_wbox) / 2, (gl_height - (2 * gl_hbox)) / 2, gl_wbox, gl_hbox);
+	r_set(&gl_rmenu, 0, 0, gl_width, gl_hbox);
+	ad_intin = ADDR(&intin[0]);
+}
+#endif
+/* WTF, this called only once at startup, why bother with asm madness? */
+	xdef _gsx_start
+_gsx_start:
 
 	movem.l	d3-d6,-(sp)
 
@@ -674,7 +832,7 @@ _gsx_star:
 	lea	_intin,a0
 	move.w	#1,(a0)			; intin[0] = 1
 
-	move.w	#1,-(sp)		; gsx_ncode( 102,0,1)
+	move.w	#1,-(sp)		; gsx_ncode( 102,0,1) vq_extnd(1)
 	clr.w	-(sp)
 	move.w	#102,-(sp)
 	jsr	_gsx_ncode
@@ -683,7 +841,7 @@ _gsx_star:
 	move.w	8(a0),_gl_nplan		; gl_nplanes = intout[4]
 
 	clr.l	    -(sp)		; gsx_ncode(38, 0, 0)
-	move.w	#38,-(sp)		; inquire text attributes
+	move.w	#38,-(sp)		; inquire text attributes (vqt_attributes)
 	jsr	_gsx_ncode
 
 	lea	_ptsout,a1
@@ -788,21 +946,34 @@ x_x1:	pea	$000F0007		;  (sp) <- 15
 
 
 
+#if CCODE
+VOID bb_fill(WORD mode, WORD fis, WORD patt, WORD hx, WORD hy, WORD hw, WORD hh)
+{
+	REG WORD *ppts;
+
+	ppts = &ptsin[0];
+
+	gsx_fix(&gl_dst, 0x0L, 0, 0);
+	ppts[0] = hx;
+	ppts[1] = hy;
+	ppts[2] = hx + hw - 1;
+	ppts[3] = hy + hh - 1;
+
+	gsx_attr(TRUE, mode, gl_tcolor);
+	if (fis != gl_fis)
+	{
+		vsf_interior(fis);
+		gl_fis = fis;
+	}
+	if (patt != gl_patt)
+	{
+		vsf_style(patt);
+		gl_patt = patt;
+	}
+	vr_recfl(&ppts[0], &gl_dst);
+}
+#endif
 	xdef _bb_fill
-
-*  call:
-*
-*	bb_fill(mode, fis, patt, hx, hy, hw, hh)
-*
-*  in:
-*	sp+04	mode	word
-*	  +06	 fis	word
-*	  +08	patt	word
-*	  +10	  hx	word
-*	  +12	  hy	word
-*	  +14	  hw	word
-*	  +16	  hh	word
-
 _bb_fill:
 
 	move.l	a3,-(sp)
@@ -865,49 +1036,71 @@ L42:	lea	_ptsin,a0
 
 
 
-*  call:
-*
-*	gsx_tcalc(font, ptext, ptextw, ptexth, pnumchs)
-*
-*  iN:
-*	sp+04	font		word
-*	  +06	ptext		pointer to text string
-*	  +10	*ptextw		pointer to word
-*	  +14	*ptexth		pointer to word
-*	  +18	*pnumchs	pointer to word
-*
-*
-*   Calculate the minimum bounding rectangle:
-*
-*   ptextw < wc * pnumchs
-*   ptexth < hc
-*
-*	ptextw  =  ptextw			(unchanged)
-*	ptexth  =  ptexth			(unchanged)
-*       pnumchs =  0
-*
-*   ptextw > wc * pnumchs
-*   ptexth < hc
-*
-*	ptextw  =  wc * number of characters
-*	ptexth  =  ptexth			(unchanged)
-*       pnumchs =  0
-*
-*   ptextw < wc * pnumchs
-*   ptexth > hc
-*
-*	ptextw  =  ptextw			(unchanged)
-*	ptexth  =  hc
-*       pnumchs =  ptextw / wc
-*
-*   ptextw > wc * pnumchs
-*   ptexth > hc
-*
-*	ptextw  =  wc * number of characters
-*	ptexth  =  hc
-*       pnumchs =  number of characters
+/*
+ *  call:
+ *
+ *	gsx_tcalc(font, ptext, ptextw, ptexth, pnumchs)
+ *
+ *  iN:
+ *	sp+04	font		word
+ *	  +06	ptext		pointer to text string
+ *	  +10	*ptextw		pointer to word
+ *	  +14	*ptexth		pointer to word
+ *	  +18	*pnumchs	pointer to word
+ *
+ *
+ *   Calculate the minimum bounding rectangle:
+ *
+ *   ptextw < wc * pnumchs
+ *   ptexth < hc
+ *
+ *	ptextw  =  ptextw			(unchanged)
+ *	ptexth  =  ptexth			(unchanged)
+ *       pnumchs =  0
+ *
+ *   ptextw > wc * pnumchs
+ *   ptexth < hc
+ *
+ *	ptextw  =  wc * number of characters
+ *	ptexth  =  ptexth			(unchanged)
+ *       pnumchs =  0
+ *
+ *   ptextw < wc * pnumchs
+ *   ptexth > hc
+ *
+ *	ptextw  =  ptextw			(unchanged)
+ *	ptexth  =  hc
+ *       pnumchs =  ptextw / wc
+ *
+ *   ptextw > wc * pnumchs
+ *   ptexth > hc
+ *
+ *	ptextw  =  wc * number of characters
+ *	ptexth  =  hc
+ *       pnumchs =  number of characters
+ */
+#if CCODE
+WORD gsx_tcalc(WORD font, const char *ptext, WORD ptextw, WORD ptexth, WORD pnumchs)
+{
+	REG WORD wc;
+	REG WORD hc;
 
-	xdef	_gsx_tcalc
+	wc = ch_width(font);
+	hc = ch_height(font);
+	/* figure out the width of the text string in pixels   */
+
+	*pnumchs = LBWMOV(ad_intin, ptext);
+	*ptextw = min(*ptextw, *pnumchs * wc);
+	/* figure out the height of the text */
+	*ptexth = min(*ptexth, hc);
+	if (*ptexth / hc)
+		*pnumchs = min(*pnumchs, *ptextw / wc);
+	else
+		*pnumchs = 0;
+}
+#endif
+ 
+ 	xdef	_gsx_tcalc
 _gsx_tcalc:
 
 	lea	4(sp),a0
@@ -965,16 +1158,41 @@ L49:	move.w	d0,(a5)			; set pnumchs
 
 
 
-*  call:
-*
-*	gsx_tblt(tb_f, x, y, tb_nc)
-*
-*  iN:
-*	sp+04	tb_f	word
-*	  +06	x	word
-*	  +08	y	word
-*	  +10	tb_nc	word
+#if CCODE
+WORD gsx_tblt(WORD tb_f, WORD x, WORD y, WORD tb_nc)
+{
+	WORD i;
+	REG WORD pts_height;
 
+	if (tb_f == IBM)
+	{
+		if (tb_f != gl_font)
+		{
+			vst_height(gl_ws.ws_chmaxh, &gl_wptschar, &gl_hptschar, &gl_wchar, &gl_hchar);
+			gl_font = tb_f;
+		}
+		y += gl_hptschar;
+	}
+
+	if (tb_f == SMALL)
+	{
+		if (tb_f != gl_font)
+		{
+			vst_height(gl_ws.ws_chminh, &gl_wsptschar, &gl_hsptschar, &gl_wschar, &gl_hschar);
+			gl_font = tb_f;
+		}
+		y += gl_hsptschar;
+	}
+
+	contrl[0] = 8;						/* TEXT */
+	contrl[1] = 1;
+	contrl[6] = gl_handle;
+	ptsin[0] = x;
+	ptsin[1] = y;
+	contrl[3] = tb_nc;
+	gsx2();
+}
+#endif
 	xdef	_gsx_tblt
 _gsx_tblt:
 
@@ -1037,15 +1255,17 @@ T51:	dc.l	_gl_hspts,_gl_hscha,_gl_wscha,_gl_hspts,_gl_wspts,_gl_ws+92
 
 
 
+#if CCODE
+VOID gsx_xbox(GRECT *pt)
+{
+	gsx_bxpts(pt);
+	gsx_xline(4, &ptsin[0]);
+	ptsin[2] = ptsin[6];				/* fix the clipping problem of xbox */
+	ptsin[3] = ptsin[7] - 1;
+	gsx_xline(2, &ptsin[0]);
+}
+#endif
 	xdef _gsx_xbox
-
-*  call:
-*
-*	gsx_xbox(pt)
-*
-*  in:
-*	sp+04	pt	long pointer to GRECT
-
 _gsx_xbox:
 
 	move.l	4(sp),-(sp)		; push *pt
@@ -1067,15 +1287,51 @@ _gsx_xbox:
 	rts
 
 
+#if CCODE
+VOID gsx_xcbox(GRECT *pt)
+{
+	REG WORD wa, ha;
+	REG WORD *ppts;
+
+	ppts = &ptsin[0];
+
+	wa = 2 * gl_wbox;
+	ha = 2 * gl_hbox;
+	ppts[0] = pt->g_x;
+	ppts[1] = pt->g_y + ha;
+	ppts[2] = pt->g_x;
+	ppts[3] = pt->g_y;
+	ppts[4] = pt->g_x + wa;
+	ppts[5] = pt->g_y;
+	gsx_xline(3, &ppts[0]);
+	ppts[0] = pt->g_x + pt->g_w - wa;
+	ppts[1] = pt->g_y;
+	ppts[2] = pt->g_x + pt->g_w - 1;
+	ppts[3] = pt->g_y;
+/*	ppts[4] = pt->g_x + pt->g_w - 1;	*/
+	ppts[4] = ppts[2];
+	ppts[5] = pt->g_y + ha;
+	gsx_xline(3, &ppts[0]);
+	ppts[0] = pt->g_x + pt->g_w - 1;
+	ppts[1] = pt->g_y + pt->g_h - ha;
+/*	ppts[2] = pt->g_x + pt->g_w - 1;	*/
+	ppts[2] = ppts[0];
+	ppts[3] = pt->g_y + pt->g_h - 1;
+	ppts[4] = pt->g_x + pt->g_w - wa;
+/*	ppts[5] = pt->g_y + pt->g_h - 1;	*/
+	ppts[5] = ppts[3];
+	gsx_xline(3, &ppts[0]);
+	ppts[0] = pt->g_x + wa;
+	ppts[1] = pt->g_y + pt->g_h - 1;
+	ppts[2] = pt->g_x;
+/*	ppts[3] = pt->g_y + pt->g_h - 1;	*/
+	ppts[3] = ppts[1];
+	ppts[4] = pt->g_x;
+	ppts[5] = pt->g_y + pt->g_h - ha;
+	gsx_xline(3, &ppts[0]);
+}
+#endif
 	xdef _gsx_xcbo
-
-*  call:
-*
-*	gsx_xcbox(pt)
-*
-*  in:
-*	sp+04	pt	long pointer to GRECT
-
 _gsx_xcbo:
 
 	move.l	4(sp),a0
@@ -1131,16 +1387,32 @@ _gsx_xcbo:
 
 
 
+#if CCODE
+VOID gsx_xline(WORD ptscount, WORD ppoints)
+{
+	static WORD const hztltbl[2] = { 0x5555, 0xaaaa };
+	static WORD const verttbl[4] = { 0x5555, 0xaaaa, 0xaaaa, 0x5555 };
+	REG WORD *linexy;
+	REG WORD st, i;
+
+	for (i = 1; i < ptscount; i++)
+	{
+		if (*ppoints == *(ppoints + 2))
+		{
+			st = verttbl[(((*ppoints) & 1) | ((*(ppoints + 1) & 1) << 1))];
+		} else
+		{
+			linexy = (*ppoints < *(ppoints + 2)) ? ppoints : ppoints + 2;
+			st = hztltbl[(*(linexy + 1) & 1)];
+		}
+		vsl_udsty(st);
+		v_pline(2, ppoints);
+		ppoints += 2;
+	}
+	vsl_udsty(0xffff);
+}
+#endif
 	xdef	_gsx_xline
-
-*  calling sequence:
-*
-*	gsx_xline(ptscount, ppoints)
-*
-*  in:
-*	sp+04	ptscount	word
-*	  +06	ppoints		pointer to vertex array
-
 _gsx_xline:
 
 	movem.l	d3-d6/a3,-(sp)
@@ -1193,3 +1465,31 @@ L67:	cmp.w	20+4(sp),d3			; if counter < ptscount, loop
 
 quit:	movem.l	(sp)+,d3-d6/a3			; d6 is included to be
 	rts					; compatible with gsx_xcbox bra
+
+
+
+
+
+
+
+#if CCODE
+UWORD ch_width(WORD fn)
+{
+	if (fn == IBM)
+		return (gl_wchar);
+	if (fn == SMALL)
+		return (gl_wschar);
+	return (0);
+}
+
+
+
+UWORD ch_height(WORD fn)
+{
+	if (fn == IBM)
+		return (gl_hchar);
+	if (fn == SMALL)
+		return (gl_hschar);
+	return (0);
+}
+#endif
