@@ -47,7 +47,7 @@
 #define MENU_TNORMAL 33
 #define MENU_TEXT 34
 #define MENU_REGISTER 35
-#define MENU_POPUP	36	/* 5/13/92	*/
+#define MENU_POPUP	36
 #define	MENU_ATTACH	37
 #define MENU_ISTART	38
 #define MENU_SETTING	39
@@ -61,7 +61,6 @@
 #define OBJC_ORDER 45
 #define OBJC_EDIT 46
 #define OBJC_CHANGE 47
-/* June 26 1992 - ml */
 #define	OBJC_SYSVAR 48
 
 /* Form Manager				*/
@@ -84,12 +83,12 @@
 #define GRAF_HANDLE 77
 #define GRAF_MOUSE 78
 #define GRAF_MKSTATE 79
-#define GRAF_MRESTORE	130
 
 /* Scrap Manager			*/
 #define SCRP_READ 80
 #define SCRP_WRITE 81
-				/* File Selector Manager		*/
+
+/* File Selector Manager		*/
 #define FSEL_INPUT 90
 #define FSEL_EXINPUT 91
 
@@ -119,7 +118,6 @@
 #define SHEL_PUT 123
 #define SHEL_FIND 124
 #define SHEL_ENVRN 125
-#define SHEL_SPATH 126
 
 /* max sizes for arrays		*/
 #define C_SIZE 4
@@ -168,8 +166,9 @@
 #define AP_BVHARD int_in[1]
 
 
-#define SCR_MGR 0x0001			/* pid of the screen manager*/
+#define SCR_MGR 0x0001			/* pid of the screen manager */
 
+/* event lib parameters	*/
 #define IN_FLAGS int_in[0]
 
 #define B_CLICKS int_in[0]
@@ -237,7 +236,7 @@
 #define	TITLE_NUM	int_in[0]		/* tnorm		*/
 #define	NORMAL_IT	int_in[1]		/* tnormal		*/
 
-						/* 5/13/92		*/
+/* 5/13/92		*/
 #define M_MENU		addr_in[0]
 #define M_XPOS		int_in[0]
 #define M_YPOS		int_in[1]
@@ -248,7 +247,7 @@
 #define M_MENU2		int_in[1]
 #define M_ITEM2		int_in[2]
 
-					/* form library parameters	*/
+/* form library parameters	*/
 #define FM_FORM addr_in[0]
 #define FM_START int_in[0]
 
@@ -282,8 +281,7 @@
 
 #define FM_CLKS int_in[1]
 
-					/* object library parameters	*/
-
+/* object library parameters	*/
 #define OB_TREE addr_in[0]		/* all ob procedures		*/
 
 #define OB_DELOB int_in[0]		/* ob_delete			*/
@@ -310,7 +308,6 @@
 #define OB_GY	int_out[4]
 #define OB_GW	int_out[5]
 #define OB_GH	int_out[6]
-
 #define OB_NEWPOS int_in[1]		/* ob_order			*/
 
 /* ob_edit			*/
@@ -322,7 +319,7 @@
 #define OB_NEWSTATE int_in[6]		/* ob_change			*/
 #define OB_REDRAW int_in[7]
 
-/* June 26 1992 - ml. */		/* ob_xtend 			*/
+/* June 26 1992 - ml. */		/* ob_sysvar 			*/
 #define	OB_MODE	    int_in[0]	/* 8/1/92 */
 #define	OB_WHICH    int_in[1]
 #define	OB_I1	    int_in[2]
@@ -331,7 +328,7 @@
 #define	OB_O2       int_out[2]
 /**/
 
-					/* graphics library parameters	*/
+/* graphics library parameters	*/
 #define GR_I1 int_in[0]
 #define GR_I2 int_in[1]
 #define GR_I3 int_in[2]
@@ -375,14 +372,14 @@
 
 /* wm_create		*/
 #define WM_KIND int_in[0]
-						/* wm_open, close, del	*/
+/* wm_open, close, del	*/
 #define WM_HANDLE int_in[0]
-						/* wm_open, wm_create	*/
+/* wm_open, wm_create	*/
 #define WM_WX int_in[1]
 #define WM_WY int_in[2]
 #define WM_WW int_in[3]
 #define WM_WH int_in[4]
-						/* wm_find		*/
+/* wm_find		*/
 #define WM_MX int_in[0]
 #define WM_MY int_in[1]
 /* wm_calc		*/

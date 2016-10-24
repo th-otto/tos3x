@@ -45,8 +45,6 @@
 
 	text
 
-	xdef _trap13
-_trap13:
 	xdef _trp13
 _trp13:
 	move.l	(sp)+,trp13ret
@@ -55,8 +53,6 @@ _trp13:
 	rts
 
 
-	xdef _trap14
-_trap14:
 	xdef _trp14
 _trp14:
 	move.l	(sp)+,trp14ret
@@ -68,7 +64,7 @@ _trp14:
 	xdef _getmouse
 _getmouse:
 	dc.w	$A000
-	suba.l	#$358,a0        ; WTF
+	suba.l	#$358,a0        ; WTF; will fail with Falcon VDI where mouse shape is stored somewhere else
 	move.l	a0,_maddr		; save the mouse block address
 	lea	mform,a1		; destination
 	move.w	#36,d0			; size ( - 1 for dbra )

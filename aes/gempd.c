@@ -1,23 +1,23 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gempd.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:26:10 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gempd.c,v $
-* Revision 2.2  89/04/26  18:26:10  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:29:02  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:34:49  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gempd.c,v $
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:26:10 $	$Locker: kbad $
+ * =======================================================================
+ *  $Log:	gempd.c,v $
+ * Revision 2.2  89/04/26  18:26:10  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:29:02  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:34:49  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMPD.C		1/27/84 - 02/09/85	Lee Jay Lorenzen	*/
 /*	pstart bugs	2/12/85 - 03/22/85	LKW			*/
 /*	Reg Opt		03/09/85		Derek Mui		*/
@@ -53,14 +53,16 @@ PP(register PD *ppd;)
 	char temp[9];
 
 	ret = FALSE;
-	temp[8] = NULL;
+	temp[8] = 0;
 	if (pname != NULL)
 	{
-		movs(8, ppd->p_name, &temp[0]);
-		ret = strcmp(pname, &temp[0]);
+		movs(8, ppd->p_name, temp);
+		ret = strcmp(pname, temp);
 	} else
+	{
 		ret = (ppd->p_pid == pid);
-	return (ret);
+	}
+	return ret;
 }
 
 
@@ -74,14 +76,14 @@ PP(uint16_t pid;)
 	for (i = 0; i < NUM_PDS; i++)
 	{
 		if (fapd(pname, pid, &D.g_pd[i]))
-			return (&D.g_pd[i]);
+			return &D.g_pd[i];
 	}
 	for (i = 0; i < gl_naccs; i++)
 	{
 		if (fapd(pname, pid, &gl_pacc[i]->ac_pd))
-			return (&gl_pacc[i]->ac_pd);
+			return &gl_pacc[i]->ac_pd;
 	}
-	return (NULL);
+	return NULL;
 }
 
 
@@ -119,8 +121,8 @@ VOID p_nameit(P(PD *) p, P(const char *) pname)
 PP(PD *p;)
 PP(const char *pname;)
 {
-	bfill(8, ' ', &p->p_name[0]);
-	strscn(pname, &p->p_name[0], '.');
+	bfill(8, ' ', p->p_name);
+	strscn(pname, p->p_name, '.');
 }
 
 
@@ -139,7 +141,7 @@ PP(intptr_t ldaddr;)
 	p_nameit(px, pfilespec);
 	/* cs, ip, use 0 flags  */
 	psetup(px, pcode);
-	/* link him up      */
+	/* link him up */
 	px->p_stat = PS_RUN;
 	px->p_link = drl;
 	drl = px;

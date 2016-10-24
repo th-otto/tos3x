@@ -1,28 +1,28 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:26:37 $
-* =======================================================================
-*
-* Revision 2.3  89/04/26  18:26:37  mui
-* TT
-* 
-* Revision 2.2  89/04/01  03:12:36  kbad
-* Change to rs_readit to allow sh_find to look for files in the directory
-* from which a program was launched.  rs_readit now uses a local buffer
-* to store the filename instead of ad_shcmd, therefore ad_shcmd is intact
-* ; contains the full pathname of the last shel_written program; and can
-* be used by shel_find.
-* 
-* Revision 2.1  89/02/22  05:29:18  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:35:03  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:26:37 $
+ * =======================================================================
+ *
+ * Revision 2.3  89/04/26  18:26:37  mui
+ * TT
+ * 
+ * Revision 2.2  89/04/01  03:12:36  kbad
+ * Change to rs_readit to allow sh_find to look for files in the directory
+ * from which a program was launched.  rs_readit now uses a local buffer
+ * to store the filename instead of ad_shcmd, therefore ad_shcmd is intact
+ * ; contains the full pathname of the last shel_written program; and can
+ * be used by shel_find.
+ * 
+ * Revision 2.1  89/02/22  05:29:18  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:35:03  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*  	GEMRSLIB.C	5/14/84 - 04/09/85	Lowell Webster		*/
 /*	Reg Opt		03/08/85 - 03/09/85	Derek Mui		*/
 /*	Fix the get_addr for imagedata	4/16/86	Derek Mui		*/
@@ -124,7 +124,7 @@ PP(int16_t ifx;)
  *
  * rs_obfix
  ************************************************************************/
-VOID rs_obfix(P(LPTREE) tree, P(int16_t) curob)
+int16_t rs_obfix(P(LPTREE) tree, P(int16_t) curob)
 PP(LPTREE tree;)
 PP(int16_t curob;)
 {
@@ -140,6 +140,10 @@ PP(int16_t curob;)
 		fix_chpos(p + (intptr_t) (2 * i), val);
 		val = !val;
 	}
+#if !BINEXACT
+	/* BUG: missing return */
+	return TRUE;
+#endif
 }
 
 
@@ -445,11 +449,11 @@ register VOIDPTR *rsaddr;
  *	Set a particular ADDRess in a resource file that has been
  *	loaded into memory.
  */
-VOID rs_saddr(P(intptr_t) pglobal, P(uint16_t) rtype, P(uint16_t) rindex, P(intptr_t) rsaddr)
+int16_t rs_saddr(P(intptr_t) pglobal, P(uint16_t) rtype, P(uint16_t) rindex, P(VOIDPTR ) rsaddr)
 PP(intptr_t pglobal;)
 PP(uint16_t rtype;)
 PP(uint16_t rindex;)
-PP(intptr_t rsaddr;)
+PP(VOIDPTR rsaddr;)
 {
 	register intptr_t psubstruct;
 
@@ -519,9 +523,11 @@ PP(const char *rsfname;)
 		{
 			/* read it all in   */
 			dos_lseek(fd, SMODE, 0x0L);
-			/* WTF why use trap() here, not dos_read */
-			trap(X_READ, fd, rslsize, rs_hdr);
+			/*
+			 * BUG (or bad design): dos_read() only takes a 16-bit value as length parameter
+			 */
 			/* dos_read(fd, rslsize, rs_hdr); */
+			trap(X_READ, fd, rslsize, rs_hdr);
 			if (!DOS_ERR)
 				do_rsfix((intptr_t) rs_hdr, (uint16_t) rslsize);	/* do all the fixups    */
 		}

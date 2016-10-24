@@ -51,7 +51,6 @@
 #include <baspag88.h>
 #include <obdefs.h>
 #include <gemlib.h>
-#include <funcdef.h>
 
 
 #define MB_DOWN 0x01
@@ -630,29 +629,22 @@ PP(register int32_t c;)								/* # of ticks to wait  */
 	cli();
 	if (CMP_TICK)
 	{
-		/* if already counting  */
-		/*   down then reset    */
-		/*   CMP_TICK to the    */
-		/*   lower number but   */
-		/*   let NUM_TICK grow  */
-		/*   from its accumulated */
-		/*   value      */
+		/*
+		 * if already counting down then reset CMP_TICK to the
+		 * lower number but let NUM_TICK grow from its accumulated value
+		 */
 		if (c <= CMP_TICK)
 			CMP_TICK = c;
 	} else
 	{
-		/* if we aren't currently */
-		/*   counting down for  */
-		/*   someone else then  */
-		/*   start ticking  */
+		/* if we aren't currently counting down for someone else then start ticking  */
 		CMP_TICK = c;
-		/* start NUM_TICK out   */
-		/*   at zero        */
+		/* start NUM_TICK out at zero */
 		NUM_TICK = 0x0L;
 	}
 
 	e->e_flag |= EVDELAY;
-	q = (char *) & dlr - elinkoff;
+	q = (EVB *)((char *) &dlr - elinkoff);
 	for (p = dlr; p; p = (q = p)->e_link)
 	{
 		if (c <= (int32_t) p->e_parm)

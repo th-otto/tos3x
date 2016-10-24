@@ -1,23 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemfmalt.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:22:40 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemfmalt.c,v $
-* Revision 2.2  89/04/26  18:22:40  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:26:06  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:33:39  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:22:40 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:22:40  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:26:06  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:33:39  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMFMALT.C		09/01/84 - 01/07/85	Lee Lorenzen	*/
 /*	CHANGED			02/19/85 - 02/23/85	Derek Mui	*/
 /*	Reg Opt			03/08/85		Derek Mui	*/
@@ -32,22 +30,18 @@
 /*	Changed fm_build and fm_alert to build 3d buttons 7/16/92 D.Mui	*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <gemusa.h>
-#include <vdidefs.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "gemusa.h"
 
 #define LORES	320
 
@@ -61,16 +55,16 @@
 #define INTER_WSPACE 2
 #define INTER_HSPACE 0
 
-GLOBAL char const gl_nils[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+char const gl_nils[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 
 /*
  *	Routine to break a string into smaller strings.  Breaks occur
  *	whenever an | or a ] is encountered.
  */
-int16_t fm_strbrk(P(LPTREE) tree, P(intptr_t) palstr, P(int16_t) stroff, P(int16_t *) pcurr_id, P(int16_t *) pnitem, P(int16_t *) pmaxlen)
+VOID fm_strbrk(P(LPTREE) tree, P(const char *) palstr, P(int16_t) stroff, P(int16_t *) pcurr_id, P(int16_t *) pnitem, P(int16_t *) pmaxlen)
 PP(LPTREE tree;)
-PP(intptr_t palstr;)
+PP(intptr_t palstr;) /* should be const char * */
 PP(int16_t stroff;)
 PP(int16_t *pcurr_id;)
 PP(int16_t *pnitem;)
@@ -84,7 +78,7 @@ PP(int16_t *pmaxlen;)
 
 	nitem = maxlen = 0;
 	curr_id = *pcurr_id;
-	tmp = NULL;
+	tmp = 0;
 
 	while (tmp != ']')
 	{
@@ -97,8 +91,8 @@ PP(int16_t *pmaxlen;)
 
 			if (len >= 31)
 			{
-				LBSET(pstr + len, NULL);
-				tmp = NULL;
+				LBSET(pstr + len, 0);
+				tmp = 0;
 				while (TRUE)
 				{
 					tmp = LBGET(palstr + curr_id);
@@ -121,17 +115,17 @@ PP(int16_t *pmaxlen;)
 					if (len < 31)
 						curr_id++;
 					else
-						tmp = NULL;
+						tmp = 0;
 				} else
 				{
 					nxttmp = tmp;
-					tmp = NULL;
+					tmp = 0;
 				}
 			}
 
 			LBSET(pstr + len, tmp);
 			len++;
-		} while (tmp != NULL);
+		} while (tmp != 0);
 
 		tmp = nxttmp;
 		maxlen = max(len - 1, maxlen);
@@ -158,9 +152,9 @@ PP(int16_t *pmaxlen;)
  *		2nd button = Cancel
  */
 
-VOID fm_parse(P(LPTREE) tree, P(intptr_t) palstr, P(int16_t *) picnum, P(int16_t *) pnummsg, P(int16_t *) plenmsg, P(int16_t *) pnumbut, P(int16_t *) plenbut)
+VOID fm_parse(P(LPTREE) tree, P(const char *) palstr, P(int16_t *) picnum, P(int16_t *) pnummsg, P(int16_t *) plenmsg, P(int16_t *) pnumbut, P(int16_t *) plenbut)
 PP(LPTREE tree;)
-PP(register intptr_t palstr;)
+PP(register intptr_t palstr;) /* should be const char */
 PP(int16_t *picnum;)
 PP(int16_t *pnummsg;)
 PP(int16_t *plenmsg;)
@@ -179,12 +173,12 @@ PP(int16_t *plenbut;)
 
 
 VOID fm_build(P(LPTREE) tree, P(int16_t) haveicon, P(int16_t) nummsg, P(int16_t) mlenmsg, P(int16_t) numbut, P(int16_t) mlenbut)
-P(register int32_t tree;)
-P(int16_t haveicon;)
-P(int16_t nummsg;)
-P(int16_t mlenmsg;)
-P(int16_t numbut;)
-P(int16_t mlenbut;)
+PP(register LPTREE tree;)
+PP(int16_t haveicon;)
+PP(int16_t nummsg;)
+PP(int16_t mlenmsg;)
+PP(int16_t numbut;)
+PP(int16_t mlenbut;)
 {
 	register int16_t i, j;
 	GRECT al, ic;
@@ -199,7 +193,7 @@ P(int16_t mlenbut;)
 	i = max(i, mlenmsg);				/* find the max char length */
 	/* find the max char height */
 	j = max(nummsg, 1);
-	r_set(&al, 0x0L, i + 2, j);			/* this is the alert box    */
+	r_set(&al, 0, 0, i + 2, j);			/* this is the alert box    */
 	/* this is the message object   */
 	r_set(&ms, 2, 0x0300, mlenmsg, 1);
 
@@ -230,7 +224,7 @@ P(int16_t mlenbut;)
 	ob_setxywh(tree, ROOT, &al);
 
 	for (i = 0; i < NUM_ALOBJS; i++)
-		LBCOPY(OB_NEXT(i), &gl_nils[0], 6);
+		LBCOPY((VOIDPTR)OB_NEXT(i), gl_nils, 6);
 
 	/* add icon object  */
 	if (haveicon)
@@ -261,14 +255,18 @@ P(int16_t mlenbut;)
 }
 
 
-int16_t fm_alert(P(int16_t) defbut, P(intptr_t) palstr)
+/*
+ * AES #52 - form_alert - Display an alert box.
+ */
+int16_t fm_alert(P(int16_t) defbut, P(const char *) palstr)
 PP(int16_t defbut;)
-PP(intptr_t palstr;)
+PP(const char *palstr;)
 {
 	register int16_t i;
-	register int32_t tree;
+	register LPTREE tree;
 	int16_t inm, nummsg, mlenmsg, numbut, mlenbut;
-	int32_t plong, addr;
+	VOIDPTR plong;
+	VOIDPTR addr;
 	GRECT d, t;
 	int16_t ratalert;						/* CHANGED 5/10 LKW */
 	int16_t x, y;							/* save the button height */
@@ -276,11 +274,13 @@ PP(intptr_t palstr;)
 	uint16_t color;
 	int32_t spec;
 
+	UNUSED(ratalert);
+	
 	/* 7/16/92        */
 
 	/* init tree pointer    */
 	rs_gaddr(ad_sysglo, R_TREE, ALERT, &addr);
-	tree = addr;
+	tree = (LPTREE) addr;
 
 	spec = LLGET(OB_SPEC(ROOT));
 	spec &= 0xFFFFFF80L;
@@ -305,7 +305,7 @@ PP(intptr_t palstr;)
 
 	if (defbut)
 	{
-		plong = OB_FLAGS(BUT_OFF + defbut - 1);
+		plong = (VOIDPTR)OB_FLAGS(BUT_OFF + defbut - 1);
 		LWSET(plong, LWGET(plong) | DEFAULT);
 	}
 

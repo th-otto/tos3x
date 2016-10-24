@@ -1,11 +1,9 @@
 ***************************    JDISPA.S    ******************************
 *
-* $Revision: 2.3 $	$Source: /u2/MRS/osrevisions/aes/jdispa.s,v $
 * =======================================================================
-* $Author: mui $ 	$Date: 89/04/26 18:28:27 $    $Locker: kbad $
+* $Author: mui $ 	$Date: 89/04/26 18:28:27 $
 * =======================================================================
 *
-* $Log:	jdispa.s,v $
 * Revision 2.3  89/04/26  18:28:27  mui
 * TT - also fixed a typo in comments before _switchto
 * 

@@ -1,68 +1,68 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: kbad $	$Date: 89/07/28 13:04:59 $
-* =======================================================================
-*
-* Revision 2.4  89/07/28  13:04:59  kbad
-* Added accs_init(), but there are still some strange interactions with
-* the critical error handler, so it is bracketed by #ifdef ACC_DELAY.
-* Also changed the desktop backdrop pattern to solid in color modes here,
-* before gemshlib:sh_main() so that the autoboot application gets the
-* right pattern drawn.  It still gets set in sh_main as well.
-* 
-* Revision 2.3  89/07/27  03:21:49  kbad
-* gsx_malloc: min gl_mlen for TT = 0xc800L
-* 
-* Revision 2.2  89/04/26  18:24:25  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:27:35  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.15  89/01/24  07:18:57  kbad
-* Change to directory of autoboot app
-* 
-* Revision 1.14  88/10/24  12:27:53  mui
-* Save 1/4 of the screen memory - added gsx_malloc
-* 
-* Revision 1.12  88/10/17  13:36:55  kbad
-* Yanked fs_start to fix fs_input growing clip rect problem
-* 
-* Revision 1.11  88/09/22  04:49:42  kbad
-* Moved rsrc_gaddr of desktop to before wm_start
-* 
-* Revision 1.10  88/09/08  18:57:55  kbad
-* added <flavor.h> for DOWARNING flag
-* 
-* Revision 1.9  88/08/08  18:56:56  mui
-* zero out the dispatcher list before bringing up system alert
-* 
-* Revision 1.8  88/08/08  12:32:38  mui
-* don't wait for accessories to finish, they only get one chance to run
-* 
-* Revision 1.7  88/08/05  16:38:52  mui
-* add escape button
-* 
-* Revision 1.6  88/08/04  19:29:19  mui
-* at autoboot, wait until all the acc finish their work before we go
-* into the auto boot sequence
-* 
-* Revision 1.4  88/08/02  13:03:15  kbad
-* changed dowarning box to match build date of 1.04d 8/1/88
-* 
-* Revision 1.3  88/07/28  17:29:06  mui
-* Nothing
-* 
-* Revision 1.2  88/07/15  16:08:31  mui
-* add warning message
-* 
-* Revision 1.1  88/06/02  12:34:14  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: kbad $	$Date: 89/07/28 13:04:59 $
+ * =======================================================================
+ *
+ * Revision 2.4  89/07/28  13:04:59  kbad
+ * Added accs_init(), but there are still some strange interactions with
+ * the critical error handler, so it is bracketed by #ifdef ACC_DELAY.
+ * Also changed the desktop backdrop pattern to solid in color modes here,
+ * before gemshlib:sh_main() so that the autoboot application gets the
+ * right pattern drawn.  It still gets set in sh_main as well.
+ * 
+ * Revision 2.3  89/07/27  03:21:49  kbad
+ * gsx_malloc: min gl_mlen for TT = 0xc800L
+ * 
+ * Revision 2.2  89/04/26  18:24:25  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:27:35  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.15  89/01/24  07:18:57  kbad
+ * Change to directory of autoboot app
+ * 
+ * Revision 1.14  88/10/24  12:27:53  mui
+ * Save 1/4 of the screen memory - added gsx_malloc
+ * 
+ * Revision 1.12  88/10/17  13:36:55  kbad
+ * Yanked fs_start to fix fs_input growing clip rect problem
+ * 
+ * Revision 1.11  88/09/22  04:49:42  kbad
+ * Moved rsrc_gaddr of desktop to before wm_start
+ * 
+ * Revision 1.10  88/09/08  18:57:55  kbad
+ * added <flavor.h> for DOWARNING flag
+ * 
+ * Revision 1.9  88/08/08  18:56:56  mui
+ * zero out the dispatcher list before bringing up system alert
+ * 
+ * Revision 1.8  88/08/08  12:32:38  mui
+ * don't wait for accessories to finish, they only get one chance to run
+ * 
+ * Revision 1.7  88/08/05  16:38:52  mui
+ * add escape button
+ * 
+ * Revision 1.6  88/08/04  19:29:19  mui
+ * at autoboot, wait until all the acc finish their work before we go
+ * into the auto boot sequence
+ * 
+ * Revision 1.4  88/08/02  13:03:15  kbad
+ * changed dowarning box to match build date of 1.04d 8/1/88
+ * 
+ * Revision 1.3  88/07/28  17:29:06  mui
+ * Nothing
+ * 
+ * Revision 1.2  88/07/15  16:08:31  mui
+ * add warning message
+ * 
+ * Revision 1.1  88/06/02  12:34:14  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMINIT.C	4/23/84 - 02/08/85	Lee Lorenzen		*/
 /*	to 68k		2/23/75 - 05/03/85	Lowell Webster		*/
 /*	Ram based		  05/15/85	Derek Mui		*/
@@ -109,11 +109,11 @@
 /*	Add new variables			8/1/92		D.Mui	*/
 
 /*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.0
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	GEM Application Environment Services		  Version 1.0
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
 #include <portab.h>
 #include <machine.h>
@@ -123,7 +123,6 @@
 #include <gemlib.h>
 #include <taddr.h>
 #include <gemusa.h>
-#include <funcdef.h>
 #include <osbind.h>
 #include <vdidefs.h>
 #include <mode.h>
@@ -141,10 +140,10 @@ int16_t do_once;
 EVB evx;
 intptr_t gl_vdo;
 intptr_t ad_sysglo;
-intptr_t ad_armice;
-intptr_t ad_hgmice;
-intptr_t ad_stdesk;
-intptr_t ad_fsel;
+VOIDPTR ad_armice;
+VOIDPTR ad_hgmice;
+LPTREE ad_stdesk;
+char *ad_fsel;
 intptr_t drawstk;
 int16_t er_num;						/* for output.s */
 int16_t no_aes;						/* gembind.s    */
@@ -166,6 +165,9 @@ int16_t crt_error;					/* critical error handler semaphore     */
 int16_t adeskp[3];					/* desktop colors & backgrounds */
 int16_t awinp[3];					/* window colors & backgrounds */
 
+#define Getrez() trp14(4)
+#define Blitmode(on) trp14(64, on)
+#define VcheckMode(mode) trp14(95, mode)
 
 static char autopath[128];
 
@@ -257,7 +259,7 @@ VOID setres(NOTHING)
 	if ((gl_vdo & 0x30000L) == 0x30000L)
 	{
 		intin[0] = 5;
-		d_rezword = trap14(95, d_rezword);
+		d_rezword = VcheckMode(d_rezword);
 /*	  ptsout[0] = d_rezword;	*/
 		gl_ws.ws_pts0 = d_rezword;
 	}
@@ -308,7 +310,7 @@ VOID main(NOTHING)
 	gl_rlen = 0;
 	gl_rbuf = 0x0L;
 	/* initialize pointers to heads of event list and thread list       */
-	elinkoff = (char *) & evx.e_link - (char *) & evx;
+	elinkoff = (intptr_t)(char *) &evx.e_link - (intptr_t)(char *) &evx;
 	/* link up all the evb's to the event unused list       */
 	eul = 0;
 	for (i = 0; i < NUM_EVBS; i++)
@@ -415,9 +417,9 @@ VOID main(NOTHING)
 	rom_ram(0, ad_sysglo);
 
 	rs_gaddr(ad_sysglo, R_BIPDATA, MICE0, &ad_armice);
-	ad_armice = LLGET(ad_armice);
+	ad_armice = LLGET((intptr_t)ad_armice);
 	rs_gaddr(ad_sysglo, R_BIPDATA, MICE2, &ad_hgmice);
-	ad_hgmice = LLGET(ad_hgmice);
+	ad_hgmice = LLGET((intptr_t)ad_hgmice);
 
 	gl_cmform = *((MFORM *) ad_hgmice);
 	/* fix up icons     */
@@ -450,7 +452,7 @@ VOID main(NOTHING)
 	/* This code is also in gemshlib, but it belongs here so that the correct
 	 * default GEM backdrop pattern is set for accessories and autoboot app.
 	 */
-	i = trp14(4);
+	i = Getrez();
 	if (i != 2 && i != 6)				/* set solid pattern in color modes */
 		LLSET(ad_stdesk + 12, 0x00001173L);
 	else
@@ -681,7 +683,11 @@ int16_t pred_dinf(NOTHING)
 							set_cache(CACHE_ON);
 					} else
 					{					/* turn on the bit ?        */
+#if BINEXACT /* sigh... */
 						trp14(((res & 0xF0) >> 4) ? 0x00400001L : 0x00400000L);
+#else
+						Blitmode(((res & 0xF0) >> 4) ? 1 : 0);
+#endif
 					}
 					/* if sparrow mode 7/17/92  */
 					if ((gl_vdo & 0xFFFF0000L) == 0x00030000L)
@@ -736,7 +742,7 @@ int16_t gsx_malloc(NOTHING)
 	int32_t len;
 
 	gsx_fix(&gl_tmp, 0x0L, 0x0L);
-	len = (int32_t) ((uint16_t) gl_wchar) * (int32_t) 25 *(int32_t) ((uint16_t) gl_height) * (int32_t) ((uint16_t) gl_nplanes);
+	len = (int32_t) ((uint16_t) gl_wchar) * (int32_t) 25 * (int32_t) ((uint16_t) gl_height) * (int32_t) ((uint16_t) gl_nplanes);
 
 	len = len / 8;
 	gl_mlen = len;
@@ -755,10 +761,10 @@ int16_t gsx_malloc(NOTHING)
 
 VOID set_defdrv(NOTHING)
 {
-/* This fugly statement gets drvbits, masks drive C,
-*  and does a GEMDOS Setdrive to drive A (0) if C doesn't exist,
-*  or to C (2) if it does exist.  Don't ask.  It had to be shrunk.
-*/
+	/* This fugly statement gets drvbits, masks drive C,
+	 *  and does a GEMDOS Setdrive to drive A (0) if C doesn't exist,
+	 *  or to C (2) if it does exist.  Don't ask.  It had to be shrunk.
+	 */
 	dos_sdrv((isdrive() & 0x04) >> 1);
 }
 

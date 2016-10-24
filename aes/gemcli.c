@@ -1,23 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemcli.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:21:22 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemcli.c,v $
-* Revision 2.2  89/04/26  18:21:22  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:25:02  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:31:09  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:21:22 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:21:22  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:25:02  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:31:09  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	Crunch at ldaccs	3/18/88			D.Mui		*/
 /*	Take out sysacc define		2/11/88		D.Mui		*/
 /*	Fix at ldaccs .. load accessory from root  10/23/85 D.Mui	*/
@@ -31,21 +29,16 @@
 /*	Start the process in to be suspended state 8/9/90	D.Mui	*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.0
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.0
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemusa.h>
-#include <gemlib.h>
-#include <dos.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "gemusa.h"
 
 
 #define ROPEN 0
@@ -135,7 +128,7 @@ PP(int16_t acc;)
 {
 	register int16_t handle;
 	int16_t err_ret;
-	int32_t ldaddr;
+	intptr_t ldaddr;
 	PD *p;
 
 	xstrpcpy(pfilespec, &D.s_cmd[0]);
@@ -153,11 +146,11 @@ PP(int16_t acc;)
 			if (err_ret != -1)
 			{
 				if (acc == 0)
-					sys_adacc = ldaddr;
+					sys_adacc = (char *)ldaddr;
 				else
-					gl_adacc[gl_naccs] = ldaddr;	/* save acc address */
+					gl_adacc[gl_naccs] = (char *)ldaddr;	/* save acc address */
 
-				p = pstart(&gotopgm, pfilespec, ldaddr);
+				p = pstart(gotopgm, pfilespec, ldaddr);
 				p->p_stat |= PS_TRYSUSPEND;
 				return (TRUE);
 			}
@@ -189,6 +182,8 @@ VOID ldaccs(NOTHING)
 	char tempadds[50];
 	char *name;
 
+	UNUSED(psp);
+	
 	gl_naccs = 0;
 	used_acc = 0;
 
@@ -233,14 +228,14 @@ VOID free_accs(NOTHING)
 
 	if (sys_adacc)
 	{
-		dos_free(LLGET(sys_adacc + 0x2c));	/* free envr string */
+		dos_free((VOIDPTR)LLGET(sys_adacc + 0x2c));	/* free envr string */
 		dos_free(sys_adacc);
 	}
 
 	for (i = 0; i < gl_naccs; i++)
 	{
 		ptmp = gl_adacc[i];
-		dos_free(LLGET(ptmp + 0x2c));	/* free envr string */
+		dos_free((VOIDPTR)LLGET(ptmp + 0x2c));	/* free envr string */
 		dos_free(ptmp);					/* free acc's memory        */
 		dos_free(gl_pacc[i]);			/* free process descriptors */
 	}
@@ -264,7 +259,7 @@ BOOLEAN cre_aproc(NOTHING)
 		ppd = &paccpd->ac_pd;
 		puda = &paccpd->ac_uda;
 		pcda = &paccpd->ac_cda;
-		pevb = &paccpd->ac_evb;
+		pevb = paccpd->ac_evb;
 
 		pinit(ppd, pcda);
 		ppd->p_uda = puda;

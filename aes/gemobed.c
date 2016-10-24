@@ -1,30 +1,30 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:25:25 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:25:25  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:28:23  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.4  89/02/12  01:05:56  kbad
-* reg opt ob_stfn, ob_delit
-* 
-* Revision 1.3  88/11/01  18:02:24  kbad
-* changed ob_center so X coordinate doesn't have to be char aligned
-* 
-* Revision 1.2  88/10/24  10:32:09  mui
-* fix ob_center to count the shadow
-* 
-* Revision 1.1  88/06/02  12:34:34  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:25:25 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:25:25  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:28:23  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.4  89/02/12  01:05:56  kbad
+ * reg opt ob_stfn, ob_delit
+ * 
+ * Revision 1.3  88/11/01  18:02:24  kbad
+ * changed ob_center so X coordinate doesn't have to be char aligned
+ * 
+ * Revision 1.2  88/10/24  10:32:09  mui
+ * fix ob_center to count the shadow
+ * 
+ * Revision 1.1  88/06/02  12:34:34  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMOBED.C	05/29/84 - 02/10/85		Gregg Morris	*/
 /*	Reg Opt		03/08/85 - 03/09/85		Derek Mui	*/
 /*	1.1		03/21/85 - 04/05/85		Lowell Webster	*/
@@ -37,12 +37,12 @@
 /*	Change at ob_center for 3D buttons	7/7/92	D.Mui		*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
 #include <portab.h>
 #include <machine.h>
@@ -87,6 +87,9 @@ PP(TEDINFO *pted;)
 
 
 
+/*
+ * AES #54 - form_center - Centre an object on the screen.
+ */
 VOID ob_center(P(LPTREE) tree, P(GRECT) *pt)
 PP(LPTREE tree;)
 PP(GRECT *pt;)

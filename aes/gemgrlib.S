@@ -1030,7 +1030,7 @@ _gr_rubbo:
  *	exit:	none
  */
 #if CCODE
-VOID gr_rubwind(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, WORD *poff, WORD *pwend, WORD *phend)
+VOID gr_rubwind(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, GRECT *poff, WORD *pwend, WORD *phend)
 {
 	WORD have2box, down;
 	GRECT o;
@@ -1161,7 +1161,7 @@ wdhtlp:
  *
  */
 #if CCODE
-VOID gr_dragbox(WORD w, WORD h, WORD sx, WORD sy, WORD *pc, WORD *pdx, WORD *pdy)
+VOID gr_dragbox(WORD w, WORD h, WORD sx, WORD sy, GRECT *pc, WORD *pdx, WORD *pdy)
 {
 	WORD offx, offy, down;
 	GRECT o;
@@ -1381,12 +1381,8 @@ mkstatlp:
 	dbra	d0,mkstatlp
 	rts
 
-
-
 mklist:
 	dc.l	_xrat
 	dc.l	_yrat
 	dc.l	_button
 	dc.l	_kstate
-
-

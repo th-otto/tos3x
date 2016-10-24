@@ -106,11 +106,11 @@ PP(BOOLEAN save;)
 {
 	if (save)
 	{
-		gr_mouse(258, (char *) 0);		/* save mouse */
-		gr_mouse(ARROW, (char *) 0);
+		gr_mouse(258, NULL);		/* save mouse */
+		gr_mouse(ARROW, NULL);
 	} else								/* restore mouse */
 	{
-		gr_mouse(259, (char *) 0);
+		gr_mouse(259, NULL);
 	}
 }
 
@@ -240,9 +240,9 @@ PP(OBJECT **itree;)
  *	int16_t    *pmenu:  returns the menu object number selected
  *	int16_t    *pitem:  returns the menu item object number selected
  */
-BOOLEAN mn_hdo(P(int16_t *) ptitle, P(OBJECT **) ptree, P(int16_t *) pmenu, P(int16_t *) pitem, P(int16_t *) keyret)
+BOOLEAN mn_hdo(P(int16_t *) ptitle, P(LPTREE *) ptree, P(int16_t *) pmenu, P(int16_t *) pitem, P(int16_t *) keyret)
 PP(int16_t *ptitle;)							/* returns the menu title       */
-PP(OBJECT **ptree;)							/* returns the object tree...   */
+PP(LPTREE *ptree;)							/* returns the object tree...   */
 PP(int16_t *pmenu;)							/* returns the menu object      */
 PP(int16_t *pitem;)							/* returns the menu item        */
 PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
@@ -641,7 +641,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 		{
 			flag = TRUE;
 			*ptitle = cur_title;
-			*ptree = MData.mn_tree;
+			*ptree = (LPTREE)MData.mn_tree;
 			*pmenu = MData.mn_menu;
 			*pitem = MData.mn_item;
 

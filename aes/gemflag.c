@@ -1,23 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemflag.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:22:31 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemflag.c,v $
-* Revision 2.2  89/04/26  18:22:31  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:26:01  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:31:47  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:22:31 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:22:31  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:26:01  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:31:47  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMFLAG.C	1/27/84 - 02/08/85	Lee Jay Lorenzen	*/
 /*	Reg Opt		03/09/85		Derek Mui		*/
 /*	1.1		03/23/85 - 6/19/85	Lowell Webster		*/
@@ -25,19 +23,15 @@
 /*	Fix at unsync	3/7/88			D.Mui			*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.01
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.01
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
 
 
 VOID tchange(P(int16_t) p1, P(int16_t) p2)
@@ -48,17 +42,16 @@ PP(int16_t p2;)
 	register EVB *d;
 	register int32_t c1;
 
-	c = *((int32_t *)&p1);
-	/* pull pd's off the    */
-	/*   delay list that    */
-	/*   have waited long   */
-	/*   enough     */
+#if BINEXACT
+	c = *((int32_t *)&p1); /* sigh... */
+#else
+	c = HW(p1) | LW(p2);
+#endif
+	/* pull pd's off the delay list that have waited long enough */
 	d = dlr;
 	while (d)
 	{
-		/* take a bite out of   */
-		/*   the amount of time */
-		/*   the pd is waiting  */
+		/* take a bite out of the amount of time the pd is waiting */
 		c1 = c - d->e_parm;
 		d->e_parm -= c;
 		c = c1;
@@ -71,10 +64,7 @@ PP(int16_t p2;)
 		} else
 			break;
 	}
-	/* set compare tick     */
-	/*   time to the amount */
-	/*   the first guy is   */
-	/*   waiting        */
+	/* set compare tick time to the amount the first guy is waiting */
 	cli();
 	if (d)								/*    6/19/85       */
 	{
@@ -92,16 +82,14 @@ PP(register SPB *sy;)
 {
 	sy->sy_tas++;						/* count up     */
 
-	/* if we didn't already */
-	/* own it and it wasn't */
-	/* then wait for it else */
-	/* claim ownership  */
+	/* if we didn't already own it and it wasn't then wait for it else claim ownership */
 	if ((sy->sy_owner != rlr) && (sy->sy_tas != 1))
 	{
 		sy->sy_tas--;
 		return (FALSE);
-	} else								/* when sempahore = 0   */
-	{									/* we can claim it  */
+	} else
+	{
+		/* when sempahore = 0 we can claim it */
 		sy->sy_owner = rlr;
 		return (TRUE);
 	}
@@ -129,8 +117,8 @@ PP(SPB *sy;)
 	if (tak_flag(sy))					/* it owns it so do it  */
 		zombie(e);
 	else
-		evinsert(e, &sy->sy_wait);		/* if it doesn't own    */
-}										/* then wait        */
+		evinsert(e, &sy->sy_wait);		/* if it doesn't own then wait*/
+}
 
 
 
@@ -139,29 +127,25 @@ PP(register SPB *sy;)
 {
 	register EVB *p;
 
-	/* internal unsync must */
-	/* be in dispatcher */
-	/* context or NODISP    */
-	/* count down       */
+	/* internal unsync must be in dispatcher context or NODISP count down */
 	if (sy->sy_tas > 0)
 	{
 
 		sy->sy_tas--;
-		/* if it went to 0 then */
-		/*   give up the sync   */
-		/*   to the next guy    */
-		/*   if there is one    */
+		/* if it went to 0 then give up the sync to the next guy if there is one */
 		if (sy->sy_tas == 0)
 		{
-			if (p = sy->sy_wait)		/* somebody's waiting   */
+			if ((p = sy->sy_wait))		/* somebody's waiting   */
 			{
 				sy->sy_wait = p->e_link;	/* so give it to him    */
-				sy->sy_owner = (PD *) p->e_pd;
+				sy->sy_owner = p->e_pd;
 				sy->sy_tas = 1;			/* restart semaphore    */
 				zombie(p);				/* start it     */
 				dsptch();				/* kick the system !    */
 			} else
+			{
 				sy->sy_owner = 0;		/* reset owner field    */
+			}
 		}
 	}
 }

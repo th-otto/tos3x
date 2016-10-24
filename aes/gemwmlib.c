@@ -49,7 +49,6 @@ VOID activate PROTO((WINDOW *wp, int16_t topped));
 VOID setcol PROTO((WINDOW *wp, int16_t ndx, int16_t topped));
 VOID w_adjust PROTO((WINDOW *wp, GRECT *rect));
 VOID w_clipdraw PROTO((WINDOW *wp, int obj, GRECT *pc));
-VOID w_drawchange PROTO((GRECT *dirty, uint16_t skip, uint16_t stop));
 VOID w_bld PROTO((WINDOW *wp, int ob, int type, int parent, intptr_t spec, int16_t is3d));
 VOID w_obrect PROTO((WINDOW *wp, int ob, int obx, int oby, int obw, int obh));
 VOID w_rect PROTO((GRECT *raddr, int gx, int gy, int gw, int gh));
@@ -528,11 +527,18 @@ PP(int16_t handle;)							/* handle of window to be deleted */
  *	    - returns TRUE (1) if everything is fine
  *
  */
+#if AESVERSION >= 0x330
 int16_t wm_get(P(int16_t) handle, P(int16_t) field, P(int16_t *)ow, P(const int16_t *) iw)
 PP(register int16_t handle;)						/* window handle */
 PP(int16_t field;)								/* flag to identify what info to be returned */
 PP(register int16_t *ow;)							/* return values */
 PP(const int16_t *iw;)
+#else
+int16_t wm_get(P(int16_t) handle, P(int16_t) field, P(int16_t *)ow)
+PP(register int16_t handle;)						/* window handle */
+PP(int16_t field;)								/* flag to identify what info to be returned */
+PP(register int16_t *ow;)							/* return values */
+#endif
 {
 	int ret, i;
 	register WINDOW *wp;
@@ -550,7 +556,6 @@ PP(const int16_t *iw;)
 
 	switch (field)
 	{
-
 	case WF_WORKXYWH:
 		r = (GRECT *) ow;
 		*r = *(GRECT *) & (wp->obj[W_WORK].ob_x);
@@ -594,7 +599,7 @@ PP(const int16_t *iw;)
 		ow[2] = wp->under;
 		break;
 
-		break;
+		break; /* WTF */
 
 	case WF_FIRSTXYWH:
 		r = (GRECT *) ow;
@@ -640,6 +645,7 @@ PP(const int16_t *iw;)
 		gsx_mret(&ow[0], &ow[2]);
 		break;
 
+#if AESVERSION >= 0x330
 	case WF_COLOR:
 		ow[1] = wp->tcolor[iw[0]];
 		ow[2] = wp->bcolor[iw[0]];
@@ -649,6 +655,7 @@ PP(const int16_t *iw;)
 		ow[1] = wtcolor[iw[0]];
 		ow[2] = wbcolor[iw[0]];
 		break;
+#endif
 
 	case WF_OWNER:
 		ow[0] = wp->owner->p_pid;

@@ -75,8 +75,8 @@ nextbit:
 *
 * r_get		Routine to set the variables x,y,w,h to the values found
 *		in an x,y,w,h block (grect)
-*		C binding:	r_get(xywhptr,xptr,yprt,wptr,hptr);
-*				int	*xywhptr;
+*		C binding:	r_get(gr,xptr,yprt,wptr,hptr);
+*				const GRECT *gr;
 *				int	*xptr,*yptr,*wptr,*hptr;
 * --
 	xdef	_r_get
@@ -94,8 +94,8 @@ _r_get:
 *
 * _r_set	Routine to set a x,y,w,h block to the x,y,w,h values passed
 *		in.
-*		C binding:	r_set(xywhptr,x,y,w,h);
-*				int	*xywhptr;
+*		C binding:	r_set(gr,x,y,w,h);
+*				GRECT *r;
 *				int	x,y,w,h;
 * --
 	xdef	_r_set
@@ -108,8 +108,8 @@ _r_set:
 * --
 *
 * rc_copy	Copy src xywh block to dest xywh block.
-*		C binding:	r_copy(srcxywh,dstxywh);
-*				GRECt	*srcxywh,*dstxywh;
+*		C binding:	r_copy(srcx,dst);
+*				GRECT	*src,*dst;
 *
 * --
 	xdef _rc_copy

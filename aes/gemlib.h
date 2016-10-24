@@ -1,21 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:25:02 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:25:02  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:28:06  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:34:26  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:25:02 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:25:02  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:28:06  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:34:26  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMLIB.H	03/15/84 - 01/07/85	Lee Lorenzen		*/
 /*	EVNTLIB.H	03/15/84 - 05/16/84	Lee Lorenzen		*/
 /*	to 68k		03/08/85 - 05/11/85	Lowell Webster		*/
@@ -29,8 +29,7 @@
 /*	Be careful when changing the THEGLO				*/
 /*	Gembind.s Gemoblib.c may be affected 				*/
 
-/*	Change these defines and you have to change those in		*/
-/*	deskapp.h							*/
+/*	Change these defines and you have to change those in deskapp.h */
 
 #ifndef GEMLIB_H
 #define GEMLIB_H 1

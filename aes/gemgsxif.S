@@ -206,7 +206,7 @@ _gsx_1code:
 
 
 #if CCODE
-VOID gsx_init(NOTHNG)
+VOID gsx_init(NOTHING)
 {
 	gsx_wsopen();
 	gsx_start();
@@ -554,8 +554,8 @@ _bb_save:
 
 
 
-	xdef _bb_resto
-_bb_resto:
+	xdef _bb_restore
+_bb_restore:
 
 	lea	_gl_dst,a1
 	pea	 (a1)
@@ -802,10 +802,10 @@ WORD v_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
 	gsx_ncode(OPEN_WORKSTATION, 0, 11);
 
 	*phandle = contrl[6];
-	i_intin(&intin);
-	i_intout(&intout);
-	i_ptsin(&ptsin);
-	i_ptsout(&ptsout);
+	i_intin(intin);
+	i_intout(intout);
+	i_ptsin(ptsin);
+	i_ptsout(ptsout);
 }
 #endif
 	xdef _v_opnwk
@@ -835,7 +835,7 @@ VOID v_pline(WORD count, WORD *pxyarray)
 {
 	i_ptsin(pxyarray);
 	gsx_ncode(POLYLINE, count, 0);
-	i_ptsin(&ptsin);
+	i_ptsin(ptsin);
 }
 #endif
 	xdef _v_pline
@@ -861,7 +861,7 @@ VOID vst_clip(WORD clip_flag, WORD pxyarray)
 	i_ptsin(pxyarray);
 	intin[0] = clip_flag;
 	gsx_ncode(TEXT_CLIP, value, 1);
-	i_ptsin(&ptsin);
+	i_ptsin(ptsin);
 }
 #endif
 	xdef _vst_clip
@@ -922,7 +922,7 @@ VOID vr_recfl(WORD *pxyarray, FDB *pdesMFDB) /* ??? why MFDB ??? */
 	i_ptr(pdesMFDB);
 	i_ptsin(pxyarray);
 	gsx_ncode(FILL_RECTANGLE, 2, 1);
-	i_ptsin(&ptsin);
+	i_ptsin(ptsin);
 }
 #endif
 	xdef _vr_recfl
@@ -946,7 +946,7 @@ VOID vro_cpyfm(WORD wr_mode, WORD *pxyarray, WORD *psrcMFDB, WORD *pdesMFDB)
 	i_ptr2(pdesMFDB);
 	i_ptsin(pxyarray);
 	gsx_ncode(COPY_RASTER_FORM, 4, 1);
-	i_ptsin(&ptsin);
+	i_ptsin(ptsin);
 }
 #endif
 	xdef _vro_cpyf
@@ -977,7 +977,7 @@ VOID vrt_cpyfm(WORD wr_mode, WORD *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, WORD 
 	i_ptr2(pdesMFDB);
 	i_ptsin(pxyarray);
 	gsx_ncode(121, 4, 3);
-	i_ptsin(&ptsin);
+	i_ptsin(ptsin);
 }
 #endif
 	xdef _vrt_cpyfm

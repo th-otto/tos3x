@@ -1,29 +1,29 @@
 /*
-***************************   GEMDISP.C    ******************************
-*
-* $Revision: 2.3 $	$Source: /u2/MRS/osrevisions/aes/gemdisp.c,v $
-* =======================================================================
-* $Author: mui $ 	$Date: 89/04/26 18:21:59 $    $Locker: kbad $
-* =======================================================================
-*
-* $Log:	gemdisp.c,v $
-* Revision 2.3  89/04/26  18:21:59  mui
-* TT
-* 
-* Revision 2.2  89/04/19  14:42:26  kbad
-* 680x0 support: removed savestate() and switchto() (now in jdispa.s)
-* 
-* Revision 2.1  89/02/22  05:25:37  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.2  88/12/05  16:50:41  mui
-* make the forkq return TRUE or FALSE
-* 
-* Revision 1.1  88/06/02  12:31:33  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ ***************************   GEMDISP.C    ******************************
+ *
+ * $Revision: 2.3 $	$Source: /u2/MRS/osrevisions/aes/gemdisp.c,v $
+ * =======================================================================
+ * $Author: mui $ 	$Date: 89/04/26 18:21:59 $    $Locker: kbad $
+ * =======================================================================
+ *
+ * $Log:	gemdisp.c,v $
+ * Revision 2.3  89/04/26  18:21:59  mui
+ * TT
+ * 
+ * Revision 2.2  89/04/19  14:42:26  kbad
+ * 680x0 support: removed savestate() and switchto() (now in jdispa.s)
+ * 
+ * Revision 2.1  89/02/22  05:25:37  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.2  88/12/05  16:50:41  mui
+ * make the forkq return TRUE or FALSE
+ * 
+ * Revision 1.1  88/06/02  12:31:33  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMDISP.C	1/27/84 - 02/03/85	Lee Jay Lorenzen	*/
 /*	Reg Opt		03/09/85		Derek Mui		*/
 /*	1.1		03/21/85		Lowell Webster		*/
@@ -38,20 +38,16 @@
 /*	Block process when in critical error	8/1/90	D.Mui		*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
-#include <funcdef.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "gsxdefs.h"
 
 
 #define KEYSTOP 0x2b1c0000L				/* control backslash    */
@@ -65,7 +61,7 @@ PD *slr;
 
 /****************************************************************/
 
-VOID forkq(P(FCODE) fcode, P(int32_t) fdata)
+BOOLEAN forkq(P(FCODE) fcode, P(int32_t) fdata)
 PP(FCODE fcode;)
 PP(int32_t fdata;)
 {
@@ -114,6 +110,7 @@ PP(register PD *p;)
 {
 	register PD *q;
 
+	UNUSED(q);
 	p->p_stat = PS_SUSPENDED;
 	p->p_link = slr;
 	slr = p;
@@ -151,20 +148,24 @@ VOID forker(NOTHING)
 				/*   then coalesce them */
 				/*   else record the    */
 				/*   event      */
-				if ((f->f_code == tchange) && (LLGET(gl_rbuf - sizeof(FPD)) == tchange))
+				if ((f->f_code == tchange) && (LLGET(gl_rbuf - sizeof(FPD)) == (intptr_t)tchange))
 				{
 					amt = f->f_data + LLGET(gl_rbuf - sizeof(int32_t));
 					LLSET(gl_rbuf - sizeof(int32_t), amt);
 				} else
 				{
-					LBCOPY(gl_rbuf, ADDR(f), sizeof(FPD));
+					LBCOPY((VOIDPTR)gl_rbuf, ADDR(f), sizeof(FPD));
 					gl_rbuf += sizeof(FPD);
 					gl_rlen--;
 					gl_recd = gl_rlen;
 				}
 			}
 		}
+#if BINEXACT
 		(*f->f_code) (f->f_data);
+#else
+		(*f->f_code) (LHIWD(f->f_data), LLOWD(f->f_data));
+#endif
 	}
 	rlr = oldrl;
 	infork = 0;
@@ -176,7 +177,7 @@ VOID chkkbd(NOTHING)
 	register int16_t achar, kstat;
 	register int16_t *pintin;
 
-	gsx_ncode(KEY_SHST, 0x0L);
+	gsx_ncode(KEY_SHST, 0, 0);
 	kstat = intout[0];
 
 	achar = 0;
@@ -186,7 +187,11 @@ VOID chkkbd(NOTHING)
 
 		pintin[0] = 4;
 		pintin[1] = 2;
+#if BINEXACT
 		gsx_ncode(33, 0x00000002L);
+#else
+		gsx_ncode(33, 0, 2);
+#endif
 
 		pintin[0] = -1;
 		pintin[1] = FALSE;				/* no echo */
@@ -196,7 +201,13 @@ VOID chkkbd(NOTHING)
 	}
 
 	if ((achar) || (kstat != kstate))
+	{
+#if BINEXACT
 		forkq(kchange, achar, kstat);
+#else
+		forkq(kchange, HW(achar) | LW(kstat));
+#endif
+	}
 }
 
 

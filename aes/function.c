@@ -41,39 +41,36 @@ PP(int16_t *ph;)
 
 
 /* 	Routine to set a x,y,w,h block to the x,y,w,h  
-*	values passed in.
-*/
+ *	values passed in.
+ */
 
-VOID r_set(P(int16_t *) pxywh, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
+VOID r_set(P(GRECT *) pxywh, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(register int16_t *pxywh;)
 PP(int16_t x;)
 PP(int16_t y;)
 PP(int16_t w;)
 PP(int16_t h;)
 {
-	pxywh[0] = x;
-	pxywh[1] = y;
-	pxywh[2] = w;
-	pxywh[3] = h;
+	gr->g_x = x;
+	gr->g_y = y;
+	gr->g_w = w;
+	gr->g_h = h;
 }
 
 
 /* 	Copy src xywh block to dest xywh block.		*/
 
-VOID rc_copy(P(int16_t *) psxywh, P(int16_t *) pdxywh)
-PP(register int16_t *psxywh;)
-PP(register int16_t *pdxywh;)
+VOID rc_copy(P(const GRECT *) src, P(GRECT *) dst)
+PP(register const GRECT *src;)
+PP(register GRECT *dst;)
 {
-	*pdxywh++ = *psxywh++;
-	*pdxywh++ = *psxywh++;
-	*pdxywh++ = *psxywh++;
-	*pdxywh++ = *psxywh++;
+	*dst = *src;
 }
 
 
 /* 	Return true if the x,y position is within the grect	*/
 
-uint16_t inside(P(int16_t) x, P(int16_t) y, P(const GRECT *) pt)
+BOOLEAN inside(P(int16_t) x, P(int16_t) y, P(const GRECT *) pt)
 PP(register int16_t x;)
 PP(register int16_t y;)
 PP(register const GRECT *pt;)

@@ -1,60 +1,60 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:23:06 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:23:06  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:26:30  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.14  88/11/02  12:00:29  mui
-* Change fs_fnum from word to long
-* 
-* Revision 1.13  88/11/01  16:07:28  kbad
-* fix hidden/system/readonly files (now they don't show)
-* 
-* Revision 1.12  88/11/01  11:21:04  kbad
-* Reg opt @ r_dir, r_files
-* 
-* Revision 1.11  88/10/24  10:31:33  mui
-* click anywhere to reload the directory
-* 
-* Revision 1.10  88/10/17  13:37:39  kbad
-* yanked fs_start to fix fs_input growing clip rect problem
-* 
-* Revision 1.9  88/09/09  17:11:25  kbad
-* Fixed the colon cancer - fixed fs_back colon handling
-* 
-* Revision 1.8  88/08/17  20:35:35  mui
-* change to handle more than 16 devices
-* 
-* Revision 1.7  88/07/29  01:30:12  kbad
-* change r_files to fix filename copy
-* 
-* Revision 1.6  88/07/28  21:25:19  mui
-* use GEMDOS to handle all path functions
-* 
-* Revision 1.5  88/07/08  11:51:38  mui
-* don't read them in until it is needed
-* 
-* Revision 1.4  88/07/07 17:55:48  mui
-* Get default directory from GEMDOS
-*
-* Revision 1.3  88/07/01 16:21:52  mui
-* Change r_files to read in everything once
-*
-* Revision 1.2  88/07/01 15:49:12  mui
-* Fix fs_input to handle drive: with no extension
-*
-* Revision 1.1  88/06/02  12:33:50  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:23:06 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:23:06  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:26:30  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.14  88/11/02  12:00:29  mui
+ * Change fs_fnum from word to long
+ * 
+ * Revision 1.13  88/11/01  16:07:28  kbad
+ * fix hidden/system/readonly files (now they don't show)
+ * 
+ * Revision 1.12  88/11/01  11:21:04  kbad
+ * Reg opt @ r_dir, r_files
+ * 
+ * Revision 1.11  88/10/24  10:31:33  mui
+ * click anywhere to reload the directory
+ * 
+ * Revision 1.10  88/10/17  13:37:39  kbad
+ * yanked fs_start to fix fs_input growing clip rect problem
+ * 
+ * Revision 1.9  88/09/09  17:11:25  kbad
+ * Fixed the colon cancer - fixed fs_back colon handling
+ * 
+ * Revision 1.8  88/08/17  20:35:35  mui
+ * change to handle more than 16 devices
+ * 
+ * Revision 1.7  88/07/29  01:30:12  kbad
+ * change r_files to fix filename copy
+ * 
+ * Revision 1.6  88/07/28  21:25:19  mui
+ * use GEMDOS to handle all path functions
+ * 
+ * Revision 1.5  88/07/08  11:51:38  mui
+ * don't read them in until it is needed
+ * 
+ * Revision 1.4  88/07/07 17:55:48  mui
+ * Get default directory from GEMDOS
+ *
+ * Revision 1.3  88/07/01 16:21:52  mui
+ * Change r_files to read in everything once
+ *
+ * Revision 1.2  88/07/01 15:49:12  mui
+ * Fix fs_input to handle drive: with no extension
+ *
+ * Revision 1.1  88/06/02  12:33:50  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*  	NEWFSLIB.C	10/27/87 - 01/06/88	Derek Mui		*/
 /*	Totally rewritten by Derek Mui					*/
 /*	Change fs_input	1/21/88	- 1/22/88	D.Mui			*/
@@ -81,22 +81,19 @@
 /*	Arrows, Sliders and Close Box get SELECTED 08/10/92     c.gee   */
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <dos.h>
-#include <gemlib.h>
-#include <vdidefs.h>
-#include <gemusa.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "gemusa.h"
+#include "dos.h"
 
 
 #define LEN_FSNAME 16
@@ -110,10 +107,10 @@ typedef struct fstruct
 } FSTRUCT;
 
 GRECT gl_rfs;
-int32_t ad_fstree;
+VOIDPTR ad_fstree;
 char *ad_fpath;
-int32_t ad_title;
-int32_t ad_select;
+char *ad_title;
+char *ad_select;
 FSTRUCT *ad_fsnames;
 int16_t fs_first;					/* first enter the file selector */
 uint16_t fs_topptr;
@@ -131,7 +128,7 @@ static int16_t defdrv;
 
 typedef struct pathstruct
 {
-	char pxname[128];
+	char pxname[LPATH];
 } PATHSTRUCT;
 
 PATHSTRUCT *pxpath;
@@ -139,13 +136,13 @@ PATHSTRUCT *pxpath;
 
 char *fs_back PROTO((char *pstr));
 int16_t r_dir PROTO((char *path, char *select, uint16_t *count));
-int16_t r_files PROTO((char *path, char *select, int16_t *count, char *filename));
-int16_t r_sort PROTO((FSTRUCT **buffer, int16_t count));
+int16_t r_files PROTO((char *path, char *select, uint16_t *count, char *filename));
+VOID r_sort PROTO((FSTRUCT *buffer, int16_t count));
 VOID r_sfiles PROTO((uint16_t index, uint16_t ratio));
-VOID fs_draw PROTO((int16_t index, char *path, char *addr1, char *addr2));
-int16_t FXWait PROTO((NOTHING));
-int16_t FXSelect PROTO((OBJECT *tree, int16_t obj));
-int16_t FXDeselect PROTO((OBJECT *tree, int16_t obj));
+VOID fs_draw PROTO((int16_t index, char *path, char **addr1, int16_t *ptxtlen));
+VOID FXWait PROTO((NOTHING));
+VOID FXSelect PROTO((OBJECT *tree, int16_t obj));
+VOID FXDeselect PROTO((OBJECT *tree, int16_t obj));
 
 
 
@@ -184,24 +181,28 @@ PP(register char *pstr;)
 
 
 /*
-*	File Selector input routine that takes control of the mouse
-*	and keyboard, searchs and sort the directory, draws the file 
-*	selector, interacts with the user to determine a selection
-*	or change of path, and returns to the application with
-*	the selected path, filename, and exit button.
-*	Add the label parameter
-*/
-
-int16_t fs_input(P(char *) pipath, P(intptr_t) pisel, P(int16_t *) pbutton, P(char *) lstring)
+ * AES #90 - fsel_input - File selection input
+ * AES #91 - fsel_exinput - File selection extended input
+ *
+ *	File Selector input routine that takes control of the mouse
+ *	and keyboard, searchs and sort the directory, draws the file 
+ *	selector, interacts with the user to determine a selection
+ *	or change of path, and returns to the application with
+ *	the selected path, filename, and exit button.
+ *	Add the label parameter
+ */
+int16_t fs_input(P(char *) pipath, P(char *) pisel, P(int16_t *) pbutton, P(char *) lstring)
 PP(char *pipath;)
-PP(intptr_t pisel;)
+PP(char *pisel;)
 PP(int16_t *pbutton;)
 PP(char *lstring;)
 {
 	register uint16_t i, j;
 	int16_t label, last, ret;
-	register int32_t tree;
-	int32_t addr, mul, savedta, savepath;
+	register LPTREE tree;
+	char *addr;
+	intptr_t mul, savedta;
+	PATHSTRUCT *savepath;
 	uint16_t botptr, count, value;
 	int16_t xoff, yoff, mx, my, bret;
 	char dirbuffer[122];
@@ -209,17 +210,23 @@ PP(char *lstring;)
 	char scopy[16];
 	char chr;
 	int16_t curdrv, savedrv;
-	int32_t **lgptr;
+	intptr_t **lgptr;
 	GRECT clip;
 	int16_t firstry;
 	OBJECT *xtree;						/* cjg */
 	int16_t newend, oldend;
 
+	UNUSED(chrptr);
+#if !BINEXACT
+	oldend = 0; /* quiet compiler */
+	bret = 0; /* quiet compiler */
+#endif
+	
 	/*
 	 *	Start up the file selector by initializing the fs_tree
 	 */
 	rs_gaddr(ad_sysglo, R_TREE, SELECTOR, &ad_fstree);
-	ob_center(ad_fstree, &gl_rfs);
+	ob_center((LPTREE)ad_fstree, &gl_rfs);
 
 	firstry = TRUE;
 	fs_first = TRUE;					/* first enter      */
@@ -256,21 +263,21 @@ PP(char *lstring;)
 
 
 	savepath = pxpath;					/* save the address */
-	pathcopy = savepath;
-	pxpath = savepath + (int16_t) LPATH;
+	pathcopy = savepath->pxname;
+	pxpath = savepath + 1;
 
 	fm_dial(FMD_START, &gl_rcenter, &gl_rfs);
 
-	tree = ad_fstree;
+	tree = (LPTREE)ad_fstree;
 	xtree = (OBJECT *) tree;
 
-	lgptr = OB_SPEC(FDIRECTORY);		/* change the buffer pointer */
-	**lgptr = dirbuffer;
+	lgptr = (intptr_t **)OB_SPEC(FDIRECTORY);		/* change the buffer pointer */
+	**lgptr = (intptr_t)dirbuffer; /* tree[FDIRECTORY].ob_spec.tedinfo->te_ptext = dirbuffer */
 
-	fs_sset(tree, FLABEL, lstring, &addr, &addr);
-	fs_sset(tree, FDIRECTORY, "", &ad_fpath, &addr);
-	fs_sset(tree, FTITLE, "", &ad_title, &addr);
-	fs_sset(tree, FSELECTION, "", &ad_select, &addr);
+	fs_sset(tree, FLABEL, lstring, &addr, (int16_t *)&addr); /* WTF */
+	fs_sset(tree, FDIRECTORY, "", &ad_fpath, (int16_t *)&addr); /* WTF */
+	fs_sset(tree, FTITLE, "", &ad_title, (int16_t *)&addr);
+	fs_sset(tree, FSELECTION, "", &ad_select, (int16_t *)&addr);
 	/* get the current drive */
 	count = isdrive();
 	j = 1;
@@ -285,7 +292,7 @@ PP(char *lstring;)
 
 	for (i = 0; i < NM_NAMES; i++)		/* clean up fields  */
 	{
-		fs_sset(tree, label, " ", &addr, &addr);
+		fs_sset(tree, label, " ", &addr, (int16_t *)&addr); /* WTF */
 		LWSET(OB_STATE(label++), NORMAL);
 	}
 	/* save the current dta   */
@@ -298,7 +305,7 @@ PP(char *lstring;)
 	LWSET(OB_Y(FSVELEV), 0);
 	LWSET(OB_HEIGHT(FSVELEV), LWGET(OB_HEIGHT(FSVSLID)));
 
-	gr_mouse(258, 0x0L);
+	gr_mouse(258, NULL);
 	gsx_mfset(ad_armice);				/* arrow pointer    */
 
 	ob_draw(tree, 0, MAX_DEPTH);		/* draw the box     */
@@ -543,7 +550,7 @@ PP(char *lstring;)
 			} else /* must be a file   */ if (chr)
 			{							/* clean up the last selected */
 				ob_change(tree, last, NORMAL, TRUE);
-				xstrpcpy(addr, LLGET(LLGET(OB_SPEC(FSELECTION))));
+				xstrpcpy(addr, (char *)(intptr_t)LLGET(LLGET(OB_SPEC(FSELECTION))));
 				ob_change(tree, ret, SELECTED, TRUE);
 				ob_draw(tree, FSELECTION, MAX_DEPTH);
 				last = ret;
@@ -591,13 +598,13 @@ PP(char *lstring;)
 	unfmt_str(ad_select, pisel);
 
 	if ((*pbutton = inf_what(tree, OK, CANCEL)) == -1)
-		*pbutton = NULL;
+		*pbutton = 0;
 
 	ob_change(tree, ret, NORMAL, FALSE);
 	fm_dial(FMD_FINISH, &gl_rcenter, &gl_rfs);
-	dos_sdta(savedta);
+	dos_sdta((VOIDPTR)savedta);
 	gsx_sclip(&clip);
-	gr_mouse(259, 0x0L);
+	gr_mouse(259, NULL);
 	return (TRUE);
 }
 
@@ -610,11 +617,14 @@ PP(char *path;)
 PP(char *select;)
 PP(register uint16_t *count;)
 {
-	int32_t tree, addr;
+	LPTREE tree;
+	char *addr;
 	register int16_t status, i;
 	int32_t h, h1;
 	char filename[16];
 
+	UNUSED(i);
+	
 	gsx_mfset(ad_hgmice);
 
 	if (!r_files(path, select, count, filename))
@@ -625,11 +635,11 @@ PP(register uint16_t *count;)
 	}
 
 	fs_count = *count;
-	fs_draw(FDIRECTORY, path, &addr, &addr);
-	fs_draw(FTITLE, filename, &addr, &addr);
-	fs_draw(FSELECTION, select, &ad_select, &addr);
+	fs_draw(FDIRECTORY, path, &addr, (int16_t *)&addr); /* WTF */
+	fs_draw(FTITLE, filename, &addr, (int16_t *)&addr); /* WTF */
+	fs_draw(FSELECTION, select, &ad_select, (int16_t *)&addr); /* WTF */
 
-	tree = ad_fstree;
+	tree = (LPTREE)ad_fstree;
 	fs_topptr = 0;						/* reset top pointer    */
 
 	h = LWGET(OB_HEIGHT(FSVSLID));
@@ -653,7 +663,7 @@ PP(register uint16_t *count;)
 	status = TRUE;
 
   r_exit:
-	gr_mouse(260, 0x0L);
+	gr_mouse(260, NULL);
 	return (status);
 }
 
@@ -663,10 +673,10 @@ PP(register uint16_t *count;)
 /*	for easy coding and redraw the count will return   */
 /*	the actual number of files		           */
 
-int16_t r_files(P(char *) path, P(char *) select, P(int16_t *) count, P(char *) filename)
+int16_t r_files(P(char *) path, P(char *) select, P(uint16_t *) count, P(char *) filename)
 PP(register char *path;)
 PP(char *select;)
-PP(int16_t *count;)
+PP(uint16_t *count;)
 PP(register char *filename;)
 {
 	register int16_t i;
@@ -692,7 +702,7 @@ PP(register char *filename;)
 	/* the drive present ?  */
 	k = 1;
 	k = k << drvid;
-	j = trap13(0xa);					/* get the drive map    */
+	j = trp13(0xa);						/* get the drive map    */
 
 	if (!(k & j))						/* drive not there  */
 		return (FALSE);
@@ -767,25 +777,26 @@ PP(register char *filename;)
 }
 
 
-int16_t r_sort(P(FSTRUCT **) buffer, P(int16_t) count)
-PP(register FSTRUCT **buffer;)
+VOID r_sort(P(FSTRUCT *) buffer, P(int16_t) count)
+PP(register FSTRUCT *buffer;)
 PP(int16_t count;)
 {
 	register int16_t gap, i, j, k;
 	char tmp[LEN_FSNAME];
 
+	UNUSED(k);
 	for (gap = count / 2; gap > 0; gap /= 2)
 	{
 		for (i = gap; i < count; i++)
 		{
 			for (j = i - gap; j >= 0; j -= gap)
 			{
-				if (strchk(buffer[j], buffer[j + gap]) <= 0)
+				if (strchk(buffer[j].snames, buffer[j + gap].snames) <= 0)
 					break;
 
-				LSTCPY(tmp, buffer[j]);
-				LSTCPY(buffer[j], buffer[j + gap]);
-				LSTCPY(buffer[j + gap], tmp);
+				LSTCPY(tmp, buffer[j].snames);
+				LSTCPY(buffer[j].snames, buffer[j + gap].snames);
+				LSTCPY(buffer[j + gap].snames, tmp);
 			}
 		}
 	}
@@ -799,17 +810,18 @@ PP(uint16_t index;)
 PP(uint16_t ratio;)
 {
 	register int16_t label, i;
-	register int32_t tree;
-	int32_t addr, h, h1, h3;
+	register LPTREE tree;
+	char *addr;
+	int32_t h, h1, h3;
 
 	label = F1NAME;
-	tree = ad_fstree;
+	tree = (LPTREE)ad_fstree;
 
 	for (i = index; i < (index + NM_NAMES); i++)
 	{
 		LWSET(OB_STATE(label), NORMAL);
-		fs_sset(ad_fstree, label, " ", &addr, &addr);
-		fs_draw(label++, &ad_fsnames[i], &addr, &addr);
+		fs_sset((LPTREE)ad_fstree, label, " ", &addr, (int16_t *)&addr); /* WTF */
+		fs_draw(label++, ad_fsnames[i].snames, &addr, (int16_t *)&addr); /* WTF */
 	}
 
 	h = LWGET(OB_HEIGHT(FSVSLID));
@@ -838,14 +850,14 @@ PP(uint16_t ratio;)
 
 /*	do the fs_sset and ob_draw	*/
 
-VOID fs_draw(P(int16_t) index, P(char *) path, P(char *) addr1, P(char *) addr2)
+VOID fs_draw(P(int16_t) index, P(char *) path, P(char **) addr1, P(int16_t *) ptxtlen)
 PP(int16_t index;)
 PP(char *path;)
-PP(char *addr1;)
-PP(char *addr2;)
+PP(char **addr1;)
+PP(int16_t *ptxtlen;)
 {
-	fs_sset(ad_fstree, index, path, addr1, addr2);
-	ob_draw(ad_fstree, index, MAX_DEPTH);
+	fs_sset((LPTREE)ad_fstree, index, path, addr1, ptxtlen);
+	ob_draw((LPTREE)ad_fstree, index, MAX_DEPTH);
 }
 
 
@@ -857,7 +869,9 @@ VOID ini_fsel(NOTHING)
 	register OBJECT *obj;
 	OBJECT *tree;
 
-	rs_gaddr(ad_sysglo, R_TREE, SELECTOR, &tree);
+	UNUSED(h);
+	
+	rs_gaddr(ad_sysglo, R_TREE, SELECTOR, (VOIDPTR *)&tree);
 	obj = tree;
 
 	y = x = 0;
@@ -875,11 +889,11 @@ VOID ini_fsel(NOTHING)
 
 	obj[FUPAROW].ob_height -= 1;
 	obj[FDNAROW].ob_height -= 1;
-	ob_offset(tree, DRIVEA, &x, &y);
+	ob_offset((LPTREE)tree, DRIVEA, &x, &y);
 	y -= obj[FSDRIVE].ob_height + 2 + ADJ3DPIX;
 	obj[FSDRIVE].ob_y = y;
 
-	ob_offset(tree, FCLSBOX, &x, &y);
+	ob_offset((LPTREE)tree, FCLSBOX, &x, &y);
 
 #if 0
 	obj[FSVSLID].ob_type |= 0x0100;
@@ -904,7 +918,7 @@ VOID ini_fsel(NOTHING)
 	obj[FILEBOX].ob_width = w;
 	obj[SCRLBAR].ob_x = obj[FILEBOX].ob_x + w;
 
-	ob_offset(tree, FILEBOX, &x, &y);
+	ob_offset((LPTREE)tree, FILEBOX, &x, &y);
 	y = obj[FILEBOX].ob_height + y + 6 + ADJ3DPIX;
 	obj[OK].ob_y = obj[CANCEL].ob_y = y;
 	y += obj[OK].ob_height + ADJ3DPIX + 6;
@@ -923,7 +937,7 @@ VOID ini_fsel(NOTHING)
 }
 
 
-int16_t FXWait(NOTHING)
+VOID FXWait(NOTHING)
 {
 	do
 	{
@@ -932,7 +946,7 @@ int16_t FXWait(NOTHING)
 }
 
 
-int16_t FXSelect(P(OBJECT *) tree, P(int16_t) obj)
+VOID FXSelect(P(OBJECT *) tree, P(int16_t) obj)
 PP(OBJECT *tree;)
 PP(int16_t obj;)
 {
@@ -941,13 +955,13 @@ PP(int16_t obj;)
 
 	tree[obj].ob_state |= SELECTED;
 	rect = *(GRECT *) & tree[(obj)].ob_x;
-	ob_gclip(tree, obj, &dummy, &dummy, &rect.g_x, &rect.g_y, &rect.g_w, &rect.g_h);
+	ob_gclip((LPTREE)tree, obj, &dummy, &dummy, &rect.g_x, &rect.g_y, &rect.g_w, &rect.g_h);
 	gsx_sclip(&rect);
-	ob_draw(tree, obj, MAX_DEPTH);		/* draw the box     */
+	ob_draw((LPTREE)tree, obj, MAX_DEPTH);		/* draw the box     */
 }
 
 
-int16_t FXDeselect(P(OBJECT *) tree, P(int16_t) obj)
+VOID FXDeselect(P(OBJECT *) tree, P(int16_t) obj)
 PP(OBJECT *tree;)
 PP(int16_t obj;)
 {
@@ -956,7 +970,7 @@ PP(int16_t obj;)
 
 	tree[obj].ob_state &= ~SELECTED;
 	rect = *(GRECT *) & tree[(obj)].ob_x;
-	ob_gclip(tree, obj, &dummy, &dummy, &rect.g_x, &rect.g_y, &rect.g_w, &rect.g_h);
+	ob_gclip((LPTREE)tree, obj, &dummy, &dummy, &rect.g_x, &rect.g_y, &rect.g_w, &rect.g_h);
 	gsx_sclip(&rect);
-	ob_draw(tree, obj, MAX_DEPTH);		/* draw the box     */
+	ob_draw((LPTREE)tree, obj, MAX_DEPTH);		/* draw the box     */
 }

@@ -128,7 +128,7 @@ _far_mchange:
 _drawrat:
 	move.w	4(a7),d0		; xrat
 	move.w	6(a7),d1		; yrat
-	move.l	_drwaddr,-(sp)
+	move.l	drwaddr,-(sp)
 	rts
 
 *

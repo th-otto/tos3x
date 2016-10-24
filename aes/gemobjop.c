@@ -1,40 +1,38 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemobjop.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:25:38 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemobjop.c,v $
-* Revision 2.2  89/04/26  18:25:38  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:28:31  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:34:38  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:25:38 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:25:38  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:28:31  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:34:38  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*
-*	GEMOBJOP.C
-*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.0
-*	TOS Atari operating system
-*	Copyright (C) 1985	 Atari Corp. 	Digital Research Inc.
-*	-------------------------------------------------------------
-*	Updates:
-*	rewrite		01/03/87		Mike Schmal
-*		ob_sst	-general poor coding rewrite.
-*		get_par -removed unused var.
-*	remove obaddr	06/10/85		Mike Schmal
-*	Reg Opt		03/08/85 - 03/09/85	Derek Mui
-*	Change at ob_sst for extended type	7/7/92	Minna Lai
-*	Remove extended type stuff	1/12/93	Eric Smith
-*/
+ *	GEMOBJOP.C
+ *
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.0
+ *	TOS Atari operating system
+ *	Copyright (C) 1985	 Atari Corp. 	Digital Research Inc.
+ *	-------------------------------------------------------------
+ *	Updates:
+ *	rewrite		01/03/87		Mike Schmal
+ *		ob_sst	-general poor coding rewrite.
+ *		get_par -removed unused var.
+ *	remove obaddr	06/10/85		Mike Schmal
+ *	Reg Opt		03/08/85 - 03/09/85	Derek Mui
+ *	Change at ob_sst for extended type	7/7/92	Minna Lai
+ *	Remove extended type stuff	1/12/93	Eric Smith
+ */
 
 #include <portab.h>
 #include <machine.h>
@@ -45,14 +43,13 @@
 #define	TED_THICKNESS	22
 
 /*
-* ob_sst	Routine to set the user variables pspec, pstate, ptype,
-*		pflags, pt, pth.
-*
-*		returns object border/text color or the 3byte of the pointer
-*		to a tedinfo structure (isn't this help full).
-*
-*/
-
+ * ob_sst	Routine to set the user variables pspec, pstate, ptype,
+ *		pflags, pt, pth.
+ *
+ *		returns object border/text color or the 3byte of the pointer
+ *		to a tedinfo structure (isn't this help full).
+ *
+ */
 char ob_sst(P(LPTREE) tree, P(int16_t) obj, P(intptr_t *) pspec, P(int16_t *) pstate, P(int16_t *) ptype, P(int16_t *) pflags, P(GRECT *) pt, P(int16_t *) apth)
 PP(LPTREE tree;)
 PP(int16_t obj;)

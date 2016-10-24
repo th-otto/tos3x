@@ -33,10 +33,6 @@
 
 #include "aes.h"
 #include "taddr.h"
-#include "obdefs.h"
-#include "struct88.h"
-#include "baspag88.h"
-#include "obdefs.h"
 #include "gemlib.h"
 
 
@@ -45,7 +41,7 @@ PP(EVB *e;)
 {
 	register PD *p, *p1, *q1;
 
-	p = (PD *) e->e_pd;
+	p = e->e_pd;
 	p->p_evflg |= e->e_mask;
 	/* off the not-ready    */
 	/*   list       */
@@ -70,12 +66,11 @@ PP(EVB *e;)
 VOID zombie(P(EVB *) e)
 PP(register EVB *e;)
 {
-	/* must be called with  */
-	/*   dispatching off    */
+	/* must be called with dispatching off */
 	e->e_link = zlr;
 	if (zlr)
 		zlr->e_pred = e;
-	e->e_pred = (char *) & zlr - elinkoff;
+	e->e_pred = (EVB *)((char *)&zlr - elinkoff);
 	zlr = e;
 	e->e_flag = COMPLETE;
 	signal(e);

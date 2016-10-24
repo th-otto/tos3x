@@ -213,21 +213,21 @@ _dos_exec:
 exok:
 	rts
 
-*
-*
-* ========================================================
-* ==							
-* ==    long multiply routine without floating point	==
-* ==  call with:					==
-* ==		two long values on stack		==
-* ==  returns:						==
-* ==		long value in d0 			==
-* ==							==
-* == warning:  no overflow checking or indication!!!!	==
-* ==							
-* ========================================================
-*
-*
+/*
+ *
+ * ========================================================
+ * ==                                                    
+ * ==    long multiply routine without floating point    ==
+ * ==  call with:                                        ==
+ * ==            two long values on stack                ==
+ * ==  returns:                                          ==
+ * ==            long value in d0                        ==
+ * ==                                                    ==
+ * == warning:  no overflow checking or indication!!!!   ==
+ * ==                                                    
+ * ========================================================
+ *
+ */
 	xdef	lmul
 lmul:
 	link	a6,#-4
@@ -259,14 +259,14 @@ L3:
 L4:
 	unlk	a6
 	rts
-*
-*
-* ========================================================
-* ==							==
-* ==			Long Divide			==
-* ==							==
-* ========================================================
-*
+/*
+ *
+ * ========================================================
+ * ==                                                    ==
+ * ==                    Long Divide                     ==
+ * ==                                                    ==
+ * ========================================================
+ */
 	xdef	ldiv
 ldiv:
 	link	a6,#-2
@@ -340,57 +340,57 @@ La1:
 	unlk	a6
 	rts
 
-*
-*
-*\////////////////////////////////////////
-*       Trap 2 interrupt handler
-*\////////////////////////////////////////
-*
-* This handler is looking for the BDOS system reset function
-* so that a system reset is not done, rather a return to the 
-* calling program can be done.
-*
+/*
+ *
+ * ////////////////////////////////////////
+ *       Trap 2 interrupt handler
+ * ////////////////////////////////////////
+ *
+ * This handler is looking for the BDOS system reset function
+ * so that a system reset is not done, rather a return to the 
+ * calling program can be done.
+ */
 _grptrp:
 	tst.w	d0			; Is function number system reset ?
 	beq	_back
-*
+
 	cmpi.w	#CRYSTAL1,d0		; Trying to get to Crystal?
 	beq	_gosuper
 	cmpi.w	#CRYSTAL2,d0		; Trying to just do a dispatch?
 	beq	_gosuper
-*
-* Not a system reset or Crystal call, so go to orginal interrupt.
-*
+/*
+ * Not a system reset or Crystal call, so go to orginal interrupt.
+ */
 	move.l	_SAV2TRP,-(sp)
 	rts
-*
-*
+
+
 **********************************************
 * Return here when loaded program is finished.
 **********************************************
-*
+
 	xdef	_back
 _back:	clr.w	-(sp)
 	move.w	#$4c,-(sp)
 	trap	#1
-*
-*
-*\/////////////////////////////////////////////
-*		Call Crystal
-*\/////////////////////////////////////////////
-*
+/*
+ *
+ * /////////////////////////////////////////////
+ *		Call Crystal
+ * /////////////////////////////////////////////
+ */
 _gosuper:
-*
+
 	jsr	_cli			; interrupts off
-*
+
 	move.l	usp,a0
 	movem.l	d1-d7/a0-a6,-(a0)	; save regs of caller on users stack
 	move.l	a0,usp
 	movea.l	_rlr,a6			; rlr is a pointer to pd structure.
 	movea.l	8(a6),a6		; get address of uda structure.
-*
+
 * 					Set parameters in uda structure
-*
+
 	move.w	#1,(a6)			; u_insuper flag.
 	move.l	a0,66(a6)		; save current user stack pointer.
 	move.l	a7,70(a6)		; save current super stack ptr
@@ -434,12 +434,12 @@ _gosuper:
 super1:
 	jsr	_dsptch
 	clr.w	d0	
-*
-*
-*\/////////////////////////////////////////////
-*	Return from Crystal call 
-*\/////////////////////////////////////////////
-*
+/*
+ *
+ * /////////////////////////////////////////////
+ *	Return from Crystal call 
+ * /////////////////////////////////////////////
+ */
 *	xdef	_supret
 *_supret:
 *	move.w	4(a7),d0		; Get return passed from super().

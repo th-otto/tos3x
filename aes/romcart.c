@@ -1,23 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/romcart.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:30:35 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	romcart.c,v $
-* Revision 2.2  89/04/26  18:30:35  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:32:18  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:36:19  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:30:35 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:30:35  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:32:18  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:36:19  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	ROMCART.C		2/26/85 - 04/14/85	Lowell Webster	*/
 /*	remove cart_start	06/10/85		Mike Schmal	*/
 /*	Fix the cart_exe	07/09/85		Derek Mui	*/
@@ -40,48 +38,30 @@
 #define CA_ISPARM 0x80000000L
 #define TEXTBASE 8
 
-extern char *dos_exec();
-
-extern int16_t wildcmp();
-
-extern VOID pstart();
-
-extern VOID gotopgm();
-
-extern int16_t cre_aproc();
-
-extern int16_t DOS_AX;
-
-extern char *g_name();
-
-extern char dtabuf[];					/* dta buffer   */
-
-
 #define CARTNODE struct cartnode
 CARTNODE
 {
 	CARTNODE *c_next;
-
 	int32_t *c_init;
-
 	int32_t *c_code;
-
 	int16_t c_time;
-
 	int16_t c_date;
-
 	int32_t c_size;
-
 	char c_name[14];
 };
 
-GLOBAL CARTNODE *cart_ptr;
-
-GLOBAL char *cart_dta;
-
+CARTNODE *cart_ptr;
+char *cart_dta;
 
 
-cart_init()
+CARTNODE *cart_find PROTO((int16_t fill));
+BOOLEAN cart_sfirst PROTO((char *pdta, int16_t attr));
+BOOLEAN cart_snext PROTO((NOTHING));
+
+
+
+
+BOOLEAN cart_init(NOTHING)
 {
 	cart_ptr = ((CARTNODE *) CART_BASE);
 	if (cart_ptr->c_next == CART_MAGIC)
@@ -96,11 +76,10 @@ cart_init()
 }
 
 
-CARTNODE * cart_find(fill)
-int16_t fill;
+CARTNODE *cart_find(P(int16_t) fill)
+PP(int16_t fill;)
 {
 	register char *pdta;
-
 	register CARTNODE *pcart;
 
 	if (cart_ptr)
@@ -120,17 +99,17 @@ int16_t fill;
 }
 
 
-int16_t cart_sfirst(pdta, attr)
-char *pdta;
-
-int16_t attr;
+BOOLEAN cart_sfirst(P(char *) pdta, P(int16_t) attr)
+PP(char *pdta;)
+PP(int16_t attr;)
 {
 	cart_dta = pdta;
 	cart_init();
 	return (cart_snext());
 }
 
-int16_t cart_snext()
+
+BOOLEAN cart_snext(NOTHING)
 {
 	if (cart_find(TRUE))
 		return (TRUE);
@@ -141,12 +120,10 @@ int16_t cart_snext()
 	}
 }
 
-int16_t ld_cartacc()
+int16_t ld_cartacc(NOTHING)
 {
 	register char *psp;
-
 	register CARTNODE *pcart;
-
 	register int16_t num_load;
 
 	cart_init();
@@ -168,12 +145,12 @@ int16_t ld_cartacc()
 	return (num_load);
 }
 
-int16_t cart_exec(pcmd, ptail)
-char *pcmd,
-*ptail;
+
+int16_t cart_exec(P(const char *) pcmd, P(const char *) ptail)
+PP(const char *pcmd;)
+PP(const char *ptail;)
 {
 	register char *psp;
-
 	register CARTNODE *pcart;
 
 	cart_init();
@@ -192,11 +169,10 @@ char *pcmd,
 }
 
 
-int16_t c_sfirst(path)
-char *path;
+int16_t c_sfirst(P(const char *) path)
+PP(const char *path;)
 {
 	char *file;
-
 	CARTNODE *pcart;
 
 	file = g_name(path);

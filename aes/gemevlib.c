@@ -1,23 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemevlib.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:22:19 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemevlib.c,v $
-* Revision 2.2  89/04/26  18:22:19  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:25:53  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:31:43  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:22:19 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:22:19  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:25:53  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:31:43  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMEVLIB.C	1/28/84 - 02/02/85	Lee Jay Lorenzen	*/
 /*	Reg Opt		03/09/85		Derek Mui		*/
 /*	1.1		03/21/85 - 04/10/85	Lowell Webster		*/
@@ -32,19 +30,15 @@
 
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
 
 
 int16_t const gl_dcrates[5] = { 450, 330, 275, 220, 165 };
@@ -60,21 +54,21 @@ int16_t gl_ticktime;
  *	Stuff the return array with the mouse x, y, button, and keyboard
  *	state.
  */
-VOID ev_rets(P(int16_t *) rets)
-PP(register int16_t *rets;)
+VOID ev_rets(P(int16_t *) lrets)
+PP(register int16_t *lrets;)
 {
 	if (mtrans)
 	{
-		rets[0] = pr_xrat;
-		rets[1] = pr_yrat;
+		lrets[0] = pr_xrat;
+		lrets[1] = pr_yrat;
 	} else
 	{
-		rets[0] = xrat;
-		rets[1] = yrat;
+		lrets[0] = xrat;
+		lrets[1] = yrat;
 	}
 
-	rets[2] = tbutton;
-	rets[3] = kstate;
+	lrets[2] = tbutton;
+	lrets[3] = kstate;
 	mtrans = 0;
 }
 
@@ -96,8 +90,10 @@ PP(intptr_t lvalue;)
 
 
 /*
-*	Wait for a key to be ready at the keyboard and return it. 
-*/
+ * AES #20 - evnt_keybd - Wait for a keyboard event
+ *
+ *	Wait for a key to be ready at the keyboard and return it. 
+ */
 uint16_t ev_keybd(NOTHING)
 {
 	return ev_block(AKBIN, 0x0L);
@@ -105,57 +101,63 @@ uint16_t ev_keybd(NOTHING)
 
 
 /*
+ * AES #21 - evnt_button - Wait for a mouse button event.
+ *
  *	Wait for the mouse buttons to reach the state where:
  *		((bmask & (bstate ^ button)) == 0) != bflag
  *	Clicks is how many times to wait for it to reach the state, but
  *	the routine should return how many times it actually reached the
  *	state before some time interval.
  */
-uint16_t ev_button(P(int16_t) bflgclks, P(uint16_t) bmask, P(uint16_t) bstate, P(int16_t *) rets)
+uint16_t ev_button(P(int16_t) bflgclks, P(uint16_t) bmask, P(uint16_t) bstate, P(int16_t *) lrets)
 PP(int16_t bflgclks;)
 PP(uint16_t bmask;)
 PP(uint16_t bstate;)
-PP(int16_t *rets;)
+PP(int16_t *lrets;)
 {
 	int16_t ret;
 	int32_t parm;
 
 	parm = HW(bflgclks) | LW((bmask << 8) | bstate);
 	ret = ev_block(ABUTTON, parm);
-	ev_rets(&rets[0]);
-	return (ret);
+	ev_rets(lrets);
+	return ret;
 }
 
 
 /*
+ * AES #22 - evnt_mouse -Wait for the mouse pointer to enter or leave a specified area of the screen.
+ *
  *	Wait for the mouse to leave or enter a specified rectangle.
  */
-uint16_t ev_mouse(P(MOBLK *)pmo, P(int16_t *) rets)
+uint16_t ev_mouse(P(MOBLK *)pmo, P(int16_t *) lrets)
 PP(MOBLK *pmo;)
-PP(int16_t *rets;)
+PP(int16_t *lrets;)
 {
 	int16_t ret;
 
-	ret = ev_block(AMOUSE, ADDR(pmo));
-	ev_rets(&rets[0]);
-	rets[2] = button;
-	return (ret);
+	ret = ev_block(AMOUSE, (intptr_t)ADDR(pmo));
+	ev_rets(lrets);
+	lrets[2] = button;
+	return ret;
 }
 
 
 /*
+ * AES #23 - evnt_mesag - Wait for an AES message.
+ *
  *	Wait for a message to be received in applications message pipe.
  *	Then read it into pbuff.
  */
-int16_t ev_mesag(P(intptr_t) pbuff)
-PP(intptr_t pbuff;)
+int16_t ev_mesag(P(int16_t *) pbuff)
+PP(int16_t *pbuff;)
 {
 	if (rlr->p_qindex > 0)
-		return (ap_rdwr(AQRD, rlr->p_pid, 16, pbuff));
+		return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
 	else
 	{
 		if (!rd_mymsg(pbuff))
-			return (ap_rdwr(AQRD, rlr->p_pid, 16, pbuff));
+			return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
 	}
 
 	return (TRUE);
@@ -163,21 +165,23 @@ PP(intptr_t pbuff;)
 
 
 /*
+ * AES #24 - evnt_timer - Wait for a given time interval. 
+ *
  *	Wait the specified time to be completed.
  */
 int16_t ev_timer(P(int32_t) count)
-P(int32_t count;)
+PP(int32_t count;)
 {
 	return ev_block(ADELAY, count / gl_ticktime);
 }
 
 /*
-*	Used by ev_multi() to check on mouse rectangle events
-*/
+ *	Used by ev_multi() to check on mouse rectangle events
+ */
 int16_t ev_mchk(P(MOBLK *) pmo)
 PP(register MOBLK *pmo;)
 {
-	if ((rlr == gl_mowner) && (pmo->m_out != inside(xrat, yrat, &pmo->m_x)))
+	if ((rlr == gl_mowner) && (pmo->m_out != inside(xrat, yrat, (GRECT *)&pmo->m_x)))
 		return (TRUE);
 	else
 		return (FALSE);
@@ -185,15 +189,17 @@ PP(register MOBLK *pmo;)
 
 
 /*
+ * AES #25 - evnt_multi - Wait for an arbitrary event.
+ *
  *	Do a multi-wait on the specified events.
  */
-int16_t ev_multi(P(int16_t) flags, P(MOBLK *) pmo1, P(MOBLK *) pmo2, P(int32_t) tmcount, P(intptr_t) buparm, P(intptr_t) mebuff, P(int16_t *) prets)
+int16_t ev_multi(P(int16_t) flags, P(MOBLK *) pmo1, P(MOBLK *) pmo2, P(int32_t) tmcount, P(intptr_t) buparm, P(int16_t *) mebuff, P(int16_t *) prets)
 PP(register int16_t flags;)
 PP(register MOBLK *pmo1;)
 PP(MOBLK *pmo2;)
 PP(int32_t tmcount;)
 PP(intptr_t buparm;)
-PP(intptr_t mebuff;)
+PP(int16_t *mebuff;)
 PP(register int16_t *prets;)
 {
 	QPB m;
@@ -203,7 +209,7 @@ PP(register int16_t *prets;)
 	register CQUEUE *pc;
 
 	/* say nothing has happened yet   */
-	what = wmask = kbmsk = bumsk = m1msk = m2msk = qrmsk = tmmsk = 0x0;
+	what = wmask = kbmsk = bumsk = m1msk = m2msk = qrmsk = tmmsk = 0;
 	/* do a pre-check for a keystroke & then clear out the forkq */
 	chkkbd();
 	forker();
@@ -255,7 +261,7 @@ PP(register int16_t *prets;)
 		if (ev_mchk(pmo2))
 			what |= MU_M2;
 	}
-	/* quick check timer    */
+	/* quick check timer */
 	if (flags & MU_TIMER)
 	{
 		if ((wmask == 0x0) && (tmcount == 0x0L))
@@ -274,9 +280,11 @@ PP(register int16_t *prets;)
 				what |= MU_MESAG;
 		}
 	}
-	/* check for quick out  */
-	/*   if something has   */
-	/*   already happened   */
+
+	/* check for quick out if something has already happened */
+#if !BINEXACT
+	which = 0; /* quiet compiler */
+#endif
 	if (what == 0x0)
 	{
 		if (flags & MU_KEYBD)
@@ -286,17 +294,17 @@ PP(register int16_t *prets;)
 			wmask |= bumsk = iasync(ABUTTON, buparm);
 		/* wait for mouse rect. */
 		if (flags & MU_M1)
-			wmask |= m1msk = iasync(AMOUSE, ADDR(pmo1));
+			wmask |= m1msk = iasync(AMOUSE, (intptr_t)ADDR(pmo1));
 		/* wait for mouse rect. */
 		if (flags & MU_M2)
-			wmask |= m2msk = iasync(AMOUSE, ADDR(pmo2));
+			wmask |= m2msk = iasync(AMOUSE, (intptr_t)ADDR(pmo2));
 		/* wait for message */
 		if (flags & MU_MESAG)
 		{
 			m.qpb_pid = rlr->p_pid;
 			m.qpb_cnt = 16;
 			m.qpb_buf = mebuff;
-			wmask |= qrmsk = iasync(AQRD, ADDR(&m));
+			wmask |= qrmsk = iasync(AQRD, (intptr_t)ADDR(&m));
 		}
 		/* wait for timer   */
 		if (flags & MU_TIMER)
@@ -307,8 +315,8 @@ PP(register int16_t *prets;)
 		/*   events     */
 		which |= acancel(wmask);
 	}
+	
 	/* get the returns  */
-
 	ev_rets(&prets[0]);
 	if (!(flags & MU_BUTTON))
 		prets[2] = button;
@@ -357,6 +365,8 @@ PP(register int16_t *prets;)
 
 
 /*
+ * AES #26 - evnt_dclick - Obtain or set the time delay between the two clicks of a double-elick.
+ *
  *	Wait for a key to be ready at the keyboard and return it. 
  */
 int16_t ev_dclick(P(int16_t) rate, P(int16_t) setit)

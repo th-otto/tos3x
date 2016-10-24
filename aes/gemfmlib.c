@@ -1,27 +1,27 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:22:52 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:22:52  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:26:14  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.3  89/01/24  15:09:54  mui
-* Fix the find_obj, check current object before incrementing to next
-* 
-* Revision 1.2  89/01/24  05:15:44  kbad
-* optimize eralert
-* 
-* Revision 1.1  88/06/02  12:33:44  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:22:52 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:22:52  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:26:14  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.3  89/01/24  15:09:54  mui
+ * Fix the find_obj, check current object before incrementing to next
+ * 
+ * Revision 1.2  89/01/24  05:15:44  kbad
+ * optimize eralert
+ * 
+ * Revision 1.1  88/06/02  12:33:44  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMFMLIB.C	03/15/84 - 02/08/85	Gregg Morris		*/
 /*	to 68k		03/12/85 - 05/24/85	Lowell Webster		*/
 /*	Trying 1.2	10/11/85 - 10/21/85	Derek Mui		*/
@@ -32,19 +32,18 @@
 /*	Change at fm_do		04/10/88	D.Mui			*/
 
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <gemusa.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+#include "gemusa.h"
 
 #define FORWARD 0
 #define BACKWARD 1
 #define DEFLT 2
 #define BELL 0x07						/* bell         */
+
+#undef LEFT
+#undef RIGHT
 
 #define BACKSPACE 0x0E08				/* backspace        */
 #define SPACE 0x3920					/* ASCII <space>    */
@@ -64,6 +63,9 @@ static int16_t const ml_alrt[] = { ALRT00CRT, ALRT01CRT, ALRT02CRT, ALRT03CRT, A
 	ALRT05CRT, ALRTDSWAP
 };
 static int16_t const ml_pwlv[] = { 0x0102, 0x0102, 0x0102, 0x0101, 0x0002, 0x0001, 0x0101 };
+
+int16_t find_obj PROTO((LPTREE tree, int16_t start_obj, int16_t which));
+
 
 /*	This routine has been move to gemctrl.c		*/
 /*	and renamed to take_ownership			*/
@@ -119,6 +121,8 @@ PP(int16_t which;)
 	register int16_t obj, flag, theflag, inc;
 	int16_t last_obj;
 
+	UNUSED(last_obj);
+	
 	obj = 0;
 	flag = EDITABLE;
 	inc = 1;
@@ -162,6 +166,9 @@ PP(int16_t which;)
 
 
 
+/*
+ * AES #55 - form_keybd - Process keyboard input in a dialog box form.
+ */
 int16_t fm_keybd(P(LPTREE) tree, P(int16_t) obj, P(int16_t *) pchar, P(int16_t *) pnew_obj)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -204,7 +211,9 @@ PP(int16_t *pnew_obj;)
 }
 
 
-
+/*
+ * AES #56 - form_button - Simulate the clicking on an object.
+ */
 int16_t fm_button(P(LPTREE) tree, P(int16_t) new_obj, P(int16_t) clks, P(int16_t *) pnew_obj)
 PP(register LPTREE tree;)
 PP(register int16_t new_obj;)
@@ -215,14 +224,12 @@ PP(int16_t *pnew_obj;)
 	int16_t orword;
 	int16_t parent, state, flags;
 	int16_t cont, tstate, tflags;
-	int16_t rets[6];
+	int16_t lrets[6];
 	cont = TRUE;
 	orword = 0x0;
 
 	state = ob_fs(tree, new_obj, &flags);
-	/* handle touchexit case */
-	/*   if double click,   */
-	/*   then set high bit  */
+	/* handle touchexit case; if double click, then set high bit */
 	if (flags & TOUCHEXIT)
 	{
 		if (clks == 2)
@@ -236,9 +243,7 @@ PP(int16_t *pnew_obj;)
 		/* if its a radio button */
 		if (flags & RBUTTON)
 		{
-			/* check siblings to    */
-			/*   find and turn off  */
-			/*   the old RBUTTON    */
+			/* check siblings to find and turn off the old RBUTTON */
 			parent = get_par(tree, new_obj);
 			tobj = LWGET(OB_HEAD(parent));
 			while (tobj != parent)
@@ -256,32 +261,34 @@ PP(int16_t *pnew_obj;)
 				tobj = LWGET(OB_NEXT(tobj));
 			}
 		} else
-		{								/* turn on new object   */
-			if (gr_watchbox(tree, new_obj, state ^ SELECTED, state))
+		{
+			/* turn on new object   */
+			if (gr_watchbox((OBJECT *)tree, new_obj, state ^ SELECTED, state))
 				state ^= SELECTED;
 		}
-		/* if not touchexit     */
-		/*   then wait for  */
-		/*   button up      */
+		/* if not touchexit then wait for button up */
 		if ((cont) && (flags & (SELECTABLE | EDITABLE)))
-			ev_button(1, 0x00010000L, &rets[0]);
+#if BINEXACT /* sigh... */
+			ev_button(1, 0x00010000L, lrets);
+#else
+			ev_button(1, 0x0001, 0000, lrets);
+#endif
 	}
-	/* see if this selection */
-	/*   gets us out    */
+	/* see if this selection gets us out */
 	if ((state & SELECTED) && (flags & EXIT))
 		cont = FALSE;
-	/* handle click on  */
-	/*   another editable   */
-	/*   field      */
+	/* handle click on another editable field */
 	if ((cont) && !(flags & EDITABLE))
 		new_obj = 0;
 
 	*pnew_obj = new_obj | orword;
-	return (cont);
+	return cont;
 }
 
 
 /*
+ * AES #50 - form_do - Process the dialog with input from the user.
+ *
  *	ForM DO routine to allow the user to interactively fill out a 
  *	form.  The cursor is placed at the starting field.  This routine
  *	returns the object that caused the exit to occur
@@ -294,24 +301,18 @@ PP(int16_t start_fld;)
 	int16_t next_obj;
 	int16_t which;
 	int16_t idx;
-	int16_t rets[6];
+	int16_t lrets[6];
 
-	/* grab ownership of    */
-	/*   screen and mouse   */
+	/* grab ownership of screen and mouse */
 	take_ownership(TRUE);
 	/* flush keyboard   */
 	fq();
-	/* set clip so we can   */
-	/*   draw chars, and    */
-	/*   invert buttons */
+	/* set clip so we can draw chars, and invert buttons */
 	gsx_sclip(&gl_rfull);
-	/* determine which is   */
-	/*   the starting field */
-	/*   to edit        */
+	/* determine which is the starting field to edit */
 
 
-	/* position cursor on   */
-	/*   the starting field */
+	/* position cursor on the starting field */
 	if (start_fld == 0)
 		next_obj = find_obj(tree, 0, FORWARD);
 	else
@@ -323,9 +324,7 @@ PP(int16_t start_fld;)
 
 	while (cont)
 	{
-		/* position cursor on   */
-		/*   the selected   */
-		/*   editting field */
+		/* position cursor on the selected editting field */
 		if ((next_obj != 0) && (edit_obj != next_obj))
 		{
 			edit_obj = next_obj;
@@ -333,25 +332,29 @@ PP(int16_t start_fld;)
 			ob_edit(tree, edit_obj, 0, &idx, EDINIT);
 		}
 		/* wait for mouse or key */
-		which = ev_multi(MU_KEYBD | MU_BUTTON, NULL, NULL, 0x0L, 0x0002ff01L, 0x0L, &rets[0]);
+		which = ev_multi(MU_KEYBD | MU_BUTTON, NULL, NULL, 0x0L, 0x0002ff01L, 0x0L, lrets);
 		/* handle keyboard event */
 		if (which & MU_KEYBD)
 		{
-			cont = fm_keybd(tree, edit_obj, &rets[4], &next_obj);
-			if (rets[4])
-				ob_edit(tree, edit_obj, rets[4], &idx, EDCHAR);
+			cont = fm_keybd(tree, edit_obj, &lrets[4], &next_obj);
+			if (lrets[4])
+				ob_edit(tree, edit_obj, lrets[4], &idx, EDCHAR);
 		}
 		/* handle button event  */
 		if (which & MU_BUTTON)
 		{
-			next_obj = ob_find(tree, ROOT, MAX_DEPTH, rets[0], rets[1]);
+			next_obj = ob_find(tree, ROOT, MAX_DEPTH, lrets[0], lrets[1]);
 			if (next_obj == NIL)
 			{
-				trap13(0x00030002L, 7);	/* Bconout(CON, 7)  */
+#if BINEXACT /* sigh... */
+				trp13(0x00030002L, 7);	/* Bconout(CON, 7)  */
+#else
+				trp13(3, 2, 7);	/* Bconout(CON, 7)  */
+#endif
 				next_obj = 0;
 			} else
 			{
-				cont = fm_button(tree, next_obj, rets[5], &next_obj);
+				cont = fm_button(tree, next_obj, lrets[5], &next_obj);
 			}
 		}
 		/* handle end of field  */
@@ -362,8 +365,7 @@ PP(int16_t start_fld;)
 			ob_edit(tree, edit_obj, 0, &idx, EDEND);
 		}
 	}
-	/* give up mouse and    */
-	/*   screen ownership   */
+	/* give up mouse and screen ownership */
 	take_ownership(FALSE);
 	/* return exit object   */
 	return (next_obj);
@@ -372,9 +374,11 @@ PP(int16_t start_fld;)
 
 
 /*
-*	Form DIALogue routine to handle visual effects of drawing and
-*	undrawing a dialogue
-*/
+ * AES #51 - form_dial - Reserve or release memory for a dialog object.
+ *
+ *	Form DIALogue routine to handle visual effects of drawing and
+ *	undrawing a dialogue
+ */
 VOID fm_dial(P(int16_t) fmd_type, P(GRECT *) pi, P(GRECT *) pt)
 PP(register int16_t fmd_type;)
 PP(register GRECT *pi;)
@@ -386,23 +390,19 @@ PP(register GRECT *pt;)
 	{
 #if UNLINKED
 	case FMD_START:
-		/* grab screen sync or  */
-		/*   some other mutual  */
-		/*   exclusion method   */
+		/* grab screen sync or some other mutual exclusion method */
 		break;
 #endif
 	case FMD_GROW:
-		/* growing box      */
+		/* growing box */
 		gr_growbox(pi, pt);
 		break;
 	case FMD_SHRINK:
-		/* shrinking box    */
+		/* shrinking box */
 		gr_shrinkbox(pi, pt);
 		break;
 	case FMD_FINISH:
-		/* update certain   */
-		/*   portion of the */
-		/*   screen     */
+		/* update certain portion of the screen */
 		w_drawchange(pt, NIL, NIL);
 		break;
 	}
@@ -411,13 +411,14 @@ PP(register GRECT *pt;)
 
 int16_t fm_show(P(int16_t) string, P(int16_t *) pwd, P(int16_t) level)
 PP(int16_t string;)
-PP(uint16_t *pwd;)
+PP(int16_t *pwd;)
 PP(int16_t level;)
 {
 	int16_t ret;
 	char *alert;
 	register char *ad_alert;
-
+	
+	UNUSED(ret);
 	ad_alert = alert = rs_str(string);
 	if (pwd)
 	{
@@ -437,17 +438,21 @@ PP(int16_t d;)									/* d = drive code, 0=A  */
 	int16_t drive_let;
 
 	pdrive_let = &drive_let;
-	drive_let = (d + 'A') << 8;			/* make it a 2 char string! */
+	drive_let = (d + 'A') << 8;			/* make it a 2 char string! WTF */
 
-	/* which alert          */
-	return (fm_show(ml_alrt[n],
-					/* string to copy in (or null)  */
-					(ml_pwlv[n] & 0xff00) ? &pdrive_let : NULL,
-					/* icon to use          */
-					ml_pwlv[n] & 0x00ff) != 1);
+	/* which alert */
+#if BINEXACT
+	/* BUG: passing the address of the pointer */
+	return fm_show(ml_alrt[n], (ml_pwlv[n] & 0xff00) ? &pdrive_let : NULL, ml_pwlv[n] & 0x00ff) != 1;
+#else
+	return fm_show(ml_alrt[n], (ml_pwlv[n] & 0xff00) ? pdrive_let : NULL, ml_pwlv[n] & 0x00ff) != 1;
+#endif
 }
 
 
+/*
+ * AES #53 - form_error - Display an alert box form for TOS errors. 
+ */
 int16_t fm_error(P(int16_t) n)
 PP(int16_t n;)									/* n = dos error number */
 {
@@ -470,11 +475,11 @@ PP(int16_t n;)									/* n = dos error number */
 		string = ALRT05ERR;
 		break;
 	case 8:							/* insufficient memory  */
-	case 10:							/* invalid environmeny  */
-	case 11:							/* invalid format   */
+	case 10:						/* invalid environmeny  */
+	case 11:						/* invalid format   */
 		string = ALRT08ERR;
 		break;
-	case 15:							/* invalid drive    */
+	case 15:						/* invalid drive    */
 		string = ALRT15ERR;
 		break;
 	default:

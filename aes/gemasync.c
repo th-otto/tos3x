@@ -1,26 +1,24 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemasync.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:20:44 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemasync.c,v $
-* Revision 2.2  89/04/26  18:20:44  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:24:16  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.2  89/02/16  10:48:04  mui
-* In acancel, clean up any outstanding d click event
-*
-* Revision 1.1  88/06/02  12:30:50  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:20:44 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:20:44  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:24:16  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.2  89/02/16  10:48:04  mui
+ * In acancel, clean up any outstanding d click event
+ *
+ * Revision 1.1  88/06/02  12:30:50  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMASYNC.C	1/27/84 - 02/05/85	Lee Jay Lorenzen	*/
 /*	to 68k		03/09/85 - 04/05/85	Derek Mui		*/
 /*	remove bit_num	06/10/85		Mike Schmal		*/
@@ -29,19 +27,15 @@
 /*	No check of mowner() at iasync	4/15/91	D.Mui			*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.0
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.0
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
 
 int16_t tbutton;
 int16_t wwait;
@@ -67,9 +61,8 @@ PP(EVB **root;)
 {
 	register EVB *p, *q;
 
-	/* insert event block   */
-	/*   on list        */
-	q = (char *) root - elinkoff;
+	/* insert event block on list */
+	q = (EVB *)((char *) root - elinkoff);
 	p = *root;
 	e->e_pred = q;
 	q->e_link = e;
@@ -127,7 +120,7 @@ PP(register intptr_t aparm;)
 	MOBLK mob;
 
 	/* e = get_evb();   */
-	if (e = eul)
+	if ((e = eul))
 	{
 		eul = eul->e_nextp;
 		bfill(sizeof(EVB), 0, e);
@@ -135,10 +128,14 @@ PP(register intptr_t aparm;)
 
 	e->e_nextp = rlr->p_evlist;			/* link the EVB to the  */
 	rlr->p_evlist = e;					/* PD evlist        */
-	e->e_pd = (char *) rlr;
-	e->e_flag = e->e_pred = 0;
-	/* find a free bit in   */
-	/*   in the mask    */
+	e->e_pd = rlr;
+#if BINEXACT
+	e->e_flag = (int)(intptr_t)(e->e_pred = 0);
+#else
+	e->e_flag = 0;
+	e->e_pred = NULL;
+#endif
+	/* find a free bit in in the mask */
 	for (e->e_mask = 1; rlr->p_evbits & e->e_mask; e->e_mask <<= 1) ;
 
 	rlr->p_evbits |= e->e_mask;
@@ -183,7 +180,7 @@ PP(register intptr_t aparm;)
 
 
 		e->e_flag |= EVDELAY;
-		q = (char *) & dlr - elinkoff;
+		q = (EVB *)((char *) &dlr - elinkoff);
 
 		for (p = dlr; p; p = (q = p)->e_link)
 		{
@@ -207,33 +204,31 @@ PP(register intptr_t aparm;)
 
 		break;
 	case AMUTEX:						/* link to the CDA also */
-		amutex(e, aparm);
+		amutex(e, (SPB *)aparm);
 		break;
 	case AKBIN:						/* link to the CDA also */
 		/* akbin(e,aparm);break; */
-		/* find vcb to input,   */
-		/*   point c at it  */
+		/* find vcb to input, point c at it */
 		if (cda->c_q.c_cnt)
 		{
-			/* another satisfied    */
-			/*   customer       */
+			/* another satisfied customer */
 			e->e_return = (uint16_t) dq(&cda->c_q);
 			zombie(e);
 		} else							/* time to zzzzz... */
+		{
 			evinsert(e, &cda->c_iiowait);
-
+		}
 		break;
 
 	case AMOUSE:						/* link to the CDA also */
 		/* amouse(e,aparm); */
 
-		LBCOPY(&mob, aparm, sizeof(MOBLK));
-		/* if already in (or    */
-		/*   out) signal    */
-		/*   immediately    */
-		if (mob.m_out != inside(xrat, yrat, &mob.m_x))
+		LBCOPY(&mob, (VOIDPTR)aparm, sizeof(MOBLK));
+		/* if already in (or out) signal immediately */
+		if (mob.m_out != inside(xrat, yrat, (GRECT *)&mob.m_x))
+		{
 			zombie(e);
-		else
+		} else
 		{
 			if (mob.m_out)
 				e->e_flag |= EVMOUT;
@@ -247,19 +242,20 @@ PP(register intptr_t aparm;)
 
 	case ABUTTON:						/* link to the CDA also */
 		/* abutton(e,aparm);    */
-/*		if ( mowner( button ) != rlr )
-		  goto mui;
-*/
+#if 0
+		if (mowner(button) != rlr)
+			goto mui;
+#endif
 		if (downorup(button, aparm))
 		{								/* changed */
 			e->e_return = HW(button);
 			zombie(e);					/* 'nuff said       */
 		} else
 		{
-			/* increment counting   */
-			/*   semaphore to show  */
-		  mui:							/*   someone cares about */
-			/*   multiple clicks    */
+			/* increment counting semaphore to show someone cares about multiple clicks */
+#if 0
+		mui:
+#endif
 			if ((LHIWD(aparm) & 0x000000ffL) > 1)
 				gl_bpend++;
 
@@ -279,8 +275,7 @@ PP(register EVSPEC mask;)
 	register EVB *p, *q, *pz;
 	uint16_t erret;
 
-	/* first find the event */
-	/*   on the process list */
+	/* first find the event on the process list */
 	for (p = (q = (EVB *) & rlr->p_evlist)->e_nextp; p; p = (q = p)->e_nextp)
 	{
 		if (p->e_mask == mask)
@@ -289,16 +284,13 @@ PP(register EVSPEC mask;)
 
 	if (!p)
 		return (NOT_FOUND);
-	/* if this event has    */
-	/*   occured, it is on  */
-	/*   the zombie list    */
-	for (pz = zlr; (pz != p) && pz; pz = pz->e_link) ;
+	/* if this event has occured, it is on the zombie list */
+	for (pz = zlr; (pz != p) && pz; pz = pz->e_link)
+		;
 
-	if (!pz)							/* otherwise it is not  */
-		return (NOT_COMPLETE);			/* completed        */
-	/* found the event, */
-	/* remove it from the   */
-	/* zombie list      */
+	if (!pz)							/* otherwise it is not completed */
+		return (NOT_COMPLETE);
+	/* found the event, remove it from the zombie list */
 	pz->e_pred->e_link = pz->e_link;
 	if (pz->e_link)
 		pz->e_link->e_pred = pz->e_pred;
@@ -316,14 +308,13 @@ PP(register EVSPEC mask;)
 
 
 EVSPEC acancel(P(EVSPEC) m)
-P(EVSPEC m;)
+PP(EVSPEC m;)
 {
-	register EVSPEC m1;						/* mask of items not    */
-	/*   cancelled      */
+	register EVSPEC m1;						/* mask of items not cancelled      */
 	register int16_t f;
 	register EVB *p, *q;
 
-	for (p = rlr->p_cda->c_bsleep; p; p = p->p_link)
+	for (p = rlr->p_cda->c_bsleep; p; p = p->e_nextp)
 	{
 		if (p->e_mask & m)
 		{
@@ -335,20 +326,21 @@ P(EVSPEC m;)
 		}
 	}
 
-
 	m1 = 0;
-	for (p = (q = (EVB *) & rlr->p_evlist)->e_nextp; p; p = (q = p)->e_nextp)
+	for (p = (q = (EVB *) &rlr->p_evlist)->e_nextp; p; p = (q = p)->e_nextp)
 	{
-		if (p->e_mask & m)				/* if this is the one   */
-		{								/* then check its status */
-
-			f = p->e_flag;				/* aret() will take out */
-			/* completed EVB    */
+		if (p->e_mask & m)
+		{
+			/* if this is the one then check its status */
+			/* aret() will take out completed EVB */
+			f = p->e_flag;
 			if ((f & NOCANCEL) || (f & COMPLETE))
+			{
 				m1 |= p->e_mask;
-			else						/* Take it off      */
-			{							/* if not completed or  */
-				q->e_nextp = p->e_nextp;	/* still in progress    */
+			} else
+			{
+				/* Take it off if not completed or still in progress */
+				q->e_nextp = p->e_nextp;
 				takeoff(p);
 				rlr->p_evbits &= ~p->e_mask;
 				rlr->p_evwait &= ~p->e_mask;
@@ -356,5 +348,5 @@ P(EVSPEC m;)
 			}
 		}
 	}
-	return (m1);
+	return m1;
 }

@@ -1,24 +1,24 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:25:14 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:25:14  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:28:13  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.2  88/10/26  19:27:23  kbad
-* made menu line redraw in replace vice XOR mode.
-* 
-* Revision 1.1  88/06/02  12:34:30  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:25:14 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:25:14  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:28:13  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.2  88/10/26  19:27:23  kbad
+ * made menu line redraw in replace vice XOR mode.
+ * 
+ * Revision 1.1  88/06/02  12:34:30  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMMNLIB.C	04/26/84 - 04/05/85	Lowell Webster		*/
 /*	Reg Opt		03/08/85 - 03/09/85	Derek Mui		*/
 /*	At mn_do, added the ctlmouse	3/4/86	Derek Mui		*/
@@ -28,12 +28,12 @@
 /*	Fix at mn_bar again so it won't lose click 6/25/90	D.Mui	*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
 #include <portab.h>
 #include <machine.h>
@@ -319,7 +319,8 @@ PP(int16_t *pitem;)
  *	set or reset.
  */
 /* 306de: 00E1F098 */
-int16_t mn_bar(P(LPTREE) tree, P(int16_t) showit)
+int16_t mn_bar
+(P(LPTREE) tree, P(int16_t) showit)
 PP(register LPTREE tree;)
 PP(int16_t showit;)
 {

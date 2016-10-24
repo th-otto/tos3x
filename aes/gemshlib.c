@@ -347,7 +347,7 @@ PP(char *ppath;)
  *	*psrch includes the '=' character.
  *	Otherwise, return a NULL in ppath.
  */
-VOID sh_envrn(P(char **) ppath, P(const char *) psrch)
+int16_t sh_envrn(P(char **) ppath, P(const char *) psrch)
 PP(register char **ppath;)						/* output pointer   */
 PP(const char *psrch;)
 {
@@ -365,7 +365,11 @@ PP(const char *psrch;)
 		if (!(*byteptr))				/* end of search string */
 		{
 			*ppath = chrptr;
-			return;
+#if BINEXACT
+			return; /* BUG: should return TRUE */
+#else
+			return TRUE;
+#endif
 		} else
 		{
 			while (*chrptr++)			/* skip to the end of   */
@@ -374,7 +378,11 @@ PP(const char *psrch;)
 	}
 
 	*ppath = NULL;						/* failed, return null  */
-	return;
+#if BINEXACT
+	return; /* BUG: should return FALSE */
+#else
+	return FALSE;
+#endif
 }
 
 
@@ -485,8 +493,8 @@ PP(register SHFIND_PROC routine;)
  *	it looks at each point it firsts call the passed-in routine with
  *	the filespec that is looking for.
  */
-int16_t sh_find(intptr_t pspec, SHFIND_PROC routine)
-register intptr_t pspec;
+int16_t sh_find(char *pspec, SHFIND_PROC routine)
+register intptr_t pspec; /* should be char */
 register SHFIND_PROC routine;
 {
 	register int16_t path;

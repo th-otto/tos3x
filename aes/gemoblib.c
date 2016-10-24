@@ -12,12 +12,12 @@
 /*	new call ob_gclip()			8/6/92	kbad		*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
 #include <portab.h>
 #include <machine.h>
@@ -27,7 +27,6 @@
 #include <taddr.h>
 #include <gemlib.h>
 #include <vdidefs.h>
-#include <funcdef.h>
 #include <osbind.h>
 
 int16_t xor16 PROTO((int16_t col));
@@ -115,13 +114,13 @@ PP(PARMBLK *fdata;)
  *	Routine to get or set object extension settings
  *
  */
-int16_t ob_sysvar(uint16_t mode, uint16_t which, uint16_t inval1, uint16_t inval2, uint16_t *outval1, uint16_t outval2)
+int16_t ob_sysvar(uint16_t mode, uint16_t which, uint16_t inval1, uint16_t inval2, int16_t *outval1, int16_t *outval2)
 PP(uint16_t mode;)
 PP(uint16_t which;)
 PP(uint16_t inval1;)
 PP(uint16_t inval2;)
-PP(uint16_t *outval1;)
-PP(uint16_t *outval2;)
+PP(int16_t *outval1;)
+PP(int16_t *outval2;)
 {
 	int ret;
 	ret = TRUE;							/* assume OK */
@@ -1208,7 +1207,7 @@ PP(int16_t redraw;)
 
 
 
-uint16_t ob_fs(P(LPTREE) tree, P(int16_t) ob, P(int16_t) pflag)
+uint16_t ob_fs(P(LPTREE) tree, P(int16_t) ob, P(int16_t *) pflag)
 PP(LPTREE tree;)
 PP(int16_t ob;)
 PP(int16_t *pflag;)

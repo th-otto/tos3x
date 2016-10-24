@@ -1,11 +1,9 @@
 /*************************************************************************
  *			Revision Control System
  * =======================================================================
- *  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/jdos.s,v $
+ *  $Author: mui $	$Date: 89/04/26 18:28:39 $
  * =======================================================================
- *  $Author: mui $	$Date: 89/04/26 18:28:39 $	$Locker: kbad $
- * =======================================================================
- *  $Log:	jdos.s,v $
+ *
  * Revision 2.2  89/04/26  18:28:39  mui
  * TT
  * 
@@ -35,6 +33,8 @@
  *
  *  2-Feb-1987 lmd	Converted from stupid C code.  Original size
  *			was $57E text, $2 data.
+ *  ...
+ *     and now its $660 text, 8 bss, and thats better??
  */
 
 
@@ -43,48 +43,10 @@
 *  Exports
 *
 
-*	xdef	_trap		; replace old trap() call
-	xdef	_isdrive
-	xdef	_pgmld
-*	xdef	_bellout
-	xdef	_dos_sfirst
-	xdef	_dos_snext
-	xdef	_dos_open
-	xdef	_dos_read
-	xdef	_dos_write
-	xdef	_dos_lseek
-	xdef	_dos_gdir
-	xdef	_dos_mkdir
-	xdef	_dos_set
-	xdef	_dos_label
-*	xdef	_dos_space
-	xdef	_dos_rename
-	xdef	_dos_alloc
-	xdef	_dos_avail
-	xdef	_chrout
-	xdef	_rawcon
-	xdef	_prt_chr
-	xdef	_dos_gdrv
-	xdef	_dos_sdta
-	xdef	_dos_close
-	xdef	_dos_chdir
-	xdef	_dos_sdrv
-	xdef	_dos_chmod
-	xdef	_dos_delete
-	xdef	_dos_rmdir
-	xdef	_dos_create
-	xdef	_dos_free
 	xdef	_DOS_AX
 	xdef	_DOS_ERR
-	xdef	_do_cdir
-
-*----------------
-*
-*  Imports
-*
 	comm _DOS_AX,2
 	comm _DOS_ERR,2
-
 
 *----------------
 *
@@ -148,6 +110,7 @@ X_GSDTOF	equ $57
 *  I know what this does, but I don't
 *  know why it's supposed to do it.
 *
+	xdef	_isdrive
 _isdrive:
 	bsr	_dos_gdrv		; get current drive number
 	move.w	d0,-(sp)		; and make it the current
@@ -193,6 +156,7 @@ jtrap:	jmp	_trap			; jump to _trap
 *		4       6       $a
 *	.cargs .handle .pname.l .ldaddr.l
 *
+	xdef	_pgmld
 _pgmld:
 	clr.l	-(sp)			; null env string (inherit parent's)
 	pea	nullstr(pc)		; empty command tail
@@ -216,7 +180,8 @@ _pgmld:
 	move.l	#$004a0000,-(sp)	; Mshrink(0, ...)
 	bsr	jtrap
 	add.w	#12,sp
-	beq.b	TRUE			; return OK on shrink success
+	/* BUG: should also adjust p_hitpa in the basepage */
+	beq.b	rettrue			; return OK on shrink success
 
 pg_fal:	moveq	#-1,d0			; return -1L
 	rts
@@ -226,7 +191,7 @@ pg_fal:	moveq	#-1,d0			; return -1L
 *
 *  Return 0 (FALSE)
 *
-FALSE:	moveq	#0,d0
+retfalse:	moveq	#0,d0
 	rts
 
 
@@ -234,7 +199,7 @@ FALSE:	moveq	#0,d0
 *
 *  Return 1 (TRUE)
 *
-TRUE:	moveq	#1,d0
+rettrue:	moveq	#1,d0
 	rts
 
 
@@ -242,6 +207,7 @@ TRUE:	moveq	#1,d0
 *
 *  Print a bell on the console (hard BIOS console)
 *
+*	xdef	_bellout
 *_bellout:
 *	move.w	#7,-(sp)			; Bconout(CON, 7)
 *	move.l	#$00030002,-(sp)
@@ -272,6 +238,7 @@ TRUE:	moveq	#1,d0
 *		4	 8
 *	 .cargs .pspec.l .attr.w	; ->name, =searchAttributes
 *
+	xdef	_dos_sfirst
 _dos_sfirst:
 	move.w	8(sp),-(sp)		; push attributes
 	move.l	4+2(sp),-(sp)		; push &name
@@ -280,14 +247,14 @@ _dos_sfirst:
 	addq	#8,sp
 
 sfsn:	tst.w	d0			; if (d0 == 0) return TRUE;
-	beq	TRUE
+	beq	rettrue
 
 	cmp.w	#E_NMFIL,d0		; if (d0 == E_NMFIL ||
 	beq.b	sf_1
 	cmp.w	#E_FILNF,d0		;     d0 == E_FILNF)
 	bne.b	sf_2
 sf_1:	move.w	#E_NOFILES,_DOS_AX	;    DOS_AX = E_NOFILES;
-sf_2:	bra	FALSE			; return FALSE
+sf_2:	bra	retfalse			; return FALSE
 
 
 *
@@ -307,6 +274,7 @@ sf_2:	bra	FALSE			; return FALSE
 *  	  return(FALSE);
 *  }
 *  
+	xdef	_dos_snext
 _dos_snext:
 	move.w	#X_SNEXT,-(sp)		; Fsnext()
 	bsr	jtrap
@@ -333,6 +301,7 @@ _dos_snext:
 *		4	 8
 *	 .cargs .pname.l .access.w
 *
+	xdef	_dos_open
 _dos_open:
 	move.w	8(sp),-(sp)
 	move.l	4+2(sp),-(sp)
@@ -345,7 +314,7 @@ _dos_open:
 	move.w	#E_FILENOTFND,_DOS_AX
 
 open_1:	tst.w	d1
-	bne	FALSE
+	bne	retfalse
 	rts
 
 
@@ -353,8 +322,8 @@ open_1:	tst.w	d1
 *  WORD
 *  dos_read(handle, cnt, pbuffer)
 *  	WORD		handle;
-*  	UWORD		cnt;
-*  	LONG		pbuffer;
+*  	size_t		cnt;
+*  	VOID *pbuffer;
 *  {
 *  	LONG		ret;
 *  	ret = trap(X_READ,handle,(ULONG)cnt,pbuffer);
@@ -364,17 +333,19 @@ open_1:	tst.w	d1
 *  WORD
 *  dos_write(handle, cnt, pbuffer)
 *  	WORD		handle;
-*  	UWORD		cnt;
-*  	LONG		pbuffer;
+*  	size_t		cnt;
+*  	VOID *pbuffer;
 *  {
 *  	LONG		ret;
 *  	ret = trap(X_WRITE,handle,(ULONG)cnt,pbuffer);
 *  	return( (UWORD)ret);
 *  }
 *
+	xdef	_dos_read
 _dos_read:	moveq	#X_READ,d1
 		bra.b	rw
 
+	xdef	_dos_write
 _dos_write:	moveq	#X_WRITE,d1
 
 *
@@ -406,6 +377,7 @@ rw:
 *		4       6       8
 *	 .cargs .handle .smode .sofst.l
 *
+	xdef	_dos_lseek
 _dos_lseek:
 	move.l	4(sp),-(sp)		; handle & smode
 	move.l	4+8(sp),-(sp)		; softst
@@ -427,6 +399,7 @@ _dos_lseek:
 *		4        6
 *	 .cargs .drive.w .pdrvpath.l
 *
+	xdef	_dos_gdir
 _dos_gdir:
 	move.w	4(sp),-(sp)		; drive
 	move.l	6+2(sp),-(sp)		; pdrvpath
@@ -453,6 +426,7 @@ _dos_gdir:
 *		4       8
 *	 .cargs .path.l .attr
 *
+	xdef	_dos_mkdir
 _dos_mkdir:
 	move.l	4(sp),-(sp)		; path
 	move.w	#X_MKDIR,-(sp)
@@ -482,6 +456,7 @@ mkd_1:	move.w	d1,d0			; return (!DOS_ERR)
 *		4   6    8
 *	 .cargs .h .time .date
 *
+	xdef	_dos_set
 _dos_set:
 	move.w	#$0001,-(sp)		; TRUE
 	move.w	4+2(sp),-(sp)		; h
@@ -529,6 +504,7 @@ _dos_set:
 *
 la_buf	equ	-(44)
 la_path	equ	-(44+8)
+	xdef	_dos_label
 _dos_label:
 	link	a6,#la_path		; make room for args
 
@@ -558,13 +534,13 @@ la_1:	move.b	(a1)+,(a0)+
 la_2:	move.b	(a1)+,(a0)+
 	bne.b	la_2
 	unlk	a6
-	bra	TRUE
+	bra	rettrue
 
 la_err:	moveq	#1,d0
 	move.w	d0,_DOS_ERR
 	move.w	d0,_DOS_AX
 	unlk	a6
-	bra	FALSE
+	bra	retfalse
 
 la_string:	dc.b	':\*.*',0
 		even
@@ -595,6 +571,7 @@ la_string:	dc.b	':\*.*',0
 *	.cargs #8, .drv.w .ptotal.l .pavail.l
 *
 *sp_buf	=	-16
+*	xdef	_dos_space
 *_dos_space:
 *	link	a6,#sp_buf
 *	move.w	8(a6),-(sp)		; drv
@@ -627,8 +604,9 @@ la_string:	dc.b	':\*.*',0
 *  	return(trap(X_RENAME,0x0,p1,p2) );
 *  }
 *  
+	xdef	_dos_rename
 _dos_rename:
-	move.l	(sp)+,retaddr
+	move.l	(sp)+,retaddr       ; WTF
 	move.l	#$00560000,-(sp)	; X_RENAME + $0000
 	bsr	jtrap
 	addq	#4,sp
@@ -656,6 +634,7 @@ _dos_rename:
 *  	return(ret);
 *  }
 *  
+	xdef	_dos_alloc
 _dos_alloc:
 	move.l	4(sp),d0		; nbytes
 	btst	#0,d0
@@ -685,6 +664,7 @@ al_3:	rts
 *  	return( trap( X_MALLOC, -1L) );
 *  }
 *
+	xdef	_dos_avail
 _dos_avail:
 	moveq	#-1,d0
 	move.l	d0,-(sp)
@@ -700,42 +680,55 @@ _dos_avail:
 *  where we make a GEMDOS trap with the
 *  arguments on the stack unchanged.
 *
+	xdef	_chrout
 _chrout:	moveq	#X_TABOUT,d1
 		bra.b	generic
 
+	xdef	_rawcon
 _rawcon:	moveq	#X_RAWCON,d1
 		bra.b	generic
 
+	xdef	_prt_chr
 _prt_chr:	moveq	#X_PRTOUT,d1
 		bra.b	generic
 
+	xdef	_dos_gdrv
 _dos_gdrv:	moveq	#X_GETDRV,d1
 		bra.b	generic
 
+	xdef	_dos_sdta
 _dos_sdta:	moveq	#X_SETDTA,d1
 		bra.b	generic
 
+	xdef	_dos_close
 _dos_close:	moveq	#X_CLOSE,d1
 		bra.b	generic
 
+	xdef	_dos_chdir
 _dos_chdir:	moveq	#X_CHDIR,d1
 		bra.b	generic
 
+	xdef	_dos_sdrv
 _dos_sdrv:	moveq	#X_SETDRV,d1
 		bra.b	generic
 
+	xdef	_dos_chmod
 _dos_chmod:	moveq	#X_CHMOD,d1
 		bra.b	generic
 
+	xdef	_dos_delete
 _dos_delete:	moveq	#X_UNLINK,d1
 		bra.b	generic
 
+	xdef	_dos_rmdir
 _dos_rmdir:	moveq	#X_RMDIR,d1
 		bra.b	generic
 
+	xdef	_dos_create
 _dos_create:	moveq	#X_CREAT,d1
 		bra.b	generic
 
+	xdef	_dos_free
 _dos_free:	moveq	#X_MFREE,d1
 
 generic:
@@ -759,6 +752,7 @@ retaddr:	ds.l	1		; saved return address
 *    Returns:	EQ+D1=0, no "dos error"
 *		NE+D1=1, "dos error" condition
 *
+*	xdef	_trap		; replace old trap() call
 _trap:
 	move.l	(sp)+,tr_retsave	; save return address
 	trap	#1			; do GEMDOS trap
@@ -776,10 +770,12 @@ tr_1:	move.w	d1,_DOS_ERR		; copy error condition to global var.
 *	WORD	drive;
 *	BYTE	*path;
 
+	xdef	_do_cdir
 _do_cdir:				
 	move.w	4(sp),-(sp)		; change the drive first
 	move.w	#X_SETDRV,-(sp)
 	jsr 	jtrap
+	/* BUG: does a Dsetpath even if Dsetdrv() fails */
 	move.l	10(sp),-(sp)		; change the directory
 	move.w	#X_CHDIR,-(sp)
 	jsr	jtrap

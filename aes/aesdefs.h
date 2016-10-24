@@ -24,3 +24,6 @@
 
 #define SUBMENUS 0
 
+#define MULTITOS 0
+
+

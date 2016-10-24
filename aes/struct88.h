@@ -1,23 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/struct88.h,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:30:56 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:30:56  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:32:26  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:36:26  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:30:56 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:30:56  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:32:26  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:36:26  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	STRUCT88.H	1/28/84 - 01/18/85	Lee Jay Lorenzen	*/
 /*	for atari	03/20/85 - 5/08/85	Lowell Webster		*/
 /*	Document EVB	02/19/88		D.Mui			*/
@@ -25,12 +23,12 @@
 /*	Increase number of NFORKS	8/17/92	D.Mui			*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.0
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.0
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
 #ifndef STRUCT88_H
 #define STRUCT88_H
@@ -132,7 +130,7 @@ EVB		/* event block structure */
 	EVB	*e_nextp;	/* link to next EVB on PD event list	*/
 	EVB	*e_link;	/* link to next EVB on CDA event chain	*/
 	EVB	*e_pred;	/* link to prev EVB on CDA event chain	*/
-	char	*e_pd;		/* owner PD (data for fork)		*/
+	PD *e_pd;		/* owner PD (data for fork)		*/
 	int32_t	e_parm;		/* parameter for request event		*/
 	int16_t	e_flag;		/* look to above defines		*/
 	EVSPEC	e_mask;		/* mask for event notification		*/
