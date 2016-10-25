@@ -152,7 +152,7 @@ extern int16_t x_type;
 
 extern int16_t gl_restype;
 
-extern int16_t gl_rschange;
+extern BOOLEAN gl_rschange;
 
 extern int16_t d_exit;
 

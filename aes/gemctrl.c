@@ -29,12 +29,6 @@
  * 
  * =======================================================================
  *
- * $Revision: 2.3 $
- * =======================================================================
- *
- * $Source: /u2/MRS/osrevisions/aes/gemctrl.c,v $
- * =======================================================================
- *
  *************************************************************************
  */
 /*	GEMCTRL.C	5/14/84 - 02/23/85	Lee Jay Lorenzen	*/
@@ -409,10 +403,10 @@ PP(int16_t h;)
 	t2.g_y = y;
 	t2.g_w = w;
 	t2.g_h = h;
-#if (AESVERSION >= 0x330) & !BINEXACT
+#if (AES3D) & !BINEXACT
 	wm_get(deskwind, WF_FIRSTXYWH, temp, NULL);
 #else
-	wm_get(deskwind, WF_FIRSTXYWH, temp); /* BUG: missing parameter for >= 0x330 */
+	wm_get(deskwind, WF_FIRSTXYWH, temp); /* BUG: missing parameter for >= 0x0330 */
 #endif
 
 	if (newdesk)
@@ -433,10 +427,10 @@ PP(int16_t h;)
 			gsx_sclip(&t1);
 			ob_draw((LPTREE)tree, stobj, MAX_DEPTH);
 		}
-#if (AESVERSION >= 0x330) & !BINEXACT
+#if (AES3D) & !BINEXACT
 		wm_get(deskwind, WF_NEXTXYWH, temp, NULL);
 #else
-		wm_get(deskwind, WF_NEXTXYWH, temp); /* BUG: missing parameter for >= 0x330 */
+		wm_get(deskwind, WF_NEXTXYWH, temp); /* BUG: missing parameter for >= 0x0330 */
 #endif
 	}
 

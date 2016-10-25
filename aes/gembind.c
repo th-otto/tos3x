@@ -11,21 +11,18 @@
 
 #include "aes.h"
 #include "gemlib.h"
+#if SUBMENUS
+#include "mn_tools.h"
+#undef MB_STATE /* grmpf */
+#endif
 #include "crysbind.h"
 #include "taddr.h"
 #include "gemusa.h"
-#if SUBMENUS
-#include "mn_tools.h"
-#endif
 
 
 int16_t gl_dspcnt; /* unused */
 
 static VOIDPTR ad_rso;
-
-MFORM gl_cmform;						/* current aes mouse form   */
-
-MFORM gl_omform;						/* old aes mouse form       */
 
 extern VOIDPTR maddr; /* hmpf */
 
@@ -48,7 +45,7 @@ PP(register int16_t *int_out;)
 PP(register VOIDPTR *addr_in;)
 {
 	intptr_t tmparm;
-	intptr_t buparm;
+	intptr_t lbuparm;
 	intptr_t lmaddr;
 	LPTREE tree;
 	register int16_t ret;
@@ -116,8 +113,8 @@ PP(register VOIDPTR *addr_in;)
 		else
 			tmparm = 0; /* BUG: using undefined value */
 #endif
-		buparm = HW(MB_CLICKS) | LW((MB_MASK << 8) | MB_STATE);
-		ret = ev_multi(MU_FLAGS, (MOBLK *)&MMO1_FLAGS, (MOBLK *)&MMO2_FLAGS, tmparm, buparm, MME_PBUFF, &EV_MX);
+		lbuparm = HW(MB_CLICKS) | LW((MB_MASK << 8) | MB_STATE);
+		ret = ev_multi(MU_FLAGS, (MOBLK *)&MMO1_FLAGS, (MOBLK *)&MMO2_FLAGS, tmparm, lbuparm, MME_PBUFF, &EV_MX);
 		break;
 	case EVNT_DCLICK:
 		ret = ev_dclick(EV_DCRATE, EV_DCSETIT);
@@ -137,6 +134,9 @@ PP(register VOIDPTR *addr_in;)
 		do_chg((LPTREE)MM_ITREE, TITLE_NUM, SELECTED, !NORMAL_IT, TRUE, TRUE);
 		break;
 	case MENU_TEXT:
+/*
+ * AES #34 - menu_text - Replaces the text of a menu item.
+ */
 		tree = (LPTREE)MM_ITREE;
 		LSTCPY((VOIDPTR)LLGET(OB_SPEC(ITEM_NUM)), MM_PTEXT);
 		break;
@@ -174,7 +174,7 @@ PP(register VOIDPTR *addr_in;)
 		ret = ob_find((LPTREE)OB_TREE, OB_STARTOB, OB_DEPTH, OB_MX, OB_MY);
 		break;
 	case OBJC_OFFSET:
-#if AESVERSION >= 0x330
+#if AES3D
 		ob_gclip((LPTREE)OB_TREE, OB_OBJ, &OB_XOFF, &OB_YOFF, &OB_GX, &OB_GY, &OB_GW, &OB_GH);
 #else
 		ob_offset((LPTREE)OB_TREE, OB_OBJ, &OB_XOFF, &OB_YOFF);
@@ -299,7 +299,7 @@ PP(register VOIDPTR *addr_in;)
 		wm_delete(WM_HANDLE);
 		break;
 	case WIND_GET:
-#if AESVERSION >= 0x330
+#if AES3D
 		ret = wm_get(WM_HANDLE, WM_WFIELD, &WM_OX, &WM_IX);
 #else
 		ret = wm_get(WM_HANDLE, WM_WFIELD, &WM_OX);
@@ -359,7 +359,7 @@ PP(register VOIDPTR *addr_in;)
 		break;
 
 	default:
-		fm_show(ALRTNOFU, NULL, 1);
+		fm_show(ALRTNOFUNC, NULL, 1); /* why not use no_aes here? */
 		ret = -1;
 		break;
 	}

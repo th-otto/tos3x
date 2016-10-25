@@ -1,12 +1,10 @@
 /*
  ***************************   GEMDISP.C    ******************************
  *
- * $Revision: 2.3 $	$Source: /u2/MRS/osrevisions/aes/gemdisp.c,v $
  * =======================================================================
- * $Author: mui $ 	$Date: 89/04/26 18:21:59 $    $Locker: kbad $
+ * $Author: mui $ 	$Date: 89/04/26 18:21:59 $
  * =======================================================================
  *
- * $Log:	gemdisp.c,v $
  * Revision 2.3  89/04/26  18:21:59  mui
  * TT
  * 
@@ -188,14 +186,14 @@ VOID chkkbd(NOTHING)
 		pintin[0] = 4;
 		pintin[1] = 2;
 #if BINEXACT
-		gsx_ncode(33, 0x00000002L);
+		gsx_ncode(SET_INPUT_MODE, 0x00000002L); /* sigh */
 #else
-		gsx_ncode(33, 0, 2);
+		gsx_ncode(SET_INPUT_MODE, 0, 2);
 #endif
 
 		pintin[0] = -1;
 		pintin[1] = FALSE;				/* no echo */
-		gsx_ncode(31, FALSE, 2);
+		gsx_ncode(STRING_INPUT, FALSE, 2);
 		if (contrl[4])
 			achar = intout[0];
 	}

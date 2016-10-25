@@ -53,45 +53,6 @@
 #include "../common/config.h"
 #include "aesdefs.h"
 
-#if TOSVERSION >= 0x0100
-#undef AESVERSION
-#define AESVERSION 0x0120
-#endif
-
-#if TOSVERSION >= 0x0104
-#undef AESVERSION
-#define AESVERSION 0x0140
-#endif
-
-#if TOSVERSION >= 0x0201
-#undef AESVERSION
-#define AESVERSION 0x0310
-#endif
-
-#if TOSVERSION >= 0x0206
-#undef AESVERSION
-#define AESVERSION 0x0320
-#endif
-
-#if TOSVERSION >= 0x0301
-#undef AESVERSION
-#define AESVERSION 0x0300
-#endif
-
-#if TOSVERSION >= 0x0306
-#undef AESVERSION
-#define AESVERSION 0x0320
-#endif
-
-#if TOSVERSION >= 0x0400
-#undef AESVERSION
-#if MULTITOS
-#define AESVERSION 0x0340
-#else
-#define AESVERSION 0x0330
-#endif
-#endif
-
 #if BINEXACT
 #  ifndef __ALCYON__
 #    undef BINEXACT
@@ -111,7 +72,6 @@ typedef int BOOLEAN;
 #endif
 
 
-#define AES3D (AESVERSION >= 0x340)
 
 
 #include "struct88.h"
@@ -241,12 +201,18 @@ int16_t	LSTCPY PROTO((char *dst, const char *src));
 
 
 /*
- * dosif.s
+ * dosif.S/jbind.S
  */
 VOID cli PROTO((NOTHING));
 VOID sti PROTO((NOTHING));
 VOID takecpm PROTO((NOTHING));
 VOID givecpm PROTO((NOTHING));
+VOID takeerr PROTO((NOTHING));
+VOID giveerr PROTO((NOTHING));
+VOID deskerr PROTO((NOTHING));
+VOID back PROTO((NOTHING));
+VOID retake PROTO((NOTHING));
+intptr_t dos_exec PROTO((const char *cmd, int16_t mode, const char *tail));
 
 
 /*
@@ -278,8 +244,6 @@ extern uint16_t gl_actbutcol;				/* activator button color */
 extern uint16_t gl_alrtcol;					/* alert background color */
 extern int16_t crt_error;					/* critical error handler semaphore     */
 
-/* set in jbind.s, checked by dispatcher    */
-
 extern int16_t adeskp[3];					/* desktop colors & backgrounds */
 extern int16_t awinp[3];					/* window colors & backgrounds */
 #if DOWARNING
@@ -287,19 +251,19 @@ extern BOOLEAN dowarn;
 #endif
 
 VOID setres PROTO((NOTHING));
-VOID main PROTO((NOTHING));
+VOID aesmain PROTO((NOTHING));
 VOID pinit PROTO((PD *ppd, CDA *pcda));
 int32_t set_cache PROTO((int32_t newcacr));
 int16_t pred_dinf PROTO((NOTHING));
-int16_t gsx_malloc PROTO((NOTHING));
+BOOLEAN gsx_malloc PROTO((NOTHING));
 VOID set_defdrv PROTO((NOTHING));
-int16_t gsx_xmfset PROTO((MFORM *pmfnew));
-int16_t gsx_mfset PROTO((MFORM *pmfnew));
+VOID gsx_xmfset PROTO((MFORM *pmfnew));
+VOID gsx_mfset PROTO((MFORM *pmfnew));
 VOID gr_mouse PROTO((int16_t mkind, MFORM *grmaddr));
 
 
 /*
- * optimize.s/function.c
+ * optimize.S/function.c
  */
 const char *scasb PROTO((const char *p, char b));
 VOID r_get PROTO((const GRECT *gr, int16_t *px, int16_t *py, int16_t *pw, int16_t *ph));
@@ -562,6 +526,7 @@ VOID kchange PROTO((int16_t ch, int16_t kstat));
 VOID post_keybd PROTO((PD *p, uint16_t ch));
 VOID bchange PROTO((int16_t new, int16_t clicks));
 int16_t downorup PROTO((int16_t new, intptr_t buparm));
+VOID post_button PROTO((PD * p, int16_t new, int16_t clks));
 VOID mchange PROTO((int16_t rx1, int16_t ry1));
 VOID post_mouse PROTO((PD *p, int16_t grx, int16_t gry));
 int16_t inorout PROTO((EVB *e, int16_t rx, int16_t ry));
@@ -573,10 +538,11 @@ int16_t inorout PROTO((EVB *e, int16_t rx, int16_t ry));
 extern LPTREE gl_mntree;
 /* BUG: accessed as short, but allocated as long */
 #if !BINEXACT
+/* for BINEXACT, can't be declared here or we get redeclaration errors */
 extern int16_t gl_mnpid;
 #endif
 extern GRECT gl_rmnactv;
-extern intptr_t desk_acc[MAX_ACCS];
+extern char *desk_acc[MAX_ACCS];
 extern int16_t desk_pid[MAX_ACCS];
 extern int16_t gl_dacnt;
 extern int16_t gl_dabase;
@@ -585,12 +551,13 @@ extern int16_t gl_dabox;
 uint16_t do_chg PROTO((LPTREE tree, int16_t iitem, uint16_t chgvalue, int16_t dochg, int16_t dodraw, int16_t chkdisabled));
 int16_t menu_set PROTO((LPTREE tree, int16_t last_item, int16_t cur_item, int16_t setit));
 VOID menu_sr PROTO((int16_t saveit, LPTREE tree, int16_t imenu));
-#if !SUBMENUS
+#if SUBMENUS
+int16_t menu_down PROTO((LPTREE tree, int16_t ititle, OBJECT **itree));
+#else
 int16_t menu_down PROTO((LPTREE tree, int16_t ititle));
 #endif
 int16_t mn_do PROTO((int16_t *ptitle, int16_t *pitem));
-int16_t mn_bar PROTO((LPTREE tree, int16_t showit));
-int16_t mn_bar PROTO((LPTREE tree, int16_t showit));
+VOID mn_bar PROTO((LPTREE tree, int16_t showit));
 VOID mn_clsda PROTO((NOTHING));
 int16_t mn_register PROTO((int16_t pid, char *pstr));
 VOID ch_wrect PROTO((GRECT *r, GRECT *n));
@@ -608,7 +575,6 @@ int16_t find_pos PROTO((char *str, int16_t pos));
 VOID pxl_rect PROTO((LPTREE tree, int16_t obj, int16_t ch_pos, GRECT *pt));
 VOID curfld PROTO((LPTREE tree, int16_t obj, int16_t new_pos, int16_t dist));
 int16_t instr PROTO((char chr, const char *str));
-int16_t check PROTO((const char *in_char, char valchar));
 VOID ob_stfn PROTO((int16_t idx, int16_t *pstart, int16_t *pfinish));
 int16_t ob_delit PROTO((int16_t idx));
 int16_t ob_edit PROTO((LPTREE tree, int16_t obj, int16_t in_char, int16_t *idx, int16_t kind));
@@ -650,8 +616,9 @@ int16_t get_prev PROTO((LPTREE tree, int16_t parent, int16_t obj));
 CICON *match_planes PROTO((CICON *iconlist, int planes));
 CICON *find_eq_or_less PROTO((CICON *iconlist, int planes));
 VOID gr_cicon PROTO((int16_t state, int16_t *pmask, int16_t *pdata, const char *ptext, int16_t ch, int16_t chx, int16_t chy, GRECT *pi, GRECT *pt, CICONBLK *cicon));
-int16_t gsx_cblt PROTO((P(int16_t *) saddr, P(uint16_t) sx, P(uint16_t) sy, P(uint16_t) swb, P(int16_t *) daddr, P(uint16_t) dx, P(uint16_t) dy, P(uint16_t) dwb, P(uint16_t) w, P(uint16_t) h, P(uint16_t) rule, P(int16_t) numplanes));
+VOID gsx_cblt PROTO((P(int16_t *) saddr, P(uint16_t) sx, P(uint16_t) sy, P(uint16_t) swb, P(int16_t *) daddr, P(uint16_t) dx, P(uint16_t) dy, P(uint16_t) dwb, P(uint16_t) w, P(uint16_t) h, P(uint16_t) rule, P(int16_t) numplanes));
 VOID get_color_rsc PROTO((CICONBLK **cicondata));
+VOID free_cicon PROTO((CICONBLK **carray));
 
 
 /*
@@ -802,7 +769,7 @@ extern int16_t st_keybd;
 
 int16_t rom_ram PROTO((int which, intptr_t pointer));
 VOID rsc_free PROTO((NOTHING));
-VOID rsc_read PROTO((NOTHING));
+BOOLEAN rsc_read PROTO((NOTHING));
 
 
 /*
@@ -824,8 +791,8 @@ int16_t rs_load PROTO((intptr_t pglobal, const char *rsfname));
 /*
  * gemsclib.c
  */
-int16_t sc_read PROTO((char *pscrap));
-int16_t sc_write PROTO((const char *pscrap));
+VOID sc_read PROTO((char *pscrap));
+VOID sc_write PROTO((const char *pscrap));
 
 
 /*
@@ -869,12 +836,12 @@ int16_t wm_create PROTO((uint16_t kind, GRECT *rect));
 int16_t wm_open PROTO((int16_t handle, GRECT *rect));
 int16_t wm_close PROTO((int16_t handle));
 int16_t wm_delete PROTO((int16_t handle));
-#if AESVERSION >= 0x330
+#if AES3D
 int16_t wm_get PROTO((int16_t handle, int16_t field, int16_t *ow, const int16_t *iw));
 #else
 int16_t wm_get PROTO((int16_t handle, int16_t field, int16_t *ow));
 #endif
-int16_t wm_set PROTO((int16_t handle, int16_t field, const int16_t *iw));
+int16_t wm_set PROTO((int16_t handle, int16_t field, int16_t *iw));
 int16_t wm_find PROTO((int mx, int my));
 int16_t wm_update PROTO((int code));
 int16_t wm_calc PROTO((int16_t type, int16_t kind, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh));
@@ -949,8 +916,8 @@ VOID mn_init PROTO((NOTHING));
  * romcart.c
  */
 BOOLEAN cart_init PROTO((NOTHING));
-int16_t cart_exec PROTO((const char *pcmd, const char *ptail));
-int16_t c_sfirst PROTO((const char *path));
+BOOLEAN cart_exec PROTO((const char *pcmd, const char *ptail));
+BOOLEAN c_sfirst PROTO((const char *path));
 int16_t ld_cartacc PROTO((NOTHING));
 
 
@@ -994,6 +961,7 @@ VOID i_ptr PROTO((VOIDPTR));
 VOID i_lptr1 PROTO((VOIDPTR, ...));
 VOID i_ptr2 PROTO((VOIDPTR));
 VOID m_lptr2 PROTO((VOIDPTR *));
+int16_t mul_div PROTO((int16_t mul1, int16_t mul2, int16_t divis));
 
 
 /*
@@ -1003,9 +971,26 @@ VOID getmouse PROTO((NOTHING));
 VOID putmouse PROTO((NOTHING));
 long trp13 PROTO((short code, ...));
 long trp14 PROTO((short code, ...));
+long gemdos PROTO((short code, ...));
+
+
+/*
+ * gemjstrt.S
+ */
+extern BOOLEAN gl_rschange;
+extern int16_t gl_restype;
 
 
 /*
  * someone messed it up and called functions from desktop here...
  */
+extern char const infdata[]; /* "DESKTOP.INF" */
+
 int16_t XDeselect PROTO((OBJECT *tree, int16_t obj));
+BOOLEAN getcookie PROTO((int32_t cookie, int32_t *val));
+char *scan_2 PROTO((char *pcurr, int16_t *pwd));
+char *escan_str PROTO((char *pcurr, char *ppstr));
+char *save_2 PROTO((char *pcurr, uint16_t wd));
+BOOLEAN app_reschange PROTO((int16_t res));
+const char *g_name PROTO((const char *file));
+BOOLEAN deskmain PROTO((NOTHING));

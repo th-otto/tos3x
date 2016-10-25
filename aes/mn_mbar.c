@@ -50,15 +50,15 @@
 /* INCLUDE FILES
  * ================================================================
  */
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
-#include <mn_tools.h>
+#include "aes.h"
+
+#if SUBMENUS /* whole file */
+
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "mn_tools.h"
+
 
 #if BINEXACT
 extern int16_t gl_mnpid;
@@ -91,7 +91,7 @@ MENU_PTR gl_menuptr;					/* MENU_PTR for the drop-down menu  */
  */
 
 VOID mn_mouse PROTO((BOOLEAN save));
-VOID mu_save PROTO((BOOLEAN saveit, LPTREE tree, int16_t imenu));
+VOID mu_save PROTO((BOOLEAN saveit, OBJECT *tree, int16_t imenu));
 int16_t GetObjMenu PROTO((OBJECT *tree, int16_t ititle, OBJECT **itree));
 
 
@@ -139,16 +139,16 @@ PP(int16_t x;)
 *	down.
 */
 
-VOID mu_save(P(BOOLEAN) saveit, P(LPTREE) tree, P(int16_t) imenu)
+VOID mu_save(P(BOOLEAN) saveit, P(OBJECT *) tree, P(int16_t) imenu)
 PP(BOOLEAN saveit;)
-PP(LPTREE tree;)
+PP(OBJECT *tree;)
 PP(int16_t imenu;)
 {
 	GRECT t;
 
 /*	gsx_sclip(&gl_rzero);	*/
 
-	ob_offset(tree, imenu, &t.g_x, &t.g_y);
+	ob_offset((LPTREE)tree, imenu, &t.g_x, &t.g_y);
 	t.g_w = LWGET(OB_WIDTH(imenu));
 	t.g_h = LWGET(OB_HEIGHT(imenu));
 
@@ -173,7 +173,7 @@ PP(int16_t imenu;)
 *	underneath the menu and drawing in the proper menu sub-tree.
 */
 
-kint16_t menu_downP(LPTREE) tree, P(int16_t) ititle, P(OBJECT **) itree)
+int16_t menu_down(P(LPTREE) tree, P(int16_t) ititle, P(OBJECT **) itree)
 PP(register LPTREE tree;)
 PP(int16_t ititle;)
 PP(OBJECT **itree;)
@@ -183,12 +183,13 @@ PP(OBJECT **itree;)
 	int16_t imenu;
 	GRECT clip;
 
+	UNUSED(clip);
 	/* correlate title # to menu subtree #  */
 	imenu = LWGET(OB_HEAD(THEMENUS));
 	for (i = ititle - THEACTIVE; i > 1; i--)
 		imenu = LWGET(OB_NEXT(imenu));
 
-	newtree = tree;
+	newtree = (OBJECT *)tree;
 	newimenu = imenu;
 #if 0
 	/* save area underneath the menu */
@@ -198,11 +199,11 @@ PP(OBJECT **itree;)
 		newimenu = 0;
 	}
 #endif /* draw title selected  */
-	if (xdo_chg(tree, ititle, SELECTED, TRUE, TRUE, TRUE))
+	if (xdo_chg((OBJECT *)tree, ititle, SELECTED, TRUE, TRUE, TRUE))
 	{
 		mu_save(TRUE, newtree, newimenu);	/* save the screen  */
 		gsx_sclip(&gl_rzero);
-		ob_draw(newtree, newimenu, MAX_DEPTH);
+		ob_draw((LPTREE)newtree, newimenu, MAX_DEPTH);
 	}
 
 	*itree = newtree;
@@ -241,16 +242,16 @@ PP(OBJECT **itree;)
  *	int16_t    *pitem:  returns the menu item object number selected
  */
 BOOLEAN mn_hdo(P(int16_t *) ptitle, P(LPTREE *) ptree, P(int16_t *) pmenu, P(int16_t *) pitem, P(int16_t *) keyret)
-PP(int16_t *ptitle;)							/* returns the menu title       */
+PP(int16_t *ptitle;)						/* returns the menu title       */
 PP(LPTREE *ptree;)							/* returns the object tree...   */
 PP(int16_t *pmenu;)							/* returns the menu object      */
 PP(int16_t *pitem;)							/* returns the menu item        */
-PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
+PP(int16_t *keyret;)						/* returns the keystate - shift,ctrl */
 {
-	MENU Menu;							/* Input  Menu Values    */
-	MENU MData;							/* Output Menu Values    */
+	MENU Menu;								/* Input  Menu Values    */
+	MENU MData;								/* Output Menu Values    */
 	OBJECT *objs;
-	OBJECT *tree;						/* ptr to the tree       */
+	OBJECT *tree;							/* ptr to the tree       */
 	int16_t menu_state, wall;
 	int16_t cur_title, cur_state, cur_menu, cur_item;
 	int16_t last_title, last_menu;
@@ -259,22 +260,22 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 	BOOLEAN flag;
 	int16_t NewMenuID;						/* Menu ID of menu displayed.       */
 	register MENU_PTR MenuPtr;				/* Pointer to menu node structures  */
-	BOOLEAN output;						/* TRUE/FALSE for valid result      */
-	OBJECT *newtree;					/* tree ptr of popup menu       */
+	BOOLEAN output;							/* TRUE/FALSE for valid result      */
+	OBJECT *newtree;						/* tree ptr of popup menu       */
 	int16_t obj;
 	int16_t title_object;
 	/* evnt_multi() variables */
-	int16_t button;
+	int16_t bbutton;
 	int16_t mflags;
 	uint16_t ev_which;
 	MOBLK m1, m2;
 	int16_t keycode, nclicks;
 	MRETS mk;
 	int16_t i, tail;
-	int16_t curobj, rets[6];
+	int16_t curobj, lrets[6];
 	int32_t bflags;
-	MN_SET MValueNew;					/* CUrrent Popup/SubMenu Parameters */
-	MN_SET MValueOld;					/* Old Parameters           */
+	MN_SET MValueNew;						/* CUrrent Popup/SubMenu Parameters */
+	MN_SET MValueOld;						/* Old Parameters           */
 
 	/* Initialize several key variables */
 	menu_state = OUTTITLE;
@@ -283,13 +284,13 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 	cur_title = cur_state = cur_menu = cur_item = NIL;
 	title_object = last_title = last_menu = NIL;
 	done = FALSE;
-	button = 1;
+	bbutton = 1;
 
-	tree = gl_mntree;					/* global menu tree */
+	tree = (OBJECT *)gl_mntree;				/* global menu tree */
 	newtree = tree;
 	buparm = 0x01;
 	flag = FALSE;
-	MenuBar_Mode = FALSE;				/* TRUE - Use code for the menubar  */
+	MenuBar_Mode = FALSE;					/* TRUE - Use code for the menubar  */
 
 	MValueNew.Display = -1;
 	MValueNew.Drag = -1;
@@ -305,7 +306,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 
 	/* Setup  globals for evnt_submenu routine */
 
-	ob_actxywh(tree, THEACTIVE, &ActiveRect);
+	ob_actxywh((LPTREE)tree, THEACTIVE, &ActiveRect);
 
 	/* Get the title that we are over. - we MUST be in the menu title area
 	 * in order to even get here.
@@ -313,7 +314,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 	gr_mkstate(&mk.x, &mk.y, &mk.buttons, &mk.kstate);
 
 	/* Find the object that we are over */
-	title_object = cur_title = ob_find(tree, THEACTIVE, 1, mk.x, mk.y);
+	title_object = cur_title = ob_find((LPTREE)tree, THEACTIVE, 1, mk.x, mk.y);
 
 	if (cur_title == NIL)				/* 06/11/92 D.Mui */
 		goto m_hexit;
@@ -359,7 +360,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 			{
 				AssignMenuData(MenuPtr, 0);
 				MSCROLL(MenuPtr) = FALSE;	/* cjg 06/29/92 */
-				ob_offset(MTREE(MenuPtr), MPARENT(MenuPtr), &MXPOS(MenuPtr), &MYPOS(MenuPtr));
+				ob_offset((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), &MXPOS(MenuPtr), &MYPOS(MenuPtr));
 			} else
 			{
 				/* Find the active process */
@@ -389,11 +390,13 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 				mn_settings(1, &MValueNew);
 			}
 
-			menu_down(tree, cur_title, &newtree);
-
+			menu_down((LPTREE)tree, cur_title, &newtree);
 		}
 	}
 
+#if !BINEXACT
+	wall = 0; /* quiet compiler */
+#endif
 	while (!done)
 	{
 		mflags = MU_BUTTON | MU_M1;
@@ -411,7 +414,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 			{
 				mflags = MU_BUTTON | MU_M1 | MU_M2;
 				/* Look for enter this rectangle */
-				rect_change(newtree, &m2, cur_menu, FALSE);
+				rect_change((LPTREE)newtree, &m2, cur_menu, FALSE);
 			}
 			break;
 
@@ -421,27 +424,27 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 			if ((cur_title != NIL) && !IsDisabled(cur_title))
 			{
 				mflags = MU_BUTTON | MU_M1 | MU_M2;
-				rect_change(newtree, &m2, cur_menu, FALSE);
+				rect_change((LPTREE)newtree, &m2, cur_menu, FALSE);
 			}
 			break;
 		}
 
-		rect_change(tree, &m1, wall, flag);
+		rect_change((LPTREE)tree, &m1, wall, flag);
 		bflags = ((int32_t) (1) << 16);
 		bflags += (1 << 8) + buparm;
 		ev_which = ev_multi(mflags, &m1, &m2, 0x0L,	/* timer */
-							bflags, 0x0L, &rets[0]);
+							bflags, 0x0L, &lrets[0]);
 
-		mk.x = rets[0];
-		mk.y = rets[1];
-		mk.buttons = rets[2];
-		mk.kstate = rets[3];
-		keycode = rets[4];
-		nclicks = rets[5];
+		mk.x = lrets[0];
+		mk.y = lrets[1];
+		mk.buttons = lrets[2];
+		mk.kstate = lrets[3];
+		keycode = lrets[4];
+		nclicks = lrets[5];
 
 		if (ev_which & MU_BUTTON)
 		{
-			obj = ob_find(tree, THEACTIVE, 1, mk.x, mk.y);
+			obj = ob_find((LPTREE)tree, THEACTIVE, 1, mk.x, mk.y);
 			if ((obj == NIL) || ((obj != NIL) && IsDisabled(obj)))
 			{
 				*keyret = mk.kstate;
@@ -461,7 +464,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 			{
 				if (NewMenuID)
 				{
-					ob_actxywh(tree, cur_title, &TitleRect);
+					ob_actxywh((LPTREE)tree, cur_title, &TitleRect);
 
 					MenuBar_Mode = TRUE;
 					gl_mtree = tree;
@@ -507,7 +510,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 						 * Unless its a disabled menu item
 						 */
 						gr_mkstate(&mk.x, &mk.y, &mk.buttons, &mk.kstate);
-						obj = ob_find(tree, THEACTIVE, 1, mk.x, mk.y);
+						obj = ob_find((LPTREE)tree, THEACTIVE, 1, mk.x, mk.y);
 						if ((obj == NIL) || ((obj != NIL) && IsDisabled(obj)))
 							done = TRUE;
 					} else
@@ -529,7 +532,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 				last_menu = cur_menu;
 
 				/* Find the object that we are over */
-				title_object = cur_title = ob_find(tree, THEACTIVE, 1, mk.x, mk.y);
+				title_object = cur_title = ob_find((LPTREE)tree, THEACTIVE, 1, mk.x, mk.y);
 				cur_state = ((cur_title != NIL) ? (ObState(cur_title)) : (0));
 
 				if ((cur_title != NIL) && (cur_state != DISABLED))
@@ -581,7 +584,7 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 						{
 							AssignMenuData(MenuPtr, 0);
 							MSCROLL(MenuPtr) = FALSE;	/* cjg - 06/29/92 */
-							ob_offset(MTREE(MenuPtr), MPARENT(MenuPtr), &MXPOS(MenuPtr), &MYPOS(MenuPtr));
+							ob_offset((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), &MXPOS(MenuPtr), &MYPOS(MenuPtr));
 						} else
 						{
 							/* Find the active process */
@@ -611,13 +614,12 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 							CheckMenuHeight(MenuPtr);	/* allow DA menu to scroll */
 							mn_settings(1, &MValueNew);
 						}
-						menu_down(tree, cur_title, &newtree);
+						menu_down((LPTREE)tree, cur_title, &newtree);
 					}
 				}
-			}							/* ev_which & MU_M1 */
+			}
 		}
-		/* if( !done )     */
-	}									/* while( !done ) */
+	}
 
 	/*Decide what should be cleaned up and returned. */
 	flag = FALSE;
@@ -665,7 +667,14 @@ PP(int16_t *keyret;)							/* returns the keystate - shift,ctrl */
 	mn_mouse(0);
 /*   ctlmouse( FALSE ); */
 	wm_update(2);
-	return (flag);
+
+	UNUSED(tail);
+	UNUSED(nclicks);
+	UNUSED(keycode);
+	UNUSED(bbutton);
+	UNUSED(dummy);
+	
+	return flag;
 }
 
 
@@ -711,3 +720,5 @@ PP(OBJECT **itree;)							/* return the menu item...      */
 	*itree = newtree;
 	return (newimenu);
 }
+
+#endif /* SUBMENUS */

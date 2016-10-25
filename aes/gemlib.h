@@ -38,6 +38,9 @@
 #define PATH_LEN 121				/* define maximum path length */
 #define SAVE_ATARI 128				/* atari specific bytes in DESKTOP.INF file size of DESKTOP.INF	file */
 
+/* max string length	*/
+#define MAX_LEN 81
+
 #define EXTENSION  6
 
 /* size of DESKTOP.INF file */
@@ -204,7 +207,7 @@ typedef struct rstree
 
 
 /* Ob_spec values */
-#define	GBOX_OBS    0x00010000	/* ob_spec value for GBOX objects */
+#define	GBOX_OBS    0x00010000L	/* ob_spec value for GBOX objects */
 
 
 /* Memory descriptor structure */
@@ -275,8 +278,8 @@ typedef	struct	window {
 THEGLO
 {
 	UDA	g_uda;			/* must be first */
-	UDA2	g_2uda;
-	UDA3	g_3uda;
+	UDA	g_2uda;
+	UDA	g_3uda;
 	PD		g_pd[NUM_PDS];
 	CDA	g_cda[NUM_PDS];
 	EVB	g_evb[NUM_EVBS];

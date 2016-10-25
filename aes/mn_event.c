@@ -54,24 +54,22 @@
 /* INCLUDE FILES
  * ================================================================
  */
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
-#include <mn_tools.h>
-#include <vdidefs.h>
+#include "aes.h"
+
+#if SUBMENUS /* whole file */
+
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "mn_tools.h"
 
 /* PROTOTYPES
  * ================================================================
  */
 
-VOID M1_Event PROTO((int16_t id, MENU_PTR MenuPtr, int16_t *old_obj, int16_t *cur_obj, MENU_PTR SubMenuPtr, int16_t *MenuDelayFlag, int16_t *MenuDragFlag, int16_t *mn_mask, MOBLK *m1, MOBLK *m2, MRETS *mk, BOOLEAN *MenuObject));
-VOID ClearDelays PROTO((int16_t *MenuDelayFlag, int16_t *MenuDragFlag, int16_t *mn_mask));
-VOID ItemHandler PROTO((int16_t id, MENU_PTR MenuPtr, int16_t cur_obj, int16_t old_obj, MENU_PTR SubMenuPtr, int16_t *MenuDelayFlag, int16_t *MenuDragFlag, int16_t *mn_mask, int16_t *MenuObject, MOBLK *m1, MOBLK *m2, MRETS *mk));
+VOID M1_Event PROTO((int16_t id, MENU_PTR MenuPtr, int16_t *old_obj, int16_t *cur_obj, MENU_PTR SubMenuPtr, BOOLEAN *MenuDelayFlag, BOOLEAN *MenuDragFlag, uint16_t *mn_mask, MOBLK *m1, MOBLK *m2, MRETS *mk, BOOLEAN *MenuObject));
+VOID ClearDelays PROTO((BOOLEAN *MenuDelayFlag, BOOLEAN *MenuDragFlag, uint16_t *mn_mask));
+VOID ItemHandler PROTO((int16_t id, MENU_PTR MenuPtr, int16_t cur_obj, int16_t old_obj, MENU_PTR SubMenuPtr, BOOLEAN *MenuDelayFlag, BOOLEAN *MenuDragFlag, uint16_t *mn_mask, BOOLEAN *MenuObject, MOBLK *m1, MOBLK *m2, MRETS *mk));
 BOOLEAN ArrowCheck PROTO((MENU_PTR MenuPtr, OBJECT *tree, int16_t cur_obj));
 BOOLEAN ArrowScroll PROTO((MENU_PTR MenuPtr, int16_t cur_obj));
 VOID SetDRect PROTO((GRECT *DragRect, int16_t mx, int16_t my, GRECT *SubRect));
@@ -137,7 +135,7 @@ PP(int16_t usetrap;)
 			 gl_rscreen.g_h, curr_state, dodraw );
 */
 	gsx_sclip(&gl_rscreen);
-	ob_change(tree, iitem, curr_state, dodraw);
+	ob_change((LPTREE)tree, iitem, curr_state, dodraw);
 	return (TRUE);
 }
 
@@ -515,7 +513,7 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node   */
 					 */
 					if (inside(mk.x, mk.y, &ActiveRect))
 					{
-						title = ob_find(gl_mtree, THEACTIVE, 1, mk.x, mk.y);
+						title = ob_find((LPTREE)gl_mtree, THEACTIVE, 1, mk.x, mk.y);
 						if (title != NIL)
 						{
 							/* Check if we are in the same menu title OR
@@ -529,11 +527,11 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node   */
 
 								/* Set the M1 RECT to LOOK IN at our current rectangle */
 								m1.m_out = FALSE;
-								ob_actxywh(MTREE(MenuPtr), MPARENT(MenuPtr), (GRECT *) & m1.m_x);
+								ob_actxywh((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), (GRECT *) & m1.m_x);
 
 								/* Set M2 to Look OUT of the title */
 								m2.m_out = TRUE;
-								ob_actxywh(gl_mtree, title, (GRECT *) & m2.m_x);
+								ob_actxywh((LPTREE)gl_mtree, title, (GRECT *) & m2.m_x);
 
 								continue;
 								/*goto skip; */
@@ -552,7 +550,7 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node   */
 						goto da_bar;
 					}
 				}						/* End of If MenuBar Mode */
-			  skip:
+			/*  skip: */
 				/* Update the Mouse Rectangle */
 				/* However, don't update if we have no events.
 				 * called probably from a goto from do_button()
@@ -669,7 +667,7 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node   */
 				done = TRUE;
 
 				/* If clicked outside, its NIL, and should return as such. */
-				result = ((cur_obj == NIL) ? (-1L) : (NULL));
+				result = ((cur_obj == NIL) ? (-1L) : (0));
 			}
 		}
 
@@ -789,6 +787,9 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node   */
 
 	}
 
+	UNUSED(nclicks);
+	UNUSED(scancode);
+	
 	return (result);
 }
 
@@ -798,15 +799,15 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node   */
  * ================================================================
  * Handles MU_M1 events
  */
-VOID M1_Event(P(int16_t) id, P(MENU_PTR) MenuPtr, P(int16_t *) old_obj, P(int16_t *) cur_obj, P(MENU_PTR) SubMenuPtr, P(int16_t *) MenuDelayFlag, P(int16_t *) MenuDragFlag, P(int16_t *) mn_mask, P(MOBLK *) m1, P(MOBLK *) m2, P(MRETS *) mk, P(BOOLEAN *)MenuObject)
+VOID M1_Event(P(int16_t) id, P(MENU_PTR) MenuPtr, P(int16_t *) old_obj, P(int16_t *) cur_obj, P(MENU_PTR) SubMenuPtr, P(BOOLEAN *) MenuDelayFlag, P(BOOLEAN *) MenuDragFlag, P(uint16_t *) mn_mask, P(MOBLK *) m1, P(MOBLK *) m2, P(MRETS *) mk, P(BOOLEAN *)MenuObject)
 PP(int16_t id;)								/* Process id         */
 PP(MENU_PTR MenuPtr;)
 PP(int16_t *old_obj;)
 PP(int16_t *cur_obj;)
 PP(MENU_PTR SubMenuPtr;)
-PP(int16_t *MenuDelayFlag;)
-PP(int16_t *MenuDragFlag;)
-PP(int16_t *mn_mask;)
+PP(BOOLEAN *MenuDelayFlag;)
+PP(BOOLEAN *MenuDragFlag;)
+PP(uint16_t *mn_mask;)
 PP(MOBLK *m1;)
 PP(MOBLK *m2;)
 PP(MRETS *mk;)
@@ -824,10 +825,10 @@ PP(BOOLEAN *MenuObject;)
  * Clear the Drag and Displa delay values. Also clears the
  * evnt_multi mask and timer values.
  */
-VOID ClearDelays(P(int16_t *) MenuDelayFlag, P(int16_t *) MenuDragFlag, P(int16_t *) mn_mask)
-PP(int16_t *MenuDelayFlag;)
-PP(int16_t *MenuDragFlag;)
-PP(int16_t *mn_mask;)
+VOID ClearDelays(P(BOOLEAN *) MenuDelayFlag, P(BOOLEAN *) MenuDragFlag, P(uint16_t *) mn_mask)
+PP(BOOLEAN *MenuDelayFlag;)
+PP(BOOLEAN *MenuDragFlag;)
+PP(uint16_t *mn_mask;)
 {
 	*MenuDelayFlag = FALSE;
 	*MenuDragFlag = FALSE;
@@ -843,16 +844,16 @@ PP(int16_t *mn_mask;)
  * Starts the timer for display delays and sets the mouse rectangles
  * for a potential drag.
  */
-VOID ItemHandler(P(int16_t) id, P(MENU_PTR) MenuPtr, P(int16_t) cur_obj, P(int16_t) old_obj, P(MENU_PTR) SubMenuPtr, P(int16_t *) MenuDelayFlag, P(int16_t *) MenuDragFlag, P(int16_t *) mn_mask, P(int16_t *) MenuObject, P(MOBLK *) m1, PP(MOBLK *) m2, P(MRETS *) mk)
+VOID ItemHandler(P(int16_t) id, P(MENU_PTR) MenuPtr, P(int16_t) cur_obj, P(int16_t) old_obj, P(MENU_PTR) SubMenuPtr, P(BOOLEAN *) MenuDelayFlag, P(BOOLEAN *) MenuDragFlag, P(uint16_t *) mn_mask, P(BOOLEAN *) MenuObject, P(MOBLK *) m1, P(MOBLK *) m2, P(MRETS *) mk)
 PP(int16_t id;)								/* Process id         */
 PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node   */
 PP(int16_t cur_obj;)
 PP(int16_t old_obj;)
 PP(MENU_PTR SubMenuPtr;)					/* Pointer to the SubMenu */
-PP(int16_t *MenuDelayFlag;)
-PP(int16_t *MenuDragFlag;)
-PP(int16_t *mn_mask;)
-PP(int16_t *MenuObject;)
+PP(BOOLEAN *MenuDelayFlag;)
+PP(BOOLEAN *MenuDragFlag;)
+PP(uint16_t *mn_mask;)
+PP(BOOLEAN *MenuObject;)
 PP(MOBLK *m1;)
 PP(MOBLK *m2;)
 PP(MRETS *mk;)
@@ -887,13 +888,13 @@ PP(MRETS *mk;)
 
 		}
 		m1->m_out = TRUE;				/* Look for leaving this menu item */
-		ob_actxywh(MTREE(MenuPtr), cur_obj, (GRECT *) & m1->m_x);
+		ob_actxywh((LPTREE)MTREE(MenuPtr), cur_obj, (GRECT *) & m1->m_x);
 
 	} else								/* We are OUTSIDE the Menu! */
 	{
 		/* Set the M1 RECT to LOOK IN at our current rectangle */
 		m1->m_out = FALSE;
-		ob_actxywh(MTREE(MenuPtr), MPARENT(MenuPtr), (GRECT *) & m1->m_x);
+		ob_actxywh((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), (GRECT *) & m1->m_x);
 
 		/* If the current menu ISN'T the ROOT MENU, then set M2
 		 * into pixel search mode. Of course, set it to this mode
@@ -920,8 +921,8 @@ PP(MRETS *mk;)
 				 * Set M2 to look into the Active!
 				 */
 				m2->m_out = FALSE;
-/*    	       ob_actxywh( MTREE( MenuPtr ), THEACTIVE, ( GRECT *)&m2->m_x );	*/
-				ob_actxywh(gl_mtree, THEACTIVE, (GRECT *) & m2->m_x);
+/*    	       ob_actxywh((LPTREE)MTREE( MenuPtr ), THEACTIVE, ( GRECT *)&m2->m_x );	*/
+				ob_actxywh((LPTREE)gl_mtree, THEACTIVE, (GRECT *) & m2->m_x);
 			}
 			*mn_mask = MU_BUTTON | MU_M1 | MU_M2;
 		} else
@@ -983,7 +984,7 @@ PP(int16_t flag;)								/* Blit To/From buffer and scrn */
 	clip.g_h += 4;
 #endif
 
-	ob_gclip(MTREE(MenuPtr), MPARENT(MenuPtr), &dummy, &dummy, &clip.g_x, &clip.g_y, &clip.g_w, &clip.g_h);
+	ob_gclip((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), &dummy, &dummy, &clip.g_x, &clip.g_y, &clip.g_w, &clip.g_h);
 
 	rc_intersect(&gl_rfull, &clip);		/* clip to the work area */
 	gsx_sclip(&clip);					/* set the clip     */
@@ -1018,14 +1019,14 @@ PP(int16_t flag;)								/* Blit To/From buffer and scrn */
 		pxy[4] = pxy[5] = 0;			/* set destination   */
 		pxy[6] = clip.g_w - 1;
 		pxy[7] = clip.g_h - 1;
-		vro_cpyf(3, pxy, (FDB *) & location, &ObjMFDB);
+		vro_cpyfm(3, pxy, (FDB *) & location, &ObjMFDB);
 	} else
 	{									/* BUFFER to SCREEN! */
 		pxy[0] = pxy[1] = 0;			/* set the source    */
 		pxy[2] = clip.g_w - 1;
 		pxy[3] = clip.g_h - 1;
 		rc_2xy(&clip, (int16_t *) & pxy[4]);	/* set the dest    */
-		vro_cpyf(3, pxy, &ObjMFDB, (FDB *) & location);
+		vro_cpyfm(3, pxy, &ObjMFDB, (FDB *) & location);
 
 		if (MBUFFER(MenuPtr))			/* Clear the buffer  */
 			dos_free(MBUFFER(MenuPtr));
@@ -1033,6 +1034,9 @@ PP(int16_t flag;)								/* Blit To/From buffer and scrn */
 	}
 	gsx_sclip(&gl_rscreen);				/* set clip to screen */
 	gsx_mon();							/* and turn the mouse */
+	
+	UNUSED(tree);
+	
 	return (TRUE);						/* back on....        */
 }
 
@@ -1092,7 +1096,7 @@ BOOLEAN ArrowScroll(P(MENU_PTR) MenuPtr, P(int16_t) cur_obj)
 PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node     */
 PP(register int16_t cur_obj;)						/* the obj being clicked on */
 {
-	register GRECT clip;						/* the blit clip rectangle  */
+	GRECT clip;							/* the blit clip rectangle  */
 	MRETS mk;							/* the mouse structure      */
 	GRECT rect;							/* temp GRECT           */
 	int16_t pxy[12];						/* blit array           */
@@ -1109,19 +1113,21 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 	int16_t nclicks;						/* evnt_multi nclicks returns        */
 	MOBLK m1;							/* evnt_multi M1 Mouse Rectangle     */
 	int16_t mn_mask;						/* event multi mask              */
-	int16_t locount;						/* event multi timer - locount       */
-	int16_t hicount;						/* event multi timer - hicount       */
+	int16_t llocount;						/* event multi timer - llocount       */
+	int16_t lhicount;						/* event multi timer - lhicount       */
 	int16_t buff[6];
-	int16_t button;
-	int16_t rets[4];
+	int16_t bbutton;
+	int16_t lrets[4];
 
+	UNUSED(dummy);
+	
 	DelayFlag = TRUE;					/* Do the delay just once   */
 	done = FALSE;
-	button = 0;
+	bbutton = 0;
 
 
 	m1.m_out = TRUE;					/* Look for leaving this menu item */
-	ob_actxywh(MTREE(MenuPtr), cur_obj, (GRECT *) & m1.m_x);
+	ob_actxywh((LPTREE)MTREE(MenuPtr), cur_obj, (GRECT *) & m1.m_x);
 	mn_mask = MU_BUTTON | MU_M1 | MU_TIMER;
 
 	/* In order to get here, cur_obj cannot be NIL. */
@@ -1164,7 +1170,7 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 /*
           ob_offset( MTREE( MenuPtr ), MPARENT( MenuPtr ), &clip.g_x, &clip.g_y );
  */
-			ob_offset(MTREE(MenuPtr), MTOP_OBJ(MenuPtr), &clip.g_x, &clip.g_y);
+			ob_offset((LPTREE)MTREE(MenuPtr), MTOP_OBJ(MenuPtr), &clip.g_x, &clip.g_y);
 
 			/* This is MAX_MENU_HEIGHT because to get here we needed to
 			 * scroll the menu, therefore, its automatically, MAX_MENU_HEIGHT
@@ -1203,7 +1209,7 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 			gsx_sclip(&clip);
 			/* BLIT the screen portion in the proper direction */
 			gsx_moff();
-			vro_cpyf(3, pxy, (FDB *) & location, (FDB *) & location);
+			vro_cpyfm(3, pxy, (FDB *) & location, (FDB *) & location);
 			gsx_mon();
 
 			gsx_sclip(&gl_rscreen);
@@ -1216,11 +1222,11 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 				/* Redraw the Down arrow if its needed and not already drawn */
 				if (!DownArrowFlag && (MB_OBJ(MenuPtr) != MLAST_CHILD(MenuPtr)))
 				{
-					ob_actxywh(MTREE(MenuPtr), MB_OBJ(MenuPtr), &rect);
+					ob_actxywh((LPTREE)MTREE(MenuPtr), MB_OBJ(MenuPtr), &rect);
 					MTREE(MenuPtr)[MB_OBJ(MenuPtr)].ob_state = NORMAL;
 					ObjcDraw(MTREE(MenuPtr), MPARENT(MenuPtr), &rect);
 				}
-				ob_actxywh(MTREE(MenuPtr), MTOP_OBJ(MenuPtr), &rect);
+				ob_actxywh((LPTREE)MTREE(MenuPtr), MTOP_OBJ(MenuPtr), &rect);
 
 				if (MTOP_OBJ(MenuPtr) != MSCROLL(MenuPtr))
 				{						/* Draw 1 item... */
@@ -1238,10 +1244,10 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 				if (!UpArrowFlag && (MTOP_OBJ(MenuPtr) != MSCROLL(MenuPtr)))
 				{
 					MTREE(MenuPtr)[MTOP_OBJ(MenuPtr)].ob_state = NORMAL;
-					ob_actxywh(MTREE(MenuPtr), MTOP_OBJ(MenuPtr), &rect);
+					ob_actxywh((LPTREE)MTREE(MenuPtr), MTOP_OBJ(MenuPtr), &rect);
 					ObjcDraw(MTREE(MenuPtr), MPARENT(MenuPtr), &rect);
 				}
-				ob_actxywh(MTREE(MenuPtr), MB_OBJ(MenuPtr), &rect);
+				ob_actxywh((LPTREE)MTREE(MenuPtr), MB_OBJ(MenuPtr), &rect);
 
 				/* Draw at least one item. */
 				rect.g_y -= gl_hchar;
@@ -1255,8 +1261,8 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 			/* This is the delay when we are already scrolling */
 			if (!DelayFlag)
 			{
-				locount = (int16_t) (SCROLL_DELAY & 0x0000ffffL);
-				hicount = (int16_t) (SCROLL_DELAY >> 16);
+				llocount = (int16_t) (SCROLL_DELAY & 0x0000ffffL);
+				lhicount = (int16_t) (SCROLL_DELAY >> 16);
 			}
 		} else
 		{
@@ -1264,7 +1270,7 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 			 * Therefore, we'll just wait for a button or mouse rectangle event
 			 */
 			mn_mask = MU_BUTTON | MU_M1;
-			locount = hicount = 0;
+			llocount = lhicount = 0;
 		}
 
 
@@ -1276,13 +1282,13 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 		 */
 		if (DelayFlag)
 		{
-			locount = (int16_t) (ARROW_DELAY & 0x0000ffffL);
-			hicount = (int16_t) (ARROW_DELAY >> 16);
+			llocount = (int16_t) (ARROW_DELAY & 0x0000ffffL);
+			lhicount = (int16_t) (ARROW_DELAY >> 16);
 			DelayFlag = FALSE;
 		}
 
 		event = ev_multi(mn_mask, &m1, 0L,
-						 (int32_t) (HW(hicount) + LW(locount)), (int32_t) (HW(1) | LW((1 << 8) | button)), 0x0L, &buff[0]);
+						 (int32_t) (HW(lhicount) + LW(llocount)), (int32_t) (HW(1) | LW((1 << 8) | bbutton)), 0x0L, &buff[0]);
 
 		mk.x = buff[0];
 		mk.y = buff[1];
@@ -1297,7 +1303,7 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 		if (event & MU_M1)
 		{
 			done = TRUE;
-			ev_button(1, 1, 0, &rets[0]);
+			ev_button(1, 1, 0, &lrets[0]);
 		}
 
 
@@ -1308,11 +1314,15 @@ PP(register int16_t cur_obj;)						/* the obj being clicked on */
 			 * The blit routines need to know whether or not to draw
 			 * based upon the current object and the last menu item in the menu.
 			 */
-			cur_obj = ob_find(MTREE(MenuPtr), MPARENT(MenuPtr), 1, mk.x, mk.y);
+			cur_obj = ob_find((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), 1, mk.x, mk.y);
 			if (!cur_obj || (cur_obj == MPARENT(MenuPtr)))
 				cur_obj = NIL;
 		}
 	} while (!done);
+	
+	UNUSED(nclicks);
+	UNUSED(scancode);
+	
 	return (TRUE);
 }
 
@@ -1372,7 +1382,7 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the node we want checked */
 {
 	register int16_t cur_obj;
 
-	cur_obj = ob_find(MTREE(MenuPtr), MPARENT(MenuPtr), 1, mk->x, mk->y);
+	cur_obj = ob_find((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), 1, mk->x, mk->y);
 
 	if (!cur_obj || (cur_obj == MPARENT(MenuPtr)))
 		cur_obj = NIL;
@@ -1387,10 +1397,12 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the node we want checked */
  * It is used because since we are getting alot of events,
  * we can miss the key button click.
  */
-BOOLEAN CheckButton(P(int16_t) button, P(MRETS *) mk)
-PP(int16_t button;)
+BOOLEAN CheckButton(P(int16_t) bbutton, P(MRETS *) mk)
+PP(int16_t bbutton;)
 PP(MRETS *mk;)
 {
 	gr_mkstate(&mk->x, &mk->y, &mk->buttons, &mk->kstate);
-	return ((!button && !mk->buttons) || (button && mk->buttons));
+	return ((!bbutton && !mk->buttons) || (bbutton && mk->buttons));
 }
+
+#endif /* SUBMENUS */

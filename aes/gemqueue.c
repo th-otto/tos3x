@@ -1,42 +1,36 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemqueue.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:26:19 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemqueue.c,v $
-* Revision 2.2  89/04/26  18:26:19  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:29:09  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:34:55  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:26:19 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:26:19  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:29:09  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:34:55  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMQUEUE.C	1/27/84 - 01/07/85	Lee Jay Lorenzen	*/
 /*	Reg Opt		03/09/85		Derek Mui		*/
 /*	Modify doq for acc wait	7/13/90		D.Mui			*/
 
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.0
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.0
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
 
 
 VOID doq PROTO((int16_t donq, PD *p, QPB *m));
@@ -58,7 +52,7 @@ PP(QPB *m;)
 		/* if its a redraw msg try to find a matching msg and union the redraw rects together */
 		nm = (int16_t *) & p->p_queue[p->p_qindex];
 
-		if (nm[0] == AC_CLOSED)
+		if (nm[0] == AC_CLOSE)
 			p->p_stat |= PS_TRYSUSPEND;
 
 		if (nm[0] == WM_REDRAW)
@@ -69,10 +63,12 @@ PP(QPB *m;)
 				om = (int16_t *) & p->p_queue[index];
 				if ((om[0] == WM_REDRAW) && (nm[3] == om[3]))
 				{
-					rc_union(&nm[4], &om[4]);
+					rc_union((GRECT *)&nm[4], (GRECT *)&om[4]);
 					n = 0;
 				} else
+				{
 					index += (om[2] + 16);
+				}
 			}
 		}
 		p->p_qindex += n;
@@ -112,7 +108,7 @@ PP(intptr_t lm;)
 	{
 		doq(isqwrite, p, m);
 		zombie(e);
-		if (e = *ppe)
+		if ((e = *ppe))
 		{
 			e->e_flag |= NOCANCEL;
 			*ppe = e->e_link;

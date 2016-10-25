@@ -61,6 +61,7 @@
 #define	SET_WRITING_MODE	32
 
 #define	SET_INPUT_MODE		33
+#define VQT_ATTRIBUTES      38
 
 #define	OPEN_VWORKSTATION	100
 #define	CLOSE_VWORKSTATION	101
@@ -170,7 +171,7 @@ extern int16_t intin[];
 extern int16_t intout[];
 extern int16_t ptsin[];
 extern int16_t ptsout[10];
-extern intptr_t ad_intin;
+extern VOIDPTR ad_intin; /* FAR ptr to intin */
 
 
 
@@ -186,6 +187,7 @@ extern intptr_t tikaddr;
 extern intptr_t tiksav;
 
 VOID gsx_mfree PROTO((NOTHING));
+VOID gsx_mret PROTO((VOIDPTR *pmaddr, int32_t *pmlen));
 
 
 VOID gsx_1code PROTO((int16_t code, int16_t value));
@@ -222,5 +224,6 @@ VOID vsl_width PROTO((int16_t width));
  * apgsxif.[cS]
  */
 VOID gsx_fix PROTO((FDB *pfd, int16_t *theaddr, int16_t wb, int16_t h));
+int16_t gsx_blt PROTO((int16_t *saddr, uint16_t sx, uint16_t sy, uint16_t swb, int16_t *daddr, uint16_t dx, uint16_t dy, uint16_t dwb, uint16_t w, uint16_t h, uint16_t rule, int16_t fgcolor, int16_t bgcolor));
 
 #endif /* GSXDEFS_H */

@@ -1,49 +1,49 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: kbad $	$Date: 89/06/15 15:29:51 $
-* =======================================================================
-*
-* Revision 2.4  89/06/15  15:29:51  kbad
-* fix sh_name so that it doesn't overshoot the string it's looking at.
-* 
-* Revision 2.3  89/04/26  18:26:59  mui
-* TT
-* 
-* Revision 2.2  89/04/01  03:07:32  kbad
-* changed sh_find to look first in the directory from which the
-* current application was launched, then cwd, then down search paths.
-* 
-* Revision 2.1  89/02/22  05:29:31  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.9  89/02/16  10:46:45  mui
-* Fix dclicks: initialize gl_bpend to 0 sh_main for dclick
-* 
-* Revision 1.8  88/12/05  17:00:54  kbad
-* Change to cart_exec only filename (rather than full pathname from
-* shel_write... since cart_exec checks for the right file, and only
-* the filenames are stored in the cart).
-* 
-* Revision 1.7  88/10/21  16:28:46  kbad
-* Major change to sh_main.  No longer change directory to prg being launched.
-* 
-* Revision 1.6  88/10/03  12:03:01  kbad
-* opt sh_draw, sh_name, sh_path
-* 
-* Revision 1.5  88/09/08  17:57:40  kbad
-* restore old sh_path, make shel_envrn use the env, while keeping
-* compatible with old path
-* 
-* Revision 1.3  88/07/01  16:22:05  mui
-* Reg opt
-* 
-* Revision 1.1  88/06/02  12:35:11  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: kbad $	$Date: 89/06/15 15:29:51 $
+ * =======================================================================
+ *
+ * Revision 2.4  89/06/15  15:29:51  kbad
+ * fix sh_name so that it doesn't overshoot the string it's looking at.
+ * 
+ * Revision 2.3  89/04/26  18:26:59  mui
+ * TT
+ * 
+ * Revision 2.2  89/04/01  03:07:32  kbad
+ * changed sh_find to look first in the directory from which the
+ * current application was launched, then cwd, then down search paths.
+ * 
+ * Revision 2.1  89/02/22  05:29:31  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.9  89/02/16  10:46:45  mui
+ * Fix dclicks: initialize gl_bpend to 0 sh_main for dclick
+ * 
+ * Revision 1.8  88/12/05  17:00:54  kbad
+ * Change to cart_exec only filename (rather than full pathname from
+ * shel_write... since cart_exec checks for the right file, and only
+ * the filenames are stored in the cart).
+ * 
+ * Revision 1.7  88/10/21  16:28:46  kbad
+ * Major change to sh_main.  No longer change directory to prg being launched.
+ * 
+ * Revision 1.6  88/10/03  12:03:01  kbad
+ * opt sh_draw, sh_name, sh_path
+ * 
+ * Revision 1.5  88/09/08  17:57:40  kbad
+ * restore old sh_path, make shel_envrn use the env, while keeping
+ * compatible with old path
+ * 
+ * Revision 1.3  88/07/01  16:22:05  mui
+ * Reg opt
+ * 
+ * Revision 1.1  88/06/02  12:35:11  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMSHLIB.C	4/18/84 - 01/07/85	Lee Lorenzen		*/
 /*	68k		2/18/85 - 05/28/85	Lowell Webster		*/
 /*	remove sh_parse	06/10/85		Mike Schmal		*/
@@ -100,22 +100,20 @@
 /*	Fixed the background pattern at TT high	11/14/90	D.Mui	*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <dos.h>
-#include <gemusa.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "dos.h"
+#include "gemusa.h"
+
 
 #define CMD_BAT    0xFA
 #define CMD_COPY   0xFB
@@ -249,11 +247,11 @@ BOOLEAN sh_tographic(NOTHING)
 
 	gsx_graphic(TRUE);					/* convert to graphic   */
 	gsx_sclip(&gl_rscreen);				/* set initial clip rect */
-	gsx_malloc();						/* allocate screen space */
+	gsx_malloc();						/* allocate screen space BUG: not checked */
 	gsx_mfset(ad_hgmice);				/* put mouse to hourglass */
 	ratinit();							/* start up the mouse   */
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -397,24 +395,24 @@ PP(const char *psrch;)
  *	(unless munged by HINSTALL or an auto folder program)
  */
 
-BOOLEAN sh_path(int16_t whichone, char *dp, char *pname)
-int16_t whichone;
-register char *dp;
-register char *pname;
+BOOLEAN sh_path(P(int16_t) whichone, P(char *) dp, P(char *) pname)
+PP(int16_t whichone;)
+PP(register char *dp;)
+PP(register char *pname;)
 {
 	register char last;
-	register const char *lp;
+	register char *lp;
 	register int16_t i;
-	const char *temp;
+	char *ltemp;
 	int16_t oldpath = FALSE;
 
 	/* find PATH= in the environment which is a double null-terminated string */
-	sh_envrn(&temp, "PATH=");
+	sh_envrn(&ltemp, "PATH=");
 
-	if (!temp)
-		return (FALSE);
+	if (!ltemp)
+		return FALSE;
 
-	lp = temp;
+	lp = ltemp;
 
 	/* This kludge, er, section of code maintains compatibility with
 	 *	the old style PATH=\0<path>\0, to support folks who run an auto-
@@ -429,7 +427,7 @@ register char *pname;
 				return (FALSE);			/* really null, so punt */
 		}
 		oldpath = TRUE;					/* it really is a path  */
-		lp = temp;						/* so munge the null    */
+		lp = ltemp;						/* so munge the null    */
 		*lp = ';';
 	}
 	/* end compatibility code ----------------				*/
@@ -445,8 +443,8 @@ register char *pname;
 	{
 		/* restore the null */
 		if (oldpath)
-			*(char *) temp = '\0';		/* (for compatibility)  */
-		return (FALSE);
+			*temp = '\0';		/* (for compatibility)  */
+		return FALSE;
 	}
 
 	/* copy over path   */
@@ -468,7 +466,7 @@ register char *pname;
 
 	/* restore the null */
 	if (oldpath)
-		*(char *) temp = '\0';			/* (for compatibility)  */
+		*temp = '\0';			/* (for compatibility)  */
 
 	/* make whichone refer to next path */
 	return (whichone + 1);
@@ -493,15 +491,15 @@ PP(register SHFIND_PROC routine;)
  *	it looks at each point it firsts call the passed-in routine with
  *	the filespec that is looking for.
  */
-int16_t sh_find(char *pspec, SHFIND_PROC routine)
-register intptr_t pspec; /* should be char */
-register SHFIND_PROC routine;
+int16_t sh_find(P(char *) pspec, P(SHFIND_PROC) routine)
+PP(register intptr_t pspec;) /* should be char * */
+PP(register SHFIND_PROC routine;)
 {
 	register int16_t path;
 	register BOOLEAN found = FALSE;
 	register char *pname;
 	char tmpname[14];
-	int32_t savedta;
+	intptr_t savedta;
 
 	savedta = trap(0x2F);				/* Fgetdta()        */
 	dos_sdta(&D.g_loc1[0]);				/* use this     */
@@ -533,8 +531,8 @@ register SHFIND_PROC routine;
 	if (found)							/* if file found    */
 		xstrpcpy(ad_path, pspec);			/* return full filespec */
 
-	dos_sdta(savedta);					/* restore DTA      */
-	return (found);
+	dos_sdta((VOIDPTR)savedta);					/* restore DTA      */
+	return found;
 }
 
 
@@ -551,8 +549,12 @@ VOID sh_main(NOTHING)
 	char tempchr;
 	PD *temprlr;
 
+	UNUSED(tempchr);
+	UNUSED(chrptr);
+	
 	DGLO = &D;
 	tree = ad_stdesk;					/* sh draw box              */
+	UNUSED(tree);
 	reschange = FALSE;					/* no resolution change     */
 
 	do
@@ -585,7 +587,7 @@ VOID sh_main(NOTHING)
 			sh_doexec = FALSE;			/* always go back to desktop */
 			sh_isgem = TRUE;
 			cart_exec(sh_name(ad_shcmd), ad_shtail);	/* only filename!  */
-			DGLO->s_tail[0] = NULL;
+			DGLO->s_tail[0] = '\0';
 			sh_iscart = FALSE;
 			continue;
 		}

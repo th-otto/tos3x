@@ -50,15 +50,15 @@
 /* INCLUDE FILES
  * ================================================================
  */
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
-#include <mn_tools.h>
+
+#include "aes.h"
+
+#if SUBMENUS /* whole file */
+
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "mn_tools.h"
 
 
 /* GLOBALS
@@ -69,7 +69,7 @@ MENU_PTR MenuList;						/* Pointer to the head of the linked list */
 				  /* that contains the structures of the    */
 				  /* menus that are to be displayed, such as */
 				  /* the ObRect, blit buffer etc...         */
-static int16_t MAX_MENU_HEIGHT;					/* The menu height we start scrolling     */
+int16_t MAX_MENU_HEIGHT;					/* The menu height we start scrolling     */
 
 
 /* PROTOTYPES
@@ -83,6 +83,8 @@ int16_t FindNewMenuID PROTO((NOTHING));
 VOID SetMenuHeight PROTO((MENU_PTR MenuPtr, int16_t start_obj, BOOLEAN adjust_flag));
 VOID PushArrowText PROTO((MENU_PTR MenuPtr));
 VOID PopArrowText PROTO((MENU_PTR MenuPtr));
+VOID AdjustMenuPositio PROTO((MENU_PTR MenuPtr, int16_t xpos, int16_t ypos, GRECT *rect, BOOLEAN Horizontal_Flag, BOOLEAN Vertical_Flag));
+
 
 
 
@@ -113,7 +115,7 @@ PP(int16_t Parent;)							/* The menu object       */
 	int16_t MenuID;						/* the Menu ID #         */
 	register MENU_PTR MenuPtr;				/* ptr to the Menu Node  */
 
-	if ((MenuID = GetNewMenu()) > NULL)	/* Get a new Menu ID     */
+	if ((MenuID = GetNewMenu()) > 0)	/* Get a new Menu ID     */
 	{									/* Yes!              */
 		MenuPtr = GetMenuPtr(MenuID);	/* Get a ptr to this node */
 		InitMenuNode(MenuPtr);			/* Init the node         */
@@ -130,7 +132,7 @@ PP(int16_t Parent;)							/* The menu object       */
 		MSTART_OBJ(MenuPtr) = MFIRST_CHILD(MenuPtr);	/* start obj */
 		return (MenuID);
 	}
-	return (NULL);
+	return 0;
 }
 
 
@@ -149,7 +151,7 @@ PP(int16_t MenuID;)							/* MenuID of node to delete */
 	register MENU_PTR ptr;					/* Temp Menu Ptr    */
 	register MENU_PTR MenuPtr;				/* Current Menu Ptr */
 
-	if ((MenuPtr = GetMenuPtr(MenuID)) > NULL)	/* Get the Ptr to the node */
+	if ((MenuPtr = GetMenuPtr(MenuID)) > 0)	/* Get the Ptr to the node */
 	{									/* YUP!                   */
 		if (MBUFFER(MenuPtr))			/* If the menu buffer is  */
 			dos_free(MBUFFER(MenuPtr));	/* still around, delete it */
@@ -274,12 +276,12 @@ int16_t GetNewMenu(NOTHING)
 
 	/* Malloc a new node!           */
 	if ((newptr = (MENU_PTR) dos_alloc((int32_t) sizeof(MENU_NODE))) == NULL)
-		return (NULL);					/* error - no memory for menuid! */
+		return 0;						/* error - no memory for menuid! */
 
-	if ((MenuID = FindNewMenuID()) == NULL)	/* Get us a new and unused ID!   */
+	if ((MenuID = FindNewMenuID()) == 0)	/* Get us a new and unused ID!   */
 	{
 		dos_free(newptr);				/* free the node         */
-		return (NULL);					/* a zero to the powers above.   */
+		return 0;						/* a zero to the powers above.   */
 	}
 
 	ptr = MenuList;						/* Set the temp to the head.     */
@@ -329,7 +331,7 @@ int16_t FindNewMenuID(NOTHING)
 		if (MenuID < MENU_MAX)			/* return the id if its < 32767 */
 			return (MenuID + 1);
 		else
-			return (NULL);				/* otherwise, return 0!         */
+			return 0;				/* otherwise, return 0!         */
 	}
 }
 
@@ -353,7 +355,7 @@ PP(int16_t MenuID;)							/* the menu id we want...    */
 	ptr = MenuList;						/* Set us to the head.       */
 
 	if (!MenuID || !MenuList)			/* Ensure a valid list and id */
-		return ((MENU_PTR) NULL);
+		return NULL;
 
 	while (ptr)							/* Go through the linked list */
 	{									/* checking menu ids. If fnd */
@@ -515,7 +517,7 @@ PP(BOOLEAN adjust_flag;)					/* see above...            */
 	for (obj = MSCROLL(MenuPtr); obj < offset_obj; obj++)
 	{
 		ObH(parent) -= ObH(obj);		/* fixup height of root menu */
-		ob_delete(tree, obj);			/* delete object in question */
+		ob_delete((LPTREE)tree, obj);			/* delete object in question */
 	}
 
 	/* update the yoffset starting from the offset object + MSCROLL()
@@ -548,7 +550,7 @@ PP(BOOLEAN adjust_flag;)					/* see above...            */
 	for (obj = MLAST_CHILD(MenuPtr); obj > MB_OBJ(MenuPtr); obj--)
 	{
 		ObH(parent) -= ObH(obj);
-		ob_delete(tree, obj);
+		ob_delete((LPTREE)tree, obj);
 	}
 
 	if (MLASTFLAG(MenuPtr))				/* CJG 01/13/92 */
@@ -611,7 +613,7 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node... */
 	while (obj != parent)
 	{
 		temp = ObNext(obj);
-		ob_delete(tree, obj);
+		ob_delete((LPTREE)tree, obj);
 		ObH(parent) -= ObH(obj);
 		obj = temp;
 	}
@@ -619,7 +621,7 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node... */
 	/* Add in all the menu items again... */
 	for (obj = MFIRST_CHILD(MenuPtr); obj <= MLAST_CHILD(MenuPtr); obj++)
 	{
-		ob_add(tree, parent, obj);
+		ob_add((LPTREE)tree, parent, obj);
 		if (IsSelected(obj))
 			Deselect(obj);
 		ObH(parent) += gl_hchar;
@@ -758,14 +760,14 @@ PP(int16_t start_obj;)							/* the menu item that we want on top */
 
 		/* Add in the objects preceding up to offset_obj */
 		for (obj = offset_obj; obj < MTOP_OBJ(MenuPtr); obj++)
-			ob_add(MTREE(MenuPtr), MPARENT(MenuPtr), obj);
+			ob_add((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), obj);
 		MTOP_OBJ(MenuPtr) = offset_obj;
 
 		/* Delete the bottom object or objects. */
 		new_bottom = min((MAX_MENU_HEIGHT - MSCROLL(MenuPtr)) + start_obj, MLAST_CHILD(MenuPtr));
 
 		for (obj = (new_bottom + 1); obj <= MB_OBJ(MenuPtr); obj++)
-			ob_delete(MTREE(MenuPtr), obj);
+			ob_delete((LPTREE)MTREE(MenuPtr), obj);
 		MB_OBJ(MenuPtr) = new_bottom;
 	} else
 	{
@@ -773,13 +775,13 @@ PP(int16_t start_obj;)							/* the menu item that we want on top */
 
 		/* Delete the starting objects. */
 		for (obj = MTOP_OBJ(MenuPtr); obj < offset_obj; obj++)
-			ob_delete(MTREE(MenuPtr), obj);
+			ob_delete((LPTREE)MTREE(MenuPtr), obj);
 		MTOP_OBJ(MenuPtr) = offset_obj;
 
 		/* Add in the bottom objects */
 		new_bottom = min((MAX_MENU_HEIGHT - MSCROLL(MenuPtr)) + start_obj, MLAST_CHILD(MenuPtr));
 		for (obj = MB_OBJ(MenuPtr) + 1; obj <= new_bottom; obj++)
-			ob_add(MTREE(MenuPtr), MPARENT(MenuPtr), obj);
+			ob_add((LPTREE)MTREE(MenuPtr), MPARENT(MenuPtr), obj);
 		MB_OBJ(MenuPtr) = new_bottom;
 	}
 
@@ -915,3 +917,5 @@ PP(int16_t height;)
 
 	return (MAX_MENU_HEIGHT);
 }
+
+#endif /* SUBMENUS */

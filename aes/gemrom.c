@@ -1,33 +1,33 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:26:27 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:26:27  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:29:13  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.5  88/11/01  18:02:04  kbad
-* Revamped PRG define
-* 
-* Revision 1.4  88/10/03  12:08:52  kbad
-* New build obsoletes ROM/IMG/PRG changes.
-* 
-* Revision 1.3  88/09/22  04:49:08  kbad
-* Added "tosrsc" label of inline linked resource
-* 
-* Revision 1.2  88/09/08  18:59:25  kbad
-* added <flavor.h> for prg/img/rom flag
-* 
-* Revision 1.1  88/06/02  12:34:59  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:26:27 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:26:27  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:29:13  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.5  88/11/01  18:02:04  kbad
+ * Revamped PRG define
+ * 
+ * Revision 1.4  88/10/03  12:08:52  kbad
+ * New build obsoletes ROM/IMG/PRG changes.
+ * 
+ * Revision 1.3  88/09/22  04:49:08  kbad
+ * Added "tosrsc" label of inline linked resource
+ * 
+ * Revision 1.2  88/09/08  18:59:25  kbad
+ * added <flavor.h> for prg/img/rom flag
+ * 
+ * Revision 1.1  88/06/02  12:34:59  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	NEW	GEMROM.C	01/11/88 - 1/19/88	Derek Mui	*/
 /*	Look for TOS.RSC and read in GEM.RSC,DESKTOP.RSC,DESKTOP.INF	*/
 /*	Make sure you set the switches right at machine.h		*/
@@ -36,10 +36,9 @@
 /*	Incorporated all the resources together	7/14/92	D.Mui		*/
 /*	Chnage the rsc table and time code format 7/16/92	D.Mui	*/
 
-#include <portab.h>
-#include <machine.h>
-#include <obdefs.h>
-#include <taddr.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
 
 RSHDR *gemptr;		/* GEM's rsc pointer        */
 RSHDR *deskptr;		/* DESKTOP'S rsc pointer    */
@@ -142,9 +141,13 @@ PP(register intptr_t pointer;)
 
 	if (doit)
 	{
-		do_rsfix(rs_hdr, size);
+		do_rsfix((intptr_t)rs_hdr, size);
 		rs_fixit(pointer);
 	}
+#if !BINEXACT
+	/* BUG: no return here */
+	return size;
+#endif
 }
 
 
@@ -159,7 +162,7 @@ VOID rsc_free(NOTHING)
 
 /*	Read in the resource file	*/
 
-VOID rsc_read(NOTHING)
+BOOLEAN rsc_read(NOTHING)
 {
 	uint16_t size;
 	register const uint16_t *intptr;
@@ -192,14 +195,14 @@ VOID rsc_read(NOTHING)
 	st_date = TIMETABLE[code++];
 	st_dchar = TIMETABLE[code];
 
-	/* The IDT format is as follow              */
-	/* HIGH int16_t  |          LOW int16_t           */
-	/* 31 - 16    | 15-12      11-8           7-0 bit   */
-	/* Reserved   | st_time    st_date        st_char   */
-	/*          0 12 hour  0  MM-DD-YY          */
-	/*      1 24 hour  1  DD-MM-YY          */
-	/*             2  YY-MM-DD          */
-	/*             3  YY-DD-MM          */
+    /* The IDT format is as follow                          */
+    /* HIGH WORD  |          LOW WORD                       */
+    /* 31 - 16    | 15-12      11-8           7-0 bit       */
+    /* Reserved   | st_time    st_date        st_char       */
+    /*              0 12 hour  0  MM-DD-YY                  */
+    /*              1 24 hour  1  DD-MM-YY                  */      
+    /*                         2  YY-MM-DD                  */
+    /*                         3  YY-DD-MM                  */
 
 	if (getcookie(0x5F494454L, &value))	/* get _IDT cookie */
 	{
@@ -214,7 +217,7 @@ VOID rsc_read(NOTHING)
 	if (!(gl_pglue = dos_alloc((int32_t) tosrsc[2])))
 	{
 		trap(9, "Unable to install AES resource!\r\n");
-		return (FALSE);
+		return FALSE;
 	}
 	/* copy rsc to ram */
 	intptr = tosrsc;
@@ -238,4 +241,8 @@ VOID rsc_read(NOTHING)
 	infsize = intptr[2] - intptr[1];
 	nodesk = FALSE;
 	nogem = FALSE;
+#if !BINEXACT
+	/* BUG: no return here */
+	return TRUE;
+#endif
 }

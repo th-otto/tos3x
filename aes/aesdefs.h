@@ -1,3 +1,46 @@
+#if TOSVERSION >= 0x0100
+#undef AESVERSION
+#define AESVERSION 0x0120
+#endif
+
+#if TOSVERSION >= 0x0104
+#undef AESVERSION
+#define AESVERSION 0x0140
+#endif
+
+#if TOSVERSION >= 0x0201
+#undef AESVERSION
+#define AESVERSION 0x0310
+#endif
+
+#if TOSVERSION >= 0x0206
+#undef AESVERSION
+#define AESVERSION 0x0320
+#endif
+
+#if TOSVERSION >= 0x0301
+#undef AESVERSION
+#define AESVERSION 0x0300
+#endif
+
+#if TOSVERSION >= 0x0306
+#undef AESVERSION
+#define AESVERSION 0x0320
+#endif
+
+#ifndef MULTITOS
+#define MULTITOS 0
+#endif
+
+#if TOSVERSION >= 0x0400
+#undef AESVERSION
+#if MULTITOS
+#define AESVERSION 0x0340
+#else
+#define AESVERSION 0x0330
+#endif
+#endif
+
 #define NUM_ACCS 1			/* for atari in rom		*/
 #define NUM_PDS (NUM_ACCS + 2)		/* acc's + ctrlpd + dos appl.	*/
 #define NUM_EVBS (NUM_PDS * 5)		/* 5 * the number of PDs	*/
@@ -22,8 +65,7 @@
 #define MULTILANG_SUPPORT (OS_COUNTRY == OS_CONF_MULTILANG)
 #endif
 
-#define SUBMENUS 0
+#define SUBMENUS (AESVERSION >= 0x340)
+#define AES3D (AESVERSION >= 0x340)
 
-#define MULTITOS 0
-
-
+#define STACK_SIZE 500

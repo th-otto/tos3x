@@ -44,14 +44,13 @@
  *	-------------------------------------------------------------
  */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemusa.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+#include "gemusa.h"
+
+#undef LEFT
+#undef RIGHT
 
 #define BACKSPACE 0x0E08				/* backspace        */
 #define SPACE 0x3920					/* ASCII <space>    */
@@ -67,6 +66,10 @@
 #define ESCAPE 0x011B					/* escape       */
 
 #define BYTESPACE 0x20					/* ascii space in bytes */
+
+
+BOOLEAN check PROTO((char *in_char, char valchar));
+
 
 #if UNLINKED
 int16_t ob_getsp(P(LPTREE) tree, P(int16_t) obj, P(TEDINFO *) pted)
@@ -131,13 +134,13 @@ PP(GRECT *pt;)
 
 
 /*
-*	Routine to scan thru a string looking for the occurrence of
-*	the specified character.  IDX is updated as we go based on
-*	the '_' characters that are encountered.  The reason for
-*	this routine is so that if a user types a template character
-*	during field entry the cursor will jump to the first 
-*	raw string underscore after that character.
-*/
+ *	Routine to scan thru a string looking for the occurrence of
+ *	the specified character.  IDX is updated as we go based on
+ *	the '_' characters that are encountered.  The reason for
+ *	this routine is so that if a user types a template character
+ *	during field entry the cursor will jump to the first 
+ *	raw string underscore after that character.
+ */
 int16_t scan_to_end(P(char *) pstr, P(int16_t) idx, P(char) chr)
 PP(register char *pstr;)
 PP(register int16_t idx;)
@@ -153,8 +156,8 @@ PP(char chr;)
 
 
 /*
-*	Routine to insert a character in a string by
-*/
+ *	Routine to insert a character in a string by
+ */
 VOID ins_char(P(char *) str, P(int16_t) pos, P(char) chr, P(int16_t) tot_len)
 PP(register char *str;)
 PP(int16_t pos;)
@@ -169,17 +172,17 @@ PP(register int16_t tot_len;)
 		str[ii] = str[ii - 1];
 	str[ii] = chr;
 	if (len + 1 < tot_len)
-		str[len + 1] = NULL;
+		str[len + 1] = '\0';
 	else
-		str[tot_len - 1] = NULL;
+		str[tot_len - 1] = '\0';
 }
 
 
 /*
-*       Routine that returns a format/template string relative number
-*       for the position that was input (in raw string relative numbers).
-*       The returned position will always be right before an '_'.
-*/
+ *       Routine that returns a format/template string relative number
+ *       for the position that was input (in raw string relative numbers).
+ *       The returned position will always be right before an '_'.
+ */
 int16_t find_pos(P(char *) str, P(int16_t) pos)
 PP(register char *str;)
 PP(register int16_t pos;)
@@ -224,12 +227,13 @@ PP(register GRECT *pt;)
 	pt->g_y = o.g_y;
 	pt->g_w = gl_wchar;
 	pt->g_h = gl_hchar;
+	UNUSED(numchs);
 }
 
 
 /*
-*	Routine to redraw the cursor or the field being editted.
-*/
+ *	Routine to redraw the cursor or the field being editted.
+ */
 VOID curfld(P(LPTREE) tree, P(int16_t) obj, P(int16_t) new_pos, P(int16_t) dist)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -240,9 +244,10 @@ PP(int16_t dist;)
 
 	pxl_rect(tree, obj, new_pos, &t);
 	if (dist)
-		t.g_w += (dist - 1) * gl_wchar + 1;	/* the "+1" is necessary or the cursor isn't always
-											   redrawn properly ++ERS 1/19/93 */
-	else
+	{
+		/* the "+1" is necessary or the cursor isn't always redrawn properly ++ERS 1/19/93 */
+		t.g_w += (dist - 1) * gl_wchar + 1;
+	} else
 	{
 		gsx_attr(FALSE, MD_XOR, BLACK);
 		t.g_y -= 3;
@@ -256,17 +261,16 @@ PP(int16_t dist;)
 		ob_draw(tree, obj, 0);
 	else
 		gsx_cline(t.g_x, t.g_y, t.g_x, t.g_y + t.g_h - 1);
-	/* turn on cursor in    */
-	/*   new position   */
+	/* turn on cursor in new position */
 	gsx_sclip(&oc);
 }
 
 
 /*
-*	Routine to check to see if given character is in the desired 
-*	range.  The character ranges are
-*	stored as enumerated characters (xyz) or ranges (x..z)
-*/
+ *	Routine to check to see if given character is in the desired 
+ *	range.  The character ranges are
+ *	stored as enumerated characters (xyz) or ranges (x..z)
+ */
 int16_t instr(P(char) chr, P(const char *) str)
 PP(register char chr;)
 PP(register char *str;)
@@ -289,11 +293,11 @@ PP(register char *str;)
 
 
 /*
-*	Routine to verify that the character matches the validation
-*	string.  If necessary, upshift it.
-*/
-int16_t check(P(const char *) in_char, P(char) valchar)
-PP(register const char *in_char;)
+ *	Routine to verify that the character matches the validation
+ *	string.  If necessary, upshift it.
+ */
+BOOLEAN check(P(char *) in_char, P(char) valchar)
+PP(register char *in_char;)
 PP(char valchar;)
 {
 	register int16_t upcase;
@@ -354,18 +358,18 @@ PP(char valchar;)
 
 
 /*
-*	Find STart and FiNish of a raw string relative to the template
-*	string.  The start is determined by the InDeX position given.
-*/
-VOID ob_stfn(P(int16_t) idx, P(int16_t *) pstart, P(int16_t *) pfinish)
+ *	Find STart and FiNish of a raw string relative to the template
+ *	string.  The start is determined by the InDeX position given.
+ */
+VOID ob_stfn(P(int16_t) idx, P(int16_t *) Pstart, P(int16_t *) pfinish)
 PP(int16_t idx;)
-PP(int16_t *pstart;)
+PP(int16_t *Pstart;)
 PP(int16_t *pfinish;)
 {
 	register THEGLO *DGLO;
 
 	DGLO = &D;
-	*pstart = find_pos(&DGLO->g_tmpstr[0], idx);
+	*Pstart = find_pos(&DGLO->g_tmpstr[0], idx);
 	*pfinish = find_pos(&DGLO->g_tmpstr[0], strlen(&DGLO->g_rawstr[0]));
 }
 
@@ -392,7 +396,7 @@ PP(int16_t in_char;)
 PP(register int16_t *idx;)							/* rel. to raw data */
 PP(int16_t kind;)
 {
-	register int32_t spec;
+	register intptr_t spec;
 	register int16_t tmp_back, cur_pos;
 	int16_t pos, len, flags, dist;
 	GRECT t, c, oc;
@@ -401,13 +405,17 @@ PP(int16_t kind;)
 	char bin_char, *pstr;
 	register THEGLO *DGLO;
 
+	UNUSED(pstr);
+	UNUSED(oc);
+	UNUSED(c);
+	UNUSED(t);
+	
 	DGLO = &D;
 
 	if ((kind == EDSTART) || (obj <= 0))
 		return (TRUE);
 
-	/* copy TEDINFO struct  */
-	/*   to local struct    */
+	/* copy TEDINFO struct to local struct  */
 /*	ob_getsp(tree, obj, &edblk);	*/
 
 	flags = LWGET(OB_FLAGS(obj));
@@ -415,19 +423,17 @@ PP(int16_t kind;)
 	if (flags & INDIRECT)
 		spec = LLGET(spec);
 
-	LBCOPY(&edblk, spec, sizeof(TEDINFO));
+	LBCOPY(&edblk, (VOIDPTR)spec, sizeof(TEDINFO));
 
-	/* copy passed in strs  */
-	/*   to local strs  */
+	/* copy passed in strs to local strs */
 	LSTCPY(&DGLO->g_tmpstr[0], edblk.te_ptmplt);
 	LSTCPY(&DGLO->g_rawstr[0], edblk.te_ptext);
 	len = ii = LSTCPY(&DGLO->g_valstr[0], edblk.te_pvalid);
 	/* expand out valid str */
 	while ((ii > 0) && (len < edblk.te_tmplen))
 		DGLO->g_valstr[len++] = DGLO->g_valstr[ii - 1];
-	DGLO->g_valstr[len] = NULL;
-	/* init formatted   */
-	/*   string     */
+	DGLO->g_valstr[len] = '\0';
+	/* init formatted string */
 	ob_format(edblk.te_just, &DGLO->g_rawstr[0], &DGLO->g_tmpstr[0], &DGLO->g_fmtstr[0]);
 	switch (kind)
 	{
@@ -435,13 +441,14 @@ PP(int16_t kind;)
 		*idx = strlen(&DGLO->g_rawstr[0]);
 		break;
 	case EDCHAR:
-		/* at this point, DGLO->g_fmtstr has already been formatted-- */
-		/*   it has both template & data. now update DGLO->g_fmtstr */
-		/*   with in_char; return it; strip out junk & update   */
-		/*   ptext string.                  */
+		/*
+		 * at this point, DGLO->g_fmtstr has already been formatted--
+		 * it has both template & data. now update DGLO->g_fmtstr
+		 * with in_char; return it; strip out junk & update
+		 *   ptext string.
+		 */
 		no_redraw = TRUE;
-		/* find cursor & turn   */
-		/*   it off     */
+		/* find cursor & turn it off */
 		ob_stfn(*idx, &start, &finish);
 		/* turn cursor off  */
 		cur_pos = start;
@@ -458,7 +465,7 @@ PP(int16_t kind;)
 			break;
 		case ESCAPE:
 			*idx = 0;
-			DGLO->g_rawstr[0] = NULL;
+			DGLO->g_rawstr[0] = '\0';
 			no_redraw = FALSE;
 			break;
 		case DELETE:
@@ -485,15 +492,16 @@ PP(int16_t kind;)
 			bin_char = in_char & 0x00ff;
 
 			if (bin_char)
-			{							/* make sure char is    */
-				/*   in specified set   */
+			{
+				/* make sure char is in specified set */
 				if (check(&bin_char, DGLO->g_valstr[*idx]))
 				{
 					ins_char(&DGLO->g_rawstr[0], *idx, bin_char, edblk.te_txtlen);
 					*idx += 1;
 					no_redraw = FALSE;
 				} else
-				{						/* see if we can skip ahead */
+				{
+					/* see if we can skip ahead */
 					if (tmp_back)
 					{
 						*idx += 1;
@@ -503,8 +511,13 @@ PP(int16_t kind;)
 
 					if (pos < (edblk.te_txtlen - 2))
 					{
+#if BINEXACT
+						/* SPACE is a key, not a char... */
 						bfill(pos - *idx, SPACE, &DGLO->g_rawstr[*idx]);
-						DGLO->g_rawstr[pos] = NULL;
+#else
+						bfill(pos - *idx, ' ', &DGLO->g_rawstr[*idx]);
+#endif
+						DGLO->g_rawstr[pos] = '\0';
 						*idx = pos;
 						no_redraw = FALSE;
 					}
@@ -523,11 +536,11 @@ PP(int16_t kind;)
 			dist = max(finish, nfinish) - start;
 			if (dist)
 				curfld(tree, obj, start, dist);
-		}								/* switch */
+		}
 		break;
 	case EDEND:
 		break;
-	}									/* switch */
+	}
 	/* draw/erase the cursor */
 	cur_pos = find_pos(&DGLO->g_tmpstr[0], *idx);
 	curfld(tree, obj, cur_pos, 0);

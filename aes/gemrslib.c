@@ -35,12 +35,16 @@
 /*	Check the RT_VRSN make sure it is greater or equal to RS_SIZE	*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
+
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
 
 
 #define X_READ	0x3F
@@ -87,7 +91,7 @@ VOID fix_trindex PROTO((NOTHING));
 VOID fix_cicon PROTO((NOTHING));
 VOID fix_objects PROTO((NOTHING));
 VOID fix_tedinfo PROTO((NOTHING));
-int16_t fix_nptrs PROTO((int16_t cnt, int16_t type));
+VOID fix_nptrs PROTO((int16_t cnt, int16_t type));
 int16_t fix_ptr PROTO((int16_t type, int16_t index));
 int16_t fix_long PROTO((intptr_t plong));
 VOID rs_sglobe PROTO((intptr_t pglobal));
@@ -129,7 +133,7 @@ PP(LPTREE tree;)
 PP(int16_t curob;)
 {
 	register int16_t i, val;
-	register inttptr_t p;
+	register intptr_t p;
 
 	/* set X,Y,W,H with fixch, use val to alternate TRUEs and FALSEs */
 	p = OB_X(curob);
@@ -184,6 +188,8 @@ PP(register uint16_t rsindex;)
 	int16_t valid;
 	uint16_t junk;
 
+	UNUSED(junk);
+	
 	valid = TRUE;
 	switch (rstype)
 	{
@@ -270,13 +276,13 @@ VOID fix_trindex(NOTHING)
 
 VOID fix_cicon(NOTHING)
 {
-	int32_t *ctable;
+	intptr_t *ctable;
 	RSHDR *header;
 
 	header = rs_hdr;
 	if (header->rsh_vrsn & 0x0004)		/* if extended type */
 	{
-		ctable = (intptr_t *)((intptr_t)rs_hdr + (intptr_t) header[RS_SIZE]);
+		ctable = (intptr_t *)((intptr_t)rs_hdr + (intptr_t) header->rsh_rssize);
 		if (ctable[1] && (ctable[1] != -1))
 			get_color_rsc((CICONBLK **)(ctable[1] + (intptr_t)rs_hdr));
 	}
@@ -341,14 +347,14 @@ VOID fix_tedinfo(NOTHING)
 		for (i = 0; i < 2; i++)
 		{
 			if (tl[i])
-				LWSET(tl[i], strlen(LLGET(ls[i])) + 1);
+				LWSET(tl[i], strlen((const char *)LLGET(ls[i])) + 1);
 		}
 		fix_ptr(R_TEPVALID, ii);
 	}
 }
 
 
-int16_t fix_nptrs(P(int16_t) cnt, P(int16_t) type)
+VOID fix_nptrs(P(int16_t) cnt, P(int16_t) type)
 PP(int16_t cnt;)
 PP(int16_t type;)
 {
@@ -399,8 +405,8 @@ PP(intptr_t pglobal;)
  *
  *	Free the memory associated with a particular resource load.
  */
-int16_t rs_free(intptr_t pglobal)
-intptr_t pglobal;
+int16_t rs_free(P(intptr_t) pglobal)
+PP(intptr_t pglobal;)
 {
 	RSHDR *header;
 	intptr_t *ctable;
@@ -430,16 +436,16 @@ intptr_t pglobal;
  *	Get a particular ADDRess out of a resource file that has been
  *	loaded into memory.
  */
-int16_t rs_gaddr(intptr_t pglobal, uint16_t rtype, uint16_t rindex, VOIDPTR *rsaddr)
-intptr_t pglobal;
-uint16_t rtype;
-uint16_t rindex;
-register VOIDPTR *rsaddr;
+int16_t rs_gaddr(P(intptr_t) pglobal, P(uint16_t) rtype, P(uint16_t) rindex, P(VOIDPTR *) rsaddr)
+PP(intptr_t pglobal;)
+PP(uint16_t rtype;)
+PP(uint16_t rindex;)
+PP(register VOIDPTR *rsaddr;)
 {
 	rs_sglobe(pglobal);
 
-	*rsaddr = get_addr(rtype, rindex);
-	return (*rsaddr != -1L);
+	*rsaddr = (VOIDPTR *)get_addr(rtype, rindex);
+	return *rsaddr != (VOIDPTR *)-1L;
 }
 
 

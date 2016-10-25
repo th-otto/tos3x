@@ -1,11 +1,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.3 $	$Source: /u2/MRS/osrevisions/aes/apgsxif.s,v $
+*  $Author: kbad $	$Date: 89/07/27 03:18:58 $
 * =======================================================================
-*  $Author: kbad $	$Date: 89/07/27 03:18:58 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	apgsxif.s,v $
+*
 * Revision 2.3  89/07/27  03:18:58  kbad
 * gsx_start: force gl_wbox > gl_wchar+2
 * 
@@ -763,7 +761,7 @@ VOID gsx_start(NOTHING)
 	gl_height = gl_hclip = gl_ws.ws_yres + 1;
 
 	intin[0] = 1;
-	gsx_ncode(102, 0, 1); /* vq_extnd(1) */
+	gsx_ncode(EXTENDED_INQUIRE, 0, 1); /* vq_extnd(1) */
 	gl_nplanes = intout[4];
 
 	/* The driver may have more than two fonts.  The large font */
@@ -771,7 +769,7 @@ VOID gsx_start(NOTHING)
 	/* font will give us 80 chars across the screen in all but  */
 	/* 320 pels in x, when it will be the 40 column font.       */
 
-	gsx_ncode(38, 0, 0);				/* inquire text attributes vqt_attributes  */
+	gsx_ncode(VQT_ATTRIBUTES, 0, 0);				/* inquire text attributes vqt_attributes  */
 	gl_wptschar = ptsout[0];
 	gl_ws.ws_chmaxh = gl_hptschar = ptsout[1];
 	gl_wchar = ptsout[2];
@@ -832,7 +830,7 @@ _gsx_start:
 	lea	_intin,a0
 	move.w	#1,(a0)			; intin[0] = 1
 
-	move.w	#1,-(sp)		; gsx_ncode( 102,0,1) vq_extnd(1)
+	move.w	#1,-(sp)		; gsx_ncode(EXTENDED_INQUIRE,0,1) vq_extnd(1)
 	clr.w	-(sp)
 	move.w	#102,-(sp)
 	jsr	_gsx_ncode
@@ -840,7 +838,7 @@ _gsx_start:
 	lea	_intout,a0	
 	move.w	8(a0),_gl_nplan		; gl_nplanes = intout[4]
 
-	clr.l	    -(sp)		; gsx_ncode(38, 0, 0)
+	clr.l	    -(sp)		; gsx_ncode(VQT_ATTRIBUTES, 0, 0)
 	move.w	#38,-(sp)		; inquire text attributes (vqt_attributes)
 	jsr	_gsx_ncode
 

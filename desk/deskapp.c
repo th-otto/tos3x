@@ -19,14 +19,14 @@ extern char *scasb();
 
 extern int16_t gl_restype;
 
-extern int16_t gl_rschange;
+extern BOOLEAN gl_rschange;
 
 extern int16_t font_save;
 
 extern char *g_name();
 
 
-int16_t app_reschange(res)
+BOOLEAN app_reschange(int16_t res)
 register int16_t res;
 {
 	if (res == gl_restype)

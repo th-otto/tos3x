@@ -8,7 +8,7 @@
 
 #include "../common/config.h"
 #include "vdidefs.h"
-#include "asmdefs.h"
+#include "../common/asmdefs.h"
 #include "../common/tosvars.inc"
 
 #include "devequ.inc"

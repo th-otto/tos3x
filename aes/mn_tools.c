@@ -17,15 +17,14 @@
 /* INCLUDES
  * ======================================================================
  */
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
-#include <mn_tools.h>
+#include "aes.h"
+
+#if SUBMENUS /* whole file */
+
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "mn_tools.h"
 
 
 /* FUNCTIONS
@@ -43,7 +42,7 @@ PP(int obj;)
 PP(GRECT *rect;)
 {
 	gsx_sclip(rect);
-	ob_draw(tree, obj, MAX_DEPTH);
+	ob_draw((LPTREE)tree, obj, MAX_DEPTH);
 }
 
 
@@ -59,3 +58,5 @@ PP(int16_t *pxy;)
 	pxy[2] += r->g_x - 1;
 	pxy[3] += r->g_y - 1;
 }
+
+#endif /* SUBMENUS */

@@ -2,11 +2,9 @@
  *************************************************************************
  *			Revision Control System
  * =======================================================================
- *  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gempd.c,v $
+ *  $Author: mui $	$Date: 89/04/26 18:26:10 $
  * =======================================================================
- *  $Author: mui $	$Date: 89/04/26 18:26:10 $	$Locker: kbad $
- * =======================================================================
- *  $Log:	gempd.c,v $
+ *
  * Revision 2.2  89/04/26  18:26:10  mui
  * TT
  * 
@@ -24,19 +22,15 @@
 /*	Move insert_process to GEMDISP	07/12/85	Derek Mui	*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
 
 
 int16_t fapd PROTO((const char *pname, int16_t pid, PD *ppd));
@@ -73,6 +67,7 @@ PP(uint16_t pid;)
 	register int16_t i;
 	PD *ppd;
 
+	UNUSED(ppd);
 	for (i = 0; i < NUM_PDS; i++)
 	{
 		if (fapd(pname, pid, &D.g_pd[i]))

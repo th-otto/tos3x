@@ -240,7 +240,7 @@ beg1:
 	move.l	a6,62(a5)	* initialize stack pointer in uda
 	move.l	a6,a7
 
-	jsr	_main
+	jsr	_aesmain
 
 	clr	(sp)
 	trap	#1

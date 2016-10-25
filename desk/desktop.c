@@ -305,11 +305,11 @@ VOID ini_rsc()
 
 
 
-int16_t deskmain()
+BOOLEAN deskmain(NOTHING)
 {
 	register int16_t i;
 
-	int16_t ret;
+	BOOLEAN ret;
 
 	int16_t handle,
 	 x;

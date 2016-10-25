@@ -9,7 +9,7 @@
 
 
 
-#include "asmdefs.h"
+#include "../common/asmdefs.h"
 #include "header.h"
 #include "../common/tosvars.inc"
 #include "biosdefs.h"

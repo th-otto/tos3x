@@ -221,11 +221,11 @@ PP(int16_t scale;)
 #if UNLINKED
 		intin[0] = 1;					/* do a mouse sample mode */
 		intin[1] = 2;
-		gsx_ncode(33, 0, 2);
+		gsx_ncode(SET_INPUT_MODE, 0, 2);
 		drawrat(gl_mx, gl_my);
 		ptsin[0] = gl_mx;
 		ptsin[1] = gl_my;
-		gsx_ncode(28, 1, 0);
+		gsx_ncode(LOCATOR_INPUT, 1, 0);
 #endif
 		i_lptr1(drwaddr);
 		gsx_ncode(CUR_VECX, 0, 0);

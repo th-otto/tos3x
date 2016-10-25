@@ -19,26 +19,25 @@
  *	-------------------------------------------------------------
  */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <vdidefs.h>
-#include <osbind.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+
+
+#define      Malloc(a)       gemdos(0x48,a)
+#define      Mfree(a)        gemdos(0x49,a)
+
 
 int16_t xor16 PROTO((int16_t col));
-int16_t xor_ok PROTO((int16_t type, int16_t flags, int16_t spec));
+int16_t xor_ok PROTO((int16_t type, int16_t flags, intptr_t spec));
 VOID just_draw PROTO((LPTREE tree, int16_t obj, int16_t sx, int16_t sy));
 VOID convert_mask PROTO((int16_t *mask, int16_t *gl_mask, int16_t width, int16_t height));
-CICONBLK *fix_mono PROTO((CICONBLK *ptr, long *plane_size, int *tot_res));
+CICON *fix_mono PROTO((CICONBLK *ptr, long *plane_size, int *tot_res));
 CICON *fix_res PROTO((CICON *ptr, long mono_size, CICON ***next_res));
 VOID fixup_cicon PROTO((CICON *ptr, int tot_icons, CICONBLK **carray));
-int16_t my_trans PROTO((int16_t *saddr, uint16_t swb, int16_t *daddr, uint16_t dwb, uint16_t h, uint16_t nplanes));
+VOID my_trans PROTO((int16_t *saddr, uint16_t swb, int16_t *daddr, uint16_t dwb, uint16_t h, uint16_t nplanes));
 VOID trans_cicon PROTO((int tot_icons, CICONBLK **carray));
-VOID free_cicon PROTO((CICONBLK **carray));
 VOID tran_check PROTO((int16_t *saddr, int16_t *daddr, int16_t *mask, int w, int h, int nplanes));
 int16_t get_rgb PROTO((int16_t index));
 
@@ -94,7 +93,7 @@ int16_t const rgb_tab[] = { 0xFFDF,
 /******************** END COLOR *******************************/
 
 TEDINFO edblk;
-BITBLK bi;
+BITBLK bi; /* WTF */
 ICONBLK ib;
 
 typedef uint16_t (*PARMBFUNC) PROTO((PARMBLK *f_data));
@@ -213,23 +212,25 @@ PP(int16_t *outval2;)
 
 
 /*
-*	Routine to take an unformatted raw string and based on a
-*	template string build a formatted string.
-*/
-VOID ob_format(P(int16_t) just, P(char *) raw_str, P(char *) tmpl_str, P(char *) fmt_str)
+ *	Routine to take an unformatted raw string and based on a
+ *	template string build a formatted string.
+ */
+VOID ob_format(P(int16_t) just, P(char *) raw_str, P(char *) tmpl_str, P(char *) fmtstr)
 PP(int16_t just;)
 PP(char *raw_str;)
 PP(char *tmpl_str;)
-PP(char *fmt_str;)
+PP(char *fmtstr;)
 {
 	register char *pfbeg, *ptbeg, *prbeg;
 	char *pfend, *ptend, *prend;
 	register int16_t inc, ptlen, prlen;
 
+	UNUSED(pfend);
+	
 	if (*raw_str == '@')
-		*raw_str = NULL;
+		*raw_str = '\0';
 
-	pfbeg = fmt_str;
+	pfbeg = fmtstr;
 	ptbeg = tmpl_str;
 	prbeg = raw_str;
 
@@ -237,7 +238,7 @@ PP(char *fmt_str;)
 	prlen = strlen(raw_str);
 
 	inc = 1;
-	pfbeg[ptlen] = NULL;
+	pfbeg[ptlen] = '\0';
 	if (just == TE_RIGHT)
 	{
 		inc = -1;
@@ -253,8 +254,9 @@ PP(char *fmt_str;)
 	while (ptbeg != ptend)
 	{
 		if (*ptbeg != '_')
+		{
 			*pfbeg = *ptbeg;
-		else
+		} else
 		{
 			if (prbeg != prend)
 			{
@@ -262,19 +264,18 @@ PP(char *fmt_str;)
 				prbeg += inc;
 			} else
 				*pfbeg = '_';
-		}								/* else */
+		}
 		pfbeg += inc;
 		ptbeg += inc;
-	}									/* while */
-}										/* ob_format */
+	}
+}
 
 
 /*
  *	Routine to load up and call a user defined object draw or change 
  *	routine.
  */
-
-int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, GRECT *pt, P(intptr_t) userblk, P(int16_t) curr_state, int16_t int16_t) new_state)
+int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, GRECT *pt, P(intptr_t) userblk, P(int16_t) curr_state, P(int16_t) new_state)
 PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(GRECT *pt;)
@@ -284,14 +285,14 @@ PP(int16_t new_state;)
 {
 	PARMBLK pb;
 
-	pb.pb_tree = tree;
+	pb.pb_tree = (OBJECT *)tree;
 	pb.pb_obj = obj;
 	pb.pb_prevstate = curr_state;
 	pb.pb_currstate = new_state;
-	rc_copy(pt, &pb.pb_x);
-	gsx_gclip(&pb.pb_xc);
+	rc_copy(pt, (GRECT *)&pb.pb_x);
+	gsx_gclip((GRECT *)&pb.pb_xc);
 	pb.pb_parm = LLGET(userblk + 4);
-	return far_call(LLGET(userblk), ADDR(&pb));
+	return far_call((PARMBFUNC)(intptr_t)LLGET(userblk), ADDR(&pb));
 }
 
 
@@ -428,7 +429,7 @@ PP(int16_t col;)
  *
  * (used by just_draw() and ob_change())
  */
-int16_t xor_ok(P(int16_t) type, P(int16_t) flags, P(int16_t) spec)
+int16_t xor_ok(P(int16_t) type, P(int16_t) flags, P(intptr_t) spec)
 PP(int16_t type;)
 PP(int16_t flags;)
 PP(intptr_t spec;)
@@ -477,13 +478,13 @@ PP(register int16_t sy;)
 	int16_t bcol, tcol, ipat, icol, tmode, th;
 	int16_t state, obtype, len, flags;
 	int16_t tmpx, tmpy, tmpth, thick;
-	int32_t spec;
+	intptr_t spec;
 	char ch;
 	GRECT t, c;
 	register GRECT *pt;
-	BITBLK bi;
-	ICONBLK ib;
-	TEDINFO edblk;
+	BITBLK bitblk;
+	ICONBLK iconblk;
+	TEDINFO tedinfo;
 	uint16_t mvtxt, chcol, three_d;
 
 	pt = &t;
@@ -524,12 +525,12 @@ PP(register int16_t sy;)
 		/* For non-3d objects, force color change if XOR is not ok. */
 		three_d = 0;
 		chcol = !xor_ok(obtype, flags, spec);
+#if !BINEXACT
+		mvtxt = 0; /* quiet compiler */
+#endif
 	}
 
-	/* do trivial reject    */
-	/*  with full extent    */
-	/*  including, outline, */
-	/*  shadow, & thickness */
+	/* do trivial reject with full extent including, outline, shadow, & thickness */
 	if (gl_wclip && gl_hclip)
 	{
 		rc_copy(pt, &c);
@@ -540,11 +541,11 @@ PP(register int16_t sy;)
 		if (!(gsx_chkclip(&c)))
 			return;
 	}
-	/* for all tedinfo  */
-	rc_copy(pt, &c);					/*   types get copy of  */
-	/*   ted and crack the  */
-	/*   color word and set */
-	/*   the text color */
+	/*
+	 * for all tedinfo types get copy of ted and crack the
+	 * color word and set the text color
+	 */
+	rc_copy(pt, &c);
 	if (obtype != G_STRING)
 	{
 		tmpth = (th < 0) ? 0 : th;
@@ -556,8 +557,8 @@ PP(register int16_t sy;)
 		case G_FBOXTEXT:
 		case G_TEXT:
 		case G_FTEXT:
-			LBCOPY(&edblk, spec, sizeof(TEDINFO));
-			gr_crack(edblk.te_color, &bcol, &tcol, &ipat, &icol, &tmode);
+			LBCOPY(&tedinfo, (VOIDPTR)spec, sizeof(TEDINFO));
+			gr_crack(tedinfo.te_color, &bcol, &tcol, &ipat, &icol, &tmode);
 			/* if it's a 3D background object, draw it in 3D color */
 			/* this can get complicated, because gr_text will always draw a white
 			 * background in replace mode. So we have to change TEXT objects
@@ -598,11 +599,10 @@ PP(register int16_t sy;)
 			}
 			break;
 		}
-		/* for all box types    */
-		/*   crack the color    */
-		/*   if not ted and */
-		/*   draw the box with  */
-		/*   border     */
+		/*
+		 * for all box types crack the color if not ted and
+		 * draw the box with border
+		 */
 		switch (obtype)
 		{
 		case G_BOX:
@@ -677,7 +677,9 @@ PP(register int16_t sy;)
 						ipat = IP_SOLID;
 						icol = BLACK;
 					} else
+					{
 						icol = xor16(icol);
+					}
 				}
 
 				gr_rect(icol, ipat, pt);
@@ -694,98 +696,93 @@ PP(register int16_t sy;)
 		}
 
 		gsx_attr(TRUE, tmode, tcol);
-		/* do whats left for    */
-		/*   all the other types */
+		
+		/* do whats left for all the other types */
 		switch (obtype)
 		{
 		case G_FTEXT:
 		case G_FBOXTEXT:
-			LSTCPY(&D.g_rawstr[0], edblk.te_ptext);
-			LSTCPY(&D.g_tmpstr[0], edblk.te_ptmplt);
-			ob_format(edblk.te_just, &D.g_rawstr[0], &D.g_tmpstr[0], &D.g_fmtstr[0]);
+			LSTCPY(&D.g_rawstr[0], tedinfo.te_ptext);
+			LSTCPY(&D.g_tmpstr[0], tedinfo.te_ptmplt);
+			ob_format(tedinfo.te_just, &D.g_rawstr[0], &D.g_tmpstr[0], &D.g_fmtstr[0]);
 			/* fall thru to gr_gtext */
 		case G_BOXCHAR:
-			edblk.te_ptext = &D.g_fmtstr[0];
+			tedinfo.te_ptext = &D.g_fmtstr[0];
 			if (obtype == G_BOXCHAR)
 			{
 				D.g_fmtstr[0] = ch;
-				D.g_fmtstr[1] = NULL;
-				edblk.te_just = TE_CNTR;
-				edblk.te_font = IBM;
+				D.g_fmtstr[1] = '\0';
+				tedinfo.te_just = TE_CNTR;
+				tedinfo.te_font = IBM;
 			}
 			/* fall thru to gr_gtext */
 		case G_TEXT:
 		case G_BOXTEXT:
 			gr_inside(pt, tmpth);
-/* June 2 1992 - ml.
-		gr_gtext(edblk.te_just, edblk.te_font, edblk.te_ptext, 
-				pt, tmode);
-/**/
-			/* July 30 1992 - ml.  Draw text of 3D objects *//* 8/1/92 */
 
+			/* July 30 1992 - ml.  Draw text of 3D objects *//* 8/1/92 */
 			if (three_d)
 			{
 				if (!(state & SELECTED) && mvtxt)
 				{
 					pt->g_x -= 1;
 					pt->g_y -= 1;
-					gr_gtext(edblk.te_just, edblk.te_font, edblk.te_ptext, pt, tmode);
+					gr_gtext(tedinfo.te_just, tedinfo.te_font, tedinfo.te_ptext, pt, tmode);
 					pt->g_x += 1;
 					pt->g_y += 1;
 				} else
 				{
-					gr_gtext(edblk.te_just, edblk.te_font, edblk.te_ptext, pt, tmode);
+					gr_gtext(tedinfo.te_just, tedinfo.te_font, tedinfo.te_ptext, pt, tmode);
 				}
 
 			} else
 			{
-				gr_gtext(edblk.te_just, edblk.te_font, edblk.te_ptext, pt, tmode);
+				gr_gtext(tedinfo.te_just, tedinfo.te_font, tedinfo.te_ptext, pt, tmode);
 			}
-
-			 /**/ gr_inside(pt, -tmpth);
+			gr_inside(pt, -tmpth);
 			break;
 		case G_IMAGE:
-			LBCOPY(&bi, spec, sizeof(BITBLK));
+			LBCOPY(&bitblk, (VOIDPTR)spec, sizeof(BITBLK));
 			if (state & SELECTED)
 			{
 				/* If selected, XOR the background before drawing the image */
 				bb_fill(MD_XOR, FIS_SOLID, IP_SOLID, pt->g_x, pt->g_y, pt->g_w, pt->g_h);
-				bi.bi_color = xor16(bi.bi_color);
+				bitblk.bi_color = xor16(bitblk.bi_color);
 			}
-			gsx_blt(bi.bi_pdata, bi.bi_x, bi.bi_y, bi.bi_wb,
-					0x0L, pt->g_x, pt->g_y, gl_width / 8, bi.bi_wb * 8, bi.bi_hl, MD_TRANS, bi.bi_color, WHITE);
+			gsx_blt(bitblk.bi_pdata, bitblk.bi_x, bitblk.bi_y, bitblk.bi_wb,
+					0x0L, pt->g_x, pt->g_y, gl_width / 8, bitblk.bi_wb * 8, bitblk.bi_hl, MD_TRANS, bitblk.bi_color, WHITE);
 			break;
 		case G_ICON:
-			LBCOPY(&ib, spec, sizeof(ICONBLK));
-			ib.ib_xicon += pt->g_x;
-			ib.ib_yicon += pt->g_y;
-			ib.ib_xtext += pt->g_x;
-			ib.ib_ytext += pt->g_y;
-			gr_gicon(state, ib.ib_pmask, ib.ib_pdata, ib.ib_ptext,
-					 ib.ib_char, ib.ib_xchar, ib.ib_ychar, &ib.ib_xicon, &ib.ib_xtext);
+			LBCOPY(&iconblk, (VOIDPTR)spec, sizeof(ICONBLK));
+			iconblk.ib_xicon += pt->g_x;
+			iconblk.ib_yicon += pt->g_y;
+			iconblk.ib_xtext += pt->g_x;
+			iconblk.ib_ytext += pt->g_y;
+			gr_gicon(state, iconblk.ib_pmask, iconblk.ib_pdata, iconblk.ib_ptext,
+					 iconblk.ib_char, iconblk.ib_xchar, iconblk.ib_ychar, (GRECT *)&iconblk.ib_xicon, (GRECT *)&iconblk.ib_xtext);
 			state &= ~SELECTED;
 			break;
 		case G_CICON:
 			/* Identical to the monochrome icon case (above) */
 			/* except for the gr_cicon() call.       */
-			LBCOPY(&ib, spec, sizeof(ICONBLK));
-			ib.ib_xicon += pt->g_x;
-			ib.ib_yicon += pt->g_y;
-			ib.ib_xtext += pt->g_x;
-			ib.ib_ytext += pt->g_y;
-			gr_cicon(state, ib.ib_pmask, ib.ib_pdata, ib.ib_ptext,
-					 ib.ib_char, ib.ib_xchar, ib.ib_ychar, &ib.ib_xicon, &ib.ib_xtext, (CICONBLK *) spec);
+			LBCOPY(&iconblk, (VOIDPTR)spec, sizeof(ICONBLK));
+			iconblk.ib_xicon += pt->g_x;
+			iconblk.ib_yicon += pt->g_y;
+			iconblk.ib_xtext += pt->g_x;
+			iconblk.ib_ytext += pt->g_y;
+			gr_cicon(state, iconblk.ib_pmask, iconblk.ib_pdata, iconblk.ib_ptext,
+					 iconblk.ib_char, iconblk.ib_xchar, iconblk.ib_ychar, (GRECT *)&iconblk.ib_xicon, (GRECT *)&iconblk.ib_xtext, (CICONBLK *) spec);
 			state &= ~SELECTED;
 			break;
 		case G_USERDEF:
 			state = ob_user(tree, obj, pt, spec, state, state);
 			break;
-		}								/* switch type */
+		}
 	}
 	if ((obtype == G_STRING) ||			/* 8/1/92 */
 		(obtype == G_TITLE) || (obtype == G_BUTTON))
 	{
-		len = LBWMOV(ad_intin, spec);
+		len = LBWMOV(ad_intin, (VOIDPTR)spec);
 		if (len)
 		{								/* 8/3/92 */
 			if ((state & SELECTED) && obtype == G_BUTTON && chcol)
@@ -942,12 +939,12 @@ PP(int16_t depth;)
 /************************************************************************/
 /* o b _ f i n d							*/
 /************************************************************************/
-int16_t ob_find(LPTREE tree, int16_t currobj, int16_t depth, int16_t mx, int16_t my)
-register LPTREE tree;
-register int16_t currobj;
-register int16_t depth;
-int16_t mx;
-int16_t my;
+int16_t ob_find(P(LPTREE) tree, P(int16_t) currobj, P(int16_t) depth, P(int16_t) mx, P(int16_t) my)
+PP(register LPTREE tree;)
+PP(register int16_t currobj;)
+PP(register int16_t depth;)
+PP(int16_t mx;)
+PP(int16_t my;)
 {
 	int16_t lastfound, dummy;
 	int16_t dosibs, done, state;
@@ -1155,14 +1152,15 @@ PP(int16_t redraw;)
 {
 	int16_t flags, obtype, th, thick;
 	GRECT t;
-	uint16_t curr_state;
+	int16_t curr_state;
 	intptr_t spec;
 	register GRECT *pt;
 	pt = &t;
 
 	ob_sst(tree, obj, &spec, &curr_state, &obtype, &flags, pt, &th);
 	thick = th;
-
+	UNUSED(thick);
+	
 	if ((curr_state == new_state) || (spec == -1L))
 		return;
 
@@ -1245,7 +1243,7 @@ PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(GRECT *pt;)
 {
-	LWCOPY(ADDR(pt), OB_X(obj), sizeof(GRECT) / 2);
+	LWCOPY(ADDR(pt), (VOIDPTR)OB_X(obj), sizeof(GRECT) / 2);
 }
 
 
@@ -1254,7 +1252,7 @@ PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(GRECT *pt;)
 {
-	LWCOPY(OB_X(obj), ADDR(pt), sizeof(GRECT) / 2);
+	LWCOPY((VOIDPTR)OB_X(obj), ADDR(pt), sizeof(GRECT) / 2);
 }
 
 
@@ -1297,7 +1295,16 @@ PP(int16_t *pdh;)
 	GRECT relr, actr;
 
 	ob_relxywh(tree, obj, &relr);
+#if BINEXACT
+	/*
+	 * BUG: ob_gclip takes separate arguments, not GRECT *
+	 * this is serious, because ob_gclip() will write to pointers
+	 * that are not passed here and most likely crash
+	 */
 	ob_gclip(tree, obj, &relr.g_x, &relr.g_y, &actr);
+#else
+	ob_gclip(tree, obj, &relr.g_x, &relr.g_y, &actr.g_x, &actr.g_y, &actr.g_w, &actr.g_h);
+#endif
 	*pdx = actr.g_x - relr.g_x;
 	*pdy = actr.g_y - relr.g_y;
 	*pdw = actr.g_w - relr.g_w;
@@ -1376,6 +1383,7 @@ PP(register int16_t obj;)
 {
 	register int16_t prev, nobj, pobj;
 
+	UNUSED(prev);
 	pobj = LWGET(OB_HEAD(parent));
 	if (pobj != obj)
 	{
@@ -1473,6 +1481,8 @@ PP(CICONBLK *cicon;)
 	int col_select;						/* is there a color select icon */
 	int i, j;
 
+	UNUSED(i);
+	UNUSED(j);
 	/* color = match_planes( cicon->mainlist, gl_nplanes ); */
 	/* 8/31/92 DLF  Don't need this routine since mainlist is patched to
 	 * contain the icon for this resolution.
@@ -1581,13 +1591,13 @@ PP(CICONBLK *cicon;)
  *	number of planes is passed in and the source and destination MFDB's
  *	had that value set correctly.  Otherwise, it is the same code.
  */
-int16_t gsx_cblt(int16_t *saddr, uint16_t sx, uint16_t sy, uint16_t swb, int16_t *daddr, uint16_t dx, uint16_t dy, uint16_t dwb, uint16_t w, uint16_t h, uint16_t rule, int16_t numplanes)
+VOID gsx_cblt(int16_t *saddr, uint16_t sx, uint16_t sy, uint16_t swb, int16_t *daddr, uint16_t dx, uint16_t dy, uint16_t dwb, uint16_t w, uint16_t h, uint16_t rule, int16_t numplanes)
 PP(int16_t *saddr;)
 PP(register uint16_t sx;)
 PP(register uint16_t sy;)
 PP(register uint16_t swb;)
 PP(int16_t *daddr;)
-PP(register uint16_t dx,)
+PP(register uint16_t dx;)
 PP(register uint16_t dy;)
 PP(uint16_t dwb;)
 PP(uint16_t w;)
@@ -1617,32 +1627,32 @@ PP(int16_t numplanes;)
 	ppts[7] = dy + h - 1;
 	vro_cpyfm(rule, &ppts[0], &gl_src, &gl_dst);
 	gsx_mon();
-
 }
 
 
 /*	Takes a ptr to a mask and copies it to another while dithering
  *	the data.  Note that this does not check the limits of the gl_mask.
  */
-VOID convert_mask(P(int16_t *) mask, P(int16_t *) gl_mask, P(int16_t) width, P(int16_t) height)
+VOID convert_mask(P(int16_t *) mask, P(int16_t *) dst_mask, P(int16_t) width, P(int16_t) height)
 PP(int16_t *mask;)
-PP(int16_t *gl_mask;)
+PP(int16_t *dst_mask;)
 PP(int16_t width;)
 PP(int16_t height;)
 {
 	int i, j, wdwide, no_bytes;
 
+	UNUSED(no_bytes);
 	wdwide = width / 16;
 	no_bytes = width / 8 * height;
 	for (i = 0; i < height; i += 2)
 	{
 		for (j = 0; j < wdwide; j++)
 		{
-			gl_mask[j + i * wdwide] = mask[j + i * wdwide] & 0x5555;
+			dst_mask[j + i * wdwide] = mask[j + i * wdwide] & 0x5555;
 		}
 		for (j = wdwide; j < 2 * wdwide; j++)
 		{
-			gl_mask[j + i * wdwide] = mask[j + i * wdwide] & 0xAAAA;
+			dst_mask[j + i * wdwide] = mask[j + i * wdwide] & 0xAAAA;
 		}
 	}
 }
@@ -1651,7 +1661,7 @@ PP(int16_t height;)
 /* FIX_MONO()
  * Do fixups on the monochrome icon then pass back a ptr to the next part.
  */
-CICONBLK *fix_mono(P(CICONBLK *) ptr, P(long *) plane_size, P(int *) tot_res)
+CICON *fix_mono(P(CICONBLK *) ptr, P(long *) plane_size, P(int *) tot_res)
 PP(CICONBLK *ptr;)
 PP(long *plane_size;)
 PP(int *tot_res;)
@@ -1660,25 +1670,25 @@ PP(int *tot_res;)
 	int16_t width, height;
 	long size;
 
-	width = ptr->monoblk.wicon;
-	height = ptr->monoblk.hicon;
-	temp = &ptr->mainlist;
+	width = ptr->monoblk.ib_wicon;
+	height = ptr->monoblk.ib_hicon;
+	temp = (VOIDPTR *)&ptr->mainlist;
 	/* in the file, first link contains number of CICON structures */
 	*tot_res = (int)(intptr_t)(*temp);
 	/* BUG: works only for width being multiple of 16, should be rounded up */
 	*plane_size = size = (long) ((width / 16) * height * 2);
 	/* data follows CICONBLK structure */
-	temp = &ptr->monoblk.ip_pdata;
+	temp = (VOIDPTR *)&ptr->monoblk.ib_pdata;
 	*temp = ptr + 1;
 	/* mask follows data */
-	temp = &ptr->monoblk.ip_pmask;
+	temp = (VOIDPTR *)&ptr->monoblk.ib_pmask;
 	*temp = (VOIDPTR)((intptr_t) (ptr + 1) + size);
 	/* text follows mask */
-	temp = &ptr->monoblk.ip_ptext;
-	*temp = (VOIDPTR)((intptr_t) (ptr + 1) + 2 * size);
+	temp = (VOIDPTR *)&ptr->monoblk.ib_ptext;
+	*temp = (VOIDPTR *)((intptr_t) (ptr + 1) + 2 * size);
 	/* icon text for color icons is limited to 12 chars, next CICONBLK structure follows it */
-	temp = (char *)(*temp) + 12L;
-	return temp;
+	temp = (VOIDPTR *)(*temp) + 12L;
+	return (CICON *)temp;
 }
 
 
@@ -1686,7 +1696,7 @@ PP(int *tot_res;)
  * Does fixups on the resolution dependent color icons.  Returns
  * a pointer past the last icon fixed up.
  */
-CICON *fix_res((CICON *) ptr, P(long) mono_size, P(CICON ***) next_res)
+CICON *fix_res(P(CICON *) ptr, P(long) mono_size, P(CICON ***) next_res)
 PP(CICON *ptr;)
 PP(long mono_size;)
 PP(CICON ***next_res;)
@@ -1697,19 +1707,19 @@ PP(CICON ***next_res;)
 
 	*next_res = &ptr->next_res;
 
-	temp = &ptr->sel_data;
+	temp = (VOIDPTR *)&ptr->sel_data;
 	/* BUG: sel_data is LONG offset to data, if it happens to be on a 256-byte boundary this will be cast to zero */
 	select = (int)(intptr_t)(*temp);
-	temp = &ptr->col_data;
+	temp = (VOIDPTR *)&ptr->col_data;
 	*temp = (VOIDPTR)((intptr_t) ptr + (intptr_t) sizeof(CICON));
-	temp = &ptr->col_mask;
+	temp = (VOIDPTR *)&ptr->col_mask;
 	*temp = (VOIDPTR)((intptr_t) ptr + (intptr_t) sizeof(CICON) + ((intptr_t) ptr->num_planes * mono_size));
 	end = (char *)(*temp) + mono_size;			/* push pointer past the mask */
 	if (select)
 	{									/* there are some selected icons */
-		temp = &ptr->sel_mask;
+		temp = (VOIDPTR *)&ptr->sel_mask;
 		*temp = end;
-		temp = &ptr->sel_mask;			/* selected mask */
+		temp = (VOIDPTR *)&ptr->sel_mask;			/* selected mask */
 		end = (char *) end + ((intptr_t) ptr->num_planes * mono_size);
 		*temp = end;
 		end = (char *) end + mono_size;
@@ -1732,6 +1742,8 @@ PP(CICONBLK **carray;)
 	CICON **next_res;
 	CICONBLK *cicon;
 
+	UNUSED(k);
+	UNUSED(tot_selicons);
 	for (i = 0; i < tot_icons; i++)
 	{
 		cicon = (CICONBLK *) ptr;
@@ -1739,6 +1751,9 @@ PP(CICONBLK **carray;)
 		ptr = fix_mono((CICONBLK *) ptr, &mono_size, &tot_resicons);
 		if (tot_resicons)				/* 7/9/92 */
 		{
+#if !BINEXACT
+			next_res = NULL; /* quiet compiler */
+#endif
 			cicon->mainlist = ptr;
 			for (j = 0; j < tot_resicons; j++)
 			{
@@ -1760,15 +1775,16 @@ PP(CICONBLK **carray;)
 VOID get_color_rsc(P(CICONBLK **) cicondata)
 PP(CICONBLK **cicondata;)
 {
-	CICONBLK *ptr, **array_ptr;
+	CICON *ptr;
+	CICONBLK **array_ptr;
 	int totalicons;
 
 	array_ptr = (CICONBLK **) cicondata;
 	totalicons = 0;
-	while (*array_ptr++ != -1L)
+	while (*array_ptr++ != (CICONBLK *)-1L)
 		totalicons++;
 
-	ptr = (CICONBLK *) array_ptr;
+	ptr = (CICON *) array_ptr;
 
 	fixup_cicon(ptr, totalicons, (CICONBLK **) cicondata);	/* fixup pointers */
 	trans_cicon(totalicons, (CICONBLK **) cicondata);	/* transform form */
@@ -1783,7 +1799,7 @@ PP(CICONBLK **cicondata;)
  * BUG FIX - pass in the number of planes instead of using the global
  *	dlf - 7/14/92
  */
-int16_t my_trans(P(int16_t *) saddr, P(uint16_t) swb, P(int16_t *) daddr, P(uint16_t) dwb, P(uint16_t) h, P(uint16_t) nplanes)
+VOID my_trans(P(int16_t *) saddr, P(uint16_t) swb, P(int16_t *) daddr, P(uint16_t) dwb, P(uint16_t) h, P(uint16_t) nplanes)
 PP(int16_t *saddr;)
 PP(uint16_t swb;)
 PP(int16_t *daddr;)
@@ -1823,6 +1839,7 @@ PP(CICONBLK **carray;)
 	int16_t *databuffer, *selbuffer, *tempbuffer;
 	int32_t tot_size;
 
+	UNUSED(cic);
 	for (i = 0; i < tot_icons; i++)
 	{
 		ciconblk = carray[i];
@@ -1845,8 +1862,8 @@ PP(CICONBLK **carray;)
 					ciconblk->mainlist = 0L;
 					return;				/* just quit */
 				}
-				expand_data(ctemp->col_data, tempbuffer, ctemp->mask, ctemp->num_planes, gl_nplanes, w, h);
-				tran_check(tempbuffer, databuffer, ctemp->mask, w, h, gl_nplanes);
+				expand_data(ctemp->col_data, tempbuffer, ctemp->col_mask, ctemp->num_planes, gl_nplanes, w, h);
+				tran_check(tempbuffer, databuffer, ctemp->col_mask, w, h, gl_nplanes);
 				ctemp->col_data = databuffer;
 				if (ctemp->sel_data)
 				{
@@ -1854,7 +1871,7 @@ PP(CICONBLK **carray;)
 					if (selbuffer)
 					{
 						expand_data(ctemp->sel_data, tempbuffer, ctemp->sel_mask, ctemp->num_planes, gl_nplanes, w, h);
-						tran_check(tempbuffer, selbuffer, ctemp->mask, w, h, gl_nplanes);
+						tran_check(tempbuffer, selbuffer, ctemp->col_mask, w, h, gl_nplanes);
 					}
 					ctemp->sel_data = selbuffer;
 				}
@@ -1902,7 +1919,7 @@ PP(CICONBLK **carray;)
 
 	ptr = carray;
 	tot_icons = 0;
-	while (*ptr++ != -1L)
+	while (*ptr++ != (CICONBLK *)-1L)
 		tot_icons++;
 
 	for (i = 0; i < tot_icons; i++)
@@ -1947,6 +1964,7 @@ PP(int nplanes;)
 	int32_t *lptr;
 
 	UNUSED(lptr);
+	UNUSED(no_longs);
 	
 	my_trans(saddr, w / 8, daddr, w / 8, h, nplanes);
 

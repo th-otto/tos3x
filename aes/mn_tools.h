@@ -435,14 +435,15 @@ extern GRECT TitleRect;
 extern BOOLEAN MenuBar_Mode;
 extern OBJECT *gl_mtree;
 extern MENU_PTR gl_menuptr;					/* MENU_PTR for the drop-down menu  */
+extern int16_t buparm; /* WTF */
 
-int16_t menu_down PROTO((LPTREE tree, int16_t ititle, OBJECT **itree));
 
 
 /*
  * mn_menu.c
  */
 extern MENU_PTR MenuList;
+extern int16_t MAX_MENU_HEIGHT;
 
 int16_t Menu_Insert PROTO((OBJECT *tree, int16_t Parent));
 VOID Menu_Delete PROTO((int16_t MenuID));

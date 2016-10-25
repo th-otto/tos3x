@@ -39,15 +39,14 @@
 /* INCLUDE FILES
  * ================================================================
  */
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
-#include <mn_tools.h>
+#include "aes.h"
+
+#if SUBMENUS /* whole file */
+
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "mn_tools.h"
 
 
 /* PROTOTYPES
@@ -169,13 +168,13 @@ PP(int16_t start_obj;)							/* the start obj of the menu   */
 	OBJECT *tree;
 
 	/* Get the pointer to the process node */
-	if ((ProcPtr = FindProcess(id)) > NULL)
+	if ((ProcPtr = FindProcess(id)) > (PNODE_PTR)NULL)
 	{
 		/* Get the Index ID Number */
-		if ((Index = FindIndex(id, itree, imenu)) > NULL)
+		if ((Index = FindIndex(id, itree, imenu)) > 0)
 		{
 			/* Get the pointer to the index node */
-			if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) > NULL)
+			if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) > (INDEX_PTR)NULL)
 			{
 				ActiveTree(itree);
 				start_obj = min(start_obj, ObTail(imenu));
@@ -214,13 +213,13 @@ PP(int16_t imenu;)								/* the menu obj of the attached menu */
 	output = 0;
 
 	/* Find the process pointer to the node */
-	if ((ProcPtr = FindProcess(id)) > NULL)
+	if ((ProcPtr = FindProcess(id)) > (PNODE_PTR)NULL)
 	{
 		/* Find the Index ID */
-		if ((Index = FindIndex(id, tree, imenu)) > NULL)
+		if ((Index = FindIndex(id, tree, imenu)) > 0)
 		{
 			/* Get the pointer to the Index Node */
-			if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) > NULL)
+			if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) > (INDEX_PTR)NULL)
 				output = INDEX_OBJ(IndexPtr);	/* return the value...  */
 		}
 	}
@@ -329,7 +328,7 @@ PP(MENU *Menu;)
 		return (FALSE);
 
 	/*Check to see if the menu item has something attached to it already */
-	if ((flag = mn_getmn(id, tree, item, &MData)) > NULL)
+	if ((flag = mn_getmn(id, tree, item, &MData)) > 0)
 	{
 		/* This menu item already has something attached, so delete it */
 		DetachSubMenu(id, tree, item);
@@ -361,9 +360,9 @@ PP(MENU *Menu;)
 		ObType(item) |= (Index << 8);
 		MakeSubMenu(item);
 
-		if ((ProcPtr = FindProcess(id)) > NULL)
+		if ((ProcPtr = FindProcess(id)) > (PNODE_PTR)NULL)
 		{
-			if ((IndexPtr = GetIndexPtr(ProcPtr, (int16_t) Index)) > NULL)
+			if ((IndexPtr = GetIndexPtr(ProcPtr, (int16_t) Index)) > (INDEX_PTR)NULL)
 			{
 				INDEX_COUNT(IndexPtr) += 1;	/* Up the count */
 				INDEX_FLAGSCROLL(IndexPtr) = Menu->mn_scroll;
@@ -405,15 +404,17 @@ PP(MENU *Menu;)
 	register INDEX_PTR IndexPtr;				/* ptr to the index node... */
 	BOOLEAN flag;						/* SUCCESS or FAILUE        */
 
+	UNUSED(type);
+	
 	flag = FALSE;
 	if (IsG_String(item) && IsSubMenu(item))
 	{
 		if (ObString(item)[(int)strlen(ObString(item)) - ARROW_OFFSET] == RIGHT_ARROW)
 		{
 			Index = (int16_t) ((ObType(item) & 0xFF00) >> 8);
-			if ((ProcPtr = FindProcess(id)) > NULL)
+			if ((ProcPtr = FindProcess(id)) > (PNODE_PTR)NULL)
 			{
-				if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) > NULL)
+				if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) > (INDEX_PTR)NULL)
 				{
 					Menu->mn_tree = INDEX_TREE(IndexPtr);
 					Menu->mn_menu = INDEX_MENU(IndexPtr);
@@ -450,6 +451,7 @@ PP(int16_t item;)								/* see above...          */
 	int16_t Index;							/* Index ID!             */
 	PNODE_PTR ProcPtr;					/* ptr to the process node   */
 
+	UNUSED(type);
 	if (IsG_String(item) && IsSubMenu(item))
 	{
 		/* Clear the character where the arrow is located. */
@@ -462,7 +464,7 @@ PP(int16_t item;)								/* see above...          */
 
 		NoSubMenu(item);				/* Clear out SUBMENU FLAG */
 
-		if ((ProcPtr = FindProcess(id)) > NULL)
+		if ((ProcPtr = FindProcess(id)) > (PNODE_PTR)NULL)
 			DeleteIndex(ProcPtr, Index, FALSE);	/* Clear out the index node. */
 	}
 }
@@ -498,15 +500,15 @@ PP(MENU_PTR SubMenuPtr;)					/* ptr to the submenu - if valid */
 	{
 		if (ObString(obj)[(int)strlen(ObString(obj)) - ARROW_OFFSET] == RIGHT_ARROW)
 		{
-			if ((MenuIndex = (ObType(obj) >> 8)) > NULL)
+			if ((MenuIndex = (ObType(obj) >> 8)) > 0)
 			{
 				/* if SubmenuPtr is non-zero, then the menu is already displayed */
 				if (!SubMenuPtr)		/* cjg 01/13/92 */
 				{
 					/* Check for a valid ptr to an Index Structure. */
-					if ((ProcPtr = FindProcess(id)) > NULL)
+					if ((ProcPtr = FindProcess(id)) > (PNODE_PTR)NULL)
 					{
-						if ((NewMenuPtr = GetIndexPtr(ProcPtr, (int16_t) MenuIndex)) > NULL)
+						if ((NewMenuPtr = GetIndexPtr(ProcPtr, (int16_t) MenuIndex)) > (INDEX_PTR)NULL)
 						{
 							/* Make sure the number of displayed submenus does not
 							 * exceed the MAX_LEVEL Limit
@@ -538,7 +540,7 @@ PP(MENU_PTR SubMenuPtr;)					/* ptr to the submenu - if valid */
  * OUT: return the ptr to the submenu displayed.
  *      NULL if a FAILURE.
  */
-MENU_PTR DoSubMenu(P(int16_t= id, P(OBJECT *) tree, P(int16_t) obj)
+MENU_PTR DoSubMenu(P(int16_t) id, P(OBJECT *) tree, P(int16_t) obj)
 PP(int16_t id;)								/* Process id             */
 PP(OBJECT *tree;)
 PP(int16_t obj;)								/* menu item we pop with      */
@@ -550,12 +552,13 @@ PP(int16_t obj;)								/* menu item we pop with      */
 	register int16_t xpos;						/* xpos, ypos of new submenu  */
 	int16_t ypos;
 
+	UNUSED(type);
+	
 	SubPopPtr = (MENU_PTR) NULL;
 
 	if ((obj != NIL) && IsG_String(obj) && IsSubMenu(obj))
 	{
-
-		ob_actxywh(tree, obj, &rect);
+		ob_actxywh((LPTREE)tree, obj, &rect);
 
 		/* We won't check for a valid menuid here, since the
 		 * CheckForSubMenu() routines already did that.
@@ -612,10 +615,10 @@ PP(GRECT *rect;)							/* rect of the button        */
 
 	newtree = INDEX_TREE(IndexPtr);		/* get the new tree */
 	/* and insert it!   */
-	if ((NewMenuID = Menu_Insert(newtree, INDEX_MENU(IndexPtr))) == NULL)
+	if ((NewMenuID = Menu_Insert(newtree, INDEX_MENU(IndexPtr))) == 0)
 		return ((MENU_PTR) NULL);
 
-	if ((MenuPtr = GetMenuPtr(NewMenuID)) > NULL)	/* get Menu Ptr     */
+	if ((MenuPtr = GetMenuPtr(NewMenuID)) > (MENU_PTR)NULL)	/* get Menu Ptr     */
 	{									/* set start obj    */
 
 		MSTART_OBJ(MenuPtr) = INDEX_OBJ(IndexPtr);
@@ -849,3 +852,5 @@ BOOLEAN CountLevel(NOTHING)
 	}
 	return (count < MAX_LEVEL);
 }
+
+#endif /* SUBMENUS */

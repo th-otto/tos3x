@@ -28,15 +28,14 @@
 /* INCLUDE FILES
  * ================================================================
  */
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
-#include <mn_tools.h>
+#include "aes.h"
+
+#if SUBMENUS /* whole file */
+
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "mn_tools.h"
 
 
 /* GLOBALS
@@ -88,6 +87,7 @@ PP(MENU *MData;)							/* the output menu structure     */
 	MRETS mk;
 	flag = FALSE;						/* Set to Invalid return data    */
 
+	UNUSED(mk);
 	ActiveTree(Menu->mn_tree);
 
 	obj = -1L;							/* Set it to no object selected  */
@@ -244,3 +244,5 @@ PP(int16_t start_obj;)							/* the obj we want on top   */
 
 	MSCROLL(MenuPtr) = FALSE;
 }
+
+#endif /* SUBMENUS */

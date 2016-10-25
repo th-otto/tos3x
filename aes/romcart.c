@@ -27,9 +27,10 @@
 /*	Added c_sfirst()	6/18/90			D.Mui		*/
 
 
-#include <portab.h>
-#include <machine.h>
-#include <dos.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "dos.h"
+
 
 #define CART_BASE 0xFA0000L
 #define CART_START 0xFA0004L
@@ -64,10 +65,10 @@ BOOLEAN cart_snext PROTO((NOTHING));
 BOOLEAN cart_init(NOTHING)
 {
 	cart_ptr = ((CARTNODE *) CART_BASE);
-	if (cart_ptr->c_next == CART_MAGIC)
+	if (cart_ptr->c_next == (CARTNODE *)CART_MAGIC)
 	{
 		cart_ptr = ((CARTNODE *) CART_START);
-		return (TRUE);
+		return TRUE;
 	} else
 	{
 		cart_ptr = NULL;
@@ -87,7 +88,7 @@ PP(int16_t fill;)
 		if (fill)
 		{
 			pdta = cart_dta;
-			bfill(42, NULL, &pdta[0]);	/* zero it out  */
+			bfill(42, 0, &pdta[0]);		/* zero it out  */
 			pdta[21] = F_RDONLY;		/* fill time,date,size,name */
 			LBCOPY(&pdta[22], &cart_ptr->c_time, 21);
 		}
@@ -95,7 +96,7 @@ PP(int16_t fill;)
 		cart_ptr = cart_ptr->c_next;	/* point to next    */
 		return (pcart);
 	}
-	return (NULL);
+	return NULL;
 }
 
 
@@ -128,25 +129,25 @@ int16_t ld_cartacc(NOTHING)
 
 	cart_init();
 	num_load = 0;
-	while (pcart = cart_find(FALSE))
+	while ((pcart = cart_find(FALSE)))
 	{
 		if (wildcmp("*.ACC", &pcart->c_name[0]))
 		{
 			if (cre_aproc())			/* create PD    */
 			{
 				num_load++;
-				psp = dos_exec("", 5, "");	/* create psp   */
+				psp = (char *)dos_exec("", 5, "");	/* create psp   */
 				LLSET(&psp[TEXTBASE], pcart->c_code);
-				pstart(&gotopgm, &pcart->c_name[0], psp);	/* go for it    */
+				pstart(gotopgm, &pcart->c_name[0], (intptr_t)psp);	/* go for it    */
 			} else
 				break;
 		}
 	}
-	return (num_load);
+	return num_load;
 }
 
 
-int16_t cart_exec(P(const char *) pcmd, P(const char *) ptail)
+BOOLEAN cart_exec(P(const char *) pcmd, P(const char *) ptail)
 PP(const char *pcmd;)
 PP(const char *ptail;)
 {
@@ -155,33 +156,33 @@ PP(const char *ptail;)
 
 	cart_init();
 
-	while (pcart = cart_find(FALSE))
+	while ((pcart = cart_find(FALSE)))
 	{
 		if (strcmp(pcmd, &pcart->c_name[0]))
 			break;
 	}
-	psp = dos_exec("", 5, ptail);
+	psp = (char *)dos_exec("", 5, ptail);
 	LLSET(&psp[TEXTBASE], pcart->c_code);
 	dos_exec("", 4, psp);
-	dos_free(*(int32_t *) (&psp[0x2c]));
+	dos_free(*(char **) (&psp[0x2c]));
 	dos_free(psp);
 	return (TRUE);
 }
 
 
-int16_t c_sfirst(P(const char *) path)
+BOOLEAN c_sfirst(P(const char *) path)
 PP(const char *path;)
 {
-	char *file;
+	const char *file;
 	CARTNODE *pcart;
 
 	file = g_name(path);
 	cart_init();
-	while (pcart = cart_find(FALSE))
+	while ((pcart = cart_find(FALSE)))
 	{
 		if (strcmp(file, &pcart->c_name[0]))
-			return (TRUE);
+			return TRUE;
 	}
 
-	return (FALSE);
+	return FALSE;
 }

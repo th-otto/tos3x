@@ -115,17 +115,11 @@
  *	-------------------------------------------------------------
  */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
-#include <taddr.h>
-#include <gemusa.h>
-#include <osbind.h>
-#include <vdidefs.h>
-#include <mode.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "gemusa.h"
 
 
 #define CACHE_ON	0x00003919L
@@ -164,6 +158,8 @@ int16_t crt_error;					/* critical error handler semaphore     */
 				/* set in jbind.s, checked by dispatcher    */
 int16_t adeskp[3];					/* desktop colors & backgrounds */
 int16_t awinp[3];					/* window colors & backgrounds */
+uint16_t d_rezword;					/* default resolution for sparrow */
+
 
 #define Getrez() trp14(4)
 #define Blitmode(on) trp14(64, on)
@@ -171,9 +167,17 @@ int16_t awinp[3];					/* window colors & backgrounds */
 
 static char autopath[128];
 
+MFORM gl_cmform;						/* current aes mouse form   */
+
+MFORM gl_omform;						/* old aes mouse form       */
+
 #if DOWARNING
 BOOLEAN dowarn;
 #endif
+
+int32_t bios PROTO((short, ...));
+#define Getshift(a) bios(11, a)
+
 
 #ifdef ACC_DELAY
 
@@ -256,29 +260,32 @@ VOID setres(NOTHING)
 {
 	int mode;
 
+	UNUSED(mode);
 	if ((gl_vdo & 0x30000L) == 0x30000L)
 	{
 		intin[0] = 5;
 		d_rezword = VcheckMode(d_rezword);
-/*	  ptsout[0] = d_rezword;	*/
+		/* ptsout[0] = d_rezword; */
 		gl_ws.ws_pts0 = d_rezword;
 	}
 }
 
 
-VOID main(NOTHING)
+VOID aesmain(NOTHING)
 {
 	register int16_t i;
-	int32_t tmpadbi;
-	int32_t tree;
+	VOIDPTR tmpadbi;
+	LPTREE tree;
 	register THEGLO *DGLO;
-	PD *slr;
+	PD *lslr;
 	register char *apath;
 	DGLO = &D;
 
+	UNUSED(lslr);
+	
 	er_num = ALRT04CRT;					/* output.s     */
-	no_aes = ALRTNOFUN;					/* for gembind.s    */
-
+	no_aes = ALRTNOFUNC;				/* for gembind.s    */
+	
 	/****************************************/
 	/*      ini_dlongs();       */
 	/****************************************/
@@ -290,15 +297,17 @@ VOID main(NOTHING)
 	/* init. long pointer to global array   */
 	/* which is used by resource calls  */
 
-	ad_sysglo = &DGLO->g_sysglo[0];
-	ad_windspb = &wind_spb;
+	ad_sysglo = (intptr_t)&DGLO->g_sysglo[0];
+	ad_windspb = (intptr_t)&wind_spb;
 
 	/****************************************/
 
-
-	drawstk = dos_alloc(0x00000400L);	/* draw stack is 1K */
-	drawstk += (0x00000400L);			/* init to top      */
-
+	/*
+	 * no check for allocation faiure here...
+	 * why not allocate that static? its never changed
+	 */
+	drawstk = (intptr_t)dos_alloc(0x00000400L);	/* draw stack is 1K */
+	drawstk += 0x00000400L;			/* init to top      */
 
 	/* no ticks during init */
 	hcli();
@@ -417,9 +426,9 @@ VOID main(NOTHING)
 	rom_ram(0, ad_sysglo);
 
 	rs_gaddr(ad_sysglo, R_BIPDATA, MICE0, &ad_armice);
-	ad_armice = LLGET((intptr_t)ad_armice);
+	ad_armice = (VOIDPTR)LLGET((intptr_t)ad_armice);
 	rs_gaddr(ad_sysglo, R_BIPDATA, MICE2, &ad_hgmice);
-	ad_hgmice = LLGET((intptr_t)ad_hgmice);
+	ad_hgmice = (VOIDPTR)LLGET((intptr_t)ad_hgmice);
 
 	gl_cmform = *((MFORM *) ad_hgmice);
 	/* fix up icons     */
@@ -445,7 +454,7 @@ VOID main(NOTHING)
 	/* set init. click rate */
 	ev_dclick(3, TRUE);
 	/* get st_desk ptr  */
-	rs_gaddr(ad_sysglo, R_TREE, SCREEN, &ad_stdesk);
+	rs_gaddr(ad_sysglo, R_TREE, SCREEN, (VOIDPTR *)&ad_stdesk);
 	tree = ad_stdesk;
 	/* fix up the GEM rsc. file now that we have an open WS    */
 
@@ -473,14 +482,14 @@ VOID main(NOTHING)
 	LWSET(OB_HEIGHT(1), (gl_hchar + 2));
 	LWSET(OB_HEIGHT(2), (gl_hchar + 3));
 
-	rs_gaddr(ad_sysglo, R_STRING, FSTRING, &ad_fsel);
+	rs_gaddr(ad_sysglo, R_STRING, FSTRING, (VOIDPTR *)&ad_fsel);
 
 	indisp = FALSE;						/* init in dispatch semaphore to not indisp        */
 
 #if DOWARNING
 	if (!dowarn)
 	{
-		slr = drl;						/* save the dispatcher list     */
+		lslr = drl;						/* save the dispatcher list     */
 		drl = 0;						/* Don't allow anybody to run   */
 		fm_alert(0, "[1][\
  \016\017 Developer Release \016\017 |\
@@ -491,7 +500,7 @@ VOID main(NOTHING)
 [Launch TOS]");
 		dowarn = TRUE;
 
-		drl = slr;						/* restore it       */
+		drl = lslr;						/* restore it       */
 	}
 #endif
 
@@ -527,7 +536,7 @@ VOID main(NOTHING)
 	rsc_free();							/* free up resource */
 
 	drawstk -= (0x00000400L);			/* reset to bottom  */
-	dos_free(drawstk);
+	dos_free((VOIDPTR)drawstk);
 
 	gsx_mfree();
 	mn_new();
@@ -558,31 +567,35 @@ VOID main(NOTHING)
 
 /*	process init	*/
 
-VOID pinit((PD *) ppd, P(CDA *) pcda)
+VOID pinit(P(PD *) ppd, P(CDA *) pcda)
 PP(register PD *ppd;)
 PP(CDA *pcda;)
 {
 	ppd->p_cda = pcda;
-	ppd->p_qaddr = &ppd->p_queue[0];
+	ppd->p_qaddr = ppd->p_queue;
 	ppd->p_qindex = 0;
-	bfill(8, ' ', &ppd->p_name[0]);
+	bfill(8, ' ', ppd->p_name);
 }
 
 
+#if BINEXACT
 int32_t set_cache(P(int32_t) newcacr)
 PP(register int32_t newcacr;)
 {
 	asm("dc.w $4e7a,$0002");			/* movec.l cacr,d0  */
+	/* WTF? and who gets newcacr into d7 ??? this is an ugly Alcyon-only hack */
 	asm("dc.w $4e7b,$7002");			/* movec.l d7,cacr  */
 }
+#endif
+
 
 /*
-*	pre read the desktop.inf file and get the resolution set
-*	accordingly. If there are no disks or a desktop.inf does
-*	not exist or the resolutions match then return FALSE.
-*
-* ++ERS 1/14/93: also read the preferred desktop backgrounds
-*/
+ *	pre read the desktop.inf file and get the resolution set
+ *	accordingly. If there are no disks or a desktop.inf does
+ *	not exist or the resolutions match then return FALSE.
+ *
+ * ++ERS 1/14/93: also read the preferred desktop backgrounds
+ */
 int16_t pred_dinf(NOTHING)
 {
 	int16_t res;
@@ -594,17 +607,23 @@ int16_t pred_dinf(NOTHING)
 	char *chrptr;
 	int16_t i;
 
+	UNUSED(chrptr);
+	
 	gl_vdo = 0x0L;
 	/* _VDO *//* 7/17/92 */
 	getcookie(0x5F56444FL, &gl_vdo);
-
 
 	g_autoboot[0] = 0;
 	pbuf = dos_alloc((int32_t) SIZE_AFILE);
 	change = FALSE;
 	sh_get(pbuf, SIZE_AFILE);
 
-	rom_ram(3, pbuf, NULL);				/* res is default from ROM  */
+#if BINEXACT
+	/* BUG: extra parameter here */
+	rom_ram(3, (intptr_t)pbuf, NULL);				/* res is default from ROM  */
+#else
+	rom_ram(3, (intptr_t)pbuf);				/* res is default from ROM  */
+#endif
 
 	adeskp[0] = 0x41;					/* 4 = dither, 1 = black */
 	adeskp[1] = 0x73;					/* 7 = solid color, 3 = green */
@@ -633,7 +652,9 @@ int16_t pred_dinf(NOTHING)
 					if (DOS_ERR)		/* failed to open   */
 						fh = dos_open(infdata, 0x0);
 				} else
-					DOS_ERR = 1;
+				{
+					DOS_ERR = TRUE;
+				}
 			}
 		}
 
@@ -651,7 +672,7 @@ int16_t pred_dinf(NOTHING)
 	if (change)
 	{
 		temp = pbuf;
-		temp[bsize] = NULL;
+		temp[bsize] = '\0';
 		cont = TRUE;
 		while (*temp && cont)
 		{
@@ -737,11 +758,11 @@ int16_t pred_dinf(NOTHING)
 
 /*     Save 25 columns and full height of the screen memory	*/
 
-int16_t gsx_malloc(NOTHING)
+BOOLEAN gsx_malloc(NOTHING)
 {
 	int32_t len;
 
-	gsx_fix(&gl_tmp, 0x0L, 0x0L);
+	gsx_fix(&gl_tmp, NULL, 0, 0);
 	len = (int32_t) ((uint16_t) gl_wchar) * (int32_t) 25 * (int32_t) ((uint16_t) gl_height) * (int32_t) ((uint16_t) gl_nplanes);
 
 	len = len / 8;
@@ -751,8 +772,12 @@ int16_t gsx_malloc(NOTHING)
 	{
 		gl_mlen = 0;
 		trap(9, "Unable to alloc AES blt buffer!\r\n");
-		return (FALSE);
+		return FALSE;
 	}
+#if !BINEXACT
+	/* BUG: no return here, which will return the value of gl_tmp.fd_addr casted to int... */
+	return TRUE;
+#endif
 }
 
 
@@ -769,8 +794,8 @@ VOID set_defdrv(NOTHING)
 }
 
 
-int16_t gsx_xmfset(P(int32_t) pmfnew)
-PP(int32_t pmfnew;)
+VOID gsx_xmfset(P(MFORM *) pmfnew)
+PP(MFORM *pmfnew;)
 {
 	gsx_moff();
 	LWCOPY(ad_intin, pmfnew, 37);
@@ -779,7 +804,7 @@ PP(int32_t pmfnew;)
 }
 
 
-int16_t gsx_mfset(P(MFORM *) pmfnew)
+VOID gsx_mfset(P(MFORM *) pmfnew)
 PP(MFORM *pmfnew;)
 {
 	gsx_moff();
@@ -793,11 +818,11 @@ PP(MFORM *pmfnew;)
 
 /*	Graf mouse		*/
 
-VOID gr_mouse(P(int16_t) mkind, P(MFORM *) grmaddr))
+VOID gr_mouse(P(int16_t) mkind, P(MFORM *) grmaddr)
 PP(register int16_t mkind;)
 PP(MFORM *grmaddr;)
 {
-	int32_t maddr;
+	VOIDPTR maddr;
 	MFORM omform;
 
 	if (mkind > 255)
@@ -828,10 +853,11 @@ PP(MFORM *grmaddr;)
 		}
 	} else
 	{
-		if (mkind != 255)				/* set new mouse form   */
+		if (mkind != USER_DEF)			/* set new mouse form   */
 		{
+			/* gsx_mfset will crash if this fails... */
 			rs_gaddr(ad_sysglo, R_BIPDATA, MICE0 + mkind, &maddr);
-			grmaddr = LLGET(maddr);
+			grmaddr = (MFORM *)LLGET((intptr_t)maddr);
 		}
 
 		gsx_mfset(grmaddr);
@@ -845,7 +871,7 @@ PP(MFORM *grmaddr;)
  * Change code to compensate 3D objects
  */
 
-int16_t gr_slidebox(P(LPTREE) tree, P(int16_t) parent, P(int16_t) obj, P(int16_t) isvert))
+int16_t gr_slidebox(P(LPTREE) tree, P(int16_t) parent, P(int16_t) obj, P(int16_t) isvert)
 PP(register LPTREE tree;)
 PP(int16_t parent;)
 PP(int16_t obj;)
@@ -859,6 +885,8 @@ PP(int16_t isvert;)
 	int16_t pflags, cflags;
 	int16_t ret, setxy, setwh;
 
+	UNUSED(setwh);
+	
 	pt = &t;
 	pc = &c;
 	/* get the parent real position */
@@ -866,7 +894,7 @@ PP(int16_t isvert;)
 	/* get the relative position    */
 	ob_relxywh(tree, obj, pt);
 
-	objc = tree;
+	objc = (OBJECT *)tree;
 	pflags = objc[parent].ob_flags;
 	cflags = objc[obj].ob_flags;
 
@@ -917,13 +945,13 @@ PP(int16_t isvert;)
 		ret = (divnd * 1000) / divis;
 		if (ret > 1000)
 			ret = 1000;
-		return (ret);
+		return ret;
 	} else
-		return (0);
+		return 0;
 #else
 	register GRECT *pt, *pc;						/* new pointer for Reg Opt  */
 	GRECT t, c;
-	register WORD divnd, divis;
+	register int16_t divnd, divis;
 
 	pt = &t;
 	pc = &c;
@@ -956,7 +984,7 @@ PP(int16_t isvert;)
 *	mouse moves into or out of the specified rectangle.
 */
 
-int16_t gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h))
+int16_t gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(int16_t out;)
 PP(int16_t x;)
 PP(int16_t y;)
@@ -978,7 +1006,7 @@ PP(int16_t h;)
 			break;
 		} else
 		{
-			if (out != inside(xrat, yrat, &x))
+			if (out != inside(xrat, yrat, (GRECT *)&x)) /* WTF */
 			{
 				status = TRUE;
 				break;

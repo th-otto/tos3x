@@ -182,27 +182,35 @@
 #define NOMEMORY          28 /* Alert string */
 /* [1][The system does not have |enough memory for this|directory.][  OK  ] */
 
-#define IMAGE1             0 /* Free image */
+#define NOTEBB             0 /* Free image */
 
-#define IMAGE2             1 /* Free image */
+#define QUESBB             1 /* Free image */
 
-#define IMAGE3             2 /* Free image */
+#define STOPBB             2 /* Free image */
 
-#define IMAGE4             3 /* Mouse cursor */
+/* ARROW */
+#define MICE0              3 /* Mouse cursor */
 
-#define IMAGE5             4 /* Mouse cursor */
+/* TEXT_CRSR */
+#define MICE1              4 /* Mouse cursor */
 
-#define IMAGE6             5 /* Mouse cursor */
+/* HOURGLASS */
+#define MICE2              5 /* Mouse cursor */
 
-#define IMAGE7             6 /* Mouse cursor */
+/* POINT_HAND */
+#define MICE3              6 /* Mouse cursor */
 
-#define IMAGE8             7 /* Mouse cursor */
+/* FLAT_HAND */
+#define MICE4              7 /* Mouse cursor */
 
-#define IMAGE9             8 /* Mouse cursor */
+/* THIN_CROSS */
+#define MICE5              8 /* Mouse cursor */
 
-#define IMAGE10            9 /* Mouse cursor */
+/* THICK_CROSS */
+#define MICE6              9 /* Mouse cursor */
 
-#define IMAGE11           10 /* Mouse cursor */
+/* OUTLN_CROSS */
+#define MICE7             10 /* Mouse cursor */
 
 
 

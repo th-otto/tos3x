@@ -120,21 +120,21 @@ DSB
 	char dserial[3];					/* 24-bit volume serial number  */
 };
 
-MLOCAL int16_t w_inc;
+static int16_t w_inc;
 
-MLOCAL int16_t bar_max;					/* in case user copies disk > 80 tracks */
+static int16_t bar_max;					/* in case user copies disk > 80 tracks */
 
-MLOCAL int16_t ttable[] = { FCCNCL, FCCOPY, FCFORMAT, SRCDRA, SRCDRB, ADRIVE,
+static int16_t ttable[] = { FCCNCL, FCCOPY, FCFORMAT, SRCDRA, SRCDRB, ADRIVE,
 	BDRIVE
 };
 
-MLOCAL int16_t skew1[MAXSPT * 2] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+static int16_t skew1[MAXSPT * 2] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18,
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18
 };
 
-MLOCAL int16_t skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+static int16_t skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 
 /*	format and copy start	*/

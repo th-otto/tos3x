@@ -35,13 +35,10 @@
  *	-------------------------------------------------------------
  */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+
 
 LPTREE gl_mntree;
 #if BINEXACT
@@ -50,7 +47,7 @@ int32_t gl_mnpid;
 int16_t gl_mnpid;
 #endif
 GRECT gl_rmnactv;
-int32_t desk_acc[MAX_ACCS];
+char *desk_acc[MAX_ACCS];
 int16_t desk_pid[MAX_ACCS];
 int16_t gl_dacnt;
 int16_t gl_dabase;
@@ -68,19 +65,23 @@ PP(MOBLK *prmob;)
 PP(int16_t iob;)
 PP(int16_t x;)
 {
-	ob_actxywh(tree, iob, &prmob->m_x);
+	ob_actxywh(tree, iob, (GRECT *)&prmob->m_x);
 	prmob->m_out = x;
 }
 #endif
 
 
 /*
-*	Routine to change the state of a particular object.  The
-*	change in state will not occur if the object is disabled
-*	and the chkdisabled parameter is set.  The object will
-*	be drawn with its new state only if the dodraw parameter
-*	is set.
-*/
+ * AES #31 - menu_icheck -  Set or clear check mark (tick) in menu options.
+ * AES #32 - menu_ienable - Enable or disable a menu entry.
+ * AES #33 - menu_tnormal - Displays a menu title in inverse video or normal.
+ *
+ *	Routine to change the state of a particular object.  The
+ *	change in state will not occur if the object is disabled
+ *	and the chkdisabled parameter is set.  The object will
+ *	be drawn with its new state only if the dodraw parameter
+ *	is set.
+ */
 
 uint16_t do_chg(P(LPTREE) tree, P(int16_t) iitem, P(uint16_t) chgvalue, P(int16_t) dochg, P(int16_t) dodraw, P(int16_t) chkdisabled)
 PP(register LPTREE tree;)						/* tree that holds item */
@@ -195,14 +196,10 @@ PP(int16_t *pitem;)
 	int16_t curstate;
 
 	tree = gl_mntree;
-	/* initially wait to    */
-	/*   go into the active */
-	/*   part of the bar    */
-	/*   or the button state */
-	/*   to change      */
-	/*   or out of the bar  */
-	/*   when nothing is    */
-	/*   down       */
+	/*
+	 * initially wait to go into the active part of the bar or the
+	 * button state to change or out of the bar when nothing is down
+	 */
 	menu_state = INBAR;
 
 	done = FALSE;
@@ -281,14 +278,16 @@ PP(int16_t *pitem;)
 				menu_sr(FALSE, tree, last_menu);
 			/* set up new state */
 			if (menu_set(tree, cur_title, last_title, TRUE))
+#if SUBMENUS
+				cur_menu = menu_down(tree, cur_title, NULL);
+#else
 				cur_menu = menu_down(tree, cur_title);
+#endif
 			menu_set(tree, cur_item, last_item, TRUE);
 		}
 	}
 	
-	/* decide what should   */
-	/*   be cleaned up and  */
-	/*   returned       */
+	/* decide what should be cleaned up and returned */
 	flag = FALSE;
 	if (cur_title != NIL)
 	{
@@ -307,26 +306,28 @@ PP(int16_t *pitem;)
 
 	ctlmouse(FALSE);					/* fixed 3/5/86     */
 
-	return (flag);
+	return flag;
 }
 #endif
 
 
 /*
+ * AES #30 - menu_bar - Display, delete or install a menu bar.
+ *
  *	Routine to display the menu bar.  Clipping is turned completely
  *	off so that this operation will be as fast as possible.  The
  *	global variable gl_mntree which is used in CTLMGR88.C is also
  *	set or reset.
  */
 /* 306de: 00E1F098 */
-int16_t mn_bar
-(P(LPTREE) tree, P(int16_t) showit)
+VOID mn_bar(P(LPTREE) tree, P(int16_t) showit)
 PP(register LPTREE tree;)
 PP(int16_t showit;)
 {
 	register int16_t i, ob, h, cnt;
-	int32_t spec;
+	intptr_t spec;
 
+	UNUSED(spec);
 	if (showit)
 	{
 		gl_mntree = tree;
@@ -334,9 +335,9 @@ PP(int16_t showit;)
 
 		/* change the waiting rectangle   */
 
-		ch_wrect(&gl_ctwait.m_x, &gl_rmnactv);
+		ch_wrect((GRECT *)&gl_ctwait.m_x, &gl_rmnactv);
 
-		rc_copy(&gl_rmnactv, &gl_ctwait.m_x);
+		rc_copy(&gl_rmnactv, (GRECT *)&gl_ctwait.m_x);
 		/*
 		 * BUG: gl_mnpid delcared as long but accessed as short;
 		 * this will be sign-extended here, causing users to always
@@ -361,8 +362,7 @@ PP(int16_t showit;)
 		{
 			ob = gl_dabox + i;
 			ob_add(tree, gl_dabox, ob);
-			/* fixup each       */
-			/*   desk accessory line */
+			/* fixup each desk accessory line */
 			if (i > 2)
 				LLSET(OB_SPEC(ob), desk_acc[i - 3]);
 			h += gl_hchar;
@@ -375,11 +375,11 @@ PP(int16_t showit;)
 		gsx_cline(0, gl_hbox - 1, gl_width - 1, gl_hbox - 1);
 	} else
 	{
-		gl_mntree = 0x0L;
+		gl_mntree = 0;
 		/* change the waiting rect */
-		ch_wrect(&gl_ctwait.m_x, &gl_rmenu);
+		ch_wrect((GRECT *)&gl_ctwait.m_x, &gl_rmenu);
 
-		rc_copy(&gl_rmenu, &gl_ctwait.m_x);
+		rc_copy(&gl_rmenu, (GRECT *)&gl_ctwait.m_x);
 	}
 	/* make ctlmgr fix up the size of rect its waiting for */
 /*	gl_fakemsg++;			*/
@@ -396,11 +396,13 @@ VOID mn_clsda(NOTHING)
 	register int16_t i;
 
 	for (i = 0; i < gl_dacnt; i++)
-		ap_sendmsg(appl_msg, AC_CLOSE, desk_pid[i], i, 0x0L, 0x0L);
+		ap_sendmsg(appl_msg, AC_CLOSE, desk_pid[i], i, 0, 0, 0, 0);
 }
 
 
 /*
+ * AES #35 - menu_register - Register a desk accessory in the 'Desk' accessory menu.
+ *
  *	Routine to register a desk accessory item on the menu bar.
  *	The return value is the object index of the menu item that
  *	was added.
@@ -411,8 +413,7 @@ PP(register intptr_t pstr;)
 {
 	char tmpname[13];
 
-	/* use this to name */
-	/*   our process    */
+	/* use this to name our process */
 	if (pid == -1)
 	{
 		LSTCPY(ADDR(&tmpname[0]), pstr);
@@ -447,8 +448,8 @@ PP(GRECT *n;)								/* new rect */
 
 	for (e = p->p_cda->c_msleep; e; e = e->e_link)
 	{
-		p1 = &e->e_parm;
-		p2 = &e->e_return;
+		p1 = (int16_t *)&e->e_parm; /* WTF */
+		p2 = (int16_t *)&e->e_return; /* WTF */
 
 		if ((r->g_x == p1[0]) && (r->g_y == p1[1]) && (r->g_w == p2[0]) && (r->g_h == p2[1]))
 		{

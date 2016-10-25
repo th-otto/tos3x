@@ -102,9 +102,8 @@ register int16_t wd;
 }
 
 
-char * escan_str(pcurr, ppstr)
+char *escan_str(char *pcurr, char *ppstr)
 register char *pcurr;
-
 register char *ppstr;
 {
 	while (*pcurr == ' ')
@@ -123,10 +122,9 @@ register char *ppstr;
 	pcurr pointing one space past the end of the four hex digits
 */
 
-char * scan_2(pcurr, pwd)
-register char *pcurr;
-
-register uint16_t *pwd;
+char *scan_2(P(char *) pcurr, P(int16_t *) pwd)
+PP(register char *pcurr;)
+PP(register int16_t *pwd;)
 {
 	register uint16_t temp;
 
@@ -134,18 +132,17 @@ register uint16_t *pwd;
 	temp |= hex_dig(*pcurr++) << 4;
 	temp |= hex_dig(*pcurr++);
 	if (temp == 0x00ff)
-		temp = NIL;
+		temp = -1;
 	*pwd = temp;
 	pcurr++;
-	return (pcurr);
+	return pcurr;
 }
 
 
 /*	Reverse of scan_2()	*/
 
-char * save_2(pcurr, wd)
+char *save_2(P(char *) pcurr, P(uint16_t) wd)
 register char *pcurr;
-
 uint16_t wd;
 {
 	*pcurr++ = uhex_dig((wd >> 4) & 0x000f);

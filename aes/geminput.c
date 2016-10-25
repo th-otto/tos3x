@@ -1,26 +1,24 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/geminput.c,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:24:39 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	geminput.c,v $
-* Revision 2.2  89/04/26  18:24:39  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:27:45  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.2  89/02/16  10:47:23  mui
-* Fix dclicks: Move gl_bpend from evremove to post_button
-* 
-* Revision 1.1  88/06/02  12:34:18  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:24:39 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:24:39  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:27:45  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.2  89/02/16  10:47:23  mui
+ * Fix dclicks: Move gl_bpend from evremove to post_button
+ * 
+ * Revision 1.1  88/06/02  12:34:18  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMINPUT.C	1/28/84 - 02/05/85	Lee Jay Lorenzen	*/
 /*	Reg Opt		03/09/85		Derek Mui		*/
 /*	1.1		03/21/85 - 06/19/85	Lowell Webster		*/
@@ -38,19 +36,16 @@
 /*	Change at mowner for new window library	8/1/92	D.Mui		*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.1
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.1
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "gsxdefs.h"
 
 
 #define MB_DOWN 0x01
@@ -111,12 +106,11 @@ PP(int16_t new;)
 	{
 		mx = xrat;
 		my = yrat;
-		/* if inside ctrl rect  */
-		/*   then owned by  */
-		/*   active process */
+		/* if inside ctrl rect then owned by active process */
 		if (inside(mx, my, &ctrl))
+		{
 			m = gl_cowner;
-		else							/* if in menu bar then  */
+		} else							/* if in menu bar then  */
 		{								/* owned by ctrl mgr    */
 			m = ctl_pd;
 
@@ -125,7 +119,11 @@ PP(int16_t new;)
 				wh = wm_find(mx, my);
 				if (wh && (wh != NIL))
 				{
-					wm_get(wh, WF_WORKXYWH, &t);
+#if AES3D
+					wm_get(wh, WF_WORKXYWH, &t.g_x, NULL);
+#else
+					wm_get(wh, WF_WORKXYWH, &t.g_x);
+#endif
 
 					if (inside(mx, my, &t))
 					{
@@ -179,17 +177,13 @@ PP(register int16_t my;)
 VOID b_click(P(int16_t) state)
 PP(register int16_t state;)
 {
-	/* ignore it unless it  */
-	/*   represents a change */
+	/* ignore it unless it represents a change */
 	if (state != gl_btrue)
 	{
-		/* see if we've already */
-		/*   set up a wait  */
+		/* see if we've already set up a wait  */
 		if (gl_bdelay)
 		{
-			/* if the change is into */
-			/*   the desired state  */
-			/*   then increment cnt */
+			/* if the change is into the desired state then increment cnt */
 			if (state == gl_bdesired)
 			{
 				gl_bclick++;
@@ -197,28 +191,23 @@ PP(register int16_t state;)
 			}
 		} else
 		{
-			/* if someone cares */
-			/*   about multiple */
-			/*   clicks and this is */
-			/*   not a null mouse   */
-			/*   then set up delay  */
-			/*   else just fork it  */
+			/*
+			 * if someone cares about multiple clicks and this is
+			 * not a null mouse then set up delay else just fork it
+			 */
 			if ((gl_bpend) && (state))
 			{
-				/* start click cnt at 1 */
-				/*   establish desired  */
-				/*   state and set wait */
-				/*   flag       */
+				/* start click cnt at 1 establish desired state and set wait flag */
 				gl_bclick = 1;
 				gl_bdesired = state;
-				/* button delay set in  */
-				/*   ev_dclick (5)  */
+				/* button delay set in ev_dclick (5) */
 				gl_bdelay = gl_dclick;
 			} else
+			{
 				forkq(bchange, state, 1);
+			}
 		}
-		/* update true state of */
-		/*   the mouse      */
+		/* update true state of the mouse */
 		gl_btrue = state;
 	}
 }
@@ -234,14 +223,10 @@ PP(register int16_t state;)
 VOID b_delay(P(int16_t) amnt)
 PP(int16_t amnt;)
 {
-	/* see if we have a     */
-	/*   delay for mouse    */
-	/*   click in progress  */
+	/* see if we have a delay for mouse click in progress */
 	if (gl_bdelay)
 	{
-		/* see if decrementing  */
-		/*  delay cnt causes    */
-		/*  delay to be over    */
+		/* see if decrementing delay cnt causes delay to be over */
 		gl_bdelay -= amnt;
 		if (!(gl_bdelay))
 		{
@@ -271,11 +256,11 @@ PP(GRECT *pt;)
 
 #if UNLINKED
 /*
-*	Get the current control rectangle which is the part of the
-*	screen owned by the active process.  Normally, the work area
-*	of the top window, but sometimes the whole screen during 
-*	form fill-in.
-*/
+ *	Get the current control rectangle which is the part of the
+ *	screen owned by the active process.  Normally, the work area
+ *	of the top window, but sometimes the whole screen during 
+ *	form fill-in.
+ */
 
 VOID get_ctrl(P(GRECT *) pt)
 PP(GRECT *pt;)
@@ -286,9 +271,9 @@ PP(GRECT *pt;)
 
 #if UNLINKED
 /*
-*	Used by form_do to remember the current keyboard and mouse
-*	owners.
-*/
+ *	Used by form_do to remember the current keyboard and mouse
+ *	owners.
+ */
 
 VOID get_mkown(P(PD **) pmown, P(PD **) pkown)
 PP(PD **pkown;)
@@ -312,15 +297,10 @@ PP(PD *kp;)
 {
 	/* change the owner */
 	gl_cowner = gl_mowner = mp;
-	/* pretend mouse    */
-	/*   moved to get the   */
-	/*   right form showing */
-	/*   and get mouse event */
-	/*   posted correctly   */
+	/* pretend mouse moved to get the right form showing */
+	/* and get mouse event posted correctly */
 	post_mouse(gl_mowner, xrat, yrat);
-	/* post a button event  */
-	/*   in case the new    */
-	/*   owner was waiting  */
+	/* post a button event in case the new owner was waiting */
 	post_button(gl_mowner, button, 1);
 
 	gl_kowner = kp;
@@ -379,7 +359,7 @@ VOID fq(NOTHING)
 
 VOID evremove(P(EVB *) e, P(uint16_t) ret)
 PP(register EVB *e;)
-PP8uint16_t ret;)
+PP(uint16_t ret;)
 {
 	/* unlinked this EVB, and aret() */
 	e->e_return |= (uint16_t) ret;			/* will remove and free the EVB */
@@ -409,9 +389,10 @@ PP(uint16_t ch;)
 
 	c = p->p_cda;
 	/* if anyone waiting ?  */
-	if (e = c->c_iiowait)				/*   wake him up    */
+	if ((e = c->c_iiowait))				/*   wake him up    */
+	{
 		evremove(e, ch);
-	else
+	} else
 	{
 		/* no one is waiting,   */
 		/*   just toss it in    */
@@ -442,16 +423,10 @@ PP(int16_t clicks;)
 #if 0
 	if (gl_mowner != ctl_pd)			/* if control mgr. does- */
 		gl_mowner = mowner(new);		/*   not own the mouse  */
-	/*   see if this button */
-	/*   event causes an    */
-	/*   ownership change   */
+	/* see if this button event causes an ownership change */
 #endif
 
-	/* if the button went   */
-	/*   down check to see  */
-	/*   if ownership should */
-	/*   go to the control  */
-	/*   mgr.       */
+	/* if the button went down check to see if ownership should go to the control mgr. */
 
 	mtrans++;
 	pr_button = button;
@@ -494,11 +469,7 @@ PP(register int16_t clks;)
 		e1 = e->e_link;
 		if (downorup(new, e->e_parm))
 		{
-			/* decrement counting   */
-			/*   semaphore if one   */
-			/*   of the multi-  */
-			/*   click guys was */
-			/*   satisfied      */
+			/* decrement counting semaphore if one of the multi-click guys was satisfied */
 			clicks = LHIWD(e->e_parm) & 0x00ffL;
 			if (clicks > 1)
 				gl_bpend--;
@@ -519,10 +490,8 @@ PP(register int16_t ry1;)
 	int16_t rx;
 	int16_t ry;
 
-	/* zero out button wait */
-	/*   if mouse moves more */
-	/*   then a little  */
-	gsx_ncode(MOUSE_ST, 0x0L);
+	/* zero out button wait if mouse moves more then a little */
+	gsx_ncode(MOUSE_ST, 0, 0);
 	rx = ptsout[0];
 	ry = ptsout[1];
 
@@ -536,23 +505,29 @@ PP(register int16_t ry1;)
 	{
 		intin[0] = 1;					/* do a mouse sample mode */
 		intin[1] = 2;
-		gsx_ncode(33, 0x00000002L);
+#if BINEXACT
+		gsx_ncode(SET_INPUT_MODE, 0x00000002L); /* sigh */
+#else
+		gsx_ncode(SET_INPUT_MODE, 0, 2);
+#endif
 		drawrat(rx1, ry1);
 		ptsin[0] = rx1;
 		ptsin[1] = ry1;
-		gsx_ncode(28, 0x00010000L);
+#if BINEXACT
+		gsx_ncode(LOCATOR_INPUT, 0x00010000L); /* sigh */
+#else
+		gsx_ncode(LOCATOR_INPUT, 1, 0);
+#endif
 		xrat = rx1;
 		yrat = ry1;
 	}
 
-	/* give mouse to screen */
-	/*   handler when not   */
-	/*   button down and    */
-	/*   there is an active */
-	/*   menu and it will   */
-	/*   satisfy his event  */
+	/*
+	 * give mouse to screen handler when not button down and
+	 * there is an active menu and it will satisfy his event
+	 */
 	/* CHANGED LKW      */
-	if ((!button) && (gl_mntree) && (gl_ctwait.m_out != inside(xrat, yrat, &gl_ctwait.m_x)))
+	if ((!button) && (gl_mntree) && (gl_ctwait.m_out != inside(xrat, yrat, (GRECT *)&gl_ctwait.m_x)))
 		gl_mowner = ctl_pd;
 
 	post_mouse(gl_mowner, xrat, yrat);
@@ -567,8 +542,7 @@ PP(int16_t gry;)
 	register EVB *e;
 	register EVB *e1;
 
-	/* check event list to  */
-	/*   signal waiting pr's */
+	/* check event list to signal waiting pr's */
 	for (e = p->p_cda->c_msleep; e; e = e1)
 	{
 		e1 = e->e_link;
@@ -592,7 +566,7 @@ PP(register int16_t ry;)
 	mo.m_y = LLOWD(e->e_parm);
 	mo.m_w = LHIWD(e->e_return);
 	mo.m_h = LLOWD(e->e_return);
-	return (mo.m_out != inside(rx, ry, &mo.m_x));
+	return (mo.m_out != inside(rx, ry, (GRECT *)&mo.m_x));
 }
 
 
@@ -605,12 +579,13 @@ intptr_t addr;
 	/* find vcb to input, point c at it  */
 	if (cda->c_q.c_cnt)
 	{
-		/* another satisfied    */
-		/*   customer       */
+		/* another satisfied customer */
 		e->e_return = (uint16_t) dq(&cda->c_q);
 		zombie(e);
 	} else								/* time to zzzzz... */
+	{
 		evinsert(e, &cda->c_iiowait);
+	}
 }
 #endif
 
@@ -680,10 +655,7 @@ PP(register int32_t p;)
 		zombie(e);						/* 'nuff said       */
 	} else
 	{
-		/* increment counting   */
-		/*   semaphore to show  */
-		/*   someone cares about */
-		/*   multiple clicks    */
+		/* increment counting semaphore to show someone cares about multiple clicks */
 		bclicks = LHIWD(p) & 0x000000ffL;
 		if (bclicks > 1)
 			gl_bpend++;
@@ -703,9 +675,7 @@ PP(int32_t pmo;)
 	MOBLK mob;
 
 	LBCOPY(ADDR(&mob), pmo, sizeof(MOBLK));
-	/* if already in (or    */
-	/*   out) signal    */
-	/*   immediately    */
+	/* if already in (or out) signal immediately */
 	if (mob.m_out != inside(xrat, yrat, &mob.m_x))
 		zombie(e);
 	else

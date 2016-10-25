@@ -1,11 +1,9 @@
 *************************************************************************
 *			Revision Control System
 * =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/gemgsxif.s,v $
+*  $Author: mui $	$Date: 89/04/26 18:23:50 $
 * =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:23:50 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	gemgsxif.s,v $
+*
 * Revision 2.2  89/04/26  18:23:50  mui
 * TT
 * 
@@ -45,6 +43,10 @@
  *	Copyright (C) 1985			Digital Research Inc.
  *	-------------------------------------------------------------
  */
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
 
 /*
  *	Calls used in Crystal:
@@ -137,7 +139,7 @@ g1:
 
 
 #if CCODE
-VOID gsx_mret(VOIDPTR *pmaddr, size_t *pmlen)
+VOID gsx_mret(VOIDPTR *pmaddr, int32_t *pmlen)
 {
 	*pmaddr = gl_tmp.fd_addr;
 	*pmlen = gl_mlen;
@@ -302,7 +304,7 @@ _v_hardcopy:
 VOID gsx_escapes(WORD esc_code)
 {
 	contrl[5] = esc_code;
-	gsx_ncode(5, 0, 0);
+	gsx_ncode(ESCAPE, 0, 0);
 }
 #endif
 	xdef _gsx_esca
@@ -776,11 +778,11 @@ WORD gsx_char(NOTHING)
 
 	pintin[0] = 4;
 	pintin[1] = 2;
-	gsx_ncode(33, 0, 2);
+	gsx_ncode(SET_INPUT_MODE, 0, 2);
 
 	pintin[0] = -1;
 	pintin[1] = FALSE;
-	gsx_ncode(31, FALSE, 2);
+	gsx_ncode(STRING_INPUT, FALSE, 2);
 	if (contrl[4])
 	  return(pintout[0]);
 	else
@@ -976,7 +978,7 @@ VOID vrt_cpyfm(WORD wr_mode, WORD *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, WORD 
 	i_ptr(psrcMFDB);
 	i_ptr2(pdesMFDB);
 	i_ptsin(pxyarray);
-	gsx_ncode(121, 4, 3);
+	gsx_ncode(TRAN_RASTER_FORM, 4, 3);
 	i_ptsin(ptsin);
 }
 #endif
@@ -1085,6 +1087,16 @@ vdi_cont:
 	addq.l	#6,sp
 	move.l	#_ptsin,pioff		; some routines alter this pointer
 	rts				; so we shall always reset it.
+
+#if !BINEXACT
+	xdef _set_cache
+_set_cache:
+	move.l 4(a7),d1
+	CACR_D0
+	D1_CACR
+	rts
+#endif
+
 
 vdi_list:	
 

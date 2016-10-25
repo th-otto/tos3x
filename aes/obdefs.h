@@ -1,21 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:29:21 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:29:21  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:31:23  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:35:57  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:29:21 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:29:21  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:31:23  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:35:57  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	OBDEFS.H	03/15/84 - 02/08/85	Gregg Morris		*/
 /*	Add 3D definitons		7/7/92	D.Mui			*/
 /*	Add another set of 3D definitons	8/1/92	D.Mui		*/
@@ -32,10 +32,8 @@
 #define K_LSHIFT 0x0002
 #define K_CTRL 0x0004
 #define K_ALT 0x00008
-/* max string length	*/
-#define MAX_LEN 81
-						/* max depth of search	*/
-						/*   or draw for objects*/
+
+/* max depth of search or draw for objects */
 #define MAX_DEPTH 8
 						/* inside patterns	*/
 #define IP_HOLLOW 0
@@ -52,7 +50,7 @@
 #define MD_XOR 3
 #define MD_ERASE 4
 
-/* gsx styles		*/
+/* gsx styles */
 #define FIS_HOLLOW 0
 #define FIS_SOLID 1
 #define FIS_PATTERN 2
@@ -211,9 +209,9 @@ GRECT
 
 TEDINFO
 {
-	intptr_t	te_ptext;	/* ptr to text (must be 1st)	*/
-	intptr_t	te_ptmplt;	/* ptr to template		*/
-	intptr_t	te_pvalid;	/* ptr to validation chrs.	*/
+	char	   *te_ptext;	/* ptr to text (must be 1st)	*/
+	char       *te_ptmplt;	/* ptr to template		*/
+	char       *te_pvalid;	/* ptr to validation chrs.	*/
 	int16_t		te_font;	/* font				*/
 	int16_t		te_junk1;	/* junk word			*/
 	int16_t		te_just;	/* justification- left, right...*/
@@ -231,7 +229,7 @@ ICONBLK
 {
 	int16_t	*ib_pmask;
 	int16_t	*ib_pdata;
-	int16_t	*ib_ptext;
+	char	*ib_ptext;
 	int16_t	ib_char;
 	int16_t	ib_xchar;
 	int16_t	ib_ychar;
@@ -274,7 +272,7 @@ PARMBLK
 	int16_t	pb_currstate;
 	int16_t	pb_x, pb_y, pb_w, pb_h;
 	int16_t	pb_xc, pb_yc, pb_wc, pb_hc;
-	intptr_t	pb_parm;
+	intptr_t pb_parm;
 };
 
 
@@ -419,9 +417,20 @@ typedef struct rshdr
 #define FMD_SHRINK 2
 #define FMD_FINISH 3
 
+#define USER_DEF 255
 #define M_OFF 256
 #define M_ON 257
 #define ARROW	0
+#define TEXT_CRSR         1
+#define HOURGLASS         2
+#define BUSY_BEE          HOURGLASS
+#define BUSYBEE           HOURGLASS
+#define POINT_HAND        3
+#define FLAT_HAND         4
+#define THIN_CROSS        5
+#define THICK_CROSS       6
+#define OUTLN_CROSS       7
+
 
 typedef struct moblk
 {

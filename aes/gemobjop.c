@@ -34,11 +34,9 @@
  *	Remove extended type stuff	1/12/93	Eric Smith
  */
 
-#include <portab.h>
-#include <machine.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <vdidefs.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
 
 #define	TED_THICKNESS	22
 
@@ -50,7 +48,7 @@
  *		to a tedinfo structure (isn't this help full).
  *
  */
-char ob_sst(P(LPTREE) tree, P(int16_t) obj, P(intptr_t *) pspec, P(int16_t *) pstate, P(int16_t *) ptype, P(int16_t *) pflags, P(GRECT *) pt, P(int16_t *) apth)
+char ob_sst(P(LPTREE) tree, P(int16_t) obj, P(intptr_t *) pspec, P(int16_t *) pstate, P(int16_t *) ptype, P(int16_t *) pflags, P(GRECT *) pt, P(int16_t *) pth)
 PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(register intptr_t *pspec;)
@@ -63,7 +61,7 @@ PP(int16_t *pth;)
 	register int16_t th;
 	register OBJECT *tmp;
 
-	tmp = OB_NEXT(obj);
+	tmp = (OBJECT *)OB_NEXT(obj);
 
 	pt->g_w = tmp->ob_width;			/* set user grect width */
 	pt->g_h = tmp->ob_height;			/* set user grect height */

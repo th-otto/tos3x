@@ -11,21 +11,23 @@
 /* 9/3/92	D.Mui	Implement WF_BEVENT and WF_BOTTOM		*/
 /* 9/10/92	D.Mui	Return WM_ONTOP or WM_UNTOPPED message		*/
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
+#include "aes.h"
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+
 
 /* whether window objects are 3D or not */
 #define NO3D	0
 #define IS3D	1
 
+#define      Malloc(a)       gemdos(0x48,a)
+#define      Mfree(a)        gemdos(0x49,a)
+
+
+
 int16_t phanwind;							/* PHANTOM window handle */
-int16_t hparts, vparts;						/* window elements masks */
+int16_t hparts, vparts;						/* window elements masks */ /* tho: nonsense to make them globally here */
 int16_t wtcolor[MAXOBJ];					/* topped window object colors  */
 int16_t wbcolor[MAXOBJ];					/* background window object colors */
 LPTREE newdesk;								/* address of new DESKTOP */
@@ -128,7 +130,7 @@ BOOLEAN wm_start(NOTHING)
 		rp->rwhere = rmhead;
 	}
 
-	newdesk = NULL;					/* no new DESKTOP */
+	newdesk = 0;					/* no new DESKTOP */
 	newroot = 0;
 
 	/* These number is fixed    */
@@ -168,10 +170,13 @@ PP(register GRECT *rect;)						/* x, y, width and height of full size window */
 	register int16_t *tc, *bc;				/* pointers to color array */
 	register WINDOW *wp;						/* pointer to window structure */
 
+	UNUSED(bc);
+	UNUSED(tc);
+	
 	/* find next available window structure and handle  */
 	/* if none available, return with a FAILURE     */
-	if ((wp = newwp()) == NULL || newhndl(wp) == FAILURE)
-		return FAILURE;
+	if ((wp = newwp()) == NULL || newhndl(wp) == -1)
+		return -1;
 
 	wp->type = 0;
 	wp->status.opened = FALSE;			/* window has not been opened yet */
@@ -216,12 +221,12 @@ PP(register GRECT *rect;)						/* x, y, width and height of full size window */
 
 		if (kind & CLOSER)
 		{
-			w_bld(wp, W_CLOSER, G_BOXCHAR, W_TITLE, 0x05010000, IS3D);
+			w_bld(wp, W_CLOSER, G_BOXCHAR, W_TITLE, 0x05010000L, IS3D);
 		}
 
 		if (kind & NAME)
 		{
-			w_bld(wp, W_NAME, G_BOXTEXT, W_TITLE, &(wp->ttxt), IS3D);
+			w_bld(wp, W_NAME, G_BOXTEXT, W_TITLE, (intptr_t)&(wp->ttxt), IS3D);
 			w_ted(&(wp->ttxt), "Title Bar", 2, wtcolor[W_TITLE]);
 		} else if (kind & MOVER)
 		{
@@ -230,25 +235,25 @@ PP(register GRECT *rect;)						/* x, y, width and height of full size window */
 
 		if (kind & FULLER)
 		{
-			w_bld(wp, W_FULLER, G_BOXCHAR, W_TITLE, 0x07010000, IS3D);
+			w_bld(wp, W_FULLER, G_BOXCHAR, W_TITLE, 0x07010000L, IS3D);
 		}
 	}
 
 	if (kind & INFO)
 	{
-		w_bld(wp, W_INFO, G_BOXTEXT, W_BOX, &(wp->itxt), NO3D);
+		w_bld(wp, W_INFO, G_BOXTEXT, W_BOX, (intptr_t)&(wp->itxt), NO3D);
 		w_ted(&(wp->itxt), "Info Line", 0, wtcolor[W_INFO]);
 	}
 
 	if (kind & MNBAR)
 	{
-		w_bld(wp, W_MNBAR, G_BOXTEXT, W_BOX, &(wp->mtxt), NO3D);
+		w_bld(wp, W_MNBAR, G_BOXTEXT, W_BOX, (intptr_t)&(wp->mtxt), NO3D);
 		w_ted(&(wp->mtxt), " Desk  File  View  Options", 0, wtcolor[W_MNBAR]);
 	}
 
 	if (kind & SIZER)
 	{
-		w_bld(wp, W_SIZER, G_BOXCHAR, W_BOX, 0x06010000, IS3D);
+		w_bld(wp, W_SIZER, G_BOXCHAR, W_BOX, 0x06010000L, IS3D);
 
 		if (!hparts && !vparts)
 		{
@@ -267,17 +272,17 @@ PP(register GRECT *rect;)						/* x, y, width and height of full size window */
 
 		if (kind & UPARROW)
 		{
-			w_bld(wp, W_UPARROW, G_BOXCHAR, W_VBAR, 0x01010000, IS3D);
+			w_bld(wp, W_UPARROW, G_BOXCHAR, W_VBAR, 0x01010000L, IS3D);
 		}
 
 		if (kind & DNARROW)
 		{
-			w_bld(wp, W_DNARROW, G_BOXCHAR, W_VBAR, 0x02010000, IS3D);
+			w_bld(wp, W_DNARROW, G_BOXCHAR, W_VBAR, 0x02010000L, IS3D);
 		}
 
 		if (kind & VSLIDE)
 		{
-			w_bld(wp, W_VSLIDE, G_BOX, W_VBAR, 0x00010000, NO3D);
+			w_bld(wp, W_VSLIDE, G_BOX, W_VBAR, 0x00010000L, NO3D);
 			w_bld(wp, W_VELEV, G_BOX, W_VSLIDE, GBOX_OBS, IS3D);
 /*	    w_bld(wp, W_VELEV, G_BOX, W_VSLIDE, GBOX_OBS, NO3D);	*/
 		}
@@ -289,17 +294,17 @@ PP(register GRECT *rect;)						/* x, y, width and height of full size window */
 
 		if (kind & LFARROW)
 		{
-			w_bld(wp, W_LFARROW, G_BOXCHAR, W_HBAR, 0x04010000, IS3D);
+			w_bld(wp, W_LFARROW, G_BOXCHAR, W_HBAR, 0x04010000L, IS3D);
 		}
 
 		if (kind & RTARROW)
 		{
-			w_bld(wp, W_RTARROW, G_BOXCHAR, W_HBAR, 0x03010000, IS3D);
+			w_bld(wp, W_RTARROW, G_BOXCHAR, W_HBAR, 0x03010000L, IS3D);
 		}
 
 		if (kind & HSLIDE)
 		{
-			w_bld(wp, W_HSLIDE, G_BOX, W_HBAR, 0x00010000, NO3D);
+			w_bld(wp, W_HSLIDE, G_BOX, W_HBAR, 0x00010000L, NO3D);
 			w_bld(wp, W_HELEV, G_BOX, W_HSLIDE, GBOX_OBS, IS3D);
 /*          w_bld(wp, W_HELEV, G_BOX, W_HSLIDE, GBOX_OBS, NO3D);	*/
 		}
@@ -324,6 +329,8 @@ PP(register GRECT *rect;)						/* x, y, width and height of opened window */
 {
 	register WINDOW *wp;					/* pointer to window structure */
 	int16_t ret, x, w, h;					/* return code */
+
+	UNUSED(x);
 
 	/* if window structure can't be found or window already opened,
 	   return error */
@@ -487,8 +494,8 @@ PP(int16_t handle;)							/* handle of window to be deleted */
 		*wp = *wp1;
 		wp->wwhere = mp;				/* restore address of memory block */
 		/* update internal pointers */
-		wp->obj[W_NAME].ob_spec = &(wp->ttxt);
-		wp->obj[W_INFO].ob_spec = &(wp->itxt);
+		wp->obj[W_NAME].ob_spec = (intptr_t)&(wp->ttxt);
+		wp->obj[W_INFO].ob_spec = (intptr_t)&(wp->itxt);
 		bucket = wp1->handle % NUMWIN;
 		if (hashtbl[bucket] == wp1)
 		{
@@ -527,7 +534,7 @@ PP(int16_t handle;)							/* handle of window to be deleted */
  *	    - returns TRUE (1) if everything is fine
  *
  */
-#if AESVERSION >= 0x330
+#if AES3D
 int16_t wm_get(P(int16_t) handle, P(int16_t) field, P(int16_t *)ow, P(const int16_t *) iw)
 PP(register int16_t handle;)						/* window handle */
 PP(int16_t field;)								/* flag to identify what info to be returned */
@@ -544,6 +551,8 @@ PP(register int16_t *ow;)							/* return values */
 	register WINDOW *wp;
 	register GRECT *r;
 
+	UNUSED(i);
+	
 	if ((field == WF_DCOLOR) || (field == WF_TOP) || (field == WF_SCREEN) || (field == WF_BOTTOM))
 		goto wg_1;
 
@@ -610,7 +619,7 @@ PP(register int16_t *ow;)							/* return values */
 			wp->fxywh = wp->nxywh = NULL;
 		}
 		/* generate new list */
-		if (wp->fxywh = genrlist(handle, WF_WORKXYWH))
+		if ((wp->fxywh = genrlist(handle, WF_WORKXYWH)))
 		{
 			wp->nxywh = (wp->fxywh)->rnext;
 			*r = (wp->fxywh)->rect;
@@ -642,10 +651,10 @@ PP(register int16_t *ow;)							/* return values */
 		break;
 
 	case WF_SCREEN:
-		gsx_mret(&ow[0], &ow[2]);
+		gsx_mret((VOIDPTR *)&ow[0], (int32_t *)&ow[2]); /* WTF */
 		break;
 
-#if AESVERSION >= 0x330
+#if AES3D
 	case WF_COLOR:
 		ow[1] = wp->tcolor[iw[0]];
 		ow[2] = wp->bcolor[iw[0]];
@@ -690,10 +699,10 @@ PP(register int16_t *ow;)							/* return values */
  *	    - returns TRUE (1) if everything is fine
  *
  */
-int16_t wm_set(P(int16_t) handle, P(int16_t field), P(const int16_t *) iw)
+int16_t wm_set(P(int16_t) handle, P(int16_t field), P(int16_t *) iw)
 PP(register int16_t handle;)						/* window handle */
 PP(register int16_t field;)							/* flag to identify what info to be changed */
-PP(register const int16_t *iw;)							/* values to change to */
+PP(register int16_t *iw;)							/* values to change to */
 {
 	register WINDOW *wp;						/* pointer to window structure */
 	int ret, obj;
@@ -703,6 +712,11 @@ PP(register const int16_t *iw;)							/* values to change to */
 	register OBJECT *work;
 	GRECT rect, rect1;
 
+	UNUSED(work);
+	UNUSED(i);
+	UNUSED(r);
+	UNUSED(r1);
+	
 	if ((field == WF_NEWDESK) || (field == WF_DCOLOR))
 		goto ws_1;
 
@@ -718,13 +732,13 @@ PP(register const int16_t *iw;)							/* values to change to */
 	switch (field)
 	{
 	case WF_NAME:
-		wp->ttxt.te_ptext = *(int32_t *) iw;
+		wp->ttxt.te_ptext = *(char **) iw;
 		if (wp->status.opened)
 			w_clipdraw(wp, W_TITLE, NULL);
 		break;
 
 	case WF_INFO:
-		wp->itxt.te_ptext = *(int32_t *) iw;
+		wp->itxt.te_ptext = *(char **) iw;
 		if (wp->status.opened)
 			w_clipdraw(wp, W_INFO, NULL);
 		break;
@@ -989,7 +1003,7 @@ PP(int16_t *oh;)								/* output height of work/border area */
 {
 	register int16_t tb, bb, lb, rb;
 	register int16_t yinc, xinc;
-	int hparts, vparts;
+	int lhparts, lvparts;
 
 	tb = bb = rb = 0;
 	lb = 1;
@@ -1004,16 +1018,16 @@ PP(int16_t *oh;)								/* output height of work/border area */
 	if (kind & MNBAR)
 		tb += yinc;
 
-	vparts = kind & (UPARROW | DNARROW | VSLIDE);
-	hparts = kind & (LFARROW | RTARROW | HSLIDE);
+	lvparts = kind & (UPARROW | DNARROW | VSLIDE);
+	lhparts = kind & (LFARROW | RTARROW | HSLIDE);
 
-	if ((kind & SIZER) && (!vparts && !hparts))
+	if ((kind & SIZER) && (!lvparts && !lhparts))
 		rb += xinc;
 
-	if (vparts)
+	if (lvparts)
 		rb += xinc;
 
-	if (hparts)
+	if (lhparts)
 		bb += yinc;
 
 	if (!rb)							/* if no right elements */
@@ -1057,7 +1071,7 @@ PP(int16_t *oh;)								/* output height of work/border area */
 {
 	register int16_t w1, w2, w3, h1, h2, h3;
 	register int16_t yinc, xinc;
-	int16_t hparts, vparts;
+	int16_t lhparts, lvparts;
 
 	w1 = w2 = w3 = h1 = h2 = h3 = 1;
 
@@ -1083,13 +1097,13 @@ PP(int16_t *oh;)								/* output height of work/border area */
 	if (kind & MNBAR)
 		h1 += yinc;
 
-	vparts = kind & (UPARROW | DNARROW | VSLIDE);
-	hparts = kind & (LFARROW | RTARROW | HSLIDE);
+	lvparts = kind & (UPARROW | DNARROW | VSLIDE);
+	lhparts = kind & (LFARROW | RTARROW | HSLIDE);
 
-	if (vparts)
+	if (lvparts)
 		w2 += xinc;
 
-	if (hparts)
+	if (lhparts)
 		h3 += yinc;
 
 	if (kind & UPARROW)
@@ -1112,16 +1126,16 @@ PP(int16_t *oh;)								/* output height of work/border area */
 
 	if (kind & SIZER)
 	{
-		if ((!vparts && !hparts))
+		if ((!lvparts && !lhparts))
 		{
 			w2 += xinc;
 			h2 += yinc;
 		}
 
-		if (vparts)
+		if (lvparts)
 			h2 += yinc;
 
-		if (!vparts && hparts)
+		if (!lvparts && lhparts)
 			w3 += xinc;
 	}
 
@@ -1163,10 +1177,10 @@ int16_t wm_new(NOTHING)
 	wm_start();							/* reinit all data structures */
 
 	ml_ocnt = 0;						/* reset the semaphore */
-	gl_mntree = NULL;					/* reset menu tree */
+	gl_mntree = 0;						/* reset menu tree */
 	gl_mowner = ctl_pd;					/* reset mouse owner */
 
-	sy = ad_windspb;
+	sy = (SPB *)ad_windspb;
 
 	if (sy->sy_tas)						/* anybody owning the screen ? */
 	{
@@ -1392,14 +1406,14 @@ PP(int16_t caller;)							/* WMOPEN: called by wm_open() */
 	/* draw the untopped window if there is one */
 	if (twp)
 	{
-		activate(twp, NO);
+		activate(twp, FALSE);
 		w_clipdraw(twp, W_BOX, NULL);
 		if (twp->handle)				/* send untopped message */
 			ap_sendmsg(wind_msg, WM_UNTOPPED, twp->owner->p_pid, twp->handle, 0, 0, 0, 0);
 	}
 
 	/* draw border of the newly topped window */
-	activate(ntwp, YES);
+	activate(ntwp, TRUE);
 	w_clipdraw(ntwp, W_BOX, NULL);
 	w_setactive();
 
@@ -1452,11 +1466,11 @@ PP(int16_t handle;)							/* handle of window to be bottmed */
 		topw = unnbwp->handle;
 
 		/* change border of newly bottomed window */
-		activate(nbwp, NO);
+		activate(nbwp, FALSE);
 		w_clipdraw(nbwp, W_BOX, NULL);
 
 		/* draw border of the newly topped window */
-		activate(unnbwp, YES);
+		activate(unnbwp, TRUE);
 		w_clipdraw(unnbwp, W_BOX, NULL);
 		w_setactive();
 	} else
@@ -1494,7 +1508,7 @@ PP(int16_t topped;)							/* YES: activate window components */
 			/* NO:  deactivate window components */
 {
 	register int16_t kind;						/* window kind */
-	int16_t hparts, vparts;
+	int16_t lhparts, lvparts;
 
 	if (!(kind = wp->kind))
 		return;
@@ -1522,21 +1536,21 @@ PP(int16_t topped;)							/* YES: activate window components */
 	if (kind & INFO)
 		setcol(wp, W_INFO, topped);
 
-	hparts = kind & HPARTS;
-	vparts = kind & VPARTS;
+	lhparts = kind & HPARTS;
+	lvparts = kind & VPARTS;
 
 	if (kind & SIZER)
 	{
 		setcol(wp, W_SIZER, topped);
 
-		if (!hparts && !vparts)
+		if (!lhparts && !lvparts)
 		{
 			setcol(wp, W_VBAR, topped);
 			setcol(wp, W_HBAR, topped);
 		}
 	}
 
-	if (vparts)
+	if (lvparts)
 	{
 		setcol(wp, W_VBAR, topped);
 
@@ -1557,7 +1571,7 @@ PP(int16_t topped;)							/* YES: activate window components */
 		}
 	}
 
-	if (hparts)
+	if (lhparts)
 	{
 		setcol(wp, W_HBAR, topped);
 
@@ -2053,7 +2067,7 @@ PP(GRECT *pc;)								/* pointer to clipping rectangle */
 		if (!pc || rc_intersect(pc, &rclip))
 		{
 			gsx_sclip(&rclip);
-			ob_draw(wp->obj, obj, MAX_DEPTH);
+			ob_draw((LPTREE)wp->obj, obj, MAX_DEPTH);
 		}
 	}
 	wm_update(FALSE);
@@ -2136,7 +2150,7 @@ PP(int16_t is3d;)
 
 	/* add object to tree */
 	if (parent != NIL)
-		ob_add(wp->obj, parent, ob);
+		ob_add((LPTREE)wp->obj, parent, ob);
 }
 
 

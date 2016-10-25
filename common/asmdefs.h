@@ -62,6 +62,7 @@
 #define FNOP                dc.l $f2800000        /* 6888X, 68040-68060 */
 #define FSAVE_MINUS_SP      dc.w $f327            /* 6888X, 68040-68060 */
 #define FRESTINC            dc.w $f35f            /* frestore (a7)+ 6888X, 68040-68060 */
+#define FRESTSP             dc.w $f357            /* frestore (a7) 6888X, 68040-68060 */
 #define FRESTORE(addr)      dc.w $f379 \
                             dc.l addr             /* frestore addr 6888X, 68040-68060 */ 
 

@@ -26,7 +26,7 @@
 #include "../common/config.h"
 #include "vdidefs.h"
 #include "lineaequ.inc"
-#include "asmdefs.h"
+#include "../common/asmdefs.h"
 
 #if BLITTER_SUPPORT /* whole file */
 

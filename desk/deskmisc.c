@@ -776,16 +776,16 @@ register char *dst;
 	return (dst);
 }
 
-char * g_name(file)
-char *file;
+const char *g_name(const char *file)
+const char *file;
 {
-	char *tail;
+	const char *tail;
 
 	tail = r_slash(file);
 	if (*tail == '\\')
 		tail++;
 
-	return (tail);
+	return tail;
 }
 
 

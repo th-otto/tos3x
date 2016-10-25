@@ -35,8 +35,6 @@
 
 #define PD	struct pd		/* process descriptor		*/
 #define UDA	struct uda		/* user stack data area		*/
-#define UDA2	struct uda2		/* user stack data area		*/
-#define UDA3	struct uda3		/* user stack data area		*/
 #define CDA	struct cdastr		/* console data area structure	*/
 #define QPB	struct qpb		/* queue parameter block	*/
 #define EVB 	struct evb		/* event block 			*/
@@ -84,41 +82,16 @@ CDA
 };
 
 
-#define STACK1_SIZE 500
-#define STACK2_SIZE 500
-#define STACK3_SIZE 500
-
 UDA
 {
 	/*    0 */	int16_t		u_insuper;		/* in supervisor flag	*/ 
 	/*    2 */	uint32_t	u_regs[15];		/* d0-d7, a0-a6			*/
 	/*   62 */	uint32_t	*u_spsuper;		/* supervisor stack 	*/
 	/*   66 */	uint32_t	*u_spuser;		/* user stack 			*/
-	/*   70 */	uint32_t	u_super[STACK1_SIZE];
+	/*   70 */	uint32_t	u_super[STACK_SIZE];
 	/* 2070 */	uint32_t	u_supstk;
 	/* 2074 */
 };
-
-UDA2
-{
-	int16_t		u_insuper;		/* in supervisor flag		*/ 
-	uint32_t	u_regs[15];		/* d0-d7, a0-a6			*/
-	uint32_t	*u_spsuper;		/* supervisor stack 		*/
-	uint32_t	*u_spuser;		/* user stack 			*/
-	uint32_t	u_super[STACK2_SIZE];
-	uint32_t	u_supstk;
-};
-
-UDA3
-{
-	int16_t	u_insuper;		/* in supervisor flag		*/ 
-	uint32_t	u_regs[15];		/* d0-d7, a0-a6			*/
-	uint32_t	*u_spsuper;		/* supervisor stack 		*/
-	uint32_t	*u_spuser;		/* user stack 			*/
-	uint32_t	u_super[STACK3_SIZE];
-	uint32_t	u_supstk;
-};
-
 
 #define NOCANCEL 0x0001		/* event is occuring 	*/
 #define COMPLETE 0x0002		/* event completed 	*/
@@ -172,7 +145,7 @@ PD
 	/*132 */	EVB	*p_evlist;	/* link to EVB			*/
 	/*136 */	EVB	*p_qdq;
 	/*140 */	EVB	*p_qnq;
-	/*144 */	int32_t	p_qaddr;	/* message queue pointer	*/
+	/*144 */	char *p_qaddr;	/* message queue pointer	*/
 	/*148 */	int16_t	p_qindex;	/* message queue index		*/
 	/*150 */	char	p_queue[QUEUE_SIZE];
 	/*406 */

@@ -61,15 +61,14 @@
 /* INCLUDE FILES
  * ================================================================
  */
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
-#include <mn_tools.h>
+#include "aes.h"
+
+#if SUBMENUS /* whole file */
+
+#include "gemlib.h"
+#include "taddr.h"
+#include "gsxdefs.h"
+#include "mn_tools.h"
 
 
 /* EXTERNS
@@ -178,7 +177,7 @@ PP(int16_t imenu;)								/* the menu object to attach       */
 		if ((ProcPtr = GetNewProc(id)) == NULL)	/* Create a new process node */
 			return (0);					/* Return a 0 index ( error ) */
 	}
-	if ((Index = GetNewID(ProcPtr)) == NULL)	/* Get an Index ID!          */
+	if ((Index = GetNewID(ProcPtr)) == 0)	/* Get an Index ID!          */
 		return (0);						/* No more- sorry            */
 
 	if ((IndexPtr = GetIndexPtr(ProcPtr, Index)) == NULL)	/* Get the pntr         */
@@ -264,7 +263,7 @@ PP(int16_t id;)								/* process id to use      */
 	register PNODE_PTR NewPtr;				/* Ptr to New Process     */
 
 	/* Allocate memory for a new process structure */
-	if ((NewPtr = (PNODE_PTR) dos_alloc((int32_t) sizeof(PNODE))) > NULL)
+	if ((NewPtr = (PNODE_PTR) dos_alloc((int32_t) sizeof(PNODE))) > (PNODE_PTR)NULL)
 	{
 		InitProcess(NewPtr, id);
 
@@ -315,7 +314,7 @@ PP(int16_t id;)								/* process id to free up */
 
 	if (IndexList)						/* Test the head list    */
 	{
-		if ((CurPtr = FindProcess(id)) > NULL)	/* Find the process!     */
+		if ((CurPtr = FindProcess(id)) > (PNODE_PTR)NULL)	/* Find the process!     */
 		{								/* YES! found the process */
 			if (CurPtr == IndexList)	/* Check if its the head */
 			{							/* Its the first structure, so */
@@ -384,7 +383,7 @@ CNODE_PTR GetNewCluster(NOTHING)
 {
 	register CNODE_PTR NewPtr;				/* Ptr to the new cluster */
 
-	if ((NewPtr = (CNODE_PTR) dos_alloc((int32_t) sizeof(CNODE))) > NULL)
+	if ((NewPtr = (CNODE_PTR) dos_alloc((int32_t) sizeof(CNODE))) > (CNODE_PTR)NULL)
 		InitCluster(NewPtr);
 	return (NewPtr);
 }
@@ -578,7 +577,7 @@ PP(BOOLEAN flag;)							/* See above description... */
 
 	if (ProcPtr)						/* Make sure its valid     */
 	{
-		if ((IndexPtr = GetIndexPtr(ProcPtr, index)) > NULL)	/* Get ptr to Index struct */
+		if ((IndexPtr = GetIndexPtr(ProcPtr, index)) > (INDEX_PTR)NULL)	/* Get ptr to Index struct */
 		{
 			if (!flag)					/* FALSE! - decrement first */
 			{
@@ -598,3 +597,5 @@ PP(BOOLEAN flag;)							/* See above description... */
 		}
 	}
 }
+
+#endif /* SUBMENUS */

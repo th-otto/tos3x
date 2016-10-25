@@ -4,14 +4,12 @@
  * Jun 19 1991	ml.	Created this.
  *
  */
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <taddr.h>
-#include <gemlib.h>
-#include <osbind.h>
+#include "aes.h"
+#include "gemlib.h"
+
+#define      Malloc(a)       gemdos(0x48,a)
+#define      Mfree(a)        gemdos(0x49,a)
+
 
 BOOLEAN brkrect PROTO((GRECT *trect, GRECT *brect, uint16_t *hv_pc));
 BOOLEAN chgrlist PROTO((uint16_t hv_pc, GRECT *cutrect, RLIST *oldrp, RLIST **rlist));
