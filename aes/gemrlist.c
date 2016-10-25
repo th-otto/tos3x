@@ -168,7 +168,7 @@ PP(VOIDPTR rlist;)							/* ptr (or address of ptr) to head of rect. list */
  *	      - return pointer to rectangle list if successful.
  *	      - return NULL if an error occurred.
  */
-RLIST *genrlist(uint16_t handle, uint16_t area)
+RLIST *genrlist(P(uint16_t) handle, P(uint16_t) area)
 PP(uint16_t handle;)							/* window handle */
 PP(int16_t area;)								/* WF_WORKXYWH: generate rectangle list of work area */
 			/* WF_CURRXYWH: generate rectangle list of whole window */
@@ -247,7 +247,7 @@ PP(int16_t area;)								/* WF_WORKXYWH: generate rectangle list of work area */
  *	     - return FALSE if the top rect does not break 
  *	       the bottom rect
  */
-BOOLEAN brkrect(GRECT *trect, GRECT *brect, uint16_t *hv_pc)
+BOOLEAN brkrect(P(GRECT *) trect, P(GRECT *) brect, P(uint16_t *) hv_pc)
 PP(GRECT *trect;)
 PP(GRECT *brect;)									/* ptrs to top and bottom rectangles */
 PP(uint16_t *hv_pc;)
@@ -347,7 +347,7 @@ PP(RLIST **rlist;)							/* addr of ptr to beginning of rectangle list */
  *	      the rectangle
  *	    - return NULL if no RLIST structure is available
  */
-static RLIST *mkrect(uint16_t pc, GRECT *trect, GRECT *brect)
+static RLIST *mkrect(P(uint16_t) pc, P(GRECT *) trect, P(GRECT *) brect)
 PP(uint16_t pc;)								/* flag */
 PP(register GRECT *trect;)						/* ptr to rectangle of window on top */
 PP(register GRECT *brect;)						/* ptr to rectangle of window at the bottom */

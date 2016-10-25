@@ -44,9 +44,13 @@
  *	-------------------------------------------------------------
  */
 
+#define __ASSEMBLER__ 1
+
 #include "../common/config.h"
 #include "aesdefs.h"
 #include "../common/asmdefs.h"
+
+#define CCODE 0
 
 /*
  *	Calls used in Crystal:
@@ -86,9 +90,6 @@
 	comm	_gl_graph,2
 	xdef	_gl_mouse
 	comm	_gl_mouse,2
-
-#define CCODE 0
-
 
 GSX_MFS	equ	 0*3
 V_OPNWK	equ	 1*3

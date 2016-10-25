@@ -215,6 +215,14 @@ bdos_tbase=BDOSTBASE
 bdos_tlen=BDOSTLEN
 bdos_dbase=BDOSDBASE
 bdos_dlen=BDOSDLEN
+aes_tbase=AESTBASE
+aes_tlen=AESTLEN
+aes_dbase=AESDBASE
+aes_dlen=AESDLEN
+desk_tbase=DESKTBASE
+desk_tlen=DESKTLEN
+desk_dbase=DESKDBASE
+desk_dlen=DESKDLEN
 
 rombase=BIOSTBASE
 
@@ -230,6 +238,14 @@ print "bdos_tbase=", bdos_tbase, "\n"
 print "bdos_tlen=", bdos_tlen, "\n"
 print "bdos_dbase=", bdos_dbase, "\n"
 print "bdos_dlen=", bdos_dlen, "\n"
+print "aes_tbase=", aes_tbase, "\n"
+print "aes_tlen=", aes_tlen, "\n"
+print "aes_dbase=", aes_dbase, "\n"
+print "aes_dlen=", aes_dlen, "\n"
+print "desk_tbase=", desk_tbase, "\n"
+print "desk_tlen=", desk_tlen, "\n"
+print "desk_dbase=", desk_dbase, "\n"
+print "desk_dlen=", desk_dlen, "\n"
 
 print "rombase=", rombase, "\n"
 

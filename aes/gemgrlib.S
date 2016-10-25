@@ -15,6 +15,13 @@
 * 
 *************************************************************************
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
+#define CCODE 0
 
 /*	GEMGRLIB.C	4/11/84 - 01/07/85	Gregg Morris		*/
 /*	Reg Opt		03/08/85 - 04/26/85	Derek Mui		*/

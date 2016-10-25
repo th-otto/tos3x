@@ -33,6 +33,13 @@
 *	Use MAC to assemble		6/28/90		D.Mui
 * assemble with MAS 900801 kbad
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
+
 *
 OB_FLAGS	equ	$8
 OB_STATE	equ	$a
@@ -651,9 +658,9 @@ _inf_sset:
 *				word	obj;
 * --
 	xdef _inf_sget
-_inf_sget:
+_inf_sget: ds.b 0
 	xdef _fs_sget
-_fs_sget:
+_fs_sget: ds.b 0
 	move.l	#OB_SPEC,a0	; a0 = offset to ob_spec
 	bsr	get_addr
 	move.l	(a0),a0		; a0 = ob_spec pointer

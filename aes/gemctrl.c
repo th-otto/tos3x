@@ -335,7 +335,10 @@ PP(int16_t my;)
 	int16_t title, item;
 	register int16_t owner, mesag;
 	LPTREE ptree;
-	int16_t pmenu, keyret;
+	int16_t pmenu;
+#if SUBMENUS
+	int16_t keyret;
+#endif
 
 	if (gl_mntree != 0 && inside(mx, my, &gl_rmnactv))
 	{
@@ -343,7 +346,11 @@ PP(int16_t my;)
 #if !BINEXACT
 		owner = 0;
 #endif
+#if SUBMENUS
 		if (mn_hdo(&title, &ptree, &pmenu, &item, &keyret))
+#else
+		if (mn_do(&title, &ptree, &pmenu, &item))
+#endif
 		{
 			/* check system menu: title == 1st menu && item == deskacc */
 			if ((gl_dacnt) && (title == THEDESK) && (item >= gl_dabase))

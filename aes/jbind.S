@@ -29,6 +29,14 @@
 *	Change in critical error to ignore error -15 3/1/91 D.Mui
 *	Install a desktop critical error handler	4/22/91	D.Mui
 
+
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
+
 * --Crystal function numbers.
 *
 CRYSTAL1 equ	200			; Call Crystal function.

@@ -32,6 +32,12 @@
 
 *	interface for rats to gsx on 68	K
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
 	text
 
 *
@@ -126,7 +132,7 @@ _far_mchange:
 _drawrat:
 	move.w	4(a7),d0		; xrat
 	move.w	6(a7),d1		; yrat
-	move.l	drwaddr,-(sp)
+	move.l	_drwaddr,-(sp)
 	rts
 
 *

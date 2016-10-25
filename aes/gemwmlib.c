@@ -699,7 +699,7 @@ PP(register int16_t *ow;)							/* return values */
  *	    - returns TRUE (1) if everything is fine
  *
  */
-int16_t wm_set(P(int16_t) handle, P(int16_t field), P(int16_t *) iw)
+int16_t wm_set(P(int16_t) handle, P(int16_t) field, P(int16_t *) iw)
 PP(register int16_t handle;)						/* window handle */
 PP(register int16_t field;)							/* flag to identify what info to be changed */
 PP(register int16_t *iw;)							/* values to change to */
@@ -989,7 +989,7 @@ PP(int code;)								/* flag for the call's function */
  *	including the Border Area and the Kind of window desired, calculate
  *	the result size of the window Work Area.
  */
-int16_t wm_calc(P(int16_t) type, P(int16_t) kind, P(int16_t) ix, P(int16_t) iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh)
+int16_t wm_calc(P(int16_t) type, P(int16_t) kind, P(int16_t) ix, P(int16_t) iy, P(int16_t) iw, P(int16_t) ih, P(int16_t *) ox, P(int16_t *) oy, P(int16_t *) ow, P(int16_t *) oh)
 PP(int16_t type;)								/* the type of calculation to perform */
 PP(int16_t kind;)								/* components present in the window */
 PP(int16_t ix;)									/* input x-coordinate of window */

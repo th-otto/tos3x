@@ -93,7 +93,7 @@ PP(TEDINFO *pted;)
 /*
  * AES #54 - form_center - Centre an object on the screen.
  */
-VOID ob_center(P(LPTREE) tree, P(GRECT) *pt)
+VOID ob_center(P(LPTREE) tree, P(GRECT *)pt)
 PP(LPTREE tree;)
 PP(GRECT *pt;)
 {

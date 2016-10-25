@@ -1,21 +1,21 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:19:44 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:19:44  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:23:45  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:30:25  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:19:44 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:19:44  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:23:45  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:30:25  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	DOS.H		4/18/84 - 9/07/84	Lee Lorenzen		*/
 
 #define STDIN  0x0000
@@ -24,6 +24,9 @@
 #define STDAUX 0x0003
 #define STDPRN 0x0004
 
+/*
+ *  PC/DOS Error Codes
+ */
 #define E_BADFUNC 1
 #define E_FILENOTFND 2
 #define E_PATHNOTFND 3
@@ -52,6 +55,18 @@
 #define F_GETMOD 0x0
 #define F_SETMOD 0x1
 
+
+/*
+ * GEMDOS error codes
+ */
+/* Access denied */
+#define E_ACCDN  -36
+/* No more files: Fsfirst/Fsnext */
+#define E_NMFIL  -49
+/* File not found */
+#define E_FILNF  -33
+
+#ifndef __ASSEMBLER__
 typedef struct exec_blk
 {
 	int16_t		eb_segenv;
@@ -66,3 +81,4 @@ typedef struct over_blk
 	int16_t		ob_seglod;
 	int16_t		ob_relfac;
 } OVER_BLK;
+#endif

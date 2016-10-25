@@ -113,7 +113,7 @@ PP(PARMBLK *fdata;)
  *	Routine to get or set object extension settings
  *
  */
-int16_t ob_sysvar(uint16_t mode, uint16_t which, uint16_t inval1, uint16_t inval2, int16_t *outval1, int16_t *outval2)
+int16_t ob_sysvar(P(uint16_t) mode, P(uint16_t) which, P(uint16_t) inval1, P(uint16_t) inval2, P(int16_t *) outval1, P(int16_t *) outval2)
 PP(uint16_t mode;)
 PP(uint16_t which;)
 PP(uint16_t inval1;)
@@ -275,7 +275,7 @@ PP(char *fmtstr;)
  *	Routine to load up and call a user defined object draw or change 
  *	routine.
  */
-int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, GRECT *pt, P(intptr_t) userblk, P(int16_t) curr_state, P(int16_t) new_state)
+int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt, P(intptr_t) userblk, P(int16_t) curr_state, P(int16_t) new_state)
 PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(GRECT *pt;)
@@ -906,7 +906,7 @@ PP(register int16_t sy;)
 /*
  *	Object draw routine that walks tree and draws appropriate objects.
  */
-VOID ob_draw(LPTREE tree, int16_t obj, int16_t depth)
+VOID ob_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) depth)
 PP(register LPTREE tree;)
 PP(int16_t obj;)
 PP(int16_t depth;)
@@ -1284,7 +1284,7 @@ PP(register int16_t *pyoff;)
  * numbers that you add to the x, y, w, h in the OBJECT
  * to get the clip rectangle.
  */
-VOID ob_dxywh(LPTREE tree, int16_t obj, int16_t *pdx, int16_t *pdy, int16_t *pdw, int16_t *pdh)
+VOID ob_dxywh(P(LPTREE) tree, P(int16_t) obj, P(int16_t *) pdx, P(int16_t *) pdy, P(int16_t *) pdw, P(int16_t *) pdh)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(int16_t *pdx;)
@@ -1591,7 +1591,7 @@ PP(CICONBLK *cicon;)
  *	number of planes is passed in and the source and destination MFDB's
  *	had that value set correctly.  Otherwise, it is the same code.
  */
-VOID gsx_cblt(int16_t *saddr, uint16_t sx, uint16_t sy, uint16_t swb, int16_t *daddr, uint16_t dx, uint16_t dy, uint16_t dwb, uint16_t w, uint16_t h, uint16_t rule, int16_t numplanes)
+VOID gsx_cblt(P(int16_t *) saddr, P(uint16_t) sx, P(uint16_t) sy, P(uint16_t) swb, P(int16_t *) daddr, P(uint16_t) dx, P(uint16_t) dy, P(uint16_t) dwb, P(uint16_t) w, P(uint16_t) h, P(uint16_t) rule, P(int16_t) numplanes)
 PP(int16_t *saddr;)
 PP(register uint16_t sx;)
 PP(register uint16_t sy;)

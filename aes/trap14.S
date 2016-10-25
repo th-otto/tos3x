@@ -41,6 +41,12 @@
 *	Fix at mediach at remove extra slash at the beginning 4/5/91 D.Mui
 
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
 	text
 
 	xdef _trp13

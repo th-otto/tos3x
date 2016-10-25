@@ -27,6 +27,12 @@
  *	-------------------------------------------------------------
  */
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
 #define CCODE 0
 
 *

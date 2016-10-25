@@ -38,6 +38,7 @@
 #include "aes.h"
 #include "gemlib.h"
 #include "taddr.h"
+#include "gsxdefs.h"
 
 
 LPTREE gl_mntree;
@@ -109,7 +110,7 @@ PP(int16_t chkdisabled;)						/* only if item enabled */
 	return (TRUE);
 }
 
-#if 0
+#if !SUBMENUS
 /*
  *	Routine to set and reset values of certain items if they
  *	are not the current item
@@ -156,7 +157,6 @@ PP(int16_t imenu;)
  *	Routine to pull a menu down.  This involves saving the data
  *	underneath the menu and drawing in the proper menu sub-tree.
  */
-#if !SUBMENUS
 int16_t menu_down(P(LPTREE) tree, P(int16_t) ititle)
 PP(register LPTREE tree;)
 PP(register int16_t ititle;)
@@ -177,7 +177,6 @@ PP(register int16_t ititle;)
 	}
 	return imenu;
 }
-#endif
 
 
 int16_t mn_do(P(int16_t *) ptitle, P(int16_t *) pitem)
@@ -192,7 +191,7 @@ PP(int16_t *pitem;)
 	uint16_t ev_which;
 	MOBLK p1mor, p2mor;
 	int16_t menu_state, rect;
-	int16_t rets[6];
+	int16_t lrets[6];
 	int16_t curstate;
 
 	tree = gl_mntree;
@@ -208,6 +207,9 @@ PP(int16_t *pitem;)
 
 	ctlmouse(TRUE);						/*  3/4/86      */
 
+#if !BINEXACT
+	rect = 0; /* quiet compiler */
+#endif
 	while (!done)
 	{
 		mnu_flags = MU_BUTTON | MU_M1;
@@ -236,7 +238,7 @@ PP(int16_t *pitem;)
 		}
 		rect_change(tree, &p1mor, rect, flag);
 
-		ev_which = ev_multi(mnu_flags, &p1mor, &p2mor, 0x0L, buparm, 0x0L, &rets[0]);
+		ev_which = ev_multi(mnu_flags, &p1mor, &p2mor, 0x0L, buparm, 0x0L, &lrets[0]);
 
 		if (ev_which & MU_BUTTON)
 		{
@@ -252,7 +254,7 @@ PP(int16_t *pitem;)
 			last_item = cur_item;
 			last_menu = cur_menu;
 			/* see if over the bar  */
-			cur_title = ob_find(tree, THEACTIVE, 1, rets[0], rets[1]);
+			cur_title = ob_find(tree, THEACTIVE, 1, lrets[0], lrets[1]);
 			curstate = LWGET(OB_STATE(cur_title));
 			if ((cur_title != NIL) && (curstate != DISABLED))
 			{
@@ -263,7 +265,7 @@ PP(int16_t *pitem;)
 				cur_title = last_title;
 				if (last_menu != NIL)
 				{
-					cur_item = ob_find(tree, last_menu, 1, rets[0], rets[1]);
+					cur_item = ob_find(tree, last_menu, 1, lrets[0], lrets[1]);
 					menu_state = (cur_item != NIL) ? OUTITEM : INBARECT;
 				} else
 				{

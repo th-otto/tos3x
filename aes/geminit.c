@@ -468,7 +468,9 @@ VOID aesmain(NOTHING)
 		LLSET(ad_stdesk + 12, 0x00001143L);
 
 	wm_init();
+#if SUBMENUS
 	mn_init();
+#endif
 
 	ini_fsel();
 
@@ -539,7 +541,9 @@ VOID aesmain(NOTHING)
 	dos_free((VOIDPTR)drawstk);
 
 	gsx_mfree();
+#if SUBMENUS
 	mn_new();
+#endif
 
 	cli();
 	giveerr();

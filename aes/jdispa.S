@@ -31,6 +31,13 @@
 *	Use MAC to assemble	6/28/90		D.Mui
 * assemble with MAS 900801 kbad
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
+
 	text
 
 longframe	equ $59e			; BIOS system variable...

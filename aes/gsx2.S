@@ -34,6 +34,12 @@
 *	Use MAC to assemble			6/28/90		D.Mui
 * assemble with MAS 900801 kbad
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
 
 	xdef	_gsx2
 _gsx2:
@@ -51,9 +57,9 @@ _gsx2:
 *	sp+08	d1
 
 	xdef	_MUL_DIV
-_MUL_DIV:
+_MUL_DIV: ds.b 0
 	xdef	_mul_div
-_mul_div:
+_mul_div: ds.b 0
 
 	move.w	6(sp),d0	;	 m2
 	add.w	d0,d0		;      2*m2
@@ -83,51 +89,51 @@ md_1:	subq.w	#1,d0		;  ((m1*2*m2)/d1)-1
 
 
 	xdef	_i_ptsin
-_i_ptsin:
+_i_ptsin: ds.b 0
 
 	move.l	4(sp),pioff
 	rts
 
 
 	xdef	_i_intin
-_i_intin:
+_i_intin: ds.b 0
 
 	move.l	4(sp),iioff
 	rts
 
 
 	xdef	_i_ptsout
-_i_ptsout:
+_i_ptsout: ds.b 0
 
 	move.l	4(sp),pooff
 	rts
 
 
 	xdef	_i_intout
-_i_intout:
+_i_intout: ds.b 0
 
 	move.l	4(sp),iooff
 	rts
 
 
 	xdef	_i_ptr
-_i_ptr:
+_i_ptr: ds.b 0
 	xdef	_i_lptr1
-_i_lptr1:
+_i_lptr1: ds.b 0
 
 	move.l	4(sp),_contrl+14
 	rts
 
 
 	xdef	_i_ptr2
-_i_ptr2:
+_i_ptr2: ds.b 0
 
 	move.l	4(sp),_contrl+18
 	rts
 
 
 	xdef	_m_lptr2
-_m_lptr2:
+_m_lptr2: ds.b 0
 
 	move.l	4(sp),a0
 	move.l	_contrl+18,(a0)

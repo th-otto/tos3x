@@ -460,7 +460,7 @@ int16_t fm_do PROTO((LPTREE tree, int16_t start_fld));
 VOID fm_dial PROTO((int16_t fmd_type, GRECT *pi, GRECT *pt));
 int16_t fm_show PROTO((int16_t string, int16_t *pwd, int16_t level));
 int16_t eralert PROTO((int16_t n, int16_t d));
-int16_t fm_error PROTO((int16_t n));
+BOOLEAN fm_error PROTO((int16_t n));
 
 
 /*

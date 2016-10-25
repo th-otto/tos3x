@@ -50,6 +50,12 @@
 *	Change the uda_size	7/16/92		D.Mui
 *	Added default res for sparrow 7/21/92	D.Mui
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
 	text
 
 uda_size	equ	2074		* 74 + STACK_SIZE of 500 x 4
@@ -104,7 +110,7 @@ gemstart:
 	move.l	$4c2,d0			* get drvbits
 	and.l	#$4,d0			* drive C there?
 	beq.b	not_ours		* nope, leave the env alone
-	cmp.l	#'PATH',(a0)+		* check 1st longword
+	cmp.l	#'PATH',(a0)+		* check 1st longword ; BUG: might be unaligned access
 	bne.b	not_ours
 	cmp.l	#$3d00413a,(a0)+	* "=0A:"
 	bne.b	not_ours

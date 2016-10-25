@@ -508,7 +508,7 @@ PP(register SHFIND_PROC routine;)
 	xstrpcpy(pname, &tmpname[0]);			/* copy it      */
 
 	pname = sh_name(ad_shcmd);			/* first look in program's dir  */
-	path = (int16_t) (pname - ad_shcmd);
+	path = (int16_t) ((intptr_t)pname - (intptr_t)ad_shcmd);
 	pname = &tmpname[0];
 	if (path)
 	{									/* if a path exists */

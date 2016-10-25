@@ -37,6 +37,13 @@
  *     and now its $660 text, 8 bss, and thats better??
  */
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+#include "dos.h"
+
 
 *----------------
 *
@@ -47,28 +54,6 @@
 	xdef	_DOS_ERR
 	comm _DOS_AX,2
 	comm _DOS_ERR,2
-
-*----------------
-*
-*  PC/DOS Error Codes
-*
-E_BADFUNC	equ 1
-E_FILENOTFND	equ 2
-E_PATHNOTFND	equ 3
-E_NOHANDLES	equ 4
-E_NOACCESS	equ 5
-E_BADHANDLE	equ 6
-E_MEMBLKERR	equ 7
-E_NOMEMORY	equ 8
-E_BADMEMBLK	equ 9
-E_BADENVIR	equ 10
-E_BADFORMAT	equ 11
-E_BADACCESS	equ 12
-E_BADDATA	equ 13
-E_BADDRIVE	equ 15
-E_NODELDIR	equ 16
-E_NOTDEVICE	equ 17
-E_NOFILES	equ 18
 
 
 *----------------

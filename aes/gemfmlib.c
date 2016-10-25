@@ -36,6 +36,7 @@
 #include "gemlib.h"
 #include "taddr.h"
 #include "gemusa.h"
+#include "dos.h"
 
 #define FORWARD 0
 #define BACKWARD 1
@@ -443,7 +444,7 @@ PP(int16_t d;)									/* d = drive code, 0=A  */
 	/* which alert */
 #if BINEXACT
 	/* BUG: passing the address of the pointer */
-	return fm_show(ml_alrt[n], (ml_pwlv[n] & 0xff00) ? &pdrive_let : NULL, ml_pwlv[n] & 0x00ff) != 1;
+	return fm_show(ml_alrt[n], (ml_pwlv[n] & 0xff00) ? &pdrive_let : (int16_t **)0, ml_pwlv[n] & 0x00ff) != 1;
 #else
 	return fm_show(ml_alrt[n], (ml_pwlv[n] & 0xff00) ? pdrive_let : NULL, ml_pwlv[n] & 0x00ff) != 1;
 #endif
@@ -453,38 +454,38 @@ PP(int16_t d;)									/* d = drive code, 0=A  */
 /*
  * AES #53 - form_error - Display an alert box form for TOS errors. 
  */
-int16_t fm_error(P(int16_t) n)
+BOOLEAN fm_error(P(int16_t) n)
 PP(int16_t n;)									/* n = dos error number */
 {
 	register int16_t string;
 
 	if (n > 63)							/* nothing for xtal errors */
-		return (FALSE);
+		return FALSE;
 
 	switch (n)
 	{
-	case 2:							/* file not found   */
-	case 18:							/* no more files    */
-	case 3:							/* path not found   */
+	case E_FILENOTFND:				/* file not found   */
+	case E_NOFILES:					/* no more files    */
+	case E_PATHNOTFND:				/* path not found   */
 		string = ALRT18ERR;
 		break;
-	case 4:							/* too many open files  */
+	case E_NOHANDLES:				/* too many open files  */
 		string = ALRT04ERR;
 		break;
-	case 5:							/* access denied    */
+	case E_NOACCESS:				/* access denied    */
 		string = ALRT05ERR;
 		break;
-	case 8:							/* insufficient memory  */
-	case 10:						/* invalid environmeny  */
-	case 11:						/* invalid format   */
+	case E_NOMEMORY:				/* insufficient memory  */
+	case E_BADENVIR:				/* invalid environmeny  */
+	case E_BADFORMAT:				/* invalid format   */
 		string = ALRT08ERR;
 		break;
-	case 15:						/* invalid drive    */
+	case E_BADDRIVE:				/* invalid drive    */
 		string = ALRT15ERR;
 		break;
 	default:
 		string = ALRTXXERR;
 	}
 
-	return fm_show(string, (string == ALRTXXERR) ? &n : NULL, 1) != 1;
+	return fm_show(string, string == ALRTXXERR ? &n : (int16_t *)&n, 1) != 1;
 }

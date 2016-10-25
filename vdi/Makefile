@@ -40,7 +40,7 @@ vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/com
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single:
-	$(LD) -s -l -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_OBJS)
+	$(LD) -s -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_OBJS)
 
 vdi.rel: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_OBJS) vdi.lnk $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(RM) $@

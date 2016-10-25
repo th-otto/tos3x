@@ -105,7 +105,7 @@ int16_t rs_readit PROTO((intptr_t pglobal, const char *rsfname));
  *	If column or width is 80 then convert to rightmost column or 
  *	full screen width. 
  */
-VOID fix_chpos(intptr_t pfix, int16_t ifx)
+VOID fix_chpos(P(intptr_t) pfix, P(int16_t) ifx)
 PP(intptr_t pfix;)
 PP(int16_t ifx;)
 {

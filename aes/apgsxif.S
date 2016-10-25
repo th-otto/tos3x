@@ -36,6 +36,12 @@
 * 	Assemble with MAS 900801 kbad
 *	Change at gsx_start to do inquire of number planes 7/7/92	D.Mui
 
+#define __ASSEMBLER__ 1
+
+#include "../common/config.h"
+#include "aesdefs.h"
+#include "../common/asmdefs.h"
+
 #define CCODE 0
 
 	xdef	_gl_width

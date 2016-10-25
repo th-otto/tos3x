@@ -91,7 +91,9 @@ int16_t ap_exit(NOTHING)
 
 	all_run();
 	release();
+#if SUBMENUS
 	mn_free(rlr->p_pid);
+#endif
 	return TRUE;
 }
 

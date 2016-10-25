@@ -82,7 +82,7 @@ PP(QPB *m;)
 }
 
 
-VOID aqueue(P(BOOLEAN) isqwrite, P(EVB *) e, intptr_t lm)
+VOID aqueue(P(BOOLEAN) isqwrite, P(EVB *) e, P(intptr_t) lm)
 PP(BOOLEAN isqwrite;)
 PP(register EVB *e;)
 PP(intptr_t lm;)
