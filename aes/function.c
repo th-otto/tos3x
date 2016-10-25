@@ -5,12 +5,12 @@
 #include "obdefs.h"
 
 
+#if !MC68K /* MC68K has optimized versions of this in optimize.S */
 
 /* 	Returns a byte pointer pointing to the matched byte or
-*	the end of the string.
-*/
-
-const char *scasb(const char *p, char b)
+ *	the end of the string.
+ */
+const char *scasb(P(const char *) p, P(char) b)
 PP(register const char *p;)
 PP(register char b;)
 {
@@ -21,31 +21,28 @@ PP(register char b;)
 
 
 
-
 /* 	Routine to set the variables x,y,w,h to the values found
-*	in an x,y,w,h block (grect)
-*/
-
-VOID r_get(P(int16_t *) pxywh, P(int16_t *) px, P(int16_t *) py, P(int16_t *) pw, P(int16_t *) ph)
-PP(register int16_t *pxywh;)
+ *	in an x,y,w,h block (grect)
+ */
+VOID r_get(P(const GRECT *) gr, P(int16_t *) px, P(int16_t *) py, P(int16_t *) pw, P(int16_t *) ph)
+PP(const GRECT *gr;)
 PP(int16_t *px;)
 PP(int16_t *py;)
 PP(int16_t *pw;)
 PP(int16_t *ph;)
 {
-	*px = pxywh[0];
-	*py = pxywh[1];
-	*pw = pxywh[2];
-	*ph = pxywh[3];
+	*px = gr->g_x;
+	*py = gr->g_y;
+	*pw = gr->g_w;
+	*ph = gr->g_h;
 }
 
 
 /* 	Routine to set a x,y,w,h block to the x,y,w,h  
  *	values passed in.
  */
-
-VOID r_set(P(GRECT *) pxywh, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
-PP(register int16_t *pxywh;)
+VOID r_set(P(GRECT *) gr, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
+PP(register int16_t *gr;)
 PP(int16_t x;)
 PP(int16_t y;)
 PP(int16_t w;)
@@ -58,8 +55,9 @@ PP(int16_t h;)
 }
 
 
-/* 	Copy src xywh block to dest xywh block.		*/
-
+/*
+ * Copy src xywh block to dest xywh block.
+ */
 VOID rc_copy(P(const GRECT *) src, P(GRECT *) dst)
 PP(register const GRECT *src;)
 PP(register GRECT *dst;)
@@ -68,44 +66,45 @@ PP(register GRECT *dst;)
 }
 
 
-/* 	Return true if the x,y position is within the grect	*/
-
+/*
+ * Return true if the x,y position is within the grect.
+ */
 BOOLEAN inside(P(int16_t) x, P(int16_t) y, P(const GRECT *) pt)
 PP(register int16_t x;)
 PP(register int16_t y;)
 PP(register const GRECT *pt;)
 {
 	if ((x >= pt->g_x) && (y >= pt->g_y) && (x < pt->g_x + pt->g_w) && (y < pt->g_y + pt->g_h))
-		return (TRUE);
-	else
-		return (FALSE);
+		return TRUE;
+	return FALSE;
 }
 
 
-
-/* 	Returns true if the two grects are equal.	*/
-
-int16_t rc_equal(P(const int16_t *) p1, P(const int16_t *) p2)
-PP(register const int16_t *p1;)
-PP(register const int16_t *p2;)
+/*
+ * Returns true if the two grects are equal.
+ */
+BOOLEAN rc_equal(P(const GRECT *) prc1, P(const GRECT *) prc2)
+PP(const int16_t *prc1;)
+PP(const int16_t *prc2;)
 {
-	register int16_t i;
-
-	for (i = 0; i < 4; i++)
+	const int16_t *p1 = &prc1->g_x;
+	const int16_t *p2 = &prc2->g_x;
+	register int count = 4;
+	
+	while (--count >= 0)
 	{
 		if (*p1++ != *p2++)
-			return (FALSE);
+			return FALSE;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 
 /* 	Returns the intersection of two rectangles in ptr2.
-*	Returns true if there was an intersection where the width
-*	is greater than x and the height is greater than y.
-*/
-
-int16_t rc_intersect(P(const GRECT *) p1, P(GRECT *) p2)
+ *	Returns true if there was an intersection where the width
+ *	is greater than x and the height is greater than y.
+ */
+BOOLEAN rc_intersect(P(const GRECT *) p1, P(GRECT *) p2)
 PP(register const GRECT *p1;)
 PP(register GRECT *p2;)
 {
@@ -119,13 +118,14 @@ PP(register GRECT *p2;)
 	p2->g_y = ty;
 	p2->g_w = tw - tx;
 	p2->g_h = th - ty;
-	return ((tw > tx) && (th > ty));
+	return (tw > tx) && (th > ty);
 }
 
 
-/* 	Returns the union of two rectangles in ptr2.	*/
-/*	Don't pass in 0s in x,y,w,h 			*/
-
+/*
+ * Returns the union of two rectangles in ptr2.
+ *	Don't pass in 0s in x,y,w,h
+ */
 VOID rc_union(P(const GRECT *) p1, P(GRECT *) p2)
 PP(register const GRECT *p1;)
 PP(register GRECT *p2;)
@@ -144,10 +144,9 @@ PP(register GRECT *p2;)
 
 
 /* 	Routine to constrain a box within another box.  This is done by
-*	seting the x,y of the inner box to remain within the
-*	constraining box.
-*/
-
+ *	seting the x,y of the inner box to remain within the
+ *	constraining box.
+ */
 VOID rc_constrain(P(const GRECT *) pc, P(GRECT *) pt)
 PP(register const GRECT *pc;)
 PP(register GRECT *pt;)
@@ -165,8 +164,9 @@ PP(register GRECT *pt;)
 
 
 
-/* 	move bytes from source to dest for a count of N	*/
-
+/*
+ * move bytes from source to dest for a count of N
+ */
 VOID movs(P(int16_t) num, P(const char *) ps, P(char *) pd)
 PP(register int16_t num;)
 PP(register const char *ps;)
@@ -178,56 +178,61 @@ PP(register char *pd;)
 }
 
 
-/* 	Returns minimum value of two words	*/
-
+/*
+ * Returns minimum value of two words
+ */
 int16_t min(P(int16_t) a, P(int16_t) b)
 PP(int16_t a;)
 PP(int16_t b;)
 {
-	return ((a < b) ? a : b);
+	return a < b ? a : b;
 }
 
 
-/* 	Returns maximum value of two words	*/
-
+/*
+ * Returns maximum value of two words
+ */
 int16_t max(P(int16_t) a, P(int16_t) b)
 PP(int16_t a;)
 PP(int16_t b;)
 {
-	return ((a > b) ? a : b);
+	return a > b ? a : b;
 }
 
 
 
-/* 	Copy the byte passed in to the dest pointer for a count of N	*/
-
-VOID bfill(P(int16_t) num, P(char) bval, P(char *) addr)
+/*
+ * Copy the byte passed in to the dest pointer for a count of N
+ */
+VOID bfill(P(int16_t) num, P(char) bval, P(VOIDPTR) addr)
 PP(register int16_t num;)
-register char bval;)
-PP(register char *addr;)
+PP(register char bval;)
+PP(VOIDPTR addr;)
 {
+	register char *p = addr;
 	while (num)
 	{
-		*addr++ = bval;
+		*p++ = bval;
 		num--;
 	}
 }
 
 
-/* 	Return upper case value		*/
-
+/*
+ * Return upper case value.
+ */
 int toupper(P(int) ch)
 PP(register char ch;)
 {
 	if ((ch >= 'a') && (ch <= 'z'))
-		return (ch - 32);
-	else
-		return (ch);
+		return ch - 32;
+	return ch;
 }
 
 
-/*	Length of a string	*/
-
+/*
+ * Length of a string
+ */
 size_t strlen(P(const char *) p1)
 PP(register const char *p1;)
 {
@@ -241,68 +246,65 @@ PP(register const char *p1;)
 }
 
 
-int strcmp(P(const char *) p1, P(const char *) p2)
+BOOLEAN streq(P(const char *) p1, P(const char *) p2)
 PP(register const char *p1;)
 PP(register const char *p2;)
 {
 	while (*p1)
 	{
 		if (*p1++ != *p2++)
-			return (FALSE);
+			return FALSE;
 	}
 	if (*p2)
-		return (FALSE);
-	return (TRUE);
+		return FALSE;
+	return TRUE;
 }
 
 
 
-char *xstrpcpy(ps, pd)
-register const char *ps;
-register char *pd;
+char *xstrpcpy(P(const char *) ps, P(char *) pd)
+PP(register const char *ps;)
+PP(register char *pd;)
 {
-	while (*pd++ = *ps++)
+	while ((*pd++ = *ps++) != '\0')
 		;
 	return pd;
 }
 
 
 /* 	copy the src to destination until we are out of characters
-*	or we get a char match.
-*/
-
-char * strscn(P(const char *) ps, P(char *) pd, P(char) stop)
+ *	or we get a char match.
+ */
+char *strscn(P(const char *) ps, P(char *) pd, P(char) stop)
 PP(register const char *ps;)
 PP(register char *pd;)
 PP(register char stop;)
 {
 	while ((*ps) && (*ps != stop))
 		*pd++ = *ps++;
-	return (pd);
+	return pd;
 }
 
 
 char *xstrpcat(P(const char *) ps, P(char *) pd)
-PP(register const char *ps;
+PP(register const char *ps;)
 PP(register char *pd;)
 {
 	while (*pd)
 		pd++;
-	while (*pd++ = *ps++)
+	while ((*pd++ = *ps++) != '\0')
 		;
 	return (pd);
 }
 
 
-
 /* 	This is the true version of strcmp. Shall we remove the
-*	other -we shall see!!!
-*	Returns	- <0 if(str1<str2), 0 if(str1=str2), >0 if(str1>str2)
-*/
-
+ *	other -we shall see!!!
+ *	Returns	- <0 if(str1<str2), 0 if(str1=str2), >0 if(str1>str2)
+ */
 int16_t strchk(P(const char *) s, P(const char *) t)
 PP(register const char *s;)
-PP(register const char *s;)
+PP(register const char *t;)
 {
 	register int16_t i;
 
@@ -316,53 +318,53 @@ PP(register const char *s;)
 
 
 /*
-*	Strip out period and turn into raw data.
-*/
-VOID fmt_str(P(const char *) instr, P(char *) outstr)
-PP(register const char *instr;)
-PP(register char *outstr;)
+ *	Strip out period and turn into raw data.
+ */
+VOID fmt_str(P(const char *) in_str, P(char *) out_str)
+PP(register const char *in_str;)
+PP(register char *out_str;)
 {
 	int16_t i;
 
 	for (i = 0; i < 8; i++)
 	{
-		if ((*instr) && (*instr != '.'))
-			*outstr++ = *instr++;
+		if ((*in_str) && (*in_str != '.'))
+			*out_str++ = *in_str++;
 		else
 		{
-			if (*instr)
-				*outstr++ = ' ';
+			if (*in_str)
+				*out_str++ = ' ';
 			else
 				break;
 		}
 	}
 
-	if (*instr)							/* must be a dot    */
-		instr++;
+	if (*in_str)							/* must be a dot    */
+		in_str++;
 
-	while (*instr)
-		*outstr++ = *instr++;
+	while (*in_str)
+		*out_str++ = *in_str++;
 
-	*outstr = NULL;
+	*out_str = '\0';
 }
 
 
 /*
  *	Insert in period and make into true data.
  */
-VOID unfmt_str(P(const char *) instr, P(char *) outstr)
-PP(register const char *instr;)
-PP(register char *outstr;)
+VOID unfmt_str(P(const char *) in_str, P(char *) out_str)
+PP(register const char *in_str;)
+PP(register char *out_str;)
 {
 	int16_t i;
 	char temp;
 
 	for (i = 0; i < 8; i++)
 	{
-		temp = *instr++;
+		temp = *in_str++;
 
 		if ((temp) && (temp != ' '))
-			*outstr++ = temp;
+			*out_str++ = temp;
 		else
 		{
 			if (!temp)					/* at the end ? */
@@ -370,14 +372,14 @@ PP(register char *outstr;)
 		}
 	}
 
-	if (*instr)							/* any extension ? */
+	if (*in_str)							/* any extension ? */
 	{
-		*outstr++ = '.';
-		while (*instr)
-			*outstr++ = *instr++;
+		*out_str++ = '.';
+		while (*in_str)
+			*out_str++ = *in_str++;
 	}
   u_1:
-	*outstr = NULL;
+	*out_str = '\0';
 }
 
 
@@ -385,8 +387,8 @@ PP(register char *outstr;)
  *	ptext.  Next copy the string located at the ob_spec long to the
  *	callers pstr.  Finally copy the length of the tedinfo string
  *	to the callers ptxtlen.
+ *  obj must reference a TEDINFO object.
  */
-
 VOID fs_sset(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr, P(char **) ptext, P(int16_t *) ptxtlen)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -394,45 +396,44 @@ PP(char *pstr;)
 PP(register char **ptext;)
 PP(int16_t *ptxtlen;)
 {
-	register int32_t spec;
+	register intptr_t spec;
 
-	*ptext = LLGET(spec = LLGET(OB_SPEC(obj)));
+	*ptext = (char *)LLGET(spec = LLGET(OB_SPEC(obj)));
 	LSTCPY(*ptext, pstr);
 	*ptxtlen = LWGET(spec + 24);
 }
 
 
 VOID inf_sset(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr)
-P(LPTREE tree;)
-P(int16_t obj;)
-P(char *pstr;)
+PP(LPTREE tree;)
+PP(int16_t obj;)
+PP(char *pstr;)
 {
-	int32_t text;
+	char *text;
 	int16_t txtlen;
 
 	fs_sset(tree, obj, ADDR(pstr), &text, &txtlen);
 }
 
 
-VOID fs_sget(P(LPTREE) tree, P(int16_t) obj, P(intptr_t) pstr)
+VOID fs_sget(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr)
 PP(LPTREE tree;)
 PP(int16_t obj;)
-PP(intptr_t pstr;)
+PP(char *pstr;)
 {
-	int32_t ptext;
+	char *ptext;
 
-	ptext = LLGET(LLGET(OB_SPEC(obj)));
+	ptext = (char *)LLGET(LLGET(OB_SPEC(obj)));
 	LSTCPY(pstr, ptext);
 }
 
 
 
 /* 	inf_sget, fs_sget
-* 	This routine copies the tedinfo string to the dst pointer.
-*	The function inf_sget was the same as fs_sget.
-*/
-
-VOID inf_sget(P(LPTREE) tree, P(int16_t) obj, P(char * pstr)
+ * 	This routine copies the tedinfo string to the dst pointer.
+ *	The function inf_sget was the same as fs_sget.
+ */
+VOID inf_sget(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr)
 PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(char *pstr;)
@@ -442,11 +443,10 @@ PP(char *pstr;)
 
 
 /* 	This routine is used to set an objects flags based on 
-*	the outcome of a 'and' operation.  The word is set to
-*	the 'truestate' if the operation is true else set to
-*	'falsestate'
-*/
-
+ *	the outcome of a 'and' operation.  The word is set to
+ *	the 'truestate' if the operation is true else set to
+ *	'falsestate'
+ */
 VOID inf_fldset(P(LPTREE) tree, P(int16_t) obj, P(uint16_t) testfld, P(uint16_t) testbit, P(uint16_t) truestate, P(uint16_t) falsestate)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -460,9 +460,8 @@ PP(uint16_t falsestate;)
 
 
 /* inf_gindex	for each object from baseobj for N objects return the object
-*		that is selected or -1 if no objects are selected.
-*/
-
+ *		that is selected or -1 if no objects are selected.
+ */
 int16_t inf_gindex(P(LPTREE) tree, P(int16_t) baseobj, P(int16_t) numobj)
 PP(LPTREE tree;)
 PP(int16_t baseobj;)
@@ -483,7 +482,6 @@ PP(int16_t numobj;)
  *	Return 0 if cancel was selected, 1 if okay was selected, -1 if
  *	nothing was selected.
  */
-
 int16_t inf_what(P(LPTREE) tree, P(int16_t) ok, P(int16_t) cncl)
 PP(register LPTREE tree;)
 PP(register int16_t ok;)
@@ -503,10 +501,10 @@ PP(register int16_t cncl;)
 
 
 
-int16_t merge_str(P(char *) pdst, P(char *) ptmp, P(uint16_t *) parms)
+int16_t merge_str(P(char *) pdst, P(char *) ptmp, P(int16_t *) parms)
 PP(register char *pdst;)
 PP(register char *ptmp;)
-PP(uint16_t *parms;)
+PP(int16_t *parms;)
 {
 	register int16_t num;
 	int16_t do_value;
@@ -541,7 +539,7 @@ PP(uint16_t *parms;)
 				do_value = TRUE;
 				break;
 			case 'S':
-				psrc = (char *) parms[num];
+				psrc = (char *) (HW(parms[num]) | LW(parms[num+1]));
 				num += 2;
 				while (*psrc)
 					*pdst++ = *psrc++;
@@ -567,7 +565,7 @@ PP(uint16_t *parms;)
 			}
 		}
 	}
-	*pdst = NULL;
+	*pdst = '\0';
 }
 
 
@@ -602,15 +600,27 @@ PP(register const char *ptest;)
 			}
 		}
 	}
-	/* eat up remaining     */
-	/*   wildcard chars */
+	/* eat up remaining wildcard chars */
 	while ((*pwild == '*') || (*pwild == '?') || (*pwild == '.'))
 		pwild++;
-	/* if any part of wild- */
-	/*   card or test is    */
-	/*   left then no match */
+	/* if any part of wildcard or test is left then no match */
 	if ((*pwild) || (*ptest))
-		return (FALSE);
-	else
-		return (TRUE);
+		return FALSE;
+	return TRUE;
 }
+
+#endif
+
+
+#ifdef __GNUC__
+/*
+ * a reference to this might be generated for structure assignments
+ */
+VOIDPTR memcpy PROTO((VOIDPTR dst, const VOIDPTR src, size_t len));
+
+VOIDPTR memcpy(P(VOIDPTR) dst, P(const VOIDPTR) src, P(size_t) len)
+{
+	LBCOPY(dst, src, len);
+	return dst;
+}
+#endif

@@ -50,6 +50,13 @@
 #include "aesdefs.h"
 #include "../common/asmdefs.h"
 
+#if BINEXACT
+#  ifdef __GNUC__
+#    undef BINEXACT
+#    define BINEXACT 0
+#  endif
+#endif
+
 #define CCODE 0
 
 /*
@@ -86,8 +93,8 @@
 	comm	_gl_moff,2
 	xdef	_gl_mlen
 	comm	_gl_mlen,4
-	xdef	_gl_graph
-	comm	_gl_graph,2
+	xdef	_gl_graphic
+	comm	_gl_graphic,2
 	xdef	_gl_mouse
 	comm	_gl_mouse,2
 
@@ -132,7 +139,7 @@ _gsx_mfree:
 	tst.l	_gl_tmp			; Fix 8/3/92
 	beq	g1
 	move.l	_gl_tmp,-(sp)		; Fix 1/20/87
-	jsr	_dos_fre
+	jsr	_dos_free
 	addq.l	#4,sp
 g1:
 	rts
@@ -181,7 +188,7 @@ _gsx_ncode:
 	addq.l	#2,a1
 	move.w	(a0)+,(a1)
 	addq.l	#6,a1
-	move.w	_gl_handl,(a1)
+	move.w	_gl_handle,(a1)
 
 	jmp	_gsx2
 
@@ -256,11 +263,11 @@ VOID gsx_graphic(BOOLEAN tographic)
 	}
 }
 #endif
-	xdef _gsx_grap
-_gsx_grap:
+	xdef _gsx_graphic
+_gsx_graphic:
 
 	move.w	4(sp),d0
-	lea	_gl_graph,a1
+	lea	_gl_graphic,a1
 	cmp.w	(a1),d0
 	beq	L8
 
@@ -308,8 +315,8 @@ VOID gsx_escapes(WORD esc_code)
 	gsx_ncode(ESCAPE, 0, 0);
 }
 #endif
-	xdef _gsx_esca
-_gsx_esca:
+	xdef _gsx_escapes
+_gsx_escapes:
 
 	move.w	4(sp),d0
 
@@ -345,7 +352,7 @@ L209:
 	move.w	-(a0),(a2)		; intin[0] <- screen handle
 
 	pea	_gl_ws
-	pea	_gl_handl
+	pea	_gl_handle
 	pea	(a2)
 			
 *	Check for sparrow machine	
@@ -395,8 +402,8 @@ L18:	cmp.w	#319,(a1)+	; check for x = 320 ?
 
 L18_1:	move.w	#6,(a2)		; No it is 320 x 480
 
-L22:	clr.w	_gl_rsch	; gl_rschange  <- FALSE
-	move.w	#1,_gl_graph	; gl_graphic   <- TRUE
+L22:	clr.w	_gl_rschange	; gl_rschange  <- FALSE
+	move.w	#1,_gl_graphic	; gl_graphic   <- TRUE
 	rts
 
 
@@ -407,8 +414,8 @@ VOID gsx_wsclose(NOTHING)
 	gsx_ncode(CLOSE_WORKSTATION, 0, 0);
 }
 #endif
-	xdef _gsx_wscl
-_gsx_wscl:
+	xdef _gsx_wsclose
+_gsx_wsclose:
 
 	moveq.l	#002,d0			; code 002 => v_clswk
 	bra	vdi_short
@@ -521,7 +528,7 @@ _bb_set:
 	move.l	-(a0),-(sp)		; push *psrc
 	pea	_ptsin			; push *ptsin
 	move.w	#3,-(sp)		; replace mode (S_ONLY)
-	bsr	_vro_cpyf
+	bsr	_vro_cpyfm
 
 	lea	26(sp),sp		; clean the stack up from earlier calls
 
@@ -687,8 +694,8 @@ WORD gsx_button(NOTHING)
 	return (button);
 }
 #endif
-	xdef _gsx_butt
-_gsx_butt:
+	xdef _gsx_button
+_gsx_button:
 
 	move.w	_button,d0
 	rts
@@ -952,8 +959,8 @@ VOID vro_cpyfm(WORD wr_mode, WORD *pxyarray, WORD *psrcMFDB, WORD *pdesMFDB)
 	i_ptsin(ptsin);
 }
 #endif
-	xdef _vro_cpyf
-_vro_cpyf:
+	xdef _vro_cpyfm
+_vro_cpyfm:
 
 	lea	4(sp),a0		; a0 -> parameters on stack
 	move.w	(a0)+,_intin		; intin[0] <- writing mode	  4(sp)
@@ -1008,8 +1015,8 @@ VOID vrn_trnfm(FDB *psrcMFDB, FDB *pdesMFDB)
 }
 #endif
 
-	xdef _vrn_trnf
-_vrn_trnf:
+	xdef _vrn_trnfm
+_vrn_trnfm:
 
 	lea	 4(sp),a0		; a0 -> stack parameters
 	bsr	mfdb_load

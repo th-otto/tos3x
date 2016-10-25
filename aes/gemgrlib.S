@@ -147,7 +147,7 @@ ptrpsh:
 	move.l	a5,-(sp)		;+24 &pt
 	move.l	4(a4),-(sp)		;+28 po->g_w, po->g_h
 
-	bsr	_gr_stepc	;gr_stepcalc(po->g_w,po->g_h,pt,&cx,...)
+	bsr	_gr_stepcalc	;gr_stepcalc(po->g_w,po->g_h,pt,&cx,...)
 
 	adda.w	#28,sp
 	rts
@@ -211,7 +211,7 @@ _gr_growbox:
 
 	jsr	_gr_movebox
 
-	jsr	_gsx_mof
+	jsr	_gsx_moff
 
 	moveq	#1,d7			;loop twice
 lab41:
@@ -283,7 +283,7 @@ _gr_shrinkbox:
 	movem.l	d2-d7/a4-a6,-(sp)	;+36 reserve 12 bytes & d5-d7/a4-a6
 	bsr	grshcalc		;call gr_stepcalc just like growbox
 
-	jsr	_gsx_mof
+	jsr	_gsx_moff
 
 	moveq	#1,d7			;loop twice
 lab46:
@@ -373,10 +373,10 @@ lab16:
 	tst.w	d4			;test "clipped"
 	beq	lab17			;br if false
 
-	jsr	_gsx_xcb		;gsx_xcbox(&cx)
+	jsr	_gsx_xcbox		;gsx_xcbox(&cx)
 	bra	lab18
 lab17:
-	jsr	_gsx_xbo		;gsx_xbox(&cx)
+	jsr	_gsx_xbox		;gsx_xbox(&cx)
 lab18:
 	lea	20+8(sp),a0		;a0 -> cx
 	sub.w	d7,(a0)+		;cx -= xstep
@@ -497,7 +497,7 @@ ynotneg:
 	moveq	#0,d4			;d4[31:16] = 0 FALSE
 	move.w	d0,d4			;d4[15:00] = cnt 
 
-	jsr	_gsx_mof
+	jsr	_gsx_moff
 
 	exg	d5,d6			;this makes a reg "royal flush", i.e,
 *					;d4[31:16] = FALSE; d4[15:00] = cnt;
@@ -690,13 +690,13 @@ _gr_watchbox:
 	move.l	sp,a6			;a6 = &t
 
 	move.l	ez_glrsr+2(pc),-(sp)	;+36 pick this up from previous use
-	jsr	_gsx_scl		;gsx_sclip(&gl_rscreen)
+	jsr	_gsx_sclip		;gsx_sclip(&gl_rscreen)
 
 	move.l	a6,-(sp)		;+40 parm 3 &t
 	move.w	d5,-(sp)		;+42 parm 2 obj
 	move.l	a5,-(sp)		;+46 parm 1 tree
 
-	jsr	_ob_actx		;ob_actxywh(tree,obj,&t)
+	jsr	_ob_actxywh		;ob_actxywh(tree,obj,&t)
 
 	moveq	#0,d7			;out = FALSE
 	moveq	#1,d4			;d4  = TRUE (constant)
@@ -710,7 +710,7 @@ lab50:
 	move.w	d5,-(sp)		;+52 parm 2 obj
 	move.l	a5,-(sp)		;+56 parm 1 &tree
 
-	jsr	_ob_chan		;ob_change(tree, obj, state, TRUE)
+	jsr	_ob_change		;ob_change(tree, obj, state, TRUE)
 
 	eor.w	d4,d7			;out = !out
 
@@ -763,7 +763,7 @@ lab50:
 	pea	32+4(sp)	;+36 parm 2 &out
 	move.w	#6,-(sp)	;+38 parm 1 MU_BUTTON | MU_M1
 
-	jsr	_ev_mult	;event multi
+	jsr	_ev_multi	;event multi
 
 	adda.w	#38,sp		;restore stack
 
@@ -819,7 +819,7 @@ _gr_draw:
 *					;a5 = &poff
 
 	move.l	a4,-(sp)		;+24
-	jsr	_gsx_xbo		;gsx_xbox(po);
+	jsr	_gsx_xbox		;gsx_xbox(po);
 	tst.w	d7			;is have2box TRUE
 	beq	lab21			;br if FALSE
 
@@ -833,7 +833,7 @@ rsetquik:
 	move.w	d0,(a0)+		;install in t
 	dbra	d1,rsetquik
 
-	jsr	_gsx_xbo		;use &t from previous
+	jsr	_gsx_xbox		;use &t from previous
 	addq.l	#4,sp			;+24
 lab21:
 	adda.w	#12,sp			;+12
@@ -846,7 +846,7 @@ lab21:
  *  We do this in-line twice so instead let's call a subroutine twice:
  */
 ofdrawon:
-	jsr	_gsx_mof		;gsx_moff()
+	jsr	_gsx_moff		;gsx_moff()
 
 	move.l	a4,-(sp)		;parm3 poff
 	move.l	a5,-(sp)		;parm2 po
@@ -904,7 +904,7 @@ _gr_wait:
 ez_glr0:
 *		;note: immed "gl_rzero" ref'd elsewhere via ez_glr0+2(pc)
 	move.l	#_gl_rzero,-(sp)	;+28 parm 1 &gl_rzero
-	jsr	_rc_equa		;
+	jsr	_rc_equal		;
 
 	bchg.l	#0,d0			;invert boolean result
 	move.w	d0,d7			;have2box = !rc_equal(&gl_zero, poff)
@@ -916,7 +916,7 @@ ez_glr0:
 	move.w	d0,-(sp)		;+32 parm 4 "1"
 	move.l	d5,-(sp)		;+36 parms 2, 3  mx, my
 	move.w	d0,-(sp)		;+38 parm 1  TRUE
-	jsr	_gr_still
+	jsr	_gr_stilldn
 
 	move.w	d0,d6			;d6=down = gr_stilldn(TRUE,mx,my,1,1)
 
@@ -946,12 +946,12 @@ VOID gr_setup(WORD color)
 _gr_setup:
 ez_glrsr:                     /* note: immed "gl_rscreen" ref'd elsewhere via ez_glrsr+2(pc) */
 	move.l	#_gl_rscreen,-(sp)	;+4  parm 1 &gl_rscreen
-	jsr	_gsx_scl		;    gsx_sclip(&gl_rscreen);
+	jsr	_gsx_sclip		;    gsx_sclip(&gl_rscreen);
 
 	move.w	4+4(sp),(sp)		;+4  parm 3 color
 	moveq	#3,d0			;d0[31:16]=0=FALSE,d0[15:00]=3=MD_XOR
 	move.l	d0,-(sp)		;+8 parm 1 FALSE : parm 2 MD_XOR
-	jsr	_gsx_att		;    gsx_attr(FALSE, MD_XOR, color);
+	jsr	_gsx_attr		;    gsx_attr(FALSE, MD_XOR, color);
 	addq.l	#8,sp
 	rts
 
@@ -987,8 +987,8 @@ VOID gr_rubbox(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, WORD *pwend, WO
 	gr_rubwind(xorigin, yorigin, wmin, hmin, &gl_rzero, pwend, phend);
 }
 #endif
-	xdef _gr_rubbo
-_gr_rubbo:
+	xdef _gr_rubbox
+_gr_rubbox:
 	lea	16(sp),a0	;a0 -> phend
 	move.l	(a0),-(sp)	;+4 parm 7 phend
 	move.l	-(a0),-(sp)	;+8 parm 6 pwend
@@ -1059,7 +1059,7 @@ VOID gr_rubwind(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, GRECT *poff, W
 _gr_rubwind:
 	movem.l	d3-d6/a3-a6,-(sp) ;+32 reserve 8 bytes of local & d5-d6/a3-a6
 	move.w	#1,-(sp)	;+34 parm 1 TRUE
-	jsr	_wm_upda	;wm_updat(TRUE)
+	jsr	_wm_update	;wm_updat(TRUE)
 
 	bsr	_gr_setup	;gr_setup(BLACK)  black is true!
 
@@ -1113,7 +1113,7 @@ wdhtlp:
 	move.w	(a3),(a6)	;*phend = o.g_h
 
 	clr.w	-(sp)		;+36 parm 1 FALSE
-	jsr	_wm_upda	;wm_updat(FALSE)
+	jsr	_wm_update	;wm_update(FALSE)
 	adda.w	#12,sp		;+24 adjust stack
 	movem.l	(sp)+,d5-d6/a3-a6	;+0
 	rts
@@ -1202,7 +1202,7 @@ _gr_dragbox:
 *					;a6 = &pdy
 
 	move.w	#1,-(sp)		;+38 parm 1 BLACK
-	jsr	_wm_upda		;wm_update(BLACK)
+	jsr	_wm_update		;wm_update(BLACK)
 	jsr	_gr_setup		;gr_setup(TRUE) black = true
 
 
@@ -1245,7 +1245,7 @@ lab31:
 	subq.l	#2,a0
 	move.l	a0,-(sp)	;+62 parm 1 &mx
 
-	jsr	_gsx_mxm	;gsx_mxmy(&mx, &my)
+	jsr	_gsx_mxmy	;gsx_mxmy(&mx, &my)
 
 	move.l	(sp)+,a0	;+58 a0 => mx
 
@@ -1262,7 +1262,7 @@ lab31:
 	move.l	a0,-(sp)	;+62 parm 2 &o
 
 	move.l	a4,-(sp)	;+66 parm 1 &pc
-	jsr	_rc_cons	;rc_constrain(pc, &o)
+	jsr	_rc_constrain	;rc_constrain(pc, &o)
 
 	lea	66-36(sp),a0	;a0 => mx
 	move.l	(a0)+,-(sp)	;+70 parm 3 mx  parm 4 my
@@ -1279,7 +1279,7 @@ lab31:
 	move.w	54-30(sp),(a6)	;*pdy = o.g_y
 
 	clr.w	-(sp)		;+56
-	jsr	_wm_upda	; wm_update(FALSE)
+	jsr	_wm_update	; wm_update(FALSE)
 
 	adda.w	#36,sp		;+20
 	movem.l	(sp)+,d6-d7/a4-a6	;+0
@@ -1337,7 +1337,7 @@ _gr_clamp:
 	pea	4-2(sp)		;+8  parm 2 &my
 	pea	8-4(sp)		;+12 parm 1 &mx
 
-	jsr	_gsx_mxm	;  gsx_mxmy(&mx, &my)
+	jsr	_gsx_mxmy	;  gsx_mxmy(&mx, &my)
 
 	lea	12+12(sp),a0	;a0 => &pneww
 

@@ -536,13 +536,16 @@ mv_desk()
  * ===============================================================
  * Install Application using Popups
  */
-mins_app()
+VOID mins_app(NOTHING)
 {
 	register OBJECT *obj;
 	register APP *app;
 	APP *sapp;
 	int16_t install, ret, newapp;
-	int16_t cont, setdir, dofull, where;
+	BOOLEAN cont;
+	BOOLEAN setdir;
+	BOOLEAN dofull;
+	in16_t where;
 	int16_t type, sret, icon, graphic;
 	char *str;
 	char buffer[8];
@@ -590,7 +593,7 @@ mins_app()
 		if (!autofile[0])
 			ret = FALSE;
 		else							/* skip the graphic flag */
-			ret = strcmp(str, &autofile[3]);
+			ret = streq(str, &autofile[3]);
 
 		/* Handle Boot Status */
 		sret = ret ? TRUE : FALSE;
@@ -618,7 +621,7 @@ mins_app()
 		}
 
 
-		if (strcmp(str, app->a_name))
+		if (streq(str, app->a_name))
 		{
 			dofull = (app->a_pref & 0x2) ? TRUE : FALSE;
 			setdir = (app->a_pref & 0x1) ? TRUE : FALSE;

@@ -460,7 +460,7 @@ _prtbrval: ds.w 1
 _pmd: ds.l 3
 
 	xdef _sft
-_sft: ds.b 10*(OPNFILES-6)
+_sft: ds.b OPNFILES*10-6*10
 
 #if TOSVERSION >= 0x300
 	xdef _ram16x32

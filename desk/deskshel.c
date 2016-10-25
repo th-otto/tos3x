@@ -287,7 +287,7 @@ char *intail;
 		file = infile;
 	}
 
-	if (strcmp(file, app->a_name))
+	if (streq(file, app->a_name))
 	{
 		dofull = (app->a_pref & 0x2) ? TRUE : FALSE;
 		setdir = (app->a_pref & 0x1) ? TRUE : FALSE;

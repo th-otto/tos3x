@@ -39,6 +39,7 @@
 #include "aes.h"
 #include "gemlib.h"
 #include "taddr.h"
+#include "../common/ctrycodes.h"
 
 RSHDR *gemptr;		/* GEM's rsc pointer        */
 RSHDR *deskptr;		/* DESKTOP'S rsc pointer    */
@@ -47,8 +48,34 @@ uint16_t infsize;
 uint16_t gemsize;
 uint16_t desksize;
 VOIDPTR gl_pglue;
-BOOLEAN nodesk;
-BOOLEAN nogem;
+BOOLEAN nodesk;		/* desk.rsc already read in ? */
+BOOLEAN nogem;		/* gem.rsc already read in ? */
+
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_MX) | (OS_COUNTRY == CTRY_TR) | (OS_COUNTRY == CTRY_DK)
+#define EUROTIME 1		/*			European Style       */
+#define EURODATE 1		/*			Date/TimeFlag	     */
+#endif
+
+#if (OS_COUNTRY == CTRY_UK)
+#define EUROTIME 0
+#define EURODATE 1
+#endif
+
+#if (OS_COUNTRY == CTRY_US)
+#define EUROTIME 0
+#define EURODATE 0
+#endif
+
+#if (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_NO) | (OS_COUNTRY == CTRY_FI)
+#define EUROTIME 1
+#define SWEDDATE 1
+#endif
+
+#if MULTILANG_SUPPORT
+
+/*
+ * these are referenced by DESKTOP.APP
+ */
 int16_t st_lang;		/* Language code    */
 uint16_t st_time;		/* time code        */
 uint16_t st_date;
@@ -66,34 +93,63 @@ int16_t st_keybd;
  */
 static const uint16_t *tosrsc;
 
-extern uint16_t const USARSC[];			/* USA, UK  */
-extern uint16_t const GRMRSC[];			/* GERMAN   */
-extern uint16_t const FRERSC[];			/* FRENCH   */
-extern uint16_t const ITARSC[];			/* ITALIAN  */
-#if 0
-extern uint16_t const SWERSC[];			/* SWEDISH  */
-#endif
-extern uint16_t const SPARSC[];				/* SPANISH  */
+extern uint16_t const RSCUS[];			/* USA, UK  */
+extern uint16_t const RSCDE[];			/* GERMAN   */
+extern uint16_t const RSCFR[];			/* FRENCH   */
+extern uint16_t const RSCES[];			/* SPANISH  */
+extern uint16_t const RSCIT[];			/* ITALIAN  */
+#define RSCSV RSCUS
+extern uint16_t const RSCSV[];			/* SWEDISH  */
+#define RSCSF RSCFR
+extern uint16_t const RSCSF[];			/* Switzerland (French)  */
+#define RSCSG RSCDE
+extern uint16_t const RSCSG[];			/* Switzerland (German)  */
+#define RSCTR RSCUS
+extern uint16_t const RSCTR[];			/* Turkish  */
+#define RSCFI RSCSV
+extern uint16_t const RSCFI[];			/* Finnish */
+#define RSCNO RSCSV
+extern uint16_t const RSCNO[];			/* Norwegian  */
 
 static char const TIMETABLE[] = {		/* Eurotime, Eurodate and separator */
-	0, 0, '/',							/* USA  */
-	1, 1, '.',							/* GERMANY  */
-	1, 1, '/',							/* FRENCH   */
-	0, 0, '/',							/* USA  */
-	1, 1, '/',							/* SPAIN    */
-	1, 1, '/',							/* ITALY    */
-	1, 2, '-'							/* SWEDEN,NORWAY,FINLAND */
+	0, 0, '/',							/* USA */
+	1, 1, '.',							/* Germany */
+	1, 1, '/',							/* France */
+	0, 0, '/',							/* UK */
+	1, 1, '/',							/* Spain */
+	1, 1, '/',							/* Italy */
+	1, 2, '-',							/* Sweden */
+#if !BINEXACT
+	1, 1, '/',							/* Switzerland (French)  */
+	1, 1, '.',							/* Switzerland (German)  */
+	1, 1, '.',							/* Turkey  */
+	1, 2, '-',							/* Finland */
+	1, 2, '-',							/* Norway */
+#endif
 };
 
 static const uint16_t *const RSCTABLE[] = {
-	USARSC,								/* USA, UK  */
-	GRMRSC,								/* GERMAN   */
-	FRERSC,								/* FRENCH   */
-	USARSC,								/* reserved */
-	SPARSC,								/* SPANISH  */
-	ITARSC,								/* ITALIAN  */
-	USARSC								/* suppose to be SWEDISH    */
+	RSCUS,								/* USA */
+	RSCDE,								/* German */
+	RSCFR,								/* French */
+	RSCUS,								/* UK */
+	RSCES,								/* Spanish */
+	RSCIT,								/* Italian */
+	RSCUS,								/* supposed to be SWEDISH    */
+#if !BINEXACT
+	RSCFR,								/* Switzerland (French)  */
+	RSCDE,								/* Switzerland (German)  */
+	RSCTR,								/* Turkish */
+	RSCFI,								/* Finnish */
+	RSCNO,								/* Norwegian */
+#endif
 };
+
+#else
+
+extern uint16_t const tosrsc[];
+
+#endif
 
 
 /* do this whenever the Gem or desktop is ready */
@@ -168,6 +224,7 @@ BOOLEAN rsc_read(NOTHING)
 	register const uint16_t *intptr;
 	const char *a;
 	char *b;
+#if MULTILANG_SUPPORT
 	int32_t value;
 	int16_t code;
 
@@ -180,14 +237,23 @@ BOOLEAN rsc_read(NOTHING)
 		st_lang = (value >> 8) & 0x00FFL;	/* get the keyboard preferences */
 	} else
 	{
-		st_keybd = st_lang = 0;
+		st_keybd = st_lang = CTRY_US;
 	}
 	
-	if ((st_keybd > 8) || (st_keybd < 0))
-		st_keybd = 0;
+	if (st_keybd > 8 || st_keybd < 0)
+		st_keybd = CTRY_US;
 
-	if ((st_lang > 6) || (st_lang < 0) || (st_lang == 3))
-		st_lang = 0;
+#if BINEXACT
+	/*
+	 * BUG: that will use US resources for CTRY_SF(7) & CTRY_SG(8)
+	 * It will also set language to US when it should be UK
+	 */
+	if (st_lang > (sizeof(RSCTABLE) / sizeof(RSCTABLE[0]) - 1) || st_lang < 0 || st_lang == CTRY_UK)
+		st_lang = CTRY_US;
+#else
+	if (st_lang >= (sizeof(RSCTABLE) / sizeof(RSCTABLE[0])) || st_lang < 0)
+		st_lang = CTRY_US;
+#endif
 
 	code = st_lang * 3;
 
@@ -213,6 +279,7 @@ BOOLEAN rsc_read(NOTHING)
 	}
 
 	tosrsc = RSCTABLE[st_lang];
+#endif
 
 	if (!(gl_pglue = dos_alloc((int32_t) tosrsc[2])))
 	{

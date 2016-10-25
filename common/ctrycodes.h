@@ -90,6 +90,11 @@
 #define CTRY_GR 31
 #define CTRY_gr CTRY_GR
 
+/* Mexico (Spanish) */
+/* (unknown, checked for in sources, but never saw an official value for this) */
+#define CTRY_MX 99
+#define CTRY_mx CTRY_MX
+
 /*
  * Special value of os_conf to indicate that the display and keyboard languages
  * will be read from the NVRAM. If the NVRAM is invalid, the default settings

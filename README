@@ -1,4 +1,6 @@
+*****************************************************************
 * Directory Structure
+*****************************************************************
 
 bin:
   Prebuild binaries of tools used in the build process. These are
@@ -12,7 +14,8 @@ include:
   tools.
 
 lib:
-  Prebuild libraries and startup files.
+  Prebuild libraries and startup files for the C runtime library.
+  None of these is used to build a ROM image.
 
 doc:
   Some unsorted documentation.
@@ -30,10 +33,16 @@ aes:
   Source of the AES part of TOS.
 
 desk:
-  Source of the TOS desktop application.
+  Source of the desktop application.
 
 common:
   Shared include files for the above components.
+
+tools:
+  Source of some small tools used in the build process,
+  namely the one that glues the builtin resources and
+  newdesk/desktop.inf files together. If you are cross-compiling,
+  these must be compiled by your native host compiler.
 
 system:
   Source of some small Atari tools.
@@ -74,3 +83,29 @@ alcyon/orig:
   because it does not support abs.w addressing mode, but also due
   to numerous bugs. Either use the fixed version from the bin
   directory or try some other assembler.
+
+*****************************************************************
+* Supported versions
+*****************************************************************
+
+BIOS, VDI, GEMDOS: 2.06, 2.08, 3.06
+AES: 3.06
+DESKTOP: not yet finished
+
+*****************************************************************
+* Supported language versions
+*****************************************************************
+
+us - USA
+de - Germany
+fr - France
+uk - United Kingdom (uses US resources)
+es - Spain (no ROM yet found to verify)
+it - Italy (no ROM yet found to verify)
+sv - Sweden
+fi - Finland (uses swedish keyboard and resources)
+no - Norway (uses swedish keyboard and resources)
+sf - Switzerland (French) (uses french keyboard and resources)
+sg - Switzerland (German) (uses german keyboard and resources)
+
+pl - Poland (only unofficial version 3.06 found on the net)

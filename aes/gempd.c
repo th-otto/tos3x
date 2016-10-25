@@ -33,17 +33,17 @@
 #include "gemlib.h"
 
 
-int16_t fapd PROTO((const char *pname, int16_t pid, PD *ppd));
+BOOLEAN fapd PROTO((const char *pname, int16_t pid, PD *ppd));
 PD *getpd PROTO((NOTHING));
 
 
 
-int16_t fapd(P(const char *) pname, P(int16_t) pid, P(PD *) ppd)
+BOOLEAN fapd(P(const char *) pname, P(int16_t) pid, P(PD *) ppd)
 PP(const char *pname;)
 PP(int16_t pid;)
 PP(register PD *ppd;)
 {
-	register int16_t ret;
+	register BOOLEAN ret;
 	char temp[9];
 
 	ret = FALSE;
@@ -51,7 +51,7 @@ PP(register PD *ppd;)
 	if (pname != NULL)
 	{
 		movs(8, ppd->p_name, temp);
-		ret = strcmp(pname, temp);
+		ret = streq(pname, temp);
 	} else
 	{
 		ret = (ppd->p_pid == pid);

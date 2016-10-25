@@ -1070,15 +1070,14 @@ PP(register int16_t cur_obj;)						/* the object to check */
 	if ((cur_obj != NIL) &&				/* Check for NIL pointer */
 		IsG_String(cur_obj) &&			/* CHeck only for G_STRING */
 		(
-			/* AES Version - strcmp() - true or False only */
 			((cur_obj == MTOP_OBJ(MenuPtr)) &&
-			 strcmp(ObString(cur_obj), &UpText[0])) ||
-			((cur_obj == MB_OBJ(MenuPtr)) && strcmp(ObString(cur_obj), &DownText[0]))))
+			 streq(ObString(cur_obj), &UpText[0])) ||
+			((cur_obj == MB_OBJ(MenuPtr)) && streq(ObString(cur_obj), &DownText[0]))))
 	{
-		return (TRUE);
+		return TRUE;
 	} else
 	{
-		return (FALSE);
+		return FALSE;
 	}
 }
 

@@ -181,7 +181,7 @@ int16_t *install;							/* application installed    */
 				return (app);
 			}
 
-			if (!strcmp(app->a_doc, noext))
+			if (!streq(app->a_doc, noext))
 			{
 				if (x_wildcmp(app->a_doc, name))
 				{
@@ -213,7 +213,7 @@ char *dest;
 		if (*scasb(source, '*'))
 			return (wildcmp(source, g_name(dest)));
 		else
-			return (strcmp(source, dest));
+			return (streq(source, dest));
 	}
 	return (FALSE);
 }

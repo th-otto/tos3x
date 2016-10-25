@@ -1,5 +1,5 @@
-AES_OBJS1 = gemjstrt.o apgrlib.o apgsxif.o gemgrlib.o gemgsxif.o gsx2.o jbind.o
-AES_OBJS2 = jdispa.o jdos.o large.o optimize.o ratrbp.o trap14.o
+AES_OBJS1 = apgrlib.o apgsxif.o gemgrlib.o gemgsxif.o gsx2.o jbind.o
+AES_OBJS2 = jdispa.o jdos.o large.o optimize.o ratrbp.o trap14.o function.o
 AES_OBJS3 = gemaints.o gemaplib.o gemasync.o gembase.o gembind.o gemcli.o gemctrl.o
 AES_OBJS4 = gemdisp.o gemevlib.o gemflag.o gemfmalt.o gemfmlib.o gemfslib.o gemglobe.o
 AES_OBJS5 = geminit.o geminput.o gemmnlib.o gemobed.o gemobjop.o gempd.o gemqueue.o
@@ -55,6 +55,7 @@ AES_SRCS = \
 	jdos.S \
 	large.S \
 	optimize.S \
+	function.c \
 	ratrbp.S \
 	trap14.S \
 	gemjstrt.S \

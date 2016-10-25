@@ -137,7 +137,7 @@ char *new;
 					end2 = escan_str(end2 + 1, argu);
 			}
 
-			if (strcmp(old, p))
+			if (streq(old, p))
 			{
 				if (!alloc)
 				{

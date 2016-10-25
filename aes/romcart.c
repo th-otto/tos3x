@@ -158,7 +158,7 @@ PP(const char *ptail;)
 
 	while ((pcart = cart_find(FALSE)))
 	{
-		if (strcmp(pcmd, &pcart->c_name[0]))
+		if (streq(pcmd, &pcart->c_name[0]))
 			break;
 	}
 	psp = (char *)dos_exec("", 5, ptail);
@@ -166,7 +166,7 @@ PP(const char *ptail;)
 	dos_exec("", 4, psp);
 	dos_free(*(char **) (&psp[0x2c]));
 	dos_free(psp);
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -180,7 +180,7 @@ PP(const char *path;)
 	cart_init();
 	while ((pcart = cart_find(FALSE)))
 	{
-		if (strcmp(file, &pcart->c_name[0]))
+		if (streq(file, &pcart->c_name[0]))
 			return TRUE;
 	}
 

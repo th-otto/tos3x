@@ -576,7 +576,7 @@ PP(char *lstring;)
 		if (ret == CANCEL)
 			break;
 
-		if (!strcmp(ad_fpath, pathcopy))	/*  is dir changed ?  */
+		if (!streq(ad_fpath, pathcopy))	/*  is dir changed ?  */
 		{
 			ob_change(tree, ret, NORMAL, TRUE);
 			ret = FDIRECTORY;			/* force a read again   */

@@ -763,7 +763,7 @@ char *fstr;
 
 	if (opcode == OP_MOVE)
 	{									/* if same name and path, don't do it */
-		if (strcmp(fixsrc, fixdst))
+		if (streq(fixsrc, fixdst))
 			goto y22;
 
 		Fclose(inhand);
@@ -1226,7 +1226,7 @@ int change;
 	switch (but = xform_do(obj, 0))
 	{
 	case COPY:
-		if (!strcmp(((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext, src))
+		if (!streq(((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext, src))
 		{								/* user edit the new name */
 			strcpy(((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext, src);
 			strcpy(src, ((TEDINFO *) (cpbox[kind].ob_spec))->te_ptext);
@@ -1238,7 +1238,7 @@ int change;
 		{								/* check if the source and destination are the same */
 			if (kind == CPDIR)
 				rmstarb(fixsrc);
-			if (strcmp(fixsrc, fixdst))	/* they are the same */
+			if (streq(fixsrc, fixdst))	/* they are the same */
 				but = SKIP;
 			if (kind == CPDIR)
 				strcat(bckslsh, fixsrc);

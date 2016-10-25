@@ -50,6 +50,7 @@ longframe	equ $59e			; BIOS system variable...
 *
 * disable interrupts and save state
 *
+/* 306de: e2588a */
 	xdef	_cli
 _cli:
 	move	sr,savsr		; save it
@@ -59,6 +60,7 @@ _cli:
 *
 * enable interrupts and restore state
 *
+/* 306de: 00e25896 */
 	xdef	_sti
 _sti:
 	move	savsr,sr
@@ -67,6 +69,7 @@ _sti:
 *
 * "hard" disable interrupts, no save
 *
+/* 306de: 00e2589e */
 	xdef	_hcli
 _hcli:
 	or	#$700,sr
@@ -75,6 +78,7 @@ _hcli:
 *
 * "hard" enable interrupts
 *
+/* 306de: 00e258a4 */
 	xdef	_hsti
 _hsti:
 	and	#$f8ff,sr
@@ -89,6 +93,7 @@ _hsti:
 * OR fix stack frame then push the sr if CPU uses long frames.	*
 *								*
 *****************************************************************
+/* 306de: 00e258aa */
 	xdef	_dsptch
 _dsptch:
 	tas	_indisp			; be atomic
@@ -148,6 +153,7 @@ _savestate:
 *
 *
 
+/* 306de: 00e25908 */
 	xdef	_switchto
 _switchto:
 	move	sr,srsave
@@ -167,6 +173,7 @@ _switchto:
 * _gotopgm:							*
 *	Run an accessory and not giving him the basepage	*
 *****************************************************************
+/* 306de: 00e25934 */
 	xdef	_gotopgm
 _gotopgm:
 	move	sr,savsr		; save sr

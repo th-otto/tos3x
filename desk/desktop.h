@@ -27,3 +27,13 @@ typedef	int32_t ERROR;
 #include "osbind.h"
 #include "extern.h"
 
+
+
+/*
+ * extern references from AES
+ */
+extern int16_t st_lang;		/* Language code    */
+extern uint16_t st_time;		/* time code        */
+extern uint16_t st_date;
+extern uint16_t st_dchar;
+extern int16_t st_keybd;

@@ -71,6 +71,8 @@ typedef int BOOLEAN;
 #  define UNUSED(x) ((void)(x))
 #endif
 
+#define I8086	0	/* Intel 8086/8088 */
+#define	MC68K	1	/* Motorola 68000 */
 
 
 
@@ -280,7 +282,7 @@ int16_t max PROTO((int16_t a, int16_t b));
 VOID bfill PROTO((int16_t num, char bval, VOIDPTR addr));
 int toupper PROTO((int ch));
 size_t strlen PROTO((const char *p1));
-int strcmp PROTO((const char *p1, const char *p2));
+BOOLEAN streq PROTO((const char *p1, const char *p2));
 char *xstrpcpy PROTO((const char *src, char *dst));
 char *xstrpcat PROTO((const char *src, char *dst));
 char *strscn PROTO((const char *src, char *dst, char stp));
@@ -289,7 +291,7 @@ VOID fmt_str PROTO((const char *instr, char *outstr));
 VOID unfmt_str PROTO((const char *instr, char *outstr));
 VOID fs_sset PROTO((LPTREE tree, int16_t obj, char *pstr, char **ptext, int16_t *ptxtlen));
 VOID inf_sset PROTO((LPTREE tree, int16_t obj, char *pstr));
-VOID fs_sget PROTO((LPTREE tree, int16_t obj, intptr_t pstr));
+VOID fs_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
 VOID inf_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
 VOID inf_fldset PROTO((LPTREE tree, int16_t obj, uint16_t testfld, uint16_t testbit, uint16_t truestate, uint16_t falsestate));
 int16_t inf_gindex PROTO((LPTREE tree, int16_t baseobj, int16_t numobj));
@@ -752,21 +754,6 @@ RLIST *genrlist PROTO((uint16_t handle, uint16_t area));
 /*
  * gemrom.c
  */
-extern RSHDR *gemptr;					/* GEM's rsc pointer, in RAM */
-extern RSHDR *deskptr;					/* DESKTOP'S rsc pointer, in RAM */
-extern char *infptr;
-extern uint16_t infsize;
-extern uint16_t gemsize;
-extern uint16_t desksize;
-extern VOIDPTR gl_pglue;
-extern BOOLEAN nodesk;
-extern BOOLEAN nogem;
-extern int16_t st_lang;					/* Language code    */
-extern uint16_t st_time;				/* time code        */
-extern uint16_t st_date;
-extern uint16_t st_dchar;
-extern int16_t st_keybd;
-
 int16_t rom_ram PROTO((int which, intptr_t pointer));
 VOID rsc_free PROTO((NOTHING));
 BOOLEAN rsc_read PROTO((NOTHING));
@@ -969,9 +956,10 @@ int16_t mul_div PROTO((int16_t mul1, int16_t mul2, int16_t divis));
  */
 VOID getmouse PROTO((NOTHING));
 VOID putmouse PROTO((NOTHING));
-long trp13 PROTO((short code, ...));
-long trp14 PROTO((short code, ...));
-long gemdos PROTO((short code, ...));
+int32_t trp13 PROTO((short code, ...));
+int32_t trp14 PROTO((short code, ...));
+int32_t gemdos PROTO((short code, ...));
+int32_t bios PROTO((short code, ...));
 
 
 /*

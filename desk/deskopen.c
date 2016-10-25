@@ -492,7 +492,7 @@ sh_witem()
 				dr[*oldstr - 'A'] = 1;
 			}
 			/* name changed ?   */
-		  sf_2:if (!strcmp(dir->d_name, newname))
+		  sf_2:if (!streq(dir->d_name, newname))
 			{							/* Yes          */
 				if (Frename(0, oldstr, newstr))
 				{
@@ -926,7 +926,7 @@ register char *new;
 
 			if (type == XFILE)
 			{
-			  u_1:if (strcmp(s, backid[i].i_path))
+			  u_1:if (streq(s, backid[i].i_path))
 				{
 					if (new)			/* rename application   */
 					{
@@ -959,7 +959,7 @@ register char *new;
 	app = app_xtype(s, &install);
 	if (!install)
 	{
-		if (strcmp(app->a_name, s))
+		if (streq(app->a_name, s))
 		{
 			if (new)
 				lp_fill(new, &app->a_name);

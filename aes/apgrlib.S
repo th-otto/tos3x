@@ -123,7 +123,7 @@ L21:	cmp.w	#IP_SOLID,d4		; else if (ipattern == IP_SOLID
 	moveq	#FIS_SOLID,d5
 L22:	move.w	d3,-(sp)
 	move.w	#S_FILL_COLOR,-(sp)
-	jsr	_gsx_1co		; vsf_color(icolor)
+	jsr	_gsx_1code		; vsf_color(icolor)
 	move.l	4(a3),-(sp)		; push pt->w and pt->ht
 	move.l	(a3),-(sp)		; push pt->x and pt->y
 	move.w	d4,-(sp)		; push ipattern
@@ -373,8 +373,8 @@ VOID gr_gicon(WORD state, int16_t *pmask, int16_t *pdata, const char *ptext, WOR
 	gr_gtext(TE_CNTR, SMALL, ptext, pt, MD_TRANS);
 }
 #endif
-	xdef	_gr_gico
-_gr_gico:
+	xdef	_gr_gicon
+_gr_gicon:
 	movem.l	d3-d7/a3-a4,-(sp)	; 28 bytes 
 	movem.w	28+18(sp),d5-d7		; d5 <- ch,d6-chx,d7-chy
 	move.w	d5,d4
@@ -409,7 +409,7 @@ L63:
 	bsr	make_call
 	move.w	d4,-(sp)		; fg
 	move.l	#$00010002,-(sp)        ; push #MD_TRANS then #1
-	jsr	_gsx_att
+	jsr	_gsx_attr
 	addq.l	#6,sp
 	tst.w	d5			; if(ch)
 	beq	L64
@@ -505,7 +505,7 @@ _gr_box:
 	beq	L71			; if(th != 0)
 	bge	L72			; if(th < 0)
 	subq.w	#1,d3			;    then th--
-L72:	jsr	_gsx_mof
+L72:	jsr	_gsx_moff
 L73:	tst.w	d3			; th += (th>0)?-1:1
 	ble	L74
 	subq	#1,d3

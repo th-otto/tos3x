@@ -6552,7 +6552,7 @@ kbdvec29:
 /* nothing to do */
 #endif
 
-#if OS_COUNTRY == CTRY_DE
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
         cmpi.b    #$1A,d1                       /* convert ALT-udiaresis to @ or backslash */
         bne.s     kbdde1
         move.b    #$40,d0
@@ -6582,7 +6582,7 @@ kbdde2:
 kbdde3:
 #endif
 
-#if OS_COUNTRY == CTRY_FR
+#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
         cmpi.b    #$1A,d1                       /* convert ALT-? to [ or { */
         bne.s     kbdfr1
         move.b    #$5B,d0

@@ -56,18 +56,18 @@
 	comm	_gl_wchar,2
 	xdef	_gl_hchar
 	comm	_gl_hchar,2
-	xdef	_gl_wscha
-	comm	_gl_wscha,2
-	xdef	_gl_hscha
-	comm	_gl_hscha,2
-	xdef	_gl_wptsc
-	comm	_gl_wptsc,2
-	xdef	_gl_hptsc
-	comm	_gl_hptsc,2
-	xdef	_gl_wspts
-	comm	_gl_wspts,2
-	xdef	_gl_hspts
-	comm	_gl_hspts,2
+	xdef	_gl_wschar
+	comm	_gl_wschar,2
+	xdef	_gl_hschar
+	comm	_gl_hschar,2
+	xdef	_gl_wptschar
+	comm	_gl_wptschar,2
+	xdef	_gl_hptschar
+	comm	_gl_hptschar,2
+	xdef	_gl_wsptschar
+	comm	_gl_wsptschar,2
+	xdef	_gl_hsptschar
+	comm	_gl_hsptschar,2
 	xdef	_gl_wbox
 	comm	_gl_wbox,2
 	xdef	_gl_hbox
@@ -80,10 +80,10 @@
 	comm	_gl_wclip,2
 	xdef	_gl_hclip
 	comm	_gl_hclip,2
-	xdef	_gl_nplan
-	comm	_gl_nplan,2
-	xdef	_gl_handl
-	comm	_gl_handl,2
+	xdef	_gl_nplanes
+	comm	_gl_nplanes,2
+	xdef	_gl_handle
+	comm	_gl_handle,2
 	xdef	_gl_src
 	comm	_gl_src,20
 	xdef	_gl_dst
@@ -116,14 +116,14 @@
 	comm	_gl_patt,2
 	xdef	_gl_font
 	comm	_gl_font,2
-	xdef	_gl_rscre
-	comm	_gl_rscre,8
+	xdef	_gl_rscreen
+	comm	_gl_rscreen,8
 	xdef	_gl_rfull
 	comm	_gl_rfull,8
 	xdef	_gl_rzero
 	comm	_gl_rzero,8
-	xdef	_gl_rcent
-	comm	_gl_rcent,8
+	xdef	_gl_rcenter
+	comm	_gl_rcenter,8
 	xdef	_gl_rmenu
 	comm	_gl_rmenu,8
 	
@@ -186,7 +186,7 @@ _gsx_sclip:
 	moveq.l	#1,d0			; d0 <- TRUE
 
 L4:	move.w	d0,-(sp)
-	jsr	_vst_cli
+	jsr	_vst_clip
 	addq.l	#6,sp			; *CS* restore the stack
 
 	moveq.l	#1,d0			; return(TRUE)
@@ -230,8 +230,8 @@ BOOLEAN gsx_chkclip(GRECT *pt)
 	return (TRUE);
 }
 #endif
-	xdef _gsx_chkc
-_gsx_chkc:
+	xdef _gsx_chkclip
+_gsx_chkclip:
 
 	move.w	_gl_wclip,d1		; d1 <- gl_wclip
 	beq	L9
@@ -283,8 +283,8 @@ VOID gsx_pline(WORD offx, WORD offy, WORD cnt, WORD pts)
 	gsx_xline(cnt, &ptsin[0]);
 }
 #endif
-	xdef	_gsx_plin
-_gsx_plin:
+	xdef	_gsx_pline
+_gsx_pline:
 
 	lea	4(sp),a0
 	move.w	(a0)+,d0		; d0 <- X offset
@@ -322,8 +322,8 @@ VOID gsx_cline(UWORD x1, UWORD y1, UWORD x2, UWORD y2)
 	gsx_mon();
 }
 #endif
-	xdef	_gsx_clin
-_gsx_clin:
+	xdef	_gsx_cline
+_gsx_cline:
 
 	jsr	_gsx_moff
 
@@ -398,7 +398,7 @@ _gsx_attr:
 
 	clr.w	          02(a4)	; contrl[1] <- 0
 	move.w	       #1,06(a4)	; contrl[3] <- 1
-	move.w	_gl_handl,12(a4)	; contrl[6] <- gl_handle
+	move.w	_gl_handle,12(a4)	; contrl[6] <- gl_handle
 
 	lea	_gl_mode,a0		; skip this call if the requested
 	cmp.w	(a0),d0			; mode is the same as the currently
@@ -457,8 +457,8 @@ VOID gsx_bxpts(GRECT *pt)
 	ppts[9] = pt->g_y;
 }
 #endif
-	xdef _gsx_bxpt
-_gsx_bxpt:
+	xdef _gsx_bxpts
+_gsx_bxpts:
 
 	move.l	4(sp),a0		; a0 -> GRECT
 
@@ -493,7 +493,7 @@ VOID gsx_box(GRECT *pt)
 _gsx_box:
 
 	move.l	4(sp),-(sp)
-	bsr	_gsx_bxpt
+	bsr	_gsx_bxpts
 
 	move.l	#_ptsin,(sp)
 	move.w	#5,-(sp)
@@ -545,7 +545,7 @@ _gsx_fix:
 	move.w	d0,(a2)+		; pfd->fd_wdwidth = pfd->fd_w / 16
 
 	clr.w	(a2)+			; pfd->fd_stand = FALSE
-	move.w	_gl_nplan,(a2)		; pfd->fd_nplanes = gl_nplanes
+	move.w	_gl_nplanes,(a2)		; pfd->fd_nplanes = gl_nplanes
 
 	rts
 
@@ -686,8 +686,8 @@ VOID bb_screen(WORD scrule, WORD scsx, WORD scsy, WORD scdx, WORD scdy, WORD scw
 	gsx_blt(0x0L, scsx, scsy, 0, 0x0L, scdx, scdy, 0, scw, sch, scrule, -1, -1);
 }
 #endif
-	xdef _bb_scree
-_bb_scree:
+	xdef _bb_screen
+_bb_screen:
 
 	lea	14(sp),a0		; a0 -> scw
 
@@ -719,8 +719,8 @@ VOID gsx_trans(int16_t *saddr, UWORD swb, int16_t *daddr, UWORD dwb, UWORD h, WO
 	vrn_trnfm(&gl_src, &gl_dst);
 }
 #endif
-	xdef _gsx_tran
-_gsx_tran:
+	xdef _gsx_trans
+_gsx_trans:
 
 	movem.l a3-a5,-(sp)
 	lea	12+16(sp),a3		; a3 -> h
@@ -842,25 +842,25 @@ _gsx_start:
 	jsr	_gsx_ncode
 	addq.l	#6,sp
 	lea	_intout,a0	
-	move.w	8(a0),_gl_nplan		; gl_nplanes = intout[4]
+	move.w	8(a0),_gl_nplanes		; gl_nplanes = intout[4]
 
 	clr.l	    -(sp)		; gsx_ncode(VQT_ATTRIBUTES, 0, 0)
 	move.w	#38,-(sp)		; inquire text attributes (vqt_attributes)
 	jsr	_gsx_ncode
 
 	lea	_ptsout,a1
-	move.w	(a1)+,_gl_wptsc		; gl_wptschar  <- ptsout[0]
+	move.w	(a1)+,_gl_wptschar		; gl_wptschar  <- ptsout[0]
 	move.w	(a1),92(a3)		; gl_ws.chmaxh <- ptsout[1]
-	move.w	(a1)+,_gl_hptsc		; gl_hptschar  <- ptsout[1]
+	move.w	(a1)+,_gl_hptschar		; gl_hptschar  <- ptsout[1]
 	move.w	(a1)+,d5		; gl_wchar     <- ptsout[2]
 	move.w	d5,_gl_wchar		; gl_wchar = d5    
 	move.w	(a1)+,d6		; gl_hchar     <- ptsout[3]
 	move.w	d6,_gl_hchar		; gl_hchar = d6
 
-	pea	_gl_hscha
-	pea	_gl_wscha
-	pea	_gl_hspts
-	pea	_gl_wspts
+	pea	_gl_hschar
+	pea	_gl_wschar
+	pea	_gl_hsptschar
+	pea	_gl_wsptschar
 	move.w	88(a3),-(sp)		; push	gl_ws.ws_chminh
 	jsr	_vst_height
 
@@ -909,7 +909,7 @@ x_x1:	pea	$000F0007		;  (sp) <- 15
 	pea	$0071FFFF		;  (sp) <- 113
 	jsr	_gsx_1code		; 2(sp) <-  -1
 
-	lea	_gl_rscre,a0		; r_set( &gl_rscreen,...)
+	lea	_gl_rscreen,a0		; r_set( &gl_rscreen,...)
 	clr.l	   (a0)+		; g_x <- 0	   g_y <- 0
 	move.w	d3,(a0)+		; g_w <- gl_width
 	move.w	d4,(a0)+		; g_h <- gl_height
@@ -930,7 +930,7 @@ x_x1:	pea	$000F0007		;  (sp) <- 15
 	move.w	d3,(a0)+		; g_w <- gl_width
 	move.w	d6,(a0)			; g_h <- gl_hbox
 
-	lea	_gl_rcent,a0		; r_set
+	lea	_gl_rcenter,a0		; r_set
 	sub.w	d5,d3			; d3  <- (gl_width - gl_wbox)
 	lsr.w	#1,d3			; d3  <- (gl_width - gl_wbox)/2
 	move.w	d3,(a0)+		; g_x <- (gl_width - gl_wbox)/2
@@ -1130,8 +1130,8 @@ _gsx_tcalc:
 L45:	cmp.w	#SMALL,d3
 	bne	L48e			; ** ERROR **   neither IBM nor SMALL
 
-	move.w	_gl_wscha,d1		; d1 <- wc for SMALL
-	move.w	_gl_hscha,d2		; d2 <- hc for SMALL
+	move.w	_gl_wschar,d1		; d1 <- wc for SMALL
+	move.w	_gl_hschar,d2		; d2 <- hc for SMALL
 
 L46:	muls	d1,d0			; d0 <- number of characters * wc
 
@@ -1243,7 +1243,7 @@ L57:	lea	_contrl,a1
 	addq.l	#2,a1
 	move.w	d5,(a1)+		; contrl[3] <- tb_nc
 	addq.l	#4,a1
-	move.w	_gl_handl,(a1)+		; contrl[6] <- gl_handle
+	move.w	_gl_handle,(a1)+		; contrl[6] <- gl_handle
 
 	move.l	d4,_ptsin		; ptsin[0] <- X      ptsin[1] <- Y
 
@@ -1253,8 +1253,8 @@ L57:	lea	_contrl,a1
 	rts
 
 
-T50:	dc.l	_gl_hptsc,_gl_hchar,_gl_wchar,_gl_hptsc,_gl_wptsc,_gl_ws+96
-T51:	dc.l	_gl_hspts,_gl_hscha,_gl_wscha,_gl_hspts,_gl_wspts,_gl_ws+92
+T50:	dc.l	_gl_hptschar,_gl_hchar,_gl_wchar,_gl_hptschar,_gl_wptschar,_gl_ws+96
+T51:	dc.l	_gl_hsptschar,_gl_hschar,_gl_wschar,_gl_hsptschar,_gl_wsptschar,_gl_ws+92
 
 
 
@@ -1273,7 +1273,7 @@ VOID gsx_xbox(GRECT *pt)
 _gsx_xbox:
 
 	move.l	4(sp),-(sp)		; push *pt
-	bsr	_gsx_bxpt
+	bsr	_gsx_bxpts
 
 	move.l	#_ptsin,(sp)		; do the top
 	move.w	    #4,-(sp)		; right side
@@ -1335,8 +1335,8 @@ VOID gsx_xcbox(GRECT *pt)
 	gsx_xline(3, &ppts[0]);
 }
 #endif
-	xdef _gsx_xcbo
-_gsx_xcbo:
+	xdef _gsx_xcbox
+_gsx_xcbox:
 
 	move.l	4(sp),a0
 	movem.l	d3-d6/a3,-(sp)

@@ -83,9 +83,7 @@ int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
 int16_t rets[6];							/* added 2/4/87     */
 int16_t ml_ocnt;
 
-						/* used to convert from */
-						/*   window object # to */
-						/*   window message code */
+/* used to convert from window object # to window message code */
 int16_t const gl_wa[] = {
 	WA_UPLINE,
 	WA_DNLINE,
@@ -334,9 +332,9 @@ PP(int16_t my;)
 {
 	int16_t title, item;
 	register int16_t owner, mesag;
+#if SUBMENUS
 	LPTREE ptree;
 	int16_t pmenu;
-#if SUBMENUS
 	int16_t keyret;
 #endif
 
@@ -349,11 +347,11 @@ PP(int16_t my;)
 #if SUBMENUS
 		if (mn_hdo(&title, &ptree, &pmenu, &item, &keyret))
 #else
-		if (mn_do(&title, &ptree, &pmenu, &item))
+		if (mn_do(&title, &item))
 #endif
 		{
 			/* check system menu: title == 1st menu && item == deskacc */
-			if ((gl_dacnt) && (title == THEDESK) && (item >= gl_dabase))
+			if (gl_dacnt && title == THEDESK && item >= gl_dabase)
 			{
 				item -= gl_dabase;
 				owner = desk_pid[item];
@@ -366,12 +364,16 @@ PP(int16_t my;)
 			}
 		}
 		/* application menu item has been selected so send it */
+#if SUBMENUS
 #if BINEXACT
 		/* WTF, another of these hacks passing 2 shorts as long */
 		ct_msgup(mesag, owner, title, item, ptree, pmenu);
 #else
 		/* and another BUG: owner used uninitialized */
 		ct_msgup(mesag, owner, title, item, LHIWD(ptree), LLOWD(ptree), pmenu);
+#endif
+#else
+		ct_msgup(mesag, owner, title, item, 0, 0, 0);
 #endif
 	}
 }

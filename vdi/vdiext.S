@@ -6,6 +6,8 @@
  * This file is only used when linking a single module,
  * to get the same addresses as when linking the whole ROM
  */
+#define __ASSEMBLER__ 1
+
 #include "../common/config.h"
 #include "vdidefs.h"
 #include "../common/ctrycodes.h"

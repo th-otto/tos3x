@@ -215,7 +215,7 @@ ins_app()
 		if (!autofile[0])
 			ret = FALSE;
 		else							/* skip the graphic flag */
-			ret = strcmp(str, &autofile[3]);
+			ret = streq(str, &autofile[3]);
 
 		sret = ret ? TRUE : FALSE;
 		obj[AUTOBOX].ob_state = ret ? SELECTED : NORMAL;
@@ -230,7 +230,7 @@ ins_app()
 		obj[INSFULL].ob_state = NORMAL;
 		obj[INSFILE].ob_state = NORMAL;
 
-		if (strcmp(str, app->a_name))
+		if (streq(str, app->a_name))
 		{
 			dofull = (app->a_pref & 0x2) ? TRUE : FALSE;
 			setdir = (app->a_pref & 0x1) ? TRUE : FALSE;
@@ -698,11 +698,9 @@ ins_icons()
 ins_wicon()
 {
 	register APP *app;
-
 	register OBJECT *obj;
-
-	int16_t ret,
-	 limit,
+	BOOLEAN ret;
+	int16_t limit,
 	 index,
 	 quit,
 	 itype;
@@ -853,7 +851,7 @@ ins_wicon()
 				{
 					if (app->a_type == type)
 					{
-						if (strcmp(buffer, app->a_doc))
+						if (streq(buffer, app->a_doc))
 						{
 							app_free(app);
 /*		      sort_show( 0, TRUE );	*/
@@ -876,7 +874,7 @@ ins_wicon()
 					{
 						if (app->a_type == type)
 						{
-							if (strcmp(buffer, app->a_doc))
+							if (streq(buffer, app->a_doc))
 								break;	/* found it */
 						}
 						app = app->a_next;

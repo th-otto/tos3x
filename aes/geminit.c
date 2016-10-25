@@ -108,7 +108,13 @@
 /*	Add code to do sparrow res change	7/17/92		D.Mui	*/
 /*	Add new variables			8/1/92		D.Mui	*/
 
-/*	-------------------------------------------------------------
+/*
+ *       Copyright 1999, Caldera Thin Clients, Inc.                      
+ *       This software is licenced under the GNU Public License.         
+ *       Please see LICENSE.TXT for further information.                 
+ *                                                                       
+ *                  Historical Copyright
+ *	-------------------------------------------------------------
  *	GEM Application Environment Services		  Version 1.0
  *	Serial No.  XXXX-0000-654321		  All Rights Reserved
  *	Copyright (C) 1985			Digital Research Inc.
@@ -125,9 +131,6 @@
 #define CACHE_ON	0x00003919L
 #define CACHE_OFF	0x00000808L
 #define LONGFRAME	*(int16_t *)(0x59eL)
-
-#define ARROW 0
-#define HGLASS 2
 
 
 int16_t do_once;
@@ -175,8 +178,7 @@ MFORM gl_omform;						/* old aes mouse form       */
 BOOLEAN dowarn;
 #endif
 
-int32_t bios PROTO((short, ...));
-#define Getshift(a) bios(11, a)
+#define Kbshift(a) bios(11, a)
 
 
 #ifdef ACC_DELAY
@@ -286,9 +288,9 @@ VOID aesmain(NOTHING)
 	er_num = ALRT04CRT;					/* output.s     */
 	no_aes = ALRTNOFUNC;				/* for gembind.s    */
 	
-	/****************************************/
-	/*      ini_dlongs();       */
-	/****************************************/
+        /****************************************/
+        /*      ini_dlongs();                   */
+        /****************************************/
 
 	ad_shcmd = &DGLO->s_cmd[0];
 	ad_shtail = &DGLO->s_tail[0];
@@ -312,15 +314,18 @@ VOID aesmain(NOTHING)
 	/* no ticks during init */
 	hcli();
 
-	/* take the 0efh int.   */
+	/* take the 0efh int. ...erm trap #2  */
 	takecpm();
+
 	/* init event recorder  */
 	gl_recd = FALSE;
 	gl_rlen = 0;
 	gl_rbuf = 0x0L;
+
 	/* initialize pointers to heads of event list and thread list       */
 	elinkoff = (intptr_t)(char *) &evx.e_link - (intptr_t)(char *) &evx;
-	/* link up all the evb's to the event unused list       */
+
+	/* link up all the evb's to the event unused list */
 	eul = 0;
 	for (i = 0; i < NUM_EVBS; i++)
 	{
@@ -338,8 +343,8 @@ VOID aesmain(NOTHING)
 	fph = 0;
 	infork = 0;
 	crt_error = FALSE;
-	/* initialize sync  */
-	/*   blocks     */
+
+	/* initialize sync blocks */
 	wind_spb.sy_tas = 0;
 	wind_spb.sy_owner = 0;
 	wind_spb.sy_wait = 0;
@@ -348,6 +353,7 @@ VOID aesmain(NOTHING)
 	gl_bdesired = 0x0;
 	gl_bdelay = 0x0;
 	gl_bclick = 0x0;
+
 	/* init initial process */
 	for (i = 0; i < NUM_PDS; i++)
 		pinit(&DGLO->g_pd[i], &DGLO->g_cda[i]);
@@ -355,10 +361,8 @@ VOID aesmain(NOTHING)
 	DGLO->g_pd[0].p_uda = &DGLO->g_uda;
 	DGLO->g_pd[1].p_uda = &DGLO->g_2uda;
 	DGLO->g_pd[2].p_uda = &DGLO->g_3uda;
-	/* if not rlr then  */
-	/* initialize his   */
-	/* stack pointer    */
-
+	
+	/* if not rlr then initialize his stack pointer */
 	DGLO->g_2uda.u_spsuper = &DGLO->g_2uda.u_supstk;
 	DGLO->g_3uda.u_spsuper = &DGLO->g_3uda.u_supstk;
 
@@ -369,21 +373,28 @@ VOID aesmain(NOTHING)
 	rlr->p_link = 0;
 	rlr->p_stat = PS_RUN;
 	cda = rlr->p_cda;
+
 	/* restart the tick */
 	hsti();
 
-	/* screen manager   */
-	/* process init. this   */
-	/* process starts out   */
-	/* owning the mouse */
-	/* and the keyboard.    */
-	/* it has a pid == 1    */
+	/* 
+	 * screen manager process init.
+	 * This process starts out owning the mouse
+	 * and the keyboard. it has a pid == 1
+	 */
 	gl_mowner = gl_kowner = ctl_pd = ictlmgr(rlr->p_pid);
 
 	/* New stuff 8/13/91    */
-
-	ctldown = Getshift(-1) & 0x0004 ? TRUE : FALSE;
-
+#if BINEXACT
+	/*
+	 * Bug: Kbshift() called without mode parameter
+	 * The outcome of this is that the lower 16 bits
+	 * of some random memory address are passed as parameter
+	 */
+	ctldown = bios(11) & 0x0004 ? TRUE : FALSE;
+#else
+	ctldown = Kbshift(-1) & 0x0004 ? TRUE : FALSE;
+#endif
 
 	rsc_read();							/* read in resource */
 

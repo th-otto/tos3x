@@ -543,7 +543,7 @@ register WINDOW *win;
 		if (!buf2[0])
 			strcpy(getall, buf2);
 
-		if (!strcmp(buf1, buf2))
+		if (!streq(buf1, buf2))
 		{
 			rep_path(buf2, win->w_path);
 			up_win(win, FALSE);

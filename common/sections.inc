@@ -1,12 +1,18 @@
 #include "../common/config.h"
 #include "../common/ctrycodes.h"
 
-#if TOSVERSION == 0x306
-
 /*
- * length of BIOS text segment is different due to some extra
- * code for ALT-scancode mappings
+ * Definitions for length of text, data and bss
+ * of the separate modules.
+ *
+ * Length of BIOS text segment is different due to some extra
+ * code for ALT-scancode mappings.
+ *
+ * Length of DESKTOP text segment is different due to some
+ * unknown reason so far, for the US+UK version only.
  */
+
+#if TOSVERSION == 0x306
 
 /*
  * length of BIOS text segment of the US version,
@@ -21,14 +27,19 @@
 #define DESKTLEN    DTLEN_US
 #endif
 
-#if OS_COUNTRY == CTRY_DE
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
 #define BIOSTLEN    BTLEN_US+$5A
 #define DESKTLEN    DTLEN_US-$2A
 #endif
 
-#if OS_COUNTRY == CTRY_FR
+#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
 #define BIOSTLEN    BTLEN_US+$78
 #define DESKTLEN    DTLEN_US-$2A
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
 #endif
 
 #if OS_COUNTRY == CTRY_ES
@@ -41,18 +52,16 @@
 #define DESKTLEN    DTLEN_US-$2A
 #endif
 
-#if OS_COUNTRY == CTRY_UK
-#define BIOSTLEN    BTLEN_US
-#define DESKTLEN    DTLEN_US
-#endif
-
 #if OS_COUNTRY == CTRY_SV
 #define BIOSTLEN    BTLEN_US+$78
 #define DESKTLEN    DTLEN_US-$2A
 #endif
 
 #if OS_COUNTRY == CTRY_PL
-#define BIOSTBASE   $00380000
+#if BINEXACT
+#undef RAMVERSION
+#define RAMVERSION 1
+#endif
 #define BIOSTLEN    BTLEN_US+$5A
 #define DESKTLEN    DTLEN_US-$2A
 #endif
@@ -83,14 +92,19 @@
 #define DESKTLEN    DTLEN_US
 #endif
 
-#if OS_COUNTRY == CTRY_DE
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
 #define BIOSTLEN    BTLEN_US+$5A
 #define DESKTLEN    DTLEN_US-$5A
 #endif
 
-#if OS_COUNTRY == CTRY_FR
+#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
 #define BIOSTLEN    BTLEN_US+$78
 #define DESKTLEN    DTLEN_US-$5A
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
 #endif
 
 #if OS_COUNTRY == CTRY_ES
@@ -101,11 +115,6 @@
 #if OS_COUNTRY == CTRY_IT
 #define BIOSTLEN    BTLEN_US+$68
 #define DESKTLEN    DTLEN_US-$5A
-#endif
-
-#if OS_COUNTRY == CTRY_UK
-#define BIOSTLEN    BTLEN_US
-#define DESKTLEN    DTLEN_US
 #endif
 
 /*
@@ -174,7 +183,11 @@
 
 
 #ifndef BIOSTBASE
+#if RAMVERSION
+#define BIOSTBASE   $00380000
+#else
 #define BIOSTBASE   $00E00000
+#endif
 #endif
 
 

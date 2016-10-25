@@ -823,7 +823,7 @@ register char *dstptr;
 	if (*srcptr != *dstptr)				/* Not the same device  */
 		return (TRUE);
 
-	if (!strcmp(srcptr, dstptr))
+	if (!streq(srcptr, dstptr))
 	{									/* not the same path    */
 		while (*srcptr)
 		{

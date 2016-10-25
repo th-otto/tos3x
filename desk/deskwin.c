@@ -151,7 +151,7 @@ int16_t change;
 
 		if (full)						/* compare the full path    */
 		{
-			if (strcmp(path, win->w_path))
+			if (streq(path, win->w_path))
 				goto uu_1;
 		} else							/* just the id  */
 		{

@@ -621,7 +621,7 @@ read_inf()
 	{
 		if (app->a_type == PTP)
 		{
-			if (strcmp(app->a_name, "*.GTP"))
+			if (streq(app->a_name, "*.GTP"))
 				return;
 		}
 
@@ -1044,7 +1044,7 @@ int16_t todisk;
 		/*	  up_allwin( infname, FALSE ); 	*//* rebuild any window on the INF drive */
 
 		/* update the buffer    */
-		if (strcmp(infname, inf_path))
+		if (streq(infname, inf_path))
 		{
 			q_change = FALSE;
 			strcpy(afile, q_addr);

@@ -273,8 +273,8 @@ uni4:
 *		C binding:	r_constrain(const_ptr,xywhptr);
 *				GRECT	*const_ptr,*xywhptr;
 * --
-	xdef _rc_const
-_rc_const:
+	xdef _rc_constrain
+_rc_constrain:
 	movem.l	4(sp),a0-a1	; a0 -> x of constrain rect, a1 -> grect
 	move.w	(a0),d0		; d0 = const_x
 	cmp.w	(a1),d0		; If ( x < const_x )
@@ -408,12 +408,12 @@ strnxt:
 
 * --
 *
-* strcmp	dito
-*		C binding:	word	strcmp(ptr1,ptr2);
+* streq	dito
+*		C binding:	word	streq(ptr1,ptr2);
 *					byte	*ptr1,*ptr2;
 * --
-	xdef _strcmp
-_strcmp:
+	xdef _streq
+_streq:
 	movem.l 4(sp),a0-a1	; a0 ->string1, a1 ->string2
 cmpnxt:
 	tst.b	(a0)		; if (we have char)
@@ -741,7 +741,7 @@ _inf_what:
 	move.w	#2,-(sp)	; sp = 2
 	move.w	10(sp),-(sp)	; sp = ok
 	move.l	8(sp),-(sp)	; sp = tree
-	jsr	_inf_gind	; find selected object
+	jsr	_inf_gindex	; find selected object
 	addq.l	#8,sp
 *
 	cmp.w	#-1,d0		; if (ret == -1)
@@ -779,7 +779,7 @@ genrts:
 * PARMS	=	7*4
 PARMS	equ	28		; fixed 8/1/92
 
-	xdef _merge_st
+	xdef _merge_str
 _merge_str:
 	movem.l	d3-d6/a3-a5,-(sp)	; save d3,d4,d5,d6,a3,a4,a5
 	movem.l	PARMS+4(sp),a3-a5	; a3 -> dest, a4 -> src, a5 -> parms
