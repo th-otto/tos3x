@@ -273,7 +273,7 @@ VOID setres(NOTHING)
 }
 
 
-VOID aesmain(NOTHING)
+VOID gem_main(NOTHING)
 {
 	register int16_t i;
 	VOIDPTR tmpadbi;

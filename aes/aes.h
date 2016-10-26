@@ -253,7 +253,7 @@ extern BOOLEAN dowarn;
 #endif
 
 VOID setres PROTO((NOTHING));
-VOID aesmain PROTO((NOTHING));
+VOID gem_main PROTO((NOTHING));
 VOID pinit PROTO((PD *ppd, CDA *pcda));
 int32_t set_cache PROTO((int32_t newcacr));
 int16_t pred_dinf PROTO((NOTHING));

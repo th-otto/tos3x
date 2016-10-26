@@ -1,43 +1,46 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:27:35 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:27:35  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:30:05  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:35:21  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
+ *************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:27:35 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:27:35  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:30:05  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:35:21  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
 /*	GEMWRECT.C	01/25/84 - 02/05/85	Lee Jay Lorenzen	*/
 /*	Reg Opt		03/09/85		Derek Mui		*/
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.0
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *	-------------------------------------------------------------
+ *	GEM Application Environment Services		  Version 1.0
+ *	Serial No.  XXXX-0000-654321		  All Rights Reserved
+ *	Copyright (C) 1985			Digital Research Inc.
+ *	-------------------------------------------------------------
+ */
 
-#include <portab.h>
-#include <machine.h>
-#include <struct88.h>
-#include <baspag88.h>
-#include <obdefs.h>
-#include <gemlib.h>
+#include "aes.h"
+#include "gemlib.h"
+
+#undef TOP
+#undef LEFT
+#undef RIGHT
+#undef BOTTOM
 
 #define TOP 0
 #define LEFT 1
 #define RIGHT 2
 #define BOTTOM 3
+
+#if 0
 
 ORECT *rul;
 ORECT gl_mkrect;
@@ -69,9 +72,9 @@ ORECT *get_orect(NOTHING)
 {
 	ORECT *po;
 
-	if (po = rul)
+	if ((po = rul))
 		rul = rul->o_link;
-	return (po);
+	return po;
 }
 
 
@@ -108,7 +111,7 @@ PP(register ORECT *old;)
 		rl->o_h = (old->o_y + old->o_h) - (new->o_y + new->o_h);
 		break;
 	}
-	return (rl);
+	return rl;
 }
 
 
@@ -163,15 +166,15 @@ PP(int16_t junky;)
 	/* redo rectangle list  */
 	while (r)
 	{
-		if (p = brkrct(new, r, p))
+		if ((p = brkrct(new, r, p)))
 		{
-			/* we broke a rectangle */
-			/*   which means this   */
-			/*   can't be blt   */
+			/* we broke a rectangle which means this can't be blt */
 			pwin->w_flags |= VF_BROKEN;
 			r = p->o_link;
 		} else
+		{
 			r = (p = r)->o_link;
+		}
 	}
 }
 
@@ -218,3 +221,5 @@ PP(int16_t junky;)
 	w_getsize(WS_TRUE, wh, &new->o_x);
 	pwin->w_rlist = new;
 }
+
+#endif
