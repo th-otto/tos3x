@@ -591,7 +591,7 @@ la_string:	dc.b	':\*.*',0
 *  
 	xdef	_dos_rename
 _dos_rename:
-	move.l	(sp)+,retaddr       ; WTF
+	move.l	(sp)+,retaddr
 	move.l	#$00560000,-(sp)	; X_RENAME + $0000
 	bsr	jtrap
 	addq	#4,sp
@@ -725,7 +725,8 @@ generic:
 	jmp	(a0)			; ... anvd return
 
 	bss
-retaddr:	ds.l	1		; saved return address
+	xdef retaddr
+	comm retaddr,4		; saved return address
 	text
 
 
@@ -769,5 +770,6 @@ _do_cdir:
 
 
 
-    BSS
-tr_retsave: ds.l	1
+    bss
+    xdef tr_retsave
+	comm tr_retsave,4

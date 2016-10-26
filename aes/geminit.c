@@ -161,7 +161,9 @@ int16_t crt_error;					/* critical error handler semaphore     */
 				/* set in jbind.s, checked by dispatcher    */
 int16_t adeskp[3];					/* desktop colors & backgrounds */
 int16_t awinp[3];					/* window colors & backgrounds */
+#if TOSVERSION >= 0x400
 uint16_t d_rezword;					/* default resolution for sparrow */
+#endif
 
 
 #define Getrez() trp14(4)
@@ -266,13 +268,16 @@ VOID setres(NOTHING)
 	if ((gl_vdo & 0x30000L) == 0x30000L)
 	{
 		intin[0] = 5;
+#if TOSVERSION >= 0x400
 		d_rezword = VcheckMode(d_rezword);
 		/* ptsout[0] = d_rezword; */
 		gl_ws.ws_pts0 = d_rezword;
+#endif
 	}
 }
 
 
+/* 306de: 00e1dca8 */
 VOID gem_main(NOTHING)
 {
 	register int16_t i;
@@ -288,9 +293,9 @@ VOID gem_main(NOTHING)
 	er_num = ALRT04CRT;					/* output.s     */
 	no_aes = ALRTNOFUNC;				/* for gembind.s    */
 	
-        /****************************************/
-        /*      ini_dlongs();                   */
-        /****************************************/
+	/****************************************/
+	/*      ini_dlongs();                   */
+	/****************************************/
 
 	ad_shcmd = &DGLO->s_cmd[0];
 	ad_shtail = &DGLO->s_tail[0];
@@ -503,7 +508,7 @@ VOID gem_main(NOTHING)
 	if (!dowarn)
 	{
 		lslr = drl;						/* save the dispatcher list     */
-		drl = 0;						/* Don't allow anybody to run   */
+		drl = NULL;						/* Don't allow anybody to run   */
 		fm_alert(0, "[1][\
  \016\017 Developer Release \016\017 |\
     08/08/88  TOS 1.4 |\
@@ -730,17 +735,21 @@ int16_t pred_dinf(NOTHING)
 					{					/* not an extended mode     */
 						if (gl_rschange)	/* 7/21/92 */
 						{
+#if TOSVERSION >= 0x400
 							temp = save_2(temp + 14, d_rezword >> 8);
 							save_2(temp, d_rezword);
+#endif
 						} else
 						{
 							if (*(temp + 14) != 0xD)
 							{
 								temp += 14;
 								temp = scan_2(temp, &res);
+#if TOSVERSION >= 0x400
 								d_rezword = res << 8;
 								temp = scan_2(temp, &res);
 								d_rezword |= res;
+#endif
 							} else
 								break;
 						}

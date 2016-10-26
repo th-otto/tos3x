@@ -47,8 +47,22 @@ TRP2VEC	 equ	$88
 *
 ERROR	equ	1
 NOERR	equ	0
-*
-*
+
+
+	bss
+	even
+
+	xdef	_crit_err
+	comm _crit_err,32
+
+#define _dk_err _crit_err+4
+#define savestk _crit_err+8
+#define _SAV2TRP _crit_err+12
+#define _savsup _crit_err+16
+#define drawsp _crit_err+20
+#define _ldivr _crit_err+24
+#define errsave _crit_err+28
+
 	text
 
 *
@@ -495,27 +509,7 @@ _err_tbl:	dc.b	4,1,1,2,1,1,2,2,4,2,2,2,0,3,4,2,6
 	even
 
 	xdef	_crit_err
-_crit_err:	ds.l	1
-_dk_err:	ds.l	1
-savestk:	ds.l	1
+	comm _crit_err,32
 
-*
-* Save current trap 2 vector.
-*
-_SAV2TRP:	ds.l	1
-*
-	xdef	_savsup
-_savsup:	ds.l	1
-*
-*	xdef	_drawaddr
-*_drawaddr:	ds.l	1		; initialized to _far_draw
-drawsp:		ds.l	1
-*
-	xdef	_ldivr
-_ldivr:		ds.l	1
-*
-	xdef	errsave
-errsave:	ds.l	1
-
-		ds.l	400		; lots of space for errors
+	ds.l	400		; lots of space for errors
 errstk:		ds.l	1

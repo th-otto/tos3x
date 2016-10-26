@@ -89,8 +89,8 @@ UDA
 	/*   62 */	uint32_t	*u_spsuper;		/* supervisor stack 	*/
 	/*   66 */	uint32_t	*u_spuser;		/* user stack 			*/
 	/*   70 */	uint32_t	u_super[STACK_SIZE];
-	/* 2070 */	uint32_t	u_supstk;
-	/* 2074 */
+	/* 1858/2070 */	uint32_t	u_supstk;
+	/* 1862/2074 */
 };
 
 #define NOCANCEL 0x0001		/* event is occuring 	*/

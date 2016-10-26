@@ -1,8 +1,8 @@
 /*
  *************************************************************************
- *			Revision Control System
+ *                      Revision Control System
  * =======================================================================
- *  $Author: mui $	$Date: 89/04/26 18:20:23 $
+ *  $Author: mui $      $Date: 89/04/26 18:20:23 $
  * =======================================================================
  *
  * Revision 2.2  89/04/26  18:20:23  mui
@@ -16,24 +16,25 @@
  *
  *************************************************************************
  */
-/*	GEMAINTS.C	1/27/84 - 01/18/85	Lee Jay Lorenzen	*/
-/*	Reg Opt		03/09/95		Derek Mui		*/
-/*	Changed at signal for acc wait	7/13/90	D.Mui			*/
+/*      GEMAINTS.C      1/27/84 - 01/18/85      Lee Jay Lorenzen        */
+/*      Reg Opt         03/09/95                Derek Mui               */
+/*      Changed at signal for acc wait  7/13/90 D.Mui                   */
 
 
 /*
-*	-------------------------------------------------------------
-*	GEM Application Environment Services		  Version 1.0
-*	Serial No.  XXXX-0000-654321		  All Rights Reserved
-*	Copyright (C) 1985			Digital Research Inc.
-*	-------------------------------------------------------------
-*/
+ *      -------------------------------------------------------------
+ *      GEM Application Environment Services              Version 1.0
+ *      Serial No.  XXXX-0000-654321              All Rights Reserved
+ *      Copyright (C) 1985                      Digital Research Inc.
+ *      -------------------------------------------------------------
+ */
 
 #include "aes.h"
 #include "taddr.h"
 #include "gemlib.h"
 
 
+/* 306de: 00e19944 */
 VOID signal(P(EVB *) e)
 PP(EVB *e;)
 {
@@ -41,9 +42,9 @@ PP(EVB *e;)
 
 	p = e->e_pd;
 	p->p_evflg |= e->e_mask;
-	/* off the not-ready    */
-	/*   list       */
-	for (p1 = (q1 = (PD *) & nrl)->p_link; (p1 != p) && (p1); p1 = (q1 = p1)->p_link) ;
+	/* off the not-ready list */
+	for (p1 = (q1 = (PD *) &nrl)->p_link; (p1 != p) && (p1); p1 = (q1 = p1)->p_link)
+		;
 	if (p != rlr)
 	{
 		if (p->p_evflg & p->p_evwait)
@@ -51,7 +52,7 @@ PP(EVB *e;)
 			if (p1)
 			{
 				p1->p_stat |= PS_RUN;
-				/* onto the drl     */
+				/* onto the drl */
 				q1->p_link = p1->p_link;
 				p1->p_link = drl;
 				drl = p1;
@@ -61,6 +62,7 @@ PP(EVB *e;)
 }
 
 
+/* 306de: 00e199aa */
 VOID zombie(P(EVB *) e)
 PP(register EVB *e;)
 {

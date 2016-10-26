@@ -51,7 +51,7 @@
 	xdef	_far_bchange
 _far_bchange:
 	move.l	a7,gstksave		; save stack, paranoid code
-	lea.l	gstack,a7
+	lea.l	gstack+23*4,a7
 	movem.l	d0-d2/a0-a2,-(sp)	; save regs that c will crunch
 
 *	move.w	d0,-(sp)		; pass button state, only if tick in gsx
@@ -109,7 +109,7 @@ bout1:
 	xdef	_far_mchange
 _far_mchange:
 	move.l	a7,gstksave		; save stack
-	lea.l 	gstack,a7
+	lea.l 	gstack+23*4,a7
 	movem.l d0-d2/a0-a2,-(sp)	; save regs that C will crunch
 
 	move.w	d1,-(sp)		; delta y
@@ -150,7 +150,7 @@ _justretf:
 	xdef	_tikcod
 _tikcod:
 	move.l	a7,tstksave		; save stack
-	lea.l 	tstack,a7
+	lea.l 	tstack+23*4,a7
 	addq.l	#1,TICKS		; bump up the absolute clock
 	tst.l	_CMP_TICK		; are we timing now?
 	beq	tpollmb			; nope, go away
@@ -238,20 +238,24 @@ xdelay:
 * addr in gsx in rat draw routine
 
 	xdef  _drwaddr
-_drwaddr:	ds.l	1		; initialized to _justretf
+	comm _drwaddr,4		; initialized to _justretf
 	xdef	_tikaddr
-_tikaddr:	ds.l	1		; initialized to _tikcod
-gstksave:	ds.l	1
-tstksave:	ds.l	1
+	comm _tikaddr,4		; initialized to _tikcod
+	xdef gstksave
+	comm gstksave,4
+	xdef tstksave
+	comm tstksave,4
 	xdef	_tiksav
-_tiksav:	ds.l	1		; addr in gsx driver of tick service
+	comm _tiksav,4		; addr in gsx driver of tick service
 	xdef	_NUM_TICK
-_NUM_TICK:	ds.l	1
+	comm _NUM_TICK,4
 	xdef	_CMP_TICK
-_CMP_TICK:	ds.l	1
-TICKS:		ds.l	1		; absolute number of ticks NOT GLOBAL!
+	comm _CMP_TICK,4
+	xdef TICKS
+	comm TICKS,4		; absolute number of ticks NOT GLOBAL!
+	
+	xdef gstack
+	comm gstack,96		; gsx stack for mouse
 
-		ds.l	23		; gsx stack for mouse
-gstack:		ds.l	1
-		ds.l	23		; tick stack
-tstack:		ds.l	1
+	xdef tstack
+	comm tstack,96		; tick stack

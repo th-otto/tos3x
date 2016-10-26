@@ -40,6 +40,20 @@
 #include "aesdefs.h"
 #include "../common/asmdefs.h"
 
+	bss
+
+	xdef pblock
+	comm pblock,20
+	xdef iioff
+iioff equ pblock+4
+	xdef pioff
+pioff equ pblock+8
+	xdef iooff
+iooff equ pblock+12
+	xdef pooff
+pooff equ pblock+16
+
+	text
 
 	xdef	_gsx2
 _gsx2:
@@ -139,18 +153,4 @@ _m_lptr2: ds.b 0
 	move.l	_contrl+18,(a0)
 	rts
 
-
-
-	bss
-
-	xdef	pblock
-pblock:	ds.l	1
-	xdef	iioff
-iioff:	ds.l	1
-	xdef	pioff
-pioff:	ds.l	1
-	xdef	iooff
-iooff:	ds.l	1
-	xdef	pooff
-pooff:	ds.l	1
 

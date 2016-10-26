@@ -46,6 +46,25 @@
 #include "../common/config.h"
 #include "aesdefs.h"
 #include "../common/asmdefs.h"
+#include "../common/tosvars.inc"
+
+	bss
+	even
+	
+	xdef fspec		/* file to look for (doesn't matter) */
+	comm fspec,112
+
+#define mydev      fspec+8
+#define oldgetbpb  fspec+10
+#define oldmediach fspec+14
+#define oldrwabs   fspec+18
+/* unused var */
+/* used by gembind:graf_mouse as a flag */
+	xdef _maddr
+_maddr     equ fspec+26
+#define mform      fspec+30
+#define trp13ret   fspec+104
+#define trp14ret   fspec+108
 
 	text
 
@@ -137,13 +156,13 @@ loop:
 *	move.l	d0,-(sp)
 *	move.w	#$20,-(sp)
 
-	move.l	$472.w,oldgetbpb
-	move.l	$47e.w,oldmediach
-	move.l	$476.w,oldrwabs
+	move.l	(_hdv_bpb).w,oldgetbpb
+	move.l	(_hdv_mediach).w,oldmediach
+	move.l	(_hdv_rw).w,oldrwabs
 
-	move.l	#newgetbpb,$472.w
-	move.l	#newmediach,$47e.w
-	move.l	#newrwabs,$476.w
+	move.l	#newgetbpb,(_hdv_bpb).w
+	move.l	#newmediach,(_hdv_mediach).w
+	move.l	#newrwabs,(_hdv_rw).w
 
 *	; Fopen a file on that drive
 
@@ -239,17 +258,3 @@ dooldr:	move.l	oldrwabs,a0	; changed from oldmediach to oldrwabs
 *									*
 *************************************************************************
 
-	bss
-	even
-
-fspec:		ds.b	8		; file to look for (doesn't matter)
-mydev:		ds.w	1
-oldgetbpb:	ds.l	1
-oldmediach:	ds.l	1
-oldrwabs:	ds.l	1
-		ds.l	1
-	xdef _maddr		; used by gembind:graf_mouse as a flag
-_maddr:		ds.l	1
-mform:		ds.w	37
-trp13ret:	ds.l	1
-trp14ret:	ds.l	1

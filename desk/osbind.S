@@ -23,4 +23,5 @@ _gemdos:
 	rts
 
 	bss
-saveret: ds.l 1
+	xdef saveret
+	comm saveret,4

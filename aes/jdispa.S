@@ -38,6 +38,22 @@
 #include "../common/asmdefs.h"
 
 
+*****************************************************************
+* BSS for this module						*
+*****************************************************************
+	bss
+	even
+	xdef _savea0
+	comm _savea0,654
+
+/* for savestate */
+#define srsave _savea0+4
+/* _cli and _si */
+#define savsr  _savea0+6
+/* for psetup */
+#define psetsr _savea0+8
+#define dspstk _savea0+10+160*4
+
 	text
 
 longframe	equ $59e			; BIOS system variable...
@@ -216,15 +232,3 @@ p_1:	move.l	d0,-(a2)		; predecrement and store val on stack
 	move	psetsr,sr		; restore interrupts
 	rts
 
-*****************************************************************
-* BSS for this module						*
-*****************************************************************
-	bss
-	even
-_savea0:	ds.l	1
-srsave:		ds.w	1		; for savestate
-savsr:		ds.w	1		; for _cli and _si
-psetsr:		ds.w	1		; for psetup
-*
-		ds.l	160		; 640 bytes ????
-dspstk:		ds.l	1

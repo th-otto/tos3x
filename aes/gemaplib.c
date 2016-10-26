@@ -63,6 +63,7 @@ int16_t gl_my;					/* 3/12/86  */
  *
  * Application Init
  */
+/* 306de: 00e199fc */
 int16_t ap_init(P(intptr_t) pglobal)
 PP(intptr_t pglobal;)
 {

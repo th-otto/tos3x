@@ -11,6 +11,7 @@
 #include "../aes/aesdefs.h"
 #include "../vdi/vdidefs.h"
 #include "../vdi/lineaequ.inc"
+#include "../desk/deskdefs.h"
 
 #define V(name,t,size) \
 	xdef name \
@@ -27,265 +28,165 @@ name: ds.t size
 	ds.b 164 /* seems to be unused */
 #endif
 
-	xdef gem_env
-gem_env: ds.b 12
+	V(gem_env,b,12)
 
 /* save area for trap13/14. */
-    xdef save_beg
-save_beg: ds.b   238
-    xdef _trap_save_area
-_trap_save_area: ds.b 0         /* End of Save storage */
+	V(save_beg,b,238)
+	V(_trap_save_area,b,0)         /* End of Save storage */
 
-	xdef oshdr
-oshdr: ds.b 6+64
+	V(oshdr,b,6+64)
 
-	xdef cookies
-cookies: ds.l NCOOKIES*2
+	V(cookies,l,NCOOKIES*2)
 
-	xdef _bootpref
-_bootpref: ds.w 1
+	V(_bootpref,w,1)
 
 #if (TOSVERSION >= 0x300)
-	xdef _altmd
-_altmd: ds.l 4
+	V(_altmd,l,4)
 #endif
 
-	xdef _has_dmasound
-_has_dmasound: ds.b 1
-	xdef STEFlag
-STEFlag: ds.b 1
-	xdef __sbss
-__sbss: ds.b 0
+	V(_has_dmasound,b,1)
+	V(STEFlag,b,1)
 
-    xdef privinst
-privinst: ds.l 2
+	V(__sbss,b,0)	/* start of the BSS area that is zeroed by BIOS */
 
-    xdef savepc
-savepc: ds.l 1
-    xdef execpath
-execpath: ds.l 1
-    xdef execname
-execname: ds.l 1
-    xdef execdta
-execdta: ds.b 44
-    xdef execfname
-execfname: ds.b 32
+	V(privinst,l,2)
 
-	xdef _pbdef
-_pbdef: ds.b 30
+	V(savepc,l,1)
+	V(execpath,l,1)
+	V(execname,l,1)
+	V(execdta,b,44)
+	V(execfname,b,32)
 
-	xdef lastacstm
-lastacstm: ds.l 1
+	V(_pbdef,b,30)
 
-	xdef scsicmd
-scsicmd: ds.b 10
+	V(lastacstm,l,1)
 
-	xdef dmarwflg
-dmarwflg: ds.b 2
+	V(scsicmd,b,10)
 
-	xdef idebuf
-idebuf: ds.b SECTOR_SIZE
+	V(dmarwflg,b,2)
+
+	V(idebuf,b,SECTOR_SIZE)
 
 	ds.l 1 /* unused */
 
 #if MSTECLK
-    xdef rtcbufa
-rtcbufa: ds.b 13
-    xdef rtcbufb
-rtcbufb: ds.b 13
-	xdef waketimeAlarm
-waketimeAlarm: ds.l 1
+	V(rtcbufa,b,13)
+	V(rtcbufb,b,13)
+	V(waketimeAlarm,l,1)
 #endif
 
-	xdef rs232ibuf
-rs232ibuf: ds.b SERIAL_BUFSIZE
-    xdef rs232obuf
-rs232obuf: ds.b SERIAL_BUFSIZE
-	xdef rs232iorec
-rs232iorec: ds.b 2*14+8
+	V(rs232ibuf,b,SERIAL_BUFSIZE)
+	V(rs232obuf,b,SERIAL_BUFSIZE)
+	V(rs232iorec,b,2*14+8)
 
-	xdef ikbdiorec
-ikbdiorec: ds.b 14
-	xdef ikbdbuf
-ikbdbuf: ds.b SERIAL_BUFSIZE
+	V(ikbdiorec,b,14)
+	V(ikbdbuf,b,SERIAL_BUFSIZE)
 
-	xdef midiiorec
-midiiorec: ds.b 14
-	xdef midibuf
-midibuf: ds.b 128
+	V(midiiorec,b,14)
+	V(midibuf,b,128)
 
-	xdef _kbdvecs
-_kbdvecs: ds.b 42
+	V(_kbdvecs,b,42)
 
-	xdef kb_altnum
-kb_altnum: ds.w 1
+	V(kb_altnum,w,1)
 	
-	xdef kbdbuf
-kbdbuf: ds.b 7
-	xdef mousebuf
-mousebuf: ds.b 5
-	xdef relmbuf
-relmbuf: ds.b 3
-	xdef clockbuf
-clockbuf: ds.b 6
-	xdef joybuf
-joybuf: ds.b 3
+	V(kbdbuf,b,7)
+	V(mousebuf,b,5)
+	V(relmbuf,b,3)
+	V(clockbuf,b,6)
+	V(joybuf,b,3)
     even
 
-	xdef iclkrtime
-iclkrtime: ds.l 1
+	V(iclkrtime,l,1)
 
-	xdef iclkwtime
-iclkwtime: ds.l 1
+	V(iclkwtime,l,1)
 	
-	xdef iclkbuf
-iclkbuf: ds.b 6      /* buffer for writing time packet to IKBD */
+	V(iclkbuf,b,6)      /* buffer for writing time packet to IKBD */
 
-	xdef buttonbuf
-buttonbuf: ds.b 3
+	V(buttonbuf,b,3)
 	
-	xdef _shifty
-_shifty: ds.b 1
+	V(_shifty,b,1)
 
-	xdef _curkeytbl
-_curkeytbl: ds.l 3
+	V(_curkeytbl,l,3)
 
-	xdef initmbuf
-initmbuf: ds.b 17
+	V(initmbuf,b,17)
 
-	xdef kb_key_last
-kb_key_last: ds.b 1
-	xdef kb_ticks
-kb_ticks: ds.b 1
-	xdef kb_delay
-kb_delay: ds.b 1
+	V(kb_key_last,b,1)
+	V(kb_ticks,b,1)
+	V(kb_delay,b,1)
 
-    xdef kb_initial
-kb_initial: ds.b 1
-    xdef kb_repeat
-kb_repeat: ds.b 1
+	V(kb_initial,b,1)
+	V(kb_repeat,b,1)
 
-	xdef lst_timeout
-lst_timeout: ds.l 1
+	V(lst_timeout,l,1)
 
-	xdef _tim_c_sieve
-_tim_c_sieve: ds.w 1
+	V(_tim_c_sieve,w,1)
 
-	xdef _sndtable
-_sndtable: ds.l 1
+	V(_sndtable,l,1)
 
-	xdef _snddelay
-_snddelay: ds.b 1
+	V(_snddelay,b,1)
 
-	xdef _sndtmp
-_sndtmp: ds.b 1
+	V(_sndtmp,b,1)
 
-	xdef _prtconfig
-_prtconfig: ds.w 1
+	V(_prtconfig,w,1)
 
-	xdef iclk_ready
-iclk_ready: ds.w 1
+	V(iclk_ready,w,1)
 
-	xdef bcmap_root
-bcmap_root: ds.b 16
+	V(bcmap_root,b,16)
 
-	xdef bcmap_devs
-bcmap_devs: ds.l 4*6 /* should be 3 for 2.06 but isnt */
+	V(bcmap_devs,l,4*6) /* should be 3 for 2.06 but isnt */
 
 #if TTMFP_SUPPORT
-	xdef mdm3ibuf
-mdm3ibuf: ds.b SERIAL_BUFSIZE
-	xdef mdm3obuf
-mdm3obuf: ds.b SERIAL_BUFSIZE
-	xdef mdm3iorec
-mdm3iorec: ds.b 2*14+8
+	V(mdm3ibuf,b,SERIAL_BUFSIZE)
+	V(mdm3obuf,b,SERIAL_BUFSIZE)
+	V(mdm3iorec,b,2*14+8)
 #endif
 
-	xdef mdm4ibuf
-mdm4ibuf: ds.b SERIAL_BUFSIZE
-	xdef mdm4obuf
-mdm4obuf: ds.b SERIAL_BUFSIZE
-	xdef mdm4iorec
-mdm4iorec: ds.b 2*14+8
+	V(mdm4ibuf,b,SERIAL_BUFSIZE)
+	V(mdm4obuf,b,SERIAL_BUFSIZE)
+	V(mdm4iorec,b,2*14+8)
 
-	xdef mdm2ibuf
-mdm2ibuf: ds.b SERIAL_BUFSIZE
-	xdef mdm2obuf
-mdm2obuf: ds.b SERIAL_BUFSIZE
-	xdef mdm2iorec
-mdm2iorec: ds.b 2*14+8
+	V(mdm2ibuf,b,SERIAL_BUFSIZE)
+	V(mdm2obuf,b,SERIAL_BUFSIZE)
+	V(mdm2iorec,b,2*14+8)
 
-	xdef fd_retry
-fd_retry: ds.w 1
-	xdef _fd_wp
-_fd_wp: ds.b NUMFLOPPIES
-	xdef _fd_latch
-_fd_latch: ds.b NUMFLOPPIES
-	xdef _fd_lastacc
-_fd_lastacc: ds.l NUMFLOPPIES
-	xdef fd_timeout
-fd_timeout: ds.l 1
-	xdef fd_motoron
-fd_motoron: ds.w 1
-	xdef fd_desel
-fd_desel: ds.w 1
-	xdef fd_dev
-fd_dev: ds.w 1
-	xdef fd_track
-fd_track: ds.w 1
-	xdef fd_sect
-fd_sect: ds.w 1
-	xdef fd_side
-fd_side: ds.w 1
-	xdef fd_scount
-fd_scount: ds.w 1
-	xdef fd_buffer
-fd_buffer: ds.l 1
-	xdef fd_spt
-fd_spt: ds.w 1
-	xdef fd_interlv
-fd_interlv: ds.w 1
-	xdef fd_virgin
-fd_virgin: ds.w 1
-	xdef fd_secmap
-fd_secmap: ds.l 1
-	xdef fd_deferr
-fd_deferr: ds.w 1
-	xdef fd_curerr
-fd_curerr: ds.w 1
+	V(fd_retry,w,1)
+	V(_fd_wp,b,NUMFLOPPIES)
+	V(_fd_latch,b,NUMFLOPPIES)
+	V(_fd_lastacc,l,NUMFLOPPIES)
+	V(fd_timeout,l,1)
+	V(fd_motoron,w,1)
+	V(fd_desel,w,1)
+	V(fd_dev,w,1)
+	V(fd_track,w,1)
+	V(fd_sect,w,1)
+	V(fd_side,w,1)
+	V(fd_scount,w,1)
+	V(fd_buffer,l,1)
+	V(fd_spt,w,1)
+	V(fd_interlv,w,1)
+	V(fd_virgin,w,1)
+	V(fd_secmap,l,1)
+	V(fd_deferr,w,1)
+	V(fd_curerr,w,1)
 
-	xdef flopsregs
-flopsregs: ds.l 9
+	V(flopsregs,l,9)
 
-	xdef dsb
-dsb: ds.b 8*NUMFLOPPIES
+	V(dsb,b,8*NUMFLOPPIES)
 	
-	xdef fd_rtryseek
-fd_rtryseek: ds.w 1
-	xdef fd_frb
-fd_frb: ds.l 1
-	xdef fd_copyp
-fd_copyp: ds.l 1
-	xdef fd_cscnt
-fd_cscnt: ds.w 1
+	V(fd_rtryseek,w,1)
+	V(fd_frb,l,1)
+	V(fd_copyp,l,1)
+	V(fd_cscnt,w,1)
 
-	xdef memtnext
-memtnext: ds.l 1
-	xdef memtaddr
-memtaddr: ds.l 1
-	xdef memtbot
-memtbot: ds.l 1
-	xdef memtend
-memtend: ds.l 1
-	xdef memttop
-memttop: ds.l 1
-	xdef memtzone
-memtzone: ds.l 1
-	xdef memtsize
-memtsize: ds.l 1
+	V(memtnext,l,1)
+	V(memtaddr,l,1)
+	V(memtbot,l,1)
+	V(memtend,l,1)
+	V(memttop,l,1)
+	V(memtzone,l,1)
+	V(memtsize,l,1)
 	
-	xdef memterr
-memterr: ds.w 1
+	V(memterr,w,1)
 
 /*
  * disk_buffer plus pad for equated arrays
@@ -295,143 +196,84 @@ memterr: ds.w 1
 
 	ds.w 1 /* unused */
 
-	xdef biosav
-biosav: ds.l 1
+	V(biosav,l,1)
 
 	ds.l 1 /* unused */
 
-	xdef savesr
-savesr: ds.w 1
+	V(savesr,w,1)
 
-	xdef fstack
-fstack: ds.w 1034
-	xdef fstrt
-fstrt: ds.l 1
-	xdef old_tik
-old_tik: ds.l 1
-	xdef old_2
-old_2: ds.l 1
+	V(fstack,w,1034)
+	V(fstrt,l,1)
+	V(old_tik,l,1)
+	V(old_2,l,1)
 
-	xdef _rseed
-_rseed: ds.l 1
+	V(_rseed,l,1)
 
-	xdef _prtbdev
-_prtbdev: ds.b 1
+	V(_prtbdev,b,1)
 	even
 
-	xdef _prtboch
-_prtboch: ds.b 1
+	V(_prtboch,b,1)
 	even
 
-    xdef _msec
-_msec: ds.w 1
+	V(_msec,w,1)
 
-	xdef _prtbbval
-_prtbbval: ds.w 1
+	V(_prtbbval,w,1)
 
 	ds.b $400
     
-    xdef _supstk
-_supstk: ds.w SUPSIZ
-    xdef _supstkend
-_supstkend: ds.b 0
+	V(_supstk,w,SUPSIZ)
+	V(_supstkend,b,0)
 
-	xdef _prtbflg
-_prtbflg: ds.b 1
+	V(_prtbflg,b,1)
 	even
 	
-	xdef _prtbdmask
-_prtbdmask: ds.b 1
+	V(_prtbdmask,b,1)
 	even
 	
-	xdef _time
-_time: ds.w 1
+	V(_time,w,1)
 
-	xdef _prtboval
-_prtboval: ds.w 4
+	V(_prtboval,w,4)
 
-	xdef _root
-_root: ds.l MAXQUICK
+	V(_root,l,MAXQUICK)
 
 	ds.b 60
 
-	xdef _glbkbchar
-_glbkbchar: ds.l 3*KBBUFSZ
+	V(_glbkbchar,l,3*KBBUFSZ)
 
-	xdef _ofdlist
-_ofdlist: ds.l 1
+	V(_ofdlist,l,1)
 
-	xdef _fd_mediach
-_fd_mediach: ds.l 1
-
-	xdef _glbcolumn
-_glbcolumn: ds.w 3
-
-	xdef _prtbwidth
-_prtbwidth: ds.w 1
+	V(_fd_mediach,l,1)
+	V(_glbcolumn,w,3)
+	V(_prtbwidth,w,1)
 	
-	xdef _drivechange
-_drivechange: ds.b NUMFLOPPIES
+	V(_drivechange,b,NUMFLOPPIES)
+	V(_rrecno,w,1)
+	V(_prtbbytes,w,1)
 
-	xdef _rrecno
-_rrecno: ds.w 1
-
-	xdef _prtbbytes
-_prtbbytes: ds.w 1
-
-	xdef _prtbilow
-_prtbilow: ds.b 1
+	V(_prtbilow,b,1)
 	even
-	xdef _prtbihigh
-_prtbihigh: ds.b 1
+	V(_prtbihigh,b,1)
 	even
 
-	xdef _rwrtflg
-_rwrtflg: ds.w 1
-	xdef _curflop
-_curflop: ds.w 1
+	V(_rwrtflg,w,1)
+	V(_curflop,w,1)
 
-	xdef _prtbwords
-_prtbwords: ds.w 1
+	V(_prtbwords,w,1)
+	V(_prtbstrt,l,1)
+	V(_prtbp2,l,1)
+	V(_prtbchunk,w,1)
 
-	xdef _prtbstrt
-_prtbstrt: ds.l 1
+	V(_virt_work,b,180+MU_PLANES*16*2)
 
-	xdef _prtbp2
-_prtbp2: ds.l 1
-
-	xdef _prtbchunk
-_prtbchunk: ds.w 1
-
-	xdef _virt_work
-_virt_work: ds.b 180+MU_PLANES*16*2
-
-	xdef _prtbp1
-_prtbp1: ds.l 1
-
-	xdef _rdm
-_rdm: ds.l 1
-
-	xdef _prtbgval
-_prtbgval: ds.w 1
-
-	xdef _prtbend
-_prtbend: ds.l 1
-
-	xdef _prtbpmsk
-_prtbpmsk: ds.w 1
-
-	xdef _prtbidx
-_prtbidx: ds.w 1
-
-	xdef _dirlock
-_dirlock: ds.w 1
-
-	xdef _prtbinvert
-_prtbinvert: ds.w 1
-
-	xdef _prtbink
-_prtbink: ds.w 1
+	V(_prtbp1,l,1)
+	V(_rdm,l,1)
+	V(_prtbgval,w,1)
+	V(_prtbend,l,1)
+	V(_prtbpmsk,w,1)
+	V(_prtbidx,w,1)
+	V(_dirlock,w,1)
+	V(_prtbinvert,w,1)
+	V(_prtbink,w,1)
 
 #if STBOOK
 	V(_ofdbuf,b,70*80)
@@ -441,194 +283,323 @@ _prtbink: ds.w 1
 	V(_ofdbuf,b,70*80)
 #endif
 
-	xdef _bpbsums
-_bpbsums: ds.w BPBSECT*NUMFLOPPIES
+	V(_bpbsums,w,BPBSECT*NUMFLOPPIES)
+	V(_oscnt,w,1)
 
-	xdef _oscnt
-_oscnt: ds.w 1
+	V(_ram8x8,b,90)
 
-	xdef _ram8x8
-_ram8x8: ds.b 90
-
-	xdef _rwerr
-_rwerr: ds.l 1
-
-	xdef _prtbrval
-_prtbrval: ds.w 1
-
-	xdef _pmd
-_pmd: ds.l 3
-
-	xdef _sft
-_sft: ds.b OPNFILES*10-6*10
+	V(_rwerr,l,1)
+	V(_prtbrval,w,1)
+	V(_pmd,l,3)
+	V(_sft,b,OPNFILES*10-6*10)
 
 #if TOSVERSION >= 0x300
-	xdef _ram16x32
-_ram16x32: ds.b 90
+	V(_ram16x32,b,90)
 #endif
 	
-	xdef _run
-_run: ds.l 1
+	V(_run,l,1)
 
-	xdef _ram8x16
-_ram8x16: ds.b 90
+	V(_ram8x16,b,90)
     
-    xdef _pbpar
-_pbpar: ds.b 30
+	V(_pbpar,b,30)
 
 #if !STBOOK
 	V(_fill,b,3)
 	even
 #endif
 
-	xdef _bakbuf
-_bakbuf: ds.l 3
+	V(_bakbuf,l,3)
 
 #if STBOOK
 	V(_fill,b,3)
 	even
 #endif
 
-	xdef _blkdev
-_blkdev: ds.b 36*NUMFLOPPIES
-    
-	xdef _secbuf
-_secbuf: ds.b 4*SECTOR_SIZE
+	V(_blkdev,b,36*NUMFLOPPIES)
+	V(_secbuf,b,4*SECTOR_SIZE)
+	V(_osuser,b,1)
+	V(_dirrec,l,1)
+	V(_prtbval,w,16)
+	V(_dirtbl,l,NCURDIR)
+	V(_prtbplanes,w,1)
+	V(_prtboffset,w,1)
+	V(_errbuf,l,3)
+	V(_prtbtcol,w,1)
 
-	xdef _osuser
-_osuser: ds.b 1
+	V(_prtbacol,b,1)
+	even
+	V(_prtbmaxval,w,16)
+	V(_prtbeps,b,1)
+	even
+	V(_prtbobuf,b,8)
+	V(_fd_err,w,NUMFLOPPIES)
+	V(_diruse,b,NCURDIR)
+	V(_drvtbl,l,BLKDEVNUM)
+	V(_drvsel,w,1)
+	V(_prtbheight,w,1)
+	V(_prtbmono,b,1)
+	even
+	V(_prtbmval,w,4)
+	V(_prtbmed,b,1)
+	even
+	V(_prtbempty,b,1)
+	even
+	V(_uptime,l,1)
+	V(_prtblines,w,1)
+	V(_errdrv,w,1)
 
-	xdef _dirrec
-_dirrec: ds.l 1
-
-	xdef _prtbval
-_prtbval: ds.w 16
-    
-	xdef _dirtbl
-_dirtbl: ds.l NCURDIR
-
-	xdef _prtbplanes
-_prtbplanes: ds.w 1
-
-	xdef _prtboffset
-_prtboffset: ds.w 1
-    
-	xdef _errbuf
-_errbuf: ds.l 3
-
-	xdef _prtbtcol
-_prtbtcol: ds.w 1
-
-	xdef _prtbacol
-_prtbacol: ds.b 1
+	V(_prtbodd,b,1)
 	even
 
-	xdef _prtbmaxval
-_prtbmaxval: ds.w 16
-
-	xdef _prtbeps
-_prtbeps: ds.b 1
+	V(_prtbdots,w,1)
+	V(_prtbomask,w,1)
+	V(_prtbbits,w,1)
+	V(_prtbprez,b,1)
 	even
-	
-	xdef _prtbobuf
-_prtbobuf: ds.b 8
+	V(_prtbminval,w,16)
+	V(_ospd,b,256)
+	V(_buptr,l,3)
 
-	xdef _fd_err
-_fd_err: ds.w NUMFLOPPIES
-    
-	xdef _diruse
-_diruse: ds.b NCURDIR
-
-	xdef _drvtbl
-_drvtbl: ds.l BLKDEVNUM
-
-	xdef _drvsel
-_drvsel: ds.w 1
-
-	xdef _prtbheight
-_prtbheight: ds.w 1
-    
-    xdef _prtbmono
-_prtbmono: ds.b 1
+	V(_prtblow,b,1)
 	even
-	
-	xdef _prtbmval
-_prtbmval: ds.w 4
-
-    xdef _prtbmed
-_prtbmed: ds.b 1
-	even
-	
-	xdef _prtbempty
-_prtbempty: ds.b 1
-	even
-	
-    xdef _uptime
-_uptime: ds.l 1
-
-	xdef _prtblines
-_prtblines: ds.w 1
-    
-	xdef _errdrv
-_errdrv: ds.w 1
-
-	xdef _prtbodd
-_prtbodd: ds.b 1
-	even
-
-	xdef _prtbdots
-_prtbdots: ds.w 1
-
-	xdef _prtbomask
-_prtbomask ds.w 1
-	
-	xdef _prtbbits
-_prtbbits: ds.w 1
-    
-	xdef _prtbprez
-_prtbprez: ds.b 1
-	even
-
-	xdef _prtbminval
-_prtbminval: ds.w 16
-    
-	xdef _ospd
-_ospd: ds.b 256
-
-    xdef _buptr
-_buptr: ds.l 3
-
-	xdef _prtblow
-_prtblow: ds.b 1
-	even
-	
-	xdef _prtbamon
-_prtbamon: ds.b 1
+	V(_prtbamon,b,1)
 	even
     
-	xdef _date
-_date: ds.w 1
-
-	xdef _bcbx
-_bcbx: ds.b 4*20
-
-	xdef _prtbbol
-_prtbbol: ds.b 1
+	V(_date,w,1)
+	V(_bcbx,b,4*20)
+	V(_prtbbol,b,1)
 	even
-
-    xdef _beptr
-_beptr: ds.l 3
+	V(_beptr,l,3)
 
 /* This label is referenced by the OSHEADER */
-	xdef _endvdibss
-_endvdibss: ds.b 0
+	V(_endvdibss,b,0)
 
-	ds.b $63E6       /* AES + desktop; not yet finished */
+/* start AES */
+
+	V(retsava,l,1)
+	V(_gl_restype,w,1)
+	V(_gl_rschange,w,1)
+	V(ustak,l,33)
+	V(_diskin,w,1)
+	V(dummycmd,w,1)
+	V(execmode,w,1)
+	V(execflags,l,1)
+	
+	ds.b $13C
+
+	V(pblock,l,5)
+	
+	ds.b $424
+
+	V(savea0,l,1)
+	V(srsave,w,1)
+	V(savsr,w,1)
+	V(psetsr,w,1)
+
+	ds.b $28C
+
+	V(_drwaddr,l,1)
+	V(tikaddr,l,1)
+	ds.l 1
+	V(save_sp,l,1)
+	V(tiksav,l,1)
+	V(_NUM_TICK,l,1)
+	V(_CMP_TICK,l,1)
+
+	ds.b $C4
+	
+	V(fspec,b,8)
+	V(mydev,w,1)
+	V(oldgetbpb,l,1)
+	V(oldmediach,l,1)
+	V(oldrwabs,l,1)
+	ds.l 1 /* unused */
+	V(_maddr,l,1)
+	V(mform,w,37)
+	V(trp13ret,l,1)
+	V(trp14ret,l,1)
+	
+	ds.b $10
+	
+	V(_intout,w,10)
+	
+	ds.w 1
+	
+	V(_ptsout,w,10)
+	
+	ds.b $70
+	
+	V(_xrat,w,1)
+	V(_yrat,w,1)
+	
+	ds.b 10
+	
+	V(_gl_bdelay,w,1)
+	
+	ds.b $64
+	
+	V(_gl_bclick,w,1)
+	
+	ds.b $B4
+	
+	V(_gl_dclick,w,1)
+	
+	ds.b $4A
+	
+	V(_gl_bdesired,w,1)
+	V(_gl_dcindex,w,1)
+	V(_gl_recd,w,1)
+	
+	ds.b $16
+	
+	V(old_bcode,l,1)
+	
+	ds.b $9c
+	
+	V(_gl_moff,w,1)
+	
+	ds.b 8
+	
+	V(_sh_iscart,w,1)
+	
+	ds.b $30
+	
+	V(old_mcode,l,1)
+	
+	ds.w 1
+	
+	V(_gl_ticktime,w,1)
+	
+	ds.b $88
+	
+	V(_DOS_AX,w,1)
+	
+	ds.b $8C
+	
+	V(_ad_envrn,l,1)
+	
+	ds.b $166
+	
+	V(_gl_rbuf,l,1)
+	
+	ds.l 1
+	
+	V(_sh_isgem,w,1)
+	
+	ds.b $74
+	
+	V(_gl_rlen,w,1)
+	
+	ds.b $CE
+	
+	V(_gl_mnpid,l,1) /* BUG: should be int */
+	V(_pr_mclick,l,1)
+	
+	ds.b 12
+	
+	V(_elinkoff,l,1)
+	
+	ds.b $84
+	
+	V(_gl_cowner,l,1)
+	
+	ds.b 4
+	
+	V(_sh_doexec,w,1)
+	
+	ds.b $48
+	
+	V(_gl_btrue,w,1)
+	
+	ds.b $1A
+	
+	V(_gl_kowner,l,1)
+	V(_crt_error,w,1)
+	
+	ds.b 6
+	
+	V(_gl_bowner,l,1)
+	
+	ds.b $9E
+	
+	V(_gl_mvisible,w,1)
+	
+	ds.b $22
+	
+	V(_autoexec,w,1)
+	
+	ds.b $18
+	
+	V(_pr_xrat,w,1)
+	V(_pr_button,w,1)
+	
+	ds.b $1064
+	
+	V(_pr_yrat,w,1)
+	
+	ds.b $44
+	
+	V(_tbutton,w,1)
+	
+	ds.b 14
+	
+	V(_fpcnt,w,1)
+	
+	ds.b $4EE
+	
+	V(_intin,w,128)
+	
+	ds.b $1D2
+	
+	V(_DOS_ERR,w,1)
+	V(_ptsin,w,20)
+	V(_dpd,l,1)
+	V(_fph,w,1)
+	V(_dlr,l,1)
+	V(_drl,l,1)
+	
+	V(_D,b,$369E) /* THEGLO _D */
+	
+	ds.l 1
+	
+	V(_fpt,w,1)
+	V(_nrl,l,1)
+	V(_rlr,l,1)
+	
+	ds.b $24
+	
+	V(_zlr,l,1)
+	
+	ds.b $12
+	
+	V(_sh_gem,w,1)
+	V(_mclick,w,1)
+	
+	ds.b $BE
+	
+	V(_indisp,b,1)
+	even
+	
+	ds.b 8
+	
+	V(_kstate,w,1)
+	
+	ds.b 16
+	
+	V(_contrl,w,12)
+	
+	ds.b $4C
+	
+	V(_mtrans,w,1)
+	
+	ds.b $2E
+	
+	V(_button,w,1)
+	
+/* end AES */
 
 /* This label is referenced by the GEM_MUPB structure */
-	xdef _endgembss
-_endgembss: ds.b 0
+	V(_endgembss,b,0)
 
 /* This label is referenced by the BIOS initialization */
-	xdef __ebss
-__ebss: ds.b 0
+	V(__ebss,b,0)
