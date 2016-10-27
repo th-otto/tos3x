@@ -35,6 +35,7 @@
 #include "../common/config.h"
 #include "vdidefs.h"
 #include "lineaequ.inc"
+#include "../common/tosvars.inc"
 
 /* v_planes == 0; stupid as68 does not optimize it */
 #if (TOSVERSION >= 0x300) | !BINEXACT

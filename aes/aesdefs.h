@@ -1,43 +1,43 @@
-#if TOSVERSION >= 0x0100
+#if TOSVERSION >= 0x100
 #undef AESVERSION
-#define AESVERSION 0x0120
+#define AESVERSION 0x120
 #endif
 
-#if TOSVERSION >= 0x0104
+#if TOSVERSION >= 0x104
 #undef AESVERSION
-#define AESVERSION 0x0140
+#define AESVERSION 0x140
 #endif
 
-#if TOSVERSION >= 0x0201
+#if TOSVERSION >= 0x201
 #undef AESVERSION
-#define AESVERSION 0x0310
+#define AESVERSION 0x310
 #endif
 
-#if TOSVERSION >= 0x0206
+#if TOSVERSION >= 0x206
 #undef AESVERSION
-#define AESVERSION 0x0320
+#define AESVERSION 0x320
 #endif
 
-#if TOSVERSION >= 0x0301
+#if TOSVERSION >= 0x301
 #undef AESVERSION
-#define AESVERSION 0x0300
+#define AESVERSION 0x300
 #endif
 
-#if TOSVERSION >= 0x0306
+#if TOSVERSION >= 0x306
 #undef AESVERSION
-#define AESVERSION 0x0320
+#define AESVERSION 0x320
 #endif
 
 #ifndef MULTITOS
 #define MULTITOS 0
 #endif
 
-#if TOSVERSION >= 0x0400
+#if TOSVERSION >= 0x400
 #undef AESVERSION
 #if MULTITOS
-#define AESVERSION 0x0340
+#define AESVERSION 0x340
 #else
-#define AESVERSION 0x0330
+#define AESVERSION 0x330
 #endif
 #endif
 
@@ -48,8 +48,6 @@
 #define EVB_PROC 5			/* for atari, number of EVB per process */
 
 #define KBD_SIZE 8
-#define QUEUE_SIZE 256
-#define NFORKS 96
 
 #define CARTRIDGE	1	/* if rom cartridge exists */
 
@@ -68,8 +66,16 @@
 #define SUBMENUS (AESVERSION >= 0x340)
 #define AES3D (AESVERSION >= 0x340)
 
-#if TOSVERSION >= 0x400
-#define STACK_SIZE 500
+#if AESVERSION >= 0x330
+#define STACK_SIZE  500
+#define STACK2_SIZE STACK_SIZE
+#define STACK3_SIZE STACK_SIZE
+#define NFORKS      96
+#define QUEUE_SIZE 256
 #else
-#define STACK_SIZE 448
+#define STACK_SIZE  448
+#define STACK2_SIZE 300
+#define STACK3_SIZE 350
+#define NFORKS      32
+#define QUEUE_SIZE 128
 #endif

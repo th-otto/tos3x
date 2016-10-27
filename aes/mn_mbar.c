@@ -106,11 +106,11 @@ PP(BOOLEAN save;)
 {
 	if (save)
 	{
-		gr_mouse(258, NULL);		/* save mouse */
+		gr_mouse(M_SAVE, NULL);		/* save mouse */
 		gr_mouse(ARROW, NULL);
 	} else								/* restore mouse */
 	{
-		gr_mouse(259, NULL);
+		gr_mouse(M_RESTORE, NULL);
 	}
 }
 

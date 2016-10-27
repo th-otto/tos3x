@@ -277,15 +277,19 @@ typedef	struct	window {
 #define THEGLO struct glstr
 THEGLO
 {
-	UDA	g_uda;			/* must be first */
-	UDA	g_2uda;
-	UDA	g_3uda;
-	PD		g_pd[NUM_PDS];
+	UDA		g_uda;			/* must be first */
+	UDA2	g_2uda;
+	UDA3	g_3uda;
+	PD g_pd[NUM_PDS];
 	CDA	g_cda[NUM_PDS];
 	EVB	g_evb[NUM_EVBS];
 
 	FPD	g_fpdx[NFORKS];
-	/* ORECT 	g_olist[NUM_ORECT]; */
+
+#if AESVERSION < 0x330
+#define NUM_ORECT 80
+	ORECT 	g_olist[NUM_ORECT];
+#endif
 
 	char	g_rawstr[MAX_LEN];	/* used in gemoblib.s	*/
 	char	g_tmpstr[MAX_LEN];	/* used in gemoblib.s	*/
@@ -295,11 +299,11 @@ THEGLO
 	char	g_loc1[256];		/* MAX alert length	*/
 	char	g_loc2[256];
 
-	char    g_scrap[164]; /* was: WORD[82]... */
+	char    g_scrap[164];		/* was: WORD[82]... */
 
 	char	g_dir[CMDLEN];		/* changed from 82 to 128 */
 
-	uint16_t	g_sysglo[G_SIZE];
+	uint16_t g_sysglo[G_SIZE];
 
 	char	g_path[CMDLEN];		/* new element		*/
 

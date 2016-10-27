@@ -98,6 +98,11 @@
 	xdef	_gl_mouse
 	comm	_gl_mouse,2
 
+#define iioff pblock+4
+#define pioff pblock+8
+#define iooff pblock+12
+#define pooff pblock+16
+
 GSX_MFS	equ	 0*3
 V_OPNWK	equ	 1*3
 VST_CLP	equ	 2*3
@@ -821,7 +826,7 @@ WORD v_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
 	xdef _v_opnwk
 _v_opnwk:
 
-	move.l	04(sp),iioff		; _intin array is pwork_in
+	move.l	4(sp),iioff		; _intin array is pwork_in
 	move.l	12(sp),a1		; a1 -> pwork_out
 	move.l	a1,iooff		; _intout array is pwork_out
 	lea	90(a1),a1		; a1 -> pwork_out+45
@@ -830,7 +835,7 @@ _v_opnwk:
 	moveq.l	#V_OPNWK,d0
 	bsr	vdi_call
 
-	move.l	08(sp),a1		; a1 -> phandle
+	move.l	8(sp),a1		; a1 -> phandle
 	move.w	_contrl+12,(a1)		; phandle <- workstation handle
 	
 	move.l	#_intin,iioff

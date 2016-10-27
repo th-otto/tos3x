@@ -172,9 +172,10 @@ uint16_t d_rezword;					/* default resolution for sparrow */
 
 static char autopath[128];
 
+#if AESVERSION >= 0x320
 MFORM gl_cmform;						/* current aes mouse form   */
-
 MFORM gl_omform;						/* old aes mouse form       */
+#endif
 
 #if DOWARNING
 BOOLEAN dowarn;
@@ -364,8 +365,8 @@ VOID gem_main(NOTHING)
 		pinit(&DGLO->g_pd[i], &DGLO->g_cda[i]);
 
 	DGLO->g_pd[0].p_uda = &DGLO->g_uda;
-	DGLO->g_pd[1].p_uda = &DGLO->g_2uda;
-	DGLO->g_pd[2].p_uda = &DGLO->g_3uda;
+	DGLO->g_pd[1].p_uda = (UDA *)&DGLO->g_2uda;
+	DGLO->g_pd[2].p_uda = (UDA *)&DGLO->g_3uda;
 	
 	/* if not rlr then initialize his stack pointer */
 	DGLO->g_2uda.u_spsuper = &DGLO->g_2uda.u_supstk;
@@ -446,16 +447,18 @@ VOID gem_main(NOTHING)
 	rs_gaddr(ad_sysglo, R_BIPDATA, MICE2, &ad_hgmice);
 	ad_hgmice = (VOIDPTR)LLGET((intptr_t)ad_hgmice);
 
+#if AESVERSION >= 0x320
 	gl_cmform = *((MFORM *) ad_hgmice);
-	/* fix up icons     */
+#endif
+	/* fix up icons */
 	for (i = 0; i < 3; i++)
 	{
 		rs_gaddr(ad_sysglo, R_BITBLK, i, &tmpadbi);
 		LBCOPY(ADDR(&bi), tmpadbi, sizeof(BITBLK));
 /*	  gsx_trans(bi.bi_pdata, bi.bi_wb, bi.bi_pdata, bi.bi_wb, bi.bi_hl);	*/
 	}
-	/* take the critical err */
-	/*   handler int.   */
+	
+	/* take the critical err handler int. */
 	cli();
 	takeerr();
 	sti();
@@ -463,17 +466,19 @@ VOID gem_main(NOTHING)
 	sh_tographic();						/* go into graphic mode */
 	sh_gem = TRUE;
 
-	/* take the tick int.   */
+	/* take the tick int. */
 	cli();
 	gl_ticktime = gsx_tick(tikaddr, &tiksav);
 	sti();
+
 	/* set init. click rate */
 	ev_dclick(3, TRUE);
-	/* get st_desk ptr  */
+
+	/* get st_desk ptr */
 	rs_gaddr(ad_sysglo, R_TREE, SCREEN, (VOIDPTR *)&ad_stdesk);
 	tree = ad_stdesk;
-	/* fix up the GEM rsc. file now that we have an open WS    */
 
+	/* fix up the GEM rsc. file now that we have an open WS    */
 	/* This code is also in gemshlib, but it belongs here so that the correct
 	 * default GEM backdrop pattern is set for accessories and autoboot app.
 	 */
@@ -567,7 +572,9 @@ VOID gem_main(NOTHING)
 
 	/* free up the acc's    */
 	free_accs();
+	
 	/* free up special glue */
+	
 	/* give back the tick   */
 	cli();
 	gl_ticktime = gsx_tick(tiksav, &tiksav);
@@ -822,8 +829,8 @@ VOID gsx_xmfset(P(MFORM *) pmfnew)
 PP(MFORM *pmfnew;)
 {
 	gsx_moff();
-	LWCOPY(ad_intin, pmfnew, 37);
-	gsx_ncode(ST_CUR_FORM, 0, 37);
+	LWCOPY(ad_intin, pmfnew, sizeof(MFORM) / 2);
+	gsx_ncode(ST_CUR_FORM, 0, sizeof(MFORM) / 2);
 	gsx_mon();
 }
 
@@ -832,16 +839,23 @@ VOID gsx_mfset(P(MFORM *) pmfnew)
 PP(MFORM *pmfnew;)
 {
 	gsx_moff();
+#if AESVERSION >= 0x320
 	gl_omform = gl_cmform;
-	LWCOPY(ad_intin, pmfnew, 37);
-	gsx_ncode(ST_CUR_FORM, 0, 37);
-	gl_cmform = *((MFORM *) pmfnew);
+#endif
+	LWCOPY(ad_intin, pmfnew, sizeof(MFORM) / 2);
+	gsx_ncode(ST_CUR_FORM, 0, sizeof(MFORM) / 2);
+#if AESVERSION >= 0x320
+	gl_cmform = *pmfnew;
+#endif
 	gsx_mon();
 }
 
 
-/*	Graf mouse		*/
-
+/*
+ * AES #78 - graf_mouse - Change the appearance of the mouse pointer.
+ *
+ * Graf mouse
+ */
 VOID gr_mouse(P(int16_t) mkind, P(MFORM *) grmaddr)
 PP(register int16_t mkind;)
 PP(MFORM *grmaddr;)
@@ -849,31 +863,33 @@ PP(MFORM *grmaddr;)
 	VOIDPTR maddr;
 	MFORM omform;
 
-	if (mkind > 255)
+	if (mkind > USER_DEF)
 	{
 		switch (mkind)
 		{
-		case 256:
+		case M_OFF:
 			gsx_moff();
 			break;
 
-		case 257:
+		case M_ON:
 			gsx_mon();
 			break;
 
-		case 258:						/* save mouse form  */
+#if AESVERSION >= 0x320
+		case M_SAVE:						/* save mouse form  */
 			rlr->p_mouse = gl_cmform;
 			break;
 
-		case 259:						/* restore saved mouse form */
+		case M_RESTORE:						/* restore saved mouse form */
 			omform = rlr->p_mouse;
 			gsx_mfset(&omform);
 			break;
 
-		case 260:						/* restore previous mouse form  */
+		case M_PREV:						/* restore previous mouse form  */
 			omform = gl_omform;
 			gsx_mfset(&omform);
 			break;
+#endif
 		}
 	} else
 	{

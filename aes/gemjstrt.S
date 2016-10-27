@@ -60,7 +60,11 @@
 	text
 
 uda_size	equ	74+4*STACK_SIZE
-init_size	equ	uda_size-2	/* 0 relative: BUG: should point to uda.u_supstk, which is -4 from end of structure */
+/* 0 relative */
+/* BUG: should point to uda.u_supstk, which is -4 from end of structure
+   most likely wrong port from x86 version where u_supstk is 2 bytes
+*/
+init_size	equ	uda_size-2
 fsize		equ	100		* size of linef handler in bytes+ a little fat
 
 #define fline		0		/* 1-line "F" included */

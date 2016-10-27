@@ -45,36 +45,23 @@ VOID bhdv_init(NOTHING)
 	for (dev = curflop = nflops = 0; dev < NUMFLOPPIES; dev++)
 	{
 		drivechange[dev] = MEDIANOCHANGE;
+#if BINEXACT
 		/*
-		 * FIXME: in original call, ALL parameters to flopini()
-		 * are pushed on the stack. Usually, only all but the last are pushed,
-		 * and the last written to the reserved area at (sp).
-		 * I have not found yet a construct that might be causing this.
+		 * Another strange hack: parameters are wrong,
+		 * but the optimizer will convert the last 2 zeroes
+		 * into a single 0L.
+		 * If you pass NULL, that will be a single parameter,
+		 * the compiler generates different code,
+		 * and the optimizer will be fooled.
 		 */
-#ifdef __ALCYON__
-		asm("clr.l     -(a7)"); /* will be clr.l (a7) when compiled */
-		asm("clr.w     -(a7)");
-		asm("move.w    -2(a6),-(a7)");
-		asm("clr.l     -(a7)");
-		asm("clr.l     -(a7)");
-		asm("jsr       _flopini");
-		asm("adda.w    #16,a7"); /* will be adda.w #12,a7 when compiled */
-		asm("move.w    d0,-(a7)");
-		asm("movea.w   -2(a6),a0");
-		asm("adda.l    a0,a0");
-		asm("adda.l    #_fd_err,a0");
-		asm("move.w    (a7)+,(a0)");
-		asm("bne.s     L999");
-		asm("addq.w    #1,_nflops");
-		asm("ori.l     #3,_drvbits");
-		asm("L999:")
-#else
+		if ((fd_err[dev] = flopini(NULL, NULL, dev, 0, 0, 0)) == 0)
+#else		
 		if ((fd_err[dev] = flopini(NULL, NULL, dev, 0, NULL)) == 0)
+#endif
 		{
 			++nflops;
 			drvbits |= 3;
 		}
-#endif
 	}
 }
 

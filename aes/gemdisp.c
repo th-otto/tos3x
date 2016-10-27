@@ -50,23 +50,19 @@
 
 #define KEYSTOP 0x2b1c0000L				/* control backslash    */
 
-/****************************************************************
- * externals							*
- ****************************************************************/
-
 PD *dpd;								/* critical error process   */
 PD *slr;
 
 /****************************************************************/
 
+/* 306de: 00e1b8ea */
 BOOLEAN forkq(P(FCODE) fcode, P(int32_t) fdata)
 PP(FCODE fcode;)
 PP(int32_t fdata;)
 {
 	register FPD *f;
 
-	/* q a fork process,    */
-	/*   enter with ints OFF */
+	/* q a fork process, enter with ints OFF */
 	if (fpcnt < NFORKS)
 	{
 		f = &D.g_fpdx[fpt++];
@@ -89,13 +85,12 @@ PP(register PD *p;)
 {
 	register PD *pq, *q;
 
-	/* process is ready,    */
-	/*   so put him on RLR  */
+	/* process is ready, so put him on RLR */
 	p->p_stat &= ~PS_MWAIT;
 	p->p_stat |= PS_RUN;
 	/* find the end     */
 	for (pq = (q = (PD *) & rlr)->p_link; pq; pq = (q = pq)->p_link) ;
-	/* link him in      */
+	/* link him in */
 	p->p_link = pq;
 	q->p_link = p;
 }
@@ -134,18 +129,16 @@ VOID forker(NOTHING)
 		if (gl_recd)
 		{
 			/* check for stop key */
-			if ((f->f_code == &kchange) && ((f->f_data & 0xffff0000L) == KEYSTOP))
+			if ((f->f_code == kchange) && ((f->f_data & 0xffff0000L) == KEYSTOP))
 				gl_recd = FALSE;
-			/* if still recording   */
-			/*   then handle event  */
+			/* if still recording then handle event */
 			if (gl_recd)
 			{
-				/* if its a time event & */
-				/*   previously recorded */
-				/*   was a time event   */
-				/*   then coalesce them */
-				/*   else record the    */
-				/*   event      */
+				/*
+				 * if its a time event & previously recorded
+				 * was a time event then coalesce them 
+				 * else record the event
+				 */
 				if ((f->f_code == tchange) && (LLGET(gl_rbuf - sizeof(FPD)) == (intptr_t)tchange))
 				{
 					amt = f->f_data + LLGET(gl_rbuf - sizeof(int32_t));
@@ -229,26 +222,23 @@ VOID disp(NOTHING)
 	register PD *p;
 	register PD *p1;
 
-	/* take the process p   */
-	/*   off the ready list */
-	/*   root       */
+	/* take the process p off the ready list root */
 	if (crt_error)
 	{
 		dpd = rlr;						/* save the current process */
 	}
 
 	rlr = (p = rlr)->p_link;
-	/* based on the state   */
-	/*   of the process p   */
-
-	/*   do something   */
+	/* based on the state of the process p do something */
 	if (p->p_stat & PS_RUN)
+	{
 		disp_act(p);
-	else if (p->p_stat & PS_MWAIT)		/* mwait_act( p );  */
+	} else if (p->p_stat & PS_MWAIT)		/* mwait_act( p );  */
 	{
 		if (p->p_evwait & p->p_evflg)
+		{
 			disp_act(p);
-		else
+		} else
 		{
 			if ((p->p_stat & PS_TOSUSPEND) && (!wwait))
 				suspend_act(p);			/* suspend the process  */
@@ -266,25 +256,27 @@ VOID disp(NOTHING)
 	do
 	{
 		forker();
-		/*  schedule();     */
-		/* run through lists    */
-		/*   until someone is   */
-		/*   on the rlr or the  */
-		/*   fork list      */
+		/* 
+		 * schedule();
+		 *
+		 * run through lists until someone is on the rlr or the fork list
+		 */
 		do
 		{
-			/* poll the keyboard    */
+			/* poll the keyboard */
 			chkkbd();
-			/* now move drl     */
-			/*   processes to rlr   */
+			/* now move drl processes to rlr */
 
 			while (drl)
 			{
 				drl = (p = drl)->p_link;
 				disp_act(p);
 			}
-			/* check if there is    */
-			/*   something to run   */
+			/* check if there is something to run */
+#ifdef THROTTLE_CPU
+			if (!rlr && !fpcnt)
+				idle();
+#endif
 		} while (!rlr && !fpcnt);
 
 	} while (fpcnt);
@@ -314,8 +306,7 @@ VOID disp(NOTHING)
 	  d_2:
 		crt_error = FALSE;
 	}
-	/* This process is to be suspended */
-	/* when it return to here   */
+	/* This process is to be suspended when it return to here   */
 	if (rlr->p_stat & PS_TRYSUSPEND)
 	{
 		rlr->p_stat &= ~PS_TRYSUSPEND;
@@ -323,7 +314,7 @@ VOID disp(NOTHING)
 	}
 
 	cda = rlr->p_cda;					/* switch to the context of the */
-	/* appropriate process      */
+	/* appropriate process */
 }
 
 /****************************************************************

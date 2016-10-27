@@ -27,6 +27,7 @@
 #include "vdidefs.h"
 #include "lineaequ.inc"
 #include "../common/asmdefs.h"
+#include "../common/tosvars.inc"
 
 #if BLITTER_SUPPORT /* whole file */
 

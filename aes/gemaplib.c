@@ -67,7 +67,7 @@ int16_t gl_my;					/* 3/12/86  */
 int16_t ap_init(P(intptr_t) pglobal)
 PP(intptr_t pglobal;)
 {
-	LLSET(pglobal, ((long)AESVERSION < 16) | (MULTITOS ? 0 : 1));		/* version 3.40     */
+	LLSET(pglobal, (((long)AESVERSION) << 16) | (MULTITOS ? 0 : 1));		/* version 3.40     */
 	LWSET(pglobal + 4, rlr->p_pid);
 	LWSET(pglobal + 20, gl_nplanes);
 	LLSET(pglobal + 22, &D);
@@ -83,7 +83,7 @@ PP(intptr_t pglobal;)
  *
  * Application Exit
  */
-
+/* 306de: 00e19a72 */
 int16_t ap_exit(NOTHING)
 {
 	mn_clsda();
@@ -99,8 +99,10 @@ int16_t ap_exit(NOTHING)
 }
 
 
-/*	Read the internal process message	*/
-
+/*
+ * Read the internal process message
+ */
+/* 306de: 00e19abc */
 int16_t rd_mymsg(P(VOIDPTR) buffer)
 PP(VOIDPTR buffer;)
 {
@@ -141,6 +143,7 @@ PP(int16_t *pbuff;)
  *
  *	APplication FIND
  */
+/* 306de: 00e19b16 */
 int16_t ap_find(P(const char *) pname)
 PP(const char *pname;)
 {
@@ -162,6 +165,7 @@ PP(const char *pname;)
  *
  *	Application Tape Player
  */
+/* 306de: 00e19b54 */
 VOID ap_tplay(P(intptr_t) pbuff, P(int16_t) length, P(int16_t) scale)
 PP(register intptr_t pbuff;)
 PP(int16_t length;)
@@ -195,10 +199,18 @@ PP(int16_t scale;)
 			{
 				/* disconnect the cursor from VDI until the playing is done */
 				i_lptr1(justretf, 0x0);
+#if BINEXACT
+				gsx_ncode(CUR_VECX, 0L); /* sigh */
+#else
 				gsx_ncode(CUR_VECX, 0, 0);
+#endif
 				m_lptr2(&drwaddr);
-				i_lptr1(justretf, 0x0);	/* not interrupt of mouse */
-				gsx_ncode(MOT_VECX, 0, 0);	/* movement       */
+				i_lptr1(justretf, 0x0);	/* not interrupt of mouse movement */
+#if BINEXACT
+				gsx_ncode(MOT_VECX, 0L); /* sigh */
+#else
+				gsx_ncode(MOT_VECX, 0, 0);
+#endif
 				m_lptr2(&gl_store);
 			}
 			f.f_code = mchange;
@@ -231,9 +243,15 @@ PP(int16_t scale;)
 		gsx_ncode(LOCATOR_INPUT, 1, 0);
 #endif
 		i_lptr1(drwaddr);
+#if BINEXACT
+		gsx_ncode(CUR_VECX, 0L); /* sigh */
+		i_lptr1(gl_store, 0x0);
+		gsx_ncode(MOT_VECX, 0L); /* sigh */
+#else
 		gsx_ncode(CUR_VECX, 0, 0);
 		i_lptr1(gl_store, 0x0);
 		gsx_ncode(MOT_VECX, 0, 0);
+#endif
 
 #if UNLINKED
 		xrat = gl_mx;
@@ -250,6 +268,7 @@ PP(int16_t scale;)
  *
  *	APplication Tape RECorDer
  */
+/* 306de: 00e19cf0 */
 int16_t ap_trecd(P(intptr_t) pbuff, P(int16_t) length)
 PP(register intptr_t pbuff;)
 PP(register int16_t length;)

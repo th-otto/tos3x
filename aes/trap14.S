@@ -53,34 +53,40 @@
 	
 	xdef fspec		/* file to look for (doesn't matter) */
 	comm fspec,112
-
-#define mydev      fspec+8
-#define oldgetbpb  fspec+10
-#define oldmediach fspec+14
-#define oldrwabs   fspec+18
-/* unused var */
+	xdef mydev
+	comm mydev,2
+	xdef oldgetbpb
+	comm oldgetbpb,4
+	xdef oldmediach
+	comm oldmediach,4
+	xdef oldrwabs
+	comm oldrwabs,4
+	
 /* used by gembind:graf_mouse as a flag */
 	xdef _maddr
-_maddr     equ fspec+26
-#define mform      fspec+30
-#define trp13ret   fspec+104
-#define trp14ret   fspec+108
+	comm _maddr,4
+	xdef mform
+	comm mform,74  /* sizeof(MFORM) */
+	xdef trp13aret
+	comm trp13aret,4
+	xdef trp14aret
+	comm trp14aret,4
 
 	text
 
 	xdef _trp13
 _trp13:
-	move.l	(sp)+,trp13ret
+	move.l	(sp)+,trp13aret
 	trap	#13
-	move.l	trp13ret,-(sp)
+	move.l	trp13aret,-(sp)
 	rts
 
 
 	xdef _trp14
 _trp14:
-	move.l	(sp)+,trp14ret
+	move.l	(sp)+,trp14aret
 	trap	#14
-	move.l	trp14ret,-(sp)
+	move.l	trp14aret,-(sp)
 	rts
 
 

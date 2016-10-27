@@ -33,7 +33,7 @@ aes.o: vars.o $(STARTUP) $(AES_OBJS) aesext.o $(top_srcdir)/common/sections.mak 
 	$(LD) -nostartfiles -nostdlib -o $@ -Wl,--script=../common/rom.ld,-Ttext=0x$(rombase),-Tbss=0 $(STARTUP) $(AES_OBJS) aesext.o -lgcc
 
 vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
-	$(AM_V_AS)$(CC) -Wa,--mri $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(AM_V_AS)$(CC) -Wa,--mri --traditional-cpp $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 check:: aes.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \

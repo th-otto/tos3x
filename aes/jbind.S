@@ -100,12 +100,13 @@ call_err:
 	addq	#8,a7
 	rts
 
+/* 306de: 00e255aa */
 	xdef	_giveerr
 _giveerr:
 	move.l	_crit_err,d0
 	bra	call_err
 
-*
+/* 306de: 00e255b2 */
 	xdef	_takeerr
 _takeerr:
 	move.l	#-1,d0			; get the old one

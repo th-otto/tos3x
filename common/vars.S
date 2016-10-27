@@ -388,8 +388,9 @@ name: ds.t size
 	ds.b $13C
 
 	V(pblock,l,5)
+	V(_crit_err,l,1)
 	
-	ds.b $424
+	ds.b $420
 
 	V(savea0,l,1)
 	V(srsave,w,1)
@@ -416,8 +417,8 @@ name: ds.t size
 	ds.l 1 /* unused */
 	V(_maddr,l,1)
 	V(mform,w,37)
-	V(trp13ret,l,1)
-	V(trp14ret,l,1)
+	V(trp13aret,l,1)
+	V(trp14aret,l,1)
 	
 	ds.b $10
 	
@@ -427,16 +428,28 @@ name: ds.t size
 	
 	V(_ptsout,w,10)
 	
-	ds.b $70
+	ds.b $46
+
+	V(_gl_adacc,l,MAX_ACCS)
+
+	ds.b $12
 	
 	V(_xrat,w,1)
 	V(_yrat,w,1)
 	
-	ds.b 10
+	ds.b 4
+	
+	V(_gl_naccs,w,1)
+	
+	ds.b 4
 	
 	V(_gl_bdelay,w,1)
 	
-	ds.b $64
+	ds.b 4
+	
+	V(_gl_pacc,l,MAX_ACCS)
+	
+	ds.b $48
 	
 	V(_gl_bclick,w,1)
 	
@@ -454,7 +467,15 @@ name: ds.t size
 	
 	V(old_bcode,l,1)
 	
-	ds.b $9c
+	ds.b 6
+	
+	V(_gl_bvhard,w,1)
+	
+	ds.b $82
+	
+	V(_gl_bvdisk,w,1)
+	
+	ds.b $10
 	
 	V(_gl_moff,w,1)
 	
@@ -465,9 +486,7 @@ name: ds.t size
 	ds.b $30
 	
 	V(old_mcode,l,1)
-	
-	ds.w 1
-	
+	V(_gl_nplanes,w,1)
 	V(_gl_ticktime,w,1)
 	
 	ds.b $88
@@ -490,7 +509,11 @@ name: ds.t size
 	
 	V(_gl_rlen,w,1)
 	
-	ds.b $CE
+	ds.b 10
+	
+	V(_sys_adacc,l,1)
+	
+	ds.b $C0
 	
 	V(_gl_mnpid,l,1) /* BUG: should be int */
 	V(_pr_mclick,l,1)
@@ -498,8 +521,9 @@ name: ds.t size
 	ds.b 12
 	
 	V(_elinkoff,l,1)
+	V(_gl_play,w,1)
 	
-	ds.b $84
+	ds.b $82
 	
 	V(_gl_cowner,l,1)
 	
@@ -520,7 +544,11 @@ name: ds.t size
 	
 	V(_gl_bowner,l,1)
 	
-	ds.b $9E
+	ds.b $86
+	
+	V(_wind_spb,b,10)    /* sizeof(SPB) */
+	
+	ds.b $E
 	
 	V(_gl_mvisible,w,1)
 	
@@ -558,16 +586,16 @@ name: ds.t size
 	V(_dlr,l,1)
 	V(_drl,l,1)
 	
-	V(_D,b,$369E) /* THEGLO _D */
+	V(_D,b,$369E) /* sizeof(THEGLO) _D */
 	
-	ds.l 1
-	
+	V(_eul,l,1)
 	V(_fpt,w,1)
 	V(_nrl,l,1)
 	V(_rlr,l,1)
 	
-	ds.b $24
+	ds.b 8
 	
+	V(_evx,b,28) /* sizeof(EVB) */
 	V(_zlr,l,1)
 	
 	ds.b $12
@@ -580,7 +608,11 @@ name: ds.t size
 	V(_indisp,b,1)
 	even
 	
-	ds.b 8
+	ds.b 2
+	V(_infork,b,1)
+	even
+	ds.b 2
+	ds.b 2
 	
 	V(_kstate,w,1)
 	

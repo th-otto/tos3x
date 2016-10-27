@@ -44,7 +44,7 @@ int16_t ROM_UD_PATRN[16] = {
 #endif
 };
 
-int16_t const OEMMSKPA = 7;
+int16_t const OEMMSKPAT = 7;
 int16_t const OEMPAT[128] = {
 						/* Brick */
 0xFFFF, 0x8080, 0x8080, 0x8080, 0xFFFF, 0x0808, 0x0808, 0x0808,

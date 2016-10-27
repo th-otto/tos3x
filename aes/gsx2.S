@@ -42,16 +42,13 @@
 
 	bss
 
+
 	xdef pblock
 	comm pblock,20
-	xdef iioff
-iioff equ pblock+4
-	xdef pioff
-pioff equ pblock+8
-	xdef iooff
-iooff equ pblock+12
-	xdef pooff
-pooff equ pblock+16
+#define iioff pblock+4
+#define pioff pblock+8
+#define iooff pblock+12
+#define pooff pblock+16
 
 	text
 

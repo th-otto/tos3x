@@ -221,6 +221,7 @@ VOID ldaccs(NOTHING)
 }
 
 
+/* 306de: 00e1b084 */
 VOID free_accs(NOTHING)
 {
 	register int16_t i;
@@ -228,20 +229,21 @@ VOID free_accs(NOTHING)
 
 	if (sys_adacc)
 	{
-		dos_free((VOIDPTR)LLGET(sys_adacc + 0x2c));	/* free envr string */
+		dos_free((VOIDPTR)LLGET(sys_adacc + 0x2c));	/* free environment string */
 		dos_free(sys_adacc);
 	}
 
 	for (i = 0; i < gl_naccs; i++)
 	{
 		ptmp = gl_adacc[i];
-		dos_free((VOIDPTR)LLGET(ptmp + 0x2c));	/* free envr string */
+		dos_free((VOIDPTR)LLGET(ptmp + 0x2c));	/* free environment string */
 		dos_free(ptmp);					/* free acc's memory        */
 		dos_free(gl_pacc[i]);			/* free process descriptors */
 	}
 }
 
 
+/* 306de: 00e1b0fe */
 BOOLEAN cre_aproc(NOTHING)
 {
 	register PD *ppd;

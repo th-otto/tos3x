@@ -417,10 +417,13 @@ typedef struct rshdr
 #define FMD_SHRINK 2
 #define FMD_FINISH 3
 
-#define USER_DEF 255
-#define M_OFF 256
-#define M_ON 257
-#define ARROW	0
+#define USER_DEF  255
+#define M_OFF     256
+#define M_ON      257
+#define M_SAVE    258
+#define M_RESTORE 259
+#define M_PREV    260 
+#define ARROW	          0
 #define TEXT_CRSR         1
 #define HOURGLASS         2
 #define BUSY_BEE          HOURGLASS
