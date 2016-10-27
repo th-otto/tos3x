@@ -7,6 +7,7 @@ DESK_OBJS5 = deskupda.o deskwin.o deskmn.o deskif.o osbind.o
 DESK_OBJS = $(DESK_OBJS1) $(DESK_OBJS2) $(DESK_OBJS3) $(DESK_OBJS4) $(DESK_OBJS5) $(DESK_OBJS6) $(DESK_OBJS7)
 
 DESK_SRCS = \
+	deskdefs.h \
 	deskact.c \
 	deskapp.c \
 	deskbind.c \

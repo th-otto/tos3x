@@ -1,6 +1,9 @@
 top_srcdir=..
 subdir=common
 
+include $(top_srcdir)/GNUmakefile.common
+include $(top_srcdir)/Makefile.silent
+
 all: $(top_srcdir)/common/sections.mak
 
 include SRCFILES

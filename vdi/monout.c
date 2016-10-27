@@ -1003,8 +1003,8 @@ VOID cir_dda(NOTHING)
 	x = 0;
 	d = 3 - 2 * y;
 
-	xptr = &q_circle[x];
-	yptr = &q_circle[y];
+	xptr = &LV(q_circle)[x];
+	yptr = &LV(q_circle)[y];
 
 	/* Do an octant, starting at north.  The values for the next octant */
 	/* (clockwise) will be filled by transposing x and y.               */
@@ -1027,7 +1027,7 @@ VOID cir_dda(NOTHING)
 	}
 
 	if (x == y)
-		q_circle[x] = x;
+		LV(q_circle)[x] = x;
 
 #if TOSVERSION >= 0x300
 	/* Fake a pixel averaging when converting to non-1:1 aspect ratio. */
@@ -1042,25 +1042,25 @@ VOID cir_dda(NOTHING)
 
 			if (y == d)
 			{
-				q_circle[i] = q_circle[x];
+				LV(q_circle)[i] = LV(q_circle)[x];
 			} else
 			{
 				d = y;
 				x -= 1;
-				q_circle[i] = q_circle[x];
+				LV(q_circle)[i] = LV(q_circle)[x];
 			}
 		}
 	} else
 	{
 		x = 1;
-		yptr = q_circle + 1;
+		yptr = LV(q_circle) + 1;
 
 		for (i = 1; i <= LV(num_qc_lines); i++)
 		{
 			y = i * ysize / xsize;
 			d = 0;
 
-			xptr = &q_circle[x];
+			xptr = &LV(q_circle)[x];
 
 			for (j = x; j <= y; j++)
 				d += *xptr++;
@@ -1159,7 +1159,7 @@ VOID wline(NOTHING)
 
 		if (vx == 0)
 		{
-			vx = q_circle[0];
+			vx = LV(q_circle)[0];
 			vy = 0;
 		}
 		/* End if:  vertical. */
@@ -1247,7 +1247,7 @@ PP(int16_t *py;)
 	vx = px;
 	vy = py;
 
-	pcircle = q_circle;
+	pcircle = LV(q_circle);
 
 	/* Mirror transform the vector so that it is in the first quadrant. */
 
@@ -1368,7 +1368,7 @@ PP(int16_t cy;)
 	if (LV(num_qc_lines) > 0)
 	{
 		/* Do the horizontal line through the center of the circle. */
-		pointer = q_circle;
+		pointer = LV(q_circle);
 		LV(X1) = cx - *pointer;
 		LV(X2) = cx + *pointer;
 		LV(Y1) = LV(Y2) = cy;
@@ -1385,7 +1385,7 @@ PP(int16_t cy;)
 #endif
 		{
 			/* Upper semi-circle. */
-			pointer = &q_circle[k];
+			pointer = &LV(q_circle)[k];
 			LV(X1) = cx - *pointer;
 			LV(X2) = cx + *pointer;
 #if TOSVERSION >= 0x300
@@ -1396,7 +1396,7 @@ PP(int16_t cy;)
 			if (clip_line())
 			{
 				ABLINE();
-				pointer = &q_circle[k];
+				pointer = &LV(q_circle)[k];
 			}
 
 			/* Lower semi-circle. */

@@ -9,6 +9,18 @@ AES_OBJS7 = jdispa.o jdos.o large.o function.o optimize.o ratrbp.o trap14.o
 AES_OBJS = $(AES_OBJS1) $(AES_OBJS2) $(AES_OBJS3) $(AES_OBJS4) $(AES_OBJS5) $(AES_OBJS6) $(AES_OBJS7)
 
 AES_SRCS = \
+	aes.h \
+	aesdefs.h \
+	alert.h \
+	crysbind.h \
+	dos.h \
+	gemusa.h \
+	gsxdefs.h \
+	mn_tools.h \
+	mode.h \
+	obdefs.h \
+	struct88.h \
+	taddr.h \
 	gemaints.c \
 	gemaplib.c \
 	gemasync.c \

@@ -1,1 +1,8 @@
 SRCS = cmprom.c newglue.c
+
+
+EXTRA_DIST = \
+	GNUmakefile \
+	Makefile \
+	SRCFILES \
+	$(empty)

@@ -1,8 +1,7 @@
-SRCS = vars.S tosvars.S sections.inc
+SRCS = vars.S tosvars.S tosvars.inc sections.inc asmdefs.h ctrycodes.h rom.ld
 
 EXTRA_DIST = \
 	GNUmakefile \
 	Makefile \
 	SRCFILES \
-	optimize.mak \
 	$(empty)

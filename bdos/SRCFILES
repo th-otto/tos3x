@@ -24,6 +24,7 @@ BDOS_OBJS = $(BDOS_$(TOSVERSION)_OBJS)
 
 
 BDOS_SRCS = \
+	bdosdefs.h \
 	osinit.S \
 	lmul.S \
 	ldiv.S \
