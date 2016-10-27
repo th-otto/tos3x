@@ -22,11 +22,11 @@
 
 int16_t gl_dspcnt; /* unused */
 
-static VOIDPTR ad_rso;
+VOIDPTR ad_rso;
 
 extern VOIDPTR maddr; /* hmpf */
 
-uint16_t crysbind PROTO((int16_t opcode, intptr_t pglobal, int16_t *int_in, int16_t *int_out, VOIDPTR *addr_in));
+uint16_t crysbind PROTO((int16_t opcode, intptr_t pglobal, uint16_t *int_in, int16_t *int_out, VOIDPTR *addr_in));
 
 
 #define CONTROL LLGET(pcrys_blk)
@@ -37,12 +37,19 @@ uint16_t crysbind PROTO((int16_t opcode, intptr_t pglobal, int16_t *int_in, int1
 #define ADDR_OUT LLGET(pcrys_blk+20)
 
 
-uint16_t crysbind(P(int16_t) opcode, P(intptr_t) pglobal, P(int16_t *) int_in, P(int16_t *) int_out, P(VOIDPTR *) addr_in)
+/* 306de: 00e1a2d2 */
+uint16_t crysbind(P(int16_t) opcode, P(intptr_t) pglobal, P(uint16_t *) int_in, P(int16_t *) int_out, P(VOIDPTR *) addr_in)
 PP(int16_t opcode;)
 PP(register intptr_t pglobal;)
-PP(register int16_t *int_in;)
+#if BINEXACT & (AESVERSION < 0x330)
+PP(uint16_t *int_in;)
+PP(int16_t *int_out;)
+PP(VOIDPTR *addr_in;)
+#else
+PP(register uint16_t *int_in;)
 PP(register int16_t *int_out;)
 PP(register VOIDPTR *addr_in;)
+#endif
 {
 	intptr_t tmparm;
 	intptr_t lbuparm;
@@ -85,6 +92,43 @@ PP(register VOIDPTR *addr_in;)
 	case APPL_EXIT:
 		ap_exit();
 		break;
+#if GEM3
+/*
+ * AES #16 - appl_bvset - Set the available logical drives for the file-selector. 
+ */
+	case APPL_BVSET:
+		gl_bvdisk = ((uint32_t) AP_BVDISK) << 16;
+		gl_bvhard = ((uint32_t) AP_BVHARD) << 16;
+		break;
+/*
+ * AES #17 - appl_yield - Force AES process-switch. 
+ */
+	/*
+	 * was never implement in TOS GEM, but calling trap #2
+	 * with D0 = 201 does the same thing
+	 */
+	case APPL_YIELD:
+		dsptch();
+		break;
+/*
+ * AES #18 - appl_xbvset - Set the available logical drives for the file-selector.
+ */
+	case APPL_BVEXT:
+		switch (AP_XBVMODE)
+		{
+		case 0:
+			AP_XBVDISKL = LLOWD(gl_bvdisk);
+			AP_XBVDISKH = LHIWD(gl_bvdisk);
+			AP_XBVHARDL = LLOWD(gl_bvhard);
+			AP_XBVHARDH = LHIWD(gl_bvhard);
+			break;
+		case 1:
+			gl_bvdisk = AP_XBVDISK;
+			gl_bvhard = AP_XBVHARD;
+			break;
+		}
+		break;
+#endif
 	
 	/* Event Manager */
 	case EVNT_KEYBD:
@@ -143,6 +187,14 @@ PP(register VOIDPTR *addr_in;)
 	case MENU_REGISTER:
 		ret = mn_register(MM_PID, MM_PSTR);
 		break;
+#if GEM3
+	/* how annoying, even in AES 3.4 still no menu_unreigster */
+	case MENU_UNREGISTER:
+		if (MM_MID == -1)
+			MM_MID = gl_mnpds[rlr->p_pid];
+		mn_unregister(MM_MID);
+		break;
+#endif
 #if SUBMENUS
 		/* 5/14/92  */
 	case MENU_POPUP:
@@ -192,11 +244,13 @@ PP(register VOIDPTR *addr_in;)
 		ob_change((LPTREE)OB_TREE, OB_DRAWOB, OB_NEWSTATE, OB_REDRAW);
 		break;
 
-/* June 26 1992 - ml.   New call for new object extensions */
-/* 8/1/92	*/
+#if AES3D
+	/* June 26 1992 - ml.   New call for new object extensions */
+	/* 8/1/92	*/
 	case OBJC_SYSVAR:
 		ret = ob_sysvar(OB_MODE, OB_WHICH, OB_I1, OB_I2, &OB_O1, &OB_O2);
 		break;
+#endif
 	
 	/* Form Manager */
 	case FORM_DO:
@@ -225,7 +279,7 @@ PP(register VOIDPTR *addr_in;)
 		ret = fm_button((LPTREE)FM_FORM, FM_OBJ, FM_CLKS, &FM_ONXTOB);
 		break;
 	
-	/* Graphics Manager         */
+	/* Graphics Manager */
 	case GRAF_RUBBOX:
 		gr_rubbox(GR_I1, GR_I2, GR_I3, GR_I4, &GR_O1, &GR_O2);
 		break;
@@ -248,6 +302,9 @@ PP(register VOIDPTR *addr_in;)
 		ret = gr_slidebox((LPTREE)GR_TREE, GR_PARENT, GR_OBJ, GR_ISVERT);
 		break;
 	case GRAF_HANDLE:
+/*
+ * AES #77 - graf_handle - Obtain the VDI handle of the AES workstation. 
+ */
 		GR_WCHAR = gl_wchar;
 		GR_HCHAR = gl_hchar;
 		GR_WBOX = gl_wbox;
@@ -270,14 +327,15 @@ PP(register VOIDPTR *addr_in;)
 		   and the call should always return TRUE */
 		break;
 	
-	/* Scrap Manager    */
+	/* Scrap Manager */
 	case SCRP_READ:
 		sc_read(SC_PATH);
 		break;
 	case SCRP_WRITE:
 		sc_write(SC_PATH);
 		break;
-		/* File Selector Manager    */
+	
+	/* File Selector Manager */
 	case FSEL_INPUT:
 		ret = fs_input(FS_IPATH, FS_ISEL, &FS_BUTTON, ad_fsel);
 		break;
@@ -285,7 +343,7 @@ PP(register VOIDPTR *addr_in;)
 		ret = fs_input(FS_IPATH, FS_ISEL, &FS_BUTTON, FS_LABEL);
 		break;
 
-	/* Window Manager       */
+	/* Window Manager */
 	case WIND_CREATE:
 		ret = wm_create(WM_KIND, (GRECT *)&WM_WX);
 		break;
@@ -302,23 +360,31 @@ PP(register VOIDPTR *addr_in;)
 #if AES3D
 		ret = wm_get(WM_HANDLE, WM_WFIELD, &WM_OX, &WM_IX);
 #else
-		ret = wm_get(WM_HANDLE, WM_WFIELD, &WM_OX);
+		wm_get(WM_HANDLE, WM_WFIELD, &WM_OX); /* BUG: ignores return value */
 #endif
 		break;
 	case WIND_SET:
-		wm_set(WM_HANDLE, WM_WFIELD, &WM_IX); /* BUG: ignores return value */
+		wm_set(WM_HANDLE, WM_WFIELD, (int16_t *)&WM_IX); /* BUG: ignores return value */
 		break;
 	case WIND_FIND:
 		ret = wm_find(WM_MX, WM_MY);
 		break;
 	case WIND_UPDATE:
+#if (AESVERSION >= 0x330) | !BINEXACT
 		ret = wm_update(WM_BEGUP);
+#else
+		wm_update(WM_BEGUP); /* BUG: ignores return value */
+#endif
 		break;
 	case WIND_CALC:
 		wm_calc(WM_WCTYPE, WM_WCKIND, WM_WCIX, WM_WCIY, WM_WCIW, WM_WCIH, &WM_WCOX, &WM_WCOY, &WM_WCOW, &WM_WCOH);
 		break;
 	case WIND_NEW:
+#if (AESVERSION >= 0x330) | !BINEXACT
 		ret = wm_new();
+#else
+		wm_new();
+#endif
 		break;
 
 	/* Resource Manager */
@@ -338,7 +404,7 @@ PP(register VOIDPTR *addr_in;)
 		ret = rs_obfix((LPTREE)RS_TREE, RS_OBJ);
 		break;
 	
-	/* Shell Manager    */
+	/* Shell Manager */
 	case SHEL_READ:
 		ret = sh_read(SH_PCMD, SH_PTAIL);
 		break;
@@ -378,7 +444,7 @@ VOID xif(P(intptr_t) pcrys_blk)
 PP(intptr_t pcrys_blk;)
 {
 	uint16_t control[C_SIZE];
-	int16_t int_in[I_SIZE];
+	uint16_t int_in[I_SIZE];
 	int16_t int_out[O_SIZE];
 	VOIDPTR addr_in[AI_SIZE];
 
@@ -395,7 +461,8 @@ PP(intptr_t pcrys_blk;)
 	/*
 	 * long standing BUG: nobody sets OUT_LEN here, so this depends
 	 * on the language binding used.
-	 * It should be AES however which tells how many output parameters were supplied.
+	 * It should be AES however which tells how many output parameters were supplied,
+	 * just like VDI does.
 	 */
 	if (OUT_LEN)
 		LWCOPY((VOIDPTR)INT_OUT, int_out, OUT_LEN);

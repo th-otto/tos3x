@@ -420,7 +420,7 @@ PP(register intptr_t pstr;)
 	{
 		LSTCPY(ADDR(&tmpname[0]), pstr);
 		p_nameit(rlr, &tmpname[0]);
-		return (TRUE);
+		return TRUE;
 	} else
 	{
 		/* add desk acc. if room */
@@ -431,7 +431,7 @@ PP(register intptr_t pstr;)
 			gl_dacnt++;
 			return (gl_dacnt - 1);
 		} else
-			return (-1);
+			return -1;
 	}
 }
 

@@ -79,3 +79,6 @@
 #define NFORKS      32
 #define QUEUE_SIZE 128
 #endif
+
+#define GEM3 0
+

@@ -55,6 +55,8 @@ EVB *get_evb(NOTHING)
 }
 #endif
 
+
+/* 306de: 00e19db6 */
 VOID evinsert(P(EVB *) e, P(EVB **) root)
 PP(register EVB *e;)
 PP(EVB **root;)
@@ -72,6 +74,7 @@ PP(EVB **root;)
 }
 
 
+/* 306de: 00e19df0 */
 VOID takeoff(P(EVB *) p)
 PP(register EVB *p;)
 {
@@ -96,6 +99,7 @@ PP(register EVB *p;)
 }
 
 
+/* 306de: */
 EVSPEC mwait(P(EVSPEC) mask)
 PP(EVSPEC mask;)
 {
@@ -111,6 +115,7 @@ PP(EVSPEC mask;)
 }
 
 
+/* 306de: 00e19e9c */
 EVSPEC iasync(P(int16_t) afunc, P(intptr_t) aparm)
 PP(int16_t afunc;)
 PP(register intptr_t aparm;)
@@ -157,25 +162,22 @@ PP(register intptr_t aparm;)
 		cli();
 		if (CMP_TICK)
 		{
-			/* if already counting  */
-			/*   down then reset    */
-			/*   CMP_TICK to the    */
-			/*   lower number but   */
-			/*   let NUM_TICK grow  */
-			/*   from its accumulated */
-			/*   value      */
+			/*
+			 * if already counting down then reset
+			 * CMP_TICK to the lower number but let NUM_TICK grow
+			 * from its accumulated value
+			 */
 			if (aparm <= CMP_TICK)
 				CMP_TICK = aparm;
 		} else
 		{
-			/* if we aren't currently */
-			/*   counting down for  */
-			/*   someone else then  */
-			/*   start ticking  */
+			/*
+			 * if we aren't currently counting down for
+			 * someone else then start ticking
+			 */
 			CMP_TICK = aparm;
-			/* start NUM_TICK out   */
-			/*   at zero        */
-			NUM_TICK = 0x0L;
+			/* start NUM_TICK out at zero */
+			NUM_TICK = 0;
 		}
 
 
@@ -269,6 +271,7 @@ PP(register intptr_t aparm;)
 }
 
 
+/* 306de: 00e1a14a */
 uint16_t aret(P(EVSPEC) mask)
 PP(register EVSPEC mask;)
 {
@@ -307,6 +310,7 @@ PP(register EVSPEC mask;)
 }
 
 
+/* 306de: 00e1a210 */
 EVSPEC acancel(P(EVSPEC) m)
 PP(EVSPEC m;)
 {

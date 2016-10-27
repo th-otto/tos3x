@@ -385,7 +385,11 @@ name: ds.t size
 	V(execmode,w,1)
 	V(execflags,l,1)
 	
-	ds.b $13C
+	ds.b 2
+	
+	V(_ad_rso,l,1)
+	
+	ds.b $136
 
 	V(pblock,l,5)
 	V(_crit_err,l,1)
@@ -437,8 +441,9 @@ name: ds.t size
 	V(_xrat,w,1)
 	V(_yrat,w,1)
 	
-	ds.b 4
+	ds.b 2
 	
+	V(_gl_hchar,w,1)
 	V(_gl_naccs,w,1)
 	
 	ds.b 4
@@ -453,7 +458,11 @@ name: ds.t size
 	
 	V(_gl_bclick,w,1)
 	
-	ds.b $B4
+	ds.b 4
+	
+	V(_gl_handle,w,1)
+	
+	ds.b $AE
 	
 	V(_gl_dclick,w,1)
 	
@@ -471,7 +480,15 @@ name: ds.t size
 	
 	V(_gl_bvhard,w,1)
 	
-	ds.b $82
+	ds.b 10
+	
+	V(_gl_wchar,w,1)
+	
+	ds.b $28
+	
+	V(_gl_bpend,w,1)
+	
+	ds.b $4c
 	
 	V(_gl_bvdisk,w,1)
 	
@@ -505,7 +522,11 @@ name: ds.t size
 	
 	V(_sh_isgem,w,1)
 	
-	ds.b $74
+	ds.b $24
+	
+	V(_gl_hbox,w,1)
+	
+	ds.b $4e
 	
 	V(_gl_rlen,w,1)
 	
@@ -531,7 +552,11 @@ name: ds.t size
 	
 	V(_sh_doexec,w,1)
 	
-	ds.b $48
+	ds.b 8
+	
+	V(_gl_rfull,w,4)
+	
+	ds.b $38
 	
 	V(_gl_btrue,w,1)
 	
@@ -539,8 +564,9 @@ name: ds.t size
 	
 	V(_gl_kowner,l,1)
 	V(_crt_error,w,1)
+	V(_gl_wbox,w,1)
 	
-	ds.b 6
+	ds.b 4
 	
 	V(_gl_bowner,l,1)
 	
@@ -577,7 +603,12 @@ name: ds.t size
 	
 	V(_intin,w,128)
 	
-	ds.b $1D2
+	ds.b 4
+	
+	V(_cda,l,1)
+	V(_wwait,w,1)
+	
+	ds.b $1C8
 	
 	V(_DOS_ERR,w,1)
 	V(_ptsin,w,20)

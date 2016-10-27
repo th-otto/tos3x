@@ -109,9 +109,11 @@ PP(PARMBLK *fdata;)
 
 
 
+#if AES3D
 /*
- *	Routine to get or set object extension settings
+ * AES #48 - objc_sysvar - Manipulation of 3D objects. 
  *
+ *	Routine to get or set object extension settings
  */
 int16_t ob_sysvar(P(uint16_t) mode, P(uint16_t) which, P(uint16_t) inval1, P(uint16_t) inval2, P(int16_t *) outval1, P(int16_t *) outval2)
 PP(uint16_t mode;)
@@ -176,8 +178,7 @@ PP(int16_t *outval2;)
 		}
 
 	} else
-	{									/* if get */
-
+	{
 		switch (which)
 		{
 		case LK3DIND:
@@ -209,6 +210,7 @@ PP(int16_t *outval2;)
 	}
 	return ret;
 }
+#endif
 
 
 /*
