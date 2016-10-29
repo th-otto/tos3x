@@ -22,6 +22,8 @@
 #include "taddr.h"
 #include "gsxdefs.h"
 
+#if !NEWWIN /* whole file */
+
 #define DESKWH	0x0
 #define DROP_SIZE 0						/* Windows don't have drop shadows */
 
@@ -85,7 +87,7 @@ PP(GRECT *pt;)
 
 
 /*
- * Wm_init() -	initializes window colors, then start up the window
+ * wm_init() -	initializes window colors, then start up the window
  *		manager.
  *	     -	this is called by geminit; only at boot time; so that
  *		window color defaults don't get munched when apps are
@@ -99,7 +101,7 @@ VOID wm_init(NOTHING)
 /*
  * AES #100 - wind_create - Initializes a new window 
  *
- * Wm_create() - allocates the application's full-size window and 
+ * wm_create() - allocates the application's full-size window and 
  *		 returns the window's handle.
  *	       - returns FAILURE (-1) if no handle is available or
  *		 if an error occurred.
@@ -116,7 +118,7 @@ PP(register GRECT *rect;)						/* x, y, width and height of full size window */
 /*
  * AES #101 - wind_open - Open window
  *
- * Wm_open() - opens a window in its given size and location.
+ * wm_open() - opens a window in its given size and location.
  *	     - returns FALSE (0) if given handle is invalid,
  *	       or if window has already been opened.
  *	     - returns TRUE (1) if everything is fine.
@@ -132,7 +134,7 @@ PP(register GRECT *rect;)						/* x, y, width and height of opened window */
 /*
  * AES #102 - wind_close - Close window
  *
- * Wm_close() - closes an opened window
+ * wm_close() - closes an opened window
  *	      - returns FALSE (0) if given handle is invalid,
  *	        or if window has already been closed.
  *	      - returns TRUE (1) if everything is fine.
@@ -148,7 +150,7 @@ PP(int16_t handle;)							/* handle of window to be closed */
 /*
  * AES #103 - wind_delete - Delete window
  *
- * Wm_delete() - closes the window if it is not already closed,
+ * wm_delete() - closes the window if it is not already closed,
  *		 and frees the window structure.
  *	       - returns FALSE (0) if given handle is invalid.
  *	       - returns TRUE (1) if everything is fine.
@@ -164,7 +166,7 @@ PP(int16_t handle;)							/* handle of window to be deleted */
 /*
  * AES #105 - wind_get - Obtains various properties of a window.
  *
- * Wm_get() - returns information of window in the given array
+ * wm_get() - returns information of window in the given array
  *	    - returns FALSE (0) if given handle is invalid
  *	    - returns TRUE (1) if everything is fine
  *
@@ -189,7 +191,7 @@ PP(register int16_t *ow;)							/* return values */
 /*
  * AES #106 - wind_set - Alter various window attributes.
  *
- * Wm_set() - changes information of a window
+ * wm_set() - changes information of a window
  *	    - returns FALSE (0) if given handle is invalid
  *	    - returns TRUE (1) if everything is fine
  *
@@ -206,7 +208,7 @@ PP(register int16_t *iw;)							/* values to change to */
 /*
  * AES #106 - wind_find - Find the ID of a window at the given coordinates.
  *
- * Wm_find() - finds which window is under the mouse's x, y position
+ * wm_find() - finds which window is under the mouse's x, y position
  *
  */
 int16_t wm_find(P(int) mx, P(int) my)
@@ -220,7 +222,7 @@ PP(int my;)									/* mouse's y position */
 /*
  * AES #107 - wind_update - Blocks or releases screen operations.
  *
- * Wm_update() - locks or unlocks the current state of the window 
+ * wm_update() - locks or unlocks the current state of the window 
  *		 tree while an application is responding to a 
  *		 window update message in his message pipe or is 
  *		 making some other direct screen update based on
@@ -262,7 +264,7 @@ PP(int16_t *oh;)								/* output height of work/border area */
 /*
  * AES #109 - wind_new - Close all windows.
  *
- * Wm_new() - Delete all the window structures and clean 
+ * wm_new() - Delete all the window structures and clean 
  *	      up the window update semaphore.  This 
  *	      routine is very critical, so don't call 
  *	      it when you are not sure.  You must call 
@@ -282,14 +284,12 @@ int16_t wm_new(NOTHING)
 
 
 /*
- * W_drawchange() - draw the borders of opened windows which 
+ * w_drawchange() - draw the borders of opened windows which 
  *		    intersects with the dirty area, and send
  *		    redraw messages to those windows
  */
-VOID w_drawchange(P(GRECT *) dirty, P(uint16_t) skip, P(uint16_t) stop)
+VOID w_drawchange(P(GRECT *) dirty)
 PP(GRECT *dirty;)							/* rectangle of dirty area */
-PP(uint16_t skip;)
-PP(uint16_t stop;)								/* window to be skipped */
 {
 }
 
@@ -323,7 +323,7 @@ PP(register int16_t w_handle;)
 
 
 /* 
- * Ap_sendmsg() - send message to current process
+ * ap_sendmsg() - send message to current process
  */
 VOID ap_sendmsg(P(int16_t *) ap_msg, P(int16_t) type, P(int16_t) towhom, P(int16_t) w3, P(int16_t) w4, P(int16_t) w5, P(int16_t) w6, P(int16_t) w7)
 PP(register int16_t *ap_msg;)
@@ -345,3 +345,14 @@ PP(int16_t w7;)
 	ap_msg[7] = w7;
 	ap_rdwr(AQWRT, towhom, 16, ADDR(&ap_msg[0]));
 }
+
+
+VOID w_update(P(int16_t) bottom, P(GRECT *) pt, P(int16_t) top, P(BOOLEAN) moved)
+PP(int16_t bottom;)
+PP(GRECT *pt;)
+PP(int16_t top;)
+PP(BOOLEAN moved;)
+{
+}
+
+#endif /* !NEWWIN */

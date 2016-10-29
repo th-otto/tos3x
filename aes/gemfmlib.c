@@ -1,8 +1,8 @@
 /*
  *************************************************************************
- *			Revision Control System
+ *                      Revision Control System
  * =======================================================================
- *  $Author: mui $	$Date: 89/04/26 18:22:52 $
+ *  $Author: mui $      $Date: 89/04/26 18:22:52 $
  * =======================================================================
  *
  * Revision 2.2  89/04/26  18:22:52  mui
@@ -22,14 +22,14 @@
  * 
  *************************************************************************
  */
-/*	GEMFMLIB.C	03/15/84 - 02/08/85	Gregg Morris		*/
-/*	to 68k		03/12/85 - 05/24/85	Lowell Webster		*/
-/*	Trying 1.2	10/11/85 - 10/21/85	Derek Mui		*/
-/*	Removed error 16	2/6/86		Derek Mui		*/
-/*	repaired get_par to new bind 01/03/87	Mike Schmal		*/
-/*	Modify rsc constants	11/25/87	D.Mui			*/
-/*	Crunch out fm_inifld	03/25/88	D.Mui			*/
-/*	Change at fm_do		04/10/88	D.Mui			*/
+/*      GEMFMLIB.C      03/15/84 - 02/08/85     Gregg Morris            */
+/*      to 68k          03/12/85 - 05/24/85     Lowell Webster          */
+/*      Trying 1.2      10/11/85 - 10/21/85     Derek Mui               */
+/*      Removed error 16        2/6/86          Derek Mui               */
+/*      repaired get_par to new bind 01/03/87   Mike Schmal             */
+/*      Modify rsc constants    11/25/87        D.Mui                   */
+/*      Crunch out fm_inifld    03/25/88        D.Mui                   */
+/*      Change at fm_do         04/10/88        D.Mui                   */
 
 
 #include "aes.h"
@@ -68,11 +68,12 @@ static int16_t const ml_pwlv[] = { 0x0102, 0x0102, 0x0102, 0x0101, 0x0002, 0x000
 int16_t find_obj PROTO((LPTREE tree, int16_t start_obj, int16_t which));
 
 
-/*	This routine has been move to gemctrl.c		*/
-/*	and renamed to take_ownership			*/
-
 #if UNLINKED
 
+/*
+ * This routine has been move to gemctrl.c
+ * and renamed to take_ownership
+ */
 VOID fm_own PROTO((int16_t beg_ownit));
 
 /*	0 = end mouse control	*/
@@ -112,8 +113,9 @@ PP(int16_t beg_ownit;)
 #endif
 
 /************************************************************************/
-/* f i n d _ o b j							*/
+/* f i n d _ o b j                                                      */
 /************************************************************************/
+/* 306de: 00e1c8ac */
 int16_t find_obj(P(LPTREE) tree, P(int16_t) start_obj, P(int16_t) which)
 PP(register LPTREE tree;)
 PP(int16_t start_obj;)
@@ -170,6 +172,7 @@ PP(int16_t which;)
 /*
  * AES #55 - form_keybd - Process keyboard input in a dialog box form.
  */
+/* 306de: 00e1c93e */
 int16_t fm_keybd(P(LPTREE) tree, P(int16_t) obj, P(int16_t *) pchar, P(int16_t *) pnew_obj)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -215,6 +218,7 @@ PP(int16_t *pnew_obj;)
 /*
  * AES #56 - form_button - Simulate the clicking on an object.
  */
+/* 306de: 00e1c9ea */
 int16_t fm_button(P(LPTREE) tree, P(int16_t) new_obj, P(int16_t) clks, P(int16_t *) pnew_obj)
 PP(register LPTREE tree;)
 PP(register int16_t new_obj;)
@@ -294,6 +298,7 @@ PP(int16_t *pnew_obj;)
  *	form.  The cursor is placed at the starting field.  This routine
  *	returns the object that caused the exit to occur
  */
+/* 306de: 00e1cb68 */
 int16_t fm_do(P(LPTREE) tree, P(int16_t) start_fld)
 PP(register LPTREE tree;)
 PP(int16_t start_fld;)
@@ -380,6 +385,7 @@ PP(int16_t start_fld;)
  *	Form DIALogue routine to handle visual effects of drawing and
  *	undrawing a dialogue
  */
+/* 306de: 00e1cce0 */
 VOID fm_dial(P(int16_t) fmd_type, P(GRECT *) pi, P(GRECT *) pt)
 PP(register int16_t fmd_type;)
 PP(register GRECT *pi;)
@@ -404,12 +410,18 @@ PP(register GRECT *pt;)
 		break;
 	case FMD_FINISH:
 		/* update certain portion of the screen */
+#if NEWWIN
 		w_drawchange(pt, NIL, NIL);
+#else
+		w_drawchange(pt);
+        w_update(DESKWH, pt, DESKWH, FALSE);
+#endif
 		break;
 	}
 }
 
 
+/* 306de: 00e1cd56 */
 int16_t fm_show(P(int16_t) string, P(int16_t *) pwd, P(int16_t) level)
 PP(int16_t string;)
 PP(int16_t *pwd;)
@@ -431,6 +443,7 @@ PP(int16_t level;)
 
 
 /* TRO 9/20/84  - entered from dosif when a DOS error occurs      */
+/* 306de: 00e1cda8 */
 int16_t eralert(P(int16_t) n, P(int16_t) d)
 PP(int16_t n;)									/* n = alert #, 0-5     */
 PP(int16_t d;)									/* d = drive code, 0=A  */
@@ -454,6 +467,7 @@ PP(int16_t d;)									/* d = drive code, 0=A  */
 /*
  * AES #53 - form_error - Display an alert box form for TOS errors. 
  */
+/* 306de: 00e1ce1a */
 BOOLEAN fm_error(P(int16_t) n)
 PP(int16_t n;)									/* n = dos error number */
 {
@@ -487,5 +501,5 @@ PP(int16_t n;)									/* n = dos error number */
 		string = ALRTXXERR;
 	}
 
-	return fm_show(string, string == ALRTXXERR ? &n : (int16_t *)&n, 1) != 1;
+	return fm_show(string, string == ALRTXXERR ? &n : (int16_t *)0, 1) != 1;
 }

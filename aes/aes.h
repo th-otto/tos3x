@@ -208,6 +208,10 @@ typedef int BOOLEAN;
  */
 typedef intptr_t LPTREE;
 
+
+#define DESKWH     0
+
+
 /*
  * large.s
  */
@@ -852,12 +856,14 @@ VOID wm_min PROTO((int16_t kind, int16_t *ow, int16_t *oh));
 #if NEWWIN
 extern MEMHDR *rmhead, *rmtail;					/* rect lists memory linked list */
 WINDOW *srchwp PROTO((int handle));
+VOID w_drawchange PROTO((GRECT *dirty, uint16_t skip, uint16_t stop));
 #else
 #define srchwp(handle) (&D.w_win[handle])
+VOID w_drawchange PROTO((GRECT *dirty));
+VOID w_update PROTO((int16_t bottom, GRECT *pt, int16_t top, BOOLEAN moved));
 #endif
 VOID w_setactive PROTO((NOTHING));
 VOID ap_sendmsg PROTO((int16_t *ap_msg, int16_t type, int16_t towhom, int16_t w3, int16_t w4, int16_t w5, int16_t w6, int16_t w7));
-VOID w_drawchange PROTO((GRECT *dirty, uint16_t skip, uint16_t stop));
 
 #if !NEWWIN
 extern int16_t gl_wtop;
