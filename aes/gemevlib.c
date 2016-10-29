@@ -54,8 +54,9 @@ int16_t gl_ticktime;
  *	Stuff the return array with the mouse x, y, button, and keyboard
  *	state.
  */
+/* 306de: 00e1bcb6 */
 VOID ev_rets(P(int16_t *) lrets)
-PP(register int16_t *lrets;)
+PP(int16_t *lrets;)
 {
 	if (mtrans)
 	{
@@ -77,6 +78,7 @@ PP(register int16_t *lrets;)
  *	Routine to block for a certain async event and return a
  *	single return code.
  */
+/* 306de: 00e1bd12 */
 int16_t ev_block(P(int16_t) code, P(intptr_t) lvalue)
 PP(int16_t code;)
 PP(intptr_t lvalue;)
@@ -94,6 +96,7 @@ PP(intptr_t lvalue;)
  *
  *	Wait for a key to be ready at the keyboard and return it. 
  */
+/* 306de: 00e1bd40 */
 uint16_t ev_keybd(NOTHING)
 {
 	return ev_block(AKBIN, 0x0L);
@@ -109,6 +112,7 @@ uint16_t ev_keybd(NOTHING)
  *	the routine should return how many times it actually reached the
  *	state before some time interval.
  */
+/* 306de: 00e1bd52 */
 uint16_t ev_button(P(int16_t) bflgclks, P(uint16_t) bmask, P(uint16_t) bstate, P(int16_t *) lrets)
 PP(int16_t bflgclks;)
 PP(uint16_t bmask;)
@@ -130,6 +134,7 @@ PP(int16_t *lrets;)
  *
  *	Wait for the mouse to leave or enter a specified rectangle.
  */
+/* 306de: 00e1bd96 */
 uint16_t ev_mouse(P(MOBLK *)pmo, P(int16_t *) lrets)
 PP(MOBLK *pmo;)
 PP(int16_t *lrets;)
@@ -149,18 +154,22 @@ PP(int16_t *lrets;)
  *	Wait for a message to be received in applications message pipe.
  *	Then read it into pbuff.
  */
+/* 306de: 00e1bdc8 */
 int16_t ev_mesag(P(int16_t *) pbuff)
 PP(int16_t *pbuff;)
 {
+#if AESVERSION > 0x320
 	if (rlr->p_qindex > 0)
+	{
 		return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
-	else
+	} else
+#endif
 	{
 		if (!rd_mymsg(pbuff))
 			return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -169,6 +178,7 @@ PP(int16_t *pbuff;)
  *
  *	Wait the specified time to be completed.
  */
+/* 306de: 00e1be00 */
 int16_t ev_timer(P(int32_t) count)
 PP(int32_t count;)
 {
@@ -178,6 +188,7 @@ PP(int32_t count;)
 /*
  *	Used by ev_multi() to check on mouse rectangle events
  */
+/* 306de: 00e1be2a */
 int16_t ev_mchk(P(MOBLK *) pmo)
 PP(register MOBLK *pmo;)
 {
@@ -193,6 +204,7 @@ PP(register MOBLK *pmo;)
  *
  *	Do a multi-wait on the specified events.
  */
+/* 306de: 00e1be72 */
 int16_t ev_multi(P(int16_t) flags, P(MOBLK *) pmo1, P(MOBLK *) pmo2, P(int32_t) tmcount, P(intptr_t) buparm, P(int16_t *) mebuff, P(int16_t *) prets)
 PP(register int16_t flags;)
 PP(register MOBLK *pmo1;)
@@ -200,7 +212,7 @@ PP(MOBLK *pmo2;)
 PP(int32_t tmcount;)
 PP(intptr_t buparm;)
 PP(int16_t *mebuff;)
-PP(register int16_t *prets;)
+PP(int16_t *prets;)
 {
 	QPB m;
 	EVSPEC wmask, kbmsk, bumsk, m1msk, m2msk, qrmsk, tmmsk;
@@ -369,6 +381,7 @@ PP(register int16_t *prets;)
  *
  *	Wait for a key to be ready at the keyboard and return it. 
  */
+/* 306de: 00e1c1b8 */
 int16_t ev_dclick(P(int16_t) rate, P(int16_t) setit)
 PP(int16_t rate;)
 PP(int16_t setit;)
