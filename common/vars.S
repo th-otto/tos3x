@@ -392,8 +392,12 @@ name: ds.t size
 	V(_ml_ctrl,w,4)    /* GRECT */
 	V(_ml_pmown,l,1)
 	V(_ml_pkown,l,1)
+	V(_fsname,b,40)
+	V(_fcopy,b,40)
+	V(_pathcopy,l,1)
+	V(_defdrv,w,1)
 	
-	ds.b $122
+	ds.b $CC
 
 	V(pblock,l,5)
 	V(_crit_err,l,1)
@@ -459,29 +463,27 @@ name: ds.t size
 	
 	V(_gl_dacnt,w,1)
 	V(_gl_bdelay,w,1)
-	
-	ds.b 4
-	
+	V(_ad_hgmice,l,1)
 	V(_gl_pacc,l,MAX_ACCS)
 	
 	ds.b $48
 	
 	V(_gl_bclick,w,1)
-	
-	ds.b 4
-	
+	V(_ad_fsnames,l,1)
 	V(_gl_handle,w,1)
 	V(_ad_armice,l,1)
+	V(_ad_select,l,1)
 	
-	ds.b $Aa
+	ds.b $A6
 	
 	V(_gl_dclick,w,1)
 	
 	ds.b $24
 	
 	V(_ad_shcmd,l,1)
+	V(_ad_fpath,l,1)
 	
-	ds.b $22
+	ds.b $1e
 	
 	V(_gl_bdesired,w,1)
 	V(_gl_dcindex,w,1)
@@ -502,8 +504,9 @@ name: ds.t size
 	ds.b 4
 	
 	V(_gl_wchar,w,1)
+	V(_ad_fsdta,l,1)
 	
-	ds.b $28
+	ds.b $24
 	
 	V(_gl_bpend,w,1)
 	
@@ -514,9 +517,7 @@ name: ds.t size
 	ds.b $10
 	
 	V(_gl_moff,w,1)
-	
-	ds.b 8
-	
+	V(_gl_rcenter,w,4) /* GRECT */
 	V(_sh_iscart,w,1)
 	
 	ds.b $30
@@ -542,8 +543,9 @@ name: ds.t size
 	
 	V(_gl_awind,l,1)
 	
-	ds.b $84
+	ds.b $80
 	
+	V(_ad_title,l,1)
 	V(_gl_ctwait,w,5) /* MOBLK */
 	V(_gl_rbuf,l,1)
 	
@@ -554,8 +556,9 @@ name: ds.t size
 	ds.b $24
 	
 	V(_gl_hbox,w,1)
+	V(_ad_fstree,l,1)
 	
-	ds.b $4e
+	ds.b $4a
 	
 	V(_gl_rlen,w,1)
 	V(_gl_rmenu,w,4) /* GRECT */
@@ -590,13 +593,19 @@ name: ds.t size
 	ds.b 2
 	
 	V(_gl_rscreen,w,4) /* GRECT */
-	
-	ds.b 2
-	
+	V(_fs_first,w,1)
 	V(_appl_msg,w,8)
 	V(_ml_ocnt,w,1)
 	
-	ds.b 26
+	ds.b 14
+	
+	V(_fs_count,w,1)
+	
+	ds.b 2
+	
+	V(_fs_fnum,l,1)
+	
+	ds.b 4
 	
 	V(_gl_btrue,w,1)
 	
@@ -623,9 +632,10 @@ name: ds.t size
 	ds.b 8
 	
 	V(_autoexec,w,1)
-	
-	ds.b $4
-	
+	V(_fs_topptr,w,1)
+
+	ds.b 2
+
 	V(_gl_wtop,w,1)
 	
 	ds.b $12
@@ -681,7 +691,11 @@ name: ds.t size
 	V(_sh_gem,w,1)
 	V(_mclick,w,1)
 	
-	ds.b $BE
+	ds.b $94
+	
+	V(_gl_rfs,w,4) /* GRECT */
+	
+	ds.b $22
 	
 	V(_indisp,b,1)
 	even
@@ -701,8 +715,9 @@ name: ds.t size
 	ds.b $4C
 	
 	V(_mtrans,w,1)
+	V(_pxpath,l,1)
 	
-	ds.b $2c
+	ds.b $28
 	
 	V(_tmpmon,w,1)
 	V(_button,w,1)

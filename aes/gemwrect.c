@@ -162,7 +162,7 @@ PP(int16_t junky;)
 	/* get the new rect that is used for breaking other this windows rects */
 	new = &gl_mkrect;
 	
-	r = (p = &pwin->w_rlist)->o_link;
+	r = (p = (ORECT *)&pwin->w_rlist)->o_link; /* AAAARG */
 	/* redo rectangle list  */
 	while (r)
 	{
@@ -208,7 +208,7 @@ PP(int16_t junky;)
 	/* start out with no broken rectangles  */
 	pwin->w_flags &= ~VF_BROKEN;
 	/* if no size then return     */
-	w_getsize(WS_TRUE, wh, &gl_mkrect.o_x);
+	w_getsize(WS_TRUE, wh, (GRECT *)&gl_mkrect.o_x);
 	if (!(gl_mkrect.o_w && gl_mkrect.o_h))
 		return;
 	/* init. a global orect for use during mkrect calls */
@@ -218,7 +218,7 @@ PP(int16_t junky;)
 	/* get an orect in this windows list   */
 	new = get_orect();
 	new->o_link = (ORECT *) 0x0;
-	w_getsize(WS_TRUE, wh, &new->o_x);
+	w_getsize(WS_TRUE, wh, (GRECT *)&new->o_x);
 	pwin->w_rlist = new;
 }
 

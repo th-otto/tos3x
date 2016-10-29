@@ -493,7 +493,9 @@ VOID gem_main(NOTHING)
 	mn_init();
 #endif
 
+#if AES3D
 	ini_fsel();
+#endif
 
 	/* startup gem libs */
 	/* fs_start(); */

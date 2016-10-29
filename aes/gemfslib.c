@@ -106,44 +106,48 @@ typedef struct fstruct
 	char snames[LEN_FSNAME];
 } FSTRUCT;
 
-GRECT gl_rfs;
-VOIDPTR ad_fstree;
-char *ad_fpath;
-char *ad_title;
-char *ad_select;
-FSTRUCT *ad_fsnames;
-int16_t fs_first;					/* first enter the file selector */
-uint16_t fs_topptr;
-uint16_t fs_count;
-int32_t fs_fnum;					/* max file allowed */
-char *ad_fsdta;
+STATIC GRECT gl_rfs;
+STATIC VOIDPTR ad_fstree;
+STATIC char *ad_fpath;
+STATIC char *ad_title;
+STATIC char *ad_select;
+STATIC FSTRUCT *ad_fsnames;
+STATIC int16_t fs_first;					/* first enter the file selector */
+STATIC uint16_t fs_topptr;
+STATIC uint16_t fs_count;
+STATIC int32_t fs_fnum;					/* max file allowed */
+STATIC char *ad_fsdta;
 
-char const wildstr[] = "*.*";
-char const wslstr[] = "\\*.*";
+static char const wildstr[] = "*.*";
+static char const wslstr[] = "\\*.*";
 
-static char fsname[40];
-static char fcopy[40];
-static char *pathcopy;					/* path copy    */
-static int16_t defdrv;
+STATIC char fsname[40];
+STATIC char fcopy[40];
+STATIC char *pathcopy;					/* path copy    */
+STATIC int16_t defdrv;
 
 typedef struct pathstruct
 {
 	char pxname[LPATH];
 } PATHSTRUCT;
 
-PATHSTRUCT *pxpath;
+STATIC PATHSTRUCT *pxpath;
+
+
+#define Drvmap() trp13(0xa)
 
 
 char *fs_back PROTO((char *pstr));
 int16_t r_dir PROTO((char *path, char *select, uint16_t *count));
 int16_t r_files PROTO((char *path, char *select, uint16_t *count, char *filename));
 VOID r_sort PROTO((FSTRUCT *buffer, int16_t count));
-VOID r_sfiles PROTO((uint16_t index, uint16_t ratio));
+VOID r_sfiles PROTO((int16_t index));
 VOID fs_draw PROTO((int16_t index, char *path, char **addr1, int16_t *ptxtlen));
-VOID FXWait PROTO((NOTHING));
-VOID FXSelect PROTO((OBJECT *tree, int16_t obj));
-VOID FXDeselect PROTO((OBJECT *tree, int16_t obj));
-
+#if (AESVERSION >= 0x330)
+static VOID FXWait PROTO((NOTHING));
+static VOID FXSelect PROTO((OBJECT *tree, int16_t obj));
+static VOID FXDeselect PROTO((OBJECT *tree, int16_t obj));
+#endif
 
 
 
@@ -151,6 +155,7 @@ VOID FXDeselect PROTO((OBJECT *tree, int16_t obj));
 /*
  *	Routine to back off the end of a file string.
  */
+/* 306de: 00e1ce92 */
 char *fs_back(P(char *) pstr)
 PP(register char *pstr;)
 {
@@ -160,14 +165,13 @@ PP(register char *pstr;)
 	i = strlen(pstr);					/* find the end of string   */
 	pend = pstr + i;
 
-	while ((*pend != '\\') && (pend != pstr))
+	while (*pend != '\\' && pend != pstr)
 	{
 		pend--;
 		if ((*pend == ':') && (pend == pstr + 1))
 			break;
 	}
-	/* if a : then insert   */
-	/*   a backslash for fsel dir line */
+	/* if a : then insert a backslash for fsel dir line */
 	if (*pend == ':')
 	{
 		pend++;
@@ -191,6 +195,7 @@ PP(register char *pstr;)
  *	the selected path, filename, and exit button.
  *	Add the label parameter
  */
+/* 306de: 00e1cef2 */
 int16_t fs_input(P(char *) pipath, P(char *) pisel, P(int16_t *) pbutton, P(char *) lstring)
 PP(char *pipath;)
 PP(char *pisel;)
@@ -198,12 +203,17 @@ PP(int16_t *pbutton;)
 PP(char *lstring;)
 {
 	register uint16_t i, j;
-	int16_t label, last, ret;
+	int16_t dummy;
+	int16_t label;
+	int16_t last;
+	int16_t ret;
 	register LPTREE tree;
 	char *addr;
 	intptr_t mul, savedta;
 	PATHSTRUCT *savepath;
-	uint16_t botptr, count, value;
+	int16_t botptr;
+	int16_t value;
+	uint16_t count;
 	int16_t xoff, yoff, mx, my, bret;
 	char dirbuffer[122];
 	char *chrptr;
@@ -213,14 +223,15 @@ PP(char *lstring;)
 	intptr_t **lgptr;
 	GRECT clip;
 	int16_t firstry;
+#if (AESVERSION >= 0x330)
 	OBJECT *xtree;						/* cjg */
-	int16_t newend, oldend;
+#define XTREE(obj) (&xtree[obj])
+#else
+#define XTREE(obj) ((OBJECT *)(tree + (obj) * sizeof(OBJECT)))
+#define xtree ((OBJECT *)tree)
+#endif
 
 	UNUSED(chrptr);
-#if !BINEXACT
-	oldend = 0; /* quiet compiler */
-	bret = 0; /* quiet compiler */
-#endif
 	
 	/*
 	 *	Start up the file selector by initializing the fs_tree
@@ -255,12 +266,15 @@ PP(char *lstring;)
 	if ((!mul) || (fs_fnum < (int32_t) NM_NAMES))
 	{
 		dos_free(ad_fsdta);
-	  bye:dos_free(pxpath);
-	  bye2:fm_show(NOMEMORY, 0x0L, 1);
-		return (FALSE);
+bye:
+		dos_free(pxpath);
+bye2:
+		fm_show(NOMEMORY, 0x0L, 1);
+		return FALSE;
 	} else
+	{
 		ad_fsnames = dos_alloc(mul);
-
+	}
 
 	savepath = pxpath;					/* save the address */
 	pathcopy = savepath->pxname;
@@ -269,7 +283,9 @@ PP(char *lstring;)
 	fm_dial(FMD_START, &gl_rcenter, &gl_rfs);
 
 	tree = (LPTREE)ad_fstree;
+#if (AESVERSION >= 0x330)
 	xtree = (OBJECT *) tree;
+#endif
 
 	lgptr = (intptr_t **)OB_SPEC(FDIRECTORY);		/* change the buffer pointer */
 	**lgptr = (intptr_t)dirbuffer; /* tree[FDIRECTORY].ob_spec.tedinfo->te_ptext = dirbuffer */
@@ -282,7 +298,7 @@ PP(char *lstring;)
 	count = isdrive();
 	j = 1;
 	/* start from A drive set the button    */
-	for (i = DRIVEA; i <= DRIVEP; i++)
+	for (ret = 0, i = DRIVEA; i <= DRIVEP; i++, ret++)
 	{
 		LWSET(OB_STATE(i), (count & j) ? NORMAL : DISABLED);
 		j = j << 1;
@@ -326,7 +342,6 @@ PP(char *lstring;)
 
 	do
 	{
-	  cg_1:
 		value = 1;						/* scroll factor    */
 
 		switch (ret)
@@ -334,40 +349,28 @@ PP(char *lstring;)
 		case FSVSLID:
 			ob_offset(tree, FSVELEV, &xoff, &yoff);
 			value = NM_NAMES;
-			if (my < yoff)
+			if (my <= yoff)
 				goto up;
-			else if (my >= yoff + xtree[FSVELEV].ob_height)
+			else /* if (my >= yoff + XTREE(FSVELEV)->ob_height) */
 				goto down;
 			/* else fall through */
 
 		case FSVELEV:
-			if (!(xtree[FSVELEV].ob_state & SELECTED))
-				FXSelect(xtree, FSVELEV);
-			gsx_sclip(&gl_rfs);
-
 			take_ownership(TRUE);
 			value = gr_slidebox(tree, FSVSLID, FSVELEV, TRUE);
 			take_ownership(FALSE);
-			if (count > NM_NAMES)
-			{
-				mul = ((int32_t) (count - NM_NAMES)) * (int32_t) (value);
-				if (fs_topptr != (mul / 1000))
-				{
-					fs_topptr = mul / 1000;
-					r_sfiles(fs_topptr, value);
-				}
-			}
-
-			goto out;
-
-		down: case FDNAROW:			/* scroll down  */
-			if (fs_topptr >= botptr)
-			{
-			  out:FXWait();
-				FXDeselect(xtree, ret);
-				gsx_sclip(&gl_rfs);
+			mul = (count - NM_NAMES) * (uint16_t) value;
+			mul = mul / 1000;
+			value = mul;
+			value = fs_topptr - value;
+			if (value >= 0)
+				goto up;
+			value = -value;
+			
+		case FDNAROW:			/* scroll down  */
+		down:
+			if (fs_topptr == botptr)
 				break;
-			}
 
 			if ((fs_topptr + value) <= botptr)
 				fs_topptr += value;
@@ -376,50 +379,28 @@ PP(char *lstring;)
 
 			goto sfiles;
 
-		up: case FUPAROW:				/* scroll up    */
+		up:
+		case FUPAROW:				/* scroll up    */
 			if (!fs_topptr)
-			{
-				FXWait();
-				FXDeselect(xtree, ret);
-				gsx_sclip(&gl_rfs);
 				break;
-			}
 
 			if ((int16_t) (fs_topptr - value) >= 0)
 				fs_topptr -= value;
 			else
 				fs_topptr = 0;
 
-		  sfiles:
-			if (!(xtree[ret].ob_state & SELECTED))
-				FXSelect(xtree, ret);
-
-			gsx_sclip(&gl_rfs);
-
-			r_sfiles(fs_topptr, value);
-
-			dsptch();
-			if (gl_button)
-				goto cg_1;
-
-			FXWait();
-			FXDeselect(xtree, ret);
-			gsx_sclip(&gl_rfs);
+		sfiles:
+			r_sfiles(fs_topptr);
 			break;
 
 		case FCLSBOX:					/* close box        */
-
-			oldend = strlen(ad_fpath);	/* find # char in string */
-			if (!(xtree[FCLSBOX].ob_state & SELECTED))
-				FXSelect(xtree, FCLSBOX);
-			gsx_sclip(&gl_rfs);
 
 			*(fs_back(ad_fpath)) = 0;	/* back to last path    */
 			xstrpcpy(ad_title, fs_back(ad_fpath) + 1);
 
 			/* fall through     */
 		case FDIRECTORY:
-		  rdir:
+		rdir:
 			if (!*ad_fpath)
 				xstrpcpy(pathcopy, ad_fpath);
 
@@ -449,7 +430,8 @@ PP(char *lstring;)
 					botptr = 0;
 			} else
 			{
-			  rdir5:xstrpcpy(pathcopy, ad_fpath);
+		rdir5:
+				xstrpcpy(pathcopy, ad_fpath);
 				ob_draw(tree, FDIRECTORY, MAX_DEPTH);
 				if (firstry)
 				{
@@ -472,34 +454,6 @@ PP(char *lstring;)
 			if (curdrv <= DRIVEP)
 				ob_change(tree, curdrv, SELECTED, TRUE);
 
-
-			/* CJG 08/11/92 */
-			if (ret == FCLSBOX)
-			{
-				newend = strlen(ad_fpath);	/* find # char in string */
-
-				if (newend != oldend)	/*  is dir changed ?    */
-				{
-					if (!(xtree[FCLSBOX].ob_state & SELECTED))
-						FXSelect(xtree, FCLSBOX);
-					gsx_sclip(&gl_rfs);
-				} else
-				{						/* Hasn't changed, wait arnd */
-					FXWait();
-					XDeselect(xtree, FCLSBOX);
-					gsx_sclip(&gl_rfs);
-					break;
-				}
-
-				dsptch();
-				if (!gl_button)
-				{
-					FXWait();
-					XDeselect(xtree, FCLSBOX);
-					gsx_sclip(&gl_rfs);
-				} else
-					goto cg_1;
-			}
 			break;
 
 		case DRIVEA:
@@ -605,22 +559,28 @@ PP(char *lstring;)
 	dos_sdta((VOIDPTR)savedta);
 	gsx_sclip(&clip);
 	gr_mouse(M_RESTORE, NULL);
+
+#undef xtree
+#undef XTREE
+
 	return TRUE;
 }
 
 
 
-/*	read in a directory	*/
-
+/*
+ * read in a directory
+ */
+/* 306de: 00e1d7d0 */
 int16_t r_dir(P(char *) path, P(char *) select, P(uint16_t *) count)
 PP(char *path;)
 PP(char *select;)
 PP(register uint16_t *count;)
 {
 	LPTREE tree;
+	register int h;
 	char *addr;
 	register int16_t status, i;
-	int32_t h, h1;
 	char filename[16];
 
 	UNUSED(i);
@@ -643,23 +603,27 @@ PP(register uint16_t *count;)
 	fs_topptr = 0;						/* reset top pointer    */
 
 	h = LWGET(OB_HEIGHT(FSVSLID));
+#if AES3D
 	h += ADJ3DPIX << 1;
+#endif
 	if (*count > NM_NAMES)
 	{
-		h1 = *count;
-		h = (h * NM_NAMES) / h1;
+		h = (h * NM_NAMES) / *count;
 	}
 
+#if AES3D
 	if (!h)								/* min size */
+	{
 		h = 1;
-	else
+	} else
 	{
 		if (h > (ADJ3DPIX << 1))
 			h -= (ADJ3DPIX << 1);
 	}
+#endif
 	LWSET(OB_Y(FSVELEV), 0);			/* move it to the top     */
 	LWSET(OB_HEIGHT(FSVELEV), (uint16_t) h);	/* height of the elevator */
-	r_sfiles(0, 0);						/* show form the top      */
+	r_sfiles(0);						/* show form the top      */
 	status = TRUE;
 
   r_exit:
@@ -668,11 +632,12 @@ PP(register uint16_t *count;)
 }
 
 
-/*	Read files into the buffer		           */
-/*	The buffer size will always be NM_NAMES or more    */
-/*	for easy coding and redraw the count will return   */
-/*	the actual number of files		           */
-
+/*
+ * Read files into the buffer
+ * The buffer size will always be NM_NAMES or more
+ * for easy coding and redraw the count will return
+ * the actual number of files
+ */
 int16_t r_files(P(char *) path, P(char *) select, P(uint16_t *) count, P(char *) filename)
 PP(register char *path;)
 PP(char *select;)
@@ -697,12 +662,14 @@ PP(register char *filename;)
 		*path = toupper(*path);
 		drvid = (int16_t) (*path - 'A');
 	} else
+	{
 		drvid = defdrv;
-
+	}
+	
 	/* the drive present ?  */
 	k = 1;
 	k = k << drvid;
-	j = trp13(0xa);						/* get the drive map    */
+	j = Drvmap();						/* get the drive map    */
 
 	if (!(k & j))						/* drive not there  */
 		return (FALSE);
@@ -803,16 +770,16 @@ PP(int16_t count;)
 }
 
 
-/*	show files and update the scroll bar	*/
-
-VOID r_sfiles(P(uint16_t) index, P(uint16_t) ratio)
-PP(uint16_t index;)
-PP(uint16_t ratio;)
+/*
+ * show files and update the scroll bar
+ */
+VOID r_sfiles(P(int16_t) index)
+PP(int16_t index;)
 {
 	register int16_t label, i;
+	register int16_t h;
 	register LPTREE tree;
 	char *addr;
-	int32_t h, h1, h3;
 
 	label = F1NAME;
 	tree = (LPTREE)ad_fstree;
@@ -825,22 +792,11 @@ PP(uint16_t ratio;)
 	}
 
 	h = LWGET(OB_HEIGHT(FSVSLID));
-	h += ADJ3DPIX << 1;
 
-	h1 = LWGET(OB_HEIGHT(FSVELEV));
-	h1 += ADJ3DPIX << 1;
-
-	h3 = index;
-
-	if (ratio == 1 || ratio == NM_NAMES)
-	{
-		if (fs_count > NM_NAMES)
-			h = ((h - h1) * h3) / (int32_t) ((fs_count - NM_NAMES));
-		else
-			h = 0;
-	} else
-		h = ((h - h1) * ratio) / 1000;
-
+	h = h * fs_topptr;
+	if (fs_count != 0)
+		h = h / fs_count;
+	
 	LWSET(OB_Y(FSVELEV), h);
 
 	ob_draw(tree, FSVSLID, MAX_DEPTH);	/* erase the old slide bar */
@@ -848,8 +804,9 @@ PP(uint16_t ratio;)
 
 
 
-/*	do the fs_sset and ob_draw	*/
-
+/*
+ * do the fs_sset and ob_draw
+ */
 VOID fs_draw(P(int16_t) index, P(char *) path, P(char **) addr1, P(int16_t *) ptxtlen)
 PP(int16_t index;)
 PP(char *path;)
@@ -861,8 +818,10 @@ PP(int16_t *ptxtlen;)
 }
 
 
-/*	Adjust all the drive boxes	*/
-
+#if AES3D
+/*
+ * Adjust all the drive boxes
+ */
 VOID ini_fsel(NOTHING)
 {
 	int16_t x, y, i, j, w, h;
@@ -935,9 +894,12 @@ VOID ini_fsel(NOTHING)
 	for (i = DRIVEA; i <= DRIVEP; i++)
 		obj[i].ob_spec = (obj[i].ob_spec & 0xfffffff0) | WHITE;
 }
+#endif
 
 
-VOID FXWait(NOTHING)
+#if (AESVERSION >= 0x330)
+
+static VOID FXWait(NOTHING)
 {
 	do
 	{
@@ -946,7 +908,7 @@ VOID FXWait(NOTHING)
 }
 
 
-VOID FXSelect(P(OBJECT *) tree, P(int16_t) obj)
+static VOID FXSelect(P(OBJECT *) tree, P(int16_t) obj)
 PP(OBJECT *tree;)
 PP(int16_t obj;)
 {
@@ -961,7 +923,7 @@ PP(int16_t obj;)
 }
 
 
-VOID FXDeselect(P(OBJECT *) tree, P(int16_t) obj)
+static VOID FXDeselect(P(OBJECT *) tree, P(int16_t) obj)
 PP(OBJECT *tree;)
 PP(int16_t obj;)
 {
@@ -974,3 +936,5 @@ PP(int16_t obj;)
 	gsx_sclip(&rect);
 	ob_draw((LPTREE)tree, obj, MAX_DEPTH);		/* draw the box     */
 }
+
+#endif

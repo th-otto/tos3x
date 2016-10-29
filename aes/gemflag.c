@@ -37,10 +37,10 @@
 /* 306de: 00e1c1f4 */
 #if BINEXACT
 VOID tchange(P(int32_t) c)
-register int32_t c;	/* number of ticks that have gone by  */
+PP(register int32_t c;)	/* number of ticks that have gone by  */
 #else
 VOID tchange(P(int16_t) p1, P(int16_t) p2)
-register int32_t c;	/* number of ticks that have gone by  */
+PP(register int32_t c;)	/* number of ticks that have gone by  */
 #endif
 {
 #if !BINEXACT

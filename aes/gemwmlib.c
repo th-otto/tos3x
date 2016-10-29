@@ -24,7 +24,6 @@
 
 #if !NEWWIN /* whole file */
 
-#define DESKWH	0x0
 #define DROP_SIZE 0						/* Windows don't have drop shadows */
 
 #if MULTIAPP
