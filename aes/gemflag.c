@@ -34,17 +34,22 @@
 #include "gemlib.h"
 
 
+/* 306de: 00e1c1f4 */
+#if BINEXACT
+VOID tchange(P(int32_t) c)
+register int32_t c;	/* number of ticks that have gone by  */
+#else
 VOID tchange(P(int16_t) p1, P(int16_t) p2)
-PP(int16_t p1;)
-PP(int16_t p2;)
+register int32_t c;	/* number of ticks that have gone by  */
+#endif
 {
+#if !BINEXACT
 	register int32_t c;	/* number of ticks that have gone by  */
+#endif
 	register EVB *d;
 	register int32_t c1;
 
-#if BINEXACT
-	c = *((int32_t *)&p1); /* sigh... */
-#else
+#if !BINEXACT
 	c = HW(p1) | LW(p2);
 #endif
 	/* pull pd's off the delay list that have waited long enough */
@@ -76,7 +81,7 @@ PP(int16_t p2;)
 
 
 
-
+/* 306de: 00e1c260 */
 int16_t tak_flag(P(SPB *) sy)
 PP(register SPB *sy;)
 {
@@ -109,7 +114,7 @@ PP(register SPB *sy;)
 /*	wind_update call then it will have the 	*/
 /*	right to access	the controlled area. 	*/
 
-
+/* 306de: 00e1c29c */
 VOID amutex(P(EVB *) e, P(SPB *) sy)
 PP(register EVB *e;)
 PP(SPB *sy;)
@@ -121,7 +126,7 @@ PP(SPB *sy;)
 }
 
 
-
+/* 306de: 00e1c2d6 */
 VOID unsync(P(SPB *) sy)
 PP(register SPB *sy;)
 {

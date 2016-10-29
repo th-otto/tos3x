@@ -62,6 +62,7 @@ char const gl_nils[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
  *	Routine to break a string into smaller strings.  Breaks occur
  *	whenever an | or a ] is encountered.
  */
+/* 306de: 00e1c322 */
 VOID fm_strbrk(P(LPTREE) tree, P(const char *) palstr, P(int16_t) stroff, P(int16_t *) pcurr_id, P(int16_t *) pnitem, P(int16_t *) pmaxlen)
 PP(LPTREE tree;)
 PP(intptr_t palstr;) /* should be const char * */
