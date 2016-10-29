@@ -114,7 +114,7 @@ gemstart:
 	move.l	($4c2).w,d0			/* get drvbits */
 	and.l	#$4,d0			/* drive C there? */
 	beq.b	not_ours		/* nope, leave the env alone */
-	cmp.l	#'PATH',(a0)+		/* check 1st longword ; BUG: might be unaligned access */
+	cmp.l	#$50415448,(a0)+		/* 'PATH' check 1st longword ; BUG: might be unaligned access */
 	bne.b	not_ours
 	cmp.l	#$3d00413a,(a0)+	/* "=0A:" */
 	bne.b	not_ours

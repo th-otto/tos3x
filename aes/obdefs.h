@@ -164,6 +164,13 @@
 #define	ALRTCOL	    5	/* change color of alert background */
 #define AD3DVALUE   6	/* get pixel adjustment for 3D objects */
 
+/* scrp_read return values */
+#define SC_FTCSV 0x0001
+#define SC_FTTXT 0x0002
+#define SC_FTGEM 0x0004
+#define SC_FTIMG 0x0008
+#define SC_FTDCA 0x0010
+#define SC_FTUSR 0x8000
 
 #define OBJECT struct object
 
@@ -374,6 +381,10 @@ typedef struct rshdr
 /* added Jul 23 91 for menu bar in window - ml. */
 #define	WF_OWNER	20
 
+#define WF_TATTRB 18	/* PC-GEM */
+#define WF_SIZTOP 19	/* PC-GEM */
+#define WF_COTOP  20	/* For ViewMAX */
+
 /* added Feb 25 92 to allow bottoming window - ml. */
 #define WF_BEVENT	24
 #define	WF_BOTTOM	25
@@ -402,7 +413,8 @@ typedef struct rshdr
 #define RTARROW 0x0400
 #define HSLIDE	0x0800
 /* Added Jul 23 91 for new window manager - ml. */
-#define MNBAR	0x1000
+#define MENUBAR	0x1000
+#define HOTCLOSE 0x1000               /* added 11/12/85       LKW             */
 
 /* mu_flags		*/
 #define MU_KEYBD 0x0001	

@@ -129,11 +129,20 @@ PP(int16_t id;)
 PP(int16_t length;)
 PP(int16_t *pbuff;)
 {
+#if BINEXACT
 	/* use id,len,pbuff on stack as a QPB  */ /* WTF */
 	return ev_block(code, (intptr_t)ADDR(&id));
 	/*
 	 * BUG: should return TRUE/FALSE, not the return value from ev_block()
 	 */
+#else
+	QPB m;
+	
+	m.qpb_pid = id;
+	m.qpb_cnt = length;
+	m.qpb_buf = pbuff;
+	return ev_block(code, (intptr_t)ADDR(&m));
+#endif
 }
 
 

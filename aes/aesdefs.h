@@ -64,7 +64,7 @@
 #endif
 
 #define SUBMENUS (AESVERSION >= 0x340)
-#define AES3D (AESVERSION >= 0x340)
+#define AES3D (AESVERSION >= 0x330)
 
 #if AESVERSION >= 0x330
 #define STACK_SIZE  500

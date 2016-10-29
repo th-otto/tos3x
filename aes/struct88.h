@@ -23,6 +23,13 @@
 /*	Increase number of NFORKS	8/17/92	D.Mui			*/
 
 /*
+ *       Copyright 1999, Caldera Thin Clients, Inc.
+ *                 2002-2016 The EmuTOS development team
+ *
+ *       This software is licenced under the GNU Public License.
+ *       Please see LICENSE.TXT for further information.
+ *
+ *                  Historical Copyright
  *	-------------------------------------------------------------
  *	GEM Application Environment Services		  Version 1.0
  *	Serial No.  XXXX-0000-654321		  All Rights Reserved
@@ -153,6 +160,9 @@ EVB		/* event block structure */
 
 /* pd defines */
 
+/* p_name */
+#define AP_NAMELEN  8           /* architectural */
+
 #define		PS_RUN			1	/* p_stat */
 #define		PS_MWAIT		2
 #define		PS_TRYSUSPEND	4
@@ -167,7 +177,7 @@ PD
 
 	/* ^^^ variables above are accessed from assembler code */
 	
-	/* 12 */	char	p_name[8];		/* processor name (not NUL terminated) */
+	/* 12 */	char	p_name[AP_NAMELEN];		/* processor name (not NUL terminated) */
 
 	/* 20 */	CDA	*p_cda;				/* Tells what we are waiting 	*/
 	/* 24 */	intptr_t p_ldaddr;		/* long address of load		*/
@@ -176,7 +186,7 @@ PD
 
 	/* 32 */	EVSPEC	p_evbits;		/* event bits in use 8 max EVB	*/
 	/* 34 */	EVSPEC	p_evwait;		/* event wait mask 		*/
-	/* 36 */	EVSPEC	p_evflg;		/* EVB that satisified		*/
+	/* 36 */	EVSPEC	p_evflg;		/* EVB that satisfied		*/
 	/* 38 */	int16_t	p_message[10];
 #if AESVERSION >= 0x320
 	/* 58 */	MFORM	p_mouse;		/* saved mouseform for M_SAVE/M_RESTORE */
@@ -194,7 +204,7 @@ PD
 
 QPB
 {
-	int16_t	qpb_pid;
+	int16_t	qpb_pid;				/* owners process id */
 	int16_t	qpb_cnt;
 	VOIDPTR qpb_buf;
 };
@@ -228,10 +238,26 @@ ACCPD
 	EVB	ac_evb[EVB_PROC];	/* 5 evb's per process		*/
 };
 
+
+/*
+ * GEM memory usage parameter block
+ * (for reference, only accessed by asm code)
+ */
+#if 0
+#define GEM_MUPB_MAGIC 0x87654321L
+
+typedef struct
+{
+    int32_t gm_magic;                  /* Magical value, has to be GEM_MUPB_MAGIC */
+    VOIDPTR gm_end;                    /* End of the memory required by GEM */
+    VOID  (*gm_init) PROTO((NOTHING)); /* Start address of GEM */
+} GEM_MUPB;
+#endif
+
 #define NOT_FOUND 100	 /* try to return from event not on PD list */
 #define NOT_COMPLETE 101 /* try to ret from event which has not occured */
 
-						/* async bdos calls */
+/* async bdos calls */
 #define AQRD 1
 #define AQWRT 2
 #define ADELAY 3

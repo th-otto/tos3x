@@ -40,7 +40,7 @@
 #define RIGHT 2
 #define BOTTOM 3
 
-#if 0
+#if !NEWWIN
 
 ORECT *rul;
 ORECT gl_mkrect;

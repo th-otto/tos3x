@@ -1,8 +1,8 @@
 AES_OBJS1 = gemaints.o gemaplib.o gemasync.o gembase.o gembind.o gemcli.o gemctrl.o gemdisp.o
 AES_OBJS2 = gemevlib.o gemflag.o gemfmalt.o gemfmlib.o gemfslib.o gemglobe.o geminit.o
 AES_OBJS3 = geminput.o gemmnlib.o gemobed.o gemobjop.o gempd.o gemqueue.o gemrom.o
-AES_OBJS4 = gemrslib.o gemsclib.o gemshlib.o gemwmlib.o gemwrect.o gemrlist.o romcart.o gemoblib.o
-AES_OBJS5 = mn_mbar.o mn_menu.o mn_popup.o mn_submn.o mn_tools.o mn_index.o mn_event.o
+AES_OBJS4 = gemrslib.o gemsclib.o gemshlib.o gemwmlib.o gemwrect.o newwrect.o newwmlib.o romcart.o
+AES_OBJS5 = gemoblib.o mn_mbar.o mn_menu.o mn_popup.o mn_submn.o mn_tools.o mn_index.o mn_event.o
 AES_OBJS6 = apgrlib.o apgsxif.o gemgrlib.o gemgsxif.o gsx2.o jbind.o
 AES_OBJS7 = jdispa.o jdos.o large.o function.o optimize.o ratrbp.o trap14.o
 
@@ -47,8 +47,9 @@ AES_SRCS = \
 	gemsclib.c \
 	gemshlib.c \
 	gemwmlib.c \
-	gemrlist.c \
 	gemwrect.c \
+	newwrect.c \
+	newwmlib.c \
 	romcart.c \
 	gemoblib.c \
 	mn_mbar.c \

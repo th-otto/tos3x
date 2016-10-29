@@ -75,8 +75,8 @@ LPTREE ml_mnhold;
 GRECT ml_ctrl;
 PD *ml_pmown;
 PD *ml_pkown;
-int16_t tmpmoff;
-int16_t tmpmon;
+STATIC int16_t tmpmoff;
+STATIC int16_t tmpmon;
 MOBLK gl_ctwait;
 int16_t appl_msg[8];
 int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
@@ -84,7 +84,7 @@ int16_t rets[6];							/* added 2/4/87     */
 int16_t ml_ocnt;
 
 /* used to convert from window object # to window message code */
-int16_t const gl_wa[] = {
+STATIC int16_t const gl_wa[] = {
 	WA_UPLINE,
 	WA_DNLINE,
 	WA_UPPAGE,
@@ -100,6 +100,7 @@ int16_t const gl_wa[] = {
 /*
  *	Send message and wait for the mouse button to come up
  */
+/* 306de: 00e1b1b4 */
 VOID ct_msgup(P(int16_t) message, P(int16_t) owner, P(int16_t) wh, P(int16_t) m1, P(int16_t) m2, P(int16_t) m3, P(int16_t) m4)
 PP(int16_t message;)
 PP(int16_t owner;)
@@ -111,18 +112,19 @@ PP(int16_t m4;)
 {
 	if (message)
 		ap_sendmsg(appl_msg, message, owner, wh, m1, m2, m3, m4);
-	/* wait for button to   */
-	/*   come up        */
+	/* wait for button to come up */
 	while ((button & 0x0001) != 0x0)
 		dsptch();
 }
 
 
+/* 306de: 00e1b1f4 */
 VOID hctl_window(P(int16_t) w_handle, P(int16_t) mx, P(int16_t) my)
 PP(register int16_t w_handle;)
 PP(int16_t mx;)
 PP(int16_t my;)
 {
+#if NEWWIN
 	GRECT t, f;
 	int16_t x, y, w, h;
 	int16_t wm, hm;
@@ -146,25 +148,25 @@ PP(int16_t my;)
 
 	/* if window is top window, handle control points */
 
-	if (w_handle == topw)
+	if (w_handle == gl_wtop)
 	{
 		/* changed ROOT to W_BOX 072691 - ml. */
 		gadget = cpt = ob_find((LPTREE)pwin->obj, W_BOX, MAX_DEPTH, mx, my);
 		nrmst = pwin->obj[gadget].ob_state & ~SELECTED;
 		selst = nrmst | SELECTED;
-		r_get(&pwin->curr, &x, &y, &w, &h);
-		kind = pwin->kind;				/* fix 10/21/85 */
+		r_get(&pwin->w_curr, &x, &y, &w, &h);
+		kind = pwin->w_kind;				/* fix 10/21/85 */
 
 		ob_gclip((LPTREE)pwin->obj, gadget, &dummy, &dummy, &f.g_x, &f.g_y, &f.g_w, &f.g_h);
-/*	 
-	f.g_w = pwin->obj[gadget].ob_width;
-	f.g_h = pwin->obj[gadget].ob_height;
-    	ob_offset(pwin->obj, gadget, &f.g_x, &f.g_y);
-	f.g_x -= ADJ3DPIX;
-	f.g_y -= ADJ3DPIX;
-	f.g_w += (ADJ3DPIX << 1);
-	f.g_h += (ADJ3DPIX << 1);	
-*/
+#if 0
+		f.g_w = pwin->obj[gadget].ob_width;
+		f.g_h = pwin->obj[gadget].ob_height;
+	    	ob_offset(pwin->obj, gadget, &f.g_x, &f.g_y);
+		f.g_x -= ADJ3DPIX;
+		f.g_y -= ADJ3DPIX;
+		f.g_w += (ADJ3DPIX << 1);
+		f.g_h += (ADJ3DPIX << 1);	
+#endif
 		gsx_sclip(&f);
 
 		switch (cpt)
@@ -180,6 +182,7 @@ PP(int16_t my;)
 			if (kind & MOVER)
 			{
 				ob_change((LPTREE)pwin->obj, gadget, selst, TRUE);
+				/* prevent the mover gadget being moved completely offscreen */
 				r_set(&f, 0, gl_hbox, (gl_rscreen.g_w + w - gl_wbox - 6), 10000);
 				gr_dragbox(w, h, x, y, &f, &x, &y);
 				message = WM_MOVED;
@@ -243,13 +246,13 @@ PP(int16_t my;)
 			x = gl_wa[cpt - W_UPARROW];
 			wm_update(FALSE);			/* give up the screen */
 			cpt = TRUE;
-			p = pwin->owner;
+			p = pwin->w_owner;
 
 			do
 			{
 				if (p->p_stat == PS_MWAIT)
 				{
-					ap_sendmsg(appl_msg, message, pwin->owner->p_pid, w_handle, x, y, w, h);
+					ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
 				} else
 				{
 					if (!p->p_message[0])
@@ -305,14 +308,197 @@ PP(int16_t my;)
 		message = WM_TOPPED;
 	}
 
+	/* BUG: x, y, w, h undefined if w_handle != gl_wtop */
 	if (message)
-		ct_msgup(message, pwin->owner->p_pid, w_handle, x, y, w, h);
+		ct_msgup(message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
 
 	if (message && (message != WM_TOPPED))
 		ob_change((LPTREE)pwin->obj, gadget, nrmst, TRUE);
+
+#else
+
+	register WINDOW *pwin;
+	GRECT t, f;
+	int16_t x, y, w, h;
+	int16_t kind;
+	int16_t px, py, pw, ph;
+	register int wm, hm;
+	register int16_t message;
+	register int16_t cpt;
+	OBJECT *tree;
+	int16_t selst, nrmst, dummy;
+	int16_t unused[3];
+	PD *p;
+	
+	UNUSED(unused);
+	UNUSED(dummy);
+	UNUSED(nrmst);
+	UNUSED(selst);
+	UNUSED(pw);
+	UNUSED(ph);
+	
+	pwin = srchwp(w_handle);
+	message = 0;
+	if (w_handle == gl_wtop /* ||
+		((D.w_win[w_handle].w_flags & VF_SUBWIN) && (D.w_win[gl_wtop].w_flags & VF_SUBWIN)) */ )
+	{
+		/* 
+		 * went down on active window so handle control points
+		 */
+		w_bldactive(w_handle);
+		tree = gl_awind;
+		UNUSED(tree);
+#if BINEXACT
+		cpt = ob_find((LPTREE)gl_awind, 10L, mx, my); /* sigh */
+#else
+		cpt = ob_find((LPTREE)gl_awind, 0, 10, mx, my);
+#endif
+        w_getsize(WS_CURR, w_handle, &t);
+        r_get(&t, &x, &y, &w, &h);
+		kind = pwin->w_kind;
+		switch (cpt)
+		{
+		case W_CLOSER:
+#if 0
+			/*
+			 * MagiC feature not supported by TOS;
+			 * HOTCLOSE (0x1000) was later used for menubars (MENUBAR) in windows
+			 */
+			if (kind & HOTCLOSE)
+			{
+				message = WM_CLOSED;
+				break;
+			}
+#endif
+			/* else fall thru */
+		case W_FULLER:
+			if (gr_watchbox(gl_awind, cpt, SELECTED, NORMAL))
+			{
+				message = (cpt == W_CLOSER) ? WM_CLOSED : WM_FULLED;
+				ob_change((LPTREE)gl_awind, cpt, NORMAL, TRUE);
+			}
+			break;
+		case W_NAME:
+			if (pwin->w_kind & MOVER)
+			{
+				/* prevent the mover gadget being moved completely offscreen */
+				r_set(&f, 0, gl_hbox, gl_rscreen.g_w + w - gl_wbox - 6, 10000);
+				gr_dragbox(w, h, x, y, &f, &x, &y);
+				message = WM_MOVED;
+			}
+			break;
+		case W_SIZER:
+			if (kind & SIZER)
+			{
+				w_getsize(WS_WORK, w_handle, &t);
+				t.g_x -= x;
+				t.g_y -= y;
+				t.g_w -= w;
+				t.g_h -= h;
+				wm = gl_wchar;
+				hm = gl_hchar;
+				if (pwin->w_kind & (LFARROW | RTARROW | HSLIDE))
+					wm = gl_wbox * 7;
+				if (pwin->w_kind & (UPARROW | DNARROW | VSLIDE))
+					hm = gl_hbox * 7;
+				gr_rubwind(x, y, wm, hm, &t, &w, &h);
+				message = WM_SIZED;
+			}
+			break;
+		case W_HSLIDE:
+		case W_VSLIDE:
+			/*
+			 * cpt + 1: W_HSLIDE -> W_HELEV, W_VSLIDE -> W_VELEV
+			 */
+			ob_offset((LPTREE)gl_awind, cpt + 1, &px, &py);
+			if (cpt == W_HSLIDE)
+			{
+				/* fix up for index into gl_wa */
+				if (!(mx < px))
+					cpt += 1;
+			} else
+			{
+				if (!(my < py))
+					cpt += 1;
+			}
+			/* fall thru */
+		case W_UPARROW:
+		case W_DNARROW:
+		case W_LFARROW:
+		case W_RTARROW:
+			message = WM_ARROWED;
+			break;
+		case W_HELEV:
+		case W_VELEV:
+			message = (cpt == W_HELEV) ? WM_HSLID : WM_VSLID;
+			/* slide is 1 less than elev */
+			x = gr_slidebox((LPTREE)gl_awind, cpt - 1, cpt, cpt == W_VELEV);
+			break;
+		}
+		if (message == WM_ARROWED)
+		{
+			x = gl_wa[cpt - W_UPARROW];
+			wm_update(FALSE);			/* give up the screen */
+			cpt = TRUE;
+			p = pwin->w_owner;
+
+			do
+			{
+				if (p->p_stat == PS_MWAIT)
+				{
+					ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
+				} else
+				{
+					if (!p->p_message[0])
+					{					/* message is sent */
+						p->p_message[0] = 1;
+						p->p_message[1] = message;	/* message */
+						p->p_message[2] = rlr->p_pid;	/* sender */
+						p->p_message[3] = 16;	/* size in bytes */ /* BUG: should be size > 16 only */
+						p->p_message[4] = w_handle;
+						p->p_message[5] = x;
+						p->p_message[6] = y;
+						p->p_message[7] = w;
+						p->p_message[8] = h;
+					}
+				}
+
+				dsptch();
+
+				/*
+				 * Delay for half current double click time: 
+				 * allow button to come back up on single click
+				 */
+				if (cpt)
+				{						/* Only delay 1st time through */
+					cpt = FALSE;
+					delay((int32_t) gl_dclick);
+				}
+
+			} while (button & 1);		/* button is global */
+
+			wm_update(TRUE);			/* take back the screen */
+			return;
+		}
+	} else
+	{
+        /*
+         * went down on inactive window so tell ap. to bring it to top
+         */
+		message = WM_TOPPED;
+#if 0 & SINGLAPP
+		ct_msgup(WM_UNTOPPED, D.w_win[gl_wtop].w_owner->p_pid, gl_wtop, x, y, w, h);
+	    for (i = 0; i < NUM_ACCS; i++)
+    	    dsptch();
+#endif
+	}
+	/* BUG: x, y, w, h undefined if w_handle != gl_wtop */
+	ct_msgup(message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
+#endif
 }
 
 
+/* 306de: 00e1b580 */
 VOID hctl_button(P(int16_t) mx, P(int16_t) my)
 PP(register int16_t mx;)
 PP(register int16_t my;)
@@ -326,6 +512,7 @@ PP(register int16_t my;)
 }
 
 
+/* 306de: 00e1b5b6 */
 VOID hctl_rect(P(int16_t) mx, P(int16_t) my)
 PP(int16_t mx;)
 PP(int16_t my;)
@@ -373,17 +560,24 @@ PP(int16_t my;)
 		ct_msgup(mesag, owner, title, item, LHIWD(ptree), LLOWD(ptree), pmenu);
 #endif
 #else
+#if BINEXACT
+		ct_msgup(mesag, owner, title, item, NULL, 0);
+#else
 		ct_msgup(mesag, owner, title, item, 0, 0, 0);
+#endif
 #endif
 	}
 }
 
 
+#if AES3D
+static VOID drawdesk PROTO((int16_t x, int16_t y, int16_t w, int16_t h));
+
 /*
- * Hctl_msg() - handle messages received by control manager
+ * hctl_msg() - handle messages received by control manager
  *		(currently only redraw message is handled)
  */
-VOID hctl_msg(P(int16_t *) msgbuf)
+static VOID hctl_msg(P(int16_t *) msgbuf)
 PP(int16_t *msgbuf;)
 {
 	if (msgbuf[0] == WM_REDRAW)
@@ -392,10 +586,10 @@ PP(int16_t *msgbuf;)
 
 
 /*
- * Drawdesk() - redraw portion of DESKTOP specified by the 
+ * drawdesk() - redraw portion of DESKTOP specified by the 
  *		given rectangle
  */
-VOID drawdesk(P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
+static VOID drawdesk(P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(int16_t x;)
 PP(int16_t y;)
 PP(int16_t w;)
@@ -446,12 +640,14 @@ PP(int16_t h;)
 	wm_update(FALSE);
 	gsx_mon();
 }
+#endif
 
 
 /*
  *	Control change of ownership to this rectangle and this process
  *	Doing the control rectangle first is important.
  */
+/* 306de: 00e1b67a */
 VOID ct_chgown(P(PD *) ppd, P(GRECT *) pr)
 PP(PD *ppd;)
 PP(GRECT *pr;)
@@ -466,7 +662,9 @@ PP(GRECT *pr;)
 	/* and get mouse event posted correctly */
 	post_mouse(gl_mowner, xrat, yrat);
 	/* post a button event in case the new owner was waiting */
-/*	post_button(gl_mowner, button, 1);	*/
+#if AESVERSION <= 0x320
+	post_button(gl_mowner, button, 1);
+#endif
 
 	gl_kowner = ppd;
 }
@@ -478,51 +676,57 @@ PP(GRECT *pr;)
  *	This process never terminates and forms an integral part of
  *	the system.
  */
+/* 306de: 00e1b6de */
 int16_t ctlmgr(NOTHING)
 {
 	register int16_t ev_which;
 	int16_t lrets[6];
+#if AES3D
 	int16_t msgbuf[8];
+#endif
 
-	/* set defaults for     */
-	/*  multi wait      */
+	/* set defaults for multi wait */
 	rc_copy(&gl_rmenu, (GRECT *)&gl_ctwait.m_x);
 	gl_ctwait.m_out = FALSE;			/* CHANGED LKW      */
 
 
-	while (TRUE)
+	while (1)
 	{
 		w_setactive();
-		/* if no waiting to go  */
-		/*   go out of menu area */
-		/*   then give mouse to */
-		/*   owner of top window */
-/*	  gsx_mxmy(&mx, &my);	*/
-/*	  gl_ctwait.m_out = inside(mx, my, &gl_ctwait.m_x);*/
+		/*
+		 * if no waiting to go out of menu area
+		 * then give mouse to owner of top window
+		 */
+		/* gsx_mxmy(&mx, &my); */
+		/* gl_ctwait.m_out = inside(mx, my, &gl_ctwait.m_x); */
 
-		/* wait for something to */
-		/*   happen     */
-		ev_which = ev_multi(MU_KEYBD | MU_BUTTON | MU_M1 | MU_MESAG,
-							&gl_ctwait, &gl_ctwait, 0x0L, 0x0001ff01L, &msgbuf[0], lrets);
+		/* wait for something to happen */
+#if AES3D
+		ev_which = ev_multi(MU_KEYBD | MU_BUTTON | MU_M1 | MU_MESAG, &gl_ctwait, &gl_ctwait, 0x0L, 0x0001ff01L, msgbuf, lrets);
+#else
+		ev_which = ev_multi(MU_KEYBD | MU_BUTTON | MU_M1, &gl_ctwait, &gl_ctwait, 0x0L, 0x0001ff01L, NULL, lrets);
+#endif
 		/* grab screen sink */
 		wm_update(TRUE);
-		/* button down over area */
-		/*   ctrl mgr owns  */
+		/* button down over area ctrl mgr owns  */
 		if (ev_which & MU_BUTTON)
 		{
 			hctl_button(lrets[0], lrets[1]);
 		}
-		/* mouse over menu bar  */
+		/* mouse over menu bar */
 		if (ev_which & MU_M1)
 		{
 			hctl_rect(lrets[0], lrets[1]);
 		}
 
+#if AES3D
 		if (ev_which & MU_MESAG)		/* need to redraw */
 		{
 			hctl_msg(msgbuf);
 		}
-		/* give up screen sink  */
+#endif
+
+		/* give up screen sink */
 		wm_update(FALSE);
 	}
 }
@@ -533,7 +737,7 @@ int16_t ctlmgr(NOTHING)
  *	executing. Also do all the initialization that is required.  
  *	Also zero out the desk accessory count.
  */
-
+/* 306de: 00e1b770 */
 PD *ictlmgr(P(int16_t) pid)
 PP(int16_t pid;)
 {
@@ -551,11 +755,13 @@ PP(int16_t pid;)
 }
 
 
-/*	New routine to force arrow mouse and show mouse when it is over	*/
-/*	the menu bar or there is an alert box	3/05/86			*/
-
-VOID ctlmouse(P(int16_t) mon)
-PP(int16_t mon;)
+/*
+ * New routine to force arrow mouse and show mouse when it is over
+ * the menu bar or there is an alert box	3/05/86
+ */
+/* 306de: 00e1b7aa */
+VOID ctlmouse(P(BOOLEAN) mon)
+PP(BOOLEAN mon;)
 {
 	if (mon)							/* turn on and show the mouse   */
 	{
@@ -569,16 +775,23 @@ PP(int16_t mon;)
 			gl_mouse = TRUE;			/* set the flag         */
 		}
 		gl_moff = 0;					/* reset the flag to make bbset */
-	} /* work             */
-	else
+	} else
 	{
+#if BINEXACT /* sigh */
+		gsx_ncode(HIDE_CUR, 0L);		/* turn off the mouse anyway    */
+#else
 		gsx_ncode(HIDE_CUR, 0, 0);		/* turn off the mouse anyway    */
+#endif
 		putmouse();						/* put the mouse back to the    */
 		gl_mouse = FALSE;				/* way it was           */
 
 		if (tmpmon)						/* the mouse was on     */
 		{
+#if BINEXACT
+			gsx_ncode(SHOW_CUR, 0L); /* sigh */
+#else
 			gsx_ncode(SHOW_CUR, 0, 0);
+#endif
 			gl_mouse = TRUE;
 		}
 
@@ -591,8 +804,9 @@ PP(int16_t mon;)
 /*	0 = end mouse control	*/
 /*	1 = mouse control	*/
 
-VOID take_ownership(P(int16_t) beg_ownit)
-PP(int16_t beg_ownit;)
+/* 3066de: 00e1b846 */
+VOID take_ownership(P(BOOLEAN) beg_ownit)
+PP(BOOLEAN beg_ownit;)
 {
 	if (beg_ownit)
 	{
@@ -600,9 +814,9 @@ PP(int16_t beg_ownit;)
 		if (ml_ocnt == 0)
 		{
 			ml_mnhold = gl_mntree;		/* save the current menu   */
-			gl_mntree = 0x0L;			/* no menu         */
+			gl_mntree = 0;				/* no menu         */
 			rc_copy(&ctrl, &ml_ctrl);	/* get_ctrl(&ml_ctrl);     */
-			/* save the control rect   */
+			/* save the control rect */
 			/* get_mkown(&ml_pmown, &ml_pkown); */
 
 			ml_pmown = gl_mowner;		/* save the mouse owner    */
@@ -616,7 +830,7 @@ PP(int16_t beg_ownit;)
 		ml_ocnt--;
 		if (ml_ocnt == 0)
 		{
-			ct_chgown(ml_pkown, &ml_ctrl);	/* restore mouse owner     */
+			ct_chgown(ml_pkown, &ml_ctrl);	/* restore mouse owner     */ /* BUG: ml_pkown is keyboard owner, not mouse */
 			gl_mntree = ml_mnhold;		/* restore menu tree       */
 		}
 		wm_update(FALSE);

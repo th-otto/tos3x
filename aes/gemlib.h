@@ -90,33 +90,12 @@
 
 /*	FSELLIB.H	05/05/84 - 01/07/85	Lee Lorenzen		*/
 
-typedef struct rssofln
-{
-	int16_t	rss_offset;
-	int16_t	rss_length;
-} RSSOFLN;
-
-typedef struct imofln			/* image block structure	*/
-{
-	int16_t	rim_offset;
-	int16_t	rim_length;
-} IMOFLN;
-
-typedef struct rstree
-{
-	int16_t	rst_first;
-	int16_t	rst_count;
-} RSTREE;
-
 #define RMODE_RD 0
 #define RMODE_WR 1
 #define RMODE_RW 2
 
 #define SMODE 0				/* seek mode is absolute offset	*/
 #define F_ATTR 0			/* file attribute for creating	*/
-
-/* # of long tree pointers reserved in the global array */
-#define RES_TREE	8
 
 /* these must coincide w/ rshdr */
 #define RT_VRSN 0
@@ -163,14 +142,14 @@ typedef struct rstree
 
 
 #define	HASHSIZ	8		/* size of hash table */
-#define	NUMWIN	8		/* # window structures per block of memory */
+#define	NUM_WIN	8		/* # window structures per block of memory */
 #define	NUMRECT	80		/* # RLISTs per block of memory allocated */
 #define	SHADOW	2		/* thickness of drop shadow in pixels */
 #define	BORDER	0		/* # pixels taken up by border around obj */
 
 
 /* Bit masks of pieces of a window */
-#define TOP	0x0001
+#define TOP		0x0001
 #define LEFT	0x0002
 #define RIGHT	0x0004
 #define BOTTOM	0x0008
@@ -196,7 +175,7 @@ typedef struct rstree
 #define	W_RTARROW   16		/* horizontal slider right arrow */
 #define	W_HSLIDE    17		/* horizontal slider background */
 #define	W_HELEV	    18		/* horizontal slider thumb/elevator */
-#define	W_MNBAR	    19		/* menu bar (added Jul 23 91 - ml.) */
+#define	W_MENUBAR	19		/* menu bar (added Jul 23 91 - ml.) */
 #define	MAXOBJ	    20		/* maximum number of objects in a window */
 
 
@@ -228,34 +207,38 @@ typedef	struct	rlist {
 } RLIST;
 
 
+#if NEWWIN
+
 /* Window structure */
 typedef	struct	window {
     struct {
 	unsigned used : 1;	/* bit 0 -> 1: slot is currently used */
 	unsigned opened : 1;	/* bit 1 -> 1: window is currently opened */
     } status;			/* window status */
-    PD	    *owner;		/* owner of this window */
-    uint16_t   mowner;		/* mouse owner of this window */
-    uint16_t   handle;		/* window handle */
-    uint16_t   kind;		/* flag for components of window */
+    PD	    *w_owner;		/* owner of this window */
+    uint16_t   w_mowner;	/* mouse owner of this window */
+    uint16_t   w_handle;	/* window handle */
+    uint16_t   w_kind;		/* flag for components of window */
     OBJECT  *aesobj;		/* for use in AES */
     OBJECT  obj[MAXOBJ];	/* definition of each object */
-    int16_t    tcolor[MAXOBJ];	/* object colors if window is topped */
-    int16_t    bcolor[MAXOBJ];	/* object colors if window is in background */
-    TEDINFO ttxt;		/* title bar text */
-    TEDINFO itxt;		/* info line text */
-    TEDINFO mtxt;		/* menu bar text */
-    GRECT   full;		/* coords and size when full */
-    GRECT   prev;		/* previous coords and size */
-    GRECT   curr;		/* current coords and size */
-    RLIST   *fxywh;		/* first rect in rectangle list */
-    RLIST   *nxywh;		/* next rect in rectangle list */
-				/* slider positions and sizes are in 1-1000
-				   range and relative to the scroll bar */
-    uint16_t   hslpos;		/* horizontal slider position */
-    uint16_t   vslpos;		/* vertical slider position */
-    uint16_t   hslsz;		/* horizontal slider size */
-    uint16_t   vslsz;		/* vertical slider size */
+#if AES3D
+    int16_t    w_tcolor[MAXOBJ];	/* object colors if window is topped */
+    int16_t    w_bcolor[MAXOBJ];	/* object colors if window is in background */
+#endif
+    TEDINFO ttxt;			/* title bar text */
+    TEDINFO itxt;			/* info line text */
+    TEDINFO mtxt;			/* menu bar text */
+    GRECT   w_full;			/* coords and size when full */
+    GRECT   w_prev;			/* previous coords and size */
+    GRECT   w_curr;			/* current coords and size */
+    RLIST   *fxywh;			/* first rect in rectangle list */
+    RLIST   *nxywh;			/* next rect in rectangle list */
+							/* slider positions and sizes are in 1-1000
+							   range and relative to the scroll bar */
+    uint16_t   w_hslide;	/* horizontal slider position */
+    uint16_t   w_vslide;	/* vertical slider position */
+    uint16_t   w_hslsiz;	/* horizontal slider size */
+    uint16_t   w_vslsiz;	/* vertical slider size */
     uint16_t   ontop;		/* handle # of window on top */
     uint16_t   under;		/* handle # of window under */
     uint16_t   nxthndl;		/* next handle # in used */
@@ -267,8 +250,39 @@ typedef	struct	window {
     struct  window *wnext;	/* ptr to next WINDOW in database */
 } WINDOW;
 
-#define	ADJ3DPIX    2	/* pixel adjustment for 3D objects */
+#else
 
+#define VF_INUSE 0x0001
+#define VF_BROKEN 0x0002
+#define VF_INTREE 0x0004
+#define VF_SUBWIN 0x0008
+#define VF_KEEPWIN 0x0010
+
+typedef struct window
+{
+	/*  0 */	int16_t		w_flags;
+	/*  2 */	PD			*w_owner;
+	/*  6 */	int16_t		w_kind;
+	/*  8 */	char		*w_pname;
+	/* 12 */	char		*w_pinfo;
+	/* 16 */	GRECT		w_full;
+	/* 24 */	GRECT		w_work;
+	/* 32 */	GRECT		w_prev;
+	/* 40 */	int16_t		w_hslide;
+	/* 42 */	int16_t		w_vslide;
+	/* 44 */	int16_t		w_hslsiz;
+	/* 46 */	int16_t		w_vslsiz;
+	/* 48 */	ORECT		*w_rlist;	/* owner rectangle list	*/
+	/* 52 */	ORECT		*w_rnext;	/* used for search first search next */
+	/* 56 */	
+	char unused[76];
+} WINDOW;
+
+#define NUM_ORECT (NUM_WIN * 10)	/* is this enough???	*/
+
+#endif
+
+#define	ADJ3DPIX    2	/* pixel adjustment for 3D objects */
 
 #define G_SIZE 15
 
@@ -286,8 +300,7 @@ THEGLO
 
 	FPD	g_fpdx[NFORKS];
 
-#if AESVERSION < 0x330
-#define NUM_ORECT 80
+#if !NEWWIN
 	ORECT 	g_olist[NUM_ORECT];
 #endif
 
@@ -311,7 +324,9 @@ THEGLO
 	char	s_save[SIZE_AFILE];	/* SIZE_AFILE		*/
 	char	s_tail[CMDLEN];
 
-	/* WINDOW	w_win[NUM_WIN]; */
+#if !NEWWIN
+	WINDOW	w_win[NUM_WIN];
+#endif
 };
 
 #endif /* GEMLIB_H */

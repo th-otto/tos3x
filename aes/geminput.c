@@ -63,12 +63,10 @@ int16_t pr_xrat;
 int16_t pr_yrat;
 int16_t pr_mclick;
 
-/* current mouse owner  */
-PD *gl_mowner;
-/* current keybd owner  */
-PD *gl_kowner;
-/* current control rect. owner */
-PD *gl_cowner;
+
+PD *gl_mowner;		/* current mouse owner  */
+PD *gl_kowner;		/* current keybd owner  */
+PD *gl_cowner;		/* current control rect. owner */
 /* screen manager process that controls the mouse when its outside the control rectangle. */
 PD *ctl_pd;
 /* current control rect. */
@@ -128,13 +126,15 @@ PP(int16_t new;)
 					if (inside(mx, my, &t))
 					{
 						wp = srchwp(wh);
+#if NEWWIN
 						if (wp->type & 0x01)
-							m = wp->owner;
+							m = wp->w_owner;
+#endif
 					}
 				} else					/* hit window 0 background */
 				{
 					/* added Jul 23 91 for new window manager - ml. */
-					m = srchwp(0)->owner;
+					m = srchwp(0)->w_owner;
 				}
 			}
 		}
@@ -146,12 +146,12 @@ PP(int16_t new;)
 
 #if UNLINKED
 /*
-*	Routine to check if the mouse is in part of 
-*	the screen owned by the control manager.  
-*	It returns -1 if it is, 
-*	It returns 0 if it is over the desktop,
-*	or +1 if it is over the active window.
-*/
+ *	Routine to check if the mouse is in part of 
+ *	the screen owned by the control manager.  
+ *	It returns -1 if it is, 
+ *	It returns 0 if it is over the desktop,
+ *	or +1 if it is over the active window.
+ */
 
 int16_t chk_ctrl(P(int16_t) mx, P(int16_t) my)
 PP(register int16_t mx;)
@@ -166,10 +166,8 @@ PP(register int16_t my;)
 	/* if on any window beside the desktop then ctrl mgr owns */
 	return ((wm_find(mx, my) ? -1 : 0));
 }
-#endif
 
 
-#if UNLINKED
 /*	Whenever there is a click, come to here
  *	Button click code call that is from the button interrupt
  *	code with interrupts off.
@@ -211,14 +209,12 @@ PP(register int16_t state;)
 		gl_btrue = state;
 	}
 }
-#endif
 
 
-#if UNLINKED
 /*
-*	Button delay code that is called from the tick interrupt code with 
-*	interrupts off.
-*/
+ *	Button delay code that is called from the tick interrupt code with 
+ *	interrupts off.
+ */
 
 VOID b_delay(P(int16_t) amnt)
 PP(int16_t amnt;)
@@ -238,23 +234,21 @@ PP(int16_t amnt;)
 		}
 	}
 }
-#endif
 
-#if UNLINKED
+
 /*
-*	Set the current control rectangle which is the part of the
-*	screen owned by the active process.  Normally, the work area
-*	of the top window.
-*/
+ *	Set the current control rectangle which is the part of the
+ *	screen owned by the active process.  Normally, the work area
+ *	of the top window.
+ */
 
 VOID set_ctrl(P(GRECT *) pt)
 PP(GRECT *pt;)
 {
 	rc_copy(pt, &ctrl);
 }
-#endif
 
-#if UNLINKED
+
 /*
  *	Get the current control rectangle which is the part of the
  *	screen owned by the active process.  Normally, the work area
@@ -267,9 +261,8 @@ PP(GRECT *pt;)
 {
 	rc_copy(&ctrl, pt);
 }
-#endif
 
-#if UNLINKED
+
 /*
  *	Used by form_do to remember the current keyboard and mouse
  *	owners.
@@ -282,10 +275,8 @@ PP(PD **pmown;)
 	*pmown = gl_mowner;
 	*pkown = gl_kowner;
 }
-#endif
 
 
-#if UNLINKED
 /*
  *	Used by control manager and form_do to give the mouse or keyboard
  *	to another process.  The mouse should only be given with the 
@@ -305,12 +296,11 @@ PP(PD *kp;)
 
 	gl_kowner = kp;
 }
-#endif
 
-#if UNLINKED
+
 /*
-*	EnQueue a character on a circular keyboard buffer.
-*/
+ *	EnQueue a character on a circular keyboard buffer.
+ */
 VOID nq(P(uint16_t) ch, P(CQUEUE *) qptr)
 PP(uint16_t ch;)
 PP(register CQUEUE *qptr;)
@@ -323,12 +313,12 @@ PP(register CQUEUE *qptr;)
 		qptr->c_cnt++;
 	}
 }
-#endif
+#endif /* UNLINKED */
 
 
 /*
-*	DeQueue a a character from a circular keyboard buffer.
-*/
+ *	DeQueue a a character from a circular keyboard buffer.
+ */
 uint16_t dq(P(CQUEUE *) qptr)
 PP(register CQUEUE *qptr;)
 {
@@ -343,8 +333,8 @@ PP(register CQUEUE *qptr;)
 
 
 /*
-*	Flush the characters from a circular keyboard buffer.
-*/
+ *	Flush the characters from a circular keyboard buffer.
+ */
 VOID fq(NOTHING)
 {
 	while (cda->c_q.c_cnt)
@@ -587,11 +577,11 @@ intptr_t addr;
 		evinsert(e, &cda->c_iiowait);
 	}
 }
-#endif
 
-#if UNLINKED
-/*	wait for timer		*/
 
+/*
+ * wait for timer
+ */
 VOID adelay(P(EVB *) e, P(int32_t) c)
 PP(register EVB *e;)
 PP(register int32_t c;)								/* # of ticks to wait  */
@@ -638,11 +628,11 @@ PP(register int32_t c;)								/* # of ticks to wait  */
 	}
 	sti();
 }
-#endif
 
-#if UNLINKED
-/*	wait for button		*/
 
+/*
+ * wait for button
+ */
 int16_t abutton(P(EVB *) e, P(int32_t) p)
 PP(register EVB *e;)
 PP(register int32_t p;)
@@ -663,11 +653,11 @@ PP(register int32_t p;)
 		evinsert(e, &cda->c_bsleep);
 	}
 }
-#endif
 
-#if UNLINKED
-/*	wait for mouse rectangle	*/
 
+/*
+ * wait for mouse rectangle
+ */
 VOID amouse(P(EVB *) e, P(int32_t) pmo)
 PP(register EVB *e;)
 PP(int32_t pmo;)
@@ -689,4 +679,4 @@ PP(int32_t pmo;)
 		evinsert(e, &(cda->c_msleep));
 	}
 }
-#endif
+#endif /* UNLINKED */

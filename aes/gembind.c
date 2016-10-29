@@ -314,12 +314,12 @@ PP(register VOIDPTR *addr_in;)
 	case GRAF_MOUSE:
 		if (maddr)
 		{
-			ctlmouse(0);
+			ctlmouse(FALSE);
 			maddr = (VOIDPTR)1;
 		}
 		gr_mouse(GR_MNUMBER, GR_MADDR);
 		if (maddr)
-			ctlmouse(1);
+			ctlmouse(TRUE);
 		break;
 	case GRAF_MKSTATE:
 		ret = gr_mkstate(&GR_MX, &GR_MY, &GR_MSTATE, &GR_KSTATE);
@@ -358,9 +358,10 @@ PP(register VOIDPTR *addr_in;)
 		break;
 	case WIND_GET:
 #if AES3D
-		ret = wm_get(WM_HANDLE, WM_WFIELD, &WM_OX, &WM_IX);
+		ret = wm_get(WM_HANDLE, WM_WFIELD, &WM_OX, (int16_t *)&WM_IX);
 #else
-		wm_get(WM_HANDLE, WM_WFIELD, &WM_OX); /* BUG: ignores return value */
+		/* BUG: ignores return value */
+		wm_get(WM_HANDLE, WM_WFIELD, &WM_OX);
 #endif
 		break;
 	case WIND_SET:
@@ -373,7 +374,8 @@ PP(register VOIDPTR *addr_in;)
 #if (AESVERSION >= 0x330) | !BINEXACT
 		ret = wm_update(WM_BEGUP);
 #else
-		wm_update(WM_BEGUP); /* BUG: ignores return value */
+		/* BUG: ignores return value */
+		wm_update(WM_BEGUP);
 #endif
 		break;
 	case WIND_CALC:
@@ -383,6 +385,7 @@ PP(register VOIDPTR *addr_in;)
 #if (AESVERSION >= 0x330) | !BINEXACT
 		ret = wm_new();
 #else
+		/* BUG: ignores return value */
 		wm_new();
 #endif
 		break;

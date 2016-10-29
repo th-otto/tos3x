@@ -317,7 +317,7 @@ _v_hardcopy:
 VOID gsx_escapes(WORD esc_code)
 {
 	contrl[5] = esc_code;
-	gsx_ncode(ESCAPE, 0, 0);
+	gsx_ncode(GSX_ESCAPE, 0, 0);
 }
 #endif
 	xdef _gsx_escapes

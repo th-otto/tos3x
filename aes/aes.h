@@ -74,11 +74,31 @@ typedef int BOOLEAN;
 #define I8086	0	/* Intel 8086/8088 */
 #define	MC68K	1	/* Motorola 68000 */
 
+#define SINGLAPP  1
+#define MULTIAPP  0
+
+/*
+ * used to mark changes to the window handling
+ */
+#define NEWWIN (AESVERSION >= 0x330)
 
 
 #include "struct88.h"
 #include "obdefs.h"
 #include "gemlib.h"
+
+
+/*
+ * Due to the way the linker works, if we want to create a binary exact image,
+ * we have to force symbols that go into the bss section at certain addresses.
+ * For this to work, some variables that should be static must be globally
+ * visible.
+ */
+#if BINEXACT
+#  define STATIC
+#else
+#  define STATIC static
+#endif
 
 
 /*
@@ -388,8 +408,6 @@ BOOLEAN cre_aproc PROTO((NOTHING));
 /*
  * gemctrl.c
  */
-extern int16_t tmpmoff;
-extern int16_t tmpmon;
 extern MOBLK gl_ctwait;
 extern int16_t appl_msg[8];
 extern int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
@@ -400,13 +418,11 @@ VOID ct_msgup PROTO((int16_t message, int16_t owner, int16_t wh, int16_t m1, int
 VOID hctl_window PROTO((int16_t w_handle, int16_t mx, int16_t my));
 VOID hctl_button PROTO((int16_t mx, int16_t my));
 VOID hctl_rect PROTO((int16_t mx, int16_t my));
-VOID hctl_msg PROTO((int16_t *msgbuf));
-VOID drawdesk PROTO((int16_t x, int16_t y, int16_t w, int16_t h));
 VOID ct_chgown PROTO((PD *ppd, GRECT *pr));
 int16_t ctlmgr PROTO((NOTHING));
 PD *ictlmgr PROTO((int16_t pid));
-VOID ctlmouse PROTO((int16_t mon));
-VOID take_ownership PROTO((int16_t beg_ownit));
+VOID ctlmouse PROTO((BOOLEAN mon));
+VOID take_ownership PROTO((BOOLEAN beg_ownit));
 
 
 /*
@@ -495,9 +511,9 @@ extern int16_t pr_xrat;
 extern int16_t pr_yrat;
 extern int16_t pr_mclick;
 
-extern PD *gl_mowner;
-extern PD *gl_kowner;
-extern PD *gl_cowner;
+extern PD *gl_mowner;		/* current mouse owner  */
+extern PD *gl_kowner;		/* current keybd owner  */
+extern PD *gl_cowner;		/* current control rect. owner */
 extern PD *ctl_pd;
 extern GRECT ctrl;
 extern int16_t gl_bclick;
@@ -814,8 +830,7 @@ VOID sh_main PROTO((NOTHING));
  */
 extern LPTREE newdesk;
 extern int16_t newroot;							/* root object of new DESKTOP */
-extern int16_t topw;
-extern MEMHDR *rmhead, *rmtail;					/* rect lists memory linked list */
+extern int16_t gl_wtop;
 extern intptr_t ad_windspb;
 
 VOID wm_init PROTO((NOTHING));
@@ -834,11 +849,23 @@ int16_t wm_update PROTO((int code));
 int16_t wm_calc PROTO((int16_t type, int16_t kind, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh));
 int16_t wm_new PROTO((NOTHING));
 VOID wm_min PROTO((int16_t kind, int16_t *ow, int16_t *oh));
+#if NEWWIN
+extern MEMHDR *rmhead, *rmtail;					/* rect lists memory linked list */
 WINDOW *srchwp PROTO((int handle));
+#else
+#define srchwp(handle) (&D.w_win[handle])
+#endif
 VOID w_setactive PROTO((NOTHING));
 VOID ap_sendmsg PROTO((int16_t *ap_msg, int16_t type, int16_t towhom, int16_t w3, int16_t w4, int16_t w5, int16_t w6, int16_t w7));
 VOID w_drawchange PROTO((GRECT *dirty, uint16_t skip, uint16_t stop));
 
+#if !NEWWIN
+extern int16_t gl_wtop;
+extern OBJECT *gl_awind;
+VOID w_getsize PROTO((int16_t which, int16_t w_handle, GRECT *pt));
+VOID w_bldactive PROTO((int16_t w_handle));
+#endif
+ 
 
 /*
  * gemwmrect.c

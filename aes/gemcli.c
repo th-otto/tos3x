@@ -54,8 +54,10 @@ char const stacc[] = "\\*.ACC";
 int16_t used_acc;							/* currently number of acc  */
 
 
-/*	Make sure everybody is on the suspend list before going on	*/
-
+/*
+ * Make sure everybody is on the suspend list before going on
+ */
+/* 306de: 00e1adde */
 VOID release(NOTHING)
 {
 	register PD *p;
@@ -100,28 +102,30 @@ VOID release(NOTHING)
 }
 
 
-/*	Give everyone a chance to run, at least once	*/
-
+/*
+ * Give everyone a chance to run, at least once
+ */
+/* 306de: 00e1ae70 */
 VOID all_run(NOTHING)
 {
 	int16_t i;
 
 	for (i = 0; i < used_acc; i++)
 		dsptch();
-	/* then get in the wait */
-	/*   line       */
+	/* then get in the wait line */
 	wm_update(TRUE);
 	wm_update(FALSE);
 }
 
 
 /*
-*	Routine to load program file pointed at by pfilespec, then
-*	create new process context for it.  This uses the load overlay
-*	function of DOS.  The room for accessories variable will be
-*	decremented by the size of the accessory image.  If the
-*	accessory is too big to fit it will be not be loaded.
-*/
+ *	Routine to load program file pointed at by pfilespec, then
+ *	create new process context for it.  This uses the load overlay
+ *	function of DOS.  The room for accessories variable will be
+ *	decremented by the size of the accessory image.  If the
+ *	accessory is too big to fit it will be not be loaded.
+ */
+/* 306de: 00e1aea6 */
 int16_t sndcli(P(char *) pfilespec, P(int16_t) acc)
 PP(register char *pfilespec;)
 PP(int16_t acc;)
@@ -141,8 +145,7 @@ PP(int16_t acc;)
 		{
 			err_ret = pgmld(handle, &D.s_cmd[0], &ldaddr);	/*, paccroom); */
 			dos_close(handle);
-			/* create process to    */
-			/*   execute it     */
+			/* create process to execute it */
 			if (err_ret != -1)
 			{
 				if (acc == 0)
@@ -172,7 +175,7 @@ PP(int16_t acc;)
  *	It will first try the hard disk, if there is no acc files then it
  *	will go back to the boot drive.
  */
-
+/* 306de: 00e1af76 */
 VOID ldaccs(NOTHING)
 {
 	register int16_t i;

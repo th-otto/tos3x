@@ -20,9 +20,9 @@ name: ds.t size
 
 	bss
 
-	ds.b $800       /* the system variables go here */
+	ds.b 2048       /* the system variables go here */
 
-	ds.b $40 /* seems to be unused */
+	ds.b 64 /* seems to be unused */
 
 #if STBOOK
 	ds.b 164 /* seems to be unused */
@@ -219,7 +219,7 @@ name: ds.t size
 
 	V(_prtbbval,w,1)
 
-	ds.b $400
+	ds.b 1024
     
 	V(_supstk,w,SUPSIZ)
 	V(_supstkend,b,0)
@@ -388,8 +388,12 @@ name: ds.t size
 	ds.b 2
 	
 	V(_ad_rso,l,1)
+	V(_ml_mnhold,l,1)
+	V(_ml_ctrl,w,4)    /* GRECT */
+	V(_ml_pmown,l,1)
+	V(_ml_pkown,l,1)
 	
-	ds.b $136
+	ds.b $122
 
 	V(pblock,l,5)
 	V(_crit_err,l,1)
@@ -432,8 +436,13 @@ name: ds.t size
 	
 	V(_ptsout,w,10)
 	
-	ds.b $46
+	ds.b 10
+	
+	V(_ctrl,w,4) /* GRECT */
+	
+	ds.b $32
 
+	V(_gl_dabase,w,1)
 	V(_gl_adacc,l,MAX_ACCS)
 
 	ds.b $12
@@ -446,8 +455,9 @@ name: ds.t size
 	V(_gl_hchar,w,1)
 	V(_gl_naccs,w,1)
 	
-	ds.b 4
+	ds.b 2
 	
+	V(_gl_dacnt,w,1)
 	V(_gl_bdelay,w,1)
 	
 	ds.b 4
@@ -461,12 +471,17 @@ name: ds.t size
 	ds.b 4
 	
 	V(_gl_handle,w,1)
+	V(_ad_armice,l,1)
 	
-	ds.b $AE
+	ds.b $Aa
 	
 	V(_gl_dclick,w,1)
 	
-	ds.b $4A
+	ds.b $24
+	
+	V(_ad_shcmd,l,1)
+	
+	ds.b $22
 	
 	V(_gl_bdesired,w,1)
 	V(_gl_dcindex,w,1)
@@ -476,11 +491,15 @@ name: ds.t size
 	
 	V(old_bcode,l,1)
 	
-	ds.b 6
+	ds.b 2
 	
 	V(_gl_bvhard,w,1)
 	
-	ds.b 10
+	ds.b 8
+	
+	V(_used_acc,w,1)
+	
+	ds.b 4
 	
 	V(_gl_wchar,w,1)
 	
@@ -513,9 +532,19 @@ name: ds.t size
 	ds.b $8C
 	
 	V(_ad_envrn,l,1)
+	V(_desk_pid,w,MAX_ACCS)
 	
-	ds.b $166
+	ds.b 16
 	
+	V(_gl_rmnactv,w,4) /* GRECT */
+	
+	ds.b $b0
+	
+	V(_gl_awind,l,1)
+	
+	ds.b $84
+	
+	V(_gl_ctwait,w,5) /* MOBLK */
 	V(_gl_rbuf,l,1)
 	
 	ds.l 1
@@ -529,8 +558,9 @@ name: ds.t size
 	ds.b $4e
 	
 	V(_gl_rlen,w,1)
+	V(_gl_rmenu,w,4) /* GRECT */
 	
-	ds.b 10
+	ds.b 2
 	
 	V(_sys_adacc,l,1)
 	
@@ -552,11 +582,21 @@ name: ds.t size
 	
 	V(_sh_doexec,w,1)
 	
-	ds.b 8
+	ds.b 4
 	
-	V(_gl_rfull,w,4)
+	V(_ad_sysglo,l,1)
+	V(_gl_rfull,w,4) /* GRECT */
+
+	ds.b 2
 	
-	ds.b $38
+	V(_gl_rscreen,w,4) /* GRECT */
+	
+	ds.b 2
+	
+	V(_appl_msg,w,8)
+	V(_ml_ocnt,w,1)
+	
+	ds.b 26
 	
 	V(_gl_btrue,w,1)
 	
@@ -565,10 +605,8 @@ name: ds.t size
 	V(_gl_kowner,l,1)
 	V(_crt_error,w,1)
 	V(_gl_wbox,w,1)
-	
-	ds.b 4
-	
-	V(_gl_bowner,l,1)
+	V(_gl_mntree,l,1)
+	V(_gl_mowner,l,1)
 	
 	ds.b $86
 	
@@ -576,13 +614,21 @@ name: ds.t size
 	
 	ds.b $E
 	
-	V(_gl_mvisible,w,1)
+	V(_gl_mouse,w,1)
 	
-	ds.b $22
+	ds.b $18
+	
+	V(_tmpmoff,w,1)
+	
+	ds.b 8
 	
 	V(_autoexec,w,1)
 	
-	ds.b $18
+	ds.b $4
+	
+	V(_gl_wtop,w,1)
+	
+	ds.b $12
 	
 	V(_pr_xrat,w,1)
 	V(_pr_button,w,1)
@@ -617,14 +663,15 @@ name: ds.t size
 	V(_dlr,l,1)
 	V(_drl,l,1)
 	
-	V(_D,b,$369E) /* sizeof(THEGLO) _D */
+	V(_D,b,$369E) /* sizeof(THEGLO) */
 	
 	V(_eul,l,1)
 	V(_fpt,w,1)
 	V(_nrl,l,1)
 	V(_rlr,l,1)
+	V(_slr,l,1)
 	
-	ds.b 8
+	ds.b 4
 	
 	V(_evx,b,28) /* sizeof(EVB) */
 	V(_zlr,l,1)
@@ -655,8 +702,9 @@ name: ds.t size
 	
 	V(_mtrans,w,1)
 	
-	ds.b $2E
+	ds.b $2c
 	
+	V(_tmpmon,w,1)
 	V(_button,w,1)
 	
 /* end AES */
