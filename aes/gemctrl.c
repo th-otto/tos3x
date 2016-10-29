@@ -255,17 +255,16 @@ PP(int16_t my;)
 					ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
 				} else
 				{
-					if (!p->p_message[0])
+					if (!p->p_msgtosend)
 					{					/* message is sent */
-						p->p_message[0] = 1;
-						p->p_message[1] = message;	/* message */
-						p->p_message[2] = rlr->p_pid;	/* sender */
-						p->p_message[3] = 0;	/* size in bytes */
-						p->p_message[4] = w_handle;
-						p->p_message[5] = x;
-						p->p_message[6] = y;
-						p->p_message[7] = w;
-						p->p_message[8] = h;
+						p->p_msgtosend = TRUE;						p->p_message[0] = message;		/* message */
+						p->p_message[1] = rlr->p_pid;	/* sender */
+						p->p_message[2] = 0;			/* extra size in bytes */
+						p->p_message[3] = w_handle;
+						p->p_message[4] = x;
+						p->p_message[5] = y;
+						p->p_message[6] = w;
+						p->p_message[7] = h;
 					}
 				}
 
@@ -449,17 +448,21 @@ PP(int16_t my;)
 					ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
 				} else
 				{
-					if (!p->p_message[0])
+					if (!p->p_msgtosend)
 					{					/* message is sent */
-						p->p_message[0] = 1;
-						p->p_message[1] = message;	/* message */
-						p->p_message[2] = rlr->p_pid;	/* sender */
-						p->p_message[3] = 16;	/* size in bytes */ /* BUG: should be size > 16 only */
-						p->p_message[4] = w_handle;
-						p->p_message[5] = x;
-						p->p_message[6] = y;
-						p->p_message[7] = w;
-						p->p_message[8] = h;
+						p->p_msgtosend = TRUE;
+						p->p_message[0] = message;	/* message */
+						p->p_message[1] = rlr->p_pid;	/* sender */
+#if BINEXACT
+						p->p_message[2] = 16;	/* size in bytes */ /* BUG: should be extra size > 16 only */
+#else
+						p->p_message[2] = 0;	/* extra size in bytes */
+#endif
+						p->p_message[3] = w_handle;
+						p->p_message[4] = x;
+						p->p_message[5] = y;
+						p->p_message[6] = w;
+						p->p_message[7] = h;
 					}
 				}
 

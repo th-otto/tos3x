@@ -661,7 +661,7 @@ VOID gr_xor PROTO((int16_t clipped, int16_t cnt, int16_t cx, int16_t cy, int16_t
 VOID gr_movebox PROTO((int16_t w, int16_t h, int16_t srcx, int16_t srcy, int16_t dstx, int16_t dsty));
 VOID gr_scale PROTO((int16_t xdist, int16_t ydist, int16_t *pcnt, int16_t *pxstep, int16_t *pystep));
 int16_t gr_watchbox PROTO((OBJECT *tree, int16_t obj, int16_t instate, int16_t outstate));
-int16_t gr_stilldn PROTO((int16_t out, int16_t x, int16_t y, int16_t w, int16_t h));
+BOOLEAN gr_stilldn PROTO((int16_t out, int16_t x, int16_t y, int16_t w, int16_t h));
 VOID gr_draw PROTO((int16_t have2box, GRECT *po, GRECT *poff));
 int16_t gr_wait PROTO((GRECT *po, GRECT *poff, int16_t mx, int16_t my));
 VOID gr_setup PROTO((int16_t color));

@@ -73,7 +73,7 @@ PP(intptr_t pglobal;)
 	LLSET(pglobal + 22, &D);
 	LWSET(pglobal + 26, gl_bvdisk);
 	LWSET(pglobal + 28, gl_bvhard);
-	rlr->p_message[0] = 0;
+	rlr->p_msgtosend = FALSE;
 	return rlr->p_pid;
 }
 
@@ -106,10 +106,10 @@ int16_t ap_exit(NOTHING)
 int16_t rd_mymsg(P(VOIDPTR) buffer)
 PP(VOIDPTR buffer;)
 {
-	if (rlr->p_message[0])				/* there is a message   */
+	if (rlr->p_msgtosend)				/* there is a message   */
 	{
-		LBCOPY(buffer, &rlr->p_message[1], 16);
-		rlr->p_message[0] = 0;			/* message is sent  */
+		LBCOPY(buffer, rlr->p_message, 16);
+		rlr->p_msgtosend = FALSE;		/* message is sent  */
 		return TRUE;
 	} else
 		return FALSE;

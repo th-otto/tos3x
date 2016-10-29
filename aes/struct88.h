@@ -187,7 +187,8 @@ PD
 	/* 32 */	EVSPEC	p_evbits;		/* event bits in use 8 max EVB	*/
 	/* 34 */	EVSPEC	p_evwait;		/* event wait mask 		*/
 	/* 36 */	EVSPEC	p_evflg;		/* EVB that satisfied		*/
-	/* 38 */	int16_t	p_message[10];
+	/* 38 */	BOOLEAN	p_msgtosend;
+	/* 40 */	int16_t	p_message[9];
 #if AESVERSION >= 0x320
 	/* 58 */	MFORM	p_mouse;		/* saved mouseform for M_SAVE/M_RESTORE */
 #endif

@@ -80,6 +80,7 @@ PP(int32_t fdata;)
 }
 
 
+/* 306de: 00e1b94a */
 VOID disp_act(P(PD *) p)
 PP(register PD *p;)
 {
@@ -96,8 +97,10 @@ PP(register PD *p;)
 }
 
 
-/*	Suspend the process	*/
-
+/*
+ * Suspend the process
+ */
+/* 306de: 00e1b982 */
 VOID suspend_act(P(PD *) p)
 PP(register PD *p;)
 {
@@ -110,6 +113,7 @@ PP(register PD *p;)
 }
 
 
+/* 306de: 00e1b9aa */
 VOID forker(NOTHING)
 {
 	register FPD *f;
@@ -163,12 +167,17 @@ VOID forker(NOTHING)
 }
 
 
+/* 306de: 00e1bac6 */
 VOID chkkbd(NOTHING)
 {
 	register int16_t achar, kstat;
 	register int16_t *pintin;
 
+#if BINEXACT /* sigh */
+	gsx_ncode(KEY_SHST, 0L);
+#else
 	gsx_ncode(KEY_SHST, 0, 0);
+#endif
 	kstat = intout[0];
 
 	achar = 0;
@@ -203,20 +212,21 @@ VOID chkkbd(NOTHING)
 
 
 /****************************************************************
- *								*
- *   dispatcher maintains all flags/regs so it looks like	*
- *   an RTE to the caller.					*
- *   dsptch() = rte						*
- *   rlr -> p_stat determines the action to perform on the	*
- *	    process that was in context				*
- *   rlr -> p_uda -> dparam is used by the action routines	*
- *								*
+ *                                                              *
+ *   dispatcher maintains all flags/regs so it looks like       *
+ *   an RTE to the caller.                                      *
+ *   dsptch() = rte                                             *
+ *   rlr -> p_stat determines the action to perform on the      *
+ *          process that was in context                         *
+ *   rlr -> p_uda -> dparam is used by the action routines      *
+ *                                                              *
  ****************************************************************/
 
 /****************************************************************
- * Machine state is saved before this routine is entered!	*
+ * Machine state is saved before this routine is entered!       *
  ****************************************************************/
 
+/* 306de: 00e1bb66 */
 VOID disp(NOTHING)
 {
 	register PD *p;
@@ -274,8 +284,9 @@ VOID disp(NOTHING)
 			}
 			/* check if there is something to run */
 #ifdef THROTTLE_CPU
-			if (!rlr && !fpcnt)
-				idle();
+			if (rlr || fpcnt)
+				break;
+			idle(); /* Tell multitasking OS we're idle */
 #endif
 		} while (!rlr && !fpcnt);
 
@@ -313,10 +324,18 @@ VOID disp(NOTHING)
 		rlr->p_stat |= PS_TOSUSPEND;
 	}
 
-	cda = rlr->p_cda;					/* switch to the context of the */
-	/* appropriate process */
+	/*
+	 * switch to the context of the appropriate process
+	 */
+	cda = rlr->p_cda;
 }
 
 /****************************************************************
  * Actual context switch happens after we fall out of disp().	*
  ****************************************************************/
+/* switchto() is a machine dependent routine which:
+ *	1) restores machine state
+ *	2) clear "indisp" semaphore
+ *	3) returns to appropriate address
+ *		so we'll never return from this
+ */

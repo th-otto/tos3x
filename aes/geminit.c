@@ -315,7 +315,7 @@ VOID gem_main(NOTHING)
 	 * why not allocate that static? its never changed
 	 */
 	drawstk = (intptr_t)dos_alloc(0x00000400L);	/* draw stack is 1K */
-	drawstk += 0x00000400L;			/* init to top      */
+	drawstk += 0x00000400L;			/* init to top */
 
 	/* no ticks during init */
 	hcli();
@@ -418,7 +418,7 @@ VOID gem_main(NOTHING)
 	/* init button stuff    */
 	set_defdrv();						/* set default drive    */
 
-	/* do gsx open work station        */
+	/* do gsx open work station */
 	gsx_init();
 
 	/* 8/1/92   */
@@ -527,13 +527,13 @@ VOID gem_main(NOTHING)
 	}
 #endif
 
-	/* off we go !!!    */
+	/* off we go !!! */
 	dsptch();
 
 #ifdef ACC_DELAY
 	accs_init();
 #else
-	/* let them run     */
+	/* let them run */
 	all_run();
 #endif
 
@@ -544,7 +544,7 @@ VOID gem_main(NOTHING)
 		for (i = 0; i < 6; i++)			/* let the acc's have a chance  */
 			all_run();
 #endif
-		/* change to dir of autoboot    */
+		/* change to dir of autoboot */
 		apath = &autopath[0];
 		xstrpcpy(g_autoboot, apath);
 		*(sh_name(apath)) = 0;			/* change path\filename to path */
@@ -570,19 +570,19 @@ VOID gem_main(NOTHING)
 	giveerr();
 	sti();
 
-	/* free up the acc's    */
+	/* free up the acc's */
 	free_accs();
 	
 	/* free up special glue */
 	
-	/* give back the tick   */
+	/* give back the tick */
 	cli();
 	gl_ticktime = gsx_tick(tiksav, &tiksav);
 	sti();
 
-	gsx_escapes(2);						/* exit alpha mode  */
+	gsx_escapes(2);						/* exit alpha mode */
 
-	/* close workstation    */
+	/* close workstation */
 	gsx_wsclose();
 
 	/* return GEM's 0xEF int */
@@ -693,8 +693,7 @@ int16_t pred_dinf(NOTHING)
 			dos_sdrv(defdrv);			/* set it back to default   */
 		}
 	}
-	/* if we read it from disk,     */
-	/* reschange may have changed.  */
+	/* if we read it from disk, reschange may have changed. */
   p_1:
 	if (change)
 	{
@@ -778,8 +777,8 @@ int16_t pred_dinf(NOTHING)
 			}
 		}
 	}
-	/* put in common area for special   */
-	/*  desk accessories            */
+	
+	/* put in common area for special desk accessories */
 	autoexec = FALSE;
 	sh_put(pbuf, SIZE_AFILE);
 	dos_free(pbuf);
@@ -787,7 +786,7 @@ int16_t pred_dinf(NOTHING)
 }
 
 
-/*     Save 25 columns and full height of the screen memory	*/
+/* Save 25 columns and full height of the screen memory */
 
 BOOLEAN gsx_malloc(NOTHING)
 {
@@ -895,7 +894,7 @@ PP(MFORM *grmaddr;)
 	{
 		if (mkind != USER_DEF)			/* set new mouse form   */
 		{
-			/* gsx_mfset will crash if this fails... */
+			/* BUG: gsx_mfset will crash if this fails because number is out of range... */
 			rs_gaddr(ad_sysglo, R_BIPDATA, MICE0 + mkind, &maddr);
 			grmaddr = (MFORM *)LLGET((intptr_t)maddr);
 		}
@@ -1018,13 +1017,13 @@ PP(int16_t isvert;)
 
 
 /*
-*	Routine to watch the mouse while the button is down and
-*	it stays inside/outside of the specified rectangle.
-*	Return TRUE as long as the mouse is down.  Block until the
-*	mouse moves into or out of the specified rectangle.
-*/
+ *	Routine to watch the mouse while the button is down and
+ *	it stays inside/outside of the specified rectangle.
+ *	Return TRUE as long as the mouse is down.  Block until the
+ *	mouse moves into or out of the specified rectangle.
+ */
 
-int16_t gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
+BOOLEAN gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(int16_t out;)
 PP(int16_t x;)
 PP(int16_t y;)
@@ -1037,7 +1036,7 @@ PP(int16_t h;)
 	 * compiler had better put the values out, x, y, w, h in the 
 	 * right order on the stack to form a MOBLK
 	 */
-	while (TRUE)
+	while (1)
 	{
 		forker();
 		if (!(button & 0x01))
@@ -1059,13 +1058,13 @@ PP(int16_t h;)
 
 #if 0
 /*
-*	Routine to watch the mouse while the button is down and
-*	it stays inside/outside of the specified rectangle.
-*	Return TRUE as long as the mouse is down.  Block until the
-*	mouse moves into or out of the specified rectangle.
-*/
+ *	Routine to watch the mouse while the button is down and
+ *	it stays inside/outside of the specified rectangle.
+ *	Return TRUE as long as the mouse is down.  Block until the
+ *	mouse moves into or out of the specified rectangle.
+ */
 
-int16_t gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h))
+BOOLEAN gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h))
 PP(int16_t out;)
 PP(int16_t x;)
 PP(int16_t y;)
@@ -1075,26 +1074,24 @@ PP(int16_t h;)
 	int16_t rets[6];
 	int16_t event;
 
-	/* compiler had better  */
-	/*   put the values out, */
-	/*   x, y, w, h in the  */
-	/*   right order on the */
-	/*   stack to form a    */
-	/*   MOBLK      */
+	/*
+	 * compiler had better put the values out, x, y, w, h in the 
+	 * right order on the stack to form a MOBLK WTF
+	 */
 	while (1)
 	{
-		event = ev_multi(MU_BUTTON | MU_M1 | MU_TIMER, &out, NULL, 0x0L, 0x00010100L, 0x0L, &rets[0]);	/* 01ff00L */
+		event = ev_multi(MU_BUTTON | MU_M1 | MU_TIMER, &out, NULL, 0x0L, 0x00010100L, 0x0L, &rets[0]); /* 01ff00L */
 
 		if (event & MU_BUTTON)			/* button up */
-			return (FALSE);
+			return FALSE;
 
 		if (event & MU_M1)
-			return (TRUE);
+			return TRUE;
 
 		if (event & MU_TIMER)
 		{
 			if (!(rets[2] & 0x01))
-				return (FALSE);
+				return FALSE;
 		}
 	}
 }

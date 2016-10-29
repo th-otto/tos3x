@@ -129,6 +129,8 @@ PP(int16_t new;)
 #if NEWWIN
 						if (wp->type & 0x01)
 							m = wp->w_owner;
+#else
+						UNUSED(wp);
 #endif
 					}
 				} else					/* hit window 0 background */
