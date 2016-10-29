@@ -152,7 +152,7 @@ PP(int16_t *pmaxlen;)
  *		1st button = Ok
  *		2nd button = Cancel
  */
-
+/* 306de: 00e1c41a */
 VOID fm_parse(P(LPTREE) tree, P(const char *) palstr, P(int16_t *) picnum, P(int16_t *) pnummsg, P(int16_t *) plenmsg, P(int16_t *) pnumbut, P(int16_t *) plenbut)
 PP(LPTREE tree;)
 PP(register intptr_t palstr;) /* should be const char */
@@ -173,6 +173,7 @@ PP(int16_t *plenbut;)
 }
 
 
+/* 306de: 00e1c492 */
 VOID fm_build(P(LPTREE) tree, P(int16_t) haveicon, P(int16_t) nummsg, P(int16_t) mlenmsg, P(int16_t) numbut, P(int16_t) mlenbut)
 PP(register LPTREE tree;)
 PP(int16_t haveicon;)
@@ -218,9 +219,10 @@ PP(int16_t mlenbut;)
 
 	/* now make the al.g_h smaller  */
 
-/*	al.g_h -= 1;
-	al.g_h += ( (gl_hchar/2) << 8 );
-*/
+#if !AES3D
+	al.g_h -= 1;
+	al.g_h += ((gl_hchar / 2) << 8 );
+#endif
 
 	ob_setxywh(tree, ROOT, &al);
 
@@ -245,20 +247,29 @@ PP(int16_t mlenbut;)
 
 	for (i = 0; i < numbut; i++)
 	{
+#if AES3D
 		LWSET(OB_FLAGS(BUT_OFF + i), SELECTABLE | EXIT | IS3DOBJ | IS3DACT);
+#else
+		LWSET(OB_FLAGS(BUT_OFF + i), SELECTABLE | EXIT);
+#endif
 		LWSET(OB_STATE(BUT_OFF + i), NORMAL);
 		ob_setxywh(tree, BUT_OFF + i, &bt);
 		bt.g_x += mlenbut + 2;
 		ob_add(tree, ROOT, BUT_OFF + i);
 	}
 	/* set last object flag */
+#if AES3D
 	LWSET(OB_FLAGS(BUT_OFF + numbut - 1), SELECTABLE | EXIT | LASTOB | IS3DOBJ | IS3DACT);
+#else
+	LWSET(OB_FLAGS(BUT_OFF + numbut - 1), SELECTABLE | EXIT | LASTOB);
+#endif
 }
 
 
 /*
  * AES #52 - form_alert - Display an alert box.
  */
+/* 306de: 00e1c6c8 */
 int16_t fm_alert(P(int16_t) defbut, P(const char *) palstr)
 PP(int16_t defbut;)
 PP(const char *palstr;)
@@ -270,30 +281,35 @@ PP(const char *palstr;)
 	VOIDPTR addr;
 	GRECT d, t;
 	int16_t ratalert;						/* CHANGED 5/10 LKW */
-	int16_t x, y;							/* save the button height */
-	int16_t x1, y1, w, h;
-	uint16_t color;
-	int32_t spec;
 
 	UNUSED(ratalert);
 	
 	/* 7/16/92        */
 
-	/* init tree pointer    */
+	/* init tree pointer */
 	rs_gaddr(ad_sysglo, R_TREE, ALERT, &addr);
 	tree = (LPTREE) addr;
 
-	spec = LLGET(OB_SPEC(ROOT));
-	spec &= 0xFFFFFF80L;
-	spec |= 0x70L;						/* 70 means "solid" (was 0x40L, "dithered") */
+#if AES3D
+	{
+		int16_t x, y;							/* save the button height */
+		int16_t x1, y1, w, h;
+		uint16_t color;
+		intptr_t spec;
 
-	if (gl_alrtcol >= gl_ws.ws_ncolors)
-		color = WHITE;
-	else
-		color = gl_alrtcol;
-
-	spec |= (color & 0x000F);
-	LLSET(OB_SPEC(ROOT), spec);
+		spec = LLGET(OB_SPEC(ROOT));
+		spec &= 0xFFFFFF80L;
+		spec |= 0x70L;							/* 70 means "solid" (was 0x40L, "dithered") */
+	
+		if (gl_alrtcol >= gl_ws.ws_ncolors)
+			color = WHITE;
+		else
+			color = gl_alrtcol;
+	
+		spec |= (color & 0x000F);
+		LLSET(OB_SPEC(ROOT), spec);
+	}
+#endif
 
 	LWSET(OB_TYPE(1), G_IMAGE);
 	rs_gaddr(ad_sysglo, R_BIPDATA, NOTEBB, &plong);
@@ -315,7 +331,7 @@ PP(const char *palstr;)
 		rs_gaddr(ad_sysglo, R_BITBLK, inm - 1, &plong);
 		LLSET(OB_SPEC(1), plong);
 	}
-	/* convert to pixels    */
+	/* convert to pixels */
 	for (i = 0; i < NUM_ALOBJS; i++)
 		rs_obfix(tree, i);
 
@@ -324,6 +340,7 @@ PP(const char *palstr;)
 
 	LLSET(OB_WIDTH(1), 0x00200020L);
 
+#if AES3D
 	/* fixed 7/16/92    */
 
 	for (i = 0; i < 3; i++)
@@ -338,10 +355,11 @@ PP(const char *palstr;)
 	y = y - LWGET(OB_Y(0));
 	y += h + 2;
 	LWSET(OB_HEIGHT(0), y);
+#endif
 	/* center tree on screen */
 	ob_center(tree, &d);
-	/* save screen under-   */
-	/*   neath the alert    */
+	
+	/* save screen underneath the alert */
 	wm_update(TRUE);
 	gsx_gclip(&t);
 	bb_save(&d);
