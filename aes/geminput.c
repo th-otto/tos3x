@@ -90,7 +90,6 @@ int16_t gl_bdelay;
 /*
  * Check if the current click will transfer mouse ownership
  */
-/* called chkown in original DRI and EmuTOS */
 /* 306de: 00e1e6fe */
 PD *mowner(P(int16_t) new)
 PP(int16_t new;)
@@ -98,8 +97,12 @@ PP(int16_t new;)
 	int16_t wh;
 	register int16_t mx, my;
 	PD *m;
+#if NEWWIN
 	WINDOW *wp;
+#endif
+#if AES3D | NEWWIN
 	GRECT t;
+#endif
 
 	m = gl_mowner;
 
@@ -113,12 +116,15 @@ PP(int16_t new;)
 			m = gl_cowner;
 		} else							/* if in menu bar then  */
 		{								/* owned by ctrl mgr    */
+#if NEWWIN
 			m = ctl_pd;
+#endif
 
+#if AES3D | NEWWIN
 			if (!inside(mx, my, &gl_rmenu))
 			{							/* Hit any window?  */
 				wh = wm_find(mx, my);
-				if (wh && (wh != NIL))
+				if (wh && wh != NIL)
 				{
 #if AES3D
 					wm_get(wh, WF_WORKXYWH, &t.g_x, NULL);
@@ -126,26 +132,36 @@ PP(int16_t new;)
 					wm_get(wh, WF_WORKXYWH, &t.g_x);
 #endif
 
+#if NEWWIN
 					if (inside(mx, my, &t))
 					{
 						wp = srchwp(wh);
-#if NEWWIN
 						if (wp->type & 0x01)
 							m = wp->w_owner;
-#else
-						UNUSED(wp);
-#endif
 					}
+#else
+					m = ctl_pd;
+#endif
 				} else					/* hit window 0 background */
 				{
 					/* added Jul 23 91 for new window manager - ml. */
 					m = srchwp(0)->w_owner;
 				}
 			}
+#else
+			if (inside(mx, my, &gl_rmenu))
+			{							/* Hit any window?  */
+				wh = NIL;
+			} else
+			{
+				wh = wm_find(mx, my) ? NIL : 0;
+			}
+			m = wh == NIL ? ctl_pd : srchwp(0)->w_owner;
+#endif
 		}
 	}
 
-	return (m);
+	return m;
 }
 
 
@@ -324,6 +340,7 @@ PP(register CQUEUE *qptr;)
 /*
  *	DeQueue a a character from a circular keyboard buffer.
  */
+/* 306de: 00e1e7a4 */
 uint16_t dq(P(CQUEUE *) qptr)
 PP(register CQUEUE *qptr;)
 {
@@ -340,6 +357,7 @@ PP(register CQUEUE *qptr;)
 /*
  *	Flush the characters from a circular keyboard buffer.
  */
+/* 306de: 00e1e7da */
 VOID fq(NOTHING)
 {
 	while (cda->c_q.c_cnt)
@@ -347,11 +365,13 @@ VOID fq(NOTHING)
 }
 
 
-/*	Remove the event from the CDA	*/
-/*	ret may have number of clicks 	*/
-/*	or the desired character 	*/
-/*	evinsert is in the gemasync.c	*/
-
+/*
+ * Remove the event from the CDA
+ * ret may have number of clicks
+ * or the desired character
+ * evinsert is in the gemasync.c
+ */
+/* 306de: 00e1e7fe */
 VOID evremove(P(EVB *) e, P(uint16_t) ret)
 PP(register EVB *e;)
 PP(uint16_t ret;)
@@ -364,6 +384,8 @@ PP(uint16_t ret;)
 	zombie(e);
 }
 
+
+/* 306de: 00e1e840 */
 VOID kchange(P(int16_t) ch, P(int16_t) kstat)
 PP(int16_t ch;)
 PP(int16_t kstat;)
@@ -374,6 +396,7 @@ PP(int16_t kstat;)
 }
 
 
+/* 306de: 00e1e864 */
 VOID post_keybd(P(PD *) p, P(uint16_t) ch)
 PP(PD *p;)
 PP(uint16_t ch;)
@@ -406,18 +429,20 @@ PP(uint16_t ch;)
 }
 
 
-/*	forker will come here		*/
-
+/*
+ * forker will come here
+ */
+/* 306de: 00e1e8c2 */
 VOID bchange(P(int16_t) new, P(int16_t) clicks)
 PP(int16_t new;)
 PP(int16_t clicks;)
 {
-	gl_mowner = mowner(new);			/*   not own the mouse  */
-#if 0
-	if (gl_mowner != ctl_pd)			/* if control mgr. does- */
-		gl_mowner = mowner(new);		/*   not own the mouse  */
-	/* see if this button event causes an ownership change */
+	/* if control mgr. does not own the mouse */
+#if AESVERSION < 0x330
+	if (gl_mowner != ctl_pd)
 #endif
+		gl_mowner = mowner(new);
+	/* see if this button event causes an ownership change */
 
 	/* if the button went down check to see if ownership should go to the control mgr. */
 
@@ -474,8 +499,10 @@ PP(register int16_t clks;)
 }
 
 
-/*	forker of mouse change		*/
-
+/*
+ * forker of mouse change
+ */
+/* 306de: 00e1ea10 */
 VOID mchange(P(int16_t) rx1, P(int16_t) ry1)
 PP(register int16_t rx1;)
 PP(register int16_t ry1;)
@@ -484,7 +511,11 @@ PP(register int16_t ry1;)
 	int16_t ry;
 
 	/* zero out button wait if mouse moves more then a little */
+#if BINEXACT /* sigh */
+	gsx_ncode(MOUSE_ST, 0L);
+#else
 	gsx_ncode(MOUSE_ST, 0, 0);
+#endif
 	rx = ptsout[0];
 	ry = ptsout[1];
 
@@ -527,6 +558,7 @@ PP(register int16_t ry1;)
 }
 
 
+/* 306de: 00e1eb5e */
 VOID post_mouse(P(PD *) p, P(int16_t) grx, P(int16_t) gry)
 PP(register PD *p;)
 PP(int16_t grx;)
@@ -545,6 +577,7 @@ PP(int16_t gry;)
 }
 
 
+/* 306de: 00e1eba0 */
 int16_t inorout(P(EVB *) e, P(int16_t) rx, P(int16_t) ry)
 PP(register EVB *e;)
 PP(register int16_t rx;)
