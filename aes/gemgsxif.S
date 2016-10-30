@@ -141,8 +141,10 @@ VOID gsx_mfree(NOTHING)
 #endif
 	xdef _gsx_mfree
 _gsx_mfree:
+#if (AESVERSION >= 0x330) | !BINEXACT
 	tst.l	_gl_tmp			; Fix 8/3/92
 	beq	g1
+#endif
 	move.l	_gl_tmp,-(sp)		; Fix 1/20/87
 	jsr	_dos_free
 	addq.l	#4,sp
@@ -360,18 +362,11 @@ L209:
 	pea	_gl_handle
 	pea	(a2)
 			
-*	Check for sparrow machine	
+/* Check for sparrow machine */
 		
-*	move.l	_gl_vdo,d0		; check for sparrow 	
-*	and.l	#$00030000,d0		; 7/17/92
-*	cmp.l	#$00030000,d0
-*	bne	L20_3
-*	lea	_intin,a0
-*	move.w	#5,(a0)
-*	lea	_intout,a0
-*	move.w	_d_rezword,(a0)
+#if TOSVERSION >= 0x400
 	jsr	_setres			; check mode code
-L20_3:
+#endif
 
 	bsr	_v_opnwk
 	lea	12(sp),sp

@@ -87,8 +87,11 @@ int16_t gl_bdelay;
 
 
 
-/*	Check if the current click will transfer mouse ownership	*/
-
+/*
+ * Check if the current click will transfer mouse ownership
+ */
+/* called chkown in original DRI and EmuTOS */
+/* 306de: 00e1e6fe */
 PD *mowner(P(int16_t) new)
 PP(int16_t new;)
 {
@@ -310,7 +313,7 @@ PP(register CQUEUE *qptr;)
 	if (qptr->c_cnt < KBD_SIZE)
 	{
 		qptr->c_buff[qptr->c_rear++] = ch;
-		if ((qptr->c_rear) == KBD_SIZE)
+		if (qptr->c_rear == KBD_SIZE)
 			qptr->c_rear = 0;
 		qptr->c_cnt++;
 	}
@@ -386,9 +389,8 @@ PP(uint16_t ch;)
 		evremove(e, ch);
 	} else
 	{
-		/* no one is waiting,   */
-		/*   just toss it in    */
-		/*   the buffer     */
+		/* no one is waiting, just toss it in the buffer */
+
 		/* nq(ch, &c->c_q); */
 
 		qptr = &c->c_q;
@@ -398,7 +400,6 @@ PP(uint16_t ch;)
 			qptr->c_buff[qptr->c_rear++] = ch;
 			if (qptr->c_rear == KBD_SIZE)
 				qptr->c_rear = 0;
-
 			qptr->c_cnt++;
 		}
 	}

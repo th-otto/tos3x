@@ -614,7 +614,9 @@ VOID sh_main(NOTHING)
 				i = 1;
 			else
 				i = 2;
+#if (AESVERSION >= 0x330) | !BINEXACT
 			LLSET(ad_stdesk + 12, 0x00001100L | adeskp[i]);
+#endif
 #endif
 
 			if (!ret)

@@ -31,13 +31,13 @@
 _xbios          equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FB9C /* E35FD8 */
 _bios           equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBAC /* E35FE8 */
 _gemdos         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBBC /* E35FF8 */
-_infdata        equ 0
+_infdata        equ DESKDBASE+$942                      /* E3EC92 */
 _XDeselect      equ 0
 _getcookie      equ 0
-_scan_2         equ 0
-_escan_str      equ 0
-_save_2         equ 0
-_app_reschange  equ 0
+_scan_2         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$51EE /* E2B62A */
+_escan_str      equ DESKTBASE+(DESKTLEN-DTLEN_US)+$51B6 /* E2B5F2 */
+_save_2         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$5232 /* E2B66E */
+_app_reschange  equ DESKTBASE+(DESKTLEN-DTLEN_US)+$192C /* E27D68 */
 _g_name         equ 0
 _deskmain       equ 0
 #endif

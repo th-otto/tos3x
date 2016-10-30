@@ -133,9 +133,13 @@
 #define LONGFRAME	*(int16_t *)(0x59eL)
 
 
-int16_t do_once;
-EVB evx;
-intptr_t gl_vdo;
+#if AESVERSION >= 0x330
+BOOLEAN do_once;
+#endif
+#if TOSVERSION >= 0x400
+int32_t gl_vdo;
+#endif
+STATIC EVB evx;						/* used only to get elinkoff offset */
 intptr_t ad_sysglo;
 VOIDPTR ad_armice;
 VOIDPTR ad_hgmice;
@@ -144,23 +148,27 @@ char *ad_fsel;
 intptr_t drawstk;
 int16_t er_num;						/* for output.s */
 int16_t no_aes;						/* gembind.s    */
-int16_t sh_up;						/* is the sh_start being ran yet ? */
-int16_t autoexec;					/* autoexec a file ?    */
-char g_autoboot[128];
-int16_t g_flag;
-int16_t ctldown;					/* ctrl key down ?  */
+BOOLEAN sh_up;				/* is the sh_start being ran yet ? */ /* unused */
+BOOLEAN autoexec;					/* autoexec a file ?    */
+STATIC char g_autoboot[CMDLEN];
+STATIC int16_t g_flag;
+STATIC int16_t ctldown;				/* ctrl key down ?  */
 /* 8/1/92 */
+#if AES3D
 uint16_t act3dtxt;					/* look of 3D activator text */
 uint16_t act3dface;					/* selected look of 3D activator */
 uint16_t ind3dtxt;					/* look of 3D indicator text */
 uint16_t ind3dface;					/* selected look of 3D indicators */
+#endif
 uint16_t gl_indbutcol;				/* indicator button color */
 uint16_t gl_actbutcol;				/* activator button color */
 uint16_t gl_alrtcol;				/* alert background color */
 int16_t crt_error;					/* critical error handler semaphore     */
 				/* set in jbind.s, checked by dispatcher    */
+#if (AESVERSION >= 0x330) | !BINEXACT
 int16_t adeskp[3];					/* desktop colors & backgrounds */
-int16_t awinp[3];					/* window colors & backgrounds */
+STATIC int16_t awinp[3];			/* window colors & backgrounds */ /* not used anymore?? */
+#endif
 #if TOSVERSION >= 0x400
 uint16_t d_rezword;					/* default resolution for sparrow */
 #endif
@@ -170,11 +178,13 @@ uint16_t d_rezword;					/* default resolution for sparrow */
 #define Blitmode(on) trp14(64, on)
 #define VcheckMode(mode) trp14(95, mode)
 
-static char autopath[128];
+#define Cconws(x) trap(9, x)
+
+STATIC char autopath[CMDLEN];
 
 #if AESVERSION >= 0x320
-MFORM gl_cmform;						/* current aes mouse form   */
-MFORM gl_omform;						/* old aes mouse form       */
+STATIC MFORM gl_cmform;				/* current aes mouse form   */
+STATIC MFORM gl_omform;				/* old aes mouse form       */
 #endif
 
 #if DOWARNING
@@ -259,8 +269,10 @@ VOID accs_init(NOTHING)
 #endif	/* ACC_DELAY */
 
 
-/*	Set the resolution	*/
-
+#if TOSVERSION >= 0x400
+/*
+ * Set the resolution
+ */
 VOID setres(NOTHING)
 {
 	int mode;
@@ -269,13 +281,12 @@ VOID setres(NOTHING)
 	if ((gl_vdo & 0x30000L) == 0x30000L)
 	{
 		intin[0] = 5;
-#if TOSVERSION >= 0x400
 		d_rezword = VcheckMode(d_rezword);
 		/* ptsout[0] = d_rezword; */
 		gl_ws.ws_pts0 = d_rezword;
-#endif
 	}
 }
+#endif
 
 
 /* 306de: 00e1dca8 */
@@ -291,8 +302,8 @@ VOID gem_main(NOTHING)
 
 	UNUSED(lslr);
 	
-	er_num = ALRT04CRT;					/* output.s     */
-	no_aes = ALRTNOFUNC;				/* for gembind.s    */
+	er_num = ALRT04CRT;					/* output.s */ /* but not used there... */
+	no_aes = ALRTNOFUNC;				/* for gembind.s */ /* but not used there... */
 	
 	/****************************************/
 	/*      ini_dlongs();                   */
@@ -326,7 +337,7 @@ VOID gem_main(NOTHING)
 	/* init event recorder  */
 	gl_recd = FALSE;
 	gl_rlen = 0;
-	gl_rbuf = 0x0L;
+	gl_rbuf = 0;
 
 	/* initialize pointers to heads of event list and thread list       */
 	elinkoff = (intptr_t)(char *) &evx.e_link - (intptr_t)(char *) &evx;
@@ -423,11 +434,11 @@ VOID gem_main(NOTHING)
 
 	/* 8/1/92   */
 	/* July 30 1992 - ml. Init 3D-look of indicators and activators */
+#if AES3D
 	act3dtxt = 1;						/* don't move text for activators */
 	act3dface = 0;						/* no color change when activator is selected */
 	ind3dtxt = 0;						/* move text for indicators */
 	ind3dface = 1;						/* change color when indicator is selected */
-
 
 	if (gl_ws.ws_ncolors <= LWHITE)
 	{									/* init button color */
@@ -438,7 +449,7 @@ VOID gem_main(NOTHING)
 		gl_actbutcol = gl_indbutcol = LWHITE;
 		gl_alrtcol = LWHITE;			/* init alert background color */
 	}
-
+#endif
 
 	rom_ram(0, ad_sysglo);
 
@@ -455,7 +466,9 @@ VOID gem_main(NOTHING)
 	{
 		rs_gaddr(ad_sysglo, R_BITBLK, i, &tmpadbi);
 		LBCOPY(ADDR(&bi), tmpadbi, sizeof(BITBLK));
-/*	  gsx_trans(bi.bi_pdata, bi.bi_wb, bi.bi_pdata, bi.bi_wb, bi.bi_hl);	*/
+#if !AES3D
+		gsx_trans(bi.bi_pdata, bi.bi_wb, bi.bi_pdata, bi.bi_wb, bi.bi_hl);
+#endif
 	}
 	
 	/* take the critical err handler int. */
@@ -555,7 +568,9 @@ VOID gem_main(NOTHING)
 		sh_write(1, (g_flag - 0), 0, &g_autoboot[0], "");
 	}
 
-	do_once = FALSE;					/* desktop do it once flag */
+#if AESVERSION >= 0x330
+	do_once = FALSE;					/* desktop do it once flag */ /* why the hell is that set here? */
+#endif
 	sh_main();
 
 	rsc_free();							/* free up resource */
@@ -582,10 +597,17 @@ VOID gem_main(NOTHING)
 	gl_ticktime = gsx_tick(tiksav, &tiksav);
 	sti();
 
+#if (AESVERSION < 0x330) & BINEXACT
+	/* close workstation */
+	gsx_wsclose();
+	/* BUG: vdi function called after v_clswk */
+	gsx_escapes(2);						/* exit alpha mode */
+#else
 	gsx_escapes(2);						/* exit alpha mode */
 
 	/* close workstation */
 	gsx_wsclose();
+#endif
 
 	/* return GEM's 0xEF int */
 	cli();
@@ -594,8 +616,10 @@ VOID gem_main(NOTHING)
 }
 
 
-/*	process init	*/
-
+/*
+ * process init
+ */
+/* 306de: 00e1e226 */
 VOID pinit(P(PD *) ppd, P(CDA *) pcda)
 PP(register PD *ppd;)
 PP(CDA *pcda;)
@@ -608,6 +632,7 @@ PP(CDA *pcda;)
 
 
 #if BINEXACT
+/* 306de: 00e1e260 */
 int32_t set_cache(P(int32_t) newcacr)
 PP(register int32_t newcacr;)
 {
@@ -625,6 +650,7 @@ PP(register int32_t newcacr;)
  *
  * ++ERS 1/14/93: also read the preferred desktop backgrounds
  */
+/* 306de: 00e1e27e */
 int16_t pred_dinf(NOTHING)
 {
 	int16_t res;
@@ -634,13 +660,17 @@ int16_t pred_dinf(NOTHING)
 	register char *temp;
 	int16_t defdrv;
 	char *chrptr;
+#if (AESVERSION >= 0x330) | !BINEXACT
 	int16_t i;
+#endif
 
 	UNUSED(chrptr);
 	
+#if TOSVERSION >= 0x400
 	gl_vdo = 0x0L;
-	/* _VDO *//* 7/17/92 */
+	/* _VDO */ /* 7/17/92 */
 	getcookie(0x5F56444FL, &gl_vdo);
+#endif
 
 	g_autoboot[0] = 0;
 	pbuf = dos_alloc((int32_t) SIZE_AFILE);
@@ -649,17 +679,19 @@ int16_t pred_dinf(NOTHING)
 
 #if BINEXACT
 	/* BUG: extra parameter here */
-	rom_ram(3, (intptr_t)pbuf, NULL);				/* res is default from ROM  */
+	rom_ram(3, (intptr_t)pbuf, 0);			/* res is default from ROM  */
 #else
 	rom_ram(3, (intptr_t)pbuf);				/* res is default from ROM  */
 #endif
 
+#if (AESVERSION >= 0x330) | !BINEXACT
 	adeskp[0] = 0x41;					/* 4 = dither, 1 = black */
 	adeskp[1] = 0x73;					/* 7 = solid color, 3 = green */
 	adeskp[2] = 0x7D;					/* 7 = solid color, D = light cyan */
 	awinp[0] = 0x70;
 	awinp[1] = 0x70;
 	awinp[2] = 0x70;
+#endif
 
 	if (ctldown)
 		goto p_1;
@@ -705,8 +737,9 @@ int16_t pred_dinf(NOTHING)
 		while (*temp && cont)
 		{
 			if (*temp != '#')
+			{
 				temp++;
-			else
+			} else
 			{
 				temp++;					/* get the auto boot file   */
 				if ((*temp == 'Z') && (autoexec))
@@ -714,6 +747,7 @@ int16_t pred_dinf(NOTHING)
 					temp += 2;			/* get the flag     */
 					temp = scan_2(temp, &g_flag);
 					temp = escan_str(temp, &g_autoboot[0]);
+#if (AESVERSION >= 0x330) | !BINEXACT
 				} else if (*temp == 'Q')
 				{
 					temp += 2;
@@ -722,11 +756,19 @@ int16_t pred_dinf(NOTHING)
 						temp = scan_2(temp, &adeskp[i]);
 						temp = scan_2(temp, &awinp[i]);
 					}
+#endif
 				} else if (*temp == 'E')
 				{
+#if TOSVERSION < 0x400
+					temp += 5;
+					scan_2(temp, &res);
+#define CACHE_OFFSET 6
+#else
+#define CACHE_OFFSET 11
+#endif
 					if (LONGFRAME)
 					{
-						scan_2(temp + 11, &cache);	/* fixed 6/26/90 Mui    */
+						scan_2(temp + CACHE_OFFSET, &cache);	/* fixed 6/26/90 Mui    */
 						/* fixed 7/17/92    */
 						if (cache & 2)
 							set_cache(CACHE_ON);
@@ -738,36 +780,38 @@ int16_t pred_dinf(NOTHING)
 						Blitmode(((res & 0xF0) >> 4) ? 1 : 0);
 #endif
 					}
+
+#if TOSVERSION >= 0x400
 					/* if sparrow mode 7/17/92  */
 					if ((gl_vdo & 0xFFFF0000L) == 0x00030000L)
 					{					/* not an extended mode     */
 						if (gl_rschange)	/* 7/21/92 */
 						{
-#if TOSVERSION >= 0x400
 							temp = save_2(temp + 14, d_rezword >> 8);
 							save_2(temp, d_rezword);
-#endif
 						} else
 						{
 							if (*(temp + 14) != 0xD)
 							{
 								temp += 14;
 								temp = scan_2(temp, &res);
-#if TOSVERSION >= 0x400
 								d_rezword = res << 8;
 								temp = scan_2(temp, &res);
 								d_rezword |= res;
-#endif
 							} else
 								break;
 						}
 					} else
+#endif
 					{
+#if TOSVERSION >= 0x400
 						temp += 5;		/* skip other envr stuff    */
 						scan_2(temp, &res);	/* don't get the return code    */
+#endif
 						if (gl_rschange)	/* if we've been here before    */
-							save_2(temp, (res & 0xF0) | (gl_restype));
-						else
+						{
+							save_2(temp, (res & 0xF0) | gl_restype);
+						} else
 						{
 							res &= 0xF;
 							gl_rschange = FALSE;
@@ -775,6 +819,7 @@ int16_t pred_dinf(NOTHING)
 								change = FALSE;	/* NO no res change     */
 						}
 					}
+
 				}
 			}
 		}
@@ -788,24 +833,45 @@ int16_t pred_dinf(NOTHING)
 }
 
 
-/* Save 25 columns and full height of the screen memory */
-
+/*
+ * Save 25 columns and full height of the screen memory
+ */
+/* 306de: 00e1e4e6 */
 BOOLEAN gsx_malloc(NOTHING)
 {
+#if (TOSVERSION >= 0x400) | !BINEXACT
 	int32_t len;
+#endif
 
+#if BINEXACT /* sigh... */
+	gsx_fix(&gl_tmp, NULL, 0L);
+#else
 	gsx_fix(&gl_tmp, NULL, 0, 0);
+#endif
+#if (TOSVERSION >= 0x400) | !BINEXACT
 	len = (int32_t) ((uint16_t) gl_wchar) * (int32_t) 25 * (int32_t) ((uint16_t) gl_height) * (int32_t) ((uint16_t) gl_nplanes);
-
 	len = len / 8;
 	gl_mlen = len;
+#else
+	/*
+	 * This buggy multiplication actually works, because it is compiled into a muls,
+	 * then the long result is stored without further sign-extension.
+	 * It thus make use of one the many bugs in the Alcyon compiler,
+	 * and has been fixed above for TOS 4.x
+	 */
+	gl_mlen = (int32_t)((gl_ws.ws_xres + 1) * (gl_ws.ws_yres + 1));
+	gl_mlen = (gl_nplanes * gl_mlen) / 16;
+#endif
+
 	gl_tmp.fd_addr = dos_alloc(gl_mlen);
+#if (TOSVERSION >= 0x400) | !BINEXACT
 	if (!gl_tmp.fd_addr)
 	{
 		gl_mlen = 0;
-		trap(9, "Unable to alloc AES blt buffer!\r\n");
+		Cconws("Unable to alloc AES blt buffer!\r\n");
 		return FALSE;
 	}
+#endif
 #if !BINEXACT
 	/* BUG: no return here, which will return the value of gl_tmp.fd_addr casted to int... */
 	return TRUE;
@@ -813,9 +879,11 @@ BOOLEAN gsx_malloc(NOTHING)
 }
 
 
-/*	return TRUE if HARD DISK	*/
-/*	Doesn't NEED to return anything -- 881109 kbad */
-
+/*
+ * return TRUE if HARD DISK
+ * Doesn't NEED to return anything -- 881109 kbad
+ */
+/* 306de: 00e1e556 */
 VOID set_defdrv(NOTHING)
 {
 	/* This fugly statement gets drvbits, masks drive C,
@@ -826,6 +894,7 @@ VOID set_defdrv(NOTHING)
 }
 
 
+/* 306de: 00e1e572 */
 VOID gsx_xmfset(P(MFORM *) pmfnew)
 PP(MFORM *pmfnew;)
 {
@@ -836,6 +905,7 @@ PP(MFORM *pmfnew;)
 }
 
 
+/* 306de: 00e1e5ae */
 VOID gsx_mfset(P(MFORM *) pmfnew)
 PP(MFORM *pmfnew;)
 {
@@ -857,6 +927,7 @@ PP(MFORM *pmfnew;)
  *
  * Graf mouse
  */
+/* 306de: 00e1e610 */
 VOID gr_mouse(P(int16_t) mkind, P(MFORM *) grmaddr)
 PP(register int16_t mkind;)
 PP(MFORM *grmaddr;)
@@ -906,12 +977,13 @@ PP(MFORM *grmaddr;)
 }
 
 
+#if AES3D
 /*
  * AES #71 - graf_slidebox - Graphics slide box
  *
  * Change code to compensate 3D objects
  */
-
+/* 306de: 00e1e6fe */
 int16_t gr_slidebox(P(LPTREE) tree, P(int16_t) parent, P(int16_t) obj, P(int16_t) isvert)
 PP(register LPTREE tree;)
 PP(int16_t parent;)
@@ -1013,9 +1085,15 @@ PP(int16_t isvert;)
 	if (divis)
 		return mul_div(divnd, 1000, divis);
 	else
-		return (0);
+		return 0;
 #endif
 }
+
+#else
+
+/* no AES3D: assembler version used */
+
+#endif
 
 
 /*
@@ -1024,7 +1102,7 @@ PP(int16_t isvert;)
  *	Return TRUE as long as the mouse is down.  Block until the
  *	mouse moves into or out of the specified rectangle.
  */
-
+#if AESVERSION >= 0x330
 BOOLEAN gr_stilldn(P(int16_t) out, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(int16_t out;)
 PP(int16_t x;)
@@ -1032,7 +1110,7 @@ PP(int16_t y;)
 PP(int16_t w;)
 PP(int16_t h;)
 {
-	int16_t status;
+	BOOLEAN status;
 
 	/*
 	 * compiler had better put the values out, x, y, w, h in the 
@@ -1054,8 +1132,11 @@ PP(int16_t h;)
 			}
 		}
 	}
-	return (status);
+	return status;
 }
+#else
+/* assembler version used */
+#endif
 
 
 #if 0

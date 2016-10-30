@@ -396,8 +396,9 @@ name: ds.t size
 	V(_fcopy,b,40)
 	V(_pathcopy,l,1)
 	V(_defdrv,w,1)
+	V(_autopath,b,CMDLEN)
 	
-	ds.b $CC
+	ds.b $4C
 
 	V(pblock,l,5)
 	V(_crit_err,l,1)
@@ -412,10 +413,10 @@ name: ds.t size
 	ds.b $28C
 
 	V(_drwaddr,l,1)
-	V(tikaddr,l,1)
+	V(_tikaddr,l,1)
 	ds.l 1
 	V(save_sp,l,1)
-	V(tiksav,l,1)
+	V(_tiksav,l,1)
 	V(_NUM_TICK,l,1)
 	V(_CMP_TICK,l,1)
 
@@ -466,16 +467,18 @@ name: ds.t size
 	V(_ad_hgmice,l,1)
 	V(_gl_pacc,l,MAX_ACCS)
 	
-	ds.b $48
+	ds.b 58
 	
+	V(_bi,b,14)      /* BITBLK */
 	V(_gl_bclick,w,1)
 	V(_ad_fsnames,l,1)
 	V(_gl_handle,w,1)
 	V(_ad_armice,l,1)
 	V(_ad_select,l,1)
 	
-	ds.b $A6
+	ds.b $A2
 	
+	V(_ad_fsel,l,1)
 	V(_gl_dclick,w,1)
 	
 	ds.b $24
@@ -489,16 +492,19 @@ name: ds.t size
 	V(_gl_dcindex,w,1)
 	V(_gl_recd,w,1)
 	
-	ds.b $16
+	ds.b 6
+	
+	V(_ad_path,l,1)
+	
+	ds.b 12
 	
 	V(old_bcode,l,1)
 	
 	ds.b 2
 	
 	V(_gl_bvhard,w,1)
-	
-	ds.b 8
-	
+	V(_ad_shtail,l,1)
+	V(_ad_stdesk,l,1)
 	V(_used_acc,w,1)
 	
 	ds.b 4
@@ -506,15 +512,21 @@ name: ds.t size
 	V(_gl_wchar,w,1)
 	V(_ad_fsdta,l,1)
 	
-	ds.b $24
+	ds.b 32
+
+	V(_ad_windspb,l,1)
+	
+	ds.b 2
 	
 	V(_gl_bpend,w,1)
-	
-	ds.b $4c
-	
+	V(_gl_cmform,w,37) /* MFORM */
 	V(_gl_bvdisk,w,1)
 	
-	ds.b $10
+	ds.b 2
+	
+	V(_ad_intin,l,1)
+	
+	ds.b 10
 	
 	V(_gl_moff,w,1)
 	V(_gl_rcenter,w,4) /* GRECT */
@@ -529,8 +541,13 @@ name: ds.t size
 	ds.b $88
 	
 	V(_DOS_AX,w,1)
+	V(_gl_mlen,l,1)
 	
-	ds.b $8C
+	ds.b 2
+	
+	V(_gl_ncol,w,1)
+	
+	ds.b $84
 	
 	V(_ad_envrn,l,1)
 	V(_desk_pid,w,MAX_ACCS)
@@ -542,9 +559,7 @@ name: ds.t size
 	ds.b $b0
 	
 	V(_gl_awind,l,1)
-	
-	ds.b $80
-	
+	V(_g_autoboot,b,CMDLEN)
 	V(_ad_title,l,1)
 	V(_gl_ctwait,w,5) /* MOBLK */
 	V(_gl_rbuf,l,1)
@@ -557,9 +572,7 @@ name: ds.t size
 	
 	V(_gl_hbox,w,1)
 	V(_ad_fstree,l,1)
-	
-	ds.b $4a
-	
+	V(_gl_omform,w,37) /* MFORM */
 	V(_gl_rlen,w,1)
 	V(_gl_rmenu,w,4) /* GRECT */
 	
@@ -625,12 +638,17 @@ name: ds.t size
 	
 	V(_gl_mouse,w,1)
 	
-	ds.b $18
+	ds.b 2
+	
+	V(_gl_nrow,w,1)
+	
+	ds.b $14
 	
 	V(_tmpmoff,w,1)
 	
-	ds.b 8
+	ds.b 6
 	
+	V(_ctldown,w,1)
 	V(_autoexec,w,1)
 	V(_fs_topptr,w,1)
 
@@ -642,8 +660,9 @@ name: ds.t size
 	
 	V(_pr_xrat,w,1)
 	V(_pr_button,w,1)
+	V(_drawstk,l,1)
 	
-	ds.b $1064
+	ds.b $1060
 	
 	V(_pr_yrat,w,1)
 	
@@ -655,7 +674,11 @@ name: ds.t size
 	
 	V(_fpcnt,w,1)
 	
-	ds.b $4EE
+	ds.b 8
+	
+	V(_gl_ws,w,57)   /* workout */
+	
+	ds.b $474
 	
 	V(_intin,w,128)
 	
@@ -686,17 +709,38 @@ name: ds.t size
 	V(_evx,b,28) /* sizeof(EVB) */
 	V(_zlr,l,1)
 	
-	ds.b $12
+	ds.l 1
+	
+	V(_g_flag,w,1)
+	
+	ds.b 12
 	
 	V(_sh_gem,w,1)
 	V(_mclick,w,1)
 	
-	ds.b $94
+	ds.b 6
+	
+	V(_no_aes,w,1)
+	
+	ds.b $30
+	
+	V(_ctl_pd,l,1)
+	
+	ds.b $58
 	
 	V(_gl_rfs,w,4) /* GRECT */
 	
-	ds.b $22
+	ds.b 4
 	
+	V(_gl_tmp,l,1)
+	
+	ds.b 20
+	
+	V(_er_num,w,1)
+	
+	ds.b 2
+	
+	V(_curpid,w,1)
 	V(_indisp,b,1)
 	even
 	

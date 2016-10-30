@@ -232,6 +232,7 @@ PP(char *lstring;)
 #endif
 
 	UNUSED(chrptr);
+	UNUSED(dummy);
 	
 	/*
 	 *	Start up the file selector by initializing the fs_tree
@@ -339,6 +340,10 @@ bye2:
 	botptr = 0;
 
 	ret = FDIRECTORY;					/* initial action   */
+	
+#if !BINEXACT
+	bret = 0; /* quiet compiler */
+#endif
 
 	do
 	{

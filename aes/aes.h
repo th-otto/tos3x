@@ -244,9 +244,9 @@ intptr_t dos_exec PROTO((const char *cmd, int16_t mode, const char *tail));
 /*
  * geminit.c
  */
-extern int16_t do_once;
-extern EVB evx;
-extern intptr_t gl_vdo;
+#if TOSVERSION >= 0x400
+extern int32_t gl_vdo;
+#endif
 extern intptr_t ad_sysglo;
 extern VOIDPTR ad_armice;
 extern VOIDPTR ad_hgmice;
@@ -255,12 +255,9 @@ extern char *ad_fsel;
 extern intptr_t drawstk;
 extern int16_t er_num;						/* for output.s */
 extern int16_t no_aes;						/* gembind.s    */
-extern int16_t sh_up;						/* is the sh_start being ran yet ? */
-extern int16_t autoexec;					/* autoexec a file ?    */
-extern char g_autoboot[128];
-extern int16_t g_flag;
-extern int16_t ctldown;						/* ctrl key down ?  */
+extern BOOLEAN autoexec;					/* autoexec a file ?    */
 /* 8/1/92 */
+#if AES3D
 extern uint16_t act3dtxt;					/* look of 3D activator text */
 extern uint16_t act3dface;					/* selected look of 3D activator */
 extern uint16_t ind3dtxt;					/* look of 3D indicator text */
@@ -268,10 +265,12 @@ extern uint16_t ind3dface;					/* selected look of 3D indicators */
 extern uint16_t gl_indbutcol;				/* indicator button color */
 extern uint16_t gl_actbutcol;				/* activator button color */
 extern uint16_t gl_alrtcol;					/* alert background color */
+#endif
 extern int16_t crt_error;					/* critical error handler semaphore     */
 
+#if (AESVERSION >= 0x330) | !BINEXACT
 extern int16_t adeskp[3];					/* desktop colors & backgrounds */
-extern int16_t awinp[3];					/* window colors & backgrounds */
+#endif
 #if DOWARNING
 extern BOOLEAN dowarn;
 #endif
@@ -730,7 +729,11 @@ VOID gsx_attr PROTO((uint16_t text, uint16_t mode, uint16_t color));
 VOID gsx_bxpts PROTO((GRECT *pt));
 VOID gsx_box PROTO((GRECT *pt));
 VOID bb_screen PROTO((int16_t scrule, int16_t scsx, int16_t scsy, int16_t scdx, int16_t scdy, int16_t scw, int16_t sch));
+#if AES3D
 VOID gsx_trans PROTO((int16_t *saddr, uint16_t swb, int16_t *daddr, uint16_t dwb, uint16_t h, int16_t fg, int16_t bg));
+#else
+VOID gsx_trans PROTO((int16_t *saddr, uint16_t swb, int16_t *daddr, uint16_t dwb, uint16_t h));
+#endif
 VOID gsx_start PROTO((NOTHING));
 VOID bb_fill PROTO((int16_t mode, int16_t fis, int16_t patt, int16_t hx, int16_t hy, int16_t hw, int16_t hh));
 int16_t gsx_tcalc PROTO((int16_t font, const char *ptext, int16_t ptextw, int16_t ptexth, int16_t pnumchs));
@@ -1006,6 +1009,10 @@ extern int16_t gl_restype;
  * someone messed it up and called functions from desktop here...
  */
 extern char const infdata[]; /* "DESKTOP.INF" */
+
+#if AESVERSION >= 0x330
+extern BOOLEAN do_once; /* used by desktop only */
+#endif
 
 int16_t XDeselect PROTO((OBJECT *tree, int16_t obj));
 BOOLEAN getcookie PROTO((int32_t cookie, int32_t *val));

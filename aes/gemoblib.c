@@ -48,7 +48,7 @@ int16_t get_rgb PROTO((int16_t index));
 /*                   COLOR ICON DECLARATIONS                     */
 /*****************************************************************/
 
-int16_t gl_colmask[128];					/* global mask used by color icons */
+STATIC int16_t gl_colmask[128];					/* global mask used by color icons */
 
 				/* WARNING:  The size of this array has been */
 				/* set to 128 words and no bound checking is */
@@ -61,7 +61,7 @@ int16_t gl_colmask[128];					/* global mask used by color icons */
  * converted to 5 bit values.  The original values are from VDI's 
  * palette settings.
  */
-int16_t const rgb_tab[] = { 0xFFDF,
+static int16_t const rgb_tab[] = { 0xFFDF,
 	0xF800, 0x7C0, 0xFFC0, 0x1F, 0xF81F, 0x7DF, 0xB596, 0x8410, 0xA000, 0x500,
 	0xA500, 0x14, 0xA014, 0x514, 0x0, 0xFFDF, 0xE71C, 0xD69A, 0xC618, 0xB596,
 	0xA514, 0x9492, 0x8410, 0x738E, 0x630C, 0x528A, 0x4208, 0x3186, 0x2104, 0x1082,
@@ -128,7 +128,6 @@ PP(int16_t *outval2;)
 
 	if (mode)
 	{									/* if set */
-
 		switch (which)
 		{
 		case LK3DIND:
@@ -487,7 +486,8 @@ PP(register int16_t sy;)
 	BITBLK bitblk;
 	ICONBLK iconblk;
 	TEDINFO tedinfo;
-	uint16_t mvtxt, chcol, three_d;
+	uint16_t mvtxt, chcol;
+	BOOLEAN three_d;
 
 	pt = &t;
 
@@ -501,18 +501,19 @@ PP(register int16_t sy;)
 	pt->g_x = sx;
 	pt->g_y = sy;
 
-/*
- * Adjust 3d object extents & get color change/move text flags
- */
+	/*
+	 * Adjust 3d object extents & get color change/move text flags
+	 */
 	if ((flags & IS3DOBJ))
 	{
-		three_d = 1;					/* object is 3D */
+		three_d = TRUE;					/* object is 3D */
 		tmpx = ADJ3DPIX;
 		pt->g_x -= tmpx;				/* expand object to accomodate */
 		pt->g_y -= tmpx;				/*  hi-lights for 3D */
 		pt->g_w += (tmpx << 1);
 		pt->g_h += (tmpx << 1);
 
+#if AES3D
 		if ((flags & IS3DACT) == 0)
 		{								/* if it's a 3D indicator */
 			mvtxt = ind3dtxt;
@@ -522,17 +523,23 @@ PP(register int16_t sy;)
 			mvtxt = act3dtxt;
 			chcol = act3dface;
 		}
+#endif
 	} else
 	{
 		/* For non-3d objects, force color change if XOR is not ok. */
-		three_d = 0;
+		three_d = FALSE;
 		chcol = !xor_ok(obtype, flags, spec);
 #if !BINEXACT
 		mvtxt = 0; /* quiet compiler */
 #endif
 	}
 
-	/* do trivial reject with full extent including, outline, shadow, & thickness */
+	/*
+	 * do trivial reject with full extent including, outline, shadow,
+	 * & thickness
+	 * BUG: this rejects USERDEFs which draw more than a 3 border outline.
+	 * It also rejects TEDINFOs with an outline thickness of more than 3 pixels.
+	 */
 	if (gl_wclip && gl_hclip)
 	{
 		rc_copy(pt, &c);
@@ -543,6 +550,7 @@ PP(register int16_t sy;)
 		if (!(gsx_chkclip(&c)))
 			return;
 	}
+	
 	/*
 	 * for all tedinfo types get copy of ted and crack the
 	 * color word and set the text color
@@ -561,8 +569,11 @@ PP(register int16_t sy;)
 		case G_FTEXT:
 			LBCOPY(&tedinfo, (VOIDPTR)spec, sizeof(TEDINFO));
 			gr_crack(tedinfo.te_color, &bcol, &tcol, &ipat, &icol, &tmode);
-			/* if it's a 3D background object, draw it in 3D color */
-			/* this can get complicated, because gr_text will always draw a white
+			/*
+			 * if it's a 3D background object, draw it in 3D color
+			 */
+			/*
+			 * this can get complicated, because gr_text will always draw a white
 			 * background in replace mode. So we have to change TEXT objects
 			 * into BOXTEXT objects with the right color background and with
 			 * transparent text (and no borders)
@@ -570,6 +581,7 @@ PP(register int16_t sy;)
 			if ((flags & (IS3DOBJ | IS3DACT)) && icol == WHITE && ipat == IP_HOLLOW)
 			{
 				ipat = IP_SOLID;
+#if AES3D
 				switch (flags & (IS3DOBJ | IS3DACT))
 				{
 				case IS3DOBJ:
@@ -585,6 +597,7 @@ PP(register int16_t sy;)
 					break;
 				}
 				icol = gl_alrtcol;
+#endif
 				if (tmode == MD_REPLACE)
 				{
 					if (obtype == G_TEXT)
@@ -601,6 +614,7 @@ PP(register int16_t sy;)
 			}
 			break;
 		}
+		
 		/*
 		 * for all box types crack the color if not ted and
 		 * draw the box with border
@@ -613,6 +627,7 @@ PP(register int16_t sy;)
 			gr_crack(LLOWD(spec), &bcol, &tcol, &ipat, &icol, &tmode);
 			if (obtype != G_IBOX && ipat == IP_HOLLOW && icol == WHITE)
 			{
+#if AES3D
 				switch (flags & (IS3DOBJ | IS3DACT))
 				{
 				case IS3DOBJ:
@@ -630,6 +645,7 @@ PP(register int16_t sy;)
 				default:
 					break;
 				}
+#endif
 			}
 			/* fall through */
 		case G_BUTTON:
@@ -641,6 +657,7 @@ PP(register int16_t sy;)
 				if (three_d)
 				{						/* 8/1/92 */
 					ipat = IP_SOLID;
+#if AES3D
 					if ((flags & IS3DACT) == 0)
 					{
 						icol = gl_indbutcol;
@@ -648,6 +665,7 @@ PP(register int16_t sy;)
 					{
 						icol = gl_actbutcol;
 					}
+#endif
 				} else
 				{
 					ipat = IP_HOLLOW;
@@ -658,7 +676,7 @@ PP(register int16_t sy;)
 			/* fall through */
 		case G_BOXTEXT:
 		case G_FBOXTEXT:
-			/* draw box's border    */
+			/* draw box's border */
 			if (th != 0)
 			{
 				gsx_attr(FALSE, MD_REPLACE, bcol);
@@ -722,7 +740,7 @@ PP(register int16_t sy;)
 		case G_BOXTEXT:
 			gr_inside(pt, tmpth);
 
-			/* July 30 1992 - ml.  Draw text of 3D objects *//* 8/1/92 */
+			/* July 30 1992 - ml.  Draw text of 3D objects */ /* 8/1/92 */
 			if (three_d)
 			{
 				if (!(state & SELECTED) && mvtxt)
@@ -765,8 +783,10 @@ PP(register int16_t sy;)
 			state &= ~SELECTED;
 			break;
 		case G_CICON:
-			/* Identical to the monochrome icon case (above) */
-			/* except for the gr_cicon() call.       */
+			/*
+			 * Identical to the monochrome icon case (above)
+			 * except for the gr_cicon() call.
+			 */
 			LBCOPY(&iconblk, (VOIDPTR)spec, sizeof(ICONBLK));
 			iconblk.ib_xicon += pt->g_x;
 			iconblk.ib_yicon += pt->g_y;
@@ -781,8 +801,9 @@ PP(register int16_t sy;)
 			break;
 		}
 	}
-	if ((obtype == G_STRING) ||			/* 8/1/92 */
-		(obtype == G_TITLE) || (obtype == G_BUTTON))
+	if (obtype == G_STRING ||			/* 8/1/92 */
+		obtype == G_TITLE ||
+		obtype == G_BUTTON)
 	{
 		len = LBWMOV(ad_intin, (VOIDPTR)spec);
 		if (len)
@@ -807,7 +828,7 @@ PP(register int16_t sy;)
 						tmpy -= 1;
 					}
 				}
-			/**/} else
+			} else
 			{
 				tmpx = pt->g_x;
 			}
@@ -827,8 +848,8 @@ PP(register int16_t sy;)
 				gsx_attr(FALSE, MD_REPLACE, WHITE);
 				gr_box(pt->g_x - 2, pt->g_y - 2, pt->g_w + 4, pt->g_h + 4, 2);
 			} else
-				/* draw a 3D outline for 3D background objects: 1/18/93 ERS */
 			{
+				/* draw a 3D outline for 3D background objects: 1/18/93 ERS */
 				gsx_attr(FALSE, MD_REPLACE, LBLACK);
 				gsx_cline(pt->g_x + pt->g_w + 2, pt->g_y - 3, pt->g_x + pt->g_w + 2, pt->g_y + pt->g_h + 2);
 				gsx_cline(pt->g_x + pt->g_w + 1, pt->g_y - 2, pt->g_x + pt->g_w + 1, pt->g_y + pt->g_h + 1);
@@ -877,9 +898,11 @@ PP(register int16_t sy;)
 
 		if (state & DISABLED)
 		{
+#if AES3D
 			if ((flags & (IS3DOBJ | IS3DACT)) == IS3DACT)
 				vsf_color(gl_alrtcol);
 			else
+#endif
 				vsf_color(WHITE);
 
 			bb_fill(MD_TRANS, FIS_PATTERN, IP_4PATT, pt->g_x, pt->g_y, pt->g_w, pt->g_h);
@@ -890,7 +913,7 @@ PP(register int16_t sy;)
 			bb_fill(MD_XOR, FIS_SOLID, IP_SOLID, pt->g_x, pt->g_y, pt->g_w, pt->g_h);
 		}
 
-		/* July 30 1992 - ml *//* 8/1/92 */
+		/* July 30 1992 - ml */ /* 8/1/92 */
 	}
 
 	if (three_d)
@@ -899,9 +922,8 @@ PP(register int16_t sy;)
 			draw_hi(&c, SELECTED, FALSE, thick, icol);
 		else
 			draw_hi(&c, NORMAL, FALSE, thick, icol);
-	 /**/}
-
-}										/* just_draw */
+	}
+}
 
 
 
@@ -939,7 +961,7 @@ PP(int16_t depth;)
  */
 
 /************************************************************************/
-/* o b _ f i n d							*/
+/* o b _ f i n d                                                        */
 /************************************************************************/
 int16_t ob_find(P(LPTREE) tree, P(int16_t) currobj, P(int16_t) depth, P(int16_t) mx, P(int16_t) my)
 PP(register LPTREE tree;)
@@ -1137,9 +1159,9 @@ PP(int16_t new_pos;)
 
 
 /************************************************************************/
-/* o b _ e d i t 							*/
+/* o b _ e d i t                                                        */
 /************************************************************************/
-/* see OBED.C								*/
+/* see OBED.C */
 
 /*
  *	Routine to change the state of an object and redraw that
@@ -1206,7 +1228,7 @@ PP(int16_t redraw;)
 }
 
 
-
+/* 306de: 00e23fb6 */
 uint16_t ob_fs(P(LPTREE) tree, P(int16_t) ob, P(int16_t *) pflag)
 PP(LPTREE tree;)
 PP(int16_t ob;)
@@ -1218,14 +1240,14 @@ PP(int16_t *pflag;)
 
 
 /************************************************************************/
-/* o b _ a c t x y w h							*/
+/* o b _ a c t x y w h                                                  */
 /************************************************************************/
 VOID ob_actxywh(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(register GRECT *pt;)
 {
-#ifndef NO_OB_GCLIP
+#if AES3D
 	int16_t x, y;
 
 	ob_gclip(tree, obj, &x, &y, &pt->g_x, &pt->g_y, &pt->g_w, &pt->g_h);
@@ -1238,8 +1260,9 @@ PP(register GRECT *pt;)
 
 
 /************************************************************************/
-/* o b _ r e l x y w h							*/
+/* o b _ r e l x y w h                                                  */
 /************************************************************************/
+/* 306de: 00e24042 */
 VOID ob_relxywh(P(LPTREE) tree, P(int16_t) obj, P(GRECT *)pt)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -1403,9 +1426,9 @@ PP(register int16_t obj;)
 
 
 /***************************************************************************/
-/*									   */
-/*			COLOR ICON ROUTINES				   */
-/*									   */
+/*                                                                         */
+/*                      COLOR ICON ROUTINES                                */
+/*                                                                         */
 /***************************************************************************/
 
 /*	Takes a list of icons and returns the first icon that 

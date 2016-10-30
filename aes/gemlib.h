@@ -47,7 +47,6 @@
 #define SIZE_AFILE ((NUM_ANODES*PATH_LEN)+(NUM_ANODES*EXTENSION)+SAVE_ATARI )	
 						
 /***********************************************************************/
-#define CMDLEN 128
 
 /*	MENULIB.H	05/04/84 - 11/01/84	Lowell Webster	*/
 

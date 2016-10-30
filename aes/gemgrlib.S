@@ -752,8 +752,27 @@ lab50:
  *
  *	exit:	d0.w	= 1 (true)	=0 (false)
  */
-*	xdef	_gr_stilldn
-*_gr_stilldn:
+#if CCODE
+BOOLEAN gr_stilldn(int16_t out, int16_t x, int16_t y, int16_t w, int16_t h)
+{
+	int16_t rets[6];
+	int16_t event;
+
+	/*
+	 * compiler had better put the values out, x, y, w, h in the 
+	 * right order on the stack to form a MOBLK WTF
+	 */
+	event = ev_multi(MU_BUTTON | MU_M1, &out, NULL, 0x0L, 0x00010100L, 0x0L, &rets[0]); /* 01ff00L */
+
+	if (event & MU_BUTTON)			/* button up */
+		return FALSE;
+	return TRUE;
+}
+#endif
+
+#if AESVERSION < 0x330
+	xdef	_gr_stilldn
+_gr_stilldn:
 	suba.w	#12,sp		;+12 make room on stack for 6 words: &rets[6]
 	move.l	sp,-(sp)	;+16 parm 7 &rets[0]
 	clr.l	-(sp)		;+20 parm 6 0x0L
@@ -772,6 +791,7 @@ lab50:
 	andi.w	#$1,d0		;else, return TRUE
 
 	rts
+#endif
 
 
 
@@ -1350,6 +1370,95 @@ _gr_clamp:
 	adda.w	#12,sp
 	rts
 
+
+
+#if !AES3D
+/*
+ * AES #71 - graf_slidebox - Graphics slide box
+ */
+#if CCODE
+int16_t gr_slidebox(LPTREE tree, int16_t parent, int16_t obj, int16_t isvert)
+{
+	register GRECT *pt, *pc;						/* new pointer for Reg Opt  */
+	GRECT t, c;
+	register int16_t divnd, divis;
+
+	pt = &t;
+	pc = &c;
+
+	ob_actxywh(tree, parent, pc);
+	ob_relxywh(tree, obj, pt);
+	gr_dragbox(pt->g_w, pt->g_h, pt->g_x + pc->g_x, pt->g_y + pc->g_y, pc, &pt->g_x, &pt->g_y);
+
+	if (isvert)
+	{
+		divnd = pt->g_y - pc->g_y;
+		divis = pc->g_h - pt->g_h;
+	} else
+	{
+		divnd = pt->g_x - pc->g_x;
+		divis = pc->g_w - pt->g_w;
+	}
+	if (divis)
+		return mul_div(divnd, 1000, divis);
+	else
+		return 0;
+}
+#endif
+
+/* 306de: 00e24fc0 */
+/* ridicolous attempt of hand-optimizing compiler generated code... */
+
+	xdef _gr_slidebox
+_gr_slidebox:
+
+        movem.l   d0-d7/a4-a6,-(a7)
+        lea.l     48(a7),a0
+        movea.l   (a0)+,a4
+        movem.w   (a0)+,d4-d6
+        movea.l   a7,a5
+        lea.l     8(a7),a6
+        move.l    a6,-(a7)
+        move.w    d4,-(a7)
+        move.l    a4,-(a7)
+        jsr       _ob_actxywh
+        move.l    a5,-(a7)
+        move.w    d5,-(a7)
+        move.l    a4,-(a7)
+        jsr       _ob_relxywh
+        pea.l     2(a5)
+        move.l    a5,-(a7)
+        move.l    a6,-(a7)
+        move.l    (a5)+,d0
+        swap      d0
+        add.w     (a6)+,d0
+        swap      d0
+        add.w     (a6)+,d0
+        move.l    d0,-(a7)
+        move.l    (a5),-(a7)
+        bsr       _gr_dragbox
+        moveq.l   #0,d0
+        moveq.l   #0,d1
+        tst.w     d6
+        beq.s     _gr_sl1
+        moveq.l   #2,d1
+_gr_sl1:
+        move.w    -4(a5,d1.w),d2
+        sub.w     -4(a6,d1.w),d2
+        move.w    0(a6,d1.w),d6
+        sub.w     0(a5,d1.w),d6
+        beq.s     _gr_sl2
+        move.w    d6,-(a7)
+        move.w    #1000,-(a7)
+        move.w    d2,-(a7)
+        jsr       _MUL_DIV
+        addq.l    #6,a7
+_gr_sl2:
+        adda.w    #$0038,a7
+        movem.l   (a7)+,d4-d7/a4-a6
+        rts
+
+#endif
 
 
 

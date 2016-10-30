@@ -54,7 +54,9 @@ extern WINDOW *w_gnext();
 
 extern char *g_name();
 
+#if TOSVERSION >= 0x400
 extern int32_t gl_vdo;
+#endif
 
 extern int16_t m_cpu;
 
@@ -434,6 +436,7 @@ uint16_t key;
 		}
 	}
 
+#if TOSVERSION >= 0x400
 	/* 7/16/92 */
 	if (((gl_vdo >> 16) & 0xFFFFL) <= 0x02)
 	{
@@ -449,6 +452,7 @@ uint16_t key;
 			}
 		}
 	}
+#endif
 
 	/* open a disk drive    */
 	if (loop_find(key, keytable, &i))

@@ -83,7 +83,7 @@
  */
 #define Srealloc( a )   gemdos( 0x15, a )
 #define VgetSize( a )   xbios( 91, a )
-
+#define VcheckMode(a) trap14(95, a)
 
 /* Structure for passing menu data */
 typedef struct _menu
@@ -1366,11 +1366,13 @@ BOOLEAN set_video()
 	/* Change the Resolution! - Pass mode_code to DEREK! */
 	if (button != SVCANCEL)
 	{									/* valid the mode code */
+#if TOSVERSION >= 0x400
 		if ((gl_vdo & 0x30000L) == 0x30000L)
-			mode_code = trap14(95, mode_code);
+			mode_code = VcheckMode(mode_code);
 
 		d_rezword = mode_code;
-		return (TRUE);
+#endif
+		return TRUE;
 
 	}
 	return (FALSE);

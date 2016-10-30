@@ -60,7 +60,10 @@ extern int16_t gl_hbox;
 
 extern GRECT gl_rfull;
 
-extern int16_t do_once;
+#if AESVERSION >= 0x330
+/* import from AES :( */
+extern BOOLEAN do_once;
+#endif
 
 int16_t m_st;								/* machine type flag    */
 
@@ -308,16 +311,10 @@ VOID ini_rsc()
 BOOLEAN deskmain(NOTHING)
 {
 	register int16_t i;
-
 	BOOLEAN ret;
-
-	int16_t handle,
-	 x;
-
+	int16_t handle, x;
 	int16_t *ptr;
-
 	char temp[30];
-
 	int32_t *lptr;
 
 	if (!inf_path[0])					/* Not set up yet       */
@@ -360,12 +357,14 @@ BOOLEAN deskmain(NOTHING)
 
 	d_maxcolor = gl_ws[13];
 
+#if AESVERSION >= 0x330
 	if (!do_once)						/* do it once only  */
 	{
 		adjdcol(WHITE);					/* adjust dialogue box's color  */
 		adjobjects();					/* adjust object positions      */
 		do_once = TRUE;
 	}
+#endif
 
 	read_inf();							/* Let see what the user want   */
 
@@ -648,13 +647,7 @@ unsigned int color;
 VOID adjobjects()
 {
 	register OBJECT *obj;
-
-	int16_t x,
-	 y,
-	 w,
-	 h,
-	 dx,
-	 dy;
+	int16_t x, y, w, h, dx, dy;
 
 	obj = get_tree(ADINSDIS);
 	objc_gclip(obj, IUP, &dx, &dy, &x, &y, &w, &h);

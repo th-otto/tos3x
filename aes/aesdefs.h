@@ -66,6 +66,8 @@
 #define SUBMENUS (AESVERSION >= 0x340)
 #define AES3D (AESVERSION >= 0x330)
 
+#define GEM3 0
+
 #if AESVERSION >= 0x330
 #define STACK_SIZE  500
 #define STACK2_SIZE STACK_SIZE
@@ -80,5 +82,4 @@
 #define QUEUE_SIZE 128
 #endif
 
-#define GEM3 0
-
+#define CMDLEN 128

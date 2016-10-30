@@ -194,7 +194,7 @@ extern VOIDPTR ad_intin; /* FAR ptr to intin */
  */
 /* counting semaphore  == 0 implies ON  >  0 implies OFF    */
 extern int gl_moff;
-extern size_t gl_mlen;
+extern long gl_mlen;
 extern BOOLEAN gl_graphic;
 extern BOOLEAN gl_mouse;					/* mouse on flag        */
 extern intptr_t tikaddr;

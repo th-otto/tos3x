@@ -758,7 +758,7 @@ VOID gsx_start(NOTHING)
 {
 	WORD dummy;
 
-	/* force update     */
+	/* force update */
 	gl_mode = gl_mask = gl_tcolor = gl_lcolor = -1;
 	gl_fis = gl_patt = gl_font = -1;
 	gl_xclip = 0;
