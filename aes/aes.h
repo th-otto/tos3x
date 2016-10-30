@@ -570,19 +570,14 @@ extern int16_t gl_dabase;
 extern int16_t gl_dabox;
 
 uint16_t do_chg PROTO((LPTREE tree, int16_t iitem, uint16_t chgvalue, int16_t dochg, int16_t dodraw, int16_t chkdisabled));
-int16_t menu_set PROTO((LPTREE tree, int16_t last_item, int16_t cur_item, int16_t setit));
-VOID menu_sr PROTO((int16_t saveit, LPTREE tree, int16_t imenu));
 #if SUBMENUS
-int16_t menu_down PROTO((LPTREE tree, int16_t ititle, OBJECT **itree));
 #else
-int16_t menu_down PROTO((LPTREE tree, int16_t ititle));
 #endif
 int16_t mn_do PROTO((int16_t *ptitle, int16_t *pitem));
 VOID mn_bar PROTO((LPTREE tree, int16_t showit));
 VOID mn_clsda PROTO((NOTHING));
 int16_t mn_register PROTO((int16_t pid, char *pstr));
 VOID ch_wrect PROTO((GRECT *r, GRECT *n));
-VOID rect_change PROTO((LPTREE tree, MOBLK *prmob, int16_t iob, int16_t x));
 
 
 /*
@@ -720,7 +715,7 @@ extern GRECT gl_rzero;
 extern GRECT gl_rcenter;
 extern GRECT gl_rmenu;
 
-VOID gsx_sclip PROTO((GRECT *pt));
+VOID gsx_sclip PROTO((const GRECT *pt));
 VOID gsx_gclip PROTO((GRECT *pt));
 BOOLEAN gsx_chkclip PROTO((GRECT *pt));
 VOID gsx_pline PROTO((int16_t offx, int16_t offy, int16_t cnt, int16_t pts));

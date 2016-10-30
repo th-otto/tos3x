@@ -93,6 +93,7 @@ MENU_PTR gl_menuptr;					/* MENU_PTR for the drop-down menu  */
 VOID mn_mouse PROTO((BOOLEAN save));
 VOID mu_save PROTO((BOOLEAN saveit, OBJECT *tree, int16_t imenu));
 int16_t GetObjMenu PROTO((OBJECT *tree, int16_t ititle, OBJECT **itree));
+int16_t menu_down PROTO((LPTREE tree, int16_t ititle, OBJECT **itree));
 
 
 /* FUNCTIONS

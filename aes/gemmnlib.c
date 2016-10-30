@@ -55,11 +55,17 @@ int16_t gl_dabase;
 int16_t gl_dabox;
 
 
+VOID rect_change PROTO((LPTREE tree, MOBLK *prmob, int16_t iob, int16_t x));
+int16_t menu_set PROTO((LPTREE tree, int16_t last_item, int16_t cur_item, int16_t setit));
+VOID menu_sr PROTO((int16_t saveit, LPTREE tree, int16_t imenu));
+int16_t menu_down PROTO((LPTREE tree, int16_t ititle));
+
+
 #if !SUBMENUS
 /*
  *	Change a mouse-wait rectangle based on an object's size.
  */
-
+/* 306de: 00e1ec14 */
 VOID rect_change(P(LPTREE) tree, P(MOBLK *) prmob, P(int16_t) iob, P(int16_t) x)
 PP(LPTREE tree;)
 PP(MOBLK *prmob;)
@@ -83,7 +89,7 @@ PP(int16_t x;)
  *	be drawn with its new state only if the dodraw parameter
  *	is set.
  */
-
+/* 306de: 00e1ec3a */
 uint16_t do_chg(P(LPTREE) tree, P(int16_t) iitem, P(uint16_t) chgvalue, P(int16_t) dochg, P(int16_t) dodraw, P(int16_t) chkdisabled)
 PP(register LPTREE tree;)						/* tree that holds item */
 PP(int16_t iitem;)								/* item to affect   */
@@ -107,14 +113,16 @@ PP(int16_t chkdisabled;)						/* only if item enabled */
 		gsx_sclip(&gl_rzero);
 
 	ob_change(tree, iitem, curr_state, dodraw);
-	return (TRUE);
+	return TRUE;
 }
+
 
 #if !SUBMENUS
 /*
  *	Routine to set and reset values of certain items if they
  *	are not the current item
  */
+/* 306de: 00e1ecb0 */
 int16_t menu_set(P(LPTREE) tree, P(int16_t) last_item, P(int16_t) cur_item, P(int16_t) setit)
 PP(LPTREE tree;)
 PP(register int16_t last_item;)
@@ -128,12 +136,14 @@ PP(int16_t setit;)
 	return (FALSE);
 }
 
+
 /*
  *	Routine to save or restore the portion of the screen underneath
  *	a menu tree.  This involves BLTing out and back
  *	the data that was underneath the menu before it was pulled
  *	down.
  */
+/* 306de: 00e1ecf4 */
 VOID menu_sr(P(int16_t) saveit, P(LPTREE) tree, P(int16_t) imenu)
 PP(int16_t saveit;)
 PP(LPTREE tree;)
@@ -157,6 +167,7 @@ PP(int16_t imenu;)
  *	Routine to pull a menu down.  This involves saving the data
  *	underneath the menu and drawing in the proper menu sub-tree.
  */
+/* 306de: 00e1ed46 */
 int16_t menu_down(P(LPTREE) tree, P(int16_t) ititle)
 PP(register LPTREE tree;)
 PP(register int16_t ititle;)
@@ -179,6 +190,7 @@ PP(register int16_t ititle;)
 }
 
 
+/* 306de: 00e1edce */
 int16_t mn_do(P(int16_t *) ptitle, P(int16_t *) pitem)
 PP(int16_t *ptitle;)
 PP(int16_t *pitem;)
@@ -353,13 +365,14 @@ PP(int16_t showit;)
 		i = 1;
 		if (gl_dacnt)
 		{
-			/* add disabled line    */
-			/*   and each desk acc  */
+			/* add disabled line and each desk acc */
 			cnt = 2 + gl_dacnt;
 			gl_dabase = gl_dabox + 3;
 		} else
+		{
 			cnt = 1;
-
+		}
+		
 		while (i <= cnt)
 		{
 			ob = gl_dabox + i;
@@ -373,7 +386,7 @@ PP(int16_t showit;)
 		LWSET(OB_HEIGHT(gl_dabox), h);
 		gsx_sclip(&gl_rzero);
 		ob_draw(tree, THEBAR, MAX_DEPTH);
-		gsx_attr(FALSE, MD_REPLACE, BLACK);	/* not xor mode!    */
+		gsx_attr(FALSE, MD_REPLACE, BLACK);	/* not xor mode! */
 		gsx_cline(0, gl_hbox - 1, gl_width - 1, gl_hbox - 1);
 	} else
 	{
@@ -390,15 +403,19 @@ PP(int16_t showit;)
 }
 
 /*
-*	Routine to tell desk accessories that the currently running
-*	application is about to terminate.
-*/
+ *	Routine to tell desk accessories that the currently running
+ *	application is about to terminate.
+ */
 VOID mn_clsda(NOTHING)
 {
 	register int16_t i;
 
 	for (i = 0; i < gl_dacnt; i++)
+#if BINEXACT /* sigh */
+		ap_sendmsg(appl_msg, AC_CLOSE, desk_pid[i], i, 0, 0, 0L);
+#else
 		ap_sendmsg(appl_msg, AC_CLOSE, desk_pid[i], i, 0, 0, 0, 0);
+#endif
 }
 
 
@@ -409,6 +426,7 @@ VOID mn_clsda(NOTHING)
  *	The return value is the object index of the menu item that
  *	was added.
  */
+/* 306de: 00e1f2b6 */
 int16_t mn_register(P(int16_t) pid, P(char *) pstr)
 PP(register int16_t pid;)
 PP(register intptr_t pstr;)
@@ -436,8 +454,10 @@ PP(register intptr_t pstr;)
 }
 
 
-/*	Change the waiting rectangle for new menu bar	*/
-
+/*
+ * Change the waiting rectangle for new menu bar
+ */
+/* 306de: 00e1f33c */
 VOID ch_wrect(P(GRECT *) r, P(GRECT *) n)
 PP(GRECT *r;)								/* old rect */
 PP(GRECT *n;)								/* new rect */
@@ -453,7 +473,7 @@ PP(GRECT *n;)								/* new rect */
 		p1 = (int16_t *)&e->e_parm; /* WTF */
 		p2 = (int16_t *)&e->e_return; /* WTF */
 
-		if ((r->g_x == p1[0]) && (r->g_y == p1[1]) && (r->g_w == p2[0]) && (r->g_h == p2[1]))
+		if (r->g_x == p1[0] && r->g_y == p1[1] && r->g_w == p2[0] && r->g_h == p2[1])
 		{
 			e->e_parm = HW(n->g_x) + n->g_y;
 			e->e_return = HW(n->g_w) + n->g_h;

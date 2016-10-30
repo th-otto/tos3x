@@ -459,15 +459,14 @@ name: ds.t size
 	
 	V(_gl_hchar,w,1)
 	V(_gl_naccs,w,1)
-	
-	ds.b 2
-	
+	V(_gl_dabox,w,1)
 	V(_gl_dacnt,w,1)
 	V(_gl_bdelay,w,1)
 	V(_ad_hgmice,l,1)
 	V(_gl_pacc,l,MAX_ACCS)
+	V(_desk_acc,l,MAX_ACCS)
 	
-	ds.b 58
+	ds.b 34
 	
 	V(_bi,b,14)      /* BITBLK */
 	V(_gl_bclick,w,1)
@@ -594,8 +593,9 @@ name: ds.t size
 	
 	V(_gl_cowner,l,1)
 	
-	ds.b 4
+	ds.b 2
 	
+	V(_gl_width,w,1)
 	V(_sh_doexec,w,1)
 	
 	ds.b 4
@@ -634,8 +634,9 @@ name: ds.t size
 	
 	V(_wind_spb,b,10)    /* sizeof(SPB) */
 	
-	ds.b $E
+	ds.b 6
 	
+	V(_gl_rzero,w,4)   /* GRECT */
 	V(_gl_mouse,w,1)
 	
 	ds.b 2
