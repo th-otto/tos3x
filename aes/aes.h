@@ -583,16 +583,7 @@ VOID ch_wrect PROTO((GRECT *r, GRECT *n));
 /*
  * gemobed.c
  */
-int16_t ob_getsp PROTO((LPTREE tree, int16_t obj, TEDINFO *pted));
 VOID ob_center PROTO((LPTREE tree, GRECT *pt));
-int16_t scan_to_end PROTO((char *pstr, int16_t idx, char chr));
-VOID ins_char PROTO((char *str, int16_t pos, char chr, int16_t tot_len));
-int16_t find_pos PROTO((char *str, int16_t pos));
-VOID pxl_rect PROTO((LPTREE tree, int16_t obj, int16_t ch_pos, GRECT *pt));
-VOID curfld PROTO((LPTREE tree, int16_t obj, int16_t new_pos, int16_t dist));
-int16_t instr PROTO((char chr, const char *str));
-VOID ob_stfn PROTO((int16_t idx, int16_t *pstart, int16_t *pfinish));
-int16_t ob_delit PROTO((int16_t idx));
 int16_t ob_edit PROTO((LPTREE tree, int16_t obj, int16_t in_char, int16_t *idx, int16_t kind));
 
 /*

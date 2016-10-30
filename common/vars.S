@@ -480,7 +480,11 @@ name: ds.t size
 	V(_ad_fsel,l,1)
 	V(_gl_dclick,w,1)
 	
-	ds.b $24
+	ds.b 2
+	
+	V(_gl_height,w,1)
+	
+	ds.b $20
 	
 	V(_ad_shcmd,l,1)
 	V(_ad_fpath,l,1)
@@ -667,7 +671,11 @@ name: ds.t size
 	
 	V(_pr_yrat,w,1)
 	
-	ds.b $44
+	ds.b 6
+	
+	V(_edblk,b,28)   /* TEDINFO */
+	
+	ds.b $22
 	
 	V(_tbutton,w,1)
 	

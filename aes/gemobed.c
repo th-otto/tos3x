@@ -68,7 +68,17 @@
 #define BYTESPACE 0x20					/* ascii space in bytes */
 
 
+int16_t ob_getsp PROTO((LPTREE tree, int16_t obj, TEDINFO *pted));
 BOOLEAN check PROTO((char *in_char, char valchar));
+int16_t scan_to_end PROTO((char *pstr, int16_t idx, char chr));
+VOID ins_char PROTO((char *str, int16_t pos, char chr, int16_t tot_len));
+int16_t find_pos PROTO((char *str, int16_t pos));
+VOID pxl_rect PROTO((LPTREE tree, int16_t obj, int16_t ch_pos, GRECT *pt));
+VOID curfld PROTO((LPTREE tree, int16_t obj, int16_t new_pos, int16_t dist));
+int16_t instr PROTO((char chr, const char *str));
+VOID ob_stfn PROTO((int16_t idx, int16_t *pstart, int16_t *pfinish));
+int16_t ob_delit PROTO((int16_t idx));
+
 
 
 #if UNLINKED
@@ -93,6 +103,7 @@ PP(TEDINFO *pted;)
 /*
  * AES #54 - form_center - Centre an object on the screen.
  */
+/* 306de: 00e1f40e */
 VOID ob_center(P(LPTREE) tree, P(GRECT *)pt)
 PP(LPTREE tree;)
 PP(GRECT *pt;)
@@ -245,8 +256,12 @@ PP(int16_t dist;)
 	pxl_rect(tree, obj, new_pos, &t);
 	if (dist)
 	{
+		t.g_w += (dist - 1) * gl_wchar
 		/* the "+1" is necessary or the cursor isn't always redrawn properly ++ERS 1/19/93 */
-		t.g_w += (dist - 1) * gl_wchar + 1;
+#if AESVERSION >= 0x330
+		 + 1
+#endif
+		 ;
 	} else
 	{
 		gsx_attr(FALSE, MD_XOR, BLACK);
@@ -389,6 +404,10 @@ PP(int16_t idx;)
 }
 
 
+/*
+ * AES #46 - objc_edit - Edit text in an editable text object.
+ */
+/* 306de: 00e1f8e0 */
 int16_t ob_edit(P(LPTREE) tree, P(int16_t) obj, P(int16_t) in_char, P(int16_t *) idx, P(int16_t) kind)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
@@ -544,5 +563,5 @@ PP(int16_t kind;)
 	/* draw/erase the cursor */
 	cur_pos = find_pos(&DGLO->g_tmpstr[0], *idx);
 	curfld(tree, obj, cur_pos, 0);
-	return (TRUE);
+	return TRUE;
 }
