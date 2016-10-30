@@ -18,8 +18,8 @@
 #define PRP    4						/* ) */
 #define PEE    0						/* all other special chars */
 
-#define OPSTLEN 10
-#define TREELEN 20
+#define OPSTLEN 20
+#define TREELEN 40
 
 /* globals for this package */
 static struct it exitm;					/* expression item */
