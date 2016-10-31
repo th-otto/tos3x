@@ -37,7 +37,7 @@ BOOLEAN fapd PROTO((const char *pname, int16_t pid, PD *ppd));
 PD *getpd PROTO((NOTHING));
 
 
-
+/* 306de: 00e1fe68 */
 BOOLEAN fapd(P(const char *) pname, P(int16_t) pid, P(PD *) ppd)
 PP(const char *pname;)
 PP(int16_t pid;)
@@ -60,6 +60,7 @@ PP(register PD *ppd;)
 }
 
 
+/* 306de: 00e1fec8 */
 PD *fpdnm(P(const char *) pname, P(uint16_t) pid)
 PP(const char *pname;)
 PP(uint16_t pid;)
@@ -82,6 +83,7 @@ PP(uint16_t pid;)
 }
 
 
+/* 306de: 00e1ff64 */
 PD *getpd(NOTHING)
 {
 	PD *p;
@@ -112,6 +114,7 @@ PD *getpd(NOTHING)
 }
 
 
+/* 306de: 00e1ffde */
 VOID p_nameit(P(PD *) p, P(const char *) pname)
 PP(PD *p;)
 PP(const char *pname;)
@@ -121,7 +124,7 @@ PP(const char *pname;)
 }
 
 
-
+/* 306de: 00e20018 */
 PD *pstart(P(VOIDPTR) pcode, P(const char *) pfilespec, P(intptr_t) ldaddr)
 PP(VOIDPTR pcode;)
 PP(const char *pfilespec;)
