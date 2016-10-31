@@ -36,7 +36,7 @@
 VOID doq PROTO((int16_t donq, PD *p, QPB *m));
 
 
-
+/* 306de: 00e20062 */
 VOID doq(P(int16_t) donq, P(PD *) p, P(QPB *) m)
 PP(int16_t donq;)
 PP(register PD *p;)
@@ -48,7 +48,7 @@ PP(QPB *m;)
 	n = m->qpb_cnt;
 	if (donq)
 	{
-		LBCOPY(p->p_qaddr + p->p_qindex, m->qpb_buf, n);
+		LBCOPY(p->p_qindex + p->p_qaddr, m->qpb_buf, n);
 		/* if its a redraw msg try to find a matching msg and union the redraw rects together */
 		nm = (int16_t *) & p->p_queue[p->p_qindex];
 
@@ -82,6 +82,7 @@ PP(QPB *m;)
 }
 
 
+/* 306de: 00e2014e */
 VOID aqueue(P(BOOLEAN) isqwrite, P(EVB *) e, P(intptr_t) lm)
 PP(BOOLEAN isqwrite;)
 PP(register EVB *e;)
