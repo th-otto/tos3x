@@ -228,14 +228,14 @@ PP(register uint16_t rsindex;)
 		if (rstype == R_TEPTMPLT)
 			return RTE_PTMPLT;
 		else
-			return (RTE_PVALID);
+			return RTE_PVALID;
 	case R_IBPDATA:
 	case R_IBPTEXT:
 		psubstruct = get_addr(R_ICONBLK, rsindex);
 		if (rstype == R_IBPDATA)
-			return (RIB_PDATA);
+			return RIB_PDATA;
 		else
-			return (RIB_PTEXT);
+			return RIB_PTEXT;
 	case R_STRING:
 		return (LLGET(get_sub(rsindex, RT_FREESTR, sizeof(int32_t))));
 	case R_IMAGEDATA:

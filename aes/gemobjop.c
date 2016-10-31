@@ -1,8 +1,8 @@
 /*
  *************************************************************************
- *			Revision Control System
+ *          Revision Control System
  * =======================================================================
- *  $Author: mui $	$Date: 89/04/26 18:25:38 $
+ *  $Author: mui $  $Date: 89/04/26 18:25:38 $
  * =======================================================================
  *
  * Revision 2.2  89/04/26  18:25:38  mui
@@ -17,21 +17,21 @@
  *************************************************************************
  */
 /*
- *	GEMOBJOP.C
+ *  GEMOBJOP.C
  *
- *	-------------------------------------------------------------
- *	GEM Application Environment Services		  Version 1.0
- *	TOS Atari operating system
- *	Copyright (C) 1985	 Atari Corp. 	Digital Research Inc.
- *	-------------------------------------------------------------
- *	Updates:
- *	rewrite		01/03/87		Mike Schmal
- *		ob_sst	-general poor coding rewrite.
- *		get_par -removed unused var.
- *	remove obaddr	06/10/85		Mike Schmal
- *	Reg Opt		03/08/85 - 03/09/85	Derek Mui
- *	Change at ob_sst for extended type	7/7/92	Minna Lai
- *	Remove extended type stuff	1/12/93	Eric Smith
+ *  -------------------------------------------------------------
+ *  GEM Application Environment Services          Version 1.0
+ *  TOS Atari operating system
+ *  Copyright (C) 1985   Atari Corp.    Digital Research Inc.
+ *  -------------------------------------------------------------
+ *  Updates:
+ *  rewrite     01/03/87        Mike Schmal
+ *      ob_sst  -general poor coding rewrite.
+ *      get_par -removed unused var.
+ *  remove obaddr   06/10/85        Mike Schmal
+ *  Reg Opt     03/08/85 - 03/09/85 Derek Mui
+ *  Change at ob_sst for extended type  7/7/92  Minna Lai
+ *  Remove extended type stuff  1/12/93 Eric Smith
  */
 
 #include "aes.h"
@@ -48,6 +48,7 @@
  *		to a tedinfo structure (isn't this help full).
  *
  */
+/* 306de: 00e1fc4c */
 char ob_sst(P(LPTREE) tree, P(int16_t) obj, P(intptr_t *) pspec, P(int16_t *) pstate, P(int16_t *) ptype, P(int16_t *) pflags, P(GRECT *) pt, P(int16_t *) pth)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -91,7 +92,7 @@ PP(int16_t *pth;)
 		th = LWGET(*pspec + TED_THICKNESS);
 		break;
 
-	case G_BOX:						/* for these use object thickness */
+	case G_BOX:							/* for these use object thickness */
 	case G_BOXCHAR:
 	case G_IBOX:
 		th = LBYTE2(((char *) pspec));
@@ -111,13 +112,16 @@ PP(int16_t *pth;)
 
 	*pth = th;							/* set user variable */
 
-	/* returns object border/text color */
-	/* or the 3byte of the pointer to a */
-	/* tedinfo structure (real helpfull) */
-	return (LBYTE3(((char *) pspec)));
+	/*
+	 * returns object border/text color
+	 * or the 3byte of the pointer to a
+	 * tedinfo structure (real helpfull)
+	 */
+	return LBYTE3(((char *) pspec));
 }
 
 
+/* 306de: 00e1fd18 */
 VOID everyobj(P(LPTREE) tree, P(int16_t) this, P(int16_t) last, P(EVERYOBJ_CALLBACK) routine, P(int16_t) startx, P(int16_t) starty, P(int16_t) maxdep)
 PP(register LPTREE tree;)
 PP(register int16_t this;)
@@ -134,19 +138,16 @@ PP(int16_t maxdep;)
 	x[0] = startx;
 	y[0] = starty;
 	depth = 1;
-	/* non-recursive tree   */
-	/*   traversal      */
+	/* non-recursive tree traversal */
   child:
-	/* see if we need to    */
-	/*   to stop        */
+	/* see if we need to to stop */
 	if (this == last)
 		return;
-	/* do this object   */
+	/* do this object */
 	x[depth] = x[depth - 1] + LWGET(OB_X(this));
 	y[depth] = y[depth - 1] + LWGET(OB_Y(this));
 	(*routine) (tree, this, x[depth], y[depth]);
-	/* if this guy has kids */
-	/*   then do them   */
+	/* if this guy has kids then do them */
 	tmp1 = LWGET(OB_HEAD(this));
 
 	if (tmp1 != NIL)
@@ -159,26 +160,25 @@ PP(int16_t maxdep;)
 		}
 	}
   sibling:
-	/* if this is the root  */
-	/*   which has no parent */
-	/*   or it is the last  */
-	/*   then stop else...  */
+	/*
+	 * if this is the root which has no parent
+	 * or it is the last then stop else...
+	 */
 	tmp1 = LWGET(OB_NEXT(this));
 	if ((tmp1 == last) || (this == ROOT))
 		return;
-	/* if this obj. has a   */
-	/*   sibling that is not */
-	/*   his parent, then   */
-	/*   move to him and do */
-	/*   him and his kids   */
+	/*
+	 * if this obj. has a sibling that is not
+	 *  his parent, then move to him and do him and his kids
+	 */
 	if (LWGET(OB_TAIL(tmp1)) != this)
 	{
 		this = tmp1;
 		goto child;
 	}
-	/* else move up to the  */
-	/*   parent and finish  */
-	/*   off his siblings   */
+	/*
+	 * else move up to the parent and finish off his siblings
+	 */
 	depth--;
 	this = tmp1;
 	goto sibling;
@@ -187,10 +187,11 @@ PP(int16_t maxdep;)
 
 
 /*
-*	Routine that will find the parent of a given object.  The
-*	idea is to walk to the end of our siblings and return
-*	our parent.  If object is the root then return NIL as parent.
-*/
+ * Routine that will find the parent of a given object.  The
+ * idea is to walk to the end of our siblings and return
+ * our parent.  If object is the root then return NIL as parent.
+ */
+/* 306de: 00e1fe24 */
 int16_t get_par(P(LPTREE) tree, P(int16_t) obj)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
@@ -200,13 +201,13 @@ PP(register int16_t obj;)
 	pobj = obj;
 
 	if (obj == ROOT)
-		return (NIL);
+		return NIL;
 
 	do
 	{
 		obj = pobj;
 		pobj = LWGET(OB_NEXT(obj));
-	} while ((LWGET(OB_TAIL(pobj)) != obj));
+	} while (LWGET(OB_TAIL(pobj)) != obj);
 
-	return (pobj);
+	return pobj;
 }
