@@ -34,6 +34,7 @@
 /*
  * AES #80 - scrp_read - Scrap read
  */
+/* 306de: 00e20b2e */
 VOID sc_read(P(char *) pscrap)
 PP(char *pscrap;)
 {
@@ -44,6 +45,7 @@ PP(char *pscrap;)
 /*
  * AES #81 - scrp_write - Scrap write
  */
+/* 306de: 00e20b48 */
 VOID sc_write(P(const char *) pscrap)
 PP(const char *pscrap;)
 {
