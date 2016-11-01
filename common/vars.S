@@ -588,8 +588,9 @@ name: ds.t size
 	V(_gl_mnpid,l,1) /* BUG: should be int */
 	V(_pr_mclick,l,1)
 	
-	ds.b 12
+	ds.b 8
 	
+	V(_rs_global,l,1)
 	V(_elinkoff,l,1)
 	V(_gl_play,w,1)
 	
@@ -601,9 +602,7 @@ name: ds.t size
 	
 	V(_gl_width,w,1)
 	V(_sh_doexec,w,1)
-	
-	ds.b 4
-	
+	V(_gl_pglue,l,1)
 	V(_ad_sysglo,l,1)
 	V(_gl_rfull,w,4) /* GRECT */
 
@@ -634,8 +633,9 @@ name: ds.t size
 	V(_gl_mntree,l,1)
 	V(_gl_mowner,l,1)
 	
-	ds.b $86
+	ds.b $84
 	
+	V(_gemsize,w,1)
 	V(_wind_spb,b,10)    /* sizeof(SPB) */
 	
 	ds.b 6
@@ -646,8 +646,9 @@ name: ds.t size
 	ds.b 2
 	
 	V(_gl_nrow,w,1)
+	V(_infsize,w,1)
 	
-	ds.b $14
+	ds.b $12
 	
 	V(_tmpmoff,w,1)
 	
@@ -661,7 +662,12 @@ name: ds.t size
 
 	V(_gl_wtop,w,1)
 	
-	ds.b $12
+	ds.b 6
+	
+	V(_desksiz,w,1)
+	V(_deskptr,l,1)
+	
+	ds.b 6
 	
 	V(_pr_xrat,w,1)
 	V(_pr_button,w,1)
@@ -679,7 +685,11 @@ name: ds.t size
 	
 	V(_tbutton,w,1)
 	
-	ds.b 14
+	ds.b 2
+	
+	V(_nogem,w,1)
+	
+	ds.b 10
 	
 	V(_fpcnt,w,1)
 	
@@ -738,12 +748,14 @@ name: ds.t size
 	ds.b $58
 	
 	V(_gl_rfs,w,4) /* GRECT */
-	
-	ds.b 4
-	
+	V(_rs_hdr,l,1)
 	V(_gl_tmp,l,1)
 	
-	ds.b 20
+	ds.b 16
+	
+	V(_nodesk,w,1)
+	
+	ds.b 2
 	
 	V(_er_num,w,1)
 	
@@ -761,11 +773,19 @@ name: ds.t size
 	
 	V(_kstate,w,1)
 	
-	ds.b 16
+	ds.b 6
+	
+	V(_gemptr,l,1)
+	
+	ds.b 6
 	
 	V(_contrl,w,12)
 	
-	ds.b $4C
+	ds.b $24
+	
+	V(_infptr,l,1)
+	
+	ds.b $24
 	
 	V(_mtrans,w,1)
 	V(_pxpath,l,1)

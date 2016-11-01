@@ -61,8 +61,9 @@
 
 uda_size	equ	74+4*STACK_SIZE
 /* 0 relative */
-/* BUG: should point to uda.u_supstk, which is -4 from end of structure
-   most likely wrong port from x86 version where u_supstk is 2 bytes
+/* BUG: init_size is not quite right, it should point to uda.u_supstk, which is -4 from end of structure,
+   but harmless because only memory below that is accessed.
+   Most likely wrong port from x86 version where u_supstk is 2 bytes
 */
 init_size	equ	uda_size-2
 fsize		equ	100		* size of linef handler in bytes+ a little fat
@@ -257,7 +258,9 @@ beg1:
 	clr	(sp)
 	trap	#1
 
-/* never get here */
+/*
+ * never get here
+ */
 
 	bra	begin		/* forever */
 

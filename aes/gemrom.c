@@ -151,8 +151,14 @@ extern uint16_t const tosrsc[];
 
 #endif
 
+#define Cconws(a) trap(9, a)
+#define Bconstat(a) (int)trp13(1, a)
 
-/* do this whenever the Gem or desktop is ready */
+
+/*
+ * do this whenever the Gem or desktop is ready
+ */
+/* 306de: 00e20244 */
 int16_t rom_ram(P(int) which, P(intptr_t) pointer)
 PP(int which;)
 PP(register intptr_t pointer;)
@@ -207,6 +213,7 @@ PP(register intptr_t pointer;)
 }
 
 
+/* 306de: 00e20316 */
 VOID rsc_free(NOTHING)
 {
 	dos_free(gl_pglue);
@@ -216,20 +223,21 @@ VOID rsc_free(NOTHING)
 }
 
 
-/*	Read in the resource file	*/
-
+/*
+ * Read in the resource file
+ */
+/* 306de: 00e20336 */
 BOOLEAN rsc_read(NOTHING)
 {
-	uint16_t size;
 	register const uint16_t *intptr;
+	uint16_t size;
 	const char *a;
 	char *b;
-#if MULTILANG_SUPPORT
 	int32_t value;
 	int16_t code;
+#if MULTILANG_SUPPORT
 
-	/* The value is defined as  */
-	/* X, X, LANGUAGE, KEYVBOARD    */
+	/* The value is defined as X, X, LANGUAGE, KEYBOARD */
 
 	if (getcookie(0x5F414B50L, &value))	/* get _AKP cookie */
 	{
@@ -279,16 +287,17 @@ BOOLEAN rsc_read(NOTHING)
 	}
 
 	tosrsc = RSCTABLE[st_lang];
-#endif
 
 	if (!(gl_pglue = dos_alloc((int32_t) tosrsc[2])))
 	{
-		trap(9, "Unable to install AES resource!\r\n");
+		Cconws("Unable to install AES resource!\r\n");
 		return FALSE;
 	}
+
 	/* copy rsc to ram */
 	intptr = tosrsc;
 
+	/* why inline LBCOPY here??? */
 	size = intptr[2];
 	a = (const char *)tosrsc;
 	b = (char *)gl_pglue;
@@ -299,17 +308,48 @@ BOOLEAN rsc_read(NOTHING)
 		size--;
 	}
 
+#else
+
+	/* copy rsc to ram */
+	intptr = tosrsc;
+
+	gl_pglue = dos_alloc((int32_t) intptr[2]);
+	if (!gl_pglue)
+	{
+		Cconws("Unable to install AES resource!");
+		while (!Bconstat(2))
+			;
+#if BINEXACT
+		/* BUG: no return value here */
+		return;
+#else
+		return FALSE;
+#endif
+	}
+
+	LBCOPY(gl_pglue, tosrsc, intptr[2]);
+
+	UNUSED(size);
+	UNUSED(a);
+	UNUSED(b);
+	UNUSED(value);
+	UNUSED(code);
+	
+#endif
+
 	intptr = (const uint16_t *)gl_pglue;
 	gemptr = (RSHDR *) ((char *)gl_pglue + 10);	/* now fix the resource   */
-	deskptr = (RSHDR *) ((char *)gl_pglue + intptr[0]);
-	infptr = (char *) ((char *)gl_pglue + intptr[1]);
+	deskptr = (RSHDR *) ((char *)gl_pglue + (intptr_t)intptr[0]);
+	infptr = (char *) ((char *)gl_pglue + (intptr_t)intptr[1]);
 	gemsize = intptr[0];    /* BUG: that includes the size of the GLUE header */
 	desksize = intptr[1] - intptr[0];
 	infsize = intptr[2] - intptr[1];
+
 	nodesk = FALSE;
 	nogem = FALSE;
+
 #if !BINEXACT
-	/* BUG: no return here */
+	/* BUG: no return value here */
 	return TRUE;
 #endif
 }

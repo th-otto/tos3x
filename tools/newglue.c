@@ -74,12 +74,14 @@ int argc;
 char **argv;
 {
 	char *outfile;
-
+	const char *country = NULL;
+	
 	if (argc == 2)
 	{
-		sprintf(gemrsc, "../aes/gem%s.rsc", argv[1]);
-		sprintf(deskrsc, "../desk/desk%s.rsc", argv[1]);
-		sprintf(deskinf, "../desk/desk%s.inf", argv[1]);
+		country = argv[1];
+		sprintf(gemrsc, "../aes/gem%s.rsc", country);
+		sprintf(deskrsc, "../desk/desk%s.rsc", country);
+		sprintf(deskinf, "../desk/desk%s.inf", country);
 		sprintf(glue, "glue.%s", argv[1]);
 	} else if (argc == (TOTALFILE + 1))
 	{
@@ -145,6 +147,29 @@ char **argv;
 		putbeshort(header + 2 * i, (int) ((intptr_t)address - (intptr_t)top - 2));
 
 		address += size;
+		
+		/*
+		 * ugly, temporary hack for BINEXACT mode:
+		 * the padding above (size + 4) writes 4 undefined bytes to the file.
+		 * Fill them in with data found in the ROMs.
+		 */
+		if (country && strcmp(country, "de") == 0)
+		{
+			if (i == 0 && size == 0x139a)
+			{
+				putbeshort(address + size - 4, 0x0000);
+				putbeshort(address + size - 2, 0x0e4c);
+			} else if (i == 1 && size == 0x5ebe)
+			{
+				putbeshort(address + size - 4, 0x5820);
+				putbeshort(address + size - 2, 0x0000);
+			} else if (i == 2 && size == 0x02ac)
+			{
+				putbeshort(address + size - 6, 0x000d);
+				putbeshort(address + size - 4, 0x0008);
+				putbeshort(address + size - 2, 0x0001);
+			}
+		}
 	}
 
 	size = (intptr_t)address - (intptr_t)top;

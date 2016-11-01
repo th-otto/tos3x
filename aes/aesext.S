@@ -69,5 +69,5 @@ _RSCFI equ 0
 _RSCNO equ 0
 #else
 	xdef _tosrsc
-_tosrsc equ 0
+_tosrsc equ DESKDBASE+DESKDLEN  /* $00E3ED2E */
 #endif

@@ -77,7 +77,8 @@
 #define BDOSDLEN    $0000039E
 #define AESTLEN     $0000CCD6
 #define AESDLEN     $000006D8
-#define DESKDLEN    $00007EE0
+#define DESKDLEN    $000009DE
+#define GLUELEN     $00007504
 
 #endif /* TOSVERSION == 0x306 */
 
@@ -193,7 +194,7 @@
 
 /*
  * now calculate addresses from above
- * The order of all TOS versions is BIOS, VDI, GEMDOS, AES, DESK
+ * The order of all TOS versions is BIOS, VDI, GEMDOS, AES, DESK (+ glued resource files)
  */
 #define VDITBASE  BIOSTBASE+BIOSTLEN
 #define BDOSTBASE VDITBASE+VDITLEN
@@ -206,7 +207,7 @@
 #define BDOSDBASE VDIDBASE+VDIDLEN
 #define AESDBASE  BDOSDBASE+BDOSDLEN
 #define DESKDBASE AESDBASE+AESDLEN
-#define EDATA     DESKDBASE+DESKDLEN
+#define EDATA     DESKDBASE+DESKDLEN+GLUELEN
 
 #ifdef __MAKEFILE__
 
