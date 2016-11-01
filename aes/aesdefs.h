@@ -65,6 +65,7 @@
 
 #define SUBMENUS (AESVERSION >= 0x340)
 #define AES3D (AESVERSION >= 0x330)
+#define COLORICON_SUPPORT (AESVERSION >= 0x330)
 
 #define GEM3 0
 

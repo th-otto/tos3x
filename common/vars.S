@@ -534,8 +534,9 @@ name: ds.t size
 	V(_gl_moff,w,1)
 	V(_gl_rcenter,w,4) /* GRECT */
 	V(_sh_iscart,w,1)
+	V(_hdr_buf,w,18)   /* RSHDR */
 	
-	ds.b $30
+	ds.b 12
 	
 	V(old_mcode,l,1)
 	V(_gl_nplanes,w,1)

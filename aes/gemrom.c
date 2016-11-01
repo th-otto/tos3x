@@ -309,7 +309,8 @@ BOOLEAN rsc_read(NOTHING)
 	}
 
 #else
-
+	short unused;
+	
 	/* copy rsc to ram */
 	intptr = tosrsc;
 
@@ -334,6 +335,7 @@ BOOLEAN rsc_read(NOTHING)
 	UNUSED(b);
 	UNUSED(value);
 	UNUSED(code);
+	UNUSED(unused);
 	
 #endif
 

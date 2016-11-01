@@ -88,7 +88,6 @@ VOID fix_chpos PROTO((intptr_t pfix, int16_t ifx));
 intptr_t get_sub PROTO((int16_t rsindex, int16_t rtype, int16_t rsize));
 intptr_t get_addr PROTO((uint16_t rstype, uint16_t rsindex));
 VOID fix_trindex PROTO((NOTHING));
-VOID fix_cicon PROTO((NOTHING));
 VOID fix_objects PROTO((NOTHING));
 VOID fix_tedinfo PROTO((NOTHING));
 VOID fix_nptrs PROTO((int16_t cnt, int16_t type));
@@ -105,6 +104,7 @@ int16_t rs_readit PROTO((intptr_t pglobal, const char *rsfname));
  *	If column or width is 80 then convert to rightmost column or 
  *	full screen width. 
  */
+/* 306de: 00e20412 */
 VOID fix_chpos(P(intptr_t) pfix, P(int16_t) ifx)
 PP(intptr_t pfix;)
 PP(int16_t ifx;)
@@ -128,6 +128,7 @@ PP(int16_t ifx;)
  *
  * rs_obfix
  ************************************************************************/
+/* 306de: 00e2047c */
 int16_t rs_obfix(P(LPTREE) tree, P(int16_t) curob)
 PP(LPTREE tree;)
 PP(int16_t curob;)
@@ -151,6 +152,7 @@ PP(int16_t curob;)
 }
 
 
+/* 306de: 00e204d0 */
 char *rs_str(P(int16_t) stnum)
 PP(int16_t stnum;)
 {
@@ -162,6 +164,7 @@ PP(int16_t stnum;)
 }
 
 
+/* 306de: 00e2050a */
 intptr_t get_sub(P(int16_t) rsindex, P(int16_t) rtype, P(int16_t) rsize)
 PP(int16_t rsindex;)
 PP(int16_t rtype;)
@@ -178,6 +181,7 @@ PP(int16_t rsize;)
 /*
  *	return address of given type and index, INTERNAL ROUTINE
  */
+/* 306de: 00e20538 */
 intptr_t get_addr(P(uint16_t) rstype, P(uint16_t) rsindex)
 PP(register uint16_t rstype;)
 PP(register uint16_t rsindex;)
@@ -259,6 +263,7 @@ PP(register uint16_t rsindex;)
 }
 
 
+/* 306de: 00e2066e */
 VOID fix_trindex(NOTHING)
 {
 	register int16_t ii;
@@ -272,9 +277,11 @@ VOID fix_trindex(NOTHING)
 }
 
 
-/*	Fix up the G_ICON table		*/
-
-VOID fix_cicon(NOTHING)
+#if COLORICON_SUPPORT
+/*
+ * Fix up the G_ICON table
+ */
+static VOID fix_cicon(NOTHING)
 {
 	intptr_t *ctable;
 	RSHDR *header;
@@ -287,15 +294,19 @@ VOID fix_cicon(NOTHING)
 			get_color_rsc((CICONBLK **)(ctable[1] + (intptr_t)rs_hdr));
 	}
 }
+#endif
 
 
-/*	Fix up the objects including color icons	*/
-
+/*
+ * Fix up the objects including color icons
+ */
+/* 306de: 00e206cc */
 VOID fix_objects(NOTHING)
 {
 	register int16_t ii;
 	register int16_t obtype;
 	register intptr_t psubstruct;
+#if COLORICON_SUPPORT
 	intptr_t *ctable;
 	RSHDR *header;
 
@@ -309,21 +320,29 @@ VOID fix_objects(NOTHING)
 	{
 		ctable = NULL;
 	}
+#endif
 	
 	for (ii = NUM_OBS - 1; ii >= 0; ii--)
 	{
 		psubstruct = get_addr(R_OBJECT, ii);
 		rs_obfix(psubstruct, 0);
 		obtype = (LWGET(ROB_TYPE) & 0x00ff);
+#if COLORICON_SUPPORT
 		if ((obtype == G_CICON) && ctable)
 			*((int32_t *) ROB_SPEC) = ctable[*((int32_t *) (ROB_SPEC))];
+#endif
 
-		if ((obtype != G_BOX) && (obtype != G_IBOX) && (obtype != G_BOXCHAR) && (obtype != G_CICON))
+		if (obtype != G_BOX && obtype != G_IBOX && obtype != G_BOXCHAR
+#if COLORICON_SUPPORT
+			&& obtype != G_CICON
+#endif
+			)
 			fix_long(ROB_SPEC);
 	}
 }
 
 
+/* 306de: 00e20736 */
 VOID fix_tedinfo(NOTHING)
 {
 	register int16_t ii, i;
@@ -354,6 +373,7 @@ VOID fix_tedinfo(NOTHING)
 }
 
 
+/* 306de: 00e20804 */
 VOID fix_nptrs(P(int16_t) cnt, P(int16_t) type)
 PP(int16_t cnt;)
 PP(int16_t type;)
@@ -365,6 +385,7 @@ PP(int16_t type;)
 }
 
 
+/* 306de: 00e20832 */
 int16_t fix_ptr(P(int16_t) type, P(int16_t) index)
 PP(int16_t type;)
 PP(int16_t index;)
@@ -373,6 +394,7 @@ PP(int16_t index;)
 }
 
 
+/* 306de: 00e20848 */
 int16_t fix_long(P(intptr_t) plong)
 PP(register intptr_t plong;)
 {
@@ -405,9 +427,11 @@ PP(intptr_t pglobal;)
  *
  *	Free the memory associated with a particular resource load.
  */
+/* 306de: 00e208a0 */
 int16_t rs_free(P(intptr_t) pglobal)
 PP(intptr_t pglobal;)
 {
+#if COLORICON_SUPPORT
 	RSHDR *header;
 	intptr_t *ctable;
 
@@ -424,8 +448,15 @@ PP(intptr_t pglobal;)
 			free_cicon((CICONBLK **)ctable);
 		}
 	}
-
 	dos_free((VOIDPTR)rs_hdr);
+
+#else
+
+	rs_global = pglobal;
+	dos_free((VOIDPTR)LLGET(APP_LO1RESV));
+
+#endif
+
 	return !DOS_ERR;
 }
 
@@ -436,6 +467,7 @@ PP(intptr_t pglobal;)
  *	Get a particular ADDRess out of a resource file that has been
  *	loaded into memory.
  */
+/* 306de: 00e208d4 */
 int16_t rs_gaddr(P(intptr_t) pglobal, P(uint16_t) rtype, P(uint16_t) rindex, P(VOIDPTR *) rsaddr)
 PP(intptr_t pglobal;)
 PP(uint16_t rtype;)
@@ -455,6 +487,7 @@ PP(register VOIDPTR *rsaddr;)
  *	Set a particular ADDRess in a resource file that has been
  *	loaded into memory.
  */
+/* 306de: 00e2090a */
 int16_t rs_saddr(P(intptr_t) pglobal, P(uint16_t) rtype, P(uint16_t) rindex, P(VOIDPTR ) rsaddr)
 PP(intptr_t pglobal;)
 PP(uint16_t rtype;)
@@ -481,12 +514,17 @@ PP(VOIDPTR rsaddr;)
  *	case of the GEM resource file this workstation will not have
  *	been loaded into memory yet.
  */
+/* 306de: 00e20946 */
 int16_t rs_readit(P(intptr_t) pglobal, P(const char *) rsfname)
 PP(intptr_t pglobal;)
 PP(const char *rsfname;)
 {
-	register uint16_t fd, ret;
+#if COLORICON_SUPPORT
 	int32_t rslsize;
+#else
+	register uint16_t rslsize;
+#endif
+	register uint16_t fd, ret;
 	char rspath[128];
 
 	/* make sure its there  */
@@ -505,15 +543,16 @@ PP(const char *rsfname;)
 	{
 		/* get size of resource */
 
+#if COLORICON_SUPPORT
 		if (hdr_buff[RT_VRSN] & 0x0004)	/* New format?      */
-		{								/* seek to the 1st entry */
-			/* of the table     */
+		{
+			/* seek to the 1st entry of the table */
 			if (dos_lseek(fd, SMODE, (int32_t) (hdr_buff[RS_SIZE])) != hdr_buff[RS_SIZE])
 			{
 				ret = FALSE;
 				goto rs_exit;
 			}
-			/* read the size    */
+			/* read the size */
 			dos_read(fd, sizeof(int32_t), &rslsize);
 			if (DOS_ERR)
 				goto rs_end;
@@ -527,7 +566,7 @@ PP(const char *rsfname;)
 
 		if (!DOS_ERR)
 		{
-			/* read it all in   */
+			/* read it all in */
 			dos_lseek(fd, SMODE, 0x0L);
 			/*
 			 * BUG (or bad design): dos_read() only takes a 16-bit value as length parameter
@@ -535,8 +574,29 @@ PP(const char *rsfname;)
 			/* dos_read(fd, rslsize, rs_hdr); */
 			trap(X_READ, fd, rslsize, rs_hdr);
 			if (!DOS_ERR)
+			{
+				/*
+				 * downcast of the filesize here to 16-bit is only
+				 * to fill the member of the global field
+				 */
+				do_rsfix((intptr_t) rs_hdr, (uint16_t) rslsize);	/* do all the fixups    */
+			}
+		}
+#else
+		rslsize = hdr_buff[RS_SIZE];
+
+		/* allocate memory  */
+		rs_hdr = (RSHDR *)dos_alloc((int32_t) rslsize);
+
+		if (!DOS_ERR)
+		{
+			/* read it all in */
+			dos_lseek(fd, SMODE, 0x0L);
+			dos_read(fd, (size_t)rslsize, rs_hdr);
+			if (!DOS_ERR)
 				do_rsfix((intptr_t) rs_hdr, (uint16_t) rslsize);	/* do all the fixups    */
 		}
+#endif
 	}
 
   rs_end:								/* close file and return */
@@ -547,8 +607,10 @@ PP(const char *rsfname;)
 }
 
 
-/* do all the fixups. rs_hdr must be initialized	*/
-
+/*
+ * do all the fixups. rs_hdr must be initialized
+ */
+/* 306de: 00e20a2a */
 VOID do_rsfix(P(intptr_t) hdr, P(int16_t) size)
 PP(intptr_t hdr;)
 PP(int16_t size;)
@@ -559,7 +621,9 @@ PP(int16_t size;)
 	LWSET(APP_LO2RESV, size);
 	/* xfer RT_TRINDEX to global and turn all offsets from base of file into pointers */
 
+#if COLORICON_SUPPORT
 	fix_cicon();						/* fix color icon       */
+#endif
 	fix_trindex();
 	fix_tedinfo();
 	ibcnt = NUM_IB - 1;
@@ -590,6 +654,7 @@ PP(intptr_t pglobal;)
  * AES #110 - rsrc_load - Resource load
  *	RS_LOAD		mega resource load
  */
+/* 306de: 00e20b00 */
 int16_t rs_load(P(intptr_t) pglobal, P(const char *) rsfname)
 PP(register intptr_t pglobal;)
 PP(const char *rsfname;)
