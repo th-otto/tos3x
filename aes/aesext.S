@@ -39,7 +39,7 @@ _escan_str      equ DESKTBASE+(DESKTLEN-DTLEN_US)+$51B6 /* E2B5F2 */
 _save_2         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$5232 /* E2B66E */
 _app_reschange  equ DESKTBASE+(DESKTLEN-DTLEN_US)+$192C /* E27D68 */
 _g_name         equ 0
-_deskmain       equ 0
+_deskmain       equ DESKTBASE+(DESKTLEN-DTLEN_US)+$D6B6 /* E33AF2 */
 #endif
 
 #if MULTILANG_SUPPORT

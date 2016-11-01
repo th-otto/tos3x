@@ -441,6 +441,7 @@ VOID forker PROTO((NOTHING));
 VOID chkkbd PROTO((NOTHING));
 VOID disp PROTO((NOTHING));
 
+
 /*
  * gemevlib.c
  */
@@ -850,6 +851,7 @@ VOID w_drawchange PROTO((GRECT *dirty, uint16_t skip, uint16_t stop));
 #define srchwp(handle) (&D.w_win[handle])
 VOID w_drawchange PROTO((GRECT *dirty));
 VOID w_update PROTO((int16_t bottom, GRECT *pt, int16_t top, BOOLEAN moved));
+VOID wm_start PROTO((NOTHING));
 #endif
 VOID w_setactive PROTO((NOTHING));
 VOID ap_sendmsg PROTO((int16_t *ap_msg, int16_t type, int16_t towhom, int16_t w3, int16_t w4, int16_t w5, int16_t w6, int16_t w7));

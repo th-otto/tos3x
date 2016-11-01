@@ -150,6 +150,8 @@ VOID sh_show PROTO((char *lcmd));
 BOOLEAN sh_path PROTO((int16_t whichone, char *dp, char *pname));
 int16_t sh_search PROTO((SHFIND_PROC routine));
 
+#define Getrez() trp14(4)
+
 
 
 
@@ -158,7 +160,7 @@ int16_t sh_search PROTO((SHFIND_PROC routine));
  *
  * Application reads in the command that invokes it
  */
-
+/* 306de: 00e20b62 */
 int16_t sh_read(P(char *) pcmd, P(char *) ptail)
 PP(char *pcmd;)
 PP(char *ptail;)
@@ -185,6 +187,7 @@ PP(char *ptail;)
  *   isover = 1  then run over DESKTOP
  *   isover = 2  then run over AES and DESKTOP
  */
+/* 306de: 00e20b98 */
 int16_t sh_write(P(int16_t) doex, P(int16_t) isgem, P(int16_t) isover, P(char *) pcmd, P(char *) ptail)
 PP(int16_t doex;)
 PP(int16_t isgem;)
@@ -192,8 +195,10 @@ PP(int16_t isover;)
 PP(char *pcmd;)
 PP(char *ptail;)
 {
+#if AESVERSION >= 0x330
 	if (doex > 1)
-		return (FALSE);
+		return FALSE;
+#endif
 
 	LBCOPY(ad_shcmd, pcmd, CMDLEN);
 	LBCOPY(ad_shtail, ptail, CMDLEN);
@@ -211,6 +216,7 @@ PP(char *ptail;)
  *	Used by the DESKTOP to recall 1024 bytes worth of previously
  *	'put' desktop-context information.
  */
+/* 306de: 00e20be8 */
 int16_t sh_get(P(char *) pbuffer, P(int16_t) len)
 PP(char *pbuffer;)
 PP(int16_t len;)
@@ -226,6 +232,7 @@ PP(int16_t len;)
  *	Used by the DESKTOP to save away 1024 bytes worth of desktop-
  *	context information.
  */
+/* 306de: 00e20c08 */
 int16_t sh_put(P(const char *) pdata, P(int16_t) len)
 PP(char *pdata;)
 PP(int16_t len;)
@@ -239,6 +246,7 @@ PP(int16_t len;)
  *	Convert the screen to graphics-mode in preparation for the 
  *	running of a GEM-based graphic application.
  */
+/* 306de: 00e20c28 */
 BOOLEAN sh_tographic(NOTHING)
 {
 	cli();
@@ -259,6 +267,7 @@ BOOLEAN sh_tographic(NOTHING)
  *	Convert the screen and system back to alpha-mode in preparation
  *	for the running of a DOS-based character application.
  */
+/* 306de: 00e20c72 */
 BOOLEAN sh_toalpha(NOTHING)
 {
 	gsx_mfset(ad_armice);				/* put mouse to arrow   */
@@ -278,8 +287,9 @@ BOOLEAN sh_toalpha(NOTHING)
 /*
  *	Routine called everytime dos_find has another path to search
  */
+/* 306de: 00e20cae */
 VOID sh_draw(P(char *) lcmd, P(int16_t) start, P(int16_t) depth)
-PP(register char *lcmd;)
+PP(char *lcmd;)
 PP(int16_t start;)
 PP(int16_t depth;)
 {
@@ -305,6 +315,7 @@ PP(int16_t depth;)
 /*
  * Routine called everytime dos_find has another path to search
  */
+/* 306de: 00e20d0c */
 VOID sh_show(P(char *) lcmd)
 PP(char *lcmd;)
 {
@@ -319,6 +330,7 @@ PP(char *lcmd;)
  *	Routine to take a full path, and scan back from the end to 
  *	find the starting byte of the particular filename
  */
+/* 306de: 00e20d36 */
 char *sh_name(P(char *) ppath)
 PP(char *ppath;)
 {
@@ -345,6 +357,7 @@ PP(char *ppath;)
  *	*psrch includes the '=' character.
  *	Otherwise, return a NULL in ppath.
  */
+/* 306de: 00e20d68 */
 int16_t sh_envrn(P(char **) ppath, P(const char *) psrch)
 PP(register char **ppath;)						/* output pointer   */
 PP(const char *psrch;)
@@ -394,7 +407,7 @@ PP(const char *psrch;)
  *	otherwise it's the default  PATH=0A:\000
  *	(unless munged by HINSTALL or an auto folder program)
  */
-
+/* 306de: 00e20dac */
 BOOLEAN sh_path(P(int16_t) whichone, P(char *) dp, P(char *) pname)
 PP(int16_t whichone;)
 PP(register char *dp;)
@@ -443,7 +456,7 @@ PP(register char *pname;)
 	{
 		/* restore the null */
 		if (oldpath)
-			*temp = '\0';		/* (for compatibility)  */
+			*ltemp = '\0';		/* (for compatibility)  */
 		return FALSE;
 	}
 
@@ -466,13 +479,14 @@ PP(register char *pname;)
 
 	/* restore the null */
 	if (oldpath)
-		*temp = '\0';			/* (for compatibility)  */
+		*ltemp = '\0';			/* (for compatibility)  */
 
 	/* make whichone refer to next path */
 	return (whichone + 1);
 }
 
 
+/* 306de: 00e20e86 */
 int16_t sh_search(P(SHFIND_PROC) routine)
 PP(register SHFIND_PROC routine;)
 {
@@ -491,6 +505,7 @@ PP(register SHFIND_PROC routine;)
  *	it looks at each point it firsts call the passed-in routine with
  *	the filespec that is looking for.
  */
+/* 306de: 00e20eba */
 int16_t sh_find(P(char *) pspec, P(SHFIND_PROC) routine)
 PP(register intptr_t pspec;) /* should be char * */
 PP(register SHFIND_PROC routine;)
@@ -536,8 +551,10 @@ PP(register SHFIND_PROC routine;)
 }
 
 
-/*	AES's Shell	*/
-
+/*
+ * AES's Shell
+ */
+/* 306de: 00e20fb4 */
 VOID sh_main(NOTHING)
 {
 	register int16_t ret;
@@ -576,7 +593,11 @@ VOID sh_main(NOTHING)
 
 		if (sh_gem)						/* if GEM app then restart */
 		{								/* window and mouse stuff  */
+#if NEWWIN
 			wm_new();					/* change from wm_start to wm_new 072691 - ml. */
+#else
+			wm_start();
+#endif
 			ratinit();
 		}
 #if CARTRIDGE
@@ -596,8 +617,8 @@ VOID sh_main(NOTHING)
 		if (!sh_doexec)					/* goto to desktop  */
 		{
 			ret = deskmain();
-#if 0
-			i = trp14(4);
+#if AESVERSION < 0x330
+			i = Getrez();
 			if (i != 2 && i != 6)
 				LLSET(ad_stdesk + 12, 0x00001173L);
 			else

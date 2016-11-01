@@ -66,8 +66,9 @@ PP(register int16_t w_handle;)
 }
 
 
-/* Get the size (x,y,w,h) of the window				*/
-
+/*
+ * Get the size (x,y,w,h) of the window
+ */
 VOID w_getsize(P(int16_t) which, P(int16_t) w_handle, P(GRECT *)pt)
 PP(int16_t which;)
 PP(int16_t w_handle;)
@@ -257,6 +258,14 @@ PP(int16_t *ow;)								/* output width of work/border area */
 PP(int16_t *oh;)								/* output height of work/border area */
 {
 	return 0;
+}
+
+
+/*
+ *  Start the window manager up by initializing internal variables
+ */
+VOID wm_start(NOTHING)
+{
 }
 
 
