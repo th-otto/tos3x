@@ -43,16 +43,16 @@
 CARTNODE
 {
 	CARTNODE *c_next;
-	int32_t *c_init;
-	int32_t *c_code;
+	intptr_t c_init;
+	intptr_t c_code;
 	int16_t c_time;
 	int16_t c_date;
 	int32_t c_size;
 	char c_name[14];
 };
 
-CARTNODE *cart_ptr;
-char *cart_dta;
+STATIC CARTNODE *cart_ptr;
+STATIC char *cart_dta;
 
 
 CARTNODE *cart_find PROTO((int16_t fill));
@@ -61,7 +61,7 @@ BOOLEAN cart_snext PROTO((NOTHING));
 
 
 
-
+/* 306de: 00e230a4 */
 BOOLEAN cart_init(NOTHING)
 {
 	cart_ptr = ((CARTNODE *) CART_BASE);
@@ -72,11 +72,12 @@ BOOLEAN cart_init(NOTHING)
 	} else
 	{
 		cart_ptr = NULL;
-		return (FALSE);
+		return FALSE;
 	}
 }
 
 
+/* 306de: 00e230de */
 CARTNODE *cart_find(P(int16_t) fill)
 PP(int16_t fill;)
 {
@@ -100,6 +101,7 @@ PP(int16_t fill;)
 }
 
 
+/* 306de: 00e2314e */
 BOOLEAN cart_sfirst(P(char *) pdta, P(int16_t) attr)
 PP(char *pdta;)
 PP(int16_t attr;)
@@ -110,17 +112,20 @@ PP(int16_t attr;)
 }
 
 
+/* 306de: 00e23164 */
 BOOLEAN cart_snext(NOTHING)
 {
 	if (cart_find(TRUE))
-		return (TRUE);
+		return TRUE;
 	else
 	{
 		DOS_AX = E_NOFILES;
-		return (FALSE);
+		return FALSE;
 	}
 }
 
+
+/* 306de: 00e23188 */
 int16_t ld_cartacc(NOTHING)
 {
 	register char *psp;
@@ -147,6 +152,7 @@ int16_t ld_cartacc(NOTHING)
 }
 
 
+/* 306de: 00e2320a */
 BOOLEAN cart_exec(P(const char *) pcmd, P(const char *) ptail)
 PP(const char *pcmd;)
 PP(const char *ptail;)
@@ -170,6 +176,7 @@ PP(const char *ptail;)
 }
 
 
+/* 306de: 00e23288 */
 BOOLEAN c_sfirst(P(const char *) path)
 PP(const char *path;)
 {

@@ -568,8 +568,9 @@ name: ds.t size
 	V(_wasclr,w,1)
 	GRECT(_gl_rmnactv)
 	
-	ds.b $a4
+	ds.b $a0
 	
+	V(_cart_dta,l,1)
 	V(_gl_mkrect,b,12)  /* ORECT */
 	V(_gl_awind,l,1)
 	V(_g_autoboot,b,CMDLEN)
@@ -621,8 +622,9 @@ name: ds.t size
 	V(_appl_msg,w,8)
 	V(_ml_ocnt,w,1)
 	
-	ds.b 14
+	ds.b 10
 	
+	V(_cart_ptr,l,1)
 	V(_fs_count,w,1)
 	V(_gl_newroot,w,1)
 	V(_fs_fnum,l,1)
