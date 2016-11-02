@@ -299,10 +299,11 @@ BOOLEAN rc_equal PROTO((const GRECT *p1, const GRECT *p2));
 BOOLEAN rc_intersect PROTO((const GRECT *p1, GRECT *p2));
 VOID rc_union PROTO((const GRECT *p1, GRECT *p2));
 VOID rc_constrain PROTO((const GRECT *pc, GRECT *pt));
-VOID movs PROTO((int16_t num, const char *ps, char *pd));
+VOID movs PROTO((int16_t num, const VOIDPTR ps, VOIDPTR pd));
 int16_t min PROTO((int16_t a, int16_t b));
 int16_t max PROTO((int16_t a, int16_t b));
 VOID bfill PROTO((int16_t num, char bval, VOIDPTR addr));
+#define memset(p, c, s) bfill(s, c, p)
 int toupper PROTO((int ch));
 size_t strlen PROTO((const char *p1));
 BOOLEAN streq PROTO((const char *p1, const char *p2));
@@ -822,36 +823,43 @@ VOID sh_main PROTO((NOTHING));
 /*
  * gemwmlib.c
  */
-extern LPTREE newdesk;
-extern int16_t newroot;							/* root object of new DESKTOP */
+extern LPTREE gl_newdesk;
+extern int16_t gl_newroot;							/* root object of new DESKTOP */
 extern int16_t gl_wtop;
 extern intptr_t ad_windspb;
 
 VOID wm_init PROTO((NOTHING));
 int16_t wm_create PROTO((uint16_t kind, GRECT *rect));
-int16_t wm_open PROTO((int16_t handle, GRECT *rect));
-int16_t wm_close PROTO((int16_t handle));
-int16_t wm_delete PROTO((int16_t handle));
-#if AES3D
-int16_t wm_get PROTO((int16_t handle, int16_t field, int16_t *ow, const int16_t *iw));
-#else
-int16_t wm_get PROTO((int16_t handle, int16_t field, int16_t *ow));
-#endif
-int16_t wm_set PROTO((int16_t handle, int16_t field, int16_t *iw));
 int16_t wm_find PROTO((int mx, int my));
-int16_t wm_update PROTO((int code));
-int16_t wm_calc PROTO((int16_t type, int16_t kind, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh));
-int16_t wm_new PROTO((NOTHING));
 VOID wm_min PROTO((int16_t kind, int16_t *ow, int16_t *oh));
 #if NEWWIN
 extern MEMHDR *rmhead, *rmtail;					/* rect lists memory linked list */
 WINDOW *srchwp PROTO((int handle));
+int16_t wm_open PROTO((int16_t handle, GRECT *rect));
+int16_t wm_close PROTO((int16_t handle));
+int16_t wm_delete PROTO((int16_t handle));
+int16_t wm_set PROTO((int16_t handle, int16_t field, int16_t *iw));
+int16_t wm_update PROTO((int code));
+int16_t wm_calc PROTO((int16_t type, int16_t kind, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh));
+int16_t wm_new PROTO((NOTHING));
 VOID w_drawchange PROTO((GRECT *dirty, uint16_t skip, uint16_t stop));
 #else
 #define srchwp(handle) (&D.w_win[handle])
-VOID w_drawchange PROTO((GRECT *dirty));
+VOID wm_open PROTO((int16_t handle, GRECT *rect));
+VOID wm_close PROTO((int16_t handle));
+VOID wm_delete PROTO((int16_t handle));
+VOID wm_set PROTO((int16_t handle, int16_t field, int16_t *iw));
+VOID wm_update PROTO((int code));
+VOID wm_calc PROTO((int16_t type, int16_t kind, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh));
+VOID w_drawdesk PROTO((GRECT *dirty));
 VOID w_update PROTO((int16_t bottom, GRECT *pt, int16_t top, BOOLEAN moved));
-VOID wm_start PROTO((NOTHING));
+VOID wm_new PROTO((NOTHING));
+BOOLEAN wm_start PROTO((NOTHING));
+#endif
+#if NEWWIN | AES3D
+int16_t wm_get PROTO((int16_t handle, int16_t field, int16_t *ow, const int16_t *iw));
+#else
+VOID wm_get PROTO((int16_t handle, int16_t field, int16_t *ow));
 #endif
 VOID w_setactive PROTO((NOTHING));
 VOID ap_sendmsg PROTO((int16_t *ap_msg, int16_t type, int16_t towhom, int16_t w3, int16_t w4, int16_t w5, int16_t w6, int16_t w7));
@@ -865,8 +873,15 @@ VOID w_bldactive PROTO((int16_t w_handle));
  
 
 /*
- * gemwmrect.c
+ * gemwrect.c
  */
+#if !NEWWIN
+extern ORECT *rul;
+
+ORECT *get_orect PROTO((NOTHING));
+VOID newrect PROTO((LPTREE tree, int16_t wh, int16_t junkx, int16_t junky));
+#endif
+
 
 /*
  * jdos.S

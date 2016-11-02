@@ -73,7 +73,7 @@
 #define SMALL 5
 
 /* Object Drawing Types */
-						/* Graphic types of obs	*/
+/* Graphic types of obs	*/
 #define G_BOX 20
 #define G_TEXT 21
 #define G_BOXTEXT 22
@@ -171,6 +171,13 @@
 #define SC_FTIMG 0x0008
 #define SC_FTDCA 0x0010
 #define SC_FTUSR 0x8000
+
+/* wind_update flags */
+#define END_UPDATE  0
+#define BEG_UPDATE  1
+#define END_MCTRL	2
+#define BEG_MCTRL	3
+#define BEG_CHECK   0x100   /* prevent the application from blocking */
 
 #define OBJECT struct object
 

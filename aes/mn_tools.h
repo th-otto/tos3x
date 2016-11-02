@@ -392,11 +392,6 @@ typedef struct _menu_node
 #define INIT_DISPLAY_DELAY	200L
 
 
-/* these are defined or should have been defined in gemlib etc */
-#define BEG_MCTRL	3
-#define END_MCTRL	2
-
-
 
 /*
  * mn_event.c

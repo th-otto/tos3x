@@ -32,11 +32,11 @@ int16_t phanwind;							/* PHANTOM window handle */
 int16_t hparts, vparts;						/* window elements masks */ /* tho: nonsense to make them globally here */
 int16_t wtcolor[MAXOBJ];					/* topped window object colors  */
 int16_t wbcolor[MAXOBJ];					/* background window object colors */
-LPTREE newdesk;								/* address of new DESKTOP */
-int16_t newroot;							/* root object of new DESKTOP */
+LPTREE gl_newdesk;							/* address of new DESKTOP */
+int16_t gl_newroot;							/* root object of new DESKTOP */
 WINDOW *hashtbl[HASHSIZ];					/* window structures hash table */
 int16_t hhead;								/* ascending handle # linked list */
-int16_t gl_wtop, botw;							/* top and bottom window handles */
+int16_t gl_wtop, botw;						/* top and bottom window handles */
 MEMHDR *wmhead, *wmtail;					/* window memory linked list */
 MEMHDR *rmhead, *rmtail;					/* rect lists memory linked list */
 int16_t wind_msg[8];						/* buffer to store window messages */
@@ -50,11 +50,7 @@ VOID storewp PROTO((WINDOW *wp));
 int16_t totop PROTO((int16_t handle, int16_t caller));
 int16_t tobot PROTO((int16_t handle));
 VOID activate PROTO((WINDOW *wp, int16_t topped));
-#if AES3D
 VOID setcol PROTO((WINDOW *wp, int16_t ndx, int16_t topped));
-#else
-#define setcol(wp, hdx, topped)
-#endif
 VOID w_adjust PROTO((WINDOW *wp, GRECT *rect));
 VOID w_clipdraw PROTO((WINDOW *wp, int obj, GRECT *pc));
 VOID w_bld PROTO((WINDOW *wp, int ob, int type, int parent, intptr_t spec, int16_t is3d));
@@ -136,8 +132,8 @@ BOOLEAN wm_start(NOTHING)
 		rp->rwhere = rmhead;
 	}
 
-	newdesk = 0;					/* no new DESKTOP */
-	newroot = 0;
+	gl_newdesk = 0;					/* no new DESKTOP */
+	gl_newroot = 0;
 
 	/* These number is fixed    */
 
@@ -353,7 +349,7 @@ PP(register GRECT *rect;)						/* x, y, width and height of opened window */
 	if ((wp = srchwp(handle)) == NULL || wp->status.opened)
 		return FALSE;
 
-	wm_update(TRUE);
+	wm_update(BEG_UPDATE);
 
 	/* check the minimum size   */
 
@@ -370,7 +366,7 @@ PP(register GRECT *rect;)						/* x, y, width and height of opened window */
 	wp->status.opened = TRUE;			/* Grand opening!       */
 
 	ret = totop(handle, WMOPEN);		/* top it */
-	wm_update(FALSE);
+	wm_update(END_UPDATE);
 	return ret;
 }
 
@@ -393,7 +389,7 @@ PP(int16_t handle;)							/* handle of window to be closed */
 	if ((wp = srchwp(handle)) == NULL || !wp->status.opened)
 		return FALSE;
 
-	wm_update(TRUE);
+	wm_update(BEG_UPDATE);
 	/* save previous coords */
 	wp->w_prev = wp->w_curr;
 
@@ -440,7 +436,7 @@ PP(int16_t handle;)							/* handle of window to be closed */
 		wp1 = srchwp(wp->ontop);
 		wp1->under = wp->under;
 	}
-	wm_update(FALSE);
+	wm_update(END_UPDATE);
 	return TRUE;
 }
 
@@ -662,8 +658,8 @@ PP(register int16_t *ow;)							/* return values */
 		break;
 
 	case WF_NEWDESK:
-		*(int32_t *) ow = newdesk;
-		ow[2] = newroot;
+		*(LPTREE *) ow = gl_newdesk;
+		ow[2] = gl_newroot;
 		break;
 
 	case WF_SCREEN:
@@ -743,7 +739,7 @@ PP(register int16_t *iw;)							/* values to change to */
 
 	ret = TRUE;							/* assume everything will be ok */
 
-	wm_update(1);						/* grab the window sync */
+	wm_update(BEG_UPDATE);						/* grab the window sync */
 
 	switch (field)
 	{
@@ -894,8 +890,8 @@ PP(register int16_t *iw;)							/* values to change to */
 
 
 	case WF_NEWDESK:
-		newdesk = *(int32_t *) & iw[0];
-		newroot = iw[2];
+		gl_newdesk = *(LPTREE *) & iw[0];
+		gl_newroot = iw[2];
 		break;
 
 #if AES3D
@@ -939,7 +935,7 @@ PP(register int16_t *iw;)							/* values to change to */
 		break;
 	}
 
-	wm_update(0);						/* give up the window sync */
+	wm_update(END_UPDATE);				/* give up the window sync */
 	return ret;
 }
 
@@ -2077,7 +2073,7 @@ PP(GRECT *pc;)								/* pointer to clipping rectangle */
 	RLIST *rlist;
 
 	gsx_moff();
-	wm_update(TRUE);
+	wm_update(BEG_UPDATE);
 	rlist = genrlist(wp->w_handle, WF_CURRXYWH);
 	for (rl = rlist; rl; rl = rl->rnext)
 	{
@@ -2093,7 +2089,7 @@ PP(GRECT *pc;)								/* pointer to clipping rectangle */
 			ob_draw((LPTREE)wp->obj, obj, MAX_DEPTH);
 		}
 	}
-	wm_update(FALSE);
+	wm_update(END_UPDATE);
 	gsx_mon();
 
 	if (rlist)
@@ -2138,7 +2134,9 @@ PP(uint16_t stop;)								/* window to be skipped */
 				ap_sendmsg(wind_msg, WM_REDRAW, ctl_pd->p_pid, handle,
 						   exposed.g_x, exposed.g_y, exposed.g_w, exposed.g_h);
 
-/*      drawdesk( exposed.g_x, exposed.g_y, exposed.g_w, exposed.g_h);*/
+#if 0
+				drawdesk(exposed.g_x, exposed.g_y, exposed.g_w, exposed.g_h);
+#endif
 			}
 		}
 	}
@@ -2162,7 +2160,7 @@ PP(int16_t is3d;)
 	register OBJECT *obaddr;
 
 	/* initialize object */
-	obaddr = &(wp->obj[ob]);
+	obaddr = &wp->obj[ob];
 	obaddr->ob_next = obaddr->ob_head = obaddr->ob_tail = NIL;
 	obaddr->ob_flags = is3d ? (IS3DOBJ | IS3DACT) : 0;
 	obaddr->ob_type = type;

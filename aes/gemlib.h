@@ -141,7 +141,6 @@
 
 
 #define	HASHSIZ	8		/* size of hash table */
-#define	NUM_WIN	8		/* # window structures per block of memory */
 #define	NUMRECT	80		/* # RLISTs per block of memory allocated */
 #define	SHADOW	2		/* thickness of drop shadow in pixels */
 #define	BORDER	0		/* # pixels taken up by border around obj */
@@ -174,8 +173,9 @@
 #define	W_RTARROW   16		/* horizontal slider right arrow */
 #define	W_HSLIDE    17		/* horizontal slider background */
 #define	W_HELEV	    18		/* horizontal slider thumb/elevator */
+#if AESVERSION >= 0x330
 #define	W_MENUBAR	19		/* menu bar (added Jul 23 91 - ml.) */
-#define	MAXOBJ	    20		/* maximum number of objects in a window */
+#endif
 
 
 /* Callers of totop() */
@@ -271,13 +271,21 @@ typedef struct window
 	/* 42 */	int16_t		w_vslide;
 	/* 44 */	int16_t		w_hslsiz;
 	/* 46 */	int16_t		w_vslsiz;
-	/* 48 */	ORECT		*w_rlist;	/* owner rectangle list	*/
-	/* 52 */	ORECT		*w_rnext;	/* used for search first search next */
-	/* 56 */	
-	char unused[76];
+	/* 48 */    int16_t     w_tcolor[MAXOBJ];	
+	/* 86 */    int16_t     w_bcolor[MAXOBJ];	
+	/* 124 */	ORECT		*w_rlist;	/* owner rectangle list	*/
+	/* 128 */	ORECT		*w_rnext;	/* used for search first search next */
+	/* 132 */
 } WINDOW;
 
 #define NUM_ORECT (NUM_WIN * 10)	/* is this enough???	*/
+
+/* system foreground and* background rules but transparent */
+#define SYS_FG 0x1100
+/* window title selected using pattern 2 & replace mode text */
+#define WTS_FG 0x11a1
+/* window title normal */
+#define WTN_FG 0x1100
 
 #endif
 

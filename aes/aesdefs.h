@@ -70,6 +70,14 @@
 #define GEM3 0
 
 #if AESVERSION >= 0x330
+#define	MAXOBJ	    20		/* maximum number of objects in a window */
+#else
+#define	MAXOBJ	    19		/* maximum number of objects in a window */
+#endif
+
+#define	NUM_WIN	8		/* # window structures per block of memory */
+
+#if AESVERSION >= 0x330
 #define STACK_SIZE  500
 #define STACK2_SIZE STACK_SIZE
 #define STACK3_SIZE STACK_SIZE

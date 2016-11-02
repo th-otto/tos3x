@@ -113,8 +113,8 @@ VOID all_run(NOTHING)
 	for (i = 0; i < used_acc; i++)
 		dsptch();
 	/* then get in the wait line */
-	wm_update(TRUE);
-	wm_update(FALSE);
+	wm_update(BEG_UPDATE);
+	wm_update(END_UPDATE);
 }
 
 

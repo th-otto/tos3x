@@ -299,7 +299,7 @@ PP(int16_t *keyret;)						/* returns the keystate - shift,ctrl */
 	MValueNew.Speed = -1;
 	MValueNew.Height = -1;
 
-	wm_update(3);
+	wm_update(BEG_MCTRL);
 
 /*   ctlmouse( TRUE );	*/
 
@@ -667,7 +667,7 @@ PP(int16_t *keyret;)						/* returns the keystate - shift,ctrl */
 
 	mn_mouse(0);
 /*   ctlmouse( FALSE ); */
-	wm_update(2);
+	wm_update(END_MCTRL);
 
 	UNUSED(tail);
 	UNUSED(nclicks);

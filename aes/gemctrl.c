@@ -244,7 +244,7 @@ PP(int16_t my;)
 			if (gadget != W_HSLIDE && gadget != W_VSLIDE)
 				ob_change((LPTREE)pwin->obj, gadget, selst, TRUE);
 			x = gl_wa[cpt - W_UPARROW];
-			wm_update(FALSE);			/* give up the screen */
+			wm_update(END_UPDATE);			/* give up the screen */
 			cpt = TRUE;
 			p = pwin->w_owner;
 
@@ -282,7 +282,7 @@ PP(int16_t my;)
 
 			} while (button & 1);		/* button is global */
 
-			wm_update(TRUE);			/* take back the screen */
+			wm_update(BEG_UPDATE);			/* take back the screen */
 			if (gadget != W_HSLIDE && gadget != W_VSLIDE)
 			{
 				ob_gclip((LPTREE)pwin->obj, gadget, &dummy, &dummy, &f.g_x, &f.g_y, &f.g_w, &f.g_h);
@@ -437,7 +437,7 @@ PP(int16_t my;)
 		if (message == WM_ARROWED)
 		{
 			x = gl_wa[cpt - W_UPARROW];
-			wm_update(FALSE);			/* give up the screen */
+			wm_update(END_UPDATE);			/* give up the screen */
 			cpt = TRUE;
 			p = pwin->w_owner;
 
@@ -480,7 +480,7 @@ PP(int16_t my;)
 
 			} while (button & 1);		/* button is global */
 
-			wm_update(TRUE);			/* take back the screen */
+			wm_update(BEG_UPDATE);			/* take back the screen */
 			return;
 		}
 	} else
@@ -604,7 +604,7 @@ PP(int16_t h;)
 	int16_t stobj;
 
 	gsx_moff();
-	wm_update(TRUE);
+	wm_update(BEG_UPDATE);
 	t2.g_x = x;
 	t2.g_y = y;
 	t2.g_w = w;
@@ -615,10 +615,10 @@ PP(int16_t h;)
 	wm_get(deskwind, WF_FIRSTXYWH, temp); /* BUG: missing parameter for >= 0x0330 */
 #endif
 
-	if (newdesk)
+	if (gl_newdesk)
 	{
-		tree = (OBJECT *) newdesk;
-		stobj = newroot;
+		tree = (OBJECT *) gl_newdesk;
+		stobj = gl_newroot;
 	} else
 	{
 		tree = (OBJECT *) ad_stdesk;
@@ -640,7 +640,7 @@ PP(int16_t h;)
 #endif
 	}
 
-	wm_update(FALSE);
+	wm_update(END_UPDATE);
 	gsx_mon();
 }
 #endif
@@ -710,7 +710,7 @@ int16_t ctlmgr(NOTHING)
 		ev_which = ev_multi(MU_KEYBD | MU_BUTTON | MU_M1, &gl_ctwait, &gl_ctwait, 0x0L, 0x0001ff01L, NULL, lrets);
 #endif
 		/* grab screen sink */
-		wm_update(TRUE);
+		wm_update(BEG_UPDATE);
 		/* button down over area ctrl mgr owns  */
 		if (ev_which & MU_BUTTON)
 		{
@@ -730,7 +730,7 @@ int16_t ctlmgr(NOTHING)
 #endif
 
 		/* give up screen sink */
-		wm_update(FALSE);
+		wm_update(END_UPDATE);
 	}
 }
 
@@ -813,7 +813,7 @@ PP(BOOLEAN beg_ownit;)
 {
 	if (beg_ownit)
 	{
-		wm_update(TRUE);
+		wm_update(BEG_UPDATE);
 		if (ml_ocnt == 0)
 		{
 			ml_mnhold = gl_mntree;		/* save the current menu   */
@@ -836,6 +836,6 @@ PP(BOOLEAN beg_ownit;)
 			ct_chgown(ml_pkown, &ml_ctrl);	/* restore mouse owner     */ /* BUG: ml_pkown is keyboard owner, not mouse */
 			gl_mntree = ml_mnhold;		/* restore menu tree       */
 		}
-		wm_update(FALSE);
+		wm_update(END_UPDATE);
 	}
 }

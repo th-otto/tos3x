@@ -18,6 +18,10 @@
 name: ds.t size
 #define S(t,size) ds.t size
 
+#define GRECT(name) V(name,w,4)
+#define TEDINFO(name) V(name,b,28)
+
+
 	bss
 
 	ds.b 2048       /* the system variables go here */
@@ -389,7 +393,7 @@ name: ds.t size
 	
 	V(_ad_rso,l,1)
 	V(_ml_mnhold,l,1)
-	V(_ml_ctrl,w,4)    /* GRECT */
+	GRECT(_ml_ctrl)
 	V(_ml_pmown,l,1)
 	V(_ml_pkown,l,1)
 	V(_fsname,b,40)
@@ -397,9 +401,8 @@ name: ds.t size
 	V(_pathcopy,l,1)
 	V(_defdrv,w,1)
 	V(_autopath,b,CMDLEN)
-	
-	ds.b $4C
-
+	V(_wtcolor,w,MAXOBJ)
+	V(_wbcolor,w,MAXOBJ)
 	V(pblock,l,5)
 	V(_crit_err,l,1)
 	
@@ -443,7 +446,7 @@ name: ds.t size
 	
 	ds.b 10
 	
-	V(_ctrl,w,4) /* GRECT */
+	GRECT(_ctrl)
 	
 	ds.b $32
 
@@ -483,14 +486,16 @@ name: ds.t size
 	ds.b 2
 	
 	V(_gl_height,w,1)
+	TEDINFO(_gl_aname)
 	
-	ds.b $20
+	ds.b 4
 	
 	V(_ad_shcmd,l,1)
 	V(_ad_fpath,l,1)
 	
-	ds.b $1e
+	ds.b 2
 	
+	TEDINFO(_gl_ainfo)
 	V(_gl_bdesired,w,1)
 	V(_gl_dcindex,w,1)
 	V(_gl_recd,w,1)
@@ -532,7 +537,7 @@ name: ds.t size
 	ds.b 10
 	
 	V(_gl_moff,w,1)
-	V(_gl_rcenter,w,4) /* GRECT */
+	GRECT(_gl_rcenter)
 	V(_sh_iscart,w,1)
 	V(_hdr_buf,w,18)   /* RSHDR */
 	
@@ -551,14 +556,17 @@ name: ds.t size
 	
 	V(_gl_ncol,w,1)
 	
-	ds.b $84
+	ds.b $82
 	
+	V(_w_walkflag,w,1)
 	V(_ad_envrn,l,1)
 	V(_desk_pid,w,MAX_ACCS)
 	
-	ds.b 16
+	ds.b 10
 	
-	V(_gl_rmnactv,w,4) /* GRECT */
+	V(_gl_newdesk,l,1)
+	V(_wasclr,w,1)
+	GRECT(_gl_rmnactv)
 	
 	ds.b $b0
 	
@@ -578,14 +586,12 @@ name: ds.t size
 	V(_ad_fstree,l,1)
 	V(_gl_omform,w,37) /* MFORM */
 	V(_gl_rlen,w,1)
-	V(_gl_rmenu,w,4) /* GRECT */
+	GRECT(_gl_rmenu)
 	
 	ds.b 2
 	
 	V(_sys_adacc,l,1)
-	
-	ds.b $C0
-	
+ 	V(_W_TREE,b,24*NUM_WIN)  /* OBJECT[NUM_WIN] */
 	V(_gl_mnpid,l,1) /* BUG: should be int */
 	V(_pr_mclick,l,1)
 	
@@ -605,11 +611,11 @@ name: ds.t size
 	V(_sh_doexec,w,1)
 	V(_gl_pglue,l,1)
 	V(_ad_sysglo,l,1)
-	V(_gl_rfull,w,4) /* GRECT */
+	GRECT(_gl_rfull)
 
 	ds.b 2
 	
-	V(_gl_rscreen,w,4) /* GRECT */
+	GRECT(_gl_rscreen)
 	V(_fs_first,w,1)
 	V(_appl_msg,w,8)
 	V(_ml_ocnt,w,1)
@@ -617,31 +623,31 @@ name: ds.t size
 	ds.b 14
 	
 	V(_fs_count,w,1)
-	
-	ds.b 2
-	
+	V(_gl_newroot,w,1)
 	V(_fs_fnum,l,1)
 	
 	ds.b 4
 	
 	V(_gl_btrue,w,1)
 	
-	ds.b $1A
+	ds.b 10
 	
+	V(_wind_msg,w,8)
 	V(_gl_kowner,l,1)
 	V(_crt_error,w,1)
 	V(_gl_wbox,w,1)
 	V(_gl_mntree,l,1)
 	V(_gl_mowner,l,1)
 	
-	ds.b $84
+	ds.b $80
 	
+	V(_gl_wtree,l,1)
 	V(_gemsize,w,1)
 	V(_wind_spb,b,10)    /* sizeof(SPB) */
 	
 	ds.b 6
 	
-	V(_gl_rzero,w,4)   /* GRECT */
+	GRECT(_gl_rzero)
 	V(_gl_mouse,w,1)
 	
 	ds.b 2
@@ -680,7 +686,7 @@ name: ds.t size
 	
 	ds.b 6
 	
-	V(_edblk,b,28)   /* TEDINFO */
+	TEDINFO(_edblk)
 	
 	ds.b $22
 	
@@ -706,8 +712,9 @@ name: ds.t size
 	
 	V(_cda,l,1)
 	V(_wwait,w,1)
+ 	V(_W_ACTIVE,b,24*NUM_WIN)  /* OBJECT[MAXOBJ] */
 	
-	ds.b $1C8
+	ds.b $108
 	
 	V(_DOS_ERR,w,1)
 	V(_ptsin,w,20)
@@ -723,9 +730,7 @@ name: ds.t size
 	V(_nrl,l,1)
 	V(_rlr,l,1)
 	V(_slr,l,1)
-	
-	ds.b 4
-	
+	V(_rul,l,1)
 	V(_evx,b,28) /* sizeof(EVB) */
 	V(_zlr,l,1)
 	
@@ -748,7 +753,7 @@ name: ds.t size
 	
 	ds.b $58
 	
-	V(_gl_rfs,w,4) /* GRECT */
+	GRECT(_gl_rfs)
 	V(_rs_hdr,l,1)
 	V(_gl_tmp,l,1)
 	

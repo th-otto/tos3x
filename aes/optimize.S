@@ -310,6 +310,7 @@ rc_done:
 *		C binding:	movs(count,src,dst);
 *				int	count;
 *				byte	*src,*dst;
+* and why do we need another copy function?
 * --
 	xdef _movs
 _movs:

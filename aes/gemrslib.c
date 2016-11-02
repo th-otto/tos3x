@@ -599,9 +599,13 @@ PP(const char *rsfname;)
 #endif
 	}
 
+#if COLORICON_SUPPORT
   rs_end:								/* close file and return */
+#endif
 	ret = !DOS_ERR;
+#if COLORICON_SUPPORT
   rs_exit:
+#endif
 	dos_close(fd);
 	return (ret);
 }

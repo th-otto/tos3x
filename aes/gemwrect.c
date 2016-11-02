@@ -46,7 +46,6 @@ ORECT *rul;
 ORECT gl_mkrect;
 
 
-ORECT *get_orect PROTO((NOTHING));
 ORECT *mkpiece PROTO((int16_t tlrb, ORECT *new, ORECT *old));
 ORECT *brkrct PROTO((ORECT *new, ORECT *r, ORECT *p));
 static VOID mkrect PROTO((LPTREE tree, int16_t wh, int16_t junkx, int16_t junky));
@@ -58,15 +57,15 @@ VOID or_start(NOTHING)
 {
 	register int16_t i;
 
-	rul = (ORECT *) 0;
+	rul = NULL;
 	for (i = 0; i < NUM_ORECT; i++)
 	{
 		D.g_olist[i].o_link = rul;
 		rul = &D.g_olist[i];
 	}
-
 }
 #endif
+
 
 ORECT *get_orect(NOTHING)
 {
@@ -180,9 +179,6 @@ PP(int16_t junky;)
 
 
 
-VOID newrect PROTO((LPTREE tree, int16_t wh, int16_t junkx, int16_t junky));
-
-/* old, unused function */
 VOID newrect(P(LPTREE) tree, P(int16_t) wh, P(int16_t) junkx, P(int16_t) junky)
 PP(LPTREE tree;)
 PP(int16_t wh;)

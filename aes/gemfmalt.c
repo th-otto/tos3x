@@ -360,7 +360,7 @@ PP(const char *palstr;)
 	ob_center(tree, &d);
 	
 	/* save screen underneath the alert */
-	wm_update(TRUE);
+	wm_update(BEG_UPDATE);
 	gsx_gclip(&t);
 	bb_save(&d);
 
@@ -377,7 +377,7 @@ PP(const char *palstr;)
 	gsx_sclip(&d);
 	bb_restore(&d);
 	gsx_sclip(&t);
-	wm_update(FALSE);
+	wm_update(END_UPDATE);
 
 
 	/*  3/3/86      */

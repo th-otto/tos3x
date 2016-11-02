@@ -1060,7 +1060,7 @@ VOID gr_rubwind(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, GRECT *poff, W
 	WORD have2box, down;
 	GRECT o;
 
-	wm_update(TRUE);
+	wm_update(BEG_UPDATE);
 	gr_setup(BLACK);
 
 	r_set(&o, xorigin, yorigin, 0, 0);
@@ -1072,14 +1072,14 @@ VOID gr_rubwind(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, GRECT *poff, W
 	} while (down);
 	*pwend = o.g_w;
 	*phend = o.g_h;
-	wm_update(FALSE);
+	wm_update(END_UPDATE);
 }
 #endif
 	xdef _gr_rubwind
 _gr_rubwind:
 	movem.l	d3-d6/a3-a6,-(sp) ;+32 reserve 8 bytes of local & d5-d6/a3-a6
 	move.w	#1,-(sp)	;+34 parm 1 TRUE
-	jsr	_wm_update	;wm_updat(TRUE)
+	jsr	_wm_update	;wm_update(BEG_UPDATE)
 
 	bsr	_gr_setup	;gr_setup(BLACK)  black is true!
 
@@ -1133,7 +1133,7 @@ wdhtlp:
 	move.w	(a3),(a6)	;*phend = o.g_h
 
 	clr.w	-(sp)		;+36 parm 1 FALSE
-	jsr	_wm_update	;wm_update(FALSE)
+	jsr	_wm_update	;wm_update(END_UPDATE)
 	adda.w	#12,sp		;+24 adjust stack
 	movem.l	(sp)+,d5-d6/a3-a6	;+0
 	rts
@@ -1192,7 +1192,7 @@ VOID gr_dragbox(WORD w, WORD h, WORD sx, WORD sy, GRECT *pc, WORD *pdx, WORD *pd
 	GRECT o;
 	WORD mx, my;
 
-	wm_update(TRUE);
+	wm_update(BEG_UPDATE);
 	gr_setup(BLACK);
 
 	gr_clamp(sx + 1, sy + 1, 0, 0, &offx, &offy);
@@ -1209,7 +1209,7 @@ VOID gr_dragbox(WORD w, WORD h, WORD sx, WORD sy, GRECT *pc, WORD *pdx, WORD *pd
 	} while (down);
 	*pdx = o.g_x;
 	*pdy = o.g_y;
-	wm_update(FALSE);
+	wm_update(END_UPDATE);
 }
 #endif
 	xdef _gr_dragbox
@@ -1221,8 +1221,8 @@ _gr_dragbox:
 *					;a5 = &pdx
 *					;a6 = &pdy
 
-	move.w	#1,-(sp)		;+38 parm 1 BLACK
-	jsr	_wm_update		;wm_update(BLACK)
+	move.w	#1,-(sp)		;+38 parm 1
+	jsr	_wm_update		;wm_update(BEG_UPDATE)
 	jsr	_gr_setup		;gr_setup(TRUE) black = true
 
 
@@ -1299,7 +1299,7 @@ lab31:
 	move.w	54-30(sp),(a6)	;*pdy = o.g_y
 
 	clr.w	-(sp)		;+56
-	jsr	_wm_update	; wm_update(FALSE)
+	jsr	_wm_update	; wm_update(END_UPDATE)
 
 	adda.w	#36,sp		;+20
 	movem.l	(sp)+,d6-d7/a4-a6	;+0

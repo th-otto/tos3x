@@ -84,7 +84,7 @@ PP(int16_t beg_ownit;)
 {
 	if (beg_ownit)
 	{
-		wm_update(TRUE);
+		wm_update(BEG_UPDATE);
 		if (ml_ocnt == 0)
 		{
 			ml_mnhold = gl_mntree;		/* save the current menu   */
@@ -107,7 +107,7 @@ PP(int16_t beg_ownit;)
 			ct_chgown(ml_pkown, &ml_ctrl);	/* restore mouse owner     */
 			gl_mntree = ml_mnhold;		/* restore menu tree       */
 		}
-		wm_update(FALSE);
+		wm_update(END_UPDATE);
 	}
 }
 #endif
@@ -413,7 +413,7 @@ PP(register GRECT *pt;)
 #if NEWWIN
 		w_drawchange(pt, NIL, NIL);
 #else
-		w_drawchange(pt);
+		w_drawdesk(pt);
         w_update(DESKWH, pt, DESKWH, FALSE);
 #endif
 		break;
