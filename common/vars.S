@@ -568,8 +568,9 @@ name: ds.t size
 	V(_wasclr,w,1)
 	GRECT(_gl_rmnactv)
 	
-	ds.b $b0
+	ds.b $a4
 	
+	V(_gl_mkrect,b,12)  /* ORECT */
 	V(_gl_awind,l,1)
 	V(_g_autoboot,b,CMDLEN)
 	V(_ad_title,l,1)

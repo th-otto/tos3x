@@ -196,18 +196,6 @@ OBJECT
 	int16_t		ob_height;	/* height of obj		*/
 };
 
-#define ORECT	struct orect
-
-ORECT
-{
-	ORECT	*o_link;
-	int16_t	o_x;
-	int16_t	o_y;
-	int16_t	o_w;
-	int16_t	o_h;
-};
-
-
 #define GRECT	struct grect
 
 GRECT
@@ -216,6 +204,15 @@ GRECT
 	int16_t	g_y;
 	int16_t	g_w;
 	int16_t	g_h;
+};
+
+
+#define ORECT	struct orect
+
+ORECT
+{
+	ORECT	*o_link;
+	GRECT    o_gr;
 };
 
 

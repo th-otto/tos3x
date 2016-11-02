@@ -40,10 +40,10 @@
 #define RIGHT 2
 #define BOTTOM 3
 
-#if !NEWWIN
+#if !NEWWIN /* whole file */
 
 ORECT *rul;
-ORECT gl_mkrect;
+STATIC ORECT gl_mkrect;
 
 
 ORECT *mkpiece PROTO((int16_t tlrb, ORECT *new, ORECT *old));
@@ -67,6 +67,7 @@ VOID or_start(NOTHING)
 #endif
 
 
+/* 306de: 00e22d7a */
 ORECT *get_orect(NOTHING)
 {
 	ORECT *po;
@@ -77,6 +78,7 @@ ORECT *get_orect(NOTHING)
 }
 
 
+/* 306de: 00e22d9c */
 ORECT *mkpiece(P(int16_t) tlrb, P(ORECT *) new, P(ORECT *) old)
 PP(int16_t tlrb;)
 PP(register ORECT *new;)
@@ -87,33 +89,34 @@ PP(register ORECT *old;)
 	rl = get_orect();
 	rl->o_link = old;
 	/* do common calcs  */
-	rl->o_x = old->o_x;
-	rl->o_w = old->o_w;
-	rl->o_y = max(old->o_y, new->o_y);
-	rl->o_h = min(old->o_y + old->o_h, new->o_y + new->o_h) - rl->o_y;
-	/* use/override calcs   */
+	rl->o_gr.g_x = old->o_gr.g_x;
+	rl->o_gr.g_w = old->o_gr.g_w;
+	rl->o_gr.g_y = max(old->o_gr.g_y, new->o_gr.g_y);
+	rl->o_gr.g_h = min(old->o_gr.g_y + old->o_gr.g_h, new->o_gr.g_y + new->o_gr.g_h) - rl->o_gr.g_y;
+	/* use/override calcs */
 	switch (tlrb)
 	{
 	case TOP:
-		rl->o_y = old->o_y;
-		rl->o_h = new->o_y - old->o_y;
+		rl->o_gr.g_y = old->o_gr.g_y;
+		rl->o_gr.g_h = new->o_gr.g_y - old->o_gr.g_y;
 		break;
 	case LEFT:
-		rl->o_w = new->o_x - old->o_x;
+		rl->o_gr.g_w = new->o_gr.g_x - old->o_gr.g_x;
 		break;
 	case RIGHT:
-		rl->o_x = new->o_x + new->o_w;
-		rl->o_w = (old->o_x + old->o_w) - (new->o_x + new->o_w);
+		rl->o_gr.g_x = new->o_gr.g_x + new->o_gr.g_w;
+		rl->o_gr.g_w = (old->o_gr.g_x + old->o_gr.g_w) - (new->o_gr.g_x + new->o_gr.g_w);
 		break;
 	case BOTTOM:
-		rl->o_y = new->o_y + new->o_h;
-		rl->o_h = (old->o_y + old->o_h) - (new->o_y + new->o_h);
+		rl->o_gr.g_y = new->o_gr.g_y + new->o_gr.g_h;
+		rl->o_gr.g_h = (old->o_gr.g_y + old->o_gr.g_h) - (new->o_gr.g_y + new->o_gr.g_h);
 		break;
 	}
 	return rl;
 }
 
 
+/* 306de: 00e22e88 */
 ORECT *brkrct(P(ORECT *) new, P(ORECT *) r, P(ORECT *) p)
 PP(register ORECT *new;)
 PP(register ORECT *r;)
@@ -123,14 +126,16 @@ PP(register ORECT *p;)
 	int16_t have_piece[4];
 
 	/* break up rectangle r based on new, adding new orects to list p */
-	if ((new->o_x < r->o_x + r->o_w) &&
-		(new->o_x + new->o_w > r->o_x) && (new->o_y < r->o_y + r->o_h) && (new->o_y + new->o_h > r->o_y))
+	if ((new->o_gr.g_x < r->o_gr.g_x + r->o_gr.g_w) &&
+		(new->o_gr.g_x + new->o_gr.g_w > r->o_gr.g_x) &&
+		(new->o_gr.g_y < r->o_gr.g_y + r->o_gr.g_h) &&
+		(new->o_gr.g_y + new->o_gr.g_h > r->o_gr.g_y))
 	{
 		/* there was overlap so we need new rectangles */
-		have_piece[TOP] = (new->o_y > r->o_y);
-		have_piece[LEFT] = (new->o_x > r->o_x);
-		have_piece[RIGHT] = (new->o_x + new->o_w < r->o_x + r->o_w);
-		have_piece[BOTTOM] = (new->o_y + new->o_h < r->o_y + r->o_h);
+		have_piece[TOP] = new->o_gr.g_y > r->o_gr.g_y;
+		have_piece[LEFT] = new->o_gr.g_x > r->o_gr.g_x;
+		have_piece[RIGHT] = new->o_gr.g_x + new->o_gr.g_w < r->o_gr.g_x + r->o_gr.g_w;
+		have_piece[BOTTOM] = new->o_gr.g_y + new->o_gr.g_h < r->o_gr.g_y + r->o_gr.g_h;
 
 		for (i = 0; i < 4; i++)
 		{
@@ -141,12 +146,13 @@ PP(register ORECT *p;)
 		p->o_link = r->o_link;
 		r->o_link = rul;
 		rul = r;
-		return (p);
+		return p;
 	}
-	return (0x0);
+	return NULL;
 }
 
 
+/* 306de: 00e22f84 */
 static VOID mkrect(P(LPTREE) tree, P(int16_t) wh, P(int16_t) junkx, P(int16_t) junky)
 PP(LPTREE tree;)
 PP(int16_t wh;)
@@ -178,7 +184,7 @@ PP(int16_t junky;)
 }
 
 
-
+/* 306de: 00e22fe2 */
 VOID newrect(P(LPTREE) tree, P(int16_t) wh, P(int16_t) junkx, P(int16_t) junky)
 PP(LPTREE tree;)
 PP(int16_t wh;)
@@ -191,7 +197,7 @@ PP(int16_t junky;)
 
 	pwin = &D.w_win[wh];
 	r0 = pwin->w_rlist;
-	/* dump rectangle list  */
+	/* dump rectangle list */
 	if (r0)
 	{
 		for (r = r0; r->o_link; r = r->o_link)
@@ -201,20 +207,20 @@ PP(int16_t junky;)
 	}
 	/* zero the rectangle list */
 	pwin->w_rlist = 0x0;
-	/* start out with no broken rectangles  */
+	/* start out with no broken rectangles */
 	pwin->w_flags &= ~VF_BROKEN;
-	/* if no size then return     */
-	w_getsize(WS_TRUE, wh, (GRECT *)&gl_mkrect.o_x);
-	if (!(gl_mkrect.o_w && gl_mkrect.o_h))
+	/* if no size then return */
+	w_getsize(WS_TRUE, wh, &gl_mkrect.o_gr);
+	if (!(gl_mkrect.o_gr.g_w && gl_mkrect.o_gr.g_h))
 		return;
 	/* init. a global orect for use during mkrect calls */
-	gl_mkrect.o_link = (ORECT *) 0x0;
+	gl_mkrect.o_link = NULL;
 	/* break other window's rects with our current rect */
 	everyobj(tree, ROOT, wh, mkrect, 0, 0, MAX_DEPTH);
-	/* get an orect in this windows list   */
+	/* get an orect in this windows list */
 	new = get_orect();
-	new->o_link = (ORECT *) 0x0;
-	w_getsize(WS_TRUE, wh, (GRECT *)&new->o_x);
+	new->o_link = NULL;
+	w_getsize(WS_TRUE, wh, &new->o_gr);
 	pwin->w_rlist = new;
 }
 

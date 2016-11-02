@@ -839,9 +839,7 @@ int16_t wm_open PROTO((int16_t handle, GRECT *rect));
 int16_t wm_close PROTO((int16_t handle));
 int16_t wm_delete PROTO((int16_t handle));
 int16_t wm_set PROTO((int16_t handle, int16_t field, int16_t *iw));
-int16_t wm_update PROTO((int code));
 int16_t wm_calc PROTO((int16_t type, int16_t kind, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh));
-int16_t wm_new PROTO((NOTHING));
 VOID w_drawchange PROTO((GRECT *dirty, uint16_t skip, uint16_t stop));
 #else
 #define srchwp(handle) (&D.w_win[handle])
@@ -849,17 +847,22 @@ VOID wm_open PROTO((int16_t handle, GRECT *rect));
 VOID wm_close PROTO((int16_t handle));
 VOID wm_delete PROTO((int16_t handle));
 VOID wm_set PROTO((int16_t handle, int16_t field, int16_t *iw));
-VOID wm_update PROTO((int code));
 VOID wm_calc PROTO((int16_t type, int16_t kind, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t *ox, int16_t *oy, int16_t *ow, int16_t *oh));
 VOID w_drawdesk PROTO((GRECT *dirty));
 VOID w_update PROTO((int16_t bottom, GRECT *pt, int16_t top, BOOLEAN moved));
-VOID wm_new PROTO((NOTHING));
 BOOLEAN wm_start PROTO((NOTHING));
 #endif
 #if NEWWIN | AES3D
 int16_t wm_get PROTO((int16_t handle, int16_t field, int16_t *ow, const int16_t *iw));
 #else
 VOID wm_get PROTO((int16_t handle, int16_t field, int16_t *ow));
+#endif
+#if (AESVERSION >= 0x330) | !BINEXACT
+int16_t wm_update PROTO((int code));
+int16_t wm_new PROTO((NOTHING));
+#else
+VOID wm_update PROTO((int code));
+VOID wm_new PROTO((NOTHING));
 #endif
 VOID w_setactive PROTO((NOTHING));
 VOID ap_sendmsg PROTO((int16_t *ap_msg, int16_t type, int16_t towhom, int16_t w3, int16_t w4, int16_t w5, int16_t w6, int16_t w7));

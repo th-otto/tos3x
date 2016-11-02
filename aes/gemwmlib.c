@@ -367,14 +367,7 @@ PP(register GRECT *pc;)
 	/* walk owner rectangle list */
 	for (po = srchwp(wh)->w_rlist; po; po = po->o_link)
 	{
-#if BINEXACT
-		rc_copy((GRECT *)&po->o_x, &t);
-#else
-		t.g_x = po->o_x;
-		t.g_y = po->o_y;
-		t.g_w = po->o_w;
-		t.g_h = po->o_h;
-#endif
+		rc_copy(&po->o_gr, &t);
 		/* intersect owner rectangle with clip rectangles */
 		if (rc_intersect(pc, &t))
 		{
@@ -1210,7 +1203,7 @@ PP(register GRECT *poutwds;)
 {
 	while (po)
 	{
-		rc_copy((GRECT *) &po->o_x, poutwds);
+		rc_copy(&po->o_gr, poutwds);
 		srchwp(w_handle)->w_rnext = po = po->o_link;
 		if (rc_intersect(pt, poutwds) /* &&
 			rc_intersect(&gl_rfull, poutwds) */)
@@ -1232,19 +1225,11 @@ PP(register GRECT *pt;)
 	if (!po)
 		return FALSE;
 
-#if BINEXACT
-	rc_copy((GRECT *)&po->o_x, (GRECT *)&pt->g_x);
-#else
-	pt->g_x = po->o_x;
-	pt->g_y = po->o_y;
-	pt->g_w = po->o_w;
-	pt->g_h = po->o_h;
-#endif
-
+	rc_copy(&po->o_gr, pt);
 	po = po->o_link;
 	while (po)
 	{
-		rc_union((GRECT *)&po->o_x, pt);  /* FIXME: typecast */
+		rc_union(&po->o_gr, pt);
 		po = po->o_link;
 	}
 
@@ -1301,10 +1286,10 @@ BOOLEAN wm_start(NOTHING)
 	/* init rectangle list */
 	DGLO->w_win[0].w_rlist = po = get_orect();
 	po->o_link = NULL;
-	po->o_x = 0;
-	po->o_y = gl_hbox;
-	po->o_w = gl_width;
-	po->o_h = gl_height - gl_hbox;
+	po->o_gr.g_x = 0;
+	po->o_gr.g_y = gl_hbox;
+	po->o_gr.g_w = gl_width;
+	po->o_gr.g_h = gl_height - gl_hbox;
 	w_setup(rlr, DESKWH, NONE);
 	w_setsize(WS_CURR, DESKWH, &gl_rscreen);
 	w_setsize(WS_PREV, DESKWH, &gl_rscreen);
@@ -1804,7 +1789,11 @@ PP(int my;)									/* mouse's y position */
  */
 /* BUG: does not return anything */
 /* 306de: 00e22c24 */
+#if (AESVERSION >= 0x330) | !BINEXACT
+int16_t wm_update(P(int) beg_update)
+#else
 VOID wm_update(P(int) beg_update)
+#endif
 PP(register int beg_update;)								/* flag for the call's function */
 {
 	if (beg_update < 2)
@@ -1822,6 +1811,9 @@ PP(register int beg_update;)								/* flag for the call's function */
 		beg_update -= 2;
 		take_ownership(beg_update);
 	}
+#if (AESVERSION >= 0x330) | !BINEXACT
+	return TRUE;
+#endif
 }
 
 
@@ -1896,9 +1888,12 @@ PP(int16_t *oh;)								/* output height of work/border area */
  * future multitasking system.
  *	
  */
-/* BUG: does not return anything */
 /* 306de: 00e22d36 */
+#if (AESVERSION >= 0x330) | !BINEXACT
+int16_t wm_new(NOTHING)
+#else
 VOID wm_new(NOTHING)
+#endif
 {
 #if 0
 	register int wh;
@@ -1932,6 +1927,9 @@ VOID wm_new(NOTHING)
 			unsync(spb);
 		}
 	}
+#endif
+#if (AESVERSION >= 0x330) | !BINEXACT
+	return TRUE;
 #endif
 }
 
