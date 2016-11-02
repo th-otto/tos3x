@@ -468,9 +468,7 @@ name: ds.t size
 	V(_ad_hgmice,l,1)
 	V(_gl_pacc,l,MAX_ACCS)
 	V(_desk_acc,l,MAX_ACCS)
-	
-	ds.b 34
-	
+	V(_ib,b,34)      /* ICONBLK */
 	V(_bi,b,14)      /* BITBLK */
 	V(_gl_bclick,w,1)
 	V(_ad_fsnames,l,1)

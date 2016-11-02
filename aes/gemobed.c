@@ -67,6 +67,9 @@
 
 #define BYTESPACE 0x20					/* ascii space in bytes */
 
+#if !BINEXACT
+static TEDINFO edblk;
+#endif
 
 int16_t ob_getsp PROTO((LPTREE tree, int16_t obj, TEDINFO *pted));
 BOOLEAN check PROTO((char *in_char, char valchar));

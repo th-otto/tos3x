@@ -29,20 +29,13 @@
 #define      Mfree(a)        gemdos(0x49,a)
 
 
-int16_t xor16 PROTO((int16_t col));
-int16_t xor_ok PROTO((int16_t type, int16_t flags, intptr_t spec));
 VOID just_draw PROTO((LPTREE tree, int16_t obj, int16_t sx, int16_t sy));
-VOID convert_mask PROTO((int16_t *mask, int16_t *gl_mask, int16_t width, int16_t height));
-CICON *fix_mono PROTO((CICONBLK *ptr, long *plane_size, int *tot_res));
-CICON *fix_res PROTO((CICON *ptr, long mono_size, CICON ***next_res));
-VOID fixup_cicon PROTO((CICON *ptr, int tot_icons, CICONBLK **carray));
-VOID my_trans PROTO((int16_t *saddr, uint16_t swb, int16_t *daddr, uint16_t dwb, uint16_t h, uint16_t nplanes));
-VOID trans_cicon PROTO((int tot_icons, CICONBLK **carray));
-VOID tran_check PROTO((int16_t *saddr, int16_t *daddr, int16_t *mask, int w, int h, int nplanes));
-int16_t get_rgb PROTO((int16_t index));
+int16_t ob_user PROTO((LPTREE tree, int16_t obj, GRECT *pt, intptr_t userblk, int16_t curr_state, int16_t new_state));
 
 
 
+
+#if COLORICON_SUPPORT
 
 /*****************************************************************/
 /*                   COLOR ICON DECLARATIONS                     */
@@ -91,15 +84,20 @@ static int16_t const rgb_tab[] = { 0xFFDF,
 };
 
 /******************** END COLOR *******************************/
+#endif
 
-TEDINFO edblk;
-BITBLK bi; /* WTF */
-ICONBLK ib;
+
+#if BINEXACT
+STATIC TEDINFO edblk;
+STATIC BITBLK bi; /* WTF */
+STATIC ICONBLK ib;
+#endif
 
 typedef uint16_t (*PARMBFUNC) PROTO((PARMBLK *f_data));
 
 uint16_t far_call PROTO((PARMBFUNC f_code, PARMBLK *f_data));
 
+/* 306de: 00e232d0 */
 uint16_t far_call(P(PARMBFUNC) fcode, P(PARMBLK *) fdata)
 PP(PARMBFUNC fcode;)
 PP(PARMBLK *fdata;)
@@ -216,6 +214,7 @@ PP(int16_t *outval2;)
  *	Routine to take an unformatted raw string and based on a
  *	template string build a formatted string.
  */
+/* 306de: 00e232e4 */
 VOID ob_format(P(int16_t) just, P(char *) raw_str, P(char *) tmpl_str, P(char *) fmtstr)
 PP(int16_t just;)
 PP(char *raw_str;)
@@ -276,6 +275,7 @@ PP(char *fmtstr;)
  *	Routine to load up and call a user defined object draw or change 
  *	routine.
  */
+/* 306de: 00e2339a */
 int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt, P(intptr_t) userblk, P(int16_t) curr_state, P(int16_t) new_state)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -298,6 +298,12 @@ PP(int16_t new_state;)
 
 
 
+#if AES3D
+
+int16_t xor16 PROTO((int16_t col));
+BOOLEAN xor_ok PROTO((int16_t type, int16_t flags, intptr_t spec));
+VOID draw_hi PROTO((GRECT *prect, int16_t state, int16_t clip, int16_t th, int16_t icol));
+
 /*
  *  Draw highlights around a rectangle depending on its state
  */
@@ -305,7 +311,7 @@ VOID draw_hi(P(GRECT *) prect, P(int16_t) state, P(int16_t) clip, P(int16_t) th,
 PP(register GRECT *prect;)						/* object rectangle */
 PP(int16_t state;)								/* NORMAL or SELECTED */
 PP(int16_t clip;)								/* 1: set clipping rect to object itself */
-PP(int16_t th;)								/* thickness of rectangle */
+PP(int16_t th;)									/* thickness of rectangle */
 PP(int16_t icol;)								/* interior color */
 {
 	int16_t pts[12], col;
@@ -398,14 +404,16 @@ PP(int16_t icol;)								/* interior color */
  * 1110	    13  light cyan
  * 1111	    1	black
  */
+
+
 int16_t xor16(P(int16_t) col)
 PP(int16_t col;)
 {
 	static int16_t const xor16tab[] = {
-/*  WHITE, BLACK, RED,   GREEN,    BLUE,    CYAN, YELLOW, MAGENTA */
-		BLACK, WHITE, LCYAN, LMAGENTA, LYELLOW, LRED, LBLUE, LGREEN,
-/*  LWHITE, LBLACK, LRED, LGREEN,  LBLUE,  LCYAN, LYELLOW, LMAGENTA */
-		LBLACK, LWHITE, CYAN, MAGENTA, YELLOW, RED, BLUE, GREEN
+    /*  WHITE,  BLACK,  RED,   GREEN,    BLUE,    CYAN,  YELLOW,   MAGENTA */
+		BLACK,  WHITE,  LCYAN, LMAGENTA, LYELLOW, LRED,  LBLUE,    LGREEN,
+    /*  LWHITE, LBLACK, LRED,  LGREEN,   LBLUE,   LCYAN, LYELLOW,  LMAGENTA */
+		LBLACK, LWHITE, CYAN,  MAGENTA,  YELLOW,  RED,   BLUE,     GREEN
 	};
 	static int16_t const xor4tab[] = { BLACK, WHITE, GREEN, RED };
 
@@ -430,7 +438,7 @@ PP(int16_t col;)
  *
  * (used by just_draw() and ob_change())
  */
-int16_t xor_ok(P(int16_t) type, P(int16_t) flags, P(intptr_t) spec)
+BOOLEAN xor_ok(P(int16_t) type, P(int16_t) flags, P(intptr_t) spec)
 PP(int16_t type;)
 PP(int16_t flags;)
 PP(intptr_t spec;)
@@ -465,11 +473,13 @@ PP(intptr_t spec;)
 
 	return (tcol < RED && icol < RED);
 }
+#endif /* AES3D */
 
 
 /*
  *	Routine to draw an object from an object tree.
  */
+/* 306de: 00e233f2 */
 VOID just_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) sx, P(int16_t) sy)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
@@ -478,16 +488,24 @@ PP(register int16_t sy;)
 {
 	int16_t bcol, tcol, ipat, icol, tmode, th;
 	int16_t state, obtype, len, flags;
-	int16_t tmpx, tmpy, tmpth, thick;
 	intptr_t spec;
+	int16_t tmpx, tmpy, tmpth;
+#if AES3D
+	int16_t thick;
+#endif
 	char ch;
 	GRECT t, c;
 	register GRECT *pt;
-	BITBLK bitblk;
-	ICONBLK iconblk;
-	TEDINFO tedinfo;
-	uint16_t mvtxt, chcol;
+#if !BINEXACT
+	BITBLK bi;
+	ICONBLK ib;
+	TEDINFO edblk;
+#endif
+#if AES3D
+	BOOLEAN mvtxt;
+	BOOLEAN chcol;
 	BOOLEAN three_d;
+#endif
 
 	pt = &t;
 
@@ -496,11 +514,14 @@ PP(register int16_t sy;)
 	if ((flags & HIDETREE) || (spec == -1L))
 		return;
 
+#if AES3D
 	thick = th;
+#endif
 
 	pt->g_x = sx;
 	pt->g_y = sy;
 
+#if AES3D
 	/*
 	 * Adjust 3d object extents & get color change/move text flags
 	 */
@@ -513,7 +534,6 @@ PP(register int16_t sy;)
 		pt->g_w += (tmpx << 1);
 		pt->g_h += (tmpx << 1);
 
-#if AES3D
 		if ((flags & IS3DACT) == 0)
 		{								/* if it's a 3D indicator */
 			mvtxt = ind3dtxt;
@@ -523,16 +543,14 @@ PP(register int16_t sy;)
 			mvtxt = act3dtxt;
 			chcol = act3dface;
 		}
-#endif
 	} else
 	{
 		/* For non-3d objects, force color change if XOR is not ok. */
 		three_d = FALSE;
 		chcol = !xor_ok(obtype, flags, spec);
-#if !BINEXACT
-		mvtxt = 0; /* quiet compiler */
-#endif
+		mvtxt = FALSE; /* quiet compiler */
 	}
+#endif
 
 	/*
 	 * do trivial reject with full extent including, outline, shadow,
@@ -555,20 +573,25 @@ PP(register int16_t sy;)
 	 * for all tedinfo types get copy of ted and crack the
 	 * color word and set the text color
 	 */
+#if AES3D
 	rc_copy(pt, &c);
+#endif
 	if (obtype != G_STRING)
 	{
 		tmpth = (th < 0) ? 0 : th;
 		tmode = MD_REPLACE;
 		tcol = BLACK;
+
 		switch (obtype)
 		{
 		case G_BOXTEXT:
 		case G_FBOXTEXT:
 		case G_TEXT:
 		case G_FTEXT:
-			LBCOPY(&tedinfo, (VOIDPTR)spec, sizeof(TEDINFO));
-			gr_crack(tedinfo.te_color, &bcol, &tcol, &ipat, &icol, &tmode);
+			LBCOPY(&edblk, (VOIDPTR)spec, sizeof(TEDINFO));
+			gr_crack(edblk.te_color, &bcol, &tcol, &ipat, &icol, &tmode);
+
+#if AES3D
 			/*
 			 * if it's a 3D background object, draw it in 3D color
 			 */
@@ -581,7 +604,6 @@ PP(register int16_t sy;)
 			if ((flags & (IS3DOBJ | IS3DACT)) && icol == WHITE && ipat == IP_HOLLOW)
 			{
 				ipat = IP_SOLID;
-#if AES3D
 				switch (flags & (IS3DOBJ | IS3DACT))
 				{
 				case IS3DOBJ:
@@ -597,7 +619,6 @@ PP(register int16_t sy;)
 					break;
 				}
 				icol = gl_alrtcol;
-#endif
 				if (tmode == MD_REPLACE)
 				{
 					if (obtype == G_TEXT)
@@ -612,6 +633,7 @@ PP(register int16_t sy;)
 					tmode = MD_TRANS;
 				}
 			}
+#endif
 			break;
 		}
 		
@@ -625,9 +647,9 @@ PP(register int16_t sy;)
 		case G_BOXCHAR:
 		case G_IBOX:
 			gr_crack(LLOWD(spec), &bcol, &tcol, &ipat, &icol, &tmode);
+#if AES3D
 			if (obtype != G_IBOX && ipat == IP_HOLLOW && icol == WHITE)
 			{
-#if AES3D
 				switch (flags & (IS3DOBJ | IS3DACT))
 				{
 				case IS3DOBJ:
@@ -645,19 +667,19 @@ PP(register int16_t sy;)
 				default:
 					break;
 				}
-#endif
 			}
+#endif
 			/* fall through */
 		case G_BUTTON:
 			if (obtype == G_BUTTON)
 			{
 				bcol = BLACK;
 
+#if AES3D
 				/* May 13 1992 - ml */
 				if (three_d)
 				{						/* 8/1/92 */
 					ipat = IP_SOLID;
-#if AES3D
 					if ((flags & IS3DACT) == 0)
 					{
 						icol = gl_indbutcol;
@@ -665,8 +687,8 @@ PP(register int16_t sy;)
 					{
 						icol = gl_actbutcol;
 					}
-#endif
 				} else
+#endif
 				{
 					ipat = IP_HOLLOW;
 					icol = WHITE;
@@ -686,6 +708,7 @@ PP(register int16_t sy;)
 			if (obtype != G_IBOX)		/* 8/1/92 */
 			{
 				gr_inside(pt, tmpth);
+#if AES3D
 				if (chcol && (state & SELECTED))
 				{
 					/* Explicitly set a 4-bit XOR fill color.
@@ -701,6 +724,7 @@ PP(register int16_t sy;)
 						icol = xor16(icol);
 					}
 				}
+#endif
 
 				gr_rect(icol, ipat, pt);
 				gr_inside(pt, -tmpth);
@@ -709,11 +733,13 @@ PP(register int16_t sy;)
 			break;
 		}
 
+#if AES3D
 		if (chcol && (state & SELECTED))
 		{
 			tmode = MD_TRANS;
 			tcol = xor16(tcol);
 		}
+#endif
 
 		gsx_attr(TRUE, tmode, tcol);
 		
@@ -722,18 +748,18 @@ PP(register int16_t sy;)
 		{
 		case G_FTEXT:
 		case G_FBOXTEXT:
-			LSTCPY(&D.g_rawstr[0], tedinfo.te_ptext);
-			LSTCPY(&D.g_tmpstr[0], tedinfo.te_ptmplt);
-			ob_format(tedinfo.te_just, &D.g_rawstr[0], &D.g_tmpstr[0], &D.g_fmtstr[0]);
+			LSTCPY(&D.g_rawstr[0], edblk.te_ptext);
+			LSTCPY(&D.g_tmpstr[0], edblk.te_ptmplt);
+			ob_format(edblk.te_just, D.g_rawstr, D.g_tmpstr, D.g_fmtstr);
 			/* fall thru to gr_gtext */
 		case G_BOXCHAR:
-			tedinfo.te_ptext = &D.g_fmtstr[0];
+			edblk.te_ptext = D.g_fmtstr;
 			if (obtype == G_BOXCHAR)
 			{
 				D.g_fmtstr[0] = ch;
 				D.g_fmtstr[1] = '\0';
-				tedinfo.te_just = TE_CNTR;
-				tedinfo.te_font = IBM;
+				edblk.te_just = TE_CNTR;
+				edblk.te_font = IBM;
 			}
 			/* fall thru to gr_gtext */
 		case G_TEXT:
@@ -741,61 +767,69 @@ PP(register int16_t sy;)
 			gr_inside(pt, tmpth);
 
 			/* July 30 1992 - ml.  Draw text of 3D objects */ /* 8/1/92 */
+#if AES3D
 			if (three_d)
 			{
 				if (!(state & SELECTED) && mvtxt)
 				{
 					pt->g_x -= 1;
 					pt->g_y -= 1;
-					gr_gtext(tedinfo.te_just, tedinfo.te_font, tedinfo.te_ptext, pt, tmode);
+					gr_gtext(edblk.te_just, edblk.te_font, edblk.te_ptext, pt, tmode);
 					pt->g_x += 1;
 					pt->g_y += 1;
 				} else
 				{
-					gr_gtext(tedinfo.te_just, tedinfo.te_font, tedinfo.te_ptext, pt, tmode);
+					gr_gtext(edblk.te_just, edblk.te_font, edblk.te_ptext, pt, tmode);
 				}
 
 			} else
 			{
-				gr_gtext(tedinfo.te_just, tedinfo.te_font, tedinfo.te_ptext, pt, tmode);
+				gr_gtext(edblk.te_just, edblk.te_font, edblk.te_ptext, pt, tmode);
 			}
+#else
+			gr_gtext(edblk.te_just, edblk.te_font, edblk.te_ptext, pt, tmode);
+#endif
 			gr_inside(pt, -tmpth);
 			break;
 		case G_IMAGE:
-			LBCOPY(&bitblk, (VOIDPTR)spec, sizeof(BITBLK));
+			LBCOPY(&bi, (VOIDPTR)spec, sizeof(BITBLK));
+#if AES3D
 			if (state & SELECTED)
 			{
 				/* If selected, XOR the background before drawing the image */
 				bb_fill(MD_XOR, FIS_SOLID, IP_SOLID, pt->g_x, pt->g_y, pt->g_w, pt->g_h);
-				bitblk.bi_color = xor16(bitblk.bi_color);
+				bi.bi_color = xor16(bi.bi_color);
 			}
-			gsx_blt(bitblk.bi_pdata, bitblk.bi_x, bitblk.bi_y, bitblk.bi_wb,
-					0x0L, pt->g_x, pt->g_y, gl_width / 8, bitblk.bi_wb * 8, bitblk.bi_hl, MD_TRANS, bitblk.bi_color, WHITE);
+#endif
+			gsx_blt(bi.bi_pdata, bi.bi_x, bi.bi_y, bi.bi_wb,
+					0x0L, pt->g_x, pt->g_y, gl_width / 8, bi.bi_wb * 8, bi.bi_hl, MD_TRANS, bi.bi_color, WHITE);
 			break;
 		case G_ICON:
-			LBCOPY(&iconblk, (VOIDPTR)spec, sizeof(ICONBLK));
-			iconblk.ib_xicon += pt->g_x;
-			iconblk.ib_yicon += pt->g_y;
-			iconblk.ib_xtext += pt->g_x;
-			iconblk.ib_ytext += pt->g_y;
-			gr_gicon(state, iconblk.ib_pmask, iconblk.ib_pdata, iconblk.ib_ptext,
-					 iconblk.ib_char, iconblk.ib_xchar, iconblk.ib_ychar, (GRECT *)&iconblk.ib_xicon, (GRECT *)&iconblk.ib_xtext);
+			LBCOPY(&ib, (VOIDPTR)spec, sizeof(ICONBLK));
+			ib.ib_xicon += pt->g_x;
+			ib.ib_yicon += pt->g_y;
+			ib.ib_xtext += pt->g_x;
+			ib.ib_ytext += pt->g_y;
+			gr_gicon(state, ib.ib_pmask, ib.ib_pdata, ib.ib_ptext,
+					 ib.ib_char, ib.ib_xchar, ib.ib_ychar, (GRECT *)&ib.ib_xicon, (GRECT *)&ib.ib_xtext);
 			state &= ~SELECTED;
 			break;
+#if COLORICON_SUPPORT
 		case G_CICON:
 			/*
 			 * Identical to the monochrome icon case (above)
 			 * except for the gr_cicon() call.
 			 */
-			LBCOPY(&iconblk, (VOIDPTR)spec, sizeof(ICONBLK));
-			iconblk.ib_xicon += pt->g_x;
-			iconblk.ib_yicon += pt->g_y;
-			iconblk.ib_xtext += pt->g_x;
-			iconblk.ib_ytext += pt->g_y;
-			gr_cicon(state, iconblk.ib_pmask, iconblk.ib_pdata, iconblk.ib_ptext,
-					 iconblk.ib_char, iconblk.ib_xchar, iconblk.ib_ychar, (GRECT *)&iconblk.ib_xicon, (GRECT *)&iconblk.ib_xtext, (CICONBLK *) spec);
+			LBCOPY(&ib, (VOIDPTR)spec, sizeof(ib));
+			ib.ib_xicon += pt->g_x;
+			ib.ib_yicon += pt->g_y;
+			ib.ib_xtext += pt->g_x;
+			ib.ib_ytext += pt->g_y;
+			gr_cicon(state, ib.ib_pmask, ib.ib_pdata, ib.ib_ptext,
+					 ib.ib_char, ib.ib_xchar, ib.ib_ychar, (GRECT *)&ib.ib_xicon, (GRECT *)&ib.ib_xtext, (CICONBLK *) spec);
 			state &= ~SELECTED;
 			break;
+#endif
 		case G_USERDEF:
 			state = ob_user(tree, obj, pt, spec, state, state);
 			break;
@@ -808,18 +842,23 @@ PP(register int16_t sy;)
 		len = LBWMOV(ad_intin, (VOIDPTR)spec);
 		if (len)
 		{								/* 8/3/92 */
+#if AES3D
 			if ((state & SELECTED) && obtype == G_BUTTON && chcol)
 				tcol = WHITE;
 			else
 				tcol = BLACK;
-
 			gsx_attr(TRUE, MD_TRANS, tcol);
+#else
+			gsx_attr(TRUE, MD_TRANS, BLACK);
+#endif
+
 			tmpy = pt->g_y + ((pt->g_h - gl_hchar) / 2);
 			if (obtype == G_BUTTON)
 			{
 				tmpx = pt->g_x + ((pt->g_w - (len * gl_wchar)) / 2);
 
-/* July 30 1992 - ml. */
+#if AES3D
+				/* July 30 1992 - ml. */
 				if (three_d)
 				{
 					if (!(state & SELECTED) && mvtxt)
@@ -828,6 +867,7 @@ PP(register int16_t sy;)
 						tmpy -= 1;
 					}
 				}
+#endif
 			} else
 			{
 				tmpx = pt->g_x;
@@ -841,12 +881,15 @@ PP(register int16_t sy;)
 	{
 		if (state & OUTLINED)
 		{
+#if AES3D
 			if ((flags & (IS3DACT | IS3DOBJ)) != IS3DACT)
+#endif
 			{
 				gsx_attr(FALSE, MD_REPLACE, BLACK);
 				gr_box(pt->g_x - 3, pt->g_y - 3, pt->g_w + 6, pt->g_h + 6, 1);
 				gsx_attr(FALSE, MD_REPLACE, WHITE);
 				gr_box(pt->g_x - 2, pt->g_y - 2, pt->g_w + 4, pt->g_h + 4, 2);
+#if AES3D
 			} else
 			{
 				/* draw a 3D outline for 3D background objects: 1/18/93 ERS */
@@ -865,6 +908,7 @@ PP(register int16_t sy;)
 				gsx_cline(pt->g_x - 3, pt->g_y - 3, pt->g_x - 3, pt->g_y + pt->g_h + 2);
 				gsx_cline(pt->g_x - 2, pt->g_y - 3, pt->g_x - 2, pt->g_y + pt->g_h + 1);
 				gsx_cline(pt->g_x - 1, pt->g_y - 3, pt->g_x - 1, pt->g_y + pt->g_h);
+#endif
 			}
 		}
 
@@ -876,7 +920,7 @@ PP(register int16_t sy;)
 		if ((state & SHADOWED) && th)
 		{
 			vsf_color(bcol);
-			/* draw the vertical line   */
+			/* draw the vertical line */
 			bb_fill(MD_REPLACE, FIS_SOLID, 0, pt->g_x, pt->g_y + pt->g_h + th, pt->g_w + th, 2 * th);
 			/* draw the horizontal line */
 			bb_fill(MD_REPLACE, FIS_SOLID, 0, pt->g_x + pt->g_w + th, pt->g_y, 2 * th, pt->g_h + (3 * th));
@@ -885,7 +929,7 @@ PP(register int16_t sy;)
 		if (state & CHECKED)
 		{
 			gsx_attr(TRUE, MD_TRANS, BLACK);
-			intin[0] = '\010';			/* a check mark */
+			intin[0] = 0x08;			/* a check mark */
 			gsx_tblt(IBM, pt->g_x + 2, pt->g_y, 1);
 		}
 
@@ -908,14 +952,18 @@ PP(register int16_t sy;)
 			bb_fill(MD_TRANS, FIS_PATTERN, IP_4PATT, pt->g_x, pt->g_y, pt->g_w, pt->g_h);
 		}
 
-		if ((state & SELECTED) && !(chcol || three_d))
+		if ((state & SELECTED)
+#if AES3D
+			&& !(chcol || three_d)
+#endif
+			)
 		{
 			bb_fill(MD_XOR, FIS_SOLID, IP_SOLID, pt->g_x, pt->g_y, pt->g_w, pt->g_h);
 		}
-
 		/* July 30 1992 - ml */ /* 8/1/92 */
 	}
 
+#if AES3D
 	if (three_d)
 	{
 		if (state & SELECTED)
@@ -923,13 +971,17 @@ PP(register int16_t sy;)
 		else
 			draw_hi(&c, NORMAL, FALSE, thick, icol);
 	}
+#endif
 }
 
 
 
 /*
+ * AES #42 - objc_draw - Draw an AES object tree.
+ *
  *	Object draw routine that walks tree and draws appropriate objects.
  */
+/* 306de: 00e23ab2 */
 VOID ob_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) depth)
 PP(register LPTREE tree;)
 PP(int16_t obj;)
@@ -954,15 +1006,17 @@ PP(int16_t depth;)
 
 
 /*
+ * AES #43 - objc_find - Find which object lies at the specified screen position.
+ *
  *	Routine to find out which object a certain mx,my value is
  *	over.  Since each parent object contains its children the
  *	idea is to walk down the tree, limited by the depth parameter,
  *	and find the last object the mx,my location was over.
  */
-
 /************************************************************************/
 /* o b _ f i n d                                                        */
 /************************************************************************/
+/* 306de: 00e23b52 */
 int16_t ob_find(P(LPTREE) tree, P(int16_t) currobj, P(int16_t) depth, P(int16_t) mx, P(int16_t) my)
 PP(register LPTREE tree;)
 PP(register int16_t currobj;)
@@ -970,8 +1024,15 @@ PP(register int16_t depth;)
 PP(int16_t mx;)
 PP(int16_t my;)
 {
-	int16_t lastfound, dummy;
-	int16_t dosibs, done, state;
+	int16_t lastfound;
+#if AES3D
+	int16_t dummy;
+#endif
+	int16_t dosibs;
+	BOOLEAN done;
+#if AES3D
+	int16_t state;
+#endif
 	GRECT t, o;
 	int16_t parent, childobj, flags;
 	register GRECT *pt;
@@ -981,8 +1042,9 @@ PP(int16_t my;)
 	lastfound = NIL;
 
 	if (currobj == 0)
+	{
 		r_set(&o, 0, 0, 0, 0);
-	else
+	} else
 	{
 		parent = get_par(tree, currobj);
 		ob_actxywh(tree, parent, &o);
@@ -995,19 +1057,23 @@ PP(int16_t my;)
 	{
 		/* if inside this obj, might be inside a child, so check */
 
+#if AES3D
 		state = LWGET(OB_STATE(currobj));
 		if (state & SHADOWED)
+#endif
 		{
 			ob_relxywh(tree, currobj, pt);
 			pt->g_x += o.g_x;
 			pt->g_y += o.g_y;
+#if AES3D
 		} else
 		{
 			ob_gclip(tree, currobj, &dummy, &dummy, &pt->g_x, &pt->g_y, &pt->g_w, &pt->g_h);
+#endif
 		}
 		
 		flags = LWGET(OB_FLAGS(currobj));
-		if ((inside(mx, my, pt)) && (!(flags & HIDETREE)))
+		if (inside(mx, my, pt) && !(flags & HIDETREE))
 		{
 			lastfound = currobj;
 
@@ -1020,16 +1086,20 @@ PP(int16_t my;)
 				o.g_y = pt->g_y;
 				dosibs = TRUE;
 			} else
+			{
 				done = TRUE;
+			}
 		} else
 		{
-			if ((dosibs) && (lastfound != NIL))
+			if (dosibs && lastfound != NIL)
 			{
 				currobj = get_prev(tree, lastfound, currobj);
 				if (currobj == NIL)
 					done = TRUE;
 			} else
+			{
 				done = TRUE;
+			}
 		}
 	}
 	/* if no one was found this will return NIL */
@@ -1038,10 +1108,13 @@ PP(int16_t my;)
 
 
 /*
+ * AES #40 - objc_add - Insert object in an object tree.
+ *
  *	Routine to add a child object to a parent object.  The child
  *	is added at the end of the parent's current sibling list.
  *	It is also initialized.
  */
+/* 306de: 00e23c82 */
 VOID ob_add(P(LPTREE) tree, P(int16_t) parent, P(int16_t) child)
 PP(register LPTREE tree;)
 PP(register int16_t parent;)
@@ -1068,8 +1141,11 @@ PP(register int16_t child;)
 
 
 /*
+ * AES #41 - objc_delete - Remove object from an object tree.
+ *
  *	Routine to delete an object from the tree.
  */
+/* 306de: 00e23cee */
 /* BUG: doesnt return FALSE as documented */
 VOID ob_delete(P(LPTREE) tree, P(int16_t) obj)
 PP(register LPTREE tree;)
@@ -1110,10 +1186,13 @@ PP(register int16_t obj;)
 
 
 /*
+ * AES #45 - objc_order - Alter order of object in object tree.
+ *
  *	Routine to change the order of an object relative to its
  *	siblings in the tree.  0 is the head of the list and NIL
  *	is the tail of the list.
  */
+/* 306de: 00e23d9c */
 /* BUG: doesnt return FALSE as documented */
 VOID ob_order(P(LPTREE) tree, P(int16_t) mov_obj, P(int16_t) new_pos)
 PP(register LPTREE tree;)
@@ -1164,9 +1243,12 @@ PP(int16_t new_pos;)
 /* see OBED.C */
 
 /*
+ * AES #47 - objc_change - Alter display of an object within specified limits.
+ *
  *	Routine to change the state of an object and redraw that
  *	object using the current clip rectangle.
  */
+/* 306de: 00e23e7a */
 /* BUG: doesnt return FALSE as documented */
 VOID ob_change(P(LPTREE) tree, P(int16_t) obj, P(int16_t) new_state, P(int16_t) redraw)
 PP(register LPTREE tree;)
@@ -1174,16 +1256,15 @@ PP(register int16_t obj;)
 PP(uint16_t new_state;)
 PP(int16_t redraw;)
 {
-	int16_t flags, obtype, th, thick;
+	int16_t flags, obtype, th;
 	GRECT t;
 	int16_t curr_state;
 	intptr_t spec;
 	register GRECT *pt;
+
 	pt = &t;
 
 	ob_sst(tree, obj, &spec, &curr_state, &obtype, &flags, pt, &th);
-	thick = th;
-	UNUSED(thick);
 	
 	if ((curr_state == new_state) || (spec == -1L))
 		return;
@@ -1209,13 +1290,19 @@ PP(int16_t redraw;)
 			 * the image must be redrawn by just_draw().  If they're selected,
 			 * just_draw() does the XOR box before redrawing the image.
 			 */
-			int16_t xok = xor_ok(obtype, flags, spec);
+#if AES3D
+			BOOLEAN xok = xor_ok(obtype, flags, spec);
 
 			if (xok || (obtype == G_IMAGE && !(new_state & SELECTED)))
+#endif
 			{
 				bb_fill(MD_XOR, FIS_SOLID, IP_SOLID, pt->g_x + th,
 						pt->g_y + th, pt->g_w - (2 * th), pt->g_h - (2 * th));
+#if AES3D
 				redraw = !xok;
+#else
+				redraw = FALSE;
+#endif
 			}
 		}
 
@@ -1224,7 +1311,6 @@ PP(int16_t redraw;)
 
 		gsx_mon();
 	}
-	return;
 }
 
 
@@ -1242,6 +1328,7 @@ PP(int16_t *pflag;)
 /************************************************************************/
 /* o b _ a c t x y w h                                                  */
 /************************************************************************/
+/* 306de: 00e23fea */
 VOID ob_actxywh(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
@@ -1282,10 +1369,13 @@ PP(GRECT *pt;)
 
 
 /*
+ * AES #44 - objc_offset - Calculate the true position of an object on the screen.
+ *
  *	Routine to find the x,y offset of a particular object relative
  *	to the physical screen.  This involves accumulating the offsets
  *	of all the objects parents up to and including the root.
  */
+/* 306de: 00e2409a */
 VOID ob_offset(P(LPTREE) tree, P(int16_t) obj, P(int16_t *) pxoff, P(int16_t *) pyoff)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
@@ -1303,6 +1393,7 @@ PP(register int16_t *pyoff;)
 }
 
 
+#if AES3D
 /*
  * Return X, Y, W, and H deltas between basic object
  * rectangle and object clip rectangle.  These are the
@@ -1335,7 +1426,9 @@ PP(int16_t *pdh;)
 	*pdw = actr.g_w - relr.g_w;
 	*pdh = actr.g_h - relr.g_h;
 }
+#endif
 
+#if NEWWIN | AES3D
 
 #define ADJOUTLPIX 3
 #define ADJSHADPIX 2
@@ -1392,6 +1485,7 @@ PP(int16_t *phcl;)
 	}
 	r_get(&r, pxcl, pycl, pwcl, phcl);
 }
+#endif
 
 
 /*
@@ -1401,6 +1495,7 @@ PP(int16_t *phcl;)
  *	us.  If we are the first child or we have no parent then
  *	return NIL.
  */
+/* 306de: 00e240fe */
 int16_t get_prev(P(LPTREE) tree, P(int16_t) parent, P(int16_t) obj)
 PP(register LPTREE tree;)
 PP(int16_t parent;)
@@ -1430,6 +1525,18 @@ PP(register int16_t obj;)
 /*                      COLOR ICON ROUTINES                                */
 /*                                                                         */
 /***************************************************************************/
+
+#if COLORICON_SUPPORT
+
+VOID convert_mask PROTO((int16_t *mask, int16_t *gl_mask, int16_t width, int16_t height));
+CICON *fix_mono PROTO((CICONBLK *ptr, long *plane_size, int *tot_res));
+CICON *fix_res PROTO((CICON *ptr, long mono_size, CICON ***next_res));
+VOID fixup_cicon PROTO((CICON *ptr, int tot_icons, CICONBLK **carray));
+VOID my_trans PROTO((int16_t *saddr, uint16_t swb, int16_t *daddr, uint16_t dwb, uint16_t h, uint16_t nplanes));
+VOID trans_cicon PROTO((int tot_icons, CICONBLK **carray));
+VOID tran_check PROTO((int16_t *saddr, int16_t *daddr, int16_t *mask, int w, int h, int nplanes));
+int16_t get_rgb PROTO((int16_t index));
+
 
 /*	Takes a list of icons and returns the first icon that 
  *	has the same number of planes.  Returns a null pointer if no match.
@@ -1481,6 +1588,7 @@ PP(int planes;)
 	else
 		return (lasticon);
 }
+
 
 /*
  *	Routine to draw a color icon, which is a graphic image with a text
@@ -1607,7 +1715,6 @@ PP(CICONBLK *cicon;)
 	}
 	/* draw the label   */
 	gr_gtext(TE_CNTR, SMALL, ptext, pt, MD_TRANS);
-
 }
 
 
@@ -2051,6 +2158,8 @@ PP(int16_t index;)
 
 	return rgb_tab[rindex];
 }
+
+#endif /* COLORICON_SUPPORT */
 
 
 #ifdef NEVER

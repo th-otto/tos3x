@@ -155,10 +155,10 @@ STATIC int16_t g_flag;
 STATIC int16_t ctldown;				/* ctrl key down ?  */
 /* 8/1/92 */
 #if AES3D
-uint16_t act3dtxt;					/* look of 3D activator text */
-uint16_t act3dface;					/* selected look of 3D activator */
-uint16_t ind3dtxt;					/* look of 3D indicator text */
-uint16_t ind3dface;					/* selected look of 3D indicators */
+BOOLEAN act3dtxt;					/* look of 3D activator text */
+BOOLEAN act3dface;					/* selected look of 3D activator */
+BOOLEAN ind3dtxt;					/* look of 3D indicator text */
+BOOLEAN ind3dface;					/* selected look of 3D indicators */
 #endif
 uint16_t gl_indbutcol;				/* indicator button color */
 uint16_t gl_actbutcol;				/* activator button color */
@@ -435,10 +435,10 @@ VOID gem_main(NOTHING)
 	/* 8/1/92   */
 	/* July 30 1992 - ml. Init 3D-look of indicators and activators */
 #if AES3D
-	act3dtxt = 1;						/* don't move text for activators */
-	act3dface = 0;						/* no color change when activator is selected */
-	ind3dtxt = 0;						/* move text for indicators */
-	ind3dface = 1;						/* change color when indicator is selected */
+	act3dtxt = TRUE;					/* don't move text for activators */
+	act3dface = FALSE;					/* no color change when activator is selected */
+	ind3dtxt = FALSE;					/* move text for indicators */
+	ind3dface = TRUE;					/* change color when indicator is selected */
 
 	if (gl_ws.ws_ncolors <= LWHITE)
 	{									/* init button color */
@@ -464,6 +464,9 @@ VOID gem_main(NOTHING)
 	/* fix up icons */
 	for (i = 0; i < 3; i++)
 	{
+#if !BINEXACT
+		BITBLK bi;
+#endif
 		rs_gaddr(ad_sysglo, R_BITBLK, i, &tmpadbi);
 		LBCOPY(ADDR(&bi), tmpadbi, sizeof(BITBLK));
 #if !AES3D

@@ -258,10 +258,10 @@ extern int16_t no_aes;						/* gembind.s    */
 extern BOOLEAN autoexec;					/* autoexec a file ?    */
 /* 8/1/92 */
 #if AES3D
-extern uint16_t act3dtxt;					/* look of 3D activator text */
-extern uint16_t act3dface;					/* selected look of 3D activator */
-extern uint16_t ind3dtxt;					/* look of 3D indicator text */
-extern uint16_t ind3dface;					/* selected look of 3D indicators */
+extern BOOLEAN act3dtxt;					/* look of 3D activator text */
+extern BOOLEAN act3dface;					/* selected look of 3D activator */
+extern BOOLEAN ind3dtxt;					/* look of 3D indicator text */
+extern BOOLEAN ind3dface;					/* selected look of 3D indicators */
 extern uint16_t gl_indbutcol;				/* indicator button color */
 extern uint16_t gl_actbutcol;				/* activator button color */
 extern uint16_t gl_alrtcol;					/* alert background color */
@@ -600,14 +600,14 @@ int16_t get_par PROTO((LPTREE tree, int16_t obj));
 /*
  * gemoblib.c
  */
+#if BINEXACT
 extern TEDINFO edblk;
 extern BITBLK bi;
 extern ICONBLK ib;
+#endif
 
 int16_t ob_sysvar PROTO((uint16_t mode, uint16_t which, uint16_t inval1, uint16_t inval2, int16_t *outval1, int16_t *outval2));
 VOID ob_format PROTO((int16_t just, char *raw_str, char *tmpl_str, char *fmt_str));
-int16_t ob_user PROTO((LPTREE tree, int16_t obj, GRECT *pt, intptr_t userblk, int16_t curr_state, int16_t new_state));
-VOID draw_hi PROTO((GRECT *prect, int16_t state, int16_t clip, int16_t th, int16_t icol));
 VOID ob_draw PROTO((LPTREE tree, int16_t obj, int16_t depth));
 int16_t ob_find PROTO((LPTREE tree, int16_t currobj, int16_t depth, int16_t mx, int16_t my));
 VOID ob_add PROTO((LPTREE tree, int16_t parent, int16_t child));
