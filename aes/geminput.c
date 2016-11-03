@@ -77,7 +77,9 @@ GRECT ctrl;
 int16_t gl_bclick;
 /* number of pending events desiring more than a single clicks     */
 int16_t gl_bpend;
+#if AESVERSION >= 0x330
 int16_t gl_button;
+#endif
 /* the current desired button state   */
 int16_t gl_bdesired;
 /* the current true button state   */

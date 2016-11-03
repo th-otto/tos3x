@@ -423,14 +423,14 @@ name: ds.t size
 	LONG(tr_retsave)
 	V(_drwaddr,l,1)
 	V(_tikaddr,l,1)
-	ds.l 1
-	V(save_sp,l,1)
+	PTR(gstksave)
+	V(tstksave,l,1)
 	V(_tiksav,l,1)
-	V(_NUM_TICK,l,1)
-	V(_CMP_TICK,l,1)
-
-	ds.b $C4
-	
+	LONG(_NUM_TICK)
+	LONG(_CMP_TICK)
+	LONG(TICKS)
+	V(gstack,l,24)
+	V(tstack,l,24)
 	V(fspec,b,8)
 	V(mydev,w,1)
 	V(oldgetbpb,l,1)

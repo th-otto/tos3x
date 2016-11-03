@@ -523,7 +523,9 @@ extern PD *ctl_pd;
 extern GRECT ctrl;
 extern int16_t gl_bclick;
 extern int16_t gl_bpend;
+#if AESVERSION >= 0x330
 extern int16_t gl_button;
+#endif
 extern int16_t gl_bdesired;
 extern int16_t gl_btrue;
 extern int16_t gl_bdelay;
