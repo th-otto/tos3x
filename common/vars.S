@@ -419,9 +419,8 @@ name: ds.t size
 #endif
 	
 	V(savea0,b,654) /* savea0,srsave,savsr,psetsr,dspstk */
-
-	ds.b 8
-
+	LONG(retaddr)
+	LONG(tr_retsave)
 	V(_drwaddr,l,1)
 	V(_tikaddr,l,1)
 	ds.l 1

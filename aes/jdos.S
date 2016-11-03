@@ -6,19 +6,19 @@
  *
  * Revision 2.2  89/04/26  18:28:39  mui
  * TT
- * 
+ *
  * Revision 2.1  89/02/22  05:30:41  kbad
  * *** TOS 1.4  FINAL RELEASE VERSION ***
- * 
+ *
  * Revision 1.3  88/07/01  16:22:43  mui
  * move dos_space C code to deskinf.c
- * 
+ *
  * Revision 1.2  88/07/01 15:50:13  mui
  * comment out dos_space
  *
  * Revision 1.1  88/06/02  12:35:45  lozben
  * Initial revision
- * 
+ *
  *************************************************************************
  *	.title	'GEMDOS Bindings for AES/Desktop'
  *	Bug fixed 2/5/87
@@ -26,7 +26,7 @@
  *	Add do_cdir		1/28/88		D.Mui
  *	Use MAC to assemble	6/29/90		D.Mui
  * assemble with MAS 900801 kbad
- 
+
  *----------------
  *
  *  Edit History
@@ -45,10 +45,12 @@
 #include "dos.h"
 
 
-*----------------
-*
-*  Exports
-*
+#define CCODE 0
+
+/*----------------
+ *
+ *  Exports
+ */
 
 	xdef	_DOS_AX
 	xdef	_DOS_ERR
@@ -56,10 +58,10 @@
 	comm _DOS_ERR,2
 
 
-*----------------
-*
-*  Dos function numbers
-*
+/*----------------
+ *
+ *  Dos function numbers
+ */
 X_TABOUT	equ $02
 X_PRTOUT	equ $05
 X_RAWCON	equ $06
@@ -90,11 +92,12 @@ X_GSDTOF	equ $57
 *	.LIST
 
 
-*----------------
-*
-*  I know what this does, but I don't
-*  know why it's supposed to do it.
-*
+/*----------------
+ *
+ *  I know what this does, but I don't
+ *  know why it's supposed to do it.
+ */
+/* 306de: 00e25994 */
 	xdef	_isdrive
 _isdrive:
 	bsr	_dos_gdrv		; get current drive number
@@ -106,41 +109,40 @@ _isdrive:
 
 nullstr: dc.b	0,0			; an empty string, for _pgmld()
 
-*----------------
-*
-*  Local jump-to-trap-handler
-*
+/*----------------
+ *
+ *  Local jump-to-trap-handler
+ */
 jtrap:	jmp	_trap			; jump to _trap
 
 
-*
-*  WORD
-*  pgmld(handle, pname, ldaddr)
-*  	WORD	handle;
-*  	BYTE	*pname;
-*  	LONG	**ldaddr;
-*  {
-*  	LONG	length;
-*  	LONG	*temp;
-*  
-*  	*ldaddr = trap(X_EXEC,3,pname,"",NULLPTR);
-*  	if (!DOS_ERR)
-*  	{			 /* code+data+bss lengths */
-*  	  temp = *ldaddr;
-*  	  length = temp[3] + temp[5] + temp[7] + 0x100;
-*  	  trap(X_SETBLOCK,0, *ldaddr, length);
-*  	  if (!DOS_ERR)
-*  	    return(TRUE);
-*  	  else
-*  	    return(-1);
-*  	}
-*  	else
-*  	  return(-1);
-*  }
-*
-*		4       6       $a
-*	.cargs .handle .pname.l .ldaddr.l
-*
+
+#if CCODE
+  WORD pgmld(WORD handle, const char *pname, LONG **ldaddr)
+  {
+  	LONG	length;
+  	LONG	*temp;
+
+  	*ldaddr = trap(X_EXEC,3,pname,"",NULLPTR);
+  	if (!DOS_ERR)
+  	{			 /* code+data+bss lengths */
+  	  temp = *ldaddr;
+  	  length = temp[3] + temp[5] + temp[7] + 0x100;
+  	  trap(X_SETBLOCK,0, *ldaddr, length);
+  	  if (!DOS_ERR)
+  	    return(TRUE);
+  	  else
+  	    return(-1);
+  	}
+  	else
+  	  return(-1);
+  }
+#endif
+/*
+ *		4       6       $a
+ *	.cargs .handle .pname.l .ldaddr.l
+ */
+/* 306de: 00e259aa */
 	xdef	_pgmld
 _pgmld:
 	clr.l	-(sp)			; null env string (inherit parent's)
@@ -172,57 +174,59 @@ pg_fal:	moveq	#-1,d0			; return -1L
 	rts
 
 
-*----------------
-*
-*  Return 0 (FALSE)
-*
+/*----------------
+ *
+ *  Return 0 (FALSE)
+ */
 retfalse:	moveq	#0,d0
 	rts
 
 
-*----------------
-*
-*  Return 1 (TRUE)
-*
+/*----------------
+ *
+ *  Return 1 (TRUE)
+ */
 rettrue:	moveq	#1,d0
 	rts
 
 
-*----------------
-*
-*  Print a bell on the console (hard BIOS console)
-*
-*	xdef	_bellout
-*_bellout:
-*	move.w	#7,-(sp)			; Bconout(CON, 7)
-*	move.l	#$00030002,-(sp)
-*	trap	#13
-*	addq	#6,sp
-*	rts
+/*----------------
+ *
+ *  Print a bell on the console (hard BIOS console)
+ */
+#if 0
+	xdef	_bellout
+_bellout:
+	move.w	#7,-(sp)			; Bconout(CON, 7)
+	move.l	#$00030002,-(sp)
+	trap	#13
+	addq	#6,sp
+	rts
+#endif
 
 
-*
-*  WORD
-*  dos_sfirst(pspec, attr)
-*  	LONG		pspec;
-*  	WORD		attr;
-*  {
-*  	REG LONG		ret;
-*  	ret = trap(X_SFIRST,pspec,attr);
-*  	if (!ret)
-*  	  return(TRUE);
-*  	if ( ret == E_NMFIL || ret == E_FILNF )
-*  	{
-*  	  DOS_AX = E_NOFILES;
-*  	  return(FALSE);
-*  	}
-*  	else
-*  	  return(FALSE);
-*  }
-*
-*		4	 8
-*	 .cargs .pspec.l .attr.w	; ->name, =searchAttributes
-*
+
+#if CCODE
+  WORD dos_sfirst(const char *name, int attrib)
+  {
+  	REG LONG		ret;
+  	ret = trap(X_SFIRST,pspec,attr);
+  	if (!ret)
+  	  return(TRUE);
+  	if ( ret == E_NMFIL || ret == E_FILNF )
+  	{
+  	  DOS_AX = E_NOFILES;
+  	  return(FALSE);
+  	}
+  	else
+  	  return(FALSE);
+  }
+#endif
+/*
+ *		4	 8
+ *	 .cargs .pspec.l .attr.w	; ->name, =searchAttributes
+ */
+/* 306de: 00e259fa */
 	xdef	_dos_sfirst
 _dos_sfirst:
 	move.w	8(sp),-(sp)		; push attributes
@@ -242,23 +246,24 @@ sf_1:	move.w	#E_NOFILES,_DOS_AX	;    DOS_AX = E_NOFILES;
 sf_2:	bra	retfalse			; return FALSE
 
 
-*
-*  WORD
-*  dos_snext()
-*  {
-*  	REG LONG		ret;
-*  	ret = trap(X_SNEXT);
-*  	if (!ret)
-*  	  return(TRUE);
-*  	if ( ret == E_NMFIL || ret == E_FILNF )
-*  	{
-*  	  DOS_AX = E_NOFILES;
-*  	  return(FALSE);
-*  	}
-*  	else
-*  	  return(FALSE);
-*  }
-*  
+
+#if CCODE
+  WORD dos_snext()
+  {
+  	REG LONG		ret;
+  	ret = trap(X_SNEXT);
+  	if (!ret)
+  	  return(TRUE);
+  	if ( ret == E_NMFIL || ret == E_FILNF )
+  	{
+  	  DOS_AX = E_NOFILES;
+  	  return(FALSE);
+  	}
+  	else
+  	  return(FALSE);
+  }
+#endif
+/* 306de: 00e25a24 */
 	xdef	_dos_snext
 _dos_snext:
 	move.w	#X_SNEXT,-(sp)		; Fsnext()
@@ -267,25 +272,25 @@ _dos_snext:
 	bra	sfsn			; [common sfirst/snext return handler]
 
 
-*  WORD
-*  dos_open(pname, access)
-*  	BYTE		*pname;
-*  	WORD		access;
-*  {
-*  	LONG		ret;
-*  
-*  	ret = trap(X_OPEN,pname,access);
-*  	if (ret == E_FILNF)
-*  	  DOS_AX = E_FILENOTFND;
-*  	if (DOS_ERR)
-*  	  return(FALSE);
-*  	else
-*  	  return((UWORD)ret);
-*  }
-*
-*		4	 8
-*	 .cargs .pname.l .access.w
-*
+#if CCODE
+  WORD  dos_open(const char *pname, int access)
+  {
+  	LONG		ret;
+
+  	ret = trap(X_OPEN,pname,access);
+  	if (ret == E_FILNF)
+  	  DOS_AX = E_FILENOTFND;
+  	if (DOS_ERR)
+  	  return(FALSE);
+  	else
+  	  return((UWORD)ret);
+  }
+#endif
+/*
+ *		4	 8
+ *	 .cargs .pname.l .access.w
+ */
+/* 306de: 00e25a30 */
 	xdef	_dos_open
 _dos_open:
 	move.w	8(sp),-(sp)
@@ -303,29 +308,23 @@ open_1:	tst.w	d1
 	rts
 
 
-*
-*  WORD
-*  dos_read(handle, cnt, pbuffer)
-*  	WORD		handle;
-*  	size_t		cnt;
-*  	VOID *pbuffer;
-*  {
-*  	LONG		ret;
-*  	ret = trap(X_READ,handle,(ULONG)cnt,pbuffer);
-*  	return((UWORD)ret);
-*  }
-*  
-*  WORD
-*  dos_write(handle, cnt, pbuffer)
-*  	WORD		handle;
-*  	size_t		cnt;
-*  	VOID *pbuffer;
-*  {
-*  	LONG		ret;
-*  	ret = trap(X_WRITE,handle,(ULONG)cnt,pbuffer);
-*  	return( (UWORD)ret);
-*  }
-*
+
+#if CCODE
+  WORD dos_read(int handle, size_tcnt, void *pbuffer)
+  {
+  	LONG		ret;
+  	ret = trap(X_READ,handle,(ULONG)cnt,pbuffer);
+  	return((UWORD)ret);
+  }
+
+  WORD dos_write(int handle, size_tcnt, const void *pbuffer)
+  {
+  	LONG		ret;
+  	ret = trap(X_WRITE,handle,(ULONG)cnt,pbuffer);
+  	return( (UWORD)ret);
+  }
+#endif
+/* 306de: 00e25a56 */
 	xdef	_dos_read
 _dos_read:	moveq	#X_READ,d1
 		bra.b	rw
@@ -333,10 +332,10 @@ _dos_read:	moveq	#X_READ,d1
 	xdef	_dos_write
 _dos_write:	moveq	#X_WRITE,d1
 
-*
-*		4         6        8
-*	.cargs	.handle.w .count.w .pbuffer.l
-*
+/*
+ *		4         6        8
+ *	.cargs	.handle.w .count.w .pbuffer.l
+ */
 rw:
 	move.l	8(sp),-(sp)		; pbuffer
 	moveq	#0,d0
@@ -349,19 +348,17 @@ rw:
 	rts
 
 
-*  
-*  LONG
-*  dos_lseek(handle, smode, sofst)
-*  	WORD		handle;
-*  	WORD		smode;
-*  	LONG		sofst;
-*  {
-*  	return( trap(X_LSEEK,sofst, handle, smode) );
-*  }
-*
-*		4       6       8
-*	 .cargs .handle .smode .sofst.l
-*
+
+#if CCODE
+  LONG dos_lseek(int handle, int smode, long sofst)
+  {
+  	return( trap(X_LSEEK,sofst, handle, smode) );
+  }
+#endif
+/*
+ *		4       6       8
+ *	 .cargs .handle .smode .sofst.l
+ */
 	xdef	_dos_lseek
 _dos_lseek:
 	move.l	4(sp),-(sp)		; handle & smode
@@ -372,18 +369,17 @@ _dos_lseek:
 	rts
 
 
-*
-*  WORD
-*  dos_gdir(drive, pdrvpath)
-*  	WORD		drive;
-*  	LONG		pdrvpath;
-*  {
-*  	return(trap(X_GETDIR,pdrvpath,drive));
-*  }
-*
-*		4        6
-*	 .cargs .drive.w .pdrvpath.l
-*
+
+#if CCODE
+  WORD dos_gdir(int drive, char *pdrvpath)
+  {
+  	return(trap(X_GETDIR,pdrvpath,drive));
+  }
+#endif
+/*
+ *		4        6
+ *	 .cargs .drive.w .pdrvpath.l
+ */
 	xdef	_dos_gdir
 _dos_gdir:
 	move.w	4(sp),-(sp)		; drive
@@ -394,23 +390,22 @@ _dos_gdir:
 	rts
 
 
-*
-*  WORD
-*  dos_mkdir(path,attr)
-*  	BYTE	*path;
-*  	WORD	attr;
-*  {
-*  	LONG	ret;
-*  
-*  	ret = trap(X_MKDIR,path);
-*  	if (ret == E_ACCDN)
-*  	  DOS_AX = E_NOACCESS;
-*  	return( !DOS_ERR );
-*  }
-*
-*		4       8
-*	 .cargs .path.l .attr
-*
+
+#if CCODE
+  WORD dos_mkdir(const char *path, int attr)
+  {
+  	LONG	ret;
+
+  	ret = trap(X_MKDIR,path);
+  	if (ret == E_ACCDN)
+  	  DOS_AX = E_NOACCESS;
+  	return( !DOS_ERR );
+  }
+#endif
+/*
+ *		4       8
+ *	 .cargs .path.l .attr
+ */
 	xdef	_dos_mkdir
 _dos_mkdir:
 	move.l	4(sp),-(sp)		; path
@@ -426,21 +421,21 @@ mkd_1:	move.w	d1,d0			; return (!DOS_ERR)
 	rts
 
 
-*
-*  WORD
-*  dos_set(h,time,date)
-*  	UWORD	h,time,date;
-*  {
-*  	UWORD	buf[2];
-*  
-*  	buf[0] = time;
-*  	buf[1] = date;
-*  	return( trap(X_GSDTOF,&buf[0],h,TRUE) );
-*  }
-*
-*		4   6    8
-*	 .cargs .h .time .date
-*
+
+#if CCODE
+  WORD dos_set(int h, unsigned short time, unsigned short date)
+  {
+  	UWORD	buf[2];
+
+  	buf[0] = time;
+  	buf[1] = date;
+  	return( trap(X_GSDTOF,&buf[0],h,TRUE) );
+  }
+#endif
+/*
+ *		4   6    8
+ *	 .cargs .h .time .date
+ */
 	xdef	_dos_set
 _dos_set:
 	move.w	#$0001,-(sp)		; TRUE
@@ -452,41 +447,40 @@ _dos_set:
 	rts
 
 
-*  
-*  WORD
-*  dos_label(drive,plabel)
-*  	BYTE	drive;
-*  	BYTE	*plabel;
-*  {
-*  	BYTE	buf[50];		/* 44 bytes used	*/
-*  	BYTE	path[8];
-*  	WORD	ret;
-*  
-*  	bfill(50,NULL,&buf[0]);
-*  	trap(X_SETDTA,&buf[0]);
-*  	path[0] = (drive + 'A') - 1;
-*  	path[1] = ':';
-*  	path[2] = '\\';
-*  	path[3] = '*';
-*  	path[4] = '.';
-*  	path[5] = '*';
-*  	path[6] = 0;
-*  	ret = trap(X_SFIRST,path,0x08);
-*  	if (!ret)
-*  	{
-*  	  xstrpcpy(&buf[30],plabel);
-*  	  return(TRUE);
-*  	}
-*  	else
-*  	{
-*  	  DOS_ERR = DOS_AX = TRUE;
-*  	  return(FALSE);
-*  	}
-*  }
-*
-*		    8	    10
-*	 .cargs #8, .drive .plabel
-*
+
+#if CCODE
+  WORD dos_label(int drive, const char *plabel)
+  {
+  	BYTE	buf[50];		/* 44 bytes used	*/
+  	BYTE	path[8];
+  	WORD	ret;
+
+  	bfill(50,NULL,&buf[0]);
+  	trap(X_SETDTA,&buf[0]);
+  	path[0] = (drive + 'A') - 1;
+  	path[1] = ':';
+  	path[2] = '\\';
+  	path[3] = '*';
+  	path[4] = '.';
+  	path[5] = '*';
+  	path[6] = 0;
+  	ret = trap(X_SFIRST,path,0x08);
+  	if (!ret)
+  	{
+  	  xstrpcpy(&buf[30],plabel);
+  	  return(TRUE);
+  	}
+  	else
+  	{
+  	  DOS_ERR = DOS_AX = TRUE;
+  	  return(FALSE);
+  	}
+  }
+#endif
+/*
+ *		    8	    10
+ *	 .cargs #8, .drive .plabel
+ */
 la_buf	equ	-(44)
 la_path	equ	-(44+8)
 	xdef	_dos_label
@@ -532,63 +526,64 @@ la_string:	dc.b	':\*.*',0
 
 
 
-*
-*   This conversion assumes no more than 65535 sectors on a media
-*   (which is "good enough" given our current state of affairs)
-*
-*  
-*  WORD
-*  dos_space(drv,ptotal, pavail)
-*  	WORD	drv;
-*  	LONG	*ptotal, *pavail;
-*  {
-*  	LONG	buf[4];
-*  	LONG	mult;
-*  
-*  	trap(X_GETFREE,buf,drv);	/* changed  0=A for gemdos	*/
-*  	mult = buf[3] * buf[2];
-*  	*ptotal = mult * buf[1];
-*  	*pavail = mult * buf[0];
-*  	return(TRUE);
-*  }
-*
-*		   8      10        14
-*	.cargs #8, .drv.w .ptotal.l .pavail.l
-*
-*sp_buf	=	-16
-*	xdef	_dos_space
-*_dos_space:
-*	link	a6,#sp_buf
-*	move.w	8(a6),-(sp)		; drv
-*	pea	sp_buf(a6)
-*	move.w	#X_GETFREE,-(sp)
-*	trap	#1
-*	addq	#8,sp
-*
-*	move.w	sp_buf+14(a6),d0	; d0 = buf[3] * buf[2]
-*	mulu	sp_buf+10(a6),d0
-*	move.w	d0,d1
-*
-*	movem.l	10(a6),a0-a1		; a0 = ptotal, a1 = pavail
-*	mulu	4+sp_buf+2(a6),d0	; *ptotal = d0 * buf[1]
-*	move.l	d0,(a0)
-*	mulu	sp_buf+2(a6),d1		; *pavail = d0 * buf[0]
-*	move.l	d1,(a1)
-*
-*	moveq	#1,d0			; return TRUE
-*	unlk	a6
-*	rts
+/*
+ *   This conversion assumes no more than 65535 sectors on a media
+ *   (which is "good enough" given our current state of affairs)
+ */
+#if CCODE
+  WORD dos_space(int drv, long *ptotal, long *pavail)
+  {
+  	LONG	buf[4];
+  	LONG	mult;
+
+  	trap(X_GETFREE,buf,drv);	/* changed  0=A for gemdos	*/
+  	mult = buf[3] * buf[2];
+  	*ptotal = mult * buf[1];
+  	*pavail = mult * buf[0];
+  	return(TRUE);
+  }
+#endif
+/*
+ *		   8      10        14
+ *	.cargs #8, .drv.w .ptotal.l .pavail.l
+ *
+ *sp_buf	=	-16
+ */
+#if 0
+	xdef	_dos_space
+_dos_space:
+	link	a6,#sp_buf
+	move.w	8(a6),-(sp)		; drv
+	pea	sp_buf(a6)
+	move.w	#X_GETFREE,-(sp)
+	trap	#1
+	addq	#8,sp
+
+	move.w	sp_buf+14(a6),d0	; d0 = buf[3] * buf[2]
+	mulu	sp_buf+10(a6),d0
+	move.w	d0,d1
+
+	movem.l	10(a6),a0-a1		; a0 = ptotal, a1 = pavail
+	mulu	4+sp_buf+2(a6),d0	; *ptotal = d0 * buf[1]
+	move.l	d0,(a0)
+	mulu	sp_buf+2(a6),d1		; *pavail = d0 * buf[0]
+	move.l	d1,(a1)
+
+	moveq	#1,d0			; return TRUE
+	unlk	a6
+	rts
+#endif
 
 
-*
-*  WORD
-*  dos_rename(p1,p2)
-*  	BYTE	*p1;
-*  	BYTE	*p2;
-*  {
-*  	return(trap(X_RENAME,0x0,p1,p2) );
-*  }
-*  
+
+#if CCODE
+  WORD dos_rename(const char *p1, const char *p2)
+  	BYTE	*p1;
+  	BYTE	*p2;
+  {
+  	return(trap(X_RENAME,0x0,p1,p2) );
+  }
+#endif
 	xdef	_dos_rename
 _dos_rename:
 	move.l	(sp)+,retaddr
@@ -599,26 +594,25 @@ _dos_rename:
 	jmp	(a0)
 
 
-*  
-*  LONG
-*  dos_alloc(nbytes)
-*  	LONG		nbytes;
-*  {
-*  	LONG		ret;
-*  
-*  	if (nbytes & 1)
-*  	  nbytes += 1;			/* get on boundary	*/
-*  	ret = trap(X_MALLOC,nbytes);
-*  	if (ret == 0 )
-*  	{
-*  	  DOS_ERR = TRUE;
-*  	  return(0);
-*  	}
-*  	if (ret & 0x1L )
-*  	  ret += 1;
-*  	return(ret);
-*  }
-*  
+
+#if CCODE
+  LONG dos_alloc(long nbytes)
+  {
+  	LONG		ret;
+
+  	if (nbytes & 1)
+  	  nbytes += 1;			/* get on boundary	*/
+  	ret = trap(X_MALLOC,nbytes);
+  	if (ret == 0 )
+  	{
+  	  DOS_ERR = TRUE;
+  	  return(0);
+  	}
+  	if (ret & 0x1L )
+  	  ret += 1;
+  	return(ret);
+  }
+#endif
 	xdef	_dos_alloc
 _dos_alloc:
 	move.l	4(sp),d0		; nbytes
@@ -642,13 +636,12 @@ al_2:	btst	#0,d0
 al_3:	rts
 
 
-*
-*  LONG
-*  dos_avail()
-*  {
-*  	return( trap( X_MALLOC, -1L) );
-*  }
-*
+#if CCODE
+  LONG dos_avail()
+  {
+  	return( trap( X_MALLOC, -1L) );
+  }
+#endif
 	xdef	_dos_avail
 _dos_avail:
 	moveq	#-1,d0
@@ -659,12 +652,12 @@ _dos_avail:
 	rts
 
 
-*----------------
-*
-*  "Generic" calls
-*  where we make a GEMDOS trap with the
-*  arguments on the stack unchanged.
-*
+/*----------------
+ *
+ *  "Generic" calls
+ *  where we make a GEMDOS trap with the
+ *  arguments on the stack unchanged.
+ */
 	xdef	_chrout
 _chrout:	moveq	#X_TABOUT,d1
 		bra.b	generic
@@ -731,14 +724,15 @@ generic:
 
 
 
-*----------------
-*
-*  GEMDOS Trap binding
-*
-*    Returns:	EQ+D1=0, no "dos error"
-*		NE+D1=1, "dos error" condition
-*
-*	xdef	_trap		; replace old trap() call
+/*----------------
+ *
+ *  GEMDOS Trap binding
+ *
+ *    Returns:	EQ+D1=0, no "dos error"
+ *		NE+D1=1, "dos error" condition
+ *
+ *	xdef	_trap		; replace old trap() call
+ */
 _trap:
 	move.l	(sp)+,tr_retsave	; save return address
 	trap	#1			; do GEMDOS trap
@@ -752,12 +746,11 @@ tr_1:	move.w	d1,_DOS_ERR		; copy error condition to global var.
 	jmp	(a0)
 
 
-*	do_cdir( drive, path )
-*	WORD	drive;
-*	BYTE	*path;
-
+/*
+ *	do_cdir(WORD drive, char *path)
+ */
 	xdef	_do_cdir
-_do_cdir:				
+_do_cdir:
 	move.w	4(sp),-(sp)		; change the drive first
 	move.w	#X_SETDRV,-(sp)
 	jsr 	jtrap
