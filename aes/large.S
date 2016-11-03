@@ -94,7 +94,6 @@ fflp:	move.w	d2,(a1)+
 	dbra	d1,fflp
 
 	move.l	a4,a0		; AND all source planes to 1st extra dest plane
-#endif
 	move.w	d4,d0		; splanes
 	subq	#1,d0		; (dbra count)
 aplp:	move.l	a2,a1		; -> 1st extra dest plane

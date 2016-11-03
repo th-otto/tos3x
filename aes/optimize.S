@@ -1,53 +1,54 @@
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:29:34 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:29:34  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:31:30  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:36:01  lozben
-* Initial revision
-* 
-*************************************************************************
-* --
-*
-* optimize.s
-* 02/02/87	Totally rewritten from optimize.c	Mike Schmal
-*
-*		Grect - a block of four contiguous words representing a 
-*			graphics rectangle x,y,w,h
-*
-* NOTE	One day we should remove calls to inf_sget and use fs_sget since
-*	they are the same function.
-*
-* UPDATES:
-*	02/24/87 Bug in fmt_str now checks for null when skipping extension
-*		 '.'.
-* Fix bug at unfmt_str	2/23/88		D.Mui
-* --
-*	Use MAC to assemble		6/28/90		D.Mui
-* assemble with MAS 900801 kbad
-
+/*************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:29:34 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:29:34  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:31:30  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:36:01  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ * --
+ *
+ * optimize.s
+ * 02/02/87	Totally rewritten from optimize.c	Mike Schmal
+ *
+ *		Grect - a block of four contiguous words representing a 
+ *			graphics rectangle x,y,w,h
+ *
+ * NOTE	One day we should remove calls to inf_sget and use fs_sget since
+ *	they are the same function.
+ *
+ * UPDATES:
+ *	02/24/87 Bug in fmt_str now checks for null when skipping extension
+ *		 '.'.
+ * Fix bug at unfmt_str	2/23/88		D.Mui
+ * --
+ *	Use MAC to assemble		6/28/90		D.Mui
+ * assemble with MAS 900801 kbad
+ */
 #define __ASSEMBLER__ 1
 
 #include "../common/config.h"
 #include "aesdefs.h"
 #include "../common/asmdefs.h"
 
+#define CCODE 0
 
-*
+
 OB_FLAGS	equ	$8
 OB_STATE	equ	$a
 OB_SPEC		equ	$c
 OB_SIZE		equ	$18
-*
+
 TEDTXTLEN	equ	$18
-*
+
 PERCENT		equ	$25
 CAP_L		equ	$4c
 CAP_W		equ	$57
@@ -59,6 +60,30 @@ STAR		equ	$2a
 
 	text
 
+#if COLORICON_SUPPORT
+/* reverses the bits of a word.  Used in get_rgb because the word of pixel-
+ * packed data end up being reversed.  Since, the rgb pixel values are
+ * table-driven and indexed, we must get a reversed index (e.g. the pixel-
+ * packed value 0x8000 is index 0x0001 ).
+ * NOTE: This routine has been optimized into assembly.
+ */
+#if CCODE
+unsigned int reverse(int index)
+{
+	unsigned int mask, result = 0x0000;
+	long temp;
+	int i;
+
+	for (i = 0; i < 16; i++)
+	{
+		mask = 0x0001 << i;
+		temp = (long) mask & index;
+		if (temp)
+			result |= 0x0001 << (16 - i - 1);
+	}
+	return result;
+}
+#endif
 	xdef	_reverse
 _reverse:
  	move.l	d3,-(sp)		; Save d3 since we clobber it
@@ -75,15 +100,16 @@ nextbit:
 	dbra	d2,dobit		; Dbra updates source bit position
 	move.l	(sp)+,d3		; Restore d3
 	rts
+#endif
 
-* --
-*
-* r_get		Routine to set the variables x,y,w,h to the values found
-*		in an x,y,w,h block (grect)
-*		C binding:	r_get(gr,xptr,yprt,wptr,hptr);
-*				const GRECT *gr;
-*				int	*xptr,*yptr,*wptr,*hptr;
-* --
+/*
+ *
+ * r_get		Routine to set the variables x,y,w,h to the values found
+ *		in an x,y,w,h block (grect)
+ *		C binding:	r_get(gr,xptr,yprt,wptr,hptr);
+ *				const GRECT *gr;
+ *				int	*xptr,*yptr,*wptr,*hptr;
+ */
 	xdef	_r_get
 _r_get:
 	movem.l	a3-a4,-(sp)	; save a3,a4
@@ -95,14 +121,14 @@ _r_get:
 	movem.l	(sp)+,a3-a4	; restore
 	rts
 
-* --
-*
-* _r_set	Routine to set a x,y,w,h block to the x,y,w,h values passed
-*		in.
-*		C binding:	r_set(gr,x,y,w,h);
-*				GRECT *r;
-*				int	x,y,w,h;
-* --
+/*
+ *
+ * _r_set	Routine to set a x,y,w,h block to the x,y,w,h values passed
+ *		in.
+ *		C binding:	r_set(gr,x,y,w,h);
+ *				GRECT *r;
+ *				int	x,y,w,h;
+ */
 	xdef	_r_set
 _r_set:
 	movem.l	4(sp),a0-a2	; a0 -> grect, a1 = x and y, a2 = w and h
@@ -110,13 +136,13 @@ _r_set:
 	rts
 
 
-* --
-*
-* rc_copy	Copy src xywh block to dest xywh block.
-*		C binding:	r_copy(srcx,dst);
-*				GRECT	*src,*dst;
-*
-* --
+/*
+ *
+ * rc_copy	Copy src xywh block to dest xywh block.
+ *		C binding:	r_copy(srcx,dst);
+ *				GRECT	*src,*dst;
+ *
+ */
 	xdef _rc_copy
 _rc_copy:
 	movem.l	4(sp),a0-a1	; a0 ->src, a1 ->dest
@@ -125,13 +151,13 @@ _rc_copy:
 	rts
 
 
-* --
-*
-* inside	Return true if the x,y position is within the grect
-*		C binding:	inside(x,y,ptr1);
-*				int	x,y;
-*				GRECT	*ptr1;
-* --
+/*
+ *
+ * inside	Return true if the x,y position is within the grect
+ *		C binding:	inside(x,y,ptr1);
+ *				int	x,y;
+ *				GRECT	*ptr1;
+ */
 	xdef _inside
 _inside:
 	movem.w	4(sp),d0-d1	; d0 = x, d1 = y
@@ -151,12 +177,12 @@ _inside:
 	bra	rettrue
 
 
-* --
-*
-* rc_equal	Returns true if the two grects are equal.
-*		C binding:	rc_equal(ptr1,ptr2);
-*				int	*ptr1,ptr2*
-* --
+/*
+ *
+ * rc_equal	Returns true if the two grects are equal.
+ *		C binding:	rc_equal(ptr1,ptr2);
+ *				int	*ptr1,ptr2*
+ */
 	xdef _rc_equal
 _rc_equal:
 	movem.l	4(sp),a0-a1	; a0 -> grect 1, a1 -> grect 2
@@ -166,15 +192,15 @@ _rc_equal:
 	bne	retfalse
 	bra	rettrue
 
-* --
-*
-* rc_intersect	Returns the intersection of two rectangles in ptr2.
-*		Returns true if there was an intersection where the width
-*		is greater than x and the height is greater than y.
-*		C binding:	rc_intersect(ptr1,ptr2);
-*				GRECT	*ptr1,*ptr2;
-*
-* --
+/*
+ *
+ * rc_intersect	Returns the intersection of two rectangles in ptr2.
+ *		Returns true if there was an intersection where the width
+ *		is greater than x and the height is greater than y.
+ *		C binding:	rc_intersect(ptr1,ptr2);
+ *				GRECT	*ptr1,*ptr2;
+ *
+ */
 	xdef _rc_intersect
 _rc_intersect:
 	movem.l	4(sp),a0-a1	; a0 = grect 1, a1 = grect 2
@@ -195,7 +221,7 @@ int2:
 	sub.w	d0,d2
 	move.w	sr,-(sp)	; save status
 	move.w	d2,4(a1)	; w2 = min(x1+w1,x2+w2) - max(x1,x2)
-*
+
 	move.w	2(a1),d0	; d0 = y2
 	cmp.w	2(a0),d0	; If (y1 < y2)
 	bge	int3
@@ -219,13 +245,13 @@ int4:
 	ble	retfalse
 	bra	rettrue
 
-* --
-*
-* rc_union	Returns the union of two rectangles in ptr2.
-*		C binding:	rc_union(ptr1,ptr2);
-*				GRECT	*ptr1,*ptr2;
-*
-* --
+/*
+ *
+ * rc_union	Returns the union of two rectangles in ptr2.
+ *		C binding:	rc_union(ptr1,ptr2);
+ *				GRECT	*ptr1,*ptr2;
+ *
+ */
 	xdef _rc_union
 _rc_union:
 	movem.l	4(sp),a0-a1	; a0 = ptr block 1, a1 = ptr block 2
@@ -245,7 +271,7 @@ uni2:
 	sub.w	d0,d2
 	move.w	d0,(a1)		; x2 = min(x1,x2)
 	move.w	d2,4(a1)	; w2 = max(x1+w1,x2+w2) - min(x1,x2)
-*
+
 	move.w	2(a1),d0	; d0 = y2
 	cmp.w	2(a0),d0	; If (y1 < y2)
 	blt	uni3
@@ -265,14 +291,14 @@ uni4:
 	rts
 
 
-* --
-*
-* rc_constrain	Routine to constrain a box within another box.  This is done by
-*		seting the x,y of the inner box to remain within the
-*		constraining box.
-*		C binding:	r_constrain(const_ptr,xywhptr);
-*				GRECT	*const_ptr,*xywhptr;
-* --
+/*
+ *
+ * rc_constrain	Routine to constrain a box within another box.  This is done by
+ *		seting the x,y of the inner box to remain within the
+ *		constraining box.
+ *		C binding:	r_constrain(const_ptr,xywhptr);
+ *				GRECT	*const_ptr,*xywhptr;
+ */
 	xdef _rc_constrain
 _rc_constrain:
 	movem.l	4(sp),a0-a1	; a0 -> x of constrain rect, a1 -> grect
@@ -304,14 +330,14 @@ clp_bottom:
 rc_done:
 	rts
 
-* --
-*
-* movs	move bytes from source to dest for a count of N
-*		C binding:	movs(count,src,dst);
-*				int	count;
-*				byte	*src,*dst;
-* and why do we need another copy function?
-* --
+/*
+ *
+ * movs	move bytes from source to dest for a count of N
+ *		C binding:	movs(count,src,dst);
+ *				int	count;
+ *				byte	*src,*dst;
+ * and why do we need another copy function?
+ */
 	xdef _movs
 _movs:
 	move.w	4(sp),d0	; count
@@ -323,12 +349,12 @@ stmovs:
 	dbra	d0,movnxt
 	rts
 
-* --
-*
-* min	Returns minimum value of two words
-*		C binding:	min(a,b);
-*				int	a,b;
-* --
+/*
+ *
+ * min	Returns minimum value of two words
+ *		C binding:	min(a,b);
+ *				int	a,b;
+ */
 	xdef _min
 _min:
 	move.w	4(sp),d0	; d0 = a
@@ -336,12 +362,12 @@ _min:
 	blt	genret
 	bra	minmax
 
-* --
-*
-* max	Returns maximum value of two words
-*		C binding:	max(a,b);
-*				int	a,b;
-* --
+/*
+ *
+ * max	Returns maximum value of two words
+ *		C binding:	max(a,b);
+ *				int	a,b;
+ */
 	xdef _max
 _max:
 	move.w	4(sp),d0	; d0 = a
@@ -352,14 +378,14 @@ minmax:
 genret:
 	rts			; general rts
 
-* --
-*
-* bfill		Copy the byte passed in to the dest pointer for a count of N
-*		C binding:	bfill(count,byte,dest);
-*				int	count;
-*				byte	byte;
-*				byte	*dest;
-* --
+/*
+ *
+ * bfill		Copy the byte passed in to the dest pointer for a count of N
+ *		C binding:	bfill(count,byte,dest);
+ *				int	count;
+ *				byte	byte;
+ *				byte	*dest;
+ */
 	xdef _bfill
 _bfill:
 	move.w	4(sp),d0	; d0 = count
@@ -372,12 +398,12 @@ bfout:
 	dbra	d0,bfnxt
 	rts
 
-* --
-*
-* toupper	Return upper case value
-*		C binding:	toupper(chr);
-*				byte	chr;
-* --
+/*
+ *
+ * toupper	Return upper case value
+ *		C binding:	toupper(chr);
+ *				byte	chr;
+ */
 	xdef _toupper
 _toupper:
 	move.b	5(sp),d0	; d0 = chr
@@ -391,12 +417,12 @@ toupout:
 	rts
 
 
-* --
-*
-* strlen	Need I say more
-*		C binding:	word	strlen(ptr);
-*					byte	*ptr;
-* --
+/*
+ *
+ * strlen	Need I say more
+ *		C binding:	word	strlen(ptr);
+ *					byte	*ptr;
+ */
 	xdef _strlen
 _strlen:
 	move.l	4(sp),a0	; a0 -> string
@@ -407,12 +433,12 @@ strnxt:
 	addq.w	#1,d0		; inc count
 	bra	strnxt
 
-* --
-*
-* streq	dito
-*		C binding:	word	streq(ptr1,ptr2);
-*					byte	*ptr1,*ptr2;
-* --
+/*
+ *
+ * streq	dito
+ *		C binding:	word	streq(ptr1,ptr2);
+ *					byte	*ptr1,*ptr2;
+ */
 	xdef _streq
 _streq:
 	movem.l 4(sp),a0-a1	; a0 ->string1, a1 ->string2
@@ -427,12 +453,14 @@ cmp1:
 	bne	retfalse
 	bra	rettrue		; else ret true
 
-* --
-*
-* xstrpcpy	dito dito
-*		C binding:	byte	*xstrpcpy(src,dst);
-*					byte	*src,*dst;
-* --
+/*
+ *
+ * xstrpcpy	dito dito
+ *		C binding:	byte	*xstrpcpy(src,dst);
+ *					byte	*src,*dst;
+ * tho: this was actually named strcpy,
+ * but has its arguments reversed
+ */
 	xdef _xstrpcpy
 _xstrpcpy:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
@@ -441,14 +469,14 @@ cpynxt:
 	bne	cpynxt
 	bra	catscn
 
-* --
-*
-* strscn	copy the src to destination untill we are out of characters
-*		or we get a char match.
-*		C binding:	byte	*strscn(src,dst,stopchar);
-*					byte	*src,*dst,stopchar;
-*
-* --
+/*
+ *
+ * strscn	copy the src to destination untill we are out of characters
+ *		or we get a char match.
+ *		C binding:	byte	*strscn(src,dst,stopchar);
+ *					byte	*src,*dst,stopchar;
+ *
+ */
 	xdef _strscn
 _strscn:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
@@ -461,11 +489,11 @@ scnxt:
 	move.b	(a0)+,(a1)+
 	bra	scnxt
 
-* --
-*
-* xstrpcat	dito dito dito
-*		C binding:	byte	*xstrpcat(src,dst);
-* --
+/*
+ *
+ * xstrpcat	dito dito dito
+ *		C binding:	byte	*xstrpcat(src,dst);
+ */
 	xdef _xstrpcat
 _xstrpcat:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
@@ -473,7 +501,7 @@ catend:
 	tst.b	(a1)+		; if (not at end of dst string)
 	bne	catend
 	sub.l	#1,a1		; now at end of str
-*
+
 catnxt:
 	move.b	(a0)+,(a1)+	; dst = scr
 	bne	catnxt
@@ -481,14 +509,14 @@ catscn:
 	move.l	a1,d0		; return dest pointer
 	rts
 
-* --
-*
-* scasb		Returns a byte pointer pointing to the matched byte or
-*		the end of the string.
-*		C binding:	byte	*scasb(ptr,byte);
-*					byte	*ptr,byte;
-*
-* --
+/*
+ *
+ * scasb		Returns a byte pointer pointing to the matched byte or
+ *		the end of the string.
+ *		C binding:	byte	*scasb(ptr,byte);
+ *					byte	*ptr,byte;
+ *
+ */
 	xdef _scasb
 _scasb:
 	move.l	4(sp),a1	; a1 -> string
@@ -502,15 +530,15 @@ scanxt:
 	bra	scanxt
 
 
-* --
-*
-* strchk	This is the true version of strcmp. Shall we remove the
-*		other -we shall see!!!
-*		Returns	- <0 if(str1<str2), 0 if(str1=str2), >0 if(str1>str2)
-*		C binding:	word	strchk(str1,str2);
-*					byte	*str1,*str2;
-*
-* --
+/*
+ *
+ * strchk	This is the true version of strcmp. Shall we remove the
+ *		other -we shall see!!!
+ *		Returns	- <0 if(str1<str2), 0 if(str1=str2), >0 if(str1>str2)
+ *		C binding:	word	strchk(str1,str2);
+ *					byte	*str1,*str2;
+ *
+ */
 	xdef _strchk
 _strchk:
 	movem.l	4(sp),a0-a1	; a0 -> string 1, a1 -> string 2
@@ -531,13 +559,13 @@ chk1:
 chkout:
 	rts
 
-* --
-*
-* fmt_str	Routine to strip out '.' from string and return raw
-*		data. Pad with spaces ex. "this.p" to "this    p"
-*		C binding:	fmt_str(src,dst);
-*					byte	*src,*dst;
-* --
+/*
+ *
+ * fmt_str	Routine to strip out '.' from string and return raw
+ *		data. Pad with spaces ex. "this.p" to "this    p"
+ *		C binding:	fmt_str(src,dst);
+ *					byte	*src,*dst;
+ */
 	xdef _fmt_str
 _fmt_str:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
@@ -565,13 +593,13 @@ fmt2:
 	move.b (a0)+,(a1)+	; copy char
 	bra	fmt2
 
-* --
-*
-* unfmt_str	Routine to convert a string of type "mike    xxx" to
-*		a dos string of "mike.xxx"
-*		C binding:	unfmt_str(src,dst);
-*				byte	*src,*dst;
-* --
+/*
+ *
+ * unfmt_str	Routine to convert a string of type "mike    xxx" to
+ *		a dos string of "mike.xxx"
+ *		C binding:	unfmt_str(src,dst);
+ *				byte	*src,*dst;
+ */
 	xdef _unfmt_str
 _unfmt_str:
 	movem.l	4(sp),a0-a1	; a0 -> src, a1 -> dst
@@ -598,44 +626,44 @@ unfout:
 	rts
 
 
-* --
-*
-* fs_sset	Copy the long in the ob_spec field to the callers variable
-*		ptext.  Next copy the string located at the ob_spec long to the
-*		callers pstr.  Finally copy the length of the tedinfo string
-*		to the callers ptxtlen.
-*		C binding:	fs_sset(tree,obj,pstr,ptext,ptxtlen);
-*					long	tree,pstr,*ptext;
-*					word	obj,*ptxtlen;
-* --
+/*
+ *
+ * fs_sset	Copy the long in the ob_spec field to the callers variable
+ *		ptext.  Next copy the string located at the ob_spec long to the
+ *		callers pstr.  Finally copy the length of the tedinfo string
+ *		to the callers ptxtlen.
+ *		C binding:	fs_sset(tree,obj,pstr,ptext,ptxtlen);
+ *					long	tree,pstr,*ptext;
+ *					word	obj,*ptxtlen;
+ */
 	xdef _fs_sset
 _fs_sset:
 	move.l	14(sp),a1	; a1 -> ptext
-*
-	move.l	#OB_SPEC,a0	; a0 = ob_spec offset
+
+	movea.w	#OB_SPEC,a0	; a0 = ob_spec offset
 	bsr	get_addr
 	move.l	(a0),a0		; a0 -> tedinfo block
-*
+
 	move.l	(a0),(a1)	; set callers ptext to tedinfo data string
 	move.l	a0,-(sp)	; save pointer to tedinfo block
-*
+
 	move.l 14(sp),-(sp)	; sp = pstr
 	move.l (a0),-(sp)	; sp = tedinfo text data
 	jsr _LSTCPY
 	addq.l #8,sp
 	move.l	(sp)+,a0	; get pointer to tedinfo structure
-*
+
 	move.l	18(sp),a1	; ptxtlen
-	add.l	#TEDTXTLEN,a0	; now points to tedinfo text length
+	adda.w	#TEDTXTLEN,a0	; now points to tedinfo text length
 	move.w	(a0),(a1)	; store it
 	rts
 
-* --
-*
-* inf_sset
-*		C binding:	inf_sset(tree,obj,pstr,&text,&txtlen);
-*
-* --
+/*
+ *
+ * inf_sset
+ *		C binding:	inf_sset(tree,obj,pstr,&text,&txtlen);
+ *
+ */
 	xdef _inf_sset
 _inf_sset:
 	link	a6,#-8		; room for temp variables
@@ -645,27 +673,27 @@ _inf_sset:
 	move.w	12(a6),-(sp)	; obj
 	move.l	8(a6),-(sp)	; tree
 	jsr	_fs_sset
-	adda.l	#18,sp
+	adda.w	#18,sp
 	unlk	a6
 	rts
 
-* --
-* inf_sget
-* fs_sget	This routine copies the tedinfo string to the dst pointer.
-*		The function inf_sget was the same as fs_sget.
-*		C binding:	inf_sget(tree,obj,dst);
-*		C binding:	fs_sget(tree,obj,dst);
-*				long	tree,dst;
-*				word	obj;
-* --
+/*
+ * inf_sget
+ * fs_sget	This routine copies the tedinfo string to the dst pointer.
+ *		The function inf_sget was the same as fs_sget.
+ *		C binding:	inf_sget(tree,obj,dst);
+ *		C binding:	fs_sget(tree,obj,dst);
+ *				long	tree,dst;
+ *				word	obj;
+ */
 	xdef _inf_sget
 _inf_sget: ds.b 0
 	xdef _fs_sget
 _fs_sget: ds.b 0
-	move.l	#OB_SPEC,a0	; a0 = offset to ob_spec
+	movea.w	#OB_SPEC,a0	; a0 = offset to ob_spec
 	bsr	get_addr
 	move.l	(a0),a0		; a0 = ob_spec pointer
-*
+
 	move.l	(a0),-(sp)	; sp = addr of tedinfo str
 	move.l	14(sp),-(sp)	; sp = destination
 	jsr	_LSTCPY
@@ -674,19 +702,19 @@ _fs_sget: ds.b 0
 
 
 
-* --
-* inff_fldset	This routine is used to set an objects flags based on 
-*		the outcome of a 'and' operation.  The word is set to
-*		the 'truestate' if the operation is true else set to
-*		'falsestate'
-*	C binding: inf_fldset(tree,obj,tstfld,tstbit,truestate,falsestate);
-*
-* --
+/*
+ * inff_fldset	This routine is used to set an objects flags based on 
+ *		the outcome of a 'and' operation.  The word is set to
+ *		the 'truestate' if the operation is true else set to
+ *		'falsestate'
+ *	C binding: inf_fldset(tree,obj,tstfld,tstbit,truestate,falsestate);
+ *
+ */
 	xdef _inf_fldset
 _inf_fldset:
-	move.l	#OB_STATE,a0	; a0 = offset to ob_state
+	movea.w	#OB_STATE,a0	; a0 = offset to ob_state
 	bsr	get_addr
-*
+
 	clr	d0
 	move.w	10(sp),d0	; d0 = tstfld
 	and.w	12(sp),d0	; d0 = tstfld & tstbit
@@ -699,19 +727,19 @@ inf1:
 	rts
 
 
-* --
-*
-* inf_gindex	for each object from baseobj for N objects return the object
-*		that is selected or -1 if no objects are selected.
-*		C binding:	inf_gindex(tree,baseobj,n);
-*					word	baseobj,n;
-*					long	tree;
-* --
+/*
+ *
+ * inf_gindex	for each object from baseobj for N objects return the object
+ *		that is selected or -1 if no objects are selected.
+ *		C binding:	inf_gindex(tree,baseobj,n);
+ *					word	baseobj,n;
+ *					long	tree;
+ */
 	xdef _inf_gindex
 _inf_gindex:
-	move.l	#OB_STATE+1,a0	; a0 = offset to byte to test
+	movea.w	#OB_STATE+1,a0	; a0 = offset to byte to test
 	bsr	get_addr
-*
+
 	move.w	10(sp),d0	; d0 = n
 	subq.w	#1,d0		; adjust for dbra
 	move.w	d0,d1		; d1 = copy of count
@@ -721,22 +749,22 @@ nxtstat:
 	sub.w	d1,d0		; get object number
 	bra	gindout
 gind1:
-	adda.l	#OB_SIZE,a0	; next object state to test
+	adda.w	#OB_SIZE,a0	; next object state to test
 	dbra	d1,nxtstat
 	move.w	d1,d0		; d0 = -1
 gindout:
 	rts
 
-* --
-*
-* inf_what	Return	 0 is cancel was selected
-*			 1 if ok was selected
-*			-1 if nothing is selected
-*		If an object was selected then deselect it.
-*		C binding:	inf_what(tree,ok,cancel);
-*					word	ok,cancel;
-*					long	tree;
-* --
+/*
+ *
+ * inf_what	Return	 0 is cancel was selected
+ *			 1 if ok was selected
+ *			-1 if nothing is selected
+ *		If an object was selected then deselect it.
+ *		C binding:	inf_what(tree,ok,cancel);
+ *					word	ok,cancel;
+ *					long	tree;
+ */
 	xdef _inf_what
 _inf_what:
 	move.w	#2,-(sp)	; sp = 2
@@ -744,22 +772,22 @@ _inf_what:
 	move.l	8(sp),-(sp)	; sp = tree
 	jsr	_inf_gindex	; find selected object
 	addq.l	#8,sp
-*
+
 	cmp.w	#-1,d0		; if (ret == -1)
 	beq	genrts
-*
+
 	move.w	d0,d1		; save return value
-*
+
 	add.w	d0,8(sp)	; 8(sp) = object# + ret
-	move.l	#OB_STATE,a0	; a0 = offset to ob_state
+	movea.w	#OB_STATE,a0	; a0 = offset to ob_state
 	bsr	get_addr
-*
+
 	clr.w	(a0)		; set ob_state to NORMAL
 	tst.w	d1
 	beq	rettrue
-*
-* general return true/false exit point
-*
+/*
+ * general return true/false exit point
+ */
 retfalse:
 	clr.w	d0
 	bra	genrts
@@ -770,14 +798,13 @@ genrts:
 
 
 
-* --
-* merge_str
-*		C binding:	merge_str(dest,src,parms);
-*					byte	*dest,src;
-*					uword	parms[];
-* --
-
-* PARMS	=	7*4
+/*
+ * merge_str
+ *		C binding:	merge_str(dest,src,parms);
+ *					byte	*dest,src;
+ *					uword	parms[];
+ */
+/* PARMS	=	7*4 */
 PARMS	equ	28		; fixed 8/1/92
 
 	xdef _merge_str
@@ -785,16 +812,16 @@ _merge_str:
 	movem.l	d3-d6/a3-a5,-(sp)	; save d3,d4,d5,d6,a3,a4,a5
 	movem.l	PARMS+4(sp),a3-a5	; a3 -> dest, a4 -> src, a5 -> parms
 	clr.w	d3			; d3 = parms[] index
-*
+
 mernxt:
 	tst.b	(a4)		; if (char = 0) get out
 	beq	merout
-*
+
 	cmp.b	#'%',(a4)	; if(char == '%')
 	beq	do_per
 	move.b	(a4)+,(a3)+	; dest = src
 	bra	mernxt
-*
+
 do_per:
 	tst.b	(a4)+		; inc past '%'
 	move.b	(a4)+,d0
@@ -831,11 +858,11 @@ s1:
 	beq	mernxt		; do next character
 	move.b	(a0)+,(a3)+	; dest = src
 	bra	s1
-*
+
 dovalue:
 	clr.l	d5		; d5 is index
-	sub.l	#16,sp		; get room on stack
-*
+	suba.w	#16,sp		; get room on stack
+
 nxtdigit:
 	tst.l	d4		; more digits (lvalue)
 	beq	nomore
@@ -862,20 +889,19 @@ ascdig:
 	move.b	(sp,d5.w),(a3)+	; copy digit
 	dbra	d5,ascdig
 stclean:
-	add.l	#16,sp		; clean up stack
+	adda.w	#16,sp		; clean up stack
 	bra	mernxt
 merout:
 	clr.b	(a3)		; null terminate string
 	movem.l	(sp)+,d3-d6/a3-a5 ; restore d3,d4,d5,d6,a3,a4,a5
 	rts
 
-* --
-*
-* wildcmp
-*		C binding:	wildcmp(pwild,ptest);
-*					byte	*pwild,*ptest;
-* --
-
+/*
+ *
+ * wildcmp
+ *		C binding:	wildcmp(pwild,ptest);
+ *					byte	*pwild,*ptest;
+ */
 	xdef _wildcmp
 _wildcmp:
 	movem.l 4(sp),a0-a1	; a0-> pwild, a1 -> ptest
@@ -914,7 +940,7 @@ wld5:
 	beq	wld6
 	cmp.b	#DOT,(a0)	; || (*pwild == '.')
 	beq	wld6
-*
+
 	tst.b	(a0)		; if (*pwild == char)
 	bne	wldfalse
 	tst.b	(a1)		; || (*ptest == char)
@@ -927,13 +953,13 @@ wldout:
 	rts
 
 
-* --
-*
-* get_addr	Calculate the objects address given:
-*			a0 = object offset
-*			12(sp) = object
-*			8(sp)  = tree
-*--
+/*
+ *
+ * get_addr	Calculate the objects address given:
+ *			a0 = object offset
+ *			12(sp) = object
+ *			8(sp)  = tree
+ */
 get_addr:
 	move.w	12(sp),d0	; d0 = object
 	muls	#OB_SIZE,d0	; d0 = object * ob_size
