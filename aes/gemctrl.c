@@ -320,11 +320,12 @@ PP(int16_t my;)
 	GRECT t, f;
 	int16_t x, y, w, h;
 	int16_t kind;
-	int16_t px, py, pw, ph;
+	int16_t px, py;
+	OBJECT *tree;
+	int16_t pw, ph;
 	register int wm, hm;
 	register int16_t message;
 	register int16_t cpt;
-	OBJECT *tree;
 	int16_t selst, nrmst, dummy;
 	int16_t unused[3];
 	PD *p;

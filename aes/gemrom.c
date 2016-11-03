@@ -317,7 +317,7 @@ BOOLEAN rsc_read(NOTHING)
 	gl_pglue = dos_alloc((int32_t) intptr[2]);
 	if (!gl_pglue)
 	{
-		Cconws("Unable to install AES resource!");
+		Cconws("Unable to install resource !");
 		while (!Bconstat(2))
 			;
 #if BINEXACT

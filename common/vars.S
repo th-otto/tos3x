@@ -672,8 +672,9 @@ name: ds.t size
 	
 	V(_tmpmoff,w,1)
 	
-	ds.b 6
+	ds.b 2
 	
+	PTR(_gl_store)
 	V(_ctldown,w,1)
 	V(_autoexec,w,1)
 	V(_fs_topptr,w,1)
@@ -711,8 +712,10 @@ name: ds.t size
 	
 	V(_nogem,w,1)
 	
-	ds.b 10
+	ds.b 6
 	
+	INT(_gl_mx)
+	INT(_gl_my)
 	V(_fpcnt,w,1)
 	
 	ds.b 8

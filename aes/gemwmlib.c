@@ -111,7 +111,15 @@ static int32_t const gl_waspec[MAXOBJ] =
     0x00011101L     /* W_HELEV      */
 };
 
-static TEDINFO const gl_asamp =
+#if BINEXACT
+static short const garbage[] = {
+	 /* hההה?? */
+	0x2304, 0x3405, 0x4506, 0x56a7, 0x6708, 0x7809, 0x890a, 0x9a0b, 0xab0c, 0xbc0d, 0xcd0e, 0xde0f, 0x2314, 0x3405,
+	0x4506, 0x5607, 0x6708, 0x7819, 0x890a, 0x9a0b, 0xab0c, 0xbc0d, 0xcd0e, 0xde0f
+};
+#endif
+
+static TEDINFO const gl_asamp[1] =
 {
 	0x0L, 0x0L, 0x0L, IBM, MD_REPLACE, TE_LEFT, SYS_FG, 0x0, 1, 80, 80
 };
@@ -1304,8 +1312,8 @@ BOOLEAN wm_start(NOTHING)
 	w_walkflag = FALSE;
 	
 	/* init tedinfo parts of title and info lines */
-	movs(sizeof(TEDINFO), &gl_asamp, &gl_aname);
-	movs(sizeof(TEDINFO), &gl_asamp, &gl_ainfo);
+	movs(sizeof(TEDINFO), gl_asamp, &gl_aname);
+	movs(sizeof(TEDINFO), gl_asamp, &gl_ainfo);
 	gl_aname.te_just = TE_CNTR;
 	W_ACTIVE[W_NAME].ob_spec = (intptr_t)&gl_aname;
 	W_ACTIVE[W_INFO].ob_spec = (intptr_t)&gl_ainfo;

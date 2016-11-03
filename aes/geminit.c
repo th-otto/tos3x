@@ -862,7 +862,7 @@ BOOLEAN gsx_malloc(NOTHING)
 	 * It thus make use of one the many bugs in the Alcyon compiler,
 	 * and has been fixed above for TOS 4.x
 	 */
-	gl_mlen = (int32_t)((gl_ws.ws_xres + 1) * (gl_ws.ws_yres + 1));
+	gl_mlen = (int32_t)((gl_ws.ws_yres + 1) * (gl_ws.ws_xres + 1));
 	gl_mlen = (gl_nplanes * gl_mlen) / 16;
 #endif
 
