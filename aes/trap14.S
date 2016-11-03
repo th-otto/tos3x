@@ -1,45 +1,45 @@
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:31:22 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:31:22  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:32:36  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.6  89/02/12  01:05:14  kbad
-* Added zeropage references in _mediach, to save a few bytes from as68 idiocy
-* 
-* Revision 1.5  89/01/24  07:21:02  kbad
-* Optimize get/putmouse, and make maddr available as a flag. (clear on exit
-* from _putmouse
-* 
-* Revision 1.4  88/07/27  10:32:47  mui
-* fix mediach
-* 
-* Revision 1.3  88/07/01  16:25:55  mui
-* Nothing
-* 
-* Revision 1.2  88/07/01  16:22:56  mui
-* add mediach code
-* 
-* Revision 1.1  88/06/02  12:36:33  lozben
-* Initial revision
-* 
-*************************************************************************
-*	trap14.s	02/28/85 - 05/21/85		Derek Mui	
-*	combine trap14 trap13 with trp14 and trp13	3/4/86	D.Mui
-*	Added save mouse form function	1/6/87	- 1/7/87Derek Mui
-*	Take out s68	2/9/88				D.Mui
-*	Rename maddr to _maddr		6/25/90		D.Mui
-*	Use MAC to assemble		6/28/90		D.Mui
-* assemble with MAS 900801 kbad (removed zeropage a0 from mediach)
-*	Fix mediach at dooldr 		12/11/90	D.Mui
-*	Fix at mediach at remove extra slash at the beginning 4/5/91 D.Mui
-
+/*************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:31:22 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:31:22  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:32:36  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.6  89/02/12  01:05:14  kbad
+ * Added zeropage references in _mediach, to save a few bytes from as68 idiocy
+ * 
+ * Revision 1.5  89/01/24  07:21:02  kbad
+ * Optimize get/putmouse, and make maddr available as a flag. (clear on exit
+ * from _putmouse
+ * 
+ * Revision 1.4  88/07/27  10:32:47  mui
+ * fix mediach
+ * 
+ * Revision 1.3  88/07/01  16:25:55  mui
+ * Nothing
+ * 
+ * Revision 1.2  88/07/01  16:22:56  mui
+ * add mediach code
+ * 
+ * Revision 1.1  88/06/02  12:36:33  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ *	trap14.s	02/28/85 - 05/21/85		Derek Mui	
+ *	combine trap14 trap13 with trp14 and trp13	3/4/86	D.Mui
+ *	Added save mouse form function	1/6/87	- 1/7/87Derek Mui
+ *	Take out s68	2/9/88				D.Mui
+ *	Rename maddr to _maddr		6/25/90		D.Mui
+ *	Use MAC to assemble		6/28/90		D.Mui
+ * assemble with MAS 900801 kbad (removed zeropage a0 from mediach)
+ *	Fix mediach at dooldr 		12/11/90	D.Mui
+ *	Fix at mediach at remove extra slash at the beginning 4/5/91 D.Mui
+ */
 
 #define __ASSEMBLER__ 1
 
@@ -50,17 +50,6 @@
 
 	bss
 	even
-	
-	xdef fspec		/* file to look for (doesn't matter) */
-	comm fspec,112
-	xdef mydev
-	comm mydev,2
-	xdef oldgetbpb
-	comm oldgetbpb,4
-	xdef oldmediach
-	comm oldmediach,4
-	xdef oldrwabs
-	comm oldrwabs,4
 	
 /* used by gembind:graf_mouse as a flag */
 	xdef _maddr
@@ -93,7 +82,7 @@ _trp14:
 	xdef _getmouse
 _getmouse:
 	dc.w	$A000
-	suba.l	#$358,a0        ; WTF; will fail with Falcon VDI where mouse shape is stored somewhere else
+	suba.w	#$358,a0        ; WTF; will fail with Falcon VDI where mouse shape is stored somewhere else
 	move.l	a0,_maddr		; save the mouse block address
 	lea	mform,a1		; destination
 	move.w	#36,d0			; size ( - 1 for dbra )
@@ -113,34 +102,52 @@ putmcp:
 	clr.l	_maddr			; no longer in use...
 	rts
 
+/*
+ * FIXME: remainder really belongs to DESKTOP
+ */
 
-*************************************************************************
-*									*
-*	mediach: cause media-change on a logical device.		*
-*									*
-*	USAGE:								*
-*		errcode = mediach(devno);    /* returns 1 for error */	*
-*		int errcode, devno;					*
-*									*
-*									*
-*	This procedure causes a media change by installing a new	*
-*	handler for the mediach, rwabs, and getbpb vectors; for device	*
-*	devno, the mediach handler returns "definitely changed," and	*
-*	the rwabs handler returns E_CHNG, until the new getbpb handler	*
-*	is called.  The new getbpb handler un-installs the new 		*
-*	handlers.							*
-*									*
-*	After installing the new handlers, this procedure performs a	*
-*	disk operation (e.g. search first) which makes GEMDOS check	*
-*	the media-change status of the drive: this will trigger the	*
-*	new rwabs, mediach and getbpb handlers to do their things.	*
-*									*
-*	RETURNS: 0 for no error, 1 for error (GEMDOS didn't ever do a	*
-*		getbpb call).						*
-*									*
-*************************************************************************
+/*************************************************************************
+ *                                                                       *
+ *       mediach: cause media-change on a logical device.                *
+ *                                                                       *
+ *       USAGE:                                                          *
+ *               errcode = mediach(devno);       returns 1 for error     *
+ *               int errcode, devno;                                     *
+ *                                                                       *
+ *                                                                       *
+ *       This procedure causes a media change by installing a new        *
+ *       handler for the mediach, rwabs, and getbpb vectors; for device  *
+ *       devno, the mediach handler returns "definitely changed," and    *
+ *       the rwabs handler returns E_CHNG, until the new getbpb handler  *
+ *       is called.  The new getbpb handler un-installs the new          *
+ *       handlers.                                                       *
+ *                                                                       *
+ *       After installing the new handlers, this procedure performs a    *
+ *       disk operation (e.g. search first) which makes GEMDOS check     *
+ *       the media-change status of the drive: this will trigger the     *
+ *       new rwabs, mediach and getbpb handlers to do their things.      *
+ *                                                                       *
+ *       RETURNS: 0 for no error, 1 for error (GEMDOS didn't ever do a   *
+ *               getbpb call).                                           *
+ *                                                                       *
+ *************************************************************************/
 
 
+	bss
+	even
+	
+	xdef fspec		/* file to look for (doesn't matter) */
+	comm fspec,112
+	xdef mydev
+	comm mydev,2
+	xdef oldgetbpb
+	comm oldgetbpb,4
+	xdef oldmediach
+	comm oldmediach,4
+	xdef oldrwabs
+	comm oldrwabs,4
+	
+	text
 
 	xdef _mediach
 _mediach:
@@ -155,12 +162,14 @@ _mediach:
 *	move.w	#9,d6			; loop 10 times!
 
 loop:
-*	clr.l	-(sp)			; get super mode, leave old ssp
-*	move.w	#$20,-(sp)		; and "super" function code on stack
-*	trap	#1
-*	addq	#6,sp
-*	move.l	d0,-(sp)
-*	move.w	#$20,-(sp)
+#if 0
+	clr.l	-(sp)			; get super mode, leave old ssp
+	move.w	#$20,-(sp)		; and "super" function code on stack
+	trap	#1
+	addq	#6,sp
+	move.l	d0,-(sp)
+	move.w	#$20,-(sp)
+#endif
 
 	move.l	(_hdv_bpb).w,oldgetbpb
 	move.l	(_hdv_mediach).w,oldmediach
@@ -170,7 +179,7 @@ loop:
 	move.l	#newmediach,(_hdv_mediach).w
 	move.l	#newrwabs,(_hdv_rw).w
 
-*	; Fopen a file on that drive
+	/* Fopen a file on that drive */
 
 	move.w	#0,-(sp)
 	move.l	#fspec,-(sp)
@@ -178,7 +187,7 @@ loop:
 	trap	#1
 	addq	#8,sp
 
-*	; Fclose the handle we just got
+	/* Fclose the handle we just got */
 
 	tst.l	d0
 	bmi.b	noclose
@@ -199,21 +208,23 @@ noclose:
 	move.l	oldrwabs,$476.w
 
 done:
-*	trap	#1			; go back to user mode (use stuff
-*	addq.w	#$6,sp			; left on stack above)
+#if 0
+	trap	#1			; go back to user mode (use stuff
+	addq.w	#$6,sp			; left on stack above)
 
-*	move.l	d7,d0
-*	dbeq	d6,loop			; loop until success, or 10 failures.
+	move.l	d7,d0
+	dbeq	d6,loop			; loop until success, or 10 failures.
+#endif
 	rts
 
-*************************************************************************
-*									*
-* new getbpb: if it's our device, uninstall vectors; 			*
-*	      in any case, call the old getbpb vector (to really 	*
-*	      get it)							*
-*									*
-*************************************************************************
-
+/*************************************************************************
+ *                                                                       *
+ * new getbpb: if it's our device, uninstall vectors;                    *
+ *             in any case, call the old getbpb vector (to really        *
+ *             get it)                                                   *
+ *                                                                       *
+ *************************************************************************/
+/* 306de: 00e2640a */
 newgetbpb:
 	move.w	mydev,d0
 	cmp.w	4(sp),d0
@@ -224,12 +235,12 @@ newgetbpb:
 dooldg:	move.l	oldgetbpb,a0	; continue here whether mine or not: call old.
 	jmp	(a0)
 
-*************************************************************************
-*									*
-* new mediach: if it's our device, return 2; else call old.		*
-*									*
-*************************************************************************
-
+/*************************************************************************
+ *                                                                       *
+ * new mediach: if it's our device, return 2; else call old.             *
+ *                                                                       *
+ *************************************************************************/
+/* 306de: 00e26436 */
 newmediach:
 	move.w	mydev,d0
 	cmp.w	4(sp),d0
@@ -241,12 +252,12 @@ dooldm:	move.l	oldmediach,a0	; not mine: call old vector.
 	jmp	(a0)
 
 
-*************************************************************************
-*									*
-*	newrwabs: return E_CHG (-14) if it's my device			*
-*									*
-*************************************************************************
-
+/*************************************************************************
+ *                                                                       *
+ *       newrwabs: return E_CHG (-14) if it's my device                  *
+ *                                                                       *
+ *************************************************************************/
+/* 306de: 00e2644e */
 newrwabs:
 	move.w	mydev,d0
 	cmp.w	$e(sp),d0
@@ -258,9 +269,8 @@ dooldr:	move.l	oldrwabs,a0	; changed from oldmediach to oldrwabs
 	jmp	(a0)
 
 
-*************************************************************************
-*									*
-*	end of mediach							*
-*									*
-*************************************************************************
-
+/*************************************************************************
+ *                                                                       *
+ *       end of mediach                                                  *
+ *                                                                       *
+ *************************************************************************/
