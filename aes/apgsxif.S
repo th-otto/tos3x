@@ -106,10 +106,10 @@
 	comm	_gl_mode,2
 	xdef	_gl_mask
 	comm	_gl_mask,2
-	xdef	_gl_tcolo
-	comm	_gl_tcolo,2
-	xdef	_gl_lcolo
-	comm	_gl_lcolo,2
+	xdef	_gl_tcolor
+	comm	_gl_tcolor,2
+	xdef	_gl_lcolor
+	comm	_gl_lcolor,2
 	xdef	_gl_fis
 	comm	_gl_fis,2
 	xdef	_gl_patt
@@ -149,10 +149,13 @@ VOID gsx_sclip(GRECT *pt)
 		ppts[3] = gl_yclip + gl_hclip - 1;
 		vst_clip(TRUE, &ppts[0]);
 	} else
+	{
 		vst_clip(FALSE, &ppts[0]);
-	return (TRUE);
+	}
+	return TRUE;
 }
 #endif
+/* 306de: 00e24440 */
 	xdef _gsx_sclip
 _gsx_sclip:
 
@@ -201,6 +204,7 @@ VOID gsx_gclip(GRECT *pt)
 	r_set(pt, gl_xclip, gl_yclip, gl_wclip, gl_hclip);
 }
 #endif
+/* 306de: 00e24452 */
 	xdef _gsx_gclip
 _gsx_gclip:
 
@@ -219,17 +223,18 @@ BOOLEAN gsx_chkclip(GRECT *pt)
 	if (gl_wclip && gl_hclip)
 	{
 		if ((pt->g_y + pt->g_h) < gl_yclip)
-			return (FALSE);				/* all above    */
+			return FALSE;				/* all above    */
 		if ((pt->g_x + pt->g_w) < gl_xclip)
-			return (FALSE);				/* all left */
+			return FALSE;				/* all left */
 		if ((gl_yclip + gl_hclip) <= pt->g_y)
-			return (FALSE);				/* all below    */
+			return FALSE;				/* all below    */
 		if ((gl_xclip + gl_wclip) <= pt->g_x)
-			return (FALSE);				/* all right    */
+			return FALSE;				/* all right    */
 	}
-	return (TRUE);
+	return TRUE;
 }
 #endif
+/* 306de: 00e24470 */
 	xdef _gsx_chkclip
 _gsx_chkclip:
 
@@ -269,7 +274,7 @@ L10:	moveq.l	#0,d0			; return(FALSE)
 
 
 #if CCODE
-VOID gsx_pline(WORD offx, WORD offy, WORD cnt, WORD pts)
+VOID gsx_pline(WORD offx, WORD offy, WORD cnt, const WORD *pts)
 {
 	REG WORD i, j;
 
@@ -283,6 +288,7 @@ VOID gsx_pline(WORD offx, WORD offy, WORD cnt, WORD pts)
 	gsx_xline(cnt, &ptsin[0]);
 }
 #endif
+/* 306de: 00e244b4 */
 	xdef	_gsx_pline
 _gsx_pline:
 
@@ -322,6 +328,7 @@ VOID gsx_cline(UWORD x1, UWORD y1, UWORD x2, UWORD y2)
 	gsx_mon();
 }
 #endif
+/* 306de: 00e244de */
 	xdef	_gsx_cline
 _gsx_cline:
 
@@ -381,6 +388,7 @@ VOID gsx_attr(UWORD text, UWORD mode, UWORD color)
 	intin[0] = tmp;
 }
 #endif
+/* 306de: 00e244fe */
 	xdef _gsx_attr
 _gsx_attr:
 
@@ -412,14 +420,14 @@ _gsx_attr:
 L18:	tst.w	d3			; text=1 => text color
 	beq	L19			; text=0 => line color
 
-	lea	_gl_tcolo,a0		; if requested text color is the same
+	lea	_gl_tcolor,a0		; if requested text color is the same
 	cmp.w	(a0),d4			; as the current text color, don't
 	beq	L21			; waste time with the VDI call
 
 	moveq.l	#22,d0			; d0 <- SET_TEXT_COLOR
 	bra	L20
 
-L19:	lea	_gl_lcolo,a0		; if the requested line color matches
+L19:	lea	_gl_lcolor,a0		; if the requested line color matches
 	cmp.w	(a0),d4			; the current default line color,
 	beq	L21			; skip the VDI call to reset it.
 
@@ -457,6 +465,7 @@ VOID gsx_bxpts(GRECT *pt)
 	ppts[9] = pt->g_y;
 }
 #endif
+/* 306de: 00e24576 */
 	xdef _gsx_bxpts
 _gsx_bxpts:
 
@@ -612,6 +621,7 @@ WORD gsx_blt(int16_t *saddr, UWORD sx, UWORD sy, UWORD swb, int16_t *daddr, UWOR
 	gsx_mon();
 }
 #endif
+/* 306de: 00e245f2 */
 	xdef	_gsx_blt
 _gsx_blt:
 
@@ -686,6 +696,7 @@ VOID bb_screen(WORD scrule, WORD scsx, WORD scsy, WORD scdx, WORD scdy, WORD scw
 	gsx_blt(0x0L, scsx, scsy, 0, 0x0L, scdx, scdy, 0, scw, sch, scrule, -1, -1);
 }
 #endif
+/* 306de: 00e2467c */
 	xdef _bb_screen
 _bb_screen:
 
@@ -711,14 +722,16 @@ _bb_screen:
 #if CCODE
 VOID gsx_trans(int16_t *saddr, UWORD swb, int16_t *daddr, UWORD dwb, UWORD h, WORD fg, WORD bg)
 {
+	gsx_fix(&gl_dst, daddr, dwb, h);
+
 	gsx_fix(&gl_src, saddr, swb, h);
 	gl_src.fd_stand = TRUE;
 	gl_src.fd_nplanes = 1;
-
-	gsx_fix(&gl_dst, daddr, dwb, h);
 	vrn_trnfm(&gl_src, &gl_dst);
 }
 #endif
+/* 306de: 00e246a0 */
+/* BUG for AES3D: fg/bg not used */
 	xdef _gsx_trans
 _gsx_trans:
 
@@ -803,6 +816,7 @@ VOID gsx_start(NOTHING)
 	ad_intin = ADDR(&intin[0]);
 }
 #endif
+/* 306de: 00e246ea */
 /* WTF, this called only once at startup, why bother with asm madness? */
 	xdef _gsx_start
 _gsx_start:
@@ -810,8 +824,8 @@ _gsx_start:
 	movem.l	d3-d6,-(sp)
 
 	moveq.l	#-1,d0
-	move.w	d0,_gl_lcolo
-	move.w	d0,_gl_tcolo
+	move.w	d0,_gl_lcolor
+	move.w	d0,_gl_tcolor
 	move.w	d0,_gl_mask
 	move.w	d0,_gl_mode
 	move.w	d0,_gl_font
@@ -833,6 +847,17 @@ _gsx_start:
 	move.w	d4,_gl_hclip
 	move.w	d4,_gl_height		; d4 = gl_height
 
+#if (AESVERSION <= 0x320) & BINEXACT
+	move.w    22(a3),d0         ; d0 = gl_ws.ncolors
+	clr.w     d1
+_gsxsta1:
+	lsr.w     #1,d0
+	beq.s     _gsxsta2
+	addq.w    #1,d1
+	bra.s     _gsxsta1
+_gsxsta2:
+	move.w    d1,_gl_nplanes
+#else
 	lea	_intin,a0
 	move.w	#1,(a0)			; intin[0] = 1
 
@@ -843,6 +868,7 @@ _gsx_start:
 	addq.l	#6,sp
 	lea	_intout,a0	
 	move.w	8(a0),_gl_nplanes		; gl_nplanes = intout[4]
+#endif
 
 	clr.l	    -(sp)		; gsx_ncode(VQT_ATTRIBUTES, 0, 0)
 	move.w	#38,-(sp)		; inquire text attributes (vqt_attributes)
@@ -977,13 +1003,14 @@ VOID bb_fill(WORD mode, WORD fis, WORD patt, WORD hx, WORD hy, WORD hw, WORD hh)
 	vr_recfl(&ppts[0], &gl_dst);
 }
 #endif
+/* 306de: 00e24894 */
 	xdef _bb_fill
 _bb_fill:
 
 	move.l	a3,-(sp)
 	lea	4+4(sp),a3			; a3 -> input parameters
 
-	move.w	_gl_tcolo,-(sp)			; gl_tcolor
+	move.w	_gl_tcolor,-(sp)			; gl_tcolor
 	move.w	    (a3)+,-(sp)			; mode
 	move.w	       #1,-(sp)			; TRUE
 	jsr	_gsx_attr
@@ -1103,7 +1130,7 @@ WORD gsx_tcalc(WORD font, const char *ptext, WORD ptextw, WORD ptexth, WORD pnum
 		*pnumchs = 0;
 }
 #endif
- 
+/* 306de: 00e2491e */
  	xdef	_gsx_tcalc
 _gsx_tcalc:
 
@@ -1197,6 +1224,7 @@ WORD gsx_tblt(WORD tb_f, WORD x, WORD y, WORD tb_nc)
 	gsx2();
 }
 #endif
+/* 306de: 00e24988 */
 	xdef	_gsx_tblt
 _gsx_tblt:
 
@@ -1269,6 +1297,7 @@ VOID gsx_xbox(GRECT *pt)
 	gsx_xline(2, &ptsin[0]);
 }
 #endif
+/* 306de: 00e24a2a */
 	xdef _gsx_xbox
 _gsx_xbox:
 
@@ -1277,7 +1306,7 @@ _gsx_xbox:
 
 	move.l	#_ptsin,(sp)		; do the top
 	move.w	    #4,-(sp)		; right side
-	bsr	_gsx_xline		; and bottom
+	bsr.s	_gsx_xline		; and bottom; NOTE: bsr.s has offset 126
 
 	move.l	  2(sp),a0		; a0 -> ptsin[0]
 	addq.l	     #4,a0		; a0 -> ptsin[2]
@@ -1335,6 +1364,7 @@ VOID gsx_xcbox(GRECT *pt)
 	gsx_xline(3, &ppts[0]);
 }
 #endif
+/* 306de: 00e24a52 */
 	xdef _gsx_xcbox
 _gsx_xcbox:
 
@@ -1416,6 +1446,7 @@ VOID gsx_xline(WORD ptscount, WORD ppoints)
 	vsl_udsty(0xffff);
 }
 #endif
+/* 306de: 00e24abc */
 	xdef	_gsx_xline
 _gsx_xline:
 
@@ -1480,10 +1511,10 @@ quit:	movem.l	(sp)+,d3-d6/a3			; d6 is included to be
 UWORD ch_width(WORD fn)
 {
 	if (fn == IBM)
-		return (gl_wchar);
+		return gl_wchar;
 	if (fn == SMALL)
-		return (gl_wschar);
-	return (0);
+		return gl_wschar;
+	return 0;
 }
 
 
@@ -1491,9 +1522,9 @@ UWORD ch_width(WORD fn)
 UWORD ch_height(WORD fn)
 {
 	if (fn == IBM)
-		return (gl_hchar);
+		return gl_hchar;
 	if (fn == SMALL)
-		return (gl_hschar);
-	return (0);
+		return gl_hschar;
+	return 0;
 }
 #endif

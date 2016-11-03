@@ -696,7 +696,7 @@ extern int16_t gl_hclip;
 extern int16_t gl_nplanes;
 extern int16_t gl_handle;
 extern int16_t gl_mode;
-extern int16_t gl_mask;
+extern int16_t gl_mask; /* unused */
 extern int16_t gl_tcolor;
 extern int16_t gl_lcolor;
 extern int16_t gl_fis;
@@ -711,7 +711,7 @@ extern GRECT gl_rmenu;
 VOID gsx_sclip PROTO((const GRECT *pt));
 VOID gsx_gclip PROTO((GRECT *pt));
 BOOLEAN gsx_chkclip PROTO((GRECT *pt));
-VOID gsx_pline PROTO((int16_t offx, int16_t offy, int16_t cnt, int16_t pts));
+VOID gsx_pline PROTO((int16_t offx, int16_t offy, int16_t cnt, const int16_t *pts));
 VOID gsx_cline PROTO((uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2));
 VOID gsx_attr PROTO((uint16_t text, uint16_t mode, uint16_t color));
 VOID gsx_bxpts PROTO((GRECT *pt));

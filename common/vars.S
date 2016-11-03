@@ -18,8 +18,14 @@
 name: ds.t size
 #define S(t,size) ds.t size
 
+#define BYTE(name) V(name,b,1)
+#define INT(name) V(name,w,1)
+#define LONG(name) V(name,l,1)
+#define PTR(name) V(name,l,1)
+
 #define GRECT(name) V(name,w,4)
 #define TEDINFO(name) V(name,b,28)
+#define MFDB(name) V(name,b,20)
 
 
 	bss
@@ -505,9 +511,7 @@ name: ds.t size
 	ds.b 12
 	
 	V(old_bcode,l,1)
-	
-	ds.b 2
-	
+	V(_gl_hclip,w,1)
 	V(_gl_bvhard,w,1)
 	V(_ad_shtail,l,1)
 	V(_ad_stdesk,l,1)
@@ -521,9 +525,7 @@ name: ds.t size
 	ds.b 32
 
 	V(_ad_windspb,l,1)
-	
-	ds.b 2
-	
+	V(_gl_mode,w,1)
 	V(_gl_bpend,w,1)
 	V(_gl_cmform,w,37) /* MFORM */
 	V(_gl_bvdisk,w,1)
@@ -531,15 +533,20 @@ name: ds.t size
 	ds.b 2
 	
 	V(_ad_intin,l,1)
+	INT(_gl_hschar)
 	
-	ds.b 10
+	ds.b 8
 	
 	V(_gl_moff,w,1)
 	GRECT(_gl_rcenter)
 	V(_sh_iscart,w,1)
 	V(_hdr_buf,w,18)   /* RSHDR */
 	
-	ds.b 12
+	ds.b 6
+	
+	INT(_gl_lcolor)
+	
+	ds.b 4
 	
 	V(old_mcode,l,1)
 	V(_gl_nplanes,w,1)
@@ -548,11 +555,9 @@ name: ds.t size
 	ds.b $88
 	
 	V(_DOS_AX,w,1)
-	V(_gl_mlen,l,1)
-	
-	ds.b 2
-	
-	V(_gl_ncol,w,1)
+	LONG(_gl_mlen)
+	INT(_gl_mask)
+	INT(_gl_ncol)
 	
 	ds.b $82
 	
@@ -566,8 +571,9 @@ name: ds.t size
 	V(_wasclr,w,1)
 	GRECT(_gl_rmnactv)
 	
-	ds.b $a0
+	ds.b $9e
 	
+	V(_gl_wclip,w,1)
 	V(_cart_dta,l,1)
 	V(_gl_mkrect,b,12)  /* ORECT */
 	V(_gl_awind,l,1)
@@ -576,34 +582,39 @@ name: ds.t size
 	V(_gl_ctwait,w,5) /* MOBLK */
 	V(_gl_rbuf,l,1)
 	
-	ds.l 1
+	ds.w 1
 	
+	V(_gl_xclip,w,1)
 	V(_sh_isgem,w,1)
 	
-	ds.b $24
+	ds.b $22
 	
+	V(_gl_yclip,w,1)
 	V(_gl_hbox,w,1)
 	V(_ad_fstree,l,1)
 	V(_gl_omform,w,37) /* MFORM */
 	V(_gl_rlen,w,1)
 	GRECT(_gl_rmenu)
-	
-	ds.b 2
-	
+	V(_gl_tcolor,w,1)
 	V(_sys_adacc,l,1)
  	V(_W_TREE,b,24*NUM_WIN)  /* OBJECT[NUM_WIN] */
-	V(_gl_mnpid,l,1) /* BUG: should be int */
-	V(_pr_mclick,l,1)
+	LONG(_gl_mnpid) /* BUG: should be int */
+	V(_pr_mclick,w,1)
 	
-	ds.b 8
+	ds.b 4
+	
+	INT(_gl_wschar)
+	
+	ds.b 4
 	
 	V(_rs_global,l,1)
 	V(_elinkoff,l,1)
 	V(_gl_play,w,1)
 	
-	ds.b $82
+	ds.b $80
 	
-	V(_gl_cowner,l,1)
+	INT(_gl_font)
+	PTR(_gl_cowner)
 	
 	ds.b 2
 	
@@ -612,9 +623,7 @@ name: ds.t size
 	V(_gl_pglue,l,1)
 	V(_ad_sysglo,l,1)
 	GRECT(_gl_rfull)
-
-	ds.b 2
-	
+	INT(_gl_patt)
 	GRECT(_gl_rscreen)
 	V(_fs_first,w,1)
 	V(_appl_msg,w,8)
@@ -631,8 +640,10 @@ name: ds.t size
 	
 	V(_gl_btrue,w,1)
 	
-	ds.b 10
+	ds.b 6
 	
+	INT(_gl_hsptschar)
+	INT(_gl_hptschar)
 	V(_wind_msg,w,8)
 	V(_gl_kowner,l,1)
 	V(_crt_error,w,1)
@@ -675,8 +686,10 @@ name: ds.t size
 	V(_desksiz,w,1)
 	V(_deskptr,l,1)
 	
-	ds.b 6
+	ds.b 2
 	
+	INT(_gl_wsptschar)
+	INT(_gl_wptschar)
 	V(_pr_xrat,w,1)
 	V(_pr_button,w,1)
 	V(_drawstk,l,1)
@@ -743,17 +756,23 @@ name: ds.t size
 	
 	V(_sh_gem,w,1)
 	V(_mclick,w,1)
+	INT(_gl_fis)
 	
-	ds.b 6
+	ds.b 4
 	
 	V(_no_aes,w,1)
 	
 	ds.b $30
 	
-	V(_ctl_pd,l,1)
+	PTR(_ctl_pd)
 	
-	ds.b $58
+	ds.b 4
 	
+	MFDB(_gl_src)
+	
+	ds.b $2c
+	
+	MFDB(_gl_dst)
 	GRECT(_gl_rfs)
 	V(_rs_hdr,l,1)
 	V(_gl_tmp,l,1)
@@ -768,8 +787,8 @@ name: ds.t size
 	
 	ds.b 2
 	
-	V(_curpid,w,1)
-	V(_indisp,b,1)
+	INT(_curpid)
+	BYTE(_indisp)
 	even
 	
 	ds.b 2
@@ -782,7 +801,7 @@ name: ds.t size
 	
 	ds.b 6
 	
-	V(_gemptr,l,1)
+	PTR(_gemptr)
 	
 	ds.b 6
 	
@@ -790,12 +809,12 @@ name: ds.t size
 	
 	ds.b $24
 	
-	V(_infptr,l,1)
+	PTR(_infptr)
 	
 	ds.b $24
 	
 	V(_mtrans,w,1)
-	V(_pxpath,l,1)
+	PTR(_pxpath)
 	
 	ds.b $28
 	

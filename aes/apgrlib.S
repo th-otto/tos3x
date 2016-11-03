@@ -77,6 +77,7 @@ VOID gr_inside(GRECT *pt, WORD th)
 	pt->g_h -= (2 * th);
 }
 #endif
+/* 306de: 00e2414c */
 	xdef	_gr_inside
 _gr_inside:
 	move.l	4(sp),a0		; a0 contains grect pointer
@@ -109,6 +110,7 @@ VOID gr_rect(UWORD icolor, UWORD ipattern, GRECT *pt)
 	bb_fill(MD_REPLACE, fis, ipattern, pt->g_x, pt->g_y, pt->g_w, pt->g_h);
 }
 #endif
+/* 306de: 00e24160 */
 	xdef	_gr_rect
 _gr_rect:
 	movem.l	d3-d5/a3-a3,-(sp)
@@ -174,6 +176,7 @@ WORD gr_just(WORD just, WORD font, const char *ptext, WORD w, WORD h, GRECT *pt)
 	return (numchs);
 }
 #endif
+/* 306de: 00e241a8 */
 	xdef	_gr_just
 _gr_just:
 	movem.l	d0-d7/a3-a3,-(sp)
@@ -240,6 +243,7 @@ VOID gr_gtext(WORD just, WORD font, const char *ptext, GRECT *pt, WORD tmode)
 		gsx_tblt(font, t.g_x, t.g_y, numchs);
 }
 #endif
+/* 306de: 00e24216 */
 	xdef	_gr_gtext
 _gr_gtext:
 	movem.l	d0-d1/a3,-(sp)		; save a3 and make room for
@@ -296,6 +300,7 @@ VOID gr_crack(UWORD color, WORD *pbc, WORD *ptc, WORD *pip, WORD *pic, WORD *pmd
 	*pic = LLOBT(color) & 0x0f;
 }
 #endif
+/* 306de: 00e2425a */
 	xdef	_gr_crack
 _gr_crack:
 	move.w	4(sp),d0		; d0 contains color
@@ -373,6 +378,7 @@ VOID gr_gicon(WORD state, int16_t *pmask, int16_t *pdata, const char *ptext, WOR
 	gr_gtext(TE_CNTR, SMALL, ptext, pt, MD_TRANS);
 }
 #endif
+/* 306de: 00e242b4 */
 	xdef	_gr_gicon
 _gr_gicon:
 	movem.l	d3-d7/a3-a4,-(sp)	; 28 bytes 
@@ -495,7 +501,7 @@ VOID gr_box(WORD x, WORD y, WORD w, WORD h, WORD th)
 	xdef	_gr_box
 _gr_box:
 	movem.l	d3/a3-a4,-(sp)		; save some needed registers
-	sub.l	#16,sp			; need 8 bytes for local grects
+	suba.w	#16,sp			; need 8 bytes for local grects
 	move.l	sp,a3			; a3 <- t grect
 	lea	8(sp),a4		; a4 <- n grect
 	move.w	28+12(sp),d3		; th
