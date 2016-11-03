@@ -85,10 +85,10 @@
 
 	xdef	_gl_tmp
 	comm	_gl_tmp,20
-	xdef	_old_mcod
-	comm 	_old_mcod,4
-	xdef	_old_bcod
-	comm	_old_bcod,4
+	xdef	old_mcode
+	comm 	old_mcode,4
+	xdef	old_bcode
+	comm	old_bcode,4
 	xdef	_gl_moff
 	comm	_gl_moff,2
 	xdef	_gl_mlen
@@ -139,6 +139,7 @@ VOID gsx_mfree(NOTHING)
 		dos_free(gl_tmp.fd_addr);
 }
 #endif
+/* 306de: 00e25064 */
 	xdef _gsx_mfree
 _gsx_mfree:
 #if (AESVERSION >= 0x330) | !BINEXACT
@@ -160,6 +161,7 @@ VOID gsx_mret(VOIDPTR *pmaddr, int32_t *pmlen)
 	*pmlen = gl_mlen;
 }
 #endif
+/* 306de: 00e25074 */
 	xdef _gsx_mret
 _gsx_mret:
 
@@ -185,6 +187,7 @@ VOID gsx_ncode(WORD code, WORD n, WORD m)
 	gsx2();
 }
 #endif
+/* 306de: 00e2508a */
 	xdef _gsx_ncode
 _gsx_ncode:
 
@@ -208,6 +211,7 @@ VOID gsx_1code(WORD code, WORD value)
 	gsx_ncode(code, 0, 1);
 }
 #endif
+/* 306de: 00e250a8 */
 	xdef _gsx_1code
 _gsx_1code:
 
@@ -233,6 +237,7 @@ VOID gsx_init(NOTHING)
 	yrat = ptsout[1];
 }
 #endif
+/* 306de: 00e250c0 */
 	xdef _gsx_init
 _gsx_init:
 
@@ -270,6 +275,7 @@ VOID gsx_graphic(BOOLEAN tographic)
 	}
 }
 #endif
+/* 306de: 00e250e4 */
 	xdef _gsx_graphic
 _gsx_graphic:
 
@@ -306,9 +312,9 @@ VOID v_hardcopy(NOTHING)
 	gsx_escapes(17);
 }
 #endif
+/* 306de: 00e2511e */
 	xdef _v_hardcopy
 _v_hardcopy:
-
 	moveq.l	#17,d0
 	bra	escape
 
@@ -328,13 +334,13 @@ _gsx_escapes:
 	move.w	4(sp),d0
 
 escape:	move.w	d0,_contrl+10
-	moveq.l	#005,d0			; code 005 => escape
+	moveq.l	#5,d0			; code 5 => escape
 	bra	vdi_short
 
 
 
 *****	 Open physical work station for 6 resolutions	*****
-
+/* 306de: 00e25132 */
 	xdef _gsx_wsopen
 _gsx_wsopen:
 
@@ -348,7 +354,7 @@ L15:	move.w	#1,(a1)+
 
 	move.w	#2,(a1)			; intin[10] <- 2
 
-	lea	restable,a0		; look for the drive handle 
+	lea	restable,a0		; look for the driver handle 
 	lea	restype,a1		; load in res table
 L209:
 	move.w	(a1)+,d0
@@ -414,10 +420,11 @@ VOID gsx_wsclose(NOTHING)
 	gsx_ncode(CLOSE_WORKSTATION, 0, 0);
 }
 #endif
+/* 306de: 00e251d4 */
 	xdef _gsx_wsclose
 _gsx_wsclose:
 
-	moveq.l	#002,d0			; code 002 => v_clswk
+	moveq.l	#2,d0			; code 2 => v_clswk
 	bra	vdi_short
 
 
@@ -491,7 +498,7 @@ _bb_set:
 
 	lea	_gl_tmp+10,a1		; a1 -> gl_tmp.fd_stand
 
-	move.w	#01,(a1)		; gl_tmp.fd_stand   <- TRUE
+	move.w	#1,(a1)			; gl_tmp.fd_stand   <- TRUE
 	move.w	d1,-(a1)		; gl_tmp.fd_wdwidth <- width in words
 	move.w	d2,-(a1)		; gl_tmp.fd_h       <- height in pixels
 	lsl.w	#4,d1
@@ -543,6 +550,7 @@ VOID bb_save(GRECT *ps)
 	bb_set(ps->g_x, ps->g_y, ps->g_w, ps->g_h, &ptsin[0], &ptsin[4], &gl_src, &gl_src, &gl_tmp);
 }
 #endif
+/* 306de: 00e25260 */
 	xdef _bb_save
 _bb_save:
 
@@ -550,8 +558,8 @@ _bb_save:
 	lea	_gl_src,a1
 	pea	 (a1)
 	pea	 (a1)
-	pea	_ptsin+08
-	pea	_ptsin+00
+	pea	_ptsin+8
+	pea	_ptsin+0
 
 	move.l	4+20(sp),a0		; a0 -> ps.g_w
 	move.l	4(a0),-(sp)		; width and height
@@ -563,7 +571,7 @@ _bb_save:
 
 
 
-
+/* 306de: 00e25290 */
 	xdef _bb_restore
 _bb_restore:
 
@@ -571,8 +579,8 @@ _bb_restore:
 	pea	 (a1)
 	pea	_gl_tmp
 	pea	 (a1)
-	pea	_ptsin+00
-	pea	_ptsin+08
+	pea	_ptsin+0
+	pea	_ptsin+8
 
 	move.l	4+20(sp),a0		; a0 -> ps.g_w
 	move.l	4(a0),-(sp)		; ps.g_w and ps.g_h
@@ -601,18 +609,19 @@ WORD gsx_setmb(UWORD *boff, UWORD *moff, VOIDPTR *pdrwaddr)
 	m_lptr2( pdrwaddr );		don't intercept draw vector */
 }
 #endif
+/* 306de: 00e252c0 */
 	xdef _gsx_setmb
 _gsx_setmb:
 
 	move.l	4(sp),_contrl+14	; contrl[7-8] <- new button vector
 	moveq.l	#125,d0
 	bsr	vdi_short
-	move.l	_contrl+18,_old_bcod
+	move.l	_contrl+18,old_bcode
 
 	move.l	8(sp),_contrl+14	; contrl[7-8] <- new motion vector
 	moveq.l	#126,d0
 	bsr	vdi_short
-	move.l	_contrl+18,_old_mcod
+	move.l	_contrl+18,old_mcode
 
 	rts
 
@@ -634,10 +643,10 @@ VOID gsx_resetmb(NOTHING)
 	xdef _gsx_resetmb
 _gsx_resetmb:
 
-	move.l	_old_bcod,_contrl+14		; reset button vector
+	move.l	old_bcode,_contrl+14		; reset button vector
 	moveq.l	#125,d0
 	bsr	vdi_short
-	move.l	_old_mcod,_contrl+14		; reset motion vector
+	move.l	old_mcode,_contrl+14		; reset motion vector
 	moveq.l	#126,d0
 	bra	vdi_short
 
@@ -652,6 +661,7 @@ WORD gsx_tick(intptr_t tcode, intptr_t *ptsave)
 	return (intout[0]);
 }
 #endif
+/* 306de: 00e25312 */
 	xdef _gsx_tick
 _gsx_tick:
 
@@ -676,6 +686,7 @@ VOID gsx_mxmy(WORD *pmx, WORD *pmy)
 	*pmy = yrat;
 }
 #endif
+/* 306de: 00e25332 */
 	xdef _gsx_mxmy
 _gsx_mxmy:
 
@@ -718,6 +729,7 @@ VOID gsx_moff(NOTHING)
 	gl_moff++;
 }
 #endif
+/* 306de: 00e25350 */
 	xdef _gsx_moff
 	xdef _ratexit
 _ratexit:
@@ -747,6 +759,7 @@ VOID gsx_mon(NOTHING)
 	}
 }
 #endif
+/* 306de: 00e2536c */
 	xdef _gsx_mon
 _gsx_mon:
 
@@ -818,6 +831,7 @@ WORD v_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
 	i_ptsout(ptsout);
 }
 #endif
+/* 306de: 00e2538c */
 	xdef _v_opnwk
 _v_opnwk:
 
@@ -848,6 +862,7 @@ VOID v_pline(WORD count, WORD *pxyarray)
 	i_ptsin(ptsin);
 }
 #endif
+/* 306de: 00e253d8 */
 	xdef _v_pline
 _v_pline:
 
@@ -874,6 +889,7 @@ VOID vst_clip(WORD clip_flag, WORD pxyarray)
 	i_ptsin(ptsin);
 }
 #endif
+/* 306de: 00e253ec */
 	xdef _vst_clip
 _vst_clip:
 
@@ -901,6 +917,7 @@ VOID vst_height(WORD height, WORD *pchr_width, WORD *pchr_height, WORD *pcell_wi
 	*pcell_height = ppts[3];
 }
 #endif
+/* 306de: 00e25400 */
 	xdef _vst_height
 _vst_height:
 
@@ -935,6 +952,7 @@ VOID vr_recfl(WORD *pxyarray, FDB *pdesMFDB) /* ??? why MFDB ??? */
 	i_ptsin(ptsin);
 }
 #endif
+/* 306de: 00e2542e */
 	xdef _vr_recfl
 _vr_recfl:
 
@@ -959,6 +977,7 @@ VOID vro_cpyfm(WORD wr_mode, WORD *pxyarray, WORD *psrcMFDB, WORD *pdesMFDB)
 	i_ptsin(ptsin);
 }
 #endif
+/* 306de: 00e2543e */
 	xdef _vro_cpyfm
 _vro_cpyfm:
 
@@ -990,6 +1009,7 @@ VOID vrt_cpyfm(WORD wr_mode, WORD *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, WORD 
 	i_ptsin(ptsin);
 }
 #endif
+/* 306de: 00e25450 */
 	xdef _vrt_cpyfm
 _vrt_cpyfm:
 
@@ -1014,7 +1034,7 @@ VOID vrn_trnfm(FDB *psrcMFDB, FDB *pdesMFDB)
 	gsx_ncode(TRANSFORM_FORM, 0, 0);
 }
 #endif
-
+/* 306de: 00e25466 */
 	xdef _vrn_trnfm
 _vrn_trnfm:
 
@@ -1034,6 +1054,7 @@ VOID vsl_width(WORD width)
 	gsx_ncode(S_LINE_WIDTH, 1, 0);
 }
 #endif
+/* 306de: 00e25470 */
 	xdef _vsl_width
 _vsl_width:
 	lea	_ptsin,a1
@@ -1076,7 +1097,7 @@ vdi_short:
 
 * in:
 *	d0	offset into vdi_list
-
+/* 306de: 00e25498 */
 vdi_call:
 
 	lea	vdi_list(pc,d0.w),a2

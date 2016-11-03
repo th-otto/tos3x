@@ -52,6 +52,7 @@
 
 	text
 
+/* 306de: 00e254f8 */
 	xdef	_gsx2
 _gsx2:
 	lea	pblock,a0	; a0 -> pblock

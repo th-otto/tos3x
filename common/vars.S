@@ -542,8 +542,9 @@ name: ds.t size
 	V(_sh_iscart,w,1)
 	V(_hdr_buf,w,18)   /* RSHDR */
 	
-	ds.b 6
+	ds.b 4
 	
+	INT(_gl_graphic)
 	INT(_gl_lcolor)
 	
 	ds.b 4
