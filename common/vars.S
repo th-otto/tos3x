@@ -418,12 +418,9 @@ name: ds.t size
 	V(errstk,l,257)
 #endif
 	
-	V(savea0,l,1)
-	V(srsave,w,1)
-	V(savsr,w,1)
-	V(psetsr,w,1)
+	V(savea0,b,654) /* savea0,srsave,savsr,psetsr,dspstk */
 
-	ds.b $28C
+	ds.b 8
 
 	V(_drwaddr,l,1)
 	V(_tikaddr,l,1)

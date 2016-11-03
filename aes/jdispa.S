@@ -43,16 +43,16 @@
 *****************************************************************
 	bss
 	even
-	xdef _savea0
-	comm _savea0,654
+	xdef savea0
+	comm savea0,654
 
 /* for savestate */
-#define srsave _savea0+4
+#define srsave savea0+4
 /* _cli and _si */
-#define savsr  _savea0+6
+#define savsr  savea0+6
 /* for psetup */
-#define psetsr _savea0+8
-#define dspstk _savea0+10+160*4
+#define psetsr savea0+8
+#define dspstk savea0+10+160*4
 
 	text
 
@@ -116,7 +116,7 @@ _dsptch:
 	beq.b	dsp1			; if clear, enter with _indisp set
 	rts				; else just forget the whole thing
  
-dsp1:	tst	longframe		; check what mode what are in
+dsp1:	tst.w	(longframe).w		; check what mode what are in
 	beq.b	dsp2			; 68000 mode !
 
 	subq	#2,sp			; bump up the stack pointer
@@ -133,7 +133,7 @@ _savestate:
 	move	sr,srsave		; save interrupts
 	or	#$700,sr		; turn them off
 
-	move.l	a0,_savea0
+	move.l	a0,savea0
 
 	move.l	_rlr,a0			; Get the current PD
 	move.l	8(a0),a0		; Get the UDA from PD
@@ -143,7 +143,7 @@ _savestate:
 
 	move.l	usp,a1
 	move.l	a1,64(a0)
-	move.l	_savea0,32(a0)
+	move.l	savea0,32(a0)
 
 	lea	dspstk,sp		; Load a dispatcher stack
 	move	srsave,sr		; Restore interrupts
@@ -196,7 +196,7 @@ _gotopgm:
 	or	#$700,SR		; turn interrupts off
 	movea.l	_rlr,a0			; get pd
 	move.l	$18(a0),a0		; pd->ldaddr is base page of program
-	tst	longframe		; if not on longframe CPU
+	tst.w	(longframe).w		; if not on longframe CPU
 	beq.b	g_1			; don't need a format word
 	clr	-(sp)			; otherwise fake a format word
 
@@ -222,7 +222,7 @@ _psetup:
 	move.l	8(sp),d0		; val
 	move.l	8(a0),a1		; a1 = pd->uda
 	move.l	62(a1),a2		; a2 = uda->SUPSTK
-	tst	longframe		; if it's not a longframe CPU
+	tst.w	(longframe).w		; if it's not a longframe CPU
 	beq.b	p_1			; don't need a format word
 	clr	-(a2)			; otherwise, fake a format word
 
