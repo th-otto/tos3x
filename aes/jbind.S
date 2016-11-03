@@ -63,35 +63,42 @@ NOERR	equ	0
 #define _ldivr _crit_err+24
 #define errsave _crit_err+28
 
+#if TOSVERSION >= 0x400
+#define ERRSTKSIZE 1604
+#else
+#define ERRSTKSIZE 1028
+#endif
+
 	text
 
-*
-*
+/* 306de: 00e25570 */
 	xdef	_givecpm
 _givecpm:
-	move.l	_SAV2TRP,TRP2VEC	; Restore Trap 2 vector.
+	move.l	_SAV2TRP,(TRP2VEC).w	; Restore Trap 2 vector.
 	rts
 
-*
-* --Grab trap 2 so we can do our own system reset if the program wants to.
-*
+/*
+ * --Grab trap 2 so we can do our own system reset if the program wants to.
+ */
+/* 306de: 00e2557a */
 	xdef	_takecpm
 _takecpm:
-	move.l	TRP2VEC,_SAV2TRP	; Save current Trap 2 vector.
-	move.l	#_grptrp,TRP2VEC	; Replace vector with ours.
+	move.l	(TRP2VEC).w,_SAV2TRP	; Save current Trap 2 vector.
+	move.l	#_grptrp,(TRP2VEC).w	; Replace vector with ours.
 	rts
-*
-*	retake gem trap and error trap after execing a program
-*
+/*
+ *	retake gem trap and error trap after execing a program
+ */
+/* 306de: 00e2558c */
 	xdef	_retake
 _retake:
-	move.l	#_grptrp,TRP2VEC	; Replace vector with ours.
+	move.l	#_grptrp,(TRP2VEC).w	; Replace vector with ours.
 	move.l	#_err_trap,d0		; set ours
 
-*	bra	call_err		; FALL TRHU
-*
-*
-*
+/*	bra	call_err		 FALL TRHU */
+
+
+
 call_err:
 	move.l	d0,-(a7)
 	move.w	#$101,-(a7)
@@ -136,10 +143,10 @@ d_out:
 	rts
 	
 
-*
-*
-*	ASSUME CALLING PROCESS HAS ENOUGH STACK
-*
+/*
+ *	ASSUME CALLING PROCESS HAS ENOUGH STACK
+ */
+/* 306de: 00e255ec */
 	xdef  _err_trap
 _err_trap:
 	move.w	#1,_crt_error		; set flag for dispatcher
@@ -154,7 +161,7 @@ _err_trap:
 	move.w	6(a7),d1		; drive
 	jsr	_cli
 	move.l	a7,errsave		; save stack
-	move.l	#errstk,a7		; switch stack
+	move.l	#errstk+ERRSTKSIZE-4,a7		; switch stack
 	jsr	_sti
 	movem.l	d3-d7/a3-a6,-(a7)
 	move.l	#_err_tbl,a1
@@ -203,6 +210,7 @@ er_1:
 *
 *	set DOS_ERR 
 *
+/* 306de: 00e2568e */
 	xdef	_dos_exec
 _dos_exec:
 	jsr	_cli
@@ -210,7 +218,7 @@ _dos_exec:
 	move.l	8(a0),a0		; get uda (pd->uda)
 	move.l	62(a0),_savsup		; save uda->supstk
 	move.l	a7,a1			; get current a7
-	sub.l	#128,a1			; give up some space
+	suba.w	#128,a1			; give up some space
 	move.l	a1,62(a0)		; make uda->supstk below GEM's ssp
 	jsr	_sti
 *
@@ -221,7 +229,7 @@ _dos_exec:
 	move.w	8(a1),-(a7)		;  segenv	(3)
 	move.w	#$4B,-(a7)		;  command
 	trap	#1
-	add.l	#16,a7
+	adda.w	#16,a7
 *
 	jsr	_cli
 	move.l	_rlr,a0
@@ -302,7 +310,7 @@ ldiv:
 	move.l	#$80000000,_ldivr
 	move.l	#$80000000,d0
 	divs.w	#0,d0			; div by zero trap
-	bra	La1
+	bra.s	La1
 La2:
 	bge	La3
 	neg.l	d6
@@ -373,6 +381,7 @@ La1:
  * so that a system reset is not done, rather a return to the 
  * calling program can be done.
  */
+/* 306de: 00e257f8 */
 _grptrp:
 	tst.w	d0			; Is function number system reset ?
 	beq	_back
@@ -449,8 +458,8 @@ _gosuper:
 *	supret(0);
 *}
 
-	cmp.w	#200,d0
-	bne	super1
+	cmp.w	#CRYSTAL1,d0
+	bne	super1             /* if CRYSTAL2, fall into dsptch (same as appl_yield() for PC-GEM) */
 	move.l	d1,-(sp)
 	jsr	_xif
 	addq.l	#4,sp
@@ -509,8 +518,5 @@ _err_tbl:	dc.b	4,1,1,2,1,1,2,2,4,2,2,2,0,3,4,2,6
 	bss
 	even
 
-	xdef	_crit_err
-	comm _crit_err,32
-
-	ds.l	400		; lots of space for errors
-errstk:		ds.l	1
+	xdef errstk
+	comm errstk,ERRSTKSIZE

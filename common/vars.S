@@ -410,10 +410,14 @@ name: ds.t size
 	V(_wtcolor,w,MAXOBJ)
 	V(_wbcolor,w,MAXOBJ)
 	V(pblock,l,5)
-	V(_crit_err,l,1)
+	V(_crit_err,l,8) /* _crit_err,_dk_err,savestk,_SAV2TRP,_savsup,drawsp,_ldivr,errsave */
 	
-	ds.b $420
-
+#if TOSVERSION >= 0x400
+	V(errstk,l,401)
+#else
+	V(errstk,l,257)
+#endif
+	
 	V(savea0,l,1)
 	V(srsave,w,1)
 	V(savsr,w,1)
