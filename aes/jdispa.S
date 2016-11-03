@@ -1,36 +1,36 @@
-***************************    JDISPA.S    ******************************
-*
-* =======================================================================
-* $Author: mui $ 	$Date: 89/04/26 18:28:27 $
-* =======================================================================
-*
-* Revision 2.3  89/04/26  18:28:27  mui
-* TT - also fixed a typo in comments before _switchto
-* 
-* Revision 2.2  89/04/19  14:43:14  kbad
-* 680x0 support, pseudo-TAS excised, changed interface to _disp, and
-* now CPU type is checked before kludgeing up an exception stack frame.
-* 
-* Revision 2.1  89/02/22  05:30:35  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.3  88/10/12  13:58:24  mui
-* added comments
-* 
-* Revision 1.2  88/09/21  14:29:05  mui
-* Add comment
-* 
-* Revision 1.1  88/06/02  12:35:40  lozben
-* Initial revision
-* 
-*************************************************************************
-*	DISPA.S		late 83			Jason Loveman
-*	for crystal	9/15/84 - 12/27/84	Lowell Webster
-* 	for gemdos	1/31/85 - 05/22/85	
-*	Clean up	02/03/88		D.Mui
-*	Use MAC to assemble	6/28/90		D.Mui
-* assemble with MAS 900801 kbad
-
+/***************************    JDISPA.S    ******************************
+ *
+ * =======================================================================
+ * $Author: mui $ 	$Date: 89/04/26 18:28:27 $
+ * =======================================================================
+ *
+ * Revision 2.3  89/04/26  18:28:27  mui
+ * TT - also fixed a typo in comments before _switchto
+ * 
+ * Revision 2.2  89/04/19  14:43:14  kbad
+ * 680x0 support, pseudo-TAS excised, changed interface to _disp, and
+ * now CPU type is checked before kludgeing up an exception stack frame.
+ * 
+ * Revision 2.1  89/02/22  05:30:35  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.3  88/10/12  13:58:24  mui
+ * added comments
+ * 
+ * Revision 1.2  88/09/21  14:29:05  mui
+ * Add comment
+ * 
+ * Revision 1.1  88/06/02  12:35:40  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ *	DISPA.S		late 83			Jason Loveman
+ *	for crystal	9/15/84 - 12/27/84	Lowell Webster
+ * 	for gemdos	1/31/85 - 05/22/85	
+ *	Clean up	02/03/88		D.Mui
+ *	Use MAC to assemble	6/28/90		D.Mui
+ * assemble with MAS 900801 kbad
+ */
 #define __ASSEMBLER__ 1
 
 #include "../common/config.h"
@@ -38,9 +38,9 @@
 #include "../common/asmdefs.h"
 
 
-*****************************************************************
-* BSS for this module						*
-*****************************************************************
+/*****************************************************************
+ * BSS for this module                                           *
+ *****************************************************************/
 	bss
 	even
 	xdef savea0
@@ -59,13 +59,13 @@
 longframe	equ $59e			; BIOS system variable...
 
 
-*****************************************************************
-* Utility routines						*
-*****************************************************************
+/*****************************************************************
+ * Utility routines						 *
+ *****************************************************************/
 
-*
-* disable interrupts and save state
-*
+/*
+ * disable interrupts and save state
+ */
 /* 306de: e2588a */
 	xdef	_cli
 _cli:
@@ -73,27 +73,27 @@ _cli:
 	or	#$700,sr
 	rts
 
-*
-* enable interrupts and restore state
-*
+/*
+ * enable interrupts and restore state
+ */
 /* 306de: 00e25896 */
 	xdef	_sti
 _sti:
 	move	savsr,sr
 	rts
 
-*
-* "hard" disable interrupts, no save
-*
+/*
+ * "hard" disable interrupts, no save
+ */
 /* 306de: 00e2589e */
 	xdef	_hcli
 _hcli:
 	or	#$700,sr
 	rts
 
-*
-* "hard" enable interrupts
-*
+/*
+ * "hard" enable interrupts
+ */
 /* 306de: 00e258a4 */
 	xdef	_hsti
 _hsti:
@@ -101,14 +101,14 @@ _hsti:
 	rts
 
  
-*****************************************************************
-*								*
-* _dsptch, called from lots of places to do context switching.	*
-* We want to return to super from switchto (see below) by using	*
-* an rte.  Return is already on stack, just push current sr...	*
-* OR fix stack frame then push the sr if CPU uses long frames.	*
-*								*
-*****************************************************************
+/*****************************************************************
+ *                                                               *
+ * _dsptch, called from lots of places to do context switching.  *
+ * We want to return to super from switchto (see below) by using *
+ * an rte.  Return is already on stack, just push current sr...  *
+ * OR fix stack frame then push the sr if CPU uses long frames.  *
+ *                                                               *
+ *****************************************************************/
 /* 306de: 00e258aa */
 	xdef	_dsptch
 _dsptch:
@@ -125,9 +125,9 @@ dsp1:	tst.w	(longframe).w		; check what mode what are in
 
 dsp2:	move	sr,-(sp)		; and finish the stack frame with sr
 	
-*
-* Now save the context of the machine
-*
+/*
+ * Now save the context of the machine
+ */
 	xdef	_savestate
 _savestate:
 	move	sr,srsave		; save interrupts
@@ -149,25 +149,28 @@ _savestate:
 	move	srsave,sr		; Restore interrupts
 	jsr	_disp			; Go to the Sub dispatcher
 
-* ================================================================
-* gemdisp.c:disp() determines who to run next, makes him rlr,
-* then comes back to us to do the actual context switch
-* ================================================================
+/*
+ * ================================================================
+ * gemdisp.c:disp() determines who to run next, makes him rlr,
+ * then comes back to us to do the actual context switch
+ * ================================================================
+ */
 
-*
-*	For reference purposes
-*	UDA
-*	{
-*		WORD	u_insuper;		/* in supervisor flag	*/ 
-*		ULONG	u_regs[15];		/* d0-d7,a0-a6		*/
-*		ULONG	*u_spsuper;		/* supervisor stack	*/
-*		ULONG	*u_spuser;		/* user stack		*/
-*		ULONG	u_super[STACK_SIZE];
-*		ULONG	u_supstk;
-*	} ;
-*
-*
-*
+#if 0
+	For reference purposes
+	UDA
+	{
+		WORD	u_insuper;		/* in supervisor flag	*/ 
+		ULONG	u_regs[15];		/* d0-d7,a0-a6		*/
+		ULONG	*u_spsuper;		/* supervisor stack	*/
+		ULONG	*u_spuser;		/* user stack		*/
+		ULONG	u_super[STACK_SIZE];
+		ULONG	u_supstk;
+	};
+#endif
+
+
+
 
 /* 306de: 00e25908 */
 	xdef	_switchto
@@ -185,10 +188,10 @@ _switchto:
 	clr.b	_indisp			; Can enter dispatcher now
 	rte	
 
-*****************************************************************
-* _gotopgm:							*
-*	Run an accessory and not giving him the basepage	*
-*****************************************************************
+/*****************************************************************
+ * _gotopgm:                                                     *
+ *       Run an accessory and not giving him the basepage        *
+ *****************************************************************/
 /* 306de: 00e25934 */
 	xdef	_gotopgm
 _gotopgm:
@@ -205,15 +208,15 @@ g_1:	move.l	8(a0),-(sp)		; get beg of text on our sp
 	eor	#$2000,(sp)		; run him in user mode (SR = 0, IPL0)
 	rte
 
-*****************************************************************
-*		VOID						*
-*	psetup(p, codevalue)					*
-*		PD		*p;				*
-*		CODE		*codevalue;			*
-*								*
-*	Set up a process' stack frame in preparation		*
-*	for an RTE that will start this process executing.	*
-*****************************************************************
+/*****************************************************************
+ *               VOID                                            *
+ *       psetup(p, codevalue)                                    *
+ *               PD              *p;                             *
+ *               CODE            *codevalue;                     *
+ *                                                               *
+ *       Set up a process' stack frame in preparation            *
+ *       for an RTE that will start this process executing.      *
+ *****************************************************************/
 	xdef	_psetup
 _psetup:
 	move	sr,psetsr		; save interrupts

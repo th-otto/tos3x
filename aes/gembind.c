@@ -104,7 +104,7 @@ PP(register VOIDPTR *addr_in;)
  * AES #17 - appl_yield - Force AES process-switch. 
  */
 	/*
-	 * was never implement in TOS GEM, but calling trap #2
+	 * was never implemented in TOS GEM, but calling trap #2
 	 * with D0 = 201 does the same thing
 	 */
 	case APPL_YIELD:

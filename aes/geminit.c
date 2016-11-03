@@ -982,7 +982,7 @@ PP(MFORM *grmaddr;)
 
 #if AES3D
 /*
- * AES #71 - graf_slidebox - Graphics slide box
+ * AES #76 - graf_slidebox - Graphics slide box
  *
  * Change code to compensate 3D objects
  */

@@ -1,34 +1,34 @@
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:28:16 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:28:16  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:30:27  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.2  88/11/01  11:25:49  mui
-* Fix the err_trap to save the PD's stack pointer
-* 
-* Revision 1.1  88/06/02  12:35:36  lozben
-* Initial revision
-* 
-*************************************************************************
-
-*	JBIND.S		 11/27/84 - 05/03/85  LKW
-*			 04/02/85 - 05/23/85  DMM
-*	Fix at the dos_exec for dos_ax return code 08/21/85 Derek Mui
-*	Clean up 	 02/03/88		D.Mui
-*	Change at gosuper, super now inlined	4/11/88
-*	Use MAC to assemble	6/28/90		D.Mui
-*	Add _crt_error semaphore to dispatcher	900731 D.Mui
-* assemble with MAS 900801 kbad (changed 2 clr.w a0 to sub.w a0,a0)
-*	Change in critical error to ignore error -15 3/1/91 D.Mui
-*	Install a desktop critical error handler	4/22/91	D.Mui
-
+/*************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:28:16 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:28:16  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:30:27  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.2  88/11/01  11:25:49  mui
+ * Fix the err_trap to save the PD's stack pointer
+ * 
+ * Revision 1.1  88/06/02  12:35:36  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ * 
+ *	JBIND.S		 11/27/84 - 05/03/85  LKW
+ *			 04/02/85 - 05/23/85  DMM
+ *	Fix at the dos_exec for dos_ax return code 08/21/85 Derek Mui
+ *	Clean up 	 02/03/88		D.Mui
+ *	Change at gosuper, super now inlined	4/11/88
+ *	Use MAC to assemble	6/28/90		D.Mui
+ *	Add _crt_error semaphore to dispatcher	900731 D.Mui
+ * assemble with MAS 900801 kbad (changed 2 clr.w a0 to sub.w a0,a0)
+ *	Change in critical error to ignore error -15 3/1/91 D.Mui
+ *	Install a desktop critical error handler	4/22/91	D.Mui
+ */
 
 #define __ASSEMBLER__ 1
 
@@ -37,14 +37,14 @@
 #include "../common/asmdefs.h"
 
 
-* --Crystal function numbers.
-*
+/* --Crystal function numbers. */
+
 CRYSTAL1 equ	200			; Call Crystal function.
 CRYSTAL2 equ	201			; Call dispatch.
 TRP2VEC	 equ	$88
-*
-* --DOS.C error flag conventions.
-*
+/*
+ * --DOS.C error flag conventions.
+ */
 ERROR	equ	1
 NOERR	equ	0
 
@@ -64,9 +64,9 @@ NOERR	equ	0
 #define errsave _crit_err+28
 
 #if TOSVERSION >= 0x400
-#define ERRSTKSIZE 1604
+ERRSTKSIZE equ 1604
 #else
-#define ERRSTKSIZE 1028
+ERRSTKSIZE equ 1028
 #endif
 
 	text
@@ -198,18 +198,18 @@ er_1:
 	rts				; off we go
 	
 
-*
-*
-*	EXEC a program
-*	dos_exec(pspec, segenv, pcmdln)
-*		LONG	pspec;
-*		WORD	segenv;
-*		LONG	pcmdln;
-*
-* tho: really belongs into jdos.S
-*
-*	set DOS_ERR 
-*
+/*
+ *
+ *	EXEC a program
+ *	dos_exec(pspec, segenv, pcmdln)
+ *		LONG	pspec;
+ *		WORD	segenv;
+ *		LONG	pcmdln;
+ *
+ * tho: really belongs into jdos.S
+ *
+ *	set DOS_ERR 
+ */
 /* 306de: 00e2568e */
 	xdef	_dos_exec
 _dos_exec:
@@ -221,7 +221,7 @@ _dos_exec:
 	suba.w	#128,a1			; give up some space
 	move.l	a1,62(a0)		; make uda->supstk below GEM's ssp
 	jsr	_sti
-*
+
 	move.l	a7,a1
 	clr.l	-(a7)			;  NULLPTR
 	move.l	10(a1),-(a7)		;  pcmdln
@@ -230,7 +230,7 @@ _dos_exec:
 	move.w	#$4B,-(a7)		;  command
 	trap	#1
 	adda.w	#16,a7
-*
+
 	jsr	_cli
 	move.l	_rlr,a0
 	move.l	8(a0),a0
@@ -421,43 +421,43 @@ _gosuper:
 	movea.l	_rlr,a6			; rlr is a pointer to pd structure.
 	movea.l	8(a6),a6		; get address of uda structure.
 
-* 					Set parameters in uda structure
+/* Set parameters in uda structure */
 
 	move.w	#1,(a6)			; u_insuper flag.
 	move.l	a0,66(a6)		; save current user stack pointer.
 	move.l	a7,70(a6)		; save current super stack ptr
 	movea.l	62(a6),a7		; get super stack from uda
-*
-	jsr	_sti			; interrupts on
-*
-* --Set up to call super() in xif.c
-*
-*	move.l	d1,-(a7)		; Address of Crystal parameter block.
-*	clr.w	-(a7)			; Unused parameter.
-*	move.w	d0,-(a7)		; Crystal function number.
-*
-* --Go to super().
-*
-*	move.l	#_super,a0
-*	jsr	(a0)			; super expects jsr
-*
-*	Supervisor entry point.  Stack frame must be exactly like
-*	this if supret is to work.
-*
-*	VOID
-*      d0,          d1 	
-*super(cx, ifunc, pcrys_blk)
-*	WORD		cx, ifunc;
-*	LONG		pcrys_blk;
-*{
-*	if( cx == 200 )
-*	  xif(pcrys_blk);
-*
-*	  dsptch();
-*
-*	supret(0);
-*}
 
+	jsr	_sti			; interrupts on
+/*
+ * --Set up to call super() in xif.c
+ *
+ *	move.l	d1,-(a7)		; Address of Crystal parameter block.
+ *	clr.w	-(a7)			; Unused parameter.
+ *	move.w	d0,-(a7)		; Crystal function number.
+ *
+ * --Go to super().
+ *
+ *	move.l	#_super,a0
+ *	jsr	(a0)			; super expects jsr
+ *
+ *	Supervisor entry point.  Stack frame must be exactly like
+ *	this if supret is to work.
+ *
+ *	VOID
+ *      d0,          d1 	
+ *super(cx, ifunc, pcrys_blk)
+ *	WORD		cx, ifunc;
+ *	LONG		pcrys_blk;
+ *{
+ *	if( cx == 200 )
+ *	  xif(pcrys_blk);
+ *
+ *	  dsptch();
+ *
+ *	supret(0);
+ *}
+ */
 	cmp.w	#CRYSTAL1,d0
 	bne	super1             /* if CRYSTAL2, fall into dsptch (same as appl_yield() for PC-GEM) */
 	move.l	d1,-(sp)
@@ -472,12 +472,14 @@ super1:
  *	Return from Crystal call 
  * /////////////////////////////////////////////
  */
-*	xdef	_supret
-*_supret:
-*	move.w	4(a7),d0		; Get return passed from super().
-*
+#if 0
+	xdef	_supret
+_supret:
+	move.w	4(a7),d0		; Get return passed from super().
+#endif
+
 	jsr	_cli
-*	add.l	#$18,a7			; restore stack
+/*	add.l	#$18,a7			; restore stack */
 	movea.l	_rlr,a0
 	movea.l	8(a0),a0		; Get address of UDA.
 	clr.w	(a0)			; clear u_insuper flag.
@@ -486,31 +488,31 @@ super1:
 	move.l	66(a0),a0		; restore caller's user stack.
 	movem.l (a0)+,d1-d7/a0-a6	; restore user's regs
 	move.l	a0,usp
-*
+
 	jsr	_sti
 	rte
 
 
-*
-* ==========================================
-*
-*	Call dr_code with its own stack
-*
-* ==========================================
-*
-*	xdef	_far_draw
-*_far_draw:
-*	move.l	4(a7),d0		; get addr of pb
-*	move.l	a7,drawsp
-*	movea.l	_drawstk,a7		; allocated by deskglob
-*	move.l	d0,-(a7)		; pass addr of pb to dr_code
-*	jsr	_dr_code
-*	movea.l	drawsp,a7
-*	rts
+/*
+ * ==========================================
+ *
+ *	Call dr_code with its own stack
+ *
+ * ==========================================
+ */
+#if 0
+	xdef	_far_draw
+_far_draw:
+	move.l	4(a7),d0		; get addr of pb
+	move.l	a7,drawsp
+	movea.l	_drawstk,a7		; allocated by deskglob
+	move.l	d0,-(a7)		; pass addr of pb to dr_code
+	jsr	_dr_code
+	movea.l	drawsp,a7
+	rts
+#endif
 
-*
-*
-*
+
 	data
 	even
 _err_tbl:	dc.b	4,1,1,2,1,1,2,2,4,2,2,2,0,3,4,2,6

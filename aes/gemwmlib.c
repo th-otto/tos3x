@@ -119,7 +119,7 @@ static short const garbage[] = {
 };
 #endif
 
-static TEDINFO const gl_asamp[1] =
+static TEDINFO const gl_asamp =
 {
 	0x0L, 0x0L, 0x0L, IBM, MD_REPLACE, TE_LEFT, SYS_FG, 0x0, 1, 80, 80
 };
@@ -1312,8 +1312,8 @@ BOOLEAN wm_start(NOTHING)
 	w_walkflag = FALSE;
 	
 	/* init tedinfo parts of title and info lines */
-	movs(sizeof(TEDINFO), gl_asamp, &gl_aname);
-	movs(sizeof(TEDINFO), gl_asamp, &gl_ainfo);
+	movs(sizeof(TEDINFO), &gl_asamp, &gl_aname);
+	movs(sizeof(TEDINFO), &gl_asamp, &gl_ainfo);
 	gl_aname.te_just = TE_CNTR;
 	W_ACTIVE[W_NAME].ob_spec = (intptr_t)&gl_aname;
 	W_ACTIVE[W_INFO].ob_spec = (intptr_t)&gl_ainfo;

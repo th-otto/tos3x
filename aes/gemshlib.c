@@ -167,7 +167,7 @@ PP(char *ptail;)
 {
 	LBCOPY(pcmd, ad_shcmd, CMDLEN);
 	LBCOPY(ptail, ad_shtail, CMDLEN);
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -206,7 +206,7 @@ PP(char *ptail;)
 	sh_doexec = doex;
 	sh_isgem = (isgem) ? TRUE : FALSE;	/* isgem may not = 1    */
 
-	return (TRUE);						/* for the future   */
+	return TRUE;						/* for the future   */
 }
 
 
@@ -222,7 +222,7 @@ PP(char *pbuffer;)
 PP(int16_t len;)
 {
 	LBCOPY(pbuffer, &D.s_save[0], len);
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -238,7 +238,7 @@ PP(char *pdata;)
 PP(int16_t len;)
 {
 	LBCOPY(&D.s_save[0], pdata, len);
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -280,7 +280,7 @@ BOOLEAN sh_toalpha(NOTHING)
 	gsx_mfree();						/* free the blt buffer  */
 	gsx_graphic(FALSE);					/* close workstation    */
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -345,7 +345,7 @@ PP(char *ppath;)
 		--pname;
 	} while ((pname >= ppath) && (*pname != '\\') && (*pname != ':'));
 
-	return (++pname);
+	return ++pname;
 }
 
 
@@ -437,7 +437,7 @@ PP(register char *pname;)
 		while (*(++lp))					/* after PATH=\0    */
 		{
 			if (*lp == '=')				/* key found =: path is */
-				return (FALSE);			/* really null, so punt */
+				return FALSE;			/* really null, so punt */
 		}
 		oldpath = TRUE;					/* it really is a path  */
 		lp = ltemp;						/* so munge the null    */
@@ -482,7 +482,7 @@ PP(register char *pname;)
 		*ltemp = '\0';			/* (for compatibility)  */
 
 	/* make whichone refer to next path */
-	return (whichone + 1);
+	return whichone + 1;
 }
 
 

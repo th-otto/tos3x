@@ -315,7 +315,9 @@ PP(int16_t *pitem;)
 			*pitem = cur_item;
 			flag = TRUE;
 		} else
+		{
 			do_chg(tree, cur_title, SELECTED, FALSE, TRUE, TRUE);
+		}
 	}
 
 	ctlmouse(FALSE);					/* fixed 3/5/86     */

@@ -1,30 +1,30 @@
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:23:50 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:23:50  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:27:16  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.2  88/10/24  10:34:08  mui
-* move gsx_malloc to geminit.c
-* 
-* Revision 1.1  88/06/02  12:34:09  lozben
-* Initial revision
-* 
-*************************************************************************
-*	Translated by J.Eisenstein	1/19/87
-*	Fix	1/21/87			Derek Mui, J.Eisenstein
-*	Fix at gsx_mret	4/28/1988	D.Mui	
-*	Remove gsx_mfset	5/8/91	D.Mui
-*	Add gsx_wsopen for six resolutions 4/25/89	D.Mui
-* 	Assemble with MAS 900801 kbad
-*	Check for sparrow resolution at gsx_wsopen	7/19/92	D.Mui	
-
+/*************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: mui $	$Date: 89/04/26 18:23:50 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:23:50  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:27:16  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.2  88/10/24  10:34:08  mui
+ * move gsx_malloc to geminit.c
+ * 
+ * Revision 1.1  88/06/02  12:34:09  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ *	Translated by J.Eisenstein	1/19/87
+ *	Fix	1/21/87			Derek Mui, J.Eisenstein
+ *	Fix at gsx_mret	4/28/1988	D.Mui	
+ *	Remove gsx_mfset	5/8/91	D.Mui
+ *	Add gsx_wsopen for six resolutions 4/25/89	D.Mui
+ * 	Assemble with MAS 900801 kbad
+ *	Check for sparrow resolution at gsx_wsopen	7/19/92	D.Mui	
+ */
 /*	GEMGSXIF.C	05/06/84 - 02/17/85	Lee Lorenzen		*/
 /*	68k		02/20/85 - 03/25/85	Lowell Webster		*/
 /*	Reg Opt		03/09/85		Derek Mui		*/
@@ -113,22 +113,23 @@ VRT_CPY	equ	 6*3
 VSL_WID	equ	 7*3
 
 
-*	xdef _gsx_malloc
-*
-*_gsx_malloc:
-*
-*	clr.l	-(sp)
-*	clr.l	-(sp)
-*	pea	_gl_tmp
-*	jsr	_gsx_fix
-*
-*	move.l	#$00003400,_gl_mlen
-*	pea	 $3400
-*	jsr	_dos_alloc
-*	move.l	 d0,_gl_tmp
-*
-*	lea	16(sp),sp		; clean up stack
-*	rts
+#if 0
+	xdef _gsx_malloc
+_gsx_malloc:
+
+	clr.l	-(sp)
+	clr.l	-(sp)
+	pea	_gl_tmp
+	jsr	_gsx_fix
+
+	move.l	#$00003400,_gl_mlen
+	pea	 $3400
+	jsr	_dos_alloc
+	move.l	 d0,_gl_tmp
+
+	lea	16(sp),sp		; clean up stack
+	rts
+#endif
 
 
 

@@ -1,21 +1,21 @@
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: kbad $	$Date: 89/07/27 03:18:58 $
-* =======================================================================
-*
-* Revision 2.3  89/07/27  03:18:58  kbad
-* gsx_start: force gl_wbox > gl_wchar+2
-* 
-* Revision 2.2  89/04/26  18:06:48  mui
-* aes30
-* 
-* Revision 2.1  89/02/22  05:14:52  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:26:09  lozben
-* Initial revision
-* 
+/*************************************************************************
+ *			Revision Control System
+ * =======================================================================
+ *  $Author: kbad $	$Date: 89/07/27 03:18:58 $
+ * =======================================================================
+ *
+ * Revision 2.3  89/07/27  03:18:58  kbad
+ * gsx_start: force gl_wbox > gl_wchar+2
+ *
+ * Revision 2.2  89/04/26  18:06:48  mui
+ * aes30
+ *
+ * Revision 2.1  89/02/22  05:14:52  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ *
+ * Revision 1.1  88/06/02  12:26:09  lozben
+ * Initial revision
+ */
 /*	APGSXIF.C	05/06/84 - 02/04/85	Lee Lorenzen		*/
 /*	Reg Opt		03/08/85 - 03/09/85	Derek Mui		*/
 /*	Crunching	4/10/86			Derek Mui		*/
@@ -29,13 +29,13 @@
  *	-------------------------------------------------------------
  */
 *************************************************************************
-*
-*	Crunched 	2/2/87 		JE
-*
-*	Change at gsx_start for new pixel ratio	7/26/89	D.Mui
-* 	Assemble with MAS 900801 kbad
-*	Change at gsx_start to do inquire of number planes 7/7/92	D.Mui
-
+/*
+ *	Crunched 	2/2/87 		JE
+ *
+ *	Change at gsx_start for new pixel ratio	7/26/89	D.Mui
+ * 	Assemble with MAS 900801 kbad
+ *	Change at gsx_start to do inquire of number planes 7/7/92	D.Mui
+ */
 #define __ASSEMBLER__ 1
 
 #include "../common/config.h"
@@ -126,7 +126,7 @@
 	comm	_gl_rcenter,8
 	xdef	_gl_rmenu
 	comm	_gl_rmenu,8
-	
+
 IBM	equ	3
 SMALL	equ	5
 
@@ -474,20 +474,20 @@ _gsx_bxpts:
 	move.l	(a0)+,d0		; d0[31:16] <- x      d0[15:00] <- y
 	move.w	(a0)+,d1
 	subq.w	#1,d1			; d1[15:00] <- w-1
-	move.w	(a0)+,d2		
+	move.w	(a0)+,d2
 	subq.w	#1,d2			; d2[15:00] <- h-1
 
 	lea	_ptsin,a1		; a1 -> ptsin[0]
 
-	move.l	   d0,(a1)+		; ptsin[0] <- x       ptsin[1] <- y  
-	move.l	   d0,(a1)		; ptsin[2] <- x       ptsin[3] <- y 
+	move.l	   d0,(a1)+		; ptsin[0] <- x       ptsin[1] <- y
+	move.l	   d0,(a1)		; ptsin[2] <- x       ptsin[3] <- y
 	add.w	   d1,(a1)		; ptsin[2] <- x+w-1
 	move.l	(a1)+,(a1)+		; ptsin[4] <- x+w-1   ptsin[5] <- y
 	move.l	   d0,(a1)		; ptsin[6] <- x       ptsin[7] <- y
 	add.w	  d2,-(a1)		;                     ptsin[5] <- y+h-1
 	move.l	(a1)+,(a1)+		; ptsin[8] <- x       ptsin[7] <- y+h-1
 	move.w	   d0,(a1)		;                     ptsin[9] <- y
-	
+
 	rts
 
 
@@ -631,7 +631,7 @@ _gsx_blt:
 	lea	 _gl_dst,a5		; *CS*
 
 	move.w	22(a3),d3		; d3 <- h
-	
+
 	move.w	d3,-(sp)		; push h
 	move.l	(a3)+,a0		; *CS*   a0 <- saddr
 	move.l	(a3)+,d4		; d4[31:16] <- sx    d4[15:00] <- sy
@@ -679,7 +679,7 @@ _gsx_blt:
 
 	jsr	_vrt_cpyfm
 	bra	L33
-	
+
 L32:	jsr	_vro_cpyfm
 
 L33:	jsr	_gsx_mon		; show cursor
@@ -754,7 +754,7 @@ _gsx_trans:
 	pea	 (a4)			; push gl_src
 	bsr	_gsx_fix
 
-	move.l	#$00010001,10(a4)	; gl_src.fd_stand=gl_src.fd_nplanes=1 
+	move.l	#$00010001,10(a4)	; gl_src.fd_stand=gl_src.fd_nplanes=1
 
 	pea	(a5)			; push gl_dst
 	pea	(a4)			; push gl_src
@@ -867,7 +867,7 @@ _gsxsta2:
 	move.w	#102,-(sp)
 	jsr	_gsx_ncode
 	addq.l	#6,sp
-	lea	_intout,a0	
+	lea	_intout,a0
 	move.w	8(a0),_gl_nplanes		; gl_nplanes = intout[4]
 #endif
 
@@ -880,7 +880,7 @@ _gsxsta2:
 	move.w	(a1),92(a3)		; gl_ws.chmaxh <- ptsout[1]
 	move.w	(a1)+,_gl_hptschar		; gl_hptschar  <- ptsout[1]
 	move.w	(a1)+,d5		; gl_wchar     <- ptsout[2]
-	move.w	d5,_gl_wchar		; gl_wchar = d5    
+	move.w	d5,_gl_wchar		; gl_wchar = d5
 	move.w	(a1)+,d6		; gl_hchar     <- ptsout[3]
 	move.w	d6,_gl_hchar		; gl_hchar = d6
 
@@ -921,7 +921,7 @@ _gsxsta2:
 
 	move.w	d5,d0			; d0 <- gl_wbox
 	sub.w	#2,d0
-	cmp.w	_gl_wchar,d0		; gl_wbox must >= gl_wchar + 2 
+	cmp.w	_gl_wchar,d0		; gl_wbox must >= gl_wchar + 2
 	bge	x_x1
 	move.w	_gl_wchar,d5
 	add.w	#2,d5
@@ -932,7 +932,7 @@ x_x1:	pea	$000F0007		;  (sp) <- 15
 
 	move.w	#1,(sp)
 	jsr	_vsl_width
-	
+
 	pea	$0071FFFF		;  (sp) <- 113
 	jsr	_gsx_1code		; 2(sp) <-  -1
 
@@ -1051,14 +1051,14 @@ L42:	lea	_ptsin,a0
 	subq.w	   #1,d0		; d0       <-      hh - 1
 	add.w	  d0,(a0)		; ptsin[2] <- hy + hh - 1
 
-	lea	_gl_dst,a3	
+	lea	_gl_dst,a3
 
 	clr.l	-(sp)
 	clr.l	-(sp)
 	pea	 (a3)
 	bsr	_gsx_fix		; gsx_fix(&gl_dst, 0x0L, 0, 0)
 
-	pea	 (a3)	
+	pea	 (a3)
 	pea	_ptsin
 	jsr	_vr_recfl
 
@@ -1171,7 +1171,7 @@ L46:	muls	d1,d0			; d0 <- number of characters * wc
 L47:	move.w	d0,(a3)			; ptextw <- ptextw (or characters * wc)
 
 	cmp.w	(a4),d2			; if ptexth < hc
-	bgt	L48			; ptexth is already the minimum 
+	bgt	L48			; ptexth is already the minimum
 
 	move.w	d2,(a4)			; ptext <- hc *CS*
 	ext.l	d0
@@ -1379,7 +1379,7 @@ _gsx_xcbox:
 
 	lea	_ptsin,a3
 	move.l	a3,-(sp)	; set up gsx_xline call
-	move.w	#3,-(sp)	
+	move.w	#3,-(sp)
 
 	move.l	 (a0),(a3)+	; ptsin[0] <- x		ptsin[1] <- y
 	add.w	 d6,-2(a3)	;			ptsin[1] <- y+ha
@@ -1486,13 +1486,13 @@ L66:	move.w	  d0,-(sp)			; set line style
 	addq.l	#4,sp
 
 	pea	  -4(a3)			; Push pointer to (X(n),Y(n))
-	move.w	#2,-(sp)			
+	move.w	#2,-(sp)
 	jsr	_v_pline			; Draw line from  (X(n),Y(n))
 	addq.l	#6,sp				;     to (X(n+1),Y(n+1))
 
 	addq.w	#1,d3				; increment vertex counter
 
-L67:	cmp.w	20+4(sp),d3			; if counter < ptscount, loop 
+L67:	cmp.w	20+4(sp),d3			; if counter < ptscount, loop
 	blt	L63
 
 	pea	$0071FFFF			; restore solid line style

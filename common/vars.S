@@ -48,28 +48,28 @@ name: ds.t size
 
 	V(cookies,l,NCOOKIES*2)
 
-	V(_bootpref,w,1)
+	INT(_bootpref)
 
 #if (TOSVERSION >= 0x300)
 	V(_altmd,l,4)
 #endif
 
-	V(_has_dmasound,b,1)
-	V(STEFlag,b,1)
+	BYTE(_has_dmasound)
+	BYTE(STEFlag)
 
 	V(__sbss,b,0)	/* start of the BSS area that is zeroed by BIOS */
 
 	V(privinst,l,2)
 
-	V(savepc,l,1)
-	V(execpath,l,1)
-	V(execname,l,1)
+	PTR(savepc)
+	PTR(execpath)
+	PTR(execname)
 	V(execdta,b,44)
 	V(execfname,b,32)
 
 	V(_pbdef,b,30)
 
-	V(lastacstm,l,1)
+	PTR(lastacstm)
 
 	V(scsicmd,b,10)
 
@@ -82,7 +82,7 @@ name: ds.t size
 #if MSTECLK
 	V(rtcbufa,b,13)
 	V(rtcbufb,b,13)
-	V(waketimeAlarm,l,1)
+	LONG(waketimeAlarm)
 #endif
 
 	V(rs232ibuf,b,SERIAL_BUFSIZE)
@@ -97,7 +97,7 @@ name: ds.t size
 
 	V(_kbdvecs,b,42)
 
-	V(kb_altnum,w,1)
+	INT(kb_altnum)
 	
 	V(kbdbuf,b,7)
 	V(mousebuf,b,5)
@@ -106,40 +106,40 @@ name: ds.t size
 	V(joybuf,b,3)
     even
 
-	V(iclkrtime,l,1)
+	LONG(iclkrtime)
 
-	V(iclkwtime,l,1)
+	LONG(iclkwtime)
 	
 	V(iclkbuf,b,6)      /* buffer for writing time packet to IKBD */
 
 	V(buttonbuf,b,3)
 	
-	V(_shifty,b,1)
+	BYTE(_shifty)
 
 	V(_curkeytbl,l,3)
 
 	V(initmbuf,b,17)
 
-	V(kb_key_last,b,1)
-	V(kb_ticks,b,1)
-	V(kb_delay,b,1)
+	BYTE(kb_key_last)
+	BYTE(kb_ticks)
+	BYTE(kb_delay)
 
-	V(kb_initial,b,1)
-	V(kb_repeat,b,1)
+	BYTE(kb_initial)
+	BYTE(kb_repeat)
 
-	V(lst_timeout,l,1)
+	LONG(lst_timeout)
 
-	V(_tim_c_sieve,w,1)
+	INT(_tim_c_sieve)
 
-	V(_sndtable,l,1)
+	PTR(_sndtable)
 
-	V(_snddelay,b,1)
+	BYTE(_snddelay)
 
-	V(_sndtmp,b,1)
+	BYTE(_sndtmp)
 
-	V(_prtconfig,w,1)
+	INT(_prtconfig)
 
-	V(iclk_ready,w,1)
+	INT(iclk_ready)
 
 	V(bcmap_root,b,16)
 
@@ -159,44 +159,44 @@ name: ds.t size
 	V(mdm2obuf,b,SERIAL_BUFSIZE)
 	V(mdm2iorec,b,2*14+8)
 
-	V(fd_retry,w,1)
+	INT(fd_retry)
 	V(_fd_wp,b,NUMFLOPPIES)
 	V(_fd_latch,b,NUMFLOPPIES)
 	V(_fd_lastacc,l,NUMFLOPPIES)
-	V(fd_timeout,l,1)
-	V(fd_motoron,w,1)
-	V(fd_desel,w,1)
-	V(fd_dev,w,1)
-	V(fd_track,w,1)
-	V(fd_sect,w,1)
-	V(fd_side,w,1)
-	V(fd_scount,w,1)
-	V(fd_buffer,l,1)
-	V(fd_spt,w,1)
-	V(fd_interlv,w,1)
-	V(fd_virgin,w,1)
-	V(fd_secmap,l,1)
-	V(fd_deferr,w,1)
-	V(fd_curerr,w,1)
+	LONG(fd_timeout)
+	INT(fd_motoron)
+	INT(fd_desel)
+	INT(fd_dev)
+	INT(fd_track)
+	INT(fd_sect)
+	INT(fd_side)
+	INT(fd_scount)
+	PTR(fd_buffer)
+	INT(fd_spt)
+	INT(fd_interlv)
+	INT(fd_virgin)
+	PTR(fd_secmap)
+	INT(fd_deferr)
+	INT(fd_curerr)
 
 	V(flopsregs,l,9)
 
 	V(dsb,b,8*NUMFLOPPIES)
 	
-	V(fd_rtryseek,w,1)
-	V(fd_frb,l,1)
-	V(fd_copyp,l,1)
-	V(fd_cscnt,w,1)
+	INT(fd_rtryseek)
+	PTR(fd_frb)
+	PTR(fd_copyp)
+	INT(fd_cscnt)
 
-	V(memtnext,l,1)
-	V(memtaddr,l,1)
-	V(memtbot,l,1)
-	V(memtend,l,1)
-	V(memttop,l,1)
-	V(memtzone,l,1)
-	V(memtsize,l,1)
+	PTR(memtnext)
+	PTR(memtaddr)
+	PTR(memtbot)
+	PTR(memtend)
+	PTR(memttop)
+	PTR(memtzone)
+	LONG(memtsize)
 	
-	V(memterr,w,1)
+	INT(memterr)
 
 /*
  * disk_buffer plus pad for equated arrays
@@ -206,41 +206,41 @@ name: ds.t size
 
 	ds.w 1 /* unused */
 
-	V(biosav,l,1)
+	PTR(biosav)
 
 	ds.l 1 /* unused */
 
-	V(savesr,w,1)
+	INT(savesr)
 
 	V(fstack,w,1034)
-	V(fstrt,l,1)
-	V(old_tik,l,1)
-	V(old_2,l,1)
+	PTR(fstrt)
+	PTR(old_tik)
+	PTR(old_2)
 
-	V(_rseed,l,1)
+	LONG(_rseed)
 
-	V(_prtbdev,b,1)
+	BYTE(_prtbdev)
 	even
 
-	V(_prtboch,b,1)
+	BYTE(_prtboch)
 	even
 
-	V(_msec,w,1)
+	INT(_msec)
 
-	V(_prtbbval,w,1)
+	INT(_prtbbval)
 
 	ds.b 1024
     
 	V(_supstk,w,SUPSIZ)
 	V(_supstkend,b,0)
 
-	V(_prtbflg,b,1)
+	BYTE(_prtbflg)
 	even
 	
-	V(_prtbdmask,b,1)
+	BYTE(_prtbdmask)
 	even
 	
-	V(_time,w,1)
+	INT(_time)
 
 	V(_prtboval,w,4)
 
@@ -250,56 +250,56 @@ name: ds.t size
 
 	V(_glbkbchar,l,3*KBBUFSZ)
 
-	V(_ofdlist,l,1)
+	PTR(_ofdlist)
 
-	V(_fd_mediach,l,1)
+	LONG(_fd_mediach)
 	V(_glbcolumn,w,3)
-	V(_prtbwidth,w,1)
+	INT(_prtbwidth)
 	
 	V(_drivechange,b,NUMFLOPPIES)
-	V(_rrecno,w,1)
-	V(_prtbbytes,w,1)
+	INT(_rrecno)
+	INT(_prtbbytes)
 
-	V(_prtbilow,b,1)
+	BYTE(_prtbilow)
 	even
-	V(_prtbihigh,b,1)
+	BYTE(_prtbihigh)
 	even
 
-	V(_rwrtflg,w,1)
-	V(_curflop,w,1)
+	INT(_rwrtflg)
+	INT(_curflop)
 
-	V(_prtbwords,w,1)
-	V(_prtbstrt,l,1)
-	V(_prtbp2,l,1)
-	V(_prtbchunk,w,1)
+	INT(_prtbwords)
+	PTR(_prtbstrt)
+	PTR(_prtbp2)
+	INT(_prtbchunk)
 
 	V(_virt_work,b,180+MU_PLANES*16*2)
 
-	V(_prtbp1,l,1)
-	V(_rdm,l,1)
-	V(_prtbgval,w,1)
-	V(_prtbend,l,1)
-	V(_prtbpmsk,w,1)
-	V(_prtbidx,w,1)
-	V(_dirlock,w,1)
-	V(_prtbinvert,w,1)
-	V(_prtbink,w,1)
+	PTR(_prtbp1)
+	PTR(_rdm)
+	INT(_prtbgval)
+	PTR(_prtbend)
+	INT(_prtbpmsk)
+	INT(_prtbidx)
+	INT(_dirlock)
+	INT(_prtbinvert)
+	INT(_prtbink)
 
 #if STBOOK
 	V(_ofdbuf,b,70*80)
-	V(_ldivr,l,1)
+	LONG(_ldivr)
 #else
-	V(_ldivr,l,1)
+	LONG(_ldivr)
 	V(_ofdbuf,b,70*80)
 #endif
 
 	V(_bpbsums,w,BPBSECT*NUMFLOPPIES)
-	V(_oscnt,w,1)
+	INT(_oscnt)
 
 	V(_ram8x8,b,90)
 
-	V(_rwerr,l,1)
-	V(_prtbrval,w,1)
+	LONG(_rwerr)
+	INT(_prtbrval)
 	V(_pmd,l,3)
 	V(_sft,b,OPNFILES*10-6*10)
 
@@ -307,7 +307,7 @@ name: ds.t size
 	V(_ram16x32,b,90)
 #endif
 	
-	V(_run,l,1)
+	PTR(_run)
 
 	V(_ram8x16,b,90)
     
@@ -327,85 +327,85 @@ name: ds.t size
 
 	V(_blkdev,b,36*NUMFLOPPIES)
 	V(_secbuf,b,4*SECTOR_SIZE)
-	V(_osuser,b,1)
-	V(_dirrec,l,1)
+	BYTE(_osuser)
+	PTR(_dirrec)
 	V(_prtbval,w,16)
 	V(_dirtbl,l,NCURDIR)
-	V(_prtbplanes,w,1)
-	V(_prtboffset,w,1)
+	INT(_prtbplanes)
+	INT(_prtboffset)
 	V(_errbuf,l,3)
-	V(_prtbtcol,w,1)
+	INT(_prtbtcol)
 
-	V(_prtbacol,b,1)
+	BYTE(_prtbacol)
 	even
 	V(_prtbmaxval,w,16)
-	V(_prtbeps,b,1)
+	BYTE(_prtbeps)
 	even
 	V(_prtbobuf,b,8)
 	V(_fd_err,w,NUMFLOPPIES)
 	V(_diruse,b,NCURDIR)
 	V(_drvtbl,l,BLKDEVNUM)
-	V(_drvsel,w,1)
-	V(_prtbheight,w,1)
-	V(_prtbmono,b,1)
+	INT(_drvsel)
+	INT(_prtbheight)
+	BYTE(_prtbmono)
 	even
 	V(_prtbmval,w,4)
-	V(_prtbmed,b,1)
+	BYTE(_prtbmed)
 	even
-	V(_prtbempty,b,1)
+	BYTE(_prtbempty)
 	even
-	V(_uptime,l,1)
-	V(_prtblines,w,1)
-	V(_errdrv,w,1)
+	LONG(_uptime)
+	INT(_prtblines)
+	INT(_errdrv)
 
-	V(_prtbodd,b,1)
+	BYTE(_prtbodd)
 	even
 
-	V(_prtbdots,w,1)
-	V(_prtbomask,w,1)
-	V(_prtbbits,w,1)
-	V(_prtbprez,b,1)
+	INT(_prtbdots)
+	INT(_prtbomask)
+	INT(_prtbbits)
+	BYTE(_prtbprez)
 	even
 	V(_prtbminval,w,16)
 	V(_ospd,b,256)
 	V(_buptr,l,3)
 
-	V(_prtblow,b,1)
+	BYTE(_prtblow)
 	even
-	V(_prtbamon,b,1)
+	BYTE(_prtbamon)
 	even
     
-	V(_date,w,1)
+	INT(_date)
 	V(_bcbx,b,4*20)
-	V(_prtbbol,b,1)
+	BYTE(_prtbbol)
 	even
 	V(_beptr,l,3)
 
 /* This label is referenced by the OSHEADER */
 	V(_endvdibss,b,0)
 
-/* start AES */
+/* start AES+DESKTOP */
 
-	V(retsava,l,1)
-	V(_gl_restype,w,1)
-	V(_gl_rschange,w,1)
+	PTR(retsava)
+	INT(_gl_restype)
+	INT(_gl_rschange)
 	V(ustak,l,33)
-	V(_diskin,w,1)
-	V(dummycmd,w,1)
-	V(execmode,w,1)
-	V(execflags,l,1)
+	INT(_diskin)
+	INT(dummycmd)
+	INT(execmode)
+	LONG(execflags)
 	
 	ds.b 2
 	
-	V(_ad_rso,l,1)
-	V(_ml_mnhold,l,1)
+	PTR(_ad_rso)
+	PTR(_ml_mnhold)
 	GRECT(_ml_ctrl)
-	V(_ml_pmown,l,1)
-	V(_ml_pkown,l,1)
+	PTR(_ml_pmown)
+	PTR(_ml_pkown)
 	V(_fsname,b,40)
 	V(_fcopy,b,40)
-	V(_pathcopy,l,1)
-	V(_defdrv,w,1)
+	PTR(_pathcopy)
+	INT(_defdrv)
 	V(_autopath,b,CMDLEN)
 	V(_wtcolor,w,MAXOBJ)
 	V(_wbcolor,w,MAXOBJ)
@@ -421,26 +421,26 @@ name: ds.t size
 	V(savea0,b,654) /* savea0,srsave,savsr,psetsr,dspstk */
 	LONG(retaddr)
 	LONG(tr_retsave)
-	V(_drwaddr,l,1)
-	V(_tikaddr,l,1)
+	PTR(_drwaddr)
+	PTR(_tikaddr)
 	PTR(gstksave)
-	V(tstksave,l,1)
-	V(_tiksav,l,1)
+	PTR(tstksave)
+	PTR(_tiksav)
 	LONG(_NUM_TICK)
 	LONG(_CMP_TICK)
 	LONG(TICKS)
 	V(gstack,l,24)
 	V(tstack,l,24)
 	V(fspec,b,8)
-	V(mydev,w,1)
-	V(oldgetbpb,l,1)
-	V(oldmediach,l,1)
-	V(oldrwabs,l,1)
+	INT(mydev)
+	PTR(oldgetbpb)
+	PTR(oldmediach)
+	PTR(oldrwabs)
 	ds.l 1 /* unused */
-	V(_maddr,l,1)
+	PTR(_maddr)
 	V(mform,w,37)
-	V(trp13aret,l,1)
-	V(trp14aret,l,1)
+	PTR(trp13aret)
+	PTR(trp14aret)
 	
 	ds.b $10
 	
@@ -456,90 +456,90 @@ name: ds.t size
 	
 	ds.b $32
 
-	V(_gl_dabase,w,1)
+	INT(_gl_dabase)
 	V(_gl_adacc,l,MAX_ACCS)
 
 	ds.b $12
 	
-	V(_xrat,w,1)
-	V(_yrat,w,1)
+	INT(_xrat)
+	INT(_yrat)
 	
 	ds.b 2
 	
-	V(_gl_hchar,w,1)
-	V(_gl_naccs,w,1)
-	V(_gl_dabox,w,1)
-	V(_gl_dacnt,w,1)
-	V(_gl_bdelay,w,1)
-	V(_ad_hgmice,l,1)
+	INT(_gl_hchar)
+	INT(_gl_naccs)
+	INT(_gl_dabox)
+	INT(_gl_dacnt)
+	INT(_gl_bdelay)
+	PTR(_ad_hgmice)
 	V(_gl_pacc,l,MAX_ACCS)
 	V(_desk_acc,l,MAX_ACCS)
 	V(_ib,b,34)      /* ICONBLK */
 	V(_bi,b,14)      /* BITBLK */
-	V(_gl_bclick,w,1)
-	V(_ad_fsnames,l,1)
-	V(_gl_handle,w,1)
-	V(_ad_armice,l,1)
-	V(_ad_select,l,1)
+	INT(_gl_bclick)
+	PTR(_ad_fsnames)
+	INT(_gl_handle)
+	PTR(_ad_armice)
+	PTR(_ad_select)
 	
 	ds.b $A2
 	
-	V(_ad_fsel,l,1)
-	V(_gl_dclick,w,1)
+	PTR(_ad_fsel)
+	INT(_gl_dclick)
 	
 	ds.b 2
 	
-	V(_gl_height,w,1)
+	INT(_gl_height)
 	TEDINFO(_gl_aname)
 	
 	ds.b 4
 	
-	V(_ad_shcmd,l,1)
-	V(_ad_fpath,l,1)
+	PTR(_ad_shcmd)
+	PTR(_ad_fpath)
 	
 	ds.b 2
 	
 	TEDINFO(_gl_ainfo)
-	V(_gl_bdesired,w,1)
-	V(_gl_dcindex,w,1)
-	V(_gl_recd,w,1)
+	INT(_gl_bdesired)
+	INT(_gl_dcindex)
+	INT(_gl_recd)
 	
 	ds.b 6
 	
-	V(_ad_path,l,1)
+	PTR(_ad_path)
 	
 	ds.b 12
 	
-	V(old_bcode,l,1)
-	V(_gl_hclip,w,1)
-	V(_gl_bvhard,w,1)
-	V(_ad_shtail,l,1)
-	V(_ad_stdesk,l,1)
-	V(_used_acc,w,1)
+	PTR(old_bcode)
+	INT(_gl_hclip)
+	INT(_gl_bvhard)
+	PTR(_ad_shtail)
+	PTR(_ad_stdesk)
+	INT(_used_acc)
 	
 	ds.b 4
 	
-	V(_gl_wchar,w,1)
-	V(_ad_fsdta,l,1)
+	INT(_gl_wchar)
+	PTR(_ad_fsdta)
 	
 	ds.b 32
 
-	V(_ad_windspb,l,1)
-	V(_gl_mode,w,1)
-	V(_gl_bpend,w,1)
+	PTR(_ad_windspb)
+	INT(_gl_mode)
+	INT(_gl_bpend)
 	V(_gl_cmform,w,37) /* MFORM */
-	V(_gl_bvdisk,w,1)
+	INT(_gl_bvdisk)
 	
 	ds.b 2
 	
-	V(_ad_intin,l,1)
+	PTR(_ad_intin)
 	INT(_gl_hschar)
 	
 	ds.b 8
 	
-	V(_gl_moff,w,1)
+	INT(_gl_moff)
 	GRECT(_gl_rcenter)
-	V(_sh_iscart,w,1)
+	INT(_sh_iscart)
 	V(_hdr_buf,w,18)   /* RSHDR */
 	
 	ds.b 4
@@ -549,58 +549,58 @@ name: ds.t size
 	
 	ds.b 4
 	
-	V(old_mcode,l,1)
-	V(_gl_nplanes,w,1)
-	V(_gl_ticktime,w,1)
+	PTR(old_mcode)
+	INT(_gl_nplanes)
+	INT(_gl_ticktime)
 	
 	ds.b $88
 	
-	V(_DOS_AX,w,1)
+	INT(_DOS_AX)
 	LONG(_gl_mlen)
 	INT(_gl_mask)
 	INT(_gl_ncol)
 	
 	ds.b $82
 	
-	V(_w_walkflag,w,1)
-	V(_ad_envrn,l,1)
+	INT(_w_walkflag)
+	PTR(_ad_envrn)
 	V(_desk_pid,w,MAX_ACCS)
 	
 	ds.b 10
 	
-	V(_gl_newdesk,l,1)
-	V(_wasclr,w,1)
+	PTR(_gl_newdesk)
+	INT(_wasclr)
 	GRECT(_gl_rmnactv)
 	
 	ds.b $9e
 	
-	V(_gl_wclip,w,1)
-	V(_cart_dta,l,1)
+	INT(_gl_wclip)
+	PTR(_cart_dta)
 	V(_gl_mkrect,b,12)  /* ORECT */
-	V(_gl_awind,l,1)
+	PTR(_gl_awind)
 	V(_g_autoboot,b,CMDLEN)
-	V(_ad_title,l,1)
+	PTR(_ad_title)
 	V(_gl_ctwait,w,5) /* MOBLK */
-	V(_gl_rbuf,l,1)
+	PTR(_gl_rbuf)
 	
 	ds.w 1
 	
-	V(_gl_xclip,w,1)
-	V(_sh_isgem,w,1)
+	INT(_gl_xclip)
+	INT(_sh_isgem)
 	
 	ds.b $22
 	
-	V(_gl_yclip,w,1)
-	V(_gl_hbox,w,1)
-	V(_ad_fstree,l,1)
+	INT(_gl_yclip)
+	INT(_gl_hbox)
+	PTR(_ad_fstree)
 	V(_gl_omform,w,37) /* MFORM */
-	V(_gl_rlen,w,1)
+	INT(_gl_rlen)
 	GRECT(_gl_rmenu)
-	V(_gl_tcolor,w,1)
-	V(_sys_adacc,l,1)
+	INT(_gl_tcolor)
+	PTR(_sys_adacc)
  	V(_W_TREE,b,24*NUM_WIN)  /* OBJECT[NUM_WIN] */
 	LONG(_gl_mnpid) /* BUG: should be int */
-	V(_pr_mclick,w,1)
+	INT(_pr_mclick)
 	
 	ds.b 4
 	
@@ -608,9 +608,9 @@ name: ds.t size
 	
 	ds.b 4
 	
-	V(_rs_global,l,1)
-	V(_elinkoff,l,1)
-	V(_gl_play,w,1)
+	PTR(_rs_global)
+	LONG(_elinkoff)
+	INT(_gl_play)
 	
 	ds.b $80
 	
@@ -619,86 +619,86 @@ name: ds.t size
 	
 	ds.b 2
 	
-	V(_gl_width,w,1)
-	V(_sh_doexec,w,1)
-	V(_gl_pglue,l,1)
-	V(_ad_sysglo,l,1)
+	INT(_gl_width)
+	INT(_sh_doexec)
+	PTR(_gl_pglue)
+	PTR(_ad_sysglo)
 	GRECT(_gl_rfull)
 	INT(_gl_patt)
 	GRECT(_gl_rscreen)
-	V(_fs_first,w,1)
+	INT(_fs_first)
 	V(_appl_msg,w,8)
-	V(_ml_ocnt,w,1)
+	INT(_ml_ocnt)
 	
 	ds.b 10
 	
-	V(_cart_ptr,l,1)
-	V(_fs_count,w,1)
-	V(_gl_newroot,w,1)
-	V(_fs_fnum,l,1)
+	PTR(_cart_ptr)
+	INT(_fs_count)
+	INT(_gl_newroot)
+	LONG(_fs_fnum)
 	
 	ds.b 4
 	
-	V(_gl_btrue,w,1)
+	INT(_gl_btrue)
 	
 	ds.b 6
 	
 	INT(_gl_hsptschar)
 	INT(_gl_hptschar)
 	V(_wind_msg,w,8)
-	V(_gl_kowner,l,1)
-	V(_crt_error,w,1)
-	V(_gl_wbox,w,1)
-	V(_gl_mntree,l,1)
-	V(_gl_mowner,l,1)
+	PTR(_gl_kowner)
+	INT(_crt_error)
+	INT(_gl_wbox)
+	PTR(_gl_mntree)
+	PTR(_gl_mowner)
 	
 	ds.b $80
 	
-	V(_gl_wtree,l,1)
-	V(_gemsize,w,1)
+	PTR(_gl_wtree)
+	INT(_gemsize)
 	V(_wind_spb,b,10)    /* sizeof(SPB) */
 	
 	ds.b 6
 	
 	GRECT(_gl_rzero)
-	V(_gl_mouse,w,1)
+	INT(_gl_mouse)
 	
 	ds.b 2
 	
-	V(_gl_nrow,w,1)
-	V(_infsize,w,1)
+	INT(_gl_nrow)
+	INT(_infsize)
 	
 	ds.b $12
 	
-	V(_tmpmoff,w,1)
+	INT(_tmpmoff)
 	
 	ds.b 2
 	
 	PTR(_gl_store)
-	V(_ctldown,w,1)
-	V(_autoexec,w,1)
-	V(_fs_topptr,w,1)
+	INT(_ctldown)
+	INT(_autoexec)
+	INT(_fs_topptr)
 
 	ds.b 2
 
-	V(_gl_wtop,w,1)
+	INT(_gl_wtop)
 	
 	ds.b 6
 	
-	V(_desksiz,w,1)
-	V(_deskptr,l,1)
+	INT(_desksiz)
+	PTR(_deskptr)
 	
 	ds.b 2
 	
 	INT(_gl_wsptschar)
 	INT(_gl_wptschar)
-	V(_pr_xrat,w,1)
-	V(_pr_button,w,1)
-	V(_drawstk,l,1)
+	INT(_pr_xrat)
+	INT(_pr_button)
+	PTR(_drawstk)
 	
 	ds.b $1060
 	
-	V(_pr_yrat,w,1)
+	INT(_pr_yrat)
 	
 	ds.b 6
 	
@@ -706,17 +706,17 @@ name: ds.t size
 	
 	ds.b $22
 	
-	V(_tbutton,w,1)
+	INT(_tbutton)
 	
 	ds.b 2
 	
-	V(_nogem,w,1)
+	INT(_nogem)
 	
 	ds.b 6
 	
 	INT(_gl_mx)
 	INT(_gl_my)
-	V(_fpcnt,w,1)
+	INT(_fpcnt)
 	
 	ds.b 8
 	
@@ -728,43 +728,43 @@ name: ds.t size
 	
 	ds.b 4
 	
-	V(_cda,l,1)
-	V(_wwait,w,1)
+	PTR(_cda)
+	INT(_wwait)
  	V(_W_ACTIVE,b,24*NUM_WIN)  /* OBJECT[MAXOBJ] */
 	
 	ds.b $108
 	
-	V(_DOS_ERR,w,1)
+	INT(_DOS_ERR)
 	V(_ptsin,w,20)
-	V(_dpd,l,1)
-	V(_fph,w,1)
-	V(_dlr,l,1)
-	V(_drl,l,1)
+	PTR(_dpd)
+	INT(_fph)
+	PTR(_dlr)
+	PTR(_drl)
 	
 	V(_D,b,$369E) /* sizeof(THEGLO) */
 	
-	V(_eul,l,1)
-	V(_fpt,w,1)
-	V(_nrl,l,1)
-	V(_rlr,l,1)
-	V(_slr,l,1)
-	V(_rul,l,1)
+	PTR(_eul)
+	INT(_fpt)
+	PTR(_nrl)
+	PTR(_rlr)
+	PTR(_slr)
+	PTR(_rul)
 	V(_evx,b,28) /* sizeof(EVB) */
-	V(_zlr,l,1)
+	PTR(_zlr)
 	
 	ds.l 1
 	
-	V(_g_flag,w,1)
+	INT(_g_flag)
 	
 	ds.b 12
 	
-	V(_sh_gem,w,1)
-	V(_mclick,w,1)
+	INT(_sh_gem)
+	INT(_mclick)
 	INT(_gl_fis)
 	
 	ds.b 4
 	
-	V(_no_aes,w,1)
+	INT(_no_aes)
 	
 	ds.b $30
 	
@@ -778,16 +778,16 @@ name: ds.t size
 	
 	MFDB(_gl_dst)
 	GRECT(_gl_rfs)
-	V(_rs_hdr,l,1)
-	V(_gl_tmp,l,1)
+	PTR(_rs_hdr)
+	PTR(_gl_tmp)
 	
 	ds.b 16
 	
-	V(_nodesk,w,1)
+	INT(_nodesk)
 	
 	ds.b 2
 	
-	V(_er_num,w,1)
+	INT(_er_num)
 	
 	ds.b 2
 	
@@ -796,12 +796,12 @@ name: ds.t size
 	even
 	
 	ds.b 2
-	V(_infork,b,1)
+	BYTE(_infork)
 	even
 	ds.b 2
 	ds.b 2
 	
-	V(_kstate,w,1)
+	INT(_kstate)
 	
 	ds.b 6
 	
@@ -817,15 +817,15 @@ name: ds.t size
 	
 	ds.b $24
 	
-	V(_mtrans,w,1)
+	INT(_mtrans)
 	PTR(_pxpath)
 	
 	ds.b $28
 	
-	V(_tmpmon,w,1)
-	V(_button,w,1)
+	INT(_tmpmon)
+	INT(_button)
 	
-/* end AES */
+/* end AES+DESKTOP */
 
 /* This label is referenced by the GEM_MUPB structure */
 	V(_endgembss,b,0)

@@ -140,12 +140,12 @@ ret:	movem.l	(sp)+,d4-d7/a4-a5
 	rts
 #endif
 
-*
-*	copy from src to dest until and including a null in the
-*	source string, return the length not including the null.
-*	len = LSTCPY(src,dst)
-*		BYTE	*src,dst;
-*
+/*
+ *	copy from src to dest until and including a null in the
+ *	source string, return the length not including the null.
+ *	len = LSTCPY(src,dst)
+ *		BYTE	*src,dst;
+ */
 	xdef	_LSTCPY
 _LSTCPY:
 	move.l	8(a7),a0	; source
@@ -157,14 +157,14 @@ lst1:
 	bne	lst1		; test for 0
 	subq	#1,d0
 	rts
-*
-*
-*	expand from bytes to words until a null, return
-*	number of bytes moved (don't transfer null)
-*
-*	len = LBWMOV(dst,src)
-*		BYTE	*dst,src;
-*
+
+/*
+ *	expand from bytes to words until a null, return
+ *	number of bytes moved (don't transfer null)
+ *
+ *	len = LBWMOV(dst,src)
+ *		BYTE	*dst,src;
+ */
 	xdef	_LBWMOV
 _LBWMOV:
 	move.l	8(a7),a0	; source
@@ -180,90 +180,88 @@ lbw1:
 lbw2:
 	rts
 	
-*
-*
-*
-* ================================================
-* ==		Copy block of words		==
-*
-* IN:	Address of destination block.
-*	Address of source block.
-*	Number of words to copy.
-*
-*OUT:	Source block duplicated at Destination.
-*
-* ==						==
-* ================================================
-*
-*
+
+
+/*
+ * ================================================
+ * ==		Copy block of words		==
+ *
+ * IN:	Address of destination block.
+ *	Address of source block.
+ *	Number of words to copy.
+ *
+ *OUT:	Source block duplicated at Destination.
+ *
+ * ==						==
+ * ================================================
+ */
 	xdef  _LWCOPY
 _LWCOPY:
-*
+
 	move.l	4(a7),a0		; Get address of destination.
 	move.l	8(a7),a1		; Get address of source.
 	move.w	12(a7),d0		; Get number of words to copy.
 	beq	lwend			; get out if none
-*
+
 lop105:
 	move.w	(a1)+,(a0)+		; Copy word.
 	subq	#1,d0
 	bne	lop105
-*
+
 lwend:
 	rts
 
-*
-*
-* ================================================
-* ==						==
-* ==		Move block of memory		==
-* ==						==
-*	Moves one block of memory to a new location.  Used mainly to move
-*	a square of screen data to a new position on the screen.  Considers
-*	if the new block overlaps the old.
-*
-* IN:	Destination address		LONG.
-*	Source address			LONG.
-*	Number of bytes to move		WORD.
-*
-*OUT:	No value returned.
-*
-*	Screen will show duplication of selected area in new choosen location.
-*
-*
+
+/*
+ * ================================================
+ * ==						==
+ * ==		Move block of memory		==
+ * ==						==
+ *	Moves one block of memory to a new location.  Used mainly to move
+ *	a square of screen data to a new position on the screen.  Considers
+ *	if the new block overlaps the old.
+ *
+ * IN:	Destination address		LONG.
+ *	Source address			LONG.
+ *	Number of bytes to move		WORD.
+ *
+ *OUT:	No value returned.
+ *
+ *	Screen will show duplication of selected area in new choosen location.
+ */
 	xdef	_LBCOPY
 _LBCOPY:
-*
+
 	movem.l	4(a7),a0-a1	; A0 = Destination   A1 = Source.
 	clr.l	d0
 	move.w	12(a7),d0	; D0 = Number of bytes to moves.
 	beq	lbcend		; get out if 0
-*
-* Move from source starting at top or bottom?
-*
+/*
+ * Move from source starting at top or bottom?
+ */
 	cmp.l	a0,a1		; If A1 < A0 then start from bottom of source
 	blt	backward	; and go backward.
-*
-* Start at beginning of source and move to end of source.
-*
+/*
+ * Start at beginning of source and move to end of source.
+ */
 lop101:
 	move.b	(a1)+,(a0)+
 	subq.w	#1,d0
 	bne	lop101
 	rts
-*
-* Start at end of source and move backward to begnning of source.
-*
+/*
+ * Start at end of source and move backward to begnning of source.
+ */
 backward:
-*
+
 	add.l	d0,a1
 	add.l	d0,a0
 	subq.w	#1,d0
-*
+
 lop102:
 	move.b	-(a1),-(a0)
 ent100:	subq.w	#1,d0
 	bpl	lop102
 lbcend:
 	rts
-*
+
