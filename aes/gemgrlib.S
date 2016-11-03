@@ -96,6 +96,7 @@ VOID gr_stepcalc(WORD orgw, WORD orgh, GRECT *pt, WORD *pcx, WORD *pcy, WORD *pc
 	*pcy += pt->g_y;
 }
 #endif
+/* 306de: 00e24b36 */
 	xdef _gr_stepcalc
 _gr_stepcalc:
 	movem.l	a3-a5,-(sp)		;+12
@@ -200,6 +201,7 @@ VOID gr_growbox(GRECT *po, GRECT *pt)
 	gsx_mon();
 }
 #endif
+/* 306de: 00e24b92 */
 	xdef _gr_growbox
 _gr_growbox:
 	movem.l	d2-d7/a4-a6,-(sp)	;+36 reserve 12 bytes & d5-d7/a4-a6
@@ -278,6 +280,7 @@ VOID gr_shrinkbox(GRECT *po, GRECT *pt)
 	gr_movebox(po->g_w, po->g_h, cx, cy, po->g_x, po->g_y);
 }
 #endif
+/* 306de: 00e24bd6 */
 	xdef _gr_shrinkbox
 _gr_shrinkbox:
 	movem.l	d2-d7/a4-a6,-(sp)	;+36 reserve 12 bytes & d5-d7/a4-a6
@@ -356,6 +359,7 @@ VOID gr_xor(WORD clipped, WORD cnt, WORD cx, WORD cy, WORD cw, WORD ch, WORD xst
 	} while (cnt--);
 }
 #endif
+/* 306de: 00e24c22 */
 	xdef _gr_xor
 _gr_xor:
 	movem.l	d4-d7,-(sp)		;+16
@@ -447,6 +451,7 @@ VOID gr_movebox(WORD w, WORD h, WORD srcx, WORD srcy, WORD dstx, WORD dsty)
 	gsx_mon();
 }
 #endif
+/* 306de: 00e24c6e */
 	xdef _gr_movebox
 _gr_movebox:
 	movem.l	d1-d7/a5,-(sp)		;+32 8 bytes local space & d3-d7/a5
@@ -559,6 +564,7 @@ VOID gr_scale(WORD xdist, WORD ydist, WORD *pcnt, WORD *pxstep, WORD *pystep)
 		*pxstep = *pystep = 1;
 }
 #endif
+/* 306de: 00e24ce8 */
 	xdef _gr_scale
 _gr_scale:
 	movem.l d4-d7/a4-a6,-(sp)	;+28 we need regs!
@@ -680,6 +686,7 @@ WORD gr_watchbox(OBJECT *tree, WORD obj, WORD instate, WORD outstate)
 	return (out);
 }
 #endif
+/* 306de: 00e24d32 */
 	xdef _gr_watchbox
 _gr_watchbox:
 	movem.l	d2-d7/a5-a6,-(sp)	;+32 reserve 8 bytes & d4-d7/a5-a6
@@ -771,6 +778,7 @@ BOOLEAN gr_stilldn(int16_t out, int16_t x, int16_t y, int16_t w, int16_t h)
 #endif
 
 #if AESVERSION < 0x330
+/* 306de: 00e24d8c */
 	xdef	_gr_stilldn
 _gr_stilldn:
 	suba.w	#12,sp		;+12 make room on stack for 6 words: &rets[6]
@@ -830,6 +838,7 @@ VOID gr_draw(WORD have2box, GRECT *po, GRECT *poff)
 	}
 }
 #endif
+/* 306de: 00e24dba */
 	xdef _gr_draw
 _gr_draw:
 	movem.l	d0-d1/d7/a4-a5,-(sp)	;+20 save d7/a4-a5 & reserve 8 bytes
@@ -913,6 +922,7 @@ WORD gr_wait(GRECT *po, GRECT *poff, WORD mx, WORD my)
 	return (down);
 }
 #endif
+/* 306de: 00e24e0a */
 	xdef _gr_wait
 _gr_wait:
 	movem.l	d5-d7/a4-a5,-(sp)	;+20
@@ -962,6 +972,7 @@ VOID gr_setup(WORD color)
 	gsx_attr(FALSE, MD_XOR, color);
 }
 #endif
+/* 306de: 00e24e4a */
 	xdef _gr_setup
 _gr_setup:
 ez_glrsr:                     /* note: immed "gl_rscreen" ref'd elsewhere via ez_glrsr+2(pc) */
@@ -1007,6 +1018,7 @@ VOID gr_rubbox(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, WORD *pwend, WO
 	gr_rubwind(xorigin, yorigin, wmin, hmin, &gl_rzero, pwend, phend);
 }
 #endif
+/* 306de: 00e24e68 */
 	xdef _gr_rubbox
 _gr_rubbox:
 	lea	16(sp),a0	;a0 -> phend
@@ -1075,6 +1087,7 @@ VOID gr_rubwind(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, GRECT *poff, W
 	wm_update(END_UPDATE);
 }
 #endif
+/* 306de: 00e24e80 */
 	xdef _gr_rubwind
 _gr_rubwind:
 	movem.l	d3-d6/a3-a6,-(sp) ;+32 reserve 8 bytes of local & d5-d6/a3-a6
@@ -1212,6 +1225,7 @@ VOID gr_dragbox(WORD w, WORD h, WORD sx, WORD sy, GRECT *pc, WORD *pdx, WORD *pd
 	wm_update(END_UPDATE);
 }
 #endif
+/* 306de: 00e24eee */
 	xdef _gr_dragbox
 _gr_dragbox:
 	movem.l	d2-d7/a4-a6,-(sp)	;+36 reserve 20 bytes & d6-d7/a4-a6 
@@ -1253,7 +1267,7 @@ _gr_dragbox:
 	add.l	d0,d7
 	move.l	d7,-(sp)
 
-	jsr	_gr_clamp	;gr_clamp(sx+1, sy+1, 0, 0, &offx, &0ffy);
+	bsr.s	_gr_clamp	;gr_clamp(sx+1, sy+1, 0, 0, &offx, &0ffy);
 
 *   get box's x,y from
 *   mouse's x,y then
@@ -1351,6 +1365,7 @@ VOID gr_clamp(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, WORD *pneww, WOR
 	*pnewh = max(my - yorigin + 1, hmin);
 }
 #endif
+/* 306de: 00e24f9e */
 	xdef _gr_clamp
 _gr_clamp:
 	subq.l	#4,sp		;+4  make room on stack for local mx, my
@@ -1482,6 +1497,7 @@ VOID gr_mkstate(WORD *pmx, WORD *pmy, WORD *pmstat, WORD *pkstat)
 	*pkstat = kstate;
 }
 #endif
+/* 306de: 00e2503c */
 	xdef _gr_mkstate
 _gr_mkstate:
 	lea	mklist(pc),a0

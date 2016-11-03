@@ -848,6 +848,7 @@ _gsx_start:
 	move.w	d4,_gl_height		; d4 = gl_height
 
 #if (AESVERSION <= 0x320) & BINEXACT
+    /* BUG: calculating gl_nplanes from number of colors */
 	move.w    22(a3),d0         ; d0 = gl_ws.ncolors
 	clr.w     d1
 _gsxsta1:

@@ -266,7 +266,7 @@ extern uint16_t gl_indbutcol;				/* indicator button color */
 extern uint16_t gl_actbutcol;				/* activator button color */
 extern uint16_t gl_alrtcol;					/* alert background color */
 #endif
-extern int16_t crt_error;					/* critical error handler semaphore     */
+extern int16_t crt_error;					/* critical error handler semaphore */
 
 #if (AESVERSION >= 0x330) | !BINEXACT
 extern int16_t adeskp[3];					/* desktop colors & backgrounds */
@@ -275,8 +275,8 @@ extern int16_t adeskp[3];					/* desktop colors & backgrounds */
 extern BOOLEAN dowarn;
 #endif
 
-VOID setres PROTO((NOTHING));
 VOID gem_main PROTO((NOTHING));
+VOID setres PROTO((NOTHING));
 VOID pinit PROTO((PD *ppd, CDA *pcda));
 int32_t set_cache PROTO((int32_t newcacr));
 int16_t pred_dinf PROTO((NOTHING));
@@ -587,6 +587,7 @@ VOID ch_wrect PROTO((GRECT *r, GRECT *n));
  */
 VOID ob_center PROTO((LPTREE tree, GRECT *pt));
 int16_t ob_edit PROTO((LPTREE tree, int16_t obj, int16_t in_char, int16_t *idx, int16_t kind));
+
 
 /*
  * gemobjop.c
@@ -921,6 +922,7 @@ int dos_free PROTO((VOIDPTR ptr));
 int do_cdir PROTO((int drv, const char *path));
 int isdrive PROTO((NOTHING)); /* BUG: should be delcared as returning LONG */
 long trap PROTO((short code, ...));
+
 
 /*
  * mn_index.c
