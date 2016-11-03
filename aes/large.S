@@ -1,34 +1,36 @@
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:28:54 $
-* =======================================================================
-*
-* Revision 2.2  89/04/26  18:28:54  mui
-* TT
-* 
-* Revision 2.1  89/02/22  05:30:57  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:35:49  lozben
-* Initial revision
-* 
-***************************************************************************
-***									***
-***									***
-***				LARGE.S					***
-***									***
-***									***
-***************************************************************************
-*
-*	10/26/84	Dan Oliver
-*	1/31/85	- 03/21/85	Lowell Webster
-*	05/10/85		Jim Eisenstein
-*	Take out LBFILL, LWFILL, LBDSKIP	 03/09/1988	D.Mui		
-*	Subroutines used by CRYSTAL.
-*	Take out LSTRLEN	3/15/88		D.Mui
-*	Use MAC to assemble	6/28/90		D.Mui
-* assemble with MAS 900801 kbad
+/*************************************************************************
+ *                       Revision Control System
+ * =======================================================================
+ *  $Author: mui $       $Date: 89/04/26 18:28:54 $
+ * =======================================================================
+ *
+ * Revision 2.2  89/04/26  18:28:54  mui
+ * TT
+ * 
+ * Revision 2.1  89/02/22  05:30:57  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.1  88/06/02  12:35:49  lozben
+ *
+ * Initial revision
+ * 
+ ***************************************************************************
+ ***                                                                     ***
+ ***                                                                     ***
+ ***                             LARGE.S                                 ***
+ ***                                                                     ***
+ ***                                                                     ***
+ ***************************************************************************
+ *
+ *       10/26/84        Dan Oliver
+ *       1/31/85 - 03/21/85      Lowell Webster
+ *       05/10/85                Jim Eisenstein
+ *       Take out LBFILL, LWFILL, LBDSKIP         03/09/1988     D.Mui           
+ *       Subroutines used by CRYSTAL.
+ *       Take out LSTRLEN        3/15/88         D.Mui
+ *       Use MAC to assemble     6/28/90         D.Mui
+ * assemble with MAS 900801 kbad
+ */
 
 #define __ASSEMBLER__ 1
 
@@ -37,7 +39,9 @@
 #include "../common/asmdefs.h"
 
 	text
-*
+
+
+#if COLORICON_SUPPORT
 
 saddr	equ $08	; -> a4
 daddr	equ $0c	; -> a5
@@ -47,18 +51,19 @@ dplanes	equ $16	; -> d5.w
 w	equ $18
 h	equ $1a
 
-* void expand_data(saddr, daddr, mask, splanes, dplanes, w, h)
-* BYTE *saddr, *daddr, *mask;
-* WORD splanes, dplanes, w, h;
-*
-* Expand a color icon at 'saddr' with 'splanes' of data
-* to 'daddr' with 'dplanes' of data.
-*
-* In pixel-packed modes, the mask must be set to 0
-* and the data must be ORed in to preserve the colors.
-* Also, data outside the mask must be set to 0.
-*
-* stack offsets after link:
+/* void expand_data(saddr, daddr, mask, splanes, dplanes, w, h)
+ * BYTE *saddr, *daddr, *mask;
+ * WORD splanes, dplanes, w, h;
+ *
+ * Expand a color icon at 'saddr' with 'splanes' of data
+ * to 'daddr' with 'dplanes' of data.
+ *
+ * In pixel-packed modes, the mask must be set to 0
+ * and the data must be ORed in to preserve the colors.
+ * Also, data outside the mask must be set to 0.
+ *
+ * stack offsets after link:
+ */
 	xdef _expand_data
 _expand_data:
 	link	a6,#0
@@ -89,6 +94,7 @@ fflp:	move.w	d2,(a1)+
 	dbra	d1,fflp
 
 	move.l	a4,a0		; AND all source planes to 1st extra dest plane
+#endif
 	move.w	d4,d0		; splanes
 	subq	#1,d0		; (dbra count)
 aplp:	move.l	a2,a1		; -> 1st extra dest plane
@@ -133,6 +139,7 @@ plp:	move.w	(a0)+,d0
 ret:	movem.l	(sp)+,d4-d7/a4-a5
 	unlk	 a6
 	rts
+#endif
 
 *
 *	copy from src to dest until and including a null in the
