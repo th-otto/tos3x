@@ -43,10 +43,10 @@
 *
 *******************************************************************************
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
 #include "lineaequ.inc"
-#include "../common/asmdefs.h"
+#include "asmdefs.h"
 
 	xref	_FindDevice
 	xref	_GSX_ENTRY

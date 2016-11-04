@@ -12,10 +12,10 @@
 *
 *************************************************************************
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
 #include "lineaequ.inc"
-#include "../common/asmdefs.h"
+#include "asmdefs.h"
 
 #if BLITTER_SUPPORT /* whole file */
 

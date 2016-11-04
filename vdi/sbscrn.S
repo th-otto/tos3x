@@ -23,7 +23,7 @@
 *
 *******************************************************************************
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
 
 #if TOSVERSION >= 0x300 /* whole file */

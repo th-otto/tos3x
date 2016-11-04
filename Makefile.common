@@ -4,7 +4,7 @@ QBS=\\${empty}
 
 BIN=..\bin${BS}
 LIB=..\lib${BS}
-INC=..\include${BS}
+INC=..\common${BS}
 EXEEXT=.ttp
 BUILD_EXEEXT=$(EXEEXT)
 ALNPATH=${LIB}

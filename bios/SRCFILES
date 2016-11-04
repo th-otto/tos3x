@@ -9,12 +9,10 @@ BIOS_OBJS = \
 	$(empty)
 
 BIOS_SRCS = \
-	asmdefs.h \
 	bios.h \
 	biosdefs.h \
 	blkdev.h \
 	bpb.h \
-	ctrycodes.h \
 	header.h \
 	ide.h \
 	linea.h \
@@ -35,7 +33,6 @@ BIOS_SRCS = \
 	nvram.inc \
 	romcrc.inc \
 	scrdmp.inc \
-	tosvars.inc \
 	$(empty)
 
 

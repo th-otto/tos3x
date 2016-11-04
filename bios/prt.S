@@ -1,4 +1,4 @@
-#include "../common/tosvars.inc"
+#include "tosvars.inc"
 
 /* 306de: 00e05f48 */
 		xdef _plststat

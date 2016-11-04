@@ -5,7 +5,7 @@
 #include <stdint.h>
 #endif
 
-#include "../common/config.h"
+#include "config.h"
 #include "bdosdefs.h"
 
 /* major.minor */

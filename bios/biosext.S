@@ -6,9 +6,9 @@
  * This file is only used when linking a single module,
  * to get the same addresses as when linking the whole ROM
  */
-#include "../common/config.h"
-#include "../common/ctrycodes.h"
-#include "../common/sections.inc"
+#include "config.h"
+#include "ctrycodes.h"
+#include "sections.inc"
 
 /* from VDI */
 		xdef line1010

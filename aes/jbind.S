@@ -32,9 +32,9 @@
 
 #define __ASSEMBLER__ 1
 
-#include "../common/config.h"
+#include "config.h"
 #include "aesdefs.h"
-#include "../common/asmdefs.h"
+#include "asmdefs.h"
 
 
 /* --Crystal function numbers. */

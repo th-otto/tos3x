@@ -33,11 +33,11 @@
 *
 *******************************************************************************
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
 #include "lineaequ.inc"
-#include "../common/asmdefs.h"
-#include "../common/tosvars.inc"
+#include "asmdefs.h"
+#include "tosvars.inc"
 
 #if PLANES8
 MAX_PLANES	equ	 8		; maximum planes for pixel fragment

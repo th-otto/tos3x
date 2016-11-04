@@ -24,10 +24,10 @@
 *
 *******************************************************************************
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
 #include "lineaequ.inc"
-#include "../common/tosvars.inc"
+#include "tosvars.inc"
 
 
 #if MULTI_LINEA

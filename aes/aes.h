@@ -50,7 +50,7 @@
 #include <stdint.h>
 #endif
 
-#include "../common/config.h"
+#include "config.h"
 #include "aesdefs.h"
 
 #if BINEXACT
@@ -414,8 +414,12 @@ BOOLEAN cre_aproc PROTO((NOTHING));
  */
 extern MOBLK gl_ctwait;
 extern int16_t appl_msg[8];
+#if AES3D
 extern int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
+#endif
+#if 0
 extern int16_t rets[6];							/* added 2/4/87     */
+#endif
 extern int16_t ml_ocnt;
 
 VOID ct_msgup PROTO((int16_t message, int16_t owner, int16_t wh, int16_t m1, int16_t m2, int16_t m3, int16_t m4));

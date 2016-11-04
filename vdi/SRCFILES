@@ -44,11 +44,9 @@ VDI_SRCS = \
 	vdi.h \
 	scrndev.h \
 	styles.h \
-	asmdefs.h \
 	\
 	devequ.inc \
 	lineaequ.inc \
-	tosvars.inc \
 	\
 	palette.S \
 	allgem.S \

@@ -46,11 +46,11 @@
 *
 *******************************************************************************
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
 #include "devequ.inc"
 #include "lineaequ.inc"
-#include "../common/tosvars.inc"
+#include "tosvars.inc"
 
 ldri_escape	equ	19	; last DRI escape = 19.
 

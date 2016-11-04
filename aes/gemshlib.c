@@ -141,7 +141,7 @@ int16_t sh_iscart;
 
 char *ad_path;
 
-char *ad_pfile; /* unused */
+/* char *ad_pfile; */ /* unused */
 
 char temp[50]; /* WTF */
 

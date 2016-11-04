@@ -17,7 +17,7 @@
 #include "vdi.h"
 #include "fontdef.h"
 #include "gsxextrn.h"
-#include "../common/ctrycodes.h"
+#include "ctrycodes.h"
 
 #if PLANES8
 

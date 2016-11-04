@@ -14,7 +14,7 @@
  *******************************************************************************
  */
 
-#include "../common/config.h"
+#include "config.h"
 
 /*
  * set to 1 if we are on a 68010+ with 8-byte trap exception frames

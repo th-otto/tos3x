@@ -38,10 +38,10 @@
 *
 *******************************************************************************
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
 #include "lineaequ.inc"
-#include "../common/asmdefs.h"
+#include "asmdefs.h"
 
 /*
  * We now use _copytran in the overlay variable space rather than

@@ -8,10 +8,10 @@
  */
 #define __ASSEMBLER__ 1
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
-#include "../common/ctrycodes.h"
-#include "../common/sections.inc"
+#include "ctrycodes.h"
+#include "sections.inc"
 
 /* from BIOS */
 		xdef ringbell

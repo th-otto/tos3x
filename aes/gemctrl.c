@@ -79,8 +79,12 @@ STATIC int16_t tmpmoff;
 STATIC int16_t tmpmon;
 MOBLK gl_ctwait;
 int16_t appl_msg[8];
-int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
-int16_t rets[6];							/* added 2/4/87     */
+#if AES3D
+int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP */ /* WTF, what for? */
+#endif
+#if 0
+int16_t rets[6];							/* added 2/4/87 ... and now unused */
+#endif
 int16_t ml_ocnt;
 
 /* used to convert from window object # to window message code */

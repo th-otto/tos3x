@@ -2,9 +2,9 @@
  * These 2 functions are referenced by GEMDOS,
  * but are defined elsewhere
  */
-#include "../common/config.h"
-#include "../common/ctrycodes.h"
-#include "../common/sections.inc"
+#include "config.h"
+#include "ctrycodes.h"
+#include "sections.inc"
 
 	xdef _zeromem
 	xdef _GSX_ENTRY

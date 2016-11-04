@@ -6,9 +6,9 @@
  *
  *****************************************************************************/
 
-#include "../common/config.h"
+#include "config.h"
 #include "bdosdefs.h"
-#include "../common/tosvars.inc"
+#include "tosvars.inc"
 
     xref    _GSX_ENTRY
     xref    _osif

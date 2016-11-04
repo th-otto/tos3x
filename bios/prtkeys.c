@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <osbind.h>
-#include "../common/ctrycodes.h"
+#include "ctrycodes.h"
 
 const char *norm_name = "keytblnorm";
 const char *shift_name = "keytblshift";

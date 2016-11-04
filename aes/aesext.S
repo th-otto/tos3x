@@ -8,10 +8,10 @@
  */
 #define __ASSEMBLER__ 1
 
-#include "../common/config.h"
+#include "config.h"
 #include "aesdefs.h"
-#include "../common/asmdefs.h"
-#include "../common/sections.inc"
+#include "asmdefs.h"
+#include "sections.inc"
 
 /* from DESKTOP */
 	xdef _infdata

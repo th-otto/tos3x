@@ -36,10 +36,10 @@
 *************************************************************************
 
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
 #include "lineaequ.inc"
-#include "../common/tosvars.inc"
+#include "tosvars.inc"
 
 #if TOSVERSION >= 0x400
 #define V_FUNC(func,la,r) \

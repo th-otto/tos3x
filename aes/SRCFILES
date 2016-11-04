@@ -11,9 +11,9 @@ AES_OBJS = $(AES_OBJS1) $(AES_OBJS2) $(AES_OBJS3) $(AES_OBJS4) $(AES_OBJS5) $(AE
 AES_SRCS = \
 	aes.h \
 	aesdefs.h \
-	alert.h \
 	crysbind.h \
 	dos.h \
+	gemlib.h \
 	gemusa.h \
 	gsxdefs.h \
 	mn_tools.h \
@@ -82,4 +82,7 @@ EXTRA_DIST = \
 	Makefile \
 	SRCFILES \
 	optimize.mak \
+	aesext.S \
+	tos306de.map \
+	tos306us.map \
 	$(empty)

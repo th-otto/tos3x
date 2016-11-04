@@ -147,3 +147,12 @@ clean:
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak
+
+maps:
+	$(MAKE) clean
+	$(MAKE) TOSVERSION=306 COUNTRY=de
+	cnm -g aes.o > tos306de.map
+	$(MAKE) clean
+	$(MAKE) TOSVERSION=306 COUNTRY=us
+	cnm -g aes.o > tos306us.map
+	$(MAKE) clean

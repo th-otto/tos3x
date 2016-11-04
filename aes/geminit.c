@@ -148,7 +148,7 @@ char *ad_fsel;
 intptr_t drawstk;
 int16_t er_num;						/* for output.s */
 int16_t no_aes;						/* gembind.s    */
-BOOLEAN sh_up;				/* is the sh_start being ran yet ? */ /* unused */
+/* BOOLEAN sh_up; */				/* is the sh_start being ran yet ? */ /* unused */
 BOOLEAN autoexec;					/* autoexec a file ?    */
 STATIC char g_autoboot[CMDLEN];
 STATIC int16_t g_flag;
@@ -159,10 +159,10 @@ BOOLEAN act3dtxt;					/* look of 3D activator text */
 BOOLEAN act3dface;					/* selected look of 3D activator */
 BOOLEAN ind3dtxt;					/* look of 3D indicator text */
 BOOLEAN ind3dface;					/* selected look of 3D indicators */
-#endif
 uint16_t gl_indbutcol;				/* indicator button color */
 uint16_t gl_actbutcol;				/* activator button color */
 uint16_t gl_alrtcol;				/* alert background color */
+#endif
 int16_t crt_error;					/* critical error handler semaphore     */
 				/* set in jbind.s, checked by dispatcher    */
 #if (AESVERSION >= 0x330) | !BINEXACT

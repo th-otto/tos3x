@@ -15,10 +15,10 @@
 *
 *******************************************************************************
 
-#include "../common/config.h"
+#include "config.h"
 #include "vdidefs.h"
-#include "../common/asmdefs.h"
-#include "../common/tosvars.inc"
+#include "asmdefs.h"
+#include "tosvars.inc"
 
 #include "devequ.inc"
 #include "lineaequ.inc"

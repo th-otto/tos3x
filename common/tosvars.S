@@ -88,7 +88,7 @@
         xdef  _bell_hook
         xdef  _kcl_hook
 
-#include "../common/tosvars.inc"
+#include "tosvars.inc"
 
 		xdef sysvars_start
 sysvars_start equ _etv_timer

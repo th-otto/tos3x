@@ -5,7 +5,7 @@
  * to get the same addresses as when linking the whole ROM
  */
 
-#include "../common/config.h"
+#include "config.h"
 #include "../bdos/bdosdefs.h"
 #include "../bios/biosdefs.h"
 #include "../aes/aesdefs.h"

@@ -43,10 +43,10 @@
 
 #define __ASSEMBLER__ 1
 
-#include "../common/config.h"
+#include "config.h"
 #include "aesdefs.h"
-#include "../common/asmdefs.h"
-#include "../common/tosvars.inc"
+#include "asmdefs.h"
+#include "tosvars.inc"
 
 	bss
 	even

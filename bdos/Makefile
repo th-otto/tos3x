@@ -54,6 +54,9 @@ check::
 clean:
 	$(RM) *.o *.a *.i *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
 
+distclean: clean
+	$(RM) $(top_srcdir)/common/sections.mak
+
 maps:
 	$(MAKE) clean
 	$(MAKE) TOSVERSION=306 COUNTRY=de
@@ -62,6 +65,3 @@ maps:
 	$(MAKE) TOSVERSION=306 COUNTRY=us
 	cnm -g bdos.o > tos306us.map
 	$(MAKE) clean
-
-distclean: clean
-	$(RM) $(top_srcdir)/common/sections.mak

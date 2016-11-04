@@ -20,7 +20,7 @@
 #include "gemusa.h"
 
 
-int16_t gl_dspcnt; /* unused */
+/* int16_t gl_dspcnt; */ /* unused */
 
 VOIDPTR ad_rso;
 
