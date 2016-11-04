@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.common
 include $(top_srcdir)/Makefile.silent
 include optimize.mak
 
-all: desk.a desk.o
+all: $(top_srcdir)/common/config.h desk.a desk.o
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -77,7 +77,7 @@ deskmn.o:   $(STDDESK.H) $(GEMDESK.H)
 check::
 
 clean:
-	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
+	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
-	$(RM) $(top_srcdir)/common/config.h
+	$(RM) $(top_srcdir)/common/sections.mak

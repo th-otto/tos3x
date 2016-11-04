@@ -10,7 +10,7 @@ include optimize.mak
 
 PROGRAMS = screen.prg
 
-all: vdi.a vdi.o $(PROGRAMS)
+all: $(top_srcdir)/common/config.h vdi.a vdi.o $(PROGRAMS)
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -368,3 +368,4 @@ clean:
 	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
+	$(RM) $(top_srcdir)/common/sections.mak

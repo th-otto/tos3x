@@ -28,18 +28,29 @@
 	xdef _gemdos
 
 #if TOSVERSION == 0x306
-_xbios          equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FB9C /* E35FD8 */
-_bios           equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBAC /* E35FE8 */
-_gemdos         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBBC /* E35FF8 */
-_infdata        equ DESKDBASE+$942                      /* E3EC92 */
+_xbios          equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FB9C /*           de:E35FD8 */
+_bios           equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBAC /*           de:E35FE8 */
+_gemdos         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBBC /*           de:E35FF8 */
+_g_name         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$9CE8 /*           de:E30124 */
+_deskmain       equ DESKTBASE+(DESKTLEN-DTLEN_US)+$D6B6 /*           de:E33AF2 */
+_scan_2         equ DESKTBASE+$51C4                     /* us:E2B5D0 de:E2B62A */
+_escan_str      equ DESKTBASE+$518C                     /* us:E2B598 de:E2B5F2 */
+_save_2         equ DESKTBASE+$5208                     /* us:E2B614 de:E2B66E */
+_app_reschange  equ DESKTBASE+$1902                     /* us:E27D0E de:E27D68 */
 _XDeselect      equ 0
 _getcookie      equ 0
-_scan_2         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$51EE /* E2B62A */
-_escan_str      equ DESKTBASE+(DESKTLEN-DTLEN_US)+$51B6 /* E2B5F2 */
-_save_2         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$5232 /* E2B66E */
-_app_reschange  equ DESKTBASE+(DESKTLEN-DTLEN_US)+$192C /* E27D68 */
-_g_name         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$9CE8 /* E30124 */
-_deskmain       equ DESKTBASE+(DESKTLEN-DTLEN_US)+$D6B6 /* E33AF2 */
+#if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
+_infdata        equ DESKDBASE+$8E6                      /* E3EC06 */
+#endif
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
+_infdata        equ DESKDBASE+$942                      /* E3EC92 */
+#endif
+#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
+_infdata        equ DESKDBASE+$95E                      /* E3ECCC */
+#endif
+#if OS_COUNTRY == CTRY_SV
+_infdata        equ DESKDBASE+$8C2                      /* E3EC30 */
+#endif
 #endif
 
 #if MULTILANG_SUPPORT
@@ -69,5 +80,5 @@ _RSCFI equ 0
 _RSCNO equ 0
 #else
 	xdef _tosrsc
-_tosrsc equ DESKDBASE+DESKDLEN  /* $00E3ED2E */
+_tosrsc equ DESKDBASE+DESKDLEN  /* us:00E3ECA2 de:00E3ED2E */
 #endif

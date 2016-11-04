@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.common
 include $(top_srcdir)/Makefile.silent
 include optimize.mak
 
-all: aes.a aes.o
+all: $(top_srcdir)/common/config.h aes.a aes.o
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -29,7 +29,11 @@ aes.a: $(STARTUP) $(AES_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(AES_OBJS7)
 
 aes.o: vars.o $(STARTUP) $(AES_OBJS) aesext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
-	$(LD) -u -s -l -o $@ -a $(aes_tbase) $(aes_dbase) 0 vars.o $(STARTUP) $(AES_OBJS) aesext.o
+	# sections.mak might have just been generated, make sure it is reread
+	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
+
+single:
+	$(LD) -u -s -l -o aes.o -a $(aes_tbase) $(aes_dbase) 0 vars.o $(STARTUP) $(AES_OBJS) aesext.o
 
 #
 # need to repeat the default suffix rule here,
@@ -113,7 +117,7 @@ tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
-aesext.o: aesext.S $(top_srcdir)/common/config.h
+aesext.o: aesext.S $(top_srcdir)/common/sections.inc $(top_srcdir)/common/config.h
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
@@ -139,7 +143,7 @@ usa.prg: $(STARTUP) $(AESOBJ) $(DESKOBJ) $(RESOURCE) makefile
 check::
 
 clean:
-	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
+	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
-	$(RM) $(top_srcdir)/common/config.h
+	$(RM) $(top_srcdir)/common/sections.mak

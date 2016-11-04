@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.common
 include $(top_srcdir)/Makefile.silent
 include optimize.mak
 
-all: bios.a bios.o
+all: $(top_srcdir)/common/config.h bios.a bios.o
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -69,3 +69,4 @@ clean:
 	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
+	$(RM) $(top_srcdir)/common/sections.mak

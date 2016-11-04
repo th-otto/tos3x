@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.common
 include $(top_srcdir)/Makefile.silent
 include optimize.mak
 
-all: bdos.a bdos.o
+all: $(top_srcdir)/common/config.h bdos.a bdos.o
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -64,3 +64,4 @@ maps:
 	$(MAKE) clean
 
 distclean: clean
+	$(RM) $(top_srcdir)/common/sections.mak
