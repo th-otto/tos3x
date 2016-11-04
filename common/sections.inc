@@ -96,33 +96,33 @@
 #if TOSVERSION == 0x206
 
 #define BTLEN_US    $0000603A
-#define DTLEN_US    $0000FBFC
+#define DTLEN_US    $0000FBCC
 
 #if OS_COUNTRY == CTRY_US
 #define BIOSTLEN    BTLEN_US
 #define DESKTLEN    DTLEN_US
-#define DESKDLEN    $00000000
-#define GLUELEN     $00000000
+#define DESKDLEN    $00000982
+#define GLUELEN     $00007492
 #endif
 
 #if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
 #define BIOSTLEN    BTLEN_US+$5A
 #define DESKTLEN    DTLEN_US-$5A
-#define DESKDLEN    $00000000
-#define GLUELEN     $00000000
+#define DESKDLEN    $000009DE
+#define GLUELEN     $00007504
 #endif
 
 #if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
 #define BIOSTLEN    BTLEN_US+$78
 #define DESKTLEN    DTLEN_US-$5A
-#define DESKDLEN    $00000000
+#define DESKDLEN    $000009FA
 #define GLUELEN     $00000000
 #endif
 
 #if OS_COUNTRY == CTRY_UK
 #define BIOSTLEN    BTLEN_US
 #define DESKTLEN    DTLEN_US
-#define DESKDLEN    $00000000
+#define DESKDLEN    $00000982
 #define GLUELEN     $00000000
 #endif
 
@@ -138,6 +138,13 @@
 #define DESKTLEN    DTLEN_US-$5A
 #define DESKDLEN    $00000000
 #define GLUELEN     $00000000
+#endif
+
+#if OS_COUNTRY == CTRY_SV
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $0000095E
+#define GLUELEN     $00007658
 #endif
 
 /*
