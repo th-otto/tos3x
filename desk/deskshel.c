@@ -9,46 +9,19 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <error.h>
-#include <extern.h>
+#include "desktop.h"
 
-extern char *r_slash();
+BOOLEAN xch_tail PROTO((char *ptr, char *argu, char *tail));
+VOID show_file PROTO((const char *file));
+VOID pr_setup PROTO((NOTHING));
+BOOLEAN printit PROTO((const char *str));
 
-extern char *g_name();
 
-extern APP *app_xtype();
 
-extern char toupper();
-
-extern char *scasb();
-
-extern OBJECT *get_tree();
-
-extern int16_t d_exit;
-
-extern int16_t s_defdir;
-
-extern int16_t s_fullpath;
-
-extern WINDOW *x_win;
-
-extern int16_t x_type;
-
-extern int16_t sh_iscart;
-
-extern char *strcpy();
-
-int16_t xch_tail(ptr, argu, tail)
-char *ptr,
-*argu,
-*tail;
+BOOLEAN xch_tail(P(char *)ptr, P(char *)argu, P(char *)tail)
+PP(char *ptr;)
+PP(char *argu;)
+PP(char *tail;)
 {
 	if ((strlen(ptr) + strlen(argu) + 1) >= PATHLEN)
 	{
@@ -56,23 +29,24 @@ char *ptr,
 		return (FALSE);
 	} else
 	{
-		strcpy(argu, &tail[1]);			/* put in first argus   */
-		strcat(ptr, &tail[1]);			/* patch in file name   */
+		strcpy(&tail[1], argu);			/* put in first argus   */
+		strcat(&tail[1], ptr);			/* patch in file name   */
 		tail[0] = strlen(&tail[1]);
 		return (TRUE);
 	}
 }
 
-int16_t ch_tail(ptr, tail)
-char *ptr,
-*tail;
+
+BOOLEAN ch_tail(P(char *)ptr, P(char *)tail)
+PP(char *ptr;)
+PP(char *tail;)
 {
-	return (xch_tail(ptr, Nostr, tail));
+	return xch_tail(ptr, Nostr, tail);
 }
 
 
-show_file(file)
-char *file;
+VOID show_file(P(const char *)file)
+PP(const char *file;)
 {
 	menu_bar(menu_addr, FALSE);
 	v_hide_c();
@@ -88,40 +62,38 @@ char *file;
 }
 
 
-pr_setup()
+VOID pr_setup(NOTHING)
 {
 	inf_sset(get_tree(PRINTFIL), PFILE, Nostr);
 	fm_draw(PRINTFIL);
 }
 
 
-/*	Print one single file		*/
-
-int16_t printit(str)
-char *str;
+/*
+ * Print one single file
+ */
+BOOLEAN printit(P(const char *)str)
+PP(const char *str;)
 {
 	char *ptr;
-
 	register OBJECT *obj;
 
 	obj = get_tree(PRINTFIL);
 	xinf_sset(obj, PFILE, g_name(str));
 	draw_fld(obj, PFILE);
-	return (showfile(str, TRUE));
+	return showfile(str, TRUE);
 }
 
 
-/*	Loop for print files	*/
-
-print_file()
+/*
+ * Loop for print files
+ */
+VOID print_file(NOTHING)
 {
-	int16_t ret,
-	 type,
-	 print,
-	 ret1;
-
+	BOOLEAN ret;
+	int type;
+	BOOLEAN print, ret1;
 	char *str;
-
 	GRECT pt;
 
 	ret1 = build_rect(background, &pt, d_xywh[6], d_xywh[9]);
@@ -161,20 +133,21 @@ print_file()
 		if (ret1)
 			do_redraw(0, &pt, 0);
 	} else
+	{
 		up_2(x_win);
-
+	}
+	
 	desk_wait(FALSE);
 }
 
 
-/*	Launch a file	*/
-
-launch_pref()
+/*
+ * Launch a file
+ */
+VOID launch_pref(NOTHING)
 {
-	int16_t graphic;
-
+	BOOLEAN graphic;
 	register OBJECT *obj;
-
 	char *ptr;
 
 	obj = get_tree(DLAUNCH);
@@ -192,8 +165,10 @@ launch_pref()
 				if (!ch_tail(ptr, comtail))
 					return;
 			} else
+			{
 				comtail[0] = 0;
-
+			}
+			
 			if (path1[1] == ':')
 				path1[0] = toupper(path1[0]);
 
@@ -203,14 +178,14 @@ launch_pref()
 }
 
 
-/*	Set the current directory					*/
-/*	The path should look like A:\FILENAME or A:\FOLDER\FILENAME	*/
-
-int16_t set_dir(path)
-register char path[];
+/*
+ * Set the current directory
+ * The path should look like A:\FILENAME or A:\FOLDER\FILENAME
+ */
+BOOLEAN set_dir(P(const char *) path)
+PP(register const char *path;)
 {
 	register char *ptr;
-
 	register int16_t ret;
 
 	if (path[0] == 'c')
@@ -219,8 +194,9 @@ register char path[];
 	ret = TRUE;
 
 	if (path[0] == '\\')				/* at the current root  */
+	{
 		ret = Dsetpath(bckslsh);
-	else
+	} else
 	{									/* there is drive id    */
 		if (path[1] == ':')
 		{
@@ -238,40 +214,32 @@ register char path[];
 				}
 			}
 		} else							/* only file name !!!   */
-			ret = FALSE;				/* OK           */
+		{
+			ret = 0;					/* OK           */
+		}
 	}
 
-	return (ret ? FALSE : TRUE);
+	return ret ? FALSE : TRUE;
 }
 
 
-/*	Run an application include doing dialogue box	*/
-
-exec_file(infile, win, item, intail)
-char *infile;
-
-WINDOW *win;
-
-int16_t item;
-
-char *intail;
+/*
+ * Run an application include doing dialogue box
+ */
+VOID exec_file(P(char *)infile, P(WINDOW *)win, P(int16_t) item, P(char *)intail)
+PP(char *infile;)
+PP(WINDOW *win;)
+PP(int16_t item;)
+PP(char *intail;)
 {
-	int16_t type,
-	 install,
-	 graphic;
-
-	int16_t dofull,
-	 setdir,
-	 which;
-
+	int16_t type, install;
+	BOOLEAN graphic;
+	BOOLEAN dofull, setdir;
+	int16_t which;
 	register APP *app;
-
 	OBJECT *obj;
-
 	char buffer[14];
-
 	char *tail;
-
 	char *file;
 
 	app = app_xtype(infile, &install);
@@ -316,13 +284,15 @@ char *intail;
 			desk_wait(FALSE);
 			do_finish(PRINTFIL);
 		} else if (which == 1)			/* show     */
+		{
 			show_file(file);
-
+		}
 		return;
 
 	case TTP:							/* TOS takes parameter  */
 		graphic = FALSE;
-
+		/* fall through */
+		
 	case PTP:							/* program takes parameter  */
 		if ((install) || (*tail))
 			break;
@@ -339,7 +309,6 @@ char *intail;
 
 		if (!ch_tail(tail, comtail))
 			return;
-
 		break;
 
 	case TOS:
@@ -360,15 +329,14 @@ char *intail;
 }
 
 
-/*	Run the application	*/
-
-run_it(file, tail, graphic, setdir)
-char *file;
-
-char *tail;
-
-int16_t graphic,
- setdir;
+/*
+ * Run the application
+ */
+VOID run_it(P(char *)file, P(char *)tail, P(BOOLEAN) graphic, P(BOOLEAN) setdir)
+PP(char *file;)
+PP(char *tail;)
+PP(BOOLEAN graphic;)
+PP(BOOLEAN setdir;)
 {
 	if (m_sfirst(file, 0x31))			/* search the file */
 	{
@@ -409,15 +377,18 @@ int16_t graphic,
 	if (*file == 'c')
 	{
 		if (cart_init())
+		{
 			sh_iscart = TRUE;
-		else
+		} else
 		{
 			do1_alert(NOCART);
 			return;
 		}
 	} else
+	{
 		sh_iscart = FALSE;
-
+	}
+	
 	tail[strlen(tail) + 1] = 0xD;
 	shel_write(TRUE, graphic, 0, file, tail);
 	d_exit = L_LAUNCH;

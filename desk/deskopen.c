@@ -13,76 +13,39 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
+#include "desktop.h"
 
-extern char *get_fstring();
+VOID xvq_chcells PROTO((int16_t *num));
+VOID sh_witem PROTO((NOTHING));
+BOOLEAN sh_disk PROTO((char *buffer));
+BOOLEAN drv_exist PROTO((int16_t id));
 
-extern WINDOW *w_gfirst();
 
-extern WINDOW *get_win();
 
-extern WINDOW *get_top();
-
-extern int16_t do_alert();
-
-extern WINDOW *get_win();
-
-extern char *r_slash();
-
-extern OBJECT *get_tree();
-
-extern DIR *get_dir();
-
-extern char *put_name();
-
-extern APP *app_xtype();
-
-extern uint16_t st_dchar;
-
-extern int16_t numicon;
-
-extern WINDOW *x_win;
-
-extern int16_t x_status;
-
-extern int16_t x_type;
-
-extern int16_t back_update;
-
-extern int16_t contrl[];
-
-extern int16_t intout[];
-
-extern int16_t XSelect();					/* cjg 08/06/92 */
-
-extern int16_t XDeselect();
-
-extern int16_t wait_up();
-
-/*	Inquire cell size	*/
-
-xvq_chcells(num)
-int16_t *num;
+/*
+ * Inquire cell size
+ */
+VOID xvq_chcells(P(int16_t *)num)
+PP(int16_t *num;)
 {
+#if BINEXACT
 	contrl[5] = 1;
 	gsx_ncode(5, 0, 0);
 	*num = intout[0];
+#else
+	int16_t rows, cols;
+	vq_chcells(&rows, &cols);
+	*num = rows;
+#endif
 }
 
 
-/*	open the default windows	*/
-
-open_def()
+/*
+ * open the default windows
+ */
+VOID open_def(NOTHING)
 {
 	register int16_t i;
-
 	register WINDOW *win;
 
 	win = winpd;
@@ -98,12 +61,10 @@ open_def()
 }
 
 
-ch_path(win)
-register WINDOW *win;
+VOID ch_path(P(WINDOW *)win)
+PP(register WINDOW *win;)
 {
-	int16_t i,
-	 num,
-	 len;
+	int16_t i, num, len;
 
 	i = 0;
 	len = strlen(win->w_path);
@@ -119,25 +80,20 @@ register WINDOW *win;
 }
 
 
-/*	Pass in window stuff and tells if you want to open it or not	*/
-/*	init -- initalize window	*/
-/*	open -- open a disk		*/
-
-int16_t open_subdir(win, icon, opendisk, init, redraw)
-register WINDOW *win;
-
-int16_t icon,
-	opendisk,
-	init,
-	redraw;
+/*
+ * Pass in window stuff and tells if you want to open it or not
+ * init -- initalize window
+ * open -- open a disk
+ */
+int16_t open_subdir(P(WINDOW *)win, P(int16_t) icon, P(BOOLEAN) opendisk, P(BOOLEAN) init, P(BOOLEAN) redraw)
+PP(register WINDOW *win;)
+PP(int16_t icon;)
+PP(BOOLEAN opendisk;)
+PP(BOOLEAN init;)
+PP(BOOLEAN redraw;)
 {
-	int16_t handle,
-	 num,
-	 len,
-	 i;
-
+	int16_t handle, num, len, i;
 	int16_t status;
-
 	char *path;
 
 	desk_wait(TRUE);
@@ -184,7 +140,7 @@ int16_t icon,
 }
 
 
-show_item()
+VOID show_item(NOTHING)
 {
 	register WINDOW *win;
 
@@ -194,7 +150,7 @@ show_item()
 	{
 		if (win = w_gfirst())
 		{
-			strcpy(wildext, win->w_buf);
+			strcpy(win->w_buf, wildext);
 			win->w_buf[0] = win->w_path[0];
 			sh_disk(win->w_buf);
 		}
@@ -204,52 +160,25 @@ show_item()
 
 /*	Show the info of an item	*/
 
-sh_witem()
+VOID sh_witem(NOTHING)
 {
 	DIR dir1;
-
 	register DIR *dir;
-
 	DIR *dir2;
-
 	register OBJECT *obj;
-
-	register int16_t curri,
-	 ret,
-	 which;
-
-	int16_t cont,
-	 changed,
-	 limit;
-
-	int16_t opened,
-	 subtype;
-
-	int32_t ndir,
-	 nfile,
-	 nsize;
-
+	register int16_t curri, ret, which;
+	int16_t cont, changed, limit;
+	int16_t opened, subtype;
+	int32_t ndir, nfile, nsize;
 	char buffer[20];
-
 	char newname[14];
-
 	int32_t sizes[4];
-
 	char *newstr;
-
 	char *oldstr;
-
-	uint16_t len,
-	 pos;
-
+	uint16_t len, pos;
 	char *file;
-
 	char *savestr;
-
-	int16_t mk_x,
-	 mk_y,
-	 mk_buttons,
-	 mk_kstate;
+	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
 
 	changed = FALSE;					/* any changes made?    */
 	cont = TRUE;
@@ -296,7 +225,7 @@ sh_witem()
 				fill_string(backid[curri++].i_name, ret);
 				goto ss_1;
 			case DISK:
-				strcpy(wildext, buffer);
+				strcpy(buffer, wildext);
 				buffer[0] = (CICONBLK *) (background[curri++].ob_spec)->monoblk.ib_char[1];
 				if (sh_disk(buffer))
 					goto ss_1;
@@ -354,7 +283,7 @@ sh_witem()
 			goto ss_5;
 		}
 
-		strcpy(file, oldstr);
+		strcpy(oldstr, file);
 
 		if ((x_type == DESKICON) && (subtype == XDIR))
 		{
@@ -369,11 +298,11 @@ sh_witem()
 			*dir = dtabuf.dirfile;
 		}
 
-		strcpy(oldstr, newstr);
+		strcpy(newstr, oldstr);
 
 		if (dir->d_att & SUBDIR)		/* directory file   */
 		{
-			strcat(wilds, newstr);		/* attach wild card */
+			strcat(newstr, wilds);		/* attach wild card */
 			/*	    i_status = FALSE;	*//* force it to do only one file */
 
 			if (dofiles(newstr, newstr, OP_COUNT, &ndir, &nfile, &nsize, TEXT, FALSE))
@@ -543,21 +472,16 @@ sh_witem()
 
 
 
-/*	Show the info of desktop items	*/
-
-sh_disk(buffer)
-char *buffer;
+/*
+ * Show the info of desktop items
+ */
+BOOLEAN sh_disk(P(char *)buffer)
+PP(char *buffer;)
 {
 	register OBJECT *obj;
-
-	int32_t ndir,
-	 nfile,
-	 nsize;
-
+	int32_t ndir, nfile, nsize;
 	char newname[14];
-
 	int32_t sizes[4];
-
 	buffer[1] = 0;
 
 	if (buffer[0] == 'c')
@@ -601,15 +525,14 @@ char *buffer;
 }
 
 
-/*	Close a path		*/
-
-close_path(win)
-register WINDOW *win;
+/*
+ * Close a path
+ */
+VOID close_path(P(WINDOW *)win)
+PP(register WINDOW *win;)
 {
 	char *ptr;
-
 	int16_t item;
-
 	char buffer[14];
 
 	save_mid(win->w_path, buffer);
@@ -623,9 +546,10 @@ register WINDOW *win;
 }
 
 
-/*	Close top window	*/
-
-close_top()
+/*
+ * Close top window
+ */
+VOID close_top(NOTHING)
 {
 	register WINDOW *win;
 
@@ -637,19 +561,16 @@ close_top()
 }
 
 
-/*	open an item	*/
-
-open_item(item, type, win)
-register int16_t item;
-
-int16_t type;
-
-WINDOW *win;
+/*
+ * open an item
+ */
+VOID open_item(P(int16_t) item, P(int16_t) type, P(WINDOW *)win)
+PP(register int16_t item;)
+PP(int16_t type;)
+PP(WINDOW *win;)
 {
 	char buffer[16];
-
 	register IDTYPE *itype;
-
 	int16_t ret;
 
 	switch (type)
@@ -690,7 +611,7 @@ WINDOW *win;
 			break;
 
 		case DISK:						/* open a disk      */
-			strcpy(wildext, buffer);
+			strcpy(buffer, wildext);
 			buffer[0] = itype->i_cicon.monoblk.ib_char[1];
 			open_disk(item, buffer, TRUE);
 			break;
@@ -715,21 +636,16 @@ WINDOW *win;
 }
 
 
-/*	Open a file, it may be an executable file		*/
-
-open_file(win, item, tail)
-register WINDOW *win;
-
-int16_t item;
-
-char *tail;
+/*
+ * Open a file, it may be an executable file
+ */
+VOID open_file(P(WINDOW *)win, P(int16_t) item, P(char *)tail)
+PP(register WINDOW *win;)
+PP(int16_t item;)
+PP(char *tail;)
 {
-	int16_t i,
-	 dump,
-	 key;
-
+	int16_t i, dump, key;
 	register DIR *dir;
-
 	char buffer[14];
 
 	if (!win)							/* open from the desktop    */
@@ -742,9 +658,9 @@ char *tail;
 		{
 			graf_mkstate(&dump, &dump, &dump, &key);
 
-			if (key == ALTER)
+			if (key == K_ALT) /* WTF? */
 			{
-				strcpy(win->w_path, path3);
+				strcpy(path3, win->w_path);
 				cat_path(dir->d_name, path3);
 				open_disk(0, path3, FALSE);
 			} else
@@ -766,17 +682,15 @@ char *tail;
 }
 
 
-/*	open a disk icon	*/
-
-int16_t open_disk(icon, path, init)
-int16_t icon;								/* icon number  */
-
-char path[];
-
-int16_t init;
+/*
+ * open a disk icon
+ */
+int16_t open_disk(P(int16_t) icon, P(char *)path, P(BOOLEAN) init)
+PP(int16_t icon;								/* icon number  */)
+PP(char *path;)
+PP(BOOLEAN init;)
 {
 	int16_t handle;
-
 	WINDOW *win;
 
 	if (path[0] == 'c')					/* cartridge    */
@@ -799,7 +713,7 @@ int16_t init;
 		else
 		{
 			win = get_win(handle);
-			strcpy(path, win->w_path);
+			strcpy(win->w_path, path);
 
 			if (open_subdir(win, icon, TRUE, init, FALSE))
 				return (TRUE);
@@ -812,21 +726,18 @@ int16_t init;
 
 
 
-/*	Do a grow or shrink box on a disk icon	*/
-
-do_box(win, item, desk, open, openfull)
-WINDOW *win;
-
-int16_t item,
- desk,
- open;									/* item number, desk icon, open/close */
-
-int16_t openfull;
+/*
+ * Do a grow or shrink box on a disk icon
+ */
+VOID do_box(P(WINDOW *)win, P(int16_t) item, P(int16_t) desk, P(int16_t) open, P(BOOLEAN) openfull)
+PP(WINDOW *win;)
+PP(int16_t item;)
+PP(int16_t desk;)
+PP(int16_t open;)								/* item number, desk icon, open/close */
+PP(BOOLEAN openfull;)
 {
 	GRECT pc;
-
 	GRECT dc;
-
 	OBJECT *obj;
 
 	obj = (desk) ? background : win->w_obj;
@@ -852,13 +763,14 @@ int16_t openfull;
 	form_dial((open) ? FMD_GROW : FMD_SHRINK, pc.x, pc.y, pc.w, pc.h, dc.x, dc.y, dc.w, dc.h);
 }
 
-/*	Does the drive exist	*/
 
-int16_t drv_exist(id)
-int16_t id;
+/*
+ * Does the drive exist
+ */
+BOOLEAN drv_exist(P(int16_t) id)
+PP(int16_t id;)
 {
 	register int32_t map;
-
 	int16_t handle;
 
 	map = (int32_t) Drvmap();
@@ -868,10 +780,11 @@ int16_t id;
 }
 
 
-/*	Check drive and put up alert	*/
-
-int16_t ch_drive(id)
-int16_t id;
+/*
+ * Check drive and put up alert
+ */
+BOOLEAN ch_drive(P(int16_t) id)
+PP(int16_t id;)
 {
 	char buffer[4];
 
@@ -888,25 +801,19 @@ int16_t id;
 
 
 
-/*	Update the desk file or desk dir on the background	*/
-/*	If new is a NULL pointer then erase the icon if matches	*/
-
-upfdesk(s, new)
-char *s;
-
-register char *new;
+/*
+ * Update the desk file or desk dir on the background
+ * If new is a NULL pointer then erase the icon if matches
+ */
+VOID upfdesk(P(char *)s, P(char *)new)
+PP(char *s;)
+PP(register char *new;)
 {
 	register OBJECT *obj;
-
 	register APP *app;
-
-	register int16_t i,
-	 type;
-
+	register int16_t i, type;
 	int16_t install;
-
 	char *ptr;
-
 	char *addr;
 
 	obj = background;
@@ -934,8 +841,8 @@ register char *new;
 						{
 							if (addr = Malloc((int32_t) (strlen(new) + 10)))
 							{
-								strcpy(new, addr);
-								strcat(wilds, addr);
+								strcpy(addr, new);
+								strcat(addr, wilds);
 								lp_fill(addr, &backid[i].i_path);
 								Mfree(addr);
 							}
@@ -974,22 +881,21 @@ register char *new;
 }
 
 
-/*	Locate an item 	*/
-
-locate_item(item, path, file)
-int16_t item,
- file;
-
-char *path;
+/*
+ * Locate an item
+ */
+VOID locate_item(P(int16_t) item, P(char *)path, P(BOOLEAN) file)
+PP(int16_t item;)
+PP(char *path;)
+PP(BOOLEAN file;)
 {
 	int16_t button;
-
 	char buffer[16];
 
   l_1:
-	strcpy("C:\\*.*", path1);
-	path1[0] = (isdrive() & 0x04) ? 'C' : 'A';
-	strcpy(Nostr, buffer);
+	strcpy(path1, "C:\\*.*");
+	path1[0] = (isdrive() & 0x04) ? 'C' : 'A'; /* WTF? */
+	strcpy(buffer, Nostr);
 	fsel_exinput(path1, buffer, &button, get_fstring(LITEM));
 
 	if (button)

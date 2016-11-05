@@ -9,55 +9,21 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <extern.h>
+#include "desktop.h"
 
-extern OBJECT *fm_draw();
 
-extern OBJECT *get_tree();
-
-extern WINDOW *w_gfirst();
-
-extern WINDOW *w_gnext();
-
-extern char *get_string();
-
-extern int16_t gl_restype;
-
-extern int16_t d_exit;
-
-extern int16_t font_save;
-
-extern int16_t m_st;
-
-extern char restable[];
-
-extern int16_t d_maxcolor;
-
-/*	Set Color and pattern	*/
-
-int16_t col_pa_pref()
+/*
+ * Set Color and pattern
+ */
+VOID col_pa_pref(NOTHING)
 {
 	register OBJECT *obj;
-
 	register int16_t ret;
-
 	register WINDOW *win;
-
 	int32_t newwin;
-
 	int32_t newdesk;
-
 	int32_t *outpat;
-
-	int16_t last,
-	 i,
-	 j;
+	int16_t last, i, j;
 
 	obj = get_tree(SSCREEN);
 

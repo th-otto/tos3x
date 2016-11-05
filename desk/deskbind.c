@@ -7,65 +7,62 @@
 /************************************************************************/
 
 
-#include <portab.h>
-#include <struct88.h>
-
-extern int16_t gl_wchar;
-
-extern int16_t gl_hchar;
-
-extern int16_t gl_wbox;
-
-extern int16_t gl_hbox;
-
-extern int16_t gl_handle;
-
-extern int16_t pglobal[];
-
-extern int16_t contrl[];
-
-extern int16_t intin[];
-
-extern int16_t ptsin[];
-
-extern PD *rlr;
+#include "desktop.h"
+#include "gembind.h"
 
 
-wind_new()
+/* direct imports from AES: */
+typedef struct pd PD;
+
+extern PD *rlr; /* WTF */
+
+VOID dpstch PROTO((NOTHING));
+VOID wm_new PROTO((NOTHING));
+int16_t fs_input PROTO((char *path, char *selec, int16_t *button, char *label));
+int16_t rs_load PROTO((intptr_t pglobal, const char *name));
+int16_t rs_obfix PROTO((LPTREE tree, int32_t obj));
+int16_t mn_popup PROTO((int16_t pid, MENU *menu, int16_t x, int16_t y, MENU *mdata));
+int16_t mn_istart PROTO((int16_t pid, int16_t code, OBJECT *mtree, int16_t mmenu, int16_t start));
+VOID ob_gclip PROTO((LPTREE tree, int16_t which, int16_t *x, int16_t *y, int16_t *rx, int16_t *ry, int16_t *w, int16_t *h));
+VOID gr_mouse PROTO((int16_t style, MFORM *grmaddr));
+
+
+
+
+VOID wind_new(NOTHING)
 {
 	wm_new();
 	dsptch();
 }
 
 
-int16_t fsel_exinput(path, selec, button, label)
-char *path,
-*selec,
-*label;
-
+int16_t fsel_exinput(P(char *)path, P(char *)selec, P(int16_t *)button, P(char *)label)
+char *path;
+char *selec;
 int16_t *button;
+char *label;
 {
 	int16_t ret;
 
 	ret = fs_input(path, selec, button, label);
 	dsptch();
-	return (ret);
+	return ret;
 }
 
 
-int16_t rsrc_load(name)
-char *name;
+int16_t rsrc_load(P(const char *) name)
+PP(const char *name;)
 {
 	int16_t ret;
 
-	ret = rs_load(pglobal, name);
+	ret = rs_load((intptr_t) pglobal, name);
 	dsptch();
 	return (ret);
 }
 
-int16_t rsrc_obfix(tree, obj)
-int32_t tree;
 
+int16_t rsrc_obfix(LPTREE tree, int16_t obj)
+LPTREE tree;
 int16_t obj;
 {
 	int16_t ret;
@@ -76,12 +73,11 @@ int16_t obj;
 }
 
 
-int16_t menu_popup(menu, x, y, mdata)
-int32_t menu,
-	mdata;
-
-int16_t x,
-	y;
+int16_t menu_popup(P(MENU *)menu, P(int16_t) x, P(int16_t) y, P(MENU *)mdata)
+PP(MENU *menu;)
+PP(int16_t x;)
+PP(int16_t y;)
+PP(MENU *mdata;)
 {
 	int16_t ret;
 
@@ -91,12 +87,11 @@ int16_t x,
 }
 
 
-int16_t menu_istart(code, mtree, mmenu, start)
-int16_t code,
-	mmenu,
-	start;
-
-int32_t mtree;
+int16_t menu_istart(P(int16_t) code, P(OBJECT *)mtree, P(int16_t) mmenu, P(int16_t) start)
+PP(int16_t code;)
+PP(OBJECT *mtree;)
+PP(int16_t mmenu;)
+PP(int16_t start;)
 {
 	int16_t ret;
 
@@ -106,76 +101,91 @@ int32_t mtree;
 }
 
 
-objc_gclip(tree, which, x, y, rx, ry, w, h)
-int32_t tree;
-
-int16_t which;
-
-int16_t *x,
-*y,
-*rx,
-*ry,
-*w,
-*h;
+VOID objc_gclip(P(LPTREE) tree, P(int16_t) which, P(int16_t *)x, P(int16_t *)y, P(int16_t *)rx, P(int16_t *)ry, P(int16_t *)w, P(int16_t *)h)
+PP(LPTREE tree;)
+PP(int16_t which;)
+PP(int16_t *x;)
+PP(int16_t *y;)
+PP(int16_t *rx;)
+PP(int16_t *ry;)
+PP(int16_t *w;)
+PP(int16_t *h;)
 {
 	ob_gclip(tree, which, x, y, rx, ry, w, h);
 	dsptch();
 }
 
 
-graf_mouse(style, pointer)
-int16_t style;
-
-char *pointer;
+VOID graf_mouse(P(int16_t) style, P(MFORM *)grmaddr)
+PP(int16_t style;)
+PP(MFORM *grmaddr;)
 {
-	gr_mouse(style, pointer);
+	gr_mouse(style, grmaddr);
 	dsptch();
 }
 
-/*	show cursor	*/
 
-v_show_c(reset)
-int16_t reset;
+/*
+ * show cursor
+ */
+VOID v_show_c(P(BOOLEAN) reset)
+PP(int16_t reset;)
 {
 	intin[0] = reset;
 	gsx_ncode(122, 0, 1);
 }
 
-/*	hide cursor	*/
 
-v_hide_c()
+/*
+ * hide cursor
+ */
+VOID v_hide_c(NOTHING)
 {
 	gsx_ncode(123, 0, 0);
 }
 
 
-/*	enter graphic mode	*/
-
-v_exit_cur()
+/*
+ * enter graphic mode
+ */
+VOID v_exit_cur(NOTHING)
 {
 	contrl[5] = 2;
 	gsx_ncode(5, 0, 0);
 }
 
-/*	enter alpha mode	*/
 
-v_enter_cur()
+/*
+ * enter alpha mode
+ */
+VOID v_enter_cur(NOTHING)
 {
 	contrl[5] = 3;
 	gsx_ncode(5, 0, 0);
 }
 
+
 /*	clipping function	*/
 
-vs_clip(clip_flag, pxyarray)
-int16_t clip_flag;
-
-int16_t pxyarray[];
+VOID vs_clip(P(BOOLEAN) clip_flag, P(const int16_t *) pxy)
+PP(BOOLEAN clip_flag;)
+PP(int16_t *pxy;)
 {
 	intin[0] = clip_flag;
-	ptsin[0] = pxyarray[0];
-	ptsin[1] = pxyarray[1];
-	ptsin[2] = pxyarray[2];
-	ptsin[3] = pxyarray[3];
+	ptsin[0] = pxy[0];
+	ptsin[1] = pxy[1];
+	ptsin[2] = pxy[2];
+	ptsin[3] = pxy[3];
 	gsx_ncode(129, 2, 1);
 }
+
+
+#if !BINEXACT
+VOID vq_chcells(int16_t *rows, int16_t *cols)
+{
+	contrl[5] = 1;
+	gsx_ncode(5, 0, 0);
+	*rows = intout[0];
+	*cols = intout[1];
+}
+#endif

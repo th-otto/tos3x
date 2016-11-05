@@ -6,33 +6,24 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <osbind.h>
-#include <window.h>
-#include <extern.h>
-#include <deskusa.h>
+#include "desktop.h"
 
 char *lp_start;
-
-char *lp_mid;
-
-char *lp_end;
+STATIC char *lp_mid;
+STATIC char *lp_end;
 
 #define LMSIZE	0x1000L
 
 uint16_t apsize;
 
-/*	Init the application buffer	*/
 
-apbuf_init()
+/*
+ * Init the application buffer
+ */
+BOOLEAN apbuf_init(NOTHING)
 {
 	register uint16_t i;
-
-	register APP *app,
-	*app1;
-
+	register APP *app, *app1;
 	APP *appsave;
 
 	apsize += APP_NODE;
@@ -75,9 +66,10 @@ apbuf_init()
 }
 
 
-/*	Initalize some memory buffer	*/
-
-int16_t mem_init()
+/*
+ * Initalize some memory buffer
+ */
+BOOLEAN mem_init(NOTHING)
 {
 	/* Allocate write string buffer */
 
@@ -103,13 +95,11 @@ int16_t mem_init()
 
 /*	Fill the path into buffer	*/
 
-char * lp_fill(path, buf)
-register char *path;
-
-char **buf;
+char *lp_fill(P(char *) path, P(char **) buf)
+PP(register char *path;)
+PP(char **buf;)
 {
 	register char *ptr;
-
 	char *ptr1;
 
 	if (!lp_start)						/* No memory    */
@@ -142,16 +132,14 @@ char **buf;
 }
 
 
-/*	Do the garbage collection of the buffer		*/
-
-int16_t lp_collect()
+/*
+ * Do the garbage collection of the buffer
+ */
+BOOLEAN lp_collect(NOTHING)
 {
 	register int16_t i;
-
 	char *addr;
-
 	register OBJECT *obj;
-
 	register APP *app;
 
 	addr = Malloc(LMSIZE);				/* 2 k memory   */

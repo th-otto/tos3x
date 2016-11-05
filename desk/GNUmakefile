@@ -27,23 +27,16 @@ include SRCFILES
 desk.a: $(DESK_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(DESK_OBJS)
 
-check:: desk.o $(top_srcdir)/common/sections.mak
-	$(AM_V_at)if ! test -f $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img; then \
-		echo "$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img: no such file" >&2; \
-		exit 1; \
-	fi
-	$(AM_V_at)offset=`echo 16 i $(desk_tbase) $(rombase) - p | dc`; \
-	tlen=`echo 16 i $(desk_tlen) p | dc`; \
-	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$tlen of=desk.orig 2> /dev/null; \
-	offset=`echo 16 i $(desk_dbase) $(rombase) - p | dc`; \
-	dlen=`echo 16 i $(desk_dlen) p | dc`; \
-	dd if=$(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bs=1 skip=$$offset count=$$dlen seek=$$tlen of=desk.orig 2> /dev/null; \
-	total=`echo $$tlen $$dlen + p | dc`; \
-	dd if=$< of=desk.new bs=1 skip=36 count=$$total 2> /dev/null; \
-	cmp desk.orig desk.new; \
+check::
+	$(AM_V_at)offset=`echo 16 i 10 o $(desk_tbase) $(rombase) - p | dc`; \
+	$(CMP) $(CMPL) -x --ignore-initial=0x$$offset:0x24 --offsets=0x$(desk_tbase):0 --bytes=0x$(desk_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img desk.o; \
 	status=$$?; \
-	$(RM) desk.orig desk.new; \
-	exit $$status
+	test $$status != 0 && echo "data:"; \
+	offset=`echo 16 i 10 o $(desk_dbase) $(rombase) - p | dc`; \
+	offset2=`echo 16 i 10 o $(desk_tlen) 24 + p | dc`; \
+	$(CMP) $(CMPL) -x --ignore-initial=0x$$offset:0x$$offset2 --offsets=0x$(desk_dbase):0x$(desk_tlen) --bytes=0x$(desk_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img desk.o; \
+	status2=$$?; \
+	test $$status == 0 -a $$status2 == 0
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)

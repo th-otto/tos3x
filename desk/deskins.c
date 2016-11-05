@@ -14,80 +14,22 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <osbind.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <extern.h>
-#include <error.h>
+#include "desktop.h"
 
-extern char *get_fstring();
 
-extern char *r_slash();
+VOID ins_wicon PROTO((NOTHING));
 
-extern APP *app_xtype();
 
-extern APP *app_icon();
-
-extern char toupper();
-
-extern int16_t av_icon();
-
-extern char *scasb();
-
-extern APP *app_alloc();
-
-extern char *g_name();
-
-extern OBJECT *get_tree();
-
-extern OBJECT *get_icon();
-
-extern DIR *get_dir();
-
-extern char *put_name();
-
-extern int16_t numicon;
-
-extern WINDOW *o_win;
-
-extern int16_t o_type;
-
-extern int16_t o_item;
-
-extern int16_t o_status;
-
-extern int16_t x_status;
-
-extern int16_t s_defdir;
-
-extern int16_t s_fullpath;
-
-extern int16_t tb3[];
-
-extern char mentable[];
-
-extern int16_t XSelect();					/* cjg 08/06/92 */
-
-extern int16_t XDeselect();
-
-extern int16_t wait_up();
-
-/*	copy iconblk image	*/
-/*	return the sources type	*/
-
-int16_t cp_iblk(number, dest_ciblk)
-register CICONBLK *dest_ciblk;
-
-int16_t number;
+/*
+ * copy iconblk image
+ * return the sources type
+ */
+int16_t cp_iblk(P(int16_t) number, P(CICONBLK) *dest_ciblk)
+PP(int16_t number;)
+PP(register CICONBLK *dest_ciblk;)
 {
 	OBJECT *obj;
-
 	CICONBLK *ciblk;
-
 	ICONBLK *iblk;
 
 	if (number >= numicon)
@@ -122,16 +64,14 @@ int16_t number;
 
 
 
-/*	Remove desktop icons	*/
-
-rm_icons()
+/*
+ * Remove desktop icons
+ */
+VOID rm_icons(NOTHING)
 {
 	register OBJECT *obj;
-
 	register int16_t i;
-
-	int16_t found,
-	 collect;
+	int16_t found, collect;
 
 	obj = background;
 
@@ -156,37 +96,22 @@ rm_icons()
 		clr_dicons();
 }
 
-#if 0
-/*	Install application	*/
 
-ins_app()
+#if 0
+/*
+ * Install application
+ */
+VOID ins_app(NOTHING)
 {
 	register OBJECT *obj;
-
 	register APP *app;
-
 	APP *sapp;
-
-	int16_t install,
-	 ret,
-	 newapp;
-
-	int16_t cont,
-	 setdir,
-	 dofull,
-	 where;
-
-	int16_t type,
-	 sret,
-	 icon,
-	 graphic;
-
+	int16_t install, ret, newapp;
+	int16_t cont, setdir, dofull, where;
+	int16_t type, sret, icon, graphic;
 	char *str;
-
 	char buffer[8];
-
 	int32_t l;
-
 
 	cont = TRUE;
 	obj = (OBJECT *) 0;
@@ -353,14 +278,14 @@ ins_app()
 				app->a_doc[0] = 0;
 
 			/* get the doc icon type    */
-			strcpy("*.", buffer);
+			strcpy(buffer, "*.");
 			inf_sget(obj, APDFTYPE, &buffer[2]);
 			app_icon(buffer, -1, &app->a_dicon);
 
 			lp_fill(str, &app->a_name);
 			lp_collect();
 
-			strcpy(buffer, app->a_doc);
+			strcpy(app->a_doc. buffer);
 			inf_sget(obj, ARGS, app->a_argu);
 			graphic = 1;
 
@@ -400,14 +325,14 @@ ins_app()
 					{
 						save_2(autofile, graphic);
 						autofile[2] = ' ';
-						strcpy(str, &autofile[3]);
+						strcpy(&autofile[3], str);
 					} else
 						do1_alert(NOAUTO);
 				}
 			} else
 			{
 				if (sret)				/* change from auto to normal   */
-					strcpy(Nostr, autofile);
+					strcpy(autofile, Nostr);
 			}
 			/* get the Function key definiton */
 			app->a_key = (uint16_t) l;
@@ -417,7 +342,7 @@ ins_app()
 		if (ret == APREMOVE)
 		{
 			if (*str)					/* changed 3/3/92   */
-				strcpy(Nostr, autofile);
+				strcpy(autofile, Nostr);
 
 			if (!newapp)
 				app_free(app);
@@ -438,46 +363,24 @@ ins_app()
 }
 #endif
 
-/*	Install desktop icons		*/
 
-ins_icons()
+/*
+ * Install desktop icons
+ */
+VOID ins_icons(NOTHING)
 {
 	register OBJECT *obj;
-
 	register CICONBLK *iblk;
-
 	CICONBLK ciblk;
-
 	register OBJECT *obj1;
-
-	register int16_t type,
-	 item,
-	 icon,
-	 style;
-
-	int16_t ret,
-	 limit,
-	 redraw,
-	 select,
-	 xitem;
-
-	int16_t driver,
-	 quit,
-	 which;
-
+	register int16_t type, item, icon, style;
+	int16_t ret, limit, redraw, select, xitem;
+	int16_t driver, quit, which;
 	char buf1[2];
-
 	char idbuffer[2];
-
 	char buffer[14];
-
 	GRECT pt;
-
-	int16_t mk_x,
-	 mk_y,
-	 mk_buttons,
-	 mk_kstate;
-
+	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
 	int32_t saveptr;
 
 	quit = FALSE;
@@ -500,7 +403,7 @@ ins_icons()
 		if (o_status)					/* an icon is selected  */
 		{
 			type = backid[item].i_type;
-			strcpy((CICONBLK *) (obj1[item].ob_spec)->monoblk.ib_ptext, buffer);
+			strcpy(buffer, (CICONBLK *) (obj1[item].ob_spec)->monoblk.ib_ptext);
 			buf1[0] = idbuffer[0] = backid[item].i_cicon.monoblk.ib_char[1];
 			icon = backid[item].i_icon;
 			if (icon >= numicon)
@@ -647,7 +550,7 @@ ins_icons()
 		cp_iblk(icon, iblk);
 		backid[item].i_icon = icon;
 
-		strcpy((CICONBLK *) (obj[DRLABEL].ob_spec)->monoblk.te_ptext, iblk->monoblk.ib_ptext);
+		strcpy(iblk->monoblk.ib_ptext, (CICONBLK *) (obj[DRLABEL].ob_spec)->monoblk.te_ptext);
 
 		if (driver)
 		{
@@ -693,38 +596,22 @@ ins_icons()
 
 
 
-/*	Install window icons	*/
-
-ins_wicon()
+/*
+ * Install window icons
+ */
+VOID ins_wicon(NOTHING)
 {
 	register APP *app;
 	register OBJECT *obj;
 	BOOLEAN ret;
-	int16_t limit,
-	 index,
-	 quit,
-	 itype;
-
-	int16_t type,
-	 install,
-	 pref,
-	 status;
-
+	int16_t limit, index, quit, itype;
+	int16_t type, install, pref, status;
 	CICONBLK *iblk;
-
 	CICONBLK ciblk;
-
 	char buffer[14];
-
 	char buf2[14];
-
 	char *str;
-
-	int16_t mk_x,
-	 mk_y,
-	 mk_buttons,
-	 mk_kstate;
-
+	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
 	int32_t saveptr;
 
 	obj = get_tree(INWICON);
@@ -761,7 +648,7 @@ ins_wicon()
 			} else
 			{
 				obj[WFOLDER].ob_state = DISABLED;
-				strcpy(g_name(str), buf2);
+				strcpy(buf2, g_name(str));
 			}
 
 			obj[WFOLDER].ob_flags &= ~(SELECTABLE | RBUTTON);
@@ -893,7 +780,7 @@ ins_wicon()
 					app->a_dicon = 0;
 					app->a_pref = pref;
 					app->a_type = type;
-					strcpy(buffer, app->a_doc);
+					strcpy(app->a_doc. buffer);
 					lp_fill(Nostr, &app->a_name);
 					app->a_dicon = index;
 					app->a_icon = index;
@@ -923,22 +810,16 @@ ins_wicon()
 }
 
 
-/*	Install all the available drives	*/
-
-ins_drive()
+/*
+ * Install all the available drives
+ */
+VOID ins_drive(NOTHING)
 {
-	register int16_t i,
-	 id;
-
-	int16_t install,
-	 free;
-
+	register int16_t i, id;
+	int16_t install, free;
 	register OBJECT *obj;
-
 	int32_t map;
-
 	char *device;
-
 	bfill(32, 0, dr);
 
 	obj = background;
@@ -994,12 +875,12 @@ ins_drive()
 }
 
 
-/*	Delay the icon scrolling	*/
-
-cl_delay()
+/*
+ * Delay the icon scrolling
+ */
+VOID cl_delay(NOTHING)
 {
-	int32_t i,
-	 j;
+	int32_t i, j;
 
 	j = 100000;
 	i = evnt_dclick(0, 0);

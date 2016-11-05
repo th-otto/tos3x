@@ -7,49 +7,24 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
-
-extern WINDOW *w_gfirst();
-
-extern WINDOW *w_gnext();
-
-extern char *put_name();
-
-int16_t x_status;							/* for x_select         */
-
-int16_t x_index;							/* For x_next and x_first   */
-
-int16_t x_type;							/* ditto            */
-
-WINDOW *x_win;							/* diito            */
-
-int16_t x_cur;								/* x_del            */
-
-int16_t d_dir;								/* count how many folders are selected  */
-
-				/* inside the window            */
-
-extern int16_t o_type;
-
-extern int16_t o_item;
-
-extern int16_t o_status;
-
-extern WINDOW *o_win;
-
-extern DIR *get_dir();
+#include "desktop.h"
 
 
-/*	Turn off the current selected object	*/
+BOOLEAN x_status;			/* for x_select         */
+STATIC int16_t x_index;		/* For x_next and x_first   */
+int16_t x_type;				/* ditto            */
+WINDOW *x_win;				/* ditto            */
+STATIC int16_t x_cur;		/* x_del            */
+int16_t d_dir;				/* count how many folders are selected inside the window */
 
-x_del()
+
+int16_t m_objfind PROTO((OBJECT *obj, int16_t mx, int16_t my, int16_t mode));
+
+
+/*
+ * Turn off the current selected object
+ */
+VOID x_del(NOTHING)
 {
 	DIR *dir;
 
@@ -58,34 +33,27 @@ x_del()
 		dir = x_win->w_memory;
 		dir[x_cur].d_state = NORMAL;
 	} else
+	{
 		background[x_cur].ob_state = NORMAL;
+	}
 }
 
 
-/*	My own object find	*/
-
-int16_t m_objfind(obj, mx, my, mode)
+/*
+ * My own object find
+ */
+int16_t m_objfind(OBJECT *obj, int16_t mx, int16_t my, int16_t mode)
 register OBJECT *obj;
-
-register int16_t mx,
-	my;
-
+register int16_t mx;
+register int16_t my;
 int16_t mode;								/* TRUE == window mode  */
 {
-	register i,
-	 limit;
-
-	int16_t status,
-	 offx,
-	 offy;
-
-	int16_t x1,
-	 y1;
-
+	register i, limit;
+	int16_t status, offx, offy;
+	int16_t x1, y1;
 	CICONBLK *iblk;
-
 	GRECT pt;
-
+	
 	status = -1;
 
 	offx = obj[0].ob_x;
@@ -140,17 +108,15 @@ int16_t mode;								/* TRUE == window mode  */
 }
 
 
-/*	Find out which object is selected based on the object structures */
-/*	Type can only be DESKICON or WINICON				*/
-
-int16_t o_select()
+/*
+ * Find out which object is selected based on the object structures
+ * Type can only be DESKICON or WINICON
+ */
+BOOLEAN o_select(NOTHING)
 {
 	register WINDOW *win;
-
 	register OBJECT *obj;
-
-	register int16_t i,
-	 j;
+	register int16_t i, j;
 
 	o_type = WINICON;					/* Try the window   */
 
@@ -170,7 +136,7 @@ int16_t o_select()
 					o_item = i;
 					o_win = win;
 					o_status = TRUE;
-					return (o_status = TRUE);
+					return o_status = TRUE;
 				}
 			}
 		}
@@ -180,20 +146,18 @@ int16_t o_select()
 
 	o_type = DESKICON;					/* Now try desktop */
 	o_win = (WINDOW *) 0;
-	return (o_status = i_next(1, background, &o_item));
+	return o_status = i_next(1, background, &o_item);
 }
 
 
-/*	Find out if anything is selected		*/
-
-int16_t x_select()
+/*
+ * Find out if anything is selected
+ */
+BOOLEAN x_select(NOTHING)
 {
 	register WINDOW *win;
-
 	register DIR *dir;
-
 	register int16_t i;
-
 	int16_t j;
 
 	x_win = (WINDOW *) 0;
@@ -216,23 +180,20 @@ int16_t x_select()
 		win = w_gnext();
 	}
 
-	return (x_status = i_next(1, background, &j));
+	return x_status = i_next(1, background, &j);
 }
 
 
-/*	Extended dir structure search next	*/
-
-x_next(name, type)
-char **name;
-
-int16_t *type;
+/*
+ * Extended dir structure search next
+ */
+BOOLEAN x_next(P(char **)name, P(int16_t *)type)
+PP(char **name;)
+PP(int16_t *type;)
 {
 	register DIR *dir;
-
 	register int16_t i;
-
 	int16_t limit;
-
 	char *str;
 
 	if (x_type == WINICON)
@@ -247,7 +208,7 @@ int16_t *type;
 				str = put_name(x_win, &dir[i].d_name[0]);
 				if (dir[i].d_att & SUBDIR)
 				{
-					strcat(wilds, str);
+					strcat(str, wilds);
 					d_dir++;
 					*type = SUBDIR;
 				} else
@@ -261,23 +222,21 @@ int16_t *type;
 		}
 		return (FALSE);
 	} else
-		return (d_sdesk(name, type));
+		return d_sdesk(name, type);
 }
 
-/*	Object oriented search first				*/
-/*	Returns icon type, WINICON, XFILE, DISK, SUBDIR		*/
-/*	Extended dir search first				*/
 
-int16_t x_first(name, type)
-char **name;
-
-int16_t *type;
+/*
+ * Object oriented search first
+ * Returns icon type, WINICON, XFILE, DISK, SUBDIR
+ * Extended dir search first
+ */
+BOOLEAN x_first(P(char **)name, P(int16_t *)type)
+PP(char **name;)
+PP(int16_t *type;)
 {
 	register WINDOW *win;
-
-	register int16_t i,
-	 j;
-
+	register int16_t i, j;
 	DIR *dir;
 
 	d_dir = 0;
@@ -313,20 +272,17 @@ int16_t *type;
 }
 
 
-/*	Find out what the user has clicked on based on the mx and my	*/
-
-int16_t i_find(mx, my, winout, item, type)
-register int16_t mx,
-	my;
-
-WINDOW **winout;
-
-int16_t *item;
-
-int16_t *type;
+/*
+ * Find out what the user has clicked on based on the mx and my
+ */
+BOOLEAN i_find(P(int16_t) mx, P(int16_t) my, P(WINDOW **)winout, P(int16_t *)item, P(int16_t *)type)
+PP(register int16_t mx;)
+PP(register int16_t my;)
+PP(WINDOW **winout;)
+PP(int16_t *item;)
+PP(int16_t *type;)
 {
 	register WINDOW *win;
-
 	register int16_t which;
 
 	win = w_gfirst();
@@ -364,17 +320,15 @@ int16_t *type;
 }
 
 
-/*	Search for next selected OBJECT		*/
-
-int16_t i_next(start, obj, itemout)
-int16_t start;
-
-register OBJECT *obj;
-
-int16_t *itemout;
+/*
+ * Search for next selected OBJECT
+ */
+BOOLEAN i_next(inP(t16_t) start, P(OBJECT *)obj, P(int16_t *)itemout)
+PP(int16_t start;)
+PP(register OBJECT *obj;)
+PP(int16_t *itemout;)
 {
-	register int16_t limit,
-	 i;
+	register int16_t limit, i;
 
 	limit = obj->ob_tail;
 
@@ -390,17 +344,16 @@ int16_t *itemout;
 	return (FALSE);
 }
 
-/*	Search the selected desktop object	*/
-/*	Used by x_next only			*/
 
-d_sdesk(name, type)
-char **name;
-
-int16_t *type;
+/*
+ * Search the selected desktop object
+ * Used by x_next only
+ */
+BOOLEAN d_sdesk(P(char **)name, P(int16_t *)type)
+PP(char **name;)
+PP(int16_t *type;)
 {
-	int16_t temp,
-	 i;
-
+	int16_t temp, i;
 	register IDTYPE *itype;
 
 	while (i_next(x_index, background, &x_index))
@@ -410,7 +363,7 @@ int16_t *type;
 
 		if (temp == DISK)
 		{
-			strcpy(wildext, path1);
+			strcpy(path1, wildext);
 			path1[0] = itype->i_cicon.monoblk.ib_char[1];
 			*name = path1;
 			*type = temp;

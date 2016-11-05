@@ -13,46 +13,26 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <osbind.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <error.h>
-#include <extern.h>
+#include "desktop.h"
 
-extern char *get_fstring();
-
-extern APP *app_icon();
-
-extern char *r_slash();
-
-extern char *scasb();
-
-extern OBJECT *get_tree();
-
-extern WINDOW *w_gfirst();
-
-extern char *bldstring();
-
-extern char *strcpy();
 
 #define CTLC 	3
 
-int16_t pri_str(where, ptr)
-int16_t where;
 
-char *ptr;
+int16_t pri_str PROTO((int16_t where, const char *ptr));
+
+
+int16_t pri_str(P(int16_t) where, P(const char *) ptr)
+PP(int16_t where;)
+PP(const char *ptr;)
 {
 	int32_t c;
-
 	int16_t ch;
 
 	while (*ptr)
 	{
-	  pr_1:if (!Bconout(where, *ptr++))/* device not present ?   */
+	pr_1:
+		if (!Bconout(where, *ptr++))/* device not present ?   */
 		{
 			if (do_alert(2, NOOUTPUT) == 1)
 				goto pr_1;
@@ -71,24 +51,17 @@ char *ptr;
 }
 
 
-/*	Print a window directory	*/
-
-pri_win()
+/*
+ * Print a window directory
+ */
+VOID pri_win(NOTHING)
 {
 	register WINDOW *win;
-
 	register int16_t serial;
-
-	int16_t max,
-	 i,
-	 type;
-
+	int16_t max, i, type;
 	DIR *dir;
-
 	char buffer[80];
-
 	char buf1[10];
-
 	int32_t sizes;
 
 	if (win = w_gfirst())
@@ -112,7 +85,7 @@ pri_win()
 		for (i = 0; i < max; i++)
 		{
 			sizes += dir[i].d_size;
-			strcpy(Nextline, bldstring(&dir[i], buffer));
+			strcpy(bldstring(&dir[i], buffer), Nextline);
 			if (!pri_str(serial, buffer))
 				goto pri_end;
 		}
@@ -120,9 +93,9 @@ pri_win()
 		*((int32_t *) & buf1[0]) = sizes;
 		*((int16_t *) & buf1[4]) = (int16_t) win->w_items;
 
-		merge_str(strcpy(Nextline, buffer) - 1, get_fstring((win->w_items == 1) ? ISTR : ISTRS), buf1);
+		merge_str(strcpy(buffer, Nextline) - 1, get_fstring((win->w_items == 1) ? ISTR : ISTRS), buf1);
 
-		strcat("\014", buffer);
+		strcat(buffer, "\014");
 		pri_str(serial, buffer);
 	  pri_end:
 		desk_wait(FALSE);
@@ -130,23 +103,17 @@ pri_win()
 }
 
 
-/*	Create a new folder on the top window	*/
-
-newfolder(win)
-register WINDOW *win;
+/*
+ * Create a new folder on the top window
+ */
+VOID newfolder(P(WINDOW) *win)
+PP(register WINDOW *win;)
 {
 	char namenew[14];
-
 	char nameold[14];
-
 	char name[14];
-
-	int16_t i,
-	 ret,
-	 update;
-
+	int16_t i, ret, update;
 	register OBJECT *obj;
-
 	char buf[2];
 
 	if (win->w_path[0] == 'c')
@@ -158,7 +125,7 @@ register WINDOW *win;
 	if (!c_path_alloc(win->w_path))
 		return;
 
-	strcpy(win->w_path, win->w_buf);
+	strcpy(win->w_buf, win->w_path);
 	obj = get_tree(ADMKDBOX);
 
 	while (TRUE)
@@ -222,30 +189,20 @@ register WINDOW *win;
 
 
 
-/*	Sort the files		*/
-
-sort_file(win, mode)
-WINDOW *win;
-
-int16_t mode;
+/*
+ * Sort the files
+ */
+VOID sort_file(P(WINDOW) *win, P(int16_t) mode)
+PP(WINDOW *win;)
+PP(int16_t mode;)
 {
 	register DIR *dir;
-
 	register int16_t n;
-
-	register int16_t gap,
-	 i,
-	 j,
-	 ret;
-
+	register int16_t gap, i, j, ret;
 	DIR buff;
-
 	register DIR *dir2;
-
 	register DIR *dir1;
-
-	char *ps1,
-	*ps2;
+	char *ps1, *ps2;
 
 	dir = win->w_memory;
 	n = win->w_items;
@@ -328,28 +285,19 @@ int16_t mode;
 }
 
 
-/*	Set up all the files pointer 	*/
-/*	Scroll up or down		*/
-
-int16_t set_newview(index, win)
-int16_t index;
-
-register WINDOW *win;
+/*
+ * Set up all the files pointer
+ * Scroll up or down
+ */
+int16_t set_newview(P(int16_t) index, P(WINDOW) *win)
+PP(int16_t index;)
+PP(register WINDOW *win;)
 {
-	register int16_t i,
-	 k,
-	 items,
-	 vicons;
-
+	register int16_t i, k, items, vicons;
 	DIR *dir;
-
 	register OBJECT *obj;
-
 	OBJECT *obj1;
-
-	int16_t len,
-	 type;
-
+	int16_t len, type;
 	char *text;
 
 	obj = win->w_obj;					/* get all the icons source */
@@ -411,25 +359,18 @@ register WINDOW *win;
 }
 
 
-/*	Read the files into a window	*/
-
-int16_t read_files(win, attr)
-register WINDOW *win;
-
-int16_t attr;
+/*
+ * Read the files into a window
+ */
+int16_t read_files(P(WINDOW) *win, P(int16_t) attr)
+PP(register WINDOW *win;)
+PP(int16_t attr;)
 {
-	register int32_t items,
-	 volume,
-	 sizes;
-
+	register int32_t items, volume, sizes;
 	register DIR *addr;
-
 	char buffer[14];
-
 	char *path;
-
-	int16_t ret,
-	 i;
+	int16_t ret, i;
 
 	items = 0;
 	sizes = 0;

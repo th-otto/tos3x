@@ -33,22 +33,7 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
-
-extern int32_t trap14();
-
-extern int32_t trap13();
-
-extern OBJECT *get_tree();
-
-extern char *get_string();
+#include "desktop.h"
 
 #define MAXTRACK	80					/* maximum number of track      */
 #define FC_NUMOBJS	26
@@ -58,11 +43,6 @@ extern char *get_string();
 #define RWABS		4					/* BIOS read/write sectors      */
 #define RSECTS		2					/* |= 0x02 so mediach state is not checked */
 #define WSECTS		3
-#define	GETBPB		7					/* BIOS Get Bios Parameter Block    */
-#define READTRK		8					/* XBIOS read track  (floprd)       */
-#define	WRITRK		9					/* XBIOS write track (flopwr)       */
-#define FORMAT		10					/* XBIOS format (flopfmt)       */
-#define	PROTOBT		18					/* XBIOS prototype a boot sector    */
 
 #define FSIZE		0x4000L				/* format buffer size (16k)     */
 #define	VIRGIN		0xe5e5				/* FORMAT value to write to new sectors */
@@ -75,27 +55,8 @@ extern char *get_string();
 #define	BADSECT		-16
 #define MAXBAD		16					/* max number of bad sector allowed */
 
-#define BPB	struct bpb					/* BIOS Parameter Block */
-BPB
-{
-	int16_t recsiz;						/* sector size (bytes)      */
+#include "../bios/bpb.h"
 
-	int16_t clsiz;							/* cluster size (sectors)   */
-
-	int16_t clsizb;						/* cluster size (bytes)     */
-
-	int16_t rdlen;							/* root directory size (sectors) */
-
-	int16_t fsiz;							/* FAT size (sectors)       */
-
-	int16_t fatrec;						/* Sector # of second FAT   */
-
-	int16_t datrec;						/* Sector # of data     */
-
-	int16_t numcl;							/* Number of data clusters  */
-
-	int16_t b_flags;						/* flags (1 => 16 bit FAT)  */
-};
 
 /* The DSB location is returned by getbpb (Xbios 7) and is defined in
 *	gemdos/rwabs.c.  We use it to determine the # of sides for
@@ -106,55 +67,68 @@ BPB
 *	(kbad 880830)
 */
 
-#define DSB	struct dsb					/* Device Status Block      */
+#define DSB	struct dsb					/* Device Status Block (BLKDEV in bios.h) */
 DSB
 {
 	BPB b;								/* BIOS Parameter Block     */
 
-	int16_t dntracks,						/* #tracks (cylinders) on dev   */
-	 dnsides,							/* #sides per cylinder      */
-	 dspc,								/* #sectors/cylinder        */
-	 dspt,								/* #sectors/track       */
-	 dhidden;							/* #hidden tracks       */
-
-	char dserial[3];					/* 24-bit volume serial number  */
+	int16_t tracks;						/* #tracks (cylinders) on dev   */
+	int16_t sides;						/* #sides per cylinder      */
+	int16_t spc;						/* #sectors/cylinder        */
+	int16_t spt;						/* #sectors/track       */
+	int16_t hidden;						/* #hidden tracks       */
+	uint8_t serial[3];					/* 24-bit volume serial number  */
 };
 
-static int16_t w_inc;
+STATIC int16_t w_inc;
 
-static int16_t bar_max;					/* in case user copies disk > 80 tracks */
+STATIC int16_t bar_max;					/* in case user copies disk > 80 tracks */
 
-static int16_t ttable[] = { FCCNCL, FCCOPY, FCFORMAT, SRCDRA, SRCDRB, ADRIVE,
+static int16_t const ttable[] = { FCCNCL, FCCOPY, FCFORMAT, SRCDRA, SRCDRB, ADRIVE,
 	BDRIVE
 };
 
-static int16_t skew1[MAXSPT * 2] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+static int16_t const skew1[MAXSPT * 2] = {
+	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18,
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18
 };
 
-static int16_t skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+static int16_t const skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 
-/*	format and copy start	*/
+/*
+ * sigh, why use trp13/trp14 from AES here?
+ */
+#define Getbpb(devno) trp13(7, devno)
+#define Rwabs(a,b,c,d,e) trp13(3, a, b, c, d, e)
+#define Flopfmt(a,b,c,d,e,f,g,h,i) trp14(10, a, b, c, d, e, f, g, h, i)
+#define Protobt(a,b,c,d) trp14(18, a, b, c, d)
 
-fc_start(source, op)
-char *source;
 
-int16_t op;
+BOOLEAN fc_format PROTO((OBJECT *obj));
+VOID fc_copy PROTO((OBJECT *obj));
+int16_t fc_rwsec PROTO((int16_t op, intptr_t buf, int16_t nsect, int16_t sect, int16_t dev));
+VOID clfix PROTO((uint16_t cl, uint16_t *fat));
+VOID fc_bar PROTO((OBJECT *obj, int16_t which));
+VOID fc_draw PROTO((OBJECT *obj, int16_t which));
+
+
+
+
+/*
+ * format and copy start
+ */
+VOID fc_start(P(char *)source, P(int16_t) op)
+PP(char *source;)
+PP(int16_t op;)
 {
-	register int16_t ret,
-	 width;
-
-	int16_t i,
-	 field,
-	 operation;
-
+	register BOOLEAN ret;
+	register int16_t width;
+	int16_t i, field, operation;
 	register char *destdr;
-
 	register OBJECT *obj;
-
 	int32_t value;
 
 	obj = get_tree(ADFORMAT);
@@ -263,8 +237,9 @@ int16_t op;
 			operation = TRUE;
 
 			if (obj[FCFORMAT].ob_state & SELECTED)
+			{
 				ret = fc_format(obj);
-			else
+			} else
 			{
 				fc_copy(obj);
 				ret = TRUE;
@@ -288,50 +263,25 @@ int16_t op;
 }
 
 
-/*	format disk	*/
-
-int16_t fc_format(obj)
-OBJECT *obj;
+/*
+ * format disk
+ */
+BOOLEAN fc_format(P(OBJECT *)obj)
+PP(OBJECT *obj;)
 {
 	register char *bufaddr;
-
-	register int16_t badindex,
-	 ret,
-	 i,
-	 trackno;
-
-	int32_t dsb,
-	 valuel,
-	 value2;
-
-	int16_t devno,
-	 j,
-	 k,
-	 disktype;
-
-	int16_t sideno,
-	 curtrk,
-	 skew,
-	 skewi;
-
-	int16_t track,
-	 numside,
-	 cl;
-
+	register int16_t badindex, ret, i, trackno;
+	int32_t dsb, valuel, value2;
+	int16_t devno, j, k, disktype;
+	int16_t sideno, curtrk, skew, skewi;
+	int16_t track, numside, cl;
 	register int16_t *badtable;
-
 	register int16_t *fat;
-
 	register BPB *bpbaddr;
-
 	char label1[14];
-
 	char label2[14];
-
 	int32_t lbuf[4];
-
 	int16_t spt;
-
 	int16_t *sktable;
 
 	/* format needs 8k buffer   */
@@ -388,7 +338,7 @@ OBJECT *obj;
 			if (skewi < 0)
 				skewi += spt;
 
-		  fagain:ret = (int16_t) (trap14(FORMAT, bufaddr, &sktable[skewi], devno,
+		  fagain:ret = (int16_t) (Flopfmt(bufaddr, &sktable[skewi], devno,
 								 spt, trackno, sideno, INTERLV, MAGIC, VIRGIN));
 
 			if (ret == -16)				/* Bad sectors !    */
@@ -424,13 +374,13 @@ OBJECT *obj;
 
 	if (!ret)							/* set up the Boot Sector info  */
 	{
-		trap14(PROTOBT, bufaddr, 0x01000000L, disktype, 0);
+		Protobt(bufaddr, 0x01000000L, disktype, 0);
 		*bufaddr = 0xe9;
 
 		if (ret = fc_rwsec(WSECTS, bufaddr, 0x10000L, devno))
 			goto eout1;
 		/* now set up the fat0 and fat1 */
-		bpbaddr = trap13(GETBPB, devno);
+		bpbaddr = Getbpb(devno);
 
 		/* 27-Mar-1985 lmd
 		 * write boot sector again
@@ -447,7 +397,7 @@ OBJECT *obj;
 		for (i = 0; i < j; i++)
 			fat[i] = 0;
 		/* get the label    */
-		strcpy((TEDINFO *) (obj[FCLABEL].ob_spec)->te_ptext, label1);
+		strcpy(label1, (TEDINFO *) (obj[FCLABEL].ob_spec)->te_ptext);
 
 		if (label1[0])
 		{
@@ -509,54 +459,32 @@ OBJECT *obj;
 }
 
 
-/*	disk copy	*/
-
-fc_copy(obj)
-OBJECT *obj;
+/*
+ * disk copy
+ */
+VOID fc_copy(P(OBJECT *)obj)
+PP(OBJECT *obj;)
 {
-	register int32_t bootbuf,
-	 buf;
-
-	int32_t bufptr,
-	 bufsize;
-
-	int16_t devnos,
-	 devnod;
-
-	register DSB *dsbs,
-	*dsbd;
-
-	int16_t spc,
-	 bps,
-	 bpc,
-	 disksect,
-	 sectbufs,
-	 leftover;
-
-	int16_t checkit,
-	 last,
-	 ret;
-
-	int16_t dev,
-	 sectno,
-	 ssect,
-	 dsect,
-	 trkops;
-
-	register int16_t j,
-	 op,
-	 loop;
+	register int32_t bootbuf, buf;
+	int32_t bufptr, bufsize;
+	int16_t devnos, devnod;
+	register DSB *dsbs, *dsbd;
+	int16_t spc, bps, bpc, disksect, sectbufs, leftover;
+	int16_t checkit, last, ret;
+	int16_t dev, sectno, ssect, dsect, trkops;
+	register int16_t j, op, loop;
 
 	if (!(bootbuf = Malloc(0x258L)))
 	{
-	  errmem:do1_alert(FCNOMEM);
+errmem:
+		do1_alert(FCNOMEM);
 		return;
 	}
 
 	devnos = (obj[SRCDRA].ob_state & SELECTED) ? 0 : 1;
 	devnod = (devnos) ? 0 : 1;
 
-  chksrc:if (!(dsbs = trap13(GETBPB, devnos)))
+  chksrc:if (!(dsbs = Getbpb(devnos)))
 	{
 		if (do1_alert(FCFAIL) == 1)		/* retry */
 			goto chksrc;
@@ -565,7 +493,7 @@ OBJECT *obj;
 	}
 
 /* should spc exist? */
-	spc = dsbs->dspc;					/* sectors per cylinder    */
+	spc = dsbs->spc;					/* sectors per cylinder    */
 	bps = dsbs->b.recsiz;				/* bytes per sector    */
 	bpc = spc * bps;					/* bytes per cylinder      */
 
@@ -577,7 +505,7 @@ OBJECT *obj;
 	}
 
 	buf = Malloc(bufsize);				/* get the buffer       */
-	disksect = spc * (dsbs->dntracks);	/* total sectors on disk    */
+	disksect = spc * (dsbs->tracks);	/* total sectors on disk    */
 	sectbufs = (bufsize / bps);			/* how many sector buffers  */
 	leftover = disksect % sectbufs;		/* sectors left for last loop */
 
@@ -627,28 +555,29 @@ OBJECT *obj;
 				if (checkit)
 				{
 					checkit = FALSE;
-				  fc_c1:if (!(dsbd = trap13(GETBPB, devnod)))
+				fc_c1:
+					if (!(dsbd = Getbpb(devnod)))
 					{
 						if (do1_alert(FCFAIL) == 1)	/* retry */
 							goto fc_c1;
 						goto bailout;
 					}
-					if ((dsbs->dnsides != dsbd->dnsides) ||
-						(spc != dsbd->dspc) || (dsbs->dntracks != dsbd->dntracks) || (bps != dsbd->b.recsiz))
+					if ((dsbs->sides != dsbd->sides) ||
+						(spc != dsbd->spc) || (dsbs->tracks != dsbd->tracks) || (bps != dsbd->b.recsiz))
 					{
 						if (do1_alert(FCNOTYPE) != 1)
 							goto bailout;
 
 						goto fc_c1;		/* try again    */
 					}
-				}						/* if( checkit ) */
+				}
 			} else
 			{
 				dsect = sectno;
 				sectno = ssect;
 			}
 			dev = devnod;
-		}								/* read, write loop */
+		}
 
 		if (!loop && !last)
 		{
@@ -656,10 +585,10 @@ OBJECT *obj;
 			sectbufs = leftover;
 			last = TRUE;
 		}
-	}									/* while( loop-- ) */
+	}
 
 	/* change the serialno */
-	trap14(PROTOBT, bootbuf, 0x01000000L, -1, -1);
+	Protobt(bootbuf, 0x01000000L, -1, -1);
 	fc_rwsec(WSECTS, bootbuf, 0x00010000L, devnod);
 
   bailout:
@@ -668,36 +597,32 @@ OBJECT *obj;
 	return;
 }
 
-fc_rwsec(op, buf, nsect, sect, dev)
-int16_t op;
 
-int32_t buf;
-
-int16_t nsect,
- sect,
- dev;
+int16_t fc_rwsec(P(int16_t) op, P(intptr_t) buf, P(int16_t) nsect, P(int16_t) sect, P(int16_t) dev)
+PP(int16_t op;)
+PP(intptr_t buf;)
+PP(int16_t nsect;)
+PP(int16_t sect;)
+PP(int16_t dev;)
 {
 	register int16_t ret;
 
-  rerw:if (ret = trap13(RWABS, op, buf, nsect, sect, dev))
+  rerw:if (ret = Rwabs(op, buf, nsect, sect, dev))
 		if ((ret = do1_alert(FCFAIL)) == 1)	/* retry */
 			goto rerw;
 	return (ret);						/* 0=>OK, 2=>error */
 }
 
 
-/*     put in the next cluster number 	*/
-
-clfix(cl, fat)
-unsigned int16_t cl;
-
-unsigned int16_t fat[];
+/*
+ * put in the next cluster number
+ */
+VOID clfix(P(uint16_t) cl, P(uint16_t *)fat)
+PP(uint16_t cl;)
+PP(uint16_t *fat;)
 {
-	register unsigned int16_t ncl,
-	 cluster;
-
-	unsigned int16_t temp,
-	 num;
+	register uint16_t ncl, cluster;
+	uint16_t temp, num;
 
 	num = 0x0FF7;
 
@@ -718,18 +643,14 @@ unsigned int16_t fat[];
 
 	fat[ncl] = num;
 	fat[ncl + 1] = num >> 8;
-
-	return;
-
 }
 
 
 /*	Inc and redraw slider bar	*/
 
-fc_bar(obj, which)
-register OBJECT *obj;
-
-register int16_t which;
+VOID fc_bar(P(OBJECT *)obj, P(int16_t) which)
+PP(register OBJECT *obj;)
+PP(register int16_t which;)
 {
 	register int16_t wid;
 
@@ -747,10 +668,9 @@ register int16_t which;
 }
 
 
-fc_draw(obj, which)
-OBJECT *obj;
-
-int16_t which;
+VOID fc_draw(P(OBJECT *)obj, P(int16_t) which)
+PP(OBJECT *obj;)
+PP(int16_t which;)
 {
 	GRECT size;
 

@@ -1,43 +1,19 @@
 /*	WINDOW.H		3/15/89 - 3/30/89	Derek Mui	*/
 /*	Change w_iblk to w_ciblk	7/11/92		D.Mui		*/
 
-#define	SUP	0
+#define	SUP		0
 #define SDOWN	1
 #define SLEFT	2
 #define	SRIGHT	3
 
-#define	MAXWIN		8	/* max number of window	*/
 
-#define PATHLEN		128
 #define INFOLEN		62
 
 #define MAX_DEPTH  8		/* Max folder level	*/
 
 #define	SCREEN	  0	/* related to background			*/
 
-#define NAME		0x0001
-#define CLOSE		0x0002
-#define FULL		0x0004
-#define MOVE		0x0008
-#define INFO		0x0010
-#define SIZE		0x0020
-#define UPARROW		0x0040
-#define DNARROW		0x0080
-#define VSLIDE		0x0100
-#define LFARROW		0x0200
-#define RTARROW		0x0400
-#define HSLIDE		0x0800
-
-#define ALLITEMS 0x0FFF
-
-typedef struct	grect
-{
-	int16_t	x;
-	int16_t	y;
-	int16_t	w;
-	int16_t	h;
-} GRECT;
-
+#define ALLITEMS (NAME|CLOSER|FULLER|MOVER|INFO|SIZER|UPARROW|DNARROW|VSLIDE|LFARROW|RTARROW|HSLIDE)
 
 typedef	struct	window
 {
@@ -86,7 +62,7 @@ struct	dir
 
 typedef	struct	dta
 {
-	char	reserved[20];	/* reserved area*/
+	char	reserved[20];	/* reserved area */
 	DIR	dirfile;
 } DTA;
 

@@ -80,21 +80,9 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <deskusa.h>
-#include <gemdefs.h>
-#include <osbind.h>
-#include <extern.h>
-
-extern char *get_fstring();
+#include "desktop.h"
 
 /* trap() is GEMDOS trap #1; trap13() is (obviously) trap 13. */
-
-extern long trap(),
- trap13();
 
 #define Fopen(f,m) trap(0x3d,f,m)
 #define Fread(handle,count,buf) trap(0x3f,handle,(long)count,buf)
@@ -123,33 +111,27 @@ extern long trap(),
 #define CTLS 19
 #define SPACE 32
 
-extern int16_t er_num;						/* no device error number */
 
-showfile(fname, mode)
-char *fname;
+long uikey PROTO((NOTHING));
+int doui PROTO((int mode, int *plinecount));
+VOID PROTO(bconws(const char *s));
 
-int mode;
+
+
+BOOLEAN showfile(P(char *)fname, P(int) mode)
+PP(char *fname;)
+PP(int mode;)
 {
-	int linecount,
-	 serial,
-	 status;
-
+	int linecount, serial;
+	BOOLEAN status;
 	register int charcount;
-
 	register int handle;
-
 	char *buf;
-
 	register char *ptr;
-
 	register long len;
-
 	register int i;
-
 	long c;
-
 	int ch;
-
 	long alert;
 
 	linecount = charcount = 0;
@@ -299,7 +281,7 @@ int mode;
   alldone:
 	if (handle >= 0)
 	{
-		if ((mode) && (status))
+		if (mode && status)
 			Bconout(serial, 0x0C);
 		Fclose(handle);
 	}
@@ -308,17 +290,16 @@ int mode;
 	if (buf)							/* if there is memory allocated */
 		Mfree(buf);						/* free it          */
 
-	return (status);
+	return status;
 }
 
 
-/* This routine uses the global GEM variable gl_btrue to get the button
+/*
+ * This routine uses the global GEM variable gl_btrue to get the button
  * state, and it shouldn't.  But it can't call graf_mkstate, because
  * that causes a dispatch, which causes the AES to buffer keystrokes.
  */
-extern gl_btrue;
-
-long uikey()
+long uikey(NOTHING)
 {
 	if (gl_btrue & 1)
 		return SPACE;					/* left mouse button = next page    */
@@ -329,20 +310,18 @@ long uikey()
 	return 0;							/* otherwise, return nullo          */
 }
 
+
 /*
  * doui: get user I/O.  Mode is 0 for polling, ~0 for blocking (at --more--).
  *
  * Returns 1 if user wants to stop, or modifies *plinecount for next
  * screenful.
  */
-
-int doui(mode, plinecount)
-int mode;
-
-int *plinecount;
+int doui(P(int) mode, P(int *)plinecount)
+PP(int mode;)
+PP(int *plinecount;)
 {
 	long c;
-
 	int stop = 0;
 
 	while ((c = uikey()) || mode || stop)
@@ -395,8 +374,9 @@ int *plinecount;
 	return 0;
 }
 
-bconws(s)
-register char *s;
+
+VOID bconws(P(const char *)s)
+PP(register const char *s;)
 {
 	while (*s)
 		Bconout(2, *s++);

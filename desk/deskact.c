@@ -16,21 +16,34 @@
 
 #include "desktop.h"
 
-int16_t back_update;						/* update background    */
+BOOLEAN back_update;						/* update background    */
+
+VOID chk_rect PROTO((WINDOW *win, GRECT *rect, int16_t id));
+VOID frame PROTO((int16_t x1, int16_t y1, int16_t x2, int16_t y2));
+int16_t dist PROTO((int16_t x, int16_t y));
+VOID win_desk PROTO((WINDOW *swin, int16_t sitems, int16_t ditem, int16_t mx, int16_t my));
+VOID desk_desk PROTO((int16_t sitem, int16_t ditem, int16_t mx, int16_t my));
+int16_t gh_init PROTO((OBJECT *obj, int16_t disk));
+VOID ghost_icon PROTO((int16_t offx, int16_t offy, int16_t disk));
+VOID to_desk PROTO((int16_t ditem, char *tail));
+VOID to_win PROTO((int16_t sitem, WINDOW *swin, int16_t ditem, WINDOW *dwin));
+
+
+
 
 /*	Check what kind of object is executable	*/
 /*	Return TRUE if it is 			*/
 
-int16_t ch_obj(mx, my, win, item, type)
-int16_t mx;
-int16_t my;
-WINDOW **win;
-int16_t *item;
-int16_t *type;
+BOOLEAN ch_obj(P(int16_t) mx, P(int16_t) my, P(WINDOW **) win, P(int16_t *) item, P(int16_t *) type)
+PP(int16_t mx;)
+PP(int16_t my;)
+PP(WINDOW **win;)
+PP(int16_t *item;)
+PP(int16_t *type;)
 {
 	register int16_t i;
 	DIR *dir;
-	int16_t install;
+	BOOLEAN install;
 	APP *app;
 	char *str;
 
@@ -56,7 +69,8 @@ int16_t *type;
 
 				str = put_name(*win, dir->d_name);
 				/* check file type  */
-			  ch_1:app = app_xtype(str, &install);
+			ch_1:
+				app = app_xtype(str, &install);
 
 				if (!install)
 				{
@@ -74,12 +88,14 @@ int16_t *type;
 		}								/* if object     */
 	}
 	/* if found something  */
-	return (FALSE);
+	return FALSE;
 }
 
-/*	Change for UNDO key	*/
 
-int16_t ch_undo()
+/*
+ * Change for UNDO key
+ */
+BOOLEAN ch_undo(NOTHING)
 {
 	if ((Bconstat(2)) && (Bconin(2) == 0x00610000L) && (do1_alert(ABORTCON) == 1))
 		return (FALSE);
@@ -88,11 +104,12 @@ int16_t ch_undo()
 }
 
 
-/*	Perform a file operation	*/
-
-VOID file_op(dest, mode)
-char *dest;
-int16_t mode;
+/*
+ * Perform a file operation
+ */
+VOID file_op(P(char *) dest, P(int16_t) mode)
+PP(char *dest;)
+PP(int16_t mode;)
 {
 	register OBJECT *obj;
 	register int16_t ret;
@@ -107,7 +124,7 @@ int16_t mode;
 	/* get the key state */
 
 	graf_mkstate(&item, &item, &item, &keydown);
-	f_rename = (keydown & ALTER) ? TRUE : FALSE;
+	f_rename = (keydown & K_ALT) ? TRUE : FALSE;
 
 	if (!x_first(&source, &type))
 		return;
@@ -227,13 +244,14 @@ int16_t mode;
 }
 
 
-/*	Build a rectangle that can hold all the selected icons	*/
-
-int16_t build_rect(obj, rect, w, h)
-register OBJECT *obj;
-register GRECT *rect;
-int16_t w;
-int16_t h;
+/*
+ * Build a rectangle that can hold all the selected icons
+ */
+BOOLEAN build_rect(P(OBJECT *) obj, P(GRECT *) rect, P(int16_t) w, P(int16_t) h)
+PP(register OBJECT *obj;)
+PP(register GRECT *rect;)
+PP(int16_t w;)
+PP(int16_t h;)
 {
 	register int16_t i;
 	register int16_t minx, miny;
@@ -280,16 +298,16 @@ int16_t h;
 		rect->h = 0;
 	}
 
-	return (found);
+	return found;
 }
 
 
 /*	Check whose is inside the rect and select the object	*/
 
-int16_t chk_rect(win, rect, id)
-register WINDOW *win;
-GRECT *rect;
-int16_t id;
+VOID chk_rect(P(WINDOW *= win, P(GRECT *) rect, P(int16_t) id)
+PP(register WINDOW *win;)
+PP(GRECT *rect;)
+PP(int16_t id;)
 {
 	register OBJECT *obj;
 	register int16_t i;
@@ -358,13 +376,14 @@ int16_t id;
 }
 
 
-/*	Draw a box	*/
-
-frame(x1, y1, x2, y2)
-int16_t x1;
-int16_t y1;
-int16_t x2;
-int16_t y2;
+/*
+ * Draw a box
+ */
+VOID frame(P(int16_t) x1, P(int16_t) y1, P(int16_t) x2, P(int16_t) y2)
+PP(int16_t x1;)
+PP(int16_t y1;)
+PP(int16_t x2;)
+PP(int16_t y2;)
 {
 	int16_t points[10];
 
@@ -381,9 +400,9 @@ int16_t y2;
 
 /*	Draw a box and wait for button to go up		*/
 
-r_box(id, win)
-int16_t id;
-WINDOW *win;
+VOID r_box(P(int16_t) id, P(WINDOW *) win)
+PP(int16_t id;)
+PP(WINDOW *win;)
 {
 	register int16_t tmpx, tmpy;
 	register int16_t tmpx1, tmpy1;
@@ -436,8 +455,8 @@ WINDOW *win;
 	rect.x = min(tmpx, tmpx1);
 	rect.y = min(tmpy, tmpy1);
 
-	rect.w = abs(tmpx, tmpx1);
-	rect.h = abs(tmpy, tmpy1);
+	rect.w = dist(tmpx, tmpx1);
+	rect.h = dist(tmpy, tmpy1);
 
 	if ((rect.w) && (rect.h))
 		chk_rect(win, &rect, id);
@@ -447,11 +466,13 @@ WINDOW *win;
 	return;
 }
 
-/*	Return an absolute value	*/
 
-int16_t abs(x, y)
-int16_t x;
-int16_t y;
+/*
+ * Return an absolute value
+ */
+int16_t dist(P(int16_t) x, P(int16_t) y)
+PP(int16_t x;)
+PP(int16_t y;)
 {
 	if (x > y)
 		return (x - y);
@@ -460,14 +481,15 @@ int16_t y;
 }
 
 
-/*	Move icons from window to desktop	*/
-
-win_desk(swin, sitems, ditem, mx, my)
-register WINDOW *swin;
-int16_t sitems;
-int16_t ditem;
-int16_t mx;
-int16_t my;
+/*
+ * Move icons from window to desktop
+ */
+VOID win_desk(P(WINDOW *) swin, P(int16_t) sitems, P(int16_t) ditem, P(int16_t) mx, P(int16_t) my)
+PP(register WINDOW *swin;)
+PP(int16_t sitems;)
+PP(int16_t ditem;)
+PP(int16_t mx;)
+PP(int16_t my;)
 {
 	DIR *dir;
 	register int16_t i;
@@ -529,7 +551,7 @@ int16_t my;
 		if (backid[ditem].i_type == XFILE)
 		{
 			dir = get_dir(swin, sitems);
-			strcpy(swin->w_path, &swin->w_buf[1]);
+			strcpy(&swin->w_buf[1], swin->w_path);
 			rep_path(dir->d_name, &swin->w_buf[1]);
 			swin->w_buf[0] = strlen(&swin->w_buf[1]);
 			tail = swin->w_buf;
@@ -541,13 +563,14 @@ int16_t my;
 }
 
 
-/*	Move icons from desktop to desktop	*/
-
-desk_desk(sitem, ditem, mx, my)
-int16_t sitem;
-int16_t ditem;
-int16_t mx;
-int16_t my;
+/*
+ * Move icons from desktop to desktop
+ */
+VOID desk_desk(P(int16_t) sitem, P(int16_t) ditem, P(int16_t) mx, P(int16_t) my)
+PP(int16_t sitem;)
+PP(int16_t ditem;)
+PP(int16_t mx;)
+PP(int16_t my;)
 {
 	register OBJECT *obj;
 	char buffer[14];
@@ -611,11 +634,12 @@ int16_t my;
 }
 
 
-/*	Ghost icon initalization	*/
-
-int16_t gh_init(obj, disk)
-register OBJECT *obj;
-int16_t disk;
+/*
+ * Ghost icon initalization
+ */
+int16_t gh_init(P(OBJECT *)obj, P(int16_t) disk)
+PP(register OBJECT *obj;)
+PP(int16_t disk;)
 {
 	register int16_t *ptr1;
 	int16_t x, y, i, offx, offy;
@@ -672,12 +696,13 @@ int16_t disk;
 }
 
 
-/*	Draw icons outline	*/
-
-ghost_icon(offx, offy, disk)
-register int16_t offx;
-register int16_t offy;
-int16_t disk;
+/*
+ * Draw icons outline
+ */
+VOID ghost_icon(P(int16_t) offx, P(int16_t) offy, P(int16_t) disk)
+PP(register int16_t offx;)
+PP(register int16_t offy;)
+PP(int16_t disk;)
 {
 	register int16_t *ptr;
 	register int16_t i, j, limit;
@@ -716,12 +741,13 @@ int16_t disk;
 }
 
 
-/*	Handle the holding down button event	*/
-
-int16_t hd_down(sitem, stype, swin)
-register int16_t sitem;
-register int16_t stype;
-register WINDOW *swin;
+/*
+ * Handle the holding down button event
+ */
+VOID hd_down(P(int16_t) sitem, P(int16_t) stype, P(WINDOW *)swin)
+PP(register int16_t sitem;)
+PP(register int16_t stype;)
+PP(register WINDOW *swin;)
 {
 	register int16_t pitem, state;
 	int16_t itype, w, h, ret, exec;
@@ -750,8 +776,9 @@ register WINDOW *swin;
 	h = d_xywh[9];
 
 	if (stype == DESKICON)				/* source is desktop    */
+	{
 		sobj = background;
-	else								/* source is window */
+	} else								/* source is window */
 	{
 		if (s_view != S_ICON)
 		{
@@ -804,7 +831,7 @@ register WINDOW *swin;
 		if (!(mstate & 0x1))			/* no button down   */
 			break;
 
-		if ((abs(mx, omx) > 2) || (abs(my, omy) > 2))
+		if (dist(mx, omx) > 2 || dist(my, omy) > 2)
 		{
 			o1 = pt.x;					/* save the old rectangle x,y   */
 			o2 = pt.y;
@@ -966,11 +993,13 @@ register WINDOW *swin;
 	return;
 }
 
-/*	Take action when something is dragged to desktop area	*/
 
-to_desk(ditem, tail)
-int16_t ditem;
-char *tail;
+/*
+ * Take action when something is dragged to desktop area
+ */
+VOID to_desk(P(int16_t) ditem, P(char *)tail)
+PP(int16_t ditem;)
+PP(char *tail;)
 {
 	char buffer[14];
 	int16_t ret;
@@ -985,7 +1014,7 @@ char *tail;
 		break;
 
 	case DISK:							/* copy to disk     */
-		strcpy(wildext, buffer);
+		strcpy(buffer, wildext);
 		buffer[0] = itype->i_cicon.monoblk.ib_char[1];
 		file_op(buffer, OP_COPY);
 		break;
@@ -1009,19 +1038,20 @@ char *tail;
 }
 
 
-/*	Take action when something is dragged to window	*/
-
-to_win(sitem, swin, ditem, dwin)
-int16_t sitem;
-int16_t ditem;
-WINDOW *swin;
-WINDOW *dwin;
+/*
+ * Take action when something is dragged to window
+ */
+VOID to_win(P(int16_t) sitem, P(WINDOW *)swin, P(int16_t) ditem, P(WINDOW *)dwin)
+PP(int16_t sitem;)
+PP(WINDOW *swin;)
+PP(int16_t ditem;)
+PP(WINDOW *dwin;)
 {
 	register DIR *dir;
 	register char *temp;
 
 	temp = (swin == dwin) ? path3 : dwin->w_buf;
-	strcpy(dwin->w_path, temp);
+	strcpy(temp, dwin->w_path);
 
 	if (ditem)							/* copy to something    */
 	{
@@ -1036,7 +1066,7 @@ WINDOW *dwin;
 					temp = swin->w_buf;
 
 				dir = get_dir(swin, sitem);
-				strcpy(swin->w_path, &temp[1]);
+				strcpy(&temp[1], swin->w_path);
 				rep_path(dir->d_name, &temp[1]);
 				temp[0] = strlen(&temp[1]);
 				open_file(dwin, ditem, temp);
@@ -1054,13 +1084,14 @@ WINDOW *dwin;
 }
 
 
-/*	make a desktop icon	*/
-
-int16_t make_icon(drive, icon, type, text)
-int16_t drive;
-int16_t icon;
-int16_t type;
-char *text;
+/*
+ * make a desktop icon
+ */
+int16_t make_icon(P(int16_t) drive, P(int16_t) icon, P(int16_t) type, P(char *)text)
+PP(int16_t drive;)
+PP(int16_t icon;)
+PP(int16_t type;)
+PP(char *text;)
 {
 	register int16_t id;
 	register IDTYPE *itype;
@@ -1074,8 +1105,8 @@ char *text;
 		itype->i_type = type;
 		itype->i_cicon.monoblk.ib_char[1] = (char) drive;
 		itype->i_icon = icon;
-		strcpy(text, (CICONBLK *) (obj[id].ob_spec)->monoblk.ib_ptext);
+		strcpy((CICONBLK *) (obj[id].ob_spec)->monoblk.ib_ptext, text);
 	}
 
-	return (id);
+	return id;
 }

@@ -1,97 +1,72 @@
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.2 $	$Source: /u2/MRS/osrevisions/aes/deskif.s,v $
-* =======================================================================
-*  $Author: mui $	$Date: 89/04/26 18:10:36 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	deskif.s,v $
-* Revision 2.2  89/04/26  18:10:36  mui
-* aes30
-* 
-* Revision 2.1  89/02/22  05:21:49  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.1  88/06/02  12:29:37  lozben
-* Initial revision
-* 
-*************************************************************************
-*	Fix bug at appl_init	3/13/87		Derek Mui
-*	The bug originated from DRI, it's not Landon's fault
-*	Deskif.s 				Landon Dyer
-*	Use MAC to assemble	6/28/90		D.Mui
-*	Release the acc wait at appl_exit	7/13/90	D.Mui
-* assemble with MAS 900801 kbad
-*	Removed far_call	4/8/91		D.Mui
-*	Remove gr_mouse		6/13/91		D.Mui
+/*************************************************************************
+ *                       Revision Control System
+ * =======================================================================
+ *  $Revision: 2.2 $     $Source: /u2/MRS/osrevisions/aes/deskif.s,v $
+ * =======================================================================
+ *  $Author: mui $       $Date: 89/04/26 18:10:36 $      $Locker: kbad $
+ * =======================================================================
+ *  $Log:        deskif.s,v $
+ * Revision 2.2  89/04/26  18:10:36  mui
+ * aes30
+ *
+ * Revision 2.1  89/02/22  05:21:49  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ *
+ * Revision 1.1  88/06/02  12:29:37  lozben
+ * Initial revision
+ *
+ *************************************************************************
+ *       Fix bug at appl_init    3/13/87         Derek Mui
+ *       The bug originated from DRI, it's not Landon's fault
+ *       Deskif.s                                Landon Dyer
+ *       Use MAC to assemble     6/28/90         D.Mui
+ *       Release the acc wait at appl_exit       7/13/90 D.Mui
+ * assemble with MAS 900801 kbad
+ *       Removed far_call        4/8/91          D.Mui
+ *       Remove gr_mouse         6/13/91         D.Mui
+ */
 
-	.globl _rlr
-	.globl _drl
-	.globl _nrl
-	.globl _eul
-	.globl _dlr
-	.globl _zlr
-	.globl _elinkoff
-	.globl _indisp
-	.globl _infork
-	.globl _fpt
-	.globl _fph
-	.globl _fpcnt
-	.globl _wind_spb
-	.globl _cda
-	.globl _curpid
-	.globl _pglobal
-	.comm _pglobal,30
-	.globl _gl_apid
-	.comm _gl_apid,2
-	.globl _D
-	.globl _gl_wchar
-	.globl _gl_hchar
-	.globl _gl_wbox
-	.globl _gl_hbox
-	.globl _gl_handl
-	.globl _ad_sysgl
-	.globl _gl_nplan
-	.globl _gl_bvdis
-	.globl _gl_bvhar
+#include "config.h"
+#include "deskdefs.h"
+#include "asmdefs.h"
+
+	xref _pglobal
+	xref _gl_wchar
+	xref _gl_hchar
+	xref _gl_wbox
+	xref _gl_hbox
+	xref _gl_handle
+	xref _gl_bvdisk
+	xref _gl_bvhard
 
 
-*  
-*  WORD
-*  appl_bvset( bvdisk, bvhard )
-*       WORD	bvdisk;
-*       WORD	bvhard;
-*  {
-*    gl_bvdisk = bvdisk;
-*    gl_bvhard = bvhard;
-*    return(TRUE);
-*  }
-*  			
-	.globl _appl_bvs
-	.text
-_appl_bvs:
-	move.w	8-4(sp),_gl_bvdis
-	move.w	10-4(sp),_gl_bvhar
+#if CCODE
+WORD appl_bvset(WORD bvdisk, WORD bvhard)
+{
+  gl_bvdisk = bvdisk;
+  gl_bvhard = bvhard;
+  return(TRUE);
+}
+#endif
+	xdef _appl_bvset
+_appl_bvset:
+	move.w	8-4(sp),_gl_bvdisk
+	move.w	10-4(sp),_gl_bvhard
 	moveq	#1,d0
 	rts
 
 
-*
-*  WORD
-*  appl_write(rwid, length, pbuff)
-*       WORD		rwid;
-*       WORD		length;
-*       LONG		pbuff;
-*  {
-*    WORD		ret;
-*    ret = ap_rdwr( AQWRT, rwid, length, pbuff);
-*    dsptch();
-*    return(ret);
-*  }
-*  
-	.globl _appl_wri
-	.text
-_appl_wri:
+#if CCODE
+WORD appl_write(WORD rwid, WORD length, int16_t *pbuff)
+{
+  WORD		ret;
+  ret = ap_rdwr( AQWRT, rwid, length, pbuff);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _appl_write
+_appl_write:
 	link	a6,#0
 	move.l	8+4(sp),-(sp)		; ap_rdwr(AQWRT, rwid, length, pbuff)
 	move.l	8+4(sp),-(sp)
@@ -106,42 +81,37 @@ disp1:	move.l	d0,-(sp)		; save return value
 
 
 
-*
-*  WORD
-*  evnt_multi(flags, bclk, bmsk, bst, m1flags, m1x, m1y, m1w, m1h, 
-*  	   m2flags, m2x, m2y, m2w, m2h, mepbuff,
-*  	   tlc, thc, pmx, pmy, pbut, pks, pkr, pbr )
-*       UWORD		flags, bclk, bmsk, bst;
-*       UWORD		m1flags, m1x, m1y, m1w, m1h;
-*       UWORD		m2flags, m2x, m2y, m2w, m2h;
-*       LONG		mepbuff;
-*       UWORD		tlc, thc;
-*       UWORD		*pmx, *pmy, *pbut, *pks, *pkr, *pbr;
-*  {
-*    LONG		buparm, tmcount;
-*    WORD		rets[6];
-*    WORD		which;
-*    
-*    buparm = ( (LONG)(bclk) << 16);
-*    buparm += (bmsk << 8) + (bst);
-*    tmcount = ( (LONG)(thc) << 16);
-*    tmcount += tlc;
-*    
-*    which = ev_multi(flags, &m1flags, &m2flags,
+#if CCODE
+WORD evnt_multi(UWORD flags, UWORD bclk, UWORD bmsk, UWORD bst,
+	UWORD m1flags, UWORD m1x, UWORD m1y, UWORD m1w, UWORD m1h,
+	UWORD m2flags, UWORD m2x, UWORD m2y, UWORD m2w, UWORD m2h,
+	int16_t *mepbuff,
+	UWORD tlc, UWORD thc,
+	int16_t *pmx, int16_t *pmy, int16_t *pbut, int16_t *pks, int16_t *pkr, int16_t *pbr)
+{
+  LONG		buparm, tmcount;
+  WORD		rets[6];
+  WORD		which;
+
+  buparm = ( (LONG)(bclk) << 16);
+  buparm += (bmsk << 8) + (bst);
+  tmcount = ( (LONG)(thc) << 16);
+  tmcount += tlc;
+
+  which = ev_multi(flags, &m1flags, &m2flags,
 *			tmcount, buparm, mepbuff, &rets[0]);
-*    dsptch();
-*    *pmx = rets[0];
-*    *pmy = rets[1];
-*    *pbut = rets[2];
-*    *pks = rets[3];
-*    *pkr = rets[4];
-*    *pbr = rets[5];
-*    return( which);
-*  }
-*  
-	.globl _evnt_mul
-	.text
-_evnt_mul:
+  dsptch();
+  *pmx = rets[0];
+  *pmy = rets[1];
+  *pbut = rets[2];
+  *pks = rets[3];
+  *pkr = rets[4];
+  *pbr = rets[5];
+  return( which);
+}
+#endif
+	xdef _evnt_multi
+_evnt_multi:
 	link	a6,#-26
 
 	moveq	#0,d0			; d0 = bclk<<16
@@ -178,29 +148,23 @@ cplp:	move.l	(a2)+,a0		; get pointer from pointer vector
 	bra	dispit			; dispatch, unlk, return D0 to caller
 
 
-*
-*  WORD
-*  evnt_button(clicks, mask, state, pmx, pmy, pmw, pmh)
-*       WORD		clicks;
-*       UWORD		mask;
-*       UWORD		state;
-*       WORD		*pmx, *pmy, *pmh, *pmw;
-*  {
-*    WORD		mrect[4];
-*    WORD		ret;
-*    
-*    ret = ev_button(clicks, mask, state, &mrect);
-*    dsptch();
-*    *pmx = mrect[0];
-*    *pmy = mrect[1];
-*    *pmw = mrect[2];
-*    *pmh = mrect[3];
-*    return(ret);
-*  }
-*  
-	.globl _evnt_but
-	.text
-_evnt_but:
+#if CCODE
+WORD evnt_button(WORD clicks, UWORD mask, UWORD state, WORD *pmx, WORD *pmy, WORD *pmw, WORD *pmh)
+{
+  WORD		mrect[4];
+  WORD		ret;
+
+  ret = ev_button(clicks, mask, state, &mrect);
+  dsptch();
+  *pmx = mrect[0];
+  *pmy = mrect[1];
+  *pmw = mrect[2];
+  *pmh = mrect[3];
+  return(ret);
+}
+#endif
+	xdef _evnt_button
+_evnt_button:
 	link	a6,#-8
 	pea	-8(a6)
 	move.w	12(a6),-(sp)
@@ -213,42 +177,35 @@ cplp4:	moveq	#4-1,d1			; d1 = count
 	bra	cplp
 
 
-*
-*  WORD
-*  evnt_dclick(rate, setit)
-*       WORD		rate, setit;
-*  {
-*    WORD		ret;
-*    ret = ev_dclick(rate,setit);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _evnt_dcl
-	.text
-_evnt_dcl:
+#if CCODE
+WORD evnt_dclick(WORD rate, WORD setit)
+{
+  WORD		ret;
+  ret = ev_dclick(rate,setit);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _evnt_dclick
+_evnt_dclick:
 	move.l	4(sp),-(sp)
 	jsr	_ev_dclic
 	addq.l	#4,sp
 	bra	disp1
 
 
-*
-*  WORD
-*  form_do(form, start)
-*       LONG		form;
-*       WORD		start;
-*  {
-*    WORD		ret;
-*    
-*    desk_wait( FALSE );
-*    ret = fm_do(form,start);
-*    dsptch();
-*    return(ret);
-*  }
-*  
-	.globl _form_do
-	.text
+#if CCODE
+WORD form_do(OBJECT *form, WORD start)
+{
+  WORD		ret;
+
+  desk_wait( FALSE );
+  ret = fm_do(form,start);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _form_do
 _form_do:
 	clr	-(sp)
 	jsr	_desk_wai
@@ -259,22 +216,17 @@ _form_do:
 	bra	disp1
 
 
-*
-*  WORD
-*  form_dial(dtype, ix, iy, iw, ih, x, y, w, h)
-*       WORD		dtype;
-*       WORD		ix, iy, iw, ih;
-*       WORD		x, y, w, h;
-*  {
-*    WORD		ret;
-*    ret = fm_dial(dtype, &ix, &x);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _form_dia
-	.text
-_form_dia:
+#if CCODE
+WORD form_dial(WORD dtype, WORD ix, WORD iy, WORD iw, WORD ih, WORD x, WORD y, WORD w, WORD h)
+{
+  WORD		ret;
+  ret = fm_dial(dtype, &ix, &x);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _form_dial
+_form_dial:
 	pea	14(sp)			; &x
 	pea	6+4(sp)			; &ix
 	move.w	4+8(sp),-(sp)		; dtype
@@ -283,21 +235,17 @@ _form_dia:
 	bra	disp1
 
 
-*
-*  WORD
-*  form_alert(defbut, astring)
-*       WORD		defbut;
-*       LONG		astring;
-*  {
-*    WORD		ret;
-*    ret = fm_alert(defbut, astring);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _form_ale
-	.text
-_form_ale:
+#if CCODE
+WORD form_alert(WORD defbut, const char *astring)
+{
+  WORD		ret;
+  ret = fm_alert(defbut, astring);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _form_alert
+_form_alert:
 	move.l	6(sp),-(sp)
 	move.w	4+4(sp),-(sp)
 	jsr	_fm_alert
@@ -305,46 +253,39 @@ _form_ale:
 	bra	disp1
 
 
-*
-*  WORD
-*  form_error(errnum)
-*       WORD		errnum;
-*  {
-*    WORD		ret;
-*    ret = fm_error(errnum);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _form_err
-	.text
-_form_err:
+#if CCODE
+WORD form_error(WORD errnum)
+{
+  WORD		ret;
+  ret = fm_error(errnum);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _form_error
+_form_error:
 	move.w	4(sp),-(sp)
 	jsr	_fm_error
 	addq.l	#2,sp
 	bra	disp1
 
 
-*
-*  WORD
-*  form_center(tree, pcx, pcy, pcw, pch)
-*       LONG		tree;
-*       WORD		*pcx, *pcy, *pcw, *pch;
-*  {
-*    WORD		ret;
-*    GRECT		pt;
-*    ret = ob_center(tree, &pt);
-*    *pcx = pt.g_x;
-*    *pcy = pt.g_y;
-*    *pcw = pt.g_w;
-*    *pch = pt.g_h;
-*    dsptch();
-*    return(ret);
-*  }
-*  
-	.globl _form_cen
-	.text
-_form_cen:
+#if CCODE
+WORD form_center(OBJECT *tree, WORD *pcx, WORD *pcy, WORD *pcw, WORD *pch)
+{
+  WORD		ret;
+  GRECT		pt;
+  ret = ob_center(tree, &pt);
+  *pcx = pt.g_x;
+  *pcy = pt.g_y;
+  *pcw = pt.g_w;
+  *pch = pt.g_h;
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _form_center
+_form_center:
 	link	a6,#-8			; space for GRECT
 	pea	-8(a6)			; &rect
 	move.l	8(a6),-(sp)		; tree
@@ -354,24 +295,18 @@ _form_cen:
 	bra	cplp4
 
 
-*
-*  WORD
-*  gr_handle(gwchar,ghchar,gwbox,ghbox)
-*       WORD	*gwchar;
-*       WORD	*ghchar;
-*       WORD	*gwbox;
-*       WORD	*ghbox;
-*  {
-*    *gwchar = gl_wchar;
-*    *ghchar = gl_hchar;
-*    *gwbox = gl_wbox;
-*    *ghbox = gl_hbox;
-*    return(gl_handle);
-*  }
-*
-	.globl _gr_handl
-	.text
-_gr_handl:
+#if CCODE
+WORD graf_handle(WORD *gwchar, WORD *ghchar, WORD *gwbox, WORD *ghbox)
+{
+  *gwchar = gl_wchar;
+  *ghchar = gl_hchar;
+  *gwbox = gl_wbox;
+  *ghbox = gl_hbox;
+  return(gl_handle);
+}
+#endif
+	xdef _graf_handle
+_graf_handle:
 	lea	4(sp),a1
 	move.l	(a1)+,a0
 	move.w	_gl_wchar,(a0)
@@ -381,42 +316,34 @@ _gr_handl:
 	move.w	_gl_wbox,(a0)
 	move.l	(a1)+,a0
 	move.w	_gl_hbox,(a0)
-	move.w	_gl_handl,d0
+	move.w	_gl_handle,d0
 	rts
 
 
-*
-*  VOID
-*  graf_rubbox(xorigin, yorigin, wmin, hmin, pwend, phend)
-*       WORD		xorigin, yorigin;
-*       WORD		wmin, hmin;
-*       WORD		*pwend, *phend;
-*  {
-*    gr_rubbox(xorigin, yorigin, wmin, hmin, pwend, phend);
-*    dsptch();
-*  }
-*
-	.globl _graf_rub
-	.text
-_graf_rub:
+#if CCODE
+VOID graf_rubbox(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, WORD *pwend, WORD phend)
+{
+  gr_rubbox(xorigin, yorigin, wmin, hmin, pwend, phend);
+  dsptch();
+}
+#endif
+	xdef _graf_rubbox
+_graf_rubbox:
 	lea	_gr_rubbo,a0		; a0 -> routine to call
 	bra.b	copy16			; use common code to copy args
 
 
-*
-*  WORD
-*  graf_mkstate(pmx, pmy, pmstate, pkstate)
-*       WORD		*pmx, *pmy, *pmstate, *pkstate;
-*  {
-*    WORD		ret;
-*    ret = gr_mkstate(pmx, pmy, pmstate, pkstate);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _graf_mks
-	.text
-_graf_mks:
+#if CCODE
+WORD graf_mkstate(WORD *pmx, WORD *pmy, WORD *pmstate, WORD *pkstate)
+{
+  WORD		ret;
+  ret = gr_mkstate(pmx, pmy, pmstate, pkstate);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _graf_mkstate
+_graf_mkstate:
 	lea	_gr_mksta,a0		; a0 -> routine to call
 
 copy16:	moveq	#4-1,d0			; copy 16 bytes of args
@@ -427,19 +354,15 @@ mkslab:	move.l	16(sp),-(sp)
 	bra	disp1
 
 
-*
-*  VOID         4     6     8     10    12 14 16 18
-*  graf_growbox(orgx, orgy, orgw, orgh, x, y, w, h)
-*       WORD		orgx, orgy, orgw, orgh;
-*       WORD		x, y, w, h;
-*  {
-*    gr_growbox(&orgx, &x);
-*    dsptch();
-*  }
-*  
-	.globl _graf_gro
-	.text
-_graf_gro:
+#if CCODE
+VOID graf_growbox(WORD orgx, WORD orgy, WORD orgw, WORD orgh, WORD x, WORD y, WORD w, WORD h)
+{
+  gr_growbox(&orgx, &x);
+  dsptch();
+}
+#endif
+	xdef _graf_growbox
+_graf_growbox:
 	lea	_gr_growb,a0
 grafx:	pea	12(sp)
 	pea	4+4(sp)
@@ -448,38 +371,30 @@ grafx:	pea	12(sp)
 	bra	disp1
 
 
-*
-*  VOID           4     6     8     10    12 14 16 18
-*  graf_shrinkbox(orgx, orgy, orgw, orgh, x, y, w, h)
-*       WORD		orgx, orgy, orgw, orgh;
-*       WORD		x, y, w, h;
-*  {
-*    gr_shrinkbox(&orgx, &x);
-*    dsptch();
-*  }
-*  
-	.globl _graf_shr
-	.text
-_graf_shr:
+#if CCODE
+VOID graf_shrinkbox(WORD orgx, WORD orgy, WORD orgw, WORD orgh, WORD x, WORD y, WORD w, WORD h)
+{
+  gr_shrinkbox(&orgx, &x);
+  dsptch();
+}
+#endif
+	xdef _graf_shrinkbox
+_graf_shrinkbox:
 	lea	_gr_shrin,a0
 	bra	grafx
 
 
-*
-*  WORD
-*  menu_tnormal(mlist, dlist, normal)
-*       LONG		mlist;
-*       WORD		dlist,normal;
-*  {
-*    WORD		ret;
-*    ret = do_chg(mlist, dlist, SELECTED, !normal, TRUE, TRUE);
-*    dsptch();
-*    return(ret);
-*  }
-*  
-	.globl _menu_tno
-	.text
-_menu_tno:
+#if CCODE
+WORD menu_tnormal(OBJECT *mlist, WORD dlist, WORD normal)
+{
+  WORD		ret;
+  ret = do_chg(mlist, dlist, SELECTED, !normal, TRUE, TRUE);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _menu_tnormal
+_menu_tnormal:
 	move.l	#$00010001,-(sp)	; TRUE, TRUE
 	moveq	#1,d1
 	tst.w	10+4(sp)		; !normal
@@ -494,20 +409,16 @@ menx:	move.l	4+10(sp),-(sp)		; mlist *CS*
 	bra	disp1
 
 
-*
-*  WORD     4     8
-*  menu_bar(tree, showit)
-*       LONG		tree;
-*       WORD		showit;
-*  {
-*    WORD		ret;
-*    ret = mn_bar(tree, showit);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _menu_bar
-	.text
+#if CCODE
+WORD menu_bar(OBJECT *tree, WORD showit)
+{
+  WORD		ret;
+  ret = mn_bar(tree, showit);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _menu_bar
 _menu_bar:
 	move.w	8(sp),-(sp)		; showit
 	move.l	4+2(sp),-(sp)		; tree
@@ -516,43 +427,35 @@ _menu_bar:
 	bra	disp1
 
 
-*
-*  WORD	       4      8      10
-*  menu_icheck(mlist, dlist, check)
-*       LONG		mlist;
-*       WORD		dlist,check;
-*  {
-*    WORD		ret;
-*    ret = do_chg(mlist, dlist, CHECKED, check, FALSE, FALSE);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _menu_ich
-	.text
-_menu_ich:
+#if CCODE
+WORD menu_icheck(OBJECT *mlist, WORD dlist, WORD check)
+{
+  WORD		ret;
+  ret = do_chg(mlist, dlist, CHECKED, check, FALSE, FALSE);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _menu_icheck
+_menu_icheck:
 	clr.l	-(sp)			; FALSE FALSE		0
 	move.w	10+4(sp),-(sp)		; check			4
 	move.w	#4,-(sp)		; CHECKED		6
 	bra	menx1
 
 
-*
-*  WORD	
-*  menu_ienable(mlist, dlist, enable) 
-*       LONG		mlist;
-*       WORD		dlist,enable;
-*  {
-*    WORD		ret;
-*    ret = do_chg(mlist, (dlist & 0x7fff), DISABLED, !enable,
-*  	       ((dlist & 0x8000) != 0x0), FALSE);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _menu_ien
-	.text
-_menu_ien:
+#if CCODE
+WORD menu_ienable(OBJECT *mlist, WORD dlist, WORD enable)
+{
+  WORD		ret;
+  ret = do_chg(mlist, (dlist & 0x7fff), DISABLED, !enable,
+	       ((dlist & 0x8000) != 0x0), FALSE);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _menu_ienable
+_menu_ienable:
 	moveq	#1,d2			; (mask for bools)
 	clr.w	-(sp)			; FALSE				+2
 	move.w	8+2(sp),d0
@@ -570,170 +473,135 @@ _menu_ien:
 	bra	menx
 
 
-*
-*  WORD
-*  objc_offset(tree, obj, poffx, poffy)
-*       LONG		tree;
-*       WORD		obj;
-*       WORD		*poffx, *poffy;
-*  {
-*    WORD		ret;
-*    ret = ob_offset(tree, obj, poffx, poffy);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _objc_off
-	.text
-_objc_off:
-	lea	_ob_offse,a0
+#if CCODE
+WORD objc_offset(OBJECT *tree, WORD obj, WORD *poffx, WORD *poffy)
+{
+  WORD		ret;
+  ret = ob_offset(tree, obj, poffx, poffy);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _objc_offset
+_objc_offset:
+	lea	_ob_offset,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  objc_order(tree, mov_obj, newpos)
-*       LONG		tree;
-*       WORD		mov_obj, newpos;
-*  {
-*    WORD		ret;
-*    ret = ob_order(tree, mov_obj, newpos);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _objc_ord
-	.text
-_objc_ord:
+#if CCODE
+WORD objc_order(OBJECT *tree, WORD mov_obj, WORD newpos)
+{
+  WORD		ret;
+  ret = ob_order(tree, mov_obj, newpos);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _objc_order
+_objc_order:
 	lea	_ob_order,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  objc_find(tree, startob, depth, mx, my)
-*       LONG		tree;
-*       WORD		startob, depth, mx, my;
-*  {
-*    WORD		ret;
-*    ret = ob_find(tree, startob, depth, mx, my);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _objc_fin
-	.text
-_objc_fin:
+#if CCODE
+WORD objc_find(OBJECT *tree, WORD startob, WORD depth, WORD mx, WORD my)
+{
+  WORD		ret;
+  ret = ob_find(tree, startob, depth, mx, my);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _objc_find
+_objc_find:
 	lea	_ob_find,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  objc_add(tree, parent, child)
-*       LONG		tree;
-*       WORD		parent, child;
-*  {
-*    WORD		ret;
-*    ret = ob_add(tree, parent, child);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _objc_add
-	.text
+#if CCODE
+WORD objc_add(OBJECT *tree, WORD parent, WORD child)
+{
+  WORD		ret;
+  ret = ob_add(tree, parent, child);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _objc_add
 _objc_add:
 	lea	_ob_add,a0
 	bra	copy16
 
 
-*
-*  WORD	     4     8       10     12  14  16  18
-*  objc_draw(tree, drawob, depth, xc, yc, wc, hc)
-*       LONG		tree;
-*       WORD		drawob, depth;
-*       WORD		xc, yc, wc, hc;
-*  {
-*    WORD		ret;
-*    gsx_sclip(&xc);
-*    ret = ob_draw(tree, drawob, depth);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _objc_dra
-	.text
-_objc_dra:
+#if CCODE
+WORD objc_draw(OBJECT *tree, WORD drawob, WORD depth, WORD xc, WORD yc, WORD wc, WORD hc)
+{
+  WORD		ret;
+  gsx_sclip(&xc);
+  ret = ob_draw(tree, drawob, depth);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _objc_draw
+_objc_draw:
 	pea	12(sp)
-	jsr	_gsx_scli
+	jsr	_gsx_sclip
 	addq	#4,sp
 	lea	_ob_draw,a0
 	bra	copy16
 
 
-*
-*  WORD		4    8       10     12  14  16  18  20		22
-*  objc_change(tree, drawob, depth, xc, yc, wc, hc, newstate, redraw)
-*       LONG		tree;
-*       WORD		drawob, depth;
-*       WORD		xc, yc, wc, hc;
-*       WORD		newstate, redraw;
-*  {
-*    WORD		ret;
-*    gsx_sclip(&xc);
-*    ret = ob_change( tree, drawob, newstate, redraw);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _objc_cha
-	.text
-_objc_cha:
+#if CCODE
+WORD objc_change(OBJECT *tree, WORD drawob, WORD depth, WORD xc, WORD yc, WORD wc, WORD hc, WORD newstate, WORD redraw)
+{
+  WORD		ret;
+  gsx_sclip(&xc);
+  ret = ob_change( tree, drawob, newstate, redraw);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _objc_change
+_objc_change:
 	pea	12(sp)			;				+4
-	jsr	_gsx_scli
+	jsr	_gsx_sclip
 	move.l	20+4(sp),-(sp)		; newstate, redraw		+8
 	move.w	8+8(sp),-(sp)		; drawob			+10
 	move.l	4+10(sp),-(sp)		; tree				+14
-	jsr	_ob_chang
+	jsr	_ob_change
 	add.w	#14,sp
 	bra	disp1
 
 
-*
-*  WORD
-*  rsrc_free()
-*  {
-*    WORD		ret;
-*    ret = rs_free( pglobal);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _rsrc_fre
-	.text
-_rsrc_fre:
+#if CCODE
+WORD rsrc_free(NOTHIN)
+{
+  WORD		ret;
+  ret = rs_free( pglobal);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _rsrc_free
+_rsrc_free:
 	pea	_pglobal
 	jsr	_rs_free
 	addq	#4,sp
 	bra	disp1
 
 
-*
-*  WORD		4     6     8
-*  rsrc_gaddr(rstype, rsid, paddr)
-*       WORD		rstype;
-*       WORD		rsid;
-*       LONG		*paddr;
-*  {
-*    WORD		ret;
-*    ret = rs_gaddr( pglobal, rstype, rsid, paddr);
-*    dsptch();
-*    return(ret);
-*  }
-*  
-	.globl _rsrc_gad
-	.text
-_rsrc_gad:
+#if CCODE
+WORD rsrc_gaddr(WORD rstype, WORD rsid, VOIDPTR *paddr)
+{
+  WORD		ret;
+  ret = rs_gaddr( pglobal, rstype, rsid, paddr);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _rsrc_gaddr
+_rsrc_gaddr:
 	move.l	8(sp),-(sp)		; paddr				+4
 	move.l	4+4(sp),-(sp)		; rstype, rsid			+4
 	pea	_pglobal		; &pglobal			+4
@@ -742,151 +610,124 @@ _rsrc_gad:
 	bra	disp1
 
 
-*
-*  WORD
-*  shel_write(doex, isgr, iscr, pcmd, ptail)
-*       WORD		doex, isgr, iscr;
-*       LONG		pcmd, ptail;
-*  {
-*    WORD		ret;
-*    ret = sh_write(doex, isgr, iscr, pcmd, ptail);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _shel_wri
-	.text
-_shel_wri:
+#if CCODE
+WORD shel_write(WORD doex, WORD isgr, WORD iscr, char *pcmd, char *ptail)
+{
+  WORD		ret;
+  ret = sh_write(doex, isgr, iscr, pcmd, ptail);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _shel_write
+_shel_write:
 	lea	_sh_write,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  shel_get(pbuffer, len)
-*       LONG		 pbuffer;
-*       WORD		len;
-*  {
-*    WORD		ret;
-*    ret = sh_get(pbuffer, len);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _shel_get
-	.text
+#if CCODE
+WORD shel_get(char *pbuffer, WORD len)
+{
+  WORD		ret;
+  ret = sh_get(pbuffer, len);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _shel_get
 _shel_get:
 	lea	_sh_get,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  shel_put(pdata, len)
-*       LONG		pdata;
-*       WORD		len;
-*  {
-*    WORD		ret;
-*    ret = sh_put(pdata, len);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _shel_put
-	.text
+#if CCODE
+WORD shel_put(const char *pdata, WORD len)
+{
+  WORD		ret;
+  ret = sh_put(pdata, len);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _shel_put
 _shel_put:
 	lea	_sh_put,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  wind_close(handle)
-*       WORD		handle;
-*  {
-*    WORD		ret;
-*    ret = wm_close(handle);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _wind_clo
-	.text
-_wind_clo:
+#if CCODE
+WORD wind_close(WORD handle)
+     WORD		handle;
+{
+  WORD		ret;
+  ret = wm_close(handle);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _wind_close
+_wind_close:
 	lea	_wm_close,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  wind_delete(handle)
-*       WORD		handle;
-*  {
-*    WORD		ret;
-*    ret = wm_delete(handle);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _wind_del
-	.text
-_wind_del:
+#if CCODE
+WORD wind_delete(WORD handle)
+{
+  WORD		ret;
+  ret = wm_delete(handle);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _wind_delete
+_wind_delete:
 	lea	_wm_delet,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  wind_find(mx, my)
-*       WORD		mx, my;
-*  {
-*    WORD		ret;
-*    ret = wm_find(mx,my);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _wind_fin
-	.text
-_wind_fin:
+#if CCODE
+WORD wind_find(WORD mx, WORD my)
+{
+  WORD		ret;
+  ret = wm_find(mx,my);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _wind_find
+_wind_find:
 	lea	_wm_find,a0
 	bra	copy16
 
 
-*
-*  WORD
-*  wind_update(beg_update)
-*       WORD		beg_update;
-*  {
-*    WORD		ret;
-*    ret = wm_update(beg_update);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _wind_upd
-	.text
-_wind_upd:
+#if CCODE
+WORD wind_update(WORD beg_update)
+{
+  WORD		ret;
+  ret = wm_update(beg_update);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _wind_update
+_wind_update:
 	lea	_wm_updat,a0
 	bra	copy16
 
 
-*
-*  WORD		4    6   8   10  12
-*  wind_create(kind, wx, wy, ww, wh)
-*       UWORD		kind;
-*       WORD		wx, wy, ww, wh;
-*  {
-*    WORD		ret;
-*    ret = wm_create(kind, &wx);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _wind_cre
-	.text
-_wind_cre:
-	lea	_wm_creat,a0
+#if CCODE
+WORD wind_create(UWORD kind, WORD wx, WORD wy, WORD ww, WORD wh)
+{
+  WORD		ret;
+  ret = wm_create(kind, &wx);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _wind_create
+_wind_create:
+	lea	_wm_create,a0
 windx:	pea	6(sp)			; &wx				+4
 	move.w	4+4(sp),-(sp)		; kind				+4
 	jsr	(a0)
@@ -894,46 +735,37 @@ windx:	pea	6(sp)			; &wx				+4
 	bra	disp1
 
 
-*
-*  WORD
-*  wind_open(handle, wx, wy, ww, wh)
-*       WORD		handle;
-*       WORD		wx, wy, ww, wh;
-*  {
-*    WORD		ret;
-*    ret = wm_open( handle, &wx);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _wind_ope
-	.text
-_wind_ope:
+#if CCODE
+WORD wind_open(WORD handle, WORD wx, WORD wy, WORD ww, WORD wh)
+{
+  WORD		ret;
+  ret = wm_open( handle, &wx);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _wind_open
+_wind_open:
 	lea	_wm_open,a0
 	bra	windx
 
 
-*
-*  WORD
-*  wind_get(w_handle, w_field, pw1, pw2, pw3, pw4)
-*       WORD		w_handle;
-*       WORD		w_field;
-*       WORD		*pw1, *pw2, *pw3, *pw4;
-*  {
-*    WORD		wm_ox[4];
-*    WORD		ret;
-*    
-*    ret = wm_get(w_handle, w_field, &wm_ox);
-*    dsptch();
-*    *pw1 = wm_ox[0];
-*    *pw2 = wm_ox[1];
-*    *pw3 = wm_ox[2];
-*    *pw4 = wm_ox[3];
-*    return(ret);
-*  }
-*
-	.globl _wind_get
-	.text
+#if CCODE
+WORD wind_get(WORD w_handle, WORD w_field, WORD *pw1, WORD *pw2, WORD *pw3, WORD *pw4)
+{
+  WORD		wm_ox[4];
+  WORD		ret;
+
+  ret = wm_get(w_handle, w_field, &wm_ox);
+  dsptch();
+  *pw1 = wm_ox[0];
+  *pw2 = wm_ox[1];
+  *pw3 = wm_ox[2];
+  *pw4 = wm_ox[3];
+  return(ret);
+}
+#endif
+	xdef _wind_get
 _wind_get:
 	link	a6,#-8
 	pea	-8(a6)
@@ -943,21 +775,16 @@ _wind_get:
 	bra	cplp4a			; go copy 4 integers
 
 
-*
-*  WORD	    4         6        8+
-*  wind_set(w_handle, w_field, w2, w3, w4, w5)
-*       WORD		w_handle;	
-*       WORD		w_field;
-*       WORD		w2, w3, w4, w5;
-*  {
-*    WORD		ret;
-*    ret = wm_set( w_handle, w_field, &w2);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _wind_set
-	.text
+#if CCODE
+WORD wind_set(WORD w_handle, WORD w_field, WORD w2, WORD w3, WORD w4, WORD w5)
+{
+  WORD		ret;
+  ret = wm_set( w_handle, w_field, &w2);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _wind_set
 _wind_set:
 	pea	8(sp)			; &w2
 	move.l	4+4(sp),-(sp)		; w_handle, w_field
@@ -966,23 +793,17 @@ _wind_set:
 	bra	disp1
 
 
-*
-*  WORD
-*  wind_calc(wctype, kind, x, y, w, h, px, py, pw, ph)
-*       WORD		wctype;
-*       UWORD		kind;
-*       WORD		x, y, w, h;
-*       WORD		*px, *py, *pw, *ph;
-*  {
-*    WORD		ret;
-*    ret = wm_calc(wctype, kind, x, y, w, h, px, py, pw, ph);
-*    dsptch();
-*    return(ret);
-*  }
-*
-	.globl _wind_cal
-	.text
-_wind_cal:
+#if CCODE
+WORD wind_calc(WORD wctype, UWORD kind, WORD x, WORD y, WORD w, WORD h, WORD px, WORD py, WORD pw, WORD ph)
+{
+  WORD		ret;
+  ret = wm_calc(wctype, kind, x, y, w, h, px, py, pw, ph);
+  dsptch();
+  return(ret);
+}
+#endif
+	xdef _wind_calc
+_wind_calc:
 	moveq	#7-1,d0			; copy 7 longs of args
 wndcp:	move.l	28(sp),-(sp)
 	dbra	d0,wndcp
@@ -991,4 +812,15 @@ wndcp:	move.l	28(sp),-(sp)
 	bra	disp1
 
 
-	.end
+#if !BINEXACT
+	xdef _inq_cache
+_inq_cache:
+	move.l 4(a7),d1
+	CACR_D0
+	cmp.l d1,-1
+	beq _inqc1
+	D1_CACR
+_inqc1:
+	CACR_D0
+	rts
+#endif

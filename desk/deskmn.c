@@ -85,17 +85,6 @@
 #define VgetSize( a )   xbios( 91, a )
 #define VcheckMode(a) trap14(95, a)
 
-/* Structure for passing menu data */
-typedef struct _menu
-{
-	OBJECT *mn_tree;					/* Object tree of the menu */
-	int16_t mn_menu;						/* Parent of the menu items */
-	int16_t mn_item;						/* Starting menu item      */
-	int16_t mn_scroll;						/* scroll flag for the menu */
-	int16_t mn_keystate;					/* Key State           */
-} MENU;
-
-
 /* Mouse Rectangle Structure...*/
 typedef struct _mrets
 {
@@ -110,11 +99,25 @@ typedef struct _mrets
 /* GLOBALS
  * ==================================================================
  */
-MENU Menu,
- MData;
+STATIC MENU Menu;
+STATIC MENU MData;
 
-OBJECT mtree[MAXMENU + 2];				/* cjg - 07/10/92 moved to global */
+STATIC OBJECT mtree[MAXMENU + 2];				/* cjg - 07/10/92 moved to global */
 
+
+/* PROTOTYPES
+ * ================================================================
+ */
+
+int16_t ChkTouchButton PROTO((OBJECT *tree, int16_t button));
+int16_t DoMKItems PROTO((OBJECT *dtree, int16_t button, int16_t *item));
+int16_t DoKeyCheck PROTO((int16_t item));
+int16_t get_that_size PROTO((int16_t newmode));
+
+
+/* FUNCTIONS
+ * ================================================================
+ */
 
 /* ChkTouchButton
  * ================================================================
@@ -123,9 +126,9 @@ OBJECT mtree[MAXMENU + 2];				/* cjg - 07/10/92 moved to global */
  * RETURNS: TRUE - the mouse was released and is within the button.
  *          FALSE - the mouse was released and is NOT within the button.
  */
-int16_t ChkTouchButton(tree, button)
-OBJECT *tree;
-int16_t button;
+int16_t ChkTouchButton(P(OBJECT *)tree, P(int16_t) button)
+PP(OBJECT *tree;)
+PP(int16_t button;)
 {
 	MRETS mk;
 	int16_t dummy;
@@ -166,7 +169,7 @@ int16_t button;
  * ===============================================================
  * Desktop Configuration modified to include Pop-ups.
  */
-mv_desk()
+VOID mv_desk(NOTHING)
 {
 	register OBJECT *obj;
 	register int32_t f;
@@ -844,11 +847,11 @@ VOID mins_app(NOTHING)
 					app->a_doc[0] = 0;
 
 				/* get the doc icon type    */
-				strcpy("*.", buffer);
+				strcpy(buffer, "*.");
 				inf_sget(obj, MPDTYPE, &buffer[2]);
 				app_icon(buffer, -1, &app->a_dicon);
 
-				strcpy(buffer, app->a_doc);
+				strcpy(app->a_doc, buffer);
 				inf_sget(obj, MPARGS, app->a_argu);
 				graphic = 1;
 
@@ -891,14 +894,14 @@ VOID mins_app(NOTHING)
 						{
 							save_2(autofile, graphic);
 							autofile[2] = ' ';
-							strcpy(str, &autofile[3]);
+							strcpy(&autofile[3], str);
 						} else
 							do1_alert(NOAUTO);
 					}
 				} else
 				{
 					if (sret)			/* change from auto to normal   */
-						strcpy(Nostr, autofile);
+						strcpy(autofile, Nostr);
 				}
 				/* get the Function key definiton */
 				app->a_key = (uint16_t) l;
@@ -910,7 +913,7 @@ VOID mins_app(NOTHING)
 			case MPREMOVE:
 				done = TRUE;
 				if (*str)				/* changed 3/3/92   */
-					strcpy(Nostr, autofile);
+					strcpy(autofile, Nostr);
 
 				if (!newapp)
 					app_free(app);
@@ -943,7 +946,7 @@ VOID mins_app(NOTHING)
  * ===============================================================
  * Desk Preferences using Pop-Ups
  */
-mdesk_pref()
+VOID mdesk_pref(NOTHING)
 {
 	register OBJECT *obj;
 	register int16_t cyes, i, flag;
@@ -1052,7 +1055,7 @@ mdesk_pref()
  * 7) If we have a SPARROW Shifter, and the current rez is an ST compatible
  *    resolution, Display the Sparrow Video Dialog Box FIRST still.
  */
-BOOLEAN set_video()
+BOOLEAN set_video(NOTHING)
 {
 	register OBJECT *obj;
 	register int16_t cyes, i, flag;
@@ -1312,8 +1315,7 @@ BOOLEAN set_video()
 						}
 
 					}
-					/* If flag != -1 */
-				}						/* if( monitor_type ) */
+				}
 				done = TRUE;
 			} else
 			{
@@ -1384,9 +1386,9 @@ BOOLEAN set_video()
  * ==================================================================
  * Select an object and redraw
  */
-int16_t XSelect(tree, obj)
-OBJECT *tree;
-int16_t obj;
+int16_t XSelect(P(OBJECT *)tree, P(int16_t) obj)
+PP(OBJECT *tree;)
+PP(int16_t obj;)
 {
 	GRECT trect;
 
@@ -1410,7 +1412,7 @@ int16_t obj;
  * Deselect an object and redraw - use the flag to redraw in case
  * the area to redraw needs to be bigger.( ie: SHADOWED )
  */
-int16_t XDeselect(tree, obj)
+int16_t XDeselect(OBJECT *tree, int16_t obj)
 OBJECT *tree;
 int16_t obj;
 {
@@ -1437,18 +1439,18 @@ int16_t obj;
  * This routine will select the title and dispay the PopUp Menu
  * at the button location.
  */
-int16_t DoPopup(tree, button, title, Mtree, Mmenu, Mfirst, Mstart, Mscroll, FirstMenu, FirstText, Skip)
-OBJECT *tree;
-int16_t button;
-int16_t title;
-OBJECT *Mtree;
-int16_t Mmenu;
-int16_t Mfirst;
-int16_t *Mstart;
-int16_t Mscroll;
-int16_t FirstMenu;
-int16_t FirstText;
-int16_t Skip;
+int16_t DoPopup(P(OBJECT *)tree, P(int16_t) button, P(int16_t) title, P(OBJECT *)Mtree, P(int16_t) Mmenu, P(int16_t) Mfirst, P(int16_t) Mstart, P(int16_t) Mscroll, P(int16_t) FirstMenu, int16_t FirstText, P(int16_t) Skip)
+PP(OBJECT *tree;)
+PP(int16_t button;)
+PP(int16_t title;)
+PP(OBJECT *Mtree;)
+PP(int16_t Mmenu;)
+PP(int16_t Mfirst;)
+PP(int16_t *Mstart;)
+PP(int16_t Mscroll;)
+PP(int16_t FirstMenu;)
+PP(int16_t FirstText;)
+PP(int16_t Skip;)
 {
 	GRECT brect;
 	int16_t flag;
@@ -1493,7 +1495,7 @@ int16_t Skip;
  * ====================================================================
  * Initialize the Video Dialog Box ( ST and TT Modes )
  */
-int16_t init_vtree()
+VOID init_vtree(NOTHING)
 {
 	register OBJECT *vtree;
 	register int16_t cyes, i, flag;
@@ -1528,16 +1530,14 @@ int16_t init_vtree()
 
 
 
-
-
 /* DoMKItems()
  * ====================================================================
  * Handle the Menu Item Popup for the configuration dialog box
  */
-int16_t DoMKItems(dtree, button, item)
-OBJECT *dtree;
-int16_t button;
-int16_t *item;
+int16_t DoMKItems(P(OBJECT *)dtree, P(int16_t) button, P(int16_t *)item)
+PP(OBJECT *dtree;)
+PP(int16_t button;)
+PP(int16_t *item;)
 {
 	OBJECT *obj1;
 	int16_t index;
@@ -1638,8 +1638,8 @@ int16_t *item;
  * Check if the keystroke is already used by another menu item
  * in the configuration dialog box.
  */
-int16_t DoKeyCheck(item)
-int16_t item;
+int16_t DoKeyCheck(P(int16_t) item)
+PP(int16_t item;)
 {
 	OBJECT *obj;
 	int16_t i;
@@ -1683,8 +1683,8 @@ int16_t item;
 
 
 
-int16_t get_that_size(newmode)
-int16_t newmode;
+int16_t get_that_size(P(int16_t) newmode)
+PP(int16_t newmode;)
 {
 	int32_t avail, size, needed;
 	int32_t char_bytes;
@@ -1712,7 +1712,7 @@ int16_t newmode;
 
 
 
-int16_t wait_up()
+VOID wait_up(NOTHING)
 {
 	MRETS mk;
 

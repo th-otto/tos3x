@@ -5,11 +5,15 @@ GEOMETRY        /* disk parameter block */
 {
 	int16_t tracks;		/* number of tracks */
     int16_t sides;      /* number of sides */
-    int16_t sph;		/* number of sectory per "cylinder" */
+    int16_t spc;		/* number of sectors per "cylinder" */
     int16_t spt;        /* number of sectors per track */
     int16_t hidden;     /* number of hidden/reserved sectors */
 };
 
+/*
+ * beware: although an internal BIOS structure,
+ * it is also used by the DESKTOP
+ */
 #define BLKDEV struct _blkdev
 BLKDEV {
 	BPB bpb;

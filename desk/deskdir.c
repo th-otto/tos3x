@@ -36,30 +36,7 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <osbind.h>
-#include <gemdefs.h>
-#include <window.h>
-#include <error.h>
-#include <deskusa.h>
-#include <error.h>
-#include <extern.h>
-
-extern char *get_fstring();
-
-extern char *r_slash();
-
-extern char *strcat();
-
-extern char *strcpy();
-
-extern OBJECT *get_tree();
-
-extern char *g_name();
-
-extern int16_t fill_string();
+#include "desktop.h"
 
 
 /* "DMA" buffer structure for Fsfirst() and Fsnext().	*/
@@ -82,57 +59,68 @@ typedef struct
 #define FILE_LEN 12
 #define HOME	'.'
 
-OBJECT *cpbox;							/* cp or rm or mv dialog box */
-
-int srclen,
- dstlen;								/* the size of source and target buffer */
-
-long numfiles,
- numdirs;								/* the number of files and dirs show in the dialog box */
-
-long tolsize;							/* the total size of all files in the path */
-
-int srcbuf,
- dstbuf;								/* the size of source and target buffer be define */
-
+STATIC OBJECT *cpbox;					/* cp or rm or mv dialog box */
+STATIC int srclen, dstlen;				/* the size of source and target buffer */
+STATIC long numfiles, numdirs;			/* the number of files and dirs show in the dialog box */
+STATIC long tolsize;					/* the total size of all files in the path */
+STATIC int srcbuf, dstbuf;				/* the size of source and target buffer be define */
 int f_level;							/* the current depth of the directory path */
-
-int f_abort;							/* the flag for the abort button selected */
-
-int opcode;								/* the operation codes for cp, mv and rm */
-
+STATIC int f_abort;						/* the flag for the abort button selected */
+STATIC int opcode;						/* the operation codes for cp, mv and rm */
 int d_display;							/* display copy box or not      */
+STATIC int rename;
 
-int rename;
+/* the source and target string pointer */
+STATIC char *fixsrc;
+STATIC char *fixdst;
 
-			/* the source and target string pointer */
-char *fixsrc;
-
-char *fixdst;
-
-char filestr[14];						/* the buffer for the file */
+STATIC char filestr[14];				/* the buffer for the file */
 
 int f_rename;
 
-/*	Main entrance of the file operation function	*/
-/*	s can be from different partitions		*/
-/*	there is only one destination			*/
 
-dofiles(s, d, code, ndirs, nfiles, tsize, type, multiple)
-char *s,
-*d;
+BOOLEAN doact PROTO((NOTHING));
+BOOLEAN count PROTO((const char *s));
+BOOLEAN countrec PROTO((NOTHING));
+BOOLEAN wrfile PROTO((const char *fstr));
+int getinfo PROTO((const char *s, const char *d));
+BOOLEAN created PROTO((const char *dir));
+BOOLEAN deleted PROTO((NOTHING));
+BOOLEAN mystrcp PROTO((const char *s0, char *s1));
+VOID chkbuf PROTO((int len, int bufsiz, char **src));
+VOID addfile PROTO((char *s, const char *obj));
+VOID rmstarb PROTO((char *src));
+VOID backdir PROTO((char *str));
+int chkdf PROTO((char *str, int flag));
+int edname PROTO((char *src, int kind, int change));
+VOID pack PROTO((char *src, int flag));
+VOID getlastpath PROTO((char *buf, char *src));
+VOID updatnum PROTO((int obj, long num));
+VOID updatname PROTO((int obj, char *str));
+VOID updatbox PROTO((char *str));
 
-int16_t code,
- type,
- multiple;
 
-int32_t *ndirs,
-*nfiles,
-*tsize;
+
+
+
+
+/*
+ * Main entrance of the file operation function
+ * s can be from different partitions
+ *there is only one destination
+ */
+BOOLEAN dofiles(P(const char *) s, P(const char *) d, P(int16_t) code, P(int32_t *)ndirs, P(int32_t *)nfiles, P(int32_t *)tsize, P(int16_t) type, P(BOOLEAN) multiple)
+PP(const char *s;)
+PP(const char *d;)
+PP(int16_t code;)
+PP(int32_t *ndirs;)
+PP(int32_t *nfiles;)
+PP(int32_t *tsize;)
+PP(int16_t type;)
+PP(BOOLEAN multiple;)
 {
-	int16_t ret,
-	 trash;
-
+	BOOLEAN ret;
+	int16_t trash;
 	char buffer[2];
 
 	if (*d == 'c')
@@ -259,16 +247,16 @@ int32_t *ndirs,
 	return (ret);
 }
 
-/* do the rm, cp and mv file job */
 
-doright(flag)
-int flag;
+/*
+ * do the rm, cp and mv file job
+ */
+BOOLEAN doright(P(int) flag)
+PP(int flag;)
 {
-	register int ret,
-	 retmsg;
-
-	char *temp,
-	 buf[14];
+	register int ret;
+	register BOOLEAN retmsg;
+	char *temp,	 buf[14];
 
 	retmsg = TRUE;
 
@@ -290,7 +278,7 @@ int flag;
 		getlastpath(filestr, fixdst);
 		backdir(fixdst);
 		getlastpath(buf, fixdst);
-		strcat(filestr, fixdst);
+		strcat(fixdst, filestr);
 		updatname(CPFILE, filestr);
 		updatname(CPDIR, buf);
 		if (opcode != OP_DELETE)
@@ -352,20 +340,17 @@ int flag;
 
 /* recursively cp or mv or rm files or directoies from a given path */
 
-int doact()
+BOOLEAN doact(NOTHING)
 {
 	char *saved;
-
 	DMABUFFER *dumb;
-
-	register int ret,
-	 retmsg;
-
+	register int ret, retmsg;
 	int error;
 
 	if (f_level >= (COPYMAXDEPTH + 1))
 	{
-	  act_1:do1_alert(STFO8DEE);
+	act_1:
+		do1_alert(STFO8DEE);
 		return (FALSE);
 	}
 
@@ -376,7 +361,7 @@ int doact()
 	retmsg = TRUE;
 	saved = (DMABUFFER *) Fgetdta();
 	Fsetdta(dumb);
-	strcat(getall, fixsrc);
+	strcat(fixsrc, getall);
 
 	if (!(error = Fsfirst(fixsrc, 0x37)))
 	{
@@ -395,11 +380,11 @@ int doact()
 				{
 					chkbuf(srclen, srcbuf, &fixsrc);	/* check buf size */
 					addfile(fixsrc, dumb->d_fname);	/* add a dir into the path */
-					strcat(bckslsh, fixsrc);
+					strcat(fixsrc, bckslsh);
 					if (opcode != OP_DELETE)
 					{
 						chkbuf(dstlen, dstbuf, &fixdst);	/* check buf size */
-						strcat(dumb->d_fname, fixdst);
+						strcat(fixdst, dumb->d_fname);
 					} else
 						goto dorec;
 
@@ -459,7 +444,7 @@ int doact()
 					}
 				  kk_1:
 					updatnum(NUMDIR, --numdirs);
-					strcat(bckslsh, fixdst);
+					strcat(fixdst, bckslsh);
 				  dorec:
 					if (!doact())		/* do the recursion */
 					{
@@ -571,8 +556,8 @@ int doact()
 
 /* set the right drive and call the recursive routine to do the counting */
 
-count(s)
-char *s;
+BOOELAN count(P(const char *) s)
+PP(const char *s;)
 {
 	char *tmp;
 
@@ -593,10 +578,9 @@ char *s;
 
 /* count the file and directory recursivly */
 
-countrec()
+BOOLEAN countrec(NOTHING)
 {
 	char *saved;
-
 	DMABUFFER *dumb;
 
 	register int retmsg;
@@ -662,32 +646,19 @@ countrec()
 }
 
 
-/* Copy the file from the s to d */
-
-wrfile(fstr)
-char *fstr;
+/* 
+ * Copy the file from the s to d
+ */
+BOOLEAN wrfile(P(const char *) fstr)
+PP(const char *fstr;)
 {
-	register int ret,
-	 retmsg;
-
-	int inhand,
-	 outhand;
-
+	register int ret, retmsg;
+	int inhand, outhand;
 	int time[2];
-
 	DMABUFFER *mydta;
-
-	char *buffer,
-	*saved;
-
-	long copysiz,
-	 bufsiz,
-	 wrsiz,
-	 tmpsiz;
-
-	int crted,
-	 sttime;
-
+	char *buffer, *saved;
+	long copysiz, bufsiz, wrsiz, tmpsiz;
+	int crted, sttime;
 	char buf[2];
 
 	crted = 0;
@@ -884,13 +855,11 @@ char *fstr;
 /* Copy s and d into fixsrc and fixdst. Also check it is one file
    copy or files and directories copy */
 
-int getinfo(s, d)
-char *s,
-*d;
+int getinfo(P(const char *) s, P(const char *) d)
+PP(const char *s;)
+PP(const char *d;)
 {
-	int sdir,
-	 ddir;
-
+	int sdir, ddir;
 	int ret;
 
 	srclen = strlen(s) + 5;				/* 1 byte for null and 4 byte for \*.* */
@@ -927,25 +896,24 @@ char *s,
 					Mfree(fixdst);
 					return (ret);
 				}
-				strcat(bckslsh, fixdst);
+				strcat(fixdst, bckslsh);
 			}
 			return (DTOD);
 		}
 		if (ddir)
 		{								/* one file to dir */
 			chkbuf(dstlen, dstbuf, &fixdst);	/* check buf size */
-			strcat(filestr, fixdst);
+			strcat(fixdst, filestr);
 		}
 		return OK;
 	}
 }
 
 
-created(dir)
-char *dir;
+BOOLEAN created(P(const char *)dir)
+PP(const char *dir;)
 {
 	int ret;
-
 	char *ptr;
 
 	updatbox(dir);
@@ -993,10 +961,9 @@ char *dir;
 }
 
 
-deleted()
+BOOLEAN deleted(NOTHING)
 {
 	int ret;
-
 	char buffer[14];
 
 	rmstarb(fixsrc);					/* remove back slash    */
@@ -1031,31 +998,29 @@ deleted()
  * 	if s0 -> c:\d1\d2\*.* or c:\d1\d2\f, after the call,
  *	s1 -> c:\d1\d2\  or c:\d1\d2\f ; 			*/
 
-mystrcp(s0, s1)
-char *s0,
-*s1;
+BOOLEAN mystrcp(P(const char *) s0, P(char *) s1)
+PP(const char *s0;)
+PP(char *s1;)
 {
-	register char *ptr;
+	register const char *ptr;
 
 	ptr = s0;
-	while ((*ptr) && (*ptr != '*'))
+	while (*ptr && *ptr != '*')
 		*s1++ = *ptr++;
 
 	*s1 = '\0';
-	return ((*ptr == '*') ? 1 : 0);
+	return *ptr == '*' ? TRUE : FALSE;
 
 }
 
 
 /* check the size of source buffer */
 
-chkbuf(len, bufsiz, src)
-int len,
- bufsiz;
-
-char **src;
+VOID chkbuf(P(int) len, P(int) bufsiz, P(char **) src)
+PP(int len;)
+PP(int bufsiz;)
+PP(char **src;)
 {
-
 	char *ptr;
 
 	if ((len + FILE_LEN) > bufsiz)
@@ -1063,7 +1028,7 @@ char **src;
 		bufsiz *= 2;
 		ptr = *src;
 		*src = (char *) Malloc((long) bufsiz);
-		strcpy(ptr, *src);
+		strcpy(*src, ptr);
 		Mfree(ptr);
 	}
 	len += FILE_LEN;
@@ -1073,28 +1038,29 @@ char **src;
 /* s -> c:\d1\d2\*.* or c:\d1\d2\, obj -> f; after the call
  * s -> c:\d1\d2\f							*/
 
-addfile(s, obj)
-char *s,
-*obj;
+VOID addfile(P(char *) s, P(const char *) obj)
+PP(char *s;)
+PP(const char *obj;)
 {
 	register char *ptr;
 
 	ptr = s;
 
-	while (*ptr++) ;
+	while (*ptr++)
+		;
 
 	if (*(ptr - 2) == '*')
 		*(ptr - 4) = '\0';
 
-	strcat(obj, s);
+	strcat(s, obj);
 }
 
 
 /* src -> c:\d1\d2\*.* or -> c:\d3\d5\, after the call,
  * src -> c:\d1\d2 or -> c:\d3\d5				*/
 
-rmstarb(src)
-register char *src;
+VOID rmstarb(P(char *) src)
+PP(register char *src;)
 {
 	while (*src++) ;
 
@@ -1108,8 +1074,8 @@ register char *src;
 /* str -> c:\d1\d2\ or c:\d1\d2\*.* or c:\d2\d4 or c:\; after the call,
  * str -> c:\d1\  or c:\d2\ or c:\		*/
 
-backdir(str)
-register char *str;
+VOID backdir(P(char *) str)
+PP(register char *str;)
 {
 	while (*str++) ;
 
@@ -1128,16 +1094,12 @@ register char *str;
 
 /* check the directory or file is exist or not */
 
-int chkdf(str, flag)
-char *str;
-
-int flag;
+int chkdf(P(char *)str, P(int) flag)
+PP(char *str;)
+PP(int flag;)
 {
 	register int ret;
-
-	int first,
-	 change;
-
+	BOLLEAN first, change;
 	int ret1;
 
 	first = TRUE;
@@ -1151,10 +1113,12 @@ int flag;
 		if (write_save)					/* overwrite existing file  */
 			return (OK);
 
-	  cc_1:if ((ret = Fopen(fixdst, 0)) >= 0)
+	cc_1:
+		if ((ret = Fopen(fixdst, 0)) >= 0)
 		{								/* file exist */
 			Fclose(ret);
-		  cc_3:ret = edname(str, CPFILE, change);
+		cc_3:
+			ret = edname(str, CPFILE, change);
 			if (ret == CHECK)
 			{
 				if (f_rename)			/* do rename    */
@@ -1172,13 +1136,14 @@ int flag;
 		if (f_rename)					/* if rename then show box first    */
 			goto cc_5;
 
-	  cc_6:Dsetdrv(*fixdst - 'A');
+	cc_6:
+	  	Dsetdrv(*fixdst - 'A');
 
 		if (!(ret = Dsetpath(fixdst + 2)))	/* direcory exist */
 		{
-		  cc_5:ret1 = edname(str, CPDIR, change);
+		cc_5:
+			ret1 = edname(str, CPDIR, change);
 												/* update name conflict box */
-
 			change = FALSE;
 
 			if ((ret1 == CHECK) ||		/* user enter new name  */
@@ -1194,26 +1159,23 @@ int flag;
 
 	/* 0xFFDE: path not found. 0xFFDF: file not found. */
 
-	return (((ret == EFILNF) || (ret == EPTHNF)) ? OK : FALSE);
+	return (ret == EFILNF || ret == EPTHNF) ? OK : FALSE;
 }
 
 
-int edname(src, kind, change)
-char *src;
-
-int kind;
-
-int change;
+int edname(P(char *)src, P(int) kind, P(int) change)
+PP(char *src;)
+PP(int kind;)
+PP(int change;)
 {
 	int but;
-
 	register OBJECT *obj;
 
 	obj = get_tree(SAMENAME);
 
 	pack(src, 0);
-	strcpy(src, ((TEDINFO *) (obj[FNAME].ob_spec))->te_ptext);
-	strcpy(src, ((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext);
+	strcpy(((TEDINFO *) (obj[FNAME].ob_spec))->te_ptext, src);
+	strcpy(((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext, src);
 /*	obj[COPY].ob_state = NORMAL;
 	obj[SKIP].ob_state = NORMAL;
 	obj[QUIT].ob_state = NORMAL;
@@ -1228,11 +1190,11 @@ int change;
 	case COPY:
 		if (!streq(((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext, src))
 		{								/* user edit the new name */
-			strcpy(((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext, src);
-			strcpy(src, ((TEDINFO *) (cpbox[kind].ob_spec))->te_ptext);
+			strcpy(src, ((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext);
+			strcpy(((TEDINFO *) (cpbox[kind].ob_spec))->te_ptext, src);
 			pack(src, 1);
 			backdir(fixdst);
-			strcat(src, fixdst);
+			strcat(fixdst, src);
 			but = CHECK;
 		} else
 		{								/* check if the source and destination are the same */
@@ -1241,7 +1203,7 @@ int change;
 			if (streq(fixsrc, fixdst))	/* they are the same */
 				but = SKIP;
 			if (kind == CPDIR)
-				strcat(bckslsh, fixsrc);
+				strcat(fixsrc, bckslsh);
 		}
 		break;
 
@@ -1266,10 +1228,10 @@ int change;
 /* pack	 : src -> file    rsc, after the call; src -> file.rsc	*/
 /* unpack: buf -> unpack.rsc, after the call, buf -> unpack  rsc.  */
 
-pack(src, flag)
-char *src;
 
-int flag;
+VOID pack(P(char *)src, P(int) flag)
+PP(char *src;)
+PP(int flag;)
 {
 	char temp[14];
 
@@ -1278,15 +1240,16 @@ int flag;
 	else
 		fmt_str(src, temp);				/* unpack */
 
-	strcpy(temp, src);
+	strcpy(src, temp);
 }
+
 
 /* src -> c:\f or c:\d1\f or c:\f\, or c:\f\*.*, after the call,
    buf -> f. But if src ->c:\, then buf -> Null 	*/
 
-getlastpath(buf, src)
-register char *buf,
-*src;
+VOID getlastpath(P(char *)buf, P(char *)src)
+PP(register char *buf;)
+PP(register char *src;)
 {
 	register char *tmp;
 
@@ -1312,10 +1275,9 @@ register char *buf,
 
 /* up date the number of file or directory in the dialog box */
 
-updatnum(obj, num)
-int obj;
-
-long num;
+VOID updatnum(P(int) obj, P(long) num)
+PP(int obj;)
+PP(long num;)
 {
 	if (d_display)
 	{
@@ -1324,32 +1286,32 @@ long num;
 	}
 }
 
-/* up date the file or directory in the dialog box */
 
-updatname(obj, str)
-int obj;
+/* update the file or directory in the dialog box */
 
-char *str;
+VOID updatname(P(int) obj, P(char *)str)
+PP(int obj;)
+PP(char *str;)
 {
 	if (d_display)
 	{
 		pack(str, 0);
-		strcpy(str, ((TEDINFO *) (cpbox[obj].ob_spec))->te_ptext);
+		strcpy(((TEDINFO *) (cpbox[obj].ob_spec))->te_ptext, str);
 		pack(str, 1);
 		draw_fld(cpbox, obj);
 	}
 }
 
 
-updatbox(str)
-char *str;
+VOID updatbox(P(char *)str)
+PP(char *str;)
 {
 	if (d_display)
 	{
 		pack(str, 0);
-		strcpy(str, ((TEDINFO *) (cpbox[CPDIR].ob_spec))->te_ptext);
+		strcpy(((TEDINFO *) (cpbox[CPDIR].ob_spec))->te_ptext, str);
 		pack(str, 1);
-		strcpy("_", ((TEDINFO *) (cpbox[CPFILE].ob_spec))->te_ptext);
+		strcpy(((TEDINFO *) (cpbox[CPFILE].ob_spec))->te_ptext, "_");
 		objc_draw(cpbox, HIDECBOX, MAX_DEPTH, 0, 0, full.w, full.h);
 	}
 }

@@ -6,28 +6,14 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
-
-extern char *scasb();
-
-extern int16_t gl_restype;
-
-extern BOOLEAN gl_rschange;
-
-extern int16_t font_save;
-
-extern char *g_name();
+#include "desktop.h"
 
 
-BOOLEAN app_reschange(int16_t res)
-register int16_t res;
+int16_t x_wildcmp PROTO((const char *source, const char *dest));
+
+
+BOOLEAN app_reschange(P(int16_t) res)
+PP(register int16_t res;)
 {
 	if (res == gl_restype)
 		return (FALSE);
@@ -35,18 +21,18 @@ register int16_t res;
 	gl_restype = res;
 	pref_save = res;
 	gl_rschange = TRUE;
-	return (TRUE);
+	return TRUE;
 }
 
 
-/*	Find the application's icon type	*/
+/*
+ * Find the application's icon type
+ */
 
-APP * app_icon(name, type, icon)
-register char *name;
-
-int16_t type;								/* looking for same type    */
-
-int16_t *icon;								/* icon number          */
+APP *app_icon(P(const char *)name, P(int16_t) type, P(int16_t) icon)
+PP(register char *name;)
+PP(int16_t type;)								/* looking for same type    */
+PP(int16_t *icon;)								/* icon number          */
 {
 	register APP *app;
 
@@ -92,10 +78,11 @@ int16_t *icon;								/* icon number          */
 }
 
 
-/*	Free an application node	*/
-
-app_free(app)
-register APP *app;
+/*
+ * Free an application node
+ */
+VOID app_free(P(APP *)app)
+PP(register APP *app;)
 {
 	register APP *list;
 
@@ -123,9 +110,11 @@ register APP *app;
 }
 
 
-/*	Allocation an anode	*/
+/*
+ * Allocation an anode
+ */
 
-APP * app_alloc()
+APP *app_alloc(NOTHING)
 {
 	register APP *list;
 
@@ -149,20 +138,19 @@ APP * app_alloc()
 			goto again;
 	}
 
-	return (list);
+	return list;
 }
 
 
 
-/*	Find the actual application type	*/
-
-APP * app_xtype(name, install)
-register char *name;
-
-int16_t *install;							/* application installed    */
+/*
+ * Find the actual application type
+ */
+APP *app_xtype(P(const char *)name, P(BOOLEAN *) install)
+PP(register const char *name;)
+BOOLEAN *install;							/* application installed    */
 {
 	register APP *app;
-
 	APP *markapp;
 
 	app = applist;
@@ -203,10 +191,9 @@ int16_t *install;							/* application installed    */
 }
 
 
-int16_t x_wildcmp(source, dest)
-char *source;
-
-char *dest;
+int16_t x_wildcmp(P(const char *) source, P(const char *) dest)
+PP(const char *source;)
+PP(const char *dest;)
 {
 	if (*source)
 	{
@@ -218,14 +205,14 @@ char *dest;
 	return (FALSE);
 }
 
-int16_t ftab[] = { 0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
+int16_t const ftab[] = { 0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 	F11, F12, F13, F14, F15, F16, F17, F18, F19, F20
 };
 
 /*	Find the key that matches the application	*/
 
-APP * app_key(key)
-int16_t key;
+APP *app_key(P(int16_t) key)
+PP(int16_t key;)
 {
 	register APP *app;
 
@@ -239,5 +226,5 @@ int16_t key;
 		app = app->a_next;
 	}
 
-	return ((APP *) 0);
+	return NULL;
 }

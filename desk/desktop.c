@@ -21,100 +21,60 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
-
-extern char *get_fstring();
-
-extern OBJECT *get_tree();
-
-extern int16_t pglobal[];
-
-extern char *lp_mid;
-
-extern char *lp_start;
-
-extern int16_t gl_restype;
-
-extern int16_t gl_rschange;
-
-extern int16_t d_exit;
-
-extern char afile[];
-
-extern char *q_addr;
-
-extern int16_t gl_ws[];
-
-extern uint16_t apsize;
-
-extern int16_t gl_apid;
-
-extern int16_t gl_hbox;
-
-extern GRECT gl_rfull;
+#include "desktop.h"
 
 #if AESVERSION >= 0x330
 /* import from AES :( */
 extern BOOLEAN do_once;
 #endif
 
-int16_t m_st;								/* machine type flag    */
-
-int16_t m_cpu;								/* cpu type     */
-
-int16_t numicon;							/* the number of icon in the resource   */
-
-char *iconmem;							/* icon data memory address */
-
-int16_t xprint;							/* do it once flag  */
-
-char restable[6];						/* resolution table */
-
-			/* Low , Medium, High, TT Medium, TT High, TT Low */
-
+BOOLEAN m_st;							/* machine type flag    */
+int16_t m_cpu;							/* cpu type     */
+int16_t numicon;						/* the number of icon in the resource   */
+STATIC char *iconmem;					/* icon data memory address */
+STATIC int16_t xprint;					/* do it once flag  */
+char restable[6];						/* resolution table Low, Medium, High, TT Medium, TT High, TT Low */
 int16_t d_maxcolor;
+STATIC USERBLK chxcache;
+STATIC CICONBLK *ciconaddr;
 
-USERBLK chxcache;
+int16_t ch_xcache PROTO((VOID))
+BOOLEAN re_icon PROTO((NOTHING));
+BOOLEAN ini_icon PROTO((NOTHING));
+VOID adj_menu PROTO((int16_t which));
+VOID ini_rsc PROTO((NOTHING));
+VOID ch_machine PROTO((NOTHING));
+int32_t inq_cache PROTO((int32_t data));
+VOID adjdcol PROTO((uint16_t color));
+VOID adjobjects PROTO((NOTHING));
 
-CICONBLK *ciconaddr;
 
-int16_t ch_xcache()
+
+int16_t ch_xcache(VOID)
 {
 	ch_cache(FALSE);
-	return (0);
+	return 0;
 }
 
 
-extern int16_t ctldown;
 
-
-/*	Read in icn file	*/
-
-int16_t re_icon()
+/*
+ * Read in icn file
+ */
+BOOLEAN re_icon(NOTHING)
 {
 	register int16_t i;
-
 	char temp[30];
-
 	int32_t *ptr;
-
 	char buf2[18];
-
 	char *iaddr;
 
 	LBCOPY(temp, pglobal, 30);			/* save the pglobal */
 
-	strcpy(icndata, buf2);
+	strcpy(buf2, icndata);
 	buf2[0] = (isdrive() & 0x4) ? 'C' : 'A';
 
-	if (ctldown)
+	if (ctldown) /* WTF; this is from AES */
 		return (FALSE);
 
 	if (!rsrc_load(buf2))
@@ -140,17 +100,15 @@ int16_t re_icon()
 }
 
 
-/*	Initalize the icon and allocate backid memory	*/
-/*	Change the G_ICON to G_CICON			*/
-
-int16_t ini_icon()
+/*
+ * Initalize the icon and allocate backid memory
+ * Change the G_ICON to G_CICON
+ */
+BOOLEAN ini_icon(NOTHING)
 {
 	register int16_t i;
-
 	register OBJECT *obj;
-
 	register IDTYPE *itype;
-
 	CICONBLK *icblk;
 
 	backid = Malloc((int32_t) (sizeof(IDTYPE) * (maxicon + 1)));
@@ -178,16 +136,15 @@ int16_t ini_icon()
 	return (TRUE);
 }
 
-/*	Shift the menu	*/
 
-VOID adj_menu(which)
-int16_t which;
+/*
+ * Shift the menu
+ */
+VOID adj_menu(P(int16_t) which)
+PP(int16_t which;)
 {
 	OBJECT *obj;
-
-	int16_t w,
-	 x,
-	 y;
+	int16_t w, x, y;
 
 	obj = menu_addr;					/* shift the menu   */
 	objc_offset(menu_addr, which, &x, &y);
@@ -201,19 +158,15 @@ int16_t which;
 }
 
 
-/*	Initalize the desktop resource		*/
-
-VOID ini_rsc()
+/*
+ * Initalize the desktop resource
+ */
+VOID ini_rsc(NOTHING)
 {
 	register OBJECT *obj;
-
 	GRECT pt;
-
 	ICONBLK *iblk;
-
-	int16_t w,
-	 i;
-
+	int16_t w, i;
 	CICONBLK *icblk;
 
 	rom_ram(1, pglobal);				/* load in resource     */
@@ -237,10 +190,10 @@ VOID ini_rsc()
 
 	maxicon = background[0].ob_tail;	/* max background icon      */
 
-/* 	Allocate memory for color icons 
- * 	These should go away if we have a RCS that can handle color icon 
- */
-
+	/* 	Allocate memory for color icons 
+	 * 	These should go away if we have a RCS that can handle color icon 
+	 */
+	
 	if (!ciconaddr)						/* 7/10/92 */
 	{
 		if (ciconaddr = Malloc((int32_t) (sizeof(CICONBLK) * maxicon)))
@@ -267,8 +220,10 @@ VOID ini_rsc()
 		icblk = (CICONBLK *) iconaddr[0].ob_spec;
 		iblk = &icblk->monoblk;
 	} else
+	{
 		iblk = (ICONBLK *) (iconaddr[0].ob_spec);
-
+	}
+	
 	rc_copy(&iblk->ib_xicon, &pt);		/* get the icon's xywh  */
 
 	d_xywh[0] = pt.x;					/* disk icon outline    */
@@ -402,8 +357,7 @@ BOOLEAN deskmain(NOTHING)
 	/* set up the right menu text */
 	/* do it here!!!!!! */
 #if 0									/* take out for sparrow */
-	strcpy(get_fstring((m_cpu == 30) ? CACHETXT : BLTTXT), menu_addr[BITBLT].ob_spec);
-
+	strcpy(get_fstring(menu_addr[BITBLT].ob_spec, m_cpu == 30 ? CACHETXT : BLTTXT));
 
 	menu_addr[SUPERITEM].ob_type = G_USERDEF;
 	chxcache.ub_code = ch_xcache;
@@ -476,9 +430,10 @@ BOOLEAN deskmain(NOTHING)
 }
 
 
-/*	Check the machine type and set res table	*/
-
-int16_t ch_machine()
+/*
+ * Check the machine type and set res table
+ */
+VOID ch_machine(NOTHING)
 {
 	int32_t value;
 
@@ -500,8 +455,9 @@ int16_t ch_machine()
 	if (!m_st)							/* TT machine   */
 	{
 		if (gl_restype == 5)			/* TT High  */
+		{
 			restable[4] = 1;
-		else
+		} else
 		{
 			bfill(4, 1, restable);		/* LOW MEDIUM HIGH  */
 			restable[5] = 1;			/* TT-LOW MEDIUM    */
@@ -509,8 +465,9 @@ int16_t ch_machine()
 	} else
 	{
 		if (gl_restype == 3)			/* ST HIGH      */
+		{
 			restable[2] = 1;
-		else
+		} else
 		{
 			restable[0] = 1;
 			restable[1] = 1;
@@ -519,27 +476,30 @@ int16_t ch_machine()
 }
 
 
-int32_t inq_cache(data)
-register int32_t data;
+
+#if BINEXACT
+int32_t inq_cache(P(int32_t) data)
+PP(register int32_t data;)
 {
-	asm(".dc.w $4e7a,$0002");			/* movec.l cacr,d0        */
+	asm("dc.w $4e7a,$0002");			/* movec.l cacr,d0        */
 
+	/* ugly Alcyon-only hack that relies on data being assigned to d7 */
 	if (data != -1)
-		asm(".dc.w $4e7b,$7002");		/* movec.l d7,cacr      */
+		asm("dc.w $4e7b,$7002");		/* movec.l d7,cacr      */
 
-	asm(".dc.w $4e7a,$0002");			/* movec.l cacr,d0        */
+	asm("dc.w $4e7a,$0002");			/* movec.l cacr,d0        */
 }
+#endif
 
 
-/*	Turn on the cache or bitblt 	*/
-
-ch_cache(set)
-int16_t set;
+/*
+ * Turn on the cache or bitblt
+ */
+VOID ch_cache(P(BOOLEAN) set)
+PP(BOOLEAN set;)
 {
 	int16_t value;
-
 	int32_t data;
-
 	int16_t temp;
 
 #if 0									/* take out for sparrow */
@@ -550,7 +510,7 @@ int16_t set;
 	if (m_cpu == 30)
 	{
 		if (set)
-			data = (s_cache) ? CACHE_ON : CACHE_OFF;
+			data = s_cache ? CACHE_ON : CACHE_OFF;
 		else
 			data = 0xFFFFFFFFL;
 
@@ -560,8 +520,6 @@ int16_t set;
 			s_cache = FALSE;
 
 		value = s_cache;
-
-
 	} else
 	{									/* turn the blt on  */
 		/* blt is there     */
@@ -597,17 +555,17 @@ int16_t set;
 
 
 
-/* adjust object colors if it is invalid */
-/* This routine should no longer be necessary, but is left
+/*
+ * adjust object colors if it is invalid
+ * This routine should no longer be necessary, but is left
  * in for the TOS 4.02 release as a precautionary measure.
  * objc_draw now understands that "hollow, white, 3D" objects
  * should be drawn in the appropriate 3D color, or white if
  * there aren't enough colors, and the resources have been
  * updated accordingly	++ERS 1/19/93
  */
-
-VOID adjdcol(color)
-unsigned int color;
+VOID adjdcol(P(uint16_t) color)
+PP(uint16_t color;)
 {
 	register OBJECT *obj;
 
@@ -642,9 +600,10 @@ unsigned int color;
 }
 
 
-/* Adjust Object Positions */
-
-VOID adjobjects()
+/*
+ * Adjust Object Positions
+ */
+VOID adjobjects(NOTHING)
 {
 	register OBJECT *obj;
 	int16_t x, y, w, h, dx, dy;

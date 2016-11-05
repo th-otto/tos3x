@@ -6,42 +6,22 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <osbind.h>
-#include <gemdefs.h>
-#include <window.h>
-#include <deskusa.h>
-#include <error.h>
-#include <extern.h>
+#include "desktop.h"
 
-extern WINDOW *alloc_win();
+VOID pos_item PROTO((WINDOW *win, int16_t newi));
+BOOLEAN rec_sea PROTO((char *filename));
+BOOLEAN display PROTO((char *filename));
+VOID mass_string PROTO((char *str1));
 
-extern WINDOW *w_gfirst();
-
-extern int16_t f_level;					/* local level counter same as deskdir  */
-
-extern int16_t f_rename;					/* window opened?           */
-
-extern WINDOW *x_win;
-
-extern int16_t x_type;
-
-extern int16_t x_status;
 
 
 /*	Position an item within a window	*/
 
-pos_item(win, newi)
-register WINDOW *win;
-
-int16_t newi;
+VOID pos_item(P(WINDOW) *win, P(int16_t) newi)
+PP(register WINDOW *win;)
+PP(int16_t newi;)
 {
-	register int16_t i,
-	 j,
-	 k;
-
+	register int16_t i, j, k;
 	int32_t l;
 
 	/******   adjust the vertical bar   ******/
@@ -101,29 +81,22 @@ int16_t newi;
 
 
 
-/*	Search a file	*/
-
-sea_file(filename)
-char *filename;
+/*
+ * Search a file
+ */
+VOID sea_file(P(char) *filename)
+PP(char *filename;)
 {
 	register WINDOW *win;
-
 	register DIR *dir;
-
 	register int16_t i;
-
 	char *str;
-
-	int16_t status,
-	 type,
-	 change,
-	 newi;
-
+	int16_t status, type, change, newi;
 	char buffer[16];
 
 	desk_wait(TRUE);
 
-	strcpy(filename, buffer);
+	strcpy(buffer, filename);
 	mass_string(filename);
 
 	change = FALSE;
@@ -201,15 +174,12 @@ char *filename;
 
 /*	Recursive search of a file	*/
 
-int16_t rec_sea(filename)
-register char *filename;
+BOOLEAN rec_sea(P(char) *filename)
+PP(register char *filename;)
 {
 	DTA *dtabuf;
-
 	DTA *savedta;
-
-	register int16_t status,
-	 ret;
+	register int16_t status, ret;
 
 	if (!(dtabuf = Malloc((int32_t) sizeof(DTA))))
 	{
@@ -256,7 +226,7 @@ register char *filename;
 		{
 			path2[0] = '.';
 			path2[1] = '\\';
-			strcpy(dtabuf->dirfile.d_name, &path2[2]);
+			strcpy(&path2[2], dtabuf->dirfile.d_name);
 			Dsetpath(path2);
 			f_level++;
 			if (f_level > COPYMAXDEPTH)
@@ -286,24 +256,18 @@ register char *filename;
 }
 
 
-/*	Display a window and highlight the items	*/
-
-display(filename)
-char *filename;
+/*
+ * Display a window and highlight the items
+ */
+BOOLEAN display(P(char) *filename)
+PP(char *filename;)
 {
 	int32_t size;
-
 	register char *addr;
-
 	register WINDOW *win;
-
 	register DIR *dir;
-
 	register int16_t i;
-
-	int16_t newi,
-	 ret,
-	 first;
+	int16_t newi, ret, first;
 
 	size = Malloc(0xFFFFFFFFL);
 	if (size)
@@ -316,15 +280,15 @@ char *filename;
 		addr[0] = Dgetdrv() + 'A';		/* get the default drive    */
 		addr[1] = ':';
 		Dgetpath(&addr[2], 0);
-		strcat(bckslsh, addr);
-		strcat(getall, addr);
+		strcat(addr, bckslsh);
+		strcat(addr, getall);
 
 		if (f_rename)
 		{
 			if (c_path_alloc(addr))
 			{
 				win = w_gfirst();
-				strcpy(addr, win->w_path);
+				strcpy(win->w_path, addr);
 				Mfree(addr);
 				first = TRUE;
 
@@ -401,13 +365,11 @@ char *filename;
 
 /*	Put in wild card in the name string	*/
 
-mass_string(str1)
-char *str1;
+VOID mass_string(P(char) *str1)
+PP(char *str1;)
 {
 	register int16_t i;
-
 	char buffer[6];
-
 	i = 0;
 
 	while (*str1)
@@ -417,17 +379,19 @@ char *str1;
 			if (i < 8)
 			{
 				*str1++ = '*';
-				strcpy(str1, buffer);
+				strcpy(buffer, str1);
 			} else
-				strcpy(str1 + 1, buffer);
-
+			{
+				strcpy(buffer, str1 + 1);
+			}
+			
 			i = strlen(buffer);
 			if (i < 3)
 				buffer[i++] = '*';
 
 			buffer[i] = 0;
 			*str1++ = '.';
-			strcpy(buffer, str1);
+			strcpy(str1, buffer);
 			return;
 		} else
 			i++;
@@ -435,5 +399,5 @@ char *str1;
 		str1++;
 	}
 
-	strcpy(getall, str1);				/*  *.* */
+	strcpy(str1, getall);				/*  *.* */
 }

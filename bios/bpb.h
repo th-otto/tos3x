@@ -1,6 +1,8 @@
 /*
  * BPB - Bios Parameter Block
  */
+#ifndef BPB_H
+#define BPB_H 1
 
 #define BPB struct _bpb_t
 BPB /* bios parameter block */
@@ -25,4 +27,4 @@ BPB /* bios parameter block */
 #define B_1FAT      2		/* device has only a single FAT */
 #define DND_LOCKED  0x8000  /* DND may not be scavenged (see     */
                             /* free_available_dnds() in fsdir.c) */
-
+#endif

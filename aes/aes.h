@@ -203,7 +203,7 @@ typedef int BOOLEAN;
 /*
  * Should really be OBJECT *, as it was in the original DRI version.
  * Someone messed it up and declared it as long in the Atari version.
- * Even worse, that type was not even used anymore, and all source
+ * Even worse, LPTREE was not even used anymore, and all source
  * files changes instead.
  */
 typedef intptr_t LPTREE;
@@ -307,6 +307,16 @@ VOID bfill PROTO((int16_t num, char bval, VOIDPTR addr));
 int toupper PROTO((int ch));
 size_t strlen PROTO((const char *p1));
 BOOLEAN streq PROTO((const char *p1, const char *p2));
+/*
+ * Original AES had functions named strcpy/strcat that have their arguments
+ * reversed as opposed to the standard functions with that name.
+ * To avoid confusion, those functions were renamed, and we use a wrapper
+ * around it instead.
+ * Note however that is still not the standard behaviour: they return
+ * the end of the string +1 instead of the destination.
+ */
+#define strcpy(dst, src) xstrpcpy(src, dst)
+#define strcat(dst, src) xstrpcat(src, dst)
 char *xstrpcpy PROTO((const char *src, char *dst));
 char *xstrpcat PROTO((const char *src, char *dst));
 char *strscn PROTO((const char *src, char *dst, char stp));

@@ -14,83 +14,56 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
+#include "desktop.h"
 
 
-extern char *scasb();
-
-extern char *r_slash();
-
-extern char *lp_fill();
-
-extern APP *app_alloc();
-
-extern int16_t isdrive();
-
-extern int16_t cart_init();
-
-extern char *strcpy();
-
-extern WINDOW *w_gfirst();
-
-extern WINDOW *w_gnext();
-
-
-extern char mentable[];
-
-extern APP *applist;
-
-extern int16_t q_change;
-
-extern char *q_addr;
-
-extern int16_t d_maxcolor;					/* max number of color  */
-
-extern int16_t numicon;
-
-uint16_t d_rezword;
-
+#if TOSVERSION >= 0x400
+uint16_t d_rezword; /* also in AES:geminit.c */
+#endif
 char afile[INFSIZE];
-
-int16_t font_save;
-
-int16_t s_defdir;
-
-int16_t s_fullpath;
+STATIC int16_t font_save;
+BOOLEAN s_defdir;
+BOOLEAN s_fullpath;
 
 #define SAVE_ATARI	128
+
 
 /*	Default keystroke	*/
 
 /* Added another 0x00 to the end for VIDITEM object - cjg 07/07/92 */
 /*	Take out two for sparrow */
-char mkeys[MAXMENU] = { 0x4F, 0x53, 0x4C, 0x00, 0x46, 0x42, 0x43, 0x57,
+static char const mkeys[MAXMENU] = {
+	0x4F, 0x53, 0x4C, 0x00, 0x46, 0x42, 0x43, 0x57,
 	0x45, 0x58, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x52,
 	0x00, 0x00, 0x4D, 0x56, 0x50
 };
 
-/*	Make inf path	*/
+char uhex_dig PROTO((int16_t wd));
+char *inf_xdesk PROTO((char *pcurr));
+char *inf_parse PROTO((char *pcurr));
+VOID inf_scan PROTO((char *buffer));
+int16_t hex_dig PROTO((char achar));
+char *save_win PROTO((WINDOW *win, char *pcurr));
+VOID tt_color PROTO((BOOLEAN put));
 
-m_infpath(buffer)
-char *buffer;
+
+
+/*
+ * Make inf path
+ */
+VOID m_infpath(P(char *)buffer)
+PP(char *buffer;)
 {
-	strcpy(infpath, buffer);			/* C:\NEWDESK.INF   */
+	strcpy(buffer, infpath);			/* C:\NEWDESK.INF   */
 	buffer[0] = (isdrive() & 0x04) ? 'C' : 'A';
 }
 
 
 /*	Reverse of hex_dig()	*/
 
-char uhex_dig(wd)
-register int16_t wd;
+char uhex_dig(P(int16_t) wd)
+PP(register int16_t wd;)
 {
 	if ((wd >= 0) && (wd <= 9))
 		return (wd + '0');
@@ -98,13 +71,13 @@ register int16_t wd;
 	if ((wd >= 0x0a) && (wd <= 0x0f))
 		return (wd + 'A' - 0x0a);
 
-	return (' ');
+	return ' ';
 }
 
 
-char *escan_str(char *pcurr, char *ppstr)
-register char *pcurr;
-register char *ppstr;
+char *escan_str(P(char *)pcurr, P(char *)ppstr)
+PP(register char *pcurr;)
+PP(register char *ppstr;)
 {
 	while (*pcurr == ' ')
 		pcurr++;
@@ -118,10 +91,10 @@ register char *ppstr;
 }
 
 
-/*	Scan off and convert the next two hex digits and return with
-	pcurr pointing one space past the end of the four hex digits
-*/
-
+/*
+ * Scan off and convert the next two hex digits and return with
+ * pcurr pointing one space past the end of the four hex digits
+ */
 char *scan_2(P(char *) pcurr, P(int16_t *) pwd)
 PP(register char *pcurr;)
 PP(register int16_t *pwd;)
@@ -139,8 +112,9 @@ PP(register int16_t *pwd;)
 }
 
 
-/*	Reverse of scan_2()	*/
-
+/*
+ * Reverse of scan_2()
+ */
 char *save_2(P(char *) pcurr, P(uint16_t) wd)
 register char *pcurr;
 uint16_t wd;
@@ -151,12 +125,13 @@ uint16_t wd;
 	return (pcurr);
 }
 
-/*	Reverse of scan_str	*/
 
-char * save_str(pcurr, pstr)
-register char *pcurr;
-
-register char *pstr;
+/*
+ * Reverse of scan_str
+ */
+char *save_str(P(char *)pcurr, P(char *)pstr)
+PP(register char *pcurr;)
+PP(register char *pstr;)
 {
 	while ((*pstr) && (pstr))
 		*pcurr++ = *pstr++;
@@ -166,24 +141,17 @@ register char *pstr;
 }
 
 
-/*	Scan the desktop icon	*/
-
-char * inf_xdesk(pcurr)
-register char *pcurr;
+/*
+ * Scan the desktop icon
+ */
+char *inf_xdesk(P(char *)pcurr)
+PP(register char *pcurr;)
 {
 	register int16_t ix;
-
 	register int16_t id;
-
 	register CICONBLK *iblk;
-
 	OBJECT *obj;
-
-	int16_t x,
-	 y,
-	 i,
-	 type;
-
+	int16_t x, y, i, type;
 	char buffer[14];
 
 	type = *pcurr++;
@@ -272,14 +240,14 @@ register char *pcurr;
 
 
 
-/*	Parse a single line from the DESKTOP.APP file.	*/
-/*	Just scan the application			*/
-
-char * inf_parse(pcurr)
-register char *pcurr;
+/*
+ * Parse a single line from the DESKTOP.APP file.
+ * Just scan the application
+ */
+char *inf_parse(P(char *)pcurr)
+PP(register char *pcurr;)
 {
 	register APP *app;
-
 	register int16_t type;
 
 	pcurr -= 2;							/* important    */
@@ -351,10 +319,10 @@ register char *pcurr;
 
 
 /*
-*	Initialize the application list by reading in the DESKTOP.APP
-*	file, either from memory or from the disk if the shel_get
-*	indicates no message is there.
-*/
+ *	Initialize the application list by reading in the DESKTOP.APP
+ *	file, either from memory or from the disk if the shel_get
+ *	indicates no message is there.
+ */
 
 /*
  * A horrible hack: Falcon TOS has a different menu setup than
@@ -365,7 +333,8 @@ register char *pcurr;
  * ++ERS 1/8/93
  */
 
-int16_t inf_permute[MAXMENU + 2] = { 0, 1, 2, 3, 4,
+static int16_t const inf_permute[MAXMENU + 2] = {
+	0, 1, 2, 3, 4,
 	5, 6, 7, 8, 9,
 	10, 11, 12, 13, 14,
 	15, 16, 17, 18, 19,
@@ -374,27 +343,17 @@ int16_t inf_permute[MAXMENU + 2] = { 0, 1, 2, 3, 4,
 	25
 };
 
-inf_scan(buffer)
-char *buffer;
+VOID inf_scan(P(char *)buffer)
+PP(char *buffer;)
 {
-	register int16_t i,
-	 tmp;
-
+	register int16_t i, tmp;
 	register WINDOW *pws;
-
 	register char *pcurr;
-
 	APP *app;
-
 	char *ptmp;
-
-	int16_t envr,
-	 j;
-
+	int16_t envr, j;
 	int32_t stmp;
-
 	char temp;
-
 	char *ptr;
 
 	i = 0;								/* for window index */
@@ -545,32 +504,29 @@ char *buffer;
 				if (envr & 0x01)
 					s_sort = S_NO;
 
-				s_cache = (envr & 0x02) ? 1 : 0;
-				s_stofit = (envr & 0x04) ? 1 : 0;
-				s_defdir = (envr & 0x08) ? 1 : 0;
-				s_fullpath = (envr & 0x10) ? 1 : 0;
+				s_cache = (envr & 0x02) ? TRUE : FALSE;
+				s_stofit = (envr & 0x04) ? TRUE : FALSE;
+				s_defdir = (envr & 0x08) ? TRUE : FALSE;
+				s_fullpath = (envr & 0x10) ? TRUE : FALSE;
 				break;
 
 			default:					/* must be the last one */
 				pcurr = inf_parse(pcurr);
 				break;
-
-			}							/* switch  */
-		}								/* if    */
-	}									/* while   */
+			}
+		}
+	}
 }
 
 
-/*	Read in a desktop.inf file and parse the string		*/
-
-read_inf()
+/*
+ * Read in a desktop.inf file and parse the string
+ */
+VOID read_inf(NOTHING)
 {
 	int16_t handle;
-
 	register int32_t size1;
-
 	char buffer[20];
-
 	register APP *app;
 
 	shel_get(afile, INFSIZE);
@@ -583,7 +539,7 @@ read_inf()
 			m_infpath(buffer);			/* open newdesk.inf */
 			if ((handle = Fopen(buffer, 0)) < 0)
 			{							/* try desktop.inf  */
-				strcpy(infdata, &buffer[3]);
+				strcpy(&buffer[3], infdata);
 				if ((handle = Fopen(buffer, 0)) < 0)
 					goto re_1;
 			}
@@ -640,11 +596,10 @@ read_inf()
 
 
 /*
-*	Convert a single hex ASCII digit to a number
-*/
-
-int16_t hex_dig(achar)
-register char achar;
+ *	Convert a single hex ASCII digit to a number
+ */
+int16_t hex_dig(P(char) achar)
+PP(register char achar;)
 {
 	if ((achar >= '0') && (achar <= '9'))
 		return (achar - '0');
@@ -656,10 +611,9 @@ register char achar;
 }
 
 
-char * save_win(win, pcurr)
-register WINDOW *win;
-
-register char *pcurr;
+char *save_win(P(WINDOW *)win, P(char *)pcurr)
+PP(register WINDOW *win;)
+PP(register char *pcurr;)
 {
 	char *ptmp;
 
@@ -690,36 +644,22 @@ register char *pcurr;
 }
 
 
-/*	Save a desktop.inf file		*/
-
-int16_t save_inf(todisk)
-int16_t todisk;
+/*
+ * Save a desktop.inf file
+ */
+BOOLEAN save_inf(P(BOOLEAN) todisk)
+PP(BOOLEAN todisk;)
 {
 	register APP *start;
-
 	register WINDOW *win;
-
 	register char *pcurr;
-
-	register int16_t envr,
-	 i;
-
-	int16_t j,
-	 w,
-	 len,
-	 h,
-	 handle;
-
+	register int16_t envr, i;
+	int16_t j, w, len, h, handle;
 	char *buf;
-
 	APP *app;
-
 	OBJECT *obj;
-
 	int32_t size;
-
 	char infname[16];
-
 	char buf1[2];
 
 	if (size = Malloc(0xFFFFFFFFL))		/* get some memory  */
@@ -1012,7 +952,7 @@ int16_t todisk;
 		goto if_2;
 	}
 
-	strcpy(buf, afile);					/* copy to my buffer    */
+	strcpy(afile, buf);					/* copy to my buffer    */
 
 	shel_put(afile, INFSIZE);			/* copy to the aes buffer   */
 
@@ -1047,7 +987,7 @@ int16_t todisk;
 		if (streq(infname, inf_path))
 		{
 			q_change = FALSE;
-			strcpy(afile, q_addr);
+			strcpy(q_addr, afile);
 		}
 
 	}
@@ -1063,19 +1003,16 @@ int16_t todisk;
 }
 
 
-/*	Position the desktop icon	*/
-
-app_posicon(colx, coly, px, py)
-int16_t colx,
- coly;
-
-register int16_t *px,
-*py;
+/*
+ * Position the desktop icon
+ */
+VOID app_posicon(P(int16_t) colx, P(int16_t) coly, P(int16_t *)px, P(int16_t *)py)
+PP(int16_t colx;)
+PP(int16_t coly;)
+PP(register int16_t *px;)
+PP(register int16_t *py;)
 {
-	register int16_t x,
-	 y,
-	 w,
-	 h;
+	register int16_t x, y, w, h;
 
 	w = r_dicon.w;
 	h = r_dicon.h;
@@ -1085,25 +1022,18 @@ register int16_t *px,
 }
 
 
-/*	Transform mouse position into icon position	*/
-
-app_mtoi(newx, newy, px, py)
-int16_t newx,
- newy;
-
-register int16_t *px,
-*py;
+/*
+ * Transform mouse position into icon position
+ */
+VOID app_mtoi(P(int16_t) newx, P(int16_t) newy, P(int16_t *)px, P(int16_t *)py)
+PP(int16_t newx;)
+PP(int16_t newy;)
+PP(register int16_t *px;)
+PP(register int16_t *py;)
 {
-	register int16_t x,
-	 y,
-	 w,
-	 h;
-
-	int16_t xm,
-	 ym;
-
-	int16_t maxx,
-	 maxy;
+	register int16_t x, y, w, h;
+	int16_t xm, ym;
+	int16_t maxx, maxy;
 
 	w = r_dicon.w;
 	h = r_dicon.h;
@@ -1139,10 +1069,11 @@ register int16_t *px,
 }
 
 
-/*	Put or get color and pattern	*/
-
-tt_color(put)
-int16_t put;
+/*
+ * Put or get color and pattern
+ */
+VOID tt_color(P(BOOLEAN) put)
+PP(BOOLEAN put;)
 {
 	int16_t j;
 

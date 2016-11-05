@@ -145,9 +145,9 @@ PP(int16_t dev;)
 	
 	bdev->geometry.sides = getiword(BS->sides);
 	bdev->geometry.spt = getiword(BS->spt);
-	bdev->geometry.sph = bdev->geometry.sides * bdev->geometry.spt;
+	bdev->geometry.spc = bdev->geometry.sides * bdev->geometry.spt;
 	bdev->geometry.hidden = getiword(BS->hid);
-	bdev->geometry.tracks = getiword(BS->sec) / bdev->geometry.sph;
+	bdev->geometry.tracks = getiword(BS->sec) / bdev->geometry.spc;
 	
 #define i bps /* reuse register variable */
 
@@ -321,13 +321,13 @@ PP(int16_t cnt;)
 	
 	bdev = &blkdev[dev];
 	odd = !(((intptr_t) buf) & 1) ? 0 : 1;
-	if (bdev->geometry.sph == 0)
-		bdev->geometry.spt = bdev->geometry.sph = 9;
+	if (bdev->geometry.spc == 0)
+		bdev->geometry.spt = bdev->geometry.spc = 9;
 	while (cnt != 0)
 	{
 		bufp = odd ? dskbufp : buf;
-		track = recnr / bdev->geometry.sph;
-		sector = recnr % bdev->geometry.sph;
+		track = recnr / bdev->geometry.spc;
+		sector = recnr % bdev->geometry.spc;
 		if (sector < bdev->geometry.spt)
 		{
 			side = 0;

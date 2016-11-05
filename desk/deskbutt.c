@@ -7,40 +7,18 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
+#include "desktop.h"
 
-extern WINDOW *get_win();
 
-extern WINDOW *get_top();
-
-extern DIR *get_dir();
-
-extern WINDOW *x_win;
-
-/*	Find an empty icon	*/
-
-int16_t av_icon()
+/*
+ * Find an empty icon
+ */
+int16_t av_icon(NOTHING)
 {
-	register int16_t i,
-	 k;
-
+	register int16_t i, k;
 	register OBJECT *obj;
-
-	int16_t x,
-	 y,
-	 col,
-	 row;
-
-	int16_t xcol,
-	 xrow,
-	 found;
+	int16_t x, y, col, row;
+	int16_t xcol, xrow, found;
 
 	obj = background;
 
@@ -89,14 +67,13 @@ int16_t av_icon()
 }
 
 
-/*	Deselect all the disk and trash icons	*/
-
-clr_dicons()
+/*
+ * Deselect all the disk and trash icons
+ */
+VOID clr_dicons(NOTHING)
 {
 	GRECT pt;
-
 	register OBJECT *obj;
-
 	int16_t i;
 
 	obj = background;
@@ -112,25 +89,19 @@ clr_dicons()
 }
 
 
-/*	Handle the click event		*/
-
-hd_button(clicks, kstate, mx, my)
-int16_t clicks,
- kstate,
- mx,
- my;
+/*
+ * Handle the click event
+ */
+VOID hd_button(P(int16_t) clicks, P(int16_t) kstate, P(int16_t) mx, P(int16_t) my)
+PP(int16_t clicks;)
+PP(int16_t kstate;)
+PP(int16_t mx;)
+PP(int16_t my;)
 {
 	register int16_t item;
-
-	int16_t xitem,
-	 type,
-	 keypress,
-	 state;
-
+	int16_t xitem, type, keypress, state;
 	register OBJECT *obj;
-
 	register WINDOW *win;
-
 	WINDOW *win1;
 
 	/* click on any objects */

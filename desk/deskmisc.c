@@ -9,43 +9,11 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <gemdefs.h>
-#include <window.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <error.h>
-#include <extern.h>
+#include "desktop.h"
 
-extern char *strcat();
-
-extern char *strcpy();
-
-extern char *strscn();
-
-extern int16_t numicon;
-
-extern int16_t x_type;
-
-extern WINDOW *x_win;
-
-extern WINDOW *w_gfirst();
-
-extern WINDOW *w_gnext();
-
-extern uint16_t st_dchar;
-
-extern int16_t st_date;
-
-extern int16_t st_time;
-
-
-int16_t m_sfirst(path, att)
-char *path;
-
-int16_t att;
+int16_t m_sfirst(P(const char *) path, P(int16_t) att)
+PP(const char *path;)
+PP(int16_t att;)
 {
 	int16_t ret;
 
@@ -62,10 +30,11 @@ int16_t att;
 }
 
 
-/*	Check path length and allocate memory	*/
-
-int16_t c_path_alloc(path)
-char *path;
+/*
+ * Check path length and allocate memory
+ */
+int16_t c_path_alloc(P(const char *) path)
+PP(const char *path;)
 {
 	int16_t level;
 
@@ -82,14 +51,13 @@ char *path;
 }
 
 
-int16_t hit_disk(drive)
-int16_t drive;
+int16_t hit_disk(P(int16_t) drive)
+PP(int16_t drive;)
 {
 	char buffer[14];
-
 	int16_t ret;
 
-	strcpy(wildext, buffer);
+	strcpy(buffer, wildext);
 	buffer[0] = drive;
 	Fsetdta(&dtabuf);					/* set dta buffer   */
 	if (ret = Fsfirst(buffer, 0x3F))
@@ -102,8 +70,8 @@ int16_t drive;
 }
 
 
-OBJECT * get_icon(item)
-int16_t item;
+OBJECT *get_icon(P(int16_t) item)
+PP(int16_t item;)
 {
 	if (item >= numicon)
 		item = numicon - 1;
@@ -112,8 +80,8 @@ int16_t item;
 }
 
 
-OBJECT * get_tree(item)
-int16_t item;
+OBJECT *get_tree(P(int16_t) item)
+PP(int16_t item;)
 {
 	OBJECT *obj;
 
@@ -123,8 +91,8 @@ int16_t item;
 
 
 
-char * get_fstring(item)
-int16_t item;
+char *get_fstring(P(int16_t) item)
+PP(int16_t item;)
 {
 	char **str;
 
@@ -133,8 +101,8 @@ int16_t item;
 }
 
 
-char * get_string(item)
-int16_t item;
+char *get_string(P(int16_t) item)
+PP(int16_t item;)
 {
 	char *str;
 
@@ -143,13 +111,11 @@ int16_t item;
 }
 
 
-DIR * get_dir(win, item)
-WINDOW *win;
-
-int16_t item;
+DIR *get_dir(P(WINDOW *)win, P(int16_t) item)
+PP(WINDOW *win;)
+PP(int16_t item;)
 {
 	int16_t j;
-
 	DIR *dir;
 
 	j = win->w_srtitem + item - 1;
@@ -157,53 +123,55 @@ int16_t item;
 	return (&dir[j]);
 }
 
-VOID up_1(win)
-WINDOW *win;
+
+VOID up_1(P(WINDOW *)win)
+PP(WINDOW *win;)
 {
 	set_newview(win->w_srtitem, win);
 	do_redraw(win->w_id, &full, 0);
 }
 
-/*	Update window because someone change the d_state 	*/
 
-VOID up_2(win)
-WINDOW *win;
+/*
+ * Update window because someone change the d_state
+ */
+VOID up_2(P(WINDOW *)win)
+PP(WINDOW *win;)
 {
 	up_1(win);
 	winfo(win);
 }
 
 
-/*	Put a file name into the win path buffer	*/
-
-char * put_name(win, name)
-WINDOW *win;
-
-char *name;
+/*
+ * Put a file name into the win path buffer
+ */
+char *put_name(P(WINDOW *)win, P(const char *) name)
+PP(WINDOW *win;)
+PP(const char *name;)
 {
-	strcpy(win->w_path, win->w_buf);
+	strcpy(win->w_buf, win->w_path);
 	rep_path(name, win->w_buf);
 	return (win->w_buf);
 }
 
 
 
-/*	Is the child inside the parent visible area?	*/
-
-int16_t in_parent(obj, child)
-OBJECT *obj;
-
-int16_t child;
+/*
+ * Is the child inside the parent visible area?
+ */
+BOOLEAN in_parent(P(OBJECT *)obj, P(int16_t) child)
+PP(OBJECT *obj;)
+PP(int16_t child;)
 {
-	return (inside(obj[child].ob_x + obj[0].ob_x, obj[child].ob_y + obj[0].ob_y, &obj[0].ob_x));
+	return inside(obj[child].ob_x + obj[0].ob_x, obj[child].ob_y + obj[0].ob_y, &obj[0].ob_x);
 }
 
-VOID xinf_sset(obj, item, buf1)
-OBJECT *obj;
 
-int16_t item;
-
-char *buf1;
+VOID xinf_sset(P(OBJECT *)obj, P(int16_t) item, P(char *)buf1)
+PP(OBJECT *obj;)
+PP(int16_t item;)
+PP(char *buf1;)
 {
 	char buf2[20];
 
@@ -211,44 +179,47 @@ char *buf1;
 	inf_sset(obj, item, buf2);
 }
 
-VOID mice_state(state)
-int16_t state;
-{
-	graf_mouse(state, (char *) 0);
-}
 
-VOID desk_wait(state)
-int16_t state;
+VOID mice_state(P(int16_t) state)
+PP(int16_t state;)
 {
-	graf_mouse(state ? HOURGLASS : ARROW, (char *) 0);
+	graf_mouse(state, NULL);
 }
 
 
-/*	Draw a single field of a dialog box	*/
+VOID desk_wait(P(BOOLEAN) state)
+PP(BOOLEAN state;)
+{
+	graf_mouse(state ? HOURGLASS : ARROW, NULL);
+}
 
-VOID draw_fld(obj, which)
-register OBJECT *obj;
 
-int16_t which;
+/*
+ * Draw a single field of a dialog box
+ */
+VOID draw_fld(P(OBJECT *)obj, P(int16_t) which)
+PP(register OBJECT *obj;)
+PP(int16_t which;)
 {
 	GRECT t;
-
-	int16_t x,
-	 y;
+	int16_t x, y;
 
 	objc_gclip(obj, which, &x, &y, &t.x, &t.y, &t.w, &t.h);
 	objc_draw(obj, which, 0, t.x, t.y, t.w, t.h);
 }
 
 
-int16_t getcookie(cookie, p_value)
-int32_t cookie;
-
-int32_t *p_value;
+int16_t getcookie(P(int32_t) cookie, P(int32_t *)p_value)
+PP(int32_t cookie;)
+PP(int32_t *p_value;)
 {
 	int32_t *cookjar;
 
+#if UNLINKED
+	todo
+#else
 	cookjar = *(int32_t *) (0x5a0);
+#endif
 
 	if (!cookjar)
 		return (FALSE);
@@ -268,20 +239,16 @@ int32_t *p_value;
 }
 
 
-/*	Format a value and fill the leading space	*/
-
-VOID f_str(obj, item, value)
-OBJECT *obj;
-
-int16_t item;
-
-int32_t value;
+/*
+ * Format a value and fill the leading space
+ */
+VOID f_str(P(OBJECT *)obj, P(int16_t) item, P(int32_t) value)
+PP(OBJECT *obj;)
+PP(int16_t item;)
+PP(int32_t value;)
 {
 	char buffer[14];
-
-	int16_t len1,
-	 len2;
-
+	int16_t len1, len2;
 	char *chrptr;
 
 	lbintoas(value, buffer);
@@ -290,14 +257,15 @@ int32_t value;
 	chrptr = (TEDINFO *) (obj[item].ob_spec)->te_ptext;
 	bfill(len1, ' ', chrptr);
 	len2 = strlen(buffer);
-	strcpy(buffer, chrptr + (int32_t) (len1 - len2));
+	strcpy(chrptr + (int32_t) (len1 - len2), buffer);
 }
 
 
-/*	Check the level of depth	*/
-
-int16_t ch_level(path)
-char *path;
+/*
+ * Check the level of depth
+ */
+int16_t ch_level(P(const char *) path)
+PP(const char *path;)
 {
 	int16_t level;
 
@@ -313,15 +281,11 @@ char *path;
 }
 
 
-OBJECT * fm_draw(item)
-int16_t item;
+OBJECT *fm_draw(P(int16_t) item)
+PP(int16_t item;)
 {
 	register OBJECT *addr;
-
-	int16_t x,
-	 y,
-	 w,
-	 h;
+	int16_t x, y, w, h;
 
 	addr = get_tree(item);
 	form_center(addr, &x, &y, &w, &h);
@@ -329,14 +293,14 @@ int16_t item;
 	return (addr);
 }
 
-/*	Wait for redraw message	*/
 
-VOID wait_msg()
+/*
+ * Wait for redraw message
+ */
+VOID wait_msg(NOTHING)
 {
 	char msgbuff[16];
-
-	int16_t event,
-	 trash;
+	int16_t event, trash;
 
 	do
 	{
@@ -352,8 +316,9 @@ VOID wait_msg()
 	} while (TRUE);
 }
 
-VOID do_finish(item)
-int16_t item;
+
+VOID do_finish(P(int16_t) item)
+PP(int16_t item;)
 {
 	GRECT pt;
 
@@ -363,10 +328,9 @@ int16_t item;
 }
 
 
-int16_t xform_do(obj, which)
-OBJECT *obj;
-
-int16_t which;
+int16_t xform_do(P(OBJECT *)obj, P(int16_t) which)
+PP(OBJECT *obj;)
+PP(int16_t which;)
 {
 	int16_t ret;
 
@@ -376,14 +340,14 @@ int16_t which;
 }
 
 
-/*	Form_do	and draw	*/
-
-int16_t fmdodraw(item, which)
-int16_t item,
-	which;
+/*
+ * Form_do and draw
+ */
+int16_t fmdodraw(P(int16_t) item, P(int16_t) which)
+PP(int16_t item;)
+PP(int16_t which;)
 {
 	OBJECT *obj;
-
 	int16_t ret;
 
 	obj = fm_draw(item);
@@ -394,22 +358,17 @@ int16_t item,
 
 
 
-/*	This routine convert binary number to ascii value	*/
-
-VOID lbintoasc(longval, buffer)
-register int32_t longval;
-
-register char buffer[];
+/*
+ * This routine convert binary number to ascii value
+ */
+VOID lbintoasc(P(int32_t) longval, P(char *)buffer)
+PP(register int32_t longval;)
+PP(register char *buffer;)
 {
 	register int16_t i;
-
 	uint16_t digit;
-
-	int16_t j,
-	 k;
-
+	int16_t j, k;
 	int32_t divten;
-
 	char buf1[12];
 
 	i = 0;
@@ -434,11 +393,10 @@ register char buffer[];
 }
 
 
-char * r_slash(path)
-register char *path;
+char *r_slash(P(char *)path)
+PP(register char *path;)
 {
 	char *start;
-
 	start = path;
 
 	while (*path)
@@ -455,17 +413,15 @@ register char *path;
 }
 
 
-/*	The path should look like A:\*.*	*/
-
-int16_t xcut_path(path, buffer, cut)
-register char *path;
-
-char *buffer;
-
-int16_t cut;
+/*
+ * The path should look like A:\*.*
+ */
+int16_t xcut_path(P(char *)path, P(char *)buffer, P(int16_t) cut)
+PP(register char *path;)
+PP(char *buffer;)
+PP(int16_t cut;)
 {
 	int16_t i;
-
 	char *chrptr;
 
 	buffer[0] = 0;
@@ -476,14 +432,14 @@ int16_t cut;
 		return (FALSE);					/* failed           */
 
 	path = r_slash(path);				/* reverse to next level    */
-	strcpy(path, buffer);
+	strcpy(buffer, path);
 	path--;
 
 	while (*path != '\\')
 		path--;
 
 	if (cut)
-		strcpy(buffer, path);
+		strcpy(path, buffer);
 	else
 	{
 		chrptr = strscn(path + 1, buffer, '\\');
@@ -494,74 +450,74 @@ int16_t cut;
 }
 
 
-/*	Cut one directory inside the path	*/
-/*	The path should look like A:\*.*	*/
-
-int16_t cut_path(path)
-register char *path;
+/*
+ * Cut one directory inside the path
+ * The path should look like A:\*.*
+ */
+int16_t cut_path(P(char *)path)
+PP(register char *path;)
 {
 	char buffer[14];
 
-	return (xcut_path(path, buffer, TRUE));
+	return xcut_path(path, buffer, TRUE);
 }
 
 
-/*	Concat a path			*/
-/*	A:\aaa\*.*  -> A:\aaa\bbb\*.*	*/
-
-VOID cat_path(name, path)
-char *name;
-
-register char *path;
+/*
+ * Concat a path
+ * A:\aaa\*.*  -> A:\aaa\bbb\*.*
+ */
+VOID cat_path(P(char *)name, P(char *)path)
+PP(char *name;)
+PP(register char *path;)
 {
 	char buffer[20];
-
 	char *start;
 
 	start = path;
 	path = r_slash(path);
-	strcpy(path, buffer);
+	strcpy(buffer, path);
 	path++;
 	rep_path(name, start);
-	strcat(buffer, path);
+	strcat(path, buffer);
 }
 
 
-/*	Replace path			*/
-/*	A:\aaa\*.* -> A:\aaa\bbb	*/
-
-VOID rep_path(name, path)
+/*
+ * Replace path
+ * A:\aaa\*.* -> A:\aaa\bbb
+ */
+VOID rep_path(char *name, char *path)
 char *name;
-
 char *path;
 {
 	path = r_slash(path);
 	path++;
-	strcpy(name, path);
+	strcpy(path, name);
 }
 
 
-/*	Perform an alert box message	*/
-
-int16_t do_alert(button, item)
-int16_t button,
-	item;
+/*
+ * Perform an alert box message
+ */
+int16_t do_alert(P(int16_t) button, P(int16_t) item)
+PP(int16_t button:)
+PP(int16_t item;)
 {
 	return (form_alert(button, get_string(item)));
 }
 
 
-int16_t do1_alert(item)
-int16_t item;
+int16_t do1_alert(P(int16_t) item)
+PP(int16_t item;)
 {
 	return (do_alert(1, item));
 }
 
 
-VOID rc_center(rec1, rec2)
-GRECT *rec1;
-
-GRECT *rec2;
+VOID rc_center(P(GRECT *)rec1, P(GRECT *)rec2)
+PP(GRECT *rec1;)
+PP(GRECT *rec2;)
 {
 	rec2->x = rec1->x + (rec1->w / 2);
 	rec2->y = rec1->y + (rec1->h / 2);
@@ -569,46 +525,43 @@ GRECT *rec2;
 
 
 
-VOID my_itoa(number, pnumstr)
-uint16_t number;
-
-register char *pnumstr;
+VOID my_itoa(P(uint16_t) number, P(char *)pnumstr)
+PP(uint16_t number;)
+PP(register char *pnumstr;)
 {
 	register int16_t ii;
 
-
-	for (ii = 0; ii < 2; pnumstr[ii++] = '0') ;
-	pnumstr[2] = NULL;
+	for (ii = 0; ii < 2; pnumstr[ii++] = '0')
+		;
+	pnumstr[2] = '\0';
 	merge_str(((number > 9) ? pnumstr : pnumstr + 1), "%W", &number);
 }
 
 /*
-*	Routine to format DOS style time.
-*
-*	15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-*	<     hh     > <    mm    > <   xx  >
-*	hh = binary 0-23
-*	mm = binary 0-59
-*	xx = binary seconds \ 2 
-*
-*	put into this form 12:45 pm
-*
-*	IF(EUROTIME)THEN Military Time Format 
-*/
-
-VOID fmt_time(time, ptime)
-register uint16_t time;
-
-register char *ptime;
+ *	Routine to format DOS style time.
+ *
+ *	15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+ *	<     hh     > <    mm    > <   xx  >
+ *	hh = binary 0-23
+ *	mm = binary 0-59
+ *	xx = binary seconds \ 2 
+ * 
+ *	put into this form 12:45 pm
+ *
+ *	IF(EUROTIME)THEN Military Time Format 
+ */
+VOID fmt_time(P(uint16_t) time, P(char *)ptime)
+PP(register uint16_t time;)
+PP(register char *ptime;)
 {
-	register int16_t pm,
-	 val;
+	register int16_t pm, val;
 
 	val = ((time & 0xf800) >> 11) & 0x001f;
 
 	if (st_time)
+	{
 		my_itoa(val, &ptime[0]);
-	else
+	} else
 	{
 		if (val >= 12)
 		{
@@ -628,9 +581,9 @@ register char *ptime;
 	my_itoa(((time & 0x07e0) >> 5) & 0x003f, &ptime[2]);
 
 	if (st_time)
-		strcpy("  ", &ptime[4]);
+		strcpy(&ptime[4], "  ");
 	else
-		strcpy(((pm) ? "pm" : "am"), &ptime[4]);
+		strcpy(&ptime[4], pm ? "pm" : "am");
 }
 
 
@@ -647,11 +600,9 @@ register char *ptime;
  *	IF(SWEDDATE)THEN Swap Day and Month thusly: yy/mm/dd
  *	Changed 7/20/92 To put in st_dchar as seperator
  */
-
-VOID fmt_date(date, pdate)
-uint16_t date;
-
-register char *pdate;
+VOID fmt_date(P(uint16_t) date, P(char *)pdate)
+PP(uint16_t date;)
+PP(register char *pdate;)
 {
 	switch (st_date)
 	{
@@ -680,22 +631,17 @@ register char *pdate;
 }
 
 
-/*	Build string		*/
-
-char * bldstring(dir, dst)
-DIR *dir;
-
-register char *dst;
+/*
+ * Build string
+ */
+char * bldstring(P(DIR *)dir, P(char *)dst)
+PP(DIR *dir;)
+PP(register char *dst;)
 {
 	register char *src;
-
 	char buf[14];
-
 	register int16_t i;
-
-	int16_t t,
-	 len;
-
+	int16_t t, len;
 	char *buffer;
 
 	buffer = buf;
@@ -739,14 +685,14 @@ register char *dst;
 
 	len = strlen(buffer);
 
-	strcpy(buffer, dst + (10 - len));
+	strcpy(dst + (10 - len), buffer);
 
 	dst += 10;
 	*dst++ = ' ';
 	*dst++ = ' ';
 
 	fmt_date(dir->d_date, buffer);
-	dst = strcpy(buffer, dst) - 1;
+	dst = strcpy(dst, buffer) - 1;
 #if 0
 	*dst++ = buffer[0];
 	*dst++ = buffer[1];
@@ -776,8 +722,9 @@ register char *dst;
 	return (dst);
 }
 
-const char *g_name(const char *file)
-const char *file;
+
+const char *g_name(P(const char *) file)
+PP(const char *file;)
 {
 	const char *tail;
 
@@ -789,36 +736,37 @@ const char *file;
 }
 
 
-/*	save the extension of the path	*/
-/*	A:\*.*				*/
-
-VOID save_ext(path, buffer)
-char *path;
-
-char *buffer;
+/*
+ * save the extension of the path
+ * A:\*.*
+ */
+VOID save_ext(P(char *)path, P(char *)buffer)
+PP(char *path;)
+PP(char *buffer;)
 {
-	strcpy(g_name(path), buffer);
+	strcpy(buffer, g_name(path));
 }
 
-/*	save the middle dir just before the ext	*/
-/*	A:\dir\*.*				*/
 
-VOID save_mid(path, buffer)
-char *path;
-
-char *buffer;
+/*
+ * save the middle dir just before the ext
+ * A:\dir\*.*
+ */
+VOID save_mid(P(char *)path, P(char *)buffer)
+PP(char *path;)
+PP(char *buffer;)
 {
 	xcut_path(path, buffer, FALSE);
 }
 
 
-/*	Check for if the source is the parent of 	*/
-/*	the destination					*/
-
-int16_t chk_par(srcptr, dstptr)
-register char *srcptr;
-
-register char *dstptr;
+/*
+ * Check for if the source is the parent of
+ * the destination
+ */
+int16_t chk_par(P(char *)srcptr, P(char *)dstptr)
+PP(register char *srcptr;)
+PP(register char *dstptr;)
 {
 	if (*srcptr != *dstptr)				/* Not the same device  */
 		return (TRUE);
@@ -847,20 +795,18 @@ register char *dstptr;
 }
 
 
-int16_t fill_string(string, item)
-char *string;
-
-int16_t item;
+int16_t fill_string(P(char *)string, P(int16_t) item)
+PP(char *string;)
+PP(int16_t item;)
 {
-	char *ptr,
-	*ptr1;
+	char *ptr, *ptr1;
 
 	ptr1 = ptr = g_name(string);
 
 	while (*ptr1)
 	{
 		if ((*ptr1 == '[') || (*ptr1 == ']') || (*ptr1 == '|'))
-			strcpy(ptr1 + 1, ptr1);
+			strcpy(ptr1, ptr1 + 1);
 		else
 			ptr1++;
 	}
@@ -870,17 +816,15 @@ int16_t item;
 }
 
 
-/*	change from ascii to binary value	*/
-/*	TRUE is OK otherwise it is FALSE	*/
-
-int16_t asctobin(ptr, value)
-char *ptr;
-
-int32_t *value;
+/*
+ * change from ascii to binary value
+ * TRUE is OK otherwise it is FALSE
+ */
+BOOLEAN asctobin(P(char *)ptr, P(int32_t *)value)
+PP(char *ptr;)
+PP(int32_t *value;)
 {
-	int32_t n,
-	 n1;
-
+	int32_t n, n1;
 	uint16_t i;
 
 	for (n = 0, i = 0, n1 = 0; *ptr; ptr++)

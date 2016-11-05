@@ -21,93 +21,37 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
-
-extern int16_t mv_desk();
-
-extern char *get_fstring();
-
-extern APP *app_key();
-
-extern char *get_string();
-
-extern WINDOW *get_win();
-
-extern WINDOW *get_top();
-
-extern char *r_slash();
-
-extern char toupper();
-
-extern OBJECT *get_tree();
-
-extern WINDOW *w_gfirst();
-
-extern WINDOW *w_gnext();
-
-extern char *g_name();
+#include "desktop.h"
 
 #if TOSVERSION >= 0x400
 extern int32_t gl_vdo;
 #endif
 
-extern int16_t m_cpu;
-
-extern int16_t s_defdir;
-
-extern int16_t s_fullpath;
-
-extern int16_t numicon;
-
-extern int16_t gl_restype;
-
-extern char afile[];
-
-extern int16_t x_status;
-
-extern int16_t x_type;
-
-extern char mkeys[];
-
-extern char restable[];
-
-extern int16_t ftab[];
-
-extern int16_t st_keybd;
-
-int16_t d_exit;							/* desktop exit flag    */
-
 char mentable[MAXMENU];
-
-char *keytable;
-
-char *contable;
+STATIC char *keytable;
+STATIC char *contable;
 
 /*	Alternate keys table	*/
 
 /*	USA|UK|SPAIN|ITALY|SWEDEN	*/
-int16_t key1table[] = { 0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
+static int16_t const key1table[] = {
+	0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x3200, 0x3100,
 	0x1800, 0x1900, 0x1000, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x1100, 0x2d00, 0x1500, 0x2c00, 0
 };
 
 /*	GERMANY|SWISSFRE|SWISSGER	*/
-int16_t key2table[] = { 0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
+static int16_t const key2table[] = {
+	0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x3200, 0x3100,
 	0x1800, 0x1900, 0x1000, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x1100, 0x2d00, 0x2c00, 0x1500, 0
 };
 
 /*	FRENCH				*/
-int16_t key3table[] = { 0x1000, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
+static int16_t const key3table[] = {
+	0x1000, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x2700, 0x3100,
 	0x1800, 0x1900, 0x1e00, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x2c00, 0x2d00, 0x1500, 0x1100, 0
@@ -117,7 +61,8 @@ int16_t key3table[] = { 0x1000, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 /*	Control keys table	*/
 
 /*	USA|UK|SPAIN|ITALY|SWEDEN	*/
-int16_t con1table[] = { 0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
+static int16_t const con1table[] = {
+	0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
 	0x2308, 0x1709, 0x240a, 0x250b, 0x260c, 0x320d, 0x310e,
 	0x180f, 0x1910, 0x1011, 0x1312, 0x1f13, 0x1414, 0x1615,
 	0x2f16, 0x1117, 0x2d18, 0x1519, 0x2c1a, 0
@@ -131,31 +76,35 @@ int16_t con2table[] = { 0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
 };
 
 /*	FRENCH			*/
-int16_t con3table[] = { 0x1001, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
+static int16_t const con3table[] = {
+	0x1001, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
 	0x2308, 0x1709, 0x240a, 0x250b, 0x260c, 0x270d, 0x310e,
 	0x180f, 0x1910, 0x1e11, 0x1312, 0x1f13, 0x1414, 0x1615,
 	0x2f16, 0x2c17, 0x2d18, 0x1519, 0x111a, 0
 };
 
 /*	Arrow keys table	*/
-int16_t arrowtab[] = { 0x4d36, 0x5032, 0x4838, 0x4b34, 0x4800, 0x5000, 0x4d00,
+static int16_t const arrowtab[] = {
+	0x4d36, 0x5032, 0x4838, 0x4b34, 0x4800, 0x5000, 0x4d00,
 	0x4b00, 0
 };
 
 /*	Arrow keys Message	*/
-int16_t arrowimg[] = { 5, 1, 0, 4, 2, 3, 7, 6 };
+static int16_t const arrowimg[] = { 5, 1, 0, 4, 2, 3, 7, 6 };
 
-int16_t tb1[] = { NEWFITEM, CLSFITEM, CLSWITEM, BOTTOP, EXTMENU, SELALL, 0 };
-int16_t tb2[] = { REMVICON, SEAMENU, SHOWITEM, 0 };
+static int16_t const tb1[] = { NEWFITEM, CLSFITEM, CLSWITEM, BOTTOP, EXTMENU, SELALL, 0 };
+static int16_t const tb2[] = { REMVICON, SEAMENU, SHOWITEM, 0 };
 
-int16_t xxxview[9] = { ICONITEM, TEXTITEM, 0, NAMEITEM, DATEITEM, SIZEITEM,
+static int16_t const xxxview[9] = {
+	ICONITEM, TEXTITEM, 0, NAMEITEM, DATEITEM, SIZEITEM,
 	TYPEITEM, NOSORT, 0
 };
 
 /* cjg - added VIDITEM - 07/07/92 		*/
 /*	Moved VIDITEM after set preferences	*/
 /*	Take out BITBLT and PRINTITE		*/
-int16_t tb3[MAXMENU] = { OPENITEM, SHOWITEM, SEAMENU, DELMENU, NEWFITEM,
+int16_t const tb3[MAXMENU] = {
+	OPENITEM, SHOWITEM, SEAMENU, DELMENU, NEWFITEM,
 	CLSFITEM, CLSWITEM, BOTTOP, SELALL, EXTMENU,
 	FORMITEM, ICONITEM, TEXTITEM, NAMEITEM, DATEITEM,
 	SIZEITEM, TYPEITEM, NOSORT, SIZEFIT, SCOLTYPE,
@@ -165,26 +114,31 @@ int16_t tb3[MAXMENU] = { OPENITEM, SHOWITEM, SEAMENU, DELMENU, NEWFITEM,
 
 /*	Alternate Number Table	*/
 
-int16_t altnum[] = { 0x7800, 0x7900, 0x7a00, 0x7c00, 0x7d00, 0x7b00, 0 };
+static int16_t const altnum[] = { 0x7800, 0x7900, 0x7a00, 0x7c00, 0x7d00, 0x7b00, 0 };
 
-int16_t o_status;							/* for o_select */
-
+BOOLEAN o_status;							/* for o_select */
 WINDOW *o_win;
-
 int16_t o_type;
-
 int16_t o_item;
+
+
+int16_t loop_find PROTO((int16_t input, const int16_t *table, int16_t *index));
+VOID sel_all PROTO((NOTHING));
+VOID hd_keybd PROTO((uint16_t key));
+VOID foption PROTO((WINDOW *win));
+VOID do_scroll PROTO((int16_t *msgbuff));
+VOID do_opt PROTO((int16_t msgbuff));
+VOID hd_menu PROTO((int16_t *msgbuff));
+
 
 
 /*	Change one individual key	*/
 
-ch_key(i)
-int16_t i;
+VOID ch_key(P(int16_t) i)
+PP(int16_t i;)
 {
 	OBJECT *obj;
-
 	register int16_t l;
-
 	register char *str;
 
 	obj = menu_addr;
@@ -192,16 +146,19 @@ int16_t i;
 	l = strlen(str);
 	if (mentable[i])
 	{
-		strcpy("[ ]", &str[l - 3]);
+		strcpy(&str[l - 3], "[ ]");
 		str[l - 2] = mentable[i];
 	} else
-		strcpy("   ", &str[l - 3]);
+	{
+		strcpy(&str[l - 3], "   ");
+	}
 }
 
 
-/*	Put keys into the menus	*/
-
-put_keys()
+/*
+ * Put keys into the menus
+ */
+VOID put_keys(NOTHING)
 {
 	register int16_t i;
 
@@ -210,14 +167,13 @@ put_keys()
 }
 
 
-/*	Loop to find matching array	*/
-
-int16_t loop_find(input, table, index)
-int16_t input;
-
-int16_t table[];
-
-int16_t *index;
+/*
+ * Loop to find matching array
+ */
+int16_t loop_find(P(int16_t) input, P(const int16_t *) table, P(int16_t *)index)
+PP(int16_t input;)
+PP(const int16_t *table;)
+PP(int16_t *index;)
 {
 	register int16_t i;
 
@@ -237,18 +193,15 @@ int16_t *index;
 }
 
 
-/*	Enable or disable the menu item according to current status	*/
-
-menu_verify()
+/*
+ * Enable or disable the menu item according to current status
+ */
+VOID menu_verify(NOTHING)
 {
 	int16_t enable;
-
 	register int16_t i;
-
 	WINDOW *win;
-
 	int16_t type;
-
 	char *str;
 
 	/* If there is a window opened/closed   */
@@ -299,23 +252,21 @@ menu_verify()
 }
 
 
-/*	Select all objects inside the window	*/
-
-sel_all()
+/*
+ * Select all objects inside the window
+ */
+VOID sel_all(NOTHING)
 {
 	register WINDOW *win;
-
 	register DIR *dir;
-
 	register int16_t i;
-
 	char buffer[14];
 
 	if (win = w_gfirst())
 	{
 		clr_dicons();
 		dir = win->w_memory;
-		strcpy(g_name(win->w_path), buffer);
+		strcpy(buffer, g_name(win->w_path));
 		for (i = 0; i < win->w_items; i++)
 		{
 			if (wildcmp(buffer, dir[i].d_name))
@@ -327,25 +278,19 @@ sel_all()
 }
 
 
-/*	Handle the keyboard	*/
-
-hd_keybd(key)
-uint16_t key;
+/*
+ * Handle the keyboard
+ */
+VOID hd_keybd(P(uint16_t) key)
+PP(uint16_t key;)
 {
 	OBJECT *obj;
-
 	register WINDOW *win;
-
 	register int16_t item;
-
 	int16_t msgbuff[8];
-
 	char buffer[14];
-
 	int16_t i;
-
 	char *str;
-
 	APP *app;
 
 	switch (st_keybd)
@@ -459,7 +404,8 @@ uint16_t key;
 	{
 		if (win)
 			clr_xwin(win, TRUE);
-	  hx_1:strcpy(wildext, buffer);
+	hx_1:
+		strcpy(buffer, wildext);
 		buffer[0] = i + 'A';
 		open_disk(0, buffer, TRUE);
 		return;
@@ -471,13 +417,13 @@ uint16_t key;
 		{
 			if (win)					/* replace top window   */
 			{
-				strcpy(win->w_path, win->w_buf);
-				strcpy(g_name(win->w_path), buffer);
-				strcpy(wildext, win->w_path);
+				strcpy(win->w_buf, win->w_path);
+				strcpy(buffer, g_name(win->w_path));
+				strcpy(win->w_path, wildext);
 				win->w_path[0] = i + 'A';
 				rep_path(buffer, win->w_path);
 				if (!up_win(win, FALSE))
-					strcpy(win->w_buf, win->w_path);
+					strcpy(win->w_pat, win->w_bufh);
 				return;
 			} else						/* open a window    */
 				goto hx_1;
@@ -523,29 +469,27 @@ uint16_t key;
 }
 
 
-/*	Set file option		*/
-
-foption(win)
-register WINDOW *win;
+/*
+ * Set file option
+ */
+VOID foption(P(WINDOW *)win)
+PP(register WINDOW *win;)
 {
 	register OBJECT *obj;
-
 	char buffer[14];
-
 	char buf2[14];
-
 	char buf1[14];
 
 	obj = get_tree(FILEOPTI);
 	save_ext(win->w_path, buf2);
-	strcpy(buf2, buf1);
+	strcpy(buf1, buf2);
 	xinf_sset(obj, OPTNAME, buf2);
 	if (fmdodraw(FILEOPTI, 0) == OPTOK)
 	{
 		inf_sget(obj, OPTNAME, buffer);
 		unfmt_str(buffer, buf2);
 		if (!buf2[0])
-			strcpy(getall, buf2);
+			strcpy(buf2, getall);
 
 		if (!streq(buf1, buf2))
 		{
@@ -556,16 +500,12 @@ register WINDOW *win;
 }
 
 
-do_scroll(msgbuff)
-int16_t msgbuff[];
+VOID do_scroll(P(int16_t *)msgbuff)
+PP(int16_t *msgbuff;)
 {
 	register int16_t act;
-
 	register WINDOW *win;
-
-	int16_t bdown,
-	 x,
-	 y;
+	int16_t bdown, x, y;
 
 	act = msgbuff[4];
 
@@ -598,19 +538,15 @@ int16_t msgbuff[];
 
 
 
-/*	Do the option menu	*/
-
-do_opt(msgbuff)
-int16_t msgbuff;
+/*
+ * Do the option menu
+ */
+VOID do_opt(P(int16_t) msgbuff)
+PP(int16_t msgbuff;)
 {
 	register OBJECT *obj;
-
-	int16_t ret,
-	 button,
-	 handle;
-
+	int16_t ret, button, handle;
 	char buffer[16];
-
 	char *str;
 
 	switch (msgbuff)
@@ -652,9 +588,9 @@ int16_t msgbuff;
 		break;
 
 	case READINF:
-		strcpy("C:\\*.INF", path1);
+		strcpy(path1, "C:\\*.INF");
 		path1[0] = (isdrive() & 0x04) ? 'C' : 'A';
-		strcpy(&infpath[3], buffer);
+		strcpy(buffer, &infpath[3]);
 		fsel_exinput(path1, buffer, &button, get_fstring(SINF));
 		if (button)
 		{
@@ -671,12 +607,15 @@ int16_t msgbuff;
 					shel_put(afile, INFSIZE);	/* copy to the aes buffer */
 					d_exit = L_READINF;
 					wait_msg();
-					strcpy(path1, inf_path);	/* new inf path */
+					strcpy(inf_path, path1);	/* new inf path */
 				} else
+				{
 					do1_alert(ILLMAT);
+				}
 			} else
+			{
 				fill_string(path1, FNOTFIND);
-
+			}
 			desk_wait(FALSE);
 		}
 
@@ -726,13 +665,13 @@ int16_t msgbuff;
 }
 
 
-/*	Do the sorting menu	*/
-
-do_view(msgbuff)
-int16_t msgbuff;
+/*
+ * Do the sorting menu
+ */
+VOID do_view(P(int16_t) msgbuff)
+PP(int16_t msgbuff;)
 {
-	int16_t mode,
-	 i;
+	int16_t mode, i;
 
 	switch (msgbuff)
 	{
@@ -758,7 +697,7 @@ int16_t msgbuff;
 			break;
 
 		s_view = mode;
-		sort_show(FALSE, TRUE);
+		sort_show(0, TRUE);
 		break;
 
 	case NAMEITEM:
@@ -798,24 +737,18 @@ int16_t msgbuff;
 }
 
 
-/*	Do the file menu	*/
-
-int16_t do_file(msgbuff)
-int16_t msgbuff;
+/*
+ * Do the file menu
+ */
+VOID do_file(P(int16_t) msgbuff)
+PP(int16_t msgbuff;)
 {
 	OBJECT *obj;
-
-	int16_t ret,
-	 type;
-
+	int16_t ret, type;
 	register WINDOW *win;
-
 	char buffer[14];
-
 	char buf2[14];
-
 	char *str;
-
 	char *str1;
 
 	win = get_top();
@@ -827,7 +760,6 @@ int16_t msgbuff;
 			open_item(o_item, o_type, o_win);
 		else
 			launch_pref();
-
 		break;
 
 	case SHOWITEM:
@@ -847,7 +779,6 @@ int16_t msgbuff;
 					sea_file(buf2);
 			}
 		}
-
 		break;
 
 	case DELMENU:
@@ -870,7 +801,6 @@ int16_t msgbuff;
 				file_op(Nostr, OP_DELETE);
 			}
 		}
-
 		break;
 
 	case NEWFITEM:
@@ -898,7 +828,6 @@ int16_t msgbuff;
 	case EXTMENU:
 		if (win)
 			foption(win);
-
 		break;
 
 	case FORMITEM:
@@ -928,10 +857,11 @@ int16_t msgbuff;
 }
 
 
-/*	Handle Menu	*/
-
-int16_t hd_menu(msgbuff)
-register int16_t msgbuff[];
+/*
+ * Handle Menu
+ */
+VOID hd_menu(P(int16_t *)msgbuff)
+PP(register int16_t *msgbuff;)
 {
 	switch (msgbuff[3])
 	{
@@ -958,30 +888,23 @@ register int16_t msgbuff[];
 }
 
 
-/*	Handle all the different message	*/
-
-VOID hd_msg(msgbuff)
-register int16_t msgbuff[];
+/*
+ * Handle all the different messages
+ */
+VOID hd_msg(P(int16_t *)msgbuff)
+PP(register int16_t *msgbuff;)
 {
 	register int16_t handle;
-
 	register WINDOW *win;
-
 	register OBJECT *obj;
-
-	int16_t shrink,
-	 x,
-	 y,
-	 w,
-	 h;
-
+	int16_t shrink, x, y, w, h;
 	GRECT pt;
-
 	GRECT *pc;
 
 	if (msgbuff[0] == MN_SELECTED)
+	{
 		hd_menu(msgbuff);
-	else
+	} else
 	{
 		pc = &msgbuff[4];				/* pc == msgbuff[4,5,6,7]   */
 		handle = msgbuff[3];
@@ -1091,7 +1014,6 @@ register int16_t msgbuff[];
 				if (x != win->w_xcol)
 					do_redraw(win->w_id, &full, 0);
 			}
-
 			break;
 
 		default:
@@ -1101,19 +1023,13 @@ register int16_t msgbuff[];
 }
 
 
-/*	Handle all the events		*/
-
-VOID actions()
+/*
+ * Handle all the events
+ */
+VOID actions(NOTHING)
 {
-	int16_t event,
-	 kstate,
-	 kreturn,
-	 button,
-	 clicks;
-
-	int16_t mx,
-	 my;
-
+	int16_t event, kstate, kreturn, button, clicks;
+	int16_t mx, my;
 	int16_t msgbuff[8];
 
 	d_exit = L_NOEXIT;
@@ -1143,18 +1059,15 @@ VOID actions()
 }
 
 
-/*	Find out available memory	*/
-
-int32_t av_mem()
+/*
+ * Find out available memory
+ */
+int32_t av_mem(NOTHING)
 {
 	register char *start;
-
 	register char *addr;
-
 	register char **new;
-
-	int32_t total,
-	 size;
+	int32_t total, size;
 
 	total = 0;
 	start = (char *) 0;
@@ -1192,37 +1105,26 @@ int32_t av_mem()
 		}
 	}
 
-	return (total);
+	return total;
 }
 
-#if 0
-/*	Find out available memory	*/
 
-av_desk()
+#if 0
+/*
+ * Find out available memory
+ */
+BOIF av_desk(NOTHING)
 {
 	register OBJECT *obj;
-
 	register int32_t f;
-
-	register int16_t fi,
-	 i,
-	 menui,
-	 which;
-
+	register int16_t fi, i, menui, which;
 	register APP *app;
-
 	int16_t len;
-
 	APP *xapp;
-
 	char *str;
-
 	char temp[MAXMENU];
-
 	OBJECT *obj1;
-
 	char buf[2];
-
 
 	obj = get_tree(SSYSTEM);
 	obj1 = menu_addr;
@@ -1360,14 +1262,14 @@ av_desk()
 				goto ad_3;
 			else
 				f++;
-
 			break;
 
 		case SDDOWN:
 			f++;
 			if (f <= 20)
 			{
-			  ad_3:if (!(xapp = app_key(ftab[f])))
+		 ad_3:
+		 		if (!(xapp = app_key(ftab[f])))
 					goto ad_2;
 				else
 				{
@@ -1379,8 +1281,9 @@ av_desk()
 					draw_fld(obj, SDKEY);
 				}
 			} else
+			{
 				f--;
-
+			}
 			break;
 
 		case SDLEFT:
@@ -1407,8 +1310,7 @@ av_desk()
 			(TEDINFO *) (obj[SDFILE].ob_spec)->te_ptext = &app->a_name[fi];
 			draw_fld(obj, SDFILE);
 			goto ad_5;
-
-		}								/* switch */
+		}
 
 		cl_delay();
 	}

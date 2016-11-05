@@ -6,81 +6,44 @@
 /*	Copyright 1989,1990 	All Rights Reserved			*/
 /************************************************************************/
 
-#include <portab.h>
-#include <mobdefs.h>
-#include <defines.h>
-#include <window.h>
-#include <gemdefs.h>
-#include <deskusa.h>
-#include <osbind.h>
-#include <extern.h>
-
-extern char *scasb();
-
-extern char afile[];
-
-extern char *r_slash();
-
-extern char *escan_str();
-
-extern char *strcpy();
-
-extern char *escan_str();
-
-extern char *save_str();
+#include "desktop.h"
 
 
 char *q_addr;							/* Inf file address */
 
-int16_t q_change;							/* Inf file is changed  */
+BOOLEAN q_change;						/* Inf file is changed  */
 
-char *newbuff;
+STATIC char *newbuff;
 
-char q_path[40];
+STATIC char q_path[40]; /* unused */
 
 /*	Load in the new inf	*/
 
-int16_t q_inf()
+VOID q_inf(NOTHING)
 {
 	if (q_addr = Malloc((int32_t) (INFSIZE)))
 	{
 		q_change = FALSE;
 		bfill(INFSIZE, 0, q_addr);
-		strcpy(afile, q_addr);
+		strcpy(q_addr, afile);
 	}
 }
 
 
 /*	Search the matching file and modify the inf file	*/
 
-int16_t q_sea(old, new)
-char *old;
-
-char *new;
+int16_t q_sea(P(char *) old, P(char *) new)
+PP(char *old;)
+PP(char *new;)
 {
-	register char *ptr1,
-	*copy1,
-	*copy2;
-
-	char *end2,
-	*p,
-	*end,
-	*sl;
-
+	register char *ptr1, *copy1, *copy2;
+	char *end2, *p, *end, *sl;
 	register char temp;
-
 	char save;
-
-	int16_t alloc,
-	 special,
-	 offset;
-
+	int16_t alloc, special, offset;
 	char buffer[16];
-
 	char argu[ARGULEN];
-
-	char tmp1,
-	 tmp2;
+	char tmp1, tmp2;
 
 	copy1 = ptr1 = q_addr;
 	alloc = FALSE;
@@ -153,7 +116,7 @@ char *new;
 				if (new)				/* Modify the path  */
 				{
 					*p = 0;
-					copy2 = strcpy(copy1, copy2) - 1;
+					copy2 = strcpy(copy2, copy1) - 1;
 					copy2 = save_str(copy2, new);
 					if (temp == 'V')
 						copy2 = save_str(copy2 - 2, wilds);
@@ -166,7 +129,7 @@ char *new;
 				} else					/* remove the path  */
 				{
 					*(ptr1 - 1) = 0;
-					copy2 = strcpy(copy1, copy2) - 1;
+					copy2 = strcpy(copy2, copy1) - 1;
 					*(ptr1 - 1) = '#';
 				}
 
@@ -183,7 +146,7 @@ char *new;
 
 	if (alloc)							/* swap the buffer  */
 	{
-		strcpy(copy1, copy2);
+		strcpy(copy2, copy1);
 		Mfree(q_addr);
 		q_addr = newbuff;
 	}
@@ -193,7 +156,7 @@ char *new;
 /*	Write out the new inf file	*/
 /*	always write out newdesk.inf	*/
 
-q_write()
+VOID q_write(NOTHING)
 {
 	register int16_t handle;
 
