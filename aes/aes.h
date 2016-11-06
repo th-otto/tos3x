@@ -324,13 +324,12 @@ int16_t strchk PROTO((const char *s, const char *t));
 VOID fmt_str PROTO((const char *instr, char *outstr));
 VOID unfmt_str PROTO((const char *instr, char *outstr));
 VOID fs_sset PROTO((LPTREE tree, int16_t obj, char *pstr, char **ptext, int16_t *ptxtlen));
-VOID inf_sset PROTO((LPTREE tree, int16_t obj, char *pstr));
-VOID fs_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
-VOID inf_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
+VOID inf_sset PROTO((OBJECT *tree, int16_t obj, char *pstr));
+VOID fs_sget PROTO((OBJECT *tree, int16_t obj, char *pstr));
 VOID inf_fldset PROTO((LPTREE tree, int16_t obj, uint16_t testfld, uint16_t testbit, uint16_t truestate, uint16_t falsestate));
 int16_t inf_gindex PROTO((LPTREE tree, int16_t baseobj, int16_t numobj));
 int16_t inf_what PROTO((LPTREE tree, int16_t ok, int16_t cncl));
-int16_t merge_str PROTO((char *pdst, char *ptmp, int16_t *parms));
+int16_t merge_str PROTO((char *pdst, const char *ptmp, VOIDPTR parms));
 int16_t wildcmp PROTO((const char *pwild, const char *ptest));
 
 
@@ -495,7 +494,7 @@ int16_t fm_keybd PROTO((LPTREE tree, int16_t obj, int16_t *pchar, int16_t *pnew_
 int16_t fm_button PROTO((LPTREE tree, int16_t new_obj, int16_t clks, int16_t *pnew_obj));
 int16_t fm_do PROTO((LPTREE tree, int16_t start_fld));
 VOID fm_dial PROTO((int16_t fmd_type, GRECT *pi, GRECT *pt));
-int16_t fm_show PROTO((int16_t string, int16_t *pwd, int16_t level));
+int16_t fm_show PROTO((int16_t string, VOIDPTR pwd, int16_t level));
 int16_t eralert PROTO((int16_t n, int16_t d));
 BOOLEAN fm_error PROTO((int16_t n));
 
@@ -745,7 +744,7 @@ int16_t gsx_tcalc PROTO((int16_t font, const char *ptext, int16_t ptextw, int16_
 int16_t gsx_tblt PROTO((int16_t tb_f, int16_t x, int16_t y, int16_t tb_nc));
 VOID gsx_xbox PROTO((GRECT *pt));
 VOID gsx_xcbox PROTO((GRECT *pt));
-VOID gsx_xline PROTO((int16_t ptscount, int16_t ppoints));
+VOID gsx_xline PROTO((int16_t ptscount, int16_t *ppoints));
 uint16_t ch_width PROTO((int16_t fn));
 uint16_t ch_height PROTO((int16_t fn));
 
@@ -793,6 +792,7 @@ BOOLEAN rsc_read PROTO((NOTHING));
 extern RSHDR *rs_hdr;
 extern intptr_t rs_global;
 
+VOID rs_sglobe PROTO((intptr_t pglobal)); /* also referenced by DESKTOP */
 int16_t rs_obfix PROTO((LPTREE tree, P(int16_t) curob));
 char *rs_str PROTO((int16_t stnum));
 int16_t rs_free PROTO((intptr_t pglobal));
@@ -820,7 +820,7 @@ extern int16_t sh_gem;
 extern char *ad_envrn;
 extern char *ad_shcmd;
 extern char *ad_shtail;
-extern int16_t sh_iscart;
+extern BOOLEAN sh_iscart;
 extern char *ad_path;
 
 int16_t sh_read PROTO((char *pcmd, char *ptail));
@@ -966,6 +966,8 @@ BOOLEAN cart_init PROTO((NOTHING));
 BOOLEAN cart_exec PROTO((const char *pcmd, const char *ptail));
 BOOLEAN c_sfirst PROTO((const char *path));
 int16_t ld_cartacc PROTO((NOTHING));
+BOOLEAN cart_sfirst PROTO((char *pdta, int16_t attr)); /* also referenced by DESKTOP */
+BOOLEAN cart_snext PROTO((NOTHING)); /* also referenced by DESKTOP */
 
 
 /*
@@ -1038,7 +1040,7 @@ extern char const infdata[]; /* "DESKTOP.INF" */
 extern BOOLEAN do_once; /* used by desktop only */
 #endif
 
-int16_t XDeselect PROTO((OBJECT *tree, int16_t obj));
+VOID XDeselect PROTO((OBJECT *tree, int16_t obj));
 BOOLEAN getcookie PROTO((int32_t cookie, int32_t *val));
 char *scan_2 PROTO((char *pcurr, int16_t *pwd));
 char *escan_str PROTO((char *pcurr, char *ppstr));

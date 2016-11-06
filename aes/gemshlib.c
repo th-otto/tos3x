@@ -136,8 +136,8 @@ char *ad_shcmd;
 
 char *ad_shtail;
 
-/* cart program     */
-int16_t sh_iscart;
+/* cart program */
+BOOLEAN sh_iscart;
 
 char *ad_path;
 

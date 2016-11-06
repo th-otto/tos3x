@@ -256,7 +256,7 @@ PP(char *lstring;)
 	{
 		dos_free(ad_fsdta);
 	  bye:dos_free(pxpath);
-	  bye2:fm_show(NOMEMORY, 0x0L, 1);
+	  bye2:fm_show(NOMEMORY, NULL, 1);
 		return (FALSE);
 	} else
 		ad_fsnames = dos_alloc(mul);

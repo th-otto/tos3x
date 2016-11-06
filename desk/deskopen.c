@@ -1,24 +1,24 @@
-/*	DESKOPEN.C		3/16/89 - 5/23/89	Derek Mui	*/
-/*	Fix show item		9/6/89			D.Mui		*/
-/*	Fixed open dir when there is no window	7/20/90	D.Mui		*/
-/*	Fixed at do_box when it is from desktop	5/2/91	D.Mui		*/
-/*	Change all the iconblk to ciconblk	7/11/92	D.Mui		*/
-/*	FILEFT and FIRIGHT are inverted when    8/06/92 c.gee		*/
-/*	selected.							*/
-/*									*/
+/*      DESKOPEN.C              3/16/89 - 5/23/89       Derek Mui       */
+/*      Fix show item           9/6/89                  D.Mui           */
+/*      Fixed open dir when there is no window  7/20/90 D.Mui           */
+/*      Fixed at do_box when it is from desktop 5/2/91  D.Mui           */
+/*      Change all the iconblk to ciconblk      7/11/92 D.Mui           */
+/*      FILEFT and FIRIGHT are inverted when    8/06/92 c.gee           */
+/*      selected.                                                       */
+/*                                                                      */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
 
-VOID xvq_chcells PROTO((int16_t *num));
 VOID sh_witem PROTO((NOTHING));
 BOOLEAN sh_disk PROTO((char *buffer));
 BOOLEAN drv_exist PROTO((int16_t id));
+VOID locate_item PROTO((int16_t item, const char **path, BOOLEAN file));
 
 
 
@@ -69,9 +69,9 @@ PP(register WINDOW *win;)
 	i = 0;
 	len = strlen(win->w_path);
 
-	if ((win->w_sizes.w >= full.w) || (len >= 127))
+	if (win->w_sizes.g_w >= full.g_w || len >= 127)
 	{
-		num = (win->w_sizes.w - (2 * gl_wbox)) / gl_wchar;
+		num = (win->w_sizes.g_w - (2 * gl_wbox)) / gl_wchar;
 		if (len > num)
 			i = len - num;
 	}
@@ -85,7 +85,7 @@ PP(register WINDOW *win;)
  * init -- initalize window
  * open -- open a disk
  */
-int16_t open_subdir(P(WINDOW *)win, P(int16_t) icon, P(BOOLEAN) opendisk, P(BOOLEAN) init, P(BOOLEAN) redraw)
+BOOLEAN open_subdir(P(WINDOW *)win, P(int16_t) icon, P(BOOLEAN) opendisk, P(BOOLEAN) init, P(BOOLEAN) redraw)
 PP(register WINDOW *win;)
 PP(int16_t icon;)
 PP(BOOLEAN opendisk;)
@@ -93,9 +93,13 @@ PP(BOOLEAN init;)
 PP(BOOLEAN redraw;)
 {
 	int16_t handle, num, len, i;
-	int16_t status;
+	BOOLEAN status;
 	char *path;
 
+	UNUSED(i);
+	UNUSED(len);
+	UNUSED(num);
+	
 	desk_wait(TRUE);
 	status = FALSE;
 
@@ -113,7 +117,7 @@ PP(BOOLEAN redraw;)
 			wind_set(handle, WF_VSLIDE, 0, 0, 0, 0);
 			win->w_coli = 0;
 			win->w_rowi = 0;
-			win->w_obj->ob_width = win->w_work.w;
+			win->w_obj->ob_width = win->w_work.g_w;
 		}
 
 		ch_path(win);					/* check and set the path   */
@@ -136,7 +140,8 @@ PP(BOOLEAN redraw;)
 		do_redraw(win->w_id, &win->w_work, 0);
 
 	desk_wait(FALSE);
-	return (status);
+	UNUSED(path);
+	return status;
 }
 
 
@@ -145,10 +150,11 @@ VOID show_item(NOTHING)
 	register WINDOW *win;
 
 	if (x_status)						/* something is selected    */
-		sh_witem();
-	else
 	{
-		if (win = w_gfirst())
+		sh_witem();
+	} else
+	{
+		if ((win = w_gfirst()) != NULL)
 		{
 			strcpy(win->w_buf, wildext);
 			win->w_buf[0] = win->w_path[0];
@@ -158,8 +164,9 @@ VOID show_item(NOTHING)
 }
 
 
-/*	Show the info of an item	*/
-
+/*
+ * Show the info of an item
+ */
 VOID sh_witem(NOTHING)
 {
 	DIR dir1;
@@ -171,15 +178,17 @@ VOID sh_witem(NOTHING)
 	int16_t opened, subtype;
 	int32_t ndir, nfile, nsize;
 	char buffer[20];
-	char newname[14];
+	char newname[NAMELEN];
 	int32_t sizes[4];
 	char *newstr;
 	char *oldstr;
 	uint16_t len, pos;
-	char *file;
+	const char *file;
 	char *savestr;
 	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
 
+	UNUSED(sizes);
+	
 	changed = FALSE;					/* any changes made?    */
 	cont = TRUE;
 	opened = FALSE;
@@ -200,18 +209,23 @@ VOID sh_witem(NOTHING)
 		curri = 0;
 	}
 
+#if !BINEXACT
+	subtype = 0; /* quiet compiler */
+	dir2 = NULL; /* quiet compiler */
+#endif
 	while (cont)
 	{									/* desktop icon     */
 		if (x_type == DESKICON)
 		{
-		  ss_1:for (; curri <= limit; curri++)
+		ss_1:
+			for (; curri <= limit; curri++)
 			{
 				if (background[curri].ob_state & SELECTED)
 					goto ss_2;
 			}
 			goto ss_5;
 
-		  ss_2:
+		ss_2:
 			subtype = backid[curri].i_type;
 			file = backid[curri].i_path;
 
@@ -226,7 +240,7 @@ VOID sh_witem(NOTHING)
 				goto ss_1;
 			case DISK:
 				strcpy(buffer, wildext);
-				buffer[0] = (CICONBLK *) (background[curri++].ob_spec)->monoblk.ib_char[1];
+				buffer[0] = ((CICONBLK *) (background[curri++].ob_spec))->monoblk.ib_char[1];
 				if (sh_disk(buffer))
 					goto ss_1;
 				else
@@ -245,7 +259,7 @@ VOID sh_witem(NOTHING)
 			{
 				if (m_sfirst(file, 0x31))	/* get the dir block    */
 				{
-					fill_string(file, FNOTFIND);
+					fill_string(NO_CONST(file), FNOTFIND); /* BUG: if "file" contains '[' or '|', fill_string will modify it */
 					goto ss_1;
 				}
 			}
@@ -260,7 +274,7 @@ VOID sh_witem(NOTHING)
 			}
 
 			goto ss_5;
-		  ss_3:
+		ss_3:
 			dir1 = dir2[curri];
 			file = put_name(x_win, dir2[curri].d_name);
 			curri++;
@@ -274,10 +288,10 @@ VOID sh_witem(NOTHING)
 
 		dir = &dir1;
 		len = strlen(file) + 20;		/* file's name length   */
-		newstr = Malloc((int32_t) len);
-		oldstr = Malloc((int32_t) len);
+		newstr = (char *)Malloc((int32_t) len);
+		oldstr = (char *)Malloc((int32_t) len);
 
-		if ((!newstr) || (!oldstr))
+		if (!newstr || !oldstr)
 		{
 			do1_alert(FCNOMEM);
 			goto ss_5;
@@ -285,7 +299,7 @@ VOID sh_witem(NOTHING)
 
 		strcpy(oldstr, file);
 
-		if ((x_type == DESKICON) && (subtype == XDIR))
+		if (x_type == DESKICON && subtype == XDIR)
 		{
 			*r_slash(oldstr) = 0;
 			if (m_sfirst(oldstr, 0x31))
@@ -303,7 +317,7 @@ VOID sh_witem(NOTHING)
 		if (dir->d_att & SUBDIR)		/* directory file   */
 		{
 			strcat(newstr, wilds);		/* attach wild card */
-			/*	    i_status = FALSE;	*//* force it to do only one file */
+			/* i_status = FALSE; */		/* force it to do only one file */
 
 			if (dofiles(newstr, newstr, OP_COUNT, &ndir, &nfile, &nsize, TEXT, FALSE))
 			{
@@ -314,13 +328,13 @@ VOID sh_witem(NOTHING)
 				goto ss_5;
 
 			*r_slash(newstr) = 0;
-			(TEDINFO *) (obj[INFTITLE].ob_spec)->te_ptext = get_fstring(FOLDINFO);
+			((TEDINFO *) (obj[INFTITLE].ob_spec))->te_ptext = get_fstring(FOLDINFO);
 		} else
 		{
-			*(char *) ((TEDINFO *) (obj[FINFOLDS].ob_spec)->te_ptext) = 0;
-			*(char *) ((TEDINFO *) (obj[FINFILES].ob_spec)->te_ptext) = 0;
+			*(((TEDINFO *) (obj[FINFOLDS].ob_spec))->te_ptext) = 0;
+			*(((TEDINFO *) (obj[FINFILES].ob_spec))->te_ptext) = 0;
 			f_str(obj, FISIZE, dir->d_size);
-			(TEDINFO *) (obj[INFTITLE].ob_spec)->te_ptext = get_fstring(FILEINFO);
+			((TEDINFO *) (obj[INFTITLE].ob_spec))->te_ptext = get_fstring(FILEINFO);
 		}
 
 		fmt_time(dir->d_time, buffer);	/* put in time  */
@@ -328,9 +342,9 @@ VOID sh_witem(NOTHING)
 		fmt_date(dir->d_date, buffer);
 		inf_sset(obj, FIDATE, buffer);
 
-		savestr = (TEDINFO *) (obj[FIFILE].ob_spec)->te_ptext;
+		savestr = ((TEDINFO *) (obj[FIFILE].ob_spec))->te_ptext;
 		len = strlen(savestr);
-	  sf_1:
+	sf_1:
 		if (!(dir->d_att & SUBDIR))
 		{
 			obj[FIRONLY].ob_state = (dir->d_att & READ) ? SELECTED : NORMAL;
@@ -342,12 +356,13 @@ VOID sh_witem(NOTHING)
 		}
 		/* put in name  */
 		xinf_sset(obj, FINAME, dir->d_name);
-		(TEDINFO *) (obj[FIFILE].ob_spec)->te_ptext = oldstr;
+		((TEDINFO *) (obj[FIFILE].ob_spec))->te_ptext = oldstr;
 		pos = 0;						/* text position    */
 
 		fm_draw(ADFILEIN);
 		opened = TRUE;
-	  ss_7:which = xform_do(obj, 0);
+	ss_7:
+		which = xform_do(obj, 0);
 
 		if (which == FIRIGHT)
 		{
@@ -371,7 +386,7 @@ VOID sh_witem(NOTHING)
 				pos--;
 			  ss_8:
 				XSelect(obj, which);	/* cjg 08/06/92 */
-				(TEDINFO *) (obj[FIFILE].ob_spec)->te_ptext = &oldstr[pos];
+				((TEDINFO *) (obj[FIFILE].ob_spec))->te_ptext = &oldstr[pos];
 				draw_fld(obj, FIFILE);
 
 				graf_mkstate(&mk_x, &mk_y, &mk_buttons, &mk_kstate);
@@ -391,11 +406,11 @@ VOID sh_witem(NOTHING)
 
 		desk_wait(TRUE);
 
-		(TEDINFO *) (obj[FIFILE].ob_spec)->te_ptext = savestr;
+		((TEDINFO *) (obj[FIFILE].ob_spec))->te_ptext = savestr;
 
 		if (which == FIOK)				/* OK       */
 		{
-			inf_sget(obj, FINAME, buffer);
+			fs_sget((LPTREE)obj, FINAME, buffer);
 			unfmt_str(buffer, newname);
 			rep_path(newname, newstr);
 
@@ -498,7 +513,9 @@ PP(char *buffer;)
 	buffer[1] = ':';
 	ndir = nfile = nsize = 0;
 
-	/*	i_status = FALSE;	*//* force to do only one item    */
+#if 0
+	i_status = FALSE;	/* force to do only one item    */
+#endif
 
 	if (dofiles(buffer, buffer, OP_COUNT, &ndir, &nfile, &nsize, TEXT, FALSE))
 	{
@@ -535,14 +552,21 @@ PP(register WINDOW *win;)
 	int16_t item;
 	char buffer[14];
 
+	UNUSED(ptr);
 	save_mid(win->w_path, buffer);
 	if (cut_path(win->w_path))			/* close a folder   */
 	{
 		do_box(win, 0, FALSE, FALSE, FALSE);
-		if (!(open_subdir(win, item, FALSE, TRUE, TRUE)))
+#if !BINEXACT
+		/* BUG: item uninitialized */
+		item = 0;
+#endif
+		if (!open_subdir(win, item, FALSE, TRUE, TRUE))
 			cat_path(buffer, win->w_path);
 	} else
+	{
 		close_top();
+	}
 }
 
 
@@ -553,7 +577,7 @@ VOID close_top(NOTHING)
 {
 	register WINDOW *win;
 
-	if (win = get_top())
+	if ((win = get_top()) != NULL)
 	{
 		do_box(win, win->w_icon, TRUE, FALSE, FALSE);
 		close_window(win->w_id, TRUE);	/* close it */
@@ -583,19 +607,20 @@ PP(WINDOW *win;)
 		case XFILE:					/* show or executable   */
 			if (m_sfirst(itype->i_path, 0x31))
 			{
-				ret = fill_string(itype->i_path, XNFILE);
+				ret = fill_string(NO_CONST(itype->i_path), XNFILE); /* BUG: if "i_path" contains '[' or '|', fill_string will modify it */
 				goto o_1;				/* file not found   */
 			} else
-				open_file((WINDOW *) 0, item, Nostr);
-
+			{
+				open_file(NULL, item, Nostr);
+			}
 			break;
 
 		case XDIR:						/* open a folder    */
 			if (m_sfirst(itype->i_path, 0x31))
 			{
-				save_mid(itype->i_path, buffer);
+				save_mid(NO_CONST(itype->i_path), buffer); /* BUG: same_mid will modify i_path */
 				ret = fill_string(buffer, XNFILE);
-			  o_1:
+			o_1:
 				if (ret == 1)
 				{
 					background[item].ob_flags |= HIDETREE;
@@ -606,8 +631,9 @@ PP(WINDOW *win;)
 				if (ret == 2)
 					locate_item(item, &itype->i_path, (itype->i_type == XFILE) ? TRUE : FALSE);
 			} else
+			{
 				open_disk(item, itype->i_path, TRUE);
-
+			}
 			break;
 
 		case DISK:						/* open a disk      */
@@ -639,18 +665,22 @@ PP(WINDOW *win;)
 /*
  * Open a file, it may be an executable file
  */
-VOID open_file(P(WINDOW *)win, P(int16_t) item, P(char *)tail)
+VOID open_file(P(WINDOW *)win, P(int16_t) item, P(const char *)tail)
 PP(register WINDOW *win;)
 PP(int16_t item;)
-PP(char *tail;)
+PP(const char *tail;)
 {
 	int16_t i, dump, key;
 	register DIR *dir;
-	char buffer[14];
+	char buffer[NAMELEN];
 
+	UNUSED(buffer);
+	UNUSED(i);
+	
 	if (!win)							/* open from the desktop    */
+	{
 		exec_file(backid[item].i_path, win, item, tail);
-	else
+	} else
 	{
 		dir = get_dir(win, item);
 
@@ -658,7 +688,7 @@ PP(char *tail;)
 		{
 			graf_mkstate(&dump, &dump, &dump, &key);
 
-			if (key == K_ALT) /* WTF? */
+			if (key == K_ALT)
 			{
 				strcpy(path3, win->w_path);
 				cat_path(dir->d_name, path3);
@@ -672,11 +702,14 @@ PP(char *tail;)
 			}
 		} else							/* open exec file   */
 		{								/* deselect the item    */
-/*	    get_dir( win, item )->d_state = NORMAL;
-	    win->w_obj[item].ob_state = NORMAL;
-*/
+#if 0
+			get_dir(win, item)->d_state = NORMAL;
+			win->w_obj[item].ob_state = NORMAL;
+#endif
 			exec_file(put_name(win, dir->d_name), win, item, tail);
-/*	    winfo( win );	*/
+#if 0
+			winfo(win);
+#endif
 		}
 	}
 }
@@ -685,9 +718,9 @@ PP(char *tail;)
 /*
  * open a disk icon
  */
-int16_t open_disk(P(int16_t) icon, P(char *)path, P(BOOLEAN) init)
+BOOLEAN open_disk(P(int16_t) icon, P(const char *)path, P(BOOLEAN) init)
 PP(int16_t icon;								/* icon number  */)
-PP(char *path;)
+PP(const char *path;)
 PP(BOOLEAN init;)
 {
 	int16_t handle;
@@ -709,8 +742,9 @@ PP(BOOLEAN init;)
 	if (c_path_alloc(path))				/* check the path length    */
 	{
 		if ((handle = create_window()) == -1)
+		{
 			do1_alert(STNOWIND);
-		else
+		} else
 		{
 			win = get_win(handle);
 			strcpy(win->w_path, path);
@@ -751,16 +785,16 @@ PP(BOOLEAN openfull;)
 		else
 			rc_copy(&win->w_work, &pc);
 
-		pc.w = 0;
-		pc.h = 0;
+		pc.g_w = 0;
+		pc.g_h = 0;
 	} else
 	{
-		objc_offset(obj, item, &pc.x, &pc.y);
-		pc.w = gl_wbox;
-		pc.h = gl_hbox;
+		objc_offset(obj, item, &pc.g_x, &pc.g_y);
+		pc.g_w = gl_wbox;
+		pc.g_h = gl_hbox;
 	}
 
-	form_dial((open) ? FMD_GROW : FMD_SHRINK, pc.x, pc.y, pc.w, pc.h, dc.x, dc.y, dc.w, dc.h);
+	form_dial((open) ? FMD_GROW : FMD_SHRINK, pc.g_x, pc.g_y, pc.g_w, pc.g_h, dc.g_x, dc.g_y, dc.g_w, dc.g_h);
 }
 
 
@@ -839,7 +873,7 @@ PP(register char *new;)
 					{
 						if (type == XDIR)	/* append wild card */
 						{
-							if (addr = Malloc((int32_t) (strlen(new) + 10)))
+							if ((addr = (char *)Malloc((int32_t) (strlen(new) + 10))))
 							{
 								strcpy(addr, new);
 								strcat(addr, wilds);
@@ -884,9 +918,9 @@ PP(register char *new;)
 /*
  * Locate an item
  */
-VOID locate_item(P(int16_t) item, P(char *)path, P(BOOLEAN) file)
+VOID locate_item(P(int16_t) item, P(const char **)path, P(BOOLEAN) file)
 PP(int16_t item;)
-PP(char *path;)
+PP(const char **path;)
 PP(BOOLEAN file;)
 {
 	int16_t button;

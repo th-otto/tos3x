@@ -1,10 +1,10 @@
-/*	DESKBUTT.C		3/16/89 - 3/22/89	Derek Mui	*/
-/*	Foption( win )		9/14/89			D.Mui		*/
+/*      DESKBUTT.C              3/16/89 - 3/22/89       Derek Mui       */
+/*      Foption( win )          9/14/89                 D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -27,8 +27,8 @@ int16_t av_icon(NOTHING)
 		if (obj[i].ob_flags & HIDETREE)
 		{
 			k = i;
-			col = full.w / r_dicon.w;
-			row = full.h / r_dicon.h;
+			col = full.g_w / r_dicon.g_w;
+			row = full.g_h / r_dicon.g_h;
 
 			for (xrow = 0; xrow < row; xrow++)
 			{
@@ -54,7 +54,7 @@ int16_t av_icon(NOTHING)
 				}
 			}
 		  av_1:
-			backid[k].i_path = (char *) 0;
+			backid[k].i_path = NULL;
 			obj[k].ob_flags = NONE;
 			obj[k].ob_state = NORMAL;
 			obj[k].ob_x = x;
@@ -134,7 +134,7 @@ PP(int16_t my;)
 			} else						/* hit something    */
 			{
 				obj = win->w_obj;
-				state = obj[item].ob_states;
+				state = obj[item].ob_state;
 
 				if ((state & SELECTED) && (!keypress))
 					goto a_1;
@@ -146,7 +146,7 @@ PP(int16_t my;)
 				} else
 					state ^= SELECTED;
 
-				obj[item].ob_states = state;
+				obj[item].ob_state = state;
 				get_dir(win, item)->d_state = state;
 				do_redraw(win->w_id, &full, item);
 				winfo(win);
@@ -177,7 +177,7 @@ PP(int16_t my;)
 				} else
 					state ^= SELECTED;
 
-				obj[item].ob_states = state;
+				obj[item].ob_state = state;
 				do_redraw(0, &full, item);
 			}
 		}

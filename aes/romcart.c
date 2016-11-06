@@ -56,8 +56,6 @@ STATIC char *cart_dta;
 
 
 CARTNODE *cart_find PROTO((int16_t fill));
-BOOLEAN cart_sfirst PROTO((char *pdta, int16_t attr));
-BOOLEAN cart_snext PROTO((NOTHING));
 
 
 
@@ -95,7 +93,7 @@ PP(int16_t fill;)
 		}
 		pcart = cart_ptr;
 		cart_ptr = cart_ptr->c_next;	/* point to next    */
-		return (pcart);
+		return pcart;
 	}
 	return NULL;
 }
@@ -106,9 +104,10 @@ BOOLEAN cart_sfirst(P(char *) pdta, P(int16_t) attr)
 PP(char *pdta;)
 PP(int16_t attr;)
 {
+	UNUSED(attr);
 	cart_dta = pdta;
 	cart_init();
-	return (cart_snext());
+	return cart_snext();
 }
 
 

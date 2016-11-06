@@ -1,9 +1,9 @@
-/*	DESKAPP.C		3/18/89 - 9/18/89	Derek Mui	*/
+/*      DESKAPP.C               3/18/89 - 9/18/89       Derek Mui       */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -28,8 +28,7 @@ PP(register int16_t res;)
 /*
  * Find the application's icon type
  */
-
-APP *app_icon(P(const char *)name, P(int16_t) type, P(int16_t) icon)
+APP *app_icon(P(const char *)name, P(int16_t) type, P(int16_t) *icon)
 PP(register char *name;)
 PP(int16_t type;)								/* looking for same type    */
 PP(int16_t *icon;)								/* icon number          */
@@ -148,7 +147,7 @@ APP *app_alloc(NOTHING)
  */
 APP *app_xtype(P(const char *)name, P(BOOLEAN *) install)
 PP(register const char *name;)
-BOOLEAN *install;							/* application installed    */
+PP(BOOLEAN *install;)							/* application installed    */
 {
 	register APP *app;
 	APP *markapp;
@@ -209,8 +208,10 @@ int16_t const ftab[] = { 0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 	F11, F12, F13, F14, F15, F16, F17, F18, F19, F20
 };
 
-/*	Find the key that matches the application	*/
 
+/*
+ * Find the key that matches the application
+ */
 APP *app_key(P(int16_t) key)
 PP(int16_t key;)
 {

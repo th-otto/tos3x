@@ -1,26 +1,26 @@
-/*	DESKSHELL.C		4/24/89	- 6/15/89	Derek Mui	*/
-/*	Take out vdi_handle	6/28/89					*/
-/*	Modify exec_file, run_it	9/13/89		D.Mui		*/
-/*	Check undo key during printing	9/26/89		D.Mui		*/
+/*      DESKSHELL.C             4/24/89 - 6/15/89       Derek Mui       */
+/*      Take out vdi_handle     6/28/89                                 */
+/*      Modify exec_file, run_it        9/13/89         D.Mui           */
+/*      Check undo key during printing  9/26/89         D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
 
-BOOLEAN xch_tail PROTO((char *ptr, char *argu, char *tail));
+BOOLEAN xch_tail PROTO((const char *ptr, const char *argu, char *tail));
 VOID show_file PROTO((const char *file));
 VOID pr_setup PROTO((NOTHING));
 BOOLEAN printit PROTO((const char *str));
 
 
 
-BOOLEAN xch_tail(P(char *)ptr, P(char *)argu, P(char *)tail)
-PP(char *ptr;)
-PP(char *argu;)
+BOOLEAN xch_tail(P(const char *)ptr, P(const char *)argu, P(char *)tail)
+PP(const char *ptr;)
+PP(const char *argu;)
 PP(char *tail;)
 {
 	if ((strlen(ptr) + strlen(argu) + 1) >= PATHLEN)
@@ -37,8 +37,8 @@ PP(char *tail;)
 }
 
 
-BOOLEAN ch_tail(P(char *)ptr, P(char *)tail)
-PP(char *ptr;)
+BOOLEAN ch_tail(P(const char *)ptr, P(char *)tail)
+PP(const char *ptr;)
 PP(char *tail;)
 {
 	return xch_tail(ptr, Nostr, tail);
@@ -51,13 +51,13 @@ PP(const char *file;)
 	menu_bar(menu_addr, FALSE);
 	v_hide_c();
 	v_enter_cur();
-	xvq_chcell(&d_nrows);
+	xvq_chcells(&d_nrows);
 	d_nrows--;
 	showfile(file, FALSE);
 	v_exit_cur();
 	v_show_c(0);
 	menu_bar(menu_addr, TRUE);
-	form_dial(FMD_FINISH, 0, 0, 0, 0, full.x, full.y, full.w, full.h);
+	form_dial(FMD_FINISH, 0, 0, 0, 0, full.g_x, full.g_y, full.g_w, full.g_h);
 	wait_msg();
 }
 
@@ -78,6 +78,7 @@ PP(const char *str;)
 	char *ptr;
 	register OBJECT *obj;
 
+	UNUSED(ptr);
 	obj = get_tree(PRINTFIL);
 	xinf_sset(obj, PFILE, g_name(str));
 	draw_fld(obj, PFILE);
@@ -91,9 +92,9 @@ PP(const char *str;)
 VOID print_file(NOTHING)
 {
 	BOOLEAN ret;
-	int type;
+	int16_t type;
 	BOOLEAN print, ret1;
-	char *str;
+	const char *str;
 	GRECT pt;
 
 	ret1 = build_rect(background, &pt, d_xywh[6], d_xywh[9]);
@@ -154,7 +155,7 @@ VOID launch_pref(NOTHING)
 	inf_sset(obj, RUNNAME, Nostr);
 	if (fmdodraw(DLAUNCH, 0) == LAUNCHOK)
 	{
-		inf_sget(obj, RUNNAME, path1);
+		fs_sget((LPTREE)obj, RUNNAME, path1);
 		if (path1[0])
 		{
 			graphic = (obj[LGRAPHIC].ob_state & SELECTED) ? TRUE : FALSE;
@@ -226,11 +227,11 @@ PP(register const char *path;)
 /*
  * Run an application include doing dialogue box
  */
-VOID exec_file(P(char *)infile, P(WINDOW *)win, P(int16_t) item, P(char *)intail)
-PP(char *infile;)
+VOID exec_file(P(const char *)infile, P(WINDOW *)win, P(int16_t) item, P(const char *)intail)
+PP(const char *infile;)
 PP(WINDOW *win;)
 PP(int16_t item;)
-PP(char *intail;)
+PP(const char *intail;)
 {
 	int16_t type, install;
 	BOOLEAN graphic;
@@ -238,10 +239,11 @@ PP(char *intail;)
 	int16_t which;
 	register APP *app;
 	OBJECT *obj;
-	char buffer[14];
-	char *tail;
-	char *file;
+	char buffer[NAMELEN];
+	const char *tail;
+	const char *file;
 
+	UNUSED(buffer);
 	app = app_xtype(infile, &install);
 	type = app->a_type;
 	/* installed document   */
@@ -251,7 +253,7 @@ PP(char *intail;)
 		file = app->a_name;
 	} else
 	{
-		tail = (intail[0]) ? &intail[1] : Nostr;
+		tail = intail[0] ? &intail[1] : Nostr;
 		file = infile;
 	}
 
@@ -305,7 +307,7 @@ PP(char *intail;)
 		if (fmdodraw(ADOPENAP, 0) == APPLCNCL)
 			return;
 
-		tail = (TEDINFO *) (obj[APPLPARM].ob_spec)->te_ptext;
+		tail = ((TEDINFO *) (obj[APPLPARM].ob_spec))->te_ptext;
 
 		if (!ch_tail(tail, comtail))
 			return;
@@ -332,15 +334,15 @@ PP(char *intail;)
 /*
  * Run the application
  */
-VOID run_it(P(char *)file, P(char *)tail, P(BOOLEAN) graphic, P(BOOLEAN) setdir)
-PP(char *file;)
+VOID run_it(P(const char *)file, P(char *)tail, P(BOOLEAN) graphic, P(BOOLEAN) setdir)
+PP(const char *file;)
 PP(char *tail;)
 PP(BOOLEAN graphic;)
 PP(BOOLEAN setdir;)
 {
 	if (m_sfirst(file, 0x31))			/* search the file */
 	{
-		fill_string(file, FNOTFIND);
+		fill_string(NO_CONST(file), FNOTFIND);
 		return;
 	}
 

@@ -1,23 +1,22 @@
-/*	DESKINS.C		3/18/89 - 9/18/89	Derek Mui	*/
-/*	Fix at ins_app, at app_free. Do the str check before freeing	*/
-/*	the app 		3/3/92			D.Mui		*/
-/*	Change all the iconblk to ciconblk	7/11/92	D.Mui		*/
-/*	Change at ins_wicon and ins_icons	7/11/92	D.Mui		*/
-/*      Changed arrows at install desk icons    8/06/92 cjg		*/
-/*      and install window icons to invert				*/
-/*	when selected.						 	*/
-/*
+/*      DESKINS.C               3/18/89 - 9/18/89       Derek Mui       */
+/*      Fix at ins_app, at app_free. Do the str check before freeing    */
+/*      the app                 3/3/92                  D.Mui           */
+/*      Change all the iconblk to ciconblk      7/11/92 D.Mui           */
+/*      Change at ins_wicons and ins_icons      7/11/92 D.Mui           */
+/*      Changed arrows at install desk icons    8/06/92 cjg             */
+/*      and install window icons to invert                              */
+/*      when selected.                                                  */
+
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
 
 
-VOID ins_wicon PROTO((NOTHING));
 
 
 /*
@@ -228,7 +227,7 @@ VOID ins_app(NOTHING)
 
 		if (ret == APOK)				/* install          */
 		{								/* do we need a new one?    */
-			inf_sget(obj, IKEY, buffer);
+			fs_sget(obj, IKEY, buffer);
 			asctobin(buffer, &l);		/* don't change this line   */
 			if (buffer[0])
 			{
@@ -279,14 +278,14 @@ VOID ins_app(NOTHING)
 
 			/* get the doc icon type    */
 			strcpy(buffer, "*.");
-			inf_sget(obj, APDFTYPE, &buffer[2]);
+			fs_sget(obj, APDFTYPE, &buffer[2]);
 			app_icon(buffer, -1, &app->a_dicon);
 
 			lp_fill(str, &app->a_name);
 			lp_collect();
 
 			strcpy(app->a_doc. buffer);
-			inf_sget(obj, ARGS, app->a_argu);
+			fs_sget(obj, ARGS, app->a_argu);
 			graphic = 1;
 
 			if (obj[APGEM].ob_state & SELECTED)
@@ -392,18 +391,22 @@ VOID ins_icons(NOTHING)
 
 	saveptr = obj[IICON].ob_spec;
 
+#if !BINEXACT
+	which = ret = 0; /* quiet compiler */
+#endif
+
 	while (TRUE)
 	{
 		obj[IICON].ob_type = G_CICON;	/* 7/11/92 */
 		ciblk.monoblk = *(ICONBLK *) (obj[IICON].ob_spec);
-		obj[IICON].ob_spec = &ciblk;
+		obj[IICON].ob_spec = (intptr_t)&ciblk;
 		iblk = (CICONBLK *) (obj[IICON].ob_spec);
 		redraw = FALSE;
 
 		if (o_status)					/* an icon is selected  */
 		{
 			type = backid[item].i_type;
-			strcpy(buffer, (CICONBLK *) (obj1[item].ob_spec)->monoblk.ib_ptext);
+			strcpy(buffer, ((CICONBLK *) (obj1[item].ob_spec))->monoblk.ib_ptext);
 			buf1[0] = idbuffer[0] = backid[item].i_cicon.monoblk.ib_char[1];
 			icon = backid[item].i_icon;
 			if (icon >= numicon)
@@ -483,7 +486,7 @@ VOID ins_icons(NOTHING)
 				XSelect(obj, ret);		/* cjg 08/06/92 */
 				cp_iblk(icon, iblk);
 				iblk->monoblk.ib_char[1] = 0;
-				objc_draw(obj, IBOX, 1, full.x, full.y, full.w, full.h);
+				objc_draw(obj, IBOX, 1, full.g_x, full.g_y, full.g_w, full.g_h);
 				cl_delay();
 
 				/* cjg 08/06/92 */
@@ -511,14 +514,14 @@ VOID ins_icons(NOTHING)
 		if (ret == DRCNCL)				/* cancel       */
 			goto in_1;
 		/* this is install  */
-		inf_sget(obj, DRID, idbuffer);
+		fs_sget((LPTREE)obj, DRID, idbuffer);
 
 		if (idbuffer[0] != 'c')
 			idbuffer[0] = toupper(idbuffer[0]);
 
 		if (driver)						/* driver type  */
 		{								/* drive icon   */
-			if (!(which = inf_gindex(obj, IDRIVE, 3)))	/* driver type */
+			if (!(which = inf_gindex((LPTREE)obj, IDRIVE, 3)))	/* driver type */
 			{
 				if ((!idbuffer[0]) || (idbuffer[0] == ' '))
 				{
@@ -538,7 +541,8 @@ VOID ins_icons(NOTHING)
 		if (o_status)					/* icon selected    */
 			goto in_4;					/* don't allocate   */
 
-	  in_41:if ((item = av_icon()) == -1)
+	in_41:
+		if ((item = av_icon()) == -1)
 										/* get new one  */
 		{								/* failed   */
 			do1_alert(NOICON);
@@ -550,7 +554,7 @@ VOID ins_icons(NOTHING)
 		cp_iblk(icon, iblk);
 		backid[item].i_icon = icon;
 
-		strcpy(iblk->monoblk.ib_ptext, (CICONBLK *) (obj[DRLABEL].ob_spec)->monoblk.te_ptext);
+		strcpy(iblk->monoblk.ib_ptext, ((CICONBLK *) (obj[DRLABEL].ob_spec))->monoblk.ib_ptext);
 
 		if (driver)
 		{
@@ -564,16 +568,18 @@ VOID ins_icons(NOTHING)
 				iblk->monoblk.ib_char[1] = 0;
 			}
 		} else
+		{
 			iblk->monoblk.ib_char[1] = 0;
-
+		}
+		
 		backid[item].i_type = type;
-	  in_1:
+	in_1:
 		if (redraw)
 		{
-			pt.x = obj1[0].ob_x + obj1[item].ob_x;
-			pt.y = obj1[0].ob_y + obj1[item].ob_y;
-			pt.w = obj1[item].ob_width;
-			pt.h = obj1[item].ob_height;
+			pt.g_x = obj1[0].ob_x + obj1[item].ob_x;
+			pt.g_y = obj1[0].ob_y + obj1[item].ob_y;
+			pt.g_w = obj1[item].ob_width;
+			pt.g_h = obj1[item].ob_height;
 			do_redraw(0, &pt, 0);
 		}
 
@@ -599,7 +605,7 @@ VOID ins_icons(NOTHING)
 /*
  * Install window icons
  */
-VOID ins_wicon(NOTHING)
+VOID ins_wicons(NOTHING)
 {
 	register APP *app;
 	register OBJECT *obj;
@@ -610,10 +616,11 @@ VOID ins_wicon(NOTHING)
 	CICONBLK ciblk;
 	char buffer[14];
 	char buf2[14];
-	char *str;
+	const char *str;
 	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
 	int32_t saveptr;
 
+	UNUSED(install);
 	obj = get_tree(INWICON);
 	limit = numicon;
 	quit = FALSE;
@@ -626,7 +633,7 @@ VOID ins_wicon(NOTHING)
 	{									/* 7/11/92 */
 		obj[WICON].ob_type = G_CICON;
 		ciblk.monoblk = *(ICONBLK *) (obj[WICON].ob_spec);
-		obj[WICON].ob_spec = &ciblk;
+		obj[WICON].ob_spec = (intptr_t)&ciblk;
 		iblk = (CICONBLK *) (obj[WICON].ob_spec);
 		inf_sset(obj, WNAME, Nostr);
 		obj[WFOLDER].ob_state = NORMAL;
@@ -644,7 +651,7 @@ VOID ins_wicon(NOTHING)
 			{
 				obj[WFOLDER].ob_state = SELECTED;
 				obj[WNONE].ob_state = DISABLED;
-				save_mid(str, buf2);
+				save_mid(NO_CONST(str), buf2);
 			} else
 			{
 				obj[WFOLDER].ob_state = DISABLED;
@@ -672,7 +679,7 @@ VOID ins_wicon(NOTHING)
 		while (TRUE)
 		{
 			ret = xform_do(obj, 0);
-			inf_sget(obj, WNAME, buf2);
+			fs_sget((LPTREE)obj, WNAME, buf2);
 			unfmt_str(buf2, buffer);
 
 			if (obj[WNONE].ob_state & SELECTED)
@@ -703,7 +710,7 @@ VOID ins_wicon(NOTHING)
 					XSelect(obj, ret);
 					cp_iblk(index, iblk);
 					iblk->monoblk.ib_char[1] = 0;
-					objc_draw(obj, WBOX, 1, full.x, full.y, full.w, full.h);
+					objc_draw(obj, WBOX, 1, full.g_x, full.g_y, full.g_w, full.g_h);
 					cl_delay();
 
 					/* cjg 08/06/92 */
@@ -741,7 +748,7 @@ VOID ins_wicon(NOTHING)
 						if (streq(buffer, app->a_doc))
 						{
 							app_free(app);
-/*		      sort_show( 0, TRUE );	*/
+							/* sort_show(0, TRUE); */
 							break;
 						}
 					}
@@ -780,11 +787,11 @@ VOID ins_wicon(NOTHING)
 					app->a_dicon = 0;
 					app->a_pref = pref;
 					app->a_type = type;
-					strcpy(app->a_doc. buffer);
+					strcpy(app->a_doc, buffer);
 					lp_fill(Nostr, &app->a_name);
 					app->a_dicon = index;
 					app->a_icon = index;
-/*		  sort_show( 0, TRUE );	*/
+					/* sort_show(0, TRUE); */
 
 				}
 				/* if there is something   */

@@ -152,7 +152,7 @@ int16_t no_aes;						/* gembind.s    */
 BOOLEAN autoexec;					/* autoexec a file ?    */
 STATIC char g_autoboot[CMDLEN];
 STATIC int16_t g_flag;
-BOOLEAN int16_t ctldown;			/* ctrl key down ? */ /* referenced by desktop */
+BOOLEAN ctldown;					/* ctrl key down ? */ /* referenced by DESKTOP */
 /* 8/1/92 */
 #if AES3D
 BOOLEAN act3dtxt;					/* look of 3D activator text */

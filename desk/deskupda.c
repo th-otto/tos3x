@@ -1,9 +1,9 @@
-/*	DESKUPDA.C		03/12/90		D.Mui		*/
+/*      DESKUPDA.C              03/12/90                D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -15,13 +15,14 @@ BOOLEAN q_change;						/* Inf file is changed  */
 
 STATIC char *newbuff;
 
-STATIC char q_path[40]; /* unused */
+char q_path[40]; /* unused */
 
-/*	Load in the new inf	*/
-
+/*
+ * Load in the new inf
+ */
 VOID q_inf(NOTHING)
 {
-	if (q_addr = Malloc((int32_t) (INFSIZE)))
+	if ((q_addr = (char *)Malloc((int32_t) (INFSIZE))))
 	{
 		q_change = FALSE;
 		bfill(INFSIZE, 0, q_addr);
@@ -30,9 +31,10 @@ VOID q_inf(NOTHING)
 }
 
 
-/*	Search the matching file and modify the inf file	*/
-
-int16_t q_sea(P(char *) old, P(char *) new)
+/*
+ * Search the matching file and modify the inf file
+ */
+VOID q_sea(P(char *) old, P(char *) new)
 PP(char *old;)
 PP(char *new;)
 {
@@ -45,10 +47,14 @@ PP(char *new;)
 	char argu[ARGULEN];
 	char tmp1, tmp2;
 
+	UNUSED(save);
 	copy1 = ptr1 = q_addr;
 	alloc = FALSE;
 
-	while (temp = *ptr1++)
+#if !BINEXACT
+	copy2 = 0; /* quiet compiler */
+#endif
+	while ((temp = *ptr1++))
 	{
 		if (temp == '#')
 		{								/* Desktop file     */
@@ -104,7 +110,7 @@ PP(char *new;)
 			{
 				if (!alloc)
 				{
-					if (copy2 = Malloc((int32_t) (INFSIZE)))
+					if ((copy2 = (char *)Malloc((int32_t) (INFSIZE))))
 					{
 						bfill(INFSIZE, 0, copy2);
 						alloc = TRUE;
@@ -153,9 +159,10 @@ PP(char *new;)
 }
 
 
-/*	Write out the new inf file	*/
-/*	always write out newdesk.inf	*/
-
+/*
+ * Write out the new inf file
+ * always write out newdesk.inf
+ */
 VOID q_write(NOTHING)
 {
 	register int16_t handle;

@@ -32,6 +32,18 @@ typedef int16_t BOOLEAN;
 #  define UNUSED(x) ((void)(x))
 #endif
 
+#ifndef NO_CONST
+#  ifdef __GNUC__
+#	 define NO_CONST(p) __extension__({ union { const void *cs; void *s; } _x; _x.cs = p; _x.s; })
+#  else
+#    ifdef __ALCYON__ /* Alcyon parses the cast as function call??? */
+#      define NO_CONST(p) p
+#    else
+#      define NO_CONST(p) ((void *)(p))
+#    endif
+#  endif
+#endif
+
 #include "mobdefs.h"
 #include "window.h"
 #include "deskus.h"
@@ -161,12 +173,12 @@ typedef struct  app
         int16_t a_type;         /* file type    */
         int16_t a_icon;         /* icon number  */
         int16_t a_dicon;        /* document icon*/
-        char    *a_name;        /* app name     */
+        const char *a_name;        /* app name     */
         char    a_doc[14];      /* doc name     */
         int16_t a_pref;         /* launch pref  set dir etc */  
         uint16_t        a_key;          /* key definition       */
         char    a_argu[ARGULEN];
-        char    *a_next;        /* app pointer  */
+        struct app *a_next;        /* app pointer  */
 } APP;
 
 typedef struct idtype
@@ -175,8 +187,8 @@ typedef struct idtype
         int16_t i_icon;
         CICONBLK i_cicon;       
 /*      ICONBLK i_iblk; */
-        char    *i_path;
-        char    i_name[14];
+        const char *i_path;
+        char i_name[NAMELEN];
 } IDTYPE;
 
 
@@ -187,7 +199,7 @@ extern char *q_addr;							/* Inf file address */
 extern BOOLEAN q_change;						/* Inf file is changed  */
 
 VOID q_inf PROTO((NOTHING));
-int16_t q_sea PROTO((char *old, char *new));
+VOID q_sea PROTO((char *old, char *new));
 VOID q_write PROTO((NOTHING));
 
 
@@ -197,12 +209,12 @@ VOID q_write PROTO((NOTHING));
 VOID winfo PROTO((WINDOW *win));
 WINDOW *w_gnext PROTO((NOTHING));
 WINDOW *w_gfirst PROTO((NOTHING));
-VOID up_2allwin PROTO((char *path));
+VOID up_2allwin PROTO((const char *path));
 VOID up_1allwin PROTO((const char *path, BOOLEAN full, BOOLEAN change));
 VOID up_allwin PROTO((const char *path, BOOLEAN full));
 BOOLEAN up_win PROTO((WINDOW *win, BOOLEAN mediac));
 VOID bottop PROTO((NOTHING));
-int16_t path_alloc PROTO((int16_t level));
+BOOLEAN path_alloc PROTO((int16_t level));
 VOID free_path PROTO((NOTHING));
 VOID clr_allwin PROTO((NOTHING));
 VOID clr_xwin PROTO((WINDOW *win, BOOLEAN infoupdate));
@@ -210,7 +222,7 @@ VOID srl_verbar PROTO((WINDOW *win, uint16_t pos));
 VOID srl_hzbar PROTO((WINDOW *win, uint16_t pos));
 VOID srl_row PROTO((WINDOW *win, int16_t row, int16_t dir));
 VOID srl_col PROTO((WINDOW *win, int16_t col, int16_t dir));
-int16_t blt_window PROTO((WINDOW *win, int16_t mode, int16_t size));
+VOID blt_window PROTO((WINDOW *win, int16_t mode, int16_t size));
 VOID view_adjust PROTO((WINDOW *win));
 VOID sort_show PROTO((int16_t mode, BOOLEAN view));
 VOID view_fixmode PROTO((WINDOW *win));
@@ -218,7 +230,7 @@ VOID make_top PROTO((WINDOW *win));
 VOID ini_windows PROTO((NOTHING));
 WINDOW *alloc_win PROTO((NOTHING));
 WINDOW *get_win PROTO((int16_t handle));
-int16_t open_window PROTO((int16_t handle));
+VOID open_window PROTO((int16_t handle));
 int16_t create_window PROTO((NOTHING));
 WINDOW *get_top PROTO((NOTHING));
 VOID close_window PROTO((int16_t handle, BOOLEAN closeit));
@@ -234,7 +246,7 @@ extern BOOLEAN back_update;						/* update background    */
 
 BOOLEAN ch_obj PROTO((int16_t mx, int16_t my, WINDOW **win, int16_t *item, int16_t *type));
 BOOLEAN ch_undo PROTO((NOTHING));
-VOID file_op PROTO((char *dest, int16_t mode));
+VOID file_op PROTO((const char *dest, int16_t mode));
 BOOLEAN build_rect PROTO((OBJECT *obj, GRECT *rect, int16_t w, int16_t h));
 VOID r_box PROTO((int16_t id, WINDOW *win));
 VOID hd_down PROTO((int16_t sitem, int16_t stype, WINDOW *swin));
@@ -247,7 +259,7 @@ int16_t make_icon PROTO((int16_t drive, int16_t icon, int16_t type, char *text))
 extern int16_t const ftab[];
 
 BOOLEAN app_reschange PROTO((int16_t res)); /* also referenced by AES */
-APP *app_icon PROTO((const char *name, int16_t type, int16_t icon));
+APP *app_icon PROTO((const char *name, int16_t type, int16_t *icon));
 VOID app_free PROTO((APP *app));
 APP *app_alloc PROTO((NOTHING));
 APP *app_key PROTO((int16_t key));
@@ -260,7 +272,7 @@ APP *app_xtype PROTO((const char *name, BOOLEAN *install));
 VOID wind_new PROTO((NOTHING));
 int16_t fsel_exinput PROTO((char *path, char *selec, int16_t *button, char *label));
 int16_t rsrc_load PROTO((const char *name));
-int16_t rsrc_obfix PROTO((LPTREE tree, int32_t obj));
+int16_t rsrc_obfix PROTO((LPTREE tree, int16_t obj));
 int16_t menu_popup PROTO((MENU *menu, int16_t x, int16_t y, MENU *mdata));
 int16_t menu_istart PROTO((int16_t code, OBJECT *mtree, int16_t mmenu, int16_t start));
 VOID objc_gclip PROTO((LPTREE tree, int16_t which, int16_t *x, int16_t *y, int16_t *rx, int16_t *ry, int16_t *w, int16_t *h));
@@ -289,7 +301,9 @@ int16_t evnt_multi PROTO((uint16_t flags, uint16_t bclk, uint16_t bmsk, uint16_t
 	uint16_t tlc, uint16_t thc,
 	int16_t *pmx, int16_t *pmy, int16_t *pbut, int16_t *pks, int16_t *pkr, int16_t *pbr));
 int16_t evnt_button PROTO((int16_t clicks, uint16_t mask, uint16_t state, int16_t *pmx, int16_t *pmy, int16_t *pmw, int16_t *pmh));
+int16_t evnt_dclick PROTO((int16_t rate, int16_t setit));
 int16_t form_do PROTO((OBJECT *form, int16_t start));
+int16_t form_dial PROTO((int16_t dtype, int16_t ix, int16_t iy, int16_t iw, int16_t ih, int16_t x, int16_t y, int16_t w, int16_t h));
 int16_t form_alert PROTO((int16_t defbut, const char *astring));
 int16_t form_error PROTO((int16_t errnum));
 int16_t form_center PROTO((OBJECT *tree, int16_t *pcx, int16_t *pcy, int16_t *pcw, int16_t *pch));
@@ -311,6 +325,7 @@ int16_t rsrc_free PROTO((NOTHING));
 int16_t rsrc_gaddr PROTO((int16_t rstype, int16_t rsid, VOIDPTR *paddr));
 int16_t shel_get PROTO((char *pbuffer, int16_t len));
 int16_t shel_put PROTO((const char *pdata, int16_t len));
+int16_t shel_write PROTO((int16_t doex, int16_t isgr, int16_t iscr, const char *pcmd, const char *ptail));
 int16_t wind_close PROTO((int16_t handle));
 int16_t wind_delete PROTO((int16_t handle));
 int16_t wind_find PROTO((int16_t mx, int16_t my));
@@ -318,6 +333,7 @@ int16_t wind_update PROTO((int16_t beg_update));
 int16_t wind_create PROTO((uint16_t kind, int16_t wx, int16_t wy, int16_t ww, int16_t wh));
 int16_t wind_open PROTO((int16_t handle, int16_t wx, int16_t wy, int16_t ww, int16_t wh));
 int16_t wind_get PROTO((int16_t w_handle, int16_t w_field, int16_t *pw1, int16_t *pw2, int16_t *pw3, int16_t *pw4));
+int16_t wind_set PROTO((int16_t w_handle, int16_t w_field, ...));
 int16_t wind_calc PROTO((int16_t wctype, uint16_t kind, int16_t x, int16_t y, int16_t w, int16_t h, int16_t px, int16_t py, int16_t pw, int16_t ph));
 
 
@@ -343,7 +359,7 @@ BOOLEAN doright PROTO((int flag));
 /*
  * deskdisk.c
  */
-VOID fc_start PROTO((char *source, int16_t op));
+VOID fc_start PROTO((const char *source, int16_t op));
 
 
 /*
@@ -352,7 +368,7 @@ VOID fc_start PROTO((char *source, int16_t op));
 VOID pri_win PROTO((NOTHING));
 VOID newfolder PROTO((WINDOW *win));
 VOID sort_file PROTO((WINDOW *win, int16_t mode));
-int16_t set_newview PROTO((int16_t index, WINDOW *win));
+VOID set_newview PROTO((int16_t index, WINDOW *win));
 int16_t read_files PROTO((WINDOW *win, int16_t attr));
 
 
@@ -364,10 +380,10 @@ extern BOOLEAN s_defdir;
 extern BOOLEAN s_fullpath;
 
 VOID m_infpath PROTO((char *buffer));
-char *escan_str PROTO((char *pcurr, char *ppstr)); /* also referenced by AES */
-char *scan_2 PROTO((char *pcurr, int16_t *pwd)); /* also referenced by AES */
+char *escan_str PROTO((const char *pcurr, char *ppstr)); /* also referenced by AES */
+char *scan_2 PROTO((const char *pcurr, int16_t *pwd)); /* also referenced by AES */
 char *save_2 PROTO((char *pcurr, uint16_t wd)); /* also referenced by AES */
-char *save_str PROTO((char *pcurr, char *pstr));
+char *save_str PROTO((char *pcurr, const char *pstr));
 VOID read_inf PROTO((NOTHING));
 BOOLEAN save_inf PROTO((BOOLEAN todisk));
 VOID app_posicon PROTO((int16_t colx, int16_t coly, int16_t *px, int16_t *py));
@@ -381,6 +397,7 @@ int16_t cp_iblk PROTO((int16_t number, CICONBLK *dest_ciblk));
 VOID rm_icons PROTO((NOTHING));
 VOID ins_app PROTO((NOTHING));
 VOID ins_icons PROTO((NOTHING));
+VOID ins_wicons PROTO((NOTHING));
 VOID ins_drive PROTO((NOTHING));
 VOID cl_delay PROTO((NOTHING));
 
@@ -392,13 +409,14 @@ extern uint16_t apsize;
 
 BOOLEAN apbuf_init PROTO((NOTHING));
 BOOLEAN mem_init PROTO((NOTHING));
-char *lp_fill PROTO((char *path, char **buf));
+const char *lp_fill PROTO((const char *path, const char **buf));
 BOOLEAN lp_collect PROTO((NOTHING));
 
 
 /*
  * deskmenu.c
  */
+extern int16_t d_exit;		/* desktop exit flag	*/
 extern char mentable[MAXMENU];
 extern int16_t const tb3[MAXMENU];
 extern BOOLEAN o_status;							/* for o_select */
@@ -431,7 +449,7 @@ VOID up_1 PROTO((WINDOW *win));
 VOID up_2 PROTO((WINDOW *win));
 char *put_name PROTO((WINDOW *win, const char *name));
 BOOLEAN in_parent PROTO((OBJECT *obj, int16_t child));
-VOID xinf_sset PROTO((OBJECT *obj, int16_t item, char *buf1));
+VOID xinf_sset PROTO((OBJECT *obj, int16_t item, const char *buf1));
 VOID mice_state PROTO((int16_t state));
 VOID desk_wait PROTO((BOOLEAN state));
 VOID draw_fld PROTO((OBJECT *obj, int16_t which));
@@ -443,11 +461,11 @@ VOID do_finish PROTO((int16_t item));
 int16_t xform_do PROTO((OBJECT *obj, int16_t which));
 int16_t fmdodraw PROTO((int16_t item, int16_t which));
 VOID lbintoasc PROTO((int32_t longval, char *buffer));
-char *r_slash PROTO((char *path));
+char *r_slash PROTO((const char *path));
 int16_t xcut_path PROTO((char *path, char *buffer, int16_t cut));
 int16_t cut_path PROTO((char *path));
 VOID cat_path PROTO((char *name, char *path));
-VOID rep_path PROTO((char *name, char *path));
+VOID rep_path PROTO((const char *name, char *path));
 int16_t do_alert PROTO((int16_t button, int16_t item));
 int16_t do1_alert PROTO((int16_t item));
 VOID rc_center PROTO((GRECT *rec1, GRECT *rec2));
@@ -455,13 +473,13 @@ VOID my_itoa PROTO((uint16_t number, char *pnumstr));
 VOID fmt_time PROTO((uint16_t time, char *ptime));
 VOID fmt_date PROTO((uint16_t date, char *pdate));
 char * bldstring PROTO((DIR *dir, char *dst));
-const char *g_name PROTO((const char *file)); /* also referenced by AES */
-VOID save_ext PROTO((char *path, char *buffer));
+char *g_name PROTO((const char *file)); /* also referenced by AES */
+VOID save_ext PROTO((const char *path, char *buffer));
 VOID save_mid PROTO((char *path, char *buffer));
-int16_t chk_par PROTO((char *srcptr, char *dstptr));
+BOOLEAN chk_par PROTO((const char *srcptr, const char *dstptr));
 int16_t fill_string PROTO((char *string, int16_t item));
 BOOLEAN asctobin PROTO((char *ptr, int32_t *value));
-
+VOID wait_msg PROTO((NOTHING));
 
 
 /*
@@ -471,9 +489,9 @@ VOID mv_desk PROTO((NOTHING));
 VOID mins_app PROTO((NOTHING));
 VOID mdesk_pref PROTO((NOTHING));
 BOOLEAN set_video PROTO((NOTHING));
-int16_t XSelect PROTO((OBJECT *tree, int16_t obj));
-int16_t XDeselect PROTO((OBJECT *tree, int16_t obj)); /* also referenced by AES */
-int16_t DoPopup PROTO((OBJECT *tree, int16_t button, int16_t title, OBJECT *Mtree, int16_t Mmenu, int16_t Mfirst, int16_t Mstart, int16_t Mscroll, int16_t FirstMenu, int16_t FirstText, int16_t Skip));
+VOID XSelect PROTO((OBJECT *tree, int16_t obj));
+VOID XDeselect PROTO((OBJECT *tree, int16_t obj)); /* also referenced by AES */
+VOID DoPopup PROTO((OBJECT *tree, int16_t button, int16_t title, OBJECT *Mtree, int16_t Mmenu, int16_t Mfirst, int16_t *Mstart, int16_t Mscroll, int16_t FirstMenu, int16_t FirstText, int16_t Skip));
 VOID init_vtree PROTO((NOTHING));
 VOID wait_up PROTO((NOTHING));
 
@@ -483,17 +501,17 @@ VOID wait_up PROTO((NOTHING));
  */
 VOID open_def PROTO((NOTHING));
 VOID ch_path PROTO((WINDOW *win));
-int16_t open_subdir PROTO((WINDOW *win, int16_t icon, BOOLEAN opendisk, BOOLEAN init, BOOLEAN redraw));
+BOOLEAN open_subdir PROTO((WINDOW *win, int16_t icon, BOOLEAN opendisk, BOOLEAN init, BOOLEAN redraw));
 VOID show_item PROTO((NOTHING));
 VOID close_path PROTO((WINDOW *win));
 VOID close_top PROTO((NOTHING));
 VOID open_item PROTO((int16_t item, int16_t type, WINDOW *win));
-VOID open_file PROTO((WINDOW *win, int16_t item, char *tail));
-int16_t open_disk PROTO((int16_t icon, char *path, BOOLEAN init));
+VOID open_file PROTO((WINDOW *win, int16_t item, const char *tail));
+BOOLEAN open_disk PROTO((int16_t icon, const char *path, BOOLEAN init));
 VOID do_box PROTO((WINDOW *win, int16_t item, int16_t desk, int16_t open, BOOLEAN openfull));
 BOOLEAN ch_drive PROTO((int16_t id));
 VOID upfdesk PROTO((char *s, char *new));
-VOID locate_item PROTO((int16_t item, char *path, BOOLEAN file));
+VOID xvq_chcells PROTO((int16_t *num));
 
 
 /*
@@ -519,8 +537,8 @@ extern int16_t d_dir;				/* count how many folders are selected inside the windo
 VOID x_del PROTO((NOTHING));
 BOOLEAN o_select PROTO((NOTHING));
 BOOLEAN x_select PROTO((NOTHING));
-BOOLEAN x_next PROTO((char **name, int16_t *type));
-BOOLEAN x_first PROTO((char **name, int16_t *type));
+BOOLEAN x_next PROTO((const char **name, int16_t *type));
+BOOLEAN x_first PROTO((const char **name, int16_t *type));
 BOOLEAN i_find PROTO((int16_t mx, int16_t my, WINDOW **winout, int16_t *item, int16_t *type));
 BOOLEAN i_next PROTO((int16_t start, OBJECT *obj, int16_t *itemout));
 
@@ -528,18 +546,18 @@ BOOLEAN i_next PROTO((int16_t start, OBJECT *obj, int16_t *itemout));
 /*
  * deskshel.c
  */
-BOOLEAN ch_tail PROTO((char *ptr, char *tail));
+BOOLEAN ch_tail PROTO((const char *ptr, char *tail));
 VOID print_file PROTO((NOTHING));
 VOID launch_pref PROTO((NOTHING));
 BOOLEAN set_dir PROTO((const char *path));
-VOID exec_file PROTO((char *infile, WINDOW *win, int16_t item, char *intail));
-VOID run_it PROTO((char *file, char *tail, BOOLEAN graphic, BOOLEAN setdir));
+VOID exec_file PROTO((const char *infile, WINDOW *win, int16_t item, const char *intail));
+VOID run_it PROTO((const char *file, char *tail, BOOLEAN graphic, BOOLEAN setdir));
 
 
 /*
  * deskshow.c
  */
-BOOLEAN showfile PROTO((char *fname, int mode));
+BOOLEAN showfile PROTO((const char *fname, int mode));
 
 
 /*
@@ -599,18 +617,20 @@ extern char const noext[];
 extern char const Nostr[];
 extern char const infdata[];
 extern char const infpath[];
-extern char icndata[];
-extern char Nextline[];
+extern char const icndata[];
+extern char const Nextline[];
 
 
 /*
  * desktop.c
  */
-BOOLEAN m_st;							/* machine type flag    */
-int16_t m_cpu;							/* cpu type     */
-int16_t numicon;						/* the number of icon in the resource   */
-char restable[];						/* resolution table */
-int16_t d_maxcolor;
+extern BOOLEAN m_st;						/* machine type flag    */
+extern int16_t m_cpu;						/* cpu type     */
+extern int16_t numicon;						/* the number of icon in the resource   */
+extern char restable[];						/* resolution table */
+extern int16_t d_maxcolor;
+extern int16_t pglobal[];
+extern int16_t gl_apid;
 
 BOOLEAN deskmain PROTO((NOTHING));
 VOID ch_cache PROTO((BOOLEAN set));
@@ -630,12 +650,17 @@ extern int16_t gl_hchar;
 extern int16_t gl_wbox;
 extern int16_t gl_hbox;
 extern int16_t gl_handle;
-extern int16_t pglobal[];
 extern int16_t contrl[];
 extern int16_t intin[];
+extern int16_t intout[];
 extern int16_t ptsin[];
 extern int16_t gl_btrue;
 extern BOOLEAN ctldown;
+extern int16_t gl_restype;
+extern BOOLEAN gl_rschange;
+extern int16_t gl_ncols;
+extern int16_t gl_nrows;
+extern BOOLEAN sh_iscart;
 
 #if TOSVERSION >= 0x400
 extern uint16_t d_rezword;
@@ -655,16 +680,16 @@ extern uint16_t d_rezword;
 char *xstrpcpy PROTO((const char *src, char *dst));
 char *xstrpcat PROTO((const char *src, char *dst));
 
-const char *scasb PROTO((const char *p, char b));
+char *scasb PROTO((const char *p, char b));
 char *strscn PROTO((const char *src, char *dst, char stp));
 size_t strlen PROTO((const char *p1));
 BOOLEAN streq PROTO((const char *p1, const char *p2));
 VOID fmt_str PROTO((const char *instr, char *outstr));
 VOID unfmt_str PROTO((const char *instr, char *outstr));
-VOID inf_sset PROTO((LPTREE tree, int16_t obj, char *pstr));
-VOID inf_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
+VOID inf_sset PROTO((OBJECT *tree, int16_t obj, const char *pstr));
+VOID fs_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
 int16_t inf_gindex PROTO((LPTREE tree, int16_t baseobj, int16_t numobj));
-int16_t merge_str PROTO((char *pdst, char *ptmp, int16_t *parms));
+int16_t merge_str PROTO((char *pdst, const char *ptmp, VOIDPTR parms));
 int16_t wildcmp PROTO((const char *pwild, const char *ptest));
 VOID bfill PROTO((int16_t num, char bval, VOIDPTR addr));
 int16_t min PROTO((int16_t a, int16_t b));
@@ -676,6 +701,23 @@ VOID rc_union PROTO((const GRECT *p1, GRECT *p2));
 VOID rc_constrain PROTO((const GRECT *pc, GRECT *pt));
 BOOLEAN inside PROTO((int16_t x, int16_t y, const GRECT *pt));
 VOID LBCOPY PROTO((VOIDPTR dst, const VOIDPTR src, int cnt));
+int16_t strchk PROTO((const char *s, const char *t));
+BOOLEAN cart_init PROTO((NOTHING));
+BOOLEAN cart_sfirst PROTO((char *pdta, int16_t attr));
+BOOLEAN c_sfirst PROTO((const char *path));
+BOOLEAN cart_snext PROTO((NOTHING));
+int toupper PROTO((int ch));
+int isdrive PROTO((NOTHING));
+int16_t rom_ram PROTO((int which, intptr_t pointer));
 
+int32_t trap PROTO((short code, ...));
 int32_t trp14 PROTO((short code, ...));
 int32_t trp13 PROTO((short code, ...));
+
+VOID deskerr PROTO((NOTHING));
+VOID desknoerr PROTO((NOTHING));
+VOID mediach PROTO((int16_t drv));
+
+VOID gsx_attr PROTO((uint16_t text, uint16_t mode, uint16_t color));
+VOID gsx_xline PROTO((int16_t ptscount, int16_t *ppoints));
+VOID vro_cpyfm PROTO((int16_t wr_mode, int16_t *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB));

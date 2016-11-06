@@ -1,30 +1,15 @@
-/*	DESKBIND.C		6/16/89	- 9/14/89	Derek Mui	*/
+/*      DESKBIND.C              6/16/89 - 9/14/89       Derek Mui       */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 
 #include "desktop.h"
 #include "gembind.h"
-
-
-/* direct imports from AES: */
-typedef struct pd PD;
-
-extern PD *rlr; /* WTF */
-
-VOID dpstch PROTO((NOTHING));
-VOID wm_new PROTO((NOTHING));
-int16_t fs_input PROTO((char *path, char *selec, int16_t *button, char *label));
-int16_t rs_load PROTO((intptr_t pglobal, const char *name));
-int16_t rs_obfix PROTO((LPTREE tree, int32_t obj));
-int16_t mn_popup PROTO((int16_t pid, MENU *menu, int16_t x, int16_t y, MENU *mdata));
-int16_t mn_istart PROTO((int16_t pid, int16_t code, OBJECT *mtree, int16_t mmenu, int16_t start));
-VOID ob_gclip PROTO((LPTREE tree, int16_t which, int16_t *x, int16_t *y, int16_t *rx, int16_t *ry, int16_t *w, int16_t *h));
-VOID gr_mouse PROTO((int16_t style, MFORM *grmaddr));
+#include "aesbind.h"
 
 
 
@@ -37,10 +22,10 @@ VOID wind_new(NOTHING)
 
 
 int16_t fsel_exinput(P(char *)path, P(char *)selec, P(int16_t *)button, P(char *)label)
-char *path;
-char *selec;
-int16_t *button;
-char *label;
+PP(char *path;)
+PP(char *selec;)
+PP(int16_t *button;)
+PP(char *label;)
 {
 	int16_t ret;
 
@@ -62,8 +47,8 @@ PP(const char *name;)
 
 
 int16_t rsrc_obfix(LPTREE tree, int16_t obj)
-LPTREE tree;
-int16_t obj;
+PP(LPTREE tree;)
+PP(int16_t obj;)
 {
 	int16_t ret;
 
@@ -165,8 +150,9 @@ VOID v_enter_cur(NOTHING)
 }
 
 
-/*	clipping function	*/
-
+/*
+ * clipping function
+ */
 VOID vs_clip(P(BOOLEAN) clip_flag, P(const int16_t *) pxy)
 PP(BOOLEAN clip_flag;)
 PP(int16_t *pxy;)

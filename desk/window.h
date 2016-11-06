@@ -15,9 +15,26 @@
 
 #define ALLITEMS (NAME|CLOSER|FULLER|MOVER|INFO|SIZER|UPARROW|DNARROW|VSLIDE|LFARROW|RTARROW|HSLIDE)
 
+typedef struct dir
+{
+	int16_t	 d_att;		/* attribute	*/
+	uint16_t d_time;	/* time		*/
+	uint16_t d_date;	/* date		*/
+	int32_t	 d_size;	/* size		*/
+	char	 d_name[14]; /* name		*/
+	int16_t	 d_state;	/* selected	*/
+	int16_t	 d_order;	/* file's order	*/
+} DIR;
+
+typedef	struct dta
+{
+	char	reserved[20];	/* reserved area */
+	DIR	dirfile;
+} DTA;
+
 typedef	struct	window
 {
-	char	*w_next;		/* link pointer		*/
+	struct window *w_next;		/* link pointer		*/
 	uint16_t	w_id;			/* window handle	*/
 	uint16_t	w_free;			/* window free to use	*/
 	char	*w_path;		/* window path name	*/
@@ -30,7 +47,7 @@ typedef	struct	window
 	int16_t	w_srtitem;	/* file item # to start with		*/
 	int16_t	w_icon;		/* disk icon that owns this window	*/
 	int16_t	w_vicons;	/* maximum visible icons		*/
-	char	*w_memory;	/* file memory owns by this window	*/
+	DIR *w_memory;		/* file memory owns by this window	*/
 	int16_t	w_items;	/* max number of file items		*/
 	int16_t	w_maxicons;	/* max # of icons allocated in window	*/
 	int16_t	w_icol;		/* max number of col at any time	*/
@@ -46,25 +63,6 @@ typedef	struct	window
 	int16_t	w_xrow;		/* number of visible row of icon	*/
 } WINDOW;	
 
-
-struct	dir
-{
-	int16_t	d_att;		/* attribute	*/
-	uint16_t	d_time;		/* time		*/
-	uint16_t	d_date;		/* date		*/
-	int32_t	d_size;		/* size		*/
-	char	d_name[14];	/* name		*/
-	int16_t	d_state;	/* selected	*/
-	int16_t	d_order;	/* file's order	*/
-};
-
-#define DIR struct dir
-
-typedef	struct	dta
-{
-	char	reserved[20];	/* reserved area */
-	DIR	dirfile;
-} DTA;
 
 typedef struct myblk
 {

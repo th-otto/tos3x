@@ -93,7 +93,6 @@ VOID fix_tedinfo PROTO((NOTHING));
 VOID fix_nptrs PROTO((int16_t cnt, int16_t type));
 int16_t fix_ptr PROTO((int16_t type, int16_t index));
 int16_t fix_long PROTO((intptr_t plong));
-VOID rs_sglobe PROTO((intptr_t pglobal));
 int16_t rs_readit PROTO((intptr_t pglobal, const char *rsfname));
 
 

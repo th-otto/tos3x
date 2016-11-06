@@ -1,4 +1,6 @@
-SRCS = compiler.h stdint.h types.h toserrno.h ostruct.h falcon.h vars.S tosvars.S tosvars.inc sections.inc asmdefs.h ctrycodes.h rom.ld
+SRCS = compiler.h stdint.h types.h toserrno.h ostruct.h \
+	falcon.h vars.S tosvars.S tosvars.inc sections.inc \
+	asmdefs.h ctrycodes.h ws.h rom.ld
 
 EXTRA_DIST = \
 	GNUmakefile \

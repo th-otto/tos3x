@@ -1,36 +1,36 @@
-/*	DESKDISK.C From 1.4 	12/7/87 - 12/15/87	Derek.Mui	*/
-/*	For newdesktop		3/18/89	- 6/15/89	Derek Mui	*/
-/*	Update and crunch	8/30/89			D.Mui		*/
-/*	Change at fc_format	1/29/90			D.Mui		*/
-/*	Add high density formatting	2/21/90		D.Mui		*/
-/*	Change the up_allwin to up_1allwin	11/14/90	D.Mui	*/
-/*	Change the high density media cookie value	4/26/91	D.Mui	*/
-/*	Change the setting of FCDOUBLE button		4/30/91	D.Mui	*/
+/*      DESKDISK.C From 1.4     12/7/87 - 12/15/87      Derek.Mui       */
+/*      For newdesktop          3/18/89 - 6/15/89       Derek Mui       */
+/*      Update and crunch       8/30/89                 D.Mui           */
+/*      Change at fc_format     1/29/90                 D.Mui           */
+/*      Add high density formatting     2/21/90         D.Mui           */
+/*      Change the up_allwin to up_1allwin      11/14/90        D.Mui   */
+/*      Change the high density media cookie value      4/26/91 D.Mui   */
+/*      Change the setting of FCDOUBLE button           4/30/91 D.Mui   */
 
-/*	Discussion of skew factors
-*	
-*	The optimal skew factor for single/double sided formats is:
-*	7 8 9 1 2 3 4 5 6
-*	5 6 7 8 9 1 2 3 4
-*	( that is, a skew factor of 2 )
-*
-*	This is because the floppy drive always does a seek-with-verify,
-*	so the controller needs to read sector 9, seek to the next head/side
-*	( where it's too late to catch the ID of sector 8 ), read the sector
-*	ID of sector 9 ( to verify the seek; now the seek is done ). and
-*	then begin reading with sector 1.
-*
-*	However, some Atari single-sided drives are actually 6ms drives.
-*	They have extra circuitry to convert the 3ms step pulses into 
-*	6ms pulses, but this slows them down enough that the above
-*	skew factor is not enough. Hence, single-sided disks are formatted
-*	with a skew factor of 3 ( or 6, depending ).
-*/
+/*      Discussion of skew factors
+ *       
+ *       The optimal skew factor for single/double sided formats is:
+ *       7 8 9 1 2 3 4 5 6
+ *       5 6 7 8 9 1 2 3 4
+ *       ( that is, a skew factor of 2 )
+ *
+ *       This is because the floppy drive always does a seek-with-verify,
+ *       so the controller needs to read sector 9, seek to the next head/side
+ *       ( where it's too late to catch the ID of sector 8 ), read the sector
+ *       ID of sector 9 ( to verify the seek; now the seek is done ). and
+ *       then begin reading with sector 1.
+ *
+ *       However, some Atari single-sided drives are actually 6ms drives.
+ *       They have extra circuitry to convert the 3ms step pulses into 
+ *       6ms pulses, but this slows them down enough that the above
+ *       skew factor is not enough. Hence, single-sided disks are formatted
+ *       with a skew factor of 3 ( or 6, depending ).
+ */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -101,6 +101,10 @@ static int16_t const skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5,
 /*
  * sigh, why use trp13/trp14 from AES here?
  */
+#undef Getbpb
+#undef Rwabs
+#undef Flopfmt
+#undef Protobt
 #define Getbpb(devno) trp13(7, devno)
 #define Rwabs(a,b,c,d,e) trp13(3, a, b, c, d, e)
 #define Flopfmt(a,b,c,d,e,f,g,h,i) trp14(10, a, b, c, d, e, f, g, h, i)
@@ -109,7 +113,7 @@ static int16_t const skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5,
 
 BOOLEAN fc_format PROTO((OBJECT *obj));
 VOID fc_copy PROTO((OBJECT *obj));
-int16_t fc_rwsec PROTO((int16_t op, intptr_t buf, int16_t nsect, int16_t sect, int16_t dev));
+int16_t fc_rwsec PROTO((int16_t op, VOIDPTR buf, int16_t nsect, int16_t sect, int16_t dev));
 VOID clfix PROTO((uint16_t cl, uint16_t *fat));
 VOID fc_bar PROTO((OBJECT *obj, int16_t which));
 VOID fc_draw PROTO((OBJECT *obj, int16_t which));
@@ -120,8 +124,8 @@ VOID fc_draw PROTO((OBJECT *obj, int16_t which));
 /*
  * format and copy start
  */
-VOID fc_start(P(char *)source, P(int16_t) op)
-PP(char *source;)
+VOID fc_start(P(const char *)source, P(int16_t) op)
+PP(const char *source;)
 PP(int16_t op;)
 {
 	register BOOLEAN ret;
@@ -145,15 +149,15 @@ PP(int16_t op;)
 			goto fc_2;
 	} else
 	{
-	  fc_2:if (obj[FCHIGH].ob_state & SELECTED)
+	fc_2:
+		if (obj[FCHIGH].ob_state & SELECTED)
 		{
 			obj[FCHIGH].ob_state = NORMAL;
 			obj[FCDOUBLE].ob_state = SELECTED;
 		}
 	}
 
-
-	destdr = &obj[DESTDR].ob_spec;		/* to set boxchar in DESTDR */
+	destdr = (char *)&obj[DESTDR].ob_spec;		/* to set boxchar in DESTDR */
 
 	width = obj[FCBARA].ob_width;
 	w_inc = width / MAXTRACK;
@@ -169,7 +173,7 @@ PP(int16_t op;)
 	obj[FCBOXF].ob_flags |= HIDETREE;
 	obj[FCBOXC].ob_flags |= HIDETREE;
 
-	ret = (*source == 'A');
+	ret = *source == 'A';
 
 	if (op == CMD_COPY)
 	{									/* format box   */
@@ -194,9 +198,13 @@ PP(int16_t op;)
 
 	operation = FALSE;
 
+#if !BINEXACT
+	field = 0; /* BUG: used uninitailized below */
+#endif
 	while (TRUE)						/* while loop   */
 	{
-	  fc_1:switch (ret)
+	fc_1:
+		switch (ret)
 		{
 		case FCFORMAT:
 			draw_fld(obj, FCBOXC);		/* erase copy function */
@@ -211,7 +219,7 @@ PP(int16_t op;)
 			obj[FCBOXF].ob_flags |= HIDETREE;
 			obj[FCBOXC].ob_flags &= ~HIDETREE;
 			fc_draw(obj, FCBOXC);
-			field = -1;
+			field = NIL;
 			break;
 
 		case SRCDRA:					/* set the copy drive   */
@@ -227,7 +235,6 @@ PP(int16_t op;)
 				up_1allwin("A", FALSE, TRUE);
 				up_1allwin("B", FALSE, TRUE);
 			}
-
 			return;
 
 		case FCOK:
@@ -276,25 +283,31 @@ PP(OBJECT *obj;)
 	int16_t sideno, curtrk, skew, skewi;
 	int16_t track, numside, cl;
 	register int16_t *badtable;
-	register int16_t *fat;
+	register uint16_t *fat;
 	register BPB *bpbaddr;
 	char label1[14];
 	char label2[14];
 	int32_t lbuf[4];
 	int16_t spt;
-	int16_t *sktable;
+	const int16_t *sktable;
 
+	UNUSED(curtrk);
+	UNUSED(value2);
+	UNUSED(valuel);
+	UNUSED(dsb);
+	
 	/* format needs 8k buffer   */
-	if (!(bufaddr = Malloc(FSIZE)))		/* no memory            */
+	if (!(bufaddr = (char *)Malloc(FSIZE)))		/* no memory            */
 	{
-	  memerr:do1_alert(FCNOMEM);
-		return (TRUE);
+	memerr:
+		do1_alert(FCNOMEM);
+		return TRUE;
 	}
 
-	fat = bufaddr;						/* the bad sector table     */
+	fat = (uint16_t *)bufaddr;						/* the bad sector table     */
 
 	/* my bad sector table      */
-	if (!(badtable = Malloc(FSIZE)))	/* no memory            */
+	if (!(badtable = (int16_t *)Malloc(FSIZE)))	/* no memory            */
 	{
 		Mfree(bufaddr);
 		goto memerr;
@@ -352,12 +365,14 @@ PP(OBJECT *obj;)
 
 					break;
 				} else
+				{
 					for (i = 0; fat[i]; i++, badindex++)
 					{
 						badtable[badindex] = (trackno * numside * spt) + ((fat[i] - 1) + (sideno * spt));
 
 						ret = 0;
 					}
+				}
 			}
 			/* if errror == 16 */
 			if (ret)					/* some other error */
@@ -377,17 +392,17 @@ PP(OBJECT *obj;)
 		Protobt(bufaddr, 0x01000000L, disktype, 0);
 		*bufaddr = 0xe9;
 
-		if (ret = fc_rwsec(WSECTS, bufaddr, 0x10000L, devno))
+		if ((ret = fc_rwsec(WSECTS, bufaddr, 1, 0, devno)))
 			goto eout1;
 		/* now set up the fat0 and fat1 */
-		bpbaddr = Getbpb(devno);
+		bpbaddr = (BPB *)Getbpb(devno);
 
 		/* 27-Mar-1985 lmd
 		 * write boot sector again
 		 * (this makes the media dirty, with drivemode = "changed")
 		 */
 
-		if (ret = fc_rwsec(WSECTS, bufaddr, 0x10000L, devno))
+		if ((ret = fc_rwsec(WSECTS, bufaddr, 1, 0, devno)))
 			goto eout1;
 
 		k = max(bpbaddr->fsiz, bpbaddr->rdlen);
@@ -397,7 +412,7 @@ PP(OBJECT *obj;)
 		for (i = 0; i < j; i++)
 			fat[i] = 0;
 		/* get the label    */
-		strcpy(label1, (TEDINFO *) (obj[FCLABEL].ob_spec)->te_ptext);
+		strcpy(label1, ((TEDINFO *) (obj[FCLABEL].ob_spec))->te_ptext);
 
 		if (label1[0])
 		{
@@ -415,7 +430,7 @@ PP(OBJECT *obj;)
 
 		i = 1 + (bpbaddr->fsiz * 2);
 
-		if (ret = fc_rwsec(WSECTS, bufaddr, bpbaddr->rdlen, i, devno))
+		if ((ret = fc_rwsec(WSECTS, bufaddr, bpbaddr->rdlen, i, devno)))
 			goto eout1;
 
 		/* clean up FAT table   */
@@ -433,7 +448,7 @@ PP(OBJECT *obj;)
 			clfix(cl, fat);
 		}
 		/* write out fat 0  */
-		if (ret = fc_rwsec(WSECTS, fat, bpbaddr->fsiz, 1, devno))
+		if ((ret = fc_rwsec(WSECTS, fat, bpbaddr->fsiz, 1, devno)))
 			goto eout1;
 		/* write out fat 1  */
 		ret = fc_rwsec(WSECTS, fat, bpbaddr->fsiz, 1 + bpbaddr->fsiz, devno);
@@ -455,7 +470,7 @@ PP(OBJECT *obj;)
 
 	Mfree(bufaddr);
 	Mfree(badtable);
-	return (ret);
+	return ret;
 }
 
 
@@ -465,8 +480,9 @@ PP(OBJECT *obj;)
 VOID fc_copy(P(OBJECT *)obj)
 PP(OBJECT *obj;)
 {
-	register int32_t bootbuf, buf;
-	int32_t bufptr, bufsize;
+	register intptr_t bootbuf, buf;
+	intptr_t bufptr;
+	int32_t bufsize;
 	int16_t devnos, devnod;
 	register DSB *dsbs, *dsbd;
 	int16_t spc, bps, bpc, disksect, sectbufs, leftover;
@@ -474,6 +490,8 @@ PP(OBJECT *obj;)
 	int16_t dev, sectno, ssect, dsect, trkops;
 	register int16_t j, op, loop;
 
+	UNUSED(ret);
+	
 	if (!(bootbuf = Malloc(0x258L)))
 	{
 errmem:
@@ -484,7 +502,8 @@ errmem:
 	devnos = (obj[SRCDRA].ob_state & SELECTED) ? 0 : 1;
 	devnod = (devnos) ? 0 : 1;
 
-  chksrc:if (!(dsbs = Getbpb(devnos)))
+chksrc:
+	if (!(dsbs = (DSB *)Getbpb(devnos)))
 	{
 		if (do1_alert(FCFAIL) == 1)		/* retry */
 			goto chksrc;
@@ -520,8 +539,8 @@ errmem:
 		loop = 1;
 	}
 
-	/* read boot sector     */
-	if (fc_rwsec(RSECTS, bootbuf, 0x00010000L, devnos))
+	/* read boot sector */
+	if (fc_rwsec(RSECTS, (VOIDPTR)bootbuf, 1, 0, devnos))
 		goto bailout;
 
 	while (loop--)
@@ -534,7 +553,7 @@ errmem:
 			trkops = sectbufs / spc;	/* how many track operations */
 			for (j = 0; j < trkops; j++)
 			{
-				if (fc_rwsec(op, bufptr, spc, sectno, dev))
+				if (fc_rwsec(op, (VOIDPTR)bufptr, spc, sectno, dev))
 					goto bailout;
 				sectno += spc;
 				bufptr += bpc;
@@ -543,7 +562,7 @@ errmem:
 			j = sectbufs % spc;
 			if (j)
 			{
-				if (fc_rwsec(op, bufptr, j, sectno, dev))
+				if (fc_rwsec(op, (VOIDPTR)bufptr, j, sectno, dev))
 					goto bailout;
 				sectno += j;
 				fc_bar(obj, dev);
@@ -556,7 +575,7 @@ errmem:
 				{
 					checkit = FALSE;
 				fc_c1:
-					if (!(dsbd = Getbpb(devnod)))
+					if (!(dsbd = (DSB *)Getbpb(devnod)))
 					{
 						if (do1_alert(FCFAIL) == 1)	/* retry */
 							goto fc_c1;
@@ -589,7 +608,7 @@ errmem:
 
 	/* change the serialno */
 	Protobt(bootbuf, 0x01000000L, -1, -1);
-	fc_rwsec(WSECTS, bootbuf, 0x00010000L, devnod);
+	fc_rwsec(WSECTS, (VOIDPTR)bootbuf, 1, 0, devnod);
 
   bailout:
 	Mfree(buf);
@@ -598,19 +617,20 @@ errmem:
 }
 
 
-int16_t fc_rwsec(P(int16_t) op, P(intptr_t) buf, P(int16_t) nsect, P(int16_t) sect, P(int16_t) dev)
+int16_t fc_rwsec(P(int16_t) op, P(VOIDPTR) buf, P(int16_t) nsect, P(int16_t) sect, P(int16_t) dev)
 PP(int16_t op;)
-PP(intptr_t buf;)
+PP(VOIDPTR buf;)
 PP(int16_t nsect;)
 PP(int16_t sect;)
 PP(int16_t dev;)
 {
 	register int16_t ret;
 
-  rerw:if (ret = Rwabs(op, buf, nsect, sect, dev))
+  rerw:
+  	if ((ret = Rwabs(op, buf, nsect, sect, dev)))
 		if ((ret = do1_alert(FCFAIL)) == 1)	/* retry */
 			goto rerw;
-	return (ret);						/* 0=>OK, 2=>error */
+	return ret;						/* 0=>OK, 2=>error */
 }
 
 
@@ -624,6 +644,8 @@ PP(uint16_t *fat;)
 	register uint16_t ncl, cluster;
 	uint16_t temp, num;
 
+	UNUSED(temp);
+	
 	num = 0x0FF7;
 
 	ncl = cl + (cl >> 1);				/* multiply by 1.5  */
@@ -646,8 +668,9 @@ PP(uint16_t *fat;)
 }
 
 
-/*	Inc and redraw slider bar	*/
-
+/*
+ * Inc and redraw slider bar
+ */
 VOID fc_bar(P(OBJECT *)obj, P(int16_t) which)
 PP(register OBJECT *obj;)
 PP(register int16_t which;)
@@ -674,7 +697,7 @@ PP(int16_t which;)
 {
 	GRECT size;
 
-	rc_copy(&obj[which].ob_x, &size);
-	objc_offset(obj, which, &size.x, &size.y);
-	objc_draw(obj, which, MAX_DEPTH, size.x, size.y, size.w + 2, size.h);
+	rc_copy((GRECT *)&obj[which].ob_x, &size);
+	objc_offset(obj, which, &size.g_x, &size.g_y);
+	objc_draw(obj, which, MAX_DEPTH, size.g_x, size.g_y, size.g_w + 2, size.g_h);
 }

@@ -1,12 +1,12 @@
-/*	DESKPREF.C		3/17/89	- 6/15/89	Derek Mui	*/
-/*	Change at set color and pattern	6/29/90		D.Mui		*/
-/*	Use m_st to determine the resolution	9/19/90	D.Mui		*/
-/*	Fixed at col_par_pref for window background 7/7/92	D.Mui	*/
+/*      DESKPREF.C              3/17/89 - 6/15/89       Derek Mui       */
+/*      Change at set color and pattern 6/29/90         D.Mui           */
+/*      Use m_st to determine the resolution    9/19/90 D.Mui           */
+/*      Fixed at col_par_pref for window background 7/7/92      D.Mui   */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -37,12 +37,15 @@ VOID col_pa_pref(NOTHING)
 
 	fm_draw(SSCREEN);
 
+#if !BINEXACT
+	outpat = 0; /* quiet compiler */
+#endif
 	goto c_1;
 
 	while (TRUE)
 	{
 		ret = xform_do(obj, 0);
-	  c_1:
+	c_1:
 		if (ret == SOK)
 			break;
 
@@ -65,13 +68,13 @@ VOID col_pa_pref(NOTHING)
 			outpat = &newwin;
 			obj[WINPREF].ob_state = SELECTED;
 			obj[DESKPREF].ob_state = NORMAL;
-		  c_2:
+		c_2:
 			draw_fld(obj, DESKPREF);
 			draw_fld(obj, WINPREF);
 			obj[PATTERN].ob_spec = *outpat;
 		}
 
-		if ((ret >= PAT0) && (ret <= PAT7))
+		if (ret >= PAT0 && ret <= PAT7)
 		{
 			obj[PATTERN].ob_spec &= 0xFFFFFF0FL;
 			obj[PATTERN].ob_spec |= obj[ret].ob_spec & 0x000000F0L;
@@ -81,10 +84,9 @@ VOID col_pa_pref(NOTHING)
 			obj[PATTERN].ob_spec |= obj[ret].ob_spec & 0x0000000FL;
 		}
 
-		objc_draw(obj, OUTBOX, 2, 0, 0, full.w, full.h);
+		objc_draw(obj, OUTBOX, 2, 0, 0, full.g_w, full.g_h);
 		*outpat = obj[PATTERN].ob_spec;
-
-	}									/* while */
+	}
 
 	do_finish(SSCREEN);
 
@@ -113,4 +115,5 @@ VOID col_pa_pref(NOTHING)
 			win = w_gnext();
 		}
 	}
+	UNUSED(last);
 }

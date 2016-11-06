@@ -678,16 +678,12 @@ _inf_sset:
 	rts
 
 /*
- * inf_sget
  * fs_sget	This routine copies the tedinfo string to the dst pointer.
  *		The function inf_sget was the same as fs_sget.
- *		C binding:	inf_sget(tree,obj,dst);
  *		C binding:	fs_sget(tree,obj,dst);
  *				long	tree,dst;
  *				word	obj;
  */
-	xdef _inf_sget
-_inf_sget: ds.b 0
 	xdef _fs_sget
 _fs_sget: ds.b 0
 	movea.w	#OB_SPEC,a0	; a0 = offset to ob_spec

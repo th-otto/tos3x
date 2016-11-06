@@ -1,15 +1,17 @@
-/*	DESKMISC.C		3/16/89	- 9/13/89	Derek Mui	*/
-/*	Change chk_par		9/25/89			D.Mui		*/
-/*	Fix at fill_string to take out control character	7/9/91	*/
-/*	Add get_fstring		7/7/92			D.Mui		*/
+/*      DESKMISC.C              3/16/89 - 9/13/89       Derek Mui       */
+/*      Change chk_par          9/25/89                 D.Mui           */
+/*      Fix at fill_string to take out control character        7/9/91  */
+/*      Add get_fstring         7/7/92                  D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
+#include "toserrno.h"
+
 
 int16_t m_sfirst(P(const char *) path, P(int16_t) att)
 PP(const char *path;)
@@ -18,7 +20,7 @@ PP(int16_t att;)
 	int16_t ret;
 
 	if (*path == 'c')
-		return (!c_sfirst(path));
+		return !c_sfirst(path);
 	else
 	{
 		desk_wait(TRUE);
@@ -42,7 +44,7 @@ PP(const char *path;)
 
 	if (level > d_level)
 	{
-/*	  form_alert( 1, Alloc );	*/
+		/* form_alert(1, Alloc); */
 		if (!path_alloc(level))
 			return (FALSE);
 	}
@@ -60,9 +62,9 @@ PP(int16_t drive;)
 	strcpy(buffer, wildext);
 	buffer[0] = drive;
 	Fsetdta(&dtabuf);					/* set dta buffer   */
-	if (ret = Fsfirst(buffer, 0x3F))
+	if ((ret = Fsfirst(buffer, 0x3F)))
 	{
-		if (ret == EFILNF)				/* that's OK    */
+		if (ret == E_FILNF)				/* that's OK    */
 			ret = FALSE;
 	}
 
@@ -85,8 +87,8 @@ PP(int16_t item;)
 {
 	OBJECT *obj;
 
-	rsrc_gaddr(R_TREE, item, &obj);
-	return (obj);
+	rsrc_gaddr(R_TREE, item, (VOIDPTR *)&obj);
+	return obj;
 }
 
 
@@ -96,8 +98,8 @@ PP(int16_t item;)
 {
 	char **str;
 
-	rsrc_gaddr(R_FRSTR, item, &str);
-	return (*str);
+	rsrc_gaddr(R_FRSTR, item, (VOIDPTR *)&str);
+	return *str;
 }
 
 
@@ -106,8 +108,8 @@ PP(int16_t item;)
 {
 	char *str;
 
-	rsrc_gaddr(R_STRING, item, &str);
-	return (str);
+	rsrc_gaddr(R_STRING, item, (VOIDPTR *)&str);
+	return str;
 }
 
 
@@ -120,7 +122,7 @@ PP(int16_t item;)
 
 	j = win->w_srtitem + item - 1;
 	dir = win->w_memory;
-	return (&dir[j]);
+	return &dir[j];
 }
 
 
@@ -164,14 +166,14 @@ BOOLEAN in_parent(P(OBJECT *)obj, P(int16_t) child)
 PP(OBJECT *obj;)
 PP(int16_t child;)
 {
-	return inside(obj[child].ob_x + obj[0].ob_x, obj[child].ob_y + obj[0].ob_y, &obj[0].ob_x);
+	return inside(obj[child].ob_x + obj[0].ob_x, obj[child].ob_y + obj[0].ob_y, (GRECT *)&obj[0].ob_x);
 }
 
 
-VOID xinf_sset(P(OBJECT *)obj, P(int16_t) item, P(char *)buf1)
+VOID xinf_sset(P(OBJECT *)obj, P(int16_t) item, P(const char *)buf1)
 PP(OBJECT *obj;)
 PP(int16_t item;)
-PP(char *buf1;)
+PP(const char *buf1;)
 {
 	char buf2[20];
 
@@ -204,8 +206,8 @@ PP(int16_t which;)
 	GRECT t;
 	int16_t x, y;
 
-	objc_gclip(obj, which, &x, &y, &t.x, &t.y, &t.w, &t.h);
-	objc_draw(obj, which, 0, t.x, t.y, t.w, t.h);
+	objc_gclip((LPTREE)obj, which, &x, &y, &t.g_x, &t.g_y, &t.g_w, &t.g_h);
+	objc_draw(obj, which, 0, t.g_x, t.g_y, t.g_w, t.g_h);
 }
 
 
@@ -218,7 +220,7 @@ PP(int32_t *p_value;)
 #if UNLINKED
 	todo
 #else
-	cookjar = *(int32_t *) (0x5a0);
+	cookjar = *((int32_t **) (0x5a0));
 #endif
 
 	if (!cookjar)
@@ -251,10 +253,10 @@ PP(int32_t value;)
 	int16_t len1, len2;
 	char *chrptr;
 
-	lbintoas(value, buffer);
-	len1 = (TEDINFO *) (obj[item].ob_spec)->te_txtlen;
+	lbintoasc(value, buffer);
+	len1 = ((TEDINFO *) (obj[item].ob_spec))->te_txtlen;
 	len1 -= 1;
-	chrptr = (TEDINFO *) (obj[item].ob_spec)->te_ptext;
+	chrptr = ((TEDINFO *) (obj[item].ob_spec))->te_ptext;
 	bfill(len1, ' ', chrptr);
 	len2 = strlen(buffer);
 	strcpy(chrptr + (int32_t) (len1 - len2), buffer);
@@ -289,7 +291,7 @@ PP(int16_t item;)
 
 	addr = get_tree(item);
 	form_center(addr, &x, &y, &w, &h);
-	objc_draw(addr, 0, 8, x, y, w, h);
+	objc_draw(addr, ROOT, MAX_DEPTH, x, y, w, h);
 	return (addr);
 }
 
@@ -299,7 +301,7 @@ PP(int16_t item;)
  */
 VOID wait_msg(NOTHING)
 {
-	char msgbuff[16];
+	int16_t msgbuff[8];
 	int16_t event, trash;
 
 	do
@@ -322,8 +324,8 @@ PP(int16_t item;)
 {
 	GRECT pt;
 
-	form_center(get_tree(item), &pt.x, &pt.y, &pt.w, &pt.h);
-	form_dial(FMD_FINISH, 0, 0, 0, 0, pt.x, pt.y, pt.w, pt.h);
+	form_center(get_tree(item), &pt.g_x, &pt.g_y, &pt.g_w, &pt.g_h);
+	form_dial(FMD_FINISH, 0, 0, 0, 0, pt.g_x, pt.g_y, pt.g_w, pt.g_h);
 	wait_msg();
 }
 
@@ -393,12 +395,12 @@ PP(register char *buffer;)
 }
 
 
-char *r_slash(P(char *)path)
-PP(register char *path;)
+char *r_slash(P(const char *)path)
+PP(register const char *path;)
 {
-	char *start;
+	const char *start;
+	
 	start = path;
-
 	while (*path)
 		path++;
 
@@ -409,7 +411,7 @@ PP(register char *path;)
 
 		path--;
 	}
-	return (path);
+	return NO_CONST(path);
 }
 
 
@@ -439,8 +441,9 @@ PP(int16_t cut;)
 		path--;
 
 	if (cut)
+	{
 		strcpy(path, buffer);
-	else
+	} else
 	{
 		chrptr = strscn(path + 1, buffer, '\\');
 		*chrptr = 0;
@@ -457,7 +460,7 @@ PP(int16_t cut;)
 int16_t cut_path(P(char *)path)
 PP(register char *path;)
 {
-	char buffer[14];
+	char buffer[NAMELEN];
 
 	return xcut_path(path, buffer, TRUE);
 }
@@ -487,9 +490,9 @@ PP(register char *path;)
  * Replace path
  * A:\aaa\*.* -> A:\aaa\bbb
  */
-VOID rep_path(char *name, char *path)
-char *name;
-char *path;
+VOID rep_path(P(const char *) name, P(char *) path)
+PP(const char *name;)
+PP(char *path;)
 {
 	path = r_slash(path);
 	path++;
@@ -519,8 +522,8 @@ VOID rc_center(P(GRECT *)rec1, P(GRECT *)rec2)
 PP(GRECT *rec1;)
 PP(GRECT *rec2;)
 {
-	rec2->x = rec1->x + (rec1->w / 2);
-	rec2->y = rec1->y + (rec1->h / 2);
+	rec2->g_x = rec1->g_x + (rec1->g_w / 2);
+	rec2->g_y = rec1->g_y + (rec1->g_h / 2);
 }
 
 
@@ -554,10 +557,14 @@ VOID fmt_time(P(uint16_t) time, P(char *)ptime)
 PP(register uint16_t time;)
 PP(register char *ptime;)
 {
-	register int16_t pm, val;
+	register BOOLEAN pm;
+	register int16_t val;
 
 	val = ((time & 0xf800) >> 11) & 0x001f;
 
+#if !BINEXACT
+	pm = FALSE; /* quiet compiler */
+#endif
 	if (st_time)
 	{
 		my_itoa(val, &ptime[0]);
@@ -644,6 +651,8 @@ PP(register char *dst;)
 	int16_t t, len;
 	char *buffer;
 
+	UNUSED(t);
+	
 	buffer = buf;
 
 	if (dir->d_att & READ)
@@ -697,11 +706,15 @@ PP(register char *dst;)
 	*dst++ = buffer[0];
 	*dst++ = buffer[1];
 	*dst++ = (char) st_dchar;
-/*	*dst++ = '-';	*/
+#if 0
+	*dst++ = '-';
+#endif
 	*dst++ = buffer[2];
 	*dst++ = buffer[3];
 	*dst++ = (char) st_dchar;
-/*	*dst++ = '-';	*/
+#if 0
+	*dst++ = '-';
+#endif
 	*dst++ = buffer[4];
 	*dst++ = buffer[5];
 #endif
@@ -723,10 +736,10 @@ PP(register char *dst;)
 }
 
 
-const char *g_name(P(const char *) file)
+char *g_name(P(const char *) file)
 PP(const char *file;)
 {
-	const char *tail;
+	char *tail;
 
 	tail = r_slash(file);
 	if (*tail == '\\')
@@ -740,8 +753,8 @@ PP(const char *file;)
  * save the extension of the path
  * A:\*.*
  */
-VOID save_ext(P(char *)path, P(char *)buffer)
-PP(char *path;)
+VOID save_ext(P(const char *)path, P(char *)buffer)
+PP(const char *path;)
 PP(char *buffer;)
 {
 	strcpy(buffer, g_name(path));
@@ -764,9 +777,9 @@ PP(char *buffer;)
  * Check for if the source is the parent of
  * the destination
  */
-int16_t chk_par(P(char *)srcptr, P(char *)dstptr)
-PP(register char *srcptr;)
-PP(register char *dstptr;)
+BOOLEAN chk_par(P(const char *)srcptr, P(const char *)dstptr)
+PP(register const char *srcptr;)
+PP(register const char *dstptr;)
 {
 	if (*srcptr != *dstptr)				/* Not the same device  */
 		return (TRUE);
@@ -812,7 +825,7 @@ PP(int16_t item;)
 	}
 
 	merge_str(g_buffer, get_string(item), &ptr);
-	return (form_alert(1, g_buffer));
+	return form_alert(1, g_buffer);
 }
 
 
@@ -839,7 +852,8 @@ PP(int32_t *value;)
 		} else
 			return (FALSE);
 	}
-
+	UNUSED(i);
+	
 	*value = n;
 	return (TRUE);
 }

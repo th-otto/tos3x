@@ -1,17 +1,17 @@
-/*	DESKINF.C		05/04/89 - 09/18/89	D.Mui		*/
-/*	Read in different setting of color and pattern depends on the	*/
-/*	color			6/28/90			D.Mui		*/
-/*	Put in default values of color and pattern	7/2/90	D.Mui	*/
-/*	Changed default color	7/20/90			D.Mui		*/
-/*	Save_inf returns status and move the up_allwin 8/14/91	D.Mui	*/
+/*      DESKINF.C               05/04/89 - 09/18/89     D.Mui           */
+/*      Read in different setting of color and pattern depends on the   */
+/*      color                   6/28/90                 D.Mui           */
+/*      Put in default values of color and pattern      7/2/90  D.Mui   */
+/*      Changed default color   7/20/90                 D.Mui           */
+/*      Save_inf returns status and move the up_allwin 8/14/91  D.Mui   */
 /*      Added another 0x00 to mkeys[] for VIDITEM obj  07/07/92 C.Gee   */
-/*	Change all the iconblk to ciconblk	7/11/92	D.Mui		*/
-/*	The #E will save 10 fields instead of 4	7/17/92	D.Mui		*/
+/*      Change all the iconblk to ciconblk      7/11/92 D.Mui           */
+/*      The #E will save 10 fields instead of 4 7/17/92 D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -28,10 +28,11 @@ BOOLEAN s_fullpath;
 #define SAVE_ATARI	128
 
 
-/*	Default keystroke	*/
-
+/*
+ * Default keystroke
+ */
 /* Added another 0x00 to the end for VIDITEM object - cjg 07/07/92 */
-/*	Take out two for sparrow */
+/* Take out two for sparrow */
 static char const mkeys[MAXMENU] = {
 	0x4F, 0x53, 0x4C, 0x00, 0x46, 0x42, 0x43, 0x57,
 	0x45, 0x58, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -40,8 +41,8 @@ static char const mkeys[MAXMENU] = {
 };
 
 char uhex_dig PROTO((int16_t wd));
-char *inf_xdesk PROTO((char *pcurr));
-char *inf_parse PROTO((char *pcurr));
+const char *inf_xdesk PROTO((const char *pcurr));
+const char *inf_parse PROTO((const char *pcurr));
 VOID inf_scan PROTO((char *buffer));
 int16_t hex_dig PROTO((char achar));
 char *save_win PROTO((WINDOW *win, char *pcurr));
@@ -60,8 +61,9 @@ PP(char *buffer;)
 }
 
 
-/*	Reverse of hex_dig()	*/
-
+/*
+ * Reverse of hex_dig()
+ */
 char uhex_dig(P(int16_t) wd)
 PP(register int16_t wd;)
 {
@@ -75,19 +77,19 @@ PP(register int16_t wd;)
 }
 
 
-char *escan_str(P(char *)pcurr, P(char *)ppstr)
-PP(register char *pcurr;)
+char *escan_str(P(const char *)pcurr, P(char *)ppstr)
+PP(register const char *pcurr;)
 PP(register char *ppstr;)
 {
 	while (*pcurr == ' ')
 		pcurr++;
 
-	while ((*pcurr != '@') && (*pcurr))
+	while (*pcurr != '@' && *pcurr)
 		*ppstr++ = *pcurr++;
 
 	*ppstr = 0;
 	pcurr++;
-	return (pcurr);
+	return NO_CONST(pcurr);
 }
 
 
@@ -95,8 +97,8 @@ PP(register char *ppstr;)
  * Scan off and convert the next two hex digits and return with
  * pcurr pointing one space past the end of the four hex digits
  */
-char *scan_2(P(char *) pcurr, P(int16_t *) pwd)
-PP(register char *pcurr;)
+char *scan_2(P(const char *) pcurr, P(int16_t *) pwd)
+PP(register const char *pcurr;)
 PP(register int16_t *pwd;)
 {
 	register uint16_t temp;
@@ -108,7 +110,7 @@ PP(register int16_t *pwd;)
 		temp = -1;
 	*pwd = temp;
 	pcurr++;
-	return pcurr;
+	return NO_CONST(pcurr);
 }
 
 
@@ -116,8 +118,8 @@ PP(register int16_t *pwd;)
  * Reverse of scan_2()
  */
 char *save_2(P(char *) pcurr, P(uint16_t) wd)
-register char *pcurr;
-uint16_t wd;
+PP(register char *pcurr;)
+PP(uint16_t wd;)
 {
 	*pcurr++ = uhex_dig((wd >> 4) & 0x000f);
 	*pcurr++ = uhex_dig(wd & 0x000f);
@@ -129,11 +131,11 @@ uint16_t wd;
 /*
  * Reverse of scan_str
  */
-char *save_str(P(char *)pcurr, P(char *)pstr)
+char *save_str(P(char *)pcurr, P(const char *)pstr)
 PP(register char *pcurr;)
-PP(register char *pstr;)
+PP(register const char *pstr;)
 {
-	while ((*pstr) && (pstr))
+	while (*pstr && pstr) /* BUG: && pstr useless when first acessing it */
 		*pcurr++ = *pstr++;
 	*pcurr++ = '@';
 	*pcurr++ = ' ';
@@ -144,15 +146,15 @@ PP(register char *pstr;)
 /*
  * Scan the desktop icon
  */
-char *inf_xdesk(P(char *)pcurr)
-PP(register char *pcurr;)
+const char *inf_xdesk(P(const char *)pcurr)
+PP(register const char *pcurr;)
 {
 	register int16_t ix;
 	register int16_t id;
 	register CICONBLK *iblk;
 	OBJECT *obj;
 	int16_t x, y, i, type;
-	char buffer[14];
+	char buffer[NAMELEN];
 
 	type = *pcurr++;
 
@@ -160,16 +162,16 @@ PP(register char *pcurr;)
 	{
 	case 'C':							/* cartridge    */
 		if (!cart_init())
-			return (pcurr);
+			return pcurr;
 
 		ix = DISK;
 		break;
 	case 'M':							/* No drive?    */
 		if (!(x = isdrive()))
-			return (pcurr);
+			return pcurr;
 
 		if ((pcurr[13] == 'C') && !(x & 0x04))
-			return (pcurr);
+			return pcurr;
 
 		ix = DISK;						/* disk drive   */
 		break;
@@ -186,11 +188,11 @@ PP(register char *pcurr;)
 		ix = PRINTER;
 		break;
 	default:							/* illegal type */
-		return (pcurr);
+		return pcurr;
 	}
 
 	if ((id = av_icon()) == -1)			/* allocate a desktop icon  */
-		return (pcurr);
+		return pcurr;
 
 	backid[id].i_type = ix;
 
@@ -227,7 +229,7 @@ PP(register char *pcurr;)
 			if (type == 'X')
 				save_ext(backid[id].i_path, iblk->monoblk.ib_ptext);
 			else
-				save_mid(backid[id].i_path, iblk->monoblk.ib_ptext);
+				save_mid(NO_CONST(backid[id].i_path), iblk->monoblk.ib_ptext);
 		}
 	} else
 	{
@@ -244,8 +246,8 @@ PP(register char *pcurr;)
  * Parse a single line from the DESKTOP.APP file.
  * Just scan the application
  */
-char *inf_parse(P(char *)pcurr)
-PP(register char *pcurr;)
+const char *inf_parse(P(const char *)pcurr)
+PP(register const char *pcurr;)
 {
 	register APP *app;
 	register int16_t type;
@@ -295,7 +297,7 @@ PP(register char *pcurr;)
 		if (*(pcurr + 1) != ' ')		/* function key     */
 		{
 			pcurr++;
-			scan_2(pcurr++, &app->a_key);
+			scan_2(pcurr++, (int16_t *)&app->a_key);
 		}
 	}
 
@@ -348,7 +350,7 @@ PP(char *buffer;)
 {
 	register int16_t i, tmp;
 	register WINDOW *pws;
-	register char *pcurr;
+	register const char *pcurr;
 	APP *app;
 	char *ptmp;
 	int16_t envr, j;
@@ -356,6 +358,11 @@ PP(char *buffer;)
 	char temp;
 	char *ptr;
 
+	UNUSED(stmp);
+	UNUSED(ptmp);
+	UNUSED(tmp);
+	UNUSED(app);
+	
 	i = 0;								/* for window index */
 	pcurr = buffer;
 	font_save = 0;
@@ -378,10 +385,10 @@ PP(char *buffer;)
 					mentable[j] = 0;
 				/* key board table  */
 				/* read in key equivalent */
-/* use MAXMENU+2 instead of MAXMENU for compatibility with MultiTOS
- * and other TOS's; that's also why we need to permute things
- * (see table above)
- */
+				/* use MAXMENU+2 instead of MAXMENU for compatibility with MultiTOS
+				 * and other TOS's; that's also why we need to permute things
+				 * (see table above)
+				 */
 				for (j = 0; j < MAXMENU + 2; j++)
 				{
 					if (*pcurr == '@')
@@ -421,34 +428,34 @@ PP(char *buffer;)
 				pcurr = scan_2(pcurr, &pws->w_rowi);
 
 				/* window's x position  */
-				pcurr = scan_2(pcurr, &pws->w_sizes.x);
-				if (pws->w_sizes.x >= gl_ncols)
-					pws->w_sizes.x = gl_ncols - 4;
+				pcurr = scan_2(pcurr, &pws->w_sizes.g_x);
+				if (pws->w_sizes.g_x >= gl_ncols)
+					pws->w_sizes.g_x = gl_ncols - 4;
 
-				pws->w_sizes.x *= gl_wchar;
+				pws->w_sizes.g_x *= gl_wchar;
 
 				/* window's y position  */
-				pcurr = scan_2(pcurr, &pws->w_sizes.y);
-				if (pws->w_sizes.y >= gl_nrows)
-					pws->w_sizes.y = gl_nrows - 1;
+				pcurr = scan_2(pcurr, &pws->w_sizes.g_y);
+				if (pws->w_sizes.g_y >= gl_nrows)
+					pws->w_sizes.g_y = gl_nrows - 1;
 
-				pws->w_sizes.y *= gl_hchar;
+				pws->w_sizes.g_y *= gl_hchar;
 
 				/* window's width   */
-				pcurr = scan_2(pcurr, &pws->w_sizes.w);
-				if (pws->w_sizes.w > gl_ncols)
-					pws->w_sizes.w /= 2;
-				pws->w_sizes.w *= gl_wchar;
-				if (pws->w_sizes.w < (7 * gl_wbox))
-					pws->w_sizes.w = 7 * gl_wbox;
+				pcurr = scan_2(pcurr, &pws->w_sizes.g_w);
+				if (pws->w_sizes.g_w > gl_ncols)
+					pws->w_sizes.g_w /= 2;
+				pws->w_sizes.g_w *= gl_wchar;
+				if (pws->w_sizes.g_w < (7 * gl_wbox))
+					pws->w_sizes.g_w = 7 * gl_wbox;
 
 				/* window's height  */
-				pcurr = scan_2(pcurr, &pws->w_sizes.h);
-				if (pws->w_sizes.h >= gl_nrows)
-					pws->w_sizes.h /= 2;
-				pws->w_sizes.h *= gl_hchar;
-				if (pws->w_sizes.h < (7 * gl_hbox))
-					pws->w_sizes.h = 7 * gl_hbox;
+				pcurr = scan_2(pcurr, &pws->w_sizes.g_h);
+				if (pws->w_sizes.g_h >= gl_nrows)
+					pws->w_sizes.g_h /= 2;
+				pws->w_sizes.g_h *= gl_hchar;
+				if (pws->w_sizes.g_h < (7 * gl_hbox))
+					pws->w_sizes.g_h = 7 * gl_hbox;
 
 				do_xyfix(&pws->w_sizes);
 				rc_copy(&pws->w_sizes, &pws->w_work);
@@ -550,7 +557,14 @@ VOID read_inf(NOTHING)
 
 			Fclose(handle);
 		} else
-		  re_1:size1 = rom_ram(3, afile, 0);
+		{
+		re_1:
+#if BINEXACT
+			size1 = rom_ram(3, (intptr_t)afile, 0); /* BUG: extra parameter */
+#else
+			size1 = rom_ram(3, (intptr_t)afile);
+#endif
+		}
 
 		afile[size1] = 0;
 	}
@@ -584,7 +598,7 @@ VOID read_inf(NOTHING)
 		app = app->a_next;
 	}
 
-	if (app = app_alloc())
+	if ((app = app_alloc()) != NULL)
 	{
 		app->a_type = PTP;
 		app->a_key = 0;
@@ -623,10 +637,10 @@ PP(register char *pcurr;)
 
 	pcurr = save_2(pcurr, win->w_coli);	/* horizontal slide bar  */
 	pcurr = save_2(pcurr, win->w_rowi);
-	pcurr = save_2(pcurr, win->w_sizes.x / gl_wchar);
-	pcurr = save_2(pcurr, win->w_sizes.y / gl_hchar);
-	pcurr = save_2(pcurr, win->w_sizes.w / gl_wchar);
-	pcurr = save_2(pcurr, win->w_sizes.h / gl_hchar);
+	pcurr = save_2(pcurr, win->w_sizes.g_x / gl_wchar);
+	pcurr = save_2(pcurr, win->w_sizes.g_y / gl_hchar);
+	pcurr = save_2(pcurr, win->w_sizes.g_w / gl_wchar);
+	pcurr = save_2(pcurr, win->w_sizes.g_h / gl_hchar);
 	pcurr = save_2(pcurr, 0);
 
 	if (win->w_id != -1)
@@ -662,12 +676,12 @@ PP(BOOLEAN todisk;)
 	char infname[16];
 	char buf1[2];
 
-	if (size = Malloc(0xFFFFFFFFL))		/* get some memory  */
+	if ((size = Malloc(0xFFFFFFFFL)))		/* get some memory  */
 	{
 		if (size < INFSIZE)
 			goto if_1;
 
-		buf = pcurr = Malloc(size);
+		buf = pcurr = (char *)Malloc(size);
 	} else
 	{
 	  if_1:do1_alert(FCNOMEM);
@@ -750,8 +764,10 @@ PP(BOOLEAN todisk;)
 
 	/* 7/17/92  */
 
+#if TOSVERSION >= 0x400
 	pcurr = save_2(pcurr, (d_rezword >> 8));
 	pcurr = save_2(pcurr, (d_rezword & 0x00FF));
+#endif
 	pcurr = save_2(pcurr, 0);
 	pcurr = save_2(pcurr, 0);
 	pcurr = save_2(pcurr, 0);
@@ -881,8 +897,8 @@ PP(BOOLEAN todisk;)
 
 	obj = background;
 
-	w = r_dicon.w;
-	h = r_dicon.h;
+	w = r_dicon.g_w;
+	h = r_dicon.g_h;
 
 	for (i = 1; i <= maxicon; i++)
 	{
@@ -921,7 +937,7 @@ PP(BOOLEAN todisk;)
 		pcurr = save_2(pcurr, obj[i].ob_y / h);
 		pcurr = save_2(pcurr, backid[i].i_icon);
 		pcurr = save_2(pcurr, 0xFFFF);
-		*pcurr = (CICONBLK *) (obj[i].ob_spec)->monoblk.ib_char[1];
+		*pcurr = ((CICONBLK *) (obj[i].ob_spec))->monoblk.ib_char[1];
 		if (!*pcurr)
 			*pcurr = ' ';
 
@@ -932,12 +948,12 @@ PP(BOOLEAN todisk;)
 		if (backid[i].i_path)
 			pcurr = save_str(pcurr, backid[i].i_path);
 
-		pcurr = save_str(pcurr, (CICONBLK *) (obj[i].ob_spec)->monoblk.ib_ptext);
+		pcurr = save_str(pcurr, ((CICONBLK *) (obj[i].ob_spec))->monoblk.ib_ptext);
 
 		if (!backid[i].i_path)
 			pcurr = save_str(pcurr, Nostr);
 
-/*	   pcurr = save_str( pcurr, Nostr );	*/
+		/* pcurr = save_str( pcurr, Nostr); */
 		*pcurr++ = 0x0d;
 		*pcurr++ = 0x0a;
 	}
@@ -981,7 +997,9 @@ PP(BOOLEAN todisk;)
 			Fdelete(infname);
 		}
 
-		/*	  up_allwin( infname, FALSE ); 	*//* rebuild any window on the INF drive */
+#if 0
+		up_allwin(infname, FALSE);	/* rebuild any window on the INF drive */
+#endif
 
 		/* update the buffer    */
 		if (streq(infname, inf_path))
@@ -1014,10 +1032,10 @@ PP(register int16_t *py;)
 {
 	register int16_t x, y, w, h;
 
-	w = r_dicon.w;
-	h = r_dicon.h;
-	x = colx * w + full.x;
-	y = coly * h + full.y;
+	w = r_dicon.g_w;
+	h = r_dicon.g_h;
+	x = colx * w + full.g_x;
+	y = coly * h + full.g_y;
 	app_mtoi(x, y, px, py);
 }
 
@@ -1035,10 +1053,10 @@ PP(register int16_t *py;)
 	int16_t xm, ym;
 	int16_t maxx, maxy;
 
-	w = r_dicon.w;
-	h = r_dicon.h;
+	w = r_dicon.g_w;
+	h = r_dicon.g_h;
 	/* maximum x coordinate */
-	maxx = (full.w - dicon.w) / w;
+	maxx = (full.g_w - dicon.g_w) / w;
 
 	x = newx / w;
 	xm = newx % w;
@@ -1050,12 +1068,12 @@ PP(register int16_t *py;)
 
 	*px = x * w;						/* new x coordinate */
 
-	if (newy < full.y)
-		newy = full.y;
+	if (newy < full.g_y)
+		newy = full.g_y;
 
-	maxy = (full.h - dicon.h) / h;
+	maxy = (full.g_h - dicon.g_h) / h;
 
-	newy -= full.y;
+	newy -= full.g_y;
 
 	y = newy / h;
 	ym = newy % h;

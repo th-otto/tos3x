@@ -159,10 +159,9 @@ _mediach:
 	move.l	#$5c580000,fspec+2	; make sure it is on word boundary
 
 
-*	move.w	#9,d6			; loop 10 times!
-
-loop:
 #if 0
+	move.w	#9,d6			; loop 10 times!
+loop:
 	clr.l	-(sp)			; get super mode, leave old ssp
 	move.w	#$20,-(sp)		; and "super" function code on stack
 	trap	#1

@@ -5,60 +5,60 @@
  * DATE
  * 06/15/92  - cjg Created - preserved original routines.
  * 06/24/92  - cjg - Install Application works
- *		   - Desktop Configuration works
- *		   - Set Preferences works
- *		   - Set Video works - requires more data for new modes
+ *                 - Desktop Configuration works
+ *                 - Set Preferences works
+ *                 - Set Video works - requires more data for new modes
  * 06/25/92  - cjg - install popup for defining keystrokes.
  * 07/09/92  - cjg - Set Video - 
- *		     If we're in TRUE COLOR, disable 80 column menu item
- *		     If we're in 80 column mode, disable TRUE COLOR menu item
+ *                   If we're in TRUE COLOR, disable 80 column menu item
+ *                   If we're in 80 column mode, disable TRUE COLOR menu item
  * 07/10/92  - cjg - Removed changes for 07/09/92
  * 07/13/92  - cjg - put in modecode routines - needs quite a few things
- *		     from kbad and townsend
+ *                   from kbad and townsend
  * 07/14/92  - cjg - Checked if the pen number for an object that is 3D
- *		     is greater than or equal to the number of pens.
- *		     if it is, then set pen number to pen zero.
- * 		   - Don't allow 40 COLUMN MONOCHROME
- *		   - Don't allow 80 COLUMN, VGA, TRUE COLOR
+ *                   is greater than or equal to the number of pens.
+ *                   if it is, then set pen number to pen zero.
+ *                 - Don't allow 40 COLUMN MONOCHROME
+ *                 - Don't allow 80 COLUMN, VGA, TRUE COLOR
  * 07/15/92  - cjg - The No Budget, IOU State, DAY 15
- *		   - _VDO Cookie for SPARROW Video is 3 for the upper word
+ *                 - _VDO Cookie for SPARROW Video is 3 for the upper word
  * 07/17/92  - cjg - Set_Video() returns TRUE and shoves set_mode() into
- *		     'd_rezword' if we want to change resolutions.
- *		   - Returns FALSE if no change or if we are not
- *		     running SPARROW video.
- *		   - Uses cookie to keep and maintain original
- *		     method of changing resolutions on an ST/TT
+ *                   'd_rezword' if we want to change resolutions.
+ *                 - Returns FALSE if no change or if we are not
+ *                   running SPARROW video.
+ *                 - Uses cookie to keep and maintain original
+ *                   method of changing resolutions on an ST/TT
  * 07/21/92  - cjg - Sparrow Set_Video()
- *		   - If in Sparrow mode, ALWAYS come up first in
- *		     the Sparrow Video Dialog Box.
- *		   - Even if we're a Monochrome monitor
+ *                 - If in Sparrow mode, ALWAYS come up first in
+ *                   the Sparrow Video Dialog Box.
+ *                 - Even if we're a Monochrome monitor
  * 07/31/92  - cjg - Many Changes...read ....
- *		   - use mon_type() to determine type of monitor
- *		   - Removed Sparrow Video Check, must always be on
- *		     a Sparrow
- *		   - Remove TT High
- *		   - ST/TT Dialog Box
- *		     -Do not initialize to any mode
- *		     -Monochrome monitor, disable everything
- *		     -Redid the layout for this dialog box.
+ *                 - use mon_type() to determine type of monitor
+ *                 - Removed Sparrow Video Check, must always be on
+ *                   a Sparrow
+ *                 - Remove TT High
+ *                 - ST/TT Dialog Box
+ *                   -Do not initialize to any mode
+ *                   -Monochrome monitor, disable everything
+ *                   -Redid the layout for this dialog box.
  * 08/03/92  - cjg - Hide TTLOW and TTMED on a TV
- *		   - fixed ST Compatibility set_mode variables
- * 		   - Added a mem-check() to test if enough memory
- *		     is available for switching resolutions.
+ *                 - fixed ST Compatibility set_mode variables
+ *                 - Added a mem-check() to test if enough memory
+ *                   is available for switching resolutions.
  * 08/05/92  - cjg - Change all Deselect() to XDeselect()
- *		   - Change all Select() to XSelect()
- *		   - Remove TTMED and TTLOW
+ *                 - Change all Select() to XSelect()
+ *                 - Remove TTMED and TTLOW
  * 08/06/92  - cjg - Changed XDeselect() and XSelect() to
- *		     redraw from the root and to increase the
- *		     redraw area by 2 pixels.
- *		   - Changed Selecting Titles to draw_fld()
- *		   - Enabled Arrow Buttons to INVERT when Selected.
- *		   - Buttons remain selected until mouse button is released.
+ *                   redraw from the root and to increase the
+ *                   redraw area by 2 pixels.
+ *                 - Changed Selecting Titles to draw_fld()
+ *                 - Enabled Arrow Buttons to INVERT when Selected.
+ *                 - Buttons remain selected until mouse button is released.
  * 08/11/92  - cjg - When a function key is already used, and cancel is pressed
- *		     deselect the OK button properly.
+ *                   deselect the OK button properly.
  * 08/11/92  - cjg - Fixed bug with objc_find() inside ChkTouchButton()
  * 08/17/92  - cjg - Fixed bug - System Configuration
- *		   - Used wrong object number..
+ *                 - Used wrong object number..
  * 09/21/92  - cjg - Configuration Popup - Look for longest string first
  * 09/24/92  - cjg - Fixed bug with MKUP and MKDOWN pausing for a scroll.
  */
@@ -135,6 +135,7 @@ PP(int16_t button;)
 	int16_t obj;
 	GRECT rect;
 
+	UNUSED(rect);
 	wind_update(BEG_MCTRL);
 	XSelect(tree, button);
 
@@ -193,6 +194,11 @@ VOID mv_desk(NOTHING)
 	int16_t skip_flag;
 	int32_t old_f;							/* cjg 09/24/92 */
 
+	UNUSED(dcolor);
+	UNUSED(trect);
+	UNUSED(flag);
+	UNUSED(brect);
+	
 	skip_flag = TRUE;
 	obj = get_tree(MNSYSTEM);			/* Get config tree  */
 	obj1 = menu_addr;					/* Get Menu Bar Tree */
@@ -204,7 +210,7 @@ VOID mv_desk(NOTHING)
 		temp[i] = mentable[i];
 
 	/* Initialize the First Menu Item Keystroke */
-	(TEDINFO *) (obj[MKITEM].ob_spec)->te_ptext = obj1[tb3[0]].ob_spec;
+	((TEDINFO *) (obj[MKITEM].ob_spec))->te_ptext = (char *)obj1[tb3[0]].ob_spec;
 	buf[1] = 0;
 	buf[0] = mentable[0];
 	inf_sset(obj, MKKEYS, buf);
@@ -225,11 +231,11 @@ VOID mv_desk(NOTHING)
 	if (s_defdir)						/* set the full path    */
 	{
 		dstart = SDAPP;					/* Application */
-		(char *) obj[SDBUTTON].ob_spec = get_fstring(FSAPP);
+		obj[SDBUTTON].ob_spec = (intptr_t)get_fstring(FSAPP);
 	} else
 	{
 		dstart = SDTOP;					/* Top Window  */
-		(char *) obj[SDBUTTON].ob_spec = get_fstring(FSTOP);
+		obj[SDBUTTON].ob_spec = (intptr_t)get_fstring(FSTOP);
 	}
 	menu_icheck(dtree, dstart, 1);
 
@@ -238,21 +244,21 @@ VOID mv_desk(NOTHING)
 	if (s_fullpath)						/* Set input parameter  */
 	{
 		istart = SIFULL;				/* Full Path   */
-		(char *) obj[SIBUTTON].ob_spec = get_fstring(FSFULL);
+		obj[SIBUTTON].ob_spec = (intptr_t)get_fstring(FSFULL);
 	} else
 	{
 		istart = SIFILE;				/* File Name   */
-		(char *) obj[SIBUTTON].ob_spec = get_fstring(FSFILE);
+		obj[SIBUTTON].ob_spec = (intptr_t)get_fstring(FSFILE);
 	}
 	menu_icheck(dtree, istart, 1);
 
 
 	/* Initialize the Free Memory String */
 	f_str(obj, MKMEMORY, av_mem());
-	*(char *) ((TEDINFO *) (obj[MFKEY].ob_spec)->te_ptext) = 0;
+	*(((TEDINFO *) (obj[MFKEY].ob_spec))->te_ptext) = '\0';
 
 	/* save the original pointer    */
-	str = (TEDINFO *) (obj[MFFILE].ob_spec)->te_ptext;
+	str = ((TEDINFO *) (obj[MFFILE].ob_spec))->te_ptext;
 	len = strlen(str);
 	*str = 0;
 
@@ -260,7 +266,7 @@ VOID mv_desk(NOTHING)
 	which = MFDOWN;
 
 	old_f = f = 0;
-	fm_draw(MNSYSTEM, FALSE);			/* save the string  */
+	fm_draw(MNSYSTEM);					/* save the string  */
 
 
 	for (f = 1; f <= 20; f++)			/* cjg 09/24/92 */
@@ -273,17 +279,18 @@ VOID mv_desk(NOTHING)
 	}
 	f = 0;								/* cjg 09/24/92 */
 
-
+	fi = 0;
 	goto ad_2;
 
 	while (TRUE)
 	{
-	  ad_5:which = form_do(obj, MKKEYS) & 0x7fff;
+	ad_5:
+		which = form_do(obj, MKKEYS) & 0x7fff;
 		obj[which].ob_state &= ~SELECTED;
 
 		if ((which == MKUPS) || (which == MKDOWNS) || (which == MOK))
 		{
-			inf_sget(obj, MKKEYS, buf);
+			fs_sget((LPTREE)obj, MKKEYS, buf);
 			buf[0] = toupper(buf[0]);
 			if (buf[0])
 			{
@@ -311,7 +318,8 @@ VOID mv_desk(NOTHING)
 			mentable[menui] = buf[0];
 		}
 
-	  ad_2:switch (which)
+	ad_2:
+		switch (which)
 		{
 		case MKITEM:
 			if (DoMKItems(obj, MKITEM, &menui))
@@ -353,7 +361,7 @@ VOID mv_desk(NOTHING)
 				menui++;
 			  p_11:
 				ch_key(menui);
-				(TEDINFO *) (obj[MKITEM].ob_spec)->te_ptext = obj1[tb3[menui]].ob_spec;
+				((TEDINFO *) (obj[MKITEM].ob_spec))->te_ptext = (char *)obj1[tb3[menui]].ob_spec;
 				draw_fld(obj, MKITEM);
 			  p_2:
 				buf[1] = 0;
@@ -436,7 +444,7 @@ VOID mv_desk(NOTHING)
 					}
 					app = xapp;
 					fi = 0;
-					(TEDINFO *) (obj[MFFILE].ob_spec)->te_ptext = app->a_name;
+					((TEDINFO *) (obj[MFFILE].ob_spec))->te_ptext = NO_CONST(app->a_name);
 					draw_fld(obj, MFFILE);
 					f_str(obj, MFKEY, f);
 					draw_fld(obj, MFKEY);
@@ -506,9 +514,9 @@ VOID mv_desk(NOTHING)
 					continue;
 				}
 			}
-		  ad_4:
+
 			XSelect(obj, which);		/* cjg 08/06/92 */
-			(TEDINFO *) (obj[MFFILE].ob_spec)->te_ptext = &app->a_name[fi];
+			((TEDINFO *) (obj[MFFILE].ob_spec))->te_ptext = NO_CONST(&app->a_name[fi]);
 			draw_fld(obj, MFFILE);
 
 			/* cjg 08/06/92 - Check if the buttons are still down */
@@ -527,7 +535,7 @@ VOID mv_desk(NOTHING)
 
   ad_1:								/* restore the pointer  */
 	put_keys();
-	(TEDINFO *) (obj[MFFILE].ob_spec)->te_ptext = str;
+	((TEDINFO *) (obj[MFFILE].ob_spec))->te_ptext = str;
 	*str = 1;
 	do_finish(MNSYSTEM);
 }
@@ -548,9 +556,9 @@ VOID mins_app(NOTHING)
 	BOOLEAN cont;
 	BOOLEAN setdir;
 	BOOLEAN dofull;
-	in16_t where;
+	int16_t where;
 	int16_t type, sret, icon, graphic;
-	char *str;
+	const char *str;
 	char buffer[8];
 	int32_t l;
 
@@ -567,8 +575,13 @@ VOID mins_app(NOTHING)
 	int16_t i;
 	int16_t done;
 
+	UNUSED(flag);
+	UNUSED(trect);
+	UNUSED(brect);
+	UNUSED(rect);
+	
 	cont = TRUE;
-	obj = (OBJECT *) 0;
+	obj = NULL;
 	dtree = get_tree(MNMENU);			/* Get menu Tree */
 
 	cont = x_first(&str, &type);
@@ -607,11 +620,11 @@ VOID mins_app(NOTHING)
 		if (ret)
 		{
 			bstart = MPBAUTO;
-			(char *) obj[MPBBUTTN].ob_spec = get_fstring(FSAUTO);
+			obj[MPBBUTTN].ob_spec = (intptr_t)get_fstring(FSAUTO);
 		} else
 		{
 			bstart = MPBNORML;
-			(char *) obj[MPBBUTTN].ob_spec = get_fstring(FSNORMAL);
+			obj[MPBBUTTN].ob_spec = (intptr_t)get_fstring(FSNORMAL);
 		}
 		menu_icheck(dtree, bstart, TRUE);
 
@@ -643,14 +656,13 @@ VOID mins_app(NOTHING)
 		if (setdir)
 		{
 			dstart = SDAPP;
-			(char *) obj[MPDBUTTN].ob_spec = get_fstring(FSAPP);
+			obj[MPDBUTTN].ob_spec = (intptr_t)get_fstring(FSAPP);
 		} else
 		{
 			dstart = SDTOP;
-			(char *) obj[MPDBUTTN].ob_spec = get_fstring(FSTOP);
+			obj[MPDBUTTN].ob_spec = (intptr_t)get_fstring(FSTOP);
 		}
 		menu_icheck(dtree, dstart, TRUE);
-
 
 
 		/* Set the Parameter Menu */
@@ -661,24 +673,23 @@ VOID mins_app(NOTHING)
 		if (dofull)
 		{
 			pstart = SIFULL;
-			(char *) obj[MPPBUTTN].ob_spec = get_fstring(FSFULL);
+			obj[MPPBUTTN].ob_spec = (intptr_t)get_fstring(FSFULL);
 		} else
 		{
 			pstart = SIFILE;
-			(char *) obj[MPPBUTTN].ob_spec = get_fstring(FSFILE);
+			obj[MPPBUTTN].ob_spec = (intptr_t)get_fstring(FSFILE);
 		}
 		menu_icheck(dtree, pstart, TRUE);
 
 
 		/* Set the Document type */
-		inf_sset(obj, MPDTYPE, (newapp) ? Nostr : &app->a_doc[2]);
+		inf_sset(obj, MPDTYPE, newapp ? Nostr : &app->a_doc[2]);
 
 		/* Set the Application Name */
 		xinf_sset(obj, MPFNAME, g_name(str));
 
 		/* Set the Arguments */
-		inf_sset(obj, MPARGS, (newapp) ? Nostr : app->a_argu);
-
+		inf_sset(obj, MPARGS, newapp ? Nostr : app->a_argu);
 
 
 		/* Clear Application Type Menu */
@@ -692,27 +703,26 @@ VOID mins_app(NOTHING)
 		case PRG:
 		case APPS:
 			ret = fstart = MPFGEM;
-			(char *) obj[MPFBUTTN].ob_spec = get_fstring(FSGEM);
+			obj[MPFBUTTN].ob_spec = (intptr_t)get_fstring(FSGEM);
 			break;
 
 		case TTP:
 			ret = fstart = MPFTTP;
-			(char *) obj[MPFBUTTN].ob_spec = get_fstring(FSTOSTTP);
+			obj[MPFBUTTN].ob_spec = (intptr_t)get_fstring(FSTOSTTP);
 			break;
 
 		case TOS:
 			ret = fstart = MPFTOS;
-			(char *) obj[MPFBUTTN].ob_spec = get_fstring(FSTOS);
+			obj[MPFBUTTN].ob_spec = (intptr_t)get_fstring(FSTOS);
 			break;
 
 		case PTP:						/* Gem takes parameters */
 			ret = fstart = MPFGMTTP;
-			(char *) obj[MPFBUTTN].ob_spec = get_fstring(FSGEMTTP);
+			obj[MPFBUTTN].ob_spec = (intptr_t)get_fstring(FSGEMTTP);
 			break;
 
 		default:
-		ins_1:
-			fill_string(str, NOTPRG);
+			fill_string(NO_CONST(str), NOTPRG);
 			goto is_1;
 		}
 		menu_icheck(dtree, ret, TRUE);
@@ -729,18 +739,18 @@ VOID mins_app(NOTHING)
 			lbintoasc((int32_t) app->a_key, buffer);
 			istart = MPIF1 + app->a_key - 1;
 
-			(char *) obj[MPIBUTTN].ob_spec = get_fstring(FSF1 + app->a_key - 1);
+			obj[MPIBUTTN].ob_spec = (intptr_t)get_fstring(FSF1 + app->a_key - 1);
 		} else
 		{
 			istart = MPINONE;
 			buffer[0] = 0;
-			(char *) obj[MPIBUTTN].ob_spec = get_fstring(FSNONE);
+			obj[MPIBUTTN].ob_spec = (intptr_t)get_fstring(FSNONE);
 		}
 		menu_icheck(dtree, istart, TRUE);
 
-		fm_draw(MNINSAPP, FALSE);
+		fm_draw(MNINSAPP);
 		where = 0;
-	  ins_2:
+	ins_2:
 		done = 0;
 		while (!done)
 		{
@@ -811,12 +821,12 @@ VOID mins_app(NOTHING)
 								{
 									lbintoasc((int32_t) app->a_key, buffer);
 									istart = MPIF1 + app->a_key - 1;
-									(char *) obj[MPIBUTTN].ob_spec = get_fstring(FSF1 + app->a_key - 1);
+									obj[MPIBUTTN].ob_spec = (intptr_t)get_fstring(FSF1 + app->a_key - 1);
 								} else
 								{
 									istart = MPINONE;
 									buffer[0] = 0;
-									(char *) obj[MPIBUTTN].ob_spec = get_fstring(FSNONE);
+									obj[MPIBUTTN].ob_spec = (intptr_t)get_fstring(FSNONE);
 								}
 								menu_icheck(dtree, istart, TRUE);
 
@@ -828,10 +838,12 @@ VOID mins_app(NOTHING)
 								where = 0;
 								goto ins_2;
 							} else
+							{
 								sapp->a_key = 0;	/* Overwrite    */
+							}
 						}
-
-					  ins_4:sapp = sapp->a_next;
+					ins_4:
+						sapp = sapp->a_next;
 					}
 				}
 				/* check function key */
@@ -844,15 +856,17 @@ VOID mins_app(NOTHING)
 						goto ins_6;
 					}
 				} else					/* clean up the old define  */
+				{
 					app->a_doc[0] = 0;
-
+				}
+				
 				/* get the doc icon type    */
 				strcpy(buffer, "*.");
-				inf_sget(obj, MPDTYPE, &buffer[2]);
+				fs_sget((LPTREE)obj, MPDTYPE, &buffer[2]);
 				app_icon(buffer, -1, &app->a_dicon);
 
 				strcpy(app->a_doc, buffer);
-				inf_sget(obj, MPARGS, app->a_argu);
+				fs_sget((LPTREE)obj, MPARGS, app->a_argu);
 				graphic = 1;
 
 				switch (fstart)
@@ -896,7 +910,9 @@ VOID mins_app(NOTHING)
 							autofile[2] = ' ';
 							strcpy(&autofile[3], str);
 						} else
+						{
 							do1_alert(NOAUTO);
+						}
 					}
 				} else
 				{
@@ -921,18 +937,17 @@ VOID mins_app(NOTHING)
 
 			default:
 				break;
-
 			}
 		}
-	  is_1:
+	is_1:
 		if (cont == FALSE)
 			break;
 
 		cont = x_next(&str, &type);
-
 	}
 
-  ins_6:if (obj)
+ins_6:
+	if (obj)
 		do_finish(MNINSAPP);
 	else
 		do1_alert(NOINSTAL);
@@ -950,47 +965,54 @@ VOID mdesk_pref(NOTHING)
 {
 	register OBJECT *obj;
 	register int16_t cyes, i, flag;
-	int16_t overwrite, font;
+	int16_t overwrite;
+	int16_t font;
 	OBJECT *dtree;
 	int16_t dstart;
 	int16_t cstart;
 	int16_t ostart;
 	int16_t button;
 
-	obj = get_tree(MNSETPRE);
+	UNUSED(font);
+	UNUSED(overwrite);
+	UNUSED(flag);
+	UNUSED(i);
+	UNUSED(cyes);
+	
+	obj = get_tree(MNSETPREF);
 	dtree = get_tree(MNMENU);
 
 	if (cdele_save)
 	{
 		dstart = SPYES;
-		(char *) obj[SPDBUTTN].ob_spec = get_fstring(FSYES);
+		obj[SPDBUTTN].ob_spec = (intptr_t)get_fstring(FSYES);
 	} else
 	{
 		dstart = SPNO;
-		(char *) obj[SPDBUTTN].ob_spec = get_fstring(FSNO);
+		obj[SPDBUTTN].ob_spec = (intptr_t)get_fstring(FSNO);
 	}
 
 	if (!write_save)					/* Overwrite is backwards... */
 	{
 		ostart = SPYES;
-		(char *) obj[SPOBUTTN].ob_spec = get_fstring(FSYES);
+		obj[SPOBUTTN].ob_spec = (intptr_t)get_fstring(FSYES);
 	} else
 	{
 		ostart = SPNO;
-		(char *) obj[SPOBUTTN].ob_spec = get_fstring(FSNO);
+		obj[SPOBUTTN].ob_spec = (intptr_t)get_fstring(FSNO);
 	}
 
 	if (ccopy_save)
 	{
 		cstart = SPYES;
-		(char *) obj[SPCBUTTN].ob_spec = get_fstring(FSYES);
+		obj[SPCBUTTN].ob_spec = (intptr_t)get_fstring(FSYES);
 	} else
 	{
 		cstart = SPNO;
-		(char *) obj[SPCBUTTN].ob_spec = get_fstring(FSNO);
+		obj[SPCBUTTN].ob_spec = (intptr_t)get_fstring(FSNO);
 	}
 
-	fm_draw(MNSETPREF, FALSE);
+	fm_draw(MNSETPREF);
 	button = 0;
 	do
 	{
@@ -1025,7 +1047,7 @@ VOID mdesk_pref(NOTHING)
 			DoPopup(obj, SPOBUTTN, SPOTITLE, dtree, SPBASE, ostart, &ostart, FALSE, SPYES, FSYES, FALSE);
 			break;
 		}
-	} while ((button != MNSPOK) && (button != MNSPCAN));
+	} while (button != MNSPOK && button != MNSPCAN);
 
 	do_finish(MNSETPREF);
 }
@@ -1082,6 +1104,12 @@ BOOLEAN set_video(NOTHING)
 	int32_t p_value;
 	char buffer[10];
 
+	UNUSED(buffer);
+	UNUSED(p_value);
+	UNUSED(overwrite);
+	UNUSED(cyes);
+	UNUSED(font);
+	
 	obj = get_tree(MNSETVID);
 	dtree = get_tree(MNMENU);
 
@@ -1141,7 +1169,7 @@ BOOLEAN set_video(NOTHING)
 	/* Initialize the number of colors available */
 	cstart = color_flag + VID2;
 
-	(char *) obj[SVCBUTTN].ob_spec = get_fstring(color_flag + FS2C);
+	obj[SVCBUTTN].ob_spec = (intptr_t)get_fstring(color_flag + FS2C);
 	menu_icheck(dtree, cstart, TRUE);
 
 
@@ -1152,11 +1180,11 @@ BOOLEAN set_video(NOTHING)
 	if (column_flag == COL80)
 	{
 		lstart = SVL80;
-		(char *) obj[SVLBUTTN].ob_spec = get_fstring(FS80);
+		obj[SVLBUTTN].ob_spec = (intptr_t)get_fstring(FS80);
 	} else
 	{
 		lstart = SVL40;
-		(char *) obj[SVLBUTTN].ob_spec = get_fstring(FS40);
+		obj[SVLBUTTN].ob_spec = (intptr_t)get_fstring(FS40);
 	}
 	menu_icheck(dtree, lstart, TRUE);
 
@@ -1166,9 +1194,9 @@ BOOLEAN set_video(NOTHING)
 	 * If we are on a Television, use Interlace
 	 */
 	if (double_flag)
-		(TEDINFO *) (obj[SVDTITLE].ob_spec)->te_ptext = get_fstring(DLTEXT);
+		((TEDINFO *) (obj[SVDTITLE].ob_spec))->te_ptext = get_fstring(DLTEXT);
 	else
-		(TEDINFO *) (obj[SVDTITLE].ob_spec)->te_ptext = get_fstring(ITEXT);
+		((TEDINFO *) (obj[SVDTITLE].ob_spec))->te_ptext = get_fstring(ITEXT);
 
 	/* Initialize the double/interlace to ON or OFF */
 	menu_icheck(dtree, SVION, FALSE);
@@ -1177,11 +1205,11 @@ BOOLEAN set_video(NOTHING)
 	if (vertical_flag)
 	{
 		dstart = SVION;
-		(char *) obj[SVDBUTTN].ob_spec = get_fstring(FSON);
+		obj[SVDBUTTN].ob_spec = (intptr_t)get_fstring(FSON);
 	} else
 	{
 		dstart = SVIOFF;
-		(char *) obj[SVDBUTTN].ob_spec = get_fstring(FSOFF);
+		obj[SVDBUTTN].ob_spec = (intptr_t)get_fstring(FSOFF);
 	}
 	menu_icheck(dtree, dstart, TRUE);
 
@@ -1194,7 +1222,7 @@ BOOLEAN set_video(NOTHING)
 	old_dstart = dstart;
 
 
-	fm_draw(MNSETVID, FALSE);
+	fm_draw(MNSETVID);
 	do
 	{
 		button = form_do(obj, 0) & 0x7fff;
@@ -1252,7 +1280,7 @@ BOOLEAN set_video(NOTHING)
 					mode_code = vga_flag | pal_flag | overscan_flag;
 
 					vtree = get_tree(MNVIDEO);
-					flag = inf_gindex(vtree, SVSTLOW, 3);
+					flag = inf_gindex((LPTREE)vtree, SVSTLOW, 3);
 					if (flag != -1)
 					{
 						switch (flag)
@@ -1320,7 +1348,7 @@ BOOLEAN set_video(NOTHING)
 			} else
 			{
 				st_flag = FALSE;
-				fm_draw(MNSETVID, FALSE);
+				fm_draw(MNSETVID);
 			}
 			break;
 
@@ -1386,7 +1414,7 @@ BOOLEAN set_video(NOTHING)
  * ==================================================================
  * Select an object and redraw
  */
-int16_t XSelect(P(OBJECT *)tree, P(int16_t) obj)
+VOID XSelect(P(OBJECT *)tree, P(int16_t) obj)
 PP(OBJECT *tree;)
 PP(int16_t obj;)
 {
@@ -1398,12 +1426,12 @@ PP(int16_t obj;)
 
 	tree[obj].ob_state |= SELECTED;
 	trect = *(GRECT *) & tree[(obj)].ob_x;
-	objc_offset(tree, obj, &trect.x, &trect.y);
-	trect.x -= 2;						/* cjg 08/06/92 */
-	trect.y -= 2;
-	trect.w += 4;
-	trect.h += 4;
-	objc_draw(tree, obj, MAX_DEPTH, trect.x, trect.y, trect.w, trect.h);
+	objc_offset(tree, obj, &trect.g_x, &trect.g_y);
+	trect.g_x -= 2;						/* cjg 08/06/92 */
+	trect.g_y -= 2;
+	trect.g_w += 4;
+	trect.g_h += 4;
+	objc_draw(tree, obj, MAX_DEPTH, trect.g_x, trect.g_y, trect.g_w, trect.g_h);
 }
 
 
@@ -1412,9 +1440,9 @@ PP(int16_t obj;)
  * Deselect an object and redraw - use the flag to redraw in case
  * the area to redraw needs to be bigger.( ie: SHADOWED )
  */
-int16_t XDeselect(OBJECT *tree, int16_t obj)
-OBJECT *tree;
-int16_t obj;
+VOID XDeselect(P(OBJECT *) tree, P(int16_t) obj)
+PP(OBJECT *tree;)
+PP(int16_t obj;)
 {
 	GRECT trect;
 
@@ -1422,12 +1450,12 @@ int16_t obj;
 	{
 		tree[obj].ob_state &= ~SELECTED;
 		trect = *(GRECT *) & tree[(obj)].ob_x;
-		objc_offset(tree, obj, &trect.x, &trect.y);
-		trect.x -= 2;					/* cjg 08/06/92 */
-		trect.y -= 2;
-		trect.w += 4;
-		trect.h += 4;
-		objc_draw(tree, obj, MAX_DEPTH, trect.x, trect.y, trect.w, trect.h);
+		objc_offset(tree, obj, &trect.g_x, &trect.g_y);
+		trect.g_x -= 2;					/* cjg 08/06/92 */
+		trect.g_y -= 2;
+		trect.g_w += 4;
+		trect.g_h += 4;
+		objc_draw(tree, obj, MAX_DEPTH, trect.g_x, trect.g_y, trect.g_w, trect.g_h);
 	}
 }
 
@@ -1439,7 +1467,7 @@ int16_t obj;
  * This routine will select the title and dispay the PopUp Menu
  * at the button location.
  */
-int16_t DoPopup(P(OBJECT *)tree, P(int16_t) button, P(int16_t) title, P(OBJECT *)Mtree, P(int16_t) Mmenu, P(int16_t) Mfirst, P(int16_t) Mstart, P(int16_t) Mscroll, P(int16_t) FirstMenu, int16_t FirstText, P(int16_t) Skip)
+VOID DoPopup(P(OBJECT *)tree, P(int16_t) button, P(int16_t) title, P(OBJECT *)Mtree, P(int16_t) Mmenu, P(int16_t) Mfirst, P(int16_t *) Mstart, P(int16_t) Mscroll, P(int16_t) FirstMenu, int16_t FirstText, P(int16_t) Skip)
 PP(OBJECT *tree;)
 PP(int16_t button;)
 PP(int16_t title;)
@@ -1462,14 +1490,13 @@ PP(int16_t Skip;)
 	tree[title].ob_state |= SELECTED;
 	draw_fld(tree, title);
 
-
-	objc_offset(tree, button, &brect.x, &brect.y);
+	objc_offset(tree, button, &brect.g_x, &brect.g_y);
 
 	Menu.mn_tree = Mtree;
 	Menu.mn_menu = Mmenu;
 	Menu.mn_item = Mfirst;
 	Menu.mn_scroll = Mscroll;
-	flag = menu_popup(&Menu, brect.x, brect.y, &MData);
+	flag = menu_popup(&Menu, brect.g_x, brect.g_y, &MData);
 	if (flag)
 	{
 		if ((Mtree == MData.mn_tree) && (MData.mn_menu == Mmenu))
@@ -1481,7 +1508,7 @@ PP(int16_t Skip;)
 			if (!Skip)
 				menu_istart(1, Mtree, Mmenu, *Mstart);
 
-			(char *) tree[button].ob_spec = get_fstring(*Mstart - FirstMenu + FirstText);
+			tree[button].ob_spec = (intptr_t)get_fstring(*Mstart - FirstMenu + FirstText);
 		}
 	}
 	/* Deselect the title */
@@ -1501,6 +1528,9 @@ VOID init_vtree(NOTHING)
 	register int16_t cyes, i, flag;
 	int16_t monitor_type;
 
+	UNUSED(flag);
+	UNUSED(cyes);
+	
 	vtree = get_tree(MNVIDEO);
 
 	/* Clear the Compatability buttons */
@@ -1558,7 +1588,7 @@ PP(int16_t *item;)
 	/* Get the length of the largest string */
 	for (index = 1; index <= MAXMENU; index++)
 	{
-		temp = strlen(obj1[tb3[index - 1]].ob_spec);
+		temp = strlen((char *)obj1[tb3[index - 1]].ob_spec);
 		if (temp > length)
 			length = temp;
 	}
@@ -1594,7 +1624,7 @@ PP(int16_t *item;)
 	}
 
 	for (index = ROOT; index <= MAXMENU; index++)
-		rsrc_obfix(mtree, index);
+		rsrc_obfix((LPTREE)mtree, index);
 
 	mtree[MAXMENU].ob_flags |= LASTOB;
 	tree = &mtree[ROOT];
@@ -1610,13 +1640,13 @@ PP(int16_t *item;)
 		mtree[old_item + 1].ob_spec = obj1[tb3[old_item]].ob_spec;
 	mtree[start].ob_spec = obj1[tb3[*item]].ob_spec;
 
-	objc_offset(dtree, button, &brect.x, &brect.y);
+	objc_offset(dtree, button, &brect.g_x, &brect.g_y);
 
 	Menu.mn_tree = tree;
 	Menu.mn_menu = ROOT;
 	Menu.mn_item = start;
 	Menu.mn_scroll = TRUE;
-	flag = menu_popup(&Menu, brect.x, brect.y, &MData);
+	flag = menu_popup(&Menu, brect.g_x, brect.g_y, &MData);
 	if (flag)
 	{
 		if (tree == MData.mn_tree)
@@ -1650,7 +1680,7 @@ PP(int16_t item;)
 
 	obj = get_tree(MNSYSTEM);			/* Get config tree */
 
-	inf_sget(obj, MKKEYS, buf);
+	fs_sget((LPTREE)obj, MKKEYS, buf);
 	buf[0] = toupper(buf[0]);
 	if (buf[0])
 	{
@@ -1693,6 +1723,7 @@ PP(int16_t newmode;)
 	int16_t Result;
 	int16_t Bits;
 
+	UNUSED(Bits);
 	avail = Srealloc(-1L);
 	size = VgetSize(newmode);
 	IsVGA = ((newmode & VGA) == VGA);

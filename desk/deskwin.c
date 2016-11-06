@@ -1,30 +1,31 @@
-/*	DESKWIN.C		3/16/89	- 6/15/89 	Derek Mui	*/
-/*	Take out vdi_handle	6/28/89					*/
-/*	Put in error checking for window memory allocating 9/24/89	*/
-/*	Add up_1allwin		11/14/90		D.Mui		*/
-/*	Add up_2allwin		4/18/91			D.Mui		*/
-/*	Fix at view_adjust for vertical slide box's size 7/9/91	D.Mui	*/
-/*	Alloc window at create_window			7/7/92	D.Mui	*/
-/*	Change all the iconblk to ciconblk	7/11/92	D.Mui		*/
-/*	Change w_iblk to w_ciblk	7/11/92		D.Mui		*/
+/*      DESKWIN.C               3/16/89 - 6/15/89       Derek Mui       */
+/*      Take out vdi_handle     6/28/89                                 */
+/*      Put in error checking for window memory allocating 9/24/89      */
+/*      Add up_1allwin          11/14/90                D.Mui           */
+/*      Add up_2allwin          4/18/91                 D.Mui           */
+/*      Fix at view_adjust for vertical slide box's size 7/9/91 D.Mui   */
+/*      Alloc window at create_window                   7/7/92  D.Mui   */
+/*      Change all the iconblk to ciconblk      7/11/92 D.Mui           */
+/*      Change w_iblk to w_ciblk        7/11/92         D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
 
-static GRECT const sizes[] = { 150, 150, 150, 150 };
-static OBJECT const blank[] = { -1, -1, -1, G_BOX, NONE, NORMAL, 0x000000F0L, 0, 0, 0, 0 };
+static GRECT const w_sizes = { 150, 150, 150, 150 };
+static OBJECT const blank = { -1, -1, -1, G_BOX, NONE, NORMAL, 0x000000F0L, 0, 0, 0, 0 };
 
-int16_t alloc_obj PROTO((int16_t mode, WINDOW *win));
+BOOLEAN alloc_obj PROTO((int16_t mode, WINDOW *win));
 VOID ret_win PROTO((WINDOW *win));
 
 
-/*	Update the window info line	*/
-
+/*
+ * Update the window info line
+ */
 VOID winfo(P(WINDOW *) win)
 PP(WINDOW *win;)
 {
@@ -33,7 +34,11 @@ PP(WINDOW *win;)
 	uint16_t j;
 	int32_t sizes;
 	int32_t sizes1;
-	char buffer[14];
+	struct {
+		int32_t size;
+		int16_t items;
+		char filler[8];
+	} buffer;
 	char *type;
 
 	dir = win->w_memory;
@@ -53,17 +58,17 @@ PP(WINDOW *win;)
 
 	if (j)								/* some items are selected  */
 	{
-		*((int32_t *) & buffer[0]) = sizes1;
-		*((int16_t *) & buffer[4]) = j;
+		buffer.size = sizes1;
+		buffer.items = j;
 		type = get_fstring((j == 1) ? ISEL : ISELS);
 	} else
 	{
-		*((int32_t *) & buffer[0]) = sizes;
-		*((int16_t *) & buffer[4]) = (int16_t) win->w_items;
+		buffer.size = sizes;
+		buffer.items = (int16_t) win->w_items;
 		type = get_fstring((win->w_items == 1) ? ISTR : ISTRS);
 	}
 
-	merge_str(win->w_info, type, buffer);
+	merge_str(win->w_info, type, &buffer);
 	wind_set(win->w_id, WF_INFO, win->w_info, 0, 0);
 }
 
@@ -77,23 +82,24 @@ WINDOW *w_gnext(NOTHING)
 		win = ww_win;
 		ww_win = ww_win->w_next;
 		if (win->w_id != -1)
-			return (win);
+			return win;
 	}
 
-	return ((WINDOW *) 0);
+	return NULL;
 }
 
 
 WINDOW *w_gfirst(NOTHING)
 {
 	ww_win = winhead;
-	return (w_gnext());
+	return w_gnext();
 }
 
 
 
-/*	Update all the windows, change dir path if fails	*/
-
+/*
+ * Update all the windows, change dir path if fails
+ */
 VOID up_2allwin(P(const char *) path)
 PP(const char *path;)
 {
@@ -117,12 +123,13 @@ PP(const char *path;)
 }
 
 
-/*	Update all the windows					*/
-/*	If the path has nothing, then update all the windows	*/
-
-VOID up_1allwin(P(const char *) path, P(BOOLEAN) full, P(BOOLEAN) change)
+/*
+ * Update all the windows
+ * If the path has nothing, then update all the windows
+ */
+VOID up_1allwin(P(const char *) path, P(BOOLEAN) dofull, P(BOOLEAN) change)
 PP(const char *path;)
-PP(BOOLEAN full;)								/* compare full path    */
+PP(BOOLEAN dofull;)								/* compare full path    */
 PP(BOOLEAN change;)
 {
 	register WINDOW *win;
@@ -134,7 +141,7 @@ PP(BOOLEAN change;)
 		if (!path[0])
 			goto uu_1;
 
-		if (full)						/* compare the full path    */
+		if (dofull)						/* compare the full path    */
 		{
 			if (streq(path, win->w_path))
 				goto uu_1;
@@ -155,11 +162,11 @@ PP(BOOLEAN change;)
 }
 
 
-VOID up_allwin(P(const char *) path, P(BOOLEAN) full)
+VOID up_allwin(P(const char *) path, P(BOOLEAN) dofull)
 PP(const char *path;)
-PP(BOOLEAN full;)
+PP(BOOLEAN dofull;)
 {
-	up_1allwin(path, full, FALSE);
+	up_1allwin(path, dofull, FALSE);
 }
 
 
@@ -175,35 +182,40 @@ PP(BOOLEAN mediac;)
 
 	ptr = win->w_path;
 
+#if !BINEXACT
+	ret = FALSE; /* BUG; maybe used uninitalized below */
+#endif
 	if (ptr[0] != 'c')
 	{
 		if (mediac)
 		{
 			desk_wait(TRUE);
-			if (ret = hit_disk((int16_t) ptr[0]))
+			if ((ret = hit_disk((int16_t) ptr[0])))
 				mediach((int16_t) (ptr[0] - 'A'));
 
 			desk_wait(FALSE);
 
 			if (!ret)
-				return (FALSE);
+				return FALSE;
 		}
 	}
 
 	if (!open_subdir(win, 0, FALSE, FALSE, TRUE))
 	{
-		if ((mediac) && (ret))			/* it is force media change */
+		if (mediac && ret)			/* it is force media change */
 		{
 			strcpy(&win->w_path[2], wilds);
-			return (open_subdir(win, 0, FALSE, FALSE, TRUE));
+			return open_subdir(win, 0, FALSE, FALSE, TRUE);
 		}
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
-/*	Bring bottom window to top	*/
 
+/*
+ * Bring bottom window to top
+ */
 VOID bottop(NOTHING)
 {
 	register WINDOW *win;
@@ -211,7 +223,8 @@ VOID bottop(NOTHING)
 	int16_t item;
 	int16_t buffer[8];
 
-	if (win = w_gfirst())
+	UNUSED(item);
+	if ((win = w_gfirst()) != NULL)
 	{
 		while (win)						/* get to the bottom one    */
 		{
@@ -229,9 +242,10 @@ VOID bottop(NOTHING)
 }
 
 
-/*	Allocate memory for window path	*/
-
-int16_t path_alloc(P(int16_t) level)					/* requested level  */
+/*
+ * Allocate memory for window path
+ */
+BOOLEAN path_alloc(P(int16_t) level)					/* requested level  */
 PP(int16_t level;)
 {
 	int16_t oldlevel, wsize;
@@ -249,7 +263,7 @@ PP(int16_t level;)
 
 	wsize = (13 * (d_level + 1)) + 3;
 	size = (MAXWIN * 2 * (uint16_t) wsize) + 1;
-	addr = path = Malloc(size);
+	addr = path = (char *)Malloc(size);
 
 	if (path)
 	{
@@ -273,12 +287,14 @@ PP(int16_t level;)
 		free_path();
 
 		d_path = path;
-		return (TRUE);
+		return TRUE;
 	} else
+	{
 		do1_alert(FCNOMEM);
-
+	}
+	
 	d_level = oldlevel;					/* restore the old level    */
-	return (FALSE);
+	return FALSE;
 }
 
 
@@ -286,15 +302,18 @@ VOID free_path(NOTHING)
 {
 	if (d_path)
 	{
-/*	  form_alert( 1, "[1][ Free Path Memory ][ OK ]" );	*/
+#if 0
+		form_alert(1, "[1][ Free Path Memory ][ OK ]");
+#endif
 		Mfree(d_path);
-		d_path = (char *) 0;
+		d_path = NULL;
 	}
 }
 
 
-/*	Clean up all the window		*/
-
+/*
+ * Clean up all the window
+ */
 VOID clr_allwin(NOTHING)
 {
 	register WINDOW *win;
@@ -309,8 +328,9 @@ VOID clr_allwin(NOTHING)
 }
 
 
-/*	Clean up and dselect the window objects		*/
-
+/*
+ * Clean up and dselect the window objects
+ */
 VOID clr_xwin(P(WINDOW *) win, P(BOOLEAN) infoupdate)
 PP(register WINDOW *win;)
 PP(BOOLEAN infoupdate;)
@@ -348,8 +368,9 @@ PP(BOOLEAN infoupdate;)
 
 
 
-/*	Move the vertical bar	*/
-
+/*
+ * Move the vertical bar
+ */
 VOID srl_verbar(P(WINDOW *) win, P(uint16_t) pos)
 PP(register WINDOW *win;)
 PP(uint16_t pos;)
@@ -387,15 +408,16 @@ PP(uint16_t pos;)
 
 		wind_set(win->w_id, WF_VSLIDE, (uint16_t) l, 0, 0, 0);
 
-		win->w_obj->ob_y = win->w_work.y;	/* reset at the topmost */
+		win->w_obj->ob_y = win->w_work.g_y;	/* reset at the topmost */
 		win->w_srtitem = i * win->w_icol;
 		up_1(win);
 	}
 }
 
 
-/*	Move the horizontal bar	*/
-
+/*
+ * Move the horizontal bar
+ */
 VOID srl_hzbar(P(WINDOW *) win, P(uint16_t) pos)
 PP(register WINDOW *win;)
 PP(uint16_t pos;)
@@ -435,23 +457,24 @@ PP(uint16_t pos;)
 
 		wind_set(win->w_id, WF_HSLIDE, (uint16_t) l, 0, 0, 0);
 
-		x = win->w_work.x;
-		w = win->w_work.w;
+		x = win->w_work.g_x;
+		w = win->w_work.g_w;
 
 		obj = win->w_obj;
 		obj[0].ob_x = x;				/* reset at the leftmost    */
 		obj[0].ob_width = w;
-		i = i * fobj.w;
+		i = i * fobj.g_w;
 		obj[0].ob_x -= i;
 		obj[0].ob_width += i;
-		objc_draw(obj, 0, 8, x, win->w_work.y, w, win->w_work.h);
+		objc_draw(obj, ROOT, MAX_DEPTH, x, win->w_work.g_y, w, win->w_work.g_h);
 	}
 }
 
 
 
-/*	Scroll the content down		*/
-
+/*
+ * Scroll the content down
+ */
 VOID srl_row(P(WINDOW *) win, P(int16_t) row, P(int16_t) dir)
 PP(register WINDOW *win;)
 PP(int16_t row;)
@@ -505,9 +528,10 @@ PP(int16_t dir;)
 }
 
 
-/*	Bitblt a window content either up, dowm, left or right	*/
-
-int16_t blt_window(P(WINDOW *) win, P(int16_t) mode, P(int16_t) size)
+/*
+ * Bitblt a window content either up, dowm, left or right
+ */
+VOID blt_window(P(WINDOW *) win, P(int16_t) mode, P(int16_t) size)
 PP(register WINDOW *win;)
 PP(int16_t mode;)
 PP(int16_t size;)
@@ -520,12 +544,13 @@ PP(int16_t size;)
 	int16_t *ptr;
 	GRECT pt;
 
+	UNUSED(pt);
 	mice_state(M_OFF);
 	obj = win->w_obj;					/* parent box       */
 	trash = 0x0L;
 
-	rc_copy(&win->w_work, e_x);			/* copy the window's rectangle  */
-	rc_intersect(&full, &e_x[0]);		/* clip with screen */
+	rc_copy(&win->w_work, (GRECT *)e_x);			/* copy the window's rectangle  */
+	rc_intersect(&full, (GRECT *)e_x);		/* clip with screen */
 
 	x = e_x[0];							/* get the real x,y,w,h */
 	y = e_x[1];
@@ -567,19 +592,21 @@ PP(int16_t size;)
 		}
 
 		if (y1 >= ptr[1])				/* source is not off the screen */
-			vro_cpyfm(3, ptr, &trash, &trash);
+			vro_cpyfm(S_ONLY, ptr, (FDB *)&trash, (FDB *)&trash); /* ugly */
 		else
-			y = win->w_work.y;
+			y = win->w_work.g_y;
 
-		objc_draw(obj, 0, 8, x, y, w, block + 1);
+		objc_draw(obj, ROOT, MAX_DEPTH, x, y, w, block + 1);
 
 		if (win->w_vvicons)
 		{
 			l = 1000 * win->w_rowi;
 			l = l / win->w_vvicons;
 		} else
+		{
 			l = 0;
-
+		}
+		
 		wind_set(win->w_id, WF_VSLIDE, (uint16_t) (l), 0, 0, 0);
 
 	} else								/* scroll left or right     */
@@ -614,21 +641,25 @@ PP(int16_t size;)
 
 		if (block > w)
 		{
-			x = win->w_work.x;
+			x = win->w_work.g_x;
 			goto bb_1;
 		} else
+		{
 			w = block + 1;
-
-		vro_cpyfm(3, ptr, &trash, &trash);
-	  bb_1:
-		objc_draw(obj, 0, 8, x, y, w, h);
+		}
+		
+		vro_cpyfm(S_ONLY, ptr, (FDB *)&trash, (FDB *)&trash); /* ugly */
+	bb_1:
+		objc_draw(obj, ROOT, MAX_DEPTH, x, y, w, h);
 		if (win->w_hvicons)
 		{
 			l = 1000 * win->w_coli;
 			l /= win->w_hvicons;
 		} else
+		{
 			l = 0;
-
+		}
+		
 		wind_set(win->w_id, WF_HSLIDE, (uint16_t) l, 0, 0, 0);
 
 	}
@@ -637,12 +668,13 @@ PP(int16_t size;)
 }
 
 
-/*	Adjust everything inside the window because of window's */
-/*	size has been changed or object type is changed		*/
-/*	Adjust means we have to do recalculation		*/
-/*	otherwise, pin down the left upper corner and just 	*/
-/*	adjust the scroll bars					*/
-
+/*
+ * Adjust everything inside the window because of window's
+ * size has been changed or object type is changed.
+ * Adjust means we have to do recalculation.
+ * Otherwise, pin down the left upper corner and just
+ * adjust the scroll bars.
+ */
 VOID view_adjust(P(WINDOW *) win)
 PP(register WINDOW *win;)
 {
@@ -664,7 +696,7 @@ PP(register WINDOW *win;)
 	if (!x)								/* at least one row    */
 		x = 1;
 
-	row = win->w_work.h / fobj.h;		/* current visible number of row */
+	row = win->w_work.g_h / fobj.g_h;		/* current visible number of row */
 
 	win->w_xrow = row;
 
@@ -675,16 +707,19 @@ PP(register WINDOW *win;)
 		l = 1000 * row;
 		i = l / x;
 	} else
+	{
 		i = 1000;
-
+	}
+	
 	wind_set(win->w_id, WF_VSLSIZE, i, 0, 0, 0);
 
 	if (win->w_rowi > win->w_vvicons)
 		win->w_rowi = win->w_vvicons;
 
 	if (!win->w_vvicons)
+	{
 		i = 0;
-	else
+	} else
 	{
 		l = 1000 * win->w_rowi;
 		i = l / win->w_vvicons;
@@ -697,7 +732,7 @@ PP(register WINDOW *win;)
 	if (win->w_icol <= 1)
 		col = 1;
 	else
-		col = win->w_work.w / fobj.w;	/* current visible column   */
+		col = win->w_work.g_w / fobj.g_w;	/* current visible column   */
 
 	if (!col)
 		col = 1;
@@ -709,8 +744,9 @@ PP(register WINDOW *win;)
 	win->w_hvicons = (x <= col) ? 0 : (x - col);
 
 	if (!x)
+	{
 		i = 1000;
-	else
+	} else
 	{
 		l = 1000 * col;
 		i = l / x;
@@ -721,14 +757,15 @@ PP(register WINDOW *win;)
 	if (win->w_coli > win->w_hvicons)
 		win->w_coli = win->w_hvicons;
 
-	obj[0].ob_x = win->w_work.x;
-	obj[0].ob_x -= (win->w_coli * fobj.w);
-	obj[0].ob_width = win->w_work.w;
-	obj[0].ob_width += (win->w_coli * fobj.w);
+	obj[0].ob_x = win->w_work.g_x;
+	obj[0].ob_x -= (win->w_coli * fobj.g_w);
+	obj[0].ob_width = win->w_work.g_w;
+	obj[0].ob_width += (win->w_coli * fobj.g_w);
 
 	if (!win->w_hvicons)				/* fits all the file    */
+	{
 		i = 0;
-	else
+	} else
 	{
 		l = 1000 * win->w_coli;
 		i = l / win->w_hvicons;
@@ -739,11 +776,12 @@ PP(register WINDOW *win;)
 }
 
 
-/*	Change the viewing mode, form text to icon or vice verse	*/
-
-VOID sort_show(int16_t mode, BOOLEAN view)
-int16_t mode;
-BOOLEAN view;
+/*
+ * Change the viewing mode, form text to icon or vice verse
+ */
+VOID sort_show(P(int16_t) mode, P(BOOLEAN) view)
+PP(int16_t mode;)
+PP(BOOLEAN view;)
 {
 	register WINDOW *win;
 
@@ -771,11 +809,12 @@ BOOLEAN view;
 }
 
 
-/*	The viewing mode has been changed				*/
-/*	Fix up the icon position according to largest window size	*/
-/*	Call this routine before calling view_adjust!!!!!!!		*/
-/*	It used the s_stofit flag to set the horizontal number of icon!	*/
-
+/*
+ * The viewing mode has been changed
+ * Fix up the icon position according to largest window size
+ * Call this routine before calling view_adjust!!!!!!!
+ * It used the s_stofit flag to set the horizontal number of icon!
+ */
 VOID view_fixmode(P(WINDOW *) win)
 PP(WINDOW *win;)
 {
@@ -793,12 +832,17 @@ PP(WINDOW *win;)
 
 	if (s_view == S_ICON)				/* icon mode    */
 	{
-		w = dicon.w;
-		h = dicon.h;					/* Change also at deskinf.c */
+		w = dicon.g_w;
+		h = dicon.g_h;					/* Change also at deskinf.c */
 		offx = (gl_hchar == 8) ? gl_wchar / 2 : gl_wchar;
 		offy = gl_hchar / 2;
 		type = G_CICON;
 		iblk = win->w_ciblk;
+#if !BINEXACT
+		ted = 0; /* quiet compiler */
+		text = 0;
+		len = 0;
+#endif
 	} else								/* text mode    */
 	{
 		obj1 = get_tree(TEXTLINES);
@@ -810,17 +854,20 @@ PP(WINDOW *win;)
 		type = G_TEXT;
 		text = win->w_text;
 		ted = win->w_ted;
+#if !BINEXACT
+		iblk = 0; /* quiet compiler */
+#endif
 	}
 
-	fobj.w = w + offx;
-	fobj.h = h + offy;
+	fobj.g_w = w + offx;
+	fobj.g_h = h + offy;
 
 	if (s_stofit)						/* size to fit  */
-		limitw = win->w_work.w;
+		limitw = win->w_work.g_w;
 	else
-		limitw = full.w - gl_wbox;
+		limitw = full.g_w - gl_wbox;
 
-	limith = full.h - (3 * gl_hbox);
+	limith = full.g_h - (3 * gl_hbox);
 
 	x = offx;
 	y = offy;
@@ -840,10 +887,11 @@ PP(WINDOW *win;)
 		obj[i].ob_next = i + 1;
 
 		if (s_view == S_ICON)			/* icon mode    */
-			obj[i].ob_spec = iblk++;
-		else
 		{
-			obj[i].ob_spec = ted;
+			obj[i].ob_spec = (intptr_t)(iblk++);
+		} else
+		{
+			obj[i].ob_spec = (intptr_t)ted;
 			ted->te_ptext = text;
 			text += len;
 			ted++;
@@ -866,12 +914,11 @@ PP(WINDOW *win;)
 
 		if (y >= limith)				/* At the bottom    */
 			break;
-
-	}									/* for */
+	}
 
 	win->w_irow = row;					/* maximum row of icons */
 
-	/* Free up the rest of the icons    */
+	/* Free up the rest of the icons */
 
 	obj[0].ob_tail = i;
 	obj[i].ob_next = 0;
@@ -880,8 +927,9 @@ PP(WINDOW *win;)
 }
 
 
-/*	Make this window to be the top one	*/
-
+/*
+ * Make this window to be the top one
+ */
 VOID make_top(P(WINDOW *) win)
 PP(register WINDOW *win;)
 {
@@ -889,8 +937,9 @@ PP(register WINDOW *win;)
 
 	if (win)
 	{
-/*	  set_dir( win->w_path );	*/
-
+#if 0
+		set_dir(win->w_path);
+#endif
 		if (winhead == win)				/* already on top   */
 			return;
 
@@ -912,9 +961,10 @@ PP(register WINDOW *win;)
 }
 
 
-/*	Allocate a window object	*/
-
-int16_t alloc_obj(P(int16_t) mode, P(WINDOW *) win)
+/*
+ * Allocate a window object
+ */
+BOOLEAN alloc_obj(P(int16_t) mode, P(WINDOW *) win)
 PP(int16_t mode;)
 PP(register WINDOW *win;)
 {
@@ -927,24 +977,26 @@ PP(register WINDOW *win;)
 	uint16_t k;
 	int32_t size;
 
-	i = full.w / dicon.w;
-	if (full.w % dicon.w)
+	UNUSED(w);
+	UNUSED(h);
+	i = full.g_w / dicon.g_w;
+	if (full.g_w % dicon.g_w)
 		i++;
 
-	j = full.h / dicon.h;
-	if (full.h % dicon.h)
+	j = full.g_h / dicon.g_h;
+	if (full.g_h % dicon.g_h)
 		j++;
 
 	item = i * j;
 
 	obj2 = get_tree(TEXTLINES);
 
-	i = full.w / obj2[TSTYLE].ob_width;
-	if (full.w % obj2[TSTYLE].ob_width)
+	i = full.g_w / obj2[TSTYLE].ob_width;
+	if (full.g_w % obj2[TSTYLE].ob_width)
 		i++;
 
-	j = full.h / obj2[TSTYLE].ob_height;
-	if (full.h % obj2[TSTYLE].ob_height)
+	j = full.g_h / obj2[TSTYLE].ob_height;
+	if (full.g_h % obj2[TSTYLE].ob_height)
 		j++;
 
 	k = i * j;
@@ -960,35 +1012,35 @@ PP(register WINDOW *win;)
 	size += (uint16_t) (item * sizeof(TEDINFO));
 	size += (uint16_t) (item * sizeof(CICONBLK));
 
-	if (win->w_obj = Malloc(size))
+	if ((win->w_obj = (OBJECT *)Malloc(size)))
 	{
 		obj1 = win->w_obj;
 
-		LBCOPY(obj1++, blank, sizeof(OBJECT));
+		LBCOPY(obj1++, &blank, sizeof(OBJECT));
 
 		for (i = 0; i < item; i++)		/* copy object structure */
 			LBCOPY(obj1++, &iconaddr[ICON1], sizeof(OBJECT));
 
-		win->w_ciblk = iblk = obj1;
+		win->w_ciblk = iblk = (CICONBLK *)obj1;
 
 		/* start of the iconblk area    */
 		for (i = 0; i < item; i++)		/* copy icon structure      */
-			LBCOPY(iblk++, iconaddr[ICON1].ob_spec, sizeof(CICONBLK));
+			LBCOPY(iblk++, (VOIDPTR)iconaddr[ICON1].ob_spec, sizeof(CICONBLK));
 
-		win->w_ted = ted = iblk;
+		win->w_ted = ted = (TEDINFO *)iblk;
 
 		for (i = 0; i < item; i++)
-			LBCOPY(ted++, obj2[TSTYLE].ob_spec, sizeof(TEDINFO));
+			LBCOPY(ted++, (VOIDPTR)obj2[TSTYLE].ob_spec, sizeof(TEDINFO));
 
-		win->w_text = ted;				/* set the text pointer     */
+		win->w_text = (char *)ted;				/* set the text pointer     */
 
 		win->w_maxicons = item;
-		return (TRUE);
+		return TRUE;
 	} else
 	{
 		win->w_maxicons = 0;
 		do1_alert(NOWINMEM);
-		return (FALSE);
+		return FALSE;
 	}
 }
 
@@ -1007,20 +1059,20 @@ VOID ini_windows(NOTHING)
 
 	for (i = 0; i < MAXWIN; i++, win++)
 	{
-		win->w_obj = (char *) 0;
-		win->w_path = (char *) 0;		/* window path  */
-		win->w_buf = (char *) 0;
+		win->w_obj = NULL;
+		win->w_path = NULL;				/* window path  */
+		win->w_buf = NULL;
 		win->w_free = FALSE;			/* window is not free yet   */
 		win->w_level = 0;
 		win->w_id = -1;					/* window is not open       */
 		win->w_rowi = 0;
 		win->w_coli = 0;
-		win->w_memory = 0x0L;			/* clean up file memory     */
+		win->w_memory = NULL;			/* clean up file memory     */
 
 		/* Put in default sizes, in case users have old inf file */
 
-		rc_copy(sizes, &win->w_work);
-		rc_copy(sizes, &win->w_sizes);
+		rc_copy(&w_sizes, &win->w_work);
+		rc_copy(&w_sizes, &win->w_sizes);
 	}
 
 	path_alloc(4);						/* allocate path memory */
@@ -1040,7 +1092,7 @@ VOID ini_windows(NOTHING)
 		win->w_free = TRUE;				/* this window is available */
 	}
 
-	winpd[i - 1].w_next = (char *) 0;
+	winpd[i - 1].w_next = NULL;
 	winhead = &winpd[0];
 }
 
@@ -1051,7 +1103,7 @@ PP(WINDOW *win;)
 	if (win->w_obj)
 	{
 		Mfree(win->w_obj);
-		win->w_obj = (OBJECT *) 0;
+		win->w_obj = NULL;
 	}
 
 	win->w_free = TRUE;
@@ -1074,13 +1126,13 @@ WINDOW *alloc_win(NOTHING)
 				break;
 			}
 			win->w_free = FALSE;
-			return (win);
+			return win;
 		}
 
 		win = win->w_next;
 	}
 
-	return ((WINDOW *) 0);
+	return NULL;
 }
 
 
@@ -1102,33 +1154,33 @@ PP(int16_t handle;)
 		win = win->w_next;
 	}
 
-	return (win);
+	return win;
 }
 
 
-/*	Open window	*/
-
-int16_t open_window(P(int16_t) handle)
+/*
+ * Open window
+ */
+VOID open_window(P(int16_t) handle)
 PP(int16_t handle;)
 {
 	register WINDOW *win;
 
 	win = get_win(handle);				/* window's size    */
-	/* open it      */
+	/* open it */
 
 	win->w_obj->ob_spec = windspec;		/* set window's color   */
 
 	do_xyfix(&win->w_sizes);
 
-	wind_open(handle, win->w_sizes.x, win->w_sizes.y, win->w_sizes.w, win->w_sizes.h);
+	wind_open(handle, win->w_sizes.g_x, win->w_sizes.g_y, win->w_sizes.g_w, win->w_sizes.g_h);
 
-	wind_get(handle, WF_CURRXYWH, &win->w_sizes.x, &win->w_sizes.y, &win->w_sizes.w, &win->w_sizes.h);
+	wind_get(handle, WF_CURRXYWH, &win->w_sizes.g_x, &win->w_sizes.g_y, &win->w_sizes.g_w, &win->w_sizes.g_h);
 
-	/* get the working area */
-	/* and set it to object */
-	wind_get(handle, WF_WORKXYWH, &win->w_work.x, &win->w_work.y, &win->w_work.w, &win->w_work.h);
+	/* get the working area and set it to object */
+	wind_get(handle, WF_WORKXYWH, &win->w_work.g_x, &win->w_work.g_y, &win->w_work.g_w, &win->w_work.g_h);
 
-	rc_copy(&win->w_work, &win->w_obj->ob_x);
+	rc_copy(&win->w_work, (GRECT *)&win->w_obj->ob_x);
 	make_top(win);
 }
 
@@ -1139,23 +1191,23 @@ PP(int16_t handle;)
 int16_t create_window(NOTHING)
 {
 	register WINDOW *win;
-
 	int16_t handle;
 
 	/* Do we have any window pd ?   */
-	if (win = alloc_win())
+	if ((win = alloc_win()) != NULL)
 	{
-		handle = wind_create(ALLITEMS, win->w_sizes.x, win->w_sizes.y, win->w_sizes.w, win->w_sizes.h);
+		handle = wind_create(ALLITEMS, win->w_sizes.g_x, win->w_sizes.g_y, win->w_sizes.g_w, win->w_sizes.g_h);
 
 		if (handle < 0)					/* release windows  */
+		{
 			ret_win(win);
-		else
+		} else
 		{
 			win->w_id = handle;
-			return (handle);
+			return handle;
 		}
 	}
-	return (-1);
+	return -1;
 }
 
 
@@ -1194,17 +1246,17 @@ PP(BOOLEAN closeit;)
 	if (closeit)						/* close window     */
 		wind_close(handle);
 
-	/*  Delete window and assume it is closed   */
-	/*  Free up the file memory         */
+	/* Delete window and assume it is closed */
+	/* Free up the file memory */
 
-	if (win = get_win(handle))
+	if ((win = get_win(handle)) != NULL)
 	{
 		win->w_id = -1;
 		win->w_free = TRUE;
 		if (win->w_memory)
 		{
 			Mfree(win->w_memory);
-			win->w_memory = (char *) 0;
+			win->w_memory = NULL;
 		}
 		wind_delete(handle);
 
@@ -1217,7 +1269,9 @@ PP(BOOLEAN closeit;)
 					make_top(win);
 					break;
 				} else
+				{
 					win = win->w_next;
+				}
 			}
 		}
 	}
@@ -1240,7 +1294,7 @@ VOID free_windows(NOTHING)
 		if (win->w_obj)
 		{
 			Mfree(win->w_obj);
-			win->w_obj = (char *) 0;
+			win->w_obj = NULL;
 		}
 
 		/* don't close window, do it at the sh_main */
@@ -1268,7 +1322,7 @@ PP(int16_t which;)
 
 	rc_copy(pc, &px);
 
-	wind_get(handle, WF_FIRSTXYWH, &pt.x, &pt.y, &pt.w, &pt.h);
+	wind_get(handle, WF_FIRSTXYWH, &pt.g_x, &pt.g_y, &pt.g_w, &pt.g_h);
 
 	if (handle > 0)
 	{
@@ -1281,19 +1335,19 @@ PP(int16_t which;)
 	
 	if (which)
 	{
-		objc_offset(obj, which, &px.x, &px.y);
-		px.w = obj[which].ob_width;
-		px.h = obj[which].ob_height;
+		objc_offset(obj, which, &px.g_x, &px.g_y);
+		px.g_w = obj[which].ob_width;
+		px.g_h = obj[which].ob_height;
 	}
 
-	while (pt.w && pt.h)
+	while (pt.g_w && pt.g_h)
 	{
 		if (rc_intersect(&px, &pt))
 		{
 			if (rc_intersect(&full, &pt))
-				objc_draw(obj, 0, 8, pt.x, pt.y, pt.w, pt.h);
+				objc_draw(obj, ROOT, MAX_DEPTH, pt.g_x, pt.g_y, pt.g_w, pt.g_h);
 		}
-		wind_get(handle, WF_NEXTXYWH, &pt.x, &pt.y, &pt.w, &pt.h);
+		wind_get(handle, WF_NEXTXYWH, &pt.g_x, &pt.g_y, &pt.g_w, &pt.g_h);
 	}
 }
 
@@ -1305,29 +1359,29 @@ PP(register GRECT *pc;)
 
 	rc_copy(&full, &rect);
 
-	pc->w = min(pc->w, rect.w);
-	pc->h = min(pc->h, rect.h);
+	pc->g_w = min(pc->g_w, rect.g_w);
+	pc->g_h = min(pc->g_h, rect.g_h);
 
-	if (pc->x >= (rect.x + rect.w))
-		pc->x = rect.x + rect.w;
+	if (pc->g_x >= (rect.g_x + rect.g_w))
+		pc->g_x = rect.g_x + rect.g_w;
 
-	if (pc->x < rect.x)
-		pc->x = rect.x;
+	if (pc->g_x < rect.g_x)
+		pc->g_x = rect.g_x;
 
-	if (pc->y >= (rect.y + rect.h))
-		pc->y = rect.y + rect.h;
+	if (pc->g_y >= (rect.g_y + rect.g_h))
+		pc->g_y = rect.g_y + rect.g_h;
 
-	if (pc->y < rect.y)
-		pc->y = rect.y;
+	if (pc->g_y < rect.g_y)
+		pc->g_y = rect.g_y;
 
-	rect.x = pc->x;
+	rect.g_x = pc->g_x;
 
-	pc->x = (rect.x & 0x000f);
+	pc->g_x = (rect.g_x & 0x000f);
 
-	if (pc->x < 8)
-		pc->x = rect.x & 0xfff0;
+	if (pc->g_x < 8)
+		pc->g_x = rect.g_x & 0xfff0;
 	else
-		pc->x = (rect.x & 0xfff0) + 16;
+		pc->g_x = (rect.g_x & 0xfff0) + 16;
 
-	pc->y = max(pc->y, rect.y);
+	pc->g_y = max(pc->g_y, rect.g_y);
 }

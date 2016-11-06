@@ -1,42 +1,42 @@
 /*
-*************************************************************************
-*			Revision Control System
-* =======================================================================
-*  $Revision: 2.3 $	$Source: /u2/MRS/osrevisions/aes/deskshow.c,v $
-* =======================================================================
-*  $Author: kbad $	$Date: 89/07/29 20:23:22 $	$Locker: kbad $
-* =======================================================================
-*  $Log:	deskshow.c,v $
-* Revision 2.3  89/07/29  20:23:22  kbad
-* Removed error messages requiring keyboard input at the start of showfile.
-* Also added uikey() to allow mouse buttons to function like keys during
-* showfile.
-* 
-* Revision 2.2  89/04/26  18:11:42  mui
-* aes30
-* 
-* Revision 2.1  89/02/22  05:22:36  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-* 
-* Revision 1.3  88/07/01  16:21:10  mui
-* Check port for printing
-*
-* Revision 1.2  88/07/01  15:48:12  mui
-* Take out tab expansion, fix fm_show
-* 
-* Revision 1.1  88/06/02  12:29:59  lozben
-* Initial revision
-* 
-*************************************************************************
-*/
-/*	DESKSHOW.C		5/3/88			Allan Pratt
+ *************************************************************************
+ *                      Revision Control System
+ * =======================================================================
+ *  $Revision: 2.3 $    $Source: /u2/MRS/osrevisions/aes/deskshow.c,v $
+ * =======================================================================
+ *  $Author: kbad $     $Date: 89/07/29 20:23:22 $      $Locker: kbad $
+ * =======================================================================
+ *  $Log:       deskshow.c,v $
+ * Revision 2.3  89/07/29  20:23:22  kbad
+ * Removed error messages requiring keyboard input at the start of showfile.
+ * Also added uikey() to allow mouse buttons to function like keys during
+ * showfile.
+ * 
+ * Revision 2.2  89/04/26  18:11:42  mui
+ * aes30
+ * 
+ * Revision 2.1  89/02/22  05:22:36  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ * 
+ * Revision 1.3  88/07/01  16:21:10  mui
+ * Check port for printing
  *
- *	
+ * Revision 1.2  88/07/01  15:48:12  mui
+ * Take out tab expansion, fix fm_show
+ * 
+ * Revision 1.1  88/06/02  12:29:59  lozben
+ * Initial revision
+ * 
+ *************************************************************************
+ */
+/*      DESKSHOW.C              5/3/88                  Allan Pratt
+ *
+ *      
  * show.c: desktop "show file" code.
  *
  * showfile(fname,mode)
- * char *fname;		filename of file to show
- * int mode;		TRUE for printer, FALSE for screen.
+ * char *fname;         filename of file to show
+ * int mode;            TRUE for printer, FALSE for screen.
  *
  * For screen mode, call this function after the screen is clear and the 
  * cursor is enabled.  When this function returns, the screen needs to
@@ -69,20 +69,26 @@
  * print function with wierder files than that).
  */
 
-/*	Return error code back to the caller, form feed after print 
-					8/15/89		D.Mui		*/
+/*      Return error code back to the caller, form feed after print 
+                                        8/15/89         D.Mui           */
 
-/*	take out rsrc_gaddr( R_STRING ...	8/30/89	D.Mui		*/
+/*      take out rsrc_gaddr( R_STRING ...       8/30/89 D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
 
-/* trap() is GEMDOS trap #1; trap13() is (obviously) trap 13. */
+/* trap() is GEMDOS trap #1; trp13() is (obviously) trap 13. */
+
+#undef Fopen
+#undef Fread
+#undef Fclose
+#undef Malloc
+#undef Mfree
 
 #define Fopen(f,m) trap(0x3d,f,m)
 #define Fread(handle,count,buf) trap(0x3f,handle,(long)count,buf)
@@ -90,9 +96,13 @@
 #define Malloc(size) trap(0x48,(long)size)
 #define Mfree(size) trap(0x49,(long)size)
 
-#define Bconstat(d) trap13(1,d)
-#define Bconin(d) trap13(2,d)
-#define Bconout(d,c) trap13(3,d,c)
+#undef Bconstat
+#undef Bconin
+#undef Bconout
+
+#define Bconstat(d) trp13(1,d)
+#define Bconin(d) trp13(2,d)
+#define Bconout(d,c) trp13(3,d,c)
 
 #define BUFSIZ 4096						/* Malloc this much as a disk buffer */
 
@@ -114,12 +124,12 @@
 
 long uikey PROTO((NOTHING));
 int doui PROTO((int mode, int *plinecount));
-VOID PROTO(bconws(const char *s));
+VOID bconws PROTO((const char *s));
 
 
 
-BOOLEAN showfile(P(char *)fname, P(int) mode)
-PP(char *fname;)
+BOOLEAN showfile(P(const char *)fname, P(int) mode)
+PP(const char *fname;)
 PP(int mode;)
 {
 	int linecount, serial;
@@ -132,13 +142,13 @@ PP(int mode;)
 	register int i;
 	long c;
 	int ch;
-	long alert;
+	const char *alert;
 
 	linecount = charcount = 0;
 	handle = -1;
 	status = TRUE;
 
-	if (!(buf = Malloc((long) BUFSIZ)))
+	if (!(buf = (char *)Malloc((long) BUFSIZ)))
 	{
 		status = FALSE;
 
@@ -219,7 +229,7 @@ PP(int mode;)
 						goto alldone;
 					}
 				}
-			  dontprint:
+
 				if (++linecount >= MAXCHAR)
 				{
 					linecount = 0;
@@ -275,10 +285,9 @@ PP(int mode;)
 		bconws(alert);
 	}
 
-  allfin:
 	doui(1, &linecount);
 
-  alldone:
+alldone:
 	if (handle >= 0)
 	{
 		if (mode && status)

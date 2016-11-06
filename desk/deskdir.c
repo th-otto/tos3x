@@ -1,42 +1,43 @@
-/*	DESKDIR.C		7/31/89			Jian Ye		*/
-/*	Fix the count operation	8/1/89			D.Mui		*/
-/* 	Change and fix another bug in the count()	8/2/89	J.Ye	*/
-/* 	8/7/89							J.Ye	*/
-/* 	Add the check point in the countrec(). When the Depth of path	*/
-/* 	reach the 9 level, the system stack will over flow 		*/
-/*	Fix at rmfile	8/8/89			D.Mui			*/
-/*	Fix count 	8/8/89						*/
-/*	Fix the delete() for root dir		8/9/89			*/
-/*	Fix at chkfile, close file after opening it	8/15/89	D.Mui	*/
-/* 	Fix tow bugs in the chkfile() and chkdir() so that they check	*/
-/*		the second name conflict.		8/17/89	J.Ye	*/
-/* 	Optimize, simplify, compact this function.	8/27/89 J.Ye	*/
-/*	Modify edname					9/6/89	D.Mui	*/
-/*	Take out wdesk,hdesk	9/7/89			D.Mui		*/
-/* 	simplify the single flopy disk copy		9/11/89	J.Ye	*/
-/*	Fix at doact to return error code		9/19/89 D.Mui	*/
-/*	Add path checking			9/25/89		D.Mui	*/
-/*	Clean up rmstarb() and backdir()	9/26/89		D.Mui	*/
-/*	Modify chkdf(), edname()		9/28/89		D.Mui	*/
-/*	Check depth of directory at doact	12/19/89	D.Mui	*/
-/*	Fixed at wrfile for move file in the same place 2/8/90	D.Mui	*/
-/*	Fix bugs at doright and dofiles		3/21/90		D.Mui	*/
-/*	Fix at dofiles when there is an abort and make sure to do	*/
-/*	redraw	4/18/91					D.Mui		*/
-/*	change the move operation at wrfile()	4/19/91	D.Mui		*/
-/*	Change at chkdf() to do file checking correctly	4/19/91	D.Mui	*/
-/*	Take out specific error checking code	4/19/91	D.Mui		*/
-/*	Fix at wrfile for move operation	7/8/91	D.Mui		*/
-/*	Fix at chkdf for dir rename operation	7/9/91	D.Mui		*/
-/*	Close file before deleting it when the disk is full 8/31/92 Mui	*/
+/*      DESKDIR.C               7/31/89                 Jian Ye         */
+/*      Fix the count operation 8/1/89                  D.Mui           */
+/*      Change and fix another bug in the count()       8/2/89  J.Ye    */
+/*      8/7/89                                                  J.Ye    */
+/*      Add the check point in the countrec(). When the Depth of path   */
+/*      reach the 9 level, the system stack will over flow              */
+/*      Fix at rmfile   8/8/89                  D.Mui                   */
+/*      Fix count       8/8/89                                          */
+/*      Fix the delete() for root dir           8/9/89                  */
+/*      Fix at chkfile, close file after opening it     8/15/89 D.Mui   */
+/*      Fix tow bugs in the chkfile() and chkdir() so that they check   */
+/*              the second name conflict.               8/17/89 J.Ye    */
+/*      Optimize, simplify, compact this function.      8/27/89 J.Ye    */
+/*      Modify edname                                   9/6/89  D.Mui   */
+/*      Take out wdesk,hdesk    9/7/89                  D.Mui           */
+/*      simplify the single flopy disk copy             9/11/89 J.Ye    */
+/*      Fix at doact to return error code               9/19/89 D.Mui   */
+/*      Add path checking                       9/25/89         D.Mui   */
+/*      Clean up rmstarb() and backdir()        9/26/89         D.Mui   */
+/*      Modify chkdf(), edname()                9/28/89         D.Mui   */
+/*      Check depth of directory at doact       12/19/89        D.Mui   */
+/*      Fixed at wrfile for move file in the same place 2/8/90  D.Mui   */
+/*      Fix bugs at doright and dofiles         3/21/90         D.Mui   */
+/*      Fix at dofiles when there is an abort and make sure to do       */
+/*      redraw  4/18/91                                 D.Mui           */
+/*      change the move operation at wrfile()   4/19/91 D.Mui           */
+/*      Change at chkdf() to do file checking correctly 4/19/91 D.Mui   */
+/*      Take out specific error checking code   4/19/91 D.Mui           */
+/*      Fix at wrfile for move operation        7/8/91  D.Mui           */
+/*      Fix at chkdf for dir rename operation   7/9/91  D.Mui           */
+/*      Close file before deleting it when the disk is full 8/31/92 Mui */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
+#include "toserrno.h"
 
 
 /* "DMA" buffer structure for Fsfirst() and Fsnext().	*/
@@ -82,9 +83,9 @@ int f_rename;
 BOOLEAN doact PROTO((NOTHING));
 BOOLEAN count PROTO((const char *s));
 BOOLEAN countrec PROTO((NOTHING));
-BOOLEAN wrfile PROTO((const char *fstr));
+BOOLEAN wrfile PROTO((char *fstr));
 int getinfo PROTO((const char *s, const char *d));
-BOOLEAN created PROTO((const char *dir));
+BOOLEAN created PROTO((char *dir));
 BOOLEAN deleted PROTO((NOTHING));
 BOOLEAN mystrcp PROTO((const char *s0, char *s1));
 VOID chkbuf PROTO((int len, int bufsiz, char **src));
@@ -123,6 +124,7 @@ PP(BOOLEAN multiple;)
 	int16_t trash;
 	char buffer[2];
 
+	UNUSED(trash);
 	if (*d == 'c')
 		return (FALSE);
 
@@ -256,10 +258,13 @@ PP(int flag;)
 {
 	register int ret;
 	register BOOLEAN retmsg;
-	char *temp,	 buf[14];
+	char *temp;
+	char buf[14];
 
 	retmsg = TRUE;
-
+#if !BINEXACT
+	temp = 0;
+#endif
 	if (opcode == OP_DELETE)
 	{
 		temp = fixdst;
@@ -290,12 +295,13 @@ PP(int flag;)
 		  redel:
 			if ((ret = Fdelete(fixsrc)))
 			{							/* seek error or drive not ready */
-/*		if ( (ret == E_SEEK) || (ret == EDRVNR) )	
-	      	{
-		  retmsg = FALSE;	  	
-		  goto endright;
-	      	}
-*/
+#if 0
+				if (ret == E_SEEK || ret == E_DRVNR)
+				{
+					retmsg = FALSE;	  	
+					goto endright;
+				}
+#endif
 				if ((ret = fill_string(fixsrc, CNTDELF)) == 2)
 					goto redel;
 
@@ -317,9 +323,10 @@ PP(int flag;)
 
 		if (retmsg == TRUE)
 		{
-/*	    if ( opcode == OP_MOVE )
-	      upfdesk( fixsrc, fixdst );
-*/
+#if 0
+			if (opcode == OP_MOVE)
+				upfdesk(fixsrc, fixdst);
+#endif
 			if (opcode == OP_DELETE)
 				upfdesk(fixsrc, (char *) 0);
 
@@ -338,13 +345,15 @@ PP(int flag;)
 }
 
 
-/* recursively cp or mv or rm files or directoies from a given path */
-
+/*
+ * recursively cp or mv or rm files or directoies from a given path
+ */
 BOOLEAN doact(NOTHING)
 {
-	char *saved;
+	DMABUFFER *saved;
 	DMABUFFER *dumb;
-	register int ret, retmsg;
+	register int ret;
+	register BOOLEAN retmsg;
 	int error;
 
 	if (f_level >= (COPYMAXDEPTH + 1))
@@ -354,7 +363,7 @@ BOOLEAN doact(NOTHING)
 		return (FALSE);
 	}
 
-	if (!(dumb = (char *) Malloc((int32_t) sizeof(DMABUFFER))))
+	if (!(dumb = (DMABUFFER *) Malloc((int32_t) sizeof(DMABUFFER))))
 		goto act_1;
 
 	f_level++;
@@ -509,14 +518,16 @@ BOOLEAN doact(NOTHING)
 					if (opcode == OP_COPY)
 						goto clnfile;
 				  remvf:
-					if (ret = (Fdelete(fixsrc)))	/* rm the file from source */
+					if ((ret = Fdelete(fixsrc)))	/* rm the file from source */
 					{					/* seek error or drive not ready */
-/*		  if ((ret == E_SEEK) || (ret == EDRVNR))
-		  {
-		    retmsg = FALSE;
-		    goto mvend;
-								  }
-*//* retry */
+#if 0
+						if (ret == E_SEEK || ret == E_DRVNR)
+						{
+							retmsg = FALSE;
+							goto mvend;
+						}
+#endif
+						/* retry */
 						if ((ret = fill_string(fixsrc, CNTDELF)) == 2)
 							goto remvf;
 						else if (ret == 3)
@@ -542,7 +553,7 @@ BOOLEAN doact(NOTHING)
 		} while (!Fsnext());
 	} else
 	{
-		if (error != EFILNF)			/* if not file not found */
+		if (error != E_FILNF)			/* if not file not found */
 			retmsg = FALSE;				/* then return error     */
 	}
 
@@ -550,19 +561,21 @@ BOOLEAN doact(NOTHING)
 	Fsetdta(saved);
 	f_level--;
 	Mfree(dumb);
-	return (retmsg);
+	return retmsg;
 }
 
 
-/* set the right drive and call the recursive routine to do the counting */
-
-BOOELAN count(P(const char *) s)
+/*
+ * set the right drive and call the recursive routine to do the counting
+ */
+BOOLEAN count(P(const char *) s)
 PP(const char *s;)
 {
-	char *tmp;
+	const char *tmp;
 
 	tmp = s;
-	while (*tmp++) ;
+	while (*tmp++)
+		;
 
 	if (*(tmp - 2) == '*')				/* a dir */
 	{
@@ -576,16 +589,17 @@ PP(const char *s;)
 }
 
 
-/* count the file and directory recursivly */
-
+/*
+ * count the file and directory recursivly
+ */
 BOOLEAN countrec(NOTHING)
 {
-	char *saved;
+	DMABUFFER *saved;
 	DMABUFFER *dumb;
 
 	register int retmsg;
 
-	dumb = Malloc((int32_t) sizeof(DMABUFFER));
+	dumb = (DMABUFFER *)Malloc((int32_t) sizeof(DMABUFFER));
 	if (!dumb)
 	{
 		do1_alert(STFO8DEE);
@@ -649,14 +663,16 @@ BOOLEAN countrec(NOTHING)
 /* 
  * Copy the file from the s to d
  */
-BOOLEAN wrfile(P(const char *) fstr)
-PP(const char *fstr;)
+/* This was apparently ported from a BASIC program... */
+BOOLEAN wrfile(P(char *) fstr)
+PP(char *fstr;)
 {
 	register int ret, retmsg;
 	int inhand, outhand;
 	int time[2];
 	DMABUFFER *mydta;
-	char *buffer, *saved;
+	char *buffer;
+	DMABUFFER *saved;
 	long copysiz, bufsiz, wrsiz, tmpsiz;
 	int crted, sttime;
 	char buf[2];
@@ -665,12 +681,17 @@ PP(const char *fstr;)
 	sttime = 1;
 	retmsg = TRUE;
 	rename = 0;
+#if !BINEXACT
+	outhand = 0;
+#endif
   open:								/* open the source file */
 	if ((inhand = Fopen(fixsrc, 0)) < 0)
 	{									/* seek error or drive not ready */
-/*	  if ( (inhand == E_SEEK) || (inhand == EDRVNR) )
-			    return( FALSE );
-*//* skip */
+#if 0
+		if (inhand == E_SEEK || inhand == E_DRVNR)
+			return FALSE;
+#endif
+		/* skip */
 		if ((ret = fill_string(fixsrc, CNTOPEN)) == 1)
 		{
 			updatnum(NUMFILE, --numfiles);
@@ -684,7 +705,8 @@ PP(const char *fstr;)
 	if (!ch_undo())						/* user want to stop */
 	{
 		Fclose(inhand);
-	  ww_3:f_abort = 1;
+	ww_3:
+		f_abort = 1;
 		return (FALSE);
 	}
 
@@ -706,7 +728,6 @@ PP(const char *fstr;)
 	buffer = (char *) Malloc(bufsiz);
 	copysiz = mydta->d_fsize;
 	Fdatime(&time, inhand, 0);			/* read the time and date */
-
 
 
   rechkd:
@@ -775,7 +796,6 @@ PP(const char *fstr;)
 
 
 
-
 	  create:
 		if (sttime)
 		{
@@ -822,7 +842,7 @@ PP(const char *fstr;)
 			Fdelete(fixdst);
 			buf[0] = *fixdst;
 			buf[1] = 0;
-			fill_string(buf, STDISKFU);
+			fill_string(buf, STDISKFULL);
 			goto y1;
 		}
 
@@ -834,14 +854,13 @@ PP(const char *fstr;)
 	if (p_timedate)
 		Fdatime(&time, outhand, 1);
 
-  y0:
 	Fclose(outhand);
   y1:
 	Mfree(buffer);
   y2:
 	updatnum(NUMFILE, --numfiles);
 	Fsetdta(saved);
-  y3:
+
 	Fclose(inhand);
 	Mfree(mydta);
 
@@ -852,9 +871,10 @@ PP(const char *fstr;)
 }
 
 
-/* Copy s and d into fixsrc and fixdst. Also check it is one file
-   copy or files and directories copy */
-
+/*
+ * Copy s and d into fixsrc and fixdst. Also check it is one file
+ * copy or files and directories copy
+ */
 int getinfo(P(const char *) s, P(const char *) d)
 PP(const char *s;)
 PP(const char *d;)
@@ -910,8 +930,8 @@ PP(const char *d;)
 }
 
 
-BOOLEAN created(P(const char *)dir)
-PP(const char *dir;)
+BOOLEAN created(P(char *)dir)
+PP(char *dir;)
 {
 	int ret;
 	char *ptr;
@@ -993,11 +1013,12 @@ BOOLEAN deleted(NOTHING)
 }
 
 
-/*  this call will copy the string inside the s to 
- * 	the fixs. For example,
- * 	if s0 -> c:\d1\d2\*.* or c:\d1\d2\f, after the call,
- *	s1 -> c:\d1\d2\  or c:\d1\d2\f ; 			*/
-
+/*
+ * this call will copy the string inside the s to 
+ * the fixs. For example,
+ * if s0 -> c:\d1\d2\*.* or c:\d1\d2\f, after the call,
+ * s1 -> c:\d1\d2\  or c:\d1\d2\f ;
+ */
 BOOLEAN mystrcp(P(const char *) s0, P(char *) s1)
 PP(const char *s0;)
 PP(char *s1;)
@@ -1014,8 +1035,9 @@ PP(char *s1;)
 }
 
 
-/* check the size of source buffer */
-
+/*
+ * check the size of source buffer
+ */
 VOID chkbuf(P(int) len, P(int) bufsiz, P(char **) src)
 PP(int len;)
 PP(int bufsiz;)
@@ -1035,9 +1057,10 @@ PP(char **src;)
 }
 
 
-/* s -> c:\d1\d2\*.* or c:\d1\d2\, obj -> f; after the call
- * s -> c:\d1\d2\f							*/
-
+/*
+ * s -> c:\d1\d2\*.* or c:\d1\d2\, obj -> f; after the call
+ * s -> c:\d1\d2\f
+ */
 VOID addfile(P(char *) s, P(const char *) obj)
 PP(char *s;)
 PP(const char *obj;)
@@ -1056,9 +1079,10 @@ PP(const char *obj;)
 }
 
 
-/* src -> c:\d1\d2\*.* or -> c:\d3\d5\, after the call,
- * src -> c:\d1\d2 or -> c:\d3\d5				*/
-
+/*
+ * src -> c:\d1\d2\*.* or -> c:\d3\d5\, after the call,
+ * src -> c:\d1\d2 or -> c:\d3\d5
+ */
 VOID rmstarb(P(char *) src)
 PP(register char *src;)
 {
@@ -1071,9 +1095,10 @@ PP(register char *src;)
 }
 
 
-/* str -> c:\d1\d2\ or c:\d1\d2\*.* or c:\d2\d4 or c:\; after the call,
- * str -> c:\d1\  or c:\d2\ or c:\		*/
-
+/*
+ * str -> c:\d1\d2\ or c:\d1\d2\*.* or c:\d2\d4 or c:\; after the call,
+ * str -> c:\d1\  or c:\d2\ or c:\
+ */
 VOID backdir(P(char *) str)
 PP(register char *str;)
 {
@@ -1092,14 +1117,15 @@ PP(register char *str;)
 }
 
 
-/* check the directory or file is exist or not */
-
+/*
+ * check the directory or file is exist or not
+ */
 int chkdf(P(char *)str, P(int) flag)
 PP(char *str;)
 PP(int flag;)
 {
 	register int ret;
-	BOLLEAN first, change;
+	BOOLEAN first, change;
 	int ret1;
 
 	first = TRUE;
@@ -1123,7 +1149,7 @@ PP(int flag;)
 			{
 				if (f_rename)			/* do rename    */
 				{
-/*	        first = FALSE;	*/
+					/* first = FALSE; */
 					change = FALSE;
 					goto cc_1;
 				}
@@ -1159,7 +1185,7 @@ PP(int flag;)
 
 	/* 0xFFDE: path not found. 0xFFDF: file not found. */
 
-	return (ret == EFILNF || ret == EPTHNF) ? OK : FALSE;
+	return ret == E_FILNF || ret == E_PTHNF ? OK : FALSE;
 }
 
 
@@ -1176,10 +1202,11 @@ PP(int change;)
 	pack(src, 0);
 	strcpy(((TEDINFO *) (obj[FNAME].ob_spec))->te_ptext, src);
 	strcpy(((TEDINFO *) (obj[EDFNAME].ob_spec))->te_ptext, src);
-/*	obj[COPY].ob_state = NORMAL;
+#if 0
+	obj[COPY].ob_state = NORMAL;
 	obj[SKIP].ob_state = NORMAL;
 	obj[QUIT].ob_state = NORMAL;
-*/
+#endif
 	((TEDINFO *) (obj[SNAME].ob_spec))->te_ptext = get_fstring((change) ? RNAME : NCONFLICT);
 
 	desk_wait(FALSE);
@@ -1216,19 +1243,21 @@ PP(int change;)
 
 	if (d_display)
 		fm_draw(CPBOX);
-/*	  else
+#if 0
+	else
 	    namecon = TRUE;
-*/
+#endif
 	if (but != CHECK)
 		pack(src, 1);
 
 	return but;
 }
 
-/* pack	 : src -> file    rsc, after the call; src -> file.rsc	*/
-/* unpack: buf -> unpack.rsc, after the call, buf -> unpack  rsc.  */
 
-
+/*
+ * pack	 : src -> file    rsc, after the call; src -> file.rsc
+ * unpack: buf -> unpack.rsc, after the call, buf -> unpack  rsc.
+ */
 VOID pack(P(char *)src, P(int) flag)
 PP(char *src;)
 PP(int flag;)
@@ -1244,9 +1273,10 @@ PP(int flag;)
 }
 
 
-/* src -> c:\f or c:\d1\f or c:\f\, or c:\f\*.*, after the call,
-   buf -> f. But if src ->c:\, then buf -> Null 	*/
-
+/*
+ * src -> c:\f or c:\d1\f or c:\f\, or c:\f\*.*, after the call,
+ * buf -> f. But if src ->c:\, then buf -> Null
+ */
 VOID getlastpath(P(char *)buf, P(char *)src)
 PP(register char *buf;)
 PP(register char *src;)
@@ -1256,25 +1286,38 @@ PP(register char *src;)
 	tmp = src;
 	*buf = '\0';
 
-	while (*tmp++) ;
+	while (*tmp++)
+		;
 
 	tmp -= 2;
 	if (*tmp == '*')					/* src -> c:\f\*.* */
 		tmp -= 3;
 	if (*(tmp - 1) == ':')				/* src -> c:\ */
-		return OK;
+#if BINEXACT
+		return OK; /** ??? OK is a resource index */
+#else
+		return;
+#endif
 
-	while (*--tmp != '\\') ;			/* back one more path */
+	while (*--tmp != '\\')
+		;			/* back one more path */
 
 	while ((*buf = *++tmp) != '\\')
 		if (!*buf++)
+		{
+#if BINEXACT
 			return OK;
+#else
+			return;
+#endif
+		}
 	*buf = '\0';
 }
 
 
-/* up date the number of file or directory in the dialog box */
-
+/*
+ * up date the number of file or directory in the dialog box
+ */
 VOID updatnum(P(int) obj, P(long) num)
 PP(int obj;)
 PP(long num;)
@@ -1287,8 +1330,9 @@ PP(long num;)
 }
 
 
-/* update the file or directory in the dialog box */
-
+/*
+ * update the file or directory in the dialog box
+ */
 VOID updatname(P(int) obj, P(char *)str)
 PP(int obj;)
 PP(char *str;)
@@ -1312,6 +1356,6 @@ PP(char *str;)
 		strcpy(((TEDINFO *) (cpbox[CPDIR].ob_spec))->te_ptext, str);
 		pack(str, 1);
 		strcpy(((TEDINFO *) (cpbox[CPFILE].ob_spec))->te_ptext, "_");
-		objc_draw(cpbox, HIDECBOX, MAX_DEPTH, 0, 0, full.w, full.h);
+		objc_draw(cpbox, HIDECBOX, MAX_DEPTH, 0, 0, full.g_w, full.g_h);
 	}
 }

@@ -1,32 +1,31 @@
-/*	DESKTOP.C		3/15/89 - 7/26/89	Derek Mui	*/
-/*	Take out vdi_handle	6/28/89					*/
-/*	Read in icn file	9/23/89			D.Mui		*/
-/*	New adj_menu to adjust menu	6/27/90		D.Mui		*/
-/*	Take the wind_update in deskmain	8/9/90	D.Mui		*/
-/*	Add m_cpu to check CPU	9/19/90			D.Mui		*/
-/*	Fix the cache menu so that it checks the cache when menu is down*/
-/*					10/24/90	D.Mui		*/
-/*	Moved the wind_set in the main to just before menu_bar. It is 	*/
-/*	to fix the acc problem			12/4/90	D.Mui		*/
-/*	Change appl_init to ap_init and appl_exit to ap_exit 4/3/91	*/
-/*	Add wm_update before bringing up the menu bar 4/18/91 Mui	*/
-/*	Install desktop critical error handler	4/22/91	D.Mui		*/
-/*	Check control key for nodisk system at re_icon 8/13/91	D.Mui	*/
-/*	Change all the iconblk to ciconblk	7/11/92	D.Mui		*/
-/*      Added adjobjects() to adjust objects    8/06/92 cgee		*/
+/*      DESKTOP.C               3/15/89 - 7/26/89       Derek Mui       */
+/*      Take out vdi_handle     6/28/89                                 */
+/*      Read in icn file        9/23/89                 D.Mui           */
+/*      New adj_menu to adjust menu     6/27/90         D.Mui           */
+/*      Take the wind_update in deskmain        8/9/90  D.Mui           */
+/*      Add m_cpu to check CPU  9/19/90                 D.Mui           */
+/*      Fix the cache menu so that it checks the cache when menu is down*/
+/*                                      10/24/90        D.Mui           */
+/*      Moved the wind_set in the main to just before menu_bar. It is   */
+/*      to fix the acc problem                  12/4/90 D.Mui           */
+/*      Change appl_init to ap_init and appl_exit to ap_exit 4/3/91     */
+/*      Add wm_update before bringing up the menu bar 4/18/91 Mui       */
+/*      Install desktop critical error handler  4/22/91 D.Mui           */
+/*      Check control key for nodisk system at re_icon 8/13/91  D.Mui   */
+/*      Change all the iconblk to ciconblk      7/11/92 D.Mui           */
+/*      Added adjobjects() to adjust objects    8/06/92 cgee            */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
+#include "../aes/aesdefs.h"
+#include "aesbind.h"
+#include "ws.h"
 
-#if AESVERSION >= 0x330
-/* import from AES :( */
-extern BOOLEAN do_once;
-#endif
 
 BOOLEAN m_st;							/* machine type flag    */
 int16_t m_cpu;							/* cpu type     */
@@ -35,10 +34,14 @@ STATIC char *iconmem;					/* icon data memory address */
 STATIC int16_t xprint;					/* do it once flag  */
 char restable[6];						/* resolution table Low, Medium, High, TT Medium, TT High, TT Low */
 int16_t d_maxcolor;
+#ifdef BITBLT
 STATIC USERBLK chxcache;
+#endif
 STATIC CICONBLK *ciconaddr;
+int16_t pglobal[15];
+int16_t gl_apid;
 
-int16_t ch_xcache PROTO((VOID))
+int16_t ch_xcache PROTO((NOTHING));
 BOOLEAN re_icon PROTO((NOTHING));
 BOOLEAN ini_icon PROTO((NOTHING));
 VOID adj_menu PROTO((int16_t which));
@@ -48,6 +51,8 @@ int32_t inq_cache PROTO((int32_t data));
 VOID adjdcol PROTO((uint16_t color));
 VOID adjobjects PROTO((NOTHING));
 
+#undef Blitmode
+#define Blitmode(a) trp14(64, a)
 
 
 int16_t ch_xcache(VOID)
@@ -59,34 +64,36 @@ int16_t ch_xcache(VOID)
 
 
 /*
- * Read in icn file
+ * Read in icon resource file
  */
 BOOLEAN re_icon(NOTHING)
 {
 	register int16_t i;
 	char temp[30];
-	int32_t *ptr;
+	char **ptr;
 	char buf2[18];
 	char *iaddr;
 
+	UNUSED(i);
+	
 	LBCOPY(temp, pglobal, 30);			/* save the pglobal */
 
 	strcpy(buf2, icndata);
 	buf2[0] = (isdrive() & 0x4) ? 'C' : 'A';
 
 	if (ctldown) /* WTF; this is from AES */
-		return (FALSE);
+		return FALSE;
 
 	if (!rsrc_load(buf2))
-		return (FALSE);
+		return FALSE;
 
-	ptr = &pglobal[7];					/* get the new rsc address  */
+	ptr = (char **)&pglobal[7];			/* get the new rsc address  */
 	iaddr = *ptr;
 
 	if (iconmem)						/* free up memory   */
 	{									/* use rs_free to free memory */
 		*ptr = iconmem;					/* because it may have color icons */
-		rs_free(pglobal);
+		rs_free((intptr_t) pglobal);
 	}
 
 	iconmem = iaddr;
@@ -95,8 +102,8 @@ BOOLEAN re_icon(NOTHING)
 	iconaddr++;							/* get the icon address */
 	LBCOPY(pglobal, temp, 30);
 
-	rs_sglobe(pglobal);					/* restore the pglobal  */
-	return (TRUE);
+	rs_sglobe((intptr_t) pglobal);		/* restore the pglobal  */
+	return TRUE;
 }
 
 
@@ -111,10 +118,10 @@ BOOLEAN ini_icon(NOTHING)
 	register IDTYPE *itype;
 	CICONBLK *icblk;
 
-	backid = Malloc((int32_t) (sizeof(IDTYPE) * (maxicon + 1)));
+	backid = (IDTYPE *)Malloc((int32_t) (sizeof(IDTYPE) * (maxicon + 1)));
 
 	if (!backid)
-		return (FALSE);
+		return FALSE;
 
 	obj = background;
 
@@ -124,16 +131,16 @@ BOOLEAN ini_icon(NOTHING)
 		obj[i].ob_type = G_CICON;		/* 7/11/92 */
 		obj[i].ob_flags = HIDETREE;
 		obj[i].ob_state = NORMAL;
-		obj[i].ob_width = dicon.w;
-		obj[i].ob_height = dicon.h;
+		obj[i].ob_width = dicon.g_w;
+		obj[i].ob_height = dicon.g_h;
 		icblk = (CICONBLK *) (iconaddr[0].ob_spec);
 		itype->i_cicon = *icblk;
 		itype->i_cicon.monoblk.ib_ptext = &itype->i_name[0];
-		obj[i].ob_spec = &itype->i_cicon;
-		itype->i_path = (char *) 0;
+		obj[i].ob_spec = (intptr_t)&itype->i_cicon;
+		itype->i_path = NULL;
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -150,9 +157,9 @@ PP(int16_t which;)
 	objc_offset(menu_addr, which, &x, &y);
 
 	w = obj[which].ob_width + x;
-	if (w >= (full.w + full.x))
+	if (w >= (full.g_w + full.g_x))
 	{
-		x = w - (full.w + full.x) + gl_wchar;
+		x = w - (full.g_w + full.g_x) + gl_wchar;
 		obj[which].ob_x -= x;
 	}
 }
@@ -169,7 +176,7 @@ VOID ini_rsc(NOTHING)
 	int16_t w, i;
 	CICONBLK *icblk;
 
-	rom_ram(1, pglobal);				/* load in resource     */
+	rom_ram(1, (intptr_t)pglobal);				/* load in resource     */
 
 	menu_addr = get_tree(ADMENU);		/* get the menu address     */
 
@@ -196,24 +203,28 @@ VOID ini_rsc(NOTHING)
 	
 	if (!ciconaddr)						/* 7/10/92 */
 	{
-		if (ciconaddr = Malloc((int32_t) (sizeof(CICONBLK) * maxicon)))
+		if ((ciconaddr = (CICONBLK *)Malloc((int32_t) (sizeof(CICONBLK) * maxicon))))
 		{
 			for (i = 0; i < maxicon; i++)
 			{
-/*	      ciconaddr[i].monoblk = *((ICONBLK*)background[i+1].ob_spec);	*/
-				background[i + 1].ob_spec = &ciconaddr[i];
-				backgroubd[i + 1].ob_type = G_CICON;
+				/* ciconaddr[i].monoblk = *((ICONBLK*)background[i+1].ob_spec);	*/
+				background[i + 1].ob_spec = (intptr_t)&ciconaddr[i];
+				background[i + 1].ob_type = G_CICON;
 			}
 		} else
 		{
 			Cconws("Color icon failed \r\n");
-			return (FALSE);
+#if BINEXACT
+			return FALSE;
+#else
+			return;
+#endif
 		}
 	}
 
-	rc_copy(&full, &background[0].ob_x);
+	rc_copy(&full, (GRECT *)&background[0].ob_x);
 
-	/* Precalculate the disk icon's pline values    */
+	/* Precalculate the disk icon's pline values */
 
 	if (iconaddr[0].ob_type == G_CICON)
 	{
@@ -224,32 +235,32 @@ VOID ini_rsc(NOTHING)
 		iblk = (ICONBLK *) (iconaddr[0].ob_spec);
 	}
 	
-	rc_copy(&iblk->ib_xicon, &pt);		/* get the icon's xywh  */
+	rc_copy((GRECT *)&iblk->ib_xicon, &pt);		/* get the icon's xywh  */
 
-	d_xywh[0] = pt.x;					/* disk icon outline    */
-	d_xywh[3] = d_xywh[1] = pt.y;
-	d_xywh[4] = d_xywh[2] = d_xywh[0] + pt.w;
-	d_xywh[5] = d_xywh[3] + pt.h;
+	d_xywh[0] = pt.g_x;					/* disk icon outline    */
+	d_xywh[3] = d_xywh[1] = pt.g_y;
+	d_xywh[4] = d_xywh[2] = d_xywh[0] + pt.g_w;
+	d_xywh[5] = d_xywh[3] + pt.g_h;
 
-	rc_copy(&iblk->ib_xtext, &pt);
-	d_xywh[8] = d_xywh[6] = pt.x + pt.w;
-	d_xywh[13] = d_xywh[7] = pt.y;
-	d_xywh[11] = d_xywh[9] = d_xywh[7] + pt.h;
-	d_xywh[12] = d_xywh[10] = pt.x;
+	rc_copy((GRECT *)&iblk->ib_xtext, &pt);
+	d_xywh[8] = d_xywh[6] = pt.g_x + pt.g_w;
+	d_xywh[13] = d_xywh[7] = pt.g_y;
+	d_xywh[11] = d_xywh[9] = d_xywh[7] + pt.g_h;
+	d_xywh[12] = d_xywh[10] = pt.g_x;
 	d_xywh[16] = d_xywh[14] = d_xywh[0];
 	d_xywh[15] = d_xywh[5];
 	d_xywh[17] = d_xywh[1];
 
-	dicon.x = 0;						/* precalculate text icon's x,y,w,h */
-	dicon.y = 0;
-	dicon.w = iblk->ib_wtext;
-	dicon.h = iblk->ib_hicon + iblk->ib_htext;
+	dicon.g_x = 0;						/* precalculate text icon's x,y,w,h */
+	dicon.g_y = 0;
+	dicon.g_w = iblk->ib_wtext;
+	dicon.g_h = iblk->ib_hicon + iblk->ib_htext;
 
 	rc_copy(&dicon, &r_dicon);
-	r_dicon.w += 5;
-	r_dicon.h += 7;
-	r_dicon.w += (full.w % r_dicon.w) / (full.w / r_dicon.w);
-	r_dicon.h += (full.h % r_dicon.h) / (full.h / r_dicon.h);
+	r_dicon.g_w += 5;
+	r_dicon.g_h += 7;
+	r_dicon.g_w += (full.g_w % r_dicon.g_w) / (full.g_w / r_dicon.g_w);
+	r_dicon.g_h += (full.g_h % r_dicon.g_h) / (full.g_h / r_dicon.g_h);
 
 	w = gl_wchar * 14;					/* text outline */
 
@@ -270,30 +281,33 @@ BOOLEAN deskmain(NOTHING)
 	int16_t handle, x;
 	int16_t *ptr;
 	char temp[30];
-	int32_t *lptr;
+	VOIDPTR *lptr;
 
+	UNUSED(x);
+	UNUSED(handle);
+	
 	if (!inf_path[0])					/* Not set up yet       */
 		m_infpath(inf_path);
 
 #if 0
-	ciconaddr = (char *) 0;				/* 7/10/92 */
+	ciconaddr = NULL;					/* 7/10/92 */
 #endif
 
-  top:
-	gl_apid = ap_init(pglobal);			/* initalize the application    */
+top:
+	gl_apid = ap_init((intptr_t) pglobal);			/* initalize the application    */
 
 	deskerr();							/* install our critical error   */
 
 	ret = TRUE;							/* assume everything is OK  */
 	d_exit = L_NOEXIT;
 
-	appnode = (char *) 0;				/* No app buffer yet        */
-	applist = (char *) 0;				/* No app list yet      */
+	appnode = NULL;						/* No app buffer yet        */
+	applist = NULL;						/* No app list yet      */
 	apsize = 0;							/* Initalize app size       */
 
 	desk_wait(TRUE);
 	/* get the full window size */
-	wind_get(0, WF_WORKXYWH, &full.x, &full.y, &full.w, &full.h);
+	wind_get(0, WF_WORKXYWH, &full.g_x, &full.g_y, &full.g_w, &full.g_h);
 
 	ini_rsc();							/* init the resource        */
 
@@ -302,7 +316,8 @@ BOOLEAN deskmain(NOTHING)
 
 	if (!mem_init())					/* init the app path buffer */
 	{									/* and desk app buffer      */
-	  m_2:desknoerr();
+m_2:
+		desknoerr();
 		goto m_1;
 	}
 
@@ -310,7 +325,7 @@ BOOLEAN deskmain(NOTHING)
 
 	ini_windows();
 
-	d_maxcolor = gl_ws[13];
+	d_maxcolor = gl_ws.ws_ncolors;
 
 #if AESVERSION >= 0x330
 	if (!do_once)						/* do it once only  */
@@ -331,6 +346,9 @@ BOOLEAN deskmain(NOTHING)
 	/* change the menu bar      */
 	do_view((s_view == S_ICON) ? ICONITEM : TEXTITEM);
 
+#if !BINEXACT
+	i = NOSORT; /* quiet compiler */
+#endif
 	switch (s_sort)
 	{
 	case S_NAME:
@@ -356,8 +374,9 @@ BOOLEAN deskmain(NOTHING)
 	ch_machine();						/* check the machine    */
 	/* set up the right menu text */
 	/* do it here!!!!!! */
-#if 0									/* take out for sparrow */
-	strcpy(get_fstring(menu_addr[BITBLT].ob_spec, m_cpu == 30 ? CACHETXT : BLTTXT));
+#ifdef BITBLT
+									/* take out for sparrow */
+	strcpy(menu_addr[BITBLT].ob_spec, get_fstring(m_cpu == 30 ? CACHETXT : BLTTXT));
 
 	menu_addr[SUPERITEM].ob_type = G_USERDEF;
 	chxcache.ub_code = ch_xcache;
@@ -396,7 +415,7 @@ BOOLEAN deskmain(NOTHING)
 	wind_update(FALSE);					/* release window   */
   m_1:
 	ap_exit();
-	/* Loop again       */
+	/* Loop again */
 	if (d_exit == L_READINF)
 	{
 		wind_new();						/* Read inf file    */
@@ -408,25 +427,25 @@ BOOLEAN deskmain(NOTHING)
 		if (ciconaddr)					/* 7/10/92  */
 		{
 			Mfree(ciconaddr);
-			ciconaddr = (char *) 0;
+			ciconaddr = NULL;
 		}
 
 		iconaddr = (OBJECT *) 0;
 		if (iconmem)
 		{
 			LBCOPY(temp, pglobal, 30);	/* construct the pglobal   */
-			ptr = temp;
-			lptr = &ptr[7];
+			ptr = (int16_t *)temp;
+			lptr = (VOIDPTR *)&ptr[7];
 			*lptr = iconmem;
-			rs_free(temp);
-			iconmem = (char *) 0;
+			rs_free((intptr_t) temp);
+			iconmem = NULL;
 		}
 		ret = FALSE;					/* resolution change    */
 		inf_path[0] = 0;
 		gl_rschange = TRUE;
 	}
 
-	return (ret);
+	return ret;
 }
 
 
@@ -478,12 +497,12 @@ VOID ch_machine(NOTHING)
 
 
 #if BINEXACT
+/* same ugly Alcyon-only hack as in AES: relies on data being assigned to d7 */
 int32_t inq_cache(P(int32_t) data)
 PP(register int32_t data;)
 {
 	asm("dc.w $4e7a,$0002");			/* movec.l cacr,d0        */
 
-	/* ugly Alcyon-only hack that relies on data being assigned to d7 */
 	if (data != -1)
 		asm("dc.w $4e7b,$7002");		/* movec.l d7,cacr      */
 
@@ -502,10 +521,11 @@ PP(BOOLEAN set;)
 	int32_t data;
 	int16_t temp;
 
+	UNUSED(value);
 #if 0									/* take out for sparrow */
 	menu_addr[BITBLT].ob_state &= ~DISABLED;
+	menu_ienable(menu_addr, BITBLT, TRUE);
 #endif
-/*	menu_ienable( menu_addr, BITBLT, TRUE );	*/
 
 	if (m_cpu == 30)
 	{
@@ -523,29 +543,31 @@ PP(BOOLEAN set;)
 	} else
 	{									/* turn the blt on  */
 		/* blt is there     */
-	  ch_1:if ((temp = trap14(64, -1)) & 0x2)
+	ch_1:
+		if ((temp = Blitmode(-1)) & 0x2)
 		{
 			if (set)
 			{
-				trap14(64, (cbit_save) ? 1 : 0);
+				Blitmode(cbit_save ? 1 : 0);
 				set = FALSE;
 				goto ch_1;				/* check status again   */
 			} else
+			{
 				cbit_save = (temp & 0x1) ? TRUE : FALSE;
-
+			}
 			value = cbit_save;
 		} else
 		{
 			value = FALSE;
 #if 0									/* take out for sparrow */
 			menu_addr[BITBLT].ob_state |= DISABLED;
+			menu_ienable(menu_addr, BITBLT, FALSE);
 #endif
-/*	    menu_ienable( menu_addr, BITBLT, FALSE );	*/
 		}
 	}
 
-/*	menu_icheck( menu_addr, BITBLT, value ? TRUE : FALSE );	*/
 #if 0									/* take out for sparrow */
+	menu_icheck( menu_addr, BITBLT, value ? TRUE : FALSE );
 	if (value)
 		menu_addr[BITBLT].ob_state |= CHECKED;
 	else
@@ -569,7 +591,7 @@ PP(uint16_t color;)
 {
 	register OBJECT *obj;
 
-	if (gl_ws[13] > LWHITE)
+	if (gl_ws.ws_ncolors > LWHITE)
 		return;
 
 	obj = get_tree(ADFILEIN);
@@ -609,14 +631,14 @@ VOID adjobjects(NOTHING)
 	int16_t x, y, w, h, dx, dy;
 
 	obj = get_tree(ADINSDIS);
-	objc_gclip(obj, IUP, &dx, &dy, &x, &y, &w, &h);
+	objc_gclip((LPTREE)obj, IUP, &dx, &dy, &x, &y, &w, &h);
 	obj[IDOWN].ob_y = h + obj[IUP].ob_y;
 	obj[IDRIVE].ob_y += 2;
 	obj[ITRASH].ob_y += 2;
 	obj[IPRINTER].ob_y += 2;
 
 	obj = get_tree(INWICON);
-	objc_gclip(obj, WUP, &dx, &dy, &x, &y, &w, &h);
+	objc_gclip((LPTREE)obj, WUP, &dx, &dy, &x, &y, &w, &h);
 	obj[WDOWN].ob_y = h + obj[WUP].ob_y;
 	obj[WFOLDER].ob_height = gl_hchar;
 	obj[WNONE].ob_height = gl_hchar;
@@ -626,9 +648,9 @@ VOID adjobjects(NOTHING)
 	obj[WQUIT].ob_height = gl_hchar;
 
 	obj = get_tree(MNSYSTEM);
-	objc_gclip(obj, MFUP, &dx, &dy, &x, &y, &w, &h);
+	objc_gclip((LPTREE)obj, MFUP, &dx, &dy, &x, &y, &w, &h);
 	obj[MFDOWN].ob_y = h + obj[MFUP].ob_y;
-	objc_gclip(obj, MKUPS, &dx, &dy, &x, &y, &w, &h);
+	objc_gclip((LPTREE)obj, MKUPS, &dx, &dy, &x, &y, &w, &h);
 	obj[MKDOWNS].ob_y = h + obj[MKUPS].ob_y;
 	obj[MFBASE].ob_height += 2;
 

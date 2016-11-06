@@ -422,9 +422,9 @@ PP(register GRECT *pt;)
 
 
 /* 306de: 00e1cd56 */
-int16_t fm_show(P(int16_t) string, P(int16_t *) pwd, P(int16_t) level)
+int16_t fm_show(P(int16_t) string, P(VOIDPTR) pwd, P(int16_t) level)
 PP(int16_t string;)
-PP(int16_t *pwd;)
+PP(VOIDPTR pwd;)
 PP(int16_t level;)
 {
 	int16_t ret;
@@ -448,19 +448,23 @@ int16_t eralert(P(int16_t) n, P(int16_t) d)
 PP(int16_t n;)									/* n = alert #, 0-5     */
 PP(int16_t d;)									/* d = drive code, 0=A  */
 {
+#if BINEXACT
 	int16_t *pdrive_let;
 	int16_t drive_let;
 
 	pdrive_let = &drive_let;
-	drive_let = (d + 'A') << 8;			/* make it a 2 char string! WTF */
+	drive_let = (d + 'A') << 8;					/* make it a 2 char string! WTF */
+#else
+	char *pdrive_let;
+	char drive_let[2];
+
+	pdrive_let = drive_let;
+	drive_let[0] = d + 'A';						/* make it a 2 char string */
+	drive_let[1] = '\0';
+#endif
 
 	/* which alert */
-#if BINEXACT
-	/* BUG: passing the address of the pointer */
-	return fm_show(ml_alrt[n], (ml_pwlv[n] & 0xff00) ? &pdrive_let : (int16_t **)0, ml_pwlv[n] & 0x00ff) != 1;
-#else
-	return fm_show(ml_alrt[n], (ml_pwlv[n] & 0xff00) ? pdrive_let : NULL, ml_pwlv[n] & 0x00ff) != 1;
-#endif
+	return fm_show(ml_alrt[n], (ml_pwlv[n] & 0xff00) ? (VOIDPTR)&pdrive_let : NULL, ml_pwlv[n] & 0x00ff) != 1;
 }
 
 
@@ -501,5 +505,5 @@ PP(int16_t n;)									/* n = dos error number */
 		string = ALRTXXERR;
 	}
 
-	return fm_show(string, string == ALRTXXERR ? &n : (int16_t *)0, 1) != 1;
+	return fm_show(string, string == ALRTXXERR ? (VOIDPTR)&n : NULL, 1) != 1;
 }

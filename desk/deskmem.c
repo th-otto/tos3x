@@ -1,9 +1,9 @@
-/*	DESKMEM.C		7/18/89 - 10/4/89	D.Mui		*/
+/*      DESKMEM.C               7/18/89 - 10/4/89       D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -28,7 +28,7 @@ BOOLEAN apbuf_init(NOTHING)
 
 	apsize += APP_NODE;
 
-	if (!(app = Malloc((int32_t) (sizeof(APP) * apsize))))
+	if (!(app = (APP *)Malloc((int32_t) (sizeof(APP) * apsize))))
 		return (FALSE);
 
 	for (i = 0; i < apsize; i++)		/* set up linked array    */
@@ -73,7 +73,7 @@ BOOLEAN mem_init(NOTHING)
 {
 	/* Allocate write string buffer */
 
-	if (!(lp_mid = lp_start = Malloc(LMSIZE)))	/* 2 k memory  */
+	if (!(lp_mid = lp_start = (char *)Malloc(LMSIZE)))	/* 2 k memory  */
 	{
 	  m_1:do1_alert(FCNOMEM);
 		return (FALSE);
@@ -93,11 +93,12 @@ BOOLEAN mem_init(NOTHING)
 
 
 
-/*	Fill the path into buffer	*/
-
-char *lp_fill(P(char *) path, P(char **) buf)
-PP(register char *path;)
-PP(char **buf;)
+/*
+ * Fill the path into buffer
+ */
+const char *lp_fill(P(const char *) path, P(const char **) buf)
+PP(register const char *path;)
+PP(const char **buf;)
 {
 	register char *ptr;
 	char *ptr1;
@@ -111,8 +112,9 @@ PP(char **buf;)
 	{
 		if (ptr >= lp_end)				/* end of buffer */
 		{
-		  lp_1:*buf = (char *) 0;
-			return (path);
+		lp_1:
+			*buf = NULL;
+			return path;
 		}
 
 		if (*path == '@')
@@ -142,7 +144,7 @@ BOOLEAN lp_collect(NOTHING)
 	register OBJECT *obj;
 	register APP *app;
 
-	addr = Malloc(LMSIZE);				/* 2 k memory   */
+	addr = (char *)Malloc(LMSIZE);				/* 2 k memory   */
 	if (!addr)
 	{
 		do1_alert(MCFAIL);

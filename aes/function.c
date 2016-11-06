@@ -404,8 +404,8 @@ PP(int16_t *ptxtlen;)
 }
 
 
-VOID inf_sset(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr)
-PP(LPTREE tree;)
+VOID inf_sset(P(OBJECT *) tree, P(int16_t) obj, P(char *) pstr)
+PP(OBJECT *tree;)
 PP(int16_t obj;)
 PP(char *pstr;)
 {
@@ -416,8 +416,12 @@ PP(char *pstr;)
 }
 
 
-VOID fs_sget(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr)
-PP(LPTREE tree;)
+/* 	fs_sget
+ * 	This routine copies the tedinfo string to the dst pointer.
+ *	The function inf_sget was the same as fs_sget.
+ */
+VOID fs_sget(P(OBJECT *) tree, P(int16_t) obj, P(char *) pstr)
+PP(OBJECT *tree;)
 PP(int16_t obj;)
 PP(char *pstr;)
 {
@@ -427,19 +431,6 @@ PP(char *pstr;)
 	LSTCPY(pstr, ptext);
 }
 
-
-
-/* 	inf_sget, fs_sget
- * 	This routine copies the tedinfo string to the dst pointer.
- *	The function inf_sget was the same as fs_sget.
- */
-VOID inf_sget(P(LPTREE) tree, P(int16_t) obj, P(char *) pstr)
-PP(LPTREE tree;)
-PP(int16_t obj;)
-PP(char *pstr;)
-{
-	fs_sget(tree, obj, ADDR(pstr));
-}
 
 
 /* 	This routine is used to set an objects flags based on 

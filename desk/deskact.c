@@ -1,17 +1,17 @@
-/*	DESKACT.C		5/31/89 - 6/19/89	Derek Mui	*/
-/*	Take out vdi_handle from vdi calls	6/28/89			*/
-/*	Fix hd_down, it needs to update menu	7/3/90	D.Mui		*/
-/*	Modifying hd_down	7/8/90			D.Mui		*/
-/*	Fix at hd_down to solve bug when mouse is moving too fast	*/
-/*				4/16/91			D.Mui		*/
-/*	Fix at file_op to check for destination drive	4/18/91	D.Mui	*/
-/*	Fix at file_op to do update for all affected windows 4/18/91	*/
-/*	Change all the iconblk to ciconblk	7/11/92	D.Mui		*/
+/*      DESKACT.C               5/31/89 - 6/19/89       Derek Mui       */
+/*      Take out vdi_handle from vdi calls      6/28/89                 */
+/*      Fix hd_down, it needs to update menu    7/3/90  D.Mui           */
+/*      Modifying hd_down       7/8/90                  D.Mui           */
+/*      Fix at hd_down to solve bug when mouse is moving too fast       */
+/*                              4/16/91                 D.Mui           */
+/*      Fix at file_op to check for destination drive   4/18/91 D.Mui   */
+/*      Fix at file_op to do update for all affected windows 4/18/91    */
+/*      Change all the iconblk to ciconblk      7/11/92 D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -23,17 +23,18 @@ VOID frame PROTO((int16_t x1, int16_t y1, int16_t x2, int16_t y2));
 int16_t dist PROTO((int16_t x, int16_t y));
 VOID win_desk PROTO((WINDOW *swin, int16_t sitems, int16_t ditem, int16_t mx, int16_t my));
 VOID desk_desk PROTO((int16_t sitem, int16_t ditem, int16_t mx, int16_t my));
-int16_t gh_init PROTO((OBJECT *obj, int16_t disk));
+BOOLEAN gh_init PROTO((OBJECT *obj, int16_t disk));
 VOID ghost_icon PROTO((int16_t offx, int16_t offy, int16_t disk));
-VOID to_desk PROTO((int16_t ditem, char *tail));
+VOID to_desk PROTO((int16_t ditem, const char *tail));
 VOID to_win PROTO((int16_t sitem, WINDOW *swin, int16_t ditem, WINDOW *dwin));
 
 
 
 
-/*	Check what kind of object is executable	*/
-/*	Return TRUE if it is 			*/
-
+/*
+ * Check what kind of object is executable
+ * Return TRUE if it is
+ */
 BOOLEAN ch_obj(P(int16_t) mx, P(int16_t) my, P(WINDOW **) win, P(int16_t *) item, P(int16_t *) type)
 PP(int16_t mx;)
 PP(int16_t my;)
@@ -45,7 +46,7 @@ PP(int16_t *type;)
 	DIR *dir;
 	BOOLEAN install;
 	APP *app;
-	char *str;
+	const char *str;
 
 	if (i_find(mx, my, win, item, type))
 	{
@@ -107,16 +108,16 @@ BOOLEAN ch_undo(NOTHING)
 /*
  * Perform a file operation
  */
-VOID file_op(P(char *) dest, P(int16_t) mode)
-PP(char *dest;)
+VOID file_op(P(const char *) dest, P(int16_t) mode)
+PP(const char *dest;)
 PP(int16_t mode;)
 {
 	register OBJECT *obj;
-	register int16_t ret;
+	register BOOLEAN ret;
 	int16_t type, item, i;
 	int16_t keydown;
 	int32_t ndir, nfile, nsize;
-	char *source;
+	const char *source;
 	char buffer[2];
 	GRECT pt;
 	char *which;
@@ -143,6 +144,9 @@ PP(int16_t mode;)
 	obj[CDDRIVE].ob_flags &= ~HIDETREE;
 	obj[DATEBOX].ob_flags &= ~HIDETREE;
 
+#if !BINEXACT
+	which = 0; /* quiet compiler */
+#endif
 	switch (mode)
 	{
 	case OP_DELETE:
@@ -177,12 +181,12 @@ PP(int16_t mode;)
 
 	if (!dofiles(source, dest, OP_COUNT, &ndir, &nfile, &nsize, type, TRUE))
 	{
-		do1_alert(STBADCOP);
+		do1_alert(STBADCOPY);
 		return;
 	}
 
 	ndir += d_dir;						/* count also the number of dir in window */
-	(TEDINFO *) (obj[TITLE].ob_spec)->te_ptext = which;
+	((TEDINFO *) (obj[TITLE].ob_spec))->te_ptext = which;
 	f_str(obj, NUMDIR, ndir);
 	f_str(obj, NUMFILE, nfile);
 	obj[HIDECBOX].ob_flags |= HIDETREE;
@@ -203,6 +207,9 @@ PP(int16_t mode;)
 	p_timedate = (obj[PYES].ob_state & SELECTED) ? TRUE : FALSE;
 	d_display = TRUE;
 
+#if !BINEXACT
+	ret = FALSE; /* quiet compiler */
+#endif
 	if (item == OKCP)
 	{
 		obj[HIDECBOX].ob_flags &= ~HIDETREE;
@@ -214,7 +221,7 @@ PP(int16_t mode;)
 	obj[item].ob_state = NORMAL;
 	do_finish(CPBOX);
 
-	if ((item == OKCP) && (ret))
+	if (item == OKCP && ret)
 	{
 		for (i = 0; i < 32; i++)		/* update all the affected window */
 		{
@@ -258,8 +265,8 @@ PP(int16_t h;)
 	register int16_t maxx, maxy;
 	int16_t found;
 
-	minx = full.x + full.w;
-	miny = full.y + full.h;
+	minx = full.g_x + full.g_w;
+	miny = full.g_y + full.g_h;
 	maxx = 0;
 	maxy = 0;
 	found = FALSE;
@@ -286,25 +293,26 @@ PP(int16_t h;)
 
 	if (found)
 	{
-		rect->x = minx + obj[0].ob_x;
-		rect->y = miny + obj[0].ob_y;
-		rect->w = maxx - minx + w;
-		rect->h = maxy - miny + h;
+		rect->g_x = minx + obj[0].ob_x;
+		rect->g_y = miny + obj[0].ob_y;
+		rect->g_w = maxx - minx + w;
+		rect->g_h = maxy - miny + h;
 	} else
 	{
-		rect->x = 0;
-		rect->y = 0;
-		rect->w = 0;
-		rect->h = 0;
+		rect->g_x = 0;
+		rect->g_y = 0;
+		rect->g_w = 0;
+		rect->g_h = 0;
 	}
 
 	return found;
 }
 
 
-/*	Check whose is inside the rect and select the object	*/
-
-VOID chk_rect(P(WINDOW *= win, P(GRECT *) rect, P(int16_t) id)
+/*
+ * Check whose is inside the rect and select the object
+ */
+VOID chk_rect(P(WINDOW *) win, P(GRECT *) rect, P(int16_t) id)
 PP(register WINDOW *win;)
 PP(GRECT *rect;)
 PP(int16_t id;)
@@ -340,9 +348,9 @@ PP(int16_t id;)
 	{
 		if (!(obj[i].ob_flags & HIDETREE))
 		{
-			rc_copy(&obj[i].ob_x, &pt);
-			pt.x += orgx;
-			pt.y += orgy;
+			rc_copy((GRECT *)&obj[i].ob_x, &pt);
+			pt.g_x += orgx;
+			pt.g_y += orgy;
 			if (rc_intersect(rect, &pt))
 			{
 				if (minx > obj[i].ob_x)
@@ -367,10 +375,10 @@ PP(int16_t id;)
 
 	if (select)
 	{
-		pt.w = maxx - minx + obj[1].ob_width;
-		pt.h = maxy - miny + obj[1].ob_height;
-		pt.x = minx + obj[0].ob_x;
-		pt.y = miny + obj[0].ob_y;
+		pt.g_w = maxx - minx + obj[1].ob_width;
+		pt.g_h = maxy - miny + obj[1].ob_height;
+		pt.g_x = minx + obj[0].ob_x;
+		pt.g_y = miny + obj[0].ob_y;
 		do_redraw(id, &pt, 0);
 	}
 }
@@ -393,13 +401,14 @@ PP(int16_t y2;)
 	points[2] = points[4] = x2;
 	points[5] = points[7] = y2;
 	gsx_attr(FALSE, MD_XOR, BLACK);
-	gsx_xlines(5, points);
+	gsx_xline(5, points);
 	mice_state(M_ON);
 }
 
 
-/*	Draw a box and wait for button to go up		*/
-
+/*
+ * Draw a box and wait for button to go up
+ */
 VOID r_box(P(int16_t) id, P(WINDOW *) win)
 PP(int16_t id;)
 PP(WINDOW *win;)
@@ -412,20 +421,23 @@ PP(WINDOW *win;)
 
 	graf_mkstate(&gr_mkmx, &gr_mkmy, &gr_mkmstate, &gr_mkkstate);
 
-	if (!(0x0001 & gr_mkmstate))
+	if (!(0x01 & gr_mkmstate))
 		return;
 
 	mice_state(POINT_HAND);
 
-	rect.x = full.x;
-	rect.y = full.y;
-	rect.w = full.x + full.w;
-	rect.h = full.y + full.h;
+	rect.g_x = full.g_x;
+	rect.g_y = full.g_y;
+	rect.g_w = full.g_x + full.g_w; /* BUG: should be -1 for vs_clip */
+	rect.g_h = full.g_y + full.g_h; /* BUG: should be -1 for vs_clip */
 
-	vs_clip(1, &rect);
+	vs_clip(1, &rect.g_x);
 
 	wind_update(TRUE);
 
+#if !BINEXACT
+	tmpx = tmpy = tmpx1 = tmpy1 = 0; /* quiet compiler */
+#endif
 	while (TRUE)
 	{
 		if (0x0001 & gr_mkmstate)
@@ -434,7 +446,7 @@ PP(WINDOW *win;)
 			tmpx = tmpx1 = gr_mkmx;
 			frame(tmpx, tmpy, tmpx1, tmpy1);
 
-			while (0x0001 & gr_mkmstate)
+			while (0x01 & gr_mkmstate)
 			{
 				if (((tmpx1 != gr_mkmx) || (tmpy1 != gr_mkmy)) && (0x0001 & gr_mkmstate))
 				{
@@ -452,13 +464,13 @@ PP(WINDOW *win;)
 		break;
 	}
 
-	rect.x = min(tmpx, tmpx1);
-	rect.y = min(tmpy, tmpy1);
+	rect.g_x = min(tmpx, tmpx1);
+	rect.g_y = min(tmpy, tmpy1);
 
-	rect.w = dist(tmpx, tmpx1);
-	rect.h = dist(tmpy, tmpy1);
+	rect.g_w = dist(tmpx, tmpx1);
+	rect.g_h = dist(tmpy, tmpy1);
 
-	if ((rect.w) && (rect.h))
+	if (rect.g_w && rect.g_h)
 		chk_rect(win, &rect, id);
 
 	wind_update(FALSE);
@@ -496,8 +508,8 @@ PP(int16_t my;)
 	int16_t temp, first, type, status, ntype;
 	int16_t x, y;
 	char buffer[14];
-	char *str;
-	char *tail;
+	const char *str;
+	const char *tail;
 
 	if (!ditem)
 	{
@@ -509,14 +521,14 @@ PP(int16_t my;)
 			if (type == SUBDIR)
 			{
 				ntype = XDIR;
-				save_mid(str, buffer);
+				save_mid(NO_CONST(str), buffer); /* BUG: save_mid can modify str */
 			} else
 			{
 				ntype = XFILE;
 				save_ext(str, buffer);
 			}
 
-			app_icon(buffer, (type == SUBDIR) ? FOLDER : -1, &temp);
+			app_icon(buffer, type == SUBDIR ? FOLDER : -1, &temp);
 
 			if ((i = make_icon(0, temp, ntype, buffer)) == -1)
 			{
@@ -556,8 +568,10 @@ PP(int16_t my;)
 			swin->w_buf[0] = strlen(&swin->w_buf[1]);
 			tail = swin->w_buf;
 		} else
+		{
 			tail = Nostr;
-
+		}
+		
 		to_desk(ditem, tail);
 	}
 }
@@ -578,7 +592,7 @@ PP(int16_t my;)
 	char temp2;
 	GRECT rect;
 	int16_t sitems;
-	char *tail;
+	const char *tail;
 
 	obj = background;
 
@@ -590,9 +604,9 @@ PP(int16_t my;)
 			while (i_next(sitems, obj, &sitems))
 			{							/* copy x,y,w,h     */
 				rc_copy(&dicon, &rect);	/* set x,y      */
-				rect.x = obj[0].ob_x + obj[sitems].ob_x;
-				rect.y = obj[0].ob_y + obj[sitems].ob_y;
-				app_mtoi(rect.x + mx, rect.y + my, &obj[sitems].ob_x, &obj[sitems].ob_y);
+				rect.g_x = obj[0].ob_x + obj[sitems].ob_x;
+				rect.g_y = obj[0].ob_y + obj[sitems].ob_y;
+				app_mtoi(rect.g_x + mx, rect.g_y + my, &obj[sitems].ob_x, &obj[sitems].ob_y);
 				do_redraw(0, &rect, 0);	/* erase old one    */
 				do_redraw(0, &full, sitems);	/* draw the new one */
 				sitems++;
@@ -610,7 +624,7 @@ PP(int16_t my;)
 		{
 			if (temp1 == temp2)
 			{
-				do1_alert(STBADCOP);
+				do1_alert(STBADCOPY);
 				return;
 			} else if (((temp1 == 'A') || (temp1 == 'B')) && ((temp2 == 'A') || (temp2 == 'B')))
 			{
@@ -627,8 +641,10 @@ PP(int16_t my;)
 			else
 				return;
 		} else
+		{
 			tail = Nostr;
-
+		}
+		
 		to_desk(ditem, tail);
 	}
 }
@@ -637,7 +653,7 @@ PP(int16_t my;)
 /*
  * Ghost icon initalization
  */
-int16_t gh_init(P(OBJECT *)obj, P(int16_t) disk)
+BOOLEAN gh_init(P(OBJECT *)obj, P(int16_t) disk)
 PP(register OBJECT *obj;)
 PP(int16_t disk;)
 {
@@ -663,7 +679,7 @@ PP(int16_t disk;)
 	offx = obj->ob_x;
 	offy = obj->ob_y;
 
-	ptr1 = gh_buffer;
+	ptr1 = (int16_t *)gh_buffer;
 	ptr1++;								/* leave space to save the count    */
 
 	tree = obj++;
@@ -690,9 +706,9 @@ PP(int16_t disk;)
 		}
 	}
 
-	ptr1 = gh_buffer;
+	ptr1 = (int16_t *)gh_buffer;
 	*ptr1 = count;
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -712,14 +728,14 @@ PP(int16_t disk;)
 
 	mice_state(M_OFF);
 
-	rc_copy(&full, buffer);				/* set clipping rectangle   */
+	rc_copy(&full, (GRECT *)buffer);				/* set clipping rectangle   */
 	buffer[2] = buffer[0] + buffer[2];
 	buffer[3] = buffer[1] + buffer[3];
 	vs_clip(1, buffer);
 
 	gsx_attr(FALSE, MD_XOR, BLACK);
 
-	ptr = gh_buffer;
+	ptr = (int16_t *)gh_buffer;
 	limit = *ptr++;
 
 	lines = disk ? 9 : 5;
@@ -734,7 +750,7 @@ PP(int16_t disk;)
 			*ptr++ += offy;
 		}
 
-		gsx_xlines(lines, start);
+		gsx_xline(lines, start);
 	}
 
 	mice_state(M_ON);
@@ -750,11 +766,13 @@ PP(register int16_t stype;)
 PP(register WINDOW *swin;)
 {
 	register int16_t pitem, state;
-	int16_t itype, w, h, ret, exec;
+	int16_t itype, w, h, ret;
+	BOOLEAN exec;
 	int16_t mx, my, kstate, mstate;
 	int16_t omx, omy;
 	int16_t ditem, dtype;
-	int16_t ptype, pid, docopy;
+	int16_t ptype, pid;
+	BOOLEAN docopy;
 	int16_t cx, cy, offx, offy, o1, o2;
 	WINDOW *dwin;
 	WINDOW *pwin;
@@ -768,7 +786,7 @@ PP(register WINDOW *swin;)
 	if (!i_find(omx, omy, &pwin, &ret, &ptype))
 		return;
 	/* if no button or no object    */
-	if ((!(mstate & 0x1)) || (!sitem))
+	if (!(mstate & 0x01) || !sitem)
 		return;
 
 	itype = TRUE;
@@ -795,7 +813,7 @@ PP(register WINDOW *swin;)
 		while (TRUE)					/* wait until button comes up   */
 		{
 			graf_mkstate(&omx, &omy, &mstate, &kstate);
-			if (!(mstate & 0x1))
+			if (!(mstate & 0x01))
 				break;
 		}
 		return;
@@ -824,25 +842,28 @@ PP(register WINDOW *swin;)
 	cx = omx;
 	cy = omy;
 
+#if !BINEXACT
+	docopy = exec = FALSE; /* quiet compiler */
+#endif
 	do
 	{
 		graf_mkstate(&mx, &my, &mstate, &kstate);
 
-		if (!(mstate & 0x1))			/* no button down   */
+		if (!(mstate & 0x01))			/* no button down   */
 			break;
 
 		if (dist(mx, omx) > 2 || dist(my, omy) > 2)
 		{
-			o1 = pt.x;					/* save the old rectangle x,y   */
-			o2 = pt.y;
+			o1 = pt.g_x;					/* save the old rectangle x,y   */
+			o2 = pt.g_y;
 
-			pt.x = o1 + mx - omx;		/* update the new x.y   */
-			pt.y = o2 + my - omy;
+			pt.g_x = o1 + mx - omx;		/* update the new x.y   */
+			pt.g_y = o2 + my - omy;
 
 			rc_constrain(&full, &pt);	/* check how far it can move    */
 
-			offx = pt.x - o1;			/* movement distance    */
-			offy = pt.y - o2;
+			offx = pt.g_x - o1;			/* movement distance    */
+			offy = pt.g_y - o2;
 
 			if (offx)					/* movement */
 			{
@@ -854,7 +875,8 @@ PP(register WINDOW *swin;)
 				{
 					if (mx < cx)
 					{
-					  h_3:pt.x -= offx;
+					h_3:
+						pt.g_x -= offx;
 						offx = 0;
 					}
 				}
@@ -872,7 +894,8 @@ PP(register WINDOW *swin;)
 				{
 					if (my < cy)
 					{
-					  h_4:pt.y -= offy;
+					h_4:
+						pt.g_y -= offy;
 						offy = 0;
 					}
 				}
@@ -886,7 +909,7 @@ PP(register WINDOW *swin;)
 
 			ret = TRUE;					/* pass the loop    */
 
-			if ((pwin != dwin) || (pitem != ditem) || (ptype != dtype))
+			if (pwin != dwin || pitem != ditem || ptype != dtype)
 			{
 				if (pitem)				/* restore the previous item    */
 				{
@@ -965,7 +988,7 @@ PP(register WINDOW *swin;)
 		if (dtype == DESKICON)			/* Hit the desktop  */
 		{
 			if ((!ditem) || (exec))
-				win_desk(swin, sitem, ditem, pt.x - pt2.x, pt.y - pt2.y);
+				win_desk(swin, sitem, ditem, pt.g_x - pt2.g_x, pt.g_y - pt2.g_y);
 		} else
 		{
 			if (!exec)					/* if no executable the assume  */
@@ -980,7 +1003,7 @@ PP(register WINDOW *swin;)
 				ditem = 0;
 
 			if ((!ditem) || (exec))
-				desk_desk(sitem, ditem, pt.x - pt2.x, pt.y - pt2.y);
+				desk_desk(sitem, ditem, pt.g_x - pt2.g_x, pt.g_y - pt2.g_y);
 		} else							/* hit the window   */
 		{
 			if (!exec)
@@ -997,14 +1020,15 @@ PP(register WINDOW *swin;)
 /*
  * Take action when something is dragged to desktop area
  */
-VOID to_desk(P(int16_t) ditem, P(char *)tail)
+VOID to_desk(P(int16_t) ditem, P(const char *)tail)
 PP(int16_t ditem;)
-PP(char *tail;)
+PP(const char *tail;)
 {
 	char buffer[14];
 	int16_t ret;
 	register IDTYPE *itype;
 
+	UNUSED(ret);
 	itype = &backid[ditem];
 
 	switch (itype->i_type)
@@ -1032,7 +1056,7 @@ PP(char *tail;)
 		break;
 
 	default:
-		do1_alert(STBADCOP);
+		do1_alert(STBADCOPY);
 		break;
 	}
 }
@@ -1105,7 +1129,7 @@ PP(char *text;)
 		itype->i_type = type;
 		itype->i_cicon.monoblk.ib_char[1] = (char) drive;
 		itype->i_icon = icon;
-		strcpy((CICONBLK *) (obj[id].ob_spec)->monoblk.ib_ptext, text);
+		strcpy(((CICONBLK *) (obj[id].ob_spec))->monoblk.ib_ptext, text);
 	}
 
 	return id;

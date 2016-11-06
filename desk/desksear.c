@@ -1,9 +1,9 @@
-/*	DESKSEAR.C		1/3/90 - 1/16/90	D.Mui		*/
+/*      DESKSEAR.C              1/3/90 - 1/16/90        D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -15,8 +15,9 @@ VOID mass_string PROTO((char *str1));
 
 
 
-/*	Position an item within a window	*/
-
+/*
+ * Position an item within a window
+ */
 VOID pos_item(P(WINDOW) *win, P(int16_t) newi)
 PP(register WINDOW *win;)
 PP(int16_t newi;)
@@ -39,7 +40,7 @@ PP(int16_t newi;)
 
 	win->w_rowi = j;
 
-	win->w_srtitems = j * win->w_icol;
+	win->w_srtitem = j * win->w_icol;
 
 	if (i > win->w_xrow)
 	{
@@ -48,13 +49,13 @@ PP(int16_t newi;)
 	} else
 		l = 1000;
 
-	win->w_obj->ob_y = win->w_work.y;
+	win->w_obj->ob_y = win->w_work.g_y;
 	wind_set(win->w_id, WF_VSLIDE, (uint16_t) l, 0, 0, 0);
 
 	/*******  adjust the horizontal bar  ********/
 
-	win->w_obj->ob_x = win->w_work.x;
-	win->w_obj->ob_width = win->w_work.w;
+	win->w_obj->ob_x = win->w_work.g_x;
+	win->w_obj->ob_width = win->w_work.g_w;
 
 	i = (newi % win->w_icol) + 1;		/* column index     */
 	if (i > win->w_xcol)				/* bigger than one frame */
@@ -64,7 +65,7 @@ PP(int16_t newi;)
 
 	win->w_coli = j;					/* column index     */
 
-	k = j * fobj.w;						/* move the object if necessary */
+	k = j * fobj.g_w;					/* move the object if necessary */
 	win->w_obj->ob_x -= k;
 	win->w_obj->ob_width += k;
 
@@ -73,8 +74,10 @@ PP(int16_t newi;)
 		l = 1000 * j;
 		l = l / win->w_hvicons;
 	} else
+	{
 		l = 1000;
-
+	}
+	
 	wind_set(win->w_id, WF_HSLIDE, (uint16_t) l, 0, 0, 0);
 	up_2(win);
 }
@@ -90,8 +93,9 @@ PP(char *filename;)
 	register WINDOW *win;
 	register DIR *dir;
 	register int16_t i;
-	char *str;
-	int16_t status, type, change, newi;
+	const char *str;
+	BOOLEAN status;
+	int16_t type, change, newi;
 	char buffer[16];
 
 	desk_wait(TRUE);
@@ -101,7 +105,7 @@ PP(char *filename;)
 
 	change = FALSE;
 
-	if (status = x_first(&str, &type))
+	if ((status = x_first(&str, &type)))
 	{
 		f_level = 0;
 		f_rename = FALSE;
@@ -129,7 +133,7 @@ PP(char *filename;)
 		}
 	} else
 	{
-		if (win = w_gfirst())
+		if ((win = w_gfirst()) != NULL)
 		{
 			if (win->w_path[0] == 'c')
 			{
@@ -172,23 +176,24 @@ PP(char *filename;)
 }
 
 
-/*	Recursive search of a file	*/
-
+/*
+ * Recursive search of a file
+ */
 BOOLEAN rec_sea(P(char) *filename)
 PP(register char *filename;)
 {
-	DTA *dtabuf;
+	DTA *ldtabuf;
 	DTA *savedta;
 	register int16_t status, ret;
 
-	if (!(dtabuf = Malloc((int32_t) sizeof(DTA))))
+	if (!(ldtabuf = (DTA *)Malloc((int32_t) sizeof(DTA))))
 	{
 		do1_alert(FCNOMEM);
 		return (TRUE);
 	}
 
-	savedta = Fgetdta();				/* save the dta buffer  */
-	Fsetdta(dtabuf);					/* set the new dta  */
+	savedta = (DTA *)Fgetdta();			/* save the dta buffer  */
+	Fsetdta(ldtabuf);					/* set the new dta  */
 
 	status = FALSE;						/* not found        */
 
@@ -198,7 +203,7 @@ PP(register char *filename;)
 
 	while (!ret)
 	{									/* matched      */
-		if (wildcmp(filename, dtabuf->dirfile.d_name))
+		if (wildcmp(filename, ldtabuf->dirfile.d_name))
 		{
 			if (display(filename))
 			{
@@ -217,16 +222,16 @@ PP(register char *filename;)
   s_more:
 	desk_wait(TRUE);
 
-	Fsetdta(dtabuf);					/* set the new dta  */
+	Fsetdta(ldtabuf);					/* set the new dta  */
 	ret = Fsfirst(getall, 0x31);
 
 	while (!ret)
 	{
-		if ((dtabuf->dirfile.d_att & SUBDIR) && (dtabuf->dirfile.d_name[0] != '.'))
+		if ((ldtabuf->dirfile.d_att & SUBDIR) && (ldtabuf->dirfile.d_name[0] != '.'))
 		{
 			path2[0] = '.';
 			path2[1] = '\\';
-			strcpy(&path2[2], dtabuf->dirfile.d_name);
+			strcpy(&path2[2], ldtabuf->dirfile.d_name);
 			Dsetpath(path2);
 			f_level++;
 			if (f_level > COPYMAXDEPTH)
@@ -250,9 +255,9 @@ PP(register char *filename;)
 	}									/* while       */
 
   s_exit:
-	Mfree(dtabuf);
+	Mfree(ldtabuf);
 	Fsetdta(savedta);
-	return (status);
+	return status;
 }
 
 
@@ -267,22 +272,27 @@ PP(char *filename;)
 	register WINDOW *win;
 	register DIR *dir;
 	register int16_t i;
-	int16_t newi, ret, first;
+	int16_t newi;
+	BOOLEAN ret;
+	int16_t first;
 
 	size = Malloc(0xFFFFFFFFL);
 	if (size)
 	{
-		addr = Malloc(size);
+		addr = (char *)Malloc(size);
 		Dgetpath(addr, 0);
 		i = strlen(addr) + 20;
 		Mfree(addr);					/* free the memory      */
-		addr = Malloc((int32_t) i);
+		addr = (char *)Malloc((int32_t) i);
 		addr[0] = Dgetdrv() + 'A';		/* get the default drive    */
 		addr[1] = ':';
 		Dgetpath(&addr[2], 0);
 		strcat(addr, bckslsh);
 		strcat(addr, getall);
 
+#if !BINEXACT
+		newi = 0; /* quiet compiler */
+#endif
 		if (f_rename)
 		{
 			if (c_path_alloc(addr))
@@ -307,8 +317,7 @@ PP(char *filename;)
 							dir[i].d_state = SELECTED;
 						}
 					}
-				} /* open subdir */
-				else
+				} else
 					return (FALSE);
 			} else
 			{
@@ -318,19 +327,23 @@ PP(char *filename;)
 		} else
 		{
 			f_rename = TRUE;
-			if (win = alloc_win())		/* check for window */
+			if ((win = alloc_win()) != NULL)		/* check for window */
 			{
-/*	      win->w_sizes.x = full.x;
-	      win->w_sizes.y = full.y;
-	      win->w_sizes.w = full.w;
-	      win->w_sizes.h = full.h / 3;
-	      rc_copy( &win->w_sizes, &win->w_work );
-*/
+#if 0
+				win->w_sizes.x = full.x;
+				win->w_sizes.y = full.y;
+				win->w_sizes.w = full.w;
+				win->w_sizes.h = full.h / 3;
+				rc_copy( &win->w_sizes, &win->w_work );
+#endif
+
 				win->w_free = TRUE;		/* return window    */
 				ret = open_disk(0, addr, FALSE);
 			} else
+			{
 				ret = FALSE;
-
+			}
+			
 			Mfree(addr);
 
 			if (!ret)
@@ -363,8 +376,9 @@ PP(char *filename;)
 }
 
 
-/*	Put in wild card in the name string	*/
-
+/*
+ * Put in wild card in the name string
+ */
 VOID mass_string(P(char) *str1)
 PP(char *str1;)
 {

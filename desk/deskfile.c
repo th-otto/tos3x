@@ -1,19 +1,20 @@
-/*	DESKFILE.C		3/17/89 - 6/15/89	Derek Mui	*/
-/*	Change read_file	9/14/89			D.Mui		*/
-/*	Change the way it gets icon	9/15/89		D.Mui		*/
-/*	Fix at sort by date		6/28/90		D.Mui		*/
-/*	Fix at read_file to allow lower case 7/18/90	D.Mui		*/
-/*	Fix at read_file for calculating volume value	4/29/91	D.Mui	*/
-/*	Fix at read_file for calculating volume again	8/13/91	D.Mui	*/
-/*	Change all the iconblk to ciconblk	7/11/92	D.Mui		*/
+/*      DESKFILE.C              3/17/89 - 6/15/89       Derek Mui       */
+/*      Change read_file        9/14/89                 D.Mui           */
+/*      Change the way it gets icon     9/15/89         D.Mui           */
+/*      Fix at sort by date             6/28/90         D.Mui           */
+/*      Fix at read_file to allow lower case 7/18/90    D.Mui           */
+/*      Fix at read_file for calculating volume value   4/29/91 D.Mui   */
+/*      Fix at read_file for calculating volume again   8/13/91 D.Mui   */
+/*      Change all the iconblk to ciconblk      7/11/92 D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
+#include "toserrno.h"
 
 
 #define CTLC 	3
@@ -58,19 +59,25 @@ VOID pri_win(NOTHING)
 {
 	register WINDOW *win;
 	register int16_t serial;
-	int16_t max, i, type;
+	int16_t maxitems, i, type;
 	DIR *dir;
 	char buffer[80];
-	char buf1[10];
+	struct {
+		int32_t sizes;
+		int16_t items;
+		int32_t dummy;
+	} buf1;
 	int32_t sizes;
 
-	if (win = w_gfirst())
+	UNUSED(type);
+	
+	if ((win = w_gfirst()) != NULL)
 	{
 		desk_wait(TRUE);
 
 		serial = (trp14(0x21, 0xFFFF) & 0x10) ? TRUE : FALSE;
 		dir = win->w_memory;
-		max = win->w_items;
+		maxitems = win->w_items;
 		sizes = 0;
 
 		if (!pri_str(serial, Nextline))
@@ -82,7 +89,7 @@ VOID pri_win(NOTHING)
 		if (!pri_str(serial, "\012\012\015"))
 			goto pri_end;
 
-		for (i = 0; i < max; i++)
+		for (i = 0; i < maxitems; i++)
 		{
 			sizes += dir[i].d_size;
 			strcpy(bldstring(&dir[i], buffer), Nextline);
@@ -90,14 +97,14 @@ VOID pri_win(NOTHING)
 				goto pri_end;
 		}
 
-		*((int32_t *) & buf1[0]) = sizes;
-		*((int16_t *) & buf1[4]) = (int16_t) win->w_items;
+		buf1.sizes = sizes;
+		buf1.items = win->w_items;
 
-		merge_str(strcpy(buffer, Nextline) - 1, get_fstring((win->w_items == 1) ? ISTR : ISTRS), buf1);
+		merge_str(strcpy(buffer, Nextline) - 1, get_fstring((win->w_items == 1) ? ISTR : ISTRS), &buf1);
 
 		strcat(buffer, "\014");
 		pri_str(serial, buffer);
-	  pri_end:
+	pri_end:
 		desk_wait(FALSE);
 	}
 }
@@ -109,16 +116,19 @@ VOID pri_win(NOTHING)
 VOID newfolder(P(WINDOW) *win)
 PP(register WINDOW *win;)
 {
-	char namenew[14];
-	char nameold[14];
-	char name[14];
+	char namenew[NAMELEN];
+	char nameold[NAMELEN];
+	char name[NAMELEN];
 	int16_t i, ret, update;
 	register OBJECT *obj;
 	char buf[2];
 
+	UNUSED(i);
+	UNUSED(nameold);
+	
 	if (win->w_path[0] == 'c')
 	{
-		do_alert(1, STBADCOP);
+		do_alert(1, STBADCOPY);
 		return;
 	}
 
@@ -137,7 +147,7 @@ PP(register WINDOW *win;)
 		if (xform_do(obj, 0) == MKCNCL)
 			break;
 
-		inf_sget(obj, MKNAME, name);
+		fs_sget((LPTREE)obj, MKNAME, name);
 		unfmt_str(name, namenew);
 		if (!namenew[0])				/* no name  */
 			break;
@@ -148,10 +158,10 @@ PP(register WINDOW *win;)
 
 		if (ret)						/* Error    */
 		{
-			if (ret == EFILNF)			/* File Not found */
+			if (ret == E_FILNF)			/* File Not found */
 				goto n_1;
 
-			if (ret == EACCDN)			/* access denied */
+			if (ret == E_ACCDN)			/* access denied */
 			{
 				buf[0] = win->w_buf[0];
 				buf[1] = 0;
@@ -161,7 +171,7 @@ PP(register WINDOW *win;)
 			break;
 		} else							/* file exists  */
 		{
-			if (do1_alert(STFOEXIST) == 2)
+			if (do1_alert(STFOEXISTS) == 2)
 				break;
 			else
 				continue;				/* retry    */
@@ -230,6 +240,9 @@ PP(int16_t mode;)
 				ps1 = &dir[j].d_name[0];
 				ps2 = &dir[j + gap].d_name[0];
 
+#if !BINEXACT
+				ret = 0; /* quiet compiler */
+#endif
 				switch (mode)
 				{
 				case S_NO:
@@ -237,7 +250,6 @@ PP(int16_t mode;)
 						ret = 1;
 					else
 						ret = -1;
-
 					break;
 
 				case S_SIZE:
@@ -247,11 +259,10 @@ PP(int16_t mode;)
 						ret = -1;
 					else
 						ret = strchk(ps1, ps2);
-
 					break;
 
 				case S_TYPE:
-					if (ret = strchk(scasb(ps1, '.'), scasb(ps2, '.')))
+					if ((ret = strchk(scasb(ps1, '.'), scasb(ps2, '.'))))
 						break;
 
 				case S_NAME:
@@ -276,7 +287,8 @@ PP(int16_t mode;)
 				if (ret <= 0)
 					break;
 
-			  ss_2:buff = dir[j];
+			ss_2:
+				buff = dir[j];
 				dir[j] = dir[j + gap];
 				dir[j + gap] = buff;
 			}
@@ -289,7 +301,7 @@ PP(int16_t mode;)
  * Set up all the files pointer
  * Scroll up or down
  */
-int16_t set_newview(P(int16_t) index, P(WINDOW) *win)
+VOID set_newview(P(int16_t) index, P(WINDOW) *win)
 PP(int16_t index;)
 PP(register WINDOW *win;)
 {
@@ -340,7 +352,7 @@ PP(register WINDOW *win;)
 		}
 
 		obj->ob_flags &= ~HIDETREE;
-		obj->ob_states = dir[i].d_state;
+		obj->ob_state = dir[i].d_state;
 		obj->ob_next = k + 1;
 
 	}									/* for loop    */
@@ -394,13 +406,17 @@ PP(int16_t attr;)
 	rep_path(getall, path);				/* search everything    */
 
 	if (path[0] == 'c')
-		ret = !cart_sfirst(&dtabuf);
+#if BINEXACT
+		ret = !cart_sfirst((char *)&dtabuf); /* BUG: missing parameter attr (not used there) */
+#else
+		ret = !cart_sfirst((char *)&dtabuf, 0x31);
+#endif
 	else
 		ret = Fsfirst(path, 0x31);		/* Error    */
 
 	if (ret)
 	{
-		if (ret != EFILNF)				/* Fatal error  */
+		if (ret != E_FILNF)				/* Fatal error  */
 		{
 			rep_path(buffer, path);
 			return (FALSE);
@@ -410,13 +426,13 @@ PP(int16_t attr;)
 	if (win->w_memory)					/* Memory allocated?    */
 	{
 		Mfree(win->w_memory);			/* Free it      */
-		win->w_memory = (char *) 0;
+		win->w_memory = NULL;
 	}
 
-	if (ret == EFILNF)					/* file not found   */
+	if (ret == E_FILNF)					/* file not found   */
 		goto r_2;
 
-	addr = Malloc(0xFFFFFFFFL);			/* we should have memory */
+	addr = (DIR *)Malloc(0xFFFFFFFFL);			/* we should have memory */
 
 	if (!addr)							/* No memory        */
 	{
@@ -427,9 +443,9 @@ PP(int16_t attr;)
 
 	volume = ((int32_t) addr) / (int32_t) (sizeof(DIR));
 
-	addr = Malloc(addr);
+	addr = (DIR *)Malloc(addr);
 
-	win->w_memory = (char *) addr;
+	win->w_memory = addr;
 
 	if (!volume)
 		goto r_2;
@@ -476,11 +492,12 @@ PP(int16_t attr;)
 	/* Free up some memory      */
 
 	if (items)
-		Mshrink(win->w_memory, (int32_t) ((char *) addr - (char *) win->w_memory));
-	else
+	{
+		Mshrink(win->w_memory, (int32_t) ((intptr_t) addr - (intptr_t) win->w_memory));
+	} else
 	{
 		Mfree(win->w_memory);
-		win->w_memory = (char *) 0;
+		win->w_memory = NULL;
 	}
 
   r_1:

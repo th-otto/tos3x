@@ -270,7 +270,7 @@ PP(char *lstring;)
 bye:
 		dos_free(pxpath);
 bye2:
-		fm_show(NOMEMORY, 0x0L, 1);
+		fm_show(NOMEMORY, NULL, 1);
 		return FALSE;
 	} else
 	{

@@ -1,11 +1,11 @@
-/*	DESKSTOR.C		6/12/89 - 6/13/89	Derek Mui	*/
-/*	Take out some variable	6/28/89	- 9/13/89	D.Mui		*/
-/*	Take out strXXX.h	7/7/92			D.Mui		*/
+/*      DESKSTOR.C              6/12/89 - 6/13/89       Derek Mui       */
+/*      Take out some variable  6/28/89 - 9/13/89       D.Mui           */
+/*      Take out strXXX.h       7/7/92                  D.Mui           */
 
 /************************************************************************/
-/*	New Desktop for Atari ST/TT Computer				*/
-/*	Atari Corp							*/
-/*	Copyright 1989,1990 	All Rights Reserved			*/
+/*      New Desktop for Atari ST/TT Computer                            */
+/*      Atari Corp                                                      */
+/*      Copyright 1989,1990     All Rights Reserved                     */
 /************************************************************************/
 
 #include "desktop.h"
@@ -36,8 +36,9 @@ DTA dtabuf;								/* dta buffer   */
 
 WINDOW *warray[MAXWIN];					/* window structure */
 
-/*	Variables for the desktop.inf file	*/
-
+/*
+ * Variables for the desktop.inf file
+ */
 int16_t s_sort;							/* sort item    */
 int16_t s_view;							/* view item    */
 int16_t ccopy_save;						/* copy ?   */
@@ -74,5 +75,5 @@ char const noext[] = "*.";
 char const Nostr[] = "";
 char const infdata[] = "DESKTOP.INF";
 char const infpath[] = "C:\\NEWDESK.INF";
-char icndata[] = "C:\\DESKICON.RSC";
-char Nextline[] = "\012\015";
+char const icndata[] = "C:\\DESKICON.RSC";
+char const Nextline[] = "\012\015";
