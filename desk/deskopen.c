@@ -249,7 +249,7 @@ VOID sh_witem(NOTHING)
 
 			curri++;
 
-			if (*file == 'c')
+			if (*file == CHAR_FOR_CARTRIDGE)
 			{
 				do1_alert(CARTNOSH);
 				goto ss_1;
@@ -279,7 +279,7 @@ VOID sh_witem(NOTHING)
 			file = put_name(x_win, dir2[curri].d_name);
 			curri++;
 
-			if (*file == 'c')
+			if (*file == CHAR_FOR_CARTRIDGE)
 			{
 				do1_alert(CARTNOSH);
 				goto ss_1;
@@ -499,7 +499,7 @@ PP(char *buffer;)
 	int32_t sizes[4];
 	buffer[1] = 0;
 
-	if (buffer[0] == 'c')
+	if (buffer[0] == CHAR_FOR_CARTRIDGE)
 	{
 		do1_alert(CARTNOSH);
 		return (TRUE);
@@ -638,7 +638,11 @@ PP(WINDOW *win;)
 
 		case DISK:						/* open a disk      */
 			strcpy(buffer, wildext);
+#if COLORICON_SUPPORT
 			buffer[0] = itype->i_cicon.monoblk.ib_char[1];
+#else
+			buffer[0] = itype->i_iblk.ib_char[1];
+#endif
 			open_disk(item, buffer, TRUE);
 			break;
 
@@ -726,7 +730,7 @@ PP(BOOLEAN init;)
 	int16_t handle;
 	WINDOW *win;
 
-	if (path[0] == 'c')					/* cartridge    */
+	if (path[0] == CHAR_FOR_CARTRIDGE)	/* cartridge    */
 	{
 		if (!cart_init())				/* error    */
 		{

@@ -126,7 +126,7 @@ PP(register WINDOW *win;)
 	UNUSED(i);
 	UNUSED(nameold);
 	
-	if (win->w_path[0] == 'c')
+	if (win->w_path[0] == CHAR_FOR_CARTRIDGE)
 	{
 		do_alert(1, STBADCOPY);
 		return;
@@ -406,7 +406,7 @@ PP(int16_t attr;)
 
 	rep_path(getall, path);				/* search everything    */
 
-	if (path[0] == 'c')
+	if (path[0] == CHAR_FOR_CARTRIDGE)
 #if BINEXACT
 		ret = !cart_sfirst((char *)&dtabuf); /* BUG: missing parameter attr (not used there) */
 #else
@@ -480,7 +480,7 @@ PP(int16_t attr;)
 			break;
 
 	  r_3:
-		if (path[0] == 'c')
+		if (path[0] == CHAR_FOR_CARTRIDGE)
 			ret = !cart_snext();
 		else
 			ret = Fsnext();

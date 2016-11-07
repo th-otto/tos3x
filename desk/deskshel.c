@@ -189,8 +189,8 @@ PP(register const char *path;)
 	register char *ptr;
 	register int16_t ret;
 
-	if (path[0] == 'c')
-		return (TRUE);
+	if (path[0] == CHAR_FOR_CARTRIDGE)
+		return TRUE;
 
 	ret = TRUE;
 
@@ -376,7 +376,7 @@ PP(BOOLEAN setdir;)
 
 	wind_set(0, WF_NEWDESK, 0, 0, 0, 0);
 
-	if (*file == 'c')
+	if (*file == CHAR_FOR_CARTRIDGE)
 	{
 		if (cart_init())
 		{

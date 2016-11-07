@@ -1,7 +1,6 @@
 /* direct imports from AES: */
 #define I8086 0
 #define MC68K 1
-#include "../aes/aesdefs.h"
 #undef MFORM
 #include "../aes/struct88.h"
 #undef MFORM

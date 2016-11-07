@@ -35,6 +35,7 @@ VOID to_win PROTO((int16_t sitem, WINDOW *swin, int16_t ditem, WINDOW *dwin));
  * Check what kind of object is executable
  * Return TRUE if it is
  */
+/* 306de: 00e26466 */
 BOOLEAN ch_obj(P(int16_t) mx, P(int16_t) my, P(WINDOW **) win, P(int16_t *) item, P(int16_t *) type)
 PP(int16_t mx;)
 PP(int16_t my;)
@@ -61,12 +62,12 @@ PP(int16_t *type;)
 					goto ch_1;
 				}
 
-				return (TRUE);
+				return TRUE;
 			} else
 			{
 				dir = get_dir(*win, i);
 				if (dir->d_att & SUBDIR)	/* dir is OK    */
-					return (TRUE);
+					return TRUE;
 
 				str = put_name(*win, dir->d_name);
 				/* check file type  */
@@ -82,11 +83,11 @@ PP(int16_t *type;)
 					case PRG:
 					case PTP:
 					case APPS:
-						return (TRUE);
+						return TRUE;
 					}
 				}
 			}							/* window object   */
-		}								/* if object     */
+		}
 	}
 	/* if found something  */
 	return FALSE;
@@ -94,14 +95,15 @@ PP(int16_t *type;)
 
 
 /*
- * Change for UNDO key
+ * Check for UNDO key
  */
+/* 306de: 00e26566 */
 BOOLEAN ch_undo(NOTHING)
 {
-	if ((Bconstat(2)) && (Bconin(2) == 0x00610000L) && (do1_alert(ABORTCON) == 1))
-		return (FALSE);
+	if (Bconstat(2) && Bconin(2) == 0x00610000L && do1_alert(ABORTCON) == 1)
+		return FALSE;
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -155,7 +157,6 @@ PP(int16_t mode;)
 		obj[DATEBOX].ob_flags |= HIDETREE;
 		if (!cdele_save)
 			d_display = FALSE;
-
 		break;
 
 	case OP_COPY:
@@ -164,16 +165,14 @@ PP(int16_t mode;)
 			which = get_fstring((f_rename) ? CRENSTR : CPYSTR);
 			if (!ccopy_save)
 				d_display = FALSE;
-
 			break;
 		}
 
 	case OP_MOVE:
 		mode = OP_MOVE;
 		which = get_fstring((f_rename) ? MRENSTR : MOVESTR);
-		if ((!ccopy_save) && (!cdele_save))
+		if (!ccopy_save && !cdele_save)
 			d_display = FALSE;
-
 		break;
 	}
 
@@ -273,7 +272,7 @@ PP(int16_t h;)
 
 	for (i = 1; i <= obj[0].ob_tail; i++)
 	{
-		if ((obj[i].ob_state & SELECTED) && (in_parent(obj, i)))
+		if ((obj[i].ob_state & SELECTED) && in_parent(obj, i))
 		{
 			found = TRUE;
 
@@ -448,7 +447,7 @@ PP(WINDOW *win;)
 
 			while (0x01 & gr_mkmstate)
 			{
-				if (((tmpx1 != gr_mkmx) || (tmpy1 != gr_mkmy)) && (0x0001 & gr_mkmstate))
+				if ((tmpx1 != gr_mkmx || tmpy1 != gr_mkmy) && (0x0001 & gr_mkmstate))
 				{
 					frame(tmpx, tmpy, tmpx1, tmpy1);
 					frame(tmpx, tmpy, gr_mkmx, gr_mkmy);
@@ -487,9 +486,9 @@ PP(int16_t x;)
 PP(int16_t y;)
 {
 	if (x > y)
-		return (x - y);
+		return x - y;
 	else
-		return (y - x);
+		return y - x;
 }
 
 
@@ -598,7 +597,7 @@ PP(int16_t my;)
 
 	if (!ditem)							/* on the background    */
 	{
-		if ((mx) || (my))				/* moved        */
+		if (mx || my)					/* moved        */
 		{
 			sitems = 1;
 			while (i_next(sitems, obj, &sitems))
@@ -620,13 +619,13 @@ PP(int16_t my;)
 		temp1 = ((CICONBLK *) (obj[sitem].ob_spec))->monoblk.ib_char[1];
 		temp2 = ((CICONBLK *) (obj[ditem].ob_spec))->monoblk.ib_char[1];
 
-		if ((backid[sitem].i_type == DISK) && (backid[ditem].i_type == DISK))
+		if (backid[sitem].i_type == DISK && backid[ditem].i_type == DISK)
 		{
 			if (temp1 == temp2)
 			{
 				do1_alert(STBADCOPY);
 				return;
-			} else if (((temp1 == 'A') || (temp1 == 'B')) && ((temp2 == 'A') || (temp2 == 'B')))
+			} else if ((temp1 == 'A' || temp1 == 'B') && (temp2 == 'A' || temp2 == 'B'))
 			{
 				buffer[0] = temp1;
 				fc_start(buffer, CMD_COPY);
@@ -665,7 +664,7 @@ PP(int16_t disk;)
 	OBJECT *tree;
 
 	if (!(gh_buffer = Malloc(0xFFFFFFFFL)))
-		return (FALSE);
+		return FALSE;
 
 	gh_buffer = Malloc(gh_buffer);
 
@@ -973,7 +972,7 @@ PP(register WINDOW *swin;)
 
 	menu_verify();
 	/* fall back on its own icon    */
-	if ((stype == dtype) && (sitem == ditem))
+	if (stype == dtype && sitem == ditem)
 	{
 		if (dtype == WINICON)
 		{
@@ -987,7 +986,7 @@ PP(register WINDOW *swin;)
 	{
 		if (dtype == DESKICON)			/* Hit the desktop  */
 		{
-			if ((!ditem) || (exec))
+			if (!ditem || exec)
 				win_desk(swin, sitem, ditem, pt.g_x - pt2.g_x, pt.g_y - pt2.g_y);
 		} else
 		{
@@ -1002,7 +1001,7 @@ PP(register WINDOW *swin;)
 			if (!docopy)				/* treat everything as a move function */
 				ditem = 0;
 
-			if ((!ditem) || (exec))
+			if (!ditem || exec)
 				desk_desk(sitem, ditem, pt.g_x - pt2.g_x, pt.g_y - pt2.g_y);
 		} else							/* hit the window   */
 		{
@@ -1039,7 +1038,11 @@ PP(const char *tail;)
 
 	case DISK:							/* copy to disk     */
 		strcpy(buffer, wildext);
+#if COLORICON_SUPPORT
 		buffer[0] = itype->i_cicon.monoblk.ib_char[1];
+#else
+		buffer[0] = itype->i_iblk.ib_char[1];
+#endif
 		file_op(buffer, OP_COPY);
 		break;
 
@@ -1127,7 +1130,11 @@ PP(char *text;)
 		obj = background;
 		cp_iblk(icon, (CICONBLK *) (obj[id].ob_spec));
 		itype->i_type = type;
+#if COLORICON_SUPPORT
 		itype->i_cicon.monoblk.ib_char[1] = (char) drive;
+#else
+		itype->i_iblk.ib_char[1] = (char) drive;
+#endif
 		itype->i_icon = icon;
 		strcpy(((CICONBLK *) (obj[id].ob_spec))->monoblk.ib_ptext, text);
 	}

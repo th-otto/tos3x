@@ -171,21 +171,22 @@ PP(BOOLEAN dofull;)
 
 
 
-/* 	Do the actual update of a particular window	*/
-
+/*
+ * Do the actual update of a particular window
+ */
 BOOLEAN up_win(P(WINDOW *) win, P(BOOLEAN) mediac)
 PP(WINDOW *win;)
 PP(BOOLEAN mediac;)
 {
 	char *ptr;
-	int16_t ret;
+	BOOLEAN ret;
 
 	ptr = win->w_path;
 
 #if !BINEXACT
 	ret = FALSE; /* BUG; maybe used uninitalized below */
 #endif
-	if (ptr[0] != 'c')
+	if (ptr[0] != CHAR_FOR_CARTRIDGE)
 	{
 		if (mediac)
 		{

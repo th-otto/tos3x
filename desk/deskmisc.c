@@ -19,7 +19,7 @@ PP(int16_t att;)
 {
 	int16_t ret;
 
-	if (*path == 'c')
+	if (*path == CHAR_FOR_CARTRIDGE)
 		return !c_sfirst(path);
 	else
 	{
@@ -53,7 +53,7 @@ PP(const char *path;)
 }
 
 
-int16_t hit_disk(P(int16_t) drive)
+BOOLEAN hit_disk(P(int16_t) drive)
 PP(int16_t drive;)
 {
 	char buffer[14];

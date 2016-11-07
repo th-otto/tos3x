@@ -369,7 +369,11 @@ PP(int16_t *type;)
 		if (temp == DISK)
 		{
 			strcpy(path1, wildext);
+#if COLORICON_SUPPORT
 			path1[0] = itype->i_cicon.monoblk.ib_char[1];
+#else
+			path1[0] = itype->i_iblk.ib_char[1];
+#endif
 			*name = path1;
 			*type = temp;
 			goto xd_1;

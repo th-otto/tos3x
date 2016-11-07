@@ -63,9 +63,17 @@
 #define MULTILANG_SUPPORT (OS_COUNTRY == OS_CONF_MULTILANG)
 #endif
 
+#ifndef SUBMENUS
 #define SUBMENUS (AESVERSION >= 0x340)
+#endif
+
+#ifndef AES3D
 #define AES3D (AESVERSION >= 0x330)
+#endif
+
+#ifndef COLORICON_SUPPORT
 #define COLORICON_SUPPORT (AESVERSION >= 0x330)
+#endif
 
 #define GEM3 0
 

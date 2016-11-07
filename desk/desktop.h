@@ -44,6 +44,7 @@ typedef int16_t BOOLEAN;
 #  endif
 #endif
 
+#include "../aes/aesdefs.h"
 #include "mobdefs.h"
 #include "window.h"
 #include "deskus.h"
@@ -168,28 +169,33 @@ typedef intptr_t LPTREE;
 
 #define ARGULEN 12
 
-typedef struct  app
+typedef struct	app
 {
-        int16_t a_type;         /* file type    */
-        int16_t a_icon;         /* icon number  */
-        int16_t a_dicon;        /* document icon*/
-        const char *a_name;        /* app name     */
-        char    a_doc[14];      /* doc name     */
-        int16_t a_pref;         /* launch pref  set dir etc */  
-        uint16_t        a_key;          /* key definition       */
-        char    a_argu[ARGULEN];
-        struct app *a_next;        /* app pointer  */
+	int16_t a_type; 		/* file type	*/
+	int16_t a_icon; 		/* icon number	*/
+	int16_t a_dicon;		/* document icon*/
+	const char *a_name; 	   /* app name	   */
+	char	a_doc[14];		/* doc name 	*/
+	int16_t a_pref; 		/* launch pref	set dir etc */
+	uint16_t		a_key;			/* key definition		*/
+	char	a_argu[ARGULEN];
+	struct app *a_next; 	   /* app pointer  */
 } APP;
 
 typedef struct idtype
 {
-        int16_t i_type;
-        int16_t i_icon;
-        CICONBLK i_cicon;       
-/*      ICONBLK i_iblk; */
-        const char *i_path;
-        char i_name[NAMELEN];
+	int16_t i_type;
+	int16_t i_icon;
+#if COLORICON_SUPPORT
+	CICONBLK i_cicon;
+#else
+	ICONBLK i_iblk;
+#endif
+	const char *i_path;
+	char i_name[NAMELEN];
 } IDTYPE;
+
+#define CHAR_FOR_CARTRIDGE 'c'
 
 
 /*
@@ -441,7 +447,7 @@ int32_t av_mem PROTO((NOTHING));
  */
 int16_t m_sfirst PROTO((const char *path, int16_t att));
 int16_t c_path_alloc PROTO((const char *path));
-int16_t hit_disk PROTO((int16_t drive));
+BOOLEAN hit_disk PROTO((int16_t drive));
 OBJECT *get_icon PROTO((int16_t item));
 OBJECT *get_tree PROTO((int16_t item));
 char *get_fstring PROTO((int16_t item));

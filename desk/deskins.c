@@ -407,7 +407,11 @@ VOID ins_icons(NOTHING)
 		{
 			type = backid[item].i_type;
 			strcpy(buffer, ((CICONBLK *) (obj1[item].ob_spec))->monoblk.ib_ptext);
+#if COLORICON_SUPPORT
 			buf1[0] = idbuffer[0] = backid[item].i_cicon.monoblk.ib_char[1];
+#else
+			buf1[0] = idbuffer[0] = backid[item].i_iblk.ib_char[1];
+#endif
 			icon = backid[item].i_icon;
 			if (icon >= numicon)
 				icon = numicon - 1;
@@ -516,7 +520,7 @@ VOID ins_icons(NOTHING)
 		/* this is install  */
 		fs_sget((LPTREE)obj, DRID, idbuffer);
 
-		if (idbuffer[0] != 'c')
+		if (idbuffer[0] != CHAR_FOR_CARTRIDGE)
 			idbuffer[0] = toupper(idbuffer[0]);
 
 		if (driver)						/* driver type  */
@@ -838,8 +842,12 @@ VOID ins_drive(NOTHING)
 	{
 		if ((!(obj[i].ob_flags & HIDETREE)) && (backid[i].i_type == DISK))
 		{
+#if COLORICON_SUPPORT
 			id = backid[i].i_cicon.monoblk.ib_char[1];
-			if ((id <= '`') && (id >= 'A'))
+#else
+			id = backid[i].i_iblk.ib_char[1];
+#endif
+			if (id <= '`' && id >= 'A')
 			{
 				dr[id - 'A'] = 1;
 				if (!((map >> (id - 'A')) & 0x01))
@@ -857,7 +865,7 @@ VOID ins_drive(NOTHING)
 
 	if (cart_init())
 	{
-		if (make_icon((int16_t) ('c'), 0, DISK, device) != -1)
+		if (make_icon((int16_t) (CHAR_FOR_CARTRIDGE), 0, DISK, device) != -1)
 			install = TRUE;
 	}
 

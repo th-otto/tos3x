@@ -22,7 +22,6 @@
 /************************************************************************/
 
 #include "desktop.h"
-#include "../aes/aesdefs.h"
 #include "aesbind.h"
 #include "ws.h"
 
@@ -134,15 +133,25 @@ BOOLEAN ini_icon(NOTHING)
 	for (i = 1; i <= maxicon; i++)
 	{
 		itype = &backid[i];
+#if COLORICON_SUPPORT
 		obj[i].ob_type = G_CICON;		/* 7/11/92 */
+#else
+		obj[i].ob_type = G_ICON;		/* 7/11/92 */
+#endif
 		obj[i].ob_flags = HIDETREE;
 		obj[i].ob_state = NORMAL;
 		obj[i].ob_width = dicon.g_w;
 		obj[i].ob_height = dicon.g_h;
 		icblk = (CICONBLK *) (iconaddr[0].ob_spec);
+#if COLORICON_SUPPORT
 		itype->i_cicon = *icblk;
-		itype->i_cicon.monoblk.ib_ptext = &itype->i_name[0];
+		itype->i_cicon.monoblk.ib_ptext = itype->i_name;
 		obj[i].ob_spec = (intptr_t)&itype->i_cicon;
+#else
+		itype->i_iblk = icblk->monoblk;
+		itype->i_iblk.ib_ptext = itype->i_name;
+		obj[i].ob_spec = (intptr_t)&itype->i_iblk;
+#endif
 		itype->i_path = NULL;
 	}
 

@@ -913,7 +913,11 @@ PP(BOOLEAN todisk;)
 			*pcurr++ = 'O';
 			break;
 		case DISK:
-			if (backid[i].i_cicon.monoblk.ib_char[1] == 'c')
+#if COLORICON_SUPPORT
+			if (backid[i].i_cicon.monoblk.ib_char[1] == CHAR_FOR_CARTRIDGE)
+#else
+			if (backid[i].i_iblk.ib_char[1] == CHAR_FOR_CARTRIDGE)
+#endif
 				*pcurr++ = 'C';
 			else
 				*pcurr++ = 'M';
@@ -921,7 +925,7 @@ PP(BOOLEAN todisk;)
 		case XFILE:					/* file on desktop  */
 			*pcurr++ = 'X';
 			break;
-		case XDIR:						/* DIR on desktop   */
+		case XDIR:					/* DIR on desktop   */
 			*pcurr++ = 'V';
 			break;
 		case TRASHCAN:

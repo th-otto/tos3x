@@ -112,11 +112,12 @@ PP(char *filename;)
 
 		while (status)
 		{
-			if ((type == DISK) || (type == SUBDIR) || (type == XDIR))
+			if (type == DISK || type == SUBDIR || type == XDIR)
 			{
-				if (*str == 'c')
+				if (*str == CHAR_FOR_CARTRIDGE)
+				{
 					do1_alert(NOSEA);
-				else
+				} else
 				{
 					set_dir(str);		/* set the current directory    */
 					if (rec_sea(filename))
@@ -135,7 +136,7 @@ PP(char *filename;)
 	{
 		if ((win = w_gfirst()) != NULL)
 		{
-			if (win->w_path[0] == 'c')
+			if (win->w_path[0] == CHAR_FOR_CARTRIDGE)
 			{
 				do1_alert(NOSEA);
 				goto s_ex2;

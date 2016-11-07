@@ -125,7 +125,7 @@ PP(BOOLEAN multiple;)
 	char buffer[2];
 
 	UNUSED(trash);
-	if (*d == 'c')
+	if (*d == CHAR_FOR_CARTRIDGE)
 		return (FALSE);
 
 	desk_wait(TRUE);
@@ -153,7 +153,7 @@ PP(BOOLEAN multiple;)
 
 	do
 	{
-		if (*s == 'c')					/* skip cartridge   */
+		if (*s == CHAR_FOR_CARTRIDGE)	/* skip cartridge   */
 			goto cc_4;
 
 		buffer[0] = *s;
@@ -211,7 +211,7 @@ PP(BOOLEAN multiple;)
 			if (ret == SKIP)
 				continue;
 		}
-	  cc_3:
+	cc_3:
 		if (code != OP_COUNT)
 			x_del();
 		/* deselect object  */
@@ -221,7 +221,8 @@ PP(BOOLEAN multiple;)
 		if ((code == OP_COPY) || (code == OP_MOVE))
 			dr[*d - 'A'] = 1;
 
-	  cc_4:if (!multiple)				/* do only one device   */
+	cc_4:
+		if (!multiple)				/* do only one device   */
 			break;
 
 	} while (x_next(&s, &type));
@@ -232,14 +233,14 @@ PP(BOOLEAN multiple;)
 
   clnup:
 	/* deselect object  */
-	if ((code == OP_DELETE) || (code == OP_MOVE))
+	if (code == OP_DELETE || code == OP_MOVE)
 	{
-		if (*s != 'c')
+		if (*s != CHAR_FOR_CARTRIDGE)
 			dr[*s - 'A'] = 1;
 	}
 
-	if ((code == OP_COPY) || (code == OP_MOVE))
-		dr[*d - 'A'] = 1;
+	if (code == OP_COPY || code == OP_MOVE)
+		dr[*d - 'A'] = 1; /* assumes we can't get here when trying to copy to cartridge */
 
 	desk_wait(FALSE);
 

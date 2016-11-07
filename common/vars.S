@@ -751,9 +751,7 @@ name: ds.t size
 	PTR(_rul)
 	V(_evx,b,28) /* sizeof(EVB) */
 	PTR(_zlr)
-	
-	ds.l 1
-	
+	PTR(_backid)
 	INT(_g_flag)
 	
 	ds.b 12
