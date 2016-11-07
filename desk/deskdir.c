@@ -1208,7 +1208,11 @@ PP(int change;)
 	obj[SKIP].ob_state = NORMAL;
 	obj[QUIT].ob_state = NORMAL;
 #endif
-	((TEDINFO *) (obj[SNAME].ob_spec))->te_ptext = get_fstring((change) ? RNAME : NCONFLICT);
+#if STR_IN_RSC
+	((TEDINFO *) (obj[SNAME].ob_spec))->te_ptext = get_fstring(change ? RNAME : NCONFLICT);
+#else
+	((TEDINFO *) (obj[SNAME].ob_spec))->te_ptext = NO_CONST(change ? Rname : Nconflict);
+#endif
 
 	desk_wait(FALSE);
 	fm_draw(SAMENAME);

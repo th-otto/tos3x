@@ -258,7 +258,11 @@ PP(int mode;)
 				linecount++;
 				if (linecount >= d_nrows)
 				{
+#if STR_IN_RSC
 					alert = get_fstring(MORE);
+#else
+					alert = More;
+#endif
 					bconws("\r");
 					bconws(alert);
 					if (doui(1, &linecount))
@@ -275,12 +279,20 @@ PP(int mode;)
 
 	if (len < 0)
 	{
+#if STR_IN_RSC
 		alert = get_fstring(READERROR);
+#else
+		alert = Readerror;
+#endif
 		bconws(Nextline);
 		bconws(alert);
 	} else
 	{
+#if STR_IN_RSC
 		alert = get_fstring(ENDFILE);
+#else
+		alert = Endfile;
+#endif
 		bconws(Nextline);
 		bconws(alert);
 	}

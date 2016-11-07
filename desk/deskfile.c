@@ -100,7 +100,11 @@ VOID pri_win(NOTHING)
 		buf1.sizes = sizes;
 		buf1.items = win->w_items;
 
-		merge_str(strcpy(buffer, Nextline) - 1, get_fstring((win->w_items == 1) ? ISTR : ISTRS), &buf1);
+#if STR_IN_RSC
+		merge_str(strcpy(buffer, Nextline) - 1, get_fstring(win->w_items == 1 ? ISTR : ISTRS), &buf1);
+#else
+		merge_str(strcpy(buffer, Nextline) - 1, win->w_items == 1 ? Istr : Istrs, &buf1);
+#endif
 
 		strcat(buffer, "\014");
 		pri_str(serial, buffer);
@@ -342,7 +346,11 @@ PP(register WINDOW *win;)
 		if (s_view == S_ICON)
 		{
 			app_icon(&dir[i].d_name[0], (dir[i].d_att & 0x10) ? FOLDER : -1, &type);
+#if COLORICON_SUPPORT
 			cp_iblk(type, (CICONBLK *) (obj->ob_spec));
+#else
+			cp_iblk(get_icon(type), (ICONBLK *) (obj->ob_spec));
+#endif
 			((CICONBLK *) (obj->ob_spec))->monoblk.ib_char[1] = 0;
 			((CICONBLK *) (obj->ob_spec))->monoblk.ib_ptext = &dir[i].d_name[0];
 		} else

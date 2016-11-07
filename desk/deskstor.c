@@ -41,13 +41,13 @@ WINDOW *warray[MAXWIN];					/* window structure */
  */
 int16_t s_sort;							/* sort item    */
 int16_t s_view;							/* view item    */
-int16_t ccopy_save;						/* copy ?   */
-int16_t cdele_save;						/* delete ? */
+BOOLEAN ccopy_save;						/* copy ?   */
+BOOLEAN cdele_save;						/* delete ? */
 int16_t write_save;						/* write ?  */
-int16_t cbit_save;						/* bitblt   */
+BOOLEAN cbit_save;						/* bitblt   */
 int16_t pref_save;						/* screen pref  */
 BOOLEAN s_cache;						/* cache    */
-int16_t s_stofit;						/* size to fit  */
+BOOLEAN s_stofit;						/* size to fit  */
 uint16_t windspec;						/* window pattern   */
 
 /************************************************/

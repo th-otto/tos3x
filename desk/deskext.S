@@ -109,6 +109,7 @@
 	xdef _gsx_xline
 	xdef _vro_cpyfm
 	xdef _gsx_ncode
+	xdef _v_hardcopy
 	
 	xdef lmul
 	xdef ldiv
@@ -206,6 +207,7 @@ _gsx_attr       equ 0
 _gsx_xline      equ 0
 _vro_cpyfm      equ 0
 _gsx_ncode      equ 0
+_v_hardcopy     equ 0
 
 lmul            equ 0
 ldiv            equ 0

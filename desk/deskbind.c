@@ -20,11 +20,11 @@ VOID wind_new(NOTHING)
 }
 
 
-int16_t fsel_exinput(P(char *)path, P(char *)selec, P(int16_t *)button, P(char *)label)
+int16_t fsel_exinput(P(char *)path, P(char *)selec, P(int16_t *)button, P(const char *)label)
 PP(char *path;)
 PP(char *selec;)
 PP(int16_t *button;)
-PP(char *label;)
+PP(const char *label;)
 {
 	int16_t ret;
 

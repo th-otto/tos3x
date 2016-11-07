@@ -23,8 +23,8 @@ VOID frame PROTO((int16_t x1, int16_t y1, int16_t x2, int16_t y2));
 int16_t dist PROTO((int16_t x, int16_t y));
 VOID win_desk PROTO((WINDOW *swin, int16_t sitems, int16_t ditem, int16_t mx, int16_t my));
 VOID desk_desk PROTO((int16_t sitem, int16_t ditem, int16_t mx, int16_t my));
-BOOLEAN gh_init PROTO((OBJECT *obj, int16_t disk));
-VOID ghost_icon PROTO((int16_t offx, int16_t offy, int16_t disk));
+BOOLEAN gh_init PROTO((OBJECT *obj, BOOLEAN disk));
+VOID ghost_icon PROTO((int16_t offx, int16_t offy, BOOLEAN disk));
 VOID to_desk PROTO((int16_t ditem, const char *tail));
 VOID to_win PROTO((int16_t sitem, WINDOW *swin, int16_t ditem, WINDOW *dwin));
 
@@ -110,6 +110,7 @@ BOOLEAN ch_undo(NOTHING)
 /*
  * Perform a file operation
  */
+/* 306de: 00e265b0 */
 VOID file_op(P(const char *) dest, P(int16_t) mode)
 PP(const char *dest;)
 PP(int16_t mode;)
@@ -122,7 +123,7 @@ PP(int16_t mode;)
 	const char *source;
 	char buffer[2];
 	GRECT pt;
-	char *which;
+	const char *which;
 
 	/* get the key state */
 
@@ -143,8 +144,13 @@ PP(int16_t mode;)
 	buffer[1] = 0;
 
 	obj = get_tree(CPBOX);
+#if AES3D
 	obj[CDDRIVE].ob_flags &= ~HIDETREE;
 	obj[DATEBOX].ob_flags &= ~HIDETREE;
+#else
+	obj[CDDRIVE].ob_flags = 0;
+	obj[DATEBOX].ob_flags = 0;
+#endif
 
 #if !BINEXACT
 	which = 0; /* quiet compiler */
@@ -152,9 +158,18 @@ PP(int16_t mode;)
 	switch (mode)
 	{
 	case OP_DELETE:
+#if STR_IN_RSC
 		which = get_fstring(DELSTR);
+#else
+		which = Delstr;
+#endif
+#if AES3D
 		obj[CDDRIVE].ob_flags |= HIDETREE;
 		obj[DATEBOX].ob_flags |= HIDETREE;
+#else
+		obj[CDDRIVE].ob_flags = HIDETREE;
+		obj[DATEBOX].ob_flags = HIDETREE;
+#endif
 		if (!cdele_save)
 			d_display = FALSE;
 		break;
@@ -162,7 +177,11 @@ PP(int16_t mode;)
 	case OP_COPY:
 		if (!(keydown & K_CTRL))		/* control key down?    */
 		{
-			which = get_fstring((f_rename) ? CRENSTR : CPYSTR);
+#if STR_IN_RSC
+			which = get_fstring(f_rename ? CRENSTR : CPYSTR);
+#else
+			which = f_rename ? Crenstr : Cpystr;
+#endif
 			if (!ccopy_save)
 				d_display = FALSE;
 			break;
@@ -170,7 +189,11 @@ PP(int16_t mode;)
 
 	case OP_MOVE:
 		mode = OP_MOVE;
-		which = get_fstring((f_rename) ? MRENSTR : MOVESTR);
+#if STR_IN_RSC
+		which = get_fstring(f_rename ? MRENSTR : MOVESTR);
+#else
+		which = f_rename ? Mrenstr : Movestr;
+#endif
 		if (!ccopy_save && !cdele_save)
 			d_display = FALSE;
 		break;
@@ -185,17 +208,25 @@ PP(int16_t mode;)
 	}
 
 	ndir += d_dir;						/* count also the number of dir in window */
-	((TEDINFO *) (obj[TITLE].ob_spec))->te_ptext = which;
+	((TEDINFO *) (obj[TITLE].ob_spec))->te_ptext = NO_CONST(which);
 	f_str(obj, NUMDIR, ndir);
 	f_str(obj, NUMFILE, nfile);
+#if AES3D
 	obj[HIDECBOX].ob_flags |= HIDETREE;
+#else
+	obj[HIDECBOX].ob_flags = HIDETREE;
+#endif
 	inf_sset(obj, CSDRIVE, Nostr);
 	buffer[0] = *dest;
 	inf_sset(obj, CDDRIVE, buffer);
+#if AES3D
 	if (d_display)
 		obj[CHBOX1].ob_flags &= ~HIDETREE;
 	else
 		obj[CHBOX1].ob_flags |= HIDETREE;
+#else
+	obj[CHBOX1].ob_flags = d_display ? 0 : HIDETREE;
+#endif
 	fm_draw(CPBOX);						/* draw the box     */
 
 	if (d_display)
@@ -211,7 +242,11 @@ PP(int16_t mode;)
 #endif
 	if (item == OKCP)
 	{
+#if AES3D
 		obj[HIDECBOX].ob_flags &= ~HIDETREE;
+#else
+		obj[HIDECBOX].ob_flags = 0;
+#endif
 		bfill(32, 0, dr);
 		x_first(&source, &type);
 		ret = dofiles(source, dest, mode, &ndir, &nfile, &nsize, type, TRUE);
@@ -253,6 +288,7 @@ PP(int16_t mode;)
 /*
  * Build a rectangle that can hold all the selected icons
  */
+/* 306de: 00e26984 */
 BOOLEAN build_rect(P(OBJECT *) obj, P(GRECT *) rect, P(int16_t) w, P(int16_t) h)
 PP(register OBJECT *obj;)
 PP(register GRECT *rect;)
@@ -311,6 +347,7 @@ PP(int16_t h;)
 /*
  * Check whose is inside the rect and select the object
  */
+/* 306de: 00e26ab6 */
 VOID chk_rect(P(WINDOW *) win, P(GRECT *) rect, P(int16_t) id)
 PP(register WINDOW *win;)
 PP(GRECT *rect;)
@@ -318,11 +355,13 @@ PP(int16_t id;)
 {
 	register OBJECT *obj;
 	register int16_t i;
+	int unused;
 	register int16_t minx, miny, maxx, maxy;
 	int16_t orgx, orgy, select;
 	GRECT pt;
 	int16_t doit;
 
+	UNUSED(unused);
 	if (win)
 	{
 		rc_intersect(&win->w_work, rect);
@@ -345,7 +384,11 @@ PP(int16_t id;)
 
 	for (i = 1; i <= obj[0].ob_tail; i++)
 	{
+#if AES3D
 		if (!(obj[i].ob_flags & HIDETREE))
+#else
+		if (obj[i].ob_flags != HIDETREE)
+#endif
 		{
 			rc_copy((GRECT *)&obj[i].ob_x, &pt);
 			pt.g_x += orgx;
@@ -386,6 +429,7 @@ PP(int16_t id;)
 /*
  * Draw a box
  */
+/* 306de: 00e26c7e */
 VOID frame(P(int16_t) x1, P(int16_t) y1, P(int16_t) x2, P(int16_t) y2)
 PP(int16_t x1;)
 PP(int16_t y1;)
@@ -408,6 +452,7 @@ PP(int16_t y2;)
 /*
  * Draw a box and wait for button to go up
  */
+/* 306de: 00e26cf8 */
 VOID r_box(P(int16_t) id, P(WINDOW *) win)
 PP(int16_t id;)
 PP(WINDOW *win;)
@@ -481,6 +526,7 @@ PP(WINDOW *win;)
 /*
  * Return an absolute value
  */
+/* 306de: 00e26e90 */
 int16_t dist(P(int16_t) x, P(int16_t) y)
 PP(int16_t x;)
 PP(int16_t y;)
@@ -495,6 +541,7 @@ PP(int16_t y;)
 /*
  * Move icons from window to desktop
  */
+/* 306de: 00e26eb6 */
 VOID win_desk(P(WINDOW *) swin, P(int16_t) sitems, P(int16_t) ditem, P(int16_t) mx, P(int16_t) my)
 PP(register WINDOW *swin;)
 PP(int16_t sitems;)
@@ -502,6 +549,7 @@ PP(int16_t ditem;)
 PP(int16_t mx;)
 PP(int16_t my;)
 {
+	register VOIDPTR unused;
 	DIR *dir;
 	register int16_t i;
 	int16_t temp, first, type, status, ntype;
@@ -510,6 +558,7 @@ PP(int16_t my;)
 	const char *str;
 	const char *tail;
 
+	UNUSED(unused);
 	if (!ditem)
 	{
 		first = TRUE;
@@ -547,7 +596,11 @@ PP(int16_t my;)
 			if (!backid[i].i_path)
 			{
 				do1_alert(NOICON);
+#if AES3D
 				background[i].ob_flags |= HIDETREE;
+#else
+				background[i].ob_flags = HIDETREE;
+#endif
 				break;
 			}
 
@@ -579,6 +632,7 @@ PP(int16_t my;)
 /*
  * Move icons from desktop to desktop
  */
+/* 306de: 00e2711c */
 VOID desk_desk(P(int16_t) sitem, P(int16_t) ditem, P(int16_t) mx, P(int16_t) my)
 PP(int16_t sitem;)
 PP(int16_t ditem;)
@@ -586,13 +640,18 @@ PP(int16_t mx;)
 PP(int16_t my;)
 {
 	register OBJECT *obj;
-	char buffer[14];
+	char buffer[NAMELEN];
 	register char temp1;
 	char temp2;
 	GRECT rect;
+	long unused1;
 	int16_t sitems;
+	long unused2;
 	const char *tail;
 
+	UNUSED(unused1);
+	UNUSED(unused2);
+	
 	obj = background;
 
 	if (!ditem)							/* on the background    */
@@ -609,11 +668,9 @@ PP(int16_t my;)
 				do_redraw(0, &rect, 0);	/* erase old one    */
 				do_redraw(0, &full, sitems);	/* draw the new one */
 				sitems++;
-
-			}							/* while */
-		}								/* if moved */
-	} /* if open area */
-	else
+			}
+		}
+	} else
 	{									/* check for floppy disk copy   */
 		/* 7/11/92          */
 		temp1 = ((CICONBLK *) (obj[sitem].ob_spec))->monoblk.ib_char[1];
@@ -652,9 +709,10 @@ PP(int16_t my;)
 /*
  * Ghost icon initalization
  */
-BOOLEAN gh_init(P(OBJECT *)obj, P(int16_t) disk)
+/* 306de: 00e2731a */
+BOOLEAN gh_init(P(OBJECT *)obj, P(BOOLEAN) disk)
 PP(register OBJECT *obj;)
-PP(int16_t disk;)
+PP(BOOLEAN disk;)
 {
 	register int16_t *ptr1;
 	int16_t x, y, i, offx, offy;
@@ -690,7 +748,7 @@ PP(int16_t disk;)
 		{								/* if inside parent */
 			if (in_parent(tree, (int16_t) j + 1))
 			{
-				ptr = (disk) ? d_xywh : f_xywh;
+				ptr = disk ? d_xywh : f_xywh;
 				x = obj->ob_x;
 				y = obj->ob_y;
 
@@ -714,10 +772,11 @@ PP(int16_t disk;)
 /*
  * Draw icons outline
  */
-VOID ghost_icon(P(int16_t) offx, P(int16_t) offy, P(int16_t) disk)
+/* 306de: 00e2747c */
+VOID ghost_icon(P(int16_t) offx, P(int16_t) offy, P(BOOLEAN) disk)
 PP(register int16_t offx;)
 PP(register int16_t offy;)
-PP(int16_t disk;)
+PP(BOOLEAN disk;)
 {
 	register int16_t *ptr;
 	register int16_t i, j, limit;
@@ -759,13 +818,15 @@ PP(int16_t disk;)
 /*
  * Handle the holding down button event
  */
+/* 306de: 00e27544 */
 VOID hd_down(P(int16_t) sitem, P(int16_t) stype, P(WINDOW *)swin)
 PP(register int16_t sitem;)
 PP(register int16_t stype;)
 PP(register WINDOW *swin;)
 {
 	register int16_t pitem, state;
-	int16_t itype, w, h, ret;
+	BOOLEAN itype;
+	int16_t w, h, ret;
 	BOOLEAN exec;
 	int16_t mx, my, kstate, mstate;
 	int16_t omx, omy;
@@ -944,15 +1005,12 @@ PP(register WINDOW *swin;)
 				pwin = dwin;
 				pitem = ditem;
 				ptype = dtype;
-
 			}
-			/* if moved    */
+			
 			ghost_icon(offx, offy, itype);	/* draw icon    */
 			omx = mx;
 			omy = my;
-
 		}
-		/* if moved      */
 	} while (TRUE);
 
 	ghost_icon(0, 0, itype);			/* erase ghost icon */
@@ -1019,6 +1077,7 @@ PP(register WINDOW *swin;)
 /*
  * Take action when something is dragged to desktop area
  */
+/* 306de: 00e27ae2 */
 VOID to_desk(P(int16_t) ditem, P(const char *)tail)
 PP(int16_t ditem;)
 PP(const char *tail;)
@@ -1068,6 +1127,7 @@ PP(const char *tail;)
 /*
  * Take action when something is dragged to window
  */
+/* 306de: 00e27b98 */
 VOID to_win(P(int16_t) sitem, P(WINDOW *)swin, P(int16_t) ditem, P(WINDOW *)dwin)
 PP(int16_t sitem;)
 PP(WINDOW *swin;)
@@ -1114,11 +1174,12 @@ PP(WINDOW *dwin;)
 /*
  * make a desktop icon
  */
-int16_t make_icon(P(int16_t) drive, P(int16_t) icon, P(int16_t) type, P(char *)text)
+/* 306de: 00e27cda */
+int16_t make_icon(P(int16_t) drive, P(int16_t) icon, P(int16_t) type, P(const char *)text)
 PP(int16_t drive;)
 PP(int16_t icon;)
 PP(int16_t type;)
-PP(char *text;)
+PP(const char *text;)
 {
 	register int16_t id;
 	register IDTYPE *itype;
@@ -1128,7 +1189,12 @@ PP(char *text;)
 	{
 		itype = &backid[id];
 		obj = background;
+#if COLORICON_SUPPORT
 		cp_iblk(icon, (CICONBLK *) (obj[id].ob_spec));
+#else
+		cp_iblk(get_icon(icon), (ICONBLK *) (obj[id].ob_spec));
+#endif
+		/* $00E2D47E */
 		itype->i_type = type;
 #if COLORICON_SUPPORT
 		itype->i_cicon.monoblk.ib_char[1] = (char) drive;

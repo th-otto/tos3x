@@ -47,6 +47,15 @@ typedef int16_t BOOLEAN;
 #include "../aes/aesdefs.h"
 #include "mobdefs.h"
 #include "window.h"
+
+/*
+ * TOS versions before 4.x had some language dependant strings
+ * compiled into the executable.
+ * Since TOS 4.x, all those strings are now part of the resource file.
+ */
+#define STR_IN_RSC (TOSVERSION >= 0x400)
+
+
 #include "deskrsc.h"
 #include "osbind.h"
 
@@ -69,7 +78,6 @@ typedef int16_t BOOLEAN;
  * files changes instead.
  */
 typedef intptr_t LPTREE;
-
 
 #define UNLINKED        0
 
@@ -171,15 +179,15 @@ typedef intptr_t LPTREE;
 
 typedef struct	app
 {
-	int16_t a_type; 		/* file type	*/
-	int16_t a_icon; 		/* icon number	*/
-	int16_t a_dicon;		/* document icon*/
-	const char *a_name; 	   /* app name	   */
-	char	a_doc[14];		/* doc name 	*/
-	int16_t a_pref; 		/* launch pref	set dir etc */
-	uint16_t		a_key;			/* key definition		*/
-	char	a_argu[ARGULEN];
-	struct app *a_next; 	   /* app pointer  */
+	int16_t a_type; 		/* file type */
+	int16_t a_icon; 		/* icon number */
+	int16_t a_dicon;		/* document icon */
+	const char *a_name; 	/* app name */
+	char a_doc[NAMELEN];	/* doc name */
+	int16_t a_pref; 		/* launch pref set dir etc */
+	uint16_t a_key;			/* key definition */
+	char a_argu[ARGULEN];
+	struct app *a_next;     /* app pointer */
 } APP;
 
 typedef struct idtype
@@ -195,6 +203,11 @@ typedef struct idtype
 	char i_name[NAMELEN];
 } IDTYPE;
 
+/*
+ * Symbolic "drive letter" for the cartridge.
+ * Must be lowercase. This is only handled by
+ * the desktop, not by GEMDOS.
+ */
 #define CHAR_FOR_CARTRIDGE 'c'
 
 
@@ -202,7 +215,7 @@ typedef struct idtype
  * deskupda.c
  */
 extern char *q_addr;							/* Inf file address */
-extern BOOLEAN q_change;						/* Inf file is changed  */
+extern BOOLEAN q_change;						/* Inf file is changed */
 
 VOID q_inf PROTO((NOTHING));
 VOID q_sea PROTO((char *old, char *new));
@@ -256,7 +269,7 @@ VOID file_op PROTO((const char *dest, int16_t mode));
 BOOLEAN build_rect PROTO((OBJECT *obj, GRECT *rect, int16_t w, int16_t h));
 VOID r_box PROTO((int16_t id, WINDOW *win));
 VOID hd_down PROTO((int16_t sitem, int16_t stype, WINDOW *swin));
-int16_t make_icon PROTO((int16_t drive, int16_t icon, int16_t type, char *text));
+int16_t make_icon PROTO((int16_t drive, int16_t icon, int16_t type, const char *text));
 
 
 /*
@@ -276,7 +289,7 @@ APP *app_xtype PROTO((const char *name, BOOLEAN *install));
  * deskbind.c
  */
 VOID wind_new PROTO((NOTHING));
-int16_t fsel_exinput PROTO((char *path, char *selec, int16_t *button, char *label));
+int16_t fsel_exinput PROTO((char *path, char *selec, int16_t *button, const char *label));
 int16_t rsrc_load PROTO((const char *name));
 int16_t rsrc_obfix PROTO((LPTREE tree, int16_t obj));
 int16_t menu_popup PROTO((MENU *menu, int16_t x, int16_t y, MENU *mdata));
@@ -401,7 +414,11 @@ VOID app_mtoi PROTO((int16_t newx, int16_t newy, int16_t *px, int16_t *py));
 /*
  * deskins.c
  */
+#if COLORICON_SUPPORT
 int16_t cp_iblk PROTO((int16_t number, CICONBLK *dest_ciblk));
+#else
+VOID cp_iblk PROTO((const ICONBLK *src_iblk, ICONBLK *dest_iblk));
+#endif
 VOID rm_icons PROTO((NOTHING));
 VOID ins_app PROTO((NOTHING));
 VOID ins_icons PROTO((NOTHING));
@@ -448,7 +465,11 @@ int32_t av_mem PROTO((NOTHING));
 int16_t m_sfirst PROTO((const char *path, int16_t att));
 int16_t c_path_alloc PROTO((const char *path));
 BOOLEAN hit_disk PROTO((int16_t drive));
+#if COLORICON_SUPPORT
 OBJECT *get_icon PROTO((int16_t item));
+#else
+ICONBLK *get_icon PROTO((int16_t item));
+#endif
 OBJECT *get_tree PROTO((int16_t item));
 char *get_fstring PROTO((int16_t item));
 char *get_string PROTO((int16_t item));
@@ -594,13 +615,13 @@ extern DTA dtabuf;						/* dta buffer   */
 extern WINDOW *warray[MAXWIN];			/* window structure */
 extern int16_t s_sort;					/* sort item    */
 extern int16_t s_view;					/* view item    */
-extern int16_t ccopy_save;				/* copy ?   */
-extern int16_t cdele_save;				/* delete ? */
+extern BOOLEAN ccopy_save;				/* copy ?   */
+extern BOOLEAN cdele_save;				/* delete ? */
 extern int16_t write_save;				/* write ?  */
-extern int16_t cbit_save;				/* bitblt   */
+extern BOOLEAN cbit_save;				/* bitblt   */
 extern int16_t pref_save;				/* screen pref  */
 extern BOOLEAN s_cache;					/* cache    */
-extern int16_t s_stofit;				/* size to fit  */
+extern BOOLEAN s_stofit;				/* size to fit  */
 extern uint16_t windspec;				/* window pattern   */
 extern char autofile[PATHLEN];
 extern char path1[PATHLEN];				/* utility path     */
@@ -730,3 +751,4 @@ VOID mediach PROTO((int16_t drv));
 VOID gsx_attr PROTO((uint16_t text, uint16_t mode, uint16_t color));
 VOID gsx_xline PROTO((int16_t ptscount, int16_t *ppoints));
 VOID vro_cpyfm PROTO((int16_t wr_mode, int16_t *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB));
+VOID v_hardcopy PROTO((NOTHING));

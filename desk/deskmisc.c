@@ -72,6 +72,7 @@ PP(int16_t drive;)
 }
 
 
+#if COLORICON_SUPPORT
 OBJECT *get_icon(P(int16_t) item)
 PP(int16_t item;)
 {
@@ -80,6 +81,16 @@ PP(int16_t item;)
 
 	return &iconaddr[item];
 }
+#else
+ICONBLK *get_icon(P(int16_t) item)
+PP(int16_t item;)
+{
+	if (item >= numicon)
+		item = numicon - 1;
+
+	return (ICONBLK *)(iconaddr[item].ob_spec);
+}
+#endif
 
 
 OBJECT *get_tree(P(int16_t) item)
@@ -93,6 +104,7 @@ PP(int16_t item;)
 
 
 
+#if STR_IN_RSC
 char *get_fstring(P(int16_t) item)
 PP(int16_t item;)
 {
@@ -101,6 +113,7 @@ PP(int16_t item;)
 	rsrc_gaddr(R_FRSTR, item, (VOIDPTR *)&str);
 	return *str;
 }
+#endif
 
 
 char *get_string(P(int16_t) item)

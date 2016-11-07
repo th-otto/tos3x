@@ -17,7 +17,7 @@ VOID dsptch PROTO((NOTHING));
 VOID wm_new PROTO((NOTHING));
 int16_t ap_init PROTO((intptr_t pglobal));
 int16_t ap_exit PROTO((NOTHING));
-int16_t fs_input PROTO((char *path, char *selec, int16_t *button, char *label));
+int16_t fs_input PROTO((char *path, char *selec, int16_t *button, const char *label));
 VOID rs_sglobe PROTO((intptr_t pglobal));
 int16_t rs_load PROTO((intptr_t pglobal, const char *name));
 int16_t rs_free PROTO((intptr_t pglobal));

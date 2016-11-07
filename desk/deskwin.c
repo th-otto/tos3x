@@ -39,7 +39,7 @@ PP(WINDOW *win;)
 		int16_t items;
 		char filler[8];
 	} buffer;
-	char *type;
+	const char *type;
 
 	dir = win->w_memory;
 	j = 0;
@@ -60,12 +60,20 @@ PP(WINDOW *win;)
 	{
 		buffer.size = sizes1;
 		buffer.items = j;
-		type = get_fstring((j == 1) ? ISEL : ISELS);
+#if STR_IN_RSC
+		type = get_fstring(j == 1 ? ISEL : ISELS);
+#else
+		type = j == 1 ? Isel : Isels;
+#endif
 	} else
 	{
 		buffer.size = sizes;
 		buffer.items = (int16_t) win->w_items;
-		type = get_fstring((win->w_items == 1) ? ISTR : ISTRS);
+#if STR_IN_RSC
+		type = get_fstring(win->w_items == 1 ? ISTR : ISTRS);
+#else
+		type = win->w_items == 1 ? Istr : Istrs;
+#endif
 	}
 
 	merge_str(win->w_info, type, &buffer);

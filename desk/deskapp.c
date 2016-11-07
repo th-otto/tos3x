@@ -12,11 +12,12 @@
 int16_t x_wildcmp PROTO((const char *source, const char *dest));
 
 
+/* 306de: 00e27d68 */
 BOOLEAN app_reschange(P(int16_t) res)
 PP(register int16_t res;)
 {
 	if (res == gl_restype)
-		return (FALSE);
+		return FALSE;
 
 	gl_restype = res;
 	pref_save = res;
@@ -28,6 +29,7 @@ PP(register int16_t res;)
 /*
  * Find the application's icon type
  */
+/* 306de: 00e27da0 */
 APP *app_icon(P(const char *)name, P(int16_t) type, P(int16_t *)icon)
 PP(register char *name;)
 PP(int16_t type;)								/* looking for same type    */
@@ -71,15 +73,16 @@ PP(int16_t *icon;)								/* icon number          */
 			}
 		}
 		app = app->a_next;
-	}									/* while     */
+	}
 
-	return (app);
+	return app;
 }
 
 
 /*
  * Free an application node
  */
+/* 306de: 00e27e4e */
 VOID app_free(P(APP *)app)
 PP(register APP *app;)
 {
@@ -112,13 +115,12 @@ PP(register APP *app;)
 /*
  * Allocation an anode
  */
-
 APP *app_alloc(NOTHING)
 {
 	register APP *list;
 
-  again:
-	list = (APP *) 0;
+again:
+	list = NULL;
 
 	if (appfree)
 	{
@@ -145,6 +147,7 @@ APP *app_alloc(NOTHING)
 /*
  * Find the actual application type
  */
+/* 306de: 00e27f0c */
 APP *app_xtype(P(const char *)name, P(BOOLEAN *) install)
 PP(register const char *name;)
 PP(BOOLEAN *install;)							/* application installed    */
@@ -165,7 +168,7 @@ PP(BOOLEAN *install;)							/* application installed    */
 					goto x_p1;
 
 				*install = FALSE;
-				return (app);
+				return app;
 			}
 
 			if (!streq(app->a_doc, noext))
@@ -174,22 +177,22 @@ PP(BOOLEAN *install;)							/* application installed    */
 				{
 					*install = TRUE;
 					if (app->a_name[0])
-						return (app);
+						return app;
 
 					if (!markapp)
 						markapp = app;
 				}
 			}
 		}
-	  x_p1:
+	x_p1:
 		app = app->a_next;
+	}
 
-	}									/* while     */
-
-	return (markapp);
+	return markapp;
 }
 
 
+/* 306de: 00e27fb4 */
 int16_t x_wildcmp(P(const char *) source, P(const char *) dest)
 PP(const char *source;)
 PP(const char *dest;)
@@ -197,14 +200,16 @@ PP(const char *dest;)
 	if (*source)
 	{
 		if (*scasb(source, '*'))
-			return (wildcmp(source, g_name(dest)));
+			return wildcmp(source, g_name(dest));
 		else
-			return (streq(source, dest));
+			return streq(source, dest);
 	}
-	return (FALSE);
+	return FALSE;
 }
 
-int16_t const ftab[] = { 0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
+
+int16_t const ftab[] = {
+	0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 	F11, F12, F13, F14, F15, F16, F17, F18, F19, F20
 };
 
@@ -212,6 +217,7 @@ int16_t const ftab[] = { 0, F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
 /*
  * Find the key that matches the application
  */
+/* 306de: 00e2800a */
 APP *app_key(P(int16_t) key)
 PP(int16_t key;)
 {
@@ -222,7 +228,7 @@ PP(int16_t key;)
 	while (app)
 	{
 		if (ftab[app->a_key] == key)
-			return (app);
+			return app;
 
 		app = app->a_next;
 	}

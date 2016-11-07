@@ -328,13 +328,21 @@ VOID sh_witem(NOTHING)
 				goto ss_5;
 
 			*r_slash(newstr) = 0;
+#if STR_IN_RSC
 			((TEDINFO *) (obj[INFTITLE].ob_spec))->te_ptext = get_fstring(FOLDINFO);
+#else
+			((TEDINFO *) (obj[INFTITLE].ob_spec))->te_ptext = NO_CONST(Foldinfo);
+#endif
 		} else
 		{
 			*(((TEDINFO *) (obj[FINFOLDS].ob_spec))->te_ptext) = 0;
 			*(((TEDINFO *) (obj[FINFILES].ob_spec))->te_ptext) = 0;
 			f_str(obj, FISIZE, dir->d_size);
+#if STR_IN_RSC
 			((TEDINFO *) (obj[INFTITLE].ob_spec))->te_ptext = get_fstring(FILEINFO);
+#else
+			((TEDINFO *) (obj[INFTITLE].ob_spec))->te_ptext = NO_CONST(Fileinfo);
+#endif
 		}
 
 		fmt_time(dir->d_time, buffer);	/* put in time  */
@@ -930,11 +938,15 @@ PP(BOOLEAN file;)
 	int16_t button;
 	char buffer[16];
 
-  l_1:
+l_1:
 	strcpy(path1, "C:\\*.*");
 	path1[0] = (isdrive() & 0x04) ? 'C' : 'A'; /* WTF? */
 	strcpy(buffer, Nostr);
+#if STR_IN_RSC
 	fsel_exinput(path1, buffer, &button, get_fstring(LITEM));
+#else
+	fsel_exinput(path1, buffer, &button, Litem);
+#endif
 
 	if (button)
 	{

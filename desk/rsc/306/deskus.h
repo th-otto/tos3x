@@ -89,7 +89,7 @@
 #define SUPERITEM                         59 /* STRING in tree ADMENU */
 
 #define ADFILEIN                           1 /* form/dialog */
-#define INFTTLE                            1 /* TEXT in tree ADFILEIN */ /* max len 1 */
+#define INFTITLE                           1 /* TEXT in tree ADFILEIN */ /* max len 1 */
 #define FIFILE                             2 /* FTEXT in tree ADFILEIN */ /* max len 24 */
 #define FILEFT                             3 /* BOXCHAR in tree ADFILEIN */
 #define FIRIGHT                            4 /* BOXCHAR in tree ADFILEIN */
@@ -188,6 +188,7 @@
 #define FCBOXC                             2 /* BOX in tree ADFORMAT */
 #define SRCDRA                             4 /* BOXCHAR in tree ADFORMAT */
 #define SRCDRB                             5 /* BOXCHAR in tree ADFORMAT */
+#define DESTDR                             6 /* BOXCHAR in tree ADFORMAT */
 #define FCCOPY                             7 /* BUTTON in tree ADFORMAT */
 #define LINEBOX                            8 /* BOX in tree ADFORMAT */
 #define FCBOXF                             9 /* BOX in tree ADFORMAT */
@@ -366,7 +367,7 @@
 #define FCSIZE                             9 /* Alert string */
 /* [1][This disk has %L bytes|available to user.][ Continue | Quit ] */
 
-#define FCTYPE                            10 /* Alert string */
+#define FCNOTYPE                          10 /* Alert string */
 /* [3][The destination disk is|not the same type as the|source disk. Please insert|another disk.][ Retry |Abort] */
 
 #define SAVETOP                           11 /* Alert string */

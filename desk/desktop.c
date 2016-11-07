@@ -390,11 +390,15 @@ m_2:
 	/* set up the right menu text */
 	/* do it here!!!!!! */
 #ifdef BITBLT /* take out for sparrow */
-	strcpy(menu_addr[BITBLT].ob_spec, get_fstring(m_cpu == 30 ? CACHETXT : BLTTXT));
+#if STR_IN_RSC
+	strcpy((char *)menu_addr[BITBLT].ob_spec, get_fstring(m_cpu == 30 ? CACHETXT : BLTTXT));
+#else
+	strcpy((char *)menu_addr[BITBLT].ob_spec, m_cpu == 30 ? Cachetxt : Blttxt);
+#endif
 
 	menu_addr[SUPERITEM].ob_type = G_USERDEF;
-	chxcache.ub_code = ch_xcache;
-	menu_addr[SUPERITEM].ob_spec = &chxcache;
+	chxcache.ub_code = (intptr_t)ch_xcache;
+	menu_addr[SUPERITEM].ob_spec = (intptr_t)&chxcache;
 #endif
 
 

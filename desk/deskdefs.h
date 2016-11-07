@@ -23,3 +23,7 @@
 #ifndef COLORICON_SUPPORT
 #define COLORICON_SUPPORT (AESVERSION >= 0x330)
 #endif
+
+#ifndef POPUP_SUPPORT
+#define POPUP_SUPPORT (AESVERSION >= 0x330)
+#endif

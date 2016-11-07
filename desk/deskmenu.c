@@ -131,9 +131,13 @@ int16_t const tb3[MAXMENU] = {
 	INSDISK,
 	REMVICON,
 	PREFITEM,
+#ifdef VIDITEM
 	VIDITEM,
+#endif
 	READINF,
+#ifdef MEMMENU
 	MEMMENU,
+#endif
 	SAVEITEM
 };
 
@@ -634,7 +638,11 @@ PP(int16_t msgbuff;)
 		strcpy(path1, "C:\\*.INF");
 		path1[0] = (isdrive() & 0x04) ? 'C' : 'A';
 		strcpy(buffer, &infpath[3]);
+#if STR_IN_RSC
 		fsel_exinput(path1, buffer, &button, get_fstring(SINF));
+#else
+		fsel_exinput(path1, buffer, &button, Sinf);
+#endif
 		if (button)
 		{
 			desk_wait(TRUE);
@@ -664,11 +672,12 @@ PP(int16_t msgbuff;)
 
 		break;
 
+#ifdef MEMMENU
 	case MEMMENU:
 		mv_desk();						/* cjg - 07/07/92 */
 		/* av_desk(); */
 		break;
-
+#endif
 
 	case SAVEITEM:						/* save desktop     */
 		if (do1_alert(SAVETOP) == 1)
@@ -699,10 +708,12 @@ PP(int16_t msgbuff;)
 		break;
 #endif
 
+#ifdef VIDITEM
 	case VIDITEM:
 		if (set_video())
 			d_exit = L_CHGRES;
 		break;
+#endif
 	}
 }
 

@@ -6,6 +6,7 @@
 #define VIDEL_PAL      0x0020           /* PAL if set; otherwise NTSC */
 #define VIDEL_VGA      0x0010           /* VGA if set; otherwise TV */
 #define VIDEL_80COL    0x0008           /* 80-column mode if set; otherwise 40 */
+#define VIDEL_40COL    0x0000
 #define VIDEL_BPPMASK  0x0007           /* mask for bits/pixel encoding */
 #define VIDEL_1BPP          0               /* 2 colours */
 #define VIDEL_2BPP          1               /* 4 colours */

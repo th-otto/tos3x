@@ -450,8 +450,9 @@ name: ds.t size
 	
 	V(_ptsout,w,10)
 	
-	ds.b 10
+	ds.b 2
 	
+	GRECT(_full)
 	GRECT(_ctrl)
 	
 	ds.b $32
@@ -486,9 +487,7 @@ name: ds.t size
 	
 	PTR(_ad_fsel)
 	INT(_gl_dclick)
-	
-	ds.b 2
-	
+	INT(_cdele_save)
 	INT(_gl_height)
 	TEDINFO(_gl_aname)
 	
@@ -504,12 +503,14 @@ name: ds.t size
 	INT(_gl_dcindex)
 	INT(_gl_recd)
 	
-	ds.b 6
+	ds.b 2
 	
+	PTR(_gh_buffer)
 	PTR(_ad_path)
 	
-	ds.b 12
+	ds.b 8
 	
+	PTR(_iconaddr)
 	PTR(old_bcode)
 	INT(_gl_hclip)
 	INT(_gl_bvhard)
@@ -517,25 +518,23 @@ name: ds.t size
 	PTR(_ad_stdesk)
 	INT(_used_acc)
 	
-	ds.b 4
+	ds.b 2
 	
+	INT(_back_up)
 	INT(_gl_wchar)
 	PTR(_ad_fsdta)
-	
-	ds.b 32
-
+	V(_dr,b,32)
 	PTR(_ad_windspb)
 	INT(_gl_mode)
 	INT(_gl_bpend)
 	V(_gl_cmform,w,37) /* MFORM */
 	INT(_gl_bvdisk)
-	
-	ds.b 2
-	
+	INT(_f_rename)
 	PTR(_ad_intin)
 	INT(_gl_hschar)
+	PTR(_background)
 	
-	ds.b 8
+	ds.b 4
 	
 	INT(_gl_moff)
 	GRECT(_gl_rcenter)
@@ -559,14 +558,17 @@ name: ds.t size
 	LONG(_gl_mlen)
 	INT(_gl_mask)
 	INT(_gl_ncol)
-	
-	ds.b $82
-	
+	V(_path2,b,PATHLEN)
+	INT(_d_display)
 	INT(_w_walkflag)
 	PTR(_ad_envrn)
 	V(_desk_pid,w,MAX_ACCS)
 	
-	ds.b 10
+	ds.b 4
+	
+	PTR(_path3)
+	
+	ds.b 2
 	
 	PTR(_gl_newdesk)
 	INT(_wasclr)
@@ -582,9 +584,7 @@ name: ds.t size
 	PTR(_ad_title)
 	V(_gl_ctwait,w,5) /* MOBLK */
 	PTR(_gl_rbuf)
-	
-	ds.w 1
-	
+	INT(_p_timedate)
 	INT(_gl_xclip)
 	INT(_sh_isgem)
 	
@@ -640,8 +640,9 @@ name: ds.t size
 	ds.b 4
 	
 	INT(_gl_btrue)
+	INT(_ccopy_save)
 	
-	ds.b 6
+	ds.b 4
 	
 	INT(_gl_hsptschar)
 	INT(_gl_hptschar)
@@ -667,8 +668,9 @@ name: ds.t size
 	
 	INT(_gl_nrow)
 	INT(_infsize)
+	INT(_numicon)
 	
-	ds.b $12
+	ds.b 16
 	
 	INT(_tmpmoff)
 	
@@ -699,13 +701,15 @@ name: ds.t size
 	ds.b $1060
 	
 	INT(_pr_yrat)
+	INT(_d_dir)
 	
-	ds.b 6
+	ds.b 4
 	
 	TEDINFO(_edblk)
 	
-	ds.b $22
+	ds.b 26
 	
+	GRECT(_dicon)
 	INT(_tbutton)
 	
 	ds.b 2
@@ -725,9 +729,7 @@ name: ds.t size
 	ds.b $474
 	
 	V(_intin,w,128)
-	
-	ds.b 4
-	
+	PTR(_x_win)
 	PTR(_cda)
 	INT(_wwait)
  	V(_W_ACTIVE,b,24*NUM_WIN)  /* OBJECT[MAXOBJ] */
@@ -800,25 +802,26 @@ name: ds.t size
 	ds.b 2
 	
 	INT(_kstate)
+	INT(_s_view)
 	
-	ds.b 6
+	ds.b 4
 	
 	PTR(_gemptr)
 	
 	ds.b 6
 	
 	V(_contrl,w,12)
-	
-	ds.b $24
-	
+	V(_d_xywh,w,18)
 	PTR(_infptr)
-	
-	ds.b $24
-	
+	V(_f_xywh,w,18)
 	INT(_mtrans)
 	PTR(_pxpath)
 	
-	ds.b $28
+	ds.b $20
+	
+	INT(_x_type)
+	
+	ds.b 6
 	
 	INT(_tmpmon)
 	INT(_button)

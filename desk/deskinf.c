@@ -213,7 +213,11 @@ PP(register const char *pcurr;)
 
 	iblk = (CICONBLK *) (background[id].ob_spec);
 
+#if COLORICON_SUPPORT
 	cp_iblk(i, iblk);
+#else
+	cp_iblk(get_icon(i), &iblk->monoblk);
+#endif
 
 	pcurr += 3;
 	iblk->monoblk.ib_char[1] = (*pcurr == ' ') ? 0 : *pcurr;

@@ -19,6 +19,7 @@
 
 
 
+#if COLORICON_SUPPORT
 /*
  * copy iconblk image
  * return the sources type
@@ -45,7 +46,7 @@ PP(register CICONBLK *dest_ciblk;)
 		dest_ciblk->monoblk.ib_char[1] = iblk->ib_char[1];
 		dest_ciblk->monoblk.ib_xchar = iblk->ib_xchar;
 		dest_ciblk->monoblk.ib_ychar = iblk->ib_ychar;
-		dest_ciblk->mainlist = (CICON *) 0;
+		dest_ciblk->mainlist = NULL;
 	} else								/* must be G_CICON */
 	{
 		ciblk = (CICONBLK *) (obj->ob_spec);
@@ -58,8 +59,24 @@ PP(register CICONBLK *dest_ciblk;)
 		dest_ciblk->mainlist = ciblk->mainlist;
 	}
 
-	return (obj->ob_type);
+	return obj->ob_type;
 }
+
+#else
+
+VOID cp_iblk(P(const ICONBLK *)src_iblk, P(ICONBLK *)dest_iblk)
+PP(register const ICONBLK *src_iblk;)
+PP(register ICONBLK *dest_iblk;)
+{
+	dest_iblk->ib_pmask = src_iblk->ib_pmask;
+	dest_iblk->ib_pdata = src_iblk->ib_pdata;
+	dest_iblk->ib_char[0] = src_iblk->ib_char[0];
+	dest_iblk->ib_char[1] = src_iblk->ib_char[1];
+	dest_iblk->ib_xchar = src_iblk->ib_xchar;
+	dest_iblk->ib_ychar = src_iblk->ib_ychar;
+}
+
+#endif
 
 
 
@@ -454,7 +471,11 @@ VOID ins_icons(NOTHING)
 		if (driver)
 			obj[ret].ob_state = SELECTED;
 
+#if COLORICON_SUPPORT
 		cp_iblk(icon, iblk);
+#else
+		cp_iblk(get_icon(icon), &iblk->monoblk);
+#endif
 
 		iblk->monoblk.ib_char[1] = 0;
 
@@ -488,7 +509,11 @@ VOID ins_icons(NOTHING)
 				icon++;
 			  in_3:
 				XSelect(obj, ret);		/* cjg 08/06/92 */
+#if COLORICON_SUPPORT
 				cp_iblk(icon, iblk);
+#else
+				cp_iblk(get_icon(icon), &iblk->monoblk);
+#endif
 				iblk->monoblk.ib_char[1] = 0;
 				objc_draw(obj, IBOX, 1, full.g_x, full.g_y, full.g_w, full.g_h);
 				cl_delay();
@@ -555,7 +580,11 @@ VOID ins_icons(NOTHING)
 
 	  in_4:redraw = TRUE;				/* user selected OK */
 		iblk = (CICONBLK *) (obj1[item].ob_spec);
+#if COLORICON_SUPPORT
 		cp_iblk(icon, iblk);
+#else
+		cp_iblk(get_icon(icon), &iblk->monoblk);
+#endif
 		backid[item].i_icon = icon;
 
 		strcpy(iblk->monoblk.ib_ptext, ((CICONBLK *) (obj[DRLABEL].ob_spec))->monoblk.ib_ptext);
@@ -675,7 +704,11 @@ VOID ins_wicons(NOTHING)
 			buf2[0] = 0;
 		}
 
+#if COLORICON_SUPPORT
 		cp_iblk(index, iblk);
+#else
+		cp_iblk(get_icon(index), &iblk->monoblk);
+#endif
 		iblk->monoblk.ib_char[1] = 0;
 
 		fm_draw(INWICON);
@@ -712,7 +745,11 @@ VOID ins_wicons(NOTHING)
 					index++;
 				  k_1:
 					XSelect(obj, ret);
+#if COLORICON_SUPPORT
 					cp_iblk(index, iblk);
+#else
+					cp_iblk(get_icon(index), &iblk->monoblk);
+#endif
 					iblk->monoblk.ib_char[1] = 0;
 					objc_draw(obj, WBOX, 1, full.g_x, full.g_y, full.g_w, full.g_h);
 					cl_delay();
@@ -830,7 +867,7 @@ VOID ins_drive(NOTHING)
 	int16_t install, free;
 	register OBJECT *obj;
 	int32_t map;
-	char *device;
+	const char *device;
 	bfill(32, 0, dr);
 
 	obj = background;
@@ -861,7 +898,11 @@ VOID ins_drive(NOTHING)
 	/* now install the icons    */
 	install = FALSE;
 
+#if STR_IN_RSC
 	device = get_fstring(DEVICE);
+#else
+	device = Device;
+#endif
 
 	if (cart_init())
 	{
