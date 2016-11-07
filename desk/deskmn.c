@@ -1467,7 +1467,7 @@ PP(int16_t obj;)
  * This routine will select the title and dispay the PopUp Menu
  * at the button location.
  */
-VOID DoPopup(P(OBJECT *)tree, P(int16_t) button, P(int16_t) title, P(OBJECT *)Mtree, P(int16_t) Mmenu, P(int16_t) Mfirst, P(int16_t *) Mstart, P(int16_t) Mscroll, P(int16_t) FirstMenu, int16_t FirstText, P(int16_t) Skip)
+VOID DoPopup(P(OBJECT *)tree, P(int16_t) button, P(int16_t) title, P(OBJECT *)Mtree, P(int16_t) Mmenu, P(int16_t) Mfirst, P(int16_t *) Mstart, P(int16_t) Mscroll, P(int16_t) FirstMenu, P(int16_t) FirstText, P(int16_t) Skip)
 PP(OBJECT *tree;)
 PP(int16_t button;)
 PP(int16_t title;)

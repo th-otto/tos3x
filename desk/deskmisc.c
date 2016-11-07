@@ -27,7 +27,7 @@ PP(int16_t att;)
 		Fsetdta(&dtabuf);
 		ret = Fsfirst(path, att);
 		desk_wait(FALSE);
-		return (ret);
+		return ret;
 	}
 }
 
@@ -46,10 +46,10 @@ PP(const char *path;)
 	{
 		/* form_alert(1, Alloc); */
 		if (!path_alloc(level))
-			return (FALSE);
+			return FALSE;
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -68,7 +68,7 @@ PP(int16_t drive;)
 			ret = FALSE;
 	}
 
-	return (ret ? FALSE : TRUE);
+	return ret ? FALSE : TRUE;
 }
 
 
@@ -78,7 +78,7 @@ PP(int16_t item;)
 	if (item >= numicon)
 		item = numicon - 1;
 
-	return (&iconaddr[item]);
+	return &iconaddr[item];
 }
 
 
@@ -154,7 +154,7 @@ PP(const char *name;)
 {
 	strcpy(win->w_buf, win->w_path);
 	rep_path(name, win->w_buf);
-	return (win->w_buf);
+	return win->w_buf;
 }
 
 
@@ -211,7 +211,7 @@ PP(int16_t which;)
 }
 
 
-int16_t getcookie(P(int32_t) cookie, P(int32_t *)p_value)
+BOOLEAN getcookie(P(int32_t) cookie, P(int32_t *)p_value)
 PP(int32_t cookie;)
 PP(int32_t *p_value;)
 {
@@ -224,20 +224,20 @@ PP(int32_t *p_value;)
 #endif
 
 	if (!cookjar)
-		return (FALSE);
+		return FALSE;
 
 	while (*cookjar)
 	{
 		if (*cookjar == cookie)
 		{
 			*p_value = *(cookjar + 1);
-			return (TRUE);
+			return TRUE;
 		}
 
 		cookjar += 2;
 	}
 
-	return (FALSE);
+	return FALSE;
 }
 
 
@@ -279,7 +279,7 @@ PP(const char *path;)
 			level++;
 	}
 
-	return (level);
+	return level;
 }
 
 
@@ -292,7 +292,7 @@ PP(int16_t item;)
 	addr = get_tree(item);
 	form_center(addr, &x, &y, &w, &h);
 	objc_draw(addr, ROOT, MAX_DEPTH, x, y, w, h);
-	return (addr);
+	return addr;
 }
 
 
@@ -338,7 +338,7 @@ PP(int16_t which;)
 
 	ret = form_do(obj, which) & 0x7FFF;
 	obj[ret].ob_state = NORMAL;
-	return (ret);
+	return ret;
 }
 
 
@@ -355,7 +355,7 @@ PP(int16_t which;)
 	obj = fm_draw(item);
 	ret = xform_do(obj, which);
 	do_finish(item);
-	return (ret);
+	return ret;
 }
 
 
@@ -418,7 +418,7 @@ PP(register const char *path;)
 /*
  * The path should look like A:\*.*
  */
-int16_t xcut_path(P(char *)path, P(char *)buffer, P(int16_t) cut)
+BOOLEAN xcut_path(P(char *)path, P(char *)buffer, P(int16_t) cut)
 PP(register char *path;)
 PP(char *buffer;)
 PP(int16_t cut;)
@@ -431,7 +431,7 @@ PP(int16_t cut;)
 	i = ch_level(path);
 
 	if (i <= 1)							/* only one level depth     */
-		return (FALSE);					/* failed           */
+		return FALSE;					/* failed           */
 
 	path = r_slash(path);				/* reverse to next level    */
 	strcpy(buffer, path);
@@ -449,7 +449,7 @@ PP(int16_t cut;)
 		*chrptr = 0;
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -457,7 +457,7 @@ PP(int16_t cut;)
  * Cut one directory inside the path
  * The path should look like A:\*.*
  */
-int16_t cut_path(P(char *)path)
+BOOLEAN cut_path(P(char *)path)
 PP(register char *path;)
 {
 	char buffer[NAMELEN];
@@ -504,17 +504,17 @@ PP(char *path;)
  * Perform an alert box message
  */
 int16_t do_alert(P(int16_t) button, P(int16_t) item)
-PP(int16_t button:)
+PP(int16_t button;)
 PP(int16_t item;)
 {
-	return (form_alert(button, get_string(item)));
+	return form_alert(button, get_string(item));
 }
 
 
 int16_t do1_alert(P(int16_t) item)
 PP(int16_t item;)
 {
-	return (do_alert(1, item));
+	return do_alert(1, item);
 }
 
 
@@ -732,7 +732,7 @@ PP(register char *dst;)
 	*dst++ = buffer[5];
 	*dst++ = ' ';
 	*dst++ = ' ';
-	return (dst);
+	return dst;
 }
 
 
@@ -782,7 +782,7 @@ PP(register const char *srcptr;)
 PP(register const char *dstptr;)
 {
 	if (*srcptr != *dstptr)				/* Not the same device  */
-		return (TRUE);
+		return TRUE;
 
 	if (!streq(srcptr, dstptr))
 	{									/* not the same path    */
@@ -793,18 +793,18 @@ PP(register const char *dstptr;)
 				if (*srcptr == '*')		/* source is the parent */
 					break;				/* return FALSE     */
 				else
-					return (TRUE);
+					return TRUE;
 			}
 
 			if (!*dstptr)				/* destination is shorter */
-				return (TRUE);
+				return TRUE;
 
 			srcptr++;
 			dstptr++;
 		}								/* while */
 	}
 
-	return (FALSE);
+	return FALSE;
 }
 
 
@@ -848,12 +848,12 @@ PP(int32_t *value;)
 			if (n1 >= n)
 				n = n1;
 			else
-				return (FALSE);
+				return FALSE;
 		} else
-			return (FALSE);
+			return FALSE;
 	}
 	UNUSED(i);
 	
 	*value = n;
-	return (TRUE);
+	return TRUE;
 }

@@ -294,12 +294,14 @@ VOID vq_chcells PROTO((int16_t *rows, int16_t *cols));
  */
 int16_t appl_bvset PROTO((int16_t bvdisk, int16_t bvhard));
 int16_t appl_write PROTO((int16_t rwid, int16_t length, int16_t *pbuff));
+#ifndef __ALCYON__ /* macro line too long for this prototype... sigh */
 int16_t evnt_multi PROTO((uint16_t flags, uint16_t bclk, uint16_t bmsk, uint16_t bst,
 	uint16_t m1flags, uint16_t m1x, uint16_t m1y, uint16_t m1w, uint16_t m1h,
 	uint16_t m2flags, uint16_t m2x, uint16_t m2y, uint16_t m2w, uint16_t m2h,
 	int16_t *mepbuff,
 	uint16_t tlc, uint16_t thc,
 	int16_t *pmx, int16_t *pmy, int16_t *pbut, int16_t *pks, int16_t *pkr, int16_t *pbr));
+#endif
 int16_t evnt_button PROTO((int16_t clicks, uint16_t mask, uint16_t state, int16_t *pmx, int16_t *pmy, int16_t *pmw, int16_t *pmh));
 int16_t evnt_dclick PROTO((int16_t rate, int16_t setit));
 int16_t form_do PROTO((OBJECT *form, int16_t start));
@@ -453,7 +455,7 @@ VOID xinf_sset PROTO((OBJECT *obj, int16_t item, const char *buf1));
 VOID mice_state PROTO((int16_t state));
 VOID desk_wait PROTO((BOOLEAN state));
 VOID draw_fld PROTO((OBJECT *obj, int16_t which));
-int16_t getcookie PROTO((int32_t cookie, int32_t *p_value)); /* also referenced by AES */
+BOOLEAN getcookie PROTO((int32_t cookie, int32_t *p_value)); /* also referenced by AES */
 VOID f_str PROTO((OBJECT *obj, int16_t item, int32_t value));
 int16_t ch_level PROTO((const char *path));
 OBJECT *fm_draw PROTO((int16_t item));
@@ -462,8 +464,8 @@ int16_t xform_do PROTO((OBJECT *obj, int16_t which));
 int16_t fmdodraw PROTO((int16_t item, int16_t which));
 VOID lbintoasc PROTO((int32_t longval, char *buffer));
 char *r_slash PROTO((const char *path));
-int16_t xcut_path PROTO((char *path, char *buffer, int16_t cut));
-int16_t cut_path PROTO((char *path));
+BOOLEAN xcut_path PROTO((char *path, char *buffer, int16_t cut));
+BOOLEAN cut_path PROTO((char *path));
 VOID cat_path PROTO((char *name, char *path));
 VOID rep_path PROTO((const char *name, char *path));
 int16_t do_alert PROTO((int16_t button, int16_t item));
@@ -640,7 +642,6 @@ VOID ch_cache PROTO((BOOLEAN set));
 /*
  * extern references from AES
  */
-extern int16_t st_lang;		/* Language code    */
 extern uint16_t st_time;		/* time code        */
 extern uint16_t st_date;
 extern uint16_t st_dchar;
@@ -661,6 +662,8 @@ extern BOOLEAN gl_rschange;
 extern int16_t gl_ncols;
 extern int16_t gl_nrows;
 extern BOOLEAN sh_iscart;
+extern int16_t gl_bvdisk;
+extern int16_t gl_bvhard;
 
 #if TOSVERSION >= 0x400
 extern uint16_t d_rezword;

@@ -41,6 +41,12 @@ STATIC CICONBLK *ciconaddr;
 int16_t pglobal[15];
 int16_t gl_apid;
 
+/* for MULITLANG_SUPPORT: */
+uint16_t st_time;		/* time code        */
+uint16_t st_date;
+uint16_t st_dchar;
+int16_t st_keybd;
+
 int16_t ch_xcache PROTO((NOTHING));
 BOOLEAN re_icon PROTO((NOTHING));
 BOOLEAN ini_icon PROTO((NOTHING));
@@ -55,7 +61,7 @@ VOID adjobjects PROTO((NOTHING));
 #define Blitmode(a) trp14(64, a)
 
 
-int16_t ch_xcache(VOID)
+int16_t ch_xcache(NOTHING)
 {
 	ch_cache(FALSE);
 	return 0;
@@ -661,3 +667,27 @@ VOID adjobjects(NOTHING)
 	obj[FIRONLY].ob_y -= 1;
 	obj[FIRWRITE].ob_y -= 1;
 }
+
+
+#ifdef __GNUC__
+int16_t gl_wchar;
+int16_t gl_hchar;
+int16_t gl_wbox;
+int16_t gl_hbox;
+int16_t gl_handle;
+int16_t contrl[12];
+int16_t intin[128];
+int16_t intout[128];
+int16_t ptsin[20];
+int16_t gl_btrue;
+BOOLEAN ctldown;
+int16_t gl_restype;
+BOOLEAN gl_rschange;
+int16_t gl_ncols;
+int16_t gl_nrows;
+BOOLEAN sh_iscart;
+int16_t gl_bvdisk;
+int16_t gl_bvhard;
+PD *rlr;
+WS gl_ws;
+#endif

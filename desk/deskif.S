@@ -30,6 +30,15 @@
 #include "deskdefs.h"
 #include "asmdefs.h"
 
+#if BINEXACT
+#  ifdef __GNUC__
+#    undef BINEXACT
+#    define BINEXACT 0
+#  endif
+#endif
+
+#define CCODE 0
+
 	xref _pglobal
 	xref _gl_wchar
 	xref _gl_hchar
@@ -170,7 +179,7 @@ _evnt_button:
 	move.w	12(a6),-(sp)
 	move.w	10(a6),-(sp)
 	move.w	8(a6),-(sp)
-	jsr	_ev_butto
+	jsr	_ev_button
 	lea	14(a6),a2		; a2 -> vector of addrs to stuff
 cplp4a:	lea	-8(a6),a1		; a1 -> vector of words
 cplp4:	moveq	#4-1,d1			; d1 = count
@@ -208,7 +217,7 @@ WORD form_do(OBJECT *form, WORD start)
 	xdef _form_do
 _form_do:
 	clr	-(sp)
-	jsr	_desk_wai
+	jsr	_desk_wait
 	move.w	10(sp),(sp)			; CS from 8(sp)
 	move.l	6(sp),-(sp)
 	jsr	_fm_do
@@ -289,7 +298,7 @@ _form_center:
 	link	a6,#-8			; space for GRECT
 	pea	-8(a6)			; &rect
 	move.l	8(a6),-(sp)		; tree
-	jsr	_ob_cente		; ob_center(tree, &rect)
+	jsr	_ob_center		; ob_center(tree, &rect)
 	lea	12(a6),a2		; copy coords back
 	lea	-8(a6),a1
 	bra	cplp4
@@ -329,7 +338,7 @@ VOID graf_rubbox(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, WORD *pwend, 
 #endif
 	xdef _graf_rubbox
 _graf_rubbox:
-	lea	_gr_rubbo,a0		; a0 -> routine to call
+	lea	_gr_rubbox,a0		; a0 -> routine to call
 	bra.b	copy16			; use common code to copy args
 
 
@@ -344,7 +353,7 @@ WORD graf_mkstate(WORD *pmx, WORD *pmy, WORD *pmstate, WORD *pkstate)
 #endif
 	xdef _graf_mkstate
 _graf_mkstate:
-	lea	_gr_mksta,a0		; a0 -> routine to call
+	lea	_gr_mkstate,a0		; a0 -> routine to call
 
 copy16:	moveq	#4-1,d0			; copy 16 bytes of args
 mkslab:	move.l	16(sp),-(sp)
@@ -363,7 +372,7 @@ VOID graf_growbox(WORD orgx, WORD orgy, WORD orgw, WORD orgh, WORD x, WORD y, WO
 #endif
 	xdef _graf_growbox
 _graf_growbox:
-	lea	_gr_growb,a0
+	lea	_gr_growbox,a0
 grafx:	pea	12(sp)
 	pea	4+4(sp)
 	jsr	(a0)
@@ -380,7 +389,7 @@ VOID graf_shrinkbox(WORD orgx, WORD orgy, WORD orgw, WORD orgh, WORD x, WORD y, 
 #endif
 	xdef _graf_shrinkbox
 _graf_shrinkbox:
-	lea	_gr_shrin,a0
+	lea	_gr_shrinkbox,a0
 	bra	grafx
 
 
@@ -682,7 +691,7 @@ WORD wind_delete(WORD handle)
 #endif
 	xdef _wind_delete
 _wind_delete:
-	lea	_wm_delet,a0
+	lea	_wm_delete,a0
 	bra	copy16
 
 
@@ -712,7 +721,7 @@ WORD wind_update(WORD beg_update)
 #endif
 	xdef _wind_update
 _wind_update:
-	lea	_wm_updat,a0
+	lea	_wm_update,a0
 	bra	copy16
 
 
@@ -817,7 +826,7 @@ wndcp:	move.l	28(sp),-(sp)
 _inq_cache:
 	move.l 4(a7),d1
 	CACR_D0
-	cmp.l d1,-1
+	cmp.l #-1,d1
 	beq _inqc1
 	D1_CACR
 _inqc1:

@@ -8,7 +8,6 @@
 
 
 #include "desktop.h"
-#include "gembind.h"
 #include "aesbind.h"
 
 
@@ -46,7 +45,7 @@ PP(const char *name;)
 }
 
 
-int16_t rsrc_obfix(LPTREE tree, int16_t obj)
+int16_t rsrc_obfix(P(LPTREE) tree, P(int16_t) obj)
 PP(LPTREE tree;)
 PP(int16_t obj;)
 {

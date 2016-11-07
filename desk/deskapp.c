@@ -28,7 +28,7 @@ PP(register int16_t res;)
 /*
  * Find the application's icon type
  */
-APP *app_icon(P(const char *)name, P(int16_t) type, P(int16_t) *icon)
+APP *app_icon(P(const char *)name, P(int16_t) type, P(int16_t *)icon)
 PP(register char *name;)
 PP(int16_t type;)								/* looking for same type    */
 PP(int16_t *icon;)								/* icon number          */

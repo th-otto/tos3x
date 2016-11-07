@@ -23,7 +23,7 @@
  * copy iconblk image
  * return the sources type
  */
-int16_t cp_iblk(P(int16_t) number, P(CICONBLK) *dest_ciblk)
+int16_t cp_iblk(P(int16_t) number, P(CICONBLK *)dest_ciblk)
 PP(int16_t number;)
 PP(register CICONBLK *dest_ciblk;)
 {

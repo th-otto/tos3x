@@ -113,7 +113,7 @@ VOID pri_win(NOTHING)
 /*
  * Create a new folder on the top window
  */
-VOID newfolder(P(WINDOW) *win)
+VOID newfolder(P(WINDOW *)win)
 PP(register WINDOW *win;)
 {
 	char namenew[NAMELEN];
@@ -176,10 +176,11 @@ PP(register WINDOW *win;)
 			else
 				continue;				/* retry    */
 		}
-	  n_1:
+	n_1:
 		desk_wait(TRUE);
 
-	  n_2:if (Dcreate(win->w_buf))
+	n_2:
+		if (Dcreate(win->w_buf))
 		{
 			if (fill_string(win->w_buf, CNTCRTDR) == 2)
 				goto n_2;
@@ -202,7 +203,7 @@ PP(register WINDOW *win;)
 /*
  * Sort the files
  */
-VOID sort_file(P(WINDOW) *win, P(int16_t) mode)
+VOID sort_file(P(WINDOW *)win, P(int16_t) mode)
 PP(WINDOW *win;)
 PP(int16_t mode;)
 {
@@ -301,7 +302,7 @@ PP(int16_t mode;)
  * Set up all the files pointer
  * Scroll up or down
  */
-VOID set_newview(P(int16_t) index, P(WINDOW) *win)
+VOID set_newview(P(int16_t) index, P(WINDOW *)win)
 PP(int16_t index;)
 PP(register WINDOW *win;)
 {
@@ -374,7 +375,7 @@ PP(register WINDOW *win;)
 /*
  * Read the files into a window
  */
-int16_t read_files(P(WINDOW) *win, P(int16_t) attr)
+int16_t read_files(P(WINDOW *)win, P(int16_t) attr)
 PP(register WINDOW *win;)
 PP(int16_t attr;)
 {

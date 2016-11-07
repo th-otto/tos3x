@@ -18,7 +18,7 @@ VOID mass_string PROTO((char *str1));
 /*
  * Position an item within a window
  */
-VOID pos_item(P(WINDOW) *win, P(int16_t) newi)
+VOID pos_item(P(WINDOW *) win, P(int16_t) newi)
 PP(register WINDOW *win;)
 PP(int16_t newi;)
 {
@@ -87,7 +87,7 @@ PP(int16_t newi;)
 /*
  * Search a file
  */
-VOID sea_file(P(char) *filename)
+VOID sea_file(P(char *)filename)
 PP(char *filename;)
 {
 	register WINDOW *win;
@@ -179,7 +179,7 @@ PP(char *filename;)
 /*
  * Recursive search of a file
  */
-BOOLEAN rec_sea(P(char) *filename)
+BOOLEAN rec_sea(P(char *)filename)
 PP(register char *filename;)
 {
 	DTA *ldtabuf;
@@ -264,7 +264,7 @@ PP(register char *filename;)
 /*
  * Display a window and highlight the items
  */
-BOOLEAN display(P(char) *filename)
+BOOLEAN display(P(char *)filename)
 PP(char *filename;)
 {
 	int32_t size;
@@ -379,7 +379,7 @@ PP(char *filename;)
 /*
  * Put in wild card in the name string
  */
-VOID mass_string(P(char) *str1)
+VOID mass_string(P(char *)str1)
 PP(char *str1;)
 {
 	register int16_t i;

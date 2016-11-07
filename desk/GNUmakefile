@@ -17,7 +17,7 @@ LIBS =
 CPPFLAGS = -I$(top_srcdir)/common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-all: desk.a
+all: desk.a desk.o
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -26,6 +26,12 @@ include SRCFILES
 
 desk.a: $(DESK_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(DESK_OBJS)
+
+desk.o: vars.o $(DESK_OBJS) deskext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
+	$(LD) -nostartfiles -nostdlib -o $@ -Wl,--script=../common/rom.ld,-Ttext=0x$(rombase),-Tbss=0 $(STARTUP) $(DESK_OBJS) vars.o deskext.o -lgcc
+
+vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)$(CC) -Wa,--mri --traditional-cpp $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 check::
 	$(AM_V_at)offset=`echo 16 i 10 o $(desk_tbase) $(rombase) - p | dc`; \
