@@ -759,11 +759,11 @@ VOID mins_app(NOTHING)
 
 			switch (ret)
 			{
-			case MPCANCEL:
+			case MPSKIP:
 				done = TRUE;
 				break;
 
-			case MPQUIT:
+			case MPCANCEL:
 				cont = FALSE;
 				done = TRUE;
 				break;

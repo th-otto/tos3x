@@ -47,7 +47,7 @@ typedef int16_t BOOLEAN;
 #include "../aes/aesdefs.h"
 #include "mobdefs.h"
 #include "window.h"
-#include "deskus.h"
+#include "deskrsc.h"
 #include "osbind.h"
 
 /*

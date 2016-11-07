@@ -125,7 +125,7 @@
 #include "gemlib.h"
 #include "taddr.h"
 #include "gsxdefs.h"
-#include "gemusa.h"
+#include "gemrsc.h"
 
 
 #define CACHE_ON	0x00003919L
@@ -994,7 +994,7 @@ PP(int16_t obj;)
 PP(int16_t isvert;)
 {
 #if AES3D
-	register GRECT *pt,	*pc;		/* new pointer for Reg Opt  */
+	register GRECT *pt, *pc;			/* new pointer for Reg Opt  */
 	GRECT t, c;
 	register int32_t divnd, divis;
 	OBJECT *objc;

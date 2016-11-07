@@ -104,14 +104,37 @@ static int16_t const xxxview[9] = {
 
 /* cjg - added VIDITEM - 07/07/92 */
 /* Moved VIDITEM after set preferences */
-/* Take out BITBLT and PRINTITE */
+/* Take out BITBLT and PRINTITEM */
 int16_t const tb3[MAXMENU] = {
-	OPENITEM, SHOWITEM, SEAMENU, DELMENU, NEWFITEM,
-	CLSFITEM, CLSWITEM, BOTTOP, SELALL, EXTMENU,
-	FORMITEM, ICONITEM, TEXTITEM, NAMEITEM, DATEITEM,
-	SIZEITEM, TYPEITEM, NOSORT, SIZEFIT, SCOLTYPE,
-	IDSKITEM, IAPPITEM, INSDISK, REMVICON, PREFITEM,
-	VIDITEM, READINF, MEMMENU, SAVEITEM
+	OPENITEM,
+	SHOWITEM,
+	SEAMENU,
+	DELMENU,
+	NEWFITEM,
+	CLSFITEM,
+	CLSWITEM,
+	BOTTOP,
+	SELALL,
+	EXTMENU,
+	FORMITEM,
+	ICONITEM,
+	TEXTITEM,
+	NAMEITEM,
+	DATEITEM,
+	SIZEITEM,
+	TYPEITEM,
+	NOSORT,
+	SIZEFIT,
+	SCOLTYPE,
+	IDSKITEM,
+	IAPPITEM,
+	INSDISK,
+	REMVICON,
+	PREFITEM,
+	VIDITEM,
+	READINF,
+	MEMMENU,
+	SAVEITEM
 };
 
 /* Alternate Number Table */
@@ -252,8 +275,8 @@ VOID menu_verify(NOTHING)
 
 	menu_ienable(menu_addr, BOTTOP, enable);
 	ch_cache(FALSE);
-#if 0									/* take out for sparrow */
-	menu_ienable(menu_addr, PRINTITE, (gl_restype <= 3) ? TRUE : FALSE);
+#ifdef PRINTITEM /* take out for sparrow */
+	menu_ienable(menu_addr, PRINTITEM, (gl_restype <= 3) ? TRUE : FALSE);
 #endif
 }
 
@@ -652,9 +675,9 @@ PP(int16_t msgbuff;)
 			save_inf(TRUE);
 		break;
 
-#if 0									/* take out for sparrow */
-	case PRINTITE:						/* print screen     */
-		if (!(menu_addr[PRINTITE].ob_state & DISABLED))
+#ifdef PRINTITEM								/* take out for sparrow */
+	case PRINTITEM:						/* print screen     */
+		if (!(menu_addr[PRINTITEM].ob_state & DISABLED))
 		{
 			if (do1_alert(PRINTTOP) == 1)
 			{
@@ -664,7 +687,9 @@ PP(int16_t msgbuff;)
 			}
 		}
 		break;
+#endif
 
+#ifdef BITBLT
 	case BITBLT:
 		if (m_cpu != 30)
 			cbit_save = !cbit_save;

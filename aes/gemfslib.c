@@ -92,7 +92,7 @@
 #include "gemlib.h"
 #include "taddr.h"
 #include "gsxdefs.h"
-#include "gemusa.h"
+#include "gemrsc.h"
 #include "dos.h"
 
 

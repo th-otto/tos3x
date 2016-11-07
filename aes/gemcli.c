@@ -38,7 +38,7 @@
 
 #include "aes.h"
 #include "gemlib.h"
-#include "gemusa.h"
+#include "gemrsc.h"
 
 
 #define ROPEN 0

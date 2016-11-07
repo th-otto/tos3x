@@ -5,11 +5,12 @@ include $(top_srcdir)/Makefile.common
 include $(top_srcdir)/Makefile.silent
 
 LIBS = $(LIBC)
+INC := ..\include${BS}
 
 PROGRAMS = newglue$(BUILD_EXEEXT)
 
-# didnt bother to port this to alcyon
-#PROGRAMS += cmprom$(BUILD_EXEEXT)
+# didnt bother to port these to alcyon
+#PROGRAMS += cmprom$(BUILD_EXEEXT) findrsc$(BUILD_EXEEXT)
 
 all: $(PROGRAMS)
 
@@ -22,6 +23,9 @@ cmprom$(BUILD_EXEEXT): cmprom.o
 	$(LD) -u -o $@ $(CRT0) $< $(LIBS)
 
 newglue$(BUILD_EXEEXT): newglue.o
+	$(LD) -u -o $@ $(CRT0) $< $(LIBS)
+
+findrsc$(BUILD_EXEEXT): findrsc.o
 	$(LD) -u -o $@ $(CRT0) $< $(LIBS)
 
 check::

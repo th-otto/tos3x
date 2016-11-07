@@ -22,6 +22,23 @@
  #  define lfree(ptr) free(ptr)
 #endif
 
+#ifdef __ALCYON__
+#define VOID int					/* Void function return	   */
+#define VOIDPTR char *
+#define NOTHING                     /* no parameters */
+#define PROTO(p) ()
+#define P(t)
+#define PP(v) v
+#define volatile
+#define const
+#define signed
+#else
+#define NOTHING void                /* no parameters */
+#define PROTO(p) p
+#define P(t) t
+#define PP(v)
+#endif
+
 #define _(x) x
 
 
@@ -59,9 +76,9 @@ static char *files[TOTALFILE] = {
 
 
 
-static int putbeshort(ptr, val)
-register char *ptr;
-register int val;
+static int putbeshort(P(char *) ptr, P(int) val)
+PP(register char *ptr;)
+PP(register int val;)
 {
 	*ptr++ = (val >> 8) & 0xff;
 	*ptr = (val) & 0xff;
@@ -69,19 +86,27 @@ register int val;
 }
 
 
-int main(argc, argv)
-int argc;
-char **argv;
+int main(P(int) argc, P(char **) argv)
+PP(int argc;)
+PP(char **argv;)
 {
 	char *outfile;
 	const char *country = NULL;
 	
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	if (argc == 2)
 	{
 		country = argv[1];
 		sprintf(gemrsc, "../aes/gem%s.rsc", country);
-		sprintf(deskrsc, "../desk/desk%s.rsc", country);
-		sprintf(deskinf, "../desk/desk%s.inf", country);
+		sprintf(deskrsc, "../desk/rsc/desk%s.rsc", country);
+		sprintf(deskinf, "../desk/rsc/desk%s.inf", country);
 		sprintf(glue, "glue.%s", argv[1]);
 	} else if (argc == (TOTALFILE + 1))
 	{
@@ -111,7 +136,7 @@ char **argv;
 	printf(_("Please don't type in a three-letter abbrevation of the\n"));
 	printf(_("country and don't hit escape key to quit.\n"));
 
-	header = top;					/* header adrea */
+	header = top;					/* header address */
 	memory = totalsize - HEADSIZE;
 	address = top + HEADSIZE;
 	size = 0;

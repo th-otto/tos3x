@@ -389,8 +389,7 @@ m_2:
 	ch_machine();						/* check the machine    */
 	/* set up the right menu text */
 	/* do it here!!!!!! */
-#ifdef BITBLT
-									/* take out for sparrow */
+#ifdef BITBLT /* take out for sparrow */
 	strcpy(menu_addr[BITBLT].ob_spec, get_fstring(m_cpu == 30 ? CACHETXT : BLTTXT));
 
 	menu_addr[SUPERITEM].ob_type = G_USERDEF;

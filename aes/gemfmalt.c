@@ -41,7 +41,7 @@
 #include "gemlib.h"
 #include "taddr.h"
 #include "gsxdefs.h"
-#include "gemusa.h"
+#include "gemrsc.h"
 
 #define LORES	320
 

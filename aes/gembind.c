@@ -17,7 +17,7 @@
 #endif
 #include "crysbind.h"
 #include "taddr.h"
-#include "gemusa.h"
+#include "gemrsc.h"
 
 
 /* int16_t gl_dspcnt; */ /* unused */

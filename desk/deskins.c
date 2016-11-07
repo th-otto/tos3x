@@ -509,13 +509,13 @@ VOID ins_icons(NOTHING)
 			goto in_2;
 		}
 
-		if (ret == DRQUIT)
+		if (ret == DRCANCEL)
 		{
 			quit = TRUE;
 			goto in_1;
 		}
 
-		if (ret == DRCNCL)				/* cancel       */
+		if (ret == DRSKIP)				/* skip */
 			goto in_1;
 		/* this is install  */
 		fs_sget((LPTREE)obj, DRID, idbuffer);

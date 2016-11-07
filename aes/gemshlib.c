@@ -112,7 +112,7 @@
 #include "taddr.h"
 #include "gsxdefs.h"
 #include "dos.h"
-#include "gemusa.h"
+#include "gemrsc.h"
 
 
 #define CMD_BAT    0xFA

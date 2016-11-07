@@ -35,7 +35,7 @@
 #include "aes.h"
 #include "gemlib.h"
 #include "taddr.h"
-#include "gemusa.h"
+#include "gemrsc.h"
 #include "dos.h"
 
 #define FORWARD 0

@@ -83,12 +83,99 @@
  * http://sparemint.atariforge.net/cgi-bin/cvsweb/freemint/sys/keyboard.c?rev=1.114&content-type=text/x-cvsweb-markup
  * http://sparemint.atariforge.net/cgi-bin/cvsweb/freemint/xaaes/src.km/init.c?rev=1.125&content-type=text/x-cvsweb-markup
  */
+/* Lithuania */
+#define CTRY_LT 18
+#define CTRY_lt CTRY_LT
 /* Russia */
 #define CTRY_RU 19
 #define CTRY_ru CTRY_RU
+/* Estonia */
+#define CTRY_EE 20
+#define CTRY_ee CTRY_EE
+/* Belarus */
+#define CTRY_BY 21
+#define CTRY_by CTRY_BY
+/* Ukraine */
+#define CTRY_UA 22
+#define CTRY_ua CTRY_UA
+/* Slovak Republic */
+#define CTRY_SK 23
+#define CTRY_sk CTRY_SK
+/* Romania */
+#define CTRY_RO 24
+#define CTRY_ro CTRY_RO
+/* Bulgaria */
+#define CTRY_BG 25
+#define CTRY_bg CTRY_BG
+/* Slovenia */
+#define CTRY_SI 26
+#define CTRY_si CTRY_SI
+/* Croatia */
+#define CTRY_HR 27
+#define CTRY_hr CTRY_HR
+/* Serbia */
+#define CTRY_RS 28
+#define CTRY_rs CTRY_RS
+/* Montenegro */
+#define CTRY_ME 29
+#define CTRY_me CTRY_ME
+/* Macedonia */
+#define CTRY_MK 30
+#define CTRY_mk CTRY_MK
 /* Greece */
 #define CTRY_GR 31
 #define CTRY_gr CTRY_GR
+/* Latvia */
+#define CTRY_LV 32
+#define CTRY_lv CTRY_LV
+/* Israel */
+#define CTRY_IL 33
+#define CTRY_il CTRY_IL
+/* South Africa */
+#define CTRY_ZA 34
+#define CTRY_za CTRY_ZA
+/* Portugal */
+#define CTRY_PT 35
+#define CTRY_pt CTRY_PT
+/* Belgium */
+#define CTRY_BE 36
+#define CTRY_ne CTRY_BE
+/* Japan */
+#define CTRY_JP 37
+#define CTRY_jp CTRY_JP
+/* China */
+#define CTRY_CN 38
+#define CTRY_cn CTRY_CN
+/* Korea */
+#define CTRY_KR 39
+#define CTRY_kr CTRY_KR
+/* Vietnam */
+#define CTRY_VN 40
+#define CTRY_vn CTRY_VN
+/* India */
+#define CTRY_IN 41
+#define CTRY_in CTRY_IN
+/* Iran */
+#define CTRY_IR 42
+#define CTRY_ir CTRY_IR
+/* Mongolia */
+#define CTRY_MN 43
+#define CTRY_mn CTRY_MN
+/* Nepal */
+#define CTRY_NP 44
+#define CTRY_np CTRY_NP
+/* Lao People's Democratic Republic */
+#define CTRY_LA 45
+#define CTRY_la CTRY_LA
+/* Cambodia */
+#define CTRY_KH 46
+#define CTRY_kh CTRY_KH
+/* Indonesia */
+#define CTRY_ID 47
+#define CTRY_id CTRY_ID
+/* Bangladesh */
+#define CTRY_BD 48
+#define CTRY_bd CTRY_BD
 
 /* Mexico (Spanish) */
 /* (unknown, checked for in sources, but never saw an official value for this) */

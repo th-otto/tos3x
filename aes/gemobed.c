@@ -47,7 +47,7 @@
 #include "aes.h"
 #include "gemlib.h"
 #include "taddr.h"
-#include "gemusa.h"
+#include "gemrsc.h"
 
 #undef LEFT
 #undef RIGHT

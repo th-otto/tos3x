@@ -1,4 +1,4 @@
-SRCS = cmprom.c newglue.c
+SRCS = cmprom.c newglue.c findrsc.c
 
 
 EXTRA_DIST = \

@@ -9,7 +9,7 @@ LIBS =
 CPPFLAGS =
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = cmprom$(BUILD_EXEEXT)
+PROGRAMS = cmprom$(BUILD_EXEEXT) newglue$(BUILD_EXEEXT) findrsc$(BUILD_EXEEXT)
 
 all: $(PROGRAMS)
 
@@ -18,8 +18,14 @@ include $(top_srcdir)/config.mak
 
 include SRCFILES
 
-cmprom$(BUILD_EXEEXT): cmprom.o ${MAKEFILE}
-	$(CC) $(CFLAGS) -o $@ cmprom.o
+cmprom$(BUILD_EXEEXT): cmprom.o
+	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+
+newglue$(BUILD_EXEEXT): newglue.o
+	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+
+findrsc$(BUILD_EXEEXT): findrsc.o
+	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 check::
 
