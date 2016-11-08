@@ -232,7 +232,7 @@ VOID gsx_init(NOTHING)
 {
 	gsx_wsopen();
 	gsx_start();
-	gsx_setmb(&far_bcha, &far_mcha, &drwaddr);
+	gsx_setmb(far_bchange, far_mchange, &drwaddr);
 	gsx_ncode(MOUSE_ST, 0, 0);
 	xrat = ptsout[0];
 	yrat = ptsout[1];
@@ -267,7 +267,7 @@ VOID gsx_graphic(BOOLEAN tographic)
 		if (gl_graphic)
 		{
 			gsx_escapes(2);
-			gsx_setmb(&far_bcha, &far_mcha, &drwaddr);
+			gsx_setmb(far_bchange, far_mchange, &drwaddr);
 		} else
 		{
 			gsx_escapes(3);

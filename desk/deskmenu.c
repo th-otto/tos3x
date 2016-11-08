@@ -1168,10 +1168,7 @@ int32_t av_mem(NOTHING)
 
 
 #if 0
-/*
- * Find out available memory
- */
-BOIF av_desk(NOTHING)
+VOID av_desk(NOTHING)
 {
 	register OBJECT *obj;
 	register int32_t f;
@@ -1190,7 +1187,7 @@ BOIF av_desk(NOTHING)
 	for (i = 0; i < MAXMENU; i++)		/* save a copy  */
 		temp[i] = mentable[i];
 
-	(TEDINFO *) (obj[MKSTR].ob_spec)->te_ptext = obj1[tb3[0]].ob_spec;
+	((TEDINFO *) (obj[MKSTR].ob_spec))->te_ptext = obj1[tb3[0]].ob_spec;
 	buf[1] = 0;
 	buf[0] = mentable[0];
 	inf_sset(obj, MKKEY, buf);
@@ -1212,10 +1209,10 @@ BOIF av_desk(NOTHING)
 		obj[DEFFILE].ob_state = SELECTED;
 
 	f_str(obj, SDMEMORY, av_mem());
-	*(char *) ((TEDINFO *) (obj[SDKEY].ob_spec)->te_ptext) = 0;
+	*(((TEDINFO *) (obj[SDKEY].ob_spec))->te_ptext) = '\0';
 
 	/* save the original pointer    */
-	str = (TEDINFO *) (obj[SDFILE].ob_spec)->te_ptext;
+	str = ((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext;
 	len = strlen(str);
 	*str = 0;
 
@@ -1228,7 +1225,8 @@ BOIF av_desk(NOTHING)
 
 	while (TRUE)
 	{
-	  ad_5:which = xform_do(obj, MKKEY);
+	ad_5:
+		which = xform_do(obj, MKKEY);
 
 		if ((which == MKUP) || (which == MKDOWN) || (which == SDOK))
 		{
@@ -1260,12 +1258,12 @@ BOIF av_desk(NOTHING)
 			mentable[menui] = buf[0];
 		}
 
-	  ad_2:switch (which)
+	ad_2:
+		switch (which)
 		{
 		case CLRKEYS:
 			for (i = 0; i < MAXMENU; i++)
 				mentable[i] = 0;
-
 			put_keys();
 			goto p_11;
 
@@ -1275,24 +1273,22 @@ BOIF av_desk(NOTHING)
 				menui--;
 				goto p_11;
 			}
-
 			break;
 
 		case MKDOWN:
 			if ((menui + 1) < MAXMENU)
 			{
 				menui++;
-			  p_11:
+			p_11:
 				ch_key(menui);
-				(TEDINFO *) (obj[MKSTR].ob_spec)->te_ptext = obj1[tb3[menui]].ob_spec;
+				((TEDINFO *) (obj[MKSTR].ob_spec))->te_ptext = obj1[tb3[menui]].ob_spec;
 				draw_fld(obj, MKSTR);
-			  p_2:
+			p_2:
 				buf[1] = 0;
 				buf[0] = mentable[menui];
 				inf_sset(obj, MKKEY, buf);
 				draw_fld(obj, MKKEY);
 			}
-
 			break;
 
 		case SDCANCEL:					/* restore the menu key table */
@@ -1333,7 +1329,7 @@ BOIF av_desk(NOTHING)
 				{
 					app = xapp;
 					fi = 0;
-					(TEDINFO *) (obj[SDFILE].ob_spec)->te_ptext = app->a_name;
+					((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = app->a_name;
 					draw_fld(obj, SDFILE);
 					f_str(obj, SDKEY, f);
 					draw_fld(obj, SDKEY);
@@ -1364,8 +1360,8 @@ BOIF av_desk(NOTHING)
 					continue;
 				}
 			}
-		  ad_4:
-			(TEDINFO *) (obj[SDFILE].ob_spec)->te_ptext = &app->a_name[fi];
+		ad_4:
+			((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = &app->a_name[fi];
 			draw_fld(obj, SDFILE);
 			goto ad_5;
 		}
@@ -1375,7 +1371,7 @@ BOIF av_desk(NOTHING)
 
   ad_1:								/* restore the pointer  */
 	put_keys();
-	(TEDINFO *) (obj[SDFILE].ob_spec)->te_ptext = str;
+	((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = str;
 	*str = 1;
 	do_finish(SSYSTEM);
 }

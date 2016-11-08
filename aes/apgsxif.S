@@ -849,7 +849,7 @@ _gsx_start:
 
 #if (AESVERSION <= 0x320) & BINEXACT
     /* BUG: calculating gl_nplanes from number of colors */
-	move.w    22(a3),d0         ; d0 = gl_ws.ncolors
+	move.w    22(a3),d0         ; d0 = gl_ws.ws_ncolors
 	clr.w     d1
 _gsxsta1:
 	lsr.w     #1,d0

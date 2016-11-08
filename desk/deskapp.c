@@ -115,6 +115,7 @@ PP(register APP *app;)
 /*
  * Allocation an anode
  */
+/* 306de: 00e27ea8 */
 APP *app_alloc(NOTHING)
 {
 	register APP *list;

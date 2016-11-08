@@ -567,9 +567,7 @@ name: ds.t size
 	ds.b 4
 	
 	PTR(_path3)
-	
-	ds.b 2
-	
+	INT(_pref_save)
 	PTR(_gl_newdesk)
 	INT(_wasclr)
 	GRECT(_gl_rmnactv)
@@ -587,8 +585,9 @@ name: ds.t size
 	INT(_p_timedate)
 	INT(_gl_xclip)
 	INT(_sh_isgem)
+	PTR(_appfree)
 	
-	ds.b $22
+	ds.b 30
 	
 	INT(_gl_yclip)
 	INT(_gl_hbox)
@@ -685,8 +684,9 @@ name: ds.t size
 
 	INT(_gl_wtop)
 	
-	ds.b 6
+	ds.b 2
 	
+	PTR(_applist)
 	INT(_desksiz)
 	PTR(_deskptr)
 	

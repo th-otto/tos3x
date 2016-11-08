@@ -63,50 +63,50 @@
  * 
  *************************************************************************
  */
-/*	GEMINIT.C	4/23/84 - 02/08/85	Lee Lorenzen		*/
-/*	to 68k		2/23/75 - 05/03/85	Lowell Webster		*/
-/*	Ram based		  05/15/85	Derek Mui		*/
-/* 	Fix the main		  07/11/85 	Derek Mui		*/
-/*	08/28/85  Fix when no disk attached		Derek Mui	*/
-/*	10/23/85  Fix at pred_inf to read inf file from root  D.Mui	*/
-/*	05/22/85  Initialize in dispatch semaphore 	M Schmal	*/
-/*	Fix at pred_dinf for bit on 	2/12/87		Derek Mui	*/
-/*	Change at main to get mouse add	11/30/87	D.Mui		*/
-/*	Update		12/10/87			D.Mui		*/
-/*	Change at ini_dlong	12/17/87		D.Mui		*/
-/*	Added ad_out1, ad_out2	1/7/88			D.Mui		*/
-/*	Added er_num, no_aes	1/8/88			D.Mui		*/
-/*	Move drawstk from deskglob to here at main 1/15/88	D.Mui	*/
-/*	Add ad_fsel		1/21/88			D.Mui		*/
-/*	Take out ad_out1 and ad_out2	1/27/88		D.Mui		*/
-/*	Change pred_dinf		1/28/88		D.Mui		*/
-/*	Take out ad_envrn		1/28/88		D.Mui		*/
-/*	Add autoexec 			2/11/88		D.Mui		*/
-/*	Add g_autoboot	2/11/88				D.Mui		*/
-/*	Change the resolution masking	2/23/88		D.Mui		*/
-/*	Check to turn bit on when autoboot	3/10/88	D.Mui		*/
-/*	In line coded of ini_dlongs	3/24/88		D.Mui		*/
-/*	Fix at pred_dinf for scan_2	5/2/88		D.Mui		*/
-/*	Change at pref_dinf for gl_restype 4/25/89	D.Mui		*/
-/*	Change at gsx_malloc for new size  7/26/89	D.Mui		*/
-/*	Turn on the cache in pred_dinf		6/25/90	D.Mui		*/
-/*	Make sure the scan_2 for cache checking doesn't reset temp	*/
-/*	Look for newdesk.inf then desktop.inf in pred_dinf 6/26/90	*/
-/*	Change RES4 to RES5 for solid pattern	6/27/90	D.Mui		*/
-/*	Changed wm_start to wm_init		900628 kbad		*/
-/*	Moved all_run to gemcli.c		07/16/90	D.Mui	*/
-/*	Fix at gsx_malloc to save 1/2 of the screen	7/19/90	D.Mui	*/
-/*	Added initialization of crt_error semaphore	900731  D.Mui	*/
-/*	Removed #include flavor.h: DOWARNING now here 900801 kbad	*/
-/*	Also removed TT conditional.  If it's longframe, it's TT	*/
-/*	Fixed the background pattern in TT high	11/14/90	D.Mui	*/
-/*	Init the current mouse form		5/8/91		D.Mui	*/
-/*	Check control key for nodisk system at main 8/13/91	D.Mui	*/
-/*	Exit graphic mode before closing work station 12/20/91		*/
-/*	Change at gsx_malloc for saving 25 columns of screen 7/7/92 Mui	*/
-/*	Add 3D stuff				7/7/92		D.Mui	*/
-/*	Add code to do sparrow res change	7/17/92		D.Mui	*/
-/*	Add new variables			8/1/92		D.Mui	*/
+/*      GEMINIT.C       4/23/84 - 02/08/85      Lee Lorenzen            */
+/*      to 68k          2/23/75 - 05/03/85      Lowell Webster          */
+/*      Ram based                 05/15/85      Derek Mui               */
+/*      Fix the main              07/11/85      Derek Mui               */
+/*      08/28/85  Fix when no disk attached             Derek Mui       */
+/*      10/23/85  Fix at pred_inf to read inf file from root  D.Mui     */
+/*      05/22/85  Initialize in dispatch semaphore      M Schmal        */
+/*      Fix at pred_dinf for bit on     2/12/87         Derek Mui       */
+/*      Change at main to get mouse add 11/30/87        D.Mui           */
+/*      Update          12/10/87                        D.Mui           */
+/*      Change at ini_dlong     12/17/87                D.Mui           */
+/*      Added ad_out1, ad_out2  1/7/88                  D.Mui           */
+/*      Added er_num, no_aes    1/8/88                  D.Mui           */
+/*      Move drawstk from deskglob to here at main 1/15/88      D.Mui   */
+/*      Add ad_fsel             1/21/88                 D.Mui           */
+/*      Take out ad_out1 and ad_out2    1/27/88         D.Mui           */
+/*      Change pred_dinf                1/28/88         D.Mui           */
+/*      Take out ad_envrn               1/28/88         D.Mui           */
+/*      Add autoexec                    2/11/88         D.Mui           */
+/*      Add g_autoboot  2/11/88                         D.Mui           */
+/*      Change the resolution masking   2/23/88         D.Mui           */
+/*      Check to turn bit on when autoboot      3/10/88 D.Mui           */
+/*      In line coded of ini_dlongs     3/24/88         D.Mui           */
+/*      Fix at pred_dinf for scan_2     5/2/88          D.Mui           */
+/*      Change at pref_dinf for gl_restype 4/25/89      D.Mui           */
+/*      Change at gsx_malloc for new size  7/26/89      D.Mui           */
+/*      Turn on the cache in pred_dinf          6/25/90 D.Mui           */
+/*      Make sure the scan_2 for cache checking doesn't reset temp      */
+/*      Look for newdesk.inf then desktop.inf in pred_dinf 6/26/90      */
+/*      Change RES4 to RES5 for solid pattern   6/27/90 D.Mui           */
+/*      Changed wm_start to wm_init             900628 kbad             */
+/*      Moved all_run to gemcli.c               07/16/90        D.Mui   */
+/*      Fix at gsx_malloc to save 1/2 of the screen     7/19/90 D.Mui   */
+/*      Added initialization of crt_error semaphore     900731  D.Mui   */
+/*      Removed #include flavor.h: DOWARNING now here 900801 kbad       */
+/*      Also removed TT conditional.  If it's longframe, it's TT        */
+/*      Fixed the background pattern in TT high 11/14/90        D.Mui   */
+/*      Init the current mouse form             5/8/91          D.Mui   */
+/*      Check control key for nodisk system at main 8/13/91     D.Mui   */
+/*      Exit graphic mode before closing work station 12/20/91          */
+/*      Change at gsx_malloc for saving 25 columns of screen 7/7/92 Mui */
+/*      Add 3D stuff                            7/7/92          D.Mui   */
+/*      Add code to do sparrow res change       7/17/92         D.Mui   */
+/*      Add new variables                       8/1/92          D.Mui   */
 
 /*
  *       Copyright 1999, Caldera Thin Clients, Inc.                      
@@ -114,11 +114,11 @@
  *       Please see LICENSE.TXT for further information.                 
  *                                                                       
  *                  Historical Copyright
- *	-------------------------------------------------------------
- *	GEM Application Environment Services		  Version 1.0
- *	Serial No.  XXXX-0000-654321		  All Rights Reserved
- *	Copyright (C) 1985			Digital Research Inc.
- *	-------------------------------------------------------------
+ *      -------------------------------------------------------------
+ *      GEM Application Environment Services              Version 1.0
+ *      Serial No.  XXXX-0000-654321              All Rights Reserved
+ *      Copyright (C) 1985                      Digital Research Inc.
+ *      -------------------------------------------------------------
  */
 
 #include "aes.h"
@@ -578,7 +578,7 @@ VOID gem_main(NOTHING)
 
 	rsc_free();							/* free up resource */
 
-	drawstk -= (0x00000400L);			/* reset to bottom  */
+	drawstk -= 0x00000400L;				/* reset to bottom  */
 	dos_free((VOIDPTR)drawstk);
 
 	gsx_mfree();
