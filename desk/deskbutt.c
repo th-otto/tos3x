@@ -13,6 +13,7 @@
 /*
  * Find an empty icon
  */
+/* 306de: 00e281aa */
 int16_t av_icon(NOTHING)
 {
 	register int16_t i, k;
@@ -59,17 +60,18 @@ int16_t av_icon(NOTHING)
 			obj[k].ob_state = NORMAL;
 			obj[k].ob_x = x;
 			obj[k].ob_y = y;
-			return (k);
+			return k;
 		}
 	}
 
-	return (-1);
+	return -1;
 }
 
 
 /*
  * Deselect all the disk and trash icons
  */
+/* 306de: 00e282fc */
 VOID clr_dicons(NOTHING)
 {
 	GRECT pt;
@@ -92,6 +94,7 @@ VOID clr_dicons(NOTHING)
 /*
  * Handle the click event
  */
+/* 306de: 00e2836c */
 VOID hd_button(P(int16_t) clicks, P(int16_t) kstate, P(int16_t) mx, P(int16_t) my)
 PP(int16_t clicks;)
 PP(int16_t kstate;)
@@ -144,8 +147,10 @@ PP(int16_t my;)
 					clr_xwin(win, FALSE);
 					state = SELECTED;
 				} else
+				{
 					state ^= SELECTED;
-
+				}
+				
 				obj[item].ob_state = state;
 				get_dir(win, item)->d_state = state;
 				do_redraw(win->w_id, &full, item);
@@ -175,13 +180,15 @@ PP(int16_t my;)
 					state = SELECTED;
 					clr_dicons();
 				} else
+				{
 					state ^= SELECTED;
-
+				}
+				
 				obj[item].ob_state = state;
 				do_redraw(0, &full, item);
 			}
 		}
-	  a_1:
+	a_1:
 		o_select();						/* update the search routine    */
 		x_select();
 

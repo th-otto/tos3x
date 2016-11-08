@@ -2,11 +2,9 @@
  *************************************************************************
  *                      Revision Control System
  * =======================================================================
- *  $Revision: 2.3 $    $Source: /u2/MRS/osrevisions/aes/deskshow.c,v $
+ *  $Author: kbad $     $Date: 89/07/29 20:23:22 $
  * =======================================================================
- *  $Author: kbad $     $Date: 89/07/29 20:23:22 $      $Locker: kbad $
- * =======================================================================
- *  $Log:       deskshow.c,v $
+ *
  * Revision 2.3  89/07/29  20:23:22  kbad
  * Removed error messages requiring keyboard input at the start of showfile.
  * Also added uikey() to allow mouse buttons to function like keys during

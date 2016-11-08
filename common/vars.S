@@ -552,8 +552,9 @@ name: ds.t size
 	INT(_gl_nplanes)
 	INT(_gl_ticktime)
 	
-	ds.b $88
+	ds.b $80
 	
+	GRECT(_r_dicon)
 	INT(_DOS_AX)
 	LONG(_gl_mlen)
 	INT(_gl_mask)
@@ -636,8 +637,9 @@ name: ds.t size
 	INT(_fs_count)
 	INT(_gl_newroot)
 	LONG(_fs_fnum)
+	INT(_maxicon)
 	
-	ds.b 4
+	ds.b 2
 	
 	INT(_gl_btrue)
 	INT(_ccopy_save)
