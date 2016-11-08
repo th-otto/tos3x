@@ -154,21 +154,21 @@ _deskerr        equ 0
 _desknoerr      equ 0
 _mediach        equ 0
 	
-_dsptch         equ 0
-_wm_new         equ 0
-_wm_close       equ 0
-_wm_delete      equ 0
-_wm_find        equ 0
-_wm_update      equ 0
-_wm_create      equ 0
-_wm_open        equ 0
-_wm_get         equ 0
-_wm_set         equ 0
-_wm_calc        equ 0
+_dsptch         equ AESTBASE+$C11A
+_wm_create      equ AESTBASE+$8FB2
+_wm_open        equ AESTBASE+$90B4
+_wm_close       equ AESTBASE+$90CE
+_wm_delete      equ AESTBASE+$90E8
+_wm_get         equ AESTBASE+$9106
+_wm_set         equ AESTBASE+$9224
+_wm_find        equ AESTBASE+$9472
+_wm_update      equ AESTBASE+$9494
+_wm_calc        equ AESTBASE+$94F0
+_wm_new         equ AESTBASE+$96A6
 _ap_init        equ 0
 _ap_exit        equ 0
 _ap_rdwr        equ 0
-_fs_input       equ 0
+_fs_input       equ AESTBASE+$3762
 _rs_sglobe      equ 0
 _rs_load        equ 0
 _rs_free        equ 0
@@ -202,12 +202,12 @@ _sh_get         equ 0
 _sh_put         equ 0
 _sh_write       equ 0
 
-_gsx_sclip      equ 0
-_gsx_attr       equ 0
-_gsx_xline      equ 0
-_vro_cpyfm      equ 0
-_gsx_ncode      equ 0
-_v_hardcopy     equ 0
+_gsx_sclip      equ AESTBASE+$AC70
+_gsx_attr       equ AESTBASE+$AD6E
+_gsx_xline      equ AESTBASE+$B32C
+_vro_cpyfm      equ AESTBASE+$BCAE
+_gsx_ncode      equ AESTBASE+$B8FA
+_v_hardcopy     equ AESTBASE+$B98E
 
 lmul            equ 0
 ldiv            equ 0

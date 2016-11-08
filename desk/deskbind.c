@@ -12,7 +12,7 @@
 
 
 
-
+/* 306de: 00e28052 */
 VOID wind_new(NOTHING)
 {
 	wm_new();
@@ -20,6 +20,7 @@ VOID wind_new(NOTHING)
 }
 
 
+/* 306de: 00e28066 */
 int16_t fsel_exinput(P(char *)path, P(char *)selec, P(int16_t *)button, P(const char *)label)
 PP(char *path;)
 PP(char *selec;)
@@ -34,6 +35,7 @@ PP(const char *label;)
 }
 
 
+/* 306de: 00e28098 */
 int16_t rsrc_load(P(const char *) name)
 PP(const char *name;)
 {
@@ -41,10 +43,11 @@ PP(const char *name;)
 
 	ret = rs_load((intptr_t) pglobal, name);
 	dsptch();
-	return (ret);
+	return ret;
 }
 
 
+#if POPUP_SUPPORT
 int16_t rsrc_obfix(P(LPTREE) tree, P(int16_t) obj)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -53,7 +56,7 @@ PP(int16_t obj;)
 
 	ret = rs_obfix(tree, obj);
 	dsptch();
-	return (ret);
+	return ret;
 }
 
 
@@ -67,7 +70,7 @@ PP(MENU *mdata;)
 
 	ret = mn_popup(rlr->p_pid, menu, x, y, mdata);
 	dsptch();
-	return (ret);
+	return ret;
 }
 
 
@@ -81,10 +84,12 @@ PP(int16_t start;)
 
 	ret = mn_istart(rlr->p_pid, code, mtree, mmenu, start);
 	dsptch();
-	return (ret);
+	return ret;
 }
+#endif
 
 
+#if AES3D
 VOID objc_gclip(P(LPTREE) tree, P(int16_t) which, P(int16_t *)x, P(int16_t *)y, P(int16_t *)rx, P(int16_t *)ry, P(int16_t *)w, P(int16_t *)h)
 PP(LPTREE tree;)
 PP(int16_t which;)
@@ -98,8 +103,10 @@ PP(int16_t *h;)
 	ob_gclip(tree, which, x, y, rx, ry, w, h);
 	dsptch();
 }
+#endif
 
 
+/* 306de: 00e280c0 */
 VOID graf_mouse(P(int16_t) style, P(MFORM *)grmaddr)
 PP(int16_t style;)
 PP(MFORM *grmaddr;)
@@ -112,6 +119,7 @@ PP(MFORM *grmaddr;)
 /*
  * show cursor
  */
+/* 306de: 00e280de */
 VOID v_show_c(P(BOOLEAN) reset)
 PP(int16_t reset;)
 {
@@ -123,6 +131,7 @@ PP(int16_t reset;)
 /*
  * hide cursor
  */
+/* 306de: 00e28100 */
 VOID v_hide_c(NOTHING)
 {
 	gsx_ncode(123, 0, 0);
@@ -132,6 +141,7 @@ VOID v_hide_c(NOTHING)
 /*
  * enter graphic mode
  */
+/* 306de: 00e28118 */
 VOID v_exit_cur(NOTHING)
 {
 	contrl[5] = 2;
@@ -142,6 +152,7 @@ VOID v_exit_cur(NOTHING)
 /*
  * enter alpha mode
  */
+/* 306de: 00e28138 */
 VOID v_enter_cur(NOTHING)
 {
 	contrl[5] = 3;
@@ -152,6 +163,7 @@ VOID v_enter_cur(NOTHING)
 /*
  * clipping function
  */
+/* 306de: 00e28158 */
 VOID vs_clip(P(BOOLEAN) clip_flag, P(const int16_t *) pxy)
 PP(BOOLEAN clip_flag;)
 PP(int16_t *pxy;)

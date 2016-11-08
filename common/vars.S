@@ -571,8 +571,9 @@ name: ds.t size
 	PTR(_gl_newdesk)
 	INT(_wasclr)
 	GRECT(_gl_rmnactv)
+	V(_pglobal,w,15)
 	
-	ds.b $9e
+	ds.b $80
 	
 	INT(_gl_wclip)
 	PTR(_cart_dta)
