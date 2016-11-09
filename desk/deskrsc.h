@@ -1,9 +1,46 @@
+#include "ctrycodes.h"
+
 #if TOSVERSION == 0x404
 #include "rsc/404/deskus.h"
 #endif
 
 #if TOSVERSION == 0x306
+#if OS_COUNTRY == CTRY_US
 #include "rsc/306/deskus.h"
+#endif
+#if OS_COUNTRY == CTRY_UK
+#include "rsc/306/deskuk.h"
+#endif
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
+#include "rsc/306/deskde.h"
+#endif
+#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
+#include "rsc/306/deskfr.h"
+#endif
+#if OS_COUNTRY == CTRY_ES
+#include "rsc/306/deskes.h"
+#endif
+#if OS_COUNTRY == CTRY_IT
+#include "rsc/306/deskit.h"
+#endif
+#if OS_COUNTRY == CTRY_SV
+#include "rsc/306/desksv.h"
+#endif
+#if OS_COUNTRY == CTRY_TR
+#include "rsc/306/desktr.h"
+#endif
+#if OS_COUNTRY == CTRY_FI
+#include "rsc/306/deskfi.h"
+#endif
+#if OS_COUNTRY == CTRY_NO
+#include "rsc/306/deskno.h"
+#endif
+#if OS_COUNTRY == CTRY_DK
+#include "rsc/306/deskdk.h"
+#endif
+#if OS_COUNTRY == CTRY_PL
+#include "rsc/306/deskpl.h"
+#endif
 #endif
 
 #if !STR_IN_RSC

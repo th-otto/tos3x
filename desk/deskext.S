@@ -9,6 +9,7 @@
 #define __ASSEMBLER__ 1
 
 #include "config.h"
+#include "../aes/aesdefs.h"
 #include "deskdefs.h"
 #include "asmdefs.h"
 #include "sections.inc"
@@ -16,8 +17,6 @@
 
 /* from AES */
 
-	xdef _strcpy
-	xdef _strcat
 	xdef _xstrpcpy
 	xdef _xstrpcat
 	xdef _scasb
@@ -76,11 +75,8 @@
 	xdef _rs_free
 	xdef _rs_obfix
 	xdef _rs_gaddr
-	xdef _mn_popup
-	xdef _mn_istart
 	xdef _mn_bar
 	xdef _do_chg
-	xdef _ob_gclip
 	xdef _ob_offset
 	xdef _ob_order
 	xdef _ob_find
@@ -114,45 +110,43 @@
 	xdef lmul
 	xdef ldiv
 	
-_strcpy         equ 0
-_strcat         equ 0
-_xstrpcpy       equ 0
-_xstrpcat       equ 0
-_scasb          equ 0
-_strscn         equ 0
-_strlen         equ 0
-_streq          equ 0
-_fmt_str        equ 0
-_unfmt_str      equ 0
-_inf_sset       equ 0
-_fs_sget        equ 0
-_inf_gindex     equ 0
-_merge_str      equ 0
-_wildcmp        equ 0
-_bfill          equ 0
-_min            equ 0
-_max            equ 0
-_rc_copy        equ 0
-_rc_equal       equ 0
-_rc_intersect   equ 0
-_rc_union       equ 0
-_rc_constrain   equ 0
-_inside         equ 0
-_LBCOPY         equ 0
-_strchk         equ 0
-_cart_init      equ 0
-_cart_sfirst    equ 0
-_c_sfirst       equ 0
-_cart_snext     equ 0
-_toupper        equ 0
-_isdrive        equ 0
-_rom_ram        equ 0
-_trap           equ 0
-_trp14          equ 0
-_trp13          equ 0
-_deskerr        equ 0
-_desknoerr      equ 0
-_mediach        equ 0
+_trap           equ AESTBASE+$0186
+_rom_ram        equ AESTBASE+$6AB4
+_cart_init      equ AESTBASE+$9914
+_cart_sfirst    equ AESTBASE+$99BE
+_c_sfirst       equ AESTBASE+$9AF8
+_cart_snext     equ AESTBASE+$99D4
+_deskerr        equ AESTBASE+$BE34
+_desknoerr      equ AESTBASE+$BE46
+_isdrive        equ AESTBASE+$C204
+_LBCOPY         equ AESTBASE+$C4DA
+_rc_copy        equ AESTBASE+$C526
+_inside         equ AESTBASE+$C532
+_rc_equal       equ AESTBASE+$C568
+_rc_intersect   equ AESTBASE+$C57E
+_rc_union       equ AESTBASE+$C5E8
+_rc_constrain   equ AESTBASE+$C640
+_min            equ AESTBASE+$C69E
+_max            equ AESTBASE+$C6AA
+_bfill          equ AESTBASE+$C6BA
+_toupper        equ AESTBASE+$C6D0
+_strlen         equ AESTBASE+$C6E8
+_streq          equ AESTBASE+$C6F8
+_xstrpcpy       equ AESTBASE+$C714
+_strscn         equ AESTBASE+$C720
+_xstrpcat       equ AESTBASE+$C736
+_scasb          equ AESTBASE+$C74A
+_strchk         equ AESTBASE+$C75E
+_fmt_str        equ AESTBASE+$C780
+_unfmt_str      equ AESTBASE+$C7B4
+_inf_sset       equ AESTBASE+$C812
+_fs_sget        equ AESTBASE+$C834
+_inf_gindex     equ AESTBASE+$C86E
+_merge_str      equ AESTBASE+$C8C8
+_wildcmp        equ AESTBASE+$C982
+_trp13          equ AESTBASE+$CB80
+_trp14          equ AESTBASE+$CB90
+_mediach        equ AESTBASE+$CBDC
 	
 _dsptch         equ AESTBASE+$C11A
 _wm_create      equ AESTBASE+$8FB2
@@ -165,42 +159,49 @@ _wm_find        equ AESTBASE+$9472
 _wm_update      equ AESTBASE+$9494
 _wm_calc        equ AESTBASE+$94F0
 _wm_new         equ AESTBASE+$96A6
-_ap_init        equ 0
-_ap_exit        equ 0
-_ap_rdwr        equ 0
+_ap_init        equ AESTBASE+$026C
+_ap_exit        equ AESTBASE+$02E2
+_ap_rdwr        equ AESTBASE+$036E
 _fs_input       equ AESTBASE+$3762
-_rs_sglobe      equ 0
-_rs_load        equ 0
-_rs_free        equ 0
-_rs_obfix       equ 0
-_rs_gaddr       equ 0
+_rs_sglobe      equ AESTBASE+$70EE
+_rs_load        equ AESTBASE+$7370
+_rs_free        equ AESTBASE+$7110
+_rs_obfix       equ AESTBASE+$6CEC
+_rs_gaddr       equ AESTBASE+$7144
+#if POPUP_SUPPORT
+	xdef _mn_popup
+	xdef _mn_istart
 _mn_popup       equ 0
 _mn_istart      equ 0
-_mn_bar         equ 0
-_do_chg         equ 0
+#endif
+_mn_bar         equ AESTBASE+$5908
+_do_chg         equ AESTBASE+$54AA
+#if AES3D
+	xdef _ob_gclip
 _ob_gclip       equ 0
-_ob_offset      equ 0
-_ob_order       equ 0
-_ob_find        equ 0
-_ob_add         equ 0
-_ob_draw        equ 0
-_ob_change      equ 0
-_ob_center      equ 0
-_gr_mouse       equ 0
-_gr_mkstate     equ 0
-_gr_growbox     equ 0
-_gr_shrinkbox   equ 0
-_gr_rubbox      equ 0
-_ev_multi       equ 0
-_ev_button      equ 0
-_ev_dclick      equ 0
-_fm_do          equ 0
-_fm_dial        equ 0
-_fm_alert       equ 0
-_fm_error       equ 0
-_sh_get         equ 0
-_sh_put         equ 0
-_sh_write       equ 0
+#endif
+_ob_offset      equ AESTBASE+$A90A
+_ob_order       equ AESTBASE+$A60C
+_ob_find        equ AESTBASE+$A3C2
+_ob_add         equ AESTBASE+$A4F2
+_ob_draw        equ AESTBASE+$A322
+_ob_change      equ AESTBASE+$A6EA
+_ob_center      equ AESTBASE+$5CFE
+_gr_mouse       equ AESTBASE+$4E80
+_gr_mkstate     equ AESTBASE+$B8AC
+_gr_growbox     equ AESTBASE+$B402
+_gr_shrinkbox   equ AESTBASE+$B446
+_gr_rubbox      equ AESTBASE+$B6D8
+_ev_multi       equ AESTBASE+$26E2
+_ev_button      equ AESTBASE+$25C2
+_ev_dclick      equ AESTBASE+$2A28
+_fm_do          equ AESTBASE+$33D8
+_fm_dial        equ AESTBASE+$3550
+_fm_alert       equ AESTBASE+$2F38
+_fm_error       equ AESTBASE+$368A
+_sh_get         equ AESTBASE+$7458
+_sh_put         equ AESTBASE+$7478
+_sh_write       equ AESTBASE+$7408
 
 _gsx_sclip      equ AESTBASE+$AC70
 _gsx_attr       equ AESTBASE+$AD6E
@@ -209,5 +210,5 @@ _vro_cpyfm      equ AESTBASE+$BCAE
 _gsx_ncode      equ AESTBASE+$B8FA
 _v_hardcopy     equ AESTBASE+$B98E
 
-lmul            equ 0
-ldiv            equ 0
+lmul            equ AESTBASE+$BF78
+ldiv            equ AESTBASE+$BFCC

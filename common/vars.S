@@ -441,8 +441,10 @@ name: ds.t size
 	V(mform,w,37)
 	PTR(trp13aret)
 	PTR(trp14aret)
+	INT(_w_inc)
+	INT(_bar_max)
 	
-	ds.b $10
+	ds.b 12
 	
 	V(_intout,w,10)
 	

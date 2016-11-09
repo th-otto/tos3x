@@ -34,13 +34,13 @@
 /************************************************************************/
 
 #include "desktop.h"
+#include "toserrno.h"
 
 #define MAXTRACK	80					/* maximum number of track      */
 #define FC_NUMOBJS	26
 #define MAXSPT		18					/* Maximum sector / track       */
 #define	SECSIZE		512
 #define	TRKSIZE		0x1200				/* (bytesPerSector) * (sectorsPerTrack) */
-#define RWABS		4					/* BIOS read/write sectors      */
 #define RSECTS		2					/* |= 0x02 so mediach state is not checked */
 #define WSECTS		3
 
@@ -59,13 +59,13 @@
 
 
 /* The DSB location is returned by getbpb (Xbios 7) and is defined in
-*	gemdos/rwabs.c.  We use it to determine the # of sides for
-*	fc_copy, since it's easier to call getbpb and use the
-*	system data structures than to read the boot sector
-*	ourselves. getbpb actually returns a pointer to
-*	this global system structure.
-*	(kbad 880830)
-*/
+ *	gemdos/rwabs.c.  We use it to determine the # of sides for
+ *	fc_copy, since it's easier to call getbpb and use the
+ *	system data structures than to read the boot sector
+ *	ourselves. getbpb actually returns a pointer to
+ *	this global system structure.
+ *	(kbad 880830)
+ */
 
 #define DSB	struct dsb					/* Device Status Block (BLKDEV in bios.h) */
 DSB
@@ -106,7 +106,7 @@ static int16_t const skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5,
 #undef Flopfmt
 #undef Protobt
 #define Getbpb(devno) trp13(7, devno)
-#define Rwabs(a,b,c,d,e) trp13(3, a, b, c, d, e)
+#define Rwabs(a,b,c,d,e) trp13(4, a, b, c, d, e)
 #define Flopfmt(a,b,c,d,e,f,g,h,i) trp14(10, a, b, c, d, e, f, g, h, i)
 #define Protobt(a,b,c,d) trp14(18, a, b, c, d)
 
@@ -124,6 +124,7 @@ VOID fc_draw PROTO((OBJECT *obj, int16_t which));
 /*
  * format and copy start
  */
+/* 306de: 00e29ea2 */
 VOID fc_start(P(const char *)source, P(int16_t) op)
 PP(const char *source;)
 PP(int16_t op;)
@@ -139,12 +140,20 @@ PP(int16_t op;)
 
 	/* check for switch in cookie jar   */
 
+#if AES3D
 	obj[FCHIGH].ob_flags |= HIDETREE;
+#else
+	obj[FCHIGH].ob_flags = HIDETREE;
+#endif
 
 	if (getcookie(0x5F464443L, &value))	/* FDC cookie   */
 	{
 		if (value & 0xFF000000L)		/* high density */
+#if AES3D
 			obj[FCHIGH].ob_flags &= ~HIDETREE;
+#else
+			obj[FCHIGH].ob_flags = SELECTABLE|RBUTTON;
+#endif
 		else
 			goto fc_2;
 	} else
@@ -170,8 +179,13 @@ PP(int16_t op;)
 
 	inf_sset(obj, FCLABEL, Nostr);
 
+#if AES3D
 	obj[FCBOXF].ob_flags |= HIDETREE;
 	obj[FCBOXC].ob_flags |= HIDETREE;
+#else
+	obj[FCBOXF].ob_flags = HIDETREE;
+	obj[FCBOXC].ob_flags = HIDETREE;
+#endif
 
 	ret = *source == 'A';
 
@@ -208,16 +222,26 @@ PP(int16_t op;)
 		{
 		case FCFORMAT:
 			draw_fld(obj, FCBOXC);		/* erase copy function */
+#if AES3D
 			obj[FCBOXC].ob_flags |= HIDETREE;
 			obj[FCBOXF].ob_flags &= ~HIDETREE;
+#else
+			obj[FCBOXC].ob_flags = HIDETREE;
+			obj[FCBOXF].ob_flags = 0;
+#endif
 			fc_draw(obj, FCBOXF);		/* draw the format  */
 			field = 0;
 			break;
 
 		case FCCOPY:
 			draw_fld(obj, FCBOXF);		/* erase the format     */
+#if AES3D
 			obj[FCBOXF].ob_flags |= HIDETREE;
 			obj[FCBOXC].ob_flags &= ~HIDETREE;
+#else
+			obj[FCBOXF].ob_flags = HIDETREE;
+			obj[FCBOXC].ob_flags = 0;
+#endif
 			fc_draw(obj, FCBOXC);
 			field = NIL;
 			break;
@@ -273,6 +297,7 @@ PP(int16_t op;)
 /*
  * format disk
  */
+/* 306de: 00e2a1a4 */
 BOOLEAN fc_format(P(OBJECT *)obj)
 PP(OBJECT *obj;)
 {
@@ -283,7 +308,7 @@ PP(OBJECT *obj;)
 	int16_t sideno, curtrk, skew, skewi;
 	int16_t track, numside, cl;
 	register int16_t *badtable;
-	register uint16_t *fat;
+	register int16_t *fat;
 	register BPB *bpbaddr;
 	char label1[14];
 	char label2[14];
@@ -304,7 +329,7 @@ PP(OBJECT *obj;)
 		return TRUE;
 	}
 
-	fat = (uint16_t *)bufaddr;						/* the bad sector table     */
+	fat = (int16_t *)bufaddr;						/* the bad sector table     */
 
 	/* my bad sector table      */
 	if (!(badtable = (int16_t *)Malloc(FSIZE)))	/* no memory            */
@@ -351,18 +376,18 @@ PP(OBJECT *obj;)
 			if (skewi < 0)
 				skewi += spt;
 
-		  fagain:ret = (int16_t) (Flopfmt(bufaddr, &sktable[skewi], devno,
+		fagain:
+			ret = (int16_t) (Flopfmt(bufaddr, &sktable[skewi], devno,
 								 spt, trackno, sideno, INTERLV, MAGIC, VIRGIN));
 
-			if (ret == -16)				/* Bad sectors !    */
+			if (ret == E_BADSF)				/* Bad sectors !    */
 			{
-				if ((trackno < 2) || ((badindex + spt) >= MAXBAD))
+				if (trackno < 2 || ((badindex + spt) >= MAXBAD))
 				{
 					if (do1_alert(FCFAIL) == 1)	/* too many bad sectors */
 						goto fagain;
 					else
 						ret = 1;
-
 					break;
 				} else
 				{
@@ -392,7 +417,11 @@ PP(OBJECT *obj;)
 		Protobt(bufaddr, 0x01000000L, disktype, 0);
 		*bufaddr = 0xe9;
 
+#if BINEXACT
+		if ((ret = fc_rwsec(WSECTS, bufaddr, 0x10000L, devno)))
+#else
 		if ((ret = fc_rwsec(WSECTS, bufaddr, 1, 0, devno)))
+#endif
 			goto eout1;
 		/* now set up the fat0 and fat1 */
 		bpbaddr = (BPB *)Getbpb(devno);
@@ -402,7 +431,11 @@ PP(OBJECT *obj;)
 		 * (this makes the media dirty, with drivemode = "changed")
 		 */
 
+#if BINEXACT
+		if ((ret = fc_rwsec(WSECTS, bufaddr, 0x10000L, devno)))
+#else
 		if ((ret = fc_rwsec(WSECTS, bufaddr, 1, 0, devno)))
+#endif
 			goto eout1;
 
 		k = max(bpbaddr->fsiz, bpbaddr->rdlen);
@@ -445,7 +478,7 @@ PP(OBJECT *obj;)
 		for (i = 0; i < badindex; i++)
 		{
 			cl = (badtable[i] - bpbaddr->datrec) / bpbaddr->clsiz + 2;
-			clfix(cl, fat);
+			clfix(cl, (uint16_t *)fat);
 		}
 		/* write out fat 0  */
 		if ((ret = fc_rwsec(WSECTS, fat, bpbaddr->fsiz, 1, devno)))
@@ -477,6 +510,7 @@ PP(OBJECT *obj;)
 /*
  * disk copy
  */
+/* 306de: 00e2a654 */
 VOID fc_copy(P(OBJECT *)obj)
 PP(OBJECT *obj;)
 {
@@ -540,7 +574,11 @@ chksrc:
 	}
 
 	/* read boot sector */
+#if BINEXACT
+	if (fc_rwsec(RSECTS, (VOIDPTR)bootbuf, 0x10000L, devnos))
+#else
 	if (fc_rwsec(RSECTS, (VOIDPTR)bootbuf, 1, 0, devnos))
+#endif
 		goto bailout;
 
 	while (loop--)
@@ -559,8 +597,20 @@ chksrc:
 				bufptr += bpc;
 				fc_bar(obj, dev);
 			}
+#if BINEXACT
+			/*
+			 * This is miscompiled into
+			 * ...
+			 * divs -14(a6),d5
+			 * swap d5
+			 * beq ...
+			 * however swap sets the Z-bit if the 32-bit result is zero
+			 */
+			if ((j = sectbufs % spc))
+#else
 			j = sectbufs % spc;
 			if (j)
+#endif
 			{
 				if (fc_rwsec(op, (VOIDPTR)bufptr, j, sectno, dev))
 					goto bailout;
@@ -608,7 +658,11 @@ chksrc:
 
 	/* change the serialno */
 	Protobt(bootbuf, 0x01000000L, -1, -1);
+#if BINEXACT
+	fc_rwsec(WSECTS, (VOIDPTR)bootbuf, 0x10000L, devnod);
+#else
 	fc_rwsec(WSECTS, (VOIDPTR)bootbuf, 1, 0, devnod);
+#endif
 
   bailout:
 	Mfree(buf);
@@ -617,6 +671,7 @@ chksrc:
 }
 
 
+/* 306de: 00e2a982 */
 int16_t fc_rwsec(P(int16_t) op, P(VOIDPTR) buf, P(int16_t) nsect, P(int16_t) sect, P(int16_t) dev)
 PP(int16_t op;)
 PP(VOIDPTR buf;)
@@ -637,6 +692,7 @@ PP(int16_t dev;)
 /*
  * put in the next cluster number
  */
+/* 306de: 00e2a9d0 */
 VOID clfix(P(uint16_t) cl, P(uint16_t *)fat)
 PP(uint16_t cl;)
 PP(uint16_t *fat;)
@@ -671,6 +727,7 @@ PP(uint16_t *fat;)
 /*
  * Inc and redraw slider bar
  */
+/* 306de: 00e2aa84 */
 VOID fc_bar(P(OBJECT *)obj, P(int16_t) which)
 PP(register OBJECT *obj;)
 PP(register int16_t which;)
@@ -691,7 +748,8 @@ PP(register int16_t which;)
 }
 
 
-VOID fc_draw(P(OBJECT *)obj, P(int16_t) which)
+/* 306de: 00e2ab0c */
+VOID (P(OBJECT *)obj, P(int16_t) which)
 PP(OBJECT *obj;)
 PP(int16_t which;)
 {

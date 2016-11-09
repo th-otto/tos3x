@@ -4,7 +4,11 @@
 
 #include "ctrycodes.h"
 
-#if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
+#if OS_COUNTRY == CTRY_US
+#include "rsc/306/strus.h"
+#endif
+
+#if OS_COUNTRY == CTRY_UK
 #include "rsc/306/strus.h"
 #endif
 
@@ -42,6 +46,10 @@
 
 #if OS_COUNTRY == CTRY_DK
 #include "rsc/306/strdk.h"
+#endif
+
+#if OS_COUNTRY == CTRY_PL
+#include "rsc/306/strpl.h"
 #endif
 
 #endif
