@@ -545,9 +545,8 @@ name: ds.t size
 	
 	INT(_gl_graphic)
 	INT(_gl_lcolor)
-	
-	ds.b 4
-	
+	INT(_f_abort)
+	INT(_f_level)
 	PTR(old_mcode)
 	INT(_gl_nplanes)
 	INT(_gl_ticktime)
@@ -643,9 +642,7 @@ name: ds.t size
 	
 	INT(_gl_btrue)
 	INT(_ccopy_save)
-	
-	ds.b 4
-	
+	LONG(_numfiles)
 	INT(_gl_hsptschar)
 	INT(_gl_hptschar)
 	V(_wind_msg,w,8)
@@ -672,8 +669,9 @@ name: ds.t size
 	INT(_infsize)
 	INT(_numicon)
 	
-	ds.b 16
+	ds.b 2
 	
+	V(_filestr,b,NAMELEN)
 	INT(_tmpmoff)
 	
 	ds.b 2
@@ -705,13 +703,12 @@ name: ds.t size
 	
 	INT(_pr_yrat)
 	INT(_d_dir)
-	
-	ds.b 4
-	
+	LONG(_numdirs)
 	TEDINFO(_edblk)
 	
-	ds.b 26
+	ds.b 22
 	
+	LONG(_tolsize)
 	GRECT(_dicon)
 	INT(_tbutton)
 	
@@ -725,8 +722,9 @@ name: ds.t size
 	INT(_gl_my)
 	INT(_fpcnt)
 	
-	ds.b 8
+	ds.b 4
 	
+	PTR(_cpbox)
 	V(_gl_ws,w,57)   /* workout */
 	
 	ds.b $474
@@ -772,9 +770,8 @@ name: ds.t size
 	ds.b $30
 	
 	PTR(_ctl_pd)
-	
-	ds.b 4
-	
+	INT(_rename)
+	INT(_opcode)
 	MFDB(_gl_src)
 	
 	ds.b $2c
@@ -787,32 +784,26 @@ name: ds.t size
 	ds.b 16
 	
 	INT(_nodesk)
-	
-	ds.b 2
-	
+	INT(_srcbuf)
 	INT(_er_num)
-	
-	ds.b 2
-	
+	INT(_srclen)
 	INT(_curpid)
 	BYTE(_indisp)
 	even
-	
-	ds.b 2
+	INT(_dstbuf)
 	BYTE(_infork)
 	even
-	ds.b 2
+	INT(_dstlen)
 	ds.b 2
 	
 	INT(_kstate)
 	INT(_s_view)
-	
-	ds.b 4
-	
+	PTR(_fixsrc)
 	PTR(_gemptr)
 	
-	ds.b 6
+	ds.b 2
 	
+	PTR(_fixdst)
 	V(_contrl,w,12)
 	V(_d_xywh,w,18)
 	PTR(_infptr)

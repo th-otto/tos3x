@@ -293,7 +293,7 @@ VOID sel_all(NOTHING)
 	register WINDOW *win;
 	register DIR *dir;
 	register int16_t i;
-	char buffer[14];
+	char buffer[NAMELEN];
 
 	if ((win = w_gfirst()) != NULL)
 	{
@@ -321,7 +321,7 @@ PP(uint16_t key;)
 	register WINDOW *win;
 	register int16_t item;
 	int16_t msgbuff[8];
-	char buffer[14];
+	char buffer[NAMELEN];
 	int16_t i;
 	char *str;
 	APP *app;
@@ -411,8 +411,7 @@ PP(uint16_t key;)
 				do_opt(tb3[i]);
 				return;
 
-			}							/* switch */
-
+			}
 			break;
 		}
 	}
@@ -512,9 +511,9 @@ VOID foption(P(WINDOW *)win)
 PP(register WINDOW *win;)
 {
 	register OBJECT *obj;
-	char buffer[14];
-	char buf2[14];
-	char buf1[14];
+	char buffer[NAMELEN];
+	char buf2[NAMELEN];
+	char buf1[NAMELEN];
 
 	obj = get_tree(FILEOPTI);
 	save_ext(win->w_path, buf2);
@@ -800,8 +799,8 @@ PP(int16_t msgbuff;)
 	OBJECT *obj;
 	int16_t ret, type;
 	register WINDOW *win;
-	char buffer[14];
-	char buf2[14];
+	char buffer[NAMELEN];
+	char buf2[NAMELEN];
 	const char *str;
 	const char *str1;
 

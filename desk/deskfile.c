@@ -389,7 +389,7 @@ PP(int16_t attr;)
 {
 	register int32_t items, volume, sizes;
 	register DIR *addr;
-	char buffer[14];
+	char buffer[NAMELEN];
 	char *path;
 	int16_t ret, i;
 

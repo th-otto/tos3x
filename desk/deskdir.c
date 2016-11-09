@@ -75,7 +75,7 @@ STATIC int rename;
 STATIC char *fixsrc;
 STATIC char *fixdst;
 
-STATIC char filestr[14];				/* the buffer for the file */
+STATIC char filestr[NAMELEN];			/* the buffer for the file */
 
 int f_rename;
 
@@ -85,9 +85,9 @@ BOOLEAN count PROTO((const char *s));
 BOOLEAN countrec PROTO((NOTHING));
 BOOLEAN wrfile PROTO((char *fstr));
 int getinfo PROTO((const char *s, const char *d));
-BOOLEAN created PROTO((char *dir));
+int16_t created PROTO((char *dir));
 BOOLEAN deleted PROTO((NOTHING));
-BOOLEAN mystrcp PROTO((const char *s0, char *s1));
+BOOLEAN mystrcpy PROTO((const char *s0, char *s1));
 VOID chkbuf PROTO((int len, int bufsiz, char **src));
 VOID addfile PROTO((char *s, const char *obj));
 VOID rmstarb PROTO((char *src));
@@ -110,6 +110,7 @@ VOID updatbox PROTO((char *str));
  * s can be from different partitions
  *there is only one destination
  */
+/* 306de: 00e28572 */
 BOOLEAN dofiles(P(const char *) s, P(const char *) d, P(int16_t) code, P(int32_t *)ndirs, P(int32_t *)nfiles, P(int32_t *)tsize, P(int16_t) type, P(BOOLEAN) multiple)
 PP(const char *s;)
 PP(const char *d;)
@@ -126,7 +127,7 @@ PP(BOOLEAN multiple;)
 
 	UNUSED(trash);
 	if (*d == CHAR_FOR_CARTRIDGE)
-		return (FALSE);
+		return FALSE;
 
 	desk_wait(TRUE);
 	/* get the dialog box string */
@@ -158,7 +159,7 @@ PP(BOOLEAN multiple;)
 
 		buffer[0] = *s;
 
-		if ((d_display) && (code != OP_COUNT))
+		if (d_display && code != OP_COUNT)
 		{
 			inf_sset(cpbox, CSDRIVE, buffer);
 			draw_fld(cpbox, CSDRIVE);
@@ -176,15 +177,15 @@ PP(BOOLEAN multiple;)
 				goto clnup;
 			}
 			/* delete the whole disk    */
-			if ((type == DISK) && (code == OP_DELETE))
+			if (type == DISK && code == OP_DELETE)
 			{
 				if (fill_string(buffer, DELDISK) != 1)
 					goto cc_4;
 			}
 
-			if ((code == OP_COPY) || (code == OP_MOVE))
+			if (code == OP_COPY || code == OP_MOVE)
 			{
-				if ((type == SUBDIR) || (type == XDIR) || (type == DISK))
+				if (type == SUBDIR || type == XDIR || type == DISK)
 				{
 					if (!chk_par(s, d))	/* illegal  */
 					{
@@ -215,10 +216,10 @@ PP(BOOLEAN multiple;)
 		if (code != OP_COUNT)
 			x_del();
 		/* deselect object  */
-		if ((code == OP_DELETE) || (code == OP_MOVE))
+		if (code == OP_DELETE || code == OP_MOVE)
 			dr[*s - 'A'] = 1;
 
-		if ((code == OP_COPY) || (code == OP_MOVE))
+		if (code == OP_COPY || code == OP_MOVE)
 			dr[*d - 'A'] = 1;
 
 	cc_4:
@@ -231,7 +232,7 @@ PP(BOOLEAN multiple;)
 	*nfiles = numfiles;
 	*tsize = tolsize;
 
-  clnup:
+clnup:
 	/* deselect object  */
 	if (code == OP_DELETE || code == OP_MOVE)
 	{
@@ -245,22 +246,23 @@ PP(BOOLEAN multiple;)
 	desk_wait(FALSE);
 
 	if (f_abort)
-		return (TRUE);
+		return TRUE;
 
-	return (ret);
+	return ret;
 }
 
 
 /*
  * do the rm, cp and mv file job
  */
+/* 306de: 00e2883c */
 BOOLEAN doright(P(int) flag)
 PP(int flag;)
 {
 	register int ret;
 	register BOOLEAN retmsg;
 	char *temp;
-	char buf[14];
+	char buf[NAMELEN];
 
 	retmsg = TRUE;
 #if !BINEXACT
@@ -288,7 +290,7 @@ PP(int flag;)
 		updatname(CPFILE, filestr);
 		updatname(CPDIR, buf);
 		if (opcode != OP_DELETE)
-			if ((!(retmsg = wrfile(filestr))) || (rename) || (retmsg == SKIP))
+			if (!(retmsg = wrfile(filestr)) || rename || retmsg == SKIP)
 				goto endright;
 
 		if (opcode != OP_COPY)
@@ -334,7 +336,7 @@ PP(int flag;)
 		}
 	}
 
-  endright:
+endright:
 	Mfree(fixsrc);
 
 	if (opcode == OP_DELETE)
@@ -342,13 +344,14 @@ PP(int flag;)
 	else
 		Mfree(fixdst);
 
-	return (retmsg);
+	return retmsg;
 }
 
 
 /*
  * recursively cp or mv or rm files or directoies from a given path
  */
+/* 306de: 00e289ee */
 BOOLEAN doact(NOTHING)
 {
 	DMABUFFER *saved;
@@ -361,7 +364,7 @@ BOOLEAN doact(NOTHING)
 	{
 	act_1:
 		do1_alert(STFO8DEE);
-		return (FALSE);
+		return FALSE;
 	}
 
 	if (!(dumb = (DMABUFFER *) Malloc((int32_t) sizeof(DMABUFFER))))
@@ -512,7 +515,7 @@ BOOLEAN doact(NOTHING)
 						if (!(retmsg = wrfile(dumb->d_fname)))
 							goto mvend;
 
-						if ((rename) || (retmsg == SKIP))
+						if (rename || retmsg == SKIP)
 							goto clnfile;
 					}
 
@@ -569,6 +572,7 @@ BOOLEAN doact(NOTHING)
 /*
  * set the right drive and call the recursive routine to do the counting
  */
+/* 306de: 00e28f22 */
 BOOLEAN count(P(const char *) s)
 PP(const char *s;)
 {
@@ -581,18 +585,19 @@ PP(const char *s;)
 	if (*(tmp - 2) == '*')				/* a dir */
 	{
 		if (set_dir(s))					/* set the path     */
-			return (countrec());		/* recursive count  */
+			return countrec();			/* recursive count  */
 		else
-			return (FALSE);
+			return FALSE;
 	}
 	numfiles++;
-	return (TRUE);
+	return TRUE;
 }
 
 
 /*
  * count the file and directory recursivly
  */
+/* 306de: 00e28f6c */
 BOOLEAN countrec(NOTHING)
 {
 	DMABUFFER *saved;
@@ -604,7 +609,7 @@ BOOLEAN countrec(NOTHING)
 	if (!dumb)
 	{
 		do1_alert(STFO8DEE);
-		return (FALSE);
+		return FALSE;
 	}
 
 	retmsg = TRUE;
@@ -657,7 +662,7 @@ BOOLEAN countrec(NOTHING)
   endrec:
 	Fsetdta(saved);						/* reset the dta    */
 	Mfree(dumb);
-	return (retmsg);
+	return retmsg;
 }
 
 
@@ -665,6 +670,7 @@ BOOLEAN countrec(NOTHING)
  * Copy the file from the s to d
  */
 /* This was apparently ported from a BASIC program... */
+/* 306de: 00e290bc */
 BOOLEAN wrfile(P(char *) fstr)
 PP(char *fstr;)
 {
@@ -708,7 +714,7 @@ PP(char *fstr;)
 		Fclose(inhand);
 	ww_3:
 		f_abort = 1;
-		return (FALSE);
+		return FALSE;
 	}
 
 	saved = (DMABUFFER *) Fgetdta();
@@ -770,11 +776,13 @@ PP(char *fstr;)
 				time[1] = Tgetdate();
 				Fdatime(&time, inhand, 1);
 			}
-		  y22:
+		y22:
 			rename = 1;
 			goto y1;
 		} else
+		{
 			inhand = Fopen(fixsrc, 0);
+		}
 	}
 
 
@@ -785,8 +793,14 @@ PP(char *fstr;)
 		{
 			retmsg = SKIP;
 			if (crted)
+			{
+#if !BINEXACT
+				/* BUG: missing  */
+				Fclose(outhand);
+#endif
 				Fdelete(fixdst);
-
+			}
+			
 			if (do1_alert(RDERROR) == 2)
 			{							/* abort */
 				f_abort = 1;
@@ -796,8 +810,7 @@ PP(char *fstr;)
 		}
 
 
-
-	  create:
+	create:
 		if (sttime)
 		{
 			sttime = 0;
@@ -812,8 +825,10 @@ PP(char *fstr;)
 					f_abort = 1;
 					retmsg = FALSE;
 				} else
+				{
 					retmsg = SKIP;
-
+				}
+				
 				goto y1;
 			}
 
@@ -823,7 +838,10 @@ PP(char *fstr;)
 		if ((wrsiz = Fwrite(outhand, tmpsiz, buffer)) < 0)
 		{
 			retmsg = SKIP;
+#if (TOSVERSION >= 0x400) | !BINEXACT
+			/* BUG: in 3.x: Fdelete() on open file */
 			Fclose(outhand);
+#endif
 			Fdelete(fixdst);
 
 			if (do1_alert(WRERROR) == 2)
@@ -832,19 +850,30 @@ PP(char *fstr;)
 				retmsg = FALSE;
 			}
 
+#if (TOSVERSION < 0x400) & BINEXACT
+			goto y0;
+#else
 			goto y1;
+#endif
 		}
 		/* check if there are sufficent memory */
 		if (wrsiz != tmpsiz)
 		{								/* not sufficent memory ?? */
 			f_abort = 1;
 			retmsg = FALSE;
+#if (TOSVERSION >= 0x400) | !BINEXACT
+			/* BUG: in 3.x: Fdelete() on open file */
 			Fclose(outhand);
+#endif
 			Fdelete(fixdst);
 			buf[0] = *fixdst;
 			buf[1] = 0;
 			fill_string(buf, STDISKFULL);
+#if (TOSVERSION < 0x400) & BINEXACT
+			goto y0;
+#else
 			goto y1;
+#endif
 		}
 
 		copysiz -= tmpsiz;
@@ -855,20 +884,23 @@ PP(char *fstr;)
 	if (p_timedate)
 		Fdatime(&time, outhand, 1);
 
+#if (TOSVERSION < 0x400) & BINEXACT
+y0:
+#endif
 	Fclose(outhand);
-  y1:
+y1:
 	Mfree(buffer);
-  y2:
+y2:
 	updatnum(NUMFILE, --numfiles);
 	Fsetdta(saved);
 
 	Fclose(inhand);
 	Mfree(mydta);
 
-	if ((opcode == OP_MOVE) && (retmsg == TRUE))
+	if (opcode == OP_MOVE && retmsg == TRUE)
 		upfdesk(fixsrc, fixdst);
 
-	return (retmsg);
+	return retmsg;
 }
 
 
@@ -876,6 +908,7 @@ PP(char *fstr;)
  * Copy s and d into fixsrc and fixdst. Also check it is one file
  * copy or files and directories copy
  */
+/* 306de: 00e29560 */
 int getinfo(P(const char *) s, P(const char *) d)
 PP(const char *s;)
 PP(const char *d;)
@@ -896,14 +929,14 @@ PP(const char *d;)
 
 	fixsrc = (char *) Malloc((long) srcbuf);
 	fixdst = (char *) Malloc((long) dstbuf);
-	sdir = mystrcp(s, fixsrc);
+	sdir = mystrcpy(s, fixsrc);
 
 	if (opcode == OP_DELETE)			/* do directories or files rm */
-		return ((sdir) ? DTOD : OK);
+		return sdir ? DTOD : OK;
 	else								/* do directories or files cp or mv */
 	{
 		getlastpath(filestr, fixsrc);
-		if (((ddir = mystrcp(d, fixdst))) && (sdir))
+		if ((ddir = mystrcpy(d, fixdst)) && sdir)
 		{								/* dir to dir */
 			if (*filestr)
 			{							/* folder cp */
@@ -911,15 +944,15 @@ PP(const char *d;)
 				addfile(fixdst, filestr);	/* add the folder to dst */
 
 				ret = created(filestr);	/* create the 1st folder */
-				if ((!ret) || (ret == SKIP))
+				if (!ret || ret == SKIP)
 				{
 					Mfree(fixsrc);
 					Mfree(fixdst);
-					return (ret);
+					return ret;
 				}
 				strcat(fixdst, bckslsh);
 			}
-			return (DTOD);
+			return DTOD;
 		}
 		if (ddir)
 		{								/* one file to dir */
@@ -931,7 +964,8 @@ PP(const char *d;)
 }
 
 
-BOOLEAN created(P(char *)dir)
+/* 306de: 00e29726 */
+int16_t created(P(char *)dir)
 PP(char *dir;)
 {
 	int ret;
@@ -943,11 +977,11 @@ PP(char *dir;)
 	{
 	case QUIT:
 		f_abort = 1;
-		return (FALSE);
+		return FALSE;
 	case SKIP:
-		return (SKIP);
+		return SKIP;
 	case FALSE:
-		return (FALSE);
+		return FALSE;
 	case CHECK:
 		goto rechkd2;
 	case OK:
@@ -956,13 +990,13 @@ PP(char *dir;)
 		{
 			if (write_save)
 				goto ll_1;
-			/* retry    */
+			/* retry */
 			if ((ret = fill_string(fixdst, CNTCRTDR)) == 2)
 				goto repeat;
 			else if (ret == 3)			/* abort */
 			{
 				f_abort = 1;
-				return (FALSE);
+				return FALSE;
 			}
 		}
 
@@ -978,19 +1012,20 @@ PP(char *dir;)
 	}
   ll_1:								/* update the number of dir */
 	updatnum(NUMDIR, --numdirs);
-	return (TRUE);
+	return TRUE;
 }
 
 
+/* 306de: 00e29826 */
 BOOLEAN deleted(NOTHING)
 {
 	int ret;
-	char buffer[14];
+	char buffer[NAMELEN];
 
 	rmstarb(fixsrc);					/* remove back slash    */
 
 	if (!fixsrc[2])						/* at the root ?    */
-		return (TRUE);
+		return TRUE;
 
 	getlastpath(buffer, fixsrc);
 	updatbox(buffer);
@@ -1002,7 +1037,7 @@ BOOLEAN deleted(NOTHING)
 		else if (ret == 3)				/* abort */
 		{
 			f_abort = 1;
-			return (FALSE);
+			return FALSE;
 		}
 	} else
 		upfdesk(fixsrc, (char *) 0);
@@ -1010,7 +1045,7 @@ BOOLEAN deleted(NOTHING)
 	if (opcode == OP_DELETE)
 		updatnum(NUMDIR, --numdirs);
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -1020,7 +1055,8 @@ BOOLEAN deleted(NOTHING)
  * if s0 -> c:\d1\d2\*.* or c:\d1\d2\f, after the call,
  * s1 -> c:\d1\d2\  or c:\d1\d2\f ;
  */
-BOOLEAN mystrcp(P(const char *) s0, P(char *) s1)
+/* 306de: 00e298e2 */
+BOOLEAN mystrcpy(P(const char *) s0, P(char *) s1)
 PP(const char *s0;)
 PP(char *s1;)
 {
@@ -1039,6 +1075,7 @@ PP(char *s1;)
 /*
  * check the size of source buffer
  */
+/* 306de: 00e29920 */
 VOID chkbuf(P(int) len, P(int) bufsiz, P(char **) src)
 PP(int len;)
 PP(int bufsiz;)
@@ -1062,6 +1099,7 @@ PP(char **src;)
  * s -> c:\d1\d2\*.* or c:\d1\d2\, obj -> f; after the call
  * s -> c:\d1\d2\f
  */
+/* 306de: 00e29984 */
 VOID addfile(P(char *) s, P(const char *) obj)
 PP(char *s;)
 PP(const char *obj;)
@@ -1084,6 +1122,7 @@ PP(const char *obj;)
  * src -> c:\d1\d2\*.* or -> c:\d3\d5\, after the call,
  * src -> c:\d1\d2 or -> c:\d3\d5
  */
+/* 306de: 00e299ba */
 VOID rmstarb(P(char *) src)
 PP(register char *src;)
 {
@@ -1100,6 +1139,7 @@ PP(register char *src;)
  * str -> c:\d1\d2\ or c:\d1\d2\*.* or c:\d2\d4 or c:\; after the call,
  * str -> c:\d1\  or c:\d2\ or c:\
  */
+/* 306de: 00e299e6 */
 VOID backdir(P(char *) str)
 PP(register char *str;)
 {
@@ -1121,6 +1161,7 @@ PP(register char *str;)
 /*
  * check the directory or file is exist or not
  */
+/* 306de: 00e29a1c */
 int chkdf(P(char *)str, P(int) flag)
 PP(char *str;)
 PP(int flag;)
@@ -1138,7 +1179,7 @@ PP(int flag;)
 			goto cc_3;
 
 		if (write_save)					/* overwrite existing file  */
-			return (OK);
+			return OK;
 
 	cc_1:
 		if ((ret = Fopen(fixdst, 0)) >= 0)
@@ -1156,7 +1197,7 @@ PP(int flag;)
 				}
 			}
 
-			return (ret);
+			return ret;
 		}
 	} else
 	{
@@ -1173,14 +1214,14 @@ PP(int flag;)
 												/* update name conflict box */
 			change = FALSE;
 
-			if ((ret1 == CHECK) ||		/* user enter new name  */
-				((ret1 == COPY) && f_rename && first))
+			if (ret1 == CHECK ||		/* user enter new name  */
+				(ret1 == COPY && f_rename && first))
 			{
 				first = FALSE;
 				goto cc_6;
 			}
 
-			return (ret1);
+			return ret1;
 		}
 	}
 
@@ -1190,6 +1231,7 @@ PP(int flag;)
 }
 
 
+/* 306de: 00e29b42 */
 int edname(P(char *)src, P(int) kind, P(int) change)
 PP(char *src;)
 PP(int kind;)
@@ -1263,11 +1305,12 @@ PP(int change;)
  * pack	 : src -> file    rsc, after the call; src -> file.rsc
  * unpack: buf -> unpack.rsc, after the call, buf -> unpack  rsc.
  */
+/* 306de: 00e29ce4 */
 VOID pack(P(char *)src, P(int) flag)
 PP(char *src;)
 PP(int flag;)
 {
-	char temp[14];
+	char temp[NAMELEN];
 
 	if (flag)
 		unfmt_str(src, temp);			/* pack */
@@ -1282,6 +1325,7 @@ PP(int flag;)
  * src -> c:\f or c:\d1\f or c:\f\, or c:\f\*.*, after the call,
  * buf -> f. But if src ->c:\, then buf -> Null
  */
+/* 306de: 00e29d30 */
 VOID getlastpath(P(char *)buf, P(char *)src)
 PP(register char *buf;)
 PP(register char *src;)
@@ -1323,6 +1367,7 @@ PP(register char *src;)
 /*
  * up date the number of file or directory in the dialog box
  */
+/* 306de: 00e29d88 */
 VOID updatnum(P(int) obj, P(long) num)
 PP(int obj;)
 PP(long num;)
@@ -1338,6 +1383,7 @@ PP(long num;)
 /*
  * update the file or directory in the dialog box
  */
+/* 306de: 00e29dc0 */
 VOID updatname(P(int) obj, P(char *)str)
 PP(int obj;)
 PP(char *str;)
@@ -1352,6 +1398,7 @@ PP(char *str;)
 }
 
 
+/* 306de: 00e29e1c */
 VOID updatbox(P(char *)str)
 PP(char *str;)
 {

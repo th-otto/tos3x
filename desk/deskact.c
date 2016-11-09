@@ -554,7 +554,7 @@ PP(int16_t my;)
 	register int16_t i;
 	int16_t temp, first, type, status, ntype;
 	int16_t x, y;
-	char buffer[14];
+	char buffer[NAMELEN];
 	const char *str;
 	const char *tail;
 
@@ -1082,7 +1082,7 @@ VOID to_desk(P(int16_t) ditem, P(const char *)tail)
 PP(int16_t ditem;)
 PP(const char *tail;)
 {
-	char buffer[14];
+	char buffer[NAMELEN];
 	int16_t ret;
 	register IDTYPE *itype;
 
