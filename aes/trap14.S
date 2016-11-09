@@ -72,7 +72,9 @@ _trp13:
 
 
 	xdef _trp14
-_trp14:
+_trp14: ds.b 0
+	xdef _trp14int
+_trp14int: ds.b 0
 	move.l	(sp)+,trp14aret
 	trap	#14
 	move.l	trp14aret,-(sp)

@@ -680,7 +680,7 @@ VOID ins_wicons(NOTHING)
 		{
 			obj[WNAME].ob_flags &= ~(SELECTABLE | EDITABLE);
 
-			if (itype == SUBDIR)
+			if (itype == FA_DIREC)
 			{
 				obj[WFOLDER].ob_state = SELECTED;
 				obj[WNONE].ob_state = DISABLED;
@@ -694,7 +694,7 @@ VOID ins_wicons(NOTHING)
 			obj[WFOLDER].ob_flags &= ~(SELECTABLE | RBUTTON);
 			obj[WNONE].ob_flags &= ~(SELECTABLE | RBUTTON);
 
-			app = app_icon(buf2, (itype == SUBDIR) ? FOLDER : -1, &index);
+			app = app_icon(buf2, itype == FA_DIREC ? FOLDER : -1, &index);
 			pref = app->a_pref;
 			xinf_sset(obj, WNAME, buf2);
 		} else

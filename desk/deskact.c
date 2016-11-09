@@ -66,7 +66,7 @@ PP(int16_t *type;)
 			} else
 			{
 				dir = get_dir(*win, i);
-				if (dir->d_att & SUBDIR)	/* dir is OK    */
+				if (dir->d_att & FA_DIREC)	/* dir is OK    */
 					return TRUE;
 
 				str = put_name(*win, dir->d_name);
@@ -566,7 +566,7 @@ PP(int16_t my;)
 
 		while (status)
 		{
-			if (type == SUBDIR)
+			if (type == FA_DIREC)
 			{
 				ntype = XDIR;
 				save_mid(NO_CONST(str), buffer); /* BUG: save_mid can modify str */
@@ -576,7 +576,7 @@ PP(int16_t my;)
 				save_ext(str, buffer);
 			}
 
-			app_icon(buffer, type == SUBDIR ? FOLDER : -1, &temp);
+			app_icon(buffer, type == FA_DIREC ? FOLDER : -1, &temp);
 
 			if ((i = make_icon(0, temp, ntype, buffer)) == -1)
 			{
@@ -1143,9 +1143,10 @@ PP(WINDOW *dwin;)
 	if (ditem)							/* copy to something    */
 	{
 		dir = get_dir(dwin, ditem);
-		if (dir->d_att & SUBDIR)		/* win file to folder   */
+		if (dir->d_att & FA_DIREC)		/* win file to folder   */
+		{
 			cat_path(dir->d_name, temp);
-		else							/* launch application   */
+		} else							/* launch application   */
 		{
 			if (swin)					/* window to window */
 			{

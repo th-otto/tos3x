@@ -768,8 +768,9 @@ name: ds.t size
 	ds.b 4
 	
 	INT(_no_aes)
-	
-	ds.b $30
+	V(_dtabuf,b,44)
+
+	ds.b 4
 	
 	PTR(_ctl_pd)
 	INT(_rename)

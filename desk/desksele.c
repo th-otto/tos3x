@@ -208,11 +208,11 @@ PP(int16_t *type;)
 			if (dir[i].d_state & SELECTED)
 			{
 				str = put_name(x_win, &dir[i].d_name[0]);
-				if (dir[i].d_att & SUBDIR)
+				if (dir[i].d_att & FA_DIREC)
 				{
 					strcat(str, wilds);
 					d_dir++;
-					*type = SUBDIR;
+					*type = FA_DIREC;
 				} else
 				{
 					*type = x_type;
@@ -246,7 +246,7 @@ PP(int16_t *type;)
 	d_dir = 0;
 
 	x_type = DESKICON;					/* try desktop first    */
-	x_win = (WINDOW *) 0;
+	x_win = NULL;
 
 	if (i_next(1, background, &x_index))
 		return (x_next(name, type));

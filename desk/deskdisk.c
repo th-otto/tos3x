@@ -749,7 +749,7 @@ PP(register int16_t which;)
 
 
 /* 306de: 00e2ab0c */
-VOID (P(OBJECT *)obj, P(int16_t) which)
+VOID fc_draw(P(OBJECT *)obj, P(int16_t) which)
 PP(OBJECT *obj;)
 PP(int16_t which;)
 {

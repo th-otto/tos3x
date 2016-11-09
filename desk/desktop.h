@@ -94,12 +94,12 @@ typedef intptr_t LPTREE;
 #define XCA_ON          0x00003111L     /* read back the cache on       */
 #define XCA_OFF         0x00000000L     /* read back cache off          */
 
-#define READ            0x0001
-#define HIDDEN          0x0002
-#define SYSTEM          0x0004
-#define VOLUME          0x0008
-#define SUBDIR          0x0010
-#define MODIFIED        0x0020
+#define FA_RDONLY       0x0001
+#define FA_HIDDEN       0x0002
+#define FA_SYSTEM       0x0004
+#define FA_LABEL        0x0008
+#define FA_DIREC        0x0010
+#define FA_ARCH         0x0020
 
 
 /*****  APPLICATION FILE TYPE DEFINES      ******/
@@ -742,6 +742,7 @@ int16_t rom_ram PROTO((int which, intptr_t pointer));
 
 int32_t trap PROTO((short code, ...));
 int32_t trp14 PROTO((short code, ...));
+int16_t trp14int PROTO((short code, ...));
 int32_t trp13 PROTO((short code, ...));
 
 VOID deskerr PROTO((NOTHING));

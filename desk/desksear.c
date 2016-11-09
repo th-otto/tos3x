@@ -112,7 +112,7 @@ PP(char *filename;)
 
 		while (status)
 		{
-			if (type == DISK || type == SUBDIR || type == XDIR)
+			if (type == DISK || type == FA_DIREC || type == XDIR)
 			{
 				if (*str == CHAR_FOR_CARTRIDGE)
 				{
@@ -200,7 +200,7 @@ PP(register char *filename;)
 
 	desk_wait(TRUE);
 	/* look for matching    */
-	ret = Fsfirst(filename, 0x31);
+	ret = Fsfirst(filename, FA_ARCH|FA_DIREC|FA_RDONLY);
 
 	while (!ret)
 	{									/* matched      */
@@ -224,11 +224,11 @@ PP(register char *filename;)
 	desk_wait(TRUE);
 
 	Fsetdta(ldtabuf);					/* set the new dta  */
-	ret = Fsfirst(getall, 0x31);
+	ret = Fsfirst(getall, FA_ARCH|FA_DIREC|FA_RDONLY);
 
 	while (!ret)
 	{
-		if ((ldtabuf->dirfile.d_att & SUBDIR) && (ldtabuf->dirfile.d_name[0] != '.'))
+		if ((ldtabuf->dirfile.d_att & FA_DIREC) && (ldtabuf->dirfile.d_name[0] != '.'))
 		{
 			path2[0] = '.';
 			path2[1] = '\\';
@@ -249,11 +249,9 @@ PP(register char *filename;)
 				Dsetpath("..");
 			else
 				break;					/* quit */
-
 		}
-		/* if SUBDIR   */
 		ret = Fsnext();
-	}									/* while       */
+	}
 
   s_exit:
 	Mfree(ldtabuf);

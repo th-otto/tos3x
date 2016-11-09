@@ -314,7 +314,7 @@ VOID sh_witem(NOTHING)
 
 		strcpy(newstr, oldstr);
 
-		if (dir->d_att & SUBDIR)		/* directory file   */
+		if (dir->d_att & FA_DIREC)		/* directory file   */
 		{
 			strcat(newstr, wilds);		/* attach wild card */
 			/* i_status = FALSE; */		/* force it to do only one file */
@@ -353,10 +353,10 @@ VOID sh_witem(NOTHING)
 		savestr = ((TEDINFO *) (obj[FIFILE].ob_spec))->te_ptext;
 		len = strlen(savestr);
 	sf_1:
-		if (!(dir->d_att & SUBDIR))
+		if (!(dir->d_att & FA_DIREC))
 		{
-			obj[FIRONLY].ob_state = (dir->d_att & READ) ? SELECTED : NORMAL;
-			obj[FIRWRITE].ob_state = (dir->d_att & READ) ? NORMAL : SELECTED;
+			obj[FIRONLY].ob_state = (dir->d_att & FA_RDONLY) ? SELECTED : NORMAL;
+			obj[FIRWRITE].ob_state = (dir->d_att & FA_RDONLY) ? NORMAL : SELECTED;
 		} else
 		{
 			obj[FIRONLY].ob_state = DISABLED;
@@ -422,18 +422,18 @@ VOID sh_witem(NOTHING)
 			unfmt_str(buffer, newname);
 			rep_path(newname, newstr);
 
-			if (!(dir->d_att & SUBDIR))
+			if (!(dir->d_att & FA_DIREC))
 			{
 				if (obj[FIRONLY].ob_state & SELECTED)
 				{
-					if (dir->d_att & READ)
+					if (dir->d_att & FA_RDONLY)
 						goto sf_2;
 
-					ret = dir->d_att |= READ;
+					ret = dir->d_att |= FA_RDONLY;
 				} else
 				{
-					if (dir->d_att & READ)
-						ret = dir->d_att &= ~READ;
+					if (dir->d_att & FA_RDONLY)
+						ret = dir->d_att &= ~FA_RDONLY;
 					else
 						goto sf_2;
 				}
@@ -535,7 +535,7 @@ PP(char *buffer;)
 		sizes[1] = sizes[0] * sizes[2] * sizes[3];
 		f_str(obj, DIAVAIL, sizes[1]);
 		Fsetdta(&dtabuf);
-		if (Fsfirst(buffer, VOLUME))
+		if (Fsfirst(buffer, FA_LABEL))
 			newname[0] = 0;				/* No volume label  */
 		else
 			fmt_str(dtabuf.dirfile.d_name, newname);
@@ -696,7 +696,7 @@ PP(const char *tail;)
 	{
 		dir = get_dir(win, item);
 
-		if (dir->d_att & SUBDIR)		/* open folder  */
+		if (dir->d_att & FA_DIREC)		/* open folder  */
 		{
 			graf_mkstate(&dump, &dump, &dump, &key);
 

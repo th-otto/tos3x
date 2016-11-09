@@ -185,7 +185,7 @@ PP(BOOLEAN multiple;)
 
 			if (code == OP_COPY || code == OP_MOVE)
 			{
-				if (type == SUBDIR || type == XDIR || type == DISK)
+				if (type == FA_DIREC || type == XDIR || type == DISK)
 				{
 					if (!chk_par(s, d))	/* illegal  */
 					{
@@ -376,7 +376,7 @@ BOOLEAN doact(NOTHING)
 	Fsetdta(dumb);
 	strcat(fixsrc, getall);
 
-	if (!(error = Fsfirst(fixsrc, 0x37)))
+	if (!(error = Fsfirst(fixsrc, FA_ARCH|FA_DIREC|FA_RDONLY|FA_HIDDEN|FA_SYSTEM)))
 	{
 		do
 		{
@@ -389,7 +389,7 @@ BOOLEAN doact(NOTHING)
 
 			if (dumb->d_fname[0] != HOME)
 			{
-				if (SUBDIR & dumb->d_fattr)
+				if (FA_DIREC & dumb->d_fattr)
 				{
 					chkbuf(srclen, srcbuf, &fixsrc);	/* check buf size */
 					addfile(fixsrc, dumb->d_fname);	/* add a dir into the path */
@@ -616,13 +616,13 @@ BOOLEAN countrec(NOTHING)
 	saved = (DMABUFFER *) Fgetdta();	/* save the current dta */
 	Fsetdta(dumb);
 
-	if (!Fsfirst(curall, 0x37))
+	if (!Fsfirst(curall, FA_ARCH|FA_DIREC|FA_RDONLY|FA_HIDDEN|FA_SYSTEM))
 	{
 		do
 		{
 			if (dumb->d_fname[0] != HOME)
 			{
-				if (SUBDIR & dumb->d_fattr)
+				if (FA_DIREC & dumb->d_fattr)
 				{						/* setpath to one more down */
 					if (Dsetpath(dumb->d_fname))
 					{
@@ -720,7 +720,7 @@ PP(char *fstr;)
 	saved = (DMABUFFER *) Fgetdta();
 	Fsetdta(mydta = (DMABUFFER *) Malloc((long) sizeof(DMABUFFER)));
 
-	if (Fsfirst(fixsrc, 0x37))
+	if (Fsfirst(fixsrc, FA_ARCH|FA_DIREC|FA_RDONLY|FA_HIDDEN|FA_SYSTEM))
 	{
 		retmsg = SKIP;
 		if (do1_alert(RDERROR) == 2)	/* abort */

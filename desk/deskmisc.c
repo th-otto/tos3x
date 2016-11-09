@@ -62,7 +62,7 @@ PP(int16_t drive;)
 	strcpy(buffer, wildext);
 	buffer[0] = drive;
 	Fsetdta(&dtabuf);					/* set dta buffer   */
-	if ((ret = Fsfirst(buffer, 0x3F)))
+	if ((ret = Fsfirst(buffer, FA_ARCH|FA_DIREC|FA_RDONLY|FA_HIDDEN|FA_SYSTEM|FA_LABEL)))
 	{
 		if (ret == E_FILNF)				/* that's OK    */
 			ret = FALSE;
@@ -672,11 +672,12 @@ PP(register char *dst;)
 	
 	buffer = buf;
 
-	if (dir->d_att & READ)
-		*dst++ = 0x7F;
-	else
+	if (dir->d_att & FA_RDONLY)
 	{
-		*dst++ = (dir->d_att & SUBDIR) ? 0x07 : ' ';
+		*dst++ = 0x7F;
+	} else
+	{
+		*dst++ = (dir->d_att & FA_DIREC) ? 0x07 : ' ';
 	}
 
 	*dst++ = ' ';
@@ -702,13 +703,15 @@ PP(register char *dst;)
 
 	bfill(11, ' ', dst++);
 
-	if (dir->d_att & SUBDIR)
+	if (dir->d_att & FA_DIREC)
 	{
 		buffer[0] = ' ';
 		buffer[1] = 0;
 	} else
+	{
 		lbintoasc(dir->d_size, buffer);
-
+	}
+	
 	len = strlen(buffer);
 
 	strcpy(dst + (10 - len), buffer);
