@@ -13,6 +13,7 @@
 #include "toserrno.h"
 
 
+/* 306de: 00e2f5aa */
 int16_t m_sfirst(P(const char *) path, P(int16_t) att)
 PP(const char *path;)
 PP(int16_t att;)
@@ -35,6 +36,7 @@ PP(int16_t att;)
 /*
  * Check path length and allocate memory
  */
+/* 306de: 00e2f610 */
 int16_t c_path_alloc(P(const char *) path)
 PP(const char *path;)
 {
@@ -53,6 +55,7 @@ PP(const char *path;)
 }
 
 
+/* 306de: 00e2f644 */
 BOOLEAN hit_disk(P(int16_t) drive)
 PP(int16_t drive;)
 {
@@ -82,6 +85,7 @@ PP(int16_t item;)
 	return &iconaddr[item];
 }
 #else
+/* 306de: 00e2f6b2 */
 ICONBLK *get_icon(P(int16_t) item)
 PP(int16_t item;)
 {
@@ -93,6 +97,7 @@ PP(int16_t item;)
 #endif
 
 
+/* 306de: 00e2f6e4 */
 OBJECT *get_tree(P(int16_t) item)
 PP(int16_t item;)
 {
@@ -116,6 +121,7 @@ PP(int16_t item;)
 #endif
 
 
+/* 306de: 00e2f702 */
 char *get_string(P(int16_t) item)
 PP(int16_t item;)
 {
@@ -126,6 +132,7 @@ PP(int16_t item;)
 }
 
 
+/* 306de: 00e2f722 */
 DIR *get_dir(P(WINDOW *)win, P(int16_t) item)
 PP(WINDOW *win;)
 PP(int16_t item;)
@@ -139,6 +146,7 @@ PP(int16_t item;)
 }
 
 
+/* 306de: 00e2f752 */
 VOID up_1(P(WINDOW *)win)
 PP(WINDOW *win;)
 {
@@ -150,6 +158,7 @@ PP(WINDOW *win;)
 /*
  * Update window because someone change the d_state
  */
+/* 306de: 00e2f786 */
 VOID up_2(P(WINDOW *)win)
 PP(WINDOW *win;)
 {
@@ -161,6 +170,7 @@ PP(WINDOW *win;)
 /*
  * Put a file name into the win path buffer
  */
+/* 306de: 00e2f79e */
 char *put_name(P(WINDOW *)win, P(const char *) name)
 PP(WINDOW *win;)
 PP(const char *name;)
@@ -175,6 +185,7 @@ PP(const char *name;)
 /*
  * Is the child inside the parent visible area?
  */
+/* 306de: 00e2f7d8 */
 BOOLEAN in_parent(P(OBJECT *)obj, P(int16_t) child)
 PP(OBJECT *obj;)
 PP(int16_t child;)
@@ -183,6 +194,7 @@ PP(int16_t child;)
 }
 
 
+/* 306de: 00e2f826 */
 VOID xinf_sset(P(OBJECT *)obj, P(int16_t) item, P(const char *)buf1)
 PP(OBJECT *obj;)
 PP(int16_t item;)
@@ -195,6 +207,7 @@ PP(const char *buf1;)
 }
 
 
+/* 306de: 00e2f85a */
 VOID mice_state(P(int16_t) state)
 PP(int16_t state;)
 {
@@ -202,6 +215,7 @@ PP(int16_t state;)
 }
 
 
+/* 306de: 00e2f870 */
 VOID desk_wait(P(BOOLEAN) state)
 PP(BOOLEAN state;)
 {
@@ -212,6 +226,7 @@ PP(BOOLEAN state;)
 /*
  * Draw a single field of a dialog box
  */
+/* 306de: 00e2f890 */
 VOID draw_fld(P(OBJECT *)obj, P(int16_t) which)
 PP(register OBJECT *obj;)
 PP(int16_t which;)
@@ -222,13 +237,14 @@ PP(int16_t which;)
 
 	objc_gclip((LPTREE)obj, which, &x, &y, &t.g_x, &t.g_y, &t.g_w, &t.g_h);
 #else
-	rc_copy((GRECT *)&obj->ob_x, &t);
+	rc_copy((GRECT *)&obj[which].ob_x, &t);
 	objc_offset(obj, which, &t.g_x, &t.g_y);
 #endif
 	objc_draw(obj, which, 0, t.g_x, t.g_y, t.g_w, t.g_h);
 }
 
 
+/* 306de: 00e2f904 */
 BOOLEAN getcookie(P(int32_t) cookie, P(int32_t *)p_value)
 PP(int32_t cookie;)
 PP(int32_t *p_value;)
@@ -262,6 +278,7 @@ PP(int32_t *p_value;)
 /*
  * Format a value and fill the leading space
  */
+/* 306de: 00e2f94a */
 VOID f_str(P(OBJECT *)obj, P(int16_t) item, P(int32_t) value)
 PP(OBJECT *obj;)
 PP(int16_t item;)
@@ -284,6 +301,7 @@ PP(int32_t value;)
 /*
  * Check the level of depth
  */
+/* 306de: 00e2f9d8 */
 int16_t ch_level(P(const char *) path)
 PP(const char *path;)
 {
@@ -301,6 +319,7 @@ PP(const char *path;)
 }
 
 
+/* 306de: 00e2fa08 */
 OBJECT *fm_draw(P(int16_t) item)
 PP(int16_t item;)
 {
@@ -317,6 +336,7 @@ PP(int16_t item;)
 /*
  * Wait for redraw message
  */
+/* 306de: 00e2fa68 */
 VOID wait_msg(NOTHING)
 {
 	int16_t msgbuff[8];
@@ -337,6 +357,7 @@ VOID wait_msg(NOTHING)
 }
 
 
+/* 306de: 00e2fafe */
 VOID do_finish(P(int16_t) item)
 PP(int16_t item;)
 {
@@ -348,6 +369,7 @@ PP(int16_t item;)
 }
 
 
+/* 306de: 00e2fb5a */
 int16_t xform_do(P(OBJECT *)obj, P(int16_t) which)
 PP(OBJECT *obj;)
 PP(int16_t which;)
@@ -363,6 +385,7 @@ PP(int16_t which;)
 /*
  * Form_do and draw
  */
+/* 306de: 00e2fb90 */
 int16_t fmdodraw(P(int16_t) item, P(int16_t) which)
 PP(int16_t item;)
 PP(int16_t which;)
@@ -381,9 +404,10 @@ PP(int16_t which;)
 /*
  * This routine convert binary number to ascii value
  */
+/* 306de: 00e2fbc0 */
 VOID lbintoasc(P(int32_t) longval, P(char *)buffer)
 PP(register int32_t longval;)
-PP(register char *buffer;)
+PP(char *buffer;)
 {
 	register int16_t i;
 	uint16_t digit;
@@ -394,8 +418,9 @@ PP(register char *buffer;)
 	i = 0;
 	k = 0;
 	if (!longval)
+	{
 		buffer[k++] = '0';
-	else
+	} else
 	{
 		while (longval)
 		{
@@ -413,6 +438,7 @@ PP(register char *buffer;)
 }
 
 
+/* 306de: 00e2fc7c */
 char *r_slash(P(const char *)path)
 PP(register const char *path;)
 {
@@ -436,6 +462,7 @@ PP(register const char *path;)
 /*
  * The path should look like A:\*.*
  */
+/* 306de: 00e2fcb0 */
 BOOLEAN xcut_path(P(char *)path, P(char *)buffer, P(int16_t) cut)
 PP(register char *path;)
 PP(char *buffer;)
@@ -475,6 +502,7 @@ PP(int16_t cut;)
  * Cut one directory inside the path
  * The path should look like A:\*.*
  */
+/* 306de: 00e2fd38 */
 BOOLEAN cut_path(P(char *)path)
 PP(register char *path;)
 {
@@ -488,6 +516,7 @@ PP(register char *path;)
  * Concat a path
  * A:\aaa\*.*  -> A:\aaa\bbb\*.*
  */
+/* 306de: 00e2fd62 */
 VOID cat_path(P(char *)name, P(char *)path)
 PP(char *name;)
 PP(register char *path;)
@@ -508,6 +537,7 @@ PP(register char *path;)
  * Replace path
  * A:\aaa\*.* -> A:\aaa\bbb
  */
+/* 306de: 00e2fdb6 */
 VOID rep_path(P(const char *) name, P(char *) path)
 PP(const char *name;)
 PP(char *path;)
@@ -521,6 +551,7 @@ PP(char *path;)
 /*
  * Perform an alert box message
  */
+/* 306de: 00e2fdde */
 int16_t do_alert(P(int16_t) button, P(int16_t) item)
 PP(int16_t button;)
 PP(int16_t item;)
@@ -529,6 +560,7 @@ PP(int16_t item;)
 }
 
 
+/* 306de: 00e2fdfc */
 int16_t do1_alert(P(int16_t) item)
 PP(int16_t item;)
 {
@@ -536,6 +568,7 @@ PP(int16_t item;)
 }
 
 
+/* 306de: 00e2fe10 */
 VOID rc_center(P(GRECT *)rec1, P(GRECT *)rec2)
 PP(GRECT *rec1;)
 PP(GRECT *rec2;)
@@ -545,7 +578,7 @@ PP(GRECT *rec2;)
 }
 
 
-
+/* 306de: 00e2fe54 */
 VOID my_itoa(P(uint16_t) number, P(char *)pnumstr)
 PP(uint16_t number;)
 PP(register char *pnumstr;)
@@ -557,6 +590,7 @@ PP(register char *pnumstr;)
 	pnumstr[2] = '\0';
 	merge_str(((number > 9) ? pnumstr : pnumstr + 1), "%W", &number);
 }
+
 
 /*
  *	Routine to format DOS style time.
@@ -571,6 +605,7 @@ PP(register char *pnumstr;)
  *
  *	IF(EUROTIME)THEN Military Time Format 
  */
+/* 306de: 00e2fea6 */
 VOID fmt_time(P(uint16_t) time, P(char *)ptime)
 PP(register uint16_t time;)
 PP(register char *ptime;)
@@ -580,6 +615,7 @@ PP(register char *ptime;)
 
 	val = ((time & 0xf800) >> 11) & 0x001f;
 
+#if MULTILANG_SUPPORT
 #if !BINEXACT
 	pm = FALSE; /* quiet compiler */
 #endif
@@ -609,6 +645,30 @@ PP(register char *ptime;)
 		strcpy(&ptime[4], "  ");
 	else
 		strcpy(&ptime[4], pm ? "pm" : "am");
+#else
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_TR) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO)
+	my_itoa(val, &ptime[0]);
+	my_itoa(((time & 0x07e0) >> 5) & 0x003f, &ptime[2]);
+	strcpy(&ptime[4], "  ");
+	UNUSED(pm)
+#else
+	if (val >= 12)
+	{
+		if (val > 12)
+			val -= 12;
+		pm = TRUE;
+	} else
+	{
+		if (val == 0)
+			val = 12;
+		pm = FALSE;
+	}
+
+	my_itoa(val, &ptime[0]);
+	my_itoa(((time & 0x07e0) >> 5) & 0x003f, &ptime[2]);
+	strcpy(&ptime[4], pm ? "pm" : "am");
+#endif
+#endif
 }
 
 
@@ -623,12 +683,14 @@ PP(register char *ptime;)
  *
  *	IF(EURODATE)THEN Swap Day and Month thusly: dd/mm/yy
  *	IF(SWEDDATE)THEN Swap Day and Month thusly: yy/mm/dd
- *	Changed 7/20/92 To put in st_dchar as seperator
+ *	Changed 7/20/92 To put in st_dchar as separator
  */
+/* 306de: 00e2ff02 */
 VOID fmt_date(P(uint16_t) date, P(char *)pdate)
 PP(uint16_t date;)
 PP(register char *pdate;)
 {
+#if MULTILANG_SUPPORT
 	switch (st_date)
 	{
 	case 3:
@@ -653,13 +715,62 @@ PP(register char *pdate;)
 	}
 
 	pdate[5] = pdate[2] = (char) st_dchar;
+
+#else
+
+#if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
+#define st_date 0
+#define st_dchar '/'
+#endif
+
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_TR)
+#define st_date 1
+#define st_dchar '-' /* BUG: shold actually be '.' */
+#endif
+
+#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SF)
+#define st_date 1
+#define st_dchar '/'
+#endif
+
+#if (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO)
+#define st_date 2
+#define st_dchar '-'
+#endif
+
+#if st_date == 0
+		my_itoa((date & 0x01e0) >> 5, &pdate[0]);	/* MM */
+		my_itoa(date & 0x001f, &pdate[2]);	/* DD */
+		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[4]);
+#endif
+
+#if st_date == 1
+		my_itoa(date & 0x001f, &pdate[0]);
+		my_itoa((date & 0x01e0) >> 5, &pdate[2]);
+		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[4]);
+#endif
+
+#if st_date == 2
+		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[0]);
+		my_itoa((date & 0x01e0) >> 5, &pdate[2]);
+		my_itoa(date & 0x001f, &pdate[4]);
+#endif
+
+#if st_date == 3
+		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[0]);
+		my_itoa(date & 0x001f, &pdate[2]);
+		my_itoa((date & 0x01e0) >> 5, &pdate[4]);
+#endif
+
+#endif
 }
 
 
 /*
  * Build string
  */
-char * bldstring(P(DIR *)dir, P(char *)dst)
+/* 306de: 00e2ff6a */
+char *bldstring(P(DIR *)dir, P(char *)dst)
 PP(DIR *dir;)
 PP(register char *dst;)
 {
@@ -687,7 +798,7 @@ PP(register char *dst;)
 
 	for (i = 0; i < 8; i++)
 	{
-		if ((*src) && (*src != '.'))
+		if (*src && *src != '.')
 			*dst++ = *src++;
 		else
 			break;
@@ -700,7 +811,7 @@ PP(register char *dst;)
 		src++;
 
 	for (i = 0; i < 3; i++)
-		*dst++ = (*src) ? *src++ : ' ';
+		*dst++ = *src ? *src++ : ' ';
 
 	bfill(11, ' ', dst++);
 
@@ -722,20 +833,15 @@ PP(register char *dst;)
 	*dst++ = ' ';
 
 	fmt_date(dir->d_date, buffer);
+#if MULTILANG_SUPPORT
 	dst = strcpy(dst, buffer) - 1;
-#if 0
+#else
 	*dst++ = buffer[0];
 	*dst++ = buffer[1];
-	*dst++ = (char) st_dchar;
-#if 0
-	*dst++ = '-';
-#endif
+	*dst++ = st_dchar;
 	*dst++ = buffer[2];
 	*dst++ = buffer[3];
-	*dst++ = (char) st_dchar;
-#if 0
-	*dst++ = '-';
-#endif
+	*dst++ = st_dchar;
 	*dst++ = buffer[4];
 	*dst++ = buffer[5];
 #endif
@@ -757,6 +863,7 @@ PP(register char *dst;)
 }
 
 
+/* 306de: 00e30124 */
 char *g_name(P(const char *) file)
 PP(const char *file;)
 {
@@ -774,6 +881,7 @@ PP(const char *file;)
  * save the extension of the path
  * A:\*.*
  */
+/* 306de: 00e3014a */
 VOID save_ext(P(const char *)path, P(char *)buffer)
 PP(const char *path;)
 PP(char *buffer;)
@@ -786,6 +894,7 @@ PP(char *buffer;)
  * save the middle dir just before the ext
  * A:\dir\*.*
  */
+/* 306de: 00e30168 */
 VOID save_mid(P(char *)path, P(char *)buffer)
 PP(char *path;)
 PP(char *buffer;)
@@ -798,6 +907,7 @@ PP(char *buffer;)
  * Check for if the source is the parent of
  * the destination
  */
+/* 00e30180 */
 BOOLEAN chk_par(P(const char *)srcptr, P(const char *)dstptr)
 PP(register const char *srcptr;)
 PP(register const char *dstptr;)
@@ -829,6 +939,7 @@ PP(register const char *dstptr;)
 }
 
 
+/* 306de: 00e301dc */
 int16_t fill_string(P(const char *)string, P(int16_t) item)
 PP(const char *string;)
 PP(int16_t item;)
@@ -854,6 +965,7 @@ PP(int16_t item;)
  * change from ascii to binary value
  * TRUE is OK otherwise it is FALSE
  */
+/* 306de: 00e30264 */
 BOOLEAN asctobin(P(char *)ptr, P(int32_t *)value)
 PP(char *ptr;)
 PP(int32_t *value;)

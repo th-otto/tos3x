@@ -12,17 +12,6 @@ typedef struct _mrets
 } MRETS;
 
 
-VOID desk_pref(NOTHING)
-{
-}
-
-
-BOOLEAN set_video(NOTHING)
-{
-	return FALSE;
-}
-
-
 VOID XSelect(P(OBJECT *)tree, P(int16_t) obj)
 PP(OBJECT *tree;)
 PP(int16_t obj;)

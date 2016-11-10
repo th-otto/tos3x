@@ -394,6 +394,7 @@ int16_t read_files PROTO((WINDOW *win, int16_t attr));
  * deskinf.c
  */
 extern char afile[INFSIZE];
+extern BOOLEAN font_save;
 extern BOOLEAN s_defdir;
 extern BOOLEAN s_fullpath;
 
@@ -678,10 +679,10 @@ VOID ch_cache PROTO((BOOLEAN set));
 /*
  * extern references from AES
  */
+#if MULTILANG_SUPPORT
 extern uint16_t st_time;		/* time code        */
 extern uint16_t st_date;
 extern uint16_t st_dchar;
-#if MULTILANG_SUPPORT
 extern int16_t st_keybd;
 #endif
 extern int16_t gl_wchar;
@@ -729,7 +730,7 @@ VOID fmt_str PROTO((const char *instr, char *outstr));
 VOID unfmt_str PROTO((const char *instr, char *outstr));
 VOID inf_sset PROTO((OBJECT *tree, int16_t obj, const char *pstr));
 VOID fs_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
-int16_t inf_gindex PROTO((LPTREE tree, int16_t baseobj, int16_t numobj));
+int16_t inf_gindex PROTO((OBJECT *tree, int16_t baseobj, int16_t numobj));
 int16_t merge_str PROTO((char *pdst, const char *ptmp, VOIDPTR parms));
 int16_t wildcmp PROTO((const char *pwild, const char *ptest));
 VOID bfill PROTO((int16_t num, char bval, VOIDPTR addr));
@@ -750,6 +751,7 @@ BOOLEAN cart_snext PROTO((NOTHING));
 int toupper PROTO((int ch));
 int isdrive PROTO((NOTHING));
 int16_t rom_ram PROTO((int which, intptr_t pointer));
+int16_t inf_what PROTO((OBJECT *tree, int16_t ok, int16_t cncl));
 
 int32_t trap PROTO((short code, ...));
 int32_t trp14 PROTO((short code, ...));

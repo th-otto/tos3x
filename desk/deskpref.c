@@ -13,6 +13,107 @@
 
 
 /*
+ * Set preferences dialog
+ */
+#if !POPUP_SUPPORT
+VOID desk_pref(NOTHING)
+{
+	register OBJECT *obj;
+	register int16_t cyes, i, flag;
+	int16_t overwrite, font;
+
+	UNUSED(font);
+	UNUSED(overwrite);
+	
+	obj = get_tree(ADSETPREF);
+	cyes = cdele_save;
+	obj[SPCDYES].ob_state = cyes;
+	obj[SPCDNO].ob_state = !cyes;
+
+	cyes = write_save;
+	obj[YWRITE].ob_state = !cyes;
+	obj[NWRITE].ob_state = cyes;
+
+	cyes = ccopy_save;
+	obj[SPCCYES].ob_state = cyes;
+	obj[SPCCNO].ob_state = !cyes;
+
+	for (i = SPLOW; i <= SPEXT3; i++)	/* hopefully they are in order  */
+		obj[i].ob_state = NORMAL;
+
+	/* set the resolution button */
+	for (i = 0, flag = SPLOW; i < 6; i++, flag++)
+	{
+		if (!restable[i])
+			obj[flag].ob_state = DISABLED;
+	}
+
+	if (m_st)
+	{
+		for (i = SPEXT1; i <= SPEXT3; i++)
+			obj[i].ob_flags |= HIDETREE;
+	}
+
+	if (restable[4])					/* TT high res  */
+		cyes = font_save;
+
+	/* gl_restype is set according to followings:
+	                                vdi handle
+	1 = LOW RES     320 x 200       0, 2, 5, 7
+	2 = MEDIUM RES  640 x 200       3               
+	3 = HIGH RES    640 x 400       4
+	4 = EXT1        640 x 480       6
+	5 = EXT2        1280 x 960      8
+	6 = EXT3        320 x 480       9
+	
+	*/
+
+	switch (gl_restype)
+	{
+	case 1:
+		flag = SPLOW;
+		break;
+
+	case 2:
+		flag = SPMEDIUM;
+		break;
+
+	case 3:
+		flag = SPHIGH;
+		break;
+
+	case 4:
+		flag = SPEXT1;
+		break;
+
+	case 5:
+		flag = SPEXT2;
+		break;
+
+	case 6:
+		flag = SPEXT3;
+		break;
+	}
+
+	obj[flag].ob_state = SELECTED;
+
+	if (fmdodraw(ADSETPREF, 0) == SPOK)
+	{
+		cdele_save = inf_what(obj, SPCDYES, SPCDNO);
+		ccopy_save = inf_what(obj, SPCCYES, SPCCNO);
+		write_save = !inf_what(obj, YWRITE, NWRITE);
+
+		flag = inf_gindex(obj, SPLOW, 6) + 1;
+
+		if (app_reschange(flag))
+			d_exit = L_CHGRES;
+	}
+
+}
+#endif
+
+
+/*
  * Set Color and pattern
  */
 VOID col_pa_pref(NOTHING)

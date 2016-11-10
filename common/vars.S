@@ -483,9 +483,7 @@ name: ds.t size
 	INT(_gl_handle)
 	PTR(_ad_armice)
 	PTR(_ad_select)
-	
-	ds.b 160
-	
+	V(_g_buffer,b,160)
 	INT(_s_defdir)
 	PTR(_ad_fsel)
 	INT(_gl_dclick)
@@ -537,9 +535,7 @@ name: ds.t size
 	INT(_sh_iscart)
 	V(_hdr_buff,w,18)   /* RSHDR */
 	INT(_d_maxcolor)
-	
-	ds.b 2
-	
+	INT(_d_level)
 	INT(_gl_graphic)
 	INT(_gl_lcolor)
 	INT(_f_abort)

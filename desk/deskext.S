@@ -36,6 +36,7 @@
 	xdef _inf_sset
 	xdef _fs_sget
 	xdef _inf_gindex
+	xdef _inf_what
 	xdef _merge_str
 	xdef _wildcmp
 	xdef _bfill
@@ -151,6 +152,7 @@ _unfmt_str      equ AESTBASE+$C7B4
 _inf_sset       equ AESTBASE+$C812
 _fs_sget        equ AESTBASE+$C834
 _inf_gindex     equ AESTBASE+$C86E
+_inf_what       equ AESTBASE+$C894
 _merge_str      equ AESTBASE+$C8C8
 _wildcmp        equ AESTBASE+$C982
 _trp13          equ AESTBASE+$CB80

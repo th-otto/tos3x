@@ -453,8 +453,8 @@ PP(uint16_t falsestate;)
 /* inf_gindex	for each object from baseobj for N objects return the object
  *		that is selected or -1 if no objects are selected.
  */
-int16_t inf_gindex(P(LPTREE) tree, P(int16_t) baseobj, P(int16_t) numobj)
-PP(LPTREE tree;)
+int16_t inf_gindex(P(OBJECT *) tree, P(int16_t) baseobj, P(int16_t) numobj)
+PP(OBJECT *tree;)
 PP(int16_t baseobj;)
 PP(int16_t numobj;)
 {
@@ -462,8 +462,8 @@ PP(int16_t numobj;)
 
 	for (retobj = 0; retobj < numobj; retobj++)
 	{
-		if (LWGET(OB_STATE(baseobj + retobj)) & SELECTED)
-			return (retobj);
+		if (tree[baseobj + retobj].ob_state & SELECTED)
+			return retobj;
 	}
 	return NIL;
 }
@@ -473,8 +473,8 @@ PP(int16_t numobj;)
  *	Return 0 if cancel was selected, 1 if okay was selected, -1 if
  *	nothing was selected.
  */
-int16_t inf_what(P(LPTREE) tree, P(int16_t) ok, P(int16_t) cncl)
-PP(register LPTREE tree;)
+int16_t inf_what(P(OBJECT *) tree, P(int16_t) ok, P(int16_t) cncl)
+PP(register OBJECT *tree;)
 PP(register int16_t ok;)
 PP(register int16_t cncl;)
 {
@@ -484,10 +484,10 @@ PP(register int16_t cncl;)
 
 	if (field != -1)
 	{
-		LWSET(OB_STATE(ok + field), NORMAL);
-		field = (field == 0);
+		tree[ok + field].ob_state = NORMAL;
+		field = field == 0;
 	}
-	return (field);
+	return field;
 }
 
 

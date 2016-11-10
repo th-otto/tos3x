@@ -328,7 +328,7 @@ VOID inf_sset PROTO((OBJECT *tree, int16_t obj, char *pstr));
 VOID fs_sget PROTO((OBJECT *tree, int16_t obj, char *pstr));
 VOID inf_fldset PROTO((LPTREE tree, int16_t obj, uint16_t testfld, uint16_t testbit, uint16_t truestate, uint16_t falsestate));
 int16_t inf_gindex PROTO((LPTREE tree, int16_t baseobj, int16_t numobj));
-int16_t inf_what PROTO((LPTREE tree, int16_t ok, int16_t cncl));
+int16_t inf_what PROTO((OBJECT *tree, int16_t ok, int16_t cncl));
 int16_t merge_str PROTO((char *pdst, const char *ptmp, VOIDPTR parms));
 int16_t wildcmp PROTO((const char *pwild, const char *ptest));
 

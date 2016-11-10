@@ -21,7 +21,7 @@
 uint16_t d_rezword; /* also in AES:geminit.c */
 #endif
 char afile[INFSIZE];
-STATIC BOOLEAN font_save;
+BOOLEAN font_save;
 BOOLEAN s_defdir;
 BOOLEAN s_fullpath;
 

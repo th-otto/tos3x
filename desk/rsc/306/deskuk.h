@@ -17,7 +17,7 @@
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          24248
+ * Total file size:          24120
  */
 
 #undef RSC_NAME
@@ -165,24 +165,21 @@
 #define MKOK                               2 /* BUTTON in tree ADMKDBOX */
 #define MKCNCL                             4 /* BUTTON in tree ADMKDBOX */
 
-#define MNSETPREF                          8 /* form/dialog */
-#define SPDTITLE                           3 /* STRING in tree MNSETPREF */
-#define SPDYES                             4 /* BUTTON in tree MNSETPREF */
-#define SPDNO                              5 /* BUTTON in tree MNSETPREF */
-#define SPCTITLE                           6 /* STRING in tree MNSETPREF */
-#define SPCYES                             7 /* BUTTON in tree MNSETPREF */
-#define SPCNO                              8 /* BUTTON in tree MNSETPREF */
-#define SPOTITLE                           9 /* STRING in tree MNSETPREF */
-#define SPOYES                            10 /* BUTTON in tree MNSETPREF */
-#define SPONO                             11 /* BUTTON in tree MNSETPREF */
-#define SVSTLOW                           14 /* BUTTON in tree MNSETPREF */
-#define SVSTMED                           15 /* BUTTON in tree MNSETPREF */
-#define SVSTHIGH                          16 /* BUTTON in tree MNSETPREF */
-#define SVTTMED                           17 /* BUTTON in tree MNSETPREF */
-#define SVTTHIGH                          18 /* BUTTON in tree MNSETPREF */
-#define SVTTLOW                           19 /* BUTTON in tree MNSETPREF */
-#define MNSPOK                            21 /* BUTTON in tree MNSETPREF */
-#define MNSPCAN                           22 /* BUTTON in tree MNSETPREF */
+#define ADSETPREF                          8 /* form/dialog */
+#define SPCDYES                            4 /* BUTTON in tree ADSETPREF */
+#define SPCDNO                             5 /* BUTTON in tree ADSETPREF */
+#define SPCCYES                            7 /* BUTTON in tree ADSETPREF */
+#define SPCCNO                             8 /* BUTTON in tree ADSETPREF */
+#define YWRITE                            10 /* BUTTON in tree ADSETPREF */
+#define NWRITE                            11 /* BUTTON in tree ADSETPREF */
+#define SPLOW                             14 /* BUTTON in tree ADSETPREF */
+#define SPMEDIUM                          15 /* BUTTON in tree ADSETPREF */
+#define SPHIGH                            16 /* BUTTON in tree ADSETPREF */
+#define SPEXT1                            17 /* BUTTON in tree ADSETPREF */
+#define SPEXT2                            18 /* BUTTON in tree ADSETPREF */
+#define SPEXT3                            19 /* BUTTON in tree ADSETPREF */
+#define SPOK                              21 /* BUTTON in tree ADSETPREF */
+#define SPCANCEL                          22 /* BUTTON in tree ADSETPREF */
 
 #define ADFORMAT                           9 /* form/dialog */
 #define FCBOX4                             1 /* BOX in tree ADFORMAT */

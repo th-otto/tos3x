@@ -40,11 +40,10 @@ STATIC CICONBLK *ciconaddr;
 int16_t pglobal[15];
 int16_t gl_apid;
 
-/* for MULTILANG_SUPPORT: */
+#if MULTILANG_SUPPORT
 uint16_t st_time;		/* time code        */
 uint16_t st_date;
 uint16_t st_dchar;
-#if MULTILANG_SUPPORT
 int16_t st_keybd;
 #endif
 
