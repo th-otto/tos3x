@@ -25,6 +25,7 @@ VOID locate_item PROTO((int16_t item, const char **path, BOOLEAN file));
 /*
  * Inquire cell size
  */
+/* 306de: 00e302e6 */
 VOID xvq_chcells(P(int16_t *)num)
 PP(int16_t *num;)
 {
@@ -43,6 +44,7 @@ PP(int16_t *num;)
 /*
  * open the default windows
  */
+/* 306de: 00e30310 */
 VOID open_def(NOTHING)
 {
 	register int16_t i;
@@ -61,6 +63,7 @@ VOID open_def(NOTHING)
 }
 
 
+/* 306de: 00e30366 */
 VOID ch_path(P(WINDOW *)win)
 PP(register WINDOW *win;)
 {
@@ -85,6 +88,7 @@ PP(register WINDOW *win;)
  * init -- initalize window
  * open -- open a disk
  */
+/* 306de: 00e303f8 */
 BOOLEAN open_subdir(P(WINDOW *)win, P(int16_t) icon, P(BOOLEAN) opendisk, P(BOOLEAN) init, P(BOOLEAN) redraw)
 PP(register WINDOW *win;)
 PP(int16_t icon;)
@@ -145,6 +149,7 @@ PP(BOOLEAN redraw;)
 }
 
 
+/* 306de: 00e3051e */
 VOID show_item(NOTHING)
 {
 	register WINDOW *win;
@@ -167,6 +172,7 @@ VOID show_item(NOTHING)
 /*
  * Show the info of an item
  */
+/* 306de: 00e3056c */
 VOID sh_witem(NOTHING)
 {
 	DIR dir1;
@@ -185,7 +191,9 @@ VOID sh_witem(NOTHING)
 	uint16_t len, pos;
 	const char *file;
 	char *savestr;
+#if TOSVERSION >= 0x400
 	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
+#endif
 
 	UNUSED(sizes);
 	
@@ -257,7 +265,7 @@ VOID sh_witem(NOTHING)
 
 			if (subtype == XFILE)
 			{
-				if (m_sfirst(file, 0x31))	/* get the dir block    */
+				if (m_sfirst(file, FA_ARCH|FA_DIREC|FA_RDONLY))	/* get the dir block    */
 				{
 					fill_string(NO_CONST(file), FNOTFIND); /* BUG: if "file" contains '[' or '|', fill_string will modify it */
 					goto ss_1;
@@ -302,7 +310,7 @@ VOID sh_witem(NOTHING)
 		if (x_type == DESKICON && subtype == XDIR)
 		{
 			*r_slash(oldstr) = 0;
-			if (m_sfirst(oldstr, 0x31))
+			if (m_sfirst(oldstr, FA_ARCH|FA_DIREC|FA_RDONLY))
 			{
 				fill_string(oldstr, FNOTFIND);
 				which = FIOK;
@@ -379,8 +387,10 @@ VOID sh_witem(NOTHING)
 			if (strlen(&oldstr[pos]) < len)
 			{
 				pos--;
+#if AES3D
 				wait_up();
 				XDeselect(obj, which);	/* cjg 08/06/92 */
+#endif
 				goto ss_7;
 			} else
 				goto ss_8;
@@ -393,10 +403,13 @@ VOID sh_witem(NOTHING)
 			{
 				pos--;
 			ss_8:
+#if AES3D
 				XSelect(obj, which);	/* cjg 08/06/92 */
+#endif
 				((TEDINFO *) (obj[FIFILE].ob_spec))->te_ptext = &oldstr[pos];
 				draw_fld(obj, FIFILE);
 
+#if TOSVERSION >= 0x400
 				graf_mkstate(&mk_x, &mk_y, &mk_buttons, &mk_kstate);
 				if (mk_buttons)
 				{
@@ -406,9 +419,12 @@ VOID sh_witem(NOTHING)
 					if (which == FILEFT)
 						goto cg_2;
 				}
+#endif
 			}
+#if AES3D
 			wait_up();
 			XDeselect(obj, which);
+#endif
 			goto ss_7;
 		}
 
@@ -495,10 +511,10 @@ VOID sh_witem(NOTHING)
 }
 
 
-
 /*
  * Show the info of desktop items
  */
+/* 306de: 00e30c7e */
 BOOLEAN sh_disk(P(char *)buffer)
 PP(char *buffer;)
 {
@@ -511,11 +527,11 @@ PP(char *buffer;)
 	if (buffer[0] == CHAR_FOR_CARTRIDGE)
 	{
 		do1_alert(CARTNOSH);
-		return (TRUE);
+		return TRUE;
 	}
 
 	if (!ch_drive(buffer[0]))
-		return (TRUE);
+		return TRUE;
 
 	obj = get_tree(ADDISKIN);
 	inf_sset(obj, DIDRIVE, buffer);
@@ -544,16 +560,17 @@ PP(char *buffer;)
 		inf_sset(obj, DIVOLUME, newname);
 		desk_wait(FALSE);
 		if (fmdodraw(ADDISKIN, 0) == DIQUIT)
-			return (FALSE);
+			return FALSE;
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
 
 /*
  * Close a path
  */
+/* 306de: 00e30e48 */
 VOID close_path(P(WINDOW *)win)
 PP(register WINDOW *win;)
 {
@@ -582,6 +599,7 @@ PP(register WINDOW *win;)
 /*
  * Close top window
  */
+/* 306de: 00e30eca */
 VOID close_top(NOTHING)
 {
 	register WINDOW *win;
@@ -597,6 +615,7 @@ VOID close_top(NOTHING)
 /*
  * open an item
  */
+/* 306de: 00e30f10 */
 VOID open_item(P(int16_t) item, P(int16_t) type, P(WINDOW *)win)
 PP(register int16_t item;)
 PP(int16_t type;)
@@ -614,7 +633,7 @@ PP(WINDOW *win;)
 		switch (itype->i_type)
 		{
 		case XFILE:					/* show or executable   */
-			if (m_sfirst(itype->i_path, 0x31))
+			if (m_sfirst(itype->i_path, FA_ARCH|FA_DIREC|FA_RDONLY))
 			{
 				ret = fill_string(NO_CONST(itype->i_path), XNFILE); /* BUG: if "i_path" contains '[' or '|', fill_string will modify it */
 				goto o_1;				/* file not found   */
@@ -625,20 +644,24 @@ PP(WINDOW *win;)
 			break;
 
 		case XDIR:						/* open a folder    */
-			if (m_sfirst(itype->i_path, 0x31))
+			if (m_sfirst(itype->i_path, FA_ARCH|FA_DIREC|FA_RDONLY))
 			{
 				save_mid(NO_CONST(itype->i_path), buffer); /* BUG: same_mid will modify i_path */
 				ret = fill_string(buffer, XNFILE);
 			o_1:
 				if (ret == 1)
 				{
+#if AES3D
 					background[item].ob_flags |= HIDETREE;
+#else
+					background[item].ob_flags = HIDETREE;
+#endif
 					lp_collect();
 					do_redraw(0, &full, 0);
 				}
 
 				if (ret == 2)
-					locate_item(item, &itype->i_path, (itype->i_type == XFILE) ? TRUE : FALSE);
+					locate_item(item, &itype->i_path, itype->i_type == XFILE ? TRUE : FALSE);
 			} else
 			{
 				open_disk(item, itype->i_path, TRUE);
@@ -657,7 +680,7 @@ PP(WINDOW *win;)
 
 		case TRASHCAN:
 		case PRINTER:
-			fill_string(itype->i_name, (itype->i_type == PRINTER) ? PRINTINF : TRSINFO);
+			fill_string(itype->i_name, itype->i_type == PRINTER ? PRINTINF : TRSINFO);
 			break;
 
 		default:
@@ -678,6 +701,7 @@ PP(WINDOW *win;)
 /*
  * Open a file, it may be an executable file
  */
+/* 306de: 00e310e6 */
 VOID open_file(P(WINDOW *)win, P(int16_t) item, P(const char *)tail)
 PP(register WINDOW *win;)
 PP(int16_t item;)
@@ -731,6 +755,7 @@ PP(const char *tail;)
 /*
  * open a disk icon
  */
+/* 306de: 00e31224 */
 BOOLEAN open_disk(P(int16_t) icon, P(const char *)path, P(BOOLEAN) init)
 PP(int16_t icon;								/* icon number  */)
 PP(const char *path;)
@@ -744,12 +769,12 @@ PP(BOOLEAN init;)
 		if (!cart_init())				/* error    */
 		{
 			do1_alert(NOCART);
-			return (FALSE);
+			return FALSE;
 		}
 	} else
 	{
 		if (!ch_drive(path[0]))			/* drive exists? */
-			return (FALSE);
+			return FALSE;
 	}
 
 	if (c_path_alloc(path))				/* check the path length    */
@@ -763,19 +788,19 @@ PP(BOOLEAN init;)
 			strcpy(win->w_path, path);
 
 			if (open_subdir(win, icon, TRUE, init, FALSE))
-				return (TRUE);
+				return TRUE;
 			else
 				close_window(handle, FALSE);	/* delete the window    */
 		}
 	}
-	return (FALSE);
+	return FALSE;
 }
-
 
 
 /*
  * Do a grow or shrink box on a disk icon
  */
+/* 306de: 00e312ee */
 VOID do_box(P(WINDOW *)win, P(int16_t) item, P(int16_t) desk, P(int16_t) open, P(BOOLEAN) openfull)
 PP(WINDOW *win;)
 PP(int16_t item;)
@@ -787,9 +812,9 @@ PP(BOOLEAN openfull;)
 	GRECT dc;
 	OBJECT *obj;
 
-	obj = (desk) ? background : win->w_obj;
+	obj = desk ? background : win->w_obj;
 
-	rc_copy((openfull) ? &full : &win->w_work, &dc);
+	rc_copy(openfull ? &full : &win->w_work, &dc);
 
 	if ((obj[item].ob_flags & HIDETREE) || (!item))
 	{
@@ -807,13 +832,14 @@ PP(BOOLEAN openfull;)
 		pc.g_h = gl_hbox;
 	}
 
-	form_dial((open) ? FMD_GROW : FMD_SHRINK, pc.g_x, pc.g_y, pc.g_w, pc.g_h, dc.g_x, dc.g_y, dc.g_w, dc.g_h);
+	form_dial(open ? FMD_GROW : FMD_SHRINK, pc.g_x, pc.g_y, pc.g_w, pc.g_h, dc.g_x, dc.g_y, dc.g_w, dc.g_h);
 }
 
 
 /*
  * Does the drive exist
  */
+/* 306de: 00e313f6 */
 BOOLEAN drv_exist(P(int16_t) id)
 PP(int16_t id;)
 {
@@ -823,13 +849,14 @@ PP(int16_t id;)
 	map = (int32_t) Drvmap();
 	handle = id - 'A';
 	map = map >> handle;
-	return ((map & 0x01) ? TRUE : FALSE);
+	return (map & 0x01) ? TRUE : FALSE;
 }
 
 
 /*
  * Check drive and put up alert
  */
+/* 306de: 00e31432 */
 BOOLEAN ch_drive(P(int16_t) id)
 PP(int16_t id;)
 {
@@ -840,10 +867,10 @@ PP(int16_t id;)
 		buffer[0] = id;
 		buffer[1] = 0;
 		fill_string(buffer, NODRIVE);
-		return (FALSE);
+		return FALSE;
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -852,6 +879,7 @@ PP(int16_t id;)
  * Update the desk file or desk dir on the background
  * If new is a NULL pointer then erase the icon if matches
  */
+/* 306de: 00e31466 */
 VOID upfdesk(P(char *)s, P(char *)new)
 PP(char *s;)
 PP(register char *new;)
@@ -867,7 +895,11 @@ PP(register char *new;)
 
 	for (i = 1; i <= obj->ob_tail; i++)
 	{
+#if AES3D
 		if (!(obj[i].ob_flags & HIDETREE))
+#else
+		if (obj[i].ob_flags != HIDETREE)
+#endif
 		{
 			type = backid[i].i_type;
 
@@ -887,7 +919,7 @@ PP(register char *new;)
 					{
 						if (type == XDIR)	/* append wild card */
 						{
-							if ((addr = (char *)Malloc((int32_t) (strlen(new) + 10))))
+							if ((addr = (char *)Malloc((int32_t) ((int)strlen(new) + 10))))
 							{
 								strcpy(addr, new);
 								strcat(addr, wilds);
@@ -895,17 +927,23 @@ PP(register char *new;)
 								Mfree(addr);
 							}
 						} else
+						{
 							lp_fill(new, &backid[i].i_path);
-					} /* erase icon       */
-					else
+						}
+					} else
 					{
+						/* erase icon       */
+#if AES3D
 						obj[i].ob_flags |= HIDETREE;
+#else
+						obj[i].ob_flags = HIDETREE;
+#endif
 					}
 
 					back_update = TRUE;	/* set the flag     */
 				}						/* find the match   */
 			}
-			/* XFIlE        */
+
 			if (type == XDIR)			/* restore the wild card    */
 				*ptr = '\\';
 		}
@@ -932,6 +970,7 @@ PP(register char *new;)
 /*
  * Locate an item
  */
+/* 306de: 00e3162c */
 VOID locate_item(P(int16_t) item, P(const char **)path, P(BOOLEAN) file)
 PP(int16_t item;)
 PP(const char **path;)

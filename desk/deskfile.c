@@ -163,7 +163,7 @@ PP(register WINDOW *win;)
 
 		rep_path(namenew, win->w_buf);	/* append the name  */
 
-		ret = m_sfirst(win->w_buf, 0x10);
+		ret = m_sfirst(win->w_buf, FA_DIREC);
 
 		if (ret)						/* Error    */
 		{

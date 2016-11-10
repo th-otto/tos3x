@@ -340,7 +340,7 @@ PP(char *tail;)
 PP(BOOLEAN graphic;)
 PP(BOOLEAN setdir;)
 {
-	if (m_sfirst(file, 0x31))			/* search the file */
+	if (m_sfirst(file, FA_ARCH|FA_DIREC|FA_RDONLY))			/* search the file */
 	{
 		fill_string(NO_CONST(file), FNOTFIND);
 		return;

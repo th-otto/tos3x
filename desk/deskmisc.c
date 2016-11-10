@@ -975,7 +975,7 @@ PP(int32_t *value;)
 
 	for (n = 0, i = 0, n1 = 0; *ptr; ptr++)
 	{
-		if ((*ptr >= '0') && (*ptr <= '9'))
+		if (*ptr >= '0' && *ptr <= '9')
 		{
 			n1 = (10 * n1) + (*ptr - '0');
 			if (n1 >= n)

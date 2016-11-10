@@ -30,7 +30,6 @@ DESK_SRCS=\
 	desktop.c \
 	deskupda.c \
 	deskwin.c \
-	deskmn.c \
 	newmn.c \
 	deskrsc.c \
 	deskif.S \

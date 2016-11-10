@@ -425,6 +425,10 @@ VOID ins_icons PROTO((NOTHING));
 VOID ins_wicons PROTO((NOTHING));
 VOID ins_drive PROTO((NOTHING));
 VOID cl_delay PROTO((NOTHING));
+#if !POPUP_SUPPORT
+VOID ins_app PROTO((NOTHING));
+#endif
+
 
 /*
  * deskmem.c
@@ -457,6 +461,9 @@ VOID do_file PROTO((int16_t msgbuff));
 VOID hd_msg PROTO((int16_t *msgbuff));
 VOID actions PROTO((NOTHING));
 int32_t av_mem PROTO((NOTHING));
+#if !POPUP_SUPPORT
+VOID av_desk PROTO((NOTHING));
+#endif
 
 
 /*
@@ -527,11 +534,9 @@ VOID wait_up PROTO((NOTHING));
 
 
 /*
- * deskmn.c
+ * deskpref.c
  */
 #if !POPUP_SUPPORT
-VOID av_desk PROTO((NOTHING));
-VOID ins_app PROTO((NOTHING));
 VOID desk_pref PROTO((NOTHING));
 #endif
 
