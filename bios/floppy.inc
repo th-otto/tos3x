@@ -434,7 +434,7 @@ fmtrack3:
         clr.b     d0
         bsr       wmult
         moveq.l   #3-1,d1                       /* 3 x $f5 */
-        moveq.l   #$f5,d0
+        moveq.l   #$fffffff5,d0
         bsr       wmult
         move.b    #$FE,(a2)+                    /* $fe -- address mark intro */
         move.b    (fd_track+1).w,(a2)+          /* track# */
@@ -450,7 +450,7 @@ fmtrack3:
         clr.b     d0
         bsr       wmult
         moveq.l   #3-1,d1                       /* 3 x $f5 */
-        moveq.l   #$f5,d0
+        moveq.l   #$fffffff5,d0
         bsr       wmult
 /* --- data block: */
         move.b    #$FB,(a2)+                    /* $fb -- data intro */

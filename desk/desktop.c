@@ -652,7 +652,7 @@ VOID adjobjects(NOTHING)
 #if AES3D
 	objc_gclip((LPTREE)obj, IUP, &dx, &dy, &x, &y, &w, &h);
 #else
-	objc_offset((LPTREE)obj, IUP, &dx, &dy, &x, &y, &w, &h);
+	objc_offset(obj, IUP, &x, &y);
 #endif
 	obj[IDOWN].ob_y = h + obj[IUP].ob_y;
 	obj[IDRIVE].ob_y += 2;
@@ -663,7 +663,7 @@ VOID adjobjects(NOTHING)
 #if AES3D
 	objc_gclip((LPTREE)obj, WUP, &dx, &dy, &x, &y, &w, &h);
 #else
-	objc_offset((LPTREE)obj, WUP, &dx, &dy, &x, &y, &w, &h);
+	objc_offset(obj, WUP, &x, &y);
 #endif
 	obj[WDOWN].ob_y = h + obj[WUP].ob_y;
 	obj[WFOLDER].ob_height = gl_hchar;
@@ -677,13 +677,13 @@ VOID adjobjects(NOTHING)
 #if AES3D
 	objc_gclip((LPTREE)obj, MFUP, &dx, &dy, &x, &y, &w, &h);
 #else
-	objc_offset((LPTREE)obj, MFUP, &dx, &dy, &x, &y, &w, &h);
+	objc_offset(obj, MFUP, &x, &y);
 #endif
 	obj[MFDOWN].ob_y = h + obj[MFUP].ob_y;
 #if AES3D
 	objc_gclip((LPTREE)obj, MKUPS, &dx, &dy, &x, &y, &w, &h);
 #else
-	objc_offset((LPTREE)obj, MKUPS, &dx, &dy, &x, &y, &w, &h);
+	objc_offset(obj, MKUPS, &x, &y);
 #endif
 	obj[MKDOWNS].ob_y = h + obj[MKUPS].ob_y;
 	obj[MFBASE].ob_height += 2;

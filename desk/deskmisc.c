@@ -217,12 +217,13 @@ PP(register OBJECT *obj;)
 PP(int16_t which;)
 {
 	GRECT t;
+#if AES3D
 	int16_t x, y;
 
-#if AES3D
 	objc_gclip((LPTREE)obj, which, &x, &y, &t.g_x, &t.g_y, &t.g_w, &t.g_h);
 #else
-	objc_offset((LPTREE)obj, which, &x, &y, &t.g_x, &t.g_y, &t.g_w, &t.g_h);
+	rc_copy((GRECT *)&obj->ob_x, &t);
+	objc_offset(obj, which, &t.g_x, &t.g_y);
 #endif
 	objc_draw(obj, which, 0, t.g_x, t.g_y, t.g_w, t.g_h);
 }

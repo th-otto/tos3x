@@ -326,8 +326,6 @@ PP(register WINDOW *win;)
 	int16_t len, type;
 	char *text;
 	
-	UNUSED(unused);
-	
 	obj = win->w_obj;					/* get all the icons source */
 	obj->ob_next = 0xFFFF;
 	/* No objects           */
@@ -379,7 +377,6 @@ PP(register WINDOW *win;)
 #endif
 		obj->ob_state = dir[i].d_state;
 		obj->ob_next = k + 1;
-
 	}
 
 	obj--;								/* go back to last one      */

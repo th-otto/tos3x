@@ -28,6 +28,13 @@ typedef	int32_t ERROR;
 #  define UNUSED(x) ((void)(x))
 #endif
 
+#if BINEXACT
+#  ifndef __ALCYON__
+#    undef BINEXACT
+#    define BINEXACT 0
+#  endif
+#endif
+
 typedef int16_t RECNO;             /* record number  */ /* BUG: should be unsigned */
 typedef int32_t LRECNO;            /* record number  */ /* BUG: should be unsigned, but Alcyon does not support unsigned long */
 

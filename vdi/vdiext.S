@@ -17,8 +17,6 @@
 		xdef ringbell
 		xdef _zeromem
 		text
-ringbell ds.b 0
-
 #if BINEXACT
 #  ifdef __GNUC__
 #    undef BINEXACT
@@ -27,6 +25,8 @@ ringbell ds.b 0
 #endif
 
 #if BINEXACT
+ringbell ds.b 0
+
 /*
  * This strange looking equate is needed because the symbol
  * is accessed by a relative branch
@@ -40,4 +40,14 @@ _zeromem equ BIOSTBASE+$1680
 ringbell  equ $374A+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
 _zeromem equ BIOSTBASE+$1548
 #endif
+
+#else
+
+ringbell equ BIOSTBASE
+_zeromem equ BIOSTBASE+$1548
+       xdef _memcpy
+_memcpy equ BIOSTBASE+2
+	   xdef _shifty
+_shifty equ $10bb
+
 #endif

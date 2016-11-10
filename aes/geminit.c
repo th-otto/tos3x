@@ -688,12 +688,12 @@ int16_t pred_dinf(NOTHING)
 #endif
 
 #if (AESVERSION >= 0x330) | !BINEXACT
-	deskp[0] = (IP_4PATT << 4) | BLACK;
-	deskp[1] = (IP_SOLID << 4) | GREEN;
-	deskp[2] = (IP_SOLID << 4) | LCYAN;
-	winp[0] = (IP_SOLID << 4) | WHITE;
-	winp[1] = (IP_SOLID << 4) | WHITE;
-	winp[2] = (IP_SOLID << 4) | WHITE;
+	adeskp[0] = (IP_4PATT << 4) | BLACK;
+	adeskp[1] = (IP_SOLID << 4) | GREEN;
+	adeskp[2] = (IP_SOLID << 4) | LCYAN;
+	awinp[0] = (IP_SOLID << 4) | WHITE;
+	awinp[1] = (IP_SOLID << 4) | WHITE;
+	awinp[2] = (IP_SOLID << 4) | WHITE;
 #endif
 
 	if (ctldown)

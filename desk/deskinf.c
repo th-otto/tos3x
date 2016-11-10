@@ -377,7 +377,7 @@ PP(char *buffer;)
 	char temp;
 	char *ptr;
 
-	UNUSED(unsued1);
+	UNUSED(unused1);
 	UNUSED(stmp);
 	UNUSED(ptmp);
 	UNUSED(tmp);
