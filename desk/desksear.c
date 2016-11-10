@@ -18,6 +18,7 @@ VOID mass_string PROTO((char *str1));
 /*
  * Position an item within a window
  */
+/* 306de: 00e31aca */
 VOID pos_item(P(WINDOW *) win, P(int16_t) newi)
 PP(register WINDOW *win;)
 PP(int16_t newi;)
@@ -47,8 +48,10 @@ PP(int16_t newi;)
 		l = 1000 * j;
 		l = l / (i - win->w_xrow);
 	} else
+	{
 		l = 1000;
-
+	}
+	
 	win->w_obj->ob_y = win->w_work.g_y;
 	wind_set(win->w_id, WF_VSLIDE, (uint16_t) l, 0, 0, 0);
 
@@ -87,6 +90,7 @@ PP(int16_t newi;)
 /*
  * Search a file
  */
+/* 306de: 00e31c2e */
 VOID sea_file(P(char *)filename)
 PP(char *filename;)
 {
@@ -180,6 +184,7 @@ PP(char *filename;)
 /*
  * Recursive search of a file
  */
+/* 306de: 00e31dde */
 BOOLEAN rec_sea(P(char *)filename)
 PP(register char *filename;)
 {
@@ -263,6 +268,7 @@ PP(register char *filename;)
 /*
  * Display a window and highlight the items
  */
+/* 306de: 00e31faa */
 BOOLEAN display(P(char *)filename)
 PP(char *filename;)
 {
@@ -378,6 +384,7 @@ PP(char *filename;)
 /*
  * Put in wild card in the name string
  */
+/* 306de: 00e32202 */
 VOID mass_string(P(char *)str1)
 PP(char *str1;)
 {

@@ -444,8 +444,9 @@ name: ds.t size
 	INT(_w_inc)
 	INT(_bar_max)
 	
-	ds.b 12
+	ds.b 4
 	
+	GRECT(_fobj)
 	V(_intout,w,10)
 	
 	ds.w 1
