@@ -601,17 +601,3 @@ PP(register const char *ptest;)
 }
 
 #endif
-
-
-#ifdef __GNUC__
-/*
- * a reference to this might be generated for structure assignments
- */
-VOIDPTR memcpy PROTO((VOIDPTR dst, const VOIDPTR src, size_t len));
-
-VOIDPTR memcpy(P(VOIDPTR) dst, P(const VOIDPTR) src, P(size_t) len)
-{
-	LBCOPY(dst, src, len);
-	return dst;
-}
-#endif

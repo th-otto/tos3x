@@ -570,7 +570,7 @@ PP(int16_t size;)
 	e_x[3] = e_x[1] + e_x[3];
 	y1 = e_x[3];
 
-	vs_clip(1, e_x);					/* set clipping rect    */
+	dvs_clip(1, e_x);					/* set clipping rect    */
 	/* scroll up or down    */
 	if ((mode == SUP) || (mode == SDOWN))
 	{

@@ -472,10 +472,10 @@ PP(WINDOW *win;)
 
 	rect.g_x = full.g_x;
 	rect.g_y = full.g_y;
-	rect.g_w = full.g_x + full.g_w; /* BUG: should be -1 for vs_clip */
-	rect.g_h = full.g_y + full.g_h; /* BUG: should be -1 for vs_clip */
+	rect.g_w = full.g_x + full.g_w; /* BUG: should be -1 for dvs_clip */
+	rect.g_h = full.g_y + full.g_h; /* BUG: should be -1 for dvs_clip */
 
-	vs_clip(1, &rect.g_x);
+	dvs_clip(1, &rect.g_x);
 
 	wind_update(TRUE);
 
@@ -789,7 +789,7 @@ PP(BOOLEAN disk;)
 	rc_copy(&full, (GRECT *)buffer);				/* set clipping rectangle   */
 	buffer[2] = buffer[0] + buffer[2];
 	buffer[3] = buffer[1] + buffer[3];
-	vs_clip(1, buffer);
+	dvs_clip(1, buffer);
 
 	gsx_attr(FALSE, MD_XOR, BLACK);
 

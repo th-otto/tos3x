@@ -695,27 +695,3 @@ VOID adjobjects(NOTHING)
 	obj[FIRONLY].ob_y -= 1;
 	obj[FIRWRITE].ob_y -= 1;
 }
-
-
-#ifdef __GNUC__
-int16_t gl_wchar;
-int16_t gl_hchar;
-int16_t gl_wbox;
-int16_t gl_hbox;
-int16_t gl_handle;
-int16_t contrl[12];
-int16_t intin[128];
-int16_t intout[128];
-int16_t ptsin[20];
-int16_t gl_btrue;
-BOOLEAN ctldown;
-int16_t gl_restype;
-BOOLEAN gl_rschange;
-int16_t gl_ncols;
-int16_t gl_nrows;
-BOOLEAN sh_iscart;
-int16_t gl_bvdisk;
-int16_t gl_bvhard;
-PD *rlr;
-WS gl_ws;
-#endif

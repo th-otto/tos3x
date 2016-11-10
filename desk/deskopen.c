@@ -34,7 +34,7 @@ PP(int16_t *num;)
 	*num = intout[0];
 #else
 	int16_t rows, cols;
-	vq_chcells(&rows, &cols);
+	dvq_chcells(&rows, &cols);
 	*num = rows;
 #endif
 }

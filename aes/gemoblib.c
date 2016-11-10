@@ -349,7 +349,7 @@ PP(int16_t icol;)								/* interior color */
 
 	col = (state & SELECTED) ? BLACK : WHITE;
 	gsx_attr(0, MD_REPLACE, col);
-	v_pline(3, pts);
+	av_pline(3, pts);
 
 	/* Draw shadow:
 	 *   +--------------+
@@ -376,7 +376,7 @@ PP(int16_t icol;)								/* interior color */
 			col = BLACK;
 	}
 	gsx_attr(0, MD_REPLACE, col);
-	v_pline(3, pts);
+	av_pline(3, pts);
 
 	gsx_mon();
 }
@@ -1757,7 +1757,7 @@ PP(int16_t numplanes;)
 	ppts[5] = dy;
 	ppts[6] = dx + w - 1;
 	ppts[7] = dy + h - 1;
-	vro_cpyfm(rule, &ppts[0], &gl_src, &gl_dst);
+	avro_cpyfm(rule, &ppts[0], &gl_src, &gl_dst);
 	gsx_mon();
 }
 
@@ -1946,7 +1946,7 @@ PP(uint16_t nplanes;)
 	gsx_fix(&gl_dst, daddr, dwb, h);
 	gl_dst.fd_stand = FALSE;			/* 7/23/92 */
 	gl_dst.fd_nplanes = nplanes;
-	vrn_trnfm(&gl_src, &gl_dst);
+	avr_trnfm(&gl_src, &gl_dst);
 }
 
 

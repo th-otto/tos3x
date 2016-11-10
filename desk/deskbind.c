@@ -120,7 +120,7 @@ PP(MFORM *grmaddr;)
  * show cursor
  */
 /* 306de: 00e280de */
-VOID v_show_c(P(BOOLEAN) reset)
+VOID dv_show_c(P(BOOLEAN) reset)
 PP(int16_t reset;)
 {
 	intin[0] = reset;
@@ -132,7 +132,7 @@ PP(int16_t reset;)
  * hide cursor
  */
 /* 306de: 00e28100 */
-VOID v_hide_c(NOTHING)
+VOID dv_hide_c(NOTHING)
 {
 	gsx_ncode(123, 0, 0);
 }
@@ -142,7 +142,7 @@ VOID v_hide_c(NOTHING)
  * enter graphic mode
  */
 /* 306de: 00e28118 */
-VOID v_exit_cur(NOTHING)
+VOID dv_exit_cur(NOTHING)
 {
 	contrl[5] = 2;
 	gsx_ncode(5, 0, 0);
@@ -153,7 +153,7 @@ VOID v_exit_cur(NOTHING)
  * enter alpha mode
  */
 /* 306de: 00e28138 */
-VOID v_enter_cur(NOTHING)
+VOID dv_enter_cur(NOTHING)
 {
 	contrl[5] = 3;
 	gsx_ncode(5, 0, 0);
@@ -164,7 +164,7 @@ VOID v_enter_cur(NOTHING)
  * clipping function
  */
 /* 306de: 00e28158 */
-VOID vs_clip(P(BOOLEAN) clip_flag, P(const int16_t *) pxy)
+VOID dvs_clip(P(BOOLEAN) clip_flag, P(const int16_t *) pxy)
 PP(BOOLEAN clip_flag;)
 PP(int16_t *pxy;)
 {
@@ -178,7 +178,7 @@ PP(int16_t *pxy;)
 
 
 #if !BINEXACT
-VOID vq_chcells(int16_t *rows, int16_t *cols)
+VOID dvq_chcells(int16_t *rows, int16_t *cols)
 {
 	contrl[5] = 1;
 	gsx_ncode(5, 0, 0);

@@ -294,15 +294,15 @@ int16_t menu_istart PROTO((int16_t code, OBJECT *mtree, int16_t mmenu, int16_t s
 VOID objc_gclip PROTO((LPTREE tree, int16_t which, int16_t *x, int16_t *y, int16_t *rx, int16_t *ry, int16_t *w, int16_t *h));
 VOID graf_mouse PROTO((int16_t style, MFORM *grmaddr));
 
-VOID v_show_c PROTO((BOOLEAN reset));
+VOID dv_show_c PROTO((BOOLEAN reset));
 VOID gsx_ncode PROTO((int16_t code, int16_t n, int16_t m));
-VOID v_hide_c PROTO((NOTHING));
-VOID v_exit_cur PROTO((NOTHING));
-VOID v_enter_cur PROTO((NOTHING));
-VOID vs_clip PROTO((BOOLEAN clip_flag, const int16_t *pxyarray));
+VOID dv_hide_c PROTO((NOTHING));
+VOID dv_exit_cur PROTO((NOTHING));
+VOID dv_enter_cur PROTO((NOTHING));
+VOID dvs_clip PROTO((BOOLEAN clip_flag, const int16_t *pxyarray));
 
 #if !BINEXACT
-VOID vq_chcells PROTO((int16_t *rows, int16_t *cols));
+VOID dvq_chcells PROTO((int16_t *rows, int16_t *cols));
 #endif
 
 /*

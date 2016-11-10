@@ -13,6 +13,14 @@
 #include "asmdefs.h"
 #include "sections.inc"
 
+#if BINEXACT
+#  ifdef __GNUC__
+#    undef BINEXACT
+#    define BINEXACT 0
+#  endif
+#endif
+
+
 /* from DESKTOP */
 	xdef _infdata
 	xdef _XDeselect
@@ -109,4 +117,13 @@ _RSCNO equ 0
 #else
 	xdef _tosrsc
 _tosrsc equ DESKDBASE+DESKDLEN  /* 306us:00E3ECA2 306de:00E3ED2E */
+#endif
+
+
+#if !BINEXACT
+/*
+ * a reference to this might be generated for structure assignments
+ */
+	xdef _memcpy
+_memcpy equ 0
 #endif

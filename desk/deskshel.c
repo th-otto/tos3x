@@ -49,13 +49,13 @@ VOID show_file(P(const char *)file)
 PP(const char *file;)
 {
 	menu_bar(menu_addr, FALSE);
-	v_hide_c();
-	v_enter_cur();
+	dv_hide_c();
+	dv_enter_cur();
 	xvq_chcells(&d_nrows);
 	d_nrows--;
 	showfile(file, FALSE);
-	v_exit_cur();
-	v_show_c(0);
+	dv_exit_cur();
+	dv_show_c(0);
 	menu_bar(menu_addr, TRUE);
 	form_dial(FMD_FINISH, 0, 0, 0, 0, full.g_x, full.g_y, full.g_w, full.g_h);
 	wait_msg();

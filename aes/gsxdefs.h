@@ -181,15 +181,15 @@ int16_t gsx_button PROTO((NOTHING));
 VOID gsx_moff PROTO((NOTHING));
 VOID gsx_mon PROTO((NOTHING));
 
-int16_t v_opnwk PROTO((int16_t *pwork_in, int16_t *phandle, int16_t *pwork_out));
-VOID v_pline PROTO((int16_t count, int16_t *pxyarray));
-VOID vst_clip PROTO((int16_t clip_flag, int16_t pxyarray));
-VOID vst_height PROTO((int16_t height, int16_t *pchr_width, int16_t *pchr_height, int16_t *pcell_width, int16_t *pcell_height));
-VOID vr_recfl PROTO((int16_t *pxyarray, FDB *pdesMFDB)); /* ??? why MFDB ??? */
-VOID vro_cpyfm PROTO((int16_t wr_mode, int16_t *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB));
-VOID vrt_cpyfm PROTO((int16_t wr_mode, int16_t *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, int16_t fgcolor, int16_t bgcolor));
-VOID vrn_trnfm PROTO((FDB *psrcMFDB, FDB *pdesMFDB));
-VOID vsl_width PROTO((int16_t width));
+int16_t av_opnwk PROTO((int16_t *pwork_in, int16_t *phandle, int16_t *pwork_out));
+VOID av_pline PROTO((int16_t count, int16_t *pxyarray));
+VOID avst_clip PROTO((int16_t clip_flag, int16_t pxyarray));
+VOID avst_height PROTO((int16_t height, int16_t *pchr_width, int16_t *pchr_height, int16_t *pcell_width, int16_t *pcell_height));
+VOID avr_recfl PROTO((int16_t *pxyarray, FDB *pdesMFDB)); /* ??? why MFDB ??? */
+VOID avro_cpyfm PROTO((int16_t wr_mode, int16_t *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB));
+VOID avrt_cpyfm PROTO((int16_t wr_mode, int16_t *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, int16_t fgcolor, int16_t bgcolor));
+VOID avr_trnfm PROTO((FDB *psrcMFDB, FDB *pdesMFDB));
+VOID avsl_width PROTO((int16_t width));
 
 /*
  * apgsxif.[cS]

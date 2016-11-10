@@ -147,10 +147,10 @@ VOID gsx_sclip(GRECT *pt)
 		ppts[1] = gl_yclip;
 		ppts[2] = gl_xclip + gl_wclip - 1;
 		ppts[3] = gl_yclip + gl_hclip - 1;
-		vst_clip(TRUE, &ppts[0]);
+		avst_clip(TRUE, &ppts[0]);
 	} else
 	{
-		vst_clip(FALSE, &ppts[0]);
+		avst_clip(FALSE, &ppts[0]);
 	}
 	return TRUE;
 }
@@ -189,7 +189,7 @@ _gsx_sclip:
 	moveq.l	#1,d0			; d0 <- TRUE
 
 L4:	move.w	d0,-(sp)
-	jsr	_vst_clip
+	jsr	_avst_clip
 	addq.l	#6,sp			; *CS* restore the stack
 
 	moveq.l	#1,d0			; return(TRUE)
@@ -324,7 +324,7 @@ VOID gsx_cline(UWORD x1, UWORD y1, UWORD x2, UWORD y2)
 	WORD x, y, w, h;
 
 	gsx_moff();
-	v_pline(2, &x1);
+	av_pline(2, &x1);
 	gsx_mon();
 }
 #endif
@@ -337,7 +337,7 @@ _gsx_cline:
 	lea	4(sp),a0		; a0 -> x1
 	move.l	a0,-(sp)		; push pointer to verticies
 	move.w	#2,-(sp)		; push the count
-	jsr	_v_pline		; draw the line
+	jsr	_av_pline		; draw the line
 	addq.l	#6,sp			; clean up the stack
 
 	jsr	_gsx_mon		; show mouse cursor
@@ -495,7 +495,7 @@ _gsx_bxpts:
 VOID gsx_box(GRECT *pt)
 {
 	gsx_bxpts(pt);
-	v_pline(5, &ptsin[0]);
+	av_pline(5, &ptsin[0]);
 }
 #endif
 	xdef	_gsx_box
@@ -506,7 +506,7 @@ _gsx_box:
 
 	move.l	#_ptsin,(sp)
 	move.w	#5,-(sp)
-	jsr	_v_pline
+	jsr	_av_pline
 	addq.l	#6,sp
 
 	rts
@@ -615,9 +615,9 @@ WORD gsx_blt(int16_t *saddr, UWORD sx, UWORD sy, UWORD swb, int16_t *daddr, UWOR
 	ppts[6] = dx + w - 1;
 	ppts[7] = dy + h - 1;
 	if (fgcolor == -1)
-		vro_cpyfm(rule, &ppts[0], &gl_src, &gl_dst);
+		avro_cpyfm(rule, &ppts[0], &gl_src, &gl_dst);
 	else
-		vrt_cpyfm(rule, &ppts[0], &gl_src, &gl_dst, fgcolor, bgcolor);
+		avrt_cpyfm(rule, &ppts[0], &gl_src, &gl_dst, fgcolor, bgcolor);
 	gsx_mon();
 }
 #endif
@@ -677,10 +677,10 @@ _gsx_blt:
 	cmp.w	#-1,(a3)
 	beq	L32			; *CS* from bne
 
-	jsr	_vrt_cpyfm
+	jsr	_avrt_cpyfm
 	bra	L33
 
-L32:	jsr	_vro_cpyfm
+L32:	jsr	_avro_cpyfm
 
 L33:	jsr	_gsx_mon		; show cursor
 
@@ -727,7 +727,7 @@ VOID gsx_trans(int16_t *saddr, UWORD swb, int16_t *daddr, UWORD dwb, UWORD h, WO
 	gsx_fix(&gl_src, saddr, swb, h);
 	gl_src.fd_stand = TRUE;
 	gl_src.fd_nplanes = 1;
-	vrn_trnfm(&gl_src, &gl_dst);
+	avr_trnfm(&gl_src, &gl_dst);
 }
 #endif
 /* 306de: 00e246a0 */
@@ -758,7 +758,7 @@ _gsx_trans:
 
 	pea	(a5)			; push gl_dst
 	pea	(a4)			; push gl_src
-	jsr	_vrn_trnfm
+	jsr	_avr_trnfm
 
 	lea	32(sp),sp
 	movem.l	(sp)+,a3-a5
@@ -794,9 +794,9 @@ VOID gsx_start(NOTHING)
 	gl_wchar = ptsout[2];
 	gl_hchar = ptsout[3];
 
-	vst_height(gl_ws.ws_chminh, &gl_wsptschar, &gl_hsptschar, &gl_wschar, &gl_hschar);
+	avst_height(gl_ws.ws_chminh, &gl_wsptschar, &gl_hsptschar, &gl_wschar, &gl_hschar);
 
-	vst_height(gl_ws.ws_chmaxh, &dummy, &dummy, &dummy, &dummy);
+	avst_height(gl_ws.ws_chmaxh, &dummy, &dummy, &dummy, &dummy);
 
 	gl_ncols = gl_width / gl_wchar;
 	gl_nrows = gl_height / gl_hchar;
@@ -806,7 +806,7 @@ VOID gsx_start(NOTHING)
 	if (gl_wbox < (gl_wchar + 2))
 		gl_wbox = gl_wchar + 2;
 	vsl_type(7);
-	vsl_width(1);
+	avsl_width(1);
 	vsl_udsty(0xffff);
 	r_set(&gl_rscreen, 0, 0, gl_width, gl_height);
 	r_set(&gl_rfull, 0, gl_hbox, gl_width, (gl_height - gl_hbox));
@@ -889,7 +889,7 @@ _gsxsta2:
 	pea	_gl_hsptschar
 	pea	_gl_wsptschar
 	move.w	88(a3),-(sp)		; push	gl_ws.ws_chminh
-	jsr	_vst_height
+	jsr	_avst_height
 
 	lea	(sp),a0			; a0 -> dummy variable
 	pea	(a0)
@@ -897,7 +897,7 @@ _gsxsta2:
 	pea	(a0)
 	pea	(a0)
 	move.w	92(a3),-(sp)
-	jsr	_vst_height
+	jsr	_avst_height
 
 	move.w	d3,d0			; d0 <- gl_width
 	ext.l	d0
@@ -931,7 +931,7 @@ x_x1:	pea	$000F0007		;  (sp) <- 15
 	jsr	_gsx_1code		; 2(sp) <-  7
 
 	move.w	#1,(sp)
-	jsr	_vsl_width
+	jsr	_avsl_width
 
 	pea	$0071FFFF		;  (sp) <- 113
 	jsr	_gsx_1code		; 2(sp) <-  -1
@@ -1001,7 +1001,7 @@ VOID bb_fill(WORD mode, WORD fis, WORD patt, WORD hx, WORD hy, WORD hw, WORD hh)
 		vsf_style(patt);
 		gl_patt = patt;
 	}
-	vr_recfl(&ppts[0], &gl_dst);
+	avr_recfl(&ppts[0], &gl_dst);
 }
 #endif
 /* 306de: 00e24894 */
@@ -1060,7 +1060,7 @@ L42:	lea	_ptsin,a0
 
 	pea	 (a3)
 	pea	_ptsin
-	jsr	_vr_recfl
+	jsr	_avr_recfl
 
 	lea	26(sp),sp
 	move.l	(sp)+,a3		; *CS*
@@ -1200,7 +1200,7 @@ WORD gsx_tblt(WORD tb_f, WORD x, WORD y, WORD tb_nc)
 	{
 		if (tb_f != gl_font)
 		{
-			vst_height(gl_ws.ws_chmaxh, &gl_wptschar, &gl_hptschar, &gl_wchar, &gl_hchar);
+			avst_height(gl_ws.ws_chmaxh, &gl_wptschar, &gl_hptschar, &gl_wchar, &gl_hchar);
 			gl_font = tb_f;
 		}
 		y += gl_hptschar;
@@ -1210,7 +1210,7 @@ WORD gsx_tblt(WORD tb_f, WORD x, WORD y, WORD tb_nc)
 	{
 		if (tb_f != gl_font)
 		{
-			vst_height(gl_ws.ws_chminh, &gl_wsptschar, &gl_hsptschar, &gl_wschar, &gl_hschar);
+			avst_height(gl_ws.ws_chminh, &gl_wsptschar, &gl_hsptschar, &gl_wschar, &gl_hschar);
 			gl_font = tb_f;
 		}
 		y += gl_hsptschar;
@@ -1259,7 +1259,7 @@ L55:	move.l	(a1)+,a4		; a4 -> character width
 	move.l	(a1)+,a1		; a1 -> height
 	move.w	(a1),-(sp)		; push height
 
-	jsr	_vst_height		; set font height
+	jsr	_avst_height		; set font height
 	lea	18(sp),sp
 
 	move.w	d3,(a3)			; gl_font <- tb_f
@@ -1441,7 +1441,7 @@ VOID gsx_xline(WORD ptscount, WORD ppoints)
 			st = hztltbl[(*(linexy + 1) & 1)];
 		}
 		vsl_udsty(st);
-		v_pline(2, ppoints);
+		av_pline(2, ppoints);
 		ppoints += 2;
 	}
 	vsl_udsty(0xffff);
@@ -1487,7 +1487,7 @@ L66:	move.w	  d0,-(sp)			; set line style
 
 	pea	  -4(a3)			; Push pointer to (X(n),Y(n))
 	move.w	#2,-(sp)
-	jsr	_v_pline			; Draw line from  (X(n),Y(n))
+	jsr	_av_pline			; Draw line from  (X(n),Y(n))
 	addq.l	#6,sp				;     to (X(n+1),Y(n+1))
 
 	addq.w	#1,d3				; increment vertex counter

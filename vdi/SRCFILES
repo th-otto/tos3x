@@ -1,40 +1,38 @@
-VDI_306_OBJS1 = palette.o allgem.o opnwk.o stcolor.o ttcolor.o
-VDI_306_OBJS2 = font6x6.o font8x8.o font8x16.o fnt16x32.o tables.o
-VDI_306_OBJS3 = escape.o entry.o line1010.o gsxasm1.o blitinit.o
-VDI_306_OBJS4 = routines.o jmptbl.o isin.o monobj.o monout.o text.o
-VDI_306_OBJS5 = textblt.o hbtxtblt.o mono.o hbmono.o gsxasm2.o hbrect.o mouse.o
-VDI_306_OBJS6 = copyrfm.o blastman.o hbbitblt.o blaster.o seedfill.o xfrmform.o sbblit.o
-VDI_306_OBJS7 = sbfrag.o sbescape.o sbhline.o sbvline.o sbmono.o sbtxtblt.o
-VDI_306_OBJS8 = sbscrn.o sbsctran.o sbsctlog.o sbscolog.o sbscopaq.o
-VDI_306_OBJS9 = colorep.o cbssdefs.o
-VDI_306_OBJS10 = devices.o init.o spcolor.o trucolor.o
+VDI_306_OBJS1=palette.o allgem.o opnwk.o stcolor.o ttcolor.o
+VDI_306_OBJS2=font6x6.o font8x8.o font8x16.o fnt16x32.o tables.o
+VDI_306_OBJS3=escape.o entry.o line1010.o gsxasm1.o blitinit.o
+VDI_306_OBJS4=routines.o jmptbl.o isin.o monobj.o monout.o text.o
+VDI_306_OBJS5=textblt.o hbtxtblt.o mono.o hbmono.o gsxasm2.o hbrect.o mouse.o
+VDI_306_OBJS6=copyrfm.o blastman.o hbbitblt.o blaster.o seedfill.o xfrmform.o sbblit.o
+VDI_306_OBJS7=sbfrag.o sbescape.o sbhline.o sbvline.o sbmono.o sbtxtblt.o
+VDI_306_OBJS8=sbscrn.o sbsctran.o sbsctlog.o sbscolog.o sbscopaq.o
+VDI_306_OBJS9=colorep.o cbssdefs.o
+VDI_306_OBJS10=devices.o init.o spcolor.o trucolor.o
 
-VDI_306_OBJS = $(VDI_306_OBJS1) $(VDI_306_OBJS2) $(VDI_306_OBJS3) $(VDI_306_OBJS4) $(VDI_306_OBJS5) \
-	       $(VDI_306_OBJS6) $(VDI_306_OBJS7) $(VDI_306_OBJS8) $(VDI_306_OBJS9) $(VDI_306_OBJS10)
+VDI_306_OBJS=${VDI_306_OBJS1} ${VDI_306_OBJS2} ${VDI_306_OBJS3} ${VDI_306_OBJS4} ${VDI_306_OBJS5} ${VDI_306_OBJS6} ${VDI_306_OBJS7} ${VDI_306_OBJS8} ${VDI_306_OBJS9} ${VDI_306_OBJS10}
 
 #
 # files for 2.06 are the same, but order is different
 #
-VDI_206_OBJS1 = escape.o palette.o font6x6.o font8x8.o font8x16.o fnt16x32.o
-VDI_206_OBJS2 = entry.o tables.o line1010.o gsxasm1.o
-VDI_206_OBJS3 = allgem.o blitinit.o routines.o jmptbl.o isin.o monobj.o
-VDI_206_OBJS4 = opnwk.o monout.o text.o textblt.o hbtxtblt.o
-VDI_206_OBJS5 = mono.o hbmono.o gsxasm2.o hbrect.o mouse.o copyrfm.o blastman.o
-VDI_206_OBJS6 = hbbitblt.o blaster.o seedfill.o xfrmform.o stcolor.o ttcolor.o
-VDI_206_OBJS7 = sbblit.o sbfrag.o sbescape.o sbhline.o sbvline.o sbmono.o sbtxtblt.o
-VDI_206_OBJS8 = sbscrn.o sbsctran.o sbsctlog.o sbscolog.o sbscopaq.o
-VDI_206_OBJS9 = colorep.o cbssdefs.o
-VDI_206_OBJS10 = devices.o init.o spcolor.o trucolor.o
+VDI_206_OBJS1=escape.o palette.o font6x6.o font8x8.o font8x16.o fnt16x32.o
+VDI_206_OBJS2=entry.o tables.o line1010.o gsxasm1.o
+VDI_206_OBJS3=allgem.o blitinit.o routines.o jmptbl.o isin.o monobj.o
+VDI_206_OBJS4=opnwk.o monout.o text.o textblt.o hbtxtblt.o
+VDI_206_OBJS5=mono.o hbmono.o gsxasm2.o hbrect.o mouse.o copyrfm.o blastman.o
+VDI_206_OBJS6=hbbitblt.o blaster.o seedfill.o xfrmform.o stcolor.o ttcolor.o
+VDI_206_OBJS7=sbblit.o sbfrag.o sbescape.o sbhline.o sbvline.o sbmono.o sbtxtblt.o
+VDI_206_OBJS8=sbscrn.o sbsctran.o sbsctlog.o sbscolog.o sbscopaq.o
+VDI_206_OBJS9=colorep.o cbssdefs.o
+VDI_206_OBJS10=devices.o init.o spcolor.o trucolor.o
 
-VDI_206_OBJS = $(VDI_206_OBJS1) $(VDI_206_OBJS2) $(VDI_206_OBJS3) $(VDI_206_OBJS4) $(VDI_206_OBJS5) \
-	       $(VDI_206_OBJS6) $(VDI_206_OBJS7) $(VDI_206_OBJS8) $(VDI_206_OBJS9) $(VDI_206_OBJS10)
+VDI_206_OBJS=${VDI_206_OBJS1} ${VDI_206_OBJS2} ${VDI_206_OBJS3} ${VDI_206_OBJS4} ${VDI_206_OBJS5} ${VDI_206_OBJS6} ${VDI_206_OBJS7} ${VDI_206_OBJS8} ${VDI_206_OBJS9} ${VDI_206_OBJS10}
 
-SCREEN_OBJS = vdivtg.o alone.o jin.o
+SCREEN_OBJS=vdivtg.o alone.o jin.o
 
-VDI_OBJS = $(VDI_$(TOSVERSION)_OBJS)
+VDI_OBJS=${VDI_${TOSVERSION}_OBJS}
 
 
-VDI_SRCS = \
+VDI_SRCS=\
 	vdidefs.h \
 	attrdef.h \
 	fontdef.h \
@@ -109,19 +107,19 @@ VDI_SRCS = \
 	spcolor.c \
 	trucolor.c \
 	\
-	$(empty)
+	${empty}
 
-SCREEN_SRCS =  \
+SCREEN_SRCS=\
 	alone.S \
 	alone.h \
 	jin.S \
 	vdivtg.c \
-	$(empty)
+	${empty}
 
-SRCS = $(VDI_SRCS) $(SCREEN_SRCS)
+SRCS=${VDI_SRCS} ${SCREEN_SRCS}
 
 
-EXTRA_DIST = \
+EXTRA_DIST=\
 	GNUmakefile \
 	Makefile \
 	SRCFILES \
@@ -141,4 +139,4 @@ EXTRA_DIST = \
 	spxtblit.S \
 	spxtxtbl.S \
 	spxvline.S \
-	$(empty)
+	${empty}

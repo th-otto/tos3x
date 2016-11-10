@@ -1,29 +1,29 @@
-BDOS_306_OBJS1 = osinit.o lmul.o ldiv.o xfer.o console.o fsfat.o
-BDOS_306_OBJS2 = fsglob.o fsdir.o fsopnclo.o fshand.o fsmain.o fssupp.o
-BDOS_306_OBJS3 = proc.o umem.o osmem.o bdosmain.o sup.o time.o
+BDOS_306_OBJS1=osinit.o lmul.o ldiv.o xfer.o console.o fsfat.o
+BDOS_306_OBJS2=fsglob.o fsdir.o fsopnclo.o fshand.o fsmain.o fssupp.o
+BDOS_306_OBJS3=proc.o umem.o osmem.o bdosmain.o sup.o time.o
 
-BDOS_306_OBJS = $(BDOS_306_OBJS1) $(BDOS_306_OBJS2) $(BDOS_306_OBJS3)
+BDOS_306_OBJS=${BDOS_306_OBJS1} ${BDOS_306_OBJS2} ${BDOS_306_OBJS3}
 
 #
 # files for 2.06 and 2.08 are the same, but order is different
 #
 
-BDOS_206_OBJS1 = osinit.o lmul.o ldiv.o xfer.o console.o fsfat.o
-BDOS_206_OBJS2 = fsglob.o fsdir.o fsopnclo.o fshand.o fsmain.o fssupp.o
-BDOS_206_OBJS3 = proc.o umem.o osmem.o bdosmain.o sup.o time.o
+BDOS_206_OBJS1=osinit.o lmul.o ldiv.o xfer.o console.o fsfat.o
+BDOS_206_OBJS2=fsglob.o fsdir.o fsopnclo.o fshand.o fsmain.o fssupp.o
+BDOS_206_OBJS3=proc.o umem.o osmem.o bdosmain.o sup.o time.o
 
-BDOS_206_OBJS = $(BDOS_206_OBJS1) $(BDOS_206_OBJS2) $(BDOS_206_OBJS3)
+BDOS_206_OBJS=${BDOS_206_OBJS1} ${BDOS_206_OBJS2} ${BDOS_206_OBJS3}
 
-BDOS_208_OBJS1 = osinit.o lmul.o ldiv.o xfer.o console.o fsfat.o
-BDOS_208_OBJS2 = fsglob.o fsdir.o fsopnclo.o fshand.o fsmain.o fssupp.o
-BDOS_208_OBJS3 = proc.o umem.o osmem.o bdosmain.o sup.o time.o
+BDOS_208_OBJS1=osinit.o lmul.o ldiv.o xfer.o console.o fsfat.o
+BDOS_208_OBJS2=fsglob.o fsdir.o fsopnclo.o fshand.o fsmain.o fssupp.o
+BDOS_208_OBJS3=proc.o umem.o osmem.o bdosmain.o sup.o time.o
 
-BDOS_208_OBJS = $(BDOS_208_OBJS1) $(BDOS_208_OBJS2) $(BDOS_208_OBJS3)
+BDOS_208_OBJS=${BDOS_208_OBJS1} ${BDOS_208_OBJS2} ${BDOS_208_OBJS3}
 
-BDOS_OBJS = $(BDOS_$(TOSVERSION)_OBJS)
+BDOS_OBJS=${BDOS_${TOSVERSION}_OBJS}
 
 
-BDOS_SRCS = \
+BDOS_SRCS=\
 	bdosdefs.h \
 	osinit.S \
 	lmul.S \
@@ -51,9 +51,9 @@ BDOS_SRCS = \
 	pd.h \
 	pghdr.h \
 	tos.h \
-	$(empty)
+	${empty}
 
-EXTRA_DIST = \
+EXTRA_DIST=\
 	GNUmakefile \
 	Makefile \
 	SRCFILES \
@@ -61,6 +61,6 @@ EXTRA_DIST = \
 	optimize.mak \
 	tos306de.map \
 	tos306us.map \
-	$(empty)
+	${empty}
 
-SRCS = $(BDOS_SRCS)
+SRCS=${BDOS_SRCS}

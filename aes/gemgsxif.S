@@ -375,7 +375,7 @@ L209:
 	jsr	_setres			; check mode code
 #endif
 
-	bsr	_v_opnwk
+	bsr	_av_opnwk
 	lea	12(sp),sp
 
 	lea	_gl_ws,a1
@@ -475,7 +475,7 @@ VOID bb_set(WORD sx, WORD sy, WORD sw, WORD sh, WORD *pts1, WORD *pts2, FDB *pfd
 	pts2[3] = sh - 1;
 
 	gsx_fix(pfd, 0, 0, 0, 0);
-	vro_cpyfm(S_ONLY, &ptsin[0], psrc, pdst);
+	avro_cpyfm(S_ONLY, &ptsin[0], psrc, pdst);
 	gsx_mon();
 }
 #endif
@@ -536,7 +536,7 @@ _bb_set:
 	move.l	-(a0),-(sp)		; push *psrc
 	pea	_ptsin			; push *ptsin
 	move.w	#3,-(sp)		; replace mode (S_ONLY)
-	bsr	_vro_cpyfm
+	bsr	_avro_cpyfm
 
 	lea	26(sp),sp		; clean the stack up from earlier calls
 
@@ -815,7 +815,7 @@ WORD gsx_char(NOTHING)
 
 
 #if CCODE
-WORD v_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
+WORD av_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
 {
 	WORD *ptsptr;
 
@@ -833,8 +833,8 @@ WORD v_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
 }
 #endif
 /* 306de: 00e2538c */
-	xdef _v_opnwk
-_v_opnwk:
+	xdef _av_opnwk
+_av_opnwk:
 
 	move.l	4(sp),iioff		; _intin array is pwork_in
 	move.l	12(sp),a1		; a1 -> pwork_out
@@ -856,7 +856,7 @@ _v_opnwk:
 
 
 #if CCODE
-VOID v_pline(WORD count, WORD *pxyarray)
+VOID av_pline(WORD count, WORD *pxyarray)
 {
 	i_ptsin(pxyarray);
 	gsx_ncode(POLYLINE, count, 0);
@@ -864,8 +864,8 @@ VOID v_pline(WORD count, WORD *pxyarray)
 }
 #endif
 /* 306de: 00e253d8 */
-	xdef _v_pline
-_v_pline:
+	xdef _av_pline
+_av_pline:
 
 	lea	4(sp),a0
 
@@ -879,7 +879,7 @@ _v_pline:
 
 
 #if CCODE
-VOID vst_clip(WORD clip_flag, WORD pxyarray)
+VOID avst_clip(WORD clip_flag, WORD pxyarray)
 {
 	WORD tmp, value;
 
@@ -891,8 +891,8 @@ VOID vst_clip(WORD clip_flag, WORD pxyarray)
 }
 #endif
 /* 306de: 00e253ec */
-	xdef _vst_clip
-_vst_clip:
+	xdef _avst_clip
+_avst_clip:
 
 	lea	4(sp),a0
 	move.w	(a0)+,_intin		; intin[0] <- clip flag
@@ -903,7 +903,7 @@ _vst_clip:
 
 
 #if CCODE
-VOID vst_height(WORD height, WORD *pchr_width, WORD *pchr_height, WORD *pcell_width, WORD *pcell_height)
+VOID avst_height(WORD height, WORD *pchr_width, WORD *pchr_height, WORD *pcell_width, WORD *pcell_height)
 {
 	REG WORD *ppts;
 
@@ -919,8 +919,8 @@ VOID vst_height(WORD height, WORD *pchr_width, WORD *pchr_height, WORD *pcell_wi
 }
 #endif
 /* 306de: 00e25400 */
-	xdef _vst_height
-_vst_height:
+	xdef _avst_height
+_avst_height:
 
 	lea	_ptsin,a1
 	clr.w	      (a1)+		; ptsin[0] <- 0
@@ -945,7 +945,7 @@ _vst_height:
 
 
 #if CCODE
-VOID vr_recfl(WORD *pxyarray, FDB *pdesMFDB) /* ??? why MFDB ??? */
+VOID avr_recfl(WORD *pxyarray, FDB *pdesMFDB) /* ??? why MFDB ??? */
 {
 	i_ptr(pdesMFDB);
 	i_ptsin(pxyarray);
@@ -954,8 +954,8 @@ VOID vr_recfl(WORD *pxyarray, FDB *pdesMFDB) /* ??? why MFDB ??? */
 }
 #endif
 /* 306de: 00e2542e */
-	xdef _vr_recfl
-_vr_recfl:
+	xdef _avr_recfl
+_avr_recfl:
 
 	lea	4(sp),a0
 	bsr	set_pioff
@@ -968,7 +968,7 @@ _vr_recfl:
 
 
 #if CCODE
-VOID vro_cpyfm(WORD wr_mode, WORD *pxyarray, WORD *psrcMFDB, WORD *pdesMFDB)
+VOID avro_cpyfm(WORD wr_mode, WORD *pxyarray, WORD *psrcMFDB, WORD *pdesMFDB)
 {
 	intin[0] = wr_mode;
 	i_ptr(psrcMFDB);
@@ -979,8 +979,8 @@ VOID vro_cpyfm(WORD wr_mode, WORD *pxyarray, WORD *psrcMFDB, WORD *pdesMFDB)
 }
 #endif
 /* 306de: 00e2543e */
-	xdef _vro_cpyfm
-_vro_cpyfm:
+	xdef _avro_cpyfm
+_avro_cpyfm:
 
 	lea	4(sp),a0		; a0 -> parameters on stack
 	move.w	(a0)+,_intin		; intin[0] <- writing mode	  4(sp)
@@ -994,7 +994,7 @@ _vro_cpyfm:
 
 
 #if CCODE
-VOID vrt_cpyfm(WORD wr_mode, WORD *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, WORD fgcolor, WORD bgcolor)
+VOID avrt_cpyfm(WORD wr_mode, WORD *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, WORD fgcolor, WORD bgcolor)
 {
 	REG WORD *pintin;
 
@@ -1011,8 +1011,8 @@ VOID vrt_cpyfm(WORD wr_mode, WORD *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, WORD 
 }
 #endif
 /* 306de: 00e25450 */
-	xdef _vrt_cpyfm
-_vrt_cpyfm:
+	xdef _avrt_cpyfm
+_avrt_cpyfm:
 
 	lea	  4(sp),a0		; a0 -> parameters on stack
 	lea	 _intin,a2		; a2 -> intin array
@@ -1028,7 +1028,7 @@ _vrt_cpyfm:
 
 
 #if CCODE
-VOID vrn_trnfm(FDB *psrcMFDB, FDB *pdesMFDB)
+VOID avr_trnfm(FDB *psrcMFDB, FDB *pdesMFDB)
 {
 	i_ptr(psrcMFDB);
 	i_ptr2(pdesMFDB);
@@ -1036,8 +1036,8 @@ VOID vrn_trnfm(FDB *psrcMFDB, FDB *pdesMFDB)
 }
 #endif
 /* 306de: 00e25466 */
-	xdef _vrn_trnfm
-_vrn_trnfm:
+	xdef _avr_trnfm
+_avr_trnfm:
 
 	lea	 4(sp),a0		; a0 -> stack parameters
 	bsr	mfdb_load
@@ -1048,7 +1048,7 @@ _vrn_trnfm:
 
 
 #if CCODE
-VOID vsl_width(WORD width)
+VOID avsl_width(WORD width)
 {
 	ptsin[0] = width;
 	ptsin[1] = 0;
@@ -1056,8 +1056,8 @@ VOID vsl_width(WORD width)
 }
 #endif
 /* 306de: 00e25470 */
-	xdef _vsl_width
-_vsl_width:
+	xdef _avsl_width
+_avsl_width:
 	lea	_ptsin,a1
 	move.w	4(sp),(a1)+		; ptsin[0] <- width
 	clr.w	      (a1)		; ptsin[1] <- 0

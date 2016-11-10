@@ -1,14 +1,6 @@
-BIOS_OBJS = \
-	startup.o \
-	keytbl.o \
-	sounds.o \
-	prtblk.o \
-	blkdev.o \
-	prt.o \
-	memtest.o \
-	$(empty)
+BIOS_OBJS=startup.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
 
-BIOS_SRCS = \
+BIOS_SRCS=\
 	bios.h \
 	biosdefs.h \
 	blkdev.h \
@@ -33,15 +25,15 @@ BIOS_SRCS = \
 	nvram.inc \
 	romcrc.inc \
 	scrdmp.inc \
-	$(empty)
+	${empty}
 
 
-EXTRA_DIST = \
+EXTRA_DIST=\
 	GNUmakefile \
 	Makefile \
 	SRCFILES \
 	optimize.mak \
 	biosext.S \
-	$(empty)
+	${empty}
 
-SRCS = $(BIOS_SRCS)
+SRCS=${BIOS_SRCS}

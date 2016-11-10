@@ -15,6 +15,14 @@
 #include "sections.inc"
 
 
+#if BINEXACT
+#  ifdef __GNUC__
+#    undef BINEXACT
+#    define BINEXACT 0
+#  endif
+#endif
+
+
 /* from AES */
 
 	xdef _xstrpcpy
@@ -214,3 +222,47 @@ _v_hardcopy     equ AESTBASE+$B98E
 
 lmul            equ AESTBASE+$BF78
 ldiv            equ AESTBASE+$BFCC
+
+
+#if !BINEXACT
+		xdef _gl_wchar
+		comm _gl_wchar,2
+		xdef _gl_hchar
+		comm _gl_hchar,2
+		xdef _gl_wbox
+		comm _gl_wbox,2
+		xdef _gl_hbox
+		comm _gl_hbox,2
+		xdef _gl_handle
+		comm _gl_handle,2
+		xdef _gl_btrue
+		comm _gl_btrue,2
+		xdef _gl_ncols
+		comm _gl_ncols,2
+		xdef _gl_nrow
+		comm _gl_nrows,2
+		xdef _sh_iscart
+		comm _sh_iscart,2
+		xdef _ctldown
+		comm _ctldown,2
+		xdef _gl_restype
+		comm _gl_restype,2
+		xdef _gl_rschange
+		comm _gl_rschange,2
+		xdef _gl_bvdisk
+		comm _gl_bvdisk,2
+		xdef _gl_bvhard
+		comm _gl_bvhard,2
+		xdef _intin
+		comm _intin,256
+		xdef _contrl
+		comm _contrl,24
+		xdef _intout
+		comm _intout,256
+		xdef _ptsin
+		comm _ptsin,40
+		xdef _rlr
+		comm _rlr,4
+		xdef _gl_ws
+		comm _gl_ws,4
+#endif
