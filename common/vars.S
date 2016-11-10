@@ -451,9 +451,7 @@ name: ds.t size
 	ds.w 1
 	
 	V(_ptsout,w,10)
-	
-	ds.b 2
-	
+	INT(_m_st)
 	GRECT(_full)
 	GRECT(_ctrl)
 	

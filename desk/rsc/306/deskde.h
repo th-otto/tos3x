@@ -218,36 +218,36 @@
 
 #define SSCREEN                           13 /* form/dialog */
 #define STITLE                             1 /* TEXT in tree SSCREEN */ /* max len 11 */
-#define DESKPREF                           4 /* STRING in tree SSCREEN */
-#define WINPREF                            5 /* STRING in tree SSCREEN */
-#define PAT0                               9 /* BOX in tree SSCREEN */
-#define PAT1                              10 /* BOX in tree SSCREEN */
-#define PAT2                              11 /* BOX in tree SSCREEN */
-#define PAT3                              12 /* BOX in tree SSCREEN */
-#define PAT4                              13 /* BOX in tree SSCREEN */
-#define PAT5                              14 /* BOX in tree SSCREEN */
-#define PAT6                              15 /* BOX in tree SSCREEN */
-#define PAT7                              16 /* BOX in tree SSCREEN */
-#define OUTBOX                            17 /* BOX in tree SSCREEN */
-#define PATTERN                           18 /* BOX in tree SSCREEN */
-#define COLOR0                            20 /* BOX in tree SSCREEN */
-#define COLOR1                            21 /* BOX in tree SSCREEN */
-#define COLOR2                            22 /* BOX in tree SSCREEN */
-#define COLOR3                            23 /* BOX in tree SSCREEN */
-#define COLOR4                            24 /* BOX in tree SSCREEN */
-#define COLOR5                            25 /* BOX in tree SSCREEN */
-#define COLOR6                            26 /* BOX in tree SSCREEN */
-#define COLOR7                            27 /* BOX in tree SSCREEN */
-#define COLOR8                            28 /* BOX in tree SSCREEN */
-#define COLOR9                            29 /* BOX in tree SSCREEN */
-#define COLOR10                           30 /* BOX in tree SSCREEN */
-#define COLOR11                           31 /* BOX in tree SSCREEN */
-#define COLOR12                           32 /* BOX in tree SSCREEN */
-#define COLOR13                           33 /* BOX in tree SSCREEN */
-#define COLOR14                           34 /* BUTTON in tree SSCREEN */
-#define COLOR15                           35 /* BUTTON in tree SSCREEN */
-#define SOK                               36 /* BUTTON in tree SSCREEN */
-#define SCANCEL                           37 /* BUTTON in tree SSCREEN */
+#define PAT0                               7 /* BOX in tree SSCREEN */
+#define PAT1                               8 /* BOX in tree SSCREEN */
+#define PAT2                               9 /* BOX in tree SSCREEN */
+#define PAT3                              10 /* BOX in tree SSCREEN */
+#define PAT4                              11 /* BOX in tree SSCREEN */
+#define PAT5                              12 /* BOX in tree SSCREEN */
+#define PAT6                              13 /* BOX in tree SSCREEN */
+#define PAT7                              14 /* BOX in tree SSCREEN */
+#define OUTBOX                            15 /* BOX in tree SSCREEN */
+#define PATTERN                           16 /* BOX in tree SSCREEN */
+#define COLOR0                            18 /* BOX in tree SSCREEN */
+#define COLOR1                            19 /* BOX in tree SSCREEN */
+#define COLOR2                            20 /* BOX in tree SSCREEN */
+#define COLOR3                            21 /* BOX in tree SSCREEN */
+#define COLOR4                            22 /* BOX in tree SSCREEN */
+#define COLOR5                            23 /* BOX in tree SSCREEN */
+#define COLOR6                            24 /* BOX in tree SSCREEN */
+#define COLOR7                            25 /* BOX in tree SSCREEN */
+#define COLOR8                            26 /* BOX in tree SSCREEN */
+#define COLOR9                            27 /* BOX in tree SSCREEN */
+#define COLOR10                           28 /* BOX in tree SSCREEN */
+#define COLOR11                           29 /* BOX in tree SSCREEN */
+#define COLOR12                           30 /* BOX in tree SSCREEN */
+#define COLOR13                           31 /* BOX in tree SSCREEN */
+#define COLOR14                           32 /* BOX in tree SSCREEN */
+#define COLOR15                           33 /* BOX in tree SSCREEN */
+#define SOK                               34 /* BUTTON in tree SSCREEN */
+#define SCANCEL                           35 /* BUTTON in tree SSCREEN */
+#define WINPREF                           36 /* BUTTON in tree SSCREEN */
+#define DESKPREF                          37 /* BUTTON in tree SSCREEN */
 
 #define FILEOPTI                          14 /* form/dialog */
 #define OPTNAME                            2 /* FTEXT in tree FILEOPTI */ /* max len 11 */

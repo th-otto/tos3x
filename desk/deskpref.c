@@ -16,6 +16,7 @@
  * Set preferences dialog
  */
 #if !POPUP_SUPPORT
+/* 306de: 00e316e8 */
 VOID desk_pref(NOTHING)
 {
 	register OBJECT *obj;
@@ -51,7 +52,11 @@ VOID desk_pref(NOTHING)
 	if (m_st)
 	{
 		for (i = SPEXT1; i <= SPEXT3; i++)
+#if AES3D
 			obj[i].ob_flags |= HIDETREE;
+#else
+			obj[i].ob_flags = HIDETREE;
+#endif
 	}
 
 	if (restable[4])					/* TT high res  */
@@ -116,6 +121,7 @@ VOID desk_pref(NOTHING)
 /*
  * Set Color and pattern
  */
+/* 306de: 00e318a0 */
 VOID col_pa_pref(NOTHING)
 {
 	register OBJECT *obj;
@@ -134,7 +140,11 @@ VOID col_pa_pref(NOTHING)
 	last = ret = obj[DESKPREF].ob_state & SELECTED ? DESKPREF : WINPREF;
 
 	for (j = COLOR0, i = d_maxcolor; i < 16; i++)
+#if AES3D
 		obj[j + i].ob_flags |= HIDETREE;
+#else
+		obj[j + i].ob_flags = HIDETREE;
+#endif
 
 	fm_draw(SSCREEN);
 
@@ -204,7 +214,9 @@ VOID col_pa_pref(NOTHING)
 		windspec = (uint16_t) newwin;
 		while (win)
 		{
+#if (TOSVERSION >= 0x400) | !BINEXACT
 			if (win->w_obj)				/* fixed 7/7/92 */
+#endif
 				win->w_obj[0].ob_spec = windspec;
 			win = win->w_next;
 		}
