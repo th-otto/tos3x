@@ -829,8 +829,8 @@ PP(register const char *dstptr;)
 }
 
 
-int16_t fill_string(P(char *)string, P(int16_t) item)
-PP(char *string;)
+int16_t fill_string(P(const char *)string, P(int16_t) item)
+PP(const char *string;)
 PP(int16_t item;)
 {
 	char *ptr, *ptr1;

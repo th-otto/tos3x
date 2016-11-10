@@ -616,8 +616,11 @@ PP(int16_t msgbuff;)
 
 	case IAPPITEM:
 		if (x_first(&str, &button))
-			mins_app();					/* cjg - 07/07/92 */
-		/* ins_app(); */
+#if POPUP_SUPPORT
+			mins_app();
+#else
+			ins_app();
+#endif
 		break;
 
 	case INSDISK:

@@ -61,28 +61,13 @@ PP(register CICONBLK *dest_ciblk;)
 
 	return obj->ob_type;
 }
-
-#else
-
-VOID cp_iblk(P(const ICONBLK *)src_iblk, P(ICONBLK *)dest_iblk)
-PP(register const ICONBLK *src_iblk;)
-PP(register ICONBLK *dest_iblk;)
-{
-	dest_iblk->ib_pmask = src_iblk->ib_pmask;
-	dest_iblk->ib_pdata = src_iblk->ib_pdata;
-	dest_iblk->ib_char[0] = src_iblk->ib_char[0];
-	dest_iblk->ib_char[1] = src_iblk->ib_char[1];
-	dest_iblk->ib_xchar = src_iblk->ib_xchar;
-	dest_iblk->ib_ychar = src_iblk->ib_ychar;
-}
-
 #endif
-
 
 
 /*
  * Remove desktop icons
  */
+/* 306de: 00e2ca20 */
 VOID rm_icons(NOTHING)
 {
 	register OBJECT *obj;
@@ -99,8 +84,12 @@ VOID rm_icons(NOTHING)
 		if ((obj[i].ob_state & SELECTED) && (!(obj[i].ob_flags & HIDETREE)))
 		{
 			found = TRUE;
+#if AES3D
 			obj[i].ob_flags |= HIDETREE;
-			if ((backid[i].i_type == XFILE) || (backid[i].i_type == XDIR))
+#else
+			obj[i].ob_flags = HIDETREE;
+#endif
+			if (backid[i].i_type == XFILE || backid[i].i_type == XDIR)
 				collect = TRUE;
 		}
 	}
@@ -113,10 +102,11 @@ VOID rm_icons(NOTHING)
 }
 
 
-#if 0
+#if !POPUP_SUPPORT
 /*
  * Install application
  */
+/* 306de: 00e2cacc */
 VOID ins_app(NOTHING)
 {
 	register OBJECT *obj;
@@ -125,18 +115,18 @@ VOID ins_app(NOTHING)
 	int16_t install, ret, newapp;
 	int16_t cont, setdir, dofull, where;
 	int16_t type, sret, icon, graphic;
-	char *str;
+	const char *str;
 	char buffer[8];
 	int32_t l;
 
 	cont = TRUE;
-	obj = (OBJECT *) 0;
+	obj = NULL;
 
 	cont = x_first(&str, &type);
 
 	while (cont)
 	{
-		if ((type != WINICON) && (type != XFILE))
+		if (type != WINICON && type != XFILE)
 			goto is_1;
 
 		app = app_xtype(str, &install);
@@ -147,7 +137,7 @@ VOID ins_app(NOTHING)
 		obj = get_tree(ADINSAPP);
 
 		icon = app->a_icon;
-		/* if it is a wild card match   */
+		/* if it is a wild card match */
 		if (*scasb(app->a_name, '*') == '*')
 			newapp = TRUE;				/* then we need app         */
 		else
@@ -160,7 +150,7 @@ VOID ins_app(NOTHING)
 
 		sret = ret ? TRUE : FALSE;
 		obj[AUTOBOX].ob_state = ret ? SELECTED : NORMAL;
-		obj[NORMALBO].ob_state = ret ? NORMAL : SELECTED;
+		obj[NORMALBOX].ob_state = ret ? NORMAL : SELECTED;
 
 		obj[APGEM].ob_state = NORMAL;
 		obj[APDOS].ob_state = NORMAL;
@@ -215,7 +205,7 @@ VOID ins_app(NOTHING)
 			break;
 
 		default:
-		  ins_1:fill_string(str, NOTPRG);
+			fill_string(str, NOTPRG);
 			goto is_1;
 		}
 
@@ -230,13 +220,13 @@ VOID ins_app(NOTHING)
 
 		fm_draw(ADINSAPP);
 		where = 0;
-	  ins_2:
+	ins_2:
 		ret = xform_do(obj, where);
 
-		if (ret == APCNCL)				/* cancel           */
+		if (ret == APSKIP)
 			goto is_1;
 
-		if (ret == APQUIT)
+		if (ret == APCANCEL)
 		{
 			cont = FALSE;
 			goto is_1;
@@ -244,14 +234,15 @@ VOID ins_app(NOTHING)
 
 		if (ret == APOK)				/* install          */
 		{								/* do we need a new one?    */
-			fs_sget(obj, IKEY, buffer);
+			fs_sget((LPTREE)obj, IKEY, buffer);
 			asctobin(buffer, &l);		/* don't change this line   */
 			if (buffer[0])
 			{
-				if ((l > 20) || (l < 1))
+				if (l > 20 || l < 1)
 				{
 					do1_alert(BADKEY);
-				  ins_3:obj[APOK].ob_state = NORMAL;
+				ins_3:
+					obj[APOK].ob_state = NORMAL;
 					inf_sset(obj, IKEY, Nostr);
 					draw_fld(obj, IKEY);
 					draw_fld(obj, APOK);
@@ -277,7 +268,8 @@ VOID ins_app(NOTHING)
 							sapp->a_key = 0;	/* Overwrite    */
 					}
 
-				  ins_4:sapp = sapp->a_next;
+				ins_4:
+					sapp = sapp->a_next;
 				}
 
 			}
@@ -291,18 +283,20 @@ VOID ins_app(NOTHING)
 					goto ins_6;
 				}
 			} else						/* clean up the old define  */
+			{
 				app->a_doc[0] = 0;
-
+			}
+			
 			/* get the doc icon type    */
 			strcpy(buffer, "*.");
-			fs_sget(obj, APDFTYPE, &buffer[2]);
+			fs_sget((LPTREE)obj, APDFTYPE, &buffer[2]);
 			app_icon(buffer, -1, &app->a_dicon);
 
 			lp_fill(str, &app->a_name);
 			lp_collect();
 
-			strcpy(app->a_doc. buffer);
-			fs_sget(obj, ARGS, app->a_argu);
+			strcpy(app->a_doc, buffer);
+			fs_sget((LPTREE)obj, ARGS, app->a_argu);
 			graphic = 1;
 
 			if (obj[APGEM].ob_state & SELECTED)
@@ -343,7 +337,9 @@ VOID ins_app(NOTHING)
 						autofile[2] = ' ';
 						strcpy(&autofile[3], str);
 					} else
+					{
 						do1_alert(NOAUTO);
+					}
 				}
 			} else
 			{
@@ -357,22 +353,28 @@ VOID ins_app(NOTHING)
 		/* OK to install */
 		if (ret == APREMOVE)
 		{
+#if (TOSVERSION >= 0x400) | !BINEXACT
 			if (*str)					/* changed 3/3/92   */
 				strcpy(autofile, Nostr);
-
 			if (!newapp)
 				app_free(app);
+#else
+			if (!newapp)
+				app_free(app);
+			if (*str)
+				strcpy(autofile, Nostr);
+#endif
 		}
 
-	  is_1:
+	is_1:
 		if (cont == FALSE)
 			break;
 
 		cont = x_next(&str, &type);
+	}
 
-	}									/* while */
-
-  ins_6:if (obj)
+ins_6:
+	if (obj)
 		do_finish(ADINSAPP);
 	else
 		do1_alert(NOINSTAL);
@@ -383,11 +385,16 @@ VOID ins_app(NOTHING)
 /*
  * Install desktop icons
  */
+/* 306de: 00e2d086 */
 VOID ins_icons(NOTHING)
 {
 	register OBJECT *obj;
+#if COLORICON_SUPPORT
 	register CICONBLK *iblk;
 	CICONBLK ciblk;
+#else
+	register CICONBLK *iblk;
+#endif
 	register OBJECT *obj1;
 	register int16_t type, item, icon, style;
 	int16_t ret, limit, redraw, select, xitem;
@@ -396,8 +403,12 @@ VOID ins_icons(NOTHING)
 	char idbuffer[2];
 	char buffer[14];
 	GRECT pt;
+#if TOSVERSION >= 0x400
 	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
-	int32_t saveptr;
+#endif
+#if COLORICON_SUPPORT
+	intptr_t saveptr;
+#endif
 
 	quit = FALSE;
 	xitem = item = o_item;
@@ -406,7 +417,9 @@ VOID ins_icons(NOTHING)
 	obj1 = background;
 	limit = numicon;					/* max number of icon   */
 
+#if COLORICON_SUPPORT
 	saveptr = obj[IICON].ob_spec;
+#endif
 
 #if !BINEXACT
 	which = ret = 0; /* quiet compiler */
@@ -414,9 +427,11 @@ VOID ins_icons(NOTHING)
 
 	while (TRUE)
 	{
+#if COLORICON_SUPPORT
 		obj[IICON].ob_type = G_CICON;	/* 7/11/92 */
 		ciblk.monoblk = *(ICONBLK *) (obj[IICON].ob_spec);
 		obj[IICON].ob_spec = (intptr_t)&ciblk;
+#endif
 		iblk = (CICONBLK *) (obj[IICON].ob_spec);
 		redraw = FALSE;
 
@@ -441,7 +456,7 @@ VOID ins_icons(NOTHING)
 			buf1[0] = 0;
 		}
 
-		if ((type == XFILE) || (type == XDIR))	/* file     */
+		if (type == XFILE || type == XDIR)	/* file     */
 		{
 			style = DISABLED;
 			select = NONE;
@@ -462,7 +477,11 @@ VOID ins_icons(NOTHING)
 				ret = IPRINTER;
 		}
 
+#if AES3D
 		obj[DRID].ob_flags = (obj[DRID].ob_flags & (IS3DOBJ | IS3DACT)) | select;
+#else
+		obj[DRID].ob_flags = select;
+#endif
 		obj[IDRIVE].ob_state = style;
 		obj[ITRASH].ob_state = style;
 		obj[IPRINTER].ob_state = style;
@@ -482,33 +501,39 @@ VOID ins_icons(NOTHING)
 		inf_sset(obj, DRLABEL, buffer);
 		inf_sset(obj, DRID, idbuffer);
 
-	  in_5:fm_draw(ADINSDIS);
+	in_5:
+		fm_draw(ADINSDIS);
 
-	  in_2:ret = xform_do(obj, 0);
+	in_2:
+		ret = xform_do(obj, 0);
 
 		if (ret == IUP)
 		{
-		  cg_1:
+		cg_1:
 			if (icon)
 			{
 				icon--;
 				goto in_3;
 			} else
 			{
+#if AES3D
 				wait_up();
 				XDeselect(obj, ret);
+#endif
 				goto in_2;
 			}
 		}
 
 		if (ret == IDOWN)
 		{
-		  cg_2:
+		cg_2:
 			if ((icon + 1) < limit)
 			{
 				icon++;
-			  in_3:
+			in_3:
+#if AES3D
 				XSelect(obj, ret);		/* cjg 08/06/92 */
+#endif
 #if COLORICON_SUPPORT
 				cp_iblk(icon, iblk);
 #else
@@ -519,6 +544,7 @@ VOID ins_icons(NOTHING)
 				cl_delay();
 
 				/* cjg 08/06/92 */
+#if TOSVERSION >= 0x400
 				graf_mkstate(&mk_x, &mk_y, &mk_buttons, &mk_kstate);
 				if (mk_buttons)
 				{
@@ -528,9 +554,12 @@ VOID ins_icons(NOTHING)
 					if (ret == IDOWN)
 						goto cg_2;
 				}
+#endif
 			}
+#if AES3D
 			wait_up();
 			XDeselect(obj, ret);
+#endif
 			goto in_2;
 		}
 
@@ -552,7 +581,7 @@ VOID ins_icons(NOTHING)
 		{								/* drive icon   */
 			if (!(which = inf_gindex((LPTREE)obj, IDRIVE, 3)))	/* driver type */
 			{
-				if ((!idbuffer[0]) || (idbuffer[0] == ' '))
+				if (!idbuffer[0] || idbuffer[0] == ' ')
 				{
 					do1_alert(NOID);
 					goto in_5;
@@ -571,14 +600,14 @@ VOID ins_icons(NOTHING)
 			goto in_4;					/* don't allocate   */
 
 	in_41:
-		if ((item = av_icon()) == -1)
-										/* get new one  */
-		{								/* failed   */
+		if ((item = av_icon()) == -1)	/* get new one  */
+		{
 			do1_alert(NOICON);
 			goto in_1;
 		}
 
-	  in_4:redraw = TRUE;				/* user selected OK */
+	in_4:
+		redraw = TRUE;				/* user selected OK */
 		iblk = (CICONBLK *) (obj1[item].ob_spec);
 #if COLORICON_SUPPORT
 		cp_iblk(icon, iblk);
@@ -587,7 +616,7 @@ VOID ins_icons(NOTHING)
 #endif
 		backid[item].i_icon = icon;
 
-		strcpy(iblk->monoblk.ib_ptext, ((CICONBLK *) (obj[DRLABEL].ob_spec))->monoblk.ib_ptext);
+		strcpy(iblk->monoblk.ib_ptext, ((TEDINFO *) (obj[DRLABEL].ob_spec))->te_ptext);
 
 		if (driver)
 		{
@@ -629,15 +658,36 @@ VOID ins_icons(NOTHING)
 	}									/* while */
 
 	do_finish(ADINSDIS);
+#if COLORICON_SUPPORT
 	obj[IICON].ob_spec = saveptr;
+#endif
 }
 
+
+
+
+#if !COLORICON_SUPPORT
+/* 306de: 00e2d47e */
+VOID cp_iblk(P(const ICONBLK *)src_iblk, P(ICONBLK *)dest_iblk)
+PP(register const ICONBLK *src_iblk;)
+PP(register ICONBLK *dest_iblk;)
+{
+	dest_iblk->ib_pmask = src_iblk->ib_pmask;
+	dest_iblk->ib_pdata = src_iblk->ib_pdata;
+	dest_iblk->ib_char[0] = src_iblk->ib_char[0];
+	dest_iblk->ib_char[1] = src_iblk->ib_char[1];
+	dest_iblk->ib_xchar = src_iblk->ib_xchar;
+	dest_iblk->ib_ychar = src_iblk->ib_ychar;
+}
+
+#endif
 
 
 
 /*
  * Install window icons
  */
+/* 306de: 00e2d4b8 */
 VOID ins_wicons(NOTHING)
 {
 	register APP *app;
@@ -645,13 +695,21 @@ VOID ins_wicons(NOTHING)
 	BOOLEAN ret;
 	int16_t limit, index, quit, itype;
 	int16_t type, install, pref, status;
+#if COLORICON_SUPPORT
 	CICONBLK *iblk;
 	CICONBLK ciblk;
+#else
+	CICONBLK *iblk;
+#endif
 	char buffer[14];
 	char buf2[14];
 	const char *str;
+#if TOSVERSION >= 0x400
 	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
+#endif
+#if COLORICON_SUPPORT
 	int32_t saveptr;
+#endif
 
 	UNUSED(install);
 	obj = get_tree(INWICON);
@@ -660,25 +718,38 @@ VOID ins_wicons(NOTHING)
 
 	x_first(&str, &itype);
 	status = TRUE;
+#if COLORICON_SUPPORT
 	saveptr = obj[WICON].ob_spec;
+#endif
 
 	while (status)
 	{									/* 7/11/92 */
+#if COLORICON_SUPPORT
 		obj[WICON].ob_type = G_CICON;
 		ciblk.monoblk = *(ICONBLK *) (obj[WICON].ob_spec);
 		obj[WICON].ob_spec = (intptr_t)&ciblk;
+#endif
 		iblk = (CICONBLK *) (obj[WICON].ob_spec);
 		inf_sset(obj, WNAME, Nostr);
 		obj[WFOLDER].ob_state = NORMAL;
 		obj[WNONE].ob_state = SELECTED;
+#if AES3D
 		obj[WFOLDER].ob_flags |= (SELECTABLE | RBUTTON);
 		obj[WNONE].ob_flags |= (SELECTABLE | RBUTTON);
+#else
+		obj[WFOLDER].ob_flags = (SELECTABLE | RBUTTON);
+		obj[WNONE].ob_flags = (SELECTABLE | RBUTTON);
+#endif
 
 		pref = 0;
 
 		if (x_status)					/* something is selected    */
 		{
+#if AES3D
 			obj[WNAME].ob_flags &= ~(SELECTABLE | EDITABLE);
+#else
+			obj[WNAME].ob_flags = 0;
+#endif
 
 			if (itype == FA_DIREC)
 			{
@@ -691,8 +762,13 @@ VOID ins_wicons(NOTHING)
 				strcpy(buf2, g_name(str));
 			}
 
+#if AES3D
 			obj[WFOLDER].ob_flags &= ~(SELECTABLE | RBUTTON);
 			obj[WNONE].ob_flags &= ~(SELECTABLE | RBUTTON);
+#else
+			obj[WFOLDER].ob_flags = 0;
+			obj[WNONE].ob_flags = 0;
+#endif
 
 			app = app_icon(buf2, itype == FA_DIREC ? FOLDER : -1, &index);
 			pref = app->a_pref;
@@ -700,7 +776,11 @@ VOID ins_wicons(NOTHING)
 		} else
 		{
 			index = 0;					/* icon index   */
+#if AES3D
 			obj[WNAME].ob_flags |= EDITABLE;
+#else
+			obj[WNAME].ob_flags = EDITABLE;
+#endif
 			buf2[0] = 0;
 		}
 
@@ -726,25 +806,29 @@ VOID ins_wicons(NOTHING)
 
 			if (ret == WUP)
 			{
-			  cg_3:
+			cg_3:
 				if (index)
 				{
 					index--;
 					goto k_1;
 				}
+#if AES3D
 				wait_up();
 				XDeselect(obj, ret);
+#endif
 				continue;
 			}
 
 			if (ret == WDOWN)
 			{
-			  cg_4:
+			cg_4:
 				if ((index + 1) < limit)
 				{
 					index++;
-				  k_1:
+				k_1:
+#if AES3D
 					XSelect(obj, ret);
+#endif
 #if COLORICON_SUPPORT
 					cp_iblk(index, iblk);
 #else
@@ -755,6 +839,7 @@ VOID ins_wicons(NOTHING)
 					cl_delay();
 
 					/* cjg 08/06/92 */
+#if TOSVERSION >= 0x400
 					graf_mkstate(&mk_x, &mk_y, &mk_buttons, &mk_kstate);
 					if (mk_buttons)
 					{
@@ -764,15 +849,18 @@ VOID ins_wicons(NOTHING)
 						if (ret == WDOWN)
 							goto cg_4;
 					}
+#endif
 				}
+#if AES3D
 				wait_up();
 				XDeselect(obj, ret);
+#endif
 				continue;
 			}
 
 			switch (ret)
 			{
-			case WQUIT:
+			case WCANCEL:
 				quit = TRUE;
 				break;
 
@@ -836,11 +924,9 @@ VOID ins_wicons(NOTHING)
 
 				}
 				/* if there is something   */
-			}							/* switch */
-
+			}
 			break;
-
-		}								/* while control */
+		}
 
 		if (quit)
 			break;
@@ -853,7 +939,9 @@ VOID ins_wicons(NOTHING)
 	}									/* while more      */
 
 	do_finish(INWICON);
+#if COLORICON_SUPPORT
 	obj[WICON].ob_spec = saveptr;
+#endif
 	sort_show(0, TRUE);
 }
 
@@ -861,23 +949,27 @@ VOID ins_wicons(NOTHING)
 /*
  * Install all the available drives
  */
+/* 306de: 00e2d86c */
 VOID ins_drive(NOTHING)
 {
 	register int16_t i, id;
-	int16_t install, free;
+	BOOLEAN install, free;
 	register OBJECT *obj;
 	int32_t map;
-	const char *device;
+#if STR_IN_RSC
+	const char *Device;
+#endif
+
 	bfill(32, 0, dr);
 
 	obj = background;
 	free = FALSE;
 
-	map = (int32_t) Drvmap();
+	map = Drvmap();
 	/* let check which one is installed */
 	for (i = 1; i <= maxicon; i++)
 	{
-		if ((!(obj[i].ob_flags & HIDETREE)) && (backid[i].i_type == DISK))
+		if ((!(obj[i].ob_flags & HIDETREE)) && backid[i].i_type == DISK)
 		{
 #if COLORICON_SUPPORT
 			id = backid[i].i_cicon.monoblk.ib_char[1];
@@ -890,7 +982,11 @@ VOID ins_drive(NOTHING)
 				if (!((map >> (id - 'A')) & 0x01))
 				{
 					free = TRUE;
+#if AES3D
 					obj[i].ob_flags |= HIDETREE;
+#else
+					obj[i].ob_flags = HIDETREE;
+#endif
 				}
 			}
 		}
@@ -899,24 +995,23 @@ VOID ins_drive(NOTHING)
 	install = FALSE;
 
 #if STR_IN_RSC
-	device = get_fstring(DEVICE);
-#else
-	device = Device;
+	Device = get_fstring(DEVICE);
 #endif
 
 	if (cart_init())
 	{
-		if (make_icon((int16_t) (CHAR_FOR_CARTRIDGE), 0, DISK, device) != -1)
+		if (make_icon((int16_t) (CHAR_FOR_CARTRIDGE), 0, DISK, Device) != -1)
 			install = TRUE;
 	}
 
 	for (i = 0; i < 32; i++)
 	{
-		if ((!dr[i]) && (map & 0x1))
+		if (!dr[i] && (map & 0x1))
 		{
-			if (make_icon((int16_t) (i + 'A'), 0, DISK, device) != -1)
+			if (make_icon((int16_t) (i + 'A'), 0, DISK, Device) != -1)
+			{
 				install = TRUE;
-			else
+			} else
 			{
 				do1_alert(NOICON);
 				break;
@@ -926,7 +1021,7 @@ VOID ins_drive(NOTHING)
 		map >>= 1;
 	}
 
-	if ((install) || (free))
+	if (install || free)
 		do_redraw(0, &full, 0);
 }
 
@@ -934,6 +1029,7 @@ VOID ins_drive(NOTHING)
 /*
  * Delay the icon scrolling
  */
+/* 306de: 00e2d9e8 */
 VOID cl_delay(NOTHING)
 {
 	int32_t i, j;

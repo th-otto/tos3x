@@ -671,7 +671,7 @@ VOID adjobjects(NOTHING)
 	obj[WOK].ob_height = gl_hchar;
 	obj[WREMOVE].ob_height = gl_hchar;
 	obj[WSKIP].ob_height = gl_hchar;
-	obj[WQUIT].ob_height = gl_hchar;
+	obj[WCANCEL].ob_height = gl_hchar;
 
 	obj = get_tree(MNSYSTEM);
 #if AES3D

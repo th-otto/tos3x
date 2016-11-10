@@ -457,7 +457,7 @@ name: ds.t size
 	GRECT(_full)
 	GRECT(_ctrl)
 	
-	ds.b $32
+	ds.b 50
 
 	INT(_gl_dabase)
 	V(_gl_adacc,l,MAX_ACCS)
@@ -484,7 +484,7 @@ name: ds.t size
 	PTR(_ad_armice)
 	PTR(_ad_select)
 	
-	ds.b $A0
+	ds.b 160
 	
 	INT(_s_defdir)
 	PTR(_ad_fsel)
@@ -550,7 +550,7 @@ name: ds.t size
 	INT(_gl_nplanes)
 	INT(_gl_ticktime)
 	
-	ds.b $80
+	ds.b 128
 	
 	GRECT(_r_dicon)
 	INT(_DOS_AX)
@@ -606,7 +606,7 @@ name: ds.t size
 	LONG(_elinkoff)
 	INT(_gl_play)
 	
-	ds.b $80
+	ds.b 128
 	
 	INT(_gl_font)
 	PTR(_gl_cowner)
@@ -675,9 +675,7 @@ name: ds.t size
 	PTR(_applist)
 	INT(_desksiz)
 	PTR(_deskptr)
-	
-	ds.b 2
-	
+	INT(_o_status)
 	INT(_gl_wsptschar)
 	INT(_gl_wptschar)
 	INT(_pr_xrat)
@@ -717,7 +715,7 @@ name: ds.t size
 	INT(_wwait)
  	V(_W_ACTIVE,b,24*NUM_WIN)  /* OBJECT[MAXOBJ] */
 	
-	ds.b $108
+	ds.b 264
 	
 	INT(_DOS_ERR)
 	V(_ptsin,w,20)
@@ -726,7 +724,7 @@ name: ds.t size
 	PTR(_dlr)
 	PTR(_drl)
 	
-	V(_D,b,$369E) /* sizeof(THEGLO) */
+	V(_D,b,13982) /* sizeof(THEGLO) */
 	
 	PTR(_eul)
 	INT(_fpt)
@@ -758,7 +756,11 @@ name: ds.t size
 	INT(_opcode)
 	MFDB(_gl_src)
 	
-	ds.b $2c
+	ds.b 40
+	
+	INT(_o_item)
+	
+	ds.b 2
 	
 	MFDB(_gl_dst)
 	GRECT(_gl_rfs)

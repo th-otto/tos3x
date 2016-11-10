@@ -533,7 +533,7 @@ VOID mv_desk(NOTHING)
 			XDeselect(obj, which);		/* cjg 08/06/92 */
 			goto ad_5;
 
-		}								/* switch */
+		}
 
 		cl_delay();
 	}

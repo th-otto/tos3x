@@ -503,7 +503,7 @@ char *g_name PROTO((const char *file)); /* also referenced by AES */
 VOID save_ext PROTO((const char *path, char *buffer));
 VOID save_mid PROTO((char *path, char *buffer));
 BOOLEAN chk_par PROTO((const char *srcptr, const char *dstptr));
-int16_t fill_string PROTO((char *string, int16_t item));
+int16_t fill_string PROTO((const char *string, int16_t item));
 BOOLEAN asctobin PROTO((char *ptr, int32_t *value));
 VOID wait_msg PROTO((NOTHING));
 

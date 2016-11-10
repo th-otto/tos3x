@@ -17,7 +17,7 @@
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          24426
+ * Total file size:          24402
  */
 
 #undef RSC_NAME
@@ -139,25 +139,25 @@
 #define DRSKIP                            15 /* BUTTON in tree ADINSDIS */
 #define DRCANCEL                          16 /* BUTTON in tree ADINSDIS */
 
-#define MNINSAPP                           6 /* form/dialog */
-#define MPFNAME                            2 /* FTEXT in tree MNINSAPP */ /* max len 11 */
-#define MPFARGS                            3 /* FTEXT in tree MNINSAPP */ /* max len 11 */
-#define MPDTYPE                            4 /* FTEXT in tree MNINSAPP */ /* max len 3 */
-#define MPITITLE                           5 /* FTEXT in tree MNINSAPP */ /* max len 2 */
-#define MNAUTO                             7 /* BUTTON in tree MNINSAPP */
-#define MNNORMAL                           8 /* BUTTON in tree MNINSAPP */
-#define MNTOS                             11 /* BUTTON in tree MNINSAPP */
-#define MNTTP                             12 /* BUTTON in tree MNINSAPP */
-#define MNAPP                             13 /* BUTTON in tree MNINSAPP */
-#define MNGTP                             14 /* BUTTON in tree MNINSAPP */
-#define MNDIRAPP                          16 /* BUTTON in tree MNINSAPP */
-#define MNDIRWIN                          17 /* BUTTON in tree MNINSAPP */
-#define MNPATH                            20 /* BUTTON in tree MNINSAPP */
-#define MNNAME                            21 /* BUTTON in tree MNINSAPP */
-#define MPOK                              23 /* BUTTON in tree MNINSAPP */
-#define MPREMOVE                          24 /* BUTTON in tree MNINSAPP */
-#define MPSKIP                            25 /* BUTTON in tree MNINSAPP */
-#define MPCANCEL                          26 /* BUTTON in tree MNINSAPP */
+#define ADINSAPP                           6 /* form/dialog */
+#define APNAME                             2 /* FTEXT in tree ADINSAPP */ /* max len 11 */
+#define ARGS                               3 /* FTEXT in tree ADINSAPP */ /* max len 11 */
+#define APDFTYPE                           4 /* FTEXT in tree ADINSAPP */ /* max len 3 */
+#define IKEY                               5 /* FTEXT in tree ADINSAPP */ /* max len 2 */
+#define AUTOBOX                            7 /* BUTTON in tree ADINSAPP */
+#define NORMALBOX                          8 /* BUTTON in tree ADINSAPP */
+#define APDOS                             11 /* BUTTON in tree ADINSAPP */
+#define APPARMS                           12 /* BUTTON in tree ADINSAPP */
+#define APGEM                             13 /* BUTTON in tree ADINSAPP */
+#define APPTP                             14 /* BUTTON in tree ADINSAPP */
+#define INSAPP                            16 /* BUTTON in tree ADINSAPP */
+#define INSWIN                            17 /* BUTTON in tree ADINSAPP */
+#define INSFULL                           20 /* BUTTON in tree ADINSAPP */
+#define INSFILE                           21 /* BUTTON in tree ADINSAPP */
+#define APOK                              23 /* BUTTON in tree ADINSAPP */
+#define APREMOVE                          24 /* BUTTON in tree ADINSAPP */
+#define APSKIP                            25 /* BUTTON in tree ADINSAPP */
+#define APCANCEL                          26 /* BUTTON in tree ADINSAPP */
 
 #define ADMKDBOX                           7 /* form/dialog */
 #define MKNAME                             1 /* FTEXT in tree ADMKDBOX */ /* max len 11 */
@@ -302,7 +302,7 @@
 #define WSKIP                             12 /* BUTTON in tree INWICON */
 #define WREMOVE                           13 /* BUTTON in tree INWICON */
 #define WOK                               14 /* BUTTON in tree INWICON */
-#define WQUIT                             16 /* BUTTON in tree INWICON */
+#define WCANCEL                           16 /* BUTTON in tree INWICON */
 
 #define HELP1                             20 /* form/dialog */
 #define MOREHELP                          14 /* BUTTON in tree HELP1 */

@@ -249,7 +249,6 @@
 #define CCANCEL           15 /* BUTTON in tree CPBOX */
 
 #define INWICON           17 /* form/dialog */
-#define IBOX1              2 /* BOX in tree INWICON */
 #define WNAME              3 /* FTEXT in tree INWICON */ /* max len 11 */
 #define WBOX               5 /* BOX in tree INWICON */
 #define WICON              6 /* ICON in tree INWICON */ /* max len 0 */
@@ -260,7 +259,7 @@
 #define WSKIP             12 /* BUTTON in tree INWICON */
 #define WREMOVE           13 /* BUTTON in tree INWICON */
 #define WOK               14 /* BUTTON in tree INWICON */
-#define WQUIT             16 /* BUTTON in tree INWICON */
+#define WCANCEL           16 /* BUTTON in tree INWICON */
 
 #define HELP1             18 /* form/dialog */
 #define MOREHELP          14 /* BUTTON in tree HELP1 */

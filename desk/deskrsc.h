@@ -1,9 +1,24 @@
 #include "ctrycodes.h"
 
 #if TOSVERSION == 0x404
+/*
+ * assumes MULTILANG_SUPPORT & POPUP_SUPPORT;
+ * layout of individual resource files
+ * must be identical
+ */
+#if !MULTILANG_SUPPORT
+error
+#endif
+#if !POPUP_SUPPORT
+error
+#endif
 #include "rsc/404/deskus.h"
 #endif
 
+/*
+ * Must include the specific resource header file;
+ * the layout is actually different
+ */
 #if TOSVERSION == 0x306
 #if OS_COUNTRY == CTRY_US
 #include "rsc/306/deskus.h"

@@ -139,25 +139,25 @@
 #define DRSKIP                            15 /* BUTTON in tree ADINSDIS */
 #define DRCANCEL                          16 /* BUTTON in tree ADINSDIS */
 
-#define MNINSAPP                           6 /* form/dialog */
-#define MPFNAME                            2 /* FTEXT in tree MNINSAPP */ /* max len 11 */
-#define MPFARGS                            3 /* FTEXT in tree MNINSAPP */ /* max len 11 */
-#define MPDTYPE                            4 /* FTEXT in tree MNINSAPP */ /* max len 3 */
-#define MPITITLE                           5 /* FTEXT in tree MNINSAPP */ /* max len 2 */
-#define MNAUTO                             7 /* BUTTON in tree MNINSAPP */
-#define MNNORMAL                           8 /* BUTTON in tree MNINSAPP */
-#define MNTOS                             11 /* BUTTON in tree MNINSAPP */
-#define MNTTP                             12 /* BUTTON in tree MNINSAPP */
-#define MNAPP                             13 /* BUTTON in tree MNINSAPP */
-#define MNGTP                             14 /* BUTTON in tree MNINSAPP */
-#define MNDIRAPP                          16 /* BUTTON in tree MNINSAPP */
-#define MNDIRWIN                          17 /* BUTTON in tree MNINSAPP */
-#define MNPATH                            20 /* BUTTON in tree MNINSAPP */
-#define MNNAME                            21 /* BUTTON in tree MNINSAPP */
-#define MPOK                              23 /* BUTTON in tree MNINSAPP */
-#define MPREMOVE                          24 /* BUTTON in tree MNINSAPP */
-#define MPSKIP                            25 /* BUTTON in tree MNINSAPP */
-#define MPCANCEL                          26 /* BUTTON in tree MNINSAPP */
+#define ADINSAPP                           6 /* form/dialog */
+#define APNAME                             2 /* FTEXT in tree ADINSAPP */ /* max len 11 */
+#define ARGS                               3 /* FTEXT in tree ADINSAPP */ /* max len 11 */
+#define APDFTYPE                           4 /* FTEXT in tree ADINSAPP */ /* max len 3 */
+#define IKEY                               5 /* FTEXT in tree ADINSAPP */ /* max len 2 */
+#define AUTOBOX                            7 /* BUTTON in tree ADINSAPP */
+#define NORMALBOX                          8 /* BUTTON in tree ADINSAPP */
+#define APDOS                             11 /* BUTTON in tree ADINSAPP */
+#define APPARMS                           12 /* BUTTON in tree ADINSAPP */
+#define APGEM                             13 /* BUTTON in tree ADINSAPP */
+#define APPTP                             14 /* BUTTON in tree ADINSAPP */
+#define INSAPP                            16 /* BUTTON in tree ADINSAPP */
+#define INSWIN                            17 /* BUTTON in tree ADINSAPP */
+#define INSFULL                           20 /* BUTTON in tree ADINSAPP */
+#define INSFILE                           21 /* BUTTON in tree ADINSAPP */
+#define APCANCEL                          23 /* BUTTON in tree ADINSAPP */
+#define APOK                              24 /* BUTTON in tree ADINSAPP */
+#define APREMOVE                          25 /* BUTTON in tree ADINSAPP */
+#define APSKIP                            26 /* BUTTON in tree ADINSAPP */
 
 #define ADMKDBOX                           7 /* form/dialog */
 #define MKNAME                             1 /* FTEXT in tree ADMKDBOX */ /* max len 11 */
@@ -291,7 +291,6 @@
 #define CCANCEL                           15 /* BUTTON in tree CPBOX */
 
 #define INWICON                           19 /* form/dialog */
-#define IBOX1                              2 /* BOX in tree INWICON */
 #define WNAME                              3 /* FTEXT in tree INWICON */ /* max len 11 */
 #define WBOX                               5 /* BOX in tree INWICON */
 #define WICON                              6 /* ICON in tree INWICON */ /* max len 0 */
@@ -299,10 +298,10 @@
 #define WDOWN                              8 /* BOXCHAR in tree INWICON */
 #define WFOLDER                           10 /* BUTTON in tree INWICON */
 #define WNONE                             11 /* BUTTON in tree INWICON */
-#define WSKIP                             12 /* BUTTON in tree INWICON */
-#define WREMOVE                           13 /* BUTTON in tree INWICON */
-#define WOK                               14 /* STRING in tree INWICON */
-#define WQUIT                             16 /* BUTTON in tree INWICON */
+#define WREMOVE                           12 /* BUTTON in tree INWICON */
+#define WOK                               13 /* BUTTON in tree INWICON */
+#define WCANCEL                           15 /* BUTTON in tree INWICON */
+#define WSKIP                             16 /* BUTTON in tree INWICON */
 
 #define HELP1                             20 /* form/dialog */
 #define MOREHELP                          14 /* STRING in tree HELP1 */
