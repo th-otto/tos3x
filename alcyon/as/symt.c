@@ -19,7 +19,7 @@ static int spcnt = 0;							/* Fill counter             */
 
 
 static const char *const ermsg[] = {
-    N_("label %s redefined"),               /*  1 */
+    N_("label %.8s redefined"),             /*  1 */
     N_("invalid label"),                    /*  2 */
     N_("invalid opcode"),                   /*  3 */
     N_("no label for operand"),             /*  4 */
