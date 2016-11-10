@@ -83,6 +83,7 @@
 #define L5ITEM                            50 /* STRING in tree ADMENU */
 #define PREFITEM                          51 /* STRING in tree ADMENU */
 #define READINF                           52 /* STRING in tree ADMENU */
+#define MEMMENU                           53 /* STRING in tree ADMENU */
 #define SAVEITEM                          55 /* STRING in tree ADMENU */
 #define PRINTITEM                         56 /* STRING in tree ADMENU */
 #define BITBLT                            58 /* STRING in tree ADMENU */
@@ -304,7 +305,7 @@
 #define WSKIP                             16 /* BUTTON in tree INWICON */
 
 #define HELP1                             20 /* form/dialog */
-#define MOREHELP                          14 /* STRING in tree HELP1 */
+#define MOREHELP                          15 /* BUTTON in tree HELP1 */
 
 #define HELP2                             21 /* form/dialog */
 
@@ -313,28 +314,28 @@
 #define SEAOK                              3 /* BUTTON in tree SEAFILE */
 #define SEACNCL                            4 /* BUTTON in tree SEAFILE */
 
-#define MNSYSTEM                          23 /* form/dialog */
-#define SDTITLE                            2 /* STRING in tree MNSYSTEM */
-#define SDAPP                              4 /* BUTTON in tree MNSYSTEM */
-#define SDWIN                              5 /* BUTTON in tree MNSYSTEM */
-#define SITITLE                            6 /* STRING in tree MNSYSTEM */
-#define SIPATH                             8 /* BUTTON in tree MNSYSTEM */
-#define SINAME                             9 /* BUTTON in tree MNSYSTEM */
-#define MFBASE                            11 /* BOX in tree MNSYSTEM */
-#define MFLEFT                            12 /* BOXCHAR in tree MNSYSTEM */
-#define MFFILE                            13 /* FTEXT in tree MNSYSTEM */ /* max len 17 */
-#define MFRIGHT                           14 /* BOXCHAR in tree MNSYSTEM */
-#define MFKEY                             15 /* FTEXT in tree MNSYSTEM */ /* max len 2 */
-#define MFUP                              16 /* BOXCHAR in tree MNSYSTEM */
-#define MFDOWN                            17 /* BOXCHAR in tree MNSYSTEM */
-#define MKITEM                            21 /* BOXTEXT in tree MNSYSTEM */ /* max len 30 */
-#define MKUPS                             22 /* BOXCHAR in tree MNSYSTEM */
-#define MKDOWNS                           23 /* BOXCHAR in tree MNSYSTEM */
-#define MKKEYS                            24 /* FTEXT in tree MNSYSTEM */ /* max len 1 */
-#define MKCLEAR                           25 /* BUTTON in tree MNSYSTEM */
-#define MKMEMORY                          26 /* FTEXT in tree MNSYSTEM */ /* max len 10 */
-#define MOK                               27 /* BUTTON in tree MNSYSTEM */
-#define MCANCEL                           28 /* BUTTON in tree MNSYSTEM */
+#define SSYSTEM                           23 /* form/dialog */
+#define SDTITLE                            2 /* STRING in tree SSYSTEM */
+#define WI1                                4 /* BUTTON in tree SSYSTEM */
+#define AP1                                5 /* BUTTON in tree SSYSTEM */
+#define SITITLE                            6 /* STRING in tree SSYSTEM */
+#define DEFFILE                            8 /* BUTTON in tree SSYSTEM */
+#define DEFFULL                            9 /* BUTTON in tree SSYSTEM */
+#define MFBASE                            11 /* BOX in tree SSYSTEM */
+#define SDLEFT                            12 /* BOXCHAR in tree SSYSTEM */
+#define SDFILE                            13 /* FTEXT in tree SSYSTEM */ /* max len 17 */
+#define SDRIGHT                           14 /* BOXCHAR in tree SSYSTEM */
+#define SDKEY                             15 /* FTEXT in tree SSYSTEM */ /* max len 2 */
+#define SDUP                              16 /* BOXCHAR in tree SSYSTEM */
+#define SDDOWN                            17 /* BOXCHAR in tree SSYSTEM */
+#define MKSTR                             21 /* BOXTEXT in tree SSYSTEM */ /* max len 30 */
+#define MKUP                              22 /* BOXCHAR in tree SSYSTEM */
+#define MKDOWN                            23 /* BOXCHAR in tree SSYSTEM */
+#define MKKEY                             24 /* FTEXT in tree SSYSTEM */ /* max len 1 */
+#define CLRKEYS                           25 /* BUTTON in tree SSYSTEM */
+#define SDMEMORY                          26 /* FTEXT in tree SSYSTEM */ /* max len 10 */
+#define SDOK                              27 /* BUTTON in tree SSYSTEM */
+#define SDCANCEL                          28 /* BUTTON in tree SSYSTEM */
 
 #define STNOAPPL                           0 /* Alert string */
 /* [1][Diese Datei kann nur gedruckt|oder angezeigt werden.][Anzeigen|Drucken|Abbruch] */

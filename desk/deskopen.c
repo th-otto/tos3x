@@ -374,7 +374,7 @@ VOID sh_witem(NOTHING)
 
 		if (which == FIRIGHT)
 		{
-		  cg_1:
+		cg_1:
 			pos++;
 			if (strlen(&oldstr[pos]) < len)
 			{
@@ -388,11 +388,11 @@ VOID sh_witem(NOTHING)
 
 		if (which == FILEFT)
 		{
-		  cg_2:
+		cg_2:
 			if (pos > 0)
 			{
 				pos--;
-			  ss_8:
+			ss_8:
 				XSelect(obj, which);	/* cjg 08/06/92 */
 				((TEDINFO *) (obj[FIFILE].ob_spec))->te_ptext = &oldstr[pos];
 				draw_fld(obj, FIFILE);
@@ -444,7 +444,8 @@ VOID sh_witem(NOTHING)
 				dr[*oldstr - 'A'] = 1;
 			}
 			/* name changed ?   */
-		  sf_2:if (!streq(dir->d_name, newname))
+		sf_2:
+			if (!streq(dir->d_name, newname))
 			{							/* Yes          */
 				if (Frename(0, oldstr, newstr))
 				{
@@ -460,7 +461,7 @@ VOID sh_witem(NOTHING)
 		}
 		/* OK is selected   */
 		desk_wait(FALSE);
-	  ss_6:
+	ss_6:
 		Mfree(newstr);
 		Mfree(oldstr);
 
@@ -879,7 +880,8 @@ PP(register char *new;)
 
 			if (type == XFILE)
 			{
-			  u_1:if (streq(s, backid[i].i_path))
+			u_1:
+				if (streq(s, backid[i].i_path))
 				{
 					if (new)			/* rename application   */
 					{

@@ -417,7 +417,9 @@ int16_t cp_iblk PROTO((int16_t number, CICONBLK *dest_ciblk));
 VOID cp_iblk PROTO((const ICONBLK *src_iblk, ICONBLK *dest_iblk));
 #endif
 VOID rm_icons PROTO((NOTHING));
+#if !POPUP_SUPPORT
 VOID ins_app PROTO((NOTHING));
+#endif
 VOID ins_icons PROTO((NOTHING));
 VOID ins_wicons PROTO((NOTHING));
 VOID ins_drive PROTO((NOTHING));
@@ -509,8 +511,9 @@ VOID wait_msg PROTO((NOTHING));
 
 
 /*
- * deskmn.c
+ * newmn.c
  */
+#if POPUP_SUPPORT
 VOID mv_desk PROTO((NOTHING));
 VOID mins_app PROTO((NOTHING));
 VOID mdesk_pref PROTO((NOTHING));
@@ -518,8 +521,18 @@ BOOLEAN set_video PROTO((NOTHING));
 VOID XSelect PROTO((OBJECT *tree, int16_t obj));
 VOID XDeselect PROTO((OBJECT *tree, int16_t obj)); /* also referenced by AES */
 VOID DoPopup PROTO((OBJECT *tree, int16_t button, int16_t title, OBJECT *Mtree, int16_t Mmenu, int16_t Mfirst, int16_t *Mstart, int16_t Mscroll, int16_t FirstMenu, int16_t FirstText, int16_t Skip));
-VOID init_vtree PROTO((NOTHING));
 VOID wait_up PROTO((NOTHING));
+#endif
+
+
+/*
+ * deskmn.c
+ */
+#if !POPUP_SUPPORT
+VOID av_desk PROTO((NOTHING));
+VOID ins_app PROTO((NOTHING));
+VOID desk_pref PROTO((NOTHING));
+#endif
 
 
 /*
@@ -668,7 +681,9 @@ VOID ch_cache PROTO((BOOLEAN set));
 extern uint16_t st_time;		/* time code        */
 extern uint16_t st_date;
 extern uint16_t st_dchar;
+#if MULTILANG_SUPPORT
 extern int16_t st_keybd;
+#endif
 extern int16_t gl_wchar;
 extern int16_t gl_hchar;
 extern int16_t gl_wbox;

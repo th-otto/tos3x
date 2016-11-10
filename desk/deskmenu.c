@@ -29,19 +29,28 @@ extern int32_t gl_vdo;
 
 int16_t d_exit;		/* desktop exit flag	*/
 char mentable[MAXMENU];
+
+#if MULTILANG_SUPPORT
 STATIC const int16_t *keytable;
 STATIC const int16_t *contable;
+#endif
 
 /* Alternate keys table */
 
 /* USA|UK|SPAIN|ITALY|SWEDEN */
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV)
 static int16_t const key1table[] = {
 	0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
 	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x3200, 0x3100,
 	0x1800, 0x1900, 0x1000, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x1100, 0x2d00, 0x1500, 0x2c00, 0
 };
+#if !MULTILANG_SUPPORT
+#define keytable key1table
+#endif
+#endif
 
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG)
 /* GERMANY|SWISSFRE|SWISSGER */
 static int16_t const key2table[] = {
 	0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
@@ -49,7 +58,12 @@ static int16_t const key2table[] = {
 	0x1800, 0x1900, 0x1000, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x1100, 0x2d00, 0x2c00, 0x1500, 0
 };
+#if !MULTILANG_SUPPORT
+#define keytable key2table
+#endif
+#endif
 
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_FR)
 /* FRENCH */
 static int16_t const key3table[] = {
 	0x1000, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
@@ -57,10 +71,16 @@ static int16_t const key3table[] = {
 	0x1800, 0x1900, 0x1e00, 0x1300, 0x1f00, 0x1400, 0x1600,
 	0x2f00, 0x2c00, 0x2d00, 0x1500, 0x1100, 0
 };
+#if !MULTILANG_SUPPORT
+#define keytable key3table
+#endif
+#endif
 
 
 /* Control keys table */
 
+/* USA|UK|SPAIN|ITALY|SWEDEN */
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV)
 /* USA|UK|SPAIN|ITALY|SWEDEN */
 static int16_t const con1table[] = {
 	0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
@@ -68,7 +88,12 @@ static int16_t const con1table[] = {
 	0x180f, 0x1910, 0x1011, 0x1312, 0x1f13, 0x1414, 0x1615,
 	0x2f16, 0x1117, 0x2d18, 0x1519, 0x2c1a, 0
 };
+#if !MULTILANG_SUPPORT
+#define contable con1table
+#endif
+#endif
 
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG)
 /* GERMANY|SWISSFRE|SWISSGER */
 static int16_t const con2table[] = {
 	0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
@@ -76,7 +101,12 @@ static int16_t const con2table[] = {
 	0x180f, 0x1910, 0x1011, 0x1312, 0x1f13, 0x1414, 0x1615,
 	0x2f16, 0x1117, 0x2d18, 0x2c19, 0x151a, 0
 };
+#if !MULTILANG_SUPPORT
+#define contable con2table
+#endif
+#endif
 
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_FR)
 /* FRENCH */
 static int16_t const con3table[] = {
 	0x1001, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
@@ -84,6 +114,10 @@ static int16_t const con3table[] = {
 	0x180f, 0x1910, 0x1e11, 0x1312, 0x1f13, 0x1414, 0x1615,
 	0x2f16, 0x2c17, 0x2d18, 0x1519, 0x111a, 0
 };
+#if !MULTILANG_SUPPORT
+#define contable con3table
+#endif
+#endif
 
 /* Arrow keys table */
 static int16_t const arrowtab[] = {
@@ -135,10 +169,14 @@ int16_t const tb3[MAXMENU] = {
 	VIDITEM,
 #endif
 	READINF,
-#ifdef MEMMENU
 	MEMMENU,
+	SAVEITEM,
+#ifdef PRINTITEM
+	PRINTITEM,
 #endif
-	SAVEITEM
+#ifdef SUPERITEM
+	SUPERITEM,
+#endif
 };
 
 /* Alternate Number Table */
@@ -164,6 +202,8 @@ VOID hd_menu PROTO((int16_t *msgbuff));
 /*
  * Change one individual key
  */
+ 
+/* 306de: 00e2dcfa */
 VOID ch_key(P(int16_t) i)
 PP(int16_t i;)
 {
@@ -188,6 +228,7 @@ PP(int16_t i;)
 /*
  * Put keys into the menus
  */
+/* 306de: 00e2dd98 */
 VOID put_keys(NOTHING)
 {
 	register int16_t i;
@@ -200,6 +241,7 @@ VOID put_keys(NOTHING)
 /*
  * Loop to find matching array
  */
+/* 306de: 00e2ddbc */
 int16_t loop_find(P(int16_t) input, P(const int16_t *) table, P(int16_t *)index)
 PP(int16_t input;)
 PP(const int16_t *table;)
@@ -214,18 +256,21 @@ PP(int16_t *index;)
 		if (input == table[i])
 		{
 			*index = i;
-			return (TRUE);
+			return TRUE;
 		} else
+		{
 			i++;
+		}
 	}
 
-	return (FALSE);
+	return FALSE;
 }
 
 
 /*
  * Enable or disable the menu item according to current status
  */
+/* 306de: 00e2de02 */
 VOID menu_verify(NOTHING)
 {
 	int16_t enable;
@@ -288,6 +333,7 @@ VOID menu_verify(NOTHING)
 /*
  * Select all objects inside the window
  */
+/* 306de: 00e2df94 */
 VOID sel_all(NOTHING)
 {
 	register WINDOW *win;
@@ -314,6 +360,7 @@ VOID sel_all(NOTHING)
 /*
  * Handle the keyboard
  */
+/* 3ß6de: 00e2e024 */
 VOID hd_keybd(P(uint16_t) key)
 PP(uint16_t key;)
 {
@@ -329,28 +376,30 @@ PP(uint16_t key;)
 	UNUSED(str);
 	UNUSED(obj);
 	
+#if MULTILANG_SUPPORT
 	switch (st_keybd)
 	{
-	case 1:
-	case 7:
-	case 8:
+	case CTRY_DE:
+	case CTRY_SF:
+	case CTRY_SG:
 		keytable = key2table;
 		contable = con2table;
 		break;
-	case 2:
+	case CTRY_FR:
 		keytable = key3table;
 		contable = con3table;
 		break;
-	case 0:							/* usa */
-	case 3:							/* uk   */
-	case 4:							/* spain */
-	case 5:							/* italy */
-	case 6:							/* sweden */
+	case CTRY_US:					/* usa */
+	case CTRY_UK:					/* uk   */
+	case CTRY_ES:					/* spain */
+	case CTRY_IT:					/* italy */
+	case CTRY_SV:					/* sweden */
 	default:
 		keytable = key1table;
 		contable = con1table;
 		break;
 	}
+#endif
 
 	if ((app = app_key(key)))
 	{
@@ -371,16 +420,16 @@ PP(uint16_t key;)
 		{
 			switch (i)
 			{
-			case 0:					/* Open item    */
-			case 1:					/* Show item    */
-			case 2:					/* Search   */
-			case 3:					/* Delete   */
-			case 4:					/* Folder making    */
-			case 5:					/* Close directory  */
-			case 6:					/* Close top window */
-			case 7:					/* Bottom to top    */
-			case 8:					/* Select all       */
-			case 9:					/* Set Extension    */
+			case 0:						/* Open item    */
+			case 1:						/* Show item    */
+			case 2:						/* Search   */
+			case 3:						/* Delete   */
+			case 4:						/* Folder making    */
+			case 5:						/* Close directory  */
+			case 6:						/* Close top window */
+			case 7:						/* Bottom to top    */
+			case 8:						/* Select all       */
+			case 9:						/* Set Extension    */
 			case 10:					/* Format Disk      */
 				do_file(tb3[i]);
 				return;
@@ -407,10 +456,11 @@ PP(uint16_t key;)
 			case 27:					/* save desktop.inf */
 			case 28:					/* print screen     */
 			case 29:					/* set blt      */
+#if MAXMENU > 30
 			case 30:					/* cjg - 06/19/92  Set Video    */
+#endif
 				do_opt(tb3[i]);
 				return;
-
 			}
 			break;
 		}
@@ -419,6 +469,7 @@ PP(uint16_t key;)
 #if TOSVERSION >= 0x400
 	/* 7/16/92 */
 	if (((gl_vdo >> 16) & 0xFFFFL) <= 0x02)
+#endif
 	{
 		if (loop_find(key, altnum, &i))
 		{
@@ -432,9 +483,8 @@ PP(uint16_t key;)
 			}
 		}
 	}
-#endif
 
-	/* open a disk drive    */
+	/* open a disk drive */
 	if (loop_find(key, keytable, &i))
 	{
 		if (win)
@@ -507,6 +557,7 @@ PP(uint16_t key;)
 /*
  * Set file option
  */
+/* 306de: 00e2e34e */
 VOID foption(P(WINDOW *)win)
 PP(register WINDOW *win;)
 {
@@ -535,6 +586,7 @@ PP(register WINDOW *win;)
 }
 
 
+/* 306de: 00e2e44e */
 VOID do_scroll(P(int16_t *)msgbuff)
 PP(int16_t *msgbuff;)
 {
@@ -542,34 +594,47 @@ PP(int16_t *msgbuff;)
 	register WINDOW *win;
 	int16_t bdown, x, y;
 
-	UNUSED(x);
-	UNUSED(y);
-	UNUSED(bdown);
-	
 	act = msgbuff[4];
 
 	if ((win = get_win(msgbuff[3])) != NULL)
 	{
 		switch (act)
 		{
-		case 1:						/* page down        */
-		case 0:						/* page up      */
-			srl_row(win, win->w_xrow, (act == 1) ? SDOWN : SUP);
+		case WA_DNPAGE:						/* page down */
+		case WA_UPPAGE:						/* page up */
+			srl_row(win, win->w_xrow, act == WA_DNPAGE ? SDOWN : SUP);
 			break;
 
-		case 3:						/* arrow down       */
-		case 2:						/* arrow up     */
-			srl_row(win, 1, (act == 2) ? SUP : SDOWN);
+		case WA_DNLINE:						/* arrow down */
+		case WA_UPLINE:						/* arrow up */
+#if TOSVERSION >= 0x400
+			srl_row(win, 1, act == WA_UPLINE ? SUP : SDOWN);
+			UNUSED(x);
+			UNUSED(y);
+			UNUSED(bdown);
+#else
+			do {
+				srl_row(win, 1, act == WA_UPLINE ? SUP : SDOWN);
+				graf_mkstate(&x, &y, &bdown, &x);
+			} while (bdown);
+#endif
 			break;
 
-		case 5:						/* page left or right   */
-		case 4:
-			srl_col(win, win->w_xcol, (act == 4) ? SRIGHT : SLEFT);
+		case WA_RTPAGE:						/* page left or right */
+		case WA_LFPAGE:
+			srl_col(win, win->w_xcol, act == WA_LFPAGE ? SRIGHT : SLEFT); /* hhmm? */
 			break;
 
-		case 7:
-		case 6:						/* scroll left      */
-			srl_col(win, 1, (act == 6) ? SRIGHT : SLEFT);
+		case WA_RTLINE:
+		case WA_LFLINE:						/* scroll left */
+#if TOSVERSION >= 0x400
+			srl_col(win, 1, act == WA_LFLINE ? SRIGHT : SLEFT); /* hhmm? */
+#else
+			do {
+				srl_col(win, 1, act == WA_LFLINE ? SRIGHT : SLEFT); /* hhmm? */
+				graf_mkstate(&x, &y, &bdown, &x);
+			} while (bdown);
+#endif
 			break;
 		}
 	}
@@ -580,6 +645,7 @@ PP(int16_t *msgbuff;)
 /*
  * Do the option menu
  */
+/* 306de: 00e2e55e */
 VOID do_opt(P(int16_t) msgbuff)
 PP(int16_t msgbuff;)
 {
@@ -632,8 +698,11 @@ PP(int16_t msgbuff;)
 		break;
 
 	case PREFITEM:						/* desktop preference   */
+#if POPUP_SUPPORT
 		mdesk_pref();					/* cjg 07/07/92 */
-		/* desk_pref(); */
+#else
+		desk_pref();
+#endif
 		break;
 
 	case READINF:
@@ -671,15 +740,15 @@ PP(int16_t msgbuff;)
 			}
 			desk_wait(FALSE);
 		}
-
 		break;
 
-#ifdef MEMMENU
 	case MEMMENU:
+#if POPUP_SUPPORT
 		mv_desk();						/* cjg - 07/07/92 */
-		/* av_desk(); */
-		break;
+#else
+		av_desk();
 #endif
+		break;
 
 	case SAVEITEM:						/* save desktop     */
 		if (do1_alert(SAVETOP) == 1)
@@ -700,8 +769,8 @@ PP(int16_t msgbuff;)
 		break;
 #endif
 
-#ifdef BITBLT
-	case BITBLT:
+#ifdef SUPERITEM
+	case SUPERITEM:
 		if (m_cpu != 30)
 			cbit_save = !cbit_save;
 		else
@@ -723,6 +792,7 @@ PP(int16_t msgbuff;)
 /*
  * Do the sorting menu
  */
+/* 306de: 00e2e812 */
 VOID do_view(P(int16_t) msgbuff)
 PP(int16_t msgbuff;)
 {
@@ -796,6 +866,7 @@ v_4:
 /*
  * Do the file menu
  */
+/* 306de: 00e2e958 */
 VOID do_file(P(int16_t) msgbuff)
 PP(int16_t msgbuff;)
 {
@@ -916,8 +987,9 @@ PP(int16_t msgbuff;)
 /*
  * Handle Menu
  */
+/* 306de: 00e2eb92 */
 VOID hd_menu(P(int16_t *)msgbuff)
-PP(register int16_t *msgbuff;)
+PP(int16_t *msgbuff;)
 {
 	switch (msgbuff[3])
 	{
@@ -947,8 +1019,9 @@ PP(register int16_t *msgbuff;)
 /*
  * Handle all the different messages
  */
+/* 306de: 00e2ec12 */
 VOID hd_msg(P(int16_t *)msgbuff)
-PP(register int16_t *msgbuff;)
+PP(int16_t *msgbuff;)
 {
 	register int16_t handle;
 	register WINDOW *win;
@@ -1086,6 +1159,7 @@ PP(register int16_t *msgbuff;)
 /*
  * Handle all the events
  */
+/* 306de: 00e2f07c */
 VOID actions(NOTHING)
 {
 	int16_t event, kstate, kreturn, button, clicks;
@@ -1122,6 +1196,7 @@ VOID actions(NOTHING)
 /*
  * Find out available memory
  */
+/* 306de: 00e2f15c */
 int32_t av_mem(NOTHING)
 {
 	register char *start;
@@ -1169,7 +1244,8 @@ int32_t av_mem(NOTHING)
 }
 
 
-#if 0
+#if !POPUP_SUPPORT
+/* 306de: 00e2f1ea */
 VOID av_desk(NOTHING)
 {
 	register OBJECT *obj;
@@ -1189,7 +1265,7 @@ VOID av_desk(NOTHING)
 	for (i = 0; i < MAXMENU; i++)		/* save a copy  */
 		temp[i] = mentable[i];
 
-	((TEDINFO *) (obj[MKSTR].ob_spec))->te_ptext = obj1[tb3[0]].ob_spec;
+	((TEDINFO *) (obj[MKSTR].ob_spec))->te_ptext = (char *)obj1[tb3[0]].ob_spec;
 	buf[1] = 0;
 	buf[0] = mentable[0];
 	inf_sset(obj, MKKEY, buf);
@@ -1223,6 +1299,9 @@ VOID av_desk(NOTHING)
 
 	f = 0;
 	fm_draw(SSYSTEM);					/* save the string  */
+#if !BINEXACT
+	fi = 0; /* quite compiler */
+#endif
 	goto ad_2;
 
 	while (TRUE)
@@ -1232,7 +1311,7 @@ VOID av_desk(NOTHING)
 
 		if ((which == MKUP) || (which == MKDOWN) || (which == SDOK))
 		{
-			fs_sget(obj, MKKEY, buf);
+			fs_sget((LPTREE)obj, MKKEY, buf);
 			buf[0] = toupper(buf[0]);
 			if (buf[0])
 			{
@@ -1283,7 +1362,7 @@ VOID av_desk(NOTHING)
 				menui++;
 			p_11:
 				ch_key(menui);
-				((TEDINFO *) (obj[MKSTR].ob_spec))->te_ptext = obj1[tb3[menui]].ob_spec;
+				((TEDINFO *) (obj[MKSTR].ob_spec))->te_ptext = (char *)obj1[tb3[menui]].ob_spec;
 				draw_fld(obj, MKSTR);
 			p_2:
 				buf[1] = 0;
@@ -1296,7 +1375,6 @@ VOID av_desk(NOTHING)
 		case SDCANCEL:					/* restore the menu key table */
 			for (i = 0; i < MAXMENU; i++)
 				mentable[i] = temp[i];
-
 			goto ad_1;
 
 		case SDOK:
@@ -1309,7 +1387,6 @@ VOID av_desk(NOTHING)
 				s_fullpath = TRUE;
 			else
 				s_fullpath = FALSE;
-
 			goto ad_1;
 
 		case SDUP:
@@ -1331,7 +1408,7 @@ VOID av_desk(NOTHING)
 				{
 					app = xapp;
 					fi = 0;
-					((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = app->a_name;
+					((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = NO_CONST(app->a_name);
 					draw_fld(obj, SDFILE);
 					f_str(obj, SDKEY, f);
 					draw_fld(obj, SDKEY);
@@ -1356,14 +1433,14 @@ VOID av_desk(NOTHING)
 			} else
 			{
 				fi++;
-				if (strlen(&app->a_name[fi]) < len)
+				if ((int)strlen(&app->a_name[fi]) < len)
 				{
 					fi--;
 					continue;
 				}
 			}
-		ad_4:
-			((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = &app->a_name[fi];
+
+			((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = NO_CONST(&app->a_name[fi]);
 			draw_fld(obj, SDFILE);
 			goto ad_5;
 		}
@@ -1371,7 +1448,7 @@ VOID av_desk(NOTHING)
 		cl_delay();
 	}
 
-  ad_1:								/* restore the pointer  */
+ad_1:								/* restore the pointer  */
 	put_keys();
 	((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = str;
 	*str = 1;

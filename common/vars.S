@@ -531,9 +531,7 @@ name: ds.t size
 	PTR(_ad_intin)
 	INT(_gl_hschar)
 	PTR(_background)
-	
-	ds.b 4
-	
+	PTR(_menu_addr)
 	INT(_gl_moff)
 	GRECT(_gl_rcenter)
 	INT(_sh_iscart)
@@ -549,9 +547,7 @@ name: ds.t size
 	PTR(old_mcode)
 	INT(_gl_nplanes)
 	INT(_gl_ticktime)
-	
-	ds.b 128
-	
+	V(_path1,b,PATHLEN)
 	GRECT(_r_dicon)
 	INT(_DOS_AX)
 	LONG(_gl_mlen)
@@ -620,8 +616,9 @@ name: ds.t size
 	V(_appl_msg,w,8)
 	INT(_ml_ocnt)
 	
-	ds.b 10
+	ds.b 4
 	
+	V(_restable,b,6)
 	PTR(_cart_ptr)
 	INT(_fs_count)
 	INT(_gl_newroot)
@@ -683,21 +680,21 @@ name: ds.t size
 	LONG(_numdirs)
 	TEDINFO(_edblk)
 	
-	ds.b 22
+	ds.b 20
 	
+	INT(_x_status)
 	LONG(_tolsize)
 	GRECT(_dicon)
 	INT(_tbutton)
-	
-	ds.b 2
-	
+	INT(_m_cpu)
 	INT(_nogem)
 	V(_deskp,w,3)
 	INT(_gl_mx)
 	INT(_gl_my)
 	INT(_fpcnt)
+	INT(_o_win)
 	
-	ds.b 4
+	ds.b 2
 	
 	PTR(_cpbox)
 	V(_gl_ws,w,57)   /* workout */
@@ -754,9 +751,7 @@ name: ds.t size
 	ds.b 40
 	
 	INT(_o_item)
-	
-	ds.b 2
-	
+	INT(_d_exit)
 	MFDB(_gl_dst)
 	GRECT(_gl_rfs)
 	PTR(_rs_hdr)
@@ -780,9 +775,7 @@ name: ds.t size
 	INT(_s_view)
 	PTR(_fixsrc)
 	PTR(_gemptr)
-	
-	ds.b 2
-	
+	INT(_o_type)
 	PTR(_fixdst)
 	V(_contrl,w,12)
 	V(_d_xywh,w,18)

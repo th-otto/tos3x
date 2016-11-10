@@ -118,6 +118,7 @@ int16_t ChkTouchButton PROTO((OBJECT *tree, int16_t button));
 int16_t DoMKItems PROTO((OBJECT *dtree, int16_t button, int16_t *item));
 int16_t DoKeyCheck PROTO((int16_t item));
 BOOLEAN get_that_size PROTO((int16_t newmode));
+VOID init_vtree PROTO((NOTHING));
 
 
 /* FUNCTIONS

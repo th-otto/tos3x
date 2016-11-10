@@ -17,7 +17,7 @@
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          24728
+ * Total file size:          24860
  */
 
 #undef RSC_NAME
@@ -83,6 +83,7 @@
 #define L5ITEM                            50 /* STRING in tree ADMENU */
 #define PREFITEM                          51 /* STRING in tree ADMENU */
 #define READINF                           52 /* STRING in tree ADMENU */
+#define MEMMENU                           53 /* STRING in tree ADMENU */
 #define SAVEITEM                          55 /* STRING in tree ADMENU */
 #define PRINTITEM                         56 /* STRING in tree ADMENU */
 #define BITBLT                            58 /* STRING in tree ADMENU */
@@ -304,7 +305,7 @@
 #define WCANCEL                           16 /* BUTTON in tree INWICON */
 
 #define HELP1                             20 /* form/dialog */
-#define MOREHELP                          14 /* STRING in tree HELP1 */
+#define MOREHELP                          15 /* BUTTON in tree HELP1 */
 
 #define HELP2                             21 /* form/dialog */
 

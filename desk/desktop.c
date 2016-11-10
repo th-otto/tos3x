@@ -40,11 +40,13 @@ STATIC CICONBLK *ciconaddr;
 int16_t pglobal[15];
 int16_t gl_apid;
 
-/* for MULITLANG_SUPPORT: */
+/* for MULTILANG_SUPPORT: */
 uint16_t st_time;		/* time code        */
 uint16_t st_date;
 uint16_t st_dchar;
+#if MULTILANG_SUPPORT
 int16_t st_keybd;
+#endif
 
 int16_t ch_xcache PROTO((NOTHING));
 BOOLEAN re_icon PROTO((NOTHING));
@@ -630,6 +632,7 @@ PP(uint16_t color;)
 	obj[WUP].ob_spec = (obj[WUP].ob_spec & 0xfffffff0) | color;
 	obj[WDOWN].ob_spec = (obj[WDOWN].ob_spec & 0xfffffff0) | color;
 
+#if POPUP_SUPPORT
 	obj = get_tree(MNSYSTEM);
 	obj[MFLEFT].ob_spec = (obj[MFLEFT].ob_spec & 0xfffffff0L) | color;
 	obj[MFRIGHT].ob_spec = (obj[MFRIGHT].ob_spec & 0xfffffff0L) | color;
@@ -637,6 +640,8 @@ PP(uint16_t color;)
 	obj[MFDOWN].ob_spec = (obj[MFDOWN].ob_spec & 0xfffffff0L) | color;
 	obj[MKUPS].ob_spec = (obj[MKUPS].ob_spec & 0xfffffff0L) | color;
 	obj[MKDOWNS].ob_spec = (obj[MKDOWNS].ob_spec & 0xfffffff0L) | color;
+#else
+#endif
 }
 
 
@@ -673,6 +678,7 @@ VOID adjobjects(NOTHING)
 	obj[WSKIP].ob_height = gl_hchar;
 	obj[WCANCEL].ob_height = gl_hchar;
 
+#if POPUP_SUPPORT
 	obj = get_tree(MNSYSTEM);
 #if AES3D
 	objc_gclip((LPTREE)obj, MFUP, &dx, &dy, &x, &y, &w, &h);
@@ -687,6 +693,8 @@ VOID adjobjects(NOTHING)
 #endif
 	obj[MKDOWNS].ob_y = h + obj[MKUPS].ob_y;
 	obj[MFBASE].ob_height += 2;
+#else
+#endif
 
 	obj = get_tree(ADFILEIN);
 	obj[FIOK].ob_y += 2;
