@@ -7,7 +7,7 @@ set -- ${BIOS_OBJS}
 BIOS_OBJS="${@/#/bios/}"
 set -- ${VDI_OBJS}
 VDI_OBJS="${@/#/vdi/}"
-set -- ${VDOS_OBJS}
+set -- ${BDOS_OBJS}
 BDOS_OBJS="${@/#/bdos/}"
 set -- ${AES_OBJS}
 AES_OBJS="${@/#/aes/}"
@@ -18,3 +18,8 @@ OBJS="${BIOS_OBJS} ${VDI_OBJS} ${BDOS_OBJS} ${AES_OBJS} ${DESK_OBJS}"
 
 duplicates=`nm -A -g ${OBJS} 2>/dev/null | grep ' [TDBC] ' | sed -e 's/:[0-9a-f]* / /' | cut -d ' ' -f 3 | cut -c 1-8 | sort | uniq -d`
 echo duplicates=$duplicates
+
+for i in $duplicates; do
+	nm -A -g ${OBJS} 2>/dev/null | grep ' [TDBC] ' | sed -e 's/:[0-9a-f]* / /' | grep " $i"
+	echo ""
+done

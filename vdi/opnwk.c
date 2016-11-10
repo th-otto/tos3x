@@ -20,10 +20,10 @@
 #define		DEFAULTDEV	    0
 #define		STAYINDEV	    1
 #define		SSHIFT		    * ((char *) 0x44cL)
-#define		SETMODE(a)	    trap14b(5, 0L, 0L, 3, a)
-#define		SETREZ(a)	    trap14b(5, -1L, -1L, a)
-#define		EsetGray(a)	    trap14(86, a)
-#define		EsetBank(a)	    trap14(82, a)
+#define		SETMODE(a)	    vtrap14b(5, 0L, 0L, 3, a)
+#define		SETREZ(a)	    vtrap14b(5, -1L, -1L, a)
+#define		EsetGray(a)	    vtrap14(86, a)
+#define		EsetBank(a)	    vtrap14(82, a)
 
 FONT_HEAD ram8x16;
 FONT_HEAD ram8x8;

@@ -15,14 +15,6 @@
 
 
 /*
- *  supstk - common sup stack for all procs.  OEMs may change the size of 
- *	this stack.
- */
-
-#define	SUPSIZ	1024
-int16_t supstk[SUPSIZ];
-
-/*
  *  bufl - buffer lists
  *	two lists:  fat,dir / data
  *	these lists should be initialized by the bios.

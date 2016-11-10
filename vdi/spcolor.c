@@ -18,8 +18,8 @@
 
 #if VIDEL_SUPPORT /* whole file */
 
-#define	SETRGB(a, b, c)	    trap14(93, a, b, c)
-#define GETRGB(a, b, c)	    trap14(94, a, b, c)
+#define	SETRGB(a, b, c)	    vtrap14(93, a, b, c)
+#define GETRGB(a, b, c)	    vtrap14(94, a, b, c)
 
 /*----------------------------------------------------------------------------*/
 

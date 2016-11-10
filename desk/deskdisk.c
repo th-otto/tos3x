@@ -114,7 +114,7 @@ static int16_t const skew2[MAXSPT] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5,
 BOOLEAN fc_format PROTO((OBJECT *obj));
 VOID fc_copy PROTO((OBJECT *obj));
 int16_t fc_rwsec PROTO((int16_t op, VOIDPTR buf, int16_t nsect, int16_t sect, int16_t dev));
-VOID clfix PROTO((uint16_t cl, uint16_t *fat));
+static VOID clfix PROTO((uint16_t cl, uint16_t *fat));
 VOID fc_bar PROTO((OBJECT *obj, int16_t which));
 VOID fc_draw PROTO((OBJECT *obj, int16_t which));
 
@@ -693,7 +693,7 @@ PP(int16_t dev;)
  * put in the next cluster number
  */
 /* 306de: 00e2a9d0 */
-VOID clfix(P(uint16_t) cl, P(uint16_t *)fat)
+static VOID clfix(P(uint16_t) cl, P(uint16_t *)fat)
 PP(uint16_t cl;)
 PP(uint16_t *fat;)
 {

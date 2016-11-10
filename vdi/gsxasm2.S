@@ -73,8 +73,8 @@ _trap:	PIXLA(a0)
 
 #if TOSVERSION >= 0x300
 /* 306de: 00e0c0b4 */
-		xdef	_trap14			; xbios trap
-_trap14:	PIXLA(a0)
+		xdef	_vtrap14			; xbios trap
+_vtrap14:	PIXLA(a0)
 		move.l	(sp)+,PIXLV(trap14sav,a0)
 		trap	#14
 		PIXLA(a0)
@@ -88,8 +88,8 @@ _trap14:	PIXLA(a0)
  * The reason you ask? Those call cause XBIOS calls (i.e. one level of
  * reentency).
  */
-		xdef	_trap14b		; xbios trap
-_trap14b:	PIXLA(a0)
+		xdef	_vtrap14b		; xbios trap
+_vtrap14b:	PIXLA(a0)
 		move.l	(sp)+,PIXLV(trapb14sav,a0)
 		trap	#14
 		PIXLA(a0)

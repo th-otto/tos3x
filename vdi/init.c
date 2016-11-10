@@ -26,10 +26,10 @@
 #define PIXMASK		    0x200			/* pix control in XGA */
 #define	SSHIFT		    * ((char *) 0x44cL)
 
-#define GetRez()	trap14(4)
-#define	EsetBank(a)	trap14(82, a)
-#define	EsetGray(a)	trap14(86, a)
-#define	SETRGB(a, b, c)	trap14(93, a, b, c)
+#define GetRez()	vtrap14(4)
+#define	EsetBank(a)	vtrap14(82, a)
+#define	EsetGray(a)	vtrap14(86, a)
+#define	SETRGB(a, b, c)	vtrap14(93, a, b, c)
 
 /*----------------------------------------------------------------------------*/
 
