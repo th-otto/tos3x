@@ -131,9 +131,6 @@ typedef intptr_t LPTREE;
 
 #define MAX_LEVEL       8       /* max level of folder  */
 
-/*      Minus 2 for sparrow */  
-#define MAXMENU         29      /* max number of menus  cjg - 07/07/92*/
-
 #define DESKICON        0
 #define WINICON         1
 
@@ -612,12 +609,11 @@ extern APP *appnode;					/* app buffer array     */
 extern APP *appfree;					/* app buffer free list     */
 extern APP *applist;					/* app buffer list      */
 extern DTA dtabuf;						/* dta buffer   */
-extern WINDOW *warray[MAXWIN];			/* window structure */
 extern int16_t s_sort;					/* sort item    */
 extern int16_t s_view;					/* view item    */
 extern BOOLEAN ccopy_save;				/* copy ?   */
 extern BOOLEAN cdele_save;				/* delete ? */
-extern int16_t write_save;				/* write ?  */
+extern BOOLEAN write_save;				/* write ?  */
 extern BOOLEAN cbit_save;				/* bitblt   */
 extern int16_t pref_save;				/* screen pref  */
 extern BOOLEAN s_cache;					/* cache    */

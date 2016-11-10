@@ -27,3 +27,11 @@
 #ifndef POPUP_SUPPORT
 #define POPUP_SUPPORT (AESVERSION >= 0x330)
 #endif
+
+/* max number of menus  cjg - 07/07/92 */
+#if TOSVERSION >= 0x400
+/* Minus 2 for sparrow */
+#define MAXMENU         29
+#else
+#define MAXMENU         30
+#endif

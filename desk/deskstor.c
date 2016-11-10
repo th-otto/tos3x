@@ -34,8 +34,6 @@ APP *appfree;							/* app buffer free list     */
 APP *applist;							/* app buffer list      */
 DTA dtabuf;								/* dta buffer   */
 
-WINDOW *warray[MAXWIN];					/* window structure */
-
 /*
  * Variables for the desktop.inf file
  */
@@ -43,7 +41,7 @@ int16_t s_sort;							/* sort item    */
 int16_t s_view;							/* view item    */
 BOOLEAN ccopy_save;						/* copy ?   */
 BOOLEAN cdele_save;						/* delete ? */
-int16_t write_save;						/* write ?  */
+BOOLEAN write_save;						/* write ?  */
 BOOLEAN cbit_save;						/* bitblt   */
 int16_t pref_save;						/* screen pref  */
 BOOLEAN s_cache;						/* cache    */

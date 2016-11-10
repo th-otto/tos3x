@@ -461,14 +461,13 @@ name: ds.t size
 
 	INT(_gl_dabase)
 	V(_gl_adacc,l,MAX_ACCS)
-
-	ds.b $12
+	V(_winp,w,3)
+	
+	ds.b 12
 	
 	INT(_xrat)
 	INT(_yrat)
-	
-	ds.b 2
-	
+	INT(_s_cache)
 	INT(_gl_hchar)
 	INT(_gl_naccs)
 	INT(_gl_dabox)
@@ -485,8 +484,9 @@ name: ds.t size
 	PTR(_ad_armice)
 	PTR(_ad_select)
 	
-	ds.b $A2
+	ds.b $A0
 	
+	INT(_s_defdir)
 	PTR(_ad_fsel)
 	INT(_gl_dclick)
 	INT(_cdele_save)
@@ -504,9 +504,7 @@ name: ds.t size
 	INT(_gl_bdesired)
 	INT(_gl_dcindex)
 	INT(_gl_recd)
-	
-	ds.b 2
-	
+	INT(_q_change)
 	PTR(_gh_buffer)
 	PTR(_ad_path)
 	
@@ -519,9 +517,7 @@ name: ds.t size
 	PTR(_ad_shtail)
 	PTR(_ad_stdesk)
 	INT(_used_acc)
-	
-	ds.b 2
-	
+	INT(_cbit_save)
 	INT(_back_up)
 	INT(_gl_wchar)
 	PTR(_ad_fsdta)
@@ -541,9 +537,10 @@ name: ds.t size
 	INT(_gl_moff)
 	GRECT(_gl_rcenter)
 	INT(_sh_iscart)
-	V(_hdr_buf,w,18)   /* RSHDR */
+	V(_hdr_buff,w,18)   /* RSHDR */
+	INT(_d_maxcolor)
 	
-	ds.b 4
+	ds.b 2
 	
 	INT(_gl_graphic)
 	INT(_gl_lcolor)
@@ -565,18 +562,14 @@ name: ds.t size
 	INT(_w_walkflag)
 	PTR(_ad_envrn)
 	V(_desk_pid,w,MAX_ACCS)
-	
-	ds.b 4
-	
+	PTR(_winhead)
 	PTR(_path3)
 	INT(_pref_save)
 	PTR(_gl_newdesk)
 	INT(_wasclr)
 	GRECT(_gl_rmnactv)
 	V(_pglobal,w,15)
-	
-	ds.b $80
-	
+	V(_inf_path,b,PATHLEN)
 	INT(_gl_wclip)
 	PTR(_cart_dta)
 	V(_gl_mkrect,b,12)  /* ORECT */
@@ -589,9 +582,8 @@ name: ds.t size
 	INT(_gl_xclip)
 	INT(_sh_isgem)
 	PTR(_appfree)
-	
-	ds.b 30
-	
+	V(_mentable,b,MAXMENU)
+	even
 	INT(_gl_yclip)
 	INT(_gl_hbox)
 	PTR(_ad_fstree)
@@ -618,9 +610,7 @@ name: ds.t size
 	
 	INT(_gl_font)
 	PTR(_gl_cowner)
-	
-	ds.b 2
-	
+	INT(_font_save)
 	INT(_gl_width)
 	INT(_sh_doexec)
 	PTR(_gl_pglue)
@@ -653,20 +643,17 @@ name: ds.t size
 	INT(_gl_wbox)
 	PTR(_gl_mntree)
 	PTR(_gl_mowner)
-	
-	ds.b $80
-	
+	V(_autofile,b,PATHLEN)
 	PTR(_gl_wtree)
 	INT(_gemsize)
 	V(_wind_spb,b,10)    /* sizeof(SPB) */
 	
-	ds.b 6
+	ds.b 4
 	
+	INT(_s_fullpath)
 	GRECT(_gl_rzero)
 	INT(_gl_mouse)
-	
-	ds.b 2
-	
+	INT(_s_stofit)
 	INT(_gl_nrow)
 	INT(_infsize)
 	INT(_numicon)
@@ -675,9 +662,7 @@ name: ds.t size
 	
 	V(_filestr,b,NAMELEN)
 	INT(_tmpmoff)
-	
-	ds.b 2
-	
+	INT(_windspec)
 	PTR(_gl_store)
 	INT(_ctldown)
 	INT(_autoexec)
@@ -686,9 +671,7 @@ name: ds.t size
 	ds.b 2
 
 	INT(_gl_wtop)
-	
-	ds.b 2
-	
+	INT(_write_save)
 	PTR(_applist)
 	INT(_desksiz)
 	PTR(_deskptr)
@@ -700,9 +683,7 @@ name: ds.t size
 	INT(_pr_xrat)
 	INT(_pr_button)
 	PTR(_drawstk)
-	
-	ds.b $1060
-	
+	V(_afile,b,INFSIZE)
 	INT(_pr_yrat)
 	INT(_d_dir)
 	LONG(_numdirs)
@@ -717,9 +698,7 @@ name: ds.t size
 	ds.b 2
 	
 	INT(_nogem)
-	
-	ds.b 6
-	
+	V(_deskp,w,3)
 	INT(_gl_mx)
 	INT(_gl_my)
 	INT(_fpcnt)
@@ -728,9 +707,10 @@ name: ds.t size
 	
 	PTR(_cpbox)
 	V(_gl_ws,w,57)   /* workout */
+
+	ds.b 4
 	
-	ds.b $474
-	
+	V(_winpd,b,142*MAXWIN)
 	V(_intin,w,128)
 	PTR(_x_win)
 	PTR(_cda)
@@ -758,8 +738,9 @@ name: ds.t size
 	PTR(_zlr)
 	PTR(_backid)
 	INT(_g_flag)
+	PTR(_q_addr)
 	
-	ds.b 12
+	ds.b 8
 	
 	INT(_sh_gem)
 	INT(_mclick)
@@ -813,12 +794,11 @@ name: ds.t size
 	V(_f_xywh,w,18)
 	INT(_mtrans)
 	PTR(_pxpath)
-	
-	ds.b $20
-	
+	V(_warray,l,MAXWIN)
 	INT(_x_type)
+	INT(_s_sort)
 	
-	ds.b 6
+	ds.b 4
 	
 	INT(_tmpmon)
 	INT(_button)

@@ -21,9 +21,11 @@
 uint16_t d_rezword; /* also in AES:geminit.c */
 #endif
 char afile[INFSIZE];
-STATIC int16_t font_save;
+STATIC BOOLEAN font_save;
 BOOLEAN s_defdir;
 BOOLEAN s_fullpath;
+
+STATIC WINDOW *warray[MAXWIN];			/* window structure */ /* should be local to save_inf */
 
 #define SAVE_ATARI	128
 
@@ -53,10 +55,11 @@ VOID tt_color PROTO((BOOLEAN put));
 /*
  * Make inf path
  */
+/* 306de: 00e2b580 */
 VOID m_infpath(P(char *)buffer)
 PP(char *buffer;)
 {
-	strcpy(buffer, infpath);			/* C:\NEWDESK.INF   */
+	strcpy(buffer, infpath);			/* C:\NEWDESK.INF */
 	buffer[0] = (isdrive() & 0x04) ? 'C' : 'A';
 }
 
@@ -64,6 +67,7 @@ PP(char *buffer;)
 /*
  * Reverse of hex_dig()
  */
+/* 306de: 00e2b5b4 */
 char uhex_dig(P(int16_t) wd)
 PP(register int16_t wd;)
 {
@@ -77,6 +81,7 @@ PP(register int16_t wd;)
 }
 
 
+/* 306de: 00e2b5f2 */
 char *escan_str(P(const char *)pcurr, P(char *)ppstr)
 PP(register const char *pcurr;)
 PP(register char *ppstr;)
@@ -97,6 +102,7 @@ PP(register char *ppstr;)
  * Scan off and convert the next two hex digits and return with
  * pcurr pointing one space past the end of the four hex digits
  */
+/* 306de: 00e2b62a */
 char *scan_2(P(const char *) pcurr, P(int16_t *) pwd)
 PP(register const char *pcurr;)
 PP(register int16_t *pwd;)
@@ -117,6 +123,7 @@ PP(register int16_t *pwd;)
 /*
  * Reverse of scan_2()
  */
+/* 306de: 00e2b66e */
 char *save_2(P(char *) pcurr, P(uint16_t) wd)
 PP(register char *pcurr;)
 PP(uint16_t wd;)
@@ -131,6 +138,7 @@ PP(uint16_t wd;)
 /*
  * Reverse of scan_str
  */
+/* 306de: 00e2b6ac */
 char *save_str(P(char *)pcurr, P(const char *)pstr)
 PP(register char *pcurr;)
 PP(register const char *pstr;)
@@ -146,6 +154,7 @@ PP(register const char *pstr;)
 /*
  * Scan the desktop icon
  */
+/* 306de: 00e2b6dc */
 const char *inf_xdesk(P(const char *)pcurr)
 PP(register const char *pcurr;)
 {
@@ -250,6 +259,7 @@ PP(register const char *pcurr;)
  * Parse a single line from the DESKTOP.APP file.
  * Just scan the application
  */
+/* 306de: 00e2b8fe */
 const char *inf_parse(P(const char *)pcurr)
 PP(register const char *pcurr;)
 {
@@ -339,6 +349,7 @@ PP(register const char *pcurr;)
  * ++ERS 1/8/93
  */
 
+#if TOSVERSION >= 0x400
 static int16_t const inf_permute[MAXMENU + 2] = {
 	0, 1, 2, 3, 4,
 	5, 6, 7, 8, 9,
@@ -348,7 +359,9 @@ static int16_t const inf_permute[MAXMENU + 2] = {
 	26, 27, 28, -1, -1,
 	25
 };
+#endif
 
+/* 306de: 00e2ba0c */
 VOID inf_scan(P(char *)buffer)
 PP(char *buffer;)
 {
@@ -357,11 +370,14 @@ PP(char *buffer;)
 	register const char *pcurr;
 	APP *app;
 	char *ptmp;
-	int16_t envr, j;
+	int32_t unused1;
+	int16_t envr;
+	int16_t j;
 	int32_t stmp;
 	char temp;
 	char *ptr;
 
+	UNUSED(unsued1);
 	UNUSED(stmp);
 	UNUSED(ptmp);
 	UNUSED(tmp);
@@ -369,7 +385,7 @@ PP(char *buffer;)
 	
 	i = 0;								/* for window index */
 	pcurr = buffer;
-	font_save = 0;
+	font_save = FALSE;
 
 	/* put in default keystroke */
 	for (j = 0; j < MAXMENU; j++)
@@ -393,6 +409,7 @@ PP(char *buffer;)
 				 * and other TOS's; that's also why we need to permute things
 				 * (see table above)
 				 */
+#if TOSVERSION >= 0x400
 				for (j = 0; j < MAXMENU + 2; j++)
 				{
 					if (*pcurr == '@')
@@ -402,7 +419,16 @@ PP(char *buffer;)
 					if (inf_permute[j] >= 0)
 						mentable[inf_permute[j]] = envr;
 				}
+#else
+				for (j = 0; j < MAXMENU; j++)
+				{
+					if (*pcurr == '@')
+						break;
 
+					pcurr = scan_2(pcurr, &envr);
+					mentable[j] = envr;
+				}
+#endif
 				break;
 
 			case 'Z':					/* auto boot file   */
@@ -431,21 +457,29 @@ PP(char *buffer;)
 				/* vertical slide bar   */
 				pcurr = scan_2(pcurr, &pws->w_rowi);
 
-				/* window's x position  */
+				/* window's x position */
 				pcurr = scan_2(pcurr, &pws->w_sizes.g_x);
 				if (pws->w_sizes.g_x >= gl_ncols)
+#if TOSVERSION >= 0x400
 					pws->w_sizes.g_x = gl_ncols - 4;
+#else
+					pws->w_sizes.g_x /= 2;
+#endif
 
 				pws->w_sizes.g_x *= gl_wchar;
 
-				/* window's y position  */
+				/* window's y position */
 				pcurr = scan_2(pcurr, &pws->w_sizes.g_y);
 				if (pws->w_sizes.g_y >= gl_nrows)
+#if TOSVERSION >= 0x400
 					pws->w_sizes.g_y = gl_nrows - 1;
+#else
+					pws->w_sizes.g_y /= 2;
+#endif
 
 				pws->w_sizes.g_y *= gl_hchar;
 
-				/* window's width   */
+				/* window's width */
 				pcurr = scan_2(pcurr, &pws->w_sizes.g_w);
 				if (pws->w_sizes.g_w > gl_ncols)
 					pws->w_sizes.g_w /= 2;
@@ -477,7 +511,7 @@ PP(char *buffer;)
 
 				*ptr = '@';
 				pcurr = escan_str(pcurr, pws->w_path);
-			  i_12:
+			i_12:
 				*ptr = '@';
 				break;
 
@@ -487,20 +521,19 @@ PP(char *buffer;)
 					pcurr = scan_2(pcurr, &deskp[j]);
 					pcurr = scan_2(pcurr, &winp[j]);
 				}
-
 				tt_color(TRUE);
 				break;
 
 			case 'E':					/* environment string   */
 				pcurr = scan_2(pcurr, &envr);
-				s_view = ((envr & 0x80) != 0);
+				s_view = (envr & 0x80) != 0;
 				s_sort = (envr & 0x60) >> 5;
-				cdele_save = ((envr & 0x10) != 0);
-				ccopy_save = ((envr & 0x08) != 0);
+				cdele_save = (envr & 0x10) != 0;
+				ccopy_save = (envr & 0x08) != 0;
 				write_save = envr & 0x01;
 				pcurr = scan_2(pcurr, &envr);
-				cbit_save = (envr & 0x10) ? 1 : 0;
-				pref_save = (envr & 0x0F);	/* screen resoultion    */
+				cbit_save = (envr & 0x10) ? TRUE : FALSE;
+				pref_save = envr & 0x0F;	/* screen resoultion    */
 
 				/* This is the extended stuff   */
 
@@ -508,7 +541,7 @@ PP(char *buffer;)
 					break;				/* then skip        */
 
 				pcurr = scan_2(pcurr, &envr);
-				font_save = (envr & 0x0F) ? 1 : 0;
+				font_save = (envr & 0x0F) ? TRUE : FALSE;
 
 				pcurr = scan_2(pcurr, &envr);
 
@@ -533,6 +566,7 @@ PP(char *buffer;)
 /*
  * Read in a desktop.inf file and parse the string
  */
+/* 306de: 00e2beac */
 VOID read_inf(NOTHING)
 {
 	int16_t handle;
@@ -578,12 +612,21 @@ VOID read_inf(NOTHING)
 	/* init default desktop and window color and pattern values */
 	/* if you change these, change the ones in geminit.c, too   */
 
-	deskp[0] = 0x41;					/* 4 = dither, 1 = black */
-	deskp[1] = 0x73;					/* 7 = solid color, 3 = green */
-	deskp[2] = 0x7D;					/* 7 = solid color, D = light cyan */
-	winp[0] = 0x70;
-	winp[1] = 0x70;
-	winp[2] = 0x70;
+#if (AESVERSION >= 0x330) | !BINEXACT
+	deskp[0] = (IP_4PATT << 4) | BLACK;
+	deskp[1] = (IP_SOLID << 4) | GREEN;
+	deskp[2] = (IP_SOLID << 4) | LCYAN;
+	winp[0] = (IP_SOLID << 4) | WHITE;
+	winp[1] = (IP_SOLID << 4) | WHITE;
+	winp[2] = (IP_SOLID << 4) | WHITE;
+#else
+	deskp[0] = (IP_4PATT << 4) | BLACK;
+	deskp[1] = (IP_4PATT << 4) | GREEN;
+	deskp[2] = (IP_4PATT << 4) | GREEN;
+	winp[0] = (IP_4PATT << 4) | WHITE;
+	winp[1] = (IP_4PATT << 4) | WHITE;
+	winp[2] = (IP_4PATT << 4) | WHITE;
+#endif
 
 	tt_color(TRUE);						/* stuff color into system var  */
 
@@ -616,6 +659,7 @@ VOID read_inf(NOTHING)
 /*
  *	Convert a single hex ASCII digit to a number
  */
+/* 306de: 00e2c064 */
 int16_t hex_dig(P(char) achar)
 PP(register char achar;)
 {
@@ -629,6 +673,7 @@ PP(register char achar;)
 }
 
 
+/* 306de: 00e2c0a8 */
 char *save_win(P(WINDOW *)win, P(char *)pcurr)
 PP(register WINDOW *win;)
 PP(register char *pcurr;)
@@ -665,6 +710,7 @@ PP(register char *pcurr;)
 /*
  * Save a desktop.inf file
  */
+/* 306de: 00e2c186 */
 BOOLEAN save_inf(P(BOOLEAN) todisk)
 PP(BOOLEAN todisk;)
 {
@@ -714,10 +760,11 @@ PP(BOOLEAN todisk;)
 	*pcurr++ = 'K';
 	*pcurr++ = ' ';
 
-/* Falcon TOS is different from all other TOSes in its menu structure
- * so we permute when writing out the .INF and use MAXMENU+2 instead
- * of MAXMENU
- */
+	/* Falcon TOS is different from all other TOSes in its menu structure
+	 * so we permute when writing out the .INF and use MAXMENU+2 instead
+	 * of MAXMENU
+	 */
+#if TOSVERSION >= 0x400
 	for (i = 0; i < MAXMENU + 2; i++)
 	{
 		if (inf_permute[i] < 0)
@@ -725,11 +772,17 @@ PP(BOOLEAN todisk;)
 		else
 			pcurr = save_2(pcurr, (uint16_t) mentable[inf_permute[i]]);
 	}
+#else
+	for (i = 0; i < MAXMENU; i++)
+	{
+		pcurr = save_2(pcurr, (uint16_t) mentable[i]);
+	}
+#endif
 	*pcurr++ = '@';
 	*pcurr++ = 0x0d;
 	*pcurr++ = 0x0a;
 
-	/* save evironment  */
+	/* save evironment */
 	*pcurr++ = '#';
 	*pcurr++ = 'E';
 	*pcurr++ = ' ';
@@ -771,11 +824,11 @@ PP(BOOLEAN todisk;)
 #if TOSVERSION >= 0x400
 	pcurr = save_2(pcurr, (d_rezword >> 8));
 	pcurr = save_2(pcurr, (d_rezword & 0x00FF));
+	pcurr = save_2(pcurr, 0);
+	pcurr = save_2(pcurr, 0);
+	pcurr = save_2(pcurr, 0);
+	pcurr = save_2(pcurr, 0);
 #endif
-	pcurr = save_2(pcurr, 0);
-	pcurr = save_2(pcurr, 0);
-	pcurr = save_2(pcurr, 0);
-	pcurr = save_2(pcurr, 0);
 
 	*pcurr++ = 0x0d;
 	*pcurr++ = 0x0a;
@@ -809,7 +862,7 @@ PP(BOOLEAN todisk;)
 		warray[i] = win;
 		win = w_gnext();
 	}
-	/* save windows     */
+	/* save windows */
 	for (j = i; j >= 0; j--)
 		pcurr = save_win(warray[j], pcurr);
 
@@ -1009,7 +1062,7 @@ PP(BOOLEAN todisk;)
 		up_allwin(infname, FALSE);	/* rebuild any window on the INF drive */
 #endif
 
-		/* update the buffer    */
+		/* update the buffer */
 		if (streq(infname, inf_path))
 		{
 			q_change = FALSE;
@@ -1032,6 +1085,7 @@ PP(BOOLEAN todisk;)
 /*
  * Position the desktop icon
  */
+/* 306de: 00e2c86c */
 VOID app_posicon(P(int16_t) colx, P(int16_t) coly, P(int16_t *)px, P(int16_t *)py)
 PP(int16_t colx;)
 PP(int16_t coly;)
@@ -1051,6 +1105,7 @@ PP(register int16_t *py;)
 /*
  * Transform mouse position into icon position
  */
+/* 306de: 00e2c8b6 */
 VOID app_mtoi(P(int16_t) newx, P(int16_t) newy, P(int16_t *)px, P(int16_t *)py)
 PP(int16_t newx;)
 PP(int16_t newy;)
@@ -1098,12 +1153,13 @@ PP(register int16_t *py;)
 /*
  * Put or get color and pattern
  */
+/* 306de: 00e2c98e */
 VOID tt_color(P(BOOLEAN) put)
 PP(BOOLEAN put;)
 {
 	int16_t j;
 
-	j = 2;								/* assume more than 4 colors    */
+	j = 2;								/* assume more than 4 colors */
 
 	if (d_maxcolor == 2)
 		j = 0;
@@ -1113,11 +1169,11 @@ PP(BOOLEAN put;)
 
 	if (put)
 	{
-		windspec = (uint16_t) winp[j];
+		windspec = winp[j];
 		background[0].ob_spec = (uint16_t) deskp[j];
 	} else
 	{
-		deskp[j] = (uint16_t) background[0].ob_spec;
-		winp[j] = (uint16_t) windspec;
+		deskp[j] = background[0].ob_spec;
+		winp[j] = windspec;
 	}
 }
