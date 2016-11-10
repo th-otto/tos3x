@@ -595,9 +595,7 @@ name: ds.t size
  	V(_W_TREE,b,24*NUM_WIN)  /* OBJECT[NUM_WIN] */
 	LONG(_gl_mnpid) /* BUG: should be int */
 	INT(_pr_mclick)
-	
-	ds.b 4
-	
+	PTR(_appnode)
 	INT(_gl_wschar)
 	
 	ds.b 4
@@ -647,9 +645,7 @@ name: ds.t size
 	PTR(_gl_wtree)
 	INT(_gemsize)
 	V(_wind_spb,b,10)    /* sizeof(SPB) */
-	
-	ds.b 4
-	
+	PTR(_lp_start)
 	INT(_s_fullpath)
 	GRECT(_gl_rzero)
 	INT(_gl_mouse)
@@ -738,14 +734,13 @@ name: ds.t size
 	INT(_g_flag)
 	PTR(_q_addr)
 	
-	ds.b 8
+	ds.b 4
 	
+	PTR(_lp_end)
 	INT(_sh_gem)
 	INT(_mclick)
 	INT(_gl_fis)
-	
-	ds.b 4
-	
+	PTR(_lp_mid)
 	INT(_no_aes)
 	V(_dtabuf,b,44)
 
@@ -780,8 +775,7 @@ name: ds.t size
 	BYTE(_infork)
 	even
 	INT(_dstlen)
-	ds.b 2
-	
+	INT(_apsize)
 	INT(_kstate)
 	INT(_s_view)
 	PTR(_fixsrc)

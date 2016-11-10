@@ -20,6 +20,7 @@ uint16_t apsize;
 /*
  * Init the application buffer
  */
+/* 306de: 00e2da38 */
 BOOLEAN apbuf_init(NOTHING)
 {
 	register uint16_t i;
@@ -29,7 +30,7 @@ BOOLEAN apbuf_init(NOTHING)
 	apsize += APP_NODE;
 
 	if (!(app = (APP *)Malloc((int32_t) (sizeof(APP) * apsize))))
-		return (FALSE);
+		return FALSE;
 
 	for (i = 0; i < apsize; i++)		/* set up linked array    */
 		app[i].a_next = &app[i + 1];
@@ -50,33 +51,39 @@ BOOLEAN apbuf_init(NOTHING)
 				appfree = app1->a_next;
 				app1->a_next = (APP *) 0;
 			} else
+			{
 				app1 = app1->a_next;
+			}
 		}
 
 		applist = app;					/* new using list       */
 	} else
+	{
 		appfree = app;
-
+	}
+	
 	if (appnode)
 		Mfree(appnode);
 
 	appnode = app;						/* new app buffer       */
 
-	return (TRUE);
+	return TRUE;
 }
 
 
 /*
  * Initalize some memory buffer
  */
+/* 306de: 00e2db42 */
 BOOLEAN mem_init(NOTHING)
 {
 	/* Allocate write string buffer */
 
 	if (!(lp_mid = lp_start = (char *)Malloc(LMSIZE)))	/* 2 k memory  */
 	{
-	  m_1:do1_alert(FCNOMEM);
-		return (FALSE);
+	m_1:
+		do1_alert(FCNOMEM);
+		return FALSE;
 	}
 
 	lp_end = lp_mid + LMSIZE;
@@ -87,7 +94,7 @@ BOOLEAN mem_init(NOTHING)
 		goto m_1;
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -96,6 +103,7 @@ BOOLEAN mem_init(NOTHING)
 /*
  * Fill the path into buffer
  */
+/* 306de: 00e2dba8 */
 const char *lp_fill(P(const char *) path, P(const char **) buf)
 PP(register const char *path;)
 PP(const char **buf;)
@@ -130,13 +138,14 @@ PP(const char **buf;)
 
 	lp_mid = ptr;
 	*buf = ptr1;
-	return (path);
+	return path;
 }
 
 
 /*
  * Do the garbage collection of the buffer
  */
+/* 306de: 00e2dc08 */
 BOOLEAN lp_collect(NOTHING)
 {
 	register int16_t i;
@@ -148,7 +157,7 @@ BOOLEAN lp_collect(NOTHING)
 	if (!addr)
 	{
 		do1_alert(MCFAIL);
-		return (FALSE);
+		return FALSE;
 	}
 
 	obj = background;
@@ -159,7 +168,11 @@ BOOLEAN lp_collect(NOTHING)
 
 	for (i = 1; i <= obj[0].ob_tail; i++)
 	{
+#if AES3D
 		if (!(obj[i].ob_flags & HIDETREE))
+#else
+		if (obj[i].ob_flags != HIDETREE)
+#endif
 		{
 			if (backid[i].i_path)
 				lp_fill(backid[i].i_path, &backid[i].i_path);
@@ -176,5 +189,5 @@ BOOLEAN lp_collect(NOTHING)
 
 	Mfree(lp_start);
 	lp_start = addr;
-	return (TRUE);
+	return TRUE;
 }
