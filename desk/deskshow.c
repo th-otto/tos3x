@@ -102,6 +102,9 @@
 #define Bconin(d) trp13(2,d)
 #define Bconout(d,c) trp13(3,d,c)
 
+#undef Setprt
+#define Setprt(a) trp14int(0x21, a)
+
 #define BUFSIZ 4096						/* Malloc this much as a disk buffer */
 
 							/* #define MAXLINE 24	*//* line interval for --more-- */
@@ -125,7 +128,7 @@ int doui PROTO((int mode, int *plinecount));
 VOID bconws PROTO((const char *s));
 
 
-
+/* 306de: 00e331aa */
 BOOLEAN showfile(P(const char *)fname, P(int) mode)
 PP(const char *fname;)
 PP(int mode;)
@@ -157,7 +160,7 @@ PP(int mode;)
 			do1_alert(FCNOMEM);
 			goto allout;
 #ifdef SILLY_ERROR_HANDLING
-		} else							/* alpha mode   */
+		} else							/* alpha mode */
 		{
 			alert = get_fstring(NOMEM);
 			bconws(alert);
@@ -178,7 +181,7 @@ PP(int mode;)
 			form_error(2);
 			goto allout;
 #ifdef SILLY_ERROR_HANDLING
-		} else							/* aplha mode   */
+		} else							/* aplha mode */
 		{
 			alert = get_fstring(CANTOPEN);
 			bconws(alert);				/* Can not open */
@@ -192,10 +195,9 @@ PP(int mode;)
 	/* PRINTER MODE CODE */
 	if (mode)
 	{
-		/* find out where to send */
-		/* serial or parallel     */
+		/* find out where to send serial or parallel */
 
-		serial = (trp14(0x21, 0xFFFF) & 0x10) ? TRUE : FALSE;
+		serial = (Setprt(-1) & 0x10) ? TRUE : FALSE;
 
 		charcount = 0;
 
@@ -216,8 +218,8 @@ PP(int mode;)
 					if (*ptr >= (unsigned) SPACE)
 						charcount++;
 				}
-			  doa2:if (!Bconout(serial, *ptr))
-											/* device not present ?   */
+			doa2:
+				if (!Bconout(serial, *ptr))							/* device not present ?   */
 				{						/* retry ?      */
 					if (do_alert(2, NOOUTPUT) == 1)
 						goto doa2;
@@ -318,6 +320,7 @@ alldone:
  * state, and it shouldn't.  But it can't call graf_mkstate, because
  * that causes a dispatch, which causes the AES to buffer keystrokes.
  */
+/* 306de: 00e334a2 */
 long uikey(NOTHING)
 {
 	if (gl_btrue & 1)
@@ -336,6 +339,7 @@ long uikey(NOTHING)
  * Returns 1 if user wants to stop, or modifies *plinecount for next
  * screenful.
  */
+/* 306de: 00e3359e */
 int doui(P(int) mode, P(int *)plinecount)
 PP(int mode;)
 PP(int *plinecount;)
