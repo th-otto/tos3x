@@ -17,26 +17,27 @@ VOID pr_setup PROTO((NOTHING));
 BOOLEAN printit PROTO((const char *str));
 
 
-
+/* 306de: 00e32994 */
 BOOLEAN xch_tail(P(const char *)ptr, P(const char *)argu, P(char *)tail)
 PP(const char *ptr;)
 PP(const char *argu;)
 PP(char *tail;)
 {
-	if ((strlen(ptr) + strlen(argu) + 1) >= PATHLEN)
+	if ((int)(strlen(ptr) + strlen(argu) + 1) >= PATHLEN)
 	{
 		do1_alert(FCNOMEM);
-		return (FALSE);
+		return FALSE;
 	} else
 	{
 		strcpy(&tail[1], argu);			/* put in first argus   */
 		strcat(&tail[1], ptr);			/* patch in file name   */
 		tail[0] = strlen(&tail[1]);
-		return (TRUE);
+		return TRUE;
 	}
 }
 
 
+/* 306de: 00e32a0a */
 BOOLEAN ch_tail(P(const char *)ptr, P(char *)tail)
 PP(const char *ptr;)
 PP(char *tail;)
@@ -45,6 +46,7 @@ PP(char *tail;)
 }
 
 
+/* 306de: 00e32a26 */
 VOID show_file(P(const char *)file)
 PP(const char *file;)
 {
@@ -62,6 +64,7 @@ PP(const char *file;)
 }
 
 
+/* 306de: 00e32ac0 */
 VOID pr_setup(NOTHING)
 {
 	inf_sset(get_tree(PRINTFIL), PFILE, Nostr);
@@ -72,6 +75,7 @@ VOID pr_setup(NOTHING)
 /*
  * Print one single file
  */
+/* 306de: 00e32af2 */
 BOOLEAN printit(P(const char *)str)
 PP(const char *str;)
 {
@@ -89,6 +93,7 @@ PP(const char *str;)
 /*
  * Loop for print files
  */
+/* 306de: 00e32b48 */
 VOID print_file(NOTHING)
 {
 	BOOLEAN ret;
@@ -145,6 +150,7 @@ VOID print_file(NOTHING)
 /*
  * Launch a file
  */
+/* 306de: 00e32c44 */
 VOID launch_pref(NOTHING)
 {
 	BOOLEAN graphic;
@@ -183,8 +189,9 @@ VOID launch_pref(NOTHING)
  * Set the current directory
  * The path should look like A:\FILENAME or A:\FOLDER\FILENAME
  */
+/* 306de: 00e32d40 */
 BOOLEAN set_dir(P(const char *) path)
-PP(register const char *path;)
+PP(const char *path;)
 {
 	register char *ptr;
 	register int16_t ret;
@@ -227,6 +234,7 @@ PP(register const char *path;)
 /*
  * Run an application include doing dialogue box
  */
+/* 306de: 00e32e1e */
 VOID exec_file(P(const char *)infile, P(WINDOW *)win, P(int16_t) item, P(const char *)intail)
 PP(const char *infile;)
 PP(WINDOW *win;)
@@ -334,6 +342,7 @@ PP(const char *intail;)
 /*
  * Run the application
  */
+/* 306de: 00e33064 */
 VOID run_it(P(const char *)file, P(char *)tail, P(BOOLEAN) graphic, P(BOOLEAN) setdir)
 PP(const char *file;)
 PP(char *tail;)
@@ -348,7 +357,7 @@ PP(BOOLEAN setdir;)
 
 	desk_wait(TRUE);
 
-	if ((strlen(tail) >= PATHLEN) || (strlen(file) >= PATHLEN))
+	if ((int)strlen(tail) >= PATHLEN || (int)strlen(file) >= PATHLEN)
 	{
 		do1_alert(NOBUF);
 		goto ex_1;
@@ -356,7 +365,8 @@ PP(BOOLEAN setdir;)
 
 	if (setdir)							/* set according to application */
 	{
-	  ex_3:if (!set_dir(file))
+	ex_3:
+		if (!set_dir(file))
 			goto ex_2;
 	} else								/* set as top window    */
 	{
@@ -365,8 +375,10 @@ PP(BOOLEAN setdir;)
 
 		if (!set_dir(winhead->w_path))
 		{
-		  ex_2:do1_alert(NOSETDIR);
-		  ex_1:desk_wait(FALSE);
+		ex_2:
+			do1_alert(NOSETDIR);
+		ex_1:
+			desk_wait(FALSE);
 			return;
 		}
 	}
@@ -391,7 +403,7 @@ PP(BOOLEAN setdir;)
 		sh_iscart = FALSE;
 	}
 	
-	tail[strlen(tail) + 1] = 0xD;
+	tail[(int)strlen(tail) + 1] = 0xD; /* what for? */
 	shel_write(TRUE, graphic, 0, file, tail);
 	d_exit = L_LAUNCH;
 }

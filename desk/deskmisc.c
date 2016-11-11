@@ -650,7 +650,7 @@ PP(register char *ptime;)
 	my_itoa(val, &ptime[0]);
 	my_itoa(((time & 0x07e0) >> 5) & 0x003f, &ptime[2]);
 	strcpy(&ptime[4], "  ");
-	UNUSED(pm)
+	UNUSED(pm);
 #else
 	if (val >= 12)
 	{

@@ -382,7 +382,9 @@ VOID sh_witem(NOTHING)
 
 		if (which == FIRIGHT)
 		{
+#if TOSVERSION >= 0x400
 		cg_1:
+#endif
 			pos++;
 			if (strlen(&oldstr[pos]) < len)
 			{
@@ -398,7 +400,9 @@ VOID sh_witem(NOTHING)
 
 		if (which == FILEFT)
 		{
+#if TOSVERSION >= 0x400
 		cg_2:
+#endif
 			if (pos > 0)
 			{
 				pos--;

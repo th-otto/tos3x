@@ -509,7 +509,9 @@ VOID ins_icons(NOTHING)
 
 		if (ret == IUP)
 		{
+#if TOSVERSION >= 0x400
 		cg_1:
+#endif
 			if (icon)
 			{
 				icon--;
@@ -526,7 +528,9 @@ VOID ins_icons(NOTHING)
 
 		if (ret == IDOWN)
 		{
+#if TOSVERSION >= 0x400
 		cg_2:
+#endif
 			if ((icon + 1) < limit)
 			{
 				icon++;
@@ -579,7 +583,7 @@ VOID ins_icons(NOTHING)
 
 		if (driver)						/* driver type  */
 		{								/* drive icon   */
-			if (!(which = inf_gindex((LPTREE)obj, IDRIVE, 3)))	/* driver type */
+			if (!(which = inf_gindex(obj, IDRIVE, 3)))	/* driver type */
 			{
 				if (!idbuffer[0] || idbuffer[0] == ' ')
 				{
@@ -806,7 +810,9 @@ VOID ins_wicons(NOTHING)
 
 			if (ret == WUP)
 			{
+#if TOSVERSION >= 0x400
 			cg_3:
+#endif
 				if (index)
 				{
 					index--;
@@ -821,7 +827,9 @@ VOID ins_wicons(NOTHING)
 
 			if (ret == WDOWN)
 			{
+#if TOSVERSION >= 0x400
 			cg_4:
+#endif
 				if ((index + 1) < limit)
 				{
 					index++;

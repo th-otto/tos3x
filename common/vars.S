@@ -594,9 +594,7 @@ name: ds.t size
 	PTR(_rs_global)
 	LONG(_elinkoff)
 	INT(_gl_play)
-	
-	ds.b 128
-	
+	V(_comtail,b,PATHLEN)
 	INT(_gl_font)
 	PTR(_gl_cowner)
 	INT(_font_save)
@@ -653,9 +651,7 @@ name: ds.t size
 	INT(_ctldown)
 	INT(_autoexec)
 	INT(_fs_topptr)
-
-	ds.b 2
-
+	INT(_d_nrows)
 	INT(_gl_wtop)
 	INT(_write_save)
 	PTR(_applist)
