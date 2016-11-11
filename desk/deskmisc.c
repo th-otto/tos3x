@@ -227,7 +227,7 @@ PP(BOOLEAN state;)
  * Draw a single field of a dialog box
  */
 /* 306de: 00e2f890 */
-VOID draw_fld(P(OBJECT *)obj, P(int16_t) which)
+VOID drawfld(P(OBJECT *)obj, P(int16_t) which)
 PP(register OBJECT *obj;)
 PP(int16_t which;)
 {
@@ -345,8 +345,8 @@ VOID wait_msg(NOTHING)
 	do
 	{
 		event = evnt_multi(MU_MESAG | MU_TIMER, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* mesaage buffer   */
-						   0, 0,		/* timer counter    */
-						   &trash, &trash, &trash, &trash, &trash, &trash);
+					0, 0,		/* timer counter    */
+					&trash, &trash, &trash, &trash, &trash, &trash);
 
 		if (event & MU_MESAG)
 			hd_msg(msgbuff);

@@ -122,13 +122,13 @@ PP(char *new;)
 				{
 					*p = 0;
 					copy2 = strcpy(copy2, copy1) - 1;
-					copy2 = save_str(copy2, new);
+					copy2 = save_sstr(copy2, new);
 					if (temp == 'V')
-						copy2 = save_str(copy2 - 2, wilds);
+						copy2 = save_sstr(copy2 - 2, wilds);
 					/* copy the label   */
-					copy2 = save_str(copy2, buffer);
+					copy2 = save_sstr(copy2, buffer);
 					if (special)
-						copy2 = save_str(copy2, argu);
+						copy2 = save_sstr(copy2, argu);
 					*copy2++ = 0xD;
 					*copy2++ = 0xA;
 				} else					/* remove the path  */

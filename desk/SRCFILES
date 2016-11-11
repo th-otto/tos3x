@@ -1,8 +1,8 @@
 DESK_OBJS1=deskact.o deskapp.o deskbind.o deskbutt.o deskdir.o
 DESK_OBJS2=deskdisk.o deskfile.o deskinf.o deskins.o deskmem.o
 DESK_OBJS3=deskmenu.o deskmisc.o deskopen.o deskpref.o desksear.o
-DESK_OBJS4=desksele.o deskshel.o deskshow.o deskstor.o desktop.o
-DESK_OBJS5=deskupda.o deskwin.o newmn.o deskrsc.o deskif.o osbind.o
+DESK_OBJS4=desksele.o deskshel.o deskshow.o deskrsc.o deskstor.o
+DESK_OBJS5=desktop.o deskupda.o deskwin.o newmn.o deskif.o osbind.o
 
 DESK_OBJS=${DESK_OBJS1} ${DESK_OBJS2} ${DESK_OBJS3} ${DESK_OBJS4} ${DESK_OBJS5} ${DESK_OBJS6} ${DESK_OBJS7}
 

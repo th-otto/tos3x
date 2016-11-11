@@ -402,7 +402,7 @@ VOID m_infpath PROTO((char *buffer));
 char *escan_str PROTO((const char *pcurr, char *ppstr)); /* also referenced by AES */
 char *scan_2 PROTO((const char *pcurr, int16_t *pwd)); /* also referenced by AES */
 char *save_2 PROTO((char *pcurr, uint16_t wd)); /* also referenced by AES */
-char *save_str PROTO((char *pcurr, const char *pstr));
+char *save_sstr PROTO((char *pcurr, const char *pstr));
 VOID read_inf PROTO((NOTHING));
 BOOLEAN save_inf PROTO((BOOLEAN todisk));
 VOID app_posicon PROTO((int16_t colx, int16_t coly, int16_t *px, int16_t *py));
@@ -488,7 +488,7 @@ BOOLEAN in_parent PROTO((OBJECT *obj, int16_t child));
 VOID xinf_sset PROTO((OBJECT *obj, int16_t item, const char *buf1));
 VOID mice_state PROTO((int16_t state));
 VOID desk_wait PROTO((BOOLEAN state));
-VOID draw_fld PROTO((OBJECT *obj, int16_t which));
+VOID drawfld PROTO((OBJECT *obj, int16_t which));
 BOOLEAN getcookie PROTO((int32_t cookie, int32_t *p_value)); /* also referenced by AES */
 VOID f_str PROTO((OBJECT *obj, int16_t item, int32_t value));
 int16_t ch_level PROTO((const char *path));

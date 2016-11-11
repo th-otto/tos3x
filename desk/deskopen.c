@@ -411,7 +411,7 @@ VOID sh_witem(NOTHING)
 				XSelect(obj, which);	/* cjg 08/06/92 */
 #endif
 				((TEDINFO *) (obj[FIFILE].ob_spec))->te_ptext = &oldstr[pos];
-				draw_fld(obj, FIFILE);
+				drawfld(obj, FIFILE);
 
 #if TOSVERSION >= 0x400
 				graf_mkstate(&mk_x, &mk_y, &mk_buttons, &mk_kstate);

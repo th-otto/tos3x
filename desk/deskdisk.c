@@ -48,8 +48,7 @@
 #define	VIRGIN		0xe5e5				/* FORMAT value to write to new sectors */
 #define	MAGIC		0x87654321L
 #define INTERLV		-1					/* neg, so use skew table for format    */
-#define SINGLESKEW	3					/* amount of SKEW for a single sided and 
-										   high density disk */
+#define SINGLESKEW	3					/* amount of SKEW for a single sided and high density disk */
 #define	DOUBLESKEW	2					/* amount of skew between sides     */
 
 #define	BADSECT		-16
@@ -221,7 +220,7 @@ PP(int16_t op;)
 		switch (ret)
 		{
 		case FCFORMAT:
-			draw_fld(obj, FCBOXC);		/* erase copy function */
+			drawfld(obj, FCBOXC);		/* erase copy function */
 #if AES3D
 			obj[FCBOXC].ob_flags |= HIDETREE;
 			obj[FCBOXF].ob_flags &= ~HIDETREE;
@@ -234,7 +233,7 @@ PP(int16_t op;)
 			break;
 
 		case FCCOPY:
-			draw_fld(obj, FCBOXF);		/* erase the format     */
+			drawfld(obj, FCBOXF);		/* erase the format     */
 #if AES3D
 			obj[FCBOXF].ob_flags |= HIDETREE;
 			obj[FCBOXC].ob_flags &= ~HIDETREE;
@@ -249,7 +248,7 @@ PP(int16_t op;)
 		case SRCDRA:					/* set the copy drive   */
 		case SRCDRB:
 			*destdr = (ret == SRCDRA) ? 'B' : 'A';
-			draw_fld(obj, DESTDR);
+			drawfld(obj, DESTDR);
 			break;
 
 		case FCCNCL:					/* cancel       */
@@ -278,9 +277,9 @@ PP(int16_t op;)
 			obj[FCBARA].ob_width = width;
 			obj[FCBARB].ob_width = width;
 			obj[FCOK].ob_state = NORMAL;
-			draw_fld(obj, FCBARA);
-			draw_fld(obj, FCBARB);
-			draw_fld(obj, FCOK);
+			drawfld(obj, FCBARA);
+			drawfld(obj, FCBARB);
+			drawfld(obj, FCOK);
 			desk_wait(FALSE);
 			if (!ret)
 			{

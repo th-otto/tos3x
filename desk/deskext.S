@@ -170,7 +170,7 @@ _wm_set         equ AESTBASE+$9224
 _wm_find        equ AESTBASE+$9472
 _wm_update      equ AESTBASE+$9494
 _wm_calc        equ AESTBASE+$94F0
-_wm_new         equ AESTBASE+$96A6
+_wm_new         equ AESTBASE+$95A6
 _ap_init        equ AESTBASE+$026C
 _ap_exit        equ AESTBASE+$02E2
 _ap_rdwr        equ AESTBASE+$036E

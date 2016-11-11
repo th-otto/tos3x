@@ -1173,8 +1173,8 @@ VOID actions(NOTHING)
 		menu_verify();
 		q_write();						/* update inf file  */
 		event = evnt_multi(MU_MESAG | MU_BUTTON | MU_KEYBD, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* mesaage buffer   */
-						   0, 0,		/* timer counter    */
-						   &mx, &my, &button, &kstate, &kreturn, &clicks);
+					0, 0,		/* timer counter    */
+					&mx, &my, &button, &kstate, &kreturn, &clicks);
 
 		wind_update(TRUE);
 
@@ -1329,7 +1329,7 @@ VOID av_desk(NOTHING)
 						}
 
 						if (which == SDOK)
-							draw_fld(obj, SDOK);
+							drawfld(obj, SDOK);
 
 						goto p_2;
 					}
@@ -1363,12 +1363,12 @@ VOID av_desk(NOTHING)
 			p_11:
 				ch_key(menui);
 				((TEDINFO *) (obj[MKSTR].ob_spec))->te_ptext = (char *)obj1[tb3[menui]].ob_spec;
-				draw_fld(obj, MKSTR);
+				drawfld(obj, MKSTR);
 			p_2:
 				buf[1] = 0;
 				buf[0] = mentable[menui];
 				inf_sset(obj, MKKEY, buf);
-				draw_fld(obj, MKKEY);
+				drawfld(obj, MKKEY);
 			}
 			break;
 
@@ -1409,9 +1409,9 @@ VOID av_desk(NOTHING)
 					app = xapp;
 					fi = 0;
 					((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = NO_CONST(app->a_name);
-					draw_fld(obj, SDFILE);
+					drawfld(obj, SDFILE);
 					f_str(obj, SDKEY, f);
-					draw_fld(obj, SDKEY);
+					drawfld(obj, SDKEY);
 				}
 			} else
 			{
@@ -1441,7 +1441,7 @@ VOID av_desk(NOTHING)
 			}
 
 			((TEDINFO *) (obj[SDFILE].ob_spec))->te_ptext = NO_CONST(&app->a_name[fi]);
-			draw_fld(obj, SDFILE);
+			drawfld(obj, SDFILE);
 			goto ad_5;
 		}
 

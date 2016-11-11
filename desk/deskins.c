@@ -244,8 +244,8 @@ VOID ins_app(NOTHING)
 				ins_3:
 					obj[APOK].ob_state = NORMAL;
 					inf_sset(obj, IKEY, Nostr);
-					draw_fld(obj, IKEY);
-					draw_fld(obj, APOK);
+					drawfld(obj, IKEY);
+					drawfld(obj, APOK);
 					where = IKEY;
 					goto ins_2;
 				}
@@ -331,7 +331,7 @@ VOID ins_app(NOTHING)
 			{
 				if (*str)
 				{
-					if (strlen(str) < (PATHLEN - 4))
+					if ((int)strlen(str) < (PATHLEN - 4))
 					{
 						save_2(autofile, graphic);
 						autofile[2] = ' ';

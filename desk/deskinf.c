@@ -139,7 +139,7 @@ PP(uint16_t wd;)
  * Reverse of scan_str
  */
 /* 306de: 00e2b6ac */
-char *save_str(P(char *)pcurr, P(const char *)pstr)
+char *save_sstr(P(char *)pcurr, P(const char *)pstr)
 PP(register char *pcurr;)
 PP(register const char *pstr;)
 {
@@ -751,7 +751,7 @@ PP(BOOLEAN todisk;)
 		*pcurr++ = '#';
 		*pcurr++ = 'Z';
 		*pcurr++ = ' ';
-		pcurr = save_str(pcurr, autofile);
+		pcurr = save_sstr(pcurr, autofile);
 		*pcurr++ = 0x0d;
 		*pcurr++ = 0x0a;
 	}
@@ -928,9 +928,9 @@ PP(BOOLEAN todisk;)
 		*pcurr++ = uhex_dig(app->a_pref);
 		pcurr = save_2(pcurr, app->a_key);
 
-		pcurr = save_str(pcurr, app->a_name);
-		pcurr = save_str(pcurr, app->a_doc);
-		pcurr = save_str(pcurr, app->a_argu);
+		pcurr = save_sstr(pcurr, app->a_name);
+		pcurr = save_sstr(pcurr, app->a_doc);
+		pcurr = save_sstr(pcurr, app->a_argu);
 		*pcurr++ = 0x0d;
 		*pcurr++ = 0x0a;
 
@@ -1007,14 +1007,14 @@ PP(BOOLEAN todisk;)
 		*pcurr++ = ' ';
 
 		if (backid[i].i_path)
-			pcurr = save_str(pcurr, backid[i].i_path);
+			pcurr = save_sstr(pcurr, backid[i].i_path);
 
-		pcurr = save_str(pcurr, ((CICONBLK *) (obj[i].ob_spec))->monoblk.ib_ptext);
+		pcurr = save_sstr(pcurr, ((CICONBLK *) (obj[i].ob_spec))->monoblk.ib_ptext);
 
 		if (!backid[i].i_path)
-			pcurr = save_str(pcurr, Nostr);
+			pcurr = save_sstr(pcurr, Nostr);
 
-		/* pcurr = save_str( pcurr, Nostr); */
+		/* pcurr = save_sstr( pcurr, Nostr); */
 		*pcurr++ = 0x0d;
 		*pcurr++ = 0x0a;
 	}

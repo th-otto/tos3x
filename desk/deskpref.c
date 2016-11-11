@@ -180,8 +180,8 @@ VOID col_pa_pref(NOTHING)
 			obj[WINPREF].ob_state = SELECTED;
 			obj[DESKPREF].ob_state = NORMAL;
 		c_2:
-			draw_fld(obj, DESKPREF);
-			draw_fld(obj, WINPREF);
+			drawfld(obj, DESKPREF);
+			drawfld(obj, WINPREF);
 			obj[PATTERN].ob_spec = *outpat;
 		}
 

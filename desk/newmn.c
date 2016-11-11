@@ -51,7 +51,7 @@
  * 08/06/92  - cjg - Changed XDeselect() and XSelect() to
  *                   redraw from the root and to increase the
  *                   redraw area by 2 pixels.
- *                 - Changed Selecting Titles to draw_fld()
+ *                 - Changed Selecting Titles to drawfld()
  *                 - Enabled Arrow Buttons to INVERT when Selected.
  *                 - Buttons remain selected until mouse button is released.
  * 08/11/92  - cjg - When a function key is already used, and cancel is pressed
@@ -314,7 +314,7 @@ VOID mv_desk(NOTHING)
 						}
 
 						if (which == MOK)
-							draw_fld(obj, MOK);
+							drawfld(obj, MOK);
 
 						goto p_2;
 					}
@@ -347,7 +347,7 @@ VOID mv_desk(NOTHING)
 
 		case MKUPS:					/* check for keys   */
 
-		  cg_2:
+		cg_2:
 			if (menui)
 			{
 				XSelect(obj, which);	/* cjg 08/06/92 */
@@ -360,20 +360,20 @@ VOID mv_desk(NOTHING)
 
 		case MKDOWNS:
 
-		  cg_3:
+		cg_3:
 			if ((menui + 1) < MAXMENU)
 			{
 				XSelect(obj, which);	/* cjg 08/06/92 */
 				menui++;
-			  p_11:
+			p_11:
 				ch_key(menui);
 				((TEDINFO *) (obj[MKITEM].ob_spec))->te_ptext = (char *)obj1[tb3[menui]].ob_spec;
-				draw_fld(obj, MKITEM);
-			  p_2:
+				drawfld(obj, MKITEM);
+			p_2:
 				buf[1] = 0;
 				buf[0] = mentable[menui];
 				inf_sset(obj, MKKEYS, buf);
-				draw_fld(obj, MKKEYS);
+				drawfld(obj, MKKEYS);
 				cl_delay();
 
 				/* cjg 08/06/92 - Check if the buttons are still down */
@@ -413,7 +413,7 @@ VOID mv_desk(NOTHING)
 
 		case MFUP:
 
-		  cg_4:
+		cg_4:
 			f--;
 
 			if (f)
@@ -431,13 +431,14 @@ VOID mv_desk(NOTHING)
 
 		case MFDOWN:
 
-		  cg_5:
+		cg_5:
 			f++;
 
 			if (f <= 20)
 			{
 
-			  ad_3:if (!(xapp = app_key(ftab[f])))
+			ad_3:
+				if (!(xapp = app_key(ftab[f])))
 				{
 					goto ad_2;
 				} else
@@ -451,9 +452,9 @@ VOID mv_desk(NOTHING)
 					app = xapp;
 					fi = 0;
 					((TEDINFO *) (obj[MFFILE].ob_spec))->te_ptext = NO_CONST(app->a_name);
-					draw_fld(obj, MFFILE);
+					drawfld(obj, MFFILE);
 					f_str(obj, MFKEY, f);
-					draw_fld(obj, MFKEY);
+					drawfld(obj, MFKEY);
 
 					if (!skip_flag)		/* Silly thing - cjg 08/06/92 */
 					{
@@ -489,8 +490,7 @@ VOID mv_desk(NOTHING)
 		case MFLEFT:
 		case MFRIGHT:
 
-		  cg_1:
-
+		cg_1:
 			if (!app)
 			{
 				wait_up();
@@ -523,7 +523,7 @@ VOID mv_desk(NOTHING)
 
 			XSelect(obj, which);		/* cjg 08/06/92 */
 			((TEDINFO *) (obj[MFFILE].ob_spec))->te_ptext = NO_CONST(&app->a_name[fi]);
-			draw_fld(obj, MFFILE);
+			drawfld(obj, MFFILE);
 
 			/* cjg 08/06/92 - Check if the buttons are still down */
 			graf_mkstate(&mk.x, &mk.y, &mk.buttons, &mk.kstate);
@@ -836,7 +836,7 @@ VOID mins_app(NOTHING)
 								}
 								menu_icheck(dtree, istart, TRUE);
 
-								draw_fld(obj, MPIBUTTN);
+								drawfld(obj, MPIBUTTN);
 
 								/* cjg 08/11/92 */
 								obj[MPOK].ob_state |= SELECTED;
@@ -1273,7 +1273,7 @@ BOOLEAN set_video(NOTHING)
 
 		case SVMODES:					/* Compatibility Modes */
 			do_finish(MNSETVID);
-		  dialog1:
+		dialog1:
 			vtree = get_tree(MNVIDEO);
 			init_vtree();
 			output = fmdodraw(MNVIDEO, 0);
@@ -1499,7 +1499,7 @@ PP(int16_t Skip;)
 
 	/* Select the Title */
 	tree[title].ob_state |= SELECTED;
-	draw_fld(tree, title);
+	drawfld(tree, title);
 
 	objc_offset(tree, button, &brect.g_x, &brect.g_y);
 
@@ -1716,7 +1716,7 @@ PP(int16_t item;)
 	}
 	mentable[item] = buf[0];
 	inf_sset(obj, MKKEYS, buf);
-	draw_fld(obj, MKKEYS);
+	drawfld(obj, MKKEYS);
 	ch_key(item);
 	return (flag);
 }

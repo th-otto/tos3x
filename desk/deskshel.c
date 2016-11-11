@@ -85,7 +85,7 @@ PP(const char *str;)
 	UNUSED(ptr);
 	obj = get_tree(PRINTFIL);
 	xinf_sset(obj, PFILE, g_name(str));
-	draw_fld(obj, PFILE);
+	drawfld(obj, PFILE);
 	return showfile(str, TRUE);
 }
 

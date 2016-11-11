@@ -162,7 +162,7 @@ PP(BOOLEAN multiple;)
 		if (d_display && code != OP_COUNT)
 		{
 			inf_sset(cpbox, CSDRIVE, buffer);
-			draw_fld(cpbox, CSDRIVE);
+			drawfld(cpbox, CSDRIVE);
 		}
 		/* do the counting only */
 		if (code == OP_COUNT)
@@ -295,13 +295,13 @@ PP(int flag;)
 
 		if (opcode != OP_COPY)
 		{
-		  redel:
+		redel:
 			if ((ret = Fdelete(fixsrc)))
 			{							/* seek error or drive not ready */
 #if 0
 				if (ret == E_SEEK || ret == E_DRVNR)
 				{
-					retmsg = FALSE;	  	
+					retmsg = FALSE;
 					goto endright;
 				}
 #endif
@@ -402,7 +402,7 @@ BOOLEAN doact(NOTHING)
 						goto dorec;
 
 					updatbox(dumb->d_fname);
-				  rechkd1:				/* update check the dir existing or not */
+				rechkd1:				/* update check the dir existing or not */
 					switch (chkdf(dumb->d_fname, CPDIR))
 					{
 					case QUIT:
@@ -426,7 +426,7 @@ BOOLEAN doact(NOTHING)
 						goto rechkd1;
 
 					case OK:
-					  recrtd:
+					recrtd:
 						if (Dcreate(fixdst))
 						{
 							if (write_save)
@@ -455,10 +455,10 @@ BOOLEAN doact(NOTHING)
 						/* if recrtd */
 						break;
 					}
-				  kk_1:
+				kk_1:
 					updatnum(NUMDIR, --numdirs);
 					strcat(fixdst, bckslsh);
-				  dorec:
+				dorec:
 					if (!doact())		/* do the recursion */
 					{
 						retmsg = FALSE;
@@ -475,7 +475,7 @@ BOOLEAN doact(NOTHING)
 						getlastpath(filestr, fixsrc);
 						updatbox(filestr);
 					}
-				  remvd:
+				remvd:
 					if (Ddelete(fixsrc))
 					{					/* delete a dir */
 						if ((ret = fill_string(fixsrc, CNTDELD)) == 2)
@@ -490,7 +490,7 @@ BOOLEAN doact(NOTHING)
 					} else				/* No error */
 						upfdesk(fixsrc, (char *) 0);
 
-				  clndir:
+				clndir:
 					backdir(fixsrc);	/* back one dir */
 					srclen -= FILE_LEN;	/* subtract the add lenth */
 					if (opcode == OP_DELETE)
@@ -521,7 +521,7 @@ BOOLEAN doact(NOTHING)
 
 					if (opcode == OP_COPY)
 						goto clnfile;
-				  remvf:
+				remvf:
 					if ((ret = Fdelete(fixsrc)))	/* rm the file from source */
 					{					/* seek error or drive not ready */
 #if 0
@@ -542,7 +542,7 @@ BOOLEAN doact(NOTHING)
 						}
 					} else
 						upfdesk(fixsrc, (char *) 0);
-				  clnfile:
+				clnfile:
 					backdir(fixsrc);	/* back one dir */
 					srclen -= FILE_LEN;	/* subtract the add lenth */
 					if (opcode == OP_DELETE)
@@ -985,7 +985,7 @@ PP(char *dir;)
 	case CHECK:
 		goto rechkd2;
 	case OK:
-	  repeat:
+	repeat:
 		if (Dcreate(fixdst))
 		{
 			if (write_save)
@@ -1205,7 +1205,7 @@ PP(int flag;)
 			goto cc_5;
 
 	cc_6:
-	  	Dsetdrv(*fixdst - 'A');
+		Dsetdrv(*fixdst - 'A');
 
 		if (!(ret = Dsetpath(fixdst + 2)))	/* direcory exist */
 		{
@@ -1292,7 +1292,7 @@ PP(int change;)
 		fm_draw(CPBOX);
 #if 0
 	else
-	    namecon = TRUE;
+		namecon = TRUE;
 #endif
 	if (but != CHECK)
 		pack(src, 1);
@@ -1375,7 +1375,7 @@ PP(long num;)
 	if (d_display)
 	{
 		f_str(cpbox, obj, num);
-		draw_fld(cpbox, obj);
+		drawfld(cpbox, obj);
 	}
 }
 
@@ -1393,7 +1393,7 @@ PP(char *str;)
 		pack(str, 0);
 		strcpy(((TEDINFO *) (cpbox[obj].ob_spec))->te_ptext, str);
 		pack(str, 1);
-		draw_fld(cpbox, obj);
+		drawfld(cpbox, obj);
 	}
 }
 
