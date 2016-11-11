@@ -20,12 +20,15 @@ static GRECT const w_sizes = { 150, 150, 150, 150 };
 static OBJECT const blank = { -1, -1, -1, G_BOX, NONE, NORMAL, 0x000000F0L, 0, 0, 0, 0 };
 
 BOOLEAN alloc_obj PROTO((int16_t mode, WINDOW *win));
+#if TOSVERSION >= 0x400
 VOID ret_win PROTO((WINDOW *win));
+#endif
 
 
 /*
  * Update the window info line
  */
+/* 306de: 00e34308 */
 VOID winfo(P(WINDOW *) win)
 PP(WINDOW *win;)
 {
@@ -81,6 +84,7 @@ PP(WINDOW *win;)
 }
 
 
+/* 306de: 00e34418 */
 WINDOW *w_gnext(NOTHING)
 {
 	WINDOW *win;
@@ -97,6 +101,7 @@ WINDOW *w_gnext(NOTHING)
 }
 
 
+/* 306de: 00e34452 */
 WINDOW *w_gfirst(NOTHING)
 {
 	ww_win = winhead;
@@ -108,6 +113,7 @@ WINDOW *w_gfirst(NOTHING)
 /*
  * Update all the windows, change dir path if fails
  */
+/* 306de: 00e34466 */
 VOID up_2allwin(P(const char *) path)
 PP(const char *path;)
 {
@@ -135,6 +141,7 @@ PP(const char *path;)
  * Update all the windows
  * If the path has nothing, then update all the windows
  */
+/* 306de: 00e344e4 */
 VOID up_1allwin(P(const char *) path, P(BOOLEAN) dofull, P(BOOLEAN) change)
 PP(const char *path;)
 PP(BOOLEAN dofull;)								/* compare full path    */
@@ -157,7 +164,8 @@ PP(BOOLEAN change;)
 		{
 			if (path[0] == win->w_path[0])
 			{
-			  uu_1:if (!up_win(win, change))
+			uu_1:
+				if (!up_win(win, change))
 				{
 					strcpy(&win->w_path[2], wilds);
 					up_win(win, FALSE);
@@ -170,6 +178,7 @@ PP(BOOLEAN change;)
 }
 
 
+/* 306de: 00e3456c */
 VOID up_allwin(P(const char *) path, P(BOOLEAN) dofull)
 PP(const char *path;)
 PP(BOOLEAN dofull;)
@@ -182,6 +191,7 @@ PP(BOOLEAN dofull;)
 /*
  * Do the actual update of a particular window
  */
+/* 306de: 00e34584 */
 BOOLEAN up_win(P(WINDOW *) win, P(BOOLEAN) mediac)
 PP(WINDOW *win;)
 PP(BOOLEAN mediac;)
@@ -225,6 +235,7 @@ PP(BOOLEAN mediac;)
 /*
  * Bring bottom window to top
  */
+/* 306de: 00e3464c */
 VOID bottop(NOTHING)
 {
 	register WINDOW *win;
@@ -254,6 +265,7 @@ VOID bottop(NOTHING)
 /*
  * Allocate memory for window path
  */
+/* 306de: 00e346a2 */
 BOOLEAN path_alloc(P(int16_t) level)					/* requested level  */
 PP(int16_t level;)
 {
@@ -307,6 +319,7 @@ PP(int16_t level;)
 }
 
 
+/* 306de: 00e347dc */
 VOID free_path(NOTHING)
 {
 	if (d_path)
@@ -323,6 +336,7 @@ VOID free_path(NOTHING)
 /*
  * Clean up all the window
  */
+/* 306de: 00e34804 */
 VOID clr_allwin(NOTHING)
 {
 	register WINDOW *win;
@@ -340,6 +354,7 @@ VOID clr_allwin(NOTHING)
 /*
  * Clean up and dselect the window objects
  */
+/* 306de: 00e34832 */
 VOID clr_xwin(P(WINDOW *) win, P(BOOLEAN) infoupdate)
 PP(register WINDOW *win;)
 PP(BOOLEAN infoupdate;)
@@ -380,6 +395,7 @@ PP(BOOLEAN infoupdate;)
 /*
  * Move the vertical bar
  */
+/* 306de: 00e348f4 */
 VOID srl_verbar(P(WINDOW *) win, P(uint16_t) pos)
 PP(register WINDOW *win;)
 PP(uint16_t pos;)
@@ -401,11 +417,14 @@ PP(uint16_t pos;)
 		diff *= -1;
 		dir = SUP;
 	} else
+	{
 		dir = SDOWN;
-
+	}
+	
 	if (diff < win->w_xrow)				/* less than one window */
+	{
 		srl_row(win, diff, dir);
-	else
+	} else
 	{
 		win->w_rowi = i;
 		if (win->w_vvicons)
@@ -413,8 +432,10 @@ PP(uint16_t pos;)
 			l = 1000 * win->w_rowi;
 			l = l / win->w_vvicons;
 		} else
+		{
 			l = 0;
-
+		}
+		
 		wind_set(win->w_id, WF_VSLIDE, (uint16_t) l, 0, 0, 0);
 
 		win->w_obj->ob_y = win->w_work.g_y;	/* reset at the topmost */
@@ -427,6 +448,7 @@ PP(uint16_t pos;)
 /*
  * Move the horizontal bar
  */
+/* 306de: 00e349ec */
 VOID srl_hzbar(P(WINDOW *) win, P(uint16_t) pos)
 PP(register WINDOW *win;)
 PP(uint16_t pos;)
@@ -450,11 +472,14 @@ PP(uint16_t pos;)
 		dir = SRIGHT;
 		diff *= -1;
 	} else
+	{
 		dir = SLEFT;
-
+	}
+	
 	if (diff < win->w_xcol)				/* less than one window */
+	{
 		srl_col(win, diff, dir);
-	else
+	} else
 	{
 		win->w_coli = i;
 		if (win->w_hvicons)
@@ -462,8 +487,10 @@ PP(uint16_t pos;)
 			l = 1000 * win->w_coli;
 			l /= win->w_hvicons;
 		} else
+		{
 			l = 0;
-
+		}
+		
 		wind_set(win->w_id, WF_HSLIDE, (uint16_t) l, 0, 0, 0);
 
 		x = win->w_work.g_x;
@@ -484,6 +511,7 @@ PP(uint16_t pos;)
 /*
  * Scroll the content down
  */
+/* 306de: 00e34afe */
 VOID srl_row(P(WINDOW *) win, P(int16_t) row, P(int16_t) dir)
 PP(register WINDOW *win;)
 PP(int16_t row;)
@@ -513,6 +541,7 @@ PP(int16_t dir;)
 }
 
 
+/* 306de: 00e34ba6 */
 VOID srl_col(P(WINDOW *) win, P(int16_t) col, P(int16_t) dir)
 PP(register WINDOW *win;)
 PP(register int16_t col;)
@@ -540,6 +569,7 @@ PP(int16_t dir;)
 /*
  * Bitblt a window content either up, dowm, left or right
  */
+/* 306de: 00e34c12 */
 VOID blt_window(P(WINDOW *) win, P(int16_t) mode, P(int16_t) size)
 PP(register WINDOW *win;)
 PP(int16_t mode;)
@@ -684,6 +714,7 @@ PP(int16_t size;)
  * Otherwise, pin down the left upper corner and just
  * adjust the scroll bars.
  */
+/* 306de: 00e34fbc */
 VOID view_adjust(P(WINDOW *) win)
 PP(register WINDOW *win;)
 {
@@ -788,6 +819,7 @@ PP(register WINDOW *win;)
 /*
  * Change the viewing mode, form text to icon or vice verse
  */
+/* 306de: 00e35202 */
 VOID sort_show(P(int16_t) mode, P(BOOLEAN) view)
 PP(int16_t mode;)
 PP(BOOLEAN view;)
@@ -824,6 +856,7 @@ PP(BOOLEAN view;)
  * Call this routine before calling view_adjust!!!!!!!
  * It used the s_stofit flag to set the horizontal number of icon!
  */
+/* 306de: 00e35272 */
 VOID view_fixmode(P(WINDOW *) win)
 PP(WINDOW *win;)
 {
@@ -831,7 +864,11 @@ PP(WINDOW *win;)
 	int16_t h, limitw, limith;
 	int16_t type, offy;
 	int16_t len, col, row, doitc;
+#if COLORICON_SUPPORT
 	CICONBLK *iblk;
+#else
+	ICONBLK *iblk;
+#endif
 	char *text;
 	register OBJECT *obj;
 	OBJECT *obj1;
@@ -845,8 +882,13 @@ PP(WINDOW *win;)
 		h = dicon.g_h;					/* Change also at deskinf.c */
 		offx = (gl_hchar == 8) ? gl_wchar / 2 : gl_wchar;
 		offy = gl_hchar / 2;
+#if COLORICON_SUPPORT
 		type = G_CICON;
 		iblk = win->w_ciblk;
+#else
+		type = G_ICON;
+		iblk = win->w_iblk;
+#endif
 #if !BINEXACT
 		ted = 0; /* quiet compiler */
 		text = 0;
@@ -939,6 +981,7 @@ PP(WINDOW *win;)
 /*
  * Make this window to be the top one
  */
+/* 306de: 00e354c4 */
 VOID make_top(P(WINDOW *) win)
 PP(register WINDOW *win;)
 {
@@ -973,6 +1016,7 @@ PP(register WINDOW *win;)
 /*
  * Allocate a window object
  */
+/* 306de: 00e35508 */
 BOOLEAN alloc_obj(P(int16_t) mode, P(WINDOW *) win)
 PP(int16_t mode;)
 PP(register WINDOW *win;)
@@ -981,7 +1025,11 @@ PP(register WINDOW *win;)
 	register uint16_t item;
 	register OBJECT *obj1, *obj2;
 	int16_t w, h, len;
+#if COLORICON_SUPPORT
 	CICONBLK *iblk;
+#else
+	ICONBLK *iblk;
+#endif
 	TEDINFO *ted;
 	uint16_t k;
 	int32_t size;
@@ -1019,7 +1067,7 @@ PP(register WINDOW *win;)
 	size += (uint16_t) ((item + 1) * sizeof(OBJECT));
 	size += (uint16_t) (item * len);
 	size += (uint16_t) (item * sizeof(TEDINFO));
-	size += (uint16_t) (item * sizeof(CICONBLK));
+	size += (uint16_t) (item * sizeof(*iblk));
 
 	if ((win->w_obj = (OBJECT *)Malloc(size)))
 	{
@@ -1030,11 +1078,15 @@ PP(register WINDOW *win;)
 		for (i = 0; i < item; i++)		/* copy object structure */
 			LBCOPY(obj1++, &iconaddr[ICON1], sizeof(OBJECT));
 
+#if COLORICON_SUPPORT
 		win->w_ciblk = iblk = (CICONBLK *)obj1;
+#else
+		win->w_iblk = iblk = (ICONBLK *)obj1;
+#endif
 
 		/* start of the iconblk area    */
 		for (i = 0; i < item; i++)		/* copy icon structure      */
-			LBCOPY(iblk++, (VOIDPTR)iconaddr[ICON1].ob_spec, sizeof(CICONBLK));
+			LBCOPY(iblk++, (VOIDPTR)iconaddr[ICON1].ob_spec, sizeof(*iblk));
 
 		win->w_ted = ted = (TEDINFO *)iblk;
 
@@ -1057,6 +1109,7 @@ PP(register WINDOW *win;)
 /*
  * Initalize all the windows
  */
+/* 306de: 00e356f6 */
 VOID ini_windows(NOTHING)
 {
 	register int16_t i;
@@ -1068,7 +1121,9 @@ VOID ini_windows(NOTHING)
 
 	for (i = 0; i < MAXWIN; i++, win++)
 	{
+#if (TOSVERSION >= 0x400)
 		win->w_obj = NULL;
+#endif
 		win->w_path = NULL;				/* window path  */
 		win->w_buf = NULL;
 		win->w_free = FALSE;			/* window is not free yet   */
@@ -1090,7 +1145,7 @@ VOID ini_windows(NOTHING)
 
 	for (i = 0; i < MAXWIN; i++, win++)
 	{
-#if 0
+#if TOSVERSION < 0x400
 		if (!alloc_obj(0, win))			/* in case memory alloc failed   */
 		{
 			do1_alert(NOWINMEM);
@@ -1106,6 +1161,7 @@ VOID ini_windows(NOTHING)
 }
 
 
+#if TOSVERSION >= 0x400
 VOID ret_win(P(WINDOW *) win)
 PP(WINDOW *win;)
 {
@@ -1117,8 +1173,10 @@ PP(WINDOW *win;)
 
 	win->w_free = TRUE;
 }
+#endif
 
 
+/* 306de: 00e357e6 */
 WINDOW *alloc_win(NOTHING)
 {
 	register WINDOW *win;
@@ -1129,11 +1187,13 @@ WINDOW *alloc_win(NOTHING)
 	{
 		if (win->w_free)
 		{
+#if TOSVERSION >= 0x400
 			if (!alloc_obj(0, win))		/* allocate objects */
 			{
 				do1_alert(NOWINMEM);
 				break;
 			}
+#endif
 			win->w_free = FALSE;
 			return win;
 		}
@@ -1148,6 +1208,7 @@ WINDOW *alloc_win(NOTHING)
 /*
  * Get the window data structure address according to handle
  */
+/* 306de: 00e35816 */
 WINDOW *get_win(P(int16_t) handle)
 PP(int16_t handle;)
 {
@@ -1170,6 +1231,7 @@ PP(int16_t handle;)
 /*
  * Open window
  */
+/* 306de: 00e35844 */
 VOID open_window(P(int16_t) handle)
 PP(int16_t handle;)
 {
@@ -1197,6 +1259,7 @@ PP(int16_t handle;)
 /*
  * Create Window of its full size
  */
+/* 306de: 00e3591e */
 int16_t create_window(NOTHING)
 {
 	register WINDOW *win;
@@ -1209,7 +1272,11 @@ int16_t create_window(NOTHING)
 
 		if (handle < 0)					/* release windows  */
 		{
+#if TOSVERSION >= 0x400
 			ret_win(win);
+#else
+			win->w_free = TRUE;
+#endif
 		} else
 		{
 			win->w_id = handle;
@@ -1223,6 +1290,7 @@ int16_t create_window(NOTHING)
 /*
  * Get the top window
  */
+/* 306de: 00e35976 */
 WINDOW *get_top(NOTHING)
 {
 	return w_gfirst();
@@ -1246,6 +1314,7 @@ WINDOW *get_top(NOTHING)
 /*
  * Close and delete a window
  */
+/* 306de: 00e35982 */
 VOID close_window(P(int16_t) handle, P(BOOLEAN) closeit)
 PP(int16_t handle;)
 PP(BOOLEAN closeit;)
@@ -1291,6 +1360,7 @@ PP(BOOLEAN closeit;)
 /*
  * Free and close all the windows and free the objects
  */
+/* 306de: 00e35a02 */
 VOID free_windows(NOTHING)
 {
 	register WINDOW *win;
@@ -1319,6 +1389,7 @@ VOID free_windows(NOTHING)
 /*
  * This is my own redraw routine
  */
+/* 306de: 00e35a68 */
 VOID do_redraw(P(int16_t) handle, P(GRECT *) pc, P(int16_t) which)
 PP(register int16_t handle;)
 PP(GRECT *pc;)
@@ -1361,6 +1432,7 @@ PP(int16_t which;)
 }
 
 
+/* 306de: 00e35ba0 */
 VOID do_xyfix(P(GRECT *) pc)
 PP(register GRECT *pc;)
 {

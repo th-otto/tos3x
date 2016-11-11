@@ -710,9 +710,7 @@ name: ds.t size
 	PTR(_backid)
 	INT(_g_flag)
 	PTR(_q_addr)
-	
-	ds.b 4
-	
+	PTR(_d_path)
 	PTR(_lp_end)
 	INT(_sh_gem)
 	INT(_mclick)
@@ -766,9 +764,7 @@ name: ds.t size
 	V(_warray,l,MAXWIN)
 	INT(_x_type)
 	INT(_s_sort)
-	
-	ds.b 4
-	
+	PTR(_ww_win)
 	INT(_tmpmon)
 	INT(_button)
 	

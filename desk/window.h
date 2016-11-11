@@ -53,7 +53,11 @@ typedef	struct	window
 	int16_t	w_icol;		/* max number of col at any time	*/
 	int16_t	w_irow;		/* max number of row at any time	*/
 	TEDINFO	*w_ted;
+#if COLORICON_SUPPORT
 	CICONBLK *w_ciblk;	/* starting address of ciconblk		*/
+#else
+	ICONBLK *w_iblk;	/* starting address of iconblk		*/
+#endif
 	char	*w_text;	/* starting address of text		*/
 	int16_t	w_coli;		/* the horizontal column index 		*/
 	int16_t	w_hvicons;	/* number of invisible icon per row	*/
