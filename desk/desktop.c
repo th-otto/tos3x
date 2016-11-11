@@ -494,6 +494,7 @@ m_1:
 			*lptr = iconmem;
 			rs_free((intptr_t) temp);
 #else
+			UNUSED(ptr);
 			Mfree(iconmem);
 #endif
 			iconmem = NULL;

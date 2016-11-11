@@ -186,7 +186,7 @@
 #define FCBOXC                             2 /* BOX in tree ADFORMAT */
 #define SRCDRA                             4 /* BOXCHAR in tree ADFORMAT */
 #define SRCDRB                             5 /* BOXCHAR in tree ADFORMAT */
-#define SRCDRBSRCDRA                       6 /* BOXCHAR in tree ADFORMAT */
+#define DESTDR                             6 /* BOXCHAR in tree ADFORMAT */
 #define FCCOPY                             7 /* BUTTON in tree ADFORMAT */
 #define LINEBOX                            8 /* BOX in tree ADFORMAT */
 #define FCFORMAT                           9 /* BUTTON in tree ADFORMAT */
@@ -196,8 +196,8 @@
 #define BDRIVE                            13 /* BOXCHAR in tree ADFORMAT */
 #define FCLABEL                           14 /* FTEXT in tree ADFORMAT */ /* max len 11 */
 #define SIDEBOX                           15 /* BOX in tree ADFORMAT */
-#define FCSINGLE                          16 /* BUTTON in tree ADFORMAT */
-#define FCDOUBLE                          17 /* BUTTON in tree ADFORMAT */
+#define FCDOUBLE                          16 /* BUTTON in tree ADFORMAT */
+#define FCSINGLE                          17 /* BUTTON in tree ADFORMAT */
 #define FCHIGH                            18 /* BUTTON in tree ADFORMAT */
 #define FCBARA                            20 /* BOX in tree ADFORMAT */
 #define FCBARB                            22 /* BOX in tree ADFORMAT */
@@ -302,7 +302,7 @@
 #define WCANCEL                           16 /* BUTTON in tree INWICON */
 
 #define HELP1                             20 /* form/dialog */
-#define MORHELP                           18 /* BUTTON in tree HELP1 */
+#define MOREHELP                          18 /* BUTTON in tree HELP1 */
 
 #define HELP2                             21 /* form/dialog */
 

@@ -13,7 +13,7 @@ char *q_addr;							/* Inf file address */
 BOOLEAN q_change;						/* Inf file is changed  */
 
 STATIC char *newbuff;
-STATIC char q_path[40]; /* unused */
+char q_path[40]; /* unused */
 
 /*
  * Load in the new inf

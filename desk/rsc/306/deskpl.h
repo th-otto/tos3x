@@ -17,7 +17,7 @@
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          25168
+ * Total file size:          25216
  */
 
 #undef RSC_NAME
@@ -83,6 +83,7 @@
 #define L5ITEM                            50 /* STRING in tree ADMENU */
 #define PREFITEM                          51 /* STRING in tree ADMENU */
 #define READINF                           52 /* STRING in tree ADMENU */
+#define MEMMENU                           53 /* STRING in tree ADMENU */
 #define SAVEITEM                          55 /* STRING in tree ADMENU */
 #define PRINTITEM                         56 /* STRING in tree ADMENU */
 #define SUPERITEM                         58 /* STRING in tree ADMENU */
@@ -172,11 +173,11 @@
 #define YWRITE                            10 /* BUTTON in tree ADSETPREF */
 #define NWRITE                            11 /* BUTTON in tree ADSETPREF */
 #define SPLOW                             14 /* BUTTON in tree ADSETPREF */
-#define SPMED                             15 /* BUTTON in tree ADSETPREF */
+#define SPMEDIUM                          15 /* BUTTON in tree ADSETPREF */
 #define SPHIGH                            16 /* BUTTON in tree ADSETPREF */
-#define EXT1                              17 /* BUTTON in tree ADSETPREF */
-#define EXT2                              18 /* BUTTON in tree ADSETPREF */
-#define EXT3                              19 /* BUTTON in tree ADSETPREF */
+#define SPEXT1                            17 /* BUTTON in tree ADSETPREF */
+#define SPEXT2                            18 /* BUTTON in tree ADSETPREF */
+#define SPEXT3                            19 /* BUTTON in tree ADSETPREF */
 #define SPOK                              21 /* BUTTON in tree ADSETPREF */
 #define SPCANCEL                          22 /* BUTTON in tree ADSETPREF */
 
@@ -296,13 +297,13 @@
 #define WDOWN                              8 /* BOXCHAR in tree INWICON */
 #define WFOLDER                           10 /* BUTTON in tree INWICON */
 #define WNONE                             11 /* BUTTON in tree INWICON */
-#define WSKIP                             12 /* BUTTON in tree INWICON */
-#define WREMOVE                           13 /* BUTTON in tree INWICON */
-#define WOK                               14 /* BUTTON in tree INWICON */
-#define WCANCEL                           16 /* BUTTON in tree INWICON */
+#define WREMOVE                           12 /* BUTTON in tree INWICON */
+#define WOK                               13 /* BUTTON in tree INWICON */
+#define WSKIP                             14 /* BUTTON in tree INWICON */
+#define WCANCEL                           15 /* STRING in tree INWICON */
 
 #define HELP1                             20 /* form/dialog */
-#define MOREHELP                          14 /* BUTTON in tree HELP1 */
+#define MOREHELP                          15 /* BUTTON in tree HELP1 */
 
 #define HELP2                             21 /* form/dialog */
 
@@ -312,10 +313,10 @@
 #define SEACNCL                            4 /* BUTTON in tree SEAFILE */
 
 #define SSYSTEM                           23 /* form/dialog */
-#define AP1                                4 /* BUTTON in tree SSYSTEM */
-#define WI1                                5 /* BUTTON in tree SSYSTEM */
-#define DEFFULL                            8 /* BUTTON in tree SSYSTEM */
-#define DEFFILE                            9 /* BUTTON in tree SSYSTEM */
+#define WI1                                4 /* BUTTON in tree SSYSTEM */
+#define AP1                                5 /* BUTTON in tree SSYSTEM */
+#define DEFFILE                            8 /* BUTTON in tree SSYSTEM */
+#define DEFFULL                            9 /* BUTTON in tree SSYSTEM */
 #define MFBASE                            11 /* BOX in tree SSYSTEM */
 #define SDLEFT                            12 /* BOXCHAR in tree SSYSTEM */
 #define SDFILE                            13 /* FTEXT in tree SSYSTEM */ /* max len 17 */

@@ -646,7 +646,7 @@ PP(register char *ptime;)
 	else
 		strcpy(&ptime[4], pm ? "pm" : "am");
 #else
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_TR) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_TR) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO) | (OS_COUNTRY == CTRY_PL)
 	my_itoa(val, &ptime[0]);
 	my_itoa(((time & 0x07e0) >> 5) & 0x003f, &ptime[2]);
 	strcpy(&ptime[4], "  ");
@@ -693,24 +693,24 @@ PP(register char *pdate;)
 #if MULTILANG_SUPPORT
 	switch (st_date)
 	{
-	case 3:
+	case 3:							/* YY-DD-MM */
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[0]);
 		my_itoa(date & 0x001f, &pdate[3]);
 		my_itoa((date & 0x01e0) >> 5, &pdate[6]);
 		break;
-	case 2:							/* swedish date */
+	case 2:							/* swedish date: YY-MM-DD */
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[0]);
 		my_itoa((date & 0x01e0) >> 5, &pdate[3]);
 		my_itoa(date & 0x001f, &pdate[6]);
 		break;
-	case 1:							/* europane date */
+	case 1:							/* european date: DD-MM-YY */
 		my_itoa(date & 0x001f, &pdate[0]);
 		my_itoa((date & 0x01e0) >> 5, &pdate[3]);
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[6]);
 		break;
-	default:
-		my_itoa((date & 0x01e0) >> 5, &pdate[0]);	/* MM */
-		my_itoa(date & 0x001f, &pdate[3]);	/* DD */
+	default:						/* US date: MM-DD-YY */
+		my_itoa((date & 0x01e0) >> 5, &pdate[0]);
+		my_itoa(date & 0x001f, &pdate[3]);
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[6]);
 	}
 
@@ -718,19 +718,20 @@ PP(register char *pdate;)
 
 #else
 
-#if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
+#if (OS_COUNTRY == CTRY_US)
 #define st_date 0
-#define st_dchar '/'
+#define st_dchar '-' /* BUG: should actually be '/' */
 #endif
 
 #if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_TR)
 #define st_date 1
-#define st_dchar '-' /* BUG: shold actually be '.' */
+#define st_dchar '-' /* BUG: should actually be '.' */
 #endif
 
-#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SF)
+/* BUG: UK should be date format 0 */
+#if (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SF)
 #define st_date 1
-#define st_dchar '/'
+#define st_dchar '-' /* BUG: should actually be '/' */
 #endif
 
 #if (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO)
@@ -738,25 +739,25 @@ PP(register char *pdate;)
 #define st_dchar '-'
 #endif
 
-#if st_date == 0
-		my_itoa((date & 0x01e0) >> 5, &pdate[0]);	/* MM */
-		my_itoa(date & 0x001f, &pdate[2]);	/* DD */
+#if st_date == 0 /* MM-DD-YY */
+		my_itoa((date & 0x01e0) >> 5, &pdate[0]);
+		my_itoa(date & 0x001f, &pdate[2]);
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[4]);
 #endif
 
-#if st_date == 1
+#if st_date == 1 /* DD-MM-YY */
 		my_itoa(date & 0x001f, &pdate[0]);
 		my_itoa((date & 0x01e0) >> 5, &pdate[2]);
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[4]);
 #endif
 
-#if st_date == 2
+#if st_date == 2 /* YY-MM-DD */
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[0]);
 		my_itoa((date & 0x01e0) >> 5, &pdate[2]);
 		my_itoa(date & 0x001f, &pdate[4]);
 #endif
 
-#if st_date == 3
+#if st_date == 3 /* YY-DD-MM */
 		my_itoa(((80 + ((date >> 9) & 0x007f)) % 100), &pdate[0]);
 		my_itoa(date & 0x001f, &pdate[2]);
 		my_itoa((date & 0x01e0) >> 5, &pdate[4]);

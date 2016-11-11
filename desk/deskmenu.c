@@ -50,7 +50,7 @@ static int16_t const key1table[] = {
 #endif
 #endif
 
-#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG)
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
 /* GERMANY|SWISSFRE|SWISSGER */
 static int16_t const key2table[] = {
 	0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
@@ -93,7 +93,7 @@ static int16_t const con1table[] = {
 #endif
 #endif
 
-#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG)
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
 /* GERMANY|SWISSFRE|SWISSGER */
 static int16_t const con2table[] = {
 	0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
