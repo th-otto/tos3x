@@ -619,9 +619,7 @@ name: ds.t size
 	INT(_gl_newroot)
 	LONG(_fs_fnum)
 	INT(_maxicon)
-	
-	ds.b 2
-	
+	INT(_x_index)
 	INT(_gl_btrue)
 	INT(_ccopy_save)
 	LONG(_numfiles)
@@ -694,8 +692,9 @@ name: ds.t size
 	PTR(_cpbox)
 	V(_gl_ws,w,57)   /* workout */
 
-	ds.b 4
+	ds.b 2
 	
+	INT(_x_cur)
 	V(_winpd,b,142*MAXWIN)
 	V(_intin,w,128)
 	PTR(_x_win)

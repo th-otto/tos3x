@@ -25,6 +25,7 @@ BOOLEAN d_sdesk PROTO((const char **name, int16_t *type));
 /*
  * Turn off the current selected object
  */
+/* 306de: 00e322c6 */
 VOID x_del(NOTHING)
 {
 	DIR *dir;
@@ -43,6 +44,7 @@ VOID x_del(NOTHING)
 /*
  * My own object find
  */
+/* 306de: 00e32310 */
 int16_t m_objfind(P(OBJECT *)obj, P(int16_t) mx, P(int16_t) my, P(int16_t) mode)
 PP(register OBJECT *obj;)
 PP(register int16_t mx;)
@@ -66,7 +68,11 @@ PP(int16_t mode;)								/* TRUE == window mode  */
 		if (obj[i].ob_flags & HIDETREE)
 			continue;
 
+#if COLORICON_SUPPORT
 		if (obj[i].ob_type == G_CICON)	/* icon ?   */
+#else
+		if (obj[i].ob_type == G_ICON)	/* icon ?   */
+#endif
 		{
 			x1 = obj[i].ob_x + offx;
 			y1 = obj[i].ob_y + offy;
@@ -114,6 +120,7 @@ PP(int16_t mode;)								/* TRUE == window mode  */
  * Find out which object is selected based on the object structures
  * Type can only be DESKICON or WINICON
  */
+/* 306de: 00e324c2 */
 BOOLEAN o_select(NOTHING)
 {
 	register WINDOW *win;
@@ -155,6 +162,7 @@ BOOLEAN o_select(NOTHING)
 /*
  * Find out if anything is selected
  */
+/* 306de: 00e32582 */
 BOOLEAN x_select(NOTHING)
 {
 	register WINDOW *win;
@@ -176,7 +184,7 @@ BOOLEAN x_select(NOTHING)
 			{
 				x_win = win;
 				x_type = WINICON;
-				return (x_status = TRUE);
+				return x_status = TRUE;
 			}
 		}
 		win = w_gnext();
@@ -189,6 +197,7 @@ BOOLEAN x_select(NOTHING)
 /*
  * Extended dir structure search next
  */
+/* 306de: 00e3260a */
 BOOLEAN x_next(P(const char **)name, P(int16_t *)type)
 PP(const char **name;)
 PP(int16_t *type;)
@@ -224,7 +233,7 @@ PP(int16_t *type;)
 				return TRUE;
 			}
 		}
-		return (FALSE);
+		return FALSE;
 	} else
 		return d_sdesk(name, type);
 }
@@ -235,6 +244,7 @@ PP(int16_t *type;)
  * Returns icon type, WINICON, XFILE, DISK, SUBDIR
  * Extended dir search first
  */
+/* 306de: 00e326f8 */
 BOOLEAN x_first(P(const char **)name, P(int16_t *)type)
 PP(const char **name;)
 PP(int16_t *type;)
@@ -249,7 +259,7 @@ PP(int16_t *type;)
 	x_win = NULL;
 
 	if (i_next(1, background, &x_index))
-		return (x_next(name, type));
+		return x_next(name, type);
 
 	win = w_gfirst();
 
@@ -279,6 +289,7 @@ PP(int16_t *type;)
 /*
  * Find out what the user has clicked on based on the mx and my
  */
+/* 306de: 00e327aa */
 BOOLEAN i_find(P(int16_t) mx, P(int16_t) my, P(WINDOW **)winout, P(int16_t *)item, P(int16_t *)type)
 PP(register int16_t mx;)
 PP(register int16_t my;)
@@ -298,14 +309,14 @@ PP(int16_t *type;)
 			*winout = win;
 			*type = WINICON;
 			*item = 0;
-			/* inside the work area     */
+			/* inside the work area */
 			if (inside(mx, my, &win->w_work))
 			{
 				if ((which = m_objfind(win->w_obj, mx, my, TRUE)) != -1)
 					*item = which;
 			}
 
-			return (TRUE);
+			return TRUE;
 		}
 
 		win = w_gnext();
@@ -317,16 +328,17 @@ PP(int16_t *type;)
 		*item = which;
 		*type = DESKICON;
 		*winout = (WINDOW *) 0;
-		return (TRUE);
+		return TRUE;
 	}
 
-	return (FALSE);
+	return FALSE;
 }
 
 
 /*
  * Search for next selected OBJECT
  */
+/* 306de: 00e32878 */
 BOOLEAN i_next(P(int16_t) start, P(OBJECT *)obj, P(int16_t *)itemout)
 PP(int16_t start;)
 PP(register OBJECT *obj;)
@@ -341,11 +353,11 @@ PP(int16_t *itemout;)
 		if ((!(obj[i].ob_flags & HIDETREE)) && (obj[i].ob_state & SELECTED))
 		{
 			*itemout = i;
-			return (TRUE);
+			return TRUE;
 		}
 	}
 
-	return (FALSE);
+	return FALSE;
 }
 
 
@@ -353,6 +365,7 @@ PP(int16_t *itemout;)
  * Search the selected desktop object
  * Used by x_next only
  */
+/* 306de: 00e328ce */
 BOOLEAN d_sdesk(P(const char **)name, P(int16_t *)type)
 PP(const char **name;)
 PP(int16_t *type;)
@@ -384,11 +397,14 @@ PP(int16_t *type;)
 			if (temp == XDIR)
 				d_dir++;
 
-		  xd_1:x_cur = x_index++;
-			return (TRUE);
+		xd_1:
+			x_cur = x_index++;
+			return TRUE;
 		} else
+		{
 			x_index++;
+		}
 	}
 
-	return (FALSE);
+	return FALSE;
 }
