@@ -36,7 +36,9 @@ int16_t d_maxcolor;
 #ifdef BITBLT
 STATIC USERBLK chxcache;
 #endif
+#if COLORICON_SUPPORT
 STATIC CICONBLK *ciconaddr;
+#endif
 int16_t pglobal[15];
 int16_t gl_apid;
 
@@ -54,13 +56,16 @@ VOID adj_menu PROTO((int16_t which));
 VOID ini_rsc PROTO((NOTHING));
 VOID ch_machine PROTO((NOTHING));
 int32_t inq_cache PROTO((int32_t data));
+#if AESVERSION >= 0x330
 VOID adjdcol PROTO((uint16_t color));
 VOID adjobjects PROTO((NOTHING));
+#endif
 
 #undef Blitmode
 #define Blitmode(a) trp14(64, a)
 
 
+/* 306de: 00e335d0 */
 int16_t ch_xcache(NOTHING)
 {
 	ch_cache(FALSE);
@@ -72,13 +77,16 @@ int16_t ch_xcache(NOTHING)
 /*
  * Read in icon resource file
  */
+/* 306de: 00e335e0 */
 BOOLEAN re_icon(NOTHING)
 {
 	register int16_t i;
 	char temp[30];
 	char **ptr;
 	char buf2[18];
+#if COLORICON_SUPPORT
 	char *iaddr;
+#endif
 
 	UNUSED(i);
 	
@@ -93,7 +101,16 @@ BOOLEAN re_icon(NOTHING)
 	if (!rsrc_load(buf2))
 		return FALSE;
 
+#if !COLORICON_SUPPORT
+	if (iconmem)						/* free up memory   */
+	{
+		Mfree(iconmem);
+	}
+#endif
+
 	ptr = (char **)&pglobal[7];			/* get the new rsc address  */
+
+#if COLORICON_SUPPORT
 	iaddr = *ptr;
 
 	if (iconmem)						/* free up memory   */
@@ -101,8 +118,11 @@ BOOLEAN re_icon(NOTHING)
 		*ptr = iconmem;					/* because it may have color icons */
 		rs_free((intptr_t) pglobal);
 	}
-
 	iconmem = iaddr;
+#else
+	iconmem = *ptr;
+#endif
+
 	iconaddr = get_tree(0);
 	numicon = iconaddr[0].ob_tail;
 	iconaddr++;							/* get the icon address */
@@ -117,6 +137,7 @@ BOOLEAN re_icon(NOTHING)
  * Initalize the icon and allocate backid memory
  * Change the G_ICON to G_CICON
  */
+/* 306de: 00e336d8 */
 BOOLEAN ini_icon(NOTHING)
 {
 	register int16_t i;
@@ -163,6 +184,7 @@ BOOLEAN ini_icon(NOTHING)
 /*
  * Shift the menu
  */
+/* 306de: 00e337cc */
 VOID adj_menu(P(int16_t) which)
 PP(int16_t which;)
 {
@@ -184,13 +206,17 @@ PP(int16_t which;)
 /*
  * Initalize the desktop resource
  */
+/* 306de: 00e3385a */
 VOID ini_rsc(NOTHING)
 {
 	register OBJECT *obj;
 	GRECT pt;
 	ICONBLK *iblk;
-	int16_t w, i;
+	int16_t w;
+#if COLORICON_SUPPORT
+	int16_t i;
 	CICONBLK *icblk;
+#endif
 
 	rom_ram(1, (intptr_t)pglobal);				/* load in resource     */
 
@@ -213,10 +239,10 @@ VOID ini_rsc(NOTHING)
 
 	maxicon = background[0].ob_tail;	/* max background icon      */
 
+#if COLORICON_SUPPORT
 	/* 	Allocate memory for color icons 
 	 * 	These should go away if we have a RCS that can handle color icon 
 	 */
-	
 	if (!ciconaddr)						/* 7/10/92 */
 	{
 		if ((ciconaddr = (CICONBLK *)Malloc((int32_t) (sizeof(CICONBLK) * maxicon))))
@@ -237,16 +263,19 @@ VOID ini_rsc(NOTHING)
 #endif
 		}
 	}
+#endif
 
 	rc_copy(&full, (GRECT *)&background[0].ob_x);
 
 	/* Precalculate the disk icon's pline values */
 
+#if COLORICON_SUPPORT
 	if (iconaddr[0].ob_type == G_CICON)
 	{
 		icblk = (CICONBLK *) iconaddr[0].ob_spec;
 		iblk = &icblk->monoblk;
 	} else
+#endif
 	{
 		iblk = (ICONBLK *) (iconaddr[0].ob_spec);
 	}
@@ -289,15 +318,17 @@ VOID ini_rsc(NOTHING)
 }
 
 
-
+/* 306de: 00e33af2 */
 BOOLEAN deskmain(NOTHING)
 {
 	register int16_t i;
 	BOOLEAN ret;
 	int16_t handle, x;
 	int16_t *ptr;
+#if COLORICON_SUPPORT
 	char temp[30];
 	VOIDPTR *lptr;
+#endif
 
 	UNUSED(x);
 	UNUSED(handle);
@@ -305,7 +336,7 @@ BOOLEAN deskmain(NOTHING)
 	if (!inf_path[0])					/* Not set up yet       */
 		m_infpath(inf_path);
 
-#if 0
+#if COLORICON_SUPPORT
 	ciconaddr = NULL;					/* 7/10/92 */
 #endif
 
@@ -406,7 +437,7 @@ m_2:
 	ch_cache(TRUE);						/* set the cache    */
 
 	xprint = TRUE;
-	/* check desktop file   */
+	/* check desktop file */
 	put_keys();							/* set up the key menu  */
 
 	wind_update(TRUE);
@@ -424,7 +455,9 @@ m_2:
 	desk_wait(TRUE);
 	free_windows();						/* free up all windows  */
 
+#if (TOSVERSION >= 0x400) | !BINEXACT
 	wind_set(0, WF_NEWDESK, 0x0L, 0, 0);
+#endif
 
 	Mfree(lp_start);					/* free string buffer   */
 	Mfree(appnode);						/* free app buffer  */
@@ -432,7 +465,7 @@ m_2:
 	Mfree(q_addr);						/* update inf file on disk  */
 	menu_bar(0x0L, FALSE);
 	wind_update(FALSE);					/* release window   */
-  m_1:
+m_1:
 	ap_exit();
 	/* Loop again */
 	if (d_exit == L_READINF)
@@ -443,25 +476,33 @@ m_2:
 
 	if (d_exit == L_CHGRES)				/* if reschange free the memory */
 	{									/* start everything over again  */
+#if COLORICON_SUPPORT
 		if (ciconaddr)					/* 7/10/92  */
 		{
 			Mfree(ciconaddr);
 			ciconaddr = NULL;
 		}
+#endif
+		iconaddr = NULL;
 
-		iconaddr = (OBJECT *) 0;
 		if (iconmem)
 		{
+#if COLORICON_SUPPORT
 			LBCOPY(temp, pglobal, 30);	/* construct the pglobal   */
 			ptr = (int16_t *)temp;
 			lptr = (VOIDPTR *)&ptr[7];
 			*lptr = iconmem;
 			rs_free((intptr_t) temp);
+#else
+			Mfree(iconmem);
+#endif
 			iconmem = NULL;
 		}
 		ret = FALSE;					/* resolution change    */
 		inf_path[0] = 0;
+#if (TOSVERSION >= 0x400) /* unneccessary, already set by app_reschange */
 		gl_rschange = TRUE;
+#endif
 	}
 
 	return ret;
@@ -471,6 +512,7 @@ m_2:
 /*
  * Check the machine type and set res table
  */
+/* 306de: 00e33dba */
 VOID ch_machine(NOTHING)
 {
 	int32_t value;
@@ -479,7 +521,11 @@ VOID ch_machine(NOTHING)
 	/* _VDO */
 	if (getcookie(0x5F56444FL, &value))
 	{									/* 7/16/92 */
+#if (TOSVERSION >= 0x400) | !BINEXACT
 		if (((value >> 16) & 0x0000FFFFL) >= 0x02)	/* TT   */
+#else
+		if (value == 0x20000L)	/* TT   */
+#endif
 			m_st = FALSE;
 	}
 	/* _CPU */
@@ -516,6 +562,7 @@ VOID ch_machine(NOTHING)
 
 
 #if BINEXACT
+/* 306de: 00e33e82 */
 /* same ugly Alcyon-only hack as in AES: relies on data being assigned to d7 */
 int32_t inq_cache(P(int32_t) data)
 PP(register int32_t data;)
@@ -533,6 +580,7 @@ PP(register int32_t data;)
 /*
  * Turn on the cache or bitblt
  */
+/* 306de: 00e33eac */
 VOID ch_cache(P(BOOLEAN) set)
 PP(BOOLEAN set;)
 {
@@ -541,8 +589,10 @@ PP(BOOLEAN set;)
 	int16_t temp;
 
 	UNUSED(value);
-#if 0									/* take out for sparrow */
+#ifdef BITBLT
 	menu_addr[BITBLT].ob_state &= ~DISABLED;
+#endif
+#if 0									/* take out for sparrow */
 	menu_ienable(menu_addr, BITBLT, TRUE);
 #endif
 
@@ -578,15 +628,19 @@ PP(BOOLEAN set;)
 		} else
 		{
 			value = FALSE;
-#if 0									/* take out for sparrow */
+#ifdef BITBLT									/* take out for sparrow */
 			menu_addr[BITBLT].ob_state |= DISABLED;
+#endif
+#if 0
 			menu_ienable(menu_addr, BITBLT, FALSE);
 #endif
 		}
 	}
 
-#if 0									/* take out for sparrow */
+#ifdef BITBLT									/* take out for sparrow */
+#if 0
 	menu_icheck( menu_addr, BITBLT, value ? TRUE : FALSE );
+#endif
 	if (value)
 		menu_addr[BITBLT].ob_state |= CHECKED;
 	else
@@ -596,6 +650,7 @@ PP(BOOLEAN set;)
 
 
 
+#if AESVERSION >= 0x330
 /*
  * adjust object colors if it is invalid
  * This routine should no longer be necessary, but is left
@@ -640,6 +695,13 @@ PP(uint16_t color;)
 	obj[MKUPS].ob_spec = (obj[MKUPS].ob_spec & 0xfffffff0L) | color;
 	obj[MKDOWNS].ob_spec = (obj[MKDOWNS].ob_spec & 0xfffffff0L) | color;
 #else
+	obj = get_tree(SSYSTEM);
+	obj[SDLEFT].ob_spec = (obj[MFLEFT].ob_spec & 0xfffffff0L) | color;
+	obj[SDRIGHT].ob_spec = (obj[MFRIGHT].ob_spec & 0xfffffff0L) | color;
+	obj[SDUP].ob_spec = (obj[MFUP].ob_spec & 0xfffffff0L) | color;
+	obj[SDDOWN].ob_spec = (obj[MFDOWN].ob_spec & 0xfffffff0L) | color;
+	obj[MKUP].ob_spec = (obj[MKUPS].ob_spec & 0xfffffff0L) | color;
+	obj[MKDOWN].ob_spec = (obj[MKDOWNS].ob_spec & 0xfffffff0L) | color;
 #endif
 }
 
@@ -702,3 +764,4 @@ VOID adjobjects(NOTHING)
 	obj[FIRONLY].ob_y -= 1;
 	obj[FIRWRITE].ob_y -= 1;
 }
+#endif

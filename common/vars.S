@@ -448,9 +448,7 @@ name: ds.t size
 	
 	GRECT(_fobj)
 	V(_intout,w,10)
-	
-	ds.w 1
-	
+	INT(_xprint)
 	V(_ptsout,w,10)
 	INT(_m_st)
 	GRECT(_full)
@@ -494,9 +492,7 @@ name: ds.t size
 	
 	PTR(_ad_shcmd)
 	PTR(_ad_fpath)
-	
-	ds.b 2
-	
+	INT(_gl_apid)
 	TEDINFO(_gl_ainfo)
 	INT(_gl_bdesired)
 	INT(_gl_dcindex)
@@ -504,9 +500,7 @@ name: ds.t size
 	INT(_q_change)
 	PTR(_gh_buffer)
 	PTR(_ad_path)
-	
-	ds.b 8
-	
+	V(_chxcache,l,2) /* USERBLK */
 	PTR(_iconaddr)
 	PTR(old_bcode)
 	INT(_gl_hclip)
@@ -588,9 +582,7 @@ name: ds.t size
 	INT(_pr_mclick)
 	PTR(_appnode)
 	INT(_gl_wschar)
-	
-	ds.b 4
-	
+	PTR(_iconmem)
 	PTR(_rs_global)
 	LONG(_elinkoff)
 	INT(_gl_play)

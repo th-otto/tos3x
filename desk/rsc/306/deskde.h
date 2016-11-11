@@ -17,7 +17,7 @@
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          24250
+ * Total file size:          24378
  */
 
 #undef RSC_NAME
@@ -86,8 +86,8 @@
 #define MEMMENU                           53 /* STRING in tree ADMENU */
 #define SAVEITEM                          55 /* STRING in tree ADMENU */
 #define PRINTITEM                         56 /* STRING in tree ADMENU */
-#define BITBLT                            58 /* STRING in tree ADMENU */
-#define SUPERITEM                         59 /* STRING in tree ADMENU */
+#define SUPERITEM                         58 /* STRING in tree ADMENU */
+#define BITBLT                            59 /* STRING in tree ADMENU */
 
 #define ADFILEIN                           1 /* form/dialog */
 #define INFTITLE                           1 /* TEXT in tree ADFILEIN */ /* max len 1 */
@@ -312,13 +312,10 @@
 #define SEACNCL                            4 /* BUTTON in tree SEAFILE */
 
 #define SSYSTEM                           23 /* form/dialog */
-#define SDTITLE                            2 /* STRING in tree SSYSTEM */
 #define WI1                                4 /* BUTTON in tree SSYSTEM */
 #define AP1                                5 /* BUTTON in tree SSYSTEM */
-#define SITITLE                            6 /* STRING in tree SSYSTEM */
 #define DEFFILE                            8 /* BUTTON in tree SSYSTEM */
 #define DEFFULL                            9 /* BUTTON in tree SSYSTEM */
-#define MFBASE                            11 /* BOX in tree SSYSTEM */
 #define SDLEFT                            12 /* BOXCHAR in tree SSYSTEM */
 #define SDFILE                            13 /* FTEXT in tree SSYSTEM */ /* max len 17 */
 #define SDRIGHT                           14 /* BOXCHAR in tree SSYSTEM */

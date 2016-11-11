@@ -398,6 +398,7 @@ PP(int *plinecount;)
 }
 
 
+/* 306de: 00e3359e */
 VOID bconws(P(const char *)s)
 PP(register const char *s;)
 {

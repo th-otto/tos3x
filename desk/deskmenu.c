@@ -174,8 +174,8 @@ int16_t const tb3[MAXMENU] = {
 #ifdef PRINTITEM
 	PRINTITEM,
 #endif
-#ifdef SUPERITEM
-	SUPERITEM,
+#ifdef BITBLT
+	BITBLT,
 #endif
 };
 
@@ -769,8 +769,8 @@ PP(int16_t msgbuff;)
 		break;
 #endif
 
-#ifdef SUPERITEM
-	case SUPERITEM:
+#ifdef BITBLT
+	case BITBLT:
 		if (m_cpu != 30)
 			cbit_save = !cbit_save;
 		else
@@ -1309,7 +1309,7 @@ VOID av_desk(NOTHING)
 	ad_5:
 		which = xform_do(obj, MKKEY);
 
-		if ((which == MKUP) || (which == MKDOWN) || (which == SDOK))
+		if (which == MKUP || which == MKDOWN || which == SDOK)
 		{
 			fs_sget((LPTREE)obj, MKKEY, buf);
 			buf[0] = toupper(buf[0]);

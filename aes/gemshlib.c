@@ -578,7 +578,7 @@ VOID sh_main(NOTHING)
 	{
 		gl_bpend = 0;					/* reset the d click flag   */
 
-		if (gl_rschange)				/* change the resoulution   */
+		if (gl_rschange)				/* change the resolution */
 			break;
 
 		if (sh_gem != sh_isgem)			/* users request different  */

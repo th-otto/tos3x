@@ -10,16 +10,15 @@
 
 
 char *q_addr;							/* Inf file address */
-
 BOOLEAN q_change;						/* Inf file is changed  */
 
 STATIC char *newbuff;
-
-char q_path[40]; /* unused */
+STATIC char q_path[40]; /* unused */
 
 /*
  * Load in the new inf
  */
+/* 306de: 00e33fb0 */
 VOID q_inf(NOTHING)
 {
 	if ((q_addr = (char *)Malloc((int32_t) (INFSIZE))))
@@ -71,7 +70,6 @@ PP(char *new;)
 
 				if (*(ptr1 + 9) != ' ')
 					offset = 12;
-
 				break;
 			case 'X':
 			case 'V':
