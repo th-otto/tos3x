@@ -244,7 +244,7 @@ PP(int16_t mode;)
 
 				if (dir[j].d_att & FA_DIREC)
 					break;
-			  ss_1:
+			ss_1:
 				dir1 = &dir[j];
 				dir2 = &dir[j + gap];
 				ps1 = &dir[j].d_name[0];
@@ -506,7 +506,7 @@ PP(int16_t attr;)
 		} else
 			break;
 
-	  r_3:
+	r_3:
 		if (path[0] == CHAR_FOR_CARTRIDGE)
 			ret = !cart_snext();
 		else

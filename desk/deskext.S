@@ -198,7 +198,7 @@ _ob_find        equ AESTBASE+$A3C2
 _ob_add         equ AESTBASE+$A4F2
 _ob_draw        equ AESTBASE+$A322
 _ob_change      equ AESTBASE+$A6EA
-_ob_center      equ AESTBASE+$5CFE
+_ob_center      equ AESTBASE+$5C7E
 _gr_mouse       equ AESTBASE+$4E80
 _gr_mkstate     equ AESTBASE+$B8AC
 _gr_growbox     equ AESTBASE+$B402

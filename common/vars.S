@@ -229,7 +229,7 @@ name: ds.t size
 
 	INT(_prtbbval)
 
-	ds.b 1024
+	ds.b 1024 /* unused? $00004b58 */
     
 	V(_supstk,w,SUPSIZ)
 	V(_supstkend,b,0)
@@ -246,7 +246,7 @@ name: ds.t size
 
 	V(_root,l,MAXQUICK)
 
-	ds.b 60
+	ds.b 60 /* unused? $0000577A */
 
 	V(_glbkbchar,l,3*KBBUFSZ)
 
@@ -395,7 +395,7 @@ name: ds.t size
 	INT(execmode)
 	LONG(execflags)
 	
-	ds.b 2
+	ds.b 2 /* unused? $000083ac */
 	
 	PTR(_ad_rso)
 	PTR(_ml_mnhold)
@@ -443,9 +443,7 @@ name: ds.t size
 	PTR(trp14aret)
 	INT(_w_inc)
 	INT(_bar_max)
-	
-	ds.b 4
-	
+	PTR(saveret)
 	GRECT(_fobj)
 	V(_intout,w,10)
 	INT(_xprint)
@@ -454,14 +452,12 @@ name: ds.t size
 	GRECT(_full)
 	GRECT(_ctrl)
 	
-	ds.b 50
+	ds.b 50 /* unused? $00008d52 */
 
 	INT(_gl_dabase)
 	V(_gl_adacc,l,MAX_ACCS)
 	V(_winp,w,3)
-	
-	ds.b 12
-	
+	V(_rets,w,6) /* unused */
 	INT(_xrat)
 	INT(_yrat)
 	INT(_s_cache)
@@ -488,7 +484,7 @@ name: ds.t size
 	INT(_gl_height)
 	TEDINFO(_gl_aname)
 	
-	ds.b 4
+	ds.b 4 /* unused? $00008efc */
 	
 	PTR(_ad_shcmd)
 	PTR(_ad_fpath)
@@ -632,7 +628,7 @@ name: ds.t size
 	INT(_infsize)
 	INT(_numicon)
 	
-	ds.b 2
+	ds.b 2 /* unused? $000095b6 */
 	
 	V(_filestr,b,NAMELEN)
 	INT(_tmpmoff)
@@ -659,7 +655,7 @@ name: ds.t size
 	LONG(_numdirs)
 	TEDINFO(_edblk)
 	
-	ds.b 20
+	ds.b 20 /* unused? $0000a676 */
 	
 	INT(_x_status)
 	LONG(_tolsize)
@@ -671,14 +667,11 @@ name: ds.t size
 	INT(_gl_mx)
 	INT(_gl_my)
 	INT(_fpcnt)
-	INT(_o_win)
-	
-	ds.b 2
-	
+	PTR(_o_win)
 	PTR(_cpbox)
 	V(_gl_ws,w,57)   /* workout */
 
-	ds.b 2
+	ds.b 2 /* unused? $0000a724 */
 	
 	INT(_x_cur)
 	V(_winpd,b,142*MAXWIN)
@@ -686,10 +679,7 @@ name: ds.t size
 	PTR(_x_win)
 	PTR(_cda)
 	INT(_wwait)
- 	V(_W_ACTIVE,b,24*NUM_WIN)  /* OBJECT[MAXOBJ] */
-	
-	ds.b 264
-	
+ 	V(_W_ACTIVE,b,24*MAXOBJ)  /* OBJECT[MAXOBJ] */
 	INT(_DOS_ERR)
 	V(_ptsin,w,20)
 	PTR(_dpd)
@@ -717,17 +707,12 @@ name: ds.t size
 	INT(_gl_fis)
 	PTR(_lp_mid)
 	INT(_no_aes)
-	V(_dtabuf,b,44)
-
-	ds.b 4
-	
+	V(_dtabuf,b,44+4)
 	PTR(_ctl_pd)
 	INT(_rename)
 	INT(_opcode)
 	MFDB(_gl_src)
-	
-	ds.b 40
-	
+	V(_q_path,b,40) /* unused */
 	INT(_o_item)
 	INT(_d_exit)
 	MFDB(_gl_dst)
@@ -735,7 +720,7 @@ name: ds.t size
 	PTR(_rs_hdr)
 	PTR(_gl_tmp)
 	
-	ds.b 16
+	ds.b 16 /* unused? $0000e630 */
 	
 	INT(_nodesk)
 	INT(_srcbuf)

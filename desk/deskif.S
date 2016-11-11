@@ -55,6 +55,7 @@ WORD appl_bvset(WORD bvdisk, WORD bvhard)
   return(TRUE);
 }
 #endif
+/* 306de: 00e35c7e */
 	xdef _appl_bvset
 _appl_bvset:
 	move.w	8-4(sp),_gl_bvdisk
@@ -815,7 +816,7 @@ _wind_calc:
 wndcp:	move.l	28(sp),-(sp)
 	dbra	d0,wndcp
 	jsr	_wm_calc
-	adda.l	#28,sp
+	adda.w	#28,sp
 	bra	disp1
 
 
