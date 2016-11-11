@@ -33,6 +33,7 @@ VOID q_inf(NOTHING)
 /*
  * Search the matching file and modify the inf file
  */
+/* 306de: 00e34000 */
 VOID q_sea(P(char *) old, P(char *) new)
 PP(char *old;)
 PP(char *new;)
@@ -161,6 +162,7 @@ PP(char *new;)
  * Write out the new inf file
  * always write out newdesk.inf
  */
+/* 306de: 00e34262 */
 VOID q_write(NOTHING)
 {
 	register int16_t handle;
@@ -173,7 +175,7 @@ VOID q_write(NOTHING)
 			Fclose(handle);				/* truncates it */
 			if ((handle = Fcreate(inf_path, 0)) > 0)
 			{
-				Fwrite(handle, (int32_t) strlen(q_addr), q_addr);
+				Fwrite(handle, (int32_t) (int)strlen(q_addr), q_addr);
 				Fclose(handle);
 			}
 		}

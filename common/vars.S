@@ -600,9 +600,7 @@ name: ds.t size
 	INT(_fs_first)
 	V(_appl_msg,w,8)
 	INT(_ml_ocnt)
-	
-	ds.b 4
-	
+	PTR(_newbuff)
 	V(_restable,b,6)
 	PTR(_cart_ptr)
 	INT(_fs_count)
