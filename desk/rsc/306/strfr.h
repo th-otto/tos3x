@@ -1,4 +1,4 @@
-/*	STRFRE.H			4/19/90		Derek Mui	*/
+/* strfr.h			4/19/90		Derek Mui	*/
 
 char const More[] = "-Encore-";
 char const Endfile[] = "-Fin de fichier-";

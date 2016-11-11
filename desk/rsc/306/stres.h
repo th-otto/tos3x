@@ -1,4 +1,4 @@
-/*	STRSPA.H		4/25/90		D.Mui		*/
+/* stres.h		4/25/90		D.Mui		*/
 
 char const More[] = "-M s-";
 char const Endfile[] = "-Fin de fichero-";

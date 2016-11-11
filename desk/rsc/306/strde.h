@@ -1,4 +1,4 @@
-/*	STRGRM.H		4/12/90 - 6/28/90	Derek Mui	*/
+/* strde.h		4/12/90 - 6/28/90	Derek Mui	*/
 
 char const More[] = "-WEITER-";
 char const Endfile[] = "-ENDE DER DATEI-";

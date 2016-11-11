@@ -1,30 +1,30 @@
 /*
- * resource set indices for deskus
+ * resource set indices for desksg
  *
  * created by ORCS 2.14
  */
 
 /*
- * Number of Strings:        447
+ * Number of Strings:        420
  * Number of Bitblks:        1
  * Number of Iconblks:       14
  * Number of Color Iconblks: 0
  * Number of Color Icons:    0
- * Number of Tedinfos:       62
+ * Number of Tedinfos:       46
  * Number of Free Strings:   52
  * Number of Free Images:    0
- * Number of Objects:        422
+ * Number of Objects:        427
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          24120
+ * Total file size:          24250
  */
 
 #undef RSC_NAME
-#define RSC_NAME "deskus"
+#define RSC_NAME "desksg"
 #undef RSC_ID
-#ifdef deskus
-#define RSC_ID deskus
+#ifdef desksg
+#define RSC_ID desksg
 #else
 #define RSC_ID 0
 #endif
@@ -33,7 +33,7 @@
 # define RSC_STATIC_FILE 0
 #endif
 #if !RSC_STATIC_FILE
-#define NUM_STRINGS 447
+#define NUM_STRINGS 420
 #define NUM_FRSTR 52
 #define NUM_UD 0
 #define NUM_IMAGES 29
@@ -41,8 +41,8 @@
 #define NUM_FRIMG 0
 #define NUM_IB 14
 #define NUM_CIB 0
-#define NUM_TI 62
-#define NUM_OBS 422
+#define NUM_TI 46
+#define NUM_OBS 427
 #define NUM_TREE 24
 #endif
 
@@ -155,10 +155,10 @@
 #define INSWIN                            17 /* BUTTON in tree ADINSAPP */
 #define INSFULL                           20 /* BUTTON in tree ADINSAPP */
 #define INSFILE                           21 /* BUTTON in tree ADINSAPP */
-#define APOK                              23 /* BUTTON in tree ADINSAPP */
-#define APREMOVE                          24 /* BUTTON in tree ADINSAPP */
-#define APSKIP                            25 /* BUTTON in tree ADINSAPP */
-#define APCANCEL                          26 /* BUTTON in tree ADINSAPP */
+#define APCANCEL                          23 /* BUTTON in tree ADINSAPP */
+#define APOK                              24 /* BUTTON in tree ADINSAPP */
+#define APREMOVE                          25 /* BUTTON in tree ADINSAPP */
+#define APSKIP                            26 /* BUTTON in tree ADINSAPP */
 
 #define ADMKDBOX                           7 /* form/dialog */
 #define MKNAME                             1 /* FTEXT in tree ADMKDBOX */ /* max len 11 */
@@ -184,20 +184,20 @@
 #define ADFORMAT                           9 /* form/dialog */
 #define FCBOX4                             1 /* BOX in tree ADFORMAT */
 #define FCBOXC                             2 /* BOX in tree ADFORMAT */
-#define SRCDRA                             4 /* BOXCHAR in tree ADFORMAT */
+#define DESTDR                             3 /* BOXCHAR in tree ADFORMAT */
 #define SRCDRB                             5 /* BOXCHAR in tree ADFORMAT */
-#define DESTDR                             6 /* BOXCHAR in tree ADFORMAT */
+#define SRCDRA                             6 /* BOXCHAR in tree ADFORMAT */
 #define FCCOPY                             7 /* BUTTON in tree ADFORMAT */
-#define FCBOXF                             9 /* BOX in tree ADFORMAT */
-#define DRIVE                             10 /* STRING in tree ADFORMAT */
-#define ADRIVE                            11 /* BOXCHAR in tree ADFORMAT */
-#define BDRIVE                            12 /* BOXCHAR in tree ADFORMAT */
-#define FCLABEL                           13 /* FTEXT in tree ADFORMAT */ /* max len 11 */
-#define FCDOUBLE                          15 /* BUTTON in tree ADFORMAT */
+#define FCFORMAT                           9 /* BUTTON in tree ADFORMAT */
+#define FCBOXF                            10 /* BOX in tree ADFORMAT */
+#define DRIVE                             11 /* STRING in tree ADFORMAT */
+#define ADRIVE                            12 /* BOXCHAR in tree ADFORMAT */
+#define BDRIVE                            13 /* BOXCHAR in tree ADFORMAT */
+#define FCLABEL                           14 /* FTEXT in tree ADFORMAT */ /* max len 11 */
 #define FCSINGLE                          16 /* BUTTON in tree ADFORMAT */
-#define FCHIGH                            17 /* BUTTON in tree ADFORMAT */
-#define FCFORMAT                          18 /* BUTTON in tree ADFORMAT */
-#define FCBARA                            20 /* BOX in tree ADFORMAT */
+#define FCDOUBLE                          17 /* BUTTON in tree ADFORMAT */
+#define FCHIGH                            18 /* BUTTON in tree ADFORMAT */
+#define FCBARA                            19 /* BOX in tree ADFORMAT */
 #define FCBARB                            22 /* BOX in tree ADFORMAT */
 #define FCOK                              23 /* BUTTON in tree ADFORMAT */
 #define FCCNCL                            24 /* BUTTON in tree ADFORMAT */
@@ -215,37 +215,37 @@
 #define BACKGROUND                        12 /* unknown form */
 
 #define SSCREEN                           13 /* form/dialog */
-#define STITLE                             1 /* TEXT in tree SSCREEN */ /* max len 19 */
-#define DESKPREF                           4 /* BUTTON in tree SSCREEN */
-#define WINPREF                            5 /* BUTTON in tree SSCREEN */
-#define PAT0                               9 /* BOX in tree SSCREEN */
-#define PAT1                              10 /* BOX in tree SSCREEN */
-#define PAT2                              11 /* BOX in tree SSCREEN */
-#define PAT3                              12 /* BOX in tree SSCREEN */
-#define PAT4                              13 /* BOX in tree SSCREEN */
-#define PAT5                              14 /* BOX in tree SSCREEN */
-#define PAT6                              15 /* BOX in tree SSCREEN */
-#define PAT7                              16 /* BOX in tree SSCREEN */
-#define OUTBOX                            17 /* BOX in tree SSCREEN */
-#define PATTERN                           18 /* BOX in tree SSCREEN */
-#define COLOR0                            20 /* BOX in tree SSCREEN */
-#define COLOR1                            21 /* BOX in tree SSCREEN */
-#define COLOR2                            22 /* BOX in tree SSCREEN */
-#define COLOR3                            23 /* BOX in tree SSCREEN */
-#define COLOR4                            24 /* BOX in tree SSCREEN */
-#define COLOR5                            25 /* BOX in tree SSCREEN */
-#define COLOR6                            26 /* BOX in tree SSCREEN */
-#define COLOR7                            27 /* BOX in tree SSCREEN */
-#define COLOR8                            28 /* BOX in tree SSCREEN */
-#define COLOR9                            29 /* BOX in tree SSCREEN */
-#define COLOR10                           30 /* BOX in tree SSCREEN */
-#define COLOR11                           31 /* BOX in tree SSCREEN */
-#define COLOR12                           32 /* BOX in tree SSCREEN */
-#define COLOR13                           33 /* BOX in tree SSCREEN */
-#define COLOR14                           34 /* BOX in tree SSCREEN */
-#define COLOR15                           35 /* BOX in tree SSCREEN */
-#define SOK                               36 /* BUTTON in tree SSCREEN */
-#define SCANCEL                           37 /* BUTTON in tree SSCREEN */
+#define STITLE                             1 /* TEXT in tree SSCREEN */ /* max len 11 */
+#define PAT0                               7 /* BOX in tree SSCREEN */
+#define PAT1                               8 /* BOX in tree SSCREEN */
+#define PAT2                               9 /* BOX in tree SSCREEN */
+#define PAT3                              10 /* BOX in tree SSCREEN */
+#define PAT4                              11 /* BOX in tree SSCREEN */
+#define PAT5                              12 /* BOX in tree SSCREEN */
+#define PAT6                              13 /* BOX in tree SSCREEN */
+#define PAT7                              14 /* BOX in tree SSCREEN */
+#define OUTBOX                            15 /* BOX in tree SSCREEN */
+#define PATTERN                           16 /* BOX in tree SSCREEN */
+#define COLOR0                            18 /* BOX in tree SSCREEN */
+#define COLOR1                            19 /* BOX in tree SSCREEN */
+#define COLOR2                            20 /* BOX in tree SSCREEN */
+#define COLOR3                            21 /* BOX in tree SSCREEN */
+#define COLOR4                            22 /* BOX in tree SSCREEN */
+#define COLOR5                            23 /* BOX in tree SSCREEN */
+#define COLOR6                            24 /* BOX in tree SSCREEN */
+#define COLOR7                            25 /* BOX in tree SSCREEN */
+#define COLOR8                            26 /* BOX in tree SSCREEN */
+#define COLOR9                            27 /* BOX in tree SSCREEN */
+#define COLOR10                           28 /* BOX in tree SSCREEN */
+#define COLOR11                           29 /* BOX in tree SSCREEN */
+#define COLOR12                           30 /* BOX in tree SSCREEN */
+#define COLOR13                           31 /* BOX in tree SSCREEN */
+#define COLOR14                           32 /* BOX in tree SSCREEN */
+#define COLOR15                           33 /* BOX in tree SSCREEN */
+#define SOK                               34 /* BUTTON in tree SSCREEN */
+#define SCANCEL                           35 /* BUTTON in tree SSCREEN */
+#define WINPREF                           36 /* BUTTON in tree SSCREEN */
+#define DESKPREF                          37 /* BUTTON in tree SSCREEN */
 
 #define FILEOPTI                          14 /* form/dialog */
 #define OPTNAME                            2 /* FTEXT in tree FILEOPTI */ /* max len 11 */
@@ -287,7 +287,6 @@
 #define CCANCEL                           15 /* BUTTON in tree CPBOX */
 
 #define INWICON                           19 /* form/dialog */
-#define IBOX1                              2 /* BOX in tree INWICON */
 #define WNAME                              3 /* FTEXT in tree INWICON */ /* max len 11 */
 #define WBOX                               5 /* BOX in tree INWICON */
 #define WICON                              6 /* ICON in tree INWICON */ /* max len 0 */
@@ -295,13 +294,13 @@
 #define WDOWN                              8 /* BOXCHAR in tree INWICON */
 #define WFOLDER                           10 /* BUTTON in tree INWICON */
 #define WNONE                             11 /* BUTTON in tree INWICON */
-#define WSKIP                             12 /* BUTTON in tree INWICON */
-#define WREMOVE                           13 /* BUTTON in tree INWICON */
-#define WOK                               14 /* BUTTON in tree INWICON */
-#define WCANCEL                           16 /* BUTTON in tree INWICON */
+#define WREMOVE                           12 /* BUTTON in tree INWICON */
+#define WOK                               13 /* BUTTON in tree INWICON */
+#define WCANCEL                           15 /* BUTTON in tree INWICON */
+#define WSKIP                             16 /* BUTTON in tree INWICON */
 
 #define HELP1                             20 /* form/dialog */
-#define MOREHELP                          14 /* BUTTON in tree HELP1 */
+#define MOREHELP                          15 /* BUTTON in tree HELP1 */
 
 #define HELP2                             21 /* form/dialog */
 
@@ -311,10 +310,10 @@
 #define SEACNCL                            4 /* BUTTON in tree SEAFILE */
 
 #define SSYSTEM                           23 /* form/dialog */
-#define AP1                                4 /* BUTTON in tree SSYSTEM */
-#define WI1                                5 /* BUTTON in tree SSYSTEM */
-#define DEFFULL                            8 /* BUTTON in tree SSYSTEM */
-#define DEFFILE                            9 /* BUTTON in tree SSYSTEM */
+#define WI1                                4 /* BUTTON in tree SSYSTEM */
+#define AP1                                5 /* BUTTON in tree SSYSTEM */
+#define DEFFILE                            8 /* BUTTON in tree SSYSTEM */
+#define DEFFULL                            9 /* BUTTON in tree SSYSTEM */
 #define SDLEFT                            12 /* BOXCHAR in tree SSYSTEM */
 #define SDFILE                            13 /* FTEXT in tree SSYSTEM */ /* max len 17 */
 #define SDRIGHT                           14 /* BOXCHAR in tree SSYSTEM */
@@ -331,160 +330,160 @@
 #define SDCANCEL                          28 /* BUTTON in tree SSYSTEM */
 
 #define STNOAPPL                           0 /* Alert string */
-/* [1][You can only show or print|this document.][Show|Print| Cancel ] */
+/* [1][Diese Datei kann nur gedruckt|oder angezeigt werden.][Anzeigen|Drucken|Abbruch] */
 
 #define STNOWIND                           1 /* Alert string */
-/* [1][The GEM Desktop has no more|windows.  Please close a |window that you are not|using.][  OK  ] */
+/* [1][Keine weiteren Fenster|vorhanden! Abhilfe durch|Schlieûen eines Fensters.|         ][  OK  ] */
 
 #define STFOEXISTS                         2 /* Alert string */
-/* [2][You cannot create a folder|with that name. Please retry|and supply a new name, or|cancel the New Folder request.][ Retry |Cancel] */
+/* [2][UngÅltiger Ordnername! Bitte|den Namen Ñndern oder den|Vorgang abbrechen.|  ][ Nochmal |Abbruch] */
 
 #define STDISKFULL                         3 /* Alert string */
-/* [1][ Drive %S: does not have | enough room for this | operation.][  OK  ] */
+/* [1][ Laufwerk %S: hat nicht | genÅgend Speicherplatz fÅr| diese Operation.][  OK  ] */
 
 #define STFO8DEE                           4 /* Alert string */
-/* [1][This system can not create|or access a folder this far|down the directory tree.][  OK  ] */
+/* [1][So tief im Indexpfad kînnen|keine Ordner angelegt oder|angesprochen werden.][  OK  ] */
 
 #define STBADCOPY                          5 /* Alert string */
-/* [1][ Illegal operation! ][  OK  ] */
+/* [1][ UngÅltige Operation! ][  OK  ] */
 
 #define TRSINFO                            6 /* Alert string */
-/* [1][%S is used to|permanently delete files|or folders.][  OK  ] */
+/* [1][%S wird benutzt um|Dateien und Ordner zu|lîschen.][  OK  ] */
 
 #define FCNOMEM                            7 /* Alert string */
-/* [3][The system is out of memory!][  OK  ] */
+/* [3][Kein Systemspeicher mehr frei!][  OK  ] */
 
 #define FCFAIL                             8 /* Alert string */
-/* [3][An error has occurred during|format or copy. Target disk|may be write protected|or unusable.][ Retry |Abort] */
+/* [3][Fehler beim Formatieren oder|Kopieren!|Eventuell Zieldiskette defekt.|    ][ Nochmal |Abbruch] */
 
 #define FCSIZE                             9 /* Alert string */
-/* [1][This disk has %L bytes|available to user.][ Continue | Quit ] */
+/* [1][Diese Diskette hat|%L Bytes freien|Speicherplatz.][ Weiter | Abbruch ] */
 
 #define FCNOTYPE                          10 /* Alert string */
-/* [3][The destination disk is|not the same type as the|source disk. Please insert|another disk.][ Retry |Abort] */
+/* [3][Disketten haben nicht das|gleiche Format! Bitte eine|korrekt formatierte Diskette|in das Ziellaufwerk einlegen.][ Nochmal | Abbruch ] */
 
 #define SAVETOP                           11 /* Alert string */
-/* [1][ Save Desktop?][  OK  | Cancel ] */
+/* [1][Arbeit sichern?][  OK  | Abbruch ] */
 
 #define PRINTTOP                          12 /* Alert string */
-/* [1][Print Screen Display? ][  OK  | Cancel ] */
+/* [1][Bildschirm drucken?][  OK  | Abbruch ] */
 
 #define ABORTCON                          13 /* Alert string */
-/* [1][Abort this operation?][ Yes |No] */
+/* [1][Funktion abbrechen?][ Ja | Nein ] */
 
 #define NOICON                            14 /* Alert string */
-/* [1][Sorry, the desktop cannot|install any more icons.][  OK  ] */
+/* [1][Verzeihung, es kînnen keine|weiteren Ikonen angemeldet|werden.][  OK  ] */
 
 #define NOAPP                             15 /* Alert string */
-/* [1][Sorry, the desktop cannot|install any more applications.][  OK  ] */
+/* [1][Verzeihung, es kînnen keine|weiteren Anwendungen ange-|meldet werden.][  OK  ] */
 
 #define NODRIVE                           16 /* Alert string */
-/* [1][Drive %S: does not exist.][ Cancel ] */
+/* [1][Laufwerk %S: existiert nicht.][ Abbruch ] */
 
 #define NOOUTPUT                          17 /* Alert string */
-/* [1][Your output device is not|receiving data!][ Retry | Cancel ] */
+/* [1][AusgabegerÑt antwortet|nicht!][ Nochmal | Abbruch ] */
 
 #define CNTOPEN                           18 /* Alert string */
-/* [1][Cannot open file|%S][ Skip | Retry |Abort] */
+/* [1][Datei %S kann|nicht geîffnet werden.][Weiter|Nochmal|Abbruch] */
 
 #define CNTCRTDR                          19 /* Alert string */
-/* [1][Cannot create directory|%S][ Skip | Retry |Abort] */
+/* [1][Verzeichnis %S|kann nicht angelegt werden.][Weiter|Nochmal|Abbruch] */
 
 #define WRERROR                           20 /* Alert string */
-/* [1][An error occurred while |coping a file.][ Skip |Abort] */
+/* [1][Fehler beim Kopieren|einer Datei.][ Weiter | Abbruch ] */
 
 #define RDERROR                           21 /* Alert string */
-/* [1][An error occurred while |reading the source file.][ Skip |Abort] */
+/* [1][Fehler beim Lesen|einer Datei.][ Weiter | Abbruch ] */
 
 #define CNTCRTFL                          22 /* Alert string */
-/* [1][Cannot create file|%S][ Skip | Retry |Abort] */
+/* [1][Datei %S kann|nicht angelegt werden.][Weiter|Nochmal|Abbruch] */
 
 #define CNTDELF                           23 /* Alert string */
-/* [1][Cannot delete file|%S][ Skip | Retry |Abort] */
+/* [1][Datei %S kann|nicht gelîscht werden.][Weiter|Nochmal|Abbruch] */
 
 #define CNTDELD                           24 /* Alert string */
-/* [1][Cannot delete directory|%S][ Skip | Retry |Abort] */
+/* [1][Verzeichnis %S|kann nicht gelîscht werden.][Weiter|Nochmal|Abbruch] */
 
 #define PRINTINF                          25 /* Alert string */
-/* [1][%S|is a printing device.][  OK  ] */
+/* [1][%S|ist ein Drucker.][  OK  ] */
 
 #define RENAME                            26 /* Alert string */
-/* [1][ Rename error! ][ Retry |Cancel] */
+/* [1][Fehler beim Umbenennen!][ Nochmal | Abbruch ] */
 
 #define NOBUF                             27 /* Alert string */
-/* [1][Path name too long.][  OK  ] */
+/* [1][Pfadname zu lang.][  OK  ] */
 
 #define DELDISK                           28 /* Alert string */
-/* [2][Do you want to delete all|the files on drive %S?][Yes| No ] */
+/* [2][Wollen Sie wirklich alle|Dateien auf Laufwerk %S|lîschen?][ Ja | Nein ] */
 
 #define NOTPRG                            29 /* Alert string */
-/* [1][%S|is not an application.][  OK  ] */
+/* [1][%S|ist keine Anwendung!][  OK  ] */
 
 #define NOSETDIR                          30 /* Alert string */
-/* [1][Failed to set default |directory.][  OK  ] */
+/* [1][Standardverzeichnis konnte|nicht geîffnet werden.][  OK  ] */
 
 #define NOAUTO                            31 /* Alert string */
-/* [1][Failed to save AUTO file.][  OK  ] */
+/* [1][AUTO-Datei konnte nicht|geschrieben werden.][  OK  ] */
 
 #define NOWINMEM                          32 /* Alert string */
-/* [1][Failed to allocate window |memory.][  OK  ] */
+/* [1][Fensterspeicher konnte nicht|angelegt werden.][  OK  ] */
 
 #define NOTYPE                            33 /* Alert string */
-/* [1][Illegal file type.][  OK  ] */
+/* [1][UngÅltiger Dateityp.][  OK  ] */
 
 #define ICONTYPE                          34 /* Alert string */
-/* [1][Please select icon type.][Desktop|Window|Cancel] */
+/* [1][Bitte Ikonentyp wÑhlen.][Desktop|Fenster|Abbruch] */
 
 #define NODIRCOP                          35 /* Alert string */
-/* [1][Illegal directory operation.][ Skip | Abort ] */
+/* [1][UngÅltige Verzeichnisfunktion.][ Weiter | Abbruch ] */
 
 #define NOINSTAL                          36 /* Alert string */
-/* [1][No installable item.][ OK ] */
+/* [1][Nicht installierbar.][ OK ] */
 
 #define NOMORE                            37 /* Alert string */
-/* [1][No more files.][  OK  ] */
+/* [1][Keine weiteren Dateien.][  OK  ] */
 
 #define NOID                              38 /* Alert string */
-/* [1][No drive ID.][ Retry ] */
+/* [1][Keine Laufwerkskennung.][ Nochmal ] */
 
 #define ILLMAT                            39 /* Alert string */
-/* [1][Illegal .INF file format.][ OK ] */
+/* [1][UngÅltiges .INF-Dateiformat.][ OK ] */
 
 #define NOCART                            40 /* Alert string */
-/* [1][No cartridge.][ OK ] */
+/* [1][Kein ROM-Modul.][ OK ] */
 
 #define NOMATCH                           41 /* Alert string */
-/* [1][No matching file type.][ OK ] */
+/* [1][Keine Datei diesen Typs|gefunden.][ OK ] */
 
 #define DELITEM                           42 /* Alert string */
-/* [1][Do you want to remove icons|or delete files?][Remove|Delete| Cancel ] */
+/* [1][Wollen Sie Ikonen entfernen|oder Dateien lîschen?][Entfernen|Lîschen|Abbruch] */
 
 #define MCFAIL                            43 /* Alert string */
-/* [1][Memory cleanup failed.][ OK ] */
+/* [1][Speicherreorganisation nicht|durchfÅhrbar.][ OK ] */
 
 #define FNOTFIND                          44 /* Alert string */
-/* [1][%S not found.][ OK ] */
+/* [1][%S nicht gefunden.][ OK ] */
 
 #define SNEXT                             45 /* Alert string */
-/* [1][Continue to search? ][OK| Cancel ] */
+/* [1][Suche fortsetzen?][OK| Abbruch ] */
 
 #define NOHELP                            46 /* Alert string */
-/* [1][Help menu cannot be shown in|this resolution.][ OK ] */
+/* [1][Das HilfsmenÅ kann in dieser|Auflîsung nicht dargestellt|werden.][ OK ] */
 
 #define NOSEA                             47 /* Alert string */
-/* [1][Cannot search on cartridge.][ OK ] */
+/* [1][In einem ROM-Modul kann nicht|gesucht werden.][ OK ] */
 
 #define KEYUSED                           48 /* Alert string */
-/* [1][Last key is already defined |Do you want to overwrite it? ][OK| Cancel ] */
+/* [1][Die Taste ist bereits belegt.|öberschreiben?][OK| Abbruch ] */
 
 #define CARTNOSH                          49 /* Alert string */
-/* [1][Cannot show information|for a cartridge.][ OK ] */
+/* [1][UngÅltige Funktion fÅr|ROM-Modul.][ OK ] */
 
 #define BADKEY                            50 /* Alert string */
-/* [1][Illegal function key value.][ OK ] */
+/* [1][UngÅltiger Eintrag fÅr|Funktionstaste.][ OK ] */
 
 #define XNFILE                            51 /* Alert string */
-/* [1][%S not found.|Do you want to remove the|icon or locate the item?][Remove| Locate |Cancel] */
+/* [1][%S nicht gefunden.|lkone entfernen oder|das Objekt suchen.][Entfernen|Suchen|Abbruch] */
 
 
 
@@ -497,7 +496,7 @@
 #    define _WORD short
 #  endif
 #endif
-extern _WORD deskus_rsc_load(void);
-extern _WORD deskus_rsc_gaddr(_WORD type, _WORD idx, void *gaddr);
-extern _WORD deskus_rsc_free(void);
+extern _WORD desksg_rsc_load(void);
+extern _WORD desksg_rsc_gaddr(_WORD type, _WORD idx, void *gaddr);
+extern _WORD desksg_rsc_free(void);
 #endif

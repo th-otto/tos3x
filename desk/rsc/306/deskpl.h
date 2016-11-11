@@ -17,7 +17,7 @@
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          25216
+ * Total file size:          25100
  */
 
 #undef RSC_NAME
@@ -188,14 +188,12 @@
 #define SRCDRB                             5 /* BOXCHAR in tree ADFORMAT */
 #define SRCDRA                             6 /* BOXCHAR in tree ADFORMAT */
 #define FCCOPY                             7 /* BUTTON in tree ADFORMAT */
-#define LINEBOX                            8 /* BOX in tree ADFORMAT */
 #define FCFORMAT                           9 /* BUTTON in tree ADFORMAT */
 #define FCBOXF                            10 /* BOX in tree ADFORMAT */
 #define DRIVE                             11 /* STRING in tree ADFORMAT */
 #define ADRIVE                            12 /* BOXCHAR in tree ADFORMAT */
 #define BDRIVE                            13 /* BOXCHAR in tree ADFORMAT */
 #define FCLABEL                           14 /* FTEXT in tree ADFORMAT */ /* max len 11 */
-#define SIDEBOX                           15 /* BOX in tree ADFORMAT */
 #define FCSINGLE                          16 /* BUTTON in tree ADFORMAT */
 #define FCDOUBLE                          17 /* BUTTON in tree ADFORMAT */
 #define FCHIGH                            18 /* BUTTON in tree ADFORMAT */

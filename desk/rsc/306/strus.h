@@ -1,4 +1,4 @@
-/*	STRUSA.H			4/12/90		Derek Mui	*/
+/* strus.h			4/12/90		Derek Mui	*/
 
 char const More[] = "-More-";
 char const Endfile[] = "-End of file-";

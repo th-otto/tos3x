@@ -1,4 +1,4 @@
-/* STRPL.H */
+/* strpl.h */
 
 char const More[] = "-DALEJ--";
 char const Endfile[] = "- KONIEC PLIKU -";

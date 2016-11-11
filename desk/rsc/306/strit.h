@@ -1,4 +1,4 @@
-/*	STRITA.H		5/29/90 - 11/30/90	Derek Mui	*/
+/* strit.h		5/29/90 - 11/30/90	Derek Mui	*/
 
 char const More[] = "-Continua-";
 char const Endfile[] = "-Fine del file-";

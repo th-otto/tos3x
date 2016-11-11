@@ -1,30 +1,30 @@
 /*
- * resource set indices for deskus
+ * resource set indices for deskes
  *
  * created by ORCS 2.14
  */
 
 /*
- * Number of Strings:        447
+ * Number of Strings:        423
  * Number of Bitblks:        1
  * Number of Iconblks:       14
  * Number of Color Iconblks: 0
  * Number of Color Icons:    0
- * Number of Tedinfos:       62
+ * Number of Tedinfos:       46
  * Number of Free Strings:   52
  * Number of Free Images:    0
- * Number of Objects:        422
+ * Number of Objects:        429
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          24120
+ * Total file size:          24676
  */
 
 #undef RSC_NAME
-#define RSC_NAME "deskus"
+#define RSC_NAME "deskes"
 #undef RSC_ID
-#ifdef deskus
-#define RSC_ID deskus
+#ifdef deskes
+#define RSC_ID deskes
 #else
 #define RSC_ID 0
 #endif
@@ -33,7 +33,7 @@
 # define RSC_STATIC_FILE 0
 #endif
 #if !RSC_STATIC_FILE
-#define NUM_STRINGS 447
+#define NUM_STRINGS 423
 #define NUM_FRSTR 52
 #define NUM_UD 0
 #define NUM_IMAGES 29
@@ -41,8 +41,8 @@
 #define NUM_FRIMG 0
 #define NUM_IB 14
 #define NUM_CIB 0
-#define NUM_TI 62
-#define NUM_OBS 422
+#define NUM_TI 46
+#define NUM_OBS 429
 #define NUM_TREE 24
 #endif
 
@@ -184,23 +184,23 @@
 #define ADFORMAT                           9 /* form/dialog */
 #define FCBOX4                             1 /* BOX in tree ADFORMAT */
 #define FCBOXC                             2 /* BOX in tree ADFORMAT */
-#define SRCDRA                             4 /* BOXCHAR in tree ADFORMAT */
-#define SRCDRB                             5 /* BOXCHAR in tree ADFORMAT */
+#define SRCDRB                             4 /* BOXCHAR in tree ADFORMAT */
+#define SRCDRA                             5 /* BOXCHAR in tree ADFORMAT */
 #define DESTDR                             6 /* BOXCHAR in tree ADFORMAT */
 #define FCCOPY                             7 /* BUTTON in tree ADFORMAT */
-#define FCBOXF                             9 /* BOX in tree ADFORMAT */
-#define DRIVE                             10 /* STRING in tree ADFORMAT */
-#define ADRIVE                            11 /* BOXCHAR in tree ADFORMAT */
-#define BDRIVE                            12 /* BOXCHAR in tree ADFORMAT */
-#define FCLABEL                           13 /* FTEXT in tree ADFORMAT */ /* max len 11 */
+#define FCFORMAT                           9 /* BUTTON in tree ADFORMAT */
+#define FCBOXF                            10 /* BOX in tree ADFORMAT */
+#define DRIVE                             11 /* STRING in tree ADFORMAT */
+#define ADRIVE                            12 /* BOXCHAR in tree ADFORMAT */
+#define BDRIVE                            13 /* BOXCHAR in tree ADFORMAT */
+#define FCSINGLE                          14 /* BUTTON in tree ADFORMAT */
 #define FCDOUBLE                          15 /* BUTTON in tree ADFORMAT */
-#define FCSINGLE                          16 /* BUTTON in tree ADFORMAT */
-#define FCHIGH                            17 /* BUTTON in tree ADFORMAT */
-#define FCFORMAT                          18 /* BUTTON in tree ADFORMAT */
-#define FCBARA                            20 /* BOX in tree ADFORMAT */
-#define FCBARB                            22 /* BOX in tree ADFORMAT */
-#define FCOK                              23 /* BUTTON in tree ADFORMAT */
-#define FCCNCL                            24 /* BUTTON in tree ADFORMAT */
+#define FCHIGH                            16 /* BUTTON in tree ADFORMAT */
+#define FCLABEL                           17 /* FTEXT in tree ADFORMAT */ /* max len 11 */
+#define FCBARA                            19 /* BOX in tree ADFORMAT */
+#define FCBARB                            21 /* BOX in tree ADFORMAT */
+#define FCOK                              22 /* BUTTON in tree ADFORMAT */
+#define FCCNCL                            23 /* BUTTON in tree ADFORMAT */
 
 #define ADICON                            10 /* unknown form */
 #define ICON0                              1 /* ICON in tree ADICON */ /* max len 12 */
@@ -215,7 +215,7 @@
 #define BACKGROUND                        12 /* unknown form */
 
 #define SSCREEN                           13 /* form/dialog */
-#define STITLE                             1 /* TEXT in tree SSCREEN */ /* max len 19 */
+#define STITLE                             1 /* TEXT in tree SSCREEN */ /* max len 20 */
 #define DESKPREF                           4 /* BUTTON in tree SSCREEN */
 #define WINPREF                            5 /* BUTTON in tree SSCREEN */
 #define PAT0                               9 /* BOX in tree SSCREEN */
@@ -281,7 +281,7 @@
 #define CPDIR                              8 /* FTEXT in tree CPBOX */ /* max len 11 */
 #define DATEBOX                            9 /* BOX in tree CPBOX */
 #define PYES                              11 /* BUTTON in tree CPBOX */
-#define PNO                               12 /* BUTTON in tree CPBOX */
+#define PNO                               12 /* STRING in tree CPBOX */
 #define CHBOX1                            13 /* BOX in tree CPBOX */
 #define OKCP                              14 /* BUTTON in tree CPBOX */
 #define CCANCEL                           15 /* BUTTON in tree CPBOX */
@@ -301,7 +301,7 @@
 #define WCANCEL                           16 /* BUTTON in tree INWICON */
 
 #define HELP1                             20 /* form/dialog */
-#define MOREHELP                          14 /* BUTTON in tree HELP1 */
+#define MOREHELP                          15 /* BUTTON in tree HELP1 */
 
 #define HELP2                             21 /* form/dialog */
 
@@ -331,160 +331,160 @@
 #define SDCANCEL                          28 /* BUTTON in tree SSYSTEM */
 
 #define STNOAPPL                           0 /* Alert string */
-/* [1][You can only show or print|this document.][Show|Print| Cancel ] */
+/* [1][S¢lo puede ver o imprimir|este documento.][Ver|Imprimir|Anular] */
 
 #define STNOWIND                           1 /* Alert string */
-/* [1][The GEM Desktop has no more|windows.  Please close a |window that you are not|using.][  OK  ] */
+/* [1][El GEM Desktop no dispone|de m s ventanas. Por favor,|cierre una que no est‚|utilizando.][CONFIRMAR] */
 
 #define STFOEXISTS                         2 /* Alert string */
-/* [2][You cannot create a folder|with that name. Please retry|and supply a new name, or|cancel the New Folder request.][ Retry |Cancel] */
+/* [2][No se puede crear una carpeta|con ese nombre. Por favor, |int‚ntelo con otro nombre, o|anule esta operaci¢n.][Reintentar|Anular] */
 
 #define STDISKFULL                         3 /* Alert string */
-/* [1][ Drive %S: does not have | enough room for this | operation.][  OK  ] */
+/* [1][ La Unidad %S: no tiene m s| espacio libre para esta| operaci¢n.][CONFIRMAR] */
 
 #define STFO8DEE                           4 /* Alert string */
-/* [1][This system can not create|or access a folder this far|down the directory tree.][  OK  ] */
+/* [1][El sistema no puede crear o|acceder a una carpeta por|un camino tan largo.][CONFIRMAR] */
 
 #define STBADCOPY                          5 /* Alert string */
-/* [1][ Illegal operation! ][  OK  ] */
+/* [1][ ­Operaci¢n ilegal! ][CONFIRMAR] */
 
 #define TRSINFO                            6 /* Alert string */
-/* [1][%S is used to|permanently delete files|or folders.][  OK  ] */
+/* [1][%S es utilizado para|borrado permanente de|ficheros o carpetas.][CONFIRMAR] */
 
 #define FCNOMEM                            7 /* Alert string */
-/* [3][The system is out of memory!][  OK  ] */
+/* [3][­Memoria del sistema agotada!][CONFIRMAR] */
 
 #define FCFAIL                             8 /* Alert string */
-/* [3][An error has occurred during|format or copy. Target disk|may be write protected|or unusable.][ Retry |Abort] */
+/* [3][Error detectado en la fase de|formateo o copia. El disco de|destino puede estar protegido|contra escritura o da¤ado.][Reintentar|Anular] */
 
 #define FCSIZE                             9 /* Alert string */
-/* [1][This disk has %L bytes|available to user.][ Continue | Quit ] */
+/* [1][Este disco tiene|%L bytes|libres para usuario.][Continuar|Abandonar] */
 
 #define FCNOTYPE                          10 /* Alert string */
-/* [3][The destination disk is|not the same type as the|source disk. Please insert|another disk.][ Retry |Abort] */
+/* [3][El disco destino no es|del mismo tipo que el|disco fuente. Por favor|inserte otro disco.][Reintentar|Anular] */
 
 #define SAVETOP                           11 /* Alert string */
-/* [1][ Save Desktop?][  OK  | Cancel ] */
+/* [1][ ¨Grabar Desktop?][CONFIRMAR|Anular] */
 
 #define PRINTTOP                          12 /* Alert string */
-/* [1][Print Screen Display? ][  OK  | Cancel ] */
+/* [1][¨Imprimir Pantalla? ][CONFIRMAR|Anular] */
 
 #define ABORTCON                          13 /* Alert string */
-/* [1][Abort this operation?][ Yes |No] */
+/* [1][¨Cancelar operaci¢n?][ Si |No] */
 
 #define NOICON                            14 /* Alert string */
-/* [1][Sorry, the desktop cannot|install any more icons.][  OK  ] */
+/* [1][No es posible instalar m s|iconos en el Desktop.][CONFIRMAR] */
 
 #define NOAPP                             15 /* Alert string */
-/* [1][Sorry, the desktop cannot|install any more applications.][  OK  ] */
+/* [1][No es posible instalar m s|aplicaciones en el Desktop.][CONFIRMAR] */
 
 #define NODRIVE                           16 /* Alert string */
-/* [1][Drive %S: does not exist.][ Cancel ] */
+/* [1][La Unidad %S: no existe.][ Anular ] */
 
 #define NOOUTPUT                          17 /* Alert string */
-/* [1][Your output device is not|receiving data!][ Retry | Cancel ] */
+/* [1][­Su dispositivo de salida|no est  recibiendo datos!][Reintentar| Anular ] */
 
 #define CNTOPEN                           18 /* Alert string */
-/* [1][Cannot open file|%S][ Skip | Retry |Abort] */
+/* [1][No es posible abrir el fichero|%S][Omitir|Reintentar|Anular] */
 
 #define CNTCRTDR                          19 /* Alert string */
-/* [1][Cannot create directory|%S][ Skip | Retry |Abort] */
+/* [1][Imposible crear el directorio|%S][Omitir|Reintentar|Anular] */
 
 #define WRERROR                           20 /* Alert string */
-/* [1][An error occurred while |coping a file.][ Skip |Abort] */
+/* [1][Error detectado durante|la copia del fichero.][Omitir| Anular ] */
 
 #define RDERROR                           21 /* Alert string */
-/* [1][An error occurred while |reading the source file.][ Skip |Abort] */
+/* [1][Error detectado durante la|lectura del fichero fuente.][Omitir| Anular ] */
 
 #define CNTCRTFL                          22 /* Alert string */
-/* [1][Cannot create file|%S][ Skip | Retry |Abort] */
+/* [1][No es posible crear el fichero|%S][Omitir|Reintentar|Anular] */
 
 #define CNTDELF                           23 /* Alert string */
-/* [1][Cannot delete file|%S][ Skip | Retry |Abort] */
+/* [1][Imposible borrar el fichero|%S][Omitir|Reintentar|Anular] */
 
 #define CNTDELD                           24 /* Alert string */
-/* [1][Cannot delete directory|%S][ Skip | Retry |Abort] */
+/* [1][Imposible borrar el directorio|%S][Omitir|Reintentar|Anular] */
 
 #define PRINTINF                          25 /* Alert string */
-/* [1][%S|is a printing device.][  OK  ] */
+/* [1][%S es un dispositivo|de impresi¢n.][CONFIRMAR] */
 
 #define RENAME                            26 /* Alert string */
-/* [1][ Rename error! ][ Retry |Cancel] */
+/* [1][­Error al renombrar!][Reintentar| Anular ] */
 
 #define NOBUF                             27 /* Alert string */
-/* [1][Path name too long.][  OK  ] */
+/* [1][Nombre path muy largo.][CONFIRMAR] */
 
 #define DELDISK                           28 /* Alert string */
-/* [2][Do you want to delete all|the files on drive %S?][Yes| No ] */
+/* [2][¨Desea borrar todos los|ficheros de la unidad %S?][Si| No ] */
 
 #define NOTPRG                            29 /* Alert string */
-/* [1][%S|is not an application.][  OK  ] */
+/* [1][%S|no es una aplicaci¢n.][CONFIRMAR] */
 
 #define NOSETDIR                          30 /* Alert string */
-/* [1][Failed to set default |directory.][  OK  ] */
+/* [1][Error al fijar el directorio|por defecto.][CONFIRMAR] */
 
 #define NOAUTO                            31 /* Alert string */
-/* [1][Failed to save AUTO file.][  OK  ] */
+/* [1][Error al grabar fichero AUTO.][CONFIRMAR] */
 
 #define NOWINMEM                          32 /* Alert string */
-/* [1][Failed to allocate window |memory.][  OK  ] */
+/* [1][Error al asignar la|memoria de ventana.][CONFIRMAR] */
 
 #define NOTYPE                            33 /* Alert string */
-/* [1][Illegal file type.][  OK  ] */
+/* [1][Tipo de fichero |ilegal.][CONFIRMAR] */
 
 #define ICONTYPE                          34 /* Alert string */
-/* [1][Please select icon type.][Desktop|Window|Cancel] */
+/* [1][Seleccione un tipo de icono.][Desktop|Ventana|Anular] */
 
 #define NODIRCOP                          35 /* Alert string */
-/* [1][Illegal directory operation.][ Skip | Abort ] */
+/* [1][Operaci¢n ilegal en |directorio.][Omitir| Anular ] */
 
 #define NOINSTAL                          36 /* Alert string */
-/* [1][No installable item.][ OK ] */
+/* [1][Item no instalable.][CONFIRMAR] */
 
 #define NOMORE                            37 /* Alert string */
-/* [1][No more files.][  OK  ] */
+/* [1][No hay m s ficheros.][CONFIRMAR] */
 
 #define NOID                              38 /* Alert string */
-/* [1][No drive ID.][ Retry ] */
+/* [1][No hay ID. de unidad.][Reintentar] */
 
 #define ILLMAT                            39 /* Alert string */
-/* [1][Illegal .INF file format.][ OK ] */
+/* [1][Formato de fichero .INF |ilegal.][CONFIRMAR] */
 
 #define NOCART                            40 /* Alert string */
-/* [1][No cartridge.][ OK ] */
+/* [1][No hay cartucho.][CONFIRMAR] */
 
 #define NOMATCH                           41 /* Alert string */
-/* [1][No matching file type.][ OK ] */
+/* [1][No coincide el tipo de |fichero.][CONFIRMAR] */
 
 #define DELITEM                           42 /* Alert string */
-/* [1][Do you want to remove icons|or delete files?][Remove|Delete| Cancel ] */
+/* [1][¨Desea quitar iconos o|borrar ficheros?][Quitar|Borrar| Anular ] */
 
 #define MCFAIL                            43 /* Alert string */
-/* [1][Memory cleanup failed.][ OK ] */
+/* [1][Error al limpiar la |memoria.][CONFIRMAR] */
 
 #define FNOTFIND                          44 /* Alert string */
-/* [1][%S not found.][ OK ] */
+/* [1][%S no encontrado.][CONFIRMAR] */
 
 #define SNEXT                             45 /* Alert string */
-/* [1][Continue to search? ][OK| Cancel ] */
+/* [1][¨Continuar buscando? ][CONFIRMAR| Anular ] */
 
 #define NOHELP                            46 /* Alert string */
-/* [1][Help menu cannot be shown in|this resolution.][ OK ] */
+/* [1][El men£ de ayuda no se puede|mostrar en esta resoluci¢n.][CONFIRMAR] */
 
 #define NOSEA                             47 /* Alert string */
-/* [1][Cannot search on cartridge.][ OK ] */
+/* [1][Imposible buscar en cartucho.][CONFIRMAR] */
 
 #define KEYUSED                           48 /* Alert string */
-/* [1][Last key is already defined |Do you want to overwrite it? ][OK| Cancel ] */
+/* [1][La £ltima tecla est  definida|¨Desea reescribirla?][CONFIRMAR|Anular] */
 
 #define CARTNOSH                          49 /* Alert string */
-/* [1][Cannot show information|for a cartridge.][ OK ] */
+/* [1][Imposible ver informaci¢n|de cartucho.][CONFIRMAR] */
 
 #define BADKEY                            50 /* Alert string */
-/* [1][Illegal function key value.][ OK ] */
+/* [1][Valor de tecla de funci¢n |ilegal.][CONFIRMAR] */
 
 #define XNFILE                            51 /* Alert string */
-/* [1][%S not found.|Do you want to remove the|icon or locate the item?][Remove| Locate |Cancel] */
+/* [1][%S no encontrado.|¨Desea quitar el icono|o ubicar el item?.][ Quitar |Ubicar|Anular] */
 
 
 
@@ -497,7 +497,7 @@
 #    define _WORD short
 #  endif
 #endif
-extern _WORD deskus_rsc_load(void);
-extern _WORD deskus_rsc_gaddr(_WORD type, _WORD idx, void *gaddr);
-extern _WORD deskus_rsc_free(void);
+extern _WORD deskes_rsc_load(void);
+extern _WORD deskes_rsc_gaddr(_WORD type, _WORD idx, void *gaddr);
+extern _WORD deskes_rsc_free(void);
 #endif

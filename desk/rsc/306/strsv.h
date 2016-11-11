@@ -1,4 +1,4 @@
-/*	STRSWE.H		4/23/90		D.Mui			*/
+/* strsv.h		4/23/90		D.Mui			*/
 /*	Update			7/5/90		D.Mui			*/
 
 char const More[] = "-Mer-";
