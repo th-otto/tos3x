@@ -89,6 +89,33 @@ _infdata        equ DESKDBASE+$8C2                      /* E3EC30 */
 #endif
 
 
+#if TOSVERSION == 0x208
+_xbios          equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FB9C
+_bios           equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBAC
+_gemdos         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBBC
+_g_name         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$9CE8
+_deskmain       equ DESKTBASE+(DESKTLEN-DTLEN_US)+$D6B6
+_scan_2         equ DESKTBASE+$51C4
+_escan_str      equ DESKTBASE+$518C
+_save_2         equ DESKTBASE+$5208
+_app_reschange  equ DESKTBASE+$1902
+_XDeselect      equ 0
+_getcookie      equ 0
+#if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
+_infdata        equ DESKDBASE+$8E6
+#endif
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
+_infdata        equ DESKDBASE+$942
+#endif
+#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
+_infdata        equ DESKDBASE+$95E
+#endif
+#if OS_COUNTRY == CTRY_SV
+_infdata        equ DESKDBASE+$8C2
+#endif
+#endif
+
+
 #if MULTILANG_SUPPORT
 	xdef _RSCUS
 	xdef _RSCDE

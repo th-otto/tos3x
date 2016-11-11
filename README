@@ -88,9 +88,8 @@ alcyon/orig:
 * Supported versions
 *****************************************************************
 
-BIOS, VDI, GEMDOS: 2.06, 2.08, 3.06
-AES: 2.06, 3.06
-DESKTOP: not yet finished
+BIOS, VDI, GEMDOS, AES: 2.06, 2.08, 3.06
+DESKTOP: 3.06
 
 *****************************************************************
 * Supported language versions

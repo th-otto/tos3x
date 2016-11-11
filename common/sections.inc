@@ -107,14 +107,14 @@
 
 #if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
 #define BIOSTLEN    BTLEN_US+$5A
-#define DESKTLEN    DTLEN_US-$5A
+#define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $000009DE
 #define GLUELEN     $00007504
 #endif
 
 #if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
 #define BIOSTLEN    BTLEN_US+$78
-#define DESKTLEN    DTLEN_US-$5A
+#define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $000009FA
 #define GLUELEN     $00000000
 #endif
@@ -128,14 +128,14 @@
 
 #if OS_COUNTRY == CTRY_ES
 #define BIOSTLEN    BTLEN_US+$86
-#define DESKTLEN    DTLEN_US-$5A
+#define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $00000000
 #define GLUELEN     $00000000
 #endif
 
 #if OS_COUNTRY == CTRY_IT
 #define BIOSTLEN    BTLEN_US+$68
-#define DESKTLEN    DTLEN_US-$5A
+#define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $00000000
 #define GLUELEN     $00000000
 #endif
@@ -164,48 +164,55 @@
 #if TOSVERSION == 0x208
 
 #define BTLEN_US    $00005FEA
-#define DTLEN_US    $0000FBFC
+#define DTLEN_US    $0000FBCC
 
 #if OS_COUNTRY == CTRY_US
 #define BIOSTLEN    BTLEN_US
 #define DESKTLEN    DTLEN_US
-#define DESKDLEN    $00000000
+#define DESKDLEN    $00000982
 #define GLUELEN     $00000000
 #endif
 
 #if OS_COUNTRY == CTRY_DE
 #define BIOSTLEN    BTLEN_US+$5A
-#define DESKTLEN    DTLEN_US-$5A
-#define DESKDLEN    $00000000
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $000009DE
 #define GLUELEN     $00000000
 #endif
 
 #if OS_COUNTRY == CTRY_FR
 #define BIOSTLEN    BTLEN_US+$78
-#define DESKTLEN    DTLEN_US-$5A
-#define DESKDLEN    $00000000
-#define GLUELEN     $00000000
-#endif
-
-#if OS_COUNTRY == CTRY_ES
-#define BIOSTLEN    BTLEN_US+$86
-#define DESKTLEN    DTLEN_US-$5A
-#define DESKDLEN    $00000000
-#define GLUELEN     $00000000
-#endif
-
-#if OS_COUNTRY == CTRY_IT
-#define BIOSTLEN    BTLEN_US+$68
-#define DESKTLEN    DTLEN_US-$5A
-#define DESKDLEN    $00000000
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $000009FA
 #define GLUELEN     $00000000
 #endif
 
 #if OS_COUNTRY == CTRY_UK
 #define BIOSTLEN    BTLEN_US
 #define DESKTLEN    DTLEN_US
+#define DESKDLEN    $00000982
+#define GLUELEN     $00000000
+#endif
+
+#if OS_COUNTRY == CTRY_ES
+#define BIOSTLEN    BTLEN_US+$86
+#define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $00000000
 #define GLUELEN     $00000000
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+#define BIOSTLEN    BTLEN_US+$68
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $00000000
+#define GLUELEN     $00000000
+#endif
+
+#if OS_COUNTRY == CTRY_SV
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $0000095E
+#define GLUELEN     $00007658
 #endif
 
 /*
