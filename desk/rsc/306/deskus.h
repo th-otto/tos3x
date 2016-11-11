@@ -17,7 +17,7 @@
  * Number of Trees:          24
  * Number of Userblks:       0
  * Number of Images:         29
- * Total file size:          24426
+ * Total file size:          24120
  */
 
 #undef RSC_NAME
@@ -317,7 +317,6 @@
 #define WI1                                5 /* BUTTON in tree SSYSTEM */
 #define DEFFULL                            8 /* BUTTON in tree SSYSTEM */
 #define DEFFILE                            9 /* BUTTON in tree SSYSTEM */
-#define MFBASE                            11 /* BOX in tree SSYSTEM */
 #define SDLEFT                            12 /* BOXCHAR in tree SSYSTEM */
 #define SDFILE                            13 /* FTEXT in tree SSYSTEM */ /* max len 17 */
 #define SDRIGHT                           14 /* BOXCHAR in tree SSYSTEM */

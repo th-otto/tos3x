@@ -66,6 +66,29 @@ static uint16_t getbeshort(const char *ptr)
 }
 
 
+static uint32_t getbelong(const char *ptr)
+{
+	return ((uint32_t)getbeshort(ptr) << 16) | ((uint32_t)getbeshort(ptr + 2));
+}
+
+
+static void putbeshort(char *ptr, uint16_t val)
+{
+	ptr[0] = (val >> 8) & 0xff;
+	ptr[1] = val & 0xff;
+}
+
+
+#if 0
+static void putbelong(char *ptr, uint32_t val)
+{
+	putbeshort(ptr, val >> 16);
+	putbeshort(ptr + 2, val);
+}
+#endif
+
+
+
 static void get_rsc_header(const char *ptr, RS_HEADER *hdr)
 {
 	hdr->rsh_vrsn = getbeshort(ptr + 0);
@@ -208,9 +231,10 @@ int main(int argc, char **argv)
 	const char *filename;
 	long size;
 	char *buffer;
-	const char *address;
+	char *address;
 	const char *end;
-	RS_HEADER hdr;
+	RS_HEADER gemhdr;
+	RS_HEADER deskhdr;
 	glue_header glue;
 	int found;
 	
@@ -266,8 +290,8 @@ int main(int argc, char **argv)
 			glue.off_deskrsc < glue.off_deskinf &&
 			glue.off_deskinf < glue.totalsize)
 		{
-			get_rsc_header(address + SIZEOF_GLUE_HEADER, &hdr);
-			if (test_header(&hdr, size - offset))
+			get_rsc_header(address + SIZEOF_GLUE_HEADER, &gemhdr);
+			if (test_header(&gemhdr, size - offset))
 			{
 				uint16_t ccode;
 				const char *country;
@@ -278,10 +302,16 @@ int main(int argc, char **argv)
 				
 				found = TRUE;
 				printf(_("found resource at $%08lx\n"), offset);
-				print_header(&hdr);
-				ccode = getbeshort(buffer + 28);
+				printf("GEM:\n");
+				print_header(&gemhdr);
+				printf("DESKTOP:\n");
+				get_rsc_header(address + glue.off_deskrsc, &deskhdr);
+				print_header(&deskhdr);
+				ccode = (getbeshort(buffer + 28) >> 1) & 0x7f;
 				version = getbeshort(buffer + 2);
-				switch ((ccode >> 1) & 0x7f)
+				if (version == 0x306 && ccode == CTRY_UK && getbelong(buffer + 8) == 0x380000)
+					ccode = CTRY_PL;
+				switch (ccode)
 				{
 					case CTRY_US: country = "us"; break;
 					case CTRY_DE: country = "de"; break;
@@ -349,6 +379,13 @@ int main(int argc, char **argv)
 				write_file(gemrsc, address + SIZEOF_GLUE_HEADER, size);
 
 				size = glue.off_deskinf - glue.off_deskrsc - 4;
+				/*
+				 * fix wrong rsh_rssize field in PL resource
+				 */
+				if (ccode == CTRY_PL && deskhdr.rsh_rssize == 0x620c)
+				{
+					putbeshort(address + glue.off_deskrsc + 34, 0x6208);
+				}
 				write_file(deskrsc, address + glue.off_deskrsc, size);
 
 				size = glue.totalsize - glue.off_deskinf - 4;
