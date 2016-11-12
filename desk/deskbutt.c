@@ -42,7 +42,7 @@ int16_t av_icon(NOTHING)
 					{
 						if (!(obj[i].ob_flags & HIDETREE))
 						{
-							if ((obj[i].ob_x == x) && (obj[i].ob_y == y))
+							if (obj[i].ob_x == x && obj[i].ob_y == y)
 							{
 								found = TRUE;
 								break;
@@ -54,7 +54,7 @@ int16_t av_icon(NOTHING)
 						goto av_1;
 				}
 			}
-		  av_1:
+		av_1:
 			backid[k].i_path = NULL;
 			obj[k].ob_flags = NONE;
 			obj[k].ob_state = NORMAL;
@@ -109,7 +109,7 @@ PP(int16_t my;)
 
 	/* click on any objects */
 
-	if ((kstate != K_RSHIFT) && (kstate != K_LSHIFT))
+	if (kstate != K_RSHIFT && kstate != K_LSHIFT)
 		keypress = FALSE;
 	else
 		keypress = TRUE;
@@ -123,7 +123,7 @@ PP(int16_t my;)
 		{
 			clr_dicons();				/* clean up desktop icons */
 
-			if ((x_win) && (x_win != win))
+			if (x_win && x_win != win)
 				clr_xwin(x_win, TRUE);
 
 			if (!item)					/* hit nothing      */
@@ -139,7 +139,7 @@ PP(int16_t my;)
 				obj = win->w_obj;
 				state = obj[item].ob_state;
 
-				if ((state & SELECTED) && (!keypress))
+				if ((state & SELECTED) && !keypress)
 					goto a_1;
 
 				if (!keypress)
@@ -172,7 +172,7 @@ PP(int16_t my;)
 				obj = background;
 				state = obj[item].ob_state;
 
-				if ((state & SELECTED) && (!keypress))
+				if ((state & SELECTED) && !keypress)
 					goto a_1;
 
 				if (!keypress)

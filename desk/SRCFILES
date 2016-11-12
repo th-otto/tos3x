@@ -8,6 +8,12 @@ DESK_OBJS=${DESK_OBJS1} ${DESK_OBJS2} ${DESK_OBJS3} ${DESK_OBJS4} ${DESK_OBJS5} 
 
 DESK_SRCS=\
 	deskdefs.h \
+	desktop.h \
+	deskrsc.h \
+	aesbind.h \
+	mobdefs.h \
+	osbind.h \
+	window.h \
 	deskact.c \
 	deskapp.c \
 	deskbind.c \
@@ -43,4 +49,5 @@ EXTRA_DIST=\
 	Makefile \
 	SRCFILES \
 	optimize.mak \
+	deskext.S \
 	${empty}

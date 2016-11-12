@@ -189,7 +189,7 @@ VOID col_pa_pref(NOTHING)
 		{
 			obj[PATTERN].ob_spec &= 0xFFFFFF0FL;
 			obj[PATTERN].ob_spec |= obj[ret].ob_spec & 0x000000F0L;
-		} else /* color changed    */ if ((ret >= COLOR0) && (ret <= COLOR15))
+		} else /* color changed    */ if (ret >= COLOR0 && ret <= COLOR15)
 		{
 			obj[PATTERN].ob_spec &= 0xFFFFFFF0L;
 			obj[PATTERN].ob_spec |= obj[ret].ob_spec & 0x0000000FL;

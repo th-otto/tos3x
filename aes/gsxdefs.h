@@ -166,7 +166,7 @@ VOID gsx_ncode PROTO((int16_t code, int16_t n, int16_t m));
 VOID gsx_init PROTO((NOTHING));
 VOID gsx_graphic PROTO((BOOLEAN tographic));
 VOID gsx_escapes PROTO((int16_t esc_code));
-VOID v_hardcopy PROTO((NOTHING));
+VOID av_hardcopy PROTO((NOTHING));
 VOID gsx_wsopen PROTO((NOTHING));
 VOID gsx_wsclose PROTO((NOTHING));
 VOID ratinit PROTO((NOTHING));

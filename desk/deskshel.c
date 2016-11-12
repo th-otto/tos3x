@@ -111,7 +111,7 @@ VOID print_file(NOTHING)
 
 	while (ret)
 	{
-		if ((type == XFILE) || (type == WINICON))
+		if (type == XFILE || type == WINICON)
 		{
 			if (!print)
 			{
@@ -255,7 +255,7 @@ PP(const char *intail;)
 	app = app_xtype(infile, &install);
 	type = app->a_type;
 	/* installed document   */
-	if ((install) && (app->a_name[0]))
+	if (install && app->a_name[0])
 	{
 		tail = infile;					/* infile becomes tail  */
 		file = app->a_name;
@@ -304,7 +304,7 @@ PP(const char *intail;)
 		/* fall through */
 		
 	case PTP:							/* program takes parameter  */
-		if ((install) || (*tail))
+		if (install || *tail)
 			break;
 
 		obj = get_tree(ADOPENAP);
@@ -334,7 +334,7 @@ PP(const char *intail;)
 		return;
 	}
 
-	do_box(win, item, (win) ? FALSE : TRUE, TRUE, TRUE);
+	do_box(win, item, win ? FALSE : TRUE, TRUE, TRUE);
 	run_it(file, comtail, graphic, setdir);
 }
 

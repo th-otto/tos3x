@@ -740,7 +740,7 @@ PP(BOOLEAN disk;)
 	ptr1++;								/* leave space to save the count    */
 
 	tree = obj++;
-	lines = (disk) ? 9 : 5;
+	lines = disk ? 9 : 5;
 
 	for (count = 0, j = 0; j < limit; j++, obj++)
 	{
@@ -895,8 +895,8 @@ PP(register WINDOW *swin;)
 	state = SELECTED;
 	i_find(omx, omy, &pwin, &ret, &ptype);
 	pitem = ret;
-	pobj = (ptype == DESKICON) ? background : pwin->w_obj;
-	pid = (ptype == DESKICON) ? 0 : pwin->w_id;
+	pobj = ptype == DESKICON ? background : pwin->w_obj;
+	pid = ptype == DESKICON ? 0 : pwin->w_id;
 
 	ret = FALSE;						/* not into the loop yet    */
 	cx = omx;
@@ -1137,7 +1137,7 @@ PP(WINDOW *dwin;)
 	register DIR *dir;
 	register char *temp;
 
-	temp = (swin == dwin) ? path3 : dwin->w_buf;
+	temp = swin == dwin ? path3 : dwin->w_buf;
 	strcpy(temp, dwin->w_path);
 
 	if (ditem)							/* copy to something    */

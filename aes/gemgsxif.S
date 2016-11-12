@@ -308,14 +308,14 @@ L9:	moveq.l	#3,d0
 
 
 #if CCODE
-VOID v_hardcopy(NOTHING)
+VOID av_hardcopy(NOTHING)
 {
 	gsx_escapes(17);
 }
 #endif
 /* 306de: 00e2511e */
-	xdef _v_hardcopy
-_v_hardcopy:
+	xdef _av_hardcopy
+_av_hardcopy:
 	moveq.l	#17,d0
 	bra	escape
 

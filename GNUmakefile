@@ -24,6 +24,8 @@ dist::
 	$(CP) -a $(EXTRA_DIST) $(DISTDIR)
 	$(CP) -a -r include $(DISTDIR)
 	$(CP) -a -r bin $(DISTDIR)
-	cp -a listings/tos306de.s $(DISTDIR)/listings
+	$(CP) -a listings/tos306de.s $(DISTDIR)/listings
+	$(CP) -a -r aes/rsc $(DISTDIR)/aes
+	$(CP) -a -r desk/rsc $(DISTDIR)/desk
 	(cd $(DISTDIR)/..; rm -f tos306de.tar.bz2; tar cvfj tos306de.tar.bz2 tos306de)
 	test -d "$(WWWDIR)" && cp $(DISTDIR)/../tos306de.tar.bz2 "$(WWWDIR)"

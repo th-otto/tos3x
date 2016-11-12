@@ -171,7 +171,7 @@ PP(char *filename;)
 	goto s_ex3;
 
   s_ex1:								/* if not select from top window */
-	if ((x_type == WINICON) && (x_status))
+	if (x_type == WINICON && x_status)
 		clr_xwin(x_win, TRUE);
   s_ex2:
 	clr_dicons();
@@ -233,7 +233,7 @@ PP(register char *filename;)
 
 	while (!ret)
 	{
-		if ((ldtabuf->dirfile.d_att & FA_DIREC) && (ldtabuf->dirfile.d_name[0] != '.'))
+		if ((ldtabuf->dirfile.d_att & FA_DIREC) && ldtabuf->dirfile.d_name[0] != '.')
 		{
 			path2[0] = '.';
 			path2[1] = '\\';

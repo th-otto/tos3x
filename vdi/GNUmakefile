@@ -52,3 +52,4 @@ clean:
 	$(RM) *.o *.a $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
+	$(RM) $(top_srcdir)/common/sections.mak

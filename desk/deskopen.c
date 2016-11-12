@@ -820,7 +820,7 @@ PP(BOOLEAN openfull;)
 
 	rc_copy(openfull ? &full : &win->w_work, &dc);
 
-	if ((obj[item].ob_flags & HIDETREE) || (!item))
+	if ((obj[item].ob_flags & HIDETREE) || !item)
 	{
 		if (desk)
 			rc_center(&full, &pc);
@@ -997,7 +997,7 @@ l_1:
 	{
 		if (file)
 		{
-			if ((buffer[0]) && (path1[0]))
+			if (buffer[0] && path1[0])
 				rep_path(buffer, path1);
 			else
 				goto l_1;

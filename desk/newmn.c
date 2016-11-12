@@ -294,7 +294,7 @@ VOID mv_desk(NOTHING)
 		which = form_do(obj, MKKEYS) & 0x7fff;
 		obj[which].ob_state &= ~SELECTED;
 
-		if ((which == MKUPS) || (which == MKDOWNS) || (which == MOK))
+		if (which == MKUPS || which == MKDOWNS || which == MOK)
 		{
 			fs_sget((LPTREE)obj, MKKEYS, buf);
 			buf[0] = toupper(buf[0]);
@@ -407,8 +407,8 @@ VOID mv_desk(NOTHING)
 			goto ad_1;
 
 		case MOK:
-			s_defdir = ((dstart == SDAPP) ? (TRUE) : (FALSE));
-			s_fullpath = ((istart == SIFULL) ? (TRUE) : (FALSE));
+			s_defdir = dstart == SDAPP ? TRUE : FALSE;
+			s_fullpath = istart == SIFULL ? TRUE : FALSE;
 			goto ad_1;
 
 		case MFUP:
@@ -594,7 +594,7 @@ VOID mins_app(NOTHING)
 
 	while (cont)
 	{
-		if ((type != WINICON) && (type != XFILE))
+		if (type != WINICON && type != XFILE)
 			goto is_1;
 
 		app = app_xtype(str, &install);
@@ -799,7 +799,7 @@ VOID mins_app(NOTHING)
 			case MPOK:
 				done = TRUE;			/*Install */
 				l = (uint16_t) (istart - MPINONE);	/* Get 1 - 20 */
-				if ((istart >= MPIF1) && (istart <= MPIF20))
+				if (istart >= MPIF1 && istart <= MPIF20)
 				{
 					sapp = applist;
 
@@ -1243,15 +1243,16 @@ BOOLEAN set_video(NOTHING)
 			 * out of it...
 			 */
 		case SVOK:
-			if (((cstart != old_cstart) ||
-				 (lstart != old_lstart) ||
-				 (dstart != old_dstart) ||
+			if ((cstart != old_cstart ||
+				 lstart != old_lstart ||
+				 (start != old_dstart ||
 				 (old_mode_code & VIDEL_COMPAT)) && monitor_type)
 			{
 				st_flag = FALSE;
-				mode_code = ((cstart - VID2) |
-							 (lstart == SVL80 ? VIDEL_80COL : VIDEL_40COL) |
-							 vga_flag | pal_flag | overscan_flag | st_flag | ((dstart == SVION) ? VIDEL_VERTICAL : 0));
+				mode_code = (cstart - VID2) |
+							(lstart == SVL80 ? VIDEL_80COL : VIDEL_40COL) |
+							vga_flag | pal_flag | overscan_flag | st_flag |
+							(dstart == SVION ? VIDEL_VERTICAL : 0);
 				/* Check if there is enough memory
 				 * to switch to the new mode
 				 * If not, go back to form_do...
@@ -1340,7 +1341,7 @@ BOOLEAN set_video(NOTHING)
 							/*   d_rezword = mode_code;    */
 						}
 
-						if ((mode_code ^ old_mode_code))
+						if (mode_code ^ old_mode_code)
 						{
 							if (get_that_size(mode_code))
 							{
@@ -1510,7 +1511,7 @@ PP(int16_t Skip;)
 	flag = menu_popup(&Menu, brect.g_x, brect.g_y, &MData);
 	if (flag)
 	{
-		if ((Mtree == MData.mn_tree) && (MData.mn_menu == Mmenu))
+		if (Mtree == MData.mn_tree && MData.mn_menu == Mmenu)
 		{
 			menu_icheck(Mtree, *Mstart, 0);
 			menu_icheck(Mtree, MData.mn_item, 1);

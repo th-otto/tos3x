@@ -71,11 +71,11 @@ PP(char *buffer;)
 char uhex_dig(P(int16_t) wd)
 PP(register int16_t wd;)
 {
-	if ((wd >= 0) && (wd <= 9))
-		return (wd + '0');
+	if (wd >= 0 && wd <= 9)
+		return wd + '0';
 
-	if ((wd >= 0x0a) && (wd <= 0x0f))
-		return (wd + 'A' - 0x0a);
+	if (wd >= 0x0a && wd <= 0x0f)
+		return wd + 'A' - 0x0a;
 
 	return ' ';
 }
@@ -131,7 +131,7 @@ PP(uint16_t wd;)
 	*pcurr++ = uhex_dig((wd >> 4) & 0x000f);
 	*pcurr++ = uhex_dig(wd & 0x000f);
 	*pcurr++ = ' ';
-	return (pcurr);
+	return pcurr;
 }
 
 
@@ -147,7 +147,7 @@ PP(register const char *pstr;)
 		*pcurr++ = *pstr++;
 	*pcurr++ = '@';
 	*pcurr++ = ' ';
-	return (pcurr);
+	return pcurr;
 }
 
 
@@ -179,7 +179,7 @@ PP(register const char *pcurr;)
 		if (!(x = isdrive()))
 			return pcurr;
 
-		if ((pcurr[13] == 'C') && !(x & 0x04))
+		if (pcurr[13] == 'C' && !(x & 0x04))
 			return pcurr;
 
 		ix = DISK;						/* disk drive   */
@@ -214,10 +214,11 @@ PP(register const char *pcurr;)
 	app_posicon(x, y, &obj[id].ob_x, &obj[id].ob_y);
 
 	pcurr = scan_2(pcurr, &i);			/* get the icon id  */
-/*
-	if ( i >= numicon )
-	  i = numicon - 1;
-*/
+#if 0
+	if (i >= numicon)
+		i = numicon - 1;
+#endif
+
 	backid[id].i_icon = i;
 
 	iblk = (CICONBLK *) (background[id].ob_spec);
@@ -229,11 +230,11 @@ PP(register const char *pcurr;)
 #endif
 
 	pcurr += 3;
-	iblk->monoblk.ib_char[1] = (*pcurr == ' ') ? 0 : *pcurr;
+	iblk->monoblk.ib_char[1] = *pcurr == ' ' ? 0 : *pcurr;
 	pcurr += 2;
 
 	/* for extended file or folder */
-	if ((type == 'X') || (type == 'V'))
+	if (type == 'X' || type == 'V')
 	{
 		pcurr = lp_fill(pcurr, &backid[id].i_path);
 		pcurr = escan_str(pcurr, iblk->monoblk.ib_ptext);
@@ -250,7 +251,7 @@ PP(register const char *pcurr;)
 		pcurr = escan_str(pcurr, buffer);
 	}
 
-	return (pcurr);
+	return pcurr;
 }
 
 
@@ -292,11 +293,11 @@ PP(register const char *pcurr;)
 		type = ICONS;
 		break;
 	default:
-		return (pcurr);
+		return pcurr;
 	}
 
 	if (!(app = app_alloc()))			/* allocate a app   */
-		return (pcurr);
+		return pcurr;
 
 	app->a_type = type;					/* prg takes parameter  */
 
@@ -326,11 +327,11 @@ PP(register const char *pcurr;)
 
 	/********** Kludge **********/
 	/* make the old inf works with the new one  */
-	if ((app->a_type == TOS) && (!app->a_name[0]))
+	if (app->a_type == TOS && !app->a_name[0])
 		app->a_type = TEXT;
 
 	/***************************/
-	return (pcurr);
+	return pcurr;
 }
 
 
@@ -663,13 +664,13 @@ VOID read_inf(NOTHING)
 int16_t hex_dig(P(char) achar)
 PP(register char achar;)
 {
-	if ((achar >= '0') && (achar <= '9'))
-		return (achar - '0');
+	if (achar >= '0' && achar <= '9')
+		return achar - '0';
 
-	if ((achar >= 'A') && (achar <= 'F'))
-		return (achar - 'A' + 10);
+	if (achar >= 'A' && achar <= 'F')
+		return achar - 'A' + 10;
 
-	return (0);
+	return 0;
 }
 
 
@@ -703,7 +704,7 @@ PP(register char *pcurr;)
 	*pcurr++ = 0x0d;
 	*pcurr++ = 0x0a;
 
-	return (pcurr);
+	return pcurr;
 }
 
 
@@ -734,8 +735,9 @@ PP(BOOLEAN todisk;)
 		buf = pcurr = (char *)Malloc(size);
 	} else
 	{
-	  if_1:do1_alert(FCNOMEM);
-		return (FALSE);
+	if_1:
+		do1_alert(FCNOMEM);
+		return FALSE;
 	}
 
 	desk_wait(TRUE);
@@ -768,14 +770,14 @@ PP(BOOLEAN todisk;)
 	for (i = 0; i < MAXMENU + 2; i++)
 	{
 		if (inf_permute[i] < 0)
-			pcurr = save_2(pcurr, (uint16_t) 0);
+			pcurr = save_2(pcurr, 0);
 		else
-			pcurr = save_2(pcurr, (uint16_t) mentable[inf_permute[i]]);
+			pcurr = save_2(pcurr, mentable[inf_permute[i]]);
 	}
 #else
 	for (i = 0; i < MAXMENU; i++)
 	{
-		pcurr = save_2(pcurr, (uint16_t) mentable[i]);
+		pcurr = save_2(pcurr, mentable[i]);
 	}
 #endif
 	*pcurr++ = '@';
@@ -1036,7 +1038,7 @@ PP(BOOLEAN todisk;)
 	if (todisk)
 	{
 		m_infpath(infname);				/* always write newdesk.inf */
-	  if_3:							/* create a file, read & write  */
+	if_3:								/* create a file, read & write  */
 		handle = Fcreate(infname, 0x0);
 
 		if (handle < 0)
@@ -1078,7 +1080,7 @@ PP(BOOLEAN todisk;)
 		up_allwin(infname, FALSE);		/* rebuild any window on the INF drive */
 
 	desk_wait(FALSE);
-	return (TRUE);
+	return TRUE;
 }
 
 

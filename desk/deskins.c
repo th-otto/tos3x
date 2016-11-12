@@ -181,9 +181,9 @@ VOID ins_app(NOTHING)
 		else
 			obj[INSFILE].ob_state = SELECTED;
 
-		inf_sset(obj, APDFTYPE, (newapp) ? Nostr : &app->a_doc[2]);
+		inf_sset(obj, APDFTYPE, newapp ? Nostr : &app->a_doc[2]);
 		xinf_sset(obj, APNAME, g_name(str));
-		inf_sset(obj, ARGS, (newapp) ? Nostr : app->a_argu);
+		inf_sset(obj, ARGS, newapp ? Nostr : app->a_argu);
 
 		switch (app->a_type)
 		{
@@ -630,7 +630,7 @@ VOID ins_icons(NOTHING)
 				iblk->monoblk.ib_char[1] = idbuffer[0];
 			} else
 			{
-				type = (which == 1) ? TRASHCAN : PRINTER;
+				type = which == 1 ? TRASHCAN : PRINTER;
 				iblk->monoblk.ib_char[1] = 0;
 			}
 		} else

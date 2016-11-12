@@ -113,9 +113,9 @@
 	xdef _gsx_sclip
 	xdef _gsx_attr
 	xdef _gsx_xline
-	xdef _vro_cpyfm
+	xdef _avro_cpyfm
 	xdef _gsx_ncode
-	xdef _v_hardcopy
+	xdef _av_hardcopy
 	
 	xdef lmul
 	xdef ldiv
@@ -218,9 +218,9 @@ _sh_write       equ AESTBASE+$7408
 _gsx_sclip      equ AESTBASE+$AC70
 _gsx_attr       equ AESTBASE+$AD6E
 _gsx_xline      equ AESTBASE+$B32C
-_vro_cpyfm      equ AESTBASE+$BCAE
+_avro_cpyfm     equ AESTBASE+$BCAE
 _gsx_ncode      equ AESTBASE+$B8FA
-_v_hardcopy     equ AESTBASE+$B98E
+_av_hardcopy    equ AESTBASE+$B98E
 
 lmul            equ AESTBASE+$BF78
 ldiv            equ AESTBASE+$BFCC

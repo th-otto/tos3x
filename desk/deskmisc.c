@@ -588,7 +588,7 @@ PP(register char *pnumstr;)
 	for (ii = 0; ii < 2; pnumstr[ii++] = '0')
 		;
 	pnumstr[2] = '\0';
-	merge_str(((number > 9) ? pnumstr : pnumstr + 1), "%W", &number);
+	merge_str(number > 9 ? pnumstr : pnumstr + 1, "%W", &number);
 }
 
 
@@ -951,7 +951,7 @@ PP(int16_t item;)
 
 	while (*ptr1)
 	{
-		if ((*ptr1 == '[') || (*ptr1 == ']') || (*ptr1 == '|'))
+		if (*ptr1 == '[' || *ptr1 == ']' || *ptr1 == '|')
 			strcpy(ptr1, ptr1 + 1);
 		else
 			ptr1++;

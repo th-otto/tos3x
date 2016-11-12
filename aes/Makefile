@@ -1,4 +1,4 @@
-top_srcdir=..
+ptop_srcdir=..
 
 include $(top_srcdir)/Makefile.common
 include $(top_srcdir)/Makefile.silent

@@ -391,7 +391,7 @@ m_2:
 
 	pref_save = gl_restype;				/* get the real res     */
 	/* change the menu bar      */
-	do_view((s_view == S_ICON) ? ICONITEM : TEXTITEM);
+	do_view(s_view == S_ICON ? ICONITEM : TEXTITEM);
 
 #if !BINEXACT
 	i = NOSORT; /* quiet compiler */

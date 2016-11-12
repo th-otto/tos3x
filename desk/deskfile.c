@@ -354,7 +354,7 @@ PP(register WINDOW *win;)
 	{
 		if (s_view == S_ICON)
 		{
-			app_icon(&dir[i].d_name[0], (dir[i].d_att & 0x10) ? FOLDER : -1, &type);
+			app_icon(&dir[i].d_name[0], (dir[i].d_att & FA_DIREC) ? FOLDER : -1, &type);
 #if COLORICON_SUPPORT
 			cp_iblk(type, (CICONBLK *) (obj->ob_spec));
 #else
@@ -482,7 +482,7 @@ PP(int16_t attr;)
 		if (dtabuf.dirfile.d_att & FA_LABEL)
 			goto r_3;
 		/* directory file   */
-		if (dtabuf.dirfile.d_att & 0x10)
+		if (dtabuf.dirfile.d_att & FA_DIREC)
 		{
 			if (dtabuf.dirfile.d_name[0] == '.')
 #if (TOSVERSION >= 0x400) | !BINEXACT

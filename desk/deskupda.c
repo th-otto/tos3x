@@ -141,7 +141,7 @@ PP(char *new;)
 				copy1 = ptr1 = end2 + 3;
 				q_change = TRUE;
 			}							/* same string  */
-		  qq_1:
+		qq_1:
 			if (temp == 'V')
 				*sl = tmp2;
 

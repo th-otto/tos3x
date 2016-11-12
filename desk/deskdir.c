@@ -788,7 +788,7 @@ PP(char *fstr;)
 
 	while (copysiz >= 0)				/* let it passes through for zero file */
 	{
-		tmpsiz = (copysiz > bufsiz) ? bufsiz : copysiz;
+		tmpsiz = copysiz > bufsiz ? bufsiz : copysiz;
 		if (Fread(inhand, tmpsiz, buffer) < 0)
 		{
 			retmsg = SKIP;

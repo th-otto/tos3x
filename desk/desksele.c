@@ -138,7 +138,7 @@ BOOLEAN o_select(NOTHING)
 
 		for (i = 1; i <= j; i++)
 		{
-			if ((obj[i].ob_state & SELECTED) && (obj[i].ob_flags != HIDETREE))
+			if ((obj[i].ob_state & SELECTED) && obj[i].ob_flags != HIDETREE)
 			{
 				if (in_parent(obj, i))	/* in side parent's box? */
 				{

@@ -17,9 +17,10 @@ error
 
 /*
  * Must include the specific resource header file;
- * the layout is actually different
+ * the layout is actually different.
+ * We can use the same header files for 2.06, 2.08 & 3.06, though.
  */
-#if TOSVERSION == 0x306
+#if (TOSVERSION == 0x306) | (TOSVERSION == 0x206) | (TOSVERSION == 0x208)
 #if OS_COUNTRY == CTRY_US
 #include "rsc/306/deskus.h"
 #endif

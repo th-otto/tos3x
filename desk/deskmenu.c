@@ -40,10 +40,33 @@ STATIC const int16_t *contable;
 /* USA|UK|SPAIN|ITALY|SWEDEN */
 #if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV)
 static int16_t const key1table[] = {
-	0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
-	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x3200, 0x3100,
-	0x1800, 0x1900, 0x1000, 0x1300, 0x1f00, 0x1400, 0x1600,
-	0x2f00, 0x1100, 0x2d00, 0x1500, 0x2c00, 0
+	0x1e00,	/* ALT-'A' */
+	0x3000, /* ALT-'B' */
+	0x2e00, /* ALT-'C' */
+	0x2000, /* ALT-'D' */
+	0x1200, /* ALT-'E' */
+	0x2100, /* ALT-'F' */
+	0x2200, /* ALT-'G' */
+	0x2300, /* ALT-'H' */
+	0x1700, /* ALT-'I' */
+	0x2400, /* ALT-'J' */
+	0x2500, /* ALT-'K' */
+	0x2600, /* ALT-'L' */
+	0x3200, /* ALT-'M' */
+	0x3100, /* ALT-'N' */
+	0x1800, /* ALT-'O' */
+	0x1900, /* ALT-'P' */
+	0x1000, /* ALT-'Q' */
+	0x1300, /* ALT-'R' */
+	0x1f00, /* ALT-'S' */
+	0x1400, /* ALT-'T' */
+	0x1600, /* ALT-'U' */
+	0x2f00, /* ALT-'V' */
+	0x1100, /* ALT-'W' */
+	0x2d00, /* ALT-'X' */
+	0x1500, /* ALT-'Y' */
+	0x2c00, /* ALT-'Z' */
+	0
 };
 #if !MULTILANG_SUPPORT
 #define keytable key1table
@@ -53,10 +76,33 @@ static int16_t const key1table[] = {
 #if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
 /* GERMANY|SWISSFRE|SWISSGER */
 static int16_t const key2table[] = {
-	0x1e00, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
-	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x3200, 0x3100,
-	0x1800, 0x1900, 0x1000, 0x1300, 0x1f00, 0x1400, 0x1600,
-	0x2f00, 0x1100, 0x2d00, 0x2c00, 0x1500, 0
+	0x1e00,	/* ALT-'A' */
+	0x3000, /* ALT-'B' */
+	0x2e00, /* ALT-'C' */
+	0x2000, /* ALT-'D' */
+	0x1200, /* ALT-'E' */
+	0x2100, /* ALT-'F' */
+	0x2200, /* ALT-'G' */
+	0x2300, /* ALT-'H' */
+	0x1700, /* ALT-'I' */
+	0x2400, /* ALT-'J' */
+	0x2500, /* ALT-'K' */
+	0x2600, /* ALT-'L' */
+	0x3200, /* ALT-'M' */
+	0x3100, /* ALT-'N' */
+	0x1800, /* ALT-'O' */
+	0x1900, /* ALT-'P' */
+	0x1000, /* ALT-'Q' */
+	0x1300, /* ALT-'R' */
+	0x1f00, /* ALT-'S' */
+	0x1400, /* ALT-'T' */
+	0x1600, /* ALT-'U' */
+	0x2f00, /* ALT-'V' */
+	0x1100, /* ALT-'W' */
+	0x2d00, /* ALT-'X' */
+	0x2c00, /* ALT-'Y' */
+	0x1500, /* ALT-'Z' */
+	0
 };
 #if !MULTILANG_SUPPORT
 #define keytable key2table
@@ -66,10 +112,33 @@ static int16_t const key2table[] = {
 #if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_FR)
 /* FRENCH */
 static int16_t const key3table[] = {
-	0x1000, 0x3000, 0x2e00, 0x2000, 0x1200, 0x2100, 0x2200,
-	0x2300, 0x1700, 0x2400, 0x2500, 0x2600, 0x2700, 0x3100,
-	0x1800, 0x1900, 0x1e00, 0x1300, 0x1f00, 0x1400, 0x1600,
-	0x2f00, 0x2c00, 0x2d00, 0x1500, 0x1100, 0
+	0x1000,	/* ALT-'A' */
+	0x3000, /* ALT-'B' */
+	0x2e00, /* ALT-'C' */
+	0x2000, /* ALT-'D' */
+	0x1200, /* ALT-'E' */
+	0x2100, /* ALT-'F' */
+	0x2200, /* ALT-'G' */
+	0x2300, /* ALT-'H' */
+	0x1700, /* ALT-'I' */
+	0x2400, /* ALT-'J' */
+	0x2500, /* ALT-'K' */
+	0x2600, /* ALT-'L' */
+	0x2700, /* ALT-'M' */
+	0x3100, /* ALT-'N' */
+	0x1800, /* ALT-'O' */
+	0x1900, /* ALT-'P' */
+	0x1e00, /* ALT-'Q' */
+	0x1300, /* ALT-'R' */
+	0x1f00, /* ALT-'S' */
+	0x1400, /* ALT-'T' */
+	0x1600, /* ALT-'U' */
+	0x2f00, /* ALT-'V' */
+	0x2c00, /* ALT-'W' */
+	0x2d00, /* ALT-'X' */
+	0x1500, /* ALT-'Y' */
+	0x1100, /* ALT-'Z' */
+	0
 };
 #if !MULTILANG_SUPPORT
 #define keytable key3table
@@ -83,10 +152,33 @@ static int16_t const key3table[] = {
 #if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV)
 /* USA|UK|SPAIN|ITALY|SWEDEN */
 static int16_t const con1table[] = {
-	0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
-	0x2308, 0x1709, 0x240a, 0x250b, 0x260c, 0x320d, 0x310e,
-	0x180f, 0x1910, 0x1011, 0x1312, 0x1f13, 0x1414, 0x1615,
-	0x2f16, 0x1117, 0x2d18, 0x1519, 0x2c1a, 0
+	0x1e01,	/* CTRL-'A' */
+	0x3002, /* CTRL-'B' */
+	0x2e03, /* CTRL-'C' */
+	0x2004, /* CTRL-'D' */
+	0x1205, /* CTRL-'E' */
+	0x2106, /* CTRL-'F' */
+	0x2207, /* CTRL-'G' */
+	0x2308, /* CTRL-'H' */
+	0x1709, /* CTRL-'I' */
+	0x240a, /* CTRL-'J' */
+	0x250b, /* CTRL-'K' */
+	0x260c, /* CTRL-'L' */
+	0x320d, /* CTRL-'M' */
+	0x310e, /* CTRL-'N' */
+	0x180f, /* CTRL-'O' */
+	0x1910, /* CTRL-'P' */
+	0x1011, /* CTRL-'Q' */
+	0x1312, /* CTRL-'R' */
+	0x1f13, /* CTRL-'S' */
+	0x1414, /* CTRL-'T' */
+	0x1615, /* CTRL-'U' */
+	0x2f16, /* CTRL-'V' */
+	0x1117, /* CTRL-'W' */
+	0x2d18, /* CTRL-'X' */
+	0x1519, /* CTRL-'Y' */
+	0x2c1a, /* CTRL-'Z' */
+	0
 };
 #if !MULTILANG_SUPPORT
 #define contable con1table
@@ -96,10 +188,33 @@ static int16_t const con1table[] = {
 #if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
 /* GERMANY|SWISSFRE|SWISSGER */
 static int16_t const con2table[] = {
-	0x1e01, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
-	0x2308, 0x1709, 0x240a, 0x250b, 0x260c, 0x320d, 0x310e,
-	0x180f, 0x1910, 0x1011, 0x1312, 0x1f13, 0x1414, 0x1615,
-	0x2f16, 0x1117, 0x2d18, 0x2c19, 0x151a, 0
+	0x1e01,	/* CTRL-'A' */
+	0x3002, /* CTRL-'B' */
+	0x2e03, /* CTRL-'C' */
+	0x2004, /* CTRL-'D' */
+	0x1205, /* CTRL-'E' */
+	0x2106, /* CTRL-'F' */
+	0x2207, /* CTRL-'G' */
+	0x2308, /* CTRL-'H' */
+	0x1709, /* CTRL-'I' */
+	0x240a, /* CTRL-'J' */
+	0x250b, /* CTRL-'K' */
+	0x260c, /* CTRL-'L' */
+	0x320d, /* CTRL-'M' */
+	0x310e, /* CTRL-'N' */
+	0x180f, /* CTRL-'O' */
+	0x1910, /* CTRL-'P' */
+	0x1011, /* CTRL-'Q' */
+	0x1312, /* CTRL-'R' */
+	0x1f13, /* CTRL-'S' */
+	0x1414, /* CTRL-'T' */
+	0x1615, /* CTRL-'U' */
+	0x2f16, /* CTRL-'V' */
+	0x1117, /* CTRL-'W' */
+	0x2d18, /* CTRL-'X' */
+	0x2c19, /* CTRL-'Y' */
+	0x151a, /* CTRL-'Z' */
+	0
 };
 #if !MULTILANG_SUPPORT
 #define contable con2table
@@ -109,10 +224,33 @@ static int16_t const con2table[] = {
 #if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_FR)
 /* FRENCH */
 static int16_t const con3table[] = {
-	0x1001, 0x3002, 0x2e03, 0x2004, 0x1205, 0x2106, 0x2207,
-	0x2308, 0x1709, 0x240a, 0x250b, 0x260c, 0x270d, 0x310e,
-	0x180f, 0x1910, 0x1e11, 0x1312, 0x1f13, 0x1414, 0x1615,
-	0x2f16, 0x2c17, 0x2d18, 0x1519, 0x111a, 0
+	0x1001,	/* CTRL-'A' */
+	0x3002, /* CTRL-'B' */
+	0x2e03, /* CTRL-'C' */
+	0x2004, /* CTRL-'D' */
+	0x1205, /* CTRL-'E' */
+	0x2106, /* CTRL-'F' */
+	0x2207, /* CTRL-'G' */
+	0x2308, /* CTRL-'H' */
+	0x1709, /* CTRL-'I' */
+	0x240a, /* CTRL-'J' */
+	0x250b, /* CTRL-'K' */
+	0x260c, /* CTRL-'L' */
+	0x270d, /* CTRL-'M' */
+	0x310e, /* CTRL-'N' */
+	0x180f, /* CTRL-'O' */
+	0x1910, /* CTRL-'P' */
+	0x1e11, /* CTRL-'Q' */
+	0x1312, /* CTRL-'R' */
+	0x1f13, /* CTRL-'S' */
+	0x1414, /* CTRL-'T' */
+	0x1615, /* CTRL-'U' */
+	0x2f16, /* CTRL-'V' */
+	0x2c17, /* CTRL-'W' */
+	0x2d18, /* CTRL-'X' */
+	0x1519, /* CTRL-'Y' */
+	0x111a, /* CTRL-'Z' */
+	0
 };
 #if !MULTILANG_SUPPORT
 #define contable con3table
@@ -121,8 +259,7 @@ static int16_t const con3table[] = {
 
 /* Arrow keys table */
 static int16_t const arrowtab[] = {
-	0x4d36, 0x5032, 0x4838, 0x4b34, 0x4800, 0x5000, 0x4d00,
-	0x4b00, 0
+	0x4d36, 0x5032, 0x4838, 0x4b34, 0x4800, 0x5000, 0x4d00,	0x4b00, 0
 };
 
 /* Arrow keys Message */
@@ -325,7 +462,7 @@ VOID menu_verify(NOTHING)
 	menu_ienable(menu_addr, BOTTOP, enable);
 	ch_cache(FALSE);
 #ifdef PRINTITEM /* take out for sparrow */
-	menu_ienable(menu_addr, PRINTITEM, (gl_restype <= 3) ? TRUE : FALSE);
+	menu_ienable(menu_addr, PRINTITEM, gl_restype <= 3 ? TRUE : FALSE);
 #endif
 }
 
@@ -724,7 +861,7 @@ PP(int16_t msgbuff;)
 				bfill(INFSIZE, 0, afile);
 				Fread(handle, (int32_t) INFSIZE, afile);
 				Fclose(handle);
-				if ((afile[0] == '#') && (afile[1] == 'a'))
+				if (afile[0] == '#' && afile[1] == 'a')
 				{
 					shel_put(afile, INFSIZE);	/* copy to the aes buffer */
 					d_exit = L_READINF;
@@ -762,7 +899,7 @@ PP(int16_t msgbuff;)
 			if (do1_alert(PRINTTOP) == 1)
 			{
 				desk_wait(TRUE);
-				v_hardcopy();
+				av_hardcopy();
 				desk_wait(FALSE);
 			}
 		}
@@ -894,7 +1031,7 @@ PP(int16_t msgbuff;)
 		break;
 
 	case SEAMENU:						/* search file menu */
-		if ((x_status) || (w_gfirst()))
+		if (x_status || w_gfirst())
 		{
 			obj = get_tree(SEAFILE);
 			inf_sset(obj, SFILE, Nostr);
@@ -960,14 +1097,14 @@ PP(int16_t msgbuff;)
 	case FORMITEM:
 		str = "A";
 
-		if ((x_status) && (x_type == DESKICON))
+		if (x_status && x_type == DESKICON)
 		{
 			ret = x_first(&str1, &type);
 			while (ret)
 			{
 				if (type == DISK)
 				{
-					if ((*str1 == 'A') || (*str1 == 'B'))
+					if (*str1 == 'A' || *str1 == 'B')
 					{
 						str = str1;
 						break;

@@ -247,7 +247,7 @@ PP(int16_t op;)
 
 		case SRCDRA:					/* set the copy drive   */
 		case SRCDRB:
-			*destdr = (ret == SRCDRA) ? 'B' : 'A';
+			*destdr = ret == SRCDRA ? 'B' : 'A';
 			drawfld(obj, DESTDR);
 			break;
 
@@ -363,7 +363,7 @@ PP(OBJECT *obj;)
 	badindex = 0;						/* bad sector table */
 
 	/* amount of skew from track to track   */
-	skew = ((numside == 1) || (disktype == 4)) ? SINGLESKEW : DOUBLESKEW;
+	skew = numside == 1 || disktype == 4 ? SINGLESKEW : DOUBLESKEW;
 
 	skewi = 0;
 
@@ -533,7 +533,7 @@ errmem:
 	}
 
 	devnos = (obj[SRCDRA].ob_state & SELECTED) ? 0 : 1;
-	devnod = (devnos) ? 0 : 1;
+	devnod = devnos ? 0 : 1;
 
 chksrc:
 	if (!(dsbs = (DSB *)Getbpb(devnos)))
@@ -737,7 +737,7 @@ PP(register int16_t which;)
 
 	wid = obj[which].ob_width + w_inc;
 
-	wid = (wid < bar_max) ? wid : bar_max;	/* don't overflow box */
+	wid = wid < bar_max ? wid : bar_max;	/* don't overflow box */
 
 	obj[which].ob_width = wid;
 	obj[which].ob_spec = 0xFF1121L;

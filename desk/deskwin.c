@@ -602,7 +602,7 @@ PP(int16_t size;)
 
 	dvs_clip(1, e_x);					/* set clipping rect    */
 	/* scroll up or down    */
-	if ((mode == SUP) || (mode == SDOWN))
+	if (mode == SUP || mode == SDOWN)
 	{
 		i = size * win->w_icol;
 		block = obj[i].ob_height + obj[i].ob_y;
@@ -631,7 +631,7 @@ PP(int16_t size;)
 		}
 
 		if (y1 >= ptr[1])				/* source is not off the screen */
-			vro_cpyfm(S_ONLY, ptr, (FDB *)&trash, (FDB *)&trash); /* ugly */
+			avro_cpyfm(S_ONLY, ptr, (FDB *)&trash, (FDB *)&trash); /* ugly */
 		else
 			y = win->w_work.g_y;
 
@@ -687,7 +687,7 @@ PP(int16_t size;)
 			w = block + 1;
 		}
 		
-		vro_cpyfm(S_ONLY, ptr, (FDB *)&trash, (FDB *)&trash); /* ugly */
+		avro_cpyfm(S_ONLY, ptr, (FDB *)&trash, (FDB *)&trash); /* ugly */
 	bb_1:
 		objc_draw(obj, ROOT, MAX_DEPTH, x, y, w, h);
 		if (win->w_hvicons)
@@ -740,7 +740,7 @@ PP(register WINDOW *win;)
 
 	win->w_xrow = row;
 
-	win->w_vvicons = (x < row) ? 0 : (x - row);
+	win->w_vvicons = x < row ? 0 : x - row;
 
 	if (x > row)						/* if there is more need to be shown */
 	{
@@ -777,11 +777,11 @@ PP(register WINDOW *win;)
 	if (!col)
 		col = 1;
 
-	x = (win->w_items > win->w_icol) ? win->w_icol : win->w_items;
+	x = win->w_items > win->w_icol ? win->w_icol : win->w_items;
 
 	win->w_xcol = col;					/* current visible column   */
 
-	win->w_hvicons = (x <= col) ? 0 : (x - col);
+	win->w_hvicons = x <= col ? 0 : x - col;
 
 	if (!x)
 	{
@@ -880,7 +880,7 @@ PP(WINDOW *win;)
 	{
 		w = dicon.g_w;
 		h = dicon.g_h;					/* Change also at deskinf.c */
-		offx = (gl_hchar == 8) ? gl_wchar / 2 : gl_wchar;
+		offx = gl_hchar == 8 ? gl_wchar / 2 : gl_wchar;
 		offy = gl_hchar / 2;
 #if COLORICON_SUPPORT
 		type = G_CICON;

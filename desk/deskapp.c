@@ -62,7 +62,7 @@ PP(int16_t *icon;)								/* icon number          */
 					break;
 				}
 
-				if ((app->a_type == ICONS) || (app->a_type == TEXT))
+				if (app->a_type == ICONS || app->a_type == TEXT)
 				{
 					if (x_wildcmp(app->a_doc, name))
 					{
@@ -161,7 +161,7 @@ PP(BOOLEAN *install;)							/* application installed    */
 
 	while (app)
 	{
-		if ((app->a_type != FOLDER) && (app->a_type != ICONS))
+		if (app->a_type != FOLDER && app->a_type != ICONS)
 		{
 			if (x_wildcmp(app->a_name, name))
 			{
