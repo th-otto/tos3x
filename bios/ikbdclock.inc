@@ -1,3 +1,5 @@
+	text
+
 /**************************************************************************
  *                                                                        *
  *        convert ikbd real-time clock format to jdos format              *
@@ -124,3 +126,14 @@ bcdget:
         add.w     d1,d0                         /* + low nibble */
         rts
 
+
+	bss
+
+	xdef iclkbuf
+	comm iclkbuf,6
+	xdef iclkrtime
+	comm iclkrtime,4
+	xdef iclkwtime
+	comm iclkwtime,4
+	xdef iclk_ready
+	comm iclk_ready,1

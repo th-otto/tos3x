@@ -1,3 +1,4 @@
+		text
 /*
  * uint16_t check_rom_crc(void *start, long count, short offset)
  * For 512k ROMs in 4x128k chips (TOS 3.x), call with

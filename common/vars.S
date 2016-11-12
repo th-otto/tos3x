@@ -73,8 +73,9 @@ name: ds.t size
 
 	V(scsicmd,b,10)
 
-	V(dmarwflg,b,2)
-
+	V(dmarwflg,b,1)
+	even
+	
 	V(idebuf,b,SECTOR_SIZE)
 
 	ds.l 1 /* unused */
@@ -232,7 +233,6 @@ name: ds.t size
 	ds.b 1024 /* unused? $00004b58 */
     
 	V(_supstk,w,SUPSIZ)
-	V(_supstkend,b,0)
 
 	BYTE(_prtbflg)
 	even
@@ -376,7 +376,7 @@ name: ds.t size
 	even
     
 	INT(_date)
-	V(_bcbx,b,4*20)
+	V(_bcbx,b,4*20) /* 4*sizeof(BCB) */
 	BYTE(_prtbbol)
 	even
 	V(_beptr,l,3)

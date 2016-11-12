@@ -401,3 +401,30 @@ prtdec5:
 prtdec6:
         movem.l   (a7)+,d3-d4
         rts
+
+		bss
+		
+		xdef memterr
+		comm memterr,2
+		
+		xdef memtbot
+		comm memtbot,4
+		
+		xdef memtnext
+		comm memtnext,4
+		
+		xdef memtzone
+		comm memtzone,4
+		
+		xdef memtsize
+		comm memtsize,4
+
+		xdef memtend
+		comm memtend,4
+		
+		xdef memtaddr
+		comm memtaddr,4
+		
+		xdef memttop
+		comm memttop,4
+

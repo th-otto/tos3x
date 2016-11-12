@@ -799,7 +799,7 @@ ERROR xsnext(NOTHING)
 
 	builds(dt->dt_name, name);
 	name[11] = dt->dt_attr;
-	dirlock = 1;
+	dirlock = TRUE;
 	first = TRUE;
 	while (1)
 	{
@@ -839,12 +839,12 @@ ERROR xsnext(NOTHING)
 notfound:
 	dt->dt_name[0] = '\0';
 	dt->dt_fname[0] = '\0';
-	dirlock = 1;
+	dirlock = TRUE;
 	return E_NMFIL;
 
 found:
 	makbuf(f, dt);
-	dirlock = 1;
+	dirlock = TRUE;
 	return E_OK;
 }
 

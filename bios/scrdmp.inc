@@ -1,3 +1,4 @@
+		text
 /*
  * XBIOS #14 - Scrdmp - Dump screen to printer.
  */

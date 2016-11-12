@@ -11,6 +11,7 @@ int32_t glbkbchart[3][KBBUFSZ];				/* The actual typeahead buffer    */
 int32_t *buptr[3];
 int32_t *beptr[3];
 int glbcolumn[3];
+char fill[3];
 
 
 VOID conbrk PROTO((FH h, int flag));

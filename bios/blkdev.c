@@ -25,6 +25,9 @@ char fd_latch[NUMFLOPPIES];
 char fd_wp[NUMFLOPPIES];
 char drivechange[NUMFLOPPIES];
 long rseed;
+int curflop;
+BLKDEV blkdev[NUMFLOPPIES];
+
 
 static int16_t getiword PROTO((const uint8_t *addr));
 static int16_t sectsum PROTO((const int16_t *buf, int count));

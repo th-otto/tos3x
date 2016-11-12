@@ -323,9 +323,9 @@ PP(int8_t attr;)
 			/*  but can't grow root  */
 			return E_ACCDN;
 		
-		dirlock = 1;
+		dirlock = TRUE;
 		rc = nextcl(fd, 1);
-		dirlock = 1;
+		dirlock = TRUE;
 		if (rc != 0)
 			return E_ACCDN;
 		
@@ -589,7 +589,7 @@ PP(long pos;)
 	cl = f->f_clust;
 	swp68((uint16_t *)&cl);
 	n = cl;
-	dirlock = 1;
+	dirlock = TRUE;
 	
 	while (n && !endofchain(n))
 	{
@@ -603,7 +603,7 @@ PP(long pos;)
 		}
 		n = n2;
 	}
-	dirlock = 1;
+	dirlock = TRUE;
 
 	/*
 	 * Mark the directory entry as erased.
@@ -853,11 +853,11 @@ PP(register long n;)								/*  number of bytes to seek     */
 		clx = p->o_strtcl;
 	}
 	
-	dirlock = 1;
+	dirlock = TRUE;
 	for (i = 1; i < clnum; i++)
 		if ((clx = getcl(clx, dm)) == ENDOFCHAIN)
 		{
-			dirlock = 1;
+			dirlock = TRUE;
 			return ERR;
 		}
 		
@@ -865,7 +865,7 @@ PP(register long n;)								/*  number of bytes to seek     */
 
 	if (p->o_curbyt && clnum)
 		clx = getcl(clx, dm);
-	dirlock = 1;
+	dirlock = TRUE;
 
 fillin:
 	p->o_curcl = clx;

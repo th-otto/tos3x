@@ -1,4 +1,4 @@
-/* common supervisor stack size (in words) */
+/* common supervisor stack size (in words) (also defined in biosdefs.h) */
 #define SUPSIZ 1024
 /* max open files in system */
 #define OPNFILES 81

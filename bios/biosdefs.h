@@ -1,3 +1,6 @@
+/* common supervisor stack size (in words) (also defined in bdosdefs.h) */
+#define SUPSIZ 1024
+
 #define NUMFLOPPIES 2
 
 /* standard for floppy, hard disk */

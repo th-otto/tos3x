@@ -10,6 +10,7 @@
 #include "mem.h"
 #include "btools.h"
 
+PD ospd;
 
 /*
  *  local constants

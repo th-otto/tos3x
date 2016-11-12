@@ -1,3 +1,4 @@
+	text
 
 /* NVRAM_ADDR_REG  equ $ffff8961 */
 /* NVRAM_DATA_REG  equ $ffff8963 */
@@ -582,4 +583,15 @@ enawtimDone:moveq     #0,d0
 enawtim3:   clr.l     waketimeAlarm
             moveq     #-1,d0
             rts
+#endif
+
+	bss
+
+#if MSTECLK
+	xdef rtcbufa
+	comm rtcbufa,13
+	xdef rtcbufb
+	comm rtcbufb,13
+	xdef waketimeAlarm
+	comm waketimeAlarm,4
 #endif

@@ -53,7 +53,7 @@ BDOS_SRCS=\
 	tos.h \
 	${empty}
 
-EXTRA_DIST=\
+EXTRA_DIST:=\
 	GNUmakefile \
 	Makefile \
 	SRCFILES \
@@ -63,4 +63,4 @@ EXTRA_DIST=\
 	tos306us.map \
 	${empty}
 
-SRCS=${BDOS_SRCS}
+SRCS:=${BDOS_SRCS}

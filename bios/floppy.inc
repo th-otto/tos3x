@@ -4,6 +4,8 @@ FRB_THRESHOLD equ $00A00000
 FRB_THRESHOLD equ $00400000
 #endif
 
+	text
+
 /*
  * flopini - initialize floppies
  * int flopini(void *buffer, DSB *dsb, int devno)
@@ -1353,3 +1355,68 @@ getfrb4:
             addq.l    #8,a7                     /* go 2 return levels up */
             moveq.l   #-12,d0                   /* return E_GENRL if no _FRB cookie */
             rts
+
+	bss
+
+	xdef fd_spt
+	comm fd_spt,2
+
+	xdef fd_desel
+	comm fd_desel,2
+	
+	xdef fd_timeout
+	comm fd_timeout,4
+	
+	xdef fd_sect
+	comm fd_sect,2
+	
+	xdef fd_curerr
+	comm fd_curerr,2
+	
+	xdef fd_virgin
+	comm fd_virgin,2
+	
+	xdef fd_motoron
+	comm fd_motoron,2
+	
+	xdef fd_scount
+	comm fd_scount,2
+
+	xdef fd_retry
+	comm fd_retry,2
+	
+	xdef fd_copyp
+	comm fd_copyp,4
+	
+	xdef fd_frb
+	comm fd_frb,4
+	
+	xdef fd_interlv
+	comm fd_interlv,2
+	
+	xdef fd_cscnt
+	comm fd_cscnt,2
+	
+	xdef flopsreg
+	comm flopsreg,2
+	
+	xdef fd_side
+	comm fd_side,2
+	
+	xdef fd_rtryseek
+	comm fd_rtryseek,2
+	
+	xdef fd_dev
+	comm fd_dev,2
+	
+	xdef fd_secmap
+	comm fd_secmap,4
+	
+	xdef fd_track
+	comm fd_track,2
+	
+	xdef fd_buffer
+	comm fd_buffer,4
+	
+	xdef fd_deferr
+	comm fd_deferr,2

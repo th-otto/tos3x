@@ -484,12 +484,12 @@ PP(RECNO recno;)
 PP(DMD *dm;)
 PP(int wrtflg;)
 {
-	dirlock = 1;
+	dirlock = TRUE;
 	dirrec = getrec(recno - (dm->m_recoff[BT_FAT] - dm->m_fatrec), dm, wrtflg);
 	rrecno = recno;
 	rdm = dm;
 	rwrtflg = wrtflg;
-	dirlock = 0;
+	dirlock = FALSE;
 	return dirrec;
 }
 
@@ -921,7 +921,7 @@ PP(xfer bufxfr;)
 	 */
 
 	lentail = len & dm->m_rbm;
-	dirlock = 1;
+	dirlock = TRUE;
 	
 	if ((lenmid = len - lentail) != 0)			/*  Is there a Middle ? */
 	{
@@ -1042,7 +1042,7 @@ PP(xfer bufxfr;)
 eof:
 	rc = p->o_bytnum - bytpos;
 exit:
-	dirlock = 1;
+	dirlock = TRUE;
  	return rc;
 }
 
@@ -1136,7 +1136,7 @@ PP(int32_t *bufp;)
 
 	dm = drvtbl[i];
 	free = 0;
-	dirlock = 1;
+	dirlock = TRUE;
 	numcl = dm->m_numcl;
 	if (dm->m_16)
 	{
@@ -1147,7 +1147,7 @@ PP(int32_t *bufp;)
 			if (!getcl(i, dm))
 				free++;
 	}
-	dirlock = 1;
+	dirlock = TRUE;
 	*buf++ = free; /* BUG: will be sign-extended */
 	*buf++ = dm->m_numcl; /* BUG: will be sign-extended */
 	*buf++ = dm->m_recsiz; /* BUG: will be sign-extended */

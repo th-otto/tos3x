@@ -28,7 +28,7 @@ BIOS_SRCS=\
 	${empty}
 
 
-EXTRA_DIST=\
+EXTRA_DIST:=\
 	GNUmakefile \
 	Makefile \
 	SRCFILES \
@@ -36,4 +36,4 @@ EXTRA_DIST=\
 	biosext.S \
 	${empty}
 
-SRCS=${BIOS_SRCS}
+SRCS:=${BIOS_SRCS}

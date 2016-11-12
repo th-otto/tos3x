@@ -9,6 +9,8 @@ ide_headn  equ $FFF00019
 ide_comst  equ $FFF0001D
 ide_stat2  equ $FFF00039
 
+	text
+
 /**************************************************************************
  * DMAREAD.S from the AHDI source                                         *
  **************************************************************************/
@@ -1046,3 +1048,17 @@ str1:       movem.l   (sp)+,d1/a0-a1            /* restore registers d1, a0 and 
             rts
 
 #endif
+
+	bss
+
+	xdef dmarwflg
+	comm dmarwflg,1
+
+	xdef scsicmd
+	comm scsicmd,10
+
+	xdef idebuf
+	comm idebuf,SECTOR_SIZE
+
+	xdef lastacstm
+	comm lastacstm,4

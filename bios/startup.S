@@ -124,6 +124,9 @@ BCONMAP_START_HANDLE equ 6
         xref _endgembss    /* end of GEM BSS */
         xref __ebss        /* end of BSS */
 
+		xref _supstk
+
+
 /* ==== Structures =========================================================== */
 
 #define kbdvec    _kbdvecs+0
@@ -195,7 +198,6 @@ LcdPControl equ $FFFF827F
         xdef _ui_mupb
 
         xref  _root
-        xref  _shifty
         xref  _run
 
 _os_entry:
@@ -669,9 +671,9 @@ nomemchk:
 #if OS_COUNTRY == CTRY_PL
 		/* apparently a patch that was applied by the maker of the PL version */
 		clr.l     (_shell_p).w
-        movea.w   #_supstkend,a7
+        movea.w   #SUPSIZ*2+_supstk,a7
 #else
-        movea.l   #_supstkend,a7
+        movea.l   #SUPSIZ*2+_supstk,a7
 #endif
 
 #if STBOOK
@@ -3349,10 +3351,9 @@ autosca3:
  *
  */
 autosca4:
-        lea.l     _supstkend,a7                /* setup supervisor stack */
+        lea.l     SUPSIZ*2+_supstk,a7                /* setup supervisor stack */
         move.l    savepc,-(a7)                 /* get return addr */
         rts
-
 
 
 #include "scrdmp.inc"
@@ -3662,9 +3663,9 @@ zerom4:
         rts
 
 #include "mmu030.inc"
-		text
 
 #include "romcrc.inc"
+
 		text
 
 /*
@@ -3834,6 +3835,8 @@ esetsm2:
 #include "nvram.inc"
 
 #include "ikbdclock.inc"
+
+		text
 
 /**************************************************************************
  *                                                                        *
@@ -7717,6 +7720,7 @@ soundir7:
  *********************************************************/
 /* 306de: 00e03b86 */
 /* 206de: 00e037a4 */
+		xdef ringbell
 ringbell:
         btst      #2,(_conterm).w               /* console bell enabled? */
         beq.s     soundir8                      /* (no sound) */
@@ -7784,3 +7788,113 @@ cooksize equ NCOOKIES*2*4
 
 		xdef bcmap_devs
 		comm bcmap_devs,96
+
+		xdef execname
+		comm execname,4
+
+		xdef execpath
+		comm execpath,4
+
+		xdef execfnam
+		comm execfnam,32
+
+		xdef _tim_c_sieve
+		comm _tim_c_sieve,2
+		
+		xdef kb_delay
+		comm kb_delay,1
+		
+		xdef _shifty
+		comm _shifty,1
+
+		xdef execdta
+		comm execdta,44
+
+		xdef _sndtmp
+		comm _sndtmp,1
+		
+		xdef _snddelay
+		comm _snddelay,1
+		
+		xdef _sndtable
+		comm _sndtable,4
+		
+		xdef _prtconfig
+		comm _prtconfig,2
+		
+		xdef _bootpref
+		comm _bootpref,2
+
+#if (TOSVERSION >= 0x300)
+		xdef _altmd
+		comm _altmd,16
+#endif
+
+		xdef dsb
+		comm dsb,16
+
+		xdef kbdbuf
+		comm kbdbuf,7
+		xdef mousebuf
+		comm mousebuf,5
+		xdef relmbuf
+		comm relmbuf,3
+		xdef clockbuf
+		comm clockbuf,6
+		xdef joybuf
+		comm joybuf,3
+		xdef buttonbuf
+		comm buttonbuf,3
+		xdef initmbuf
+		comm initmbuf,17
+		xdef kb_key_last
+		comm kb_key_last,1
+		xdef kb_ticks
+		comm kb_ticks,1
+		xdef kb_delay
+		comm kb_delay,1
+		xdef kb_initial
+		comm kb_initial,1
+		xdef kb_repeat
+		comm kb_repeat,1
+		xdef kb_altnum
+		comm kb_altnum,2
+		
+		xdef savepc
+		comm savepc,4
+
+		xdef lst_timeout
+		comm lst_timeout,4
+		
+#if TTMFP_SUPPORT
+		xdef mdm3ibuf
+		comm mdm3ibuf,SERIAL_BUFSIZE
+		xdef mdm3obuf
+		comm mdm3obuf,SERIAL_BUFSIZE
+		xdef mdm3iorec
+		comm mdm3iorec,36
+#endif
+
+		xdef mdm4ibuf
+		comm mdm4ibuf,SERIAL_BUFSIZE
+		xdef mdm4obuf
+		comm mdm4obuf,SERIAL_BUFSIZE
+		xdef mdm4iorec
+		comm mdm4iorec,36
+
+		xdef mdm2ibuf
+		comm mdm2ibuf,SERIAL_BUFSIZE
+		xdef mdm2obuf
+		comm mdm2obuf,SERIAL_BUFSIZE
+		xdef mdm2iorec
+		comm mdm2iorec,36
+
+		xdef rs232ibuf
+		comm rs232ibuf,SERIAL_BUFSIZE
+		xdef rs232obuf
+		comm rs232obuf,SERIAL_BUFSIZE
+		xdef rs232iorec
+		comm rs232iorec,36
+
+		xdef _curkeytbl
+		comm _curkeytbl,12

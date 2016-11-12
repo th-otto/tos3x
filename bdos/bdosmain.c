@@ -5,6 +5,10 @@
 #include "fs.h"
 #include "bios.h"
 
+BCB bcbx[4];
+BOOLEAN dirlock;
+char secbuf[4][512];
+
 
 /*
  *  TIMESTAMP - set to 1 if it's okay for the bdos to print the time
