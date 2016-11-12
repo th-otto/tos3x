@@ -34,6 +34,7 @@
 #include <osiferr.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <portab.h>
 #include <fcntl.h>
@@ -45,7 +46,7 @@ PP(int ch;)								/* Channel number       */
 PP(register const char *filename;)						/* -> filename          */
 PP(int bdosfunc;)							/* BDOS Function        */
 {
-	FD *fp;								/* -> ccb area          */
+	register FD *fp;						/* -> ccb area          */
 	register int rv;						/* Return value         */
 #if CPM
 	register int xuser;						/* User number          */
@@ -55,20 +56,26 @@ PP(int bdosfunc;)							/* BDOS Function        */
 
 #if GEMDOS
 	{
-		short mode;
-		long dosfd;
+		register short mode;
+		register long dosfd;
 		register char *tmp;
+		char tmpbuf[128];
+		register size_t len;
 		
 		if (strchr(filename, '/') != 0)
 		{
-			tmp = _salloc(strlen(filename) + 1);
-			strcpy(tmp, filename);
-			filename = tmp;
-			while (*tmp)
+			len = strlen(filename) + 1;
+			if (len < sizeof(tmpbuf))
 			{
-				if (*tmp == '/')
-					*tmp = '\\';
-				tmp++;
+				strcpy(tmpbuf, filename);
+				tmp = tmpbuf;
+				filename = tmp;
+				while (*tmp)
+				{
+					if (*tmp == '/')
+						*tmp = '\\';
+					tmp++;
+				}
 			}
 		}
 		

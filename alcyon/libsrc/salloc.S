@@ -16,7 +16,7 @@
 __salloc:
 	move.l	(sp)+,a0			*	Save return address
 	clr.l	d0				*	Zap d0 high word
-	move.w	(sp)+,d0			*	Get arg (word size)
+	move.w	(sp),d0			*	Get arg (word size)
 	addq.l	#1+4,d0				*	Round 
 	bclr.l	#0,d0				*		up to word
 	move.l	__break,a1			*	a1 -> break area
