@@ -50,7 +50,7 @@ dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a $(PROGRAMS) $(top_srcdir)/common/config.h
+	$(RM) *.o *.a *.ndx $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak

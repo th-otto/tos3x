@@ -1,0 +1,118 @@
+top_srcdir=..
+subdir=glue
+
+include $(top_srcdir)/Makefile.common
+include $(top_srcdir)/Makefile.silent
+
+IMG = tos$(TOSVERSION)$(COUNTRY).img
+
+all: $(IMG)
+
+include $(top_srcdir)/config.mak
+-include $(top_srcdir)/common/sections.mak
+
+include SRCFILES
+
+STARTUP = startup.o
+
+LIBS = ../bios/bios.a ../vdi/vdi.a ../bdos/bdos.a ../aes/aes.a ../desk/desk.a
+LIBSNDX = ../bios/bios.ndx ../vdi/vdi.ndx ../bdos/bdos.ndx ../aes/aes.ndx ../desk/desk.ndx
+OBJS = $(STARTUP) $(BIOS_OBJS) $(VDI_OBJS) $(BDOS_OBJS) $(AES_OBJS) $(DESK_OBJS)
+
+ROMSIZE_206 = 256k
+ROMSIZE_208 = 256k
+ROMSIZE_306 = 512k
+
+ROMSIZE = $(ROMSIZE_$(TOSVERSION))
+
+$(IMG): tos.img $(MKROM)
+	$(MKROM) pad $(ROMSIZE) $< $@
+
+tos.img: $(STARTUP) $(LIBSNDX) tosrsc.o vars.o
+	$(LD) -o $@ $(SYMBOLS) -a $(rombase) x 0 $(STARTUP) -x ../bios/bios.a -x ../vdi/vdi.a -x ../bdos/bdos.a -x ../aes/aes.a -x ../desk/desk.a tosrsc.o vars.o
+
+../bios/bios.ndx: ../bios/bios.a
+	$(RANLIB) $<
+
+../vdi/vdi.ndx: ../vdi/vdi.a
+	$(RANLIB) $<
+
+../bdos/bdos.ndx: ../bdos/bdos.a
+	$(RANLIB) $<
+
+../aes/aes.ndx: ../aes/aes.a
+	$(RANLIB) $<
+
+../desk/desk.ndx: ../desk/desk.a
+	$(RANLIB) $<
+
+startup.o: startup.S
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+	
+vdivar.o: ../vdi/vdivar.S
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+	
+vars.o: ../common/vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+
+tosrsc.o: tosrsc.c
+
+tosrsc.c: $(MKBININC) glue.$(COUNTRY)
+	$(AM_V_GEN)$(MKBININC) glue.$(COUNTRY) tosrsc $@
+
+glue.us: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemus.rsc ../desk/rsc/$(TOSVERSION)/deskus.rsc ../desk/rsc/$(TOSVERSION)/deskus.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemus.rsc ../desk/rsc/$(TOSVERSION)/deskus.rsc ../desk/rsc/$(TOSVERSION)/deskus.inf $@
+
+glue.de: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemde.rsc ../desk/rsc/$(TOSVERSION)/deskde.rsc ../desk/rsc/$(TOSVERSION)/deskde.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemde.rsc ../desk/rsc/$(TOSVERSION)/deskde.rsc ../desk/rsc/$(TOSVERSION)/deskde.inf $@
+
+glue.fr: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemfr.rsc ../desk/rsc/$(TOSVERSION)/deskfr.rsc ../desk/rsc/$(TOSVERSION)/deskfr.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemfr.rsc ../desk/rsc/$(TOSVERSION)/deskfr.rsc ../desk/rsc/$(TOSVERSION)/deskfr.inf $@
+
+glue.uk: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemuk.rsc ../desk/rsc/$(TOSVERSION)/deskuk.rsc ../desk/rsc/$(TOSVERSION)/deskuk.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemuk.rsc ../desk/rsc/$(TOSVERSION)/deskuk.rsc ../desk/rsc/$(TOSVERSION)/deskuk.inf $@
+
+glue.es: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemes.rsc ../desk/rsc/$(TOSVERSION)/deskes.rsc ../desk/rsc/$(TOSVERSION)/deskes.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemes.rsc ../desk/rsc/$(TOSVERSION)/deskes.rsc ../desk/rsc/$(TOSVERSION)/deskes.inf $@
+
+glue.it: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemit.rsc ../desk/rsc/$(TOSVERSION)/deskit.rsc ../desk/rsc/$(TOSVERSION)/deskit.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemit.rsc ../desk/rsc/$(TOSVERSION)/deskit.rsc ../desk/rsc/$(TOSVERSION)/deskit.inf $@
+
+glue.sv: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemsv.rsc ../desk/rsc/$(TOSVERSION)/desksv.rsc ../desk/rsc/$(TOSVERSION)/desksv.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemsv.rsc ../desk/rsc/$(TOSVERSION)/desksv.rsc ../desk/rsc/$(TOSVERSION)/desksv.inf $@
+
+glue.sf: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemsf.rsc ../desk/rsc/$(TOSVERSION)/desksf.rsc ../desk/rsc/$(TOSVERSION)/desksf.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemsf.rsc ../desk/rsc/$(TOSVERSION)/desksf.rsc ../desk/rsc/$(TOSVERSION)/desksf.inf $@
+
+glue.sg: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemsg.rsc ../desk/rsc/$(TOSVERSION)/desksg.rsc ../desk/rsc/$(TOSVERSION)/desksg.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemsg.rsc ../desk/rsc/$(TOSVERSION)/desksg.rsc ../desk/rsc/$(TOSVERSION)/desksg.inf $@
+
+glue.tr: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemtr.rsc ../desk/rsc/$(TOSVERSION)/desktr.rsc ../desk/rsc/$(TOSVERSION)/desktr.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemtr.rsc ../desk/rsc/$(TOSVERSION)/desktr.rsc ../desk/rsc/$(TOSVERSION)/desktr.inf $@
+
+glue.fi: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemfi.rsc ../desk/rsc/$(TOSVERSION)/deskfi.rsc ../desk/rsc/$(TOSVERSION)/deskfi.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemfi.rsc ../desk/rsc/$(TOSVERSION)/deskfi.rsc ../desk/rsc/$(TOSVERSION)/deskfi.inf $@
+
+glue.no: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemno.rsc ../desk/rsc/$(TOSVERSION)/deskno.rsc ../desk/rsc/$(TOSVERSION)/deskno.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemno.rsc ../desk/rsc/$(TOSVERSION)/deskno.rsc ../desk/rsc/$(TOSVERSION)/deskno.inf $@
+
+glue.dk: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemdk.rsc ../desk/rsc/$(TOSVERSION)/deskdk.rsc ../desk/rsc/$(TOSVERSION)/deskdk.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemdk.rsc ../desk/rsc/$(TOSVERSION)/deskdk.rsc ../desk/rsc/$(TOSVERSION)/deskdk.inf $@
+
+glue.pl: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gempl.rsc ../desk/rsc/$(TOSVERSION)/deskpl.rsc ../desk/rsc/$(TOSVERSION)/deskpl.inf
+	$(AM_V_GEN)$(MKGLUE) ../aes/rsc/$(TOSVERSION)/gempl.rsc ../desk/rsc/$(TOSVERSION)/deskpl.rsc ../desk/rsc/$(TOSVERSION)/deskpl.inf $@
+
+check::
+	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
+
+clean:
+	$(RM) $(IMG) tos.img $(PROGRAMS) tosrsc.c glue.$(COUNTRY) *.o *.i $(top_srcdir)/common/config.h
+
+distclean: clean
+	$(RM) $(top_srcdir)/common/sections.mak

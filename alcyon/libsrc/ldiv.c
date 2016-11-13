@@ -43,7 +43,7 @@ PP(long al2;)
 		goto doret;
 	}
 	b = 1;								/* bit value */
-	while (l1 >= l2)
+	while (l1 >= l2 && l2 < 0x40000000L)
 	{
 		l2 <<= 1;
 		b <<= 1;

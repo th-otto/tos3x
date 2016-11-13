@@ -51,8 +51,16 @@
 #include "devequ.inc"
 #include "lineaequ.inc"
 #include "tosvars.inc"
+#include "sections.inc"
 
 ldri_escape	equ	19	; last DRI escape = 19.
+
+#if BINEXACT
+#  ifdef __GNUC__
+#    undef BINEXACT
+#    define BINEXACT 0
+#  endif
+#endif
 
 *
 *	font header structure equates.
@@ -286,9 +294,34 @@ ctrl_tbl:
 	dc.w	ascii_cr-ctrl_tbl	; ^M  Carriage Return
 
 
-do_bell:
+do_bell: ds.b 0
 
-	bra.w	ringbell			; need local variable in ctrl_tbl
+/*
+ * for some unknown reason, "bra.w ringbell" gives a
+ * 16-bit PC-relative overflow.
+ */
+
+#if BINEXACT
+
+#if TOSVERSION == 0x306
+ringbell  equ $2CB6+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
+#endif
+
+#if TOSVERSION == 0x206
+ringbell  equ $3684+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
+#endif
+
+#if TOSVERSION == 0x208
+ringbell  equ $359E+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
+#endif
+
+	dc.w $6000,ringbell
+	
+#else
+
+	jmp	ringbell			; need local variable in ctrl_tbl
+
+#endif
 
 do_tab:
 

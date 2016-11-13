@@ -1,0 +1,4 @@
+*.img
+tosrsc.c
+*.map
+glue.*

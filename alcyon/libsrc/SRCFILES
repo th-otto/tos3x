@@ -19,7 +19,7 @@ COBJS13 = puts.o fputs.o xttyin.o ttyin.o ttyout.o getpass.o getpid.o getopt.o
 COBJS14 = abort.o chmod.o access.o chown.o dup.o rename.o unlink.o
 COBJS15 = doscan.o scanf.o fscanf.o sscanf.o optoff.o sgtty.o ttyinraw.o
 COBJS16 = errno.o strchr.o strrchr.o lstout.o mktemp.o prtld.o prtint.o prtshort.o
-COBJS17 = rand.o setbuf.o signal.o swab.o
+COBJS17 = rand.o setbuf.o signal.o swab.o strtol.o
 COBJS18 = aldiv.o almul.o alrem.o uldiv.o ldiv.o lmul.o lrem.o
 
 COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} ${COBJS9} \

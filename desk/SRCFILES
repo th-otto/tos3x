@@ -42,9 +42,9 @@ DESK_SRCS=\
 	osbind.S \
 	${empty}
 
-SRCS=${DESK_SRCS}
+SRCS:=${DESK_SRCS}
 
-EXTRA_DIST=\
+EXTRA_DIST:=\
 	GNUmakefile \
 	Makefile \
 	SRCFILES \

@@ -7720,7 +7720,9 @@ soundir7:
  *********************************************************/
 /* 306de: 00e03b86 */
 /* 206de: 00e037a4 */
+#if !BINEXACT
 		xdef ringbell
+#endif
 ringbell:
         btst      #2,(_conterm).w               /* console bell enabled? */
         beq.s     soundir8                      /* (no sound) */

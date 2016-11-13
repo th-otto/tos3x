@@ -1,0 +1,9 @@
+SRCS:=
+
+EXTRA_DIST:=\
+	GNUmakefile \
+	Makefile \
+	SRCFILES \
+	tos306de.map \
+	tos306us.map \
+	${empty}

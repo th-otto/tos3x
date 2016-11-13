@@ -75,14 +75,12 @@ AES_SRCS=\
 	gemjstrt.S \
 	${empty}
 
-SRCS=${AES_SRCS}
+SRCS:=${AES_SRCS}
 
-EXTRA_DIST=\
+EXTRA_DIST:=\
 	GNUmakefile \
 	Makefile \
 	SRCFILES \
 	optimize.mak \
 	aesext.S \
-	tos306de.map \
-	tos306us.map \
 	${empty}

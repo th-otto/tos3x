@@ -1,6 +1,6 @@
 #!/bin/sh
 
-eval `cat bios/SRCFILES vdi/SRCFILES bdos/SRCFILES aes/SRCFILES desk/SRCFILES | sed -e '/\\\\$/d' -e '/^#/d' -e 's/\${TOSVERSION}/306/' -e 's/^\(.*\)=\(.*\)$/\1="\2"/' -e '/^$/d' -e '/\${empty}/d' -e 's/$/;/'`
+eval `cat bios/SRCFILES vdi/SRCFILES bdos/SRCFILES aes/SRCFILES desk/SRCFILES | sed -e '/\\\\$/d' -e '/^#/d' -e '/:=/=/' -e '/ = /=/' -e 's/\${TOSVERSION}/306/' -e 's/^\(.*\)=\(.*\)$/\1="\2"/' -e '/^$/d' -e '/\${empty}/d' -e 's/$/;/'`
 
 
 set -- ${BIOS_OBJS}

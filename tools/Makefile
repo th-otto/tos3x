@@ -7,7 +7,7 @@ include $(top_srcdir)/Makefile.silent
 LIBS = $(LIBC)
 INC := ..\include${BS}
 
-PROGRAMS = newglue$(BUILD_EXEEXT)
+PROGRAMS = newglue$(BUILD_EXEEXT) mkbininc$(BUILD_EXEEXT) mkrom$(BUILD_EXEEXT)
 
 # didnt bother to port these to alcyon
 #PROGRAMS += cmprom$(BUILD_EXEEXT) findrsc$(BUILD_EXEEXT)
@@ -20,13 +20,19 @@ include $(top_srcdir)/config.mak
 include SRCFILES
 
 cmprom$(BUILD_EXEEXT): cmprom.o
-	$(LD) -u -o $@ $(CRT0) $< $(LIBS)
+	$(LD) -o $@ $(CRT0) $< $(LIBS)
 
 newglue$(BUILD_EXEEXT): newglue.o
-	$(LD) -u -o $@ $(CRT0) $< $(LIBS)
+	$(LD) -o $@ $(CRT0) $< $(LIBS)
 
 findrsc$(BUILD_EXEEXT): findrsc.o
-	$(LD) -u -o $@ $(CRT0) $< $(LIBS)
+	$(LD) -o $@ $(CRT0) $< $(LIBS)
+
+mkbininc$(BUILD_EXEEXT): mkbininc.o
+	$(LD) -o $@ $(CRT0) $< $(LIBS)
+
+mkrom$(BUILD_EXEEXT): mkrom.o
+	$(LD) -o $@ $(CRT0) $< $(LIBS)
 
 check::
 

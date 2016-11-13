@@ -1332,7 +1332,7 @@ PP(int16_t *ty;)
 	case 3:
 		*tx = -x;
 		break;
-#if (TOSVERSION == 0x206) & BINEXACT
+#if ((TOSVERSION == 0x206) | (TOSVERSION == 0x208)) & BINEXACT
 		asm("ds.b 0"); /* hmpf, optimizer seems to have missed to remove superfluous bra */
 #endif
 	}
@@ -1347,7 +1347,7 @@ PP(int16_t *ty;)
 	case 3:
 	case 4:
 		*ty = -y;
-#if (TOSVERSION != 0x206) | !BINEXACT /* hmpf */
+#if ((TOSVERSION != 0x206) & (TOSVERSION != 0x208)) | !BINEXACT /* hmpf */
 		break;
 #endif
 	}

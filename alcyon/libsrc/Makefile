@@ -51,3 +51,6 @@ install: all
 
 clean:
 	$(RM) *.o *.a *.ndx
+
+strtol.ttp: strtol.o libc.ndx
+	aln -u -o $@ crt0.o strtol.o libc.a

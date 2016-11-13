@@ -141,9 +141,9 @@ BOOLEAN sh_iscart;
 
 char *ad_path;
 
-/* char *ad_pfile; */ /* unused */
+char *ad_pfile; /* unused */
 
-char temp[50]; /* WTF */
+char temp[50]; /* WTF, unused */
 
 
 VOID sh_show PROTO((char *lcmd));

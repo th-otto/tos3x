@@ -1,4 +1,4 @@
-ptop_srcdir=..
+top_srcdir=..
 
 include $(top_srcdir)/Makefile.common
 include $(top_srcdir)/Makefile.silent
@@ -122,37 +122,10 @@ aesext.o: aesext.S $(top_srcdir)/common/sections.inc $(top_srcdir)/common/config
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-##
-#### Actions
-##
-
-RESOURCE =	glue.$(COUNTRY)
-
-## -l generates too many symbols, so we use -s instead
-##		aln -w -l -k gemstart -q -o $@
-usa.prg: $(STARTUP) $(AESOBJ) $(DESKOBJ) $(RESOURCE) makefile
-		aln -w -o $@ $(STARTUP) $(AESOBJ) $(DESKOBJ) \
-			-i glue.usa _USARSC \
-			-i glue.grm _GRMRSC \
-			-i glue.fre _FRERSC \
-			-i glue.ita _ITARSC \
-			-i glue.swe _SWERSC \
-			-i glue.spa _SPARSC
-
-
 check::
 
 clean:
-	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
+	$(RM) *.o *.a *.ndx *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak
-
-maps:
-	$(MAKE) clean
-	$(MAKE) TOSVERSION=306 COUNTRY=de
-	cnm -g aes.o > tos306de.map
-	$(MAKE) clean
-	$(MAKE) TOSVERSION=306 COUNTRY=us
-	cnm -g aes.o > tos306us.map
-	$(MAKE) clean

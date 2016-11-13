@@ -451,9 +451,7 @@ name: ds.t size
 	INT(_m_st)
 	GRECT(_full)
 	GRECT(_ctrl)
-	
-	ds.b 50 /* unused? $00008d52 */
-
+	V(_temp,b,50) /* unused */
 	INT(_gl_dabase)
 	V(_gl_adacc,l,MAX_ACCS)
 	V(_winp,w,3)
@@ -483,9 +481,7 @@ name: ds.t size
 	INT(_cdele_save)
 	INT(_gl_height)
 	TEDINFO(_gl_aname)
-	
-	ds.b 4 /* unused? $00008efc */
-	
+	PTR(_ad_pfile) /* unused */
 	PTR(_ad_shcmd)
 	PTR(_ad_fpath)
 	INT(_gl_apid)
@@ -627,9 +623,7 @@ name: ds.t size
 	INT(_gl_nrow)
 	INT(_infsize)
 	INT(_numicon)
-	
-	ds.b 2 /* unused? $000095b6 */
-	
+	INT(_sh_up) /* unused */
 	V(_filestr,b,NAMELEN)
 	INT(_tmpmoff)
 	INT(_windspec)
@@ -654,9 +648,7 @@ name: ds.t size
 	INT(_d_dir)
 	LONG(_numdirs)
 	TEDINFO(_edblk)
-	
-	ds.b 20 /* unused? $0000a676 */
-	
+	V(_pxyarray,w,10) /* unused */
 	INT(_x_status)
 	LONG(_tolsize)
 	GRECT(_dicon)
@@ -670,9 +662,7 @@ name: ds.t size
 	PTR(_o_win)
 	PTR(_cpbox)
 	V(_gl_ws,w,57)   /* workout */
-
-	ds.b 2 /* unused? $0000a724 */
-	
+	INT(_i_status) /* unused */
 	INT(_x_cur)
 	V(_winpd,b,142*MAXWIN)
 	V(_intin,w,128)

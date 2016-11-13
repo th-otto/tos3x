@@ -148,7 +148,7 @@ char *ad_fsel;
 intptr_t drawstk;
 int16_t er_num;						/* for output.s */
 int16_t no_aes;						/* gembind.s    */
-/* BOOLEAN sh_up; */				/* is the sh_start being ran yet ? */ /* unused */
+BOOLEAN sh_up;						/* is the sh_start being ran yet ? */ /* unused */
 BOOLEAN autoexec;					/* autoexec a file ?    */
 STATIC char g_autoboot[CMDLEN];
 STATIC int16_t g_flag;

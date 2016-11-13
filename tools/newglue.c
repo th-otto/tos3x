@@ -76,9 +76,9 @@ static char *files[TOTALFILE] = {
 
 
 
-static int putbeshort(P(char *) ptr, P(int) val)
+static int putbeshort(P(char *) ptr, P(unsigned int) val)
 PP(register char *ptr;)
-PP(register int val;)
+PP(register unsigned int val;)
 {
 	*ptr++ = (val >> 8) & 0xff;
 	*ptr = (val) & 0xff;
@@ -104,7 +104,7 @@ PP(char **argv;)
 	if (argc == 2)
 	{
 		country = argv[1];
-		sprintf(gemrsc, "../aes/gem%s.rsc", country);
+		sprintf(gemrsc, "../aes/rsc/gem%s.rsc", country);
 		sprintf(deskrsc, "../desk/rsc/desk%s.rsc", country);
 		sprintf(deskinf, "../desk/rsc/desk%s.inf", country);
 		sprintf(glue, "glue.%s", argv[1]);
@@ -154,7 +154,7 @@ PP(char **argv;)
 
 		printf(_("Reading %s\n"), files[i]);
 
-		size = read(handle, address, 0x10000L);
+		size = read(handle, address, 0xfff8);
 		close(handle);
 
 		if (size & 0x1)				/* on the odd boundary */
@@ -198,8 +198,13 @@ PP(char **argv;)
 	}
 
 	size = (intptr_t)address - (intptr_t)top;
-
-	putbeshort(header + 2 * i, (int) (size));
+	if (size >= 0xfffcL)
+	{
+		fprintf(stderr, _("output file is too large ($%lx)\n"), size);
+		return EXIT_FAILURE;
+	}
+	
+	putbeshort(header + 2 * i, (unsigned int) (size));
 
 	handle = open(outfile, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY);
 	if (handle < 0)
@@ -210,11 +215,12 @@ PP(char **argv;)
 
 	printf(_("Writing %s\n"), outfile);
 
-	memory = write(handle, top + 2, size);
+	memory = write(handle, top + 2, (size_t)size);
 	close(handle);
 	if (size != memory)
 	{
 		fprintf(stderr, _("Write error on output file\n"));
+		unlink(outfile);
 		return EXIT_FAILURE;
 	}
 

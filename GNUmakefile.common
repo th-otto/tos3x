@@ -59,7 +59,10 @@ MKDIR_P = $(MKDIR) -p
 SED   = sed
 AWK   = awk
 
-CMP   = $(top_srcdir)/tools/cmprom$(BUILD_EXEEXT)
+CMP      = $(top_srcdir)/tools/cmprom$(BUILD_EXEEXT)
+MKGLUE   = $(top_srcdir)/tools/newglue$(BUILD_EXEEXT)
+MKBININC = $(top_srcdir)/tools/mkbininc$(BUILD_EXEEXT)
+MKROM    = $(top_srcdir)/tools/mkrom$(BUILD_EXEEXT)
 
 #
 # optimizations

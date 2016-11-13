@@ -59,8 +59,6 @@ EXTRA_DIST:=\
 	SRCFILES \
 	vdidsp.S \
 	optimize.mak \
-	tos306de.map \
-	tos306us.map \
 	${empty}
 
 SRCS:=${BDOS_SRCS}

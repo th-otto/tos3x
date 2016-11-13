@@ -30,6 +30,7 @@ VOIDPTR calloc PROTO((size_t nmemb, size_t size));
 
 int atoi PROTO((const char *s));
 long atol PROTO((const char *s));
+long strtol PROTO((const char *s, char **end, int base));
 
 /* Absolute value function */
 int abs PROTO((int));
