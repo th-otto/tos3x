@@ -138,6 +138,7 @@ EXTRA_DIST:=\
 	SRCFILES \
 	optimize.mak \
 	vdiext.S \
+	lmul.S \
 	\
 	hpxoblit.S \
 	pxabline.S \

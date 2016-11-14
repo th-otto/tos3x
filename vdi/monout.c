@@ -51,8 +51,8 @@
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
-#define Malloc(size) trap(0x48, (long)(size))
-#define Mfree(ptr) trap(0x49, ptr)
+#define Malloc(size) vtrap1(0x48, (long)(size))
+#define Mfree(ptr) vtrap1(0x49, ptr)
 #define SPSHIFTMODE	    (* ((int16_t *) 0xff8266L))	/* sparrow shift mode */
 #define PIXMASK		    0x200			/* pix control in XGA */
 

@@ -62,8 +62,8 @@
 
 /* 306de: 00e0c0a4 */
 /* 206de: 00e0c414 */
-		xdef	_trap
-_trap:	PIXLA(a0)
+		xdef	_vtrap1
+_vtrap1:	PIXLA(a0)
 		move.l	(sp)+,PIXLV(retsav,a0)
 		trap	#1
 		PIXLA(a0)

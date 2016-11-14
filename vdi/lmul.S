@@ -35,9 +35,9 @@
  * }
  */
 
-	xdef	bdoslmul
+	xdef	lmul
 	text
-bdoslmul:
+lmul:
 	link	a6,#-4
 	clr.w	d2
 	tst.l	8(a6)		/* is first arg negative? */

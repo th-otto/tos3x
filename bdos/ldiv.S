@@ -1,10 +1,8 @@
 	xref _ldivr
 	comm _ldivr,4
-	globl _ldiv
-	globl ldiv
+	globl bdosldiv
 	text
-_ldiv:
-ldiv:
+bdosldiv:
 	link a6,#-2
 	movem.l d2-d7,-(sp)
 	clr d3

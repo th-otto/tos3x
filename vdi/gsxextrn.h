@@ -154,7 +154,7 @@ int16_t	vec_len PROTO((int16_t, int16_t));
 /*
  * gsxasm2.S
  */
-int32_t	trap PROTO((int16_t, ...));
+int32_t	vtrap1 PROTO((int16_t, ...));
 int32_t	vtrap14 PROTO((int16_t, ...));
 int32_t	vtrap14b PROTO((int16_t, ...));
 int16_t	end_pts PROTO((int16_t xstart, int16_t ystart, int16_t *lptr, int16_t *rptr));

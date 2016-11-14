@@ -47,16 +47,16 @@ _bcon2out   equ VDITBASE+$0078
 
 /* from GEMDOS */
 		xdef _osinit
-		xdef lmul
+		xdef bdoslmul
 
 #if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
 _osinit   equ BDOSTBASE+$5588
-lmul      equ BDOSTBASE+$298
+bdoslmul  equ BDOSTBASE+$298
 #endif
 
 #if (TOSVERSION >= 0x200) & (TOSVERSION < 0x300)
 _osinit   equ BDOSTBASE+$55D8
-lmul      equ BDOSTBASE+$2E8
+bdoslmul  equ BDOSTBASE+$2E8
 #endif
 
 /* from AES */

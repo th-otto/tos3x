@@ -4,7 +4,7 @@
 
 int16_t falcon_videomode;
 
-#define Srealloc(size) trap(21, size)
+#define Srealloc(size) vtrap1(21, size)
 #define VsetMode(mode) mode
 
 #define VcheckMode mode_validate

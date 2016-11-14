@@ -39,10 +39,42 @@
 
 #define _(x) x
 
+#define MIN(a, b) ((a)<=(b) ? (a) : (b))
+#define BUFFER_SIZE (16*1024)
 
 
 #define	 TRUE	1
 #define	 FALSE  0
+
+
+/* Read a stream into memory */
+static int read_file(P(int) infile, P(const char *) infilename, P(char *) buffer, P(long) count)
+PP(int infile;)
+PP(const char *infilename;)
+PP(char *buffer;)
+PP(long count;)
+{
+	size_t toread; /* Number of bytes to read this time */
+	size_t towrite; /* Number of bytes to write this time */
+	
+	for (;;)
+	{
+		toread = MIN(BUFFER_SIZE, count);
+		if (toread == 0)
+			break;
+
+		towrite = read(infile, buffer, toread);
+		if (towrite != toread)
+		{
+			fprintf(stderr, "%s: %s\n", infilename, strerror(errno));
+			return FALSE;
+		}
+		count -= towrite;
+		buffer += towrite;
+	}
+
+	return TRUE;
+}
 
 
 int main(P(int) argc, P(char **) argv)
@@ -57,6 +89,7 @@ PP(char **argv;)
 	char *buffer;
 	FILE *fp;
 	char *p;
+	int ret;
 	
 #ifdef __ALCYON__
 	/* symbols etoa and ftoa are unresolved */
@@ -96,8 +129,10 @@ PP(char **argv;)
 		fprintf(stderr, _("No memory !\n"));
 		return EXIT_FAILURE;
 	}
-	read(handle, buffer, filesize);
+	ret = read_file(handle, infile, buffer, filesize);
 	close(handle);
+	if (ret == FALSE)
+		return EXIT_FAILURE;
 	
 	if (strcmp(outfile, "-") == 0)
 	{

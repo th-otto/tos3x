@@ -388,7 +388,7 @@ int main(int argc, char **argv)
 				}
 				write_file(deskrsc, address + glue.off_deskrsc, size);
 
-				size = glue.totalsize - glue.off_deskinf - 4;
+				size = glue.totalsize - glue.off_deskinf - 6; /* -6 because of bug in newglue.c */
 				write_file(deskinf, address + glue.off_deskinf, size);
 
 				break;

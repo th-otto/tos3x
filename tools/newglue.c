@@ -92,6 +92,7 @@ PP(char **argv;)
 {
 	char *outfile;
 	const char *country = NULL;
+	const char *version = NULL;
 	
 #ifdef __ALCYON__
 	/* symbols etoa and ftoa are unresolved */
@@ -107,7 +108,15 @@ PP(char **argv;)
 		sprintf(gemrsc, "../aes/rsc/gem%s.rsc", country);
 		sprintf(deskrsc, "../desk/rsc/desk%s.rsc", country);
 		sprintf(deskinf, "../desk/rsc/desk%s.inf", country);
-		sprintf(glue, "glue.%s", argv[1]);
+		sprintf(glue, "glue.%s", country);
+	} else if (argc == 3)
+	{
+		country = argv[1];
+		version = argv[2];
+		sprintf(gemrsc, "../aes/rsc/%s/gem%s.rsc", version, country);
+		sprintf(deskrsc, "../desk/rsc/%s/desk%s.rsc", version, country);
+		sprintf(deskinf, "../desk/rsc/%s/desk%s.inf", version, country);
+		sprintf(glue, "glue.%s", country);
 	} else if (argc == (TOTALFILE + 1))
 	{
 		for (i = 0; i < TOTALFILE; i++)
@@ -180,24 +189,24 @@ PP(char **argv;)
 		 */
 		if (country && strcmp(country, "de") == 0)
 		{
-			if (i == 0 && size == 0x139a)
+			if (i == 0 && size == 0x1390)
 			{
-				putbeshort(address + size - 4, 0x0000);
-				putbeshort(address + size - 2, 0x0e4c);
+				putbeshort(address - 4, 0x0000);
+				putbeshort(address - 2, 0x0e4c);
 			} else if (i == 1 && size == 0x5ebe)
 			{
-				putbeshort(address + size - 4, 0x5820);
-				putbeshort(address + size - 2, 0x0000);
-			} else if (i == 2 && size == 0x02ac)
+				putbeshort(address - 4, 0x5820);
+				putbeshort(address - 2, 0x0000);
+			} else if (i == 2 && size == 0x02aa)
 			{
-				putbeshort(address + size - 6, 0x000d);
-				putbeshort(address + size - 4, 0x0008);
-				putbeshort(address + size - 2, 0x0001);
+				putbeshort(address - 4, 0x000d);
+				putbeshort(address - 2, 0x0008);
+				putbeshort(address - 0, 0x0001);
 			}
 		}
 	}
 
-	size = (intptr_t)address - (intptr_t)top;
+	size = (intptr_t)address - (intptr_t)top; /* BUG: should be address - top - 2 */
 	if (size >= 0xfffcL)
 	{
 		fprintf(stderr, _("output file is too large ($%lx)\n"), size);

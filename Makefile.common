@@ -77,3 +77,12 @@ RUN_OPTIMIZE_ = ${RUN_OPTIMIZE_1}
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
+#
+# The final ROM image contains two versions of this compiler
+# support functions. In order to avoid duplicate symbols,
+# and because they are slightly different,
+# we have to rename one of those
+# (we use the ones from bdos since they are referenced less often)
+#
+SUBSTLMUL = $(SED) -e 's/lmul/bdoslmul/' $*.s > $*.i; $(MV) $*.i $*.s
+SUBSTLDIV = $(SED) -e 's/ldiv/bdosldiv/' $*.s > $*.i; $(MV) $*.i $*.s

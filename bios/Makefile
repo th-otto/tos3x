@@ -50,6 +50,17 @@ bios.o: tosvars.o vars.o $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.ma
 	# sections.mak might have just been generated, make sure it is reread
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
+blkdev.o: blkdev.c
+	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
+	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
+	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
+	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}
+	$(AM_V_at)$(SUBSTLMUL)
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s
+	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
+
+
+
 single:
 	$(LD) -u -s -l -o bios.o -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o
 

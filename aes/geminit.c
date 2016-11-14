@@ -180,7 +180,7 @@ uint16_t d_rezword;					/* default resolution for sparrow */
 
 #define Cconws(x) trap(9, x)
 
-STATIC char autopath[CMDLEN];
+STATIC char aautopath[CMDLEN];
 
 #if AESVERSION >= 0x320
 STATIC MFORM gl_cmform;				/* current aes mouse form   */
@@ -563,7 +563,7 @@ VOID gem_main(NOTHING)
 			all_run();
 #endif
 		/* change to dir of autoboot */
-		apath = &autopath[0];
+		apath = &aautopath[0];
 		xstrpcpy(g_autoboot, apath);
 		*(sh_name(apath)) = 0;			/* change path\filename to path */
 		do_cdir(apath[0] - 'A', apath);

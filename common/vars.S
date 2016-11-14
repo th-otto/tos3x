@@ -1,8 +1,13 @@
 /*
  * common variables
  *
- * This file is only used when linking a single module,
- * to get the same addresses as when linking the whole ROM
+ * This file is used when linking a single module,
+ * to get the same addresses as when linking the whole ROM.
+ *
+ * It is now also used when linking the final ROM, when
+ * you want to create an exact binary image of an official
+ * ROM version. This is because, due to the way the linker works,
+ * it is impossible to get the same order of symbols in the bss section.
  */
 
 #include "config.h"
@@ -406,7 +411,7 @@ name: ds.t size
 	V(_fcopy,b,40)
 	PTR(_pathcopy)
 	INT(_defdrv)
-	V(_autopath,b,CMDLEN)
+	V(_aautopath,b,CMDLEN)
 	V(_wtcolor,w,MAXOBJ)
 	V(_wbcolor,w,MAXOBJ)
 	V(pblock,l,5)

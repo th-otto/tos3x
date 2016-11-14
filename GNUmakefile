@@ -20,6 +20,9 @@ dist::
 all clean distclean dist::
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 
+check::
+	$(MAKE) -C glue $@
+
 dist::
 	$(CP) -a $(EXTRA_DIST) $(DISTDIR)
 	$(CP) -a -r include $(DISTDIR)
