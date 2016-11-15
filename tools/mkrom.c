@@ -72,7 +72,7 @@ struct hdr2
 
 #define MAGIC		(unsigned short) 0x601a	/*  bra .+26 instruction */
 #define MAGIC1		(unsigned short) 0x601b	/* data & bss base defined */
-#define MAGIC2		(unsigned short) 0x601e	/*  bra .+30 instruction */
+#define MAGIC2		(unsigned short) 0x602e	/*  bra .+46 instruction */
 
 
 static char const program_name[] = "mkrom";
@@ -412,6 +412,23 @@ PP(long target_size;)
 		source_size = hdr.ch_tsize + hdr.ch_dsize;
 	}
 	
+	buffer = lmalloc(target_size);
+	if (buffer == NULL)
+	{
+		fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+		return FALSE;
+	}
+	
+	/* read the input file */
+	ret = read_file(infile, infilename, buffer, source_size);
+	if (!ret)
+		return ret;
+
+	if (rdbeshort(buffer) == MAGIC2)
+		tos_version = rdbeshort(buffer + 2);
+	else
+		tos_version = 0;
+		
 	if ((tos_version >= 0x400 && tos_version < 0x500) && target_size == 512L * 1024L)
 	{
 		/*
@@ -419,7 +436,7 @@ PP(long target_size;)
 		 */
 		banks = 1;
 		banksize = 0x7fffeL;
-	} else if ((tos_version == 0x207 || tos_version == 0x208) && target_size == 512L * 1024L)
+	} else if ((tos_version == 0x206 || tos_version == 0x207 || tos_version == 0x208) && target_size == 257L * 1024L)
 	{
 		/*
 		 * ST-Book TOS 2.x: a single 256KB ROM
@@ -427,6 +444,7 @@ PP(long target_size;)
 		 */
 		banks = 1;
 		banksize = 0x3fffeL;
+		target_size = 256L * 1024L;
 	} else if (tos_version != 0 && target_size == 512L * 1024L)
 	{
 		/*
@@ -440,7 +458,7 @@ PP(long target_size;)
 		 * STE TOS 2.x: 2 128KB ROMs
 		 */
 		banks = 2;
-		banksize = 0x3fffeL;
+		banksize = 0x1fffeL;
 	} else
 	{
 		/*
@@ -453,31 +471,15 @@ PP(long target_size;)
 	/* Check if the input file size is not too big */
 	if (source_size > (target_size - 2 * banks))
 	{
+		lfree(buffer);
 		fprintf(stderr, "%s: %s is too big: %lu extra bytes\n", program_name, infilename, source_size - target_size);
 		return FALSE;
 	}
-
-	buffer = lmalloc(target_size);
-	if (buffer == NULL)
-	{
-		fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
-		return FALSE;
-	}
-	
-	/* read the input file */
-	ret = read_file(infile, infilename, buffer, source_size);
-	if (!ret)
-		return ret;
 
 	/* Pad with FF */
 	free_size = target_size - source_size;
 	lmemset(buffer + source_size, 0xff, free_size);
 	
-	if (rdbeshort(buffer) == MAGIC2)
-		tos_version = rdbeshort(buffer + 2);
-	else
-		tos_version = 0;
-		
 	if (banks != 0)
 	{
 		for (i = 0; i < banks; i++)

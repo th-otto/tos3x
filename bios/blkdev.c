@@ -38,6 +38,7 @@ static ERROR dorwabs PROTO((int16_t rw, char *buf, RECNO recnr, int16_t dev, int
  * default function for system variable hdv_init
  */
 /* 306de: 00e055da */
+/* 404: 00e04792 */
 VOID bhdv_init(NOTHING)
 {
 	int dev;
@@ -94,6 +95,7 @@ PP(int32_t msg_arg;)
  * default function for system variable hdv_bpb
  */
 /* 306de: 00e0565c */
+/* 404: 00e0480c */
 BPB *bhdv_getbpb(P(int16_t) dev)
 PP(int16_t dev;)
 {
@@ -180,6 +182,7 @@ PP(int16_t dev;)
  * default function for system variable hdv_mediach
  */
 /* 306de: 00e058ae */
+/* 404: 00e04a6c */
 int16_t bhdv_mediach(P(int16_t) dev)
 PP(int16_t dev;)
 {
@@ -268,6 +271,7 @@ PP(int16_t dev;)
  * default function for system variable hdv_rw
  */
 /* 306de: 00e05a96 */
+/* 404: 00e04c5c */
 ERROR bhdv_rwabs(P(int16_t) rw, P(char *) buf, P(int16_t) cnt, P(RECNO) recnr, P(int16_t) dev, P(LRECNO) lrecnr)
 PP(int16_t rw;)
 PP(char *buf;)
@@ -418,6 +422,7 @@ long random(NOTHING)
  * default function for system variable hdv_boot
  */
 /* 306de: 00e05d88 */
+/* 404: 00e04f54 */
 int16_t bhdv_boot(NOTHING)
 {
 	register int ret;

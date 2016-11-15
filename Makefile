@@ -3,7 +3,7 @@ top_srcdir=.
 include $(top_srcdir)/Makefile.common
 include $(top_srcdir)/Makefile.silent
 
-SUBDIRS = common bios vdi bdos aes tools system glue
+SUBDIRS = common bios vdi bdos aes desk tools system glue
 
 all::
 
@@ -17,6 +17,7 @@ all clean distclean dist::
 	$(MAKE) -C vdi $(FLAGSTOPASS) $@
 	$(MAKE) -C bdos $(FLAGSTOPASS) $@
 	$(MAKE) -C aes $(FLAGSTOPASS) $@
+	$(MAKE) -C desk $(FLAGSTOPASS) $@
 	$(MAKE) -C tools $(FLAGSTOPASS) $@
 	$(MAKE) -C system $(FLAGSTOPASS) $@
 	$(MAKE) -C glue $(FLAGSTOPASS) $@
@@ -24,8 +25,9 @@ all clean distclean dist::
 maps:
 	$(MAKE) clean
 	$(MAKE) SYMBOLS=-s TOSVERSION=306 COUNTRY=de
-	cnm -g glue/tos306de.img > glue/tos306de.map
+	cnm -g glue/tos.img > glue/tos306de.map
 	$(MAKE) clean
 	$(MAKE) SYMBOLS=-s TOSVERSION=306 COUNTRY=us
-	cnm -g glue/tos306us.img > glue/tos306us.map
+	cnm -g glue/tos.img > glue/tos306us.map
 	$(MAKE) clean
+	$(RM) glue/*.img glue/glue.*

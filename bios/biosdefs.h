@@ -18,7 +18,11 @@
 /* media def has changed */
 #define MEDIACHANGE      2
 
+#if TOSVERSION >= 0x400
+#define NCOOKIES 32
+#else
 #define NCOOKIES 16
+#endif
 
 /*
  * set to 1 if we are on a 68010+ with 8-byte trap exception frames

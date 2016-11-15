@@ -606,6 +606,7 @@ PP(register char *pnumstr;)
  *	IF(EUROTIME)THEN Military Time Format 
  */
 /* 306de: 00e2fea6 */
+/* 306us: 00e2fe4c */
 VOID fmt_time(P(uint16_t) time, P(char *)ptime)
 PP(register uint16_t time;)
 PP(register char *ptime;)
@@ -686,6 +687,7 @@ PP(register char *ptime;)
  *	Changed 7/20/92 To put in st_dchar as separator
  */
 /* 306de: 00e2ff02 */
+/* 306us: 00e2fed2 */
 VOID fmt_date(P(uint16_t) date, P(char *)pdate)
 PP(uint16_t date;)
 PP(register char *pdate;)

@@ -55,7 +55,7 @@ STATIC CARTNODE *cart_ptr;
 STATIC char *cart_dta;
 
 
-CARTNODE *cart_find PROTO((int16_t fill));
+CARTNODE *cart_find PROTO((BOOLEAN fill));
 
 
 
@@ -76,8 +76,8 @@ BOOLEAN cart_init(NOTHING)
 
 
 /* 306de: 00e230de */
-CARTNODE *cart_find(P(int16_t) fill)
-PP(int16_t fill;)
+CARTNODE *cart_find(P(BOOLEAN) fill)
+PP(BOOLEAN fill;)
 {
 	register char *pdta;
 	register CARTNODE *pcart;
@@ -87,7 +87,7 @@ PP(int16_t fill;)
 		if (fill)
 		{
 			pdta = cart_dta;
-			bfill(42, 0, &pdta[0]);		/* zero it out  */
+			bfill(42, 0, pdta);		/* zero it out  */
 			pdta[21] = F_RDONLY;		/* fill time,date,size,name */
 			LBCOPY(&pdta[22], &cart_ptr->c_time, 21);
 		}
@@ -135,14 +135,14 @@ int16_t ld_cartacc(NOTHING)
 	num_load = 0;
 	while ((pcart = cart_find(FALSE)))
 	{
-		if (wildcmp("*.ACC", &pcart->c_name[0]))
+		if (wildcmp("*.ACC", pcart->c_name))
 		{
 			if (cre_aproc())			/* create PD    */
 			{
 				num_load++;
 				psp = (char *)dos_exec("", 5, "");	/* create psp   */
 				LLSET(&psp[TEXTBASE], pcart->c_code);
-				pstart(gotopgm, &pcart->c_name[0], (intptr_t)psp);	/* go for it    */
+				pstart(gotopgm, pcart->c_name, (intptr_t)psp);	/* go for it    */
 			} else
 				break;
 		}
@@ -163,7 +163,7 @@ PP(const char *ptail;)
 
 	while ((pcart = cart_find(FALSE)))
 	{
-		if (streq(pcmd, &pcart->c_name[0]))
+		if (streq(pcmd, pcart->c_name))
 			break;
 	}
 	psp = (char *)dos_exec("", 5, ptail);
@@ -186,7 +186,7 @@ PP(const char *path;)
 	cart_init();
 	while ((pcart = cart_find(FALSE)))
 	{
-		if (streq(file, &pcart->c_name[0]))
+		if (streq(file, pcart->c_name))
 			return TRUE;
 	}
 

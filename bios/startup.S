@@ -168,6 +168,9 @@ palette   equ $FFFF8240
 v_shf_mod equ $FFFF8260
 shift_tt  equ $FFFF8262
 
+spshift   equ $FFFF8266
+sppalette equ $FFFF9800
+
 psgsel    equ $FFFF8800
 psgwr     equ $FFFF8802
 
@@ -274,11 +277,18 @@ _main:
         move    #$2700,sr
 
 /* special TT reset */
-#if TOSVERSION >= 0x300
-        move.w #$0100,($FFFF8606).w
-        move.w #$0000,($FFFF8606).w
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+        move.w #$0100,(DMA_CTRL).w
+        move.w #$0000,(DMA_CTRL).w
+#endif
+#if TOSVERSION >= 0x400
+		move.w ($FFFF8006).w,d0
 #endif
         reset                  /* reset all hardware */
+#if TOSVERSION >= 0x400
+		move.w ($FFFF8006).w,d0
+		move.w #7,($FFFF8940).w
+#endif
 
 /*
  * Check for diagnostic cartridge
@@ -309,10 +319,20 @@ zero:
         TO_TC(zero)          /*  we're done if we get a lineF exception ... */
         TO_TTR0(zero)        /* first we initialise the TTRs (ACRs on a 68ec030) */
         TO_TTR1(zero)
+
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
         FRESTORE(zero)
 
         btst      #0,(scu_gp1).w			/* memconfig valid? */
         beq.s     noreset
+#endif
+#endif
+#if TOSVERSION >= 0x400
+		move.w    #$0020,($FFFF828C).w
+		move.w    #$0010,($FFFF8282).w
+		ori.b     #$25,($FFFF8007).w
+		btst      #6,($FFFF8007).w
+		beq.s     noreset
 #endif
         lea       memcret(pc),a6
         bra       memchk
@@ -375,19 +395,21 @@ meminit:
         move.b    #$0E,(a0)  /* select Port A */
         move.b    #$07,2(a0) /* deselect floppy drives */
 
+#if TOSVERSION < 0x400
 #if TOSVERSION >= 0x300
         move.b    #$01,(v_syncmod).w /* set video sync */
 #else
-            btst      #0,_os_conf+1             /* check bit: configured for 50hz? */
-            beq.s     notpal                    /* (nope -- we're good ol' NTSC) */
-            lea       ret_1b(pc),a6
-            bra       waitvbl                   /* a short delay for PAL */
-ret_1b:     move.b    #2,(v_syncmod).w          /* yes -- twiddle to 50hz */
+        btst      #0,_os_conf+1             /* check bit: configured for 50hz? */
+        beq.s     notpal                    /* (nope -- we're good ol' NTSC) */
+        lea       ret_1b(pc),a6
+        bra       waitvbl                   /* a short delay for PAL */
+ret_1b: move.b    #2,(v_syncmod).w          /* yes -- twiddle to 50hz */
 notpal:
 #if STBOOK
-		 	move.b    #2,(v_shf_mod).w          /* Switch to 640x400x1 */
-            move.b    #$80,(LcdPControl).w      /* LCD display on */
-            tst.w     tt_mcu                    /* ST Book: ??? */
+		move.b    #2,(v_shf_mod).w          /* Switch to 640x400x1 */
+        move.b    #$80,(LcdPControl).w      /* LCD display on */
+        tst.w     tt_mcu                    /* ST Book: ??? */
+#endif
 #endif
 #endif
 
@@ -396,20 +418,37 @@ notpal:
  */
 
         lea.l     (palette).w,a1
-        move.w    #$000F,d0
+#if TOSVERSION >= 0x400
+        moveq     #16-1,d0
+#else
+        move.w    #16-1,d0
+#endif
         lea.l     dflt_pal(pc),a0
 initpal:
         move.w    (a0)+,(a1)+
         dbf       d0,initpal
 
+#if TOSVERSION >= 0x400
+		move.b    #$00,(spshift).w
+		lea.l     (sppalette).w,a1
+		moveq.l   #15,d0
+initpal2:
+		move.l    (a0)+,(a1)+
+		dbf       d0,initpal2
+		move.b    #$00,(v_shf_mod).w
+#endif
+
+
 /* set Video screen memory position to 0x10000 */
         move.b    #$01,(v_bas_h).w
         clr.b     (v_bas_m).w
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
         btst      #0,(scu_gp1).w
         beq.s      domemchk
 #endif
+
+#if TOSVERSION < 0x400
 
         move.b    (memctrl).w,d6                /* d6 = memory controller configuration */
 #if TOSVERSION < 0x300
@@ -601,6 +640,66 @@ clrmem:
 
         /* Store the ST-RAM parameters in the ST-RAM itself */
         move.b  d6,(memctrl).w             /* set copy of hw memory config */
+
+#else
+
+/* =========================================================================== */
+/* ==== memconf for Falcon =================================================== */
+/* =========================================================================== */
+
+		bset      #6,($FFFF8007).w
+		beq.s     domemchk
+		cmpi.l    #$752019F3,(_memvalid).w
+		bne.s     domemchk
+		cmpi.l    #$237698AA,(_memval2).w
+		bne.s     domemchk
+		cmpi.l    #$5555AAAA,(_memval3).w
+		beq       nomemchk
+domemchk:
+		move.w    ($FFFF8006).w,d0
+		lsr.w     #8,d0
+		lsr.b     #1,d0
+		move.b    d0,d1
+		and.b     #$01,d1
+		lsr.b     #2,d0
+		and.b     #$06,d0
+		or.b      d0,d1
+		move.l    #$00080000,d0
+		asl.l     d1,d0
+		cmp.b     #$05,d1
+		bne.s     domem1
+		move.l    #$00E00000,d0
+domem1:
+		move.l    d0,d5
+		lea.l     (sysvars_start).w,a4
+		move.l    d5,d4
+		sub.l     a4,d4
+		lsr.l     #8,d4
+		subq.l    #1,d4
+		lea.l     ($00000200).w,a5
+		moveq.l   #0,d0
+		movea.l   d0,a0
+		moveq.l   #0,d1
+		movea.l   d1,a1
+		moveq.l   #0,d2
+		movea.l   d2,a2
+		moveq.l   #0,d3
+		movea.l   d3,a3
+		lea.l     256(a4),a4
+clrmem:
+		movem.l   d0-d3/a0-a3,-(a4)
+		movem.l   d0-d3/a0-a3,-(a4)
+		movem.l   d0-d3/a0-a3,-(a4)
+		movem.l   d0-d3/a0-a3,-(a4)
+		movem.l   d0-d3/a0-a3,-(a4)
+		movem.l   d0-d3/a0-a3,-(a4)
+		movem.l   d0-d3/a0-a3,-(a4)
+		movem.l   d0-d3/a0-a3,-(a4)
+		adda.l    a5,a4
+		dbf       d4,clrmem
+
+#endif
+
         move.l  d5,(_phystop).w            /* highest address as phystop */
 
         move.l    #$752019F3,(_memvalid).w /* set memvalid to ok */
@@ -617,7 +716,7 @@ clrmem:
  * NOTE: whether we actually have FastRAM or not, setting the
  * value always causes a bus error, so we need to handle it.
  */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
         move.l  #refresh_done,(_buserror).w      /* bus error vector */
         move.w  #$0000,tt_mcu+224
 refresh_done:
@@ -676,7 +775,7 @@ nomemchk:
         movea.l   #SUPSIZ*2+_supstk,a7
 #endif
 
-#if STBOOK
+#if STBOOK | (TOSVERSION >= 0x400)
 /*
  *  Initialize interrupt vectors
  *
@@ -738,11 +837,15 @@ tconl:      move.l    (a0)+,(a1)+
             movea.l   (_buserror).w,a0
             movea.l   sp,a1
             move.l    #vmeinit,(_buserror).w
+#if (TOSVERSION < 0x400)
             move.b    #$40,(vme_mask).w         /* Enable IRQ6 from VMEBUS/MFP */
             move.b    #$14,(sys_mask).w         /* VSYNC & HSYNC enable in the VME Bus System Control Unit */
+#endif
 vmeinit:    move.l    a0,(_buserror).w
             movea.l   a1,sp
 #endif
+
+#if (TOSVERSION < 0x400)
 
 #if OS_COUNTRY == CTRY_PL
         clr.b     (_has_dmasound).w
@@ -796,6 +899,20 @@ nostedetect:
 #endif
 #endif
 
+#else
+
+		move.b    ($FFFF8006).w,d0
+		move.b    d0,d1
+		lsl.b     #6,d1
+		and.b     #$80,d1
+		lsr.b     #6,d0
+		or.b      d0,d1
+		move.w    d1,($FFFF82C0).w
+		st        _has_dmasound
+		sf        STEFlag
+
+#endif
+
 
 /* clear the remainder of the BSS section */
 
@@ -815,7 +932,7 @@ clrbss:
 
 /* clear screen memory */
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
 scrsize equ ((1280*960)/8+$100)
 #else
 scrsize equ ((640*400)/8+$300)
@@ -912,11 +1029,17 @@ cpuexit:
         move.l    d1,(a0)+      /* set _CPU cookie */
         sne       (_longframe+1).w
 
-#if STBOOK
+#if STBOOK | (TOSVERSION >= 0x400)
             move.l    #$5F56444F,(a0)+          /* setup VDO cookie: Video hardware */
+#if (TOSVERSION >= 0x400)
+            move.l    #$30000,(a0)+             /* 3,0 => Atari Falcon, ST */
+            move.l    #$5F4D4348,(a0)+          /* setup MCH cookie: Machine type */
+            move.l    #$30000,(a0)+             /* 3,0 => Atari Falcon, ST */
+#else
             move.l    #$10001,(a0)+             /* 1,1 => Atari STE, ST-Book */
             move.l    #$5F4D4348,(a0)+          /* setup MCH cookie: Machine type */
             move.l    #$10001,(a0)+             /* 1,1 => Atari STE, ST-Book */
+#endif
 
             move.b    #$7f,d0
             tst.b     STEFlag
@@ -926,7 +1049,12 @@ cpuexit:
             move.w    (STConfig).w,d0
             lsr.w     #8,d0
             move.l    d0,(a0)+                  /* all DIP switches as a bit mask 0..7 */
-cooSTE:     moveq     #3,d1                     /* bit 0: PSG, bit 1: 8-bit DMA */
+cooSTE:     
+#if (TOSVERSION >= 0x400)
+            moveq     #31,d1                    /* bit 0: PSG, bit 1: 8-bit DMA, 2: CODEC, 3: DSP, 4: Multiplex */
+#else
+            moveq     #3,d1                     /* bit 0: PSG, bit 1: 8-bit DMA */
+#endif
             move.l    #$5F534E44,(a0)+          /* setup SND cookie: Sound hardware */
             btst      #7,d0                     /* DIP switch 7 on? */
             bne.s     cooSND                    /* (punt) */
@@ -936,8 +1064,8 @@ cooSND:     move.l    d1,(a0)+
             bne.s     cooFDC                    /* (punt - no HD floppy) */
             move.b    #8,dsb                    /* select HD density for drive A */
             move.l    #'_FDC',(a0)+             /* setup FDC cookie: Floppy disk controller */
-            move.l    #$1415443,(a0)+           /* 'FDC' | (1 << 24) */
-cooFDC:     move.l    #$5F465055,(a0)+             /* Setup FPU cookie: Type of the FPU */
+            move.l    #$01415443,(a0)+          /* 'FDC' | (1 << 24) */
+cooFDC:     move.l    #$5F465055,(a0)+          /* Setup FPU cookie: Type of the FPU */
             moveq     #0,d7                     /* 0 = no FPU */
             suba.w    #$24,sp
             move.l    (_lineftrap).w,(sp)
@@ -1103,7 +1231,7 @@ frbdone:
 /* initialize exception vectors */
 /* =========================================================================== */
 
-#if !STBOOK
+#if !STBOOK & (TOSVERSION < 0x400)
         lea.l     just_rte(pc),a3
         lea.l     bios_unimpl(pc),a4
         lea.l     any_vec(pc),a1            /* default to exception handler displaying bombs */
@@ -1190,6 +1318,14 @@ ikbdwait:
 /*
  * check monitor type, and set boot resolution
  */
+#if TOSVERSION >= 0x400
+		moveq.l   #3,d1
+		move.w    (falcon_videomode).w,d2
+		bne.s     nocompat
+		move.w    #$0082,d2
+nocompat:
+		move.w    d2,(falcon_videomode).w
+#else
 #if STBOOK
             bsr       scanextrom
 
@@ -1222,12 +1358,14 @@ moncolor:
 #endif
         move.b    d1,(_sshiftmod).w  /* .. and also system var */
 
-/*
- * initialize video
- */
         bsr       blittest
         jsr       resetdev                /* linaA blitter/no-blitter table init */
         jsr       esc_init                /* clear screen, initialize cursor */
+#endif
+
+/*
+ * initialize video
+ */
         move.l    #_main,(_swv_vec).w     /* RESET system on monitor change */
         move.w    #$0001,(_vblsem).w      /* enable vblank processing */
 
@@ -1260,126 +1398,50 @@ resDelayL:  cmp.l     (_hz_200).w,d0            /* a short delay of 15-20ms */
  * continue with rest of bios initialization
  */
         move.l    #_int_priv,(_privvio).w
+
+#if TOSVERSION < 0x400
         bra       biosinit
-
-/*
- * Flush instruction and data cache (68020+)
- */
-flushCaches:
-        move.w    sr,-(a7)
-        ori.w     #$0700,sr
-        CACR_D0
-        or.l      #$00000808,d0           /* CI (Clear Instruction Cache), DI (Clear Data Cache) */
-        D0_CACR
-        move.w    (a7)+,sr
-        rts
-
-/*
- * _int_priv - privileged instruction handler
- *
- * Convert a privileged 'MOVE SR,...' to 'MOVE CCR,...'
- */
-/* 306de: 00e0060a */
-/* 206de: 00e00638 */
-_int_priv:
-        movem.l   d0-d2,-(a7)      /* saving some registers while we test */
-        move.l    a1,-(a7)
-        move.l    a0,-(a7)
-        movea.l   22(a7),a0        /* the offending address */
-        move.w    (a0),d0          /* the offending instruction */
-        move.w    d0,d1            /* save for later tests */
-        and.w     #$FFC0,d0        /* isolate move from SR opcode */
-        cmp.w     #$40C0,d0        /* we don't care where "To" was */
-        bne       pi_back          /* Not a MOVE SR,XX instruction */
-        move.l    #$30004E71,privinst.w   /* move.w d0,d0; nop */
-        move.l    #$4E714E75,(privinst+4).w /* nop; rts */
-        move.w    d1,d0
-        and.w     #$0007,d0        /* <ea> register (bit 0..2) */
-        lsl.w     #8,d0
-        lsl.w     #1,d0            /* move into bit 9..11 of the destination <ea> */
-        or.w      d0,privinst.w    /* insert the destination register */
-        move.w    d1,d0
-        and.w     #$0038,d0        /* <ea> mode (bit 3..5) */
-        lsl.w     #3,d0
-        or.w      d0,privinst.w    /* insert the destination addressing mode */
-        moveq.l   #2,d2            /* skip that many instruction bytes */
-        cmp.w     #$0180,d0        /* is it indexed? */
-        beq       pi_back          /* not supported -> _term */
-        tst.w     d0               /* is it data-register direct? */
-        beq.s     int_p4           /* yes go execute it */
-        cmp.w     #$0140,d0        /* is it d(An)? */
-        beq.s     int_p2           /* yes */
-        cmp.w     #$01C0,d0        /* is it absolute? */
-        bne.s     int_p3
-/* <ea> = (xxx).l or (xxx).w */
-        and.w     #$0007,d1        /* is it absolute short? */
-        beq.s     int_p1           /* yes, skip */
-        addq.w    #2,d2            /* 2 more bytes of instruction */
-        move.w    4(a0),(privinst+4).w /* copy lower 16 bits of address */
-int_p1:
-        addq.w    #2,d2            /* 2 more bytes of instruction */
-        move.w    2(a0),(privinst+2).w /* copy remaining 16 bits of address */
-        bra.s     int_p5
-/* <ea> = d16(An) */
-int_p2:
-        addq.w    #2,d2            /* 2 more bytes of instruction */
-        move.w    2(a0),(privinst+2).w /* copy displacement */
-int_p3:
-        and.w     #$0007,d1        /* is USP affected? */
-        cmp.w     #$0007,d1
-        bne.s     int_p5           /* no -> regular destination ea */
-/* <ea> = d16(A7) or d8(A7,Dn) */
-/* Special case because A7 has to be the USP, instead of the current SSP (in A7) */
-        move.l    usp,a1           /* have to use the USP, otherwise we wouldn't have gotten the exception */
-        andi.w    #$F3FF,privinst.w /* convert A7-relative into A1-relative destination <ea> */
-        add.l     d2,22(a7)        /* pc += opcode size */
-#if TOSVERSION >= 0x300
-        bsr       flushCaches
-#endif
-        move.w    20(a7),d0        /* d0 = SR */
-        jsr       privinst.w       /* execute: MOVE D0,d(A1,Dn); NOP; RTS or MOVE D0,d(A1); NOP; RTS */
-        move.l    a1,usp           /* restore USP, but shouldn't have changed anyway */
-        movea.l   (a7)+,a0
-        movea.l   (a7)+,a1
-        movem.l   (a7)+,d0-d2
-        rte
-/* <ea> = Dn */
-int_p4:
-        add.l     d2,22(a7)           /* adjust return PC by number of bytes to skip */
-        ori.w     #$0010,privinst.w   /* source ea = (A0) */
-#if TOSVERSION >= 0x300
-        bsr       flushCaches
-#endif
-        lea.l     20(a7),a0           /* a0 = address of SR from stack frame */
-        movem.l   8(a7),d0-d2
-        jsr       privinst.w          /* execute: MOVE (A0),Dn; NOP; NOP; RTS */
-        movea.l   (a7)+,a0
-        movea.l   (a7)+,a1
-        adda.w    #$000C,a7           /* skip d0-d2, because they have already been restored */
-        rte
-int_p5:
-        add.l     d2,22(a7)           /* adjust return PC by number of bytes to skip */
-#if TOSVERSION >= 0x300
-        bsr       flushCaches
-#endif
-        movea.l   (a7)+,a0
-        movea.l   (a7)+,a1
-        move.w    12(a7),d0
-        jsr       privinst.w          /* execute: MOVE D0,<ea>; ...; RTS */
-        movem.l   (a7)+,d0-d2
-        rte
-pi_back:
-        movea.l   (a7)+,a0
-        movea.l   (a7)+,a1
-        movem.l   (a7)+,d0-d2
-#if TOSVERSION < 0x300
-        jmp       any_vec+$08000000             /* illegal instruction => _term; $80000000 to get exception number in high byte */
-#else
-        jmp       any_vec            /* illegal instruction => _term */
-#endif
+#include "intpriv.inc"
 
 biosinit:
 		jsr       _osinit            /* initialize DOS */
+
+#else
+
+biosinit:
+		
+		move.l    (_phystop).w,(_memtop).w
+		jsr       _osinit            /* initialize DOS */
+		move.w    (falcon_videomode).w,-(a7)
+		move.w    #$0003,-(a7)
+		clr.l     -(a7)
+		clr.l     -(a7)
+		jsr       VsetScreen
+		lea.l     12(a7),a7
+		jsr       $00E0567E(pc)
+		move.w    #$0001,-(a7)
+		move.w    #$0000,-(a7)
+		move.w    #$0000,-(a7)
+		move.w    #$0008,-(a7)
+		move.w    #$0000,-(a7)
+		jsr       devconnect(pc)
+		addq.w    #6,a7
+		clr.w     (a7)
+		jsr       setmode(pc)
+		move.l    #$00020080,(a7)
+		jsr       soundcmd(pc)
+		move.w    #$0003,(a7)
+		jsr       soundcmd(pc)
+		move.l    #$00060003,(a7)
+		jsr       soundcmd(pc)
+		move.w    #$0004,(a7)
+		jsr       soundcmd(pc)
+		move.w    #$0005,(a7)
+		jsr       soundcmd(pc)
+		addq.w    #4,a7
+
+#endif
+
 
 /* --- set the current system time and date */
         move.w    _os_dosdate,_date  /* use BIOS time as current time */
@@ -2170,6 +2232,7 @@ dflt_pal:
  */
 /* 306de: 00e00c44 */
 /* 206de: 00e00bf0 */
+/* 404: 00e00c9a */
 int_hbl:
         move.w    d0,-(a7)            /* save d0 */
         move.w    2(a7),d0            /* get status register from stack */
@@ -2188,6 +2251,7 @@ is_ipl:
 /* 306de: 00e00c5a */
 /* 206de: 00e00c06 */
 /* 208de: 00e00baa */
+/* 404: 00e00cb0 */
 int_vbl:
         addq.l    #1,_frclock         /* increase num of happened ints */
         subq.w    #1,_vblsem          /* check vbl semaphore */
@@ -2389,6 +2453,7 @@ critret:
 
 /* 306de: 00e00d9c */
 /* 206de: 00e00d3e */
+/* 404: 00e00d76 */
 _xbiostrap:
         lea.l     xbios_vecs(pc),a0
         bra.s     biosxbios
@@ -2397,6 +2462,7 @@ _xbiostrap:
 
 /* 306de: 00e00da2 */
 /* 206de: 00e00d44 */
+/* 404: 00e00d7c */
 _biostrap:
         lea.l     bios_vecs(pc),a0
 
@@ -2727,6 +2793,7 @@ doxconstd:
  */
 /* 306de: 00e01024 */
 /* 206de: 00e00f30 */
+/* 404: 00e00e56 */
 tconstat:
         dc.l      bios_unimpl
         dc.l      _bcon6stat    /* BIOS device 1 (AUX) defaults to RS232 port */
@@ -6963,6 +7030,7 @@ mousekey:  dc.b      $47,$c7,$52,$d2
 
 /* 306de: 00e0380c */
 /* 206de: 00e03466 */
+/* 404: 00e0398c */
 coldboot:
         move.w    #$2700,sr                 /* disable all IRQSR */
 

@@ -43,6 +43,8 @@
 *    the appropriate primitive graphics routine.			*
 *************************************************************************
 
+/* 306de: 00e0792c */
+/* 404: 00e094ea */
 		xdef	line1010
 line1010:	move.l	2(sp),a1	; fetch pc off stack.
 		move.w	(a1),d2		; fetch 1010 instruction.

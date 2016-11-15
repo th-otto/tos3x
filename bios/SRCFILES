@@ -25,6 +25,7 @@ BIOS_SRCS=\
 	nvram.inc \
 	romcrc.inc \
 	scrdmp.inc \
+	intpriv.inc \
 	${empty}
 
 

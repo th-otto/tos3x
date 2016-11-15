@@ -50,6 +50,9 @@ system:
 listings:
   Working versions of disassembler listings of various TOS versions.
 
+glue:
+  The final ROM images will be build here.
+
 alcyon:
   Source of the (modified) tools of the Alcyon
   C compiler & tools, as used to compile TOS.
@@ -59,6 +62,9 @@ alcyon/orig:
   identical versions of the ones found in the developer kit.
 
 
+*****************************************************************
+* Aseembler sources
+*****************************************************************
 
 - Assembler sources are written in a format that is accepted
   both by as68 and by the GNU assembler with the --mri option.
@@ -67,7 +73,7 @@ alcyon/orig:
 
 - All comments in assembly files are in C-style. The makefile
   preprocesses them before passing them to the assembler. This
-  avoid problems with different types of comment delimiters in
+  avoids problems with different types of comment delimiters in
   different assemblers, and also works around some bugs of
   the conditional assembly directives of as68. It also allows
   using the same files defining some key constants to be

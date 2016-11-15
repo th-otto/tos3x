@@ -20,7 +20,8 @@ LIBSNDX = ../bios/bios.ndx ../vdi/vdi.ndx ../bdos/bdos.ndx ../aes/aes.ndx ../des
 OBJS = $(STARTUP) $(BIOS_OBJS) $(VDI_OBJS) $(BDOS_OBJS) $(AES_OBJS) $(DESK_OBJS)
 
 ROMSIZE_206 = 256k
-ROMSIZE_208 = 256k
+# use 257 for ST-book, since mkrom can't distinguish it from 2.06
+ROMSIZE_208 = 257k
 ROMSIZE_306 = 512k
 
 ROMSIZE = $(ROMSIZE_$(TOSVERSION))
@@ -28,8 +29,8 @@ ROMSIZE = $(ROMSIZE_$(TOSVERSION))
 $(IMG): tos.img $(MKROM)
 	$(MKROM) pad $(ROMSIZE) $< $@
 
-tos.img: $(STARTUP) $(LIBSNDX) tosrsc.o vars.o
-	$(LD) -o $@ $(SYMBOLS) -a $(rombase) x 0 $(STARTUP) -x ../bios/bios.a -x ../vdi/vdi.a -x ../bdos/bdos.a -x ../aes/aes.a -x ../desk/desk.a tosrsc.o vars.o
+tos.img: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o
+	$(LD) -o $@ $(SYMBOLS) -a $(rombase) x 0 $(STARTUP) -x ../bios/bios.a -x ../vdi/vdi.a -x ../bdos/bdos.a -x ../aes/aes.a -x ../desk/desk.a tosrsc$(COUNTRY).o vars.o
 
 ../bios/bios.ndx: ../bios/bios.a
 	$(RANLIB) $<
@@ -61,9 +62,9 @@ vars.o: ../common/vars.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
-tosrsc.o: tosrsc.c
+tosrsc$(COUNTRY).o: tosrsc$(COUNTRY).c
 
-tosrsc.c: $(MKBININC) glue.$(COUNTRY)
+tosrsc$(COUNTRY).c: $(MKBININC) glue.$(COUNTRY)
 	$(AM_V_GEN)$(MKBININC) glue.$(COUNTRY) tosrsc $@
 
 glue.us: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemus.rsc ../desk/rsc/$(TOSVERSION)/deskus.rsc ../desk/rsc/$(TOSVERSION)/deskus.inf
@@ -108,11 +109,17 @@ glue.dk: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemdk.rsc ../desk/rsc/$(TOSVERSION)/
 glue.pl: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gempl.rsc ../desk/rsc/$(TOSVERSION)/deskpl.rsc ../desk/rsc/$(TOSVERSION)/deskpl.inf
 	$(AM_V_GEN)$(MKGLUE) pl $(TOSVERSION)
 
+glue.gr: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemgr.rsc ../desk/rsc/$(TOSVERSION)/deskgr.rsc ../desk/rsc/$(TOSVERSION)/deskgr.inf
+	$(AM_V_GEN)$(MKGLUE) gr $(TOSVERSION)
+
+glue.ru: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemru.rsc ../desk/rsc/$(TOSVERSION)/deskru.rsc ../desk/rsc/$(TOSVERSION)/deskru.inf
+	$(AM_V_GEN)$(MKGLUE) ru $(TOSVERSION)
+
 check::
 	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
 
 clean:
-	$(RM) $(IMG) tos.img $(PROGRAMS) tosrsc.c glue.$(COUNTRY) *.o *.i $(top_srcdir)/common/config.h
+	$(RM) *.o *.i $(IMG) tos.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h
 
 distclean: clean
-	$(RM) $(top_srcdir)/common/sections.mak
+	$(RM) $(top_srcdir)/common/sections.mak *.img

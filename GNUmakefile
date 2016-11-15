@@ -1,7 +1,7 @@
 include GNUmakefile.common
 include Makefile.silent
 
-SUBDIRS = common bios vdi bdos aes desk tools system
+SUBDIRS = common bios vdi bdos aes desk tools system glue
 
 EXTRA_DIST = \
 	GNUmakefile \

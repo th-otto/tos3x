@@ -237,6 +237,7 @@ int main(int argc, char **argv)
 	RS_HEADER deskhdr;
 	glue_header glue;
 	int found;
+	unsigned long osentry;
 	
 	if (argc != 2)
 	{
@@ -270,6 +271,11 @@ int main(int argc, char **argv)
 	address = buffer + SIZEOF_GLUE_HEADER;
 	end = buffer + size - SIZEOF_RS_HEADER;
 	
+	if (getbeshort(buffer) == 0x602e)
+		osentry = getbelong(buffer + 8);
+	else
+		osentry = 0;
+	
 	found = FALSE;
 	while (address < end)
 	{
@@ -301,7 +307,13 @@ int main(int argc, char **argv)
 				char deskinf[128];
 				
 				found = TRUE;
-				printf(_("found resource at $%08lx\n"), offset);
+				printf(_("found resource at $%08lx: glue header $%08lx, gem.rsc $%08lx($%04x), desk.rsc $%08lx($%04x), desktop.inf $%08lx($%04x)\n"),
+					offset,
+					offset + osentry,
+					offset + SIZEOF_GLUE_HEADER + osentry, glue.off_deskrsc - SIZEOF_GLUE_HEADER,
+					offset + glue.off_deskrsc + osentry, glue.off_deskinf - glue.off_deskrsc,
+					offset + glue.off_deskinf + osentry, glue.totalsize - glue.off_deskinf);
+					
 				printf("GEM:\n");
 				print_header(&gemhdr);
 				printf("DESKTOP:\n");

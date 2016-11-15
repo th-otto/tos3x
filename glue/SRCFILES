@@ -1,4 +1,4 @@
-SRCS:=
+SRCS:=startup.S
 
 EXTRA_DIST:=\
 	GNUmakefile \

@@ -1,4 +1,3 @@
 *.img
-tosrsc.c
-*.map
+tosrsc*.c
 glue.*

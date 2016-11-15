@@ -184,7 +184,7 @@ PP(char **argv;)
 		
 		/*
 		 * ugly, temporary hack for BINEXACT mode:
-		 * the padding above (size + 4) writes 4 undefined bytes to the file.
+		 * the padding & gap above writes 4-5 undefined bytes to the file.
 		 * Fill them in with data found in the ROMs.
 		 */
 		if (country && strcmp(country, "de") == 0)
@@ -202,6 +202,98 @@ PP(char **argv;)
 				putbeshort(address - 4, 0x000d);
 				putbeshort(address - 2, 0x0008);
 				putbeshort(address - 0, 0x0001);
+			}
+		}
+
+		if (country && strcmp(country, "us") == 0)
+		{
+			if (i == 0 && size == 0x13a4)
+			{
+				putbeshort(address - 4, 0x0000);
+				putbeshort(address - 2, 0x0e60);
+			} else if (i == 1 && size == 0x5e3c)
+			{
+				putbeshort(address - 4, 0x001b);
+				putbeshort(address - 2, 0x0040);
+			} else if (i == 2 && size == 0x02a6)
+			{
+				address[-5] = 0x01;
+				putbeshort(address - 4, 0x0009);
+				putbeshort(address - 2, 0xffff);
+				putbeshort(address - 0, 0xffff);
+			}
+		}
+
+		if (country && strcmp(country, "uk") == 0)
+		{
+			if (i == 0 && size == 0x13a4)
+			{
+				putbeshort(address - 4, 0x0000);
+				putbeshort(address - 2, 0x0e60);
+			} else if (i == 1 && size == 0x5e3c)
+			{
+				putbeshort(address - 4, 0x001b);
+				putbeshort(address - 2, 0x0040);
+			} else if (i == 2 && size == 0x02a6)
+			{
+				address[-5] = 0x01;
+				putbeshort(address - 4, 0x0009);
+				putbeshort(address - 2, 0xffff);
+				putbeshort(address - 0, 0xffff);
+			}
+		}
+
+		if (country && strcmp(country, "fr") == 0)
+		{
+			if (i == 0 && size == 0x1444)
+			{
+				putbeshort(address - 4, 0x0000);
+				putbeshort(address - 2, 0x0f00);
+			} else if (i == 1 && size == 0x609c)
+			{
+				putbeshort(address - 4, 0x0000);
+				putbeshort(address - 2, 0x5d10);
+			} else if (i == 2 && size == 0x029c)
+			{
+				putbeshort(address - 4, 0x1100);
+				putbeshort(address - 2, 0x0001);
+				putbeshort(address - 0, 0x0003);
+			}
+		}
+
+		if (country && strcmp(country, "sv") == 0)
+		{
+			if (i == 0 && size == 0x13f0)
+			{
+				putbeshort(address - 4, 0x0000);
+				putbeshort(address - 2, 0x0eac);
+			} else if (i == 1 && size == 0x5fba)
+			{
+				putbeshort(address - 4, 0x0713);
+				putbeshort(address - 2, 0x0008);
+			} else if (i == 2 && size == 0x02a2)
+			{
+				putbeshort(address - 4, 0x4d20);
+				putbeshort(address - 2, 0x3031);
+				putbeshort(address - 0, 0x2030);
+			}
+		}
+
+		if (country && strcmp(country, "pl") == 0)
+		{
+			if (i == 0 && size == 0x1436)
+			{
+			} else if (i == 1 && size == 0x620c)
+			{
+				/*
+				 * put back wrong rsh_rssize field in PL resource
+				 */
+				putbeshort(address - size + 34, 0x620c);
+			} else if (i == 2 && size == 0x02a4)
+			{
+				putbeshort(address - 4, 0x4020);
+				putbeshort(address - 2, 0x4020);
+				putbeshort(address - 0, 0x0d0a);
 			}
 		}
 	}

@@ -33,7 +33,7 @@ dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a $(PROGRAMS) $(top_srcdir)/common/config.h
+	$(RM) *.o *.a $(IMG) tos.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h
 
 distclean: clean
-	$(RM) $(top_srcdir)/common/sections.mak
+	$(RM) $(top_srcdir)/common/sections.mak *.img
