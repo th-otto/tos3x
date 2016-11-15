@@ -211,6 +211,14 @@ PP(char **argv;)
 	int ret;
 	int status;
 	
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	if (argc == 1)
 	{
 		puts(_("RELMOD version 1.03\n"));

@@ -167,7 +167,7 @@ bla:
 	    optimize.s
 
 check::
-	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
+	cmp optimize$(EXEEXT) ${BIN}optimize$(EXEEXT)
 
 clean:
 	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) fixnops$(EXEEXT)

@@ -1,44 +1,86 @@
-AOBJS1 = blivot.o xsignal.o salloc.o setjmp.o memsets.o brk.o
-AOBJS2 = bios.o xbios.o gemdos.o strchrs.o
+ASRCS1 = blivot.S xsignal.S salloc.S setjmp.S memsets.S brk.S
+ASRCS2 = bios.S xbios.S gemdos.S strchrs.S
+
+AOBJS1 = $(ASRCS1:.S=.o)
+AOBJS2 = $(ASRCS1:.S=.o)
 
 AOBJS = $(AOBJS1) $(AOBJS2)
+ASRCS = $(ASRCS1) $(ASRCS2)
 
-COBJS1 = asctime.o ctime.o localtime.o mktime.o consec.o cnvsec.o timezone.o time.o
-COBJS2 = atoi.o perror.o strerror.o atol.o ctype.o getl.o getw.o fopen.o xmain.o xwmain.o fgetc.o
-COBJS3 = ungetc.o fgets.o filbuf.o read.o readasc.o readbin.o creat.o exit.o cleanup.o
-COBJS4 = fclose.o close.o fdecls.o fflush.o open.o lseek.o tell.o fputn.o
-COBJS5 = putl.o putw.o fputc.o flsbuf.o isatty.o isdev.o ttyname.o malloc.o calloc.o mallocnd.o
-COBJS6 = sbrk.o memset.o write.o wrtchr.o chinit.o allocc.o chkc.o lmalloc.o lsbrk.o
-COBJS7 = writeasc.o writebin.o blkio.o xread.o xwrite.o xopen.o getmode.o
-COBJS8 = strupr.o strlwr.o strcpy.o strncpy.o strlen.o strcat.o strncat.o
-COBJS9 = strcmp.o strncmp.o stricmp.o qsort.o fseek.o rewind.o ftell.o gets.o
-COBJS10 = nf_name.o nf_vers.o nf_debug.o nf_shutd.o nf_ops.o cookie.o
-COBJS11 = printf.o fprintf.o sprintf.o vprintf.o vfprintf.o vsprintf.o xdoprtfp.o doprint.o
-COBJS12 = fread.o fwrite.o blkmove.o fdopen.o freopen.o filesz.o
-COBJS13 = puts.o fputs.o xttyin.o ttyin.o ttyout.o getpass.o getpid.o getopt.o
-COBJS14 = abort.o chmod.o access.o chown.o dup.o rename.o unlink.o
-COBJS15 = doscan.o scanf.o fscanf.o sscanf.o optoff.o sgtty.o ttyinraw.o
-COBJS16 = errno.o strchr.o strrchr.o lstout.o mktemp.o prtld.o prtint.o prtshort.o
-COBJS17 = rand.o setbuf.o signal.o swab.o strtol.o
-COBJS18 = aldiv.o almul.o alrem.o uldiv.o ldiv.o lmul.o lrem.o
+CSRCS1 = asctime.c ctime.c localtime.c mktime.c consec.c cnvsec.c timezone.c time.c
+CSRCS2 = atoi.c perror.c strerror.c atol.c ctype.c getl.c getw.c fopen.c xmain.c xwmain.c fgetc.c
+CSRCS3 = ungetc.c fgets.c filbuf.c read.c readasc.c readbin.c creat.c exit.c cleanup.c
+CSRCS4 = fclose.c close.c fdecls.c fflush.c open.c lseek.c tell.c fputn.c
+CSRCS5 = putl.c putw.c fputc.c flsbuf.c isatty.c isdev.c ttyname.c malloc.c calloc.c mallocnd.c
+CSRCS6 = sbrk.c memset.c write.c wrtchr.c chinit.c allocc.c chkc.c lmalloc.c lsbrk.c
+CSRCS7 = writeasc.c writebin.c blkio.c xread.c xwrite.c xopen.c getmode.c
+CSRCS8 = strupr.c strlwr.c strcpy.c strncpy.c strlen.c strcat.c strncat.c
+CSRCS9 = strcmp.c strncmp.c stricmp.c qsort.c fseek.c rewind.c ftell.c gets.c
+CSRCS10 = nf_name.c nf_vers.c nf_debug.c nf_shutd.c nf_ops.c cookie.c
+CSRCS11 = printf.c fprintf.c sprintf.c vprintf.c vfprintf.c vsprintf.c xdoprtfp.c doprint.c
+CSRCS12 = fread.c fwrite.c blkmove.c fdopen.c freopen.c filesz.c
+CSRCS13 = puts.c fputs.c xttyin.c ttyin.c ttyout.c getpass.c getpid.c getopt.c
+CSRCS14 = abort.c chmod.c access.c chown.c dup.c rename.c unlink.c
+CSRCS15 = doscan.c scanf.c fscanf.c sscanf.c optoff.c sgtty.c ttyinraw.c
+CSRCS16 = errno.c strchr.c strrchr.c lstout.c mktemp.c prtld.c prtint.c prtshort.c
+CSRCS17 = rand.c setbuf.c signal.c swab.c strtol.c
+CSRCS18 = aldiv.c almul.c alrem.c uldiv.c ldiv.c lmul.c lrem.c
+
+COBJS1 = $(CSRCS1:.c=.o)
+COBJS2 = $(CSRCS2:.c=.o)
+COBJS3 = $(CSRCS3:.c=.o)
+COBJS4 = $(CSRCS4:.c=.o)
+COBJS5 = $(CSRCS5:.c=.o)
+COBJS6 = $(CSRCS6:.c=.o)
+COBJS7 = $(CSRCS7:.c=.o)
+COBJS8 = $(CSRCS8:.c=.o)
+COBJS9 = $(CSRCS9:.c=.o)
+COBJS10 = $(CSRCS10:.c=.o)
+COBJS11 = $(CSRCS11:.c=.o)
+COBJS12 = $(CSRCS12:.c=.o)
+COBJS13 = $(CSRCS13:.c=.o)
+COBJS14 = $(CSRCS14:.c=.o)
+COBJS15 = $(CSRCS15:.c=.o)
+COBJS16 = $(CSRCS16:.c=.o)
+COBJS17 = $(CSRCS17:.c=.o)
+COBJS18 = $(CSRCS18:.c=.o)
 
 COBJS=${COBJS1} ${COBJS2} ${COBJS3} ${COBJS4} ${COBJS5} ${COBJS6} ${COBJS7} ${COBJS8} ${COBJS9} \
       ${COBJS10} ${COBJS11} ${COBJS12} ${COBJS13} ${COBJS14} ${COBJS15} ${COBJS16} ${COBJS17} ${COBJS18}
 
+CSRCS=${CSRCS1} ${CSRCS2} ${CSRCS3} ${CSRCS4} ${CSRCS5} ${CSRCS6} ${CSRCS7} ${CSRCS8} ${CSRCS9} \
+      ${CSRCS10} ${CSRCS11} ${CSRCS12} ${CSRCS13} ${CSRCS14} ${CSRCS15} ${CSRCS16} ${CSRCS17} ${CSRCS18}
+
 OBJS = $(AOBJS) $(COBJS)
 
-MAOBJS1 = atan.o cosh.o ffpabs.o ffpadd.o ffpatan.o ffpcmp.o ffpcpyrt.o ffpdiv.o ffpexp.o
-MAOBJS2 = ffphthet.o ffplog.o ffpmul2.o ffppwr.o ffpsin.o ffpsinh.o ffpsqrt.o ffptheta.o
-MAOBJS3 = ffptnorm.o fpadd.o fpcmp.o fpcos.o fpdiv.o fpexp.o fplog.o fpmul.o fpneg.o
-MAOBJS4 = fppwr.o fpsin.o fpsqrt.o fpsub.o sinh.o tanh.o
+MASRCS1 = atan.S cosh.S ffpabs.S ffpadd.S ffpatan.S ffpcmp.S ffpcpyrt.S ffpdiv.S ffpexp.S
+MASRCS2 = ffphthet.S ffplog.S ffpmul2.S ffppwr.S ffpsin.S ffpsinh.S ffpsqrt.S ffptheta.S
+MASRCS3 = ffptnorm.S fpadd.S fpcmp.S fpcos.S fpdiv.S fpexp.S fplog.S fpmul.S fpneg.S
+MASRCS4 = fppwr.S fpsin.S fpsqrt.S fpsub.S sinh.S tanh.S
+
+MAOBJS1 = $(MASRCS1:.S=.o)
+MAOBJS2 = $(MASRCS2:.S=.o)
+MAOBJS3 = $(MASRCS3:.S=.o)
+MAOBJS4 = $(MASRCS4:.S=.o)
 
 MAOBJS = $(MAOBJS1) $(MAOBJS2) $(MAOBJS3) $(MAOBJS4)
+MASRCS = $(MASRCS1) $(MASRCS2) $(MASRCS3) $(MASRCS4)
 
-MCOBJS1 = atof.o ceil.o etoa.o fabs.o ffptof.o floor.o fmod.o ftoa.o gtoa.o ftoffp.o
-MCOBJS2 = ftol.o ltof.o
+MCSRCS1 = atof.c ceil.c etoa.c fabs.c ffptof.c floor.c fmod.c ftoa.c gtoa.c ftoffp.c
+MCSRCS2 = ftol.c ltof.c
+
+MCOBJS1 = $(MCSRCS1:.c=.o)
+MCOBJS2 = $(MCSRCS2:.c=.o)
 
 MCOBJS = $(MCOBJS1) $(MCOBJS2) $(MCOBJS3) $(MCOBJS4)
+MCSRCS = $(MCSRCS1) $(MCSRCS2) $(MCSRCS3) $(MCSRCS4)
 
 MOBJS = $(MAOBJS) $(MCOBJS)
+MSRCS = $(MASRCS) $(MCSRCS)
 
-OPTIONOBJS = mallocdb.o nofloat.o nottyin.o nottyout.o
+OPTIONSRCS = mallocdb.c nofloat.c nottyin.c nottyout.c
+OPTIONOBJS = $(OPTIONSRCS:.c=.o)
+
+SRCS = $(ASRCS) $(CSRCS) $(MASRCS) $(MCSRCS) $(OPTIONSRCS) lib.h crt0.S
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES

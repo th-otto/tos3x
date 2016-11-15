@@ -1,7 +1,12 @@
 top_srcdir=..
 subdir=common
 
+include $(top_srcdir)/Makefile.common
+include $(top_srcdir)/Makefile.silent
+
 all: $(top_srcdir)/common/sections.mak
+
+include $(top_srcdir)/config.mak
 
 include SRCFILES
 

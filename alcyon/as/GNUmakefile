@@ -1,3 +1,6 @@
+top_srcdir=..
+subdir=as
+
 # 
 # cross compiling
 #
@@ -22,6 +25,9 @@ install: all
 	$(CP) $(PROGRAMS) $(BIN)
 
 check::
+
+dist::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

@@ -1,3 +1,6 @@
+top_srcdir=..
+subdir=util
+
 # 
 # cross compiling
 #
@@ -25,6 +28,9 @@ nm68$(EXEEXT): $(NM_OBJS)
 
 analyze$(EXEEXT): $(ANALYZE_OBJS)
 	$(AM_V_LD)$(LD) $(ANALYZE_OBJS) $(LDFLAGS) -o $@ $(LIBS)
+
+dist::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

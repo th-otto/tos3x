@@ -1,1 +1,7 @@
-CP_OBJS = cexpr.o lex.o macro.o main.o util.o
+CP_SRCS = cexpr.c lex.c macro.c main.c util.c
+
+CP_OBJS = $(CP_SRCS:.c=.o)
+
+SRCS = $(CP_SRCS) preproc.h kputc.c kgetc.c kopen.c
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES cp68.lnk

@@ -1,3 +1,6 @@
+top_srcdir=..
+subdir=link68
+
 # 
 # cross compiling
 #
@@ -21,6 +24,9 @@ relmod$(EXEEXT): $(RELMOD_OBJS)
 
 check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i.ttp ../bin/$$i.ttp; done
+
+dist::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

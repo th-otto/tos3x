@@ -130,7 +130,8 @@ relmod$(EXEEXT): $(RELMOD_OBJS) ${MAKEFILE}
 		$(empty)
 
 check::
-	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
+	cmp link68$(EXEEXT) ${BIN}link68$(EXEEXT)
+	cmp relmod$(EXEEXT) ${BIN}relmod$(EXEEXT)
 
 clean:
 	$(RM) *.o *.a *.s *.i *.1 *.2 *.rel *.mod $(PROGRAMS)

@@ -1,0 +1,41 @@
+This directory contains the sources of the C compiler and
+utilities that i used to compile TOS. They are functional identical
+to the ones in the developer kit, but with numerous bugs fixed
+that made them difficult to use:
+
+- fopen() has been changed to understand a "b" parameter, and
+  pass it along to the low-level read/write calls.
+
+- obsolete functions like fopena have been removed from the library.
+
+- the stdio library has been changed to handle streams opened for
+  reading+writing.
+
+- Most of the bugs mentioned in the original source files have been fixed.
+
+- The assembler has been substantely changed to
+  - not require the as68symb.dat file anymore
+  - understand short absolute address form
+  so that it can now be used to assemble all the hand-written assembler files.
+
+Note that, despite all the fixes, no changes were made (especially to the compiler)
+that would lead to different code generation.
+
+Finished:
+	- cp68.ttp (preprocessor)
+	- c068.ttp (C parser)
+	- c168.ttp (C code generator)
+	- optimize.ttp (peephole optimizer)
+	- link68.ttp (original CPM linker)
+	- relmod.ttp (convert output of link68 to GEMDOS format)
+	- nm68.ttp (symbol print utility)
+	- size68.ttp (utility to print section sizes)
+
+Missing:
+	- ar68.ttp (archive utility)
+	- aln.ttp (Atari's version of linker)
+	- doindex.ttp (create symbol index for aln)
+
+
+The sources of the original versions of these tools can be found in the "orig"
+directory.

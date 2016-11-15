@@ -1,3 +1,11 @@
-SIZE_OBJS = size.o
-NM_OBJS = nm.o libget.o getchd.o
-ANALYZE_OBJS = analyze.o getarhd.o libget.o getchd.o
+SIZE_SRCS = size.c
+NM_SRCS = nm.c libget.c getchd.c
+ANALYZE_SRCS = analyze.c getarhd.c libget.c getchd.c
+
+SIZE_OBJS = $(SIZE_SRCS:.c=.o)
+NM_OBJS = $(NM_SRCS:.c=.o)
+ANALYZE_OBJS = $(ANALYZE_SRCS:.c=.o)
+
+SRCS = $(SIZE_SRCS) nm.c $(ANALYZE_SRCS) libput.c setstack.c util.h
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES

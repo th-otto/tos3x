@@ -9,7 +9,7 @@ all: $(PROGRAMS)
 
 include SRCFILES
 
-LIB1OBJS = kputc.o kgetc.o kopen.o 
+LIB1OBJS = kputc.o kgetc.o kopen.o
 
 LIBOBJS = \
 		$(LIBSRC)kcreat.o \
@@ -99,7 +99,7 @@ c068$(EXEEXT): c068.rel
 
 
 check::
-	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
+	cmp c068$(EXEEXT) ${BIN}c068$(EXEEXT)
 
 clean:
 	$(RM) *.o *.a *.s *.i *.1 *.2 *.rel *.mod $(PROGRAMS)

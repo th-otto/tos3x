@@ -1,1 +1,7 @@
-C168_OBJS = interf.o main.o codegen.o canon.o optab.o putexpr.o smatch.o cskels.o sucomp.o tabl.o util.o
+C168_SRCS = interf.c main.c codegen.c canon.c optab.c putexpr.c smatch.c cskels.c sucomp.c tabl.c util.c
+
+C168_OBJS = $(C168_SRCS:.c=.o)
+
+SRCS = $(C168_SRCS) cgen.h cskel.h icode.h
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES

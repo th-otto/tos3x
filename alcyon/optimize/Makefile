@@ -8,7 +8,6 @@ CPPFLAGS += -DGEMDOS
 all: $(PROGRAMS)
 
 include SRCFILES
-include optimize.mak
 
 # symbols etoa and ftoa are unresolved
 optimize$(EXEEXT): $(OPTIMIZE_OBJS) ${MAKEFILE}

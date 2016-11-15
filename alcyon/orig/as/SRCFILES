@@ -1,1 +1,7 @@
-AS68_OBJS = dir.o expr.o list.o main.o misc.o pass1a.o pass2.o symt.o putchd.o libput.o
+AS68_SRCS = dir.c expr.c list.c main.c misc.c pass1a.c pass2.c symt.c putchd.c libput.c
+
+AS68_OBJS = $(AS68_SRCS:.c=.o)
+
+SRCS = $(AS68_SRCS) as68.h def.h p2def.h kputc.c kopen.c kcreat.c
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES as68.lnk

@@ -14,10 +14,9 @@ AES_SRCS=\
 	crysbind.h \
 	dos.h \
 	gemlib.h \
-	gemusa.h \
+	gemrsc.h \
 	gsxdefs.h \
 	mn_tools.h \
-	mode.h \
 	obdefs.h \
 	struct88.h \
 	taddr.h \

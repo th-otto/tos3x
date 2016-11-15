@@ -1,3 +1,6 @@
+top_srcdir=..
+subdir=libsrc
+
 # 
 # cross compiling
 #
@@ -24,8 +27,8 @@ ${LIBM}: $(MOBJS)
 	$(AM_V_at)$(RM) $@
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(MOBJS)
 
+dist::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
+
 clean:
 	$(RM) *.o *.a *.ndx
-
-echo:
-	echo $(COBJS:.o=.c)

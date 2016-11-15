@@ -158,6 +158,14 @@ PP(char **argv;)
 
 	char symbol[SYNAMLEN + 1];
 
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	if (argc < 2)
 	{
 		printf("Usage: nm68 objectfile\n");

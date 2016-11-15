@@ -1,7 +1,7 @@
 include GNUmakefile.common
 include Makefile.silent
 
-SUBDIRS = libsrc as cgen cp68 link68 optimize parser util
+SUBDIRS = libsrc as cgen cpp link68 optimize parser util
 
 EXTRA_DIST = \
 	GNUmakefile \
@@ -18,7 +18,7 @@ all::
 dist::
 	for i in $(SUBDIRS); do $(MKDIR_P) $(DISTDIR)/$$i; done
 
-all clean check dist::
+all clean distclean dist::
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 
 check::

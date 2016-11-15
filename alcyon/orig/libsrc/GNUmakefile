@@ -1,3 +1,6 @@
+top_srcdir=..
+subdir=libsrc
+
 # 
 # cross compiling
 #
@@ -28,6 +31,9 @@ ${LIBM}: $(MOBJS)
 
 install: ${LIBC_NDX} ${OPTIONOBJS} ${CRT0}
 	$(CP) ${LIBC} ${LIBC_NDX} ${CRT0} $(LIB)
+
+dist::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a *.ndx

@@ -99,6 +99,14 @@ PP(register char **argv;)
 	const char *argv0;
 	register int c, i, x;
 	
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	argv0 = NULL;
 	if (argc >= 1)
 		argv0 = *argv++;

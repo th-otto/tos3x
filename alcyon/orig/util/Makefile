@@ -204,7 +204,8 @@ ar68$(EXEEXT): $(AR_OBJS) arcrt.o ${MAKEFILE}
 
 
 check::
-	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
+	cmp size68$(EXEEXT) ${BIN}size68$(EXEEXT)
+	cmp nm68$(EXEEXT) ${BIN}nm68$(EXEEXT)
 
 clean:
 	$(RM) *.o *.a *.i *.1 *.2 $(PROGRAMS)

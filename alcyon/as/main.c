@@ -962,6 +962,14 @@ PP(char **argv;)
 {
 	register short i;
 
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	nerror = 0;
 
 	signal(SIGINT, rubout);

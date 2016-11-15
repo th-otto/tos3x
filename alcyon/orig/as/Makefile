@@ -87,7 +87,7 @@ as68$(EXEEXT): as68.rel
 
 
 check::
-	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
+	cmp as68$(EXEEXT) ${BIN}as68$(EXEEXT)
 
 clean:
 	$(RM) *.o *.a *.s *.i *.1 *.2 *.rel *.mod $(PROGRAMS)

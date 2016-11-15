@@ -1,2 +1,9 @@
-LINK_OBJS = link68.o preproc.o lnkmess.o
-RELMOD_OBJS = relmod.o fext.o
+LINK_SRCS = link68.c preproc.c lnkmess.c
+RELMOD_SRCS = relmod.c fext.c
+
+LINK_OBJS = $(LINK_SRCS:.c=.o)
+RELMOD_OBJS = $(RELMOD_SRCS:.c=.o)
+
+SRCS = $(LINK_SRCS) $(RELMOD_SRCS) link68.h fext.h
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES

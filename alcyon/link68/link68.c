@@ -2189,6 +2189,14 @@ PP(char **argv;)
 	register int i;
 	struct symtab *pt;
 
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	banner();							/* print the sign-on message    */
 
 	if (argc == 1)						/* no command line  */

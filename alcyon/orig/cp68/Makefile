@@ -79,7 +79,7 @@ cp68$(EXEEXT): cp68.rel
 	$(PRGFLAGS) 7 7 $@
 
 check::
-	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
+	cmp cp68$(EXEEXT) ${BIN}cp68$(EXEEXT)
 
 clean:
 	$(RM) *.o *.a *.s *.i *.1 *.2 *.rel *.mod $(PROGRAMS)

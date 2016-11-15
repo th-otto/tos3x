@@ -1,3 +1,6 @@
+top_srcdir=..
+subdir=cpp
+
 include ../GNUmakefile.common
 include ../Makefile.silent
 include SRCFILES
@@ -16,6 +19,9 @@ cp68$(EXEEXT): ${OBJS}
 
 install: all
 	$(CP) cp68$(EXEEXT) $(BIN)
+
+dist::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean::
 	$(RM) *.o $(PROGRAMS)

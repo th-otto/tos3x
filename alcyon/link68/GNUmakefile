@@ -1,3 +1,6 @@
+top_srcdir=..
+subdir=link68
+
 # 
 # cross compiling
 #
@@ -38,6 +41,9 @@ link68.rel::
 	cp ../libsrc/libc.a .
 	cp ../libsrc/nofloat.o .
 	./link68$(EXEEXT) '[s]' $@=crt0.o,nofloat.o,link68.o,preproc.o,lnkmess.o,libc.a
+
+dist::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

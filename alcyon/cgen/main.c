@@ -470,6 +470,14 @@ PP(char **argv;)
 {
 	register char *q;
 
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	if (argc < 4)
 		usage();
 	if ((ifil = fopen(argv[1], "r")) == NULL)

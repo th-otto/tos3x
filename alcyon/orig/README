@@ -1,14 +1,6 @@
-- change for (init; cond; expr) into
-  init;
-  for (;;)
-  {
-     if (!cond) break;
-     ...
-     expr;
-  }
-
-- change continue in some for loops into goto start of loop
-
+This directory contains the sources of the C compiler and
+utilities that compile to identical versions of the ones
+found in the developer kit, with only a few differences:
 
 - a few programs in the original developer kit (e.g. optimize.prg)
   had a symbol table. Since, due to the way the linker works, it is
@@ -26,7 +18,7 @@
 
 
 Finished:
-	- cp68.ttp (proprocessor)
+	- cp68.ttp (preprocessor)
 	- c068.ttp (C parser)
 	- c168.ttp (C code generator)
 	- optimize.ttp (peephole optimizer)

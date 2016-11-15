@@ -41,6 +41,14 @@ PP(char **argv;)
 	register unsigned short w;
 	register int i;
 
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	if (argc < 2)
 	{
 		puts("ABORT.  Usage is:  size68 file_name_list\n");

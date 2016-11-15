@@ -82,7 +82,7 @@ c168$(EXEEXT): c168.rel
 
 
 check::
-	for i in $(PROGRAMS); do cmp $$i ${BIN}$$i; done
+	cmp c168$(EXEEXT) ${BIN}c168$(EXEEXT)
 
 clean:
 	$(RM) *.o *.a *.s *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
