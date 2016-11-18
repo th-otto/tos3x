@@ -494,13 +494,30 @@ VOID hreg(NOTHING)
 /* Define constant block */
 VOID hdcb(NOTHING)
 {
+	long len;
+	
 	chkeven();							/* on even boundary if not byte block. */
 	dlabl();							/* define label... */
 	opitb();
+	expr(p1gi);
+	if (itype != ITCN)
+	{
+		xerr(17);						/* must be constant */
+		return;
+	}
+	if (reloc != ABS)
+	{
+		xerr(9);						/* must be absolute */
+		return;
+	}
+	opitoo();
+	len = ival.l;
+	itype = ITSP;
+	ival.l = ',';
+	opitoo();							/* output a comma */
 	opito();
 	stbuf[0].itrl = itwc;
-	numops = stbuf[ITOP1].itop.l;
-	loctr += numops * modelen;
+	loctr += len * modelen;
 	wostb();							/* write out statement buffer */
 }
 
@@ -578,9 +595,9 @@ VOID hsection(NOTHING)
 		xerr(9);						/* proper range 0..15 */
 		return;
 	}
-	rlflg = (ival.l == 14) ? DATA : (ival.l == 15) ? BSS : TEXT;
+	rlflg = ival.l == 14 ? DATA : ival.l == 15 ? BSS : TEXT;
 	loctr = savelc[rlflg];
-	stbuf[3].itop.l = loctr;				/* pass 1 location counter */
+	stbuf[3].itop.l = loctr;			/* pass 1 location counter */
 	stbuf[3].itrl = rlflg;				/* relocation base */
 	stbuf[0].itrl = itwc;
 	wostb();
@@ -716,7 +733,7 @@ VOID sdcb(NOTHING)
 			if (i > 3)
 			{
 				instrlen = i * 2;
-				print((pfg++) ? 2 : 1);
+				print(pfg++ ? 2 : 1);
 				loctr += instrlen;
 				i = 0;
 			}
@@ -731,7 +748,7 @@ VOID sdcb(NOTHING)
 	if (i)
 	{									/* more printing */
 		instrlen = i * 2 - hflg;
-		print((pfg) ? 2 : 1);
+		print(pfg ? 2 : 1);
 		loctr += instrlen;
 	}
 }
@@ -817,7 +834,7 @@ PP(int dtyp;)
 	register short pfg, i, hflg, w;
 
 	hflg = i = pfg = 0;
-	while (1)
+	for (;;)
 	{
 		expr(p2gi);						/* evaluate expression */
 		if (pitw < pnite)
@@ -861,7 +878,7 @@ PP(int dtyp;)
 			if (i > 3)
 			{
 				instrlen = i * 2;
-				print((pfg++) ? 2 : 1);
+				print(pfg++ ? 2 : 1);
 				loctr += instrlen;
 				i = 0;
 			}

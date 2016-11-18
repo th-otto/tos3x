@@ -587,7 +587,7 @@ VOID hsection(NOTHING)
 		xerr(9);						/* proper range 0..15 */
 		return;
 	}
-	rlflg = (ival.l == 14) ? DATA : (ival.l == 15) ? BSS : TEXT;
+	rlflg = ival.l == 14 ? DATA : ival.l == 15 ? BSS : TEXT;
 	loctr = savelc[rlflg];
 	stbuf[3].itop.l = loctr;				/* pass 1 location counter */
 	stbuf[3].itrl = (char)rlflg;				/* relocation base */
@@ -729,7 +729,7 @@ VOID sdcb(NOTHING)
 			if (i > 3)
 			{
 				instrlen = i * 2;
-				print((pfg++) ? 2 : 1);
+				print(pfg++ ? 2 : 1);
 				loctr += instrlen;
 				i = 0;
 			}
@@ -743,7 +743,7 @@ VOID sdcb(NOTHING)
 	if (i)
 	{									/* more printing */
 		instrlen = i * 2 - hflg;
-		print((pfg) ? 2 : 1);
+		print(pfg ? 2 : 1);
 		loctr += instrlen;
 	}
 }
@@ -879,7 +879,7 @@ PP(int dtyp;)
 			if (i > 3)
 			{
 				instrlen = i * 2;
-				print((pfg++) ? 2 : 1);
+				print(pfg++ ? 2 : 1);
 				loctr += instrlen;
 				i = 0;
 			}
@@ -905,7 +905,7 @@ PP(int dtyp;)
 			if (i)
 			{							/* more printing */
 				instrlen = i * 2 - hflg;
-				print((pfg) ? 2 : 1);
+				print(pfg ? 2 : 1);
 				loctr += instrlen;
 			}
 			return;
