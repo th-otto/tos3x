@@ -51,11 +51,14 @@ listings:
   Working versions of disassembler listings of various TOS versions.
 
 glue:
-  The final ROM images will be build here.
+  The final ROM images will be build here. It also contains link maps
+  for some ROM versions, for reference. The identifiers in those maps
+  are truncated to 8 characters, though (a limitation of the DRI
+  object file format).
 
 alcyon:
-  Source of the (modified) tools of the Alcyon
-  C compiler & tools, as used to compile TOS.
+  Source of the (modified) tools of the Alcyon C compiler & tools,
+  as used to compile TOS.
 
 alcyon/orig:
   Source of the tools of the Alcyon C compiler & tools, that compile to binary
@@ -63,7 +66,7 @@ alcyon/orig:
 
 
 *****************************************************************
-* Aseembler sources
+* Assembler sources
 *****************************************************************
 
 - Assembler sources are written in a format that is accepted
@@ -94,8 +97,8 @@ alcyon/orig:
 * Supported versions
 *****************************************************************
 
-BIOS, VDI, GEMDOS, AES: 2.06, 2.08, 3.06
-DESKTOP: 3.06
+BIOS, VDI, GEMDOS, AES, DESKTOP: 2.06, 2.08, 3.06
+2.08 is 2.06 modified for ST-Book, it identifies itself as 2.06 though
 
 *****************************************************************
 * Supported language versions

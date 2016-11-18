@@ -30,4 +30,16 @@ maps:
 	$(MAKE) SYMBOLS=-s TOSVERSION=306 COUNTRY=us
 	cnm -g glue/tos.img > glue/tos306us.map
 	$(MAKE) clean
+	$(MAKE) SYMBOLS=-s TOSVERSION=206 COUNTRY=de
+	cnm -g glue/tos.img > glue/tos206de.map
+	$(MAKE) clean
+	$(MAKE) SYMBOLS=-s TOSVERSION=206 COUNTRY=us
+	cnm -g glue/tos.img > glue/tos206us.map
+	$(MAKE) clean
+	$(MAKE) SYMBOLS=-s TOSVERSION=208 COUNTRY=de
+	cnm -g glue/tos.img > glue/tos208de.map
+	$(MAKE) clean
+	$(MAKE) SYMBOLS=-s TOSVERSION=208 COUNTRY=us
+	cnm -g glue/tos.img > glue/tos208us.map
+	$(MAKE) clean
 	$(RM) glue/*.img glue/glue.*

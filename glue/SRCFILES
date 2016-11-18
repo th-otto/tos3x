@@ -6,4 +6,8 @@ EXTRA_DIST:=\
 	SRCFILES \
 	tos306de.map \
 	tos306us.map \
+	tos206de.map \
+	tos206us.map \
+	tos208de.map \
+	tos208us.map \
 	${empty}
