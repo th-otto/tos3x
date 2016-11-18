@@ -1,4 +1,4 @@
-SRCS:=startup.S
+SRCS:=startup.S cartridge.S
 
 EXTRA_DIST:=\
 	GNUmakefile \

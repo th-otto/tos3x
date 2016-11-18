@@ -3418,7 +3418,7 @@ autosca3:
  *
  */
 autosca4:
-        lea.l     SUPSIZ*2+_supstk,a7                /* setup supervisor stack */
+        lea.l     SUPSIZ*2+_supstk,a7          /* setup supervisor stack */
         move.l    savepc,-(a7)                 /* get return addr */
         rts
 

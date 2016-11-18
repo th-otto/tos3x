@@ -26,11 +26,23 @@ ROMSIZE_306 = 512k
 
 ROMSIZE = $(ROMSIZE_$(TOSVERSION))
 
+#
+# Base of the internal cartridge ROM of St-Book TOS
+#
+CARTBASE = E40000
+
 $(IMG): tos.img $(MKROM)
 	$(MKROM) pad $(ROMSIZE) $< $@
 
 tos.img: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o
 	$(LD) -o $@ $(SYMBOLS) -a $(rombase) x 0 $(STARTUP) -x ../bios/bios.a -x ../vdi/vdi.a -x ../bdos/bdos.a -x ../aes/aes.a -x ../desk/desk.a tosrsc$(COUNTRY).o vars.o
+
+cartridge_ASFLAGS=-n
+
+cartridge.img: cartridge.o
+	$(LD) -o cartridge.tmp -a $(CARTBASE) x 0 cartridge.o
+	dd bs=1 skip=36 < cartridge.tmp > $@
+	$(RM) cartridge.tmp
 
 ../bios/bios.ndx: ../bios/bios.a
 	$(RANLIB) $<
@@ -62,6 +74,11 @@ vars.o: ../common/vars.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
+cartridge.o: cartridge.S
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+	
 tosrsc$(COUNTRY).o: tosrsc$(COUNTRY).c
 
 tosrsc$(COUNTRY).c: $(MKBININC) glue.$(COUNTRY)
@@ -119,7 +136,7 @@ check::
 	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
 
 clean:
-	$(RM) *.o *.i $(IMG) tos.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h
+	$(RM) *.o *.i $(IMG) tos.img cartridge.tmp cartridge.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak *.img

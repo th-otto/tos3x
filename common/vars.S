@@ -37,7 +37,7 @@ name: ds.t size
 
 	ds.b 2048       /* the system variables go here */
 
-	ds.b 64 /* seems to be unused */
+	ds.b 64         /* used by ST-Book TOS by the cartridge ROM */
 
 #if STBOOK
 	ds.b 164 /* seems to be unused */
