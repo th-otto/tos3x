@@ -1064,7 +1064,7 @@ cooSND:     move.l    d1,(a0)+
             bne.s     cooFDC                    /* (punt - no HD floppy) */
             move.b    #8,dsb                    /* select HD density for drive A */
             move.l    #'_FDC',(a0)+             /* setup FDC cookie: Floppy disk controller */
-            move.l    #$01415443,(a0)+          /* 'FDC' | (1 << 24) */
+            move.l    #$01415443,(a0)+          /* 'ATC' | (1 << 24) */
 cooFDC:     move.l    #$5F465055,(a0)+          /* Setup FPU cookie: Type of the FPU */
             moveq     #0,d7                     /* 0 = no FPU */
             suba.w    #$24,sp
@@ -1117,9 +1117,9 @@ cooFPU3:    move.l    a1,(_buserror).w
 #if TOSVERSION < 0x300
 			tst.b     STEFlag                   /* no STE hardware available? */
 			beq.s     cooVDO                    /* (correct) */
-			move.l    #$5F56444F,(a0)+
+			move.l    #$5F56444F,(a0)+			/* '_VDO' */
 			clr.l     (a0)+                     /* 0,0 = Atari ST (260 ST, 520 ST, 1040 ST, Mega ST, ...) */
-			move.l    #$5F4D4348,(a0)+
+			move.l    #$5F4D4348,(a0)+			/* '_MCH' */
 			clr.l     (a0)+                     /* 0,0 = Atari ST */
 			bra.s     cooSWI
 

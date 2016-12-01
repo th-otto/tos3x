@@ -216,7 +216,7 @@ PP(register int16_t state;)
 			 * if someone cares about multiple clicks and this is
 			 * not a null mouse then set up delay else just fork it
 			 */
-			if ((gl_bpend) && (state))
+			if (gl_bpend && state)
 			{
 				/* start click cnt at 1 establish desired state and set wait flag */
 				gl_bclick = 1;
@@ -350,7 +350,7 @@ PP(register CQUEUE *qptr;)
 
 	qptr->c_cnt--;
 	q2 = qptr->c_front++;
-	if ((qptr->c_front) == KBD_SIZE)
+	if (qptr->c_front == KBD_SIZE)
 		qptr->c_front = 0;
 	return (qptr->c_buff[q2]);
 }
@@ -521,7 +521,7 @@ PP(register int16_t ry1;)
 	rx = ptsout[0];
 	ry = ptsout[1];
 
-	if ((gl_bdelay) && ((xrat - rx > 2) || (xrat - rx < -2) || (yrat - ry > 2) || (yrat - ry < -2)))
+	if (gl_bdelay && ((xrat - rx > 2) || (xrat - rx < -2) || (yrat - ry > 2) || (yrat - ry < -2)))
 		b_delay(gl_bdelay);
 	/* xrat, yrat hold true */
 	xrat = rx;
@@ -553,7 +553,7 @@ PP(register int16_t ry1;)
 	 * there is an active menu and it will satisfy his event
 	 */
 	/* CHANGED LKW      */
-	if ((!button) && (gl_mntree) && (gl_ctwait.m_out != inside(xrat, yrat, (GRECT *)&gl_ctwait.m_x)))
+	if (!button && gl_mntree && gl_ctwait.m_out != inside(xrat, yrat, (GRECT *)&gl_ctwait.m_x))
 		gl_mowner = ctl_pd;
 
 	post_mouse(gl_mowner, xrat, yrat);

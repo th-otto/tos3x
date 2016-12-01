@@ -281,7 +281,7 @@ PP(int16_t my;)
 				if (cpt)
 				{						/* Only delay 1st time through */
 					cpt = FALSE;
-					delay((int32_t) (gl_dclick));
+					delay((int32_t) gl_dclick);
 				}
 
 			} while (button & 1);		/* button is global */

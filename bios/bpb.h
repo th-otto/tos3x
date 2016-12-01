@@ -25,6 +25,7 @@ BPB /* bios parameter block */
 
 #define B_16        1		/* device has 16-bit FATs */
 #define B_1FAT      2		/* device has only a single FAT */
+#define B_XHDI      4       /* extended BPB returned by XHDI drivers */
 #define DND_LOCKED  0x8000  /* DND may not be scavenged (see     */
                             /* free_available_dnds() in fsdir.c) */
 #endif
