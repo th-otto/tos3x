@@ -525,7 +525,7 @@ PP(register int16_t sy;)
 	/*
 	 * Adjust 3d object extents & get color change/move text flags
 	 */
-	if ((flags & IS3DOBJ))
+	if (flags & IS3DOBJ)
 	{
 		three_d = TRUE;					/* object is 3D */
 		tmpx = ADJ3DPIX;

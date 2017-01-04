@@ -90,7 +90,7 @@ ERROR xgetdrv(NOTHING)
 /*
  *  divmod - do divide and modulo arithmetic
  *	the divide is accomplished with the log2 shift factor passed in as
- *	as psuedo divisor, the remainder (modulo) is left in the varable 
+ *	as pseudo divisor, the remainder (modulo) is left in the variable 
  *	pointed to by the third argument.
  */
 
