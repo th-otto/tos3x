@@ -27,10 +27,13 @@ include SRCFILES
 vdi.a: $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS)
 
-vdi.o: vars.o $(AES_OBJS) vdiext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
-	$(LD) -nostartfiles -nostdlib -o $@ -Wl,--script=../common/rom.ld,-Ttext=0x$(rombase),-Tbss=0 $(VDI_OBJS) vars.o vdiext.o -lgcc
+vdi.o: tosvars.o vars.o $(AES_OBJS) vdiext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
+	$(LD) -nostartfiles -nostdlib -o $@ -Wl,--script=../common/rom.ld,-Ttext=0x$(rombase),-Tbss=0 $(VDI_OBJS) tosvars.o vars.o vdiext.o -lgcc
 
 vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)$(CC) -Wa,--mri --traditional-cpp $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(CC) -Wa,--mri --traditional-cpp $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 check::
