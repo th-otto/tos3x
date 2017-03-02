@@ -11,6 +11,7 @@ EXTRA_DIST = \
 	Makefile.common \
 	Makefile.silent \
 	config.mak \
+	README \
 	$(empty)
 
 all::
