@@ -1202,7 +1202,7 @@ VOID d_justified(NOTHING)
 	int16_t expand, sav_cnt;
 	int16_t interword, interchar;
 	int16_t cnt, *old_intin, *old_ptsout, extent[8], max_x;
-	register int16_t i, direction, delword, delchar;
+	register int16_t i, ddirection, delword, delchar;
 	register int16_t *pointer;
 
 	pointer = &NINTIN;
@@ -1233,11 +1233,11 @@ VOID d_justified(NOTHING)
 
 		if (rmword < 0)
 		{
-			direction = -1;
+			ddirection = -1;
 			rmword = 0 - rmword;
 		} else
 		{
-			direction = 1;
+			ddirection = 1;
 		}
 		
 		if (interchar)
@@ -1253,7 +1253,7 @@ VOID d_justified(NOTHING)
 				delword = 0 - expand;
 				rmword = 0;
 			}
-			width += (delword * spaces) + (rmword * direction);
+			width += (delword * spaces) + (rmword * ddirection);
 		}
 
 		switch (LV(CHUP))
@@ -1261,26 +1261,26 @@ VOID d_justified(NOTHING)
 		case 0:
 			wordx = delword;
 			wordy = 0;
-			rmwordx = direction;
+			rmwordx = ddirection;
 			rmwordy = 0;
 			break;
 		case 900:
 			wordx = 0;
 			wordy = 0 - delword;
 			rmwordx = 0;
-			rmwordy = 0 - direction;
+			rmwordy = 0 - ddirection;
 			break;
 		case 1800:
 			wordx = 0 - delword;
 			wordy = 0;
-			rmwordx = 0 - direction;
+			rmwordx = 0 - ddirection;
 			rmwordy = 0;
 			break;
 		case 2700:
 			wordx = 0;
 			wordy = delword;
 			rmwordx = 0;
-			rmwordy = direction;
+			rmwordy = ddirection;
 			break;
 #if BINEXACT
 			asm("ds.b 0"); /* prevent superfluous bra from being removed */
@@ -1300,11 +1300,11 @@ VOID d_justified(NOTHING)
 
 		if (rmchar < 0)
 		{
-			direction = -1;
+			ddirection = -1;
 			rmchar = 0 - rmchar;
 		} else
 		{
-			direction = 1;
+			ddirection = 1;
 		}
 		
 		switch (LV(CHUP))
@@ -1312,26 +1312,26 @@ VOID d_justified(NOTHING)
 		case 0:
 			charx = delchar;
 			chary = 0;
-			rmcharx = direction;
+			rmcharx = ddirection;
 			rmchary = 0;
 			break;
 		case 900:
 			charx = 0;
 			chary = 0 - delchar;
 			rmcharx = 0;
-			rmchary = 0 - direction;
+			rmchary = 0 - ddirection;
 			break;
 		case 1800:
 			charx = 0 - delchar;
 			chary = 0;
-			rmcharx = 0 - direction;
+			rmcharx = 0 - ddirection;
 			rmchary = 0;
 			break;
 		case 2700:
 			charx = 0;
 			chary = delchar;
 			rmcharx = 0;
-			rmchary = direction;
+			rmchary = ddirection;
 			break;
 		}
 	} else

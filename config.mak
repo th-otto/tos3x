@@ -49,7 +49,11 @@ $(top_srcdir)/common/config.h: $(top_srcdir)/config.mak ${MAKEFILE}
 	$(AM_V_at)echo '#define TOSVERSION 0x$(TOSVERSION)' >> $@
 	$(AM_V_at)echo '#define ATOSVERSION $$$(TOSVERSION)' >> $@
 	$(AM_V_at)echo '#define OS_COUNTRY CTRY_$(COUNTRY)' >> $@
-	$(AM_V_at)echo '#define BINEXACT $(BINEXACT)' >> $@
+	$(AM_V_at)echo '#ifdef __GNUC__' >> $@
+	$(AM_V_at)echo '# define BINEXACT 0' >> $@
+	$(AM_V_at)echo '#else' >> $@
+	$(AM_V_at)echo '# define BINEXACT $(BINEXACT)' >> $@
+	$(AM_V_at)echo '#endif' >> $@
 	$(AM_V_at)echo '#define RAMVERSION $(RAMVERSION)' >> $@
 
 $(top_srcdir)/common/sections.mak: $(top_srcdir)/common/sections.inc $(top_srcdir)/common/config.h

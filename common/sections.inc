@@ -133,7 +133,7 @@
 #if OS_COUNTRY == CTRY_ES
 #define BIOSTLEN    BTLEN_US+$86
 #define DESKTLEN    DTLEN_US-$2A
-#define DESKDLEN    $000009c4
+#define DESKDLEN    $000009C4
 #define GLUELEN     $00007730
 #endif
 

@@ -556,7 +556,7 @@ bye2:
 	xstrpcpy(ad_fpath, pipath);
 	unfmt_str(ad_select, pisel);
 
-	if ((*pbutton = inf_what(tree, OK, CANCEL)) == -1)
+	if ((*pbutton = inf_what((OBJECT *)tree, OK, CANCEL)) == -1)
 		*pbutton = 0;
 
 	ob_change(tree, ret, NORMAL, FALSE);
