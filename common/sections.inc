@@ -9,7 +9,8 @@
  * code for ALT-scancode mappings.
  *
  * Length of DESKTOP text segment is different due to some
- * unknown reason so far, for the US+UK version only.
+ * differences in fmt_date() and fmt_time() which build
+ * a language-specific version of the file date+time
  */
 
 #if TOSVERSION == 0x306
@@ -53,7 +54,7 @@
 #if OS_COUNTRY == CTRY_ES
 #define BIOSTLEN    BTLEN_US+$86
 #define DESKTLEN    DTLEN_US-$2A
-#define DESKDLEN    $000009c4
+#define DESKDLEN    $000009C4
 #define GLUELEN     $00007730
 #endif
 

@@ -1,0 +1,28 @@
+206de:
+_infdata E36A28
+desk_dbase E360E6
+
+206us:
+_infdata E3699C
+desk_dbase E360B6
+
+206es:
+desk_dbase=E36112
+_infdata E36A3A
+
+206it:
+desk_dbase=E360F4
+_infdata E36A0E
+
+306de:
+_infdata E3EC92
+desk_dbase=E3E350
+
+306us:
+_infdata E3EC06
+desk_dbase=E3E320
+
+306es:
+desk_dbase=E3E37C
+_infdata E3ECA4
+
