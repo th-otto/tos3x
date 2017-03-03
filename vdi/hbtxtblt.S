@@ -116,7 +116,7 @@ scal_dwn:
 *
 	move.w	d6,tmp_dely(a4)		;save scaled y for use later
 	move.w	d5,tmp_delx(a4)		; & x too
-	beq	no_blit			;** 25-Feb can't handle 0 widths
+	beq	no_blit			/* ** 25-Feb can't handle 0 widths */
 *
 *  end scaling calculations
 *
@@ -165,13 +165,13 @@ adr_notk:
 	add.w	d1,d5			;add skew offsets (if applicable)
 *
 	btst	#OUTLINE,d0		;check for outline
-	beq	adr_nadj		;skip outline adjust if not outlinin'
+	beq	adr_nadj		;skip outline adjust if not outlining
 	addq.w	#2,d5			;add enough for perimeter on DELX
 	addq.w	#2,d6			;  & likewise for dely
 adr_nadj:
-*
-*  now check rotatin'..
-*
+/*
+ *  now check rotating..
+ */
 	move.w	LV(CHUP,a6),d0		;get rotate value
 	beq	chk_clip		;if none, get on with clip
 *
@@ -194,7 +194,7 @@ add180:
 	bra	chk_clip
 add270:
 	cmpi.w	#2700,d0		;270 degrees?
-	bne	chk_clip		;we don't do no stinkin "obtuse" angles
+	bne	chk_clip		/* we don't do no stinkin "obtuse" angles */
 *
 *  270 degree rotate
 *
@@ -304,7 +304,7 @@ clp_done:
 	move.w	LV(SOURCEX,a6),d0		;d0 = fontform SRC X min
 	move.w	LV(DELX,a6),d3		;get x width
 	subq.w	#1,d3			;adjust
-	bmi	no_blit			;can't blit 0 or neg widths
+	bmi	no_blit			/* can't blit 0 or neg widths */
 
 	move.w	d0,d4
 	add.w	d3,d4			;d4 = fontform SRC X max
@@ -326,7 +326,7 @@ clp_done:
 *  a0 => src ptr, d0 = src XMIN, d4 = src XMAX, d3 = delx-1, d7 = dely-1
 *         d1 = sum of skew offsets
 *
-	tst.w	LV(SCALE,a6)		;are we scalin'?
+	tst.w	LV(SCALE,a6)		/* are we scaling? */
 	beq	chk_skw			;br if not
 
 .page
@@ -570,7 +570,7 @@ skp_bold:
 	move.w	d_next(a4),s_next(a4)
 *
 	tst.w	d0			;outline puts 1 here, else 0
-	beq	chk_rota		;skip if no outlinin' ta do
+	beq	chk_rota		;skip if no outlining ta do
 *
 	movem.l	a0/d0/d3-d4/d7,-(sp)
 *
@@ -815,10 +815,10 @@ rot_done:
 	add.w	d3,d4			;  using new delx-1
 *
 	bra	no_rota
-*
-*   180 degrees---upside yo' head
-*
-*
+/*
+ *   180 degrees---upside yo' head
+ *
+ */
 upsd_dwn:
 	add.w	d4,locdestx(a4)		;adjust horz position
 	move.w	d0,d1
@@ -948,7 +948,7 @@ nolite:
 	beq	noskew
 	tst.w	skewmsk(a4)			;was skew already performed?
 	beq	set_skew			;br if not
-	clr.w	skewmsk(a4)			;if so, don't repeat
+	clr.w	skewmsk(a4)			/* if so, don't repeat */
 	bra	noskew
 set_skew:
 	move.w	#cas1-skewx,skewcase(a4)	;assume case I
@@ -1416,22 +1416,22 @@ wrmtab:
 	dc.b	$6,$6,$6,$6		*XOR mode
 	dc.b	$1,$1,$D,$D		*inverse transparent mode
 *
-	dc.b	$0,$F,$0,$F		*mode 0  D' = 0
-	dc.b	$0,$E,$1,$F		*mode 1  D' = S and D
-	dc.b	$0,$D,$2,$F		*mode 2  D' = S and [not D]
-	dc.b	$0,$C,$3,$F		*mode 3  D' = S	(replace)
-	dc.b	$0,$B,$4,$F		*mode 4  D' = [not S] and D
-	dc.b	$0,$A,$5,$F		*mode 5  D' = D
-	dc.b	$0,$9,$6,$F		*mode 6  D' = S xor D (XOR mode)
-	dc.b	$0,$8,$7,$F		*mode 7  D' = S or D  (OR mode)
-	dc.b	$0,$7,$8,$F		*mode 8  D' = not [S or D]
-	dc.b	$0,$6,$9,$F		*mode 9  D' = not [S xor D]
-	dc.b	$0,$5,$A,$F		*mode A  D' = not D
-	dc.b	$0,$4,$B,$F		*mode B  D' = S or [not D]
-	dc.b	$0,$3,$C,$F		*mode C  D' = not S
-	dc.b	$0,$2,$D,$F		*mode D  D' = [not s] or D
-	dc.b	$0,$1,$E,$F		*mode E  D' = not [S and D]
-	dc.b	$0,$0,$F,$F		*mode F  D' = 1
+	dc.b	$0,$F,$0,$F		/* mode 0  D' = 0 */
+	dc.b	$0,$E,$1,$F		/* mode 1  D' = S and D */
+	dc.b	$0,$D,$2,$F		/* mode 2  D' = S and [not D] */
+	dc.b	$0,$C,$3,$F		/* mode 3  D' = S	(replace) */
+	dc.b	$0,$B,$4,$F		/* mode 4  D' = [not S] and D */
+	dc.b	$0,$A,$5,$F		/* mode 5  D' = D */
+	dc.b	$0,$9,$6,$F		/* mode 6  D' = S xor D (XOR mode) */
+	dc.b	$0,$8,$7,$F		/* mode 7  D' = S or D  (OR mode) */
+	dc.b	$0,$7,$8,$F		/* mode 8  D' = not [S or D] */
+	dc.b	$0,$6,$9,$F		/* mode 9  D' = not [S xor D] */
+	dc.b	$0,$5,$A,$F		/* mode A  D' = not D */
+	dc.b	$0,$4,$B,$F		/* mode B  D' = S or [not D] */
+	dc.b	$0,$3,$C,$F		/* mode C  D' = not S */
+	dc.b	$0,$2,$D,$F		/* mode D  D' = [not s] or D */
+	dc.b	$0,$1,$E,$F		/* mode E  D' = not [S and D] */
+	dc.b	$0,$0,$F,$F		/* mode F  D' = 1 */
 *
 blt_adj:
 	move.l	-(a0),d0
@@ -1453,9 +1453,9 @@ blt_adj:
 *
 *
 do_skew:
-*
-*  we're skewin'..
-*
+/*
+ *  we're skewin'..
+ */
 	move.w	B_F1_MSK(a5),d0
 	swap	d0
 	move.w	B_F2_MSK(a5),d0		;get mask
@@ -1484,7 +1484,7 @@ mo_skew:
 	move.w	(a5),d7			;retrieve skew value
 	ori.w	#BM_GO,d7		;set for go in case skew & lighten
 	muls	s_next(a4),d4		;**19-Mar** update our own src addr
-	suba.l	d4,a0			;**19-Mar** since bltter won't always
+	suba.l	d4,a0			/* **19-Mar** since bltter won't always */
 *
 *
 	move.l	B_D_ADDR(a5),a1		; get DST addr from blt
