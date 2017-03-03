@@ -94,7 +94,7 @@ hb_cell:
 
 char_loop:
 
-	move.l	a0,B_S_ADDR(a5)			; BLASTER doesn't see LSB
+	move.l	a0,B_S_ADDR(a5)			/* BLASTER doesn't see LSB */
 	move.l	a2,B_D_ADDR(a5)			;
 	move.w	d1,B_HEIGHT(a5)			;
 

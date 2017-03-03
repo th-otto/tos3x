@@ -688,7 +688,7 @@ devI4:	move.l	4(sp),a0			; a0 -> device struct
 		bge	devI0				; skip if fnt ok
 		move.l	#_ram8x8,DEVFNTPTR(a0)		; set to an 8x8 sys fnt
 		tst.l	DEVCURROUTINES(a0)		; see if routines set
-		bne	esc_init			; if so don't do it
+		bne	esc_init			/* if so don't do it */
 
 devI0:
 #if VIDEL_SUPPORT

@@ -121,12 +121,12 @@ vl_wrap:
 	lsl.w	#2,d1			; d1 <- offset into main table
 	add.w	d1,a2			; a2 -> op code table for this mode
 
-	subq.w	#8,d1			; if it's XOR mode ...
+	subq.w	#8,d1			/* if it's XOR mode ... */
 	bne	vl_newmask		
-	tst.w	LV(LSTLIN,a4)		; and it's not the last line ...
+	tst.w	LV(LSTLIN,a4)		/* and it's not the last line ... */
 	bne	vl_newmask
 
-	subq.w	#1,d7			; don't plot last pixel
+	subq.w	#1,d7			/* don't plot last pixel */
 
 vl_newmask:
 
