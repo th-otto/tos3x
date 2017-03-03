@@ -481,11 +481,11 @@ PP(char **argv;)
 	if (argc < 4)
 		usage();
 	if ((ifil = fopen(argv[1], "r")) == NULL)
-		fatal("can't open %s", *argv);
+		fatal("can't open %s", argv[1]);
 	if ((lfil = fopen(argv[2], "r")) == NULL)
-		fatal("can't open %s", *argv);
+		fatal("can't open %s", argv[2]);
 	if ((ofil = fopen(argv[3], "w")) == NULL)
-		fatal("can't create %s", *argv);
+		fatal("can't create %s", argv[3]);
 
 	for (argc -= 4; argc--;)
 	{

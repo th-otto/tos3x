@@ -74,11 +74,11 @@ struct xxsym {
 union tval {
 	struct {
 		struct tnode *left;			/* left sub-tree */
-		struct tnode *right;			/* right sub-tree (undefined if unary) */
+		struct tnode *right;		/* right sub-tree (undefined if unary) */
 	} t;
 	struct words w;
-	short s;							/* value or label number */
-	long l;								/* value or label number */
+	short s;						/* value or label number */
+	long l;							/* value or label number */
 	struct xlsym lsym;
 	struct xesym esym;
 	struct xxsym xsym;
