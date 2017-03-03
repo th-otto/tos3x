@@ -5,25 +5,92 @@
 #define max(x,y)   (((x) > (y)) ? (x) :  (y))
 #define min(x,y)   (((x) < (y)) ? (x) :  (y))
 
+/*
+ ** Prtblk print parameter values.
+ */
+#define       MAXOFF    (7)                      /* maximum value of offset */
+
+#define       LOWID     (320)                    /* low clip width */
+#define       HIWID     (640)                    /* medium/high clip width */
+
+#define       LOW       (0)                      /* low srcres */
+#define       MEDIUM    (1)                      /* medium srcres */
+#define       HIGH      (2)                      /* high srcres */
+#define       MAXSRC    (2)                      /* maximum value of srcres */
+
+#define       DRAFT     (0)                      /* draft dstres */
+#define       FINAL     (1)                      /* final dstres */
+#define       MAXDST    (1)                      /* maximum value of dstres */
+
+#define       ATMDM     (0)                      /* Atari mono dot matrix */
+#define       ATCDM     (1)                      /* Atari color dot matrix */
+#define       ATMDW     (2)                      /* Atari mono daisy wheel */
+#define       EPMDM     (3)                      /* Epson mono dot matrix */
+#define       MAXTYP    (3)                      /* maximum value of type */
+
+#define       PRNTR     (0)                      /* parallel printer port */
+#define       MODEM     (1)                      /* serial modem port */
+#define       MAXPOR    (1)                      /* maximum value of port */
+
+/*
+ ** Prtblk control character and escape sequence strings.
+ */
+
+#define       ABMMO     "\033\131\377"           /* Atari BitMap mode */
+#define       EBMMO     "\033\114\377"           /* Epson BitMap mode */
+
+#define       YELLO     "\033\130\006\377"       /* set yellow */
+#define       MAGTA     "\033\130\005\377"       /* set magenta */
+#define       CYAN      "\033\130\003\377"       /* set cyan */
+
+#define       PIXLS     "\033\063\001\377"       /* pixel line spacing */
+#define       RASLS     "\033\061\377"           /* raster line spacing */
+
+#define       RSTLS     "\033\062\377"           /* reset line spacing */
+#define       RSTCO     "\033\130\000\377"       /* reset color */
+
+#define       CR        '\015'                   /* carriage return */
+#define       LF        '\012'                   /* line feed */
+
+/*
+ ** Prtblk get word bit and byte bit macro functions.
+ */
+
+#define       WRDBIT(wrd,bit)  ((wrd>>(15-bit))&0x0001)
+#define       BYTBIT(byt,bit)  ((byt>>(7-bit))&0x0001)
+
+/*
+ ** Prtblk miscellaneous macros.
+ */
+
+#define       NOABRT    (1)                      /* prtcnt no abort value */
+
+#define       RETERR  {prtcnt=(-1);return(-1);}  /* return prtblk error */
+
+#define       FALSE     (0)                      /* boolean false */
+#define       TRUE      (1)                      /* boolean true */
+
+#define       PBERR     (-1)                     /* prtblk return error */
+
 PBDEF pbpar;
 
-char prtbdev;	/* TRUE when printing to centronics port */
-char prtblow;	/* TRUE when printing low resolution */
-char prtbmed;	/* TRUE when printing medium resolution */
-char prtbmono;	/* TRUE when printing monochrome resolution */
-char prtbprez;	/* TRUE when printing high quality */
-char prtbacol;	/* TRUE when printing on Atari color matrix */
-char prtbamon;	/* TRUE when printing on Atari monochrome */
-char prtbeps;	/* TRUE when printing on Epson */
-char prtbdmask; /* TRUE if using default halftone mask */
-int16_t prtbinvert; /* invert flag for monochrome */
-int16_t prtbtcol; /* temp color mask */
+char prtbdev;	/* TRUE when printing to centronics port; was: PR */
+char prtblow;	/* TRUE when printing low resolution; was: LO */
+char prtbmed;	/* TRUE when printing medium resolution; was: ME */
+char prtbmono;	/* TRUE when printing monochrome resolution; was: HI */
+char prtbprez;	/* TRUE when printing high quality; was: DR */
+char prtbacol;	/* TRUE when printing on Atari color matrix; was: CD */
+char prtbamon;	/* TRUE when printing on Atari monochrome; was: DW */
+char prtbeps;	/* TRUE when printing on Epson; was: ED */
+char prtbdmask; /* TRUE if using default halftone mask; was: TW */
+int16_t prtbinvert; /* invert flag for monochrome; was: invid */
+int16_t prtbtcol; /* duplicate colpal entry */
 int16_t prtbbval; /* blue value */
 int16_t prtbgval; /* green value */
 int16_t prtbrval; /* red value */
-int16_t prtbmaxval[16]; /* maximum values */
-int16_t prtbminval[16]; /* minimum values */
-int16_t prtbval[16]; /* minimum values */
+int16_t prtbmaxval[16]; /* intensity palette */
+int16_t prtbminval[16]; /* lumin/satur palette */
+int16_t prtbval[16]; /* hue palette */
 int16_t prtbplanes;
 int16_t prtbdots;
 int16_t prtblines;
@@ -35,7 +102,7 @@ int16_t prtbwidth;
 int16_t prtbheight;
 char *prtbstrt;
 char prtbbol;
-char prtbflg;
+char prtbflg;		/* white space flag; was: WS */
 char *prtbend;
 int16_t *prtbp1;
 int16_t *prtbp2;
@@ -94,21 +161,26 @@ PP(const PBDEF *par;)
 	register const char *src;
 	register char *dst;
 	
+	/* copy prtblk arguments */
 	for (src = (const char *)par, dst = (char *)&pbpar, i = sizeof(*par); i > 0; i--)
 		*dst++ = *src++;
 	
-	if (pbpar.pb_prport > 1)
+	/* determine output port */
+	if (pbpar.pb_prport > MAXPOR)
 	{
 		RETERR;
 	}
 	
+	/* determine output port */
 	prtbdev = pbpar.pb_prport != 0 ? 0 : 1;
 	
+	/* check for text string */
 	if (pbpar.pb_height == 0)
 	{
 		while (pbpar.pb_width-- != 0)
 		{
-			if (dumpflg != 1)
+			/* check global print count for abort */
+			if (dumpflg != NOABRT)
 				break;
 			PRTCHAR(*pbpar.pb_scrptr++);
 		}
@@ -116,51 +188,53 @@ PP(const PBDEF *par;)
 		return 0;
 	}
 	
-	if (pbpar.pb_prtype > 3)
+	/* check print parameters (some for debug) */
+	if (pbpar.pb_prtype > MAXTYP)
 	{
 		RETERR;
 	}
 	
-	if (pbpar.pb_prrez > 1)
+	if (pbpar.pb_prrez > MAXDST)
 	{
 		RETERR;
 	}
 	
-	if (pbpar.pb_screz > 2)
+	if (pbpar.pb_screz > MAXSRC)
 	{
 		RETERR;
 	}
 	
-	if (pbpar.pb_offset > 7)
+	if (pbpar.pb_offset > MAXOFF)
 	{
 		RETERR;
 	}
 	
-	prtblow = pbpar.pb_screz != 0 ? FALSE : TRUE;
-	prtbmed = pbpar.pb_screz != 1 ? FALSE : TRUE;
-	prtbmono = pbpar.pb_screz != 2 ? FALSE : TRUE;
-	prtbprez = pbpar.pb_prrez != 0 ? FALSE : TRUE;
-	prtbacol = pbpar.pb_prtype != 1 ? FALSE : TRUE;
-	prtbamon = pbpar.pb_prtype != 2 ? FALSE : TRUE;
-	prtbeps = pbpar.pb_prtype != 3 ? FALSE : TRUE;
+	prtblow = pbpar.pb_screz == LOW;
+	prtbmed = pbpar.pb_screz == MEDIUM;
+	prtbmono = pbpar.pb_screz == HIGH;
+	prtbprez = pbpar.pb_prrez == DRAFT;
+	prtbacol = pbpar.pb_prtype == ATCDM;
+	prtbamon = pbpar.pb_prtype == ATMDW;
+	prtbeps = pbpar.pb_prtype == EPMDM;
 	
-	if (prtbamon)
+	if (prtbamon)								/* BitMap on daisy wheel */
 	{
 		RETERR;
 	}
 	
-	prtbprez = prtbeps && !prtbprez ? TRUE : prtbprez;
+	prtbprez = prtbeps && !prtbprez ? TRUE : prtbprez;		/* force draft on Epson */
 	
-	if (prtblow && pbpar.pb_width > 320)
+	if (prtblow && pbpar.pb_width > LOWID)					/* clip width to low */
 	{
-		pbpar.pb_right += pbpar.pb_width - 320;
-		pbpar.pb_width = 320;
-	} else if (pbpar.pb_width > 640)
+		pbpar.pb_right += pbpar.pb_width - LOWID;
+		pbpar.pb_width = LOWID;
+	} else if (pbpar.pb_width > HIWID)						/* clip width to high */
 	{
-		pbpar.pb_right += pbpar.pb_width - 640;
-		pbpar.pb_width = 640;
+		pbpar.pb_right += pbpar.pb_width - HIWID;
+		pbpar.pb_width = HIWID;
 	}
 	
+	/* determine halftone masks and trailing white truncation */
 	if (pbpar.pb_mask == NULL)
 	{
 		pbpar.pb_mask = pbt_mask;
@@ -170,6 +244,7 @@ PP(const PBDEF *par;)
 		prtbdmask = FALSE;
 	}
 	
+	/* build luminance or hue/saturation/intensity palettes */
 	if (prtbmono)
 	{
 		prtbinvert = pbpar.pb_colptr[0] & 1;
@@ -183,7 +258,7 @@ PP(const PBDEF *par;)
 				prtbbval = prtbtcol & 0x07;
 				prtbgval = (prtbtcol >> 4) & 0x07;
 				prtbrval = (prtbtcol >> 8) & 0x07;
-				if (prtbacol)
+				if (prtbacol)										/* color hue/satur/inten */
 				{
 					prtbmaxval[i] = prtbrval;
 					prtbmaxval[i] = max(prtbgval, prtbmaxval[i]);
@@ -196,9 +271,9 @@ PP(const PBDEF *par;)
 					prtbgval = (prtbgval - (prtbminval[i] + 1)) <= 0 ? 0 : 1;
 					prtbbval = (prtbbval - (prtbminval[i] + 1)) <= 0 ? 0 : 1;
 					prtbval[i] = (prtbrval << 2) + (prtbgval << 1) + prtbbval;
-				} else
+				} else												/* monochrome luminance */
 				{
-					prtbminval[i] = (prtbrval * 30 + prtbgval * 59 + prtbbval * 11) / 100;
+					prtbminval[i] = (prtbrval * 30 + prtbgval * 59 + prtbbval * 11) / 100;	/* NTSC RGB summation */
 					prtbval[i] = 7;
 					prtbmaxval[i] = 8;
 				}
@@ -211,6 +286,7 @@ PP(const PBDEF *par;)
 		}
 	}
 	
+	/* determine pixel mapping parameters */
 	if (prtblow)
 	{
 		prtbplanes = prtblines = prtbdots = 4;
@@ -229,15 +305,18 @@ PP(const PBDEF *par;)
 	
 	prtbwords = ((pbpar.pb_left + pbpar.pb_width + pbpar.pb_right) * prtbplanes) >> 4;
 	prtbbytes = prtbwords * prtblines;
+	/* normalize BitMap block pointer */
+	/* NB -- all bits are addressed left to right */
 	prtbstrt = (char *)((intptr_t)pbpar.pb_scrptr & ~1);
 	prtboffset = pbpar.pb_scrptr == prtbstrt ? pbpar.pb_offset : pbpar.pb_offset + 8;
 	
+	/* map pixels and print */
 	prtbbol = 1;
 	height = 0;
 	
 	while (height < pbpar.pb_height)
 	{
-		if (dumpflg != 1)
+		if (dumpflg != NOABRT)
 			break;
 		
 		if (prtbdmask)
@@ -307,18 +386,18 @@ PP(const PBDEF *par;)
 				{
 					if (prtbink == 0)
 					{
-						PRTSTR("\033\130\006\377");
+						PRTSTR(YELLO);
 					} else if (prtbink == 1)
 					{
-						PRTSTR("\033\130\005\377");
+						PRTSTR(MAGTA);
 					} else
 					{
-						PRTSTR("\033\130\003\377");
+						PRTSTR(CYAN);
 					}
 				}
 				
 				/* select 120 dpi graphics */
-				PRTSTR(prtbeps ? "\033\114\377" : "\033\131\377");
+				PRTSTR(prtbeps ? EBMMO : ABMMO);
 				
 				PRTCHAR(prtbilow);
 				PRTCHAR(prtbihigh);
@@ -335,7 +414,8 @@ PP(const PBDEF *par;)
 						prtboval[i] = 7;
 						prtbmval[i] = 8;
 					}
-
+					
+					/* build pixel block */
 					prtbheight = ((pbpar.pb_height - height) / prtblines) != 0 ? prtblines : (pbpar.pb_height - height);
 					if (((pbpar.pb_height - height) / prtblines) != 0)
 					{
@@ -372,6 +452,7 @@ PP(const PBDEF *par;)
 						prtbp1 += prtbwords;
 					}
 					
+					/* adjust pixel block for ymc color and intensity and brown */
 					if (prtbacol && !prtbmono)
 					{
 						for (i = 0; i < prtbheight; i++)
@@ -414,6 +495,7 @@ PP(const PBDEF *par;)
 						}
 					}
 					
+					/* print pixel block */
 					for (i = 4; i < (prtbdots + 4); i++)
 					{
 						prtboch = 0;
@@ -440,12 +522,12 @@ PP(const PBDEF *par;)
 					}
 				}
 				
-				PRTCHAR(0x0d);
+				PRTCHAR(CR);
 			}
 			
 			/* set 1/216 inch line spacing */
-			PRTSTR("\033\063\001\377");
-			PRTCHAR(0x0a);
+			PRTSTR(PIXLS);
+			PRTCHAR(LF);
 		}
 		
 		if (prtbprez)
@@ -453,23 +535,23 @@ PP(const PBDEF *par;)
 			for (i = 0; i < (prtbeps ? 2 : 1); i++)
 			{
 				/* set 1/216 inch line spacing */
-				PRTSTR("\033\063\001\377");
-				PRTCHAR(0x0a);
+				PRTSTR(PIXLS);
+				PRTCHAR(LF);
 			}
 		}
 		
 		if (prtbbol)
 		{
 			/* Select 7/72-inch line spacing */
-			PRTSTR("\033\061\377");
-			PRTCHAR(0x0a);
+			PRTSTR(RASLS);
+			PRTCHAR(LF);
 		} else
 		{
 			for (i = 0; i < (prtbeps ? (prtbheight * 6 - 3) : ((prtbheight << 2) - 2)); i++)
 			{
 				/* set 1/216 inch line spacing */
-				PRTSTR("\033\063\001\377");
-				PRTCHAR(0x0a);
+				PRTSTR(PIXLS);
+				PRTCHAR(LF);
 			}
 		}
 		
@@ -478,10 +560,10 @@ PP(const PBDEF *par;)
 	}
 	
 	/* set 1/6 inch line spacing */
-	prtstr("\033\062\377");
+	prtstr(RSTLS);
 	if (prtbacol && !prtbmono)
 	{
-		prtstr("\033\130\000\377");
+		prtstr(RSTCO);
 	}
 	
 	dumpflg = -1;
@@ -495,7 +577,7 @@ PP(char c;)
 	if (prtbdev != 0)
 	{
 		if (prtlst(c, c) == 0)
-			return -1;
+			return PBERR;
 	} else
 	{
 		prtaux(c, c);
@@ -510,7 +592,7 @@ PP(const char *s;)
 	while (*s != 0xff)
 	{
 		if (prtchar(*s++) != 0)
-			return -1;
+			return PBERR;
 	}
 	return 0;
 }
