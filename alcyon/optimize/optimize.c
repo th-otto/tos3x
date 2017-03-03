@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
+#ifdef __ALCYON__
+#include <mint/osbind.h>
+#endif
 
 #define BOOLEAN int
 #define FALSE 0
@@ -40,6 +43,7 @@ static char opath[MAXPATH];
 /* stupid alcyon does not handle multiplication with constants */
 #define MUL10(x) ((((x) << 2) + x) << 1)
 
+#define ISNL(c) ((c) == '\n')
 
 /*****************************************************************************/
 /* ------------------------------------------------------------------------- */
@@ -283,7 +287,6 @@ static BOOLEAN addinrange(NOTHING)
 	}
 	nextline();
 	i = nxt_line;
-	i = nxt_line;
 	while (i < size && in_buff[i] != '\n')
 	{
 		++i;
@@ -373,7 +376,7 @@ static VOID clrwtol(NOTHING)
 			(in_buff + in_ind)[5] == 's' &&
 		/*	(in_buff + in_ind)[6] == 'p' && */
 		/*	(in_buff + in_ind)[7] == ')' && */
-			(in_buff + in_ind)[8] == '\n')
+			ISNL((in_buff + in_ind)[8]))
 		{
 			nxt_line = in_ind;
 			nextline();
@@ -501,7 +504,7 @@ static VOID mvwtol(NOTHING)
 				(in_buff + tmp_ind)[7] == 's' &&
 			/*	(in_buff + tmp_ind)[8] == 'p' && */
 			/*	(in_buff + tmp_ind)[9] == ')' && */
-				(in_buff + tmp_ind)[10] == '\n')
+				ISNL((in_buff + tmp_ind)[10]))
 			{
 				regnum = (in_buff + tmp_ind)[3];
 				nxt_line = in_ind;
@@ -775,7 +778,7 @@ static VOID imov1_op(NOTHING)
 				(in_buff + tmp_ind)[2] == 's' && /*
 				(in_buff + tmp_ind)[3] == 'p' &&
 				(in_buff + tmp_ind)[4] == ')' && */
-				(in_buff + tmp_ind)[5] == '\n'
+				ISNL((in_buff + tmp_ind)[5])
 				)
 			{
 				nxt_line = in_ind;
@@ -860,13 +863,13 @@ static VOID clrop(NOTHING)
 			(in_buff + in_ind)[2] == 'r' &&
 			(in_buff + in_ind)[3] == ' ' &&
 			(in_buff + in_ind)[4] == 'R' &&
-		/*	(in_buff + in_ind)[5] == '0' && */
-			(in_buff + in_ind)[6] == '\n')
+		 /*	(in_buff + in_ind)[5] == '0' && */
+			ISNL((in_buff + in_ind)[6]))
 		{
 			savereg = (in_buff + in_ind)[5];
-			i = nxt_line;
 			nxt_line = in_ind;
 			nextline();
+			i = nxt_line;
 			if ((in_buff + nxt_line)[0] == 'm' &&
 				(in_buff + nxt_line)[1] == 'o' &&
 				(in_buff + nxt_line)[2] == 'v' &&
@@ -1008,7 +1011,7 @@ static VOID mv2pea1(NOTHING)
 							ADDC((reg % 10) + '0');
 							ADDC(')');
 							nextline();
-							i = nxt_line - 2; /* assumes CR/LF */
+							i = nxt_line - 1; /* points to newline before next line */
 							++mv1_total;
 						}
 					}
@@ -1384,7 +1387,7 @@ static VOID samebra(NOTHING)
 					i++;
 					nxt++;
 				}
-				if ((i + in_buff)[0] == '\n')
+				if (ISNL((i + in_buff)[0]))
 				{
 					++bra_total;
 					in_ind = nxt_line;
@@ -1455,8 +1458,13 @@ PP(register int fd;)
 	
 	if (fd < 0)
 		return 0;
+#ifdef __ALCYON__
+	fsize = Fseek(0L, fd, SEEK_END);
+	Fseek(0L, fd, SEEK_SET);
+#else
 	fsize = lseek(fd, 0L, SEEK_END);
 	lseek(fd, 0L, SEEK_SET);
+#endif
 	return fsize;
 }
 
@@ -1466,10 +1474,19 @@ static BOOLEAN open_file(P(const char *) name)
 PP(const char *name;)
 {
 	register int in_hndl;
+	register long got;
 	
 	in_buff = NULL;
 	out_buff = NULL;
+#ifdef __ALCYON__
+	/*
+	 * have to use TOS-functions here, since read() only takes unsigned int
+	 * as parameter
+	 */
+	in_hndl = Fopen(name, O_RDONLY);
+#else
 	in_hndl = open(name, O_RDONLY | O_BINARY);
+#endif
 	size = filesize(in_hndl);
 	if (size < 0 || in_hndl < 0)
 	{
@@ -1483,13 +1500,22 @@ PP(const char *name;)
 		fprintf(stderr, _("Not enough memory for operation on %s -Abort\n"), name);
 		return FALSE;
 	}
-	if (read(in_hndl, in_buff, size) != size)
+#ifdef __ALCYON__
+	got = Fread(in_hndl, size, in_buff);
+#else
+	got = read(in_hndl, in_buff, size);
+#endif
+	if (got != size)
 	{
-		fprintf(stderr, _("Error reading %s. -Abort\n"), name);
+		fprintf(stderr, _("Error reading %s (got %ld, expected %ld). -Abort\n"), name, got, size);
 		return FALSE;
 	}
 	in_buff[size] = '\0';
+#ifdef __ALCYON__
+	Fclose(in_hndl);
+#else
 	close(in_hndl);
+#endif
 	return TRUE;
 }
 
@@ -1500,22 +1526,37 @@ PP(const char *name;)
 {
 	char buf[MAXPATH];
 	register int out_hndl;
+	register long got;
 	
 	if (out_buff == NULL)
 		return FALSE;
 	strcpy(buf, opath);
 	strcat(buf, name);
-	if ((out_hndl = open(buf, O_WRONLY|O_CREAT|O_TRUNC, 0644)) < 0)
+#ifdef __ALCYON__
+	out_hndl = Fcreate(buf, 0);
+#else
+	out_hndl = open(buf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+#endif
+	if (out_hndl < 0)
 	{
 		fprintf(stderr, _("Error creating %s for output -Abort.\n"), buf);
 		return FALSE;
 	}
-	if (write(out_hndl, out_buff, size) != size)
+#ifdef __ALCYON__
+	got = Fwrite(out_hndl, size, out_buff);
+#else
+	got = write(out_hndl, out_buff, size);
+#endif
+	if (got != size)
 	{
-		fprintf(stderr, _("Error writing %s%s. -Abort.\n"), opath, name);
+		fprintf(stderr, _("Error writing %s%s (got %ld, expected %ld). -Abort.\n"), opath, name, got, size);
 		return FALSE;
 	}
+#ifdef __ALCYON__
+	Fclose(out_hndl);
+#else
 	close(out_hndl);
+#endif
 	return TRUE;
 }
 
