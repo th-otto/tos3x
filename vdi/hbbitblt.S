@@ -347,11 +347,11 @@ not_insane:
 
 *  filter out complex patterns
 
-	move.w	P_NXLN(a6),d0		; if NXLN isn't 2, use blast_1
+	move.w	P_NXLN(a6),d0		/* if NXLN isn't 2, use blast_1 */
 	subq.w	#2,d0
 	bne	blast_1
 
-	move.w	P_MASK(a6),d0		; if MASK isn't 1E or 1F, use blast_1
+	move.w	P_MASK(a6),d0		/* if MASK isn't 1E or 1F, use blast_1 */
 	and.w	#$FFFE,d0
 	cmp.w	#$001E,d0
 	bne	blast_1

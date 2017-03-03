@@ -266,13 +266,13 @@ col_1_ok:
 
 inverse_transparent_mode:
 
-	move.b	#01,OP_TAB+00(a6)	; fg:0 bg:0  D' <- S and D
-	move.b	#13,OP_TAB+01(a6)	; fg:0 bg:1  D' <- [not S] or D
+	move.b	#01,OP_TAB+00(a6)	/* fg:0 bg:0  D' <- S and D */
+	move.b	#13,OP_TAB+01(a6)	/* fg:0 bg:1  D' <- [not S] or D */
 	clr.w	FG_COL(a6)		; were only interested in one color
 	move.w	d6,BG_COL(a6)		; save the color of interest
 
 #if VIDEL_SUPPPORT
-	cmp.w	#PIXPACKED,form_id(a1)	; see if we're in px packed
+	cmp.w	#PIXPACKED,form_id(a1)	/* see if we're in px packed */
 	bne	the_clipper
 	move.b	#13,OP_TAB+00(a6)	; (NOT S) OR D
 	move.w	d7,FG_COL(a6)
@@ -281,13 +281,13 @@ inverse_transparent_mode:
 
 transparent_mode:
 
-	move.b	#04,OP_TAB+00(a6)	; fg:0 bg:0  D' <- [not S] and D
-	move.b	#07,OP_TAB+02(a6)	; fg:1 bg:0  D' <- S or D
+	move.b	#04,OP_TAB+00(a6)	/* fg:0 bg:0  D' <- [not S] and D */
+	move.b	#07,OP_TAB+02(a6)	/* fg:1 bg:0  D' <- S or D */
 	clr.w	BG_COL(a6)		; were only interested in one color
 	move.w	d7,FG_COL(a6)		; save the color of interest
 
 #if VIDEL_SUPPPORT
-	cmp.w	#PIXPACKED,form_id(a1)	; see if we're in px packed
+	cmp.w	#PIXPACKED,form_id(a1)	/* see if we're in px packed */
 	bne	the_clipper
 	move.b	#7,OP_TAB+00(a6)	; S OR D
 	move.w	d6,BG_COL(a6)
@@ -300,13 +300,13 @@ replace_mode:
 	move.w	d6,BG_COL(a6)		; save fore and background colors
 	move.w	d7,FG_COL(a6)
 
-	move.b	#00,OP_TAB+00(a6)	; fg:0 bg:0  D' <- 0
-	move.b	#12,OP_TAB+01(a6)	; fg:0 bg:1  D' <- not S
-	move.b	#03,OP_TAB+02(a6)	; fg:1 bg:0  D' <- S
-	move.b	#15,OP_TAB+03(a6)	; fg:1 bg:1  D' <- 1
+	move.b	#00,OP_TAB+00(a6)	/* fg:0 bg:0  D' <- 0 */
+	move.b	#12,OP_TAB+01(a6)	/* fg:0 bg:1  D' <- not S */
+	move.b	#03,OP_TAB+02(a6)	/* fg:1 bg:0  D' <- S */
+	move.b	#15,OP_TAB+03(a6)	/* fg:1 bg:1  D' <- 1 */
 
 #if VIDEL_SUPPPORT
-	cmp.w	#PIXPACKED,form_id(a1)	; see if we're in px packed
+	cmp.w	#PIXPACKED,form_id(a1)	/* see if we're in px packed */
 	bne	the_clipper
 	move.b	#3,OP_TAB+00(a6)	; S
 #endif
@@ -318,7 +318,7 @@ xor_mode:
 	clr.w	BG_COL(a6)
 	clr.w	FG_COL(a6)
 
-	move.b	#06,OP_TAB+00(a6)	; fg:0 bg:0  D' <- S xor D
+	move.b	#06,OP_TAB+00(a6)	/* fg:0 bg:0  D' <- S xor D */
 
 	bra	the_clipper
 
@@ -353,7 +353,7 @@ the_clipper:
 	tst.w	PIXLV(CLIP,a1)
 	beq	dont_clip		; if clipping disabled, skip the clip
 
-	tst.l	MF_BAS_AD(a4)		; if dst isn't screen, don't clip
+	tst.l	MF_BAS_AD(a4)		/* if dst isn't screen, don't clip */
 	beq	clip_it
 
 dont_clip:

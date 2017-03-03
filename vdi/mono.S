@@ -67,21 +67,21 @@ on_bounds:
 		move.w	(a5)+,d6	;8	d6 <- Ymin clip
 		move.w	(a5)+,d7	;8	d7 <- Xmax clip
 
-		cmp.w	d6,d1			; str can't extend above Ymin
+		cmp.w	d6,d1			/* str can't extend above Ymin */
 		blt	fail_ret		;
 
 		move.w	d1,d4			;4	d4 <- dst Y
 		add.w	d3,d4			;4	d4 <- bottom Y +1
-		cmp.w	(a5),d4	; str can't descend below Ymax
+		cmp.w	(a5),d4	/* str can't descend below Ymax */
 		bge	fail_ret		;8/10
 
-		cmp.w	d5,d0			; str can't extend left of Xmin
+		cmp.w	d5,d0			/* str can't extend left of Xmin */
 		blt	fail_ret		;8/10
 
 		move.w	d2,d4			; d4 <- number of characters
 		lsl.w	#3,d4			; d4 <- width of str in pixels
 		add.w	d0,d4			; d4 <- rightmost X +1
-		cmp.w	d7,d4			; str can't extend right of Xmax
+		cmp.w	d7,d4			/* str can't extend right of Xmax */
 		bge	fail_ret		;8/10
 
 *  no clipping to worry about
@@ -118,21 +118,21 @@ on_bounds:
 		move.w	PIXLV(YMN_CLIP,a1),d6	;8	d6 <- Ymin clip
 		move.w	PIXLV(XMX_CLIP,a1),d7	;8	d7 <- Xmax clip
 
-		cmp.w	d6,d1			; str can't extend above Ymin
+		cmp.w	d6,d1			/* str can't extend above Ymin */
 		blt	fail_ret		;
 
 		move.w	d1,d4			;4	d4 <- dst Y
 		add.w	d3,d4			;4	d4 <- bottom Y +1
-		cmp.w	PIXLV(YMX_CLIP,a1),d4	; str can't descend below Ymax
+		cmp.w	PIXLV(YMX_CLIP,a1),d4	/* str can't descend below Ymax */
 		bge	fail_ret		;8/10
 
-		cmp.w	d5,d0			; str can't extend left of Xmin
+		cmp.w	d5,d0			/* str can't extend left of Xmin */
 		blt	fail_ret		;8/10
 
 		move.w	d2,d4			; d4 <- number of characters
 		lsl.w	#3,d4			; d4 <- width of str in pixels
 		add.w	d0,d4			; d4 <- rightmost X +1
-		cmp.w	d7,d4			; str can't extend right of Xmax
+		cmp.w	d7,d4			/* str can't extend right of Xmax */
 		bge	fail_ret		;8/10
 
 *  no clipping to worry about

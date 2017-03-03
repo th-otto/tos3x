@@ -185,8 +185,8 @@ s1b_cont:
 
 rf_multi:
 
-	cmp.w	#15,d0			; if the pattern isn't 16 words long,
-	bne	rf_dgen			; then it's a degenerate case
+	cmp.w	#15,d0			/* if the pattern isn't 16 words long, */
+	bne	rf_dgen			/* then it's a degenerate case */
 
 	moveq.l	#2,d1			; d1 <- logic op offset mask
 
@@ -284,7 +284,7 @@ sd2_loop:
 	move.w	0(a0,d4.w),(a2)		 ; load the current pattern
 	addq.w	#2,d4			 ; d4 <- offset to next pattern word
 	cmp.w	d0,d4			 ; if greater than mask, reset
-	ble	sd2_blast		 ; (that's how matt did it)
+	ble	sd2_blast		 /* (that's how matt did it) */
 
 	clr.w	d4			 ; d4 <- offset to first word
 

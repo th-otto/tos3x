@@ -67,7 +67,7 @@ _st_vs_color:
 	add.w	d2,a1			; a1 -> component for given index (requested)
 
 	subq.w	#1,d1			; d1 <- # planes - 1
-	beq	monochrome		; don't deal with monochrome case
+	beq	monochrome		/* don't deal with monochrome case */
 
 
 *

@@ -189,7 +189,7 @@ mchar_cont:
 
 	addq.l	#1,d1		;8     d1 -> next character destination
 	btst.l	#0,d1		;10    if next character on odd byte boundry,
-	bne	char1st		;8/10  dst address is same as last character's
+	bne	char1st		 /* 8/10  dst address is same as last character's */
 
 	move.l	a1,d1		;4     d1 -> destination just blasted
 	subq.l	#1,d1		;8     d1 -> next character destination

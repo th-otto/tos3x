@@ -125,8 +125,10 @@ mlp:	move.w	(a0)+,d0
 	dbra	d5,mplp
 	bra.b	ret
 
-* If pixel-packed, the outside of the mask must be made all 1's,
-* since later in trans_check() all 1's become 0's (black in pixel packed).
+/*
+ * If pixel-packed, the outside of the mask must be made all 1's,
+ * since later in trans_check() all 1's become 0's (black in pixel packed).
+ */
 pixpac:	move.l	a4,a0
 	move.w	d7,d1		; dbra # of words per plane
 plp:	move.w	(a0)+,d0

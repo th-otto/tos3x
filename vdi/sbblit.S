@@ -1,42 +1,43 @@
-*********************************  sbblit.s  **********************************
-*
-* =============================================================================
-* $Author: lozben $	$Date: 91/08/06 17:34:28 $
-* =============================================================================
-*
-* Revision 3.1  91/08/06  17:34:28  lozben
-* Made changes so the code could work with multiple linea variable structures.
-*
-* Revision 3.0  91/08/06  17:15:30  lozben
-* New generation VDI
-*
-* Revision 2.7  91/07/26  12:07:25  lozben
-* Found a way not to put a nop. Look at comment 2.6 & label sb_blit.
-*
-* Revision 2.6  91/07/26  11:34:51  lozben
-* Added a nop in front of a ".ifeq" directive. There is a bug in the assembler.
-* You can't have ".ifeq" directive on the same line as a label.
-*
-* Revision 2.5  91/07/08  16:29:23  lozben
-* We now set COPYTRAN and OPAQUE flags when appropriate.
-*
-* Revision 2.4  90/02/16  12:24:52  lozben
-* Fixed some of the code so that it can be assembled with mas.
-*
-* Revision 2.3  90/01/11  12:20:28  lozben
-* Added code to check for the case of unaligned src to dst copy (Atari
-* ST/TT screen memory format). If check turns out to be true go to new
-* special case code.
-*
-* Revision 2.2  89/12/07  12:12:04  lozben
-* Added code to make a call to scrn_wrd_blt in proper cases. The routine
-* does a fast source to destination blit, which is on the same pixel
-* boundaries.
-*
-* Revision 2.1  89/02/21  17:24:32  kbad
-* *** TOS 1.4  FINAL RELEASE VERSION ***
-*
-*******************************************************************************
+/*********************************  sbblit.s  **********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/08/06 17:34:28 $
+ * =============================================================================
+ *
+ * Revision 3.1  91/08/06  17:34:28  lozben
+ * Made changes so the code could work with multiple linea variable structures.
+ *
+ * Revision 3.0  91/08/06  17:15:30  lozben
+ * New generation VDI
+ *
+ * Revision 2.7  91/07/26  12:07:25  lozben
+ * Found a way not to put a nop. Look at comment 2.6 & label sb_blit.
+ *
+ * Revision 2.6  91/07/26  11:34:51  lozben
+ * Added a nop in front of a ".ifeq" directive. There is a bug in the assembler.
+ * You can't have ".ifeq" directive on the same line as a label.
+ *
+ * Revision 2.5  91/07/08  16:29:23  lozben
+ * We now set COPYTRAN and OPAQUE flags when appropriate.
+ *
+ * Revision 2.4  90/02/16  12:24:52  lozben
+ * Fixed some of the code so that it can be assembled with mas.
+ *
+ * Revision 2.3  90/01/11  12:20:28  lozben
+ * Added code to check for the case of unaligned src to dst copy (Atari
+ * ST/TT screen memory format). If check turns out to be true go to new
+ * special case code.
+ *
+ * Revision 2.2  89/12/07  12:12:04  lozben
+ * Added code to make a call to scrn_wrd_blt in proper cases. The routine
+ * does a fast source to destination blit, which is on the same pixel
+ * boundaries.
+ *
+ * Revision 2.1  89/02/21  17:24:32  kbad
+ * *** TOS 1.4  FINAL RELEASE VERSION ***
+ *
+ *******************************************************************************
+ */
 
 #include "config.h"
 #include "vdidefs.h"
@@ -132,7 +133,7 @@ sb_bitblt: ds.b 0
     bne	std_blt
 	tst.l	FG_COL(a6)		; and fore and back colors are 0 ...
 	bne	std_blt
-	cmp.b	#03,OP_TAB(a6)		; and D'<- S is the logic operation ...
+	cmp.b	#03,OP_TAB(a6)		/* and D'<- S is the logic operation ... */
 	bne	std_blt
 	move.w	d4,d7			; and both src and dst occupy
 	add.w	d6,d7			; three or more words apiece ...
@@ -166,7 +167,7 @@ sb_bitblt: ds.b 0
 
 	tst.l	FG_COL(a6)		; and fore and back colors are 0 ...
 	bne	opaque_blt
-	cmp.b	#03,OP_TAB(a6)		; and D'<- S is the logic operation ...
+	cmp.b	#03,OP_TAB(a6)		/* and D'<- S is the logic operation ... */
 	bne	opaque_blt
 	jmp	scrn_blt		; do fast non tearing blit
 
@@ -184,7 +185,7 @@ trns_blt:
 
 sbBl0:	tst	d1			; see if S and D are pixel aligned
 	bne	std_blt			; if Xmin src mod16 = Xmin DST mod16 ..
-	bra	word_blt		; if so do pixel aligned blit D' <- S
+	bra	word_blt		/* if so do pixel aligned blit D' <- S */
 
 #endif
 
@@ -457,7 +458,7 @@ np_cont:
 	move.l	a1,D_ADDR(a6)
 
 	move.l	P_ADDR(a6),d0		; update pattern plane base pointer
-	beq	next_plane		; if pointer isn't null
+	beq	next_plane		/* if pointer isn't null */
 
 	move.l	d0,a2
 	add.w	P_NXPL(a6),a2
@@ -731,7 +732,7 @@ sc_mp_f1:
 	eor.w	d1,d0		;					 4
 	and.w	d6,d0		;					 4
 	eor.w	d1,d0		;					 4
-	move.w	d0,(a1)		; D' <- S				 8
+	move.w	d0,(a1)		/* D' <- S				 8 */
 
 	adda.w	d2,a0		; a0 -> 2nd SOURCE word			 8
 	adda.w	d3,a1		; a1 -> 2nd DESTINATION word		 8
@@ -753,7 +754,7 @@ sc_mp_f2:
 	eor.w	d1,d0		;					 4
 	and.w	d6,d0		;					 4
 	eor.w	d1,d0		;					 4
-	move.w	d0,(a1)		; D' <- S				 8
+	move.w	d0,(a1)		/* D' <- S				 8 */
 	swap	d6		; d6 <- first fringe			 4
 
 	add.w	a4,a0		; a0 -> next SOURCE row			 8
