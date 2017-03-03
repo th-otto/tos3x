@@ -199,6 +199,26 @@ PP(const char *s;)
 }
 
 
+static int rgetch(P(FILE *) fp)
+PP(FILE *fp;)
+{
+	int c;
+	
+	c = getc(fp);
+	if (c == 0x0d)
+	{
+		c = getc(fp);
+		if (c != 0x0a)
+		{
+			if (c != EOF)
+				putback(c);
+		}
+		c = '\n';
+	}
+	return c;
+}
+
+
 /*
  * ngetch - get a (possibly) pushed back character
  *      This handles the include file stack and incrementing the line
@@ -212,7 +232,7 @@ int ngetch(NOTHING)
 	if (pbp > &pbbuf[0])
 		return *--pbp;
 	pbflag = 0;
-	while ((c = getc(inbuf)) < 0)
+	while ((c = rgetch(inbuf)) < 0)
 	{
 		if (filep == &filestack[0])
 			return CEOF;
