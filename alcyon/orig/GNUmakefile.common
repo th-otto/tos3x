@@ -43,8 +43,6 @@ FLAGS = $(CROSSPREFIX)flags
 # 
 # some tools
 # 
-YACC  = bison -dk
-LEX   = flex
 MV    = mv
 CP    = cp
 RM    = rm -f
