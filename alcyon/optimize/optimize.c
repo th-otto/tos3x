@@ -38,7 +38,9 @@ static char *in_buff;
 static char *out_buff;
 static long nxt_line;
 static char opath[MAXPATH];
-
+static int stp_lines;
+static int stp_symbols;
+static int quiet;
 
 /* stupid alcyon does not handle multiplication with constants */
 #define MUL10(x) ((((x) << 2) + x) << 1)
@@ -245,6 +247,62 @@ static VOID stripcr(NOTHING)
 	}
 	if (out > out_buff && out[-1] != '\n')
 		*out++ = '\n';
+	size = (intptr_t)out - (intptr_t)out_buff;
+}
+
+/* ------------------------------------------------------------------------- */
+
+static VOID striplines(NOTHING)
+{
+	register char *in;
+	register char *end;
+	register char *out;
+	
+	in = in_buff;
+	end = in_buff + size;
+	out = out_buff;
+	while (in < end)
+	{
+		if (in[0] == '*' || in[0] == ';')
+		{
+			while (in < end && in[0] != '\n')
+				in++;
+			in++;
+		} else
+		{
+			while (in < end && in[0] != '\n')
+				*out++ = *in++;
+			*out++ = *in++;
+		}
+	}
+	size = (intptr_t)out - (intptr_t)out_buff;
+}
+
+/* ------------------------------------------------------------------------- */
+
+static VOID stripsyms(NOTHING)
+{
+	register char *in;
+	register char *end;
+	register char *out;
+	
+	in = in_buff;
+	end = in_buff + size;
+	out = out_buff;
+	while (in < end)
+	{
+		if (in[0] == '~')
+		{
+			while (in < end && in[0] != '\n')
+				in++;
+			in++;
+		} else
+		{
+			while (in < end && in[0] != '\n')
+				*out++ = *in++;
+			*out++ = *in++;
+		}
+	}
 	size = (intptr_t)out - (intptr_t)out_buff;
 }
 
@@ -1416,7 +1474,19 @@ static VOID do_optimize(NOTHING)
 	
 	stripcr();
 	SWAP();
-
+	
+	if (stp_lines)
+	{
+		striplines();
+		SWAP();
+	}
+	
+	if (stp_symbols)
+	{
+		stripsyms();
+		SWAP();
+	}
+	
 	clrwtol();
 	SWAP();
 
@@ -1476,17 +1546,22 @@ PP(const char *name;)
 	register int in_hndl;
 	register long got;
 	
-	in_buff = NULL;
-	out_buff = NULL;
 #ifdef __ALCYON__
+	char buf[MAXPATH];
 	/*
 	 * have to use TOS-functions here, since read() only takes unsigned int
 	 * as parameter
 	 */
-	in_hndl = Fopen(name, O_RDONLY);
+	strcpy(buf, name);
+	_dosify(buf);
+	in_hndl = Fopen(buf, O_RDONLY);
 #else
 	in_hndl = open(name, O_RDONLY | O_BINARY);
 #endif
+
+	in_buff = NULL;
+	out_buff = NULL;
+
 	size = filesize(in_hndl);
 	if (size < 0 || in_hndl < 0)
 	{
@@ -1533,6 +1608,7 @@ PP(const char *name;)
 	strcpy(buf, opath);
 	strcat(buf, name);
 #ifdef __ALCYON__
+	_dosify(buf);
 	out_hndl = Fcreate(buf, 0);
 #else
 	out_hndl = open(buf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
@@ -1581,7 +1657,7 @@ PP(const char *str;)
 
 static VOID __NORETURN usage(NOTHING)
 {
-	Error(_("USAGE: optimize.prg [ -oPATH ] files ..."));
+	Error(_("USAGE: optimize.prg [-l] [-s] [-q] [ -oPATH ] files ..."));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -1599,38 +1675,50 @@ PP(register char **argv;)
 	asm("xdef _ftoa");
 	asm("_ftoa equ 0");
 #endif
-	if (argc < 2)
-		usage();
-	if (argv[1][0] == '-')
+
+	argi = 1;
+	while (argi < argc && argv[argi][0] == '-')
 	{
-		if (argv[1][1] == 'o' || argv[1][1] == 'O')
+		char c;
+		
+		c = argv[argi][1];
+		if (c == 'o' || c == 'O')
 		{
 			int l;
 			
-			if (argv[1][2] == '\0')
+			if (argv[argi][2] == '\0')
 			{
-				if (argc < 3)
+				if ((argi + 2) >= argc)
 					usage();
-				strcpy(opath, argv[2]);
-				argi = 3;
+				strcpy(opath, argv[argi + 1]);
+				argi += 2;
 			} else
 			{
-				strcpy(opath, &argv[1][2]);
-				if (argc == 2)
-					usage();
-				argi = 2;
+				strcpy(opath, &argv[argi][2]);
+				argi++;
 			}
 			l = strlen(opath);
 			if (l != 0 && opath[l - 1] != '/' && opath[l - 1] != '\\')
 				strcat(opath, "/");
+		} else if (c == 'l' || c == 'L')
+		{
+			stp_lines = TRUE;
+			argi++;
+		} else if (c == 's' || c == 'S')
+		{
+			stp_symbols = TRUE;
+			argi++;
+		} else if (c == 'q' || c == 'Q')
+		{
+			quiet = TRUE;
+			argi++;
 		} else
 		{
 			usage();
 		}
-	} else
-	{
-		argi = 1;
 	}
+	if (argi >= argc)
+		usage();
 	
 	if (init_optimize() == FALSE)
 	{
@@ -1649,16 +1737,19 @@ PP(register char **argv;)
 		argi++;
 	}
 	
-	printf(_("%6d Total clr's removed\n"), clr_total);
-	printf(_("%6d Total clr's (w/stk mod) removed\n"), clr1_total);
-	printf(_("%6d Total moves's removed\n"), mov_total);
-	printf(_("%6d Total moves (w/stk mod) removed\n"), mov1_total);
-	printf(_("%6d Total move immediates removed\n"), imov_total);
-	printf(_("%6d Total move immed.(w/stk mod) removed\n"), imov1_total);
-	printf(_("%6d Total redundant bra's removed\n"), bra_total);
-	printf(_("%6d Total pea's used (4 bytes)\n"), mv1_total);
-	printf(_("%6d Total pea's used (w/stk mod) (2 or 4 bytes)\n"), mv2_total);
-	printf(_("%6d Total adda.l's improved (2 bytes)\n"), adda_total);
+	if (!quiet)
+	{
+		printf(_("%6d Total clr's removed\n"), clr_total);
+		printf(_("%6d Total clr's (w/stk mod) removed\n"), clr1_total);
+		printf(_("%6d Total moves's removed\n"), mov_total);
+		printf(_("%6d Total moves (w/stk mod) removed\n"), mov1_total);
+		printf(_("%6d Total move immediates removed\n"), imov_total);
+		printf(_("%6d Total move immed.(w/stk mod) removed\n"), imov1_total);
+		printf(_("%6d Total redundant bra's removed\n"), bra_total);
+		printf(_("%6d Total pea's used (4 bytes)\n"), mv1_total);
+		printf(_("%6d Total pea's used (w/stk mod) (2 or 4 bytes)\n"), mv2_total);
+		printf(_("%6d Total adda.l's improved (2 bytes)\n"), adda_total);
+	}
 	
-	exit(EXIT_SUCCESS);
+	return EXIT_SUCCESS;
 }
