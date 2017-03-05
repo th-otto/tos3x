@@ -17,6 +17,8 @@
 #define	F_OK	0		/* Test for existence.  */
 #endif
 
+extern char **environ;
+
 int isatty PROTO((int fd));
 int isdev PROTO((int fd));
 char *ttyname PROTO((int fd));

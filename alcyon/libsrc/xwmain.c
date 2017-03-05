@@ -35,12 +35,14 @@
 #include <portab.h>
 #include <fcntl.h>
 #include <ostruct.h>
+#include <mint/basepage.h>
 
 
 int main PROTO((int argc, char **argv, char **envp));
 
 #define ISWHITE(ch) ((ch) == '\0' || isspace((UBYTE)ch))
 
+char **environ;
 
 static int argc;						/* Arg count */
 static char **argv;						/* -> array of pointers */
@@ -165,9 +167,26 @@ PP(int len;)								/* Command length */
 	register char *s;						/* Temp byte pointer */
 	register char *p;						/* Another "" */
 	register char c;						/* Character temp */
-
+	register BASEPAGE *bp;
+	
 	/* -> first free location */
-	argv2 = argv = (char **)sbrk(0);
+	environ = (char **)sbrk(0);
+	argv2 = environ;
+	bp = _base;
+	if ((p = bp->p_env) != NULL)
+	{
+		while (*p != '\0')
+		{
+			*argv2++ = p;
+			while (*p != '\0')
+				p++;
+			p++;
+		}
+	}
+	*argv2++ = NULL;
+	
+	/* -> first free location */
+	argv = argv2;
 	/* No args yet */
 	argc = 0;
 	addargv(__pname);
