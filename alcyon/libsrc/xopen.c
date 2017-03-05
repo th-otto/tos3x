@@ -41,6 +41,22 @@
 
 #define HIBIT 0x80
 
+char *_dosify(P(char *) s)
+PP(register char *s;)
+{
+	register char *ret;
+	
+	ret = s;
+	while (*s)
+	{
+		if (*s == '/')
+			*s = '\\';
+		s++;
+	}
+	return ret;
+}
+
+
 int __open(P(int) ch, P(const char *) filename, P(int) bdosfunc)
 PP(int ch;)								/* Channel number       */
 PP(register const char *filename;)						/* -> filename          */
@@ -58,7 +74,6 @@ PP(int bdosfunc;)							/* BDOS Function        */
 	{
 		register short mode;
 		register long dosfd;
-		register char *tmp;
 		char tmpbuf[128];
 		register size_t len;
 		
@@ -68,14 +83,7 @@ PP(int bdosfunc;)							/* BDOS Function        */
 			if (len < sizeof(tmpbuf))
 			{
 				strcpy(tmpbuf, filename);
-				tmp = tmpbuf;
-				filename = tmp;
-				while (*tmp)
-				{
-					if (*tmp == '/')
-						*tmp = '\\';
-					tmp++;
-				}
+				filename = _dosify(tmpbuf);
 			}
 		}
 		

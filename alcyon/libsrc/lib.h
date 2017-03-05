@@ -101,6 +101,7 @@ int _filbuf PROTO((FILE *));
 long _filesz PROTO((int fd));						/* computes CP/M file size  */
 char *_salloc PROTO((size_t size));					/* Stack allocation routine */
 int _flsbuf PROTO((int c, FILE *fp));
+char *_dosify PROTO((char *s));
 
 VOID blkmove PROTO((char *to, const char *from, size_t nn));
 
