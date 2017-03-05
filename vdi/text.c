@@ -1333,6 +1333,9 @@ VOID d_justified(NOTHING)
 			rmcharx = 0;
 			rmchary = ddirection;
 			break;
+#if BINEXACT
+			asm("ds.b 0"); /* prevent superfluous bra from being removed */
+#endif
 		}
 	} else
 	{
