@@ -34,6 +34,7 @@
 #include <ctype.h>
 #include <portab.h>
 #include <fcntl.h>
+#include <stdint.h>
 #include <ostruct.h>
 #include <mint/basepage.h>
 
@@ -48,6 +49,9 @@ static int argc;						/* Arg count */
 static char **argv;						/* -> array of pointers */
 static char **argv2;					/* Companion ptr to argv */
 
+#if 0
+#define STRICTLY_COMPATIBLE_WITH_STANDARD
+#endif
 
 /* Error routine */
 /* output directly to CON: */
@@ -172,143 +176,178 @@ PP(int len;)								/* Command length */
 	/* -> first free location */
 	environ = (char **)sbrk(0);
 	argv2 = environ;
+	/* No args yet */
+	argc = 0;
 	bp = _base;
 	if ((p = bp->p_env) != NULL)
 	{
 		while (*p != '\0')
 		{
-			*argv2++ = p;
-			while (*p != '\0')
-				p++;
-			p++;
-		}
-	}
-	*argv2++ = NULL;
-	
-	/* -> first free location */
-	argv = argv2;
-	/* No args yet */
-	argc = 0;
-	addargv(__pname);
-	for (s = com; *s; s += i)
-	{
-		/* Skip leading spaces */
-		while (*s && isspace((UBYTE)*s))
-			++s;
-		/* End of line? */
-		if (!*s)
-			break;
-		if (*s == '"' || *s == '\'')
-		{
-			/* Quoted string */
-			c = *s;
-			/* Find next */
-			p = strchr(s + 1, c);
-			if (p == NULL)
-				_err(s, ": unmatched quote");
-			/* Compute length */
-			i = (int) p - (long)s; /* BUG; truncating pointer to int */
-			s[i++] = '\0';
-			/* Add to arg list */
-			addargv(s + 1);
-		} else
-		{
-			/* How many characters? */
-			for (i = 0; !ISWHITE(s[i]); ++i)
-				;
-			/* If last is space, make it a null for C */
-			if (s[i])
-				s[i++] = '\0';
-			/* Now do i/o scan */
-			switch (*s)
+			if (p[0] == 'A' && p[1] == 'R' && p[2] == 'G' && p[3] == 'V' && p[4] == '=')
 			{
-			case '<':
-				/* Redirecting input */
-				close(STDIN);
-				if (open(s + 1, O_RDONLY | O_TEXT) != STDIN)
-					_err("Cannot open ", s + 1);
-				break;
-
-			case '>':
-				/* Redirecting output */
-				close(STDOUT);
-				if (s[1] == '>')
+				*p = '\0';
+				*argv2++ = NULL;
+#ifdef STRICTLY_COMPATIBLE_WITH_STANDARD
+				if (len != 127)
+					break;
+#endif
+				/* skip ARGV= string */
+				p += 5;
+				/* skip ARGV= value */
+				while (*p++ != '\0')
+					;
+				argv = argv2;
+				*argv2++ = p;
+				/* skip argv[0] */
+				while (*p++ != '\0')
+					;
+				argc++;
+				while (*p != '\0')
 				{
-					/* Appending, try to open old */
-					if (open(s + 2, O_WRONLY | O_TEXT | O_CREAT | O_APPEND) != STDOUT)
-						_err("Cannot append ", s + 1);
-				} else
-				{
-					/* Try to open new */
-					if (open(s + 1, O_WRONLY | O_CREAT | O_TRUNC | O_TEXT) != STDOUT)
-						_err("Cannot create ", s + 1);
+					*argv2++ = p;
+					argc++;
+					while (*p++ != '\0')
+						;
 				}
 				break;
-
-			default:
-
+			}
+			*argv2++ = p;
+			while (*p++ != '\0')
+				;
+		}
+	}
+	/* terminate environment */
+	*argv2++ = NULL;
+	
+	if (argc == 0)
+	{
+		/* -> first free location */
+		argv = argv2;
+		if (len > 126)
+			len = 126;
+		com[len] = '\0';
+		addargv(__pname);
+		for (s = com; *s; s += i)
+		{
+			/* Skip leading spaces */
+			while (*s && isspace((UBYTE)*s))
+				++s;
+			/* End of line? */
+			if (!*s)
+				break;
+			if (*s == '"' || *s == '\'')
+			{
+				/* Quoted string */
+				c = *s;
+				/* Find next */
+				p = strchr(s + 1, c);
+				if (p == NULL)
+					_err(s, ": unmatched quote");
+				/* Compute length */
+				i = (int)((intptr_t)p - (intptr_t)s);
+				s[i++] = '\0';
+				/* Add to arg list */
+				addargv(s + 1);
+			} else
+			{
+				/* How many characters? */
+				for (i = 0; !ISWHITE(s[i]); ++i)
+					;
+				/* If last is space, make it a null for C */
+				if (s[i])
+					s[i++] = '\0';
+				/* Now do i/o scan */
+				switch (*s)
+				{
+				case '<':
+					/* Redirecting input */
+					close(STDIN);
+					if (open(s + 1, O_RDONLY | O_TEXT) != STDIN)
+						_err("Cannot open ", s + 1);
+					break;
+	
+				case '>':
+					/* Redirecting output */
+					close(STDOUT);
+					if (s[1] == '>')
+					{
+						/* Appending, try to open old */
+						if (open(s + 2, O_WRONLY | O_TEXT | O_CREAT | O_APPEND) != STDOUT)
+							_err("Cannot append ", s + 1);
+					} else
+					{
+						/* Try to open new */
+						if (open(s + 1, O_WRONLY | O_CREAT | O_TRUNC | O_TEXT) != STDOUT)
+							_err("Cannot create ", s + 1);
+					}
+					break;
+	
+				default:
+	
 #ifndef NOWILD
-				if (strchr(s, '?') ||	/* Wild */
-					strchr(s, '*'))		/* Cards? */
-				{
+					if (strchr(s, '?') ||	/* Wild */
+						strchr(s, '*'))		/* Cards? */
+					{
 #if GEMDOS
-					DTA dta;
-					long res;
-					
-					__OSIF(SETDMA, &dta);
-					res = Fsfirst(s, 0);
-					if (res < 0)
-						_err(s, ": No match");
-					/* Do search next's */
-					while (res >= 0)
-					{
-						/* Allocate area */
-						p = _salloc(strlen(dta.d_fname) + 1);
-						/* Move in filename */
-						strcpy(p, dta.d_fname);
-						/* Add this file to argv */
-						addargv(p);
-						res = Fsnext();
-					}
+						DTA dta;
+						long res;
+						
+						__OSIF(SETDMA, &dta);
+						res = Fsfirst(s, 0);
+						if (res < 0)
+							_err(s, ": No match");
+						/* Do search next's */
+						while (res >= 0)
+						{
+							/* Allocate area */
+							p = _salloc(strlen(dta.d_fname) + 1);
+							/* Move in filename */
+							strcpy(p, dta.d_fname);
+							/* Add this file to argv */
+							addargv(p);
+							res = Fsnext();
+						}
 #else
-					FD *pfd;							/* File Desc temp */
-					char tmpbuf[30];					/* Filename temp */
-
-					/* Use unused channel */
-					pfd = _getccb(STDERR + 1);
-					/* Use buffer for DMA */
-					__OSIF(SETDMA, pfd->buffer);
-					/* Do the search */
-					c = jsfirst(s, 0);
-					if (c < 0)
-						_err(s, ": No match");
-					/* Do search next's */
-					while (c >= 0)
+						FD *pfd;							/* File Desc temp */
+						char tmpbuf[30];					/* Filename temp */
+	
+						/* Use unused channel */
+						pfd = _getccb(STDERR + 1);
+						/* Use buffer for DMA */
+						__OSIF(SETDMA, pfd->buffer);
+						/* Do the search */
+						c = jsfirst(s, 0);
+						if (c < 0)
+							_err(s, ": No match");
+						/* Do search next's */
+						while (c >= 0)
+						{
+							/* Convert file to ascii */
+							_toasc(pfd, c, tmpbuf);
+							/* Allocate area */
+							p = _salloc(strlen(tmpbuf) + 1);
+							/* Move in filename */
+							strcpy(p, tmpbuf);
+							/* Add this file to argv */
+							addargv(p);
+							c = jsnext();
+						}
+#endif
+					} else
+#endif
 					{
-						/* Convert file to ascii */
-						_toasc(pfd, c, tmpbuf);
-						/* Allocate area */
-						p = _salloc(strlen(tmpbuf) + 1);
-						/* Move in filename */
-						strcpy(p, tmpbuf);
-						/* Add this file to argv */
-						addargv(p);
-						c = jsnext();
+						/* save in argv */
+						addargv(s);
 					}
-#endif
-				} else
-#endif
-				{
-					/* save in argv */
-					addargv(s);
 				}
 			}
 		}
+		/* Insure terminator */
+		addargv(NULL);
+		/* Back off by 1 */
+		argc--;
 	}
-	/* Insure terminator */
-	addargv(NULL);
-	/* Back off by 1 */
-	argc--;
+	
 	/* Allocate the pointers */
 	if (brk((VOIDPTR)argv2) < 0)
 		_err("Stack Overflow", "");
