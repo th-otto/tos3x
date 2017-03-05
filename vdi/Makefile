@@ -327,7 +327,7 @@ vdiext.o: vdiext.S $(top_srcdir)/common/sections.inc
 #
 # sed: optimizer seems to have missed an add.l #4,(sp) in make_header()
 #
-text_306_sed=sed -e 's/add.l #4,(sp)/dc.w 22679/' $*.s > $*.1; mv $*.1 $*.s
+text_306_sed=$(SED) -e 's/add.l #4,(sp)/dc.w 22679/' $*.s > $*.1; mv $*.1 $*.s
 
 text.o: text.c
 	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
@@ -346,7 +346,7 @@ text.o: text.c
 #	$(AM_V_CC)${BIN}cp68${EXEEXT} ${CPPFLAGS} $*.c $*.i
 #	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
 #	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
-#	$(AM_V_at)sed -e 's/sub.l #8,(sp)/dc.w 20887/' \
+#	$(AM_V_at)$(SED) -e 's/sub.l #8,(sp)/dc.w 20887/' \
 #	    -e 's/sub.l #6,(sp)/dc.w 23959/' \
 #	    $*.s > $*.1; mv $*.1 $*.s
 #	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}

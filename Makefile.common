@@ -41,7 +41,6 @@ TOUCH = touch
 MKDIR = mkdir
 MKDIR_P = $(MKDIR) -p
 SED   = sed
-AWK   = awk
 
 CMP      = $(top_srcdir)/tools/cmprom$(BUILD_EXEEXT)
 MKGLUE   = $(top_srcdir)/tools/newglue$(BUILD_EXEEXT)

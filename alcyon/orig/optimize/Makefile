@@ -104,7 +104,7 @@ optimize.o: optimize.c fixnops$(EXEEXT)
 	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
 	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
 	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}
-	$(AM_V_at)sed -e 's/add.l #2,(sp)/dc.w 1687,0,2/' \
+	$(AM_V_at)$(SED) -e 's/add.l #2,(sp)/dc.w 1687,0,2/' \
 	    -e '/move.l \(_[a-z_]*\),R8/N' \
 	    -e '/move.l \(_[a-z_]*\),R8\nadd.l \(_[a-z_]*\),R8/N' \
 	    -e 's/move.l \(_[a-z_]*\),R8\nadd.l \(_[a-z_]*\),R8\ntst.b (R8)/dc.w 8313\ndc.l \1\ndc.w 8761\ndc.l \2\ndc.w 18992,6144/' \
@@ -152,7 +152,7 @@ xomain.o: xomain.c fixnops$(EXEEXT)
 	$(AM_V_at)${BIN}c068${EXEEXT} $*.i $*.1 $*.2 $*.3 ${CFLAGS}
 	$(AM_V_at)${BIN}c168${EXEEXT} $*.1 $*.2 $*.s
 	$(AM_V_at)${RUN_OPTIMIZE_${$*_OPTIMIZE}}
-	$(AM_V_at)sed -e '/move \(-[0-9]*\)(R14),R8/N' \
+	$(AM_V_at)$(SED) -e '/move \(-[0-9]*\)(R14),R8/N' \
 	    -e 's/move \(-[0-9]*\)(R14),R8\nmove.b -1(R13,R8),R0/dc.w 12334,\1,36988,1,18624,4149,2048/' \
 	    -e 's/sub #\([0-9]*\),\(-[0-9]*\)(R14)/dc.w 1134,\1,\2/' \
 	    -e 's/add #\([0-9]*\),\(-[0-9]*\)(R14)/dc.w 1646,\1,\2/' \
@@ -161,10 +161,6 @@ xomain.o: xomain.c fixnops$(EXEEXT)
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.s
 	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
 	.$(BS)fixnops$(EXEEXT) $@
-
-bla:
-	sed -e 's/sub.l #\([0-9]*\),\(-[0-9]*\)(R14)/dc.w 1198\ndc.l \1\ndc.w \2/' \
-	    optimize.s
 
 check::
 	cmp optimize$(EXEEXT) ${BIN}optimize$(EXEEXT)
