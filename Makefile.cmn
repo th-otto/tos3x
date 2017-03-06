@@ -53,7 +53,7 @@ MKROM    = $(top_srcdir)/tools/mkrom$(BUILD_EXEEXT)
 # It can be overridden by specifying foo_OPTIMIZE=0
 # for individual files.
 RUN_OPTIMIZE_0 = \#
-RUN_OPTIMIZE_1 = ${BIN}optimize${EXEEXT} $*.s > NUL:
+RUN_OPTIMIZE_1 = ${BIN}optimize${EXEEXT} -q $*.s
 RUN_OPTIMIZE_ = ${RUN_OPTIMIZE_1}
 
 .SUFFIXES: .c .S .s .o .oo

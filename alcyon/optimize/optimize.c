@@ -1724,11 +1724,16 @@ PP(register char **argv;)
 	{
 		Error(_("Initialization Failure !!!"));
 	}
+	
+	argv += argi;
+	argc -= argi;
+	argi = 0;
 	while (argi < argc)
 	{
 		if (open_file(argv[argi]))
 		{
-			printf(" %d.    %s.\n", argi, argv[argi]);
+			if (!quiet)
+				printf(" %d.    %s.\n", argi, argv[argi]);
 			do_optimize();
 			close_file(argv[argi]);
 		}

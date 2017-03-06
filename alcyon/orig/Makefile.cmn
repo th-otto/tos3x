@@ -38,7 +38,7 @@ LDFLAGS=
 # It can be overridden by specifying foo_OPTIMIZE=0
 # for individual files.
 RUN_OPTIMIZE_0 = \#
-RUN_OPTIMIZE_1 = ${BIN}optimize${EXEEXT} $*.s > NUL: ; $(SED) -e 's/move.l #$$[0],-(sp)/clr.l -(sp)/' $*.s > $*.1; mv $*.1 $*.s
+RUN_OPTIMIZE_1 = ${BIN}optimize${EXEEXT} $*.s; $(SED) -e 's/move.l #$$[0],-(sp)/clr.l -(sp)/' $*.s > $*.1; mv $*.1 $*.s
 RUN_OPTIMIZE_ = ${RUN_OPTIMIZE_0}
 
 .c.o:
