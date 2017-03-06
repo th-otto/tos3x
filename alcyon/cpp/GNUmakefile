@@ -1,8 +1,8 @@
 top_srcdir=..
 subdir=cpp
 
-include ../GNUmakefile.common
-include ../Makefile.silent
+include ../GNUmakefile.cmn
+include ../Makefile.sil
 include SRCFILES
 
 LIBS =

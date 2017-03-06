@@ -1,8 +1,8 @@
 top_srcdir=..
 subdir=glue
 
-include $(top_srcdir)/Makefile.common
-include $(top_srcdir)/Makefile.silent
+include $(top_srcdir)/Makefile.cmn
+include $(top_srcdir)/Makefile.sil
 
 IMG = tos$(TOSVERSION)$(COUNTRY).img
 

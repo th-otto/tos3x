@@ -1,8 +1,8 @@
 top_srcdir=..
 subdir=desk
 
-include $(top_srcdir)/Makefile.common
-include $(top_srcdir)/Makefile.silent
+include $(top_srcdir)/Makefile.cmn
+include $(top_srcdir)/Makefile.sil
 include optimize.mak
 
 all: $(top_srcdir)/common/config.h desk.a desk.o

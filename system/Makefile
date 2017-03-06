@@ -1,5 +1,5 @@
-include ../Makefile.common
-include ../Makefile.silent
+include ../Makefile.cmn
+include ../Makefile.sil
 
 cache100_ASFLAGS = -n
 cache100_old_ASFLAGS = -n

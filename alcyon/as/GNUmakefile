@@ -4,8 +4,8 @@ subdir=as
 # 
 # cross compiling
 #
-include ../GNUmakefile.common
-include ../Makefile.silent
+include ../GNUmakefile.cmn
+include ../Makefile.sil
 
 PROGRAMS = as68$(EXEEXT)
 

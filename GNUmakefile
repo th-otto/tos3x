@@ -1,15 +1,15 @@
-include GNUmakefile.common
-include Makefile.silent
+include GNUmakefile.cmn
+include Makefile.sil
 
 SUBDIRS = common bios vdi bdos aes desk tools system glue
 EXTRA_SUBDIRS = alcyon alcyon/orig
 
 EXTRA_DIST = \
 	GNUmakefile \
-	GNUmakefile.common \
+	GNUmakefile.cmn \
 	Makefile \
-	Makefile.common \
-	Makefile.silent \
+	Makefile.cmn \
+	Makefile.sil \
 	config.mak \
 	README \
 	$(empty)

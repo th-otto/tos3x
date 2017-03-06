@@ -1,5 +1,5 @@
-include ../Makefile.common
-include ../Makefile.silent
+include ../Makefile.cmn
+include ../Makefile.sil
 
 inst_PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT)
 PROGRAMS = $(inst_PROGRAMS) analyze$(EXEEXT)

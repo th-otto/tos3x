@@ -4,8 +4,8 @@ subdir=parser
 # 
 # cross compiling
 #
-include ../GNUmakefile.common
-include ../Makefile.silent
+include ../GNUmakefile.cmn
+include ../Makefile.sil
 
 PROGRAMS = c068$(EXEEXT)
 

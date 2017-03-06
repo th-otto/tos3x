@@ -1,8 +1,8 @@
 top_srcdir=..
 subdir=tools
 
-include $(top_srcdir)/GNUmakefile.common
-include $(top_srcdir)/Makefile.silent
+include $(top_srcdir)/GNUmakefile.cmn
+include $(top_srcdir)/Makefile.sil
 
 LIBS =
 

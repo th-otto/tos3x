@@ -7,8 +7,8 @@ subdir=libsrc
 EVAL_CROSS := case `uname -s` in *MiNT*|*TOS*) echo no;; *) echo yes; esac
 CROSS := $(shell $(EVAL_CROSS))
 
-include ../GNUmakefile.common
-include ../Makefile.silent
+include ../GNUmakefile.cmn
+include ../Makefile.sil
 
 CPPFLAGS = -I ../include -I $(INC)
 CFLAGS = $(OPTS) $(WARN)

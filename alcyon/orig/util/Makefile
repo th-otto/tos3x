@@ -1,5 +1,5 @@
-include ../Makefile.common
-include ../Makefile.silent
+include ../Makefile.cmn
+include ../Makefile.sil
 
 PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT) ar68$(EXEEXT)
 LIBS = ${LIBC}

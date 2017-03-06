@@ -1,8 +1,8 @@
 top_srcdir=..
 subdir=common
 
-include $(top_srcdir)/GNUmakefile.common
-include $(top_srcdir)/Makefile.silent
+include $(top_srcdir)/GNUmakefile.cmn
+include $(top_srcdir)/Makefile.sil
 
 all: $(top_srcdir)/common/sections.mak
 

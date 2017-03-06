@@ -4,8 +4,8 @@ subdir=cgen
 # 
 # cross compiling
 #
-include ../GNUmakefile.common
-include ../Makefile.silent
+include ../GNUmakefile.cmn
+include ../Makefile.sil
 
 PROGRAMS = c168$(EXEEXT)
 

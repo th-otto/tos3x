@@ -1,5 +1,5 @@
-include ../Makefile.common
-include ../Makefile.silent
+include ../Makefile.cmn
+include ../Makefile.sil
 
 PROGRAMS = as68$(EXEEXT)
 LIBS = ${LIBC}

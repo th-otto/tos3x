@@ -4,8 +4,8 @@ subdir=link68
 # 
 # cross compiling
 #
-include ../GNUmakefile.common
-include ../Makefile.silent
+include ../GNUmakefile.cmn
+include ../Makefile.sil
 
 CPPFLAGS = -I ../common -I $(INC) -DGEMDOS
 CFLAGS = $(OPTS) $(WARN)

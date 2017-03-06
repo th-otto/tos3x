@@ -4,8 +4,8 @@ subdir=optimize
 # 
 # cross compiling
 #
-include ../GNUmakefile.common
-include ../Makefile.silent
+include ../GNUmakefile.cmn
+include ../Makefile.sil
 
 CPPFLAGS = -I ../common -I $(INC)
 CFLAGS = $(OPTS) $(WARN)

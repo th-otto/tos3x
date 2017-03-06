@@ -7,8 +7,8 @@ subdir=bdos
 EVAL_CROSS := case `uname -s` in *MiNT*|*TOS*) echo no;; *) echo yes; esac
 CROSS := $(shell $(EVAL_CROSS))
 
-include $(top_srcdir)/GNUmakefile.common
-include $(top_srcdir)/Makefile.silent
+include $(top_srcdir)/GNUmakefile.cmn
+include $(top_srcdir)/Makefile.sil
 
 CC += -mshort
 

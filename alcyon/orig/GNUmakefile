@@ -1,13 +1,13 @@
-include GNUmakefile.common
-include Makefile.silent
+include GNUmakefile.cmn
+include Makefile.sil
 
 SUBDIRS = libsrc as cgen cp68 link68 optimize parser util
 
 EXTRA_DIST = \
 	GNUmakefile \
-	GNUmakefile.common \
-	Makefile.common \
-	Makefile.silent \
+	GNUmakefile.cmn \
+	Makefile.cmn \
+	Makefile.sil \
 	functions.sh \
 	README \
 	$(empty)
