@@ -63,32 +63,32 @@ PP(struct tnode *tp;)
 	if (!tp)
 		return;
 
-	oprintf("%x.%x", tp->t_op, tp->t_type);
+	oprintf("%X.%X", tp->t_op, tp->t_type);
 
 	switch (tp->t_op)
 	{
 	case CINT:
-		oprintf(".%x\n", ((struct conode *) tp)->t_value);
+		oprintf(".%X\n", ((struct conode *) tp)->t_value);
 		break;
 
 	case CLONG:
 		w1 = ((struct lconode *) tp)->_l.w.hiword;
 		w2 = ((struct lconode *) tp)->_l.w.loword;
-		oprintf(".%x.%x\n", w1, w2);
+		oprintf(".%X.%X\n", w1, w2);
 		break;
 
 	case CFLOAT:
 		w1 = ((struct lconode *) tp)->_l.w.hiword;
 		w2 = ((struct lconode *) tp)->_l.w.loword;
-		oprintf(".%x.%x\n", w1, w2);
+		oprintf(".%X.%X\n", w1, w2);
 		break;
 
 	case SYMBOL:
-		oprintf(".%x", ((struct symnode *) tp)->t_sc);
+		oprintf(".%X", ((struct symnode *) tp)->t_sc);
 		if (((struct symnode *) tp)->t_sc == EXTERNAL)
 			oprintf(".%.*s\n", SSIZE, ((struct extnode *) tp)->t_symbol);
 		else
-			oprintf(".%x\n", ((struct symnode *) tp)->t_offset);
+			oprintf(".%X\n", ((struct symnode *) tp)->t_offset);
 		break;
 
 	case 0:
@@ -97,7 +97,7 @@ PP(struct tnode *tp;)
 
 	case IFGOTO:
 	case BFIELD:
-		oprintf(".%x\n", tp->t_dp);
+		oprintf(".%X\n", tp->t_dp);
 		outtree(tp->t_left);
 		break;
 

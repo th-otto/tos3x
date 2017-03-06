@@ -31,7 +31,7 @@ VOID outline(NOTHING)
 {
 	if (!bol)
 		oputchar('\n');
-	oprintf(".%x.%s\n", lineno, source);
+	oprintf(".%X.%s\n", lineno, source);
 	lst_ln_id = lineno;
 }
 
@@ -69,7 +69,7 @@ PP(int value;)
 		defbdata();
 	else
 		defwdata();
-	oprintf("$%x\n", value);
+	oprintf("$%X\n", value);
 }
 
 
@@ -278,7 +278,7 @@ PP(int w;)
 	if (begseq)
 		oputchar(',');
 	begseq++;
-	oprintf("$%x", w);
+	oprintf("$%X", w);
 }
 
 

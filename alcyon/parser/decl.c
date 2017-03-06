@@ -453,7 +453,7 @@ PP(long *ptsize;)
 PP(short *pdtype;)
 {
 	struct symbol *sp;
-	char sym[8];
+	char sym[SSIZE];
 	register short token, stdflag, sbits, fake;
 
 	stdflag = tdflag;
@@ -898,7 +898,7 @@ PP(int castflg;)							/* casting flag, 1=>allow no declarator */
 						break;
 				}
 				indecl--;				/* must not confuse, we are in decls */
-				fp->f_sp = 0;
+				fp->f_sp = NULL;
 			}
 			if (!next(RPAREN))
 				break;

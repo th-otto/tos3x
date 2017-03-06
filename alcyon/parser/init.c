@@ -20,7 +20,6 @@ short lst_boffset;						/* new bit field entity ?? */
 #define BCHK(plus) {plus = out_bfield(CHAR); nbout += plus; nbleft += plus;}
 
 
-
 #define COPY(c,s) c = s
 #define HCOPY(c,s) c = s
 #define BASIC_AR(x) (x==(ARRAY|CHAR)||x==(ARRAY|INT)||x==(ARRAY|LONG))
@@ -88,7 +87,8 @@ PP(int type;)								/* type of initializer */
 PP(int dp;)
 PP(int sc;)									/* for bit field init */
 {
-	register short op, plus, ivalue;
+	register short op, plus;
+	register unsigned short ivalue;
 	register struct tnode *tp;
 	register long value;
 
@@ -142,7 +142,7 @@ PP(int sc;)									/* for bit field init */
 			if (initdebug)
 				fprintf(stderr, "ivalue %d\n", ivalue);
 #endif
-			if ((ivalue > 255) || (ivalue < -128))
+			if (ivalue > 255 || ivalue < -128)
 				warning(_("initializer truncated"));
 			return 1 + plus;
 		}
@@ -160,7 +160,7 @@ PP(int sc;)									/* for bit field init */
 			if (ccbytes < 2)
 			{
 				outc(CHAR, ((int) ivalue) & 0xff);
-				if ((ivalue > 255) || (ivalue < -128))
+				if (ivalue > 255 || ivalue < -128)
 					warning(_("initializer truncated"));
 				return 1 + plus;
 			} else
@@ -177,7 +177,7 @@ PP(int sc;)									/* for bit field init */
 			break;
 		if (op == CINT || op == CLONG)
 		{
-			outc(INT, (int) value);
+			outc(INT, ivalue);
 			if ((value & 0xffff0000) && ((value & 0xffff0000) != 0xffff0000))
 				warning(_("initializer truncated"));
 		} else
@@ -558,7 +558,7 @@ PP(struct symbol *sp;)						/* pointer to symbol to init */
 		isize = WALIGN(datasize);
 #ifdef DEBUG
 		if (initdebug)
-			fprintf(stderr, "%s sc %x attrib %x\n", sp->s_symbol, sp->s_sc, sp->s_attrib);
+			fprintf(stderr, "%s sc %X attrib %X\n", sp->s_symbol, sp->s_sc, sp->s_attrib);
 #endif
 		if (sp->s_sc == EXTERNAL)
 			OUTCOMMON(sp->s_symbol, isize);

@@ -87,7 +87,7 @@ static char const asmap[] = {
 	EQDIV,							/* /= */
 	EQOR,							/* |= */
 	EQXOR,							/* ^= */
-	EQMOD,							/* %= */
+	EQMOD							/* %= */
 };
 
 static short pbchar;								/* pushed back character */
@@ -587,9 +587,17 @@ int ngetch(NOTHING)
 	}
 
 	c = getc(ifil);
-	if (c == '\r')
+	if (c == 0x0d)
+	{
 		c = getc(ifil);
-	if (c == '\n')
+		if (c != 0x0a)
+		{
+			if (c != EOF)
+				putback(c);
+		}
+		c = EOLC;
+	}
+	if (c == EOLC)
 	{
 		if (lst_ln_id != lineno && instmt)
 		{
@@ -601,7 +609,7 @@ int ngetch(NOTHING)
 	} else if (cr_last && c == '#')
 	{
 		/* handle: # 33 "file.h" */
-		c = getc(ifil);
+		c = getc(ifil);					/* get space */
 		if (c != ' ')
 			putback(c);
 		lineno = getdec() & 077777;

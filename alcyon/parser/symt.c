@@ -104,7 +104,7 @@ PP(int stel;)								/* structure element flag */
  */
 struct symbol *install(P(const char *) sym, P(int) attrib, P(int) offset)
 PP(const char *sym;)						/* symbol to install */
-PP(int attrib;)								/* attribues of symbol */
+PP(int attrib;)								/* attributes of symbol */
 PP(int offset;)								/* symbol offset (resword value) */
 {
 	register struct symbol *sp;

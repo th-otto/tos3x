@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 #define NOPROFILE
-#define DEBUG
+/* #define DEBUG */
 
 #include "icode.h"
 

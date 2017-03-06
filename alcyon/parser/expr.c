@@ -433,7 +433,8 @@ PP(struct lconode *rtp;)					/* pointer to right subtree */
 				rvalue *= size;
 			}
 #ifdef DEBUG
-			warning(_("constant coerced"));
+			if (treedebug)
+				warning(_("constant coerced"));
 #endif
 		}
 		lvalue = ltp->t_lvalue;
