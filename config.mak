@@ -59,5 +59,5 @@ $(top_srcdir)/common/config.h: $(top_srcdir)/config.mak ${MAKEFILE}
 $(top_srcdir)/common/sections.mak: $(top_srcdir)/common/sections.inc $(top_srcdir)/common/config.h
 	$(AM_V_GEN)$(CPP) -D__MAKEFILE__ $(top_srcdir)${BS}common${BS}sections.inc $(CPPOUT) sections.i
 	$(AM_V_at)$(SED) -e 's/$(QBS)$$//g' -e '//d' sections.i > sections.1
-	$(AM_V_at)bc -q < sections.1 > $@
+	$(AM_V_at)$(BC) -q < sections.1 > $@
 	$(AM_V_at)$(RM) sections.i sections.1

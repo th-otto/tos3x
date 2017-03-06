@@ -1,12 +1,16 @@
-*****************************************************************
+******************************************************************************
 * Directory Structure
-*****************************************************************
+******************************************************************************
 
 bin:
   Prebuild binaries of tools used in the build process. These are
   essentially identical to the ones from the developer kit, with 
   modifications as described in alcyon/README. Sources of almost
   all of these tools are found in the alcyon directory.
+
+  It also contains a few tools that are not part of the developer-kit,
+  but are now used in the build process (sed, rm, mv and bc). Those
+  are taken from GNU packages.
 
 include:
   Include files for the C compiler. Only a few of them are actually
@@ -15,7 +19,7 @@ include:
 
 lib:
   Prebuild libraries and startup files for the C runtime library.
-  None of these is used to build a ROM image.
+  None of these is linked into a ROM image, they are only used for the tools.
 
 doc:
   Some unsorted documentation.
@@ -65,9 +69,9 @@ alcyon/orig:
   identical versions of the ones found in the developer kit.
 
 
-*****************************************************************
+******************************************************************************
 * Assembler sources
-*****************************************************************
+******************************************************************************
 
 - Assembler sources are written in a format that is accepted
   both by as68 and by the GNU assembler with the --mri option.
@@ -93,16 +97,16 @@ alcyon/orig:
   to numerous bugs. Either use the fixed version from the bin
   directory or try some other assembler.
 
-*****************************************************************
+******************************************************************************
 * Supported versions
-*****************************************************************
+******************************************************************************
 
 BIOS, VDI, GEMDOS, AES, DESKTOP: 2.06, 2.08, 3.06
 2.08 is 2.06 modified for ST-Book, it identifies itself as 2.06 though
 
-*****************************************************************
+******************************************************************************
 * Supported language versions
-*****************************************************************
+******************************************************************************
 
 us - USA
 de - Germany
@@ -117,3 +121,51 @@ sf - Switzerland (French) (uses french keyboard and resources)
 sg - Switzerland (German) (uses german keyboard and resources)
 
 pl - Poland (only unofficial version 3.06 found on the net)
+
+******************************************************************************
+* How to compile
+******************************************************************************
+
+First off to clarify: the goal of this project was to actually be able to
+regenerate the original ROM images. Most parts of the sources used herein were
+already available before, but scattered around in several archives, and most
+of the time incomplete so they could be used for illustratve purposes at best.
+They are not meant to be a base for serious further development, the Alcyon
+compiler tools that were originally used are just too outdated and buggy.
+
+Having that said, if you still feeling adventurous and want to try to compile
+it yourself, you will need
+
+- unpack the archive in some directory of your choice. All pathnames used
+  in the makefiles are relative, so its name does not matter.
+
+- install some shell. In my case i used GEMINI (unfortunately german only).
+  bash might work, but some of the tools will have problems with MiNT which
+  bash requires.
+
+- cd to the toplevel directory
+
+- make sure the bin directory from the archive is on your PATH:
+  PATH=$PWD\bin,$PATH
+  (for gemini/mupfel; other shells might use ';' as path separator)
+
+- type "make"
+  This should build the default configuration (german TOS 3.06).
+  If the build succeeds, the final image will be found in the "glue" directory.
+
+- for building other configurations, you can say e.g.
+  make TOSVERSION=206 COUNTRY=us
+  Alternatively, you can edit config.mak in the toplevel directory.
+  See there also for a list of valid configurations.
+  Also, when switching configurations, always make sure to run
+  make clean
+  first.
+  IF you pass the configuration via commandline, be sure to always
+  use the same command when having to restart make.
+
+- There might currently be some issues with \ vs / in pathnames. If
+  that is the case, try to run it using some emulator. Hatari
+  (https://hatari.tuxfamily.org/) is reported to work.
+
+- There might be some more hints available on
+  http://www.atari-forum.com/viewforum.php?f=16

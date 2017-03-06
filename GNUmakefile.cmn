@@ -55,6 +55,7 @@ TOUCH = touch
 MKDIR = mkdir
 MKDIR_P = $(MKDIR) -p
 SED   = sed
+BC    = bc
 
 CMP      = $(top_srcdir)/tools/cmprom$(BUILD_EXEEXT)
 MKGLUE   = $(top_srcdir)/tools/newglue$(BUILD_EXEEXT)

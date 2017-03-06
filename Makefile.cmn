@@ -40,7 +40,8 @@ RM    = rm -f
 TOUCH = touch
 MKDIR = mkdir
 MKDIR_P = $(MKDIR) -p
-SED   = sed
+SED   = ${BIN}sed
+BC    = ${BIN}bc
 
 CMP      = $(top_srcdir)/tools/cmprom$(BUILD_EXEEXT)
 MKGLUE   = $(top_srcdir)/tools/newglue$(BUILD_EXEEXT)
