@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include "../util/util.h"
 
+#define BINEXACT 1
+
 #include "icode.h"
 #include "cskel.h"
 
@@ -172,10 +174,20 @@ extern short stacksize;
 
 /* one line routines turned into defines for speed */
 
+#if BINEXACT
+/*
+ * Note: these two macros are actually buggy and create side-effects
+ * when used in codegen.c, but can't be fixed when we want o
+/* outgoto - output "bra L[labno]" */
+#define OUTGOTO(lab)	if (lab > 0) oprintf("bra L%d\n",lab)
+/* outlab - output "L[labno]:" */
+#define OUTLAB(lab)		if (lab > 0) oprintf("L%d:",lab)
+#else
 /* outgoto - output "bra L[labno]" */
 #define OUTGOTO(lab)	if ((lab) > 0) oprintf("bra L%d\n",lab)
 /* outlab - output "L[labno]:" */
 #define OUTLAB(lab)		if ((lab) > 0) oprintf("L%d:",lab)
+#endif
 
 /* outext - output register sign extension */
 #define OUTEXT(reg)		oprintf("ext.l R%d\n",reg)

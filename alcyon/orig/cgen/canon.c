@@ -833,8 +833,10 @@ PP(short *lconst;)
 }
 
 
-/* indexreg - returns whether node is an address register */
-/*      For 68000, must be an A register */
+/*
+ * indexreg - returns whether node is an address register
+ * For 68000, must be an A register
+ */
 int indexreg(P(struct tnode *) tp)							/* returns whether node is A reg */
 PP(struct tnode *tp;)
 {
