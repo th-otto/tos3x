@@ -55,3 +55,13 @@ aln:
     -x <file>                include all modules from archive
     -c <file>                command file
     
+ar68: flags [pos] archive file1 file2 ...
+    d                        Delete the specified files from the archive
+    p                        Print the specified files
+    r                        Replace the specified files
+    t                        Print a table of contents of the archive
+    x                        Extract the specified files from the archive
+    a pos                    insert files after the file "pos" 
+    b pos                    insert files before the file "pos" 
+    i pos                    same as b
+    v                        verbose

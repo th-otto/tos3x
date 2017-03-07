@@ -13,7 +13,7 @@ VOID outinit(P(struct tnode *) tp, P(int) type)
 PP(struct tnode *tp;)
 PP(int type;)
 {
-#ifdef __ALCYON__
+#if BINEXACT
 	/* BUG: missing argument to tnalloc */
 	outexpr(tnalloc(INIT, type, 0, 0, tp));
 #else
@@ -25,7 +25,7 @@ PP(int type;)
 VOID outcforreg(P(struct tnode *) tp)
 PP(struct tnode *tp;)
 {
-#ifdef __ALCYON__
+#if BINEXACT
 	/* BUG: missing argument to tnalloc */
 	outexpr(tnalloc(CFORREG, tp->t_type, 0, 0, tp));
 #else
@@ -39,7 +39,7 @@ PP(struct tnode *tp;)
 PP(int dir;)
 PP(int lab;)
 {
-#ifdef __ALCYON__
+#if BINEXACT
 	/* BUG: missing argument to tnalloc */
 	outexpr(tnalloc(IFGOTO, dir, lab, 0, tp));
 #else

@@ -20,7 +20,7 @@ PP(int size;)
 
 	p = opap;
 	if ((p + size) >= &exprarea[EXPSIZE])
-		ferror("expression too complex");
+		ferror(_("expression too complex"));
 	opap = p + size;
 	return p;
 }
@@ -169,7 +169,7 @@ VOID pushopd(P(VOIDPTR ) tp)
 PP(VOIDPTR tp;)						/* pointer to tree node to push */
 {
 	if (opdp >= &opdstack[OPDSIZE])
-		ferror("expression too complex");
+		ferror(_("expression too complex"));
 	*opdp++ = tp;
 }
 

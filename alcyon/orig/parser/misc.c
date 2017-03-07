@@ -45,7 +45,7 @@ PP(int nsptype;)							/* special type to be added */
 	dtype = BTYPE(type);
 	type &= (~TYPE);
 	if (type & (0xc000 >> SUTYPLEN))	/* 4.3, top type field full */
-		error("arrays limited to five dimensions");
+		error(_("arrays limited to five dimensions"));
 	else
 		type <<= SUTYPLEN;
 	return type | SUPTYPE(nsptype) | dtype;
@@ -98,7 +98,7 @@ PP(int offset;)								/* current structure offset */
 
 	if (flen <= 0)
 	{
-		error("invalid field size");
+		error(_("invalid field size"));
 		flen = 0;
 	}
 	switch (type)
@@ -106,7 +106,7 @@ PP(int offset;)								/* current structure offset */
 	case INT:
 	case UNSIGNED:
 		if (flen > BITSPWORD)
-			error("field overflows word");
+			error(_("field overflows word"));
 		if ((flen + boffset) > BITSPWORD)
 			off = CHRSPWORD;
 		else
@@ -116,12 +116,12 @@ PP(int offset;)								/* current structure offset */
 	case CHAR:
 	case UCHAR:
 		if (flen > BITSPCHAR)
-			error("field overflows byte");
+			error(_("field overflows byte"));
 		off = ((flen + boffset) > BITSPCHAR);
 		break;
 
 	default:
-		error("invalid field type description");
+		error(_("invalid field type description"));
 		return 0;
 
 	}
@@ -164,7 +164,7 @@ int delspchk(P(int) type)
 PP(int type;)								/* type to modify */
 {
 	if (!(SUPTYPE(type)))
-		error("bad indirection");
+		error(_("bad indirection"));
 	return delsp(type);
 }
 
@@ -264,7 +264,7 @@ PP(int sp;)									/* size POINTER if structure */
 	}
 #endif
 	if (!size)
-		error("invalid data type");
+		error(_("invalid data type"));
 	return size * nel;
 }
 
@@ -281,5 +281,5 @@ PP(int atype;)								/* alternate type allowable */
 
 	type = tp->t_type;
 	if (type != INT && type != UNSIGNED && type != CHAR && type != UCHAR && !SUPTYPE(type) && type != atype)
-		warning("integral type expected");	/* "invalid operand type" */
+		warning(_("integral type expected"));	/* "invalid operand type" */
 }

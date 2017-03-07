@@ -176,7 +176,7 @@ static strtol_error bkm_scale_by_power(__strtol_t * x, int base, int power)
 }
 
 
-static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __strtol_t * val, const char *val_suffixes)
+static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __strtol_t *val, const char *val_suffixes)
 {
 	char *t_ptr;
 	char **p;
@@ -335,7 +335,7 @@ static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __str
    *followed by DELIMITER; otherwise it must be null-terminated.  */
 static void specify_ignore_initial(int f, char **argptr, char delimiter)
 {
-	uintmax_t val;
+	__strtol_t val;
 	char const *arg = *argptr;
 	strtol_error e = xstrtoumax (arg, argptr, 0, &val, valid_suffixes);
 	
@@ -348,7 +348,7 @@ static void specify_ignore_initial(int f, char **argptr, char delimiter)
 
 static void specify_offset(int f, char **argptr, char delimiter)
 {
-	uintmax_t val;
+	__strtol_t val;
 	char const *arg = *argptr;
 	strtol_error e = xstrtoumax (arg, argptr, 0, &val, valid_suffixes);
 	
@@ -896,7 +896,7 @@ int main(int argc, char **argv)
 
 		case 'n':
 			{
-				uintmax_t n;
+				__strtol_t n;
 
 				if (xstrtoumax(optarg, 0, 0, &n, valid_suffixes) != LONGINT_OK)
 					try_help(_("invalid --bytes value '%s'"), optarg);

@@ -54,7 +54,7 @@ VOID stmt(NOTHING)
 				stmt();
 			}
 		case CEOF:
-			error("{ not matched by }");
+			error(_("{ not matched by }"));
 		case SEMI:						/* null statement */
 			return;
 
@@ -136,16 +136,16 @@ VOID stmt(NOTHING)
 			case R_STRUCT:
 			case R_UNION:
 			case R_REGISTER:
-				synerr("invalid declaration");
+				synerr(_("invalid declaration"));
 				return;
 
 			default:
-				synerr("invalid keyword");
+				synerr(_("invalid keyword"));
 				return;
 			}
 		}
 		if (!next(SEMI))
-			synerr("missing semicolon");
+			synerr(_("missing semicolon"));
 		return;
 	}
 }
@@ -168,7 +168,7 @@ struct tnode *balpar(NOTHING)
 		if (next(RPAREN))
 			return tp;
 	}
-	synerr("parenthesized expression syntax");
+	synerr(_("parenthesized expression syntax"));
 	return NULL;
 }
 
@@ -183,7 +183,7 @@ int gotolabel(NOTHING)
 	register struct symbol *sp;
 
 	if (!next(SYMBOL))
-		synerr("expected label");
+		synerr(_("expected label"));
 	else
 	{
 		sp = csp;
@@ -206,7 +206,7 @@ int gotolabel(NOTHING)
 		}
 		if ((!sp->s_sc || sp->s_sc == STATIC) && sp->s_type == LLABEL)
 			return sp->s_offset;
-		synerr("invalid label");
+		synerr(_("invalid label"));
 	}
 	return 0;
 }
@@ -226,7 +226,7 @@ VOID dolabel(NOTHING)
 	{
 		if (sp->s_scope == FUNC_SCOPE)
 		{								/* truly redefined !!!! */
-			error("label redeclaration: %.8s", sp->s_symbol);
+			error(_("label redeclaration: %.8s"), sp->s_symbol);
 			return;
 		}
 		csp = lookup(sp->s_symbol, 1);	/* force individual entry */
@@ -251,7 +251,7 @@ VOID dolabel(NOTHING)
 int brklabel(NOTHING)
 {
 	if (!blabel)
-		error("invalid break statement");
+		error(_("invalid break statement"));
 	return blabel;
 }
 
@@ -264,7 +264,7 @@ int brklabel(NOTHING)
 int contlabel(NOTHING)
 {
 	if (!clabel)
-		error("invalid continue statement");
+		error(_("invalid continue statement"));
 	return clabel;
 }
 
@@ -282,10 +282,10 @@ VOID docase(NOTHING)
 	value = cexpr();					/* get case value */
 	colonstop--;
 	if (!next(COLON))					/* check for colon */
-		synerr("missing colon");
+		synerr(_("missing colon"));
 	if (swp < 0)
 	{
-		error("case not inside a switch block");
+		error(_("case not inside a switch block"));
 	} else if (swp >= (SWSIZE - 1))
 	{
 		error(_("too many cases in switch"));
@@ -308,9 +308,9 @@ VOID docase(NOTHING)
 VOID dodefault(NOTHING)
 {
 	if (!next(COLON))
-		error("missing colon");
+		error(_("missing colon"));
 	if (swp < 0)
-		error("default not inside a switch block");
+		error(_("default not inside a switch block"));
 	else
 	{
 		dlabel = nextlabel++;			/* allocate default label */
@@ -334,7 +334,7 @@ VOID dodo(NOTHING)
 	OUTLAB(clabel);						/* continue label */
 	if (!nextrw(R_WHILE))
 	{
-		warning("missing while");		/* only advisory... */
+		warning(_("missing while"));		/* only advisory... */
 		OUTGOTO(lab);
 	} else
 		outifgoto(balpar(), TRUE, lab);	/* while expression */
@@ -357,7 +357,7 @@ VOID dofor(NOTHING)
 	register char *savep;
 	short rinit, clno, iscond;
 
-#ifndef __ALCYON__
+#if !BINEXACT
 	testlab = 0; /* quiet compiler */
 	cp = NULL;
 #endif
@@ -370,7 +370,7 @@ VOID dofor(NOTHING)
 		if (symdebug)
 			printf("invalid for... commastop is %d", commastop);
 #endif
-		synerr("invalid for statement");
+		synerr(_("invalid for statement"));
 		return;
 	}
 	if (!next(SEMI))
@@ -456,7 +456,7 @@ VOID doif(NOTHING)
 	{									/* easy goto, do branch if true */
 		outifgoto(tp, TRUE, exitlab);
 		if (!next(SEMI))
-			synerr("missing semicolon");
+			synerr(_("missing semicolon"));
 		if (nextrw(R_ELSE))				/* else clause, just output it */
 			stmt();
 	} else
@@ -516,7 +516,7 @@ VOID doasm(NOTHING)
 				return;
 			}
 	}
-	synerr("illegal asm syntax");
+	synerr(_("illegal asm syntax"));
 }
 
 
@@ -628,7 +628,7 @@ PP(int nlab;)								/* new label */
 	{
 		if (s->sw_value == nswp->sw_value)
 		{
-			error("duplicate case value");
+			error(_("duplicate case value"));
 			return 0;					/* don't add it in !!!! */
 		}
 		if (s->sw_value < nswp->sw_value)

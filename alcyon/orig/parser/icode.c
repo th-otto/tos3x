@@ -262,7 +262,7 @@ PP(const char *fname;)
 
 	close(fileno(&sbuf));
 	if (fopen(fname, &sbuf, 0) < 0)		/* 3rd arg for versados */
-		ferror("can't copy %s", fname);
+		ferror(_("can't copy %s"), fname);
 	while ((c = getc(&sbuf)) > 0)
 		putc(c, &obuf);
 	v6flush(&obuf);
@@ -346,7 +346,7 @@ PP(long strsize;)
 	if (maxsize > strsize)
 		OUTRESMEM((long) (maxsize - strsize));
 	else if (maxsize && (strsize > maxsize))
-		warning("String initalizer truncated");
+		warning(_("String initalizer truncated"));
 	return LMAX(strsize, maxsize);
 
 }

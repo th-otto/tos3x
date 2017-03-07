@@ -99,7 +99,7 @@ short const opinfo[] = {
 	TRMPRI,										/* IFGOTO */
 	TRMPRI,										/* INIT */
 	TRMPRI,										/* CFORREG */
-#ifdef __ALCYON__
+#if BINEXACT
 	TRMPRI,										/* DCLONG - divide const long */
 #else
 	TRMPRI | OPTERM,							/* DCLONG - divide const long */

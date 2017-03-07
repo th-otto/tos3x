@@ -98,7 +98,7 @@ c068$(EXEEXT): c068.rel
 	$(PRGFLAGS) 7 7 $@
 
 
-check::
+check:: $(PROGRAMS)
 	cmp c068$(EXEEXT) ${BIN}c068$(EXEEXT)
 
 clean:

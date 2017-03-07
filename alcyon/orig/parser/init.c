@@ -72,7 +72,7 @@ PP(struct symbol *sp;)						/* pointer to symbol to init */
 	} else
 	{
 		if (!(next(ASSIGN)))			/* ignore '=' if there */
-			warning("old fashion initialization");
+			warning(_("old fashion initialization"));
 		if (type == LONG || ISPOINTER(type))
 			outldata();
 		else if (type == DOUBLE || type == FLOAT)
@@ -99,7 +99,7 @@ PP(struct symbol *sp;)						/* pointer to symbol to init */
 					;
 				dtab[sp->s_dp] = (isize / dsize(type, sp->s_dp, sp->s_ssp));
 			} else
-				error("too many initializers");
+				error(_("too many initializers"));
 		}
 		if (sp->s_sc == STATIC)
 			OUTTEXT();
@@ -139,7 +139,7 @@ PP(int ssp;)
 	nbout = 0;
 	datasize = dsize(type, dp, ssp);
 	nbleft = 0;							/* keep track of no. of bytes left */
-#ifndef __ALCYON__
+#if !BINEXACT
 	elsize = 0; /* quiet compiler */
 #endif
 	atype = (ISARRAY(type)) ? delsp(type) : type;
@@ -151,13 +151,13 @@ PP(int ssp;)
 		datasize = dsize(atype, dp, ssp);
 		elsize = dsize(atype, dp + 1, ssp);
 		if (!i)
-			error("missing { in initialization");
+			error(_("missing { in initialization"));
 		do
 		{
 			j = (next(LCURBR));
 			nbout += str_init(elsize, atype);
 			if (j && !(next(RCURBR)))
-				error("missing } in initialization");
+				error(_("missing } in initialization"));
 			next(COMMA);				/* skip over comma... */
 		} while (!PEEK(RCURBR) && !PEEK(SEMI));
 		nbleft = datasize - nbout;
@@ -168,7 +168,7 @@ PP(int ssp;)
 			nbleft = 0;
 		if (nbleft < 0)
 		{
-			error("initializer list too long");
+			error(_("initializer list too long"));
 			nbleft = 0;
 		}
 	} else if (BTYPE(type) == STRUCT && NOTPOINTER(type) && ISPOINTER(onetype))
@@ -176,7 +176,7 @@ PP(int ssp;)
 		/* multi-dimensional array */
 		nbleft = elsize = PTRSIZE;
 		if (!i)
-			error("missing { in initialization");
+			error(_("missing { in initialization"));
 		do
 		{
 			nbleft = s_or_a(POINTER | CHAR, elsize, &nbout, nbleft, NULL, NULL);
@@ -186,7 +186,7 @@ PP(int ssp;)
 	{
 		nbleft = elsize = dsize(delsp(type), dp, ssp);	/* was dp+1 */
 		if (!i && BTYPE(type) == STRUCT)
-			error("missing { in initialization");
+			error(_("missing { in initialization"));
 		do
 		{
 			nbleft = s_or_a(onetype, elsize, &nbout, nbleft, sp->s_par, NULL);
@@ -208,7 +208,7 @@ PP(int ssp;)
 	{
 		next(COMMA);					/* skip over extra comma */
 		if (!(next(RCURBR)))
-			error("missing } in initialization");
+			error(_("missing } in initialization"));
 	}
 	return nbout;
 }
@@ -285,7 +285,7 @@ PP(struct symbol *child;)
 			if (snest)
 			{
 				if (!next(RCURBR))		/* force release of matched curbr */
-					error("mismatched curly braces");
+					error(_("mismatched curly braces"));
 			} else if (!peektok)
 			{
 				peektok = COMMA;
@@ -305,7 +305,7 @@ PP(struct symbol *child;)
 			if (!nbout && !nbleft)
 				goto restart;
 			if (i > elsize)
-				error("initializer list too long");
+				error(_("initializer list too long"));
 			child = 0;					/* force restart of structure match up */
 			goto restart;
 		} else if (PEEK(RCURBR))
@@ -399,7 +399,7 @@ PP(struct symbol *child;)
 			if (!nbleft && !SIMPLE_TYP(original))
 				nbleft = elsize;
 			if (i > nbleft)
-				error("initializer alignment");
+				error(_("initializer alignment"));
 			nbleft = (i >= nbleft) ? 0 : nbleft - i;
 			if (BTYPE(original) == STRUCT)
 			{
@@ -450,7 +450,7 @@ PP(struct symbol *child;)
 	{
 		next(COMMA);					/* comma's may separate.... */
 		if (!next(RCURBR))				/* force release of matched curbr */
-			error("mismatched curly braces");
+			error(_("mismatched curly braces"));
 	}
 	next(COMMA);						/* comma's may separate.... */
 	return nbleft;
@@ -506,7 +506,7 @@ PP(int type;)								/* should not get a bit field here..... */
 		if (maxsize <= output)
 		{
 			if (maxsize < output)
-				error("character array initializer alignment");
+				error(_("character array initializer alignment"));
 			return output;
 		}
 	} while (next(COMMA) && !PEEK(SEMI) && !PEEK(RCURBR));
@@ -541,7 +541,7 @@ PP(int sc;)									/* for bit field init */
 #endif
 	if ((tp = (struct tnode *) expr(0)) == 0)
 	{
-		error("invalid initializer");
+		error(_("invalid initializer"));
 		commastop--;
 		return 0;
 	}
@@ -565,13 +565,13 @@ PP(int sc;)									/* for bit field init */
 		{
 			outc(CHAR, ((int) (ivalue & 0xff)));
 			if ((ivalue & 0xff00) && ((ivalue & 0xff00) != 0xff00))
-				warning("initializer truncated");
+				warning(_("initializer truncated"));
 			return 1 + plus;
 		}
 		if (op == ADDR)
 		{
 			outc(CHAR, ((int) (*cstr & 0xff)));
-			warning("string used to initialize character value");
+			warning(_("string used to initialize character value"));
 			return 1 + plus;
 		}
 		break;
@@ -585,13 +585,13 @@ PP(int sc;)									/* for bit field init */
 				printf("ivalue %d\n", ivalue);
 #endif
 			if ((ivalue > 255) || (ivalue < -128))
-				warning("initializer truncated");
+				warning(_("initializer truncated"));
 			return 1 + plus;
 		}
 		if (op == ADDR)
 		{
 			outc(CHAR, ((int) *cstr) & 0xff);
-			warning("string used to initialize character value");
+			warning(_("string used to initialize character value"));
 			return 1 + plus;
 		}
 		break;
@@ -603,7 +603,7 @@ PP(int sc;)									/* for bit field init */
 			{
 				outc(CHAR, ((int) ivalue) & 0xff);
 				if ((ivalue > 255) || (ivalue < -128))
-					warning("initializer truncated");
+					warning(_("initializer truncated"));
 				return 1 + plus;
 			} else
 			{							/* 2 character  charconst eg. 'ab' */
@@ -621,7 +621,7 @@ PP(int sc;)									/* for bit field init */
 		{
 			outc(INT, (int) value);
 			if ((value & 0xffff0000) && ((value & 0xffff0000) != 0xffff0000))
-				warning("initializer truncated");
+				warning(_("initializer truncated"));
 		} else
 		{
 			outinit(tp, inittype);
@@ -636,7 +636,7 @@ PP(int sc;)									/* for bit field init */
 		if (op == CLONG || op == CINT)
 		{
 			if ((value & 0xffff0000) && ((value & 0xffff0000) != 0xffff0000))
-				warning("initializer truncated");
+				warning(_("initializer truncated"));
 			ivalue = value & 0xffff;
 			outc(INT, ivalue);
 		} else
@@ -668,7 +668,7 @@ PP(int sc;)									/* for bit field init */
 		return 4 + plus;
 
 	}
-	error("invalid initializer type=%d", ISALLTYPE(type));
+	error(_("invalid initializer type=%d"), ISALLTYPE(type));
 	return plus;
 }
 

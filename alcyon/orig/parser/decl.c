@@ -73,7 +73,7 @@ VOID doextdef(NOTHING)
 			}
 			if (!dflag && NOTFUNCTION(sp->s_type))
 			{
-				synerr("external definition syntax");
+				synerr(_("external definition syntax"));
 				return;
 			}
 			if (!ISTYPEDEF(sp) && sc != STATIC)
@@ -104,7 +104,7 @@ VOID doextdef(NOTHING)
 			if (symdebug)
 				printf("external definition syntax due to lost comma...\n");
 #endif
-			synerr("external definition syntax");
+			synerr(_("external definition syntax"));
 		}
 	}
 }
@@ -135,8 +135,8 @@ PP(int declok;)								/* as opposed to casting op */
 	dtype = TYPELESS;
 	sc = *defsc;
 	indecl = 0;							/* start off at 0 !!!! */
-#ifndef __ALCYON__
-	sp = NULL;
+#if !BINEXACT
+	sp = NULL; /* quiet compiler */
 #endif
 	for (;; decflag++)
 	{
@@ -159,31 +159,31 @@ PP(int declok;)								/* as opposed to casting op */
 
 		case R_TYPEDEF:
 			if (tdflag)
-				error("invalid typedef statement");
+				error(_("invalid typedef statement"));
 			tdflag++;
 			continue;
 
 		case R_STATIC:
 			if (sc && sc != STATIC && sc != EXTERNAL)
-				error("invalid storage class");
+				error(_("invalid storage class"));
 			sc = STATIC;
 			continue;
 
 		case R_AUTO:
 			if (sc && sc != AUTO)
-				error("invalid storage class");
+				error(_("invalid storage class"));
 			sc = AUTO;
 			continue;
 
 		case R_EXTERNAL:
 			if (sc && sc != EXTERNAL)
-				error("invalid storage class");
+				error(_("invalid storage class"));
 			sc = (scope_level == GLOB_SCOPE) ? DEXTERN : EXTERNAL;
 			continue;
 
 		case R_REGISTER:
 			if (sc && sc != REGISTER && sc != PDECLIST && sc != PDECREG)
-				error("invalid register specification");
+				error(_("invalid register specification"));
 			sc = (sc != PDECLIST) ? REGISTER : PDECREG;
 			continue;
 
@@ -210,20 +210,20 @@ PP(int declok;)								/* as opposed to casting op */
 
 		case R_INT:
 			if (dtype != TYPELESS)
-				error("invalid type declaration");
+				error(_("invalid type declaration"));
 			dtype = INT;
 			continue;
 
 		case R_CHAR:
 			if (dtype != TYPELESS)
-				error("invalid type declaration");
+				error(_("invalid type declaration"));
 			dtype = CHAR;
 			continue;
 
 		case R_FLOAT:
 		case R_DOUBLE:
 			if (dtype != TYPELESS)
-				error("invalid type declaration");
+				error(_("invalid type declaration"));
 			dtype = FLOAT;
 			continue;
 		}
@@ -241,26 +241,26 @@ PP(int declok;)								/* as opposed to casting op */
 		else if (dtype == FLOAT)
 			dtype = DOUBLE;
 		else
-			error("invalid long declaration");
+			error(_("invalid long declaration"));
 	}
 	if (sflag && dtype != INT)
-		error("invalid short declaration");
+		error(_("invalid short declaration"));
 	if (uflag)
 	{
 		if (dtype == LONG)
 		{
 			dtype = LONG;
-			warning("unsigned long unimplemented, signed long assumed");
+			warning(_("unsigned long unimplemented, signed long assumed"));
 		} else if (dtype == CHAR)
 		{
 			dtype = CHAR;
-			warning("unsigned char unimplemented, signed char assumed");
+			warning(_("unsigned char unimplemented, signed char assumed"));
 		} else if (dtype == INT)
 		{
 			dtype = UNSIGNED;
 		} else
 		{
-			error("invalid unsigned declaration");
+			error(_("invalid unsigned declaration"));
 		}
 	}
 	if (!sflag && xflag && dtype == INT)
@@ -321,7 +321,7 @@ PP(short *pdtype;)
 			printf("scope %d %d\n", sp->s_scope, scope_level);
 		}
 #endif
-		error("redeclaration: %.8s", sp->s_symbol);
+		error(_("redeclaration: %.8s"), sp->s_symbol);
 	}
 	smember = 0;
 	if (next(LCURBR))
@@ -329,7 +329,7 @@ PP(short *pdtype;)
 		struc_sib[in_struct] = hold_sib;
 		if (hold_sib)
 		{								/* not struct element yet... */
-#ifdef __ALCYON__
+#if BINEXACT
 			asm("move.l _hold_sib,a0");
 			asm("clr.l 28(a0)");
 #else
@@ -338,7 +338,7 @@ PP(short *pdtype;)
 		}
 		in_struct++;
 		struc_parent[in_struct] = sp;
-#ifdef __ALCYON__
+#if BINEXACT
 		asm("movea.w   _in_struc,a0");
 		asm("adda.l    a0,a0");
 		asm("adda.l    a0,a0");
@@ -353,7 +353,7 @@ PP(short *pdtype;)
 		boffset = sbits;
 		if (!next(RCURBR))
 		{
-			synerr("structure declaration syntax");
+			synerr(_("structure declaration syntax"));
 		} else if (sp)
 		{
 			if (dtab[sp->s_ssp])
@@ -365,11 +365,11 @@ PP(short *pdtype;)
 					printf("scope %d %d\n", sp->s_scope, scope_level);
 				}
 #endif
-				error("redeclaration: %.8s", sp->s_symbol);
+				error(_("redeclaration: %.8s"), sp->s_symbol);
 			}
 			dtab[sp->s_ssp] = *ptsize;
 		}
-#ifdef __ALCYON__
+#if BINEXACT
 		asm("movea.w   _in_struc,a0");
 		asm("adda.l    a0,a0");
 		asm("adda.l    a0,a0");
@@ -388,10 +388,10 @@ PP(short *pdtype;)
 			hold_sib = NULL;
 	} else if (fake)
 	{
-		error("no structure name");
+		error(_("no structure name"));
 	} else if (sp->s_sc != STRPROTO)
 	{
-		error("invalid structure prototype: %.8s", sp->s_symbol);
+		error(_("invalid structure prototype: %.8s"), sp->s_symbol);
 	} else if (!dtab[sp->s_ssp])
 	{									/* FRSTRUCT */
 		if (struc_sib[in_struct])
@@ -401,7 +401,7 @@ PP(short *pdtype;)
 				struc_sib[in_struct] = hold_sib;
 				if (hold_sib)
 				{
-#ifdef __ALCYON__
+#if BINEXACT
 					asm("movea.l   _hold_si,a0");
 					asm("clr.w     d0");
 					asm("ext.l     d0");
@@ -416,7 +416,7 @@ PP(short *pdtype;)
 		}
 		token = FRSTRUCT;
 		if (++frstp >= NFRSTR)
-			ferror("structure table overflow");
+			ferror(_("structure table overflow"));
 		frstab[frstp] = sp;
 	} else
 	{
@@ -424,7 +424,7 @@ PP(short *pdtype;)
 	}
 	tdflag = stdflag;
 	if (*pdtype != TYPELESS)
-		error("invalid type declaration");
+		error(_("invalid type declaration"));
 	*pdtype = (token == R_UNION) ? STRUCT : token;
 	return token;
 }
@@ -472,7 +472,7 @@ PP(long size;)								/* size of single data item 3.4 i=> l */
 			if (size)
 				sp->s_ssp = dalloc(size);
 			else
-				error("invalid structure declaration: %.8s", sp->s_symbol);
+				error(_("invalid structure declaration: %.8s"), sp->s_symbol);
 		} else if (BTYPE(type) == FRSTRUCT)
 		{
 			sp->s_ssp = frstp;
@@ -525,9 +525,9 @@ PP(long size;)								/* size of single data item 3.4 i=> l */
 			}
 #endif
 			if (scope_level == GLOB_SCOPE)	/* extern signif to 7 */
-				error("redeclaration: %.7s", sp->s_symbol);
+				error(_("redeclaration: %.7s"), sp->s_symbol);
 			else
-				error("redeclaration: %.8s", sp->s_symbol);
+				error(_("redeclaration: %.8s"), sp->s_symbol);
 			return size;
 		}
 		sp->s_type = type;
@@ -560,7 +560,7 @@ PP(long size;)								/* size of single data item 3.4 i=> l */
 		if (dtype == FUNCTION)
 		{
 			if (sc != AUTO && sc != EXTERNAL && sc != DEXTERN && sc != STATIC)
-				error("illegal function declaration");
+				error(_("illegal function declaration"));
 			if (sc != STATIC)
 				sc = EXTERNAL;
 		} else if (sc == REGISTER || sc == PDECREG)
@@ -636,7 +636,7 @@ PP(struct symbol *fsp;)
 	rlabel = nextlabel++;
 	if (!next(LCURBR))
 	{
-		synerr("function body syntax");
+		synerr(_("function body syntax"));
 	} else
 	{
 		localsize = 0;					/* end of first auto offset from l.e.p. */
@@ -689,7 +689,7 @@ PP(struct symbol *fsp;)
 		{
 			if (next(CEOF))
 			{
-				error("{ not matched by }");
+				error(_("{ not matched by }"));
 				break;
 			}
 			instmt = 1;
@@ -770,7 +770,7 @@ PP(int defsc;)								/* default storage class */
 				READ_ST(csp, csp_addr);
 				if (!SIMPLE_TYP(csp->s_type) && NOTPOINTER(csp->s_type))
 				{
-					synerr("illegal autoinitialization data type");
+					synerr(_("illegal autoinitialization data type"));
 					break;
 				}
 				peektok = ASSIGN;
@@ -782,14 +782,14 @@ PP(int defsc;)								/* default storage class */
 				else if ((tp = expr(1)) != 0)
 					outexpr(tp);
 				else
-					synerr("auto initialization syntax");
+					synerr(_("auto initialization syntax"));
 				commastop--;			/* back to previous comma handling */
 				indecl = 1;
 			}
 		} while (next(COMMA));
 		if (!next(SEMI))
 		{
-			synerr("declaration syntax");
+			synerr(_("declaration syntax"));
 			tdflag = 0;					/* reset on sighting a semicolon */
 			break;
 		}
@@ -866,7 +866,7 @@ PP(int castflg;)							/* casting flag, 1=>allow no declarator */
 	{
 		if (next(LPAREN))
 		{								/* declarator ( ... ) */
-#ifndef __ALCYON__
+#if !BINEXACT
 			fp = NULL; /* quiet compiler */
 #endif
 			if (!infunc)
@@ -886,10 +886,10 @@ PP(int castflg;)							/* casting flag, 1=>allow no declarator */
 							printf("scope %d %d\n", p->s_scope, scope_level);
 						}
 #endif
-						error("redeclaration: %.8s", p->s_symbol);
+						error(_("redeclaration: %.8s"), p->s_symbol);
 					} else if (fp >= &fargtab[NFARGS - 1])
 					{
-						synerr("too many parameters");
+						synerr(_("too many parameters"));
 						break;
 					} else
 					{
@@ -905,7 +905,7 @@ PP(int castflg;)							/* casting flag, 1=>allow no declarator */
 						break;
 				}
 				indecl--;				/* must not confuse, we are in decls */
-#ifdef __ALCYON__
+#if BINEXACT
 				asm("movea.l   -4(a6),a0");
 				asm("clr.l     (a0)"); /* generated: move.l #$0,(a0)" */
 #else
@@ -951,7 +951,7 @@ PP(int castflg;)							/* casting flag, 1=>allow no declarator */
 		break;
 	}
   baddec:
-	synerr("invalid declarator");
+	synerr(_("invalid declarator"));
 	return -1;
 }
 

@@ -26,6 +26,12 @@
 #  define UNUSED(x) ((void)(x))
 #endif
 
+#ifdef __ALCYON__
+#  define BINEXACT 1
+#else
+#  define BINEXACT 0
+#endif
+
 #define _(x) x
 
 

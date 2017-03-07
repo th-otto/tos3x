@@ -37,7 +37,7 @@ PP(int preset;)
 		  exprerr:
 			if (token == SEMI || token == RCURBR)
 				pbtok(token);
-			error("invalid expression");
+			error(_("invalid expression"));
 			opdp = opdsave;
 			opp = oprsave;
 			opdontop = opdotsave;
@@ -79,7 +79,7 @@ PP(int preset;)
 				 * operator, hence we need to stack it.
 				 */
 				if (++opp >= &opstack[OPSSIZE])
-					ferror("expression too complex");
+					ferror(_("expression too complex"));
 				if (token == POSTINC || token == POSTDEC)
 					oppri = PSTPRI;
 				else if (token == LPAREN || token == LBRACK || token == CALL)
@@ -116,7 +116,7 @@ PP(int preset;)
 			case MPARENS:
 				if (!maketree(NACALL))
 				{
-					warning("Null expression encountered");
+					warning(_("Null expression encountered"));
 					return 0;
 					/* goto exprerr; */
 				}
@@ -148,7 +148,7 @@ PP(int preset;)
 			break;
 		}								/* while (1) */
 	}
-	error("unexpected EOF");
+	error(_("unexpected EOF"));
 	return NULL;
 }
 
@@ -368,7 +368,7 @@ VOIDPTR get_symbol(NOTHING)
 			p->s_sc = EXTERNAL;
 		} else
 		{
-			error("undefined symbol: %.8s", p->s_symbol);
+			error(_("undefined symbol: %.8s"), p->s_symbol);
 		}
 		p->s_attrib |= SDEFINED;
 		TO_DSK(p, p_addr);
@@ -433,7 +433,7 @@ PP(struct lconode *rtp;)					/* pointer to right subtree */
 				rvalue *= size;
 			}
 #ifdef DEBUG
-			warning("constant coerced");
+			warning(_("constant coerced"));
 #endif
 		}
 		lvalue = ltp->t_lvalue;
@@ -590,7 +590,7 @@ long cexpr(NOTHING)
 	tp = (struct lconode *) expr(0);
 	op = tp->t_op;
 	if (op != CINT && op != CLONG)
-		error("constant required");
+		error(_("constant required"));
 	commastop--;
 	exprp = savep;
 	return (op == CLONG) ? tp->t_lvalue : (long) ((struct conode *) tp)->t_value;

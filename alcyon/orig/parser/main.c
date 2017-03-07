@@ -86,7 +86,7 @@ PP(char **argv;)							/* argument pointers */
 
 	/* BUG: signal() not declared; useless anyway, since they are not implemented in the library */
 	/* BUG2: comparing the result of signal to a function pointer generates totally bogus code */
-#ifdef __ALCYON__
+#if BINEXACT
 	asm("move.l    #$00000001,(a7)");
 	asm("move.w    #$0002,-(a7)");
 	asm("jsr       _signal");
@@ -127,14 +127,14 @@ PP(char **argv;)							/* argument pointers */
 	for (q = source, p = *argv++; (*q++ = *p++) != 0;)
 		;
 	if (fopen(source, &ibuf, 0) < 0)
-		ferror("can't open %s", source);
+		ferror(_("can't open %s"), source);
 	source[(int)strlen(source) - 1] = 'c';
 	if (fcreat(*argv++, &obuf, 0) < 0 || fcreat(*argv++, &lbuf, 0) < 0)
-		ferror("temp creation error");
+		ferror(_("temp creation error"));
 
 	strfile = *argv++;
 	if (fcreat(strfile, &sbuf, 0) < 0)
-		ferror("string file temp creation error");
+		ferror(_("string file temp creation error"));
 	obp = &obuf;
 	lineno++;
 	frstp = -1;							/* initialize only once */
@@ -216,7 +216,7 @@ PP(char **argv;)							/* argument pointers */
 		OUTTEXT();
 	copysfile(strfile);
 	cleanup();
-#ifndef __ALCYON__
+#if !BINEXACT
 	return 0;
 #endif
 }
@@ -235,7 +235,7 @@ VOID cleanup(NOTHING)
 VOID usage(P(char *) calledby)
 PP(char *calledby;)
 {
-	ferror("usage: %s source link icode strings [-e|-f] [-w] [-T]", calledby);
+	ferror(_("usage: %s source link icode strings [-e|-f] [-w] [-T]"), calledby);
 }
 
 

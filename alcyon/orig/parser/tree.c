@@ -54,7 +54,7 @@ PP(int op;)									/* new root operator */
 	if (treedebug)
 		printf("maketree op = %d\n", op);
 #endif
-#ifndef __ALCYON__
+#if !BINEXACT
 	rtp = NULL; /* quiet compiler */
 	rtype = 0;
 #endif
@@ -97,7 +97,7 @@ PP(int op;)									/* new root operator */
 	if (RINTEGRAL(op))
 		integral(rtp, LONG);
 	if (LVALOP(op) && ltp->t_op != SYMBOL && ltp->t_op != INDR && ltp->t_op != BFIELD)
-		error("assignable operand required");
+		error(_("assignable operand required"));
 	if (UNARYOP(op))
 	{
 		if (!unopeval(op, (struct lconode *)ltp))
@@ -125,7 +125,7 @@ PP(int op;)									/* new root operator */
 			strsize = right = dosizeof(rtp, 0);
 			if (left < right)
 			{							/* left side smaller than right */
-				warning("left side of structure assignment smaller than right");
+				warning(_("left side of structure assignment smaller than right"));
 				strsize = left;
 			}
 			pushopd(ltp);
@@ -137,7 +137,7 @@ PP(int op;)									/* new root operator */
 			return 1;
 		}
 		ltype = rtype = INT;
-		error("illegal structure operation");
+		error(_("illegal structure operation"));
 	}
 	type = ltype;
 	if (rtype == TYPELESS)
@@ -165,7 +165,7 @@ PP(int op;)									/* new root operator */
 		if ((op == ASSIGN || op == FRETURN) && rtp->t_op != CINT && (conv == INT_PTR || conv == UNSN_PTR))
 		{
 			conv = INT_LONG;
-			warning("short assigned to pointer");
+			warning(_("short assigned to pointer"));
 		} else if (op == ASSIGN || op == CAST)
 		{
 			switch (conv)
@@ -204,14 +204,14 @@ PP(int op;)									/* new root operator */
 			pconv++;
 		} else if (op != FRETURN && ((ISALLTYPE(ltype) != ISALLTYPE(rtype) || ISALLTYPE(ltype) != (POINTER | CHAR))))
 		{
-			warning("suspect conversion operation");
+			warning(_("suspect conversion operation"));
 		}
 	}
 	docast = QCAST(ltp, rtp);
 	if (conv)
 	{
 		if (conv == BADCONV)
-			error("illegal type conversion");
+			error(_("illegal type conversion"));
 		else if (lconv)
 			ltp = cvopgen(ltp, type, conv, psize(rtp), op);
 		else
@@ -247,7 +247,7 @@ PP(int op;)									/* new root operator */
 	}
 	if (op == SUB && (ltype & POINTER) && (rtype & POINTER) && !lconv && !conv)
 	{
-		warning("pointer subtraction yields a long result");
+		warning(_("pointer subtraction yields a long result"));
 #ifdef DEBUG
 		if (symdebug)
 			printf("pconv = %d\n", pconv);
@@ -295,7 +295,7 @@ PP(struct tnode *rtp;)						/* right subtree pointer */
 		ltp = (struct tnode *) popopd();	/* ltp cannot be 0 */
 	case PERIOD:						/* expr . name */
 		if (!(ISSTEL(rtp)))
-			error("invalid structure member name");
+			error(_("invalid structure member name"));
 		type = rtp->t_type;
 		if (ISARRAY(type))
 		{
@@ -316,7 +316,7 @@ PP(struct tnode *rtp;)						/* right subtree pointer */
 
 	case QMARK:
 		if (rtp->t_op != COLON)
-			error("invalid ?: operator syntax");
+			error(_("invalid ?: operator syntax"));
 		if (ltp->t_op == CINT && rtp->t_left->t_op == CINT && rtp->t_right->t_op == CINT)
 			((struct conode *)ltp)->t_value = (((struct conode *)ltp)->t_value ? ((struct conode *)rtp->t_left)->t_value : ((struct conode *)rtp->t_right)->t_value);
 		else
@@ -335,7 +335,7 @@ PP(struct tnode *rtp;)						/* right subtree pointer */
 		else
 		{
 			if (ISFUNCTION(type))
-				error("indirection on function invalid");
+				error(_("indirection on function invalid"));
 			ltp = tnalloc(INDR, delspchk(type), ltp->t_dp, ltp->t_ssp, ltp, 0L);
 		}
 		break;
@@ -348,7 +348,7 @@ PP(struct tnode *rtp;)						/* right subtree pointer */
 	case CALL:
 		if (NOTFUNCTION(type))
 		{
-			error("illegal call");
+			error(_("illegal call"));
 #ifdef DEBUG
 			if (symdebug)
 				printf("illegal call...................\n");
@@ -363,10 +363,10 @@ PP(struct tnode *rtp;)						/* right subtree pointer */
 		else if (ltp->t_op == SYMBOL)
 		{
 			if (((struct symnode *) ltp)->t_sc == REGISTER)
-				error("address of register");
+				error(_("address of register"));
 			ltp = tnalloc(ADDR, addsp(type, POINTER), ltp->t_dp, ltp->t_ssp, ltp, 0L);
 		} else
-			error("& operator illegal");
+			error(_("& operator illegal"));
 		break;
 	}
 	pushopd(ltp);
@@ -397,7 +397,7 @@ PP(int op;)									/* for cast operator */
 	}
 #endif
 
-#ifndef __ALCYON__
+#if !BINEXACT
 	rtp = NULL; /* quiet compiler */
 #endif
 	switch (conv)
@@ -464,7 +464,7 @@ PP(int op;)									/* for cast operator */
 		break;
 
 	default:
-		error("invalid conversion");
+		error(_("invalid conversion"));
 		return tp;
 	}
 	return tnalloc(cop, type, 0, 0, tp, rtp);

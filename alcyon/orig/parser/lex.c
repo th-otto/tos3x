@@ -121,7 +121,7 @@ PP(double f;)
 	register long exp, l;
 	register short sign;
 
-#ifdef __ALCYON__
+#if BINEXACT
 	asm("clr.l     -(a7)");			/*  generated: move.l $0,-(a7) */
 	asm("move.l    8(a6),-(a7)");
 	asm("jsr       _fpcmp");
@@ -175,7 +175,7 @@ PP(double f;)
 	register long exp, l;
 	register short sign;
 
-#ifdef __ALCYON__
+#if BINEXACT
 	asm("clr.l     -(a7)");			/*  generated: move.l $0,-(a7) */
 	asm("move.l    8(a6),-(a7)");
 	asm("jsr       _fpcmp");
@@ -211,7 +211,7 @@ PP(double f;)
 		exp++;
 	for (; f < 1.0; f = f * 2.0)
 		exp--;
-#ifdef __ALCYON__
+#if BINEXACT
 	asm("move.l    #$00000041,-(a7)"); /* seems to be buggy 1.0 constant */
 	asm("move.l    8(a6),-(a7)");
 	asm("jsr       _fpadd");
@@ -246,7 +246,7 @@ long gethex(NOTHING)
 			c -= '0';
 		else
 		{
-#ifdef __ALCYON__
+#if BINEXACT
 			asm("move.b    d6,d0");
 			asm("ext.w     d0");
 			asm("and.w     #$FFDF,d0");
@@ -326,7 +326,7 @@ PP(int force;)								/* force nested decls */
 		switch (ctype[c])
 		{
 		case BADC:						/* bad character */
-			error("invalid character");
+			error(_("invalid character"));
 			break;
 
 		case SEMI:
@@ -384,7 +384,7 @@ PP(int force;)								/* force nested decls */
 			getstr(cstr, STRSIZE, '\'');
 			if (cstrsize > CHRSPWORD + 1)
 			{
-				error("character constant too long");
+				error(_("character constant too long"));
 				cstrsize = CHRSPWORD + 1;
 			}
 			ccbytes = cstrsize - 1;
@@ -413,7 +413,7 @@ PP(int force;)								/* force nested decls */
 						break;
 				if (c == CEOF)
 				{
-					error("no */ before EOF");
+					error(_("no */ before EOF"));
 					return CEOF;
 				}
 				continue;
@@ -475,7 +475,7 @@ PP(int force;)								/* force nested decls */
 					warning(_("old fashion assignment \"=<<\""));
 					return EQLSH;
 				}
-				error("illegal operator '=<'");
+				error(_("illegal operator '=<'"));
 				return EQUALS;
 			} else if (peekis('>'))
 			{
@@ -484,7 +484,7 @@ PP(int force;)								/* force nested decls */
 					warning(_("old fashion assignment \"=>>\""));
 					return EQRSH;
 				}
-				error("illegal operator '=>'");
+				error(_("illegal operator '=>'"));
 				return EQUALS;
 			} else if ((i = strindex("-*&=+/|^%", (c = ngetch()))) >= 0)
 			{
@@ -668,7 +668,7 @@ PP(char endc;)								/* ending string character */
 	{
 		if (c == CEOF || c == EOLC)
 		{
-			error("string cannot cross line");
+			error(_("string cannot cross line"));
 			break;
 		}
 		if (c == '\\')
@@ -678,7 +678,7 @@ PP(char endc;)								/* ending string character */
 				putback(c);
 				if ((c = getoct(1)) < 0 || c > 255)
 				{
-					error("bad character constant");
+					error(_("bad character constant"));
 					continue;
 				}
 			} else if ((j = strindex("bnrtf", c)) >= 0)	/* 4.1 added f... */
@@ -691,7 +691,7 @@ PP(char endc;)								/* ending string character */
 			cstrsize++;
 			*p++ = c;
 		} else if (!i)					/* only say error once... */
-			error("string too long");
+			error(_("string too long"));
 	}
 	if (i <= 0)							/* string overflow? */
 		p--;
@@ -724,6 +724,6 @@ VOID pbtok(P(int) tok)
 PP(int tok;)
 {
 	if (peektok)
-		error("too many tokens pushed back");
+		error(_("too many tokens pushed back"));
 	peektok = tok;
 }

@@ -58,11 +58,11 @@ PP(int offset;)								/* symbol offset (resword value) */
 	while ((sp = symbols) <= 0) /* XXX */
 	{
 		if ((sp = (struct symbol *) sbrk(SYMSIZE)) == (VOIDPTR)-1)
-			ferror("symbol table overflow");
+			ferror(_("symbol table overflow"));
 		for (i = SYMSIZE / (sizeof *symbols); --i >= 0;)
 		{
 			if (sp <= 0)
-				ferror("bad symbol table");
+				ferror(_("bad symbol table"));
 			sp->s_next = symbols;
 			symbols = sp++;
 		}
@@ -199,7 +199,7 @@ PP(int level;)								/* scope levels... */
 			if (level == FUNC_SCOPE)
 				if (!(sp->s_attrib & SDEFINED))
 				{
-					error("undefined label: %.8s", sp->s_symbol);
+					error(_("undefined label: %.8s"), sp->s_symbol);
 					sp->s_attrib |= SDEFINED;
 				}
 			if (sp->s_attrib & (SGLOBAL | SRESWORD))
@@ -251,7 +251,7 @@ PP(int ok;)
 			}
 			if (sc == PDECLIST || sc == PDECREG)
 			{
-				error("not in parameter list: %.8s", sp->s_symbol);
+				error(_("not in parameter list: %.8s"), sp->s_symbol);
 				sp->s_sc = (char)((sc == PDECLIST) ? AUTO : REGISTER); /* XXX */
 				if (ok)
 					outlocal(sp->s_type, sp->s_sc, sp->s_symbol, sp->s_offset);
@@ -332,7 +332,7 @@ PP(char *to;)								/* pointer to area to copy to */
 
 	for (p = from, q = to, i = SSIZE; --i >= 0;)
 	{
-#ifdef __ALCYON__
+#if BINEXACT
 		asm("tst.b     (a5)");
 		asm("beq.s     l8887");
 		asm("move.b    (a5)+,d0");
