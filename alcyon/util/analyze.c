@@ -11,6 +11,8 @@
 
 static char const prg_name[] = "analyze";
 
+#define SYMDEF "._SYMDEF"
+
 static int verbose;
 
 static struct libhdr arhdr;
@@ -389,7 +391,7 @@ PP(char **argv;)
 		return EXIT_FAILURE;
 	}
 	
-	if (lgetw(&magic, ifp) != 0 || magic != LIBMAGIC)
+	if (lgetw(&magic, ifp) != 0 || (magic != LIBMAGIC && magic != LIBRMAGIC))
 	{
 		fprintf(stderr, "%s: not an archive\n", ifilname);
 		return EXIT_FAILURE;
@@ -403,7 +405,10 @@ PP(char **argv;)
 
 		strncpy(name, arhdr.lfname, LIBNSIZE);
 		name[LIBNSIZE] = '\0';
-		if (readhdr() && couthd.ch_magic == EX_MAGIC)
+		if (strcmp(name, SYMDEF) == 0)
+		{
+			;
+		} else if (readhdr() && couthd.ch_magic == EX_MAGIC)
 		{
 			long i;
 			long l;

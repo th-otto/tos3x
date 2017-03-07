@@ -30,9 +30,9 @@ Finished:
 	- relmod.ttp (convert output of link68 to GEMDOS format)
 	- nm68.ttp (symbol print utility)
 	- size68.ttp (utility to print section sizes)
+	- ar68.ttp (archive utility)
 
 Missing:
-	- ar68.ttp (archive utility)
 	- aln.ttp (Atari's version of linker)
 	- doindex.ttp (create symbol index for aln)
 

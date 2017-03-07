@@ -5,152 +5,626 @@
 	San Diego, Ca. 92121
  */
 
-char *SCCSID = "@(#) ar68 - July 1, 1983";
-
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <unistd.h>
+#include <ar68.h>
+#include "util.h"
 
-#ifndef PDP11
-#	define SEEKTYPE long
-#	include <sys/types.h>
-#	include <stat.h>
-#	ifdef VAX11
-#		include <c68/ar68.h>
-#	else
-#		include <ar68.h>
-#	endif
-#else
-#	include <stat11.h>
-#	define SEEKTYPE int
+#define FALSE 0
+#define TRUE  1
 
-long mklong();
-#endif
+#define _(x) x
 
-#ifdef VAX11
-#	define int short
-#endif
-
-#define USAGE		"usage: %s [rdxtpvabi] [pos] archive file [file ...]\n"
 #define DEFMODE  	0666
 
-char buff[BUFSIZ];
+#define SYMDEF "._SYMDEF"
 
-struct stat astat,
- tstat;									/* 11 apr 83, struct stat */
+static char buff[BUFSIZ];
 
-#define READ	0
-#define WRITE	1
+#if 0
+static struct stat astat, tstat;
+#endif
 
 /* flags for cp1file */
 
 #define IEVEN	1
 #define OEVEN	2
 #define WHDR	4
+#define WCOUTHD 8
 
-#define	ROWN	0400					/* file protection flags */
-#define	WOWN	0200
-#define	XOWN	0100
-#define	RGRP	040
-#define	WGRP	020
-#define	XGRP	010
-#define	ROTH	04
-#define	WOTH	02
-#define	XOTH	01
+static struct libhdr libhd;
+static struct libhdr *lp = &libhd;
 
-struct libhdr libhd;
-struct libhdr *lp = { &libhd };
+static unsigned short libmagic = LIBMAGIC;
 
-int libmagic = LIBMAGIC;
+static int rflg;
+static int dflg;
+static int xflg;
+static int tflg;
+static int vflg;
+static int uflg;
+static int pflg;
+static int areof;
+static FILE *arfp;
+static FILE *tempfd;
 
-int rflg,
- dflg,
- xflg,
- tflg,
- vflg;
+static int aflg;
+static int bflg;
+static int psflg;
+static int matchflg;
+static char *psname;
+static char *arname;
+static char *tempname;
+static char tempnbuf[10];
 
-int uflg;
+static char const program_name[] = "ar68";
 
-int pflg;
+static struct hdr2 couthd;
+static int exitstat;
 
-int areof;
+static VOID (*docom) PROTO((const char *name));
 
-FILE *arfp;
 
-FILE *tempfd;
+static short const m1[] = { 1, S_IRUSR, 'r', '-' };
+static short const m2[] = { 1, S_IWUSR, 'w', '-' };
+static short const m3[] = { 1, S_IXUSR, 'x', '-' };
+static short const m4[] = { 1, S_IRGRP, 'r', '-' };
+static short const m5[] = { 1, S_IWGRP, 'w', '-' };
+static short const m6[] = { 1, S_IXGRP, 'x', '-' };
+static short const m7[] = { 1, S_IROTH, 'r', '-' };
+static short const m8[] = { 1, S_IWOTH, 'w', '-' };
+static short const m9[] = { 1, S_IXOTH, 'x', '-' };
 
-int aflg,
- bflg;
+static const short *const m[] = { m1, m2, m3, m4, m5, m6, m7, m8, m9 };
 
-int psflg;
 
-int matchflg;
 
-char *psname;
-
-char *arname,
-*tempname;
-
-FILE *openar();
-
-char *mktemp();
-
-char *ctime();
-
-char *fnonly();
-
-int (*docom) ();
-
-int endit();
-
-int replace();
-
-int delete();
-
-int extract();
-
-int tell();
-
-int print();
-
-#ifdef VAX11
-struct
+static VOID cleanup(NOTHING)
 {
-	short loword;
-	short hiword;
-};
-#else
-struct
+	if (tempname)
+		unlink(tempname);
+	exit(exitstat);
+}
+
+
+static VOID endit(P(int) sig)
+PP(int sig;)
 {
-	int hiword;
-	int loword;
-};
-#endif
+	UNUSED(sig);
+	exitstat = EXIT_FAILURE;
+	cleanup();
+}
 
-char fname[15];
 
-main(argc, argv)
-char **argv;
+static FILE *openar(P(const char *) arp, P(int) crfl)
+PP(const char *arp;)
+PP(int crfl;)
 {
-	register char *p1,
-	*p2;
+	register FILE *i;
+	unsigned short ib;
 
-	register char **ap;
+	if ((i = fopen(arp, "rb")) == NULL)
+	{									/* does not exist */
+		areof = 1;
+		return NULL;
+	}
+	if (lgetw(&ib, i) != 0 || (ib != LIBMAGIC && ib != LIBRMAGIC))
+	{
+		fprintf(stderr, _("%s: not archive format: %s %o\n"), program_name, arp, ib);
+		endit(0);
+	}
+	libmagic = ib;						/* use the same magic number */
+	return i;
+}
 
+
+
+
+static VOID select(P(const short *) pairp, P(int) flg)
+PP(const short *pairp;)
+PP(int flg;)
+{
+	register int n;
+	register const short *ap;
+	register int f;
+
+	ap = pairp;
+	f = flg;
+	n = *ap++;
+	while (--n >= 0 && (f & *ap++) == 0)
+		ap++;
+	putchar(*ap);
+}
+
+
+static VOID pmode(P(int) aflg1)
+PP(int aflg1;)
+{
+	register const short *const *mp;
+
+	for (mp = &m[0]; mp < &m[9];)
+		select(*mp++, aflg1);
+}
+
+
+static VOID pfname(NOTHING)
+{
+	register char *p;
 	register int i;
 
-	int j,
-	 docopy;
+	p = &lp->lfname[0];
+	i = LIBNSIZE;
+	while (*p && i)
+	{
+		putchar(*p++);
+		i--;
+	}
+	putchar('\n');
+}
 
-	char *myname;
 
-	myname = *argv;
+static VOID inform(P(char) cc)
+PP(char cc;)
+{
+	if (vflg)
+	{
+		putchar(cc);
+		putchar(' ');
+		pfname();
+	}
+}
+
+
+static VOID cp1file(P(FILE *) ifd, P(FILE *) ofd, P(int) aflags, P(const char *) iname, P(const char *) oname)
+PP(FILE *ifd;)
+PP(FILE *ofd;)
+PP(int aflags;)
+PP(const char *iname;)
+PP(const char *oname;)
+{
+	register int i;
+	register long l;
+	register int flags, sz;
+
+	flags = aflags;
+	if (flags & WHDR)
+	{
+		if (putarhd(ofd, &libhd) != 0)
+		{
+		  iwrerr:
+			fprintf(stderr, _("%s: write error on %s: %s\n"), program_name, oname, strerror(errno));
+			endit(0);
+		}
+	}
+	if (flags & WCOUTHD)
+	{
+		if (putchd(ofd, &couthd) != 0)
+		{
+			goto iwrerr;
+		}
+		l = lp->lfsize - HDSIZE;
+	} else
+	{
+		l = lp->lfsize;
+	}
+	while (l)
+	{
+		if (l < BUFSIZ)
+			sz = l;
+		else
+			sz = BUFSIZ;
+		if ((i = fread(buff, sizeof(char), sz, ifd)) == 0)
+		{
+			fprintf(stderr, _("%s: read error: %s\n"), program_name, strerror(errno));
+			endit(0);
+		}
+		if (fwrite(buff, sizeof(char), i, ofd) == 0)
+			goto iwrerr;
+		l -= i;
+	}
+	if (flags & OEVEN)
+	{
+		if (lp->lfsize & 1)
+			fputc(0, ofd);
+	}
+	if (flags & IEVEN)
+	{
+		if (lp->lfsize & 1)
+			fread(buff, sizeof(char), 1, ifd);
+	}
+}
+
+
+/* call with cpflag = 0 for skip, cpflag = 1 for copy */
+static VOID skcopy(P(int) cpflag)
+PP(int cpflag;)
+{
+	register off_t l;
+
+	if (areof)
+		return;
+	l = lp->lfsize;
+	if (l & 1)
+		l++;
+	if (cpflag)
+	{
+		inform('c');
+		cp1file(arfp, tempfd, WHDR + OEVEN + IEVEN, arname, tempname);
+	} else
+	{
+		if (fseek(arfp, l, SEEK_CUR) == -1)
+		{
+			fprintf(stderr, _("%s: seek error on library\n"), program_name);
+			endit(0);
+		}
+	}
+}
+
+
+static VOID copystr(P(const char *) ap1, P(char *) ap2, P(int) alen)
+PP(const char *ap1;)
+PP(char *ap2;)
+PP(int alen;)
+{
+	register const char *p1;
+	register const char *slash;
+	register char *p2;
+	register int len;
+	register char c;
+	
+	slash = NULL;
+	p1 = ap1;
+	while (*p1)
+	{
+		c = *p1++;
+		if (c == '/' || c == '\\')
+			slash = p1;					/* point to char after last '/' in name */
+	}
+	if (slash)
+		p1 = slash;
+	else
+		p1 = ap1;
+	p2 = ap2;
+	len = alen;
+	while (len)
+	{
+		if ((*p2++ = *p1++) == '\0')
+			break;
+		len--;
+	}
+	while (--len > 0)
+		*p2++ = '\0';
+}
+
+
+static int ckafile(P(const char *) ap)
+PP(const char *ap;)
+{
+	if (ap == NULL || *ap == '\0')
+		cleanup();
+	if (areof)
+	{
+		fprintf(stderr, _("%s: %s not in archive file\n"), program_name, ap);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+/* execute one command -- call with filename or 0 */
+
+static VOID tellar68(P(const char *) ap)
+PP(const char *ap;)
+{
+	register char *p1;
+
+	if (ap != (const char *)-1 && ckafile(ap))
+		return;
+	if (vflg)
+	{									/* long list */
+		pmode(lp->lfimode);
+		printf(" %d/%d ", lp->luserid, lp->lgid);
+		printf("%6ld", lp->lfsize);
+		p1 = ctime(&lp->lmodti);
+		p1[24] = '\0';
+		p1 += 4;
+		printf(" %s  ", p1);
+	}
+	pfname();
+	skcopy(0);
+}
+
+
+/* read next ar file header into libhd */
+
+static int nextar(NOTHING)
+{
+	if (areof || getarhd(arfp, &libhd) == EOF || feof(arfp) || *libhd.lfname == '\0')
+	{
+		areof++;
+		return FALSE;
+	}
+	return TRUE;
+}
+
+static VOID cprest(NOTHING)
+{
+	while (nextar())
+		skcopy(1);						/* copy rest of library */
+}
+
+
+static VOID replace(P(const char *) name)
+PP(const char *name;)
+{
+	register FILE *ifd;
+
+#if 0
+	register struct stat *stp;
+	struct stat stbuf;
+	stp = &stbuf;
+#endif
+
+	if (name == NULL)
+	{
+		if (bflg && areof == 0)
+		{
+			if (fseek(arfp, -(long) LIBHDSIZE, 1) == -1)
+				fprintf(stderr, _("%s: %s: fseek error\n"), program_name, arname);
+		}
+		cprest();
+		return;
+	}
+#if 0
+	if (stat(name, stp) < 0)
+	{
+		fprintf(stderr, _("%s: can't find %s\n"), program_name, name);
+		endit(0);
+	}
+#endif
+	if ((ifd = fopen(name, "rb")) == NULL)
+	{
+		fprintf(stderr, _("%s: can't open %s\n"), program_name, name);
+		endit(0);
+	}
+	/* BUG: ar should not depend on members being object files */
+	if (getchd(ifd, &couthd) < 0)
+	{
+		fprintf(stderr, _("%s: can't read %s\n"), program_name, name);
+		endit(0);
+	}
+	if (areof && psflg)
+	{
+		fprintf(stderr, _("%s: %s not in library\n"), program_name, psname);
+		endit(0);
+	}
+	if ((bflg | aflg) && matchflg == 0)
+	{									/* copy archive before appending */
+		if (aflg)
+			skcopy(1);
+		matchflg++;
+	}
+	copystr(name, &lp->lfname[0], LIBNSIZE);
+	if (areof | aflg)
+	{
+		inform('a');
+	} else if (bflg)
+	{
+		inform('i');
+	} else
+	{
+		inform('r');
+		skcopy(0);						/* skip old copy */
+	}
+#if 0
+	lp->luserid = stp->st_uid;
+	lp->lgid = stp->st_gid;
+	lp->lfimode = stp->st_mode;
+	lp->lmodti = stp->st_mtime;
+	lp->lfsize = stp->st_size;
+#else
+	lp->lfsize = couthd.ch_tsize + couthd.ch_dsize + couthd.ch_ssize + HDSIZE; /* BUG: should check magic first for headersize */
+	if (couthd.ch_rlbflg == 0)
+		lp->lfsize += couthd.ch_tsize + couthd.ch_dsize;
+#endif
+	cp1file(ifd, tempfd, WHDR + OEVEN, name, tempname);
+	fclose(ifd);
+}
+
+
+static VOID ddelete(P(const char *) ap)
+PP(const char *ap;)
+{
+	if (ap == NULL)
+	{
+		cprest();
+		fseek(tempfd, 0L, SEEK_SET);
+		lputw(&libmagic, tempfd);
+		return;
+	}
+	if (strcmp(ap, SYMDEF) == 0)
+		libmagic = LIBMAGIC;
+	inform('d');
+	skcopy(0);
+}
+
+
+static VOID extract(P(const char *) ap)
+PP(const char *ap;)
+{
+	register FILE *ofd;
+	register int i;
+	mode_t mode;
+	
+	if (ckafile(ap))
+		return;
+	mode = lp->lfimode & 0777;
+	if (!(mode & S_IWUSR))
+		mode = DEFMODE;
+	if ((i = open(ap, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, mode)) < 0)
+	{
+		fprintf(stderr, _("%s: can't create %s\n"), program_name, ap);
+		endit(0);
+	}
+	ofd = fdopen(i, "wb");
+	inform('x');
+	cp1file(arfp, ofd, IEVEN, arname, ap);
+	fclose(ofd);
+}
+
+
+static VOID prshort(P(const char *) ap)
+PP(const char *ap;)
+{
+	if (ckafile(ap))
+		return;
+	cp1file(arfp, stdout, IEVEN, arname, "std output");
+}
+
+
+/* list all file in the library */
+
+static VOID listall(NOTHING)
+{
+	while (nextar())
+		tellar68((const char *) -1);
+}
+
+
+static VOID exall(NOTHING)
+{
+	if (nextar())
+	{
+		if (strcmp(libhd.lfname, SYMDEF) == 0)
+		{
+			fseek(arfp, lp->lfsize, SEEK_CUR);
+			if (nextar() == FALSE)
+				return;
+		}
+	}
+	do {
+		extract(lp->lfname);
+	} while (nextar());
+}
+
+
+static VOID tmp2ar(NOTHING)
+{
+	register int n, ifd, ofd;
+
+	if ((ofd = open(arname, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, DEFMODE)) < 0)
+	{
+		fprintf(stderr, _("%s: can't create %s\narchive left in %s\n"), program_name, arname, tempname);
+		tempname = NULL;					/* keeps endit from removing the archive */
+		return;
+	}
+	fclose(tempfd);
+	if ((ifd = open(tempname, O_RDONLY|O_BINARY)) < 0)
+	{
+		fprintf(stderr, _("%s: failed to open %s\n"), program_name, tempname);
+		return;
+	}
+	while ((n = read(ifd, buff, BUFSIZ)) > 0)
+		write(ofd, buff, n);
+	buff[0] = buff[1] = buff[2] = buff[3] = 0;
+	write(ofd, buff, 4);
+	close(ofd);
+	tempfd = fdopen(ifd, "rb");
+}
+
+
+static const char *fnonly(P(const char *) s)
+PP(const char *s;)
+{
+	register const char *p;
+	register const char *r;
+
+	r = s;
+	p = NULL;
+	while (*r)
+	{
+		if (*r == '/' || *r == '\\')
+			p = r;
+		r++;
+	}
+	if (p)
+	{
+		++p;
+		if (*p == 0)
+			p = s;
+	} else
+	{
+		p = s;
+	}
+	
+	return p;
+}
+
+
+#if 0 /* unused */
+/* this is a copy routine for the cross device archive creation */
+static int copy(P(const char *) from, P(const char *) to)
+PP(const char *from;)
+PP(const char *to;)
+{
+	register int ifd, ofd, len;
+
+	if ((ofd = open(to, O_WRONLY|O_BINARY)) == -1)
+	{
+		if ((ofd = open(to, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, DEFMODE)) == -1)
+			return -1;
+	}
+	if ((ifd = open(from, O_RDONLY|O_BINARY)) == -1)
+	{
+		close(ofd);
+		unlink(to);
+		return -1;
+	}
+
+	while ((len = read(ifd, buff, sizeof buff)) > 0)
+		write(ofd, buff, len);
+
+	close(ifd);
+	close(ofd);
+	return 0;
+}
+#endif
+
+
+int main(P(int) argc, P(char **) argv)
+PP(int argc;)
+PP(char **argv;)
+{
+	register char *p1;
+	register char **ap;
+	register int i;
+	int j, docopy;
+
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
+	printf(_("AR68 Archiver (c) Alcyon Corporation\n"));
+	exitstat = EXIT_SUCCESS;
 	if (argc < 3)
 	{
 	  usage:
-		printf(USAGE, myname);
-		endit();
+		fprintf(stderr, _("usage: %s [rdxtpvabi] [pos] archive file [file ...]\n"), program_name);
+		endit(0);
 	}
-	signal(1, endit);
-	signal(2, endit);
+	signal(SIGHUP, endit);
+	signal(SIGINT, endit);
 	ap = &argv[1];
 	p1 = *ap++;
 	i = argc - 3;
@@ -175,7 +649,7 @@ char **argv;
 			break;
 		case 'd':
 			dflg++;
-			docom = delete;
+			docom = ddelete;
 			break;
 		case 'x':
 			xflg++;
@@ -183,11 +657,11 @@ char **argv;
 			break;
 		case 't':
 			tflg++;
-			docom = tell;
+			docom = tellar68;
 			break;
 		case 'p':
 			pflg++;
-			docom = print;
+			docom = prshort;
 			break;
 		case 'v':
 			vflg++;
@@ -195,52 +669,64 @@ char **argv;
 		case '-':
 			break;
 		default:
-			printf("invalid option flag: %c\n", *--p1);
-			endit();
+			fprintf(stderr, _("%s: invalid option flag: %c\n"), program_name, *--p1);
+			endit(0);
+			break;
 		}
 	}
 	uflg = rflg + dflg;
 	if ((uflg + xflg + tflg + pflg) != 1)
 	{
-		printf("At least one and only one of 'rdxt' flags required\n");
-		endit();
+		fprintf(stderr, _("%s: one and only one of 'rdxt' flags required\n"), program_name);
+		endit(0);
 	}
 	psflg = aflg + bflg;
 	if (psflg > 1)
 	{
-		printf("only one of 'abi' flags allowed\n");
-		endit();
+		fprintf(stderr, _("%s: only one of 'abi' flags allowed\n"), program_name);
+		endit(0);
 	}
 	if (psflg && (rflg != 1))
 	{
-		printf("'abi' flags can only be used with 'r' flag\n");
-		endit();
+		fprintf(stderr, _("%s: 'abi' flags can only be used with 'r' flag\n"), program_name);
+		endit(0);
 	}
 	arname = *ap++;
 	arfp = openar(arname, rflg);
+	if (arfp == NULL && (tflg + xflg + bflg + aflg + dflg))
+	{
+		fprintf(stderr, _("%s: no such file '%s'\n"), program_name, arname);
+		endit(0);
+	}
 	if (i == 0 && tflg)
 	{
 		listall();
-		endit();
+		cleanup();
 	}
 	if (i == 0 && xflg)
 	{
 		exall();
-		endit();
+		cleanup();
 	}
 	if (i <= 0)
 		goto usage;
-	tempname = mktemp("/tmp/_~ar?????");
-	if ((tempfd = fopen(tempname, "w")) == NULL)
+	if (libmagic == LIBRMAGIC && uflg)
+		fprintf(stderr, _("%s: warning, changing a random access library\n"), program_name);
+	if (!pflg && !tflg)
 	{
-		printf("can't create %s\n", tempname);
-		endit();
+		strcpy(tempnbuf, "arXXXXXX");
+		tempname = mktemp(tempnbuf);
+		if ((tempfd = fopen(tempname, "wb")) == NULL)
+		{
+			fprintf(stderr, _("%s: can't create %s\n"), program_name, tempname);
+			endit(0);
+		}
+
+		if (lputw(&libmagic, tempfd) != 0)
+			fprintf(stderr, _("%s: write error on magic number: %s\n"), program_name, strerror(errno));
 	}
 
-	if (lputw(&libmagic, tempfd) != 0)
-		perror("ar: write error on magic number");
-
-/* read archive, executing appropriate commands */
+	/* read archive, executing appropriate commands */
 	while (matchflg == 0 && nextar())
 	{
 		docopy = 1;
@@ -248,7 +734,7 @@ char **argv;
 		{
 			for (j = 0; j < i; j++)
 			{
-				if (streq(fnonly(ap[j]), &lp->lfname[0]))
+				if (strcmp(fnonly(ap[j]), &lp->lfname[0]) == 0)
 				{
 					docopy = 0;
 					(*docom) (ap[j]);
@@ -260,7 +746,7 @@ char **argv;
 					}
 				}
 			}
-		} else if (streq(psname, &lp->lfname[0]))
+		} else if (strcmp(psname, &lp->lfname[0]) == 0)
 		{
 			docopy = 0;
 			for (j = 0; j < i; j++)
@@ -272,31 +758,39 @@ char **argv;
 			skcopy(uflg);
 	}
 
-/* deal with the leftovers */
+	/* deal with the leftovers */
 	if (i > 0)
 	{
 		for (j = 0; j < i; j++)
 		{
 			if (rflg)
+			{
 				(*docom) (ap[j]);
-			else
-				printf("%s not found\n", ap[j]);
+			} else
+			{
+				fprintf(stderr, "%s not found\n", ap[j]);
+				exitstat = EXIT_FAILURE;
+			}
 		}
 	}
-	(*docom) (0L);
+	(*docom) (NULL);
 
-/* make temp file the archive file */
+	if (tflg || pflg)					/* 20 sep 83, don't need to do this stuff... */
+		cleanup();
+
+#if 0
+	/* make temp file the archive file */
 	if (stat(tempname, &tstat) < 0)
 	{
-		printf("can't find %s\n", tempname);
-		endit();
+		fprintf(stderr, _("%s: can't find %s\n", program_name, tempname);
+		endit(0);
 	}
 	if (arfp != NULL)
 	{
 		if (stat(arname, &astat) < 0)
 		{
-			printf("can't find %s\n", arname);
-			endit();
+			fprintf(stderr, _("%s: can't find %s\n"), program_name, arname);
+			endit(0);
 		}
 		if ((astat.st_nlink != 1) || (astat.st_dev != tstat.st_dev))
 		{
@@ -304,567 +798,48 @@ char **argv;
 			tmp2ar();
 		} else if ((unlink(arname) == -1))
 		{
-			printf("can't unlink old archive\nnew archive left in %s\n", tempname);
+			fprintf(stderr, _("%s: can't unlink old archive\nnew archive left in %s\n"), program_name, tempname);
 			tempname = 0;				/* keeps endit from removing the archive */
 		} else if (link(tempname, arname) < 0)
 		{
 			if (copy(tempname, arname) < 0)
 			{
-				printf("can't link to %s\nnew archive left in %s\n", arname, tempname);
+				fprintf(stderr, _("%s: can't link to %s\nnew archive left in %s\n"), program_name, arname, tempname);
 				tempname = 0;
 			}
 		}
 	} else
 	{
-		if ((arfp = fopen(arname, "w")) == NULL)
+		if ((arfp = fopen(arname, "wb")) == NULL)
 		{
-			printf("can't create %s\narchive left in %s\n", arname, tempname);
-			tempname = 0;				/* keeps endit from removing the archive */
+			fprintf(stderr, _("%s: can't create %s\narchive left in %s\n"), program_name, arname, tempname);
+			tempname = NULL;				/* keeps endit from removing the archive */
 			endit();
 		}
 		if (stat(arname, &astat) < 0)
 		{
-			printf("can't find %s\n", arname);
-			endit();
+			fprintf(stderr, _("%s: can't find %s\n"), program_name, arname);
+			endit(0);
 		}
 		fclose(arfp);
 		if (astat.st_dev != tstat.st_dev)
+		{
 			tmp2ar();
-		else if ((unlink(arname) < 0) || (link(tempname, arname) < 0))
+			exitstat = EXIT_SUCCESS;
+		} else if ((unlink(arname) < 0) || (link(tempname, arname) < 0))
 		{
-			printf("can't link to %s\n", arname);
-			printf("new archive left in %s\n", tempname);
-			tempname = 0;				/* keeps endit from removing the archive */
+			fprintf(stderr, _("%s: can't link to %s\nnew archive left in %s\n"), program_name, arname, tempname);
+			tempname = NULL;				/* keeps endit from removing the archive */
 		}
 	}
-	endit();
-}
-
-FILE *openar(arp, crfl)
-char *arp;
-{
-	register FILE *i;
-
-	unsigned int ib;
-
-	if ((i = fopen(arp, "r")) == NULL)
-	{									/* does not exist */
-		areof = 1;
-		return (NULL);
-	}
-	if (lgetw(&ib, i) != 0 || ib != LIBMAGIC)
-	{
-	  notar:
-		printf("not archive format: %s %o\n", arp, ib);
-		endit();
-	}
-	return (i);
-}
-
-/* execute one command -- call with filename or 0 */
-
-int tell(ap)
-char *ap;
-{
-	register char *p;
-
-	register i;
-
-	register char *p1;
-
-	if (ckafile(ap))
-		return;
-	if (vflg)
-	{									/* long list */
-		pmode(lp->lfimode);
-		printf(" %d/%d ", lp->luserid, lp->lgid);
-#ifdef PDP11
-		plong("%6ld", lp->lfsize);
+	cleanup();
 #else
-		printf("%6ld", lp->lfsize);
-#endif
-		p1 = ctime(&lp->lmodti);
-		p1[24] = '\0';
-		p1 += 4;
-		printf(" %s  ", p1);
-	}
-	pfname();
-	skcopy(0);
-}
-
-pfname()
-{
-	register char *p;
-
-	register i;
-
-	p = &lp->lfname[0];
-	i = LIBNSIZE;
-	while (*p && i)
-	{
-		putchar(*p++);
-		i--;
-	}
-	putchar('\n');
-}
-
-int replace(name)
-char *name;
-{
-	register int i;
-
-	register FILE *ifd;
-
-	register struct stat *stp;			/* 11 apr 83, struct stat */
-
-	struct stat stbuf;
-
-#ifdef PDP11
-	long l;
+	if (tflg || pflg)
+		cleanup();
+	tmp2ar();
+	exitstat = EXIT_SUCCESS;
+	cleanup();
 #endif
 
-	stp = &stbuf;
-	if (name == 0)
-	{
-		if (bflg && areof == 0)
-		{
-			if (fseek(arfp, -(SEEKTYPE) LIBHDSIZE, 1) == -1)
-				printf("fseek error\n");
-		}
-		cprest();
-		return;
-	}
-	if (stat(name, stp) < 0)
-	{
-		printf("can't find %s\n", name);
-		endit();
-	}
-	if ((ifd = fopen(name, "r")) == NULL)
-	{
-		printf("can't open %s\n", name);
-		endit();
-	}
-	if (areof && psflg)
-	{
-		printf("%s not in library\n", psname);
-		endit();
-	}
-	if ((bflg | aflg) && matchflg == 0)
-	{									/* copy archive before appending */
-		if (aflg)
-			skcopy(1);
-		matchflg++;
-	}
-	copystr(name, &lp->lfname[0], LIBNSIZE);
-	if (areof | aflg)
-		inform('a');
-	else if (bflg)
-		inform('i');
-	else
-	{
-		inform('r');
-		skcopy(0);						/* skip old copy */
-	}
-	lp->luserid = stp->st_uid;
-	lp->lgid = stp->st_gid;
-	lp->lfimode = stp->st_mode;
-#ifdef PDP11
-	l = mklong(stp->st_mtime[0], stp->st_mtime[1]);
-	lp->lmodti = l;
-	l = mklong(stp->st_size0, stp->st_size1);
-	lp->lfsize = l;
-#else
-	lp->lmodti = stp->st_mtime;
-	lp->lfsize = stp->st_size;
-#endif
-	cp1file(ifd, tempfd, WHDR + OEVEN, name, tempname);
-	fclose(ifd);
-}
-
-int delete(ap)
-char *ap;
-{
-	if (ap == 0)
-	{
-		cprest();
-		return;
-	}
-	inform('d');
-	skcopy(0);
-}
-
-int extract(ap)
-char *ap;
-{
-	register FILE *ofd;
-
-	register i;
-
-	if (ckafile(ap))
-		return;
-	if ((i = creat(ap, lp->lfimode)) < 0)
-	{
-		printf("can't create %s\n", ap);
-		endit();
-	}
-	ofd = fdopen(i, "w");
-	inform('x');
-	cp1file(arfp, ofd, IEVEN, arname, ap);
-	fclose(ofd);
-}
-
-int print(ap)
-char *ap;
-{
-
-	if (ckafile(ap))
-		return;
-	cp1file(arfp, 1, IEVEN, arname, "std output");
-}
-
-int endit()
-{
-
-	if (tempname)
-		unlink(tempname);
-	exit(0);
-}
-
-/* list all file in the library */
-
-listall()
-{
-
-	while (nextar())
-		tell((char *) -1);
-}
-
-/* read next ar file header into libhd */
-
-nextar()
-{
-
-	if (areof || getarhd(arfp, &libhd) == EOF || libhd.lfname[0] == 0)
-	{
-		areof++;
-		return (0);
-	}
-	return (1);
-}
-
-/* call with cpflag = 0 for skip, cpflag = 1 for copy */
-skcopy(cpflag)
-int cpflag;
-{
-	register SEEKTYPE l;
-
-	register int i;
-
-	if (areof)
-		return;
-	l = lp->lfsize;
-	if (l & 1)
-		l++;
-	if (cpflag)
-	{
-		inform('c');
-		cp1file(arfp, tempfd, WHDR + OEVEN + IEVEN, arname, tempname);
-	} else
-	{
-		if (fseek(arfp, l, 1) == -1)
-		{
-			printf("seek error on library\n");
-			endit();
-		}
-	}
-}
-
-char *mktemp(ap)
-char *ap;
-{
-	register char *p;
-
-	register i,
-	 j;
-
-	i = getpid();						/* process id */
-	p = ap;
-	while (*p)
-		p++;
-	for (j = 0; j < 5; j++)
-	{
-		*--p = ((i & 7) + '0');
-		i >>= 3;
-	}
-	return (ap);
-}
-
-streq(s1, s2)
-char *s1,
-*s2;
-{
-	register char *p1,
-	*p2;
-
-	p1 = s1;
-	p2 = s2;
-	while (*p1++ == *p2)
-		if (*p2++ == 0)
-			return (1);
-	return (0);
-}
-
-int m1[] = { 1, ROWN, 'r', '-' };
-int m2[] = { 1, WOWN, 'w', '-' };
-int m3[] = { 1, XOWN, 'x', '-' };
-int m4[] = { 1, RGRP, 'r', '-' };
-int m5[] = { 1, WGRP, 'w', '-' };
-int m6[] = { 1, XGRP, 'x', '-' };
-int m7[] = { 1, ROTH, 'r', '-' };
-int m8[] = { 1, WOTH, 'w', '-' };
-int m9[] = { 1, XOTH, 'x', '-' };
-
-int *m[] = { m1, m2, m3, m4, m5, m6, m7, m8, m9 };
-
-pmode(aflg1)
-{
-	register int **mp;
-
-	for (mp = &m[0]; mp < &m[9];)
-		select(*mp++, aflg1);
-}
-
-select(pairp, flg)
-int *pairp;
-
-int flg;
-{
-	register int n,
-	*ap,
-	 f;
-
-	ap = pairp;
-	f = flg;
-	n = *ap++;
-	while (--n >= 0 && (f & *ap++) == 0)
-		ap++;
-	putchar(*ap);
-}
-
-inform(cc)
-char cc;
-{
-
-	if (vflg)
-	{
-		putchar(cc);
-		putchar(' ');
-		pfname();
-	}
-}
-
-copystr(ap1, ap2, alen)
-char *ap1,
-*ap2;
-{
-	register char *p1,
-	*p2;
-
-	register len;
-
-	p2 = 0;
-	p1 = ap1;
-	while (*p1)
-		if (*p1++ == '/')
-			p2 = p1;					/* point to char after last '/' in name */
-	if (p2)
-		p1 = p2;
-	else
-		p1 = ap1;
-	p2 = ap2;
-	len = alen;
-	while (len)
-	{
-		if (!(*p2++ = *p1++))
-			break;
-		len--;
-	}
-	while (--len > 0)
-		*p2++ = '\0';
-}
-
-#ifdef PDP11
-long mklong(ai1, ai2)
-{
-	long l;
-
-	l.hiword = ai1;
-	l.loword = ai2;
-	return (l);
-}
-
-plong(num)
-long num;
-{
-}
-#endif
-
-cprest()
-{
-
-	while (nextar())
-		skcopy(1);						/* copy rest of library */
-}
-
-cp1file(ifd, ofd, aflags, iname, oname)
-FILE *ifd,
-*ofd;
-
-int aflags;
-
-char *iname,
-*oname;
-{
-	register i;
-
-	register long l;
-
-	register int flags,
-	 sz;
-
-	char str[50];
-
-	flags = aflags;
-	if (flags & WHDR)
-	{
-		if (putarhd(ofd, &libhd) != 0)
-		{
-		  iwrerr:
-			sprintf(str, "ar: write error on %s", oname);
-			perror(str);
-			endit();
-		}
-	}
-	l = lp->lfsize;
-	while (l)
-	{
-		if (l < BUFSIZ)
-			sz = l;
-		else
-			sz = BUFSIZ;
-		if ((i = fread(buff, sizeof(char), sz, ifd)) == NULL)
-		{
-			perror("ar: read error");
-			endit();
-		}
-		if (fwrite(buff, sizeof(char), i, ofd) == NULL)
-			goto iwrerr;
-		l -= i;
-	}
-	if (flags & OEVEN)
-	{
-		if (lp->lfsize & 1)
-			fwrite("", sizeof(char), 1, ofd);
-	}
-	if (flags & IEVEN)
-		if (lp->lfsize & 1)
-			fread(buff, sizeof(char), 1, ifd);
-}
-
-ckafile(ap)
-char *ap;
-{
-
-	if (ap == 0)
-		endit();
-	if (areof)
-	{
-		printf("%s not in archive file\n", ap);
-		return (1);
-	}
-	return (0);
-}
-
-exall()
-{
-	while (nextar())
-		extract(lp->lfname);
-}
-
-tmp2ar()
-{
-	register int n,
-	 ifd,
-	 ofd;
-
-	if ((ofd = creat(arname, DEFMODE)) < 0)
-	{
-		printf("can't create %s\n", arname);
-		printf("archive left in %s\n", tempname);
-		tempname = 0;					/* keeps endit from removing the archive */
-		return;
-	}
-	fclose(tempfd);
-	if ((ifd = open(tempname, 0)) < 0)
-	{
-		printf("failed to open %s\n", tempname);
-		return;
-	}
-	while ((n = read(ifd, buff, BUFSIZ)) > 0)
-		write(ofd, buff, n);
-	tempfd = fdopen(ifd, "r");
-}
-
-char *fnonly(s)
-char *s;
-{
-	register char *p,
-	*r;
-
-	r = s;
-	strcpy(fname, r);
-	p = 0;
-	while (*r)
-	{
-		if (*r == '/')
-			p = r;
-		r++;
-	}
-	if (p)
-	{
-		++p;
-		if (*p == 0)
-			p = fname;
-	} else
-		p = fname;
-
-	return (p);
-}
-
-/* this is a copy routine for the cross device archive creation */
-copy(from, to)
-char *from,
-*to;
-{
-	register int ifd,
-	 ofd,
-	 len;
-
-	if ((ofd = open(to, WRITE)) == -1)
-	{
-		if ((ofd = creat(to, DEFMODE)) == -1)
-			return (-1);
-	}
-	if ((ifd = open(from, READ)) == -1)
-	{
-		close(ofd);
-		unlink(to);
-		return (-1);
-	}
-
-	while ((len = read(ifd, buff, sizeof buff)) > 0)
-		write(ofd, buff, len);
-
-	close(ifd);
-	close(ofd);
+	return EXIT_SUCCESS;
 }

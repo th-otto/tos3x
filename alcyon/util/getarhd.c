@@ -18,7 +18,7 @@
 
 
 /*
- * getarhd - fills the archive header structure from the buffer int
+ * getarhd - fills the archive header structure from the buffer in
  *		the manner which will be understood on the current machine.
  */
 int getarhd(P(FILE *) fp, P(struct libhdr *) arptr)

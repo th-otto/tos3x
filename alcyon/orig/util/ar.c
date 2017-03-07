@@ -47,7 +47,7 @@ char *SCCSID = "@(#) ar68 - July 1, 1983";
 #define openb open
 #endif
 
-#define USAGE		"usage: %s [rdxtpvabi] [pos] archive file [file ...]\n"
+#define USAGE	"usage: %s [rdxtpvabi] [pos] archive file [file ...]\n"
 #define DEFMODE  	0666
 
 #define SYMDEF "._SYMDEF"
@@ -70,7 +70,7 @@ struct libhdr *lp = &libhd;
 
 unsigned short libmagic = LIBMAGIC;
 
-int rflg, dflg, xflg, tflg,vflg;
+int rflg, dflg, xflg, tflg, vflg;
 int uflg;
 int pflg;
 int areof;
@@ -132,7 +132,7 @@ PP(char **argv;)
 	close(2); /* WTF? */
 	close(0); /* WTF? */
 	myname = *argv;
-	exitstat = 0;
+	exitstat = EXIT_SUCCESS;
 	if (argc < 3)
 	{
 	  usage:
@@ -241,7 +241,7 @@ PP(char **argv;)
 		if (lputw(&libmagic, tempfd) != 0)
 			printf(_("%s: write error on magic number"), myname); /* BUG: no newline; should use perror */
 	}
-	
+
 	/* read archive, executing appropriate commands */
 	while (matchflg == 0 && nextar())
 	{
@@ -366,7 +366,7 @@ PP(const char *arp;)
 PP(int crfl;)
 {
 	register FILE *i;
-	unsigned short ib;
+	unsigned int ib;
 
 	if ((i = fopenbr(arp)) == NULL)
 	{									/* does not exist */
@@ -394,7 +394,7 @@ PP(const char *ap;)
 
 	UNUSED(i);
 	UNUSED(p);
-	if (ap != (char *)-1 && ckafile(ap))
+	if (ap != (const char *)-1 && ckafile(ap))
 		return;
 	if (vflg)
 	{									/* long list */
@@ -576,7 +576,7 @@ VOID cleanup(NOTHING)
 VOID listall(NOTHING)
 {
 	while (nextar())
-		xtell((char *) -1);
+		xtell((const char *) -1);
 }
 
 /* read next ar file header into libhd */
@@ -612,7 +612,7 @@ PP(int cpflag;)
 	{
 		if (efseek(arfp, l, SEEK_CUR) == -1)
 		{
-			printf(_("%s; seek error on library\n"), myname);
+			printf(_("%s: seek error on library\n"), myname);
 			endit();
 		}
 	}
@@ -714,7 +714,7 @@ PP(int alen;)
 	register char *p2;
 	register int len;
 
-	p2 = 0;
+	p2 = NULL;
 	p1 = ap1;
 	while (*p1)
 		if (*p1++ == '/')
@@ -886,7 +886,7 @@ PP(const char *s;)
 
 	r = s;
 	strcpy(fname, r);
-	p = 0;
+	p = NULL;
 	while (*r)
 	{
 		if (*r == '/')
@@ -899,8 +899,10 @@ PP(const char *s;)
 		if (*p == 0)
 			p = fname;
 	} else
+	{
 		p = fname;
-
+	}
+	
 	return p;
 }
 

@@ -1,9 +1,6 @@
 top_srcdir=..
 subdir=util
 
-# 
-# cross compiling
-#
 include ../GNUmakefile.cmn
 include ../Makefile.sil
 

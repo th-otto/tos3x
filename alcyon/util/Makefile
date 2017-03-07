@@ -1,7 +1,7 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-inst_PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT)
+inst_PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT) ar68$(EXEEXT)
 PROGRAMS = $(inst_PROGRAMS) analyze$(EXEEXT)
 LIBS = ${LIBC}
 
@@ -14,6 +14,9 @@ size68$(EXEEXT): $(SIZE_OBJS)
 
 nm68$(EXEEXT): $(NM_OBJS)
 	$(AM_V_LD)$(LD) $(LDFLAGS) -u -o $@ $(CRT0) nofloat.o $(NM_OBJS) $(LIBS)
+
+ar68$(EXEEXT): $(AR_OBJS)
+	$(AM_V_LD)$(LD) $(LDFLAGS) -u -o $@ $(CRT0) nofloat.o $(AR_OBJS) $(LIBS)
 
 analyze$(EXEEXT): $(ANALYZE_OBJS)
 	$(AM_V_LD)$(LD) $(LDFLAGS) -u -o $@ $(CRT0) nofloat.o $(ANALYZE_OBJS) $(LIBS)

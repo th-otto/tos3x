@@ -11,6 +11,7 @@
 #define __AR68_H__ 1
 
 #define LIBMAGIC	0xff65
+#define LIBRMAGIC	0xff66
 #define LIBHDSIZE	28
 #define LIBNSIZE	14
 

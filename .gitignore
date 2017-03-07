@@ -50,6 +50,7 @@ core
 bla.*
 aaa.cfg
 /bin
+/bin64
 /lib
 /alcyon/bin
 /alcyon/lib
