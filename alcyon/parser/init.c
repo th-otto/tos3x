@@ -91,6 +91,7 @@ PP(int sc;)									/* for bit field init */
 	register unsigned short ivalue;
 	register struct tnode *tp;
 	register long value;
+	register short svalue;
 
 	commastop++;
 #ifdef DEBUG
@@ -142,7 +143,8 @@ PP(int sc;)									/* for bit field init */
 			if (initdebug)
 				fprintf(stderr, "ivalue %d\n", ivalue);
 #endif
-			if (ivalue > 255 || ivalue < -128)
+			svalue = ivalue;
+			if (svalue > 255 || svalue < -128)
 				warning(_("initializer truncated"));
 			return 1 + plus;
 		}
@@ -160,7 +162,8 @@ PP(int sc;)									/* for bit field init */
 			if (ccbytes < 2)
 			{
 				outc(CHAR, ((int) ivalue) & 0xff);
-				if (ivalue > 255 || ivalue < -128)
+				svalue = ivalue;
+				if (svalue > 255 || svalue < -128)
 					warning(_("initializer truncated"));
 				return 1 + plus;
 			} else
