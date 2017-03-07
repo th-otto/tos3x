@@ -599,9 +599,11 @@ PP(struct symbol *sp;)						/* pointer to symbol to init */
 			{
 				for (type = sp->s_type; ISARRAY(type); type = delsp(type))
 					;
-				dtab[sp->s_dp] = (isize / dsize(type, sp->s_dp, sp->s_ssp));
+				dtab[sp->s_dp] = isize / dsize(type, sp->s_dp, sp->s_ssp);
 			} else
+			{
 				error(_("too many initializers"));
+			}
 		}
 		if (sp->s_sc == STATIC)
 			OUTTEXT();
@@ -626,7 +628,7 @@ PP(int ssp;)
 	register short onetype, plus, atype;
 	long datasize, i, j, elsize, nbleft, nbout;
 
-	i = (next(LCURBR));
+	i = next(LCURBR);
 	for (onetype = type; ISARRAY(onetype); onetype = delsp(onetype))
 		;
 #ifdef DEBUG
