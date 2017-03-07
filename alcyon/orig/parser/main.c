@@ -241,6 +241,8 @@ PP(char *calledby;)
 
 #ifndef __ALCYON__
 static VOID verror(P(const char *) s, P(va_list) args)
+PP(const char *s;)
+PP(va_list args;)
 {
 	fprintf(stderr, "\"%s\", * %d: ", source, lineno);
 	vfprintf(stderr, s, args);

@@ -7,7 +7,7 @@
 /*** ---------------------------------------------------------------------- ***/
 
 int nf_dbgvprintf(P(const char *) format, P(va_list) args)
-PP(const char * format;)
+PP(const char *format;)
 PP(va_list args;)
 {
 	struct nf_ops *nf_ops;

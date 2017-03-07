@@ -106,7 +106,7 @@ PP(const char *fname;)
 /* usage - output usage error message and die */
 static VOID usage(NOTHING)
 {
-	fatal(_("usage: %s source link icode strings [-e|-f] [-w] [-t]\n"), program_name);
+	fatal(_("usage: %s source link icode strings [-e|-f] [-w] [-t]"), program_name);
 }
 
 
@@ -226,6 +226,8 @@ PP(char **argv;)							/* argument pointers */
 
 
 static VOID verror(P(const char *) s, P(va_list) args)
+PP(const char *s;)
+PP(va_list args;)
 {
 	if (lineno)
 		fprintf(stderr, "\"%s\", * %d: ", source, lineno);
