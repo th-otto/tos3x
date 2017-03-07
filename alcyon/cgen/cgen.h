@@ -177,7 +177,9 @@ extern short stacksize;
 #if BINEXACT
 /*
  * Note: these two macros are actually buggy and create side-effects
- * when used in codegen.c, but can't be fixed when we want o
+ * when used in codegen.c, but can't be fixed when we want to
+ * create binary exact output
+ */
 /* outgoto - output "bra L[labno]" */
 #define OUTGOTO(lab)	if (lab > 0) oprintf("bra L%d\n",lab)
 /* outlab - output "L[labno]:" */

@@ -456,9 +456,9 @@ _va_dcl
 static VOID usage(NOTHING)
 {
 #ifdef DEBUG
-	fatal("usage: %s icode link asm [-DTacemov]", program_name);
+	fatal(_("usage: %s icode link asm [-DTacemov]"), program_name);
 #else
-	fatal("usage: %s icode link asm [-Tav]", program_name);
+	fatal(_("usage: %s icode link asm [-Tav]"), program_name);
 #endif
 }
 
@@ -481,11 +481,11 @@ PP(char **argv;)
 	if (argc < 4)
 		usage();
 	if ((ifil = fopen(argv[1], "r")) == NULL)
-		fatal("can't open %s", argv[1]);
+		fatal(_("can't open %s"), argv[1]);
 	if ((lfil = fopen(argv[2], "r")) == NULL)
-		fatal("can't open %s", argv[2]);
+		fatal(_("can't open %s"), argv[2]);
 	if ((ofil = fopen(argv[3], "w")) == NULL)
-		fatal("can't create %s", argv[3]);
+		fatal(_("can't create %s"), argv[3]);
 
 	for (argc -= 4; argc--;)
 	{

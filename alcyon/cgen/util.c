@@ -18,7 +18,7 @@ PP(int size;)
 
 	p = opap;
 	if (p + size >= &exprarea[EXPSIZE])
-		fatal("expression too complex");
+		fatal(_("expression too complex"));
 	opap = p + size;
 	return (struct tnode *)p;
 }
