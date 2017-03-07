@@ -205,7 +205,6 @@ static int getctok(NOTHING)
 			return CONST;
 
 		case SQUOTE:
-			printf("SQUOTE: %s\n", token);
 			for (cvalue = 0, p = &token[1], count = sizeof(cvalue); --count >= 0;)
 			{
 				if ((c = *p++) == '\'')
@@ -257,6 +256,21 @@ static int getctok(NOTHING)
 						case '\\':
 							break;
 						
+						case 'x':
+							for (c = 0; ;)
+							{
+								if (*p >= '0' && *p <= '9')
+									c = (c << 4) + (*p++ - '0');
+								else if (*p >= 'a' && *p <= 'f')
+									c = (c << 4) + (*p++ - 'a' + 10);
+								else if (*p >= 'A' && *p <= 'F')
+									c = (c << 4) + (*p++ - 'A' + 10);
+								else
+									break;
+							}
+							c = (char)c;
+							break;
+							
 						default:
 							warning(_("unknown escape sequence '\\%c'"), c);
 							break;
@@ -267,6 +281,8 @@ static int getctok(NOTHING)
 			}
 			if (count < (sizeof(cvalue) - 2))
 				warning(_("multi-character character constant"));
+			if (cvalue < -128 || cvalue > 255)
+				warning(_("character constant out of range"));
 			return CONST;
 
 		case ALPHA:
