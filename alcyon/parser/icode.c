@@ -245,32 +245,6 @@ PP(struct swtch *sp;)						/* switch table pointer */
 }
 
 
-VOID outeof(NOTHING)
-{
-	if (lfil)
-		fflush(lfil);
-	if (sfil)
-		fflush(sfil);
-	if (ofil)
-		fflush(ofil);
-}
-
-
-/* copysfile - copy string file to end of output file */
-VOID copysfile(P(const char *) fname)
-PP(const char *fname;)
-{
-	register short c;
-
-	fclose(sfil);
-	if ((sfil = fopen(fname, "r")) == NULL)
-		fatal(_("can't copy %s"), fname);
-	while ((c = getc(sfil)) > 0)
-		putc(c, ofil);
-	fflush(ofil);
-}
-
-
 /* outword - output a word of data */
 static VOID outword(P(int) w)								/* word expression */
 PP(int w;)
@@ -364,10 +338,10 @@ PP(char c;)
 	if (c == '\t')
 	{
 		if (bol)						/* not used  && !onepass ) */
-			putc('(', obp);				/* for code generator */
+			kputc('(', obp);				/* for code generator */
 	} else
 	{
 		bol = c == '\n';
-		putc(c, obp);
+		kputc(c, obp);
 	}
 }

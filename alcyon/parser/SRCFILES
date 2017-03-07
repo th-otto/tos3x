@@ -1,6 +1,6 @@
-C068_SRCS = decl.c expr.c icode.c init.c interf.c lex.c main.c misc.c node.c putexpr.c stmt.c symt.c tabl.c tree.c
+C068_SRCS = decl.c expr.c icode.c init.c interf.c lex.c main.c misc.c node.c putexpr.c stmt.c symt.c tabl.c tree.c klib.c
 C068_OBJS = $(C068_SRCS:.c=.o)
 
-SRCS = $(C068_SRCS) icode.h parser.h
+SRCS = $(C068_SRCS) icode.h parser.h klib.h
 
 EXTRA_DIST = GNUmakefile Makefile SRCFILES

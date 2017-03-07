@@ -61,20 +61,6 @@ static struct resword const reswords[] = {
 
 
 /*
- * syminit - initialize the symbol table, install reswords
- *		Goes thru the resword table and installs them into the symbol
- *		table.
- */
-VOID syminit(NOTHING)
-{
-	register const struct resword *rp;
-
-	for (rp = &reswords[0]; rp->r_name != 0; rp++)
-		install(rp->r_name, SRESWORD | SDEFINED, rp->r_value);
-}
-
-
-/*
  * symhash - compute hash value for symbol
  *		Sums the symbols characters and takes that modulus the hash table
  *		size.
@@ -102,7 +88,7 @@ PP(int stel;)								/* structure element flag */
  * into the hash table chain.
  * returns pointer to symbol struct
  */
-struct symbol *install(P(const char *) sym, P(int) attrib, P(int) offset)
+static struct symbol *install(P(const char *) sym, P(int) attrib, P(int) offset)
 PP(const char *sym;)						/* symbol to install */
 PP(int attrib;)								/* attributes of symbol */
 PP(int offset;)								/* symbol offset (resword value) */
@@ -110,29 +96,28 @@ PP(int offset;)								/* symbol offset (resword value) */
 	register struct symbol *sp;
 	register short i, is;
 
-	while ((sp = symbols) <= 0) /* XXX */
+	if ((sp = symbols) == NULL)
 	{
-		if ((sp = (struct symbol *) sbrk(SYMSIZE)) == (VOIDPTR)-1)
+		if ((sp = (struct symbol *) malloc(SYMSIZE * sizeof(*symbols))) == NULL)
 			fatal(_("symbol table overflow"));
-		for (i = SYMSIZE / (sizeof *symbols); --i >= 0;)
+		for (i = SYMSIZE; --i >= 0;)
 		{
-			if (sp <= 0)
-				fatal(_("bad symbol table"));
 			sp->s_next = symbols;
 			symbols = sp++;
 		}
+		sp = symbols;
 	}
 	is = in_struct;
 	symbols = sp->s_next;
 	sp->s_attrib = attrib;
 	sp->s_offset = offset;
 	sp->s_sc = sp->s_type = sp->s_dp = sp->s_ssp = 0;
-	sp->s_sib = sp->s_child = sp->s_par = 0;
+	sp->s_sib = sp->s_child = sp->s_par = NULL;
 	if (is)
 	{
 		sp->s_par = struc_parent[is];
 		hold_sib = struc_sib[is];
-		sp->s_scope = (infunc) ? FUNC_SCOPE : GLOB_SCOPE;
+		sp->s_scope = infunc ? FUNC_SCOPE : GLOB_SCOPE;
 		if (struc_sib[is])
 			struc_sib[is]->s_sib = sp;
 		else
@@ -231,7 +216,9 @@ PP(int force;)							/* force entry in symbol table */
 	prev_level = 0;
 	for (sp = symtab[symhash(p, 0)]; sp != 0; sp = sp->s_next)
 		if ((sp->s_attrib & (SRESWORD | STYPEDEF)) && symequal(p, sp->s_symbol))
+		{
 			return sp;
+		}
 	hold = 0;
 	if (!(smember | in_struct))
 	{
@@ -239,15 +226,18 @@ PP(int force;)							/* force entry in symbol table */
 			if (symequal(p, sp->s_symbol))
 			{
 				if (scope_level == sp->s_scope)
+				{
 					return sp;		/* perfect scope match */
-				else if (!force && prev_level <= sp->s_scope)
+				} else if (!force && prev_level <= sp->s_scope)
 				{
 					hold = sp;
 					prev_level = sp->s_scope;
 				}
 			}
 		if (hold)
+		{
 			return hold;
+		}
 	} else
 	{									/* doing a declaration or an expression */
 		exact = 0;
@@ -256,13 +246,18 @@ PP(int force;)							/* force entry in symbol table */
 			if (symequal(p, sp->s_symbol))
 			{
 				if (symsame(sp, hold, &exact))
+				{
 					return sp;
-				else if (!hold && !exact)
+				} else if (!hold && !exact)
+				{
 					hold = sp;
+				}
 			}
 		}
 		if (hold && (instmt || in_struct == 0 || smember != 0))
+		{
 			return hold;
+		}
 	}
 #ifdef DEBUG
 	if (symdebug)
@@ -294,10 +289,12 @@ PP(int level;)								/* scope levels... */
 					sp->s_attrib |= SDEFINED;
 				}
 			if (sp->s_attrib & (SGLOBAL | SRESWORD))
+			{
 				tp = sp;
-			else if (!(sp->s_attrib & SGLOBAL) && sp->s_scope < level)
+			} else if (!(sp->s_attrib & SGLOBAL) && sp->s_scope < level)
+			{
 				tp = sp;
-			else
+			} else
 			{
 #ifdef DEBUG
 				if (symdebug)
@@ -367,4 +364,18 @@ PP(char *to;)								/* pointer to area to copy to */
 	{
 		*q++ = (*p ? *p++ : '\0');
 	}
+}
+
+
+/*
+ * syminit - initialize the symbol table, install reswords
+ *		Goes thru the resword table and installs them into the symbol
+ *		table.
+ */
+VOID syminit(NOTHING)
+{
+	register const struct resword *rp;
+
+	for (rp = &reswords[0]; rp->r_name != 0; rp++)
+		install(rp->r_name, SRESWORD | SDEFINED, rp->r_value);
 }

@@ -9,6 +9,7 @@
  *	C68 Parser - include file
  */
 #include <stdio.h>
+#include "klib.h"
 
 #define NOPROFILE
 /* #define DEBUG */
@@ -111,7 +112,7 @@
 #define GLOB_SCOPE	0			/* global level is 0 */
 #define FUNC_SCOPE	1			/* function level is 1 */
 
-#define SYMSIZE 	1024		/* size to alloc for symbol structures */
+#define SYMSIZE 	128			/* # of symbol structures to allocate */
 
 #ifndef VAX11
 struct words { short hiword; short loword; };
@@ -449,8 +450,6 @@ VOID outfpdata PROTO((NOTHING));
 VOID outbexit PROTO((int nlocs, int nds, int nas));
 VOID outlocal PROTO((int type, int sc, const char *sym, int val));
 VOID outswitch PROTO((int ncases, int deflab, struct swtch *sp));
-VOID outeof PROTO((NOTHING));
-VOID copysfile PROTO((const char *fname));
 VOID outfp_or_l PROTO((long l));
 VOID outtstr PROTO((int lab));
 long outstr PROTO((long maxsize, long strsize));
@@ -531,7 +530,6 @@ VOID outassign PROTO((struct tnode *ltp, struct tnode *rtp));
  * symt.c
  */
 VOID syminit PROTO((NOTHING));
-struct symbol *install PROTO((const char *sym, int attrib, int offset));
 struct symbol *lookup PROTO((const char *sym, int force));
 VOID freesyms PROTO((int level));
 VOID chksyms PROTO((int ok));

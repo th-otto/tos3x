@@ -586,10 +586,10 @@ int ngetch(NOTHING)
 		return c;
 	}
 
-	c = getc(ifil);
+	c = kgetc(ifil);
 	if (c == 0x0d)
 	{
-		c = getc(ifil);
+		c = kgetc(ifil);
 		if (c != 0x0a)
 		{
 			if (c != EOF)
@@ -609,17 +609,17 @@ int ngetch(NOTHING)
 	} else if (cr_last && c == '#')
 	{
 		/* handle: # 33 "file.h" */
-		c = getc(ifil);					/* get space */
+		c = kgetc(ifil);					/* get space */
 		if (c != ' ')
 			putback(c);
 		lineno = getdec() & 077777;
 		ptr = &source[0];
-		if ((c = getc(ifil)) != '\"')	/* get past double quote */
+		if ((c = kgetc(ifil)) != '\"')	/* get past double quote */
 			*ptr++ = c;
-		while ((c = getc(ifil)) != '\"' && c != '\n' && c != EOF)
+		while ((c = kgetc(ifil)) != '\"' && c != '\n' && c != EOF)
 			*ptr++ = c;
 		while (c != '\n' && c != EOF)
-			c = getc(ifil);			/* get carriage return */
+			c = kgetc(ifil);			/* get carriage return */
 		*ptr = 0;
 		cr_last = 1;
 		c = '\n';

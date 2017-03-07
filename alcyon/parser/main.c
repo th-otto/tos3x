@@ -53,21 +53,53 @@ static char *strfile;
 
 static char const program_name[] = "c068";
 
+#if KLUDGE
+static struct kludge_iob obuf, lbuf, sbuf, ibuf;
+#endif
+
+
+static VOID outeof(NOTHING)
+{
+	if (lfil)
+		kflush(lfil);
+	if (sfil)
+		kflush(sfil);
+	if (ofil)
+		kflush(ofil);
+}
+
 
 static VOID cleanup(NOTHING)
 {
 	signal(SIGINT, SIG_IGN);
 	if (lfil)
-		fclose(lfil);
-	if (ifil && ifil != stdin)
-		fclose(ifil);
-	if (ofil && ofil != stdout)
-		fclose(ofil);
+		kfclose(lfil);
+	if (ifil && ifil != (FILE *)stdin)
+		kfclose(ifil);
+	if (ofil && ofil != (FILE *)stdout)
+		kfclose(ofil);
 	if (sfil)
-		fclose(sfil);
+		kfclose(sfil);
 	if (strfile)
 		unlink(strfile);
 	exit(errcnt != 0);
+}
+
+
+/* copysfile - copy string file to end of output file */
+static VOID copysfile(P(const char *) fname)
+PP(const char *fname;)
+{
+	register short c;
+
+	kfclose(sfil);
+	if ((sfil = xfopen(fname, &sbuf)) == NULL)
+		fatal(_("can't copy %s"), fname);
+	while ((c = kgetc(sfil)) > 0)
+		kputc(c, ofil);
+	kflush(ofil);
+	kfclose(sfil);
+	sfil = NULL;
 }
 
 
@@ -100,14 +132,14 @@ PP(char **argv;)							/* argument pointers */
 	argv++;
 	for (q = source, p = *argv++; (*q++ = *p++) != 0;)
 		;
-	if ((ifil = fopen(source, "r")) == NULL)
+	if ((ifil = kfopen(source, &ibuf)) == NULL)
 		fatal(_("can't open %s"), source);
 	source[(int)strlen(source) - 1] = 'c';
-	if ((ofil = fopen(*argv++, "w")) == NULL || (lfil = fopen(*argv++, "w")) == NULL)
+	if ((ofil = kfcreat(*argv++, &obuf)) == NULL || (lfil = kfcreat(*argv++, &lbuf)) == NULL)
 		fatal(_("temp creation error"));
 
 	strfile = *argv++;
-	if ((sfil = fopen(strfile, "w")) == NULL)
+	if ((sfil = kfcreat(strfile, &sbuf)) == NULL)
 		fatal(_("string file temp creation error"));
 	obp = ofil;
 	lineno++;
@@ -195,7 +227,8 @@ PP(char **argv;)							/* argument pointers */
 
 static VOID verror(P(const char *) s, P(va_list) args)
 {
-	fprintf(stderr, "\"%s\", * %d: ", source, lineno);
+	if (lineno)
+		fprintf(stderr, "\"%s\", * %d: ", source, lineno);
 	vfprintf(stderr, s, args);
 	fprintf(stderr, "\n");
 	errcnt++;
