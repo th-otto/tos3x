@@ -73,7 +73,7 @@ PP(int base;)
 	save = s = nptr;
 
 	/* Skip white space.  */
-	while (isspace(*s))
+	while (isspace((__uint8_t)*s))
 		++s;
 	if (*s == '\0')
 		goto noconv;
@@ -91,7 +91,7 @@ PP(int base;)
 	/* Recognize number prefix and if BASE is zero, figure it out ourselves.  */
 	if (*s == '0')
 	{
-		if ((base == 0 || base == 16) && toupper(s[1]) == 'X')
+		if ((base == 0 || base == 16) && toupper((__uint8_t)s[1]) == 'X')
 		{
 			s += 2;
 			base = 16;
@@ -143,7 +143,7 @@ PP(int base;)
 	/* Store in ENDPTR the address of one character
 	   past the last character we converted.  */
 	if (endptr != NULL)
-		*endptr = (char *) s;
+		*endptr = (char *)NO_CONST(s);
 
 #if !UNSIGNED
 	/* Check for a value that is within the range of
@@ -173,11 +173,11 @@ PP(int base;)
 	   ENDPTR points to the `x`.  */
 	if (endptr != NULL)
 	{
-		if ((long)save - (long)nptr >= 2 && toupper(save[-1]) == 'X' && save[-2] == '0')
-			*endptr = (char *) &save[-1];
+		if ((long)save - (long)nptr >= 2 && toupper((__uint8_t)save[-1]) == 'X' && save[-2] == '0')
+			*endptr = (char *) NO_CONST(&save[-1]);
 		else
 			/*  There was no number to convert.  */
-			*endptr = (char *) nptr;
+			*endptr = (char *) NO_CONST(nptr);
 	}
 
 	return 0;

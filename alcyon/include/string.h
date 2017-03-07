@@ -33,6 +33,8 @@ int strcmp PROTO((const char *, const char *));
 int strncmp PROTO((const char *, const char *, size_t));
 int strcasecmp PROTO((const char *, const char *));
 
+char *strpbrk PROTO((const char *s1, const char *s2));
+
 char *strlwr PROTO ((char *str));
 char *strupr PROTO ((char *str));
 
