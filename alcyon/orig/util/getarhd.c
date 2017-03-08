@@ -25,25 +25,27 @@
  *		the manner which will be understood on the current machine.
  */
 int getarhd(P(FILE *) fp, P(struct libhdr *) arptr)
-PP(register FILE *fp;)
+PP(FILE *fp;)
 PP(struct libhdr *arptr;)
 {
-	register int i, j;
-	char *lp;
+	register int i;
+	int junk;
+	register char *p, *lp;
 
 	for (i = 0, lp = arptr->lfname; i < LIBNSIZE; i++)
-		if ((lp[i] = getc(fp)) == EOF)
+		if ((*lp++ = getc(fp)) == EOF)
 			return EOF;
 	if (lgetl(&arptr->lmodti, fp) == EOF)
 		return EOF;
-	if ((lp[(i++) + 4] = getc(fp)) == EOF)
+	if ((arptr->luserid = getc(fp)) == EOF)
 		return EOF;
-	if ((lp[(i++) + 4] = getc(fp)) == EOF)
+	if ((arptr->lgid = getc(fp)) == EOF)
 		return EOF;
 	if (lgetw(&arptr->lfimode, fp) == EOF)
 		return EOF;
 	if (lgetl(&arptr->lfsize, fp) == EOF)
 		return EOF;
-	UNUSED(j);
+	if (lgetw(&junk, fp) == EOF)
+		return EOF;
 	return 0;
 }

@@ -180,30 +180,6 @@ notend:	cmp.b	(a0)+,d0	* check for character
 	rts
 
 *
-*	Data area
-*
-	.data
-	.globl	___pname	* Program Name
-	.globl	___tname	* Terminal Name
-	.globl	___lname	* List device name
-	.globl	___xeof		* ^Z byte
-ovf:		.dc.b	'Stack Overflow$',0	* Overflow message
-___pname:	.dc.b	'C runtime',0	* Program name
-___tname:	.dc.b	'CON:',0	* Console name
-___lname:	.dc.b	'LST:',0	* List device name
-___xeof:	.dc.b	$1a		* Control-Z
-
-**********************************************************************
-*
-* BSS AREA
-**********************************************************************
-	.bss
-	.even
-__base:		.ds.l	1	* -> Base Page
-__break:	.ds.l	1	* Break location
-___cpmrv:	.ds.w	1	* Last CP/M return val
-
-*
 *	control array for vdibind
 *
 	.data
@@ -336,5 +312,29 @@ _ctrl_cnts:			 	*	Application Manager
 	.dc.b	1, 1, 1			* func 123
 	.dc.b	0, 1, 1			* func 124
 	.dc.b	0, 1, 2			* func 125
+
+*
+*	Data area
+*
+	.data
+	.globl	___pname	* Program Name
+	.globl	___tname	* Terminal Name
+	.globl	___lname	* List device name
+	.globl	___xeof		* ^Z byte
+ovf:		.dc.b	'Stack Overflow$'	* Overflow message
+___pname:	.dc.b	'C runtime',0	* Program name
+___tname:	.dc.b	'CON:',0	* Console name
+___lname:	.dc.b	'LST:',0	* List device name
+___xeof:	.dc.b	$1a		* Control-Z
+
+**********************************************************************
+*
+* BSS AREA
+**********************************************************************
+	.bss
+	.even
+__base:		.ds.l	1	* -> Base Page
+__break:	.ds.l	1	* Break location
+___cpmrv:	.ds.w	1	* Last CP/M return val
 
 	.end

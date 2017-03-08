@@ -19,6 +19,8 @@ AR = ${BIN}ar68${EXEEXT}
 ARFLAGS = -r
 RANLIB = ${BIN}doindex${EXEEXT}
 
+SED   = sed
+
 LD=${BIN}aln${EXEEXT}
 LINK68=${BIN}link68${EXEEXT}
 RELMOD=${BIN}relmod${EXEEXT}

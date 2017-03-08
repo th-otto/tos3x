@@ -5,19 +5,31 @@
 	San Diego, Ca. 92121
  */
 
-char *SCCSID = "@(#) ar68 - July 1, 1983";
+char *SCCSID = "@(#)ar68.c\t2.1\t4/26/85";
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <time.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
 #include <ar68.h>
 #include "util.h"
+
+#define HAVE_CTIME 0
+#ifdef __ALCYON__
+#define BINEXACT 1
+#define EXTERN
+#else
+#define BINEXACT 0
+#define EXTERN static
+#endif
+
+#if HAVE_CTIME
+#include <time.h>
+#endif
 
 #define FALSE 0
 #define TRUE  1
@@ -52,7 +64,7 @@ char *SCCSID = "@(#) ar68 - July 1, 1983";
 
 #define SYMDEF "._SYMDEF"
 
-char buff[BUFSIZ];
+EXTERN char buff[BUFSIZ];
 
 #if 0
 struct stat astat, tstat;
@@ -65,30 +77,36 @@ struct stat astat, tstat;
 #define WHDR	4
 #define WCOUTHD 8
 
-struct libhdr libhd;
+EXTERN struct libhdr libhd;
 struct libhdr *lp = &libhd;
 
 unsigned short libmagic = LIBMAGIC;
 
-int rflg, dflg, xflg, tflg, vflg;
-int uflg;
-int pflg;
-int areof;
-FILE *arfp;
-FILE *tempfd;
+EXTERN int rflg;
+EXTERN int dflg;
+EXTERN int xflg;
+EXTERN int tflg;
+EXTERN int vflg;
+EXTERN int uflg;
+EXTERN int pflg;
+EXTERN int areof;
+EXTERN FILE *arfp;
+EXTERN FILE *tempfd;
 
-int aflg, bflg;
-int psflg;
-int matchflg;
-char *psname;
-char *arname, *tempname;
+EXTERN int aflg;
+EXTERN int bflg;
+EXTERN int psflg;
+EXTERN int matchflg;
+EXTERN char *psname;
+EXTERN char *arname;
+EXTERN char *tempname;
 
-char *myname;
-struct hdr2 couthd;
-int exitstat;
+EXTERN char *myname;
+EXTERN struct hdr couthd; /* BUG: should be hdr2 */
+EXTERN int exitstat;
 
 FILE *openar PROTO((const char *arp, int crfl));
-VOID xtell PROTO((const char * ap));
+VOID tellar68 PROTO((const char * ap));
 VOID pfname PROTO((NOTHING));
 VOID replace PROTO((const char *name));
 VOID delete PROTO((const char *name));
@@ -110,13 +128,14 @@ VOID cp1file PROTO((FILE *ifd, FILE *ofd, int aflags, const char *iname, const c
 int ckafile PROTO((const char *ap));
 VOID exall PROTO((NOTHING));
 VOID tmp2ar PROTO((NOTHING));
+
+EXTERN VOID (*docom) PROTO((const char *name));
+
 const char *fnonly PROTO((const char *s));
 int copy PROTO((const char *from, const char *to));
 
 
-VOID (*docom) PROTO((const char *name));
-
-char fname[15];
+EXTERN char fname[50];
 
 int main(P(int) argc, P(char **) argv)
 PP(int argc;)
@@ -127,8 +146,61 @@ PP(char **argv;)
 	register int i;
 	int j, docopy;
 
+#if 0
+/*
+ * ugly hack to get the bss segment in the original link order.
+ * no longer used,
+ */
+#if BINEXACT
+	asm(".bss");
+	asm(".xdef _fbonebuf");
+	asm("_fbonebuf: ds.b 16");
+	asm(".xdef _lcargc");
+	asm("_lcargc: ds.w 1");
+	asm(".xdef _lcargv");
+	asm("_lcargv: ds.l 1");
+	asm(".xdef _lcargv2");
+	asm("_lcargv2: ds.l 1");
+	asm(".xdef __dp_fn");
+	asm("__dp_fn: ds.l 1");
+	asm(".xdef epa");
+	asm("epa: ds.l 1");
+	asm(".xdef tsavpc");
+	asm("tsavpc: ds.l 1");
+	asm("_buff: ds.b 512");
+	asm("_pflg: ds.w 1");
+	asm("_arfp: ds.l 1");
+	asm("_rflg: ds.w 1");
+	asm("_tflg: ds.w 1");
+	asm("_uflg: ds.w 1");
+	asm("_vflg: ds.w 1");
+	asm("_xflg: ds.w 1");
+	asm("_tempname: ds.l 1");
+	asm("_arname: ds.l 1");
+	asm("_tempfd: ds.l 1");
+	asm("_exitstat: ds.w 1");
+	asm("_libhd: ds.b 26");
+	asm("_psname: ds.l 1");
+	asm("_fname: ds.b 50");
+	asm("_myname: ds.l 1");
+	asm("_areof: ds.w 1");
+	asm(".xdef ___signal");
+	asm("___signal: ds.l 16");
+	asm("_couthd: ds.b 28");
+	asm("_docom: ds.l 1");
+	asm("_aflg: ds.w 1");
+	asm("_bflg: ds.w 1");
+	asm("_psflg: ds.w 1");
+	asm(".xdef __fds");
+	asm("__fds: ds.b 2840");
+	asm("_dflg: ds.w 1");
+	asm("_matchflg: ds.w 1");
+	asm(".text");
+#endif
+#endif
+
 	UNUSED(p2);
-	printf(_("AR68 Archiver (c) Alcyon Corporation\n"));
+	printf(_("AR68 Archiver (c) 1985 Alcyon Corporation\n"));
 	close(2); /* WTF? */
 	close(0); /* WTF? */
 	myname = *argv;
@@ -173,7 +245,7 @@ PP(char **argv;)
 			break;
 		case 't':
 			tflg++;
-			docom = xtell;
+			docom = tellar68;
 			break;
 		case 'p':
 			pflg++;
@@ -250,6 +322,11 @@ PP(char **argv;)
 		{
 			for (j = 0; j < i; j++)
 			{
+				/*
+				 * could not find a C-construct that would push/pop a3
+				 * for the address calculations; maybe a different compiler
+				 * was used for this tool?
+				 */
 				if (streq(fnonly(ap[j]), &lp->lfname[0]))
 				{
 					docopy = 0;
@@ -257,7 +334,20 @@ PP(char **argv;)
 					i--;
 					while (j < i)
 					{
+#if BINEXACT
+						asm("movea.w   -2(a6),a0");
+						asm("adda.l    a0,a0");
+						asm("adda.l    a0,a0");
+						asm("adda.l    a3,a0");
+						asm("movea.w   -2(a6),a1");
+						asm("addq.w    #1,a1");
+						asm("adda.l    a1,a1");
+						asm("adda.l    a1,a1");
+						asm("adda.l    a3,a1");
+						asm("move.l    (a1),(a0)");
+#else
 						ap[j] = ap[j + 1];
+#endif
 						j++;
 					}
 				}
@@ -266,7 +356,9 @@ PP(char **argv;)
 		{
 			docopy = 0;
 			for (j = 0; j < i; j++)
+			{
 				(*docom) (ap[j]);
+			}
 			i = 0;
 			psflg = 0;
 		}
@@ -355,7 +447,7 @@ PP(char **argv;)
 	cleanup();
 #endif
 
-#ifndef __ALYCYON__
+#if !BINEXACT
 	return EXIT_SUCCESS;
 #endif
 }
@@ -366,26 +458,27 @@ PP(const char *arp;)
 PP(int crfl;)
 {
 	register FILE *i;
-	unsigned int ib;
+	unsigned short ib;
 
 	if ((i = fopenbr(arp)) == NULL)
 	{									/* does not exist */
 		areof = 1;
 		return NULL;
 	}
-	if (lgetw(&ib, i) != 0 || ib != LIBMAGIC)
+	if (lgetw(&ib, i) != 0 || (ib != LIBMAGIC && ib != LIBRMAGIC))
 	{
 	/*  notar: */
 		printf(_("%s: not archive format: %s %x\n"), myname, arp, ib);
 		endit();
 	}
+	libmagic = ib;						/* use the same magic number */
 	return i;
 }
 
 
 /* execute one command -- call with filename or 0 */
 
-VOID xtell(P(const char *) ap)
+VOID tellar68(P(const char *) ap)
 PP(const char *ap;)
 {
 	register char *p;
@@ -394,6 +487,7 @@ PP(const char *ap;)
 
 	UNUSED(i);
 	UNUSED(p);
+	UNUSED(p1);
 	if (ap != (const char *)-1 && ckafile(ap))
 		return;
 	if (vflg)
@@ -401,10 +495,14 @@ PP(const char *ap;)
 		pmode(lp->lfimode);
 		printf(" %d/%d ", lp->luserid, lp->lgid);
 		printf("%6ld", lp->lfsize);
+#if HAVE_CTIME
 		p1 = ctime(&lp->lmodti);
 		p1[24] = '\0';
 		p1 += 4;
 		printf(" %s  ", p1);
+#else
+		fputc(' ', stdout);
+#endif
 	}
 	pfname();
 	skcopy(0);
@@ -439,9 +537,10 @@ PP(const char *name;)
 	{
 		if (bflg && areof == 0)
 		{
+			/* BUG: LIBHDSIZE defined as 26, but getarhd reads 28 bytes */
 			if (efseek(arfp, -(off_t) LIBHDSIZE, SEEK_CUR) == -1)
 			{
-#ifdef __ALCYON__
+#if BINEXACT
 				/* BUG: should print arname instead */
 				printf(_("%s: fseek error\n"), myname);
 #else
@@ -454,14 +553,14 @@ PP(const char *name;)
 	}
 	copystr(name, namebuf, sizeof(namebuf));
 	
+	/* WTF: why use the basename only for open? */
 	if ((ifd = fopenbr(namebuf)) == NULL)
 	{
-		/* BUG: should use namebuf */
 		printf(_("%s: can't open %s\n"), myname, name);
 		endit();
 	}
 	/* BUG: ar should not depend on members being object files */
-	if (getchd(ifd, &couthd) < 0)
+	if (getchd(ifd, (struct hdr2 *)&couthd) < 0)
 	{
 		printf(_("%s: can't read %s\n"), myname, name);
 		endit();
@@ -500,7 +599,7 @@ PP(const char *name;)
 	if (couthd.ch_rlbflg == 0)
 		lp->lfsize += couthd.ch_tsize + couthd.ch_dsize;
 #endif
-	cp1file(ifd, tempfd, WHDR + OEVEN, name, tempname);
+	cp1file(ifd, tempfd, WHDR + OEVEN + WCOUTHD, name, tempname);
 	fclose(ifd);
 }
 
@@ -515,7 +614,7 @@ PP(const char *ap;)
 		lputw(&libmagic, tempfd);
 		return;
 	}
-	if (strcmp(ap, SYMDEF) == 0)
+	if (strcmp(SYMDEF, ap) == 0)
 		libmagic = LIBMAGIC;
 	inform('d');
 	skcopy(0);
@@ -530,7 +629,7 @@ PP(const char *ap;)
 
 	if (ckafile(ap))
 		return;
-	if ((i = creatb(ap, lp->lfimode)) < 0)
+	if ((i = creatb(ap, 0644)) < 0)
 	{
 		printf(_("%s: can't create %s\n"), myname, ap);
 		endit();
@@ -548,11 +647,7 @@ PP(const char *ap;)
 	if (ckafile(ap))
 		return;
 	/* WTF; 2nd argument to cp1file is a FILE *, not '1' */
-#ifdef __ALCYON___
-	cp1file(arfp, 1, IEVEN, arname, "std output");
-#else
-	cp1file(arfp, (FILE *)1, IEVEN, arname, "std output");
-#endif
+	cp1file(arfp, stdout, IEVEN, arname, "std output");
 }
 
 
@@ -576,14 +671,19 @@ VOID cleanup(NOTHING)
 VOID listall(NOTHING)
 {
 	while (nextar())
-		xtell((const char *) -1);
+		tellar68((const char *) -1);
 }
 
 /* read next ar file header into libhd */
 
 int nextar(NOTHING)
 {
-	if (areof || getarhd(arfp, &libhd) == EOF || libhd.lfname[0] == 0)
+	if (areof || getarhd(arfp, &libhd) == EOF || feof(arfp))
+	{
+		areof++;
+		return FALSE;
+	}
+	if (libhd.lfname[0] == 0)
 	{
 		areof++;
 		return FALSE;
@@ -596,9 +696,11 @@ VOID skcopy(P(int) cpflag)
 PP(int cpflag;)
 {
 	register off_t l;
+#if BINEXACT
 	register int i;
+	char buff[512];
+#endif
 
-	UNUSED(i);
 	if (areof)
 		return;
 	l = lp->lfsize;
@@ -631,7 +733,7 @@ PP(char *ap;)
 		p++;
 	for (j = 0; j < 5; j++)
 	{
-		*--p = ((i & 7) + '0');
+		*--p = (char)((i & 7) + '0');
 		i >>= 3;
 	}
 	return ap;
@@ -687,7 +789,7 @@ PP(int flg;)
 	ap = pairp;
 	f = flg;
 	n = *ap++;
-	while (--n >= 0 && (f & *ap++) == 0)
+	while (--n >= 0 && !(f & *ap++))
 		ap++;
 	putchar(*ap);
 }
@@ -717,7 +819,7 @@ PP(int alen;)
 	p2 = NULL;
 	p1 = ap1;
 	while (*p1)
-		if (*p1++ == '/')
+		if (*p1++ == ':')
 			p2 = NO_CONST(p1);					/* point to char after last '/' in name */
 	if (p2)
 		p1 = p2;
@@ -762,7 +864,7 @@ PP(const char *oname;)
 		if (putarhd(ofd, &libhd) != 0)
 		{
 		  iwrerr:
-#ifdef __ALCYON__
+#if BINEXACT
 			sprintf(str, _("%s: write error on %s"), myname, oname);
 			printf("%s\n", str);
 #else
@@ -774,11 +876,12 @@ PP(const char *oname;)
 	}
 	if (flags & WCOUTHD)
 	{
-		if (putchd(ofd, &couthd) != 0)
+		if (putchd(ofd, (struct hdr2 *)&couthd) != 0)
 		{
-#ifdef __ALCYON__
+#if BINEXACT
 			sprintf(str, _("%s: write error on CHDR %s"), myname, oname);
 			printf("%s\n", str);
+			endit();
 #else
 			goto iwrerr;
 #endif
@@ -796,7 +899,7 @@ PP(const char *oname;)
 			sz = BUFSIZ;
 		if ((i = fread(buff, sizeof(char), sz, ifd)) == 0)
 		{
-#ifdef __ALCYON__
+#if BINEXACT
 			printf(_("%s: read error\n"), myname);
 #else
 			fprintf(stderr, "%s: ", myname);
@@ -804,7 +907,7 @@ PP(const char *oname;)
 #endif
 			endit();
 		}
-		if (fwrite(buff, sizeof(char), i, ofd) == 0)
+		if (fwrite(buff, sizeof(char), i, ofd) != i)
 			goto iwrerr;
 		l -= i;
 	}
@@ -839,7 +942,7 @@ VOID exall(NOTHING)
 {
 	if (nextar())
 	{
-		if (strcmp(libhd.lfname, SYMDEF) == 0)
+		if (strcmp(lp->lfname, SYMDEF) == 0)
 		{
 			efseek(arfp, lp->lfsize, SEEK_CUR);
 			if (nextar() == FALSE)
@@ -871,7 +974,10 @@ VOID tmp2ar(NOTHING)
 	}
 	while ((n = read(ifd, buff, BUFSIZ)) > 0)
 		write(ofd, buff, n);
-	buff[0] = buff[1] = buff[2] = buff[3] = 0;
+	buff[0] = 0;
+	buff[1] = 0;
+	buff[2] = 0;
+	buff[3] = 0;
 	write(ofd, buff, 4);
 	/* BUG: ofd never closed */
 	tempfd = fdopen(ifd, "r");
@@ -889,7 +995,7 @@ PP(const char *s;)
 	p = NULL;
 	while (*r)
 	{
-		if (*r == '/')
+		if (*r == ':')
 			p = r;
 		r++;
 	}
@@ -932,7 +1038,7 @@ PP(const char *to;)
 	close(ifd);
 	close(ofd);
 	/* BUG: no return value */
-#ifndef __ALCYON__
+#if !BINEXACT
 	return 0;
 #endif
 }

@@ -30,7 +30,9 @@ PP(struct libhdr *arptr;)
 {
 	register int i;
 	register char *p, *lp;
-
+	unsigned short junk;
+	
+	junk = 0;
 	UNUSED(p);
 	for (i = 0, lp = arptr->lfname; i < LIBNSIZE; i++, lp++)
 		if (putc(*lp, fp) == -1)
@@ -44,6 +46,8 @@ PP(struct libhdr *arptr;)
 	if (lputw(&arptr->lfimode, fp) == -1)
 		return EOF;
 	if (lputl(&arptr->lfsize, fp) == -1)
+		return EOF;
+	if (lputw(&junk, fp) == -1)
 		return EOF;
 	return 0;
 }

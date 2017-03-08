@@ -161,9 +161,9 @@ static VOID pfname(NOTHING)
 	register char *p;
 	register int i;
 
-	p = &lp->lfname[0];
+	p = lp->lfname;
 	i = LIBNSIZE;
-	while (*p && i)
+	while (i && *p)
 	{
 		putchar(*p++);
 		i--;
@@ -231,7 +231,7 @@ PP(const char *oname;)
 			fprintf(stderr, _("%s: read error: %s\n"), program_name, strerror(errno));
 			endit(0);
 		}
-		if (fwrite(buff, sizeof(char), i, ofd) == 0)
+		if (fwrite(buff, sizeof(char), i, ofd) != i)
 			goto iwrerr;
 		l -= i;
 	}
@@ -290,7 +290,7 @@ PP(int alen;)
 	while (*p1)
 	{
 		c = *p1++;
-		if (c == '/' || c == '\\')
+		if (c == '/' || c == '\\' || c == ':')
 			slash = p1;					/* point to char after last '/' in name */
 	}
 	if (slash)
@@ -418,7 +418,7 @@ PP(const char *name;)
 			skcopy(1);
 		matchflg++;
 	}
-	copystr(name, &lp->lfname[0], LIBNSIZE);
+	copystr(name, lp->lfname, LIBNSIZE);
 	if (areof | aflg)
 	{
 		inform('a');
@@ -515,7 +515,7 @@ static VOID exall(NOTHING)
 {
 	if (nextar())
 	{
-		if (strcmp(libhd.lfname, SYMDEF) == 0)
+		if (strcmp(lp->lfname, SYMDEF) == 0)
 		{
 			fseek(arfp, lp->lfsize, SEEK_CUR);
 			if (nextar() == FALSE)
@@ -628,7 +628,7 @@ PP(char **argv;)
 	asm("_ftoa equ 0");
 #endif
 
-	printf(_("AR68 Archiver (c) Alcyon Corporation\n"));
+	printf(_("AR68 Archiver (c) 1985 Alcyon Corporation\n"));
 	exitstat = EXIT_SUCCESS;
 	if (argc < 3)
 	{
@@ -747,7 +747,7 @@ PP(char **argv;)
 		{
 			for (j = 0; j < i; j++)
 			{
-				if (strcmp(fnonly(ap[j]), &lp->lfname[0]) == 0)
+				if (strcmp(fnonly(ap[j]), lp->lfname) == 0)
 				{
 					docopy = 0;
 					(*docom) (ap[j]);
@@ -759,7 +759,7 @@ PP(char **argv;)
 					}
 				}
 			}
-		} else if (strcmp(psname, &lp->lfname[0]) == 0)
+		} else if (strcmp(psname, lp->lfname) == 0)
 		{
 			docopy = 0;
 			for (j = 0; j < i; j++)

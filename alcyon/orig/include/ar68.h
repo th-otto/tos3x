@@ -11,6 +11,7 @@
 #define __AR68_H__ 1
 
 #define LIBMAGIC	0xff65
+#define LIBRMAGIC	0xff66
 #define LIBHDSIZE	26
 #define LIBNSIZE	14
 
@@ -22,6 +23,7 @@ struct libhdr
 	char lgid;
 	unsigned short lfimode;
 	long lfsize;
+/*	unsigned short junk; */
 };
 
 #endif

@@ -94,7 +94,7 @@ fixnops$(EXEEXT): fixnops.c
 # all the ugly sed scripts are only neccessary to get a binary identical version.
 # The code produced by the included compiler is not wrong,
 # but apparently the program included in the package was compiled
-# by an older version.
+# by an different compiler version.
 # Most of the fixes are assembler related (suppressing optimizing
 # of add immediate to addq), some are code generator related
 # (current version prefers to use address registers as index)

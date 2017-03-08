@@ -17,7 +17,7 @@
 #include <cout.h>
 #include "util.h"
 
-#define dogetc(byte,i,fp) byte = getc(fp)
+#define dogetc(byte,i,fp) byte = getc(fp) & 0xff
 
 struct mlbytes { char b1; char b2; char b3; char b4; };
 struct mwbytes { char wb1; char wb2; };
@@ -38,7 +38,7 @@ PP(FILE *f;)
 	dogetc(lp->b3, i, f);
 	dogetc(lp->b4, i, f);
 	UNUSED(i);
-	return ferror(f) ? -1 : 0;
+	return ferror(f) || feof(f) ? -1 : 0;
 }
 
 int lgetw(P(unsigned short *) llp, P(FILE *) f)
@@ -54,9 +54,10 @@ PP(FILE *f;)
 
 	dogetc(lp->wb1, i, f);
 	dogetc(lp->wb2, i, f);
-#if 0
-	*llp &= 0xffff;
+#ifdef __ALCYON__
+	/* rather useless... */
+	*((unsigned short *)llp) &= 0xffff;
 #endif
 	UNUSED(i);
-	return ferror(f) ? -1 : 0;
+	return ferror(f) || feof(f) ? -1 : 0;
 }
