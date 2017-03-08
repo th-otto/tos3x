@@ -9,17 +9,20 @@ static FILE *stream;
 static unsigned short get16be(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
-	unsigned int c1 = getc(sp) & 0xff;
-	unsigned int c2 = getc(sp) & 0xff;
-	return (c1 << 8) | c2;
+	register unsigned int w1;
+	w1 = getc(sp) & 0xff;
+	w1 <<= 8;
+	w1 |= getc(sp) & 0xff;
+	return w1;
 }
 
 
 static long get32be(P(FILE *) sp)
 PP(register FILE *sp;)				/* the stream to get from   */
 {
-	unsigned int w1 = get16be(sp);
-	unsigned int w2 = get16be(sp);
+	register unsigned short w1, w2;
+	w1 = get16be(sp);
+	w2 = get16be(sp);
 	return ((long)w1 << 16) | w2;
 }
 

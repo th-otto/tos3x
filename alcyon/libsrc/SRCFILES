@@ -7,7 +7,7 @@ AOBJS2 = $(ASRCS2:.S=.o)
 AOBJS = $(AOBJS1) $(AOBJS2)
 ASRCS = $(ASRCS1) $(ASRCS2)
 
-CSRCS1 = asctime.c ctime.c localtime.c mktime.c consec.c cnvsec.c timezone.c time.c
+CSRCS1 = asctime.c ctime.c localtime.c mktime.c gmtime.c consec.c cnvsec.c timezone.c time.c
 CSRCS2 = atoi.c perror.c strerror.c atol.c ctype.c getl.c getw.c fopen.c xmain.c xwmain.c fgetc.c
 CSRCS3 = ungetc.c fgets.c filbuf.c read.c readasc.c readbin.c creat.c exit.c cleanup.c
 CSRCS4 = fclose.c close.c fdecls.c fflush.c open.c lseek.c tell.c fputn.c

@@ -7,16 +7,12 @@ PP(struct tm *tm;)
 	time_t t;
 	
 	t = _cnvDS(tm);
-	if (t < 0)
-		return -1;
-	_conSD_r(t, 0, tm);
+	if (t == (time_t)-1)
+		return t;
+	tzset();
+	t += timezone;
 	if (daylight)
-	{
-		tm->tm_isdst = 1;
 		t -= 3600;
-	}
-	t -= timezone;
-	if (t < 0)
-		return -1;
+	_conSD_r(t, 1, tm);
 	return t;
 }

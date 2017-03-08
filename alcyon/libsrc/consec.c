@@ -34,6 +34,17 @@ PP(struct tm *tp;)
 	tzset();
 	if (clock < 0)
 		clock = 0;
+	tp->tm_gmtoff = -timezone;
+	if (local && daylight)
+	{
+		tp->tm_isdst = 1;
+		tp->tm_gmtoff += 3600;
+	} else
+	{
+		tp->tm_isdst = 0;
+	}
+	if (local)
+		clock += tp->tm_gmtoff;
 	tp->tm_sec = (int)(clock % 60);
 	clock /= 60;
 	tp->tm_min = (int)(clock % 60);
@@ -55,20 +66,10 @@ PP(struct tm *tp;)
 		clock -= leaphours;
 	}
 	
-	tp->tm_gmtoff = -timezone;
-	if (local && daylight)
-	{
-		clock++;
-		tp->tm_isdst = 1;
-		tp->tm_gmtoff -= 3600;
-	} else
-	{
-		tp->tm_isdst = 0;
-	}
 	tp->tm_hour = (int)(clock % 24);
 	clock /= 24;
 	tp->tm_yday = (int)clock;
-	days += (int)(clock + 5);
+	days += (int)(clock + 4);
 	tp->tm_wday = days % 7;
 	clock++;
 	if ((tp->tm_year & 3) == 0)
@@ -89,7 +90,7 @@ PP(struct tm *tp;)
 		clock -= _monDayLen[tp->tm_mon];
 		tp->tm_mon++;
 	}
-	tp->tm_mday = (int)clock + 1;
+	tp->tm_mday = (int)clock;
 	return tp;
 }
 

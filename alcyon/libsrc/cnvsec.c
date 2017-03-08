@@ -37,11 +37,10 @@ PP(const struct tm *tm;)
 		months -= 12;
 	}
 	if (years < 0)
-		return -1;
+		return (time_t)-1;
 	leapdays = (years + 1) >> 2;
 	days = years * 365 + leapdays + _monDaySum[months] + tm->tm_mday - 1;
 	if (((leapdays + 2) & 3) == 0 && months >= 2)
 		days++;
 	return (((long)days * 24 + tm->tm_hour) * 60 + tm->tm_min) * 60 + tm->tm_sec;
 }
-

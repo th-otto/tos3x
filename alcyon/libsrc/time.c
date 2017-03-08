@@ -22,10 +22,6 @@ PP(time_t *ptime;)
 	tm.tm_isdst = -1;
 	
 	ttime = mktime(&tm);
-	if (ttime < 0)
-		return ttime;
-	
-	ttime += timezone;
 	
     if (ptime)
     {

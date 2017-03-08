@@ -244,7 +244,11 @@ PP(char **argv;)
 			continue;
 		if (tellem)
 			printf("%s:\n", ifilname);
-		l = couthd.ch_tsize + couthd.ch_dsize + HDSIZE;
+		l = couthd.ch_tsize + couthd.ch_dsize;
+		if (couthd.ch_magic == EX_ABMAGIC)
+			l += HDSIZ2;
+		else
+			l += HDSIZE;
 #ifdef PDP11
 		if (longseek(l, fileno(ifp), 3) == 0)
 #else

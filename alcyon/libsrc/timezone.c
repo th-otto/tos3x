@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-long timezone = 3600;
+long timezone = -3600;
 int daylight = 0;
 
 /* buffers must hold 64 characters! */

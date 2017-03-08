@@ -1,5 +1,5 @@
-#include "lib.h"
 #include <time.h>
+#include "lib.h"
 
 struct tm *gmtime(P(const time_t *)ptime)
 PP(const time_t *ptime;)
@@ -8,8 +8,8 @@ PP(const time_t *ptime;)
 
 	if (ptime == NULL)
 		return NULL;
-	ttime = *time;
+	ttime = *ptime;
 	if (ttime < 0)
 		return NULL;
-	return _conSD(*clock, 0);
+	return _conSD(ttime, 0);
 }

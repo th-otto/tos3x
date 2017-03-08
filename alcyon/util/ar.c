@@ -28,7 +28,9 @@
 
 static char buff[BUFSIZ];
 
-#if 0
+#define HAVE_STAT 0
+
+#if HAVE_STAT
 static struct stat astat, tstat;
 #endif
 
@@ -209,7 +211,11 @@ PP(const char *oname;)
 		{
 			goto iwrerr;
 		}
-		l = lp->lfsize - HDSIZE;
+		l = lp->lfsize;
+		if (couthd.ch_magic == EX_ABMAGIC)
+			l -= HDSIZ2;
+		else
+			l -= HDSIZE;
 	} else
 	{
 		l = lp->lfsize;
@@ -237,7 +243,7 @@ PP(const char *oname;)
 	if (flags & IEVEN)
 	{
 		if (lp->lfsize & 1)
-			fread(buff, sizeof(char), 1, ifd);
+			fgetc(ifd);
 	}
 }
 
@@ -354,6 +360,7 @@ static int nextar(NOTHING)
 	return TRUE;
 }
 
+
 static VOID cprest(NOTHING)
 {
 	while (nextar())
@@ -366,7 +373,7 @@ PP(const char *name;)
 {
 	register FILE *ifd;
 
-#if 0
+#if HAVE_STAT
 	register struct stat *stp;
 	struct stat stbuf;
 	stp = &stbuf;
@@ -382,7 +389,7 @@ PP(const char *name;)
 		cprest();
 		return;
 	}
-#if 0
+#if HAVE_STAT
 	if (stat(name, stp) < 0)
 	{
 		fprintf(stderr, _("%s: can't find %s\n"), program_name, name);
@@ -423,17 +430,23 @@ PP(const char *name;)
 		inform('r');
 		skcopy(0);						/* skip old copy */
 	}
-#if 0
+#if HAVE_STAT
 	lp->luserid = stp->st_uid;
 	lp->lgid = stp->st_gid;
 	lp->lfimode = stp->st_mode;
 	lp->lmodti = stp->st_mtime;
 	lp->lfsize = stp->st_size;
 #else
-	lp->lfsize = couthd.ch_tsize + couthd.ch_dsize + couthd.ch_ssize + HDSIZE; /* BUG: should check magic first for headersize */
+	lp->lfsize = couthd.ch_tsize + couthd.ch_dsize + couthd.ch_ssize;
+	if (couthd.ch_magic == EX_ABMAGIC)
+		lp->lfsize += HDSIZ2;
+	else
+		lp->lfsize += HDSIZE;
+	lp->lfimode = 0644;
 	if (couthd.ch_rlbflg == 0)
 		lp->lfsize += couthd.ch_tsize + couthd.ch_dsize;
 #endif
+	fseek(ifd, 0L, SEEK_SET);
 	cp1file(ifd, tempfd, WHDR + OEVEN, name, tempname);
 	fclose(ifd);
 }
@@ -568,7 +581,7 @@ PP(const char *s;)
 }
 
 
-#if 0 /* unused */
+#if HAVE_STAT
 /* this is a copy routine for the cross device archive creation */
 static int copy(P(const char *) from, P(const char *) to)
 PP(const char *from;)
@@ -778,7 +791,7 @@ PP(char **argv;)
 	if (tflg || pflg)					/* 20 sep 83, don't need to do this stuff... */
 		cleanup();
 
-#if 0
+#if HAVE_STAT
 	/* make temp file the archive file */
 	if (stat(tempname, &tstat) < 0)
 	{
