@@ -1,0 +1,9 @@
+COMA_SRCS = coma.S command.c
+
+COMA_OBJS = coma.o command.o 
+
+LIB1OBJS=lmul.o lrem.o ldiv.o
+
+SRCS = $(COMA_SRCS)
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES

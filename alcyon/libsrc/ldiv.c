@@ -1,6 +1,9 @@
+#define NO_STDIO
 #include "lib.h"
 
 long ldivr;
+
+long ldiv PROTO((long al1, long al2));
 
 long ldiv(P(long) al1, P(long) al2)
 PP(long al1;)

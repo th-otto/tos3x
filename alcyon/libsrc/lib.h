@@ -2,7 +2,11 @@
 #define _LIBC 1
 
 #include <stdarg.h>
+#include <sys/types.h>
+#ifndef NO_STDIO
 #include <stdio.h>
+#endif
+#include <stddef.h>
 
 #ifdef __ALCYON__
 #  define UNUSED(x)
@@ -35,8 +39,10 @@
 #define STDOUT 1
 #define STDERR 2
 
+#ifndef NO_STDIO
 extern char __pname[];					/* Program name         */
 extern char *_break;					/* -> Program break location */
+#endif
 
 char *petoa PROTO((double fp, char *buf, int prec));
 char *pftoa PROTO((double fp, char *buf, int prec));

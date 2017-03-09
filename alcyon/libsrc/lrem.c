@@ -1,3 +1,4 @@
+#define NO_STDIO
 #include "lib.h"
 
 extern long ldivr;

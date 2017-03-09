@@ -7,7 +7,7 @@
  *
  * warning:  no overflow checking or indication!!!!
  */
-
+#define NO_STDIO
 #include "lib.h"
 
 long lmul(P(long) al1, P(long) al2)

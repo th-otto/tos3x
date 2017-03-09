@@ -22,6 +22,7 @@ SED   = sed
 LD=${BIN}aln${EXEEXT}
 LINK68=${BIN}link68${EXEEXT}
 RELMOD=${BIN}relmod${EXEEXT}
+PRGFLAGS=${BIN}prgflags.prg
 CRT0=crt0.o
 LIBC=libc.a
 LIBC_NDX=libc.ndx
