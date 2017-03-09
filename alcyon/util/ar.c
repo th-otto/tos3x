@@ -628,7 +628,7 @@ PP(char **argv;)
 	asm("_ftoa equ 0");
 #endif
 
-	printf(_("AR68 Archiver (c) 1985 Alcyon Corporation\n"));
+	/* printf(_("AR68 Archiver (c) 1985 Alcyon Corporation\n")); */
 	exitstat = EXIT_SUCCESS;
 	if (argc < 3)
 	{

@@ -362,7 +362,7 @@ lmul.o: lmul.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-check::
+check:: vdi.o
 
 clean:
 	$(RM) *.o *.a *.ndx *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h

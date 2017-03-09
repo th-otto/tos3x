@@ -17,7 +17,7 @@ LIBS =
 CPPFLAGS = -I$(top_srcdir)/common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-all: vdi.a vdi.o
+all: vdi.a
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -27,8 +27,8 @@ include SRCFILES
 vdi.a: $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS)
 
-vdi.o: tosvars.o vars.o $(AES_OBJS) vdiext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
-	$(LD) -nostartfiles -nostdlib -o $@ -Wl,--script=../common/rom.ld,-Ttext=0x$(rombase),-Tbss=0 $(VDI_OBJS) tosvars.o vars.o vdiext.o -lgcc
+#vdi.o: tosvars.o vars.o $(AES_OBJS) vdiext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
+#	$(LD) -nostartfiles -nostdlib -o $@ -Wl,--script=../common/rom.ld,-Ttext=0x$(rombase),-Tbss=0 $(VDI_OBJS) tosvars.o vars.o vdiext.o -lgcc
 
 vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(CC) -Wa,--mri --traditional-cpp $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
@@ -36,7 +36,7 @@ vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
 tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(CC) -Wa,--mri --traditional-cpp $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-check::
+check:: vdi.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)offset=`echo 16 i 10 o $(vdi_tbase) $(rombase) - p | dc`; \
 	$(CMP) $(CMPL) -x --ignore-initial=0x$$offset:0x24 --offsets=0x$(vdi_tbase):0 --bytes=0x$(vdi_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img vdi.o; \
 	status=$$?; \

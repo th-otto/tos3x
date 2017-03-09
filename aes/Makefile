@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 include optimize.mak
 
-all: $(top_srcdir)/common/config.h aes.a aes.o
+all: $(top_srcdir)/common/config.h aes.a
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -122,7 +122,7 @@ aesext.o: aesext.S $(top_srcdir)/common/sections.inc $(top_srcdir)/common/config
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-check::
+check:: aes.o
 
 clean:
 	$(RM) *.o *.a *.ndx *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h

@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 include optimize.mak
 
-all: $(top_srcdir)/common/config.h bios.a bios.o
+all: $(top_srcdir)/common/config.h bios.a
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -74,7 +74,7 @@ keytbl.o: $(top_srcdir)/common/config.h
 prtkeys$(EXEEXT): prtkeys.o
 	$(AM_V_LD)${LD} ${LDFLAGS} -o $@ prtkeys.o
 
-check::
+check:: bios.o
 
 clean:
 	$(RM) *.o *.a *.ndx *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h

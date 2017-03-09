@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 include optimize.mak
 
-all: $(top_srcdir)/common/config.h bdos.a bdos.o
+all: $(top_srcdir)/common/config.h bdos.a
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -59,7 +59,7 @@ tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
-check::
+check:: bdos.o
 
 clean:
 	$(RM) *.o *.a *.ndx *.i *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h

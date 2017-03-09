@@ -5,7 +5,7 @@ include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 
 LIBS = $(LIBC)
-INC := ..\include${BS}
+INC := ..${BS}include${BS}
 
 PROGRAMS = newglue$(BUILD_EXEEXT) mkbininc$(BUILD_EXEEXT) mkrom$(BUILD_EXEEXT)
 

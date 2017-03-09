@@ -5,7 +5,7 @@ include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 include optimize.mak
 
-all: $(top_srcdir)/common/config.h desk.a desk.o
+all: $(top_srcdir)/common/config.h desk.a
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
@@ -60,7 +60,7 @@ deskext.o: deskext.S $(top_srcdir)/common/config.h $(top_srcdir)/common/sections
 	$(AM_V_at)${RM} $*.i
 
 
-check::
+check:: desk.o
 
 clean:
 	$(RM) *.o *.a *.ndx *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
