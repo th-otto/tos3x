@@ -39,7 +39,6 @@
 	globl	_cpmread
 	globl	_cpmwrite
 	globl	_cmain
-	globl	_xoscall
 	globl	_bios
 	globl	_xsetjmp
 	globl	_xlongjmp
@@ -215,18 +214,6 @@ okrc:	move.l	8(a6),a0
 	move.l	(a0),-(sp)
 	rts
 
-_bios:	move.l	(sp)+,biosav
-	trap	#13
-	move.l	biosav,-(sp)
-	rts
-
-* call dosjr from within itself (or from linked-in shell)
-_xoscall:
-	move.l	(sp)+,retshell
-	trap	#1
-	move.l	retshell,-(sp)
-	rts
-
 parse:	lea	cpmfcb,a1
 	cmp.b	#'9',(a0)
 	bgt	nousr
@@ -354,8 +341,6 @@ aris:	dc.b	13,10,'(A)bort, (R)etry, or (I)gnore ?',0
 savess:	ds.l	1
 ocrit:	ds.l	1
 oterm:	ds.l	1
-biosav:	ds.l	1
-retshell: ds.l	1
 cpmfcb:	ds.b	36
 	ds.l	800
 mystak:	ds.l	1

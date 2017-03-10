@@ -32,6 +32,7 @@ cacheold.prg: $(CACHE100_OLD_OBJS) ${MAKEFILE}
 	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ ${CACHE100_OLD_OBJS}
 
 check::
+	@:
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)

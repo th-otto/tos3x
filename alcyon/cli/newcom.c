@@ -137,7 +137,7 @@ NAMES
 
 */
 
-extern long xoscall();
+extern long gemdos();
 
 extern long bios();
 
@@ -154,36 +154,36 @@ extern user();
 #define TRUE -1
 #define MAXARGS 20
 
-#define xrdchne() xoscall (0x08)
-#define xecho(a) xoscall (0x02,a)
-#define xread(a,b,c) xoscall(0x3f,a,b,c)
-#define xwrite(a,b,c) xoscall(0x40,a,b,c)
-#define xopen(a,b) xoscall(0x3d,a,b)
-#define xclose(a) xoscall(0x3e,a)
-#define xcreat(a,b) xoscall(0x3c,a,b)
-#define xforce(a,b) xoscall(0x46,a,b)
-#define xexec(a,b,c,d) xoscall(0x4b,a,b,c,d)
-#define dup(a) xoscall(0x45,a)
-#define xgetdrv() xoscall(0x19)
-#define xsetdrv(a) xoscall(0x0e,a)
-#define xsetdta(a) xoscall(0x1a,a)
-#define xsfirst(a,b) xoscall(0x4e,a,b)
-#define xsnext() xoscall(0x4f)
-#define xgetdir(a,b) xoscall(0x47,a,b)
-#define xmkdir(a) xoscall(0x39,a)
-#define xrmdir(a) xoscall(0x3a,a)
-#define xchdir(a) xoscall(0x3b,a)
-#define xunlink(a) xoscall(0x41,a)
-#define xrename(a,b,c) xoscall(0x56,a,b,c)
-#define xgetfree(a,b) xoscall(0x36,a,b)
-#define xterm(a) xoscall(0x4c,a)
-#define xf_seek(a,b,c) xoscall(0x42,a,b,c)
-#define xmalloc(a) xoscall(0x48,a);
-#define xmfree(a) xoscall(0x49,a);
-#define xattrib(a,b,c) xoscall(0x43,a,b,c)
+#define xrdchne() gemdos (0x08)
+#define xecho(a) gemdos (0x02,a)
+#define xread(a,b,c) gemdos(0x3f,a,b,c)
+#define xwrite(a,b,c) gemdos(0x40,a,b,c)
+#define xopen(a,b) gemdos(0x3d,a,b)
+#define xclose(a) gemdos(0x3e,a)
+#define xcreat(a,b) gemdos(0x3c,a,b)
+#define xforce(a,b) gemdos(0x46,a,b)
+#define xexec(a,b,c,d) gemdos(0x4b,a,b,c,d)
+#define dup(a) gemdos(0x45,a)
+#define xgetdrv() gemdos(0x19)
+#define xsetdrv(a) gemdos(0x0e,a)
+#define xsetdta(a) gemdos(0x1a,a)
+#define xsfirst(a,b) gemdos(0x4e,a,b)
+#define xsnext() gemdos(0x4f)
+#define xgetdir(a,b) gemdos(0x47,a,b)
+#define xmkdir(a) gemdos(0x39,a)
+#define xrmdir(a) gemdos(0x3a,a)
+#define xchdir(a) gemdos(0x3b,a)
+#define xunlink(a) gemdos(0x41,a)
+#define xrename(a,b,c) gemdos(0x56,a,b,c)
+#define xgetfree(a,b) gemdos(0x36,a,b)
+#define xterm(a) gemdos(0x4c,a)
+#define xf_seek(a,b,c) gemdos(0x42,a,b,c)
+#define xmalloc(a) gemdos(0x48,a);
+#define xmfree(a) gemdos(0x49,a);
+#define xattrib(a,b,c) gemdos(0x43,a,b,c)
 #define getbpb(a) bios(7,a)
 #define rwabs(a,b,c,d,e) bios(4,a,b,c,d,e)
-#define xdatime(a,b,c) xoscall(0x57,a,b,c)
+#define xdatime(a,b,c) gemdos(0x57,a,b,c)
 
 #define BPB struct _bpb
 BPB										/* bios parameter block */
@@ -884,7 +884,7 @@ cr2cont()
 {
 	wrt("CR to continue...");
 	lin[0] = 126;
-	xoscall(10, &lin[0]);
+	gemdos(10, &lin[0]);
 }
 
 /***************************************************************************/
@@ -2254,7 +2254,7 @@ register char *lin;
 	i = j = 0;
 
 	lin[0] = 126;
-	xoscall(10, &lin[0]);
+	gemdos(10, &lin[0]);
 
 	lin[lin[1] + 2] = 0;
 
@@ -2918,7 +2918,7 @@ char *outsd_tl;
 			} else if (xncmps(8, s, "VERSION"))
 			{
 				preCmd(*nonStdIn, &rd, newsi, newso);
-				i = xoscall(0x30);
+				i = gemdos(0x30);
 				prtdecl((long) (i & 0xFF));
 				xwrite(1, 1L, ".");
 				prtdecl((long) ((i >> 8) & 0xFF));

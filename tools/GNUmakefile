@@ -34,6 +34,7 @@ mkrom$(BUILD_EXEEXT): mkrom.o
 	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 check::
+	@:
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)

@@ -27,7 +27,7 @@ dist::
 	for i in $(EXTRA_SUBDIRS); do $(MAKE) -C $$i $@; done
 
 check::
-	$(MAKE) -C glue $@
+	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $@; done
 
 dist::
 	$(CP) -a $(EXTRA_DIST) $(DISTDIR)

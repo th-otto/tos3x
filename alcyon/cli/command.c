@@ -141,6 +141,8 @@ NAMES
 
 #include <stdio.h>
 #include <string.h>
+#include <osbind.h>
+#include <fcntl.h>
 
 #define _(x) x
 
@@ -153,8 +155,6 @@ struct xjmpbuf {
 /*
  * from coma.s
  */
-long xoscall PROTO((short code, ...));
-long bios PROTO((short code, ...));
 VOID in_term PROTO((NOTHING));
 VOID rm_term PROTO((NOTHING));
 VOID super PROTO((NOTHING));
@@ -172,51 +172,6 @@ VOID devector PROTO((NOTHING));
 #define FALSE 0
 #define TRUE 1
 #define MAXARGS 20
-
-#define xrdchne() xoscall (0x08)
-#define xecho(a) xoscall (0x02,a)
-#define xread(a,b,c) xoscall(0x3f,a,b,c)
-#define xwrite(a,b,c) xoscall(0x40,a,b,c)
-#define xopen(a,b) xoscall(0x3d,a,b)
-#define xclose(a) xoscall(0x3e,a)
-#define xcreat(a,b) xoscall(0x3c,a,b)
-#define xforce(a,b) xoscall(0x46,a,b)
-#define xexec(a,b,c,d) xoscall(0x4b,a,b,c,d)
-#define dup(a) xoscall(0x45,a)
-#define xgetdrv() xoscall(0x19)
-#define xsetdrv(a) xoscall(0x0e,a)
-#define xsetdta(a) xoscall(0x1a,a)
-#define xsfirst(a,b) xoscall(0x4e,a,b)
-#define xsnext() xoscall(0x4f)
-#define xgetdir(a,b) xoscall(0x47,a,b)
-#define xmkdir(a) xoscall(0x39,a)
-#define xrmdir(a) xoscall(0x3a,a)
-#define xchdir(a) xoscall(0x3b,a)
-#define xunlink(a) xoscall(0x41,a)
-#define xrename(a,b,c) xoscall(0x56,a,b,c)
-#define xgetfree(a,b) xoscall(0x36,a,b)
-#define xterm(a) xoscall(0x4c,a)
-#define Fseek(a,b,c) xoscall(0x42,a,b,c)
-#define xmalloc(a) xoscall(0x48,a);
-#define xmfree(a) xoscall(0x49,a);
-#define xattrib(a,b,c) xoscall(0x43,a,b,c)
-#define getbpb(a) bios(7,a)
-#define rwabs(a,b,c,d,e) bios(4,a,b,c,d,e)
-#define xdatime(a,b,c) xoscall(0x57,a,b,c)
-
-#define BPB struct _bpb
-BPB										/* bios parameter block */
-{
-	short recsiz;
-	short clsiz;
-	short clsizb;
-	short rdlen;							/* root directory length in records */
-	short fsiz;							/* fat size in records */
-	short fatrec;							/* first fat record (of last fat) */
-	short datrec;							/* first data record */
-	short numcl;							/* number of data clusters available */
-	short b_flags;
-};
 
 struct rdb								/*IO redirection info block     */
 {
@@ -281,7 +236,6 @@ VOID chk_redirect PROTO((struct rdb *r));
 VOID errout PROTO((NOTHING));
 int xncmps PROTO((int n, const char *s, const char *d));
 VOID prthex PROTO((unsigned int h));
-size_t strlen PROTO((const char *s));
 VOID prtdecl PROTO((long d));
 VOID pdl PROTO((long d));
 VOID prtDclFmt PROTO((long d, int cnt, char *ch));
@@ -334,17 +288,17 @@ PP(register struct rdb *r;)
 	/* if a new standard in specified ...*/
 	if (r->nsi)
 	{
-		xclose(0);
-		xforce(0, r->oldsi);
-		xclose(r->oldsi);
+		Fclose(0);
+		Fforce(0, r->oldsi);
+		Fclose(r->oldsi);
 		r->nsi = FALSE;
 	}
 	/* if a new standard out specified.*/
 	if (r->nso)
 	{
-		xclose(1);
-		xforce(1, r->oldso);
-		xclose(r->oldso);
+		Fclose(1);
+		Fforce(1, r->oldso);
+		Fclose(r->oldso);
 		r->nso = FALSE;
 	}
 }
@@ -377,12 +331,12 @@ PP(unsigned int h;)
 	if ((h2 = (h >> 4)) != 0)
 		prthex(h2);
 	else
-		xwrite(1, 1L, "0");
-	xwrite(1, 1L, &hexch[h & 0x0f]);
+		Fwrite(1, 1L, "0");
+	Fwrite(1, 1L, &hexch[h & 0x0f]);
 }
 
 /***************************************************************************/
-size_t strlen(P(const char *) s)
+static size_t xstrlen(P(const char *) s)
 PP(register const char *s;)
 {
 	register int n;
@@ -400,7 +354,7 @@ PP(long d;)
 	if (d)
 		pdl(d);
 	else
-		xwrite(1, 1L, "0");
+		Fwrite(1, 1L, "0");
 }
 
 /***************************************************************************/
@@ -412,7 +366,7 @@ PP(long d;)
 
 	if ((d2 = d / 10) != 0 )
 		pdl(d2);
-	xwrite(1, 1L, &hexch[d % 10]);
+	Fwrite(1, 1L, &hexch[d % 10]);
 }
 
 /***************************************************************************/
@@ -431,7 +385,7 @@ PP(char *ch;)
 		j *= 10;
 	while (k < j)
 	{
-		xwrite(1, 1L, ch);
+		Fwrite(1, 1L, ch);
 		k *= 10;
 	}
 	prtdecl(d);
@@ -473,7 +427,7 @@ PP(char *s;)
 /*
    gtFlNm - get file name of the next file in the directory match a 
       path\wildcat specification. The first invocation makes a call to
-      xsfirst.  Each subsequent invocation uses xsnext().  To invoke
+      Fsfirst.  Each subsequent invocation uses Fsnext().  To invoke
       the routine, the wildcarded path name is put into WSrcReq and the
       routine called.  For this and each subseqent call the descriptor block
       for the found file (if one was found) is pointed to by WThisSrc.
@@ -490,7 +444,7 @@ int gtFlNm(NOTHING)
 	/* First file request? */
 	if (WSrcReq != NULL)
 	{
-		if (xsfirst(WSrcReq, WAttCode))
+		if (Fsfirst(WSrcReq, WAttCode))
 			return FALSE;
 
 		WSrcReq = NULL;
@@ -499,7 +453,7 @@ int gtFlNm(NOTHING)
 	/* Subsequent file request	*/
 	else
 	{
-		if (xsnext())
+		if (Fsnext())
 			return FALSE;
 	}
 	return TRUE;
@@ -536,9 +490,9 @@ PP(char *dirExp;)
 PP(char *filExp;)
 PP(int check;)
 {
-	int pathLen = strlen(pathExp);
+	int pathLen = xstrlen(pathExp);
 	int dirLen;
-	int wildLen = strlen(wildExp);
+	int wildLen = xstrlen(wildExp);
 	int wildFnd = FALSE;
 	int i = 0;
 	int flExsists;
@@ -554,9 +508,9 @@ PP(int check;)
 
 	if (!pathLen)
 	{									/*if no directory was specified, use current drive */
-		pathExp[0] = xgetdrv() + 'A';
+		pathExp[0] = Dgetdrv() + 'A';
 		pathExp[1] = ':';
-		xgetdir(&pathbuf[0], 0);		/*get current path name */
+		Dgetpath(pathbuf, 0);		/*get current path name */
 		for (dirLen = pathLen = 2, p = pathbuf, q = pathExp + 2; (*q = *p) != '\0'; dirLen++, pathLen++, p++, q++) ;
 		if (*(q - 1) != '\\')
 		{
@@ -582,11 +536,11 @@ PP(int check;)
 			pathbuf[0] = pathExp[0];
 			pathLen -= 2;				/*drive name & : */
 			q = pathExp + 2;
-			xgetdir(&pathbuf[2], pathExp[0] - 'A' + 1);
+			Dgetpath(&pathbuf[2], pathExp[0] - 'A' + 1);
 			goto cp_dir;
 		} else if (!dirLen || (pathExp[1] != ':'))
 		{								/*no drive was specified */
-			pathbuf[0] = xgetdrv() + 'A';	/*get the default drive name */
+			pathbuf[0] = Dgetdrv() + 'A';	/*get the default drive name */
 			q = pathExp;
 			if (*q == '\\')
 			{							/*root was specified, don't get the default directory */
@@ -596,7 +550,7 @@ PP(int check;)
 				q++;
 				goto cp_dir;
 			}
-			xgetdir(&pathbuf[2], 0);
+			Dgetpath(&pathbuf[2], 0);
 		  cp_dir:
 			pathbuf[1] = ':';
 			for (dirLen = 2, p = pathbuf + 2; *p; p++, dirLen++)
@@ -627,7 +581,7 @@ PP(int check;)
 	}
 
 	/* return file not found if not found.*/
-	flExsists = xsfirst(pathExp, WAttCode) ? -2 : 0;
+	flExsists = Fsfirst(pathExp, WAttCode) ? -2 : 0;
 
 	/* if wild cards were specified in file name and file exsists return 1 */
 	flExsists = wildFnd ? (flExsists ? -2 : 1) : flExsists;
@@ -704,7 +658,7 @@ int chkDst(NOTHING)
 
 		  doDstChk:
 			/* If dst file name longer than wild exp, must be error. */
-			if (strlen(dstNmPat) > strlen(wildExp))
+			if (xstrlen(dstNmPat) > xstrlen(wildExp))
 				return -1;
 
 			/* Loop till end of dst fil nam to see if it matches wild exp. */
@@ -829,9 +783,9 @@ VOID wrerr(NOTHING)
 {
 	int fd;
 
-	fd = xopen("CON:", 2);
-	xwrite(fd, 24L, "\r\nFile write error....\r\n");
-	xclose(fd);
+	fd = Fopen("CON:", O_RDWR);
+	Fwrite(fd, 24L, "\r\nFile write error....\r\n");
+	Fclose(fd);
 	errout();
 }
 
@@ -845,8 +799,8 @@ PP(const char *msg;)
 {
 	long count, bytes;
 
-	bytes = strlen(msg);
-	count = xwrite(1, bytes, msg);
+	bytes = xstrlen(msg);
+	count = Fwrite(1, bytes, msg);
 	if (count != bytes)
 		wrerr();
 }
@@ -880,7 +834,7 @@ PP(int n;)
 	char ch;
 	ch = n + '0';
 	wrt(" OUT<< ");
-	xwrite (1, 1L, &ch);
+	Fwrite (1, 1L, &ch);
 	wrtln("");
 }
 
@@ -891,7 +845,7 @@ PP(int n;)
 	
 	ch = n + '0';
 	wrt(" IN>> ");
-	xwrite(1, 1L, &ch);
+	Fwrite(1, 1L, &ch);
 	wrtln("");
 }
 #endif
@@ -905,7 +859,7 @@ VOID cr2cont(NOTHING)
 {
 	wrt("CR to continue...");
 	lin[0] = 126;
-	xoscall(10, &lin[0]);
+	Cconrs(lin);
 }
 
 /***************************************************************************/
@@ -1075,16 +1029,16 @@ PP(int msg;)
 		wrtln("");
 	case 14:
 		wrt("{");
-		drvch = (drv = xgetdrv()) + 'a';
-		xwrite(1, 1L, &drvch);
+		drvch = (drv = Dgetdrv()) + 'a';
+		Fwrite(1, 1L, &drvch);
 		wrt("}");
 		break;
 	case 15:
 		wrtln("Wild cards not allowed in destination.");
 		break;
 	case 16:
-		drvch = (drv = xgetdrv()) + 'a';
-		xwrite(1, 1L, &drvch);
+		drvch = (drv = Dgetdrv()) + 'a';
+		Fwrite(1, 1L, &drvch);
 		wrt(":");
 		break;
 	case 18:
@@ -1102,7 +1056,7 @@ int getYes(NOTHING)
 {
 	char inpStr[30];
 
-	inpStr[0] = xrdchne();
+	inpStr[0] = Cnecin();
 	inpStr[1] = 0;
 	ucase(&inpStr[0]);
 	if (inpStr[0] == 'Y')
@@ -1166,40 +1120,40 @@ PP(int move;)
 						mkSrc();
 						if (!(srcEqDst = mkDst()))
 						{
-							xunlink(dstFlNm);
+							Fdelete(dstFlNm);
 							dspMsg(12);
 							dspMsg(7);
 							dspMsg(10);
 							dspMsg(8);
-							if ((fds = xopen(srcFlNm, 0)) <= 0)
+							if ((fds = Fopen(srcFlNm, O_RDONLY)) <= 0)
 								goto error0;
-							if ((fdd = xcreat(dstFlNm, 0x20)) <= 0)
+							if ((fdd = Fcreate(dstFlNm, 0x20)) <= 0)
 								goto error1;
 							compl_code = 0;
 							nr = nw = -1;
 							while (nr && nw)
 							{
-								if ((nr = xread(fds, (long) BUFSIZ, buf)) > 0)
+								if ((nr = Fread(fds, (long) BUFSIZ, buf)) > 0)
 								{
-									if ((nw = xwrite(fdd, nr, buf)) < nr)
+									if ((nw = Fwrite(fdd, nr, buf)) < nr)
 										goto error4;
 								} else if (nr < 0)
 								{
 									goto error3;
 								}
 							}
-							xdatime(buff, fds, 0);	/* get the time stamp from source */
-							xdatime(buff, fdd, 1);	/* set the time stamp for destination */
-							mod = (char) xattrib(srcFlNm, 0, 0);
-							xattrib(dstFlNm, 1, mod);
-							xclose(fds);
+							Fdatime(buff, fds, 0);	/* get the time stamp from source */
+							Fdatime(buff, fdd, 1);	/* set the time stamp for destination */
+							mod = (char) Fattrib(srcFlNm, 0, 0);
+							Fattrib(dstFlNm, 1, mod);
+							Fclose(fds);
 							if (move)
 							{
-								xunlink(srcFlNm);
+								Fdelete(srcFlNm);
 								wrt(" DELETING ");
 								dspMsg(7);
 							}
-							xclose(fdd);
+							Fclose(fdd);
 						} else
 						{
 							goto error2;
@@ -1244,7 +1198,7 @@ PP(int move;)
 	return -1;
 
   eout:
-	xunlink(dstFlNm);
+	Fdelete(dstFlNm);
 	wrt(" DELETING ");
 	wrt(dstFlNm);
 	return -1;
@@ -1332,7 +1286,7 @@ PP(char *dst;)
 									dspMsg(7);
 									dspMsg(10);
 									dspMsg(8);
-									compl_code = xrename(0, srcFlNm, dstFlNm);
+									compl_code = Frename(0, srcFlNm, dstFlNm);
 									if (compl_code < 0)
 									{
 										wrt("  Rename Unsucessfull!");
@@ -1426,7 +1380,7 @@ PP(char **argv;)
 		k = 0;
 		do
 		{
-			n = strlen(&srchb[30]);
+			n = xstrlen(&srchb[30]);
 			if (dirOnly && (srchb[21] != 0x10))
 				goto skip;
 			if ((filOnly) && (srchb[21] == 0x10))
@@ -1458,7 +1412,7 @@ PP(char **argv;)
 			if (!terse)
 			{
 				for (i = n; i < 15; i++)
-					xwrite(1, 1L, " ");
+					wrt(" ");
 
 				dt = (short *)&srchb[24];
 				j = *dt;
@@ -1482,7 +1436,7 @@ PP(char **argv;)
 				if (att < 0x10)
 					wrt("0");
 				prthex(att);
-				xwrite(1, 2L, "  ");
+				wrt("  ");
 
 				pl = (long *) &srchb[26];
 				ts += *pl;
@@ -1554,7 +1508,7 @@ PP(char **argv;)
 						compl_c = -1;
 					} else
 					{
-						compl_c = xattrib(srcFlNm, 1, mode);
+						compl_c = Fattrib(srcFlNm, 1, mode);
 					}
 				} while (gtFlNm());
 				if (compl_c >= 0)
@@ -1619,7 +1573,7 @@ PP(char **argv;)
 						return -1;
 					}
 					mkSrc();
-					if ((fd = xopen(srcFlNm, 0)) <= 0)
+					if ((fd = Fopen(srcFlNm, O_RDONLY)) <= 0)
 					{
 						wrtln("Cannot open file ");
 						wrt(srcFlNm);
@@ -1627,16 +1581,16 @@ PP(char **argv;)
 					}
 					do
 					{
-						n = xread(fd, (long)BUFSIZ, buf);
+						n = Fread(fd, (long)BUFSIZ, buf);
 						if (n > 0)
 						{
-							count = xwrite(1, (long) n, buf);
+							count = Fwrite(1, (long) n, buf);
 							if (count != n)
 								wrerr();
 						}
 					} while (n > 0);
 				} while (gtFlNm());
-				xclose(fd);
+				Fclose(fd);
 			}
 		}
 	}
@@ -1730,7 +1684,7 @@ PP(char **argv;)
 							else
 								goto skipdel;
 						}
-						compl_c = xunlink(srcFlNm);
+						compl_c = Fdelete(srcFlNm);
 						file_del = TRUE;
 					  skipdel:
 						dspMsg(12);
@@ -1775,13 +1729,13 @@ PP(long newso;)
 		dspCL();
 	if (rd->nso)
 	{
-		xforce(1, (int) newso);
-		xclose((int) newso);
+		Fforce(1, (int) newso);
+		Fclose((int) newso);
 	}
 	if (rd->nsi)
 	{
-		xforce(0, (int) newsi);
-		xclose((int) newsi);
+		Fforce(0, (int) newsi);
+		Fclose((int) newsi);
 	}
 }
 
@@ -1816,7 +1770,7 @@ PP(char *p;)
 			q = pathbuf + 3;
 			if (*q-- == 0 && *q-- == '\\' && *q-- == ':')
 			{
-				i = xgetdrv();
+				i = Dgetdrv();
 				c = *q;
 				if (c >= 'a' && c <= 'z')
 					c -= 'a';
@@ -1824,18 +1778,18 @@ PP(char *p;)
 					c -= 'A';
 				else
 					c = 60;				/* just set it illegal */
-				if (c < 0 || c > 15 || xsetdrv((int) c) < 0)
+				if (c < 0 || c > 15 || Dsetdrv((int) c) < 0)
 				{
-					xsetdrv(i);
+					Dsetdrv(i);
 					return (compl_code = -1L);
 				}
-				xsetdrv(i);				/*restore the old drive */
+				Dsetdrv(i);				/*restore the old drive */
 			} else
 			{
 				q = pathbuf;				/* scan pathbuf to see any * or ? embeded */
 				while (*q && *q != '*' && *q != '?')
 					q++;
-				if (*q || xsfirst(pathbuf, 0x10) < 0)
+				if (*q || Fsfirst(pathbuf, FA_SUBDIR) < 0)
 					return (compl_code = -1L);
 			}
 		}
@@ -1875,18 +1829,18 @@ PP(char *cmdtl;)
 	envPtr = prntEnvPtr;
 	while (*envPtr)						/* while not at last NULL   */
 	{
-		i = strlen(envPtr) + 1;			/* get length + 1 for NULL  */
+		i = xstrlen(envPtr) + 1;			/* get length + 1 for NULL  */
 		if (!xncmps(5, envPtr, pthSymb))	/* if not PATH=...      */
 			envLen += i;				/* add length of this string    */
 		envPtr += i;					/* move to next string      */
 	}
 
 	/* Add len of path definition */
-	if ((i = strlen(path)) != 0)		/* is a new path defined?   */
+	if ((i = xstrlen(path)) != 0)		/* is a new path defined?   */
 		envLen += sizeof(pthSymb) + i + 1;	/* space for PATH=... and NULL  */
 
 	/* Allocate envLen number of bytes for environment strings. */
-	envPtr = (char *)xmalloc((long) envLen);
+	envPtr = (char *)Malloc((long) envLen);
 
 	/* copy path string into env. */
 	i = 0;
@@ -1906,7 +1860,7 @@ PP(char *cmdtl;)
 	{
 		/* if a path has been defined, don't copy it. */
 		if (xncmps(5, &prntEnvPtr[envLen], pthSymb))
-			envLen += (1 + strlen(&prntEnvPtr[envLen]));
+			envLen += (1 + xstrlen(&prntEnvPtr[envLen]));
 		else
 		{
 			i++;
@@ -1942,7 +1896,7 @@ PP(char *cmdtl;)
 
 	cmdptr = cmd;
 	j = 0;
-	while ((err = xexec(0, cmdptr, cmdtl, envPtr)) == -33 && gtpath)
+	while ((err = Pexec(0, cmdptr, cmdtl, envPtr)) == -33 && gtpath)
 	{
 		k = j;
 		if (path[j])
@@ -1971,7 +1925,7 @@ PP(char *cmdtl;)
 	user();
 
 	exeflg = 0;
-	xmfree(envPtr);
+	Mfree(envPtr);
 
 	return err;
 }
@@ -2014,7 +1968,7 @@ PP(char **parms;)
 
 		cmdptr = cmd;
 		j = 0;
-		while (((flHnd = xopen(cmdptr, 0)) <= 0) && (gtpath))
+		while (((flHnd = Fopen(cmdptr, O_RDONLY)) <= 0) && (gtpath))
 		{
 			k = j;
 			if (path[j])
@@ -2051,7 +2005,7 @@ PP(char **parms;)
 				return -1;
 			}
 			xCmdLn(parms, &i, (int)flHnd, NULL);
-			xclose((int) flHnd);
+			Fclose((int) flHnd);
 			--batlev;
 			compl_code = 0;
 			return -1;
@@ -2173,8 +2127,8 @@ PP(char **parm;)
 		if (*parm[i] == '"')
 		{
 			parm[i]++;
-			if (*(parm[i] + strlen(parm[i]) - 1) == '"')
-				*(parm[i] + strlen(parm[i]) - 1) = 0;
+			if (*(parm[i] + xstrlen(parm[i]) - 1) == '"')
+				*(parm[i] + xstrlen(parm[i]) - 1) = 0;
 
 			parm_ptr = parm[i];
 			while ((ch = *parm_ptr) != 0)
@@ -2234,7 +2188,7 @@ PP(register char *llin;)
 	i = j = 0;
 
 	llin[0] = 126;
-	xoscall(10, llin);
+	Cconrs(llin);
 
 	llin[llin[1] + 2] = 0;
 
@@ -2265,13 +2219,13 @@ PP(int flHnd;)
 	char ch;
 
 	j = 0;
-	while ((chrFnd = xread(flHnd, 1L, &ch)) > 0)
+	while ((chrFnd = Fread(flHnd, 1L, &ch)) > 0)
 	{
 		if (ch == 0x0a)
 			break;
 		if (ch == 0x0d)
 		{
-			if (xread(flHnd, 1L, &ch) > 0)
+			if (Fread(flHnd, 1L, &ch) > 0)
 			{
 				if (ch != 0x0a)
 					Fseek(-1L, flHnd, SEEK_CUR);
@@ -2312,7 +2266,7 @@ PP(register char *p;)
 	
 	for (i = 0; i < BUFSIZ; i++)
 		buf[i] = 0;
-	i = xgetdrv();			/* default drive */
+	i = Dgetdrv();			/* default drive */
 	if (!*p)
 	{
 		drv = i;
@@ -2320,27 +2274,27 @@ PP(register char *p;)
 	{
 		ucase(p);
 		drv = *p - 'A';
-		if (drv < 0 || drv > 31 || xsetdrv(drv) < 0)
+		if (drv < 0 || drv > 31 || Dsetdrv(drv) < 0)
 		{
 			dspMsg(18);
 			wrt(p);
-			xsetdrv(i);		/* restore the default drive */
+			Dsetdrv(i);		/* restore the default drive */
 			return;
 		}
-		xsetdrv(i);
+		Dsetdrv(i);
 	}
 	buf[0] = 0xf7;
 	buf[1] = 0xff;
 	buf[2] = 0xff;
 	super();
-	b = (BPB *)getbpb(drv);
+	b = (BPB *)Getbpb(drv);
 	if (b->b_flags & 1)
 		buf[3] = 0xFF;
 	f1 = b->fatrec - b->fsiz;
 	f2 = b->fatrec;
 	fs = b->fsiz;
-	rwabs(1, buf, fs, f1, drv);
-	rwabs(1, buf, fs, f2, drv);
+	Rwabs(1, buf, fs, f1, drv);
+	Rwabs(1, buf, fs, f2, drv);
 	nd = b->recsiz / 32;
 	d = buf;
 	for (i = 0; i < nd; i++)
@@ -2351,7 +2305,7 @@ PP(register char *p;)
 	}
 	rec = f2 + fs;
 	for (i = 0; i < b->rdlen; i++, rec++)
-		rwabs(1, buf, 1, rec, drv);
+		Rwabs(1, buf, 1, rec, drv);
 	user();
 	dspMsg(5);
 }
@@ -2465,7 +2419,7 @@ PP(char *outsd_tl;)
 					wrt("File name not specified after @.");
 					goto redrc;
 				}
-				if ((dskFlHnd = xopen(tl0, 0)) >= 0)
+				if ((dskFlHnd = Fopen(tl0, O_RDONLY)) >= 0)
 				{
 					pipe = -1;
 				} else
@@ -2484,9 +2438,9 @@ PP(char *outsd_tl;)
 				}
 				*tl++ = 0;
 
-				if ((newsi = xopen(tl0, 0)) >= 0)
+				if ((newsi = Fopen(tl0, O_RDONLY)) >= 0)
 				{
-					rd.oldsi = dup(0);
+					rd.oldsi = Fdup(0);
 					rd.nsi = TRUE;
 				} else
 				{
@@ -2524,9 +2478,9 @@ PP(char *outsd_tl;)
 				}
 				if (concat)
 				{
-					if ((newso = xopen(tl1, 1)) < 0)
+					if ((newso = Fopen(tl1, O_WRONLY)) < 0)
 					{
-						if ((newso = xcreat(tl1, 0)) < 0)
+						if ((newso = Fcreate(tl1, 0)) < 0)
 						{
 							wrtln(" Error of opening/creating output:");
 							wrt(tl1);
@@ -2535,15 +2489,15 @@ PP(char *outsd_tl;)
 					}
 				} else
 				{
-					xunlink(tl1);
-					if ((newso = xcreat(tl1, 0)) < 0)
+					Fdelete(tl1);
+					if ((newso = Fcreate(tl1, 0)) < 0)
 					{
 						wrtln(" Error of creating output:");
 						wrt(tl1);
 						goto redrc;
 					}
 				}
-				rd.oldso = dup(1);
+				rd.oldso = Fdup(1);
 				rd.nso = TRUE;
 				if (concat)
 					Fseek(0L, (int) newso, 2);
@@ -2576,14 +2530,14 @@ PP(char *outsd_tl;)
 		{
 			preCmd(&rd, newsi, newso);
 			xCmdLn(argv, &pipe, (int)dskFlHnd, NULL);
-			xclose((int) dskFlHnd);
+			Fclose((int) dskFlHnd);
 		} else
 		{
-			if (strlen(s) == 2 && s[1] == ':')
+			if (xstrlen(s) == 2 && s[1] == ':')
 			{
 				preCmd(&rd, newsi, newso);
 				drv = *s - 'A';
-				if (drv < 0 || drv > 31 || xsetdrv(drv) < 0)
+				if (drv < 0 || drv > 31 || Dsetdrv(drv) < 0)
 				{
 					dspMsg(18);
 					wrt(s);
@@ -2621,7 +2575,7 @@ PP(char *outsd_tl;)
 					{
 						wrtln(&prntEnvPtr[i]);
 					}
-					i += strlen(&prntEnvPtr[i]);
+					i += xstrlen(&prntEnvPtr[i]);
 					if (prntEnvPtr[i] + prntEnvPtr[i + 1] == 0)
 						break;
 					i += 1;
@@ -2653,20 +2607,20 @@ PP(char *outsd_tl;)
 				preCmd(&rd, newsi, newso);
 				if (argc == 0)
 				{
-					xgetdir(buf, drv + 1);
+					Dgetpath(buf, drv + 1);
 					if (!buf[0])
 					{
 						buf[0] = '\\';
 						buf[1] = 0;
 					}
-					bytes = strlen(buf);
-					count = xwrite(1, bytes, buf);
+					bytes = xstrlen(buf);
+					count = Fwrite(1, bytes, buf);
 					if (count != bytes)
 						wrerr();
 				} else
 				{
 					if (chk_wild(p))
-						if ((compl_code = xchdir(p)) != 0)
+						if ((compl_code = Dsetpath(p)) != 0)
 							wrt("Directory not found.");
 				}
 			} else if (xncmps(7, s, "CMDERR"))
@@ -2712,7 +2666,7 @@ PP(char *outsd_tl;)
 				preCmd(&rd, newsi, newso);
 				if (chk_wild(p))
 				{
-					if ((compl_code = xmkdir(p)) != 0)
+					if ((compl_code = Dcreate(p)) != 0)
 						wrt("Unable to make directory");
 				}
 			} else if (xncmps(3, s, "RD"))
@@ -2731,7 +2685,7 @@ PP(char *outsd_tl;)
 						{
 							wrt("Cannot remove root directory\n");
 							compl_code = -1L;
-						} else if ((compl_code = xrmdir(p)) != 0)
+						} else if ((compl_code = Ddelete(p)) != 0)
 						{
 							wrt("Unable to remove directory");
 						}
@@ -2755,11 +2709,15 @@ PP(char *outsd_tl;)
 			{
 				preCmd(&rd, newsi, newso);
 				ucase(p);
-				if (*p && (*p < 'A' || *p > 'P' || *(p + 1) != ':'))
+				if (*p)
+					drv = *p - 'A' + 1;
+				else
+					drv = 0;
+				if (drv < 0 || drv > 32 || (drv != 0 && p[1] != ':' && p[1] != '\0'))
 				{
 					dspMsg(18);
 					wrt(p);
-				} else if (xgetfree(sbuf, (*p ? *p - 64 : 0)) < 0)
+				} else if (Dfree(sbuf, drv) < 0)
 				{
 					wrt("Unable to get drive information: ");
 					wrt(p);
@@ -2795,11 +2753,11 @@ PP(char *outsd_tl;)
 				preCmd(&rd, newsi, newso);
 				ucase(p);
 				drv = *p - 'A';
-				fd = xopen(argv[2], 0);
-				xread(fd, 540L, buf);
-				xclose(fd);
+				fd = Fopen(argv[2], O_RDONLY);
+				Fread(fd, 540L, buf);
+				Fclose(fd);
 				super();
-				rwabs(1, &buf[28], 1, 0, drv);
+				Rwabs(1, &buf[28], 1, 0, drv);
 				user();
 				dspMsg(5);
 			} else if ((xncmps(5, s, "COPY")) || (xncmps(5, s, "MOVE")))
@@ -2814,16 +2772,16 @@ PP(char *outsd_tl;)
 				preCmd(&rd, newsi, newso);
 				ucase(p);
 				cpmopen(p);
-				fd = xcreat(argv[2], 0x20);
+				fd = Fcreate(argv[2], 0x20);
 
 				do
 				{
 					n = cpmread(buf);
 					if (!n)
-						xwrite(fd, 128L, buf);
+						Fwrite(fd, 128L, buf);
 				} while (!n);
 
-				xclose(fd);
+				Fclose(fd);
 				dspMsg(5);
 			} else if (xncmps(6, s, "PAUSE"))
 			{
@@ -2833,11 +2791,11 @@ PP(char *outsd_tl;)
 			{
 				preCmd(&rd, newsi, newso);
 				cpmcreate(argv[2]);
-				fd = xopen(p, 0);
+				fd = Fopen(p, O_RDONLY);
 
 				do
 				{
-					n = xread(fd, 128L, buf);
+					n = Fread(fd, 128L, buf);
 					if (n > 0)
 						compl_code = cpmwrite(buf);
 				} while (n > 0);
@@ -2855,32 +2813,32 @@ PP(char *outsd_tl;)
 			{
 			  exit:
 				preCmd(&rd, newsi, newso);
-				xclose(rd.oldsi);
-				xclose(rd.oldso);
+				Fclose(rd.oldsi);
+				Fclose(rd.oldso);
 				devector();				/* remove vectors */
-				xterm(0);
+				Pterm0();
 			} else if (xncmps(8, s, "VERSION"))
 			{
 				preCmd(&rd, newsi, newso);
-				i = xoscall(0x30);
+				i = Sversion();
 				prtdecl((long) (i & 0xFF));
-				xwrite(1, 1L, ".");
+				wrt(".");
 				prtdecl((long) ((i >> 8) & 0xFF));
 			} else if (xncmps(5, s, "WRAP"))
 			{
 				preCmd(&rd, newsi, newso);
-				xwrite(1, 2L, "\033v");
+				wrt("\033v");
 				dspMsg(5);
 			} else if (xncmps(7, s, "NOWRAP"))
 			{
 				preCmd(&rd, newsi, newso);
-				xwrite(1, 2L, "\033w");
+				wrt("\033w");
 				dspMsg(5);
 			} else if (xncmps(4, s, "CLS"))
 			{
 				rd.echocmd = FALSE;
 				preCmd(&rd, newsi, newso);
-				xwrite(1, 4L, "\033H\033J");
+				wrt("\033H\033J");
 				rd.echocmd = rd.nonstdin != 0;
 			} else if (xncmps(5, s, "STAY"))
 			{
@@ -2953,7 +2911,7 @@ PP(char *bp;)								/* Base page address */
 	if (cmd < 0 || cmd >= 127)
 		cmd = 0;
 
-	xsetdta(srchb);
+	Fsetdta(srchb);
 	path[0] = 0;
 	compl_code = 0;
 	prgerr = -1;
@@ -2985,7 +2943,7 @@ PP(char *bp;)								/* Base page address */
 		if (err != -2)
 		{
 			for (i = 6; i <= 20; i++)
-				xclose(i);
+				Fclose(i);
 			if (cmd)
 			{
 				wrtln("Stay in COMMAND.PRG (Y/CR)? ");

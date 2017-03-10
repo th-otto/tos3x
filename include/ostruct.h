@@ -15,6 +15,7 @@
 #define FA_HIDDEN       0x02
 #define FA_SYSTEM       0x04
 #define FA_LABEL        0x08
+#define FA_SUBDIR       0x10
 #ifndef FA_DIREC
 #define FA_DIREC        0x10
 #endif

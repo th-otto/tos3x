@@ -10,7 +10,7 @@ CROSS := $(shell $(EVAL_CROSS))
 include ../GNUmakefile.cmn
 include ../Makefile.sil
 
-CPPFLAGS = -I ../common -I $(INC)
+CPPFLAGS = -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
 PROGRAMS = command.tos
@@ -19,8 +19,14 @@ all: $(PROGRAMS)
 
 include SRCFILES
 
-command.tos: $(COMA_OBJS)
-	$(AM_V_LD)$(LD) -nostdlib $(COMA_OBJS) $(LDFLAGS) -o $@ -lgcc
+command.tos: $(COMA_OBJS) gemdos.o bios.o
+	$(AM_V_LD)$(LD) -nostdlib $^ $(LDFLAGS) -o $@ -lgcc
+
+gemdos.o: ../libsrc/gemdos.S
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+bios.o: ../libsrc/bios.S
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i ../bin/$$i; done
