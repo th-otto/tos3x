@@ -6,6 +6,7 @@ PROGRAMS = command.tos
 all: $(PROGRAMS)
 
 include SRCFILES
+include optimize.mak
 
 command.tos: $(COMA_OBJS) $(LIB1OBJS) ${MAKEFILE}
 	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(COMA_OBJS) $(LIB1OBJS)

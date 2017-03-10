@@ -4,6 +4,9 @@ subdir=command
 # 
 # cross compiling
 #
+EVAL_CROSS := case `uname -s` in *MiNT*|*TOS*) echo no;; *) echo yes; esac
+CROSS := $(shell $(EVAL_CROSS))
+
 include ../GNUmakefile.cmn
 include ../Makefile.sil
 
@@ -17,10 +20,7 @@ all: $(PROGRAMS)
 include SRCFILES
 
 command.tos: $(COMA_OBJS)
-	$(AM_V_LD)$(LD) $(COMA_OBJS) $(LDFLAGS) -o $@
-
-coma.o: coma.S
-	../../../bin/as68 -u -l $<
+	$(AM_V_LD)$(LD) -nostdlib $(COMA_OBJS) $(LDFLAGS) -o $@ -lgcc
 
 check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i ../bin/$$i; done

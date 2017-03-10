@@ -29,27 +29,27 @@
 *	SCC	Steven C. Cavender
 *
 
-	.text
-	.globl	_in_term
-	.globl	_rm_term
-	.globl	_xbrkpt
-	.globl	_cpmopen
-	.globl	_cpmcreate
-	.globl	_cpmclose
-	.globl	_cpmread
-	.globl	_cpmwrite
-	.globl	_cmain
-	.globl	_div10
-	.globl	_mod10
-	.globl	_oscall
-	.globl	_bios
-	.globl	_xsetjmp
-	.globl	_xlongjmp
-	.globl	_exeflg
-	.globl	_jb
-	.globl	_devector
-	.globl	_super
-	.globl	_user
+	text
+	globl	_in_term
+	globl	_rm_term
+	globl	_xbrkpt
+	globl	_cpmopen
+	globl	_cpmcreate
+	globl	_cpmclose
+	globl	_cpmread
+	globl	_cpmwrite
+	globl	_cmain
+	globl	_div10
+	globl	_mod10
+	globl	_oscall
+	globl	_bios
+	globl	_xsetjmp
+	globl	_xlongjmp
+	globl	_exeflg
+	globl	_jb
+	globl	_devector
+	globl	_super
+	globl	_user
 
 
 _main:	move.l	#mystak,a5
@@ -364,17 +364,16 @@ _cpmwrite:
 	unlk	a6
 	rts
 
-	.data
-aris:	.dc.b	13,10,'(A)bort, (R)etry, or (I)gnore ?',0
+	data
+aris:	dc.b	13,10,'(A)bort, (R)etry, or (I)gnore ?',0
 
-	.bss
-	.even
-savess:	.ds.l	1						/* JSL  20 Mar 85 */
-ocrit:	.ds.l	1
-oterm:	.ds.l	1
-biosav:	.ds.l	1
-retshell: .ds.l	1
-cpmfcb:	.ds.b	36
-	.ds.l	400   						/* LTG  15 May 85 */
-mystak:	.ds.l	1
-	.end
+	bss
+	even
+savess:	ds.l	1						/* JSL  20 Mar 85 */
+ocrit:	ds.l	1
+oterm:	ds.l	1
+biosav:	ds.l	1
+retshell: ds.l	1
+cpmfcb:	ds.b	36
+	ds.l	400   						/* LTG  15 May 85 */
+mystak:	ds.l	1

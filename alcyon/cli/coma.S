@@ -29,27 +29,27 @@
 *	SCC	Steven C. Cavender
 *
 
-	.text
-	.globl	_in_term
-	.globl	_rm_term
-	.globl	_xbrkpt
-	.globl	_cpmopen
-	.globl	_cpmcreate
-	.globl	_cpmclose
-	.globl	_cpmread
-	.globl	_cpmwrite
-	.globl	_cmain
-	.globl	_xoscall
-	.globl	_bios
-	.globl	_xsetjmp
-	.globl	_xlongjmp
-	.globl	_exeflg
-	.globl	_jb
-	.globl	_devector
-	.globl	_super
-	.globl	_user
-	.globl	_cli
-_cli:
+	text
+	globl	_in_term
+	globl	_rm_term
+	globl	_xbrkpt
+	globl	_cpmopen
+	globl	_cpmcreate
+	globl	_cpmclose
+	globl	_cpmread
+	globl	_cpmwrite
+	globl	_cmain
+	globl	_xoscall
+	globl	_bios
+	globl	_xsetjmp
+	globl	_xlongjmp
+	globl	_exeflg
+	globl	_jb
+	globl	_devector
+	globl	_super
+	globl	_user
+
+
 _main:	move.l	#mystak,a5
 	move.l	4(sp),-(a5)
 	clr.l	-(a5)		/* bogus return address */
@@ -66,10 +66,10 @@ _main:	move.l	#mystak,a5
 	trap	#1
 	add.l	#12,sp
 
-	clr.l	-(sp)		/* toggle into sup mode		* SCC  13 Mar 85 */
-	move.w	#$20,-(sp)	/* to do BIOS calls		* SCC  13 Mar 85 */
-	trap	#1						/* SCC  13 Mar 85 */
-	move.l	d0,2(sp)	/* save SSP back in stack	* SCC  13 Mar 85 */
+	clr.l	-(sp)		/* toggle into sup mode */
+	move.w	#$20,-(sp)	/* to do BIOS calls */
+	trap	#1
+	move.l	d0,2(sp)	/* save SSP back in stack */
 
 	move.l	#mycrit,-(sp)
 	move	#$101,-(sp)
@@ -103,35 +103,35 @@ _devector:
 	rts
 
 _in_term:
-	move.l	#myterm,-(sp)					/* LTG  20 May 85 */
-	move	#$102,-(sp)					/* LTG  20 May 85 */
-	move	#5,-(sp)					/* LTG  20 May 85 */
-	trap	#13		/* set/get terminate vector	* LTG  20 May 85 */
-	add.l	#8,sp						/* LTG  20 May 85 */
-	move.l	d0,oterm					/* LTG  20 May 85 */
-	rts							/* LTG  20 May 85 */
+	move.l	#myterm,-(sp)
+	move	#$102,-(sp)
+	move	#5,-(sp)
+	trap	#13		/* set/get terminate vector */
+	add.l	#8,sp
+	move.l	d0,oterm
+	rts
 
 _rm_term:
-	move.l	oterm,-(sp)	/* restore terminate vector	* SCC  22 Mar 85 */
-	move.w	#$102,-(sp)					/* SCC  22 Mar 85 */
-	move.w	#5,-(sp)					/* SCC  22 Mar 85 */
-	trap	#13						/* SCC  22 Mar 85 */
-	add.l	#8,sp						/* SCC  22 Mar 85 */
+	move.l	oterm,-(sp)	/* restore terminate vector */
+	move.w	#$102,-(sp)
+	move.w	#5,-(sp)
+	trap	#13
+	add.l	#8,sp
 	rts
 
 
-_super:	clr.l	-(sp)						/* JSL  20 Mar 85 */
-	move	#$20,-(sp)					/* JSL  20 Mar 85 */
-	trap	#1						/* JSL  20 Mar 85 */
-	addq.l	#6,sp						/* JSL  20 Mar 85 */
-	move.l	d0,savess					/* JSL  20 Mar 85 */
-	rts							/* JSL  20 Mar 85 */
+_super:	clr.l	-(sp)
+	move	#$20,-(sp)
+	trap	#1
+	addq.l	#6,sp
+	move.l	d0,savess
+	rts
 
-_user:	move.l	savess,-(sp)					/* JSL  20 Mar 85 */
-	move	#$20,-(sp)					/* JSL  20 Mar 85 */
-	trap	#1						/* JSL  20 Mar 85 */
-	addq.l	#6,sp						/* JSL  20 Mar 85 */
-	rts							/* JSL  20 Mar 85 */
+_user:	move.l	savess,-(sp)
+	move	#$20,-(sp)
+	trap	#1
+	addq.l	#6,sp
+	rts
 
 myterm:	cmp	#0,_exeflg	/* is this my child's term */
 	beq	itsme
@@ -346,17 +346,16 @@ _cpmwrite:
 	unlk	a6
 	rts
 
-	.data
-aris:	.dc.b	13,10,'(A)bort, (R)etry, or (I)gnore ?',0
+	data
+aris:	dc.b	13,10,'(A)bort, (R)etry, or (I)gnore ?',0
 
-	.bss
-	.even
-savess:	.ds.l	1						/* JSL  20 Mar 85 */
-ocrit:	.ds.l	1
-oterm:	.ds.l	1
-biosav:	.ds.l	1
-retshell: .ds.l	1
-cpmfcb:	.ds.b	36
-	.ds.l	800   						/* LTG  15 May 85 */
-mystak:	.ds.l	1
-	.end
+	bss
+	even
+savess:	ds.l	1
+ocrit:	ds.l	1
+oterm:	ds.l	1
+biosav:	ds.l	1
+retshell: ds.l	1
+cpmfcb:	ds.b	36
+	ds.l	800
+mystak:	ds.l	1

@@ -1465,57 +1465,57 @@ PP(char **parm;)
 PP(int *pipeflg;)
 PP(long *nonStdIn;)
 {
-	int pipe; /* -2 */
-	int nsi; /* -4 */
-	int nso; /* -6 */
-	int bdChrs; /* -8 */
+	int pipe;
+	int nsi;
+	int nso;
+	int bdChrs;
 	int n2;
-	int fs; /* -40 */
-	int fd; /* -14 */
+	int fs;
+	int fd;
 	int n;
 	int fds;
 	int fdd;
-	int rwflg; /* -22 */
-	int dummy1; /* -24 */
-	int i; /* -26 */
-	int j; /* -28 */
-	int k; /* -30 */
-	int att; /* -32 */
-	int argc; /* -34 */
-	int f1; /* -36 */
-	int f2; /* -38 */
-	int nd; /* -40 */
-	int rec; /* -42 */
-	int oldsi; /* -44 */
-	int oldso; /* -46 */
-	int concat; /* -48 */
-	short *dt; /* -52 */
-	int filOnly; /* -54 */
-	int dirOnly; /* -56 */
-	int terse; /* -58 */
+	int rwflg;
+	int dummy1;
+	int i;
+	int j;
+	int k;
+	int att;
+	int argc;
+	int f1;
+	int f2;
+	int nd;
+	int rec;
+	int oldsi;
+	int oldso;
+	int concat;
+	short *dt;
+	int filOnly;
+	int dirOnly;
+	int terse;
 	int nch;
 	short dummy2;
 	short dummy3;
-	char unused[10]; /* -74 */
-	long *pl; /* -78 */
-	long nl; /* -82 */
-	long newso; /* -86 */
-	long newsi; /* -90 */
-	long sbuf[4]; /* -106 */
-	long dskFlHnd; /* -110 */
-	int next; /* -112 */
-	char ch; /* -114 */
-	char *cmdtl; /* -118 */
-	char *tl0; /* -122 */
-	char *tl1; /* -126 */
-	char *tl; /* -130 */
-	char *d; /* -134 */
-	char *s; /* -138 */
-	char *argv[MAXARGS]; /* -218 */
-	char *p; /* -222 */
-	char *lastp; /* -226 */
-	char ltail[130]; /* -356 */
-	BPB *b; /* -360 */
+	char unused[10];
+	long *pl;
+	long nl;
+	long newso;
+	long newsi;
+	long sbuf[4];
+	long dskFlHnd;
+	int next;
+	char ch;
+	char *cmdtl;
+	char *tl0;
+	char *tl1;
+	char *tl;
+	char *d;
+	char *s;
+	char *argv[MAXARGS];
+	char *p;
+	char *lastp;
+	char ltail[130];
+	BPB *b;
 	
 	UNUSED(lastp);
 	UNUSED(nl);
@@ -1525,12 +1525,19 @@ PP(long *nonStdIn;)
 	UNUSED(nch);
 	UNUSED(n2);
 	UNUSED(rwflg);
-
+	UNUSED(dummy1);
+	UNUSED(dummy2);
+	UNUSED(dummy3);
+	UNUSED(unused);
+	
 	nsi = nso = 0;
 	oldsi = dup(0);
 	oldso = dup(1);
 	
 	/* while there is input from the disk or standard input */
+#if !BINEXACT
+	bdChrs = 0;
+#endif
 	while ((*nonStdIn ? (bdChrs = readDsk(lin, nonStdIn)) : readSi(lin)))
 	{
 		/* Garbage chars in disk file. */

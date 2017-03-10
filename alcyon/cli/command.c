@@ -53,12 +53,87 @@ MODIFICATION HISTORY - As of version 0.20 as modified by LTG
    11-14-85 0.42 LTG Added code to erase partially created file when copy aborts
                      Fixed bug that disallowed copy \pathn \pathx
                      Added code to allow spec of multiple names in del command
-                     
+   11-21-85 0.43 LTG Added multiple files to type command.
+                     Changed code so that commands ouput to screen when > used.
+   12-17-85 0.44 LTG Fixed bug in REM.
+   01-17-85 0.45 LTG Added stay STAY and total files to dir.
+   02-25-86 0.46 MLC Fixed bug in xCmdLn when removing root directory, crashed.
+   		     Fixed bug in ioredirection when an illegal file name is 
+		     there, creating the file has problem.
+		     Add time, type, date, diff, era, find and format to help
+		     message and corrected some misspelling.
+   03-07-86 0.47 MLC Fixed bug in SHOW command with illegal drive name.
+		     Fixed bug in CHMOD command without mode specification.
+		     Fixed bug in I/O redirection, checking if files can be created.
+   		     Fixed bug in "copy a:  " command, where a is current directory.
+   03-14-86 0.48 MLC Fixed bug in chk_sub. When %% is enter.
+    		     date.prg and time.prg are also modified seperately.
+   03-18-86 0.49 MLC Fixed bug in HELP command: displays too many lines before
+    		     pausing and also pausing when output was redirect.
+    		     Fixed bug in dspCL: command line was not completely 
+    		     displayed, the redirection symbol and the file name missing
+    		     Fixed bug in CHMOD command: when the mode was not 0,
+    		     not message was displayed; wildcards was not processed
+    		     correctly: only one file get changed mode.
+    		     Fixed bug in DIR command: displayed hidden and system file.
+    		     Fixed bug in DEL command: displayed "DONE",even the file
+    		     is a read only file.
+    		     Fixed bug in RD command: when "rd a:".
+    		     Fixed bug in REM command: it not only displayed the string
+    		     but also the whole command.
+    		     Fixed bug in nesting too many levels of batch files causing
+    		     the system crash without warning.
+   03-25-86 0.50 MLC Fixed scrolling in help command.
+   03-31-86 0.51 MLC Fixed bug in RD command. 
+    		     Fixed bug in @ directive.
+    		     Changed wording in SHOW error message.
+    		     Added "Done" message to "RD" and "MD" command when finish.
+   04-15-86 0.52 MLC Fixed bug in copy file to it self.
+   04-21-86 0.53 MLC Fixed bug in copy command. Put the current directory in
+    		     the path name when none is supplied. Also fixed the bug
+    		     in a command line specified @ as output file.(e.g. >@)
+   05-01-86 0.54 MLC Fixed bug in chk_sub, so that if % is contained in a quoted
+    		     string, it will not be processed as parameter substitute.
+    		     Fixed bug in rename and copy command.  Also fixed bug in
+    		     readDsk. Fixed bug in outputting "command not found".
+   05-07-86 0.55 MLC When wildcard in the TYPE command, print error message.
+    		     Added cr/lf to the end of help message. Fixed COPY command 
+    		     such that it copy the date stamp from the old file. Deleted
+    		     the repeated lines in help message.  Fixed DIR command for
+    		     the hidden/system file.
+   06-03-86 0.57 MLC Fixed bug in COPY command. Fixed invalid drive/path name
+    		     in COPY, MOVE, CHANGE DIRECTORY, INIT, PATH commands.
+   08-06-86 0.58 MLC Fixed bug in chk_redirect.  Fixed bug in COPY command
+    		     so the file attributes is set as the source file.  Fixed
+    		     bugs in write error in TYPE command and add wrerr routine.
+    		     Also fixed bug in chdir.
+   09-15-86 0.59 MGA Fixed bug in creation of the copy of environment strings
+		     for an xexec'd process: one byte too few being allocated
+		     for the environment.
+   10-28-86 0.60 MLC Fixed bug in deleting a file name -.  - is for query option
+    		     for the delete command before, since no doc mentions it,
+    		     it will be taken away.
+   10-30-86 0.61 MLC Fixed bug in dir command with subdirectory names longer
+    		     than 67.
+   10-31-86 0.62 MLC Fixed bug in file names specified by "?" in the commands
+    		     COPY, DIR, MV, DEL, CD, RD etc.  Fixed bug in SHOW when
+    		     an illegal drive name is entered.  Correct the spelling
+    		     in Help command.  When no file is copied, change "Done"
+    		     to "No file found" in COPY command.  Also took care of "*",
+    		     "?" in PATH command.
+   11-06-86 0.63 MLC Not allow '*' or '?' in PATH, CD, MD and RD commands. 
+   11-07-86 0.64 MLC RD did not print the error message when there is a * or ?.
+   11-11-86 0.65 MLC '*' or '?' in .bat file or .prg file name, issue error message.
+   11-13-86 0.66 MLC Make buffer larger to hold directory/path/file name.  If
+    		     no file are deleted, issue "no file deleted" instead of "done"
+
 NAMES
 
 	JSL	Jason S. Loveman
 	LGT	Lou T. Garavaglia
 	SCC	Steven C. Cavender
+	MLC	Mei L. Chung
+	MGA	Mark G. Alexander
 
 */
 
@@ -68,12 +143,6 @@ NAMES
 #  define UNUSED(x)
 #else
 #  define UNUSED(x) ((void)(x))
-#endif
-
-#ifdef __ALCYON__
-#  define BINEXACT 1
-#else
-#  define BINEXACT 0
 #endif
 
 #define _(x) x
@@ -104,7 +173,7 @@ VOID xbrkpt PROTO((NOTHING));
 VOID devector PROTO((NOTHING));
 
 #define FALSE 0
-#define TRUE -1 /* WTF */
+#define TRUE 1
 #define MAXARGS 20
 
 #define xrdchne() xoscall (0x08)
@@ -136,6 +205,7 @@ VOID devector PROTO((NOTHING));
 #define xattrib(a,b,c) xoscall(0x43,a,b,c)
 #define getbpb(a) bios(7,a)
 #define rwabs(a,b,c,d,e) bios(4,a,b,c,d,e)
+#define xdatime(a,b,c) xoscall(0x57,a,b,c)
 
 #define BPB struct _bpb
 BPB										/* bios parameter block */
@@ -153,8 +223,9 @@ BPB										/* bios parameter block */
 
 struct rdb								/*IO redirection info block     */
 {
-	short nso;
-	short nsi;
+	int nso;
+	int nsi;
+	int echocmd;
 	short oldso;
 	short oldsi;
 };
@@ -169,9 +240,8 @@ int exeflg;
 int rtrnFrmBat;
 int prgerr;
 int cmderr;
-
+int batlev;								/* batch file nested level */
 struct xjmpbuf jb;
-
 long compl_code;
 
 #define BUFSIZ 10000
@@ -197,13 +267,15 @@ char *WSrcReq;
 int WAttCode;
 char wildExp[4] = { "*.*" };
 
-char srcFlNm[67];						/* src file name */
-char dstFlNm[67];						/* destination file name */
-char srcDir[67];						/* src dir path */
-char dstDir[67];						/* dst dir path */
+#define PATH_MAX 140
+
+char srcFlNm[PATH_MAX];						/* src file name */
+char dstFlNm[PATH_MAX];						/* destination file name */
+char srcDir[PATH_MAX];						/* src dir path */
+char dstDir[PATH_MAX];						/* dst dir path */
 char srcNmPat[13];						/* src file name specified in path */
 char dstNmPat[13];						/* dst file name specified in path */
-char path[67];							/* lst of default path names       */
+char path[PATH_MAX];							/* lst of default path names       */
 
 /* Forward declarations. */
 VOID chk_redirect PROTO((struct rdb *r));
@@ -214,32 +286,36 @@ size_t strlen PROTO((const char *s));
 VOID prtdecl PROTO((long d));
 VOID pdl PROTO((long d));
 VOID prtDclFmt PROTO((long d, int cnt, char *ch));
-VOID ucase PROTO((char * s));
+VOID ucase PROTO((char *s));
+int chk_wild PROTO((char *s));
 int gtFlNm PROTO((NOTHING));
-int chkDir PROTO((char *pathExp, char *dirExp, char *filExp));
+int chkDir PROTO((char *pathExp, char *dirExp, char *filExp, int check));
 int chkDst PROTO((NOTHING));
 int mkDst PROTO((NOTHING));
 VOID mkSrc PROTO((NOTHING));
+VOID wrerr PROTO((NOTHING));
 VOID wrt PROTO((const char *msg));
 VOID wrtln PROTO((const char *msg));
-VOID dspDir PROTO((char *p, char *dir));
+VOID wrtch PROTO((char ch));
 VOID cr2cont PROTO((NOTHING));
 VOID dspMsg PROTO((int msg));
+VOID dspHelp PROTO((int stand_out));
 int getYes PROTO((NOTHING));
 int copyCmd PROTO((char *src, char *dst, int move));
-int renmCmd PROTO((char *src, char *dst));
+VOID renmCmd PROTO((char *src, char *dst));
 long dirCmd PROTO((char **argv));
 long chmodCmd PROTO((char **argv));
 long typeCmd PROTO((char **argv));
 long delCmd PROTO((char **argv));
-VOID dspCL PROTO((char **argv));
-VOID setPath PROTO((char *p));
+VOID dspCL PROTO((NOTHING));
+VOID preCmd PROTO((long nonStdIn, struct rdb *rd, long newsi, long newso));
+long setPath PROTO((char *p));
 long execPrgm PROTO((char *s, char *cmdtl));
 int execBat PROTO((char *s, char **parms));
 int mknum PROTO((char *str));
-VOID chk_sub PROTO((char *tl, char **parm));
+int chk_sub PROTO((char *tl, char **parm));
 VOID chk_str PROTO((char **parm));
-int readSi PROTO((char *lin));
+long readSi PROTO((char *lin));
 int readDsk PROTO((char *lin, long *flHnd));
 VOID xCmdLn PROTO((char **parm, int *pipeflg, long *nonStdIn, char *outsd_tl));
 
@@ -254,23 +330,26 @@ VOID cmain PROTO((char *bp));
 */
 /***************************************************************************/
 VOID chk_redirect(P(struct rdb *) r)
-PP(struct rdb *r;)
+PP(register struct rdb *r;)
 {
 	/* if a new standard in specified ...*/
-	if (r->nsi == -1)
+	if (r->nsi)
 	{
 		xclose(0);
 		xforce(0, r->oldsi);
+		xclose(r->oldsi);
+		r->nsi = FALSE;
 	}
 	/* if a new standard out specified.*/
-	if (r->nso == -1)
+	if (r->nso)
 	{
 		xclose(1);
 		xforce(1, r->oldso);
+		xclose(r->oldso);
+		r->nso = FALSE;
 	}
 }
 
-/***************************************************************************/
 /***************************************************************************/
 VOID errout(NOTHING)
 {
@@ -279,11 +358,10 @@ VOID errout(NOTHING)
 }
 
 /***************************************************************************/
-/***************************************************************************/
 int xncmps(P(int) n, P(const char *) s, P(const char *) d)
-PP(int n;)
-PP(const char *s;)
-PP(const char *d;)
+PP(register int n;)
+PP(register const char *s;)
+PP(register const char *d;)
 {
 	while (n--)
 		if (*s++ != *d++)
@@ -292,13 +370,12 @@ PP(const char *d;)
 }
 
 /***************************************************************************/
-/***************************************************************************/
 VOID prthex(P(unsigned int) h)
 PP(unsigned int h;)
 {
 	unsigned int h2;
 
-	if ((h2 = (h >> 4)) /* != 0 */)
+	if ((h2 = (h >> 4)) != 0)
 		prthex(h2);
 	else
 		xwrite(1, 1L, "0");
@@ -306,11 +383,10 @@ PP(unsigned int h;)
 }
 
 /***************************************************************************/
-/***************************************************************************/
 size_t strlen(P(const char *) s)
-PP(const char *s;)
+PP(register const char *s;)
 {
-	int n;
+	register int n;
 
 	for (n = 0; *s++; n++)
 		;
@@ -335,7 +411,7 @@ PP(long d;)
 {
 	long d2;
 
-	if ((d2 = d / 10) /* != 0 */)
+	if ((d2 = d / 10) != 0 )
 		pdl(d2);
 	xwrite(1, 1L, &hexch[d % 10]);
 }
@@ -347,8 +423,8 @@ PP(long d;)
 PP(int cnt;)
 PP(char *ch;)
 {
-	int i;
-	long k, j;
+	register int i;
+	register long k, j;
 
 	k = (d ? d : 1);
 	j = 1;
@@ -365,11 +441,33 @@ PP(char *ch;)
 /***************************************************************************/
 /***************************************************************************/
 VOID ucase(P(char *) s)
-PP(char *s;)
+PP(register char *s;)
 {
 	for (; *s; s++)
 		if (*s >= 'a' && *s <= 'z')
 			*s &= ~0x20;
+}
+
+/***************************************************************************/
+/* chk_wild checks wildcard * and ? in the string s.  If s contains * or ?,*/
+/* it issue error message and return false, else it return true.	       */
+/***************************************************************************/
+int chk_wild(P(char *) s)
+PP(char *s;)
+{
+	char *q;
+
+	q = s;								/*scan input to see any * or ? embeded */
+	while (*q && *q != '*' && *q != '?')
+		q++;
+	if (*q)
+	{
+		dspMsg(18);
+		wrt(s);
+		compl_code = -1L;
+		return FALSE;
+	} else
+		return TRUE;
 }
 
 /***************************************************************************/
@@ -379,7 +477,7 @@ PP(char *s;)
       xsfirst.  Each subsequent invocation uses xsnext().  To invoke
       the routine, the wildcarded path name is put into WSrcReq and the
       routine called.  For this and each subseqent call the descriptor block
-      block for the found file (if one was found) is pointed to by WThisSrc.
+      for the found file (if one was found) is pointed to by WThisSrc.
 
 
    returns 0 if no match
@@ -416,9 +514,10 @@ int gtFlNm(NOTHING)
      not) was found, it is place in filExp.  If no file name was found,
      filExp points to "*.*".
 
-  int chkDir (pathExp, dirExp, filExp)
+  int chkDir (pathExp, dirExp, filExp, check)
 
-  returns -3 if wild cards specified in path name
+returns	  -4 if Illegal syntax : was found.
+          -3 if wild cards specified in path name
           -2 if pathExp does NOT specify a file, directory, or device
           -1 if pathExp evaluates to a subdirectory, or a volume label
            0 if pathExp evaluates to a normal, read-only, or system file
@@ -428,13 +527,15 @@ int gtFlNm(NOTHING)
   pathExp - ptr to path expression, w/wo wild cards to be evaluated
   dirExp  - ptr to dir part of pathExp
   filExp  - ptr to file.ext part of pathExp
+  check	  - flag to check if the file exists.
 */
 /***************************************************************************/
 
-int chkDir(P(char *) pathExp, P(char *) dirExp, P(char *) filExp)
+int chkDir(P(char *) pathExp, P(char *) dirExp, P(char *) filExp, P(int) check)
 PP(char *pathExp;)
 PP(char *dirExp;)
 PP(char *filExp;)
+PP(int check;)
 {
 	int pathLen = strlen(pathExp);
 	int dirLen;
@@ -443,22 +544,82 @@ PP(char *filExp;)
 	int i = 0;
 	int flExsists;
 	char c;
+	char pathbuf[PATH_MAX];
+	char *p;
+	char *q;
 
 	/* directory length = path length to start with. */
 	dirLen = pathLen;
+	pathbuf[0] = pathbuf[2] = 0;
+	ucase(pathExp);
 
-	/* Loop thru path expresion from end looking for delimeters and the 1st char.*/
-	do
+	if (!pathLen)
+	{									/*if no directory was specified, use current drive */
+		pathExp[0] = xgetdrv() + 'A';
+		pathExp[1] = ':';
+		xgetdir(&pathbuf[0], 0);		/*get current path name */
+		for (dirLen = pathLen = 2, p = pathbuf, q = pathExp + 2; (*q = *p) != '\0'; dirLen++, pathLen++, p++, q++) ;
+		if (*(q - 1) != '\\')
+		{
+			*q++ = '\\';
+			*q = 0;						/*terminated by null */
+			pathLen++;
+			dirLen++;
+		}
+	} else
 	{
-		if ((c = pathExp[dirLen]) == '*')
-			wildFnd = TRUE;
-	} while ((c != ':') && (c != '\\') && (dirLen--));
-	dirLen++;
-
+		/* Loop thru path expression from end looking for delimeters and the 1st char.*/
+		do
+		{
+			if ((c = pathExp[dirLen]) == '*' || c == '?')
+				wildFnd = TRUE;
+		} while ((c != ':') && (c != '\\') && (dirLen--));
+		if (dirLen++ && c == '\\')		/*contains subdiretory name,but not from root */
+			i = dirLen;
+		if (c == ':')
+		{
+			if (pathExp[1] != ':')
+				return (-4);
+			pathbuf[0] = pathExp[0];
+			pathLen -= 2;				/*drive name & : */
+			q = pathExp + 2;
+			xgetdir(&pathbuf[2], pathExp[0] - 'A' + 1);
+			goto cp_dir;
+		} else if (!dirLen || (pathExp[1] != ':'))
+		{								/*no drive was specified */
+			pathbuf[0] = xgetdrv() + 'A';	/*get the default drive name */
+			q = pathExp;
+			if (*q == '\\')
+			{							/*root was specified, don't get the default directory */
+				pathLen--;
+				if (i > 1)
+					--i;
+				q++;
+				goto cp_dir;
+			}
+			xgetdir(&pathbuf[2], 0);
+		  cp_dir:
+			pathbuf[1] = ':';
+			for (dirLen = 2, p = pathbuf + 2; *p; p++, dirLen++)
+				;
+			if (*(p - 1) != '\\')
+			{
+				*p++ = '\\';
+				dirLen++;
+			}
+			dirLen += i;
+			for (; pathLen > 0; pathLen--)	/*copy file name to pathbuf */
+				*p++ = *q++;
+			*p = 0;						/*terminated by null */
+			for (p = pathbuf, q = pathExp; (*q++ = *p++) != '\0'; pathLen++)	/* copy to pathExp */
+				;
+		}
+	}
 	/* IF nothing specified defalult to wild expresion.*/
-	if (pathLen == 0 || pathExp[pathLen - 1] == '\\' || pathExp[pathLen - 1] == ':')
+	if (pathExp[pathLen - 1] == '\\' || pathExp[pathLen - 1] == ':')
 	{
-		while ((pathExp[pathLen] = wildExp[i]) /* != 0 */)
+		i = 0;
+		while ((pathExp[pathLen] = wildExp[i]) != '\0')
 		{
 			pathLen++;
 			i++;
@@ -469,13 +630,16 @@ PP(char *filExp;)
 	/* return file not found if not found.*/
 	flExsists = xsfirst(pathExp, WAttCode) ? -2 : 0;
 
-	/* if wild cards were specified in file name and file exists return 1 */
+	/* if wild cards were specified in file name and file exsists return 1 */
 	flExsists = wildFnd ? (flExsists ? -2 : 1) : flExsists;
+
+	if (check && wildFnd && flExsists == -2)
+		return (flExsists);
 
 	/* If no wild cards/file name found check if directory. */
 	if (!wildFnd)
 	{
-		/* if a file structure exists... */
+		/* if a file structure exsists... */
 		if (!flExsists)
 		{
 			/* if it is a directory or a volume label... */
@@ -489,7 +653,6 @@ PP(char *filExp;)
 
 				/* copy wild card expresion into spec'd path and file name. */
 				for (i = 0; i <= wildLen; i++)
-
 					/* onto end of path expresion. */
 					pathExp[i + dirLen] = wildExp[i];
 
@@ -497,18 +660,18 @@ PP(char *filExp;)
 			}
 		}
 	}
-	/* copy path exp into directory expresion.*/
+	/* copy path exp into directory expresion. */
 	for (pathLen = 0; pathLen < dirLen; pathLen++)
-		if ((dirExp[pathLen] = pathExp[pathLen]) == '*')
-			return -3;
+		dirExp[pathLen] = pathExp[pathLen];
 
 	/* chop off file nm from dirExp.*/
 	dirExp[dirLen] = '\0';
 
 	/* copy file name into return var.*/
 	i = 0;
-	while ((filExp[i++] = pathExp[pathLen++]) /* != 0 */)
-		;
+	while ((c = filExp[i++] = pathExp[pathLen++]) != '\0')
+		if (c == '*')
+			flExsists = -3;
 
 	return flExsists;
 }
@@ -532,7 +695,7 @@ int chkDst(NOTHING)
 	char c;
 
 	/* check for proper use of wild chards.*/
-	while ((c = srcNmPat[i++]) /* != 0 */)
+	while ((c = srcNmPat[i++]) != 0)
 	{
 		/* Look for wild card chars. */
 		switch (c)
@@ -542,7 +705,7 @@ int chkDst(NOTHING)
 
 		  doDstChk:
 			/* If dst file name longer than wild exp, must be error. */
-			if ((int)strlen(dstNmPat) > (int)strlen(wildExp))
+			if (strlen(dstNmPat) > strlen(wildExp))
 				return -1;
 
 			/* Loop till end of dst fil nam to see if it matches wild exp. */
@@ -585,12 +748,14 @@ int chkDst(NOTHING)
 /***************************************************************************/
 int mkDst(NOTHING)
 {
-	int i, k, ndx;
-	int srcEqDst;
-	i = ndx = 0;
+	register int i, k, ndx;
+	register int srcEqDst;
+
+	i = 0;
+	ucase(&srchb[30]);
 
 	/* determine If dst dir path = src dir path.*/
-	while ((srcEqDst = (srcDir[i] == dstDir[i])) && srcDir[i] && (dstFlNm[i] = dstDir[i]))
+	while ((srcEqDst = (srcDir[i] == dstDir[i])) && srcDir[i] && dstDir[i])
 		i++;
 
 	/* if they do...*/
@@ -605,40 +770,31 @@ int mkDst(NOTHING)
 			while ((srcEqDst = (srchb[30 + i] == dstNmPat[i])) && srchb[30 + i] && dstNmPat[i])
 				i++;
 	}
+	i = 0;
+	ndx = 0;
+	/* copy dst dir path into dst file name.*/
+	while ((dstFlNm[ndx] = dstDir[ndx]) != '\0')
+		ndx++;
 
-	/* if the entire name matches create a dst file name with '.&&&' as ext*/
+	/* if the entire name matches create a dst file name with '.&&&' as ext */
 	if (srcEqDst)
 	{
-		i = 0;
-		while ((dstFlNm[ndx] = dstDir[ndx]) /* != 0 */)
-			ndx++;
-
-		while ((dstFlNm[ndx + i] = srchb[30 + i]) && (dstFlNm[ndx + i] != '.'))
+		while ((dstFlNm[ndx + i] = srchb[30 + i]) != '\0' && dstFlNm[ndx + i] != '.')
 			i++;
-		i++;
+		dstFlNm[ndx + i++] = '.';
 
-		for (k = 0; k <= 2; dstFlNm[i + (k++)] = '&')
-			;
-	}
-
-	/* else file names do not match.*/
-	else
+		for (k = 0; k <= 2; k++)
+			dstFlNm[ndx + i + k] = '&';
+	} else
 	{
-		i = 0;
-		ndx = 0;
-
-		/* copy dst dir path into dst file name. */
-		while ((dstFlNm[ndx] = dstDir[ndx]) /* != 0 */)
-			ndx++;
-
 		/* if dst file pat is wild card, copy src file name into dst file name. */
 		if (dstNmPat[0] == '*')
-			while ((dstFlNm[ndx + i] = srchb[30 + i]) /* != 0 */)
+			while ((dstFlNm[ndx + i] = srchb[30 + i]) != 0)
 				i++;
 
 		else
 			/* copy dst name pat directly into dst file name. */
-			while ((dstFlNm[ndx + i] = dstNmPat[i]) /* != 0 */)
+			while ((dstFlNm[ndx + i] = dstNmPat[i]) != 0)
 				i++;
 	}
 	return srcEqDst;
@@ -652,16 +808,32 @@ int mkDst(NOTHING)
 /***************************************************************************/
 VOID mkSrc(NOTHING)
 {
-	int i;
-	int j = 0;
+	register int i;
+	register int j = 0;
 
 	/* copy src directroy into src directory file name.*/
 	for (i = 0; (srcFlNm[i] = srcDir[i]); i++)
 		;
 
 	/* copy source file name from search first/next into src file name.*/
-	while ((srcFlNm[i + j] = srchb[30 + j]) /* != 0 */)
+	while ((srcFlNm[i + j] = srchb[30 + j]) != 0)
 		j++;
+	ucase(srcFlNm);
+}
+
+/***************************************************************************/
+/*
+    wrerr - write error
+*/
+/***************************************************************************/
+VOID wrerr(NOTHING)
+{
+	int fd;
+
+	fd = xopen("CON:", 2);
+	xwrite(fd, 24L, "\r\nFile write error....\r\n");
+	xclose(fd);
+	errout();
 }
 
 /***************************************************************************/
@@ -672,7 +844,12 @@ VOID mkSrc(NOTHING)
 VOID wrt(P(const char *) msg)
 PP(const char *msg;)
 {
-	xwrite(1, (long)(int)strlen(msg), msg);
+	long count, bytes;
+
+	bytes = strlen(msg);
+	count = xwrite(1, bytes, msg);
+	if (count != bytes)
+		wrerr();
 }
 
 VOID wrtln(P(const char *) msg)
@@ -682,45 +859,16 @@ PP(const char *msg;)
 	wrt(msg);
 }
 
-/***************************************************************************/
-/*
-   dspDir - display directory
-*/
-/***************************************************************************/
-VOID dspDir(P(char *) p, P(char *) dir)
-PP(char *p;)
-PP(char *dir;)
+VOID wrtch(P(char) ch)
+PP(char ch;)
 {
-	int i, j;
-	char ch;
-	char tmpbuf[100];
+	char str[2];
 
-	if (*p && p[1] == ':')
-	{
-		ch = *p;
-		i = p[0] - 'A';
-		j = 2;
-	} else
-	{
-		ch = (i = xgetdrv()) + 'A';
-		j = 0;
-	}
-	xwrite(1, 1L, &ch);
-	wrt(":");
-	if (!dir[j])
-	{
-		xgetdir(&tmpbuf, i + 1);
-		if (tmpbuf[0] == 0)
-		{
-			tmpbuf[0] = '\\';
-			tmpbuf[1] = 0;
-		}
-		wrt(tmpbuf);
-	} else
-		wrt(dir + j);
+	str[0] = ch;
+	str[1] = 0;
+	wrt(str);
 }
 
-/***************************************************************************/
 #if 0
 VOID wrtEol(NOTHING)
 {
@@ -731,10 +879,10 @@ VOID to(P(int) n)
 PP(int n;)
 {
 	char ch;
-	ch = n+'0';
+	ch = n + '0';
 	wrt(" OUT<< ");
 	xwrite (1, 1L, &ch);
-	wrt ("\r\n");
+	wrtln("");
 }
 
 VOID ti(P(int) n)
@@ -763,6 +911,121 @@ VOID cr2cont(NOTHING)
 
 /***************************************************************************/
 /*
+   dspHelp - display help message
+*/
+/***************************************************************************/
+
+VOID dspHelp(P(int) stand_out)
+PP(int stand_out;)
+{
+	wrtln("# in the first non blank column in a batch file is a comment.");
+	wrtln("CAT or TYPE filenm.ext [[filenm.ext]...]");
+	wrtln("    Writes filenm.ext(s) to standard output.");
+	wrtln("CD [pathnm]");
+	wrtln("    With pathnm it sets default for working directory.");
+	wrtln("    Without pathnm displays current working directory.");
+	wrtln("CHMOD [pathnm/]filenm mode");
+	wrtln("    Changes the mode of the file specified in filenm to the");
+	wrtln("    value of mode.  Acceptable values are <= 7:");
+	wrtln("       0 - Normal File Entry");
+	wrtln("       1 - File is Read Only");
+	wrtln("       2 - File is Hidden from directory Search");
+	wrtln("       4 - File is System File");
+	wrtln("       3, 5, 6, 7 - are combinations of the above value");
+	wrtln("CLS");
+	wrtln("    Clears the screen.");
+	wrtln("COPY source_file [destination_file]");
+	wrtln("    Copies source to destination.");
+	wrtln("DATE [mm/dd/yy]");
+	wrtln("    Sets or displays the date that you enter into the system");
+	wrtln("DIFF [-b] filespec1 filespec2");
+	wrtln("    Compares two files character by character.");
+	wrtln("    -b - ingnores spaces in the files and compares text only");
+	if (stand_out)
+	{
+		wrtln("");
+		cr2cont();
+	}
+	wrtln("DIR or LS [filenm.ext] [-f] [-d] [-t] [-w]");
+	wrtln("    -f - anything but directories.");
+	wrtln("    -d - directories only.");
+	wrtln("    -t - terse: names only.");
+	wrtln("    -w - wide: names only displayed horizontally.");
+	wrtln("ERA [d:][path]filespec");
+	wrtln("    Removes one or more files from a disk directory");
+	wrtln("ERR ");
+	wrtln("    Displays the value of the Completion Code for the last command.");
+	wrtln("EXIT");
+	wrtln("    Exits CLI to invoking program.");
+	wrtln("FIND \"string\"filename1 [filename2...filenamelast]");
+	wrtln("    Search for the occurrence of a character string in one or more files");
+	wrtln("FORMAT d:");
+	wrtln("    Prepares a disk to recieve data before it can be used");
+	wrtln("INIT [drive_spec:]");
+	wrtln("    Reinitializes FAT entries, erases data from a disk.");
+	wrtln("MD [subdirectory name]");
+	wrtln("    Creates a new subdirectory in current directory.");
+	wrtln("MOVE source_file [destination_file]");
+	wrtln("    Copies source to destination and deletes source.");
+	wrtln("PAUSE");
+	wrtln("    Writes 'CR to continue...' to standard output");
+	if (stand_out)
+	{
+		wrtln("");
+		cr2cont();
+	}
+	wrtln("    and waits for a carriage return from standard input.");
+	wrtln("PRGERR [ON | OFF]");
+	wrtln("    Turns command processing abort feature ON/OFF.");
+	wrtln("    If PRGERR is ON and a .PRG file returns a non zero completion");
+	wrtln("    code, all further processing will stop.  Usefull in .BAT files.");
+	wrtln("    Default is ON.");
+	wrtln("NOWRAP");
+	wrtln("    Disables line wrap.");
+	wrtln("PATH [;[pathnm]...]");
+	wrtln("    With path name sets default path for batch and commands.");
+	wrtln("    Without path name displays current path");
+	wrtln("REM or ECHO [\"string\"]");
+	wrtln("    Strips quotes and writes string to standard output.");
+	wrtln("    \\r is replaced by 0x13, \\n by 0x10, \\0 by 0x0.");
+	wrtln("    \\c by 0x13 0x10, \\anything is replaced by anything.");
+	wrtln("REN source_file_nm [destination_file_nm]");
+	wrtln("    Renames source to destination.");
+	wrtln("RD [pathnm]");
+	wrtln("    Removes named directory.");
+	wrtln("RM or DEL or ERA filenm [[filemn]...] [-q]");
+	wrtln("    Removes named file from directory.");
+	wrtln("    IF the -q option is used, the CLI will display the question");
+	wrtln("    Y/CR... and wait for a responce.");
+	wrtln("SHOW [drive_spec:]");
+	wrtln("    Displays disk status for default drive or drive specified.");
+	if (stand_out)
+	{
+		wrtln("");
+		cr2cont();
+	}
+	wrtln("STAY");
+	wrtln("    Optionally stays in cli instead of exiting when");
+	wrtln("    cli is invoked with parameters.");
+	wrtln("TIME [hh:mm:ss]");
+	wrtln("    Sets or displays the time that you enter into the system");
+	wrtln("TREE [d:]");
+	wrtln("    Displays all the directory paths on a given disk drive");
+	wrtln("TYPE [d:][path]filename.ext");
+	wrtln("    Displays the contents of a file on your screen");
+	wrtln("VERSION");
+	wrtln("    Displays current version of OS.");
+	wrtln("WRAP");
+	wrtln("    Enables line wrap.");
+	wrtln(">filenm, >>filenm, <filenm");
+	wrtln("    Provides for ouput, concatenation, and input redirection.");
+	wrtln("cmd @filenm");
+	wrtln("    Allows a list of command tails to be put in a file and fed to a command.");
+	wrtln("");					/* for prn, otherwise, the previous line won't print */
+}
+
+/***************************************************************************/
+/*
    dspMsg - display message
 */
 /***************************************************************************/
@@ -772,7 +1035,7 @@ PP(int msg;)
 	switch (msg)
 	{
 	case 0:
-		wrtln("Wild cards not allowed in path name.");
+		wrtln("Wild cards not allowed/Cannot rename/type directories.");
 		break;
 	case 1:
 		wrtln("File Not Found.");
@@ -784,7 +1047,7 @@ PP(int msg;)
 		wrtln("******* TEST  CLI *******");
 		break;
 	case 4:
-		wrtln("Command v0.42 11/14/85 LTG");
+		wrtln("Command v0.66 11/13/86 MLC");
 		break;
 	case 5:
 		wrt("Done.");
@@ -825,76 +1088,8 @@ PP(int msg;)
 		xwrite(1, 1L, &drvch);
 		wrt(":");
 		break;
-	case 17:
-		wrtln("# in the first non blank column is a comment.");
-		wrtln("CAT or TYPE filenm.ext");
-		wrtln("    Writes filenm.ext to standard output.");
-		wrtln("CD [pathnm]");
-		wrtln("    With pathnm it sets default for working directory.");
-		wrtln("    Without pathnm displays current working directory.");
-		wrtln("CHMOD [pathnm/]filenm mode");
-		wrtln("    Changes the mode of the file specified in filenm to the");
-		wrtln("    value of mode.  Acceptable values are < 7:");
-		wrtln("       0 - Normal File Entry");
-		wrtln("       1 - File is Read Only");
-		wrtln("       2 - File is Hidden from directory Search");
-		wrtln("       4 - File is System File");
-		wrtln("CLS");
-		wrtln("    Clears the screen.");
-		wrtln("COPY source_file [destination_file]");
-		wrtln("    Copies source to destination.");
-		wrtln("DIR or LS [filenm.ext] [-f] [-d] [-t] [-w]");
-		wrtln("    -f - anything but directoryies.");
-		wrtln("    -d - directories only.");
-		wrtln("    -t - terse: names only.");
-		wrtln("    -w - wide: names only displayed horizontally.");
-		wrtln("");
-		cr2cont();
-		wrtln("ERR ");
-		wrtln("    Displays the value of the Completion Code for the last command.");
-		wrtln("EXIT");
-		wrtln("    Exits CLI to invoking program.");
-		wrtln("INIT [drive_spec:]");
-		wrtln("    Reinitializes FAT entries this wiping disk.");
-		wrtln("MD [subdirectory name]");
-		wrtln("    Creates a new subdirectory in current directory.");
-		wrtln("MOVE source_file [destination_file]");
-		wrtln("    Copies source to destination and deletes source.");
-		wrtln("PAUSE");
-		wrtln("    Writes 'CR to continue...' to standard output");
-		wrtln("    and waits for a carriage return from standard input.");
-		wrtln("PRGERR [ON | OFF]");
-		wrtln("    Turns command processing abort feature ON/OFF.");
-		wrtln("    If PRGERR is ON and a .PRG file returns a non zero completion");
-		wrtln("    code, all further processing will stop.  Usefull in .BAT files.");
-		wrtln("    Default is ON.");
-		wrtln("NOWRAP");
-		wrtln("    Disables line wrap.");
-		wrtln("PATH [;[pathnm]...]");
-		wrtln("    With path name sets default path for batch and commands.");
-		wrtln("    Without path name displays current path");
-		wrtln("");
-		cr2cont();
-		wrtln("REM or ECHO [\"string\"]");
-		wrtln("    Strips quotes and writes string to standard output.");
-		wrtln("    \\r is replaced by 0x13, \\n by 0x10, \\0 by 0x0.");
-		wrtln("    \\c by 0x13 0x10, \\anything is replaced by anything.");
-		wrtln("REN source_file_nm [destination_file_nm]");
-		wrtln("    Renames source to destination.");
-		wrtln("RD [pathnm]");
-		wrtln("    Removes named directory.");
-		wrtln("RM or DEL or ERA filenm [[filemn]...] [-q]");
-		wrtln("    Removes named file from directory.");
-		wrtln("    IF the -q option is used, the CLI will display the question");
-		wrtln("    Y/CR... and wait for a responce.");
-		wrtln("SHOW [drive_spec:]");
-		wrtln("    Displays disk status for default drive or drive specified.");
-		wrtln("VERSION");
-		wrtln("    Displays current version of OS.");
-		wrtln("WRAP");
-		wrtln("    Enbles line wrap.");
-		wrtln("");
-		cr2cont();
+	case 18:
+		wrtln("Invalid drive/path/file name specified");
 		break;
 	}
 }
@@ -931,85 +1126,93 @@ PP(char *src;)
 PP(char *dst;)
 PP(int move;)
 {
-	int i, j, srcEqDst, fds, fdd;
+	register int i, j, srcEqDst, fds, fdd;
 	long nr, nw;
-	char srcSpc[67];
-	char dstSpc[67];
+	char srcSpc[PATH_MAX];
+	char dstSpc[PATH_MAX];
+	char mod;
+	int buff[2], nofile;
 
 	UNUSED(j);
-	for (i = 0; (srcSpc[i] = src[i]) /* != 0 */; i++)
+	for (i = 0; (srcSpc[i] = src[i]) != 0; i++)
 		;
-	for (i = 0; (dstSpc[i] = dst[i]) /* != 0 */; i++)
+	for (i = 0; (dstSpc[i] = dst[i]) != 0; i++)
 		;
 
 	WSrcReq = srcSpc;
 	WAttCode = -1;
-
+	nofile = TRUE;
 	compl_code = 0xFFFFFFFF;
 
 	/* If not a valid file name... */
-	switch (chkDir(srcSpc, srcDir, srcNmPat))
+	switch (chkDir(srcSpc, srcDir, srcNmPat, 1))
 	{
-	case -3:
-		goto error5;
 	case -2:
 		goto error6;
+	case -4:
+		goto error7;
 	default:
 		{
 			/* Check destination directory. */
-			if (chkDir(dstSpc, dstDir, dstNmPat) == -3)
-				goto error5;
-
+			if (chkDir(dstSpc, dstDir, dstNmPat, 0) == -4)
+				goto error7;
+			if (chkDst())
+				dspMsg(2);
 			else
 			{
-				if (chkDst())
-					dspMsg(2);
-
-				else
+				while (gtFlNm())
 				{
-					while (gtFlNm())
+					if (!(srchb[21] & 0x18))
 					{
-						if (!(srchb[21] & 0x18))
+						nofile = FALSE;
+						mkSrc();
+						if (!(srcEqDst = mkDst()))
 						{
-							mkSrc();
-							if (!(srcEqDst = mkDst()))
+							xunlink(dstFlNm);
+							dspMsg(12);
+							dspMsg(7);
+							dspMsg(10);
+							dspMsg(8);
+							if ((fds = xopen(srcFlNm, 0)) <= 0)
+								goto error0;
+							if ((fdd = xcreat(dstFlNm, 0x20)) <= 0)
+								goto error1;
+							compl_code = 0;
+							nr = nw = -1;
+							while (nr && nw)
 							{
-								xunlink(dstFlNm);
-								dspMsg(12);
-								dspMsg(7);
-								dspMsg(10);
-								dspMsg(8);
-								if ((fds = xopen(srcFlNm, 0)) <= 0)
-									goto error0;
-								if ((fdd = xcreat(dstFlNm, 0x20)) <= 0)
-									goto error1;
-								compl_code = 0;
-								nr = nw = -1;
-								while (nr && nw)
+								if ((nr = xread(fds, (long) BUFSIZ, buf)) > 0)
 								{
-									if ((nr = xread(fds, (long) BUFSIZ, buf)) > 0)
-									{
-										if ((nw = xwrite(fdd, nr, buf)) < nr)
-											goto error4;
-									} else if (nr < 0)
-									{
-										goto error3;
-									}
-								}
-								xclose(fds);
-								if (move)
+									if ((nw = xwrite(fdd, nr, buf)) < nr)
+										goto error4;
+								} else if (nr < 0)
 								{
-									xunlink(srcFlNm);
-									wrt(" DELETING ");
-									dspMsg(7);
+									goto error3;
 								}
-								xclose(fdd);
-							} else
-							{
-								goto error2;
 							}
+							xdatime(buff, fds, 0);	/* get the time stamp from source */
+							xdatime(buff, fdd, 1);	/* set the time stamp for destination */
+							mod = (char) xattrib(srcFlNm, 0, 0);
+							xattrib(dstFlNm, 1, mod);
+							xclose(fds);
+							if (move)
+							{
+								xunlink(srcFlNm);
+								wrt(" DELETING ");
+								dspMsg(7);
+							}
+							xclose(fdd);
+						} else
+						{
+							goto error2;
 						}
 					}
+				}
+				if (nofile)
+				{
+					dspMsg(1);
+				} else
+				{
 					dspMsg(12);
 					dspMsg(5);
 				}
@@ -1033,13 +1236,13 @@ PP(int move;)
 	wrtln("Error reading source file.");
 	goto eout;
   error4:
-	wrtln("Disk full -- copy failed.");
+	wrtln("Write error -- copy failed.");
 	goto eout;
-  error5:
-	dspMsg(0);
-	return -1;
   error6:
 	dspMsg(1);
+	return -1;
+  error7:
+	dspMsg(18);
 	return -1;
 
   eout:
@@ -1051,28 +1254,28 @@ PP(int move;)
 
 /***************************************************************************/
 /* 
-   int renmCmd
+   void renmCmd
 
    renmCmd - rename command
 
 */
 /***************************************************************************/
-int renmCmd(P(char *) src, P(char *) dst)
+VOID renmCmd(P(char *) src, P(char *) dst)
 PP(char *src;)
 PP(char *dst;)
 {
-	int i, j, fds, fdd;
+	register int i, j, fds, fdd, code;
 	long nl;
-	char srcSpc[67];
-	char dstSpc[67];
+	char srcSpc[PATH_MAX];
+	char dstSpc[PATH_MAX];
 
 	UNUSED(nl);
 	UNUSED(fdd);
 	UNUSED(fds);
 	UNUSED(j);
-	for (i = 0; (srcSpc[i] = src[i]) /* != 0 */; i++)
+	for (i = 0; (srcSpc[i] = src[i]) != 0; i++)
 		;
-	for (i = 0; (dstSpc[i] = dst[i]) /* != 0 */; i++)
+	for (i = 0; (dstSpc[i] = dst[i]) != 0; i++)
 		;
 
 	WSrcReq = srcSpc;
@@ -1083,12 +1286,16 @@ PP(char *dst;)
 
 	/* IF src not specified err out. */
 	if (!(*src))
+	{
 		dspMsg(6);
-
-	/* If not a valid file name...*/
-	else
-		switch (chkDir(srcSpc, srcDir, srcNmPat))
+	} else
+	{
+		/* If not a valid file name... */
+		switch (i = chkDir(srcSpc, srcDir, srcNmPat, 1))
 		{
+		case -4:
+			dspMsg(18);
+			break;
 		case -3:
 			dspMsg(0);
 			break;
@@ -1098,18 +1305,22 @@ PP(char *dst;)
 		default:
 			{
 				/* Check destination directory. */
-				if (chkDir(dstSpc, dstDir, dstNmPat) == -3)
+				if ((code = chkDir(dstSpc, dstDir, dstNmPat, 0)) == -3)
 				{
-					if (((i = chkDir(srcSpc, srcDir, srcNmPat)) == -3) || (i == 1))
+					if (i == 1)
 					{
 						wrt("Rename ALL files matching ");
 						wrt(srcDir);
 						wrt(srcNmPat);
 						wrt(" (Y/CR)? ");
 						if (!getYes())
-							goto skprnm;
+							return;
 						wrtln("");
 					}
+				} else if (code == -4)
+				{
+					dspMsg(18);
+					break;
 				} else
 				{
 					if (chkDst())
@@ -1121,10 +1332,9 @@ PP(char *dst;)
 						{
 							if (!(srchb[21] & 0x18))
 							{
+								mkSrc();
 								if (!mkDst()) ; /* ??? runaway ';'? */
 								{
-									mkSrc();
-
 									dspMsg(12);
 									dspMsg(7);
 									dspMsg(10);
@@ -1143,12 +1353,7 @@ PP(char *dst;)
 				}
 			}
 		}
-
-  skprnm:
-	;
-#if !BINEXACT
-	return 0;
-#endif
+	}
 }
 
 /***************************************************************************/
@@ -1156,13 +1361,15 @@ PP(char *dst;)
 long dirCmd(P(char **) argv)
 PP(char **argv;)
 {
-	char srcSpc[67];
-	int i, j, k, n, att;
+	char srcSpc[PATH_MAX];
+	register int i, j, k, n, att;
 	short *dt;
-	int filOnly, dirOnly, terse, wide;
-	long compl_c, *pl;
+	int filOnly, dirOnly, terse, wide, hidSys, tf;
+	long compl_c;
+	long *pl;
+	long ts;
 
-	wide = filOnly = dirOnly = terse = 0;
+	wide = filOnly = dirOnly = terse = tf = ts = hidSys = 0;
 	i = 1;
 	while (*argv[i])
 	{
@@ -1185,6 +1392,9 @@ PP(char **argv;)
 			case 'T':
 				terse = -1;
 				break;
+			case 'H':
+				hidSys = -1;
+				break;					/* switch show the hidden, system files */
 			default:
 				break;
 			}
@@ -1195,19 +1405,23 @@ PP(char **argv;)
 			i++;
 	}
 
-	for (i = 0; (srcSpc[i] = argv[1][i]) /* != 0 */; i++)
+	WAttCode = -1;
+	for (i = 0; (srcSpc[i] = argv[1][i]) != 0; i++)
 		;
-	chkDir(srcSpc, srcDir, srcNmPat);
+	if (chkDir(srcSpc, srcDir, srcNmPat, 0) == -4)
+	{
+		dspMsg(18);
+		return -1;
+	}
 
 	if (!terse)
 	{
 		wrt("Directory of ");
-		dspDir(srcSpc, srcDir);
+		wrt(srcDir);
 		dspMsg(12);
 	}
 
 	WSrcReq = srcSpc;
-	WAttCode = -1;
 	if (!gtFlNm())
 	{
 		compl_c = 0xFFFFFFFF;
@@ -1223,6 +1437,8 @@ PP(char **argv;)
 			if (dirOnly && (srchb[21] != 0x10))
 				goto skip;
 			if ((filOnly) && (srchb[21] == 0x10))
+				goto skip;
+			if (!hidSys && (srchb[21] & 0x06))
 				goto skip;
 			if ((terse) && ((xncmps(2, &srchb[30], ".")) || (xncmps(3, &srchb[30], ".."))))
 				goto skip;
@@ -1241,7 +1457,10 @@ PP(char **argv;)
 					k++;
 				}
 			} else
+			{
 				wrtln(&srchb[30]);
+				tf++;
+			}
 
 			if (!terse)
 			{
@@ -1273,14 +1492,22 @@ PP(char **argv;)
 				xwrite(1, 2L, "  ");
 
 				pl = (long *) &srchb[26];
+				ts += *pl;
 				prtDclFmt((long) *pl, 6, " ");
 			}
 		  skip:
-		  	;
+			;
 		} while (gtFlNm());
 		wrtln("");
 		if (!terse)
-			dspMsg(5);
+		{
+			wrt("       ");
+			prtDclFmt((long) tf, 3, " ");
+			wrt(" files using ");
+			prtDclFmt(ts, 7, " ");
+			wrt(" bytes of disk.");
+			wrtln("");
+		}
 	}
 	return compl_c;
 }
@@ -1290,52 +1517,56 @@ PP(char **argv;)
 long chmodCmd(P(char **) argv)
 PP(char **argv;)
 {
-	char srcSpc[67];
-	int i, att;
-	long compl_c;
+	char srcSpc[PATH_MAX];
+	register int i, att, mode;
+	register long compl_c;
 
-	for (i = 0; (srcSpc[i] = argv[1][i]) != 0; i++)
-		;
-
-	chkDir(srcSpc, srcDir, srcNmPat);
-	WSrcReq = srcSpc;
-	WAttCode = -1;
-	if (!gtFlNm())
+	if (!*argv[2])
 	{
+		wrt("Mode specification needed for CHMOD command.");
 		compl_c = 0xFFFFFFFF;
-		dspMsg(1);
 	} else
 	{
-		mkSrc();
-		att = srchb[21];
-		if (att & 0x18)
+		mode = mknum(argv[2]);
+		if (mode & ~0x7)
 		{
-			wrt("Unable to change mode on subdirectorys or volumes.");
+			wrt("Invalid mode specification.");
 			compl_c = 0xFFFFFFFF;
 		} else
 		{
-			compl_c = 0;
-			do
+			for (i = 0; (srcSpc[i] = argv[1][i]) != 0; i++)
+				;
+
+			if (chkDir(srcSpc, srcDir, srcNmPat, 0) == -4)
 			{
-				if (!*argv[2])
+				dspMsg(18);
+				return -1;
+			}
+			WSrcReq = srcSpc;
+			WAttCode = -1;
+			if (!gtFlNm())
+			{
+				compl_c = 0xFFFFFFFF;
+				dspMsg(1);
+			} else
+			{
+				compl_c = 0;
+				do
 				{
-					wrt("Invalid mode specification.");
-					compl_c = 0xFFFFFFFF;
-				} else
-				{
-					i = mknum(argv[2]);
-					if (i & ~0x7)
+					mkSrc();
+					att = srchb[21];
+					if (att & 0x18)
 					{
-						wrt("Invalid mode specification.");
+						wrt("Unable to change mode on subdirectorys or volumes.");
 						compl_c = 0xFFFFFFFF;
 					} else
-						compl_c = xattrib(srcFlNm, 1, i);
-				}
-			} while (gtFlNm());
-		}
-		if (!compl_c)
-		{
-			dspMsg(5);
+					{
+						compl_c = xattrib(srcFlNm, 1, mode);
+					}
+				} while (gtFlNm());
+				if (compl_c >= 0)
+					dspMsg(5);
+			}
 		}
 	}
 	return compl_c;
@@ -1346,41 +1577,74 @@ PP(char **argv;)
 long typeCmd(P(char **) argv)
 PP(char **argv;)
 {
-	char srcSpc[67];
-	int i, n, fd;
+	char srcSpc[PATH_MAX];
+	register int i, j, fd;
 	long compl_c;
+	char *p;
+	long n, count;
 
-#if !BINEXACT
-	compl_c = 0; /* BUG: used uninitialized */
-#endif
+	compl_c = 0;
 	if (!(*argv[1]))
-		dspMsg(6);
-	else
 	{
-		for (i = 0; (srcSpc[i] = argv[1][i]) /* != 0 */; i++) 
-			;
-		chkDir(srcSpc, srcDir, srcNmPat);
-		WSrcReq = srcSpc;
-		WAttCode = -1;
-		if (!gtFlNm())
+		dspMsg(6);
+	} else
+	{
+		j = 1;
+		while (*argv[j])
 		{
-			dspMsg(1);
-			compl_c = 0xFFFFFFFF;
-		} else
-		{
-			compl_c = 0;
-			do
+			for (i = 0; (srcSpc[i] = argv[j][i]) != 0; i++)
+				;
+			j++;
+			if (chkDir(srcSpc, srcDir, srcNmPat, 0) == -4)
 			{
-				mkSrc();
-				fd = xopen(srcFlNm, 0);
+				dspMsg(18);
+				return -1;
+			}
+			p = srcNmPat;
+			while (*p)
+			{
+				if (*p == '*' || *p == '?')
+				{
+					dspMsg(0);
+					return -1;
+				}
+				p++;
+			}
+			WSrcReq = srcSpc;
+			WAttCode = -1;
+			if (!gtFlNm())
+			{
+				dspMsg(1);
+				compl_c = 0xFFFFFFFF;
+			} else
+			{
 				do
 				{
-					n = xread(fd, 1000L, buf);
-					if (n > 0)
-						xwrite(1, (long) n, buf);
-				} while (n > 0);
-			} while (gtFlNm());
-			xclose(fd);
+					if (srchb[21] & 0x10)
+					{
+						dspMsg(0);
+						return -1;
+					}
+					mkSrc();
+					if ((fd = xopen(srcFlNm, 0)) <= 0)
+					{
+						wrtln("Cannot open file ");
+						wrt(srcFlNm);
+						return -1;
+					}
+					do
+					{
+						n = xread(fd, (long)BUFSIZ, buf);
+						if (n > 0)
+						{
+							count = xwrite(1, (long) n, buf);
+							if (count != n)
+								wrerr();
+						}
+					} while (n > 0);
+				} while (gtFlNm());
+				xclose(fd);
+			}
 		}
 	}
 	return compl_c;
@@ -1391,13 +1655,12 @@ PP(char **argv;)
 long delCmd(P(char **) argv)
 PP(char **argv;)
 {
-	char srcSpc[67];
-	int i, j, k, query;
+	char srcSpc[PATH_MAX];
+	register int i, j, k, file_del, query;
 	long compl_c;
 
-#if !BINEXACT
-	compl_c = 0; /* BUG: used uninitialized */
-#endif
+	file_del = FALSE;
+	compl_c = 0;
 	query = 0;
 	i = 1;
 	while (*argv[i])
@@ -1417,7 +1680,9 @@ PP(char **argv;)
 			while (*(argv[j] = argv[j + 1]))
 				j++;
 		} else
+		{
 			i++;
+		}
 	}
 
 	if (*argv[1])
@@ -1425,12 +1690,12 @@ PP(char **argv;)
 		k = 1;
 		while (*argv[k])
 		{
-			for (i = 0; (srcSpc[i] = argv[k][i]) /* != 0 */; i++)
+			for (i = 0; (srcSpc[i] = argv[k][i]) != 0; i++)
 				;
 			k++;
 			WSrcReq = srcSpc;
 			WAttCode = -1;
-			if (((i = chkDir(srcSpc, srcDir, srcNmPat)) == -3) || (i == 1))
+			if (((i = chkDir(srcSpc, srcDir, srcNmPat, 0)) == -3) || (i == 1))
 			{
 				wrt("Delete ALL files matching ");
 				wrt(srcDir);
@@ -1439,6 +1704,10 @@ PP(char **argv;)
 				if (!getYes())
 					goto noera;
 				wrtln("");
+			} else if (i == -4)
+			{
+				dspMsg(18);
+				return -1;
 			}
 			if (!gtFlNm())
 			{
@@ -1453,7 +1722,12 @@ PP(char **argv;)
 					{
 						mkSrc();
 						dspMsg(7);
-						if (query)
+						if (srchb[21] & 0x01)
+						{
+							wrt(" IS READ-ONLY FILE, NOT DELETED");
+							compl_c = -36;
+							goto skipdel;
+						} else if (query)
 						{
 							wrt("? ");
 							i = getYes();
@@ -1464,13 +1738,17 @@ PP(char **argv;)
 								goto skipdel;
 						}
 						compl_c = xunlink(srcFlNm);
+						file_del = TRUE;
 					  skipdel:
 						dspMsg(12);
 					}
 				} while (gtFlNm());
 			}
 		}
-		dspMsg(5);
+		if (file_del)
+			dspMsg(5);
+		else
+			wrtln("No file deleted.");
 	} else
 		dspMsg(6);
 
@@ -1483,19 +1761,36 @@ PP(char **argv;)
    dspCL - display command line
 */
 /***************************************************************************/
-VOID dspCL(P(char **) argv)
-PP(char **argv;)
+VOID dspCL(NOTHING)
 {
-	int i;
-
 	dspMsg(14);
-	i = 0;
-	while (*argv[i])
+	wrt(lin);
+	wrtln("");
+}
+
+/***************************************************************************/
+/*
+   preCmd - Do pre command processing
+*/
+/***************************************************************************/
+VOID preCmd(P(long) nonStdIn, P(struct rdb *) rd, P(long) newsi, P(long) newso)
+PP(long nonStdIn;)
+PP(struct rdb *rd;)
+PP(long newsi;)
+PP(long newso;)
+{
+	if (nonStdIn)
+		dspCL();
+	if (rd->nso)
 	{
-		wrt(argv[i++]);
-		wrt(" ");
+		xforce(1, (int) newso);
+		xclose((int) newso);
 	}
-	dspMsg(12);
+	if (rd->nsi)
+	{
+		xforce(0, (int) newsi);
+		xclose((int) newsi);
+	}
 }
 
 /***************************************************************************/
@@ -1503,23 +1798,61 @@ PP(char **argv;)
    setPath - set execution path
 */
 /***************************************************************************/
-VOID setPath(P(char *) p)
+long setPath(P(char *) p)
 PP(char *p;)
 {
-	int i = 0;
+	char pathbuf[PATH_MAX], c;
+	register int i;
+	register char *q, *s;
 
+	compl_code = 0;
 	if (!*p)
 		wrt(path);
 	else if (xncmps(2, p, ";"))
-		path[i] = 0;
+		path[0] = 0;
 	else
-#if BINEXACT
-		while ((path[i] = p[i++]) /* != 0 */) /* BUG: operation on i is undefined */
+	{
+		s = p;
+		while (*s)
+		{
+			q = pathbuf;
+			while (*s != ';' && *s != '\0')
+				*q++ = *s++;
+			*q = '\0';
+			if (*s == ';')
+				s++;
+			q = pathbuf + 3;
+			if (*q-- == 0 && *q-- == '\\' && *q-- == ':')
+			{
+				i = xgetdrv();
+				c = *q;
+				if (c >= 'a' && c <= 'z')
+					c -= 'a';
+				else if (c >= 'A' && c <= 'Z')
+					c -= 'A';
+				else
+					c = 60;				/* just set it illegal */
+				if (c < 0 || c > 15 || xsetdrv((int) c) < 0)
+				{
+					xsetdrv(i);
+					return (compl_code = -1L);
+				}
+				xsetdrv(i);				/*restore the old drive */
+			} else
+			{
+				q = pathbuf;				/* scan pathbuf to see any * or ? embeded */
+				while (*q && *q != '*' && *q != '?')
+					q++;
+				if (*q || xsfirst(pathbuf, 0x10) < 0)
+					return (compl_code = -1L);
+			}
+		}
+		q = path;
+		s = p;
+		while ((*q++ = *s++) != '\0')
 			;
-#else
-		while ((path[i] = p[i]) != 0)
-			i++;
-#endif
+	}
+	return compl_code;
 }
 
 
@@ -1532,36 +1865,33 @@ long execPrgm(P(char *) s, P(char *) cmdtl)
 PP(char *s;)
 PP(char *cmdtl;)
 {
-	char cmd[100]; /* WTF? why 100? */
-	char ch, *cmdptr;
-	int k, i, j, gtpath, envLen;
+	char cmd[130];
+	char ch;
+	char *cmdptr;
+	register int k, i, j, gtpath, envLen;
 	int tlNtFnd = -1;
 	long err;
-	char *envPtr;
+	register char *envPtr;
 
-	/* Add len of path definition + 2 for 00 terminator */
-#if BINEXACT
-	envLen = ((i = strlen(path)) + (i ? 5 : 0) + 2); /* BUG: operation on i is undefined */
-#else
-	i = strlen(path);
-	envLen = (i + (i ? 5 : 0) + 2);
-#endif
+	/* Loop thru environment strings looking for '00.  Don't count
+	 * any PATH=... definitions in the environment because the user
+	 * may have redefined the PATH, which is now in path[].
+	 * The last string in the environment is followed by second NULL.
+	 */
 
-	/*Loop thru enviorment strings looking for '00' */
-	i = 0;
-	while ((prntEnvPtr[i] + prntEnvPtr[i + 1]) != 0)
+	envLen = 1;							/* one byte for last NULL   */
+	envPtr = prntEnvPtr;
+	while (*envPtr)						/* while not at last NULL   */
 	{
-		/* if a path has been defined, don't count it. */
-		if (xncmps(5, &prntEnvPtr[i], "PATH="))
-		{
-			envLen--;
-			i += strlen(&prntEnvPtr[i]);
-		} else
-		{
-			envLen++;
-			i++;
-		}
+		i = strlen(envPtr) + 1;			/* get length + 1 for NULL  */
+		if (!xncmps(5, envPtr, pthSymb))	/* if not PATH=...      */
+			envLen += i;				/* add length of this string    */
+		envPtr += i;					/* move to next string      */
 	}
+
+	/* Add len of path definition */
+	if ((i = strlen(path)) != 0)		/* is a new path defined?   */
+		envLen += sizeof(pthSymb) + i + 1;	/* space for PATH=... and NULL  */
 
 	/* Allocate envLen number of bytes for environment strings. */
 	envPtr = (char *)xmalloc((long) envLen);
@@ -1573,7 +1903,7 @@ PP(char *cmdtl;)
 		for (i = 0; pthSymb[i]; i++)
 			envPtr[i] = pthSymb[i];
 		j = 0;
-		while ((envPtr[i] = path[j++]) /* != 0 */)
+		while ((envPtr[i] = path[j++]) != 0)
 			i++;
 		envPtr[i++] = 0;
 	}
@@ -1583,7 +1913,7 @@ PP(char *cmdtl;)
 	while ((envPtr[i] = prntEnvPtr[envLen]) | prntEnvPtr[envLen + 1])
 	{
 		/* if a path has been defined, don't copy it. */
-		if (xncmps(5, &prntEnvPtr[envLen], "PATH="))
+		if (xncmps(5, &prntEnvPtr[envLen], pthSymb))
 			envLen += (1 + strlen(&prntEnvPtr[envLen]));
 		else
 		{
@@ -1598,17 +1928,17 @@ PP(char *cmdtl;)
 	/* Null termintate. */
 	envPtr[i] = 0;
 
-	for (i = 0; (cmd[i] = *s); s++, i++)
+	for (i = 0; (cmd[i] = *s) != 0 && (i < sizeof(cmd)); s++, i++)
 		if (*s == '.')
 			tlNtFnd = 0;
 
 	if (tlNtFnd)
-		for (j = 0; (cmd[i] = prgTail[j]) /* != 0 */; i++, j++)
+		for (j = 0; (cmd[i] = prgTail[j]) != 0 && (i < sizeof(cmd)); i++, j++)
 			;
 
 	i = 0;
 	gtpath = -1;
-	while ((ch = cmd[i++]) /* != 0 */)
+	while ((ch = cmd[i++]) != 0 && (i <= sizeof(cmd)))
 		if (ch == ':' || ch == '\\')
 			gtpath = 0;
 
@@ -1654,9 +1984,6 @@ PP(char *cmdtl;)
 	return err;
 }
 
-
-
-
 /**************************************************************************/
 /*
    execBat - execute batch file
@@ -1667,20 +1994,22 @@ PP(char *s;)
 PP(char **parms;)
 {
 	long flHnd;
-	int i, j, k, oldsi, gtpath;
+	int i;
+	register int j, k;
+	int oldsi, gtpath;
 	int tlNtFnd = -1;
-	char ch;
-	char cmd[100];
+	register char ch;
+	char cmd[130];
 	char *cmdptr;
 
 	UNUSED(oldsi);
-	for (i = 0; (cmd[i] = *s) /* != 0 */; s++, i++)
+	for (i = 0; (cmd[i] = *s) != 0 && (i < sizeof(cmd)); s++, i++)
 		if (*s == '.')
 			tlNtFnd = 0;
 
 	if (tlNtFnd)
 	{
-		for (j = 0; (cmd[i] = batTail[j]) /* != 0 */; i++, j++)
+		for (j = 0; (cmd[i] = batTail[j]) != 0 && (i < sizeof(cmd)); i++, j++)
 			;
 	}
 	
@@ -1688,7 +2017,7 @@ PP(char **parms;)
 	{
 		i = 0;
 		gtpath = -1;
-		while ((ch = cmd[i++]) /* != 0 */)
+		while ((ch = cmd[i++]) != 0 && (i <= sizeof(cmd)))
 			if (ch == ':' || ch == '\\')
 				gtpath = 0;
 
@@ -1721,8 +2050,18 @@ PP(char **parms;)
 		if (flHnd >= 0)
 		{
 			i = 0;
+			if (++batlev > 4)
+			{
+				wrtln("TOO MANY LEVELS OF BATCH FILES NESTED.");
+				compl_code = 0xFFFFFFFF;
+				batlev = 0;
+				if (prgerr)
+					errout();
+				return -1;
+			}
 			xCmdLn(parms, &i, &flHnd, (char *) 0L);
 			xclose((int) flHnd);
+			--batlev;
 			compl_code = 0;
 			return -1;
 		}
@@ -1737,9 +2076,10 @@ PP(char **parms;)
 int mknum(P(char *) str)
 PP(char *str;)
 {
-	int num, hex = 0;
-	char ch;
+	register int num, hex;
+	register char ch;
 
+	hex = 0;
 	ucase(str);
 	if (*str == 'X')
 	{
@@ -1748,7 +2088,7 @@ PP(char *str;)
 	}
 
 	num = 0;
-	while ((ch = *str++) /* != 0 */)
+	while ((ch = *str++) != 0)
 	{
 		if (hex)
 		{
@@ -1768,7 +2108,7 @@ PP(char *str;)
 
 /***************************************************************************/
 /***************************************************************************/
-VOID chk_sub(P(char *) tl, P(char **) parm)
+int chk_sub(P(char *) tl, P(char **) parm)
 PP(char *tl;)
 PP(char **parm;)
 {
@@ -1783,7 +2123,7 @@ PP(char **parm;)
 	tmp_front = tmptl_ptr;
 	tl_front = tl;
 
-	while ((ch = *tl++) /* != 0 */)
+	while ((ch = *tl++) != 0)
 	{
 		switch (ch)
 		{
@@ -1794,15 +2134,22 @@ PP(char **parm;)
 				*tmptl_ptr++ = *tl++;
 			} else
 			{
-				*tmptl_ptr = ch;
-				tmptl_ptr++;
+				*tmptl_ptr++ = ch;
 			}
 			break;
 
+		case '"':
+			*tmptl_ptr++ = ch;
+			while (*tl && (*tmptl_ptr++ = *tl++) != '"')
+				;
+			break;
+
 		case '%':
+			if (*tl > '9' || *tl < '0')
+				return -1;
 			if (*(parm_ptr = parm[*tl++ - '0']))
 			{
-				while ((*tmptl_ptr = *parm_ptr++) /* != 0 */)
+				while ((*tmptl_ptr = *parm_ptr++) != 0)
 					tmptl_ptr++;
 			}
 			break;
@@ -1814,8 +2161,9 @@ PP(char **parm;)
 	}
 	*tmptl_ptr = 0;
 
-	while ((*tl_front = *tmp_front++) /* != 0 */)
+	while ((*tl_front = *tmp_front++) != 0)
 		tl_front++;
+	return 0;
 }
 
 /***************************************************************************/
@@ -1823,11 +2171,12 @@ PP(char **parm;)
 VOID chk_str(P(char **) parm)
 PP(char **parm;)
 {
-	int i = 0;
-	char *parm_ptr;
-	char *tmp_ptr;
-	char ch;
+	register int i;
+	register char *parm_ptr;
+	register char *tmp_ptr;
+	register char ch;
 
+	i = 0;
 	while (*parm[i])
 	{
 		if (*parm[i] == '"')
@@ -1837,7 +2186,7 @@ PP(char **parm;)
 				*(parm[i] + strlen(parm[i]) - 1) = 0;
 
 			parm_ptr = parm[i];
-			while ((ch = *parm_ptr) /* != 0 */)
+			while ((ch = *parm_ptr) != 0)
 			{
 				if (ch == '\\')
 				{
@@ -1862,7 +2211,7 @@ PP(char **parm;)
 					}
 					parm_ptr++;
 					tmp_ptr = parm_ptr;
-					while ((*tmp_ptr = *(tmp_ptr + 1)) /* != 0 */)
+					while ((*tmp_ptr = *(tmp_ptr + 1)) != 0)
 						tmp_ptr++;
 				  skip:
 				  	;
@@ -1883,10 +2232,10 @@ PP(char **parm;)
    readSi - read standard input
 */
 /***************************************************************************/
-int readSi(P(char *) llin)
-PP(char *llin;)
+long readSi(P(char *) llin)
+PP(register char *llin;)
 {
-	int i, j;
+	register int i, j;
 
 	dspMsg(13);
 	for (i = 1; i <= 125; llin[i++] = 0)
@@ -1908,7 +2257,7 @@ PP(char *llin;)
 
 	llin[j] = 0;
 	llin[j + 1] = 0;
-	return j;
+	return 1;
 }
 
 /***************************************************************************/
@@ -1917,14 +2266,14 @@ PP(char *llin;)
 */
 /***************************************************************************/
 int readDsk(P(char *) llin, P(long *) flHnd)
-PP(char *llin;)
+PP(register char *llin;)
 PP(long *flHnd;)
 {
-	int i, j;
+	register int i, j;
 	int chrFnd;
 	char ch;
 
-	for (i = 1; i <= 125; llin[i++] = 0)
+	for (i = 0; i <= 125; llin[i++] = 0)
 		;
 	i = j = 0;
 
@@ -1960,14 +2309,18 @@ PP(char *outsd_tl;)
 	int pipe, bdChrs;
 	int rwflg;
 	int fs, fd, n, n2, nch, fds, fdd;
-	int i, j, k, argc, f1, f2, nd, rec;
+	register int i, j, k, argc;
+	int f1, f2, nd, rec;
 	int concat;
 	long pos, len, err, siz, *pl, nl, newso, newsi;
 	long sbuf[4];
 	long dskFlHnd;
 	int next;
-	char ch, *cmdtl, *tl0, *tl1, *tl, *d, *s, *argv[MAXARGS];
+	char ch, *cmdtl, *d, *s;
+	char *argv[MAXARGS];
+	register char *tl, *tl0, *tl1;
 	char *p, *lastp, ltail[130];
+	long count, bytes;
 	struct rdb rd;
 	BPB *b;
 
@@ -1985,15 +2338,14 @@ PP(char *outsd_tl;)
 	UNUSED(n2);
 	UNUSED(rwflg);
 
-	rd.nso = 0;
-	rd.nsi = 0;
+	rd.nso = FALSE;
+	rd.nsi = FALSE;
 	rd_ptr = &rd;
+	newsi = 0;
+	newso = 0;
 
-#if !BINEXACT
-	bdChrs = 0; /* BUG: used uninitialized */
-#endif
 	/* while there is input from the disk or standard input */
-	while ((long) outsd_tl ? 1 : (*nonStdIn ? (bdChrs = readDsk(lin, nonStdIn)) : readSi(lin)))
+	while ((bdChrs = outsd_tl ? 1 : *nonStdIn ? readDsk(lin, nonStdIn) : readSi(lin)) != 0)
 	{
 		/* Garbage chars in disk file. */
 		if (bdChrs == -1 && *nonStdIn)
@@ -2008,7 +2360,7 @@ PP(char *outsd_tl;)
 		pipe = 0;
 		dskFlHnd = 0;
 
-		/*Set up for input redirection. */
+		/* Set up for input redirection. */
 		if (*pipeflg)
 		{
 			argv[0] = parm[0];
@@ -2017,7 +2369,7 @@ PP(char *outsd_tl;)
 		}
 
 		/* find command tail */
-		if ((long) outsd_tl)
+		if (outsd_tl)
 		{
 			tl = outsd_tl + 1;
 			tl[(__uint8_t)outsd_tl[0]] = 0;
@@ -2026,13 +2378,18 @@ PP(char *outsd_tl;)
 
 		while (*tl == ' ')
 			tl++;
-		chk_sub(tl, &parm[0]);
+		if (chk_sub(tl, &parm[0]))
+		{
+			wrt(" Illegal usage of %.");
+			goto again;
+		}
 
 		/* allow remarks in batch files. */
-		if (*tl == '#')
+		if (*nonStdIn && *tl == '#')
 			goto again;
 
-		while ((ch = *tl++) /* != 0 */)
+		while ((ch = *tl++) != 0)
+		{
 			switch (ch)
 			{
 			case ' ':
@@ -2049,13 +2406,17 @@ PP(char *outsd_tl;)
 				break;
 
 			case '@':
-				for (tl0 = tl; (ch = *tl) /* != 0 */; tl++)
+				for (tl0 = tl; (ch = *tl) != 0; tl++)
 				{
 					if (ch == ' ')
 						break;
 				}
 				*tl++ = 0;
-
+				if (!(*tl0))
+				{
+					wrt("File name not specified after @.");
+					goto redrc;
+				}
 				if ((dskFlHnd = xopen(tl0, 0)) >= 0)
 				{
 					pipe = -1;
@@ -2063,11 +2424,12 @@ PP(char *outsd_tl;)
 				{
 					wrtln(tl0);
 					wrt(" not found.");
+					goto redrc;
 				}
 				break;
 
 			case '<':
-				for (tl0 = tl; (ch = *tl) /* != 0 */; tl++)
+				for (tl0 = tl; (ch = *tl) != 0; tl++)
 				{
 					if (ch == ' ')
 						break;
@@ -2077,51 +2439,72 @@ PP(char *outsd_tl;)
 				if ((newsi = xopen(tl0, 0)) >= 0)
 				{
 					rd.oldsi = dup(0);
-					xforce(0, (int) newsi);
-					xclose((int) newsi);
-					rd.nsi = -1;
+					rd.nsi = TRUE;
 				} else
 				{
 					wrtln(tl0);
 					wrt(" not found.");
+					goto redrc;
 				}
 				break;
 
 			case '>':
-				for (tl1 = tl; (ch = *tl) /* != 0 */; tl++)
+				for (tl1 = tl; (ch = *tl) != 0; tl++)
 				{
 					if (ch == '>')
 					{
-						concat = -1;
-						tl1++;
+						if (concat)
+						{
+							wrtln(" Illegal output file name : ");
+							wrt(tl1);	/* takes care the case: >>> was in the command line */
+							goto redrc;
+						} else
+						{
+							concat = -1;
+							tl1++;
+						}
 					}
 					if (ch == ' ')
 						break;
 				}
 				*tl++ = 0;
+				if (*tl1 == '@' || *tl1 == '<')
+				{
+					wrtln("Illegal outputfile name:");
+					wrt(tl1);
+					goto redrc;
+				}
 				if (concat)
 				{
 					if ((newso = xopen(tl1, 1)) < 0)
 					{
-						newso = xcreat(tl1, 0);
+						if ((newso = xcreat(tl1, 0)) < 0)
+						{
+							wrtln(" Error of opening/creating output:");
+							wrt(tl1);
+							goto redrc;
+						}
 					}
 				} else
 				{
 					xunlink(tl1);
-					newso = xcreat(tl1, 0);
-					rd.nso = -1;
+					if ((newso = xcreat(tl1, 0)) < 0)
+					{
+						wrtln(" Error of creating output:");
+						wrt(tl1);
+						goto redrc;
+					}
 				}
 				rd.oldso = dup(1);
-				xforce(1, (int) newso);
-				xclose((int) newso);
+				rd.nso = TRUE;
 				if (concat)
-					xf_seek(0L, 1, 2);
-				rd.nso = -1;
+					xf_seek(0L, (int) newso, 2);
 				break;
 			default:
 				*d++ = ch;
 			}
-
+		}
+		
 		/* If pipe tack on remaining parms if any. */
 		if (*pipeflg)
 		{
@@ -2141,59 +2524,54 @@ PP(char *outsd_tl;)
 		p = argv[1];
 		ucase(s);
 
-		/*Build command tail. */
-		cmdtl = lin;
-		j = 1;
-		i = 1;
-		while (*argv[i])
-		{
-			k = 0;
-			while ((cmdtl[++j] = *(argv[i] + k++)) /* != 0 */)
-				;
-			cmdtl[j] = ' ';
-			i++;
-		}
-		cmdtl[j] = 0xd;
-		cmdtl[j + 1] = 0;
-		cmdtl[0] = --j;
-		cmdtl[1] = ' ';
-
 		if (pipe)
 		{
-			xCmdLn(argv, &pipe, &dskFlHnd, (char *) 0L);
+			preCmd(*nonStdIn, &rd, newsi, newso);
+			xCmdLn(argv, &pipe, &dskFlHnd, NULL);
 			xclose((int) dskFlHnd);
 		} else
 		{
-			if ((strlen(s) == 2) && (s[1] == ':'))
+			if (strlen(s) == 2 && s[1] == ':')
 			{
-				xsetdrv(drv = (*s - 'A'));
+				preCmd(*nonStdIn, &rd, newsi, newso);
+				drv = *s - 'A';
+				if (drv < 0 || drv > 31 || xsetdrv(drv) < 0)
+				{
+					dspMsg(18);
+					wrt(s);
+					goto redrc;
+				}
 			} else if (xncmps(3, s, "LS") || xncmps(4, s, "DIR"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				compl_code = dirCmd(&argv[0]);
 			} else if (xncmps(6, s, "CHMOD"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				compl_code = chmodCmd(&argv[0]);
 			} else if (xncmps(4, s, "ERR"))
 			{
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				wrt("Completion code for previous command = ");
 				prthex((int) compl_code);
 			} else if (xncmps(5, s, "PATH"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				ucase(p);
-				setPath(p);
+				if (setPath(p))
+				{
+					dspMsg(18);
+					wrt(p);
+					goto redrc;
+				}
 			} else if (xncmps(4, s, "ENV"))
 			{
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				i = 0;
 				while ((prntEnvPtr[i] + prntEnvPtr[i + 1]) != 0)
 				{
 					/* if a path has been defined, don't count it. */
-					if (!(xncmps(5, &prntEnvPtr[i], "PATH=")))
+					if (!xncmps(5, &prntEnvPtr[i], pthSymb))
 					{
 						wrtln(&prntEnvPtr[i]);
 					}
@@ -2204,18 +2582,16 @@ PP(char *outsd_tl;)
 				}
 				if (path[0])
 				{
-					wrtln("PATH=");
+					wrtln(pthSymb);
 					wrt(path);
 				}
-			}
-
-			else if (xncmps(4, s, "CAT") || xncmps(4, s, "TYPE"))
+			} else if (xncmps(4, s, "CAT") || xncmps(4, s, "TYPE"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				compl_code = typeCmd(&argv[0]);
 			} else if ((xncmps(4, s, "REM")) || (xncmps(4, s, "ECHO")))
 			{
+				preCmd(0L, &rd, newsi, newso);	/* don't want to print the command */
 				chk_str(&argv[1]);
 				i = 1;
 				while (*argv[i])
@@ -2224,12 +2600,9 @@ PP(char *outsd_tl;)
 					wrt(" ");
 				}
 				dspMsg(12);
-			}
-
-			else if (xncmps(3, s, "CD"))
+			} else if (xncmps(3, s, "CD"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				if (argc == 0)
 				{
 					xgetdir(buf, drv + 1);
@@ -2238,18 +2611,19 @@ PP(char *outsd_tl;)
 						buf[0] = '\\';
 						buf[1] = 0;
 					}
-					xwrite(1, (long)(int)strlen(buf), buf);
+					bytes = strlen(buf);
+					count = xwrite(1, bytes, buf);
+					if (count != bytes)
+						wrerr();
 				} else
 				{
-					if ((compl_code = xchdir(p)) != 0)
-						wrt("Directory not found.");
+					if (chk_wild(p))
+						if ((compl_code = xchdir(p)) != 0)
+							wrt("Directory not found.");
 				}
-			}
-
-			else if (xncmps(7, s, "CMDERR"))
+			} else if (xncmps(7, s, "CMDERR"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				if (argc == 0)
 				{
 					if (cmderr)
@@ -2266,12 +2640,9 @@ PP(char *outsd_tl;)
 					else
 						wrt("Arg must be ON or OFF.");
 				}
-			}
-
-			else if (xncmps(7, s, "PRGERR"))
+			} else if (xncmps(7, s, "PRGERR"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				if (argc == 0)
 				{
 					if (prgerr)
@@ -2292,64 +2663,105 @@ PP(char *outsd_tl;)
 
 			else if (xncmps(3, s, "MD"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
-				if ((compl_code = xmkdir(p)) != 0)
-					wrt("Unable to make directory");
+				preCmd(*nonStdIn, &rd, newsi, newso);
+				if (chk_wild(p))
+				{
+					if ((compl_code = xmkdir(p)) != 0)
+						wrt("Unable to make directory");
+				}
 			} else if (xncmps(3, s, "RD"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
-				if ((compl_code = xrmdir(p)) != 0)
-					wrt("Unable to remove directory");
+				preCmd(*nonStdIn, &rd, newsi, newso);
+				if (!(*p))
+				{
+					dspMsg(6);
+				} else
+				{
+					if (chk_wild(p))
+					{
+						if ((*p == '\\' && *(p + 1) == 0) ||
+							(*(p + 1) == ':' && (*(p + 2) == 0 ||
+							 (*(p + 2) == '\\' && *(p + 3) == 0))))
+						{
+							wrt("Cannot remove root directory\n");
+							compl_code = -1L;
+						} else if ((compl_code = xrmdir(p)) != 0)
+						{
+							wrt("Unable to remove directory");
+						}
+					}
+				}
 			} else if (xncmps(3, s, "RM") || xncmps(4, s, "DEL") || xncmps(4, s, "ERA"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				compl_code = delCmd(&argv[0]);
-			}
-
-			else if (xncmps(4, s, "REN"))
+			} else if (xncmps(4, s, "REN"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
-				compl_code = renmCmd(argv[1], argv[2]); /* BUG: renmCmd does not return anything */
+				preCmd(*nonStdIn, &rd, newsi, newso);
+				if (argc < 2)
+				{
+					dspMsg(6);
+				} else
+				{
+					renmCmd(argv[1], argv[2]);
+				}
 			} else if (xncmps(5, s, "SHOW"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				ucase(p);
-				xgetfree(sbuf, (*p ? *p - 64 : 0));
-				wrt("Allocation Information: Drive ");
-				if (!*p)
-					dspMsg(16);
-				else
+				if (*p && (*p < 'A' || *p > 'P' || *(p + 1) != ':'))
+				{
+					dspMsg(18);
 					wrt(p);
-				dspMsg(12);
-				wrtln("Drive size in BYTES    ");
-				prtDclFmt((long) (sbuf[1] * sbuf[3] * sbuf[2]), 8, " ");
-				wrtln("BYTES used on drive    ");
-				prtDclFmt((long) ((sbuf[1] - sbuf[0]) * sbuf[3] * sbuf[2]), 8, " ");
-				wrtln("BYTES left on drive    ");
-				prtDclFmt((long) (sbuf[0] * sbuf[3] * sbuf[2]), 8, " ");
-				wrtln("Total Units on Drive   ");
-				prtDclFmt((long) sbuf[1], 8, " ");
-				wrtln("Free Units on Drive    ");
-				prtDclFmt((long) sbuf[0], 8, " ");
-				wrtln("Sectors per Unit       ");
-				prtDclFmt((long) sbuf[3], 8, " ");
-				wrtln("Bytes per Sector       ");
-				prtDclFmt((long) sbuf[2], 8, " ");
-			}
-
-			else if (xncmps(5, s, "INIT"))
+				} else if (xgetfree(sbuf, (*p ? *p - 64 : 0)) < 0)
+				{
+					wrt("Unable to get drive information: ");
+					wrt(p);
+				} else
+				{
+					wrt("Allocation Information: Drive ");
+					if (!*p)
+						dspMsg(16);
+					else
+						wrt(p);
+					dspMsg(12);
+					wrtln("Drive size in BYTES    ");
+					prtDclFmt((long) (sbuf[1] * sbuf[3] * sbuf[2]), 8, " ");
+					wrtln("BYTES used on drive    ");
+					prtDclFmt((long) ((sbuf[1] - sbuf[0]) * sbuf[3] * sbuf[2]), 8, " ");
+					wrtln("BYTES left on drive    ");
+					prtDclFmt((long) (sbuf[0] * sbuf[3] * sbuf[2]), 8, " ");
+					wrtln("Total Units on Drive   ");
+					prtDclFmt((long) sbuf[1], 8, " ");
+					wrtln("Free Units on Drive    ");
+					prtDclFmt((long) sbuf[0], 8, " ");
+					wrtln("Sectors per Unit       ");
+					prtDclFmt((long) sbuf[3], 8, " ");
+					wrtln("Bytes per Sector       ");
+					prtDclFmt((long) sbuf[2], 8, " ");
+				}
+			} else if (xncmps(5, s, "INIT"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				for (i = 0; i < BUFSIZ; i++)
 					buf[i] = 0;
-				ucase(p);
-				drv = *p - 'A';
+				i = xgetdrv();			/* default drive */
+				if (!*p)
+				{
+					drv = i;
+				} else
+				{
+					ucase(p);
+					drv = *p - 'A';
+					if (drv < 0 || drv > 15 || xsetdrv(drv) < 0)
+					{
+						dspMsg(18);
+						wrt(p);
+						xsetdrv(i);		/* restore the default drive */
+						goto redrc;
+					}
+					xsetdrv(i);
+				}
 				buf[0] = 0xf7;
 				buf[1] = 0xff;
 				buf[2] = 0xff;
@@ -2368,7 +2780,7 @@ PP(char *outsd_tl;)
 				{
 					*d++ = 0;
 					for (j = 0; j < 31; j++)
-						*d++ = 0;		/*formerly f6 */
+						*d++ = 0;		/* formerly f6 */
 				}
 				rec = f2 + fs;
 				for (i = 0; i < b->rdlen; i++, rec++)
@@ -2379,8 +2791,7 @@ PP(char *outsd_tl;)
 
 			else if (xncmps(8, s, "PUTBOOT"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				ucase(p);
 				drv = *p - 'A';
 				fd = xopen(argv[2], 0);
@@ -2394,17 +2805,14 @@ PP(char *outsd_tl;)
 
 			else if ((xncmps(5, s, "COPY")) || (xncmps(5, s, "MOVE")))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				if (argc >= 1)
-				{
 					compl_code = copyCmd(p, argv[2], xncmps(5, s, "MOVE") ? 1 : 0);
-				} else
+				else
 					dspMsg(6);
 			} else if (xncmps(4, s, "GET"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				ucase(p);
 				cpmopen(p);
 				fd = xcreat(argv[2], 0x20);
@@ -2422,11 +2830,11 @@ PP(char *outsd_tl;)
 
 			else if (xncmps(6, s, "PAUSE"))
 			{
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				cr2cont();
 			} else if (xncmps(4, s, "PUT"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				cpmcreate(argv[2]);
 				fd = xopen(p, 0);
 
@@ -2441,65 +2849,90 @@ PP(char *outsd_tl;)
 				dspMsg(5);
 			} else if (xncmps(5, s, "HELP"))
 			{
-				dspMsg(17);
+				preCmd(*nonStdIn, &rd, newsi, newso);
+				dspHelp(rd.nso ? 0 : 1);
 			} else if (xncmps(6, s, "BREAK"))
 			{
 				xbrkpt();
 			} else if (xncmps(5, s, "EXIT"))
 			{
 			  exit:
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				xclose(rd.oldsi);
 				xclose(rd.oldso);
 				devector();				/* remove vectors */
 				xterm(0);
 			} else if (xncmps(8, s, "VERSION"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				i = xoscall(0x30);
 				prtdecl((long) (i & 0xFF));
 				xwrite(1, 1L, ".");
 				prtdecl((long) ((i >> 8) & 0xFF));
 			} else if (xncmps(5, s, "WRAP"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				xwrite(1, 2L, "\033v");
 				dspMsg(5);
 			} else if (xncmps(7, s, "NOWRAP"))
 			{
-				if (*nonStdIn)
-					dspCL(&argv[0]);
+				preCmd(*nonStdIn, &rd, newsi, newso);
 				xwrite(1, 2L, "\033w");
 				dspMsg(5);
 			} else if (xncmps(4, s, "CLS"))
-				xwrite(1, 4L, "\033H\033J");
-			else
 			{
-				if (*nonStdIn)
-					dspCL(argv);
-				if (!(execBat(s, argv)))
+				rd.echocmd = FALSE;
+				preCmd(*nonStdIn, &rd, newsi, newso);
+				xwrite(1, 4L, "\033H\033J");
+				rd.echocmd = *nonStdIn != 0;
+			} else if (xncmps(5, s, "STAY"))
+			{
+				xlongjmp(&jb, -2);
+			} else
+			{
+				preCmd(*nonStdIn, &rd, newsi, newso);
+				if (chk_wild(s))
 				{
-					if ((compl_code = execPrgm(s, cmdtl)) == -32)
-						errout();
-					else if ((compl_code > 0) && prgerr)
-						errout();
-					else if ((compl_code & 0xFFFFFFFF) < 0)
+					if (!(execBat(s, argv)))
 					{
-						wrt("Command not found.");
-						if (prgerr)
+						/* Build command tail.  So lin won't be modified before the command */
+						/* was outputed by preCmd which calls dspCL to actually do it */
+						cmdtl = lin;
+						j = 1;
+						i = 1;
+						while (*argv[i])
+						{
+							k = 0;
+							while ((cmdtl[++j] = *(argv[i] + k++)) != 0)
+								;
+							cmdtl[j] = ' ';
+							i++;
+						}
+						cmdtl[j] = 0xd;
+						cmdtl[j + 1] = 0;
+						cmdtl[0] = --j;
+						cmdtl[1] = ' ';
+
+						if ((compl_code = execPrgm(s, cmdtl)) == -32)
 							errout();
+						else if ((compl_code > 0) && prgerr)
+							errout();
+						else if ((compl_code & 0xFFFFFFFF) < 0)
+						{
+							wrt("Command not found.");
+							if (prgerr)
+								errout();
+						}
 					}
 				}
 			}
 		}
+	  redrc:
 		chk_redirect(&rd);
 
 	  again:
-		/*if command coming from outside the command int exit */
-		if ((long) outsd_tl)
+		/* if command coming from outside the command int exit */
+		if (outsd_tl)
 			goto exit;
 	}
 }
@@ -2511,9 +2944,10 @@ VOID cmain(P(char *) bp)
 PP(char *bp;)								/* Base page address */
 {
 	char *parm[MAXARGS];
-	char *tl;
+	register char *tl;
 	int i, k, cmd;
 	long j;
+	int err;
 
 	basePage = bp;
 	prntEnvPtr = *((char **) (basePage + 0x2C));
@@ -2535,9 +2969,13 @@ PP(char *bp;)								/* Base page address */
 	while ((prntEnvPtr[i] + prntEnvPtr[i + 1]) != 0)
 	{
 		/* if a path has been defined, don't count it. */
-		if (xncmps(5, &prntEnvPtr[i], "PATH="))
+		if (xncmps(5, &prntEnvPtr[i], pthSymb))
 		{
-			setPath(&prntEnvPtr[i + 5]);
+			if (setPath(&prntEnvPtr[i + 5]))
+			{
+				dspMsg(18);
+				wrt(&prntEnvPtr[i + 5]);
+			}
 			break;
 		}
 		i++;
@@ -2546,19 +2984,29 @@ PP(char *bp;)								/* Base page address */
 	if (!cmd)
 		execBat(autoBat, &parm[0]);
 
-	if (xsetjmp(&jb))
+	if ((err = xsetjmp(&jb)) != 0)
 	{
-		for (i = 6; i <= 20; i++)
-			xclose(i);
-		if (cmd)
+		if (err != -2)
 		{
-			tl[0] = 4;
-			tl[1] = 'e';
-			tl[2] = 'x';
-			tl[3] = 'i';
-			tl[4] = 't';
-			tl[5] = 0xd;
-			tl[6] = 0;
+			for (i = 6; i <= 20; i++)
+				xclose(i);
+			if (cmd)
+			{
+				wrtln("Stay in COMMAND.PRG (Y/CR)? ");
+				if (getYes())
+				{
+					cmd = 0;
+				} else
+				{
+					tl[0] = 4;
+					tl[1] = 'e';
+					tl[2] = 'x';
+					tl[3] = 'i';
+					tl[4] = 't';
+					tl[5] = 0xd;
+					tl[6] = 0;
+				}
+			}
 		}
 	}
 
@@ -2566,6 +3014,7 @@ PP(char *bp;)								/* Base page address */
 	{
 		k = 0;
 		j = 0;
-		xCmdLn(&parm[0], &k, &j, cmd ? tl : (char *) 0L);
+		batlev = 0;
+		xCmdLn(&parm[0], &k, &j, cmd ? tl : NULL);
 	} while (1);
 }
