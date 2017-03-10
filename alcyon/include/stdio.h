@@ -51,7 +51,9 @@ struct _iobuf {
          int _cnt;                      /* # chars to be read/have been wrt */
 };
 
+#ifndef _NO_IOBUF
 extern struct _iobuf _iob[MAXFILES];
+#endif
 typedef struct _iobuf FILE;
 
 /* flag byte definition */

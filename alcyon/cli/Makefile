@@ -1,7 +1,7 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-PROGRAMS = command.tos
+PROGRAMS = command.tos newcom.tos
 
 all: $(PROGRAMS)
 
@@ -10,6 +10,9 @@ include optimize.mak
 
 command.tos: $(COMA_OBJS) $(LIB1OBJS) ${MAKEFILE}
 	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(COMA_OBJS) $(LIB1OBJS)
+
+newcom.tos: coma.o newcom.o $(LIB1OBJS) ${MAKEFILE}
+	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ coma.o newcom.o $(LIB1OBJS)
 
 lmul.o:	../libsrc/lmul.o
 	$(CP) $< $@
