@@ -1,5 +1,5 @@
 #include "../common/config.h"
-#include "../common/ctrycodes.h"
+#include "../common/ctrycode.h"
 
 /*
  * Definitions for length of text, data and bss

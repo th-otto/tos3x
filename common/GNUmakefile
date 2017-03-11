@@ -14,6 +14,9 @@ check::
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/common
 
+dosdir::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(DOSDIR)/common
+
 clean::
 
 distclean: clean

@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
-#include "../common/ctrycodes.h"
+#include "../common/ctrycode.h"
 
 #ifndef O_BINARY
 #  ifdef _O_BINARY

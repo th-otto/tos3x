@@ -1,5 +1,5 @@
 top_srcdir=..
-subdir=command
+subdir=cli
 
 # 
 # cross compiling

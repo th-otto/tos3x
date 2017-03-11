@@ -46,7 +46,7 @@ BEGIN {
     print "#define HEADER_H\n"
 
     # print "#include \"i18nconf.h\""
-    print "#include \"ctrycodes.h\"\n"
+    print "#include \"ctrycode.h\"\n"
 
     print "/* The defines below must only be used in startup.S and comprimg.S."
     print " * Then the OS header variables must be used elsewhere."

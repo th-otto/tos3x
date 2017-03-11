@@ -19,7 +19,7 @@ BIOS_SRCS=\
 	memtest.S \
 	dma.inc \
 	floppy.inc \
-	ikbdclock.inc \
+	ikbdclk.inc \
 	linea.inc \
 	mmu030.inc \
 	nvram.inc \
@@ -35,6 +35,7 @@ EXTRA_DIST:=\
 	SRCFILES \
 	optimize.mak \
 	biosext.S \
+	prtkeys.c \
 	${empty}
 
 SRCS:=${BIOS_SRCS}

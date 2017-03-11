@@ -39,6 +39,9 @@ check::
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
+dosdir::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(DOSDIR)/$(subdir)
+
 clean:
 	$(RM) *.o *.a $(PROGRAMS)
 

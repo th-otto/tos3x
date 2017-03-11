@@ -1,7 +1,7 @@
 include GNUmakefile.cmn
 include Makefile.sil
 
-SUBDIRS = libsrc as cgen cpp link68 optimize parser util
+SUBDIRS = libsrc as cgen cpp link68 optimize parser util cli
 
 EXTRA_DIST = \
 	GNUmakefile \

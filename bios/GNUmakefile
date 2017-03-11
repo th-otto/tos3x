@@ -27,7 +27,7 @@ include SRCFILES
 bios.a: $(BIOS_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(BIOS_OBJS)
 
-startup.o: startup.S $(top_srcdir)/common/config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc nvram.inc ikbdclock.inc floppy.inc
+startup.o: startup.S $(top_srcdir)/common/config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc nvram.inc ikbdclk.inc floppy.inc
 
 keytbl.o: $(top_srcdir)/common/config.h
 
@@ -40,6 +40,9 @@ check:: bios.o $(top_srcdir)/common/sections.mak
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
+
+dosdir::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(DOSDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a *.ndx $(PROGRAMS) $(top_srcdir)/common/config.h

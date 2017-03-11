@@ -3,6 +3,7 @@ LIB=../lib/
 INC=../include
 
 DISTDIR=../tmp/tos306de
+DOSDIR=/mnt/tos/TOS
 WWWDIR=$(HOME)/webgo24/home/www/download
 
 ALNPATH=${LIB}

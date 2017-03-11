@@ -44,6 +44,9 @@ check:: vdi.o $(top_srcdir)/common/sections.mak
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
+dosdir::
+	$(CP) -a $(SRCS) $(EXTRA_DIST) $(DOSDIR)/$(subdir)
+
 clean:
 	$(RM) *.o *.a *.ndx $(PROGRAMS) $(top_srcdir)/common/config.h
 

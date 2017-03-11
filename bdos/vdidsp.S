@@ -3,7 +3,7 @@
  * but are defined elsewhere
  */
 #include "config.h"
-#include "ctrycodes.h"
+#include "ctrycode.h"
 #include "sections.inc"
 
 	xdef _zeromem

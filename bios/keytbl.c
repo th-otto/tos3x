@@ -1,5 +1,5 @@
 #include "bios.h"
-#include "ctrycodes.h"
+#include "ctrycode.h"
 
 #define DEADMIN 1
 #define DEAD(i) (i + DEADMIN)

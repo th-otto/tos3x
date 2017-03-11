@@ -3901,7 +3901,7 @@ esetsm2:
 
 #include "nvram.inc"
 
-#include "ikbdclock.inc"
+#include "ikbdclk.inc"
 
 		text
 

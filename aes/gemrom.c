@@ -39,7 +39,7 @@
 #include "aes.h"
 #include "gemlib.h"
 #include "taddr.h"
-#include "ctrycodes.h"
+#include "ctrycode.h"
 
 RSHDR *gemptr;		/* GEM's rsc pointer        */
 RSHDR *deskptr;		/* DESKTOP'S rsc pointer    */

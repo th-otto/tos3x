@@ -1,5 +1,5 @@
 /*
- * ctrycodes.h - a mere list of country codes
+ * ctrycode.h - a mere list of country codes
  *
  * Copyright (C) 2003-2016 The EmuTOS development team
  *

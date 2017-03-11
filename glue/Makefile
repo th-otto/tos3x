@@ -39,10 +39,10 @@ tos.img: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o
 
 cartridge_ASFLAGS=-n
 
-cartridge.img: cartridge.o
-	$(LD) -o cartridge.tmp -a $(CARTBASE) x 0 cartridge.o
-	dd bs=1 skip=36 < cartridge.tmp > $@
-	$(RM) cartridge.tmp
+cartridg.img: cartridg.o
+	$(LD) -o cartridg.tmp -a $(CARTBASE) x 0 cartridg.o
+	dd bs=1 skip=36 < cartridg.tmp > $@
+	$(RM) cartridg.tmp
 
 ../bios/bios.ndx: ../bios/bios.a
 	$(RANLIB) $<
@@ -74,7 +74,7 @@ vars.o: ../common/vars.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
-cartridge.o: cartridge.S
+cartridg.o: cartridg.S
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
@@ -136,7 +136,7 @@ check::
 	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
 
 clean:
-	$(RM) *.o *.i $(IMG) tos.img cartridge.tmp cartridge.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h
+	$(RM) *.o *.i $(IMG) tos.img cartridg.tmp cartridg.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak *.img
