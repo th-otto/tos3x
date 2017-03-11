@@ -79,11 +79,11 @@ NAMES
 #define _(x) x
 
 struct xjmpbuf {
-	long fp;
-	long sp;
-	long pc;
+	long old_a6;
+	long old_a6;
+	long retaddr;
 #if BINEXACT
-	int drv;
+	int drv; /* ugly hack to get it linked just after jb */
 #define zdrv jb.drv
 #endif
 };

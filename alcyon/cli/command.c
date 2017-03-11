@@ -147,9 +147,9 @@ NAMES
 #define _(x) x
 
 struct xjmpbuf {
-	long fp;
-	long sp;
-	long pc;
+	long old_a6;
+	long old_a6;
+	long retaddr;
 };
 
 /*
@@ -194,7 +194,7 @@ struct xjmpbuf jb;
 
 static struct rdb *rd_ptr; /* FIXME: pts to auto variable */
 
-char hexch[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+static char const hexch[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 static int prgerr;
 static int cmderr;
 static long compl_code;
@@ -207,10 +207,10 @@ static char buf[BUFSIZ];
 static char lin[130];
 
 static char srchb[44];
-static char prgTail[5] = ".PRG";
-static char batTail[5] = ".BAT";
-static char autoBat[13] = "AUTOEXEC.BAT";
-static char pthSymb[6] = "PATH=";
+static char const prgTail[5] = ".PRG";
+static char const batTail[5] = ".BAT";
+static char const autoBat[13] = "AUTOEXEC.BAT";
+static char const pthSymb[6] = "PATH=";
 
 static char *basePage;
 
@@ -234,7 +234,6 @@ static char dstNmPat[13];						/* dst file name specified in path */
 static char path[PATH_MAX];							/* lst of default path names       */
 
 /* Forward declarations. */
-VOID dspMsg PROTO((int msg));
 static VOID xCmdLn PROTO((char **parm, int *pipeflg, int nonStdIn, char *outsd_tl));
 
 /* entry point called from coma.S */
@@ -392,7 +391,7 @@ static VOID wrerr(NOTHING)
 	int fd;
 
 	fd = Fopen("CON:", O_RDWR);
-	Fwrite(fd, 24L, "\r\nFile write error....\r\n");
+	Fwrite(fd, 24L, _("\r\nFile write error....\r\n"));
 	Fclose(fd);
 	errout();
 }
@@ -435,6 +434,51 @@ PP(char ch;)
 	wrt(str);
 }
 
+static VOID errPath(NOTHING)
+{
+	wrtln(_("Invalid drive/path/file name specified"));
+}
+
+static VOID errIncomplete(NOTHING)
+{
+	wrtln(_("Command is incompletely specified."));
+}
+
+static VOID errDestWild(NOTHING)
+{
+	wrtln(_("Destination is not a valid wild card expression."));
+}
+
+static VOID errNotFound(NOTHING)
+{
+	wrtln(_("File Not Found."));
+}
+
+static VOID errWild(NOTHING)
+{
+	wrtln(_("Wild cards not allowed/Cannot rename/type directories."));
+}
+
+static VOID dspTo(NOTHING)
+{
+	wrt(_(" to "));
+}
+
+static VOID dspDst(NOTHING)
+{
+	wrt(dstFlNm);
+}
+
+static VOID dspSrc(NOTHING)
+{
+	wrt(srcFlNm);
+}
+
+static VOID dspDone(NOTHING)
+{
+	wrt(_("Done."));
+}
+
 /***************************************************************************/
 /* chk_wild checks wildcard * and ? in the string s.  If s contains * or ?,*/
 /* it issue error message and return false, else it return true.	       */
@@ -449,7 +493,7 @@ PP(char *s;)
 		q++;
 	if (*q)
 	{
-		dspMsg(18);
+		errPath();
 		wrt(s);
 		compl_code = -1L;
 		return FALSE;
@@ -838,7 +882,7 @@ PP(int n;)
 /***************************************************************************/
 static VOID cr2cont(NOTHING)
 {
-	wrt("CR to continue...");
+	wrt(_("CR to continue..."));
 	lin[0] = 126;
 	Cconrs(lin);
 }
@@ -887,169 +931,110 @@ PP(char *str;)
 static VOID dspHelp(P(int) stand_out)
 PP(int stand_out;)
 {
-	wrtln("# in the first non blank column in a batch file is a comment.");
-	wrtln("CAT or TYPE filenm.ext [[filenm.ext]...]");
-	wrtln("    Writes filenm.ext(s) to standard output.");
-	wrtln("CD [pathnm]");
-	wrtln("    With pathnm it sets default for working directory.");
-	wrtln("    Without pathnm displays current working directory.");
-	wrtln("CHMOD [pathnm/]filenm mode");
-	wrtln("    Changes the mode of the file specified in filenm to the");
-	wrtln("    value of mode.  Acceptable values are <= 7:");
-	wrtln("       0 - Normal File Entry");
-	wrtln("       1 - File is Read Only");
-	wrtln("       2 - File is Hidden from directory Search");
-	wrtln("       4 - File is System File");
-	wrtln("       3, 5, 6, 7 - are combinations of the above value");
-	wrtln("CLS");
-	wrtln("    Clears the screen.");
-	wrtln("COPY source_file [destination_file]");
-	wrtln("    Copies source to destination.");
-	wrtln("DATE [mm/dd/yy]");
-	wrtln("    Sets or displays the date that you enter into the system");
-	wrtln("DIFF [-b] filespec1 filespec2");
-	wrtln("    Compares two files character by character.");
-	wrtln("    -b - ingnores spaces in the files and compares text only");
+	wrtln(_("# in the first non blank column in a batch file is a comment."));
+	wrtln(_("CAT or TYPE filenm.ext [[filenm.ext]...]"));
+	wrtln(_("    Writes filenm.ext(s) to standard output."));
+	wrtln(_("CD [pathnm]"));
+	wrtln(_("    With pathnm it sets default for working directory."));
+	wrtln(_("    Without pathnm displays current working directory."));
+	wrtln(_("CHMOD [pathnm/]filenm mode"));
+	wrtln(_("    Changes the mode of the file specified in filenm to the"));
+	wrtln(_("    value of mode.  Acceptable values are <= 7:"));
+	wrtln(_("       0 - Normal File Entry"));
+	wrtln(_("       1 - File is Read Only"));
+	wrtln(_("       2 - File is Hidden from directory Search"));
+	wrtln(_("       4 - File is System File"));
+	wrtln(_("       3, 5, 6, 7 - are combinations of the above value"));
+	wrtln(_("CLS"));
+	wrtln(_("    Clears the screen."));
+	wrtln(_("COPY source_file [destination_file]"));
+	wrtln(_("    Copies source to destination."));
+	wrtln(_("DATE [mm/dd/yy]"));
+	wrtln(_("    Sets or displays the date that you enter into the system"));
+	wrtln(_("DIFF [-b] filespec1 filespec2"));
+	wrtln(_("    Compares two files character by character."));
+	wrtln(_("    -b - ingnores spaces in the files and compares text only"));
 	if (stand_out)
 	{
 		wrtnl();
 		cr2cont();
 	}
-	wrtln("DIR or LS [filenm.ext] [-f] [-d] [-t] [-w]");
-	wrtln("    -f - anything but directories.");
-	wrtln("    -d - directories only.");
-	wrtln("    -t - terse: names only.");
-	wrtln("    -w - wide: names only displayed horizontally.");
-	wrtln("ERA [d:][path]filespec");
-	wrtln("    Removes one or more files from a disk directory");
-	wrtln("ERR ");
-	wrtln("    Displays the value of the Completion Code for the last command.");
-	wrtln("EXIT");
-	wrtln("    Exits CLI to invoking program.");
-	wrtln("FIND \"string\"filename1 [filename2...filenamelast]");
-	wrtln("    Search for the occurrence of a character string in one or more files");
-	wrtln("FORMAT d:");
-	wrtln("    Prepares a disk to recieve data before it can be used");
-	wrtln("INIT [drive_spec:]");
-	wrtln("    Reinitializes FAT entries, erases data from a disk.");
-	wrtln("MD [subdirectory name]");
-	wrtln("    Creates a new subdirectory in current directory.");
-	wrtln("MOVE source_file [destination_file]");
-	wrtln("    Copies source to destination and deletes source.");
-	wrtln("PAUSE");
-	wrtln("    Writes 'CR to continue...' to standard output");
+	wrtln(_("DIR or LS [filenm.ext] [-f] [-d] [-t] [-w]"));
+	wrtln(_("    -f - anything but directories."));
+	wrtln(_("    -d - directories only."));
+	wrtln(_("    -t - terse: names only."));
+	wrtln(_("    -w - wide: names only displayed horizontally."));
+	wrtln(_("ERA [d:][path]filespec"));
+	wrtln(_("    Removes one or more files from a disk directory"));
+	wrtln(_("ERR "));
+	wrtln(_("    Displays the value of the Completion Code for the last command."));
+	wrtln(_("EXIT"));
+	wrtln(_("    Exits CLI to invoking program."));
+	wrtln(_("FIND \"string\"filename1 [filename2...filenamelast]"));
+	wrtln(_("    Search for the occurrence of a character string in one or more files"));
+	wrtln(_("FORMAT d:"));
+	wrtln(_("    Prepares a disk to recieve data before it can be used"));
+	wrtln(_("INIT [drive_spec:]"));
+	wrtln(_("    Reinitializes FAT entries, erases data from a disk."));
+	wrtln(_("MD [subdirectory name]"));
+	wrtln(_("    Creates a new subdirectory in current directory."));
+	wrtln(_("MOVE source_file [destination_file]"));
+	wrtln(_("    Copies source to destination and deletes source."));
+	wrtln(_("PAUSE"));
+	wrtln(_("    Writes 'CR to continue...' to standard output"));
 	if (stand_out)
 	{
 		wrtnl();
 		cr2cont();
 	}
-	wrtln("    and waits for a carriage return from standard input.");
-	wrtln("PRGERR [ON | OFF]");
-	wrtln("    Turns command processing abort feature ON/OFF.");
-	wrtln("    If PRGERR is ON and a .PRG file returns a non zero completion");
-	wrtln("    code, all further processing will stop.  Usefull in .BAT files.");
-	wrtln("    Default is ON.");
-	wrtln("NOWRAP");
-	wrtln("    Disables line wrap.");
-	wrtln("PATH [;[pathnm]...]");
-	wrtln("    With path name sets default path for batch and commands.");
-	wrtln("    Without path name displays current path");
-	wrtln("REM or ECHO [\"string\"]");
-	wrtln("    Strips quotes and writes string to standard output.");
-	wrtln("    \\r is replaced by 0x13, \\n by 0x10, \\0 by 0x0.");
-	wrtln("    \\c by 0x13 0x10, \\anything is replaced by anything.");
-	wrtln("REN source_file_nm [destination_file_nm]");
-	wrtln("    Renames source to destination.");
-	wrtln("RD [pathnm]");
-	wrtln("    Removes named directory.");
-	wrtln("RM or DEL or ERA filenm [[filemn]...] [-q]");
-	wrtln("    Removes named file from directory.");
-	wrtln("    IF the -q option is used, the CLI will display the question");
-	wrtln("    Y/CR... and wait for a responce.");
-	wrtln("SHOW [drive_spec:]");
-	wrtln("    Displays disk status for default drive or drive specified.");
+	wrtln(_("    and waits for a carriage return from standard input."));
+	wrtln(_("PRGERR [ON | OFF]"));
+	wrtln(_("    Turns command processing abort feature ON/OFF."));
+	wrtln(_("    If PRGERR is ON and a .PRG file returns a non zero completion"));
+	wrtln(_("    code, all further processing will stop.  Usefull in .BAT files."));
+	wrtln(_("    Default is ON."));
+	wrtln(_("NOWRAP"));
+	wrtln(_("    Disables line wrap."));
+	wrtln(_("PATH [;[pathnm]...]"));
+	wrtln(_("    With path name sets default path for batch and commands."));
+	wrtln(_("    Without path name displays current path"));
+	wrtln(_("REM or ECHO [\"string\"]"));
+	wrtln(_("    Strips quotes and writes string to standard output."));
+	wrtln(_("    \\r is replaced by 0x13, \\n by 0x10, \\0 by 0x0."));
+	wrtln(_("    \\c by 0x13 0x10, \\anything is replaced by anything."));
+	wrtln(_("REN source_file_nm [destination_file_nm]"));
+	wrtln(_("    Renames source to destination."));
+	wrtln(_("RD [pathnm]"));
+	wrtln(_("    Removes named directory."));
+	wrtln(_("RM or DEL or ERA filenm [[filemn]...] [-q]"));
+	wrtln(_("    Removes named file from directory."));
+	wrtln(_("    IF the -q option is used, the CLI will display the question"));
+	wrtln(_("    Y/CR... and wait for a responce."));
+	wrtln(_("SHOW [drive_spec:]"));
+	wrtln(_("    Displays disk status for default drive or drive specified."));
 	if (stand_out)
 	{
 		wrtnl();
 		cr2cont();
 	}
-	wrtln("STAY");
-	wrtln("    Optionally stays in cli instead of exiting when");
-	wrtln("    cli is invoked with parameters.");
-	wrtln("TIME [hh:mm:ss]");
-	wrtln("    Sets or displays the time that you enter into the system");
-	wrtln("TREE [d:]");
-	wrtln("    Displays all the directory paths on a given disk drive");
-	wrtln("TYPE [d:][path]filename.ext");
-	wrtln("    Displays the contents of a file on your screen");
-	wrtln("VERSION");
-	wrtln("    Displays current version of OS.");
-	wrtln("WRAP");
-	wrtln("    Enables line wrap.");
-	wrtln(">filenm, >>filenm, <filenm");
-	wrtln("    Provides for ouput, concatenation, and input redirection.");
-	wrtln("cmd @filenm");
-	wrtln("    Allows a list of command tails to be put in a file and fed to a command.");
+	wrtln(_("STAY"));
+	wrtln(_("    Optionally stays in cli instead of exiting when"));
+	wrtln(_("    cli is invoked with parameters."));
+	wrtln(_("TIME [hh:mm:ss]"));
+	wrtln(_("    Sets or displays the time that you enter into the system"));
+	wrtln(_("TREE [d:]"));
+	wrtln(_("    Displays all the directory paths on a given disk drive"));
+	wrtln(_("TYPE [d:][path]filename.ext"));
+	wrtln(_("    Displays the contents of a file on your screen"));
+	wrtln(_("VERSION"));
+	wrtln(_("    Displays current version of OS."));
+	wrtln(_("WRAP"));
+	wrtln(_("    Enables line wrap."));
+	wrtln(_(">filenm, >>filenm, <filenm"));
+	wrtln(_("    Provides for ouput, concatenation, and input redirection."));
+	wrtln(_("cmd @filenm"));
+	wrtln(_("    Allows a list of command tails to be put in a file and fed to a command."));
 	wrtnl();					/* for prn, otherwise, the previous line won't print */
-}
-
-/***************************************************************************/
-/*
-   dspMsg - display message
-*/
-/***************************************************************************/
-VOID dspMsg(P(int) msg)
-PP(int msg;)
-{
-	switch (msg)
-	{
-	case 0:
-		wrtln("Wild cards not allowed/Cannot rename/type directories.");
-		break;
-	case 1:
-		wrtln("File Not Found.");
-		break;
-	case 2:
-		wrtln("Destination is not a valid wild card expresion.");
-		break;
-	case 3:
-		wrtln("******* TEST  CLI *******");
-		break;
-	case 4:
-		wrtln("Command v0.66 11/13/86 MLC");
-		break;
-	case 5:
-		wrt("Done.");
-		break;
-	case 6:
-		wrtln("Command is incompletely specified.");
-		break;
-	case 7:
-		wrt(srcFlNm);
-		break;
-	case 8:
-		wrt(dstFlNm);
-		break;
-	case 9:
-		wrtln(".");
-		break;
-	case 10:
-		wrt(" to ");
-		break;
-	case 11:
-		break;
-	case 12:
-		wrtnl();
-		break;
-	case 15:
-		wrtln("Wild cards not allowed in destination.");
-		break;
-	case 16:
-		break;
-	case 18:
-		wrtln("Invalid drive/path/file name specified");
-		break;
-	}
 }
 
 /***************************************************************************/
@@ -1112,8 +1097,9 @@ PP(int move;)
 			if (chkDir(dstSpc, dstDir, dstNmPat, 0) == -4)
 				goto error7;
 			if (chkDst())
-				dspMsg(2);
-			else
+			{
+				errDestWild();
+			} else
 			{
 				while (gtFlNm())
 				{
@@ -1124,10 +1110,10 @@ PP(int move;)
 						if (!(srcEqDst = mkDst()))
 						{
 							Fdelete(dstFlNm);
-							dspMsg(12);
-							dspMsg(7);
-							dspMsg(10);
-							dspMsg(8);
+							wrtnl();
+							dspSrc();
+							dspTo();
+							dspDst();
 							if ((fds = Fopen(srcFlNm, O_RDONLY)) <= 0)
 								goto error0;
 							if ((fdd = Fcreate(dstFlNm, 0x20)) <= 0)
@@ -1153,8 +1139,8 @@ PP(int move;)
 							if (move)
 							{
 								Fdelete(srcFlNm);
-								wrt(" DELETING ");
-								dspMsg(7);
+								wrt(_(" DELETING "));
+								dspSrc();
 							}
 							Fclose(fdd);
 						} else
@@ -1165,11 +1151,11 @@ PP(int move;)
 				}
 				if (nofile)
 				{
-					dspMsg(1);
+					errNotFound();
 				} else
 				{
-					dspMsg(12);
-					dspMsg(5);
+					wrtnl();
+					dspDone();
 				}
 			}
 		}
@@ -1177,32 +1163,32 @@ PP(int move;)
 	return 0;
 
   error0:
-	dspMsg(1);
+	errNotFound();
 	return -1;
   error1:
-	wrtln("Error creating file.");
+	wrtln(_("Error creating file."));
 	return -1;
   error2:
-	wrtln("Cannot copy ");
-	dspMsg(7);
-	wrt(" to itself.");
+	wrtln(_("Cannot copy "));
+	dspSrc();
+	wrt(_(" to itself."));
 	return -1;
   error3:
-	wrtln("Error reading source file.");
+	wrtln(_("Error reading source file."));
 	goto eout;
   error4:
-	wrtln("Write error -- copy failed.");
+	wrtln(_("Write error -- copy failed."));
 	goto eout;
   error6:
-	dspMsg(1);
+	errNotFound();
 	return -1;
   error7:
-	dspMsg(18);
+	errPath();
 	return -1;
 
   eout:
 	Fdelete(dstFlNm);
-	wrt(" DELETING ");
+	wrt(_(" DELETING "));
 	wrt(dstFlNm);
 	return -1;
 }
@@ -1237,20 +1223,20 @@ PP(char *dst;)
 	/* IF src not specified err out. */
 	if (!(*src))
 	{
-		dspMsg(6);
+		errIncomplete();
 	} else
 	{
 		/* If not a valid file name... */
 		switch (i = chkDir(srcSpc, srcDir, srcNmPat, 1))
 		{
 		case -4:
-			dspMsg(18);
+			errPath();
 			break;
 		case -3:
-			dspMsg(0);
+			errWild();
 			break;
 		case -2:
-			dspMsg(1);
+			errNotFound();
 			break;
 		default:
 			{
@@ -1259,23 +1245,23 @@ PP(char *dst;)
 				{
 					if (i == 1)
 					{
-						wrt("Rename ALL files matching ");
+						wrt(_("Rename ALL files matching "));
 						wrt(srcDir);
 						wrt(srcNmPat);
-						wrt(" (Y/CR)? ");
+						wrt(_(" (Y/CR)? "));
 						if (!getYes())
 							return;
 						wrtnl();
 					}
 				} else if (code == -4)
 				{
-					dspMsg(18);
+					errPath();
 					break;
 				} else
 				{
 					if (chkDst())
 					{
-						dspMsg(2);
+						errDestWild();
 					} else
 					{
 						while (gtFlNm())
@@ -1285,20 +1271,20 @@ PP(char *dst;)
 								mkSrc();
 								if (!mkDst()) ; /* ??? runaway ';'? */
 								{
-									dspMsg(12);
-									dspMsg(7);
-									dspMsg(10);
-									dspMsg(8);
+									wrtnl();
+									dspSrc();
+									dspTo();
+									dspDst();
 									compl_code = Frename(0, srcFlNm, dstFlNm);
 									if (compl_code < 0)
 									{
-										wrt("  Rename Unsucessfull!");
+										wrt(_("  Rename Unsucessfull!"));
 									}
 								}
 							}
 						}
-						dspMsg(12);
-						dspMsg(5);
+						wrtnl();
+						dspDone();
 					}
 				}
 			}
@@ -1360,15 +1346,15 @@ PP(char **argv;)
 		;
 	if (chkDir(srcSpc, srcDir, srcNmPat, 0) == -4)
 	{
-		dspMsg(18);
+		errPath();
 		return -1;
 	}
 
 	if (!terse)
 	{
-		wrt("Directory of ");
+		wrt(_("Directory of "));
 		wrt(srcDir);
-		dspMsg(12);
+		wrtnl();
 	}
 
 	WSrcReq = srcSpc;
@@ -1376,7 +1362,7 @@ PP(char **argv;)
 	{
 		compl_c = -1;
 		if (!terse)
-			dspMsg(1);
+			errNotFound();
 	} else
 	{
 		compl_c = 0;
@@ -1453,9 +1439,9 @@ PP(char **argv;)
 		{
 			wrt("       ");
 			prtDclFmt((long) tf, 3, " ");
-			wrt(" files using ");
+			wrt(_(" files using "));
 			prtDclFmt(ts, 7, " ");
-			wrt(" bytes of disk.");
+			wrt(_(" bytes of disk."));
 			wrtnl();
 		}
 	}
@@ -1473,14 +1459,14 @@ PP(char **argv;)
 
 	if (!*argv[2])
 	{
-		wrt("Mode specification needed for CHMOD command.");
+		wrt(_("Mode specification needed for CHMOD command."));
 		compl_c = -1;
 	} else
 	{
 		mode = mknum(argv[2]);
 		if (mode & ~0x7)
 		{
-			wrt("Invalid mode specification.");
+			wrt(_("Invalid mode specification."));
 			compl_c = -1;
 		} else
 		{
@@ -1489,7 +1475,7 @@ PP(char **argv;)
 
 			if (chkDir(srcSpc, srcDir, srcNmPat, 0) == -4)
 			{
-				dspMsg(18);
+				errPath();
 				return -1;
 			}
 			WSrcReq = srcSpc;
@@ -1497,7 +1483,7 @@ PP(char **argv;)
 			if (!gtFlNm())
 			{
 				compl_c = -1;
-				dspMsg(1);
+				errNotFound();
 			} else
 			{
 				compl_c = 0;
@@ -1507,7 +1493,7 @@ PP(char **argv;)
 					att = srchb[21];
 					if (att & 0x18)
 					{
-						wrt("Unable to change mode on subdirectorys or volumes.");
+						wrt(_("Unable to change mode on subdirectorys or volumes."));
 						compl_c = -1;
 					} else
 					{
@@ -1515,7 +1501,7 @@ PP(char **argv;)
 					}
 				} while (gtFlNm());
 				if (compl_c >= 0)
-					dspMsg(5);
+					dspDone();
 			}
 		}
 	}
@@ -1536,7 +1522,7 @@ PP(char **argv;)
 	compl_c = 0;
 	if (!(*argv[1]))
 	{
-		dspMsg(6);
+		errIncomplete();
 	} else
 	{
 		j = 1;
@@ -1547,7 +1533,7 @@ PP(char **argv;)
 			j++;
 			if (chkDir(srcSpc, srcDir, srcNmPat, 0) == -4)
 			{
-				dspMsg(18);
+				errPath();
 				return -1;
 			}
 			p = srcNmPat;
@@ -1555,7 +1541,7 @@ PP(char **argv;)
 			{
 				if (*p == '*' || *p == '?')
 				{
-					dspMsg(0);
+					errWild();
 					return -1;
 				}
 				p++;
@@ -1564,7 +1550,7 @@ PP(char **argv;)
 			WAttCode = -1;
 			if (!gtFlNm())
 			{
-				dspMsg(1);
+				errNotFound();
 				compl_c = -1;
 			} else
 			{
@@ -1572,13 +1558,13 @@ PP(char **argv;)
 				{
 					if (srchb[21] & 0x10)
 					{
-						dspMsg(0);
+						errWild();
 						return -1;
 					}
 					mkSrc();
 					if ((fd = Fopen(srcFlNm, O_RDONLY)) <= 0)
 					{
-						wrtln("Cannot open file ");
+						wrtln(_("Cannot open file "));
 						wrt(srcFlNm);
 						return -1;
 					}
@@ -1647,22 +1633,22 @@ PP(char **argv;)
 			WAttCode = -1;
 			if (((i = chkDir(srcSpc, srcDir, srcNmPat, 0)) == -3) || (i == 1))
 			{
-				wrt("Delete ALL files matching ");
+				wrt(_("Delete ALL files matching "));
 				wrt(srcDir);
 				wrt(srcNmPat);
-				wrt(" (Y/CR)? ");
+				wrt(_(" (Y/CR)? "));
 				if (!getYes())
 					goto noera;
 				wrtnl();
 			} else if (i == -4)
 			{
-				dspMsg(18);
+				errPath();
 				return -1;
 			}
 			if (!gtFlNm())
 			{
 				compl_c = -1;
-				dspMsg(1);
+				errNotFound();
 				wrtnl();
 			} else
 			{
@@ -1671,10 +1657,10 @@ PP(char **argv;)
 					if (!(srchb[21] & 0x18))
 					{
 						mkSrc();
-						dspMsg(7);
+						dspSrc();
 						if (srchb[21] & 0x01)
 						{
-							wrt(" IS READ-ONLY FILE, NOT DELETED");
+							wrt(_(" IS READ-ONLY FILE, NOT DELETED"));
 							compl_c = -36;
 							goto skipdel;
 						} else if (query)
@@ -1683,25 +1669,27 @@ PP(char **argv;)
 							i = getYes();
 							wrt("\b\b ");
 							if (i)
-								wrt(" << DELETED");
+								wrt(_(" << DELETED"));
 							else
 								goto skipdel;
 						}
 						compl_c = Fdelete(srcFlNm);
 						file_del = TRUE;
 					  skipdel:
-						dspMsg(12);
+						wrtnl();
 					}
 				} while (gtFlNm());
 			}
 		}
 		if (file_del)
-			dspMsg(5);
+			dspDone();
 		else
-			wrtln("No file deleted.");
+			wrtln(_("No file deleted."));
 	} else
-		dspMsg(6);
-
+	{
+		errIncomplete();
+	}
+	
   noera:
 	return compl_c;
 }
@@ -1954,8 +1942,8 @@ PP(char *cmdtl;)
    execBat - execute batch file
 */
 /***************************************************************************/
-static int execBat(P(char *) s, P(char **) parms)
-PP(char *s;)
+static int execBat(P(const char *) s, P(char **) parms)
+PP(const char *s;)
 PP(char **parms;)
 {
 	long flHnd;
@@ -1977,7 +1965,7 @@ PP(char **parms;)
 			;
 	}
 	
-	if (xcmps(&cmd[i - 3], "BAT"))
+	if (xcmps(&cmd[i - 3], batTail + 1))
 	{
 		i = 0;
 		gtpath = -1;
@@ -1987,7 +1975,7 @@ PP(char **parms;)
 
 		cmdptr = cmd;
 		j = 0;
-		while (((flHnd = Fopen(cmdptr, O_RDONLY)) <= 0) && (gtpath))
+		while ((flHnd = Fopen(cmdptr, O_RDONLY)) <= 0 && gtpath)
 		{
 			k = j;
 			if (path[j])
@@ -2016,7 +2004,7 @@ PP(char **parms;)
 			i = 0;
 			if (++batlev > 4)
 			{
-				wrtln("too many levels of batch files nested.");
+				wrtln(_("too many levels of batch files nested."));
 				compl_code = -1;
 				batlev = 0;
 				if (prgerr)
@@ -2261,7 +2249,7 @@ PP(register char *p;)
 		drv = *p - 'A';
 		if (drv < 0 || drv >= MAXDRIVES || Dsetdrv(drv) < 0)
 		{
-			dspMsg(18);
+			errPath();
 			wrt(p);
 			Dsetdrv(i);		/* restore the default drive */
 			return;
@@ -2292,7 +2280,7 @@ PP(register char *p;)
 	for (i = 0; i < b->rdlen; i++, rec++)
 		Rwabs(1, buf, 1, rec, drv);
 	user();
-	dspMsg(5);
+	dspDone();
 }
 
 
@@ -2316,7 +2304,7 @@ PP(register char *from;)
 		} while (!n);
 
 		Fclose((int) fd);
-		dspMsg(5);
+		dspDone();
 	}
 }
 
@@ -2340,7 +2328,7 @@ PP(register char *from;)
 		} while (n > 0);
 	
 		cpmclose();
-		dspMsg(5);
+		dspDone();
 	}
 }
 
@@ -2359,15 +2347,15 @@ PP(register char *p;)
 		drv = 0;
 	if (drv < 0 || drv > MAXDRIVES || (drv != 0 && p[1] != ':' && p[1] != '\0'))
 	{
-		dspMsg(18);
+		errPath();
 		wrt(p);
 	} else if (Dfree(sbuf, drv) < 0)
 	{
-		wrt("Unable to get drive information: ");
+		wrt(_("Unable to get drive information: "));
 		wrt(p);
 	} else
 	{
-		wrt("Allocation Information: Drive ");
+		wrt(_("Allocation Information: Drive "));
 		if (drv == 0)
 			drv = Dgetdrv();
 		else
@@ -2375,20 +2363,20 @@ PP(register char *p;)
 		drvch = drv + 'A';
 		wrtch(drvch);
 		wrt(":");
-		dspMsg(12);
-		wrtln("Drive size in BYTES    ");
+		wrtnl();
+		wrtln(_("Drive size in BYTES    "));
 		prtDclFmt(sbuf[1] * sbuf[3] * sbuf[2], 8, " ");
-		wrtln("BYTES used on drive    ");
+		wrtln(_("BYTES used on drive    "));
 		prtDclFmt((sbuf[1] - sbuf[0]) * sbuf[3] * sbuf[2], 8, " ");
-		wrtln("BYTES left on drive    ");
+		wrtln(_("BYTES left on drive    "));
 		prtDclFmt(sbuf[0] * sbuf[3] * sbuf[2], 8, " ");
-		wrtln("Total Units on Drive   ");
+		wrtln(_("Total Units on Drive   "));
 		prtDclFmt(sbuf[1], 8, " ");
-		wrtln("Free Units on Drive    ");
+		wrtln(_("Free Units on Drive    "));
 		prtDclFmt(sbuf[0], 8, " ");
-		wrtln("Sectors per Unit       ");
+		wrtln(_("Sectors per Unit       "));
 		prtDclFmt(sbuf[3], 8, " ");
-		wrtln("Bytes per Sector       ");
+		wrtln(_("Bytes per Sector       "));
 		prtDclFmt(sbuf[2], 8, " ");
 	}
 }
@@ -2417,7 +2405,7 @@ PP(char *p;)
 	{
 		if (chk_wild(p))
 			if ((compl_code = Dsetpath(p)) != 0)
-				wrt("Directory not found.");
+				wrt(_("Directory not found."));
 	}
 }
 
@@ -2434,7 +2422,7 @@ PP(char *fname;)
 	drv = *drive - 'A';
 	if (drv < 0 || drv >= MAXDRIVES)
 	{
-		dspMsg(18);
+		errPath();
 	} else
 	{
 		fd = Fopen(fname, O_RDONLY);
@@ -2446,9 +2434,9 @@ PP(char *fname;)
 			compl_code = Rwabs(1, &secbuf[28], 1, 0, drv);
 			user();
 			if (compl_code == 0)
-				dspMsg(5);
+				dspDone();
 			else
-				wrtln("Write error");
+				wrtln(_("Write error"));
 		}
 	}
 }
@@ -2523,7 +2511,7 @@ PP(char *outsd_tl;)
 			tl++;
 		if (chk_sub(tl, parm))
 		{
-			wrt(" Illegal usage of %.");
+			wrt(_(" Illegal usage of %."));
 			goto again;
 		}
 
@@ -2557,7 +2545,7 @@ PP(char *outsd_tl;)
 				*tl++ = 0;
 				if (!(*tl0))
 				{
-					wrt("File name not specified after @.");
+					wrt(_("File name not specified after @."));
 					goto redrc;
 				}
 				if ((dskFlHnd = Fopen(tl0, O_RDONLY)) >= 0)
@@ -2566,7 +2554,7 @@ PP(char *outsd_tl;)
 				} else
 				{
 					wrtln(tl0);
-					wrt(" not found.");
+					wrt(_(" not found."));
 					goto redrc;
 				}
 				break;
@@ -2587,7 +2575,7 @@ PP(char *outsd_tl;)
 				} else
 				{
 					wrtln(tl0);
-					wrt(" not found.");
+					wrt(_(" not found."));
 					goto redrc;
 				}
 				break;
@@ -2599,7 +2587,7 @@ PP(char *outsd_tl;)
 					{
 						if (concat)
 						{
-							wrtln(" Illegal output file name : ");
+							wrtln(_(" Illegal output file name : "));
 							wrt(tl1);	/* takes care the case: >>> was in the command line */
 							goto redrc;
 						} else
@@ -2614,7 +2602,7 @@ PP(char *outsd_tl;)
 				*tl++ = 0;
 				if (*tl1 == '@' || *tl1 == '<')
 				{
-					wrtln("Illegal outputfile name:");
+					wrtln(_("Illegal outputfile name:"));
 					wrt(tl1);
 					goto redrc;
 				}
@@ -2624,7 +2612,7 @@ PP(char *outsd_tl;)
 					{
 						if ((fd = Fcreate(tl1, 0)) < 0)
 						{
-							wrtln(" Error of opening/creating output:");
+							wrtln(_(" Error of opening/creating output:"));
 							wrt(tl1);
 							goto redrc;
 						}
@@ -2634,7 +2622,7 @@ PP(char *outsd_tl;)
 					Fdelete(tl1);
 					if ((fd = Fcreate(tl1, 0)) < 0)
 					{
-						wrtln(" Error of creating output:");
+						wrtln(_(" Error of creating output:"));
 						wrt(tl1);
 						goto redrc;
 					}
@@ -2684,7 +2672,7 @@ PP(char *outsd_tl;)
 				drv = *s - 'A';
 				if (drv < 0 || drv >= MAXDRIVES || Dsetdrv(drv) < 0)
 				{
-					dspMsg(18);
+					errPath();
 					wrt(s);
 				}
 			} else if (xcmps(s, "LS") || xcmps(s, "DIR"))
@@ -2698,7 +2686,7 @@ PP(char *outsd_tl;)
 			} else if (xcmps(s, "ERR"))
 			{
 				preCmd(&rd);
-				wrt("Completion code for previous command = ");
+				wrt(_("Completion code for previous command = "));
 				prthex((int) compl_code);
 			} else if (xcmps(s, "PATH"))
 			{
@@ -2706,7 +2694,7 @@ PP(char *outsd_tl;)
 				ucase(p);
 				if (setPath(p))
 				{
-					dspMsg(18);
+					errPath();
 					wrt(p);
 				}
 			} else if (xcmps(s, "ENV"))
@@ -2746,8 +2734,8 @@ PP(char *outsd_tl;)
 					wrt(argv[i++]);
 					wrt(" ");
 				}
-				dspMsg(12);
-			} else if (xncmps(s, "CD"))
+				wrtnl();
+			} else if (xcmps(s, "CD"))
 			{
 				preCmd(&rd);
 				cdCmd(argc == 0 ? p : NULL);
@@ -2757,9 +2745,9 @@ PP(char *outsd_tl;)
 				if (argc == 0)
 				{
 					if (cmderr)
-						wrt("ON");
+						wrt(_("ON"));
 					else
-						wrt("OFF");
+						wrt(_("OFF"));
 				} else
 				{
 					ucase(p);
@@ -2768,7 +2756,7 @@ PP(char *outsd_tl;)
 					else if (xcmps(p, "OFF"))
 						cmderr = 0;
 					else
-						wrt("Arg must be ON or OFF.");
+						wrt(_("Arg must be ON or OFF."));
 				}
 			} else if (xcmps(s, "PRGERR"))
 			{
@@ -2776,9 +2764,9 @@ PP(char *outsd_tl;)
 				if (argc == 0)
 				{
 					if (prgerr)
-						wrt("ON");
+						wrt(_("ON"));
 					else
-						wrt("OFF");
+						wrt(_("OFF"));
 				} else
 				{
 					ucase(p);
@@ -2787,7 +2775,7 @@ PP(char *outsd_tl;)
 					else if (xcmps(p, "OFF"))
 						prgerr = 0;
 					else
-						wrt("Arg must be ON or OFF.");
+						wrt(_("Arg must be ON or OFF."));
 				}
 			} else if (xcmps(s, "MD"))
 			{
@@ -2795,14 +2783,14 @@ PP(char *outsd_tl;)
 				if (chk_wild(p))
 				{
 					if ((compl_code = Dcreate(p)) != 0)
-						wrt("Unable to make directory");
+						wrt(_("Unable to make directory"));
 				}
 			} else if (xcmps(s, "RD"))
 			{
 				preCmd(&rd);
 				if (!(*p))
 				{
-					dspMsg(6);
+					errIncomplete();
 				} else
 				{
 					if (chk_wild(p))
@@ -2811,11 +2799,11 @@ PP(char *outsd_tl;)
 							(*(p + 1) == ':' && (*(p + 2) == 0 ||
 							 (*(p + 2) == '\\' && *(p + 3) == 0))))
 						{
-							wrt("Cannot remove root directory\n");
+							wrt(_("Cannot remove root directory\n"));
 							compl_code = -1L;
 						} else if ((compl_code = Ddelete(p)) != 0)
 						{
-							wrt("Unable to remove directory");
+							wrt(_("Unable to remove directory"));
 						}
 					}
 				}
@@ -2828,7 +2816,7 @@ PP(char *outsd_tl;)
 				preCmd(&rd);
 				if (argc < 2)
 				{
-					dspMsg(6);
+					errIncomplete();
 				} else
 				{
 					renmCmd(argv[1], argv[2]);
@@ -2851,7 +2839,7 @@ PP(char *outsd_tl;)
 				if (argc >= 1)
 					compl_code = copyCmd(p, argv[2], xcmps(s, "MOVE"));
 				else
-					dspMsg(6);
+					errIncomplete();
 			} else if (xcmps(s, "GET"))
 			{
 				preCmd(&rd);
@@ -2890,12 +2878,12 @@ PP(char *outsd_tl;)
 			{
 				preCmd(&rd);
 				wrt("\033v");
-				dspMsg(5);
+				dspDone();
 			} else if (xcmps(s, "NOWRAP"))
 			{
 				preCmd(&rd);
 				wrt("\033w");
-				dspMsg(5);
+				dspDone();
 			} else if (xcmps(s, "CLS"))
 			{
 				rd.echocmd = FALSE;
@@ -2935,9 +2923,9 @@ PP(char *outsd_tl;)
 							errout();
 						else if (compl_code < 0)
 						{
-							wrt("Command '");
+							wrt(_("Command '"));
 							wrt(s);
-							wrt("' not found.");
+							wrt(_("' not found."));
 							if (prgerr)
 								errout();
 						}
@@ -2979,7 +2967,7 @@ PP(char *bp;)								/* Base page address */
 	prgerr = -1;
 	cmderr = 0;
 	if (!cmd)
-		dspMsg(4);
+		wrtln("Command v0.66 11/13/86 MLC");
 
 	i = 0;
 	while ((prntEnvPtr[i] + prntEnvPtr[i + 1]) != 0)
@@ -2989,7 +2977,7 @@ PP(char *bp;)								/* Base page address */
 		{
 			if (setPath(&prntEnvPtr[i + sizeof(pthSymb) - 1]))
 			{
-				dspMsg(18);
+				errPath();
 				wrt(&prntEnvPtr[i + sizeof(pthSymb) - 1]);
 			}
 			break;
@@ -3008,7 +2996,7 @@ PP(char *bp;)								/* Base page address */
 				Fclose(i);
 			if (cmd)
 			{
-				wrtln("Stay in COMMAND.PRG (Y/CR)? ");
+				wrtln(_("Stay in COMMAND.PRG (Y/CR)? "));
 				if (getYes())
 				{
 					cmd = 0;
