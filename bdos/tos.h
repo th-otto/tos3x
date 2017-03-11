@@ -41,6 +41,10 @@
 #undef GEMDOS
 #define GEMDOS 0x0020
 #endif
+#if TOSVERSION >= 0x0400
+#undef GEMDOS
+#define GEMDOS 0x0030
+#endif
 
 
 

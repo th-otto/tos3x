@@ -40,7 +40,8 @@ name: ds.t size
 	ds.b 64         /* used by ST-Book TOS by the cartridge ROM */
 
 #if STBOOK
-	ds.b 164 /* seems to be unused */
+	V(padmagic,l,1)		/* $01241960 for STPAD touch driver */
+	V(padstuff,l,40)		/* other pad variables (total 160 bytes) */
 #endif
 
 	V(gem_env,b,12)
@@ -53,7 +54,14 @@ name: ds.t size
 
 	V(cookies,l,NCOOKIES*2)
 
-	INT(_bootpref)
+	INT(_bootpref)					/* boot pref for _dmaboot */
+
+#if (TOSVERSION >= 0x400)
+	V(dspin,b,1)		/* spinup delay before _dmaboot */
+	V(iscan,b,1)		/* IDE scan mask for _dmaboot */
+	V(sscan,b,1)		/* SCSI scan mask for _dmaboot */
+	V(ascan,b,1)		/* ACSI scan mask for _dmaboot */
+#endif
 
 #if (TOSVERSION >= 0x300)
 	V(_altmd,l,4)
@@ -62,7 +70,7 @@ name: ds.t size
 	BYTE(_has_dmasound)
 	BYTE(STEFlag)
 
-	V(__sbss,b,0)	/* start of the BSS area that is zeroed by BIOS */
+	V(__sbss,b,0)	/* end of "base" BSS; start of the BSS area that is zeroed by BIOS */
 
 	V(privinst,l,2)
 

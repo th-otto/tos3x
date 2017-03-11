@@ -87,29 +87,36 @@ _trap14:
  *
  * This minimal interface connects the entry point for a system where the AES
  * and VDI are already in memory.
+ *
+ *  This is a kind of mish-mash:
+ *    If D0 == 0x0000, terminate the current process (old CP/M terminate).
+ *    If D0 == 115, call VDI, `_GSX_ENTRY', and return via RTE;
+ *    If D0 == 0xffff, return address of _GSX_ENTRY in D0.L;
+ *    Otherwise, follow old Trap 2 vector (which should just RTE).
  */
 
 ground_it:              
-    tst.w   d0
-    beq oterm
-    cmp.w     #$0073,d0
-    bne novdi
-    jsr       _GSX_ENTRY
-    rte
+    tst.w   	d0						/* if D0 == 0x0000, Pterm0(). */
+    beq			oterm					/* (bye bye) */
+    cmp.w		#$0073,d0				/* if D0 == 115, call VDI */
+    bne			novdi					/* (don't call) */
+    jsr			_GSX_ENTRY				/* call VDI */
+    rte									/* and return */
 novdi:
-    cmp.w     #-1,d0
-    bne       nodsp
-    move.l    #_GSX_ENTRY,d0
+    cmp.w     	#-1,d0					/* if D0 == 0xffff, return address */
+    bne      	nodsp					/*	of VDI's entry point. */
+    move.l		#_GSX_ENTRY,d0			/* return it */
     rte
 nodsp:
-    move.l  old_2,-(sp)
+    move.l		old_2,-(sp)				/* follow old Trap 2 vector */
     rts
 
-oterm:  move.l  fstrtend,sp
-    clr.w   -(sp)
-    bsr _xterm
-    illegal
-    rte
+oterm:
+	move.l		fstrtend,sp				/* get file system's stack */
+    clr.w   	-(sp)					/* return code = 0x0000 */
+    bsr 		_xterm					/* terminate (never returns) */
+    illegal								/* "cannot happen" */
+    rte									/* "cannot happen" */
 
 /***************************************************************************
  *
@@ -120,9 +127,9 @@ oterm:  move.l  fstrtend,sp
     xdef _uc
 _uc:
     move.w    4(a7),d0
-    cmp.b     #$61,d0
+    cmp.b     #'a',d0
     blt.s     uc1
-    cmp.b     #$7A,d0
+    cmp.b     #'z',d0
     bgt.s     uc1
     bclr      #5,d0
 uc1:
@@ -137,10 +144,10 @@ uc1:
  ***************************************************************************/
 
 tikhnd:
-    move.w  4(sp),-(sp) /* get tick value.  ignore flags */
-    jsr _tikfrk         /* call interrupt handler extension */
-    addq.l  #2,sp       /* clear the stack */
-    move.l    old_tik,-(a7)
+    move.w  	4(sp),-(sp)				/* get tick value.  ignore flags */
+    jsr 		_tikfrk    				/* call interrupt handler extension */
+    addq.l  	#2,sp       			/* clear the stack */
+    move.l    	old_tik,-(a7)			/* follow old vector */
     rts
 
     xdef _indcall
@@ -157,10 +164,10 @@ _indcall:
 
     xdef    _swp68
 _swp68:
-    move.l  4(a7),a0
-    move    (a0),d0
-    ror #8,d0
-    move    d0,(a0)
+    move.l  4(a7),a0					/* a0 -> word */
+    move    (a0),d0						/* get word */
+    ror 	#8,d0						/* swap bytes */
+    move    d0,(a0)						/* stuff word back */
     rts
 
 /***************************************************************************
@@ -171,11 +178,11 @@ _swp68:
 
     xdef    _swp68l
 _swp68l:
-    move.l  4(a7),a0
-    move.l  (a0),d0
-    ror #8,d0
-    swap    d0
-    ror #8,d0
+    move.l  4(a7),a0					/* a0 -> longword */
+    move.l  (a0),d0						/* get longword */
+    ror 	#8,d0						/* swap low word */
+    swap    d0							/* switch high and low words */
+    ror 	#8,d0						/* swap high word */
     move.l  d0,(a0)
     rts
 
@@ -189,11 +196,11 @@ _swp68l:
     xdef    _xsetjmp
 _xsetjmp:
     link    a6,#0
-    move.l  8(a6),a0      /* get jmp_buf */
-    move.l  (a6),(a0)+    /* save a6 */
-    lea 8(a6),a1
-    move.l  a1,(a0)+      /* save sp */
-    move.l  4(a6),(a0)    /* save return pc */
+    move.l  8(a6),a0      				/* a0 -> context block */
+    move.l  (a6),(a0)+    				/* save a6 */
+    lea 	8(a6),a1
+    move.l  a1,(a0)+      				/* save sp */
+    move.l  4(a6),(a0)    				/* save return pc */
     clr.l   d0
     unlk    a6
     rts

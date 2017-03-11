@@ -2,7 +2,7 @@
  * rom.ld - Custom linker script for TOS ROM
  * based on linker script from EmuTOS
  *
- * Copyriggt (C) 2016 Thorsten Otto
+ * Copyright (C) 2016 Thorsten Otto
  * Copyright (C) 2016 The EmuTOS development team
  *
  * Authors:
