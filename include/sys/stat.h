@@ -15,6 +15,7 @@
 #define		S_IFCHR		0040000		/* char special file */
 #define		S_IFBLK		0020000		/* block special file */
 #define		S_IFIFO		0010000		/* named pipe (fifo) file */
+#define     S_IFLNK     0160000     /* Symbolic link.  */
 #define     S_IFREG     0000000     /* regular file */
 #define		S_ISUID		0004000		/* set user id upon execution */
 #define		S_ISGID		0002000		/* set group id upon execution */
@@ -24,7 +25,7 @@
 
 /* Test macros for file types.	*/
 
-#define	__S_ISTYPE(mode, mask)	(((mode) & __S_IFMT) == (mask))
+#define	__S_ISTYPE(mode, mask)	(((mode) & S_IFMT) == (mask))
 
 #define	S_ISDIR(mode)	 __S_ISTYPE((mode), S_IFDIR)
 #define	S_ISCHR(mode)	 __S_ISTYPE((mode), S_IFCHR)
@@ -63,19 +64,19 @@
 #define S_BLKSIZE	512	/* Block size for `st_blocks'.  */
 
 struct stat {
-	int		i_magic;		/* magic number to id indirect blocks */
-	long	st_size;		/* file size */
-	int		st_uid;			/* file owner id */
-	char	st_gid;			/* group id of file */
-	char	st_nlink;		/* file reference count */
+	off_t	st_size;		/* file size */
+	uid_t	st_uid;			/* file owner id */
+	gid_t	st_gid;			/* group id of file */
+	int		st_nlink;		/* file reference count */
 	long	st_mtime;		/* file modification date and time */
 	long	st_atime;		/* file access date and time */
-	int		st_mode;		/* file type and access mode */
-	int		i_nu1;			/* pad for word */
+	long	st_ctime;		/* Time of last status change. */
+	mode_t	st_mode;		/* file type and access mode */
 	int		st_rdev;		/* device for character and block devs */
-	long	i_nu2;			/* pad for block */
-	int		i_nu3;			/* pad for word */
-	int		st_dev;			/*  device number where file resides */
+	int		st_dev;			/* device number where file resides */
+	long    st_ino;         /* file serial number. */
+	long    st_blksize;     /* Optimal block size for I/O. */
+	long    st_blocks;      /* Number 512-byte blocks allocated. */
 };
 
 int stat PROTO((const char *path, struct stat *st));

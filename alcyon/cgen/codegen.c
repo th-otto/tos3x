@@ -315,12 +315,8 @@ PP(int reg;)
 		r = scodegen(tp->t_right->t_left, cookie, reg);
 		outmovr(r, reg, tp);
 		stacksize = savestk;
-#if BINEXACT
-		OUTGOTO(lab2 = nextlabel++); /* BUG: expanded to lab2 = nextlabel++ > 0, not what was intended */
-#else
 		lab2 = nextlabel++;
 		OUTGOTO(lab2);
-#endif
 		OUTLAB(lab1);
 		r = scodegen(tp->t_right->t_right, cookie, reg);
 		outmovr(r, reg, tp);

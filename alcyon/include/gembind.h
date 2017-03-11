@@ -6,15 +6,17 @@
 /*		 We reccomend you use the supplied binding libraries	*/
 /************************************************************************/
 
-				/* Application Manager			*/
+/* Application Manager			*/
 #define APPL_INIT 10
 #define APPL_READ 11
 #define APPL_WRITE 12
 #define APPL_FIND 13
 #define APPL_TPLAY 14
 #define APPL_TRECORD 15
+#define APPL_BVSET 16
 #define APPL_EXIT 19
-				/* Event Manager			*/
+
+/* Event Manager			*/
 #define EVNT_KEYBD 20
 #define	EVNT_BUTTON 21
 #define EVNT_MOUSE 22
@@ -22,14 +24,20 @@
 #define EVNT_TIMER 24
 #define EVNT_MULTI 25
 #define EVNT_DCLICK 26
-				/* Menu Manager				*/
+
+/* Menu Manager				*/
 #define MENU_BAR 30
 #define MENU_ICHECK 31
 #define MENU_IENABLE 32
 #define MENU_TNORMAL 33
 #define MENU_TEXT 34
 #define MENU_REGISTER 35
-				/* Object Manager			*/
+#define MENU_POPUP	36
+#define	MENU_ATTACH	37
+#define MENU_ISTART	38
+#define MENU_SETTING	39
+
+/* Object Manager			*/
 #define OBJC_ADD 40
 #define OBJC_DELETE 41
 #define OBJC_DRAW 42
@@ -38,13 +46,18 @@
 #define OBJC_ORDER 45
 #define OBJC_EDIT 46
 #define OBJC_CHANGE 47
-				/* Form Manager				*/
+#define	OBJC_SYSVAR 48
+
+/* Form Manager				*/
 #define FORM_DO 50
 #define FORM_DIAL 51
 #define FORM_ALERT 52
 #define FORM_ERROR 53
 #define FORM_CENTER 54
-				/* Graphics Manager			*/
+#define FORM_KEYBD 55
+#define FORM_BUTTON 56
+
+/* Graphics Manager			*/
 #define GRAF_RUBBOX 70
 #define GRAF_DRAGBOX 71
 #define GRAF_MBOX 72
@@ -55,12 +68,16 @@
 #define GRAF_HANDLE 77
 #define GRAF_MOUSE 78
 #define GRAF_MKSTATE 79
-				/* Scrap Manager			*/
+
+/* Scrap Manager			*/
 #define SCRP_READ 80
 #define SCRP_WRITE 81
-				/* File Selector Manager		*/
+
+/* File Selector Manager		*/
 #define FSEL_INPUT 90
-				/* Window Manager			*/
+#define FSEL_EXINPUT 91
+
+/* Window Manager			*/
 #define WIND_CREATE 100
 #define WIND_OPEN 101
 #define WIND_CLOSE 102
@@ -70,20 +87,24 @@
 #define WIND_FIND 106
 #define WIND_UPDATE 107
 #define WIND_CALC 108
-				/* Resource Manager			*/
+#define WIND_NEW 109
+
+/* Resource Manager			*/
 #define RSRC_LOAD 110
 #define RSRC_FREE 111
 #define RSRC_GADDR 112
 #define RSRC_SADDR 113
 #define RSRC_OBFIX 114
-				/* Shell Manager			*/
+
+/* Shell Manager			*/
 #define SHEL_READ 120
 #define SHEL_WRITE 121
 #define SHEL_GET 122
 #define SHEL_PUT 123
 #define SHEL_FIND 124
 #define SHEL_ENVRN 125
-					/* max sizes for arrays		*/
+
+/* max sizes for arrays		*/
 #define C_SIZE 4
 #define G_SIZE 15
 #define I_SIZE 16
@@ -126,7 +147,11 @@
 #define AP_TLENGTH int_in[0]
 #define AP_TSCALE int_in[1]
 
-#define SCR_MGR 0x0001			/* pid of the screen manager*/
+#define AP_BVDISK int_in[0]
+#define AP_BVHARD int_in[1]
+
+
+#define SCR_MGR 0x0001			/* pid of the screen manager */
 
 #define AP_MSG 0
 #define MN_SELECTED 10
@@ -148,7 +173,8 @@
 #define CT_UPDATE 50
 #define CT_MOVE 51
 #define CT_NEWTOP 52
-						/* event lib parameters	*/
+
+/* event lib parameters	*/
 #define IN_FLAGS int_in[0]
 
 #define B_CLICKS int_in[0]
@@ -195,7 +221,8 @@
 
 #define MT_LOCOUNT int_in[14]
 #define MT_HICOUNT int_in[15]
-						/* mu_flags		*/
+
+/* mu_flags		*/
 #define MU_KEYBD 0x0001	
 #define MU_BUTTON 0x0002
 #define MU_M1 0x0004
@@ -223,7 +250,18 @@
 #define	TITLE_NUM	int_in[0]		/* tnorm		*/
 #define	NORMAL_IT	int_in[1]		/* tnormal		*/
 
-					/* form library parameters	*/
+/* 5/13/92		*/
+#define M_MENU		addr_in[0]
+#define M_XPOS		int_in[0]
+#define M_YPOS		int_in[1]
+#define M_MDATA		addr_in[1]
+#define M_FLAG		int_in[0]
+#define M_TREE		addr_in[0]
+#define M_ITEM		int_in[1]
+#define M_MENU2		int_in[1]
+#define M_ITEM2		int_in[2]
+
+/* form library parameters	*/
 #define FM_FORM addr_in[0]
 #define FM_START int_in[0]
 
@@ -252,8 +290,17 @@
 #define FMD_GROW 1
 #define FMD_SHRINK 2
 #define FMD_FINISH 3
-					/* object library parameters	*/
 
+#define FM_OBJ int_in[0]
+#define FM_ICHAR int_in[1]
+#define FM_INXTOB int_in[2]
+
+#define FM_ONXTOB int_out[1]
+#define FM_OCHAR int_out[2]
+
+#define FM_CLKS int_in[1]
+
+/* object library parameters	*/
 #define OB_TREE addr_in[0]		/* all ob procedures		*/
 
 #define OB_DELOB int_in[0]		/* ob_delete			*/
@@ -275,9 +322,14 @@
 #define OB_OBJ int_in[0]		/* ob_offset, ob_order		*/
 #define OB_XOFF int_out[1]
 #define OB_YOFF int_out[2]
+/*	New for ob_gclip 	8/6/92	*/
+#define OB_GX 	int_out[3]
+#define OB_GY	int_out[4]
+#define OB_GW	int_out[5]
+#define OB_GH	int_out[6]
 #define OB_NEWPOS int_in[1]		/* ob_order			*/
 
-					/* ob_edit			*/
+/* ob_edit			*/
 #define OB_CHAR int_in[1]
 #define OB_IDX int_in[2]
 #define OB_KIND int_in[3]
@@ -285,7 +337,17 @@
 
 #define OB_NEWSTATE int_in[6]		/* ob_change			*/
 #define OB_REDRAW int_in[7]
-					/* graphics library parameters	*/
+
+/* June 26 1992 - ml. */		/* ob_sysvar 			*/
+#define	OB_MODE	    int_in[0]	/* 8/1/92 */
+#define	OB_WHICH    int_in[1]
+#define	OB_I1	    int_in[2]
+#define	OB_I2       int_in[3]
+#define	OB_O1       int_out[1]
+#define	OB_O2       int_out[2]
+/**/
+
+/* graphics library parameters	*/
 #define GR_I1 int_in[0]
 #define GR_I2 int_in[1]
 #define GR_I3 int_in[2]
@@ -325,11 +387,12 @@
 #define SC_PATH addr_in[0]
 					/* file selector library parms	*/
 
-#define FS_IPATH addr_in[0]
-#define FS_ISEL addr_in[1]
-
+#define FS_IPATH  addr_in[0]
+#define FS_ISEL   addr_in[1]
+#define FS_LABEL  addr_in[2]
 #define FS_BUTTON int_out[1]
-					/* window library parameters	*/
+
+/* window library parameters	*/
 #define XFULL 0
 #define YFULL gl_hbox
 #define WFULL gl_width
@@ -373,19 +436,19 @@
 #define WA_RTPAGE 5
 #define WA_LFLINE 6
 #define WA_RTLINE 7
-						/* wm_create		*/
+/* wm_create		*/
 #define WM_KIND int_in[0]
-						/* wm_open, close, del	*/
+/* wm_open, close, del	*/
 #define WM_HANDLE int_in[0]
-						/* wm_open, wm_create	*/
+/* wm_open, wm_create	*/
 #define WM_WX int_in[1]
 #define WM_WY int_in[2]
 #define WM_WW int_in[3]
 #define WM_WH int_in[4]
-						/* wm_find		*/
+/* wm_find		*/
 #define WM_MX int_in[0]
 #define WM_MY int_in[1]
-						/* wm_calc		*/
+/* wm_calc		*/
 #define WC_BORDER 0
 #define WC_WORK 1
 #define WM_WCTYPE int_in[0]
@@ -453,7 +516,7 @@
 #define R_FRIMG 16		/* gets addr of ptr to free images	*/
 
 
-				/* shell library parameters	*/
+/* shell library parameters	*/
 #define SH_DOEX int_in[0]
 #define SH_ISGR int_in[1]
 #define SH_ISCR int_in[2]
@@ -467,3 +530,6 @@
 
 #define SH_PATH addr_in[0]
 #define SH_SRCH addr_in[1]
+
+#define	SH_INPATH  addr_in[0]
+#define SH_OUTPATH addr_in[1]

@@ -12,6 +12,7 @@ LIBC_NDX=
 LIBM=libm.a
 LIBM_NDX=
 
+BS=/
 QBS=\${empty}
 
 #

@@ -20,10 +20,29 @@
 #  endif
 #endif
 
+#ifndef VOID
+# define VOID void
+#endif
+#ifndef VOIDPTR
+# define VOIDPTR void *
+#endif
+#ifndef NOTHING
+# define NOTHING void
+#endif
+#ifndef PROTO
+#define PROTO(p) p
+#define P(t) t
+#define PP(v)
+#endif
+
+#ifndef STDOUT_FILENO
+#  define STDOUT_FILENO 1
+#endif
+
 # define same_file(s, t) \
     ((((s)->st_ino == (t)->st_ino) && ((s)->st_dev == (t)->st_dev)))
 
-# define same_file_attributes(s, t) \
+# define same_attributes(s, t) \
    ((s)->st_mode == (t)->st_mode \
     && (s)->st_nlink == (t)->st_nlink \
     && (s)->st_uid == (t)->st_uid \
@@ -41,6 +60,28 @@
 # else
 #  define STAT_BLOCKSIZE(s) (8 * 1024)
 # endif
+#endif
+
+#ifdef __ALCYON__
+/*
+ * not quite right, but we don't want to be limited to 64k.
+ * can't use unsigned long, because that's not implemented.
+ */
+typedef long xsize_t;
+typedef long xssize_t;
+#undef  UINTMAX_MAX
+#define UINTMAX_MAX LONG_MAX
+#ifndef SSIZE_MAX
+#define SSIZE_MAX INT_MAX
+#endif
+#define malloc lmalloc
+#define memcmp lmemcmp
+#define strtoul strtol
+#define ptrsub(e, s) ((long)(e) - (long)(s))
+#else
+#define ptrsub(e, s) ((const char *)(e) - (const char *)(s))
+typedef size_t xsize_t;
+typedef ssize_t xssize_t;
 #endif
 
 #define NULL_DEVICE "/dev/null"
@@ -62,13 +103,17 @@ static int file_desc[2];
 /* Status of the files.  */
 static struct stat stat_buf[2];
 
+#if INT_MAX <= 32767
+typedef long word;
+#else
 typedef int word;
+#endif
 
 /* Read buffers for the files.  */
 static word *buffer[2];
 
 /* Optimal block size for the files.  */
-static size_t buf_size;
+static xsize_t buf_size;
 
 /* Initial prefix to ignore for each file.  */
 static off_t ignore_initial[2];
@@ -78,23 +123,18 @@ static off_t offsets[2];
 static uintmax_t bytes = UINTMAX_MAX;
 
 /* Output format.  */
-static enum comparison_type
-{
-	type_first_diff,					/* Print the first difference.  */
-	type_all_diffs,						/* Print all differences.  */
-	type_no_stdout,						/* Do not output to stdout; only stderr.  */
-	type_status							/* Exit status only.  */
-} comparison_type;
+#define type_first_diff 0					/* Print the first difference.  */
+#define type_all_diffs  1					/* Print all differences.  */
+#define type_no_stdout  2					/* Do not output to stdout; only stderr.  */
+#define type_status		3					/* Exit status only.  */
+static int comparison_type;
 
 /* If nonzero, print values of bytes quoted like cat -t does. */
-static int opt_print_bytes;
-static int opt_print_hex;
+static int opt_pbytes;
+static int opt_phex;
 
 /* Values for long options that do not have single-letter equivalents.  */
-enum
-{
-	HELP_OPTION = CHAR_MAX + 1
-};
+#define HELP_OPTION (CHAR_MAX + 1)
 
 static struct option const long_options[] = {
 	{ "print-bytes", no_argument, NULL, 'b' },
@@ -110,9 +150,11 @@ static struct option const long_options[] = {
 	{ "help", no_argument, NULL, HELP_OPTION },
 	{ NULL, no_argument, NULL, 0 }
 };
-
 
-static void try_help(char const *reason_msgid, char const *operand)
+
+static VOID try_help(P(char const *) reason_msgid, P(char const *)operand)
+PP(char const *reason_msgid;)
+PP(char const *operand;)
 {
 	if (reason_msgid)
 	{
@@ -125,50 +167,53 @@ static void try_help(char const *reason_msgid, char const *operand)
 
 static char const valid_suffixes[] = "kKMGTPEZY0";
 
-enum strtol_error
-  {
-    LONGINT_OK = 0,
-
-    /* These two values can be ORed together, to indicate that both
+typedef int strtol_error;
+#define LINT_OK 0
+   /* These two values can be ORed together, to indicate that both
        errors occurred.  */
-    LONGINT_OVERFLOW = 1,
-    LONGINT_INVALID_SUFFIX_CHAR = 2,
+#define LINT_OVERFLOW 1
+#define LINT_SUFFIX_CHAR 2
+#define LINT_INVALID 4
 
-    LONGINT_INVALID_SUFFIX_CHAR_WITH_OVERFLOW = (LONGINT_INVALID_SUFFIX_CHAR
-                                                 | LONGINT_OVERFLOW),
-    LONGINT_INVALID = 4
-  };
-typedef enum strtol_error strtol_error;
-
-#define STRTOL_T_MAXIMUM ULONG_MAX
-#define STRTOL_T_MINIMUM 0
+#define S2L_MINIMUM 0
+#ifdef __ALCYON__
+#define __strtol_t long
+#define S2L_MAXIMUM LONG_MAX
+#else
 #define __strtol_t unsigned long
+#define S2L_MAXIMUM ULONG_MAX
+#endif
 #define TYPE_SIGNED(x) 0
 #define INT_BUFSIZE_BOUND(x) 40
 #define INT_STRLEN_BOUND(x) (INT_BUFSIZE_BOUND(x) - 1)
 
 
 
-static strtol_error bkm_scale(__strtol_t * x, int scale_factor)
+static strtol_error bkm_scale(P(__strtol_t *) x, P(int) scale_factor)
+PP(__strtol_t *x;)
+PP(int scale_factor;)
 {
-	if (TYPE_SIGNED(__strtol_t) && *x < STRTOL_T_MINIMUM / scale_factor)
+	if (TYPE_SIGNED(__strtol_t) && *x < S2L_MINIMUM / scale_factor)
 	{
-		*x = STRTOL_T_MINIMUM;
-		return LONGINT_OVERFLOW;
+		*x = S2L_MINIMUM;
+		return LINT_OVERFLOW;
 	}
-	if (STRTOL_T_MAXIMUM / scale_factor < *x)
+	if (S2L_MAXIMUM / scale_factor < *x)
 	{
-		*x = STRTOL_T_MAXIMUM;
-		return LONGINT_OVERFLOW;
+		*x = S2L_MAXIMUM;
+		return LINT_OVERFLOW;
 	}
 	*x *= scale_factor;
-	return LONGINT_OK;
+	return LINT_OK;
 }
 
 
-static strtol_error bkm_scale_by_power(__strtol_t * x, int base, int power)
+static strtol_error bkm_power(P(__strtol_t *) x, P(int) base, P(int) power)
+PP(__strtol_t *x;)
+PP(int base;)
+PP(int power;)
 {
-	strtol_error err = LONGINT_OK;
+	strtol_error err = LINT_OK;
 
 	while (power--)
 		err |= bkm_scale(x, base);
@@ -176,24 +221,29 @@ static strtol_error bkm_scale_by_power(__strtol_t * x, int base, int power)
 }
 
 
-static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __strtol_t *val, const char *val_suffixes)
+static strtol_error xstrtoumax(P(const char *) s, P(char **) ptr, P(int) strtol_base, P(__strtol_t *) val, P(const char *) val_suffixes)
+PP(const char *s;)
+PP(char **ptr;)
+PP(int strtol_base;)
+PP(__strtol_t *val;)
+PP(const char *val_suffixes;)
 {
 	char *t_ptr;
 	char **p;
 	__strtol_t tmp;
-	strtol_error err = LONGINT_OK;
+	strtol_error err = LINT_OK;
 
 	p = (ptr ? ptr : &t_ptr);
 
 	if (!TYPE_SIGNED(__strtol_t))
 	{
 		const char *q = s;
-		unsigned char ch = *q;
+		uint8_t ch = *q;
 
 		while (isspace(ch))
 			ch = *++q;
 		if (ch == '-')
-			return LONGINT_INVALID;
+			return LINT_INVALID;
 	}
 
 	errno = 0;
@@ -206,12 +256,12 @@ static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __str
 		if (val_suffixes && **p && strchr(val_suffixes, **p))
 			tmp = 1;
 		else
-			return LONGINT_INVALID;
+			return LINT_INVALID;
 	} else if (errno != 0)
 	{
 		if (errno != ERANGE)
-			return LONGINT_INVALID;
-		err = LONGINT_OVERFLOW;
+			return LINT_INVALID;
+		err = LINT_OVERFLOW;
 	}
 
 	/* Let valid_suffixes == NULL mean "allow any suffix".  */
@@ -232,7 +282,7 @@ static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __str
 		if (!strchr(val_suffixes, **p))
 		{
 			*val = tmp;
-			return err | LONGINT_INVALID_SUFFIX_CHAR;
+			return err | LINT_SUFFIX_CHAR;
 		}
 
 		if (strchr(val_suffixes, '0'))
@@ -274,31 +324,31 @@ static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __str
 			break;
 
 		case 'E':						/* exa or exbi */
-			overflow = bkm_scale_by_power(&tmp, base, 6);
+			overflow = bkm_power(&tmp, base, 6);
 			break;
 
 		case 'G':						/* giga or gibi */
 		case 'g':						/* 'g' is undocumented; for compatibility only */
-			overflow = bkm_scale_by_power(&tmp, base, 3);
+			overflow = bkm_power(&tmp, base, 3);
 			break;
 
 		case 'k':						/* kilo */
 		case 'K':						/* kibi */
-			overflow = bkm_scale_by_power(&tmp, base, 1);
+			overflow = bkm_power(&tmp, base, 1);
 			break;
 
 		case 'M':						/* mega or mebi */
 		case 'm':						/* 'm' is undocumented; for compatibility only */
-			overflow = bkm_scale_by_power(&tmp, base, 2);
+			overflow = bkm_power(&tmp, base, 2);
 			break;
 
 		case 'P':						/* peta or pebi */
-			overflow = bkm_scale_by_power(&tmp, base, 5);
+			overflow = bkm_power(&tmp, base, 5);
 			break;
 
 		case 'T':						/* tera or tebi */
 		case 't':						/* 't' is undocumented; for compatibility only */
-			overflow = bkm_scale_by_power(&tmp, base, 4);
+			overflow = bkm_power(&tmp, base, 4);
 			break;
 
 		case 'w':
@@ -306,22 +356,22 @@ static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __str
 			break;
 
 		case 'Y':						/* yotta or 2**80 */
-			overflow = bkm_scale_by_power(&tmp, base, 8);
+			overflow = bkm_power(&tmp, base, 8);
 			break;
 
 		case 'Z':						/* zetta or 2**70 */
-			overflow = bkm_scale_by_power(&tmp, base, 7);
+			overflow = bkm_power(&tmp, base, 7);
 			break;
 
 		default:
 			*val = tmp;
-			return err | LONGINT_INVALID_SUFFIX_CHAR;
+			return err | LINT_SUFFIX_CHAR;
 		}
 
 		err |= overflow;
 		*p += suffixes;
 		if (**p)
-			err |= LONGINT_INVALID_SUFFIX_CHAR;
+			err |= LINT_SUFFIX_CHAR;
 	}
 
 	*val = tmp;
@@ -333,33 +383,44 @@ static strtol_error xstrtoumax(const char *s, char **ptr, int strtol_base, __str
    *operand ARGPTR of --ignore-initial, updating *ARGPTR to point
    *after the operand.  If DELIMITER is nonzero, the operand may be
    *followed by DELIMITER; otherwise it must be null-terminated.  */
-static void specify_ignore_initial(int f, char **argptr, char delimiter)
+static VOID spec_ignore_initial(P(int) f, P(char **) argptr, P(char) delimiter)
+PP(int f;)
+PP(char **argptr;)
+PP(char delimiter;)
 {
 	__strtol_t val;
-	char const *arg = *argptr;
-	strtol_error e = xstrtoumax (arg, argptr, 0, &val, valid_suffixes);
+	char const *arg;
+	strtol_error e;
 	
-	if (!(e == LONGINT_OK || (e == LONGINT_INVALID_SUFFIX_CHAR && **argptr == delimiter)) || STRTOL_T_MAXIMUM < val)
+	arg = *argptr;
+	e = xstrtoumax (arg, argptr, 0, &val, valid_suffixes);
+	if (!(e == LINT_OK || (e == LINT_SUFFIX_CHAR && **argptr == delimiter)) || S2L_MAXIMUM < val)
 		try_help(_("invalid --ignore-initial value '%s'"), arg);
 	if (ignore_initial[f] < val)
 		ignore_initial[f] = val;
 }
 
 
-static void specify_offset(int f, char **argptr, char delimiter)
+static VOID spec_offset(P(int) f, P(char **) argptr, P(char) delimiter)
+PP(int f;)
+PP(char **argptr;)
+PP(char delimiter;)
 {
 	__strtol_t val;
-	char const *arg = *argptr;
-	strtol_error e = xstrtoumax (arg, argptr, 0, &val, valid_suffixes);
+	char const *arg;
+	strtol_error e;
 	
-	if (!(e == LONGINT_OK || (e == LONGINT_INVALID_SUFFIX_CHAR && **argptr == delimiter)) || STRTOL_T_MAXIMUM < val)
+	arg = *argptr;
+	e = xstrtoumax (arg, argptr, 0, &val, valid_suffixes);
+	if (!(e == LINT_OK || (e == LINT_SUFFIX_CHAR && **argptr == delimiter)) || S2L_MAXIMUM < val)
 		try_help(_("invalid --offsets value '%s'"), arg);
 	offsets[f] = val;
 }
 
 
 /* Specify the output format.  */
-static void specify_comparison_type(enum comparison_type t)
+static VOID spec_comparison_type(P(int) t)
+PP(int t;)
 {
 	if (comparison_type && comparison_type != t)
 		try_help(_("options -l and -s are incompatible"), 0);
@@ -367,7 +428,7 @@ static void specify_comparison_type(enum comparison_type t)
 }
 
 
-static void check_stdout(void)
+static VOID check_stdout(NOTHING)
 {
 	fflush(stdout);
 	if (ferror(stdout))
@@ -381,17 +442,18 @@ static void check_stdout(void)
 /* Position file F to ignore_initial[F] bytes from its initial position,
    and yield its new position.  Don't try more than once.  */
 
-static off_t file_position(int f)
+static off_t file_position(P(int) f)
+PP(int f;)
 {
 	static int positioned[2];
-	static off_t position[2];
+	static off_t pos[2];
 
 	if (!positioned[f])
 	{
 		positioned[f] = TRUE;
-		position[f] = lseek(file_desc[f], ignore_initial[f], SEEK_CUR);
+		pos[f] = lseek(file_desc[f], ignore_initial[f], SEEK_CUR);
 	}
-	return position[f];
+	return pos[f];
 }
 
 
@@ -401,7 +463,9 @@ static off_t file_position(int f)
 
    Return the offset of the first byte that differs.  */
 
-static size_t block_compare(word const *p0, word const *p1)
+static xsize_t block_compare(P(word const *) p0, P(word const *) p1)
+PP(word const *p0;)
+PP(word const *p1;)
 {
 	word const *l0, *l1;
 	char const *c0, *c1;
@@ -417,16 +481,35 @@ static size_t block_compare(word const *p0, word const *p1)
 	for (c0 = (char const *) l0, c1 = (char const *) l1; *c0 == *c1; c0++, c1++)
 		continue;
 
-	return c0 - (char const *) p0;
+	return ptrsub(c0, p0);
 }
 
 
+#ifdef __ALCYON__
+VOIDPTR rawmemchr(P(const VOIDPTR) s, P(int) ucharwanted)
+PP(const VOIDPTR s;)
+PP(register char ucharwanted;)
+{
+	register const char *scan;
+
+	scan = (const char *) s;
+	for (;;)
+	{
+		if (*scan == ucharwanted)
+			return scan;
+		else
+			scan++;
+	}
+}
+#endif
 
 /* Return the number of newlines in BUF, of size BUFSIZE,
    where BUF[NBYTES] is available for use as a sentinel.  */
-static size_t count_newlines(char *buf, size_t bufsize)
+static xsize_t count_newlines(P(char *) buf, P(xsize_t) bufsize)
+PP(char *buf;)
+PP(xsize_t bufsize;)
 {
-	size_t count = 0;
+	xsize_t count = 0;
 	char *p;
 	char *lim = buf + bufsize;
 
@@ -440,7 +523,9 @@ static size_t count_newlines(char *buf, size_t bufsize)
 /* Put into BUF the unsigned char C, making unprintable bytes
    visible by quoting like cat -t does.  */
 
-static void sprintc(char *buf, unsigned char c)
+static VOID sprintc(P(char *) buf, P(unsigned char) c)
+PP(char *buf;)
+PP(char c;)
 {
 	if (!isprint(c))
 	{
@@ -476,18 +561,23 @@ static void sprintc(char *buf, unsigned char c)
    On error, return SIZE_MAX, setting errno.
    The number returned is always NBYTES unless end-of-file or error.  */
 
-static size_t block_read(int fd, char *buf, size_t nbytes)
+static xsize_t block_read(P(int) fd, P(char *) buf, P(xsize_t) nbytes)
+PP(int fd;)
+PP(char *buf;)
+PP(xsize_t nbytes;)
 {
 	char *bp = buf;
-	char const *buflim = buf + nbytes;
-	size_t readlim = MIN(SSIZE_MAX, SIZE_MAX);
+	char const *buflim;
+	xsize_t readlim;
 
+	buflim = buf + nbytes;
+	readlim = MIN(SSIZE_MAX, SIZE_MAX);
 	do
 	{
-		size_t bytes_remaining = buflim - bp;
+		xsize_t bytes_remaining = ptrsub(buflim, bp);
 		size_t bytes_to_read = MIN(bytes_remaining, readlim);
-		ssize_t nread = read(fd, bp, bytes_to_read);
-
+		xssize_t nread = read(fd, bp, bytes_to_read);
+		
 		if (nread <= 0)
 		{
 			if (nread == 0)
@@ -514,13 +604,17 @@ static size_t block_read(int fd, char *buf, size_t nbytes)
 		bp += nread;
 	} while (bp < buflim);
 
-	return bp - buf;
+	return ptrsub(bp, buf);
 }
 
 
-static char *offtostr(off_t i, char *buf)
+static char *offtostr(P(off_t) i, P(char *) buf)
+PP(off_t i;)
+PP(char *buf;)
 {
-	char *p = buf + INT_STRLEN_BOUND(inttype);
+	char *p;
+	
+	p = buf + INT_STRLEN_BOUND(inttype);
 	*p = 0;
 
 	if (i < 0)
@@ -544,9 +638,12 @@ static char *offtostr(off_t i, char *buf)
    either A or B is zero, or if the multiple is greater than LCM_MAX,
    return a reasonable buffer size.  */
 
-static size_t buffer_lcm(size_t a, size_t b, size_t lcm_max)
+static xsize_t buffer_lcm(P(xsize_t) a, P(xsize_t) b, P(xsize_t) lcm_max)
+PP(xsize_t a;)
+PP(xsize_t b;)
+PP(xsize_t lcm_max;)
 {
-	size_t lcm, m, n, q, r;
+	xsize_t lcm, m, n, q, r;
 
 	/* Yield reasonable values if buffer sizes are zero.  */
 	if (!a)
@@ -569,25 +666,30 @@ static size_t buffer_lcm(size_t a, size_t b, size_t lcm_max)
    using 'buffer[0]' and 'buffer[1]'.
    Return EXIT_SUCCESS if identical, EXIT_FAILURE if different,
    >1 if error.  */
-static int cmp(void)
+static int cmp(NOTHING)
 {
 	off_t line_number = 1;				/* Line number (1...) of difference. */
 	off_t byte_number = 0;				/* Byte number (1...) of difference. */
-	uintmax_t remaining = bytes;		/* Remaining number of bytes to compare.  */
-	size_t read0, read1;				/* Number of bytes read from each file. */
-	size_t first_diff;					/* Offset (0...) in buffers of 1st diff. */
-	size_t smaller;						/* The lesser of 'read0' and 'read1'. */
-	word *buffer0 = buffer[0];
-	word *buffer1 = buffer[1];
-	char *buf0 = (char *) buffer0;
-	char *buf1 = (char *) buffer1;
+	uintmax_t remaining;				/* Remaining number of bytes to compare.  */
+	xsize_t read0, read1;				/* Number of bytes read from each file. */
+	xsize_t first_diff;					/* Offset (0...) in buffers of 1st diff. */
+	xsize_t smaller;					/* The lesser of 'read0' and 'read1'. */
+	word *buffer0;
+	word *buffer1;
+	char *buf0;
+	char *buf1;
 	int differing = 0;
 	int f;
 	int offset_width = 0;
 
+	remaining = bytes;		/* Remaining number of bytes to compare.  */
+	buffer0 = buffer[0];
+	buffer1 = buffer[1];
+	buf0 = (char *) buffer0;
+	buf1 = (char *) buffer1;
 	if (comparison_type == type_all_diffs)
 	{
-		off_t byte_number_max = MIN(bytes, STRTOL_T_MAXIMUM);
+		off_t byte_number_max = MIN(bytes, S2L_MAXIMUM);
 
 		for (f = 0; f < 2; f++)
 		{
@@ -600,7 +702,7 @@ static int cmp(void)
 			}
 		}
 		
-		if (opt_print_hex)
+		if (opt_phex)
 		{
 			for (offset_width = 3; (byte_number_max /= 16) != 0; offset_width++)
 				continue;
@@ -620,8 +722,8 @@ static int cmp(void)
 			/* lseek failed; read and discard the ignored initial prefix.  */
 			do
 			{
-				size_t bytes_to_read = MIN(ig, buf_size);
-				size_t r = block_read(file_desc[f], buf0, bytes_to_read);
+				xsize_t bytes_to_read = MIN(ig, buf_size);
+				xsize_t r = block_read(file_desc[f], buf0, bytes_to_read);
 
 				if (r != bytes_to_read)
 				{
@@ -639,7 +741,7 @@ static int cmp(void)
 
 	do
 	{
-		size_t bytes_to_read = buf_size;
+		xsize_t bytes_to_read = buf_size;
 
 		if (remaining != UINTMAX_MAX)
 		{
@@ -691,18 +793,25 @@ static int cmp(void)
 					char const *byte_num;
 					char const *line_num = offtostr(line_number, line_buf);
 
-					if (opt_print_hex)
+					if (opt_phex)
 					{
+#ifdef __ALCYON__
+						if (offsets[0] != offsets[1])
+							sprintf(byte_buf, "0x%lx-0x%lx", byte_number + offsets[0], byte_number + offsets[1]);
+						else
+							sprintf(byte_buf, "0x%lx", byte_number + offsets[0]);
+#else
 						if (offsets[0] != offsets[1])
 							sprintf(byte_buf, "0x%llx-0x%llx", (unsigned long long)byte_number + offsets[0], (unsigned long long)byte_number + offsets[1]);
 						else
 							sprintf(byte_buf, "0x%llx", (unsigned long long)byte_number + offsets[0]);
+#endif
 						byte_num = byte_buf;
 					} else
 					{
 						byte_num = offtostr(byte_number, byte_buf);
 					}
-					if (!opt_print_bytes)
+					if (!opt_pbytes)
 					{
 						/* See POSIX 1003.1-2001 for this format.  This
 						   message is used only in the POSIX locale, so it
@@ -722,14 +831,14 @@ static int cmp(void)
 						printf(use_byte_message ? byte_message : char_message, file[0], file[1], byte_num, line_num);
 					} else
 					{
-						unsigned char c0 = buf0[first_diff];
-						unsigned char c1 = buf1[first_diff];
+						uint8_t c0 = buf0[first_diff];
+						uint8_t c1 = buf1[first_diff];
 						char s0[5];
 						char s1[5];
 
 						sprintc(s0, c0);
 						sprintc(s1, c1);
-						if (opt_print_hex)
+						if (opt_phex)
 						{
 							printf (_("%s %s differ: byte %s, line %s is 0x%02x %s 0x%02x %s\n"),
 								file[0], file[1], byte_num, line_num, c0, s0, c1, s1);
@@ -747,29 +856,36 @@ static int cmp(void)
 			case type_all_diffs:
 				do
 				{
-					unsigned char c0 = buf0[first_diff];
-					unsigned char c1 = buf1[first_diff];
+					uint8_t c0 = buf0[first_diff];
+					uint8_t c1 = buf1[first_diff];
 
 					if (c0 != c1)
 					{
 						char byte_buf[INT_BUFSIZE_BOUND(off_t)];
 						char const *byte_num;
 						
-						if (opt_print_hex)
+						if (opt_phex)
 						{
+#ifdef __ALCYON__
+							if (offsets[0] != offsets[1])
+								sprintf(byte_buf, "0x%lx-0x%lx", byte_number + offsets[0], byte_number + offsets[1]);
+							else
+								sprintf(byte_buf, "0x%lx", byte_number + offsets[0]);
+#else
 							if (offsets[0] != offsets[1])
 								sprintf(byte_buf, "0x%llx-0x%llx", (unsigned long long)byte_number + offsets[0], (unsigned long long)byte_number + offsets[1]);
 							else
 								sprintf(byte_buf, "0x%llx", (unsigned long long)byte_number + offsets[0]);
+#endif
 							byte_num = byte_buf;
 						} else
 						{
 							byte_num = offtostr(byte_number, byte_buf);
 						}
-						if (!opt_print_bytes)
+						if (!opt_pbytes)
 						{
 							/* See POSIX 1003.1-2001 for this format.  */
-							if (opt_print_hex)
+							if (opt_phex)
 								printf ("%*s 0x%02x 0x%02x\n", offset_width, byte_num, c0, c1);
 							else
 								printf("%*s %3o %3o\n", offset_width, byte_num, c0, c1);
@@ -780,7 +896,7 @@ static int cmp(void)
 
 							sprintc(s0, c0);
 							sprintc(s1, c1);
-							if (opt_print_hex)
+							if (opt_phex)
 								printf ("%*s 0x%02x %-4s 0x%02x %s\n", offset_width, byte_num, c0, s0, c1, s1);
 							else
 								printf("%*s %3o %-4s %3o %s\n", offset_width, byte_num, c0, s0, c1, s1);
@@ -817,8 +933,7 @@ static int cmp(void)
 static char const *const option_help_msgid[] = {
 	N_("-b, --print-bytes          print differing bytes"),
 	N_("-i, --ignore-initial=SKIP         skip first SKIP bytes of both inputs"),
-	N_("-i, --ignore-initial=SKIP1:SKIP2  skip first SKIP1 bytes of FILE1 and\n"
-	   "                                         first SKIP2 bytes of FILE2"),
+	N_("-i, --ignore-initial=SKIP1:SKIP2  skip first SKIP1 bytes of FILE1 and\n                                         first SKIP2 bytes of FILE2"),
 	N_("-l, --verbose              output byte numbers and differing byte values"),
 	N_("-x, --hex                  print values in hexadecimal"),
 	N_("-n, --bytes=LIMIT          compare at most LIMIT bytes"),
@@ -828,15 +943,14 @@ static char const *const option_help_msgid[] = {
 	0
 };
 
-static void usage(void)
+static VOID usage(NOTHING)
 {
 	char const *const *p;
 
 	printf(_("Usage: %s [OPTION]... FILE1 [FILE2 [SKIP1 [SKIP2]]]\n"), program_name);
 	printf("%s\n", _("Compare two files byte by byte."));
 	printf("\n%s\n\n",
-		   _("The optional SKIP1 and SKIP2 specify the number of bytes to skip\n"
-			 "at the beginning of each file (zero by default)."));
+		   _("The optional SKIP1 and SKIP2 specify the number of bytes to skip\nat the beginning of each file (zero by default)."));
 
 	fputs(_("\
 Mandatory arguments to long options are mandatory for short options too.\n\
@@ -851,54 +965,70 @@ GB 1,000,000,000, G 1,073,741,824, and so on for T, P, E, Z, Y."),
 }
 
 
-static void print_version(void)
+static VOID print_version(NOTHING)
 {
 }
 
 
-int main(int argc, char **argv)
+int main(P(int) argc, P(char **) argv)
+PP(int argc;)
+PP(char **argv;)
 {
 	int c, f, exit_status;
-	size_t words_per_buffer;
+	xsize_t words_per_buffer;
 
 	/* Parse command line options.  */
 
-	while ((c = getopt_long(argc, argv, "bcxi:O:ln:sv", long_options, 0)) != -1)
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
+	while ((c =
+#ifdef __SHORT_EXTERNAL_NAMES
+		getopl
+#else
+		getopt_long
+#endif
+		(argc, argv, "bcxi:O:ln:sv", long_options, NULL)) != -1)
 	{
 		switch (c)
 		{
 		case 'b':
 		case 'c':						/* 'c' is obsolescent as of diffutils 2.7.3 */
-			opt_print_bytes = TRUE;
+			opt_pbytes = TRUE;
 			break;
 
 		case 'i':
-			specify_ignore_initial(0, &optarg, ':');
+			spec_ignore_initial(0, &optarg, ':');
 			if (*optarg++ == ':')
-				specify_ignore_initial(1, &optarg, 0);
+				spec_ignore_initial(1, &optarg, 0);
 			else if (ignore_initial[1] < ignore_initial[0])
 				ignore_initial[1] = ignore_initial[0];
 			break;
 
 		case 'O':
-			specify_offset(0, &optarg, ':');
+			spec_offset(0, &optarg, ':');
 			if (*optarg++ == ':')
-				specify_offset(1, &optarg, 0);
+				spec_offset(1, &optarg, 0);
 			break;
 
 		case 'x':
-			opt_print_hex = TRUE;
+			opt_phex = TRUE;
 			break;
 
 		case 'l':
-			specify_comparison_type(type_all_diffs);
+			spec_comparison_type(type_all_diffs);
 			break;
 
 		case 'n':
 			{
 				__strtol_t n;
 
-				if (xstrtoumax(optarg, 0, 0, &n, valid_suffixes) != LONGINT_OK)
+				if (xstrtoumax(optarg, NULL, 0, &n, valid_suffixes) != LINT_OK)
 					try_help(_("invalid --bytes value '%s'"), optarg);
 				if (n < bytes)
 					bytes = n;
@@ -906,7 +1036,7 @@ int main(int argc, char **argv)
 			break;
 
 		case 's':
-			specify_comparison_type(type_status);
+			spec_comparison_type(type_status);
 			break;
 
 		case 'v':
@@ -934,12 +1064,12 @@ int main(int argc, char **argv)
 	{
 		char *arg = argv[optind++];
 
-		specify_ignore_initial(f, &arg, 0);
+		spec_ignore_initial(f, &arg, 0);
 	}
 
 	if (optind < argc)
 		try_help(_("extra operand '%s'"), argv[optind]);
-
+	
 	for (f = 0; f < 2; f++)
 	{
 		/* If file[1] is "-", treat it first; this avoids a misdiagnostic if
@@ -971,12 +1101,13 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-
+	
 	/* If the files are links to the same inode and have the same file position,
 	   they are identical.  */
 
-	if (0 < same_file(&stat_buf[0], &stat_buf[1])
-		&& same_file_attributes(&stat_buf[0], &stat_buf[1]) && file_position(0) == file_position(1))
+	if (0 < same_file(&stat_buf[0], &stat_buf[1]) &&
+		same_attributes(&stat_buf[0], &stat_buf[1]) &&
+		file_position(0) == file_position(1))
 		return EXIT_SUCCESS;
 
 	/* If output is redirected to the null device, we can avoid some of
@@ -984,11 +1115,11 @@ int main(int argc, char **argv)
 
 	if (comparison_type != type_status)
 	{
-		struct stat outstat,
-		 nullstat;
+		struct stat outstat, nullstat;
 
-		if (fstat(STDOUT_FILENO, &outstat) == 0
-			&& stat(NULL_DEVICE, &nullstat) == 0 && 0 < same_file(&outstat, &nullstat))
+		if (fstat(STDOUT_FILENO, &outstat) == 0 &&
+			stat(NULL_DEVICE, &nullstat) == 0 &&
+			0 < same_file(&outstat, &nullstat))
 			comparison_type = type_no_stdout;
 	}
 
@@ -1012,8 +1143,8 @@ int main(int argc, char **argv)
 
 	/* Get the optimal block size of the files.  */
 
-	buf_size = buffer_lcm(STAT_BLOCKSIZE(stat_buf[0]), STAT_BLOCKSIZE(stat_buf[1]), PTRDIFF_MAX - sizeof(word));
-
+	buf_size = buffer_lcm((xsize_t)STAT_BLOCKSIZE(stat_buf[0]), (xsize_t)STAT_BLOCKSIZE(stat_buf[1]), (xsize_t)(PTRDIFF_MAX - sizeof(word)));
+	
 	/* Allocate word-aligned buffers, with space for sentinels at the end.  */
 
 	words_per_buffer = (buf_size + 2 * sizeof(word) - 1) / sizeof(word);

@@ -60,6 +60,8 @@ tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_at)${RM} $*.i
 
 check:: bdos.o
+	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(bdos_toff):0x24 --offsets=0x$(bdos_tbase):0 --bytes=0x$(bdos_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bdos.o
+	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(bdos_doff):0x$(bdos_tleno) --offsets=0x$(bdos_dbase):0x$(bdos_tlen) --bytes=0x$(bdos_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bdos.o
 
 clean:
 	$(RM) *.o *.a *.ndx *.i *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h

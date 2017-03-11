@@ -133,6 +133,7 @@ int _ttyinraw PROTO((NOTHING));
 struct tm *_conSD_r PROTO((time_t clock, int local, struct tm *tp));
 struct tm *_conSD PROTO((time_t clock, int local));
 time_t _cnvDS PROTO((const struct tm *tm));
+time_t ftimtosec PROTO((DOSTIME *f));
 #endif
 
 /*

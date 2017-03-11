@@ -22,6 +22,7 @@
 #ifndef FA_ARCH
 #define FA_ARCH         0x20
 #endif
+#define FA_SYMLINK      0x40
 
 #define MAXPATH   119
 #define MAXDRIVE  3

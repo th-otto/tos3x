@@ -39,7 +39,10 @@ char *strlwr PROTO ((char *str));
 char *strupr PROTO ((char *str));
 
 VOIDPTR memset PROTO((VOIDPTR ptr, int c, size_t bytes));
+int memcmp PROTO((const VOIDPTR __s1, const VOIDPTR __s2, size_t __n));
 
 char *strerror PROTO((int err_no));
+
+int lmemcmp PROTO((const VOIDPTR __s1, const VOIDPTR __s2, long __n));
 
 #endif /* __STRING_H__ */

@@ -35,7 +35,7 @@ $(IMG): tos.img $(MKROM)
 	$(MKROM) pad $(ROMSIZE) $< $@
 
 tos.img: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o
-	$(LD) -o $@ $(SYMBOLS) -a $(rombase) x 0 $(STARTUP) -x ../bios/bios.a -x ../vdi/vdi.a -x ../bdos/bdos.a -x ../aes/aes.a -x ../desk/desk.a tosrsc$(COUNTRY).o vars.o
+	$(LD) -o $@ $(SYMBOLS) -a $(rombase) x 0 $(STARTUP) -x ..$(BS)bios$(BS)bios.a -x ..$(BS)vdi$(BS)vdi.a -x ..$(BS)bdos$(BS)bdos.a -x ..$(BS)aes$(BS)aes.a -x ..$(BS)desk$(BS)desk.a tosrsc$(COUNTRY).o vars.o
 
 cartridge_ASFLAGS=-n
 
@@ -133,7 +133,7 @@ glue.ru: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemru.rsc ../desk/rsc/$(TOSVERSION)/
 	$(AM_V_GEN)$(MKGLUE) ru $(TOSVERSION)
 
 check::
-	cmp $(CMPL) -x $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
+	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
 
 clean:
 	$(RM) *.o *.i $(IMG) tos.img cartridge.tmp cartridge.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h

@@ -8,9 +8,9 @@ LIBS = $(LIBC)
 INC := ..${BS}include${BS}
 
 PROGRAMS = newglue$(BUILD_EXEEXT) mkbininc$(BUILD_EXEEXT) mkrom$(BUILD_EXEEXT)
-
+PROGRAMS += cmprom$(BUILD_EXEEXT)
 # didnt bother to port these to alcyon
-#PROGRAMS += cmprom$(BUILD_EXEEXT) findrsc$(BUILD_EXEEXT)
+#PROGRAMS += findrsc$(BUILD_EXEEXT)
 
 all: $(PROGRAMS)
 
