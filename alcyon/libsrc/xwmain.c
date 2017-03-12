@@ -289,7 +289,7 @@ PP(int len;)								/* Command length */
 						strchr(s, '*'))		/* Cards? */
 					{
 #if GEMDOS
-						DTA dta;
+						_DTA dta;
 						long res;
 						
 						__OSIF(SETDMA, &dta);

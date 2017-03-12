@@ -36,7 +36,7 @@ typedef struct
     __int16_t d_date;          /* packed date           */
     __int32_t d_length;        /* filesize              */
     char      d_fname[14];     /* file name             */
-} DTA;
+} _DTA;
 
 /*
  *  DOSTIME - the standard layout of time & date

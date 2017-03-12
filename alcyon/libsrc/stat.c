@@ -7,13 +7,13 @@
 
 
 int stat(P(const char *) filename, P(struct stat *) st)
-PP(const char *filename;)
-PP(struct stat;)
+PP(register const char *filename;)
+PP(register struct stat;)
 {
 	unsigned short buf[2];
 	unsigned short mode;
-	DTA *olddta;
-	DTA dta;
+	_DTA *olddta;
+	_DTA dta;
 	int drv;
 	int handle;
 	int res;
@@ -29,7 +29,7 @@ PP(struct stat;)
 		}
 	}
 		
-	olddta = Fgetdta();
+	olddta = (_DTA *)Fgetdta();
 	Fsetdta(&dta);
 	res = Fsfirst(filename, FA_RDONLY | FA_ARCH | FA_DIREC | FA_HIDDEN | FA_SYSTEM);
 	Fsetdta(olddta);
