@@ -23,6 +23,9 @@ lrem.o:	../libsrc/lrem.o
 ldiv.o:	../libsrc/ldiv.o
 	$(CP) $< $@
 
+uldiv.o:	../libsrc/uldiv.o
+	$(CP) $< $@
+
 bios.o:	../libsrc/bios.o
 	$(CP) $< $@
 

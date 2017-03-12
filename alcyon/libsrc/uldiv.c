@@ -1,113 +1,62 @@
+#define NO_STDIO
 #include "lib.h"
 
 /* unsigned long divide */
-
-long uldivr;
 
 long uldiv(P(long) al1, P(long) al2)
 PP(long al1;)
 PP(long al2;)
 {
-#if 0
-	register unsigned long l1, l2;
-	register long q, b;
+#ifdef __ALCYON__
+	asm("move.l	d2,a0");
+	asm("move.l	12(a6),d1");	/* d1 = divisor */
+	asm("move.l	8(a6),d0");	/* d0 = dividend */
 
-	l1 = al1;
-	l2 = al2;
-	if (l2 == 0)
-	{
-		uldivr = 0x80000000;
-		asm("divu.w #0,d0");
-		return 0x80000000;
-	}
-	if (l2 > l1)
-	{							/** comparison (ble->bls) **/
-		uldivr = l1;
-		return 0;
-	}
-	if (l1 == l2)
-	{
-		q = 1;
-		l1 = 0;
-		goto doret;
-	}
-	b = 1;								/* bit value */
-	while (l1 >= l2)
-	{							/** comparison (blt->blo) **/
-		if (l2 > (l2 << 1))		/** comparison (bgt->bhi) **/
-			break;						/* detect overflow */
-		l2 <<= 1;
-		b <<= 1;
-	}
-	q = 0;
-	while (b)
-	{									/* now do shifts and subtracts */
-		if (l1 >= l2)
-		{						/** comparison (blt->blo) **/
-			q |= b;
-			l1 -= l2;
-		}
-		b >>= 1;
-		l2 >>= 1;
-	}
-  doret:
-	uldivr = l1;
-	return q;
+	asm("cmp.l	#$10000,d1"); /* divisor >= 2 ^ 16 ?   */
+	asm("bcc	L3003");		/* then try next algorithm */
+	asm("move.l	d0,d2");
+	asm("clr.w	d2");
+	asm("swap	d2");
+	asm("divu	d1,d2");          /* high quotient in lower word */
+	asm("move.w	d2,d0");		/* save high quotient */
+	asm("swap	d0");
+	asm("move.w	10(a6),d2");	/* get low dividend + high rest */
+	asm("divu	d1,d2");		/* low quotient */
+	asm("move.w	d2,d0");
+	asm("bra	L3006");
+
+asm("L3003:");
+	asm("move.l	d1,d2");		/* use d2 as divisor backup */
+asm("L3004:");
+	asm("lsr.l	#1,d1");	/* shift divisor */
+	asm("lsr.l	#1,d0");	/* shift dividend */
+	asm("cmp.l	#$10000,d1"); /* still divisor >= 2 ^ 16 ?  */
+	asm("bcc	L3004");
+	asm("divu	d1,d0");		/* now we have 16-bit divisor */
+	asm("and.l	#$ffff,d0"); /* mask out divisor, ignore remainder */
+
+/* Multiply the 16-bit tentative quotient with the 32-bit divisor.  Because of
+   the operand ranges, this might give a 33-bit product.  If this product is
+   greater than the dividend, the tentative quotient was too large. */
+	asm("move.l	d2,d1");
+	asm("mulu	d0,d1");		/* low part, 32 bits */
+	asm("swap	d2");
+	asm("mulu	d0,d2");		/* high part, at most 17 bits */
+	asm("swap	d2");		/* align high part with low part */
+	asm("tst.w	d2");		/* high part 17 bits? */
+	asm("bne	L3005");		/* if 17 bits, quotient was too large */
+	asm("add.l	d2,d1");		/* add parts */
+	asm("bcs	L3005");		/* if sum is 33 bits, quotient was too large */
+	asm("cmp.l	8(a6),d1");	/* compare the sum with the dividend */
+	asm("bls	L3006");		/* if sum > dividend, quotient was too large */
+asm("L3005:");
+	asm("subq.l	#1,d0");	/* adjust quotient */
+
+asm("L3006:");
+	asm("move.l	a0,d2");
 #else
-asm("   movem.l d4-d7,-(sp)");
-asm("   move.l 8(a6),d7");
-asm("   move.l 12(a6),d6");
-asm("   tst.l d6");
-asm("   bne L2");
-asm("   move.l #$80000000,_uldivr");
-asm("   move.l #$80000000,d0");
-asm("   divu.w #0,d0");
-asm("   bra L99");
-asm("L2:");
-asm("   cmp.l d7,d6");
-asm("   bls L3"); /*          *<<<<< ble */
-asm("   move.l d7,_uldivr");
-asm("   clr.l d0");
-asm("   bra L99");
-asm("L3:");
-asm("   cmp.l d6,d7");
-asm("   bne L4");
-asm("   move.l #1,d5");
-asm("   clr.l d7");
-asm("   bra L5");
-asm("L4:");
-asm("   move.l #1,d4");
-asm("L7:");
-asm("   cmp.l d6,d7");
-asm("   blo L6"); /*          *<<<< blt */
-asm("   move.l d6,d0");
-asm("   asl.l #1,d0");
-asm("   cmp.l d0,d6");
-asm("   bhi L6"); /*          *<<<< bgt */
-asm("   asl.l #1,d6");
-asm("   asl.l #1,d4");
-asm("   bra L7");
-asm("L6:");
-asm("   clr.l d5");
-asm("L9:");
-asm("   tst.l d4");
-asm("   beq L8");
-asm("   cmp.l d6,d7");
-asm("   blo L10"); /*          *<<<< blt */
-asm("   or.l d4,d5");
-asm("   sub.l d6,d7");
-asm("L10:");
-asm("   lsr.l #1,d4"); /*       *<<<< asr */
-asm("   lsr.l #1,d6"); /*       *<<<< asr */
-asm("   bra L9");
-asm("L8:");
-asm("L5:");
-asm("   move.l d7,_uldivr");
-asm("   move.l d5,d0");
-asm("L99:");
-asm("   movem.l (sp)+,d4-d7");
-#endif
-#ifndef __ALCYON__
-	return 0;
+	(void) al1;
+	(void) al2;
+	__builtin_unreachable();
 #endif
 }

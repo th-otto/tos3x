@@ -24,7 +24,7 @@ CSRCS14 = abort.c chmod.c access.c chown.c dup.c rename.c unlink.c stat.c fstat.
 CSRCS15 = doscan.c scanf.c fscanf.c sscanf.c optoff.c sgtty.c ttyinraw.c
 CSRCS16 = errno.c strchr.c strrchr.c lstout.c mktemp.c prtld.c prtint.c prtshort.c
 CSRCS17 = rand.c setbuf.c signal.c swab.c strtol.c getenv.c strpbrk.c
-CSRCS18 = aldiv.c almul.c alrem.c uldiv.c ldiv.c lmul.c lrem.c
+CSRCS18 = aldiv.c almul.c alrem.c uldiv.c ulrem.c ldiv.c lmul.c lrem.c
 
 COBJS1 = $(CSRCS1:.c=.o)
 COBJS2 = $(CSRCS2:.c=.o)

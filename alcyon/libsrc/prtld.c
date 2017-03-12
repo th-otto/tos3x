@@ -7,8 +7,6 @@
 
 #include "lib.h"
 
-extern long uldivr;
-
 char *__prtld(P(register long) n, P(char **) pbuf, P(int) base, P(int) issigned, P(char *) digs)
 PP(register long n;)
 PP(char **pbuf;)
@@ -53,8 +51,8 @@ PP(char *digs;)
 		}
 		while (n)
 		{
+			*p++ = ulrem(n, b);
 			n = uldiv(n, b);
-			*p++ = uldivr;
 		}
 	}
 	return p;

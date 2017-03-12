@@ -18,6 +18,7 @@
 
 #include <osif.h>
 #include "lib.h"
+#include <osbind.h>
 #include <osiferr.h>
 #include <errno.h>
 

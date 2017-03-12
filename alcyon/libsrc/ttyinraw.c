@@ -11,6 +11,7 @@
  ****************************************************************************/
 
 #include "lib.h"
+#include <osbind.h>
 #include <osif.h>
 #include <osiferr.h>
 

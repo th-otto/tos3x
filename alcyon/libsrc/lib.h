@@ -54,17 +54,18 @@ char *__prtshort PROTO((long n, char **pbuf, int base, int issigned, char *digs)
 char *__prtld PROTO((long n, char **pbuf, int base, int issigned, char *digs));
 char *__prtint PROTO((long n, char *pbuf, int base, int issigned, printfunc f, int upper));
 
+#ifndef NO_STDIO
 int __doprint PROTO((FILE *stream, const char *fmt, int mode, va_list args));
 int _doscan PROTO((FILE *stream, const char *fmt, va_list args));
+int _doprt PROTO((FILE *sp, const char * fmt, char *pb));
+int _filbuf PROTO((FILE *));
+int _flsbuf PROTO((int c, FILE *fp));
+#endif
 
 long fptoffp PROTO((double f));
 double ffptof PROTO((long lf));
 long fpftol PROTO((long f));
 long fpltof PROTO((long l));
-int _doprt PROTO((FILE *sp, const char * fmt, char *pb));
-
-long ldiv PROTO((long al1, long al2));
-long lrem PROTO((long al1, long al2));
 
 int __getmode PROTO((const char *mode));
 
@@ -80,11 +81,14 @@ union ll {
 	long l;
 };
 
+long ldiv PROTO((long al1, long al2));
+long lrem PROTO((long al1, long al2));
 long lmul PROTO((long l1, long l2));
-VOID almul PROTO((register long * l1, register long l2));
 long uldiv PROTO((long al1, long al2));
+long ulrem PROTO((long al1, long al2));
 VOID aldiv PROTO((long * al1, long al2));
 VOID alrem PROTO((long *al1, long al2));
+VOID almul PROTO((register long *l1, register long l2));
 
 int _open PROTO((const char *name, int mode, int binary));
 int __open PROTO((int fd, const char *name, int search));
@@ -103,10 +107,8 @@ int _main PROTO((char *com, int len));
 int __main PROTO((char *com, int len));
 VOID _cleanup PROTO((NOTHING));
 
-int _filbuf PROTO((FILE *));
 long _filesz PROTO((int fd));						/* computes CP/M file size  */
 char *_salloc PROTO((size_t size));					/* Stack allocation routine */
-int _flsbuf PROTO((int c, FILE *fp));
 char *_dosify PROTO((char *s));
 
 VOID blkmove PROTO((char *to, const char *from, size_t nn));
@@ -133,6 +135,9 @@ int _ttyinraw PROTO((NOTHING));
 struct tm *_conSD_r PROTO((time_t clock, int local, struct tm *tp));
 struct tm *_conSD PROTO((time_t clock, int local));
 time_t _cnvDS PROTO((const struct tm *tm));
+#ifdef __GNUC__
+#include <osbind.h>
+#endif
 time_t ftimtosec PROTO((_DOSTIME *f));
 #endif
 

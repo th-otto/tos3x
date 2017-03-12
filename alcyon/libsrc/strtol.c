@@ -24,7 +24,11 @@
 #include <limits.h>
 #include <errno.h>
 
+#ifdef __ALCYON__
 #define ulong long
+#else
+#define ulong unsigned long
+#endif
 
 /* Nonzero if we are defining `strtoul' or `strtoull', operating on
    unsigned integers.  */

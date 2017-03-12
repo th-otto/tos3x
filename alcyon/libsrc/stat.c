@@ -3,6 +3,7 @@
 #include <osbind.h>
 #include <ctype.h>
 #include <errno.h>
+#include <string.h>
 #include "lib.h"
 
 
@@ -72,7 +73,7 @@ PP(register struct stat;)
 	st->st_nlink = 1;
 	st->st_uid = st->st_gid = 0;
 	st->st_size = dta.d_length;
-	st->st_atime = st->st_ctime = st->st_mtime = ftimtosec((struct ftime *)&dta.d_time);
+	st->st_atime = st->st_ctime = st->st_mtime = ftimtosec((_DOSTIME *)&dta.d_time);
 	st->st_blocks = (st->st_size + 511) >> 9;
 	
 	return 0;
