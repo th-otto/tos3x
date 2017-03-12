@@ -13,7 +13,7 @@ include ../Makefile.sil
 CPPFLAGS = -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = command.tos
+PROGRAMS = command.tos find.ttp
 
 all: $(PROGRAMS)
 
@@ -21,6 +21,9 @@ include SRCFILES
 
 command.tos: $(COMA_OBJS) gemdos.o bios.o
 	$(AM_V_LD)$(LD) -nostdlib $^ $(LDFLAGS) -o $@ -lgcc
+
+find.ttp: $(FIND_OBJS)
+	$(AM_V_LD)$(LD) $^ $(LDFLAGS) -o $@
 
 gemdos.o: ../libsrc/gemdos.S
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<

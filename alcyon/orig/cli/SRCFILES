@@ -2,8 +2,12 @@ COMA_SRCS = coma.S command.c
 
 COMA_OBJS = coma.o command.o 
 
+FIND_SRCS = find.c
+
+FIND_OBJS = $(FIND_SRCS:.c=.o)
+
 LIB1OBJS=lmul.o
 
-SRCS = $(COMA_SRCS)
+SRCS = $(COMA_SRCS) $(FIND_SRCS)
 
 EXTRA_DIST = GNUmakefile Makefile SRCFILES

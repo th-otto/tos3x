@@ -13,7 +13,7 @@ include ../Makefile.sil
 CPPFLAGS = -I ../common -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = command.tos
+PROGRAMS = command.tos find.ttp
 
 all: $(PROGRAMS)
 
@@ -21,6 +21,9 @@ include SRCFILES
 
 command.tos: $(COMA_OBJS)
 	$(AM_V_LD)$(LD) -nostdlib $(COMA_OBJS) $(LDFLAGS) -o $@ -lgcc
+
+find.ttp: $(FIND_OBJS)
+	$(AM_V_LD)$(LD) $(FIND_OBJS) $(LDFLAGS) -o $@
 
 check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i ../bin/$$i; done

@@ -2,6 +2,10 @@ COMA_SRCS = coma.S command.c
 
 COMA_OBJS = coma.o command.o 
 
+FIND_SRCS = find.c
+
+FIND_OBJS = $(FIND_SRCS:.c=.o)
+
 LIB1OBJS=lmul.o lrem.o ldiv.o uldiv.o ulrem.o gemdos.o bios.o
 
 SRCS = $(COMA_SRCS)
