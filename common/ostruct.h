@@ -45,7 +45,7 @@ typedef struct
 {
     __uint16_t time;         /* Time like Tgettime() */
     __uint16_t date;         /* Date like Tgetdate() */
-} DOSTIME;
+} _DOSTIME;
 
 /*
  *  BPB - Bios Parameter Block

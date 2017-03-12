@@ -33,7 +33,7 @@ OFD
 	/*   0 */ OFD   *o_link;		/*	link to next OFD					*/
 	/*   4 */ uint16_t o_flag;
 					/* the following 3 items must be as in FCB: */
-	/*   6 */ DOSTIME o_td;			/*	creation time/date: little-endian!	*/
+	/*   6 */ _DOSTIME o_td;		/*	creation time/date: little-endian!	*/
 	/*  10 */ CLNO  o_strtcl; 		/*	starting cluster number 			*/
 	/*  12 */ int32_t  o_fileln;	/*  length of file in bytes			    */
 
@@ -106,7 +106,7 @@ FCB
 	char f_name[11];
 	char f_attrib;
 	char f_fill[10];
-	DOSTIME f_td;			/* time, date */
+	_DOSTIME f_td;			/* time, date */
 	CLNO f_clust;
 	int32_t f_fileln;
 };
@@ -126,7 +126,7 @@ DND /* directory node descriptor */
 	/* 12 */ uint16_t d_flag;
 	/* 14 */ CLNO d_strtcl;		/*	starting cluster number of dir		*/
 
-	/* 16 */ DOSTIME d_td;		/*	time/date: little-endian!			*/
+	/* 16 */ _DOSTIME d_td;		/*	time/date: little-endian!			*/
 	/* 20 */ OFD  *d_ofd;		/*	open file descr for this dir		*/
 	/* 24 */ DND  *d_parent; 	/*	parent dir (..) 					*/
 	/* 28 */ DND  *d_left;		/*	1st child							*/

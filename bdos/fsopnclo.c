@@ -39,7 +39,7 @@ PP(int part;)
 	BCB *b;
 	char x1[34];
 	struct {
-		DOSTIME f_td;			/* time, date */
+		_DOSTIME f_td;			/* time, date */
 		CLNO f_clust;
 		int32_t f_fileln;
 	} f;

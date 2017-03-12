@@ -13,7 +13,7 @@ PP(struct stat *st;)
 	long pos;
 	unsigned short buf[2];
 	unsigned short mode;
-	DOSTIME dtime;
+	_DOSTIME dtime;
 	register FD *fp;	
 	
 	/* is fd valid? */

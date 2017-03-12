@@ -2,8 +2,8 @@
 #include <ostruct.h>
 #include "lib.h"
 
-time_t ftimtosec(P(DOSTIME *) f)
-PP(DOSTIME *f;)
+time_t ftimtosec(P(_DOSTIME *) f)
+PP(_DOSTIME *f;)
 {
 	struct tm tm;
 	
