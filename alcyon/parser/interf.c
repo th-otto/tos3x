@@ -46,7 +46,10 @@ VOID outasm(NOTHING)
 	oputchar('\t');
 	for (p = cstr; *p; p++)
 	{
-		oputchar(*p);
+		if (*p == '\t')
+			oputchar(' ');
+		else
+			oputchar(*p);
 		if (*p == '\n')
 			oputchar('\t');
 	}
