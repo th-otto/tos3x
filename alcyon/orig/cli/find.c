@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <portab.h>
 #include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 

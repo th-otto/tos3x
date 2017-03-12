@@ -6,8 +6,16 @@ FIND_SRCS = find.c
 
 FIND_OBJS = $(FIND_SRCS:.c=.o)
 
+TIME_SRCS = time.c dt.c dts.S
+
+TIME_OBJS = time.o dt.o dts.o
+
+DATE_SRCS = date.c dt.c dts.S
+
+DATE_OBJS = date.o dt.o dts.o
+
 LIB1OBJS=lmul.o
 
-SRCS = $(COMA_SRCS) $(FIND_SRCS)
+SRCS = $(COMA_SRCS) $(FIND_SRCS) $(DATE_SRCS) $(TIME_SRCS)
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES
+EXTRA_DIST = GNUmakefile Makefile SRCFILES dt.h

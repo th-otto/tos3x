@@ -1,7 +1,7 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-PROGRAMS = command.tos find.ttp
+PROGRAMS = command.tos find.ttp time.prg date.prg
 
 LIBS = ${LIBC}
 
@@ -15,6 +15,12 @@ command.tos: $(COMA_OBJS) $(LIB1OBJS) ${MAKEFILE}
 
 find.ttp: $(FIND_OBJS) ${MAKEFILE}
 	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(CRT0) $(FIND_OBJS) $(LIBS)
+
+time.prg: $(TIME_OBJS) ${MAKEFILE}
+	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(TIME_OBJS)
+
+date.prg: $(DATE_OBJS) ${MAKEFILE}
+	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(DATE_OBJS)
 
 lmul.o:	../libsrc/lmul.o
 	$(CP) $< $@

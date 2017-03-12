@@ -13,7 +13,7 @@ include ../Makefile.sil
 CPPFLAGS = -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = command.tos find.ttp
+PROGRAMS = command.tos find.ttp time.prg date.prg
 
 all: $(PROGRAMS)
 
@@ -24,6 +24,12 @@ command.tos: $(COMA_OBJS) gemdos.o bios.o
 
 find.ttp: $(FIND_OBJS)
 	$(AM_V_LD)$(LD) $^ $(LDFLAGS) -o $@
+
+time.prg: $(TIME_OBJS)
+	$(AM_V_LD)$(LD) -nostdlib $(TIME_OBJS) $(LDFLAGS) -o $@ -lgcc
+
+date.prg: $(DATE_OBJS)
+	$(AM_V_LD)$(LD) -nostdlib $(DATE_OBJS) $(LDFLAGS) -o $@ -lgcc
 
 gemdos.o: ../libsrc/gemdos.S
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<

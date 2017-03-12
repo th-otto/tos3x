@@ -1,7 +1,7 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-PROGRAMS = command.tos find.ttp
+PROGRAMS = command.tos find.ttp time.prg date.prg
 
 all: $(PROGRAMS)
 
@@ -83,9 +83,17 @@ lrem.o:	../libsrc/lrem.o
 ldiv.o:	../libsrc/ldiv.o
 	$(CP) $< $@
 
+time.prg: $(TIME_OBJS) ${MAKEFILE}
+	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(TIME_OBJS)
+
+date.prg: $(DATE_OBJS) ${MAKEFILE}
+	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(DATE_OBJS)
+
 check:: $(PROGRAMS)
 	cmp command.tos ${BIN}command.tos
 	cmp find.ttp ${BIN}find.ttp
+	cmp time.prg ${BIN}time.prg
+	cmp date.prg ${BIN}date.prg
 
 clean:
 	$(RM) *.o *.a command.s *.i *.1 *.2 *.rel *.mod $(PROGRAMS)
