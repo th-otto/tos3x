@@ -80,7 +80,7 @@ NAMES
 
 struct xjmpbuf {
 	long old_a6;
-	long old_a6;
+	long old_sp;
 	long retaddr;
 #if BINEXACT
 	int drv; /* ugly hack to get it linked just after jb */

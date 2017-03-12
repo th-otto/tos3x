@@ -143,12 +143,13 @@ NAMES
 #include <string.h>
 #include <osbind.h>
 #include <fcntl.h>
+#include <limits.h>
 
 #define _(x) x
 
 struct xjmpbuf {
 	long old_a6;
-	long old_a6;
+	long old_sp;
 	long retaddr;
 };
 
@@ -168,6 +169,21 @@ int cpmread PROTO((char *buf));
 int cpmwrite PROTO((const char *buf));
 VOID xbrkpt PROTO((NOTHING));
 VOID devector PROTO((NOTHING));
+
+/*
+ * from library
+ */
+long ldiv PROTO((long al1, long al2));
+long lrem PROTO((long al1, long al2));
+long lmul PROTO((long l1, long l2));
+long uldiv PROTO((long al1, long al2));
+long ulrem PROTO((long al1, long al2));
+
+#ifdef __GNUC__
+#  define ulrem(a, b) ((unsigned long)(a) % (unsigned long)(b))
+#  define uldiv(a, b) ((unsigned long)(a) / (unsigned long)(b))
+#endif
+
 
 #define FALSE 0
 #define TRUE 1
@@ -306,64 +322,6 @@ PP(const char *d;)
 }
 
 /***************************************************************************/
-static VOID prthex(P(unsigned int) h)
-PP(unsigned int h;)
-{
-	unsigned int h2;
-
-	if ((h2 = (h >> 4)) != 0)
-		prthex(h2);
-	else
-		Fwrite(1, 1L, "0");
-	Fwrite(1, 1L, &hexch[h & 0x0f]);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-static VOID pdl(P(long) d)
-PP(long d;)
-{
-	long d2;
-
-	if ((d2 = d / 10) != 0)
-		pdl(d2);
-	Fwrite(1, 1L, &hexch[d % 10]);
-}
-
-/***************************************************************************/
-/***************************************************************************/
-static VOID prtdecl(P(long) d)
-PP(long d;)
-{
-	if (d)
-		pdl(d);
-	else
-		Fwrite(1, 1L, "0");
-}
-
-/***************************************************************************/
-/***************************************************************************/
-static VOID prtDclFmt(P(long) d, P(int) cnt, P(char *) ch)
-PP(long d;)
-PP(int cnt;)
-PP(char *ch;)
-{
-	register int i;
-	register long k, j;
-
-	k = (d ? d : 1);
-	j = 1;
-	for (i = 1; i < cnt; i++)
-		j = MUL10(j);
-	while (k < j)
-	{
-		Fwrite(1, 1L, ch);
-		k = MUL10(k);
-	}
-	prtdecl(d);
-}
-
-/***************************************************************************/
 /***************************************************************************/
 
 static char xtoupper(P(char) c)
@@ -477,6 +435,121 @@ static VOID dspSrc(NOTHING)
 static VOID dspDone(NOTHING)
 {
 	wrt(_("Done."));
+}
+
+/***************************************************************************/
+static VOID prthex(P(unsigned int) h)
+PP(unsigned int h;)
+{
+	unsigned int h2;
+
+	if ((h2 = (h >> 4)) != 0)
+		prthex(h2);
+	wrtch(hexch[h & 0x0f]);
+}
+
+/***************************************************************************/
+/***************************************************************************/
+static VOID prtdecl(P(long) n)
+PP(long n;)
+{
+	__uint8_t digs[40];
+	register __uint8_t *p = digs;
+	long base = 10;
+	
+	while (n)
+	{
+		*p++ = ulrem(n, base);
+		n = uldiv(n, base);
+	}
+	if (p == digs)
+		*p++ = 0;
+	while (p != digs)
+	{
+		wrtch(hexch[*--p]);
+	}
+}
+
+/***************************************************************************/
+/***************************************************************************/
+static VOID prtDclFmt(P(long) n, P(int) cnt, P(const char *) ch)
+PP(long n;)
+PP(register int cnt;)
+PP(const char *ch;)
+{
+	__uint8_t digs[40];
+	register __uint8_t *p = digs;
+	long base = 10;
+	register int len;
+	
+	while (n)
+	{
+		*p++ = ulrem(n, base);
+		n = uldiv(n, base);
+	}
+	if (p == digs)
+		*p++ = 0;
+	len = (int)((long) p - (long) digs);
+	while (len < cnt)
+	{
+		wrt(ch);
+		len++;
+	}
+	while (p != digs)
+	{
+		wrtch(hexch[*--p]);
+	}
+}
+
+/*
+ * Print the result of n * clsiz, making sure it does not overflow the value of ULONG_MAX.
+ * clsiz is assumed to be a power of 2.
+ */
+static VOID prtLarge(P(long) n, P(long) clsize)
+PP(register long n;)
+PP(register long clsize;)
+{
+	register int shift = 0;
+	const char *suff;
+	
+	if (clsize != 0)
+	{
+		while (!(clsize & 1))
+		{
+			clsize = (clsize >> 1) & 0x7fffffffl;
+			shift++;
+		}
+	}
+	if (n != 0)
+	{
+		while (!(n & 1))
+		{
+			n = (n >> 1) & 0x7fffffffl;
+			shift++;
+		}
+	}
+	if (shift >= 40)
+	{
+		suff = " TB";
+		shift -= 40;
+	} else if (shift >= 30)
+	{
+		suff = " GB";
+		shift -= 30;
+	} else if (shift >= 20)
+	{
+		suff = " MB";
+		shift -= 20;
+	} else if (shift >= 10)
+	{
+		suff = " KB";
+		shift -= 10;
+	} else
+	{
+		suff = "";
+	}
+	prtDclFmt((n * clsize) << shift, 10, " ");
+	wrt(suff);
 }
 
 /***************************************************************************/
@@ -1275,7 +1348,7 @@ PP(char *dst;)
 									dspSrc();
 									dspTo();
 									dspDst();
-									compl_code = Frename(0, srcFlNm, dstFlNm);
+									compl_code = Frename(srcFlNm, dstFlNm);
 									if (compl_code < 0)
 									{
 										wrt(_("  Rename Unsucessfull!"));
@@ -1409,7 +1482,7 @@ PP(char **argv;)
 				wrt("/");
 				prtDclFmt((long) (j & 0x1F), 2, "0");
 				wrt("/");
-				prtDclFmt((long) (((j >> 9) & 0x7F) + 80), 2, "0");
+				prtDclFmt((long) ((((j >> 9) & 0x7F) + 80) % 100), 2, "0");
 				wrt("  ");
 
 				dt = (short *)&srchb[22];
@@ -2336,9 +2409,10 @@ PP(register char *from;)
 static VOID freeCmd(P(char *) p)
 PP(register char *p;)
 {
-	long sbuf[4];
+	_DISKINFO sbuf;
 	register int drv;
 	char drvch;
+	register long clsiz;
 	
 	ucase(p);
 	if (*p)
@@ -2349,7 +2423,7 @@ PP(register char *p;)
 	{
 		errPath();
 		wrt(p);
-	} else if (Dfree(sbuf, drv) < 0)
+	} else if (Dfree(&sbuf, drv) < 0)
 	{
 		wrt(_("Unable to get drive information: "));
 		wrt(p);
@@ -2364,20 +2438,23 @@ PP(register char *p;)
 		wrtch(drvch);
 		wrt(":");
 		wrtnl();
+		clsiz = sbuf.b_clsiz * sbuf.b_secsiz;
 		wrtln(_("Drive size in BYTES    "));
-		prtDclFmt(sbuf[1] * sbuf[3] * sbuf[2], 8, " ");
+		prtLarge(sbuf.b_total, clsiz);
 		wrtln(_("BYTES used on drive    "));
-		prtDclFmt((sbuf[1] - sbuf[0]) * sbuf[3] * sbuf[2], 8, " ");
+		prtLarge((sbuf.b_total - sbuf.b_free), clsiz);
 		wrtln(_("BYTES left on drive    "));
-		prtDclFmt(sbuf[0] * sbuf[3] * sbuf[2], 8, " ");
+		prtLarge(sbuf.b_free, clsiz);
 		wrtln(_("Total Units on Drive   "));
-		prtDclFmt(sbuf[1], 8, " ");
+		prtDclFmt(sbuf.b_total, 10, " ");
 		wrtln(_("Free Units on Drive    "));
-		prtDclFmt(sbuf[0], 8, " ");
+		prtDclFmt(sbuf.b_free, 10, " ");
 		wrtln(_("Sectors per Unit       "));
-		prtDclFmt(sbuf[3], 8, " ");
+		prtDclFmt(sbuf.b_clsiz, 10, " ");
 		wrtln(_("Bytes per Sector       "));
-		prtDclFmt(sbuf[2], 8, " ");
+		prtDclFmt(sbuf.b_secsiz, 10, " ");
+		wrtln(_("Bytes per Cluster      "));
+		prtDclFmt(clsiz, 10, " ");
 	}
 }
 
@@ -2738,7 +2815,7 @@ PP(char *outsd_tl;)
 			} else if (xcmps(s, "CD"))
 			{
 				preCmd(&rd);
-				cdCmd(argc == 0 ? p : NULL);
+				cdCmd(argc == 0 ? NULL : p);
 			} else if (xcmps(s, "CMDERR"))
 			{
 				preCmd(&rd);
@@ -2950,7 +3027,7 @@ VOID cmain(P(char *) bp)
 PP(char *bp;)								/* Base page address */
 {
 	char *parm[MAXARGS];
-	register char *tl;
+	char *tl;
 	int i, k, cmd;
 	int err;
 

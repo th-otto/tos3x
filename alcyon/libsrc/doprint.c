@@ -11,6 +11,7 @@
 
 #include "lib.h"
 #include <string.h>
+#include <stdint.h>
 
 
 static VOID __putch(P(FILE *) stream, P(int) mode, P(char) c)
@@ -138,6 +139,9 @@ PP(va_list args;)
 
 		case 'u':						/* decimal unsigned */
 		case 'U':
+#if SIZE_MAX == UINT16_MAX
+		case 'z':
+#endif
 			if (longf)
 			{
 				n = va_arg(args, long);
@@ -149,6 +153,21 @@ PP(va_list args;)
 			}
 			__prtint(n, buf, 10, 0, fn, 0);
 			break;
+
+#if SIZE_MAX != UINT16_MAX
+		case 'z':
+			if (longf)
+			{
+				n = va_arg(args, long);
+				fn = __prtld;
+			} else
+			{
+				n = va_arg(args, size_t);
+				fn = __prtshort;
+			}
+			__prtint(n, buf, 10, 0, fn, 0);
+			break;
+#endif
 
 		case 'o':						/* octal unsigned */
 		case 'O':
