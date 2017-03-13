@@ -853,6 +853,11 @@ PP(char **argv;)
 	}
 	cleanup();
 #else
+	if (arfp != NULL)
+	{
+		fclose(arfp);
+		arfp = NULL;
+	}
 	if (tflg || pflg)
 		cleanup();
 	tmp2ar();
