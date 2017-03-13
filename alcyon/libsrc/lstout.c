@@ -15,7 +15,7 @@
  *									    
  ****************************************************************************/
 
-#include <osif.h>
+#include <osbind.h>
 #include "lib.h"
 
 /* note: not used for GEMDOS; we can use Fwrite as usual */
@@ -29,6 +29,6 @@ PP(register const char *buffer;)						/* -> 1st char output      */
 	xcount = count = (0xFF & *buffer++);	/* Copy for later      */
 
 	while (count-- > 0)					/* Until all written       */
-		__OSIF(LSTOUT, *buffer++);		/* Output next character   */
+		Cprnout(*buffer++);		/* Output next character   */
 	return xcount;					/* return original count   */
 }

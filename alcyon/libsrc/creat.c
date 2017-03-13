@@ -23,7 +23,6 @@
 *****************************************************************************/
 #include <osif.h>
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>

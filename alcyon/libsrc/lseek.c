@@ -29,7 +29,6 @@
 
 #include <osif.h>
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 
 
@@ -43,38 +42,14 @@ PP(int whence;)								/* Sense of offset      */
 	/* Convert to pointer */
 	if ((fp = _chkc(fd)) == NULLFD)
 		return -1;	
-#if GEMDOS
 	{
 		long pos;
 		pos = Fseek(offs, fp->dosfd, whence);
 		if (pos >= 0)
 			fp->offset = pos;
+		else
+			__set_errno(_XltErr((int)pos, ERANGE));
 	}
-#else
-	switch (whence)
-	{
-	case SEEK_SET:						/* From beginning of file   */
-		fp->offset = offs;
-		break;
-
-	case SEEK_CUR:						/* From present position    */
-		fp->offset += offs;
-		break;
-
-	case SEEK_END:						/* From end of file     */
-		/* go find the end of file  */
-		fp->offset = _filesz(fd);
-		/* compute from end of file */
-		fp->offset = fp->offset + offs;
-		break;
-
-	default:							/* All others NFG       */
-		RETERR(-1, EINVAL);
-	}
-	/* bad seek call? */
-	if (fp->offset < 0)
-		fp->offset = -1;
-#endif
 	/* any seek clears EOF */
 	fp->flags &= ~ATEOF;
 	return fp->offset;

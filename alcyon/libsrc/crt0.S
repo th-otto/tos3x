@@ -42,8 +42,8 @@ start:		move.l	4(a7),a0		*	a0 -> Base page
 		suba.l  a0,a1
 		move.l  a1,__PgmSize
 		lea.l	command(a0),a2		*	a2 -> command line
+		moveq	#0,d0			*	clear junk
 		move.b	(a2)+,d0		*	d0 = byte count
-		andi.l	#$ff,d0			*	clear junk
 		move.w	d0,-(a7)		*	push length
 		move.l	a2,-(a7)		*	Push commnd
 		suba.l	a6,a6			*	Clear frame pointer

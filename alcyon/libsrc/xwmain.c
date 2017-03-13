@@ -27,7 +27,7 @@
 *
 *****************************************************************************/
 
-#include <osif.h>
+#include <osbind.h>
 #include "lib.h"
 #include <stdlib.h>
 #include <string.h>
@@ -48,6 +48,7 @@ char **environ;
 static int argc;						/* Arg count */
 static char **argv;						/* -> array of pointers */
 static char **argv2;					/* Companion ptr to argv */
+static _DTA dta;
 
 #if 0
 #define STRICTLY_COMPATIBLE_WITH_STANDARD
@@ -60,11 +61,11 @@ PP(const char *s1;)
 PP(const char *s2;)
 {
 	/* Output error message */
-	__OSIF(C_WRITESTR, s1);
+	Cconws(s1);
 	/* And filename */
-	__OSIF(C_WRITESTR, s2);
+	Cconws(s2);
 	/* + Newline */
-	__OSIF(C_WRITESTR, "\r\n");
+	Cconws("\r\n");
 	/* And fail hard */
 	exit(-1);
 }
@@ -89,81 +90,7 @@ PP(register char *ptr;)							/* -> Argument string to add */
 /*****************************************************************************/
 
 
-#ifndef NOWILD
-
-#if !GEMDOS
-/*
- *	Toasc routine -- combines the FCB name in the DMA and the user number
- *	/ drive field to produce an ascii file name for SEARCHes.
- *
- */
-static VOID _toasc(P(register FD *) p, P(register char) c, P(register char *) buf)
-PP(register FD *p;)						/* -> Data area */
-PP(register char c;)						/* 0 .. 3 search code */
-PP(register char *buf;)					/* Output buffer area */
-{
-	register char *f;						/* -> Fcb in DMA buffer */
-	int i;
-
-	/* Nullify at first */
-	*buf = '\0';
-	i = FALSE;
-	/* Pnt to results of search */
-	f = p->buffer;
-#if CPM
-	/* c == directory search code */
-	f += c * 32;
-	if (p->user)
-	{
-		/* User # not default, cvt to real user # */
-		i = (p->user) - 1;
-		if (i >= 10)
-			*buf++ = '1';				/* Assume user # <15 */
-		*buf++ = (i % 10) + '0';
-		*buf++ = ':';
-		i = TRUE;
-	}
-#endif
-	/* Drive specified? */
-	if (p->fcb.drive)
-	{
-		if (i)							/* User #? */
-			buf--;						/* Yes, back up over ':' */
-		/* Put in drive code */
-		*buf++ = p->fcb.drive - 1 + 'a';
-		*buf++ = ':';					/* And delimiter */
-	}
-	/* Move the filename */
-	for (i = 1; i < 9; i++)
-	{
-		if (f[i] != ' ')
-			*buf++ = tolower((f[i] & 0x7f));
-	}
-	/* Put in delimiter */
-	*buf++ = '.';
-	/* Move in extension */
-	for (i = 9; i < 12; i++)
-	{
-		if (f[i] != ' ')
-			*buf++ = tolower((f[i] & 0x7f));
-	}
-	/* Null at end */
-	*buf++ = '\0';
-}
-
-#endif
-
-#else
-
-/* stubroutine for OPTION*.h package */
-VOID nowildcards(NOTHING)
-{
-}
-
-#endif
-
-
-int __main(P(char *) com, P(int) len)
+static VOID initargs(P(char *) com, P(int) len)
 PP(char *com;)								/* Command address */
 PP(int len;)								/* Command length */
 {
@@ -173,6 +100,8 @@ PP(int len;)								/* Command length */
 	register char c;						/* Character temp */
 	register BASEPAGE *bp;
 	
+	/* set DTA to a save place; it might point to the commandline buffer */
+	Fsetdta(&dta);
 	/* -> first free location */
 	environ = (char **)sbrk(0);
 	argv2 = environ;
@@ -284,61 +213,9 @@ PP(int len;)								/* Command length */
 	
 				default:
 	
-#ifndef NOWILD
-					if (strchr(s, '?') ||	/* Wild */
-						strchr(s, '*'))		/* Cards? */
-					{
-#if GEMDOS
-						_DTA dta;
-						long res;
-						
-						__OSIF(SETDMA, &dta);
-						res = Fsfirst(s, 0);
-						if (res < 0)
-							_err(s, ": No match");
-						/* Do search next's */
-						while (res >= 0)
-						{
-							/* Allocate area */
-							p = _salloc(strlen(dta.d_fname) + 1);
-							/* Move in filename */
-							strcpy(p, dta.d_fname);
-							/* Add this file to argv */
-							addargv(p);
-							res = Fsnext();
-						}
-#else
-						FD *pfd;							/* File Desc temp */
-						char tmpbuf[30];					/* Filename temp */
-	
-						/* Use unused channel */
-						pfd = _getccb(STDERR + 1);
-						/* Use buffer for DMA */
-						__OSIF(SETDMA, pfd->buffer);
-						/* Do the search */
-						c = jsfirst(s, 0);
-						if (c < 0)
-							_err(s, ": No match");
-						/* Do search next's */
-						while (c >= 0)
-						{
-							/* Convert file to ascii */
-							_toasc(pfd, c, tmpbuf);
-							/* Allocate area */
-							p = _salloc(strlen(tmpbuf) + 1);
-							/* Move in filename */
-							strcpy(p, tmpbuf);
-							/* Add this file to argv */
-							addargv(p);
-							c = jsnext();
-						}
-#endif
-					} else
-#endif
-					{
-						/* save in argv */
-						addargv(s);
-					}
+					/* save in argv */
+					addargv(s);
+					break;
 				}
 			}
 		}
@@ -348,6 +225,14 @@ PP(int len;)								/* Command length */
 		argc--;
 	}
 	
+}
+
+
+int __main(P(char *) com, P(int) len)
+PP(char *com;)								/* Command address */
+PP(int len;)								/* Command length */
+{
+	initargs(com, len);
 	/* Allocate the pointers */
 	if (brk((VOIDPTR)argv2) < 0)
 		_err("Stack Overflow", "");

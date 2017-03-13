@@ -12,6 +12,19 @@
 *	Pulled out of 'w.s' 1/84 whf
 *	Fixed 2/84 sw
 *
+* DO NOT USE; does not work with the current function prologue/epilogue:
+*
+* link a6,#size
+* movem.l saveregs,-(a7)
+* ...
+* movem.l (a7)+,saveregs
+* unlk a6
+* rts
+*
+* manipulating sp does not work because that restores
+* the saved registers from the wrong location in the epilogue
+*
+
 	xdef	__salloc
 __salloc:
 	move.l	(sp)+,a0			*	Save return address

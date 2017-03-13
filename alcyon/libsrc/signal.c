@@ -68,22 +68,7 @@ static VOID _setvec(P(int) vector, P(VOIDPTR) func)
 PP(int vector;)								/* Vector #         */
 PP(VOIDPTR func;)								/* Function address     */
 {
-#if GEMDOS
 	Setexc(vector, func);
-#else
-	struct
-	{									/* A CP/M EPB structure     */
-		int vec;						/* Vector number        */
-		char *userepa;					/* User's epa           */
-		char *bdosepa;					/* BDOS's epa           */
-	} epb;
-
-	epb.vec = vector;					/* Set up vector        */
-	epb.userepa = func;					/* and function         */
-	epb.bdosepa = 0L;					/* Clear return word        */
-	/* Do it. */
-	__BDOS(SETVEC, (long)&epb);
-#endif
 }
 
 

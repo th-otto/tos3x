@@ -64,28 +64,15 @@ PP(int bdosfunc;)							/* BDOS Function        */
 {
 	register FD *fp;						/* -> ccb area          */
 	register int rv;						/* Return value         */
-#if CPM
-	register int xuser;						/* User number          */
-#endif
 	
 	fp = _getccb(ch);					/* Fetch ccb pointer        */
 
-#if GEMDOS
 	{
 		register short mode;
 		register long dosfd;
-		char tmpbuf[128];
-		register size_t len;
+		char tmpbuf[PATH_MAX];
 		
-		if (strchr(filename, '/') != 0)
-		{
-			len = strlen(filename) + 1;
-			if (len < sizeof(tmpbuf))
-			{
-				strcpy(tmpbuf, filename);
-				filename = _dosify(tmpbuf);
-			}
-		}
+		filename = _dosify(strncpy(tmpbuf, filename, sizeof(tmpbuf)));
 		
 		rv = -1;
 		switch (bdosfunc)
@@ -138,51 +125,4 @@ PP(int bdosfunc;)							/* BDOS Function        */
 	}
 	
 	return rv;
-	
-#else
-
-	{
-		register struct fcbtab *fcbp;			/* -> FCB area in ccb       */
-	
-		fcbp = &(fp->fcb);					/* Fetch fcb pointer        */
-		rv = 0;						/* Default to success       */
-		
-		if (_parsefn(filename, fcbp) != 0)	/* Parse filename into fcb    */
-			RETERR(-1, EINVAL);		/* Quit if name not ok      */
-	
-#if CPM									/* Handling user numbers?   */
-		if (fcbp->fuser)					/* User # specified?        */
-			fp->user = fcbp->fuser;			/* put it where we use it   */
-#endif
-		if (bdosfunc == CREATE &&			/* Creating file?       */
-			strchr(fcbp->fname, '?'))		/* Wild cards @!@#$!!!      */
-			RETERR(-1, EINVAL);		/* Just quit            */
-		
-#if CPM
-		xuser = _chkuser(fp->user);			/* Change user # if needed  */
-#endif
-		
-		if (bdosfunc == CREATE)				/* Creating file?       */
-			__OSIF(DELETE, fcbp);			/*  delete it first     */
-		
-#if CPM									/* running some brand of CPM */
-		if (bdosfunc == OPEN)				/* Opening a file?      */
-		{									/* Yes...           */
-			if (fp->flags & ISREAD)			/* Open file Read-Only?     */
-				(fcbp->fname)[5] |= HIBIT;	/* Turn on F6' attribute bit */
-		}									/*              */
-#endif
-		
-		rv = __OSIF(bdosfunc, fcbp);		/* Do requested operation   */
-		
-#if CPM
-		_uchkuser(fp->user, xuser);			/* Change back if needed    */
-#endif
-		
-		if (bdosfunc == SEARCHF || bdosfunc == SEARCHN)	/*           */
-			return rv;					/* return directory count   */
-	}
-	
-	return (rv <= 3) ? 0 : -1;	/* Binary return code       */
-#endif
 }

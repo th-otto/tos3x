@@ -18,17 +18,9 @@ PP(register struct stat;)
 	int drv;
 	int handle;
 	int res;
-	char tmpbuf[128];
+	char tmpbuf[PATH_MAX];
 	
-	if (strchr(filename, '/') != 0)
-	{
-		size_t len = strlen(filename) + 1;
-		if (len < sizeof(tmpbuf))
-		{
-			strcpy(tmpbuf, filename);
-			filename = _dosify(tmpbuf);
-		}
-	}
+	filename = _dosify(strncpy(tmpbuf, filename, sizeof(tmpbuf)));
 		
 	olddta = (_DTA *)Fgetdta();
 	Fsetdta(&dta);

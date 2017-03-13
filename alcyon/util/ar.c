@@ -392,19 +392,19 @@ PP(const char *name;)
 #if HAVE_STAT
 	if (stat(name, stp) < 0)
 	{
-		fprintf(stderr, _("%s: can't find %s\n"), program_name, name);
+		fprintf(stderr, _("%s: can't find %s: %s\n"), program_name, name, strerror(errno));
 		endit(0);
 	}
 #endif
 	if ((ifd = fopen(name, "rb")) == NULL)
 	{
-		fprintf(stderr, _("%s: can't open %s\n"), program_name, name);
+		fprintf(stderr, _("%s: can't open %s: %s\n"), program_name, name, strerror(errno));
 		endit(0);
 	}
 	/* BUG: ar should not depend on members being object files */
 	if (getchd(ifd, &couthd) < 0)
 	{
-		fprintf(stderr, _("%s: can't read %s\n"), program_name, name);
+		fprintf(stderr, _("%s: can't read %s: %s\n"), program_name, name, strerror(errno));
 		endit(0);
 	}
 	if (areof && psflg)
@@ -483,7 +483,7 @@ PP(const char *ap;)
 		mode = DEFMODE;
 	if ((i = open(ap, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, mode)) < 0)
 	{
-		fprintf(stderr, _("%s: can't create %s\n"), program_name, ap);
+		fprintf(stderr, _("%s: can't create %s: %s\n"), program_name, ap, strerror(errno));
 		endit(0);
 	}
 	ofd = fdopen(i, "wb");
@@ -534,7 +534,7 @@ static VOID tmp2ar(NOTHING)
 
 	if ((ofd = open(arname, O_WRONLY|O_CREAT|O_TRUNC|O_BINARY, DEFMODE)) < 0)
 	{
-		fprintf(stderr, _("%s: can't create %s\narchive left in %s\n"), program_name, arname, tempname);
+		fprintf(stderr, _("%s: can't create %s: %s\narchive left in %s\n"), program_name, arname, strerror(errno), tempname);
 		tempname = NULL;					/* keeps endit from removing the archive */
 		return;
 	}
@@ -731,7 +731,7 @@ PP(char **argv;)
 		tempname = mktemp(tempnbuf);
 		if ((tempfd = fopen(tempname, "wb")) == NULL)
 		{
-			fprintf(stderr, _("%s: can't create %s\n"), program_name, tempname);
+			fprintf(stderr, _("%s: can't create %s: %s\n"), program_name, tempname, strerror(errno));
 			endit(0);
 		}
 
@@ -795,43 +795,46 @@ PP(char **argv;)
 	/* make temp file the archive file */
 	if (stat(tempname, &tstat) < 0)
 	{
-		fprintf(stderr, _("%s: can't find %s\n", program_name, tempname);
+		fprintf(stderr, _("%s: can't find %s: %s\n", program_name, tempname, strerror(errno));
 		endit(0);
 	}
 	if (arfp != NULL)
 	{
 		if (stat(arname, &astat) < 0)
 		{
-			fprintf(stderr, _("%s: can't find %s\n"), program_name, arname);
+			fprintf(stderr, _("%s: can't find %s: %s\n"), program_name, arname, strerror(errno));
 			endit(0);
 		}
-		if ((astat.st_nlink != 1) || (astat.st_dev != tstat.st_dev))
+		if (astat.st_nlink != 1 || astat.st_dev != tstat.st_dev)
 		{
 			fclose(arfp);
 			tmp2ar();
-		} else if ((unlink(arname) == -1))
+		} else if (unlink(arname) == -1)
 		{
-			fprintf(stderr, _("%s: can't unlink old archive\nnew archive left in %s\n"), program_name, tempname);
-			tempname = 0;				/* keeps endit from removing the archive */
-		} else if (link(tempname, arname) < 0)
+			fprintf(stderr, _("%s: can't unlink old archive: %s\nnew archive left in %s\n"), program_name, strerror(errno), tempname);
+			tempname = NULL;				/* keeps endit from removing the archive */
+		} else if (rename(tempname, arname) < 0)
 		{
 			if (copy(tempname, arname) < 0)
 			{
-				fprintf(stderr, _("%s: can't link to %s\nnew archive left in %s\n"), program_name, arname, tempname);
-				tempname = 0;
+				fprintf(stderr, _("%s: can't link to %s: %s\nnew archive left in %s\n"), program_name, arname, strerror(errno), tempname);
 			}
+			tempname = NULL;
+		} else
+		{
+			tempname = NULL;
 		}
 	} else
 	{
 		if ((arfp = fopen(arname, "wb")) == NULL)
 		{
-			fprintf(stderr, _("%s: can't create %s\narchive left in %s\n"), program_name, arname, tempname);
+			fprintf(stderr, _("%s: can't create %s: %s\narchive left in %s\n"), program_name, arname, strerror(errno), tempname);
 			tempname = NULL;				/* keeps endit from removing the archive */
 			endit();
 		}
 		if (stat(arname, &astat) < 0)
 		{
-			fprintf(stderr, _("%s: can't find %s\n"), program_name, arname);
+			fprintf(stderr, _("%s: can't find %s: %s\n"), program_name, arname, strerror(errno));
 			endit(0);
 		}
 		fclose(arfp);
@@ -839,10 +842,13 @@ PP(char **argv;)
 		{
 			tmp2ar();
 			exitstat = EXIT_SUCCESS;
-		} else if ((unlink(arname) < 0) || (link(tempname, arname) < 0))
+		} else if (unlink(arname) < 0 || rename(tempname, arname) < 0)
 		{
-			fprintf(stderr, _("%s: can't link to %s\nnew archive left in %s\n"), program_name, arname, tempname);
+			fprintf(stderr, _("%s: can't link to %s: %s\nnew archive left in %s\n"), program_name, arname, strerror(errno), tempname);
 			tempname = NULL;				/* keeps endit from removing the archive */
+		} else
+		{
+			tempname = NULL;
 		}
 	}
 	cleanup();

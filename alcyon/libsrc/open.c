@@ -22,7 +22,6 @@
 *****************************************************************************/
 #include <osif.h>
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -92,7 +91,8 @@ _va_dcl
 			if (ret == 0)
 			{
 				close(ch->chan);
-				RETERR(-1, EEXIST);
+				__set_errno(EEXIST);
+				return -1;
 			} else if (flags & O_TRUNC)
 			{
 				ret = __open(ch->chan, fname, CREATE);
@@ -108,7 +108,8 @@ _va_dcl
 	{
 		/* deallocate channel */
 		_freec(ch->chan);
-		RETERR(-1, ENOENT);
+		__set_errno(_XltErr(ret, ENOENT));
+		return -1;
 	}
 	
 	/* Set OPEN bit */

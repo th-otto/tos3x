@@ -24,7 +24,6 @@
  ****************************************************************************/
 #include <osif.h>
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 
 size_t write(P(int) fd, P(const VOIDPTR) buff, P(size_t) bytes)
@@ -43,8 +42,11 @@ PP(size_t bytes;)							/* Number of bytes to xfer  */
 		return 0;						/* Yes, a wise guy!     */
 
 	if ((fp->flags & ISWRITE) == 0)		/* Check for readonly file  */
-		RETERR(-1, EBADF);
-
+	{
+		__set_errno(EBADF);
+		return -1;
+	}
+	
 #if !GEMDOS
 	if (fp->flags & (ISTTY | ISLPT | ISQUE))	/* TTY, LST or QUE File?    */
 		return _wrtchr(fp, buff, xbytes);	/*  Yes, handle it      */

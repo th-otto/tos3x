@@ -17,7 +17,6 @@
 *****************************************************************************/
 #include <osif.h>					/* Also CP/M ones       */
 #include "lib.h"					/* Include std definitions  */
-#include <osiferr.h>				/* To set error vars        */
 #include <errno.h>					/* Error return vals        */
 #include <string.h>
 

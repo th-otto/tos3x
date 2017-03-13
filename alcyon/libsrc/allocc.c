@@ -17,7 +17,6 @@
 *****************************************************************************/
 #include <osif.h>					/* Also CP/M ones       */
 #include "lib.h"					/* Include std definitions  */
-#include <osiferr.h>				/* To set error vars        */
 #include <errno.h>					/* Error return vals        */
 
 /*****************************************************************************
@@ -54,7 +53,8 @@ int _allocc(NOTHING)
 		}
 		j <<= 1;						/* Up to next bit       */
 	}									/* End FOR loop         */
-	RETERR(-1, EMFILE);			/* All channels in use!     */
+	__set_errno(EMFILE);			/* All channels in use!     */
+	return -1;
 }
 
 int _freec(P(int) ch)

@@ -19,9 +19,9 @@ CSRCS9 = strcmp.c strncmp.c stricmp.c qsort.c fseek.c rewind.c ftell.c gets.c
 CSRCS10 = nf_name.c nf_vers.c nf_debug.c nf_shutd.c nf_ops.c cookie.c
 CSRCS11 = printf.c fprintf.c sprintf.c vprintf.c vfprintf.c vsprintf.c xdoprtfp.c doprint.c
 CSRCS12 = fread.c fwrite.c blkmove.c fdopen.c freopen.c filesz.c
-CSRCS13 = puts.c fputs.c xttyin.c ttyin.c ttyout.c getpass.c getpid.c getopt.c
+CSRCS13 = puts.c fputs.c ttyout.c getpass.c getpid.c getopt.c
 CSRCS14 = abort.c chmod.c access.c chown.c dup.c rename.c unlink.c stat.c fstat.c ftim2sec.c
-CSRCS15 = doscan.c scanf.c fscanf.c sscanf.c optoff.c sgtty.c ttyinraw.c
+CSRCS15 = doscan.c scanf.c fscanf.c sscanf.c optoff.c sgtty.c xlterr.c
 CSRCS16 = errno.c strchr.c strrchr.c lstout.c mktemp.c prtld.c prtint.c prtshort.c
 CSRCS17 = rand.c setbuf.c signal.c swab.c strtol.c getenv.c strpbrk.c
 CSRCS18 = aldiv.c almul.c alrem.c uldiv.c ulrem.c ldiv.c lmul.c lrem.c
@@ -78,7 +78,7 @@ MCSRCS = $(MCSRCS1) $(MCSRCS2) $(MCSRCS3) $(MCSRCS4)
 MOBJS = $(MAOBJS) $(MCOBJS)
 MSRCS = $(MASRCS) $(MCSRCS)
 
-OPTIONSRCS = mallocdb.c nofloat.c nottyin.c nottyout.c
+OPTIONSRCS = mallocdb.c nofloat.c nottyout.c
 OPTIONOBJS = $(OPTIONSRCS:.c=.o)
 
 SRCS = $(ASRCS) $(CSRCS) $(MASRCS) $(MCSRCS) $(OPTIONSRCS) lib.h crt0.S

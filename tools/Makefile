@@ -20,7 +20,7 @@ include $(top_srcdir)/config.mak
 include SRCFILES
 
 cmprom$(BUILD_EXEEXT): cmprom.o
-	$(LD) -o $@ $(CRT0) $< $(LIBS)
+	$(LD) -s -o $@ $(CRT0) $< $(LIBS)
 
 newglue$(BUILD_EXEEXT): newglue.o
 	$(LD) -o $@ $(CRT0) $< $(LIBS)

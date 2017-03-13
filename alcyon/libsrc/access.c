@@ -22,7 +22,6 @@
 
 #include <osif.h>
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -41,5 +40,5 @@ PP(int mode;)
 		close(rval);					/* Free up fd         */
 		return 0;
 	}
-	RETERR(-1, ENOENT);
+	return -1;
 }

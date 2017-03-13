@@ -25,7 +25,6 @@
 
 #include <osif.h>
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 
 size_t read(P(int) fd, P(VOIDPTR) buff, P(size_t) bytes)
@@ -40,12 +39,10 @@ PP(size_t bytes;)							/* =  byte count to read    */
 	if ((fp->flags & ATEOF) != 0)		/* End of file already?     */
 		return 0;						/* Yes, quit now        */
 	if ((fp->flags & ISREAD) == 0)		/* Check for readonly file  */
-		RETERR(-1, EBADF);
-
-#if !GEMDOS
-	if ((fp->flags & ISTTY) != 0)		/* TTY?             */
-		return _ttyin(fp, buff, bytes);	/*  Yes, read 1 line    */
-#endif
+	{
+		__set_errno(EBADF);
+		return -1;
+	}
 
 	if (fp->flags & ISASCII)			/* ASCII??          */
 		return _rdasc(fp, buff, (long) bytes);	/* Yes, read ascii     */

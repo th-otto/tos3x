@@ -21,7 +21,6 @@
  *	1/84 whf	refresh include files for 68K (sbrk in asm for 8086)
  ****************************************************************************/
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,7 +46,9 @@ PP(long incr;)								/* Incremental storage      */
 	
 	/* Allocate */
 	if (brk(t2) < 0)
-		RETERR((VOIDPTR)-1, ENOMEM);
-	
+	{
+		__set_errno(ENOMEM);
+		return (VOIDPTR)-1;
+	}
 	return t1;
 }

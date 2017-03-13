@@ -17,7 +17,6 @@
 *****************************************************************************/
 #include <osif.h>					/* Also CP/M ones       */
 #include "lib.h"					/* Include std definitions  */
-#include <osiferr.h>				/* To set error vars        */
 #include <errno.h>					/* Error return vals        */
 
 /*****************************************************************************
@@ -41,11 +40,17 @@ PP(register unsigned int ch;)
 
 	/* Is channel in range?  */
 	if (ch >= MAXCCBS)
-		RETERR(NULLFD, EBADF);
+	{
+		__set_errno(EBADF);
+		return NULLFD;
+	}
 	
 	xcb = _getccb(ch);
 	/* Is channel OPEN? */
 	if ((xcb->flags & OPENED) == 0)
-		RETERR(NULLFD, EBADF);
+	{
+		__set_errno(EBADF);
+		return NULLFD;
+	}
 	return xcb;
 }

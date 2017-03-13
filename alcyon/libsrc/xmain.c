@@ -25,9 +25,7 @@
 #include <portab.h>
 #include <fcntl.h>
 
-int _main(P(char *) com, P(int) len)
-PP(char * com;)							/* Command address      */
-PP(int len;)								/* Command length       */
+static VOID initstd(NOTHING)
 {
 	register FD *ch;;
 	
@@ -52,7 +50,17 @@ PP(int len;)								/* Command length       */
 		ch->flags |= OPENED;
 	}
 	
-	com[len] = '\0';						/* Insure null at line end  */
-	
+}
+
+int _main(P(char *) com, P(int) len)
+PP(char * com;)							/* Command address      */
+PP(int len;)								/* Command length       */
+{
+	initstd();
+	/* Insure null at line end  */
+	if (len < 127)
+		com[len] = '\0';
+	else
+		com[126] = '\0';
 	return __main(com, len);
 }

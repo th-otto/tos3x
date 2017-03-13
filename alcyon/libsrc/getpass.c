@@ -21,7 +21,7 @@
 **************************************************************************/
 
 #include "lib.h"
-#include <osif.h>
+#include <osbind.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -42,7 +42,7 @@ PP(int ln;)
 	cur = 0;
 	for (;;)
 	{
-		switch ((ch = (CMASK & _ttyinraw())) != 0)
+		switch ((ch = (CMASK & Crawcin())) != 0)
 		{
 		case '\b':
 		case DEL:
@@ -80,7 +80,7 @@ PP(const char *prompt;)
 {
 	static char ibuf[9];
 
-	__OSIF(C_WRITESTR, prompt);
+	Cconws(prompt);
 	_noecho(ibuf, 9);
 	return ibuf;
 }

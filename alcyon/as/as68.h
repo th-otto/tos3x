@@ -338,7 +338,7 @@ FILE *trfil;			/* temp for text relocation bits */
 FILE *drfil;            /* temp for data relocation bits */
 
 #ifndef PATH_MAX
-#define PATH_MAX 255
+#define PATH_MAX 256
 #endif
 
 char itfilnam[PATH_MAX];

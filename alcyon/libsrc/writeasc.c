@@ -20,7 +20,6 @@
 
 #include <osif.h>
 #include "lib.h"
-#include <osiferr.h>
 #include <errno.h>
 
 
@@ -32,7 +31,6 @@ PP(long xbytes;)					/* # bytes to write     */
 	register FD *fp;
 	register const char *buff;
 	register long bytes;
-#if PCDOS
 	long ii, jj, kk;
 
 	fp = ccb;
@@ -46,7 +44,10 @@ PP(long xbytes;)					/* # bytes to write     */
 		{								/* something to write?      */
 			ii = _pc_writeblk(fp, fp->offset, buff + jj, kk - jj);
 			if (ii < 0)
-				RETERR(-1, EIO);
+			{
+				__set_errno(EIO);
+				return -1;
+			}
 			fp->offset += ii;			/* Incr pos in file     */
 			jj = kk;					/* advance this ptr     */
 		} else
@@ -54,69 +55,12 @@ PP(long xbytes;)					/* # bytes to write     */
 			kk++;						/* write it out next time   */
 			ii = _pc_writeblk(fp, fp->offset, "\r", 1L);
 			if (ii < 0)
-				RETERR(-1, EIO);
+			{
+				__set_errno(EIO);
+				return -1;
+			}
 			fp->offset += ii;			/* Incr pos in file     */
 		}
 	}									/* end FOR loop         */
 	return jj;							/* Number written       */
-#endif
-
-#if CPM
-	register char *p1;					/* Temp buffer pointer      */
-	register char cc;					/* character temp       */
-	static long xsector;					/* Sector temp          */
-	static long nsector;					/* Multi-sector count       */
-	static long written;					/* # bytes to write     */
-	static long xbytes;					/* Save byte count remaining */
-
-	written = bytes;					/* Remember original request */
-	cc = 0;								/* Init to garbage value    */
-
-	while (bytes > 0)					/* While more bytes to write */
-	{
-		xsector = fp->offset >> 7;		/* Compute beginning sector */
-
-		if (xsector != fp->sector)		/* Have to read it first    */
-		{
-			if ((fp->flags & DIRTY) != 0)	/* Buffer has data?     */
-			{
-				if (_blkio(fp, fp->sector, fp->buffer, 1L, B_WRITE) != 1)	/* Try to write         */
-					RETERR(-1, EIO);	/* Couldn't         */
-				fp->flags &= ~DIRTY;	/* Nice clean buffer now    */
-			}
-
-			if (_blkio(fp, xsector, fp->buffer, 1L, B_READ) != 1)	/* Now read the correct sec */
-				memset(fp->buffer, 0, SECSIZ);	/* Zero out the buffer      */
-			fp->sector = xsector;		/* Mark buffer correctly    */
-		}
-
-		p1 = &(fp->buffer[(int) fp->offset & (SECSIZ - 1)]);	/* 1st char to write */
-		
-		xbytes = bytes;					/* Save byte count remaining */
-		while (p1 < &(fp->buffer[SECSIZ])	/* Until buffer is full     */
-			   && (bytes > 0))			/* or until request done    */
-		{
-			if (*buff == '\n' && cc != '\r')	/* need to insert C/R       */
-				cc = '\r';
-			else						/* Don't need to        */
-			{
-				cc = *buff++;
-				bytes--;
-			}
-			*p1++ = cc;					/* Put char in buffer       */
-			fp->offset++;				/* Increment file offset    */
-		}
-		if (p1 >= &(fp->buffer[SECSIZ]))	/* Need to write buffer     */
-		{
-			if (_blkio(fp, xsector, fp->buffer, 1L, B_WRITE) != 1)	/* Try the write        */
-				return written - xbytes;	/* return # actually written */
-		}
-		else
-			fp->flags |= DIRTY;			/* Buffer dirty again       */
-		if (bytes == 0)					/* If done,         */
-		{								/* Check offset here        */
-			return written;
-		}
-	}
-#endif
 }

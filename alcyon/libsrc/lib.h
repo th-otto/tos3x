@@ -44,6 +44,10 @@ extern char __pname[];					/* Program name         */
 extern char *_break;					/* -> Program break location */
 #endif
 
+#ifndef PATH_MAX
+#define PATH_MAX 256
+#endif
+
 char *petoa PROTO((double fp, char *buf, int prec));
 char *pftoa PROTO((double fp, char *buf, int prec));
 char *pgtoa PROTO((double fp, char *buf, int prec));
@@ -71,6 +75,7 @@ int __getmode PROTO((const char *mode));
 
 #define __set_errno(e) (errno = (e))
 #define __validfp(p) ((p) != NULL && (p) >= &_iob[0] && (p) < &_iob[MAXFILES])
+int _XltErr PROTO((int err, int dflt));
 
 union ll {
 	struct
@@ -117,7 +122,6 @@ VOID blkmove PROTO((char *to, const char *from, size_t nn));
 FD *_fd_get PROTO((int flags));
 char *_parsefn PROTO((const char *filename, struct fcbtab *fdb));
 FD *_chkc PROTO((unsigned int fd));						/* Converts fd to fp */
-size_t _ttyin PROTO((FD *fp, VOIDPTR buff, size_t bytes));					/* Read from tty rtn        */
 long _rdasc PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read ascii rtn       */
 long _rdbin PROTO((FD *fp, VOIDPTR buff, long bytes));					/* Read binary rtn      */
 long _wrtasc PROTO((FD *fp, const VOIDPTR buff, long bytes));
@@ -125,11 +129,10 @@ long _wrtbin PROTO((FD *fp, const VOIDPTR buff, long bytes));
 long _wrtchr PROTO((FD *fp, const VOIDPTR buff, long bytes));
 long _pc_readblk PROTO((FD *ccbp, long offset, VOIDPTR buff, long bytes));
 long _pc_writeblk PROTO((FD *ccbp, long offset, const VOIDPTR buff, long bytes));
-int _ttyout PROTO(( const char *buff ));
-int _lstout PROTO(( const char *buff ));
 long _blkio PROTO((FD *ccbp, long sector, VOIDPTR buffer, long count, int bdosfunc));
 #endif
-int _ttyinraw PROTO((NOTHING));
+int _lstout PROTO(( const char *buff ));
+int _ttyout PROTO(( const char *buff ));
 
 #ifdef __TIME_H__
 struct tm *_conSD_r PROTO((time_t clock, int local, struct tm *tp));
