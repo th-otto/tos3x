@@ -132,7 +132,7 @@ glue.gr: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemgr.rsc ../desk/rsc/$(TOSVERSION)/
 glue.ru: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemru.rsc ../desk/rsc/$(TOSVERSION)/deskru.rsc ../desk/rsc/$(TOSVERSION)/deskru.inf
 	$(AM_V_GEN)$(MKGLUE) ru $(TOSVERSION)
 
-check::
+check: $(IMG)
 	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
 
 clean:

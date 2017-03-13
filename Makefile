@@ -3,7 +3,7 @@ top_srcdir=.
 include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-SUBDIRS = common bios vdi bdos aes desk tools system glue
+SUBDIRS = common tools bios vdi bdos aes desk system glue
 
 all::
 
@@ -12,13 +12,14 @@ include $(top_srcdir)/config.mak
 FLAGSTOPASS = COUNTRY=$(COUNTRY) TOSVERSION=$(TOSVERSION) SYMBOLS=$(SYMBOLS)
 
 all clean distclean dist check::
+	echo MAKE=$(MAKE)
 	$(MAKE) -C common $(FLAGSTOPASS) $@
+	$(MAKE) -C tools $(FLAGSTOPASS) $@
 	$(MAKE) -C bios $(FLAGSTOPASS) $@
 	$(MAKE) -C vdi $(FLAGSTOPASS) $@
 	$(MAKE) -C bdos $(FLAGSTOPASS) $@
 	$(MAKE) -C aes $(FLAGSTOPASS) $@
 	$(MAKE) -C desk $(FLAGSTOPASS) $@
-	$(MAKE) -C tools $(FLAGSTOPASS) $@
 	$(MAKE) -C system $(FLAGSTOPASS) $@
 	$(MAKE) -C glue $(FLAGSTOPASS) $@
 

@@ -48,6 +48,7 @@ memtest.o: memtest.S
 
 bios.o: tosvars.o vars.o $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	# sections.mak might have just been generated, make sure it is reread
+	echo MAKE=$(MAKE)
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 blkdev.o: blkdev.c
@@ -74,7 +75,7 @@ keytbl.o: $(top_srcdir)/common/config.h
 prtkeys$(EXEEXT): prtkeys.o
 	$(AM_V_LD)${LD} ${LDFLAGS} -o $@ prtkeys.o
 
-check:: bios.o $(top_srcdir)/common/sections.mak
+check:: bios.a bios.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(bios_toff):0x24 --offsets=0x$(bios_tbase):0 --bytes=0x$(bios_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bios.o
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(bios_doff):0x$(bios_tleno) --offsets=0x$(bios_dbase):0x$(bios_tlen) --bytes=0x$(bios_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bios.o
 

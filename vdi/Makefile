@@ -362,7 +362,7 @@ lmul.o: lmul.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-check:: vdi.o $(top_srcdir)/common/sections.mak
+check:: vdi.a vdi.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(vdi_toff):0x24 --offsets=0x$(vdi_tbase):0 --bytes=0x$(vdi_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img vdi.o
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(vdi_doff):0x$(vdi_tleno) --offsets=0x$(vdi_dbase):0x$(vdi_tlen) --bytes=0x$(vdi_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img vdi.o
 

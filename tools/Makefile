@@ -34,7 +34,7 @@ mkbininc$(BUILD_EXEEXT): mkbininc.o
 mkrom$(BUILD_EXEEXT): mkrom.o
 	$(LD) -o $@ $(CRT0) $< $(LIBS)
 
-check::
+check: $(PROGRAMS)
 
 dist::
 

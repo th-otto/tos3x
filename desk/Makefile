@@ -60,7 +60,7 @@ deskext.o: deskext.S $(top_srcdir)/common/config.h $(top_srcdir)/common/sections
 	$(AM_V_at)${RM} $*.i
 
 
-check:: desk.o
+check:: desk.a desk.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(desk_toff):0x24 --offsets=0x$(desk_tbase):0 --bytes=0x$(desk_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img desk.o
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(desk_doff):0x$(desk_tleno) --offsets=0x$(desk_dbase):0x$(desk_tlen) --bytes=0x$(desk_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img desk.o
 
