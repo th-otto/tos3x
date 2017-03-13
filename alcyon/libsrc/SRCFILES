@@ -1,4 +1,4 @@
-ASRCS1 = blivot.S xsignal.S salloc.S setjmp.S memsets.S brk.S
+ASRCS1 = xsignal.S salloc.S setjmp.S memsets.S brk.S
 ASRCS2 = bios.S xbios.S gemdos.S strchrs.S
 
 AOBJS1 = $(ASRCS1:.S=.o)
@@ -81,6 +81,6 @@ MSRCS = $(MASRCS) $(MCSRCS)
 OPTIONSRCS = mallocdb.c nofloat.c nottyout.c
 OPTIONOBJS = $(OPTIONSRCS:.c=.o)
 
-SRCS = $(ASRCS) $(CSRCS) $(MASRCS) $(MCSRCS) $(OPTIONSRCS) lib.h crt0.S
+SRCS = $(ASRCS) $(CSRCS) $(MASRCS) $(MCSRCS) $(OPTIONSRCS) lib.h crt0.S gemstart.S
 
 EXTRA_DIST = GNUmakefile Makefile SRCFILES

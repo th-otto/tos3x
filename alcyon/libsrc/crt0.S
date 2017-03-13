@@ -24,12 +24,10 @@ exit equ 76			* Pterm GEMDOS exit call
 		xdef	__base
 		xdef	__BasPag
 		xdef	__PgmSize
-		xref  _sw_
 	    xdef	__sovf
 
 		text
-__start:	clr.l	d5			* clear a register
-		jsr	_sw_			* security reasons
+__start:
 		bra	start			*	Branch around ID
 		dc.b 'CLEAR68K V02.00, Copyright(c) 1984, Digital Research '
 serial:		dc.b	'XXXX-0000-654321'	*	serial number
@@ -84,6 +82,5 @@ ovf:		dc.b	'Stack Overflow'	*	Error message
 *
 		data
 		xdef	___pname		*	Program Name
-		xdef	___xeof			*	^Z byte
+
 ___pname:	dc.b	'C runtime',0		*	Program name
-___xeof:	dc.b	$1a			*	Control-Z

@@ -49,11 +49,13 @@
 	globl	_user
 
 
-_main:	move.l	#mystak,a5
-	move.l	4(sp),-(a5)
+_main:
+	move.l	4(sp),a0    /* get basepage */
+	move.l	#mystak,a5
+	move.l	a0,-(a5)    /* build new call frame */
 	clr.l	-(a5)		/* bogus return address */
 	move.l	a5,sp
-	move.l	4(sp),a5
+	move.l	a0,a5
 	move.l	$c(a5),d0
 	add.l	$14(a5),d0
 	add.l	$1c(a5),d0
@@ -61,7 +63,7 @@ _main:	move.l	#mystak,a5
 	move.l	d0,-(sp)
 	move.l	a5,-(sp)
 	move.w	#0,-(sp)
-	move.w	#$4a,-(sp)
+	move.w	#$4a,-(sp)	/* Mshrink to basepage+text+data+bss */
 	trap	#1
 	add.l	#12,sp
 
@@ -95,7 +97,7 @@ _devector:
 	trap	#13
 	add.l	#8,sp
 
-	jsr	_rm_term
+	jsr		_rm_term
 	move.w	#$20,(sp)	/* toggle back out to user mode	*/
 	trap	#1
 	addq.l	#6,sp
@@ -105,7 +107,7 @@ _in_term:
 	move.l	#myterm,-(sp)
 	move	#$102,-(sp)
 	move	#5,-(sp)
-	trap	#13		/* set/get terminate vector */
+	trap	#13			/* set/get terminate vector */
 	add.l	#8,sp
 	move.l	d0,oterm
 	rts
@@ -119,20 +121,23 @@ _rm_term:
 	rts
 
 
-_super:	clr.l	-(sp)
+_super:
+	clr.l	-(sp)
 	move	#$20,-(sp)
 	trap	#1
 	addq.l	#6,sp
 	move.l	d0,savess
 	rts
 
-_user:	move.l	savess,-(sp)
+_user:
+	move.l	savess,-(sp)
 	move	#$20,-(sp)
 	trap	#1
 	addq.l	#6,sp
 	rts
 
-myterm:	cmp	#0,_exeflg	/* is this my child's term */
+myterm:
+	cmp	#0,_exeflg	/* is this my child's term */
 	beq	itsme
 
 	rts

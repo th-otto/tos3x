@@ -2205,9 +2205,7 @@ PP(char **parm;)
 						tmp_ptr++;
 				  skip:
 				  	;
-				}
-
-				else
+				} else
 				{
 					parm_ptr++;
 				}

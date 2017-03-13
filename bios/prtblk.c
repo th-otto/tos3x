@@ -65,11 +65,6 @@
 
 #define       NOABRT    (1)                      /* prtcnt no abort value */
 
-#define       RETERR  {prtcnt=(-1);return(-1);}  /* return prtblk error */
-
-#define       FALSE     (0)                      /* boolean false */
-#define       TRUE      (1)                      /* boolean true */
-
 #define       PBERR     (-1)                     /* prtblk return error */
 
 PBDEF pbpar;

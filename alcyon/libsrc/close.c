@@ -22,8 +22,6 @@
 #include "lib.h"
 #include <errno.h>
 
-/* End of file for ASCII */
-extern char __xeof;
 
 int close(P(int) fd)
 PP(register int fd;)							/* File descriptor to close */
