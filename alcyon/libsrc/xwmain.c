@@ -224,7 +224,6 @@ PP(int len;)								/* Command length */
 		/* Back off by 1 */
 		argc--;
 	}
-	
 }
 
 
@@ -235,7 +234,7 @@ PP(int len;)								/* Command length */
 	initargs(com, len);
 	/* Allocate the pointers */
 	if (brk((VOIDPTR)argv2) < 0)
-		_err("Stack Overflow", "");
-	/* Invoke C program (No Env) */
-	exit(main(argc, argv, NULL));
+		_sovf();
+	/* Invoke C program */
+	exit(main(argc, argv, environ));
 }

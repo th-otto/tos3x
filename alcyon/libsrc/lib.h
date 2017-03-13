@@ -43,6 +43,7 @@
 extern char __pname[];					/* Program name         */
 extern char *_break;					/* -> Program break location */
 #endif
+__EXITING _sovf PROTO((NOTHING)) __NORETURN;
 
 #ifndef PATH_MAX
 #define PATH_MAX 256

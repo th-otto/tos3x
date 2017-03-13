@@ -142,14 +142,18 @@ static VOID exchange(P(const char **) argv, P(struct _getopt_data *) d)
 PP(register const char **argv;)
 PP(register struct _getopt_data *d;)
 {
-	register int bottom = d->__first_nonopt;
-	register int middle = d->__last_nonopt;
-	register int top = d->optind;
+	register int bottom;
+	register int middle;
+	register int top;
 	register const char *tem;
 	int len;
 	register int i;
 	int swap;
 	
+	bottom = d->__first_nonopt;
+	middle = d->__last_nonopt;
+	top = d->optind;
+
 	/* Exchange the shorter segment with the far end of the longer segment.
 	   That puts the shorter segment into the right place.
 	   It leaves the longer segment in the right place overall,
@@ -309,8 +313,9 @@ PP(int long_only;)
 PP(register struct _getopt_data *d;)
 PP(int posixly_correct;)
 {
-	int print_errors = d->opterr;
+	int print_errors;
 
+	print_errors = d->opterr;
 	if (argc < 1)
 		return EOF;
 
@@ -646,8 +651,9 @@ PP(int long_only;)
 PP(int posixly_correct;)
 {
 	int result;
-	register struct _getopt_data *d = &getodata;
+	register struct _getopt_data *d;
 	
+	d = &getodata;
 	d->optind = optind;
 	d->opterr = opterr;
 
