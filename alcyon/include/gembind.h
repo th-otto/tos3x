@@ -1,535 +1,107 @@
-/************************************************************************/
-/*	GEMBIND.H Do-It-Yourself GEM binding kit.			*/
-/*		Copyright 1985 Atari Corp.				*/
-/*									*/
-/*	WARNING: This file is not supported!				*/
-/*		 We reccomend you use the supplied binding libraries	*/
-/************************************************************************/
-
-/* Application Manager			*/
-#define APPL_INIT 10
-#define APPL_READ 11
-#define APPL_WRITE 12
-#define APPL_FIND 13
-#define APPL_TPLAY 14
-#define APPL_TRECORD 15
-#define APPL_BVSET 16
-#define APPL_EXIT 19
-
-/* Event Manager			*/
-#define EVNT_KEYBD 20
-#define	EVNT_BUTTON 21
-#define EVNT_MOUSE 22
-#define EVNT_MESAG 23
-#define EVNT_TIMER 24
-#define EVNT_MULTI 25
-#define EVNT_DCLICK 26
-
-/* Menu Manager				*/
-#define MENU_BAR 30
-#define MENU_ICHECK 31
-#define MENU_IENABLE 32
-#define MENU_TNORMAL 33
-#define MENU_TEXT 34
-#define MENU_REGISTER 35
-#define MENU_POPUP	36
-#define	MENU_ATTACH	37
-#define MENU_ISTART	38
-#define MENU_SETTING	39
-
-/* Object Manager			*/
-#define OBJC_ADD 40
-#define OBJC_DELETE 41
-#define OBJC_DRAW 42
-#define OBJC_FIND 43
-#define OBJC_OFFSET 44
-#define OBJC_ORDER 45
-#define OBJC_EDIT 46
-#define OBJC_CHANGE 47
-#define	OBJC_SYSVAR 48
-
-/* Form Manager				*/
-#define FORM_DO 50
-#define FORM_DIAL 51
-#define FORM_ALERT 52
-#define FORM_ERROR 53
-#define FORM_CENTER 54
-#define FORM_KEYBD 55
-#define FORM_BUTTON 56
-
-/* Graphics Manager			*/
-#define GRAF_RUBBOX 70
-#define GRAF_DRAGBOX 71
-#define GRAF_MBOX 72
-#define GRAF_GROWBOX 73
-#define GRAF_SHRINKBOX 74
-#define GRAF_WATCHBOX 75
-#define GRAF_SLIDEBOX 76
-#define GRAF_HANDLE 77
-#define GRAF_MOUSE 78
-#define GRAF_MKSTATE 79
-
-/* Scrap Manager			*/
-#define SCRP_READ 80
-#define SCRP_WRITE 81
-
-/* File Selector Manager		*/
-#define FSEL_INPUT 90
-#define FSEL_EXINPUT 91
-
-/* Window Manager			*/
-#define WIND_CREATE 100
-#define WIND_OPEN 101
-#define WIND_CLOSE 102
-#define WIND_DELETE 103
-#define WIND_GET 104
-#define WIND_SET 105
-#define WIND_FIND 106
-#define WIND_UPDATE 107
-#define WIND_CALC 108
-#define WIND_NEW 109
-
-/* Resource Manager			*/
-#define RSRC_LOAD 110
-#define RSRC_FREE 111
-#define RSRC_GADDR 112
-#define RSRC_SADDR 113
-#define RSRC_OBFIX 114
-
-/* Shell Manager			*/
-#define SHEL_READ 120
-#define SHEL_WRITE 121
-#define SHEL_GET 122
-#define SHEL_PUT 123
-#define SHEL_FIND 124
-#define SHEL_ENVRN 125
-
-/* max sizes for arrays		*/
-#define C_SIZE 4
-#define G_SIZE 15
-#define I_SIZE 16
-#define O_SIZE 7
-#define AI_SIZE 2
-#define AO_SIZE 1
-					/* Crystal funtion op code	*/
-#define OP_CODE control[0]
-#define IN_LEN control[1]
-#define OUT_LEN control[2]
-#define AIN_LEN control[3]
-			
-#define RET_CODE int_out[0]
-					/* application lib parameters	*/
-#define AP_VERSION global[0]
-#define AP_COUNT global[1]
-#define AP_ID global[2]
-#define AP_LOPRIVATE global[3]
-#define AP_HIPRIVATE global[4]
-#define AP_LOPNAME global[5]		/* long ptr. to tree base in rsc*/
-#define AP_HIPNAME global[6]
-#define AP_LO1RESV global[7]		/* long address of memory alloc.*/
-#define AP_HI1RESV global[8]
-#define AP_LO2RESV global[9]		/* length of memory allocated	*/
-#define AP_HI2RESV global[10]		/* colors available on screen	*/
-#define AP_LO3RESV global[11]
-#define AP_HI3RESV global[12]
-#define AP_LO4RESV global[13]
-#define AP_HI4RESV global[14]
-
-#define AP_GLSIZE int_out[1]
-
-#define AP_RWID int_in[0]
-#define AP_LENGTH int_in[1]
-#define AP_PBUFF addr_in[0]
-
-#define AP_PNAME addr_in[0]
-
-#define AP_TBUFFER addr_in[0]
-#define AP_TLENGTH int_in[0]
-#define AP_TSCALE int_in[1]
-
-#define AP_BVDISK int_in[0]
-#define AP_BVHARD int_in[1]
-
-
-#define SCR_MGR 0x0001			/* pid of the screen manager */
-
-#define AP_MSG 0
-#define MN_SELECTED 10
-
-#define WM_REDRAW 20
-#define WM_TOPPED 21
-#define WM_CLOSED 22
-#define WM_FULLED 23
-#define WM_ARROWED 24
-#define WM_HSLID 25
-#define WM_VSLID 26
-#define WM_SIZED 27
-#define WM_MOVED 28
-#define WM_NEWTOP 29
-
-#define AC_OPEN 40
-#define AC_CLOSE 41
-
-#define CT_UPDATE 50
-#define CT_MOVE 51
-#define CT_NEWTOP 52
-
-/* event lib parameters	*/
-#define IN_FLAGS int_in[0]
-
-#define B_CLICKS int_in[0]
-#define B_MASK int_in[1]
-#define B_STATE int_in[2]
-
-#define MO_FLAGS int_in[0]
-#define MO_X int_in[1]
-#define MO_Y int_in[2]
-#define MO_WIDTH int_in[3]
-#define MO_HEIGHT int_in[4]
-
-#define ME_PBUFF addr_in[0]
-
-#define T_LOCOUNT int_in[0]
-#define T_HICOUNT int_in[1]
-
-#define MU_FLAGS int_in[0]
-#define EV_MX int_out[1]
-#define EV_MY int_out[2]
-#define EV_MB int_out[3]
-#define EV_KS int_out[4]
-#define EV_KRET int_out[5]
-#define EV_BRET int_out[6]
-
-
-#define MB_CLICKS int_in[1]
-#define MB_MASK int_in[2]
-#define MB_STATE int_in[3]
-
-#define MMO1_FLAGS int_in[4]
-#define MMO1_X int_in[5]
-#define MMO1_Y int_in[6]
-#define MMO1_WIDTH int_in[7]
-#define MMO1_HEIGHT int_in[8]
-
-#define MMO2_FLAGS int_in[9]
-#define MMO2_X int_in[10]
-#define MMO2_Y int_in[11]
-#define MMO2_WIDTH int_in[12]
-#define MMO2_HEIGHT int_in[13]
-
-#define MME_PBUFF addr_in[0]
-
-#define MT_LOCOUNT int_in[14]
-#define MT_HICOUNT int_in[15]
-
-/* mu_flags		*/
-#define MU_KEYBD 0x0001	
-#define MU_BUTTON 0x0002
-#define MU_M1 0x0004
-#define MU_M2 0x0008
-#define MU_MESAG 0x0010
-#define MU_TIMER 0x0020
-
-#define EV_DCRATE int_in[0]
-#define EV_DCSETIT int_in[1]
-						/* menu library parameters */
-
-#define MM_ITREE	addr_in[0]		/* ienable,icheck,tnorm	*/
-
-#define MM_PSTR		addr_in[0]
-
-#define MM_PTEXT	addr_in[1]
-
-#define SHOW_IT		int_in[0]		/* bar			*/
-
-#define	ITEM_NUM	int_in[0]		/* icheck, ienable	*/
-#define	MM_PID		int_in[0]		/* register		*/
-#define	CHECK_IT	int_in[1]		/* icheck		*/
-#define	ENABLE_IT	int_in[1]		/* ienable		*/
-
-#define	TITLE_NUM	int_in[0]		/* tnorm		*/
-#define	NORMAL_IT	int_in[1]		/* tnormal		*/
-
-/* 5/13/92		*/
-#define M_MENU		addr_in[0]
-#define M_XPOS		int_in[0]
-#define M_YPOS		int_in[1]
-#define M_MDATA		addr_in[1]
-#define M_FLAG		int_in[0]
-#define M_TREE		addr_in[0]
-#define M_ITEM		int_in[1]
-#define M_MENU2		int_in[1]
-#define M_ITEM2		int_in[2]
-
-/* form library parameters	*/
-#define FM_FORM addr_in[0]
-#define FM_START int_in[0]
-
-#define FM_TYPE int_in[0]
-
-#define FM_ERRNUM int_in[0]
-
-#define FM_DEFBUT int_in[0]
-#define FM_ASTRING addr_in[0]
-
-#define FM_IX int_in[1]
-#define FM_IY int_in[2]
-#define FM_IW int_in[3]
-#define FM_IH int_in[4]
-#define FM_X int_in[5]
-#define FM_Y int_in[6]
-#define FM_W int_in[7]
-#define FM_H int_in[8]
-
-#define FM_XC int_out[1]
-#define FM_YC int_out[2]
-#define FM_WC int_out[3]
-#define FM_HC int_out[4]
-
-#define FMD_START 0
-#define FMD_GROW 1
-#define FMD_SHRINK 2
-#define FMD_FINISH 3
-
-#define FM_OBJ int_in[0]
-#define FM_ICHAR int_in[1]
-#define FM_INXTOB int_in[2]
-
-#define FM_ONXTOB int_out[1]
-#define FM_OCHAR int_out[2]
-
-#define FM_CLKS int_in[1]
-
-/* object library parameters	*/
-#define OB_TREE addr_in[0]		/* all ob procedures		*/
-
-#define OB_DELOB int_in[0]		/* ob_delete			*/
-
-#define OB_DRAWOB int_in[0]		/* ob_draw, ob_change		*/
-#define OB_DEPTH int_in[1]
-#define OB_XCLIP int_in[2]
-#define OB_YCLIP int_in[3]
-#define OB_WCLIP int_in[4]
-#define OB_HCLIP int_in[5]
-
-#define OB_STARTOB int_in[0]		/* ob_find			*/
-#define OB_DEPTH int_in[1]
-#define OB_MX int_in[2]
-#define OB_MY int_in[3]
-
-#define OB_PARENT int_in[0]		/* ob_add			*/
-#define OB_CHILD int_in[1]
-#define OB_OBJ int_in[0]		/* ob_offset, ob_order		*/
-#define OB_XOFF int_out[1]
-#define OB_YOFF int_out[2]
-/*	New for ob_gclip 	8/6/92	*/
-#define OB_GX 	int_out[3]
-#define OB_GY	int_out[4]
-#define OB_GW	int_out[5]
-#define OB_GH	int_out[6]
-#define OB_NEWPOS int_in[1]		/* ob_order			*/
-
-/* ob_edit			*/
-#define OB_CHAR int_in[1]
-#define OB_IDX int_in[2]
-#define OB_KIND int_in[3]
-#define OB_ODX int_out[1]
-
-#define OB_NEWSTATE int_in[6]		/* ob_change			*/
-#define OB_REDRAW int_in[7]
-
-/* June 26 1992 - ml. */		/* ob_sysvar 			*/
-#define	OB_MODE	    int_in[0]	/* 8/1/92 */
-#define	OB_WHICH    int_in[1]
-#define	OB_I1	    int_in[2]
-#define	OB_I2       int_in[3]
-#define	OB_O1       int_out[1]
-#define	OB_O2       int_out[2]
-/**/
-
-/* graphics library parameters	*/
-#define GR_I1 int_in[0]
-#define GR_I2 int_in[1]
-#define GR_I3 int_in[2]
-#define GR_I4 int_in[3]
-#define GR_I5 int_in[4]
-#define GR_I6 int_in[5]
-#define GR_I7 int_in[6]
-#define GR_I8 int_in[7]
-
-#define GR_O1 int_out[1]
-#define GR_O2 int_out[2]
-
-#define GR_TREE addr_in[0]
-#define GR_PARENT int_in[0]
-#define GR_OBJ int_in[1]
-#define GR_INSTATE int_in[2]
-#define GR_OUTSTATE int_in[3]
-
-#define GR_ISVERT int_in[2]
-
-#define M_OFF 256
-#define M_ON 257
-
-#define GR_MNUMBER int_in[0]
-#define GR_MADDR addr_in[0]
-
-#define GR_WCHAR int_out[1]
-#define GR_HCHAR int_out[2]
-#define GR_WBOX int_out[3]
-#define GR_HBOX int_out[4]
-
-#define GR_MX int_out[1]
-#define GR_MY int_out[2]
-#define GR_MSTATE int_out[3]
-#define GR_KSTATE int_out[4]
-					/* scrap library parameters	*/
-#define SC_PATH addr_in[0]
-					/* file selector library parms	*/
-
-#define FS_IPATH  addr_in[0]
-#define FS_ISEL   addr_in[1]
-#define FS_LABEL  addr_in[2]
-#define FS_BUTTON int_out[1]
-
-/* window library parameters	*/
-#define XFULL 0
-#define YFULL gl_hbox
-#define WFULL gl_width
-#define HFULL (gl_height - gl_hbox)
-
-#define NAME 0x0001
-#define CLOSER 0x0002
-#define FULLER 0x0004
-#define MOVER 0x0008
-#define INFO 0x0010
-#define SIZER 0x0020
-#define UPARROW 0x0040
-#define DNARROW 0x0080
-#define VSLIDE 0x0100
-#define LFARROW 0x0200
-#define RTARROW 0x0400
-#define HSLIDE 0x0800
-
-#define WF_KIND 1
-#define WF_NAME 2
-#define WF_INFO 3
-#define WF_WXYWH 4
-#define WF_CXYWH 5
-#define WF_PXYWH 6
-#define WF_FXYWH 7
-#define WF_HSLIDE 8
-#define WF_VSLIDE 9
-#define WF_TOP 10
-#define WF_FIRSTXYWH 11
-#define WF_NEXTXYWH 12
-#define WF_IGNORE 13
-#define WF_NEWDESK 14
-#define WF_HSLSIZ 15
-#define WF_VSLSIZ 16
-						/* arrow message	*/
-#define WA_UPPAGE 0
-#define WA_DNPAGE 1
-#define WA_UPLINE 2
-#define WA_DNLINE 3
-#define WA_LFPAGE 4
-#define WA_RTPAGE 5
-#define WA_LFLINE 6
-#define WA_RTLINE 7
-/* wm_create		*/
-#define WM_KIND int_in[0]
-/* wm_open, close, del	*/
-#define WM_HANDLE int_in[0]
-/* wm_open, wm_create	*/
-#define WM_WX int_in[1]
-#define WM_WY int_in[2]
-#define WM_WW int_in[3]
-#define WM_WH int_in[4]
-/* wm_find		*/
-#define WM_MX int_in[0]
-#define WM_MY int_in[1]
-/* wm_calc		*/
-#define WC_BORDER 0
-#define WC_WORK 1
-#define WM_WCTYPE int_in[0]
-#define WM_WCKIND int_in[1]
-#define WM_WCIX int_in[2]
-#define WM_WCIY int_in[3]
-#define WM_WCIW int_in[4]
-#define WM_WCIH int_in[5]
-#define WM_WCOX int_out[1]
-#define WM_WCOY int_out[2]
-#define WM_WCOW int_out[3]
-#define WM_WCOH int_out[4]
-						/* wm_update		*/
-#define WM_BEGUP int_in[0]
-
-
-#define WM_WFIELD int_in[1]
-
-#define WM_IPRIVATE int_in[2]
-
-#define WM_IKIND int_in[2]
-						/* for name and info	*/
-#define WM_IOTITLE addr_in[0]
-
-#define WM_IX int_in[2]
-#define WM_IY int_in[3]
-#define WM_IW int_in[4]
-#define WM_IH int_in[5]
-
-#define WM_OX int_out[1]
-#define WM_OY int_out[2]
-#define WM_OW int_out[3]
-#define WM_OH int_out[4]
-
-#define WM_ISLIDE int_in[2]
-
-#define WM_IRECTNUM int_in[6]
-					/* resource library parameters	*/
-
-#define RS_PFNAME addr_in[0]		/* rs_init, 			*/
-#define RS_TYPE int_in[0]
-#define RS_INDEX int_in[1]
-#define RS_INADDR addr_in[0]
-#define RS_OUTADDR addr_out[0]		
-
-#define RS_TREE addr_in[0]
-#define RS_OBJ int_in[0]
-
-#define R_TREE 0
-#define R_OBJECT 1
-#define R_TEDINFO 2
-#define R_ICONBLK 3
-#define R_BITBLK 4
-#define R_STRING 5
-#define R_IMAGEDATA 6
-#define R_OBSPEC 7
-#define R_TEPTEXT 8		/* sub ptrs in TEDINFO	*/
-#define R_TEPTMPLT 9
-#define R_TEPVALID 10
-#define R_IBPMASK 11		/* sub ptrs in ICONBLK	*/
-#define R_IBPDATA 12
-#define R_IBPTEXT 13
-#define R_BIPDATA 14		/* sub ptrs in BITBLK	*/
-#define R_FRSTR 15		/* gets addr of ptr to free strings	*/
-#define R_FRIMG 16		/* gets addr of ptr to free images	*/
-
-
-/* shell library parameters	*/
-#define SH_DOEX int_in[0]
-#define SH_ISGR int_in[1]
-#define SH_ISCR int_in[2]
-#define SH_PCMD addr_in[0]
-#define SH_PTAIL addr_in[1]
-
-#define SH_PDATA addr_in[0]
-#define SH_PBUFFER addr_in[0]
-
-#define SH_LEN int_in[0]
-
-#define SH_PATH addr_in[0]
-#define SH_SRCH addr_in[1]
-
-#define	SH_INPATH  addr_in[0]
-#define SH_OUTPATH addr_in[1]
+extern short gl_apid;
+
+
+short appl_exit PROTO((NOTHING));
+short appl_find PROTO((const char *pname));
+short appl_init PROTO((NOTHING));
+short appl_read PROTO((short rwid, short length, VOIDPTR pbuff));
+short appl_tplay PROTO((VOIDPTR tbuffer, short tlength, short tscale));
+short appl_trecord PROTO((VOIDPTR tbuffer, short tlength));
+short appl_write PROTO((short rwid, short length, const VOIDPTR pbuff));
+
+short evnt_button PROTO((short clicks, short mask, short state, short *pmx, short *pmy, short *pmb, short *pks));
+short evnt_dclick PROTO((short rate, short setit));
+short evnt_keybd PROTO((NOTHING));
+short evnt_mesag PROTO((short *pbuff));
+short evnt_mouse PROTO((short flags, short x, short y, short width, short height, short *pmx, short *pmy, short *pmb, short *pks));
+#ifdef __ALCYON__ /* macro argument too long.. sigh */
+short evnt_multi ();
+#else
+short evnt_multi PROTO((short flags, short bclk, short bmsk, short bst,
+	short m1flags, short m1x, short m1y, short m1w, short m1h,
+	short m2flags, short m2x, short m2y, short m2w, short m2h,
+	short *mepbuff,
+	short tlc, short thc,
+	short *pmx, short *pmy, short *pmb, short *pks, short *pkr, short *pbr));
+#endif
+short evnt_timer PROTO((short locnt, short hicnt));
+
+short form_alert PROTO((short defbut, const char *astring));
+short form_center PROTO((OBJECT *tree, short *pcx, short *pcy, short *pcw, short *pch));
+short form_dial PROTO((short dtype, short ix, short iy, short iw, short ih, short x, short y, short w, short h));
+short form_do PROTO((OBJECT *form, short start));
+short form_error PROTO((short errnum));
+short form_keybd PROTO((OBJECT *tree, short obj, short next, short kchar, short *nxtobj, short *nxtchar));
+short form_button PROTO((OBJECT *tree, short obj, short clicks, short *nxtobj));
+short form_popup PROTO((OBJECT *tree, short x, short y));
+
+short fsel_input PROTO((char *pipath, char *pisel, short *pbutton));
+short fsel_exinput PROTO((char *pipath, char *pisel, short *pbutton, const char *label));
+
+short graf_dragbox PROTO((short w, short h, short sx, short sy, short xc, short yc, short wc, short hc, short *pdx, short *pdy));
+short graf_growbox PROTO((short orgx, short orgy, short orgw, short orgh, short x, short y, short w, short h));
+short graf_handle PROTO((short *pwchar, short *phchar, short *pwbox, short *phbox));
+short graf_mbox PROTO((short w, short h, short srcx, short srcy, short dstx, short dsty));
+short graf_mkstate PROTO((short *pmx, short *pmy, short *pmstate, short *pkstate));
+short graf_mouse PROTO((short m_number, const MFORM *m_addr));
+short graf_rubbox PROTO((short xorigin, short yorigin, short wmin, short hmin, short *pwend, short *phend));
+short graf_shrinkbox PROTO((short orgx, short orgy, short orgw, short orgh, short x, short y, short w, short h));
+short graf_slidebox PROTO((OBJECT *tree, short parent, short obj, short isvert));
+short graf_watchbox PROTO((OBJECT *tree, short obj, short instate, short outstate));
+
+short menu_bar PROTO((OBJECT *tree, short showit));
+short menu_icheck PROTO((OBJECT *tree, short itemnum, short checkit));
+short menu_ienable PROTO((OBJECT *tree, short itemnum, short enableit));
+short menu_register PROTO((short pid, const char *pstr));
+short menu_text PROTO((OBJECT *tree, short inum, const char *ptext));
+short menu_tnormal PROTO((OBJECT *tree, short titlenum, short normalit));
+short menu_popup PROTO((MENU *menu, short xpos, short ypos, MENU *mdata));
+short menu_attach PROTO((short flag, OBJECT *tree, short item, MENU *menu));
+short menu_istart PROTO((short flag, OBJECT *tree, short menu, short item));
+short menu_settings PROTO((short flag, MN_SET * values));
+
+short objc_add PROTO((OBJECT *tree, short parent, short child));
+short objc_change PROTO((OBJECT *tree, short drawob, short depth, short xc, short yc, short wc, short hc, short newstate, short redraw));
+short objc_delete PROTO((OBJECT *tree, short delob));
+short objc_draw PROTO((OBJECT *tree, short drawob, short depth, short xc, short yc, short wc, short hc));
+short objc_edit PROTO((OBJECT *tree, short obj, short inchar, short *idx, short kind));
+short objc_find PROTO((OBJECT *tree, short startob, short depth, short mx, short my));
+short objc_offset PROTO((OBJECT *tree, short obj, short *poffx, short *poffy));
+short objc_order PROTO((OBJECT *tree, short mov_obj, short newpos));
+short objc_sysvar PROTO((short mode, short which, short inval1, short inval2, short *outval1, short *outval2));
+
+short rsrc_free PROTO((NOTHING));
+short rsrc_gaddr PROTO((short rstype, short rsid, VOIDPTR paddr));
+short rsrc_load PROTO((const char *rsname));
+short rsrc_obfix PROTO((OBJECT *tree, short obj));
+short rsrc_rcfix PROTO((RSHDR *header));
+short rsrc_saddr PROTO((short rstype, short rsid, VOIDPTR lngval));
+
+short scrp_read PROTO((char *pscrap));
+short scrp_write PROTO((const char *pscrap));
+
+short shel_envrn PROTO((char **ppath, const char *psrch));
+short shel_find PROTO((char *ppath));
+short shel_get PROTO((char *pbuffer, short len));
+short shel_put PROTO((const char *pdata, short len));
+short shel_read PROTO((char *pcmd, char *ptail));
+short shel_write PROTO((short doex, short isgr, short iscr, const VOIDPTR pcmd, const char *ptail));
+
+short wind_calc PROTO((short wctype, short kind, short x, short y, short w, short h, short *px, short *py, short *pw, short *ph));
+short wind_close PROTO((short handle));
+short wind_create PROTO((short kind, short wx, short wy, short ww, short wh));
+short wind_delete PROTO((short handle));
+short wind_find PROTO((short mx, short my));
+short wind_get PROTO((short w_handle, short w_field, short *pw1, short *pw2, short *pw3, short *pw4));
+short wind_open PROTO((short handle, short wx, short wy, short ww, short wh));
+short wind_set PROTO((short w_handle, short w_field, short w2, short w3, short w4, short w5));
+short wind_update PROTO((short beg_update));
+VOID wind_new PROTO((NOTHING));
+
+short min PROTO((short a, short b));
+short max PROTO((short a, short b));
+
+short rc_equal PROTO((const GRECT *p1, const GRECT *p2));
+VOID rc_copy PROTO((const GRECT *src, GRECT *dst));
+short rc_intersect PROTO((const GRECT *r1, GRECT *r2));
+VOID rc_union PROTO((const GRECT *r1, GRECT *r2));

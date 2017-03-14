@@ -1,0 +1,96 @@
+ASRCS = crystal.S vdi.S
+
+AOBJS = $(ASRCS:.S=.o)
+
+CSRCS = ctrlcnts.c crysif.c \
+	ap_exit.c \
+	ap_find.c \
+	ap_init.c \
+	ap_read.c \
+	ap_tplay.c \
+	ap_treco.c \
+	ap_write.c \
+	ev_butto.c \
+	ev_dclic.c \
+	ev_keybd.c \
+	ev_mesag.c \
+	ev_mouse.c \
+	ev_multi.c \
+	ev_timer.c \
+	fm_alert.c \
+	fm_butto.c \
+	fm_cente.c \
+	fm_dial.c \
+	fm_do.c \
+	fm_error.c \
+	fm_keybd.c \
+	fs_input.c \
+	fs_exinp.c \
+	gr_dragb.c \
+	gr_growb.c \
+	gr_handl.c \
+	gr_mbox.c \
+	gr_mksta.c \
+	gr_mouse.c \
+	gr_rubbo.c \
+	gr_shrin.c \
+	gr_slide.c \
+	gr_watch.c \
+	mn_bar.c \
+	mn_ichec.c \
+	mn_ienab.c \
+	mn_regis.c \
+	mn_text.c \
+	mn_tnorm.c \
+	mn_popup.c \
+	mn_attac.c \
+	mn_istar.c \
+	mn_setti.c \
+	ob_add.c \
+	ob_chang.c \
+	ob_delet.c \
+	ob_draw.c \
+	ob_edit.c \
+	ob_find.c \
+	ob_offse.c \
+	ob_order.c \
+	ob_sysva.c \
+	rs_free.c \
+	rs_gaddr.c \
+	rs_load.c \
+	rs_obfix.c \
+	rs_rcfix.c \
+	rs_saddr.c \
+	sc_read.c \
+	sc_write.c \
+	sh_envrn.c \
+	sh_find.c \
+	sh_get.c \
+	sh_put.c \
+	sh_read.c \
+	sh_write.c \
+	wm_calc.c \
+	wm_close.c \
+	wm_creat.c \
+	wm_delet.c \
+	wm_find.c \
+	wm_get.c \
+	wm_open.c \
+	wm_set.c \
+	wm_updat.c \
+	wm_new.c \
+	\
+	min.c \
+	max.c \
+	rc_equal.c \
+	rc_copy.c \
+	rc_inter.c \
+
+
+COBJS = $(CSRCS:.c=.o)
+
+SRCS = $(ASRCS) $(CSRCS) gemstart.S
+
+OBJS = $(AOBJS) $(COBJS)
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES

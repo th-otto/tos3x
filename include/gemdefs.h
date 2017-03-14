@@ -4,19 +4,22 @@
 /************************************************************************/
 
 /*	EVENT Manager Definitions					*/
-						/* multi flags		*/
+
+/* multi flags		*/
 #define MU_KEYBD  0x0001	
 #define MU_BUTTON 0x0002
 #define MU_M1     0x0004
 #define MU_M2     0x0008
 #define MU_MESAG  0x0010
 #define MU_TIMER  0x0020
-						/* keyboard states	*/
+
+/* keyboard states	*/
 #define K_RSHIFT 0x0001
 #define K_LSHIFT 0x0002
 #define K_CTRL   0x0004
 #define K_ALT    0x0008
-						/* message values	*/
+
+/* message values	*/
 #define MN_SELECTED 10
 #define WM_REDRAW   20
 #define WM_TOPPED   21
@@ -31,15 +34,23 @@
 #define AC_OPEN     40
 #define AC_CLOSE    41
 
+#define CT_UPDATE   50
+#define CT_MOVE     51
+#define CT_NEWTOP   52
+
+#define SCR_MGR 0x0001			/* pid of the screen manager */
+
 /*	FORM Manager Definitions					*/
-						/* Form flags		*/
+
+/* Form flags		*/
 #define FMD_START  0
 #define FMD_GROW   1
 #define FMD_SHRINK 2
 #define FMD_FINISH 3
 
 /*	RESOURCE Manager Definitions					*/
-						/* data structure types */
+
+/* data structure types */
 #define R_TREE     0
 #define R_OBJECT   1
 #define R_TEDINFO  2
@@ -58,32 +69,32 @@
 #define R_FRSTR    15		/* gets addr of ptr to free strings	*/
 #define R_FRIMG    16		/* gets addr of ptr to free images	*/
 
-						/* used in RSCREATE.C	*/
+/* used in RSCREATE.C	*/
 typedef struct rshdr
 {
-	int		rsh_vrsn;
-	int		rsh_object;
-	int		rsh_tedinfo;
-	int		rsh_iconblk;	/* list of ICONBLKS		*/
-	int		rsh_bitblk;
-	int		rsh_frstr;	
-	int		rsh_string;
-	int		rsh_imdata;	/* image data			*/
-	int		rsh_frimg;	
-	int		rsh_trindex;
-	int		rsh_nobs;	/* counts of various structs	*/
-	int		rsh_ntree;
-	int		rsh_nted;
-	int		rsh_nib;
-	int		rsh_nbb;
-	int		rsh_nstring;
-	int		rsh_nimages;
-	int		rsh_rssize;	/* total bytes in resource	*/
+	unsigned short		rsh_vrsn;
+	unsigned short		rsh_object;
+	unsigned short		rsh_tedinfo;
+	unsigned short		rsh_iconblk;	/* list of ICONBLKS		*/
+	unsigned short		rsh_bitblk;
+	unsigned short		rsh_frstr;	
+	unsigned short		rsh_string;
+	unsigned short		rsh_imdata;	/* image data			*/
+	unsigned short		rsh_frimg;	
+	unsigned short		rsh_trindex;
+	unsigned short		rsh_nobs;	/* counts of various structs	*/
+	unsigned short		rsh_ntree;
+	unsigned short		rsh_nted;
+	unsigned short		rsh_nib;
+	unsigned short		rsh_nbb;
+	unsigned short		rsh_nstring;
+	unsigned short		rsh_nimages;
+	unsigned short		rsh_rssize;	/* total bytes in resource	*/
 } RSHDR;
-#define	F_ATTR	0			/* file attr for dos_create	*/
 
 /*	WINDOW Manager Definitions.					*/
-						/* Window Attributes	*/
+
+/* Window Attributes	*/
 #define NAME    0x0001
 #define CLOSER  0x0002
 #define FULLER  0x0004
@@ -96,10 +107,12 @@ typedef struct rshdr
 #define LFARROW 0x0200
 #define RTARROW 0x0400
 #define HSLIDE  0x0800
-						/* wind_create flags	*/
+
+/* wind_calc flags	*/
 #define WC_BORDER 0
 #define WC_WORK   1
-						/* wind_get flags	*/
+
+/* wind_get flags	*/
 #define WF_KIND		1
 #define WF_NAME		2
 #define WF_INFO		3
@@ -117,14 +130,26 @@ typedef struct rshdr
 #define WF_HSLSIZE   	15
 #define WF_VSLSIZE   	16
 #define WF_SCREEN   	17
-						/* update flags		*/
+
+/* update flags		*/
 #define	END_UPDATE 0
 #define	BEG_UPDATE 1
 #define	END_MCTRL  2
 #define	BEG_MCTRL  3
 
+/* arrow message	*/
+#define WA_UPPAGE 0
+#define WA_DNPAGE 1
+#define WA_UPLINE 2
+#define WA_DNLINE 3
+#define WA_LFPAGE 4
+#define WA_RTPAGE 5
+#define WA_LFLINE 6
+#define WA_RTLINE 7
+
 /*	GRAPHICS Manager Definitions					*/
-						/* Mouse Forms		*/
+
+/* Mouse Forms		*/
 #define	ARROW	    0
 #define	TEXT_CRSR   1
 #define	HOURGLASS   2
@@ -138,27 +163,48 @@ typedef struct rshdr
 #define M_ON      257
 
 /*	MISCELLANEOUS Structures					*/
-					/* Memory Form Definition Block */
+
+/* Memory Form Definition Block */
 typedef struct fdbstr
 {
 	long		fd_addr;
-	int		fd_w;
-	int		fd_h;
-	int		fd_wdwidth;
-	int		fd_stand;
-	int		fd_nplanes;
-	int		fd_r1;
-	int		fd_r2;
-	int		fd_r3;
+	short		fd_w;
+	short		fd_h;
+	short		fd_wdwidth;
+	short		fd_stand;
+	short		fd_nplanes;
+	short		fd_r1;
+	short		fd_r2;
+	short		fd_r3;
 } FDB;
-					/* Mouse Form Definition Block */
+
+/* Mouse Form Definition Block */
 typedef struct mfstr
 {
-	int	mf_xhot;
-	int	mf_yhot;
-	int	mf_nplanes;
-	int	mf_fg;
-	int	mf_bg;
-	int	mf_mask[16];
-	int	mf_data[16];
-} MFORM ;
+	short	mf_xhot;
+	short	mf_yhot;
+	short	mf_nplanes;
+	short	mf_fg;
+	short	mf_bg;
+	short	mf_mask[16];
+	short	mf_data[16];
+} MFORM;
+
+/* Structure for passing menu data */
+typedef struct _menu
+{
+   OBJECT *mn_tree;		/* Object tree of the menu */
+   short mn_menu;			/* Parent of the menu items*/
+   short mn_item;			/* Starting menu item      */
+   short mn_scroll;		/* scroll flag for the menu*/
+} MENU;
+
+/* Structure for the Menu Settings */
+typedef struct _mn_set
+{
+   long   Display;		/* The display delay      */
+   long   Drag;			/* The drag delay         */
+   long   Delay;		/* The Arrow Delay        */
+   long   Speed;		/* The scroll speed delay */
+   short  Height;		/* The menu scroll height */
+} MN_SET;

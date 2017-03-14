@@ -106,36 +106,36 @@
 
 typedef struct object
 {
-	int		ob_next;	/* -> object's next sibling	*/
-	int		ob_head;	/* -> head of object's children */
-	int		ob_tail;	/* -> tail of object's children */
-	unsigned int	ob_type;	/* type of object- BOX, CHAR,...*/
-	unsigned int	ob_flags;	/* flags			*/
-	unsigned int	ob_state;	/* state- SELECTED, OPEN, ...	*/
+	short		ob_next;	/* -> object's next sibling	*/
+	short		ob_head;	/* -> head of object's children */
+	short		ob_tail;	/* -> tail of object's children */
+	unsigned short	ob_type;	/* type of object- BOX, CHAR,...*/
+	unsigned short	ob_flags;	/* flags			*/
+	unsigned short	ob_state;	/* state- SELECTED, OPEN, ...	*/
 	long		ob_spec;	/* "out"- -> anything else	*/
-	int		ob_x;		/* upper left corner of object	*/
-	int		ob_y;		/* upper left corner of object	*/
-	int		ob_width;	/* width of obj			*/
-	int		ob_height;	/* height of obj		*/
+	short		ob_x;		/* upper left corner of object	*/
+	short		ob_y;		/* upper left corner of object	*/
+	short		ob_width;	/* width of obj			*/
+	short		ob_height;	/* height of obj		*/
 } OBJECT;
 
 
 typedef struct orect
 {
 struct orect	*o_link;
-	int	o_x;
-	int	o_y;
-	int	o_w;
-	int	o_h;
+	short	o_x;
+	short	o_y;
+	short	o_w;
+	short	o_h;
 } ORECT;
 
 
 typedef struct grect
 {
-	int	g_x;
-	int	g_y;
-	int	g_w;
-	int	g_h;
+	short	g_x;
+	short	g_y;
+	short	g_w;
+	short	g_h;
 } GRECT;
 
 
@@ -144,14 +144,14 @@ typedef struct text_edinfo
 	long		te_ptext;	/* ptr to text (must be 1st)	*/
 	long		te_ptmplt;	/* ptr to template		*/
 	long		te_pvalid;	/* ptr to validation chrs.	*/
-	int		te_font;	/* font				*/
-	int		te_junk1;	/* junk word			*/
-	int		te_just;	/* justification- left, right...*/
-	int		te_color;	/* color information word	*/
-	int		te_junk2;	/* junk word			*/
-	int		te_thickness;	/* border thickness		*/
-	int		te_txtlen;	/* length of text string	*/
-	int		te_tmplen;	/* length of template string	*/
+	short		te_font;	/* font				*/
+	short		te_junk1;	/* junk word			*/
+	short		te_just;	/* justification- left, right...*/
+	short		te_color;	/* color information word	*/
+	short		te_junk2;	/* junk word			*/
+	short		te_thickness;	/* border thickness		*/
+	short		te_txtlen;	/* length of text string	*/
+	short		te_tmplen;	/* length of template string	*/
 } TEDINFO;
 
 
@@ -160,27 +160,27 @@ typedef struct icon_block
 	long	ib_pmask;
 	long	ib_pdata;
 	long	ib_ptext;
-	int	ib_char;
-	int	ib_xchar;
-	int	ib_ychar;
-	int	ib_xicon;
-	int	ib_yicon;
-	int	ib_wicon;
-	int	ib_hicon;
-	int	ib_xtext;
-	int	ib_ytext;
-	int	ib_wtext;
-	int	ib_htext;
+	short	ib_char;
+	short	ib_xchar;
+	short	ib_ychar;
+	short	ib_xicon;
+	short	ib_yicon;
+	short	ib_wicon;
+	short	ib_hicon;
+	short	ib_xtext;
+	short	ib_ytext;
+	short	ib_wtext;
+	short	ib_htext;
 } ICONBLK;
 
 typedef struct bit_block
 {
 	long	bi_pdata;		/* ptr to bit forms data	*/
-	int	bi_wb;			/* width of form in bytes	*/
-	int	bi_hl;			/* height in lines		*/
-	int	bi_x;			/* source x in bit form		*/
-	int	bi_y;			/* source y in bit form		*/
-	int	bi_color;		/* fg color of blt 		*/
+	short	bi_wb;			/* width of form in bytes	*/
+	short	bi_hl;			/* height in lines		*/
+	short	bi_x;			/* source x in bit form		*/
+	short	bi_y;			/* source y in bit form		*/
+	short	bi_color;		/* fg color of blt 		*/
 } BITBLK;
 
 typedef struct user_blk
@@ -192,11 +192,10 @@ typedef struct user_blk
 typedef struct parm_blk
 {
 	long	pb_tree;
-	int	pb_obj;
-	int	pb_prevstate;
-	int	pb_currstate;
-	int	pb_x, pb_y, pb_w, pb_h;
-	int	pb_xc, pb_yc, pb_wc, pb_hc;
+	short	pb_obj;
+	short	pb_prevstate;
+	short	pb_currstate;
+	short	pb_x, pb_y, pb_w, pb_h;
+	short	pb_xc, pb_yc, pb_wc, pb_hc;
 	long	pb_parm;
 } PARMBLK;
-

@@ -2,7 +2,7 @@
 *
 * gemstart.s -startup code for the C runtime library, aesbind, vdibind
 *	
-*	IMPORTANT: SEE THE DESCRIPTION OF THE "STACK" VARIABLE, BELOW.
+*	IMPORTANT: SEE THE DESCRIPTION OF THE "_stksize" VARIABLE, BELOW.
 *
 *	This is the startup code for any application running on the Atari ST.
 *	This includes gemlib, vdi, and the aes bindings.
@@ -64,9 +64,9 @@
 *
 *************************************************************************
 *
-*	Here are the memory models you can set up with the STACK variable:
+*	Here are the memory models you can set up with the _stksize variable:
 *
-*	STACK
+*	_stksize
 *	value	Meaning
 *	------	---------------------------------------------------------
 *	-1	Keep all the memory for this process. Return NONE of it
@@ -99,26 +99,17 @@
 *		of room for using malloc(), but leaves enough for the
 *		AES and VDI to allocate their buffers, too.
 *
-*	 4	This is a special value which means "Keep the number of
-*		bytes in the LONG global variable __STKSIZ."  You must declare
-*		a variable in your program called "_STKSIZ" and initialize
-*		it to the number of bytes you want for your stack and heap.
-*		If __STKSIZ is negative, it means "Keep all BUT the number
-*		of bytes in __STKSIZ."  As a safeguard, if __STKSIZ is
-*		undefined, you will get MINSTACK bytes of stack/heap.
+*   An example using __stksize C is:
 *
-*		An example using __STKSIZ this in C is:
-*
-*			/* outside all function blocks */
-*			unsigned long _STKSIZ = 32767;	/* 32K stack+heap */
+*	/* outside all function blocks */
+*	long _stksize = 32767;	/* 32K stack+heap */
 *		or
-*			unsigned long _STKSIZ = -8192;	/* keep all but 8K */
+*	long _stksize = -8192;	/* keep all but 8K */
 *
-*		Note that in C, all variables get an underscore stuck on
-*		the front, so you just use one underscore in your program.
-*		Note also that it has to be all upper-case.
+*	Note that in C, all variables get an underscore stuck on
+*	the front, so you just use one underscore in your program.
 *
-*	Any other POSITIVE value of STACK will be taken as the number of
+*	Any other POSITIVE value of _stksize will be taken as the number of
 *	bytes you want to KEEP for your stack and heap.
 *
 *	Any other NEGATIVE value of STACK will be taken as the number of
@@ -131,7 +122,7 @@
 *	In all cases, a minimum stack size is enforced.  This minimum is
 *	set by the variable MINSTACK in this assembly file.  This value
 *	should be at least 256 bytes, but should be more like 4K. If
-*	the stack size from the STACK model you choose or the _STKSIZ
+*	the stack size from the STACK model you choose or the _stksize
 *	variable in your program is less than MINSTACK, you'll get
 *	MINSTACK bytes.  If there aren't MINSTACK bytes free past the end
 *	of your BSS, the program will abort with an error message.
@@ -144,28 +135,25 @@
 *	 1=keep 1/4 of free memory
 *	 2=keep 2/4
 *	 3=keep 3/4
-*	 4=use _STKSIZ: keep (if >0) or give up (if <0) _STKSIZ bytes.
 *    other=keep that many bytes (positive) or give back that many (negative)
 
-STACK=-8192		* CHANGE THIS VARIABLE TO CHOOSE A MEMORY MODEL
-
-MINSTACK=4096		* minimum stack+heap size.
-FUDGE=512		* minimum space to leave ABOVE our stack
+MINSTACK equ 4096		* minimum stack+heap size.
+FUDGE equ 512		* minimum space to leave ABOVE our stack
 
 * BASEPAGE ADDRESSES:
-p_lowtpa=$0		* Low TPA address (basepage address)
-p_hitpa=$4		* High TPA address (and initial stack pointer)
-p_tbase=$8		* ptr to Code segment start
-p_tlen=$c		* Code segment length
-p_dbase=$10		* ptr to Data segment start
-p_dlen=$14		* Data segment length
-p_bbase=$18		* ptr to Bss  segment start
-p_blen=$1c		* Bss  segment length
-p_dta=$20		* ptr to process's initial DTA
-p_parent=$24		* ptr to process's parent's basepage
-p_reserved=$28		* reserved pointer
-p_env=$2c		* ptr to environment string for process
-p_cmdlin=$80		* Command line image
+p_lowtpa equ $0		* Low TPA address (basepage address)
+p_hitpa equ $4		* High TPA address (and initial stack pointer)
+p_tbase equ $8		* ptr to Code segment start
+p_tlen equ $c		* Code segment length
+p_dbase equ $10		* ptr to Data segment start
+p_dlen equ $14		* Data segment length
+p_bbase equ $18		* ptr to Bss  segment start
+p_blen equ $1c		* Bss  segment length
+p_dta equ $20		* ptr to process's initial DTA
+p_parent equ $24	* ptr to process's parent's basepage
+p_reserved equ $28	* reserved pointer
+p_env equ $2c		* ptr to environment string for process
+p_cmdlin equ $80	* Command line image
 
 *
 * CONTROL VARIABLES (used in stack computations)
@@ -176,13 +164,12 @@ p_cmdlin=$80		* Command line image
 * DOSHRINK: a boolean which is set FALSE if STACK is -1, meaning "don't
 *	    shrink any memory back to the operating system."
 *
-gotstack	.equ	0	* set to 1 if STACK in [-1..4]
-doshrink	.equ	1	* default is 1; set to 0 if STACK = -1
 
 * GEMDOS functions:
-cconws=$09		* Cconws(string): write to console
-mshrink=$4a		* Mshrink(newsize): shrink a block to a new size
-pterm=$4c		* Pterm(code): exit, return code to parent
+cconws equ $09		* Cconws(string): write to console
+fsetdta equ $1a
+mshrink equ $4a		* Mshrink(newsize): shrink a block to a new size
+pterm equ $4c		* Pterm(code): exit, return code to parent
 
 	xdef	__start
 	xdef	__main
@@ -192,32 +179,40 @@ pterm=$4c		* Pterm(code): exit, return code to parent
 	xdef	__base
 	xdef	__BasPag
 	xdef	__sovf
+	xdef	__app
+	
+	xref    __stksize
 
-
-	.text
+	text
 *
 *  Must be first object file in link statement
 *
 
 __start:
-	move.l	sp,a1		* save our initial sp (used by ABORT)
-	move.l	4(sp),a0	* a0 = basepage address
+	move.l  a0,a3
+    move.l  a3,d0
+    bne     isacc
+    move.l  4(a7),a0	* a0 = basepage address
+    moveq.l #1,d0
+    bra     isapp
+isacc:
+	moveq.l #0,d0
+isapp:
+   	move.l	sp,a1		* save our initial sp (used by ABORT)
 	move.l	a0,__base	* base = a0
+    move.w  d0,_app
 	move.l	p_bbase(a0),d0	* d0 = bss seg start
 	add.l	p_blen(a0),d0	* d0 += bss length  (d0 now = start of heap)
 	move.l	d0,__break	* __break = first byte of heap
-
+    move.l  d0,d1
+    sub.l   a0,d1
+    move.l  d1,__PgmSize
+    
 *************************************************************************
 *									*
-*	Compute stack size based on MINSTACK, p_hitpa(a0), STACK,	*
-*	and __STKSIZ, as appropriate.  Place the SP where you want	*
+*	Compute stack size based on MINSTACK, p_hitpa(a0),
+*	and __stksize, as appropriate.  Place the SP where you want	*
 *	your stack to be. Note that a0 == __base, d0 == __break		*
-*									*
-*	At most one of the STACK code fragments will be assembled.	*
-*	If none of them are, then `gotstack' will still be 0, and	*
-*	the final block, saving STACK bytes, is used. Finally, if	*
-*	STACK wasn't -1 (meaning don't shrink at all), DOSHRINK		*
-*	gets control.  See doshrink for more.				*
 *									*
 *************************************************************************
 
@@ -225,58 +220,62 @@ __start:
 *		STACK = -1: keep all of memory				*
 *************************************************************************
 
-	.ifeq	STACK+1		* if (STACK == -1)
-gotstack	.equ	1
-doshrink	.equ	0	* this PREVENTS doshrink from assembling.
+	move.l  __stksize,d7
+	cmp.l   #-1,d7		* if (STACK == -1)
+	bne     minstack
 	move.l	p_hitpa(a0),sp	* place stack at top of tpa.
 	move.l	d0,d1		* check against MINSTACK
 	add.l	#MINSTACK,d1	* d1 = __break + MINSTACK;
 	cmp.l	sp,d1		* if (sp < __break + MINSTACK)
-	bhi	abort		*	goto abort;
-	.endc			* (this falls through to the __main call)
+	bhi	    abort		*	goto abort;
+	bra     gotstack    *   skips doshrink
 
 *************************************************************************
 *		STACK = 0: keep only MINSTACK bytes			*
 *************************************************************************
 
-	.ifeq	STACK
-gotstack	.equ	1
+minstack:
+    tst.l    d7
+    bne      stak1
 	move.l	#MINSTACK,sp	*	sp = __break+MINSTACK;
 	add.l	d0,sp
-	.endc			* (this falls through to doshrink)
+	bra     doshrink
 
 *************************************************************************
 *		STACK = 1: keep 1/4 of available memory			*
 *************************************************************************
 
-	.ifeq	STACK-1
-gotstack	.equ	1	*	/* keep 1/4 of available RAM */
+stak1:
+    cmp.l    #1,d7
+    bne      stak2
 	move.l	p_hitpa(a0),d1	*	d1 = p_hitpa;
 	sub.l	d0,d1		*	d1 -= __break; /* d1 = free ram size */
 	lsr.l	#2,d1		*	d1 /= 4;
 	add.l	d0,d1		*	d1 += __break;     /* d1 = new sp */
 	move.l	d1,sp		* 	sp = d1;
-	.endc			* } (this falls through to doshrink)
+	bra     doshrink
 
 *************************************************************************
 *		STACK = 2: keep 2/4 of available memory			*
 *************************************************************************
 
-	.ifeq	STACK-2		* if (STACK == 2) {	/* keep 1/2 */
-gotstack	.equ	1
+stak2:
+    cmp.l    #2,d7
+    bne      stak3
 	move.l	p_hitpa(a0),d1	*	d1 = p_hitpa;
 	sub.l	d0,d1		*	d1 -= __break; /* d1 = free ram size */
 	lsr.l	#1,d1		*	d1 /= 2;
 	add.l	d0,d1		*	d1 += __break; /* d1 = new sp */
 	move.l	d1,sp		* 	sp = d1;
-	.endc			* this falls through to doshrink
+	bra     doshrink
 
 *************************************************************************
 *		STACK = 3: keep 3/4 of available memory			*
 *************************************************************************
 
-	.ifeq	STACK-3		* if (STACK == 3) {	/* keep 3/4 */
-gotstack	.equ	1
+stak3:
+    cmp.l    #3,d7
+    bne      stak4
 	move.l	p_hitpa(a0),d1	*	d1 = p_hitpa;
 	sub.l	d0,d1		*	d1 -= __break; /* d1 = free ram size */
 	lsr.l	#2,d1		*	d1 /= 4;
@@ -285,50 +284,23 @@ gotstack	.equ	1
 	add.l	d2,d1		*	d1 += d2; /* now d1 = 3*(d1/4) */
 	add.l	d0,d1		*	d1 += __break;     /* d1 = new sp */
 	move.l	d1,sp		* 	sp = d1;
-	.endc			* this falls through to doshrink
-
-*************************************************************************
-*		STACK = 4: keep or give up __STKSIZ bytes of memory.	*
-*************************************************************************
-
-	.ifeq	STACK-4		* if (STACK == 4) {	/* keep __STKSIZ */
-	.globl __STKSIZ		* global variable holding stack size
-gotstack	.equ	1
-	move.l	#__STKSIZ,a1	* Check to see if __STKSIZ was undefined.
-	beq	keepmin		* if it's zero, keep the minimum stack.
-	move.l	(a1),d1
-	bmi	giveback	*	if (__STKSIZ < 0) goto giveback;
-	add.l	d0,d1		*	d1 = __base+__STKSIZ; /* new sp */
-	bra	gotd1
-
-keepmin:			* __STKSIZ was undefined; keep minimum.
-	move.l	#MINSTACK,d1
-	add.l	d0,d1		*	d1 = __base + MINSTACK;
-	bra	gotd1		*	goto gotd1;
-
-giveback:
-	add.l	p_hitpa(a0),d1	*	d1 += hitpa;
-
-gotd1:	move.l	d1,sp		* gotd1: sp = d1;
-	.endc
+	bra     doshrink
 
 *************************************************************************
 *		STACK is something else: keep (if STACK>0) or give	*
 *			back (if STACK<0) STACK bytes			*
 *************************************************************************
 
-	.ifeq	gotstack	* it's a constant stack value (+ or -)
+stak4:
+	move.l d7,d1
+	bmi	giveback	*	if (__stksize < 0) goto giveback;
+	add.l	d0,d1		*	d1 = __base+__STKSIZ; /* new sp */
+	bra	gotd1
 
-	move.l	#STACK,d1	*	/* if neg, give back STACK bytes */
-	bmi	giveback	*	if (STACK < 0) goto giveback;
-	add.l	d0,d1		*	d1 = __STKSIZ + __base; /* new sp */
-	bra	gotd1		*	goto gotd1;
+giveback:
+	add.l	p_hitpa(a0),d1	*	d1 += hitpa;
 
-giveback:			* giveback:
-	add.l	p_hitpa(a0),d1	*	d1 += hitpa;	/* d1 = new sp */
-gotd1:				* gotd1:
-	move.l	d1,sp		*	sp = d1;
-	.endc
+gotd1:	move.l	d1,sp		* gotd1: sp = d1;
 
 *************************************************************************
 *									*
@@ -364,7 +336,7 @@ gotd1:				* gotd1:
 *
 *************************************************************************
 
-	.ifne	doshrink	* assemble this only if STACK != -1
+doshrink:
 	move.l	d0,d1		*     d1 = __break;
 	add.l	#MINSTACK,d1	*     d1 += MINSTACK;
 	cmp.l	d1,sp		*     if ((__break+MINSTACK) < sp)
@@ -397,7 +369,6 @@ maxok:
 	move	#mshrink,-(sp)	* and the function code
 	trap	#1		* Mshrink(0,__base,(sp-base))
 	add.l	#12,sp		* clean the stack after ourselves
-	.endc
 
 *************************************************************************
 *									*
@@ -405,16 +376,29 @@ maxok:
 *									*
 *************************************************************************
 
+gotstack:
 	move.l	__base,a0	* set up _main(cmdline,length)
 	lea.l	p_cmdlin(a0),a2	* a2 now points to command line
 	move.b	(a2)+,d0	* d0 = length; a2++;
 	ext.w	d0		* extend byte count into d0.w
 	move.w	d0,-(a7)	* push length
 	move.l	a2,-(a7)	* Push commnd
-	clr.l	a6		* Clear frame pointer
+	suba.l	a6,a6		* Clear frame pointer
 	jsr	__main		* call main routine	NEVER RETURNS
     move.w d0,-(a7)
-    jsr __exit
+    bsr __exit
+
+*
+* stack overflow! This external is called by salloc in gemlib as well as above
+*
+__sovf:
+	lea	ovf(pc),a0			*	a0-> message
+	move.l	a0,-(a7)			*	load proper reg
+	move.w	#cconws,-(sp)	* push fn code
+	trap	#1		* Issue message
+
+	moveq   #-1,d0
+	move.w  d0,4(a7)
 
 ***********************************************************************
 *
@@ -423,9 +407,11 @@ maxok:
 ***********************************************************************
 
 __exit:
-	tst.l	(a7)+		* drop return PC off the stack, leaving code
+	addq.l   #4,a7		* drop return PC off the stack, leaving code
 	move.w	#pterm,-(a7)	* push function number
+_halt:
 	trap	#1		* and trap.
+	bra.s _halt
 
 *
 * abort: used if the stack setup above fails. Restores the initial sp,
@@ -433,7 +419,7 @@ __exit:
 *
 abort:				* print an abortive message and quit
 	move.l	a1,sp		* restore initial sp
-	pea.l	abortmsg	* push string address
+	pea.l	abortmsg(pc)	* push string address
 	move.w	#cconws,-(a7)	* and function code
 	trap	#1		* and trap to print message
 	addq.l	#6,a7		* clean off stack
@@ -456,79 +442,26 @@ _brk:
 badbrk:
 	move.l	#-1,d0		* Load return reg
 	rts			* Return
-*
-*
-*
-* stack overflow! This external is called by salloc in gemlib as well as above
-*
-__sovf:
-	move.l	#ovf,-(sp)	* push message address
-	move.w	#cconws,-(sp)	* push fn code
-	trap	#1		* Issue message
 
-	move.w	#1,-(a7)	* push return code (1)
-	move.w	#pterm,d0	* push function code (Pterm)
-	trap	#1		* call Pterm(1) (never returns)
-
-*
-*	Block Fill function:
-*
-*	blkfill(dest,char,cnt);
-*
-*	BYTE	*dest;		* -> area to be filled
-*	BYTE	char;		* =  char to fill
-*	WORD	cnt;		* =  # bytes to fill
-*
-	xdef	_blkfill
-_blkfill:
-	move.l	4(a7),a0	* -> Output area
-	move.w	8(a7),d1	* =  output char
-	move.w	10(a7),d0	* =  output count
-	ext.l	d0		* make it long
-	subq.l	#1,d0		* decrement
-	ble	filldone	* Done if le
-fillit:	move.b	d1,(a0)+	* move a byte
-	dbra	d0,fillit	* Continue
-filldone: clr.l	d0		* always return 0
-	rts			*
-
-*
-*	Index function to find out if a particular character is in a string.
-*
-	xdef	_index
-	xdef	_strchr
-_index:
-_strchr:
-	move.l	4(a7),a0	* a0 -> String
-	move.w	8(a7),d0	* D0 = desired character
-xindex:	tst.b	(a0)		* EOS?
-	bne	notend		* No, continue to look
-	clr.l	d0		* Not found
-	rts			* Quit
-notend:	cmp.b	(a0)+,d0	* check for character
-	bne	xindex		*	
-	move.l	a0,d0		* Found it
-	subq.l	#1,d0		* set return pointer
-	rts
+ovf:		dc.b	'Stack Overflow',13,10,0	* Overflow message
+abortmsg:	dc.b	'Cannot initialize stack',13,10,0	* abort message
+    even
 
 *
 *	Data area
 *
 	data
 	xdef	___pname	* Program Name
-	xdef	___xeof		* ^Z byte
-ovf:		dc.b	'Stack Overflow',13,10,0	* Overflow message
 ___pname:	dc.b	'runtime',0	* Program name
-___xeof:	dc.b	$1a		* Control-Z
-abortmsg:	dc.b	'Cannot initialize stack',13,10,0	* abort message
 
 **********************************************************************
 *
 * BSS AREA
 **********************************************************************
-	.bss
-	.even
+	bss
+	even
 __BasPag:
 __base:		ds.l	1	* -> Base Page
 __break:	ds.l	1	* Break location
 __PgmSize:  ds.l    1
+_app:		ds.w	1
