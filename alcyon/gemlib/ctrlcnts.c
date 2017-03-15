@@ -132,5 +132,7 @@ char const ctrl_cnts[] = {
 	0, 0, 0,							/* func 126     */
 	0, 0, 0,							/* func 127     */
 	0, 0, 0,							/* func 128     */
-	0, 0, 0								/* func 129     */
+	0, 0, 0,							/* func 129     */
+/* extended */
+	1, 5, 0,							/* func 130     */
 };

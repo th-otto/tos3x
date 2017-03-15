@@ -1,5 +1,5 @@
 top_srcdir=..
-subdir=gemlib
+subdir=examples
 
 # 
 # cross compiling
@@ -13,18 +13,23 @@ include ../Makefile.sil
 CPPFLAGS = -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-all::
+PROGRAMS = test.prg
+LIBS = -lgem
+
+all: $(PROGRAMS)
 
 include SRCFILES
 
-all:: ${GEMLIB} gemstart.o
+test.prg: $(TEST_OBJS)
+	$(AM_V_LD)$(LD) $(TEST_OBJS) $(LDFLAGS) -o $@ $(LIBS)
 
-${GEMLIB}: $(OBJS)
-	$(AM_V_at)$(RM) $@
-	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OBJS)
+install: all
+	@:
+
+check::
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a *.ndx
+	$(RM) *.o *.a $(PROGRAMS)

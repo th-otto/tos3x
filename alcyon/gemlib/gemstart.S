@@ -180,6 +180,7 @@ pterm equ $4c		* Pterm(code): exit, return code to parent
 	xdef	__BasPag
 	xdef	__sovf
 	xdef	__app
+	xdef	__PgmSize
 	
 	xref    __stksize
 
@@ -200,7 +201,7 @@ isacc:
 isapp:
    	move.l	sp,a1		* save our initial sp (used by ABORT)
 	move.l	a0,__base	* base = a0
-    move.w  d0,_app
+    move.w  d0,__app
 	move.l	p_bbase(a0),d0	* d0 = bss seg start
 	add.l	p_blen(a0),d0	* d0 += bss length  (d0 now = start of heap)
 	move.l	d0,__break	* __break = first byte of heap
@@ -464,4 +465,4 @@ __BasPag:
 __base:		ds.l	1	* -> Base Page
 __break:	ds.l	1	* Break location
 __PgmSize:  ds.l    1
-_app:		ds.w	1
+__app:		ds.w	1

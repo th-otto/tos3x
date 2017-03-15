@@ -1,9 +1,6 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-GEMLIB=gem.a
-GEMLIB_NDX=gem.ndx
-
 all::
 
 include SRCFILES

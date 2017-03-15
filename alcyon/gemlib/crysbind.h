@@ -9,6 +9,7 @@
 #define APPL_TRECORD 15
 #define APPL_BVSET 16
 #define APPL_EXIT 19
+#define APPL_GINFO 130
 
 /* Event Manager			*/
 #define EVNT_KEYBD 20

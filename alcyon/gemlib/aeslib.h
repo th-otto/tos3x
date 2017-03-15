@@ -31,12 +31,12 @@ typedef struct cblk
 	VOIDPTR *cb_padrout;		
 } CBLK;
 
-extern int16_t control[C_SIZE];
-extern int16_t global[G_SIZE];
-extern int16_t int_in[I_SIZE];
-extern int16_t int_out[O_SIZE];
-extern VOIDPTR addr_in[AI_SIZE];
-extern VOIDPTR addr_out[AO_SIZE];
+extern int16_t control[];
+extern int16_t global[];
+extern int16_t int_in[];
+extern int16_t int_out[];
+extern VOIDPTR addr_in[];
+extern VOIDPTR addr_out[];
 
 int crystal PROTO((CBLK *));
 

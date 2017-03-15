@@ -8,22 +8,11 @@
  */
 typedef struct _mrets
 {
-  WORD x;
-  WORD y;
-  WORD buttons;
-  WORD kstate;
+  short x;
+  short y;
+  short buttons;
+  short kstate;
 }MRETS;
-
-#if 0     /* Found in AES.H */
-typedef struct _moblk
-{
-  WORD m_x;
-  WORD m_y;
-  WORD m_w;
-  WORD m_h;
-  WORD m_out;
-}MOBLK;
-#endif
 
 /*
  * Object bitfield structures
@@ -52,8 +41,8 @@ typedef struct sColorword
 
 typedef struct sObInfo
 {
-	BYTE   letter;
-	BYTE   border;
+	char   letter;
+	char   border;
 	Colorword	c;
 } ObInfo;
 

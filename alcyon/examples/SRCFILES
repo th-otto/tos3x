@@ -1,0 +1,7 @@
+TEST_SRCS = test.c
+TEST_OBJS = $(TEST_SRCS:.c=.o)
+
+SRCS = $(TEST_SRCS)
+
+EXTRA_DIST = GNUmakefile Makefile SRCFILES \
+	test.h test.rsc test.rso

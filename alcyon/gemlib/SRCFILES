@@ -10,6 +10,8 @@ CSRCS = ctrlcnts.c crysif.c \
 	ap_tplay.c \
 	ap_treco.c \
 	ap_write.c \
+	ap_ginfo.c \
+	ap_xginf.c \
 	ev_butto.c \
 	ev_dclic.c \
 	ev_keybd.c \
@@ -85,6 +87,7 @@ CSRCS = ctrlcnts.c crysif.c \
 	rc_equal.c \
 	rc_copy.c \
 	rc_inter.c \
+	rc_union.c \
 	\
 	varc.c \
 	vbar.c \
@@ -205,6 +208,8 @@ CSRCS = ctrlcnts.c crysif.c \
 	vqperror.c \
 	vspsave.c \
 	vspmessg.c \
+	vspstate.c \
+	vqpstate.c \
 	\
 	$(empty)
 

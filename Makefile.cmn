@@ -26,8 +26,13 @@ CPP=${BIN}cp68${EXEEXT} ${CPPFLAGS} -P
 CRT0=crt0.o
 LIBC=libc.a
 LIBC_NDX=libc.ndx
+DEPLIBC=${LIB}${LIBC}
 LIBM=libm.a
 LIBM_NDX=libm.ndx
+DEPLIBM=${LIB}${LIBM}
+GEMLIB=gem.a
+GEMLIB_NDX=gem.ndx
+DEPGEMLIB=${LIB}${GEMLIB}
 NOFLOAT=nofloat.o
 LDFLAGS=
 

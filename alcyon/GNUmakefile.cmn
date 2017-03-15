@@ -11,6 +11,8 @@ LIBC=libc.a
 LIBC_NDX=
 LIBM=libm.a
 LIBM_NDX=
+GEMLIB=gem.a
+GEMLIB_NDX=
 
 #
 # target and host compiler
