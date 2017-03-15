@@ -5,6 +5,8 @@ PP(int16_t handle;)
 PP(MFDB *srcMFDB;)
 PP(MFDB *desMFDB;)
 {
+	VOIDPTR *t;
+	
 	i_ptr(srcMFDB);
 	i_ptr2(desMFDB);
 

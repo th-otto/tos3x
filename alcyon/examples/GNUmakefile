@@ -13,7 +13,7 @@ include ../Makefile.sil
 CPPFLAGS = -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = test.prg
+PROGRAMS = test.prg apskel.prg
 LIBS = -lgem
 
 all: $(PROGRAMS)
@@ -22,6 +22,9 @@ include SRCFILES
 
 test.prg: $(TEST_OBJS)
 	$(AM_V_LD)$(LD) $(TEST_OBJS) $(LDFLAGS) -o $@ $(LIBS)
+
+apskel.prg: $(APSKEL_OBJS)
+	$(AM_V_LD)$(LD) $(APSKEL_OBJS) $(LDFLAGS) -o $@ $(LIBS)
 
 install: all
 	@:

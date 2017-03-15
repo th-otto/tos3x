@@ -5,7 +5,7 @@
  * rc_union	Returns the union of two rectangles in r2.
  */
 
-short rc_union(P(const GRECT *) r1, P(GRECT *) r2)
+VOID rc_union(P(const GRECT *) r1, P(GRECT *) r2)
 PP(register const GRECT *r1;)
 PP(register GRECT *r2;)
 {

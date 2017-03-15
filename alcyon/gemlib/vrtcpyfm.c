@@ -8,6 +8,8 @@ PP(MFDB *srcMFDB;)
 PP(MFDB *desMFDB;)
 PP(int16_t *index;)
 {
+	VOIDPTR *t;
+	
 	intin[0] = wr_mode;
 	intin[1] = *index++;
 	intin[2] = *index;

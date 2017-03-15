@@ -5,6 +5,8 @@ PP(int16_t handle;)
 PP(VOIDPTR usercode;)
 PP(VOIDPTR *savecode;)
 {
+	VOIDPTR *t;
+	
 	i_ptr(usercode);
 
 	contrl[0] = 127;

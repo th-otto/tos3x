@@ -1,7 +1,10 @@
 TEST_SRCS = test.c
 TEST_OBJS = $(TEST_SRCS:.c=.o)
 
-SRCS = $(TEST_SRCS)
+APSKEL_SRCS = apskel.c
+APSKEL_OBJS = $(APSKEL_SRCS:.c=.o)
+
+SRCS = $(TEST_SRCS) $(APSKEL_SRCS)
 
 EXTRA_DIST = GNUmakefile Makefile SRCFILES \
 	test.h test.rsc test.rso

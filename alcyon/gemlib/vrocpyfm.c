@@ -7,6 +7,8 @@ PP(int16_t *xy;)
 PP(MFDB *srcMFDB;)
 PP(MFDB *desMFDB;)
 {
+	VOIDPTR *t;
+	
 	intin[0] = wr_mode;
 	i_ptr(srcMFDB);
 	i_ptr2(desMFDB);

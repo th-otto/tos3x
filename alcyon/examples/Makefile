@@ -1,7 +1,7 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-PROGRAMS = test.prg
+PROGRAMS = test.prg apskel.prg
 LIBS = ${LIBC} ${GEMLIB}
 DEPLIBS = ${DEPLIBC} ${DEPGEMLIB}
 
@@ -11,6 +11,9 @@ include SRCFILES
 
 test.prg: $(TEST_OBJS) ${MAKEFILE} $(DEPLIBS)
 	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ gemstart.o $(NOFLOAT) $(TEST_OBJS) $(LIBS)
+
+apskel.prg: $(APSKEL_OBJS) ${MAKEFILE} $(DEPLIBS)
+	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ gemstart.o $(NOFLOAT) $(APSKEL_OBJS) $(LIBS)
 
 install: all
 	@:

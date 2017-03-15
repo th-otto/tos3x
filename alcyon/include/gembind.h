@@ -103,6 +103,9 @@ short wind_find PROTO((short mx, short my));
 short wind_get PROTO((short w_handle, short w_field, short *pw1, short *pw2, short *pw3, short *pw4));
 short wind_open PROTO((short handle, short wx, short wy, short ww, short wh));
 short wind_set PROTO((short w_handle, short w_field, short w2, short w3, short w4, short w5));
+#ifndef __ALCYON__
+short wind_set_str PROTO((short w_handle, short w_field, const char *str));
+#endif
 short wind_update PROTO((short beg_update));
 VOID wind_new PROTO((NOTHING));
 

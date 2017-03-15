@@ -1,4 +1,4 @@
-ASRCS = crystal.S vdi.S iptr.S iptr2.S mlptr.S muldiv.S umuldiv.S smuldiv.S veclen.S
+ASRCS = crystal.S vdi.S muldiv.S umuldiv.S smuldiv.S veclen.S
 
 AOBJS = $(ASRCS:.S=.o)
 
@@ -89,6 +89,7 @@ CSRCS = ctrlcnts.c crysif.c \
 	rc_inter.c \
 	rc_union.c \
 	\
+	vdivars.c \
 	varc.c \
 	vbar.c \
 	vbitimag.c \

@@ -21,17 +21,21 @@ extern int16_t intin[];
 extern int16_t ptsin[];
 extern int16_t intout[];
 extern int16_t ptsout[];
+extern VDIPB pblock;
 
-#define i_ptsin(ptr) pioff = ptr
-#define i_intin(ptr) iioff = ptr
-#define i_intout(ptr) iooff = ptr
-#define i_ptsout(ptr) pooff = ptr
+#define i_ptsin(ptr) pblock.ptsin = ptr
+#define i_intin(ptr) pblock.intin = ptr
+#define i_intout(ptr) pblock.intout = ptr
+#define i_ptsout(ptr) pblock.ptsout = ptr
 
-extern int16_t *pioff, *iioff, *pooff, *iooff;
+/*
+ * dereferencing a type-casted ptr does not work in Alcyon,
+ * you need to assign it to a temporary first.
+ */
+#define i_ptr(p) t = (VOIDPTR *)&contrl[7]; *t = (VOID *)(p)
+#define i_ptr2(p) t = (VOIDPTR *)&contrl[9]; *t = (VOID *)(p)
 
-VOID i_ptr PROTO((VOIDPTR));
-VOID i_ptr2 PROTO((VOIDPTR));
-VOID m_lptr2 PROTO((VOIDPTR *));
+#define m_lptr2(p) t = (VOIDPTR *)&contrl[9]; *((VOID **)(p)) = *t
 
 VOID vdi PROTO((NOTHING));
 

@@ -23,6 +23,17 @@ typedef struct memory_form
 } MFDB;
 #endif
 
+#ifndef __VDIPB
+#define __VDIPB
+typedef struct
+{
+	short       *control;
+	const short *intin;
+	const short *ptsin;
+	short       *intout;
+	short       *ptsout;
+} VDIPB;
+#endif
 
 VOID v_opnwk PROTO((short *work_in, short *handle, short *work_out));
 VOID v_opnvwk PROTO((short *work_in, short *handle, short *work_out));

@@ -3,6 +3,9 @@
 #endif
 
 extern short gl_apid;
+extern short _app;
+
+extern short global[];
 
 
 short appl_exit PROTO((NOTHING));
@@ -12,6 +15,7 @@ short appl_read PROTO((short rwid, short length, VOIDPTR pbuff));
 short appl_tplay PROTO((VOIDPTR tbuffer, short tlength, short tscale));
 short appl_trecord PROTO((VOIDPTR tbuffer, short tlength));
 short appl_write PROTO((short rwid, short length, const VOIDPTR pbuff));
+short appl_getinfo PROTO((short type, short *out1, short *out2, short *out3, short *out4));
 
 short evnt_button PROTO((short clicks, short mask, short state, short *pmx, short *pmy, short *pmb, short *pks));
 short evnt_dclick PROTO((short rate, short setit));
@@ -99,6 +103,9 @@ short wind_find PROTO((short mx, short my));
 short wind_get PROTO((short w_handle, short w_field, short *pw1, short *pw2, short *pw3, short *pw4));
 short wind_open PROTO((short handle, short wx, short wy, short ww, short wh));
 short wind_set PROTO((short w_handle, short w_field, short w2, short w3, short w4, short w5));
+#ifndef __ALCYON__
+short wind_set_str PROTO((short w_handle, short w_field, const char *str));
+#endif
 short wind_update PROTO((short beg_update));
 VOID wind_new PROTO((NOTHING));
 
@@ -109,3 +116,5 @@ short rc_equal PROTO((const GRECT *p1, const GRECT *p2));
 VOID rc_copy PROTO((const GRECT *src, GRECT *dst));
 short rc_intersect PROTO((const GRECT *r1, GRECT *r2));
 VOID rc_union PROTO((const GRECT *r1, GRECT *r2));
+
+short appl_xgetinfo PROTO((short type, short *out1, short *out2, short *out3, short *out4));
