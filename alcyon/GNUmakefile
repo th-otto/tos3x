@@ -1,7 +1,7 @@
 include GNUmakefile.cmn
 include Makefile.sil
 
-SUBDIRS = libsrc as cgen cpp link68 optimize parser util cli
+SUBDIRS = libsrc as cgen cpp link68 optimize parser util cli gemlib
 
 EXTRA_DIST = \
 	GNUmakefile \

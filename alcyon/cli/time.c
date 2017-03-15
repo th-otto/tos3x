@@ -5,7 +5,7 @@
 #include <osbind.h>
 #include "dt.h"
 
-VOID entry PROTO((char *bp));
+VOID entry PROTO((BASEPAGE *bp));
 
 VOID entry(P(BASEPAGE *) bp)
 PP(BASEPAGE *bp;)

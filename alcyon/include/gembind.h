@@ -1,3 +1,7 @@
+#ifndef __COMPILER_H__
+#include <compiler.h>
+#endif
+
 extern short gl_apid;
 
 

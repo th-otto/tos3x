@@ -1,4 +1,4 @@
-ASRCS = crystal.S vdi.S
+ASRCS = crystal.S vdi.S iptr.S iptr2.S mlptr.S muldiv.S umuldiv.S smuldiv.S veclen.S
 
 AOBJS = $(ASRCS:.S=.o)
 
@@ -85,6 +85,128 @@ CSRCS = ctrlcnts.c crysif.c \
 	rc_equal.c \
 	rc_copy.c \
 	rc_inter.c \
+	\
+	varc.c \
+	vbar.c \
+	vbitimag.c \
+	vcella.c \
+	vcircle.c \
+	vclrdspl.c \
+	vclrwk.c \
+	vclsvwk.c \
+	vclswk.c \
+	vcontrf.c \
+	vcurdown.c \
+	vcurhome.c \
+	vcurleft.c \
+	vcurrigh.c \
+	vcurtext.c \
+	vcurup.c \
+	vdspcur.c \
+	veeol.c \
+	veeos.c \
+	vellarc.c \
+	vellipse.c \
+	vellpie.c \
+	ventercu.c \
+	vexbutv.c \
+	vexcurv.c \
+	vexmotv.c \
+	vextimv.c \
+	vexitcur.c \
+	vfilla.c \
+	vformadv.c \
+	vgetpix.c \
+	vgtext.c \
+	vhardc.c \
+	vhidec.c \
+	vjustif.c \
+	vmetaext.c \
+	vmfilen.c \
+	vopnvwk.c \
+	vopnwk.c \
+	voutwin.c \
+	vpie.c \
+	vpline.c \
+	vpmark.c \
+	vqcella.c \
+	vqchcell.c \
+	vqcolor.c \
+	vqcuradd.c \
+	vqextnd.c \
+	vqfattr.c \
+	vqinmode.c \
+	vqkeys.c \
+	vqlattr.c \
+	vqmattr.c \
+	vqmouse.c \
+	vqpfilms.c \
+	vqpfilmn.c \
+	vqtabst.c \
+	vqtattr.c \
+	vqtexten.c \
+	vqtfonti.c \
+	vqtname.c \
+	vqtwidth.c \
+	vrbox.c \
+	vrfbox.c \
+	vrmcur.c \
+	vrocpyfm.c \
+	vrqchoic.c \
+	vrqlocat.c \
+	vrqstrin.c \
+	vrqval.c \
+	vrrecfl.c \
+	vrtcpyfm.c \
+	vrtrnfm.c \
+	vrvoff.c \
+	vrvon.c \
+	vscform.c \
+	vsclip.c \
+	vscolor.c \
+	vscuradd.c \
+	vsfcolor.c \
+	vsfint.c \
+	vsfperim.c \
+	vsfstyle.c \
+	vsfudpat.c \
+	vshowc.c \
+	vsinmode.c \
+	vslcolor.c \
+	vslends.c \
+	vsltype.c \
+	vsludsty.c \
+	vslwidth.c \
+	vsmchoic.c \
+	vsmcolor.c \
+	vsmheigh.c \
+	vsmlocat.c \
+	vsmstrin.c \
+	vsmtype.c \
+	vsmval.c \
+	vspalett.c \
+	vstalign.c \
+	vstcolor.c \
+	vsteffec.c \
+	vstfont.c \
+	vstheigh.c \
+	vstload.c \
+	vstpoint.c \
+	vstrot.c \
+	vstunloa.c \
+	vswrmode.c \
+	vupdwk.c \
+	vwritem.c \
+	vqscan.c \
+	valphat.c \
+	vspfilm.c \
+	vsound.c \
+	vsmute.c \
+	vqperror.c \
+	vspsave.c \
+	vspmessg.c \
+	\
+	$(empty)
 
 
 COBJS = $(CSRCS:.c=.o)

@@ -53,8 +53,9 @@
 #define	NOT_SORD   8
 #define	NOT_SXORD  9
 #define D_INVERT  10
-#define	NOT_D     11
-#define	S_OR_NOTD 12
+#define	NOT_D     11 /* BUG: should be same as D_INVERT */
+#define	S_OR_NOTD 12 /* BUG: should be 11 */
+#define NOT_S     12 /* was missing */
 #define NOTS_OR_D 13
 #define	NOT_SANDD 14
 #define ALL_BLACK 15
