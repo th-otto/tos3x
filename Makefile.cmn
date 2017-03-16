@@ -48,10 +48,10 @@ MKDIR_P = $(MKDIR) -p
 SED   = ${BIN}sed
 BC    = ${BIN}bc
 
-CMP      = $(top_srcdir)/tools/cmprom$(BUILD_EXEEXT)
-MKGLUE   = $(top_srcdir)/tools/newglue$(BUILD_EXEEXT)
-MKBININC = $(top_srcdir)/tools/mkbininc$(BUILD_EXEEXT)
-MKROM    = $(top_srcdir)/tools/mkrom$(BUILD_EXEEXT)
+CMP      = $(top_srcdir)$(BS)tools$(BS)cmprom$(BUILD_EXEEXT)
+MKGLUE   = $(top_srcdir)$(BS)tools$(BS)newglue$(BUILD_EXEEXT)
+MKBININC = $(top_srcdir)$(BS)tools$(BS)mkbininc$(BUILD_EXEEXT)
+MKROM    = $(top_srcdir)$(BS)tools$(BS)mkrom$(BUILD_EXEEXT)
 
 # Wether to run the optimizer pass.
 # the default is evaluated by RUN_OPTIMIZE_,
