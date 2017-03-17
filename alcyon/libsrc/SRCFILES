@@ -1,4 +1,4 @@
-ASRCS1 = xsignal.S salloc.S setjmp.S memsets.S brk.S
+ASRCS1 = xsignal.S salloc.S setjmp.S memsets.S memcpys.S brk.S
 ASRCS2 = bios.S xbios.S gemdos.S strchrs.S
 
 AOBJS1 = $(ASRCS1:.S=.o)

@@ -3,6 +3,10 @@
 /*		Copyright 1985 Atari Corp.				*/
 /************************************************************************/
 
+#ifndef __COMPILER_H__
+#include <compiler.h>
+#endif
+
 /*	EVENT Manager Definitions					*/
 
 /* multi flags		*/
@@ -163,20 +167,6 @@ typedef struct rshdr
 #define M_ON      257
 
 /*	MISCELLANEOUS Structures					*/
-
-/* Memory Form Definition Block */
-typedef struct fdbstr
-{
-	long		fd_addr;
-	short		fd_w;
-	short		fd_h;
-	short		fd_wdwidth;
-	short		fd_stand;
-	short		fd_nplanes;
-	short		fd_r1;
-	short		fd_r2;
-	short		fd_r3;
-} FDB;
 
 /* Mouse Form Definition Block */
 typedef struct mfstr

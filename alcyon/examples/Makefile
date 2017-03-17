@@ -1,7 +1,7 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-PROGRAMS = test.prg apskel.prg
+PROGRAMS = test.prg apskel.prg doodle.app
 LIBS = ${LIBC} ${GEMLIB}
 DEPLIBS = ${DEPLIBC} ${DEPGEMLIB}
 
@@ -14,6 +14,9 @@ test.prg: $(TEST_OBJS) ${MAKEFILE} $(DEPLIBS)
 
 apskel.prg: $(APSKEL_OBJS) ${MAKEFILE} $(DEPLIBS)
 	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ gemstart.o $(NOFLOAT) $(APSKEL_OBJS) $(LIBS)
+
+doodle.app: $(DOODLE_OBJS) ${MAKEFILE} $(DEPLIBS)
+	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ gemstart.o $(NOFLOAT) $(DOODLE_OBJS) $(LIBS)
 
 install: all
 	@:

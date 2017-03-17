@@ -9,9 +9,10 @@
 
 #ifndef __MFDB
 #define __MFDB
+/* Memory Form Definition Block */
 typedef struct memory_form
 {
-	VOIDPTR fd_addr;	/**< TODO */
+	VOIDPTR fd_addr;
 	short 	fd_w;		/**< Form Width in Pixels */
 	short 	fd_h; 		/**< Form Height in Pixels */
 	short 	fd_wdwidth;	/**< Form Width in shorts(fd_w/sizeof(short) */
@@ -34,6 +35,13 @@ typedef struct
 	short       *ptsout;
 } VDIPB;
 #endif
+
+/* vsf_interior modes */
+#define FIS_HOLLOW		0
+#define FIS_SOLID		1
+#define FIS_PATTERN		2
+#define FIS_HATCH		3
+#define FIS_USER		4
 
 VOID v_opnwk PROTO((short *work_in, short *handle, short *work_out));
 VOID v_opnvwk PROTO((short *work_in, short *handle, short *work_out));

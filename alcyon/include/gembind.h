@@ -109,6 +109,8 @@ short wind_set_str PROTO((short w_handle, short w_field, const char *str));
 short wind_update PROTO((short beg_update));
 VOID wind_new PROTO((NOTHING));
 
+#undef min
+#undef max
 short min PROTO((short a, short b));
 short max PROTO((short a, short b));
 
@@ -116,5 +118,6 @@ short rc_equal PROTO((const GRECT *p1, const GRECT *p2));
 VOID rc_copy PROTO((const GRECT *src, GRECT *dst));
 short rc_intersect PROTO((const GRECT *r1, GRECT *r2));
 VOID rc_union PROTO((const GRECT *r1, GRECT *r2));
+short umul_div PROTO((unsigned short m1, unsigned short m2, unsigned short d1));
 
 short appl_xgetinfo PROTO((short type, short *out1, short *out2, short *out3, short *out4));

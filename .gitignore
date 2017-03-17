@@ -19,8 +19,10 @@ build
 *.exe
 *.pdb
 *.prg
+*.prg
 *.tos
 *.ttp
+*.app
 *.ldg
 *.slb
 *.pcf

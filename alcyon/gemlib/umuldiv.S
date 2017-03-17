@@ -1,3 +1,12 @@
+*
+*short umul_div(m1, m2, d1)
+*unsigned short m1;
+*unsigned short m2;
+*unsigned short d1;
+*{
+*	return ((((m2 + m2) * m1) / d1) + 1) >> 1;
+*}
+*
 	xdef	_umul_div
 _umul_div:
 

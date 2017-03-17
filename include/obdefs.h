@@ -3,12 +3,19 @@
 /*		Copyright 1985 Atari Corp.				*/
 /************************************************************************/
 
+#ifndef __COMPILER_H__
+#include <compiler.h>
+#endif
+
 #define ROOT 0
-						/* max string length	*/
+#define NIL (-1)
+#define DESK            0				/* Desktop window handle */
+
+/* max string length	*/
 #define MAX_LEN 81
-					/* max depth of search or draw	*/
+/* max depth of search or draw	*/
 #define MAX_DEPTH 8
-						/* inside patterns	*/
+/* inside patterns	*/
 #define IP_HOLLOW 0
 #define IP_1PATT 1
 #define IP_2PATT 2
@@ -17,12 +24,14 @@
 #define IP_5PATT 5
 #define IP_6PATT 6
 #define IP_SOLID 7
-						/* gsx modes		*/
+
+/* gsx modes		*/
 #define MD_REPLACE 1
 #define MD_TRANS   2
 #define MD_XOR     3
 #define MD_ERASE   4
-						/* bit blt rules	*/
+
+/* bit blt rules	*/
 #define ALL_WHITE  0
 #define S_AND_D    1
 #define	S_AND_NOTD 2
@@ -142,9 +151,9 @@ typedef struct grect
 
 typedef struct text_edinfo
 {
-	long		te_ptext;	/* ptr to text (must be 1st)	*/
-	long		te_ptmplt;	/* ptr to template		*/
-	long		te_pvalid;	/* ptr to validation chrs.	*/
+	char       *te_ptext;	/* ptr to text (must be 1st)	*/
+	char       *te_ptmplt;	/* ptr to template		*/
+	char       *te_pvalid;	/* ptr to validation chrs.	*/
 	short		te_font;	/* font				*/
 	short		te_junk1;	/* junk word			*/
 	short		te_just;	/* justification- left, right...*/
@@ -158,9 +167,9 @@ typedef struct text_edinfo
 
 typedef struct icon_block
 {
-	long	ib_pmask;
-	long	ib_pdata;
-	long	ib_ptext;
+	VOIDPTR ib_pmask;
+	VOIDPTR ib_pdata;
+	VOIDPTR ib_ptext;
 	short	ib_char;
 	short	ib_xchar;
 	short	ib_ychar;
@@ -176,7 +185,7 @@ typedef struct icon_block
 
 typedef struct bit_block
 {
-	long	bi_pdata;		/* ptr to bit forms data	*/
+	VOIDPTR bi_pdata;		/* ptr to bit forms data	*/
 	short	bi_wb;			/* width of form in bytes	*/
 	short	bi_hl;			/* height in lines		*/
 	short	bi_x;			/* source x in bit form		*/
@@ -192,7 +201,7 @@ typedef struct user_blk
 
 typedef struct parm_blk
 {
-	long	pb_tree;
+	OBJECT *pb_tree;
 	short	pb_obj;
 	short	pb_prevstate;
 	short	pb_currstate;
