@@ -121,7 +121,7 @@ short pen_ink = PEN_INK;				/* current ink shade            */
 short bkgr_color = WHITE;				/* current background shade     */
 short bkgr_next = WHITE;				/* next background shade        */
 short dood_pen = 1;						/* doodle current pen width     */
-short dood_height = 4;					/* doodle current char height   */
+short dood_height = 13;					/* doodle current char height   */
 short char_fine;						/* character height for fine    */
 short char_medium;						/* character height for medium  */
 short char_broad;						/* character height for broad   */
@@ -175,89 +175,6 @@ long color_sel[N_COLORS + 1] = {		/* data for scrolling color selector */
 	0x46FF107FL
 };
 
-/*------------------------------*/
-/*      Mouse Data Structures   */
-/*------------------------------*/
-
-MFORM erase_broad =					/* mouse form for broad eraser */
-{
-	7, 7, 1, 0, 1,
-#ifndef __ALCYON__
-	{
-#endif
-	  0x0000, 0x0000, 0x0000, 0x0000,		/* mask */
-	  0x0000, 0x1ff0, 0x1ff0, 0x1ff0,
-	  0x1ff0, 0x1ff0, 0x0000, 0x0000,
-	  0x0000, 0x0000, 0x0000, 0x0000
-#ifndef __ALCYON__
-	}
-#endif
-	,
-#ifndef __ALCYON__
-	{
-#endif
-	  0x0000, 0x0000, 0x0000, 0x0000,		/* data */
-	  0x7ffc, 0x600c, 0x600c, 0x600c,
-	  0x600c, 0x600c, 0x7ffc, 0x0000,
-	  0x0000, 0x0000, 0x0000, 0x0000
-#ifndef __ALCYON__
-	}
-#endif
-};
-
-MFORM erase_medium =					/* mouse form for medium eraser */
-{
-	7, 7, 1, 0, 1,
-#ifndef __ALCYON__
-	{
-#endif
-	  0x0000, 0x0000, 0x0000, 0x0000,		/* mask */
-	  0x0000, 0x0000, 0x07c0, 0x07c0,
-	  0x07c0, 0x0000, 0x0000, 0x0000,
-	  0x0000, 0x0000, 0x0000, 0x0000
-#ifndef __ALCYON__
-	}
-#endif
-	,
-#ifndef __ALCYON__
-	{
-#endif
-	  0x0000, 0x0000, 0x0000, 0x0000,		/* data */
-	  0x0000, 0x1ff0, 0x1830, 0x1830,
-	  0x1830, 0x1ff0, 0x0000, 0x0000,
-	  0x0000, 0x0000, 0x0000, 0x0000
-#ifndef __ALCYON__
-	}
-#endif
-};
-
-MFORM erase_fine =					/* mouse form for fine eraser */
-{
-	7, 7, 1, 0, 1,
-#ifndef __ALCYON__
-	{
-#endif
-	  0x0000, 0x0000, 0x0000, 0x0000,		/* mask */
-	  0x0000, 0x0000, 0x0000, 0x0100,
-	  0x0000, 0x0000, 0x0000, 0x0000,
-	  0x0000, 0x0000, 0x0000, 0x0000
-#ifndef __ALCYON__
-	}
-#endif
-	,
-#ifndef __ALCYON__
-	{
-#endif
-	  0x0000, 0x0000, 0x0000, 0x0000,		/* data */
-	  0x0000, 0x0000, 0x07c0, 0x06c0,
-	  0x07c0, 0x0000, 0x0000, 0x0000,
-	  0x0000, 0x0000, 0x0000, 0x0000
-#ifndef __ALCYON__
-	}
-#endif
-};
-
-
 /************************************************************************/
 /************************************************************************/
 /****                                                                ****/
@@ -282,6 +199,29 @@ PP(short which;)
 
 
 /*------------------------------*/
+/*      bit_addr                */
+/*------------------------------*/
+/* returns a free image addr  */
+static BITBLK *bit_addr(P(short) which)
+PP(short which;)
+{
+	BITBLK **bit;
+	
+	rsrc_gaddr(R_FRIMG, which, &bit);
+	return *bit;
+}
+
+static MFORM *mform_addr(P(short) which)
+PP(short which;)
+{
+	BITBLK *bit;
+	
+	bit = bit_addr(which);
+	return (MFORM *)(bit->bi_pdata);
+}
+
+
+/*------------------------------*/
 /*      inside                  */
 /*------------------------------*/
 /* determine if x,y is in rectangle     */
@@ -291,10 +231,9 @@ PP(short y;)
 PP(const GRECT *pt;)
 {
 	if ((x >= pt->g_x) && (y >= pt->g_y) && (x < pt->g_x + pt->g_w) && (y < pt->g_y + pt->g_h))
-		return (TRUE);
-	else
-		return (FALSE);
-}										/* inside */
+		return TRUE;
+	return FALSE;
+}
 
 /*------------------------------*/
 /*      grect_to_array          */
@@ -612,7 +551,7 @@ PP(short obj;)
 	short pobj;
 
 	if (obj == NIL)
-		return (NIL);
+		return NIL;
 	pobj = tree[obj].ob_next;
 	if (pobj != NIL)
 	{
@@ -622,7 +561,7 @@ PP(short obj;)
 			pobj = tree[obj].ob_next;
 		}
 	}
-	return (pobj);
+	return pobj;
 }
 
 /*------------------------------*/
@@ -801,7 +740,7 @@ PP(short xtype;)
 	default:
 		break;
 	}
-	return (FALSE);
+	return FALSE;
 }
 
 /*------------------------------*/
@@ -837,7 +776,7 @@ PP(short h;)
 
 	form_dial(2, x, y, w, h, xdial, ydial, wdial, hdial);
 	form_dial(3, x, y, w, h, xdial, ydial, wdial, hdial);
-	return (exitobj);
+	return exitobj;
 }
 
 /*------------------------------*/
@@ -1027,7 +966,7 @@ PP(char *name;)
 	} else
 	{
 		desel_obj(tree, DOODSCNL);
-		return (FALSE);
+		return FALSE;
 	}
 }
 
@@ -1241,7 +1180,7 @@ static BOOLEAN do_save(NOTHING)
 			if (form_alert(1, string_addr(DOODOVWR)) == 2)
 			{							/* Cancel - dont't overwrite  */
 				Fclose(file_handle);
-				return (FALSE);
+				return FALSE;
 			}
 		}
 
@@ -1251,7 +1190,7 @@ static BOOLEAN do_save(NOTHING)
 		{								/* disable Save and Abandon   */
 			disab_menu(DOODSAVE);
 			disab_menu(DOODABAN);
-			return (FALSE);
+			return FALSE;
 		}
 
 		Fwrite(file_handle, buff_size, buff_location);
@@ -1259,9 +1198,9 @@ static BOOLEAN do_save(NOTHING)
 		enab_menu(DOODABAN);
 		Fclose(file_handle);
 		file_handle = -1;
-		return (TRUE);
+		return TRUE;
 	}
-	return (FALSE);
+	return FALSE;
 }
 
 
@@ -1316,9 +1255,8 @@ PP(short pen;)
 PP(short height;)
 {
 	dood_pen = pen;
-	dood_height = height;
 	monumber = 5;						/* thin cross hair */
-	mofaddr = 0x0L;
+	mofaddr = NULL;
 }
 
 /*------------------------------*/
@@ -1331,7 +1269,6 @@ PP(short height;)
 PP(MFORM *eraser;)
 {
 	dood_pen = pen;
-	dood_height = height;
 	dood_shade = PEN_ERASER;
 	monumber = 255;
 	mofaddr = eraser;
@@ -1423,13 +1360,13 @@ static VOID do_penselect(NOTHING)
 			dood_shade = color;
 			break;
 		case DOODEFIN:
-			set_eraser(PEN_FINE, char_fine, &erase_fine);
+			set_eraser(PEN_FINE, char_fine, mform_addr(ERASEFIN));
 			break;
 		case DOODEMED:
-			set_eraser(PEN_MEDIUM, char_medium, &erase_medium);
+			set_eraser(PEN_MEDIUM, char_medium, mform_addr(ERASEMED));
 			break;
 		case DOODEBRD:
-			set_eraser(PEN_BROAD, char_broad, &erase_broad);
+			set_eraser(PEN_BROAD, char_broad, mform_addr(ERASEBRD));
 			break;
 		}
 		pen_ink = color;
@@ -1585,7 +1522,7 @@ PP(unsigned short kreturn;)
 	GRECT lttr, test;
 
 	if ((str[0] = kreturn & 0xff) == 0x03)	/* Ctrl C */
-		return (TRUE);
+		return TRUE;
 
 	graf_mouse(M_OFF, NULL);
 	if (!key_input)
@@ -1614,7 +1551,8 @@ PP(unsigned short kreturn;)
 	{
 		save_work();					/* update undo area from work area  */
 		graf_mouse(M_ON, NULL);
-		return (key_input = FALSE);
+		key_input = FALSE;
+		return FALSE;
 	} else if (str[0] == 0x0D)			/* carriage return  */
 	{
 		/* adjust x,y */
@@ -1642,7 +1580,7 @@ PP(unsigned short kreturn;)
 		if (!rc_equal(&lttr, &test))
 		{
 			graf_mouse(M_ON, NULL);
-			return (FALSE);
+			return FALSE;
 		}
 		set_clip(TRUE, &work_area);
 		vswr_mode(vdi_handle, MD_TRANS);
@@ -1659,7 +1597,7 @@ PP(unsigned short kreturn;)
 	}
 	curs_on();
 	graf_mouse(M_ON, NULL);
-	return (FALSE);
+	return FALSE;
 }
 
 
@@ -2360,6 +2298,14 @@ static int dood_init(NOTHING)
 int main(NOTHING)
 {
 	int term_type;
+
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
 
 	if (!(term_type = dood_init()))
 		doodle();
