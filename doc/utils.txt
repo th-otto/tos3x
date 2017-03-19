@@ -65,3 +65,22 @@ ar68: flags [pos] archive file1 file2 ...
     b pos                    insert files before the file "pos" 
     i pos                    same as b
     v                        verbose
+
+/* '[' here means the literal character, not an optional value */
+link68:
+    ABSOLUTE                 perform absolute link
+    ALLMODS                  include all modules from library
+    BSSBASE[<hex>]           set absolute bss start
+    CHAINED                  chain overlays
+    COMMAND[<file>]          read commands from file
+    DATABASE[<hex>]          set absolute data start
+    IGNORE                   ignore range overflows
+    INCLUDE[<sym>]
+    LOCALS                   include local symbols in map
+    MAP                      generate a load map
+    NOLOCALS                 do not include local symbols in map
+    SYMBOLS                  keep symbol table in output
+    TEMPFILES[<drv>]         driver for temporary files
+    TEXTBASE[<hex>]          set absolute text start
+    UNDEFINED                allow undefined symbols
+    XXYYZ                    dump internal symbol table

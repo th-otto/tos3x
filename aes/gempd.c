@@ -110,7 +110,7 @@ PD *getpd(NOTHING)
 
 	p->p_uda->u_insuper = 1;
 	/* return the pd we got */
-	return (p);
+	return p;
 }
 
 
@@ -144,7 +144,7 @@ PP(intptr_t ldaddr;)
 	px->p_link = drl;
 	drl = px;
 
-	return (px);
+	return px;
 }
 
 

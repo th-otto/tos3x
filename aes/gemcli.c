@@ -155,12 +155,12 @@ PP(int16_t acc;)
 
 				p = pstart(gotopgm, pfilespec, ldaddr);
 				p->p_stat |= PS_TRYSUSPEND;
-				return (TRUE);
+				return TRUE;
 			}
 		}
 	}
 
-	return (FALSE);
+	return FALSE;
 
 }
 
@@ -219,7 +219,6 @@ VOID ldaccs(NOTHING)
 
 			ret = dos_snext();
 		}
-
 	}
 }
 
@@ -274,7 +273,7 @@ BOOLEAN cre_aproc(NOTHING)
 			pevb[i].e_nextp = eul;
 			eul = &pevb[i];
 		}
-		return (TRUE);
+		return TRUE;
 	}
-	return (FALSE);
+	return FALSE;
 }
