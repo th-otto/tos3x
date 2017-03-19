@@ -152,7 +152,7 @@ _err_trap:
 	move.w	#1,_crt_error		; set flag for dispatcher
 	move.l	_rlr,a0			; get the current rlr
 	move.l	8(a0),a0		; get the UDA
-	move.l	62(a0),savestk		; save the stack
+	move.l	62(a0),savestk		; save the stack (u_spsuper)
 	
 	move.w	4(a7),d0		; error
 	cmp.w	#-15,d0

@@ -142,7 +142,7 @@ _savestate:
 	movem.l	d0-d7/a0-a7,-(a0)	; save everything
 
 	move.l	usp,a1
-	move.l	a1,64(a0)
+	move.l	a1,64(a0)		/* save USP to u_spuser */
 	move.l	savea0,32(a0)
 
 	lea	dspstk,sp		; Load a dispatcher stack
@@ -180,12 +180,12 @@ _switchto:
 
 	move.l	_rlr,sp
 	move.l	8(sp),sp		; Get the UDA
-	lea	2(sp),sp		; Points the D0 area	
-	move.l	64(sp),a0		; Get the USP
+	lea	2(sp),sp			; Points the D0 area	
+	move.l	64(sp),a0		; Get the USP from u_spuser
 	move.l	a0,usp
 	movem.l	(sp)+,d0-d7/a0-a6	; Pull regs from uda
-	move.l	(sp),sp
-	clr.b	_indisp			; Can enter dispatcher now
+	move.l	(sp),sp				/* restore sp from u_spsuper */
+	clr.b	_indisp				; Can enter dispatcher now
 	rte	
 
 /*****************************************************************
@@ -234,4 +234,3 @@ p_1:	move.l	d0,-(a2)		; predecrement and store val on stack
 	move.l	a2,62(a1)		; restore stack ptr
 	move	psetsr,sr		; restore interrupts
 	rts
-
