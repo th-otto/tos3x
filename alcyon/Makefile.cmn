@@ -8,6 +8,9 @@ EXEEXT=.ttp
 ALNPATH=${LIB}
 export ALNPATH
 
+LIBSRC=../libsrc/
+GEMLIBSRC=../gemlib/
+
 CC=NYI
 CFLAGS= -f 
 ASFLAGS = -u -L -s ${LIB}

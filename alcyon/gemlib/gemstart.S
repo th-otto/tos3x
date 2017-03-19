@@ -207,7 +207,6 @@ isapp:
 	move.l	d0,__break	* __break = first byte of heap
     move.l  d0,d1
     sub.l   a0,d1
-    move.l  d1,__PgmSize
     
 *************************************************************************
 *									*
@@ -379,6 +378,9 @@ maxok:
 
 gotstack:
 	move.l	__base,a0	* set up _main(cmdline,length)
+	move.l  sp,d1
+	sub.l   a0,d1
+    move.l  d1,__PgmSize
 	lea.l	p_cmdlin(a0),a2	* a2 now points to command line
 	move.b	(a2)+,d0	* d0 = length; a2++;
 	ext.w	d0		* extend byte count into d0.w
