@@ -8,22 +8,22 @@ AOBJS = $(AOBJS1) $(AOBJS2)
 ASRCS = $(ASRCS1) $(ASRCS2)
 
 CSRCS1 = asctime.c ctime.c localtime.c mktime.c gmtime.c consec.c cnvsec.c timezone.c time.c
-CSRCS2 = atoi.c perror.c strerror.c atol.c ctype.c getl.c getw.c fopen.c xmain.c xwmain.c fgetc.c
+CSRCS2 = atoi.c perror.c strerror.c atol.c getl.c getw.c fopen.c xmain.c xwmain.c fgetc.c
 CSRCS3 = ungetc.c fgets.c filbuf.c read.c readasc.c readbin.c creat.c exit.c cleanup.c
-CSRCS4 = fclose.c close.c fdecls.c fflush.c open.c lseek.c tell.c fputn.c
-CSRCS5 = putl.c putw.c fputc.c flsbuf.c isatty.c isdev.c ttyname.c malloc.c calloc.c mallocnd.c
-CSRCS6 = sbrk.c memset.c memcmp.c lmemcmp.c write.c wrtchr.c chinit.c allocc.c chkc.c lmalloc.c
-CSRCS7 = lsbrk.c writeasc.c writebin.c blkio.c xread.c xwrite.c xopen.c getmode.c
-CSRCS8 = strupr.c strlwr.c strcpy.c strncpy.c strlen.c strcat.c strncat.c
-CSRCS9 = strcmp.c strncmp.c stricmp.c qsort.c fseek.c rewind.c ftell.c gets.c
-CSRCS10 = nf_name.c nf_vers.c nf_debug.c nf_shutd.c nf_ops.c cookie.c
-CSRCS11 = printf.c fprintf.c sprintf.c vprintf.c vfprintf.c vsprintf.c xdoprtfp.c doprint.c
-CSRCS12 = fread.c fwrite.c blkmove.c fdopen.c freopen.c filesz.c
+CSRCS4 = nf_name.c nf_vers.c nf_debug.c nf_shutd.c nf_ops.c cookie.c
+CSRCS5 = printf.c fprintf.c sprintf.c vprintf.c vfprintf.c vsprintf.c doprint.c xdoprtfp.c
+CSRCS6 = fclose.c close.c fdecls.c fflush.c open.c lseek.c tell.c fputn.c
+CSRCS7 = fwrite.c putl.c putw.c fputc.c flsbuf.c isatty.c isdev.c ttyname.c malloc.c calloc.c mallocnd.c
+CSRCS8 = sbrk.c memset.c memcmp.c lmemcmp.c write.c wrtchr.c chinit.c allocc.c chkc.c lmalloc.c
+CSRCS9 = lsbrk.c writeasc.c writebin.c blkio.c xread.c xwrite.c xopen.c getmode.c
+CSRCS10 = strupr.c strlwr.c strcpy.c strncpy.c strlen.c strcat.c strncat.c
+CSRCS11 = strcmp.c strncmp.c stricmp.c qsort.c fseek.c rewind.c ftell.c gets.c
+CSRCS12 = fread.c blkmove.c fdopen.c freopen.c filesz.c
 CSRCS13 = puts.c fputs.c ttyout.c getpass.c getpid.c getopt.c stksize.c
 CSRCS14 = abort.c chmod.c access.c chown.c dup.c rename.c unlink.c stat.c fstat.c ftim2sec.c
 CSRCS15 = doscan.c scanf.c fscanf.c sscanf.c optoff.c sgtty.c xlterr.c
 CSRCS16 = errno.c strchr.c strrchr.c lstout.c mktemp.c prtld.c prtint.c prtshort.c
-CSRCS17 = rand.c setbuf.c signal.c swab.c strtol.c getenv.c strpbrk.c
+CSRCS17 = rand.c setbuf.c signal.c swab.c strtol.c getenv.c strpbrk.c ctype.c
 CSRCS18 = aldiv.c almul.c alrem.c uldiv.c ulrem.c ldiv.c lmul.c lrem.c
 
 COBJS1 = $(CSRCS1:.c=.o)
