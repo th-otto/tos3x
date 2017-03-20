@@ -2181,13 +2181,103 @@ static VOID dumpsyms(NOTHING)
 }
 
 
-static VOID dumpmap(NOTHING)
+static int sortmap(P(const VOIDPTR) p1, P(const VOIDPTR) p2)
+PP(const VOIDPTR p1;)
+PP(const VOIDPTR p2;)
 {
-	struct symtab *p;
+	const struct symtab *s1;
+	const struct symtab *s2;
+	int idx1, idx2;
+	
+	s1 = *((const struct symtab * const *)p1);
+	s2 = *((const struct symtab * const *)p2);
+	if (s1->flags & SYTX)
+		idx1 = 0;
+	else if (s1->flags & SYDA)
+		idx1 = 1;
+	else if (s1->flags & SYBS)
+		idx1 = 2;
+	else
+		idx1 = 3;
+	if (s2->flags & SYTX)
+		idx2 = 0;
+	else if (s2->flags & SYDA)
+		idx2 = 1;
+	else if (s2->flags & SYBS)
+		idx2 = 2;
+	else
+		idx2 = 3;
+	if (idx1 < idx2)
+		return -1;
+	if (idx1 > idx2)
+		return 1;
+	if (s1->vl1 < s2->vl1)
+		return -1;
+	if (s1->vl1 > s2->vl1)
+		return 1;
+	return 0;
+}
 
-	for (p = bmte; p < lmte; p++)
+
+VOID dumpmap(NOTHING)
+{
+	register struct symtab *p;
+	size_t count;
+	register size_t i, j;
+	register struct symtab **sorted;
+	char c;
+	register unsigned short a_type;
+	
+	count = ((intptr_t)lmte - (intptr_t)bmte) / sizeof(*lmte);
+	sorted = (struct symtab **)malloc(count * sizeof(struct symtab *));
+	if (sorted == NULL)
+		return;
+	for (i = 0, j = 0; i < count; i++)
 	{
-		printf("%-*.*s %08lx", SYNAMLEN, SYNAMLEN, p->name, p->vl1);
+		p = bmte + i;
+		if (p->flags & SYXR)			/* external symbol */
+			continue;
+		if ((p->flags & SYGL) == 0 && (p->name[0] == 'L' || Xflag == 0))
+			continue;
+		sorted[j++] = p;
+	}
+	qsort(sorted, j, sizeof(struct symtab *), sortmap);
+	
+	for (i = 0; i < j; i++)
+	{
+		p = sorted[i];
+		a_type = p->flags;
+		if (a_type == A_TFILE)
+		{
+			c = 'f';
+		} else
+		{
+			int ext = (a_type & A_GLOBL) != 0;
+			c = '?';
+			if ((a_type & A_GLOBL) != 0 || ((a_type & A_DEF) && (a_type & A_EXT)))
+			{
+				c = 'c';
+				a_type &= ~A_GLOBL;
+			}
+			if ((a_type & A_GLOBL) != 0 && !(a_type & A_DEF) && (a_type & A_EXT) && p->vl1 != 0)
+				c = 'C';
+			else if (a_type == A_UNDF)
+				c = 'U';
+			else if ((a_type & A_EQU) != 0)
+				c = 'A';
+			else if ((a_type & A_EQREG) != 0)
+				c = 'R';
+			else if ((a_type & A_TEXT) != 0)
+				c = 'T';
+			else if ((a_type & A_DATA) != 0)
+				c = 'D';
+			else if ((a_type & A_BSS) != 0)
+				c = 'B';
+			if (!ext)
+				c |= 0x20;
+		}
+		printf("%-*.*s %c %08lx", SYNAMLEN, SYNAMLEN, p->name, c, p->vl1);
+#if 0
 		if (p->flags & SYDF)
 			printf(" DEF");
 		if (p->flags & SYEQ)
@@ -2204,8 +2294,10 @@ static VOID dumpmap(NOTHING)
 			printf(" TEX");
 		if (p->flags & SYBS)
 			printf(" BSS");
+#endif
 		printf("\n");
 	}
+	free(sorted);
 	mapflg = FALSE;
 }
 
