@@ -8,15 +8,6 @@ VOIDPTR addr_in[AI_SIZE];
 VOIDPTR addr_out[AO_SIZE];
 int16_t gl_apid;
 
-static CBLK c = {
-	control,
-	global,
-	int_in,
-	int_out,
-	addr_in,
-	addr_out
-};
-
 int16_t crys_if(P(int16_t) opcode)
 PP(int16_t opcode;)
 {
@@ -30,6 +21,6 @@ PP(int16_t opcode;)
 	*pc++ = *pctrl++;
 	*pc = *pctrl;
 
-	crystal(&c);
+	crystal();
 	return RET_CODE;
 }

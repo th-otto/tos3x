@@ -1,3 +1,4 @@
+
 #include <stdint.h>
 #include <obdefs.h>
 #include <gemdefs.h>
@@ -38,6 +39,6 @@ extern int16_t int_out[];
 extern VOIDPTR addr_in[];
 extern VOIDPTR addr_out[];
 
-int crystal PROTO((CBLK *));
+VOID crystal PROTO((NOTHING));
 
 int16_t crys_if PROTO((int16_t opcode));
