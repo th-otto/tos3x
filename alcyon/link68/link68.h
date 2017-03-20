@@ -5,6 +5,7 @@
 #define LINK68 1
 
 #include <sendc68.h>
+#include <stdint.h>
 
 #define BOOLEAN int
 #define FALSE 0
@@ -124,9 +125,9 @@ extern int numovls;			/* number of actual overlays */
 
 
 
-extern long textstart;
-extern long datastart;
-extern long bssstart;
+extern int32_t textstart;
+extern int32_t datastart;
+extern int32_t bssstart;
 extern int Bflag;
 extern int Dflag;
 extern int Zflag;

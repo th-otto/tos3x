@@ -801,14 +801,18 @@ PP(struct filenode *fnpt;)
 		opnum = readop(tokenval);		/* which option?    */
 
 		if (opnum == LOCALS)
+		{
 			locsflg = TRUE;				/* include local syms.  */
-		else if (opnum == NOLOCALS)
+		} else if (opnum == NOLOCALS)
+		{
 			locsflg = FALSE;
-		else if (opnum == ALLMODS)
+		} else if (opnum == ALLMODS)
+		{
 			fnpt->fnflags |= FNALL;		/* don't search library */
-		else if (opnum == INCLUDE)
+		} else if (opnum == INCLUDE)
+		{
 			inclname(fnpt);				/* get the name     */
-		else if (opnum == COMMAND)
+		} else if (opnum == COMMAND)
 		{
 			cmdfile();					/* set up command file  */
 			return;						/* leave loop -- return */

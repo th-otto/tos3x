@@ -7,15 +7,15 @@
 #include <sendc68.h>
 
 struct symtab *symptr;
-long textstart;
-long datastart;
-long bssstart;
+int32_t textstart;
+int32_t datastart;
+int32_t bssstart;
 
 int Dflag;
 int Bflag;
 int Zflag;
 static int Xflag;
-static int sflag;							/* if set, keep symbol table */
+static int sflag;						/* if set, keep symbol table */
 
 int ignflg;
 int exstat;
@@ -59,7 +59,7 @@ static struct symhash savgirt[SZIRT];
 
 static struct symhash *pirt;
 
-static struct symtab *lmte;							/* last entry in main table */
+static struct symtab *lmte;				/* last entry in main table */
 
 static struct symtab *savlmte;
 
@@ -71,14 +71,15 @@ static FILE *rtbuf;
 static FILE *rdbuf;
 
 
-static long textbase;
-static long database;
-static long bssbase;
+static int32_t textbase;
+static int32_t database;
+static int32_t bssbase;
 
-static long textsize;
-static long datasize;
-static long bsssize;
-static long stacksize;
+static int32_t textsize;
+static int32_t datasize;
+static int32_t bsssize;
+static int32_t stacksize;
+#define MINSTACK 0x1000
 
 static const char *ifilname;			/* points to name of current input file  */
 static char ilibmem[FNAMELEN * 2 + 2];
@@ -99,9 +100,9 @@ static int noload;						/* dont load this lib file flag */
 static int lbfictr[NLIB];				/* counts files loaded from one library */
 
 static int *libfctr;					/* points to lbfictr */
-static long lbfioff[NFILE];				/* each file offset in library */
+static int32_t lbfioff[NFILE];				/* each file offset in library */
 
-static long *libptr;					/* points to lbfioff */
+static int32_t *libptr;					/* points to lbfioff */
 
 #define LIB1MAGIC	0xff6d
 #define LIB2MAGIC	0xff65
@@ -110,7 +111,7 @@ static long *libptr;					/* points to lbfioff */
 struct libhdr
 {
 	char l1fname[8];
-	long l1modti;
+	int32_t l1modti;
 	char l1userid;
 	char l1fimode;
 	short l1fsize;
@@ -119,11 +120,11 @@ struct libhdr
 struct lib2hdr
 {
 	char l2fname[14];
-	long l2modti;
+	int32_t l2modti;
 	char l2userid;
 	char l2gid;
 	short l2fimode;
-	long l2fsize;
+	int32_t l2fsize;
 	short l2junk;
 };
 
@@ -152,14 +153,14 @@ union alibhd {
 	struct libhdr hdr1;
 	struct lib2hdr hdr2;
 	struct ar_hdr ar;
-	long l[20];					/* length is max lib head size */
+	int32_t l[20];					/* length is max lib head size */
 };
 static union alibhd libhd;
 
 static int umesflg;
 static char dafnc;
 static int pass2;
-static long stlen;
+static int32_t stlen;
 
 
 static struct symtab *etextptr;
@@ -167,6 +168,8 @@ static struct symtab *edataptr;
 static struct symtab *erootptr;
 static struct symtab *endptr;
 static struct symtab *lastdup;
+static struct symtab *stksptr;
+static int32_t stkspos;
 
 static char rtfnc;
 static char rdfnc;
@@ -178,7 +181,7 @@ static int saverbits;
 struct ovtab {
 	char tbname[TBNAMESIZE];	/* file name -- pad with blanks */
 	char tbext[TBEXTSIZE + 1];	/* file extension -- no dot (.) */
-	long tbldpt;				/* load point for module */
+	int32_t tbldpt;				/* load point for module */
 };
 #define SIZEOF_OVTAB 16
 
@@ -186,10 +189,10 @@ struct ovtab {
 
 struct ovcalblk {
 	short jsrovh;			/* call overlay handler */
-	long ovhandlr;			/* address of overlay handlr */
-	long ovtabad;			/* pointer into overlay table */
+	int32_t ovhandlr;		/* address of overlay handlr */
+	int32_t ovtabad;		/* pointer into overlay table */
 	short jmprout;			/* jump to overlayed routine */
-	long routaddr;			/* address to jump to */
+	int32_t routaddr;		/* address to jump to */
 };
 #define SIZEOF_OVCALBLK 16
 
@@ -208,7 +211,7 @@ static struct ovtab ovtab1;
  */
 
 #ifdef VMS
-static char libname[] = "lib:lib6.a";			/* default library name */
+static char libname[] = "lib:lib6.a";	/* default library name */
 #define	LIBCHAR libname[7]				/* Character to be modified */
 #endif
 
@@ -223,20 +226,20 @@ static char libname[] = "libc.a";
 #endif
 
 #ifdef UNIX
-static char libname[] = "/lib/lib6.a";			/* Default library name     */
+static char libname[] = "/lib/lib6.a";	/* Default library name     */
 #define LIBCHAR libname[8]				/* Character to be modified */
 #endif
 
 #ifdef	UNIX
-static const char *tfbase = "loXXXXXX";				/* Temp base name   */
+static const char *tfbase = "loXXXXXX";	/* Temp base name   */
 char tdisk[DRIVELEN] = "/tmp/";			/* Temp disk name   */
 #else /* CP/M and VMS     */
-static const char *tfbase = "loXXXXXA";				/* Temp base name   */
+static const char *tfbase = "loXXXXXA";	/* Temp base name   */
 char tdisk[DRIVELEN];					/* Temp disk name   */
 #endif
 
-static char *tfchar;							/* -> changeable character */
-static char tfilname[80];						/* first temp file name */
+static char *tfchar;					/* -> changeable character */
+static char tfilname[80];				/* first temp file name */
 
 #define TFCHAR *tfchar					/* Name to simplify assignments */
 static char const etexstr[] = "_etext\0\0";
@@ -244,12 +247,13 @@ static char const edatstr[] = "_edata\0\0";
 static char const erootstr[] = "_eroot\0\0";
 static char const eendstr[] = "_end\0\0\0\0";
 static char const ovhstr[] = "_ovhdlr\0";
+static char const stksstr[] = "__stksiz";
 
-static long rtxsize;						/* size of root's text          */
-static long rdtsize;						/* size of root's data          */
-static long hihiaddr;						/* first even word above whole program  */
+static int32_t rtxsize;					/* size of root's text          */
+static int32_t rdtsize;					/* size of root's data          */
+static int32_t hihiaddr;				/* first even word above whole program  */
 
-static long ovtable;						/* address of overlay table start   */
+static int32_t ovtable;					/* address of overlay table start   */
 
 static struct ovcalblk ovcall;
 
@@ -262,15 +266,15 @@ static int ovpath[MAXOVDEP + 1];		/* current path in ovtree walk  */
 static int ovpathtp = -1;				/* current end of path      */
 
 
-static long lbctr;
-static long libfilsize;
+static int32_t lbctr;
+static int32_t libfilsize;
 
 
 
 
 
 static unsigned short get16be(P(FILE *) sp)
-PP(register FILE *sp;)				/* the stream to get from   */
+PP(register FILE *sp;)					/* the stream to get from   */
 {
 	register unsigned int w1;
 	w1 = getc(sp);
@@ -279,12 +283,12 @@ PP(register FILE *sp;)				/* the stream to get from   */
 }
 
 
-static long get32be(P(FILE *) sp)
-PP(register FILE *sp;)				/* the stream to get from   */
+static int32_t get32be(P(FILE *) sp)
+PP(register FILE *sp;)					/* the stream to get from   */
 {
 	register unsigned int w1;
 	w1 = get16be(sp);
-	return ((long)w1 << 16) | get16be(sp);
+	return ((int32_t)w1 << 16) | get16be(sp);
 }
 
 
@@ -297,8 +301,8 @@ PP(register FILE *sp;)
 }
 
 
-static VOID put32be(P(long) l, P(FILE *) sp)
-PP(long l;)
+static VOID put32be(P(int32_t) l, P(FILE *) sp)
+PP(int32_t l;)
 PP(register FILE *sp;)
 {
 	put16be((unsigned short)(l >> 16), sp);
@@ -313,8 +317,8 @@ PP(register FILE *sp;)
  *  last argument indicates relative or absolute seek
  */
 
-static VOID lbseek(P(long) al, P(FILE *) bp)
-PP(long al;)
+static VOID lbseek(P(int32_t) al, P(FILE *) bp)
+PP(int32_t al;)
 PP(FILE *bp;)
 {
 	if (fseek(bp, al, SEEK_SET) < 0)
@@ -465,10 +469,10 @@ static int hash(NOTHING)
 	register char *p;
 
 	ht1 = 0;
-	p = &lmte->name[0];
+	p = lmte->name;
 	for (i = 0; i < SYNAMLEN; i++)
 		ht1 += *p++;
-	return ht1 & (SZIRT - 1);					/* make hash code even and between 0 and 62 */
+	return ht1 & (SZIRT - 1);			/* make hash code even and between 0 and 62 */
 }
 
 static struct symtab *nextsy(P(struct symtab *) amtpt)
@@ -482,8 +486,8 @@ PP(struct symtab *amtpt;)
 
 	/* loop to locate entry in main table */
   lemtl:
-	p1 = (short *)&mtpt->name[0];
-	p2 = (short *)&lmte->name[0];
+	p1 = (short *)mtpt->name;
+	p2 = (short *)lmte->name;
 	for (i = 0; i < SYNAMLEN / (sizeof (*p1)); i++)
 	{
 		if (*p1++ != *p2++)
@@ -543,7 +547,7 @@ PP(const struct symtab *ap;)
  *
  ************************************************************************/
 
-static long extval(P(unsigned int) extno)
+static int32_t extval(P(unsigned int) extno)
 PP(unsigned int extno;)
 {
 	register struct symtab *p;
@@ -608,8 +612,6 @@ PP(unsigned int extno;)
  * load a file doing relocation and external resolution
  *  lflg is set if we are loading from a library
  */
-
-
 static VOID do2load(P(int) lflg)
 PP(int lflg;)
 {
@@ -618,9 +620,9 @@ PP(int lflg;)
 	register FILE *p;
 	register FILE *pr;
 	int saof;
-	register long tpc;
-	register long l;
-	long l1;
+	register int32_t tpc;
+	register int32_t l;
+	int32_t l1;
 	int wasext;
 
 	tpc = 0;
@@ -651,7 +653,7 @@ PP(int lflg;)
 			break;
 
 		case LUPPER:					/* high word of long */
-			l1 = ((long)i) << 16;
+			l1 = ((int32_t)i) << 16;
 			if (saverbits)
 				put16be(j, pr);			/* upper word relocation bits */
 			l1 |= get16be(ibuf);
@@ -700,7 +702,7 @@ PP(int lflg;)
 				l1 = l1 + extval(j >> 3) - textbase - tpc + 2;
 				if (l1 < (-32768L) || l1 > 0x7fff)
 				{
-					errorx(_("relative address overflow at %lx in %s\n"), tpc - 2, ifilname);
+					errorx(_("relative address overflow at %lx in %s\n"), (long)tpc - 2, ifilname);
 					prextname(j >> 3);	/* give name referenced */
 				}
 				if (saverbits)
@@ -710,19 +712,26 @@ PP(int lflg;)
 			}
 			if (ignflg == 0 && longf == 0 && (l1 & 0xffff8000L) && saof)
 			{
-				errorx(_("short address overflow at %lx in %s\n"), tpc - 2, ifilname);
+				errorx(_("short address overflow at %lx in %s\n"), (long)tpc - 2, ifilname);
 				if (wasext)
 					prextname(j >> 3);
 				if (lflg)
 				{
 					l1 = *(libptr - 1);
-					fprintf(stderr, "library offset = %lx\n", l1);
+					fprintf(stderr, "library offset = %lx\n", (long)l1);
 					l1 = 0;
 				}
 				saof = 0;
 			}
 			if (longf)
 			{
+				if (p == tbuf && ftell(p) == stkspos)
+				{
+					if (l1 == 0)
+						l1 = MINSTACK;
+					if (l1 > 4)
+						stacksize = l1;
+				}
 				put32be(l1, p);
 			} else
 			{
@@ -736,7 +745,7 @@ PP(int lflg;)
 		case BRELOC:
 		case EXTVAR:
 		case EXTREL:
-			l1 = (long)(int)i;						/* sign extend to long like 68000 */
+			l1 = (int32_t)(int)i;			/* sign extend to long like 68000 */
 			goto dorelc;
 
 		default:
@@ -748,7 +757,7 @@ PP(int lflg;)
 	if (p == obuf)
 	{
 		p = tbuf;						/* place to put data */
-		pr = rdbuf;						/* file for data relocatin bits */
+		pr = rdbuf;						/* file for data relocation bits */
 		l = couthd.ch_dsize;
 		goto do2l1;						/* now do the data */
 	}
@@ -763,7 +772,7 @@ PP(int lflg;)
 static VOID loadlib(NOTHING)
 {
 	register int i;
-	register long l;
+	register int32_t l;
 
 	i = *libfctr++;						/* # files to load from this library */
 	if (i == 0)
@@ -819,7 +828,7 @@ static VOID getsym(NOTHING)
 
 static VOID relocsym(NOTHING)
 {
-	register long l;
+	register int32_t l;
 
 	l = 0;
 	if (lmte->flags & SYXR)				/* external */
@@ -937,7 +946,7 @@ static VOID addsym(NOTHING)
 				noload++;
 				lastdup = p;
 			} else if ((p->ovlnum != lmte->ovlnum) || (p->flags != lmte->flags) || (p->vl1 != lmte->vl1))
-				prdup(p->name);				/* dup defn msg */
+				prdup(p->name);			/* dup defn msg */
 		}
 	} else
 	{									/* normal symbol */
@@ -1041,10 +1050,10 @@ PP(char *ap;)
  */
 
 static VOID do1load(P(int) lflg)
-PP(int lflg;)								/* set if file is in a library  */
+PP(int lflg;)							/* set if file is in a library  */
 {
-	register long i;
-	register long l;
+	register int32_t i;
+	register int32_t l;
 
 	*firstsym = lmte;					/* remember where this symbol table starts */
 	l = couthd.ch_tsize + couthd.ch_dsize + HDSIZE;
@@ -1069,6 +1078,10 @@ PP(int lflg;)								/* set if file is in a library  */
 
 static VOID searchlib(NOTHING)
 {
+	if (libfctr >= &lbfictr[NLIB])
+	{
+		fatalx(FALSE, _("too many libraries"));
+	}
 	*libfctr = 0;						/* no files from this library yet */
 	lbctr = 2;							/* current library position - skip magic */
 	ilibname = ifilname;
@@ -1082,9 +1095,13 @@ static VOID searchlib(NOTHING)
 		if (extmatch > noload)
 		{								/* found a match */
 			if (noload)
-				prdup(lastdup->name);			/* print dup defn */
+				prdup(lastdup->name);	/* print dup defn */
 			addsizes();					/* add this file's sizes */
 			firstsym++;
+			if (libptr >= &lbfioff[NFILE])
+			{
+				fatalx(FALSE, _("%s: too many input files"), ifilname);
+			}
 			*libfctr += 1;				/* count files loaded from this library */
 			*libptr++ = lbctr;			/* remember offset in library */
 		} else
@@ -1136,6 +1153,7 @@ PP(char *ap;)
 		addsizes();
 	}
 	fclose(ibuf);
+	ibuf = NULL;
 }
 
 
@@ -1147,7 +1165,7 @@ PP(char *ap;)
  ************************************************************************/
 
 static VOID dopass1(P(struct ovtrnode *) opt)
-PP(register struct ovtrnode *opt;)				/* pointer to node in command tree */
+PP(register struct ovtrnode *opt;)		/* pointer to node in command tree */
 {
 	register struct filenode *fpt, *tfpt;
 
@@ -1258,7 +1276,7 @@ PP(register struct symtab *spt;)
 	register int i;
 	register struct jmpblock *jpt;
 	register struct ovtrnode *ovpt;
-	register long cbadd;
+	register int32_t cbadd;
 
 	if (spt->vl1)						/* already been processed   */
 		return 0;
@@ -1323,12 +1341,12 @@ PP(register struct symtab *spt;)
  ************************************************************************/
 
 static VOID ovexts(P(struct ovtrnode *) ovpt)
-PP(register struct ovtrnode *ovpt;)				/* points to node in command tree */
+PP(register struct ovtrnode *ovpt;)		/* points to node in command tree */
 {
-	register struct symtab *cursym;			/* current symbol being examined */
+	register struct symtab *cursym;		/* current symbol being examined */
 	int ovrefs;							/* count overlay references */
-	register long newbase;					/* use for adjusting seg. bases */
-	register short onum;						/* this module's number     */
+	register int32_t newbase;				/* use for adjusting seg. bases */
+	register short onum;				/* this module's number     */
 
 	onum = ovpath[ovpathtp];
 	if (onum != ROOT)					/* adjust textbase to above parent */
@@ -1379,23 +1397,23 @@ typedef VOID (*visitf) PROTO((struct ovtrnode *opt));
 #define POSTORDER 1	/* postorder search of command tree */
 
 static VOID walktree(P(int) idx, P(visitf) visit, P(int) order)
-PP(register int idx;)						/* index into overlay tree  */
+PP(register int idx;)					/* index into overlay tree  */
 PP(visitf visit;)						/* routine to process node  */
-PP(int order;)								/* specifies which order walk   */
+PP(int order;)							/* specifies which order walk   */
 {
 	register int kidpt;
 
 	ovpath[++ovpathtp] = idx;			/* put node in path list */
 	if (order == PREORDER)
-		(*visit) (ovtree[idx]);		/* process the node */
-	kidpt = ovtree[idx]->ovfstkid;	/* get first descendant */
-	while (kidpt != 0)				/* visit each descendant */
+		(*visit) (ovtree[idx]);			/* process the node */
+	kidpt = ovtree[idx]->ovfstkid;		/* get first descendant */
+	while (kidpt != 0)					/* visit each descendant */
 	{
 		walktree(kidpt, visit, order);	/* depth-first call */
 		kidpt = ovtree[kidpt]->ovnxtsib;	/* next descendant */
 	}
 	if (order != PREORDER)
-		(*visit) (ovtree[idx]);		/* process the node */
+		(*visit) (ovtree[idx]);			/* process the node */
 	ovpathtp--;							/* take node out of list */
 }
 
@@ -1421,7 +1439,7 @@ static VOID intsytab(NOTHING)
 	if (bmte == (VOIDPTR)-1)
 		oom();
 	emte = bmte + SZMT;	/* end of main table */
-	if ((long) bmte & 1)
+	if ((intptr_t) bmte & 1)
 		bmte++;
 	lmte = bmte;						/* beginning main table */
 	p1 = eirt;
@@ -1465,22 +1483,22 @@ PP(struct symtab *ap;)
 	register struct symtab *p;
 
 	p = ap;
-	if (eqstr(etexstr, &p->name[0]))
+	if (eqstr(etexstr, p->name))
 	{
 		etextptr = p;
 		return 1;
 	}
-	if (eqstr(edatstr, &p->name[0]))
+	if (eqstr(edatstr, p->name))
 	{
 		edataptr = p;
 		return 1;
 	}
-	if (eqstr(erootstr, &p->name[0]))
+	if (eqstr(erootstr, p->name))
 	{
 		erootptr = p;
 		return 1;
 	}
-	if (eqstr(eendstr, &p->name[0]))
+	if (eqstr(eendstr, p->name))
 	{
 		endptr = p;
 		return 1;
@@ -1510,7 +1528,7 @@ PP(struct symtab *ap;)
 	register struct symtab *p, *pg;
 
 	p = ap;
-	pack(p->name, lmte->name);						/* copy current symbol name */
+	pack(p->name, lmte->name);			/* copy current symbol name */
 	pg = lemt(girt);
 astry2:
 	if (pg == lmte)
@@ -1557,7 +1575,7 @@ static VOID fixexts(NOTHING)
 
 	for (sx1 = eirt; sx1 < &eirt[SZIRT]; sx1++)
 	{									/* go thru externals */
-		if ((sx2 = sx1->first) == NULL)		/* this chain empty */
+		if ((sx2 = sx1->first) == NULL)	/* this chain empty */
 			continue;
 
 		/* go thru symbols on chain */
@@ -1596,9 +1614,17 @@ static VOID fixsyms(NOTHING)
 			if (p->ovlnum != ROOT)
 				p->vl1 += ovtree[p->ovlnum]->ovtxbase;
 		} else if (p->flags & SYDA)		/* data symbol */
+		{
+			if (eqstr(stksstr, p->name) && (p->flags & SYDF) && (p->flags & SYGL))
+			{
+				stksptr = p;
+				stkspos = p->vl1;
+			}
 			p->vl1 += ovtree[p->ovlnum]->ovdtbase;
-		else if (p->flags & SYBS)		/* bss symbol */
+		} else if (p->flags & SYBS)		/* bss symbol */
+		{
 			p->vl1 += ovtree[p->ovlnum]->ovbsbase;
+		}
 	}
 }
 
@@ -1618,6 +1644,8 @@ static VOID resolve(NOTHING)
 {
 	register struct symtab *p;
 
+	stksptr = NULL;
+	stkspos = -1;
 	fixsyms();							/* relocate symbols with addresses */
 	fixexts();							/* fix external addresses & commons */
 	if (etextptr)
@@ -1675,13 +1703,13 @@ static VOID resolve(NOTHING)
  *
  ************************************************************************/
 
-static long bsscomm;						/* use only in fixcoms and asgncomn */
+static int32_t bsscomm;					/* use only in fixcoms and asgncomn */
 
 static VOID asgncomn(P(struct symtab *) ap)
 PP(struct symtab *ap;)
 {
 	register struct symtab *p, *p1;
-	register long l;
+	register int32_t l;
 
 	p = ap;
 	pack(p->name, lmte->name);
@@ -1722,13 +1750,13 @@ static VOID fixcoms(NOTHING)
 	register struct symtab *p;
 	register struct symhash *sx1;
 	register struct symtab *sx2;
-	long oldtop;
+	int32_t oldtop;
 
 	oldtop = ovtree[ROOT]->ovcap - ovtree[ROOT]->ovbsbase;
 	bsscomm = oldtop;					/* current free bss */
 	for (sx1 = eirt; sx1 < &eirt[SZIRT]; sx1++)
 	{									/* go thru externals */
-		if ((sx2 = sx1->first) == NULL)		/* this chain empty */
+		if ((sx2 = sx1->first) == NULL)	/* this chain empty */
 			continue;
 
 		/* go thru symbols on chain */
@@ -1775,7 +1803,9 @@ PP(char *ap;)
 		addsizes();
 	}
 	fclose(ibuf);
+	ibuf = NULL;
 	fclose(rbuf);
+	rbuf = NULL;
 }
 
 
@@ -1788,9 +1818,9 @@ PP(char *ofilname;)
 	if ((obuf = fopen(ofilname, "wb")) == NULL)
 		fatalx(FALSE, _("unable to create file: %s\n"), ofilname);
 	if (Dflag | Bflag)
-		put16be(MAGIC1, obuf);				/* data & bss bases in header */
+		put16be(MAGIC1, obuf);			/* data & bss bases in header */
 	else
-		put16be(MAGIC, obuf);				/* normal header */
+		put16be(MAGIC, obuf);			/* normal header */
 
 	put32be(textsize, obuf);
 	put32be(datasize, obuf);
@@ -1800,10 +1830,10 @@ PP(char *ofilname;)
 	put32be(textstart, obuf);
 	if (saverbits)
 	{
-		put16be(0, obuf);					/* relocation bits present */
+		put16be(0, obuf);				/* relocation bits present */
 	} else
 	{
-		put16be(-1, obuf);					/* relocation bits removed */
+		put16be(-1, obuf);				/* relocation bits removed */
 	}
 
 	if (Dflag | Bflag)
@@ -1843,13 +1873,13 @@ static VOID wrjumps(NOTHING)
 		ovcall.ovtabad = ovtable + ((onum - 1) * SIZEOF_OVCALBLK);
 		ovcall.routaddr = (jpt->globref)->vl1;
 
-		put16be(ovcall.jsrovh, obuf);		/* jsr  _ovhdlr */
+		put16be(ovcall.jsrovh, obuf);	/* jsr  _ovhdlr */
 		put32be(ovcall.ovhandlr, obuf);
 		put32be(ovcall.ovtabad, obuf);	/* .dc.l ovtab  */
-		put16be(ovcall.jmprout, obuf);		/* jmp  routine */
+		put16be(ovcall.jmprout, obuf);	/* jmp  routine */
 		put32be(ovcall.routaddr, obuf);
 
-		textbase += SIZEOF_OVCALBLK;		/* bump for block size  */
+		textbase += SIZEOF_OVCALBLK;	/* bump for block size  */
 
 		if (saverbits)
 		{
@@ -1919,7 +1949,7 @@ static VOID wrovtab(NOTHING)
 		opt = ovtree[i];
 		fixname(opt);					/* put name in ovtab1       */
 		ovtab1.tbldpt = opt->ovtxbase;	/* load point for module */
-		pt = (short *)&ovtab1;					/* first word of ovtab1     */
+		pt = (short *)&ovtab1;			/* first word of ovtab1     */
 		for (j = 1; j <= 6; j++, pt++)	/* write filename   */
 		{
 			put16be(*pt, tbuf);
@@ -1984,21 +2014,24 @@ static VOID osymt(NOTHING)
 }
 
 /* copy the initialized data words from temp file to output file */
-static VOID cpdata(P(FILE *) pb, P(int) fnc, P(long) size)
-PP(register FILE *pb;)
+static VOID cpdata(P(FILE **) ppb, P(int) fnc, P(int32_t) size)
+PP(register FILE **ppb;)
 PP(int fnc;)
-PP(long size;)
+PP(int32_t size;)
 {
 	register int j;
-
+	register FILE *pb;
+	
+	pb = *ppb;
 	fflush(pb);
 	fclose(pb);
+	*ppb = NULL;
 	TFCHAR = fnc;
 	if ((pb = fopen(tfilname, "rb")) == NULL)
 		fatalx(FALSE, _("unable to reopen file: %s\n"), tfilname);
 	while (size > 0)
 	{
-		j = get16be(pb);					/* Fetch word from source buffer */
+		j = get16be(pb);				/* Fetch word from source buffer */
 		put16be(j, obuf);
 		size -= 2;						/* Down by 2 bytes      */
 	}
@@ -2025,14 +2058,27 @@ static VOID finalwr(NOTHING)
 	}
 	if (ovflag && !chnflg && (ovpath[ovpathtp] == ROOT))
 		wrovtab();
-	cpdata(tbuf, dafnc, datasize);
-	osymt();							/* write the symbol table */
+	/* copy initialized data segment to output file */
+	cpdata(&tbuf, dafnc, datasize);
+	/* write the symbol table */
+	osymt();
 	if (saverbits)
 	{
-		cpdata(rtbuf, rtfnc, textsize);
-		cpdata(rdbuf, rdfnc, datasize);
+		/* copy text relocations to output file */
+		cpdata(&rtbuf, rtfnc, textsize);
+		/* copy data relocations to output file */
+		cpdata(&rdbuf, rdfnc, datasize);
 	}
 	fflush(obuf);
+#if 0
+	if (stacksize)
+	{
+		bsssize += stacksize;
+		fseek(obuf, 10L, SEEK_SET);
+		put32be(bsssize, obuf);
+	}
+#endif
+	/* update size of symbols table in header */
 	fseek(obuf, 14L, SEEK_SET);
 	put32be(stlen, obuf);
 	if (ferror(obuf))
@@ -2055,7 +2101,7 @@ static VOID finalwr(NOTHING)
  ************************************************************************/
 
 static VOID dopass2(P(struct ovtrnode *) opt)
-PP(register struct ovtrnode *opt;)				/* pointer to node in command tree */
+PP(register struct ovtrnode *opt;)		/* pointer to node in command tree */
 {
 	register struct filenode *fpt;
 
@@ -2104,11 +2150,11 @@ static VOID dumpsyms(NOTHING)
 	struct symtab *p;
 
 	printf("\nDUMP OF INTERNAL SYMBOL TABLE\n");
-	printf("BMTE = %lx, LMTE = %lx\n\n", (long)bmte, (long)lmte);
+	printf("BMTE = %lx, LMTE = %lx\n\n", (intptr_t)bmte, (intptr_t)lmte);
 
 	for (p = bmte; p < lmte; p++)
 	{
-		printf("NAME:    %s\n", p->name);
+		printf("NAME:    %.*s\n", SYNAMLEN, p->name);
 		printf("FLAGS:   ");
 		if (p->flags & SYDF)
 			printf("DEF ");
@@ -2129,9 +2175,38 @@ static VOID dumpsyms(NOTHING)
 		printf("\n");
 		printf("VALUE:   %lx\n", p->vl1);
 		printf("OVERLAY: %d\n", p->ovlnum);
-		printf("INTERNAL ADDRESS = %lx, LINK = %lx\n\n", (long)p, (long)p->tlnk);
+		printf("INTERNAL ADDRESS = %lx, LINK = %lx\n\n", (intptr_t)p, (intptr_t)p->tlnk);
 	}
 	dmpflg = FALSE;
+}
+
+
+static VOID dumpmap(NOTHING)
+{
+	struct symtab *p;
+
+	for (p = bmte; p < lmte; p++)
+	{
+		printf("%-*.*s %08lx", SYNAMLEN, SYNAMLEN, p->name, p->vl1);
+		if (p->flags & SYDF)
+			printf(" DEF");
+		if (p->flags & SYEQ)
+			printf(" EQU");
+		if (p->flags & SYGL)
+			printf(" GLB");
+		if (p->flags & SYER)
+			printf(" REG");
+		if (p->flags & SYXR)
+			printf(" EXT");
+		if (p->flags & SYDA)
+			printf(" DAT");
+		if (p->flags & SYTX)
+			printf(" TEX");
+		if (p->flags & SYBS)
+			printf(" BSS");
+		printf("\n");
+	}
+	mapflg = FALSE;
 }
 
 
@@ -2167,8 +2242,10 @@ PP(int stat;)
 		TFCHAR = rdfnc;
 		unlink(tfilname);
 	}
-	if (dmpflg)
+	if (dmpflg && stat >= 0)
 		dumpsyms();
+	if (mapflg && stat >= 0)
+		dumpmap();
 	if (stat != 0)
 		exit(EXIT_FAILURE);
 }
@@ -2176,9 +2253,6 @@ PP(int stat;)
 /************************************************************************
  *
  * main() -- driver routine for entire linker.
- *
- *
- *
  *
  ************************************************************************/
 
@@ -2197,10 +2271,9 @@ PP(char **argv;)
 	asm("_ftoa equ 0");
 #endif
 
-	banner();							/* print the sign-on message    */
-
 	if (argc == 1)						/* no command line  */
 	{
+		banner();						/* print the sign-on message    */
 		usage();
 		exit(EXIT_FAILURE);
 	}
@@ -2217,7 +2290,9 @@ PP(char **argv;)
 		}
 	}
 
+#if 0
 	printf("%s\n", cmdline);			/* echo command line    */
+#endif
 
 	preproc();							/* build command tree   */
 	ovflag = (numovls > 0);				/* are there overlays?  */
@@ -2265,7 +2340,7 @@ PP(char **argv;)
 	Xflag = TRUE;						/* print all locals entered by pass 1   */
 	if (ovflag && !chnflg)				/* set up template overlay call block   */
 	{
-		pack(ovhstr, lmte->name);				/* get overlay handler address  */
+		pack(ovhstr, lmte->name);		/* get overlay handler address  */
 		pt = lemt(girt);
 		ovcall.ovhandlr = pt->vl1;
 		ovcall.jsrovh = JSRL;
