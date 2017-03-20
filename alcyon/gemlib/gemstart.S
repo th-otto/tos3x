@@ -166,10 +166,11 @@ p_cmdlin equ $80	* Command line image
 *
 
 * GEMDOS functions:
-cconws equ $09		* Cconws(string): write to console
-fsetdta equ $1a
-mshrink equ $4a		* Mshrink(newsize): shrink a block to a new size
-pterm equ $4c		* Pterm(code): exit, return code to parent
+Cconws equ $09		* Cconws(string): write to console
+Fsetdta equ $1a
+Mshrink equ $4a		* Mshrink(newsize): shrink a block to a new size
+Pterm equ $4c		* Pterm(code): exit, return code to parent
+Malloc equ $48
 
 	xdef	__start
 	xdef	__main
@@ -194,20 +195,20 @@ __start:
     move.l  a3,d0
     bne     isacc
     move.l  4(a7),a0	* a0 = basepage address
-    moveq.l #1,d0
+    moveq.l #1,d3
     bra     isapp
 isacc:
-	moveq.l #0,d0
+	moveq.l #0,d3
 isapp:
    	move.l	sp,a1		* save our initial sp (used by ABORT)
 	move.l	a0,__base	* base = a0
-    move.w  d0,__app
+    move.w  d3,__app
 	move.l	p_bbase(a0),d0	* d0 = bss seg start
 	add.l	p_blen(a0),d0	* d0 += bss length  (d0 now = start of heap)
 	move.l	d0,__break	* __break = first byte of heap
     move.l  d0,d1
     sub.l   a0,d1
-    
+
 *************************************************************************
 *									*
 *	Compute stack size based on MINSTACK, p_hitpa(a0),
@@ -221,6 +222,8 @@ isapp:
 *************************************************************************
 
 	move.l  __stksize,d7
+    tst.w   d3
+    beq     accmain
 	cmp.l   #-1,d7		* if (STACK == -1)
 	bne     minstack
 	move.l	p_hitpa(a0),sp	* place stack at top of tpa.
@@ -337,21 +340,21 @@ gotd1:	move.l	d1,sp		* gotd1: sp = d1;
 *************************************************************************
 
 doshrink:
-	move.l	d0,d1		*     d1 = __break;
+	move.l	d0,d1			*     d1 = __break;
 	add.l	#MINSTACK,d1	*     d1 += MINSTACK;
-	cmp.l	d1,sp		*     if ((__break+MINSTACK) < sp)
-	bhi	minok		* 	goto minok;
-	move.l	d1,sp		*     else sp = (__break+MINSTACK)
-minok:				* minok:
+	cmp.l	d1,sp			*     if ((__break+MINSTACK) < sp)
+	bhi	minok				* 	goto minok;
+	move.l	d1,sp			*     else sp = (__break+MINSTACK)
+minok:						* minok:
 	move.l	p_hitpa(a0),d2	*     d2 = hitpa;
-	sub.l	#FUDGE,d2	*     d2 -= FUDGE;
-	cmp.l	d2,sp		*     if ((hitpa - FUDGE) > sp)
-	bcs	maxok		*	goto maxok;
-*				*     else {
-	move.l	d2,sp		*	sp = (hitpa - FUDGE);
-	cmp.l	d1,d2		* 	if ((__break+MINSTACK) > (hitpa-FUDGE))
-	bcs	abort		*	    goto abort;	/* BAD NEWS */
-*				*     }
+	sub.l	#FUDGE,d2		*     d2 -= FUDGE;
+	cmp.l	d2,sp			*     if ((hitpa - FUDGE) > sp)
+	bcs	maxok				*	goto maxok;
+*							*     else {
+	move.l	d2,sp			*	sp = (hitpa - FUDGE);
+	cmp.l	d1,d2			* 	if ((__break+MINSTACK) > (hitpa-FUDGE))
+	bcs	abort				*	    goto abort;	/* BAD NEWS */
+*							*     }
 maxok:
 
 *************************************************************************
@@ -366,7 +369,7 @@ maxok:
 	move.l	d1,-(sp)	* push the size to keep
 	move.l	a0,-(sp)	* and start of this block (our basepage)
 	clr.w	-(sp)		* and a junk word
-	move	#mshrink,-(sp)	* and the function code
+	move	#Mshrink,-(sp)	* and the function code
 	trap	#1		* Mshrink(0,__base,(sp-base))
 	add.l	#12,sp		* clean the stack after ourselves
 
@@ -381,6 +384,7 @@ gotstack:
 	move.l  sp,d1
 	sub.l   a0,d1
     move.l  d1,__PgmSize
+gomain:
 	lea.l	p_cmdlin(a0),a2	* a2 now points to command line
 	move.b	(a2)+,d0	* d0 = length; a2++;
 	ext.w	d0		* extend byte count into d0.w
@@ -397,7 +401,7 @@ gotstack:
 __sovf:
 	lea	ovf(pc),a0			*	a0-> message
 	move.l	a0,-(a7)			*	load proper reg
-	move.w	#cconws,-(sp)	* push fn code
+	move.w	#Cconws,-(sp)	* push fn code
 	trap	#1		* Issue message
 
 	moveq   #-1,d0
@@ -411,10 +415,40 @@ __sovf:
 
 __exit:
 	addq.l   #4,a7		* drop return PC off the stack, leaving code
-	move.w	#pterm,-(a7)	* push function number
+	move.w	#Pterm,-(a7)	* push function number
 _halt:
 	trap	#1		* and trap.
 	bra.s _halt
+
+accmain:
+	move.l	#256,d1
+	add.l	p_tlen(a0),d1
+	add.l	p_dlen(a0),d1
+	add.l	p_blen(a0),d1
+    move.l  d1,__PgmSize
+	tst.l	d7
+	beq		accmin
+	cmp.l	#-1,d7
+	beq		nomin
+accmin:
+	move.l	#MINSTACK,d7
+nomin:
+	tst.l	d7
+	bpl		noneg
+	neg.l	d7
+noneg:
+	and.l	#-4,d7
+	move.l	a0,a3
+	lea		252(a0),sp	* use the command line as a temporary stack
+	move.l	d7,-(a7)
+	move.w	#Malloc,-(a7)
+	trap	#1
+	addq.l	#6,a7
+	move.l	a3,a0
+	move.l  d0,__break
+	move.l	d0,sp
+	add.l	d7,sp
+	bra		gomain
 
 *
 * abort: used if the stack setup above fails. Restores the initial sp,
@@ -423,28 +457,11 @@ _halt:
 abort:				* print an abortive message and quit
 	move.l	a1,sp		* restore initial sp
 	pea.l	abortmsg(pc)	* push string address
-	move.w	#cconws,-(a7)	* and function code
+	move.w	#Cconws,-(a7)	* and function code
 	trap	#1		* and trap to print message
 	addq.l	#6,a7		* clean off stack
 	move.w	#-39,-(a7)	* push error number -39: ENSMEM
 	jsr	__exit		* and exit with it.
-*
-*
-_brk:		
-	cmp.l	__break,sp	* compare current break with current stack
-	bcs	__sovf		* actual stack overflow!
-	movea.l	4(sp),a0	* get new break
-	move.l	a0,d0		* compare with stack, including 256-byte
-	adda.l	#$100,a0	* chicken factor
-	cmpa.l	a0,sp		* if (sp < a0+256)
-	bcs	badbrk		* 	bad break;
-	move.l	d0,__break	* OK break: save the break
-	clr.l	d0		* Set OK return
-	rts			* return
-
-badbrk:
-	move.l	#-1,d0		* Load return reg
-	rts			* Return
 
 ovf:		dc.b	'Stack Overflow',13,10,0	* Overflow message
 abortmsg:	dc.b	'Cannot initialize stack',13,10,0	* abort message
