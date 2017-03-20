@@ -23,11 +23,10 @@ struct symtab {
 	long  vl1;					/* symbol value */
 #ifdef LINK68
 	short ovlnum;				/* overlay number */
+	struct symtab *next; 		/* global table link */
 #endif
-	struct symtab *tlnk;		/* table link */
+	struct symtab *tlnk;		/* hash table link */
 };
-
-struct symtab *symptr;
 
 /* flags for symbols */
 #define SYDF	0x8000		/* defined */

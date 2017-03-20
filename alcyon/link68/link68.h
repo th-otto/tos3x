@@ -4,8 +4,9 @@
 
 #define LINK68 1
 
-#include <sendc68.h>
 #include <stdint.h>
+#include <sendc68.h>
+#include <cout.h>
 
 #define BOOLEAN int
 #define FALSE 0
@@ -17,7 +18,7 @@
 #  define UNUSED(x) ((void)(x))
 #endif
 
-#define	PROGNAME "LINK68"	/* name of this program */
+#define	PROGNAME "link68"	/* name of this program */
 #define CBMAIN	"__cbmain"	/* main entry point in CBASIC program */
 
 /* format of a symbol entry in the main table*/
