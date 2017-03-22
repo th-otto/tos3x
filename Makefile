@@ -12,7 +12,6 @@ include $(top_srcdir)/config.mak
 FLAGSTOPASS = COUNTRY=$(COUNTRY) TOSVERSION=$(TOSVERSION) SYMBOLS=$(SYMBOLS)
 
 all clean distclean dist check::
-	echo MAKE=$(MAKE)
 	$(MAKE) -C common $(FLAGSTOPASS) $@
 	$(MAKE) -C tools $(FLAGSTOPASS) $@
 	$(MAKE) -C bios $(FLAGSTOPASS) $@

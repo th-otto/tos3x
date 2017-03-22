@@ -113,7 +113,7 @@ PP(int16_t dev;)
 	bdev = &blkdev[dev];
 	bpb = &bdev->bpb;
 	do {
-#ifdef __ALCYON__
+#if BINEXACT
 		/* 0L = ugly hack to pass 2 zeroes */
 		err = floprd(dskbufp, NULL, dev, 1, 0L, BPBSECT);
 #else
@@ -152,7 +152,7 @@ PP(int16_t dev;)
 	bdev->geometry.spt = getiword(BS->spt);
 	bdev->geometry.spc = bdev->geometry.sides * bdev->geometry.spt;
 	bdev->geometry.hidden = getiword(BS->hid);
-	bdev->geometry.tracks = getiword(BS->sec) / bdev->geometry.spc;
+	bdev->geometry.tracks = getiword(BS->sec) / bdev->geometry.spc; /* BUG: no check for divide by zero */
 	
 #define i bps /* reuse register variable */
 
@@ -220,7 +220,7 @@ PP(int16_t dev;)
 	} else if (ret == MEDIAMAYCHANGE)
 	{
 		do {
-#ifdef __ALCYON__
+#if BINEXACT
 			/* 0L = ugly hack to pass 2 zeroes */
 			err = floprd(dskbufp, NULL, dev, 1, 0L, BPBSECT);
 #else
@@ -455,7 +455,7 @@ int16_t bhdv_boot(NOTHING)
 		return 3;   /* unreadable */
 		asm("L9992");
 #else
-#ifdef __ALCYON__
+#if BINEXACT
 		/* 0L = ugly hack to pass 2 zeroes */
 		if (floprd(dskbufp, NULL, 0, 1, 0L, 1) == 0)
 #else
