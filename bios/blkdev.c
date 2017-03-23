@@ -491,8 +491,8 @@ static char const proto_data[NUM_PROTOBT_ENTRIES * 19] = {
 	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(112), LEW(720),   0xfd, LEW(2),  LEW(9),  LEW(2), LEW(0),   /* 1 = DS, 40 tracks, SD */
 	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(112), LEW(720),   0xf9, LEW(5),  LEW(9),  LEW(1), LEW(0),   /* 2 = SS, 80 tracks, SD */
 	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(112), LEW(1440),  0xf9, LEW(5),  LEW(9),  LEW(2), LEW(0),   /* 3 = DS, 80 tracks, SD */
-	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(224), LEW(2880),  0xf0, LEW(5),  LEW(18), LEW(2), LEW(0),   /* 4 = DS, 80 tracks, HD */
-	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(224), LEW(5760),  0xf0, LEW(10), LEW(36), LEW(2), LEW(0),   /* 5 = DS, 80 tracks, ED */
+	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(224), LEW(2880),  0xf0, LEW(5),  LEW(18), LEW(2), LEW(0),   /* 4 = DS, 80 tracks, HD */ /* BUG: MSDOS uses 1 spc */
+	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(224), LEW(5760),  0xf0, LEW(10), LEW(36), LEW(2), LEW(0),   /* 5 = DS, 80 tracks, ED */ /* BUG: MSDOS uses 240 dir entries, and 9 spf */
 #undef LEW
 };
 
