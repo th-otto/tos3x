@@ -424,9 +424,9 @@ _gosuper:
 /* Set parameters in uda structure */
 
 	move.w	#1,(a6)			; u_insuper flag.
-	move.l	a0,66(a6)		; save current user stack pointer.
+	move.l	a0,66(a6)		; save current user stack pointer to u_spuser
 	move.l	a7,70(a6)		; save current super stack ptr
-	movea.l	62(a6),a7		; get super stack from uda
+	movea.l	62(a6),a7		; get super stack from uda.u_spsuper
 
 	jsr	_sti			; interrupts on
 /*
