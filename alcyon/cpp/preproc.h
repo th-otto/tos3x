@@ -94,11 +94,7 @@
 #define NINCL       10
 #define LABSTART    1000
 
-#ifndef VERSADOS
-#	define	HSIZE	1024
-#else
-#	define	HSIZE	2048
-#endif
+#define	HSIZE	2048
 
 /* Symbol Table Entry structure */
 struct symbol {
