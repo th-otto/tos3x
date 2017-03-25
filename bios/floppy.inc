@@ -1046,7 +1046,7 @@ hdselec3:   move      sr,d2                     /* save status register */
 fdcreset:
             move.w    #$0080,(a6)               /* execute 1770 "reset" command */
             move.w    #$00D0,d7
-#if TOSVERSION >= 0x300
+#if TTMFP_SUPPORT
             bsr.s     wrfdcd7
             move.w    d0,-(a7)
             move.w    #$0114,d0

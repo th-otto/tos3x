@@ -4559,7 +4559,7 @@ initmfp:
         bsr       settimer                      /* initialize Timer C (200hz timer) */
 
         lea.l     timercint,a2                  /* point to the timer C interrupt routine... */
-        moveq.l   #5,d0                         /* point the the timer C interrupt number */
+        moveq.l   #5,d0                         /* point to the timer C interrupt number */
         bsr       initint
 
 /* init the "d" timer */

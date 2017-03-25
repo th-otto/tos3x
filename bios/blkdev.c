@@ -530,6 +530,7 @@ PP(int16_t execflag;)
 			BS->serial[i] = serialno & 0xff;
 			serialno >>= 8;
 		}
+		/* BUG: serial2 checked by floppy mediach detection, but not set here */
 	}
 	
 	if (disktype >= 0 && disktype < NUM_PROTOBT_ENTRIES)
