@@ -21,7 +21,9 @@
  */
 
 #undef RSC_NAME
+#ifndef __ALCYON__
 #define RSC_NAME "deskes"
+#endif
 #undef RSC_ID
 #ifdef deskes
 #define RSC_ID deskes
@@ -277,14 +279,14 @@
 #define CSDRIVE                            4 /* FTEXT in tree CPBOX */ /* max len 1 */
 #define CDDRIVE                            5 /* FTEXT in tree CPBOX */ /* max len 1 */
 #define HIDECBOX                           6 /* BOX in tree CPBOX */
-#define CPFILE                             7 /* FTEXT in tree CPBOX */ /* max len 11 */
-#define CPDIR                              8 /* FTEXT in tree CPBOX */ /* max len 11 */
+#define CPDIR                              7 /* FTEXT in tree CPBOX */ /* max len 11 */
+#define CPFILE                             8 /* FTEXT in tree CPBOX */ /* max len 11 */
 #define DATEBOX                            9 /* BOX in tree CPBOX */
-#define PYES                              11 /* BUTTON in tree CPBOX */
-#define PNO                               12 /* STRING in tree CPBOX */
+#define PYES                              10 /* BUTTON in tree CPBOX */
+#define PNO                               11 /* BUTTON in tree CPBOX */
 #define CHBOX1                            13 /* BOX in tree CPBOX */
-#define OKCP                              14 /* BUTTON in tree CPBOX */
-#define CCANCEL                           15 /* BUTTON in tree CPBOX */
+#define CCANCEL                           14 /* BUTTON in tree CPBOX */
+#define OKCP                              15 /* BUTTON in tree CPBOX */
 
 #define INWICON                           19 /* form/dialog */
 #define IBOX1                              2 /* BOX in tree INWICON */

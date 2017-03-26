@@ -1,6 +1,6 @@
 #include "ctrycode.h"
 
-#if TOSVERSION == 0x404
+#if TOSVERSION >= 0x400
 /*
  * assumes MULTILANG_SUPPORT & POPUP_SUPPORT;
  * layout of individual resource files
@@ -59,6 +59,10 @@ error
 #endif
 #endif
 
+/*
+ * TOS versions before 0x400 have some language dependent strings
+ * hardcoded instead of begin placed in the resource file
+ */
 #if !STR_IN_RSC
 
 extern char const More[];
