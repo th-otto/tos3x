@@ -46,6 +46,8 @@ RAMVERSION=0
 #
 $(top_srcdir)/common/config.h: $(top_srcdir)/config.mak ${MAKEFILE}
 	$(AM_V_GEN)echo '/* automatically generated - DO NOT EDIT */' > $@
+	$(AM_V_at)echo '#ifndef __CONFIG_H__' >> $@
+	$(AM_V_at)echo '#define __CONFIG_H__ 1' >> $@
 	$(AM_V_at)echo '#define TOSVERSION 0x$(TOSVERSION)' >> $@
 	$(AM_V_at)echo '#define ATOSVERSION $$$(TOSVERSION)' >> $@
 	$(AM_V_at)echo '#define OS_COUNTRY CTRY_$(COUNTRY)' >> $@
@@ -55,6 +57,7 @@ $(top_srcdir)/common/config.h: $(top_srcdir)/config.mak ${MAKEFILE}
 	$(AM_V_at)echo '# define BINEXACT $(BINEXACT)' >> $@
 	$(AM_V_at)echo '#endif' >> $@
 	$(AM_V_at)echo '#define RAMVERSION $(RAMVERSION)' >> $@
+	$(AM_V_at)echo '#endif' >> $@
 
 $(top_srcdir)/common/sections.mak: $(top_srcdir)/common/sections.inc $(top_srcdir)/common/config.h
 	$(AM_V_GEN)$(CPP) -D__MAKEFILE__ $(top_srcdir)${BS}common${BS}sections.inc $(CPPOUT) sections.i

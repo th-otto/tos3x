@@ -10,7 +10,6 @@
 
 #include "config.h"
 #include "vdidefs.h"
-#include "ctrycode.h"
 #include "sections.inc"
 
 /* from BIOS */

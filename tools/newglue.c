@@ -22,6 +22,7 @@
  #  define lfree(ptr) free(ptr)
 #endif
 
+#ifndef PROTO
 #ifdef __ALCYON__
 #define VOID int					/* Void function return	   */
 #define VOIDPTR char *
@@ -37,6 +38,7 @@
 #define PROTO(p) p
 #define P(t) t
 #define PP(v)
+#endif
 #endif
 
 #define _(x) x

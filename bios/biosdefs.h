@@ -1,5 +1,7 @@
 /* common supervisor stack size (in words) (also defined in bdosdefs.h) */
+#ifndef SUPSIZ
 #define SUPSIZ 1024
+#endif
 
 #define NUMFLOPPIES 2
 

@@ -429,15 +429,6 @@ typedef struct rshdr
 
 
 /*
- * FORM Manager Definitions
- */
-/* Form flags */
-#define FMD_START  0
-#define FMD_GROW   1
-#define FMD_SHRINK 2
-#define FMD_FINISH 3
-
-/*
  * GRAPHICS Manager Definitions
  */
 /* Mouse Forms */

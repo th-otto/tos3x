@@ -48,10 +48,10 @@
 
 #include "config.h"
 #include "vdidefs.h"
-#include "devequ.inc"
 #include "lineaequ.inc"
 #include "tosvars.inc"
 #include "sections.inc"
+#include "asmdefs.h"
 
 ldri_escape	equ	19	; last DRI escape = 19.
 

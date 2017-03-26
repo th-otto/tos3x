@@ -20,6 +20,7 @@
  #  define lfree(ptr) free(ptr)
 #endif
 
+#ifndef PROTO
 #ifdef __ALCYON__
 #define VOID int					/* Void function return	   */
 #define VOIDPTR char *
@@ -36,9 +37,11 @@
 #define P(t) t
 #define PP(v)
 #endif
+#endif
 
 #define _(x) x
 
+#undef MIN
 #define MIN(a, b) ((a)<=(b) ? (a) : (b))
 #define BUFFER_SIZE (16*1024)
 

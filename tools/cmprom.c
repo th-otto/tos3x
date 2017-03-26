@@ -1143,7 +1143,7 @@ PP(char **argv;)
 
 	/* Get the optimal block size of the files.  */
 
-	buf_size = buffer_lcm((xsize_t)STAT_BLOCKSIZE(stat_buf[0]), (xsize_t)STAT_BLOCKSIZE(stat_buf[1]), (xsize_t)(PTRDIFF_MAX - sizeof(word)));
+	buf_size = buffer_lcm((xsize_t)STAT_BLOCKSIZE(stat_buf[0]), (xsize_t)STAT_BLOCKSIZE(stat_buf[1]), (xsize_t)(LONG_MAX - sizeof(word)));
 	
 	/* Allocate word-aligned buffers, with space for sentinels at the end.  */
 

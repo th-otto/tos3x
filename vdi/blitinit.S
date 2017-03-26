@@ -27,7 +27,6 @@
 #include "asmdefs.h"
 #include "tosvars.inc"
 
-#include "devequ.inc"
 #include "lineaequ.inc"
 
 

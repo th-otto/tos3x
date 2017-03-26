@@ -765,13 +765,13 @@ int16_t pred_dinf(NOTHING)
 #if TOSVERSION < 0x400
 					temp += 5;
 					scan_2(temp, &res);
-#define CACHE_OFFSET 6
+#define CCHE_OFFSET 6
 #else
-#define CACHE_OFFSET 11
+#define CCHE_OFFSET 11
 #endif
 					if (LONGFRAME)
 					{
-						scan_2(temp + CACHE_OFFSET, &cache);	/* fixed 6/26/90 Mui    */
+						scan_2(temp + CCHE_OFFSET, &cache);	/* fixed 6/26/90 Mui    */
 						/* fixed 7/17/92    */
 						if (cache & 2)
 							set_cache(CACHE_ON);

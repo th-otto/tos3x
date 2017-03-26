@@ -14,6 +14,9 @@
  *******************************************************************************
  */
 
+#ifndef __VDIDEFS_H__
+#define __VDIDEFS_H__ 1
+
 #include "config.h"
 
 /*
@@ -102,3 +105,5 @@
 #else
 #define MAX_PTSIN 512
 #endif
+
+#endif /* __VDIDEFS_H__ */

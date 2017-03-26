@@ -79,8 +79,6 @@ typedef int16_t BOOLEAN;
  */
 typedef intptr_t LPTREE;
 
-#define UNLINKED        0
-
 #define CMD_FORMAT  0
 #define CMD_COPY    1
 

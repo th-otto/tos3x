@@ -216,12 +216,10 @@
 #define AP_XBVMODE  int_in[0]
 #define AP_XBVDISK  addr_in[0]
 #define AP_XBVHARD  addr_in[1]
-#define AP_XBVDISKH int_out[2]
-#define AP_XBVDISKL int_out[1]
-#define AP_XBVHARDH int_out[4]
-#define AP_XBVHARDL int_out[3]
-
-#define SCR_MGR 0x0001			/* pid of the screen manager */
+#define AP_XBVDH    int_out[2]
+#define AP_XBVDL    int_out[1]
+#define AP_XBVHH    int_out[4]
+#define AP_XBVHL    int_out[3]
 
 /*
  * event lib parameters
@@ -580,14 +578,14 @@
 #define PROP_GET     1010
 #define PROP_PUT     1011
 #define PROP_DEL     1012
-#define PROP_GUI_GET 1013	/* Get general GUI option */
-#define PROP_GUI_SET 1014	/* Set general GUI option */
+#define PROP_GGET    1013	/* Get general GUI option */
+#define PROP_GSET    1014	/* Set general GUI option */
 
 #define PROP_PROG addr_in[0]
 #define PROP_SECT addr_in[1]
 #define PROP_BUF  addr_in[2]
 #define PROP_OPT  int_in[0]
-#define PROP_BUFL int_in[1]
+#define PROP_BFL  int_in[1]
 
 #define PROP_NUM   int_in[0]
 #define PROP_VALUE int_in[1]

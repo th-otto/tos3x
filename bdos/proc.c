@@ -20,7 +20,7 @@
 #define PE_GO         4
 #define PE_BASEPAGE   5
 #define PE_GOTHENFREE 6
-#define PE_BASEPAGEFLAGS 7
+#define PE_BPFLAGS    7
 #define PE_RELOCATE   50    /* required for NatFeats support only, not in Atari TOS */
 
 #define TPASIZE_QUANTUM (128*1024L)
@@ -201,7 +201,7 @@ PP(char *v;)								/* command, tail, environment   */
 	 *   check validity of mode - 1,2 or >5 is not allowed
 	 */
 
-	if (mode != PE_LOADGO && (mode < PE_LOAD || mode > PE_BASEPAGEFLAGS))
+	if (mode != PE_LOADGO && (mode < PE_LOAD || mode > PE_BPFLAGS))
 		return E_INVFN;
 
 	xmovs(sizeof(errbuf), errbuf, bakbuf);
@@ -247,7 +247,7 @@ PP(char *v;)								/* command, tail, environment   */
 		goto donehdr;
 	}
 	
-	if (mode == PE_BASEPAGEFLAGS)
+	if (mode == PE_BPFLAGS)
 	{
 		hdr.h01_ldflags = (long)s;
 	} else

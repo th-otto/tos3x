@@ -17,11 +17,6 @@
 
 #define ALCYON	1	/* Alcyon C Compiler	*/
 
-#define LINKED	1	/* if desktop linked with gem	*/
-
-#define UNLINKED	0	/* if desktop not linked with gem	*/
-#define CARTRIDGE	1	/* if rom cartridge exists		*/
-
 
 #define ATARI	1		/* for ATARI ST series			*/
 

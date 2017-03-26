@@ -30,7 +30,6 @@
 #include "tosvars.inc"
 
 #include "lineaequ.inc"
-#include "devequ.inc"
 
 
 #if MAX_PAL >= 4096

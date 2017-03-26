@@ -23,6 +23,9 @@ BPB /* bios parameter block */
  * bit usage in b_flags for BPB
  */
 
+#undef B_16 /* also defined in ostruct.h */
+#undef B_1FAT
+#undef B_XHDI
 #define B_16        1		/* device has 16-bit FATs */
 #define B_1FAT      2		/* device has only a single FAT */
 #define B_XHDI      4       /* extended BPB returned by XHDI drivers */

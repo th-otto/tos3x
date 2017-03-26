@@ -9,8 +9,6 @@
 
 #define INFOLEN		62
 
-#define MAX_DEPTH  8		/* Max folder level	*/
-
 #define	SCREEN	  0	/* related to background			*/
 
 #define ALLITEMS (NAME|CLOSER|FULLER|MOVER|INFO|SIZER|UPARROW|DNARROW|VSLIDE|LFARROW|RTARROW|HSLIDE)

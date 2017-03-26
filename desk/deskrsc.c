@@ -2,8 +2,6 @@
 
 #if !STR_IN_RSC
 
-#include "ctrycode.h"
-
 #if OS_COUNTRY == CTRY_US
 #include "rsc/306/strus.h"
 #endif

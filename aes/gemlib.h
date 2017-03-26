@@ -104,7 +104,9 @@
 #define RT_BITBLK 4
 #define RT_FREESTR 5
 #define RT_STRING 6
+#ifndef __ALCYON__ /*  clashes with RT_IMAGES */
 #define RT_IMAGEDATA 7
+#endif
 #define	RT_FREEIMG 8
 #define RT_TRINDEX 9
 
