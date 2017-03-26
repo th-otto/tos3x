@@ -279,6 +279,9 @@ static VOID dodefine(NOTHING)
 		error(_("bad define name: %s"), token);
 		return;
 	}
+	sp = lookup(token);
+	if (sp)
+		warning(_("redefining %.*s"), SSIZE, sp->s_name);
 	sp = getsp(token);
 	symcopy(token, sp->s_name);
 	sp->s_def = defused;
