@@ -8,21 +8,21 @@
 #  define TRUE  1
 #endif
 
-#define NATFEAT_ID   0x7300
-#define NATFEAT_CALL 0x7301
+#define NF_ID   0x7300
+#define NF_CALL 0x7301
 
 #ifdef __AHCC__
 
 static long __asm__ __CDECL _nf_get_id(const char *feature_name)
 {
-	dc.w NATFEAT_ID
+	dc.w NF_ID
 	rts
 }
 
 
 static long __asm__ __CDECL _nf_call(long id, ...)
 {
-	dc.w NATFEAT_CALL
+	dc.w NF_CALL
 	rts
 }
 
@@ -40,7 +40,7 @@ static long __asm__ _nf_det(void)
 
 	nop						/* flush pipelines (for 68040+) */
 
-	dc.w	NATFEAT_ID		/* Jump to NATFEAT_ID */
+	dc.w	NF_ID			/* Jump to NF_ID */
 	tst.l	d0
 	beq.s	_nf_illegal
 	moveq	#1,d0			/* NatFeats detected */
@@ -58,8 +58,8 @@ _nf_illegal:
 #else
 #ifdef __PUREC__
 
-static long nf_get_id_instr(void) NATFEAT_ID;
-static long nf_call_instr(void) NATFEAT_CALL;
+static long nf_get_id_instr(void) NF_ID;
+static long nf_call_instr(void) NF_CALL;
 
 static long __CDECL _nf_get_id(const char *feature_name)
 {
@@ -133,7 +133,7 @@ static long _nf_det(void)
 
 	nop();					/* flush pipelines (for 68040+) */
 
-	nf_get_id_instr();		/* Jump to NATFEAT_ID */
+	nf_get_id_instr();		/* Jump to NF_ID */
 	test_d0();
 	beqs_nf_illegal();
 	moveq_1_d0();			/* NatFeats detected */
@@ -162,7 +162,7 @@ static long __attribute__((noinline)) __CDECL _nf_get_id(const char *feature_nam
 	register long ret __asm__ ("d0");
 	UNUSED(feature_name);
 	__asm__ volatile(
-		ASM_NATFEAT(NATFEAT_ID)
+		ASM_NATFEAT(NF_ID)
 	: "=g"(ret)  /* outputs */
 	: /* inputs  */
 	: __CLOBBER_RETURN("d0") "d1" AND_MEMORY /* clobbered regs */
@@ -176,7 +176,7 @@ static long __attribute__((noinline)) __CDECL _nf_call(long id, ...)
 	register long ret __asm__ ("d0");
 	UNUSED(id);
 	__asm__ volatile(
-		ASM_NATFEAT(NATFEAT_CALL)
+		ASM_NATFEAT(NF_CALL)
 	: "=g"(ret)  /* outputs */
 	: /* inputs  */
 	: __CLOBBER_RETURN("d0") "d1" AND_MEMORY /* clobbered regs */
@@ -186,7 +186,7 @@ static long __attribute__((noinline)) __CDECL _nf_call(long id, ...)
 
 
 /*
- * on ColdFire, the NATFEAT_ID opcode is actually
+ * on ColdFire, the NF_ID opcode is actually
  * "mvs.b d0,d1",
  * which means the following code will NOT detect
  * the presence of an emulator (should there ever
@@ -210,7 +210,7 @@ static long _nf_det(void)
 
 	"\tnop\n"						/* flush pipelines (for 68040+) */
 
-	ASM_NATFEAT(NATFEAT_ID)			/* Jump to NATFEAT_ID */
+	ASM_NATFEAT(NF_ID)				/* Jump to NF_ID */
 	"\ttst.l	d0\n"
 	"\tbeq.s	1f\n"
 	"\tmoveq	#1,d0\n"			/* NatFeats detected */
@@ -247,7 +247,7 @@ static long _nf_det(NOTHING)
 
 	asm("nop");						/* flush pipelines (for 68040+) */
 
-	asm("dc.w   $7300");			/* Jump to NATFEAT_ID */
+	asm("dc.w   $7300");			/* Jump to NF_ID */
 	asm("tst.l  d0");
 	asm("beq.s  _nf_ill");
 	asm("moveq  #1,d0");			/* NatFeats detected */
