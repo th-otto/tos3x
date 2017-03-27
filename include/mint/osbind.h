@@ -171,6 +171,7 @@ __extension__								\
 #define	Fdelete(a)	gemdos(0x41,a)
 #define	Fseek(a,b,c)	gemdos(0x42,a,b,c)
 #define	Fattrib(a,b,c)	gemdos(0x43,a,b,c)
+#define	Mxalloc(a,b)	gemdos(0x44,a,b)
 #define	Fdup(a)		gemdos(0x45,a)
 #define	Fforce(a,b)	gemdos(0x46,a,b)
 #define	Dgetpath(a,b)	gemdos(0x47,a,b)

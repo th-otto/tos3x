@@ -181,7 +181,7 @@ __extension__								\
 #define	Pterm(a)	gemdos(0x4c,a)
 #define	Fsfirst(a,b)	gemdos(0x4e,a,b)
 #define	Fsnext()	gemdos(0x4f)
-#define	Frename(a,b)	gemdos(0x56,0,a,b)
+#define	Frename(a,b,c)	gemdos(0x56,a,b,c)
 #define	Fdatime(a,b,c)	gemdos(0x57,a,b,c)
 
 #endif /* __OSBIND_H__ */

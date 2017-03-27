@@ -823,10 +823,12 @@ __extension__								\
 		trap_1_wll(0x153, (long)(path), (long)(label))
 #define Ssystem(mode, arg1, arg2) \
 		trap_1_wwll(0x154, (short)(mode), (long)(arg1), (long)(arg2))
+#ifndef __SHORT_EXTERNAL_NAMES
 #define Tgettimeofday(tvp, tzp) \
 		trap_1_wll(0x155, (long)(tvp), (long)(tzp))
 #define Tsettimeofday(tvp, tzp) \
 		trap_1_wll(0x156, (long)(tvp), (long)(tzp))
+#endif
 #define Tadjtime(delta, olddelta) \
 		trap_1_wll(0x157, (long)(delta), (long)(olddelta))
 #define Pgetpriority(which, who) \
@@ -1021,8 +1023,10 @@ __extension__								\
 #define Dreadlabel(path, label, maxlen)  		gemdos(0x152, (long)(path), (long)(label), (short)(maxlen))
 #define Dwritelabel(path, label)  				gemdos(0x153, (long)(path), (long)(label))
 #define Ssystem(mode, arg1, arg2) 				gemdos(0x154, (short)(mode), (long)(arg1), (long)(arg2))
+#ifndef __SHORT_EXTERNAL_NAMES /* clashes with Tgettime */
 #define Tgettimeofday(tvp, tzp) 				gemdos(0x155, (long)(tvp), (long)(tzp))
 #define Tsettimeofday(tvp, tzp) 				gemdos(0x156, (long)(tvp), (long)(tzp))
+#endif
 #define Tadjtime(delta, olddelta) 				gemdos(0x157, (long)(delta), (long)(olddelta))
 #define Pgetpriority(which, who) 				gemdos(0x158, (short)(which), (short)(who))
 #define Psetpriority(which, who, prio) 			gemdos(0x159, (short)(which), (short)(who), (short)(prio))
@@ -1045,7 +1049,9 @@ __extension__								\
 #define Fsetsockopt(fh, level, name, val, valsize) 	gemdos(0x16a,(short)(fh),(long)(level),(long)(name),(long)(val),(long)(valsize))
 #define Fgetsockopt(fh, level, name, val, avalsize) gemdos(0x16b,(short)(fh),(long)(level),(long)(name),(long)(val),(long)(avalsize))
 #define Fgetpeername(fh, addr, addrlen) 		gemdos(0x16c,(short)(fh),(long)(addr),(long)(addrlen))
+#ifndef __SHORT_EXTERNAL_NAMES /* clashes with Fgetsockopt */
 #define Fgetsockname(fh, addr, addrlen) 		gemdos(0x16d,(short)(fh),(long)(addr),(long)(addrlen))
+#endif
 #define Fshutdown(fh, how) 						gemdos(0x16e,(short)(fh),(long)(how))
 /* 0x16f */
 #define Pshmget(key, size, shmflg) 				gemdos(0x170,(long)(key),(long)(size),(long)(shmflg))

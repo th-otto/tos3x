@@ -65,7 +65,6 @@
 #define C_CHNG 0x43484E47L     /* Changes */
 #define C_CHTW 0x43485457L     /* Chatwin */
 #define C_CISY 0x43495359L     /* CISYSTEM */
-#define C_CISY 0x43495359L     /* Cisystem */
 #define C_CJAR 0x434A4152L     /* Cookie.prg */
 #define C_CJar 0x434A6172L     /* JarXXX Program */
 #define C_CKBD 0x434B4244L     /* Composed Character Deluxe Keyboard Driver */
@@ -138,9 +137,8 @@
 #define C_FSEL 0x4653454CL     /* Extended File Selector (e.g. Selectricø,Freedomø) */
 #define C_FSER 0x46534552L     /* Fast Serial Interface Routines */
 #define C_FSMC 0x46534D43L     /* Advanced GDOS */
-#define C_FSmp 0x46536D70L     /* Fileselector */
-#define C_fVDI 0x66564449L     /* fVDI free VDI */
 #define C_FSmp 0x46536D70L     /* Martin Patzel File Selector */
+#define C_fVDI 0x66564449L     /* fVDI free VDI */
 #define C_F_3D 0x465F3344L     /* Focus 3D */
 #define C_GABI 0x47414249L     /* Gabrielle Serial Port Typewriter Emulator */
 #define C_GBel 0x4742656CL     /* GemBell */
@@ -314,9 +312,8 @@
 #define C_OSTT 0x4F535454L     /* OverScan TT */
 #define C_OV24 0x4F563234L     /* OverScan Hardcopy Driver 24 pins */
 #define C_oVDI 0x6F564449L     /* oVDI */
-#define C_OVDJ 0x4F56444AL     /* Overscan Hardcopytreiber fÅr HP-DeskJet */
-#define C_OVDJ 0x4F56444AL     /* OverScan Hardcopy Driver HP Deskjet */
-#define C_OVEP 0x4F564550L     /* OverScan Hardcopy Driver 9 pins */
+#define C_OVDJ 0x4F56444AL     /* OverScan Hardcopy Driver for HP Deskjet */
+#define C_OVEP 0x4F564550L     /* OverScan Hardcopy Driver for 9 pins */
 #define C_OVER 0x4F564552L     /* AutoSwitch OverScan Hardware Driver */
 #define C_OVEX 0x4F564558L     /* OverScan Exception Patch */
 #define C_OVFS 0x4F564653L     /* OverScan Fileselector Patch */
@@ -515,7 +512,6 @@
 #define C_WPRO 0x5750524FL     /* Write Protect */
 #define C_WrAp 0x57724170L     /* WarpMouse */
 #define C_XALT 0x58414C54L     /* AlberTT GFX card driver */
-#define C_XBTN 0x5842544EL     /* Maus-Routine in 'XBOOT' */
 #define C_XBTN 0x5842544EL     /* Mouse speeder routine from XBOOT */
 #define C_XDsk 0x5844736BL     /* X-DISK ramdisk */
 #define C_XFRB 0x58465242L     /* Extended Fast Ram Buffer */
@@ -569,24 +565,24 @@
 
 #define C_MACCEL 0x00AA006EL		/* MACCELL */
 
-#ifdef __SHORT_EXTERNAL_NAMES
-#define Cookie_JarInstalled ck_ji
-#define Cookie_UsedEntries ck_ue
-#define Cookie_JarSize ck_js
-#define Cookie_ReadJar ck_rdj
-#define Cookie_WriteJar ck_wrj
-#endif
-
 /* Return values of Getcookie() */
 #define C_FOUND		0
 #define C_NOTFOUND	-1	/* EERROR */
 
 extern int Getcookie PROTO((long cookie, long *val));
 
-int Cookie_JarInstalled PROTO((NOTHING));
-int Cookie_UsedEntries PROTO((NOTHING));
-int Cookie_JarSize PROTO((NOTHING));
-int Cookie_ReadJar PROTO((__uint32_t id, long *value));
-int Cookie_WriteJar PROTO((__uint32_t id, long value));
+#ifndef __SHORT_EXTERNAL_NAMES
+#define ck_ji Cookie_JarInstalled
+#define ck_ue Cookie_UsedEntries
+#define ck_js Cookie_JarSize
+#define ck_rdj Cookie_ReadJar
+#define ck_wrj Cookie_WriteJar
+#endif
+
+int ck_ji PROTO((NOTHING));
+int ck_ue PROTO((NOTHING));
+int ck_js PROTO((NOTHING));
+int ck_rdj PROTO((__uint32_t id, long *value));
+int ck_wrj PROTO((__uint32_t id, long value));
 
 #endif

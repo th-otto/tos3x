@@ -34,7 +34,7 @@ PP(const char *to;)								/* New file name        */
 	from = _dosify(strncpy(tmpbuf, from, sizeof(tmpbuf)));
 	to = _dosify(strncpy(tmpbuf2, to, sizeof(tmpbuf2)));
 	
-	if ((err = Frename(from, to)) < 0)
+	if ((err = Frename(0, from, to)) < 0)
 	{
 		__set_errno(_XltErr(err, ENOENT));
 		return -1;

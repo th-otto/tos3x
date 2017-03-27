@@ -1348,7 +1348,7 @@ PP(char *dst;)
 									dspSrc();
 									dspTo();
 									dspDst();
-									compl_code = Frename(srcFlNm, dstFlNm);
+									compl_code = Frename(0, srcFlNm, dstFlNm);
 									if (compl_code < 0)
 									{
 										wrt(_("  Rename Unsucessfull!"));

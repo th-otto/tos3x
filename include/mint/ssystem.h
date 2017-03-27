@@ -15,8 +15,13 @@
 # define S_OSXNAME	1
 # define S_OSVERSION	2
 # define S_OSHEADER	3
+#ifdef __SHORT_EXTERNAL_NAMES
+# define S_OSBDATE	4
+# define S_OSBTIME	5
+#else
 # define S_OSBUILDDATE	4
 # define S_OSBUILDTIME	5
+#endif
 # define S_OSCOMPILE	6
 # define S_OSFEATURES	7
 # define S_GETCOOKIE	8
