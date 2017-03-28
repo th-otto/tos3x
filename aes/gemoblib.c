@@ -225,8 +225,6 @@ PP(char *fmtstr;)
 	char *pfend, *ptend, *prend;
 	register int16_t inc, ptlen, prlen;
 
-	UNUSED(pfend);
-	
 	if (*raw_str == '@')
 		*raw_str = '\0';
 

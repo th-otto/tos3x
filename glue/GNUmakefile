@@ -19,10 +19,12 @@ CFLAGS = $(OPTS) $(WARN)
 
 IMG = tos$(TOSVERSION)$(COUNTRY).img
 
-all: $(IMG)
+all::
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
+
+all:: $(IMG)
 
 include SRCFILES
 
@@ -35,6 +37,9 @@ cartridge.img: cartridge.o
 	$(LD) -nostartfiles -nostdlib -o cartridge.tmp -Wl,--script=../common/rom.ld,-Ttext=0x$(CARTBASE),-Tbss=0 cartridge.o
 	$(MV) cartridge.tmp $@
 	$(RM) cartridge.tmp
+
+$(IMG): tos.img $(MKROM)
+	$(MKROM) pad $(ROMSIZE) $< $@
 
 check::
 	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)

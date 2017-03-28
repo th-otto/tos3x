@@ -133,7 +133,7 @@ PP(int16_t maxdep;)
 {
 	register int16_t tmp1;
 	register int16_t depth;
-	int16_t x[8], y[8];
+	int16_t x[MAX_DEPTH], y[MAX_DEPTH]; /* BUG: should be MAX_DEPTH+1, since we start with depth==1 */
 
 	x[0] = startx;
 	y[0] = starty;
@@ -152,7 +152,7 @@ PP(int16_t maxdep;)
 
 	if (tmp1 != NIL)
 	{
-		if (!(LWGET(OB_FLAGS(this)) & HIDETREE) && (depth <= maxdep))
+		if (!(LWGET(OB_FLAGS(this)) & HIDETREE) && (depth <= maxdep)) /* BUG: no check for overflow */
 		{
 			depth++;
 			this = tmp1;
@@ -165,7 +165,7 @@ PP(int16_t maxdep;)
 	 * or it is the last then stop else...
 	 */
 	tmp1 = LWGET(OB_NEXT(this));
-	if ((tmp1 == last) || (this == ROOT))
+	if (tmp1 == last || this == ROOT)
 		return;
 	/*
 	 * if this obj. has a sibling that is not
