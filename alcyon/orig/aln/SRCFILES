@@ -4,4 +4,5 @@ DOINDEX_OBJS = gemst8k.o $(DOINDEX_SRCS:.o=.c)
 
 SRCS = gemst8k.s $(DOINDEX_SRCS)
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES optimize.mak
+EXTRA_DIST1 = Makefile SRCFILES optimize.mak
+EXTRA_DIST2 = GNUmakefile

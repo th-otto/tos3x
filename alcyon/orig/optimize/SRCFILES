@@ -5,4 +5,5 @@ FIXNOPS_OBJS = $(FIXNOPS_SRCS:.c=.o)
 
 SRCS = $(OPTIMIZE_SRCS) $(FIXNOPS_SRCS)
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES optimize.mak optimize.lnk
+EXTRA_DIST1 = Makefile SRCFILES optimize.mak optimize.lnk
+EXTRA_DIST2 = GNUmakefile

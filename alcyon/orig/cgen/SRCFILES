@@ -4,4 +4,5 @@ C168_OBJS = $(C168_SRCS:.c=.o)
 
 SRCS = $(C168_SRCS) cgen.h cskel.h icode.h kputc.c kgetc.c kopen.c
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES c168.lnk
+EXTRA_DIST1 = Makefile SRCFILES c168.lnk
+EXTRA_DIST2 = GNUmakefile

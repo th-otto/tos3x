@@ -132,8 +132,7 @@ SCREEN_SRCS=\
 SRCS:=${VDI_SRCS} ${SCREEN_SRCS}
 
 
-EXTRA_DIST:=\
-	GNUmakefile \
+EXTRA_DIST1:=\
 	Makefile \
 	SRCFILES \
 	vdi.lnk \
@@ -154,4 +153,8 @@ EXTRA_DIST:=\
 	spxtblit.S \
 	spxtxtbl.S \
 	spxvline.S \
+	${empty}
+
+EXTRA_DIST2:=\
+	GNUmakefile \
 	${empty}

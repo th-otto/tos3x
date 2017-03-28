@@ -35,10 +35,11 @@ check::
 	@:
 
 dist::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR1)/$(subdir)
+	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 
 dosdir::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(DOSDIR)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

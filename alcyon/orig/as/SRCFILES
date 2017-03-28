@@ -4,4 +4,5 @@ AS68_OBJS = $(AS68_SRCS:.c=.o)
 
 SRCS = $(AS68_SRCS) as68.h def.h p2def.h kputc.c kopen.c kcreat.c
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES as68.lnk
+EXTRA_DIST1 = Makefile SRCFILES as68.lnk
+EXTRA_DIST2 = GNUmakefile

@@ -40,10 +40,11 @@ check:: aes.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(aes_doff):0x$(aes_tleno) --offsets=0x$(aes_dbase):0x$(aes_tlen) --bytes=0x$(aes_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img aes.o
 
 dist::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR1)/$(subdir)
+	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 
 dosdir::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(DOSDIR)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/$(subdir)
 
 clean:
 	$(RM) *.o *.a *.ndx $(PROGRAMS) $(top_srcdir)/common/config.h

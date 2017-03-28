@@ -44,10 +44,13 @@ DESK_SRCS=\
 
 SRCS:=${DESK_SRCS}
 
-EXTRA_DIST:=\
-	GNUmakefile \
+EXTRA_DIST1:=\
 	Makefile \
 	SRCFILES \
 	optimize.mak \
 	deskext.S \
+	${empty}
+
+EXTRA_DIST2:=\
+	GNUmakefile \
 	${empty}

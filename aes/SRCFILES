@@ -76,10 +76,12 @@ AES_SRCS=\
 
 SRCS:=${AES_SRCS}
 
-EXTRA_DIST:=\
-	GNUmakefile \
+EXTRA_DIST1:=\
 	Makefile \
 	SRCFILES \
 	optimize.mak \
 	aesext.S \
 	${empty}
+
+EXTRA_DIST2:=\
+	GNUmakefile \

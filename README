@@ -52,7 +52,8 @@ system:
   Source of some small Atari tools.
 
 listings:
-  Working versions of disassembler listings of various TOS versions.
+  Disassembler listings of various TOS versions that were used while
+  working on some parts of the system.
 
 glue:
   The final ROM images will be build here. It also contains link maps
@@ -68,6 +69,7 @@ alcyon/orig:
   Source of the tools of the Alcyon C compiler & tools, that compile to binary
   identical versions of the ones found in the developer kit.
 
+(the contents of the alcyon directory are now available as a separate archive)
 
 ******************************************************************************
 * Assembler sources
@@ -134,14 +136,15 @@ They are not meant to be a base for serious further development, the Alcyon
 compiler tools that were originally used are just too outdated and buggy.
 
 Having that said, if you still feeling adventurous and want to try to compile
-it yourself, you will need
+it yourself:
 
 - unpack the archive in some directory of your choice. All pathnames used
-  in the makefiles are relative, so its name does not matter.
+  in the makefiles are relative, so its name does not matter. Sources,
+  object files and any built files will need ~13MB of disk space.
 
 - install some shell. In my case i used GEMINI (unfortunately german only).
   bash might work, but some of the tools will have problems with MiNT which
-  bash requires.
+  bash requires. Using command.tos from the bin directory should also work.
 
 - cd to the toplevel directory
 
@@ -160,7 +163,7 @@ it yourself, you will need
   Also, when switching configurations, always make sure to run
   make clean
   first.
-  IF you pass the configuration via commandline, be sure to always
+  If you pass the configuration via commandline, be sure to always
   use the same command when having to restart make.
 
 - There might currently be some issues with \ vs / in pathnames. If
@@ -169,3 +172,10 @@ it yourself, you will need
 
 - There might be some more hints available on
   http://www.atari-forum.com/viewforum.php?f=16
+
+- Be patient. On a STE, recompiling everything from scratch is reported
+  to take ~2h, on a TT ~34 min. A Ramdisk might help, but note that the
+  makefiles currently don't support to only put temporary files there.
+  Without modifiying the makefiles you would need to put the sources there
+  too, risking to loose any modifications you made if something goes awfully
+  wrong.

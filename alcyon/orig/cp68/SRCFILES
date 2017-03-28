@@ -4,4 +4,5 @@ CP_OBJS = $(CP_SRCS:.c=.o)
 
 SRCS = $(CP_SRCS) preproc.h kputc.c kgetc.c kopen.c
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES cp68.lnk
+EXTRA_DIST1 = Makefile SRCFILES cp68.lnk
+EXTRA_DIST2 = GNUmakefile

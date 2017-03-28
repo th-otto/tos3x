@@ -33,7 +33,8 @@ analyze$(EXEEXT): $(ANALYZE_OBJS)
 	$(AM_V_LD)$(LD) $(ANALYZE_OBJS) $(LDFLAGS) -o $@ $(LIBS)
 
 dist::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR2)/$(subdir)
+	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

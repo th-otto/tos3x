@@ -12,10 +12,11 @@ check::
 	@:
 
 dist::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/common
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR1)/common
+	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/common
 
 dosdir::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(DOSDIR)/common
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/common
 
 clean::
 

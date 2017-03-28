@@ -18,4 +18,5 @@ LIB1OBJS=lmul.o lrem.o ldiv.o uldiv.o ulrem.o gemdos.o bios.o
 
 SRCS = $(COMA_SRCS) $(FIND_SRC) $(DATE_SRCS) $(TIME_SRCS)
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES dt.h
+EXTRA_DIST1 = Makefile SRCFILES dt.h
+EXTRA_DIST2 = GNUmakefile

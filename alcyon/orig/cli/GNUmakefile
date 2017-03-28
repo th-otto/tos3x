@@ -35,7 +35,8 @@ check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i ../bin/$$i; done
 
 dist::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
+	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 
 clean:
 	$(RM) *.o *.a $(PROGRAMS)

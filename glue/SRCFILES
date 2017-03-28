@@ -1,7 +1,6 @@
 SRCS:=startup.S cartridg.S
 
-EXTRA_DIST:=\
-	GNUmakefile \
+EXTRA_DIST1:=\
 	Makefile \
 	SRCFILES \
 	tos306de.map \
@@ -10,4 +9,8 @@ EXTRA_DIST:=\
 	tos206us.map \
 	tos208de.map \
 	tos208us.map \
+	${empty}
+
+EXTRA_DIST2:=\
+	GNUmakefile \
 	${empty}

@@ -226,4 +226,5 @@ SRCS = $(CSRCS) $(ASRCS) gemstart.S
 
 OBJS = $(COBJS) $(AOBJS)
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES
+EXTRA_DIST1 = Makefile SRCFILES
+EXTRA_DIST2 = GNUmakefile

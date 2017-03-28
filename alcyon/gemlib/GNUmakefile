@@ -24,7 +24,8 @@ ${GEMLIB}: $(OBJS)
 	$(AM_V_AR)$(AR) $(ARFLAGS) $@ $(OBJS)
 
 dist::
-	$(CP) -a $(SRCS) $(EXTRA_DIST) $(top_srcdir)/$(DISTDIR)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR2)/$(subdir)
+	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 
 clean:
 	$(RM) *.o *.a *.ndx

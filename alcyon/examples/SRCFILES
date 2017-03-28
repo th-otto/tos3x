@@ -9,6 +9,8 @@ DOODLE_OBJS = $(DOODLE_SRCS:.c=.o)
 
 SRCS = $(TEST_SRCS) $(APSKEL_SRCS) $(DOODLE_SRCS)
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES \
+EXTRA_DIST1 = Makefile SRCFILES \
 	test.h test.rsc test.rso \
 	doodle.h doodle.rsc doodle.rso highres.doo
+
+EXTRA_DIST2 = GNUmakefile

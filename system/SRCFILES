@@ -9,8 +9,11 @@ SRCS = \
 	stripex.c \
 	$(empty)
 
-EXTRA_DIST = \
-	GNUmakefile \
+EXTRA_DIST1 = \
 	Makefile \
 	SRCFILES \
+	$(empty)
+
+EXTRA_DIST2 = \
+	GNUmakefile \
 	$(empty)

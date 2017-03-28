@@ -2,7 +2,8 @@ BIN=../bin/
 LIB=../lib/
 INC=../include
 
-DISTDIR=../tmp/tos306de
+DISTDIR1=../tmp/tos306de
+DISTDIR2=../tmp/alcyon
 DOSDIR=/mnt/tos/TOS
 WWWDIR=$(HOME)/webgo24/home/www/download
 

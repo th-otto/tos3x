@@ -83,4 +83,5 @@ OPTIONOBJS = $(OPTIONSRCS:.c=.o)
 
 SRCS = $(ASRCS) $(CSRCS) $(MASRCS) $(MCSRCS) $(OPTIONSRCS) lib.h crt0.S gemstart.S
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES
+EXTRA_DIST1 = Makefile SRCFILES
+EXTRA_DIST2 = GNUmakefile

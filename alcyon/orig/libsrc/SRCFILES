@@ -130,4 +130,5 @@ srcfiles.sh: SRCFILES ${MAKEFILE}
 	@echo CRT0=\"${CRT0}\" >> $@
 	@echo LIBC=\"${LIBC}\" >> $@
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES srcfiles.sh makeall.sh optimize.mak
+EXTRA_DIST1 = Makefile SRCFILES makeall.sh optimize.mak
+EXTRA_DIST2 = GNUmakefilesrcfiles.sh

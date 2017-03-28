@@ -6,4 +6,5 @@ RELMOD_OBJS = $(RELMOD_SRCS:.c=.o)
 
 SRCS = $(LINK_SRCS) $(RELMOD_SRCS) link68.h
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES
+EXTRA_DIST1 = Makefile SRCFILES
+EXTRA_DIST2 = GNUmakefile

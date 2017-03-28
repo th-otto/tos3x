@@ -8,4 +8,5 @@ AR_OBJS = $(AR_SRCS:.c=.o)
 
 SRCS = $(SIZE_SRCS) $(NM_SRCS) $(AR_SRCS) setstack.c util.h arcrt.s
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES
+EXTRA_DIST1 = Makefile SRCFILES
+EXTRA_DIST2 = GNUmakefile

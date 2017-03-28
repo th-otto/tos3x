@@ -3,7 +3,8 @@ LIB=../lib/
 INC=../include
 EXEEXT=
 
-DISTDIR=../../../tmp/tos306de/alcyon/orig
+DISTDIR1=../../../tmp/tos306de/alcyon/orig
+DISTDIR2=../../../tmp/alcyon/alcyon/orig
 
 ALNPATH=${LIB}
 CRT0=crt0.o

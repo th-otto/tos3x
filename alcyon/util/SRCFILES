@@ -10,4 +10,5 @@ ANALYZE_OBJS = $(ANALYZE_SRCS:.c=.o)
 
 SRCS = $(SIZE_SRCS) $(NM_SRCS) $(AR_SRCS) $(ANALYZE_SRCS) setstack.c util.h
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES
+EXTRA_DIST1 = Makefile SRCFILES
+EXTRA_DIST2 = GNUmakefile

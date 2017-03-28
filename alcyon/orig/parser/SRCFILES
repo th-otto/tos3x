@@ -3,4 +3,5 @@ C068_OBJS = $(C068_SRCS:.c=.o)
 
 SRCS = $(C068_SRCS) icode.h parser.h lex.h def.h kputc.c kgetc.c kopen.c
 
-EXTRA_DIST = GNUmakefile Makefile SRCFILES c068.lnk
+EXTRA_DIST1 = Makefile SRCFILES c068.lnk
+EXTRA_DIST2 = GNUmakefile
