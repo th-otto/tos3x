@@ -465,7 +465,7 @@ PP(intptr_t spec;)
 		i = LLOWD(spec);
 		break;
 	default:							/* black border, black text, transparent, hollow, white fill */
-		i = 0xff00;
+		i = 0xff00; /* BUG: color 0xf is actually LMAGENTA */
 	}
 	gr_crack(i, &i, &tcol, &i, &icol, &i);
 
