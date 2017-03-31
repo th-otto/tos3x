@@ -641,7 +641,7 @@ int16_t get_prev PROTO((LPTREE tree, int16_t parent, int16_t obj));
 CICON *match_planes PROTO((CICON *iconlist, int planes));
 CICON *find_eq_or_less PROTO((CICON *iconlist, int planes));
 VOID gr_cicon PROTO((int16_t state, int16_t *pmask, int16_t *pdata, const char *ptext, int16_t ch, int16_t chx, int16_t chy, GRECT *pi, GRECT *pt, CICONBLK *cicon));
-VOID gsx_cblt PROTO((P(int16_t *) saddr, P(uint16_t) sx, P(uint16_t) sy, P(uint16_t) swb, P(int16_t *) daddr, P(uint16_t) dx, P(uint16_t) dy, P(uint16_t) dwb, P(uint16_t) w, P(uint16_t) h, P(uint16_t) rule, P(int16_t) numplanes));
+VOID gsx_cblt PROTO((int16_t *saddr, uint16_t sx, uint16_t sy, uint16_t swb, int16_t *daddr, uint16_t dx, uint16_t dy, uint16_t dwb, uint16_t w, uint16_t h, uint16_t rule, int16_t numplanes));
 VOID get_color_rsc PROTO((CICONBLK **cicondata));
 VOID free_cicon PROTO((CICONBLK **carray));
 
@@ -793,7 +793,7 @@ extern RSHDR *rs_hdr;
 extern intptr_t rs_global;
 
 VOID rs_sglobe PROTO((intptr_t pglobal)); /* also referenced by DESKTOP */
-int16_t rs_obfix PROTO((LPTREE tree, P(int16_t) curob));
+int16_t rs_obfix PROTO((LPTREE tree, int16_t curob));
 char *rs_str PROTO((int16_t stnum));
 int16_t rs_free PROTO((intptr_t pglobal));
 int16_t rs_gaddr PROTO((intptr_t pglobal, uint16_t rtype, uint16_t rindex, VOIDPTR *rsaddr));
