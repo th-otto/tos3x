@@ -436,7 +436,7 @@ VOID hctl_window PROTO((int16_t w_handle, int16_t mx, int16_t my));
 VOID hctl_button PROTO((int16_t mx, int16_t my));
 VOID hctl_rect PROTO((int16_t mx, int16_t my));
 VOID ct_chgown PROTO((PD *ppd, GRECT *pr));
-int16_t ctlmgr PROTO((NOTHING));
+VOID ctlmgr PROTO((NOTHING));
 PD *ictlmgr PROTO((int16_t pid));
 VOID ctlmouse PROTO((BOOLEAN mon));
 VOID take_ownership PROTO((BOOLEAN beg_ownit));
@@ -823,7 +823,7 @@ extern BOOLEAN sh_iscart;
 extern char *ad_path;
 
 int16_t sh_read PROTO((char *pcmd, char *ptail));
-int16_t sh_write PROTO((int16_t doex, int16_t isgem, int16_t isover, char *pcmd, char *ptail));
+int16_t sh_write PROTO((int16_t doex, int16_t isgem, int16_t isover, const char *pcmd, const char *ptail));
 int16_t sh_get PROTO((char *pbuffer, int16_t len));
 int16_t sh_put PROTO((const char *pdata, int16_t len));
 BOOLEAN sh_tographic PROTO((NOTHING));
@@ -935,7 +935,7 @@ int dos_chmod PROTO((const char *path, int attr));
 int dos_delete PROTO((const char *path));
 int dos_free PROTO((VOIDPTR ptr));
 int do_cdir PROTO((int drv, const char *path));
-int isdrive PROTO((NOTHING)); /* BUG: should be delcared as returning LONG */
+int isdrive PROTO((NOTHING)); /* BUG: should be declared as returning LONG */
 long trap PROTO((short code, ...));
 
 

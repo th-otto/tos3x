@@ -188,7 +188,7 @@ PP(register VOIDPTR *addr_in;)
 		ret = mn_register(MM_PID, MM_PSTR);
 		break;
 #if GEM3
-	/* how annoying, even in AES 3.4 still no menu_unreigster */
+	/* how annoying, even in AES 3.4 still no menu_unregister */
 	case MENU_UNREGISTER:
 		if (MM_MID == -1)
 			MM_MID = gl_mnpds[rlr->p_pid];

@@ -188,12 +188,12 @@ PP(char *ptail;)
  *   isover = 2  then run over AES and DESKTOP
  */
 /* 306de: 00e20b98 */
-int16_t sh_write(P(int16_t) doex, P(int16_t) isgem, P(int16_t) isover, P(char *) pcmd, P(char *) ptail)
+int16_t sh_write(P(int16_t) doex, P(int16_t) isgem, P(int16_t) isover, P(const char *) pcmd, P(const char *) ptail)
 PP(int16_t doex;)
 PP(int16_t isgem;)
 PP(int16_t isover;)
-PP(char *pcmd;)
-PP(char *ptail;)
+PP(const char *pcmd;)
+PP(const char *ptail;)
 {
 #if AESVERSION >= 0x330
 	if (doex > 1)

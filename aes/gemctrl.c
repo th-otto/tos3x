@@ -685,7 +685,7 @@ PP(GRECT *pr;)
  *	the system.
  */
 /* 306de: 00e1b6de */
-int16_t ctlmgr(NOTHING)
+VOID ctlmgr(NOTHING)
 {
 	register int16_t ev_which;
 	int16_t lrets[6];

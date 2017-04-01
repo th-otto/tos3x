@@ -145,7 +145,6 @@
 #define	HASHSIZ	8		/* size of hash table */
 #define	NUMRECT	80		/* # RLISTs per block of memory allocated */
 #define	SHADOW	2		/* thickness of drop shadow in pixels */
-#define	BORDER	0		/* # pixels taken up by border around obj */
 
 
 /* Bit masks of pieces of a window */
