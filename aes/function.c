@@ -492,10 +492,10 @@ PP(register int16_t cncl;)
 
 
 
-int16_t merge_str(P(char *) pdst, P(char *) ptmp, P(int16_t *) parms)
+VOID merge_str(P(char *) pdst, P(const char *) ptmp, P(VOIDPTR) parms)
 PP(register char *pdst;)
-PP(register char *ptmp;)
-PP(int16_t *parms;)
+PP(register const char *ptmp;)
+PP(VOIDPTR parms;)
 {
 	register int16_t num;
 	int16_t do_value;

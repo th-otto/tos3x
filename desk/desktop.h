@@ -734,7 +734,7 @@ VOID unfmt_str PROTO((const char *instr, char *outstr));
 VOID inf_sset PROTO((OBJECT *tree, int16_t obj, const char *pstr));
 VOID fs_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
 int16_t inf_gindex PROTO((OBJECT *tree, int16_t baseobj, int16_t numobj));
-int16_t merge_str PROTO((char *pdst, const char *ptmp, VOIDPTR parms));
+VOID merge_str PROTO((char *pdst, const char *ptmp, VOIDPTR parms));
 int16_t wildcmp PROTO((const char *pwild, const char *ptest));
 VOID bfill PROTO((int16_t num, char bval, VOIDPTR addr));
 int16_t min PROTO((int16_t a, int16_t b));

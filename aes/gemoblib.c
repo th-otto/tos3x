@@ -1847,7 +1847,7 @@ PP(CICON ***next_res;)
 	end = (char *)(*temp) + mono_size;			/* push pointer past the mask */
 	if (select)
 	{									/* there are some selected icons */
-		temp = (VOIDPTR *)&ptr->sel_mask;
+		temp = (VOIDPTR *)&ptr->sel_data;
 		*temp = end;
 		temp = (VOIDPTR *)&ptr->sel_mask;			/* selected mask */
 		end = (char *) end + ((intptr_t) ptr->num_planes * mono_size);
