@@ -165,7 +165,7 @@ PP(char chr;)
 		if (*pstr++ == '_')
 			idx++;
 	}
-	return (idx);
+	return idx;
 }
 
 
@@ -222,7 +222,7 @@ PP(register int16_t pos;)
 		if (str[i])
 			i++;
 	}
-	return (i);
+	return i;
 }
 
 
@@ -304,9 +304,9 @@ PP(register char *str;)
 			test2 = *str++;
 		}
 		if ((chr >= test1) && (chr <= test2))
-			return (TRUE);
+			return TRUE;
 	}
-	return (FALSE);
+	return FALSE;
 }
 
 
@@ -357,9 +357,9 @@ PP(char valchar;)
 		break;
 	case 'x':							/* anything, but upcase */
 		*in_char = toupper(*in_char);
-		return (TRUE);
+		return TRUE;
 	case 'X':							/* anything     */
-		return (TRUE);
+		return TRUE;
 	}
 	if (rstr != -1)
 	{
@@ -367,11 +367,11 @@ PP(char valchar;)
 		{
 			if (upcase)
 				*in_char = toupper(*in_char);
-			return (TRUE);
+			return TRUE;
 		}
 	}
 
-	return (FALSE);
+	return FALSE;
 }
 
 
@@ -400,10 +400,10 @@ PP(int16_t idx;)
 	DGLO = &D;
 	if (DGLO->g_rawstr[idx])
 	{
-		xstrpcpy(&DGLO->g_rawstr[idx + 1], &DGLO->g_rawstr[idx]);
-		return (FALSE);
+		strcpy(&DGLO->g_rawstr[idx], &DGLO->g_rawstr[idx + 1]);
+		return FALSE;
 	}
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -435,7 +435,7 @@ PP(int16_t kind;)
 	DGLO = &D;
 
 	if ((kind == EDSTART) || (obj <= 0))
-		return (TRUE);
+		return TRUE;
 
 	/* copy TEDINFO struct to local struct  */
 /*	ob_getsp(tree, obj, &edblk);	*/

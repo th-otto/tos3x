@@ -130,7 +130,7 @@ PP(int16_t *lrets;)
 
 
 /*
- * AES #22 - evnt_mouse -Wait for the mouse pointer to enter or leave a specified area of the screen.
+ * AES #22 - evnt_mouse - Wait for the mouse pointer to enter or leave a specified area of the screen.
  *
  *	Wait for the mouse to leave or enter a specified rectangle.
  */
@@ -378,8 +378,6 @@ PP(int16_t *prets;)
 
 /*
  * AES #26 - evnt_dclick - Obtain or set the time delay between the two clicks of a double-elick.
- *
- *	Wait for a key to be ready at the keyboard and return it. 
  */
 /* 306de: 00e1c1b8 */
 int16_t ev_dclick(P(int16_t) rate, P(int16_t) setit)

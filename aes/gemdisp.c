@@ -142,6 +142,7 @@ VOID forker(NOTHING)
 				 * if its a time event & previously recorded
 				 * was a time event then coalesce them 
 				 * else record the event
+				 * BUG: may access memory before gl_rbuf if first recorded event is time event
 				 */
 				if ((f->f_code == tchange) && (LLGET(gl_rbuf - sizeof(FPD)) == (intptr_t)tchange))
 				{

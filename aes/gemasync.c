@@ -46,12 +46,12 @@ EVB *get_evb(NOTHING)
 {
 	register EVB *e;
 
-	if (e = eul)
+	if ((e = eul) != NULL)
 	{
 		eul = eul->e_nextp;
 		bfill(sizeof(EVB), 0, e);
 	}
-	return (e);
+	return e;
 }
 #endif
 
@@ -111,7 +111,7 @@ PP(EVSPEC mask;)
 		wwait = TRUE;
 		dsptch();
 	}
-	return (rlr->p_evflg);
+	return rlr->p_evflg;
 }
 
 
@@ -125,7 +125,7 @@ PP(register intptr_t aparm;)
 	MOBLK mob;
 
 	/* e = get_evb();   */
-	if ((e = eul))
+	if ((e = eul) != NULL)
 	{
 		eul = eul->e_nextp;
 		bfill(sizeof(EVB), 0, e);
@@ -267,7 +267,7 @@ PP(register intptr_t aparm;)
 		break;
 	}
 
-	return (e->e_mask);
+	return e->e_mask;
 }
 
 
@@ -286,13 +286,13 @@ PP(register EVSPEC mask;)
 	}
 
 	if (!p)
-		return (NOT_FOUND);
+		return NOT_FOUND;
 	/* if this event has occured, it is on the zombie list */
 	for (pz = zlr; (pz != p) && pz; pz = pz->e_link)
 		;
 
 	if (!pz)							/* otherwise it is not completed */
-		return (NOT_COMPLETE);
+		return NOT_COMPLETE;
 	/* found the event, remove it from the zombie list */
 	pz->e_pred->e_link = pz->e_link;
 	if (pz->e_link)
@@ -306,7 +306,7 @@ PP(register EVSPEC mask;)
 	p->e_nextp = eul;
 	eul = p;
 	tbutton = LHIWD(p->e_return);
-	return (erret);
+	return erret;
 }
 
 
