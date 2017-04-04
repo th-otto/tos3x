@@ -227,7 +227,7 @@ L32:
  *	Routine to draw a string of graphic text.
  */
 #if CCODE
-VOID gr_gtext(WORD just, WORD font, const char *ptext, GRECT *pt, WORD tmode)
+VOID gr_gtext(WORD just, WORD font, const char *ptext, GRECT *pt)
 {
 	WORD numchs;
 

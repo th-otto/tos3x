@@ -596,7 +596,7 @@ L29:	move.w	(a0)+,d0		; d0 <- wb
  *	  +32	bgcol		word
  */
 #if CCODE
-WORD gsx_blt(int16_t *saddr, UWORD sx, UWORD sy, UWORD swb, int16_t *daddr, UWORD dx, UWORD dy, UWORD dwb, UWORD w, UWORD h, UWORD rule, WORD fgcolor, WORD bgcolor)
+VOID gsx_blt(int16_t *saddr, UWORD sx, UWORD sy, UWORD swb, int16_t *daddr, UWORD dx, UWORD dy, UWORD dwb, UWORD w, UWORD h, UWORD rule, WORD fgcolor, WORD bgcolor)
 {
 	REG WORD *ppts;
 
@@ -1112,7 +1112,7 @@ L42:	lea	_ptsin,a0
  *       pnumchs =  number of characters
  */
 #if CCODE
-WORD gsx_tcalc(WORD font, const char *ptext, WORD ptextw, WORD ptexth, WORD pnumchs)
+VOID gsx_tcalc(WORD font, const char *ptext, WORD ptextw, WORD ptexth, WORD pnumchs)
 {
 	REG WORD wc;
 	REG WORD hc;
@@ -1191,7 +1191,7 @@ L49:	move.w	d0,(a5)			; set pnumchs
 
 
 #if CCODE
-WORD gsx_tblt(WORD tb_f, WORD x, WORD y, WORD tb_nc)
+VOID gsx_tblt(WORD tb_f, WORD x, WORD y, WORD tb_nc)
 {
 	WORD i;
 	REG WORD pts_height;

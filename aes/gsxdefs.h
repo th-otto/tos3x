@@ -195,6 +195,6 @@ VOID avsl_width PROTO((int16_t width));
  * apgsxif.[cS]
  */
 VOID gsx_fix PROTO((FDB *pfd, int16_t *theaddr, int16_t wb, int16_t h));
-int16_t gsx_blt PROTO((int16_t *saddr, uint16_t sx, uint16_t sy, uint16_t swb, int16_t *daddr, uint16_t dx, uint16_t dy, uint16_t dwb, uint16_t w, uint16_t h, uint16_t rule, int16_t fgcolor, int16_t bgcolor));
+VOID gsx_blt PROTO((int16_t *saddr, uint16_t sx, uint16_t sy, uint16_t swb, int16_t *daddr, uint16_t dx, uint16_t dy, uint16_t dwb, uint16_t w, uint16_t h, uint16_t rule, int16_t fgcolor, int16_t bgcolor));
 
 #endif /* GSXDEFS_H */

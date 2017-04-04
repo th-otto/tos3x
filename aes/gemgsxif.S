@@ -474,7 +474,7 @@ VOID bb_set(WORD sx, WORD sy, WORD sw, WORD sh, WORD *pts1, WORD *pts2, FDB *pfd
 	pts2[2] = sw - 1;
 	pts2[3] = sh - 1;
 
-	gsx_fix(pfd, 0, 0, 0, 0);
+	gsx_fix(pfd, NULL, 0, 0);
 	avro_cpyfm(S_ONLY, &ptsin[0], psrc, pdst);
 	gsx_mon();
 }

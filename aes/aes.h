@@ -652,6 +652,7 @@ VOID free_cicon PROTO((CICONBLK **carray));
 VOID gr_inside PROTO((GRECT *pt, int16_t th));
 VOID gr_rect PROTO((uint16_t icolor, uint16_t ipattern, GRECT *pt));
 int16_t gr_just PROTO((int16_t just, int16_t font, const char *ptext, int16_t w, int16_t h, GRECT *pt));
+/* wrong declaration: gr_gtext does not have tmode parameter */
 VOID gr_gtext PROTO((int16_t just, int16_t font, const char *ptext, GRECT *pt, int16_t tmode));
 VOID gr_crack PROTO((uint16_t color, int16_t *pbc, int16_t *ptc, int16_t *pip, int16_t *pic, int16_t *pmd));
 VOID gr_gicon PROTO((int16_t state, int16_t *pmask, int16_t *pdata, const char *ptext, int16_t ch, int16_t chx, int16_t chy, GRECT *pi, GRECT *pt));
@@ -739,8 +740,8 @@ VOID gsx_trans PROTO((int16_t *saddr, uint16_t swb, int16_t *daddr, uint16_t dwb
 #endif
 VOID gsx_start PROTO((NOTHING));
 VOID bb_fill PROTO((int16_t mode, int16_t fis, int16_t patt, int16_t hx, int16_t hy, int16_t hw, int16_t hh));
-int16_t gsx_tcalc PROTO((int16_t font, const char *ptext, int16_t ptextw, int16_t ptexth, int16_t pnumchs));
-int16_t gsx_tblt PROTO((int16_t tb_f, int16_t x, int16_t y, int16_t tb_nc));
+VOID gsx_tcalc PROTO((int16_t font, const char *ptext, int16_t *ptextw, int16_t *ptexth, int16_t *pnumchs));
+VOID gsx_tblt PROTO((int16_t tb_f, int16_t x, int16_t y, int16_t tb_nc));
 VOID gsx_xbox PROTO((GRECT *pt));
 VOID gsx_xcbox PROTO((GRECT *pt));
 VOID gsx_xline PROTO((int16_t ptscount, int16_t *ppoints));
