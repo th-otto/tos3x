@@ -153,6 +153,9 @@ EXTRA_DIST1:=\
 	spxtblit.S \
 	spxtxtbl.S \
 	spxvline.S \
+	\
+	system08.fnt system09.fnt system10.fnt system20.fnt \
+	\
 	${empty}
 
 EXTRA_DIST2:=\
