@@ -832,8 +832,8 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node in question */
 		MTREE(MenuPtr)[obj].ob_flags &= ~SUBMENU;
 
 		/* AES version - src,dst */
-		xstrpcpy((char *) MTREE(MenuPtr)[obj].ob_spec, &MTOP_TXT(MenuPtr)[0]);
-		xstrpcpy(&UpText[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
+		strcpy(&MTOP_TXT(MenuPtr)[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
+		strcpy((char *) MTREE(MenuPtr)[obj].ob_spec, UpText);
 	}
 
 	/* Set the down ARROW if the last object is not MLAST_CHILD */
@@ -849,8 +849,8 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node in question */
 		if (MLASTFLAG(MenuPtr))			/* CJG 01/13/92 */
 			MTREE(MenuPtr)[obj].ob_flags |= LASTOB;
 		/* AES version - src,dst */
-		xstrpcpy((char *) MTREE(MenuPtr)[obj].ob_spec, &MB_TXT(MenuPtr)[0]);
-		xstrpcpy(&DownText[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
+		strcpy(MB_TXT(MenuPtr), (char *) MTREE(MenuPtr)[obj].ob_spec);
+		strcpy((char *) MTREE(MenuPtr)[obj].ob_spec, DownText);
 	}
 }
 
@@ -872,7 +872,7 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node */
 	/* Restore the text underneath the UP ARROW */
 	if ((obj = MTOP_OBJ(MenuPtr)) != MSCROLL(MenuPtr))
 	{
-		xstrpcpy(&MTOP_TXT(MenuPtr)[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
+		strcpy((char *) MTREE(MenuPtr)[obj].ob_spec, MTOP_TXT(MenuPtr));
 		MTREE(MenuPtr)[obj].ob_state = MTOP_STATE(MenuPtr);
 		MTREE(MenuPtr)[obj].ob_flags = MTOP_FLAG(MenuPtr);
 	}
@@ -881,7 +881,7 @@ PP(register MENU_PTR MenuPtr;)					/* ptr to the menu node */
 	if ((obj = MB_OBJ(MenuPtr)) != MLAST_CHILD(MenuPtr))
 	{
 		MTREE(MenuPtr)[obj].ob_flags = NONE;
-		xstrpcpy(&MB_TXT(MenuPtr)[0], (char *) MTREE(MenuPtr)[obj].ob_spec);
+		strcpy((char *) MTREE(MenuPtr)[obj].ob_spec, MB_TXT(MenuPtr));
 		MTREE(MenuPtr)[obj].ob_state = MB_STATE(MenuPtr);
 		MTREE(MenuPtr)[obj].ob_flags = MB_FLAG(MenuPtr);
 	}

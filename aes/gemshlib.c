@@ -520,7 +520,7 @@ PP(register SHFIND_PROC routine;)
 	dos_sdta(&D.g_loc1[0]);				/* use this     */
 
 	pname = sh_name(pspec);				/* get the file name    */
-	xstrpcpy(pname, &tmpname[0]);			/* copy it      */
+	strcpy(tmpname, pname);			/* copy it      */
 
 	pname = sh_name(ad_shcmd);			/* first look in program's dir  */
 	path = (int16_t) ((intptr_t)pname - (intptr_t)ad_shcmd);
@@ -534,7 +534,7 @@ PP(register SHFIND_PROC routine;)
 	if (!found)
 	{									/* if not found there, look cwd */
 		path = 0;
-		xstrpcpy(pspec, ad_path);
+		strcpy(ad_path, pspec);
 		do
 		{
 			found = sh_search(routine);
@@ -544,7 +544,7 @@ PP(register SHFIND_PROC routine;)
 	}
 
 	if (found)							/* if file found    */
-		xstrpcpy(ad_path, pspec);			/* return full filespec */
+		strcpy(pspec, ad_path);			/* return full filespec */
 
 	dos_sdta((VOIDPTR)savedta);					/* restore DTA      */
 	return found;
@@ -604,7 +604,7 @@ VOID sh_main(NOTHING)
 		if (sh_iscart)
 		{
 			DGLO->s_tail[0] = strlen(&DGLO->s_tail[1]);
-			sh_draw(ad_shcmd, 0, 1);
+			sh_draw(ad_shcmd, ROOT, 1);
 			sh_doexec = FALSE;			/* always go back to desktop */
 			sh_isgem = TRUE;
 			cart_exec(sh_name(ad_shcmd), ad_shtail);	/* only filename!  */
@@ -655,7 +655,7 @@ VOID sh_main(NOTHING)
 			/*	not change directory to the dir. of the app being launched.	*/
 
 			fname = sh_name(ad_shcmd);
-			sh_draw(fname, 0, 1);
+			sh_draw(fname, ROOT, 1);
 			sh_doexec = FALSE;			/* go back to desktop   */
 			sh_isgem = TRUE;			/* it is a gem      */
 

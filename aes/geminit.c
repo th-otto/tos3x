@@ -564,7 +564,7 @@ VOID gem_main(NOTHING)
 #endif
 		/* change to dir of autoboot */
 		apath = &aautopath[0];
-		xstrpcpy(g_autoboot, apath);
+		strcpy(apath, g_autoboot);
 		*(sh_name(apath)) = 0;			/* change path\filename to path */
 		do_cdir(apath[0] - 'A', apath);
 

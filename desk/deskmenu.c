@@ -1325,8 +1325,7 @@ VOID actions(NOTHING)
 			hd_keybd(kreturn);
 
 		wind_update(FALSE);
-
-	}									/* while */
+	}
 }
 
 

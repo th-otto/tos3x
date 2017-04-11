@@ -135,7 +135,7 @@ PP(int16_t acc;)
 	intptr_t ldaddr;
 	PD *p;
 
-	xstrpcpy(pfilespec, &D.s_cmd[0]);
+	strcpy(D.s_cmd, pfilespec);
 	handle = dos_open(ad_shcmd, ROPEN);
 	if (!DOS_ERR)
 	{									/* allocate PD memory for accessory */

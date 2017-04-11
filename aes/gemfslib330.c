@@ -175,7 +175,7 @@ PP(register char *pstr;)
 		*pend = '\\';
 	}
 
-	return (pend);
+	return pend;
 }
 
 
@@ -257,7 +257,7 @@ PP(char *lstring;)
 		dos_free(ad_fsdta);
 	  bye:dos_free(pxpath);
 	  bye2:fm_show(NOMEMORY, NULL, 1);
-		return (FALSE);
+		return FALSE;
 	} else
 		ad_fsnames = dos_alloc(mul);
 
@@ -312,11 +312,11 @@ PP(char *lstring;)
 
 	fmt_str(pisel, scopy);
 
-	xstrpcpy(pipath, ad_fpath);			/* make a copy      */
+	strcpy(ad_fpath, pipath);			/* make a copy      */
 
 	pathcopy[0] = defdrv + 'A';			/* Backup path      */
 	pathcopy[1] = ':';
-	xstrpcpy(wslstr, &pathcopy[2]);
+	strcpy(&pathcopy[2], wslstr);
 
 	count = 0;
 	fs_topptr = 0;
@@ -415,41 +415,42 @@ PP(char *lstring;)
 			gsx_sclip(&gl_rfs);
 
 			*(fs_back(ad_fpath)) = 0;	/* back to last path    */
-			xstrpcpy(ad_title, fs_back(ad_fpath) + 1);
+			strcpy(fs_back(ad_fpath) + 1, ad_title);
 
 			/* fall through     */
 		case FDIRECTORY:
 		  rdir:
 			if (!*ad_fpath)
-				xstrpcpy(pathcopy, ad_fpath);
+				strcpy(ad_fpath, pathcopy);
 
-			xstrpcpy(fs_back(ad_fpath), &fcopy[0]);
+			strcpy(fcopy, fs_back(ad_fpath));
 			/* extension OK ?   */
 			if ((fcopy[0] == '\\') && (fcopy[1]))
-				xstrpcpy(fcopy, fsname);	/* yes          */
+				strcpy(fsname, fcopy);	/* yes          */
 
 			if (fcopy[0] != '\\')		/* any slash ?      */
 			{
 				fsname[0] = '\\';
-				xstrpcpy(fcopy, fsname + 1);
+				strcpy(fsname + 1, fcopy);
 			}
 
 			if (!fcopy[1])				/* if no extension  */
 			{
-				xstrpcpy(wslstr, &fsname[0]);
-				xstrpcat(wildstr, ad_fpath);
+				strcpy(fsname, wslstr);
+				strcat(ad_fpath, wildstr);
 			}
 
 			if (r_dir(ad_fpath, scopy, &count))
 			{
-				xstrpcpy(ad_fpath, pathcopy);	/* copy current dir */
+				strcpy(pathcopy, ad_fpath);	/* copy current dir */
 				if (count > NM_NAMES)	/* more than 9 items    */
 					botptr = count - NM_NAMES;
 				else
 					botptr = 0;
 			} else
 			{
-			  rdir5:xstrpcpy(pathcopy, ad_fpath);
+			rdir5:
+				strcpy(ad_fpath, pathcopy);
 				ob_draw(tree, FDIRECTORY, MAX_DEPTH);
 				if (firstry)
 				{
@@ -545,12 +546,12 @@ PP(char *lstring;)
 			{
 				unfmt_str(addr, fs_back(ad_fpath) + 1);
 			  fs1:
-				xstrpcat(&fsname[0], ad_fpath);
+				strcat(ad_fpath, fsname);
 				goto rdir;
 			} else /* must be a file   */ if (chr)
 			{							/* clean up the last selected */
 				ob_change(tree, last, NORMAL, TRUE);
-				xstrpcpy(addr, (char *)(intptr_t)LLGET(LLGET(OB_SPEC(FSELECTION))));
+				strcpy((char *)(intptr_t)LLGET(LLGET(OB_SPEC(FSELECTION))), addr);
 				ob_change(tree, ret, SELECTED, TRUE);
 				ob_draw(tree, FSELECTION, MAX_DEPTH);
 				last = ret;
@@ -594,7 +595,7 @@ PP(char *lstring;)
 	dos_free(ad_fsdta);
 	dos_free(ad_fsnames);
 	dos_free(savepath);
-	xstrpcpy(ad_fpath, pipath);
+	strcpy(pipath, ad_fpath);
 	unfmt_str(ad_select, pisel);
 
 	if ((*pbutton = inf_what(tree, OK, CANCEL)) == -1)
@@ -664,7 +665,7 @@ PP(register uint16_t *count;)
 
   r_exit:
 	gr_mouse(M_PREV, NULL);
-	return (status);
+	return status;
 }
 
 
@@ -705,7 +706,7 @@ PP(register char *filename;)
 	j = trp13(0xa);						/* get the drive map    */
 
 	if (!(k & j))						/* drive not there  */
-		return (FALSE);
+		return FALSE;
 
 
 	dos_sdrv(drvid);					/* set the default drive    */
@@ -718,16 +719,16 @@ PP(register char *filename;)
 	if ((int)strlen(chrptr) > 12)			/* 9/5/90       */
 		chrptr[12] = 0;
 
-	xstrpcpy(chrptr, filename);			/* save the file name   */
-	xstrpcpy(wildstr, chrptr);			/* this is the dir  */
+	strcpy(filename, chrptr);			/* save the file name   */
+	strcpy(chrptr, wildstr);			/* this is the dir  */
 	dos_sdta(ad_fsdta);
 	/* look for all sub dir */
 	if (!(ret = dos_sfirst(path, 0x37)))
 	{									/* error        */
 		if (DOS_AX != E_NOFILES)		/* it is not no files   */
 		{
-			xstrpcpy(filename, chrptr);	/* then return      */
-			return (FALSE);
+			strcpy(chrptr, filename);	/* then return      */
+			return FALSE;
 		}
 	}
 
@@ -738,7 +739,7 @@ PP(register char *filename;)
 	/* time             */
 
 	for (i = 0; i < NM_NAMES; i++)
-		xstrpcpy(" ", &fsnames[i].snames[0]);
+		strcpy(fsnames[i].snames, " ");
 
 	i = 0;
 	/* look for directory   */
@@ -769,11 +770,11 @@ PP(register char *filename;)
 	if (i)
 		r_sort(fsnames, i);
 
-	xstrpcpy(filename, chrptr);			/* restore file name    */
+	strcpy(chrptr, filename);			/* restore file name    */
 
 	*count = i;
 
-	return (TRUE);
+	return TRUE;
 }
 
 

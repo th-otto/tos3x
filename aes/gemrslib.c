@@ -268,7 +268,7 @@ VOID fix_trindex(NOTHING)
 	register int16_t ii;
 	register int32_t ptreebase;
 
-	ptreebase = get_sub(0, RT_TRINDEX, sizeof(int32_t));
+	ptreebase = get_sub(R_TREE, RT_TRINDEX, sizeof(int32_t));
 	LLSET(APP_LOPNAME, ptreebase);
 
 	for (ii = NUM_TREE - 1; ii >= 0; ii--)
