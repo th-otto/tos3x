@@ -204,7 +204,7 @@ PP(int16_t *pnew_obj;)
 	{
 		*pchar = 0x0;
 		*pnew_obj = find_obj(tree, obj, direction);
-		if ((direction == DEFLT) && (*pnew_obj != 0))
+		if (direction == DEFLT && *pnew_obj != 0)
 		{
 			ob_change(tree, *pnew_obj, LWGET(OB_STATE(*pnew_obj)) | SELECTED, TRUE);
 			return (FALSE);
@@ -254,7 +254,7 @@ PP(int16_t *pnew_obj;)
 			while (tobj != parent)
 			{
 				tstate = ob_fs(tree, tobj, &tflags);
-				if ((tflags & RBUTTON) && ((tstate & SELECTED) || (tobj == new_obj)))
+				if ((tflags & RBUTTON) && ((tstate & SELECTED) || tobj == new_obj))
 				{
 					if (tobj == new_obj)
 						state = tstate |= SELECTED;
@@ -283,7 +283,7 @@ PP(int16_t *pnew_obj;)
 	if ((state & SELECTED) && (flags & EXIT))
 		cont = FALSE;
 	/* handle click on another editable field */
-	if ((cont) && !(flags & EDITABLE))
+	if (cont && !(flags & EDITABLE))
 		new_obj = 0;
 
 	*pnew_obj = new_obj | orword;
@@ -331,7 +331,7 @@ PP(int16_t start_fld;)
 	while (cont)
 	{
 		/* position cursor on the selected editting field */
-		if ((next_obj != 0) && (edit_obj != next_obj))
+		if (next_obj != 0 && edit_obj != next_obj)
 		{
 			edit_obj = next_obj;
 			next_obj = 0;
@@ -365,8 +365,7 @@ PP(int16_t start_fld;)
 		}
 		/* handle end of field  */
 		/*   clean up       */
-		if ((!cont) || ((next_obj != 0) && (next_obj != edit_obj)))
-
+		if (!cont || (next_obj != 0 && next_obj != edit_obj))
 		{
 			ob_edit(tree, edit_obj, 0, &idx, EDEND);
 		}

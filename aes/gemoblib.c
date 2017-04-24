@@ -919,9 +919,9 @@ PP(register int16_t sy;)
 		{
 			vsf_color(bcol);
 			/* draw the vertical line */
-			bb_fill(MD_REPLACE, FIS_SOLID, 0, pt->g_x, pt->g_y + pt->g_h + th, pt->g_w + th, 2 * th);
+			bb_fill(MD_REPLACE, FIS_SOLID, IP_HOLLOW, pt->g_x, pt->g_y + pt->g_h + th, pt->g_w + th, 2 * th);
 			/* draw the horizontal line */
-			bb_fill(MD_REPLACE, FIS_SOLID, 0, pt->g_x + pt->g_w + th, pt->g_y, 2 * th, pt->g_h + (3 * th));
+			bb_fill(MD_REPLACE, FIS_SOLID, IP_HOLLOW, pt->g_x + pt->g_w + th, pt->g_y, 2 * th, pt->g_h + (3 * th));
 		}
 
 		if (state & CHECKED)
@@ -1004,7 +1004,7 @@ PP(int16_t depth;)
 
 
 /*
- * AES #43 - objc_find - Find which object lies at the specified screen position.
+ * AES #43 - objc_find - Find which object that lies at the specified screen position.
  *
  *	Routine to find out which object a certain mx,my value is
  *	over.  Since each parent object contains its children the

@@ -403,7 +403,7 @@ lab19:
 	rts
 
 /*
- * AES #82 - graf_movebox - Graphics move box
+ * AES #72 - graf_movebox - Graphics move box
  *
  *	gr_movebox
  *
