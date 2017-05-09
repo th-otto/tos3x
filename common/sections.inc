@@ -73,7 +73,7 @@
 #endif
 
 #if OS_COUNTRY == CTRY_PL
-#if BINEXACT
+#if BINEXACT & 0
 #undef RAMVERSION
 #define RAMVERSION 1
 #endif
@@ -110,7 +110,7 @@
 #define GLUELEN     $00007492
 #endif
 
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
 #define BIOSTLEN    BTLEN_US+$5A
 #define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $000009DE

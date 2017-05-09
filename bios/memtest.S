@@ -228,7 +228,7 @@ memtes21:
         clr.l     d0
         rts
 
-#if OS_COUNTRY == CTRY_PL
+#if (OS_COUNTRY == CTRY_PL) & (TOSVERSION >= 0x300)
 memthdr1:
                                      dc.b 'Test pami',$d3,'ci',13,10
                                      dc.b 'ST RAM ',27,'p',0
