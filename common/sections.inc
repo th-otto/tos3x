@@ -73,7 +73,7 @@
 #endif
 
 #if OS_COUNTRY == CTRY_PL
-#if BINEXACT & 0
+#if BINEXACT
 #undef RAMVERSION
 #define RAMVERSION 1
 #endif
