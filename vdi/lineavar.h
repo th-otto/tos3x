@@ -224,7 +224,7 @@ typedef struct vdiVars {
 	LAEXT int16_t        SOURCEX;            /* X coord of character in font         */
 	LAEXT int16_t        SOURCEY;            /* Y coord of character in font         */
 	LAEXT int16_t        DESTX;              /* X coord of character on screen       */
-	LAEXT int16_t        DESTY;              /* X coord of character on screen       */
+	LAEXT int16_t        DESTY;              /* Y coord of character on screen       */
 	LAEXT int16_t        DELX;               /* width of character                   */
 	LAEXT int16_t        DELY;               /* height of character                  */
 	LAEXT const uint16_t *FBASE;             /* pointer to font data                 */
