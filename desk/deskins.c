@@ -275,7 +275,7 @@ VOID ins_app(NOTHING)
 			}
 			/* check function key */
 			if (newapp)
-			{							/* get the Function key definiton */
+			{							/* get the Function key definition */
 				app = app_alloc();		/* app_alloc will clean up doc  */
 				if (!app)
 				{
@@ -346,7 +346,7 @@ VOID ins_app(NOTHING)
 				if (sret)				/* change from auto to normal   */
 					strcpy(autofile, Nostr);
 			}
-			/* get the Function key definiton */
+			/* get the Function key definition */
 			app->a_key = (uint16_t) l;
 
 		}

@@ -305,7 +305,7 @@ PP(register const char *pcurr;)
 	pcurr = scan_2(pcurr, &app->a_icon);	/* get the icon number  */
 	pcurr = scan_2(pcurr, &app->a_dicon);
 
-	if (*pcurr != ' ')					/* default definiton    */
+	if (*pcurr != ' ')					/* default definition    */
 	{
 		app->a_pref = hex_dig(*pcurr);
 
