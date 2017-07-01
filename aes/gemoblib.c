@@ -158,7 +158,7 @@ PP(int16_t *outval2;)
 		case ACTBUTCOL:
 		case ALRTCOL:
 			if (gl_ws.ws_ncolors <= inval1)
-				return (FALSE);			/* return error if invalid */
+				return FALSE;			/* return error if invalid */
 
 			if (which == INDBUTCOL)
 				gl_indbutcol = inval1;	/* set indicator button color */
@@ -469,7 +469,7 @@ PP(intptr_t spec;)
 	}
 	gr_crack(i, &i, &tcol, &i, &icol, &i);
 
-	return (tcol < RED && icol < RED);
+	return tcol < RED && icol < RED;
 }
 #endif /* AES3D */
 
@@ -1319,7 +1319,7 @@ PP(int16_t ob;)
 PP(int16_t *pflag;)
 {
 	*pflag = LWGET(OB_FLAGS(ob));
-	return (LWGET(OB_STATE(ob)));
+	return LWGET(OB_STATE(ob));
 }
 
 
@@ -1511,10 +1511,10 @@ PP(register int16_t obj;)
 			if (nobj != obj)
 				pobj = nobj;
 			else
-				return (pobj);
+				return pobj;
 		}
 	} else
-		return (NIL);
+		return NIL;
 }
 
 
@@ -1553,7 +1553,7 @@ PP(int planes;)
 		else
 			tempicon = tempicon->next_res;
 	}
-	return (tempicon);
+	return tempicon;
 }
 
 /*	Takes a list of icons and returns the first icon that 
@@ -1582,9 +1582,9 @@ PP(int planes;)
 		}
 	}
 	if (tempicon)
-		return (tempicon);
+		return tempicon;
 	else
-		return (lasticon);
+		return lasticon;
 }
 
 

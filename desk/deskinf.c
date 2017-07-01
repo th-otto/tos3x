@@ -534,7 +534,7 @@ PP(char *buffer;)
 				write_save = envr & 0x01;
 				pcurr = scan_2(pcurr, &envr);
 				cbit_save = (envr & 0x10) ? TRUE : FALSE;
-				pref_save = envr & 0x0F;	/* screen resoultion    */
+				pref_save = envr & 0x0F;	/* screen resolution    */
 
 				/* This is the extended stuff   */
 

@@ -1855,7 +1855,7 @@ dopexec:
         jmp       _main
 
 /*
- * Default enviroment string
+ * Default environment string
  * Cannot be more than 20 chars long without modifying
  * the declaration for gem_env,
  * Any char >= $80 terminates the string (and is included in it)
@@ -2903,7 +2903,7 @@ _getmpb:
         cmpi.l    #FASTRAMBASE,_ramtop
         bls.s     getmpb1
         lea.l     (_altmd).w,a2
-        move.l    a2,(a1)            /* altmd.m_link = &themd; */
+        move.l    a2,(a1)            /* themd.m_link = &altmd; */
         clr.l     (a2)               /* altmd.m_link = NULL; */
         move.l    #FASTRAMBASE+1,4(a2)   /* altmd.m_start = (base address of fast mem) | M_ALTFLAG */
         move.l    _ramtop,d0

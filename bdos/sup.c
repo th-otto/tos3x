@@ -543,7 +543,7 @@ PP(int16_t *pw;)
 
 	if (typ & 0x80)
 	{
-		if (typ == 0x81)
+		if (typ == 0x81) /* for Fseek; handle is 2nd parameter */
 			h = pw[3];
 		else
 			h = pw[1];
