@@ -362,8 +362,6 @@ ERROR makopn PROTO((const FCB *f, DND *dn, FH h, int16_t mod));
 ERROR ixclose PROTO((OFD *fd, int part));
 ERROR ixdel PROTO((DND *dn, FCB *f, long pos));
 
-VOID ixterm PROTO((PD *r));
-
 VOID tabout PROTO((FH h, int ch));
 int32_t constat PROTO((FH h));
 int32_t conin PROTO((FH h));

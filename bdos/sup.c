@@ -636,24 +636,24 @@ PP(int16_t *pw;)
 		p = *((char **) &pw[1]);
 #if GEMDOS
 		if (ncmps(5, p, "CON:") || ncmps(5, p, "con:"))
-			rc = 0x0000ffffL; /* should be ((uint16_t)H_Console), but stupid Alcyon sign extends it */
+			rc = H_Console & 0xffffL;
 		else if (ncmps(5, p, "AUX:") || ncmps(5, p, "aux:"))
-			rc = 0x0000fffel; /* should be ((uint16_t)H_Aux), but stupid Alcyon sign extends it */
+			rc = H_Aux & 0xffffL;
 		else if (ncmps(5, p, "PRN:") || ncmps(5, p, "prn:"))
-			rc = 0x0000fffdl; /* should be ((uint16_t)H_Print), but stupid Alcyon sign extends it */
+			rc = H_Print & 0xffffL;
 #else
 		if (ncmps(5, p, "NUL:"))
-			rc = (uint16_t)H_Null;
+			rc = H_Null & 0xffffL;
 		else if (ncmps(5, p, "PRN:"))
-			rc = (uint16_t)H_Print;
+			rc = H_Print & 0xffffL;
 		else if (ncmps(5, p, "AUX:"))
-			rc = (uint16_t)H_Aux;
+			rc = H_Aux & 0xffffL;
 		else if (ncmps(5, p, "CON:"))
-			rc = (uint16_t)H_Console;
+			rc = H_Console & 0xffffL;
 		else if (ncmps(7, p, "CLOCK:"))
-			rc = (uint16_t)H_Clock;
+			rc = H_Clock & 0xffffL;
 		else if (ncmps(7, p, "MOUSE:"))
-			rc = (uint16_t)H_Mouse;
+			rc = H_Mouse & 0xffffL;
 #endif
 	}
 	if (!rc)

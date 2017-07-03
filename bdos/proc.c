@@ -29,6 +29,7 @@
 
 
 ERROR xpgmld PROTO((PGMHDR01 *hdr, FH fh, PD *p));
+VOID ixterm PROTO((PD *r));
 
 
 /*

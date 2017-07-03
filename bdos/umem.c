@@ -519,7 +519,8 @@ PP(int32_t len;)
 	register MD *q;
 	
 	s = (intptr_t)start;
-	if ((s &= M_ALTFLAG))
+	/* make start address even */
+	if ((s &= 1))
 	{
 		s = 2 - s;
 		start += s;
