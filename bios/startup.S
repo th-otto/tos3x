@@ -4533,7 +4533,7 @@ initmfp:
         lea.l     (MFP_REGS).w,a0               /* init mfp address pointer */
         moveq.l   #0,d0
         movep.l   d0,0(a0)                      /* clear gpip thru iera */
-        movep.l   d0,8(a0)                      /* clear ierb thru isrb */
+        movep.l   d0,8(a0)                      /* clear ierb thru isra */
         movep.l   d0,16(a0)                     /* clear isrb thru vr */
         move.b    #$48,MFP_VR-MFP_REGS(a0)      /* set mfp autovector to $100 and s-bit */
         bset      #2,MFP_AER-MFP_REGS(a0)       /* set cts to low to high transition */

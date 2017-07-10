@@ -419,7 +419,7 @@ PP(int16_t *pw;)
 	oscnt++;
 	fn = pw[0];
 
-	if (fn > 0x57)
+	if (fn > 0x57) /* BUG: negative numbers not rejected */
 		return E_INVFN;
 
 	if ((rc = xsetjmp(errbuf)) != 0)
