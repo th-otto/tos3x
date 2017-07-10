@@ -26,8 +26,8 @@
 #include "rsc/306/strit.h"
 #endif
 
-#if OS_COUNTRY == CTRY_SV
-#include "rsc/306/strsv.h"
+#if OS_COUNTRY == CTRY_SE
+#include "rsc/306/strse.h"
 #endif
 
 #if OS_COUNTRY == CTRY_TR

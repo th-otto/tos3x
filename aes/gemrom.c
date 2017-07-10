@@ -66,7 +66,7 @@ BOOLEAN nogem;		/* gem.rsc already read in ? */
 #define EURODATE 0
 #endif
 
-#if (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_NO) | (OS_COUNTRY == CTRY_FI)
+#if (OS_COUNTRY == CTRY_SE) | (OS_COUNTRY == CTRY_NO) | (OS_COUNTRY == CTRY_FI)
 #define EUROTIME 1
 #define SWEDDATE 1
 #endif

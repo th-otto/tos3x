@@ -38,7 +38,7 @@ STATIC const int16_t *contable;
 /* Alternate keys table */
 
 /* USA|UK|SPAIN|ITALY|SWEDEN */
-#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV)
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SE)
 static int16_t const key1table[] = {
 	0x1e00,	/* ALT-'A' */
 	0x3000, /* ALT-'B' */
@@ -149,7 +149,7 @@ static int16_t const key3table[] = {
 /* Control keys table */
 
 /* USA|UK|SPAIN|ITALY|SWEDEN */
-#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV)
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SE)
 /* USA|UK|SPAIN|ITALY|SWEDEN */
 static int16_t const con1table[] = {
 	0x1e01,	/* CTRL-'A' */
@@ -530,7 +530,7 @@ PP(uint16_t key;)
 	case CTRY_UK:					/* uk   */
 	case CTRY_ES:					/* spain */
 	case CTRY_IT:					/* italy */
-	case CTRY_SV:					/* sweden */
+	case CTRY_SE:					/* sweden */
 	default:
 		keytable = key1table;
 		contable = con1table;

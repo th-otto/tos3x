@@ -263,7 +263,7 @@ PP(char **argv;)
 			}
 		}
 
-		if (country && strcmp(country, "sv") == 0)
+		if (country && strcmp(country, "se") == 0)
 		{
 			if (i == 0 && size == 0x13f0)
 			{

@@ -62,7 +62,7 @@ _infdata        equ DESKDBASE+$91A
 #if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
 _infdata        equ DESKDBASE+$95E                      /* E3ECCC */
 #endif
-#if OS_COUNTRY == CTRY_SV
+#if OS_COUNTRY == CTRY_SE
 _infdata        equ DESKDBASE+$8C2                      /* E3EC30 */
 #endif
 #endif
@@ -95,7 +95,7 @@ _infdata        equ DESKDBASE+$91A
 #if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
 _infdata        equ DESKDBASE+$95E                      /* E3ECCC */
 #endif
-#if OS_COUNTRY == CTRY_SV
+#if OS_COUNTRY == CTRY_SE
 _infdata        equ DESKDBASE+$8C2                      /* E3EC30 */
 #endif
 #endif
@@ -122,7 +122,7 @@ _infdata        equ DESKDBASE+$942
 #if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
 _infdata        equ DESKDBASE+$95E
 #endif
-#if OS_COUNTRY == CTRY_SV
+#if OS_COUNTRY == CTRY_SE
 _infdata        equ DESKDBASE+$8C2
 #endif
 #endif

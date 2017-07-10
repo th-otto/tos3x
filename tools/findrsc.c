@@ -331,7 +331,7 @@ int main(int argc, char **argv)
 					case CTRY_UK: country = "uk"; break;
 					case CTRY_ES: country = "es"; break;
 					case CTRY_IT: country = "it"; break;
-					case CTRY_SV: country = "sv"; break;
+					case CTRY_SE: country = "se"; break;
 					case CTRY_SF: country = "sf"; break;
 					case CTRY_SG: country = "sg"; break;
 					case CTRY_TR: country = "tr"; break;

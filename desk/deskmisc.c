@@ -647,7 +647,7 @@ PP(register char *ptime;)
 	else
 		strcpy(&ptime[4], pm ? "pm" : "am");
 #else
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_TR) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO) | (OS_COUNTRY == CTRY_PL)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_SE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_TR) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO) | (OS_COUNTRY == CTRY_PL)
 	my_itoa(val, &ptime[0]);
 	my_itoa(((time & 0x07e0) >> 5) & 0x003f, &ptime[2]);
 	strcpy(&ptime[4], "  ");
@@ -736,7 +736,7 @@ PP(register char *pdate;)
 #define st_dchar '-' /* BUG: should actually be '/' */
 #endif
 
-#if (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO)
+#if (OS_COUNTRY == CTRY_SE) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO)
 #define st_date 2
 #define st_dchar '-'
 #endif

@@ -39,8 +39,8 @@ error
 #if OS_COUNTRY == CTRY_IT
 #include "rsc/306/deskit.h"
 #endif
-#if OS_COUNTRY == CTRY_SV
-#include "rsc/306/desksv.h"
+#if OS_COUNTRY == CTRY_SE
+#include "rsc/306/deskse.h"
 #endif
 #if OS_COUNTRY == CTRY_TR
 #include "rsc/306/desktr.h"

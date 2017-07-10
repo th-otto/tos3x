@@ -384,7 +384,7 @@ uint8_t const keytblcaps[128] = {
 #endif
 
 
-#if (OS_COUNTRY == CTRY_SV) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO)
+#if (OS_COUNTRY == CTRY_SE) | (OS_COUNTRY == CTRY_FI) | (OS_COUNTRY == CTRY_NO)
 /* 306sv: 00e3678a */
 uint8_t const keytblnorm[128] = {
        0, 0x1b,  '1',  '2',  '3',  '4',  '5',  '6',

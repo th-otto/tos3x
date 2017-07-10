@@ -14,7 +14,7 @@ TOSVERSION=306
 # uk - United Kingdom
 # es - Spain
 # it - Italy
-# sv - Sweden
+# se - Sweden
 # sf - Switzerland (French)
 # sg - Switzerland (German)
 #

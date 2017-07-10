@@ -102,8 +102,8 @@ glue.es: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemes.rsc ../desk/rsc/$(TOSVERSION)/
 glue.it: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemit.rsc ../desk/rsc/$(TOSVERSION)/deskit.rsc ../desk/rsc/$(TOSVERSION)/deskit.inf
 	$(AM_V_GEN)$(MKGLUE) it $(TOSVERSION)
 
-glue.sv: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemsv.rsc ../desk/rsc/$(TOSVERSION)/desksv.rsc ../desk/rsc/$(TOSVERSION)/desksv.inf
-	$(AM_V_GEN)$(MKGLUE) sv $(TOSVERSION)
+glue.se: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemse.rsc ../desk/rsc/$(TOSVERSION)/deskse.rsc ../desk/rsc/$(TOSVERSION)/deskse.inf
+	$(AM_V_GEN)$(MKGLUE) se $(TOSVERSION)
 
 glue.sf: $(MKGLUE) ../aes/rsc/$(TOSVERSION)/gemsf.rsc ../desk/rsc/$(TOSVERSION)/desksf.rsc ../desk/rsc/$(TOSVERSION)/desksf.inf
 	$(AM_V_GEN)$(MKGLUE) sf $(TOSVERSION)

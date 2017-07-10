@@ -6774,7 +6774,7 @@ kbdit3:
 kbdit4:
 #endif
 
-#if OS_COUNTRY == CTRY_SV
+#if OS_COUNTRY == CTRY_SE
         cmpi.b    #$1A,d1                       /* convert ALT-? to [ or { */
         bne.s     kbdsv1
         move.b    #$5B,d0
