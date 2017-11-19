@@ -68,53 +68,53 @@ int16_t const tplane_mask[] = {
 int16_t const ROM_DEV_TAB[45] = {
 	320-1,	/* 0	x resolution			     */
 	200-1,	/* 1	y resolution			     */
-	0,	/* 2	device precision 0=exact,1=not exact */
+	0,		/* 2	device precision 0=exact,1=not exact */
 	338,	/* 3	width of pixel			     */
 	372,	/* 4	heigth of pixel			     */
-	1,	/* 5	character sizes			     */
+	1,		/* 5	character sizes			     */
 	MX_LN_STYLE,	/* 6	linestyles		       	     */
-	0,	/* 7	linewidth			     */
-	6,	/* 8	marker types			     */
-	8,	/* 9	marker size			     */
-	1,	/* 10	text font			     */
-	MX_FIL_PAT_INDEX,/* 11	area patterns			     */
+	0,		/* 7	linewidth			     */
+	6,		/* 8	marker types			 */
+	8,		/* 9	marker size			     */
+	1,		/* 10	text font			     */
+	MX_FIL_PAT_INDEX,/* 11	area patterns	     */
 	MX_FIL_HAT_INDEX,/* 12	crosshatch patterns		     */
-	16,	/* 13	colors at one time		     */
-	10,	/* 14	number of GDP's			     */
-	1,	/* 15	GDP bar				     */
-	2,	/* 16	GDP arc				     */
-	3,	/* 17	GDP pic				     */
-	4,	/* 18	GDP circle			     */
-	5,	/* 19	GDP ellipse			     */
-	6,	/* 20	GDP elliptical arc		     */
-	7,	/* 21	GDP elliptical pie		     */
-	8,	/* 22	GDP rounded rectangle		     */
-	9,	/* 23	GDP filled rounded rectangle	     */
-	10,	/* 24	GDP #justified text		     */
-	3,	/* 25	GDP #1				     */
-	0,	/* 26	GDP #2				     */
-	3,	/* 27	GDP #3				     */
-	3,	/* 28	GDP #4				     */
-	3,	/* 29	GDP #5				     */
-	0,	/* 30	GDP #6				     */
-	3,	/* 31	GDP #7				     */
-	0,	/* 32	GDP #8				     */
-	3,	/* 33	GDP #9				     */
-	2,	/* 34	GDP #10				     */
-	1,	/* 35	Color capability		     */
-	1,	/* 36	Text Rotation			     */
-	1,	/* 37	Polygonfill			     */		
-	0,	/* 38	Cell Array			     */
+	16,		/* 13	colors at one time		 */
+	10,		/* 14	number of GDP's			 */
+	1,		/* 15	GDP bar				     */
+	2,		/* 16	GDP arc				     */
+	3,		/* 17	GDP pic				     */
+	4,		/* 18	GDP circle			     */
+	5,		/* 19	GDP ellipse			     */
+	6,		/* 20	GDP elliptical arc	     */
+	7,		/* 21	GDP elliptical pie	     */
+	8,		/* 22	GDP rounded rectangle    */
+	9,		/* 23	GDP filled rounded rectangle	     */
+	10,		/* 24	GDP #justified text		 */
+	3,		/* 25	GDP #1				     */
+	0,		/* 26	GDP #2				     */
+	3,		/* 27	GDP #3				     */
+	3,		/* 28	GDP #4				     */
+	3,		/* 29	GDP #5				     */
+	0,		/* 30	GDP #6				     */
+	3,		/* 31	GDP #7				     */
+	0,		/* 32	GDP #8				     */
+	3,		/* 33	GDP #9				     */
+	2,		/* 34	GDP #10				     */
+	1,		/* 35	Color capability		 */
+	1,		/* 36	Text Rotation			 */
+	1,		/* 37	Polygonfill			     */		
+	0,		/* 38	Cell Array			     */
 #if TOSVERSION >= 0x300
-	MAX_PAL,/* 39	Pallette size			     */
+	MAX_PAL,/* 39	Pallette size			 */
 #else
-	0,	/* 39	Pallette size			     */
+	0,		/* 39	Pallette size			 */
 #endif
-	2,	/* 40	# of locator devices 1 = mouse       */
-	1,	/* 41	# of valuator devices		     */
-	1,	/* 42	# of choice devices		     */
-	1,	/* 43	# of string devices		     */
-	2	/* 44	Workstation Type 2 = out/in	     */
+	2,		/* 40	# of locator devices 1 = mouse       */
+	1,		/* 41	# of valuator devices	 */
+	1,		/* 42	# of choice devices		 */
+	1,		/* 43	# of string devices		 */
+	2		/* 44	Workstation Type 2 = out/in	     */
 };
 
 /************************************************************/ 

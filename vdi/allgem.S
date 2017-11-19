@@ -225,6 +225,7 @@ _vex_timv:	PIXLA(a1)
  */
 devtab:    dc.w 0,0,0,1,2,0,4,0,6,7,0
 
+/* 306de: 00e0672c */
 _FindDevice:
 		PIXLA(a2)
         moveq.l   #0,d0
@@ -296,6 +297,7 @@ FindDev6:
 /*
  * old Version for ST compatible modes only
  */
+/* 206de: 00e070b8 */
 _FindDevice:
 		move.w    #$0004,-(a7)
         trap      #14         /* Getrez() */
@@ -633,7 +635,7 @@ mouse_init:
 		pea	mouse_rel	; mouse packet interrupt handler
 		pea	rel_pblock	; mouse configuration parameter block
 		move.w	#1,-(sp)	; enable mouse, in relative mode
-		clr.w	-(sp)		; INITMOUSE
+		clr.w	-(sp)		; Initmouse()
 		trap	#XBIOS
 		lea	12(sp),sp
 
