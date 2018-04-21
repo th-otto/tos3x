@@ -43,10 +43,10 @@
 #define CTRY_sf  CTRY_SF
 /* Switzerland (German), NOT Singapore! */
 #define CTRY_SG  8
-#define CTRY_sg  CTRY_sg
+#define CTRY_sg  CTRY_SG
 /* Turkey */
 #define CTRY_TR  9
-#define CTRY_tr  CTRY_tr
+#define CTRY_tr  CTRY_TR
 /* Finland */
 #define CTRY_FI 10
 #define CTRY_fi CTRY_FI
@@ -55,16 +55,16 @@
 #define CTRY_no CTRY_NO
 /* Denmark */
 #define CTRY_DK 12
-#define CTRY_dk CTRY_dk
+#define CTRY_dk CTRY_DK
 /* Saudi Arabia */
 #define CTRY_SA 13
 #define CTRY_sa CTRY_SA
 /* Holland */
 #define CTRY_NL 14
-#define CTRY_nl CTRY_nl
+#define CTRY_nl CTRY_NL
 /* Czech Republic */
 #define CTRY_CZ 15
-#define CTRY_cz CTRY_cz
+#define CTRY_cz CTRY_CZ
 /* Hungary */
 #define CTRY_HU 16
 #define CTRY_hu CTRY_HU

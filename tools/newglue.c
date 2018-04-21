@@ -207,6 +207,24 @@ PP(char **argv;)
 			}
 		}
 
+		if (country && strcmp(country, "sg") == 0)
+		{
+			if (i == 0 && size == 0x1390)
+			{
+				putbeshort(address - 4, 0x0000);
+				putbeshort(address - 2, 0x0e4c);
+			} else if (i == 1 && size == 0x5ebe)
+			{
+				putbeshort(address - 4, 0x5820);
+				putbeshort(address - 2, 0x0000);
+			} else if (i == 2 && size == 0x02aa)
+			{
+				putbeshort(address - 4, 0x000d);
+				putbeshort(address - 2, 0x0008);
+				putbeshort(address - 0, 0x0001);
+			}
+		}
+
 		if (country && strcmp(country, "us") == 0)
 		{
 			if (i == 0 && size == 0x13a4)

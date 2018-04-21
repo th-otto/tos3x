@@ -6618,11 +6618,12 @@ kbdvec29:
 /* 306any: 00e035e0 */
 /* 206any: 00e0323a */
 /* 205any: 00e028a0 */
+/* 106any: 00e03fc4 */
 #if OS_COUNTRY == CTRY_US
 /* nothing to do */
 #endif
 
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
+#if OS_COUNTRY == CTRY_DE
         cmpi.b    #$1A,d1                       /* convert ALT-udiaresis to @ or backslash */
         bne.s     kbdde1
         move.b    #$40,d0
@@ -6652,7 +6653,95 @@ kbdde2:
 kbdde3:
 #endif
 
-#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
+#if OS_COUNTRY == CTRY_SF
+        cmpi.b    #$1A,d1                       /* convert ALT-udiaresis to @ or backslash */
+        bne.s     kbdsf1
+        move.b    #$40,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$5C,d0
+        bra       kbdvec42
+kbdsf1:
+        cmpi.b    #$27,d1                       /* convert ALT-odiaresis to [ or { */
+        bne.s     kbdsf2
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdsf2:
+        cmpi.b    #$28,d1                       /* convert ALT-adiaresis to ] or } */
+        bne.s     kbdsf3
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdsf3:
+        cmpi.b    #$1b,d1                       /* convert ALT-? to # */
+        bne.s     kbdsf4
+        move.b    #$23,d0
+        bra       kbdvec42
+kbdsf4:
+        cmpi.b    #$2b,d1                       /* convert ALT-? to tilde or | */
+        bne.s     kbdsf5
+        move.b    #$7e,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7c,d0
+        bra       kbdvec42
+kbdsf5:
+#endif
+
+#if OS_COUNTRY == CTRY_SG
+        cmpi.b    #$1A,d1                       /* convert ALT-udiaresis to @ or backslash */
+        bne.s     kbdsg1
+        move.b    #$40,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$5C,d0
+        bra       kbdvec42
+kbdsg1:
+        cmpi.b    #$27,d1                       /* convert ALT-odiaresis to [ or { */
+        bne.s     kbdsg2
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdsg2:
+        cmpi.b    #$28,d1                       /* convert ALT-adiaresis to ] or } */
+        bne.s     kbdsg3
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdsg3:
+        cmpi.b    #$1b,d1                       /* convert ALT-? to # */
+        bne.s     kbdsg4
+        move.b    #$23,d0
+        bra       kbdvec42
+kbdsg4:
+        cmpi.b    #$2b,d1                       /* convert ALT-? to tilde or | */
+        bne.s     kbdsg5
+        move.b    #$7e,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7c,d0
+        bra       kbdvec42
+kbdsg5:
+#endif
+
+#if OS_COUNTRY == CTRY_FR
         cmpi.b    #$1A,d1                       /* convert ALT-? to [ or { */
         bne.s     kbdfr1
         move.b    #$5B,d0
@@ -6842,6 +6931,10 @@ kbdpl2:
         bra       kbdvec42
 kbdpl3:
 #endif
+
+/*
+ * end of country specific key handling
+ */
 
         cmpi.b    #$62,d1                       /* is it an "alt help" signal to dump the screen? */
         bne.s     kbdvec33
