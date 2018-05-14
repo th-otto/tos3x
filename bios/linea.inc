@@ -58,7 +58,7 @@ TRAP14BSAV:    ds.l 1      (lineavars-$1a6)	/* long */
                xdef NUM_QC_LIN
 NUM_QC_LIN:    ds.w 1      (lineavars-$162)	/* word */
                xdef STR_MODE
-STR_MODE:      ds.w 1      (lineavars-$169)	/* word */
+STR_MODE:      ds.w 1      (lineavars-$160)	/* word */
                xdef VAL_MODE
 VAL_MODE:      ds.w 1      (lineavars-$15e)	/* word */
                xdef CUR_MS_STAT

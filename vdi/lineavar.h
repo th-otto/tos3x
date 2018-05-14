@@ -20,7 +20,7 @@
 /*
  * we should be able to do a
  *    #define LV(v) vdivars.v
- * however this some sometimes produces strange code, ie. for reqCol
+ * however this sometimes produces strange code, ie. for reqCol
  * generates code like
  *   ... (calculate offset)
  *   move.l offset,r
