@@ -35,8 +35,8 @@ vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS9)
 	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS10)
 
+# sections.mak might have just been generated, make sure it is reread
 vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_OBJS) ${MAKEFILE}
-	# sections.mak might have just been generated, make sure it is reread
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single:

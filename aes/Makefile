@@ -28,8 +28,8 @@ aes.a: $(STARTUP) $(AES_OBJS) ${MAKEFILE}
 	$(AR) $(ARFLAGS) $@ $(AES_OBJS6)
 	$(AR) $(ARFLAGS) $@ $(AES_OBJS7)
 
+# sections.mak might have just been generated, make sure it is reread
 aes.o: vars.o $(STARTUP) $(AES_OBJS) aesext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
-	# sections.mak might have just been generated, make sure it is reread
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single:

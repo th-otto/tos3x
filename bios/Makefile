@@ -46,9 +46,8 @@ memtest.o: memtest.S
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
+# sections.mak might have just been generated, make sure it is reread
 bios.o: tosvars.o vars.o $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
-	# sections.mak might have just been generated, make sure it is reread
-	echo MAKE=$(MAKE)
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 blkdev.o: blkdev.c
