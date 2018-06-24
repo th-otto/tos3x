@@ -27,7 +27,7 @@
 
 #define DRIVELEN 2	/* drive spec length -- FOO */
 
-#define LINELEN  132	/* maximum input/output string length */
+#define LINELEN  2040	/* maximum input/output string length */
 #define FNAMELEN 15	/* drive, name, and type, null terminated */
 #define MAXOVLS  255	/* maximum number of overlays */
 #define	MAXOVDEP 5	/* maximum nesting depth for overlays */

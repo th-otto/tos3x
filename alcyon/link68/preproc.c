@@ -57,7 +57,6 @@
 #define DUMPSYMS	16
 
 #define	TOKLEN	FNAMELEN				/* max len. file or option name */
-#define	LINELEN	132						/* maximum length of input line */
 
 #define MFLTYPE	".68K"					/* default root filetype    */
 #define OFLTYPE	".O68"					/* default overlay filetype */
