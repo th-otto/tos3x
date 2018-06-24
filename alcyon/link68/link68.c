@@ -838,13 +838,24 @@ static VOID getsym(NOTHING)
 {
 	register int i;
 	register struct symtab *stpt;
-
+	char lfname[FNAMELEN + 10];
+	
 	stpt = lmte;
 	for (i = 0; i < SYNAMLEN; i++)
 		stpt->name[i] = getc(ibuf);
 	stpt->ovlnum = ovpath[ovpathtp];	/* mark which module it's in */
 	if (chnflg && (strncmp(stpt->name, CBMAIN, SYNAMLEN) == 0))	/* main CBASIC entry point? */
-		sprintf(stpt->name, "main.%03d", stpt->ovlnum);	/* make name unique */
+	{
+		i = stpt->ovlnum;
+		if (i < 0 || i >= 1000)
+		{
+			fatalx(FALSE, _("overlay number %d out of range\n"), i);
+		} else
+		{
+			sprintf(lfname, "main.%03d", i);	/* make name unique */
+			strcpy(stpt->name, lfname);
+		}
+	}
 	stpt->flags = get16be(ibuf);				/* flags */
 	stpt->vl1 = get32be(ibuf);
 }
