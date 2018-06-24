@@ -71,15 +71,15 @@ char const dinfo[] = {
  *      variables, etc.
  * returns size of declarator
  */
-static long dodecl(P(int) sc, P(int) type, P(int) offset, P(long) size)
+static int32_t dodecl(P(int) sc, P(int) type, P(int) offset, P(int32_t) size)
 PP(int sc;)									/* storage class */
 PP(int type;)								/* data type */
 PP(int offset;)								/* offset if in structure or union */
-PP(long size;)								/* size of single data item 3.4 i=> l */
+PP(int32_t size;)							/* size of single data item 3.4 i=> l */
 {
 	register struct symbol *sp;
 	register short dtype, j;
-	long constval;
+	int32_t constval;
 
 	if (PEEK(SEMI) || PEEK(RPAREN))
 		return 0;
@@ -362,7 +362,7 @@ VOID doextdef(NOTHING)
 	register struct symbol *sp;
 	register short dflag;
 	short sc, type;
-	long size;
+	int32_t size;
 
 	tdflag = 0;							/* reset on sighting a semicolon */
 	if (!next(SEMI))
@@ -447,9 +447,9 @@ PP(char *ptr;)
  *		"gettype" and returns the token parsed.
  * returns token
  */
-static short get_s_or_u(P(struct symbol **) parent, P(long *) ptsize, P(short *) pdtype)
+static short get_s_or_u(P(struct symbol **) parent, P(int32_t *) ptsize, P(short *) pdtype)
 PP(struct symbol **parent;)
-PP(long *ptsize;)
+PP(int32_t *ptsize;)
 PP(short *pdtype;)
 {
 	struct symbol *sp;
@@ -569,15 +569,15 @@ PP(short *pdtype;)
  *      handles the declarations of structures and unions.
  * returns 0 for no type, 1 otherwise
  */
-short gettype(P(short *) defsc, P(short *) deftype, P(long *) size, P(int) declok)
+short gettype(P(short *) defsc, P(short *) deftype, P(int32_t *) size, P(int) declok)
 PP(short *defsc;)							/* default storage class */
 PP(short *deftype;)							/* default data type */
-PP(long *size;)								/* size of data element 3.4 int=>long */
+PP(int32_t *size;)							/* size of data element 3.4 int=>long */
 PP(int declok;)								/* as opposed to casting op */
 {
 	register short token, sc;
 	short dtype, sflag, uflag, lflag, decflag;
-	long tsize;
+	int32_t tsize;
 	struct symbol *parent;
 
 	if (declok || instmt)
@@ -727,14 +727,14 @@ PP(int declok;)								/* as opposed to casting op */
  *      declarations and local declarations in functions.
  * returns length of declarators
  */
-long dlist(P(int) defsc)
+int32_t dlist(P(int) defsc)
 PP(int defsc;)								/* default storage class */
 {
 	register short offset;
-	register long lret, ddsize;
+	register int32_t lret, ddsize;
 	struct tnode *tp;
 	struct symnode *p;
-	long size;
+	int32_t size;
 	short type, sc;
 
 	offset = 0;
@@ -838,7 +838,7 @@ PP(int castflg;)							/* casting flag, 1=>allow no declarator */
 	register short type, i, sdp;
 	register struct symbol *sp, *tsp, *p;
 	register struct farg *fp;
-	long lvalue, value;
+	int32_t lvalue, value;
 
 	type = 0;
 	if (next(LPAREN))

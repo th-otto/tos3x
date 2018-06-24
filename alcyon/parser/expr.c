@@ -186,7 +186,7 @@ PP(short *token;)
 {
 	register struct tnode *p;
 	short type, sc;
-	long size;
+	int32_t size;
 
 	switch (*token)
 	{
@@ -400,7 +400,7 @@ PP(int op;)									/* operator to evaluate */
 PP(struct lconode *ltp;)					/* pointer to left subtree */
 PP(struct lconode *rtp;)					/* pointer to right subtree */
 {
-	register long lvalue, rvalue;
+	register int32_t lvalue, rvalue;
 	short islong, size;
 
 	PUTEXPR(treedebug, "binopeval l", (struct tnode *)ltp);
@@ -539,7 +539,7 @@ int unopeval(P(int) op, P(struct lconode *) tp)
 PP(int op;)									/* operator to evaluate */
 PP(struct lconode *tp;)						/* pointer to subexpression */
 {
-	register long value;
+	register int32_t value;
 
 	if (tp->t_op == CINT)
 		value = ((struct conode *) tp)->t_value;
@@ -579,7 +579,7 @@ PP(struct lconode *tp;)						/* pointer to subexpression */
  * Used in evaluating array bounds, bit field numbers, etc.
  * returns the constant value
  */
-long cexpr(NOTHING)
+int32_t cexpr(NOTHING)
 {
 	register struct lconode *tp;
 	register char *savep;
@@ -594,5 +594,5 @@ long cexpr(NOTHING)
 		error(_("constant required"));
 	commastop--;
 	exprp = savep;
-	return (op == CLONG) ? tp->t_lvalue : (long) ((struct conode *) tp)->t_value;
+	return (op == CLONG) ? tp->t_lvalue : (int32_t) ((struct conode *) tp)->t_value;
 }

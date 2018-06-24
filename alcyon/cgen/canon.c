@@ -17,7 +17,7 @@ PP(struct tnode **tpp;)						/* pointer to tree */
 {
 	register struct tnode *ltp, *rtp, *tp;
 	register short op, anyfloat;
-	register long rval, lval;
+	register int32_t rval, lval;
 	short anylong, lconst;
 
 	rval = 0; /* quiet compiler */
@@ -191,7 +191,7 @@ PP(struct tnode **tpp;)
 	tp = *tpp;
 	if ((p = constant(tp->t_right, &lconst)) != NULL)
 	{
-		if (!lconst && ((value = onebit((long) p->t_value)) < 0))
+		if (!lconst && ((value = onebit((int32_t) p->t_value)) < 0))
 			return 0;
 		if (lconst && ((value = onebit(p->t_lvalue)) < 0))
 			return 0;
@@ -318,7 +318,7 @@ PP(struct tnode **tpp;)
 	register struct tnode *p;
 	register short i, changes, op, tmp;
 	short lconst, tlc;
-	long cval;							/* handle all integer constants as longs */
+	int32_t cval;							/* handle all integer constants as longs */
 
 	cval = 0;
 	tp = *tpp;
@@ -546,7 +546,7 @@ PP(struct tnode **tpp;)
 		case EQUALS:
 		case NEQUALS:
 			if (p && ((i = onebit(cval)) >= 0) && ltp->t_op == AND && (rtp = constant(ltp->t_right, &tlc)))
-				if ((!tlc && i == onebit((long) rtp->t_value)) || (tlc && i == onebit(rtp->t_lvalue)))
+				if ((!tlc && i == onebit((int32_t) rtp->t_value)) || (tlc && i == onebit(rtp->t_lvalue)))
 				{
 					tp->t_op = invrel[tp->t_op - EQUALS];
 					p->t_value = 0;
@@ -674,7 +674,7 @@ PP(struct tnode **tpp;)
 				continue;
 
 			case CINT:
-				tp = snalloc(tp->t_type, CINDR, (long) ltp->t_value, 0, 0);
+				tp = snalloc(tp->t_type, CINDR, (int32_t) ltp->t_value, 0, 0);
 				continue;
 
 			case CLONG:
@@ -1102,8 +1102,8 @@ PP(struct tnode *tp;)
  * onebit - returns whether constant is power of two (one bit on)
  * returns bit number or -1
  */
-int onebit(P(long) val)
-PP(long val;)
+int onebit(P(int32_t) val)
+PP(int32_t val;)
 {
 	register short i;
 

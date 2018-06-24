@@ -123,11 +123,11 @@ static short readshort(NOTHING)
 
 
 /* readlong - reads a long value from intermediate code */
-static long readlong(NOTHING)
+static int32_t readlong(NOTHING)
 {
 	union {
 		struct words w;
-		long l;
+		int32_t l;
 	} l;
 	register unsigned short w1, w2;
 	register short c, onedot;
@@ -234,7 +234,7 @@ static struct tnode *readtree(NOTHING)						/* returns ptr to expression tree */
 		if ((sc = readshort()) == EXTERNAL)
 			tp = cenalloc(type, sc, readsym(sym));
 		else
-			tp = snalloc(type, sc, (long) readshort(), 0, 0);
+			tp = snalloc(type, sc, (int32_t) readshort(), 0, 0);
 		break;
 
 	case CINT:

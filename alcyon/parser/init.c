@@ -54,10 +54,10 @@ PP(int type;)
  * one_binit - individula element bit field initialization.
  * returns the number of bytes actually initialize 1, 2 or 0
  */
-static int one_binit(P(int) type, P(int) dp, P(long) value)
+static int one_binit(P(int) type, P(int) dp, P(int32_t) value)
 PP(int type;)
 PP(int dp;)
-PP(long value;)
+PP(int32_t value;)
 {
 	register short plus, mask, op;
 
@@ -90,7 +90,7 @@ PP(int sc;)									/* for bit field init */
 	register short op, plus;
 	register unsigned short ivalue;
 	register struct tnode *tp;
-	register long value;
+	register int32_t value;
 	register short svalue;
 
 	commastop++;
@@ -238,11 +238,11 @@ PP(int sc;)									/* for bit field init */
  * str_init - string (array) initialization
  * 		initialize a character array, truncating or padding as required
  */
-static long str_init(P(long) datasize, P(int) type)
-PP(long datasize;)
+static int32_t str_init(P(int32_t) datasize, P(int) type)
+PP(int32_t datasize;)
 PP(int type;)								/* should not get a bit field here..... */
 {
-	register long maxsize, output;
+	register int32_t maxsize, output;
 
 #ifdef DEBUG
 	if (initdebug)
@@ -269,8 +269,8 @@ PP(int type;)								/* should not get a bit field here..... */
 	{
 		if (next(STRING))
 		{
-			output += (!datasize) ? outstr((long) cstrsize, (long) cstrsize) :
-				outstr(maxsize - output, (long) cstrsize);
+			output += (!datasize) ? outstr((int32_t) cstrsize, (int32_t) cstrsize) :
+				outstr(maxsize - output, (int32_t) cstrsize);
 			return output;
 		}
 		output += oneinit(BTYPE(type) | ARRAY, 0, 0);
@@ -306,17 +306,17 @@ PP(int type;)								/* should not get a bit field here..... */
  *		sp -- pointer to structure symbol table entry
  * returns nbleft
  */
-static long s_or_a(P(int) original, P(long) elsize, P(long *) pnbout, P(long) bleft, P(struct symbol *) sp, P(struct symbol *) child)
+static int32_t s_or_a(P(int) original, P(int32_t) elsize, P(int32_t *) pnbout, P(int32_t) bleft, P(struct symbol *) sp, P(struct symbol *) child)
 PP(int original;)							/* original type... */
-PP(long elsize;)
-PP(long *pnbout;)
-PP(long bleft;)
+PP(int32_t elsize;)
+PP(int32_t *pnbout;)
+PP(int32_t bleft;)
 PP(struct symbol *sp;)
 PP(struct symbol *child;)
 {
-	register long nbleft, nbout;
+	register int32_t nbleft, nbout;
 	register short onetype, plus;
-	long i, temp, datasize, addup, x;
+	int32_t i, temp, datasize, addup, x;
 	short nest, snest;					/* nest <= number of LCURBR */
 	struct symbol *hold;
 
@@ -552,7 +552,7 @@ VOID doinit(P(struct symbol *) sp)
 PP(struct symbol *sp;)						/* pointer to symbol to init */
 {
 	register short type;
-	long isize, datasize;
+	int32_t isize, datasize;
 
 	type = sp->s_type;
 	datasize = dsize(type, sp->s_dp, sp->s_ssp);
@@ -622,14 +622,14 @@ PP(struct symbol *sp;)						/* pointer to symbol to init */
  *      necessary.
  * returns size of initializers in bytes
  */
-long initlist(P(struct symbol *) sp, P(int) type, P(int) dp, P(int) ssp)
+int32_t initlist(P(struct symbol *) sp, P(int) type, P(int) dp, P(int) ssp)
 PP(struct symbol *sp;)
 PP(int type;)
 PP(int dp;)
 PP(int ssp;)
 {
 	register short onetype, plus, atype;
-	long datasize, i, j, elsize, nbleft, nbout;
+	int32_t datasize, i, j, elsize, nbleft, nbout;
 
 	i = next(LCURBR);
 	for (onetype = type; ISARRAY(onetype); onetype = delsp(onetype))

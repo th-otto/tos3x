@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "../util/util.h"
 
 #define BINEXACT 1
@@ -44,22 +45,31 @@ extern const char *const strtab[];
 extern const char *const opname[];
 
 
-#ifndef VAX11
-struct words { short hiword; short loword; };
-#else
+#ifdef VAX11
+#define LW_LITTLE 1
+#endif
+#ifdef __i386__
+#define LW_LITTLE 1
+#endif
+#ifdef __x86_64__
+#define LW_LITTLE 1
+#endif
+#ifdef LW_LITTLE
 struct words { short loword; short hiword; };
+#else
+struct words { short hiword; short loword; };
 #endif
 
 struct xlsym {
 	short sc;						/* storage class */
-	long  offset;					/* register offset */
+	int32_t offset;					/* register offset */
 	short reg;						/* register number */
 	short label;					/* label number if static */
 };
 
 struct xesym {
 	short sc;						/* storage class */
-	long  offset;					/* register offset */
+	int32_t offset;					/* register offset */
 	short reg;						/* register number */
 	char symbol[SSIZE];				/* symbol name if external */
 };
@@ -67,7 +77,7 @@ struct xesym {
 /* 68000 special - indexed symbol node, used to generate a An(off,Xn.type) address */
 struct xxsym {
 	short sc;						/* storage class */
-	long  offset;					/* register offset */
+	int32_t  offset;					/* register offset */
 	short reg;						/* register number */
 	short xreg;
 	short xtype;
@@ -80,7 +90,7 @@ union tval {
 	} t;
 	struct words w;
 	short s;						/* value or label number */
-	long l;							/* value or label number */
+	int32_t l;							/* value or label number */
 	struct xlsym lsym;
 	struct xesym esym;
 	struct xxsym xsym;
@@ -236,7 +246,7 @@ extern short stacksize;
 struct tnode *canon PROTO((struct tnode *tp));
 struct tnode *constant PROTO((struct tnode *tp, short *lconst));
 int indexreg PROTO((struct tnode *tp));
-int onebit PROTO((long val));
+int onebit PROTO((int32_t val));
 
 /*
  * codegen.c
@@ -253,7 +263,7 @@ VOID outexpr PROTO((struct tnode *tp));
 VOID outifgoto PROTO((struct tnode *tp, int dir, int lab));
 VOID outcforreg PROTO((struct tnode *tp));
 VOID outinit PROTO((struct tnode *tp));
-struct tnode *snalloc PROTO((int type, int sc, long offset, int dp, int ssp));
+struct tnode *snalloc PROTO((int type, int sc, int32_t offset, int dp, int ssp));
 VOID outline PROTO((NOTHING));
 
 
@@ -265,8 +275,8 @@ VOID warning PROTO((const char *s, ...)) __attribute__((format(__printf__, 1, 2)
 VOID fatal PROTO((const char *s, ...)) __attribute__((format(__printf__, 1, 2)));
 struct tnode *tnalloc PROTO((int op, int type, int info, int dummy, struct tnode *left, struct tnode *right));
 struct tnode *cnalloc PROTO((int type, int value));
-struct tnode *lcnalloc PROTO((int type, long value));
-struct tnode *fpcnalloc PROTO((int type, long value));
+struct tnode *lcnalloc PROTO((int type, int32_t value));
+struct tnode *fpcnalloc PROTO((int type, int32_t value));
 struct tnode *talloc PROTO((int size));
 
 VOID oputchar PROTO((char c));
@@ -295,7 +305,7 @@ short sucomp PROTO((struct tnode *tp, int nregs, int flag));
 /*
  * util.c
  */
-struct tnode *xnalloc PROTO((int type, int ar, long off, int xr, int xt));
+struct tnode *xnalloc PROTO((int type, int ar, int32_t off, int xr, int xt));
 struct tnode *tcopy PROTO((struct tnode *tp, int autof));
 VOID outaexpr PROTO((struct tnode *tp, int flags));
 VOID outtype PROTO((int type));

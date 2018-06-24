@@ -72,9 +72,9 @@ PP(int value;)								/* constant value */
  *	lcnalloc - long constant node allocation
  *		Allocates a constant tree node and fills the info fields.
  */
-struct lconode *lcnalloc(P(int) type, P(long) value)
+struct lconode *lcnalloc(P(int) type, P(int32_t) value)
 PP(int type;)								/* data type */
-PP(long value;)								/* constant value */
+PP(int32_t value;)								/* constant value */
 {
 	register struct lconode *cp;
 
@@ -92,9 +92,9 @@ PP(long value;)								/* constant value */
  *	fpcnalloc - floating point constant node allocation
  *		Allocates a constant tree node and fills the info fields.
  */
-struct lconode *fpcnalloc(P(int) type, P(long) value)
+struct lconode *fpcnalloc(P(int) type, P(int32_t) value)
 PP(int type;)								/* data type */
-PP(long value;)								/* constant value */
+PP(int32_t value;)								/* constant value */
 {
 	register struct lconode *cp;
 

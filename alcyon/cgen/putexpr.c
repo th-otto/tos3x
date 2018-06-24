@@ -185,7 +185,7 @@ PP(struct tnode *tp;)
 	case DCLONG:
 	case CLONG:
 	case CFLOAT:
-		fprintf(stderr, " %x.%x\n", tp->v.w.hiword, tp->v.w.loword);
+		fprintf(stderr, " %x.%x\n", (unsigned short)tp->v.w.hiword, (unsigned short)tp->v.w.loword);
 		break;
 
 	case CINT:
@@ -205,36 +205,36 @@ PP(struct tnode *tp;)
 			break;
 
 		case CINDR:
-			fprintf(stderr, " %ld\n", tp->t_offset);
+			fprintf(stderr, " %ld\n", (long)tp->t_offset);
 			break;
 
 		case CLINDR:
 		case CFINDR:
-			fprintf(stderr, " %lx.", tp->t_offset);
-			fprintf(stderr, "%x\n", tp->t_ssp);
+			fprintf(stderr, " %lx.", (long)tp->t_offset);
+			fprintf(stderr, "%x\n", (unsigned short)tp->t_ssp);
 			break;
 
 		case REGOFF:
-			fprintf(stderr, " %ld", tp->t_offset);
+			fprintf(stderr, " %ld", (long)tp->t_offset);
 			fprintf(stderr, "(R%d)", tp->t_reg);
 			break;
 
 		case EXTERNAL:
 		case EXTOFF:
-			fprintf(stderr, " %s+%ld", tp->t_symbol, tp->t_offset);
+			fprintf(stderr, " %s+%ld", tp->t_symbol, (long)tp->t_offset);
 			if (tp->t_sc == EXTOFF)
 				fprintf(stderr, "(R%d)", tp->t_reg);
 			break;
 
 		case STATIC:
 		case STATOFF:
-			fprintf(stderr, " L%d+%ld", tp->t_label, tp->t_offset);
+			fprintf(stderr, " L%d+%ld", tp->t_label, (long)tp->t_offset);
 			if (tp->t_sc == STATOFF)
 				fprintf(stderr, "(R%d)", tp->t_reg);
 			break;
 
 		case INDEXED:
-			fprintf(stderr, " %ld", tp->t_offset);
+			fprintf(stderr, " %ld", (long)tp->t_offset);
 			fprintf(stderr, "(R%d,R%d)", tp->t_reg, tp->t_xreg);
 			break;
 		}

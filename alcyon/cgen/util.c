@@ -28,10 +28,10 @@ PP(int size;)
  * snalloc - code generator symbol node allocation
  * This might be coalesced into parser snalloc.
  */
-struct tnode *snalloc(P(int) type, P(int) sc, P(long) offset, P(int) dp, P(int) ssp)
+struct tnode *snalloc(P(int) type, P(int) sc, P(int32_t) offset, P(int) dp, P(int) ssp)
 PP(int type;)								/* type of symbol */
 PP(int sc;)									/* storage class */
-PP(long offset;)							/* offset from Local Environment Ptr */
+PP(int32_t offset;)							/* offset from Local Environment Ptr */
 PP(int dp;)									/* for compatability with parser */
 PP(int ssp;)								/* for compatability with parser */
 {
@@ -88,10 +88,10 @@ PP(struct tnode *right;)					/* righst sub-tree */
 {
 	register struct tnode *tp;
 
-	tp = talloc(sizeof(struct tnode) - sizeof(union tval) + 2 * sizeof(struct tnode *));
+	tp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(tp->v.t));
 	tp->t_op = op;
 	tp->t_type = type;
-	tp->t_su = info;					/* info for bit-field & condbr's */
+	tp->t_su = info;						/* info for bit-field & condbr's */
 	tp->t_left = left;
 	tp->t_right = right;
 	return tp;
@@ -105,7 +105,7 @@ PP(int value;)								/* value of constant */
 {
 	register struct tnode *cp;
 
-	cp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(short));
+	cp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(cp->t_value));
 	cp->t_op = CINT;
 	cp->t_type = type;
 	cp->t_value = value;
@@ -114,13 +114,13 @@ PP(int value;)								/* value of constant */
 
 
 /* lcnalloc - allocate constant expression tree node */
-struct tnode *lcnalloc(P(int) type, P(long) value)
+struct tnode *lcnalloc(P(int) type, P(int32_t) value)
 PP(int type;)								/* type of constant */
-PP(long value;)								/* value of constant */
+PP(int32_t value;)							/* value of constant */
 {
 	register struct tnode *cp;
 
-	cp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(long));
+	cp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(cp->t_lvalue));
 	cp->t_op = CLONG;
 	cp->t_type = type;
 	cp->t_lvalue = value;
@@ -129,13 +129,13 @@ PP(long value;)								/* value of constant */
 
 
 /* fpcnalloc - allocate constant expression tree node */
-struct tnode *fpcnalloc(P(int) type, P(long) value)
+struct tnode *fpcnalloc(P(int) type, P(int32_t) value)
 PP(int type;)								/* type of constant */
-PP(long value;)								/* value of constant */
+PP(int32_t value;)							/* value of constant */
 {
 	register struct tnode *cp;
 
-	cp = talloc(sizeof(*cp) - sizeof(union tval) + sizeof(long));
+	cp = talloc(sizeof(*cp) - sizeof(union tval) + sizeof(cp->t_lvalue));
 	cp->t_op = CFLOAT;
 	cp->t_type = type;
 	cp->t_lvalue = value;
@@ -144,10 +144,10 @@ PP(long value;)								/* value of constant */
 
 
 /* xnalloc - allocate address-indexed node */
-struct tnode *xnalloc(P(int) type, P(int) ar, P(long) off, P(int) xr, P(int) xt)
+struct tnode *xnalloc(P(int) type, P(int) ar, P(int32_t) off, P(int) xr, P(int) xt)
 PP(int type;)								/* data type */
 PP(int ar;)									/* address register */
-PP(long off;)								/* 8-bit offset */
+PP(int32_t off;)							/* 8-bit offset */
 PP(int xr;)									/* index register */
 PP(int xt;)									/* index register type */
 {
@@ -168,7 +168,7 @@ PP(int xt;)									/* index register type */
 
 /* symcopy - copy symbol */
 static VOID symcopy(P(const char *) from, P(char *) to)
-PP(const char *from;)								/* from symbol */
+PP(const char *from;)						/* from symbol */
 PP(char *to;)								/* to symbol */
 {
 	register const char *p;
@@ -265,8 +265,8 @@ PP(int autof;)								/* {A_DOPRE,A_DOPOST} */
  * This is a big pain because the PDP-11 doesn't do long divides
  * in hardware.
  */
-static VOID outlval(P(long) lval)
-PP(long lval;)
+static VOID outlval(P(int32_t) lval)
+PP(int32_t lval;)
 {
 	char digs[8];
 	register short i, c;
@@ -293,8 +293,8 @@ PP(struct tnode *tp;)
 PP(int flags;)								/* flags (IMMED,LOFFSET,...) */
 {
 	register short reg, lab;
-	register long off;
-	long l;
+	register int32_t off;
+	int32_t l;
 
 	if (tp->t_op == ADDR)
 	{
@@ -340,11 +340,11 @@ PP(int flags;)								/* flags (IMMED,LOFFSET,...) */
 			switch (tp->t_sc)
 			{
 			default:
-				oprintf("%ld+", off);
+				oprintf("%ld+", (long)off);
 				break;
 
 			case REGOFF:
-				oprintf("%ld", off);
+				oprintf("%ld", (long)off);
 			case CINDR:
 			case CLINDR:
 			case CFINDR:
@@ -383,14 +383,14 @@ PP(int flags;)								/* flags (IMMED,LOFFSET,...) */
 			break;
 
 		case INDEXED:
-			oprintf("%ld(R", off);
+			oprintf("%ld(R", (long)off);
 			oprintf("%d,R%d", reg, tp->t_xreg);
 			outatype(tp->t_xtype);
 			oputchar(')');
 			break;
 
 		case CINDR:
-			oprintf("%ld", off);
+			oprintf("%ld", (long)off);
 			break;
 			/*
 			 * the following will work on: PDP-11, 68000, IBM-360, VAX, etc.

@@ -160,7 +160,7 @@ PP(int nlab;)								/* new label */
 static VOID docase(NOTHING)
 {
 	register short lab;
-	long value;
+	int32_t value;
 
 	colonstop++;
 	value = cexpr();					/* get case value */

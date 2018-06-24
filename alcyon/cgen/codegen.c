@@ -202,7 +202,7 @@ PP(int reg;)								/* register to load */
 			off = 0;
 			if (rtp->t_op == CINT && ((off = rtp->t_value) < -128 || off > 127 || ltp->t_op != ADD))
 			{
-				tp = snalloc(type, AUTO, (long) off, 0, 0);
+				tp = snalloc(type, AUTO, (int32_t) off, 0, 0);
 				if (indexreg(ltp))
 				{
 					tp->t_reg = ltp->t_reg;
@@ -283,7 +283,7 @@ PP(int reg;)								/* register to load */
 							xr = codegen(xtp, FORREG, AREG(r));
 							xt = xtp->t_type;
 						}
-						tp = xnalloc(type, ar, (long) off, xr, xt);
+						tp = xnalloc(type, ar, (int32_t) off, xr, xt);
 					}
 				}
 			}
@@ -724,11 +724,11 @@ static int isonebit(P(struct tnode *) tp)							/* returns -1 if not 1 bit, else
 PP(struct tnode *tp;)						/* pointer to tree */
 {
 	short lconst;
-	long bvalue;
+	int32_t bvalue;
 
 	if (!(tp = constant(tp, &lconst)))
 		return -1;
-	bvalue = (lconst) ? tp->t_lvalue : (long) tp->t_value;
+	bvalue = lconst ? tp->t_lvalue : (int32_t) tp->t_value;
 	return onebit(bvalue);
 }
 

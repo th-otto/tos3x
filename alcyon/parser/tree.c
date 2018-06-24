@@ -165,11 +165,11 @@ PP(register struct tnode *rtp;)						/* right subtree pointer */
  * Generates conversions necessary for integers, pointers and longs.
  * returns pointer to conv node
  */
-static struct tnode *cvopgen(P(struct tnode *) tp, P(int) type, P(int) conv, P(long) len, P(int) op)
+static struct tnode *cvopgen(P(struct tnode *) tp, P(int) type, P(int) conv, P(int32_t) len, P(int) op)
 PP(struct tnode *tp;)						/* pointer to node to do conversion */
 PP(int type;)								/* type to convert to */
 PP(int conv;)								/* specified conversion */
-PP(long len;)								/* object length */
+PP(int32_t len;)							/* object length */
 PP(int op;)									/* for cast operator */
 {
 	register struct tnode *rtp;
@@ -217,7 +217,7 @@ PP(int op;)									/* for cast operator */
 
 	case INT_LONG:
 		if (tp->t_op == CINT)			/* constant conversion */
-			return (struct tnode *)lcnalloc(type, (long) ((struct conode *) tp)->t_value);
+			return (struct tnode *)lcnalloc(type, (int32_t) ((struct conode *) tp)->t_value);
 	case UNSN_LONG:
 		cop = INT2L;
 		break;

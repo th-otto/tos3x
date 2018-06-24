@@ -96,8 +96,8 @@ static char const escmap[] = "\010\012\015\011\014\007\011\033";
 
 
 /* used by getfp, 10^pwr */
-static double power10(P(long) pwr)
-PP(long pwr;)
+static double power10(P(int32_t) pwr)
+PP(int32_t pwr;)
 {
 	double f;
 
@@ -115,10 +115,10 @@ PP(long pwr;)
 
 
 /* converts current machine float to ffp rep */
-static long toffp(P(double) f)
+static int32_t toffp(P(double) f)
 PP(double f;)
 {
-	register long exp, l;
+	register int32_t exp, l;
 	register short sign;
 
 	if (f == 0.0)
@@ -148,10 +148,10 @@ PP(double f;)
 
 
 /* converts current machine float to ieee rep */
-static long toieee(P(double) f)
+static int32_t toieee(P(double) f)
 PP(double f;)
 {
-	register long exp, l;
+	register int32_t exp, l;
 	register short sign;
 
 	if (f == 0.0)
@@ -187,12 +187,12 @@ PP(double f;)
  *		exponent, yields an ieee formated floating point number,
  *		unless the fflag is on, then a ffp constant is generated.
  */
-static long getfp(P(long) significant, P(int) pseen)
-PP(long significant;)
+static int32_t getfp(P(int32_t) significant, P(int) pseen)
+PP(int32_t significant;)
 PP(int pseen;)								/* period seen and couldn't be pushed back */
 {
 	register char c;
-	register long places;				/* decimal places */
+	register int32_t places;				/* decimal places */
 	short esign;
 	double exp, fraction, fp;
 
@@ -237,9 +237,9 @@ PP(int pseen;)								/* period seen and couldn't be pushed back */
  *		both the PDP-11 and 68000.
  * returns number
  */
-static long getdec(NOTHING)
+static int32_t getdec(NOTHING)
 {
-	register long value;
+	register int32_t value;
 	register char c;
 
 	for (value = 0; (c = ngetch()) >= '0' && c <= '9';)
@@ -257,9 +257,9 @@ static long getdec(NOTHING)
  * gethex - get an hexidecimal number
  * Uses Horner's method to get hexidecimal number
  */
-static long gethex(NOTHING)
+static int32_t gethex(NOTHING)
 {
-	register long value;
+	register int32_t value;
 	register char c, ch;
 
 	value = 0;
@@ -285,10 +285,10 @@ static long gethex(NOTHING)
  * getoct - get an octal number
  * Uses Horner's method to get octal number
  */
-static long getoct(P(int) flag)
+static int32_t getoct(P(int) flag)
 PP(int flag;)								/* string flag 1=>in string, else 0 */
 {
-	register long value;
+	register int32_t value;
 	register char c;
 	register short count;
 
@@ -315,7 +315,7 @@ PP(int force;)								/* force nested decls */
 {
 	register short c, nextc, i, islong;
 	register char *p;
-	register long value;
+	register int32_t value;
 	char sym[SSIZE];
 
 	if (peektok)

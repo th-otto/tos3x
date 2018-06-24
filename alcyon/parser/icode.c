@@ -69,7 +69,7 @@ PP(int value;)
 		defbdata();
 	else
 		defwdata();
-	oprintf("$%X\n", value);
+	oprintf("$%X\n", (unsigned short)value);
 }
 
 
@@ -177,7 +177,7 @@ PP(struct swtch *sp;)						/* switch table pointer */
 {
 	register short vdif, val, hval, i, tlab;
 	register struct swtch *s;
-	long lswvalue;
+	int32_t lswvalue;
 
 	val = sp->sw_value;
 	hval = sp[ncases - 1].sw_value;
@@ -252,7 +252,7 @@ PP(int w;)
 	if (begseq)
 		oputchar(',');
 	begseq++;
-	oprintf("$%X", w);
+	oprintf("$%X", (unsigned short)w);
 }
 
 
@@ -267,11 +267,11 @@ static VOID outendseq(NOTHING)
  * outlong - output a long data
  * outfp - output floating poshort data
  */
-VOID outfp_or_l(P(long) l)
-PP(long l;)									/* long data (float or fixed point) to output */
+VOID outfp_or_l(P(int32_t) l)
+PP(int32_t l;)									/* long data (float or fixed point) to output */
 {
 	defldata();
-	oprintf("$%lx", l);
+	oprintf("$%lx", (long)l);
 	outendseq();
 }
 
@@ -290,7 +290,7 @@ PP(int lab;)
 
 	SAVESTATE(savep, sfil, sbol);		/* save to restore later... */
 	oprintf("\tL%d:", lab);
-	outstr((long) cstrsize, (long) cstrsize);
+	outstr((int32_t) cstrsize, (int32_t) cstrsize);
 	RESTORSTATE(savep, sbol);
 }
 
@@ -299,12 +299,12 @@ PP(int lab;)
  * outstr - output a string as a sequence of bytes
  * Outputs ".dc.b <byte1>,<byte2>,...,<0>
  */
-long outstr(P(long) maxsize, P(long) strsize)
-PP(long maxsize;)
-PP(long strsize;)
+int32_t outstr(P(int32_t) maxsize, P(int32_t) strsize)
+PP(int32_t maxsize;)
+PP(int32_t strsize;)
 {
 	register char *s;
-	register long i;
+	register int32_t i;
 
 	defbdata();
 	i = LMIN(strsize, maxsize);
@@ -319,7 +319,7 @@ PP(long strsize;)
 	}
 	outendseq();
 	if (maxsize > strsize)
-		OUTRESMEM((long) (maxsize - strsize));
+		OUTRESMEM((int32_t) (maxsize - strsize));
 	else if (maxsize && (strsize > maxsize))
 		warning(_("String initalizer truncated"));
 	return LMAX(strsize, maxsize);

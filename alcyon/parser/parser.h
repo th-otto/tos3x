@@ -9,6 +9,7 @@
  *	C68 Parser - include file
  */
 #include <stdio.h>
+#include <stdint.h>
 #include "klib.h"
 
 #define NOPROFILE
@@ -114,10 +115,19 @@
 
 #define SYMSIZE 	128			/* # of symbol structures to allocate */
 
-#ifndef VAX11
-struct words { short hiword; short loword; };
-#else
+#ifdef VAX11
+#define LW_LITTLE 1
+#endif
+#ifdef __i386__
+#define LW_LITTLE 1
+#endif
+#ifdef __x86_64__
+#define LW_LITTLE 1
+#endif
+#ifdef LW_LITTLE
 struct words { short loword; short hiword; };
+#else
+struct words { short hiword; short loword; };
 #endif
 
 
@@ -188,7 +198,7 @@ struct lconode {
 	short t_ssp;
 	union {
 		struct words w;
-		long l;					/* value or label number */
+		int32_t l;				/* value or label number */
 	} _l;
 #define t_lvalue _l.l			/* constant value */
 };
@@ -286,14 +296,14 @@ short treedebug;				/* expr tree debug flag */
 #endif
 
 /* dimension table */
-long dtab[DSIZE];				/* short => long */
+int32_t dtab[DSIZE];			/* short => long */
 short cdp;						/* next entry in dtab to alloc */
 
 /* lexical analyzer value s */
 short cvalue;					/* current token if keyword or CINT */
 short ccbytes;					/* number of bytes in char constant */
 short cstrsize; 				/* current string size */
-long clvalue;					/* current token value if long constant */
+int32_t clvalue;				/* current token value if long constant */
 struct symbol *csp; 			/* current token symbol ptr if SYMBOL */
 char cstr[STRSIZE]; 			/* current token value if CSTRING */
 struct symbol *dsp; 			/* declarator symbol pointer */
@@ -353,7 +363,7 @@ short frstp;
 
 /* outbentry - output symbol '%', signifying routine entry, for link info */
 #define OUTBENTRY() oprintf("%%\n")
-#define OUTCOMMON(sym,size) oprintf("\t.comm _%.*s,%ld\n", SSIZE, sym, size)
+#define OUTCOMMON(sym,size) oprintf("\t.comm _%.*s,%ld\n", SSIZE, sym, (long)(size))
 #define OUTGOTO(lab)		if( lab > 0 ) oprintf("\tbra L%d\n",lab)
 /* change to text segment */
 #define OUTTEXT()		oprintf("\t.text\n")
@@ -364,15 +374,15 @@ short frstp;
 /* output global symbol references */
 #define OUTEXTDEF(sym)	oprintf("\t.globl _%.*s\n", SSIZE, sym)
 /* outputs reserved memory */
-#define OUTRESMEM(size) oprintf("\t.ds.b %ld\n",size)
+#define OUTRESMEM(size) oprintf("\t.ds.b %ld\n", (long)(size))
 /* output padding for word alignments */
 #define OUTPAD()		oprintf("\t.even\n")
 /* output long constant to assembler */
-#define OUTLCON(val)	oprintf("\t.dc.l %ld\n",val)
+#define OUTLCON(val)	oprintf("\t.dc.l %ld\n", (long)(val))
 /* output label constant */
-#define OUTCLAB(lab)	oprintf("\t.dc.l L%d\n",lab)
+#define OUTCLAB(lab)	oprintf("\t.dc.l L%d\n", lab)
 /* output a label */
-#define OUTLAB(lab) 	oprintf("\tL%d:",lab)
+#define OUTLAB(lab) 	oprintf("\tL%d:", lab)
 /* output function label */
 #define OUTFLAB(sym)	oprintf("\t_%.*s:\n", SSIZE, sym); if (gflag) oprintf("\t~~%.*s:\n", SSIZE, sym)
 #ifndef NOPROFILE
@@ -402,8 +412,8 @@ short frstp;
  * decl.c
  */
 VOID doextdef PROTO((NOTHING));
-short gettype PROTO((short *defsc, short *deftype, long *size, int declok));
-long dlist PROTO((int defsc));
+short gettype PROTO((short *defsc, short *deftype, int32_t *size, int declok));
+int32_t dlist PROTO((int defsc));
 int declarator PROTO((int castflg));
 int getdecl PROTO((int castflg));
 short addtdtype PROTO((struct symbol *tddp, int type, int dp, short *ssp));
@@ -415,8 +425,8 @@ short addtdtype PROTO((struct symbol *tddp, int type, int dp, short *ssp));
 VOIDPTR talloc PROTO((int size));
 struct extnode *enalloc PROTO((struct symbol *sp));
 struct conode *cnalloc PROTO((int type, int value));
-struct lconode *lcnalloc PROTO((int type, long value));
-struct lconode *fpcnalloc PROTO((int type, long value));
+struct lconode *lcnalloc PROTO((int type, int32_t value));
+struct lconode *fpcnalloc PROTO((int type, int32_t value));
 struct tnode *tnalloc PROTO((int op, int type, int dp, int ssp, struct tnode *left, struct tnode *right));
 struct symnode *snalloc PROTO((int type, int sc, int off, int dp, int ssp));
 VOID pushopd PROTO((VOIDPTR tp));
@@ -433,7 +443,7 @@ int is_terminal PROTO((short *token));
 VOIDPTR get_symbol PROTO((NOTHING));
 int binopeval PROTO((int op, struct lconode *ltp, struct lconode *rtp));
 int unopeval PROTO((int op, struct lconode *tp));
-long cexpr PROTO((NOTHING));
+int32_t cexpr PROTO((NOTHING));
 
 
 /*
@@ -450,16 +460,16 @@ VOID outfpdata PROTO((NOTHING));
 VOID outbexit PROTO((int nlocs, int nds, int nas));
 VOID outlocal PROTO((int type, int sc, const char *sym, int val));
 VOID outswitch PROTO((int ncases, int deflab, struct swtch *sp));
-VOID outfp_or_l PROTO((long l));
+VOID outfp_or_l PROTO((int32_t l));
 VOID outtstr PROTO((int lab));
-long outstr PROTO((long maxsize, long strsize));
+int32_t outstr PROTO((int32_t maxsize, int32_t strsize));
 
 
 /*
  * init.c
  */
 VOID doinit PROTO((struct symbol *sp));
-long initlist PROTO((struct symbol *sp, int type, int dp, int ssp));
+int32_t initlist PROTO((struct symbol *sp, int type, int dp, int ssp));
 
 
 /*
@@ -500,7 +510,7 @@ VOID oputchar PROTO((char c));
 /*
  * misc.c
  */
-short dalloc PROTO((long dimsize));
+short dalloc PROTO((int32_t dimsize));
 int addsp PROTO((int type, int nsptype));
 int delsp PROTO((int type));
 int revsp PROTO((int type));
@@ -508,8 +518,8 @@ int falign PROTO((int type, int flen, int offset));
 int salign PROTO((int type, int offset));
 int delspchk PROTO((int type));
 int dosizeof PROTO((struct tnode *tp, int tbool));
-long psize PROTO((struct tnode *tp));
-long dsize PROTO((int type, int dp, int sp));
+int32_t psize PROTO((struct tnode *tp));
+int32_t dsize PROTO((int type, int dp, int sp));
 VOID integral PROTO((struct tnode *tp, int atype));
 
 

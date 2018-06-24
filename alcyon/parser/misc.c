@@ -19,8 +19,8 @@
  * Allocates an entry in the dimension table.
  * returns ptr to dimension allocated
  */
-short dalloc(P(long) dimsize)
-PP(long dimsize;)
+short dalloc(P(int32_t) dimsize)
+PP(int32_t dimsize;)
 {
 	register short i;
 
@@ -228,7 +228,7 @@ PP(int tbool;)								/* 1==>sizeof expr, 0==>other sizeof */
  * psize - return size of object ptd at by POINTER
  * returns size of object in bytes 
  */
-long psize(P(struct tnode *) tp)
+int32_t psize(P(struct tnode *) tp)
 PP(struct tnode *tp;)						/* POINTER to tree node */
 {
 	if (!(SUPTYPE(tp->t_type)))			/* what case ??? */
@@ -241,12 +241,12 @@ PP(struct tnode *tp;)						/* POINTER to tree node */
  * dsize - returns size of data object in bytes
  * returns number of bytes
  */
-long dsize(P(int) type, P(int) dp, P(int) sp)
+int32_t dsize(P(int) type, P(int) dp, P(int) sp)
 PP(int type;)								/* type of node */
 PP(int dp;)									/* dimension POINTER */
 PP(int sp;)									/* size POINTER if structure */
 {
-	register long nel, size;
+	register int32_t nel, size;
 
 	nel = 1;
 	if (ISARRAY(type))

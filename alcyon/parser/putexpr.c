@@ -188,11 +188,11 @@ PP(struct tnode *tp;)
 	case DCLONG:
 	case CLONG:
 	case CFLOAT:
-		oprintf(" %ld %X.%X\n", ((struct lconode *) tp)->t_lvalue, ((struct lconode *) tp)->_l.w.hiword, ((struct lconode *) tp)->_l.w.loword);
+		oprintf(" %ld %X.%X\n", ((struct lconode *) tp)->t_lvalue, (unsigned short)((struct lconode *) tp)->_l.w.hiword, (unsigned short)((struct lconode *) tp)->_l.w.loword);
 		break;
 
 	case CINT:
-		oprintf(" %d [0x%X]\n", ((struct conode *) tp)->t_value, ((struct conode *) tp)->t_value);
+		oprintf(" %d [0x%X]\n", ((struct conode *) tp)->t_value, (unsigned short)((struct conode *) tp)->t_value);
 		break;
 
 	case AUTODEC:
@@ -213,7 +213,7 @@ PP(struct tnode *tp;)
 
 		case CLINDR:
 		case CFINDR:
-			oprintf(" %X.%X", ((struct symnode *) tp)->t_offset, tp->t_ssp);
+			oprintf(" %X.%X", (unsigned short)((struct symnode *) tp)->t_offset, (unsigned short)tp->t_ssp);
 			break;
 
 		case REGOFF:

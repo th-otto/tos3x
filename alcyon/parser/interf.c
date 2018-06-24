@@ -61,17 +61,17 @@ VOID outasm(NOTHING)
 static VOID outtree(P(struct tnode *) tp)
 PP(struct tnode *tp;)
 {
-	short w1, w2;
+	unsigned short w1, w2;
 
 	if (!tp)
 		return;
 
-	oprintf("%X.%X", tp->t_op, tp->t_type);
+	oprintf("%X.%X", (unsigned short)tp->t_op, (unsigned short)tp->t_type);
 
 	switch (tp->t_op)
 	{
 	case CINT:
-		oprintf(".%X\n", ((struct conode *) tp)->t_value);
+		oprintf(".%X\n", (unsigned short)((struct conode *) tp)->t_value);
 		break;
 
 	case CLONG:
@@ -87,11 +87,11 @@ PP(struct tnode *tp;)
 		break;
 
 	case SYMBOL:
-		oprintf(".%X", ((struct symnode *) tp)->t_sc);
+		oprintf(".%X", (unsigned short)((struct symnode *) tp)->t_sc);
 		if (((struct symnode *) tp)->t_sc == EXTERNAL)
 			oprintf(".%.*s\n", SSIZE, ((struct extnode *) tp)->t_symbol);
 		else
-			oprintf(".%X\n", ((struct symnode *) tp)->t_offset);
+			oprintf(".%X\n", (unsigned short)((struct symnode *) tp)->t_offset);
 		break;
 
 	case 0:
@@ -100,7 +100,7 @@ PP(struct tnode *tp;)
 
 	case IFGOTO:
 	case BFIELD:
-		oprintf(".%X\n", tp->t_dp);
+		oprintf(".%X\n", (unsigned short)tp->t_dp);
 		outtree(tp->t_left);
 		break;
 
