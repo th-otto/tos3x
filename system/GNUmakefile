@@ -9,7 +9,6 @@ CROSS := $(shell $(EVAL_CROSS))
 
 include $(top_srcdir)/GNUmakefile.cmn
 include $(top_srcdir)/Makefile.sil
-CC += -mshort
 
 LIBS =
 

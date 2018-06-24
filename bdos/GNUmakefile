@@ -10,8 +10,6 @@ CROSS := $(shell $(EVAL_CROSS))
 include $(top_srcdir)/GNUmakefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-CC += -mshort
-
 CPPFLAGS = -I$(top_srcdir)/common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
