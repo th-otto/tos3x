@@ -180,7 +180,7 @@
 struct symtab {
     char name[SYNAMLEN]; /* symbol name */
     unsigned short flags;
-	long vl1;            /* symbol value */
+	int32_t vl1;         /* symbol value */
 	short vextno;		 /* external symbol reference # */
     struct symtab *tlnk; /* hash table link */
     struct symtab *next; /* global table link */
@@ -200,8 +200,8 @@ struct symtab {
  */
 
 union iival {
-	long l;
-	long oper;
+	int32_t l;
+	int32_t oper;
 	struct symtab *ptrw2;
 	VOIDPTR p;
 };
@@ -238,7 +238,7 @@ struct irts {
 	struct symtab *irfe;		/* ptr to first entry in chain */
 };
 
-long stlen;             /* length of symbol table */
+int32_t stlen;             /* length of symbol table */
 
 /* initial reference table for symbols */
 struct irts sirt[SZIRT];
@@ -262,8 +262,8 @@ short itype;            /* type of item */
 union iival ival;       /* value of item */
 struct symtab *lblpt;   /* label pointer */
 char lbt[SYNAMLEN + 1]; /* holds label name */
-long loctr;             /* location counter */
-long savelc[4];         /* save relocation counters for 3 bases */
+int32_t loctr;          /* location counter */
+int32_t savelc[4];      /* save relocation counters for 3 bases */
 short nite;             /* number of entries in stbuf */
 struct it *pnite;
 struct symtab *opcpt;   /* pointer to opcode entry in main table */
@@ -325,7 +325,7 @@ short extflg, extref;   /* external in expr */
 struct op {
     short ea;           /* effective address bits */
     short len;          /* effective address length in bytes */
-    long con;           /* constant or reloc part of operand */
+    int32_t con;        /* constant or reloc part of operand */
     short drlc;         /* reloc of con */
     short ext;          /* external variable # */
     short idx;          /* index register if any */
@@ -368,7 +368,7 @@ short ca;               /* depth of conditional assembly, none = 0 */
 short ca_level;         /* at what CA depth did CA go false? */
 short nerror;           /* # of assembler errors */
 short in_err;           /* don't generate instrlen err if in err state */
-long itoffset;
+int32_t itoffset;
 short equflg;           /* doing an equate stmt */
 short refpc;            /* * referenced in expr */
 

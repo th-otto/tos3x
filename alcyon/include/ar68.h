@@ -10,6 +10,8 @@
 #ifndef __AR68_H__
 #define __AR68_H__ 1
 
+#include <stdint.h>
+
 #define LIBMAGIC	0xff65
 #define LIBRMAGIC	0xff66
 #define LIBHDSIZE	28
@@ -18,11 +20,11 @@
 struct libhdr
 {
 	char lfname[LIBNSIZE];
-	long lmodti;
+	int32_t lmodti;
 	char luserid;
 	char lgid;
 	unsigned short lfimode;
-	long lfsize;
+	int32_t lfsize;
 	unsigned short junk;
 };
 

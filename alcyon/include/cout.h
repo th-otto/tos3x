@@ -10,42 +10,44 @@
 #ifndef __COUT_H__
 #define __COUT_H__ 1
 
+#include <stdint.h>
+
 struct hdr
 {
 	unsigned short ch_magic;			/* c.out magic number 060016 = $600E */
-	long ch_tsize;						/* text size */
-	long ch_dsize;						/* data size */
-	long ch_bsize;						/* bss size */
-	long ch_ssize;						/* symbol table size */
-	long ch_stksize;					/* stack size */
-	long ch_entry;						/* location of entry point */
+	int32_t ch_tsize;					/* text size */
+	int32_t ch_dsize;					/* data size */
+	int32_t ch_bsize;					/* bss size */
+	int32_t ch_ssize;					/* symbol table size */
+	int32_t ch_stksize;					/* stack size */
+	int32_t ch_entry;					/* location of entry point */
 	unsigned short ch_rlbflg;			/* relocation bits present flag, must be signed */
 };
 
 struct hdr_cout
 {
 	unsigned short ftype;				/* c.out magic number 060016 = $600E */
-	long ftext;							/* text size */
-	long fdata;							/* data size */
-	long fbss;							/* bss size */
-	long fsym;							/* symbol table size */
-	long fssize;						/* stack size */
-	long fentry;						/* location of entry point */
+	int32_t ftext;						/* text size */
+	int32_t fdata;						/* data size */
+	int32_t fbss;						/* bss size */
+	int32_t fsym;						/* symbol table size */
+	int32_t fssize;						/* stack size */
+	int32_t fentry;						/* location of entry point */
 	short fflag;						/* relocation bits present flag, must be signed */
 };
 
 struct hdr2
 {
 	unsigned short ch_magic;			/* c.out magic number = 601B hex */
-	long ch_tsize;						/* # bytes in program text segment */
-	long ch_dsize;						/* # bytes in program data segment */
-	long ch_bsize;						/* # bytes in program bss  segment */
-	long ch_ssize;						/* # bytes in symbol table */
-	long ch_stksize;					/* initial stack size */
-	long ch_entry;						/* entry point--address of text segment */
+	int32_t ch_tsize;					/* # bytes in program text segment */
+	int32_t ch_dsize;					/* # bytes in program data segment */
+	int32_t ch_bsize;					/* # bytes in program bss  segment */
+	int32_t ch_ssize;					/* # bytes in symbol table */
+	int32_t ch_stksize;					/* initial stack size */
+	int32_t ch_entry;					/* entry point--address of text segment */
 	unsigned short ch_rlbflg;			/* relocation bits suppressed flag, must be signed */
-	long ch_dstart;						/* address of data segment */
-	long ch_bstart;						/* address of bss segment */
+	int32_t ch_dstart;					/* address of data segment */
+	int32_t ch_bstart;					/* address of bss segment */
 };
 
 /* structure of the symbol table */
@@ -55,7 +57,7 @@ struct hdr2
 struct nlist {
 	char n_name[SYNAMLEN];
 	unsigned short n_type;
-	long n_value;
+	int32_t n_value;
 };
 #define OSTSIZE    14      /* symbol table entry length on object file */
 

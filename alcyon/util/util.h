@@ -44,11 +44,11 @@
 #define FALSE 0
 #define TRUE  1
 
-int lgetl PROTO((long *lp, FILE *f));
+int lgetl PROTO((int32_t *lp, FILE *f));
 int lgetw PROTO((unsigned short *lp, FILE *f));
 int getchd PROTO((FILE *fp, struct hdr2 *arptr));
 int putchd PROTO((FILE *fp, struct hdr2 *arptr));
 int getarhd PROTO((FILE *fp, struct libhdr *arptr));
 int putarhd PROTO((FILE *fp, struct libhdr *arptr));
 int lputw PROTO((unsigned short *wp, FILE *f));
-int lputl PROTO((long *lp, FILE *f));
+int lputl PROTO((int32_t *lp, FILE *f));

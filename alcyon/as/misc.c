@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <string.h>
 
-long stlen;
+int32_t stlen;
 
 short debug = 0;
 
@@ -822,7 +822,7 @@ PP(struct op *apea;)
 VOID cksize(P(struct op *) ap)
 PP(struct op *ap;)
 {
-	long value;
+	int32_t value;
 
 	if ((ap->ea & 070) != 070)
 		return;

@@ -28,13 +28,13 @@ PP(FILE *f;)
 	return feof(f) ? EOF : 0;
 }
 
-int lgetl(P(long *) lp, P(FILE *) f)
-PP(register long *lp;)		/* 32 bits */
+int lgetl(P(int32_t *) lp, P(FILE *) f)
+PP(register int32_t *lp;)		/* 32 bits */
 PP(FILE *f;)
 {
 	unsigned short w1, w2;
 	lgetw(&w1, f);
 	lgetw(&w2, f);
-	*lp = ((long)w1 << 16) | w2;
+	*lp = ((int32_t)w1 << 16) | w2;
 	return feof(f) ? EOF : 0;
 }

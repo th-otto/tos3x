@@ -17,8 +17,8 @@
 #include <cout.h>
 #include "../util/util.h"
 
-int lputl(P(long *) lp, P(FILE *) f)			/* returns 0 for success, -1 for failure */
-PP(register long *lp;)
+int lputl(P(int32_t *) lp, P(FILE *) f)			/* returns 0 for success, -1 for failure */
+PP(register int32_t *lp;)
 PP(register FILE *f;)
 {
 	register long l;

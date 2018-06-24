@@ -323,7 +323,7 @@ PP(int constpc;)
 	case 1:								/* constant */
 		if (!constant(&num, istr, i))
 		{
-			uerr(17);					/* illegal constant */
+			uerr(17);					/* constant required */
 			num = 0;
 		}
 		ival.l = num;
@@ -677,19 +677,19 @@ PP(int cnt;)
 			printf("%s", its[i].itop.ptrw2 ? its[i].itop.ptrw2->name : "(nil)");
 			break;
 		case ITCN:
-			printf("$%lx", its[i].itop.l);
+			printf("$%lx", (long)its[i].itop.l);
 			break;
 		case ITSP:
 			printf("%c", (int)its[i].itop.l);
 			break;
 		case ITRM:
-			printf("rm(%lx)", its[i].itop.l);
+			printf("rm(%lx)", (long)its[i].itop.l);
 			break;
 		case ITPC:
 			printf("*");
 			break;
 		case ITCW:
-			printf("$%lx.w", its[i].itop.l);
+			printf("$%lx.w", (long)its[i].itop.l);
 			break;
 		}
 	}
@@ -706,7 +706,7 @@ PP(const char *tag;)
 	printf("%s %3d: ", tag, cnt);
 	if (cnt >= ITOP1 && stbuf[0].itty == ITBS && stbuf[1].itty == ITSY && stbuf[2].itty == ITSY && stbuf[3].itty == ITCN)
 	{
-		printf("    [%08lx:%02x] ", stbuf[3].itop.l, stbuf[1].itrl);
+		printf("    [%08lx:%02x] ", (long)stbuf[3].itop.l, stbuf[1].itrl);
 		if (stbuf[1].itop.ptrw2)
 			printf("%-*.*s:   ", SYNAMLEN, SYNAMLEN, stbuf[1].itop.ptrw2->name);
 		else
@@ -721,7 +721,7 @@ PP(const char *tag;)
 	} else
 	{
 		for (i = 1; i < cnt; i++)
-			printf("    %s %02x %08lx", itbtname[stbuf[i].itty & 0xff], stbuf[i].itrl, stbuf[i].itop.l);
+			printf("    %s %02x %08lx", itbtname[stbuf[i].itty & 0xff], stbuf[i].itrl, (long)stbuf[i].itop.l);
 		printf("\n");
 	}
 }

@@ -75,7 +75,7 @@ PP(register struct symtab *osypt;)
 	if (osypt->flags & SYDF)
 	{
 		/* Print value */
-		printf("%08lx", osypt->vl1);
+		printf("%08lx", (long)osypt->vl1);
 		if (osypt->flags & SYRA)
 			printf(" DATA  ");
 		else if (osypt->flags & SYRO)
@@ -186,7 +186,7 @@ PP(int pflag;)
 
 	/* output current address, binary, and source */
 	page();
-	printf("%4d %08lx", p2absln, loctr);			/* put source line num on listing */
+	printf("%4d %08lx", p2absln, (long)loctr);			/* put source line num on listing */
 	putchar(' ');
 	if (!pflag)							/* no binary */
 	{
