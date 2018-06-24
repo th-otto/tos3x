@@ -58,7 +58,8 @@ PP(const char *argv0;)
 		s += ndx + 1;
 	if (s == argv0)
 	{
-		strcpy(stdincl, ".");
+		d = stdincl;
+		strcpy(d, ".");
 	} else
 	{
 		s--;
