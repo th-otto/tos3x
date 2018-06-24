@@ -77,7 +77,7 @@ struct xesym {
 /* 68000 special - indexed symbol node, used to generate a An(off,Xn.type) address */
 struct xxsym {
 	short sc;						/* storage class */
-	int32_t  offset;					/* register offset */
+	int32_t offset;					/* register offset */
 	short reg;						/* register number */
 	short xreg;
 	short xtype;
@@ -90,7 +90,7 @@ union tval {
 	} t;
 	struct words w;
 	short s;						/* value or label number */
-	int32_t l;							/* value or label number */
+	int32_t l;						/* value or label number */
 	struct xlsym lsym;
 	struct xesym esym;
 	struct xxsym xsym;
@@ -153,9 +153,6 @@ extern short stacksize;
 #define ISARRAY(type)		(((type) & SUPTYP) == ARRAY)
 #define ISFUNCTION(type)	(((type) & SUPTYP) == FUNCTION)
 #define ISPOINTER(type)		(((type) & SUPTYP) == POINTER)
-#define NOTARRAY(type)		(((type) & SUPTYP) != ARRAY)
-#define NOTFUNCTION(type)	(((type) & SUPTYP) != FUNCTION)
-#define NOTPOINTER(type)	(((type) & SUPTYP) != POINTER)
 #define ISFLOAT(type)		((type) == FLOAT)
 #define BTYPE(type)			((type) & TYPE)
 #define SUPTYPE(type)		((type) & SUPTYP)
@@ -169,7 +166,6 @@ extern short stacksize;
 #define BINOP(op)			((opinfo[op] & OPBIN) != 0)
 #define UNARYOP(op)			((opinfo[op] & (OPBIN|OPTERM)) == 0)
 #define LEAFOP(op)			((opinfo[op] & OPTERM) != 0)
-#define NOTLEAFOP(op)		((opinfo[op] & OPTERM) == 0)
 #define LVALOP(op)			((opinfo[op] & OPLVAL) != 0)
 #define OPPRIORITY(op)		(opinfo[op] & OPPRI)
 #define COMMOP(op)			((opinfo[op] & OPCOM) != 0)

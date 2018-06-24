@@ -333,7 +333,7 @@ PP(struct tnode **tpp;)
 	if (BINOP(op))
 		changes += optim(&tp->t_right);
 	changes += optim(&tp->t_left);
-	for (; NOTLEAFOP(op = tp->t_op); changes++)
+	for (; !LEAFOP(op = tp->t_op); changes++)
 	{
 #ifdef DEBUG
 		if (oflag > 1)
@@ -698,7 +698,7 @@ PP(struct tnode **tpp;)
 
 			case ADD:
 				if (p->t_op == SYMBOL && p->t_sc == REGOFF &&
-					(rtp = constant(ltp->t_right, &tlc)) && !tlc && NOTPOINTER(p->t_type))
+					(rtp = constant(ltp->t_right, &tlc)) && !tlc && !ISPOINTER(p->t_type))
 				{
 					p->t_offset += rtp->t_value;
 					tp = p;

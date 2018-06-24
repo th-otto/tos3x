@@ -183,6 +183,7 @@ static int32_t readlong(NOTHING)
 				w2 = 0;
 				continue;
 			}
+			/* fall through */
 		case '\n':
 			if (onedot)
 			{
@@ -190,6 +191,7 @@ static int32_t readlong(NOTHING)
 				l.w.loword = w2;
 				return l.l;
 			}
+			/* fall through */
 		default:
 			error(_("intermediate code error - %c,%d"), c, c);
 			break;
@@ -455,11 +457,13 @@ _va_dcl
 /* usage - output usage message */
 static VOID usage(NOTHING)
 {
-#ifdef DEBUG
-	fatal(_("usage: %s icode link asm [-DTacemov]"), program_name);
-#else
-	fatal(_("usage: %s icode link asm [-Tav]"), program_name);
-#endif
+	fatal(_("usage: %s icode link asm [-DTacemov]\n\
+options:\n\
+    -L    assume long (32bit) address variables (default)\n\
+    -a    assume short (16bit) address variables\n\
+    -g    generate line labels for cdb\n\
+    -d    include line numbers in assembly output\n\
+    -t    generate code for 68010"), program_name);
 }
 
 

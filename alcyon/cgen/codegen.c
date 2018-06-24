@@ -620,7 +620,7 @@ PP(int reg;)								/* register to use for code */
 	tp = *tpp;
 	op = tp->t_op;
 	change = 0;
-	if (NOTLEAFOP(op) && op != COMMA && op != QMARK && op != LAND && op != LOR &&
+	if (!LEAFOP(op) && op != COMMA && op != QMARK && op != LAND && op != LOR &&
 		op != LESS && op != LESSEQ && op != GREAT && op != GREATEQ)
 	{
 		change += rcodegen(&tp->t_left, cookie, reg);
