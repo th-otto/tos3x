@@ -25,9 +25,22 @@ bdos.a: $(BDOS_OBJS) ${MAKEFILE}
 
 $(BDOS_OBJS) vars.o vdidsp.o: $(top_srcdir)/common/config.h
 
+bdos.o: $(top_srcdir)/common/config.h tosvars.o vars.o vdidsp.o $(top_srcdir)/common/sections.mak $(BDOS_OBJS) ${MAKEFILE}
+	# sections.mak might have just been generated, make sure it is reread
+	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
+
+single:
+	$(LD) -s -l -o bdos.o -a $(bdos_tbase) $(bdos_dbase) 0 tosvars.o vars.o vdidsp.o $(BDOS_OBJS)
+
 check:: bdos.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(bdos_toff):0x24 --offsets=0x$(bdos_tbase):0 --bytes=0x$(bdos_tlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bdos.o
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(bdos_doff):0x$(bdos_tleno) --offsets=0x$(bdos_dbase):0x$(bdos_tlen) --bytes=0x$(bdos_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bdos.o
+
+tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
+	$(CC) $(CPPFLAGS) -c -o $@ $<
+
+vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
+	$(CC) $(CPPFLAGS) -c -o $@ $<
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR1)/$(subdir)

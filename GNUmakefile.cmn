@@ -1,4 +1,8 @@
+ifeq ($(USE_ALCYON),1)
+BIN=../bin64/
+else
 BIN=../bin/
+endif
 LIB=../lib/
 INC=../include
 
@@ -20,6 +24,26 @@ QBS=\${empty}
 #
 # target and host compiler
 # 
+ifeq ($(USE_ALCYON),1)
+
+EXEEXT=.ttp
+BUILD_EXEEXT=
+
+CROSSPREFIX=m68k-atari-mint-
+
+CC = $(BIN)cc68
+CPP = $(CC) $(CPPFLAGS) -E -P
+CPPOUT = -o
+LD = $(CC)
+AS = $(CC)
+AR = $(CROSSPREFIX)ar
+ARFLAGS = rcs
+RANLIB = $(CROSSPREFIX)ranlib
+STRIP = $(CROSSPREFIX)strip
+FLAGS = $(CROSSPREFIX)flags
+
+else
+
 ifeq ($(CROSS),yes)
 
 CROSSPREFIX=m68k-atari-mint-
@@ -47,6 +71,8 @@ ARFLAGS = rcs
 RANLIB = $(CROSSPREFIX)ranlib
 STRIP = $(CROSSPREFIX)strip
 FLAGS = $(CROSSPREFIX)flags
+
+endif
 
 # 
 # some tools
