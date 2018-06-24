@@ -6,7 +6,6 @@
 */
 
 #include "parser.h"
-#ifdef DEBUG
 #include <ctype.h>
 
 static char const invalid[] = "INVALID";
@@ -113,6 +112,7 @@ static const char *const types[] = {
 	invalid								/* 15=undefined */
 };
 
+#if 0
 static const char *const suvals[] = {
 	"zero",
 	"one",
@@ -127,6 +127,7 @@ static const char *const suvals[] = {
 	"hard",
 	"veryhard",
 };
+#endif
 
 static short level;
 
@@ -162,18 +163,16 @@ PP(struct tnode *tp;)
 		oprintf("*");
 		break;
 	}
-	fprintf(stderr, "%s ", types[BTYPE(tp->t_type)]);
+	oprintf("%s ", types[BTYPE(tp->t_type)]);
 }
 
 
 static VOID putsexpr(P(struct tnode *) tp)
 PP(struct tnode *tp;)
 {
-	register struct tnode *ltp;
 	register short op;
 
 	level++;
-	ltp = tp->t_left;
 	op = tp->t_op;
 	outlevel();
 	if (op < 0 || op > CFLOAT)
@@ -188,7 +187,7 @@ PP(struct tnode *tp;)
 	case DCLONG:
 	case CLONG:
 	case CFLOAT:
-		oprintf(" %ld %X.%X\n", ((struct lconode *) tp)->t_lvalue, (unsigned short)((struct lconode *) tp)->_l.w.hiword, (unsigned short)((struct lconode *) tp)->_l.w.loword);
+		oprintf(" %ld %X.%X\n", (long) ((struct lconode *) tp)->t_lvalue, (unsigned short)((struct lconode *) tp)->_l.w.hiword, (unsigned short)((struct lconode *) tp)->_l.w.loword);
 		break;
 
 	case CINT:
@@ -264,4 +263,3 @@ PP(struct tnode *tp;)
 	if (tp != 0)
 		putsexpr(tp);
 }
-#endif

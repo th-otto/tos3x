@@ -292,8 +292,8 @@ short profile;					/* profiler output */
 #ifdef DEBUG
 short initdebug;				/* init debug flag */
 short symdebug; 				/* sym debug flag */
-short treedebug;				/* expr tree debug flag */
 #endif
+short treedebug;				/* expr tree debug flag */
 
 /* dimension table */
 int32_t dtab[DSIZE];			/* short => long */
@@ -395,11 +395,7 @@ short frstp;
 #define OUTNULL()		oprintf("0\n")
 
 /* Debugging Macros */
-#ifdef DEBUG
-#	define PUTEXPR(dbg,id_str,node_ptr) if (dbg) putexpr(id_str,node_ptr)
-#else
-#	define PUTEXPR(dbg,id_str,node_ptr) 
-#endif
+#define PUTEXPR(dbg,id_str,node_ptr) if (dbg) putexpr(id_str,node_ptr)
 
 /* On Disk Symbol Table macro */
 #define TO_DSK(symp,addr)
