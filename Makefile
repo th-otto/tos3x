@@ -53,4 +53,4 @@ help::
 	@echo ""
 	@echo "The resulting output file will be glue/tos$(TOSVERSION)$(COUNTRY).img"
 	@echo ""
-	@echo "See $(top_srcdir)/config.mak for a list of valid configrations"
+	@echo "See $(top_srcdir)/config.mak for a list of valid configurations"
