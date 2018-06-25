@@ -9,17 +9,17 @@
 #define ASGOP   OPRAS|OPASSIGN|OPLVAL|OPBIN
 
 	/* info on operators: */
-	/* 000077-- OPPRI - priority */
-	/* 000100-- OPBIN - binary operator */
-	/* 000200-- OPLVAL - left operand must be lvalue */
-	/* 000400-- OPREL - relational operator */
-	/* 001000-- OPASSIGN - assignment operator */
-	/* 002000-- OPLWORD - short required on left */
-	/* 004000-- OPRWORD - short required on right */
-	/* 010000-- OPCOM commutative */
-	/* 020000-- OPRAS - right associative */
-	/* 040000-- OPTERM - termination node */
-	/* 100000 - OPCONVS - conversion operator */
+	/* 0x003f-- OPPRI - priority */
+	/* 0x0040-- OPBIN - binary operator */
+	/* 0x0080-- OPLVAL - left operand must be lvalue */
+	/* 0x0100-- OPREL - relational operator */
+	/* 0x0200-- OPASSIGN - assignment operator */
+	/* 0x0400-- OPLWORD - short required on left */
+	/* 0x0800-- OPRWORD - short required on right */
+	/* 0x1000-- OPCOM commutative */
+	/* 0x2000-- OPRAS - right associative */
+	/* 0x4000-- OPTERM - termination node */
+	/* 0x8000 - OPCONVS - conversion operator */
 short const opinfo[] = {
 	TRMPRI,										/* CEOF */
 	ADDPRI | OPCOM | OPBIN,						/* ADD - expr + expr */

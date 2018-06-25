@@ -116,8 +116,8 @@ static const char *const types[] = {
 static const char *const suvals[] = {
 	"zero",
 	"one",
-	"quick",
 	"small",
+	"quick",
 	"constant",
 	"Areg",
 	"Dreg",
@@ -126,6 +126,10 @@ static const char *const suvals[] = {
 	"easy",
 	"hard",
 	"veryhard",
+	invalid,							/* 12=undefined */
+	invalid,							/* 13=undefined */
+	invalid,							/* 14=undefined */
+	"any"
 };
 
 static short level;
@@ -137,10 +141,10 @@ static VOID outlevel(NOTHING)
 
 	for (i = 0; i < level; i++)
 	{
-		fputc(' ', stderr);
-		fputc(' ', stderr);
-		fputc(' ', stderr);
-		fputc(' ', stderr);
+		oputchar(' ');
+		oputchar(' ');
+		oputchar(' ');
+		oputchar(' ');
 	}
 }
 
@@ -153,11 +157,11 @@ PP(struct tnode *tp;)
 	if (SUPTYPE(tp->t_type))
 		oputchar('*');
 	oprintf("%s ", types[BTYPE(tp->t_type)]);
-	if (tp->t_su != 0 || (tp->t_op == CINT && tp->t_value == 0))
+	if (tp->t_su != 0 || (tp->t_op == CINT && tp->t_value == 0) || (tp->t_op == CLONG && tp->t_lvalue == 0))
 	{
 		i = tp->t_su >> 8;
-		if (i > 15 || i < 0)
-			oprintf("INVALID");
+		if (i >= (int)(sizeof(suvals) / sizeof(suvals[0])) || i < 0)
+			oprintf(invalid);
 		else
 			oprintf("%s", suvals[i]);
 	}
@@ -169,13 +173,13 @@ PP(struct tnode *tp;)
 {
 	level++;
 	outlevel();
-	fprintf(stderr, "%s ", opname[tp->t_op]);
+	oprintf("%s ", opname[tp->t_op]);
 	if (tp->t_op == BFIELD || tp->t_op == IFGOTO)
 	{
 		if (tp->t_op == BFIELD)
-			fprintf(stderr, "off=%d len=%d\n", BFOFFS(tp->t_su), BFLEN(tp->t_su));
+			oprintf("off=%d len=%d\n", BFOFFS(tp->t_su), BFLEN(tp->t_su));
 		else
-			fprintf(stderr, "%s goto L%d\n", tp->t_type ? "TRUE" : "FALSE", tp->t_su);
+			oprintf("%s goto L%d\n", tp->t_type ? "TRUE" : "FALSE", tp->t_su);
 		putsexpr(tp->t_left);
 		level--;
 		return;
@@ -186,60 +190,60 @@ PP(struct tnode *tp;)
 	case DCLONG:
 	case CLONG:
 	case CFLOAT:
-		fprintf(stderr, " %x.%x\n", (unsigned short)tp->v.w.hiword, (unsigned short)tp->v.w.loword);
+		oprintf(" %x.%x\n", (unsigned short)tp->v.w.hiword, (unsigned short)tp->v.w.loword);
 		break;
 
 	case CINT:
-		fprintf(stderr, " %d\n", tp->t_value);
+		oprintf(" %d\n", tp->t_value);
 		break;
 
 	case AUTODEC:
 	case AUTOINC:
-		fprintf(stderr, " R%d\n", tp->t_reg);
+		oprintf(" R%d\n", tp->t_reg);
 		break;
 
 	case SYMBOL:
 		switch (tp->t_sc)
 		{
 		case REGISTER:
-			fprintf(stderr, " R%d", tp->t_reg);
+			oprintf(" R%d", tp->t_reg);
 			break;
 
 		case CINDR:
-			fprintf(stderr, " %ld\n", (long)tp->t_offset);
+			oprintf(" %ld\n", (long)tp->t_offset);
 			break;
 
 		case CLINDR:
 		case CFINDR:
-			fprintf(stderr, " %lx.", (long)tp->t_offset);
-			fprintf(stderr, "%x\n", (unsigned short)tp->t_ssp);
+			oprintf(" %lx.", (long)tp->t_offset);
+			oprintf("%x\n", (unsigned short)tp->t_ssp);
 			break;
 
 		case REGOFF:
-			fprintf(stderr, " %ld", (long)tp->t_offset);
-			fprintf(stderr, "(R%d)", tp->t_reg);
+			oprintf(" %ld", (long)tp->t_offset);
+			oprintf("(R%d)", tp->t_reg);
 			break;
 
 		case EXTERNAL:
 		case EXTOFF:
-			fprintf(stderr, " %s+%ld", tp->t_symbol, (long)tp->t_offset);
+			oprintf(" %s+%ld", tp->t_symbol, (long)tp->t_offset);
 			if (tp->t_sc == EXTOFF)
-				fprintf(stderr, "(R%d)", tp->t_reg);
+				oprintf("(R%d)", tp->t_reg);
 			break;
 
 		case STATIC:
 		case STATOFF:
-			fprintf(stderr, " L%d+%ld", tp->t_label, (long)tp->t_offset);
+			oprintf(" L%d+%ld", tp->t_label, (long)tp->t_offset);
 			if (tp->t_sc == STATOFF)
-				fprintf(stderr, "(R%d)", tp->t_reg);
+				oprintf("(R%d)", tp->t_reg);
 			break;
 
 		case INDEXED:
-			fprintf(stderr, " %ld", (long)tp->t_offset);
-			fprintf(stderr, "(R%d,R%d)", tp->t_reg, tp->t_xreg);
+			oprintf(" %ld", (long)tp->t_offset);
+			oprintf("(R%d,R%d)", tp->t_reg, tp->t_xreg);
 			break;
 		}
-		fputc('\n', stderr);
+		oputchar('\n');
 		break;
 
 	case IFGOTO:
@@ -247,7 +251,7 @@ PP(struct tnode *tp;)
 		break;
 
 	default:
-		fputc('\n', stderr);
+		oputchar('\n');
 		putsexpr(tp->t_left);
 		if (BINOP(tp->t_op))
 			putsexpr(tp->t_right);
@@ -261,7 +265,7 @@ VOID putexpr(P(const char *) name, P(struct tnode *) tp)
 PP(const char *name;)
 PP(struct tnode *tp;)
 {
-	fprintf(stderr, "%s\n", name);
+	oprintf("%s\n", name);
 	putsexpr(tp);
 }
 #endif

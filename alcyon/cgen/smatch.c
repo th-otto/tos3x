@@ -335,8 +335,9 @@ PP(const struct skeleton *skp;)				/* pointer to code skeleton */
 					if (ISDREG(sreg))
 						outmovr(sreg, AREG(reg), p);
 				} else if (flag & S_NEXT)
+				{
 					nreg = sreg;
-				else if (sreg != reg)
+				} else if (sreg != reg)
 				{
 					/*
 					 * result was not in expected register, if remaining sub-tree can be
@@ -406,17 +407,18 @@ PP(struct tnode *tp;)
 PP(int skinfo;)
 {
 	register short type, unsignf;
-	register short isconstant, stype;
+	register int isconstant;
+	register short stype;
 
 	if (tp->t_su > skinfo || ((skinfo & T_INDR) && tp->t_op != INDR))
-		return 0;
+		return FALSE;
 	stype = SK_TYPE(skinfo);
 	type = tp->t_type;
 	if (ISFUNCTION(type))
 		type = BTYPE(type);
 	if ((unsignf = UNSIGN(type)) != 0)
 		type = BASETYPE(type);
-	isconstant = 0;
+	isconstant = FALSE;
 
 	switch (tp->t_op)
 	{
@@ -436,7 +438,7 @@ PP(int skinfo;)
 
 	case T_ANY:						/* either short or char */
 		if (type == CHAR)
-			return 1;
+			return TRUE;
 		/* fall through */
 	case T_INT:
 		return type == INT || isconstant;
@@ -454,8 +456,8 @@ PP(int skinfo;)
 		return ISFLOAT(type);
 
 	default:
-		error("skelmatch type: %x", stype);
-		return 0;
+		error("skelmatch type: 0x%x", stype);
+		return FALSE;
 	}
 }
 
@@ -480,12 +482,12 @@ PP(int reg;)								/* register to use */
 {
 	register const struct skeleton *skp;
 	register short op, bop;
-	short i;
+	register short i;
 	register struct tnode *ltp, *rtp;
 
 #ifdef DEBUG
 	if (mflag)
-		oprintf("match op=%d cookie=%d reg=%d\n", tp->t_op, cookie, reg);
+		oprintf("match op=%d bop=%d cookie=%d reg=%d\n", tp->t_op, BINOP(tp->t_op), cookie, reg);
 #endif
 	rtp = 0;
 	PUTEXPR(mflag, "match", tp);
@@ -500,7 +502,7 @@ PP(int reg;)								/* register to use */
 		rtp = tp->t_right;
 		if (CONVOP(ltp->t_op))
 		{
-			if (op != LSH && NOTCONVOP(rtp->t_op) && cookie != FORSTACK && cookie != FORSP && cookie != FORCREG)
+			if (op != LSH && !CONVOP(rtp->t_op) && cookie != FORSTACK && cookie != FORSP && cookie != FORCREG)
 			{
 				if (!(UNSIGN(ltp->t_left->t_type)) || op == ASSIGN)
 				{
@@ -549,8 +551,14 @@ PP(int reg;)								/* register to use */
 	if (mflag)
 		oprintf("match op=%d i=%d ", op, i);
 #endif
-	if (!(i = optab[op][i]))
+	if ((i = optab[op][i]) == 0)
+	{
+#ifdef DEBUG
+		if (mflag)
+			oprintf("no codeskel\n");
+#endif
 		return 0;
+	}
 	skp = codeskels[i];
 #ifdef DEBUG
 	if (mflag)
@@ -575,13 +583,13 @@ PP(int reg;)								/* register to use */
 		if (mflag > 1)
 			oprintf("sk_left=0x%x sk_right=0x%x\n", skp->sk_left, skp->sk_right);
 #endif
-		if (!(skelmatch(ltp, skp->sk_left)))
+		if (!skelmatch(ltp, skp->sk_left))
 			continue;
 		if (bop && !(skelmatch(rtp, skp->sk_right)))
 			continue;
 #ifdef DEBUG
 		if (mflag)
-			oprintf("match found skp=%p left=0x%x right=0x%x\n", skp, skp->sk_left, skp->sk_right);
+			oprintf("match found skp=%p (%d) left=0x%x right=0x%x\n", skp, (int)(skp - codeskels[i]), skp->sk_left, skp->sk_right);
 #endif
 		return skp;
 	}

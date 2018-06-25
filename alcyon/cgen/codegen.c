@@ -870,7 +870,9 @@ PP(int reg;)
 			if (dir == FALSE)
 				OUTGOTO(lab);
 		} else if (dir != FALSE)
+		{
 			OUTGOTO(lab);
+		}
 		break;
 
 	case NOT:

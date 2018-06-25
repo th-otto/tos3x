@@ -157,6 +157,7 @@ extern short stacksize;
 #define BTYPE(type)			((type) & TYPE)
 #define SUPTYPE(type)		((type) & SUPTYP)
 #define ISALLTYPE(type)		((type) & (SUPTYP|TYPE))
+#define OPPRIORITY(op)		(opinfo[op] & OPPRI)
 #define ISASGOP(op)			((opinfo[op] & OPASSIGN) != 0)
 #define RELOP(op)			((opinfo[op] & OPREL) != 0)
 #define COMOP(op)			((opinfo[op] & OPCOM) != 0)
@@ -167,10 +168,8 @@ extern short stacksize;
 #define UNARYOP(op)			((opinfo[op] & (OPBIN|OPTERM)) == 0)
 #define LEAFOP(op)			((opinfo[op] & OPTERM) != 0)
 #define LVALOP(op)			((opinfo[op] & OPLVAL) != 0)
-#define OPPRIORITY(op)		(opinfo[op] & OPPRI)
 #define COMMOP(op)			((opinfo[op] & OPCOM) != 0)
 #define CONVOP(op)			((opinfo[op] & OPCONVS) != 0)
-#define NOTCONVOP(op)		((opinfo[op] & OPCONVS) == 0)
 #define SIMPLE_TYP(typ)		((typ >= CHAR) && (typ <= DOUBLE))
 
 #undef MAX

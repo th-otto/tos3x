@@ -397,7 +397,9 @@ PP(struct tnode **tpp;)
 					rtp->t_right->t_op = CINT;
 					rtp->t_right->t_type = INT;
 				} else if (rtp->t_right->t_op == INT2L)
+				{
 					rtp->t_right = rtp->t_right->t_left;
+				}
 				rtp->t_op -= (LDIV - DIV);
 				tp->t_right = rtp;
 				continue;
@@ -415,7 +417,9 @@ PP(struct tnode **tpp;)
 					tmp = rtp->t_lvalue;
 					rtp->t_op = CINT;
 				} else
+				{
 					tmp = rtp->t_value;
+				}
 				if (tmp > 255)
 				{
 					warning("value assigned to char truncated");
@@ -863,7 +867,9 @@ PP(struct tnode *tp;)						/* pointer to tree */
 				btp = fixbfield(btp);
 				tp = tnalloc(op - (EQADD - ADD), INT, 0, 0, tcopy(btp, A_DOPRE), tp);
 			} else
+			{
 				rhstp = tcopy(stp, A_DOPRE);	/* for rhs of assign */
+			}
 			tp = tnalloc(AND, INT, 0, 0, tp, cnalloc(INT, fmask));
 			tp = tnalloc(LSH, INT, 0, 0, tp, cnalloc(INT, foff));
 			btp = tnalloc(AND, INT, 0, 0, rhstp, cnalloc(INT, ~(fmask << foff)));
@@ -1045,7 +1051,9 @@ PP(struct tnode *tp;)
 		tp->t_left = commute(tp->t_left);
 		tp->t_right = commute(tp->t_right);
 	} else if (UNARYOP(op))
+	{
 		tp->t_left = commute(tp->t_left);
+	}
 	return tp;
 }
 

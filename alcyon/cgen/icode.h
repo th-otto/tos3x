@@ -178,17 +178,17 @@
 #define DEXTERN     16  /* explicitly defined extern */
 
 /* opinfo table bits */
-#define OPPRI       077
-#define OPBIN       0100
-#define OPLVAL      0200
-#define OPREL       0400
-#define OPASSIGN    01000
-#define OPLWORD     02000
-#define OPRWORD     04000
-#define OPCOM       010000
-#define OPRAS       020000
-#define OPTERM      040000
-#define OPCONVS     0100000
+#define OPPRI       0x003f
+#define OPBIN       0x0040
+#define OPLVAL      0x0080
+#define OPREL       0x0100
+#define OPASSIGN    0x0200
+#define OPLWORD     0x0400
+#define OPRWORD     0x0800
+#define OPCOM       0x1000
+#define OPRAS       0x2000
+#define OPTERM      0x4000
+#define OPCONVS     0x8000
 
 /* 68000 definitions */
 #define PTRSIZE     4
