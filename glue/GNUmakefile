@@ -26,20 +26,53 @@ all:: $(IMG)
 
 include SRCFILES
 
+STARTUP = startup.o
+
+LIBS = ../bios/bios.a ../vdi/vdi.a ../bdos/bdos.a ../aes/aes.a ../desk/desk.a
+OBJS = $(STARTUP) $(BIOS_OBJS) $(VDI_OBJS) $(BDOS_OBJS) $(AES_OBJS) $(DESK_OBJS)
+
+ROMSIZE_206 = 256k
+# use 257 for ST-book, since mkrom can't distinguish it from 2.06
+ROMSIZE_208 = 257k
+ROMSIZE_306 = 512k
+
+ROMSIZE = $(ROMSIZE_$(TOSVERSION))
+
 #
 # Base of the internal cartridge ROM of St-Book TOS
 #
 CARTBASE = E40000
 
+ifeq ($(USE_CROSS_ALCYON),1)
+tos.img: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o tosvars.o
+	$(BIN)link68 '[abs,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
+endif
+
 cartridge.img: cartridge.o
+ifeq ($(USE_CROSS_ALCYON),1)
+	$(BIN)link68 -o cartridg.tmp -a $(CARTBASE) x 0 cartridg.o
+	dd bs=1 skip=36 < cartridg.tmp > $@
+else
 	$(LD) -nostartfiles -nostdlib -o cartridge.tmp -Wl,--script=../common/rom.ld,-Ttext=0x$(CARTBASE),-Tbss=0 cartridge.o
+endif
 	$(MV) cartridge.tmp $@
 	$(RM) cartridge.tmp
 
 $(IMG): tos.img $(MKROM)
 	$(MKROM) pad $(ROMSIZE) $< $@
 
-check::
+vdivar.o: ../vdi/vdivar.S
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+	
+vars.o: ../common/vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+tosvars.o: ../common/tosvars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+include gluer.mak
+
+check:: $(IMG)
 	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
 
 dist::

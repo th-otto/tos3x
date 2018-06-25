@@ -1,3 +1,5 @@
+top_srcdir=.
+
 include GNUmakefile.cmn
 include Makefile.sil
 
@@ -20,19 +22,24 @@ EXTRA_DIST2 = \
 all::
 	@:
 
+include $(top_srcdir)/config.mak
+
+FLAGSTOPASS = COUNTRY=$(COUNTRY) TOSVERSION=$(TOSVERSION) SYMBOLS=$(SYMBOLS)
+
 dist::
 	rm -rf $(DISTDIR1) $(DISTDIR2)
 	for i in $(SUBDIRS) lib; do $(MKDIR_P) $(DISTDIR1)/$$i; done
 	for i in $(SUBDIRS) $(EXTRA_SUBDIRS) listings; do $(MKDIR_P) $(DISTDIR2)/$$i; done
 
 all clean distclean dist::
-	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
+	for i in $(SUBDIRS); do $(MAKE) -C $$i $(FLAGSTOPASS) $@; done
 
 dist::
 	for i in $(EXTRA_SUBDIRS); do $(MAKE) -C $$i $@; done
 
 check::
-	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $@; done
+	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $(FLAGSTOPASS) all; done
+	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $(FLAGSTOPASS) $@; done
 
 dosdir::
 	for i in $(SUBDIRS) lib; do $(MKDIR_P) $(DOSDIR)/$$i; done

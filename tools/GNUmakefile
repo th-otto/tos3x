@@ -1,8 +1,12 @@
 top_srcdir=..
 subdir=tools
 
+USE_CROSS_ALCYON=0
+
 include $(top_srcdir)/GNUmakefile.cmn
 include $(top_srcdir)/Makefile.sil
+
+CC := $(BUILD_CC)
 
 LIBS =
 
@@ -19,19 +23,19 @@ include $(top_srcdir)/config.mak
 include SRCFILES
 
 cmprom$(BUILD_EXEEXT): cmprom.o
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+	$(AM_V_LD)$(BUILD_CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 newglue$(BUILD_EXEEXT): newglue.o
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+	$(AM_V_LD)$(BUILD_CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 findrsc$(BUILD_EXEEXT): findrsc.o
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+	$(AM_V_LD)$(BUILD_CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 mkbininc$(BUILD_EXEEXT): mkbininc.o
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+	$(AM_V_LD)$(BUILD_CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 mkrom$(BUILD_EXEEXT): mkrom.o
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+	$(AM_V_LD)$(BUILD_CC) $(CFLAGS) -o $@ $< $(LIBS)
 
 check::
 	@:

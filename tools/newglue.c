@@ -327,7 +327,7 @@ PP(char **argv;)
 	
 	putbeshort(header + 2 * i, (unsigned int) (size));
 
-	handle = open(outfile, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY);
+	handle = open(outfile, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0644);
 	if (handle < 0)
 	{
 		fprintf(stderr, _("Can not create %s\n"), outfile);

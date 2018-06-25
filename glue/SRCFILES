@@ -3,6 +3,7 @@ SRCS:=startup.S cartridg.S
 EXTRA_DIST1:=\
 	Makefile \
 	SRCFILES \
+	gluer.mak \
 	tos306de.map \
 	tos306us.map \
 	tos206de.map \
