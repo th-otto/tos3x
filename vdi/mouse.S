@@ -1305,7 +1305,7 @@ _DIS_CUR:	PIXLA(a5)
 /*   Redisplay only occurs when HIDE_CNT equals one on entry. */
 
 		move.w	SR,d0
-		or.w	#$0700,SR		/* >>>> BEGIN ATOM <<<< */
+		ori.w	#$0700,SR		/* >>>> BEGIN ATOM <<<< */
 
 		move.l	PIXLV(GCURXY,a5),d1		/* retrieve of X and Y */
 
@@ -1418,7 +1418,7 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 		lea	PIXLV(xydraw,a2),a0		/* a0 -> vblank draw packet */
 
 		move.w	SR,d0
-		or.w	#$0700,SR		/* >>>> BEGIN ATOM <<<< */
+		ori.w	#$0700,SR		/* >>>> BEGIN ATOM <<<< */
 
 		move.l	PIXLV(GCURXY,a2),(a0)+	/* setup the vblank draw packet */
 		bset.b	#0,(a0)
@@ -1446,7 +1446,7 @@ _SET_CUR: PIXLA(a1)
 		move.l	4(sp),d1		/* d1<31:16> <- newX   d1<15:00> <- newY */
 
 		move.w	SR,d0
-		or.w	#$0700,SR		/* >>>> BEGIN ATOM <<<< */
+		ori.w	#$0700,SR		/* >>>> BEGIN ATOM <<<< */
 
 		move.l	d1,PIXLV(GCURXY,a1)		/* set GCURX and GCURY */
 		move.l	d1,(a0)+		/* set vblank draw packet */
@@ -1473,7 +1473,7 @@ _vq_mouse:
 		move.l	PIXLV(PTSOUT,a2),a1		/* a1 -> PTSOUT[0] */
 
 		move.w	 SR,d0
-		or.w	 #$0700,SR		/* >>>> BEGIN ATOM <<<< */
+		ori.w	 #$0700,SR		/* >>>> BEGIN ATOM <<<< */
 
 		move.w	PIXLV(MOUSE_BT,a2),(a0)	/* INTOUT[0]   <- button status */
 		move.l	PIXLV(GCURXY,a2),(a1)	/* PTSOUT[0-1] <- mouse X and Y */

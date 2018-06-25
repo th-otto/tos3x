@@ -1,10 +1,10 @@
-*********************************  allgem.s  ***********************************
-*
-* =============================================================================
-* $Author: lozben $	$Date: 91/07/30 16:01:22 $
-* =============================================================================
-*
-*******************************************************************************
+/*********************************  allgem.s  ***********************************
+ *
+ * =============================================================================
+ * $Author: lozben $	$Date: 91/07/30 16:01:22 $
+ * =============================================================================
+ *
+ *******************************************************************************/
 
 #include "config.h"
 #include "vdidefs.h"
@@ -29,13 +29,13 @@ DEFREZ    equ 6
 
 		text
 
-*******************************************************************************
-*
-*	GET SHIFT STATE		entry: 		none
-*				exit:		CTL/SHIFT/ALT status in d0
-*				destroys:	nothing
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *	GET SHIFT STATE		entry: 		none
+ *				exit:		CTL/SHIFT/ALT status in d0
+ *				destroys:	nothing
+ *
+ *******************************************************************************/
 
 /* 306de: 00e06676 */
 		xdef	_GSHIFT_S
@@ -51,13 +51,13 @@ _v_nop: ds.b 0
 _vq_cellarray: ds.b 0
 return:		rts
 
-*******************************************************************************
-*
-*	CLEAR SCREEN		entry: 		none
-*				exit:		none
-*				destroys:	a0/d0
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *	CLEAR SCREEN		entry: 		none
+ *				exit:		none
+ *				destroys:	a0/d0
+ *
+ *******************************************************************************/
 
 /* 306de: 00e06682 */
 		xdef	_v_clrwk
@@ -146,13 +146,13 @@ clr4:		movem.l	(sp)+,d3-d7/a3	; restore registers
 		rts
 #endif
 
-*******************************************************************************
-*
-*	INITIALIZE GRAPHICS	entry: 		none
-*				exit:		none
-*				destroys:	see v_clrwk
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *	INITIALIZE GRAPHICS	entry: 		none
+ *				exit:		none
+ *				destroys:	see v_clrwk
+ *
+ *******************************************************************************/
 
    		xdef	_INIT_G
 _INIT_G:	PIXLA(a1)
@@ -208,7 +208,7 @@ _vex_timv:	PIXLA(a1)
 
 		rts
 
-*******************************************************************************
+/*******************************************************************************/
 
 #if TOSVERSION < 0x400
 
@@ -385,13 +385,13 @@ paltab16  dc.w $0fff
 
 #endif
 
-*******************************************************************************
-*
-*	Timer interrupt routine	entry: 		none
-*				exit:		none
-*				destroys:	none
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *	Timer interrupt routine	entry: 		none
+ *				exit:		none
+ *				destroys:	none
+ *
+ *******************************************************************************/
 
 /* 306de: 00e067ee */
 tick_int:
@@ -412,14 +412,14 @@ tick_int:
 		rts				; jump to next routine in chain
 
 
-*******************************************************************************
-*
-*	DEINITIALIZE GRAPHICS	entry: 		none
-*				exit:		none
-*				destroys:	a1 + see dinit_mouse, v_clrwk,
-*						esce
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *	DEINITIALIZE GRAPHICS	entry: 		none
+ *				exit:		none
+ *				destroys:	a1 + see dinit_mouse, v_clrwk,
+ *						esce
+ *
+ *******************************************************************************/
 
 /* 306de: 00e06806 */
    		xdef	_DINIT_G
@@ -436,18 +436,18 @@ _DINIT_G:	PIXLA(a1)
 
 
 
-*******************************************************************************
-*
-*
-*	GCHC_KEY	get choice for choice input: NOT IMPLEMENTED
-*
-*			exit:	d0:   0	 nothing happened
-*				      1	 choice value
-*				      2	 button pressed
-*
-*				TERM_CH	 16 bit char info
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *
+ *	GCHC_KEY	get choice for choice input: NOT IMPLEMENTED
+ *
+ *			exit:	d0:   0	 nothing happened
+ *				      1	 choice value
+ *				      2	 button pressed
+ *
+ *				TERM_CH	 16 bit char info
+ *
+ *******************************************************************************/
 
    		xdef	_GCHC_KEY
 _GCHC_KEY:	PIXLA(a1)
@@ -456,44 +456,44 @@ _GCHC_KEY:	PIXLA(a1)
 		rts
 
 
-*******************************************************************************
-*
-* title:	_GLOC_KEY
-*
-* purpose:	Note which buttons have had a state change and whether
-*		the mouse has been moved since the previous envocation of
-*		this routine. If the button states havn't changed, check
-*		for a key press from the console device.
-*
-* output:
-*
-*	d0	0	- nothing
-*
-*		1	- button or key pressed
-*
-*  			   TERM_CH = 16 bit char info
-*
-*		2 	- new coordinates
-*
-*			   X1 = new X
-*			   Y1 = new Y
-*
-*		3	- button or key pressed and new coordinates
-*
-*			   TERM_CH = 16 bit char info
-*			   X1 = new X
-*			   Y1 = new Y
-*
-* 	NOTE:	THIS ROUTINE REPORTS THE LAST CHANGE IN BUTTON STATE
-*		RATHER THAN REPORTING THE BUTTON STATE ITSELF. THE
-*		BUTTON STATE CHANGE FLAGS AND MOTION FLAG ARE CLEARED
-*		ON EXIT SO THAT SUBSEQUENT CALLS TO THE ROUTINE WILL NOT
-*		YIELD DUPLICATE REPORTS OF THE SAME EVENT. WHEN USING THIS
-*		ROUTINE TO POLL THE MOUSE FOR A PARTICULAR CONDITION, THE
-*		FIRST CALL MAY NOT RETURN CURRENT BUTTON CHANGE STATE DATA
-*		BUT IT WILL INITIALIZE THE SYSTEM FOR SUBSEQUENT CALLS.
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ * title:	_GLOC_KEY
+ *
+ * purpose:	Note which buttons have had a state change and whether
+ *		the mouse has been moved since the previous envocation of
+ *		this routine. If the button states havn't changed, check
+ *		for a key press from the console device.
+ *
+ * output:
+ *
+ *	d0	0	- nothing
+ *
+ *		1	- button or key pressed
+ *
+ *  			   TERM_CH = 16 bit char info
+ *
+ *		2 	- new coordinates
+ *
+ *			   X1 = new X
+ *			   Y1 = new Y
+ *
+ *		3	- button or key pressed and new coordinates
+ *
+ *			   TERM_CH = 16 bit char info
+ *			   X1 = new X
+ *			   Y1 = new Y
+ *
+ * 	NOTE:	THIS ROUTINE REPORTS THE LAST CHANGE IN BUTTON STATE
+ *		RATHER THAN REPORTING THE BUTTON STATE ITSELF. THE
+ *		BUTTON STATE CHANGE FLAGS AND MOTION FLAG ARE CLEARED
+ *		ON EXIT SO THAT SUBSEQUENT CALLS TO THE ROUTINE WILL NOT
+ *		YIELD DUPLICATE REPORTS OF THE SAME EVENT. WHEN USING THIS
+ *		ROUTINE TO POLL THE MOUSE FOR A PARTICULAR CONDITION, THE
+ *		FIRST CALL MAY NOT RETURN CURRENT BUTTON CHANGE STATE DATA
+ *		BUT IT WILL INITIALIZE THE SYSTEM FOR SUBSEQUENT CALLS.
+ *
+ *******************************************************************************/
 
 /* 306de: 00e06830 */
 		xdef	_GLOC_KEY
@@ -502,7 +502,7 @@ _GLOC_KEY:	PIXLA(a1)
 
 		move.w	SR,d0
 
-		or.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
+		ori.w	#$0700,SR		; >>>> BEGIN ATOM <<<<
 		move.b	PIXLV(cur_ms_stat,a1),d2	; clearing state change flags indicates
 		and.b	d1,PIXLV(cur_ms_stat,a1)	; that this data has been processed
 		move.l	PIXLV(GCURXY,a1),PIXLV(X1,a1)	; X1<-latest X and Y1<-latest Y
@@ -534,16 +534,16 @@ key_stat:	move.w	 d0,-(sp)	; preserve mouse status
 		add.w	 (sp)+,d0	; d0 <- final locator status
 		rts
 
-*******************************************************************************
-*
-*	GCHR_KEY	get char for string input
-*			entry: none
-*			exit:  d0=1	key pressed
-*			       d0=0	nothing happened
-*
-*			TERM_CH		16 bit char info
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *	GCHR_KEY	get char for string input
+ *			entry: none
+ *			exit:  d0=1	key pressed
+ *			       d0=0	nothing happened
+ *
+ *			TERM_CH		16 bit char info
+ *
+ *******************************************************************************/
 
 /* 306de: 00e0687e */
    		xdef	_GCHR_KEY
@@ -572,15 +572,15 @@ _GCHR_KEY:	move.w	#DEV,-(sp)	; see if a character present
 no_char:	rts
 
 
-*******************************************************************************
-*
-*  INITIALIZE MOUSE
-*
-*  on entry:
-*
-*     GCURXY	initial XY position of mouse cursor
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *  INITIALIZE MOUSE
+ *
+ *  on entry:
+ *
+ *     GCURXY	initial XY position of mouse cursor
+ *
+ *******************************************************************************/
 
 /* 306de: 00e068ac */
 mouse_init:
@@ -643,13 +643,13 @@ user_init:	rts
 
 
 
-*******************************************************************************
-*
-*	DEINITIALIZE MOUSE	entry: 		none
-*				exit:		none
-*				destroys:	a0/d0
-*
-*******************************************************************************
+/*******************************************************************************
+ *
+ *	DEINITIALIZE MOUSE	entry: 		none
+ *				exit:		none
+ *				destroys:	a0/d0
+ *
+ *******************************************************************************/
 
 /* 306de: 00e06932 */
 dinit_mouse:	move.l	_vblqueue,a0	; remove draw routine from vblank queue
@@ -665,9 +665,9 @@ dinit_mouse:	move.l	_vblqueue,a0	; remove draw routine from vblank queue
 		rts
 
 
-*******************************************************************************
-*			    escape initialization 			      *
-*******************************************************************************
+/*******************************************************************************
+ *			    escape initialization
+ *******************************************************************************/
 
 #if TOSVERSION >= 0x400
 
