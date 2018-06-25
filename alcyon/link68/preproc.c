@@ -153,12 +153,14 @@ static int lookahd(NOTHING)
 	case ',':
 		return COMMA;
 	case '.':
+		if (cmdline[i + 1] == '.' || cmdline[i + 1] == '/')
+			return NAMETK;
 		return DOT;						/* nameless file    */
 	}
 
 	/* only get here if not a single-character token (or junk)  */
 
-	if (isalpha(c) || c == '_')			/* file or option name? */
+	if (isalpha(c) || c == '_' || c == '.' || c == '/')			/* file or option name? */
 		return NAMETK;
 	if (isdigit(c))				/* number?      */
 		return NUMBTK;
@@ -288,7 +290,7 @@ static long scannum(NOTHING)
 	register int c;						/* current charater */
 	register long val;					/* cumulative value */
 
-	if ((scan() != LBRACK) || (scan() != NUMBTK))	/* get number */
+	if (scan() != LBRACK || scan() != NUMBTK)	/* get number */
 		synerr(BRKNUM);
 
 	st = tokenval;						/* get ptr. to string   */
@@ -336,7 +338,7 @@ static VOID cmdfile(NOTHING)
 
 	cfileflg = TRUE;					/* set it       */
 
-	if ((scan() != LBRACK) || ((toktype = scan()) != NAMETK))
+	if (scan() != LBRACK || (toktype = scan()) != NAMETK)
 		synerr(BRKNAM);		/* syntax error     */
 
 	if ((cmdfpt = fopen(tokenval, "r")) == NULL)
@@ -792,7 +794,7 @@ PP(struct filenode *fnpt;)
 	register int opnum;					/* specific option  */
 
 	toknum = scan();					/* get name, skip '['   */
-	if ((toknum != NAMETK) && (toknum != RBRACK))
+	if (toknum != NAMETK && toknum != RBRACK)
 		synerr(NAMESTR);
 
 	while (toknum == NAMETK)
@@ -822,7 +824,7 @@ PP(struct filenode *fnpt;)
 		
 		if ((toknum = scan()) == COMMA)
 			toknum = scan();			/* skip ',' to name */
-		else if ((toknum != RBRACK) && (toknum != NOMORE))
+		else if (toknum != RBRACK && toknum != NOMORE)
 			synerr(COMORBRK);
 	}
 }
@@ -868,7 +870,7 @@ PP(register int parent;)
 		tknum = NAMETK;					/* know it's a name     */
 	}
 
-	while ((tknum == NAMETK) || (tknum == DOT))
+	while (tknum == NAMETK || tknum == DOT)
 	{									/* process list of file names   */
 		if (tknum == DOT)				/* skip names starting with '.' */
 		{
@@ -892,9 +894,10 @@ PP(register int parent;)
 			tfpt = &((*tfpt)->fnnext);
 		*tfpt = curfile;				/* update link  */
 
-	  isdot:if (tknum == COMMA)
+	isdot:
+		if (tknum == COMMA)
 			tknum = scan();				/* skip ',' */
-		else if ((tknum != RPAREN) && (tknum != NOMORE))
+		else if (tknum != RPAREN && tknum != NOMORE)
 			synerr(COMORPAR);
 	}
 
@@ -927,7 +930,7 @@ PP(register int parent;)
 		if ((tknum = scan()) == COMMA)	/* skip ')' */
 			tknum = scan();				/* skip ',' too */
 		/* end, better be ')' or nothing */
-		else if ((tknum != RPAREN) && (tknum != NOMORE))
+		else if (tknum != RPAREN && tknum != NOMORE)
 			synerr(COMORPAR);
 	}
 }
