@@ -30,27 +30,28 @@
 #include <stdlib.h>
 
 
-short m68010;
 char *opap;
 short stacksize;
 char exprarea[EXPSIZE];
 short onepass;
-short dflag;
-short cflag;
 short bol;
-short eflag;
-short gflag;
 short lineno;
-short mflag;
-short oflag;
 short errcnt;
+
+short dflag; /* bool: generate code for m68010 */
+short cflag; /* bool: debug code reader */
+short eflag; /* bool: debug skeleton expansion */
+short mflag; /* bool: debug skeleton match */
+short oflag; /* bool: debug operators */
+short gflag; /* bool: generate line labels for cdb */
+short m68010; /* bool: generate code for m68010 */
+short lflag = 1; /* bool: assume long address variables */
 
 
 short nextlabel = 10000;
 
 struct tnode null;
 
-short lflag = 1;
 
 char source[PATHSIZE] = "";
 
@@ -491,9 +492,9 @@ PP(char **argv;)
 	if ((ofil = fopen(argv[3], "w")) == NULL)
 		fatal(_("can't create %s"), argv[3]);
 
-	for (argc -= 4; argc--;)
+	for (argc -= 4, argv += 4; argc--;)
 	{
-		q = *++argv;
+		q = *argv++;
 		if (*q++ != '-')
 			usage();
 		for (;;)
@@ -516,6 +517,7 @@ PP(char **argv;)
 			case 'd':
 				dflag++;
 				continue;
+
 #ifdef DEBUG
 			case 'c':
 				cflag++;
@@ -533,6 +535,7 @@ PP(char **argv;)
 				oflag++;
 				continue;
 #endif
+
 			case 'L':					/* OBSOLETE */
 			case 'l':
 				lflag++;

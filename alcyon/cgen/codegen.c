@@ -560,7 +560,7 @@ PP(int reg;)								/* register to use */
 			case ADD:
 			case SUB:
 				p = rtp->t_right;
-				if (NOTADDRESSABLE(ltp) || !noref(rtp->t_right, ltp->t_reg))
+				if (!ADDRESSABLE(ltp) || !noref(rtp->t_right, ltp->t_reg))
 					return change;
 				p = rtp->t_left;
 				if (p->t_op != SYMBOL || p->t_sc != REGISTER || p->t_reg != ltp->t_reg)

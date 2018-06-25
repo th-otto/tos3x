@@ -67,9 +67,8 @@
 #define	SU_HARD		0xa00		/* hard */
 #define	SU_VHARD	0xb00		/* very hard ... function calls, etc. */
 #define	SU_ANY		0xf00		/* anything */
-#define	ADDRESSABLE(x)		(x->t_su<=SU_ADDR)
-#define	NOTADDRESSABLE(x)	(x->t_su>SU_ADDR)
-#define	LOADABLE(x)			(x->t_su<=SU_XREG)
+#define	ADDRESSABLE(x)		(x->t_su <= SU_ADDR)
+#define	LOADABLE(x)			(x->t_su <= SU_XREG)
 
 /* flag byte (operand type): */
 #define	T_CHAR		1		/* char only */

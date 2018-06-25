@@ -121,14 +121,14 @@ struct tnode {
 extern struct tnode null;
 
 /* Code generation argument flags */
-extern short m68010;
-extern short dflag;
-extern short mflag;
-extern short cflag;
-extern short eflag;
-extern short gflag;
-extern short oflag;
-extern short lflag;
+extern short m68010; /* bool: generate code for m68010 */
+extern short dflag; /* bool: include line numbers in assembly output */
+extern short cflag; /* bool: debug code reader */
+extern short eflag; /* bool: debug skeleton expansion */
+extern short mflag; /* bool: debug skeleton match */
+extern short oflag; /* bool: debug operators */
+extern short gflag; /* bool: generate line labels for cdb */
+extern short lflag; /* bool: assume long address variables */
 
 /* expression tree storage */
 #define EXPSIZE     4096
@@ -227,7 +227,7 @@ extern short stacksize;
 #define BFOFFS(su) (((su) >> 8) & 0xff)
 #define BFLEN(su)  (((su)     ) & 0xff)
 
-
+#define DEBUG 1
 #ifdef DEBUG
 #	define PUTEXPR(cond,id_str,node_ptr)	if (cond) putexpr(id_str,node_ptr)
 #else
