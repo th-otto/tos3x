@@ -64,7 +64,7 @@ check:: bdos.a bdos.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(bdos_doff):0x$(bdos_tleno) --offsets=0x$(bdos_dbase):0x$(bdos_tlen) --bytes=0x$(bdos_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img bdos.o
 
 clean:
-	$(RM) *.o *.a *.ndx *.i *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
+	$(RM) *.o *.a *.ndx *.i *.i *.1 *.2 *.rel *.mod $(BDOS_CSRCS:.c=.s) $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak

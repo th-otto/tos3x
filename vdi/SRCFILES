@@ -45,7 +45,7 @@ SCREEN_OBJS=vdivtg.o alone.o jin.o
 VDI_OBJS=${VDI_${TOSVERSION}_OBJS}
 
 
-VDI_SRCS=\
+VDI_HEADERS=\
 	vdidefs.h \
 	attrdef.h \
 	fontdef.h \
@@ -55,10 +55,19 @@ VDI_SRCS=\
 	vdi.h \
 	scrndev.h \
 	styles.h \
-	\
+	${empty}
+
+VDI_INCLUDES=\
 	devequ.inc \
 	lineaequ.inc \
-	\
+	blaster.inc \
+	sbframe.inc \
+	hbhline.inc \
+	hbvline.inc \
+	hbescape.inc \
+	${empty}
+
+VDI_ASRCS=\
 	palette.S \
 	allgem.S \
 	blastman.S \
@@ -87,19 +96,17 @@ VDI_SRCS=\
 	sbscolog.S \
 	sbscopaq.S \
 	blaster.S \
-	blaster.inc \
-	sbframe.inc \
-	hbhline.inc \
-	hbvline.inc \
 	hbmono.S \
 	hbtxtblt.S \
 	hbrect.S \
 	hbbitblt.S \
-	hbescape.inc \
 	routines.S \
 	colorep.S \
 	hard.S \
-	\
+	stcolor.S \
+	${empty}
+
+VDI_CSRCS=\
 	cbssdefs.c \
 	font6x6.c \
 	font8x16.c \
@@ -116,10 +123,8 @@ VDI_SRCS=\
 	opnwk.c \
 	init.c \
 	ttcolor.c \
-	stcolor.S \
 	spcolor.c \
 	trucolor.c \
-	\
 	${empty}
 
 SCREEN_SRCS=\
@@ -128,6 +133,8 @@ SCREEN_SRCS=\
 	jin.S \
 	vdivtg.c \
 	${empty}
+
+VDI_SRCS = $(VDI_HEADERS) $(VDI_INCLUDES) $(VDI_ASRCS) $(VDI_CSRCS)
 
 SRCS:=${VDI_SRCS} ${SCREEN_SRCS}
 

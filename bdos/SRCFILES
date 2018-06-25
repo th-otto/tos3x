@@ -22,13 +22,25 @@ BDOS_208_OBJS=${BDOS_208_OBJS1} ${BDOS_208_OBJS2} ${BDOS_208_OBJS3}
 
 BDOS_OBJS=${BDOS_${TOSVERSION}_OBJS}
 
-
-BDOS_SRCS=\
+BDOS_HEADERS=\
 	bdosdefs.h \
+	bios.h \
+	btools.h \
+	fs.h \
+	mem.h \
+	pd.h \
+	pghdr.h \
+	tos.h \
+	${empty}
+
+BDOS_ASRCS=\
 	osinit.S \
 	lmul.S \
 	ldiv.S \
 	xfer.S \
+	${empty}
+
+BDOS_CSRCS=\
 	console.c \
 	fsfat.c \
 	fsglob.c \
@@ -43,15 +55,9 @@ BDOS_SRCS=\
 	bdosmain.c \
 	sup.c \
 	time.c \
-	\
-	bios.h \
-	btools.h \
-	fs.h \
-	mem.h \
-	pd.h \
-	pghdr.h \
-	tos.h \
 	${empty}
+
+BDOS_SRCS = $(BDOS_HEADERS) $(BDOS_ASRCS) $(BDOS_CSRCS)
 
 EXTRA_DIST1:=\
 	Makefile \

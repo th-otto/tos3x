@@ -8,7 +8,7 @@ AES_OBJS7=jdispa.o jdos.o large.o function.o optimize.o ratrbp.o trap14.o
 
 AES_OBJS=${AES_OBJS1} ${AES_OBJS2} ${AES_OBJS3} ${AES_OBJS4} ${AES_OBJS5} ${AES_OBJS6} ${AES_OBJS7}
 
-AES_SRCS=\
+AES_HEADERS=\
 	aes.h \
 	aesdefs.h \
 	crysbind.h \
@@ -20,6 +20,25 @@ AES_SRCS=\
 	obdefs.h \
 	struct88.h \
 	taddr.h \
+	${empty}
+
+AES_ASRCS=\
+	apgrlib.S \
+	apgsxif.S \
+	gemgrlib.S \
+	gemgsxif.S \
+	gsx2.S \
+	jbind.S \
+	jdispa.S \
+	jdos.S \
+	large.S \
+	optimize.S \
+	ratrbp.S \
+	trap14.S \
+	gemjstrt.S \
+	${empty}
+
+AES_CSRCS=\
 	gemaints.c \
 	gemaplib.c \
 	gemasync.c \
@@ -58,21 +77,10 @@ AES_SRCS=\
 	mn_tools.c \
 	mn_index.c \
 	mn_event.c \
-	apgrlib.S \
-	apgsxif.S \
-	gemgrlib.S \
-	gemgsxif.S \
-	gsx2.S \
-	jbind.S \
-	jdispa.S \
-	jdos.S \
-	large.S \
-	optimize.S \
 	function.c \
-	ratrbp.S \
-	trap14.S \
-	gemjstrt.S \
 	${empty}
+
+AES_SRCS = $(AES_HEADERS) $(AES_ASRCS) $(AES_CSRCS)
 
 SRCS:=${AES_SRCS}
 

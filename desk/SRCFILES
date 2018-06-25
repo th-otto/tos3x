@@ -6,7 +6,7 @@ DESK_OBJS5=desktop.o deskupda.o deskwin.o newmn.o deskif.o osbind.o
 
 DESK_OBJS=${DESK_OBJS1} ${DESK_OBJS2} ${DESK_OBJS3} ${DESK_OBJS4} ${DESK_OBJS5} ${DESK_OBJS6} ${DESK_OBJS7}
 
-DESK_SRCS=\
+DESK_HEADERS=\
 	deskdefs.h \
 	desktop.h \
 	deskrsc.h \
@@ -14,6 +14,14 @@ DESK_SRCS=\
 	mobdefs.h \
 	osbind.h \
 	window.h \
+	${empty}
+
+DESK_ASRCS=\
+	deskif.S \
+	osbind.S \
+	${empty}
+
+DESK_CSRCS=\
 	deskact.c \
 	deskapp.c \
 	deskbind.c \
@@ -38,9 +46,9 @@ DESK_SRCS=\
 	deskwin.c \
 	newmn.c \
 	deskrsc.c \
-	deskif.S \
-	osbind.S \
 	${empty}
+
+DESK_SRCS = $(DESK_HEADERS) $(DESK_ASRCS) $(DESK_CSRCS)
 
 SRCS:=${DESK_SRCS}
 

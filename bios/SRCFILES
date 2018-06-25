@@ -1,6 +1,6 @@
 BIOS_OBJS=startup.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
 
-BIOS_SRCS=\
+BIOS_HEADERS=\
 	bios.h \
 	biosdefs.h \
 	blkdev.h \
@@ -10,13 +10,9 @@ BIOS_SRCS=\
 	linea.h \
 	pbdef.h \
 	tosvars.h \
-	startup.S \
-	keytbl.c \
-	sounds.c \
-	prtblk.c \
-	blkdev.c \
-	prt.S \
-	memtest.S \
+	${empty}
+
+BIOS_INCLUDES=\
 	dma.inc \
 	floppy.inc \
 	ikbdclk.inc \
@@ -28,6 +24,20 @@ BIOS_SRCS=\
 	intpriv.inc \
 	${empty}
 
+BIOS_ASRCS = \
+	startup.S \
+	prt.S \
+	memtest.S \
+	${empty}
+
+BIOS_CSRCS = \
+	keytbl.c \
+	sounds.c \
+	prtblk.c \
+	blkdev.c \
+	${empty}
+
+BIOS_SRCS = $(BIOS_HEADERS) $(BIOS_INCLUDES) $(BIOS_ASRCS) $(BIOS_CSRCS)
 
 EXTRA_DIST1:=\
 	Makefile \
