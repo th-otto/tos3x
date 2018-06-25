@@ -469,7 +469,7 @@ static VOID usage(NOTHING)
 	error(_("    -c    debug code generator"));
 	error(_("    -e    debug skeleton expansion"));
 	error(_("    -m    debug skeleton match"));
-	error(_("    -m    debug operators"));
+	error(_("    -o    debug operators"));
 #endif
 	endit(EXIT_FAILURE);
 }

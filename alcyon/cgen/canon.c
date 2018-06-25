@@ -33,7 +33,7 @@ PP(struct tnode **tpp;)						/* pointer to tree */
 		anyfloat++;
 	} else if ((ltp = constant(ltp, &anylong)) != NULL)
 	{
-		lval = (anylong) ? ltp->t_lvalue : ltp->t_value;
+		lval = anylong ? ltp->t_lvalue : ltp->t_value;
 	} else
 	{
 		return 0;
@@ -396,10 +396,33 @@ PP(struct tnode **tpp;)
 				{
 					if (rtp->t_right->t_lvalue < 0)
 						break;
+					/*
+					 * the constant below is compiled as -1, but fixing this causes different code
+					 * to be emitted in desk/deskwin.c srl_verbar/srl_hzbar
+					 */
+#if BINEXACT
 					if (rtp->t_right->t_lvalue > 0xffff)
 						break;
+					/* ugly kludge to get deskwin.c cross-compiled */
+					if (rtp->t_right->t_lvalue > (int32_t)-1L)
+						break;
+#else
+					if (rtp->t_right->t_lvalue >= (int32_t)0x10000L)
+						break;
+#endif
+
+					/*
+					 * long / int, assigned to int:
+					 * we can make use of the fact that divs does exactly that
+					 */
 					rtp->t_right->t_op = CINT;
 					rtp->t_right->t_type = INT;
+					/*
+					 * BUG: assignment missing
+					 */
+#if !BINEXACT
+					rtp->t_right->t_value = (short)rtp->t_right->t_lvalue;
+#endif
 				} else if (rtp->t_right->t_op == INT2L)
 				{
 					rtp->t_right = rtp->t_right->t_left;
@@ -431,7 +454,7 @@ PP(struct tnode **tpp;)
 				} else if (tmp < -128)
 				{
 					warning("value assigned to char truncated");
-					rtp->t_value = ((char) (tmp & 0xff));
+					rtp->t_value = (char) (tmp & 0xff);
 				}
 				break;
 			}
