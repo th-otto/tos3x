@@ -855,7 +855,8 @@ PP(int reg;)
 
 	ltp = tp->t_left;
 	rtp = NULL;
-	if (BINOP(op = tp->t_op))
+	op = tp->t_op;
+	if (BINOP(op))
 		rtp = tp->t_right;
 	subdir = dir;						/* set up for LOR */
 #ifdef DEBUG

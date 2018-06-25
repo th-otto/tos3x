@@ -400,7 +400,7 @@ PP(const struct skeleton *skp;)				/* pointer to code skeleton */
 
 /*
  * skelmatch - sub-tree type matching for match
- * This checks a subtree for type compatability in match.
+ * This checks a subtree for type compatibility in match.
  */
 static int skelmatch(P(struct tnode *) tp, P(int) skinfo)
 PP(struct tnode *tp;)
@@ -470,7 +470,7 @@ PP(int skinfo;)
  *		skeleton list is then searched, checking the Sethy-Ullman numbers
  *		of the sub-trees against the Sethy-Ullman numbers in the code
  *		skeleton list.  If the Sethy-Ullman numbers are OK, then the
- *		left and right sub-trees are checked for compatability, e.g.
+ *		left and right sub-trees are checked for compatibility, e.g.
  *		integer pointers, etc.  If a match is found, the code skeleton
  *		list pointer is returned.
  * returns ptr to code skeleton, or 0 if no skeleton

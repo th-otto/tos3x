@@ -32,8 +32,8 @@ struct tnode *snalloc(P(int) type, P(int) sc, P(int32_t) offset, P(int) dp, P(in
 PP(int type;)								/* type of symbol */
 PP(int sc;)									/* storage class */
 PP(int32_t offset;)							/* offset from Local Environment Ptr */
-PP(int dp;)									/* for compatability with parser */
-PP(int ssp;)								/* for compatability with parser */
+PP(int dp;)									/* for compatibility with parser */
+PP(int ssp;)								/* for compatibility with parser */
 {
 	register struct tnode *sp;
 
@@ -93,6 +93,7 @@ PP(struct tnode *right;)					/* righst sub-tree */
 	tp->t_op = op;
 	tp->t_type = type;
 	tp->t_su = info;						/* info for bit-field & condbr's */
+	tp->t_ssp = 0;
 	tp->t_left = left;
 	tp->t_right = right;
 	return tp;
@@ -109,12 +110,14 @@ PP(int value;)								/* value of constant */
 	cp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(cp->t_value));
 	cp->t_op = CINT;
 	cp->t_type = type;
+	cp->t_su = 0;
+	cp->t_ssp = 0;
 	cp->t_value = value;
 	return cp;
 }
 
 
-/* lcnalloc - allocate constant expression tree node */
+/* lcnalloc - allocate long constant expression tree node */
 struct tnode *lcnalloc(P(int) type, P(int32_t) value)
 PP(int type;)								/* type of constant */
 PP(int32_t value;)							/* value of constant */
@@ -124,6 +127,8 @@ PP(int32_t value;)							/* value of constant */
 	cp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(cp->t_lvalue));
 	cp->t_op = CLONG;
 	cp->t_type = type;
+	cp->t_su = 0;
+	cp->t_ssp = 0;
 	cp->t_lvalue = value;
 	return cp;
 }
@@ -139,6 +144,8 @@ PP(int32_t value;)							/* value of constant */
 	cp = talloc(sizeof(*cp) - sizeof(union tval) + sizeof(cp->t_lvalue));
 	cp->t_op = CFLOAT;
 	cp->t_type = type;
+	cp->t_su = 0;
+	cp->t_ssp = 0;
 	cp->t_lvalue = value;
 	return cp;
 }
@@ -157,10 +164,11 @@ PP(int xt;)									/* index register type */
 	xp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(struct xxsym));
 	xp->t_op = SYMBOL;
 	xp->t_type = type;
-	xp->t_sc = INDEXED;
-	xp->t_reg = ar;
 	xp->t_su = SU_ADDR;
+	xp->t_ssp = 0;
+	xp->t_sc = INDEXED;
 	xp->t_offset = off;
+	xp->t_reg = ar;
 	xp->t_xreg = xr;
 	xp->t_xtype = xt;
 	return xp;
@@ -196,8 +204,9 @@ PP(int autof;)								/* {A_DOPRE,A_DOPOST} */
 	{
 	case SYMBOL:
 		if (tp->t_sc == EXTERNAL || tp->t_sc == EXTOFF)
+		{
 			p = cenalloc(tp->t_type, tp->t_sc, tp->t_symbol);
-		else
+		} else
 		{
 			p = snalloc(tp->t_type, tp->t_sc, tp->t_offset, 0, 0);
 			p->t_label = tp->t_label;

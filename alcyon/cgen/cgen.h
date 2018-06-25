@@ -226,7 +226,6 @@ extern short stacksize;
 #define BFOFFS(su) (((su) >> 8) & 0xff)
 #define BFLEN(su)  (((su)     ) & 0xff)
 
-#define DEBUG 1
 #ifdef DEBUG
 #	define PUTEXPR(cond,id_str,node_ptr)	if (cond) putexpr(id_str,node_ptr)
 #else

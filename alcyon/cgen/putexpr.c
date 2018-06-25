@@ -189,8 +189,11 @@ PP(struct tnode *tp;)
 	{
 	case DCLONG:
 	case CLONG:
+		oprintf(" 0x%lx\n", (long)tp->v.l);
+		break;
+
 	case CFLOAT:
-		oprintf(" %x.%x\n", (unsigned short)tp->v.w.hiword, (unsigned short)tp->v.w.loword);
+		oprintf(" 0x%x.%x\n", (unsigned short)tp->v.w.hiword, (unsigned short)tp->v.w.loword);
 		break;
 
 	case CINT:
@@ -215,8 +218,8 @@ PP(struct tnode *tp;)
 
 		case CLINDR:
 		case CFINDR:
-			oprintf(" %lx.", (long)tp->t_offset);
-			oprintf("%x\n", (unsigned short)tp->t_ssp);
+			oprintf(" 0x%lx.", (long)tp->t_offset);
+			oprintf("0x%x\n", (unsigned short)tp->t_ssp);
 			break;
 
 		case REGOFF:

@@ -26,7 +26,8 @@ PP(int flag;)								/* 1=>set values in tree, 0=>return */
 	nregs = DREG(nregs);
 	ltp = NULL;
 	rtp = NULL;
-	if (BINOP(op = tp->t_op))
+	op = tp->t_op;
+	if (BINOP(op))
 	{
 		ltp = tp->t_left;
 		rtp = tp->t_right;
@@ -37,7 +38,7 @@ PP(int flag;)								/* 1=>set values in tree, 0=>return */
 	switch (op)
 	{
 	case CLONG:
-		if (tp->t_lvalue >= 0x8000L || tp->t_lvalue <= 0xffff8000L)
+		if (tp->t_lvalue >= (int32_t)0x8000L || tp->t_lvalue <= (int32_t)0xffff8000L)
 		{
 			su = SU_ADDR;
 			break;
@@ -113,7 +114,9 @@ PP(int flag;)								/* 1=>set values in tree, 0=>return */
 			}
 			su = MAX(SU_EASY, su);
 		} else if (su <= SU_XREG)
+		{
 			su = MAX(SU_EASY, su);
+		}
 		if (ISFLOAT(tp->t_type))
 			su = SU_VHARD;
 		break;

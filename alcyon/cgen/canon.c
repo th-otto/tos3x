@@ -50,9 +50,9 @@ PP(struct tnode **tpp;)						/* pointer to tree */
 			if (!lconst && (ltp->t_op != CINT || rtp->t_op != CINT))
 				return 0;
 			if (lconst)
-				ltp->t_lvalue = (lval) ? ltp->t_lvalue : rtp->t_lvalue;
+				ltp->t_lvalue = lval ? ltp->t_lvalue : rtp->t_lvalue;
 			else
-				ltp->t_value = (lval) ? ltp->t_value : rtp->t_value;
+				ltp->t_value = lval ? ltp->t_value : rtp->t_value;
 			*tpp = ltp;
 			return 1;
 		}
@@ -72,7 +72,7 @@ PP(struct tnode **tpp;)						/* pointer to tree */
 			}
 		} else if ((rtp = constant(rtp, &lconst)) != NULL)
 		{
-			rval = (lconst) ? rtp->t_lvalue : rtp->t_value;
+			rval = lconst ? rtp->t_lvalue : rtp->t_value;
 			anylong += lconst;
 		} else
 		{
@@ -80,6 +80,9 @@ PP(struct tnode **tpp;)						/* pointer to tree */
 		}
 	}
 	
+	/*
+	 * BUG: all these evaluations to not take UNSIGNED into account
+	 */
 	switch (op)
 	{
 	case ADD:
@@ -115,19 +118,19 @@ PP(struct tnode **tpp;)						/* pointer to tree */
 		break;
 
 	case GREAT:
-		lval = (lval > rval);
+		lval = lval > rval;
 		break;
 
 	case GREATEQ:
-		lval = (lval >= rval);
+		lval = lval >= rval;
 		break;
 
 	case LESS:
-		lval = (lval < rval);
+		lval = lval < rval;
 		break;
 
 	case LESSEQ:
-		lval = (lval <= rval);
+		lval = lval <= rval;
 		break;
 
 	case UMINUS:
@@ -328,7 +331,8 @@ PP(struct tnode **tpp;)
 		tp->t_type &= TYPE;
 		tp->t_type |= POINTER;
 	}
-	if (LEAFOP(op = tp->t_op))
+	op = tp->t_op;
+	if (LEAFOP(op))
 		return 0;
 	lconst = changes = 0;
 	if (BINOP(op))
@@ -355,7 +359,7 @@ PP(struct tnode **tpp;)
 			rtp = NULL;
 		}
 		if (p)
-			cval = (lconst) ? p->t_lvalue : p->t_value;
+			cval = lconst ? p->t_lvalue : p->t_value;
 		switch (op)
 		{
 		case ADD:
@@ -820,7 +824,8 @@ PP(struct tnode *tp;)						/* pointer to tree */
 	struct tnode *rhstp, *asgtp;
 	register short foff, fmask, op, flen;
 
-	if (LEAFOP(op = tp->t_op))
+	op = tp->t_op;
+	if (LEAFOP(op))
 		return tp;
 	if (ISASGOP(op) && tp->t_left->t_op == BFIELD)
 	{
@@ -966,7 +971,8 @@ PP(struct tnode *tp;)
 	struct tnode **plp, **clp;
 	register short op;
 
-	if (RELOP(op = tp->t_op))
+	op = tp->t_op;
+	if (RELOP(op))
 	{
 		s = tp->t_left;
 		if (harder(tp->t_right, s))
@@ -1136,6 +1142,7 @@ PP(int32_t val;)
 struct tnode *canon(P(struct tnode *) tp)							/* returns pointer to tree */
 PP(struct tnode *tp;)						/* pointer to tree to canonicalize */
 {
+	PUTEXPR(cflag > 1, "canon entry", tp);
 	tp = fixbfield(tp);
 	do
 	{
