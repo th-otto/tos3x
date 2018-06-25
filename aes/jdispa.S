@@ -70,7 +70,7 @@ longframe	equ $59e			; BIOS system variable...
 	xdef	_cli
 _cli:
 	move	sr,savsr		; save it
-	or	#$700,sr
+	ori	#$700,sr
 	rts
 
 /*
@@ -88,7 +88,7 @@ _sti:
 /* 306de: 00e2589e */
 	xdef	_hcli
 _hcli:
-	or	#$700,sr
+	ori	#$700,sr
 	rts
 
 /*
@@ -97,7 +97,7 @@ _hcli:
 /* 306de: 00e258a4 */
 	xdef	_hsti
 _hsti:
-	and	#$f8ff,sr
+	andi	#$f8ff,sr
 	rts
 
  
@@ -131,7 +131,7 @@ dsp2:	move	sr,-(sp)		; and finish the stack frame with sr
 	xdef	_savestate
 _savestate:
 	move	sr,srsave		; save interrupts
-	or	#$700,sr		; turn them off
+	ori	#$700,sr		; turn them off
 
 	move.l	a0,savea0
 
@@ -176,7 +176,7 @@ _savestate:
 	xdef	_switchto
 _switchto:
 	move	sr,srsave
-	or	#$700,sr		; no interrupts while on bogus stack!
+	ori	#$700,sr		; no interrupts while on bogus stack!
 
 	move.l	_rlr,sp
 	move.l	8(sp),sp		; Get the UDA
@@ -196,7 +196,7 @@ _switchto:
 	xdef	_gotopgm
 _gotopgm:
 	move	sr,savsr		; save sr
-	or	#$700,SR		; turn interrupts off
+	ori	#$700,SR		; turn interrupts off
 	movea.l	_rlr,a0			; get pd
 	move.l	$18(a0),a0		; pd->ldaddr is base page of program
 	tst.w	(longframe).w		; if not on longframe CPU
@@ -220,7 +220,7 @@ g_1:	move.l	8(a0),-(sp)		; get beg of text on our sp
 	xdef	_psetup
 _psetup:
 	move	sr,psetsr		; save interrupts
-	or	#$700,sr		; turn them off
+	ori	#$700,sr		; turn them off
 	move.l	4(sp),a0		; *pd
 	move.l	8(sp),d0		; val
 	move.l	8(a0),a1		; a1 = pd->uda
