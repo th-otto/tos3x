@@ -6,6 +6,7 @@
 */
 
 #include "parser.h"
+#ifdef DEBUG
 #include <ctype.h>
 
 static char const invalid[] = "INVALID";
@@ -263,3 +264,4 @@ PP(struct tnode *tp;)
 	if (tp != 0)
 		putsexpr(tp);
 }
+#endif

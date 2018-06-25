@@ -106,15 +106,19 @@ PP(const char *fname;)
 /* usage - output usage error message and die */
 static VOID usage(NOTHING)
 {
-	fatal(_("usage: %s source link icode strings [-e|-f] [-w] [-t]\n\
-options:\n\
-    -e       ieee floats (default)\n\
-    -f       FFP floats\n\
-    -g       symbolic debug output\n\
-    -t       put strings into text segment\n\
-    -w       suppress warning messages\n\
-    -d[isx]  debug generator:\n\
-             i=init, s=symbols, x=tree"), program_name);
+	error(_("usage: %s source link icode strings [-e|-f] [-w] [-t]"), program_name);
+	error(_(" options:"));
+	error(_("    -e       ieee floats (default)"));
+	error(_("    -f       FFP floats"));
+	error(_("    -g       symbolic debug output"));
+	error(_("    -t       put strings into text segment"));
+	error(_("    -w       suppress warning messages"));
+#ifdef DEBUG
+	error(_("    -d[isx]  debug generator:"));
+	error(_("             i=init, s=symbols, x=tree"));
+#endif
+	errcnt = -1;
+	cleanup();
 }
 
 
@@ -203,7 +207,9 @@ PP(char **argv;)							/* argument pointers */
 #endif
 						break;
 					case 'x':					/* if debug on, debug expr tree */
+#ifdef DEBUG
 						treedebug++;
+#endif
 						break;
 					}
 					q++;
