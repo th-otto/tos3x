@@ -158,12 +158,12 @@ static int lookahd(NOTHING)
 
 	/* only get here if not a single-character token (or junk)  */
 
-	if (isalpha(c))						/* file or option name? */
+	if (isalpha(c) || c == '_')			/* file or option name? */
 		return NAMETK;
-	else if (isdigit(c))				/* number?      */
+	if (isdigit(c))				/* number?      */
 		return NUMBTK;
-	else								/* who knows?       */
-		return JUNK;
+	/* who knows? */
+	return JUNK;
 }
 
 
@@ -234,8 +234,9 @@ static int scan(NOTHING)
 		if (cfileflg)					/* reading from file?   */
 		{
 			if (fgets(cmdline, LINELEN, cmdfpt) == NULL)
+			{
 				return NOMORE;
-			else						/* got another line */
+			} else						/* got another line */
 			{
 				println(cmdline);
 				scanpos = 0;			/* ready for new line   */
@@ -254,14 +255,13 @@ static int scan(NOTHING)
 				tokenval[j++] = c;
 			}
 			c = cmdline[++i];
-		} while (isalnum(c) || c == ':' || c == '.' || c == '/' || c == '\\');
+		} while (isalnum(c) || c == '_' || c == ':' || c == '.' || c == '/' || c == '\\');
 
 		/* parser validifies number */
 		tokenval[j] = EOS;				/* mark end of string   */
 		scanpos = i;					/* save scan position   */
 		return toktype;
-	}
-	else								/* single character */
+	} else								/* single character */
 	{
 		scanpos += 1;					/* next char in stream  */
 		tokenval[0] = c;				/* keep old character   */
@@ -1024,6 +1024,12 @@ VOID putarrow(NOTHING)
 	register int i;
 	register FILE *fp = stderr;
 	
+#if 1
+	for (i = 0; i < lastpos; i++)
+		fputc(cmdline[i], fp);					/* print a line of dots */
+	fputc('\n', fp);
+
+#else
 	for (i = 0; i < lastpos; i++)
 		fputc('.', fp);					/* print a line of dots */
 
@@ -1035,6 +1041,7 @@ VOID putarrow(NOTHING)
 			fputc('-', fp);
 		fputc('^', fp);					/* mark other end of token */
 	}
+#endif
 
 	fputc('\n', fp);
 }

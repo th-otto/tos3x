@@ -44,7 +44,7 @@
 #define	__C_cs	041
 #define	__C_ps	042
 
-extern	char const __atab[];
+extern char const __atab[];
 
 /*
  *	Character Class Testing and Conversion DEFINEs:
