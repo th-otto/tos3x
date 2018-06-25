@@ -951,7 +951,15 @@ PP(unsigned short val;)
 
 static VOID usage(NOTHING)
 {
-	rpterr(_("Usage: as68 [-p] [-u] [-l] [-n] [-s d:] [-f d:] sourcefile"));
+	rpterr(_("Usage: as68 [-p] [-u] [-l] [-n] [-t] [-f d:] sourcefile"));
+	rpterr(_("Options:"));
+	rpterr(_("    -p   produce a listing"));
+	rpterr(_("    -u   make undefined symbols external"));
+	rpterr(_("    -n   no branch optimization"));
+	rpterr(_("    -l   use long addresses (default)"));
+	rpterr(_("    -a   use short addresses"));
+	rpterr(_("    -t   generating code suitable for the 68010"));
+	rpterr(_("    -f   redirect temp files to directory"));
 	exit(EXIT_FAILURE);
 }
 

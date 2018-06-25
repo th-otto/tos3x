@@ -947,7 +947,8 @@ _va_dcl
 	va_list args;
 	
 	va_start(args, ptch);
-	fprintf(stderr, "& %d: ", fchr == EOLC ? absln - 1 : absln);
+	if (absln > 0)
+		fprintf(stderr, "& %d: ", fchr == EOLC ? absln - 1 : absln);
 	vfprintf(stderr, ptch, args);
 	va_end(args);
 	fputc('\n', stderr);
