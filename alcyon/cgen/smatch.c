@@ -127,7 +127,7 @@ PP(const struct skeleton *skp;)				/* pointer to code skeleton */
 	op = tp->t_op;
 #ifdef DEBUG
 	if (eflag)
-		oprintf("expand op=%d left=%x right=%x skp=%p\n", op, skp->sk_left, skp->sk_right, skp);
+		oprintf("expand op=%d left=0x%x right=0x%x skp=%p\n", op, skp->sk_left, skp->sk_right, skp);
 #endif
 	if (((op >= MULT && op <= COMPL) || (op >= LMULT && op <= LMOD)) || tp->t_type == CHAR)
 		freg = DREG(freg);
@@ -289,6 +289,7 @@ PP(const struct skeleton *skp;)				/* pointer to code skeleton */
 		case LEFT:
 		case RIGHT:
 			subtrees--;
+			/* fall through */
 		case TREE:
 			p = (c == LEFT ? ltp : c == RIGHT ? rtp : tp);
 			flag = *macro++;
@@ -352,7 +353,9 @@ PP(const struct skeleton *skp;)				/* pointer to code skeleton */
 						freg = DREG(sreg);
 						nreg = freg + 1;
 					} else
+					{
 						outmovr(sreg, DREG(freg), p);
+					}
 				}
 			}
 			break;
@@ -370,9 +373,11 @@ PP(const struct skeleton *skp;)				/* pointer to code skeleton */
 			case LMOD:
 			case LEQMOD:
 				extf++;
+				/* fall through */
 			case MOD:
 			case EQMOD:
 				OUTSWAP(freg);
+				break;
 			}
 			break;
 		}
@@ -419,6 +424,7 @@ PP(int skinfo;)
 	case CLONG:
 		if (tp->t_su > SU_CONST)
 			break;
+		/* fall through */
 	case CINT:
 		isconstant++;
 		break;
@@ -431,6 +437,7 @@ PP(int skinfo;)
 	case T_ANY:						/* either short or char */
 		if (type == CHAR)
 			return 1;
+		/* fall through */
 	case T_INT:
 		return type == INT || isconstant;
 
@@ -566,7 +573,7 @@ PP(int reg;)								/* register to use */
 	{
 #ifdef DEBUG
 		if (mflag > 1)
-			oprintf("sk_left=%x sk_right=%x\n", skp->sk_left, skp->sk_right);
+			oprintf("sk_left=0x%x sk_right=0x%x\n", skp->sk_left, skp->sk_right);
 #endif
 		if (!(skelmatch(ltp, skp->sk_left)))
 			continue;
@@ -574,7 +581,7 @@ PP(int reg;)								/* register to use */
 			continue;
 #ifdef DEBUG
 		if (mflag)
-			oprintf("match found skp=%p left=%x right=%x\n", skp, skp->sk_left, skp->sk_right);
+			oprintf("match found skp=%p left=0x%x right=0x%x\n", skp, skp->sk_left, skp->sk_right);
 #endif
 		return skp;
 	}

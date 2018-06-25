@@ -92,6 +92,7 @@ const char *const opname[] = {
 	"cfloat",							/* 79=CFLOAT */
 };
 
+#ifdef DEBUG
 
 static const char *const types[] = {
 	"typeless-invalid",					/* 0=TYPELESS */
@@ -150,15 +151,15 @@ PP(struct tnode *tp;)
 	register short i;
 
 	if (SUPTYPE(tp->t_type))
-		fputc('*', stderr);
-	fprintf(stderr, "%s ", types[BTYPE(tp->t_type)]);
+		oputchar('*');
+	oprintf("%s ", types[BTYPE(tp->t_type)]);
 	if (tp->t_su != 0 || (tp->t_op == CINT && tp->t_value == 0))
 	{
 		i = tp->t_su >> 8;
 		if (i > 15 || i < 0)
-			fprintf(stderr, "INVALID");
+			oprintf("INVALID");
 		else
-			fprintf(stderr, "%s", suvals[i]);
+			oprintf("%s", suvals[i]);
 	}
 }
 
@@ -263,3 +264,4 @@ PP(struct tnode *tp;)
 	fprintf(stderr, "%s\n", name);
 	putsexpr(tp);
 }
+#endif

@@ -88,6 +88,7 @@ PP(struct tnode *right;)					/* righst sub-tree */
 {
 	register struct tnode *tp;
 
+	UNUSED(dummy);
 	tp = talloc(sizeof(struct tnode) - sizeof(union tval) + sizeof(tp->v.t));
 	tp->t_op = op;
 	tp->t_type = type;
@@ -243,6 +244,7 @@ PP(int autof;)								/* {A_DOPRE,A_DOPOST} */
 	case PREDEC:
 		if ((autof & A_DOPRE) == 0)
 			return tcopy(tp->t_left, autof);
+		/* fall through */
 	  copyop:
 	default:
 		if (ISASGOP(op))

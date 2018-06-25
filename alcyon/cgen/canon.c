@@ -291,6 +291,7 @@ PP(struct tnode **tpp;)
 				break;
 			if (rtp->t_op == CLONG)
 				rtp->t_op = DCLONG;
+			/* fall through */
 		case EQMULT:
 			tp->t_op += (LMULT - EQMULT);
 			*tpp = tnalloc(ASSIGN, tp->t_type, 0, 0, tcopy(tp->t_left, A_DOPOST), tcopy(tp, A_DOPRE));
@@ -401,6 +402,7 @@ PP(struct tnode **tpp;)
 				tp->t_right = rtp;
 				continue;
 			}
+			/* fall through */
 		case EQSUB:
 		case EQADD:
 		case EQAND:
@@ -631,6 +633,7 @@ PP(struct tnode **tpp;)
 				tp->t_right = rtp->t_left;
 				continue;
 			}
+			/* fall through */
 		case RSH:
 		case EQRSH:
 			if (p)
@@ -1056,8 +1059,8 @@ PP(short *lconst;)
 	{
 		*lconst = 1;
 		return tp;
-	} else
-		*lconst = 0;
+	}
+	*lconst = 0;
 	if (tp->t_op == CINT)
 		return tp;
 	if (tp->t_op == INT2L && (tp->t_left->t_op == CINT || tp->t_left->t_op == CLONG))
@@ -1110,7 +1113,7 @@ PP(int32_t val;)
 	for (i = 31; val != 0; val <<= 1, i--)
 		if (val & 0x80000000)
 			break;
-	if (val != 0x80000000)
+	if (val != (int32_t)0x80000000L)
 		return -1;
 	return i;
 }

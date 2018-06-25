@@ -546,10 +546,12 @@ PP(int reg;)								/* register to use */
 			case MOD:
 				if (rtp->t_left->t_type == LONG && ltp->t_type == INT)
 					return change;
+				/* fall through */
 			case MULT:
 				if ((rtp->t_left->t_type == INT || rtp->t_left->t_op == INT2L)
 					&& (rtp->t_right->t_type == INT || rtp->t_right->t_op == INT2L) && ltp->t_type == LONG)
 					return change;
+				/* fall through */
 			case AND:
 			case OR:
 			case XOR:
@@ -557,6 +559,7 @@ PP(int reg;)								/* register to use */
 			case RSH:
 				if (ISAREG(ltp->t_reg))
 					return change;
+				/* fall through */
 			case ADD:
 			case SUB:
 				p = rtp->t_right;
@@ -577,6 +580,7 @@ PP(int reg;)								/* register to use */
 		case EQRSH:
 			if (ltp->t_sc != REGISTER)
 				return change;
+			/* fall through */
 		case EQADD:
 		case EQSUB:
 		case EQAND:
@@ -700,6 +704,7 @@ PP(int bitno;)
 		case REGISTER:
 			if (ISDREG(tp->t_reg))
 				return bitno;
+			/* fall through */
 		default:
 			return -1;
 
@@ -874,6 +879,7 @@ PP(int reg;)
 
 	case LAND:
 		dir = !dir;
+		/* fall through */
 	case LOR:
 		if (dir == FALSE)
 		{

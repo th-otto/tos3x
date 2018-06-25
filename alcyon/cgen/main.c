@@ -38,7 +38,7 @@ short bol;
 short lineno;
 short errcnt;
 
-short dflag; /* bool: generate code for m68010 */
+short dflag; /* bool: include line numbers in assembly output */
 short cflag; /* bool: debug code reader */
 short eflag; /* bool: debug skeleton expansion */
 short mflag; /* bool: debug skeleton match */
@@ -116,7 +116,7 @@ static short readshort(NOTHING)
 			break;
 
 		default:
-			error(_("intermediate code error - %c,%d"), c, c);
+			error(_("intermediate code error reading short - %d ($%x)"), c, c);
 			break;
 		}
 	}
@@ -136,7 +136,7 @@ static int32_t readlong(NOTHING)
 	w1 = 0;
 	w2 = 0;
 	onedot = 0;
-	while (1)
+	for (;;)
 	{
 		switch (c = getc(ifil))
 		{
@@ -194,7 +194,7 @@ static int32_t readlong(NOTHING)
 			}
 			/* fall through */
 		default:
-			error(_("intermediate code error - %c,%d"), c, c);
+			error(_("intermediate code error reading long - %d ($%x)"), c, c);
 			break;
 		}
 	}
@@ -353,7 +353,7 @@ static VOID readicode(NOTHING)
 			break;
 
 		default:
-			error(_("intermediate code error %c,%d"), c, c);
+			error(_("intermediate code error reading tree %d ($%x)"), c, c);
 			break;
 		}
 	}
@@ -458,13 +458,20 @@ _va_dcl
 /* usage - output usage message */
 static VOID usage(NOTHING)
 {
-	fatal(_("usage: %s icode link asm [-DTacemov]\n\
-options:\n\
-    -L    assume long (32bit) address variables (default)\n\
-    -a    assume short (16bit) address variables\n\
-    -g    generate line labels for cdb\n\
-    -d    include line numbers in assembly output\n\
-    -t    generate code for 68010"), program_name);
+	error(_("usage: %s icode link asm [-DTacemov]"), program_name);
+	error(_("options:"));
+	error(_("    -L    assume long (32bit) address variables (default)"));
+	error(_("    -a    assume short (16bit) address variables"));
+	error(_("    -g    generate line labels for cdb"));
+	error(_("    -d    include line numbers in assembly output"));
+	error(_("    -t    generate code for 68010"));
+#ifdef DEBUG
+	error(_("    -c    debug code generator"));
+	error(_("    -e    debug skeleton expansion"));
+	error(_("    -m    debug skeleton match"));
+	error(_("    -m    debug operators"));
+#endif
+	endit(EXIT_FAILURE);
 }
 
 

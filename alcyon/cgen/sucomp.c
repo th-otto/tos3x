@@ -43,6 +43,7 @@ PP(int flag;)								/* 1=>set values in tree, 0=>return */
 			break;
 		}
 		i = tp->t_lvalue;
+		/* fall through */
 	case CINT:
 		if (op == CINT)
 			i = tp->t_value;
@@ -90,6 +91,7 @@ PP(int flag;)								/* 1=>set values in tree, 0=>return */
 	case LMULT:
 	case CALL:
 		sucomp(rtp, nregs, flag);
+		/* fall through */
 	case NACALL:
 		sucomp(ltp, nregs, flag);
 		su = SU_VHARD;					/* very hard */
