@@ -1,17 +1,21 @@
 CACHE100_OBJS = cache100.o
 CACHE100_OLD_OBJS = cacheold.o
 FOLDR100_OBJS = foldr100.o
+VDI_FIX_OBJS = vdi_fix.o
 
 SRCS = \
 	cache100.S \
 	cacheold.S \
 	foldr100.S \
+	vdifix11/vdi_fix.S \
 	stripex.c \
 	$(empty)
 
 EXTRA_DIST1 = \
 	Makefile \
 	SRCFILES \
+	vdifix11/interna.txt \
+	vdifix11/vdi_fix.txt \
 	$(empty)
 
 EXTRA_DIST2 = \

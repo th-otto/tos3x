@@ -1,0 +1,96 @@
+VDI-FIX 1.10 von Karsten Isakovic, Berlin 30.01.91
+--------------------------------------------------
+
+In allen TOS-Versionen, (bis auf das BlitterTOS 1.2, dem daraus ent-
+standenen  KAOS 1.2,  dem  KAOS  1.4x  und  den  TT-TOS  Versionen), 
+existiert ein  Fehler im  Zusammenhang mit dem ôffnen von  VDI-Work-
+stations.  Wenn  in  der Liste  der VDI-Handles, die intern als ver-
+kettete Liste  verwaltet wird, eine LÅcke  entsteht, so  werden alle
+weiteren  VDI-Workstations  falsch eingefÅgt  und erhalten denselben
+VDI-Handle.
+
+VDI-FIX  behebt  diesen Fehler,  indem  es sich in den 'v_opnwk' und
+'v_opnvwk'  Aufruf  einklinkt  und  nach  einem  solchen  Aufruf die 
+interne  Liste  umsortiert,  fals die neue VDI-Workstation durch den
+VDI-Fehler falsch eingefÅgt wurde.
+
+UnterstÅtzt werden bisher folgenden TOS-Versionen :
+
+   TOS ROM Datum
+   ------------------
+   1.0     20.11.85 
+   1.0     06.02.86 
+   1.0  x  06.02.86 
+   1.4     18.05.88 Developer
+   1.4     08.08.88 BETA
+   1.4  x  22.02.89 C-BIT
+   1.4     06.04.89 Rainbow
+   1.4  x  06.04.89 reloziertes ROM-TOS
+   1.6  x  29.07.89 STE
+   2.05 x  05.12.90 MEGA STE
+   030  x  23.05.89 TT (Diese TT-TOS Vorversion enthÑlt den Fehler)
+
+Beim  STE  gibt  es anscheinend noch ein TOS mit dem Datum 19.06.89.
+Sobald  neue  TOS-Versionen  erscheinen, wird auch VDI-FIX angepaût.
+<Solange bis ATARI den Fehler endlich selbst behebt ! (Anmerkung vom
+30.01.91: Die neuen TT-TOS Versionen haben den Fehler nicht mehr, es
+hat sich etwas bei ATARI getan!)>
+
+Das  TOS 1.7 -- das  STE TOS 1.6 vom 29.07.89,  nur auf der normalen
+ST  Hardware  lauffÑhig  --  wird  auch  erkannt,  da  alle internen 
+Variablen denen des TOS 1.6 entsprechen.
+Beim KAOS-TOS 1.41 ist der Fehler beseitigt worden.
+
+Ab  VDI-FIX 1.6 wird ÅberprÅft,  ob OVERSCAN (Version >= 2.0.16) ge-
+laden  ist,  da  dieses  Programm  den  Fehler  selber  abfÑngt  und 
+VDI-FIX somit nicht notwendig ist.
+
+AMC-GDOS  behebt  den  Fehler  nur,  wenn  ein neuer Treiber fÅr den 
+Bildschirm  geladen  wird,  z.B  fÅr den MATRIX-Bildschirm.  Ab  der
+VDI-FIX Version 1.3 ist die Reihenfolge in  Bezug auf GDOS egal. Bei
+den vorherigen Versionen muûte  VDI-FIX nach GDOS ausgefÅhrt werden.
+
+VDI-FIX 1.10 gehîrt in den AUTO-Ordner. Von den 1450 Bytes bleiben ca
+350 Bytes resident, der Rest wird freigegeben. 
+
+VDI-FIX Versionen
+------------------
+1.0	 Nur fÅr TOS 1.0 und 1.4
+1.1	 TOS 1.6 kam dazu
+1.2	 TOS 030 kam auch noch dazu
+1.3	 Reihenfolge in Bezug auf GDOS egal
+1.4	 Installiert Cookie 'VFIX'+Versionsnummer,  falls ein Cookie-
+     Jar installiert ist.
+1.5  TurboC-Cconws Fehler behoben,  der nur mit QuickST auftritt. 
+1.6  Es werden nun 140 Bytes weniger benîtigt.
+1.7  Neue TT-TOS Versionen
+1.8  Fehler behoben, der nur bei der Reihenfolge VDI-FIX 1.7/GDOS
+     auftrat...
+1.9  TT-TOS Versions-Abfrage war fehlerhaft. TOS-Version 2.05 des
+     MEGA STE wird unterstÅtzt.
+1.10 Tja, eine öberprÅfung ergab, daû beim TT-TOS der Patch nicht
+     notwendig ist. Es wird also nur noch ein Hinweis ausgegeben,
+     daû der Patch entfallen kann.
+
+******************************************************************
+*                                                                *
+*  Unter der Voraussetzung, daû die Dateien                      *
+*                                                                *
+*    VDI_FIX.PRG VDI_FIX.TXT und INTERNA.TXT                     *
+*                                                                *
+* unverÑndert kopiert werden, darf Vdi-Fix  fÅr private Anwender *
+* frei kopiert und benutzt werden. Kommerzielle Nutzung in jeder *
+* Form (dies  schlieût  auch  den  Vertrieb  Åber Public-Domain- *
+* Sammeldisketten oder Ñhnliches ein) ist NICHT GESTATTET.       *
+*                                                                *
+* Die neuste Version kann man direkt beim Autor oder in den MAUS *
+* Mailboxen beziehen.                                            *
+*                                                                *
+******************************************************************
+
+Mit freundlichen GrÅûen
+
+   Karsten Isakovic
+
+   Wilmersdorfer Str.82
+   D-1000 Berlin 12

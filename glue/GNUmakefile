@@ -45,12 +45,12 @@ CARTBASE = E40000
 
 ifeq ($(USE_CROSS_ALCYON),1)
 tos.img: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o tosvars.o
-	$(BIN)link68 '[abs,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
+	$(LINK68) '[abs,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
 endif
 
 cartridge.img: cartridge.o
 ifeq ($(USE_CROSS_ALCYON),1)
-	$(BIN)link68 -o cartridg.tmp -a $(CARTBASE) x 0 cartridg.o
+	$(LINK68) -o cartridg.tmp -a $(CARTBASE) x 0 cartridg.o
 	dd bs=1 skip=36 < cartridg.tmp > $@
 else
 	$(LD) -nostartfiles -nostdlib -o cartridge.tmp -Wl,--script=../common/rom.ld,-Ttext=0x$(CARTBASE),-Tbss=0 cartridge.o

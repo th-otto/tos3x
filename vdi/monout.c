@@ -1760,7 +1760,7 @@ VOID d_opnvwk(NOTHING)
 #endif
 	work_ptr = &virt_work;
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | (!BINEXACT)
 	while (work_ptr->next_work != NULL && handle == work_ptr->next_work->handle)
 	{
 		handle++;
@@ -1785,6 +1785,11 @@ VOID d_opnvwk(NOTHING)
 		new_work->next_work = NULL;
 	} else
 	{
+		/*
+		 * BUG: this will insert the new structure in the wrong
+		 * place if there are gaps in the handle numbers.
+		 * Fixed by the code for 3.0x above, and the VDIFIX auto folder program.
+		 */
 		register ATTRIBUTE *tmp;
 		
 		tmp = work_ptr->next_work;

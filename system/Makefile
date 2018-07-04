@@ -7,7 +7,7 @@ foldr100_ASFLAGS = -n
 
 LIBS = ${LIBC}
 
-PROGRAMS = cache100.prg foldr100.prg
+PROGRAMS = cache100.prg foldr100.prg vdi_fix.prg
 
 all: $(PROGRAMS)
 
@@ -21,6 +21,14 @@ foldr100.prg: $(FOLDR100_OBJS) ${MAKEFILE}
 
 cacheold.prg: $(CACHE100_OLD_OBJS) ${MAKEFILE}
 	$(AM_V_LD)${LD} ${LDFLAGS} -h 1 -o $@ ${CACHE100_OLD_OBJS}
+
+vdi_fix.prg: $(VDI_FIX_OBJS) ${MAKEFILE}
+	$(AM_V_LD)${LD} ${LDFLAGS} -h 7 -o $@ ${VDI_FIX_OBJS}
+
+vdi_fix.o: vdifix11/vdi_fix.S
+	$(AM_V_AS)${CPP} $*.S $(CPPOUT) $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
 
 check::
 
