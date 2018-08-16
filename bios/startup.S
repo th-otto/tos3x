@@ -277,7 +277,7 @@ _main:
         move    #$2700,sr
 
 /* special TT reset */
-#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+#if (TOSVERSION >= 0x306) & (TOSVERSION < 0x400)
         move.w #$0100,(DMA_CTRL).w
         move.w #$0000,(DMA_CTRL).w
 #endif
@@ -321,7 +321,9 @@ zero:
         TO_TTR1(zero)
 
 #if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+#if (TOSVERSION >= 0x306)
         FRESTORE(zero)
+#endif
 
         btst      #0,(scu_gp1).w			/* memconfig valid? */
         beq.s     noreset
@@ -397,7 +399,11 @@ meminit:
 
 #if TOSVERSION < 0x400
 #if TOSVERSION >= 0x300
+#if TOSVERSION >= 0x306
         move.b    #$01,(v_syncmod).w /* set video sync */
+#else
+        clr.w     (sndmactl).w
+#endif
 #else
         btst      #0,_os_conf+1             /* check bit: configured for 50hz? */
         beq.s     notpal                    /* (nope -- we're good ol' NTSC) */

@@ -105,6 +105,37 @@
 #endif /* TOSVERSION == 0x306 */
 
 
+#if TOSVERSION == 0x305
+
+/*
+ * length of BIOS text segment of the US version,
+ * which does not have any extra code
+ */
+#define BTLEN_US    $0000563E
+#define DTLEN_US    $0000FBCC
+
+
+#if OS_COUNTRY == CTRY_US
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
+#define DESKDLEN    $00000982
+#define GLUELEN     $00007492
+#endif
+
+/*
+ * these are identical in all language versions
+ */
+#define BIOSDLEN    $000009D8
+#define VDITLEN     $0000D06E
+#define VDIDLEN     $00006EFA
+#define BDOSTLEN    $000062AC
+#define BDOSDLEN    $0000039E
+#define AESTLEN     $0000CCD6
+#define AESDLEN     $000006D8
+
+#endif /* TOSVERSION == 0x305 */
+
+
 #if TOSVERSION == 0x206
 
 #define BTLEN_US    $0000603A

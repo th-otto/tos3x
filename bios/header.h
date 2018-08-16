@@ -85,6 +85,13 @@
 #define OS_DOSDATE $151D
 #endif
 
+#if TOSVERSION >= 0x305
+#undef OS_DATE
+#undef OS_DOSDATE
+#define OS_DATE $12051990
+#define OS_DOSDATE $1585
+#endif
+
 #if TOSVERSION >= 0x306
 #undef OS_DATE
 #undef OS_DOSDATE
