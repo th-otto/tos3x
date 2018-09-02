@@ -278,16 +278,16 @@ _main:
 
 /* special TT reset */
 #if (TOSVERSION >= 0x306) & (TOSVERSION < 0x400)
-        move.w #$0100,(DMA_CTRL).w
-        move.w #$0000,(DMA_CTRL).w
+        move.w #$0100,(DMA_CTRL).w /* reset ACSI chip... */
+        move.w #$0000,(DMA_CTRL).w /* ...leave in read state. */
 #endif
 #if TOSVERSION >= 0x400
-		move.w ($FFFF8006).w,d0
+		move.w ($FFFF8006).w,d0 /* read to auto-config mem cntrlr */
 #endif
         reset                  /* reset all hardware */
 #if TOSVERSION >= 0x400
-		move.w ($FFFF8006).w,d0
-		move.w #7,($FFFF8940).w
+		move.w ($FFFF8006).w,d0 /* read to auto-config mem cntrlr */
+		move.w #7,($FFFF8940).w /* Added to fix problem in Sparrow hardware. GPIO has no pullup/down resist. */
 #endif
 
 /*
