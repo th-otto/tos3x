@@ -388,6 +388,7 @@ PP(int16_t *pw;)
 
 /* 306de: 00e18cc6 */
 /* 306us: 00e18c6c */
+/* 404: 00e1dc30 */
 int32_t osif2(P(int16_t *) pw)
 PP(int16_t *pw;)
 {
@@ -474,7 +475,7 @@ PP(int16_t *pw;)
 				return ctmp;
 			case 2:                 /* Cconout */
 			case 4:                 /* Cauxout() */
-			case 5:
+			case 5:                 /* Cprnout() */
 				/* write the char in the int at pw[1] */
 			  rawout:
 				xwrite(h, 1L, ((char *) &pw[1]) + 1);

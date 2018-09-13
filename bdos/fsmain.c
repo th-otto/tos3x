@@ -15,6 +15,7 @@
 
 /* 306de: 00e1720e */
 /* 306us: 00e171b4 */
+/* 404: 00e1b57c */
 DTAINFO *xgetdta(NOTHING)							/*+ return address of dta */
 {
 	return run->p_xdta;
