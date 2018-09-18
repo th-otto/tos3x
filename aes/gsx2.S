@@ -53,6 +53,7 @@
 	text
 
 /* 306de: 00e254f8 */
+/* 404: 00e343a8 */
 	xdef	_gsx2
 _gsx2:
 	lea	pblock,a0	; a0 -> pblock
@@ -145,6 +146,7 @@ _i_ptr2: ds.b 0
 	rts
 
 
+/* 00e34414 */
 	xdef	_m_lptr2
 _m_lptr2: ds.b 0
 

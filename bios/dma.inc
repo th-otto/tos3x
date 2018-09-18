@@ -962,7 +962,7 @@ iderdy:
         andi.b    #$07,d0          /* mask off flags (if any) */
         lsl.b     #4,d0            /* shift unit # to place */
         move.b    d0,ide_headn     /* select device */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
         move.l    #1000,d0        /* set up timer IDERDY */
         add.l     (_hz_200).w,d0
 iderdy1:

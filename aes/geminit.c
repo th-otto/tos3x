@@ -273,6 +273,7 @@ VOID accs_init(NOTHING)
 /*
  * Set the resolution
  */
+/* 404: 00e24a48 */
 VOID setres(NOTHING)
 {
 	int mode;
@@ -290,6 +291,7 @@ VOID setres(NOTHING)
 
 
 /* 306de: 00e1dca8 */
+/* 404: 00e24a90 */
 VOID gem_main(NOTHING)
 {
 	register int16_t i;

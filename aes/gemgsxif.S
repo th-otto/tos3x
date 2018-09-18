@@ -141,6 +141,7 @@ VOID gsx_mfree(NOTHING)
 }
 #endif
 /* 306de: 00e25064 */
+/* 404: 00e33f06 */
 	xdef _gsx_mfree
 _gsx_mfree:
 #if (AESVERSION >= 0x330) | !BINEXACT
@@ -189,6 +190,7 @@ VOID gsx_ncode(WORD code, WORD n, WORD m)
 }
 #endif
 /* 306de: 00e2508a */
+/* 404: 00e33f34 */
 	xdef _gsx_ncode
 _gsx_ncode:
 
@@ -342,6 +344,7 @@ escape:	move.w	d0,_contrl+10
 
 *****	 Open physical work station for 6 resolutions	*****
 /* 306de: 00e25132 */
+/* 404: 00e33fdc */
 	xdef _gsx_wsopen
 _gsx_wsopen:
 
@@ -833,6 +836,7 @@ WORD av_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
 }
 #endif
 /* 306de: 00e2538c */
+/* 404: 00e3423c */
 	xdef _av_opnwk
 _av_opnwk:
 
@@ -864,6 +868,7 @@ VOID av_pline(WORD count, WORD *pxyarray)
 }
 #endif
 /* 306de: 00e253d8 */
+/* 404: 00e34288 */
 	xdef _av_pline
 _av_pline:
 
@@ -1089,7 +1094,7 @@ set_pioff:
 
 * in:
 *	d0	vdi op code
-
+/* 404: 00e34344 */
 vdi_short:
 
 	clr.l	-(sp)
@@ -1099,6 +1104,7 @@ vdi_short:
 * in:
 *	d0	offset into vdi_list
 /* 306de: 00e25498 */
+/* 404: 00e34348 */
 vdi_call:
 
 	lea	vdi_list(pc,d0.w),a2

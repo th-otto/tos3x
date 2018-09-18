@@ -63,6 +63,7 @@
 
 	text
 
+/* 404: 00e3576c */
 	xdef _trp13
 _trp13:
 	move.l	(sp)+,trp13aret
@@ -84,7 +85,7 @@ _trp14int: ds.b 0
 	xdef _getmouse
 _getmouse:
 	dc.w	$A000
-	suba.w	#$358,a0        ; WTF; will fail with Falcon VDI where mouse shape is stored somewhere else
+	suba.w	#$358,a0        ; M_POS_HX; WTF; will fail with Falcon VDI where mouse shape is stored somewhere else
 	move.l	a0,_maddr		; save the mouse block address
 	lea	mform,a1		; destination
 	move.w	#36,d0			; size ( - 1 for dbra )
@@ -151,6 +152,7 @@ putmcp:
 	
 	text
 
+/* 404: 00e357c8 */
 	xdef _mediach
 _mediach:
 	move.w	4(sp),d0
@@ -226,6 +228,7 @@ done:
  *                                                                       *
  *************************************************************************/
 /* 306de: 00e2640a */
+/* 404: 00e35866 */
 newgetbpb:
 	move.w	mydev,d0
 	cmp.w	4(sp),d0
@@ -242,6 +245,7 @@ dooldg:	move.l	oldgetbpb,a0	; continue here whether mine or not: call old.
  *                                                                       *
  *************************************************************************/
 /* 306de: 00e26436 */
+/* 404: 00e35892 */
 newmediach:
 	move.w	mydev,d0
 	cmp.w	4(sp),d0
@@ -259,6 +263,7 @@ dooldm:	move.l	oldmediach,a0	; not mine: call old vector.
  *                                                                       *
  *************************************************************************/
 /* 306de: 00e2644e */
+/* 404: 00e358aa */
 newrwabs:
 	move.w	mydev,d0
 	cmp.w	$e(sp),d0

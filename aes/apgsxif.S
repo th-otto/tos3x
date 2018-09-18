@@ -817,6 +817,7 @@ VOID gsx_start(NOTHING)
 }
 #endif
 /* 306de: 00e246ea */
+/* 404: 00e335ec */
 /* WTF, this called only once at startup, why bother with asm madness? */
 	xdef _gsx_start
 _gsx_start:
