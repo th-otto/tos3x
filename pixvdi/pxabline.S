@@ -76,7 +76,7 @@
 #if VIDEL_SUPPORT
 	xdef	PX_ABLINE
 PX_ABLINE:	
-	move.l	_lineAVar,a4		; a4 -> base of LineA variables
+	move.l	_lineAVars,a4		; a4 -> base of LineA variables
 	moveq.l	#2,d0			; d0 <- XOR writing mode code
 
 	movem.w	_X1(a4),d4-d7		; d4<-X1  d5<-Y1  d6<-X2  d7<-Y2

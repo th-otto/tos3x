@@ -46,17 +46,17 @@ FONT_COUNT:    ds.w 1      (lineavars-$1b8)	/* word */
 LINE_CW:       ds.w 1      (lineavars-$1b6)	/* word */
                xdef LOC_MODE
 LOC_MODE:      ds.w 1      (lineavars-$1b4)	/* word */
-               xdef TRAP14SAV
-TRAP14SAV:     ds.l 1      (lineavars-$1b2)	/* long */
-               xdef COL_OR_MASK
-COL_OR_MASK:   ds.l 1      (lineavars-$1ae)	/* long */
-               xdef COL_AND_MASK
-COL_AND_MASK:  ds.l 1      (lineavars-$1aa)	/* long */
-               xdef TRAP14BSAV
-TRAP14BSAV:    ds.l 1      (lineavars-$1a6)	/* long */
-               ds.w 32       /*   (lineavars-$1a2)    32 reserved words */
                xdef NUM_QC_LIN
-NUM_QC_LIN:    ds.w 1      (lineavars-$162)	/* word */
+NUM_QC_LIN:    ds.w 1      (lineavars-$1b2)	/* word */
+               xdef TRAP14SAV
+TRAP14SAV:     ds.l 1      (lineavars-$1b0)	/* long */
+               xdef COL_OR_MASK
+COL_OR_MASK:   ds.l 1      (lineavars-$1ac)	/* long */
+               xdef COL_AND_MASK
+COL_AND_MASK:  ds.l 1      (lineavars-$1a8)	/* long */
+               xdef TRAP14BSAV
+TRAP14BSAV:    ds.l 1      (lineavars-$1a4)	/* long */
+               ds.w 32       /*   (lineavars-$1a2)    32 reserved words */
                xdef STR_MODE
 STR_MODE:      ds.w 1      (lineavars-$160)	/* word */
                xdef VAL_MODE

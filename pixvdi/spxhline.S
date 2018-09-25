@@ -52,7 +52,7 @@
 	xdef	PX_HABLINE
 PX_HABLINE:
 
-	move.l	_lineAVar,a4		; a4 -> LineA variable base
+	move.l	_lineAVars,a4		; a4 -> LineA variable base
 	movem.w	_X1(a4),d4-d6		; d4 <- X1   d5 <- Y1   d6 <- X2
 
 	xdef	px_fline
@@ -69,7 +69,7 @@ pxh0:
 	move.l	_patptr(a4),a0		; a0 -> start of pattern
 	add.w	d0,a0			; a0 -> pattern word
 
-	move.l	_lineAVar,a4		; a4 -> base of LineA variables
+	move.l	_lineAVars,a4		; a4 -> base of LineA variables
 	move.l	LA_ROUTINES(a4),a1	; load vectrd list of primitives
 	move.l	V_HLINE(a1),a1		; vec to vert line primitive
 	jmp	(a1)			; sft: "aline"  hrd: "hb_vline"

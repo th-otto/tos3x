@@ -120,7 +120,7 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 spx_bitblt:	tst.w	S_NXPL(a6)	; see if we are doing transparant blit
 		bne	skip0		; if not then skip
 		jmp	spx_tbitblt	; else do transparant blit
-skip0:		move.l	_lineAVar,a3	; a3 -> linea variable structure
+skip0:		move.l	_lineAVars,a3	; a3 -> linea variable structure
 		move.w	S_YMIN(a6),d1	; d1 <- Ymin source
 		bsr	s_xy2addr	; a0 -> start of source block
 

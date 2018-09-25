@@ -372,7 +372,7 @@
  * PIXLV: access through base register if MULTI_LINEA, absolute otherwise
  */
 #if MULTI_LINEA
-#define LA(r) move.l _lineAVar,r
+#define LA(r) move.l _lineAVars,r
 #define PIXLA(r) LA(r)
 #define PIXLV(v,r) v(r)
 #else

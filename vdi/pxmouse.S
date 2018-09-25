@@ -52,7 +52,7 @@ SV_BUF		equ	8
 F_SAVRDY	equ	0	; save buffer status: 0:empty  1:full
 
 		xdef	px_cur_display
-px_cur_display:	move.l  _lineAVar,a4		; a4 -> linea var struct
+px_cur_display:	move.l  _lineAVars,a4		; a4 -> linea var struct
 		moveq.l	#0,d3			; d3 <- # columns to shift left
 		move.w	#15,a3			; a3 <- # of cols to blit - 1
 
@@ -401,7 +401,7 @@ x_ms8_dst:	addq.l	#1,a1		; advance to next pixel
 *******************************************************************************
 
 		xdef	px_cur_replace
-px_cur_replace:	move.l  _lineAVar,a5		; a5 -> linea var struct
+px_cur_replace:	move.l  _lineAVars,a5		; a5 -> linea var struct
 		bclr.b	#F_SAVRDY,SV_STAT(a2)   ; valid data in buffer?
 		beq	hang_it_up		; 0:nothing saved
 

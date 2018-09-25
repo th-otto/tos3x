@@ -120,7 +120,7 @@ d_xy2addr:	move.l	D_FORM(a6),a1		; a0 -> strt of dst form (0,0)
 *		rectangle height, rectangle width, number of planes
 *-
 		xdef	spx_tbitblt
-spx_tbitblt:	move.l	_lineAVar,a5	; a5 -> linea variable structure
+spx_tbitblt:	move.l	_lineAVars,a5	; a5 -> linea variable structure
 		move.w	S_YMIN(a6),d1	; d1 <- Ymin source
 		bsr	s_xy2addr	; a0 -> start of source block
 

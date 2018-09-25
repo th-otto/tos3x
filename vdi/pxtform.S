@@ -29,7 +29,7 @@ _PX_AND_INT_TRAN_FM:
 
 	movem.l	d3-d7/a3-a6,-(sp)		; save registers
 
-	move.l  _lineAVar,a0			; a0 -> linea var struct
+	move.l  _lineAVars,a0			; a0 -> linea var struct
 	move.l	CONTRL(a0),a2			; a2 -> control array
 	move.l	C_MFDB_S(a2),a0			; a0 -> source MFDB
 	move.l	C_MFDB_D(a2),a1			; a1 -> destination MFDB
@@ -91,7 +91,7 @@ leave:
 
 I2P_TRAN_FM:
 
-	move.l  _lineAVar,a0		; a0 -> linea var struct
+	move.l  _lineAVars,a0		; a0 -> linea var struct
 	move.l	CONTRL(a0),a2		; a2 -> control array
 	move.l	C_MFDB_S(a2),a0		; a0 -> source MFDB
 	move.l	C_MFDB_D(a2),a1		; a1 -> destination MFDB
@@ -236,7 +236,7 @@ I2PLB32Loop:
 
 P2I_TRAN_FM:
 
-	move.l  _lineAVar,a0		; a0 -> linea var struct
+	move.l  _lineAVars,a0		; a0 -> linea var struct
 	move.l	CONTRL(a0),a2		; a2 -> control array
 	move.l	C_MFDB_S(a2),a0		; a0 -> source MFDB
 	move.l	C_MFDB_D(a2),a1		; a1 -> destination MFDB

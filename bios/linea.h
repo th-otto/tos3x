@@ -26,13 +26,13 @@
 #define FONT_COUNT    (lineavars-$1b8)	/* word */
 #define LINE_CW       (lineavars-$1b6)	/* word */
 #define LOC_MODE      (lineavars-$1b4)	/* word */
-#define TRAP14SAV     (lineavars-$1b2)	/* long */
-#define COL_OR_MASK   (lineavars-$1ae)	/* long */
-#define COL_AND_MASK  (lineavars-$1aa)	/* long */
-#define TRAP14BSAV    (lineavars-$1a6)	/* long */
-                 /*   (lineavars-$1a2)    32 reserved words */
-#define NUM_QC_LIN    (lineavars-$162)	/* word */
-#define STR_MODE      (lineavars-$169)	/* word */
+#define NUM_QC_LIN    (lineavars-$1b2)	/* word */
+#define TRAP14SAV     (lineavars-$1b0)	/* long */
+#define COL_OR_MASK   (lineavars-$1ac)	/* long */
+#define COL_AND_MASK  (lineavars-$1a8)	/* long */
+#define TRAP14BSAV    (lineavars-$1a4)	/* long */
+                 /*   (lineavars-$1a0)    32 reserved words */
+#define STR_MODE      (lineavars-$160)	/* word */
 #define VAL_MODE      (lineavars-$15e)	/* word */
 #define CUR_MS_STAT   (lineavars-$15c)	/* byte */
 #define V_HID_CNT     (lineavars-$15a)	/* word */

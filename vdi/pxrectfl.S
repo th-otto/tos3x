@@ -52,7 +52,7 @@ rf_null:
 	xdef	PX_RECTFILL
 PX_RECTFILL:
 
-	move.l  _lineAVar,a4		; a4 -> linea var struct
+	move.l  _lineAVars,a4		; a4 -> linea var struct
 	lea	X1(a4),a0		; a0 -> rectangle endpoints array
 	movem.w	(a0),d4-d7		; d4<-X1   d5<-Y1   d6<-X2   d7<-Y2
 

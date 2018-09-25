@@ -168,7 +168,7 @@ hpx_bitblt:
 	bne	skip0			; if not then skip
 	jmp	spx_tbitblt		; else do transparant blit
 
-skip0:	move.l	_lineAVar,a3		; a3 -> linea variable structure
+skip0:	move.l	_lineAVars,a3		; a3 -> linea variable structure
 	lea	BLASTER+B_OFF,a5	; a5 -> SKEW (bit blt reference reg)
 	move.w	S_YMIN(a6),d1		; d1 <- Ymin source
 	bsr	s_xy2addr		; a0 -> start of source block

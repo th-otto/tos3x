@@ -52,7 +52,7 @@
 rout_init:
 _SETBLT:
 #if TOSVERSION >= 0x404
-		move.l  _lineAVar,a1		; a1 -> linea var struct
+		move.l  _lineAVars,a1		; a1 -> linea var struct
 		move.w	d0,LA_BLTMODE(a1)	; store present mode selection
 		move.l	LA_CURDEV(a1),a0		; a0 -> current device struct
 
@@ -107,7 +107,7 @@ rCopyLoop:
 _GETBLT:
 #if TOSVERSION >= 0x404
 		move.l	a0,-(sp)
-		move.l  _lineAVar,a0		; a0 -> linea var struct
+		move.l  _lineAVars,a0		; a0 -> linea var struct
 		move.w	LA_BLTMODE(a0),d0
 		move.l	(sp)+,a0
 #else

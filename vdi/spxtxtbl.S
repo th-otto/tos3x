@@ -2420,7 +2420,7 @@ d_xy2addr:	move.l	_v_bas_ad,a1		; a1 -> strt of dst form (0,0)
 _cheat_blit:
 
 	movem.l	d3/d7,-(sp)		; save registers
-	move.l  _lineAVar,a0		; a0 -> linea var struct
+	move.l  _lineAVars,a0		; a0 -> linea var struct
 	move.w	TEXT_BG(a0),d7		; d7 <- background color
 	lsl.w	#2,d7			; make d7 long word offset
 	add.l	#pal_map,d7		; d7 <- desired offset

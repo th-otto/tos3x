@@ -199,7 +199,7 @@ mp0:
 
 		xdef	_st_vq_color
 _st_vq_color:
-	move.l  _lineAVar,a2		; a2 -> linea var struct
+	move.l  _lineAVars,a2		; a2 -> linea var struct
 	move.l	d4,-(sp)
 	move.l	_CONTRL(a2),a0
 	move.w	#4,8(a0)		; contrl(4) <- length of intout array = 4
