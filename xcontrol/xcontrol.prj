@@ -1,0 +1,54 @@
+;....................................................................
+; XCONTROL.PRJ
+; 
+
+xcontrol.prg
+.C[-A-]
+.C[-K-]
+.C[-P]
+.C[-M]
+.L[-S=4096]
+
+; NOTE: 1) IF THE VERSION NUMBER OF XCONTROL CHANGES IN THE RESOURCE,
+;          THE VERSION NUMBER MUST ALSO BE CHANGED IN XCONTROL.C - 'XVERSION'
+;       2) The country define must be selected in COUNTRY.H
+;	3) XCONTROL.PRG/ACC must be set to SUPER with PRGFLAGS.PRG
+;xusa.acc
+;xuk.acc
+;xgerman.acc
+;xfrench.acc
+;xspain.acc
+;xsweden.acc
+;xitaly.acc
+=
+tcstart.o		 ; USE THIS FOR Turbo C
+;pcstart.o			; USE THIS FOR Pure C
+
+cookie.c
+cpxhandl.c
+mover.c
+sliders.c
+slots.c
+timedate.c
+xconfig.c
+xcontrol.c
+xform_do.c
+xoptions.c
+windows.c
+xerror.c
+text.c
+loadcpx.c
+
+gemskel.c	
+
+fixrsh\fixrsh.c	   ; Separate files.
+popup\popup.c		   ; Can be found in the Tools directory
+
+stuffptr.c
+
+alt\aesalt.prj
+
+tcstdlib.lib       ; standard library	- TURBO C
+tctoslib.lib       ; TOS library	- TURBO C
+tcgemlib.lib       ; AES and VDI library - TURBO C
+tclnalib.lib	   ; Linea Library	- TURBO C

@@ -1,0 +1,36 @@
+/* XCONTROL.H
+ *==========================================================================
+ * DATE: April 3, 1990
+ * DESCRIPTION: INCLUDE.H file from RESOURCE
+ */
+ 
+ 
+#if USA
+ #include "rsc\us.h" 
+#endif
+
+/* The UK Resource is the same as the USA version */
+#if UK
+ #include "rsc\us.h" 
+#endif
+
+#if ITALY
+ #include "rsc\it.h" 
+#endif
+
+#if GERMAN
+ #include "rsc\de.h" 
+#endif
+
+#if FRENCH
+ #include "rsc\fr.h" 
+#endif
+
+#if SPAIN
+ #include "rsc\es.h" 
+#endif
+
+#if SWEDEN
+ #include "rsc\se.h" 
+#endif
+
