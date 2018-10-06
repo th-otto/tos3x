@@ -30,11 +30,3 @@ void cdecl sl_dragy( OBJECT *tree, int base, int slider, int min,
 void Hot_Slide( OBJECT *tree, int base, int slider, int obj,
            	int inc, int min, int max, int *numvar,
            	int direction, GRECT *rect, void (*foo)() );
-
-
-/*  DEFINES
- *==========================================================================
- */
-#define NULLFUNC	((void(*)())0)
-#define HORIZONTAL	1
-#define VERTICAL	0

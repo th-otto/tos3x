@@ -7,11 +7,6 @@
 /* DEFINES
  *==========================================================================
  */
-#define SAVE_DEFAULTS	0
-#define MEM_ERR		1
-#define FILE_ERR	2
-#define FILE_NOT_FOUND  3
-
 #define NO_NODES_ERR	4
 #define RELOAD_CPXS	5
 #define UNLOAD_CPX	6
@@ -19,7 +14,6 @@
 #define SAVE_HEADER	8
 #define FILE_NOT_CPX	9
 #define NO_SOUND_DMA	10
-
 #define SHUTDOWN	11
 
 

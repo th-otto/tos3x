@@ -5,6 +5,7 @@
 xcontrol.prg
 .C[-A-]
 .C[-K-]
+.C[-G]
 .C[-P]
 .C[-M]
 .L[-S=4096]

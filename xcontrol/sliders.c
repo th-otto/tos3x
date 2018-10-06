@@ -16,6 +16,7 @@
 
 #include "country.h"
 #include "xcontrol.h"
+#include "cpxdata.h"
 
 
 
@@ -49,9 +50,6 @@ void xdeselect(OBJECT * tree, int base, int obj);
 #define SL_INC 		0
 
 /* Orientation of sliders */
-#define VERTICAL	0
-#define HORIZONTAL	1
-
 #define NULLFUNC	( void(*)())0L
 
 

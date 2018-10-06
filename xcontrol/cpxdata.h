@@ -33,6 +33,8 @@ typedef struct {
 
      void  cdecl (*Sl_size)( OBJECT *tree, int base, int slider, int num_items,
                              int visible, int direction, int min_size );
+#define VERTICAL	0
+#define HORIZONTAL	1
      
      void  cdecl (*Sl_x)( OBJECT *tree, int base, int slider, int value,
                           int num_min, int num_max, void (*foo)() );
@@ -56,6 +58,12 @@ typedef struct {
      
      void    cdecl (*Set_Evnt_Mask)( int mask, MOBLK *m1, MOBLK *m2, long time );
      BOOLEAN cdecl (*XGen_Alert)( int id );
+#define SAVE_DEFAULTS	0
+#define MEM_ERR			1
+#define FILE_ERR		2
+#define FILE_NOT_FOUND  3
+
+
      BOOLEAN cdecl (*CPX_Save)( void *ptr, long num );
      void    *cdecl (*Get_Buffer)( void );
 
@@ -64,6 +72,8 @@ typedef struct {
      int     Country_Code;        
      
      void    cdecl (*MFsave)( BOOLEAN saveit, MFORM *mf );
+#define MFSAVE 1
+#define MFRESTORE 0
 } XCPB;
 
 
