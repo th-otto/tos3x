@@ -37,7 +37,7 @@
 #endif
 
 #define BYTE char		/* Signed byte			*/
-#define UWORD unsigned short		/* unsigned word		*/
+#define UWORD unsigned short	/* unsigned word		*/
 #define WORD short				/* Signed word (16 bits)	*/
 #define ULONG unsigned long		/* Unsigned long		*/
 #define LONG long				/* signed long (32 bits)	*/

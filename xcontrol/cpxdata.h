@@ -7,7 +7,10 @@
  */
 
 #ifndef NUM_TREE
+#ifndef __foobar_defined
+#define __foobar_defined 1
 struct foobar { WORD dummy; WORD *image; };
+#endif
 #endif
 
 typedef struct {
