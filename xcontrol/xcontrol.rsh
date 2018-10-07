@@ -9,31 +9,31 @@
 #pragma warn -sig       /* 2 Conversion may lose significant digits */
  
 #if USA
- #include "rsc\us.rsh" 
+#include "rsc\en.rsh" 
 #endif
 
 #if UK
- #include "rsc\us.rsh" 
+#include "rsc\en.rsh" 
 #endif
 
 #if ITALY
- #include "rsc\it.rsh" 
+#include "rsc\it.rsh" 
 #endif
 
 #if GERMAN
- #include "rsc\de.rsh" 
+#include "rsc\de.rsh" 
 #endif
 
 #if FRENCH
- #include "rsc\fr.rsh" 
+#include "rsc\fr.rsh" 
 #endif
 
 #if SPAIN
- #include "rsc\es.rsh" 
+#include "rsc\es.rsh" 
 #endif
 
 #if SWEDEN
- #include "rsc\se.rsh" 
+#include "rsc\sv.rsh" 
 #endif
 
 #pragma warn .sig
