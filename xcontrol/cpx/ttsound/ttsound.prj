@@ -1,4 +1,4 @@
-fsound.cp
+ttsound.cp
 .C[-Irsc]
 .C[-I..\..]
 .C[-A-]
@@ -11,7 +11,7 @@ fsound.cp
 =
 cpxstart.s
 
-fsound.c
+ttsound.c
 
 ..\..\alt\aesalt.lib
 
