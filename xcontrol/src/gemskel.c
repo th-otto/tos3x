@@ -8,7 +8,7 @@
  * 890708 kbad Created
  */
 
-#include <sys\gemskel.h>				/* gets aesalt, aes, vdi, stddef */
+#include "gemskel.h"				/* gets aesalt, aes, vdi, stddef */
 #include <stdlib.h>						/* for exit() */
 #include <tos.h>						/* Getrez() */
 

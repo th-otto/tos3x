@@ -11,7 +11,7 @@
 /* INCLUDE FILES
  *==========================================================================
  */
-#include <sys\gemskel.h>
+#include "gemskel.h"
 #include <stdlib.h>
 
 #include "country.h"

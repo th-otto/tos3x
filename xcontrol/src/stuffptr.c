@@ -1,8 +1,9 @@
+#include "gemskel.h"
 #include "stuffptr.h"
 
-EXTERN WORD AES_Version;
-MFORM mfAlert,
- mfOther;
+extern WORD AES_Version;
+MFORM mfAlert;
+MFORM mfOther;
 
 
 /* MODIFIED 04/28/92 CJG -

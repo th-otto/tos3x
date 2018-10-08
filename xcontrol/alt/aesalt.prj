@@ -1,5 +1,5 @@
 aesalt.lib
-.C[-I..]
+.C[-I..\include]
 .C[-P-]
 .L[-J]
 

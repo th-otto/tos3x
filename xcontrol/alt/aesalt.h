@@ -15,7 +15,7 @@
 #endif
 #ifndef PORTAB_H
 #include <stddef.h>
-#include <sys\portab.h>
+#include "aportab.h"
 #endif
 
 

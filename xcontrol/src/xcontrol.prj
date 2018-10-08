@@ -3,6 +3,7 @@
 ; 
 
 xcontrol.prg
+.C[-I..\include]
 .C[-A-]
 .C[-K-]
 .C[-G]
@@ -42,12 +43,12 @@ loadcpx.c
 
 gemskel.c	
 
-fixrsh\fixrsh.c	   ; Separate files.
-popup\popup.c		   ; Can be found in the Tools directory
+fixrsh.c
+popup.c
 
 stuffptr.c
 
-alt\aesalt.prj
+..\alt\aesalt.prj
 
 tcstdlib.lib       ; standard library	- TURBO C
 tctoslib.lib       ; TOS library	- TURBO C

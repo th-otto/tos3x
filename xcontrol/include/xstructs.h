@@ -10,7 +10,6 @@
  *  #include "cpxhandl.h"		;cpxhandl.c prototypes
  *  #include "slots.h"			;slots.c prototypes
  */
-#include <sys\portab.h>
 #include "cpxhead.h"				/* CPX HEADER FORMAT */ 
 
 typedef struct _Prghead

@@ -19,7 +19,7 @@
 /* INCLUDE FILES
  *==========================================================================
  */
-#include <sys\gemskel.h>
+#include "gemskel.h"
 #include <string.h>
 #include <tos.h>
 

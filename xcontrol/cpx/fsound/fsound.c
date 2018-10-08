@@ -49,7 +49,7 @@
  */
 
 /* Include Files */
-#include <sys\gemskel.h>
+#include "gemskel.h"
 #include <tos.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -58,7 +58,7 @@
 
 #include "fsound.h"						/* Resource include file    */
 #include "fsound.rsh"
-#include "../../cpxdata.h"				/* CPX generic header       */
+#include "cpxdata.h"				/* CPX generic header       */
 
 #include "fsound_p.h"					/* Sound CPX specific header    */
 

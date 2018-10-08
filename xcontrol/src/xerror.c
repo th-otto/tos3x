@@ -10,7 +10,7 @@
 /* INCLUDE FILES
  *==========================================================================
  */
-#include <sys\gemskel.h>
+#include "gemskel.h"
 
 #include "country.h"
 #include "xcontrol.h"

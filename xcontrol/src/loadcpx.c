@@ -4,6 +4,7 @@
 #include <tos.h>
 #include <stdlib.h>
 
+#include "aportab.h"
 #include "xstructs.h"
 
 Prghead head;

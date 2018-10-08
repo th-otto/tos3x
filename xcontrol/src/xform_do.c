@@ -15,8 +15,8 @@
 /* INCLUDE FILES
  *==========================================================================
  */
-#include <sys\gemskel.h>
-#include <sys\vdikeys.h>
+#include "gemskel.h"
+#include "vdikeys.h"
 
 #include "cpxdata.h"					/* These 3 must remain in */
 #include "xstructs.h"					/* order...       */

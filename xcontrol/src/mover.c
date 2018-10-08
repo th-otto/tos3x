@@ -19,8 +19,8 @@
 /* INCLUDE FILES
  *==========================================================================
  */
-#include <sys\gemskel.h>
-#include <sys\gemerror.h>
+#include "gemskel.h"
+#include "gemerror.h"
 
 #include <string.h>
 #include <tos.h>

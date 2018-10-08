@@ -7,7 +7,7 @@
  */
 
 #ifndef __AESALT__
-#include <alt\aesalt.h> /* alternate aes bindings, gets aes, stddef */
+#include "..\alt\aesalt.h" /* alternate aes bindings, gets aes, stddef */
 #endif
 
 #ifndef __VDI__

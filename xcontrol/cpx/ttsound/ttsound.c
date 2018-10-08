@@ -41,7 +41,7 @@
  */
 
 /* Include Files */
-#include <sys\gemskel.h>
+#include "gemskel.h"
 #include <tos.h>
 #include <stdlib.h>
 #include <stdio.h>

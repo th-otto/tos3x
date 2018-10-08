@@ -8,7 +8,7 @@
 /* INCLUDE FILES
  *==========================================================================
  */
-#include <sys\gemskel.h>
+#include "gemskel.h"
 #include <tos.h>
 
 

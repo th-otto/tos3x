@@ -1,4 +1,3 @@
-#include <sys\portab.h>
 #include <linea.h>
 
 extern MFORM mfAlert, mfOther;

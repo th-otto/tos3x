@@ -1,6 +1,6 @@
 ttsound.cp
 .C[-Irsc]
-.C[-I..\..]
+.C[-I..\..\include]
 .C[-A-]
 .C[-K-]
 .C[-G]
