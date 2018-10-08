@@ -1,0 +1,28 @@
+general.cp
+.C[-Irsc]
+.C[-I..\..\include]
+.C[-A-]
+.C[-K-]
+.C[-G]
+.C[-P]
+.C[-M]
+.L[-S=4096]
+.L[-F]
+=
+cpxstart.s
+
+general.c
+dclick.c
+keybell.c	
+keyboard.c
+status.c
+ttblit.c
+block2.c
+text.c
+super.c
+cache.s
+..\..\alt\aesalt.lib
+
+TCSTDLIB.LIB       ; standard library
+TCTOSLIB.LIB       ; TOS library
+TCGEMLIB.LIB       ; AES and VDI library

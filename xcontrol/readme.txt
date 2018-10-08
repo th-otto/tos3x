@@ -14,3 +14,27 @@
 	     - The 'Number of Slots' option has been removed.
 
 	     - Still need to set PROTECTION to SUPERVISOR.
+
+
+identical:
+    xcontrol.prg
+    fsound
+    general
+    ttsound
+    
+not identical:
+    colorvdi
+    config
+    wcolors
+
+tbd:
+    maccel
+    modem
+    multitos
+    printer
+    setenv
+    submenu
+    system
+
+others:
+    alerts
