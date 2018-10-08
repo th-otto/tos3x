@@ -96,6 +96,10 @@ typedef struct {
                 	 	   int *key, int *nclicks );
 
      void  	cdecl (*cpx_close)( BOOLEAN flag );
-}CPXINFO;
+} CPXINFO;
 
-
+CPXINFO *cdecl cpx_init(XCPB *Xcpb)
+#ifdef __GNUC__
+	__asm__("cpx_init")
+#endif
+	;
