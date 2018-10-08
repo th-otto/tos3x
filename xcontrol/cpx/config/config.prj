@@ -1,0 +1,20 @@
+config.cp
+.C[-Irsc]
+.C[-I..\..\include]
+.C[-A-]
+.C[-K-]
+.C[-G]
+.C[-P]
+.C[-M]
+.L[-S=4096]
+.L[-F]
+=
+cpxstart.s
+
+config.c
+
+..\..\alt\aesalt.lib
+
+TCSTDLIB.LIB       ; standard library
+TCTOSLIB.LIB       ; TOS library
+TCGEMLIB.LIB       ; AES and VDI library

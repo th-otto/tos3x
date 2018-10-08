@@ -32,7 +32,8 @@ typedef struct _cpxhead {
 
 	unsigned short	magic;			/* Magic Number = 100 		*/
 	struct {
-		unsigned reserved : 13;	/* Reserved for Expansion 	*/
+		unsigned was_resident : 1; /* used by config.cpx */
+		unsigned reserved : 12;	/* Reserved for Expansion 	*/
 		unsigned resident : 1;	/* RAM Resident Flag		*/
 		unsigned bootinit : 1;	/* Boot Initialization Flag	*/
 		unsigned setonly  : 1;	/* Set Only CPX Flag 		*/
