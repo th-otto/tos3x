@@ -20,6 +20,7 @@ identical:
     xcontrol.prg
     fsound
     general
+    modem
     ttsound
     
 not identical:
@@ -29,7 +30,6 @@ not identical:
 
 tbd:
     maccel
-    modem
     multitos
     printer
     setenv
