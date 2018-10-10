@@ -11,43 +11,9 @@
  *==========================================================================
  */
 #include "gemskel.h"
+#include "cpxdata.h"
+#include "fixrsh.h"
 
-
-/* PROTOTYPES
- *==========================================================================
- */
-void cdecl fix_rsh(int num_obs, int num_frstr, int num_frimg, int num_tree,
-				   OBJECT * rs_object, TEDINFO * rs_tedinfo, BYTE * rs_strings[],
-				   ICONBLK * rs_iconblk, BITBLK * rs_bitblk, long *rs_frstr,
-				   long *rs_frimg, long *rs_trindex, struct foobar *rs_imdope);
-
-void cdecl Rsrc_obfix(OBJECT * tree, int curob);
-int Fix_chpos(int pfix, int ifx);
-
-
-/* EXTERNALS
- *==========================================================================
- */
-
-
-/* GLOBAL
- *==========================================================================
- */
-BOOLEAN Fix_As_Dialog = FALSE;
-
-
-/* LOCAL
- *==========================================================================
- */
-struct foobar
-{
-	WORD dummy;
-	WORD *image;
-};
-
-/* FUNCTIONS
- *==========================================================================
- */
 
 /* fix_rsh()
  *==========================================================================
@@ -70,11 +36,10 @@ struct foobar
  * menus, (if we ever use them) must not be adjusted for
  * 8x16 only.
  */
-void cdecl
-fix_rsh(int num_obs, int num_frstr, int num_frimg, int num_tree,
-		OBJECT * rs_object, TEDINFO * rs_tedinfo, BYTE * rs_strings[],
-		ICONBLK * rs_iconblk, BITBLK * rs_bitblk, long *rs_frstr,
-		long *rs_frimg, long *rs_trindex, struct foobar *rs_imdope)
+void fix_rsh(int num_obs, int num_frstr, int num_frimg, int num_tree,
+	OBJECT * rs_object, TEDINFO * rs_tedinfo, BYTE * rs_strings[],
+	ICONBLK * rs_iconblk, BITBLK * rs_bitblk, long *rs_frstr,
+	long *rs_frimg, long *rs_trindex, struct foobar *rs_imdope)
 {
 	int i;
 	long index;
@@ -130,10 +95,7 @@ fix_rsh(int num_obs, int num_frstr, int num_frimg, int num_tree,
 		case G_BOXCHAR:
 			break;
 		}
-		if (Fix_As_Dialog)
-			rsrc_obfix(rs_object, i);
-		else
-			Rsrc_obfix(rs_object, i);
+		rsrc_obfix(rs_object, i);
 	}
 
 	/* fix up free strings & images */
@@ -150,46 +112,4 @@ fix_rsh(int num_obs, int num_frstr, int num_frimg, int num_tree,
 	/* fix up tree index references */
 	for (i = 0; i < num_tree; i++)
 		rs_trindex[i] = (long) (&rs_object[rs_trindex[i]]);
-	Fix_As_Dialog = FALSE;
-}
-
-
-
-/* Rsrc_obfix()
- *==========================================================================
- * Custom Resource Fixup that always has horizontal characters as
- * multiples of 8 pixels and vertical characters as multiples of
- * 16 pixels.
- */
-void cdecl Rsrc_obfix(OBJECT * tree, int curob)
-{
-	GRECT p;
-
-	p = ObRect(curob);
-	ObX(curob) = Fix_chpos(p.g_x, TRUE);
-	ObY(curob) = Fix_chpos(p.g_y, FALSE);
-	ObW(curob) = Fix_chpos(p.g_w, TRUE);
-	ObH(curob) = Fix_chpos(p.g_h, FALSE);
-}
-
-
-
-/* Fix_chpos()
- *==========================================================================
- * Converts the characters to Pixel position offsets.
- * Horizontal characters are always multiples of 8 pixels.
- * Vertical characters are always multiples of 16 pixels.
- * IFX = flag for 0 - y value, 1 - x value
- */
-int Fix_chpos(int pfix, int ifx)
-{
-	int cpos,
-	 coffset;
-
-	cpos = pfix;
-	coffset = (cpos >> 8) & 0x00ff;
-	cpos &= 0x00ff;
-	cpos *= (ifx) ? 8 : 16;
-	cpos += (coffset > 128) ? (coffset - 256) : coffset;
-	return (cpos);
 }
