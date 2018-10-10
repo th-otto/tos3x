@@ -28,11 +28,11 @@ identical:
 not identical:
     colorvdi
     config
+    setenv
     wcolors
 
 tbd:
     maccel
-    setenv
     submenu
     system
 
