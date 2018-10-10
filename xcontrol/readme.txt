@@ -22,6 +22,7 @@ identical:
     general
     modem
     multitos
+    printer
     ttsound
     
 not identical:
@@ -31,7 +32,6 @@ not identical:
 
 tbd:
     maccel
-    printer
     setenv
     submenu
     system
