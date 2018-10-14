@@ -272,7 +272,7 @@ void xopt_option(void)
 	dircount = 0;
 	dirsize = (int) strlen(dirpath);
 	strcpy(template, blnkstring);
-	strncpy(template, dirpath, min(DIR_MAX, dirsize));
+	strncpy(template, dirpath, mymin(DIR_MAX, dirsize));
 	if (dirsize > DIR_MAX)
 		template[DIR_MAX - 1] = 0xAF;
 	TedText(CPXPATH) = template;
@@ -353,7 +353,7 @@ BOOLEAN do_option_button(int obj)
 			strcat(dirpath, "*.CPX");
 			dirsize = (int) strlen(&dirpath[0]);
 			strcpy(template, blnkstring);
-			strncpy(template, dirpath, min(DIR_MAX, dirsize));
+			strncpy(template, dirpath, mymin(DIR_MAX, dirsize));
 			dircount = 0;
 			if (dirsize > DIR_MAX)
 			{
@@ -373,7 +373,7 @@ BOOLEAN do_option_button(int obj)
 		{
 			ActiveTree(xtree);
 			dircount++;
-			strncpy(template, &dirpath[dircount], min(DIR_MAX, dirsize - dircount));
+			strncpy(template, &dirpath[dircount], mymin(DIR_MAX, dirsize - dircount));
 			template[0] = 0xAE;			/* << */
 			if ((dirsize - dircount) > DIR_MAX)
 				template[DIR_MAX - 1] = 0xAF;	/* >> */
@@ -387,7 +387,7 @@ BOOLEAN do_option_button(int obj)
 		{
 			ActiveTree(xtree);
 			dircount--;
-			strncpy(template, &dirpath[dircount], min(DIR_MAX, dirsize - dircount));
+			strncpy(template, &dirpath[dircount], mymin(DIR_MAX, dirsize - dircount));
 			if (dircount)
 				template[0] = 0xAE;		/* << */
 			if ((dirsize - dircount) > DIR_MAX)
@@ -410,7 +410,7 @@ BOOLEAN do_option_button(int obj)
 		break;
 
 	case STATS:
-		select(xtree, STATS);
+		selectobj(xtree, STATS);
 		wait_up();
 		Deselect(STATS);
 		if (!do_mover())

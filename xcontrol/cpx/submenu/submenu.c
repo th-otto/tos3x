@@ -276,8 +276,8 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 		{
 		case MOK:
 			CurData[4].value = atoi(TedText(M5SLIDER));
-			CurData[4].value = min(CurData[4].value, CurData[4].xmax);
-			CurData[4].value = max(CurData[4].value, CurData[4].xmin);
+			CurData[4].value = mymin(CurData[4].value, CurData[4].xmax);
+			CurData[4].value = mymax(CurData[4].value, CurData[4].xmin);
 			SetHardWare();
 
 		case MCANCEL:
@@ -296,8 +296,8 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 			if ((*xcpb->XGen_Alert) (SAVE_DEFAULTS) == TRUE)
 			{
 				CurData[4].value = atoi(TedText(M5SLIDER));
-				CurData[4].value = min(CurData[4].value, CurData[4].xmax);
-				CurData[4].value = max(CurData[4].value, CurData[4].xmin);
+				CurData[4].value = mymin(CurData[4].value, CurData[4].xmax);
+				CurData[4].value = mymax(CurData[4].value, CurData[4].xmin);
 
 				PutValues();
 				(*xcpb->CPX_Save) ((void *) &saved, 10L);
@@ -407,16 +407,16 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 
 		case M5UP:
 			newvalue = atoi(TedText(M5SLIDER));
-			CurData[4].value = min(newvalue, CurData[4].xmax);
-			CurData[4].value = max(newvalue, CurData[4].xmin);
+			CurData[4].value = mymin(newvalue, CurData[4].xmax);
+			CurData[4].value = mymax(newvalue, CurData[4].xmin);
 			if (CurData[4].value < CurData[4].xmax)
 			{
-				select(tree, M5UP);
+				selectobj(tree, M5UP);
 				PushValues();
 				do
 				{
 					CurData[4].value += 1;
-					CurData[4].value = min(CurData[4].value, CurData[4].xmax);
+					CurData[4].value = mymin(CurData[4].value, CurData[4].xmax);
 					sprintf(CurData[4].text, "%3d", CurData[4].value);
 					TedText(M5SLIDER) = CurData[4].text;
 					Objc_draw(ad_tree, M5SLIDER, MAX_DEPTH, NULL);
@@ -432,16 +432,16 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 
 		case M5DOWN:
 			newvalue = atoi(TedText(M5SLIDER));
-			CurData[4].value = min(newvalue, CurData[4].xmax);
-			CurData[4].value = max(newvalue, CurData[4].xmin);
+			CurData[4].value = mymin(newvalue, CurData[4].xmax);
+			CurData[4].value = mymax(newvalue, CurData[4].xmin);
 			if (CurData[4].value > CurData[4].xmin)
 			{
-				select(tree, M5DOWN);
+				selectobj(tree, M5DOWN);
 				PushValues();
 				do
 				{
 					CurData[4].value -= 1;
-					CurData[4].value = max(CurData[4].value, CurData[4].xmin);
+					CurData[4].value = mymax(CurData[4].value, CurData[4].xmin);
 					sprintf(CurData[4].text, "%3d", CurData[4].value);
 					TedText(M5SLIDER) = CurData[4].text;
 					Objc_draw(ad_tree, M5SLIDER, MAX_DEPTH, NULL);
@@ -470,8 +470,8 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 
 				case WM_CLOSED:		/* treated like an OK */
 					CurData[4].value = atoi(TedText(M5SLIDER));
-					CurData[4].value = min(CurData[4].value, CurData[4].xmax);
-					CurData[4].value = max(CurData[4].value, CurData[4].xmin);
+					CurData[4].value = mymin(CurData[4].value, CurData[4].xmax);
+					CurData[4].value = mymax(CurData[4].value, CurData[4].xmin);
 					SetHardWare();
 
 					quit = TRUE;
@@ -553,8 +553,8 @@ void Update(void)
 {
 	if (curslid == M1SLIDER)
 	{
-		CurData[0].value = max(CurData[0].value, CurData[0].xmin);
-		CurData[0].value = min(CurData[0].value, CurData[0].xmax);
+		CurData[0].value = mymax(CurData[0].value, CurData[0].xmin);
+		CurData[0].value = mymin(CurData[0].value, CurData[0].xmax);
 
 		sprintf(CurData[0].text, "%2.2f", CurData[0].value / 1000.0);
 		TedText(M1SLIDER) = CurData[0].text;
@@ -563,8 +563,8 @@ void Update(void)
 
 	if (curslid == M2SLIDER)
 	{
-		CurData[1].value = max(CurData[1].value, CurData[1].xmin);
-		CurData[1].value = min(CurData[1].value, CurData[1].xmax);
+		CurData[1].value = mymax(CurData[1].value, CurData[1].xmin);
+		CurData[1].value = mymin(CurData[1].value, CurData[1].xmax);
 
 		sprintf(CurData[1].text, "%d", CurData[1].value / 1000);
 		TedText(M2SLIDER) = CurData[1].text;
@@ -573,8 +573,8 @@ void Update(void)
 
 	if (curslid == M3SLIDER)
 	{
-		CurData[2].value = max(CurData[2].value, CurData[2].xmin);
-		CurData[2].value = min(CurData[2].value, CurData[2].xmax);
+		CurData[2].value = mymax(CurData[2].value, CurData[2].xmin);
+		CurData[2].value = mymin(CurData[2].value, CurData[2].xmax);
 
 		sprintf(CurData[2].text, "%2.2f", CurData[2].value / 1000.0);
 		TedText(M3SLIDER) = CurData[2].text;
@@ -583,8 +583,8 @@ void Update(void)
 
 	if (curslid == M4SLIDER)
 	{
-		CurData[3].value = max(CurData[3].value, CurData[3].xmin);
-		CurData[3].value = min(CurData[3].value, CurData[3].xmax);
+		CurData[3].value = mymax(CurData[3].value, CurData[3].xmin);
+		CurData[3].value = mymin(CurData[3].value, CurData[3].xmax);
 
 		sprintf(CurData[3].text, "%2.2f", CurData[3].value / 1000.0);
 		TedText(M4SLIDER) = CurData[3].text;
@@ -674,8 +674,8 @@ void do_keys(int key)
 		/* RESTORE DEFAULTS */
 	case HOME:
 		CurData[4].value = atoi(TedText(M5SLIDER));
-		CurData[4].value = min(CurData[4].value, CurData[4].xmax);
-		CurData[4].value = max(CurData[4].value, CurData[4].xmin);
+		CurData[4].value = mymin(CurData[4].value, CurData[4].xmax);
+		CurData[4].value = mymax(CurData[4].value, CurData[4].xmin);
 
 		PushValues();
 

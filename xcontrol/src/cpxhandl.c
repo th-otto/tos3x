@@ -361,7 +361,7 @@ void init_cpxs(void)
 	count_active_nodes();
 	vacant_nodes = count_inactive_nodes();
 
-	num_nodes = max((num_active + (num_active / 2)), num_default_nodes);
+	num_nodes = mymax((num_active + (num_active / 2)), num_default_nodes);
 
 	/* vacant_nodes are the number of empty nodes that we already have
 	 * num_nodes are the TOTAL number of nodes that we want.
@@ -940,14 +940,13 @@ BOOLEAN cpx_reload(BOOLEAN flag)
 	OBJECT *tree;
 
 	CPXNODE *curptr;
-	DTA thedta,
-	*saved;
+	DTA thedta,	*saved;
 	BOOLEAN button = FALSE;
 
 	if (!flag)							/* Called from XCONFIG */
 	{
 		ActiveTree(ad_xinfo);
-		select(tree, RELOAD);
+		selectobj(tree, RELOAD);
 		wait_up();
 	}
 	/* else, RENAME/MOVER called it */

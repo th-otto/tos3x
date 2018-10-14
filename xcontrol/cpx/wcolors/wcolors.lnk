@@ -1,0 +1,6 @@
+PREFIX wcolors.hdr
+FROM csnbcpx.o+cpxstart.o+wcolors.o+asm.o
+LIB lcgsnb.lib+lcsnb.lib
+TO wcolors.cpx
+NODEBUG
+BATCH

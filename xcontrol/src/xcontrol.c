@@ -620,11 +620,11 @@ void handle_slider(int obj)
 	switch (obj)
 	{
 	case UARROW:
-		sl_arrow(tree, BASE, SLIDER, UARROW, -1, max(num_active - MAX_SLOTS, 0), 0, &cur_slot, VERTICAL, draw_slider);
+		sl_arrow(tree, BASE, SLIDER, UARROW, -1, mymax(num_active - MAX_SLOTS, 0), 0, &cur_slot, VERTICAL, draw_slider);
 		break;
 
 	case DARROW:
-		sl_arrow(tree, BASE, SLIDER, DARROW, 1, max(num_active - MAX_SLOTS, 0), 0, &cur_slot, VERTICAL, draw_slider);
+		sl_arrow(tree, BASE, SLIDER, DARROW, 1, mymax(num_active - MAX_SLOTS, 0), 0, &cur_slot, VERTICAL, draw_slider);
 		break;
 
 	case SLIDER:
@@ -634,7 +634,7 @@ void handle_slider(int obj)
 		if ((AES_Version >= 0x0330) && (gl_ncolors > LWHITE))
 			xselect(tree, SLIDER, SLIDER);
 
-		sl_dragy(tree, BASE, SLIDER, max(num_active - MAX_SLOTS, 0), 0, &cur_slot, draw_slider);
+		sl_dragy(tree, BASE, SLIDER, mymax(num_active - MAX_SLOTS, 0), 0, &cur_slot, draw_slider);
 		if ((AES_Version >= 0x0330) && (gl_ncolors > LWHITE))
 			xdeselect(tree, SLIDER, SLIDER);
 		MFsave(MFRESTORE, &mfOther);
@@ -644,7 +644,7 @@ void handle_slider(int obj)
 		Graf_mkstate(&mk);
 		objc_offset(tree, SLIDER, &ox, &oy);
 		ox = ((mk.y < oy) ? (-MAX_SLOTS) : (MAX_SLOTS));
-		sl_arrow(tree, BASE, SLIDER, -1, ox, max(num_active - MAX_SLOTS, 0), 0, &cur_slot, VERTICAL, draw_slider);
+		sl_arrow(tree, BASE, SLIDER, -1, ox, mymax(num_active - MAX_SLOTS, 0), 0, &cur_slot, VERTICAL, draw_slider);
 		break;
 
 	default:

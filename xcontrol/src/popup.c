@@ -364,7 +364,7 @@ Pop_Text( char *items[], int num_items, int default_item,
    width =  (int)(strlen( items[0] ) + 1 ) * 8;	/* Get width of objects  */
    
    ActiveTree( ad_object );   
-   ObW( QBASE ) = max( width, but_width );	
+   ObW( QBASE ) = mymax( width, but_width );	
    if( num_items <= POP_MAX )
    {			
 	index = 0;   	
@@ -372,7 +372,7 @@ Pop_Text( char *items[], int num_items, int default_item,
    	{
    	    height = Set_Box( tree, index + Q1,
    	    		      height, ObH( index + Q1 ) - 1,
-   	    		      max( width, but_width ),
+   	    		      mymax( width, but_width ),
    	    		      TE_RIGHT, font_size,
    	    		      items[ index ] );
    	    if( index == default_item )  *items[ index ] = 0x08;
@@ -395,17 +395,17 @@ Pop_Text( char *items[], int num_items, int default_item,
      
      height = Set_Box( tree, Q1, height,
      		       ObH( Q1 ) - 1,
-     		       max( width, but_width ),
+     		       mymax( width, but_width ),
      		       TE_CNTR, IBM, ad_strings[0] );
      height = Set_Box( tree, Q5, height,
      		       ObH( Q5 ) - 1,
-     		       max( width, but_width ),
+     		       mymax( width, but_width ),
      		       TE_CNTR, IBM, ad_strings[ 12 ] );
 
      for( i = Q2; i <= Q4; i++ )
      {
  	 height = Set_Box( tree, i, height, ObH( i ) - 1,
- 	 		   max( width, but_width ),
+ 	 		   mymax( width, but_width ),
  	 		   TE_RIGHT, font_size, items[ index ] );
  	 		   
    	 if( index == default_item )  *items[ index ] = 0x08;

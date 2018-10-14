@@ -1,6 +1,6 @@
 #include "aesalt.h"
 
-WORD min(WORD a, WORD b)
+WORD mymin(WORD a, WORD b)
 {
 	if (a < b)
 		return a;
@@ -8,7 +8,7 @@ WORD min(WORD a, WORD b)
 }
 
 
-WORD max(WORD a, WORD b)
+WORD mymax(WORD a, WORD b)
 {
 	if (a > b)
 		return a;

@@ -80,16 +80,16 @@ void cdecl sl_size(OBJECT * tree, int base, int slider, int num_items, int visib
 	int size = 1000;
 
 	if (visible && num_items)
-		size = min(1000, (int) ((1000L * (long) visible) / (long) num_items));
+		size = mymin(1000, (int) ((1000L * (long) visible) / (long) num_items));
 
 	if (direction == HORIZONTAL)
 	{
 		ObW(slider) = (int) (((long) size * (long) ObW(base)) / 1000L);
-		ObW(slider) = max(min_size, ObW(slider));
+		ObW(slider) = mymax(min_size, ObW(slider));
 	} else
 	{
 		ObH(slider) = (int) (((long) size * (long) ObH(base)) / 1000L);
-		ObH(slider) = max(min_size, ObH(slider));
+		ObH(slider) = mymax(min_size, ObH(slider));
 	}
 }
 
@@ -209,7 +209,7 @@ void cdecl sl_arrow(OBJECT * tree, int base, int slider, int obj,
 
 	if (obj > 0)
 	{
-/* select( tree, obj );*/
+/* selectobj( tree, obj );*/
 /*	xselect( tree, ROOT, obj );*/
 		xselect(tree, obj, obj);
 	}
@@ -494,7 +494,7 @@ Hot_Slide(OBJECT * tree, int base, int slider, int obj,
 	slidrect.g_h += 6;
 
 	if (obj > 0)
-		select(tree, obj);
+		selectobj(tree, obj);
 
 	oldvalue = *numvar;
 	do

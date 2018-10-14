@@ -11,13 +11,55 @@
 #ifndef __AESALT__
 #define __AESALT__
 #ifndef __AES__
+
+/*
+ * Object bitfield structures
+ */
+typedef struct sColorword
+{
+#if 0
+	unsigned cfill	 : 4;
+	unsigned pattern : 3;
+	unsigned replace : 1;
+	unsigned ctext	 : 4;
+	unsigned cborder : 4;
+#else
+	unsigned cborder : 4;
+	unsigned ctext	 : 4;
+	unsigned replace : 1;
+	unsigned pattern : 3;
+	unsigned cfill	 : 4;
+#endif
+} Colorword;
+
+#ifdef LATTICE
+typedef struct sObInfo
+{
+	unsigned char letter;
+	signed char border;
+	Colorword c;
+} ObInfo;
+#endif
+
 #include <aes.h>
 #endif
+
 #ifndef PORTAB_H
 #include <stddef.h>
 #include "aportab.h"
 #endif
 
+
+#ifdef LATTICE_56
+typedef struct moblk
+{
+	short m_out;
+	short m_x;
+	short m_y;
+	short m_w;
+	short m_h;
+} MOBLK;
+#endif
 
 /* Definitions
  * ================================================================
@@ -28,6 +70,7 @@
 #define A_CANCEL FALSE
 
 /* nil object */
+#undef NIL
 #define NIL		(-1)
 
 /* Window info structure, demonstrated in textwind.c
@@ -49,7 +92,7 @@ typedef struct _winfo{
 		GRECT	phy;			/* physical coordinates */
 		WORD 	wchar, hchar;	/* dimensions of a "character" */
 		GRECT	vir;			/* virtual coordinates */
-		void	*x;				/* extended info (app. specific) */
+		void *x;				/* extended info (app. specific) */
 } WINFO;
 
 
@@ -149,7 +192,7 @@ typedef union {
 		WORD	startob;
 	} newdesk;			/* NEWDESK */
 	WORD	size;		/* HSLSIZE, VSLSIZE */
-	void	*buf;		/* SCREEN */
+	VOIDP	buf;		/* SCREEN */
 } WARGS;
 
 #define NOBOX 0, 0, 0, 0	/* some GEM routines need coordinates */
@@ -186,72 +229,127 @@ typedef union {
 
 
 
-/*
- * Object bitfield structures
- */
-typedef struct sColorword
-{
-	unsigned cborder : 4;
-	unsigned ctext	 : 4;
-	unsigned replace : 1;
-	unsigned pattern : 3;
-	unsigned cfill	 : 4;
-} Colorword;
-
-
 /* Object structure macros, useful in dealing with forms
  * ================================================================
  * `tree' must be an OBJECT *
  */
+#undef SPECIAL
 #define SPECIAL		0x40 /* user defined object state */
 
-#define ObNext(obj)		( tree[(obj)].ob_next )
-#define ObHead(obj)		( tree[(obj)].ob_head )
-#define ObTail(obj)		( tree[(obj)].ob_tail )
-#define ObFlags(obj)	( tree[(obj)].ob_flags )
-#define ObState(obj)	( tree[(obj)].ob_state )
-#define ObIndex( obj )	( tree[(obj)].ob_spec.index )
-#define ObType( obj )	( tree[(obj)].ob_type )
-#define ObColor( obj )  ( tree[(obj)].ob_spec.index )
+#ifdef LATTICE_560
+/*
+ * this is ugly, but without it, Lattice 5.6
+ * generates calls to _ulmul for every access
+ */
+#define _O(t, o) (*((OBJECT *)((char *)(t) + (o) * (short)sizeof(OBJECT))))
+#else
+#define _O(t, o) t[o]
+#endif
+#define _OT(o) _O(tree, o)
 
+#define ObNext(obj)		( _OT(obj).ob_next )
+#define ObHead(obj)		( _OT(obj).ob_head )
+#define ObTail(obj)		( _OT(obj).ob_tail )
+#define ObFlags(obj)	( _OT(obj).ob_flags )
+#define ObState(obj)	( _OT(obj).ob_state )
+#define ObSpec(obj)		( _OT(obj).ob_spec )
+#define ObType(obj)		( _OT(obj).ob_type )
+
+/* ObSpecs for ObBOX, ObIBOX, ObBOXCHAR */
+#ifdef LATTICE
+#define ObIndex(obj)    ( (*(long *)&ObSpec(obj)))
+#define ObColor(obj)    ( (*(ObInfo *)&ObSpec(obj)).c )
+#define ObChar(obj) 	( (*(ObInfo *)&ObSpec(obj)).letter )
+#define ObBorder(obj)	( (*(ObInfo *)&ObSpec(obj)).border )
+#define ObCBorder(obj)	( ObColor(obj).cborder )
+#define ObCText(obj)	( ObColor(obj).ctext )
+#define ObReplace(obj)	( ObColor(obj).replace )
+#define ObPattern(obj)	( ObColor(obj).pattern )
+#define ObCFill(obj)	( ObColor(obj).cfill )
+
+#define TedThick(obj)   ( tree[(obj)].ob_spec.tedinfo->te_thickness )
+
+#define _TE(obj)	( (TEDINFO *)ObSpec(obj) )
+#define TedText(obj)	( _TE(obj)->te_ptext )
+#define TedTemplate(obj)( _TE(obj)->te_ptmplt )
+#define TedValid(obj)	( _TE(obj)->te_pvalid )
+#define TedLen(obj) 	( _TE(obj)->te_txtlen )
+#define TedTempLen(obj) ( _TE(obj)->te_tmplen )
+#define TedBorder(obj)	( _TE(obj)->te_thickness )
+#define TedFont(obj)	( _TE(obj)->te_font )
+#define TedJust(obj)	( _TE(obj)->te_just )
+
+#define TedColor(obj)   ((*(WORD *)&_TE(obj)->te_color))
+#define TedCBorder(obj) ((*(Colorword *)&_TE(obj)->te_color).cborder )
+#define TedCText(obj)	((*(Colorword *)&_TE(obj)->te_color).ctext )
+#define TedReplace(obj) ((*(Colorword *)&_TE(obj)->te_color).replace )
+#define TedPattern(obj) ((*(Colorword *)&_TE(obj)->te_color).pattern )
+#define TedCFill(obj)	((*(Colorword *)&_TE(obj)->te_color).cfill )
+
+#define ObString(obj)	( (char *)ObSpec(obj) )
+
+#else
+
+#define ObIndex(obj)	( tree[(obj)].ob_spec.index )
+#define ObColor(obj)	( tree[(obj)].ob_spec.index )
 
 #define TedText(obj)	( tree[(obj)].ob_spec.tedinfo->te_ptext )
-#define TedTemp(obj)	( tree[(obj)].ob_spec.tedinfo->te_ptmplt )
+#define TedTemplate(obj)	( tree[(obj)].ob_spec.tedinfo->te_ptmplt )
+#define TedValid(obj)	( tree[(obj)].ob_spec.tedinfo->te_pvalid )
 #define TedLen(obj)	( tree[(obj)].ob_spec.tedinfo->te_txtlen )
 #define TedTempLen(obj)	( tree[(obj)].ob_spec.tedinfo->te_tmplen )
-#define TedThick(obj)   ( tree[(obj)].ob_spec.tedinfo->te_thickness )
-#define TedJust( obj )  ( tree[(obj)].ob_spec.tedinfo->te_just )
-#define TedFont( obj )  ( tree[(obj)].ob_spec.tedinfo->te_font )
-#define TedColor( obj ) ( tree[(obj)].ob_spec.tedinfo->te_color )
+#define TedBorder(obj)	( tree[(obj)].ob_spec.tedinfo->te_thickness )
+#define TedJust(obj)	( tree[(obj)].ob_spec.tedinfo->te_just )
+#define TedFont(obj)	( tree[(obj)].ob_spec.tedinfo->te_font )
+#define TedColor(obj)	( tree[(obj)].ob_spec.tedinfo->te_color )
 
 #define ObString(obj)	( tree[(obj)].ob_spec.free_string )
-#define ObX(obj)	( tree[(obj)].ob_x )
-#define ObY(obj)	( tree[(obj)].ob_y )
-#define ObW(obj)	( tree[(obj)].ob_width )
-#define ObH(obj)	( tree[(obj)].ob_height )
-#define ObRect(obj) 	( *(GRECT *)(&(tree[(obj)].ob_x)) )
 
-#define IconData( obj )   ( tree[(obj)].ob_spec.iconblk->ib_pdata )
-#define IconText( obj )   ( tree[(obj)].ob_spec.iconblk->ib_ptext )
-#define IconWidth( obj )  ( tree[(obj)].ob_spec.iconblk->ib_wicon )
-#define IconHeight( obj ) ( tree[(obj)].ob_spec.iconblk->ib_hicon )
-#define IconColor( obj )  ( tree[(obj)].ob_spec.iconblk->ib_char )
-#define IconTextH( obj )  ( tree[(obj)].ob_spec.iconblk->ib_htext )
-#define IconY( obj )	  ( tree[(obj)].ob_spec.iconblk->ib_yicon )
+#endif
 
-#define BitData( obj )	  ( tree[(obj)].ob_spec.bitblk )
+#define ObX(obj)	( _OT(obj).ob_x )
+#define ObY(obj)	( _OT(obj).ob_y )
+#define ObW(obj)	( _OT(obj).ob_width )
+#define ObH(obj)	( _OT(obj).ob_height )
+#define ObRect(obj) 	( *(GRECT *)(&ObX(obj)) )
+
+#define IconData(obj)	( tree[(obj)].ob_spec.iconblk->ib_pdata )
+#define IconText(obj)	( tree[(obj)].ob_spec.iconblk->ib_ptext )
+#define IconWidth(obj)	( tree[(obj)].ob_spec.iconblk->ib_wicon )
+#define IconHeight(obj)	( tree[(obj)].ob_spec.iconblk->ib_hicon )
+#define IconColor(obj)	( tree[(obj)].ob_spec.iconblk->ib_char )
+#define IconTextH(obj)	( tree[(obj)].ob_spec.iconblk->ib_htext )
+#define IconY(obj)		( tree[(obj)].ob_spec.iconblk->ib_yicon )
+
+#define BitData(obj)	( tree[(obj)].ob_spec.bitblk )
 
 #define Set_tree(obj)		( rsrc_gaddr(R_TREE,(obj),&tree) )
 #define Set_alert(num,s)	( rsrc_gaddr(R_STRING,(num),&((OBJECT *)(s)) )
 #define Set_button(num,s)	( rsrc_gaddr(R_STRING,(num),&((OBJECT *)(s)) )
 
-#define IsSelected(obj)			( ObState(obj) & SELECTED )
-#define IsEditable(obj)			( ObFlags(obj) & EDITABLE )
-#define IsSpecial(obj)			( ObState(obj) & SPECIAL  )
+#define IsSelectable(obj)	( ObFlags(obj) & SELECTABLE )
+#define IsDefault(obj)		( ObFlags(obj) & DEFAULT )
+#define IsExit(obj) 		( ObFlags(obj) & EXIT )
+#define IsEditable(obj)		( ObFlags(obj) & EDITABLE )
+#define IsRadio(obj)		( ObFlags(obj) & RBUTTON )
+#define IsLastob(obj) 		( ObFlags(obj) & LASTOB )
+#define IsTouchexit(obj)	( ObFlags(obj) & TOUCHEXIT )
+#define IsHidden(obj)		( ObFlags(obj) & HIDETREE )
+#define IsIndirect(obj) 	( ObFlags(obj) & INDIRECT )
+#define IsSubMenu(obj)		( ObFlags(obj) & SUBMENU )
+
+#define IsSelected(obj)		( ObState(obj) & SELECTED )
+#define IsCrossed(obj)		( ObState(obj) & CROSSED )
+#define IsChecked(obj)		( ObState(obj) & CHECKED )
+#define IsDisabled(obj)		( ObState(obj) & DISABLED )
+#define IsOutlined(obj) 	( ObState(obj) & OUTLINED )
+#define IsShadowed(obj) 	( ObState(obj) & SHADOWED )
+#define IsSpecial(obj)		( ObState(obj) & SPECIAL )
+
+#define IsTed(obj) ((ObType(obj) & 0x00ff) == G_TEXT || (ObType(obj) & 0x00ff) == G_BOXTEXT || (ObType(obj) & 0x00ff) == G_FTEXT || (ObType(obj) & 0x00ff) == G_FBOXTEXT)
+
 #define ActiveTree( newtree )	( tree = newtree )
-#define IsDisabled(obj)			( ObState(obj) & DISABLED )
 #define IsActiveTree( newtree ) ( tree == newtree )
-#define IsHidden( obj )		( ObFlags(obj ) & HIDETREE )
 
 /* macros ok when object is not on screen
  */
@@ -259,30 +357,31 @@ typedef struct sColorword
 #define ShowObj(obj)		( ObFlags(obj) &= ~HIDETREE )
 #define MakeEditable(obj)	( ObFlags(obj) |= EDITABLE )
 #define NoEdit(obj)			( ObFlags(obj) &= ~EDITABLE )
+#define MakeDefault(obj)	( ObFlags(obj) |= DEFAULT )
+#define NoDefault(obj)		( ObFlags(obj) &= ~DEFAULT )
+#define MakeExit(obj)		( ObFlags(obj) |= EXIT )
+#define NoExit(obj)			( ObFlags(obj) &= ~EXIT )
+#define MakeTouchExit(obj)	( ObFlags(obj) |= TOUCHEXIT )
+#define NoTouchExit(obj)	( ObFlags(obj) &= ~TOUCHEXIT )
+
+#define SetNormal(obj)		( ObState(obj) = NORMAL )
 #define Select(obj)			( ObState(obj) |= SELECTED )
 #define Deselect(obj)		( ObState(obj) &= ~SELECTED )
 #define Disable(obj)		( ObState(obj) |= DISABLED )
 #define Enable(obj)			( ObState(obj) &= ~DISABLED )
-#define MarkObj(obj)		( ObState(obj) |= SPECIAL  )
-#define UnmarkObj(obj)		( ObState(obj) &= ~SPECIAL  )
-#define SetNormal(obj)		( ObState(obj) = NORMAL	   )
-#define MakeDefault(obj)	( ObFlags(obj) |= DEFAULT )
-#define NoDefault(obj)		( ObFlags(obj) &= ~DEFAULT )
-#define MakeExit( obj )		( ObFlags(obj) |= EXIT )
-#define NoExit( obj )		( ObFlags(obj) &= ~EXIT )
-#define MakeTouchExit( obj )	( ObFlags(obj) |= TOUCHEXIT )
-#define NoTouchExit( obj )	( ObFlags(obj) &= ~TOUCHEXIT )
-#define CheckObj( obj )		( ObState(obj) |= CHECKED )
-#define UnCheckObj( obj )	( ObState(obj) &= ~CHECKED )
-#define MakeShadow( obj )	( ObState(obj) |= SHADOWED )
-#define NoShadow( obj )		( ObState(obj) &= ~SHADOWED )
+#define CheckObj(obj)		( ObState(obj) |= CHECKED )
+#define UnCheckObj(obj)		( ObState(obj) &= ~CHECKED )
+#define MakeShadow(obj)		( ObState(obj) |= SHADOWED )
+#define NoShadow(obj)		( ObState(obj) &= ~SHADOWED )
+#define MarkObj(obj)		( ObState(obj) |= SPECIAL )
+#define UnmarkObj(obj)		( ObState(obj) &= ~SPECIAL )
 
 
 /* use these when object is on screen - see Objc_change below
  */
 #define deselect( tree, obj ) \
 	Objc_change( (tree), (obj), NULL, (ObState(obj) & ~SELECTED), 1 )
-#define select( tree, obj ) \
+#define selectobj( tree, obj ) \
 	Objc_change( (tree), (obj), NULL, (ObState(obj) | SELECTED), 1 )
 #define enable( tree, obj ) \
 	Objc_change( (tree), (obj), NULL, (ObState(obj) & ~DISABLED), 1 )
@@ -297,43 +396,51 @@ typedef struct sColorword
 /* min & max - used by rc_functions
  * self explanatory (I hope!)
  */
-WORD min( WORD a, WORD b );
-WORD max( WORD a, WORD b );
+WORD mymin( WORD a, WORD b );
+WORD mymax( WORD a, WORD b );
 
 /* rc (rect) functions
  */
-void	rc_2xy( const GRECT *r, WORD *pxy );
+
 /* Convert GRECT to VDI pxy array.
 */
-void	rc_center( const GRECT *rs, GRECT *rd, WORD xoffset, WORD yoffset );
+void	rc_2xy( const GRECT *r, WORD *pxy );
+
 /* Center `rd' within `rs', offset by `xoffset' and `yoffset'
  */
+#ifdef LATTICE
+void Rc_center(const GRECT *rs, WORD xoffset, WORD yoffset, GRECT *rd);
+#else
+void Rc_center(const GRECT *rs, GRECT *rd, WORD xoffset, WORD yoffset);
+#endif
 
 /* -WARNING- Psychotic typecasts! */
+#undef rc_equal
 #define rc_equal( r1, r2 ) \
 	( *((long *)(r1)) == *((long *)(r2)) && \
 	  *((long *)(&((r1)->g_w))) == *((long *)(&((r2)->g_w))) )
 #define rc_empty( r ) ( !*(long *)(&((r)->g_w)) )
 
-void	rc_inset( GRECT *r, WORD xoffset, WORD yoffset );
 /* Inset `r' within itself by `xoffset' and `yoffset'
  */
-BOOLEAN	rc_intersect( const GRECT *rs, GRECT *rd );
+void rc_inset(GRECT *r, WORD xoffset, WORD yoffset);
+void rc_shrink(GRECT *r, WORD xoffset, WORD yoffset);
 /* If `rs' and `rd' intersect, change `rd' to the intersection rect,
  * and return TRUE.  Otherwise, leave `rd' alone and return FALSE.
  */
-void	rc_union( const GRECT *rs, GRECT *rd );
+BOOLEAN	rc_intersect(const GRECT *rs, GRECT *rd);
 /* Change `rd' to the union of `rs' and `rd'.
  */
+void rc_union( const GRECT *rs, GRECT *rd );
 
 /* xy functions
  */
-void	xy_2rect( const WORD *pxy, GRECT *r );
 /* Convert VDI pxy array to rect
 */
-BOOLEAN	xy_inrect( WORD x, WORD y, GRECT *r );
+void	xy_2rect( const WORD *pxy, GRECT *r );
 /* Return TRUE if coordinates are within r
 */
+BOOLEAN	xy_inrect( WORD x, WORD y, GRECT *r );
 
 
 
@@ -377,7 +484,7 @@ WORD	fsel_name( BOOLEAN remember, char *name, const char *searchmask,
  */
 
 WORD	fsel_load( BOOLEAN remember, char *name, const char *searchmask,
-					const char *label, void **buffer );
+					const char *label, VOIDP *buffer );
 /* Select a file, Malloc a buffer for it, and read the file into the buffer.
  * Parameters as for fsel_name(); the address of the Malloc'ed
  * buffer is passed back in `buffer'.  Return any errors in buffer Malloc,
@@ -434,7 +541,8 @@ BOOLEAN	Graf_shrinkbox( const GRECT *small, const GRECT *large );
  */
 BOOLEAN Objc_change( OBJECT *tree, WORD object, const GRECT *clip,
 						WORD state, BOOLEAN redraw );
-BOOLEAN Objc_draw( OBJECT *tree, WORD startob, WORD depth, const GRECT *clip );
+BOOLEAN Objc_draw(OBJECT *tree, WORD startob, WORD depth, const GRECT *clip);
+BOOLEAN ObjcDraw(OBJECT *tree, WORD startob, WORD depth, const GRECT *clip);
 
 /* Window manager functions
  */
@@ -443,5 +551,4 @@ BOOLEAN	Wind_get( WORD id, WFLAG which, WARGS *args );
 BOOLEAN	Wind_open( WORD id, const GRECT *size );
 BOOLEAN	Wind_set( WORD id, WFLAG which, const WARGS *args );
 
-#endif __AESALT__
-
+#endif /* __AESALT__ */

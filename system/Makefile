@@ -26,7 +26,7 @@ vdi_fix.prg: $(VDI_FIX_OBJS) ${MAKEFILE}
 	$(AM_V_LD)${LD} ${LDFLAGS} -h 7 -o $@ ${VDI_FIX_OBJS}
 
 vdi_fix.o: vdifix11/vdi_fix.S
-	$(AM_V_AS)${CPP} $*.S $(CPPOUT) $*.i
+	$(AM_V_AS)${CPP} $< $(CPPOUT) $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 

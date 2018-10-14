@@ -2,8 +2,7 @@
 
 WORD _AesCtrl(long code);
 
-BOOLEAN Objc_change(OBJECT *tree, WORD object, const GRECT *clip,
-						WORD state, BOOLEAN redraw )
+BOOLEAN Objc_change(OBJECT *tree, WORD object, const GRECT *clip, WORD state, BOOLEAN redraw)
 {
 	GRECT r;
 	int *p = _GemParBlk.intin;

@@ -319,7 +319,7 @@ static void cdecl cpx_button(MRETS * mrets, int nclicks, int *event)
 		switch (obj)
 		{
 		case SEXIT:
-			select(tree, SEXIT);
+			selectobj(tree, SEXIT);
 			graf_mkstate(&mk.x, &mk.y, &mk.buttons, &mk.kstate);
 			while (mk.buttons)
 			{
@@ -331,7 +331,7 @@ static void cdecl cpx_button(MRETS * mrets, int nclicks, int *event)
 				} else
 				{
 					if (!IsSelected(SEXIT))
-						select(tree, SEXIT);
+						selectobj(tree, SEXIT);
 				}
 				graf_mkstate(&mk.x, &mk.y, &mk.buttons, &mk.kstate);
 			}

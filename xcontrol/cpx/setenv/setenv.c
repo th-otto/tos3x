@@ -484,7 +484,7 @@ void SlotSetup(NODE_PTR list_ptr, int scount, int start_index)
 	OldSlot = CurSlot = start_index;
 
 	(*xcpb->Sl_size) (tree, XBASE, XSLIDE, scount, MAX_SLOTS, VERTICAL, 1);
-	(*xcpb->Sl_y) (tree, XBASE, XSLIDE, CurSlot, max(scount - MAX_SLOTS, 0), 0, 0);
+	(*xcpb->Sl_y) (tree, XBASE, XSLIDE, CurSlot, mymax(scount - MAX_SLOTS, 0), 0, 0);
 }
 
 
@@ -564,7 +564,7 @@ void mover_button(int obj, int clicks)
 	{
 		UndoSlots();
 		(*xcpb->Sl_arrow) (tree, XBASE, XSLIDE, XUP, -1,
-						   max(num_count - MAX_SLOTS, 0), 0, &CurSlot, VERTICAL, DrawSlot);
+						   mymax(num_count - MAX_SLOTS, 0), 0, &CurSlot, VERTICAL, DrawSlot);
 		return;
 	}
 
@@ -572,7 +572,7 @@ void mover_button(int obj, int clicks)
 	{
 		UndoSlots();
 		(*xcpb->Sl_arrow) (tree, XBASE, XSLIDE, XDOWN, 1,
-						   max(num_count - MAX_SLOTS, 0), 0, &CurSlot, VERTICAL, DrawSlot);
+						   mymax(num_count - MAX_SLOTS, 0), 0, &CurSlot, VERTICAL, DrawSlot);
 		return;
 	}
 
@@ -582,7 +582,7 @@ void mover_button(int obj, int clicks)
 		(*xcpb->MFsave) (MFSAVE, &Mbuffer);
 		if (AES_Version >= 0x0320)
 			graf_mouse(FLAT_HAND, 0L);
-		(*xcpb->Sl_dragy) (tree, XBASE, XSLIDE, max(num_count - MAX_SLOTS, 0), 0, &CurSlot, DrawSlot);
+		(*xcpb->Sl_dragy) (tree, XBASE, XSLIDE, mymax(num_count - MAX_SLOTS, 0), 0, &CurSlot, DrawSlot);
 		(*xcpb->MFsave) (MFRESTORE, &Mbuffer);
 		return;
 	}
@@ -593,7 +593,7 @@ void mover_button(int obj, int clicks)
 		Graf_mkstate(&mk);
 		objc_offset(tree, XSLIDE, &ox, &oy);
 		ox = ((mk.y < oy) ? (-MAX_SLOTS) : (MAX_SLOTS));
-		(*xcpb->Sl_arrow) (tree, XBASE, XSLIDE, -1, ox, max(num_count - MAX_SLOTS, 0), 0, &CurSlot, VERTICAL, DrawSlot);
+		(*xcpb->Sl_arrow) (tree, XBASE, XSLIDE, -1, ox, mymax(num_count - MAX_SLOTS, 0), 0, &CurSlot, VERTICAL, DrawSlot);
 		return;
 	}
 
@@ -609,7 +609,7 @@ void mover_button(int obj, int clicks)
 				{
 					UndoSlots();
 					EnableDelete();
-					select(tree, obj);
+					selectobj(tree, obj);
 				}
 				curptr = (NODE_PTR) & Slots[(obj - T1) + CurSlot];
 				strcpy(temp, ACTUAL(curptr));
@@ -655,7 +655,7 @@ void mover_button(int obj, int clicks)
 				if (strlen(ACTUAL(curptr)) > 0)
 				{
 					EnableDelete();
-					select(tree, obj);
+					selectobj(tree, obj);
 				}
 			}
 		}

@@ -266,8 +266,8 @@ BOOLEAN open_window(void)
 	w.work.g_h = WIND_HEIGHT;
 
 	wind_calc(0, w.kind, w.work.g_x, w.work.g_y, w.work.g_w, w.work.g_h, &w.r.g_x, &w.r.g_y, &w.r.g_w, &w.r.g_h);
-	w.r.g_x = max(desk.g_x, (desk.g_w - w.r.g_w) / 2);
-	w.r.g_y = max(desk.g_y, (desk.g_h - w.r.g_h) / 2);
+	w.r.g_x = mymax(desk.g_x, (desk.g_w - w.r.g_w) / 2);
+	w.r.g_y = mymax(desk.g_y, (desk.g_h - w.r.g_h) / 2);
 	wind_calc(1, w.kind, w.r.g_x, w.r.g_y, w.r.g_w, w.r.g_h, &w.work.g_x, &w.work.g_y, &w.work.g_w, &w.work.g_h);
 
 	GrowShrinkBox(GROWBOX);

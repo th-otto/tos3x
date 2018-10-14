@@ -338,7 +338,7 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 
 	/* Volume Slider and Text Numbers */
 
-	cur_volume = max(cur_data.lvol, cur_data.rvol);
+	cur_volume = mymax(cur_data.lvol, cur_data.rvol);
 	(*xcpb->Sl_y) (tree, VBASE, VSLIDER, cur_volume, VOL_MIN, VOL_MAX, slide_volume);
 	DrawObject(tree, VSLIDER);
 	DrawObject(tree, BSLIDER);
@@ -423,8 +423,8 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 			objc_offset(tree, BSLIDER, &ox, &oy);
 			inc = FindIncrement(&cur_data, 0);
 			inc *= 2;
-			inc = max(2, inc);
-			inc = min(VOL_MAX, inc);
+			inc = mymax(2, inc);
+			inc = mymin(VOL_MAX, inc);
 			oy = ((mk.x < ox) ? (-inc) : (inc));
 			(*xcpb->Sl_arrow) (tree, BBASE, BSLIDER, -1, oy, BAL_MIN, BAL_MAX, &cur_balance, HORIZONTAL, slide_balance);
 			SnapBalance();
@@ -447,7 +447,7 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 			if (mk.buttons && mk.y != oy)
 			{
 
-				cur_volume = max(cur_data.lvol, cur_data.rvol);
+				cur_volume = mymax(cur_data.lvol, cur_data.rvol);
 				(*xcpb->Sl_dragy) (tree, VBASE, VSLIDER, VOL_MIN, VOL_MAX, &cur_volume, slide_volume);
 			}
 			SnapBalance();
@@ -459,13 +459,13 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 			break;
 
 		case VR:						/* Volume Control Right Arrow */
-			cur_volume = max(cur_data.lvol, cur_data.rvol);
+			cur_volume = mymax(cur_data.lvol, cur_data.rvol);
 			(*xcpb->Sl_arrow) (tree, VBASE, VSLIDER, VR, 1, VOL_MIN, VOL_MAX, &cur_volume, VERTICAL, slide_volume);
 			SnapBalance();
 			break;
 
 		case VL:						/* Volume Control Left Arrow */
-			cur_volume = max(cur_data.lvol, cur_data.rvol);
+			cur_volume = mymax(cur_data.lvol, cur_data.rvol);
 			(*xcpb->Sl_arrow) (tree, VBASE, VSLIDER, VL, -1, VOL_MIN, VOL_MAX, &cur_volume, VERTICAL, slide_volume);
 			SnapBalance();
 			break;
@@ -474,7 +474,7 @@ BOOLEAN cdecl cpx_call(GRECT * rect)
 			Graf_mkstate(&mk);
 			objc_offset(tree, VSLIDER, &ox, &oy);
 			ox = ((mk.y < oy) ? (2) : (-2));
-			cur_volume = max(cur_data.lvol, cur_data.rvol);
+			cur_volume = mymax(cur_data.lvol, cur_data.rvol);
 			(*xcpb->Sl_arrow) (tree, VBASE, VSLIDER, -1, ox, VOL_MIN, VOL_MAX, &cur_volume, VERTICAL, slide_volume);
 			SnapBalance();
 			break;
@@ -966,7 +966,7 @@ void slide_volume(void)
 
 	DrawObject(tree, VSLIDER);
 
-	cur_value = max(cur_data.lvol, cur_data.rvol);
+	cur_value = mymax(cur_data.lvol, cur_data.rvol);
 	if (cur_volume != cur_value)
 	{
 		if (cur_volume > cur_value)
@@ -1066,7 +1066,7 @@ void do_redraw(WORD * msg)
 	while (xrect)
 	{
 		rect = *xrect;
-		cur_volume = max(cur_data.lvol, cur_data.rvol);
+		cur_volume = mymax(cur_data.lvol, cur_data.rvol);
 		if (cur_volume == BAL_MAX)
 			do_volume_blit(BAL_MAX - 1, (GRECT *) & rect);
 		else
@@ -1085,8 +1085,7 @@ void set_balance(int balance)
 	int total;
 	int mod;
 
-	upper = max(cur_data.lvol, cur_data.rvol);
-
+	upper = mymax(cur_data.lvol, cur_data.rvol);
 
 	if (balance < BAL_MID)
 	{
@@ -1099,7 +1098,7 @@ void set_balance(int balance)
 		cur_data.rvol = total / BAL_MID;
 		mod = total % BAL_MID;
 		mod = ((mod > 7) ? (1) : (0));
-		cur_data.rvol = max(BAL_MIN, cur_data.rvol + mod);
+		cur_data.rvol = mymax(BAL_MIN, cur_data.rvol + mod);
 	} else
 	{
 		cur_data.rvol = upper;
@@ -1107,7 +1106,7 @@ void set_balance(int balance)
 		cur_data.lvol = total / BAL_MID;
 		mod = total % BAL_MID;
 		mod = ((mod > 7) ? (1) : (0));
-		cur_data.lvol = max(BAL_MIN, cur_data.lvol + mod);
+		cur_data.lvol = mymax(BAL_MIN, cur_data.lvol + mod);
 	}
 }
 
@@ -1264,8 +1263,8 @@ int GetBalance(SND * snd_struct)
 	int lower;
 	int mod;
 
-	upper = max(snd_struct->lvol, snd_struct->rvol);
-	lower = min(snd_struct->lvol, snd_struct->rvol);
+	upper = mymax(snd_struct->lvol, snd_struct->rvol);
+	lower = mymin(snd_struct->lvol, snd_struct->rvol);
 
 	diff = snd_struct->lvol - snd_struct->rvol;
 
@@ -1279,8 +1278,8 @@ int GetBalance(SND * snd_struct)
 		mod = (lower * VOL_MAX) % upper;
 		mod = ((mod > (upper / 2)) ? (1) : (0));
 		balance += mod;
-		balance = max(BAL_MIN, balance);
-		balance = min(BAL_MAX, balance);
+		balance = mymax(BAL_MIN, balance);
+		balance = mymin(BAL_MAX, balance);
 
 		if (diff < 0)					/* Balance is to the RIGHT */
 		{
@@ -1352,8 +1351,8 @@ int FindIncrement(SND * snd_struct, int flag)
 	int CalcBalance;
 	int lvol, rvol;
 
-	upper = max(snd_struct->lvol, snd_struct->rvol);
-	lower = min(snd_struct->lvol, snd_struct->rvol);
+	upper = mymax(snd_struct->lvol, snd_struct->rvol);
+	lower = mymin(snd_struct->lvol, snd_struct->rvol);
 	
 	value = VOL_MAX / upper;
 
@@ -1361,8 +1360,8 @@ int FindIncrement(SND * snd_struct, int flag)
 	mod = ((mod > (upper / 2)) ? (1) : (0));
 
 	value += mod;
-	value = max(1, value);
-	value = min(VOL_MAX, value);
+	value = mymax(1, value);
+	value = mymin(VOL_MAX, value);
 
 	/* Check only if +1/-1 
 	 * Get the new balance
@@ -1394,8 +1393,8 @@ int FindIncrement(SND * snd_struct, int flag)
 			value += 1;
 		}
 
-		value = max(1, value);
-		value = min(VOL_MAX, value);
+		value = mymax(1, value);
+		value = mymin(VOL_MAX, value);
 
 	}
 	return value;

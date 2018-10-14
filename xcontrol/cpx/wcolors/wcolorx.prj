@@ -1,0 +1,10 @@
+WCOLORX.CPX
+.C	[-b0 -b4 -r0 -r6 -v -w -d0 -m0 -rs -fm -i..\..\ALT\ -i..\..\INCLUDE\]
+.S	[-m0]
+=
+CSNBCPX.O
+CPXSTART.S
+WCOLORX.C
+FCOLOR.C
+LCGSNB.LIB
+LCSNB.LIB

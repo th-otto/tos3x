@@ -24,6 +24,11 @@
 #define ANSI_C	1
 #endif
 
+#ifdef LATTICE_56
+#undef	ANSI_C
+#define ANSI_C	1
+#endif
+
 #define UCHARA	0			/* if char is unsigned		*/
 
 /* Standard type definitions
@@ -37,8 +42,13 @@
 #endif
 
 #define BYTE char		/* Signed byte			*/
+#if defined(__TURBOC__) && !defined(WORD)
 #define UWORD unsigned short	/* unsigned word		*/
 #define WORD short				/* Signed word (16 bits)	*/
+#else
+#define UWORD unsigned short	/* unsigned word		*/
+#define WORD short				/* Signed word (16 bits)	*/
+#endif
 #define ULONG unsigned long		/* Unsigned long		*/
 #define LONG long				/* signed long (32 bits)	*/
 

@@ -9,6 +9,7 @@ xcontrol.prg
 .C[-G]
 .C[-P]
 .C[-M]
+.C[-w-sus] ; FIXME
 .L[-S=4096]
 
 ; NOTE: 1) IF THE VERSION NUMBER OF XCONTROL CHANGES IN THE RESOURCE,

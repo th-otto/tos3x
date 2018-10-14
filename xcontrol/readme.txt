@@ -17,20 +17,20 @@
 
 
 identical:
-    xcontrol.prg
-    fsound
-    general
-    modem
-    multitos
-    printer
-    ttsound
+    xcontrol.prg; compile using Turbo-C 2.0
+    fsound.cpx; compile using Turbo-C 2.0
+    general.cpx; compile using Turbo-C 2.0
+    modem.cpx; compile using Turbo-C 2.0
+    multitos.cpx; compile using Turbo-C 2.0
+    printer.cpx; compile using Turbo-C 2.0
+    ttsound.cpx; compile using Turbo-C 2.0
     
 not identical:
-    colorvdi
-    config
-    setenv
-    submenu
-    wcolors
+    colorvdi.cpx
+    config.cpx
+    setenv.cpx
+    submenu.cpx
+    wcolors.cpx; compiled by Lattice-C 5.06.??
 
 tbd:
     maccel

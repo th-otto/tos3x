@@ -19,6 +19,7 @@
 /* INCLUDE FILES
  *==========================================================================
  */
+
 #include "gemskel.h"
 #include "gemerror.h"
 
@@ -309,13 +310,13 @@ BOOLEAN mover_button(int obj)
 		case AUP:
 			Undo_Fnodes(Ihdptr, INACTIVE_FNODE);
 			Set_Move_Text(TO_INACTIVE);
-			sl_arrow(tree, ABASE, ASLIDER, AUP, -1, max(Atotal - MAX_SLITS, 0), 0, &Cur_ASlit, VERTICAL, Draw_ASlit);
+			sl_arrow(tree, ABASE, ASLIDER, AUP, -1, mymax(Atotal - MAX_SLITS, 0), 0, &Cur_ASlit, VERTICAL, Draw_ASlit);
 			break;
 
 		case ADOWN:
 			Undo_Fnodes(Ihdptr, INACTIVE_FNODE);
 			Set_Move_Text(TO_INACTIVE);
-			sl_arrow(tree, ABASE, ASLIDER, ADOWN, 1, max(Atotal - MAX_SLITS, 0), 0, &Cur_ASlit, VERTICAL, Draw_ASlit);
+			sl_arrow(tree, ABASE, ASLIDER, ADOWN, 1, mymax(Atotal - MAX_SLITS, 0), 0, &Cur_ASlit, VERTICAL, Draw_ASlit);
 			break;
 
 		case ASLIDER:
@@ -327,7 +328,7 @@ BOOLEAN mover_button(int obj)
 
 			if ((AES_Version >= 0x0330) && (gl_ncolors > LWHITE))
 				xselect(tree, ASLIDER, ASLIDER);
-			sl_dragy(tree, ABASE, ASLIDER, max(Atotal - MAX_SLITS, 0), 0, &Cur_ASlit, Draw_ASlit);
+			sl_dragy(tree, ABASE, ASLIDER, mymax(Atotal - MAX_SLITS, 0), 0, &Cur_ASlit, Draw_ASlit);
 
 			if ((AES_Version >= 0x0330) && (gl_ncolors > LWHITE))
 				xdeselect(tree, ASLIDER, ASLIDER);
@@ -339,7 +340,7 @@ BOOLEAN mover_button(int obj)
 			Graf_mkstate(&mk);
 			objc_offset(tree, ASLIDER, &ox, &oy);
 			ox = ((mk.y < oy) ? (-MAX_SLITS) : (MAX_SLITS));
-			sl_arrow(tree, ABASE, ASLIDER, -1, ox, max(Atotal - MAX_SLITS, 0), 0, &Cur_ASlit, VERTICAL, Draw_ASlit);
+			sl_arrow(tree, ABASE, ASLIDER, -1, ox, mymax(Atotal - MAX_SLITS, 0), 0, &Cur_ASlit, VERTICAL, Draw_ASlit);
 			break;
 
 
@@ -347,13 +348,13 @@ BOOLEAN mover_button(int obj)
 		case IUP:
 			Undo_Fnodes(Ahdptr, ACTIVE_FNODE);
 			Set_Move_Text(TO_ACTIVE);
-			sl_arrow(tree, IBASE, ISLIDER, IUP, -1, max(Itotal - MAX_SLITS, 0), 0, &Cur_ISlit, VERTICAL, Draw_ISlit);
+			sl_arrow(tree, IBASE, ISLIDER, IUP, -1, mymax(Itotal - MAX_SLITS, 0), 0, &Cur_ISlit, VERTICAL, Draw_ISlit);
 			break;
 
 		case IDOWN:
 			Undo_Fnodes(Ahdptr, ACTIVE_FNODE);
 			Set_Move_Text(TO_ACTIVE);
-			sl_arrow(tree, IBASE, ISLIDER, IDOWN, 1, max(Itotal - MAX_SLITS, 0), 0, &Cur_ISlit, VERTICAL, Draw_ISlit);
+			sl_arrow(tree, IBASE, ISLIDER, IDOWN, 1, mymax(Itotal - MAX_SLITS, 0), 0, &Cur_ISlit, VERTICAL, Draw_ISlit);
 			break;
 
 		case ISLIDER:
@@ -366,7 +367,7 @@ BOOLEAN mover_button(int obj)
 			if ((AES_Version >= 0x0330) && (gl_ncolors > LWHITE))
 				xselect(tree, ROOT, ISLIDER);
 
-			sl_dragy(tree, IBASE, ISLIDER, max(Itotal - MAX_SLITS, 0), 0, &Cur_ISlit, Draw_ISlit);
+			sl_dragy(tree, IBASE, ISLIDER, mymax(Itotal - MAX_SLITS, 0), 0, &Cur_ISlit, Draw_ISlit);
 
 			if ((AES_Version >= 0x0330) && (gl_ncolors > LWHITE))
 				xdeselect(tree, ROOT, ISLIDER);
@@ -379,7 +380,7 @@ BOOLEAN mover_button(int obj)
 			Graf_mkstate(&mk);
 			objc_offset(tree, ISLIDER, &ox, &oy);
 			ox = ((mk.y < oy) ? (-MAX_SLITS) : (MAX_SLITS));
-			sl_arrow(tree, IBASE, ISLIDER, -1, ox, max(Itotal - MAX_SLITS, 0), 0, &Cur_ISlit, VERTICAL, Draw_ISlit);
+			sl_arrow(tree, IBASE, ISLIDER, -1, ox, mymax(Itotal - MAX_SLITS, 0), 0, &Cur_ISlit, VERTICAL, Draw_ISlit);
 			break;
 
 			/* CPX filename buttons */
@@ -408,10 +409,10 @@ BOOLEAN mover_button(int obj)
 			{
 				if (ChkTouchButton(tree, MOVETEXT))
 				{
-/*			   
+#if 0
            		    xselect( tree, ROOT, MOVETEXT );
            		    wait_up();
- */
+#endif
 					Graf_mkstate(&mk);
 					flag = objc_find(tree, MOVETEXT, MAX_DEPTH, mk.x, mk.y);
 					if (flag != -1)
@@ -465,7 +466,9 @@ BOOLEAN mover_button(int obj)
 					} else
 						flag = FALSE;
 				}
-/*			    xdeselect( tree, ROOT, MOVETEXT );*/
+#if 0
+				xdeselect( tree, ROOT, MOVETEXT );
+#endif
 				if (IsSelected(MOVETEXT))
 					xdeselect(tree, ROOT, MOVETEXT);
 			}
@@ -494,7 +497,7 @@ BOOLEAN mover_button(int obj)
 		 */
 		if (flag)
 		{
-			select(xtree, obj);
+			selectobj(xtree, obj);
 			wait_up();
 
 			tree = xtree = (OBJECT *) rs_trindex[XINFO];
@@ -839,8 +842,10 @@ void Undo_Fnodes(FNODE * ptr, BOOLEAN flag)
 	}
 
 	for (i = 0; i < MAX_SLITS; i++)
+	{
+		/* FIXME: defining WORD to int causes this to generate slightly different code??? */
 		deselect(tree, obj + i);
-
+	}
 }
 
 
@@ -1045,7 +1050,7 @@ void blit_slits(BOOLEAN flag, int old_slit, int new_slit)
 		return;
 
 	rc_intersect(&desk, &clip2);
-	if ((abs(offset) < MAX_SLITS) && rc_equal(&clip2, &clip))
+	if (abs(offset) < MAX_SLITS && rc_equal(&clip2, &clip))
 	{
 		rect.g_h = (abs(offset) * ObH(obj));
 		dstbase.g_h = srcbase.g_h = (MAX_SLITS - abs(offset)) * ObH(obj);
@@ -1540,7 +1545,7 @@ Old_Index_Handler(int old_index, int new_index, int findex,
 					if (Old_Node->sflag)
 					{
 						Old_Node->aflag = Old_Node->sflag;
-						select(tree, Above_Obj);
+						selectobj(tree, Above_Obj);
 					}
 				}
 			}
@@ -1582,7 +1587,7 @@ Old_Index_Handler(int old_index, int new_index, int findex,
 					if (Old_Node->sflag)
 					{
 						Old_Node->aflag = Old_Node->sflag;
-						select(tree, Below_Obj);
+						selectobj(tree, Below_Obj);
 					}
 				}
 			}
@@ -1668,7 +1673,7 @@ New_Index_Handler(int old_index, int new_index, int findex,
 					{
 						New_Node->sflag = New_Node->aflag;
 						New_Node->aflag ^= TRUE;
-						select(tree, Above_Obj);
+						selectobj(tree, Above_Obj);
 					}
 				} else
 				{
@@ -1713,7 +1718,7 @@ New_Index_Handler(int old_index, int new_index, int findex,
 					{
 						New_Node->sflag = New_Node->aflag;
 						New_Node->aflag ^= TRUE;
-						select(tree, Below_Obj);
+						selectobj(tree, Below_Obj);
 					}
 				} else
 				{
@@ -1731,13 +1736,8 @@ New_Index_Handler(int old_index, int new_index, int findex,
 				}
 			}
 		}
-	}									/* End of if( old_index != new_index etc.. */
+	}
 }
-
-
-
-
-
 
 
 
@@ -1802,7 +1802,7 @@ Do_Hot_Scroll(int obj, FNODE * Top_Node, FNODE * base_node,
 		Base_Node->aflag ^= TRUE;		/* <=====   NOTE: there might be a problem here */
 		Base_Node->sflag = Base_Node->aflag;	/* Especially when shift key is supposed to be down */
 		if (Base_Node->aflag)
-			select(tree, obj);
+			selectobj(tree, obj);
 		else
 			deselect(tree, obj);
 
@@ -1875,7 +1875,7 @@ Do_Hot_Scroll(int obj, FNODE * Top_Node, FNODE * base_node,
 					{
 					case 0:
 					case 6:
-						old_index = ((cold_index == 0) ? (max(new_index - 1, 0)) : (min(new_index + 1, Total - 1)));
+						old_index = ((cold_index == 0) ? (mymax(new_index - 1, 0)) : (mymin(new_index + 1, Total - 1)));
 						if (old_index != new_index)
 						{
 							New_Node = Slit_Array[index - 1];
@@ -1944,7 +1944,7 @@ Do_Hot_Scroll(int obj, FNODE * Top_Node, FNODE * base_node,
 										  Top_Node, Base_Node, (hot_index - 2) + Top_Obj, hot_index + Top_Obj);
 						ox = ((hot_index == 0) ? (-1) : (1));
 						Hot_Slide(tree, Xbase, Xslider, -1,
-								  ox, max(Total - MAX_SLITS, 0), 0, cur_slit, VERTICAL, &hot_spot[hot_index], foo);
+								  ox, mymax(Total - MAX_SLITS, 0), 0, cur_slit, VERTICAL, &hot_spot[hot_index], foo);
 
 						/* Update the Hot_Index flag to see where we really are...
 						 * It SHOULD be either hot_index 1 or 5

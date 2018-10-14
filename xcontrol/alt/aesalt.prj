@@ -6,7 +6,7 @@ aesalt.lib
 =
 rc_inter.s
 rc_union.c
-rc_cente.s
+rc_cente.c
 rc_inset.c
 rc_2xy.c
 minmax.c

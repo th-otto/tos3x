@@ -527,8 +527,8 @@ BOOLEAN cdecl cpx_call(GRECT *rect)
 				{
 
 					CurPen = atoi(TedText(CTSLIDE));
-					CurPen = min(CurPen, col_max);
-					CurPen = max(CurPen, col_min);
+					CurPen = mymin(CurPen, col_max);
+					CurPen = mymax(CurPen, col_min);
 					curcol = CurPen;
 					Deselect(CTSLIDE);
 					Deselect(EXIT1);
@@ -1270,8 +1270,8 @@ void do_rgb(int slider, int base, int index)
 	if (strlen(TedText(CSLIDERS)))
 	{
 		CurValue = atoi(TedText(CSLIDERS));
-		CurValue = min(CurValue, 1000);
-		CurValue = max(CurValue, 0);
+		CurValue = mymin(CurValue, 1000);
+		CurValue = mymax(CurValue, 0);
 		curscrn[index] = CurValue;
 	}
 	Deselect(CSLIDERS);
