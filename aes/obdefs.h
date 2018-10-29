@@ -142,8 +142,8 @@
 #define DISABLED  0x8
 #define OUTLINED 0x10
 #define SHADOWED 0x20
-#define DRAW3D	 0x40
-#define WHITEBAK 0x80
+#define WHITEBAK 0x40
+#define DRAW3D	 0x80
 
 /* Object colors */
 #define WHITE    0
