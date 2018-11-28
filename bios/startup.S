@@ -7534,6 +7534,7 @@ xbtimtab:  dc.b 13,8,5,4
  *************************************************************************/
 /* 306de: 00e03a08 */
 /* 206de: 00e03622 */
+/* 404: 00e03b64 */
 _keytbl:
         tst.l     4(a7)
         bmi.s     _keytbl1
@@ -7565,6 +7566,7 @@ _keytbl3:
 /* 306de: 00e03a08 */
 /* 206de: 00e0364e */
 _bioskeys:
+#if TOSVERSION < 0x400
         move.l    #_keytblnorm,(_curkeytbl).w
         move.l    #_keytblshift,(_curkeytbl+4).w
         move.l    #_keytblcaps,(_curkeytbl+8).w
@@ -7572,6 +7574,10 @@ _bioskeys:
 		clr.b     (kb_key_last).w
 #endif
         rts
+#else
+/* 404: 00e03b90 */
+_bioskeys:
+#endif
 
 /*************************************************************************
  *                                                                       *
