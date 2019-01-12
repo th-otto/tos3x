@@ -129,7 +129,7 @@ PP(int crfl;)
 
 
 
-static VOID select(P(const short *) pairp, P(int) flg)
+static VOID selectp(P(const short *) pairp, P(int) flg)
 PP(const short *pairp;)
 PP(int flg;)
 {
@@ -152,7 +152,7 @@ PP(int aflg1;)
 	register const short *const *mp;
 
 	for (mp = &m[0]; mp < &m[9];)
-		select(*mp++, aflg1);
+		selectp(*mp++, aflg1);
 }
 
 
@@ -335,10 +335,13 @@ PP(const char *ap;)
 		return;
 	if (vflg)
 	{									/* long list */
+		time_t t;
+		
 		pmode(lp->lfimode);
 		printf(" %d/%d ", lp->luserid, lp->lgid);
-		printf("%6ld", lp->lfsize);
-		p1 = ctime(&lp->lmodti);
+		printf("%6ld", (long)lp->lfsize);
+		t = lp->lmodti;
+		p1 = ctime(&t);
 		p1[24] = '\0';
 		p1 += 4;
 		printf(" %s  ", p1);

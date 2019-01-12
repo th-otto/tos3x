@@ -152,7 +152,8 @@ PP(char **argv;)
 	register char *p;
 	register long symsize;
 	register int i, c, tellem;
-	long l, value;
+	long l;
+	int32_t value;
 	unsigned short flags;
 	int optioncount, argc_old;
 
@@ -273,7 +274,7 @@ PP(char **argv;)
 			if (accept(flags, optioncount))
 			{
 				printf("%-*s", SYNAMLEN + 3, symbol);
-				printf("%8lx", value);
+				printf("%8lx", (long)value);
 				prtflags(flags);
 			}
 		}

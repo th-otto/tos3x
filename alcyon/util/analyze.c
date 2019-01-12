@@ -106,7 +106,7 @@ PP(const char *filename;)
 	}
 	fclose(fp);
 	printf("%s: text 0x%08lx, data 0x%08lx, bss 0x%08lx\n",
-		filename, prg_hd.ch_tsize, prg_hd.ch_dsize, prg_hd.ch_bsize);
+		filename, (long)prg_hd.ch_tsize, (long)prg_hd.ch_dsize, (long)prg_hd.ch_bsize);
 }
 
 
@@ -174,7 +174,7 @@ static int search_lib(NOTHING)
 	register size_t i;
 	register long j;
 	register struct member *m;
-	register int match, thismatch, anymatch;
+	register int thismatch, anymatch;
 	int nummatches;
 	struct member *matchmember;
 	long matchpos;
@@ -200,7 +200,6 @@ static int search_lib(NOTHING)
 				continue;
 			if (m->found)
 				continue;
-			match = FALSE;
 			tryend = (const unsigned short *)(prg_image + s->pos + s->size - (m->tsize << 1));
 			start = (const unsigned short *)(prg_image + s->pos);
 			while (start <= tryend)
@@ -216,7 +215,6 @@ static int search_lib(NOTHING)
 				}
 				if (thismatch)
 				{
-					match = TRUE;
 					if (nummatches == 0)
 					{
 						matchmember = m;
@@ -462,12 +460,15 @@ PP(char **argv;)
 					m->symtab = (struct symbol *)malloc(m->numsyms * sizeof(struct symbol));
 					for (i = 0; i < l; i++)
 					{
+						int32_t value;
+						
 						struct symbol *sym = &m->symtab[i];
 						for (n = 0; n < SYNAMLEN; n++)
 							sym->name[n] = getc(ifp);
 						sym->name[n] = '\0';
 						lgetw(&sym->flags, ifp);
-						lgetl(&sym->value, ifp);
+						lgetl(&value, ifp);
+						sym->value = value;
 					}
 				}
 				fseek(ifp, pos + couthd.ch_ssize, SEEK_SET);
