@@ -40,7 +40,8 @@ VOID tchange(P(int32_t) c)
 PP(register int32_t c;)	/* number of ticks that have gone by  */
 #else
 VOID tchange(P(int16_t) p1, P(int16_t) p2)
-PP(register int32_t c;)	/* number of ticks that have gone by  */
+PP(int16_t p1;)
+PP(int16_t p2;)
 #endif
 {
 #if !BINEXACT

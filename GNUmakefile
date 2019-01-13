@@ -31,7 +31,10 @@ dist::
 	for i in $(SUBDIRS) lib; do $(MKDIR_P) $(DISTDIR1)/$$i; done
 	for i in $(SUBDIRS) $(EXTRA_SUBDIRS) listings; do $(MKDIR_P) $(DISTDIR2)/$$i; done
 
-all clean distclean dist::
+all dist::
+	for i in $(SUBDIRS); do $(MAKE) -C $$i $(FLAGSTOPASS) $@ || exit 1; done
+
+clean distclean::
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $(FLAGSTOPASS) $@; done
 
 dist::

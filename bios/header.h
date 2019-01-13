@@ -108,7 +108,7 @@
 
 
 /* the PAL/NTSC flag */
-#if OS_COUNTRY == CTRY_US
+#if (OS_COUNTRY == CTRY_US) | TP_02
 #define OS_PAL 0
 #else
 #define OS_PAL 1

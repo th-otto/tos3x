@@ -61,3 +61,5 @@ tc.cfg
 /mint108
 /devkit
 /gemdos
+localcnf.h
+localcnf.mak

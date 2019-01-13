@@ -284,7 +284,11 @@ _main:
 #if TOSVERSION >= 0x400
 		move.w ($FFFF8006).w,d0 /* read to auto-config mem cntrlr */
 #endif
+#if TP_01
+        nop
+#else
         reset                  /* reset all hardware */
+#endif
 #if TOSVERSION >= 0x400
 		move.w ($FFFF8006).w,d0 /* read to auto-config mem cntrlr */
 		move.w #7,($FFFF8940).w /* Added to fix problem in Sparrow hardware. GPIO has no pullup/down resist. */
@@ -400,7 +404,7 @@ meminit:
 #if TOSVERSION < 0x400
 #if TOSVERSION >= 0x300
 #if TOSVERSION >= 0x306
-        move.b    #$01,(v_syncmod).w /* set video sync */
+        move.b    #1,(v_syncmod).w /* set video sync */
 #else
         clr.w     (sndmactl).w
 #endif
@@ -409,7 +413,12 @@ meminit:
         beq.s     notpal                    /* (nope -- we're good ol' NTSC) */
         lea       ret_1b(pc),a6
         bra       waitvbl                   /* a short delay for PAL */
-ret_1b: move.b    #2,(v_syncmod).w          /* yes -- twiddle to 50hz */
+ret_1b: 
+#if TP_02
+        move.b    #0,(v_syncmod).w          /* yes -- twiddle to 60hz */
+#else
+        move.b    #2,(v_syncmod).w          /* yes -- twiddle to 50hz */
+#endif
 notpal:
 #if STBOOK
 		move.b    #2,(v_shf_mod).w          /* Switch to 640x400x1 */
@@ -444,10 +453,13 @@ initpal2:
 		move.b    #$00,(v_shf_mod).w
 #endif
 
-
 /* set Video screen memory position to 0x10000 */
         move.b    #$01,(v_bas_h).w
         clr.b     (v_bas_m).w
+
+#if TP_03
+#include "../tospatch/ramres.s"
+#else
 
 #if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
         btst      #0,(scu_gp1).w
@@ -769,6 +781,8 @@ ttramok:
 #endif
 
 nomemchk:
+
+#endif /* TP_03 */
 
 
 /* detect basic STe/TT DMA sound */
@@ -7046,7 +7060,11 @@ kbdvec45:
         cmp.w     #$0C53,d2                     /* control+alt+delete? */
         beq       _main                         /* yes, reset */
         cmp.w     #$0D53,d2                     /* control+alt+leftshift-delete? */
+#if TP_03
+        beq       newkres
+#else
         beq       coldboot
+#endif
         btst      #3,(_conterm).w
         bne.s     kbdvec46
         andi.l    #$00FFFFFF,d0
