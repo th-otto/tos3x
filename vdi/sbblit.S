@@ -105,7 +105,7 @@ sb_bitblt: ds.b 0
 	PIXLA(a4)
 #if TOSVERSION >= 0x300
 	clr.w	OPAQUE(a6)		; set OPAQUE flag off
-	clr.w	_COPYTRAN		; turn blit transparent flag off
+	clr.w	PIXLV(COPYTRAN,a6)		; turn blit transparent flag off
 #endif
 
 	moveq.l	#$0F,d5			; d5 <- mod 16 mask
@@ -180,7 +180,7 @@ trns_blt:
 	bne	sbBl0			; if not do other more general case
 	tst.w	S_NXPL(a6)		; see if doing transparent blit
 	bne	sbBl0			; if so do fast non tearing blit
-	move.w	#-1,_COPYTRAN		; turn blit transparent flag on
+	move.w	#-1,PIXLV(COPYTRAN,a6)		; turn blit transparent flag on
 	jmp	scrn_blt
 
 sbBl0:	tst	d1			; see if S and D are pixel aligned

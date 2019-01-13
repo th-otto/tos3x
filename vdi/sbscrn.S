@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "vdidefs.h"
+#include "lineaequ.inc"
 
 #if TOSVERSION >= 0x300 /* whole file */
 
@@ -167,7 +168,7 @@ setup:		subq.w	#1,d2
 		bmi	neg_setup
 
 		sub.w	d4,a5		/* adjust for n - 1 planes */
-		tst.w	_COPYTRAN	/* see if blit transparent flag is on */
+		tst.w	PIXLV(COPYTRAN,ax)	/* see if blit transparent flag is on */
 		beq	setup1		/* if not do regular blit */
 		subq.w	#2,a4		/* adjust for 1 plane */
 		jmp	trans_pos_row	/* go to transparent blit */
@@ -185,7 +186,7 @@ gotoPosRow:	lea	PTow1(pc,d0.w),a3
 
 neg_setup:	add.w	d4,a1		/* adjust for predecrement */
 		add.w	d4,a5		/* adjust for n planes */
-		tst.w	_COPYTRAN	/* see if blit transparent flag is on */
+		tst.w	PIXLV(COPYTRAN,ax)	/* see if blit transparent flag is on */
 		beq	setup2		/* if not do regular blit */
 		addq.w	#2,a4		/* adjust for n planes */
 		addq.w	#2,a0		/* adjust for predecrement */
@@ -318,7 +319,7 @@ unaligned:	move.w	PLANE_CT(a6),d4
  * Blits any number of planes. As long as the're in ST screen format and,
  * Source and Destination are pixel aligned.
  */
-shiftSetup:	tst.w	_COPYTRAN		/* see if blit transparent flag is on */
+shiftSetup:	tst.w	PIXLV(COPYTRAN,ax)		/* see if blit transparent flag is on */
 		bne	trShiftSetup		/* if so do transparent blit */
 		subq.w	#2,d2			/* subtract last fringe + 1 */
 		tst.w	OPAQUE(a6)		/* see if doing general PAQUE */
@@ -385,7 +386,7 @@ shiftPos:	move.w	S_XMIN(a6),d0		/* d0 <- source x min */
  * case shift right positive
  */
 csrp0:		lea	srPentry(pc),a3		/* a3 -> entry routine for blit */
-		tst.w	_COPYTRAN		/* see if blit transparent flg is on */
+		tst.w	PIXLV(COPYTRAN,ax)		/* see if blit transparent flg is on */
 		beq	csrp2			/* if not then skip */
 		lea	transSrPos,a3		/* a3 -> trns entry for blit */
 
@@ -424,7 +425,7 @@ csrp1:		add.w	d4,a5			/* adjust offset to nxt dst wrd */
  * case shift left positive
  */
 cslp0:		lea	slPentry(pc),a3		/* a3 -> entry routine for blit */
-		tst.w	_COPYTRAN		/* see if blit transparent flg is on */
+		tst.w	PIXLV(COPYTRAN,ax)		/* see if blit transparent flg is on */
 		beq	cslp2			/* if not then skip */
 		lea	transSlPos,a3		/* a3 -> trns entry for blit */
 
@@ -473,7 +474,7 @@ shiftNeg:	move.w	S_XMAX(a6),d0		/* d0 <- source x max */
  * case shift right negative
  */
 csrn0:		lea	srNentry(pc),a3		/* a3 -> entry routine for blit */
-		tst.w	_COPYTRAN		/* see if blit transparent flg is on */
+		tst.w	PIXLV(COPYTRAN,ax)		/* see if blit transparent flg is on */
 		beq	csrn2			/* if not then skip */
 		lea	transSrNeg,a3		/* a3 -> trns entry for blit */
 
@@ -513,7 +514,7 @@ csrn1:		add.w	#16,d1			/* d1 <- D_XMIN mod 16 */
  * case shift left negative
  */
 csln0:		lea	slNentry(pc),a3		/* a3 -> entry routine for blit */
-		tst.w	_COPYTRAN		/* see if blit transparent flg is on */
+		tst.w	PIXLV(COPYTRAN,ax)		/* see if blit transparent flg is on */
 		beq	csln2			/* if not then skip */
 		lea	transSlNeg,a3		/* a3 -> trns entry for blit */
 

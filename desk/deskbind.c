@@ -178,7 +178,9 @@ PP(int16_t *pxy;)
 
 
 #if !BINEXACT
-VOID dvq_chcells(int16_t *rows, int16_t *cols)
+VOID dvq_chcells(P(int16_t *) rows, P(int16_t *) cols)
+PP(int16_t *rows;)
+PP(int16_t *cols;)
 {
 	contrl[5] = 1;
 	gsx_ncode(5, 0, 0);
