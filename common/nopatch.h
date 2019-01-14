@@ -47,7 +47,7 @@
 #define TP_12 0
 #define TP_13 (OS_COUNTRY == CTRY_PL)
 #define TP_14 0
-#define TP_15 0
+#define TP_15 (OS_COUNTRY == CTRY_PL)
 #define TP_16 0
 #define TP_17 0
 #define TP_18 0

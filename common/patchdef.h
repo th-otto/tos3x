@@ -31,10 +31,10 @@
  * TP_04: MEM_INIT: Clear memory from $100-$400
  * Clear the memory starting at $100 instead of $400 on reset,
  * to remove any junk.
- * This patch must not be used together with the RAMRESET patch.
+ * This patch is disabled if the RAMRESET patch is also active.
  */
 #ifndef TP_04
-#define TP_04 (!TP_03)
+#define TP_04 0
 #endif
 
 /*
@@ -129,4 +129,30 @@
  */
 #ifndef TP_14
 #define TP_14 0
+#endif
+
+/*
+ * TP_15: STACK_POINTER: Fix stack pointer in autoexec
+ * Fixes a bug the autoexec routine (see ST-Computer 1/90)
+ */
+#ifndef TP_15
+#define TP_15 1
+#endif
+
+/*
+ * TP_16: PILZE: Alternative image for bombs:
+ * Replaces the Atari bomb images with the original mushrooms
+ */
+#ifndef TP_16
+#define TP_16 0
+#endif
+
+/*
+ * TP_17: LOCK_CLOCK: Lock Mega-ST clock
+ * 
+ * Prevents the hardware clock from being set by TOS.
+ * A separate program is then needed to update it.
+ */
+#ifndef TP_17
+#define TP_17 0
 #endif

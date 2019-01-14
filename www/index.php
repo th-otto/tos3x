@@ -93,7 +93,7 @@ Reset resident:
 <input type="checkbox" name="tp_03" value="1" /><br />
 </td>
 <td>
-Modified reset routine. </br>
+Modified reset routine. <br />
 Will keep RAM-TOS resident even after Hardreset (via keyboard)
 </td>
 </tr>
@@ -107,8 +107,8 @@ Clear memory from $100-$400:
 </td>
 <td>
 Clear the memory starting at $100 instead of $400 on reset,
-to remove any junk. </br>
-This patch must not be used together with the &lt;Reset Resident&gt; patch.
+to remove any junk. <br />
+This patch is disabled if the &lt;Reset Resident&gt; patch is also active.
 </td>
 </tr>
 
@@ -177,10 +177,10 @@ Change delay for CRC test:
 <input type="checkbox" name="tp_09" value="1" /><br />
 </td>
 <td rowspan="5">
-Reduce the delay after which - on system start - </br>
-a CRC test or a RAM test is run. Additionally, the </br>
-RAM test can be configured to display only the </br>
-memory configuration or the bar. </br>
+Reduce the delay after which - on system start - <br />
+a CRC test or a RAM test is run. Additionally, the <br />
+RAM test can be configured to display only the <br />
+memory configuration or the bar. <br />
 </td>
 </tr>
 <tr>
@@ -240,6 +240,44 @@ Boot function for c't "Billigl&ouml;sung":
 The c't "Billigl&ouml;sung" was a project started by
 the german magazine c't around 1988. This patch adds support
 for that adapter.
+</td>
+</tr>
+
+<tr>
+<td>
+Fix stack pointer in autoexec:
+</td>
+<td>
+<input type="checkbox" name="tp_15" value="1" checked="checked" /><br />
+</td>
+<td>
+Fixes a bug the autoexec routine (see ST-Computer 1/90)
+</td>
+</tr>
+
+<tr>
+<td>
+Alternative image for bombs:
+</td>
+<td>
+<input type="checkbox" name="tp_16" value="1" /><br />
+</td>
+<td>
+Replaces the Atari bomb images <img src="bomb.bmp" width="16" height="16" style="border:0" alt="Bomb" />
+with the original mushrooms <img src="mushroom.bmp" width="16" height="16" style="border:0" alt="Mushroom" />
+</td>
+</tr>
+
+<tr>
+<td>
+Lock Mega-ST clock:
+</td>
+<td>
+<input type="checkbox" name="tp_17" value="1" /><br />
+</td>
+<td>
+Prevents the hardware clock from being set by TOS. <br />
+A separate program is then needed to update it.
 </td>
 </tr>
 

@@ -645,7 +645,7 @@ st_ramsize_done:                    /* bus error or bad ram  */
 /* =========================================================================== */
 
         /* Clear the memory */
-#if TP_04 /* MEM_INIT */
+#if TP_04 & !TP_03 /* MEM_INIT */
         movea.w   #$100,a0
 #else
         movea.w   #sysvars_start,a0
@@ -1946,7 +1946,9 @@ dmaloop:
         bsr       memtest
         movea.w   d0,a5                     /* memtest done? */
         beq       dmawait                   /* (no) */
-#if !TP_11
+#if TP_11
+        bra       dmadone
+#endif
         move.w    #$001B,-(a7)
         move.l    #$00030002,-(a7)
         trap      #13                       /* Bconout(2, ESC) */
@@ -2043,7 +2045,6 @@ dmaline:
         move.l    #$00030002,(a7)
         trap      #13                       /* Bconout(2, 'K') Clear to eol */
         addq.l    #6,a7
-#endif /* TP_11 */
 
 /* --- boot from DMA device */
 dmadone:
@@ -3410,8 +3411,7 @@ autoscan:
         clr.w     -(a7)
         move.w    #$004A,-(a7)                  /* Mshrink to basepage only */
         trap      #1
-#if OS_COUNTRY == CTRY_PL
-		/* apparently a patch that was applied by the maker of the PL version */
+#if TP_15 /* STACK_POINTER */
 		adda.w    #12,a7
         tst.w     d0
         bne.s     autosca4                      /* if Mshrink failed, done */
@@ -3421,7 +3421,7 @@ autoscan:
         addq.w    #6,a7
         tst.w     d0
         bne.s     autosca4                      /* if Mshrink failed, done */
-        move.w    #$7,-(a7)                     /* find r/o+hidden+system files */
+        move.w    #7,-(a7)                      /* find r/o+hidden+system files */
         move.l    execpath,-(a7)                /* -> filename (on input) */
 #endif
         move.w    #$004E,-(a7)                  /* Fsfirst */
@@ -3478,8 +3478,12 @@ autosca4:
 /* --- what it is: */
 /* 306de: 00e014f6 */
 /* 206de: 00e013b2 */
-bombimage:        dc.w $0600,$2900,$0080,$4840,$11f0,$01f0,$07fc,$0ffe,$0dfe,$1fff,$1fef,$0fee,$0fde,$07fc,$03f8,$00e0
-
+bombimage:
+#if TP_16
+        dc.w $07c0,$1ff0,$3bf8,$77f4,$b7fa,$bbfa,$dff6,$66fc,$3288,$0280,$0440,$0440,$0540,$0520,$0920,$0920
+#else
+        dc.w $0600,$2900,$0080,$4840,$11f0,$01f0,$07fc,$0ffe,$0dfe,$1fff,$1fef,$0fee,$0fde,$07fc,$03f8,$00e0
+#endif
 
 /*
  * waitvbl - wait for the beam inside the vertical blank area
@@ -3580,7 +3584,11 @@ _gettime:
 _settime:
         move.w    4(a7),_date
         move.w    6(a7),_time
+#if TP_17 /* LOCK_CLOCK */
+        lea.l     retzero(pc),a3
+#else
         lea.l     writeRTCTime,a3
+#endif
         lea.l     isetdt,a4
 gsettime:
         bsr       checkRTC
@@ -3972,6 +3980,7 @@ _bco3stat:
         move.b    (ACIA_MIDI_BASE+ACIA_CTRL).w,d2
         btst      #1,d2
         bne.s     bco3sret
+retzero:
         moveq.l   #0,d0
 bco3sret:
         rts
