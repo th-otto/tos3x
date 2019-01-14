@@ -123,3 +123,10 @@
 #ifndef TP_13
 #define TP_13 1
 #endif
+
+/*
+ * TP_14: CT_HD: Boot function for c't "Billigloesung"
+ */
+#ifndef TP_14
+#define TP_14 0
+#endif

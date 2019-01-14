@@ -6,9 +6,7 @@
 #undef TP_05
 #undef TP_06
 #undef TP_07
-#undef STEP_RATE
 #undef TP_08
-#undef FDC_COOKIE
 #undef TP_09
 #undef TP_10
 #undef TP_11
@@ -30,6 +28,10 @@
 #undef TP_27
 #undef TP_28
 #undef TP_29
+
+#undef STEP_RATE
+#undef FDC_COOKIE
+#undef BOOT_TIME
 
 #define TP_01 0
 #define TP_02 0

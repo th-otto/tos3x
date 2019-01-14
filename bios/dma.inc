@@ -199,9 +199,19 @@ dodmaread:
 domdmar1:
         bsr       rcvacsi        /* it's an ACSI device */
 #else
+#if TP_14 /* CT_HD */
+	bsr.s     read_boot
+#else
         bsr.s     rcvacsi        /* it's an ACSI device */
 #endif
+#endif
         rts
+
+#if TP_14 /* CT_HD */
+
+#include "../tospatch/ct_hd2.s"
+
+#else
 
 /*
  * dowcmd() - send a command which will write data to the target
@@ -497,6 +507,8 @@ shortdelay:
         tst.b     (MFP_GPIP).w
         tst.b     (MFP_GPIP).w
         rts
+
+#endif /* TP_14 */
 
 
 #if TOSVERSION >= 0x300

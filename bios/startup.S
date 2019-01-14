@@ -2068,6 +2068,10 @@ dmadone:
         beq.s     confdone
 #endif
 #endif
+
+#if TP_14 /* CT_HD */
+#include "../tospatch/ct_hd1.s"
+#else
         clr.w     (_bootpref).w
 confdone:
         move.w    #$0001,d1            /* d1 -> 2 tries per device */
@@ -2144,6 +2148,9 @@ doboot:
         cmp.l     (_hdv_rw).w,d0         /* did the read sector function change? */
         beq.s     nextdev                /* no -> no device driver was loaded -> continue to load boot sectors */
         rts
+
+#endif /* TP_14 */
+
 
 /*
  * void run_cartridge_applications(WORD typebit);

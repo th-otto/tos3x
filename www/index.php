@@ -117,7 +117,7 @@ This patch must not be used together with the &lt;Reset Resident&gt; patch.
 Clear _shell_p:
 </td>
 <td>
-<input type="checkbox" name="tp_05" value="1" /><br />
+<input type="checkbox" name="tp_05" value="1" checked="checked" /><br />
 </td>
 <td>
 Clear the _shell_p system variable on reset.
@@ -221,11 +221,25 @@ Show only amount of memory:
 Fix boot device error:
 </td>
 <td>
-<input type="checkbox" name="tp_13" value="1" /><br />
+<input type="checkbox" name="tp_13" value="1" checked="checked" /><br />
 </td>
 <td>
 Fixes a long-standing bug that sets the default
 path for GEM to the floppy (see ST-Computer 1/90)
+</td>
+</tr>
+
+<tr>
+<td>
+Boot function for c't "Billigl&ouml;sung":
+</td>
+<td>
+<input type="checkbox" name="tp_14" value="1" /><br />
+</td>
+<td>
+The c't "Billigl&ouml;sung" was a project started by
+the german magazine c't around 1988. This patch adds support
+for that adapter.
 </td>
 </tr>
 
