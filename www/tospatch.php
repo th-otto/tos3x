@@ -1,7 +1,7 @@
 <?php
 
-error_reporting(E_ALL & ~E_WARNING);
 error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_WARNING);
 ini_set("display_errors", 1);
 ini_set("track_errors", 1);
 
@@ -123,9 +123,10 @@ function compile_tos()
 	global $country;
 	global $filename;
 	global $zip;
+	global $exitcode;
 	
 	$retval = false;
-	$exitcode = 0;
+	$exitcode = 1;
 	
 	if (is_cli() || $_SERVER['REQUEST_METHOD'] == 'GET')
 	{
@@ -148,9 +149,7 @@ function compile_tos()
 			$tp_05 = isset($_GET['tp_05']) ? $_GET['tp_05'] : 0;
 			$tp_06 = isset($_GET['tp_06']) ? $_GET['tp_06'] : 0;
 			$tp_07 = isset($_GET['tp_07']) ? $_GET['tp_07'] : 0;
-			$seekrate = isset($_GET['seekrate']) ? $_GET['seekrate'] : 3;
 			$tp_08 = isset($_GET['tp_08']) ? $_GET['tp_08'] : 0;
-			$fdc_cookie = isset($_GET['fdc_cookie']) ? $_GET['fdc_cookie'] : '$01415443';
 			$tp_09 = isset($_GET['tp_09']) ? $_GET['tp_09'] : 0;
 			$tp_10 = isset($_GET['tp_10']) ? $_GET['tp_10'] : 0;
 			$tp_11 = isset($_GET['tp_11']) ? $_GET['tp_11'] : 0;
@@ -173,6 +172,12 @@ function compile_tos()
 			$tp_28 = isset($_GET['tp_28']) ? $_GET['tp_28'] : 0;
 			$tp_29 = isset($_GET['tp_29']) ? $_GET['tp_29'] : 0;
 		
+			$seekrate = isset($_GET['seekrate']) ? $_GET['seekrate'] : 3;
+			$fdc_cookie = isset($_GET['fdc_cookie']) ? $_GET['fdc_cookie'] : '$01415443';
+			$boottime = isset($_GET['boottime']) ? $_GET['boottime'] : 80;
+			$prntimeout = isset($_GET['prntimeout']) ? $_GET['prntimeout'] : 30;
+			$conterm = isset($_GET['conterm']) ? $_GET['conterm'] : 7;
+
 			$fp = fopen('common/localcnf.h', 'w');
 			if (!is_resource($fp))
 			{
@@ -186,7 +191,6 @@ function compile_tos()
 				fprintf($fp, "#define TP_05 %d\n", $tp_05);
 				fprintf($fp, "#define TP_06 %d\n", $tp_06);
 				fprintf($fp, "#define TP_07 %d\n", $tp_07);
-				fprintf($fp, "#define STEP_RATE %d\n", $seekrate);
 				fprintf($fp, "#define TP_08 %d\n", $tp_08);
 				fprintf($fp, "#define FDC_COOKIE %s\n", $fdc_cookie);
 				fprintf($fp, "#define TP_09 %d\n", $tp_09);
@@ -210,14 +214,23 @@ function compile_tos()
 				fprintf($fp, "#define TP_27 %d\n", $tp_27);
 				fprintf($fp, "#define TP_28 %d\n", $tp_28);
 				fprintf($fp, "#define TP_29 %d\n", $tp_29);
+
+				fprintf($fp, "#define STEP_RATE %d\n", $seekrate);
+				fprintf($fp, "#define FDC_COOKIE %s\n", $fdc_cookie);
+				fprintf($fp, "#define BOOT_TIME %d\n", $boottime);
+				fprintf($fp, "#define PRNTIMEOUT %d\n", $prntimeout);
+				fprintf($fp, "#define CONTERM %d\n", $conterm);
+
 				fclose($fp);
 			
 				system("make clean 2>&1");
 				system("make 2>&1", $exitcode);
+				error_log("make exited with code $exitcode");
 				
 				if ($exitcode == 0)
 				{
 					system("zip -j $zip $filename 2>&1", $exitcode);
+					error_log("zip exited with code $exitcode");
 					if ($exitcode == 0)
 					{
 						$retval = true;
@@ -241,8 +254,6 @@ $filename = 'glue/tos' . $tosversion . $country . '.img';
 $zip = 'glue/tos' . $tosversion . $country . '.zip';
 unlink($zip);
 
-send_headers();
-
 if ($retval)
 	$retval = compile_tos();
 
@@ -256,20 +267,32 @@ if ($retval)
 	if (headers_sent($file, $line))
 	{
 		error_log("headers already sent at $file $line");
+	} else
+	{
+		send_headers();
+		header('Content-Length: ' . filesize($zip));
 	}
-	header('Content-Length: ' . filesize($zip));
 	flush();
 	readfile($zip);
 } else
 {
 	html_header();
-	echo $compile_output;
+	/* echo $compile_output; */
 	echo "error generating tos.img\n";
+
+	$errfile = fopen('../errors.log', 'a');
+	fputs($errfile, "$currdate: start\n");
+	fprintf($errfile, "FROM: %s\n", $_SERVER['REMOTE_ADDR']);
+	fprintf($errfile, "QUERY_STRING: %s\n", $_SERVER['QUERY_STRING']);
+	fprintf($errfile, "FAILED:\n");
+	fputs($errfile, "$compile_output\n\n");
+	fclose($errfile);
+
 	html_trailer();
 }
 
 $currdate = date('Y-m-d H:i:s');
-fputs($log, "$currdate: end\n\n");
+fputs($log, "$currdate: end $exitcode\n\n");
 
 
 fclose($log);

@@ -209,7 +209,7 @@ domdmar1:
 
 #if TP_14 /* CT_HD */
 
-#include "../tospatch/ct_hd2.s"
+#include "../tospatch/ct_hd2.S"
 
 #else
 

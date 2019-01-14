@@ -281,6 +281,70 @@ A separate program is then needed to update it.
 </td>
 </tr>
 
+<tr>
+<td>
+Ignore the blitter:
+</td>
+<td>
+<input type="checkbox" name="tp_18" value="1" /><br />
+</td>
+<td>
+The blitter will be disavowed and ignored by TOS
+</td>
+</tr>
+
+<tr>
+<td>
+Fast printer routines for the parallel port:
+</td>
+<td>
+<input type="checkbox" name="tp_19" value="1" checked="checked" /><br />
+</td>
+<td>
+Output, Input- and wait functions will be replaced.
+Corresponds to FASTPRN.PRG from Ecki from the c't magazine.
+</td>
+</tr>
+
+<tr>
+<td>
+Set printer timeout:
+</td>
+<td>
+<input type="checkbox" name="tp_20" value="1" checked="checked" /><br />
+</td>
+<td>
+Original value is 30 seconds. Minimum value is 5 seconds.
+Does not work with the Atari Laser Printer.
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>
+<input type="number" name="prntimeout" value="30" min="5" max="30" style="width: 4em" /> seconds<br />
+</td>
+</tr>
+
+<tr>
+<td>
+Set conterm system variable:
+</td>
+<td>
+<input type="checkbox" name="tp_21" value="1" /><br />
+</td>
+<td>
+Bit 2 set: bell on CNTRL-G<br />
+Bit 1 set: key repeat on<br />
+Bit 0 set: key click on<br />
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>
+<input type="number" name="conterm" value="7" min="0" max="7" style="width: 4em" /><br />
+</td>
+</tr>
+
 <tr><td>&nbsp;</td></tr>
 
 <tr>

@@ -29,10 +29,6 @@
 #undef TP_28
 #undef TP_29
 
-#undef STEP_RATE
-#undef FDC_COOKIE
-#undef BOOT_TIME
-
 #define TP_01 0
 #define TP_02 0
 #define TP_03 0
@@ -51,7 +47,7 @@
 #define TP_16 0
 #define TP_17 0
 #define TP_18 0
-#define TP_19 0
+#define TP_19 (OS_COUNTRY == CTRY_PL)
 #define TP_20 0
 #define TP_21 0
 #define TP_22 0
@@ -65,6 +61,28 @@
 
 #endif
 
+/*
+ * make sure the defaults are used for patches that are not activated
+ */
+#if !TP_07
+#undef STEP_RATE
+#endif
+#if !TP_08
+#undef FDC_COOKIE
+#endif
+#if !TP_09 & !TP_10
+#undef BOOT_TIME
+#endif
+#if !TP_20
+#undef PRNTIMEOUT
+#endif
+#if !TP_21
+#undef CONTERM
+#endif
+
+/*
+ * These are the defaults that are used for patches that are not activated
+ */
 #ifndef STEP_RATE
 #define STEP_RATE 3
 #endif
@@ -74,4 +92,10 @@
 #endif
 #ifndef BOOT_TIME
 #define BOOT_TIME 80
+#endif
+#ifndef PRNTIMEOUT
+#define PRNTIMEOUT 30
+#endif
+#ifndef CONTERM
+#define CONTERM 7
 #endif

@@ -458,7 +458,7 @@ initpal2:
         clr.b     (v_bas_m).w
 
 #if TP_03 /* RAMRESET */
-#include "../tospatch/ramres.s"
+#include "../tospatch/ramres.S"
 #else
 
 #if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
@@ -645,7 +645,7 @@ st_ramsize_done:                    /* bus error or bad ram  */
 /* =========================================================================== */
 
         /* Clear the memory */
-#if TP_04 & !TP_03 /* MEM_INIT */
+#if TP_04 & !TP_03 /* MEM_INIT & !RAMRESET */
         movea.w   #$100,a0
 #else
         movea.w   #sysvars_start,a0
@@ -791,7 +791,7 @@ nomemchk:
 
 /* detect basic STe/TT DMA sound */
 
-#if TP_05
+#if TP_05 /* SHELL_P */
 		clr.l     (_shell_p).w
         movea.w   #SUPSIZ*2+_supstk,a7
 #else
@@ -870,7 +870,7 @@ vmeinit:    move.l    a0,(_buserror).w
 
 #if (TOSVERSION < 0x400)
 
-#if TP_05
+#if TP_05 /* SHELL_P */
         clr.b     (_has_dmasound).w
 #else
         clr.b     _has_dmasound
@@ -936,7 +936,7 @@ nostedetect:
 
 #endif
 
-#if TP_06
+#if TP_06 /* MSTE_CACHE_ON */
 		tst.b     (STEFlag).w
 		beq.s     nostec
 		ori.b     #3,($ffff8e21).w /* turn on 16MHz and cache */
@@ -1860,7 +1860,7 @@ copyenv:
 nextenvc:
         move.b    (a0)+,(a1)+
         bpl.s     copyenv
-#if TP_13
+#if TP_13 /* BOOT_DEV */
         move.w    _bootdev,d0
 #else
         move.b    _bootdev,d0                  /* compute drive#, and shove it (infamous old bug accessing _bootdev as byte) */
@@ -2071,7 +2071,7 @@ dmadone:
 #endif
 
 #if TP_14 /* CT_HD */
-#include "../tospatch/ct_hd1.s"
+#include "../tospatch/ct_hd1.S"
 #else
         clr.w     (_bootpref).w
 confdone:
@@ -3631,6 +3631,9 @@ braop:
 /* 306de: 00e015dc */
 /* 206de: 00e014b4 */
 _blitmode:
+#if TP_18 /* IGNORE_BLITTER */
+		moveq     #0,d0
+#else
         bsr.s     blittest                      /* test if blitter is installed */
         move.w    d0,d4                         /* d4 = blitter status */
         move.w    d0,d5
@@ -3645,6 +3648,7 @@ _blitmode:
         jsr       _SETBLT                       /* disable/enable blitter */
 blitmod1:
         move.w    d3,d0
+#endif
         rts
 
 /*
@@ -4105,125 +4109,9 @@ bcon3i2:
         move.w    (a7)+,sr
         rts
 
-#if OS_COUNTRY == CTRY_PL
-/**************************************************************************
- *                                                                        *
- * Bconout function for device 0 (parallel i/o port)                      *
- *                                                                        *
- *       this set of routines is for general parallel i/o                 *
- *                                                                        *
- *       entry to listout                                                 *
- *                                                                        *
- *       entry to listin                                                  *
- *                                                                        *
- *       exit from listin                                                 *
- *                                                                        *
- **************************************************************************/
-/* 306p: 00e022ee */
-		/* apparently a patch that was applied by the maker of the PL version */
-_bcon0out:
-        btst      #4,(_prtconfig).w  /* Printer configured for output to RS232? */
-        bne       _bcon6out
-		lea.l     (_hz_200).w,a0
-		move.l    (a0),d3
-		move.l    d3,d2
-		sub.l     (lst_timeout).w,d3
-		cmpi.l    #1000,d3
-        bcs.s     bcon0o2
-bcon0o1:
-        bsr.s     _bco0stat
-        bmi.s     bcon0o3
-        move.l    (a0),d3
-        sub.l     d2,d3
-        cmpi.l    #6000,d3
-        bcs.s     bcon0o1
-bcon0o2:
-        dc.l      6000             /* == ori.b #$70,d0; most likely bytes forgotten to patch */
-        moveq.l   #0,d0
-        rts
-bcon0o3:
-        bsr.s     gpipisr7
-        moveq.l   #7,d1
-        moveq.l   #$c0,d0
-        bsr.s     ongib
-        move.b    #$0F,(a0)
-        move.b    7(a7),(a1)
-        bsr.s     strobeon
-        move.w    (a0),d0
-        move.w    (a0),d0
-        bsr.s     ongib0
-        move.w    d3,sr
-        moveq.l   #-1,d0
-        rts
+#if TP_19 /* FASTPRN */
 
-strobeoff:
-        moveq.l   #14,d1
-ongib0:
-        moveq.l   #$20,d0
-ongib:
-        move.b    d1,(a0)
-        or.b      (a0),d0
-        move.b    d0,(a1)
-        rts
-
-strobeon:
-        moveq.l   #14,d1
-offgib0:
-        moveq.l   #$DF,d0
-offgib:
-        move.b    d1,(a0)
-        and.b     (a0),d0
-        move.b    d0,(a1)
-        rts
-
-
-/*
- * Bconin function for device 0 (printer)
- */
-/* 306pl: 0038235a */
-_bcon0in:
-        bsr.s     gpipisr7
-        moveq.l   #7,d1
-        moveq.l   #127,d0
-        bsr.s     offgib
-        bsr.s     strobeoff
-        move.w    d3,sr
-bcon0in1:
-        bsr.s     _bco0stat
-        bmi.s     bcon0in1
-        bsr.s     gpipisr7
-        bsr.s     offgib0
-        move.b    #$0F,(a0)
-        move.b    (a0),d0
-        move.w    d3,sr
-        rts
-
-/*
- * Bcostat function for device 0 (printer)
- */
-/* 306pl: 00382378 */
-_bco0stat:
-        andi.b    #$FE,(MFP_DDR).w
-        moveq.l   #0,d0
-        btst      d0,(MFP_GPIP).w
-        bne.s     bco0st1
-        moveq.l   #-1,d0
-bco0st1:
-        rts
-
-strobeo0:
-        bsr.s     gpipisr7
-        bsr.s     strobeoff
-        move.w    d3,sr
-        rts
-
-gpipisr7:
-        lea.l     (psgsel).w,a0
-        lea.l     2(a0),a1
-        move.w    sr,d3
-        ori.w     #$0700,sr
-        rts
-		dc.w -1
+#include "../tospatch/fastprn.S"
 
 #else
 
@@ -4256,7 +4144,7 @@ bcon0o1:
         bne.s     bcon0o3                       /* port is ready -- print the char */
         move.l    (_hz_200).w,d3                /* d3 = hz_200 - d2 */
         sub.l     d2,d3                         /* check for 30 second delta */
-        cmpi.l    #6000,d3
+        cmpi.l    #PRNTIMEOUT*200,d3
         blt.s     bcon0o1                       /* continue if no timeout */
 bcon0o2:
         moveq.l   #0,d0                         /* return value of 0 indicates timeout */
@@ -4328,7 +4216,7 @@ _bco0stat:
 bco0st1:
         rts
 
-#endif /* CTRY_PL */
+#endif /* TP_19 */
 
 /**************************************************************************
  *                                                                        *
@@ -4683,7 +4571,7 @@ initmfp2:
         move.b    #$95,(ACIA_MIDI_BASE+ACIA_CTRL).w
 
 /* initialize the keyboard acia interrupt vector exception address */
-        move.b    #$07,(_conterm).w             /* enabled keyclick, repeat key, bell functions */
+        move.b    #CONTERM,(_conterm).w         /* enabled keyclick, repeat key, bell functions */
         move.l    #_clockvec,(clockvec).w
         move.l    #dummyrts,d0
         move.l    d0,(statvec).w
@@ -4697,7 +4585,7 @@ initmfp2:
         move.b    d0,(_snddelay).w              /* clear delay timer */
         move.b    d0,(_sndtmp).w                /* clear temp value */
         move.l    d0,(lst_timeout).w            /* init printer timeout to 0 */
-#if OS_COUNTRY == CTRY_PL
+#if TP_19
         bsr       strobeo0
 #else
         bsr       strobeoff                     /* init strobe to off (line high!) */

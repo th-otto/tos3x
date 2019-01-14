@@ -64,9 +64,6 @@
 #define TP_07 0
 #define STEP_RATE 3
 #endif
-#if !TP_07
-#undef STEP_RATE
-#endif
 
 /*
  * TP_08: SET_FDC_COOKIE: Install HD cookie
@@ -84,9 +81,6 @@
 #ifndef TP_08
 #define TP_08 0
 #define FDC_COOKIE $01415443
-#endif
-#if !TP_08
-#undef FDC_COOKIE
 #endif
 
 /*
@@ -140,7 +134,7 @@
 #endif
 
 /*
- * TP_16: PILZE: Alternative image for bombs:
+ * TP_16: PILZE: Alternative image for bombs
  * Replaces the Atari bomb images with the original mushrooms
  */
 #ifndef TP_16
@@ -155,4 +149,50 @@
  */
 #ifndef TP_17
 #define TP_17 0
+#endif
+
+/*
+ * TP_18: IGNORE_BLITTER: Ignore the blitter
+ * 
+ * The blitter will be disavowed and ignored by TOS
+ */
+#ifndef TP_18
+#define TP_18 0
+#endif
+
+/*
+ * TP_19: FASTPRN: Fast printer routines for the parallel port
+ * 
+ * Output, Input- and wait functions will be replaced.
+ * Corresponds to FASTPRN.PRG from Ecki from the c't magazine.
+ */
+#ifndef TP_19
+#define TP_19 1
+#endif
+
+/*
+ * TP_20: TIMEOUT: Set printer timeout
+ * 
+ * Original value is 30 seconds. Minimum value is 5 seconds.
+ * Does not work with the Atari Laser Printer.
+ */
+#ifndef TP_20
+#define TP_20 1
+#endif
+#ifndef PRNTIMEOUT
+#define PRNTIMEOUT 30
+#endif
+
+/*
+ * TP_21: SET_CONTERM: Set conterm
+ * 
+ * Bit 2 set: bell on CNTRL-G
+ * Bit 1 set: key repeat on
+ * Bit 0 set: key click on
+ */
+#ifndef TP_21
+#define TP_21 0
+#endif
+#ifndef CONTERM
+#define CONTERM 6
 #endif
