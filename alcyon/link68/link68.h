@@ -25,8 +25,6 @@
 
 #define SEEKREL	1	/*relative seek flag*/
 
-#define DRIVELEN 2	/* drive spec length -- FOO */
-
 #define LINELEN  2040	/* maximum input/output string length */
 #define FNAMELEN 15	/* drive, name, and type, null terminated */
 #define MAXOVLS  255	/* maximum number of overlays */

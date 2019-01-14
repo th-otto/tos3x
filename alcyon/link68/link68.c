@@ -226,12 +226,22 @@ static char libname[] = "/lib/lib6.a";	/* Default library name */
 #define LIBCHAR libname[8]				/* Character to be modified */
 #endif
 
-#ifdef	UNIX
+#ifdef UNIX
+#define HAVE_MKTEMP
+#endif
+#ifdef __unix__
+#define HAVE_MKTEMP
+#endif
+#ifdef __linux__
+#define HAVE_MKTEMP
+#endif
+
+#ifdef HAVE_MKTEMP
 static const char *tfbase = "loXXXXXX";	/* Temp base name */
-char tdisk[DRIVELEN] = "/tmp/";			/* Temp disk name */
+char tdisk[80] = "/tmp/";			/* Temp disk name */
 #else /* CP/M and VMS */
 static const char *tfbase = "loXXXXXA";	/* Temp base name */
-char tdisk[DRIVELEN];					/* Temp disk name */
+char tdisk[80];					/* Temp disk name */
 #endif
 
 static char *tfchar;					/* -> changeable character */
@@ -2439,7 +2449,7 @@ static VOID buildf(NOTHING)
 	strcat(tfilname, tdisk);			/* Put disk name in first  */
 	strcat(tfilname, tfbase);			/* Put in filename now    */
 
-#ifdef	UNIX							/* On UNIX,           */
+#ifdef HAVE_MKTEMP						/* On UNIX,           */
 	mktemp(tfilname);					/* Make a temp filename   */
 #endif
 
