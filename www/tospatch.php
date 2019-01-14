@@ -50,7 +50,9 @@ function is_cli()
 
 $log = fopen('tospatch.log', 'a');
 $currdate = date('Y-m-d H:i:s');
-fprintf($log, "%s: start\n", $currdate);
+fputs($log, "$currdate: start\n");
+fprintf($log, "FROM: %s\n", $_SERVER['REMOTE_ADDR']);
+fprintf($log, "QUERY_STRING: %s\n", $_SERVER['QUERY_STRING']);
 
 function error_handler($errno, $errmsg, $errfile, $errline, $errcontext)
 {
@@ -146,7 +148,9 @@ function compile_tos()
 			$tp_05 = isset($_GET['tp_05']) ? $_GET['tp_05'] : 0;
 			$tp_06 = isset($_GET['tp_06']) ? $_GET['tp_06'] : 0;
 			$tp_07 = isset($_GET['tp_07']) ? $_GET['tp_07'] : 0;
+			$seekrate = isset($_GET['seekrate']) ? $_GET['seekrate'] : 3;
 			$tp_08 = isset($_GET['tp_08']) ? $_GET['tp_08'] : 0;
+			$fdc_cookie = isset($_GET['fdc_cookie']) ? $_GET['fdc_cookie'] : '$01415443';
 			$tp_09 = isset($_GET['tp_09']) ? $_GET['tp_09'] : 0;
 			$tp_10 = isset($_GET['tp_10']) ? $_GET['tp_10'] : 0;
 			$tp_11 = isset($_GET['tp_11']) ? $_GET['tp_11'] : 0;
@@ -158,6 +162,16 @@ function compile_tos()
 			$tp_17 = isset($_GET['tp_17']) ? $_GET['tp_17'] : 0;
 			$tp_18 = isset($_GET['tp_18']) ? $_GET['tp_18'] : 0;
 			$tp_19 = isset($_GET['tp_19']) ? $_GET['tp_19'] : 0;
+			$tp_20 = isset($_GET['tp_20']) ? $_GET['tp_20'] : 0;
+			$tp_21 = isset($_GET['tp_21']) ? $_GET['tp_21'] : 0;
+			$tp_22 = isset($_GET['tp_22']) ? $_GET['tp_22'] : 0;
+			$tp_23 = isset($_GET['tp_23']) ? $_GET['tp_23'] : 0;
+			$tp_24 = isset($_GET['tp_24']) ? $_GET['tp_24'] : 0;
+			$tp_25 = isset($_GET['tp_25']) ? $_GET['tp_25'] : 0;
+			$tp_26 = isset($_GET['tp_26']) ? $_GET['tp_26'] : 0;
+			$tp_27 = isset($_GET['tp_27']) ? $_GET['tp_27'] : 0;
+			$tp_28 = isset($_GET['tp_28']) ? $_GET['tp_28'] : 0;
+			$tp_29 = isset($_GET['tp_29']) ? $_GET['tp_29'] : 0;
 		
 			$fp = fopen('common/localcnf.h', 'w');
 			if (!is_resource($fp))
@@ -172,7 +186,9 @@ function compile_tos()
 				fprintf($fp, "#define TP_05 %d\n", $tp_05);
 				fprintf($fp, "#define TP_06 %d\n", $tp_06);
 				fprintf($fp, "#define TP_07 %d\n", $tp_07);
+				fprintf($fp, "#define STEP_RATE %d\n", $seekrate);
 				fprintf($fp, "#define TP_08 %d\n", $tp_08);
+				fprintf($fp, "#define FDC_COOKIE %s\n", $fdc_cookie);
 				fprintf($fp, "#define TP_09 %d\n", $tp_09);
 				fprintf($fp, "#define TP_10 %d\n", $tp_10);
 				fprintf($fp, "#define TP_11 %d\n", $tp_11);
@@ -184,6 +200,16 @@ function compile_tos()
 				fprintf($fp, "#define TP_17 %d\n", $tp_17);
 				fprintf($fp, "#define TP_18 %d\n", $tp_18);
 				fprintf($fp, "#define TP_19 %d\n", $tp_19);
+				fprintf($fp, "#define TP_20 %d\n", $tp_20);
+				fprintf($fp, "#define TP_21 %d\n", $tp_21);
+				fprintf($fp, "#define TP_22 %d\n", $tp_22);
+				fprintf($fp, "#define TP_23 %d\n", $tp_23);
+				fprintf($fp, "#define TP_24 %d\n", $tp_24);
+				fprintf($fp, "#define TP_25 %d\n", $tp_25);
+				fprintf($fp, "#define TP_26 %d\n", $tp_26);
+				fprintf($fp, "#define TP_27 %d\n", $tp_27);
+				fprintf($fp, "#define TP_28 %d\n", $tp_28);
+				fprintf($fp, "#define TP_29 %d\n", $tp_29);
 				fclose($fp);
 			
 				system("make clean 2>&1");
@@ -191,8 +217,11 @@ function compile_tos()
 				
 				if ($exitcode == 0)
 				{
-					system("zip -j $zip $filename");
-					$retval = true;
+					system("zip -j $zip $filename 2>&1", $exitcode);
+					if ($exitcode == 0)
+					{
+						$retval = true;
+					}
 				}
 			}
 		}
@@ -240,7 +269,7 @@ if ($retval)
 }
 
 $currdate = date('Y-m-d H:i:s');
-fprintf($log, "%s: end\n\n", $currdate);
+fputs($log, "$currdate: end\n\n");
 
 
 fclose($log);

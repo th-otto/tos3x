@@ -280,6 +280,7 @@ mempstr2:
 
 testzone:
         moveq.l   #0,d0
+#if !TP_12
         move.l    memtaddr,d1
         cmp.l     memtbot,d1
         bcs.s     testzon8
@@ -330,6 +331,7 @@ testzon6:
 testzon7:
         moveq.l   #-1,d0
 testzon8:
+#endif /* TP_12 */
         movea.l   memtaddr,a0
         adda.l    #ZONESIZE,a0
         move.l    a0,memtaddr

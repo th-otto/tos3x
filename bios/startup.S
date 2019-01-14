@@ -284,7 +284,7 @@ _main:
 #if TOSVERSION >= 0x400
 		move.w ($FFFF8006).w,d0 /* read to auto-config mem cntrlr */
 #endif
-#if TP_01
+#if TP_01 /* KILL_RESET */
         nop
 #else
         reset                  /* reset all hardware */
@@ -414,7 +414,7 @@ meminit:
         lea       ret_1b(pc),a6
         bra       waitvbl                   /* a short delay for PAL */
 ret_1b: 
-#if TP_02
+#if TP_02 /* COLOR_60HZ */
         move.b    #0,(v_syncmod).w          /* yes -- twiddle to 60hz */
 #else
         move.b    #2,(v_syncmod).w          /* yes -- twiddle to 50hz */
@@ -457,7 +457,7 @@ initpal2:
         move.b    #$01,(v_bas_h).w
         clr.b     (v_bas_m).w
 
-#if TP_03
+#if TP_03 /* RAMRESET */
 #include "../tospatch/ramres.s"
 #else
 
@@ -645,7 +645,11 @@ st_ramsize_done:                    /* bus error or bad ram  */
 /* =========================================================================== */
 
         /* Clear the memory */
+#if TP_04 /* MEM_INIT */
+        movea.w   #$100,a0
+#else
         movea.w   #sysvars_start,a0
+#endif
         move.l    d5,d4
         moveq.l   #0,d0
 clrmem:
@@ -787,8 +791,7 @@ nomemchk:
 
 /* detect basic STe/TT DMA sound */
 
-#if OS_COUNTRY == CTRY_PL
-		/* apparently a patch that was applied by the maker of the PL version */
+#if TP_05
 		clr.l     (_shell_p).w
         movea.w   #SUPSIZ*2+_supstk,a7
 #else
@@ -867,7 +870,7 @@ vmeinit:    move.l    a0,(_buserror).w
 
 #if (TOSVERSION < 0x400)
 
-#if OS_COUNTRY == CTRY_PL
+#if TP_05
         clr.b     (_has_dmasound).w
 #else
         clr.b     _has_dmasound
@@ -932,6 +935,13 @@ nostedetect:
 		sf        STEFlag
 
 #endif
+
+#if TP_06
+		tst.b     (STEFlag).w
+		beq.s     nostec
+		ori.b     #3,($ffff8e21).w /* turn on 16MHz and cache */
+nostec:
+#endif /* TP_06 */
 
 
 /* clear the remainder of the BSS section */
@@ -1004,7 +1014,7 @@ gemok:
         move.l    (_end_os).w,(_membot).w          /* set bottom of memory (for DOS) */
         move.w    #8,(_nvbls).w                    /* default number of vbl queue entries */
         st        (_fverify).w                     /* enable write-verify */
-        move.w    #3,(_seekrate).w                 /* set default seek-rate */
+        move.w    #STEP_RATE,(_seekrate).w         /* set default seek-rate */
         move.l    #_dskbuf,(_dskbufp).w            /* set pointer to disk buffer */
         move.w    #-1,(_dumpflg).w                 /* initialize print-count */
         move.l    #_os_entry,(_sysbase).w          /* unnessary; will be overwritten by instoshdr below */
@@ -1188,11 +1198,13 @@ nomicro:
         bclr      #1,d1
 yesstereo:
         move.l    d1,(a0)+
+#if !TP_08
         btst      #6,d0
         bne.s     nofdc
         move.b    #$08,dsb+fd_drivetype
+#endif
         move.l    #$5F464443,(a0)+ /* '_FDC' */
-        move.l    #$01415443,(a0)+ /* FDC_1ATC */
+        move.l    #FDC_COOKIE,(a0)+ /* FDC_1ATC */
 nofdc:
 
 /* detect FPU */
@@ -1691,7 +1703,11 @@ notlow:
         addq.w    #6,a7
 
 #if TOSVERSION < 0x300
+#if TP_09
+        cmpi.l    #BOOT_TIME*200,_hz_200       /* system running for >80s? */
+#else
         cmpi.l    #80*200,_hz_200       /* system running for >80s? */
+#endif
         bcc       ptch_term             /* (then no ROM CRC check) */
 #endif
 
@@ -1844,7 +1860,7 @@ copyenv:
 nextenvc:
         move.b    (a0)+,(a1)+
         bpl.s     copyenv
-#if OS_COUNTRY == CTRY_PL
+#if TP_13
         move.w    _bootdev,d0
 #else
         move.b    _bootdev,d0                  /* compute drive#, and shove it (infamous old bug accessing _bootdev as byte) */
@@ -1916,7 +1932,11 @@ nodiskboot:
 /* 306de: 00e009a2 */
 /* 206de: 00e0097a */
 dmaboot:
+#if TP_10
+        move.l    #BOOT_TIME*200,d7
+#else
         move.l    #80*200,d7
+#endif
         cmp.l     _hz_200,d7                /* is the system running for > 80s? */
         bcs       dmadone                   /* (no memory test) */
         movea.w   #$0000,a5                 /* done status = false */
@@ -1926,6 +1946,7 @@ dmaloop:
         bsr       memtest
         movea.w   d0,a5                     /* memtest done? */
         beq       dmawait                   /* (no) */
+#if !TP_11
         move.w    #$001B,-(a7)
         move.l    #$00030002,-(a7)
         trap      #13                       /* Bconout(2, ESC) */
@@ -2022,6 +2043,7 @@ dmaline:
         move.l    #$00030002,(a7)
         trap      #13                       /* Bconout(2, 'K') Clear to eol */
         addq.l    #6,a7
+#endif /* TP_11 */
 
 /* --- boot from DMA device */
 dmadone:
@@ -3383,16 +3405,16 @@ autoscan:
         trap      #1
 #if OS_COUNTRY == CTRY_PL
 		/* apparently a patch that was applied by the maker of the PL version */
-		adda.w    #$000C,a7
+		adda.w    #12,a7
         tst.w     d0
         bne.s     autosca4                      /* if Mshrink failed, done */
-        move.w    #$0007,-(a7)
+        move.w    #7,-(a7)
         move.l    (execpath.w),-(a7)
 #else
         addq.w    #6,a7
         tst.w     d0
         bne.s     autosca4                      /* if Mshrink failed, done */
-        move.w    #$0007,-(a7)                  /* find r/o+hidden+system files */
+        move.w    #$7,-(a7)                     /* find r/o+hidden+system files */
         move.l    execpath,-(a7)                /* -> filename (on input) */
 #endif
         move.w    #$004E,-(a7)                  /* Fsfirst */
@@ -7060,7 +7082,7 @@ kbdvec45:
         cmp.w     #$0C53,d2                     /* control+alt+delete? */
         beq       _main                         /* yes, reset */
         cmp.w     #$0D53,d2                     /* control+alt+leftshift-delete? */
-#if TP_03
+#if TP_03 /* RAMRESET */
         beq       newkres
 #else
         beq       coldboot

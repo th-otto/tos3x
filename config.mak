@@ -58,8 +58,11 @@ $(top_srcdir)/common/config.h: $(top_srcdir)/config.mak ${MAKEFILE}
 	$(AM_V_at)echo '# define BINEXACT $(BINEXACT)' >> $@
 	$(AM_V_at)echo '#endif' >> $@
 	$(AM_V_at)echo '#define RAMVERSION $(RAMVERSION)' >> $@
-	$(AM_V_at)echo $(LOCALCONF) >> $@
+	$(AM_V_at)echo '#if !BINEXACT' >> $@
+	$(AM_V_at)echo '#include "localcnf.h"' >> $@
+	$(AM_V_at)echo '#endif' >> $@
 	$(AM_V_at)echo '#include "patchdef.h"' >> $@
+	$(AM_V_at)echo '#include "nopatch.h"' >> $@
 	$(AM_V_at)echo '#endif' >> $@
 
 $(top_srcdir)/common/sections.mak: $(top_srcdir)/common/sections.inc $(top_srcdir)/common/config.h

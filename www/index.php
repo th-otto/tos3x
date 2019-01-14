@@ -2,7 +2,7 @@
           "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>TOS Patchers</title>
+<title>TOS Patches</title>
 <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 <meta name="keywords" content="ORCS, CAT, GC, PBEM, PBM, GC-Ork, GCORK, ARAnyM, UDO, EmuTOS" />
 <link rel="stylesheet" type="text/css" href="tospatch.css" />
@@ -26,10 +26,10 @@
 <td>
 TOS version:
 </td>
-<td>
+<td colspan="2">
 <select id="tosversion" name="tosversion">
-<option value="206"> 2.06</option>
-<option value="306"> 3.06</option>
+<option value="206">2.06</option>
+<option value="306">3.06</option>
 </select>
 </td>
 </tr>
@@ -38,17 +38,17 @@ TOS version:
 <td>
 Country:
 </td>
-<td>
+<td colspan="2">
 <select id="country" name="country">
-<option value="us"> USA</option>
-<option value="de"> Germany</option>
-<option value="fr"> France</option>
-<option value="uk"> United Kingdom</option>
-<option value="es"> Spain</option>
-<option value="it"> Italy</option>
-<option value="se"> Sweden</option>
-<option value="sf"> Switzerland (French)</option>
-<option value="sg"> Switzerland (German)</option>
+<option value="us">USA</option>
+<option value="de">Germany</option>
+<option value="fr">France</option>
+<option value="uk">United Kingdom</option>
+<option value="es">Spain</option>
+<option value="it">Italy</option>
+<option value="se">Sweden</option>
+<option value="sf">Switzerland (French)</option>
+<option value="sg">Switzerland (German)</option>
 </select>
 </td>
 </tr>
@@ -71,7 +71,7 @@ Kill Reset:
 <td>
 Omit RESET instruction for RAM-TOS on older ST's
 </td>
-<tr>
+</tr>
 
 <tr>
 <td>
@@ -83,7 +83,7 @@ Color 60hz:
 <td>
 Switch to 60Hz on color monitors
 </td>
-<tr>
+</tr>
 
 <tr>
 <td>
@@ -96,7 +96,140 @@ Reset resident:
 Modified reset routine. </br>
 Will keep RAM-TOS resident even after Hardreset (via keyboard)
 </td>
+</tr>
+
 <tr>
+<td>
+Clear memory from $100-$400:
+</td>
+<td>
+<input type="checkbox" name="tp_04" value="1" /><br />
+</td>
+<td>
+Clear the memory starting at $100 instead of $400 on reset,
+to remove any junk. </br>
+This patch must not be used together with the &lt;Reset Resident&gt; patch.
+</td>
+</tr>
+
+<tr>
+<td>
+Clear _shell_p:
+</td>
+<td>
+<input type="checkbox" name="tp_05" value="1" /><br />
+</td>
+<td>
+Clear the _shell_p system variable on reset.
+</td>
+</tr>
+
+<tr>
+<td>
+Turn on 16Mhz for Mega-STE:
+</td>
+<td>
+<input type="checkbox" name="tp_06" value="1" /><br />
+</td>
+<td>
+Turns on 16 MHz and cache on Mega-STE already when booting
+</td>
+</tr>
+
+<tr>
+<td>
+Set steprate for floppy drives A: and B:
+</td>
+<td>
+<input type="checkbox" name="tp_07" value="1" /><br />
+</td>
+<td>
+<select id="seekrate" name="seekrate">
+<option value="2">2 ms</option>
+<option value="3" selected="selected">3 ms</option>
+<option value="0">6 ms</option>
+<option value="1">12 ms</option>
+</select>
+</td>
+</tr>
+
+<tr>
+<td>
+Install HD cookie:
+</td>
+<td>
+<input type="checkbox" name="tp_08" value="1" /><br />
+</td>
+<td>
+<select id="fdc_cookie" name="fdc_cookie">
+<option value="$00415443">normal density (DD 720kB/360kB)</option>
+<option value="$01415443" selected="selected">high density (HD 1.44MB)</option>
+<option value="$02415443">extra-high density (ED 2.88MB)</option>
+</select>
+</td>
+</tr>
+
+<tr>
+<td>
+Change delay for CRC test:
+</td>
+<td>
+<input type="checkbox" name="tp_09" value="1" /><br />
+</td>
+<td rowspan="5">
+Reduce the delay after which - on system start - </br>
+a CRC test or a RAM test is run. Additionally, the </br>
+RAM test can be configured to display only the </br>
+memory configuration or the bar. </br>
+</td>
+</tr>
+<tr>
+<td>
+Change delay for RAM test:
+</td>
+<td>
+<input type="checkbox" name="tp_10" value="1" /><br />
+</td>
+</tr>
+<tr>
+<td>
+Boot time for above:
+</td>
+<td>
+<input type="number" name="boottime" value="80" min="0" max="80" style="width: 4em" /> seconds<br />
+</td>
+</tr>
+<tr>
+<td>
+Skip display of ramtest bar:
+</td>
+<td>
+<input type="checkbox" name="tp_11" value="1" /><br />
+</td>
+</tr>
+<tr>
+<td>
+Show only amount of memory:
+</td>
+<td>
+<input type="checkbox" name="tp_12" value="1" /><br />
+</td>
+</tr>
+
+<tr>
+<td>
+Fix boot device error:
+</td>
+<td>
+<input type="checkbox" name="tp_13" value="1" /><br />
+</td>
+<td>
+Fixes a long-standing bug that sets the default
+path for GEM to the floppy (see ST-Computer 1/90)
+</td>
+</tr>
+
+<tr><td>&nbsp;</td></tr>
 
 <tr>
 <td>
