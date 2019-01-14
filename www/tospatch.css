@@ -1,0 +1,23 @@
+body {
+	margin:1em;
+	padding:1em;
+	background-color: #ffffff;
+	color: #0000FF;
+	link-color: #8000FF;
+}
+a:link, a:visited {
+	color: #8000FF;
+	text-decoration: underline;
+}
+tr {
+	margin:0;
+	padding:0;
+}
+td {
+	margin:0;
+	padding:0 0 0 10px;
+}
+p {
+	margin:0;
+	padding:0;
+}
