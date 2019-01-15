@@ -49,6 +49,10 @@ VOID bhdv_init(NOTHING)
 	for (dev = curflop = nflops = 0; dev < NUMFLOPPIES; dev++)
 	{
 		drivechange[dev] = MEDIANOCHANGE;
+#if TP_24 /* SKIP_B */
+		if (dev >= 1)
+			break;
+#endif
 #if BINEXACT
 		/*
 		 * Another strange hack: parameters are wrong,
@@ -94,6 +98,7 @@ PP(int32_t msg_arg;)
 /*
  * default function for system variable hdv_bpb
  */
+/* 206de: 00e0526a */
 /* 306de: 00e0565c */
 /* 404: 00e0480c */
 BPB *bhdv_getbpb(P(int16_t) dev)
@@ -134,20 +139,32 @@ PP(int16_t dev;)
 		(spc = BS->spc & 0xff) <= 0)
 		return NULL;
 	
+#if TP_25 /* ED_BIOS */
+#define res1 getiword(BS->res)
+#else
+#define res1 1
+#endif
+
 	bpb->recsiz = bps;
 	bpb->clsiz = spc;
 	bpb->fsiz = getiword(BS->spf);
-	/* BUG: assumes 2 FATs */
-	/* BUG: ignores res field of bootsector */
-	bpb->fatrec = bpb->fsiz + 1;
+	/* BUG: original code assumes 2 FATs */
+	/* BUG: original code ignores res field of bootsector */
+	bpb->fatrec = bpb->fsiz + res1;
 	bpb->clsizb = bpb->recsiz * bpb->clsiz;
 	bpb->rdlen = (getiword(BS->dir) << 5) / bpb->recsiz;
 	bpb->datrec = bpb->fatrec + bpb->rdlen + bpb->fsiz;
 	bpb->numcl = (getiword(BS->sec) - bpb->datrec) / bpb->clsiz;
 	bpb->b_flags = 0;
 	if (BS->fat < 2)
+	{
 		bpb->b_flags |= B_1FAT;
-	
+	}
+#if TP_25 /* ED_BIOS */
+	if (BS->numcl > 4078)
+		bpb->b_flags |= B_16;
+#endif
+
 	bdev->geometry.sides = getiword(BS->sides);
 	bdev->geometry.spt = getiword(BS->spt);
 	bdev->geometry.spc = bdev->geometry.sides * bdev->geometry.spt;
@@ -165,7 +182,11 @@ PP(int16_t dev;)
 	for (i = 0; i < BPBSECT; i++)
 	{
 		/* BUG: always stores sums for Drive 0 */
+#if TP_25 /* ED_BIOS */
+		bpbsums[dev == 0 ? i : (i + BPBSECT)] = sectsum(buf, SECTOR_SIZE / 2);
+#else
 		bpbsums[i] = sectsum(buf, SECTOR_SIZE / 2);
+#endif
 		buf += SECTOR_SIZE / 2;
 	}
 
@@ -173,6 +194,7 @@ PP(int16_t dev;)
 	
 #undef i
 #undef BS
+#undef res1
 
 	return &bdev->bpb;
 }
@@ -307,6 +329,7 @@ PP(LRECNO lrecnr;) /* not supported by TOS */
 }
 
 
+/* 206de: 00e0572c */
 /* 306de: 00e05b1e */
 static ERROR dorwabs(P(int16_t) rw, P(char *) buf, P(RECNO) recnr, P(int16_t) dev, P(int16_t) cnt)
 PP(int16_t rw;)
@@ -360,9 +383,15 @@ PP(int16_t cnt;)
 			p = bufp;
 			for (i = 0; i < numsect; i++)
 			{
-				/* BUG: always stores sums for Drive 0 */
+#if TP_25 /* ED_BIOS */
+				if ((sector + i) >= BPBSECT)
+					break;
+				bpbsums[sector + (dev == 0 ? i : (i + BPBSECT))] = sectsum((const int16_t *)p, SECTOR_SIZE / 2);
+#else
 				/* BUG: overflows for (sector + numsect) > BPBSECT */
+				/* BUG: always stores sums for Drive 0 */
 				bpbsums[sector + i] = sectsum((const int16_t *)p, SECTOR_SIZE / 2);
+#endif
 				p += SECTOR_SIZE;
 			}
 		}

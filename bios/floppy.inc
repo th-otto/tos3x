@@ -24,7 +24,11 @@ _flopini:
         lea.l     dsb+8,a1
 flopini1:
         move.w    _seekrat,fd_seekrate(a1)      /* setup default seek rate */
+#if TP_22 /* SEEK_UP */
+        move.w    #0,fd_density(a1)             /* default: HD mode */
+#else
         move.w    #3,fd_density(a1)             /* default: HD mode */
+#endif
         moveq.l   #-1,d0                        /* (default error) */
         clr.w     fd_curtrack(a1)               /* fake clean drive */
         clr.w     fd_cscnt
@@ -895,7 +899,11 @@ go2trac1:
         move.w    #$0086,(a6)                   /* set destination track# in */
         move.w    (fd_track).w,d7               /* 1770's data register */
         bsr       wrfdcd7                       /* (write track#) */
-        moveq.l   #20,d6                        /* execute 1770 "seek_with_verify" */
+#if TP_23 /* FASTLOAD */
+        moveq.l   #$10,d6                       /* execute 1770 "seek" */
+#else
+        moveq.l   #$14,d6                       /* execute 1770 "seek_with_verify" */
+#endif
         bsr.s     flopcmds                      /* (include seek-rate bits) */
         bcs.s     go2trret
         bne.s     go2trac2                      /* return error on seek failure */

@@ -345,6 +345,68 @@ Bit 0 set: key click on<br />
 </td>
 </tr>
 
+<tr>
+<td>
+Set hdmode to zero:
+</td>
+<td>
+<input type="checkbox" name="tp_22" value="1" /><br />
+</td>
+<td>
+Borrowed from SEEKUP from Martin Osieka.
+The patch only changes the initialization, everything
+else remains unchanged. <br />
+
+SEEKUP turns off the seek rate doubling on STs
+(recognizable by the seek noise of the drive)
+<td>
+</td>
+</tr>
+
+<tr>
+<td>
+Set fastload-bit for floppy reads:
+</td>
+<td>
+<input type="checkbox" name="tp_23" value="1" /><br />
+</td>
+<td>
+Produces errors with some driver, take care!
+(see ST-Computer 1/90)
+<td>
+</td>
+</tr>
+
+<tr>
+<td>
+Skip the search for drive B:
+</td>
+<td>
+<input type="checkbox" name="tp_24" value="1" /><br />
+</td>
+<td>
+This allows faster booting. Do not use that
+when 2 drives are connected.
+<td>
+</td>
+</tr>
+
+<tr>
+<td>
+Support ED drives:
+</td>
+<td>
+<input type="checkbox" name="tp_25" value="1" /><br />
+</td>
+<td>
+New functions Getbpb and Rwabs with support for ED drives: <br />
+- better support for media change detection <br />
+- Rwabs()-function does not destroy VDI buffers anymore <br />
+- Floppy discs with 1 FAT only are supported <br />
+<td>
+</td>
+</tr>
+
 <tr><td>&nbsp;</td></tr>
 
 <tr>

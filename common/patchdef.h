@@ -196,3 +196,49 @@
 #ifndef CONTERM
 #define CONTERM 6
 #endif
+
+/*
+ * TP_22: SEEK_UP: Set hdmode to zero
+ *
+ * Borrowed from SEEKUP from Martin Osieka.
+ * The patch only changes the initialization, everything
+ * else remains unchanged.
+ *
+ * SEEKUP turns off the seek rate doubling on STs
+ * (recognizable by the seek noise of the drive)
+ */
+#ifndef TP_22
+#define TP_22 0
+#endif
+
+/*
+ * TP_23: FASTLOAD: Set fastload-bit for floppy reads
+ *
+ * Produces errors with some driver, take care!
+ * (see ST-Computer 1/90)
+ */
+#ifndef TP_23
+#define TP_23 0
+#endif
+
+/*
+ * TP_24: SKIP_B: Skip the search for drive B:
+ *
+ * This allows faster booting. Do not use that
+ * when 2 drives are connected.
+ */
+#ifndef TP_24
+#define TP_24 0
+#endif
+
+/*
+ * TP_25: ED_BIOS: Support ED drives
+ *
+ * New functions Getbpb and Rwabs with support for ED drives:
+ * - better support for media change detection
+ * - Rwabs()-function does not destroy VDI buffers anymore
+ * - Floppy discs with 1 FAT only are supported
+ */
+#ifndef TP_25
+#define TP_25 0
+#endif

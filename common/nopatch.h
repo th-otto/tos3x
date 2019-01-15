@@ -28,6 +28,16 @@
 #undef TP_27
 #undef TP_28
 #undef TP_29
+#undef TP_30
+#undef TP_31
+#undef TP_32
+#undef TP_33
+#undef TP_34
+#undef TP_35
+#undef TP_36
+#undef TP_37
+#undef TP_38
+#undef TP_39
 
 #define TP_01 0
 #define TP_02 0
@@ -58,6 +68,16 @@
 #define TP_27 0
 #define TP_28 0
 #define TP_29 0
+#define TP_30 0
+#define TP_31 0
+#define TP_32 0
+#define TP_33 0
+#define TP_34 0
+#define TP_35 0
+#define TP_36 0
+#define TP_37 0
+#define TP_38 0
+#define TP_39 0
 
 #endif
 
