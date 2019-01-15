@@ -1753,14 +1753,14 @@ VOID d_opnvwk(NOTHING)
 
 	/* Now find a free handle */
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | TP_28 /* VDIFIX */
 	handle = 2;
 #else
 	handle = 1;
 #endif
 	work_ptr = &virt_work;
 
-#if (TOSVERSION >= 0x300) | (!BINEXACT)
+#if (TOSVERSION >= 0x300) | TP_28 /* VDIFIX */
 	while (work_ptr->next_work != NULL && handle == work_ptr->next_work->handle)
 	{
 		handle++;
@@ -1796,7 +1796,7 @@ VOID d_opnvwk(NOTHING)
 		LV(cur_work) = work_ptr->next_work = new_work;
 		new_work->next_work = tmp;
 	}
-#endif
+#endif /* TP_28 */
 
 	new_work->handle = LV(CONTRL)[6] = handle;
 

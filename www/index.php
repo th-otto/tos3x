@@ -6,6 +6,37 @@
 <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 <meta name="keywords" content="ORCS, CAT, GC, PBEM, PBM, GC-Ork, GCORK, ARAnyM, UDO, EmuTOS" />
 <link rel="stylesheet" type="text/css" href="tospatch.css" />
+<script type="text/javascript">
+function contermClick()
+{
+	var c = document.getElementById('conterm_click');
+	var f = document.getElementById('conterm');
+	f.value = (f.value & 6) + c.checked * 1;
+}
+function contermRepeat()
+{
+	var c = document.getElementById('conterm_repeat');
+	var f = document.getElementById('conterm');
+	f.value = (f.value & 5) + c.checked * 2;
+}
+function contermBell()
+{
+	var c = document.getElementById('conterm_bell');
+	var f = document.getElementById('conterm');
+	f.value = (f.value & 3) + c.checked * 4;
+}
+function contermChange()
+{
+	var c;
+	var f = document.getElementById('conterm');
+	c = document.getElementById('conterm_click');
+	c.checked = (f.value & 1) != 0;
+	c = document.getElementById('conterm_repeat');
+	c.checked = (f.value & 2) != 0;
+	c = document.getElementById('conterm_bell');
+	c.checked = (f.value & 4) != 0;
+}
+</script>
 </head>
 
 <body>
@@ -333,15 +364,15 @@ Set conterm system variable:
 <input type="checkbox" name="tp_21" value="1" /><br />
 </td>
 <td>
-Bit 2 set: bell on CNTRL-G<br />
-Bit 1 set: key repeat on<br />
-Bit 0 set: key click on<br />
+<input type="checkbox" id="conterm_bell" name="conterm_bell" value="1" checked="checked" onclick="contermBell();">Bit 2 set: bell on CNTRL-G</input><br />
+<input type="checkbox" id="conterm_repeat" name="conterm_repeat" value="1" checked="checked" onclick="contermRepeat();">Bit 1 set: key repeat on</input><br />
+<input type="checkbox" id="conterm_click" name="conterm_click" value="1" checked="checked" onclick="contermClick();">Bit 0 set: key click on</input><br />
 </td>
 </tr>
 <tr>
 <td>&nbsp;</td>
 <td>
-<input type="number" name="conterm" value="7" min="0" max="7" style="width: 4em" /><br />
+<input type="number" id="conterm" name="conterm" value="7" min="0" max="7" style="width: 4em" onchange="contermChange();" /><br />
 </td>
 </tr>
 
@@ -359,7 +390,6 @@ else remains unchanged. <br />
 
 SEEKUP turns off the seek rate doubling on STs
 (recognizable by the seek noise of the drive)
-<td>
 </td>
 </tr>
 
@@ -373,7 +403,6 @@ Set fastload-bit for floppy reads:
 <td>
 Produces errors with some driver, take care!
 (see ST-Computer 1/90)
-<td>
 </td>
 </tr>
 
@@ -387,7 +416,6 @@ Skip the search for drive B:
 <td>
 This allows faster booting. Do not use that
 when 2 drives are connected.
-<td>
 </td>
 </tr>
 
@@ -403,7 +431,42 @@ New functions Getbpb and Rwabs with support for ED drives: <br />
 - better support for media change detection <br />
 - Rwabs()-function does not destroy VDI buffers anymore <br />
 - Floppy discs with 1 FAT only are supported <br />
+</td>
+</tr>
+
+<tr>
 <td>
+Prevent execution of floppy boot sector:
+</td>
+<td>
+<input type="checkbox" name="tp_26" value="1" /><br />
+</td>
+</tr>
+
+<tr>
+<td>
+Normal boot:
+</td>
+<td>
+<input type="checkbox" name="tp_27" value="1" /><br />
+</td>
+<td>
+Similar to above, but prevents execution of floppy bootsector
+only if system was already booted from harddisk. This was
+normal behaviour until TOS 1.4.
+</td>
+</tr>
+
+<tr>
+<td>
+New v_opnvwk() function:
+</td>
+<td>
+<input type="checkbox" name="tp_28" value="1" checked="checked" /><br />
+</td>
+<td>
+Replace v_opnvwk() by a new function to fix a bug.
+Same functionality as VDIFIX.PRG autofolder program.
 </td>
 </tr>
 
@@ -419,10 +482,10 @@ New functions Getbpb and Rwabs with support for ED drives: <br />
 </fieldset>
 </form>
 </td>
+</tr>
 
 <tr><td>&nbsp;</td></tr>
 
-</tr>
 </table>
 
 <div style="text-align:center">
@@ -431,5 +494,14 @@ New functions Getbpb and Rwabs with support for ED drives: <br />
 </p>
 </div>
 
+<div style="text-align:center">
+<p>
+<a href="https://validator.w3.org/check?uri=referer"><img
+        src="../images/valid-xhtml11.png" height="31" width="88"
+        alt="Valid XHTML 1.1!" /></a>
+</p>
+</div>
+
+</div>
 </body>
 </html>

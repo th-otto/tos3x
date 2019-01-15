@@ -414,7 +414,11 @@ PP(OBJECT *obj;)
 	if (!ret)							/* set up the Boot Sector info  */
 	{
 		Protobt(bufaddr, 0x01000000L, disktype, 0);
+#if TP_31 /* MS_DOS */
+		*((long *)bufaddr) = 0xeb34904eL;
+#else
 		*bufaddr = 0xe9;
+#endif
 
 #if BINEXACT
 		if ((ret = fc_rwsec(WSECTS, bufaddr, 0x10000L, devno)))

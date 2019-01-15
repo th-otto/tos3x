@@ -435,6 +435,7 @@ PP(int16_t cnt;)
 /*
  * XBIOS #17 - Random - Random number generator
  */
+/* 206de: 00e05946 */
 /* 306de: 00e05d38 */
 long random(NOTHING)
 {
@@ -450,6 +451,7 @@ long random(NOTHING)
 /*
  * default function for system variable hdv_boot
  */
+/* 206de: 00e05996 */
 /* 306de: 00e05d88 */
 /* 404: 00e04f54 */
 int16_t bhdv_boot(NOTHING)
@@ -457,14 +459,19 @@ int16_t bhdv_boot(NOTHING)
 	register int ret;
 	
 	chdv_init();
-	if (nflops != 0)
+#if !TP_26 /* KILL_BOOT */
+	if (nflops != 0
+#if TP_27 /* NORM_BOOT */
+		&& (_bootdev < NUMFLOPPIES)
+#endif
+		)
 	{
 		ret = 2;   /* couldn't load */
-#if OS_COUNTRY == CTRY_PL
-		/* apparently a patch that was applied by the maker of the PL version */
+#if (OS_COUNTRY == CTRY_PL) & !TP_27
+		/* this code results from applying the NORM_BOOT patch of TOSPATCH */
+		/* this is same as call below, optimized to squeeze it in the original bytes */
 		asm("cmp.w     (_bootdev).w,d7");
 		asm("ble.s     L9998");
-		/* this is same as call below, optimized to squeeze it in the original bytes */
 		asm("moveq.l   #1,d0");
 		asm("move.w    d0,(a7)");
 		asm("clr.l     -(a7)");
@@ -498,8 +505,9 @@ int16_t bhdv_boot(NOTHING)
 		}
 #endif
 	} else
+#endif /* TP_26 */
 	{
-#if OS_COUNTRY == CTRY_PL
+#if (OS_COUNTRY == CTRY_PL) & !TP_27
 		asm("L9998:")
 #endif
 		ret = 1;   /* no floppy */

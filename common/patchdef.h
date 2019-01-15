@@ -1,7 +1,8 @@
 /*
  * Defaults which patches should be applied.
- * This is only for reference.
- * DO NOT EDIT THIS - create a file common/localcnf.h instead
+ *
+ * You can either edit the settings below, or
+ * (better) create a file common/localcnf.h instead
  * with your preferred settings
  */
  
@@ -241,4 +242,58 @@
  */
 #ifndef TP_25
 #define TP_25 0
+#endif
+
+/*
+ * TP_26: KILL_BOOT: Prevent execution of floppy boot sector
+ */
+#ifndef TP_26
+#define TP_26 0
+#endif
+
+/*
+ * TP_27: NORM_BOOT: Normal boot
+ *
+ * Similar to above, but prevents execution of floppy bootsector
+ * only if system was already booted from harddisk. This was
+ * normal behaviour until TOS 1.4.
+ */
+#ifndef TP_27
+#define TP_27 0
+#endif
+
+/*
+ * TP_28: VDIFIX: New v_opnvwk() function
+ *
+ * Replace v_opnvwk() by a new function to fix a bug.
+ * Same functionality as VDIFIX.PRG autofolder program.
+ */
+#ifndef TP_28
+#define TP_28 1
+#endif
+
+/*
+ * TP_29: M_SHRINK: Mshrink fix
+ *
+ * Fixes a bug in Mshrink that can destroy the memory lists
+ */
+#ifndef TP_29
+#define TP_29 0
+#endif
+
+/*
+ * TP_30: DRAW_BOXES: Turn off grow- and shrinkboxes
+ */
+#ifndef TP_30
+#define TP_30 0
+#endif
+
+/*
+ * TP_31: MS_DOS: Correct MS-DOS Format
+ *
+ * Writes $EB34904E into the first bytes of the boot sector
+ * when formatting floppy discs
+ */
+#ifndef TP_31
+#define TP_31 0
 #endif
