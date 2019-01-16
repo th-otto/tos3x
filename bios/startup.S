@@ -1198,7 +1198,7 @@ nomicro:
         bclr      #1,d1
 yesstereo:
         move.l    d1,(a0)+
-#if !TP_08
+#if !TP_08 /* SET_FDC_COOKIE */
         btst      #6,d0
         bne.s     nofdc
         move.b    #$08,dsb+fd_drivetype
@@ -1590,92 +1590,27 @@ logodone:
 
 /* 96x86 image of atari logo displayed at boot time */
 atarilogo:
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$79ff,$3c00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0000,$f9ff,$3e00,$0000,$0000
-        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
-        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
-        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
-        dc.w $0000,$0001,$f9ff,$3f00,$0000,$0000
-        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
-        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
-        dc.w $0000,$0003,$f9ff,$3f80,$0000,$0000
-        dc.w $0000,$0007,$f1ff,$1fc0,$0000,$0000
-        dc.w $0000,$0007,$f1ff,$1fc0,$0000,$0000
-        dc.w $0000,$000f,$f1ff,$1fe0,$0000,$0000
-        dc.w $0000,$000f,$f1ff,$1fe0,$0000,$0000
-        dc.w $0000,$001f,$e1ff,$0ff0,$0000,$0000
-        dc.w $0000,$003f,$e1ff,$0ff8,$0000,$0000
-        dc.w $0000,$003f,$e1ff,$0ff8,$0000,$0000
-        dc.w $0000,$007f,$c1ff,$07fc,$0000,$0000
-        dc.w $0000,$00ff,$c1ff,$07fe,$0000,$0000
-        dc.w $0000,$01ff,$81ff,$03ff,$0000,$0000
-        dc.w $0000,$03ff,$81ff,$03ff,$8000,$0000
-        dc.w $0000,$07ff,$01ff,$01ff,$c000,$0000
-        dc.w $0000,$0ffe,$01ff,$00ff,$e000,$0000
-        dc.w $0000,$1ffe,$01ff,$00ff,$f000,$0000
-        dc.w $0000,$7ffc,$01ff,$007f,$fc00,$0000
-        dc.w $0000,$fff8,$01ff,$003f,$fe00,$0000
-        dc.w $0003,$fff0,$01ff,$001f,$ff80,$0000
-        dc.w $001f,$ffe0,$01ff,$000f,$fff0,$0000
-        dc.w $00ff,$ffc0,$01ff,$0007,$fffe,$0000
-        dc.w $00ff,$ff80,$01ff,$0003,$fffe,$0000
-        dc.w $00ff,$ff00,$01ff,$0001,$fffe,$0000
-        dc.w $00ff,$fc00,$01ff,$0000,$7ffe,$0000
-        dc.w $00ff,$f800,$01ff,$0000,$3ffe,$0000
-        dc.w $00ff,$e000,$01ff,$0000,$0ffe,$0000
-        dc.w $00ff,$8000,$01ff,$0000,$03fe,$0000
-        dc.w $00fc,$0000,$01ff,$0000,$007e,$0000
-        dc.w $00e0,$0000,$01ff,$0000,$000e,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$0000,$0000,$0000,$0000,$0000
-        dc.w $0000,$c07f,$fe03,$0007,$c01e,$0700
-        dc.w $0001,$e07f,$fe07,$801f,$f81e,$18c0
-        dc.w $0003,$e07f,$fe0f,$803f,$fc1e,$1740
-        dc.w $0003,$f07f,$fe0f,$c03f,$fe1e,$2520
-        dc.w $0003,$f07f,$fe0f,$c03f,$fe1e,$2620
-        dc.w $0007,$f803,$c01f,$e03c,$1f1e,$2520
-        dc.w $0007,$f803,$c01f,$e03c,$0f1e,$1540
-        dc.w $0007,$f803,$c01f,$e03c,$0f1e,$18c0
-        dc.w $000f,$7c03,$c03d,$f03c,$0f1e,$0700
-        dc.w $000f,$3c03,$c03c,$f03c,$0f1e,$0000
-        dc.w $000f,$3c03,$c03c,$f03c,$1e1e,$0000
-        dc.w $001e,$3e03,$c078,$f83c,$7e1e,$0000
-        dc.w $001e,$1e03,$c078,$783d,$fc1e,$0000
-        dc.w $001e,$1e03,$c078,$783d,$f81e,$0000
-        dc.w $003e,$1f03,$c0f8,$7c3d,$e01e,$0000
-        dc.w $003f,$ff03,$c0ff,$fc3d,$e01e,$0000
-        dc.w $003f,$ff03,$c0ff,$fc3d,$e01e,$0000
-        dc.w $007f,$ff83,$c1ff,$fe3c,$f01e,$0000
-        dc.w $007f,$ff83,$c1ff,$fe3c,$f81e,$0000
-        dc.w $0078,$0783,$c1e0,$1e3c,$781e,$0000
-        dc.w $00f8,$07c3,$c3e0,$1f3c,$3c1e,$0000
-        dc.w $00f0,$07c3,$c3c0,$1f3c,$3e1e,$0000
-        dc.w $00f0,$03c3,$c3c0,$0f3c,$1e1e,$0000
-        dc.w $01f0,$03e3,$c7c0,$0fbc,$1f1e,$0000
-        dc.w $01e0,$01e3,$c780,$07b8,$0f1e,$0000
+#if TP_33 == 0
+#include "../tospatch/fuji/atari.S"
+#endif
+#if TP_33 == 1
+#include "../tospatch/fuji/pak3.S"
+#endif
+#if TP_33 == 2
+#include "../tospatch/fuji/gib_dos.S"
+#endif
+#if TP_33 == 3
+#include "../tospatch/fuji/gt_tos.S"
+#endif
+#if TP_33 == 4
+#include "../tospatch/fuji/schegale.S"
+#endif
+#if TP_33 == 5
+#include "../tospatch/fuji/ufp_logo.S"
+#endif
+#if TP_33 == 6
+#include "../tospatch/fuji/x.S"
+#endif
 
 		text
 
@@ -1703,7 +1638,7 @@ notlow:
         addq.w    #6,a7
 
 #if TOSVERSION < 0x300
-#if TP_09
+#if TP_09 /* SET_TIME_CRC */
         cmpi.l    #BOOT_TIME*200,_hz_200       /* system running for >80s? */
 #else
         cmpi.l    #80*200,_hz_200       /* system running for >80s? */
@@ -1932,7 +1867,7 @@ nodiskboot:
 /* 306de: 00e009a2 */
 /* 206de: 00e0097a */
 dmaboot:
-#if TP_10
+#if TP_10 /* SET_TIME_RAM */
         move.l    #BOOT_TIME*200,d7
 #else
         move.l    #80*200,d7
@@ -1946,7 +1881,7 @@ dmaloop:
         bsr       memtest
         movea.w   d0,a5                     /* memtest done? */
         beq       dmawait                   /* (no) */
-#if TP_11
+#if TP_11 /* SKIP_WAIT */
         bra       dmadone
 #endif
         move.w    #$001B,-(a7)
@@ -3479,7 +3414,7 @@ autosca4:
 /* 306de: 00e014f6 */
 /* 206de: 00e013b2 */
 bombimage:
-#if TP_16
+#if TP_16 /* PILZE */
         dc.w $07c0,$1ff0,$3bf8,$77f4,$b7fa,$bbfa,$dff6,$66fc,$3288,$0280,$0440,$0440,$0540,$0520,$0920,$0920
 #else
         dc.w $0600,$2900,$0080,$4840,$11f0,$01f0,$07fc,$0ffe,$0dfe,$1fff,$1fef,$0fee,$0fde,$07fc,$03f8,$00e0
@@ -4585,7 +4520,7 @@ initmfp2:
         move.b    d0,(_snddelay).w              /* clear delay timer */
         move.b    d0,(_sndtmp).w                /* clear temp value */
         move.l    d0,(lst_timeout).w            /* init printer timeout to 0 */
-#if TP_19
+#if TP_19 /* FASTPRN */
         bsr       strobeo0
 #else
         bsr       strobeoff                     /* init strobe to off (line high!) */

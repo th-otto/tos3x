@@ -1,45 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html>
 <html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>TOS Patches</title>
 <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 <meta name="keywords" content="ORCS, CAT, GC, PBEM, PBM, GC-Ork, GCORK, ARAnyM, UDO, EmuTOS" />
 <link rel="stylesheet" type="text/css" href="tospatch.css" />
-<script type="text/javascript">
-function contermClick()
-{
-	var c = document.getElementById('conterm_click');
-	var f = document.getElementById('conterm');
-	f.value = (f.value & 6) + c.checked * 1;
-}
-function contermRepeat()
-{
-	var c = document.getElementById('conterm_repeat');
-	var f = document.getElementById('conterm');
-	f.value = (f.value & 5) + c.checked * 2;
-}
-function contermBell()
-{
-	var c = document.getElementById('conterm_bell');
-	var f = document.getElementById('conterm');
-	f.value = (f.value & 3) + c.checked * 4;
-}
-function contermChange()
-{
-	var c;
-	var f = document.getElementById('conterm');
-	c = document.getElementById('conterm_click');
-	c.checked = (f.value & 1) != 0;
-	c = document.getElementById('conterm_repeat');
-	c.checked = (f.value & 2) != 0;
-	c = document.getElementById('conterm_bell');
-	c.checked = (f.value & 4) != 0;
-}
-</script>
+<script src="tospatch.js"></script>
 </head>
 
-<body>
+<body onload="onload();">
 <div>
 
 <hr />
@@ -60,6 +29,7 @@ TOS version:
 <td colspan="2">
 <select id="tosversion" name="tosversion">
 <option value="206">2.06</option>
+<option value="208">2.08 (STBook)</option>
 <option value="306">3.06</option>
 </select>
 </td>
@@ -84,13 +54,36 @@ Country:
 </td>
 </tr>
 
-<tr><td>&nbsp;</td></tr>
+<tr>
+<td>
+Output:
+</td>
+<td colspan="2">
+<select id="ramversion" name="ramversion">
+<option value="0">ROM image</option>
+<option value="1">RAM image for 0.5 MB ST-RAM</option>
+<option value="2">RAM image for 1 MB ST-RAM</option>
+<option value="3">RAM image for 2 MB ST-RAM</option>
+<option value="4">RAM image for 2.5 MB ST-RAM</option>
+<option value="5">RAM image for 3 MB ST-RAM</option>
+<option value="6">RAM image for 4 MB ST-RAM</option>
+<option value="7">RAM image for 4 MB TT-RAM</option>
+<option value="8">RAM image for 8 MB TT-RAM</option>
+<option value="9">RAM image for 16 MB TT-RAM</option>
+</select>
+</td>
+</tr>
+
+<tr><td>&nbsp;</td><td></td><td></td></tr>
 
 <tr>
 <td colspan="2">
 Patches:
 </td>
+<td></td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -104,6 +97,8 @@ Omit RESET instruction for RAM-TOS on older ST's
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Color 60hz:
@@ -115,6 +110,8 @@ Color 60hz:
 Switch to 60Hz on color monitors
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -128,6 +125,8 @@ Modified reset routine. <br />
 Will keep RAM-TOS resident even after Hardreset (via keyboard)
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -143,6 +142,8 @@ This patch is disabled if the &lt;Reset Resident&gt; patch is also active.
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Clear _shell_p:
@@ -155,6 +156,8 @@ Clear the _shell_p system variable on reset.
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Turn on 16Mhz for Mega-STE:
@@ -166,6 +169,8 @@ Turn on 16Mhz for Mega-STE:
 Turns on 16 MHz and cache on Mega-STE already when booting
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -184,6 +189,8 @@ Set steprate for floppy drives A: and B:
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Install HD cookie:
@@ -199,6 +206,8 @@ Install HD cookie:
 </select>
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -247,6 +256,8 @@ Show only amount of memory:
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Fix boot device error:
@@ -259,6 +270,8 @@ Fixes a long-standing bug that sets the default
 path for GEM to the floppy (see ST-Computer 1/90)
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -274,6 +287,8 @@ for that adapter.
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Fix stack pointer in autoexec:
@@ -285,6 +300,8 @@ Fix stack pointer in autoexec:
 Fixes a bug the autoexec routine (see ST-Computer 1/90)
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -299,6 +316,8 @@ with the original mushrooms <img src="mushroom.bmp" width="16" height="16" style
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Lock Mega-ST clock:
@@ -312,6 +331,8 @@ A separate program is then needed to update it.
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Ignore the blitter:
@@ -323,6 +344,8 @@ Ignore the blitter:
 The blitter will be disavowed and ignored by TOS
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -336,6 +359,8 @@ Output, Input- and wait functions will be replaced.
 Corresponds to FASTPRN.PRG from Ecki from the c't magazine.
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -354,7 +379,10 @@ Does not work with the Atari Laser Printer.
 <td>
 <input type="number" name="prntimeout" value="30" min="5" max="30" style="width: 4em" /> seconds<br />
 </td>
+<td></td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -364,9 +392,9 @@ Set conterm system variable:
 <input type="checkbox" name="tp_21" value="1" /><br />
 </td>
 <td>
-<input type="checkbox" id="conterm_bell" name="conterm_bell" value="1" checked="checked" onclick="contermBell();">Bit 2 set: bell on CNTRL-G</input><br />
-<input type="checkbox" id="conterm_repeat" name="conterm_repeat" value="1" checked="checked" onclick="contermRepeat();">Bit 1 set: key repeat on</input><br />
-<input type="checkbox" id="conterm_click" name="conterm_click" value="1" checked="checked" onclick="contermClick();">Bit 0 set: key click on</input><br />
+<input type="checkbox" id="conterm_bell" name="conterm_bell" value="1" checked="checked" onclick="contermBell();" />Bit 2 set: bell on CNTRL-G<br />
+<input type="checkbox" id="conterm_repeat" name="conterm_repeat" value="1" checked="checked" onclick="contermRepeat();" />Bit 1 set: key repeat on<br />
+<input type="checkbox" id="conterm_click" name="conterm_click" value="1" checked="checked" onclick="contermClick();" />Bit 0 set: key click on<br />
 </td>
 </tr>
 <tr>
@@ -374,7 +402,10 @@ Set conterm system variable:
 <td>
 <input type="number" id="conterm" name="conterm" value="7" min="0" max="7" style="width: 4em" onchange="contermChange();" /><br />
 </td>
+<td></td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -393,6 +424,8 @@ SEEKUP turns off the seek rate doubling on STs
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Set fastload-bit for floppy reads:
@@ -406,6 +439,8 @@ Produces errors with some driver, take care!
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Skip the search for drive B:
@@ -418,6 +453,8 @@ This allows faster booting. Do not use that
 when 2 drives are connected.
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -434,6 +471,8 @@ New functions Getbpb and Rwabs with support for ED drives: <br />
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 Prevent execution of floppy boot sector:
@@ -441,7 +480,10 @@ Prevent execution of floppy boot sector:
 <td>
 <input type="checkbox" name="tp_26" value="1" /><br />
 </td>
+<td></td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
 
 <tr>
 <td>
@@ -457,6 +499,8 @@ normal behaviour until TOS 1.4.
 </td>
 </tr>
 
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
 <td>
 New v_opnvwk() function:
@@ -470,12 +514,207 @@ Same functionality as VDIFIX.PRG autofolder program.
 </td>
 </tr>
 
-<tr><td>&nbsp;</td></tr>
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Mshrink fix:
+</td>
+<td>
+<input type="checkbox" name="tp_29" value="1" checked="checked" /><br />
+</td>
+<td>
+Fixes a bug in Mshrink that can destroy the memory lists
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Turn off grow- and shrinkboxes:
+</td>
+<td>
+<input type="checkbox" name="tp_30" value="1" /><br />
+</td>
+<td>
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Correct MS-DOS Format:
+</td>
+<td>
+<input type="checkbox" name="tp_31" value="1" /><br />
+</td>
+<td>
+Writes $EB34904E into the first bytes of the boot sector
+when formatting floppy discs
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Activate caches for all cpus &gt;= 68020:
+</td>
+<td>
+<input type="checkbox" name="tp_32" value="1" /><br />
+</td>
+<td>
+This patch is still experimental. Note also that with this patch active,
+you won't be able to activate/deactivate the blitter from the desktop
+when you have a cpu &gt;= 68020.
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Substitute starting fuji:
+</td>
+<td colspan="2">
+<table>
+<tr>
+<td>
+<select id="fuji" name="tp_33" onchange="changeFuji();" style="vertical-align: middle; padding: 0 0;" >
+<option value="0" selected="selected">original atari fuji</option>
+<option value="1">modified atari fuji with PAK/3 letters from SE</option>
+<option value="2">'Gib Dos keine Chance' from Reiner Rosin/TRK</option>
+<option value="3">'GeTuned' from Sven Spitzmacher</option>
+<option value="4">Schegale</option>
+<option value="5">UFP logo</option>
+<option value="6">X</option>
+</select>
+</td>
+<td>
+<img id="fujiimg" src="fuji/atari.bmp" width="96" height="86" style="border:0" alt="Atari" />
+</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Change printer line spacing:
+</td>
+<td>
+<input type="checkbox" name="tp_34" value="1" /><br />
+</td>
+<td>
+Changes the line spacing for hardcopy. Enables use
+of hardcopies for NEC-P6, as well as EPSON printers
+(see ST-Computer 10/90)
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td colspan="3">
+<table>
+<tr>
+<td>
+Substitute 6x6 font:
+</td>
+<td>
+<select id="tp_35_6" name="tp_35_6" onchange="change6x6();" style="vertical-align: middle; padding: 0 0;" >
+<option value="0" selected="selected">Original Atari font</option>
+<option value="1">Modified Atari font</option>
+<option value="2">Polish font from tos306pl</option>
+<option value="3">Monaco Mono</option>
+</select>
+</td>
+<td>
+<img id="tp_35_6_img" src="fonts/6x6/system.png" width="136" height="136" style="border:0" alt="Atari" />
+</td>
+<td>
+Substitute 8x8 font:
+</td>
+<td>
+<select id="tp_35_8" name="tp_35_8" onchange="change8x8();" style="vertical-align: middle; padding: 0 0;" >
+<option value="0" selected="selected">Original Atari font</option>
+<option value="1">Modified atari font</option>
+<option value="2">Polish font from tos306pl</option>
+<option value="3">Monaco Mono</option>
+</select>
+</td>
+<td>
+<img id="tp_35_8_img" src="fonts/8x8/system.png" width="168" height="168" style="border:0" alt="Atari" />
+</td>
+</tr>
+<tr>
+<td>
+Substitute 8x16 font:
+</td>
+<td>
+<select id="tp_35_16" name="tp_35_16" onchange="change8x16();" style="vertical-align: middle; padding: 0 0;" >
+<option value="0" selected="selected">Original Atari font</option>
+<option value="1">Modified Atari font</option>
+<option value="2">Polish font from tos306pl</option>
+<option value="3">Monaco Mono</option>
+<option value="4">Blue</option>
+<option value="5">Classic</option>
+<option value="6">Classic 1</option>
+<option value="7">Classic 2</option>
+<option value="8">Computer</option>
+<option value="9">Cursive</option>
+<option value="10">Desktop</option>
+<option value="11">Deutsch</option>
+<option value="12">Eight</option>
+<option value="13">Griech</option>
+<option value="14">IBM G2</option>
+<option value="15">Kritzel</option>
+<option value="16">Mac font</option>
+<option value="17">Mc Appeal</option>
+<option value="18">Old</option>
+<option value="19">Rally</option>
+<option value="20">Skyvox</option>
+<option value="21">Stencil</option>
+<option value="22">Sv</option>
+<option value="23">Tempus</option>
+<option value="24">Thin</option>
+<option value="25">Thin 1</option>
+<option value="26">Typewriter</option>
+</select>
+</td>
+<td>
+<img id="tp_35_16_img" src="fonts/8x16/system.png" width="168" height="296" style="border:0" alt="Atari" />
+</td>
+<td>
+Substitute 16x32 font:
+</td>
+<td>
+<select id="tp_35_32" name="tp_35_32" onchange="change16x32();" style="vertical-align: middle; padding: 0 0;" >
+<option value="0" selected="selected">Original Atari font</option>
+<option value="3">Monaco Mono</option>
+</select>
+</td>
+<td>
+<img id="tp_35_32_img" src="fonts/16x32/system.png" width="296" height="552" style="border:0" alt="Atari" />
+</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr><td>&nbsp;</td><td></td><td></td></tr>
 
 <tr>
 <td>
 <input id="runit" style="background-color: #cccccc; font-weight: bold;" type="submit" value="Create TOS image" />
 </td>
+<td></td><td></td>
 </tr>
 
 </table>

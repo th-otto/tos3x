@@ -58,7 +58,7 @@ long gemdos PROTO((short op, ...));
 #define	Random()	xbios(17)
 #define	Protobt(a,b,c,d)	xbios(18,a,b,c,d)
 #define	Flopver(a,b,c,d,e,f,g)	xbios(19,a,b,c,d,e,f,g)
-#define	Prtblk()	xbios(20)	/* WARNING: This Bind Incomplete */
+#define	Scrdmp()	xbios(20)	/* WARNING: This Bind Incomplete */
 #define	Cursconf(a,b)	xbios(21,a,b)
 #define	Settime(a)	xbios(22,a)
 #define	Gettime()	xbios(23)

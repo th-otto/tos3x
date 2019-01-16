@@ -224,6 +224,7 @@ PP(int16_t mode;)
  *	Last modified	SCC	19 Apr 85
  */
 
+/* 206de: 00e147b6 */
 /* 306de: 00e1821c */
 /* 306us: 00e181c2 */
 ERROR xsetblk(P(int16_t) n, P(VOIDPTR) blk, P(int32_t) len)
@@ -266,7 +267,11 @@ found:
 
 	if (len == 0)
 	{
+#if TP_29 /* M_SHRINK */
+		xmfree(blk);
+#else
 		freeit(p, &pmd);
+#endif
 		return E_OK;
 	}
 	

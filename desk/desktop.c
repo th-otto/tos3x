@@ -318,6 +318,7 @@ VOID ini_rsc(NOTHING)
 }
 
 
+/* 206de. 00e3008c */
 /* 306de: 00e33af2 */
 BOOLEAN deskmain(NOTHING)
 {
@@ -422,11 +423,17 @@ m_2:
 	/* set up the right menu text */
 	/* do it here!!!!!! */
 #ifdef BITBLT /* take out for sparrow */
-#if STR_IN_RSC
-	strcpy((char *)menu_addr[BITBLT].ob_spec, get_fstring(m_cpu == 30 ? CACHETXT : BLTTXT));
+#if TP_32 /* CACHE_0X0 */
+#define cache_txt m_cpu >= 20
 #else
-	strcpy((char *)menu_addr[BITBLT].ob_spec, m_cpu == 30 ? Cachetxt : Blttxt);
+#define cache_txt m_cpu == 30
 #endif
+#if STR_IN_RSC
+	strcpy((char *)menu_addr[BITBLT].ob_spec, get_fstring(cache_txt ? CACHETXT : BLTTXT));
+#else
+	strcpy((char *)menu_addr[BITBLT].ob_spec, cache_txt ? Cachetxt : Blttxt);
+#endif
+#undef cache_txt
 
 	menu_addr[SUPERITEM].ob_type = G_USERDEF;
 	chxcache.ub_code = (intptr_t)ch_xcache;
@@ -513,6 +520,7 @@ m_1:
 /*
  * Check the machine type and set res table
  */
+/* 206de: 00e30354 */
 /* 306de: 00e33dba */
 VOID ch_machine(NOTHING)
 {
@@ -563,6 +571,7 @@ VOID ch_machine(NOTHING)
 
 
 #if BINEXACT
+/* 206de: 00e30446 */
 /* 306de: 00e33e82 */
 /* same ugly Alcyon-only hack as in AES: relies on data being assigned to d7 */
 int32_t inq_cache(P(int32_t) data)
@@ -581,6 +590,7 @@ PP(register int32_t data;)
 /*
  * Turn on the cache or bitblt
  */
+/* 206de: 00e30446 */
 /* 306de: 00e33eac */
 VOID ch_cache(P(BOOLEAN) set)
 PP(BOOLEAN set;)
@@ -597,13 +607,22 @@ PP(BOOLEAN set;)
 	menu_ienable(menu_addr, BITBLT, TRUE);
 #endif
 
+#if TP_32 /* CACHE_0X0 */
+	if (m_cpu >= 20)
+#else
 	if (m_cpu == 30)
+#endif
 	{
 		if (set)
 			data = s_cache ? CACHE_ON : CACHE_OFF;
 		else
 			data = 0xFFFFFFFFL;
 
+#if TP_32 /* CACHE_0X0 */
+		if (m_cpu == 20 && (inq_cache(data) & 0x1) != 0)
+			s_cache = TRUE;
+		else
+#endif
 		if (inq_cache(data) == XCA_ON)
 			s_cache = TRUE;
 		else

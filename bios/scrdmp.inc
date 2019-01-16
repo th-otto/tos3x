@@ -1,6 +1,6 @@
 		text
 /*
- * XBIOS #14 - Scrdmp - Dump screen to printer.
+ * XBIOS #20 - Scrdmp - Dump screen to printer.
  */
 /* 306de: 00e01450 */
 /* 206de: 00e0130c */

@@ -278,7 +278,7 @@
  * Fixes a bug in Mshrink that can destroy the memory lists
  */
 #ifndef TP_29
-#define TP_29 0
+#define TP_29 1
 #endif
 
 /*
@@ -296,4 +296,92 @@
  */
 #ifndef TP_31
 #define TP_31 0
+#endif
+
+/*
+ * TP_32: CACHE_0X0: Activate caches for all cpus >= 68020
+ *
+ * This patch is still experimental. Note also that with this patch active,
+ * you won't be able to activate/deactivate the blitter from the desktop
+ * when you have a cpu >= 68020.
+ */
+#ifndef TP_32
+#define TP_32 0
+#endif
+
+/*
+ * TP_33: FUJI: Substitute starting fuji
+ *
+ * 0: original atari fuji
+ * 1: modified atari fuji with PAK/3 letters from SE
+ * 2: 'Gib Dos keine Chance' from Reiner Rosin/TRK
+ * 3: 'GeTuned' from Sven Spitzmacher
+ * 4: Schegale
+ * 5: UFP logo
+ * 6: X
+ */
+#ifndef TP_33
+#define TP_33 0
+#endif
+
+/*
+ * TP_34: NEC_P6: Change printer line spacing
+ *
+ * Changes the line spacing for hardcopy. Enables use
+ * of hardcopies for NEC-P6, as well as EPSON printers
+ * (see ST-Computer 10/90)
+ */
+#ifndef TP_34
+#define TP_34 0
+#endif
+
+/*
+ * TP_35: FONTS: Change font images
+ *
+ * Changes the images of the builtin fonts
+ * (the data only; all other properties must remain)
+ * 0: original system font
+ * 1: new font from tospatch archive
+ * 2: polish font found in tos306pl
+ * 3: Monaco Mono
+ * below are only available in 8x16:
+ * 4: blue
+ * 5: classic
+ * 6: classic 1
+ * 7: classic 2
+ * 8: computer
+ * 9: cursive
+ * 10: desktop
+ * 11: deutsch
+ * 12: eight
+ * 13: griech
+ * 14: ibm_g2
+ * 15: kritzel
+ * 16: mac_font
+ * 17: mcappeal
+ * 18: old
+ * 19: rally
+ * 20: skyvox
+ * 21: stencil
+ * 22: sv
+ * 23: tempus
+ * 24: thin
+ * 25: thin1
+ * 26: typewrit
+ */
+/* for 6x6 font */
+#ifndef TP_35_6
+#define TP_35_6 0
+#endif
+/* for 8x8 font */
+#ifndef TP_35_8
+#define TP_35_8 0
+#endif
+/* for 8x16 font */
+#ifndef TP_35_16
+#define TP_35_16 0
+#endif
+/* for 16x32 font (TOS 3.06 only) */
+#ifndef TP_35_32
+#define TP_35_32 0
 #endif

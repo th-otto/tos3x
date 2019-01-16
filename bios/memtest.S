@@ -280,7 +280,7 @@ mempstr2:
 
 testzone:
         moveq.l   #0,d0
-#if !TP_12
+#if !TP_12 /* SKIP_RAM */
         move.l    memtaddr,d1
         cmp.l     memtbot,d1
         bcs.s     testzon8

@@ -49,6 +49,7 @@ function is_cli()
 	
 
 $log = fopen('tospatch.log', 'a');
+flock($log, LOCK_EX);
 $currdate = date('Y-m-d H:i:s');
 fputs($log, "$currdate: start\n");
 fprintf($log, "FROM: %s\n", $_SERVER['REMOTE_ADDR']);
@@ -180,6 +181,7 @@ function compile_tos()
 		$tp_38 = isset($_GET['tp_38']) ? $_GET['tp_38'] : 0;
 		$tp_39 = isset($_GET['tp_39']) ? $_GET['tp_39'] : 0;
 	
+		$ramversion = isset($_GET['ramversion']) ? $_GET['ramversion'] : 0;
 		$seekrate = isset($_GET['seekrate']) ? $_GET['seekrate'] : 3;
 		$fdc_cookie = isset($_GET['fdc_cookie']) ? $_GET['fdc_cookie'] : '$01415443';
 		$boottime = isset($_GET['boottime']) ? $_GET['boottime'] : 80;
@@ -232,6 +234,7 @@ function compile_tos()
 			fprintf($fp, "#define TP_38 %d\n", $tp_38);
 			fprintf($fp, "#define TP_39 %d\n", $tp_39);
 
+			fprintf($fp, "#define RAMVERSION %d\n", $ramversion);
 			fprintf($fp, "#define STEP_RATE %d\n", $seekrate);
 			fprintf($fp, "#define FDC_COOKIE %s\n", $fdc_cookie);
 			fprintf($fp, "#define BOOT_TIME %d\n", $boottime);
@@ -242,13 +245,17 @@ function compile_tos()
 		
 			system("make clean 2>&1");
 			system("make 2>&1", $exitcode);
-			error_log("make exited with code $exitcode");
 			
-			if ($exitcode == 0)
+			if ($exitcode != 0)
+			{
+				error_log("make exited with code $exitcode");
+			} else
 			{
 				system("zip -j $zip $filename 2>&1", $exitcode);
-				error_log("zip exited with code $exitcode");
-				if ($exitcode == 0)
+				if ($exitcode != 0)
+				{
+					error_log("zip exited with code $exitcode");
+				} else
 				{
 					$retval = true;
 				}
@@ -276,7 +283,7 @@ if ($retval)
 $compile_output = ob_get_contents();
 ob_end_clean();
 
-fputs($log, "$compile_output\n");
+/* fputs($log, "$compile_output\n"); */
 
 if ($retval)
 {
@@ -308,7 +315,7 @@ if ($retval)
 }
 
 $currdate = date('Y-m-d H:i:s');
-fputs($log, "$currdate: end $exitcode\n\n");
+fprintf($log, "$currdate: end (%s)\n\n", $retval ? "success" : "failed");
 
 
 fclose($log);

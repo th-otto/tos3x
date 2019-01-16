@@ -782,6 +782,7 @@ PP(int16_t *msgbuff;)
 /*
  * Do the option menu
  */
+/* 206de. 00e2aaf8 */
 /* 306de: 00e2e55e */
 VOID do_opt(P(int16_t) msgbuff)
 PP(int16_t msgbuff;)
@@ -908,7 +909,11 @@ PP(int16_t msgbuff;)
 
 #ifdef BITBLT
 	case BITBLT:
+#if TP_32 /* CACHE_0X0 */
+		if (m_cpu < 20)
+#else
 		if (m_cpu != 30)
+#endif
 			cbit_save = !cbit_save;
 		else
 			s_cache = !s_cache;
