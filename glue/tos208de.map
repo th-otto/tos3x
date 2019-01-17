@@ -1,4 +1,4 @@
-2004 global symbols 
+2006 global symbols
 00000380 A _proc_li
 00000384 A _proc_dr
 000003a4 A _proc_ar
@@ -1465,6 +1465,8 @@
 00e369f4 D _icndata
 00e36a04 D _Nextlin
 00e36a74 D _tosrsc
+00000840 B padmagic
+00000844 B padstuff
 000008e4 B gem_env
 000008f0 B save_beg
 000009de B _trap_sa

@@ -76,11 +76,11 @@
 #define TP_32 0
 #define TP_33 0
 #define TP_34 0
-#define TP_35 0
-#define TP_36_6 (OS_COUNTRY == CTRY_PL ? 2 : 0)
-#define TP_36_8 (OS_COUNTRY == CTRY_PL ? 2 : 0)
-#define TP_36_16 (OS_COUNTRY == CTRY_PL ? 2 : 0)
-#define TP_36_32 0
+#define TP_35_6 (OS_COUNTRY == CTRY_PL ? 2 : 0)
+#define TP_35_8 (OS_COUNTRY == CTRY_PL ? 2 : 0)
+#define TP_35_16 (OS_COUNTRY == CTRY_PL ? 2 : 0)
+#define TP_35_32 0
+#define TP_36 0
 #define TP_37 0
 #define TP_38 0
 #define TP_39 0
