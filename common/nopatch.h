@@ -38,9 +38,22 @@
 #undef TP_35_16
 #undef TP_35_32
 #undef TP_36
-#undef TP_37
+#undef TP_37_1
+#undef TP_37_2
+#undef TP_37_3
+#undef TP_37_4
+#undef TP_37_5
+#undef TP_37_6
+#undef TP_37_7
+#undef TP_37_8
+#undef TP_37_9
+#undef TP_37_10
+#undef TP_37_11
+#undef TP_37_12
 #undef TP_38
 #undef TP_39
+
+#undef SUPERTOS
 
 #define TP_01 0
 #define TP_02 0
@@ -76,12 +89,16 @@
 #define TP_32 0
 #define TP_33 0
 #define TP_34 0
-#define TP_35_6 (OS_COUNTRY == CTRY_PL ? 2 : 0)
-#define TP_35_8 (OS_COUNTRY == CTRY_PL ? 2 : 0)
-#define TP_35_16 (OS_COUNTRY == CTRY_PL ? 2 : 0)
+#if OS_COUNTRY == CTRY_PL
+#define TP_35_6 2
+#define TP_35_8 2
+#define TP_35_16 2
+#else
+#define TP_35_6 0
+#define TP_35_8 0
+#define TP_35_16 0
+#endif
 #define TP_35_32 0
-#define TP_36 0
-#define TP_37 0
 #define TP_38 0
 #define TP_39 0
 
@@ -124,4 +141,8 @@
 #endif
 #ifndef CONTERM
 #define CONTERM 7
+#endif
+
+#ifndef SUPERTOS
+#define SUPERTOS 0
 #endif

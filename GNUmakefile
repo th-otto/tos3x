@@ -44,8 +44,12 @@ check::
 	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $(FLAGSTOPASS) all; done
 	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $(FLAGSTOPASS) $@; done
 
+WWWDIR=/srv/www/htdocs/tospatch/src
+
 rsync::
-	for i in $(SUBDIRS) include tospatch GNUmakefile GNUmakefile.cmn config.mak; do rsync -vzrlp $$i /srv/www/htdocs/tospatch/src; done
+	for i in $(SUBDIRS) include tospatch GNUmakefile GNUmakefile.cmn config.mak; do sudo rsync -vzrlp $$i $(WWWDIR); done
+	sudo chown -R wwwrun:www $(WWWDIR)
+	sudo chmod -R g+w $(WWWDIR)
 
 dosdir::
 	for i in $(SUBDIRS) lib; do $(MKDIR_P) $(DOSDIR)/$$i; done

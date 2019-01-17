@@ -18,7 +18,7 @@
 <table>
 <tr>
 <td>
-<form action="tospatch.php" method="get" id="tospatch" enctype="application/x-www-form-urlencoded">
+<form action="tospatch.php" method="post" id="tospatch" enctype="multipart/form-data">
 <fieldset>
 <table>
 
@@ -703,6 +703,131 @@ Substitute 16x32 font:
 </td>
 </tr>
 </table>
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Custom info text:
+</td>
+<td>
+<input type="text" name="tp_36" maxlength="29" /><br />
+</td>
+<td>
+This string will be displayed in place of the hyphens in the About dialog
+(29 characters max., ASCII only)
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Floppy icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_37_1" name="tp_37_1" accept=".ico" onchange="previewIcon('tp_37_1');" /></td>
+<td><img id="tp_37_1_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="icons/floppy.ico" width="32" height="32" style="border:0" />
+This must be a 32x32 icon.
+</td>
+</tr>
+
+<tr>
+<td>
+Folder icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_37_2" name="tp_37_2" accept=".ico" onchange="previewIcon('tp_37_2');" /></td>
+<td><img id="tp_37_2_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="icons/folder.ico" width="32" height="32" style="border:0" />
+This must be a 32x32 icon.
+</td>
+</tr>
+
+<tr>
+<td>
+Trashcan icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_37_3" name="tp_37_3" accept=".ico" onchange="previewIcon('tp_37_3');" /></td>
+<td><img id="tp_37_3_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="icons/trash.ico" width="32" height="32" style="border:0" />
+This must be a 32x32 icon.
+</td>
+</tr>
+
+<tr>
+<td>
+Program icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_37_4" name="tp_37_4" accept=".ico" onchange="previewIcon('tp_37_4');" /></td>
+<td><img id="tp_37_4_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="icons/program.ico" width="32" height="32" style="border:0" />
+This must be a 32x32 icon.
+</td>
+</tr>
+
+<tr>
+<td>
+File icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_37_5" name="tp_37_5" accept=".ico" onchange="previewIcon('tp_37_5');" /></td>
+<td><img id="tp_37_5_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="icons/file.ico" width="32" height="32" style="border:0" />
+This must be a 32x32 icon.
+</td>
+</tr>
+
+<tr>
+<td>
+Harddisk icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_37_12" name="tp_37_12" accept=".ico" onchange="previewIcon('tp_37_12');" /></td>
+<td><img id="tp_37_12_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="icons/harddisk.ico" width="32" height="32" style="border:0" />
+This must be a 32x32 icon.
 </td>
 </tr>
 

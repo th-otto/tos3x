@@ -184,6 +184,20 @@ function change16x32()
 		i.src = "fonts/16x32/monaco.png";
 	}
 }
+function previewIcon(name)
+{
+	var input = document.getElementById(name);
+	if (input)
+	{
+		var preview = document.getElementById(name + '_img');
+		var files = input.files;
+		if (files.length == 0) {
+			preview.src = '';
+		} else {
+			preview.src = window.URL.createObjectURL(files[0]);
+		}
+	}
+}
 function onload()
 {
 	changeFuji();
@@ -191,4 +205,8 @@ function onload()
 	change8x8();
 	change8x16();
 	change16x32();
+	for (var i = 1; i <= 12; i++)
+	{
+		previewIcon('tp_37_' + i);
+	}
 }

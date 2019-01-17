@@ -741,6 +741,7 @@ PP(register int16_t w_handle;)
 /* 
  * ap_sendmsg() - send message to current process
  */
+/* 206us: 00e1e2ea */
 /* 306de: 00e21daa */
 VOID ap_sendmsg(P(int16_t *) ap_msg, P(int16_t) type, P(int16_t) towhom, P(int16_t) w3, P(int16_t) w4, P(int16_t) w5, P(int16_t) w6, P(int16_t) w7)
 PP(int16_t *ap_msg;)
@@ -764,6 +765,7 @@ PP(int16_t w7;)
 }
 
 
+/* 206us: 00e1e35c */
 /* 306de: 00e21e1c */
 static VOID w_redraw(P(int16_t) w_handle, P(GRECT *) dirty)
 PP(register int16_t w_handle;)
@@ -797,6 +799,7 @@ PP(GRECT *dirty;)
  *	blit.  If the source is at -1, then the source and destination left
  *	fringes need to be realigned.
  */
+/* 206us: 00e1e400 */
 /* 306de: 00e21ec0 */
 static BOOLEAN w_mvfix(P(GRECT *) ps, P(GRECT *) pd)
 PP(register GRECT *ps;)
@@ -823,6 +826,7 @@ PP(register GRECT *pd;)
  *	the whole desktop is just updated.	All uncovered portions of the
  *	desktop are redrawn by later calling w_update.
  */
+/* 206us: 00e1e43e */
 /* 306de: 00e21efe */
 static BOOLEAN w_move(P(int16_t) w_handle, P(int16_t *) pstop, P(GRECT *) prc)
 PP(register int16_t w_handle;)
@@ -1358,7 +1362,9 @@ VOID wm_init(NOTHING)
  *	       - returns FAILURE (-1) if no handle is available or
  *		 if an error occurred.
  */
+/* 206us: 00e1ec82 */
 /* 306de: 00e22742 */
+/* 206x: 00e1e3a8 */
 int16_t wm_create(P(uint16_t) kind, P(GRECT *) rect)
 PP(uint16_t kind;)						/* kind of window to be created */
 PP(GRECT *rect;)						/* x, y, width and height of full size window */

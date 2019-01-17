@@ -227,7 +227,11 @@ PP(register intptr_t aparm;)
 
 		LBCOPY(&mob, (VOIDPTR)aparm, sizeof(MOBLK));
 		/* if already in (or out) signal immediately */
+#if SUPERTOS
+		if (ev_mchk(&mob))
+#else
 		if (mob.m_out != inside(xrat, yrat, (GRECT *)&mob.m_x))
+#endif
 		{
 			zombie(e);
 		} else

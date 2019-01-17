@@ -1,11 +1,12 @@
 <?php
 
-error_reporting(E_ALL);
 error_reporting(E_ALL & ~E_WARNING);
+error_reporting(E_ALL);
 ini_set("display_errors", 1);
 ini_set("track_errors", 1);
 
 $top = getcwd();
+$custom_dir = 'custom/';
 
 function html_header()
 {
@@ -53,7 +54,9 @@ flock($log, LOCK_EX);
 $currdate = date('Y-m-d H:i:s');
 fputs($log, "$currdate: start\n");
 fprintf($log, "FROM: %s\n", $_SERVER['REMOTE_ADDR']);
-fprintf($log, "QUERY_STRING: %s\n", $_SERVER['QUERY_STRING']);
+fprintf($log, "POST: %s\n", var_export($_POST, true));
+fprintf($log, "FILES: %s\n", var_export($_FILES, true));
+fprintf($log, "SERVER: %s\n", var_export($_SERVER, true));
 
 function error_handler($errno, $errmsg, $errfile, $errline, $errcontext)
 {
@@ -101,15 +104,15 @@ function get_options()
 		}
 	} else
 	{
-		if (isset($_GET['tosversion']))
+		if (isset($_POST['tosversion']))
 		{
-			$tosversion = $_GET['tosversion'];
+			$tosversion = $_POST['tosversion'];
 		}
-		if (isset($_GET['country']))
+		if (isset($_POST['country']))
 		{
-			$country = $_GET['country'];
+			$country = $_POST['country'];
 		}
-		$ramversion = isset($_GET['ramversion']) ? $_GET['ramversion'] : 0;
+		$ramversion = isset($_POST['ramversion']) ? $_POST['ramversion'] : 0;
 	}
 	if ($tosversion == 0)
 	{
@@ -133,6 +136,7 @@ function compile_tos()
 	global $filename;
 	global $zip;
 	global $exitcode;
+	global $custom_dir;
 	
 	$retval = false;
 	$exitcode = 1;
@@ -149,58 +153,61 @@ function compile_tos()
 		fprintf($fp, "RAMVERSION:=%s\n", $ramversion);
 		fclose($fp);
 	
-		$tp_01 = isset($_GET['tp_01']) ? $_GET['tp_01'] : 0;
-		$tp_02 = isset($_GET['tp_02']) ? $_GET['tp_02'] : 0;
-		$tp_03 = isset($_GET['tp_03']) ? $_GET['tp_03'] : 0;
-		$tp_04 = isset($_GET['tp_04']) ? $_GET['tp_04'] : 0;
-		$tp_05 = isset($_GET['tp_05']) ? $_GET['tp_05'] : 0;
-		$tp_06 = isset($_GET['tp_06']) ? $_GET['tp_06'] : 0;
-		$tp_07 = isset($_GET['tp_07']) ? $_GET['tp_07'] : 0;
-		$tp_08 = isset($_GET['tp_08']) ? $_GET['tp_08'] : 0;
-		$tp_09 = isset($_GET['tp_09']) ? $_GET['tp_09'] : 0;
-		$tp_10 = isset($_GET['tp_10']) ? $_GET['tp_10'] : 0;
-		$tp_11 = isset($_GET['tp_11']) ? $_GET['tp_11'] : 0;
-		$tp_12 = isset($_GET['tp_12']) ? $_GET['tp_12'] : 0;
-		$tp_13 = isset($_GET['tp_13']) ? $_GET['tp_13'] : 0;
-		$tp_14 = isset($_GET['tp_14']) ? $_GET['tp_14'] : 0;
-		$tp_15 = isset($_GET['tp_15']) ? $_GET['tp_15'] : 0;
-		$tp_16 = isset($_GET['tp_16']) ? $_GET['tp_16'] : 0;
-		$tp_17 = isset($_GET['tp_17']) ? $_GET['tp_17'] : 0;
-		$tp_18 = isset($_GET['tp_18']) ? $_GET['tp_18'] : 0;
-		$tp_19 = isset($_GET['tp_19']) ? $_GET['tp_19'] : 0;
-		$tp_20 = isset($_GET['tp_20']) ? $_GET['tp_20'] : 0;
-		$tp_21 = isset($_GET['tp_21']) ? $_GET['tp_21'] : 0;
-		$tp_22 = isset($_GET['tp_22']) ? $_GET['tp_22'] : 0;
-		$tp_23 = isset($_GET['tp_23']) ? $_GET['tp_23'] : 0;
-		$tp_24 = isset($_GET['tp_24']) ? $_GET['tp_24'] : 0;
-		$tp_25 = isset($_GET['tp_25']) ? $_GET['tp_25'] : 0;
-		$tp_26 = isset($_GET['tp_26']) ? $_GET['tp_26'] : 0;
-		$tp_27 = isset($_GET['tp_27']) ? $_GET['tp_27'] : 0;
-		$tp_28 = isset($_GET['tp_28']) ? $_GET['tp_28'] : 0;
-		$tp_29 = isset($_GET['tp_29']) ? $_GET['tp_29'] : 0;
-		$tp_30 = isset($_GET['tp_30']) ? $_GET['tp_30'] : 0;
-		$tp_31 = isset($_GET['tp_31']) ? $_GET['tp_31'] : 0;
-		$tp_32 = isset($_GET['tp_32']) ? $_GET['tp_32'] : 0;
-		$tp_33 = isset($_GET['tp_33']) ? $_GET['tp_33'] : 0;
-		$tp_34 = isset($_GET['tp_34']) ? $_GET['tp_34'] : 0;
-		$tp_35 = isset($_GET['tp_35']) ? $_GET['tp_35'] : 0;
-		$tp_36 = isset($_GET['tp_36']) ? $_GET['tp_36'] : 0;
-		$tp_37 = isset($_GET['tp_37']) ? $_GET['tp_37'] : 0;
-		$tp_38 = isset($_GET['tp_38']) ? $_GET['tp_38'] : 0;
-		$tp_39 = isset($_GET['tp_39']) ? $_GET['tp_39'] : 0;
-	
-		$seekrate = isset($_GET['seekrate']) ? $_GET['seekrate'] : 3;
-		$fdc_cookie = isset($_GET['fdc_cookie']) ? $_GET['fdc_cookie'] : '$01415443';
-		$boottime = isset($_GET['boottime']) ? $_GET['boottime'] : 80;
-		$prntimeout = isset($_GET['prntimeout']) ? $_GET['prntimeout'] : 30;
-		$conterm = isset($_GET['conterm']) ? $_GET['conterm'] : 7;
-
 		$fp = fopen('common/localcnf.h', 'w');
 		if (!is_resource($fp))
 		{
 			error_log("$php_errormsg");
 		} else
 		{
+			$tp_01 = isset($_POST['tp_01']) ? $_POST['tp_01'] : 0;
+			$tp_02 = isset($_POST['tp_02']) ? $_POST['tp_02'] : 0;
+			$tp_03 = isset($_POST['tp_03']) ? $_POST['tp_03'] : 0;
+			$tp_04 = isset($_POST['tp_04']) ? $_POST['tp_04'] : 0;
+			$tp_05 = isset($_POST['tp_05']) ? $_POST['tp_05'] : 0;
+			$tp_06 = isset($_POST['tp_06']) ? $_POST['tp_06'] : 0;
+			$tp_07 = isset($_POST['tp_07']) ? $_POST['tp_07'] : 0;
+			$tp_08 = isset($_POST['tp_08']) ? $_POST['tp_08'] : 0;
+			$tp_09 = isset($_POST['tp_09']) ? $_POST['tp_09'] : 0;
+			$tp_10 = isset($_POST['tp_10']) ? $_POST['tp_10'] : 0;
+			$tp_11 = isset($_POST['tp_11']) ? $_POST['tp_11'] : 0;
+			$tp_12 = isset($_POST['tp_12']) ? $_POST['tp_12'] : 0;
+			$tp_13 = isset($_POST['tp_13']) ? $_POST['tp_13'] : 0;
+			$tp_14 = isset($_POST['tp_14']) ? $_POST['tp_14'] : 0;
+			$tp_15 = isset($_POST['tp_15']) ? $_POST['tp_15'] : 0;
+			$tp_16 = isset($_POST['tp_16']) ? $_POST['tp_16'] : 0;
+			$tp_17 = isset($_POST['tp_17']) ? $_POST['tp_17'] : 0;
+			$tp_18 = isset($_POST['tp_18']) ? $_POST['tp_18'] : 0;
+			$tp_19 = isset($_POST['tp_19']) ? $_POST['tp_19'] : 0;
+			$tp_20 = isset($_POST['tp_20']) ? $_POST['tp_20'] : 0;
+			$tp_21 = isset($_POST['tp_21']) ? $_POST['tp_21'] : 0;
+			$tp_22 = isset($_POST['tp_22']) ? $_POST['tp_22'] : 0;
+			$tp_23 = isset($_POST['tp_23']) ? $_POST['tp_23'] : 0;
+			$tp_24 = isset($_POST['tp_24']) ? $_POST['tp_24'] : 0;
+			$tp_25 = isset($_POST['tp_25']) ? $_POST['tp_25'] : 0;
+			$tp_26 = isset($_POST['tp_26']) ? $_POST['tp_26'] : 0;
+			$tp_27 = isset($_POST['tp_27']) ? $_POST['tp_27'] : 0;
+			$tp_28 = isset($_POST['tp_28']) ? $_POST['tp_28'] : 0;
+			$tp_29 = isset($_POST['tp_29']) ? $_POST['tp_29'] : 0;
+			$tp_30 = isset($_POST['tp_30']) ? $_POST['tp_30'] : 0;
+			$tp_31 = isset($_POST['tp_31']) ? $_POST['tp_31'] : 0;
+			$tp_32 = isset($_POST['tp_32']) ? $_POST['tp_32'] : 0;
+			$tp_33 = isset($_POST['tp_33']) ? $_POST['tp_33'] : 0;
+			$tp_34 = isset($_POST['tp_34']) ? $_POST['tp_34'] : 0;
+			$tp_35_6 = isset($_POST['tp_35_6']) ? $_POST['tp_35_6'] : 0;
+			$tp_35_8 = isset($_POST['tp_35_8']) ? $_POST['tp_35_8'] : 0;
+			$tp_35_16 = isset($_POST['tp_35_16']) ? $_POST['tp_35_16'] : 0;
+			$tp_35_32 = isset($_POST['tp_35_32']) ? $_POST['tp_35_32'] : 0;
+			$tp_36 = isset($_POST['tp_36']) ? $_POST['tp_36'] : '';
+
+			$tp_38 = isset($_POST['tp_38']) ? $_POST['tp_38'] : 0;
+			$tp_39 = isset($_POST['tp_39']) ? $_POST['tp_39'] : 0;
+		
+			$seekrate = isset($_POST['seekrate']) ? $_POST['seekrate'] : 3;
+			$fdc_cookie = isset($_POST['fdc_cookie']) ? $_POST['fdc_cookie'] : '$01415443';
+			$boottime = isset($_POST['boottime']) ? $_POST['boottime'] : 80;
+			$prntimeout = isset($_POST['prntimeout']) ? $_POST['prntimeout'] : 30;
+			$conterm = isset($_POST['conterm']) ? $_POST['conterm'] : 7;
+
 			fprintf($fp, "#define TP_01 %d\n", $tp_01);
 			fprintf($fp, "#define TP_02 %d\n", $tp_02);
 			fprintf($fp, "#define TP_03 %d\n", $tp_03);
@@ -235,9 +242,23 @@ function compile_tos()
 			fprintf($fp, "#define TP_32 %d\n", $tp_32);
 			fprintf($fp, "#define TP_33 %d\n", $tp_33);
 			fprintf($fp, "#define TP_34 %d\n", $tp_34);
-			fprintf($fp, "#define TP_35 %d\n", $tp_35);
-			fprintf($fp, "#define TP_36 %d\n", $tp_36);
-			fprintf($fp, "#define TP_37 %d\n", $tp_37);
+			fprintf($fp, "#define TP_35_6 %d\n", $tp_35_6);
+			fprintf($fp, "#define TP_35_8 %d\n", $tp_35_8);
+			fprintf($fp, "#define TP_35_16 %d\n", $tp_35_16);
+			fprintf($fp, "#define TP_35_32 %d\n", $tp_35_32);
+			fprintf($fp, "#define TP_36 \"%s\"\n", $tp_36);
+
+			for ($icon = 1; $icon <= 12; $icon++)
+			{
+				if (isset($_FILES['tp_37_' . $icon]['tmp_name']) &&
+					$_FILES['tp_37_' . $icon]['error'] == UPLOAD_ERR_OK)
+				{
+					$icon_name = $custom_dir . 'tp_37_' .  $icon . '.ico';
+					move_uploaded_file($_FILES['tp_37_' . $icon]['tmp_name'], $icon_name);
+					fprintf($fp, "#define TP_37_%d \"../%s\"\n", $icon, $icon_name);
+				}
+			}
+
 			fprintf($fp, "#define TP_38 %d\n", $tp_38);
 			fprintf($fp, "#define TP_39 %d\n", $tp_39);
 
@@ -312,7 +333,8 @@ if ($retval)
 	$errfile = fopen('../errors.log', 'a');
 	fputs($errfile, "$currdate: start\n");
 	fprintf($errfile, "FROM: %s\n", $_SERVER['REMOTE_ADDR']);
-	fprintf($errfile, "QUERY_STRING: %s\n", $_SERVER['QUERY_STRING']);
+	fprintf($errfile, "POST: %s\n", var_export($_POST, true));
+	fprintf($errfile, "FILES: %s\n", var_export($_FILES, true));
 	fprintf($errfile, "FAILED:\n");
 	fputs($errfile, "$compile_output\n\n");
 	fclose($errfile);

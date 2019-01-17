@@ -385,3 +385,29 @@
 #ifndef TP_35_32
 #define TP_35_32 0
 #endif
+
+/*
+ * TP_36: INFO_TXT: Set custom info text
+ *
+ * This string will be displayed in place of the hyphens in the About dialog
+ * (29 characters max., ASCII only)
+ */
+#ifndef TP_36
+#define TP_36 "-----------------------------"
+#endif
+
+/*
+ * TP_37: ICONS: Set custom desktop icons
+ * TP_37_1: floppy
+ * TP_37_2: folder
+ * TP_37_3: trashcan
+ * TP_37_4: program
+ * TP_37_5: file
+ * TP_37_6: printer
+ * TP_37_7: laserprinter
+ * TP_37_8: cdrom
+ * TP_37_9: cartridge
+ * TP_37_10: floppy2
+ * TP_37_11: new program
+ * TP_37_12: harddisk
+ */

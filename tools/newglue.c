@@ -1,5 +1,6 @@
 /*	NEWGLUE.C	12/21/87		Derek Mui	*/
 
+#include "../common/config.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -7,6 +8,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
+#include "../desk/rsc/306/deskus.h"
+
 
 #ifndef O_BINARY
 #  ifdef _O_BINARY
@@ -34,6 +37,7 @@
 #define const
 #define signed
 #else
+#define VOID void
 #define NOTHING void                /* no parameters */
 #define PROTO(p) p
 #define P(t) t
@@ -85,6 +89,98 @@ PP(register unsigned int val;)
 	*ptr++ = (val >> 8) & 0xff;
 	*ptr = (val) & 0xff;
 	return 0;
+}
+
+
+static unsigned int getbeshort(P(char *) ptr)
+PP(register char *ptr;)
+{
+	register unsigned int w1;
+	w1 = ptr[0] & 0xff;
+	w1 <<= 8;
+	w1 |= ptr[1] & 0xff;
+	return w1;
+}
+
+
+static int32_t getbelong(P(char *) ptr)
+PP(register char *ptr;)
+{
+	register unsigned int w1, w2;
+	w1 = getbeshort(ptr);
+	w2 = getbeshort(ptr + 2);
+	return ((int32_t)w1 << 16) | w2;
+}
+
+
+static char *rsc_gaddr(P(char *) hdr, P(int) tree, P(int) object)
+PP(char *hdr;)
+PP(int tree;)
+PP(int object;)
+{
+	char *trees;
+	char *obj;
+	char *spec;
+	
+	trees = address + getbeshort(hdr + 18);
+	obj = address + getbelong(trees + tree * 4);
+	spec = address + getbelong(obj + object * 24 + 12);
+	return spec;
+}
+
+
+static VOID copymask(P(char *)dst, P(char *) src)
+PP(register char *dst;)
+PP(register char *src;)
+{
+	register int x, y;
+	
+	src += 128;
+	for (y = 0; y < 32; y++)
+	{
+		src -= 4;
+		for (x = 0; x < 4; x++)
+			dst[x] = ~src[x];
+		dst += 4;
+	}
+}
+
+
+static VOID copy_icon(P(char *)hdr, P(int) tree, P(int) object, P(const char *) name)
+PP(char *hdr;)
+PP(int tree;)
+PP(int object;)
+PP(const char *name;)
+{
+	register int ic;
+	char *icon;
+	char *destdata;
+	char *destmask;
+	char buf[256];
+	int count;
+	
+	if (name == 0 || *name == '\0')
+		return;
+	ic = open(name, O_RDONLY | O_BINARY);
+	if (ic < 0)
+	{
+		fprintf(stderr, _("%s not found\n"), name);
+		exit(EXIT_FAILURE);
+	}
+	lseek(ic, 70, 0);
+	count = read(ic, buf, 256);
+	close(ic);
+	if (count != 256)
+	{
+		fprintf(stderr, _("%s: wrong format\n"), name);
+		exit(EXIT_FAILURE);
+	}
+	icon = rsc_gaddr(hdr, tree, object);
+	destmask = hdr + getbelong(icon + 0);
+	destdata = hdr + getbelong(icon + 4);
+	copymask(destdata, buf);
+	copymask(destmask, buf + 128);
+	printf("patched in: %s\n", name);
 }
 
 
@@ -181,6 +277,72 @@ PP(char **argv;)
 
 		/* fill in header */
 		putbeshort(header + 2 * i, (int) ((intptr_t)address - (intptr_t)top - 2));
+
+#ifdef TP_36
+		if (i == 1)
+		{
+			char *infostr;
+			int len;
+			
+			infostr = rsc_gaddr(address, ADDINFO, 3);
+			len = (int)strlen(TP_36);
+			if (len > 0)
+			{
+				if (len > (int)strlen(infostr))
+					len = (int)strlen(infostr);
+				memcpy(infostr, TP_36, len + 1);
+			}
+		}
+#endif
+
+#ifdef TP_37_1
+		if (i == 1)
+			copy_icon(address, ADICON, 1, TP_37_1);
+#endif
+#ifdef TP_37_2
+		if (i == 1)
+			copy_icon(address, ADICON, 2, TP_37_2);
+#endif
+#ifdef TP_37_3
+		if (i == 1)
+			copy_icon(address, ADICON, 3, TP_37_3);
+#endif
+#ifdef TP_37_4
+		if (i == 1)
+			copy_icon(address, ADICON, 4, TP_37_4);
+#endif
+#ifdef TP_37_5
+		if (i == 1)
+			copy_icon(address, ADICON, 5, TP_37_5);
+#endif
+#ifdef TP_37_6
+		if (i == 1)
+			copy_icon(address, ADICON, 6, TP_37_6);
+#endif
+#ifdef TP_37_7
+		if (i == 1)
+			copy_icon(address, ADICON, 7, TP_37_7);
+#endif
+#ifdef TP_37_8
+		if (i == 1)
+			copy_icon(address, ADICON, 8, TP_37_8);
+#endif
+#ifdef TP_37_9
+		if (i == 1)
+			copy_icon(address, ADICON, 9, TP_37_9);
+#endif
+#ifdef TP_37_10
+		if (i == 1)
+			copy_icon(address, ADICON, 10, TP_37_10);
+#endif
+#ifdef TP_37_11
+		if (i == 1)
+			copy_icon(address, ADICON, 11, TP_37_11);
+#endif
+#ifdef TP_37_12
+		if (i == 1)
+			copy_icon(address, ADICON, 12, TP_37_12);
+#endif
 
 		address += size;
 		
