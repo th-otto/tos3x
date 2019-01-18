@@ -172,6 +172,7 @@ spshift   equ $FFFF8266
 sppalette equ $FFFF9800
 
 psgsel    equ $FFFF8800
+psgrd     equ $FFFF8800
 psgwr     equ $FFFF8802
 
 STConfig  equ $FFFF9200
@@ -1477,6 +1478,9 @@ biosinit:
 
 /* --- set the current system time and date */
         move.w    _os_dosdate,_date  /* use BIOS time as current time */
+#if (HD_WAIT == 1) | (HD_WAIT == 2)
+		jsr       hd_wait
+#endif
         jsr       ngetdt             /* set current time to RTC time */
         beq.s     clockdone
         bsr       igetdt             /* read time from the keyboard controller */
@@ -7796,6 +7800,17 @@ soundir8:
 
 #include "floppy.inc"
 
+        text
+
+#if HD_WAIT == 1
+#include "../tospatch/hdwait1.S"
+#endif
+#if HD_WAIT == 2
+#include "../tospatch/hdwait2.S"
+#endif
+#if HD_WAIT == 3
+#include "../tospatch/hdwait3.S"
+#endif
 
 		bss
 

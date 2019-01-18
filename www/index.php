@@ -475,6 +475,28 @@ New functions Getbpb and Rwabs with support for ED drives: <br />
 
 <tr>
 <td>
+HD-Floppy controlling
+</td>
+<td>
+<select id="tp_41" name="tp_41">
+<option value="0" selected="selected">No change</option>
+<option value="6">Use sound-chip bit 6</option>
+<option value="7">Use sound-chip bit 7</option>
+</select>
+<input type="checkbox" name="tp_42" value="1" />Invert level<br />
+</td>
+<td>
+Control HD-floppy selection via sound-chip bit 6 or 7.
+If the HD controller expects low-level, use "Invert level",
+otherwise high-level will be used.
+Note: ST-Book uses a low-level on bit 7.
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
 Prevent execution of floppy boot sector:
 </td>
 <td>
@@ -496,6 +518,31 @@ Normal boot:
 Similar to above, but prevents execution of floppy bootsector
 only if system was already booted from harddisk. This was
 normal behaviour until TOS 1.4.
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Harddisk waiter
+</td>
+<td>
+<select id="tp_43" name="tp_43">
+<option value="0" selected="selected">None</option>
+<option value="1" title="Unknown routine that may only work with 1 harddisk
+Can be aborted by pressing ALTERNATE.
+Only tested with Megafile">Version 1</option>
+<option value="2" title="Simple version that just waits for 12sec
+This should work in any case.
+Can be aborted by pressing any key.
+">Version 2</option>
+<option value="3">Version 3</option>
+<option value="4">Version 4</option>
+</select>
+</td>
+<td>
+Wait for harddisk after powerup.
 </td>
 </tr>
 
@@ -736,7 +783,7 @@ Note alert icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_39_1');"> Default: <img src="icons/note.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_39_1');"> Default: <img src="icons/note.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -754,7 +801,7 @@ Question alert icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_39_2');"> Default: <img src="icons/quest.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_39_2');"> Default: <img src="icons/quest.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -772,7 +819,7 @@ Stop alert icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_39_3');"> Default: <img src="icons/stop.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_39_3');"> Default: <img src="icons/stop.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -792,7 +839,7 @@ Floppy icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_1');"> Default: <img src="icons/floppy.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_37_1');"> Default: <img src="icons/floppy.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -810,7 +857,7 @@ Folder icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_2');"> Default: <img src="icons/folder.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_37_2');"> Default: <img src="icons/folder.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -828,7 +875,7 @@ Trashcan icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_3');"> Default: <img src="icons/trash.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_37_3');"> Default: <img src="icons/trash.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -846,7 +893,7 @@ Program icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_4');"> Default: <img src="icons/program.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_37_4');"> Default: <img src="icons/program.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -864,7 +911,7 @@ File icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_5');"> Default: <img src="icons/file.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_37_5');"> Default: <img src="icons/file.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -882,7 +929,7 @@ Harddisk icon:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_12');"> Default: <img src="icons/harddisk.ico" width="32" height="32" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_37_12');"> Default: <img src="icons/harddisk.ico" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -902,7 +949,7 @@ Arrow cursor:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_0');"> Default: <img src="mform/mform0.cur" width="16" height="16" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_38_0');"> Default: <img src="mform/mform0.cur" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -920,7 +967,7 @@ Text cursor:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_1');"> Default: <img src="mform/mform1.cur" width="16" height="16" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_38_1');"> Default: <img src="mform/mform1.cur" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -938,7 +985,7 @@ Busy bee:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_2');"> Default: <img src="mform/mform2.cur" width="16" height="16" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_38_2');"> Default: <img src="mform/mform2.cur" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -956,7 +1003,7 @@ Point hand:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_3');"> Default: <img src="mform/mform3.cur" width="16" height="16" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_38_3');"> Default: <img src="mform/mform3.cur" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -974,7 +1021,7 @@ Flat hand:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_4');"> Default: <img src="mform/mform4.cur" width="16" height="16" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_38_4');"> Default: <img src="mform/mform4.cur" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -992,7 +1039,7 @@ Thin cross:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_5');"> Default: <img src="mform/mform5.cur" width="16" height="16" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_38_5');"> Default: <img src="mform/mform5.cur" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1010,7 +1057,7 @@ Thick cross:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_6');"> Default: <img src="mform/mform6.cur" width="16" height="16" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_38_6');"> Default: <img src="mform/mform6.cur" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1028,10 +1075,70 @@ Outline cross:
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_7');"> Default: <img src="mform/mform7.cur" width="16" height="16" style="border:0" /> </a>
+<a href="javascript:killIcon('tp_38_7');"> Default: <img src="mform/mform7.cur" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<tr><td colspan="3">
+All files together must not exceed 64Kb. Also take care not to exceed
+the total ROM size (there are approximately 8K free in the 2.06 version).
+The files for 2.06 and 3.06 are identical, so you can use the
+same resource files for both versions.
+</tr>
+<td>
+Substitute GEM resource:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_40_1" name="tp_40_1" accept=".rsc" /></td>
+<td><img id="tp_40_1_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+<a href="javascript:killIcon('tp_40_1');">Reset</a><br />
+</td>
+</tr>
+
+<tr>
+<td>
+Substitute DESKTOP resource:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_40_2" name="tp_40_2" accept=".rsc" /></td>
+<td><img id="tp_40_2_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+<a href="javascript:killIcon('tp_40_2');">Reset</a><br />
+</td>
+</tr>
+
+<tr>
+<td>
+Substitute NEWDESK.INF file:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_40_3" name="tp_40_3" accept=".inf" /></td>
+<td><img id="tp_40_3_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+<a href="javascript:killIcon('tp_40_3');">Reset</a><br />
+</td>
+</tr>
+
 
 <tr><td colspan="3"><hr /></td></tr>
 

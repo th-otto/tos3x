@@ -1,5 +1,4 @@
 #include "config.h"
-#include "ctrycode.h"
 
 ZONESIZE equ $20000
 

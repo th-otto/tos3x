@@ -190,11 +190,13 @@ function previewIcon(name)
 	if (input)
 	{
 		var preview = document.getElementById(name + '_img');
-		var files = input.files;
-		if (files.length == 0) {
-			preview.src = '';
-		} else {
-			preview.src = window.URL.createObjectURL(files[0]);
+		if (preview) {
+			var files = input.files;
+			if (files.length == 0) {
+				preview.src = '';
+			} else {
+				preview.src = window.URL.createObjectURL(files[0]);
+			}
 		}
 	}
 }

@@ -154,7 +154,8 @@ function compile_tos()
 		fclose($fp);
 	
 		$fp = fopen('common/localcnf.h', 'w');
-		if (!is_resource($fp))
+		$mk = fopen('glue/localrsc.mak', 'w');
+		if (!is_resource($fp) || !is_resource($mk))
 		{
 			error_log("$php_errormsg");
 		} else
@@ -289,12 +290,29 @@ function compile_tos()
 				}
 			}
 
+			$rsc_names = array(
+				'',
+				'GEM_RSC',
+				'DESK_RSC',
+				'DESK_INF',
+			);
+			for ($icon = 1; $icon <= 3; $icon++)
+			{
+				if (isset($_FILES['tp_40_' . $icon]['tmp_name']) &&
+					$_FILES['tp_40_' . $icon]['error'] == UPLOAD_ERR_OK)
+				{
+					$icon_name = $custom_dir . 'tp_40_' .  $icon . '.ico';
+					move_uploaded_file($_FILES['tp_40_' . $icon]['tmp_name'], $icon_name);
+					fprintf($mk, "%s := ../%s\n", $rsc_names[$icon], $icon_name);
+				}
+			}
+
 			fprintf($fp, "#define TP_40 %d\n", $tp_40);
 			fprintf($fp, "#define TP_41 %d\n", $tp_41);
 			fprintf($fp, "#define TP_42 %d\n", $tp_42);
-			fprintf($fp, "#define TP_43 %d\n", $tp_43);
-			fprintf($fp, "#define TP_44 %d\n", $tp_44);
-			fprintf($fp, "#define TP_45 %d\n", $tp_45);
+			fprintf($fp, "#define HD_WAIT %d\n", $tp_43);
+			fprintf($fp, "#define HD_WAITTIME %d\n", $tp_44);
+			fprintf($fp, "#define HD_WAITDEVICE %d\n", $tp_45);
 			fprintf($fp, "#define TP_46 %d\n", $tp_46);
 			fprintf($fp, "#define TP_47 %d\n", $tp_47);
 			fprintf($fp, "#define TP_48 %d\n", $tp_48);
@@ -307,7 +325,8 @@ function compile_tos()
 			fprintf($fp, "#define CONTERM %d\n", $conterm);
 
 			fclose($fp);
-		
+			fclose($mk);
+			
 			system("make clean 2>&1");
 			system("make 2>&1", $exitcode);
 			

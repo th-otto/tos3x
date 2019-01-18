@@ -24,7 +24,6 @@
 #include "vdi.h"
 #include "fontdef.h"
 #include "gsxextrn.h"
-#include "ctrycode.h"
 
 
 extern int16_t const off_8x8[];

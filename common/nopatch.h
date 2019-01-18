@@ -65,6 +65,9 @@
 #undef TP_41
 #undef TP_42
 #undef TP_43
+#undef HD_WAIT
+#undef HD_WAITTIME
+#undef HD_WAITDEVICE
 #undef TP_44
 #undef TP_45
 #undef TP_46
@@ -121,9 +124,9 @@
 #define TP_40 0
 #define TP_41 0
 #define TP_42 0
-#define TP_43 0
-#define TP_44 0
-#define TP_45 0
+#define HD_WAIT 0
+#define HD_WAITTIME 0
+#define HD_WAITDEVICE 0
 #define TP_46 0
 #define TP_47 0
 #define TP_48 0

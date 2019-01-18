@@ -1,7 +1,6 @@
 #include "bios.h"
 #include <toserrno.h>
 #include "tosvars.h"
-#include "ctrycode.h"
 
 /* read/write flags */
 #define RW_READ             0

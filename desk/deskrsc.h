@@ -1,5 +1,3 @@
-#include "ctrycode.h"
-
 #if TOSVERSION >= 0x400
 /*
  * assumes MULTILANG_SUPPORT & POPUP_SUPPORT;

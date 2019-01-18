@@ -9,7 +9,6 @@
  * config.h should define TOSVERSION and COUNTRY
  */
 #include "config.h"
-#include "ctrycode.h"
 
 /* the year used in copyright notices */
 #define COPYRIGHT_YEAR "1991"

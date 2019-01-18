@@ -245,6 +245,27 @@
 #endif
 
 /*
+ * TP_41: HD_BIT: HD-Floppy controlling
+ *
+ * 0: don't change
+ * 6: use sound-chip bit 6
+ * 7: use sound-chip bit 7
+ *
+ * TP_42: HD_INVERT: Invert level
+ *
+ * Control HD-floppy selection via sound-chip bit 6 or 7.
+ * If the HD controller expects low-level, also set TP_42 (HD_INVERT) to 1,
+ * otherwise high-level will be used.
+ * Note: ST-Book uses a low-level on bit 7.
+ */
+#ifndef TP_41
+#define TP_41 0
+#endif
+#ifndef TP_42
+#define TP_42 0
+#endif
+
+/*
  * TP_26: KILL_BOOT: Prevent execution of floppy boot sector
  */
 #ifndef TP_26
@@ -260,6 +281,36 @@
  */
 #ifndef TP_27
 #define TP_27 0
+#endif
+
+/*
+ * TP_43: HD_WAIT: Harddisk waiter
+ *
+ * 0: do not use
+ * 1: Version 1
+ *    Unknown routine that may only work with 1 harddisk.
+ *    Can be aborted by pressing ALTERNATE.
+ *    Only tested with Megafile
+ * 2: Version 2
+ *    Simple version that just waits for 12sec
+ *    This should work in any case.
+ *    Can be aborted by pressing any key.
+ * 3: Version 3
+ *    New version written by EWK, can wait for any device.
+ * 4: Version 4
+ *
+ * TP_44: HDWAIT_TIME: Waiting time in seconds
+ * TP_45: HDWAIT_DEVICE: Device to wait for,
+ *        for version 3
+ */
+#ifndef HD_WAIT
+#define HD_WAIT 0
+#endif
+#ifndef HD_WAITTIME
+#define HD_WAITTIME 12
+#endif
+#ifndef HD_WAITDEVICE
+#define HD_WAITDEVICE 0
 #endif
 
 /*
@@ -422,4 +473,18 @@
  * TP_38_5: Thin cross
  * TP_38_6: Thick cross
  * TP_38_7: Outline cross
+ */
+
+/*
+ * TP_39: MOUSE: Set custom alert icons
+ * TP_39_1: Note icon
+ * TP_39_2: Question icon
+ * TP_39_3: Stop icon
+ */
+
+/*
+ * TP_40: RSC: Replace resource files
+ * TP_40_1: AES resource file
+ * TP_40_2: DESKTOP resource file
+ * TP_40_3: NEWDESK.INF file
  */

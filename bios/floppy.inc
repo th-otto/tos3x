@@ -380,6 +380,9 @@ _flopfmt:
         bcc.s     flopfmt1
         moveq.l   #0,d0                         /* SD mode */
 flopfmt1:
+#if TP_41 /* HD_BIT */
+	bsr       hd_port_a
+#else
 #if STBOOK
 	bsr       hdselect                      /* select SD/HD mode of floppy */
 #else
@@ -388,8 +391,9 @@ flopfmt1:
 	bne.s     flopfmt2                      /* (correct) */
 #endif
         move.w    d0,($FFFF860E).w
-flopfmt2:
 #endif
+flopfmt2:
+#endif /* TP_41 */
         move.w    d0,fd_density(a1)
 /* --- seek to track (hard seek): */
         bsr       hardseek                      /* hard seek to 'ctrack' */
@@ -913,6 +917,9 @@ go2trac2:
         move.w    fd_density(a1),d0
         and.w     #$0003,d0
         eori.w    #$0003,d0                     /* toggle between SD/HD mode for a second seek try */
+#if TP_41 /* HD_BIT */
+	bsr       hd_port_a
+#else
 #if STBOOK
 	move.w    d0,fd_density(a1)
         bsr       hdselect                      /* select SD/HD mode of floppy */
@@ -928,6 +935,7 @@ go2trc2b:
         move.w    d0,fd_density(a1)
 #endif
 #endif
+#endif /* TP_41 */
         subq.w    #1,fd_rtryseek                /* --seek retry count */
         bne.s     go2trret                      /* (out of retries -- punt) */
         bsr.s     restore                       /* move head to track 00 to reset it */
@@ -980,6 +988,9 @@ flopcmds:
 flopcms1:
         or.b      d0,d6
         or.b      (a1),d6                       /* (a1) == 8 for HD, with sets the verify bit in the command */
+#if TP_41 /* HD_BIT */
+	bsr       hd_port
+#else
 #if STBOOK
         move.w    fd_density(a1),d0             /* get SD/HD mode */
         bsr.s     hdselect                      /* select SD/HD mode of floppy */
@@ -990,6 +1001,7 @@ flopcms1:
 #endif
         move.w    fd_density(a1),($FFFF860E).w
 #endif
+#endif /* TP_41 */
 
 /*
  * flopcmd - execute 1770 command (with timeout)
@@ -1036,7 +1048,7 @@ hdselect:   tst.w     d0                        /* if != 0 then select HD */
 hdselec2:   move.b    #$80,d0                   /* HD mode is bit 7 in PORT A on the sound chip */
 hdselec3:   move      sr,d2                     /* save status register */
             move.b    #14,(psgsel).w            /* select port on GI chip */
-            move.b    (psgsel).w,d1             /* get current bits */
+            move.b    (psgrd).w,d1              /* get current bits */
             bclr      #7,d1                     /* clear HD bit */
             or.b      d0,d1                     /* or-in our new bit */
             move.b    #14,(psgsel).w            /* select port on GI chip */
@@ -1111,8 +1123,8 @@ select1:
 setporta:
             move.w    sr,-(a7)                  /* save our IPL */
             ori.w     #$0700,sr                 /* start critical section */
-            move.b    #$0E,(psgsel).w           /* select port on GI chip */
-            move.b    (psgsel).w,d1             /* get current bits */
+            move.b    #14,(psgsel).w            /* select port on GI chip */
+            move.b    (psgrd).w,d1              /* get current bits */
             move.b    d1,d2                     /* save old bits for caller */
             and.b     #$F8,d1                   /* strip low three bits there */
             or.b      d0,d1                     /* or-in our new bits */
@@ -1363,6 +1375,45 @@ getfrb4:
             addq.l    #8,a7                     /* go 2 return levels up */
             moveq.l   #-12,d0                   /* return E_GENRL if no _FRB cookie */
             rts
+
+#if TP_41 /* HD_BIT */
+/*
+ * select HD mode using bit 6 or 7 of the sound chip.
+ * Bit 7 is eg. used on ST-Book
+ */
+hd_port:
+            movem.w   d0-d1,-(a7)
+            move.w    fd_density(a1),d0
+            bra.s     hd_port_b
+hd_port_a:
+            movem.w   d0-d1,-(a7)
+            move.w    d0,fd_density(a1)
+hd_port_b:
+            move.w    sr,-(a7)
+            ori.w     #$0700,sr
+            move.b    #14,(psgsel).w
+            move.b    (psgrd).w,d1
+#if TP_41 == 6
+            and.b     #$bf,d1
+#else
+            and.b     #$7f,d1
+#endif
+            and.b     #1,d0
+#if TP_42 /* HD_INVERT */
+            eori.b    #1,d0
+#endif
+#if TP_41 == 6
+            lsl.b     #6,d0
+#else
+            lsl.b     #7,d0
+#endif
+            or.b      d1,d0
+            move.b    #14,(psgsel).w
+            move.b    d0,(psgwr).w
+            move.w    (a7)+,sr
+            movem.w   (a7)+,d0-d1
+            rts
+#endif /* TP_41 */
 
 	bss
 
