@@ -296,11 +296,15 @@
  *    This should work in any case.
  *    Can be aborted by pressing any key.
  * 3: Version 3
- *    New version written by EWK, can wait for any device.
+ *    New version written by EWK, can wait for any ACSI device.
+ *    Can be aborted by pressing Shift-Shift.
  * 4: Version 4
+ *    A version that waits instead of displaying the ramtest bar.
+ *    Uses DMAread instead of waiting a specific time.
+ *    Can be aborted by pressing any shift key.
  *
- * TP_44: HDWAIT_TIME: Waiting time in seconds
- * TP_45: HDWAIT_DEVICE: Device to wait for,
+ * TP_44: HD_WAITTIME: Waiting time in seconds
+ * TP_45: HD_WAITDEVICE: Device to wait for,
  *        for version 3
  */
 #ifndef HD_WAIT

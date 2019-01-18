@@ -1478,7 +1478,7 @@ biosinit:
 
 /* --- set the current system time and date */
         move.w    _os_dosdate,_date  /* use BIOS time as current time */
-#if (HD_WAIT == 1) | (HD_WAIT == 2)
+#if (HD_WAIT == 1) | (HD_WAIT == 2) | (HD_WAIT == 3)
 		jsr       hd_wait
 #endif
         jsr       ngetdt             /* set current time to RTC time */
@@ -1885,6 +1885,10 @@ dmaloop:
         bsr       memtest
         movea.w   d0,a5                     /* memtest done? */
         beq       dmawait                   /* (no) */
+#if (HD_WAIT == 4)
+		jsr       hd_wait
+        bra       dmadone
+#endif
 #if TP_11 /* SKIP_WAIT */
         bra       dmadone
 #endif
@@ -7810,6 +7814,9 @@ soundir8:
 #endif
 #if HD_WAIT == 3
 #include "../tospatch/hdwait3.S"
+#endif
+#if HD_WAIT == 4
+#include "../tospatch/hdwait4.S"
 #endif
 
 		bss

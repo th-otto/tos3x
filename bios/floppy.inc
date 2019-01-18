@@ -381,7 +381,7 @@ _flopfmt:
         moveq.l   #0,d0                         /* SD mode */
 flopfmt1:
 #if TP_41 /* HD_BIT */
-	bsr       hd_port_a
+	bsr       hd_porta
 #else
 #if STBOOK
 	bsr       hdselect                      /* select SD/HD mode of floppy */
@@ -918,7 +918,7 @@ go2trac2:
         and.w     #$0003,d0
         eori.w    #$0003,d0                     /* toggle between SD/HD mode for a second seek try */
 #if TP_41 /* HD_BIT */
-	bsr       hd_port_a
+	bsr       hd_porta
 #else
 #if STBOOK
 	move.w    d0,fd_density(a1)
@@ -1384,11 +1384,11 @@ getfrb4:
 hd_port:
             movem.w   d0-d1,-(a7)
             move.w    fd_density(a1),d0
-            bra.s     hd_port_b
-hd_port_a:
+            bra.s     hd_portb
+hd_porta:
             movem.w   d0-d1,-(a7)
             move.w    d0,fd_density(a1)
-hd_port_b:
+hd_portb:
             move.w    sr,-(a7)
             ori.w     #$0700,sr
             move.b    #14,(psgsel).w

@@ -535,11 +535,16 @@ Can be aborted by pressing ALTERNATE.
 Only tested with Megafile">Version 1</option>
 <option value="2" title="Simple version that just waits for 12sec
 This should work in any case.
-Can be aborted by pressing any key.
-">Version 2</option>
-<option value="3">Version 3</option>
-<option value="4">Version 4</option>
-</select>
+Can be aborted by pressing any key.">Version 2</option>
+<option value="3" title="New version written by EWK, can wait for any ACSI device.
+Can be aborted by pressing Shift-Shift.">Version 3</option>
+<option value="4" title="A version that waits instead of
+displaying the ramtest bar.
+Uses DMAread instead of waiting a specific time.
+Can be aborted by pressing any shift key.">Version 4</option>
+</select><br />
+<input type="number" name="tp_44" value="12" min="0" max="327" style="width: 4em" />&nbsp;Wait time (in sec)<br />
+<input type="number" name="tp_45" value="0" min="0" max="7" style="width: 4em" />&nbsp;ACSI device<br />
 </td>
 <td>
 Wait for harddisk after powerup.
