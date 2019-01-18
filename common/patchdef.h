@@ -128,7 +128,7 @@
 
 /*
  * TP_15: STACK_POINTER: Fix stack pointer in autoexec
- * Fixes a bug the autoexec routine (see ST-Computer 1/90)
+ * Fixes a bug in the autoexec routine (see ST-Computer 1/90)
  */
 #ifndef TP_15
 #define TP_15 1
@@ -215,7 +215,7 @@
 /*
  * TP_23: FASTLOAD: Set fastload-bit for floppy reads
  *
- * Produces errors with some driver, take care!
+ * Produces errors with some drives, take care!
  * (see ST-Computer 1/90)
  */
 #ifndef TP_23

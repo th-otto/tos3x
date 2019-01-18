@@ -297,7 +297,7 @@ Fix stack pointer in autoexec:
 <input type="checkbox" name="tp_15" value="1" checked="checked" /><br />
 </td>
 <td>
-Fixes a bug the autoexec routine (see ST-Computer 1/90)
+Fixes a bug in the autoexec routine (see ST-Computer 1/90)
 </td>
 </tr>
 
@@ -434,7 +434,7 @@ Set fastload-bit for floppy reads:
 <input type="checkbox" name="tp_23" value="1" /><br />
 </td>
 <td>
-Produces errors with some driver, take care!
+Produces errors with some drives, take care!
 (see ST-Computer 1/90)
 </td>
 </tr>
@@ -725,6 +725,62 @@ This string will be displayed in place of the hyphens in the About dialog
 
 <tr>
 <td>
+Note alert icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_39_1" name="tp_39_1" accept=".ico" onchange="previewIcon('tp_39_1');" /></td>
+<td><img id="tp_39_1_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+<a href="javascript:killIcon('tp_39_1');"> Default: <img src="icons/note.ico" width="32" height="32" style="border:0" /> </a>
+This must be a 32x32 icon.
+</td>
+</tr>
+
+<tr>
+<td>
+Question alert icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_39_2" name="tp_39_2" accept=".ico" onchange="previewIcon('tp_39_2');" /></td>
+<td><img id="tp_39_2_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+<a href="javascript:killIcon('tp_39_2');"> Default: <img src="icons/quest.ico" width="32" height="32" style="border:0" /> </a>
+This must be a 32x32 icon.
+</td>
+</tr>
+
+<tr>
+<td>
+Stop alert icon:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_39_3" name="tp_39_3" accept=".ico" onchange="previewIcon('tp_39_3');" /></td>
+<td><img id="tp_39_3_img" src="" width="32" height="32" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+<a href="javascript:killIcon('tp_39_3');"> Default: <img src="icons/stop.ico" width="32" height="32" style="border:0" /> </a>
+This must be a 32x32 icon.
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
 Floppy icon:
 </td>
 <td>
@@ -736,7 +792,7 @@ Floppy icon:
 </table>
 </td>
 <td>
-Default: <img src="icons/floppy.ico" width="32" height="32" style="border:0" />
+<a href="javascript:killIcon('tp_37_1');"> Default: <img src="icons/floppy.ico" width="32" height="32" style="border:0" /> </a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -754,7 +810,7 @@ Folder icon:
 </table>
 </td>
 <td>
-Default: <img src="icons/folder.ico" width="32" height="32" style="border:0" />
+<a href="javascript:killIcon('tp_37_2');"> Default: <img src="icons/folder.ico" width="32" height="32" style="border:0" /> </a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -772,7 +828,7 @@ Trashcan icon:
 </table>
 </td>
 <td>
-Default: <img src="icons/trash.ico" width="32" height="32" style="border:0" />
+<a href="javascript:killIcon('tp_37_3');"> Default: <img src="icons/trash.ico" width="32" height="32" style="border:0" /> </a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -790,7 +846,7 @@ Program icon:
 </table>
 </td>
 <td>
-Default: <img src="icons/program.ico" width="32" height="32" style="border:0" />
+<a href="javascript:killIcon('tp_37_4');"> Default: <img src="icons/program.ico" width="32" height="32" style="border:0" /> </a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -808,7 +864,7 @@ File icon:
 </table>
 </td>
 <td>
-Default: <img src="icons/file.ico" width="32" height="32" style="border:0" />
+<a href="javascript:killIcon('tp_37_5');"> Default: <img src="icons/file.ico" width="32" height="32" style="border:0" /> </a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -826,7 +882,7 @@ Harddisk icon:
 </table>
 </td>
 <td>
-Default: <img src="icons/harddisk.ico" width="32" height="32" style="border:0" />
+<a href="javascript:killIcon('tp_37_12');"> Default: <img src="icons/harddisk.ico" width="32" height="32" style="border:0" /> </a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -846,7 +902,7 @@ Arrow cursor:
 </table>
 </td>
 <td>
-Default: <img src="mform/mform0.cur" width="16" height="16" style="border:0" />
+<a href="javascript:killIcon('tp_38_0');"> Default: <img src="mform/mform0.cur" width="16" height="16" style="border:0" /> </a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -864,7 +920,7 @@ Text cursor:
 </table>
 </td>
 <td>
-Default: <img src="mform/mform1.cur" width="16" height="16" style="border:0" />
+<a href="javascript:killIcon('tp_38_1');"> Default: <img src="mform/mform1.cur" width="16" height="16" style="border:0" /> </a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -882,7 +938,7 @@ Busy bee:
 </table>
 </td>
 <td>
-Default: <img src="mform/mform2.cur" width="16" height="16" style="border:0" />
+<a href="javascript:killIcon('tp_38_2');"> Default: <img src="mform/mform2.cur" width="16" height="16" style="border:0" /> </a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -900,7 +956,7 @@ Point hand:
 </table>
 </td>
 <td>
-Default: <img src="mform/mform3.cur" width="16" height="16" style="border:0" />
+<a href="javascript:killIcon('tp_38_3');"> Default: <img src="mform/mform3.cur" width="16" height="16" style="border:0" /> </a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -918,7 +974,7 @@ Flat hand:
 </table>
 </td>
 <td>
-Default: <img src="mform/mform4.cur" width="16" height="16" style="border:0" />
+<a href="javascript:killIcon('tp_38_4');"> Default: <img src="mform/mform4.cur" width="16" height="16" style="border:0" /> </a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -936,7 +992,7 @@ Thin cross:
 </table>
 </td>
 <td>
-Default: <img src="mform/mform5.cur" width="16" height="16" style="border:0" />
+<a href="javascript:killIcon('tp_38_5');"> Default: <img src="mform/mform5.cur" width="16" height="16" style="border:0" /> </a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -954,7 +1010,7 @@ Thick cross:
 </table>
 </td>
 <td>
-Default: <img src="mform/mform6.cur" width="16" height="16" style="border:0" />
+<a href="javascript:killIcon('tp_38_6');"> Default: <img src="mform/mform6.cur" width="16" height="16" style="border:0" /> </a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -972,7 +1028,7 @@ Outline cross:
 </table>
 </td>
 <td>
-Default: <img src="mform/mform7.cur" width="16" height="16" style="border:0" />
+<a href="javascript:killIcon('tp_38_7');"> Default: <img src="mform/mform7.cur" width="16" height="16" style="border:0" /> </a>
 This must be a 16x16 cursor.
 </td>
 </tr>

@@ -199,8 +199,16 @@ function compile_tos()
 			$tp_35_32 = isset($_POST['tp_35_32']) ? $_POST['tp_35_32'] : 0;
 			$tp_36 = isset($_POST['tp_36']) ? $_POST['tp_36'] : '';
 
-			$tp_38 = isset($_POST['tp_38']) ? $_POST['tp_38'] : 0;
-			$tp_39 = isset($_POST['tp_39']) ? $_POST['tp_39'] : 0;
+			$tp_40 = isset($_POST['tp_40']) ? $_POST['tp_40'] : 0;
+			$tp_41 = isset($_POST['tp_41']) ? $_POST['tp_41'] : 0;
+			$tp_42 = isset($_POST['tp_42']) ? $_POST['tp_42'] : 0;
+			$tp_43 = isset($_POST['tp_43']) ? $_POST['tp_43'] : 0;
+			$tp_44 = isset($_POST['tp_44']) ? $_POST['tp_44'] : 0;
+			$tp_45 = isset($_POST['tp_45']) ? $_POST['tp_45'] : 0;
+			$tp_46 = isset($_POST['tp_46']) ? $_POST['tp_46'] : 0;
+			$tp_47 = isset($_POST['tp_47']) ? $_POST['tp_47'] : 0;
+			$tp_48 = isset($_POST['tp_48']) ? $_POST['tp_48'] : 0;
+			$tp_49 = isset($_POST['tp_49']) ? $_POST['tp_49'] : 0;
 		
 			$seekrate = isset($_POST['seekrate']) ? $_POST['seekrate'] : 3;
 			$fdc_cookie = isset($_POST['fdc_cookie']) ? $_POST['fdc_cookie'] : '$01415443';
@@ -270,7 +278,27 @@ function compile_tos()
 				}
 			}
 
-			fprintf($fp, "#define TP_39 %d\n", $tp_39);
+			for ($icon = 1; $icon <= 3; $icon++)
+			{
+				if (isset($_FILES['tp_39_' . $icon]['tmp_name']) &&
+					$_FILES['tp_39_' . $icon]['error'] == UPLOAD_ERR_OK)
+				{
+					$icon_name = $custom_dir . 'tp_39_' .  $icon . '.ico';
+					move_uploaded_file($_FILES['tp_39_' . $icon]['tmp_name'], $icon_name);
+					fprintf($fp, "#define TP_39_%d \"../%s\"\n", $icon, $icon_name);
+				}
+			}
+
+			fprintf($fp, "#define TP_40 %d\n", $tp_40);
+			fprintf($fp, "#define TP_41 %d\n", $tp_41);
+			fprintf($fp, "#define TP_42 %d\n", $tp_42);
+			fprintf($fp, "#define TP_43 %d\n", $tp_43);
+			fprintf($fp, "#define TP_44 %d\n", $tp_44);
+			fprintf($fp, "#define TP_45 %d\n", $tp_45);
+			fprintf($fp, "#define TP_46 %d\n", $tp_46);
+			fprintf($fp, "#define TP_47 %d\n", $tp_47);
+			fprintf($fp, "#define TP_48 %d\n", $tp_48);
+			fprintf($fp, "#define TP_49 %d\n", $tp_49);
 
 			fprintf($fp, "#define STEP_RATE %d\n", $seekrate);
 			fprintf($fp, "#define FDC_COOKIE %s\n", $fdc_cookie);

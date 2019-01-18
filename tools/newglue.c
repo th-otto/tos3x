@@ -18,6 +18,8 @@
 #undef NUM_IB
 #undef NUM_TI
 #undef NUM_OBS
+#undef NUM_UD
+#undef NUM_CIB
 #undef TITLE
 #include "../aes/rsc/404/gemus.h"
 
@@ -180,6 +182,7 @@ PP(const char *name;)
 	char *icon;
 	char *destdata;
 	char *destmask;
+	char headerbuf[70];
 	char buf[256];
 	int count;
 	
@@ -191,7 +194,7 @@ PP(const char *name;)
 		fprintf(stderr, _("%s not found\n"), name);
 		exit(EXIT_FAILURE);
 	}
-	lseek(ic, 70, 0);
+	count = read(ic, headerbuf, sizeof(headerbuf));
 	count = read(ic, buf, sizeof(buf));
 	close(ic);
 	if (count != sizeof(buf))
@@ -263,6 +266,43 @@ PP(const char *name;)
 			dst[x] = ~src[x];
 		dst += 2;
 	}
+
+	printf("patched in: %s\n", name);
+}
+
+
+static VOID copy_image(P(char *)hdr, P(int) tree, P(const char *) name)
+PP(char *hdr;)
+PP(int tree;)
+PP(const char *name;)
+{
+	register int ic;
+	char *bitblk;
+	char *destdata;
+	char headerbuf[70];
+	char buf[128];
+	int count;
+	
+	if (name == 0 || *name == '\0')
+		return;
+	ic = open(name, O_RDONLY | O_BINARY);
+	if (ic < 0)
+	{
+		fprintf(stderr, _("%s not found\n"), name);
+		exit(EXIT_FAILURE);
+	}
+	count = read(ic, headerbuf, sizeof(headerbuf));
+	count = read(ic, buf, sizeof(buf));
+	close(ic);
+	if (count != sizeof(buf))
+	{
+		fprintf(stderr, _("%s: wrong format\n"), name);
+		exit(EXIT_FAILURE);
+	}
+	bitblk = rsc_gbitblk(hdr, tree);
+	destdata = hdr + getbelong(bitblk + 0);
+
+	copymask(destdata, buf);
 
 	printf("patched in: %s\n", name);
 }
@@ -461,6 +501,23 @@ PP(char **argv;)
 			copy_cursor(address, MICE7, TP_38_7);
 #endif
 
+#ifdef TP_39_1
+		if (i == 0)
+			copy_image(address, NOTEBB, TP_39_1);
+#endif
+#ifdef TP_39_2
+		if (i == 0)
+			copy_image(address, QUESBB, TP_39_2);
+#endif
+#ifdef TP_39_3
+		if (i == 0)
+			copy_image(address, STOPBB, TP_39_3);
+#endif
+
+		(VOID)copy_icon;
+		(VOID)copy_cursor;
+		(VOID)copy_image;
+		
 		address += size;
 		
 		/*

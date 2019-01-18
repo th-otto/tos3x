@@ -198,6 +198,15 @@ function previewIcon(name)
 		}
 	}
 }
+function killIcon(name)
+{
+	var input = document.getElementById(name);
+	if (input)
+	{
+		input.value = '';
+		previewIcon(name);
+	}
+}
 function onload()
 {
 	changeFuji();
@@ -212,5 +221,9 @@ function onload()
 	for (var i = 0; i <= 7; i++)
 	{
 		previewIcon('tp_38_' + i);
+	}
+	for (var i = 1; i <= 3; i++)
+	{
+		previewIcon('tp_39_' + i);
 	}
 }
