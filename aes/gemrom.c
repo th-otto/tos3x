@@ -226,6 +226,7 @@ VOID rsc_free(NOTHING)
 /*
  * Read in the resource file
  */
+/* 206de: 00e1c8d0 */
 /* 306de: 00e20336 */
 BOOLEAN rsc_read(NOTHING)
 {

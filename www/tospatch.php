@@ -259,7 +259,17 @@ function compile_tos()
 				}
 			}
 
-			fprintf($fp, "#define TP_38 %d\n", $tp_38);
+			for ($icon = 0; $icon <= 7; $icon++)
+			{
+				if (isset($_FILES['tp_38_' . $icon]['tmp_name']) &&
+					$_FILES['tp_38_' . $icon]['error'] == UPLOAD_ERR_OK)
+				{
+					$icon_name = $custom_dir . 'tp_38_' .  $icon . '.ico';
+					move_uploaded_file($_FILES['tp_38_' . $icon]['tmp_name'], $icon_name);
+					fprintf($fp, "#define TP_38_%d \"../%s\"\n", $icon, $icon_name);
+				}
+			}
+
 			fprintf($fp, "#define TP_39 %d\n", $tp_39);
 
 			fprintf($fp, "#define STEP_RATE %d\n", $seekrate);

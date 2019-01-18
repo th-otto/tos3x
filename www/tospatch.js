@@ -209,4 +209,8 @@ function onload()
 	{
 		previewIcon('tp_37_' + i);
 	}
+	for (var i = 0; i <= 7; i++)
+	{
+		previewIcon('tp_38_' + i);
+	}
 }

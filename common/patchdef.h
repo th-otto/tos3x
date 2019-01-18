@@ -411,3 +411,15 @@
  * TP_37_11: new program
  * TP_37_12: harddisk
  */
+
+/*
+ * TP_38: ICONS: Set custom mouse cursors
+ * TP_38_0: Arrow
+ * TP_38_1: Text cursor
+ * TP_38_2: Busy bee
+ * TP_38_3: Point hand
+ * TP_38_4: Flat hand
+ * TP_38_5: Thin cross
+ * TP_38_6: Thick cross
+ * TP_38_7: Outline cross
+ */

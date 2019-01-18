@@ -833,6 +833,152 @@ This must be a 32x32 icon.
 
 <tr><td colspan="3"><hr /></td></tr>
 
+<tr>
+<td>
+Arrow cursor:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_38_0" name="tp_38_0" accept=".cur" onchange="previewIcon('tp_38_0');" /></td>
+<td><img id="tp_38_0_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="mform/mform0.cur" width="16" height="16" style="border:0" />
+This must be a 16x16 cursor.
+</td>
+</tr>
+
+<tr>
+<td>
+Text cursor:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_38_1" name="tp_38_1" accept=".cur" onchange="previewIcon('tp_38_1');" /></td>
+<td><img id="tp_38_1_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="mform/mform1.cur" width="16" height="16" style="border:0" />
+This must be a 16x16 cursor.
+</td>
+</tr>
+
+<tr>
+<td>
+Busy bee:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_38_2" name="tp_38_2" accept=".cur" onchange="previewIcon('tp_38_2');" /></td>
+<td><img id="tp_38_2_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="mform/mform2.cur" width="16" height="16" style="border:0" />
+This must be a 16x16 cursor.
+</td>
+</tr>
+
+<tr>
+<td>
+Point hand:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_38_3" name="tp_38_3" accept=".cur" onchange="previewIcon('tp_38_3');" /></td>
+<td><img id="tp_38_3_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="mform/mform3.cur" width="16" height="16" style="border:0" />
+This must be a 16x16 cursor.
+</td>
+</tr>
+
+<tr>
+<td>
+Flat hand:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_38_4" name="tp_38_4" accept=".cur" onchange="previewIcon('tp_38_4');" /></td>
+<td><img id="tp_38_4_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="mform/mform4.cur" width="16" height="16" style="border:0" />
+This must be a 16x16 cursor.
+</td>
+</tr>
+
+<tr>
+<td>
+Thin cross:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_38_5" name="tp_38_5" accept=".cur" onchange="previewIcon('tp_38_5');" /></td>
+<td><img id="tp_38_5_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="mform/mform5.cur" width="16" height="16" style="border:0" />
+This must be a 16x16 cursor.
+</td>
+</tr>
+
+<tr>
+<td>
+Thick cross:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_38_6" name="tp_38_5" accept=".cur" onchange="previewIcon('tp_38_6');" /></td>
+<td><img id="tp_38_6_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="mform/mform6.cur" width="16" height="16" style="border:0" />
+This must be a 16x16 cursor.
+</td>
+</tr>
+
+<tr>
+<td>
+Outline cross:
+</td>
+<td>
+<table>
+<tr>
+<td><input type="file" id="tp_38_7" name="tp_38_7" accept=".cur" onchange="previewIcon('tp_38_7');" /></td>
+<td><img id="tp_38_7_img" src="" width="16" height="16" style="border:0" /></td>
+</tr>
+</table>
+</td>
+<td>
+Default: <img src="mform/mform7.cur" width="16" height="16" style="border:0" />
+This must be a 16x16 cursor.
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr><td>&nbsp;</td><td></td><td></td></tr>
 
 <tr>

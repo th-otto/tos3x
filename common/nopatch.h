@@ -50,7 +50,14 @@
 #undef TP_37_10
 #undef TP_37_11
 #undef TP_37_12
-#undef TP_38
+#undef TP_38_0
+#undef TP_38_1
+#undef TP_38_2
+#undef TP_38_3
+#undef TP_38_4
+#undef TP_38_5
+#undef TP_38_6
+#undef TP_38_7
 #undef TP_39
 
 #undef SUPERTOS

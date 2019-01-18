@@ -9,6 +9,17 @@
 #include <unistd.h>
 #include <stdint.h>
 #include "../desk/rsc/306/deskus.h"
+#undef NUM_STRINGS
+#undef NUM_TREE
+#undef NUM_FRSTR
+#undef NUM_IMAGES
+#undef NUM_BB
+#undef NUM_FRIMG
+#undef NUM_IB
+#undef NUM_TI
+#undef NUM_OBS
+#undef TITLE
+#include "../aes/rsc/404/gemus.h"
 
 
 #ifndef O_BINARY
@@ -113,7 +124,7 @@ PP(register char *ptr;)
 }
 
 
-static char *rsc_gaddr(P(char *) hdr, P(int) tree, P(int) object)
+static char *rsc_gspec(P(char *) hdr, P(int) tree, P(int) object)
 PP(char *hdr;)
 PP(int tree;)
 PP(int object;)
@@ -126,6 +137,19 @@ PP(int object;)
 	obj = address + getbelong(trees + tree * 4);
 	spec = address + getbelong(obj + object * 24 + 12);
 	return spec;
+}
+
+
+static char *rsc_gbitblk(P(char *) hdr, P(int) tree)
+PP(char *hdr;)
+PP(int tree;)
+{
+	char *bitblks;
+	char *obj;
+	
+	bitblks = address + getbeshort(hdr + 16);
+	obj = address + getbelong(bitblks + tree * 4);
+	return obj;
 }
 
 
@@ -168,18 +192,78 @@ PP(const char *name;)
 		exit(EXIT_FAILURE);
 	}
 	lseek(ic, 70, 0);
-	count = read(ic, buf, 256);
+	count = read(ic, buf, sizeof(buf));
 	close(ic);
-	if (count != 256)
+	if (count != sizeof(buf))
 	{
 		fprintf(stderr, _("%s: wrong format\n"), name);
 		exit(EXIT_FAILURE);
 	}
-	icon = rsc_gaddr(hdr, tree, object);
+	icon = rsc_gspec(hdr, tree, object);
 	destmask = hdr + getbelong(icon + 0);
 	destdata = hdr + getbelong(icon + 4);
 	copymask(destdata, buf);
 	copymask(destmask, buf + 128);
+	printf("patched in: %s\n", name);
+}
+
+
+static VOID copy_cursor(P(char *)hdr, P(int) tree, P(const char *) name)
+PP(char *hdr;)
+PP(int tree;)
+PP(const char *name;)
+{
+	register int ic;
+	char *bitblk;
+	char *destdata;
+	char headerbuf[70];
+	char buf[128];
+	int count;
+	register int x, y;
+	register char *src;
+	register char *dst;
+	
+	if (name == 0 || *name == '\0')
+		return;
+	ic = open(name, O_RDONLY | O_BINARY);
+	if (ic < 0)
+	{
+		fprintf(stderr, _("%s not found\n"), name);
+		exit(EXIT_FAILURE);
+	}
+	count = read(ic, headerbuf, sizeof(headerbuf));
+	count = read(ic, buf, sizeof(buf));
+	close(ic);
+	if (count != sizeof(buf))
+	{
+		fprintf(stderr, _("%s: wrong format\n"), name);
+		exit(EXIT_FAILURE);
+	}
+	bitblk = rsc_gbitblk(hdr, tree);
+	destdata = hdr + getbelong(bitblk + 0);
+
+	dst = destdata;
+	dst[1] = headerbuf[10]; /* x-hot */
+	dst[3] = headerbuf[12]; /* y-hot */
+	dst += 10;
+	
+	src = buf + 128;
+	for (y = 0; y < 16; y++)
+	{
+		src -= 4;
+		for (x = 0; x < 2; x++)
+			dst[x] = ~src[x];
+		dst += 2;
+	}
+	src = buf + 64;
+	for (y = 0; y < 16; y++)
+	{
+		src -= 4;
+		for (x = 0; x < 2; x++)
+			dst[x] = ~src[x];
+		dst += 2;
+	}
+
 	printf("patched in: %s\n", name);
 }
 
@@ -284,7 +368,7 @@ PP(char **argv;)
 			char *infostr;
 			int len;
 			
-			infostr = rsc_gaddr(address, ADDINFO, 3);
+			infostr = rsc_gspec(address, ADDINFO, 3);
 			len = (int)strlen(TP_36);
 			if (len > 0)
 			{
@@ -342,6 +426,39 @@ PP(char **argv;)
 #ifdef TP_37_12
 		if (i == 1)
 			copy_icon(address, ADICON, 12, TP_37_12);
+#endif
+
+#ifdef TP_38_0
+		if (i == 0)
+			copy_cursor(address, MICE0, TP_38_0);
+#endif
+#ifdef TP_38_1
+		if (i == 0)
+			copy_cursor(address, MICE1, TP_38_1);
+#endif
+#ifdef TP_38_2
+		if (i == 0)
+			copy_cursor(address, MICE2, TP_38_2);
+#endif
+#ifdef TP_38_3
+		if (i == 0)
+			copy_cursor(address, MICE3, TP_38_3);
+#endif
+#ifdef TP_38_4
+		if (i == 0)
+			copy_cursor(address, MICE4, TP_38_4);
+#endif
+#ifdef TP_38_5
+		if (i == 0)
+			copy_cursor(address, MICE5, TP_38_5);
+#endif
+#ifdef TP_38_6
+		if (i == 0)
+			copy_cursor(address, MICE6, TP_38_6);
+#endif
+#ifdef TP_38_7
+		if (i == 0)
+			copy_cursor(address, MICE7, TP_38_7);
 #endif
 
 		address += size;
