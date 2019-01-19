@@ -125,6 +125,7 @@
 #define ULONG        8
 #define FLOAT        9
 #define DOUBLE      10
+#define SIZE_T UNSIGNED
 
 /* data types local to parser */
 #define STRUCT      11

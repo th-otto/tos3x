@@ -730,7 +730,7 @@ PP(int declok;)								/* as opposed to casting op */
 int32_t dlist(P(int) defsc)
 PP(int defsc;)								/* default storage class */
 {
-	register short offset;
+	register int32_t offset;
 	register int32_t lret, ddsize;
 	struct tnode *tp;
 	struct symnode *p;
@@ -738,7 +738,7 @@ PP(int defsc;)								/* default storage class */
 	short type, sc;
 
 	offset = 0;
-	ddsize = 0L;
+	ddsize = 0;
 	do
 	{
 		sc = defsc;
@@ -748,13 +748,15 @@ PP(int defsc;)								/* default storage class */
 		indecl = 1;
 		do
 		{
-			lret = dodecl(sc, type, offset, size);
+			lret = dodecl(sc, type, (int)offset, size);
 			if (defsc != UNELCL)
 			{
-				offset += (int) lret;
+				offset += lret;
 				ddsize += lret;
 			} else if (lret > ddsize)
 				ddsize = lret;
+			if (ddsize < 0 || ddsize >= 65536L)
+				synerr(_("structure too large: %ld"), (long)ddsize);
 			if (sc == STATIC && dsp && !ISTYPEDEF(dsp))
 				doinit(dsp);			/* process any initializer */
 			ZERO_DSP();
@@ -980,7 +982,9 @@ PP(short *ssp;)
 	}
 	for (t = tddp->s_type, i = tddp->s_dp; SUPTYPE(t); t = delsp(t))
 		if (ISARRAY(t))
+		{
 			dalloc(dtab[i++]);
+		}
 	for (t = tddp->s_type; SUPTYPE(ntype); ntype = delsp(ntype))
 		t = addsp(t, ntype);
 	if ((ntype = BTYPE(t)) == STRUCT)

@@ -89,12 +89,12 @@ PP(int type;)								/* type to reverse */
  * falign - handle bit field alignments
  * returns number of bytes padded
  */
-int falign(P(int) type, P(int) flen, P(int) offset)
+int falign(P(int) type, P(int) flen, P(unsigned int) offset)
 PP(int type;)								/* data type */
 PP(int flen;)								/* field length */
-PP(int offset;)								/* current structure offset */
+PP(unsigned int offset;)					/* current structure offset */
 {
-	register short off;
+	register unsigned int off;
 
 	if (flen <= 0)
 	{
@@ -136,11 +136,11 @@ PP(int offset;)								/* current structure offset */
  * salign - structure alignment
  * returns bytes of padding
  */
-int salign(P(int) type, P(int) offset)
+int salign(P(int) type, P(unsigned int) offset)
 PP(int type;)								/* data type to align */
-PP(int offset;)								/* current structure offset */
+PP(unsigned int offset;)					/* current structure offset */
 {
-	register short off;
+	register unsigned int off;
 
 	off = offset;
 	if (boffset)
