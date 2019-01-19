@@ -1,0 +1,20 @@
+SRCS = \
+	ct_hd1.S \
+	ct_hd2.S \
+	fastprn.S \
+	hdwait1.S \
+	hdwait2.S \
+	hdwait3.S \
+	hdwait4.S \
+	nova.S \
+	ramres.S \
+	$(empty)
+
+EXTRA_DIST1 = \
+	Makefile \
+	SRCFILES \
+	$(empty)
+
+EXTRA_DIST2 = \
+	GNUmakefile \
+	$(empty)

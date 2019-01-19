@@ -1500,6 +1500,10 @@ clockdone:
 #endif
 
 
+#if TP_46 /* NOVA */
+		bsr       nova
+#endif
+
 /*
  * Draw the Atari logo.
  */
@@ -1511,11 +1515,11 @@ clockdone:
 		move.w    (a2),d4   /* LA_PLANES */
 		move.w    -2(a2),d5 /* V_BYTES_LIN */
 		move.w    d5,d0
-		mulu.w    #$0008,d0
+		mulu.w    #8,d0
 		adda.w    d0,a1
-        moveq.l   #$0055,d0        /* 86 lines of data */
+        moveq.l   #86-1,d0         /* 86 lines of data */
 logocol1:
-        moveq.l   #5,d1            /* 12 bytes of data per line */
+        moveq.l   #6-1,d1          /* 12 bytes of data per line */
         movea.l   a1,a2
 logocol2:
         move.l    d4,d2
@@ -1543,16 +1547,16 @@ logocol3:
         nop
 #else
         move.b    (_sshiftmod).w,d0
-        cmp.b     #$02,d0          /* ST-High resolution? */
+        cmp.b     #2,d0            /* ST-High resolution? */
         beq.s     logomono
-        cmp.b     #$06,d0
+        cmp.b     #6,d0
         beq.s     logomono         /* TT-High resolution? */
 #if TOSVERSION >= 0x300
         adda.w    #((640/8)*4)*4,a1  /* start at screen line 4 */
 #else
         adda.w    #((320/8)*4)*4,a1  /* start at screen line 4 */
 #endif
-        move.w    #$0055,d0        /* 86 lines of data */
+        move.w    #86-1,d0         /* 86 lines of data */
 logocol1:
         moveq.l   #5,d1            /* 12 bytes of data per line */
 logocol2:
@@ -1573,11 +1577,11 @@ logomono:
 #if TOSVERSION >= 0x300
         adda.w    #(1280/8)*4,a1   /* start at screen line 4 */
 #else
-        adda.w    #(640/8)*4,a1   /* start at screen line 4 */
+        adda.w    #(640/8)*4,a1    /* start at screen line 4 */
 #endif
-        move.w    #$0055,d0        /* 86 lines of data */
+        move.w    #86-1,d0         /* 86 lines of data */
 logomon1:
-        moveq.l   #11,d1           /* 12 bytes of data per line */
+        moveq.l   #12-1,d1         /* 12 bytes of data per line */
 logomon2:
         move.b    (a0)+,(a1)+
         dbf       d1,logomon2
@@ -1587,8 +1591,9 @@ logomon2:
         adda.w    #(640/8)-12,a1
 #endif
         dbf       d0,logomon1
-logodone:
 #endif
+logodone:
+		text
 
         data
 
@@ -7817,6 +7822,10 @@ soundir8:
 #endif
 #if HD_WAIT == 4
 #include "../tospatch/hdwait4.S"
+#endif
+
+#if TP_46 /* NOVA */
+#include "../tospatch/nova.S"
 #endif
 
 		bss

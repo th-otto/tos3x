@@ -318,6 +318,16 @@
 #endif
 
 /*
+ * TP_46: NOVA: NovaPatch
+ *
+ * Activation of nova card already when booting.
+ * For all Nova cards except type 2 and 6.
+ */
+#ifndef TP_46
+#define TP_46 0
+#endif
+
+/*
  * TP_28: VDIFIX: New v_opnvwk() function
  *
  * Replace v_opnvwk() by a new function to fix a bug.

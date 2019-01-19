@@ -671,6 +671,21 @@ of hardcopies for NEC-P6, as well as EPSON printers
 <tr><td colspan="3"><hr /></td></tr>
 
 <tr>
+<td>
+NovaPatch:
+</td>
+<td>
+<input type="checkbox" name="tp_46" value="1" /><br />
+</td>
+<td>
+Activation of nova card already when booting.
+For all Nova cards except type 2 and 6.
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
 <td colspan="3">
 <table>
 <tr>
