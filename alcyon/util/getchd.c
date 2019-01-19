@@ -13,6 +13,7 @@
 	characters as is required for structure.
  */
 
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <cout.h>
 #include "util.h"

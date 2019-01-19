@@ -5,6 +5,7 @@
 	San Diego, Ca. 92121
  */
 
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +20,9 @@
 
 #define FALSE 0
 #define TRUE  1
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 #define _(x) x
 

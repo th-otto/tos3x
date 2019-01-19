@@ -1,7 +1,8 @@
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <option.h>
+#include "../include/option.h"
 
 #include <cout.h>
 #include <sendc68.h>
@@ -460,9 +461,9 @@ PP(char **argv;)
 					m->symtab = (struct symbol *)malloc(m->numsyms * sizeof(struct symbol));
 					for (i = 0; i < l; i++)
 					{
+						struct symbol *sym = &m->symtab[i];
 						int32_t value;
 						
-						struct symbol *sym = &m->symtab[i];
 						for (n = 0; n < SYNAMLEN; n++)
 							sym->name[n] = getc(ifp);
 						sym->name[n] = '\0';

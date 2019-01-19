@@ -1,13 +1,18 @@
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "../include/stdarg.h"
 #include "klib.h"
 
 #if KLUDGE
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 static VOID xwritefail(NOTHING)
 {

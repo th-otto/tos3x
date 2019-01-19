@@ -1,5 +1,6 @@
 #include "link68.h"
 #include <stdlib.h>
+#include "../include/stdarg.h"
 
 
 static char const progname[] = PROGNAME;

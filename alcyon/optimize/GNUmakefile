@@ -11,7 +11,8 @@ PROGRAMS = optimize$(EXEEXT)
 
 LIBS =
 
-CPPFLAGS = -I ../common -I $(INC)
+CPPFLAGS = -I ../common
+#CPPFLAGS += -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
 all: $(PROGRAMS)

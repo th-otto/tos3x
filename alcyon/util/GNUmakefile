@@ -11,7 +11,7 @@ include ../GNUmakefile.cmn
 include ../Makefile.sil
 
 CPPFLAGS = -I ../common
-CPPFLAGS += -I $(INC)
+#CPPFLAGS += -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
 PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT) ar68$(EXEEXT) analyze$(EXEEXT)

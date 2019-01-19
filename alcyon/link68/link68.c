@@ -4,6 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#undef max
+#define max(x,y)   (((x) > (y)) ? (x) : (y))
+
 int32_t textstart;
 int32_t datastart;
 int32_t bssstart;

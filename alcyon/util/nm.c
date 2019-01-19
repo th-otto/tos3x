@@ -5,12 +5,13 @@
 	San Diego, Ca. 92121
 */
 
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <cout.h>
 #include <sendc68.h>
-#include <option.h>
+#include "../include/option.h"
 #include "util.h"
 
 const char *ifilname;

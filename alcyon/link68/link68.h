@@ -1,3 +1,4 @@
+#include "../include/compiler.h"
 #include <stdio.h>
 
 #define _(x) x

@@ -7,7 +7,8 @@ subdir=link68
 include ../GNUmakefile.cmn
 include ../Makefile.sil
 
-CPPFLAGS = -I ../common -I $(INC) -DGEMDOS
+CPPFLAGS = -I ../common -DGEMDOS
+#CPPFLAGS += -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
 PROGRAMS = link68$(EXEEXT) relmod$(EXEEXT)

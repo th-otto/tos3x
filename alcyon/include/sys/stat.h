@@ -1,6 +1,17 @@
 #ifndef __SYS_STAT_H__
 #define __SYS_STAT_H__ 1
 
+#ifdef __GNUC__
+ #ifndef _LIBC
+ #  include <sys/time.h>
+ #  include <time.h>
+ #  include_next <sys/stat.h>
+ #  define _NO_FILE
+ #endif
+#endif
+
+#ifndef _NO_FILE
+
 #ifndef __COMPILER_H__
 #include <compiler.h>
 #endif
@@ -83,5 +94,7 @@ int stat PROTO((const char *path, struct stat *st));
 int fstat PROTO((int fd, struct stat *st));
 
 int chmod PROTO((const char *path, mode_t mode));
+
+#endif
 
 #endif

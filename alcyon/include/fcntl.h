@@ -3,6 +3,7 @@
 
 #ifdef __GNUC__
  #ifndef _LIBC
+ #  undef st_atim
  #  include_next <fcntl.h>
  #  define _NO_FILE
  #endif

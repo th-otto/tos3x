@@ -12,6 +12,7 @@
  */
 
 
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <ar68.h>
 #include "util.h"

@@ -5,11 +5,14 @@
  *	San Diego, Ca.  92121
  */
 
+#define _GNU_SOURCE
+
 #include "parser.h"
 #include <string.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "../include/stdarg.h"
 
 
 /*

@@ -8,6 +8,7 @@
 /*
  *	C68 Parser - include file
  */
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <stdint.h>
 #include "klib.h"

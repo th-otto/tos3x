@@ -1,7 +1,8 @@
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <cout.h>
-#include <option.h>
+#include "../include/option.h"
 #include "util.h"
 
 static FILE *stream;

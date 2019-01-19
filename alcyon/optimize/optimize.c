@@ -1,3 +1,4 @@
+#include "../include/compiler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +7,18 @@
 #include <fcntl.h>
 #ifdef __ALCYON__
 #include <mint/osbind.h>
+#endif
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
+#ifdef __GNUC__
+ # ifndef _LIBC
+ #  define lmalloc(size) malloc(size)
+ #  define lrealloc(ptr, size) realloc(ptr, size)
+ #  define lfree(ptr) free(ptr)
+ # endif
 #endif
 
 #define BOOLEAN int

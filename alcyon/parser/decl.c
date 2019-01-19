@@ -751,12 +751,12 @@ PP(int defsc;)								/* default storage class */
 			lret = dodecl(sc, type, (int)offset, size);
 			if (defsc != UNELCL)
 			{
+				if (offset < 0 || offset >= 32768L)
+					synerr(_("structure too large: %ld"), (long)ddsize);
 				offset += lret;
 				ddsize += lret;
 			} else if (lret > ddsize)
 				ddsize = lret;
-			if (ddsize < 0 || ddsize >= 65536L)
-				synerr(_("structure too large: %ld"), (long)ddsize);
 			if (sc == STATIC && dsp && !ISTYPEDEF(dsp))
 				doinit(dsp);			/* process any initializer */
 			ZERO_DSP();
