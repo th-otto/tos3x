@@ -3,7 +3,7 @@ top_srcdir=.
 include GNUmakefile.cmn
 include Makefile.sil
 
-SUBDIRS = common tools bios vdi bdos aes desk system glue
+SUBDIRS = common tools tospatch bios vdi bdos aes desk system glue
 EXTRA_SUBDIRS = alcyon alcyon/orig
 
 EXTRA_DIST1 = \
@@ -44,12 +44,10 @@ check::
 	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $(FLAGSTOPASS) all; done
 	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $(FLAGSTOPASS) $@; done
 
-WWWDIR=/srv/www/htdocs/tospatch/src
-
 rsync::
-	for i in $(SUBDIRS) include tospatch GNUmakefile GNUmakefile.cmn config.mak; do sudo rsync -vzrlp $$i $(WWWDIR); done
-	sudo chown -R wwwrun:www $(WWWDIR)
-	sudo chmod -R g+w $(WWWDIR)
+	for i in $(SUBDIRS) include GNUmakefile GNUmakefile.cmn config.mak; do sudo rsync -vzrlp $$i $(LOCAL_WWWDIR); done
+	sudo chown -R wwwrun:www $(LOCAL_WWWDIR)
+	sudo chmod -R g+w $(LOCAL_WWWDIR)
 
 dosdir::
 	for i in $(SUBDIRS) lib; do $(MKDIR_P) $(DOSDIR)/$$i; done
