@@ -414,7 +414,7 @@ meminit:
         beq.s     notpal                    /* (nope -- we're good ol' NTSC) */
         lea       ret_1b(pc),a6
         bra       waitvbl                   /* a short delay for PAL */
-ret_1b: 
+ret_1b:
 #if TP_02 /* COLOR_60HZ */
         move.b    #0,(v_syncmod).w          /* yes -- twiddle to 60hz */
 #else

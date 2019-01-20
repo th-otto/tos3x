@@ -332,7 +332,7 @@ function compile_tos()
 			fclose($mk);
 			
 			system("make clean 2>&1");
-			system("make 2>&1", $exitcode);
+			system("make -j4 2>&1", $exitcode);
 			
 			if ($exitcode != 0)
 			{
