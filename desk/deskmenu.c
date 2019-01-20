@@ -859,12 +859,12 @@ PP(int16_t msgbuff;)
 			handle = Fopen(path1, 0x00);
 			if (handle > 0)
 			{
-				bfill(INFSIZE, 0, afile);
-				Fread(handle, (int32_t) INFSIZE, afile);
+				bfill(SIZE_AFILE, 0, afile);
+				Fread(handle, (int32_t) SIZE_AFILE, afile);
 				Fclose(handle);
 				if (afile[0] == '#' && afile[1] == 'a')
 				{
-					shel_put(afile, INFSIZE);	/* copy to the aes buffer */
+					shel_put(afile, SIZE_AFILE);	/* copy to the aes buffer */
 					d_exit = L_READINF;
 					wait_msg();
 					strcpy(inf_path, path1);	/* new inf path */

@@ -391,7 +391,11 @@ int16_t read_files PROTO((WINDOW *win, int16_t attr));
 /*
  * deskinf.c
  */
-extern char afile[INFSIZE];
+#if TP_47 /* SHBUF */
+extern char *afile;
+#else
+extern char afile[SIZE_AFILE];
+#endif
 extern BOOLEAN font_save;
 extern BOOLEAN s_defdir;
 extern BOOLEAN s_fullpath;

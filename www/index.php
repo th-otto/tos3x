@@ -686,6 +686,33 @@ For all Nova cards except type 2 and 6.
 <tr><td colspan="3"><hr /></td></tr>
 
 <tr>
+<td>
+Increase buffer for NEWDESK.INF:
+</td>
+<td>
+<input type="checkbox" name="tp_47" value="1" /><br />
+</td>
+<td>
+Increases the buffer used for reading the NEWDESK.INF.
+Original routines from SHBUF 1.3 by Martin Osieka.
+For more information, see SHBUF.
+
+SHBUFSIZE: Maximum is 32766 => 32k per buffer.
+Since there are 2 buffers, that are 64K of memory.
+Original value is 4k.
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+<td>
+<input type="number" name="shbufsize" value="22698" min="4192" max="32766" style="width: 5em" /> bytes<br />
+</td>
+<td></td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
 <td colspan="3">
 <table>
 <tr>

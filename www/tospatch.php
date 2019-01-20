@@ -216,6 +216,7 @@ function compile_tos()
 			$boottime = isset($_POST['boottime']) ? $_POST['boottime'] : 80;
 			$prntimeout = isset($_POST['prntimeout']) ? $_POST['prntimeout'] : 30;
 			$conterm = isset($_POST['conterm']) ? $_POST['conterm'] : 7;
+			$shbufsize = isset($_POST['shbufsize']) ? $_POST['shbufsize'] : 0;
 
 			fprintf($fp, "#define TP_01 %d\n", $tp_01);
 			fprintf($fp, "#define TP_02 %d\n", $tp_02);
@@ -323,6 +324,7 @@ function compile_tos()
 			fprintf($fp, "#define BOOT_TIME %d\n", $boottime);
 			fprintf($fp, "#define PRNTIMEOUT %d\n", $prntimeout);
 			fprintf($fp, "#define CONTERM %d\n", $conterm);
+			fprintf($fp, "#define SHBUFSIZE %d\n", $shbufsize);
 
 			fclose($fp);
 			fclose($mk);

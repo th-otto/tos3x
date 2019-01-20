@@ -152,6 +152,9 @@
 #if !TP_21
 #undef CONTERM
 #endif
+#if !TP_47
+#undef SHBUFSIZE
+#endif
 
 /*
  * These are the defaults that are used for patches that are not activated

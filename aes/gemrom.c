@@ -157,6 +157,7 @@ extern uint16_t const tosrsc[];
 /*
  * do this whenever the Gem or desktop is ready
  */
+/* 206de: 00e1c7de */
 /* 306de: 00e20244 */
 int16_t rom_ram(P(int) which, P(intptr_t) pointer)
 PP(int which;)

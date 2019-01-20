@@ -825,7 +825,7 @@ extern char *ad_path;
 
 int16_t sh_read PROTO((char *pcmd, char *ptail));
 int16_t sh_write PROTO((int16_t doex, int16_t isgem, int16_t isover, const char *pcmd, const char *ptail));
-int16_t sh_get PROTO((char *pbuffer, int16_t len));
+int16_t sh_get PROTO((char *pbuffer, uint16_t len));
 int16_t sh_put PROTO((const char *pdata, int16_t len));
 BOOLEAN sh_tographic PROTO((NOTHING));
 BOOLEAN sh_toalpha PROTO((NOTHING));

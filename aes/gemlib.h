@@ -44,8 +44,16 @@
 #define EXTENSION  6
 
 /* size of DESKTOP.INF file */
-#define SIZE_AFILE ((NUM_ANODES*PATH_LEN)+(NUM_ANODES*EXTENSION)+SAVE_ATARI )	
-						
+#define SIZE_AFILE ((NUM_ANODES*PATH_LEN)+(NUM_ANODES*EXTENSION)+SAVE_ATARI)
+#ifdef SHBUFSIZE /* TP_47 */
+# if SHBUFSIZE < SIZE_AFILE
+#   undef SIZE_AFILE /* to generate compile error */
+# else
+#   undef SIZE_AFILE
+#   define SIZE_AFILE SHBUFSIZE
+# endif
+#endif
+
 /***********************************************************************/
 
 /*	MENULIB.H	05/04/84 - 11/01/84	Lowell Webster	*/
@@ -329,7 +337,11 @@ THEGLO
 	char	g_path[CMDLEN];		/* new element		*/
 
 	char	s_cmd[CMDLEN];
-	char	s_save[SIZE_AFILE];	/* SIZE_AFILE		*/
+#if TP_47 /* SHBUF */
+	char	*s_save;
+#else
+	char	s_save[SIZE_AFILE];
+#endif
 	char	s_tail[CMDLEN];
 
 #if !NEWWIN

@@ -656,7 +656,11 @@ name: ds.t size
 	INT(_pr_xrat)
 	INT(_pr_button)
 	PTR(_drawstk)
-	V(_afile,b,INFSIZE)
+#if TP_47 /* SHBUF */
+	PTR(_afile)
+#else
+	V(_afile,b,SIZE_AFILE)
+#endif
 	INT(_pr_yrat)
 	INT(_d_dir)
 	LONG(_numdirs)

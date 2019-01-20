@@ -1,4 +1,12 @@
-#define INFSIZE 4192            /* inf file size        */
+#define SIZE_AFILE 4192            /* inf file size: ((NUM_ANODES*PATH_LEN)+(NUM_ANODES*EXTENSION)+SAVE_ATARI) */
+#ifdef SHBUFSIZE /* TP_47 */
+# if SHBUFSIZE < SIZE_AFILE
+#   undef SIZE_AFILE /* to generate compile error */
+# else
+#   undef SIZE_AFILE
+#   define SIZE_AFILE SHBUFSIZE
+# endif
+#endif
 
 #define PATHLEN		128
 #define NAMELEN     14

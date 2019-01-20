@@ -216,13 +216,24 @@ PP(const char *ptail;)
  *	Used by the DESKTOP to recall 1024 bytes worth of previously
  *	'put' desktop-context information.
  */
+/* 206de: 00e1d182 */
 /* 306de: 00e20be8 */
-int16_t sh_get(P(char *) pbuffer, P(int16_t) len)
+int16_t sh_get(P(char *) pbuffer, P(uint16_t) len)
 PP(char *pbuffer;)
-PP(int16_t len;)
+PP(uint16_t len;)
 {
-	LBCOPY(pbuffer, &D.s_save[0], len);
+#if TP_47 /* SHBUF */
+	if (len != (uint16_t)-1)
+	{
+		if (len > SIZE_AFILE)
+			len = SIZE_AFILE;
+		LBCOPY(pbuffer, D.s_save, len);
+	}
+	return SIZE_AFILE;
+#else
+	LBCOPY(pbuffer, D.s_save, len);
 	return TRUE;
+#endif
 }
 
 
@@ -232,12 +243,13 @@ PP(int16_t len;)
  *	Used by the DESKTOP to save away 1024 bytes worth of desktop-
  *	context information.
  */
+/* 206de: 00e1d1a2 */
 /* 306de: 00e20c08 */
 int16_t sh_put(P(const char *) pdata, P(int16_t) len)
 PP(char *pdata;)
 PP(int16_t len;)
 {
-	LBCOPY(&D.s_save[0], pdata, len);
+	LBCOPY(D.s_save, pdata, len);
 	return TRUE;
 }
 

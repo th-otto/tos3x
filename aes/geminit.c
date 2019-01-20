@@ -191,6 +191,10 @@ STATIC MFORM gl_omform;				/* old aes mouse form       */
 BOOLEAN dowarn;
 #endif
 
+#if TP_47 /* SHBUF */
+extern char *afile; /* ugly hack; imported from desktop */
+#endif
+
 #define Kbshift(a) bios(11, a)
 
 
@@ -655,6 +659,7 @@ PP(register int32_t newcacr;)
  *
  * ++ERS 1/14/93: also read the preferred desktop backgrounds
  */
+/* 206de: 00e1a818 */
 /* 306de: 00e1e27e */
 int16_t pred_dinf(NOTHING)
 {
@@ -679,8 +684,23 @@ int16_t pred_dinf(NOTHING)
 
 	g_autoboot[0] = 0;
 	pbuf = dos_alloc((int32_t) SIZE_AFILE);
+#if TP_47 /* SHBUF */
+	D.s_save = dos_alloc((int32_t) SIZE_AFILE);
+	afile = dos_alloc((int32_t) SIZE_AFILE);
+	if (pbuf == 0 || D.s_save == 0 || afile == 0)
+	{
+		Cconws("Unable to alloc AES shell buffer!\r\n");
+		return FALSE;
+	}
+#endif
 	change = FALSE;
+#if !TP_47 /* SHBUF */
+	/*
+	 * unneeded call; buffer will be overwritten
+	 * by builtin version below
+	 */
 	sh_get(pbuf, SIZE_AFILE);
+#endif
 
 #if BINEXACT
 	/* BUG: extra parameter here */
@@ -834,7 +854,7 @@ int16_t pred_dinf(NOTHING)
 	autoexec = FALSE;
 	sh_put(pbuf, SIZE_AFILE);
 	dos_free(pbuf);
-	return (change);
+	return change;
 }
 
 

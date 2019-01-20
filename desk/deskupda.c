@@ -18,13 +18,14 @@ char q_path[40]; /* unused */
 /*
  * Load in the new inf
  */
+/* 206de: 00e3054a */
 /* 306de: 00e33fb0 */
 VOID q_inf(NOTHING)
 {
-	if ((q_addr = (char *)Malloc((int32_t) (INFSIZE))))
+	if ((q_addr = (char *)Malloc((int32_t) (SIZE_AFILE))))
 	{
 		q_change = FALSE;
-		bfill(INFSIZE, 0, q_addr);
+		bfill(SIZE_AFILE, 0, q_addr);
 		strcpy(q_addr, afile);
 	}
 }
@@ -109,9 +110,9 @@ PP(char *new;)
 			{
 				if (!alloc)
 				{
-					if ((copy2 = (char *)Malloc((int32_t) (INFSIZE))))
+					if ((copy2 = (char *)Malloc((int32_t) (SIZE_AFILE))))
 					{
-						bfill(INFSIZE, 0, copy2);
+						bfill(SIZE_AFILE, 0, copy2);
 						alloc = TRUE;
 						newbuff = copy2;
 					} else

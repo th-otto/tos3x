@@ -328,6 +328,25 @@
 #endif
 
 /*
+ * TP_47: SHBUF: Increase buffer for NEWDESK.INF
+ *
+ * Increases the buffer used for reading the NEWDESK.INF.
+ * Original routines from SHBUF 1.3 by Martin Osieka.
+ * For more information, see SHBUF.
+ *
+ * SHBUFSIZE: Maximum is 32766 => 32k per buffer.
+ * Since there are 2 buffers, that are 64K of memory.
+ * Original value is 4k.
+ */
+#ifndef TP_46
+#define TP_46 0
+#endif
+#ifndef SHBUFSIZE
+#define SHBUFSIZE 32766
+#endif
+
+
+/*
  * TP_28: VDIFIX: New v_opnvwk() function
  *
  * Replace v_opnvwk() by a new function to fix a bug.

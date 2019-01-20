@@ -20,7 +20,11 @@
 #if TOSVERSION >= 0x400
 uint16_t d_rezword; /* also in AES:geminit.c */
 #endif
-char afile[INFSIZE];
+#if TP_47 /* SHBUF */
+char *afile;
+#else
+char afile[SIZE_AFILE];
+#endif
 BOOLEAN font_save;
 BOOLEAN s_defdir;
 BOOLEAN s_fullpath;
@@ -567,6 +571,7 @@ PP(char *buffer;)
 /*
  * Read in a desktop.inf file and parse the string
  */
+/* 206de: 00e28446 */
 /* 306de: 00e2beac */
 VOID read_inf(NOTHING)
 {
@@ -575,11 +580,11 @@ VOID read_inf(NOTHING)
 	char buffer[20];
 	register APP *app;
 
-	shel_get(afile, INFSIZE);
+	shel_get(afile, SIZE_AFILE);
 
 	if (afile[0] != '#')
 	{
-		bfill(INFSIZE, 0, afile);
+		bfill(SIZE_AFILE, 0, afile);
 		if (isdrive())
 		{
 			m_infpath(buffer);			/* open newdesk.inf */
@@ -590,8 +595,8 @@ VOID read_inf(NOTHING)
 					goto re_1;
 			}
 
-			size1 = Fread(handle, (int32_t) INFSIZE, afile);
-			if (size1 == INFSIZE)		/* buffer full  */
+			size1 = Fread(handle, (int32_t) SIZE_AFILE, afile);
+			if (size1 == SIZE_AFILE)		/* buffer full  */
 				size1--;
 
 			Fclose(handle);
@@ -608,7 +613,7 @@ VOID read_inf(NOTHING)
 		afile[size1] = 0;
 	}
 
-	shel_put(afile, INFSIZE);			/* copy to the aes buffer   */
+	shel_put(afile, SIZE_AFILE);			/* copy to the aes buffer   */
 
 	/* init default desktop and window color and pattern values */
 	/* if you change these, change the ones in geminit.c, too   */
@@ -711,6 +716,7 @@ PP(register char *pcurr;)
 /*
  * Save a desktop.inf file
  */
+/* 206de: 00e28720 */
 /* 306de: 00e2c186 */
 BOOLEAN save_inf(P(BOOLEAN) todisk)
 PP(BOOLEAN todisk;)
@@ -729,7 +735,7 @@ PP(BOOLEAN todisk;)
 
 	if ((size = Malloc(0xFFFFFFFFL)))		/* get some memory  */
 	{
-		if (size < INFSIZE)
+		if (size < SIZE_AFILE)
 			goto if_1;
 
 		buf = pcurr = (char *)Malloc(size);
@@ -742,7 +748,7 @@ PP(BOOLEAN todisk;)
 
 	desk_wait(TRUE);
 
-	bfill(INFSIZE, 0, afile);			/* clean up buffer  */
+	bfill(SIZE_AFILE, 0, afile);			/* clean up buffer  */
 
 	shel_get(buf, SAVE_ATARI);			/* get the control panel stuff  */
 
@@ -1025,7 +1031,7 @@ PP(BOOLEAN todisk;)
 
 	len = strlen(buf);
 
-	if (len > INFSIZE)
+	if (len > SIZE_AFILE)
 	{
 		do1_alert(FCNOMEM);
 		goto if_2;
@@ -1033,7 +1039,7 @@ PP(BOOLEAN todisk;)
 
 	strcpy(afile, buf);					/* copy to my buffer    */
 
-	shel_put(afile, INFSIZE);			/* copy to the aes buffer   */
+	shel_put(afile, SIZE_AFILE);			/* copy to the aes buffer   */
 
 	if (todisk)
 	{

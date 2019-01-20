@@ -37,6 +37,7 @@ uint16_t crysbind PROTO((int16_t opcode, intptr_t pglobal, uint16_t *int_in, int
 #define ADDR_OUT LLGET(pcrys_blk+20)
 
 
+/* 206de: 00e1686c */
 /* 306de: 00e1a2d2 */
 uint16_t crysbind(P(int16_t) opcode, P(intptr_t) pglobal, P(uint16_t *) int_in, P(int16_t *) int_out, P(VOIDPTR *) addr_in)
 PP(int16_t opcode;)
