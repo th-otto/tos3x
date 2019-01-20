@@ -1890,7 +1890,7 @@ dmaloop:
         bsr       memtest
         movea.w   d0,a5                     /* memtest done? */
         beq       dmawait                   /* (no) */
-#if (HD_WAIT == 4)
+#if HD_WAIT == 4
 		jsr       hd_wait
         bra       dmadone
 #endif
@@ -2470,7 +2470,7 @@ biosxbios:
         move.w    (a7)+,d0               /* Status register -> d0 */
         move.w    d0,-(a1)               /* and save in save_area */
         move.l    (a7)+,-(a1)            /* save return address */
-#if !P68010 | !BINEXACT
+#if !P68010
         tst.w     (_longframe).w
         beq.s     traph2
 #endif
@@ -2502,7 +2502,7 @@ bx_notindirect:
 bx_ret:
         movea.l   _savptr,a1
         movem.l   (a1)+,d3-d7/a3-a7      /* Get regs back, including sp */
-#if !P68010 | !BINEXACT
+#if !P68010
         tst.w     (_longframe).w
         beq.s     trph3
 #endif
