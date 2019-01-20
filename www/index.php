@@ -367,19 +367,13 @@ Corresponds to FASTPRN.PRG from Ecki from the c't magazine.
 Set printer timeout:
 </td>
 <td>
-<input type="checkbox" name="tp_20" value="1" checked="checked" /><br />
+<input type="checkbox" name="tp_20" value="1" checked="checked" />
+<input type="number" name="prntimeout" value="30" min="5" max="30" style="width: 4em" /> seconds<br />
 </td>
 <td>
 Original value is 30 seconds. Minimum value is 5 seconds.
 Does not work with the Atari Laser Printer.
 </td>
-</tr>
-<tr>
-<td>&nbsp;</td>
-<td>
-<input type="number" name="prntimeout" value="30" min="5" max="30" style="width: 4em" /> seconds<br />
-</td>
-<td></td>
 </tr>
 
 <tr><td colspan="3"><hr /></td></tr>
@@ -389,20 +383,14 @@ Does not work with the Atari Laser Printer.
 Set conterm system variable:
 </td>
 <td>
-<input type="checkbox" name="tp_21" value="1" /><br />
+<input type="checkbox" name="tp_21" value="1" />
+<input type="number" id="conterm" name="conterm" value="7" min="0" max="7" style="width: 4em" onchange="contermChange();" /><br />
 </td>
 <td>
 <input type="checkbox" id="conterm_bell" name="conterm_bell" value="1" checked="checked" onclick="contermBell();" />Bit 2 set: bell on CNTRL-G<br />
 <input type="checkbox" id="conterm_repeat" name="conterm_repeat" value="1" checked="checked" onclick="contermRepeat();" />Bit 1 set: key repeat on<br />
 <input type="checkbox" id="conterm_click" name="conterm_click" value="1" checked="checked" onclick="contermClick();" />Bit 0 set: key click on<br />
 </td>
-</tr>
-<tr>
-<td>&nbsp;</td>
-<td>
-<input type="number" id="conterm" name="conterm" value="7" min="0" max="7" style="width: 4em" onchange="contermChange();" /><br />
-</td>
-<td></td>
 </tr>
 
 <tr><td colspan="3"><hr /></td></tr>
@@ -690,24 +678,38 @@ For all Nova cards except type 2 and 6.
 Increase buffer for NEWDESK.INF:
 </td>
 <td>
-<input type="checkbox" name="tp_47" value="1" /><br />
+<input type="checkbox" name="tp_47" value="1" />
+<input type="number" name="shbufsize" value="22698" min="4192" max="32766" style="width: 5em" /> bytes<br />
 </td>
 <td>
 Increases the buffer used for reading the NEWDESK.INF.
 Original routines from SHBUF 1.3 by Martin Osieka.
 For more information, see SHBUF.
-
+<br />
 SHBUFSIZE: Maximum is 32766 => 32k per buffer.
 Since there are 2 buffers, that are 64K of memory.
 Original value is 4k.
 </td>
 </tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
 <tr>
-<td>&nbsp;</td>
 <td>
-<input type="number" name="shbufsize" value="22698" min="4192" max="32766" style="width: 5em" /> bytes<br />
+New scroll functions for GEM:
 </td>
-<td></td>
+<td>
+<input type="checkbox" name="tp_48" value="1" />
+<input type="number" name="arrowtime" value="3" min="0" max="9" style="width: 2em" /> 0,125s<br />
+</td>
+<td>
+Original routines from ARROWFIX 1.5 by Martin Osieka.
+For more information, see ARROWFIX.
+<br />
+ARROWTIME: default time delay until first
+repetition of scroll messages, in 0.125s. This time
+can also be set by the ARROWFIX.CPX. Valid values are 0-9.
+</td>
 </tr>
 
 <tr><td colspan="3"><hr /></td></tr>
@@ -793,7 +795,9 @@ Substitute 16x32 font:
 </select>
 </td>
 <td>
+<!--
 <img id="tp_35_32_img" src="fonts/16x32/system.png" width="296" height="552" style="border:0" alt="Atari" />
+-->
 </td>
 </tr>
 </table>

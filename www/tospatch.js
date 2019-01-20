@@ -177,11 +177,14 @@ function change16x32()
 {
 	var f = document.getElementById('tp_35_32');
 	var i = document.getElementById('tp_35_32_img');
-	if (f.value == 0) {
-		i.src = "fonts/16x32/system.png";
-	}
-	if (f.value == 3) {
-		i.src = "fonts/16x32/monaco.png";
+	if (i)
+	{
+		if (f.value == 0) {
+			i.src = "fonts/16x32/system.png";
+		}
+		if (f.value == 3) {
+			i.src = "fonts/16x32/monaco.png";
+		}
 	}
 }
 function previewIcon(name)

@@ -49,6 +49,7 @@
  *	  interrupts should be off and in supervisor mode
  *	  calls b_click in geminput.c
  */
+/* 206de: 00e2271c */
 /* 306de: 00e26182 */
 	xdef	_far_bchange
 _far_bchange:
@@ -81,7 +82,9 @@ _b_click:
 	bra	bout3
 
 bout2:
+#if !TP_48 /* ARROWFIX */
 	tst.w	_gl_bpend		; if ( gl_bpend && state )
+#endif
 	beq	bout4
 	tst.w	d0
 	beq	bout4
@@ -159,7 +162,7 @@ _justretf:
 _tikcod:
 	move.l	a7,tstksave		; save stack
 	lea.l 	tstack+23*4,a7
-	addq.l	#1,TICKS		; bump up the absolute clock
+	addq.l	#1,_TICKS		; bump up the absolute clock
 	tst.l	_CMP_TICK		; are we timing now?
 	beq	tpollmb			; nope, go away
 	addq.l	#1,_NUM_TICK		; yes, we're timing
@@ -221,23 +224,33 @@ _b_delay:
 bdout1:
 	rts
 
+#if TP_48 /* ARROWFIX */
+/*
+ * Only place where this functions was used is in hctl_window().
+ * The ARROWFIX removes that code.
+ * In the original patch, this routine was overwritten
+ * with the code to handle the extended modes of ev_dclick().
+ */
+#else
 /*
  *	delay( ticks )
  *	ULONG ticks;
  * Busy-wait the specified number of system timer ticks, then return.
  * No dispatching here!
  */
+/* 206de: 00e22894 */
 /* 306de: 00e262fa */
 	xdef	_delay
 _delay:
 	move.l	4(sp),d0
 	beq.b	xdelay
-	add.l	TICKS,d0
+	add.l	_TICKS,d0
 delay:
-	cmp.l	TICKS,d0		; updated by system timer interrupt
+	cmp.l	_TICKS,d0		; updated by system timer interrupt
 	bcc.b	delay			; busy-wait...
 xdelay:
 	rts
+#endif
 
 
 	bss
@@ -259,8 +272,8 @@ xdelay:
 	comm _NUM_TICK,4
 	xdef _CMP_TICK
 	comm _CMP_TICK,4
-	xdef TICKS
-	comm TICKS,4		; absolute number of ticks NOT GLOBAL!
+	xdef _TICKS
+	comm _TICKS,4		; absolute number of ticks NOT GLOBAL!
 
 	xdef gstack
 	comm gstack,96		; gsx stack for mouse

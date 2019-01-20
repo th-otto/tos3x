@@ -122,6 +122,7 @@ PP(int16_t m4;)
 }
 
 
+/* 206de: 00e1778e */
 /* 306de: 00e1b1f4 */
 VOID hctl_window(P(int16_t) w_handle, P(int16_t) mx, P(int16_t) my)
 PP(register int16_t w_handle;)
@@ -249,9 +250,9 @@ PP(int16_t my;)
 				ob_change((LPTREE)pwin->obj, gadget, selst, TRUE);
 			x = gl_wa[cpt - W_UPARROW];
 			wm_update(END_UPDATE);			/* give up the screen */
+
 			cpt = TRUE;
 			p = pwin->w_owner;
-
 			do
 			{
 				if (p->p_stat == PS_MWAIT)
@@ -261,7 +262,8 @@ PP(int16_t my;)
 				{
 					if (!p->p_msgtosend)
 					{					/* message is sent */
-						p->p_msgtosend = TRUE;						p->p_message[0] = message;		/* message */
+						p->p_msgtosend = TRUE;
+						p->p_message[0] = message;		/* message */
 						p->p_message[1] = rlr->p_pid;	/* sender */
 						p->p_message[2] = 0;			/* extra size in bytes */
 						p->p_message[3] = w_handle;
@@ -443,9 +445,51 @@ PP(int16_t my;)
 		{
 			x = gl_wa[cpt - W_UPARROW];
 			wm_update(END_UPDATE);			/* give up the screen */
+
+#if TP_48 /* ARROWFIX */
+			{
+				extern int32_t TICKS;
+				extern int16_t gl_dcindex;
+				register long end = ((((gl_dcindex >> 8) & 0xff) - 1) << 7) / gl_ticktime + TICKS;
+				
+				goto next;
+				for (;;)
+				{
+					if (pwin->w_owner->p_qindex <= 0)
+					{
+				next:
+						if (p->p_stat & PS_MWAIT)
+						{
+							p->p_msgtosend = FALSE;
+							ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
+						} else
+						{
+							if (!p->p_msgtosend)
+							{					/* message is sent */
+								p->p_msgtosend = TRUE;
+								p->p_message[0] = message;		/* message */
+								p->p_message[1] = rlr->p_pid;	/* sender */
+								p->p_message[2] = 0;			/* extra size in bytes */
+								p->p_message[3] = w_handle;
+								p->p_message[4] = x;
+								p->p_message[5] = y;
+								p->p_message[6] = w;
+								p->p_message[7] = h;
+							}
+						}
+					}
+					do
+					{
+						dsptch();
+						if (!(button & 1))
+							goto done;
+					} while (TICKS <= end);
+				}
+				done:;
+			}
+#else
 			cpt = TRUE;
 			p = pwin->w_owner;
-
 			do
 			{
 				if (p->p_stat == PS_MWAIT)
@@ -456,12 +500,12 @@ PP(int16_t my;)
 					if (!p->p_msgtosend)
 					{					/* message is sent */
 						p->p_msgtosend = TRUE;
-						p->p_message[0] = message;	/* message */
+						p->p_message[0] = message;		/* message */
 						p->p_message[1] = rlr->p_pid;	/* sender */
 #if BINEXACT
-						p->p_message[2] = 16;	/* size in bytes */ /* BUG: should be extra size > 16 only */
+						p->p_message[2] = 16;			/* size in bytes */ /* BUG: should be extra size > 16 only */
 #else
-						p->p_message[2] = 0;	/* extra size in bytes */
+						p->p_message[2] = 0;			/* extra size in bytes */
 #endif
 						p->p_message[3] = w_handle;
 						p->p_message[4] = x;
@@ -484,6 +528,7 @@ PP(int16_t my;)
 				}
 
 			} while (button & 1);		/* button is global */
+#endif /* TP_48 */
 
 			wm_update(BEG_UPDATE);			/* take back the screen */
 			return;

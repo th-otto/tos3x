@@ -155,6 +155,9 @@
 #if !TP_47
 #undef SHBUFSIZE
 #endif
+#if !TP_48
+#undef ARROWTIME
+#endif
 
 /*
  * These are the defaults that are used for patches that are not activated
@@ -178,4 +181,7 @@
 
 #ifndef SUPERTOS
 #define SUPERTOS 0
+#endif
+#if SUPERTOS
+#define TP_48 1
 #endif

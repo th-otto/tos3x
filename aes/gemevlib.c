@@ -154,10 +154,15 @@ PP(int16_t *lrets;)
  *	Wait for a message to be received in applications message pipe.
  *	Then read it into pbuff.
  */
+/* 206de: 00e18362 */
 /* 306de: 00e1bdc8 */
 int16_t ev_mesag(P(int16_t *) pbuff)
 PP(int16_t *pbuff;)
 {
+#if TP_48 /* ARROWFIX */
+	if (rlr->p_qindex > 0 || !rd_mymsg(pbuff))
+		return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
+#else
 #if AESVERSION > 0x320
 	if (rlr->p_qindex > 0)
 	{
@@ -168,6 +173,7 @@ PP(int16_t *pbuff;)
 		if (!rd_mymsg(pbuff))
 			return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
 	}
+#endif /* TP_48 */
 
 	return TRUE;
 }
@@ -379,11 +385,31 @@ PP(int16_t *prets;)
 /*
  * AES #26 - evnt_dclick - Obtain or set the time delay between the two clicks of a double-elick.
  */
+/* 206de: 00e18752 */
 /* 306de: 00e1c1b8 */
 int16_t ev_dclick(P(int16_t) rate, P(int16_t) setit)
 PP(int16_t rate;)
 PP(int16_t setit;)
 {
+#if TP_48 /* ARROWFIX */
+	register int16_t oldrate;
+	oldrate = gl_dcindex & 0xff;
+
+	if (setit)
+	{
+		oldrate = rate;
+		oldrate &= 0xff;
+		gl_dcindex = (gl_dcindex & 0xff00) | oldrate;
+		if ((rate & 0xff00) != 0)
+		{
+			if (rate > 0)
+				gl_dcindex = (gl_dcindex & 0xff) | (rate << 8);
+			oldrate = gl_dcindex;
+		}		
+		gl_dclick = gl_dcrates[oldrate & 0xff] / gl_ticktime;
+	}	
+	return oldrate;
+#else
 	if (setit)
 	{
 		gl_dcindex = rate;
@@ -391,4 +417,5 @@ PP(int16_t setit;)
 	}
 
 	return gl_dcindex;
+#endif
 }

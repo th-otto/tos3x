@@ -459,6 +459,7 @@ PP(int16_t clicks;)
 }
 
 
+/* 206de: 00e1aed2 */
 int16_t downorup(P(int16_t) new, P(intptr_t) buparm)
 PP(int16_t new;)
 PP(register intptr_t buparm;)

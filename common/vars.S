@@ -441,7 +441,7 @@ name: ds.t size
 	PTR(_tiksav)
 	LONG(_NUM_TICK)
 	LONG(_CMP_TICK)
-	LONG(TICKS)
+	LONG(_TICKS)
 	V(gstack,l,24)
 	V(tstack,l,24)
 	V(fspec,b,8)

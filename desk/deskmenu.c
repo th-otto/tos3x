@@ -22,6 +22,12 @@
 /************************************************************************/
 
 #include "desktop.h"
+#if TP_48 /* ARROWFIX */
+#define MC68K 1
+#define I8086 0
+#include "../aes/struct88.h"
+extern PD *rlr;
+#endif
 
 #if TOSVERSION >= 0x400
 extern int32_t gl_vdo;
@@ -497,7 +503,8 @@ VOID sel_all(NOTHING)
 /*
  * Handle the keyboard
  */
-/* 3ß6de: 00e2e024 */
+/* 206de: 00e2a5be */
+/* 306de: 00e2e024 */
 VOID hd_keybd(P(uint16_t) key)
 PP(uint16_t key;)
 {
@@ -694,6 +701,7 @@ PP(uint16_t key;)
 /*
  * Set file option
  */
+/* 206de: 00e2a8e8 */
 /* 306de: 00e2e34e */
 VOID foption(P(WINDOW *)win)
 PP(register WINDOW *win;)
@@ -723,6 +731,25 @@ PP(register WINDOW *win;)
 }
 
 
+#if TP_48 /* ARROWFIX */
+/*
+ * WTF: messing with AES structures???
+ */
+static int is_arrowed(NOTHING)
+{
+	register PD *p;
+	
+	p = rlr;
+	if (p->p_qindex)
+		return *((int16_t *)p->p_qaddr) == WM_ARROWED;
+	if (p->p_msgtosend)
+		return p->p_message[0] == WM_ARROWED;
+	return FALSE;
+}
+#endif /* TP_48 */
+
+
+/* 206de: 00e2a9e8 */
 /* 306de: 00e2e44e */
 VOID do_scroll(P(int16_t *)msgbuff)
 PP(int16_t *msgbuff;)
@@ -733,6 +760,9 @@ PP(int16_t *msgbuff;)
 
 	act = msgbuff[4];
 
+#if TP_48 /* ARROWFIX */
+again:;
+#endif
 	if ((win = get_win(msgbuff[3])) != NULL)
 	{
 		switch (act)
@@ -744,7 +774,7 @@ PP(int16_t *msgbuff;)
 
 		case WA_DNLINE:						/* arrow down */
 		case WA_UPLINE:						/* arrow up */
-#if TOSVERSION >= 0x400
+#if (AESVERSION > 0x320) | TP_48 /* ARROWFIX */
 			srl_row(win, 1, act == WA_UPLINE ? SUP : SDOWN);
 			UNUSED(x);
 			UNUSED(y);
@@ -764,7 +794,7 @@ PP(int16_t *msgbuff;)
 
 		case WA_RTLINE:
 		case WA_LFLINE:						/* scroll left */
-#if TOSVERSION >= 0x400
+#if (AESVERSION > 0x320) | TP_48 /* ARROWFIX */
 			srl_col(win, 1, act == WA_LFLINE ? SRIGHT : SLEFT); /* hhmm? */
 #else
 			do {
@@ -774,6 +804,19 @@ PP(int16_t *msgbuff;)
 #endif
 			break;
 		}
+#if TP_48 /* ARROWFIX */
+		/*
+		 * WTF: why is that neccessary? other applications
+		 * would need that same fix
+		 */
+		if (is_arrowed())
+		{
+			wind_update(END_UPDATE);
+			wm_update(BEG_UPDATE);
+			ev_mesag(msgbuff);
+			goto again;
+		}
+#endif
 	}
 }
 

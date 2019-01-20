@@ -338,11 +338,29 @@
  * Since there are 2 buffers, that are 64K of memory.
  * Original value is 4k.
  */
-#ifndef TP_46
-#define TP_46 0
+#ifndef TP_47
+#define TP_47 0
 #endif
 #ifndef SHBUFSIZE
 #define SHBUFSIZE 32766
+#endif
+
+
+/*
+ * TP_48: ARROWFIX: New scroll functions for GEM
+ *
+ * Original routines from ARROWFIX 1.5 by Martin Osieka.
+ * For more information, see ARROWFIX.
+ *
+ * ARROWTIME: default time delay until first
+ * repetition of scroll messages, in 0.125s. This time
+ * can also be set by the ARROWFIX.CPX. Valid values are 0-9.
+ */
+#ifndef TP_48
+#define TP_48 0
+#endif
+#ifndef ARROWTIME
+#define ARROWTIME 3
 #endif
 
 
