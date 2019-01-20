@@ -529,7 +529,7 @@ Can be aborted by pressing Shift-Shift.">Version 3</option>
 <option value="4" title="A version that waits instead of
 displaying the ramtest bar.
 Uses DMAread instead of waiting a specific time.
-Can be aborted by pressing any shift key.">Version 4</option>
+Can be aborted by pressing ALTERNATE.">Version 4</option>
 </select><br />
 <input type="number" name="tp_44" value="12" min="0" max="327" style="width: 4em" />&nbsp;Wait time (in sec)<br />
 <input type="number" name="tp_45" value="0" min="0" max="7" style="width: 4em" />&nbsp;ACSI device<br />

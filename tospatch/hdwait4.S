@@ -46,10 +46,18 @@ hd_w5:
 hd_w6:
             movem.l   (a7)+,d0-d7/a0-a6
             rts
+
+#if COUNTRY == CTRY_DE
 hd_w7:      dc.b 'Suche nach Festplatte'
             dc.b 0
-hd_w8:      dc.b ' -> OK'
-            dc.b 0
 hd_w9:      dc.b ' -> Abbruch'
+            dc.b 0
+#else
+hd_w7:      dc.b 'Searching for harddisk'
+            dc.b 0
+hd_w9:      dc.b ' -> Cancel'
+            dc.b 0
+#endif
+hd_w8:      dc.b ' -> OK'
             dc.b 0
             even

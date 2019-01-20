@@ -245,27 +245,6 @@
 #endif
 
 /*
- * TP_41: HD_BIT: HD-Floppy controlling
- *
- * 0: don't change
- * 6: use sound-chip bit 6
- * 7: use sound-chip bit 7
- *
- * TP_42: HD_INVERT: Invert level
- *
- * Control HD-floppy selection via sound-chip bit 6 or 7.
- * If the HD controller expects low-level, also set TP_42 (HD_INVERT) to 1,
- * otherwise high-level will be used.
- * Note: ST-Book uses a low-level on bit 7.
- */
-#ifndef TP_41
-#define TP_41 0
-#endif
-#ifndef TP_42
-#define TP_42 0
-#endif
-
-/*
  * TP_26: KILL_BOOT: Prevent execution of floppy boot sector
  */
 #ifndef TP_26
@@ -282,87 +261,6 @@
 #ifndef TP_27
 #define TP_27 0
 #endif
-
-/*
- * TP_43: HD_WAIT: Harddisk waiter
- *
- * 0: do not use
- * 1: Version 1
- *    Unknown routine that may only work with 1 harddisk.
- *    Can be aborted by pressing ALTERNATE.
- *    Only tested with Megafile
- * 2: Version 2
- *    Simple version that just waits for 12sec
- *    This should work in any case.
- *    Can be aborted by pressing any key.
- * 3: Version 3
- *    New version written by EWK, can wait for any ACSI device.
- *    Can be aborted by pressing Shift-Shift.
- * 4: Version 4
- *    A version that waits instead of displaying the ramtest bar.
- *    Uses DMAread instead of waiting a specific time.
- *    Can be aborted by pressing any shift key.
- *
- * TP_44: HD_WAITTIME: Waiting time in seconds
- * TP_45: HD_WAITDEVICE: Device to wait for,
- *        for version 3
- */
-#ifndef HD_WAIT
-#define HD_WAIT 0
-#endif
-#ifndef HD_WAITTIME
-#define HD_WAITTIME 12
-#endif
-#ifndef HD_WAITDEVICE
-#define HD_WAITDEVICE 0
-#endif
-
-/*
- * TP_46: NOVA: NovaPatch
- *
- * Activation of nova card already when booting.
- * For all Nova cards except type 2 and 6.
- */
-#ifndef TP_46
-#define TP_46 0
-#endif
-
-/*
- * TP_47: SHBUF: Increase buffer for NEWDESK.INF
- *
- * Increases the buffer used for reading the NEWDESK.INF.
- * Original routines from SHBUF 1.3 by Martin Osieka.
- * For more information, see SHBUF.
- *
- * SHBUFSIZE: Maximum is 32766 => 32k per buffer.
- * Since there are 2 buffers, that are 64K of memory.
- * Original value is 4k.
- */
-#ifndef TP_47
-#define TP_47 0
-#endif
-#ifndef SHBUFSIZE
-#define SHBUFSIZE 32766
-#endif
-
-
-/*
- * TP_48: ARROWFIX: New scroll functions for GEM
- *
- * Original routines from ARROWFIX 1.5 by Martin Osieka.
- * For more information, see ARROWFIX.
- *
- * ARROWTIME: default time delay until first
- * repetition of scroll messages, in 0.125s. This time
- * can also be set by the ARROWFIX.CPX. Valid values are 0-9.
- */
-#ifndef TP_48
-#define TP_48 0
-#endif
-#ifndef ARROWTIME
-#define ARROWTIME 3
-#endif
-
 
 /*
  * TP_28: VDIFIX: New v_opnvwk() function
@@ -539,3 +437,103 @@
  * TP_40_2: DESKTOP resource file
  * TP_40_3: NEWDESK.INF file
  */
+
+/*
+ * TP_41: HD_BIT: HD-Floppy controlling
+ *
+ * 0: don't change
+ * 6: use sound-chip bit 6
+ * 7: use sound-chip bit 7
+ *
+ * TP_42: HD_INVERT: Invert level
+ *
+ * Control HD-floppy selection via sound-chip bit 6 or 7.
+ * If the HD controller expects low-level, also set TP_42 (HD_INVERT) to 1,
+ * otherwise high-level will be used.
+ * Note: ST-Book uses a low-level on bit 7.
+ */
+#ifndef TP_41
+#define TP_41 0
+#endif
+#ifndef TP_42
+#define TP_42 0
+#endif
+
+/*
+ * TP_43: HD_WAIT: Harddisk waiter
+ *
+ * 0: do not use
+ * 1: Version 1
+ *    Unknown routine that may only work with 1 harddisk.
+ *    Can be aborted by pressing ALTERNATE.
+ *    Only tested with Megafile
+ * 2: Version 2
+ *    Simple version that just waits for 12sec
+ *    This should work in any case.
+ *    Can be aborted by pressing any key.
+ * 3: Version 3
+ *    New version written by EWK, can wait for any ACSI device.
+ *    Can be aborted by pressing Shift-Shift.
+ * 4: Version 4
+ *    A version that waits instead of displaying the ramtest bar.
+ *    Uses DMAread instead of waiting a specific time.
+ *    Can be aborted by pressing ALTERNATE.
+ *
+ * TP_44: HD_WAITTIME: Waiting time in seconds
+ * TP_45: HD_WAITDEVICE: Device to wait for,
+ *        for version 3
+ */
+#ifndef HD_WAIT
+#define HD_WAIT 0
+#endif
+#ifndef HD_WAITTIME
+#define HD_WAITTIME 12
+#endif
+#ifndef HD_WAITDEVICE
+#define HD_WAITDEVICE 0
+#endif
+
+/*
+ * TP_46: NOVA: NovaPatch
+ *
+ * Activation of nova card already when booting.
+ * For all Nova cards except type 2 and 6.
+ */
+#ifndef TP_46
+#define TP_46 0
+#endif
+
+/*
+ * TP_47: SHBUF: Increase buffer for NEWDESK.INF
+ *
+ * Increases the buffer used for reading the NEWDESK.INF.
+ * Original routines from SHBUF 1.3 by Martin Osieka.
+ * For more information, see SHBUF.
+ *
+ * SHBUFSIZE: Maximum is 32766 => 32k per buffer.
+ * Since there are 2 buffers, that are 64K of memory.
+ * Original value is 4k.
+ */
+#ifndef TP_47
+#define TP_47 0
+#endif
+#ifndef SHBUFSIZE
+#define SHBUFSIZE 32766
+#endif
+
+/*
+ * TP_48: ARROWFIX: New scroll functions for GEM
+ *
+ * Original routines from ARROWFIX 1.5 by Martin Osieka.
+ * For more information, see ARROWFIX.
+ *
+ * ARROWTIME: default time delay until first
+ * repetition of scroll messages, in 0.125s. This time
+ * can also be set by the ARROWFIX.CPX. Valid values are 0-9.
+ */
+#ifndef TP_48
+#define TP_48 0
+#endif
+#ifndef ARROWTIME
+#define ARROWTIME 3
+#endif
