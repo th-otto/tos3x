@@ -191,6 +191,7 @@ PP(int32_t count;)
 	return ev_block(ADELAY, count / gl_ticktime);
 }
 
+
 /*
  *	Used by ev_multi() to check on mouse rectangle events
  */
@@ -200,9 +201,9 @@ int16_t ev_mchk(P(MOBLK *) pmo)
 PP(register MOBLK *pmo;)
 {
 	if ((rlr == gl_mowner) && (pmo->m_out != inside(xrat, yrat, (GRECT *)&pmo->m_x)))
-		return (TRUE);
+		return TRUE;
 	else
-		return (FALSE);
+		return FALSE;
 }
 
 
@@ -379,7 +380,7 @@ PP(int16_t *prets;)
 	}
 
 	/* return what happened */
-	return (what);
+	return what;
 }
 
 
@@ -404,7 +405,7 @@ PP(int16_t setit;)
 		if ((rate & 0xff00) != 0)
 		{
 			if (rate > 0)
-				gl_dcindex = (gl_dcindex & 0xff) | (rate << 8);
+				gl_dcindex = (gl_dcindex & 0xff) | (rate & 0xff00);
 			oldrate = gl_dcindex;
 		}		
 		gl_dclick = gl_dcrates[oldrate & 0xff] / gl_ticktime;

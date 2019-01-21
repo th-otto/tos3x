@@ -452,6 +452,7 @@ PP(int16_t my;)
 				extern int16_t gl_dcindex;
 				register long end = ((((gl_dcindex >> 8) & 0xff) - 1) << 7) / gl_ticktime + TICKS;
 				
+				p = pwin->w_owner;
 				goto next;
 				for (;;)
 				{
@@ -461,7 +462,7 @@ PP(int16_t my;)
 						if (p->p_stat & PS_MWAIT)
 						{
 							p->p_msgtosend = FALSE;
-							ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
+							ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, 0, 0, 0);
 						} else
 						{
 							if (!p->p_msgtosend)
@@ -472,9 +473,9 @@ PP(int16_t my;)
 								p->p_message[2] = 0;			/* extra size in bytes */
 								p->p_message[3] = w_handle;
 								p->p_message[4] = x;
-								p->p_message[5] = y;
-								p->p_message[6] = w;
-								p->p_message[7] = h;
+								p->p_message[5] = 0;
+								p->p_message[6] = 0;
+								p->p_message[7] = 0;
 							}
 						}
 					}

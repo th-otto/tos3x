@@ -3,7 +3,8 @@ AES_OBJS2=gemevlib.o gemflag.o gemfmalt.o gemfmlib.o gemfslib.o gemglobe.o gemin
 AES_OBJS3=geminput.o gemmnlib.o gemobed.o gemobjop.o gempd.o gemqueue.o gemrom.o
 AES_OBJS4=gemrslib.o gemsclib.o gemshlib.o gemwmlib.o gemwrect.o newwrect.o newwmlib.o romcart.o
 AES_OBJS5=gemoblib.o mn_mbar.o mn_menu.o mn_popup.o mn_submn.o mn_tools.o mn_index.o mn_event.o
-AES_OBJS6=apgrlib.o apgsxif.o gemgrlib.o gemgsxif.o gsx2.o jbind.o
+#DBG_OBJS = nf_debug.o vsprintf.o doprint.o
+AES_OBJS6=apgrlib.o apgsxif.o gemgrlib.o gemgsxif.o gsx2.o jbind.o $(DBG_OBJS)
 AES_OBJS7=jdispa.o jdos.o large.o function.o optimize.o ratrbp.o trap14.o
 
 AES_OBJS=${AES_OBJS1} ${AES_OBJS2} ${AES_OBJS3} ${AES_OBJS4} ${AES_OBJS5} ${AES_OBJS6} ${AES_OBJS7}
@@ -78,6 +79,7 @@ AES_CSRCS=\
 	mn_index.c \
 	mn_event.c \
 	function.c \
+	$(DBG_OBJS:.o=.c) \
 	${empty}
 
 AES_SRCS = $(AES_HEADERS) $(AES_ASRCS) $(AES_CSRCS)

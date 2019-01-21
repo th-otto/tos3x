@@ -260,7 +260,9 @@ exok:
  *
  */
 	xdef	lmul
+	xdef	_lmul
 lmul:
+_lmul:
 	link	a6,#-4
 	clr.w	d2
 	tst.l	8(a6)		;is first arg negative?
@@ -299,7 +301,9 @@ L4:
  * ========================================================
  */
 	xdef	ldiv
+	xdef	_ldiv
 ldiv:
+_ldiv:
 	link	a6,#-2
 	movem.l	d2-d7,-(sp)
 	clr.w	d3
