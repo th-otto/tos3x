@@ -260,6 +260,21 @@ Show only amount of memory:
 
 <tr>
 <td>
+Fix memory size display:
+</td>
+<td>
+<input type="checkbox" name="tp_49" value="1" checked="checked" /><br />
+</td>
+<td>
+The memory test at boot time could
+not correctly print values > 64MB.
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
 Fix boot device error:
 </td>
 <td>

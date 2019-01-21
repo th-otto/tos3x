@@ -537,3 +537,14 @@
 #ifndef ARROWTIME
 #define ARROWTIME 3
 #endif
+
+
+/*
+ * TP_49: Fix memory size display
+ *
+ * The memory test at boot time could
+ * not correctly print values > 64MB
+ */
+#ifndef TP_49
+#define TP_49 0
+#endif

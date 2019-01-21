@@ -210,6 +210,16 @@ function compile_tos()
 			$tp_47 = isset($_POST['tp_47']) ? $_POST['tp_47'] : 0;
 			$tp_48 = isset($_POST['tp_48']) ? $_POST['tp_48'] : 0;
 			$tp_49 = isset($_POST['tp_49']) ? $_POST['tp_49'] : 0;
+			$tp_50 = isset($_POST['tp_50']) ? $_POST['tp_50'] : 0;
+			$tp_51 = isset($_POST['tp_51']) ? $_POST['tp_51'] : 0;
+			$tp_52 = isset($_POST['tp_52']) ? $_POST['tp_52'] : 0;
+			$tp_53 = isset($_POST['tp_53']) ? $_POST['tp_53'] : 0;
+			$tp_54 = isset($_POST['tp_54']) ? $_POST['tp_54'] : 0;
+			$tp_55 = isset($_POST['tp_55']) ? $_POST['tp_55'] : 0;
+			$tp_56 = isset($_POST['tp_56']) ? $_POST['tp_56'] : 0;
+			$tp_57 = isset($_POST['tp_57']) ? $_POST['tp_57'] : 0;
+			$tp_58 = isset($_POST['tp_58']) ? $_POST['tp_58'] : 0;
+			$tp_59 = isset($_POST['tp_59']) ? $_POST['tp_59'] : 0;
 		
 			$seekrate = isset($_POST['seekrate']) ? $_POST['seekrate'] : 3;
 			$fdc_cookie = isset($_POST['fdc_cookie']) ? $_POST['fdc_cookie'] : '$01415443';
@@ -319,6 +329,16 @@ function compile_tos()
 			fprintf($fp, "#define TP_47 %d\n", $tp_47);
 			fprintf($fp, "#define TP_48 %d\n", $tp_48);
 			fprintf($fp, "#define TP_49 %d\n", $tp_49);
+			fprintf($fp, "#define TP_50 %d\n", $tp_50);
+			fprintf($fp, "#define TP_51 %d\n", $tp_51);
+			fprintf($fp, "#define TP_52 %d\n", $tp_52);
+			fprintf($fp, "#define TP_53 %d\n", $tp_53);
+			fprintf($fp, "#define TP_54 %d\n", $tp_54);
+			fprintf($fp, "#define TP_55 %d\n", $tp_55);
+			fprintf($fp, "#define TP_56 %d\n", $tp_56);
+			fprintf($fp, "#define TP_57 %d\n", $tp_57);
+			fprintf($fp, "#define TP_58 %d\n", $tp_58);
+			fprintf($fp, "#define TP_59 %d\n", $tp_59);
 
 			fprintf($fp, "#define STEP_RATE %d\n", $seekrate);
 			fprintf($fp, "#define FDC_COOKIE %s\n", $fdc_cookie);
