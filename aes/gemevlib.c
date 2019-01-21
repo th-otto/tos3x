@@ -195,6 +195,7 @@ PP(int32_t count;)
  *	Used by ev_multi() to check on mouse rectangle events
  */
 /* 306de: 00e1be2a */
+/* 206de: 00e183c4 */
 int16_t ev_mchk(P(MOBLK *) pmo)
 PP(register MOBLK *pmo;)
 {

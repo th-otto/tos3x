@@ -1699,7 +1699,7 @@ crcmsg2 dc.b '.',13,10,0
 crcfail:
         move.l    a5,d5
         pea.l     crcmsg
-        move.w    #$0009,-(a7)
+        move.w    #9,-(a7)
         trap      #1
         move.b    #$45,d0            /* 'E' - even */
         btst      #0,d5
@@ -1707,7 +1707,7 @@ crcfail:
         move.b    #$4F,d0            /* 'O' - odd */
 chipE:
         move.w    d0,2(a7)
-        move.w    #$0002,(a7)
+        move.w    #2,(a7)
         trap      #1
 #if TOSVERSION >= 0x300
         move.b    #$45,d0            /* 'E' - even */
@@ -1716,11 +1716,11 @@ chipE:
         move.b    #$4F,d0            /* 'O' - odd */
 chipE2:
         move.w    d0,2(a7)
-        move.w    #$0002,(a7)
+        move.w    #2,(a7)
         trap      #1
 #endif
         move.l    #crcmsg2,2(a7)
-        move.w    #$0009,(a7)
+        move.w    #9,(a7)
         trap      #1
         addq.w    #6,a7
         addq.l    #1,a5
@@ -4352,6 +4352,7 @@ ikbdws1:
  */
 /* 306de: 00e02488 */
 /* 206de: 00e021b8 */
+/* 404: 00e0258e */
 _bcon2stat:
         lea.l     (ikbdiorec).w,a0              /* point to ikbd buffer record */
         moveq.l   #-1,d0
@@ -4368,6 +4369,7 @@ bcon2st1:
  */
 /* 306de: 00e0249e */
 /* 206de: 00e021ce */
+/* 404: 00e025a4 */
 _bcon2in:
         bsr.s     _bcon2stat                    /* see if key pressed */
         tst.w     d0

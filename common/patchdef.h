@@ -85,13 +85,13 @@
 #endif
 
 /*
- * TP_09: SET_TIME_CRC: Change delay for CRC test
- * TP_10: SET_TIME_RAM: Change delay for RAM test
+ * TP_09: SET_TIME_CRC: Reduce time for CRC test
+ * TP_10: SET_TIME_RAM: Reduce time for RAM test
  * BOOT_TIME: time (in s) for above
  * TP_11: SKIP_WAIT: Skip display of ramtest bar
  * TP_12: SKIP_RAM: Show only amount of memory
  *
- * Reduce the delay after which - on system start -
+ * Reduce the time after which - after system start -
  * a CRC test or a RAM test is run. Additionally, the
  * RAM test can be configured to display only the
  * memory configuration or the bar.

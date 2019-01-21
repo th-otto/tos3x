@@ -116,6 +116,7 @@ PP(EVSPEC mask;)
 
 
 /* 306de: 00e19e9c */
+/* 206de: 00e16436 */
 EVSPEC iasync(P(int16_t) afunc, P(intptr_t) aparm)
 PP(int16_t afunc;)
 PP(register intptr_t aparm;)
@@ -141,7 +142,8 @@ PP(register intptr_t aparm;)
 	e->e_pred = NULL;
 #endif
 	/* find a free bit in in the mask */
-	for (e->e_mask = 1; rlr->p_evbits & e->e_mask; e->e_mask <<= 1) ;
+	for (e->e_mask = 1; rlr->p_evbits & e->e_mask; e->e_mask <<= 1)
+		;
 
 	rlr->p_evbits |= e->e_mask;
 

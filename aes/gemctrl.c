@@ -355,9 +355,9 @@ PP(int16_t my;)
 		tree = gl_awind;
 		UNUSED(tree);
 #if BINEXACT
-		cpt = ob_find((LPTREE)gl_awind, 10L, mx, my); /* sigh */
+		cpt = ob_find(gl_awind, 10L, mx, my); /* sigh */
 #else
-		cpt = ob_find((LPTREE)gl_awind, 0, 10, mx, my);
+		cpt = ob_find(gl_awind, 0, 10, mx, my);
 #endif
         w_getsize(WS_CURR, w_handle, &t);
         r_get(&t, &x, &y, &w, &h);
@@ -381,7 +381,7 @@ PP(int16_t my;)
 			if (gr_watchbox(gl_awind, cpt, SELECTED, NORMAL))
 			{
 				message = (cpt == W_CLOSER) ? WM_CLOSED : WM_FULLED;
-				ob_change((LPTREE)gl_awind, cpt, NORMAL, TRUE);
+				ob_change(gl_awind, cpt, NORMAL, TRUE);
 			}
 			break;
 		case W_NAME:
@@ -416,7 +416,7 @@ PP(int16_t my;)
 			/*
 			 * cpt + 1: W_HSLIDE -> W_HELEV, W_VSLIDE -> W_VELEV
 			 */
-			ob_offset((LPTREE)gl_awind, cpt + 1, &px, &py);
+			ob_offset(gl_awind, cpt + 1, &px, &py);
 			if (cpt == W_HSLIDE)
 			{
 				/* fix up for index into gl_wa */
@@ -436,9 +436,9 @@ PP(int16_t my;)
 			break;
 		case W_HELEV:
 		case W_VELEV:
-			message = (cpt == W_HELEV) ? WM_HSLID : WM_VSLID;
+			message = cpt == W_HELEV ? WM_HSLID : WM_VSLID;
 			/* slide is 1 less than elev */
-			x = gr_slidebox((LPTREE)gl_awind, cpt - 1, cpt, cpt == W_VELEV);
+			x = gr_slidebox(gl_awind, cpt - 1, cpt, cpt == W_VELEV);
 			break;
 		}
 		if (message == WM_ARROWED)

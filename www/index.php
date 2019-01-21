@@ -217,7 +217,7 @@ Change delay for CRC test:
 <input type="checkbox" name="tp_09" value="1" /><br />
 </td>
 <td rowspan="5">
-Reduce the delay after which - on system start - <br />
+Reduce the time after which - after system start - <br />
 a CRC test or a RAM test is run. Additionally, the <br />
 RAM test can be configured to display only the <br />
 memory configuration or the bar. <br />
