@@ -47,7 +47,7 @@ hd_w6:
             movem.l   (a7)+,d0-d7/a0-a6
             rts
 
-#if COUNTRY == CTRY_DE
+#if OS_COUNTRY == CTRY_DE
 hd_w7:      dc.b 'Suche nach Festplatte'
             dc.b 0
 hd_w9:      dc.b ' -> Abbruch'

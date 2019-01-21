@@ -57,7 +57,11 @@ memtes5:
         cmp.l     memttop,d0
         bne.s     memtes8
         move.l    d7,-(a7)
+#if BINEXACT
         moveq.l   #8,d7
+#else
+        moveq.l   #10,d7
+#endif
 memtes6:
         move.w    #$0008,-(a7)
         move.l    #$00030002,-(a7)
@@ -126,7 +130,11 @@ memtes12:
         cmp.l     memtend,d0
         bne.s     memtes14
         move.l    d7,-(a7)
+#if BINEXACT
         moveq.l   #8,d7
+#else
+        moveq.l   #10,d7
+#endif
 memtes13:
         move.w    #$0008,-(a7)
         move.l    #$00030002,-(a7)
@@ -235,7 +243,6 @@ memthdr2:                            dc.b 13,10,'TT RAM ',27,'p',0
 memtcmsg:                            dc.b 13,10,'Koniec testu pami',$d3,'ci.',13,10,0
 memtkb:                              dc.b ' KB',27,'q',27,'K',0
 memtamsg:                            dc.b 13,10,'!TEST NIEDOKO',$c5,'CZONY.',27,'q',13,10,0
-memtsp:                              dc.b '       ',0
 #else
 #if TOSVERSION >= 0x300
 memthdr1:
@@ -246,7 +253,6 @@ memtcmsg:                            dc.b 13,10,'Memory Test Complete.',13,10,0
 memtkb:                              dc.b ' KB',27,'q',27,'K',0
 memtamsg:                            dc.b 13,10,'Memory Test Aborted.'
                                      dc.b 27,'q',13,10,0
-memtsp:                              dc.b '       ',0
 #else
 memthdr1:
                                      dc.b 'Memory Test:',13,10
@@ -257,8 +263,12 @@ memtkb:                              dc.b ' KB',27,'q',27,'K',0
 memtamsg:                            dc.b 13,10,'Memory Test Aborted.'
                                      dc.b 27,'q',13,10,0
 memtams2:                            dc.b 27,'p',0
-memtsp:                              dc.b '       ',0
 #endif
+#endif
+#if BINEXACT
+memtsp:                              dc.b '       ',0
+#else
+memtsp:                              dc.b '         ',0
 #endif
 		even
 
@@ -344,6 +354,7 @@ prtdec:
         movem.l   d3-d4,-(a7)
         clr.l     d4
 prtdec1:
+#if BINEXACT
         move.l    #10000,d2
         clr.w     d3
         cmp.l     #$00010000,d0
@@ -379,7 +390,7 @@ prtdec2:
         bne.s     prtdec3
         tst.w     d3
         bne.s     prtdec3
-        cmpi.l    #$00000001,d2
+        cmpi.l    #1,d2
         beq.s     prtdec3
         tst.w     d4
         bne.s     prtdec5
@@ -399,6 +410,46 @@ prtdec5:
         moveq.l   #10,d1
         divu.w    d1,d2
         bne.s     prtdec2
+#else
+        move.l    #1000000,d2
+        clr.w     d3
+prtdec2:
+        movem.l   d1-d2,-(a7)
+		move.l    d2,-(a7)
+		move.l    d0,-(a7)
+		jsr       bdosldivr
+		addq.l    #8,a7
+        tst.l     d0
+        bne.s     prtdec3
+        tst.w     d3
+        bne.s     prtdec3
+        cmpi.l    #1,d2
+        beq.s     prtdec3
+        tst.w     d4
+        bne.s     prtdec5
+        move.b    #$20,d0
+        bra.s     prtdec4
+prtdec3:
+        addi.b    #$30,d0
+        moveq.l   #1,d3
+prtdec4:
+        move.w    d0,-(a7)
+        move.l    #$00030002,-(a7)
+        trap      #13
+        addq.w    #6,a7
+prtdec5:
+        movem.l   (a7)+,d1-d2
+        move.l    _ldivr,d0
+        move.l    d0,-(a7)
+        pea       10.w
+        move.l    d2,-(a7)
+        jsr       bdosldiv
+        addq.l    #8,a7
+        move.l    d0,d2
+        move.l    (a7)+,d0
+        tst.l     d2
+        bne.s     prtdec2
+#endif
 prtdec6:
         movem.l   (a7)+,d3-d4
         rts
