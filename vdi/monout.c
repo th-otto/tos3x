@@ -1029,7 +1029,7 @@ VOID cir_dda(NOTHING)
 	if (x == y)
 		LV(q_circle)[x] = x;
 
-#if TOSVERSION >= 0x300
+#if PLANES8
 	/* Fake a pixel averaging when converting to non-1:1 aspect ratio. */
 	if (xsize > ysize)
 	{

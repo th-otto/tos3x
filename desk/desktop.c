@@ -423,7 +423,7 @@ m_2:
 	/* set up the right menu text */
 	/* do it here!!!!!! */
 #ifdef BITBLT /* take out for sparrow */
-#if TP_32 /* CACHE_0X0 */
+#if TP_32 | TP_50 /* CACHE_0X0 | PAK */
 #define cache_txt m_cpu >= 20
 #else
 #define cache_txt m_cpu == 30
@@ -607,7 +607,7 @@ PP(BOOLEAN set;)
 	menu_ienable(menu_addr, BITBLT, TRUE);
 #endif
 
-#if TP_32 /* CACHE_0X0 */
+#if TP_32 | TP_50 /* CACHE_0X0 | PAK */
 	if (m_cpu >= 20)
 #else
 	if (m_cpu == 30)
@@ -618,7 +618,7 @@ PP(BOOLEAN set;)
 		else
 			data = 0xFFFFFFFFL;
 
-#if TP_32 /* CACHE_0X0 */
+#if TP_32 | TP_50 /* CACHE_0X0 | PAK */
 		if (m_cpu == 20 && (inq_cache(data) & 0x1) != 0)
 			s_cache = TRUE;
 		else

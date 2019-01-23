@@ -84,6 +84,16 @@
 #undef TP_57
 #undef TP_58
 #undef TP_59
+#undef TP_60
+#undef TP_61
+#undef TP_62
+#undef TP_63
+#undef TP_64
+#undef TP_65
+#undef TP_66
+#undef TP_67
+#undef TP_68
+#undef TP_69
 
 #undef SUPERTOS
 
@@ -151,6 +161,16 @@
 #define TP_57 0
 #define TP_58 0
 #define TP_59 0
+#define TP_60 0
+#define TP_61 0
+#define TP_62 0
+#define TP_63 0
+#define TP_64 0
+#define TP_65 0
+#define TP_66 0
+#define TP_67 0
+#define TP_68 0
+#define TP_69 0
 
 #endif
 

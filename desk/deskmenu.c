@@ -952,7 +952,7 @@ PP(int16_t msgbuff;)
 
 #ifdef BITBLT
 	case BITBLT:
-#if TP_32 /* CACHE_0X0 */
+#if TP_32 | TP_50 /* CACHE_0X0 | PAK */
 		if (m_cpu < 20)
 #else
 		if (m_cpu != 30)

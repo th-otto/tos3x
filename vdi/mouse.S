@@ -280,9 +280,7 @@ vb_draw:	PIXLA(a5)
 #if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	/* a2 -> save block */
 #else
-#if TOSVERSION < 0x300
 		lea     PIXLV(save_block,a5),a2
-#endif
 #endif
 		bsr	cur_replace		/* Undraw old cursor */
 #if MULTI_LINEA
@@ -295,9 +293,7 @@ vb_draw:	PIXLA(a5)
 #if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	/* a2 -> save block */
 #else
-#if TOSVERSION < 0x300
 		lea     PIXLV(save_block,a5),a2
-#endif
 #endif
 		bsr	cur_display		/* and draw new cursor */
 
@@ -1277,9 +1273,7 @@ _HIDE_CUR:	PIXLA(a5)
 #if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	/* a2 -> save block */
 #else
-#if TOSVERSION < 0x300
 		lea     PIXLV(save_block,a5),a2
-#endif
 #endif
 		bsr	cur_replace		/* turn it off */
 		move.l	(sp)+,a6
@@ -1328,9 +1322,7 @@ _DIS_CUR:	PIXLA(a5)
 #if PLANES8
 		move.l	PIXLV(sv_blk_ptr,a5),a2	/* a2 -> save block */
 #else
-#if TOSVERSION < 0x300
 		lea     PIXLV(save_block,a5),a2
-#endif
 #endif
 		bsr	cur_display
 		PIXLA(a5)
@@ -1488,7 +1480,7 @@ _vq_mouse:
 		rts
 
 
-/* paramater block for a relative mouse BIOS call */
+/* parameter block for a relative mouse BIOS call */
 		xdef	rel_pblock
 rel_pblock:	dc.b	0	/* Y=0 at the top of the screen */
 		dc.b	0	/* Generate interrupts on make and break */

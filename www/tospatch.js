@@ -53,6 +53,29 @@ function changeFuji()
 		i.src = "fuji/x.bmp";
 	}
 }
+function changeBombs()
+{
+	var f = document.getElementById('tp_16');
+	var i = document.getElementById('tp_16_img');
+	if (f.value == 0) {
+		i.src = "bombs/bomb.bmp";
+	}
+	if (f.value == 1) {
+		i.src = "bombs/mushroom.bmp";
+	}
+	if (f.value == 2) {
+		i.src = "bombs/atarinew.bmp";
+	}
+	if (f.value == 3) {
+		i.src = "bombs/pfeifkpf.bmp";
+	}
+	if (f.value == 4) {
+		i.src = "bombs/stfinger.bmp";
+	}
+	if (f.value == 5) {
+		i.src = "bombs/totenkpf.bmp";
+	}
+}
 function change6x6()
 {
 	var f = document.getElementById('tp_35_6');
@@ -212,9 +235,32 @@ function killIcon(name)
 		previewIcon(name);
 	}
 }
+function changePak()
+{
+	var tosVersion = document.getElementById('tosversion').value;
+	var f;
+	f = document.getElementById('tp_50');
+	var disabled = tosVersion == '306' && f.checked ? '' : 'disabled';
+	document.getElementById('tp_51').disabled = disabled;
+	document.getElementById('tp_52').disabled = disabled;
+	document.getElementById('tp_53').disabled = disabled;
+	/* document.getElementById('tp_54').disabled = disabled; same as tp_18: ignore_blitter */
+	document.getElementById('tp_55').disabled = disabled;
+	/* document.getElementById('tp_56').disabled = disabled; no longer needed */
+	document.getElementById('tp_57').disabled = disabled;
+}
+function changeTosVersion()
+{
+	var tosVersion = document.getElementById('tosversion').value;
+	changePak();
+	var disabled = tosVersion == '306' ? '' : 'disabled';
+	document.getElementById('tp_35_32').disabled = disabled;
+}
 function onload()
 {
+	changeTosVersion();
 	changeFuji();
+	changeBombs();
 	change6x6();
 	change8x8();
 	change8x16();

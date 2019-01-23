@@ -63,7 +63,7 @@ name: ds.t size
 	V(ascan,b,1)		/* ACSI scan mask for _dmaboot */
 #endif
 
-#if (TOSVERSION >= 0x300)
+#if (TOSVERSION >= 0x300) | TP_50
 	V(_altmd,l,4)
 #endif
 

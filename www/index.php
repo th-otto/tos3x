@@ -3,7 +3,7 @@
 <head>
 <title>TOS Patches</title>
 <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-<meta name="keywords" content="ORCS, CAT, GC, PBEM, PBM, GC-Ork, GCORK, ARAnyM, UDO, EmuTOS" />
+<meta name="keywords" content="ORCS, CAT, GC, PBEM, PBM, GC-Ork, GCORK, ARAnyM, UDO, EmuTOS, TOSPATCH" />
 <link rel="stylesheet" type="text/css" href="tospatch.css" />
 <script src="tospatch.js"></script>
 </head>
@@ -27,7 +27,7 @@
 TOS version:
 </td>
 <td colspan="2">
-<select id="tosversion" name="tosversion">
+<select id="tosversion" name="tosversion" onchange="changeTosVersion();">
 <option value="206">2.06</option>
 <option value="208">2.08 (STBook)</option>
 <option value="306">3.06</option>
@@ -323,11 +323,19 @@ Fixes a bug in the autoexec routine (see ST-Computer 1/90)
 Alternative image for bombs:
 </td>
 <td>
-<input type="checkbox" name="tp_16" value="1" /><br />
+<select id="tp_16" name="tp_16" onchange="changeBombs();" style="vertical-align: middle; padding: 0 0;" >
+<option value="0" selected="selected">Bombs</option>
+<option value="1">Mushrooms</option>
+<option value="2">Atari logo</option>
+<option value="3">Pfeifenkopf</option>
+<option value="4">Stinkefinger</option>
+<option value="5">Skull</option>
+</select>
+<img id="tp_16_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" />
 </td>
 <td>
-Replaces the Atari bomb images <img src="bomb.bmp" width="16" height="16" style="border:0" alt="Bomb" />
-with the original mushrooms <img src="mushroom.bmp" width="16" height="16" style="border:0" alt="Mushroom" />
+Replaces the Atari bomb images <img src="bombs/bomb.bmp" width="16" height="16" style="border:0" alt="Bomb" />
+<!-- with the original mushrooms <img src="bombs/mushroom.bmp" width="16" height="16" style="border:0" alt="Mushroom" /> -->
 </td>
 </tr>
 
@@ -356,7 +364,8 @@ Ignore the blitter:
 <input type="checkbox" name="tp_18" value="1" /><br />
 </td>
 <td>
-The blitter will be disavowed and ignored by TOS
+The blitter will be disavowed and ignored by TOS.
+Should be set if PAK patches are also applied.
 </td>
 </tr>
 
@@ -730,6 +739,50 @@ can also be set by the ARROWFIX.CPX. Valid values are 0-9.
 <tr><td colspan="3"><hr /></td></tr>
 
 <tr>
+<td>
+Activate PAK Patches
+</td>
+<td>
+<input type="checkbox" id="tp_50" name="tp_50" value="1" onchange="changePak();" />
+</td>
+<td>
+PAK III-Patches Version 2 (for 68020 and 68030)
+<br />
+</td>
+</tr>
+<tr><td></td><td></td><td></td></tr>
+<tr><td></td><td></td><td>
+<input type="checkbox" id="tp_51" name="tp_51" value="1" disabled="disabled" />
+TOS for Static-RAMs
+</td></tr>
+<tr><td></td><td></td><td>
+<input type="checkbox" id="tp_52" name="tp_52" value="1" disabled="disabled" />
+Display bombs on graphic cards/extensions,
+works on all bitplane organized systems
+</td></tr>
+<tr><td></td><td></td><td>
+<input type="checkbox" id="tp_53" name="tp_53" value="1" checked="checked" disabled="disabled" />
+PAK-trick to boot up the PAK ROMS with FC-TOS on mainboard.
+</td></tr>
+<tr><td></td><td></td><td>
+<input type="checkbox" id="tp_55" name="tp_55" value="1" disabled="disabled" />
+This ST has been upgraded with a TT-MFP
+</td></tr>
+<!-- no longer needed; determined at runtime
+<tr><td></td><td></td><td>
+<input type="checkbox" id="tp_56" name="tp_56" value="1" disabled="disabled" />
+Do not eliminate MSTE/TT-HD switch
+</td></tr>
+-->
+<tr><td></td><td></td><td>
+<input type="checkbox" id="tp_57" name="tp_57" value="1" checked="checked" disabled="disabled" />
+Use alternative video synchronisation
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
 <td colspan="3">
 <table>
 <tr>
@@ -844,12 +897,12 @@ Note alert icon:
 <table>
 <tr>
 <td><input type="file" id="tp_39_1" name="tp_39_1" accept=".ico" onchange="previewIcon('tp_39_1');" /></td>
-<td><img id="tp_39_1_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_39_1_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_39_1');"> Default: <img src="icons/note.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_39_1');"> Default: <img src="icons/note.ico" alt="Note" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -862,12 +915,12 @@ Question alert icon:
 <table>
 <tr>
 <td><input type="file" id="tp_39_2" name="tp_39_2" accept=".ico" onchange="previewIcon('tp_39_2');" /></td>
-<td><img id="tp_39_2_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_39_2_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_39_2');"> Default: <img src="icons/quest.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_39_2');"> Default: <img src="icons/quest.ico" alt="Question" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -880,12 +933,12 @@ Stop alert icon:
 <table>
 <tr>
 <td><input type="file" id="tp_39_3" name="tp_39_3" accept=".ico" onchange="previewIcon('tp_39_3');" /></td>
-<td><img id="tp_39_3_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_39_3_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_39_3');"> Default: <img src="icons/stop.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_39_3');"> Default: <img src="icons/stop.ico" alt="Stop" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -900,12 +953,12 @@ Floppy icon:
 <table>
 <tr>
 <td><input type="file" id="tp_37_1" name="tp_37_1" accept=".ico" onchange="previewIcon('tp_37_1');" /></td>
-<td><img id="tp_37_1_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_37_1_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_1');"> Default: <img src="icons/floppy.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_37_1');"> Default: <img src="icons/floppy.ico" alt="Floppy" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -918,12 +971,12 @@ Folder icon:
 <table>
 <tr>
 <td><input type="file" id="tp_37_2" name="tp_37_2" accept=".ico" onchange="previewIcon('tp_37_2');" /></td>
-<td><img id="tp_37_2_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_37_2_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_2');"> Default: <img src="icons/folder.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_37_2');"> Default: <img src="icons/folder.ico" alt="Folder" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -936,12 +989,12 @@ Trashcan icon:
 <table>
 <tr>
 <td><input type="file" id="tp_37_3" name="tp_37_3" accept=".ico" onchange="previewIcon('tp_37_3');" /></td>
-<td><img id="tp_37_3_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_37_3_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_3');"> Default: <img src="icons/trash.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_37_3');"> Default: <img src="icons/trash.ico" alt="Trashcan" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -954,12 +1007,12 @@ Program icon:
 <table>
 <tr>
 <td><input type="file" id="tp_37_4" name="tp_37_4" accept=".ico" onchange="previewIcon('tp_37_4');" /></td>
-<td><img id="tp_37_4_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_37_4_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_4');"> Default: <img src="icons/program.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_37_4');"> Default: <img src="icons/program.ico" alt="Program" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -972,12 +1025,12 @@ File icon:
 <table>
 <tr>
 <td><input type="file" id="tp_37_5" name="tp_37_5" accept=".ico" onchange="previewIcon('tp_37_5');" /></td>
-<td><img id="tp_37_5_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_37_5_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_5');"> Default: <img src="icons/file.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_37_5');"> Default: <img src="icons/file.ico" alt="File" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -990,12 +1043,12 @@ Harddisk icon:
 <table>
 <tr>
 <td><input type="file" id="tp_37_12" name="tp_37_12" accept=".ico" onchange="previewIcon('tp_37_12');" /></td>
-<td><img id="tp_37_12_img" src="" width="32" height="32" style="border:0" /></td>
+<td><img id="tp_37_12_img" src="icons/empty.gif" alt="None" width="32" height="32" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_37_12');"> Default: <img src="icons/harddisk.ico" width="32" height="32" style="border:0" /></a>
+<a href="javascript:killIcon('tp_37_12');"> Default: <img src="icons/harddisk.ico" alt="Harddisk" width="32" height="32" style="border:0" /></a>
 This must be a 32x32 icon.
 </td>
 </tr>
@@ -1010,12 +1063,12 @@ Arrow cursor:
 <table>
 <tr>
 <td><input type="file" id="tp_38_0" name="tp_38_0" accept=".cur" onchange="previewIcon('tp_38_0');" /></td>
-<td><img id="tp_38_0_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_38_0_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_0');"> Default: <img src="mform/mform0.cur" width="16" height="16" style="border:0" /></a>
+<a href="javascript:killIcon('tp_38_0');"> Default: <img src="mform/mform0.cur" alt="Arrow" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1028,12 +1081,12 @@ Text cursor:
 <table>
 <tr>
 <td><input type="file" id="tp_38_1" name="tp_38_1" accept=".cur" onchange="previewIcon('tp_38_1');" /></td>
-<td><img id="tp_38_1_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_38_1_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_1');"> Default: <img src="mform/mform1.cur" width="16" height="16" style="border:0" /></a>
+<a href="javascript:killIcon('tp_38_1');"> Default: <img src="mform/mform1.cur" alt="Text" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1046,12 +1099,12 @@ Busy bee:
 <table>
 <tr>
 <td><input type="file" id="tp_38_2" name="tp_38_2" accept=".cur" onchange="previewIcon('tp_38_2');" /></td>
-<td><img id="tp_38_2_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_38_2_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_2');"> Default: <img src="mform/mform2.cur" width="16" height="16" style="border:0" /></a>
+<a href="javascript:killIcon('tp_38_2');"> Default: <img src="mform/mform2.cur" alt="Busy Bee" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1064,12 +1117,12 @@ Point hand:
 <table>
 <tr>
 <td><input type="file" id="tp_38_3" name="tp_38_3" accept=".cur" onchange="previewIcon('tp_38_3');" /></td>
-<td><img id="tp_38_3_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_38_3_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_3');"> Default: <img src="mform/mform3.cur" width="16" height="16" style="border:0" /></a>
+<a href="javascript:killIcon('tp_38_3');"> Default: <img src="mform/mform3.cur" alt="Point hand" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1082,12 +1135,12 @@ Flat hand:
 <table>
 <tr>
 <td><input type="file" id="tp_38_4" name="tp_38_4" accept=".cur" onchange="previewIcon('tp_38_4');" /></td>
-<td><img id="tp_38_4_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_38_4_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_4');"> Default: <img src="mform/mform4.cur" width="16" height="16" style="border:0" /></a>
+<a href="javascript:killIcon('tp_38_4');"> Default: <img src="mform/mform4.cur" alt="Flat hand" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1100,12 +1153,12 @@ Thin cross:
 <table>
 <tr>
 <td><input type="file" id="tp_38_5" name="tp_38_5" accept=".cur" onchange="previewIcon('tp_38_5');" /></td>
-<td><img id="tp_38_5_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_38_5_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_5');"> Default: <img src="mform/mform5.cur" width="16" height="16" style="border:0" /></a>
+<a href="javascript:killIcon('tp_38_5');"> Default: <img src="mform/mform5.cur" alt="Thin cross" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1118,12 +1171,12 @@ Thick cross:
 <table>
 <tr>
 <td><input type="file" id="tp_38_6" name="tp_38_5" accept=".cur" onchange="previewIcon('tp_38_6');" /></td>
-<td><img id="tp_38_6_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_38_6_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_6');"> Default: <img src="mform/mform6.cur" width="16" height="16" style="border:0" /></a>
+<a href="javascript:killIcon('tp_38_6');"> Default: <img src="mform/mform6.cur" alt="Thick cross" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
@@ -1136,25 +1189,25 @@ Outline cross:
 <table>
 <tr>
 <td><input type="file" id="tp_38_7" name="tp_38_7" accept=".cur" onchange="previewIcon('tp_38_7');" /></td>
-<td><img id="tp_38_7_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_38_7_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
 <td>
-<a href="javascript:killIcon('tp_38_7');"> Default: <img src="mform/mform7.cur" width="16" height="16" style="border:0" /></a>
+<a href="javascript:killIcon('tp_38_7');"> Default: <img src="mform/mform7.cur" alt="Outline cross" width="16" height="16" style="border:0" /></a>
 This must be a 16x16 cursor.
 </td>
 </tr>
 
 <tr><td colspan="3"><hr /></td></tr>
 
-<tr>
 <tr><td colspan="3">
 All files together must not exceed 64Kb. Also take care not to exceed
 the total ROM size (there are approximately 8K free in the 2.06 version).
 The files for 2.06 and 3.06 are identical, so you can use the
 same resource files for both versions.
 </tr>
+<tr>
 <td>
 Substitute GEM resource:
 </td>
@@ -1162,7 +1215,7 @@ Substitute GEM resource:
 <table>
 <tr>
 <td><input type="file" id="tp_40_1" name="tp_40_1" accept=".rsc" /></td>
-<td><img id="tp_40_1_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_40_1_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
@@ -1179,7 +1232,7 @@ Substitute DESKTOP resource:
 <table>
 <tr>
 <td><input type="file" id="tp_40_2" name="tp_40_2" accept=".rsc" /></td>
-<td><img id="tp_40_2_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_40_2_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>
@@ -1196,7 +1249,7 @@ Substitute NEWDESK.INF file:
 <table>
 <tr>
 <td><input type="file" id="tp_40_3" name="tp_40_3" accept=".inf" /></td>
-<td><img id="tp_40_3_img" src="" width="16" height="16" style="border:0" /></td>
+<td><img id="tp_40_3_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
 </td>

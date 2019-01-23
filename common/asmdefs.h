@@ -59,6 +59,10 @@
 #define TO_TTR0(addr) dc.l $f0390800,addr   /* pmove addr,ttr0 68030 */
 #define TO_TTR1(addr) dc.l $f0390c00,addr   /* pmove addr,ttr1 68030 */
 
+#define TO_TC_A0      dc.l $f0104000        /* pmove (a0),tc */
+#define TO_TTR0_A0    dc.l $f0100800        /* pmove (a0),ttr0 */
+#define TO_TTR1_A0    dc.l $f0100c00        /* pmove (a0),ttr1 */
+
 #define FNOP                dc.l $f2800000        /* 6888X, 68040-68060 */
 #define FSAVE_MINUS_SP      dc.w $f327            /* 6888X, 68040-68060 */
 #define FRESTINC            dc.w $f35f            /* frestore (a7)+ 6888X, 68040-68060 */

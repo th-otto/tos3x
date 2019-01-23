@@ -153,7 +153,23 @@ PP(char **argv;)
 	fprintf(fp, "/*\n");
 	fprintf(fp, " * automatically generated from %s - DO NOT EDIT\n", infile);
 	fprintf(fp, " */\n");
+	fprintf(fp, "#include \"config.h\"\n");
 	fprintf(fp, "#include <compiler.h>\n\n");
+
+	fprintf(fp, "\n\n");
+	fprintf(fp, "#if TP_50 & TP_53\n\n");
+	fprintf(fp, "static char const fillup[] = {\n");
+	for (i = 0; i < 4094; i++)
+		fprintf(fp, "\t0, 0, 0, 0, 0, 0, 0, 0,\n");
+	fprintf(fp, "\t0, 0, 0, 0, 0, 0, 0, 0\n");
+	fprintf(fp, "};\n");
+	fprintf(fp, "static char const fillup2[] = {\n");
+	for (i = 0; i < 4094; i++)
+		fprintf(fp, "\t0, 0, 0, 0, 0, 0, 0, 0,\n");
+	fprintf(fp, "\t0, 0, 0, 0, 0, 0, 0, 0\n");
+	fprintf(fp, "};\n");
+	fprintf(fp, "#endif\n\n");
+
 	fprintf(fp, "char const %s[] = {\n", symname);
 
 	p = buffer;

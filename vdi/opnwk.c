@@ -182,6 +182,7 @@ VOID v_opnwk(NOTHING)
 		ram8x16.flags |= DEFAULT;
 		break;
 
+#if !TP_50 /* PAK */
 	case _1280x960:
 		LV(DEV_TAB)[0] = 1280 - 1;		/* X max                      */
 		LV(DEV_TAB)[1] = 960 - 1;		/* Y max                      */
@@ -209,6 +210,7 @@ VOID v_opnwk(NOTHING)
 		ram8x8.flags &= ~DEFAULT;
 		ram8x16.flags |= DEFAULT;
 		break;
+#endif
 	
 	case 3:
 	case 5:
@@ -296,7 +298,7 @@ VOID v_opnwk(NOTHING)
 	dp = &LV(REQ_COL)[0][0];
 	sp = new_intout + 1;
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50
 	switch (curRez)
 	{
 	case _320x200:						/* initialize the 2 color arrays to the */

@@ -1,7 +1,7 @@
 /* #include "asmdefs.h" */
 /* #include "tosvars.inc" */
 
-#if (TOSVERSION >= 0x300)
+#if (TOSVERSION >= 0x300) | TP_50
 
 mmutable_ram equ $700 /* CPU root table in memory */
 
@@ -21,6 +21,8 @@ mmutable_ram equ $700 /* CPU root table in memory */
 #define PD   $01
 /* short-format table descriptor */
 #define TD   $02
+/* write-protected */
+#define WP   $04
 /* cache inhibit (page descriptors only) */
 #define CI   $40
 
@@ -41,13 +43,31 @@ initmmu:
 initmmu1:
         move.l    (a1)+,(a0)+
         dbf       d0,initmmu1
+#if TP_50 /* PAK */
+	lea       skipmmuinit(pc),a0
+	move.l	  a0,(_illinst).w
+	move.l    a0,(_lineftrap).w
+	move.l    a7,a0
+#endif
+#if TP_60 /* NO_MMU_RESET */
+	lea    _main(pc),a1
+	cmpa.l #$e00000,a1
+	bcs    nommuinit
+#endif
         TO_CRP(mmu_crp)
         TO_TC(mmu_tc)
+nommuinit:
         TO_TTR0(mmu_tt0)
         TO_TTR1(mmu_tt1)
+#if TP_50 /* PAK */
+skipmmuinit:
+	move.l a0,a7
+#endif
         rts
 
 	    data
+/* 306de: 00e36520 */
+/* 306us: 00e364f0 */
 mmurom_table:
 /* tia: top level table (for 0x00000000-0xffffffff) */
         dc.l      TABLE(tib1)        /* for 0x00000000-0x0fffffff, use table tib1 */
@@ -111,11 +131,29 @@ mmurom_table:
         dc.l      PAGE($00700000)
         dc.l      PAGE($00800000)
         dc.l      PAGE($00900000)
+#if TP_50 /* PAK */
+/*
+ * SE: (02.10.93)
+ * Veraenderte MMU-Tabelle.
+ * Oberhalb von 10 MB kein Caching, z.B. fuer Mega-Bus.
+ */
+        dc.l      PAGE_CI($00a00000)
+        dc.l      PAGE_CI($00b00000)
+        dc.l      PAGE_CI($00c00000)
+        dc.l      PAGE_CI($00d00000)
+#if TP_51 /* StaticRam */
+	/* write-protect ROM area */
+        dc.l      PAGE_CI($00e00000+WP)
+#else
+        dc.l      PAGE_CI($00e00000)
+#endif
+#else
         dc.l      PAGE($00a00000)
         dc.l      PAGE($00b00000)
         dc.l      PAGE($00c00000)
         dc.l      PAGE($00d00000)
         dc.l      PAGE($00e00000)
+#endif
         dc.l      PAGE_CI($00f00000)   /* map 0xfff00000-0xffffffff 0x00f00000-0x00ffffff, DON'T allow caching */
 mmuromend:
 

@@ -137,6 +137,12 @@
 /*
  * TP_16: PILZE: Alternative image for bombs
  * Replaces the Atari bomb images with the original mushrooms
+ * 0: Original bombs
+ * 1: Mushrooms
+ * 2: Atari logo
+ * 3: Pfeifenkopf
+ * 4: Stinkefinger
+ * 5: Skull
  */
 #ifndef TP_16
 #define TP_16 0
@@ -156,9 +162,10 @@
  * TP_18: IGNORE_BLITTER: Ignore the blitter
  * 
  * The blitter will be disavowed and ignored by TOS
+ * Should be set if PAK patches are also applied.
  */
 #ifndef TP_18
-#define TP_18 0
+#define TP_18 TP_50
 #endif
 
 /*
@@ -538,7 +545,6 @@
 #define ARROWTIME 3
 #endif
 
-
 /*
  * TP_49: Fix memory size display
  *
@@ -547,4 +553,80 @@
  */
 #ifndef TP_49
 #define TP_49 0
+#endif
+
+/*
+ * TP_50: PAK: Activate PAK Patches
+ *
+ *   TP_51: StaticRAM:    1: TOS for Static-RAMs
+ *                        0: TOS for ROMs/EPROMs
+ *   TP_52: Grafik_Bombs  1: Display bombs on graphic cards/extensions,
+ *                           works on all bitplane organized systems
+ *                        0: Display bombs on ST screen
+ *   TP_53: BootJMP:      1: PAK-trick to boot up the PAK ROMS with FC-TOS
+ *                           on mainboard.
+ *                        0: don't use
+ *   TP_55: HasTTMfp:     1: This ST has been upgraded with a TT-MFP
+ *                        0: No TT-MFP present
+ *   TP_56: MSTE:         1: Do not eliminate MSTE/TT-HD switch
+ *                        0: Eliminate MSTE/TT-HD switch for normal STs
+ *                           (no longer needed; determined at runtime)
+ *   TP_57: Alt_Sync:     1: Use alternative video synchronisation
+ *                        0: Use normal video synchronisation
+ */
+#ifndef TP_50
+#define TP_50 0
+#endif
+#ifndef TP_51
+#define TP_51 0
+#endif
+#ifndef TP_52
+#define TP_52 0
+#endif
+#ifndef TP_53
+#define TP_53 1
+#endif
+#ifndef TP_54
+#define TP_54 0
+#endif
+#ifndef TP_55
+#define TP_55 0
+#endif
+#ifndef TP_56
+#define TP_56 0
+#endif
+#ifndef TP_57
+#define TP_57 1
+#endif
+
+/*
+ * TP_58: NEWVIDEO:
+ * TP_59: SWITCH:
+ */
+#ifndef TP_58
+#define TP_58 0
+#endif
+#ifndef TP_59
+#define TP_59 0
+#endif
+
+/*
+ * TP_60: NO_MMU_RESET
+ */
+#ifndef TP_60
+#define TP_60 0
+#endif
+
+/*
+ * TP_61: FPU_TEST
+ */
+#ifndef TP_61
+#define TP_61 1
+#endif
+
+/*
+ * TP_62: LOGO
+ */
+#ifndef TP_62
+#define TP_62 1
 #endif

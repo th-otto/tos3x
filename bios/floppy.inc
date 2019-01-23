@@ -386,7 +386,7 @@ flopfmt1:
 #if STBOOK
 	bsr       hdselect                      /* select SD/HD mode of floppy */
 #else
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 	tst.b     STEFlag                       /* no STE hardware available? */
 	bne.s     flopfmt2                      /* (correct) */
 #endif
@@ -870,7 +870,7 @@ hardsee1:
  */
 reseek:
         move.w    #-6,fd_curerr                 /* set "seek error" E_SEEK */
-#if (TOSVERSION >= 0x300) | STBOOK
+#if ((TOSVERSION >= 0x300) & !TP_50) | STBOOK
         bsr.s     restore                       /* restore head */
         bne.s     go2trret                      /* (punt if home fails) */
 #else
@@ -924,7 +924,7 @@ go2trac2:
 	move.w    d0,fd_density(a1)
         bsr       hdselect                      /* select SD/HD mode of floppy */
 #else
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 	move.w    d0,fd_density(a1)
 	tst.b     STEFlag                       /* no STE hardware available? */
 	bne.s     go2trc2b                      /* (correct) */
@@ -995,7 +995,7 @@ flopcms1:
         move.w    fd_density(a1),d0             /* get SD/HD mode */
         bsr.s     hdselect                      /* select SD/HD mode of floppy */
 #else
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 	tst.b     STEFlag                       /* no STE hardware available? */
 	bne.s     flopcmd                       /* (correct) */
 #endif

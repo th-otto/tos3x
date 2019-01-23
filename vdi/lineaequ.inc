@@ -84,7 +84,7 @@
 #define loc_mode		-436
 #define num_qc_lines		-434
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & PLANES8
 /* space to save the return address */
 #define trap14sav		-432
 /* some modes this is ored in VS_COLOR */

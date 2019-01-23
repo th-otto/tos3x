@@ -25,7 +25,11 @@ XBIOS		equ	 14
 BLITMODE	equ	$40
 
 STAYINDEV equ 1
+#if TP_50
+DEFREZ    equ 2
+#else
 DEFREZ    equ 6
+#endif
 
 		text
 
@@ -218,7 +222,7 @@ _vex_timv:	PIXLA(a1)
  */
 		xdef _FindDevice
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | TP_50
 
 /*
  * TOS version, using a small table
@@ -236,7 +240,22 @@ _FindDevice:
         beq.s     FindDev3
         cmp.w     #DEFREZ,d0
         beq.s     FindDev3
-        cmp.w     #$000A,d1
+#if TP_50
+      subq.w    #2,d1
+      bmi.s     FindDev0
+      cmp.w     d0,d1
+      beq.s     FindDev3
+      cmp.w     #2,d1
+      bcs.s     FindDev1
+FindDev0:
+        moveq.l   #0,d1
+FindDev1:
+        move.w    d1,-(a7)
+      moveq     #-1,d0
+      move.l    d0,-(a7)
+      move.l    d0,-(a7)
+#else
+        cmp.w     #10,d1
         ble.s     FindDev1
         moveq.l   #0,d1
 FindDev1:
@@ -251,13 +270,30 @@ FindDev2:
         move.w    d2,-(a7)
         move.l    #-1,-(a7)
         move.l    #-1,-(a7)
-        move.w    #$0005,-(a7)
+#endif
+        move.w    #5,-(a7)
         trap      #14 ; SETREZ(rez)
         lea.l     12(a7),a7
         bra.s     FindDev4
 FindDev3:
         bsr       esc_init
 FindDev4:
+
+#if TP_50
+      lea       paltab16(pc),a0
+      move.b    (_sshiftmod).w,d0
+      beq.s     FindDev5
+      cmp.b     #2,d0
+      bhi.s     FindDev5
+      subq.l    #(paltab16-paltab4),a0
+FindDev5:
+      pea       (a0)
+      move.w    #6,-(a7)
+      trap      #14
+      addq.l    #6,a7
+
+#else
+
 #if PLANES8 & !VIDEL_SUPPORT
         pea.l     _colors
         move.w    #$0100,-(a7)
@@ -265,7 +301,7 @@ FindDev4:
         move.w    #$0054,-(a7)
         trap      #14 ; EsetPalette(0, 256, colors)
         lea.l     10(a7),a7
-        cmpi.b    #$01,_sshiftmod
+        cmpi.b    #1,_sshiftmod
         bne.s     FindDev5
         lea.l     _colors,a0
         move.w    30(a0),-(a7)
@@ -275,7 +311,7 @@ FindDev4:
         addq.w    #6,a7
 FindDev5:
 #endif
-        cmpi.b    #$02,_sshiftmod
+        cmpi.b    #2,_sshiftmod
         bne.s     FindDev6
         move.w    #$0000,-(a7)
         move.w    #$00FE,-(a7)
@@ -288,6 +324,7 @@ FindDev5:
         trap      #14 ; EsetColor(255, 0xfff);
         addq.w    #6,a7
 FindDev6:
+#endif
         moveq.l   #0,d0
         move.b    _sshiftmod,d0
         rts
@@ -314,7 +351,7 @@ _FindDevice:
         beq.s     FindDev2
         bra.s     FindDev4
 FindDev1:
-        cmp.w     #$0003,d0                     /* switch to medium res? */
+        cmp.w     #3,d0                         /* switch to medium res? */
         beq.s     FindDev3                      /* yes */
         tst.b     d2                            /* current res = low? */
         beq.s     FindDev2                      /* yes, no need to change */
@@ -323,12 +360,12 @@ FindDev1:
         moveq.l   #-1,d0
         move.l    d0,-(a7)
         move.l    d0,-(a7)
-        move.w    #$0005,-(a7)                  /* Setscreen(-1, -1, 0) */
+        move.w    #5,-(a7)                      /* Setscreen(-1, -1, 0) */
         trap      #14
         lea.l     12(a7),a7
 FindDev2:
         pea.l     paltab16
-        move.w    #$0006,-(a7)
+        move.w    #6,-(a7)
         trap      #14                           /* Setpalette */
         addq.l    #6,a7
         moveq.l   #1,d0
@@ -342,29 +379,33 @@ FindDev3:
         moveq.l   #-1,d0
         move.l    d0,-(a7)
         move.l    d0,-(a7)
-        move.w    #$0005,-(a7)
+        move.w    #5,-(a7)
         trap      #14                           /* Setscreen(-1, -1, 1) */
         lea.l     12(a7),a7
 FindDev4:
         pea.l     paltab4
-        move.w    #$0006,-(a7)
+        move.w    #6,-(a7)
         trap      #14                           /* Setpalette */
         addq.l    #6,a7
         moveq.l   #2,d0
         rts
 FindDev5:
         pea.l     paltab4
-        move.w    #$0006,-(a7)
+        move.w    #6,-(a7)
         trap      #14                           /* Setpalette */
         addq.l    #6,a7
         moveq.l   #3,d0
         rts
+
+#endif
+
+#if (TOSVERSION < 0x300) | TP_50
 		
 paltab4:  dc.w $0fff
           dc.w $0f00
           dc.w $00f0
           dc.w $0000
-paltab16  dc.w $0fff
+paltab16: dc.w $0fff
           dc.w $0f00
           dc.w $00f0
           dc.w $0ff0
@@ -834,9 +875,14 @@ _esc_init:
         cmp.w     #1,d0
         ble.s     esc2
         lea.l     _f8x16,a0
+#if TP_50 /* PAK */
+        cmp.w     #3,d0
+        blt.s     esc2	; see if we have > 4 planes
+#else
         cmp.w     #6,d0
         blt.s     esc2	; see if we have > 4 planes
         beq.s     esc1
+#endif
         move.l    #lineavars+(sav8_block),PIXLV(sv_blk_ptr,a1)			; if so point to > save buff
         bra.s     esc2
 esc1:
@@ -896,7 +942,7 @@ rezinit:
         move.w    (a0)+,PIXLV(bytes_lin,a1)
         move.w    (a0)+,PIXLV(v_vt_rez,a1)
         move.w    (a0),PIXLV(v_hz_rez,a1)
-#if TOSVERSION >= 0x300
+#if PLANES8
         lsr.w     #3,d0
 #endif
         rts

@@ -92,6 +92,9 @@ VOID seedfill(NOTHING)
 	int16_t xright;
 
 	BOOLEAN collision, leftcollision;
+#if !PLANES8
+	register int16_t color;
+#endif
 
 	q = Q;
 
@@ -99,10 +102,10 @@ VOID seedfill(NOTHING)
 #define Qptr0 *Qptr
 #else
 	/* in TOS prior to 3.x, all those variables are in the "overlay" area */
-	register int16_t color;
 #define q Q
 #define Qptr0 qPtr
 #define Qtop qTop
+	register int16_t color;
 #endif
 
 	xleft = LV(PTSIN)[0];

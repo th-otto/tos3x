@@ -1173,7 +1173,7 @@ _vq_mouse:
 		rts
 
 
-* paramater block for a relative mouse BIOS call
+* parameter block for a relative mouse BIOS call
 
 rel_pblock:	dc.b	0	; Y=0 at the top of the screen
 		dc.b	0	; Generate interrupts on make and break

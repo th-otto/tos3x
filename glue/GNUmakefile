@@ -70,6 +70,9 @@ vars.o: ../common/vars.S $(top_srcdir)/common/config.h
 tosvars.o: ../common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
+fillup.o: fillup.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+
 include gluer.mak
 
 check:: $(IMG)

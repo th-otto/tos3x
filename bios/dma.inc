@@ -513,6 +513,19 @@ shortdelay:
 
 #if TOSVERSION >= 0x300
 /* 306de: 00e01b68 */
+#if TP_50 /* PAK */
+/*
+ * c't 9/92 / SE (18.09.93):
+ * SCSI-I/O muss immer Fehler -12 zurueckgeben.
+ * (auf -1 umgestellt).
+ */
+scsiread:
+	moveq     #-1,d0
+	rts
+scsiwrite:
+	moveq     #-1,d0
+	rts
+#else
 scsiread:
         move.l    a0,-(a7)
         andi.w    #$0007,d0
@@ -717,7 +730,8 @@ ldelaytime:
         move.l    #201,d1
         add.l     (a0),d1
         rts
-#endif
+#endif /* TP_50 */
+#endif /* TOSVERSION >= 0x300 */
 
 
 /*

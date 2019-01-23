@@ -182,6 +182,14 @@ FPStat    equ $FFFFFA40
 LcdPControl equ $FFFF827F
 
 
+STLOW     equ 0
+STMED     equ 1
+STHIGH    equ 2
+FALCONREZ equ 3
+TTMED     equ 4
+TTHIGH    equ 6
+TTLOW     equ 7
+
 /* =========================================================================== */
 /* ==== TEXT segment (TOS image) ============================================= */
 /* =========================================================================== */
@@ -285,11 +293,34 @@ _main:
 #if TOSVERSION >= 0x400
 		move.w ($FFFF8006).w,d0 /* read to auto-config mem cntrlr */
 #endif
-#if TP_01 /* KILL_RESET */
-        nop
+#if TP_01 & !TP_50 /* KILL_RESET & !PAK */
+		nop
 #else
         reset                  /* reset all hardware */
 #endif
+
+#if TP_50 /* PAK */
+/*
+ * Stack einrichten, um die Prozessorunabh„ngigkeiten in den Griff zu bekommen.
+ * Aužerdem muž die MCU initialisiert werden, damit der Speicher berhaupt
+ * benutzbar ist. Falls das TOS im ST-RAM ist, wird das jedoch unterlassen, da
+ * es nur mit 4MB-Rechner funktionieren wrde und das RAM sowieso initialisiert
+ * ist.
+ *
+ * Falls wir in Wirklichkeit einen Warmstart machen, so fhrt das zu keinen
+ * Problemen, da kurz sp„ter bei gltigen memvalid, memval2 und memval3 die
+ * MCU noch einmal mit dem Wert aus memcntrl ($424) gefttert wird.
+ *
+ * Dazu den Zugriff auf DMA entfernt und zuerst den Reset gemacht.
+ */
+		lea    _main(pc),a0
+		cmpa.l #$e00000,a0
+		bcs    noconf
+		move.b #$a,(memconf).w
+noconf:
+		lea    $7fc,sp
+#endif
+
 #if TOSVERSION >= 0x400
 		move.w ($FFFF8006).w,d0 /* read to auto-config mem cntrlr */
 		move.w #7,($FFFF8940).w /* Added to fix problem in Sparrow hardware. GPIO has no pullup/down resist. */
@@ -307,7 +338,7 @@ nodiag:
 /*
  * disable the instruction/data caches
  */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | TP_50
         data
 zero:
 	    dc.l 0
@@ -321,19 +352,48 @@ zero:
 /*
  * disable the MMU
  */
+#if TP_50 /* PAK */
+/*
+ * Prozessorunabh„ngiges 3.06.
+ * Initialisierung der 68030 MMU nach Reset.
+ */
+		lea    nommu(pc),a0
+		move.l a0,(_illinst).w
+		move.l a0,(_lineftrap).w
+		move.l #zero,a0
+		TO_TC_A0
+		TO_TTR0_A0
+		TO_TTR1_A0
+nommu:
+#else
+#if TP_60 /* NO_MMU_RESET */
+		lea    _main(pc),a1
+		cmpa.l #$e00000,a1
+		bcs    nommur
+#endif
         TO_TC(zero)          /*  we're done if we get a lineF exception ... */
+nommur:
         TO_TTR0(zero)        /* first we initialise the TTRs (ACRs on a 68ec030) */
         TO_TTR1(zero)
+#endif
 
+#if !TP_50 /* PAK */
+/*
+ * c't 9/92:
+ * SCU: General-Purpose-Register checken, ob es ein Power-On war.
+ * Da wir das Register nicht haben, mssen wir immer die Power-On-Checks
+ * durchfhren.
+ */
 #if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
 #if (TOSVERSION >= 0x306)
         FRESTORE(zero)
 #endif
-
         btst      #0,(scu_gp1).w			/* memconfig valid? */
         beq.s     noreset
 #endif
 #endif
+#endif
+
 #if TOSVERSION >= 0x400
 		move.w    #$0020,($FFFF828C).w
 		move.w    #$0010,($FFFF8282).w
@@ -368,7 +428,7 @@ reset2c:
         cmpi.l   #$31415926,(resvalid).w  /* Jump to resetvector? */
         bne.s    noreset                /* No --> noreset */
         move.l   (resvector).w,d0       /* Yes: old resvec to d0 */
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) & !TP_50
         tst.b    (resvector).w          /* bits 24..31 must be zero */
         bne.s    noreset                /* (they aren't, so punt) */
 #endif
@@ -402,10 +462,17 @@ meminit:
         move.b    #$0E,(a0)  /* select Port A */
         move.b    #$07,2(a0) /* deselect floppy drives */
 
+#if TP_50
+		bsr       VDOSkip1
+#else
 #if TOSVERSION < 0x400
 #if TOSVERSION >= 0x300
 #if TOSVERSION >= 0x306
+#if TP_02 /* COLOR_60HZ */
+        move.b    #0,(v_syncmod).w /* set video sync */
+#else
         move.b    #1,(v_syncmod).w /* set video sync */
+#endif
 #else
         clr.w     (sndmactl).w
 #endif
@@ -422,9 +489,10 @@ ret_1b:
 #endif
 notpal:
 #if STBOOK
-		move.b    #2,(v_shf_mod).w          /* Switch to 640x400x1 */
+		move.b    #STLOW,(v_shf_mod).w      /* Switch to 640x400x1 */
         move.b    #$80,(LcdPControl).w      /* LCD display on */
         tst.w     tt_mcu                    /* ST Book: ??? */
+#endif
 #endif
 #endif
 #endif
@@ -451,7 +519,7 @@ initpal:
 initpal2:
 		move.l    (a0)+,(a1)+
 		dbf       d0,initpal2
-		move.b    #$00,(v_shf_mod).w
+		move.b    #STLOW,(v_shf_mod).w
 #endif
 
 /* set Video screen memory position to 0x10000 */
@@ -462,15 +530,15 @@ initpal2:
 #include "../tospatch/ramres.S"
 #else
 
-#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400) & !TP_50
         btst      #0,(scu_gp1).w
-        beq.s      domemchk
+        beq.s     domemchk
 #endif
 
 #if TOSVERSION < 0x400
 
         move.b    (memctrl).w,d6                /* d6 = memory controller configuration */
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
         move.b    d6,(memconf).w                /* setup memory controller configuration register */
 #endif
 
@@ -500,7 +568,7 @@ ret_2a:     move.l    #$100000,d5               /* d5 -> physical top of memory 
 ret_2b:     lea       $8000,sp
 
 #else
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 /* First we try to configure the memory controller */
 
             clr.w     d6
@@ -544,7 +612,7 @@ chkmem3:    beq.s     chkmem7					/* bank is not working => */
             bra       memchk0
 chkmem4:    beq.s     chkmem6					/* bank has 512Kb of memory => */
 
-            movea.w   #$8,a0					/* + 0 bytes */
+            movea.w   #8,a0						/* + 0 bytes */
             lea       chkmem5(pc),a4
             bra       memchk0
 chkmem5:    bne.s     chkmem7					/* bank is empty => */
@@ -739,7 +807,7 @@ clrmem:
  * NOTE: whether we actually have FastRAM or not, setting the
  * value always causes a bus error, so we need to handle it.
  */
-#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+#if ((TOSVERSION >= 0x300) & (TOSVERSION < 0x400)) | TP_50
         move.l  #refresh_done,(_buserror).w      /* bus error vector */
         move.w  #$0000,tt_mcu+224
 refresh_done:
@@ -751,6 +819,20 @@ refresh_done:
         moveq.l   #0,d0
         move.l    #$00020000,d7       /* d7 = address gap between memory test zones */
         movea.l   #$01020000,a0       /* a0 = address of current test zone */
+#if TP_50
+		movea.l   a0,a2
+		movea.l   d7,a1
+		move.l    (a1),d1
+		not.l     d1
+		move.l    d1,(a0)
+		cmp.l     (a1),d1
+		bne.s     next_tt
+		bra       tt_ramsize_done
+next_pak:
+		move.l    a0,-4(a0)
+		cmpa.l    -4(a2),a0
+		beq.s     tt_ramsize_done
+#endif
 next_tt:
         movea.l   a0,a1               /* a1 -> memory being tested */
         move.w    d0,d2               /* d2.w = test value */
@@ -769,7 +851,11 @@ check_tt:
         add.w     d3,d0
         dbf       d1,check_tt
         adda.l    d7,a0
+#if TP_50
+        bra.s     next_pak
+#else
         bra.s     next_tt
+#endif
 tt_ramsize_done:                    /* bus error or bad ram  */
         suba.l    d7,a0
         cmpa.l    #$01000000,a0
@@ -779,7 +865,9 @@ ttramok:
         move.l    a0,d5
         move.l    d5,(_ramtop).w
         move.l    #$1357BD13,(_ramvalid).w
+#if !TP_50
         bset      #0,(scu_gp1).w
+#endif
 #else
         clr.l     _ramtop                /* no FASTRAM available */
         move.l    #$1357bd13,(_ramvalid).w   /* ramtop is valid (ramvalid == RAMMAGIC) */
@@ -907,7 +995,7 @@ checkmicro:
 nodmasound:
         movea.l   a6,a7
 
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 			move.b    #90,(v_bas_l).w           /* write low byte of video address */
 			tst.b     (v_bas_m).w               /* access the medium byte */
 			move.b    (v_bas_l).w,d0            /* (which should reset the low byte on an STE!) */
@@ -957,13 +1045,13 @@ clrbss:
 
 
 /* initialize the MMU */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | TP_50
         bsr       initmmu
 #endif
 
 /* clear screen memory */
 
-#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
+#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400) & !TP_50
 scrsize equ ((1280*960)/8+$100)
 #else
 scrsize equ ((640*400)/8+$300)
@@ -1143,9 +1231,10 @@ cooFPU:     movea.l   a2,sp
             bset      #0,-3(a0)                 /* SFP004 present */
 cooFPU3:    move.l    a1,(_buserror).w
             movea.l   a2,sp
+
 #else
 
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 			tst.b     STEFlag                   /* no STE hardware available? */
 			beq.s     cooVDO                    /* (correct) */
 			move.l    #$5F56444F,(a0)+			/* '_VDO' */
@@ -1216,6 +1305,28 @@ nofdc:
         movea.l   a7,a3         /* save SP */
         move.l    #nofpu,(_lineftrap).w
         move.l    #nofpu,(_coprovio).w
+#if TP_50 /* PAK */
+/*
+ * SE: (29.10.93)
+ * Cookie-Test der FPU pr„zisiert
+ */
+			moveq     #0,d1
+			dc.w      $f327      /* fsave -(a7) */
+			move.b    1(a7),d0
+			cmpi.b    #$18,d0
+			beq.s     is881
+			cmpi.b    #$38,d0
+			beq.s     is882
+			cmpi.b    #$40,d0
+			bne.s     linef_emu
+			addq.w    #2,d1
+is882:		addq.w    #2,d1
+is881:		addq.w    #2,d1
+linef_emu:	addq.w    #2,d1
+nofpu:		swap      d1
+			move.l    d1,(a0)+
+#else
+
 #if OS_COUNTRY == CTRY_PL
         D0_FP0
 #else
@@ -1225,6 +1336,8 @@ nofdc:
         bra.s     fpudone
 nofpu:
         clr.l     (a0)+
+#endif /* TP_50 */
+
 fpudone:
         move.l    a1,(_lineftrap).w /* restore Line-F trap */
         move.l    a2,(_coprovio).w
@@ -1240,7 +1353,7 @@ nosfp:
         move.l    a1,(_buserror).w
         movea.l   a2,a7         /* restore SP */
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | TP_50
 /* check wether fast ram buffer is needed */
         tst.l     (_ramtop).w
         beq.s     frbdone
@@ -1352,7 +1465,7 @@ ikbdwait:
  * check monitor type, and set boot resolution
  */
 #if TOSVERSION >= 0x400
-		moveq.l   #3,d1
+		moveq.l   #FALCONREZ,d1
 		move.w    (falcon_videomode).w,d2
 		bne.s     nocompat
 		move.w    #$0082,d2
@@ -1364,27 +1477,27 @@ nocompat:
 
             move.b    #$80,(LcdPControl).w      /* LCD display on */
             move.b    #$80,(LcdPShadow).w       /* LCD display shadow register */
-            moveq     #2,d1                     /* Switch to 640x400x1 */
+            moveq     #STHIGH,d1                /* Switch to 640x400x1 */
             lea       setvb1(pc),a6
             bra       waitvbl
 setvb1:     move.b    d1,(v_shf_mod).w          /* set rez hardware register */
 
 #else
-#if TOSVERSION < 0x300
-			moveq     #0,d1						/* Switch to 320x200x4 */
+#if (TOSVERSION < 0x300) | TP_50 /* PAK */
+			moveq     #STLOW,d1					/* Switch to 320x200x4 */
 			btst      #7,(MFP_GPIP).w			/* monochrome monitor connected? */
 			bne.s     nomonomon					/* (no) */
-			moveq     #2,d1                     /* Switch to 640x400x1 */
+			moveq     #STHIGH,d1                /* Switch to 640x400x1 */
 nomonomon:
             lea       setvb1(pc),a6
             bra       waitvbl
 setvb1:     move.b    d1,(v_shf_mod).w          /* set rez hardware register */
 
 #else
-        moveq.l   #4,d1                     /* assume color, video mode 640x480x16 */
+        moveq.l   #TTMED,d1                 /* assume color, video mode 640x480x16 */
         btst      #7,(MFP_GPIP).w			/* monochrome monitor connected? */
         bne.s     moncolor
-        moveq.l   #6,d1                     /* Switch to 1280x960x1 */
+        moveq.l   #TTHIGH,d1                /* Switch to 1280x960x1 */
 moncolor:
         move.b    d1,(shift_tt).w   /* set TT shifter video mode */
 #endif
@@ -1547,11 +1660,11 @@ logocol3:
         nop
 #else
         move.b    (_sshiftmod).w,d0
-        cmp.b     #2,d0            /* ST-High resolution? */
+        cmp.b     #STHIGH,d0       /* ST-High resolution? */
         beq.s     logomono
-        cmp.b     #6,d0
+        cmp.b     #TTHIGH,d0
         beq.s     logomono         /* TT-High resolution? */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50 /* PAK */
         adda.w    #((640/8)*4)*4,a1  /* start at screen line 4 */
 #else
         adda.w    #((320/8)*4)*4,a1  /* start at screen line 4 */
@@ -1566,7 +1679,7 @@ logocol2:
         move.w    d2,(a1)+
         move.w    d2,(a1)+
         dbf       d1,logocol2
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50 /* PAK */
         adda.w    #(640/8-12)*4,a1
 #else
         adda.w    #(320/8-12)*4,a1
@@ -1574,7 +1687,7 @@ logocol2:
         dbf       d0,logocol1
         bra.s     logodone
 logomono:
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50 /* PAK */
         adda.w    #(1280/8)*4,a1   /* start at screen line 4 */
 #else
         adda.w    #(640/8)*4,a1    /* start at screen line 4 */
@@ -1585,7 +1698,7 @@ logomon1:
 logomon2:
         move.b    (a0)+,(a1)+
         dbf       d1,logomon2
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50 /* PAK */
         adda.w    #(1280/8)-12,a1
 #else
         adda.w    #(640/8)-12,a1
@@ -1693,7 +1806,11 @@ crccheck:
         bne.s     crcfail
         addq.l    #1,a5
         dbf       d6,crccheck
+#if TP_50 /* PAK */
+        bra       crcok
+#else
         bra.s     crcok
+#endif
 crcmsg: dc.b 'WARNING: BAD ROM CRC IN CHIP ',0
 crcmsg2 dc.b '.',13,10,0
 crcfail:
@@ -1724,6 +1841,19 @@ chipE2:
         trap      #1
         addq.w    #6,a7
         addq.l    #1,a5
+#if TP_50 /* PAK */
+/*
+ * Wegen der Static-RAMs erh”htes Risiko fr zerschossenes TOS
+ * daher nach der Warnung eine Endlosschleife.
+ */
+#if !TP_51 /* StaticRam */
+		lea      _main(pc),a0
+		cmp.l    #$e00000,a0
+		beq.s    chipE4
+#endif
+chipE3: bra.s chipE3
+chipE4:
+#endif
         dbf       d6,crccheck
 crcok:
 
@@ -1734,7 +1864,11 @@ crcok:
  * ??? a bit too late, after displaying error messages
  */
 #if TOSVERSION >= 0x300
-        cmpi.b    #$06,(_sshiftmod).w         /* TT high? */
+#if TP_50 /* PAK */
+        cmpi.b    #STHIGH,(_sshiftmod).w         /* ST high? */
+#else
+        cmpi.b    #TTHIGH,(_sshiftmod).w         /* TT high? */
+#endif
         beq.s     nosetrez
         move.l    #$000BFFFF,-(a7)
         trap      #13                         /* Kbshift(-1) */
@@ -2002,19 +2136,31 @@ dmadone:
 #if TOSVERSION < 0x300
 	    moveq	  #16,d4     /* d4 = device (IDE0) */
 #else
+#if TP_50 /* PAK */
+/*
+ * c't 9/92 / SE (21.09.93):
+ * Bootpreference nicht aus SCU holen, sondern direkt in D0 schreiben.
+ * (korrigiert zu MOVEQ #$80,D0)
+ */
+        moveq     #$80,d0
+        moveq.l   #8,d4      /* d4 = device (SCSI0) */
+#else
         jsr       scsirst
         moveq.l   #8,d4      /* d4 = device (SCSI0) */
         move.b    (scu_gp1).w,d0
+#endif
         and.w     #$00F8,d0
         move.w    d0,(_bootpref).w
         bne.s     confdone
+#if !TP_50 /* PAK */
         pea.l     (_bootpref).w
-        move.w    #$0002,-(a7)
+        move.w    #2,-(a7)
         clr.l     -(a7)
         jsr       _nvmaccess /* read first 2 bytes of nvram (bootpref) */
-        adda.w    #$000A,a7
+        adda.w    #10,a7
         tst.w     d0
         beq.s     confdone
+#endif
 #endif
 #endif
 
@@ -2035,7 +2181,7 @@ dmadev:
         move.w    #$0001,-(a7)         /* count = 1 */
         clr.l     -(a7)                /* sectnum = 0 */
         jsr       _dmaread             /* read first sector of this device */
-        adda.w    #$000C,a7
+        adda.w    #12,a7
         move.w    (a7)+,d1
         tst.l     d0                   /* read successful? */
         beq.s     dmaok                /* yes -> */
@@ -2155,7 +2301,7 @@ bios_unimpl:
  *       Uses:           d0.w, a1
  *       Called-by:      Coldstart memory-sizing routine.
  */
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 memchk0:
 #endif
 /* 306: unused */
@@ -2181,7 +2327,7 @@ memchk2:
  */
 /* 306de: 00e00c06 */
 /* 206de: 00e00bb2 */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50
 memchk0:
 #endif
 memchk:
@@ -2286,7 +2432,11 @@ vbl_next:
         move.w    sr,-(a7)
         ori.w     #$0700,sr
 moncheck:
+#if TP_50 /* PAK ?why? */
+		move.b    #0,d0
+#else
         move.b    ((sndmactl)+1).w,d0
+#endif
         move.b    (MFP_GPIP).w,d1
         btst      #7,d1
         sne       d1
@@ -2295,48 +2445,52 @@ moncheck:
         sne       d2
         cmp.b     d1,d2
         bne.s     moncheck
+#if TP_50 /* PAK ?why? */
+		move.b    #0,d0
+#else
         cmp.b     ((sndmactl)+1).w,d0
+#endif
         bne.s     moncheck
         move.w    (a7)+,sr
         btst      #0,d0
         beq.s     nomoncheck
         not.b     d1
 nomoncheck:
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 		move.b    (v_shf_mod).w,d0
 		and.b     #3,d0
-		cmp.b     #2,d0
+		cmp.b     #STHIGH,d0
 		bge.s     vbl_wasmono
 #else
         move.b    (shift_tt).w,d0
-        and.b     #$07,d0
-        cmp.b     #$06,d0
+        and.b     #7,d0
+        cmp.b     #TTHIGH,d0
         beq.s     vbl_wasmono
 #endif
         btst      #7,d1
         bne.s     vbl_nomonchg
         bsr       dovsync
-#if TOSVERSION < 0x300
-		move.b    #2,d0
+#if (TOSVERSION < 0x300) | TP_50
+		move.b    #STHIGH,d0
 #else
-        move.b    #$06,d0
+        move.b    #TTHIGH,d0
 #endif
         bra.s     vbl_monchg
 vbl_wasmono:
         btst      #7,d1
         beq.s     vbl_nomonchg
         move.b    (_defshiftmod).w,d0
-#if TOSVERSION < 0x300
-		cmp.b     #2,d0
+#if (TOSVERSION < 0x300) | TP_50
+		cmp.b     #STHIGH,d0
 		blt.s     vbl_monchg
 #else
-        cmp.b     #$06,d0
+        cmp.b     #TTHIGH,d0
         bne.s     vbl_monchg
 #endif
-        clr.b     d0
+        clr.b     d0 /* STLOW */
 vbl_monchg:
         move.b    d0,(_sshiftmod).w
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 		move.b    d0,(v_shf_mod).w
 #else
         move.b    (shift_tt).w,d1
@@ -2487,7 +2641,7 @@ bx_sp_ok:
         move.w    d0,d1
         lsl.w     #2,d1                  /* function table is 1 LW per number so multiply function number by 4 */
         move.l    0(a0,d1.w),d1          /* get function address */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | TP_50
         bclr      #0,d1                  /* indirect call? */
         movea.l   d1,a0
         beq.s     bx_notindirect
@@ -2515,10 +2669,10 @@ trph3:  move.l    (a1)+,-(a7)            /* return adress */
 /* ------ jump table for BIOS functions: */
 /* 306de: 00e00dfa */
 /* 206de: 00e00da4 */
-#if TOSVERSION < 0x300
-#define INDIRECT $80000000
-#else
+#if (TOSVERSION >= 0x300) | TP_50
 #define INDIRECT 1
+#else
+#define INDIRECT $80000000
 #endif
 bios_vecs:
         dc.w 12
@@ -2613,7 +2767,7 @@ xbios_vecs:
         dc.l bios_unimpl
         dc.l bios_unimpl
         dc.l _blitmode
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50
         dc.l bios_unimpl
         dc.l bios_unimpl
         dc.l bios_unimpl
@@ -2895,7 +3049,7 @@ _getmpb:
         move.l    d0,8(a1)           /* themd.m_length = memtop - membot; */
         clr.l     12(a1)             /* themd.m_own = NULL; */
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | TP_50
         cmpi.l    #$1357BD13,_ramvalid
         bne.s     getmpb1
         cmpi.l    #FASTRAMBASE,_ramtop
@@ -2992,12 +3146,12 @@ _getrez:
         move.b    (_sshiftmod).w,d0         /* get screen rezolution */
         and.b     #3,d0                     /* strip garbage bits */
 #else
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) | TP_50
 		move.b    (v_shf_mod).w,d0          /* get screen rezolution */
         and.b     #3,d0                     /* strip garbage bits */
 #else
         move.b    (shift_tt).w,d0
-        and.b     #$07,d0
+        and.b     #7,d0
 #endif
 #endif
         rts
@@ -3031,7 +3185,7 @@ nosetp:
         bmi.s     nosetr
         bsr       dovsync                    /* wait for start of vertical-blank */
         move.b    13(a7),(_sshiftmod).w      /* set software shadow */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50
         move.b    (shift_tt).w,d0            /* set hardware location */
         and.b     #$F8,d0
         or.b      13(a7),d0
@@ -3041,7 +3195,7 @@ nosetp:
 #endif
         clr.w     (_vblsem).w                /* disable vblank processing */
         jsr       esc_init                   /* re-initialize glass tty routines */
-        move.w    #$0001,(_vblsem).w         /* re-enable vblanks */
+        move.w    #1,(_vblsem).w             /* re-enable vblanks */
 nosetr:
         rts
 
@@ -3168,11 +3322,45 @@ any_vec1:
  *
  */
 drawbombs:
-        move.b    (_sshiftmod).w,d7
-#if TOSVERSION >= 0x300
-        and.w     #$0007,d7
+#if (TP_50 & TP_52) | TP_62 /* (PAK & Grafik_Bombs) | LOGO */
+/*
+ * Bombenausgabe auf Grafikkarten/Grafikerweiterungen u.„.
+ *
+ * Schwierigkeiten:
+ * Auf Grafikkarten ohne Bitplanes (zB MegaVision300) werden die Bomben in
+ * Farbe nicht korrekt ausgegeben.
+ */
+	lea       (lineavars).w,a2
+	move.w    (a2),d7   /* LA_PLANES */
+	subq.w    #1,d7
+	moveq     #0,d4
+	move.w    -2(a2),d4 /* V_BYTES_LIN */
+	movea.l   (_v_bas_ad).w,a0
+	move.w    -4(a2),d0 /* V_REZ_VT */
+	lsr.w     #1,d0
+	mulu      d4,d0
+	adda.l    d0,a0
+	lea       bombimage(pc),a1
+	moveq     #$f,d6
+drawbo4:
+	move.w    d1,d2
+	movea.l   a0,a2
+drawbo5:
+	move.w    d7,d5
+drawbo6:
+	move.w    (a1),(a2)+
+	dbf       d5,drawbo6
+	dbf       d2,drawbo5
+	addq.w    #2,a1
+	adda.w    d4,a0
+	dbf       d6,drawbo4
+	rts
 #else
-        and.w     #$0003,d7
+        move.b    (_sshiftmod).w,d7
+#if (TOSVERSION >= 0x300) & !TP_50
+        and.w     #7,d7
+#else
+        and.w     #3,d7
 #endif
         add.w     d7,d7                      /* d7 = rez index */
         moveq.l   #0,d0
@@ -3185,7 +3373,7 @@ drawbombs:
         move.b    (v_bas_l).w,d0
 drawbo1:
         movea.l   d0,a0                      /* a0 -> base of mem to draw at */
-        cmp.w     #$0006,d7
+        cmp.w     #TTHIGH,d7
         blt.s     drawbo2
         adda.l    #80*960,a0
         bra.s     drawbo3
@@ -3216,6 +3404,7 @@ dplanetab:        /* number of planes - 1, indexed by resolution */
         dc.w      3,1,0,0,3,0,0,7
 dwidthtab:        /* number of bytes per screen line, indexed by resolution */
         dc.w      320*4/8,640*2/8,640/8,0,640*4/8,0,1280/8,320*8/8
+#endif
 
 
 /*
@@ -3427,10 +3616,29 @@ autosca4:
 /* 306de: 00e014f6 */
 /* 206de: 00e013b2 */
 bombimage:
-#if TP_16 /* PILZE */
-        dc.w $07c0,$1ff0,$3bf8,$77f4,$b7fa,$bbfa,$dff6,$66fc,$3288,$0280,$0440,$0440,$0540,$0520,$0920,$0920
-#else
-        dc.w $0600,$2900,$0080,$4840,$11f0,$01f0,$07fc,$0ffe,$0dfe,$1fff,$1fef,$0fee,$0fde,$07fc,$03f8,$00e0
+#if TP_16 == 0 /* Bomb */
+        dc.b $06,$00,$29,$00,$00,$80,$48,$40,$11,$f0,$01,$f0,$07,$fc,$0f,$fe
+        dc.b $0d,$fe,$1f,$ff,$1f,$ef,$0f,$ee,$0f,$de,$07,$fc,$03,$f8,$00,$e0
+#endif
+#if TP_16 == 1 /* PILZE */
+        dc.b $07,$c0,$1f,$f0,$3b,$f8,$77,$f4,$b7,$fa,$bb,$fa,$df,$f6,$66,$fc
+        dc.b $32,$88,$02,$80,$04,$40,$04,$40,$05,$40,$05,$20,$09,$20,$09,$20
+#endif
+#if TP_16 == 2 /* Atari logo */
+		dc.b $00,$00,$05,$a0,$05,$a0,$05,$a0,$05,$a0,$05,$a0,$05,$a0,$0d,$b0
+		dc.b $0d,$b0,$1d,$b8,$3d,$bc,$f9,$9f,$f9,$9f,$f1,$8f,$e1,$87,$00,$00
+#endif
+#if TP_16 == 3 /* Pfeifenkopf */
+		dc.b $07,$f0,$0f,$f8,$1f,$ec,$18,$04,$18,$04,$10,$04,$1e,$3c,$17,$54
+		dc.b $11,$04,$0b,$28,$0d,$d8,$06,$28,$07,$d0,$2e,$10,$39,$e0,$38,$00
+#endif
+#if TP_16 == 4 /* Stinkefinger */
+		dc.b $0c,$00,$12,$00,$11,$00,$09,$00,$09,$f0,$04,$a8,$1c,$a4,$26,$54
+		dc.b $22,$04,$28,$04,$3c,$04,$44,$02,$40,$02,$30,$02,$0e,$02,$01,$01
+#endif
+#if TP_16 == 5 /* Skull */
+		dc.b $07,$E0,$08,$10,$16,$68,$16,$68,$10,$08,$09,$90,$08,$10,$0B,$D0
+		dc.b $04,$20,$33,$CC,$2C,$34,$13,$C8,$0C,$30,$13,$C8,$2C,$34,$30,$0C
 #endif
 
 /*
@@ -3626,6 +3834,46 @@ noblitter:
 /* 306de: 00e0162e */
 /* 206de: 00e01506 */
 mfpdelay:
+
+#if TP_50 & !TP_55 /* PAK & !HasTTMfp */
+
+/*
+ * SE: (13.10.93)
+ * Delay-Routine:
+ * Zeitmessung von Timer C im TT-MFP auf Timer C im ST-MFP verlegt.
+ * Zur Messung wird Polling von TCDR verwendet (Aufl”sung 26 usec).
+ *
+ * Nicht n”tig, wenn ein TT-MFP existiert.
+ *
+ * FIXME: bad idea, Timer-C is also used for 200hz timer
+ * could just use MFP Timer-A, as the 2.06 version
+ */
+      movem.l   a0/d0-d1,-(a7)
+      moveq     #0,d1
+      move.b    d0,d1
+      bne.s     mfpdela1
+      move.w    #$100,d1
+mfpdela1:
+	  lsr.w     #8,d0
+      andi.w    #7,d0
+      move.b    mfpdeltab(pc,d0.w),d0
+      mulu      d0,d1
+      lsr.l     #4,d1
+      addq.l    #2,d1
+      lea       (MFP_TCDR).w,a0
+mfpdela2:
+	  move.b    (a0),d0
+mfpdela3:
+	  cmp.b     (a0),d0
+      beq.s     mfpdela3
+      dbf       d1,mfpdela2
+      movem.l   (a7)+,a0/d0-d1
+      rts
+mfpdeltab:
+	  dc.b      0,1,3,4,13,16,25,50
+
+#else
+
         bsr.s     timerc
 mfpdela1:
 #if TTMFP_SUPPORT
@@ -3678,6 +3926,8 @@ timerc:
         rol.w     #8,d0
 #endif
         rts
+
+#endif /* TP_50 & !TP_55 */
 
 /*
  *
@@ -3744,10 +3994,146 @@ zerom4:
 
 		text
 
+#if TP_50 /* PAK */
+/*
+ * Einen Teil der Initialisierung des Shifters verschoben.
+ */
+VDOSkip1:
+		bsr.s altsync
+#if TP_02 /* COLOR_60HZ */
+        move.b    #0,(v_syncmod).w          /* yes -- twiddle to 60hz */
+#else
+        move.b    #2,(v_syncmod).w          /* yes -- twiddle to 50hz */
+#endif
+		rts
+
+VDOSkip2:
+		bsr.s altsync
+		move.b    d1,(v_shf_mod).w
+		rts
+
+altsync:
+#if !TP_57 /* Alt_Sync */
+      lea       (MFP_TBDR).w,a0
+      lea       (MFP_TBCR).w,a1
+      bclr      #0,(MFP_IERA).w
+      moveq     #1,d4
+      clr.b     (a1)
+      move.b    #$f0,(a0)
+      move.b    #8,(a1)
+altsync1:
+	  cmp.b     (a0),d4
+      bne.s     altsync1
+altsync2:
+      move.b    (a0),d4
+      move.w    #616-1,d3
+altsync3:
+	  cmp.b     (a0),d4
+      bne.s     altsync2
+      dbf       d3,altsync3
+      move.b    #$10,(a1)
+#else
+      move.b    (v_bas_h).w,d3
+      move.b    (v_bas_m).w,d4
+      lea       ($ffff8205).w,a0
+      lea       ($ffff8207).w,a1
+altsync1:
+      cmp.b     (a0),d3
+      bne.s     altsync2
+      cmp.b     (a1),d4
+      beq.s     altsync1
+altsync2:
+      cmp.b     (a0),d3
+      bne.s     altsync2
+      cmp.b     (a1),d4
+      bne.s     altsync2
+#endif
+		rts
+
+/*
+ * Initialisierung des DMA-Sound.
+ */
+#if 0 /* not needed for source patch; already done above */
+InitDMASound:
+      movea.l   a7,a6
+      lea       initdma5(pc),a0
+      move.l    a0,(_buserror).w
+      clr.w     (sndmactl).w
+      st        (_has_dmasound).w
+      lea       initdma1(pc),a0
+      move.w    (a0)+,(mwmask).w
+      bra.s     initdma4
+initdma1:
+      dc.b      $0f,$fe,$09,$d1,$0a,$a9,$0a,$29
+      dc.b      $09,$0d,$08,$8d,$08,$03,$00,$00
+initdma2:
+      move.w    d0,(mwdata).w
+initdma3:
+      tst.w     (mwdata).w
+      bne.s     initdma3
+initdma4:
+      move.w    (a0)+,d0
+      bne.s     initdma2
+initdma5:
+      movea.l   a6,a7
+      move.b    #90,(v_bas_l).w
+      tst.b     (v_bas_m).w
+      move.b    (v_bas_l).w,d0
+      cmp.b     #90,d0
+      bne.s     initdma6
+      clr.b     (v_bas_l).w
+      tst.w     (palette).w
+      tst.b     (v_bas_l).w
+initdma6:
+      sne       (STEFlag).w
+      rts
+#endif
+
+/*
+ * Cookie-Check _VDO und _MCU aus TOS 2.06.
+ * Hope it works, bisher nicht getestet.
+ */
+#if 0 /* not needed for source patch; same functionality as in 2.06 */
+MCHTest:
+      move.l    #$5f56444f,(a0)+    /* "_vdo" */
+      tst.b     (STEFlag).w
+      beq.s     mchtest1
+      clr.l     (a0)+
+      clr.l     d0
+      bra.s     mchtest4
+mchtest1:
+	  move.l    #$00010000,(a0)+
+      move.l    #$00010000,d0
+      movea.l   (_buserror).w,a1
+      lea       mchtest2(pc),a2
+      move.l    a2,(_buserror).w
+      movea.l   a7,a2
+      tst.b     (scu_gp1).w
+      move.w    #$10,d0
+      bra.s     mchtest3
+mchtest2:
+      clr.w     d0
+      movea.l   a2,a7
+      lea       mchtest3(pc),a3
+      move.l    a3,(_buserror).w
+      tst.b     $fff00039.l
+      move.w    #8,d0
+mchtest3:
+      move.l    a1,(_buserror).w
+      movea.l   a2,a7
+mchtest4:
+      move.l    #$5f4d4348,(a0)+    /* "_mch" */
+      move.l    d0,(a0)+
+      rts
+#endif
+
+#endif /* TP_50 */
+
+
 /*
  * XBIOS #80 - EsetShift
  */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) & !TP_50
 /* 306de: 00e01756 */
 _esetshift:
         bsr       dovsync
@@ -3759,7 +4145,7 @@ _esetshift:
         move.b    d0,(_sshiftmod).w
         clr.w     (_vblsem).w
         jsr       esc_init
-        move.w    #$0001,(_vblsem).w
+        move.w    #1,(_vblsem).w
         move.w    (a7)+,d0
         rts
 
@@ -4309,7 +4695,7 @@ ikbd_wr1:
         move.b    (a1),d2                       /* grab keyboard status */
         btst      #1,d2
         beq.s     ikbd_wr1
-#if TTMFP_SUPPORT
+#if TTMFP_SUPPORT | TP_50
         move.w    #$0400,d0
         bsr       mfpdelay
 #else
@@ -4463,7 +4849,7 @@ initmfp:
         moveq.l   #1,d1                         /* init for /4 for 9600 baud */
         moveq.l   #2,d2                         /* init for 9600 baud */
         bsr       settimer                      /* branch to out timer initialier... */
-        move.b    #$01,(rs232iorec+baudrate).w  /* baudreate = 9600 */
+        move.b    #$01,(rs232iorec+baudrate).w  /* baudrate = 9600 */
 
 /* now init the 3 rs232 chip registers */
         lea.l     (MFP_REGS).w,a0
@@ -4476,7 +4862,7 @@ initmfp:
         movep.l   d0,MFP_SCR-MFP_REGS(a0)       /* inits scr,ucr,rsr,tsr */
         move.b    #$01,(MFP_TCDCR+(TTMFP_REGS-MFP_REGS)).w /* timer c+d control register: delay 1:4 */
         move.b    #$02,(MFP_TDDR+(TTMFP_REGS-MFP_REGS)).w  /* timer d data register */
-        move.b    #$01,(mdm3iorec+baudrate).w   /* baudreate = 9600 */
+        move.b    #$01,(mdm3iorec+baudrate).w   /* baudrate = 9600 */
 #endif
 
         tst.b     STEFlag
@@ -5371,7 +5757,7 @@ initdevstables:
         movea.l   (_buserror).w,a2
         move.l    #initdevnoscc,(_buserror).w
         tst.b     (scu_gp1).w
-        move.w    #rs232devs,d0                 /* also 2 SCC RS232 are available */
+        move.w    #3,d0                         /* also 2 SCC RS232 are available */
 initdevnoscc:
         movea.l  a1,sp
         move.l    a2,(_buserror).w
@@ -5534,7 +5920,7 @@ initscc:
 initscc1:
         move.l    (a1)+,(a0)+
         dbf       d0,initscc1
-#if TOSVERSION >= 0x300
+#if TOSVERSION >= 0x300 & !TP_50 /* PAK: MSTE does not have SCCDMA */
         clr.w     ($FFFF8C14).w
 #endif
         bsr.s     nolan
@@ -7038,7 +7424,7 @@ coldboo3:   move.l    d0,(a0)+
             jmp       (a0)
 
 #else
-#if TOSVERSION < 0x300
+#if (TOSVERSION < 0x300) & !TP_50
 			move.w    #(coldbend-coldboor)/4-1,d0
 			lea       coldboor(pc),a0
 			movea.w   #$000c,a1
@@ -7062,9 +7448,25 @@ coldbend:  ds.b 0
         D0_CACR
         moveq.l   #0,d0
         D0_VBR
+#if TP_50
+/*
+ * SE: (26.10.93)
+ * Das gleiche Prozessorunabh„ngig:
+ * MMU-Deinitialisierung vor Kaltstart.
+ */
+        lea       coldboo0(pc),a0
+        move.l    a0,(_illinst).w
+        move.l    a0,(_lineftrap).w
+        lea       zero2,a0
+        TO_TC_A0
+        TO_TTR0_A0
+        TO_TTR1_A0
+coldboo0:
+#else
         TO_TC(zero2)   /* disable PMMU and address translation */
         TO_TTR0(zero2)
         TO_TTR1(zero2)
+#endif
 /* copy erase routine to low memory */
         move.w    #(coldbend-coldboor)/4-1,d0
         lea.l     coldboor(pc),a0
@@ -7470,7 +7872,6 @@ _bioskeys:
         rts
 #else
 /* 404: 00e03b90 */
-_bioskeys:
 #endif
 
 /*************************************************************************
@@ -7912,7 +8313,7 @@ cooksize equ NCOOKIES*2*4
 		xdef _bootpref
 		comm _bootpref,2
 
-#if (TOSVERSION >= 0x300)
+#if (TOSVERSION >= 0x300) | TP_50
 		xdef _altmd
 		comm _altmd,16
 #endif

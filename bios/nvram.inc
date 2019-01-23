@@ -133,7 +133,7 @@ nvramfail:
         rts
 
 /*
- * XBIOS +42 - NVMaccess
+ * XBIOS #42 - NVMaccess
  */
 /* 306de: 00e0208c */
 _nvmaccess:
@@ -272,12 +272,24 @@ checkRTC:   movea.w   #rtc_sec,a0
             move.l    #chkRTC2,(_buserror).w
             bset      #0,$1b(a0)
             move.l    d2,(_buserror).w
+#if !BINEXACT
+/* preserve old value */
+            movep.w   5(a0),d0
+            move.w    d0,-(a7)
+#endif
             move.w    #$a05,d0
             movep.w   d0,5(a0)
             movep.w   5(a0),d1
             and.w     #$f0f,d1
             cmp.w     d0,d1
+#if BINEXACT
             bne.s     chkRTC3
+#else
+            bne.s     chkRTC2
+/* restore old value */
+            move.w    (a7)+,d0
+            movep.w   d0,5(a0)
+#endif
             move.b    #1,1(a0)
             bclr      #0,$1b(a0)
             move.b    #0,$1d(a0)
@@ -286,7 +298,7 @@ chkRTC2:    movea.l   a2,sp
             move.l    d2,(_buserror).w
 chkRTC3:    ori       #1,ccr                    /* RTC not available */
             rts
-#endif
+#endif /* STBOOK */
 
 /* 206de: 00e01af8 */
 readRTCTime:bsr.s     checkRTC
@@ -462,7 +474,7 @@ daysOffsetToMonths:DC.W $0000,$001f,$003b,$005a
             DC.W      $0078,$0097,$00b5,$00d4
             DC.W      $00f3,$0111,$0130,$014e
 
-#endif
+#endif /* MSTECLK */
 
 
 #if MSTECLK
@@ -583,6 +595,154 @@ enawtimDone:moveq     #0,d0
 enawtim3:   clr.l     waketimeAlarm
             moveq     #-1,d0
             rts
+#endif /* MSTECLK */
+
+#if 0 /* original functions from tospatch; no longer needed */
+
+/*
+ ********************************************************************************
+ * RTC-Patches:
+ * Die Megauhr soll ja wohl auch ausgelesen werden, oder?
+ * Da das 3.06 natÅrlich nichts von der Mega-Uhr weiû, mÅssen hier andere
+ * Routinen rein.
+ *******************************************************************************
+ */
+xngetdt:
+      bsr       checkRTC
+      bcs.s     ngetdt1
+      bclr      #0,$1b(a0)
+      clr.l     d0
+      moveq     #1,d1
+      bsr.s     ngetdt2
+      asr.l     #1,d1
+      bfins     d1,d0{27:5}
+      moveq     #5,d1
+      bsr.s     ngetdt2
+      bfins     d1,d0{21:6}
+      moveq     #9,d1
+      bsr.s     ngetdt2
+      bfins     d1,d0{16:5}
+      moveq     #$f,d1
+      bsr.s     ngetdt2
+      bfins     d1,d0{11:5}
+      moveq     #$13,d1
+      bsr.s     ngetdt2
+      bfins     d1,d0{7:4}
+      moveq     #$17,d1
+      bsr.s     ngetdt2
+      bfins     d1,d0{0:7}
+      move      sr,d2
+      ori.w     #$700,sr
+      move.w    d0,_time.w
+      swap      d0
+      move.w    d0,_date
+      swap      d0
+      move      d2,sr
+ngetdt1:
+      rts
+ngetdt2:
+      move.b    0(a0,d1.w),d2
+      bsr.s     ngetdt3
+      andi.b    #$f,d2
+      move.b    2(a0,d1.w),d1
+      andi.b    #$f,d1
+      mulu      #$a,d1
+      add.b     d2,d1
+ngetdt3:
+      move.l    d0,-(a7)
+      move.w    #$101,d0
+      jsr       mfpdelay
+      move.l    (a7)+,d0
+      rts
+ngetdt4:
+      movea.l   a2,a7
+ngetdt5:
+      move.l    a1,(_buserror).w
+      ori.b     #1,ccr
+      rts
+ngetdt6:
+      move.l    a1,(_buserror).w
+      move.b    #1,1(a0)
+      move.b    #0,$1d(a0)
+      andi.b    #-2,ccr
+      rts
+	  dc.b 0,0,0,0
+
+
+/*
+ *****************************************************************
+ * se: (20.09.93)
+ * rtc auf neue zeit einstellen.
+ * erharlt die zeit im gemdos-format auf dem stack (4(sp)).
+ */
+
+writeRTCTime:
+      bsr       checkRTC
+      bcs       writeR9
+      bclr      #0,$1b(a0)
+      move.l    4(a7),d0
+      bfextu    d0{27:5},d1
+      andi.l    #$1f,d1
+      asl.l     #1,d1
+      moveq     #1,d2
+      bsr.s     writeR8
+      bfextu    d0{21:6},d1
+      andi.l    #$3f,d1
+      moveq     #5,d2
+      bsr.s     writeR8
+      bfextu    d0{16:5},d1
+      andi.l    #$1f,d1
+      moveq     #9,d2
+      bsr.s     writeR8
+      bfextu    d0{11:5},d1
+      andi.l    #$1f,d1
+      moveq     #$f,d2
+      bsr.s     writeR8
+      bfextu    d0{7:4},d1
+      andi.l    #$f,d1
+      moveq     #$13,d2
+      bsr.s     writeR8
+      bfextu    d0{0:7},d1
+      andi.l    #$7f,d1
+      moveq     #$17,d2
+writeR8:
+      move.l    d3,-(a7)
+      clr.l     d3
+      move.b    d1,d3
+      divu      #$a,d3
+      mulu      #$a,d3
+      sub.b     d3,d1
+      divu      #$a,d3
+      move.b    d1,0(a0,d2.w)
+      move.b    d3,2(a0,d2.w)
+      move.l    (a7)+,d3
+writeR9:
+      rts
+writeR10:
+      cmp.w     d1,d2
+      bne       ngetdt5
+      movep.w   d0,5(a0)
+      bra       ngetdt6
+      dc.b 0,0,0,0
+
+/*
+ *******************************************************************************
+ * se: (20.09.93)
+ * check, ob die uhr da ist.
+ */
+checkRTC:
+      movea.l   a7,a2
+      movea.l   (_buserror).w,a1
+      lea       ngetdt4(pc),a0          
+      move.l    a0,(_buserror).w
+      movea.w   #rtc_sec,a0
+      bset      #0,$1b(a0)
+      movep.w   5(a0),d0
+      move.w    #$a05,d1
+      movep.w   d1,5(a0)
+      movep.w   5(a0),d2
+      andi.w    #$f0f,d2
+      bra.s     writeR10
 #endif
 
 	bss

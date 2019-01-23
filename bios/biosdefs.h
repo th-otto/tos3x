@@ -38,16 +38,16 @@
  * Used when invalidating caches might be neccessary
  */
 #ifndef P68030
-#define P68030  (TOSVERSION >= 0x300)
+#define P68030  ((TOSVERSION >= 0x300) | TP_50)
 #endif
 
-#define NVRAM_SUPPORT (TOSVERSION >= 0x300)
+#define NVRAM_SUPPORT ((TOSVERSION >= 0x300) & !TP_50)
 
 #define STBOOK ((TOSVERSION >= 0x207) & (TOSVERSION <= 0x208))
 
-#define MSTECLK ((TOSVERSION >= 0x200) & (TOSVERSION < 0x300))
+#define MSTECLK (((TOSVERSION >= 0x200) & (TOSVERSION < 0x300)) | TP_50)
 
-#define TTMFP_SUPPORT ((TOSVERSION >= 0x300) & (TOSVERSION < 0x400))
+#define TTMFP_SUPPORT (((TOSVERSION >= 0x300) & (TOSVERSION < 0x400)) | (TP_50 & TP_55))
 
 #define SCC_SUPPORT ((TOSVERSION >= 0x300) & (TOSVERSION < 0x400))
 

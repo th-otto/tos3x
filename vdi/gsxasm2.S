@@ -71,7 +71,10 @@ _vtrap1:	PIXLA(a0)
 		rts
 
 
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300)
+#if !PLANES8
+#define trap14sav q_circle
+#endif
 /* 306de: 00e0c0b4 */
 		xdef	_vtrap14			; xbios trap
 _vtrap14:	PIXLA(a0)

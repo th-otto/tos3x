@@ -29,7 +29,7 @@ vs_col1:
         move.w    d5,PIXLV((INQ_TAB)+2,a4)
         move.w    d5,PIXLV((DEV_TAB)+78,a4)
 vs_col1a:
-        sub.w     #$0200,d5
+        sub.w     #512,d5
         movea.l   PIXLV(INTIN,a4),a0
         move.w    (a0)+,d0
         move.w    PIXLV(v_planes,a4),d1
@@ -37,7 +37,7 @@ vs_col1a:
         cmp.b     d4,d0
         bhi       vs_col10
         move.w    d0,d2
-        mulu.w    #$0006,d2
+        mulu.w    #6,d2
         lea.l     PIXLV(REQ_COL,a4),a1
         adda.w    d2,a1
         subq.w    #1,d1
@@ -111,16 +111,16 @@ vs_col10:
 vs_col11:
         tst.w     d5
         beq       vs_col12
-        cmp.w     #$0043,d1
+        cmp.w     #67,d1
         blt       vs_col14
-        cmp.w     #$03A6,d1
+        cmp.w     #934,d1
         blt       vs_col13
         move.w    #1000,d1
         rts
 vs_col12:
         cmp.w     #142,d1
         blt       vs_col14
-        cmp.w     #$035A,d1
+        cmp.w     #858,d1
         blt       vs_col13
         move.w    #1000,d1
 vs_col13:
@@ -242,5 +242,193 @@ cookvdo2:
         move.w    4(a0),d0
 cookvdo3:
         rts
+
+#endif
+
+#if 0 /* version from PAK patch */
+VS_COLOR:
+      movem.l   a0-a5/d3-d7,-(a7)
+      lea       (lineavars).w,a5
+      lea       l001a(pc),a0           
+      move.w    0(a5),d4
+      move.w    d4,d0
+      add.w     d0,d0
+      move.w    0(a0,d0.w),d7
+      movea.l   8(a5),a0 /* LA_INTIN */
+      move.w    (a0)+,d6
+      cmp.w     d7,d6
+      bhi       l0006
+      lea       -594(a5),a4 /* REQ_COL */
+      move.w    d6,d0
+      mulu      #6,d0
+      adda.l    d0,a4
+      move.w    (a0)+,(a4)+
+      move.w    (a0)+,(a4)+
+      move.w    (a0),(a4)
+      lea       -4(a0),a5 /* WTF? */
+      subq.w    #1,d4
+      beq.s     l0007
+      move.w    #512,d5
+      tst.b     (STEFlag).w
+      bne.s     l0000
+      move.w    #4096,d5
+l0000:move.w    d5,-780(a5) /* INQ_TAB[4] BUG: should be INQ_TAB[1] */
+      move.w    d5,-614(a5) /* DEV_TAB[39] */
+      sub.w     #512,d5
+      lea       _MAP_COL,a0
+      add.w     d6,d6
+      move.w    0(a0,d6.w),d6
+      and.w     d7,d6
+      moveq     #0,d3
+      moveq     #3,d7
+l0001:moveq     #0,d4
+      move.w    (a5)+,d4
+      bpl.s     l0002
+      moveq     #0,d4
+l0002:cmp.w     #1000,d4
+      bls.s     l0003
+      move.w    #1000,d4
+l0003:tst.w     d5
+      beq.s     l0004
+      mulu      #15,d4
+      add.l     #500,d4
+      divu      #1000,d4
+      lsr.w     #1,d4
+      bcc.s     l0005
+      or.w      #8,d4
+      bra.s     l0005
+l0004:add.w     #72,d4
+      divu      #143,d4
+l0005:lsl.w     #4,d3
+      or.w      d4,d3
+      subq.w    #1,d7
+      bne.s     l0001
+      lea       (palette).w,a0
+      add.w     d6,d6
+      move.w    d3,0(a0,d6.w)
+l0006:movem.l   (a7)+,a0-a5/d3-d7
+      rts
+l0007:moveq     #2,d5
+      move.w    d5,-780(a5) /* INQ_TAB[4] BUG: should be INQ_TAB[1] */
+      move.w    d5,-614(a5) /* DEV_TAB[39] */
+      moveq     #0,d3
+      moveq     #3,d7
+      move.w    #142,d0
+      move.w    #858,d1
+      tst.b     (STEFlag).w
+      bne.s     l0008
+      move.w    #67,d0
+      move.w    #934,d1
+l0008:move.w    (a5)+,d4
+      bmi.s     l000b
+      cmp.w     #1000,d4
+      bhi.s     l0009
+      cmp.w     d0,d4
+      blt.s     l000b
+      cmp.w     d1,d4
+      blt.s     l000a
+l0009:move.w    #1000,d4
+l000a:add.w     d4,d3
+l000b:subq.w    #1,d7
+      bne.s     l0008
+      tst.w     d3
+      beq.s     l000c
+      cmp.w     #3000,d3
+      bne.s     l000d
+      not.w     d6
+l000c:move.w    d6,(palette).w
+l000d:movem.l   (a7)+,a0-a5/d3-d7
+      rts
+
+VQ_COLOR:
+      movem.l   a0-a5/d3-d7,-(a7)
+      lea       (lineavars),a5
+      movea.l   4(a5),a0 /* LA_CONTROL */
+      move.w    #4,8(a0)
+      lea       l001a(pc),a0
+      move.w    0(a5),d4
+      move.w    d4,d0
+      add.w     d0,d0
+      move.w    0(a0,d0.w),d7
+      movea.l   8(a5),a0 /* LA_INTIN */
+      movea.l   16(a5),a3 /* LA_INTOUT */
+      move.w    (a0)+,d6
+      cmp.w     d7,d6
+      bls.s     l000e
+      move.w    #-1,(a3)
+      bra.s     l0014
+l000e:move.w    d6,(a3)+
+      lea       -594(a5),a4 /* REQ_COL */
+      move.w    d6,d0
+      mulu      #6,d0
+      adda.l    d0,a4
+      tst.w     (a0)
+      beq.s     l0015
+      subq.w    #1,d4
+      beq.s     l0016
+      move.w    #512,d5
+      tst.b     (STEFlag).w
+      bne.s     l000f
+      move.w    #4096,d5
+l000f:move.w    d5,-780(a5) /* INQ_TAB[4] BUG: should be INQ_TAB[1] */
+      move.w    d5,-614(a5) /* DEV_TAB[39] */
+      sub.w     #512,d5
+      lea       _MAP_COL,a0
+      add.w     d6,d6
+      move.w    0(a0,d6.w),d6
+      and.w     d7,d6
+      lea       (palette).w,a0
+      move.w    d6,d0
+      add.w     d0,d0
+      move.w    0(a0,d0.w),d3
+      addq.l    #6,a3
+      moveq     #3,d1
+l0010:move.w    d3,d0
+      tst.w     d5
+      beq.s     l0012
+      add.w     d0,d0
+      btst      #4,d0
+      beq.s     l0011
+      addq.w    #1,d0
+l0011:and.w     #$f,d0
+      add.w     d0,d0
+      move.w    l0018(pc,d0.w),-(a3)
+      bra.s     l0013
+l0012:and.w     #7,d0
+      add.w     d0,d0
+      move.w    l0019(pc,d0.w),-(a3)    
+l0013:lsr.w     #4,d3
+      subq.w    #1,d1
+      bne.s     l0010
+l0014:movem.l   (a7)+,a0-a5/d3-d7
+      rts
+l0015:move.w    (a4)+,(a3)+
+      move.w    (a4)+,(a3)+
+      move.w    (a4),(a3)
+      movem.l   (a7)+,a0-a5/d3-d7
+      rts
+l0016:moveq     #2,d5
+      move.w    d5,-780(a5) /* INQ_TAB[4] BUG: should be INQ_TAB[1] */
+      move.w    d5,-614(a5) /* DEV_TAB[39] */
+      move.w    (palette).w,d0
+      eor.w     d0,d6
+      moveq     #0,d0
+      and.w     #1,d6
+      beq.s     l0017
+      move.w    #1000,d0
+l0017:move.w    d0,(a3)+
+      move.w    d0,(a3)+
+      move.w    d0,(a3)
+      movem.l   (a7)+,a0-a5/d3-d7
+      rts
+
+l0018:dc.w      $0000,$0043,$0085,$00c8
+      dc.w      $010b,$014d,$0190,$01d3
+      dc.w      $0215,$0258,$029b,$02dd
+      dc.w      $0320,$0363,$03a5,$03e8
+l0019:dc.w      $0000,$008e,$011d,$01ac
+      dc.w      $023b,$02ca,$0359,$03e8
+l001a:dc.w      $0000,$0001,$0003,$0007
+      dc.w      $000f,$001f,$007f,$00ff
 
 #endif

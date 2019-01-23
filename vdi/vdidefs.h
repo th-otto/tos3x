@@ -31,7 +31,7 @@
  * Used when invalidating caches might be neccessary
  */
 #ifndef P68030
-#define P68030  (TOSVERSION >= 0x300)
+#define P68030  (TOSVERSION >= 0x300) | TP_50
 #endif
 
 #if TOSVERSION >= 0x206
@@ -54,7 +54,7 @@
  * set to 1 for supporting 8 planes interleaved video modes
  * (and corresponding 256 entries color palette)
  */
-#define PLANES8 (TOSVERSION >= 0x300)
+#define PLANES8 ((TOSVERSION >= 0x300) & (!TP_50 | (TOSVERSION >= 0x400)))
 
 /*
  * used to mark some strange looking code segments
