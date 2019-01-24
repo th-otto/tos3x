@@ -52,6 +52,9 @@ function changeFuji()
 	if (f.value == 6) {
 		i.src = "fuji/x.bmp";
 	}
+	if (f.value == 7) {
+		i.src = "fuji/intl_out.bmp";
+	}
 }
 function changeBombs()
 {

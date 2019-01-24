@@ -326,6 +326,7 @@
  * 4: Schegale
  * 5: UFP logo
  * 6: X
+ * 7: Intel Outside
  */
 #ifndef TP_33
 #define TP_33 0

@@ -654,6 +654,7 @@ Substitute starting fuji:
 <option value="4">Schegale</option>
 <option value="5">UFP logo</option>
 <option value="6">X</option>
+<option value="7">Intel Outside</option>
 </select>
 </td>
 <td>

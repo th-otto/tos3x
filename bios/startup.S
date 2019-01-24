@@ -1733,6 +1733,9 @@ atarilogo:
 #if TP_33 == 6
 #include "../tospatch/fuji/x.S"
 #endif
+#if TP_33 == 7
+#include "../tospatch/fuji/intl_out.S"
+#endif
 
 		text
 
