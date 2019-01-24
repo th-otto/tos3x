@@ -47,7 +47,7 @@ maps:
 help::
 	@echo ""
 	@echo "targets:"
-	@echo "   all       - build default configuration TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY)
+	@echo "   all       - build default configuration TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY)"
 	@echo "   clean     - remove temporary files"
 	@echo "   distclean - remove all generated files"
 	@echo ""

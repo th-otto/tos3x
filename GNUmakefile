@@ -49,6 +49,17 @@ rsync::
 	sudo chown -R wwwrun:www $(LOCAL_WWWDIR)
 	sudo chmod -R g+w $(LOCAL_WWWDIR)
 
+maps:
+	for lang in de us; do \
+		for version in 306 206 208; do \
+			$(MAKE) clean; \
+			$(MAKE) SYMBOLS=-s TOSVERSION=$${version} COUNTRY=$${lang} || exit 1; \
+			cnm -g glue/tos.img > glue/tos$${version}$${lang}.map; \
+		done; \
+	done
+	$(MAKE) clean
+	$(RM) glue/*.img glue/glue.*
+
 dosdir::
 	for i in $(SUBDIRS) lib; do $(MKDIR_P) $(DOSDIR)/$$i; done
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
@@ -73,3 +84,14 @@ dist::
 	(cd $(DISTDIR2); rm -f ../alcyon.tar.bz2; tar cvfj ../alcyon.tar.bz2 .)
 	test -d "$(WWWDIR)" && cp $(DISTDIR1)/../tos306de.tar.bz2 "$(WWWDIR)"
 	test -d "$(WWWDIR)" && cp $(DISTDIR2)/../alcyon.tar.bz2 "$(WWWDIR)"
+
+help::
+	@echo ""
+	@echo "targets:"
+	@echo "   all       - build default configuration TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY)"
+	@echo "   clean     - remove temporary files"
+	@echo "   distclean - remove all generated files"
+	@echo ""
+	@echo "The resulting output file will be glue/tos$(TOSVERSION)$(COUNTRY).img"
+	@echo ""
+	@echo "See $(top_srcdir)/config.mak for a list of valid configurations"

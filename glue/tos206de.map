@@ -1,4 +1,3 @@
-2004 global symbols 
 00000380 A _proc_li
 00000384 A _proc_dr
 000003a4 A _proc_ar
@@ -999,7 +998,9 @@
 00e21b86 T _err_tra
 00e21c28 T _dos_exe
 00e21ca2 T lmul
+00e21ca2 T _lmul
 00e21cf6 T ldiv
+00e21cf6 T _ldiv
 00e21daa T _back
 00e21e24 T _cli
 00e21e30 T _sti
@@ -1696,7 +1697,7 @@
 0000717c B _tiksav
 00007180 B _NUM_TIC
 00007184 B _CMP_TIC
-00007188 B TICKS
+00007188 B _TICKS
 0000718c B gstack
 000071ec B tstack
 0000724c B fspec
