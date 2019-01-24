@@ -157,17 +157,34 @@ PP(char **argv;)
 	fprintf(fp, "#include <compiler.h>\n\n");
 
 	fprintf(fp, "\n\n");
-	fprintf(fp, "#if TP_50 & TP_53\n\n");
-	fprintf(fp, "static char const fillup[] = {\n");
-	for (i = 0; i < 4094; i++)
-		fprintf(fp, "\t0, 0, 0, 0, 0, 0, 0, 0,\n");
-	fprintf(fp, "\t0, 0, 0, 0, 0, 0, 0, 0\n");
-	fprintf(fp, "};\n");
-	fprintf(fp, "static char const fillup2[] = {\n");
-	for (i = 0; i < 4094; i++)
-		fprintf(fp, "\t0, 0, 0, 0, 0, 0, 0, 0,\n");
-	fprintf(fp, "\t0, 0, 0, 0, 0, 0, 0, 0\n");
-	fprintf(fp, "};\n");
+	/*
+	 * PAK-trick to boot up the PAK ROMS with TOS 1.x on the mainboard.
+	 * For this to work, we have to move the resource after
+	 * the OSHEADER of the 2nd half of the ROM:
+	 *
+	 * - after reset, CPU loads $00FC0030 as initial PC (from TOS 1.xx on the mainboard)
+	 * - when accessing $00FC0030, the PAK-TOS will be accessed if enabled
+	 * - addresses as seen by PAK-ROMs: 
+	 *   F    C    0    0    3    0      ; this address is on the bus (hex)
+	 *   1111 1100 0000 0000 0011 0000   ; (bin)
+	 *   xxxx x100 0000 0000 0011 0000   ; this address will be seen by ROM (512 kBytes, bin)
+	 *   x    4    0    0    3    0      ; (hex)
+	 *
+	 * The constant RSCGAP is computed from the Makefile,
+	 * by linking the image without a resource first.
+	 */
+	fprintf(fp, "#if TP_50 & TP_53\n");
+	fprintf(fp, "#include \"rscend.h\"\n");
+	fprintf(fp, "#ifndef RSCGAP\n");
+	fprintf(fp, "error\n");
+	fprintf(fp, "#endif\n");
+	fprintf(fp, "#if RSCGAP != 0\n");
+	fprintf(fp, "#if RSCGAP < 0\n");
+	fprintf(fp, "error\n");
+	fprintf(fp, "#endif\n");
+	fprintf(fp, "static char const fillup[RSCGAP] = { 0 };\n");
+	fprintf(fp, "static char const bootjmp[] = { 0x4E,0xF9,0,0xE0,0,0 };\n");
+	fprintf(fp, "#endif\n");
 	fprintf(fp, "#endif\n\n");
 
 	fprintf(fp, "char const %s[] = {\n", symname);

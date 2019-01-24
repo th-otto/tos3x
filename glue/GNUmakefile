@@ -44,8 +44,17 @@ ROMSIZE = $(ROMSIZE_$(TOSVERSION))
 CARTBASE = E40000
 
 ifeq ($(USE_CROSS_ALCYON),1)
-tos.img: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o tosvars.o
+tos.img: $(STARTUP) $(LIBS) tosimg.tmp tosrsc$(COUNTRY).o vars.o tosvars.o
 	$(LINK68) '[abs,symbols,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
+
+# For the PAK/BootJmp option, we need to know the start of the resource area first
+tosimg.tmp: $(STARTUP) $(LIBS) rscend.o vars.o tosvars.o
+	$(LINK68) '[abs,symbols,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],rscend.o
+
+rscend.h: tosimg.tmp
+	tosrsc=`$(BIN)cnm $< | $(GREP) tosrsc | $(SED) -e 's/ .*$$//' -e 's/^00//' | $(TR) abcdef ABCDEF`; \
+	fill=`echo "16 i E40030 $$tosrsc - p" | $(DC)`; \
+	echo "#define RSCGAP $$fill" > $@
 endif
 
 cartridge.img: cartridge.o
@@ -70,9 +79,6 @@ vars.o: ../common/vars.S $(top_srcdir)/common/config.h
 tosvars.o: ../common/tosvars.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-fillup.o: fillup.S $(top_srcdir)/common/config.h
-	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
-
 include gluer.mak
 
 check:: $(IMG)
@@ -86,7 +92,7 @@ dosdir::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a $(IMG) tos.img cartridge.tmp cartridge.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h
+	$(RM) *.o *.a $(IMG) tos.img tosimg.tmp cartridge.tmp cartridge.img $(PROGRAMS) tosrsc*.c glue.* rscend.h $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak *.img

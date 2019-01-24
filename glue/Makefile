@@ -34,8 +34,23 @@ CARTBASE = E40000
 $(IMG): tos.img $(MKROM)
 	$(MKROM) pad $(ROMSIZE) $< $@
 
-tos.img: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o
+tos.img: $(STARTUP) $(LIBS) tosimg.tmp tosrsc$(COUNTRY).o vars.o
 	$(LD) -o $@ $(SYMBOLS) -a $(rombase) x 0 $(STARTUP) -x ..$(BS)bios$(BS)bios.a -x ..$(BS)vdi$(BS)vdi.a -x ..$(BS)bdos$(BS)bdos.a -x ..$(BS)aes$(BS)aes.a -x ..$(BS)desk$(BS)desk.a tosrsc$(COUNTRY).o vars.o
+
+tosimg.tmp: $(STARTUP) $(LIBS) rscend.o vars.o
+	$(LD) -o $@ -s -a $(rombase) x 0 $(STARTUP) -x ..$(BS)bios$(BS)bios.a -x ..$(BS)vdi$(BS)vdi.a -x ..$(BS)bdos$(BS)bdos.a -x ..$(BS)aes$(BS)aes.a -x ..$(BS)desk$(BS)desk.a rscend.o vars.o
+
+# For the PAK/BootJmp option, we need to know the start of the resource area first
+rscend.h: tosimg.tmp
+	$(BIN)cnm $< > rscend.1; \
+	$(GREP) tosrsc rscend.1 > rscend.2; \
+	$(SED) -e 's/ .*$$//' -e 's/^00//' rscend.2 > rscend.1; \
+	$(TR) abcdef ABCDEF < rscend.1 > rscend.2; \
+	echo "16 i E40030" > rscend.1; cat rscend.2 >> rscend.1; echo "- p" >> rscend.1; \
+	$(TR) -d '\015' < rscend.1 > rscend.2; \
+	$(DC) < rscend.2 > rscend.1; \
+	$(SED) -e 's/^/#define RSCGAP /' rscend.1 > $@; \
+	$(RM) rscend.1 rscend.2
 
 cartridge_ASFLAGS=-n
 
@@ -85,7 +100,7 @@ check: $(IMG)
 	$(CMP) $(CMPL) -x --ignore-initial=0x0:0x0 --offsets=0x$(rombase):0 $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img $(IMG)
 
 clean:
-	$(RM) *.o *.i $(IMG) tos.img cartridg.tmp cartridg.img $(PROGRAMS) tosrsc*.c glue.* $(top_srcdir)/common/config.h
+	$(RM) *.o *.i $(IMG) tos.img tosimg.tmp cartridg.tmp cartridg.img $(PROGRAMS) tosrsc*.c glue.* rscend.h $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak *.img

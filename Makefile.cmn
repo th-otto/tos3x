@@ -47,6 +47,9 @@ MKDIR = mkdir
 MKDIR_P = $(MKDIR) -p
 SED   = ${BIN}sed
 BC    = ${BIN}bc
+DC    = ${BIN}dc
+GREP  = ${BIN}grep
+TR    = ${BIN}tr
 
 CMP      = $(top_srcdir)$(BS)tools$(BS)cmprom$(BUILD_EXEEXT)
 MKGLUE   = $(top_srcdir)$(BS)tools$(BS)newglue$(BUILD_EXEEXT)

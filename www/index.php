@@ -763,7 +763,7 @@ works on all bitplane organized systems
 </td></tr>
 <tr><td></td><td></td><td>
 <input type="checkbox" id="tp_53" name="tp_53" value="1" checked="checked" disabled="disabled" />
-PAK-trick to boot up the PAK ROMS with FC-TOS on mainboard.
+PAK-trick to boot up the PAK ROMS with TOS 1.x on the mainboard.
 </td></tr>
 <tr><td></td><td></td><td>
 <input type="checkbox" id="tp_55" name="tp_55" value="1" disabled="disabled" />

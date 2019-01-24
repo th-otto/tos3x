@@ -564,8 +564,8 @@
  *   TP_52: Grafik_Bombs  1: Display bombs on graphic cards/extensions,
  *                           works on all bitplane organized systems
  *                        0: Display bombs on ST screen
- *   TP_53: BootJMP:      1: PAK-trick to boot up the PAK ROMS with FC-TOS
- *                           on mainboard.
+ *   TP_53: BootJMP:      1: PAK-trick to boot up the PAK ROMS with TOS 1.x
+ *                           on the mainboard.
  *                        0: don't use
  *   TP_55: HasTTMfp:     1: This ST has been upgraded with a TT-MFP
  *                        0: No TT-MFP present

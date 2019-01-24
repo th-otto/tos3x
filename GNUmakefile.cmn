@@ -99,6 +99,9 @@ MKDIR = mkdir
 MKDIR_P = $(MKDIR) -p
 SED   = sed
 BC    = bc
+DC    = dc
+GREP  = grep
+TR    = tr
 
 CMP      = $(top_srcdir)/tools/cmprom$(BUILD_EXEEXT)
 MKGLUE   = $(top_srcdir)/tools/newglue$(BUILD_EXEEXT)

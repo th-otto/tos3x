@@ -1,4 +1,4 @@
-tosrsc$(COUNTRY).o: tosrsc$(COUNTRY).c
+tosrsc$(COUNTRY).o: tosrsc$(COUNTRY).c rscend.h
 
 tosrsc$(COUNTRY).c: $(MKBININC) glue.$(COUNTRY)
 	$(AM_V_GEN)$(MKBININC) glue.$(COUNTRY) tosrsc $@
@@ -11,3 +11,5 @@ DESK_INF = ../desk/rsc/$(TOSVERSION)/desk$(COUNTRY).inf
 
 glue.$(COUNTRY): $(MKGLUE) $(GEM_RSC) $(DESK_RSC) $(DESK_INF)
 	$(AM_V_GEN)$(MKGLUE) $(COUNTRY) $(TOSVERSION)
+
+rscend.o: rscend.S
