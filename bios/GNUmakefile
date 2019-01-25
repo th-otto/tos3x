@@ -16,7 +16,7 @@ LIBS =
 CPPFLAGS = -I$(top_srcdir)/common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-all: bios.a
+all:: bios.a
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak

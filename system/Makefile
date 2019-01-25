@@ -9,7 +9,7 @@ LIBS = ${LIBC}
 
 PROGRAMS = cache100.prg foldr100.prg vdi_fix.prg
 
-all: $(PROGRAMS)
+all:: $(PROGRAMS)
 
 include SRCFILES
 

@@ -50,8 +50,15 @@ rsync::
 	sudo chmod -R g+w $(LOCAL_WWWDIR)
 
 maps:
-	for lang in de us; do \
-		for version in 306 206 208; do \
+	for version in 306 206; do \
+		for lang in us de fr es it se sf sg; do \
+			$(MAKE) clean; \
+			$(MAKE) SYMBOLS=-s TOSVERSION=$${version} COUNTRY=$${lang} || exit 1; \
+			cnm -g glue/tos.img > glue/tos$${version}$${lang}.map; \
+		done; \
+	done
+	for version in 208; do \
+		for lang in de us fr; do \
 			$(MAKE) clean; \
 			$(MAKE) SYMBOLS=-s TOSVERSION=$${version} COUNTRY=$${lang} || exit 1; \
 			cnm -g glue/tos.img > glue/tos$${version}$${lang}.map; \

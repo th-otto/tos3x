@@ -233,7 +233,8 @@
  * TP_24: SKIP_B: Skip the search for drive B:
  *
  * This allows faster booting. Do not use that
- * when 2 drives are connected.
+ * when 2 drives are connected. The virtual drive
+ * B: will still be present on the desktop.
  */
 #ifndef TP_24
 #define TP_24 0
@@ -246,6 +247,8 @@
  * - better support for media change detection
  * - Rwabs()-function does not destroy VDI buffers anymore
  * - Floppy discs with 1 FAT only are supported
+ *
+ * Original routines from Harun Scheutzow.
  */
 #ifndef TP_25
 #define TP_25 0

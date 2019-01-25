@@ -6,7 +6,7 @@ include $(top_srcdir)/Makefile.sil
 
 IMG = tos$(TOSVERSION)$(COUNTRY).img
 
-all: $(IMG)
+all:: $(IMG)
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak

@@ -47,7 +47,16 @@
 
 #define MSTECLK (((TOSVERSION >= 0x200) & (TOSVERSION < 0x300)) | TP_50)
 
-#define TTMFP_SUPPORT (((TOSVERSION >= 0x300) & (TOSVERSION < 0x400)) | (TP_50 & TP_55))
+/*
+ * True if TT-MFP is assumed to be present;
+ * otherwise checked at runtime
+ */
+#define TTMFP_ASSUMED (((TOSVERSION >= 0x300) & (TOSVERSION < 0x400)) & !TP_50)
+
+/*
+ * True to add support for TT-MFP
+ */
+#define TTMFP_SUPPORT (TTMFP_ASSUMED | (TP_50 & TP_55)) /* (TTMFP_ASSUMED | (PAK & HasTTMfp))
 
 #define SCC_SUPPORT ((TOSVERSION >= 0x300) & (TOSVERSION < 0x400))
 

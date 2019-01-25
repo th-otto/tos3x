@@ -4,7 +4,7 @@ subdir=common
 include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-all: $(top_srcdir)/common/sections.mak
+all:: $(top_srcdir)/common/sections.mak
 
 include $(top_srcdir)/config.mak
 

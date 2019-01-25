@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 include optimize.mak
 
-all: $(top_srcdir)/common/config.h bios.a
+all:: $(top_srcdir)/common/config.h bios.a
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak

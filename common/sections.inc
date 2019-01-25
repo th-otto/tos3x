@@ -43,8 +43,15 @@
 #define GLUELEN     $00007788
 #endif
 
-#if (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_SF)
-#define BIOSTLEN    BTLEN_US+$86
+#if OS_COUNTRY == CTRY_SF
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $000009FA
+#define GLUELEN     $00007788
+#endif
+
+#if OS_COUNTRY == CTRY_SG
+#define BIOSTLEN    BTLEN_US+$5A
 #define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $000009DE
 #define GLUELEN     $00007504
@@ -341,6 +348,9 @@ desk_tlen=DESKTLEN
 desk_dbase=DESKDBASE
 desk_dlen=DESKDLEN
 
+gluebase=DESKDBASE+DESKDLEN
+edata=EDATA
+
 rombase=BIOSTBASE
 
 print "bios_tbase=", bios_tbase, "\n"
@@ -378,6 +388,9 @@ print "desk_tleno=", desk_tlen + 24, "\n"
 print "desk_dbase=", desk_dbase, "\n"
 print "desk_doff=", desk_dbase - rombase, "\n"
 print "desk_dlen=", desk_dlen, "\n"
+
+print "gluebase=", gluebase, "\n"
+print "edata=", edata, "\n"
 
 print "rombase=", rombase, "\n"
 

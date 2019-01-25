@@ -462,7 +462,8 @@ Skip the search for drive B:
 </td>
 <td>
 This allows faster booting. Do not use that
-when 2 drives are connected.
+when 2 drives are connected. The virtual drive
+B: will still be present on the desktop.
 </td>
 </tr>
 
@@ -480,6 +481,8 @@ New functions Getbpb and Rwabs with support for ED drives: <br />
 - better support for media change detection <br />
 - Rwabs()-function does not destroy VDI buffers anymore <br />
 - Floppy discs with 1 FAT only are supported <br />
+<br />
+Original routines from Harun Scheutzow.
 </td>
 </tr>
 

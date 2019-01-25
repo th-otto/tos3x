@@ -15,7 +15,7 @@ CFLAGS = $(OPTS) $(WARN)
 
 PROGRAMS = cmprom$(BUILD_EXEEXT) newglue$(BUILD_EXEEXT) findrsc$(BUILD_EXEEXT) mkbininc$(BUILD_EXEEXT) mkrom$(BUILD_EXEEXT)
 
-all: $(PROGRAMS)
+all:: $(PROGRAMS)
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak

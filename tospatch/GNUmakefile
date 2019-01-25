@@ -4,7 +4,7 @@ subdir=tospatch
 include $(top_srcdir)/GNUmakefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-all:
+all::
 	@:
 
 include SRCFILES

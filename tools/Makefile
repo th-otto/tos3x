@@ -12,7 +12,7 @@ PROGRAMS += cmprom$(BUILD_EXEEXT)
 # didnt bother to port these to alcyon
 #PROGRAMS += findrsc$(BUILD_EXEEXT)
 
-all: $(PROGRAMS)
+all:: $(PROGRAMS)
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak

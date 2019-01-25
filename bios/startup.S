@@ -286,7 +286,7 @@ _main:
         move    #$2700,sr
 
 /* special TT reset */
-#if (TOSVERSION >= 0x306) & (TOSVERSION < 0x400)
+#if ((TOSVERSION >= 0x306) & (TOSVERSION < 0x400)) & !TP_50
         move.w #$0100,(DMA_CTRL).w /* reset ACSI chip... */
         move.w #$0000,(DMA_CTRL).w /* ...leave in read state. */
 #endif
@@ -297,28 +297,6 @@ _main:
 		nop
 #else
         reset                  /* reset all hardware */
-#endif
-
-#if TP_50 /* PAK */
-/*
- * Stack einrichten, um die Prozessorunabh„ngigkeiten in den Griff zu bekommen.
- * Aužerdem muž die MCU initialisiert werden, damit der Speicher berhaupt
- * benutzbar ist. Falls das TOS im ST-RAM ist, wird das jedoch unterlassen, da
- * es nur mit 4MB-Rechner funktionieren wrde und das RAM sowieso initialisiert
- * ist.
- *
- * Falls wir in Wirklichkeit einen Warmstart machen, so fhrt das zu keinen
- * Problemen, da kurz sp„ter bei gltigen memvalid, memval2 und memval3 die
- * MCU noch einmal mit dem Wert aus memcntrl ($424) gefttert wird.
- *
- * Dazu den Zugriff auf DMA entfernt und zuerst den Reset gemacht.
- */
-		lea    _main(pc),a0
-		cmpa.l #$e00000,a0
-		bcs    noconf
-		move.b #$a,(memconf).w
-noconf:
-		lea    $7fc,sp
 #endif
 
 #if TOSVERSION >= 0x400
@@ -335,6 +313,33 @@ noconf:
         jmp     cart_base+4             /* execute diagnostig cartridge */
 nodiag:
 
+#if TP_50 /* PAK */
+/*
+ * Stack einrichten, um die Prozessorunabh„ngigkeiten in den Griff zu bekommen.
+ * Aužerdem muž die MCU initialisiert werden, damit der Speicher berhaupt
+ * benutzbar ist. Falls das TOS im ST-RAM ist, wird das jedoch unterlassen, da
+ * es nur mit 4MB-Rechner funktionieren wrde und das RAM sowieso initialisiert
+ * ist.
+ *
+ * Falls wir in Wirklichkeit einen Warmstart machen, so fhrt das zu keinen
+ * Problemen, da kurz sp„ter bei gltigen memvalid, memval2 und memval3 die
+ * MCU noch einmal mit dem Wert aus memcntrl ($424) gefttert wird.
+ *
+ * Dazu den Zugriff auf DMA entfernt und zuerst den Reset gemacht.
+ */
+		moveq.l   #1,d7
+		moveq.l   #10,d0
+		lea.l     memcret3(pc),a6
+		bra       memchk
+memcret3:
+		bne       noconf
+		moveq.l   #0,d7
+		move.b    (memctrl).w,d0
+noconf:
+		move.b    d0,(memconf).w
+		lea       $7fc,sp
+#endif
+
 /*
  * disable the instruction/data caches
  */
@@ -344,11 +349,17 @@ zero:
 	    dc.l 0
 		text
 
+#if TP_50 /* PAK */
+		lea     no020(pc),a0
+		move.l  a0,(_illinst).w
+#endif
         move.l  #$00000808,d0     /* clear & disable instruction/data caches on */
         D0_CACR              /*  68020-60 (even though bit usage differs!) */
 
         moveq   #0,d0
         D0_VBR           /* initialise VBR to zero */
+no020:
+
 /*
  * disable the MMU
  */
@@ -359,12 +370,18 @@ zero:
  */
 		lea    nommu(pc),a0
 		move.l a0,(_illinst).w
+		lea    nofpu1(pc),a0
 		move.l a0,(_lineftrap).w
 		move.l #zero,a0
 		TO_TC_A0
 		TO_TTR0_A0
 		TO_TTR1_A0
 nommu:
+        FRESTORE(zero)
+nofpu1:
+		tst.l     d7
+		bne.s     noreset
+		moveq.l   #0,d7
 #else
 #if TP_60 /* NO_MMU_RESET */
 		lea    _main(pc),a1
@@ -401,11 +418,14 @@ nommur:
 		btst      #6,($FFFF8007).w
 		beq.s     noreset
 #endif
+
+#if !TP_50 /* for PAK, already done above */
         lea       memcret(pc),a6
         bra       memchk
 memcret:
         bne.s      noreset
         move.b    (memctrl).w,(memconf).w  /* initialize memory controller */
+#endif
 
 resetvec:
 /*
@@ -719,6 +739,7 @@ st_ramsize_done:                    /* bus error or bad ram  */
 #else
         movea.w   #sysvars_start,a0
 #endif
+
         move.l    d5,d4
         moveq.l   #0,d0
 clrmem:
@@ -822,15 +843,12 @@ refresh_done:
 #if TP_50
 		movea.l   a0,a2
 		movea.l   d7,a1
-		move.l    (a1),d1
+		move.l    -(a0),d1
 		not.l     d1
-		move.l    d1,(a0)
-		cmp.l     (a1),d1
-		bne.s     next_tt
-		bra       tt_ramsize_done
-next_pak:
-		move.l    a0,-4(a0)
-		cmpa.l    -4(a2),a0
+		move.l    d1,-(a1)
+		sub.l     (a0)+,d1
+		clr.l     (a1)+
+		tst.l     d1
 		beq.s     tt_ramsize_done
 #endif
 next_tt:
@@ -852,7 +870,9 @@ check_tt:
         dbf       d1,check_tt
         adda.l    d7,a0
 #if TP_50
-        bra.s     next_pak
+        move.l    a0,-4(a0)
+        cmpa.l    -4(a2),a0
+        bne.s     next_tt
 #else
         bra.s     next_tt
 #endif
@@ -1489,9 +1509,14 @@ setvb1:     move.b    d1,(v_shf_mod).w          /* set rez hardware register */
 			bne.s     nomonomon					/* (no) */
 			moveq     #STHIGH,d1                /* Switch to 640x400x1 */
 nomonomon:
+#if TP_50
             lea       setvb1(pc),a6
             bra       waitvbl
-setvb1:     move.b    d1,(v_shf_mod).w          /* set rez hardware register */
+setvb1:
+#else
+            bsr       altsync
+#endif
+            move.b    d1,(v_shf_mod).w          /* set rez hardware register */
 
 #else
         moveq.l   #TTMED,d1                 /* assume color, video mode 640x480x16 */
@@ -2627,7 +2652,7 @@ biosxbios:
         move.w    (a7)+,d0               /* Status register -> d0 */
         move.w    d0,-(a1)               /* and save in save_area */
         move.l    (a7)+,-(a1)            /* save return address */
-#if !P68010
+#if !P68010 | !BINEXACT
         tst.w     (_longframe).w
         beq.s     traph2
 #endif
@@ -2659,7 +2684,7 @@ bx_notindirect:
 bx_ret:
         movea.l   _savptr,a1
         movem.l   (a1)+,d3-d7/a3-a7      /* Get regs back, including sp */
-#if !P68010
+#if !P68010 | !BINEXACT
         tst.w     (_longframe).w
         beq.s     trph3
 #endif
@@ -4010,13 +4035,9 @@ VDOSkip1:
 #endif
 		rts
 
-VDOSkip2:
-		bsr.s altsync
-		move.b    d1,(v_shf_mod).w
-		rts
-
 altsync:
 #if !TP_57 /* Alt_Sync */
+	  /* Synchronisierung mit DE-Signal an TBI */
       lea       (MFP_TBDR).w,a0
       lea       (MFP_TBCR).w,a1
       bclr      #0,(MFP_IERA).w
@@ -7447,10 +7468,16 @@ coldbooe:nop
 coldbend:  ds.b 0
 
 #else
+#if TP_50 /* PAK */
+		lea     no020_2(pc),a0
+		move.l  a0,(_illinst).w
+#endif
         move.l    #$00000808,d0
         D0_CACR
         moveq.l   #0,d0
         D0_VBR
+no020_2:
+
 #if TP_50
 /*
  * SE: (26.10.93)

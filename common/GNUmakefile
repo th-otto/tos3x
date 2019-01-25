@@ -4,7 +4,9 @@ subdir=common
 include $(top_srcdir)/GNUmakefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-all: $(top_srcdir)/common/sections.mak
+all:: $(top_srcdir)/common/sections.mak
+
+include $(top_srcdir)/config.mak
 
 include SRCFILES
 

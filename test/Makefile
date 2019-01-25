@@ -3,7 +3,7 @@ include ../Makefile.sil
 
 PROGRAMS = hello.tos
 
-all:	$(PROGRAMS)
+all::	$(PROGRAMS)
 
 hello.tos: hello.o
 	$(LD) -o $@ $(CRT0) hello.o gemlib.a vdibind.a aesbind.a osbind.o libf.a
