@@ -276,13 +276,13 @@ static VOID collapse(NOTHING)
 			if (iop != bos)
 			{							/* push up the rest of the tree... */
 				i = iop + 2 - bos;
-				pitr = piop + 2;
+				pitr = piop + 3;
 				for (; i < itr; i++)
 				{
 					piop++;
-					pitr++;
 					piop->swd1 = pitr->swd1;
 					piop->itop.p = pitr->itop.p;
+					pitr++;
 				}
 			}
 			itr -= 2;
@@ -407,8 +407,7 @@ PP(aexpr iploc;)
 	extflg = starmul = iop = lpflg = 0;
 	piop = &opstk[0];
 	itr = -1;							/* tree stack pointer */
-	pitr = &tree[0];
-	pitr--;
+	pitr = tree;
 	/* form end of expression operator */
 	opstk[0].itty = ITSP;				/* special character */
 	opstk[0].itop.l = '?';
@@ -463,9 +462,9 @@ PP(aexpr iploc;)
 				while (piop->itop.l != '(')
 				{						/* top stk is '(' */
 					itr++;				/* up tree pointer */
-					pitr++;
 					pitr->swd1 = piop->swd1;	/* move operator */
 					pitr->itop.l = piop->itop.l;
+					pitr++;
 					iop--;				/* reduce operand stack */
 					piop--;
 				}
@@ -477,9 +476,9 @@ PP(aexpr iploc;)
 			while (ipr <= gprc(i = piop->itop.l))
 			{							/* >= precedence */
 				itr++;
-				pitr++;
 				pitr->swd1 = piop->swd1;	/* move operator */
 				pitr->itop.p = piop->itop.p;
+				pitr++;
 				iop--;					/* reduce operand stack */
 				piop--;
 			}
@@ -495,9 +494,9 @@ PP(aexpr iploc;)
 		{
 			lastopr = lpflg = 0;		/* clear flag */
 			itr++;						/* up tree pointer */
-			pitr++;
 			pitr->swd1 = exitm.swd1;	/* put in tree */
 			pitr->itop.p = exitm.itop.p;
+			pitr++;
 			starmul = 1;				/* * is multiply */
 			continue;
 		}
@@ -507,9 +506,9 @@ PP(aexpr iploc;)
 	for (i = iop; i >= 0; i--)
 	{
 		itr++;
-		pitr++;
 		pitr->swd1 = piop->swd1;		/* move operator */
 		pitr->itop.p = piop->itop.p;
+		pitr++;
 		piop--;
 	}
 
