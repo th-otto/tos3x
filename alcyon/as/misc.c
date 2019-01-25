@@ -795,8 +795,24 @@ PP(struct op *apea;)
 			if (p->drlc != ABS)
 			{
 				if (p->drlc != rlflg)	/* not same reloc base */
-					uerr(27); /* relocation error */
-				p->con -= (loctr + instrlen);
+				{
+					if (rlflg == TEXT && p->drlc == DATA && p->ext == -1)
+					{
+						p->con -= (loctr + instrlen);
+						p->con += couthd.ch_tsize;
+					} else if (rlflg == TEXT && p->drlc == BSS && p->ext == -1)
+					{
+						p->con -= (loctr + instrlen);
+						p->con += couthd.ch_tsize;
+						p->con += couthd.ch_dsize;
+					} else
+					{
+						uerr(27); /* relocation error */
+					}
+				} else
+				{
+					p->con -= (loctr + instrlen);
+				}
 				p->drlc = ABS;
 			}
 			if ((p->ea & 7) == 3)		/* d(PC,Ri.X) */
