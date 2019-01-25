@@ -32,7 +32,7 @@ vdi_fix.o: vdifix11/vdi_fix.S
 
 check::
 
-clean:
+clean::
 	$(RM) *.o *.a *.i *.1 *.2 *.rel *.mod $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean

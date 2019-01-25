@@ -37,6 +37,9 @@ gemdos.o: ../libsrc/gemdos.S
 bios.o: ../libsrc/bios.S
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
+install64::
+	@:
+
 check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i ../bin/$$i; done
 

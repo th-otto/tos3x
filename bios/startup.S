@@ -1510,11 +1510,11 @@ setvb1:     move.b    d1,(v_shf_mod).w          /* set rez hardware register */
 			moveq     #STHIGH,d1                /* Switch to 640x400x1 */
 nomonomon:
 #if TP_50
+            bsr       altsync
+#else
             lea       setvb1(pc),a6
             bra       waitvbl
 setvb1:
-#else
-            bsr       altsync
 #endif
             move.b    d1,(v_shf_mod).w          /* set rez hardware register */
 

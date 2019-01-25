@@ -66,5 +66,5 @@ dist::
 dosdir::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/$(subdir)
 
-clean:
-	$(RM) *.o *.a $(PROGRAMS)
+clean::
+	$(RM) *.o *.a *.i *.1 *.2 *.rel $(PROGRAMS)

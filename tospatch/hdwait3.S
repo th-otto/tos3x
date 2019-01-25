@@ -1,10 +1,10 @@
 /********************************************************************************
  * Harddiskwaiter
  *
- * Geschrieben von EWK, fÅr TOSPATCH umgeschrieben von Markus Heiden
+ * Geschrieben von EWK, fuer TOSPATCH umgeschrieben von Markus Heiden
  *
- * Ω1992 EWK
- * Ω1993 Markus Heiden                                               09.03.1993
+ * (C)1992 EWK
+ * (C)1993 Markus Heiden                                             09.03.1993
  ********************************************************************************/
 
 hd_wait:
@@ -36,7 +36,7 @@ wait_key:       move.l  #$000BFFFF,-(SP)
                 addq.l  #4,SP
 
                 and.b   #3,D0           /* Beide Shift-Tasten */
-                subq.b  #3,D0           /* gedrÅckt? */
+                subq.b  #3,D0           /* gedrueckt? */
                 beq.s   abbruch         /* Ja! => Ende */
 
                 bsr.s   acsiw           /* Platte schon fertig? */
@@ -48,7 +48,7 @@ wait_key:       move.l  #$000BFFFF,-(SP)
                 subq.w  #1,D6           /* Zeit dekrementieren; Wartezeit-Timeout? */
                 bpl.s   next_second     /* Nein! => nochmal */
 
-abbruch:        lea     clr_scr(PC),A0  /* Bildschirm lîschen und zurÅck zum TOS */
+abbruch:        lea     clr_scr(PC),A0  /* Bildschirm loeschen und zurueck zum TOS */
 
 /*    ***   Subroutines   *** */
 
@@ -87,13 +87,13 @@ acsiw:          st      (_flock).w      /* DMA-Zugriff sperren */
                 bsr.s   waitdm          /* Senden des 1. Bytes abwarten */
                 bne.s   acsiw2
 
-                moveq   #3,D3           /* Kommandoblock Åbertragen */
+                moveq   #3,D3           /* Kommandoblock uebertragen */
 acsiw1:         move.l  d2,(a0)
                 bsr.s   waitdm          /* Senden des Bytes abwarten */
                 bne.s   acsiw2
                 dbra    D3,acsiw1
 
-                move.l  D2,(a0)         /* letztes Byte Åbertragen */
+                move.l  D2,(a0)         /* letztes Byte uebertragen */
 
                 move.l  #800,D0         /* 4s */
                 bsr.s   waitdm1         /* warten auf DMA-IRQ */
@@ -105,7 +105,7 @@ acsiw1:         move.l  d2,(a0)
 acsiw2:         move.w  D4,(a1)         /* #$0088 Attention! */
                 move.l  D4,(a0)
 
-                move.w  #$0080,(a1)     /* auf FDC zurÅckschalten */
+                move.w  #$0080,(a1)     /* auf FDC zurueckschalten */
 
                 sf      (_flock).w      /* DMA-Zugriff wieder freigeben */
 
@@ -125,7 +125,7 @@ prefix_txt:     DC.B $1B,'H',$0A,' ',0
 wait_txt:       DC.B $1B,'E',$0A,' .. Warte auf DMA '
                 dc.b HD_WAITDEVICE+'0'
                 dc.b $0D,$0A
-                DC.B " Platten-Warter Ω'92 by EWK",$0D,$0A,$0A
+                DC.B " Platten-Warter ",$bd,"'92 by EWK",$0D,$0A,$0A
                 DC.B ' ',$1B,'p',' Shift+Shift = Abbruch ',$1B,'q',0
 clr_scr:        DC.B $1B,'E',0
 				even

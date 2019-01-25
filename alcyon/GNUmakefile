@@ -1,7 +1,8 @@
 include GNUmakefile.cmn
 include Makefile.sil
 
-SUBDIRS = libsrc as cgen cpp link68 optimize parser util cli gemlib
+SUBDIRS = as cgen cpp link68 optimize parser util cli gemlib
+DIST_SUBDIRS = libsrc as cgen cpp link68 optimize parser util cli gemlib
 
 EXTRA_DIST1 = \
 	Makefile.cmn \
@@ -21,7 +22,13 @@ all::
 dist::
 	for i in $(SUBDIRS); do $(MKDIR_P) $(DISTDIR2)/$$i; done
 
-all clean distclean dist::
+dist clean distclean::
+	for i in $(DIST_SUBDIRS); do $(MAKE) -C $$i $@; done
+
+all::
+	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
+
+install64::
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 
 check::

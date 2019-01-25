@@ -18,7 +18,10 @@ cp68$(EXEEXT): ${OBJS}
 	$(AM_V_LD)${CC} ${CFLAGS} ${OBJS} ${LIBS} $(LDFLAGS) -o $@
 
 install: all
-	$(CP) cp68$(EXEEXT) $(BIN)
+	$(CP) $(PROGRAMS) $(BIN)
+
+install64: all
+	$(CP) $(PROGRAMS) ../../bin64
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR2)/$(subdir)

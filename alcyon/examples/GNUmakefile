@@ -32,6 +32,9 @@ doodle.app: $(DOODLE_OBJS)
 install: all
 	@:
 
+install64: all
+	@:
+
 check::
 
 dist::

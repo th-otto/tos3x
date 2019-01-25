@@ -1,3 +1,6 @@
+#ifdef __linux__
+#include "../common/linux/libcwrap.h"
+#endif
 #include "../include/compiler.h"
 #include <stdio.h>
 
