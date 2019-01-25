@@ -1,7 +1,11 @@
 #if TOSVERSION >= 0x300
 FRB_THRESHOLD equ $00A00000
 #else
+#if TP_63 /* MAGNUM */
+FRB_THRESHOLD equ $00100000
+#else
 FRB_THRESHOLD equ $00400000
+#endif
 #endif
 
 	text

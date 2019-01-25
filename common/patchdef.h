@@ -634,3 +634,18 @@
 #ifndef TP_62
 #define TP_62 1
 #endif
+
+/*
+ * TP_63: Magnum
+ *
+ * Adjust floppy routines vor Magnum Fastram
+ *
+ * Needed for Magnum-ST with 16MB-SIMM in computers with 1MB ST-RAM,
+ * when the low 3 MB ($100000 - $3fffff) should be used
+ *
+ * Originally by Michael Schwingen
+ * see also http://www.uweschneider.de/en/downloads.php
+ */
+#ifndef TP_63
+#define TP_63 0
+#endif

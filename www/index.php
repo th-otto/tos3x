@@ -643,6 +643,24 @@ when you have a cpu &gt;= 68020.
 
 <tr>
 <td>
+Adjust floppy routines vor Magnum Fastram
+</td>
+<td>
+<input type="checkbox" name="tp_63" value="1" /><br />
+</td>
+<td>
+Needed for Magnum-ST with 16MB-SIMM in computers with 1MB ST-RAM,<br />
+when the low 3 MB ($100000 - $3fffff) should be used<br />
+<br />
+Originally by Michael Schwingen<br />
+see also <a href="http://www.uweschneider.de/en/downloads.php" alt="Magnum ST">http://www.uweschneider.de/en/downloads.php</a>
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
 Substitute starting fuji:
 </td>
 <td colspan="2">
