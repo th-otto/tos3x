@@ -8,6 +8,7 @@ SRCS = \
 	hdwait4.S \
 	nova.S \
 	ramres.S \
+	tospatch.S \
 	$(empty)
 
 EXTRA_DIST1 = \
