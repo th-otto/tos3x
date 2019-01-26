@@ -130,11 +130,13 @@ PP(int adelim;)
 			break;						/* filled one bucket */
 		}
 	}
+#if 0
 	while (i < modelen)
 	{
 		l <<= 8;
 		i++;
 	}
+#endif
 	itype = ITCN;
 	ival.l = l;
 	reloc = ABS;
