@@ -16,14 +16,17 @@ all:: $(PROGRAMS)
 
 include SRCFILES
 
+#SYMBOLS = '[symbols,locals]'
 tospatch.ttp: tospatch.o ${MAKEFILE}
 ifeq ($(USE_CROSS_ALCYON),1)
-	$(AM_V_LD)${LINK68} tospatch.rel=tospatch
+	$(AM_V_LD)${LINK68} $(SYMBOLS) tospatch.rel=tospatch.o
 	$(AM_V_at)${RELMOD} tospatch.rel $@
 	@$(RM) tospatch.rel
 else
 	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ tospatch
 endif
+
+tospatch.o: tospatch.S GNUmakefile
 
 check::
 	@:

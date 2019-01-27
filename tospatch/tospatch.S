@@ -1,13 +1,13 @@
 /********************************************************************************
- * TosPatch V2.9.1:                                                             *
+ * TosPatch V2.9.2:                                                             *
  * Dieses Programm dient zum Patchen des TOS mit einem einfachen ASCII-File.    *
  *                                                                              *
  * (C)1990    Sigma-soft, Markus Fritze                                         *
- * (C)1992-96 Markus Heiden                                          09.09.1996 *
+ * (C)1992-96 Markus Heiden                                          16.09.1996 *
  ********************************************************************************/
 
 /* Versionsnummer */
-#define version  '2.9.1 (09.09.1996)'
+#define version  '2.9.2 (16.09.1996)'
 
 def_base        EQU $00E00000   ;Default-Basisadresse des TOS
 def_width       EQU 16          ;Default-Breite des TOS
@@ -334,16 +334,14 @@ mkplis5:        cmp.b   #':',d0         ;~ setzen?
                 bsr     error42
                 bra     mkplis1
 
-mkplis5d:       moveq   #1,d5           ;Flag setzen
-
-                cmpi.b  #'|',(a6)+      ;~ nicht veraendern?
-                beq.s   mkplis5x        ;ja! =>
-
-                subq.l  #1,A6
-                move.l    d6,current_adr
-                moveq.l   #0,d5           ;Flag loeschen
+mkplis5d:       cmpi.b    #$7C,d0          ;Flag setzen
+                seq       d4
+                bne.s     mkplis5x
+                addq.l    #1,a6
 
 mkplis5x: 
+                move.l    PCRB(current_adr),d5
+                move.l    d6,current_adr
 
                 bsr       skip_space
                 bne       error0
@@ -355,11 +353,12 @@ mkplis5x:
                 sub.l     d6,d0
                 bsr       read_patches
                 bmi       error27
-                tst.l     d5
-                bne       mkplis2
                 move.l    d6,d1
                 add.l     d0,d1
                 move.l    d1,current_adr
+                tst.b     d4
+                beq       mkplis2
+                move.l    d5,current_adr
                 bra       mkplis2
 
 ****************************************
@@ -713,6 +712,7 @@ mkpli34b:
                 move.l    sel_var(pc),d7
 mkpli34c:
                 bsr       skip_space
+                bne       error48
                 cmpi.b    #',',d0
                 bne.s     mkpli34d
                 tst.l     d7
@@ -723,15 +723,17 @@ mkpli34c:
 mkpli34d:       bsr       get_term
                 tst.l     d7
                 beq.s     mkpli34g
+                move.l    d0,d1
                 bsr       skip_space
-                beq.s     mkpli34e
+                bne.s     mkpli34e
                 cmpi.b    #':',(a6)+
                 beq.s     mkpli34f
                 subq.l    #1,d7
                 cmpi.b    #',',d0
                 beq.s     mkpli34c
                 bra       error48
-mkpli34e:       cmp.l     sel_var(pc),d7
+mkpli34e:       move.l    d1,d0
+                cmp.l     sel_var(pc),d7
                 beq.s     mkpli34g
                 bra       error48
 mkpli34f:       bsr       get_term
@@ -984,20 +986,23 @@ cmdfill2:
                 sub.l     d6,d5
                 beq       mkplis2
                 bmi       error28
-                moveq.l   #1,d1
-                cmpi.b    #'|',(a6)+
-                beq.s     cmdfill3
-                subq.l    #1,a6
-                move.l    d6,current_adr
-                moveq.l   #0,d1
+                cmpi.b    #'|',d0
+                seq       d1
+                bne.s     cmdfill3
+                addq.l    #1,a6
 cmdfill3:
+                move.l    PCRB(current_adr),d4
+                move.l    d6,current_adr
                 bsr       skip_space
                 bmi       error0
                 moveq.l   #32,d0
                 lea.l     number_puffer(pc),a0
                 bsr       read_patches
                 bmi       error30
-                movea.l   buffer(pc),a1
+                tst.b     d1
+                beq.s     cmdfil3a
+                move.l    d4,current_adr
+cmdfil3a:       movea.l   buffer(pc),a1
                 move.l    a1,d7
                 beq       error3
                 adda.l    d6,a1
@@ -1177,7 +1182,6 @@ cmdundef:
 read_patches:
                 movem.l   d1-d7/a0-a5,-(a7)
                 move.l    d0,d6
-                move.l    d1,d7
                 movea.l   a0,a1
                 bsr     skip_space
                 bne     error0
@@ -1208,8 +1212,6 @@ mkplis5c:       add.l   D1,D5           ;Breite zur Laenge
                 adda.l  d1,a1           ;und zur Adresse addieren
                 cmp.l     d6,d5
                 bhi       readpaerr
-                tst.l     d7
-                bne.s     readpa2
                 add.l     d1,current_adr
 readpa2:
                 movea.l   a1,a0
@@ -1254,8 +1256,6 @@ readpa6:
                 bcc.s     readpaerr
                 move.b    d0,(a1)+
                 addq.l    #1,d5
-                tst.l     d7
-                bne.s     readpa6
                 addq.l    #1,current_adr
                 bra.s     readpa6
 readpa7:        bsr       getfilename
@@ -1979,15 +1979,15 @@ getfil2:        clr.b     (a0)
 skip_space:     movem.l d7,-(a7)
 skipspa1:       move.b  (A6)+,D0
                 beq.s   skipspa2
-                cmp.b   #$0D,D0
-                beq.s   skipspa2
-                cmp.b   #$0A,D0
-                beq.s   skipspa2
                 cmpi.b  #' ',D0
                 beq.s   skipspa1
                 cmpi.b  #9,D0
                 beq.s   skipspa1
                 cmp.b   #';',D0
+                beq.s   skipspa2
+                cmp.b   #$0D,D0
+                beq.s   skipspa2
+                cmp.b   #$0A,D0
                 beq.s   skipspa2
                 subq.l  #1,A6
                 moveq   #0,D7
