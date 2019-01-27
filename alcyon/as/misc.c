@@ -814,6 +814,10 @@ PP(struct op *apea;)
 					p->con -= (loctr + instrlen);
 				}
 				p->drlc = ABS;
+				if (p->con < -32768L || p->con > 32767L ||
+					((p->ea & 7) == 3 &&
+					 (p->con < -128L || p->con > 127L)))
+					uerr(27); /* relocation error */
 			}
 			if ((p->ea & 7) == 3)		/* d(PC,Ri.X) */
 				goto dindx;
