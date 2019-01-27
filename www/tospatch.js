@@ -280,4 +280,8 @@ function onload()
 	{
 		previewIcon('tp_39_' + i);
 	}
+	for (var i = 1; i <= 3; i++)
+	{
+		previewIcon('tp_40_' + i);
+	}
 }

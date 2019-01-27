@@ -653,7 +653,7 @@ Needed for Magnum-ST with 16MB-SIMM in computers with 1MB ST-RAM,<br />
 when the low 3 MB ($100000 - $3fffff) should be used<br />
 <br />
 Originally by Michael Schwingen<br />
-see also <a href="http://www.uweschneider.de/en/downloads.php" alt="Magnum ST">http://www.uweschneider.de/en/downloads.php</a>
+see also <a href="http://www.uweschneider.de/en/downloads.php">http://www.uweschneider.de/en/downloads.php</a>
 </td>
 </tr>
 
@@ -1236,7 +1236,7 @@ Substitute GEM resource:
 <td>
 <table>
 <tr>
-<td><input type="file" id="tp_40_1" name="tp_40_1" accept=".rsc" /></td>
+<td><input type="file" id="tp_40_1" name="tp_40_1" accept=".rsc" onchange="previewIcon('tp_40_1');" /></td>
 <td><img id="tp_40_1_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
@@ -1253,7 +1253,7 @@ Substitute DESKTOP resource:
 <td>
 <table>
 <tr>
-<td><input type="file" id="tp_40_2" name="tp_40_2" accept=".rsc" /></td>
+<td><input type="file" id="tp_40_2" name="tp_40_2" accept=".rsc" onchange="previewIcon('tp_40_2');" /></td>
 <td><img id="tp_40_2_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
@@ -1270,7 +1270,7 @@ Substitute NEWDESK.INF file:
 <td>
 <table>
 <tr>
-<td><input type="file" id="tp_40_3" name="tp_40_3" accept=".inf" /></td>
+<td><input type="file" id="tp_40_3" name="tp_40_3" accept=".inf" onchange="previewIcon('tp_40_3');" /></td>
 <td><img id="tp_40_3_img" src="icons/empty.gif" alt="None" width="16" height="16" style="border:0" /></td>
 </tr>
 </table>
