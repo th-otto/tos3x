@@ -3,11 +3,11 @@
  * Dieses Programm dient zum Patchen des TOS mit einem einfachen ASCII-File.    *
  *                                                                              *
  * (C)1990    Sigma-soft, Markus Fritze                                         *
- * (C)1992-96 Markus Heiden                                          16.09.1996 *
+ * (C)1992-97 Markus Heiden                                          20.02.1997 *
  ********************************************************************************/
 
 /* Versionsnummer */
-#define version  '2.9.2 (16.09.1996)'
+#define version  '2.9.2 (20.02.1997)'
 
 def_base        EQU $00E00000   ;Default-Basisadresse des TOS
 def_width       EQU 16          ;Default-Breite des TOS
@@ -705,9 +705,12 @@ mkpli34a:       bsr     skip_space
                 bsr     get_term        ;Wert holen
                 bsr     write_var       ;und Variable schreiben
                 bsr     skip_space
-                cmp.b   #',',d0
                 bne     mkplis2
-                bra     error51
+                cmp.b   #',',d0
+                beq     error51
+                cmp.b   #':',d0
+                beq     error51
+                bra     error54
 mkpli34b:
                 move.l    sel_var(pc),d7
 mkpli34c:
@@ -722,7 +725,7 @@ mkpli34c:
                 bra.s     mkpli34c
 mkpli34d:       bsr       get_term
                 tst.l     d7
-                beq.s     mkpli34g
+                beq.s     mkpli34h
                 move.l    d0,d1
                 bsr       skip_space
                 bne.s     mkpli34e
@@ -738,7 +741,17 @@ mkpli34e:       move.l    d1,d0
                 bra       error48
 mkpli34f:       bsr       get_term
 mkpli34g:       bsr       write_var
-                bra       mkplis2
+                bsr       skip_space
+                bne       mkplis2
+                bra       error54
+mkpli34h:       bsr       write_var
+                bsr       skip_space
+                bne       mkplis2
+                cmp.b     #',',d0
+                beq       mkplis2
+                cmp.b     #':',d0
+                beq       mkplis2
+                bra       error54
 
 ****************************************
 * .VARIABLE ist Patchoffset
@@ -927,7 +940,10 @@ mkplis55:       move.b  (A6)+,D1        ;Zeichen holen
 cmdeven:        moveq.l #-1,d7
                 bsr     skip_space
                 bne.s   cmdeven1
-                moveq.l #0,d7
+                cmp.b   #'$',d0
+                bne.s   cmdeven0
+                addq.l  #1,a6
+cmdeven0:       moveq.l #0,d7
                 bsr     get_term
 cmdeven1:       move.l  PCRB(current_adr),D1 ;akt. Adresse holen
                 btst    #0,D1           ;gerade?
@@ -1459,12 +1475,12 @@ do_not:
 do_boolnot:
                 tst.l     d2
                 bne.s     do_bool1
-                moveq.l   #1,d2 /* BUG: must be d1 */
+                moveq.l   #1,d1
                 bra       end_do
 do_bool1:
                 subq.l    #1,d2
                 bne       error16
-                move.l    d2,d1
+                moveq.l   #0,d1
                 bra       end_do
 
 do_xor:         eor.l   D2,D1           ;Exklusivoder-Routine
@@ -1500,7 +1516,7 @@ do_mult1:       move.l  D2,D0           ;Ist kleinerer Wert
                 bne     error7          ;Ja! =>
                 add.l   D0,D1           ;Summe beider Produkte = Ergebnis
                 bcs     error7          ;ueberlauf? Ja! =>
-                bra.s   end_do
+                bra     end_do
 
 do_div:         tst.l   D2              ;Divisions-Routine
                 beq     error9          ;Divisor = 0? Ja! => Division durch 0
@@ -1520,7 +1536,7 @@ do_div:         tst.l   D2              ;Divisions-Routine
                 divu    D2,D0           ;teilen
                 move.w  D0,D4           ;Quotient zu D4 'addieren'
                 move.l  D4,D1           ;Ergebnis nach D1
-                bra.s   end_do
+                bra     end_do
 
 do_div2:        moveq   #0,D0           ;Zaehler fuer das Ergebnis auf 0 setzen
                 bra.s   do_div4
@@ -1531,13 +1547,35 @@ do_div4:        cmp.l   D2,D1           ;Divident noch groesser als Divisor
                 move.l  D0,D1           ;Ergenis nach D1
                 bra.s   end_do
 
+do_mod:         tst.l   D2
+                beq     error9
+                move.l  d2,d0
+                swap    d0
+                tst.w   d0
+                bne.s   do_mod2
+                swap    d1
+                moveq.l #0,d0
+                move.w  d1,d0
+                divu.w  d2,d0
+                swap    d1
+                move.w  d1,d0
+                divu.w  d2,d0
+                swap    d0
+                moveq.l #0,d1
+                move.w  d0,d1
+                bra.s   end_do
+do_mod1:        sub.l   d2,d1
+do_mod2:        cmp.l   d2,d1
+                bcc.s   do_mod1
+                bra.s   end_do
+
+
 do_pot:         tst.l   D2              ;Routine fuer Potenzen
                 bne.s   do_pot1         ;Exponent = 0? Nein! =>
                 moveq   #1,D1           ;Ergebnis = 1
                 bra.s   end_do
 do_pot1:        cmp.l   #1,D2           ;Exponent = 1
                 beq.s   end_do          ;Ja! => Fertig
-
                 moveq   #1,D4           ;Ergebnis auf 1 setzen
                 move.l  D1,D0           ;Highword
                 swap    D0              ;der Basis (D1)
@@ -1545,10 +1583,10 @@ do_pot1:        cmp.l   #1,D2           ;Exponent = 1
                 bne     error7          ;Ja! => ueberlauf
 do_pot3:        moveq   #0,D0           ;Lowword
                 move.w  D4,D0           ;des Ergebnisses (D4)
-                mulu    D1,D0           ;mit Basis (D1) multiplizieren
+                mulu.w  D1,D0           ;mit Basis (D1) multiplizieren
                 clr.w   D4              ;Highword
                 swap    D4              ;des Ergebnisses (D4)
-                mulu    D1,D4           ;mit Basis (D1) multiplizieren
+                mulu.w  D1,D4           ;mit Basis (D1) multiplizieren
                 swap    D4              ;mal $10000
                 tst.w   D4              ;ueberlauf bei Multiplikation mit Basis?
                 bne     error7          ;Ja! =>
@@ -2743,7 +2781,7 @@ error19:        moveq   #19,D0
 error20:        moveq   #20,D0
                 bra     error_handler
 error21:        moveq   #21,D0
-                bra.s   error_handler
+                bra     error_handler
 error22:        moveq   #22,D0
                 bra.s   error_handler
 error23:        moveq   #23,D0
@@ -2807,6 +2845,8 @@ error51:        moveq   #51,D0
 error52:        moveq   #52,D0
                 bra.s   error_handler
 error53:        moveq   #53,D0
+                bra.s   error_handler
+error54:        moveq   #54,D0
 
 
 error_handler:  move.w    d0,d7
@@ -2869,7 +2909,7 @@ bfname:         DC.B 'PATCH.FIL',0
 
 init_text:      DC.B $1b,'E',$1b,'v',10,$1b,'p TOS-Patch V',version,' ',$1b,'q',13,10,10
                 DC.B $bd,'1990    ',$e4,'-soft, Markus Fritze',13,10
-                DC.B $bd,'1992-96 Markus Heiden',13,10,10,0
+                DC.B $bd,'1992-97 Markus Heiden',13,10,10,0
 path_text:      DC.B 'Setze Pfad auf "',0
 path_end_text:  DC.B '"',13,10,0
 read_rom_text:  DC.B 'Lese das TOS aus dem ROM',13,10,0
@@ -2899,7 +2939,7 @@ upriority:
                 dc.b '(',0,0,0,0,0,0,0
                 dc.b $7f,16
                 dc.b '-',0,0,0,0,0,0,0
-                dc.b $51,17
+                dc.b $52,17
                 dc.b '|',0,0,0,0,0,0,0
                 dc.b $20,18
                 dc.b '!NOT!',0,0,0
@@ -2953,9 +2993,13 @@ priority:       DC.B ')',0,0,0,0,0,0,0
                 DC.B '-',0,0,0,0,0,0,0
                 DC.B $40,11
                 DC.B '*',0,0,0,0,0,0,0
-                DC.B $51,12
+                DC.B $52,12
                 DC.B '/',0,0,0,0,0,0,0
-                DC.B $50,13
+                DC.B $51,13
+                DC.B '!MOD!',0,0,0
+                DC.B $50,21
+                DC.B '!M!',0,0,0,0,0
+                DC.B $50,21
                 DC.B '^',0,0,0,0,0,0,0
                 DC.B $52,14
                 DC.B '!IN!',0,0,0,0
@@ -2985,7 +3029,7 @@ optab:
                 dc.w do_not-opfuncs
                 dc.w do_error-opfuncs
                 dc.w do_boolnot-opfuncs
-                dc.w -1
+                dc.w do_mod-opfuncs
                 dc.w -1
                 dc.w -1
                 dc.w -1
@@ -3176,7 +3220,7 @@ error_tab:      DC.L error0_t,error1_t,error2_t,error3_t
                 DC.L error40_t,error41_t,error42_t,error43_t
                 DC.L error44_t,error45_t,error46_t,error47_t
                 DC.L error48_t,error49_t,error50_t,error51_t
-                DC.L error52_t,error53_t
+                DC.L error52_t,error53_t,error54_t
 
 error0_t:       DC.B 0,'Unerwartetes Zeilen- oder Dateiende',0
 error1_t:       DC.B 0,'Illegaler Patchoffset',0
@@ -3236,6 +3280,7 @@ error50_t:      DC.B 0,'Keine Mengenoperation vor Menge',0
 error51_t:      DC.B 0,'Mehrfachzuweisung ohne Selektor',0
 error52_t:      DC.B 0,'Kein Argument f',$81,'r Selektor',0
 error53_t:      DC.B 0,'Falsche Erweiterung (.B,.W,.L)',0
+error54_t:      DC.B 0,'M',$81,'ll am Ende eines Ausdrucks',0
 
                 EVEN
 
