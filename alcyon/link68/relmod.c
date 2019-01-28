@@ -72,7 +72,7 @@ PP(int flag;)
 	
 	for (p = filename; *p != '\0'; p++)
 		;
-	for (; p > filename && p[-1] != '\\'; )
+	for (; p > filename && p[-1] != '\\' && p[-1] != '/'; )
 		--p;
 	if (flag)
 	{
@@ -199,7 +199,10 @@ PP(const char *fname;)
 			}
 			w = get16be(infil);
 		}
-		fputc(0, outfil);
+		if (opos == 0)
+			put32be(0L, outfil);
+		else
+			fputc(0, outfil);
 	}
 	return TRUE;
 }
