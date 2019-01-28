@@ -10,6 +10,7 @@
 int32_t textstart;
 int32_t datastart;
 int32_t bssstart;
+int32_t prgflags;
 
 int Dflag;
 int Bflag;
@@ -1950,7 +1951,7 @@ PP(char *ofilname;)
 	outfname = ofilname;				/* save name in case of error   */
 	if ((obuf = fopen(ofilname, "wb")) == NULL)
 		fatalx(FALSE, _("unable to create file: %s\n"), ofilname);
-	if (Dflag | Bflag)
+	if (Zflag | Dflag | Bflag)
 		put16be(MAGIC1, obuf);			/* data & bss bases in header */
 	else
 		put16be(MAGIC, obuf);			/* normal header */
@@ -1959,8 +1960,15 @@ PP(char *ofilname;)
 	put32be(datasize, obuf);
 	put32be(bsssize, obuf);
 	put32be(0L, obuf);	/* symbol table size; will be patched later in finalwr() */
-	put32be(stacksize, obuf);
-	put32be(textstart, obuf);
+	if (Zflag | Dflag | Bflag)
+	{
+		put32be(stacksize, obuf);
+		put32be(textstart, obuf);
+	} else
+	{
+		put32be(0L, obuf);
+		put32be(prgflags, obuf);
+	}
 	if (saverbits)
 	{
 		put16be(0, obuf);				/* relocation bits present */
@@ -1969,7 +1977,7 @@ PP(char *ofilname;)
 		put16be(-1, obuf);				/* relocation bits removed */
 	}
 
-	if (Dflag | Bflag)
+	if (Zflag | Dflag | Bflag)
 	{									/* output expanded header */
 		put32be(datastart, obuf);
 		put32be(bssstart, obuf);

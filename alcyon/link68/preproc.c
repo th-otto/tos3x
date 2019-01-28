@@ -55,6 +55,7 @@
 #define UNDEFINED	14
 #define CHAINED		15
 #define DUMPSYMS	16
+#define PRGFLAGS	17
 
 #define	TOKLEN	FNAMELEN				/* max len. file or option name */
 
@@ -79,6 +80,7 @@
 #define TEXSTR	"TEXTBASE"
 #define UDFSTR	"UNDEFINED"
 #define DMPSTR	"XXZZY"
+#define PRGSTR  "PRGFLAGS"
 
 /* syntax error submessages -- change for foreign language */
 
@@ -436,6 +438,11 @@ PP(char *oname;)
 		op = DUMPSYMS;
 		count++;
 	}
+	if (strcmp(oname, PRGSTR) == 0)
+	{
+		op = PRGFLAGS;
+		count++;
+	}
 	if (match(oname, INCSTR))
 	{
 		op = INCLUDE;
@@ -592,6 +599,9 @@ static VOID globops(NOTHING)
 		{
 			Zflag++;
 			textstart = scannum();
+		} else if (opnum == PRGFLAGS)
+		{
+			prgflags = scannum();
 		} else if (opnum == UNDEFINED)
 		{
 			udfflg = TRUE;				/* allow undefineds */
@@ -997,14 +1007,25 @@ static VOID parsecmd(NOTHING)
 
 VOID preproc(NOTHING)
 {
+	prgflags = -1;
+	
 	ovtree[ROOT] = newovnod();			/* init. overlay tree */
 
 	parsecmd();							/* parse command line   */
 
 	numovls = curovnum;
-	ovflag = (numovls > 0);
+	ovflag = numovls > 0;
 	if (ovflag && (Dflag || Bflag))
 		fatalx(FALSE, _("cannot set data or bss base when using overlays\n"));
+	if (Zflag | Dflag | Bflag)
+	{
+		if (prgflags >= 0)
+			fatalx(FALSE, _("cannot set program flags when linking absolute\n"));
+	} else
+	{
+		if (prgflags < 0)
+			prgflags = 7;
+	}
 }
 
 

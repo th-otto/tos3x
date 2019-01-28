@@ -131,6 +131,7 @@ extern int numovls;			/* number of actual overlays */
 extern int32_t textstart;
 extern int32_t datastart;
 extern int32_t bssstart;
-extern int Bflag;
-extern int Dflag;
-extern int Zflag;
+extern int32_t prgflags;
+extern int Bflag; /* bss start was set */
+extern int Dflag; /* data start was set */
+extern int Zflag; /* text start was set */
