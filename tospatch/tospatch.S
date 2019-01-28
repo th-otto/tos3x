@@ -1,16 +1,13 @@
 /********************************************************************************
- * TosPatch V2.9.2:                                                             *
+ * TosPatch V2.9.8:                                                             *
  * Dieses Programm dient zum Patchen des TOS mit einem einfachen ASCII-File.    *
  *                                                                              *
  * (C)1990    Sigma-soft, Markus Fritze                                         *
- * (C)1992-97 Markus Heiden                                          20.02.1997 *
+ * (C)1992-99 Markus Heiden                                          02.07.1999 *
  ********************************************************************************/
 
 /* Versionsnummer */
-#define version  '2.9.2 (20.02.1997)'
-
-def_base        EQU $00E00000   ;Default-Basisadresse des TOS
-def_width       EQU 16          ;Default-Breite des TOS
+#define version  '2.9.8 (02.07.1999)'
 
 stack_size      EQU 4096        ;Stack fuer das Programm
 
@@ -32,12 +29,15 @@ init:           movea.l 4(SP),A6        ;Basepageadresse holen
 
                 lea     stack+stack_size,SP ;eigenen Stack setzen
 
-                bsr.s   getargs
+                bsr     getargs
                 
                 lea     PCRD(init_text),A0
                 bsr     print_line
 
-                lea     PCRD(read_text),A0
+                bsr     openlog
+                bsr     setlog
+
+                lea     PCRD(read_1st_text),A0
                 bsr     print_line
 
                 movea.l a6,a0
@@ -63,7 +63,9 @@ init:           movea.l 4(SP),A6        ;Basepageadresse holen
                 bsr     save_tos        ;und das TOS wieder abspeichern
 
 exit:           moveq.l #0,d7
-exit1:          tst.b   quiet
+exit1:          bsr     setlog0
+                bsr     closelog
+                tst.b   quiet
                 bne.s   quit
                 pea     PCRD(key_text)    ;Taste...
                 move.w  #9,-(SP)        ;Cconws
@@ -85,30 +87,40 @@ getargs:
                 moveq   #0,D0
                 move.b  (A6)+,D0
                 clr.b   0(A6,D0.w)      ;Commandline mit einem Nullbyte abschliessen
-                bsr       getfname
+                bsr     getfname
                 bne.s   getargs7        ;if not filename, use "PATCH.FIL"
 getargs1:
-                cmp.b     #$2D,d0
-                bne.s     getargs8
-                addq.l    #1,a6
-                move.b    (a6)+,d0
-                beq       error44
+                cmp.b   #'-',d0
+                bne.s   getargs8
+                addq.l  #1,a6
+                move.b  (a6)+,d0
+                beq     error44
 getargs2:
-                cmpi.b    #$71,d0
+                cmpi.b    #'q',d0
                 beq.s     getargs3
-                cmp.b     #$6D,d0
+                cmp.b     #'m',d0
                 beq.s     getargs4
-                cmp.b     #$4B,d0
+                cmp.b     #'l',d0
+                beq.s     getargs9
+                cmp.b     #'a',d0
+                beq.s     getarg10
+                cmp.b     #'K',d0
                 beq.s     getargs5
                 bra       error44
-getargs3:
-                move.b    #$01,quiet
+getargs9:
+                move.b    #1,logflg
+                bra.s     getargs6
+getarg10:
+                move.b    #1,adrflg
                 bra.s     getargs6
 getargs4:
-                move.b    #$01,allyes
+                move.b    #1,allyes
+                bra.s     getargs6
+getargs3:
+                move.b    #1,quiet
                 bra.s     getargs6
 getargs5:
-                move.b    #$01,soundflg
+                move.b    #1,soundflg
 getargs6:
                 move.b    (a6)+,d0
                 beq.s     getargs7
@@ -117,8 +129,216 @@ getargs6:
                 bsr       getfname
                 beq.s     getargs1
 getargs7:
-                lea.l     bfname(pc),a6
+                lea.l     PCRD(bfname),a6
 getargs8:
+                rts
+
+****************************************
+
+openlog:        movem.l   d0/a0,-(a7)
+                move.b    PCRB(logflg),d0
+                beq.s     openlog1
+                lea.l     PCRD(logopen_txt),a0
+                bsr       print_line
+                lea.l     PCRD(logname),a0
+                bsr       fcreate
+                move.w    d0,loghdl
+                bpl.s     openlog1
+                clr.b     logflg
+openlog1:       movem.l   (a7)+,d0/a0
+                rts
+
+closelog:       movem.l   d0/a0,-(a7)
+                move.b    PCRB(logflg),d0
+                beq.s     closelg1
+                lea.l     PCRD(logclose_txt),a0
+                bsr       print_line
+                lea.l     PCRD(logname),a0
+                move.w    PCRB(loghdl),d0
+                bsr       fclose
+closelg1:       movem.l   (a7)+,d0/a0
+                rts
+
+setlog:         tst.b     logflg
+                beq.s     setlog0
+                move.b    #1,dolog
+                rts
+setlog0:        clr.b     dolog
+                rts
+
+logline:
+                movem.l   d0-d7/a0-a6,-(a7)
+                move.b    PCRB(dolog),d0
+                beq.s     logline3
+                moveq.l   #0,d0
+                movea.l   a0,a1
+logline1:       tst.b     (a1)+
+                beq.s     logline2
+                addq.l    #1,d0
+                bra.s     logline1
+logline2:       pea.l     (a0)
+                move.l    d0,-(a7)
+                move.w    PCRB(loghdl),-(a7)
+                move.w    #$0040,-(a7)
+                trap      #1
+                lea.l     12(a7),a7
+logline3:       movem.l   (a7)+,d0-d7/a0-a6
+                rts
+
+clrrange:
+                move.l    d0,-(a7)
+                move.b    PCRB(adrflg),d0
+                beq.s     clrrang1
+                moveq.l   #0,d0
+                move.l    d0,rangelo
+                move.l    d0,rangehi
+                move.b    #1,neednl
+clrrang1:       move.l    (a7)+,d0
+                rts
+
+prrange:        movem.l   d0-d1,-(a7)
+                clr.b     neednl
+                move.l    PCRB(rangelo),d0
+                move.l    PCRB(rangehi),d1
+                beq.s     prrange1
+                bsr       logrange
+prrange1:       movem.l   (a7)+,d0-d1
+                rts
+
+prcrange:       movem.l   d0-d1,-(a7)
+                move.b    PCRB(neednl),d0
+                beq.s     prcrang1
+                move.l    PCRB(rangelo),d0
+                move.l    PCRB(rangehi),d1
+                beq.s     prcrang1
+                bsr.s     logrange
+                moveq.l   #0,d0
+                move.l    d0,rangelo
+                move.l    d0,rangehi
+prcrang1:       movem.l   (a7)+,d0-d1
+                rts
+
+ckrange:        movem.l   d0-d3/a0,-(a7)
+                move.b    PCRB(neednl),d2
+                beq.s     ckrange4
+                add.l     d1,d0
+                movem.l   PCRB(rangelo),d2-d3
+                tst.l     d3
+                beq.s     ckrange2
+                cmp.l     d3,d1
+                bhi.s     ckrange3
+                cmp.l     d2,d0
+                bcs.s     ckrange3
+                cmp.l     d2,d1
+                bcc.s     ckrange1
+                move.l    d1,rangelo
+ckrange1:       cmp.l     d3,d0
+                bls.s     ckrange4
+                move.l    d0,rangehi
+                bra.s     ckrange4
+ckrange2:       move.l    d1,rangelo
+                move.l    d0,rangehi
+                bra.s     ckrange4
+ckrange3:       move.l    d1,rangelo
+                move.l    d0,rangehi
+                move.l    d2,d0
+                move.l    d3,d1
+                bsr.s     logrange
+ckrange4:       movem.l   (a7)+,d0-d3/a0
+                rts
+
+logrange:       movem.l   d0-d1/a0,-(a7)
+                lea.l     PCRD(log_patch),a0
+                bsr       print_line
+                bsr       hex_out
+                neg.l     d0
+                add.l     d1,d0
+                subq.l    #1,d0
+                beq.s     lograng1
+                lea.l     PCRD(log_hyphen),a0
+                bsr       print_line
+                move.l    d1,d0
+                bsr       hex_out
+lograng1:       lea.l     PCRD(lf_text),a0
+                bsr       print_line
+                movem.l   (a7)+,d0-d1/a0
+                rts
+
+clradr:         move.l    d0,-(a7)
+                move.b    PCRB(adrflg),d0
+                beq.s     clradr1
+                clr.l     lastadr
+                move.b    #1,neednl
+clradr1:        move.l    (a7)+,d0
+                rts
+
+lognl:          movem.l   d0/a0,-(a7)
+                clr.b     neednl
+                move.l    PCRB(lastadr),d0
+                beq.s     lognl1
+                lea.l     PCRD(lf_text),a0
+                bsr       print_line
+lognl1:         movem.l   (a7)+,d0/a0
+                rts
+
+logadr:         movem.l   d0-d1/a0,-(a7)
+                move.b    PCRB(neednl),d1
+                beq.s     logadr3
+                move.l    PCRB(lastadr),d1
+                bne.s     logadr1
+                lea.l     PCRD(log_reloc),a0
+                bsr       print_line
+                bra.s     logadr2
+logadr1:        lea.l     PCRD(comma_text),a0
+                bsr       print_line
+logadr2:        bsr       hex_out
+                addq.l    #1,d1
+                and.b     #7,d1
+                move.l    d1,lastadr
+                bne.s     logadr3
+                lea.l     PCRD(lf_text),a0
+                bsr       print_line
+logadr3:        movem.l   (a7)+,d0-d1/a0
+                rts
+
+clradrx:
+                move.l    d0,-(a7)
+                move.b    PCRB(adrflg),d0
+                beq.s     clradrx1
+                clr.l     lastadr
+                move.b    #1,neednl
+clradrx1:       move.l    (a7)+,d0
+                rts
+
+lognlx:
+                movem.l   d0/a0,-(a7)
+                clr.b     neednl
+                move.l    PCRB(lastadr),d0
+                beq.s     lognlx1
+                lea.l     PCRD(lf_text),a0
+                bsr       print_line
+lognlx1:
+                movem.l   (a7)+,d0/a0
+                rts
+
+logcrc:         movem.l   d0-d1/a0,-(a7)
+                move.b    PCRB(neednl),d1
+                beq.s     logcrc3
+                move.l    PCRB(lastadr),d1
+                bne.s     logcrc1
+                lea.l     PCRD(log_crc),a0
+                bsr       print_line
+                bra.s     logcrc2
+logcrc1:        lea.l     PCRD(comma_text),a0
+                bsr       print_line
+logcrc2:        bsr       hex_out
+                addq.l    #1,d1
+                and.b     #$07,d1
+                move.l    d1,lastadr
+                bne.s     logcrc3
+                lea.l     PCRD(lf_text),a0
+                bsr       print_line
+logcrc3:        movem.l   (a7)+,d0-d1/a0
                 rts
 
 ****************************************
@@ -180,30 +400,47 @@ savtos2:        lsr.w     #1,d1
                 addq.w    #1,d0
                 bra.s     savtos2
 
-savtos3:        asl.l   #2,D0             ;auf Longword-Offset
+savtos3:        asl.w   #2,D0             ;auf Longword-Offset
 
-                lea     PCRD(w_tab),A5    ;Adresse der Extensiontabelle berechnen
+                lea     PCRD(wx_tab),A5   ;Adresse der Extensiontabelle berechnen
+                move.l  PCRB(machine_type),d1
+                cmp.l   (a5)+,d1
+                bhi     error55
+                asl.l   #2,d1
+                movea.l 0(a5,d1.l),a5
                 movea.l 0(A5,D0.w),A5
                 movea.l PCRB(buffer),a6
 
                 moveq   #'0',D7         ;Nummer fuer TOS-Dateien
-                clr.l   fname_ext       ;File-Extension erstmal loeschen
 
                 moveq   #0,D5           ;Offset-Zaehler
                 moveq   #0,D6           ;Laengen-Zaehler
 savtos4:        moveq.l #0,d1
+savtos4a:       move.l    d1,d0
+                asl.l     #2,d0
+                lea.l     0(a5,d0.l),a0
+                lea.l     PCRD(fname_ext),a1
+                move.b    (a0)+,(a1)+
+                move.b    (a0)+,(a1)+
+                move.b    (a0)+,(a1)
+                cmp.l     PCRB(output_format),d3
+                beq.s     savtos5
+                tst.b     (a1)
+                bne       error56
+                move.b    d7,(a1)
+
 savtos5:        lea     0(A6,D6.l),A2   ;Anfangsadresse berechnen
                 adda.l  d1,a2
                 movea.l a4,a3           ;Zwischenspeicher fuer File
 
-                lea.l     space_text(pc),a0
+                lea.l     PCRD(space_text),a0
                 bsr       print_line
-                bsr       get_base
+                bsr       get_reloc_adr
                 move.l    a2,d0
                 sub.l     a6,d0
                 add.l     a0,d0
                 bsr       hex_out
-                lea.l     colon_text(pc),a0
+                lea.l     PCRD(colon_text),a0
                 bsr       print_line
 
                 move.l  D4,D0
@@ -215,17 +452,6 @@ savtos6:        move.b  (A2),(A3)+      ;TOS in Zwischenspeicher kopieren
 
                 add.l   D4,D5           ;Laenge aufsummieren
 
-                move.l  D1,D0
-                add.l   D0,D0           ;Offset auf Word
-                move.w  0(A5,D0.l),D0   ;Endung holen
-                move.w  D0,fname_ext    ;und schreiben
-                moveq.l   #0,d0
-
-                cmp.l   PCRB(output_format),D3 ;Nur eine Bank?
-                beq.s   savtos7         ;Ja! =>
-                move.b  d7,d0
-                
-savtos7:        move.b  d0,fname_ext+2  ;sonst Nummer in Extension eintragen
                 move.l  d4,d0
                 lea     PCRD(fname),A0    ;File schreiben
                 movea.l a4,a1
@@ -233,7 +459,7 @@ savtos7:        move.b  d0,fname_ext+2  ;sonst Nummer in Extension eintragen
 
                 addq.l  #1,D1           ;naechstes File
                 cmp.l   d3,d1           ;schon eine Bank fertig?
-                bcs.s   savtos5         ;Nein! =>
+                bcs.s   savtos4a        ;Nein! =>
 
                 move.l  d5,d6
                 addq.b  #1,D7           ;Nummer der TOS-Dateien erhoehen
@@ -242,16 +468,39 @@ savtos7:        move.b  d0,fname_ext+2  ;sonst Nummer in Extension eintragen
                 addq.b  #'A'-('9'+1),D7
 
 savtos8:        sub.l   D3,D2           ;schon alle Files?
-                bne.s   savtos4         ;Nein! =>
+                bne     savtos4         ;Nein! =>
                 movea.l a4,a0
                 bsr     mfree
 
 savtos_end:     rts
 
-mkplis:         move.l  PCRB(btchbuf),A6
+mkplis:         bsr     clrrange
+                move.l  PCRB(btchbuf),A6
                 
+                move.w    #$002A,-(a7) /* Tgetdate */
+                trap      #1
+                addq.l    #2,a7
+                lea.l     PCRD(datevar),a0
+                bsr       write_var
+                move.l    d0,d1
+                moveq.l   #31,d0
+                and.l     d1,d0
+                lea.l     PCRD(dayvar),a0
+                bsr       write_var
+                lsr.l     #5,d1
+                moveq.l   #15,d0
+                and.l     d1,d0
+                lea.l     PCRD(monthvar),a0
+                bsr       write_var
+                lsr.l     #4,d1
+                moveq.l   #127,d0
+                and.l     d1,d0
+                add.w     #1980,d0
+                lea.l     PCRD(yearvar),a0
+                bsr       write_var
+
                 moveq   #0,D0           ;'CRC' erzeugen und auf 0 setzen
-                lea.l   crcvar(pc),a0
+                lea.l   PCRD(crcvar),a0
                 bsr     write_var
 
                 moveq.l   #0,d0
@@ -316,12 +565,12 @@ mkplis1a:       cmp.b   #'.',d0
 * Patches auswerten
 
 mkplis3:        bsr     get_term        ;Patchoffset holen
-                cmp.l   max_length(pc),d0
+                cmp.l   PCRB(max_length),d0
                 bcs.s   mkplis4
                 bsr       get_base        ;TOS-Basisadresse holen
                 sub.l     a0,d0
                 bcs       error1
-                cmp.l     max_length(pc),d0
+                cmp.l     PCRB(max_length),d0
                 bcc       error1
 mkplis4:        move.l    d0,d6
                 bsr       skip_space
@@ -331,10 +580,12 @@ mkplis4:        move.l    d0,d6
 
 mkplis5:        cmp.b   #':',d0         ;~ setzen?
                 bne.s   mkplis5d        ;Nein! => weiter
+                addq.l    #1,a6
+                move.l    d6,current_adr
                 bsr     error42
                 bra     mkplis1
 
-mkplis5d:       cmpi.b    #$7C,d0          ;Flag setzen
+mkplis5d:       cmpi.b    #'|',d0          ;Flag setzen
                 seq       d4
                 bne.s     mkplis5x
                 addq.l    #1,a6
@@ -345,14 +596,16 @@ mkplis5x:
 
                 bsr       skip_space
                 bne       error0
-                movea.l   buffer(pc),a0
+                movea.l   PCRB(buffer),a0
                 move.l    a0,d0
                 beq       error3
                 adda.l    d6,a0
-                move.l    max_length(pc),d0
+                move.l    PCRB(max_length),d0
                 sub.l     d6,d0
                 bsr       read_patches
                 bmi       error27
+                move.l    d6,d1
+                bsr       ckrange
                 move.l    d6,d1
                 add.l     d0,d1
                 move.l    d1,current_adr
@@ -454,7 +707,9 @@ mkpli14a:
                 bsr     get_term
                 move.l  PCRB(buffer),A0
                 move.w  28(a0),d1
-                lsr.w   #1,d1
+                asr.b   #1,d1
+                ext.w   d1
+                ext.l   d1
                 cmp.w   d0,d1
                 beq     mkplis2
                 bsr     error43
@@ -475,6 +730,7 @@ mkplis16:       lsl.l   #4,D1
 mkplis17:       addq.l  #1,A6
                 cmpi.b  #'*',(A6)       ;TOS aus ROM lesen?
                 bne.s   mkplis19        ;Nein! =>
+                bsr     prcrange
 
 ****************************************
 * TOS aus ROM lesen
@@ -500,7 +756,8 @@ mkplis18:       move.l  (A1)+,(A0)+     ;TOS kopieren
 ****************************************
 * TOS von Disk lesen
 
-mkplis19:       lea     PCRD(read_tos),A0
+mkplis19:       bsr     prcrange
+                lea     PCRD(read_tos),A0
                 bsr     print_line
 
                 bsr     get_length
@@ -538,6 +795,8 @@ mkplis21:       addq.l  #1,A6
                 move.l  d0,output_format ;und sichern
 mkplis22:       bsr     skip_space      ;Ist Relozieradresse angegeben?
                 bne.s   mkpli22a        ;Nein! =>
+                cmp.b   #',',d0
+                beq.s   mkpli22a
 
                 bsr     get_term        ;Relozieradresse holen
                 bra.s   mkpli22b
@@ -547,13 +806,59 @@ mkpli22a:       bsr     get_base
 
 mkpli22b:       lea.l   PCRD(relocvar),a0
                 bsr     write_var
-                bra     mkplis2
+                clr.l     machine_type
+                bsr       skip_space
+                bne       mkplis2
+                cmpi.b    #',',(a6)+
+                bne       error2
+                bsr       skip_space
+                bne       error0
+                lea.l     PCRD(mach_tab),a1
+mkpli22h:
+                moveq.l   #15,d0
+                movea.l   a6,a0
+mkpli22c:
+                move.b    (a0)+,d2
+                beq       error0
+                cmp.b     #$0D,d2
+                beq       error0
+                cmp.b     #$0A,d2
+                beq       error0
+                cmp.b     #$61,d2
+                bcs.s     mkpli22d
+                cmp.b     #$7A,d2
+                bhi.s     mkpli22d
+                and.b     #$DF,d2
+mkpli22d:
+                cmp.b     (a1)+,d2
+                bne.s     mkpli22g
+                tst.b     (a1)
+                beq.s     mkpli22f
+                subq.l    #1,d0
+                bpl.s     mkpli22c
+mkpli22e:
+                movea.l   a0,a6
+                move.l    (a1)+,d0
+                move.l    d0,machine_type
+                cmp.l     PCRD(wx_tab),d0
+                bls       mkplis2
+                bra       error55
+mkpli22f:
+                adda.l    d0,a1
+                bra.s     mkpli22e
+mkpli22g:
+                adda.l    d0,a1
+                addq.l    #4,a1
+                tst.b     (a1)
+                bne.s     mkpli22h
+                bra       error57
 
 
 ****************************************
 * Aktuellen Pfad aendern
 
 mkplis23:       addq.l  #1,A6
+                bsr       prcrange
 
                 lea     PCRD(path_text),A0
                 bsr     print_line
@@ -585,12 +890,16 @@ mkplis25:       tst.l   if_count        ;noch eine offener _IF-Befehl?
                 bne     error46         ;Ja! =>
                 move.w  PCRB(filenr),d0 ;Ende des 2. Batchfile?
                 bne.s   mkpli25a        ;Ja! =>
+                bsr     prrange
                 rts
 
 ****************************************
 * Ende eines 2. Batchfiles
 
-mkpli25a:       subq.w  #1,filenr       ;Flag fuer 2. Batchfile loeschen
+mkpli25a:       bsr     prcrange
+                lea.l   PCRD(batch_end_text),a0
+                bsr     print_line
+                subq.w  #1,filenr       ;Flag fuer 2. Batchfile loeschen
                 move.l  (SP)+,sel_count
                 move.l  (SP)+,sw_count
                 move.l  (SP)+,if_count  ;Bedingungszaehler,
@@ -605,7 +914,7 @@ mkpli25a:       subq.w  #1,filenr       ;Flag fuer 2. Batchfile loeschen
 * CRC-Berechnung aktivieren
 
 mkplis26:       moveq   #1,D0           ;Eine 1 in Variable 'CRC' schreiben
-                lea.l   crcvar(pc),a0
+                lea.l   PCRD(crcvar),a0
                 bsr     write_var
                 bra     mkplis2
 
@@ -642,12 +951,13 @@ mkplis30:       addq.l  #1,A6
 * 2. Batchfile laden
 
 mkplis31:       addq.l  #1,A6
+                bsr       prcrange
 
                 move.w  PCRB(filenr),d0
                 cmp.w   #256,d0
                 bcc     error19
 
-                lea     PCRD(read_text),A0
+                lea     PCRD(read_2nd_text),A0
                 bsr     print_line
                 bsr     getfilename
                 bne       error0
@@ -658,10 +968,10 @@ mkplis31:       addq.l  #1,A6
                 movea.l   a0,a1
                 move.l    a1,-(a7)        ;batch buffer,
                 move.l    a6,-(a7)        ;Textpointer,
-                move.l    line(pc),-(a7)  ;Zeilennummer und
-                move.l    if_count(pc),-(a7) ;Bedingungszaehler sichern
-                move.l    sw_count(pc),-(a7)
-                move.l    sel_count(pc),-(a7)
+                move.l    PCRB(line),-(a7)  ;Zeilennummer und
+                move.l    PCRB(if_count),-(a7) ;Bedingungszaehler sichern
+                move.l    PCRB(sw_count),-(a7)
+                move.l    PCRB(sel_count),-(a7)
                 addq.w    #1,filenr
                 movea.l   a5,a0
 
@@ -694,7 +1004,7 @@ mkplis34:       bsr     get_vname
 ****************************************
 * ~ auf .VARIABLE setzen
 
-                move.l  current_adr(pc),d0
+                move.l  PCRB(current_adr),d0
                 bsr     write_var
                 bra     mkplis1
 
@@ -712,7 +1022,7 @@ mkpli34a:       bsr     skip_space
                 beq     error51
                 bra     error54
 mkpli34b:
-                move.l    sel_var(pc),d7
+                move.l    PCRB(sel_var),d7
 mkpli34c:
                 bsr       skip_space
                 bne       error48
@@ -736,7 +1046,7 @@ mkpli34d:       bsr       get_term
                 beq.s     mkpli34c
                 bra       error48
 mkpli34e:       move.l    d1,d0
-                cmp.l     sel_var(pc),d7
+                cmp.l     PCRB(sel_var),d7
                 beq.s     mkpli34g
                 bra       error48
 mkpli34f:       bsr       get_term
@@ -764,6 +1074,7 @@ mkplis35:       movea.l A1,A6           ;alten Textpointer zurueckholen
 * PRINT-Befehl (/)
 
 mkplis36:       addq.l  #1,A6
+                bsr     prcrange
 mkplis37:       moveq.l #0,d7           ;Flag loeschen
                 bsr     skip_space
                 bne     error2
@@ -831,7 +1142,7 @@ mkplis43:       move.b  (A0)+,D2        ;Zeichen holen
                 bpl.s   mkplis43        ;Nein! =>
 mkpli43b:       movea.l A0,A6           ;Textpointer aktualisieren
                 move.w  (a1)+,d1
-                move.w  cond_flag(pc),d0
+                move.w  PCRB(cond_flag),d0
                 beq.s   mkpli43a
                 cmp.w   d0,d1
                 bne     mkplis2
@@ -858,13 +1169,13 @@ cmdif1:         bsr     get_term        ;Ergebnis des Vergleichs holen
                 subq.l  #1,D0           ;ist es TRUE (1)?
                 bne     error16         ;Nein! =>
                 addq.l  #1,if_count     ;IF-Verschachtelung um 1 erhoehen
-                move.w  #$4946,-(SP)    ;Wert fuer IF/TRUE auf den Stack legen
+                move.w  #'IF',-(SP)     ;Wert fuer IF/TRUE auf den Stack legen
                 bra     mkplis2
 
-mkplis47:       addq.l    #1,if_count
-                move.w    #$454C,-(a7)
-                move.w    #$4946,cond_flag
-                bra       mkplis2
+mkplis47:       addq.l  #1,if_count
+                move.w  #'EL',-(a7)
+                move.w  #$4946,cond_flag
+                bra     mkplis2
 
 ****************************************
 * _ELSE-Befehl
@@ -876,16 +1187,16 @@ cmdelse:
                 bne     mkplis2
                 tst.l   if_count        ;Ist ein offener IF-Befehl vorhanden?
                 beq     error17         ;Nein! =>
-                cmpi.w  #$454C,(SP)     ;War es ein IF/TRUE?
+                cmpi.w  #'EL',(SP)      ;War es ein IF/TRUE?
                 bne     error17         ;Nein! =>
                 clr.w   cond_flag
                 bra     mkplis2
-cmdelse1:       tst.l     if_count
-                beq       error17
-                cmpi.w    #$4946,(a7)
-                bne       error17
-                move.w    #$4946,cond_flag
-                bra       mkplis2
+cmdelse1:       tst.l   if_count
+                beq     error17
+                cmpi.w  #'IF',(a7)
+                bne     error17
+                move.w  #'IF',cond_flag
+                bra     mkplis2
 
 ****************************************
 * _ENDIF-Befehl
@@ -902,16 +1213,17 @@ cmdendi2:       tst.l   if_count        ;Ist ein offenener IF-Befehl vorhanden?
                 beq     error18         ;Nein! =>
                 subq.l  #1,if_count     ;Anzahl der IF-Befehle dekrementieren
                 move.w  (SP)+,d0        ;Wert fuer IF-Befehl auf dem Stack?
-                cmp.w   #$4946,d0
+                cmp.w   #'IF',d0
                 beq     mkplis2
-                cmp.w   #$454C,d0
+                cmp.w   #'EL',d0
                 beq     mkplis2
                 bra     error18
 
 ****************************************
 * _ERROR-Befehl
 
-cmderror:       bsr     skip_space
+cmderror:       bsr       prcrange
+                bsr     skip_space
                 bne     error22         ;'_ERROR'-Message ohne zus. Text ausgeben
                 cmpi.b  #"'",(A6)+      ;ein ' als Textanfang?
                 beq.s   mkpli54a        ;Ja! =>
@@ -958,7 +1270,10 @@ cmdeven1:       move.l  PCRB(current_adr),D1 ;akt. Adresse holen
                 movea.l PCRB(buffer),a0
                 move.l  a0,d7
                 beq     error3
-                move.b  d2,-1(a0,d0.l)        ;an akt. Adresse schreiben
+                move.b  d2,-1(a0,d1.l)        ;an akt. Adresse schreiben
+                subq.l  #1,d1
+                moveq.l #1,d0
+                bsr     ckrange
                 bra     mkplis2
 
 ****************************************
@@ -968,12 +1283,12 @@ cmdfill:
                 bmi       error0
                 bsr       get_term
                 move.l    d0,d6
-                cmp.l     max_length(pc),d6
+                cmp.l     PCRB(max_length),d6
                 bcs.s     cmdfill1
                 bsr       get_base
                 sub.l     a0,d6
                 bcs       error1
-                cmp.l     max_length(pc),d6
+                cmp.l     PCRB(max_length),d6
                 bcc       error1
 cmdfill1:
                 bsr       skip_space
@@ -984,12 +1299,12 @@ cmdfill1:
                 bne       error0
                 bsr       get_term
                 move.l    d0,d7
-                cmp.l     max_length(pc),d7
+                cmp.l     PCRB(max_length),d7
                 bcs.s     cmdfill2
                 bsr       get_base
                 sub.l     a0,d7
                 bcs       error1
-                cmp.l     max_length(pc),d7
+                cmp.l     PCRB(max_length),d7
                 bcc       error1
 cmdfill2:
                 bsr       skip_space
@@ -1012,19 +1327,24 @@ cmdfill3:
                 bsr       skip_space
                 bmi       error0
                 moveq.l   #32,d0
-                lea.l     number_puffer(pc),a0
+                lea.l     PCRB(number_puffer),a0
                 bsr       read_patches
                 bmi       error30
                 tst.b     d1
                 beq.s     cmdfil3a
                 move.l    d4,current_adr
-cmdfil3a:       movea.l   buffer(pc),a1
+cmdfil3a:       
+                move.l    d0,d2
+                move.l    d5,d0
+                move.l    d6,d1
+                bsr       ckrange
+                movea.l   PCRB(buffer),a1
                 move.l    a1,d7
                 beq       error3
                 adda.l    d6,a1
 cmdfill4:
-                lea.l     number_puffer(pc),a0
-                move.l    d0,d1
+                lea.l     PCRB(number_puffer),a0
+                move.l    d2,d1
 cmdfill5:
                 move.b    (a0)+,(a1)+
                 subq.l    #1,d5
@@ -1043,8 +1363,8 @@ cmdswitch:      tst.w     d0
 cmdsw1:         bsr       get_term
                 addq.l    #1,sw_count
                 move.l    d0,-(a7)
-                move.w    #$5357,-(a7)
-                move.w    #$5357,cond_flag
+                move.w    #'SW',-(a7)
+                move.w    #'SW',cond_flag
                 bra       mkplis2
 
 ****************************************
@@ -1055,24 +1375,30 @@ cmdcase:        tst.w     d0
                 bne       mkplis2
 cmdcase1:       tst.l     sw_count
                 beq       error35
-                bsr       get_term
-                move.l    d0,d1
-                bsr       skip_space
-                cmpi.b    #':',(a6)+
-                bne       error34
                 move.w    (a7),d0
-                cmpi.w    #$4445,d0
+                cmpi.w    #'DE',d0
                 beq       error36
-                cmpi.w    #$4341,d0
+                cmpi.w    #'CA',d0
                 beq.s     cmdcase2
-                cmpi.w    #$5357,d0
+                cmpi.w    #'SW',d0
                 bne       error35
-cmdcase2:       cmp.l     2(a7),d1
-                bne.s     cmdcase3
-                move.w    #$4341,(a7)
+cmdcase2:       move.l    2(a7),d1
+                moveq.l   #0,d2
+cmdcase3:       bsr       get_term
+                cmp.l     d0,d1
+                seq       d0
+                or.b      d0,d2
+                bsr       skip_space
+                cmpi.b    #',',(a6)+
+                beq.s     cmdcase3
+                cmp.b     #':',d0
+                bne       error34
+                tst.b     d2
+                beq.s     cmdcase5
+                move.w    #'CA',(a7)
                 clr.w     cond_flag
                 bra       mkplis1
-cmdcase3:       move.w    #$5357,cond_flag
+cmdcase5:       move.w    #'SW',cond_flag
                 bra       mkplis2
 
 ****************************************
@@ -1088,16 +1414,16 @@ cmddefa1:       tst.l     sw_count
                 cmpi.b    #':',(a6)+
                 bne       error41
                 move.w    (a7),d0
-                cmpi.w    #$4445,d0
+                cmpi.w    #'DE',d0
                 beq       error39
-                cmpi.w    #$4341,d0
+                cmpi.w    #'CA',d0
                 beq.s     cmddefa2
-                cmpi.w    #$5357,d0
+                cmpi.w    #'SW',d0
                 bne       error37
-                move.w    #$4445,(a7)
+                move.w    #'DE',(a7)
                 clr.w     cond_flag
                 bra       mkplis1
-cmddefa2:       move.w    #$5357,cond_flag
+cmddefa2:       move.w    #'SW',cond_flag
                 bra       mkplis2
 
 ****************************************
@@ -1117,11 +1443,11 @@ cmdends2:
                 subq.l    #1,sw_count
                 move.w    (a7)+,d0
                 addq.l    #4,a7
-                cmpi.w    #$4341,d0
+                cmpi.w    #'CA',d0
                 beq       mkplis2
-                cmpi.w    #$4445,d0
+                cmpi.w    #'DE',d0
                 beq       mkplis2
-                cmpi.w    #$5357,d0
+                cmpi.w    #'SW',d0
                 beq       mkplis2
                 bra       error38
 
@@ -1132,8 +1458,8 @@ cmdselect:
                 bmi       error0
                 bsr       get_term
                 addq.l    #1,sel_count
-                move.l    sel_var(pc),-(a7)
-                move.w    #$5345,-(a7)
+                move.l    PCRB(sel_var),-(a7)
+                move.w    #'SE',-(a7)
                 move.l    d0,sel_var
                 bra       mkplis2
 
@@ -1142,7 +1468,7 @@ cmdselect:
 cmdendselect:
                 tst.l     sel_count
                 beq       error45
-                cmpi.w    #$5345,(a7)+
+                cmpi.w    #'SE',(a7)+
                 bne       error47
                 subq.l    #1,sel_count
                 move.l    (a7)+,sel_var
@@ -1165,11 +1491,11 @@ cmdifd1:        bsr       skip_space
                 cmp.b     d1,d2
                 bne.s     cmdifd2
                 addq.l    #1,if_count
-                move.w    #$4946,-(a7)
+                move.w    #'IF',-(a7)
                 bra       mkplis2
 cmdifd2:        addq.l    #1,if_count
-                move.w    #$454C,-(a7)
-                move.w    #$4946,cond_flag
+                move.w    #'EL',-(a7)
+                move.w    #'IF',cond_flag
                 bra       mkplis2
 
 ****************************************
@@ -1243,7 +1569,7 @@ readpa4:
                 beq.s     readpa1
                 bra       error2
 mkplis7a:
-                move.l    variable(pc),d0
+                move.l    PCRB(variable),d0
                 addq.l    #1,a6
                 move.b    (a6)+,d2
                 and.b     #$DF,d2
@@ -1340,7 +1666,7 @@ getwid1:        move.l  (a7)+,a0
 
 
 get_crc:        move.l    a0,-(a7)
-                lea.l     crcvar(pc),a0
+                lea.l     PCRD(crcvar),a0
                 bsr       read_var
                 beq.s     get_crc1
                 moveq.l   #0,d0
@@ -1358,7 +1684,7 @@ get_term:       movem.l D1-A1,-(SP)     ;Benutzte Register sichern
                 bsr     get_number      ;1. Zahl holen
                 beq     getter0
                 bpl     getter1
-                bra       error33
+                bra     error33
 getter0:        bsr     get_command     ;1. Kommando holen
                 beq     gettere3        ;Fertig =>
 getter1:        move.l  D0,-(SP)        ;und sichern
@@ -1383,7 +1709,7 @@ getter4a:       move.b    6(a7),d0
 getter5:
                 move.w    (a7)+,d0
                 move.l    (a7)+,d1
-                lea.l     optab(pc),a0
+                lea.l     PCRD(optab),a0
                 move.w    d0,d4
                 and.w     #$007F,d4
                 cmp.w     (a0)+,d4
@@ -1921,8 +2247,8 @@ makev4:         move.l    d2,(a1)
 search_var:     movem.l   d0-d2/a2-a5,-(a7)
                 movea.l   a0,a2
                 move.l    #$00000400,d2
-                lea.l     varname(pc),a0
-                lea.l     varvalue(pc),a1
+                lea.l     PCRB(varname),a0
+                lea.l     PCRB(varvalue),a1
                 suba.l    a4,a4
 srchvar1:       move.w    #16,d1
                 movea.l   a2,a3
@@ -2112,7 +2438,7 @@ rw_file:        move.l  A1,-(SP)        ;File-Puffer
                 trap    #1              ;GEMDOS 60/61
                 addq.l  #8,SP
 
-                move.l  D0,D7           ;Handle merken
+                move.w  D0,D7           ;Handle merken
                 bmi.s   rw_err          ;Fehler? Ja! =>
 
                 move.w  D7,-(SP)        ;Handle
@@ -2204,15 +2530,52 @@ rl_err:         move.w  D7,-(SP)        ;Handle
                 addq.l  #4,SP
 
 rl_err1:        lea     PCRD(space_text),A0
-                bsr.s   print_line
+                bsr     print_line
                 movem.l (SP)+,D1-A6     ;Register wiederholen
-                bsr.s   print_line      ;Filename ausgeben
+                bsr     print_line      ;Filename ausgeben
                 lea     PCRD(error_text),A0 ;'...Fehler'
-                bsr.s   print_line      ;ausgeben
+                bsr     print_line      ;ausgeben
                 move.w  #10,d7
                 bra     exit1
 
 ****************************************
+
+fcreate:
+                movem.l   d1-d7/a0-a6,-(a7)
+                movea.l   a0,a1
+                lea.l     PCRD(space_text),a0
+                bsr       print_line
+                movea.l   a1,a0
+                bsr       print_line
+                move.w    #0,-(a7)
+                pea.l     (a1)
+                move.w    #$003C,-(a7)
+                trap      #1
+                addq.l    #8,a7
+                tst.w     d0
+                bmi       rw_err
+                bsr       rw_ok
+                movem.l   (a7)+,d1-d7/a0-a6
+                rts
+
+fclose:
+                movem.l   d1-d7/a0-a6,-(a7)
+                movea.l   a0,a1
+                lea.l     PCRD(space_text),a0
+                bsr.s     print_line
+                movea.l   a1,a0
+                bsr.s     print_line
+                move.w    d0,-(a7)
+                move.w    #$003E,-(a7)
+                trap      #1
+                addq.l    #4,a7
+                lea.l     PCRD(ok_text),a0
+                tst.w     d0
+                bpl.s     fclose1
+                lea.l     PCRD(error_text),a0
+fclose1:        bsr.s     print_line
+                movem.l   (a7)+,d1-d7/a0-a6
+                rts
 
 malloc:
                 movem.l   d0-d7/a1-a6,-(a7)
@@ -2244,14 +2607,23 @@ mfree:
 * IN A0.l: Adresse des Textes
 
 print_line:     movem.l D0-A6,-(SP)
+                bsr.s   cconws
+                bsr     logline
+                bsr.s   prline
+                movem.l (a7)+,d0-d7/a0-a6
+                rts
 
-                tst.b   quiet
-                bne.s   prline2
+cconws:         movem.l   d0-d7/a0-a6,-(a7)
+                move.b    PCRB(quiet),d0
+                bne.s     cconws1
+                move.l    a0,-(a7)
+                move.w    #$0009,-(a7)
+                trap      #1
+                addq.l    #6,a7
+cconws1:        movem.l   (a7)+,d0-d7/a0-a6
+                rts
 
-                move.l  A0,-(SP)        ;Text ausgeben
-                move.w  #9,-(SP)        ;Cconws
-                trap    #1              ;GEMDOS 9
-                addq.l  #6,SP
+prline:         movem.l   d0-d7/a0-a6,-(a7)
 
                 move.w  #$000B,-(SP)    ;Cconis
                 trap    #1              ;GEMDOS 11
@@ -2296,7 +2668,7 @@ prline2:        movem.l (SP)+,D0-A6     ;Zurueck
 
 print_point:    move.l  A0,-(SP)
                 lea     PCRD(point_text),A0
-                bsr.s   print_line
+                bsr     print_line
                 movea.l (SP)+,A0
                 rts
 
@@ -2359,7 +2731,7 @@ dez_out5:       bsr     print_line
                 rts
 
 bin_out:        movem.l   d0/d6-d7/a0-a1,-(a7)
-                lea.l     number_puffer(pc),a0
+                lea.l     PCRB(number_puffer),a0
                 movea.l   a0,a1
                 move.w    #$2530,(a1)+
                 moveq.l   #31,d7
@@ -2394,13 +2766,22 @@ reloc_it:       bsr       get_base
                 lea     PCRD(reloc_text),A0
                 bsr     print_line
                 bsr     hex_out
+                bsr     clradr
+                move.b  PCRB(neednl),d0
+                beq.s   reloc_i1
+                lea.l   PCRD(lf_text),a0
+                bsr     print_line
+reloc_i1:
 
                 bsr.s   optimize
                 bsr     reloc
                 bsr     forced_reloc
 
+                move.b  PCRB(neednl),d0
+                bne.s   reloc_i2
                 lea     PCRD(lf_text),A0
                 bsr     print_line
+reloc_i2:       bsr     lognl
 relocite:       rts
 
 ****************************************
@@ -2506,18 +2887,20 @@ reloc:          bsr       get_base
                 move.w  #$50C8,D5
 
                 move.l  (A5)+,D6
-                move.l  (A6),D7
+                move.l  (A6)+,D7
 
 reloc1:         move.w  (A4)+,D1
+
+                cmpa.l  A3,A4
+                bcc     reloc9
 
                 move.w  A4,D0
                 sub.w   A2,D0
                 bne.s   reloc2
 
+                move.b  PCRB(neednl),d0
+                bne.s   reloc2
                 bsr     print_point
-
-                cmpa.l  A3,A4
-                bhs.s   reloc9
 
 reloc2:         move.w  D1,D0
                 and.w   D2,D0
@@ -2527,61 +2910,60 @@ reloc2:         move.w  D1,D0
                 cmp.w   D5,D0
                 beq.s   reloc3
                 swap    D1
-                move.w  (A4)+,D1
+                move.w  (A4),D1
 
-                move.l  A4,D0
+                cmp.l   a0,d1
+                bcs.s   reloc1
+                cmp.l   a1,d1
+                bcc.s   reloc1
+
+                move.l  a4,d0
                 sub.l   A2,D0
-                tst.w   D0
-                bne.s   reloc2a
-
-                bsr     print_point
-
-                cmpa.l  A3,A4
-                bhs.s   reloc9
-
-reloc2a:        cmp.l   A0,D1
-                blo.s   reloc2
-                cmp.l   A1,D1
-                bhs.s   reloc2
-
-                subq.l  #4,D0           ;wegen 2* .w (A4)+
-
-reloc4:         cmp.l   D6,D0
-                blo.s   reloc6
+                subq.l  #2,d0
+reloc2b:
+                cmp.l   d6,d0
+                bcs.s   reloc6
                 beq.s   reloc1
-reloc5:         move.l  (A5)+,D6
-                bne.s   reloc4
+
+                move.l  (a5)+,d6
+                bne.s   reloc2b
+
                 moveq   #-1,D6
 
 reloc6:         cmp.l   D7,D0
-                blo.s   reloc7
-                cmp.l   4(A6),D0
-                blo.s   reloc1
-                addq.l  #8,A6
-                move.l  (A6),D7
+                bcs.s   reloc7
+                cmp.l   (A6),D0
+                bcs.s   reloc1
+                addq.l  #4,A6
+                move.l  (A6)+,D7
                 beq.s   reloc6a
                 subq.l  #3,D7
                 bra.s   reloc6
 reloc6a:        moveq   #-1,D7
 
 reloc7:         sub.l   A0,D1
-                move.l  a0,-(a7)
+                move.l  a0,d0
                 bsr     get_reloc_adr
                 add.l   a0,d1
-                movea.l (a7)+,a0
-                move.l  D1,-4(A4)
-                bra.s   reloc1
+                movea.l d0,a0
+                move.l  D1,-2(A4)
+                move.l  a4,d0
+                subq.l  #2,d0
+                sub.l   PCRB(buffer),d0
+                bsr     logadr
 
 reloc3:         addq.l  #2,A4
 
+                cmpa.l  a3,a4
+                bcc.s   reloc9
                 move.w  A4,D0
                 sub.w   A2,D0
                 bne.s   reloc1
-
+                move.b  PCRB(neednl),d0
+                bne     reloc1
                 bsr     print_point
+                bra     reloc1
 
-                cmpa.l  A3,A4
-                blo.s   reloc1
 reloc9:         rts
 
 ****************************************
@@ -2591,17 +2973,18 @@ reloc9:         rts
 *    forced_table.l: Tabelle mit den zu relozierenden Adressen
 
 forced_reloc:   bsr     get_base
-                move.l  a0,d0
+                move.l  a0,d1
                 bsr     get_reloc_adr
-                sub.l   a0,d0
+                sub.l   a0,d1
                 move.l  PCRB(buffer),A0
                 lea     PCRB(forced_table),A3
 
-forcer1:        move.l  (A3)+,D2
+forcer1:        move.l  (A3)+,D0
                 beq.s   forcer2
-                add.l   A0,D2
-                movea.l D2,A2
-                sub.l   D0,(A2)
+                bsr     logadr
+                movea.l d0,a2
+                adda.l  a0,a2
+                sub.l   d1,(a2)
                 bra.s   forcer1
 forcer2:        rts
 
@@ -2609,9 +2992,10 @@ forcer2:        rts
 ****************************************
 * CRC-Checksumme ueber TOS berechnen
 
-crc_checksum:   bsr     get_crc
+crc_checksum:   movem.l   d0-d7/a0-a6,-(a7)
+                bsr     get_crc
                 tst.l   d0              ;Checksumme berechnen?
-                beq     crc10           ;Nein! =>
+                beq     crc11           ;Nein! =>
 
                 bsr     get_width
                 move.l  d0,d7
@@ -2624,6 +3008,12 @@ crc_checksum:   bsr     get_crc
                 lea     PCRD(cksum_text),A0
                 bsr     print_line
 
+                bsr     clradrx
+                move.b  PCRB(neednl),d0
+                beq.s   crc0
+                lea.l   PCRD(lf_text),a0
+                bsr     print_line
+crc0:
                 lsr.l   #1,D7
                 movea.l D7,A3
 
@@ -2637,7 +3027,8 @@ crc1:           lsr.w   #1,D0
 crc2:           lsr.l   D1,D6
                 movea.l D6,A4
 
-                move.l  PCRB(buffer),A2
+                move.l  PCRB(buffer),A6
+                movea.l a6,a2
                 lea     PCRD(crctab),A1
 
                 cmpa.w  #1,A3           ;Schrittweite 1?
@@ -2668,8 +3059,15 @@ crc4:           move.b  (A0),D3
                 move.b  D0,0(A0,A3.l)
                 move.b  D1,(A0)
 
+                move.l    a0,d0
+                sub.l     a6,d0
+                bsr       logcrc
+                add.l     a3,d0
+                bsr       logcrc
+                move.b    PCRB(neednl),d0
+                bne.s     crc4a
                 bsr     print_point
-
+crc4a:
                 addq.l  #1,A2
                 subq.l  #1,D7
                 bne.s   crc3
@@ -2714,24 +3112,43 @@ crc8:           move.b  (A0)+,D3
                 subq.l  #2,D2           ;2 Durchgaenge fuer (A4) Bytes
                 bne.s   crc8
 
+                move.b  PCRB(neednl),d0
+                bne.s   crc8a
                 bsr     print_point
+crc8a:
 
                 subq.l  #1,D4
                 bne.s   crc7
 
                 move.b  D0,2(A0,A3.l)
-                move.b  D1,(A0)+
+                move.b  D1,(A0)
+                move.l    a0,d0
+                sub.l     a6,d0
+                bsr       logcrc
+                add.l     a3,d0
+                bsr       logcrc
+                addq.l    #1,a0
 
                 move.b  D5,2(A0,A3.l)
                 move.b  D6,(A0)
+                move.l    a0,d0
+                sub.l     a6,d0
+                bsr       logcrc
+                add.l     a3,d0
+                bsr       logcrc
 
                 addq.l  #2,A2           ;Anfangsadresse um 2 erhoehen, da
                 subq.l  #2,D7           ;2 Durchgaenge auf einmal erledigt
                 bne.s   crc6
 
-crc9:           lea     PCRD(lf_text),A0
+crc9:           
+                move.b  PCRB(neednl),d0
+                bne.s   crc10
+                lea     PCRD(lf_text),A0
                 bsr     print_line
-crc10:          rts
+crc10:          bsr       lognlx
+crc11:          movem.l   (a7)+,d0-d7/a0-a6
+                rts
 
 
 uerror:         moveq.l   #0,d6
@@ -2783,11 +3200,11 @@ error20:        moveq   #20,D0
 error21:        moveq   #21,D0
                 bra     error_handler
 error22:        moveq   #22,D0
-                bra.s   error_handler
+                bra     error_handler
 error23:        moveq   #23,D0
-                bra.s   error_handler
+                bra     error_handler
 error24:        moveq   #24,D0
-                bra.s   error_handler
+                bra     error_handler
 error25:        moveq   #25,D0
                 bra.s   error_handler
 error26:        moveq   #26,D0
@@ -2847,13 +3264,19 @@ error52:        moveq   #52,D0
 error53:        moveq   #53,D0
                 bra.s   error_handler
 error54:        moveq   #54,D0
+                bra.s   error_handler
+error55:        moveq   #55,D0
+                bra.s   error_handler
+error56:        moveq   #56,D0
+                bra.s   error_handler
+error57:        moveq   #57,D0
 
 
-error_handler:  move.w    d0,d7
-                add.w     #100,d7
-                lea.l     lf_text(pc),a0
-                bsr       print_line
-                lsl.w     #2,d0
+error_handler:  move.w  d0,d7
+                add.w   #100,d7
+                lea.l   PCRD(lf_text),a0
+                bsr     print_line
+                lsl.w   #2,d0
                 lea     PCRD(error_tab),A0
                 movea.l 0(A0,D0.w),A0
                 move.b  (A0)+,D6
@@ -2868,7 +3291,7 @@ user_error:
                 move.l  PCRB(line),D0
                 bsr     dez_out
                 moveq.l #0,d0
-                move.w  filenr(pc),d0
+                move.w  PCRB(filenr),d0
                 beq.s   errorh1
                 lea     PCRD(batch_text),A0
                 bsr     print_line
@@ -2905,17 +3328,21 @@ errorh3:        rts
 
 fname:          DC.B 'TOS.'
 fname_ext:      DC.B 'IMG',0
+logname:        DC.B 'TOS.LOG',0
 bfname:         DC.B 'PATCH.FIL',0
 
 init_text:      DC.B $1b,'E',$1b,'v',10,$1b,'p TOS-Patch V',version,' ',$1b,'q',13,10,10
-                DC.B $bd,'1990    ',$e4,'-soft, Markus Fritze',13,10
-                DC.B $bd,'1992-97 Markus Heiden',13,10,10,0
+                DC.B $bd,'1990      ',$e4,'-soft, Markus Fritze',13,10
+                DC.B $bd,'1992-1999 Markus Heiden',13,10,10,0
 path_text:      DC.B 'Setze Pfad auf "',0
 path_end_text:  DC.B '"',13,10,0
 read_rom_text:  DC.B 'Lese das TOS aus dem ROM',13,10,0
-read_text:      DC.B 'Lese',0
+read_1st_text:  DC.B 'Lese Hauptbatchdatei',13,10,0
+read_2nd_text:  DC.B 'Lese Unterbatchdatei',13,10,0
+batch_end_text: dc.b 'Ende der Unterbatchdatei.',13,10,0
 space_text:     DC.B ' ',0
 point_text:     DC.B '.',0
+comma_text:     DC.B ',',0
 colon_text:     DC.B ':',0
 lf_text:        DC.B 13,10,0
 ok_text:        DC.B '...OK',13,10,0
@@ -2927,10 +3354,16 @@ read_tos:       DC.B 'Lese TOS',13,10,0
 write_tos:      DC.B 'Schreibe TOS',13,10,0
 reloc_text:     DC.B 'Reloziere TOS nach ',0
 cksum_text:     DC.B 'Bilde CRC-Pr',$81,'fsumme',0
+logopen_txt:    DC.B $99,'ffne LOG-Datei',13,10,0
+logclose_txt:   DC.B 'Schlie',$9e,'e LOG-Datei',13,10,0
 error_txt:      DC.B 13,10,'Fehler: ',0
 abbruch_text:   DC.B 13,10,10,'Abbruch durch <ESC>...',13,10,0
 key_text:       DC.B 13,10,'Ende! Taste dr',$81,'cken.',0
 key2_text:      DC.B '--> Bitte Taste dr',$81,'cken! ( <ESC>: Abbruch )',13,10,0
+log_patch:      DC.B ' PATCH: ',0
+log_reloc:      DC.B ' RELOC: ',0
+log_crc:        DC.B ' CRC: ',0
+log_hyphen:     DC.B ' - ',0
 
 
                 EVEN
@@ -3105,16 +3538,15 @@ endif_txt:      DC.B 'ENDIF',0,0,0,0,0,0,0,0,0,0,0
 /* end of command table */
 				DC.W 0
 
-crcvar:
-                dc.b 'CRC',0,0,0,0,0,0,0,0,0,0,0,0,0
-basevar:
-                dc.b 'BASE',0,0,0,0,0,0,0,0,0,0,0,0
-lengthvar:
-                dc.b 'LENGTH',0,0,0,0,0,0,0,0,0,0
-relocvar:
-                dc.b 'RELOCADR',0,0,0,0,0,0,0,0
-widthvar:
-                dc.b 'WIDTH',0,0,0,0,0,0,0,0,0,0,0
+datevar:        dc.b 'DATE',0,0,0,0,0,0,0,0,0,0,0,0
+dayvar:         dc.b 'DAY',0,0,0,0,0,0,0,0,0,0,0,0,0
+monthvar:       dc.b 'MONTH',0,0,0,0,0,0,0,0,0,0,0
+yearvar:        dc.b 'YEAR',0,0,0,0,0,0,0,0,0,0,0,0
+crcvar:         dc.b 'CRC',0,0,0,0,0,0,0,0,0,0,0,0,0
+basevar:        dc.b 'BASE',0,0,0,0,0,0,0,0,0,0,0,0
+lengthvar:      dc.b 'LENGTH',0,0,0,0,0,0,0,0,0,0
+relocvar:       dc.b 'RELOCADR',0,0,0,0,0,0,0,0
+widthvar:       dc.b 'WIDTH',0,0,0,0,0,0,0,0,0,0,0
 
 countries:
                 dc.b 'USA',0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -3201,11 +3633,20 @@ crctab:         DC.W $0000,$1021,$2042,$3063
                 DC.W $6E17,$7E36,$4E55,$5E74
                 DC.W $2E93,$3EB2,$0ED1,$1EF0
 
-w_tab:          DC.L w8_ext,w16_ext,w32_ext,w64_ext
-w8_ext:         DC.W 'IM',0
-w16_ext:        DC.W 'HI','LO',0
-w32_ext:        DC.W 'EE','OE','EO','OO',0
-w64_ext:        DC.W '0_','1_','2_','3_','4_','5_','6_','7_',0
+mach_tab:       dc.b 'PAK3',0,0,0,0,0,0,0,0,0,0,0,0
+                dc.l 1
+                dc.b 0
+                even
+
+wx_tab:         DC.L 1,w0_tab,w1_tab
+w0_tab:         DC.L w8_ext,w16_ext,w32_ext,w64_ext
+w1_tab:         DC.L w8_ext,w16_ext,w32_ext1,w64_ext
+w8_ext:         DC.B 'IM',0,0,0
+w16_ext:        DC.B 'HI',0,0,'LO',0,0,0
+w32_ext:        DC.B 'EE',0,0,'OE',0,0,'EO',0,0,'OO',0,0,0
+w32_ext1:       DC.B 'U10',0,'U11',0,'U12',0,'U13',0,0
+w64_ext:        DC.B '0_',0,0,'1_',0,0,'2_',0,0,'3_',0,0,'4_',0,0,'5_',0,0,'6_',0,0,'7_',0,0,0
+                EVEN
 
 error_tab:      DC.L error0_t,error1_t,error2_t,error3_t
                 DC.L error4_t,error5_t,error6_t,error7_t
@@ -3220,7 +3661,8 @@ error_tab:      DC.L error0_t,error1_t,error2_t,error3_t
                 DC.L error40_t,error41_t,error42_t,error43_t
                 DC.L error44_t,error45_t,error46_t,error47_t
                 DC.L error48_t,error49_t,error50_t,error51_t
-                DC.L error52_t,error53_t,error54_t
+                DC.L error52_t,error53_t,error54_t,error55_t
+                DC.L error56_t,error57_t
 
 error0_t:       DC.B 0,'Unerwartetes Zeilen- oder Dateiende',0
 error1_t:       DC.B 0,'Illegaler Patchoffset',0
@@ -3281,6 +3723,9 @@ error51_t:      DC.B 0,'Mehrfachzuweisung ohne Selektor',0
 error52_t:      DC.B 0,'Kein Argument f',$81,'r Selektor',0
 error53_t:      DC.B 0,'Falsche Erweiterung (.B,.W,.L)',0
 error54_t:      DC.B 0,'M',$81,'ll am Ende eines Ausdrucks',0
+error55_t:      DC.B 0,'Unerlaubter Maschinentyp f',$81,'rs Abspeichern',0
+error56_t:      DC.B 1,'Angegebener Maschinentyp unterst',$81,'tzt nur eine Bank!',0
+error57_t:      DC.B 0,'Unbekannter Maschinentyp',0
 
                 EVEN
 
@@ -3293,6 +3738,7 @@ max_length:     DS.L 1
 variable:       DS.L 1
 line:           DS.L 1
 output_format:  DS.L 1
+machine_type:   DS.L 1
 current_adr:    DS.L 1
                 DS.L 1
 cond_flag:      DS.W 1
@@ -3301,9 +3747,17 @@ if_count:       DS.L 1
 sw_count:       DS.L 1
 sel_count:      DS.L 1
 sel_var:        DS.L 1
+loghdl:         ds.w 1
+rangelo:        ds.l 1
+rangehi:        ds.l 1
+lastadr:        ds.l 1
 quiet:          ds.b 1
 allyes:         ds.b 1
 soundflg:       ds.b 1
+logflg:         ds.b 1
+adrflg:         ds.b 1
+dolog:          ds.b 1
+neednl:         ds.b 1
                 even
 number_puffer:  DS.B 32
 filename:       DS.B 256
@@ -3317,4 +3771,3 @@ varname:        DS.B 1024*16
 stack:          DS.B stack_size ;Stack
 
 __ebss: ds.b 0
-
