@@ -10,7 +10,10 @@ CROSS := $(shell $(EVAL_CROSS))
 include $(top_srcdir)/GNUmakefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-PROGRAMS = tospatch.ttp tosload.prg
+CPPFLAGS = -I../common -I$(INC)
+CFLAGS = $(OPTS) $(WARN)
+
+PROGRAMS = tospatch.ttp tosload.prg romdump.tos
 
 all:: $(PROGRAMS)
 
@@ -24,7 +27,7 @@ ifeq ($(USE_CROSS_ALCYON),1)
 	$(AM_V_at)${RELMOD} tospatch.rel $@
 	@$(RM) tospatch.rel
 else
-	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ tospatch
+	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ tospatch.o
 endif
 
 tospatch.o: tospatch.S GNUmakefile
@@ -35,10 +38,21 @@ ifeq ($(USE_CROSS_ALCYON),1)
 	$(AM_V_at)${RELMOD} tosload.rel $@
 	@$(RM) tosload.rel
 else
-	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ tosload
+	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ tosload.o
 endif
 
 tosload.o: tosload.S GNUmakefile
+
+romdump.tos: romdump.o ${MAKEFILE}
+ifeq ($(USE_CROSS_ALCYON),1)
+	$(AM_V_LD)${LINK68} $(SYMBOLS) romdump.rel=$(LIB)$(CRT0),romdump.o,$(LIB)$(LIBC)
+	$(AM_V_at)${RELMOD} romdump.rel $@
+	@$(RM) romdump.rel
+else
+	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ romdump.o
+endif
+
+romdump.o: romdump.c GNUmakefile
 
 check::
 	@:

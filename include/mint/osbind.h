@@ -20,7 +20,68 @@ extern	long gemdos PROTO((short code, ...));
 
 #ifdef __GNUC__
 #ifdef __mc68000__
-#define trap_1_wwll(n, a, b, c)						\
+
+#define t1_w(n)							\
+__extension__								\
+({									\
+	register long __retvalue __asm__("d0");				\
+	    								\
+	__asm__ volatile						\
+	(								\
+		"movw	%1,%%sp@-\n\t"					\
+		"trap	#1\n\t"						\
+		"addql	#2,%%sp\n\t"					\
+	: "=r"(__retvalue)			/* outputs */		\
+	: "g"(n)				/* inputs  */		\
+	: __CLOBBER_RETURN("d0") "d1", "d2", "a0", "a1", "a2", "cc"    /* clobbered regs */	\
+	  AND_MEMORY							\
+	);								\
+	__retvalue;							\
+})
+
+#define t1_ww(n, a)							\
+__extension__								\
+({									\
+	register long __retvalue __asm__("d0");				\
+	short _a = (short)(a);						\
+	    								\
+	__asm__ volatile						\
+	(								\
+		"movw	%2,%%sp@-\n\t"					\
+		"movw	%1,%%sp@-\n\t"					\
+		"trap	#1\n\t"						\
+		"addql	#4,%%sp"						\
+	: "=r"(__retvalue)			/* outputs */		\
+	: "g"(n), "r"(_a)			/* inputs  */		\
+	: __CLOBBER_RETURN("d0") "d1", "d2", "a0", "a1", "a2", "cc"    /* clobbered regs */	\
+	  AND_MEMORY							\
+	);								\
+	__retvalue;							\
+})
+
+#define t1_wlw(n, a, b)						\
+__extension__								\
+({									\
+	register long __retvalue __asm__("d0");				\
+	long  _a = (long) (a);						\
+	short _b = (short)(b);						\
+	    								\
+	__asm__ volatile						\
+	(								\
+		"movw	%3,%%sp@-\n\t"					\
+		"movl	%2,%%sp@-\n\t"					\
+		"movw	%1,%%sp@-\n\t"					\
+		"trap	#1\n\t"						\
+		"addql	#8,%%sp"						\
+	: "=r"(__retvalue)			/* outputs */		\
+	: "g"(n), "r"(_a), "r"(_b)		/* inputs  */		\
+	: __CLOBBER_RETURN("d0") "d1", "d2", "a0", "a1", "a2", "cc"    /* clobbered regs */	\
+	  AND_MEMORY							\
+	);								\
+	__retvalue;							\
+})
+
+#define t1_wwll(n, a, b, c)						\
 __extension__								\
 ({									\
 	register long retvalue __asm__("d0");				\
@@ -44,7 +105,7 @@ __extension__								\
 	retvalue;							\
 })
 
-#define trap_14_wlll(n, a, b, c)					\
+#define t14_wlll(n, a, b, c)					\
 __extension__								\
 ({									\
 	register long retvalue __asm__("d0");				\
@@ -68,12 +129,36 @@ __extension__								\
 	retvalue;							\
 })
 
+#define t14_wl(n, a)						\
+__extension__								\
+({									\
+	register long __retvalue __asm__("d0");				\
+	long  _a = (long) (a);						\
+	    								\
+	__asm__ volatile						\
+	(								\
+		"movl	%2,%%sp@-\n\t"					\
+		"movw	%1,%%sp@-\n\t"					\
+		"trap	#14\n\t"					\
+		"addql	#6,%%sp"						\
+	: "=r"(__retvalue)			/* outputs */		\
+	: "g"(n), "r"(_a)			/* inputs  */		\
+	: __CLOBBER_RETURN("d0") "d1", "d2", "a0", "a1", "a2", "cc"    /* clobbered regs */	\
+	  AND_MEMORY							\
+	);								\
+	__retvalue;							\
+})
+
 #endif
 #endif
 
-#ifndef __GNUC__
-#define trap_1_wwll gemdos
-#define trap_14_wlll xbios
+#ifndef t1_wwll
+#define t1_w gemdos
+#define t1_wlw gemdos
+#define t1_ww gemdos
+#define t1_wwll gemdos
+#define t14_wl xbios
+#define t14_wlll xbios
 #endif
 
 
@@ -97,8 +182,7 @@ __extension__								\
 #define	Logbase()	xbios(3)
 #define	Getrez()	(int)xbios(4)
 #define	Setscreen(a,b,c)	xbios(5,a,b,c)
-#define	Setpallete(a)	xbios(6,a)
-#define Setpalette(a)	xbios(6,a)	/* correct spelling */
+#define Setpalette(a)	xbios(6,a)
 #define Setcolor(a,b)	xbios(7,a,b)
 #define	Floprd(a,b,c,d,e,f,g)	xbios(8,a,b,c,d,e,f,g)
 #define	Flopwr(a,b,c,d,e,f,g)	xbios(9,a,b,c,d,e,f,g)
@@ -107,7 +191,7 @@ __extension__								\
 #define	Mfpint(a,b)	xbios(13,a,b)
 #define	Iorec(a)	xbios(14,a)
 #define	Rsconf(a,b,c,d,e,f)	xbios(15,a,b,c,d,e,f)
-#define	Keytbl(nrml,shft,caps)	(_KEYTAB *)trap_14_wlll((short)(0x10),(long)(nrml), (long)(shft),(long)(caps))
+#define	Keytbl(nrml,shft,caps)	(_KEYTAB *)t14_wlll((short)(0x10),(long)(nrml), (long)(shft),(long)(caps))
 #define	Random()	xbios(17)
 #define	Protobt(a,b,c,d)	xbios(18,a,b,c,d)
 #define	Flopver(a,b,c,d,e,f,g)	xbios(19,a,b,c,d,e,f,g)
@@ -128,7 +212,7 @@ __extension__								\
 #define	Kbrate(a,b)	xbios(35,a,b)
 #define Prtblk()	xbios(0x24)
 #define Vsync()		xbios(0x25)
-#define Supexec(fn)	xbios(0x26,fn)	/* not in original */
+#define Supexec(fn)	t14_wl(0x26, (long)(fn))
 #define Puntaes()	xbios(0x27)	/* not in original */
 
 /*	GEMDOS	(trap1)		*/
@@ -140,7 +224,7 @@ __extension__								\
 #define	Cprnout(a)	gemdos(0x5,a)
 #define	Crawio(a)	gemdos(0x6,a)
 #define	Crawcin()	gemdos(0x7)
-#define	Cnecin()	gemdos(0x8)
+#define	Cnecin()	t1_w(0x08)
 #define	Cconws(a)	gemdos(0x9,a)
 #define	Cconrs(a)	gemdos(0x0a,a)
 #define	Cconis()	(int)gemdos(0x0b)
@@ -163,11 +247,11 @@ __extension__								\
 #define	Dcreate(a)	gemdos(0x39,a)
 #define	Ddelete(a)	gemdos(0x3a,a)
 #define	Dsetpath(a)	gemdos(0x3b,a)
-#define	Fcreate(a,b)	gemdos(0x3c,a,b)
-#define	Fopen(a,b)	gemdos(0x3d,a,b)
-#define	Fclose(a)	gemdos(0x3e,a)
+#define	Fcreate(fn, mode)	t1_wlw(0x3C,(long)(fn),(short)(mode))
+#define	Fopen(fn, mode)	t1_wlw(0x3D,(long)(fn),(short)(mode))
+#define	Fclose(handle)	t1_ww(0x3E,(short)(handle))
 #define	Fread(a,b,c)	gemdos(0x3f,a,b,c)
-#define	Fwrite(a,b,c)	gemdos(0x40,a,b,c)
+#define	Fwrite(handle,cnt,buf)	t1_wwll(0x40,(short)(handle), (long)(cnt),(long)(buf))
 #define	Fdelete(a)	gemdos(0x41,a)
 #define	Fseek(a,b,c)	gemdos(0x42,a,b,c)
 #define	Fattrib(a,b,c)	gemdos(0x43,a,b,c)

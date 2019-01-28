@@ -97,8 +97,7 @@ __extension__								\
 #define	Logbase()	xbios(3)
 #define	Getrez()	(int)xbios(4)
 #define	Setscreen(a,b,c)	xbios(5,a,b,c)
-#define	Setpallete(a)	xbios(6,a)
-#define Setpalette(a)	xbios(6,a)	/* correct spelling */
+#define Setpalette(a)	xbios(6,a)
 #define Setcolor(a,b)	xbios(7,a,b)
 #define	Floprd(a,b,c,d,e,f,g)	xbios(8,a,b,c,d,e,f,g)
 #define	Flopwr(a,b,c,d,e,f,g)	xbios(9,a,b,c,d,e,f,g)

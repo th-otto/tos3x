@@ -4,7 +4,7 @@ subdir=tospatch
 include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-PROGRAMS = tospatch.ttp tosload.prg
+PROGRAMS = tospatch.ttp tosload.prg romdump.tos
 
 all:: $(PROGRAMS)
 
@@ -15,6 +15,9 @@ tospatch.ttp: tospatch.o ${MAKEFILE}
 
 tosload.prg: tosload.o ${MAKEFILE}
 	$(AM_V_LD)${LD} ${LDFLAGS} -h 7 -o $@ tosload.o
+
+romdump.tos: romdump.o ${MAKEFILE}
+	$(AM_V_LD)${LD} ${LDFLAGS} -h 7 -o $@ romdump.o
 
 check::
 

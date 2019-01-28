@@ -90,4 +90,30 @@ typedef struct {
 
 } _KEYTAB;
 
+typedef struct
+{
+	long gem_magic;			/* $87654321 if GEM present */
+	long gem_end;			/* End address of OS RAM usage */
+	long gem_entry;			/* Execution address of GEM */
+} GEM_MUPB;
+
+typedef struct _osheader 
+{
+    unsigned short	os_entry;   	 /* 0x00  BRA to reset handler	*/
+    unsigned short	os_version; 	 /* 0x02  TOS version		*/
+    VOID		(*reseth) (NOTHING); /* 0x04 -> reset handler	*/
+    struct _osheader	*os_beg;	 /* 0x08 -> base of OS		*/
+    VOID		*os_end;	 /* 0x0c -> end of OS ram usage */
+    char		*os_rsv1;	 /* 0x10 reserved		*/
+	GEM_MUPB	*os_magic;	 /* 0x14 GEM memory usage param */
+    long		os_date;	 /* 0x18 Build date 0xMMDDYYYY	*/
+    unsigned short	os_conf;	 /* 0x1c OS conf bits		*/
+    unsigned short	os_dosdate;	 /* 0x1e DOS format build date  */
+    /* the following available on TOS version >= 1.2 */
+    char		**p_root;	 /* 0x20 -> base of OS pool	*/
+    char		**pkbshift;	 /* 0x24 -> kbd shift state var */
+    char		**p_run;	 /* 0x28 -> PID of current proc */
+    char		*p_rsv2;	 /* 0x2c reserved		*/
+} OSHEADER;
+
 #endif /* __OSTRUCT_H__ */

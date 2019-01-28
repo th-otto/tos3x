@@ -10,6 +10,7 @@ SRCS = \
 	ramres.S \
 	tospatch.S \
 	tosload.S \
+	romdump.c \
 	$(empty)
 
 EXTRA_DIST1 = \
