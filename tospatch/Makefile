@@ -4,7 +4,7 @@ subdir=tospatch
 include $(top_srcdir)/Makefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-PROGRAMS = tospatch.ttp
+PROGRAMS = tospatch.ttp tosload.prg
 
 all:: $(PROGRAMS)
 
@@ -12,6 +12,9 @@ include SRCFILES
 
 tospatch.ttp: tospatch.o ${MAKEFILE}
 	$(AM_V_LD)${LD} ${LDFLAGS} -h 7 -o $@ tospatch.o
+
+tosload.prg: tosload.o ${MAKEFILE}
+	$(AM_V_LD)${LD} ${LDFLAGS} -h 7 -o $@ tosload.o
 
 check::
 

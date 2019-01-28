@@ -10,13 +10,14 @@ CROSS := $(shell $(EVAL_CROSS))
 include $(top_srcdir)/GNUmakefile.cmn
 include $(top_srcdir)/Makefile.sil
 
-PROGRAMS = tospatch.ttp
+PROGRAMS = tospatch.ttp tosload.prg
 
 all:: $(PROGRAMS)
 
 include SRCFILES
 
 #SYMBOLS = '[symbols,locals]'
+
 tospatch.ttp: tospatch.o ${MAKEFILE}
 ifeq ($(USE_CROSS_ALCYON),1)
 	$(AM_V_LD)${LINK68} $(SYMBOLS) tospatch.rel=tospatch.o
@@ -27,6 +28,17 @@ else
 endif
 
 tospatch.o: tospatch.S GNUmakefile
+
+tosload.prg: tosload.o ${MAKEFILE}
+ifeq ($(USE_CROSS_ALCYON),1)
+	$(AM_V_LD)${LINK68} $(SYMBOLS) tosload.rel=tosload.o
+	$(AM_V_at)${RELMOD} tosload.rel $@
+	@$(RM) tosload.rel
+else
+	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ tosload
+endif
+
+tosload.o: tosload.S GNUmakefile
 
 check::
 	@:

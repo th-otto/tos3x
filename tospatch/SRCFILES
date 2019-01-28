@@ -9,6 +9,7 @@ SRCS = \
 	nova.S \
 	ramres.S \
 	tospatch.S \
+	tosload.S \
 	$(empty)
 
 EXTRA_DIST1 = \
