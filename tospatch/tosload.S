@@ -28,7 +28,8 @@
                 addq.l  #6,SP
 
                 moveq   #0,D0
-                move.b  128(A5),D0      ;Commandline vorhanden?
+                lea     128(a5),a4
+                move.b  (a4)+,D0        ;Commandline vorhanden?
                 beq     normal          ;Nein! =>
                 cmp.b   #126,D0         ;Commandline zu lang?
                 bhi     normal          ;Ja! =>
@@ -37,10 +38,10 @@
 ****************************************
 * Start mit Commandline-Pfad
 
-                clr.b   -127(A5,D0.w)    ;Ende markieren; BUG: was 129, which is out-of-range for 8-bit displacement
+                clr.b   0(A4,D0.w)      ;Ende markieren
 
 open:           clr.w   -(SP)
-                pea     129(A5)         ;Kommandozeile
+                pea     (a4)            ;Kommandozeile
                 move.w  #$3D,-(SP)
                 trap    #1              ;Fopen ("TOS.IMG",ReadOnly)
                 addq.l  #8,SP
