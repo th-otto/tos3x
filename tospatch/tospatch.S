@@ -3,11 +3,11 @@
  * Dieses Programm dient zum Patchen des TOS mit einem einfachen ASCII-File.    *
  *                                                                              *
  * (C)1990    Sigma-soft, Markus Fritze                                         *
- * (C)1992-99 Markus Heiden                                          02.07.1999 *
+ * (C)1992-99 Markus Heiden                                          11.07.1999 *
  ********************************************************************************/
 
 /* Versionsnummer */
-#define version  '2.9.8 (02.07.1999)'
+#define version  '2.9.8 (11.07.1999)'
 
 stack_size      EQU 4096        ;Stack fuer das Programm
 
@@ -2676,8 +2676,15 @@ print_point:    move.l  A0,-(SP)
 * hex_out: Gibt eine hexadezimale Zahl aus
 * IN D0.l: Auszugebende Zahl
 
-hex_out:        movem.l D0/D6-A1,-(SP)
+hex_out2:       movem.l D0/D6-A1,-(SP)
+                lea     PCRB(number_puffer),A0
+                movea.l A0,A1
+                move.l  #$24303000,(A1)+
+                subq.l  #1,A1
+                moveq   #1,D7
+                bra.s   hex_out1
 
+hex_out:        movem.l D0/D6-A1,-(SP)
                 lea     PCRB(number_puffer),A0
                 movea.l A0,A1
                 move.l  #$24303030,(A1)+
@@ -2689,12 +2696,11 @@ hex_out1:       move.b  D0,D6
                 and.b   #$0F,D6
                 add.b   D6,-(A1)
                 cmp.b   #10,D6
-                blo.s   hex_out2
+                blo.s   hex_out3
                 addq.b  #'A'-('9'+1),(A1)
-hex_out2:       lsr.l   #4,D0
+hex_out3:       lsr.l   #4,D0
                 dbra    D7,hex_out1
                 bsr     print_line
-
                 movem.l (SP)+,D0/D6-A1
                 rts
 
@@ -3112,7 +3118,7 @@ crc8:           move.b  (A0)+,D3
                 subq.l  #2,D2           ;2 Durchgaenge fuer (A4) Bytes
                 bne.s   crc8
 
-                move.b  PCRB(neednl),d0
+                move.b  PCRB(neednl),d2
                 bne.s   crc8a
                 bsr     print_point
 crc8a:
@@ -3144,10 +3150,30 @@ crc8a:
 crc9:           
                 move.b  PCRB(neednl),d0
                 bne.s   crc10
-                lea     PCRD(lf_text),A0
+                lea.l   PCRD(space_text),a0
                 bsr     print_line
-crc10:          bsr       lognlx
-crc11:          movem.l   (a7)+,d0-d7/a0-a6
+                lea.l   PCRD(oparen_text),a0
+                bsr     print_line
+                movea.l PCRB(buffer),a6
+                bsr     get_length
+                adda.l  d0,a6
+                bsr     get_width
+                lsr.l   #2,d0
+                move.l  d0,d1
+                suba.l  d0,a6
+crc13:          move.b  (a6)+,d0
+                bsr     hex_out2
+                subq.l  #1,d1
+                beq.s   crc12
+                lea.l   PCRD(comma_text),a0
+                bsr     print_line
+                bra.s   crc13
+crc12:          lea.l   PCRD(cparen_text),a0
+                bsr     print_line
+                lea.l   PCRD(lf_text),a0
+                bsr     print_line
+crc10:          bsr     lognlx
+crc11:          movem.l (a7)+,d0-d7/a0-a6
                 rts
 
 
@@ -3344,6 +3370,8 @@ space_text:     DC.B ' ',0
 point_text:     DC.B '.',0
 comma_text:     DC.B ',',0
 colon_text:     DC.B ':',0
+oparen_text:    DC.B '(',0
+cparen_text:    DC.B ')',0
 lf_text:        DC.B 13,10,0
 ok_text:        DC.B '...OK',13,10,0
 error_text:     DC.B '...Fehler',13,10,0
