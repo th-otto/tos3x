@@ -259,9 +259,9 @@ ngetdt2:
 #if STBOOK
 checkRTC:
 	movea.w   #rtc_sec,a0
-        move.b    #$00,$1d(a0)              /* Clear RTC Test register */
-        move.b    #$0c,$1f(a0)              /* Reset 1 Hz & 16 Hz alarm pulse */
-        move.b    #$08,$1b(a0)              /* Clock Start, Alarm off, Bank 0 */
+        move.b    #$00,29(a0)               /* Clear RTC Test register */
+        move.b    #$0c,31(a0)               /* Reset 1 Hz & 16 Hz alarm pulse */
+        move.b    #$08,27(a0)               /* Clock Start, Alarm off, Bank 0 */
         moveq     #0,d0                     /* The RTC is always available */
         rts
 #else
@@ -270,7 +270,7 @@ checkRTC:   movea.w   #rtc_sec,a0
             move.l    (_buserror).w,d2
             movea.l   sp,a2
             move.l    #chkRTC2,(_buserror).w
-            bset      #0,$1b(a0)
+            bset      #0,27(a0)
             move.l    d2,(_buserror).w
 #if !BINEXACT
 /* preserve old value */
@@ -291,8 +291,8 @@ checkRTC:   movea.w   #rtc_sec,a0
             movep.w   d0,5(a0)
 #endif
             move.b    #1,1(a0)
-            bclr      #0,$1b(a0)
-            move.b    #0,$1d(a0)
+            bclr      #0,27(a0)
+            move.b    #0,29(a0)
             rts
 chkRTC2:    movea.l   a2,sp
             move.l    d2,(_buserror).w
@@ -383,16 +383,16 @@ writeRTCTime:bsr      checkRTC
             and.l     #$1f,d0
             add.w     d0,d0
             divu.w    #10,d0
-            move.b    d0,$b(a1)
+            move.b    d0,11(a1)
             swap      d0
-            move.b    d0,$c(a1)
+            move.b    d0,12(a1)
             move.w    d1,d0
             lsr.w     #5,d0
             and.l     #$3f,d0
             divu.w    #10,d0
             move.b    d0,9(a1)
             swap      d0
-            move.b    d0,$a(a1)
+            move.b    d0,10(a1)
             lsr.w     #8,d1
             lsr.w     #3,d1
             ext.l     d1
@@ -425,24 +425,24 @@ writeRTCTime:bsr      checkRTC
             divu.w    #4,d2
             swap      d2
             move.b    #$e,$1f(a0)
-            bset      #0,$1b(a0)
-            move.b    #1,$15(a0)
-            move.b    d2,$17(a0)
-            bclr      #0,$1b(a0)
-            bclr      #3,$1b(a0)
+            bset      #0,$1b(a0) /* select bank 1 */
+            move.b    #1,$15(a0) /* set 24h mode */
+            move.b    d2,$17(a0) /* set learyear register */
+            bclr      #0,$1b(a0) /* select bank 0 */
+            bclr      #3,$1b(a0) /* stop the clock */
             moveq     #$c,d0
             moveq     #1,d1
-wrRTC2:     move.b  (a1,d0.w),(a0,d1.w)
+wrRTC2:     move.b    (a1,d0.w),(a0,d1.w)
             addq.w    #2,d1
             dbra      d0,wrRTC2
-            bset      #3,$1b(a0)
+            bset      #3,$1b(a0) /* start the clock */
             moveq     #0,d0
             rts
 
 no_RTC_found:moveq    #-1,d0
             rts
 
-rtcwday:    moveq  #2,d2
+rtcwday:    moveq     #2,d2
             move.w    a2,d0
             lsr.w     #8,d0
             lsr.w     #1,d0

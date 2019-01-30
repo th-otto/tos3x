@@ -99,7 +99,7 @@ typedef struct vdiVars {
 	LAEXT int16_t        loc_mode;           /* the mode of the Locator device       */
 	LAEXT int16_t        num_qc_lines;       /* # of line in the quarter circle      */
 
-#if TOSVERSION >= 0x300 & PLANES8
+#if (TOSVERSION >= 0x300) & PLANES8
 	LAEXT int32_t        trap14sav;	         /* space to save the return address     */
 	LAEXT int32_t        col_or_mask;        /* some modes this is ored in VS_COLOR  */
 	LAEXT int32_t        col_and_mask;       /* some modes this is anded in VS_COLOR */
@@ -177,6 +177,8 @@ typedef struct vdiVars {
 
 /*
  * the lineavars point here:
+ * 306: 3a1a
+ * 206: 2904
  */
 	LAEXT int16_t        v_planes;	         /* number of video planes               */
 	LAEXT int16_t        v_lin_wr;	         /* number of bytes/video line           */

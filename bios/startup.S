@@ -2171,10 +2171,18 @@ dmadone:
  * (korrigiert zu MOVEQ #$80,D0)
  */
         moveq     #$80,d0
-        moveq.l   #8,d4      /* d4 = device (SCSI0) */
+#if TP_64 /* IDE_BOOT */
+        moveq.l   #16,d4     /* d4 = device (IDE0) */
+#else
+        moveq.l   #8,d4     /* d4 = device (SCSI0) */
+#endif
 #else
         jsr       scsirst
+#if TP_64 /* IDE_BOOT */
+        moveq.l   #16,d4     /* d4 = device (IDE0) */
+#else
         moveq.l   #8,d4      /* d4 = device (SCSI0) */
+#endif
         move.b    (scu_gp1).w,d0
 #endif
         and.w     #$00F8,d0
@@ -7498,7 +7506,7 @@ coldboo0:
         TO_TTR1(zero2)
 #endif
 /* copy erase routine to low memory */
-        move.w    #(coldbend-coldboor)/4-1,d0
+        move.w    #(coldbend-coldboor+3)/4-1,d0
         lea.l     coldboor(pc),a0
         movea.w   #$00c,a1
 coldboo1:

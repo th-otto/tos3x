@@ -13,7 +13,7 @@ palette equ $00FF8240
 plane_mask:
 	dc.b 1,3,0,15
 
-/* 206de: 00e0da2e */
+/* 206de: 00e0dad2 */
 	xdef _vs_color
 _vs_color:
         movem.w   d3-d5,-(a7)

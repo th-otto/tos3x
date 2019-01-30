@@ -403,7 +403,7 @@ PP(int16_t cnt;)
 				if (err == 0 && fverify)
 				{
 					err = flopver(dskbufp, NULL, dev, sector, track, side, numsect);
-					if (err == 0 && getiword(((struct fat16_bs *)dskbufp)->bra) != 0)
+					if (err == 0 && getiword((const uint8_t *)dskbufp) != 0)
 						err = E_BADSF;
 				}
 			} else

@@ -649,3 +649,10 @@
 #ifndef TP_63
 #define TP_63 0
 #endif
+
+/*
+ * TP_64: IDE_BOOT: Try to boot from IDE first
+ */
+#ifndef TP_64
+#define TP_64 1
+#endif
