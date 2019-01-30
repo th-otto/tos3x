@@ -604,8 +604,14 @@
 #endif
 
 /*
- * TP_58: NEWVIDEO:
+ * TP_58: NEWVIDEO: Activate EPROM sequencer
  * TP_59: SWITCH:
+ *    0 - do not switch
+ *    6 - use PSG bit 6
+ *    7 - use PSG bit 7
+ *
+ * Used to activate an EPROM sequencer already in the bootphase.
+ * Only for STs with EPROM sequencer expansion.
  */
 #ifndef TP_58
 #define TP_58 0
@@ -615,21 +621,28 @@
 #endif
 
 /*
- * TP_60: NO_MMU_RESET
+ * TP_60: NO_MMU_RESET: Do not reset MMU
+ *
+ * Needed to make the TOS work when run from TT-RAM,
+ * eg. when using ROMRAM.
  */
 #ifndef TP_60
 #define TP_60 0
 #endif
 
 /*
- * TP_61: FPU_TEST
+ * TP_61: FPU_TEST: Fix check for FPU
+ * Fixes a bug in FPU detection
  */
 #ifndef TP_61
 #define TP_61 1
 #endif
 
 /*
- * TP_62: LOGO
+ * TP_62: LOGO: Logo output independent of resolution
+ *
+ * Uses LineA variables to display the logo, instead
+ * of testing the resolution
  */
 #ifndef TP_62
 #define TP_62 1
@@ -654,5 +667,47 @@
  * TP_64: IDE_BOOT: Try to boot from IDE first
  */
 #ifndef TP_64
-#define TP_64 1
+#define TP_64 0
+#endif
+
+/*
+ * TP_65: EAGLE: GE-Soft Eagle patch
+ *
+ * Prevent monochrome monitor change
+ */
+#ifndef TP_65
+#define TP_65 0
+#endif
+
+/*
+ * TP_66: SCSI_ID: Initiatoridentification
+ *
+ * Initiatoridentification on SCSI access. TT will
+ * report ID 7. Needed to be able to boot
+ * from certain harddisks (eg. Quantum Empire)
+ */
+#ifndef TP_66
+#define TP_66 1
+#endif
+
+/*
+ * TP_67: FLOP_TEST: Floppy test fix
+ *
+ * When testing for floppy, select track #1 instead of track #10
+ */
+#ifndef TP_67
+#define TP_67 0
+#endif
+
+/*
+ * TP_68: FLOPPY: Increase floppy delay
+ *
+ * Increase delay for floppy access, to prevent problems
+ * with 50MHz. Original value 281.
+ */
+#ifndef TP_68
+#define TP_68 0
+#endif
+#ifndef FLOPDELAY
+#define FLOPDELAY 512
 #endif

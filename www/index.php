@@ -101,6 +101,21 @@ Omit RESET instruction for RAM-TOS on older ST's
 
 <tr>
 <td>
+Do not reset MMU:
+</td>
+<td>
+<input type="checkbox" name="tp_60" value="1" /><br />
+</td>
+Needed to make the TOS work when run from TT-RAM,
+eg. when using ROMRAM.
+<td>
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
 Color 60hz:
 </td>
 <td>
@@ -186,6 +201,36 @@ Set steprate for floppy drives A: and B:
 <option value="0">6 ms</option>
 <option value="1">12 ms</option>
 </select>
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Floppy test fix:
+</td>
+<td>
+<input type="checkbox" name="tp_67" value="1" /><br />
+</td>
+<td>
+When testing for floppy, select track #1 instead of track #10
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Increase floppy delay
+</td>
+<td>
+<input type="checkbox" name="tp_68" value="1" /><br />
+<input type="number" name="flopdelay" value="512" min="128" max="1024" style="width: 5em" /><br />
+</td>
+<td>
+Increase delay for floppy access, to prevent problems
+with 50MHz. Original value 281.
 </td>
 </tr>
 
@@ -283,6 +328,20 @@ Fix boot device error:
 <td>
 Fixes a long-standing bug that sets the default
 path for GEM to the floppy (see ST-Computer 1/90)
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Fix check for FPU:
+</td>
+<td>
+<input type="checkbox" name="tp_61" value="1" checked="checked" /><br />
+</td>
+<td>
+Fixes a bug in FPU detection
 </td>
 </tr>
 
@@ -690,6 +749,21 @@ Substitute starting fuji:
 
 <tr>
 <td>
+Logo output independent of resolution:
+</td>
+<td>
+<input type="checkbox" name="tp_62" value="1" checked="checked" /><br />
+</td>
+<td>
+Uses LineA variables to display the logo, instead
+of testing the resolution
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
 Change printer line spacing:
 </td>
 <td>
@@ -799,6 +873,64 @@ Do not eliminate MSTE/TT-HD switch
 <tr><td></td><td></td><td>
 <input type="checkbox" id="tp_57" name="tp_57" value="1" checked="checked" disabled="disabled" />
 Use alternative video synchronisation
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Activate EPROM sequencer:
+</td>
+<td>
+<input type="checkbox" id="tp_58" name="tp_58" onchange="changeSwitch();" value="1" />
+</td>
+<td>
+Used to activate an EPROM sequencer already in the bootphase.<br />
+Only for STs with EPROM sequencer expansion.
+</td>
+</tr>
+<tr>
+<td>
+Switch:
+</td>
+<td>
+<select id="tp_59" name="tp_59" style="vertical-align: middle; padding: 0 0;" >
+<option value="0" selected="selected">Do not switch</option>
+<option value="6">Use PSG bit 6</option>
+<option value="7">Use PSG bit 7</option>
+</select>
+</td>
+<td></td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+GE-Soft Eagle patch:
+</td>
+<td>
+<input type="checkbox" id="tp_65" name="tp_65" value="1" />
+</td>
+<td>
+Prevent monochrome monitor change
+</td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
+<td>
+Initiatoridentification:
+</td>
+<td>
+<input type="checkbox" id="tp_66" name="tp_66" value="1" checked="checked" />
+</td>
+<td>
+Initiatoridentification on SCSI access. TT will
+report ID 7. Needed to be able to boot
+from certain harddisks (eg. Quantum Empire)
 </td>
 </tr>
 

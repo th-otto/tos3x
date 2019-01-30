@@ -480,7 +480,11 @@ meminit:
         move.b    #$07,(a0)  /* select mixer control */
         move.b    #$C0,2(a0) /* Port A+B = output */
         move.b    #$0E,(a0)  /* select Port A */
-        move.b    #$07,2(a0) /* deselect floppy drives */
+#if TP_58 & (TP_59 != 0) /* NEWVIDEO & SWITCH */
+        move.b    #((1<<TP_59)+7),2(a0) /* deselect floppy drives */
+#else
+        move.b    #7,2(a0) /* deselect floppy drives */
+#endif
 
 #if TP_50
 		bsr       VDOSkip1
@@ -1076,6 +1080,8 @@ scrsize equ ((1280*960)/8+$100)
 #else
 scrsize equ ((640*400)/8+$300)
 #endif
+#if TP_58 /* NEWVIDEO */
+#endif
 
         movea.l   (_phystop).w,a0
         suba.l    #scrsize,a0
@@ -1347,7 +1353,7 @@ nofpu:		swap      d1
 			move.l    d1,(a0)+
 #else
 
-#if OS_COUNTRY == CTRY_PL
+#if (OS_COUNTRY == CTRY_PL) | TP_61 /* FPU_TEST */
         D0_FP0
 #else
         FP0_D0
@@ -1647,9 +1653,8 @@ clockdone:
  */
         movea.l   #atarilogo,a0
         movea.l   (_v_bas_ad).w,a1
-#if OS_COUNTRY == CTRY_PL
-		/* apparently a patch that was applied by the maker of the PL version */
-		lea (lineavars).w,a2
+#if (OS_COUNTRY == CTRY_PL) | TP_62 | TP_58
+		lea       (lineavars).w,a2
 		move.w    (a2),d4   /* LA_PLANES */
 		move.w    -2(a2),d5 /* V_BYTES_LIN */
 		move.w    d5,d0
@@ -1669,6 +1674,7 @@ logocol3:
         dbf       d1,logocol2
         lea.l     0(a2,d5.w),a1
         dbf       d0,logocol1
+#if BINEXACT
         nop
         nop
         nop
@@ -1683,6 +1689,7 @@ logocol3:
         nop
         nop
         nop
+#endif
 #else
         move.b    (_sshiftmod).w,d0
         cmp.b     #STHIGH,d0       /* ST-High resolution? */
@@ -2492,6 +2499,7 @@ moncheck:
         beq.s     nomoncheck
         not.b     d1
 nomoncheck:
+#if !TP_65 /* EAGLE */
 #if (TOSVERSION < 0x300) | TP_50
 		move.b    (v_shf_mod).w,d0
 		and.b     #3,d0
@@ -2536,6 +2544,7 @@ vbl_monchg:
 #endif
         movea.l   (_swv_vec).w,a0
         jsr       (a0)
+#endif /* TP_65 */
 vbl_nomonchg:
 #endif /* !STBOOK */
         jsr       blink								/* blink cursor */

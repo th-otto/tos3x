@@ -198,6 +198,9 @@
 #if !TP_48
 #undef ARROWTIME
 #endif
+#if !TP_68
+#undef FLOPDELAY
+#endif
 
 /*
  * These are the defaults that are used for patches that are not activated
@@ -218,10 +221,18 @@
 #ifndef CONTERM
 #define CONTERM 7
 #endif
+#ifndef FLOPDELAY
+#define FLOPDELAY 281
+#endif
 
 #ifndef SUPERTOS
 #define SUPERTOS 0
 #endif
 #if SUPERTOS
 #define TP_48 1
+#endif
+/* for PAK, activate Alt_Sync with NEWVIDEO */
+#if TP_58 & TP_50 & !TP_57
+#undef TP_57
+#define TP_57 1
 #endif

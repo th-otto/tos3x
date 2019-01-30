@@ -238,6 +238,7 @@ function compile_tos()
 			$conterm = isset($_POST['conterm']) ? $_POST['conterm'] : 7;
 			$shbufsize = isset($_POST['shbufsize']) ? $_POST['shbufsize'] : 0;
 			$arrowtime = isset($_POST['arrowtime']) ? $_POST['arrowtime'] : 0;
+			$arrowtime = isset($_POST['flopdelay']) ? $_POST['flopdelay'] : 281;
 
 			fprintf($fp, "#define TP_01 %d\n", $tp_01);
 			fprintf($fp, "#define TP_02 %d\n", $tp_02);
@@ -367,6 +368,7 @@ function compile_tos()
 			fprintf($fp, "#define CONTERM %d\n", $conterm);
 			fprintf($fp, "#define SHBUFSIZE %d\n", $shbufsize);
 			fprintf($fp, "#define ARROWTIME %d\n", $arrowtime);
+			fprintf($fp, "#define FLOPDELAY %d\n", $flopdelay);
 
 			fclose($fp);
 			fclose($mk);

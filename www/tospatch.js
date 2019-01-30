@@ -259,6 +259,12 @@ function changeTosVersion()
 	var disabled = tosVersion == '306' ? '' : 'disabled';
 	document.getElementById('tp_35_32').disabled = disabled;
 }
+function changeSwitch()
+{
+	var f = document.getElementById('tp_58');
+	var disabled = f.checked ? '' : 'disabled';
+	document.getElementById('tp_59').disabled = disabled;
+}
 function onload()
 {
 	changeTosVersion();
@@ -268,6 +274,7 @@ function onload()
 	change8x8();
 	change8x16();
 	change16x32();
+	changeSwitch();
 	for (var i = 1; i <= 12; i++)
 	{
 		previewIcon('tp_37_' + i);

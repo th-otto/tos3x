@@ -45,7 +45,7 @@ check::
 	for i in $(SUBDIRS); do $(MAKE) --no-print-directory -C $$i $(FLAGSTOPASS) $@; done
 
 rsync::
-	for i in $(SUBDIRS) include GNUmakefile GNUmakefile.cmn config.mak; do sudo rsync -vzrlp $$i $(LOCAL_WWWDIR); done
+	for i in $(SUBDIRS) include GNUmakefile GNUmakefile.cmn config.mak; do sudo rsync -vzrlpt $$i $(LOCAL_WWWDIR); done
 	sudo chown -R wwwrun:www $(LOCAL_WWWDIR)
 	sudo chmod -R g+w $(LOCAL_WWWDIR)
 

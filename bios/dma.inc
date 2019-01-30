@@ -612,7 +612,11 @@ scsipha2:
         move.b    #$00,($FFFF8787).w
         move.b    #$00,($FFFF8789).w
         move.b    #$0C,($FFFF8783).w
+#if TP_66 /* SCSI_ID */
+	moveq     #$80,d0
+#else
         clr.w     d0
+#endif
         move.w    4(a7),d1
         bset      d1,d0
         move.b    d0,($FFFF8781).w

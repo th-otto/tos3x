@@ -788,7 +788,11 @@ floploc1:
         clr.w     fd_curtrack(a1)
         bsr       restore                       /* attempt restore */
         beq.s     floploc3                      /* (it won) */
+#if TP_67 /* FLOP_TEST */
+        moveq.l   #1,d7                         /* attempt seek to track 1 */
+#else
         moveq.l   #10,d7                        /* attempt seek to track 10 */
+#endif
         bsr       hardsee1
         bne.s     floploc2                      /* (failed) */
         bsr       restore                       /* attempt restore again */
@@ -1179,7 +1183,11 @@ rdfdcd0:
 rwdelay:
 #if TTMFP_SUPPORT
             move.w    d0,-(a7)
+#if TP_68
+            move.w    #FLOPDELAY,d0
+#else
             move.w    #$0119,d0
+#endif
             bsr       mfpdelay
             move.w    (a7)+,d0
 #else
