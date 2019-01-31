@@ -88,7 +88,7 @@ int16_t ap_exit(NOTHING)
 {
 	mn_clsda();
 	if (rlr->p_qindex)
-#if SUPERTOS
+#if TP_WINX
 		ap_rdwr(AQRD, rlr->p_pid, rlr->p_qindex, (int16_t *) rlr->p_qaddr);
 #else
 		ap_rdwr(AQRD, rlr->p_pid, rlr->p_qindex, (int16_t *) D.g_valstr);

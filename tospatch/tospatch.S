@@ -1078,7 +1078,7 @@ mkplis36:       addq.l  #1,A6
 mkplis37:       moveq.l #0,d7           ;Flag loeschen
                 bsr     skip_space
                 bne     error2
-                cmpi.b  #"'",D0         ;Textausgabe?
+                cmpi.b  #39,D0          ;Textausgabe?
                 beq.s   mkplis38        ;Ja! =>
                 cmp.b   #'"',D0
                 beq.s   mkplis38        ;Ja! =>
@@ -1225,7 +1225,7 @@ cmdendi2:       tst.l   if_count        ;Ist ein offenener IF-Befehl vorhanden?
 cmderror:       bsr       prcrange
                 bsr     skip_space
                 bne     error22         ;'_ERROR'-Message ohne zus. Text ausgeben
-                cmpi.b  #"'",(A6)+      ;ein ' als Textanfang?
+                cmpi.b  #39,(A6)+       ;ein ' als Textanfang?
                 beq.s   mkpli54a        ;Ja! =>
                 cmpi.b  #'"',D0         ;ein " als Textanfang?
                 bne     error2          ;Nein! =>
@@ -3708,7 +3708,7 @@ error12_t:      DC.B 1,'Zu viele TOS-Dateien zum Splitten!',0
 error13_t:      DC.B 0,'Undefinierte Variable',0
 error14_t:      DC.B 7,'>>> Falsche TOS-Version!',0
 error15_t:      DC.B 0,'Falscher Befehl',0
-error16_t:      DC.B 0,"Kein Bool'scher Wert",0
+error16_t:      DC.B 0,'Kein Bool',39,'scher Wert',0
 error17_t:      DC.B 0,'ELSE ohne IF',0
 error18_t:      DC.B 0,'ENDIF ohne IF',0
 error19_t:      DC.B 1,'Nur 256 Unterbatchdateien m',$94,'glich!',0
@@ -3726,15 +3726,15 @@ error30_t:      DC.B 0,'Zu viele Argumente f',$81,'r _FILL',0
 error31_t:      DC.B 1,'Illegale Breite',0
 error32_t:      DC.B 1,'Interner Variablenspeicher zu klein!',0
 error33_t:      DC.B 0,'Menge kann nicht 1. Argument sein',0
-error34_t:      DC.B 0,"Kein ':' nach CASE-Wert",0
+error34_t:      DC.B 0,'Kein ',39,':',39,' nach CASE-Wert',0
 error35_t:      DC.B 0,'CASE ohne SWITCH',0
 error36_t:      DC.B 0,'CASE nach DEFAULT',0
 error37_t:      DC.B 0,'DEFAULT ohne SWITCH',0
 error38_t:      DC.B 0,'ENDSWITCH ohne SWITCH',0
 error39_t:      DC.B 0,'Doppeltes DEFAULT',0
 error40_t:      DC.B 1,'SWITCH ohne ENDSWITCH',0
-error41_t:      DC.B 0,"Kein ':' nach DEFAULT",0
-error42_t:      DC.B 4,"Undokumentierte Verwendung von ':'",0
+error41_t:      DC.B 0,'Kein ',39,':',39,' nach DEFAULT',0
+error42_t:      DC.B 4,'Undokumentierte Verwendung von ',39,':',39,0
 error43_t:      DC.B 7,'>>> Falsche TOS-Nationalit',$84,'t',0
 error44_t:      DC.B 1,'Ung',$81,'ltiger Schalter!',13,10,10
                 DC.B   'TOSPATCH [-qmK] patchfile',13,10

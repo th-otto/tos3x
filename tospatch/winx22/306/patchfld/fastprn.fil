@@ -1,0 +1,92 @@
+ 310  $22F8+80+.BASE.L        ;Warteroutine auf neue Routine
+ 1044 $22F8+62+.BASE.L        ;bconin-Vector auf neue Routine
+ 1064 $22F8+80+.BASE.L        ;Warteroutine auf neue Routine
+
+22F8
+~ $41,f8,04,ba                   ; lea.l     (_hz_200).w,a0
+~ $26,10                         ; move.l    (a0),d3
+~ $24,03                         ; move.l    d3,d2
+~ $96,b8,10,de                   ; sub.l     ($000010DE).w,d3
+~ $0c,83,00,00,03,e8             ; cmpi.l    #5*200,d3
+~ $65,10                         ; bcs.s     bcon0o2
+;bcon0o1:
+~ $61,6a                         ; bsr.s     bcon0o11
+~ $6b,14                         ; bmi.s     bcon0o3
+~ $26,10                         ; move.l    (a0),d3
+~ $96,82                         ; sub.l     d2,d3
+~ $0c,83,.PRINT_TIMEOUT.L        ; cmpi.l    #30*200,d3
+~ $65,f0                         ; bcs.s     bcon0o1
+;bcon0o2:
+~ $21,d0,10,de                   ; move.l    (a0),($000010DE).w
+~ $70,00                         ; moveq.l   #0,d0
+~ $4e,75                         ; rts
+;bcon0o3:
+~ $61,6c                         ; bsr.s     bcon0o13
+~ $72,07                         ; moveq.l   #7,d1
+~ $70,c0                         ; moveq.l   #-64,d0
+~ $61,1a                         ; bsr.s     bcon0o6
+~ $10,bc,00,0f                   ; move.b    #$0F,(a0)
+~ $12,af,00,07                   ; move.b    7(a7),(a1)
+~ $61,18                         ; bsr.s     bcon0o7
+~ $30,10                         ; move.w    (a0),d0
+~ $30,10                         ; move.w    (a0),d0
+~ $61,08                         ; bsr.s     bcon0o5
+~ $46,c3                         ; move.w    d3,sr
+~ $70,ff                         ; moveq.l   #-1,d0
+~ $4e,75                         ; rts
+;bcon0o4:
+~ $72,0e                         ; moveq.l   #14,d1
+;bcon0o5:
+~ $70,20                         ; moveq.l   #32,d0
+;bcon0o6:
+~ $10,81                         ; move.b    d1,(a0)
+~ $80,10                         ; or.b      (a0),d0
+~ $12,80                         ; move.b    d0,(a1)
+~ $4e,75                         ; rts
+;bcon0o7:
+~ $72,0e                         ; moveq.l   #14,d1
+;bcon0o8:
+~ $70,df                         ; moveq.l   #-33,d0
+;bcon0o9:
+~ $10,81                         ; move.b    d1,(a0)
+~ $c0,10                         ; and.b     (a0),d0
+~ $12,80                         ; move.b    d0,(a1)
+~ $4e,75                         ; rts
+;bcon0in:
+~ $61,36                         ; bsr.s     bcon0o13
+~ $72,07                         ; moveq.l   #7,d1
+~ $70,7f                         ; moveq.l   #127,d0
+~ $61,f0                         ; bsr.s     bcon0o9
+~ $61,de                         ; bsr.s     bcon0o4
+~ $46,c3                         ; move.w    d3,sr
+;bcon0o10:
+~ $61,10                         ; bsr.s     bcon0o11
+~ $6b,fc                         ; bmi.s     bcon0o10
+~ $61,26                         ; bsr.s     bcon0o13
+~ $61,e2                         ; bsr.s     bcon0o8
+~ $10,bc,00,0f                   ; move.b    #$0F,(a0)
+~ $10,10                         ; move.b    (a0),d0
+~ $46,c3                         ; move.w    d3,sr
+~ $4e,75                         ; rts
+;bcon0o11:
+~ $02,38,00,fe,fa,05             ; andi.b    #$FE,($FFFFFA05).w
+~ $70,00                         ; moveq.l   #0,d0
+~ $01,38,fa,01                   ; btst      d0,($FFFFFA01).w
+~ $66,02                         ; bne.s     bcon0o12
+~ $70,ff                         ; moveq.l   #-1,d0
+;bcon0o12:
+~ $4e,75                         ; rts
+;strobeoff:
+~ $61,06                         ; bsr.s     bcon0o13
+~ $61,b4                         ; bsr.s     bcon0o4
+~ $46,c3                         ; move.w    d3,sr
+~ $4e,75                         ; rts
+;bcon0o13:
+~ $41,f8,88,00                   ; lea.l     ($FFFF8800).w,a0
+~ $43,e8,00,02                   ; lea.l     2(a0),a1
+~ $40,c3                         ; move.w    sr,d3
+~ $00,7c,07,00                   ; ori.w     #$0700,sr
+~ $4e,75                         ; rts
+~ $ff,ff
+
+262E $61,00,22F8+92-~.W      ;Routine zum Strobe setzen hat sich verschoben...

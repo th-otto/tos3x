@@ -157,6 +157,9 @@
 #define XGRF_COLOR 132		/* ViewMAX */
 #define XGRF_DTIMAGE 133	/* ViewMAX Panther */
 
+/* new functions */
+#define APPL_GETINFO 130
+
 /* max sizes for arrays */
 #define C_SIZE 4
 #define I_SIZE 16

@@ -1,0 +1,382 @@
+;***************************************************************************
+;* Martin Osieka: (implementiert durch MH)
+;* Der WINX-Patch erlaubt mehr Fenster als je zuvor !!!
+
+; 306-206: 3A66
+
+.WINX08 = 1D766+.d1
+.WINX09 = 2203C+.d1
+.WINX15 = 311AC+.d2
+.WINX17 = 31A5E+.d2
+.WINX19 = 3235A+.d2
+.WINX20 = 35F20+.d2
+
+;Damit WINX richtig reloziert wird
+!.WINX08+124A ; 1E9B0
+!.WINX08+1764 ; 1EECA
+!.WINX08+246  ; 1D9AC
+!.WINX08+250  ; 1D9B6
+!.WINX08+FDA  ; INIT_SCROLL 1E740
+!.WINX08+FDC  ; CONT_SCROLL 1E742
+!.WINX08+FDE  ; CONT_CLOSE 1E744
+!.WINX08+FE0  ; CONT_FULL 1E746
+!.WINX15+12E  ; GLOBAL 312DA
+
+.rd_mymsg    = 16056+.d1+.BASE
+.ap_rdwr     = 16098+.d1+.BASE
+.crysbind    = 1686C+.d1+.BASE
+.ev_mchk     = 183C4+.d1+.BASE
+.ob_find     = 200EC+.d1+.BASE
+.ldiv        = 21CF6+.d1+.BASE
+.dsptch      = 21E44+.d1+.BASE
+.gr_stilldn  = 21326+.d1+.BASE
+.gr_dragbox  = 21488+.d1+.BASE
+.gr_slidebox = 2155A+.d1+.BASE
+.gsx_ncode   = 21624+.d1+.BASE
+.mice_state  = 2BDF4+.d1+.BASE
+
+.srl_row     = 31098+.d2+.BASE
+.srl_col     = 31140+.d2+.BASE
+.get_win     = 31DB0+.d2+.BASE
+.do_redraw   = 32002+.d2+.BASE
+.wind_update = 32504+.d2+.BASE
+.appl_write  = 3222C+.d2+.BASE
+.wind_get    = 3252C+.d2+.BASE
+.wind_set    = 32546+.d2+.BASE
+
+.ml_pmown    = 6974
+.ml_pkown    = 6978
+.TICKS       = 7188
+.ad_stdesk   = 7504
+.ad_windspb  = 7534
+.gl_ticktime = 75DA
+.winhead     = 7702
+.gl_newdesk  = 770C
+.gl_rfull    = 7A58
+.appl_msg    = 7A6C
+.gl_newroot  = 7A8E
+.gl_mowner   = 7AC0
+.s_stofit    = 7B64
+.gl_wtop     = 7B8C
+.intin       = 914E
+.D           = 9458
+.rlr         = CB00
+.ctl_pd      = CB7A
+.button      = CCB0
+
+
+;
+; in ap_exit(), change parameter in call to ap_rdwr
+;
+16022+.d1 $2E,A8,00,90,4E,71        ;move.l 144(a0),(a7); nop
+
+;
+; in iasync, change mouse rectangle check to call to ev_mchk()
+; (same as for ARROWFIX)
+;
+165DA+.d1 $4E,B9,.ev_mchk.L         ;jsr ev_mchk
+~         $50,8F                    ;addq.l #8,a7
+~         $4A,40                    ;tst.w d0
+~         $4E,71,4E,71,4E,71,4E,71
+~         $4E,71,4E,71,4E,71,4E,71
+~         $4E,71,4E,71
+
+; crysbind: new address for wm_create()
+17026+.d1 $4E,B9,.WINX08+.BASE+C9C.L      ;jsr $E1E402
+; crysbind: new address for wm_open()
+17040+.d1 $4E,B9,.WINX08+.BASE+DAC.L      ;jsr $E1E512
+; crysbind: new address for wm_close()
+17052+.d1 $4E,B9,.WINX08+.BASE+E38.L      ;jsr $E1E59E
+; crysbind: new address for wm_delete()
+17062+.d1 $4E,B9,.WINX08+.BASE+E10.L      ;jsr $E1E576
+; crysbind: new address for wm_get()
+17080+.d1 $4E,B9,.WINX08+.BASE+10E8.L     ;jsr $E1E84E
+; crysbind: new address for wm_set()
+170A0+.d1 $4E,B9,.WINX08+.BASE+1268.L     ;jsr $E1E9CE
+; crysbind: new address for wm_find()
+170BA+.d1 $4E,B9,.WINX08+.BASE+13D2.L     ;jsr $E1EB38
+; crysbind: new address for wm_update()
+170CE+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+; crysbind: new address for wm_calc()
+1711E+.d1 $4E,B9,.WINX08+.BASE+1486.L     ;jsr $E1EBEC
+; crysbind: new address for wm_new()
+1712C+.d1 $4E,B9,.WINX08+.BASE+15B8.L     ;jsr $E1ED1E
+
+;
+; optimize xif(), to make room for appl_getinfo() check
+;
+172A4+.d1
++winx01.fil              ;172A4 - 17344 (.160)
+
+; all_run(): new address for wm_update()
+1742E+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+17436+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+;
+; replace ct_msg() & hctl_window()
+;
+1774E+.d1
++winx02.fil              ;1774E - 17ABC (.878)
+
+; remove call to post_button() in ct_chgown()
+17C54+.d1 $4E,71,4E,71,4E,71,4E,71
+~         $4E,71,4E,71,4E,71,4E,71
+~         $4E,71,4E,71,4E,71,4E,71
+
+; ctlmgr(): new address for w_setactive()
+17C9C+.d1 $4E,B9,.WINX08+.BASE+98E.L      ;jsr $E1E0F4
+
+; ctlmgr(): change parameter for ev_multi()
+17CA8+.d1 $2F,3C,01,02,03,00        ;move.l #$01020300,-(a7)
+
+; ctlmgr(): new address for wm_update()
+17CD0+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+; ctlmgr(): new address for hctl_button()
+17CE0+.d1 $61,00,.hctl_button-~.W   ;bsr $E17790
+
+; ctlmgr(): new address for wm_update()
+17CF8+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+; ctlmouse(): new address for getmouse()
+17D48+.d1 $61,00,.WINX08+1A38-~.W   ;bsr $E1F19E
+
+; take_ownership(): new address for wm_update()
+17DEE+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+; take_ownership(): mouse owner is also keyboard owner
+17E2A+.d1 $23,F9,.gl_mowner.L,.ml_pkown.L ; move.l $00007AC0,$00006978
+
+; take_ownership(): new address for wm_update()
+17E7A+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+; disable interrupts in forq()
+17E84+.d1 $2F,0D                    ;move.l a5,-(a7)
+~         $40,C1                    ;move.w sr,d1
+~         $00,7C,07,00              ;ori.w #$0700,sr
+17EC4+.d1 $2A,AF,00,08              ;move.l 8(a7),(a5)
+~         $2B,6F,00,0C,00,04        ;move.l 12(a7),4(a5)
+17EDA+.d1 $46,C1                    ;move.w d1,sr
+~         $2A,5F                    ;movea.l (a7)+,a5
+~         $4E,75                    ;rts
+1820C+.d1 $4E,71,4E,71,4E,71
+
+;
+; replace ev_mesag() (same as for ARROWFIX)
+;
+18362+.d1
++winx04.fil              ;18362 - 18396 (.52)
+
+; call wx_timchk() from WINX15.FIL in ev_multi()
+18550+.d1 $4E,B9,.WINX15+.BASE+186.L      ;jsr $E31332
+~         $08,07,00,04              ;btst #4,d7
+~         $67,2C                    ;beq $E18578
+
+; amutex(): call wx_evinsert() from WINX15.FIL
+18856+.d1 $4E,B9,.WINX15+.BASE+170.L      ;jsr $E3131C
+
+; fm_alert(): new address for wm_update()
+18DA2+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+; fm_alert(): change parameter for ctlmouse()
+18DE2+.d1 $3E,BC,00,02              ;move.w #2,(a7)
+
+; fm_alert(): new address for wm_update()
+18E32+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+; fm_dial(): new address for w_drawdesk()
+192BC+.d1 $61,00,.WINX08+658-~.W    ;bsr $E1DDBE
+~         $60,00,00,10              ;bra.w $E192D2
+
+; gem_main(): new address for wm_init()
+1A61E+.d1 $4E,B9,.WINX08+.BASE+F86.L      ;jsr $E1E6EC
+
+; mowner(): call helper function wx_owner() for additional checks
+1ACA8+.d1 $4E,B9,.WINX08+.BASE+152C.L     ;jsr $E1EC92
+
+; mowner(): new address for wm_find() & call helper function wx_srchwp()
+1AD00+.d1 $4E,B9,.WINX08+.BASE+13D2.L     ;jsr $E1EB38
+~         $54,8F                    ;addq.l #2,a7
+~         $61,00,.WINX08+EBE-~.W    ;bsr $E1E624
+~         $60,00,00,1E              ;bra.w $E1AD2C
+
+;
+; optimized version of downorup(), used to patch a call in iasync()
+; (same as for ARROWFIX)
+;
+1AED2+.d1
++winx05.fil              ;1AED2 - 1AF0E (.60)
+
+; mn_do(): change parameter for ctlmouse()
+1B390+.d1 $3E,BC,00,02              ;move.w #2,(a7)
+
+; mn_clsda(): new address for ap_sendmsg()
+1B832+.d1 $4E,B9,.WINX08+.BASE+12.L       ;jsr $E1D778
+
+; fapd(): change access to appl specific message buffer
+1C402+.d1
++winx06.fil              ;1C402 - 1C452 (.80)
+
+;p_nameit: optimized version to insert call to wx_nameit()
+1C578+.d1
++winx07.fil              ;1C578 - 1C5A4 (.44)
+
+; doq: change access to appl specific message buffer
+1C63C+.d1 $26,6B,00,90              ;movea.l 144(a3),a3
+~         $D6,C0                    ;adda.w d0,a3
+~         $4E,71,4E,71              ;nop
+1C65E+.d1 $28,6C,00,90              ;movea.l 144(a4),a4
+~         $D8,C6                    ;adda.w d6,a4
+~         $4E,71                    ;nop
+
+; doq: insert call to wx_rmerge
+1C676+.d1 $61,00,.WINX08+191E-~.W   ;bsr $E1F084
+~         $60,00,00,22              ;bra.w $E1C69E
+
+; aqueue: changed QUEUE_SIZE
+1C70C+.d1 $30,3C,05,00              ;move.w #$0500,d0
+
+; rsc_read(): change dos_alloc -> wx_alloc()
+1C8E6+.d1 $4E,B9,.WINX15+.BASE+D6.L       ;jsr $E31282
+
+; sh_main(): new address for wm_start()
+1D5A8+.d1 $4E,B9,.WINX08+.BASE+FE4.L      ;jsr $E1E74A
+
+; sh_main(): new address for wm_new()
+1D712+.d1 $4E,B9,.WINX08+.BASE+15B8.L     ;jsr $E1ED1E
+
+;
+; replacements for all window manager functions
+;
+.WINX08 winx08.abs              ;1D766 - 1F63E (.7896)
+.WINX08+246 $.LOCAL.W       ; 1D9AC
+.WINX08+250 $.DESKTOP.W     ; 1D9B6
+.WINX08+FDA $.INIT_SCROLL.W ; 1E740
+.WINX08+FDC $.CONT_SCROLL.W ; 1E742
+.WINX08+FDE $.CONT_CLOSE.W  ; 1E744
+.WINX08+FE0 $.CONT_FULL.W   ; 1E746
+
+; bb_fill(): insert call to wx_fill()
+20E4A+.d1 $61,00,.WINX09-~.W              ;bsr $E2203C
+
+; gr_stilldn(): support for button modes
+2132E+.d1 $4E,B9,.WINX08+.BASE+1548.L     ;jsr $E1ECAE
+
+; gr_rubwind(): new address for wm_update()
+21422+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+21478+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+; gr_dragbox(): new address for wm_update()
+21496+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+2150E+.d1 $4E,B9,.WINX08+.BASE+1408.L     ;jsr $E1EB6E
+
+;
+; wx_fill() function
+;
+.WINX09
++winx09.fil              ;2203C - 220DC (.160)
+
+; b_click(): remove test for gl_bpend
+; (same as ARROWFIX)
+22752+.d1 $4E,71,4E,71,4E,71,4E,71
+
+; helper function for hctl_window
+22894+.d1
++winx10.fil              ;22894 - 228AA (.22)
+
+; wind_new(): new address for wm_new()
+245F0+.d1 $4E,B9,.WINX08+.BASE+15B8.L     ;jsr $E1ED1E
+
+; hd_keybd(): set msgbuff[5] to 0 for WM_ARROWED message
+2A84C+.d1 $42,6E,FF,F6              ;clr.w -10(a6)
+~         $4E,71                    ;nop
+
+;
+; support new extended WM_ARROWED messages
+; in deskmenu.c/do_scroll
+;
+2A9E8+.d1
++winx11.fil              ;2A84C - 2AAB4 (.204)
+
+;
+; support WM_BOTTOM in deskmenu.c/hd_msg
+;
+2B20C+.d1
++winx12.fil              ;2B20C - 2B234 (.40)
+2B24A+.d1 $90,7C,00,21              ;sub.w #33,d0 /* WM_BOTTOM */
+2B260+.d1 $4E,71,4E,71              ;nop
+
+;
+; hd_msg(): send redraw messages instead of directly
+; redrawing the windows, for better support of
+; realtime window sizing
+;
+2B546
++winx13.fil              ;2B546 - 2B596 (.80)
+                         ;2B5C2 - 2B5EE (.44)
+
+;close_top(): eliminate call to get_top()
+2D46C+.d2 $4E,71,4E,71,4E,71,4E,71  ;nop
+
+;srl_hzbar: replace call to objc_draw() by do_redraw()
+;this fixes a bug when drawing into background windows
+3107A+.d2 $42,67                    ;clr.w -(a7)
+~         $48,6D,00,58              ;pea.l 88(a5)
+~         $3F,2D,00,04              ;move.w 4(a5),-(a7)
+~         $61,00,.do_redraw-~.W     ;bsr $E32002
+
+.WINX15
++winx15.fil              ;311AC - 31354 (.424)
+
+;
+; new make_top() function in deskwin.c
+; to handle WM_BOTTOM message
+;
+.WINX17
++winx17.fil              ;31A5E - 31AA2 (.68)
+
+; close_window(): patch call to make_top()
+31F78+.d2 $4E,71,4E,71,4E,71,4E,71,4E,71
+~         $42,97                    ;clr.l (a7)
+
+; replace do_xyfix
+3213A+.d2
++winx18.fil              ;3213A - 321BC (.130)
+
+; replace unused graf_handle by a helper function
+.WINX19
++winx19.fil              ;3235A - 32382 (.40)
+
+;wind_close(): new address for wm_close()
+324E6+.d2 $41,F9,.WINX08+.BASE+E38.L      ;lea $E1E59E,a0
+
+;wind_delete(): new address for wm_delete()
+324F0+.d2 $41,F9,.WINX08+.BASE+E10.L      ;lea $E1E576,a0
+
+;wind_find(): new address for wm_find()
+324FA+.d2 $41,F9,.WINX08+.BASE+13D2.L     ;lea $E1EB38,a0
+
+;wind_update(): new address for wm_update()
+32504+.d2 $41,F9,.WINX08+.BASE+1408.L     ;lea $E1EB6E,a0
+
+;wind_create(): new address for wm_create
+3250E+.d2 $41,F9,.WINX08+.BASE+C9C.L      ;lea $E1E402,a0
+
+;wind_open(): new address for wm_open()
+32524+.d2 $41,F9,.WINX08+.BASE+DAC.L      ;lea $E1E512,a0
+
+;wind_get(): new address for wm_get()
+32538+.d2 $4E,B9,.WINX08+.BASE+10E8.L     ;jsr $E1E84E
+
+;wind_set(): new address for wm_set()
+3254E+.d2 $4E,B9,.WINX08+.BASE+1268.L     ;jsr $E1E9CE
+
+;wind_calc(): new address for wm_calc()
+32564+.d2 $4E,B9,.WINX08+.BASE+1486.L     ;jsr $E1EBEC
+
+; several tables
+.WINX20
++winx20.fil              ;35F20 - 3602E (.270)
+
+;***************************************************************************
+;* end of Winx-Patches

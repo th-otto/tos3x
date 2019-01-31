@@ -1,0 +1,349 @@
+;******************************************************************************
+; Aenderungen fuer deutsches PAK-TOS bei Zim
+
+;******************************************************************************
+; 306_US1A.FIL	fr TOSPATCH V2.9.8 (11.07.99)
+
+; 02-08-11   Z70_D09.FIL
+;	    - NOVABS50 mit PAK/3-Logo
+
+; 20-11-11   306_D10.FIL
+;	    - ROMTOP eingefhrt, fr Erweiterungen hinter originalem TOS-Code
+;	    - WINX 2.2 mit Patchfile WINX.FIL (aus TP306V20)
+
+; 21-12-11   306_US1.FIL
+;	    - RSC-Bereich hinter $E40030 verschoben, wegen Boot-Patch
+;	    - ARROWFIX 1.5 aus TP306V20 ersetzt alte Routine von Harun
+
+; 02-01-12   306_US1A.FIL
+;           - umgestellt, INIT4.FIL auf UK-TOS erweitert
+
+;******************************************************************************
+; Schalter fr verschiedene Patch-Varianten
+
+; Weitere Schalter (Standard: alles auf .0)
+
+.NOVA = 0        ; Ansteuerung von NOVA-Grafikkarten schon beim Booten
+		; Logo, RAM-Test etc. sind auf dem NOVA-Bildschirm sichtbar
+
+.Grafik_Bombs = 0	; Bomben auf Grafikkarten/Grafikerweiterungen ausgeben
+		; funktioniert bei allen Systemen, fr Grafikkartenbesitzer
+		; mit angeschlossenem ST-Screen ist es evtl interessant
+		; diesen Patch herauszunehmen, da die Bomben dort sichtbar
+		; bleiben.
+
+.SKIP_B = 0	; Suche nach Laufwerk B: beim Booten unterbinden.
+		; Verkrzt die Bootzeit um rund 3 sec.
+		; Das logische Laufwerk B: mitsamt Icon gibt es trotzdem.
+		; Klar: Nur dann auf .1 setzen, falls kein zweites Floppy-
+		; Laufwerk angeschlossen ist.
+
+.HDwait = 0	; Plattenwarter nach RAM-Test, statt Wartebalken
+
+.NO_MMU_RESET = 0   ;MMU-Reset verhindern, damit das TOS auch im TT-RAM lauff„hig ist.
+
+;* Modifizierte Reset-Routine. H„lt RAM-TOS 3.06 auch bei Hardreset von
+;* Tastatur und Resettaste (Resettaste nur bei _RAMR_S2.ABS) im RAM.
+.RAMRESET = 0
+
+.MEM_INIT = 0       ;Speicher ab $100 initialisieren und nicht ab $400
+
+;* HD-Floppy-Steuerung mit Sound-Chip-Bit 6 oder 7.
+.HD_BIT    = 0      ;0: nicht einbinden, 6: Bit 6 verwenden, 7: Bit 7 verwenden
+.HD_INVERT = 0      ;0: HD aktiv bei High-Pegel, 1: HD aktiv bei Low-Pegel
+
+;------------------------------------------------------------------------------
+; Weitere Schalter (Standard: alles auf .1)
+
+.WINX = 1	; WINX 2.2 von Martin Osieka (wie in TP306V20)
+		; Neue Fensterverwaltung, enth„lt auch den Arrowfix-Patch
+
+.ARROWFIX = 1	; ARROWFIX 1.5 von Martin Osieka (wie in TP306V20)
+		; Neue GEM-Scrollroutinen 
+		; Bei .WINX = 1 wird .ARROWFIX automatisch auf 0 gesetzt
+
+.BPatch = 1	; XBIOS-Floppy-Patches von Harun Scheutzow einfgen
+		; - Floppy-Getbpb-Routine des TOS vollst„ndig neu
+		; - Floppy-Rwabs-Routine des TOS teilweise neu
+
+.GrowShrink = 1	; Grow- und Shrinkboxen: 1=ein (wie Original 3.06), 0=aus 
+
+.FASTPRN = 1	; Schnelle Druckerroutinen fr den Parallelport: 1=ein
+
+.SHELL_P = 1        ;_shell_p wird beim RESET zurckgesetzt (wie es sich geh”rt).
+
+.FPU_TEST = 1       ;Fehler beim FPU-Test beheben.
+
+.LOGO = 1           ;Logoausgabe aufl”sungsunabh„ngig.
+
+.BOOT_DEV = 1       ;Boot-Device-Fehler beheben (siehe ST-Computer 1/90).
+
+.STACK_POINTER = 1  ;Stackpointer bei Autoexec korrigieren (siehe ST-Computer 1/90).
+
+.SCSI_ID = 1        ;Initiatoridentification beim SCSI-Zugriff
+
+;------------------------------------------------------------------------------
+; Weitere Variablen
+
+.BOOT_TIME = .15	; Zeit (sec) fr Wartebalken beim Kaltstart (Orig. 80 sec)
+
+.PRINT_TIMEOUT = .15	; Druckertimeout (sec) (Orig. 30 sec)
+
+.COLOR_60HZ = 0     ;60Hz beim Start in Farbe (Original: 2 w„re 50Hz).
+
+.VDIFIX = 0	    ; VDI-Patch: Neue v_opnvwk()-Routine, ersetzt VDIFIX
+
+.M_SHRINK = 1       ;Beseitigt den Fehler, der beim einen Mshrink(0)-Aufruf die Memory-Listen
+                    ;zerst”rte.
+
+.IDE_BOOT = 0       ;Plattenscanning auf IDE ausdehnen (Booten von IDE-Platten)
+
+.IGNORE_BLITTER = 0 ;Der Blitter wird vom TOS verleugnet und nicht benutzt.
+
+;* Setzt die Steprate der Laufwerke A: und B:
+;* $00 = 6 ms,   $01 = 12 ms,   $02 = 2 ms,   $03 = 3 ms.
+.STEP_RATE = 03     ;Gewnschte Steprate hier eintragen.
+
+.KILL_CRC = 0       ;Nur CRC-Check ausschalten.
+
+.EAGLE = 0          ;Der Eagle-Patch. Monochrommonitorchange unterbinden.
+
+.LOCK_CLOCK = 0     ;Die Megauhr kann NICHT mehr mit dem TOS verstellt werden
+
+.CONTERM = %111     ;Wert fr conterm, z.B. %110 fr Tastenklick aus. Original: %111
+
+.SEEK_UP = 0        ;SEEKUP schaltet auf STs unter TOS 3.06 die Verdoppelung der
+                    ;Seekrate aus (erkennbar am Seek-Ger„usch der Laufwerke).
+
+.FLOP_TEST = 1      ;Im Floppy-Test Track 10 anstatt Track 1 ansteuern
+
+.FASTLOAD = 0       ;Fast-Load-Bit fr schnelleres Laden (siehe ST-Computer 1/90).
+                    ;Produziert Fehler bei einigen Laufwerken.
+
+;* Warte-Pause fr Floppyzugriffe etwas erh”hen, damit die Probleme mit 50 MHz
+;* behoben werden. Originalwert $119.
+.FLOPPY_DELAY = 200  ;Hier das gewnschte Delay eintragen.
+
+.KILL_BOOT = 0      ;Ausfhren des Bootsektors der Diskette verhindern
+
+.NORM_BOOT = 1      ;Bootsektor der Diskette nach Warmstart nicht mehr ausfhren
+
+.MS_DOS = 1         ;Korrektes MSDOS-Format (Statt $EB nun $EB34904E als 1. Bytes im Bootsektor).
+
+.NEC_P6 = 0         ;Žndert den Papiervorschub bei der Hardcopy ab
+
+.FDC_COOKIE = 01415443  ;FDC-Cookie-Wert, z.B. HD: 01415443 oder ED: 02000000.
+
+;* Puffer fr NEWDESK.INF vergr”žern. Originalroutinen aus SHBUF 1.3!
+.SHBUFSIZE = 1000   ;In diese Zeile kann die gewnschte Puffergr”že
+                    ;eingetragen werden. Maximum ist $7FFE => 32kB pro Puffer.
+
+;------------------------------------------------------------------------------
+; Several desktop customizations
+
+.FONTS = 0          ;Replace fonts from fonts folder
+
+.ICONS = 0          ;Replace desktop icons from icons folder
+
+.MOUSE = 0          ;Replace mouse cursors
+
+.INFO_TXT = 0       ;Set a customized text in about dialog
+
+.NEW_KBD = 0        ;Replace keyboard tables
+
+.FUJI = 0           ;0: Kein neues Fuji einbinden.
+                    ;1: modifiziertes Atarifuji mit PAK/3-Schriftzug von SE.
+                    ;2: 'Gib Dos keine Chance' von Reiner Rosin/TRK.
+                    ;3: 'GeTuned' von Sven Spitzmacher.
+
+.PILZE = 0          ;0: Bombs
+                    ;1: Mushrooms
+                    ;2: Atari logo
+                    ;3: Pfeifenkopf
+                    ;4: Stinkefinger
+                    ;5: Skull
+
+.RSC = 0            ;1: RSC-Patch einbinden, 0: RSC-Patch nicht einbinden
+
+;------------------------------------------------------------------------------
+; PAK specific settings
+
+.PAK = 0        ;1: PAK-Patches einbinden, 0: PAK-Patches nicht einbinden
+
+.Alt_Sync = 0       ;1: Alternative Bildschirmsynchronisierung benutzen
+                    ;   (fr NEWVIDEO-Patch erforderlich!).
+                    ;0: Normale Synchronisierung benutzen.
+
+;* NEWVIDEO-Patch.
+;* Dient zum Aktivieren eines EPROM-Sequencers schon w„hrend der Bootphase.
+.NEWVIDEO  = 0      ;1: Patch einbinden, 0: Patch nicht einbinden
+.SWITCH    = 0      ;0: Nicht umschalten, 6,7: Umschalten mit PSG Bit 6,7
+
+.StaticRAM = 0	; Dies ist ein TOS fr Static-RAMs. Besonderheiten:
+		; - ROM (1MB ab $E00000) in MMU-Tabelle schreibgeschtzt
+		; - System Halt nach "Bad ROM CRC in Chip xx"
+
+.HasTTMfp = 0	; Dieser ST hat einen nachgersteten TT-MFP
+
+.NEW_FLOPFMT = 0    ; Floprd/Flopwr/Flopver/Flopfmt/Floprate komplett ersetzen
+
+_IF .PAK
+.DefHDinf = .0	; Default Density setzen (0=DD, 3=HD=Original 3.06)
+		; Bei 3 wird die Steprate auf 6ms eingestellt.
+		; Bei HD-Modulen mit Hardware-Stepratenanpassung
+		; auf 0 setzen, damit das Laufwerk mit 3ms steppt.
+_ELSE
+.DefHDinf = .3
+_ENDIF
+
+;******************************************************************************
+; Einleseformat
+
+.WIDTH  =    .32    ; wenn wir splitten, dann bitte in vier Bytes
+.BASE   = E00000    ; TOS-ROM-Adresse (Default $E00000)
+.LENGTH =  80000    ; TOS-L„nge (Default $80000)
+
+;------------------------------------------------------------------------------
+; Ausgabeformat
+
+>1		; eine Datei (TOS.IMG) erzeugen
+;>4, PAK3		; gesplittet zum Brennen (U10=EE, U11=OE, U12=EO, U13=OO)
+
+;******************************************************************************
+
+.NATION = .FRG	; TOS-Nationalit„t (z.Zt. m”glich: FRG, USA, UK, FRA, SPA, ITA, SWF, SWG, SWE)
+
+;------------------------------------------------------------------------------
+_SWITCH .NATION
+
+_CASE .FRG:
+  <tos306de.ori	; Original TT-TOS 3.06 deutsch   (CRC: 2272.6158.13C5.2020)
+
+_CASE .USA:
+  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
+  <tos306us.ori	; Original TOS 3.06 amerikanisch (CRC: 514F.7DE4.797D.963C)
+
+_CASE .UK:
+  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
+  <tos306us.ori	; Original TT-TOS 3.06 amerikanisch
+  -patchfld	; Dsetpath("patchfld\")
+  +_us2uk.fil	; UK-TOS aus USA-TOS erzeugen
+  -..           ; Dsetpath ('..')
+
+_CASE .FRA:
+  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
+  <tos306fr.ori	; Original TOS 3.06 franz”sisch  (CRC: 1001.847B.5E08.C44E)
+
+_CASE .SPA:
+  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
+  <tos306es.ori	; Original TOS 3.06 spanish (gabs nie)  (CRC: 83E3.3B49.9BD1.47F8)
+
+_CASE .ITA:
+  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
+  <tos306it.ori	; Original TOS 3.06 italienisch (gabs nie) (CRC: 6838:927B:DDD9:7BFB)
+
+_CASE .SWF:
+  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
+  <tos306sf.ori	; Original TOS 3.06 Schweiz (franz”sisch) (CRC: 134E:515F:18F1:B496)
+
+_CASE .SWG:
+  <tos306sg.ori	; Original TOS 3.06 Schweiz (german) (CRC: A29D:CD1B:1435:037E)
+
+_CASE .SWE:
+  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
+  <tos306se.ori	; Original TOS 3.06 Schwedish (CRC: F95C:C029:E9AE:25B4)
+
+_DEFAULT:
+  _ERROR "unsupported country"
+
+_ENDSWITCH
+
+;------------------------------------------------------------------------------
+=24.09.1991,.NATION ; Version und Nationalit„t muž stimmen (sonst Message!)
+.CRC = 1                   ; Berechnen und Setzen der CRC-Prfsumme vom TOS.
+
+;******************************************************************************
+; Aufruf der Patchfiles
+
+-patchfld	; Dsetpath("patchfld\")
+
++romtop.fil
++relocs.fil
++newrsc.fil
+
+;------------------------------------------------------------------------------
+
+_IF .WINX
+
+ .GLOBAL      = %1111111111111 ; global flags (rightmost: flag G1)
+ .LOCAL       =  %111111111111 ; local flags  (rightmost: flag L1)
+ .DESKTOP     =  %111111111111 ; desktop flags (rightmost: flag D1)
+ .INIT_SCROLL =           .460 ; Initial scroll delay in ms
+ .CONT_SCROLL =            .40 ; Continous scroll delay in ms
+ .CONT_CLOSE  =          .1000 ; Continous close delay in ms
+ .CONT_FULL   =          .2000 ; Continous full delay in ms
+
+ +winx.fil;	WINX 2.2:  Neue Fensterverwaltung (wie in TP306V20)
+ ;		Originalroutinen aus WINX 2.2, incl. Arrowfix-Patch
+_ENDIF
+
+_IF .ARROWFIX !A! (.WINX = 0)
+ .TIME = 3;	Ansprechzeit in 0,125s (Original-Wert ist 3)
+
+ +arrowfix.fil;	ARROWFIX 1.5:  Neue GEM-Scrollroutinen (wie in TP306V20)
+_ENDIF
+
+;------------------------------------------------------------------------------
+
+_IF .PAK
++p_init.fil;	Patchfile fr TOS 3.06 fr PAK/3:  Initialisierung
++p_mmu.fil;	Patchfile fr TOS 3.06 fr PAK/3:  020/030-Abh„ngigkeiten
++p_video.fil;	Patchfile fr TOS 3.06 fr PAK/3:  Video-Initialisierung
++p_rtc.fil;	Patchfile fr TOS 3.06 fr PAK/3:  Routinen fr Mega-Uhr
++p_mfp.fil;	Patchfile fr TOS 3.06 fr PAK/3:  MFP-Routinen
+_ENDIF
+
++p_drive.fil;   Patchfile fr TOS 3.06: Laufwerksgeschichten
++p_std.fil;	Patchfile fr TOS 3.06: Standard TOS-Patches
++icons.fil;
+
+;------------------------------------------------------------------------------
+
+_IF .NEWVIDEO
+ +newvideo.fil
+_ENDIF
+
+;------------------------------------------------------------------------------
+;		Gerhard Huber: (implementiert von MH, angepasst von Zim)
+;		Ansteuerung von NOVA-Grafikkarten schon beim Booten.
+;		Fr alle NOVA-Grafikkarten ausser Typ 2 und 6.
+;		Zim 20.11.11: Zieladresse jetzt .ROMTOP statt fest 46232
+;		Daher keine Kollision mehr mit anderen Erweiterungen
+;		Unabh„ngig von .NATION, es muss nur .ROMTOP definiert sein
+
+_IF .NOVA
+
+ 74A      $4E,F9,.ROMTOP+8+.BASE.L    ; Einsprung zum NovaPatch (ab NOVABS40)
+
+ .ROMTOP            ; Zeiger auf freien Bereich hinter ROM-Code
+ ~ NOVABS50.B       ; NovaPatch einbinden
+ !.ROMTOP+8 .. ~    ; Im Patch nicht relozieren
+
+ .ROMTOP:           ; Zeiger auf freien Bereich zeigt jetzt hinter diesen Patch
+
+_ENDIF		; Ende .NOVA
+
+;------------------------------------------------------------------------------
+-..                 ; Dsetpath ('..')
+
+;******************************************************************************
+;	TOS Info Dialog „ndern (29 Zeichen + $00, im Original alles '-')
+
+_IF .PAK
+.TOS_INFO
+~       ' 3.06.D11 '     ; 10 Zeichen
+~       '--------'       ; 8 Zeichen
+~       ' for PAK/3 ',0  ; 11 Zeichen + Endekennung
+_ENDIF
+
+;******************************************************************************

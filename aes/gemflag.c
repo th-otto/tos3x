@@ -120,10 +120,20 @@ VOID amutex(P(EVB *) e, P(SPB *) sy)
 PP(register EVB *e;)
 PP(SPB *sy;)
 {
-	if (tak_flag(sy))					/* it owns it so do it  */
+	if (tak_flag(sy))					/* it owns it so do it */
+	{
 		zombie(e);
-	else
-		evinsert(e, &sy->sy_wait);		/* if it doesn't own then wait*/
+	} else
+	{
+#if TP_WINX
+		register EVB **w = &sy->sy_wait;
+		while (*w)
+			w = &(*w)->e_link;
+		evinsert(e, w);
+#else
+		evinsert(e, &sy->sy_wait);		/* if it doesn't own then wait */
+#endif
+	}
 }
 
 

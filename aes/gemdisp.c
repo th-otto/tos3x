@@ -61,6 +61,10 @@ PP(FCODE fcode;)
 PP(int32_t fdata;)
 {
 	register FPD *f;
+#if TP_WINX
+	register short savesr = spl7();
+	register BOOLEAN ret = FALSE;
+#endif
 
 	/* q a fork process, enter with ints OFF */
 	if (fpcnt < NFORKS)
@@ -74,9 +78,18 @@ PP(int32_t fdata;)
 		f->f_data = fdata;
 
 		fpcnt++;
-		return (TRUE);
+#if TP_WINX
+		ret = TRUE;
+#else
+		return TRUE;
+#endif
 	}
-	return (FALSE);
+#if TP_WINX
+	spl(savesr);
+	return ret;
+#else
+	return FALSE;
+#endif
 }
 
 
@@ -316,7 +329,10 @@ VOID disp(NOTHING)
 			goto d_1;					/* critical process isn't here      */
 		}								/* the critical process is at the head  */
 	  d_2:
-		crt_error = FALSE;
+#if !TP_WINX
+		crt_error = FALSE
+#endif
+		;
 	}
 	/* This process is to be suspended when it return to here   */
 	if (rlr->p_stat & PS_TRYSUSPEND)

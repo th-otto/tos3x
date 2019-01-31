@@ -1,0 +1,64 @@
+;*******************************************************************************
+;* TOS 3.06 an eine bestimmte Adresse relozieren
+;*
+;* Ω 1992-96 Markus Heiden
+
+.BASE   = E00000    ;TOS-Basisadresse
+.LENGTH =  80000    ;LÑnge des TOS'
+.WIDTH  =    .32    ;Organisation des TOS (32-bittig)
+
+.NATION = .FRG      ;TOS-NationalitÑt
+
+_SWITCH .NATION
+
+_CASE .FRG:
+  <tos306de.ori	; Original TT-TOS 3.06 deutsch   (CRC: 2272.6158.13C5.2020)
+
+_CASE .USA:
+  <tos306us.ori	; Original TOS 3.06 amerikanisch (CRC: 514F.7DE4.797D.963C)
+
+_CASE .UK:
+  <tos306us.ori	; Original TT-TOS 3.06 amerikanisch
+  -patchfld	; Dsetpath("patchfld\")
+  +_us2uk.fil	; UK-TOS aus USA-TOS erzeugen
+  -..           ; Dsetpath ('..')
+
+_CASE .FRA:
+  <tos306fr.ori	; Original TOS 3.06 franzîsisch  (CRC: 1001.847B.5E08.C44E)
+
+_CASE .SPA:
+  <tos306se.ori	; Original TOS 3.06 spanish (gabs nie)  (CRC: 83E3.3B49.9BD1.47F8)
+
+_CASE .ITA:
+  <tos306it.ori	; Original TOS 3.06 italienisch (gabs nie) (CRC: 6838:927B:DDD9:7BFB)
+
+_CASE .SWF:
+  <tos306sf.ori	; Original TOS 3.06 Schweiz (franzîsisch) (CRC: 134E:515F:18F1:B496)
+
+_CASE .SWG:
+  <tos306sg.ori	; Original TOS 3.06 Schweiz (german) (CRC: A29D:CD1B:1435:037E)
+
+_CASE .SWE:
+  <tos306se.ori	; Original TOS 3.06 Schwedish (CRC: F95C:C029:E9AE:25B4)
+
+_DEFAULT:
+  _ERROR "unsupported country"
+
+_ENDSWITCH
+
+=24.09.1991,.NATION ;muû die Version vom 24.09.1991 sein! (sonst Message!)
+
+;>1 1F80000 ;16MB-TT-RAM / 1 File ;Im TT-Ram lÑuft das TOS schneller!
+;>1 1780000 ; 8MB-TT-RAM / 1 File ;Dies ersetzt (fast) ROMRAM
+;>1 1380000 ; 4MB-TT-RAM / 1 File ;oder Ñhnliche TOS-Beschleuniger!
+>1 0380000 ; 4MB-ST-RAM / 1 File
+;>1 0180000 ; 2MB-ST-RAM / 1 File
+
+-patchfld	; Dsetpath("patchfld\")
+
++relocs.fil
+
+-..                ; Dsetpath ('..')
+;PrÅfsumme berechnen
+.CRC = 1
+

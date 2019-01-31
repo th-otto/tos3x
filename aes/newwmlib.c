@@ -40,7 +40,7 @@ int16_t gl_wtop, botw;						/* top and bottom window handles */
 MEMHDR *wmhead, *wmtail;					/* window memory linked list */
 MEMHDR *rmhead, *rmtail;					/* rect lists memory linked list */
 int16_t wind_msg[8];						/* buffer to store window messages */
-intptr_t ad_windspb;
+SPB *ad_windspb;
 
 
 BOOLEAN wm_start PROTO((NOTHING));
@@ -981,7 +981,7 @@ PP(int code;)								/* flag for the call's function */
 		if (code)
 		{
 			if (!tak_flag(&wind_spb))
-				ev_block(AMUTEX, ad_windspb);
+				ev_block(AMUTEX, (intptr_t)ad_windspb);
 		} else
 		{
 			unsync(&wind_spb);
@@ -1195,7 +1195,7 @@ int16_t wm_new(NOTHING)
 	gl_mntree = 0;						/* reset menu tree */
 	gl_mowner = ctl_pd;					/* reset mouse owner */
 
-	sy = (SPB *)ad_windspb;
+	sy = ad_windspb;
 
 	if (sy->sy_tas)						/* anybody owning the screen ? */
 	{

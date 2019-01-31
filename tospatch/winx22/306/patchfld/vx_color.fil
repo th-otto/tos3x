@@ -1,0 +1,188 @@
+ .VS_COLOR
+ ~ $48,e7,1f,fc                     ;MOVEM.L   A0-A5/D3-D7,-(A7)
+ ~ $4b,f8,3a,1a                     ;LEA       $3A1A.S,A5
+ ~ $41,fa,02,be                     ;LEA       L001A(PC),A0
+ ~ $38,2d,00,00                     ;MOVE.W    0(A5),D4
+ ~ $30,04                           ;MOVE.W    D4,D0
+ ~ $d0,40                           ;ADD.W     D0,D0
+ ~ $3e,30,00,00                     ;MOVE.W    0(A0,D0.W),D7
+ ~ $20,6d,00,08                     ;MOVEA.L   8(A5),A0
+ ~ $3c,18                           ;MOVE.W    (A0)+,D6
+ ~ $bc,47                           ;CMP.W     D7,D6
+ ~ $62,00,00,90                     ;BHI       L0006
+ ~ $49,ed,fd,ae                     ;LEA       -594(A5),A4
+ ~ $30,06                           ;MOVE.W    D6,D0
+ ~ $c0,fc,00,06                     ;MULU      #6,D0
+ ~ $d9,c0                           ;ADDA.L    D0,A4
+ ~ $38,d8                           ;MOVE.W    (A0)+,(A4)+
+ ~ $38,d8                           ;MOVE.W    (A0)+,(A4)+
+ ~ $38,90                           ;MOVE.W    (A0),(A4)
+ ~ $4b,e8,ff,fc                     ;LEA       -4(A0),A5
+ ~ $53,44                           ;SUBQ.W    #1,D4
+ ~ $67,7a                           ;BEQ.S     L0007
+ ~ $3a,3c,02,00                     ;MOVE.W    #$200,D5
+ ~ $4a,38,0a,13                     ;TST.B     $A13.S
+ ~ $66,04                           ;BNE.S     L0000
+ ~ $3a,3c,10,00                     ;MOVE.W    #$1000,D5
+ ~ $3b,45,fc,f4               ;L0000:MOVE.W    D5,-780(A5) ; INQ_TAB[1]
+ ~ $3b,45,fd,9a                     ;MOVE.W    D5,-614(A5) ; DEV_TAB[39]
+ ~ $9a,7c,02,00                     ;SUB.W     #$200,D5
+ ~ $41,f9,.MAP_TAB+.BASE.L          ;LEA       $E3D25E,A0
+ ~ $dc,46                           ;ADD.W     D6,D6
+ ~ $3c,30,60,00                     ;MOVE.W    0(A0,D6.W),D6
+ ~ $cc,47                           ;AND.W     D7,D6
+ ~ $76,00                           ;MOVEQ     #0,D3
+ ~ $7e,03                           ;MOVEQ     #3,D7
+ ~ $78,00                     ;L0001:MOVEQ     #0,D4
+ ~ $38,1d                           ;MOVE.W    (A5)+,D4
+ ~ $6a,02                           ;BPL.S     L0002
+ ~ $78,00                           ;MOVEQ     #0,D4
+ ~ $b8,7c,03,e8               ;L0002:CMP.W     #1000,D4
+ ~ $63,04                           ;BLS.S     L0003
+ ~ $38,3c,03,e8                     ;MOVE.W    #1000,D4
+ ~ $4a,45                     ;L0003:TST.W     D5
+ ~ $67,18                           ;BEQ.S     L0004
+ ~ $c8,fc,00,0f                     ;MULU      #$F,D4
+ ~ $d8,bc,00,00,01,f4               ;ADD.L     #500,D4
+ ~ $88,fc,03,e8                     ;DIVU      #1000,D4
+ ~ $e2,4c                           ;LSR.W     #1,D4
+ ~ $64,0e                           ;BCC.S     L0005
+ ~ $88,7c,00,08                     ;OR.W      #8,D4
+ ~ $60,08                           ;BRA.S     L0005
+ ~ $d8,7c,00,48               ;L0004:ADD.W     #$48,D4
+ ~ $88,fc,00,8f                     ;DIVU      #$8F,D4
+ ~ $e9,4b                     ;L0005:LSL.W     #4,D3
+ ~ $86,44                           ;OR.W      D4,D3
+ ~ $53,47                           ;SUBQ.W    #1,D7
+ ~ $66,c2                           ;BNE.S     L0001
+ ~ $41,f8,82,40                     ;LEA       $FFFF8240.S,A0
+ ~ $dc,46                           ;ADD.W     D6,D6
+ ~ $31,83,60,00                     ;MOVE.W    D3,0(A0,D6.W)
+ ~ $4c,df,3f,f8               ;L0006:MOVEM.L   (A7)+,A0-A5/D3-D7
+ ~ $4e,75                           ;RTS
+ ~ $7a,02                     ;L0007:MOVEQ     #2,D5
+ ~ $3b,45,fc,f4                     ;MOVE.W    D5,-780(A5) ; INQ_TAB[1]
+ ~ $3b,45,fd,9a                     ;MOVE.W    D5,-614(A5) ; DEV_TAB[39]
+ ~ $76,00                           ;MOVEQ     #0,D3
+ ~ $7e,03                           ;MOVEQ     #3,D7
+ ~ $30,3c,00,8e                     ;MOVE.W    #$8E,D0
+ ~ $32,3c,03,5a                     ;MOVE.W    #$35A,D1
+ ~ $4a,38,0a,13                     ;TST.B     $A13.S
+ ~ $66,08                           ;BNE.S     L0008
+ ~ $30,3c,00,43                     ;MOVE.W    #$43,D0
+ ~ $32,3c,03,a6                     ;MOVE.W    #$3A6,D1
+ ~ $38,1d                     ;L0008:MOVE.W    (A5)+,D4
+ ~ $6b,14                           ;BMI.S     L000B
+ ~ $b8,7c,03,e8                     ;CMP.W     #1000,D4
+ ~ $62,08                           ;BHI.S     L0009
+ ~ $b8,40                           ;CMP.W     D0,D4
+ ~ $6d,0a                           ;BLT.S     L000B
+ ~ $b8,41                           ;CMP.W     D1,D4
+ ~ $6d,04                           ;BLT.S     L000A
+ ~ $38,3c,03,e8               ;L0009:MOVE.W    #1000,D4
+ ~ $d6,44                     ;L000A:ADD.W     D4,D3
+ ~ $53,47                     ;L000B:SUBQ.W    #1,D7
+ ~ $66,e4                           ;BNE.S     L0008
+ ~ $4a,43                           ;TST.W     D3
+ ~ $67,08                           ;BEQ.S     L000C
+ ~ $b6,7c,0b,b8                     ;CMP.W     #$BB8,D3
+ ~ $66,06                           ;BNE.S     L000D
+ ~ $46,46                           ;NOT.W     D6
+ ~ $31,c6,82,40               ;L000C:MOVE.W    D6,$FFFF8240.S
+ ~ $4c,df,3f,f8               ;L000D:MOVEM.L   (A7)+,A0-A5/D3-D7
+ ~ $4e,75                           ;RTS
+
+ _FILL ~,.VQ_COLOR,$FF              ;Leerbereich fÅllen
+
+ .VQ_COLOR
+ ~ $48,e7,1f,fc                     ;MOVEM.L   A0-A5/D3-D7,-(A7)
+ ~ $4b,f8,3a,1a                     ;LEA       $3A1A.S,A5
+ ~ $20,6d,00,04                     ;MOVEA.L   4(A5),A0
+ ~ $31,7c,00,04,00,08               ;MOVE.W    #4,8(A0)
+ ~ $41,fa,01,06                     ;LEA       L001A(PC),A0
+ ~ $38,2d,00,00                     ;MOVE.W    0(A5),D4
+ ~ $30,04                           ;MOVE.W    D4,D0
+ ~ $d0,40                           ;ADD.W     D0,D0
+ ~ $3e,30,00,00                     ;MOVE.W    0(A0,D0.W),D7
+ ~ $20,6d,00,08                     ;MOVEA.L   8(A5),A0
+ ~ $26,6d,00,10                     ;MOVEA.L   16(A5),A3
+ ~ $3c,18                           ;MOVE.W    (A0)+,D6
+ ~ $bc,47                           ;CMP.W     D7,D6
+ ~ $63,06                           ;BLS.S     L000E
+ ~ $36,bc,ff,ff                     ;MOVE.W    #$FFFF,(A3)
+ ~ $60,7a                           ;BRA.S     L0014
+ ~ $36,c6                     ;L000E:MOVE.W    D6,(A3)+
+ ~ $49,ed,fd,ae                     ;LEA       -594(A5),A4
+ ~ $30,06                           ;MOVE.W    D6,D0
+ ~ $c0,fc,00,06                     ;MULU      #6,D0
+ ~ $d9,c0                           ;ADDA.L    D0,A4
+ ~ $4a,50                           ;TST.W     (A0)
+ ~ $67,6e                           ;BEQ.S     L0015
+ ~ $53,44                           ;SUBQ.W    #1,D4
+ ~ $67,76                           ;BEQ.S     L0016
+ ~ $3a,3c,02,00                     ;MOVE.W    #$200,D5
+ ~ $4a,38,0a,13                     ;TST.B     $A13.S
+ ~ $66,04                           ;BNE.S     L000F
+ ~ $3a,3c,10,00                     ;MOVE.W    #$1000,D5
+ ~ $3b,45,fc,f4               ;L000F:MOVE.W    D5,-780(A5) ; INQ_TAB[1]
+ ~ $3b,45,fd,9a                     ;MOVE.W    D5,-614(A5) ; DEV_TAB[39]
+ ~ $9a,7c,02,00                     ;SUB.W     #$200,D5
+ ~ $41,f9,.MAP_TAB+.BASE.L          ;LEA       $E3D25E,A0
+ ~ $dc,46                           ;ADD.W     D6,D6
+ ~ $3c,30,60,00                     ;MOVE.W    0(A0,D6.W),D6
+ ~ $cc,47                           ;AND.W     D7,D6
+ ~ $41,f8,82,40                     ;LEA       $FFFF8240.S,A0
+ ~ $30,06                           ;MOVE.W    D6,D0
+ ~ $d0,40                           ;ADD.W     D0,D0
+ ~ $36,30,00,00                     ;MOVE.W    0(A0,D0.W),D3
+ ~ $5c,8b                           ;ADDQ.L    #6,A3
+ ~ $72,03                           ;MOVEQ     #3,D1
+ ~ $30,03                     ;L0010:MOVE.W    D3,D0
+ ~ $4a,45                           ;TST.W     D5
+ ~ $67,16                           ;BEQ.S     L0012
+ ~ $d0,40                           ;ADD.W     D0,D0
+ ~ $08,00,00,04                     ;BTST      #4,D0
+ ~ $67,02                           ;BEQ.S     L0011
+ ~ $52,40                           ;ADDQ.W    #1,D0
+ ~ $c0,7c,00,0f               ;L0011:AND.W     #$F,D0
+ ~ $d0,40                           ;ADD.W     D0,D0
+ ~ $37,3b,00,4e                     ;MOVE.W    L0018(PC,D0.W),-(A3)
+ ~ $60,0a                           ;BRA.S     L0013
+ ~ $c0,7c,00,07               ;L0012:AND.W     #7,D0
+ ~ $d0,40                           ;ADD.W     D0,D0
+ ~ $37,3b,00,62                     ;MOVE.W    L0019(PC,D0.W),-(A3)
+ ~ $e8,4b                     ;L0013:LSR.W     #4,D3
+ ~ $53,41                           ;SUBQ.W    #1,D1
+ ~ $66,d4                           ;BNE.S     L0010
+ ~ $4c,df,3f,f8               ;L0014:MOVEM.L   (A7)+,A0-A5/D3-D7
+ ~ $4e,75                           ;RTS
+ ~ $36,dc                     ;L0015:MOVE.W    (A4)+,(A3)+
+ ~ $36,dc                           ;MOVE.W    (A4)+,(A3)+
+ ~ $36,94                           ;MOVE.W    (A4),(A3)
+ ~ $4c,df,3f,f8                     ;MOVEM.L   (A7)+,A0-A5/D3-D7
+ ~ $4e,75                           ;RTS
+ ~ $7a,02                     ;L0016:MOVEQ     #2,D5
+ ~ $3b,45,fc,f4                     ;MOVE.W    D5,-780(A5) ; INQ_TAB[1]
+ ~ $3b,45,fd,9a                     ;MOVE.W    D5,-614(A5) ; DEV_TAB[39]
+ ~ $30,38,82,40                     ;MOVE.W    $FFFF8240.S,D0
+ ~ $b1,46                           ;EOR.W     D0,D6
+ ~ $70,00                           ;MOVEQ     #0,D0
+ ~ $cc,7c,00,01                     ;AND.W     #1,D6
+ ~ $67,04                           ;BEQ.S     L0017
+ ~ $30,3c,03,e8                     ;MOVE.W    #1000,D0
+ ~ $36,c0                     ;L0017:MOVE.W    D0,(A3)+
+ ~ $36,c0                           ;MOVE.W    D0,(A3)+
+ ~ $36,80                           ;MOVE.W    D0,(A3)
+ ~ $4c,df,3f,f8                     ;MOVEM.L   (A7)+,A0-A5/D3-D7
+ ~ $4e,75                           ;RTS
+
+ ~ $00,00,00,43,00,85,00,C8   ;L0018:DC.W      $0000,$0043,$0085,$00C8
+ ~ $01,0B,01,4D,01,90,01,D3         ;DC.W      $010B,$014D,$0190,$01D3
+ ~ $02,15,02,58,02,9B,02,DD         ;DC.W      $0215,$0258,$029B,$02DD
+ ~ $03,20,03,63,03,A5,03,E8         ;DC.W      $0320,$0363,$03A5,$03E8
+ ~ $00,00,00,8E,01,1D,01,AC   ;L0019:DC.W      $0000,$008E,$011D,$01AC
+ ~ $02,3B,02,CA,03,59,03,E8         ;DC.W      $023B,$02CA,$0359,$03E8
+ ~ $00,00,00,01,00,03,00,07   ;L001A:DC.W      $0000,$0001,$0003,$0007
+ ~ $00,0F,00,1F,00,7F,00,FF         ;DC.W      $000F,$001F,$007F,$00FF
+
+ _FILL ~,.VS_COLOR+382,$FF          ;Leerbereich fÅllen

@@ -1,0 +1,135 @@
+;******************************************************************************
+; P_MMU3.FIL	Patchfile fÅr TOS 3.06 fÅr PAK/3:  020/030-AbhÑngigkeiten
+;		Benutzte Variablen: .NATION .StaticRAM
+;		énderungen ggÅ. _20_30.FIL aus PATCHFLD.SE:
+;		 - 'Cache' statt 'Blitter' jetzt auch im englischen TOS
+;		 - MMU-Reset und MMU-Init entfernt, weil der TOS-Anfang
+;		   jetzt als BinÑrfile (begin71.b) eingelesen wird
+;		 - .NATION statt .ENG, erweitert auf: FRG, USA, UK, FRA
+
+;------------------------------------------------------------------------------
+;	ProzessorunabhÑngiges 3.06
+;	Initialisierung der 68030 MMU nach Reset
+;	SE 14.10.93
+
+;68:	Entfernt! (Ist in begin7.b enthalten, wird in P_INIT.FIL eingelesen)
+
+;------------------------------------------------------------------------------
+;	Wegen der Static-RAMs erhîhtes Risiko fÅr zerschossenes TOS
+;	daher nach der Warnung eine Endlosschleife
+;	SE 04.10.93
+
+_IF .StaticRAM OR (.RELOCADR <> .BASE)
+882
+~       $60,FE                  ; L000:  BRA.S     L000
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	Initialisierung der MMU (prozessorunabhÑngig)
+;	SE 29.10.93
+
+;16EC:	Entfernt! (Die Abfangroutine fÅr Line F und Illegal ist jetzt in 
+;	der Hauptroutine (begin7.b) enthalten, die Routine ab $E016EC bleibt 
+;	deshalb unverÑndert.
+
+;------------------------------------------------------------------------------
+;	MMU-Deinitialisierung vor Kaltstart (prozessorunabhÑngig)
+;	SE 26.10.93, Anpassung fÅr franzîsisches TOS von Zim 01.06.00
+
+.TabAdr=36768+.BASE+.d2
+
+380C +.d1
+~       $46,FC,27,00                    ;MOVE      #$2700,SR
+~       $20,3C,00,00,08,08              ;MOVE.L    #$808,D0
+~       $4E,7B,00,02                    ;MOVEC     D0,CACR
+~       $70,00                          ;MOVEQ     #0,D0
+~       $4E,7B,08,01                    ;MOVEC     D0,VBR
+~       $41,FA,00,1C                    ;LEA       $1C(PC),A0           L0000
+~       $21,C8,00,10                    ;MOVE.L    A0,$10.W
+~       $21,C8,00,2C                    ;MOVE.L    A0,$2C.W
+~       $41,F9,.TabAdr.L                ;LEA       $E36768,A0
+~       $F0,10,40,00                    ;PMOVE     (A0),TC
+~       $F0,10,08,00                    ;PMOVE     (A0),TT0
+~       $F0,10,0C,00                    ;PMOVE     (A0),TT1
+~       $30,3C,00,0A              ;L0000:MOVE.W    #$A,D0
+~       $41,FA,00,10                    ;LEA       $10(PC),A0           L0002
+~       $32,7C,00,0C                    ;MOVEA.W   #$C,A1
+~       $22,D8                    ;L0001:MOVE.L    (A0)+,(A1)+
+~       $51,C8,FF,FC                    ;DBF       D0,-4(PC)            L0001
+~       $4E,F8,00,0C                    ;JMP       $C.W
+~       $41,FA,00,1A              ;L0002:LEA       $1A(PC),A0           L0004
+~       $21,C8,00,08                    ;MOVE.L    A0,8.W
+~       $41,FA,00,20                    ;LEA       $20(PC),A0           L0005
+~       $70,00                          ;MOVEQ     #0,D0
+~       $72,00                          ;MOVEQ     #0,D1
+~       $74,00                          ;MOVEQ     #0,D2
+~       $48,D0,00,07              ;L0003:MOVEM.L   D0-D2,(A0)
+~       $41,E8,00,0C                    ;LEA       $C(A0),A0
+~       $60,F6                          ;BRA.S     -$A(PC)              L0003
+~       $21,F8,00,04,00,08        ;L0004:MOVE.L    4.W,8.W
+~       $41,F9,01,00,00,00              ;LEA       $1000000.L,A0
+~       $60,E8                          ;BRA.S     -$18(PC)             L0003
+
+;------------------------------------------------------------------------------
+;	Desktop-Eintrag 'Cache' statt 'Blitter', Cache statt Blitter setzen
+;	SE 04.12.93, Anpassung fÅr englisches TOS von Zim 06.09.96
+;	Anpassung fÅr franzîsisches TOS von Zim 01.06.00
+
+2E7AE +.d1
+~       $0C,79,00,14,00,00,A6,9A        ; CMPI.W  #$14,$A69A    war: #$1E
+~       $6C,16                          ; BGE.S   22(PC)        war: BEQ
+33C3E +.d2
+~       $0C,79,00,14,00,00,A6,9A        ; CMPI.W  #$14,$A69A    war: #$1E
+~       $6D,08                          ; BLT.S   8(PC)         war: BNE
+33EBC +.d2
+~       $0C,79,00,14,00,00,A6,9A        ; CMPI.W  #$14,$A69A    war: #$1E
+~       $6D,54                          ; BLT.S   84(PC)        war: BNE
+
+;	Das Desktop hakt den Menu-Eintrag nur ab, wenn im CCR $3111 steht.
+;	Auf Vergleich auf $xxx1 umgestellt, damit 020 und 030 egal sind.
+
+33EF6 +.d2
+~       $C0,BC,00,00,00,01          ; AND.L   #1,D0     war: CMP.L #$3111,D0
+~       $67,0A                      ; BEQ.S   10(PC)        war: BNE
+
+;------------------------------------------------------------------------------
+;	VerÑnderte MMU-Tabelle
+;	Oberhalb von 10 MB kein Caching, z.B. fÅr Mega-Bus.
+;	SE 02.10.93, Anpassung fÅr franzîsisches TOS von Zim 01.06.00
+
+36420 +.d2
+; erste Ebene, 16 * 256 MB (wie Original 3.06)
+
+~       $00,00,07,42, 10,00,00,01, 20,00,00,01, 30,00,00,01
+~       $40,00,00,01, 50,00,00,01, 60,00,00,01, 70,00,00,01
+~       $80,00,00,41, 90,00,00,41, A0,00,00,41, B0,00,00,41
+~       $C0,00,00,41, D0,00,00,41, E0,00,00,41, 00,00,07,82
+
+; zweite Ebene, 16 * 16 MB $00000000 - $00FFFFFF (wie Original 3.06)
+
+~       $00,00,07,C2, 01,00,00,01, 02,00,00,01, 03,00,00,01
+~       $04,00,00,01, 05,00,00,01, 06,00,00,01, 07,00,00,01
+~       $08,00,00,01, 09,00,00,01, 0A,00,00,01, 0B,00,00,01
+~       $0C,00,00,01, 0D,00,00,01, 0E,00,00,01, 0F,00,00,01
+
+; zweite Ebene, 16 * 16 MB $F0000000 - $FFFFFFFF
+; Abbildung auf $00000000 - $00FFFFFF (wie Original 3.06)
+
+~       $00,00,00,41, 01,00,00,41, 02,00,00,41, 03,00,00,41
+~       $04,00,00,41, 05,00,00,41, 06,00,00,41, 07,00,00,41
+~       $08,00,00,41, 09,00,00,41, 0A,00,00,41, 0B,00,00,41
+~       $0C,00,00,41, 0D,00,00,41, 0E,00,00,41, 00,00,07,C2
+
+; dritte Ebene, 16 * 1 MB $00000000 - $00FFFFFF
+; oberhalb von 10 MB kein Caching, zB fÅr Mega-Bus
+
+~       $00,00,00,01, 00,10,00,01, 00,20,00,01, 00,30,00,01
+~       $00,40,00,01, 00,50,00,01, 00,60,00,01, 00,70,00,01
+~       $00,80,00,01, 00,90,00,01, 00,A0,00,41, 00,B0,00,41
+_IF .StaticRAM                                               ; Read only im
+~       $00,C0,00,41, 00,D0,00,41, 00,E0,00,05, 00,F0,00,41  ; ROM-Bereich
+_ELSE
+~       $00,C0,00,41, 00,D0,00,41, 00,E0,00,01, 00,F0,00,41
+_ENDIF
+
+;******************************************************************************

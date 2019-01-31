@@ -22,11 +22,10 @@
 /************************************************************************/
 
 #include "desktop.h"
-#if TP_48 /* ARROWFIX */
-#define MC68K 1
-#define I8086 0
-#include "../aes/struct88.h"
+#if TP_WINX | TP_48 /* ARROWFIX */
+#include "../aes/winx.h"
 extern PD *rlr;
+int16_t ev_mesag PROTO((int16_t *pbuff));
 #endif
 
 #if TOSVERSION >= 0x400
@@ -40,6 +39,11 @@ char mentable[MAXMENU];
 STATIC const int16_t *keytable;
 STATIC const int16_t *contable;
 #endif
+
+#if TP_WINX
+#define wm_update wx_update
+#endif
+
 
 /* Alternate keys table */
 
@@ -666,6 +670,12 @@ PP(uint16_t key;)
 			msgbuff[0] = WM_ARROWED;
 			msgbuff[3] = win->w_id;
 			msgbuff[4] = arrowimg[i];
+#if !BINEXACT
+			/* BUG: was uninitialized */
+			msgbuff[5] = 0;
+			msgbuff[6] = 0;
+			msgbuff[7] = 0;
+#endif
 			do_scroll(msgbuff);
 			return;
 		}
@@ -731,7 +741,7 @@ PP(register WINDOW *win;)
 }
 
 
-#if TP_48 /* ARROWFIX */
+#if TP_WINX | TP_48 /* ARROWFIX */
 /*
  * WTF: messing with AES structures???
  */
@@ -746,7 +756,7 @@ static int is_arrowed(NOTHING)
 		return p->p_message[0] == WM_ARROWED;
 	return FALSE;
 }
-#endif /* TP_48 */
+#endif /* TP_WINX | TP_48 */
 
 
 /* 206de: 00e2a9e8 */
@@ -757,25 +767,42 @@ PP(int16_t *msgbuff;)
 	register int16_t act;
 	register WINDOW *win;
 	int16_t bdown, x, y;
+#if TP_WINX
+	int16_t mult;
+#endif
+
+#if TP_WINX | TP_48 /* ARROWFIX */
+again:;
+#endif
 
 	act = msgbuff[4];
 
-#if TP_48 /* ARROWFIX */
-again:;
-#endif
 	if ((win = get_win(msgbuff[3])) != NULL)
 	{
+#if TP_WINX
+		mult = -msgbuff[5];
+		if (mult <= 0)
+			mult = 1;
+#endif
 		switch (act)
 		{
 		case WA_DNPAGE:						/* page down */
 		case WA_UPPAGE:						/* page up */
+#if TP_WINX
+			srl_row(win, win->w_xrow * mult, act == WA_DNPAGE ? SDOWN : SUP);
+#else
 			srl_row(win, win->w_xrow, act == WA_DNPAGE ? SDOWN : SUP);
+#endif
 			break;
 
 		case WA_DNLINE:						/* arrow down */
 		case WA_UPLINE:						/* arrow up */
-#if (AESVERSION > 0x320) | TP_48 /* ARROWFIX */
+#if (AESVERSION > 0x320) | TP_WINX | TP_48 /* ARROWFIX */
+#if TP_WINX
+			srl_row(win, mult, act == WA_UPLINE ? SUP : SDOWN);
+#else
 			srl_row(win, 1, act == WA_UPLINE ? SUP : SDOWN);
+#endif
 			UNUSED(x);
 			UNUSED(y);
 			UNUSED(bdown);
@@ -789,13 +816,21 @@ again:;
 
 		case WA_RTPAGE:						/* page left or right */
 		case WA_LFPAGE:
+#if TP_WINX
+			srl_col(win, win->w_xcol * mult, act == WA_LFPAGE ? SRIGHT : SLEFT); /* hhmm? */
+#else
 			srl_col(win, win->w_xcol, act == WA_LFPAGE ? SRIGHT : SLEFT); /* hhmm? */
+#endif
 			break;
 
 		case WA_RTLINE:
 		case WA_LFLINE:						/* scroll left */
-#if (AESVERSION > 0x320) | TP_48 /* ARROWFIX */
+#if (AESVERSION > 0x320) | TP_WINX | TP_48 /* ARROWFIX */
+#if TP_WINX
+			srl_col(win, mult, act == WA_LFLINE ? SRIGHT : SLEFT); /* hhmm? */
+#else
 			srl_col(win, 1, act == WA_LFLINE ? SRIGHT : SLEFT); /* hhmm? */
+#endif
 #else
 			do {
 				srl_col(win, 1, act == WA_LFLINE ? SRIGHT : SLEFT); /* hhmm? */
@@ -804,7 +839,7 @@ again:;
 #endif
 			break;
 		}
-#if TP_48 /* ARROWFIX */
+#if TP_WINX | TP_48 /* ARROWFIX */
 		/*
 		 * WTF: why is that neccessary? other applications
 		 * would need that same fix
@@ -1126,7 +1161,11 @@ PP(int16_t msgbuff;)
 		break;
 
 	case CLSWITEM:						/* close the top window */
+#if TP_WINX
+		close_top(win);
+#else
 		close_top();
+#endif
 		break;
 
 	case BOTTOP:						/* bring bot win to top */
@@ -1211,7 +1250,10 @@ PP(int16_t *msgbuff;)
 	register int16_t handle;
 	register WINDOW *win;
 	register OBJECT *obj;
-	int16_t shrink, x, y, w, h;
+#if !TP_WINX
+	int16_t shrink;
+#endif
+	int16_t x, y, w, h;
 	GRECT pt;
 	GRECT *pc;
 
@@ -1240,15 +1282,27 @@ PP(int16_t *msgbuff;)
 			return;
 
 		case WM_TOPPED:
+#if TP_WINX
+		case WM_BOTTOM:
+			/* note: topping a window no longer deselect the items */
+			{
+				int16_t msg = msgbuff[0] == WM_TOPPED ? WF_TOP : WF_BOTTOM;
+				wind_set(handle, msg, WF_TOP, 0, 0, msg);
+				make_top(win, msg);
+			}
+#else
 		case WM_NEWTOP:
 			clr_allwin();
 			wind_set(handle, WF_TOP, 0, 0, 0, 0);
 			make_top(win);
+#endif
 			return;
 		}
 
+#if !TP_WINX
 		if (handle != get_top()->w_id)
 			return;
+#endif
 
 		switch (msgbuff[0])
 		{
@@ -1307,6 +1361,28 @@ PP(int16_t *msgbuff;)
 
 			wind_get(handle, WF_WORKXYWH, &obj->ob_x, &obj->ob_y, &obj->ob_width, &obj->ob_height);
 
+#if TP_WINX
+			h = win->w_rowi;
+			w = win->w_coli;
+			x = win->w_xcol;
+			rc_copy((GRECT *)&obj->ob_x, &win->w_work);
+
+			ch_path(win);
+
+			if (s_stofit)				/* size to fit */
+				view_fixmode(win);
+
+			view_adjust(win);			/* adjust parameter */
+
+			if ((s_stofit && x != win->w_xcol) ||
+				h != win->w_rowi ||
+				w != win->w_coli)
+			{
+				rc_copy(&full, (GRECT *)&msgbuff[4]);
+				msgbuff[0] = WM_REDRAW;
+				appl_write(0, 16, msgbuff);
+			}
+#else
 			shrink = FALSE;
 
 			if (obj->ob_width < win->w_work.g_w && obj->ob_height <= win->w_work.g_h)
@@ -1332,6 +1408,7 @@ PP(int16_t *msgbuff;)
 				if (x != win->w_xcol)
 					do_redraw(win->w_id, &full, 0);
 			}
+#endif
 			break;
 
 		default:

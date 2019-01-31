@@ -605,6 +605,7 @@ PP(register char *pnumstr;)
  *
  *	IF(EUROTIME)THEN Military Time Format 
  */
+/* 206de: 00e2c440 */
 /* 306de: 00e2fea6 */
 /* 306us: 00e2fe4c */
 VOID fmt_time(P(uint16_t) time, P(char *)ptime)
@@ -686,6 +687,7 @@ PP(register char *ptime;)
  *	IF(SWEDDATE)THEN Swap Day and Month thusly: yy/mm/dd
  *	Changed 7/20/92 To put in st_dchar as separator
  */
+/* 206de: 00e2c49c */
 /* 306de: 00e2ff02 */
 /* 306us: 00e2fed2 */
 VOID fmt_date(P(uint16_t) date, P(char *)pdate)
@@ -772,6 +774,7 @@ PP(register char *pdate;)
 /*
  * Build string
  */
+/* 206de: 00e2c504 */
 /* 306de: 00e2ff6a */
 char *bldstring(P(DIR *)dir, P(char *)dst)
 PP(DIR *dir;)

@@ -711,3 +711,31 @@
 #ifndef FLOPDELAY
 #define FLOPDELAY 512
 #endif
+
+/*
+ * TP_WINX: WINX 2.2 patch
+ */
+#ifndef TP_WINX
+#define TP_WINX 0
+#endif
+#ifndef WX_GLOBAL
+#define WX_GLOBAL 65535
+#endif
+#ifndef WX_LOCAL
+#define WX_LOCAL 65535
+#endif
+#ifndef WX_DESKTOP
+#define WX_DESKTOP 65535
+#endif
+#ifndef WX_INIT_SCROLL
+#define WX_INIT_SCROLL 460
+#endif
+#ifndef WX_SCROLL_CONT
+#define WX_SCROLL_CONT 40
+#endif
+#ifndef WX_CLOSE_CONT
+#define WX_CLOSE_CONT 1000
+#endif
+#ifndef WX_FULL_CONT
+#define WX_FULL_CONT 2000
+#endif

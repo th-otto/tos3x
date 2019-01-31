@@ -1,0 +1,475 @@
+PROGRAMM
+     WINX 2.2 [17.10.1993] - 
+     Patchprogramm fÅr die GEM-Fensterverwaltung
+
+BESCHREIBUNG
+     WINX erweitert das GEM der TOS Versionen bis 4.04 um einige Eigen-
+     schaften, die auch unter MultiTOS zur VerfÅgung stehen. Aus der
+     Sicht des Anwenders gehîren dazu z.B. mehr Fenster, Kontroll-
+     elemente an den hinteren Fenstern und eine erweiterte Benutzer-
+     schnittstelle (betrifft die Bedienung der Kontrollelemente).
+     Auûerdem werden einige Fehler und UnzulÑnglichkeiten in den ver-
+     schiedenen GEM Versionen behoben, wodurch die Benutzung des
+     GEM wesentlich sicherer wird. FÅr den Entwickler ist zusÑtzlich
+     die Mîglichkeit interessant sich fehlerhafte Aufrufe der Fenster-
+     funktionen anzeigen zu lassen.
+
+     Theoretisch sollten alle 'sauberen' GEM-Programme mit fast allen
+     énderungen der Fensterverwaltung zurechtkommen, die Praxis sieht
+     allerdings anders aus. So muûte z.B. auch das GEM-Desktop in
+     einigen Punkten Åberarbeitet werden. Denken Sie daran, wenn eines
+     ihrer Programme unter WINX fehlerhaft arbeitet, wird dies mit
+     ziemlicher Sicherheit auch unter MultiTOS der Fall sein. Fordern
+     Sie die Autoren auf ihre Programme anzupassen.
+
+     Die erweiterte Benutzerschnittstelle integriert WINX ab TOS 2.xx
+     ins GEM. Von nun an haben beide Maustasten beim Klick auf ein
+     Kontrollelement des Fensterrahmens eine Funktion. Mit der rechten
+     Taste kann man Aktionen auslîsen, die erst beim Loslassen der
+     Maustaste ausgefÅhrt werden. Benutzt man die linke Taste, werden
+     die Aktionen sofort und solange ausgefÅhrt, wie man die Taste
+     gedrÅckt hÑlt. Erkennen kann man diesen Zustand daran, daû der
+     Pfeil, der die Mausposition auf dem Bildschirm darstellt, seinen
+     'Schaft' verliert. Am Beispiel des Verschiebens eines Fensters
+     soll dies deutlich werden. Nimmt man das Fenster am Bewegungs-
+     element mit der rechten Taste auf, dann wird zunÑchst nur ein
+     Rahmen gezeichnet, den man Åber den Bildschirm bewegen kann. Erst
+     beim Loslassen wird das Fenster an der neuen Position dargestellt.
+     Nimmt man hingegen die linke Taste, dann wird noch wÑhrend des
+     Bewegens die Fensterposition aktualisiert. Entsprechendes gilt
+     fÅr die énderung der Fenstergrîûe, das Bewegen der Scrollbalken
+     und das Benutzen von Schlieû- und Maximalgrîûe-Element. 
+     
+     Die Aktionen, die beim Klick mit der linken Maustaste auf die
+     Scrollpfeile bzw. in die Scrollbereiche ausgelîst werden, haben
+     sich nicht verÑndert. Sie fÅhrten ja auch bisher schon zu direkten
+     Reaktionen des Anwendungsprogramms. ZusÑtzlich kann man durch
+     einen Klick mit der rechten Maustaste auf die Scrollpfeile den
+     Scrollbalken an den Anfang bzw. das Ende seines Scrollbereichs
+     setzen. Klickt man in einen Scrollbereich, dann wird der Scroll-
+     balken direkt auf die entsprechende Position gesetzt. 
+     
+     Neue Kontrollelemente auf dem Fensterrahmen sind die Scrollboxen.
+     Sie befinden sich am Ende jedes Scrollpfeils und ermîglichen das
+     Scrollen mit Richtungswechsel und variabler Geschwindigkeit
+     (falls Programme dies unterstÅtzen). Nach dem Klicken auf eine
+     Scrollbox (bzw. den zugehîrigen Scrollpfeil) bestimmt die Aus-
+     lenkung und die Entfernung des Mauspfeils von der Scrollbox
+     die Scrollrichtung und -geschwindigkeit. Befindet sich der Maus-
+     pfeil direkt Åber der Scrollbox wird nicht gescrollt. Solange
+     die Maustaste gedrÅckt ist, kann man durch Verschieben der Maus 
+     die Scrollrichtung und -geschwindigkeit Ñndern.
+     
+     Eine weitere neue Mîglichkeit hat man beim Klick auf den Fenster-
+     titel. Konnte man damit bisher nur hintere Fenster nach vorne 
+     holen, ist es jetzt auch mîglich das vorderste Fenster nach hinten
+     zu stellen, falls das Programm bereits die entsprechende Meldung
+     versteht.
+     
+     Die CONTROL-Taste dient als Modifizierer von Aktionen, die man
+     durch einen Klick auf ein Kontrollelement des Fensterrahmens
+     auslîst. Ist die CONTROL-Taste in dem Augenblick gedrÅckt in dem
+     man mit der Maus klickt, dann wird die normale Bedeutung der
+     Kontrollelemente ignoriert. Stattdessen wird das Fenster entweder
+     nach vorne geholt bzw. nach hinten gestellt. Praktisch ist dies,
+     wenn ein Fenster nur teilweise sichtbar ist.
+     
+     Ist die CONTROL-Taste gedrÅckt, wÑhrend man die rechte Maustaste
+     loslÑût, dann wird die anstehende Aktion ignoriert (z.B. wenn man
+     das Verschieben eines Fensters eingeleitet hat und es dann doch
+     lieber an der alten Position hÑtte).
+
+     Im folgenden sind die énderungen, die WINX am GEM vornimmt, im
+     einzelnen beschrieben, dabei steht '*' fÅr 'neu in dieser Version'
+     und '[G..]' bzw. '[L..]' fÅr 'diese énderung kann abgeschaltet
+     werden' (-> KONFIGURATION). Leider ist dieser Teil teilweise sehr
+     technisch. Trotzdem sollte man ihn sich mindestens einmal durch-
+     lesen, da einem sonst einige Mîglichkeiten verborgen bleiben.
+
+     GEM-SCRENMGR:
+     (Teil des GEM, der Klicks auf den Fensterrahmen verarbeitet)
+     - [L1] Bedienung von Kontrollelementen an hinteren Fenstern
+     * [G10] BackDrop-Erweiterung: Beim Klick auf die Titelzeile des
+       vordersten Fensters wird es nach hinten gestellt (deaktiviert),
+       falls die Applikation, der das Fenster gehîrt, diese neue
+       FÑhigkeit bereits unterstÅtzt bzw. nur ein Fenster offen hat.
+     * [G9] HÑlt man die CONTROL-Taste beim Klick auf ein Kontroll-
+       elemente gedrÅckt, wird dessen Bedeutung aufgehoben. Stattdessen
+       werden hintere Fenster aktiviert bzw. das vordere nach hinten
+       gestellt (falls BackDrop eingeschaltet ist)
+     * Repeatfunktion fÅr Scrollpfeile unter TOS 1.00
+     * Probleme mit WM_ARROWED-Nachrichten beseitigt (ARROWFIX-Patches)
+       TOS >= 1.04: Doppelnachricht
+       TOS 2.06/3.06: Doppelnachricht, verzîgerte Nachricht, öberlÑnge
+       TOS 4.01-4.04: Doppelnachricht, verzîgerte Nachricht, öberlÑnge
+       ARROWFIX.GER aus dem ARROWFIX-Paket erlÑutert Einzelheiten.
+     - Optische RÅckmeldung bei der Bedienung von Kontrollelementen
+       [G4] Selektion der Scrollpfeile
+       [G5] Selektion der Scrollbalken
+       [G6] Selektion des Bewegungselements
+       [G7] Selektion des Grîûenelements
+     * [G2] Rechtsklick auf Fensterrahmen an SCRENMGR (sonst an 
+       Applikation)
+     * [G3] Einfacher Linksklick aktiviert Echtzeitfunktionen (sonst
+       Rechtsklick, falls [G2] eingeschaltet ist, sonst Doppelklick)
+     * [L11] Fenster auch links aus Bildschirm schiebbar (sonst nur
+       rechts)
+
+     GEM-DESKTOP
+     - Bearbeitung hinterer Desktopfenster (Schlieûen, Scrollen, ...)
+     * BackDrop Integration
+     * Aktivieren und Deaktivieren von Fenstern deselektiert im
+       2.x/3.x Desktop nicht mehr die Dateien
+     - Das TOS 2.x/3.x Desktop bietet jetzt 8 statt 7 Fenstern, das
+       von TOS 1.x wie bisher 4.
+     * Beim Scrollen in hinteren Fenster wird jetzt versucht soviel
+       wie mîglich zu kopieren und nur noch den Rest neu auszugeben.
+     * Einfache Implementierung der Reaktion auf die erweiterten
+       WM_ARROWED-Nachrichten zum Scrollen.
+     
+     Fensterverwaltung:
+     - [G1] Verwaltung von bis zu 40 Fenstern (statt bisher 8)
+     - [L1] Kontrollelemente am Fensterrahmen hinterer Fenster
+     - [L2] Minimierung der Anzahl der Elemente eines Fensterrahmens
+       (bisher hatte ein Fensterrahmen mit einem Grîûenelement immer
+       sowohl einen horizontalen als auch einen vertikalen Balken)
+     - [G8] Breiterer Rahmen fÅr die Sliderelemente auf dem Fensterrahmen
+       (sehr umstrittene Option :-)
+     * Fensterfarben fÅr TOS 1.x mit WINCOLOR.CPX. Dieses CPX ist aber
+       auch fÅr TOS 2.x/3.x dem Original WCOLORS.CPX vorzuziehen (nach
+       der unmaûgeblichen Meinung des Autors).
+     * Verbessertes Redraw von Fenstern (Neuausgabe von Rahmen und Inhalt)
+     * Aktivieren (und Deaktivieren) verÑndert nicht mehr das
+       WF_PREVXYWH-Rechteck eines Fensters. In diesem Rechteck wird
+       bei einer VerÑnderung des Fensters die letzte Position bzw.
+       Grîûe gespeichert.
+     * [L3] Aktivieren und ôffnen eines Fenster versenden WM_UNTOPPED, 
+       Deaktivieren und Schlieûen eine WM_ONTOP-Nachricht.
+     * Es wird nur noch ein Objektbaum zur Darstellung des Hintergrunds
+       benutzt
+     * wind_set-Modifikationen (optimierte WF_SLIDE Routine; WF_BOTTOM;
+       WF_BEVENT)
+     * wind_get-Modifikationen (WF_NEWDESK; WF_BEVENT; WF_BOTTOM;
+       WF_OWNER; WF_TOP; WF_COLOR; WF_DCOLOR)
+     - Anpassung von wind_calc an den verÑnderten Rahmenaufbau
+     * Komplett neues Modul zur Berechnung der Rechtecklisten.
+       Optimiert die Berechnungszeit und die Anzahl der Rechtecke.
+     * [L4] Optimiertes Redraw beim Aktivieren eines Fensters:
+       Beim Aktivieren bzw. Schlieûen eines Fensters werden mîglichst
+       nur noch die vorher verdeckten Teile des neuen obersten Fensters
+       ausgegeben. Leider fÅhrt dies in einigen Programmen zu unvoll-
+       stÑndigen Ausgaben.
+     * [L5] Optimiertes Redraw beim Verschieben eines Fensters:
+       Ist diese Schalter eingeschaltet werden alle sichtbaren Teilen
+       des Fensters kopiert und nur fÅr den Rest Redraw-Nachrichten
+       versandt (eventuell mÅssen die Nachrichten jedoch Verschmolzen
+       werden, dadurch werden auch kopierte Bereiche neu ausgegeben)
+     * [L6] Optimiertes Redraw beim Vergrîûern eines Fensters:
+       Es werden nur noch Redraws fÅr die vorher unsichtbaren Bereiche
+       des Fensters versandt
+     * [L7] Optimiertes Verschmelzen von Redraw-Nachrichten:
+       Die bisherigen TOS-Versionen speicherten max. eine Redraw-
+       Nachricht pro Fenster im Nachrichtenpuffer der Applikation.
+       Muûte ein zweite gespeichert werden, wurde das Redraw-Rechteck
+       der ersten durch das umfassende Rechteck beider Nachrichten
+       ersetzt. MultiTOS 1.0 verschmilzt hingegen Redraw-Nachrichten
+       nicht mehr. Beide Lîsungen haben Nachteile. Unter WINX ist
+       ein Kompromiû mîglich. Redraws werden nur noch verschmolzen,
+       wenn die GesamtflÑche des umfassenden Rechtecks nicht grîûer
+       als 25% der Summe der EinzelflÑchen ist. Maximal kînnen zwei
+       Redraws pro Fenster im Nachrichtenpuffer sein.
+       (nur fÅr TOS Versionen > 1.x)
+     * [L9] Die Scrollpfeile eines Fensters kînnen getrennt oder
+       zusammengefaût in der rechten unteren Ecke des Fensterrahmens
+       dargestellt werden
+     * Es ist jetzt mîglich die wind_update()-Kontrolle nur noch zu
+       Åbernehmen, falls kein anderes Programm die Kontrolle besitzt.
+       Auûerdem wird wind_update() auf Unterlauf geprÅft.
+     * [G11] Fensterrahmen im 3D-Look (ab GEM 3.31)
+     * [L10] Scrollboxen als ErgÑnzung der Scrollpfeile
+     * [L12] Fehlerhafte Fensterposition und -groesse korrigieren
+     - Anpassung der anderen Routinen an die grîûeren Fensterstrukturen
+
+     Sonstiges:
+     - Vergrîûerung des Nachrichtenpuffers einer Applikation von
+       8 auf 40 Standard-Nachrichten (damit kînnen Verklemmungen
+       des GEM vermieden werden)
+     - Die Mausklickwartezeit wurde fest auf Doppelklick eingestellt.
+       In den bisherigen GEM-Versionen ist die Zeitspanne zwischen dem
+       Mausklick des Anwenders und der Verarbeitung durch den SCRENMGR
+       nicht einheitlich. Konkret hÑngt die Zeitspanne davon ab, ob
+       mindestens eine Applikation bzw. ein Accessory auf einen Doppel-
+       klick wartet oder nicht. Die Einstellung auf Doppelklick ist
+       notwendig, da sonst, beim Klick auf das Titelelement eines
+       hinteren Fensters, nicht immer zwischen Verschieben und
+       Aktivieren unterschieden werden kann.
+     * Bei der Benutzung des Timers meldet evnt_multi() kein Mausknopf-
+       bzw. Rechteckereignis mehr, solange ein anderes Programm oder der
+       SCRENMGR die Mauskontrolle hat (dies konnte z.B. passieren,
+       wÑhrend man ein Fenster verschob).
+     * UnterstÅtzung des WF_BEVENT Flags bei der Zuordnung der Button-
+       ereignisse an die Applikationen
+     * TOS 1.x: Die dynamisch angeforderten Strukturen zur Verwaltung
+       von Accessories werden jetzt (wie in den neueren TOS Versionen)
+       explizit gelîscht. Damit wird verhindert, daû es zu Problemen
+       mit AUTO-Ordner Programmen kommt, die den selben Speicher vorher
+       bereits einmal belegt hatten.
+     * [G12] Der Musterbezugspunkt von GEM-Objekten wurde auf die
+       linke obere Ecke des Objekts gesetzt.
+     * Der Name der aktiven Applikation wird jetzt auch in TOS 1.00
+       und 1.02 vor jedem Aufruf des integrierten Desktops zurÅckgesetzt.
+     * [L8] Schaltet man diesen Schalter an, meldet WINX Aufrufe von
+       Fensterfunktion mit fehlerhaften Parametern Åber ein Alert.
+       Diese Option ist vorallem fÅr Entwickler gedacht.
+     * [G13] Beim Starten eines Programms B aus dem laufenden Programm
+       A wird der Name, den GEM der aktiven Applikation zuordnet, auf
+       B gesetzt. Terminiert B wird der Name auf A zurÅckgesetzt.
+       Damit arbeitet appl_find() jetzt auch im obigen Fall korrekt.
+       (bisher wurde A statt B gefunden).
+     * wind_new ordnet Mausklicks jetzt der Hauptapplikation zu
+       (statt dem SCRENMGR) (TOS >= 2.x/3.x). Damit wird verhindert,
+       daû nach Beendigung eines Programms der erste Klick auf ein
+       Objekt des Desktops verloren geht.
+     * In den Code von wind_new() wurde ein wind_update( BEG_UPDATE)
+       eingefÅgt. wind_new() wird vom Desktop benutzt um nach der
+       Beendigung von Programmen den Bildschirm aufzurÑumen. Durch das
+       EinfÅgen von wind_update() sind ACCs jetzt besser davor ge-
+       schÅtzt, daû der AufrÑumvorgang zu einem ungÅnstigen Zeitpunkt
+       stattfindet.
+     * Ein Fehler des Taskumschalters von GEM 3.xx wurde gefixt, damit
+       sollte jetzt, wÑhrend das Alert des CEH (Critical Error Handler)
+       sichtbar ist, kein Taskwechsel mehr stattfinden.
+     * appl_getinfo()
+     * Patch fÅr 'Phantom typist'-Problem (nicht mehr kontrollierbares
+       Verhalten der Tastatur und/oder der Maus)
+
+INSTALLATION     
+     Um all diese énderungen vornehmen zu kînnen, muû WINX tief in den
+     Programmcode des GEM eingreifen. Der Eingriff kann auf dreierlei
+     Weise erfolgen:
+
+     a) Patchen einer Kopie des GEM im RAM
+          Man installiert beim Booten des Rechners eine Kopie des GEM
+          im RAM, die dann vor dem Start des GEM durch WINX modifiziert
+          wird. Dies ist mit einem der folgenden Programme mîglich:
+
+          ROMRAM    TOS Beschleuniger fÅr TTs;
+                    Mailbox Maus HH2 (Freeware);
+                    Alexander Herzlinger; >256 KB; PTOS
+          VRAM030   Virtuelle Speicherverwaltung fÅr TT und FALCON030;
+                    OverScan, D-12277 Berlin;
+                    Alexander Herzlinger; >256 KB; VRAM
+          ROMSPEED  TOS Beschleuniger fÅr TTs (Bestandteil von OUTSIDE
+                    einer virtuelle Speicherverwaltung fÅr TTs);
+                    MAXON Verlag; D-65734 Eschborn;
+                    Uwe Seimet; >256 KB; USRS
+          GEMRAM    GEM im RAM installieren (ST,TT,FALCON);
+                    Mailbox Maus MTK (Freeware);
+                    Martin Osieka; 80-200 KB; MOGR
+          (Beschreibung; Bezugsquelle; Autor; Speicherbedarf; Cookie)
+
+          WINX gehîrt in diesem Fall nach diesen Programmen in den
+          Ordner \AUTO auf dem Bootlaufwerk und wird somit beim Booten
+          automatisch gestartet.
+          Die Programme werden nur erkannt, wenn sie das entsprechende
+          Cookie im Cookiejar eingetragen haben.
+
+     b) Patchen einer TOS-Datei
+          Man benutzt WINX um sich eine modifizierte Kopie des TOS zu 
+          erstellen, die anschlieûend auf Eproms gebrannt und in den
+          Rechner eingesetzt wird. Hierzu ruft man WINX vom Desktop
+          auf und erhÑlt dann die Mîglichkeit, das TOS aus den ROMs 
+          oder einer bereits bestehenden TOS-Datei zu laden. Nachdem
+          WINX das TOS modifiziert hat, kann es abgespeichert werden.
+
+     c) Patchen einzelner GEM-Routinen      
+          Auf Rechnern mit Original-TOS 1.00, 1.02 bzw. 1.04 kann man
+          WINX ohne RAM-Kopie des GEM benutzen. Auch in diesem Fall
+          gehîrt WINX in den AUTO-Ordner. Beim Start von WINX werden
+          dann nur die Funktionen des GEM ins RAM kopiert, die von WINX
+          modifiziert werden. Diese Methode ist in den neueren TOS-
+          Versionen nicht anwendbar. Die kopierten GEM-Routinen belegen
+          ca. 16 KByte.
+
+     ZusÑtzlich zum Speicher fÅr eine Kopie des GEM bzw. der kopierten
+     GEM-Funktionen fordert WINX beim Start des GEM weiteren Speicher
+     fÅr die Fensterstrukturen an (ca. 24 KByte).
+
+     WINX wurde an die folgenden offiziellen GEM Versionen angepasst:
+     
+        GEM(AES)   TOS
+          1.20     GER 1.00/1.02
+          1.40     GER 1.04/1.06/1.62
+          3.00     GER 3.01
+          3.10     GER/UK 2.05/3.05
+          3.20     GER/UK 2.06/3.06
+          3.31     4.01
+          3.40     4.02-4.04
+
+     WINX identifiziert das GEM Åber die LÑnge des GEM-TEXT-Segments.
+     GEM Versionen anderer LÑnder werden bei identischer LÑnge akzeptiert.
+
+KONFIGURATION
+     Die énderungen, die WINX am GEM vornimmt, kînnen weitgehend Åber
+     'Schalter' ein- bzw. ausgeschaltet werden. Die Einstellung der
+     Schalter erfolgt momentan Åber die Konfigurationsdatei WINX.INF,
+     die sich im AUTO-Ordner befinden muû. Es handelt sich um eine
+     Textdatei, die mit einem Editor verÑndert werden kann.
+     
+     Ab der WINX-Version 2.1 wird zwischen globalen und lokalen
+     Schaltern unterschieden, wobei die globalen Schalter fÅr alle
+     Applikationen gelten und die lokalen fÅr jede Applikation
+     individuell eingestellt werden kînnen. Alles weitere kann man
+     WINX.INF entnehmen.
+     
+     In Zukunft soll WINX.INF Åber WINX.CPX manipuliert werden kînnen.
+     Momentan fehlt noch der zÅndende Funke, wie man das fÅr den
+     Anwender am praktikabelsten aufzieht.
+     
+     Die Wiederholraten von Schlieûelement, Maximalgrîûe-Element
+     und Scrollpfeilen kînnen Åber WINX.CPX eingestellt werden.
+
+     Benutzt man WINX-modifizierte ROMs, dann braucht man trotzdem
+     WINX.PRG im Autoordner um Programme individuell konfigurieren zu
+     kînnen. WINX erkennt in diesem Fall beim Start, daû das GEM bereits
+     mit WINX gepatcht ist und lÑdt nur noch die Konfigurationsdatei
+     WINX.INF, trÑgt den WINX-Cookie in den Cookie Jar ein und stellt
+     Åber diesen eine Zugriffsfunktion auf die Konfigurationswerte
+     bereit. Verzichtet man auf WINX im AUTO-Ordner, dann benutzt das 
+     WINX gepatchte GEM Defaultwerte. Hat man Speicherplatzprobleme auf
+     dem Bootlaufwerk, dann kann man statt WINX auch das Programm
+     WINXCOOK verwenden, bei dem die Patchfunktion entfernt wurde.
+
+     Die Defaultwerte von WINX kînnen auch direkt in die Datei 
+     WINX.PRG gepatcht werden. Hierzu sucht man in der Datei zunÑchst
+     nach dem String "PATCH HERE:". An dieser Position der Datei sind
+     die Defaultwert in der folgenden Struktur abgelegt:
+
+       typedef struct {     /* offset  description */
+         char prefix[ 12];  /* $00  "PATCH HERE:" */
+         short size;        /* $0C  sizeof( defaultS) */
+         short global;      /* $0E  global switches */
+         short local;       /* $10  local switches */
+         short desk;        /* $12  desktop switches */
+         short isdelay;     /* $14  initial scroll delay */
+         short csdelay;     /* $16  continous scroll delay */
+         short ccdelay;     /* $18  continous close delay */
+         short cfdelay;     /* $1A  continous full delay */
+       } defaultS;
+     
+     Die Schalter sind jeweils in einem Bitfeld abgelegt. Bit 0
+     entspricht Schalter 1, etc. Die Verzîgerungswerte sind in ms
+     anzugeben.
+               
+TERMINATE AND KEEP RESIDENT
+     WINX ist ein TKR-Programm und besteht aus einem TKR-Lader in den
+     das TKR-Modul 'WINX.TKR' eingefÅgt ist. Das TKR-Konzept sieht
+     vor, daû Programme (TKR-Module), die residenten Speicher benîtigen,
+     diesen von einem anderen Programm (dem TKR-Lader) bereitgestellt
+     bekommen. Dadurch kann sich das TKR-Modul auf seine eigentliche
+     Aufgabe konzentrieren und belegt nur minimal Speicher. Der hier
+     benutzte TKR-Lader kann beliebig viele TKR-Module und andere
+     Programme enthalten. Ist beim Start des TKR-Laders eine SHIFT-
+     Taste gedrÅckt, wird fÅr jedes TKR-Modul nachgefragt, ob es
+     gestartet werden soll. Der TKR-Lader gibt bei Programmende die
+     Gesamtgrîûe des resident gehaltenen Speichers aus.
+     
+BEKANNTE PROBLEME
+     - Einige Ñltere Programme verwenden die Fensterkennung zur
+       Indizierung eigener Tabellen, dies fÅhrt in der Regel bei
+       vielen offenen Fenstern zum Absturz.
+     - Einige Programme beschrÑnken ohne zwingenden Grund die Anzahl
+       ihrer Fenster (z.B. das Original-Desktop).
+     - WINX Versionen vor 2.0 stÅrzten ab, wenn Programme die fehler-
+       hafte Fensterkennung -1 (NOWINDOW) benutzten. Dies wird jetzt
+       abgefangen.
+     - TOS14FIX darf nur nach WINX aufgerufen werden.
+     - TEMPLMON Versionen < 2.0 mÅssen vor WINX aufgerufen werden.
+     - Viele Programme kommen mit der Bearbeitung von hinteren Fenstern
+       nicht zurecht, vorallem das Scrollen in teilweise verdeckten
+       Fenstern bereitet Probleme.
+     - MultiGEM erlaubt nur 10 Fenster pro Applikation.
+     - WINX 2.1 wird erst ab MultiGEM 2.00 (Copyrightjahr 1993!)
+       unterstÅtzt (zum Update siehe Hinweise im MultiGEM Handbuch)
+     - Da MultiGEM in der obigen Version noch die Fensterkennungen
+       auf eigene Werte abbildet, liefern einige neue wind_get()-
+       Modi falsche Kennungen:
+         WF_OWNER, WF_BOTTOM, WF_TOP (fÅr owner und belowwin)
+     - BackDrop funktioniert nur vollstÑndig, wenn es von Programmen
+       unterstÅtzt wird
+     - Einige Graphikkarten (bzw. deren VDI-Treiber) haben offenbar
+       Probleme mit userdefined patterns. In diesem Fall sollte man
+       den Musterbezugspunktschalter auf 0/0 setzen und den Hersteller
+       der Karte bzw. des VDI-Treibers informieren.
+     - Ist der Musterbezugspunkschalter ausgeschaltet, werden Objekte
+       des Fensterrahmens immer komplett ausgegeben. Auûerdem kann es
+       dadurch fÅr verschiedene Programme notwendig werden die Redraw-
+       optimierungen auszuschalten (z.B. fÅr XCONTROL).
+     - Beim Beenden von Applikationen schlieût GEM die Fenster von
+       Accessories selbstÑndig. In selten FÑllen kann es vorkommen,
+       daû die Accessories nicht rechtzeitig vom GEM Åber diesen
+       Vorgang informiert werden und sie auf das nicht mehr existente
+       Fenster zugreifen. Ist jetzt die Fehlermeldungsanzeige von
+       WINX eingeschaltet, wird der fehlerhafte Zugriff gemeldet.
+       Dies ist ein konzeptionelles Problem des GEM.
+       Abhilfe: Anzeige ausschalten.
+     - Das Einstellen der Verzîgerungswerte funktioniert erst ab TOS 1.04,
+       da das GEM vorher keinen entsprechenden ZÑhler bereitstellt.
+     - Die Fensterverwaltung des GEMs 3.40 initialisiert den Namen und
+       die Infozeile des Fensters auf Defaultwerte. WINX tut dies nicht.
+     - Durch die VerÑnderungen im SCRENMGR kann der Anwender Fenster jetzt
+       Åber den sichtbaren Bereich hinaus vergrîûern. Programme, die von
+       einer maximale Fenstergrîûe ausgehen und diese nicht ÅberprÅfen,
+       kînnen daher Probleme bereiten.
+     - Da WINX >= 2.1 die ARROWFIX-Patches enthÑlt, muû ARROWFIX aus
+       dem AUTO-Ordner entfernt werden.
+
+HINWEISE FöR ENTWICKLER
+     siehe Datei WINXPROG.GER
+
+VEKTOREN, COOKIES, ENVIRONMENT, ...
+     Im Fall c) wird der LineF-Vektor verbogen (XBRA-Kennung AESF).
+
+     WINX (bzw. WINXCOOK, das Zusatzprogramm fÅr ein WINX modifiziertes
+     ROM) erzeugt ab der Version 2.1 den Cookiejareintrag 'WINX'.
+     Dieser Cookie enthÑlt als Wert eine Zeiger auf einen Funktion
+     Åber die bestimmte Eigenschaften der akt. WINX-Version erfragt
+     werden kînnen.
+
+     Ist der WINX-Cookie installiert, wird beim Start des GEM der
+     GEMDOS-Vektor verbogen (XBRA-Kennung WINX).
+
+     GEMRAM bestimmt die Ausgabesprache zunÑchst aus den OSHEADER,
+     dann Åber den _AKP-Cookie (falls er existiert). Beim Start aus
+     dem Desktop wird zusÑtzlich die Environmentvariable "AE_LANG"
+     ausgewertet. Falls als Sprache etwas anderes als Deutsch
+     ermittelt wird, benutzt GEMRAM Englisch. Das Datumsformat wird
+     aus dem _IDT-Cookie bestimmt, falls dieser nicht existiert Åber
+     die Ausgabesprache.
+
+COPYRIGHT
+     Autor:      (\/) Martin Osieka
+     Anschrift:  Martin Osieka, Erbacherstr. 2, 
+                 D-64283 Darmstadt, Bundesrepublik Deutschland
+     Internet:   Martin_Osieka@mtk.maus.de
+
+     Schriftlichen Anfragen bitte immer einen frankierten und
+     adressierten RÅckumschlag beilegen.
+
+     Das Programm WINX.PRG darf auf beliebige Art und Weise weiter-
+     verbreitet werden, solange alle Dateien des Programmpakets
+     beiliegen. Zum Paket gehîren:
+
+     WINX.PRG, WINX.CPX      Patchprogramm und Konfigurationsmodul
+     WINXCOOK.PRG            Zusatzprogramm fÅr WINX im ROM
+     WINX.INF                Datei mit Konfigurationsinformationen
+     WINX.GER, WINXPROG.GER  Dokumentation (deutsch)
+     WINX.ENG, WINXPROG.ENG  Dokumentation (englisch)
+     WINX.UPL                Upload-Beschreibung (deutsch)
+     LIESMICH                Kurzbeschreibung
+     NEUES                   énderungen seit der letzten Version
+
+     Die Benutzung des Programms erfolgt auf eigene Gefahr.
+
+SIEHE AUCH
+     Dokumentation von GEMRAM, ARROWFIX und WINCOLOR

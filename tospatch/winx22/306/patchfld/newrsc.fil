@@ -1,0 +1,106 @@
+;*******************************************************************************
+;* MH:
+;* Das Default-NEWDESK.INF und die Resourcen zum Includen!!!
+;* Hier nun die ultimative Mîglichkeit, sich das TOS nach seinen WÅnschen
+;* zu gestalten. Originalfiles: RSC_1.RSC,RSC_2.RSC,NEWDESK.INF.
+;*
+;* Vorsicht: Alle 3 Files dÅrfen jeweils max. 64kB lang sein, da die
+;*           Pointer auf dieselbigen Words sind.
+;*
+;* Diese Dateien von TOS 2.06 und TOS 3.06 sind identisch(!), d.h. sie
+;* kînnen fÅr beide TOS-Versionen zum Patchen genutzt werden.
+;*
+;* Wenn man mehr Icons gleichzeitig auf dem Desktop haben mîchte, muû man
+;* in der 2.RSC-Datei (RSC_2.RSC) im 13. Formular (ICONS) einfach mehr Boxen
+;* reinsetzen. Ich habe in der Datei RSC_2X.RSC die Anzahl der Icons
+;* schon von 48 auf 160 vergrîûert.
+;*
+;* Man kann nun auch neue und mehr Icons in sein TOS einbinden (anstatt
+;* DESKICON.RSC zu verwenden). Die Icons findet man in der 2. RSC-Datei
+;* (RSC_2.RSC) im 11. Formular (DESKICON). Hier einfach neue oder andere
+;* Icons eintragen.
+
+.INSTALL_RSC = 20336+.d1
+.RSC_END     = .ROMTOP
+
+_IF .PAK
+
+;******************************************************************************
+;	Trick, damit die PAK auch mit TOS 1.xx auf dem Mainboard startet
+;	Kein Konflikt mehr, da der RSC-Bereich nach hinten verschoben wird
+;	Zim 20.12.2011
+;
+; - CPU lÑdt nach Reset $00FC0030 als StartAdr (aus TOS 1.xx auf dem Mainboard)
+; - Bei Zugriff auf $00FC0030 wird das PAK-TOS angesprochen, falls enabled
+; - Adresse, die die PAK-ROMs sehen: 
+;   F    C    0    0    3    0      ; diese Adresse liegt am AdrBus an (hex)
+;   1111 1100 0000 0000 0011 0000   ; (bin)
+;   xxxx x100 0000 0000 0011 0000   ; diese Adr sieht das ROM (512 kBytes, bin)
+;   x    4    0    0    3    0      ; (hex)
+
+_FILL .RSC_TAB,40030,$FF   ; Alten RSC-Bereich bis Boot-Patch lîschen
+40030   $4E,F9,.BASE+30.L  ; jmp os_main
+
+.RSC_TAB:                  ; ~ in Variable speichern
+                           ; Neuen RSC-Bereich ab hier einrichten
+.RSC = 1                   ; in jedem Fall Resource-Files dort auch laden
+_ENDIF
+
+_IF .RSC
+
+.RSC_TAB+A
+_SWITCH .NATION
+  _CASE .USA:
+    -rsc\us                ; english RSC-files
+  _CASE .FRG:
+    -rsc\de                ; german RSC-files
+  _CASE .UK:
+    -rsc\uk                ; english RSC-files
+  _CASE .FRA:
+    -rsc\fr                ; french RSC-files
+  _CASE .SPA:
+    -rsc\es                ; spanish RSC-files
+  _CASE .ITA:
+    -rsc\es                ; italian RSC-files
+  _CASE .SWE:
+    -rsc\se                ; swedish RSC-files
+  _CASE .SWF:
+    -rsc\sf                ; french RSC-files
+  _CASE .SWG:
+    -rsc\sg                ; german RSC-files
+  _DEFAULT:
+    _ERROR "unsupported country"
+_ENDSWITCH
+
+.AES_RSC_START:
+~ aes.rsc
+_EVEN $00
+~ $00,00,00,00
+.DESK_RSC_START:
+~ desk.rsc
+_EVEN $00
+~ $00,00,00,00
+.NEWDESK_INF:
+~ newdesk.inf
+_EVEN $00
+~ $00,00,00,00,00,00
+.RSC_LEN = ~-.RSC_TAB
+
+-..\..
+
+; now (re)generate the glue header
+.RSC_TAB
+~ $.DESK_RSC_START-.RSC_TAB.W
+~ $.NEWDESK_INF-.RSC_TAB.W
+~ $.RSC_LEN.W
+
+.ROMTOP = .RSC_TAB+.RSC_LEN                             ; neues ROMTOP in Variable speichern
+
+_ENDIF
+
+.TOS_INFO = .RSC_TAB + .TOSINFO_OFS  ; zeigt auf TOS Info Dialog
+
+.INSTALL_RSC+ A   $.RSC_TAB+.BASE.L
+.INSTALL_RSC+5A   $.RSC_TAB+.BASE.L
+
+!.RSC_TAB .. .ROMTOP          ; Im RSC/NEWDESK.INF nicht relozieren.

@@ -57,6 +57,10 @@
 
 char const gl_nils[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
+#if TP_WINX
+#define wm_update wx_update
+#endif
+
 
 /*
  *	Routine to break a string into smaller strings.  Breaks occur
@@ -367,7 +371,11 @@ PP(const char *palstr;)
 	/* draw the alert   */
 	gsx_sclip(&d);
 	ob_draw(tree, ROOT, MAX_DEPTH);
-	ctlmouse(TRUE);						/* turn on the mouse    */
+#if TP_WINX
+	ctlmouse(2);						/* turn on the mouse */
+#else
+	ctlmouse(TRUE);						/* turn on the mouse */
+#endif
 	/* let user pick button */
 	i = fm_do(tree, 0) & 0x7FFF;
 

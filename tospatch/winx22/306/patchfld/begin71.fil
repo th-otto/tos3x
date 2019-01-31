@@ -1,0 +1,216 @@
+; $E00030 .. $E0029C
+
+.VDOSkip1 = 176E
+.memchk = 0C06
+.dflt_pal = 0C24
+.stramtest = 208E
+.InitDMASound = 17A0
+.initmmu = 16EC
+
+.mmu_tab = 36014+.BASE+.d2 ; .USA, .UK: E35FE4; .FRA: E36032
+
+~ $46,fc,27,00                ; move.w    #$2700,sr
+~ $4e,70                      ; reset
+~ $0c,b9,fa,52,23,5f,00,fa,00,00  ; cmpi.l    #$FA52235F,$00FA0000
+~ $66,0a                      ; bne.s     nodiag
+~ $4d,fa,00,08                ; lea.l     nodiag(pc),a6
+~ $4e,f9,00,fa,00,04          ; jmp       $00FA0004
+.nodiag:
+~ $7e,01                      ; moveq.l   #1,d7
+~ $70,0a                      ; moveq.l   #10,d0
+~ $4d,fa,00,06                ; lea.l     memcret3(pc),a6
+~ $60,00,.memchk-~.w          ; bra       memchk
+.memcret3:
+~ $66,06                      ; bne.s     noconf
+~ $7e,00                      ; moveq.l   #0,d7
+~ $10,38,04,24                ; move.b    ($00000424).w,d0
+.noconf:
+~ $11,c0,80,01                ; move.b    d0,($FFFF8001).w
+~ $4f,f8,07,fc                ; lea.l     ($000007FC).w,a7
+~ $20,3c,00,00,08,08          ; move.l    #$00000808,d0
+~ $4e,7b,00,02                ; movec     d0,cacr ; 68020+ only
+~ $70,00                      ; moveq.l   #0,d0
+~ $4e,7b,08,01                ; movec     d0,vbr ; 68020+ only
+~ $41,fa,00,20                ; lea.l     nommu(pc),a0
+~ $21,c8,00,10                ; move.l    a0,($00000010).w
+~ $41,fa,00,1A                ; lea.l     nofpu1(pc),a0
+~ $21,c8,00,2c                ; move.l    a0,($0000002C).w
+~ $41,f9,.mmu_tab.L           ; lea.l     $00E36014,a0
+~ $f0,10,40,00                ; pmove.l   (a0),tc
+~ $f0,10,08,00                ; pmove.l   (a0),tt0
+~ $f0,10,0c,00                ; pmove.l   (a0),tt1
+.nommu:
+~ $f3,50                      ; frestore  (a0)
+.nofpu1:
+~ $4a,87                      ; tst.l     d7
+~ $66,1e                      ; bne.s     noreset
+.resetvec:
+~ $7e,00                      ; moveq.l   #0,d7
+~ $0c,b8,31,41,59,26,04,26    ; cmpi.l    #$31415926,($00000426).w
+~ $66,12                      ; bne.s     noreset
+~ $20,38,04,2a                ; move.l    ($0000042A).w,d0
+~ $08,00,00,00                ; btst      #0,d0
+~ $66,08                      ; bne.s     noreset
+~ $20,40                      ; movea.l   d0,a0
+~ $4d,fa,.resetvec-~.w        ; lea.l     resetvec(pc),a6
+~ $4e,d0                      ; jmp       (a0)
+.noreset:
+~ $41,f8,88,00                ; lea.l     ($FFFF8800).w,a0
+~ $10,bc,00,07                ; move.b    #$07,(a0)
+~ $11,7c,00,c0,00,02          ; move.b    #$C0,2(a0)
+~ $10,bc,00,0e                ; move.b    #$0E,(a0)
+~ $11,7c,00,07,00,02          ; move.b    #$07,2(a0)
+~ $61,00,.VDOSkip1-~.w        ; bsr       VDOSkip1 ; $00E0176E
+~ $11,fc,00,02,82,0a          ; move.b    #$02,($FFFF820A).w
+~ $43,f8,82,40                ; lea.l     ($FFFF8240).w,a1
+~ $30,3c,00,0f                ; move.w    #$000F,d0
+~ $41,fa,.dflt_pal-~.w        ; lea.l     dflt_pal(pc),a0 ; $00E00C24
+.initpal:
+~ $32,d8                      ; move.w    (a0)+,(a1)+
+~ $51,c8,.initpal-~.w         ; dbf       d0,initpal
+~ $11,fc,00,01,82,01          ; move.b    #$01,($FFFF8201).w
+~ $42,38,82,03                ; clr.b     ($FFFF8203).w
+~ $2a,38,04,2e                ; move.l    ($0000042E).w,d5
+~ $4d,fa,00,06                ; lea.l     memcret2(pc),a6
+~ $60,00,.memchk-~.w          ; bra       memchk
+.memcret2:
+~ $67,00,01,58                ; beq       nomemchk
+~ $11,fc,00,0a,80,01          ; move.b    #$0A,($FFFF8001).w
+~ $30,7c,00,08                ; movea.w   #$0008,a0
+~ $43,f9,00,20,00,08          ; lea.l     $00200008,a1
+~ $70,00                      ; moveq.l   #0,d0
+.chkpatloop:
+~ $30,c0                      ; move.w    d0,(a0)+
+~ $32,c0                      ; move.w    d0,(a1)+
+~ $06,40,fa,54                ; addi.w    #$FA54,d0
+~ $b0,fc,02,00                ; cmpa.w    #$0200,a0
+~ $66,.chkpatloop-~-1.b       ; bne.s     chkpatloop
+~ $2e,3c,00,00,02,00          ; move.l    #$00000200,d7
+~ $11,fc,00,5a,82,0d          ; move.b    #$5A,($FFFF820D).w
+~ $4a,38,82,03                ; tst.b     ($FFFF8203).w
+~ $10,38,82,0d                ; move.b    ($FFFF820D).w,d0
+~ $b0,3c,00,5a                ; cmp.b     #$5A,d0
+~ $66,14                      ; bne.s     chkmem1
+~ $42,38,82,0d                ; clr.b     ($FFFF820D).w
+~ $4a,78,82,40                ; tst.w     ($FFFF8240).w
+~ $4a,38,82,0d                ; tst.b     ($FFFF820D).w
+~ $66,06                      ; bne.s     chkmem1
+~ $2e,3c,00,04,00,00          ; move.l    #$00040000,d7
+.chkmem1:
+~ $22,3c,00,20,00,00          ; move.l    #$00200000,d1
+.chkmemloop:
+~ $7c,00                      ; moveq.l   #0,d6
+~ $4e,b9,.stramtest+.BASE.L   ; jsr       stramtest
+~ $11,c6,80,01                ; move.b    d6,($FFFF8001).w
+~ $4f,f9,00,00,80,00          ; lea.l     $00008000,a7
+~ $41,fa,00,34                ; lea.l     st_ramsize_done(pc),a0
+~ $21,c8,00,08                ; move.l    a0,($00000008).w
+~ $36,3c,fb,55                ; move.w    #$FB55,d3
+~ $2e,3c,00,02,00,00          ; move.l    #$00020000,d7
+~ $20,47                      ; movea.l   d7,a0
+.next_zone:
+~ $22,48                      ; movea.l   a0,a1
+~ $34,00                      ; move.w    d0,d2
+~ $72,2a                      ; moveq.l   #42,d1
+.storemem:
+~ $33,02                      ; move.w    d2,-(a1)
+~ $d4,43                      ; add.w     d3,d2
+~ $51,c9,.storemem-~.w        ; dbf       d1,store_mem
+~ $22,48                      ; movea.l   a0,a1
+~ $72,2a                      ; moveq.l   #42,d1
+.check_mem:
+~ $b0,61                      ; cmp.w     -(a1),d0
+~ $66,0c                      ; bne.s     st_ramsize_done
+~ $42,51                      ; clr.w     (a1)
+~ $d0,43                      ; add.w     d3,d0
+~ $51,c9,.check_mem-~.w       ; dbf       d1,check_mem
+~ $d1,c7                      ; adda.l    d7,a0
+~ $60,.next_zone-~-1.b        ; bra.s     next_zone
+.st_ramsize_done:
+~ $91,c7                      ; suba.l    d7,a0
+~ $2a,08                      ; move.l    a0,d5
+_IF .MEM_INIT !A! (.RAMRESET = 0)
+~ $30,7c,01,00                ; movea.w   #$0100,a0
+ _ELSE
+~ $30,7c,01,00                ; movea.w   #$0400,a0
+_ENDIF
+~ $70,00                      ; moveq.l   #0,d0
+~ $72,00                      ; moveq.l   #0,d1
+~ $74,00                      ; moveq.l   #0,d2
+~ $76,00                      ; moveq.l   #0,d3
+.clrmem:
+~ $48,d0,00,0f                ; movem.l   d0-d3,(a0)
+~ $41,e8,00,10                ; lea.l     16(a0),a0
+~ $b1,c5                      ; cmpa.l    d5,a0
+~ $65,.clrmem-~-1.b           ; bcs.s     clrmem
+~ $11,c6,04,24                ; move.b    d6,($00000424).w
+~ $21,c5,04,2e                ; move.l    d5,($0000042E).w
+~ $21,fc,75,20,19,f3,04,20    ; move.l    #$752019F3,($00000420).w
+~ $21,fc,23,76,98,aa,04,3a    ; move.l    #$237698AA,($0000043A).w
+~ $21,fc,55,55,aa,aa,05,1a    ; move.l    #$5555AAAA,($0000051A).w
+~ $41,fa,00,0e                ; lea.l     refresh_done(pc),a0
+~ $21,c8,00,08                ; move.l    a0,($00000008).w
+~ $33,fc,00,00,ff,d0,00,e0    ; move.w    #$0000,$FFD000E0
+.refresh_done:
+~ $41,fa,00,54                ; lea.l     tt_ramsize_done(pc),a0
+~ $21,c8,00,08                ; move.l    a0,($00000008).w
+~ $36,3c,fb,55                ; move.w    #$FB55,d3
+~ $70,00                      ; moveq.l   #0,d0
+~ $2e,3c,00,02,00,00          ; move.l    #$00020000,d7
+~ $20,7c,01,02,00,00          ; movea.l   #$01020000,a0
+~ $24,48                      ; movea.l   a0,a2
+~ $22,47                      ; movea.l   d7,a1
+~ $22,20                      ; move.l    -(a0),d1
+~ $46,81                      ; not.l     d1
+~ $23,01                      ; move.l    d1,-(a1)
+~ $92,98                      ; sub.l     (a0)+,d1
+~ $42,99                      ; clr.l     (a1)+
+~ $4a,81                      ; tst.l     d1
+~ $67,2a                      ; beq.s     tt_ramsize_done
+.next_tt:
+~ $22,48                      ; movea.l   a0,a1
+~ $34,00                      ; move.w    d0,d2
+~ $72,2a                      ; moveq.l   #42,d1
+.store_tt:
+~ $33,02                      ; move.w    d2,-(a1)
+~ $d4,43                      ; add.w     d3,d2
+~ $51,c9,.store_tt-~.w        ; dbf       d1,store_tt
+~ $22,48                      ; movea.l   a0,a1
+~ $72,2a                      ; moveq.l   #42,d1
+.check_tt:
+~ $b0,61                      ; cmp.w     -(a1),d0
+~ $66,14                      ; bne.s     tt_ramsize_done
+~ $42,51                      ; clr.w     (a1)
+~ $d0,43                      ; add.w     d3,d0
+~ $51,c9,.check_tt-~.w        ; dbf       d1,check_tt
+~ $d1,c7                      ; adda.l    d7,a0
+~ $21,48,ff,fc                ; move.l    a0,-4(a0)
+~ $b1,ea,ff,fc                ; cmpa.l    -4(a2),a0
+~ $66,.next_tt-~-1.b          ; bne.s     next_tt
+.tt_ramsize_done:
+~ $91,c7                      ; suba.l    d7,a0
+~ $b1,fc,01,00,00,00          ; cmpa.l    #$01000000,a0
+~ $66,02                      ; bne.s     ttramok
+~ $91,c8                      ; suba.l    a0,a0
+.ttramok:
+~ $21,c8,05,a4                ; move.l    a0,($000005A4).w
+~ $21,fc,13,57,bd,13,05,a8    ; move.l    #$1357BD13,($000005A8).w
+.nomemchk:
+~ $3e,7c,57,58                ; movea.w   #$5758,a7
+~ $42,b8,04,f6                ; clr.l     ($000004F6).w
+~ $42,78,0a,12                ; clr.w     ($00000A12).w
+~ $4e,b9,.InitDMASound+.BASE.L ; jsr       .InitDMASound
+~ $22,7c,00,00,e6,fc          ; movea.l   #__ebss,a1
+~ $30,7c,0a,14                ; movea.w   #__sbss,a0
+~ $70,00                      ; moveq.l   #0,d0
+.clrbss:
+~ $20,c0                      ; move.l    d0,(a0)+
+~ $b3,c8                      ; cmpa.l    a0,a1
+~ $62,.clrbss-~-1.b           ; bhi.s     clrbss
+~ $41,fa,00,12                ; lea.l     skipmmuinit(pc),a0
+~ $21,c8,00,10                ; move.l    a0,($00000010).w
+~ $21,c8,00,2c                ; move.l    a0,($0000002C).w
+~ $24,4f                      ; movea.l   a7,a2
+~ $4e,b9,.initmmu+.BASE.L     ; jsr       initmmu
+.skipmmuinit:
+~ $2e,4a                      ; movea.l   a2,a7

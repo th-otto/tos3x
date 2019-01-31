@@ -1,0 +1,95 @@
+;do_scroll:
+~ $48,e7,40,0c                  ; movem.l   d1/a4-a5,-(a7)
+~ $28,6f,00,10                  ; movea.l   16(a7),a4
+;doscr0:
+~ $3e,ac,00,06                  ; move.w    6(a4),(a7)
+~ $4e,b9,.get_win.L             ; jsr       $00E35816
+~ $2a,40                        ; movea.l   d0,a5
+~ $20,0d                        ; move.l    a5,d0
+~ $67,00,00,8c                  ; beq       doscr16
+~ $30,2c,00,0a                  ; move.w    10(a4),d0
+~ $44,40                        ; neg.w     d0
+~ $6e,02                        ; bgt.s     doscr1
+~ $70,01                        ; moveq.l   #1,d0
+;doscr1:
+~ $32,2c,00,08                  ; move.w    8(a4),d1
+~ $b2,7c,00,07                  ; cmp.w     #7,d1
+~ $62,00,00,76                  ; bhi.w     doscr16
+~ $12,3b,10,08                  ; move.b    doscr2(pc,d1.w),d1
+~ $d2,41                        ; add.w     d1,d1
+~ $4e,fb,10,02                  ; jmp       doscr2(pc,d1.w)
+;doscr2:
+~ $04                           ; dc.b (doscr3-doscr2)/2
+~ $06                           ; dc.b (doscr4-doscr2)/2
+~ $0a                           ; dc.b (doscr6-doscr2)/2
+~ $0c                           ; dc.b (doscr7-doscr2)/2
+~ $15                           ; dc.b (doscr9-doscr2)/2
+~ $17                           ; dc.b (doscr10-doscr2)/2
+~ $1b                           ; dc.b (doscr12-doscr2)/2
+~ $1d                           ; dc.b (doscr13-doscr2)/2
+;doscr3:
+~ $72,00                        ; moveq.l   #0,d1
+~ $60,02                        ; bra.s     doscr5
+;doscr4:
+~ $72,01                        ; moveq.l   #1,d1
+;doscr5:
+~ $c1,ed,00,8c                  ; muls.w    140(a5),d0
+~ $60,06                        ; bra.s     doscr8
+;doscr6:
+~ $72,00                        ; moveq.l   #0,d1
+~ $60,02                        ; bra.s     doscr8
+;doscr7:
+~ $72,01                        ; moveq.l   #1,d1
+;doscr8:
+~ $3f,01                        ; move.w    d1,-(a7)
+~ $3f,00                        ; move.w    d0,-(a7)
+~ $2f,0d                        ; move.l    a5,-(a7)
+~ $4e,b9,.srl_row.L             ; jsr       $00E34AFE
+~ $50,8f                        ; addq.l    #8,a7
+~ $60,20                        ; bra.s     doscr15
+;doscr9:
+~ $72,03                        ; moveq.l   #3,d1
+~ $60,02                        ; bra.s     doscr11
+;doscr10:
+~ $72,02                        ; moveq.l   #2,d1
+;doscr11:
+~ $c1,ed,00,8a                  ; muls.w    138(a5),d0
+~ $60,06                        ; bra.s     doscr14
+;doscr12:
+~ $72,03                        ; moveq.l   #3,d1
+~ $60,02                        ; bra.s     doscr14
+;doscr13:
+~ $72,02                        ; moveq.l   #2,d1
+;doscr14:
+~ $3f,01                        ; move.w    d1,-(a7)
+~ $3f,00                        ; move.w    d0,-(a7)
+~ $2f,0d                        ; move.l    a5,-(a7)
+~ $4e,b9,.srl_col.L             ; jsr       $00E34BA6
+~ $50,8f                        ; addq.l    #8,a7
+;doscr15:
+~ $61,24                        ; bsr.s     doscr17
+~ $66,1c                        ; bne.s     doscr16
+~ $42,57                        ; clr.w     (a7)
+~ $4e,b9,.wind_update.L         ; jsr       $00E35F6A
+~ $52,57                        ; addq.w    #1,(a7)
+~ $4e,b9,.WINX08+.BASE+1408.L   ; jsr       $00E225D4 ; wx_update
+~ $2e,8c                        ; move.l    a4,(a7)
+~ $4e,b9,.ev_mesag+.BASE.L      ; jsr       $00E1BDC8
+~ $60,00,ff,66                  ; bra       doscr0
+;doscr16:
+~ $4c,df,30,02                  ; movem.l   (a7)+,d1/a4-a5
+~ $4e,75                        ; rts
+;doscr17:
+~ $20,79,.rlr.L                 ; movea.l   $0000E54A,a0
+~ $22,68,00,90                  ; movea.l   144(a0),a1
+~ $4a,68,00,94                  ; tst.w     148(a0)
+~ $66,08                        ; bne.s     doscr18
+~ $43,e8,00,26                  ; lea.l     38(a0),a1
+~ $4a,59                        ; tst.w     (a1)+
+~ $67,06                        ; beq.s     doscr19
+;doscr18:
+~ $0c,51,00,18                  ; cmpi.w    #$0018,(a1)
+~ $4e,75                        ; rts
+;doscr19:
+~ $70,01                        ; moveq.l   #1,d0
+~ $4e,75                        ; rts

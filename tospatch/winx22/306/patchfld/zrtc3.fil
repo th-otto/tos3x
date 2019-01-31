@@ -1,0 +1,140 @@
+;*******************************************************************************
+;* SE: (19.09.93)
+;* Bei der Zeitinitialisierung beim System-Boot wird nach der Kontrolle auf
+;* Uhrenexistenz auch auf GÅltigkeit getestet.
+;* Muû entfernt werden, da sonst nachtrÑglich verworfen wÅrde:
+;* [ALL]
+
+1EF0
+_FILL ~,1F20,$ff
+
+;*******************************************************************************
+;* SE: (19.09.93)
+;* Uhrzeit aus RTC holen, und in D0 im GEMDOS-Format liefern.
+;* [ALL]
+1F20
+.get_rtc:
+~ $61,00,01,3c                      ;bsr       L000B
+~ $65,20                            ;bcs.s     L0002
+~ $61,20                            ;bsr.s     L0003
+~ $22,40                      ;L0001:movea.l   d0,a1
+~ $61,1c                            ;bsr.s     L0003
+~ $b3,c0                            ;cmpa.l    d0,a1
+~ $66,f8                            ;bne.s     L0001
+~ $40,c2                            ;move.w    sr,d2
+~ $00,7c,07,00                      ;ori.w     #$0700,sr
+~ $31,c0,57,5c                      ;move.w    d0,($0000575C).w _time
+~ $48,40                            ;swap      d0
+~ $33,c0,00,00,82,b6                ;move.w    d0,$000082B6 _date
+~ $48,40                            ;swap      d0
+~ $46,c2                            ;move.w    d2,sr
+~ $4e,75                      ;L0002:rts
+~ $70,00                      ;L0003:moveq.l   #0,d0
+~ $72,01                            ;moveq.l   #1,d1
+~ $61,30                            ;bsr.s     L0004
+~ $e2,81                            ;asr.l     #1,d1
+~ $ef,c0,16,c5                      ;bfins     d1,d0{27:5}
+~ $72,05                            ;moveq.l   #5,d1
+~ $61,26                            ;bsr.s     L0004
+~ $ef,c0,15,46                      ;bfins     d1,d0{21:6}
+~ $72,09                            ;moveq.l   #9,d1
+~ $61,1e                            ;bsr.s     L0004
+~ $ef,c0,14,05                      ;bfins     d1,d0{16:5}
+~ $72,0f                            ;moveq.l   #15,d1
+~ $61,16                            ;bsr.s     L0004
+~ $ef,c0,12,c5                      ;bfins     d1,d0{11:5}
+~ $72,13                            ;moveq.l   #19,d1
+~ $61,0e                            ;bsr.s     L0004
+~ $ef,c0,11,c4                      ;bfins     d1,d0{7:4}
+~ $72,17                            ;moveq.l   #23,d1
+~ $61,06                            ;bsr.s     L0004
+~ $ef,c0,10,07                      ;bfins     d1,d0{0:7}
+~ $4e,75                            ;rts
+~ $14,30,10,00                ;L0004:move.b    0(a0,d1.w),d2
+                                    ; FIXME: 3.06 version has a call to mfpdelay here
+~ $02,42,00,0f                      ;andi.w    #$000F,d2
+~ $12,30,10,02                      ;move.b    2(a0,d1.w),d1
+~ $02,41,00,0f                      ;andi.w    #$000F,d1
+~ $c2,fc,00,0a                      ;mulu.w    #10,d1
+~ $d2,02                            ;add.b     d2,d1
+~ $4e,75                            ;rts
+~ $01,88,00,05                ;L0005:movep.w   d0,5(a0)
+~ $08,a8,00,00,00,1b                ;bclr      #0,27(a0)
+~ $02,42,0f,0f                      ;andi.w    #$0F0F,d2
+~ $b4,41                            ;cmp.w     d1,d2
+~ $66,0a                            ;bne.s     L0007
+~ $21,c9,00,08                      ;move.l    a1,($00000008).w
+~ $70,00                            ;moveq.l   #0,d0
+~ $4e,75                            ;rts
+~ $2e,4a                      ;L0006:movea.l   a2,a7
+~ $21,c9,00,08                ;L0007:move.l    a1,($00000008).w
+~ $70,00                            ;moveq.l   #0,d0
+~ $53,80                            ;subq.l    #1,d0
+~ $4e,75                            ;rts
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff
+
+;*******************************************************************************
+;* SE: (20.09.93)
+;* RTC auf neue Zeit einstellen.
+;* ErhÑlt die Zeit im GEMDOS-Format auf dem Stack (4(SP)).
+;* [ALL]
+
+.set_rtc:
+~ $61,00,00,96                      ;bsr       L000B
+~ $65,78                            ;bcs.s     L0008
+~ $11,7c,00,0e,00,1f                ;move.b    #$0E,31(a0)
+~ $11,7c,00,00,00,1d                ;move.b    #$00,29(a0)
+~ $08,e8,00,00,00,1b                ;bset      #0,27(a0)
+~ $70,01                            ;moveq.l   #1,d0
+~ $11,40,00,15                      ;move.b    d0,21(a0)
+~ $11,40,00,17                      ;move.b    d0,23(a0)
+~ $11,40,00,01                      ;move.b    d0,1(a0)
+~ $02,28,00,06,00,1b                ;andi.b    #$06,27(a0)
+~ $20,2f,00,08                      ;move.l    8(a7),d0
+~ $e9,c0,16,c5                      ;bfextu    d0{27:5},d1
+~ $02,41,00,1f                      ;andi.w    #$001F,d1
+~ $e3,81                            ;asl.l     #1,d1
+~ $74,01                            ;moveq.l   #1,d2
+~ $61,42                            ;bsr.s     L0009
+~ $e9,c0,15,46                      ;bfextu    d0{21:6},d1
+~ $02,41,00,3f                      ;andi.w    #$003F,d1
+~ $74,05                            ;moveq.l   #5,d2
+~ $61,36                            ;bsr.s     L0009
+~ $e9,c0,14,05                      ;bfextu    d0{16:5},d1
+~ $02,41,00,1f                      ;andi.w    #$001F,d1
+~ $74,09                            ;moveq.l   #9,d2
+~ $61,2a                            ;bsr.s     L0009
+~ $e9,c0,12,c5                      ;bfextu    d0{11:5},d1
+~ $02,41,00,1f                      ;andi.w    #$001F,d1
+~ $74,0f                            ;moveq.l   #15,d2
+~ $61,1e                            ;bsr.s     L0009
+~ $e9,c0,11,c4                      ;bfextu    d0{7:4},d1
+~ $02,41,00,0f                      ;andi.w    #$000F,d1
+~ $74,13                            ;moveq.l   #19,d2
+~ $61,12                            ;bsr.s     L0009
+~ $e9,c0,10,07                      ;bfextu    d0{0:7},d1
+~ $74,17                            ;moveq.l   #23,d2
+~ $61,0a                            ;bsr.s     L0009
+~ $08,e8,00,03,00,1b                ;bset      #3,27(a0)
+~ $70,00                            ;moveq.l   #0,d0
+~ $4e,75                      ;L0008:rts
+~ $02,81,00,00,00,7f          ;L0009:andi.l    #$0000007F,d1
+~ $82,fc,00,0a                      ;divu.w    #10,d1
+~ $11,81,20,02                      ;move.b    d1,2(a0,d2.w)
+~ $48,41                            ;swap      d1
+~ $11,81,20,00                      ;move.b    d1,0(a0,d2.w)
+~ $4e,75                            ;rts
+~ $ff,ff
+~ $24,4f                      ;L000B:movea.l   a7,a2
+~ $22,78,00,08                      ;movea.l   8.w,a1
+~ $41,fa,ff,4a                      ;lea.l     L0006(pc),a0
+~ $21,c8,00,08                      ;move.l    a0,($00000008).w
+~ $30,7c,fc,20                      ;movea.w   #$FC20,a0
+~ $08,e8,00,00,00,1b                ;bset      #0,27(a0)
+~ $01,08,00,05                      ;movep.w   5(a0),d0
+~ $32,3c,0a,05                      ;move.w    #$0A05,d1
+~ $03,88,00,05                      ;movep.w   d1,5(a0)
+~ $05,08,00,05                      ;movep.w   5(a0),d2
+~ $60,00,ff,0e                      ;bra       L0005
+~ $ff,ff

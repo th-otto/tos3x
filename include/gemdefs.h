@@ -35,6 +35,10 @@
 #define WM_SIZED    27
 #define WM_MOVED    28
 #define WM_NEWTOP   29
+#define WM_UNTOPPED	30
+#define WM_ONTOP	31
+#define WM_BOTTOM	33
+
 #define AC_OPEN     40
 #define AC_CLOSE    41
 

@@ -32,9 +32,9 @@ typedef	struct dta
 
 typedef	struct	window
 {
-	struct window *w_next;		/* link pointer		*/
-	uint16_t	w_id;			/* window handle	*/
-	uint16_t	w_free;			/* window free to use	*/
+	struct window *w_next;	/* link pointer		*/
+	uint16_t w_id;			/* window handle	*/
+	uint16_t w_free;		/* window free to use	*/
 	char	*w_path;		/* window path name	*/
 	char	*w_buf;			/* scratch buffer	*/
 	int16_t	w_level;		/* max level allowed in this path */
@@ -57,11 +57,11 @@ typedef	struct	window
 	ICONBLK *w_iblk;	/* starting address of iconblk		*/
 #endif
 	char	*w_text;	/* starting address of text		*/
-	int16_t	w_coli;		/* the horizontal column index 		*/
+	int16_t	w_coli;		/* the horizontal column index 		130*/
 	int16_t	w_hvicons;	/* number of invisible icon per row	*/
-	int16_t	w_rowi;		/* the vertical row index		*/
+	int16_t	w_rowi;		/* the vertical row index		 134*/
 	int16_t	w_vvicons;	/* number of invisible icon per col	*/
-	int16_t	w_xcol;		/* number of visible column of icon	*/
+	int16_t	w_xcol;		/* number of visible column of icon	 138*/
 	int16_t	w_xrow;		/* number of visible row of icon	*/
 } WINDOW;	
 

@@ -1,0 +1,190 @@
+.dorwabs: ; long dorwabs(int16_t rw, char *buf, RECNO recnr, int16_t dev, int16_t cnt)
+~ $4e,56,ff,f4                ;link      a6,#$FFF4
+~ $48,e7,3f,04                ;movem.l   d2-d7/a5,-(a7)
+~ $3a,7c,77,aa                ;movea.w   #$77AA,a5    ; BLKDEV *bdev = blkdev;
+~ $4a,6e,00,10                ;tst.w     16(a6)       ; if (dev != 0)
+~ $67,04                      ;beq.s     dorwabs1
+~ $da,fc,00,24                ;adda.w    #$0024,a5    ;     bdev++;
+;dorwabs1:
+~ $42,40                      ;clr.w     d0           ; odd = 0;
+~ $08,2e,00,00,00,0d          ;btst      #0,13(a6)    ; if ((long)buf & 1)
+~ $67,02                      ;beq.s     dorwabs2
+~ $70,01                      ;moveq.l   #1,d0        ;     odd = 1;
+;dorwabs2:
+~ $3d,40,ff,fe                ;move.w    d0,-2(a6)
+~ $4a,6d,00,16                ;tst.w     22(a5)       ; if (bdev->geometry.spc == 0)
+~ $66,0a                      ;bne.s     dorwabs3
+~ $70,09                      ;moveq.l   #9,d0        ;     bdev->geometry.spt = bdev->geometry.spc = 9;
+~ $3b,40,00,16                ;move.w    d0,22(a5)
+~ $3b,40,00,18                ;move.w    d0,24(a5)
+;dorwabs3:
+~ $60,00,01,b6                ;bra       dorwabs25    ; while (cnt != 0) {
+;dorwabs4:
+~ $20,2e,00,0a                ;move.l    10(a6),d0    ;     bufp = odd ? dskbufp : buf;
+~ $4a,6e,ff,fe                ;tst.w     -2(a6)
+~ $67,06                      ;beq.s     dorwabs5
+~ $20,39,00,00,04,c6          ;move.l    $000004C6,d0
+;dorwabs5:
+~ $2d,40,ff,fa                ;move.l    d0,-6(a6)
+~ $3c,2e,00,0e                ;move.w    14(a6),d6    ;     track = recnr / bdev->geometry.spc;
+~ $48,c6                      ;ext.l     d6
+~ $8d,ed,00,16                ;divs.w    22(a5),d6
+~ $38,2e,00,0e                ;move.w    14(a6),d4    ;     sector = recnr % bdev->geometry.spc;
+~ $48,c4                      ;ext.l     d4
+~ $89,ed,00,16                ;divs.w    22(a5),d4
+~ $48,44                      ;swap      d4
+~ $42,45                      ;clr.w     d5           ;     side = 0;
+~ $b8,6d,00,18                ;cmp.w     24(a5),d4    ;     if (sector >= bdev->geometry.spt) {
+~ $65,06                      ;bcs.s     dorwabs6
+~ $7a,01                      ;moveq.l   #1,d5        ;         side = 1;
+~ $98,6d,00,18                ;sub.w     24(a5),d4    ;         sector -= bdev->geometry.spt;
+;dorwabs6:                                            ;     }
+~ $76,01                      ;moveq.l   #1,d3        ;     numsect = 1;
+~ $4a,6e,ff,fe                ;tst.w     -2(a6)       ;     if (!odd) {
+~ $66,18                      ;bne.s     dorwabs8
+~ $30,2d,00,18                ;move.w    24(a5),d0    ;         if ((bdev->geometry.spt - sector) < cnt)
+~ $90,44                      ;sub.w     d4,d0
+~ $b0,6e,00,12                ;cmp.w     18(a6),d0
+~ $6c,08                      ;bge.s     dorwabs7
+~ $36,2d,00,18                ;move.w    24(a5),d3    ;             numsect = bdev->geometry.spt - sector;
+~ $96,44                      ;sub.w     d4,d3
+~ $60,04                      ;bra.s     dorwabs8     ;         else
+;dorwabs7:
+~ $36,2e,00,12                ;move.w    18(a6),d3    ;             numsect = cnt;
+;dorwabs8:                                            ;     }
+~ $4a,6e,ff,fe                ;tst.w     -2(a6)       ;     if (odd)
+~ $67,10                      ;beq.s     dorwabs9
+~ $2e,ae,ff,fa                ;move.l    -6(a6),(a7)  ;         cpy512(buf, bufp);
+~ $2f,2e,00,0a                ;move.l    10(a6),-(a7)
+~ $4e,b9,00,e0,12,fe          ;jsr       $00E012FE
+~ $58,8f                      ;addq.l    #4,a7
+;dorwabs9:
+~ $08,2e,00,00,00,09          ;btst      #0,9(a6)     ;     if ((rw & RW_WRITE)
+~ $67,4a                      ;beq.s     dorwabs15
+~ $30,06                      ;move.w    d6,d0        ;         && (track | side) == 0
+~ $80,45                      ;or.w      d5,d0
+~ $66,44                      ;bne.s     dorwabs15
+~ $0c,44,00,06                ;cmpi.w    #$0006,d4    ;         && sector < BPBSECT) {
+~ $64,3e                      ;bcc.s     dorwabs15
+~ $48,e7,03,04                ;movem.l   d6-d7/a5,-(a7)
+~ $30,04                      ;move.w    d4,d0
+~ $e3,40                      ;asl.w     #1,d0
+~ $3a,7c,73,50                ;movea.w   #$7350,a5    ;        short *sump = bpbsums[sector];
+~ $4a,6e,00,10                ;tst.w     16(a6)       ;        if (dev != 0)
+~ $67,04                      ;beq.s     dorwabs11    ;            sump += BPBSECT;
+~ $da,fc,00,0c                ;adda.w    #12,a5
+;dorwabs11:
+~ $da,c0                      ;adda.w    d0,a5
+~ $7e,06                      ;moveq.l   #6,d7        ;        sumcnt = BPBSECT - sector;
+~ $9e,44                      ;sub.w     d4,d7
+~ $be,43                      ;cmp.w     d3,d7        ;        if (sumcnt > numsect)
+~ $65,02                      ;bcs.s     dorwabs12
+~ $3e,03                      ;move.w    d3,d7        ;                sumcnt = numsect;
+;dorwabs12:
+~ $53,47                      ;subq.w    #1,d7        ;        /* for dbra */
+~ $20,6e,ff,fa                ;movea.l   -6(a6),a0    ;        p = bufp;
+;dorwabs13:                                           ;        for (i = 0; i < numsect; i++)
+~ $3c,3c,00,ff                ;move.w    #$00FF,d6
+~ $42,40                      ;clr.w     d0
+;dorwabs14:
+~ $d0,58                      ;add.w     (a0)+,d0
+~ $51,ce,ff,fc                ;dbf       d6,dorwabs14
+~ $3a,c0                      ;move.w    d0,(a5)+     ;            *sump++ = sectsum(p); p += 512;
+~ $51,cf,ff,f0                ;dbf       d7,dorwabs13
+~ $4c,df,20,c0                ;movem.l   (a7)+,d6-d7/a5
+;dorwabs15:                                           ;     }
+~ $52,44                      ;addq.w    #1,d4        ;     sector++;
+;dorwabs16:                                           ;     do {
+~ $08,2e,00,00,00,09          ;btst      #0,9(a6)     ;         if (rw & RW_WRITE) {
+~ $67,5c                      ;beq.s     dorwabs18
+~ $3e,83                      ;move.w    d3,(a7)
+~ $3f,05                      ;move.w    d5,-(a7)
+~ $3f,06                      ;move.w    d6,-(a7)
+~ $3f,04                      ;move.w    d4,-(a7)
+~ $3f,2e,00,10                ;move.w    16(a6),-(a7)
+~ $42,a7                      ;clr.l     -(a7)
+~ $2f,2e,ff,fa                ;move.l    -6(a6),-(a7)
+~ $4e,b9,.Flopwr.L            ;jsr       $00E03D12    ;             err = flopwrt(bufp, NULL, dev, sector, track, side, numsect);
+~ $4f,ef,00,10                ;lea.l     16(a7),a7
+~ $2e,00                      ;move.l    d0,d7
+~ $4a,87                      ;tst.l     d7           ;             if (err == 0 && fverify) {
+~ $66,38                      ;bne.s     dorwabs17
+~ $4a,79,00,00,04,44          ;tst.w     $00000444
+~ $67,30                      ;beq.s     dorwabs17    
+~ $3e,83                      ;move.w    d3,(a7)
+~ $3f,05                      ;move.w    d5,-(a7)
+~ $3f,06                      ;move.w    d6,-(a7)
+~ $3f,04                      ;move.w    d4,-(a7)
+~ $3f,2e,00,10                ;move.w    16(a6),-(a7)
+~ $42,a7                      ;clr.l     -(a7)
+~ $2f,39,00,00,04,c6          ;move.l    $000004C6,-(a7)
+~ $4e,b9,.Flopver.L           ;jsr       $00E03FFE    ;                 err = flopver(dskbufp, NULL, dev, sector, track, side, numsect);
+~ $4f,ef,00,10                ;lea.l     16(a7),a7
+~ $2e,00                      ;move.l    d0,d7
+~ $4a,87                      ;tst.l     d7           ;                 if (err == 0
+~ $66,0c                      ;bne.s     dorwabs17
+~ $20,79,00,00,04,c6          ;movea.l   $000004C6,a0 ;                     && ((struct fat16_bs *)dskbufp)->bra != 0)
+~ $4a,50                      ;tst.w     (a0)
+~ $67,02                      ;beq.s     dorwabs17
+~ $7e,f0                      ;moveq.l   #-16,d7      ;                     err = E_BADSF;
+;dorwabs17:                                           ;             }
+~ $60,34                      ;bra.s     dorwabs19    ;         } else {
+;dorwabs18:
+~ $3e,83                      ;move.w    d3,(a7)
+~ $3f,05                      ;move.w    d5,-(a7)
+~ $3f,06                      ;move.w    d6,-(a7)
+~ $3f,04                      ;move.w    d4,-(a7)
+~ $3f,2e,00,10                ;move.w    16(a6),-(a7)
+~ $42,a7                      ;clr.l     -(a7)
+~ $2f,2e,ff,fa                ;move.l    -6(a6),-(a7)
+~ $4e,b9,.Floprd.L            ;jsr       $00E03C10    ;             err = floprd(bufp, NULL, dev, sector, track, side, numsect);
+~ $4f,ef,00,10                ;lea.l     16(a7),a7
+~ $2e,00                      ;move.l    d0,d7
+~ $4a,6e,ff,fe                ;tst.w     -2(a6)       ;             if (odd)
+~ $67,10                      ;beq.s     dorwabs19
+~ $2e,ae,00,0a                ;move.l    10(a6),(a7)  ;                 cpy512(bufp, buf);
+~ $2f,2e,ff,fa                ;move.l    -6(a6),-(a7)
+~ $4e,b9,00,e0,12,fe          ;jsr       $00E012FE
+~ $58,8f                      ;addq.l    #4,a7
+;dorwabs19:                                           ;         }
+~ $4a,87                      ;tst.l     d7
+~ $6c,34                      ;bge.s     dorwabs20    ;         if (err < 0) {
+~ $3e,ae,00,10                ;move.w    16(a6),(a7)
+~ $20,07                      ;move.l    d7,d0
+~ $3f,00                      ;move.w    d0,-(a7)
+~ $4e,b9,00,e0,0d,92          ;jsr       $00E00D92    ;             err = callcrit((int16_t)err, dev);
+~ $54,8f                      ;addq.l    #2,a7
+~ $2e,00                      ;move.l    d0,d7
+~ $0c,6e,00,02,00,08          ;cmpi.w    #$0002,8(a6) ;             if (rw < 2
+~ $6c,1a                      ;bge.s     dorwabs20
+~ $0c,87,00,01,00,00          ;cmpi.l    #$00010000,d7 ;                && err == CRITIC_RETRY_REQUEST
+~ $66,12                      ;bne.s     dorwabs20
+~ $3e,ae,00,10                ;move.w    16(a6),(a7)  ;                 && ckmediach(dev) == MEDIACHANGE) {
+~ $4e,b9,.i_mediach.L         ;jsr       $00E05918
+~ $0c,40,00,02                ;cmpi.w    #$0002,d0
+~ $66,02                      ;bne.s     dorwabs20
+~ $7e,f2                      ;moveq.l   #-14,d7      ;                 err = E_CHNG;
+;dorwabs20:                                           ;             }
+;                                                     ;         }
+~ $0c,87,00,01,00,00          ;cmpi.l    #$00010000,d7 ;    } while (err == CRITIC_RETRY_REQUEST);
+~ $67,00,ff,28                ;beq       dorwabs16
+~ $20,07                      ;move.l    d7,d0        ;     if (err < 0)
+~ $6b,1e                      ;bmi.s     dorwabs26    ;         return err;
+~ $30,03                      ;move.w    d3,d0        ;     buf += (intptr_t)numsect * SECTOR_SIZE;
+~ $48,c0                      ;ext.l     d0
+~ $72,09                      ;moveq.l   #9,d1
+~ $e3,a0                      ;asl.l     d1,d0
+~ $d1,ae,00,0a                ;add.l     d0,10(a6)
+~ $d7,6e,00,0e                ;add.w     d3,14(a6)    ;     recnr += numsect;
+~ $97,6e,00,12                ;sub.w     d3,18(a6)    ;     cnt -= numsect;
+;dorwabs25:
+~ $4a,6e,00,12                ;tst.w     18(a6)       ; }
+~ $66,00,fe,46                ;bne       dorwabs4
+~ $42,80                      ;clr.l     d0           ; return E_OK;
+;dorwabs26:
+~ $4a,9f                      ;tst.l     (a7)+
+~ $4c,df,20,f8                ;movem.l   (a7)+,d3-d7/a5
+~ $4e,5e                      ;unlk      a6
+~ $4e,75                      ;rts
+
+_FILL ~,.dorwabs+21A,$4e71.w

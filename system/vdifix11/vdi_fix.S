@@ -1,5 +1,3 @@
-#define basepage entry-256
-#define cmdline basepage+128
 
 _vblqueue equ $456
 _sysbase equ $4f2
@@ -8,6 +6,9 @@ _p_cookies equ $5a0
 entry:
 				bra       start
 				dc.b      'K.Isakovic'
+
+basepage equ entry-256
+cmdline equ basepage+128
 
 respart:
 
@@ -106,13 +107,13 @@ instfix:
 				trap      #2
 				move.l    d0,olddisp
 
-				lea.l     respart(pc),a0
-				lea.l     cmdline(pc),a1
+				lea       respart(pc),a0
+				lea       cmdline(pc),a1
 				move.l    #((resend-respart+3)/4)-1,d0
 copyres:
 				move.l    (a0)+,(a1)+
 				dbf       d0,copyres
-				lea.l     oldtrap-respart+cmdline(pc),a0
+				lea       oldtrap-respart+cmdline(pc),a0
 				move.l    ($00000088).w,(a0)+
 				move.l    a0,($00000088).w
 				rts
@@ -335,7 +336,7 @@ supexec:
 				movea.l   (a7)+,a2
 				rts
 
-				.data
+				data
 
 key_msg:
 				dc.b $f5,'    Please press RETURN             ',$f5,10,13,10,13,0
@@ -362,7 +363,7 @@ notinst8:
 installed:
 				dc.b $f5,' now installed.                     ',$f5,10,13,10,13,0
 
-				.bss
+				bss
 
 base:			ds.l 1
 save_pc:		ds.l 1

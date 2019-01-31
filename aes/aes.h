@@ -438,7 +438,7 @@ VOID hctl_rect PROTO((int16_t mx, int16_t my));
 VOID ct_chgown PROTO((PD *ppd, GRECT *pr));
 VOID ctlmgr PROTO((NOTHING));
 PD *ictlmgr PROTO((int16_t pid));
-VOID ctlmouse PROTO((BOOLEAN mon));
+VOID ctlmouse PROTO((int mon));
 VOID take_ownership PROTO((BOOLEAN beg_ownit));
 
 
@@ -843,7 +843,7 @@ VOID sh_main PROTO((NOTHING));
 extern LPTREE gl_newdesk;
 extern int16_t gl_newroot;							/* root object of new DESKTOP */
 extern int16_t gl_wtop;
-extern intptr_t ad_windspb;
+extern SPB *ad_windspb;
 
 VOID wm_init PROTO((NOTHING));
 int16_t wm_create PROTO((uint16_t kind, GRECT *rect));
@@ -1048,3 +1048,7 @@ char *save_2 PROTO((char *pcurr, uint16_t wd));
 BOOLEAN app_reschange PROTO((int16_t res));
 const char *g_name PROTO((const char *file));
 BOOLEAN deskmain PROTO((NOTHING));
+
+#if TP_WINX
+#include "winx.h"
+#endif

@@ -1,0 +1,231 @@
+IMPORTANT NOTES FOR WINX PROGRAMMERS (WINX 2.2 [10/17/1993])
+
+- For the time of testing your own programs, WINX will be a helpful
+  tool and should always configured to display wrong parameters
+  for calls of the window library.
+  The only wind_xxx function which may be called with an invalid window
+  handle without getting an error report is wind_get(WF_OWNER).
+
+- wind_get()/wind_set()
+  Both function now return 0 in case of an error, otherwise 1.
+  (up to now, the return value was ALWAYS 1)
+  An error is reported for example in the case, that a mode
+  WF_xxxx is not implemented or the call has been made with
+  an illegal window handle. If you start a program, you should
+  ALWAYS check, if wind_get() returns a sensible value. This could
+  be done by using the following:
+    #define WF_RETURN 1
+    retok = (wind_get( 0, WF_RETURN, &ign, &ign, &ign, &ign) == 0);
+  It is under all current GEM-Versions not critical to use an
+  unknown WF_-Mode, because it always has been ignored.
+
+- wind_get( 0, WF_WINX(=22360='WX'), &version, &date, &func_h, &func_l)
+  Returns WF_WINX, if WINX >= 2.1 is installiert, otherwise 0.
+  version:  Bit [15..12]  beta indicator
+            Bit [11.. 8]  major version number (actually 2)
+            Bit [ 7.. 4]  minor version number (actually 1)
+            Bit [ 3.. 0] internal identifier
+  date:     creation date 
+  func_h/l: High and low word of the WINX cookie function address
+            (or NULL)
+
+- wind_get( 0, WF_WINXCFG(=22361), &gmask, &gflags, &lmask, &lflags)
+  Returns the application specific configuration switches of the
+  currently running application.
+  gmask:   mask of the GLOBAL switches, which are supported by the
+           currently installed version of WINX
+  gflags:  the current setting of the GLOBAL switches. Applicable are
+           only those switches, which are set in mask (bit 0 - switch 1)
+  gmask:   mask of the LOCAL switches, which are supported by the
+           currently installed version of WINX
+  gflags:  the current setting of the LOCAL switches. Applicable are
+           only those switches, which are set in mask (bit 0 - switch 1)
+
+- wind_get( rsv0, 22362-22400, &rsv2, &rsv3, &rsv4, &rsv5)
+  wind_set( rsv0, 22362-22400, rsv2, rsv3, rsv4, rsv5)
+  Undocumented and reserved WINX extensions.
+
+- wind_get( 0, WF_TOP, &topwin, &owner, &belowwin)
+  Always returns the handle of the topmost window. If no window is
+  open, topwin will be 0.
+
+- wind_get( win, WF_OWNER(=20), &owner, &isopen, &abovewin, &belowwin)
+  delivers informations of a window. the window even can be closed
+  (this means, it is not in the window stack) or even not exist (then
+  the function return 0).
+
+- wind_set( win, WF_BOTTOM(=25), 0, 0, 0, 0)
+  WF_BOTTOM puts a window in the background in the window stack.
+  This must be an open window.
+
+- wind_get( 0, WF_BOTTOM(=25), &bottomwin)
+  Returns the handle of the mostback window in the window stack.
+  If no window is open, bottomwin will contain -1 (NOWINDOW).
+
+- wind_set( win, WF_BEVENT(=24), 0/1, 0, 0, 0)
+  WF_BEVENT takes care, that the owner of a window will not get
+  a WM_TOPPED-message, if somebody clicks in the window, while the
+  window is not active. Instead of this, a MU_BUTTON event is generated,
+  if the window owner has requested such an event with evnt_multi().
+
+- wind_get( win, WF_BEVENT(=24), &v1, &v2, &v3, &v4)
+  Returns the BEVENT-state of the window in Bit 0 of v1.
+
+- wind_get( win, WF_NEWDESK, &treehigh, &treelow, &treeroot)
+  Return the current background tree and its root object.
+  CAUTION: Up to now, it is not documented how this information
+  might be used.
+
+- wind_get( win, WF_COLOR, &obj, &col1, &col2);
+  returns the colors of an objekts of the window frame.
+  CAUTION: obj must be passed in intin[ 2].
+
+- wind_get( 0, WF_DCOLOR, &obj, &col1, &col2);
+  Returns the default color of an object of the window frame.
+  CAUTION: obj must be passed in intin[ 2].
+
+- If you want to set an own background tree with wind_set( WF_NEWDESK )
+  you always should ask for position and dimension of its ROOT object
+  by calling
+    wind_get( 0, WF_WORKXYWH, &deskx, &desky, &deskw, &deskh)
+  (and NOT using WF_CURRXYWH)
+
+- wind_set( win, WF_CURRXYWH, x, y,w, h), wind_open( win, x, y, w, h)
+  After these operations an application should always call
+    wind_get( win, WF_CURRXYWH, &currx, &curry, &currw, &currh)
+  to get the window rectangle, because there is a possibility that
+  the AES corrects the rectangle automatically.
+  
+- [WM_BOTTOMED(=33) apid 0 win 0 0 0 0]-message
+  This message is used by the WINX SCRENMGR to ask the application
+  to put its window in the background by calling
+    wind_set( win, WF_BOTTOM, 0,0,0,0).
+  After this action the application should NOT top one of its own
+  windows explicitly.
+  If an application has opened more than one window, and it doesn't
+  want to change the hierarchy of the windows, it should put ALL
+  windows in the background (it would be very practical, the AES
+  would have such a function...)
+
+- programming an inverse 'change window' function
+  An application, which wants to give acess to such a funktion
+  should put its topmost window in the background with
+  WF_BOTTOM and then activate the now topmost window in its
+  own window list with WF_TOP (to make sure, that the application
+  always has full control of the keyboard input).
+
+- inverse 'change window' function in applications
+  an application, which implements such a window should put its tomost
+  window to the back with WF_BOTTOM and then activate the topmost from
+  its own window list with WF_TOP (to make sure to still have the
+  key focus)
+
+- [WM_UNTOPPED(=30) apid 0 win 0 0 0 0]-message
+  [WM_ONTOP(=31) apid 0 win 0 0 0 0]-message
+  Both messages are used to inform applications about changes in
+  the active window. WM_UNTOPPED is sent to the owner of the
+  previously active window after a window has been opened or
+  activated. WM_ONTOP is sent to the owner of the THEN (afterwards)
+  active window after closing or deactivating another window. At
+  the time where this message arrives, the window stack can
+  already have been again changed.
+
+- wind_update() saved the list of applications waiting for update
+  control in a LIFO queue (this means the newest request for update
+  control will be fulfilled first.) WINX uses a FIFO.
+
+- wind_update( BEG_UPDATE|0x100 );
+  wind_update( BEG_MCTRL|0x100 );
+  WINX implements the 'check and set' mode of MultiTOS AES 4.00.
+  This means, the control will only be taken, if not already another
+  application has control or is not owners of the application. If
+  control cannot be taken, the function returns 0.
+
+- wind_update( END_xxxx) is now checked for underflow and generates an
+  alert on errors.
+
+- wind_new() cleared all stacked update requests without any relief.
+  WINX sees wind_new() as a function to clear off after a crashed
+  application, so it only clears off THEIR update requests. The new
+  initialistion of the window management is performed under strict
+  UPDATE control, this guarantees, that windows do not disappear while
+  an accesory might have the update control.
+
+- evnt_multi()
+  The realtime functions of WINX can only work, if with the usage of
+  MU_TIMER the timer value is set to a value greater than 0, because
+  evnt_multi() does not pass the requests to the kernal, but only reads
+  queued events.
+
+- fill pattern base coordinate
+  If this switch is turned on WINX takes care that during the drawing
+  of a GEM-Object, the fill pattern will be drawn be relative to the left
+  topmost edge of the object (instead of being at 0/0 of the current
+  screen). Only THIS way, the redraw can be reduced to the parts of
+  the object, which have been invisible before a window has been
+  moved etc, so this is an elementary neccesity for realizing stuff
+  like realtime moving of filled objects and realtime scrolling.
+
+- the value of the WINX cookie contains a pointer to a function, that
+  returns some information about some functionality of the current
+  version of WINX
+
+    long cdecl winxfunc(short founcid,...);  /* PureC syntax) */
+
+  The parameters are passed on the stack. The result is returned in
+  register D0. If not explicitly defined in a different way, a return
+  value of -1L means, that the function is not existing or is not
+  applicable in this moment.
+  Some functions are reserved for internal communication. No register
+  except D0 are changed after a function call.
+
+  Some WINX internal variables can be accessed through TSR programs.
+  Detailed information can be supplied by the author.
+
+- appl_getinfo()
+  WINX versions >= 2.2 offer the new AES call appl_getinfo().
+
+    #define WF_WINX 22360
+    
+    int has_appl_getinfo( void)
+    /* Returns TRUE, if the AES has the appl_getinfo call */
+    {
+      static int hagi = -1;
+      int ign;
+
+      if (hagi < 0) {      
+        hagi = ((_GemParBlk.global[ 0] >= 0x400) ||
+          (wind_get( 0, WF_WINX, &ign, &ign, &ign, &ign) == WF_WINX));
+      };
+      return( hagi);
+    } /* has_appl_getinfo */
+
+- Overview of assignment of button clicks to applications
+
+  mouse     ||    front window    | background window  | desktop  |   menu   |
+  click     ||  frame   work area |  frame   work area |          |          |
+  ----------++--------------------+--------------------+----------+----------+
+            ||                                                               |
+            ||                     AES versions <= 3.20                      |
+            ||                                                               |
+  left      || SCRENMGR   owner   | SCRENMGR  SCRENMGR |  owner   | SCRENMGR |
+            ||                    |                    |          |          |
+  right     ||  owner     owner   |   top       top    |   top    |   top    |
+            ||                                                               |
+            ||                     MultiTOS 1.01 (5/93)                      |
+            ||                                                               |
+  left      || SCRENMGR   owner   | SCRENMGR    sm/o   |  owner   | SCRENMGR |
+            ||                    |                    |          |          |
+  right     || SCRENMGR   owner   | SCRENMGR   owner   |  owner   | SCRENMGR |
+            ||                                                               |
+            ||                           WINX 2.1                            |
+            ||                                                               |
+  left      || SCRENMGR   owner   | SCRENMGR    sm/o   |  owner   | SCRENMGR |
+            ||                    |                    |          |          |
+  right  G2+|| SCRENMGR   owner   | SCRENMGR   owner   |  owner   | SCRENMGR |
+         G2-||  owner     owner   |   top       top    |   top    |   top    |
+  ----------++--------------------+--------------------+----------+----------+
+  
+                top  =  owner of the top window
+                sm/o =  SCRENMGR or owner (if BEVENT flag is set)
+                G2   =  .GLOBAL switch 2 of WINX

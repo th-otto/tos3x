@@ -159,7 +159,7 @@ PP(int16_t *lrets;)
 int16_t ev_mesag(P(int16_t *) pbuff)
 PP(int16_t *pbuff;)
 {
-#if TP_48 /* ARROWFIX */
+#if TP_WINX | TP_48 /* ARROWFIX */
 	if (rlr->p_qindex > 0 || !rd_mymsg(pbuff))
 		return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
 #else
@@ -173,7 +173,7 @@ PP(int16_t *pbuff;)
 		if (!rd_mymsg(pbuff))
 			return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
 	}
-#endif /* TP_48 */
+#endif /* TP_WINX | TP_48 */
 
 	return TRUE;
 }
@@ -284,8 +284,13 @@ PP(int16_t *prets;)
 	/* quick check timer */
 	if (flags & MU_TIMER)
 	{
-		if ((wmask == 0x0) && (tmcount == 0x0L))
-			what |= MU_TIMER;
+		if (wmask == 0 && tmcount == 0)
+		{
+#if TP_WINX
+			if (rlr == ad_windspb->sy_owner || winxvars.xAF10 == 0)
+#endif
+				what |= MU_TIMER;
+		}
 	}
 	/* quick check message  */
 	if (flags & MU_MESAG)

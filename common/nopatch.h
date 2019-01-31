@@ -94,8 +94,7 @@
 #undef TP_67
 #undef TP_68
 #undef TP_69
-
-#undef SUPERTOS
+#undef TP_WINX
 
 #define TP_01 0
 #define TP_02 0
@@ -171,6 +170,7 @@
 #define TP_67 0
 #define TP_68 0
 #define TP_69 0
+#define TP_WINX 0
 
 #endif
 
@@ -201,6 +201,15 @@
 #if !TP_68
 #undef FLOPDELAY
 #endif
+#if !TP_WINX
+#undef WX_GLOBAL
+#undef WX_LOCAL
+#undef WX_DESKTOP
+#undef WX_INIT_SCROLL
+#undef WX_SCROLL_CONT
+#undef WX_CLOSE_CONT
+#undef WX_FULL_CONT
+#endif
 
 /*
  * These are the defaults that are used for patches that are not activated
@@ -225,12 +234,6 @@
 #define FLOPDELAY 281
 #endif
 
-#ifndef SUPERTOS
-#define SUPERTOS 0
-#endif
-#if SUPERTOS
-#define TP_48 1
-#endif
 /* for PAK, activate Alt_Sync with NEWVIDEO */
 #if TP_58 & TP_50 & !TP_57
 #undef TP_57

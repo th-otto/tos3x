@@ -15,6 +15,9 @@
 /************************************************************************/
 
 #include "desktop.h"
+#if TP_WINX
+#include "../aes/winx.h"
+#endif
 
 static GRECT const w_sizes = { 150, 150, 150, 150 };
 static OBJECT const blank = { -1, -1, -1, G_BOX, NONE, NORMAL, 0x000000F0L, 0, 0, 0, 0 };
@@ -502,7 +505,12 @@ PP(uint16_t pos;)
 		i = i * fobj.g_w;
 		obj[0].ob_x -= i;
 		obj[0].ob_width += i;
+#if TP_WINX
+		do_redraw(win->w_id, &win->w_work, 0);
+#else
+		/* BUG: does not honor rectangle list */
 		objc_draw(obj, ROOT, MAX_DEPTH, x, win->w_work.g_y, w, win->w_work.g_h);
+#endif
 	}
 }
 
@@ -519,7 +527,7 @@ PP(int16_t dir;)
 {
 	int16_t i;
 
-	if (dir == SDOWN)					/* scroll content dowm  */
+	if (dir == SDOWN)					/* scroll content down */
 	{
 		i = win->w_vvicons - win->w_rowi;
 		if (i)
@@ -567,8 +575,9 @@ PP(int16_t dir;)
 
 
 /*
- * Bitblt a window content either up, dowm, left or right
+ * Bitblt a window content either up, down, left or right
  */
+/* WINXTODO: in winx15 */
 /* 306de: 00e34c12 */
 VOID blt_window(P(WINDOW *) win, P(int16_t) mode, P(int16_t) size)
 PP(register WINDOW *win;)
@@ -700,7 +709,6 @@ PP(int16_t size;)
 		}
 		
 		wind_set(win->w_id, WF_HSLIDE, (uint16_t) l, 0, 0, 0);
-
 	}
 
 	mice_state(M_ON);
@@ -981,6 +989,58 @@ PP(WINDOW *win;)
 /*
  * Make this window to be the top one
  */
+#if TP_WINX
+/* 306de: 00e354c4 */
+VOID make_top(P(WINDOW *) win, P(int16_t) msg)
+PP(register WINDOW *win;)
+PP(int16_t msg;)
+{
+	register WINDOW **winptr;
+	register WINDOW *next;
+
+again:
+	if (win)
+	{
+#if 0
+		set_dir(win->w_path);
+#endif
+		winptr = &winhead;
+
+		while ((next = *winptr) != NULL)
+		{
+			if (next == win)
+				*winptr = win->w_next;
+			winptr = &next->w_next;
+		}
+		if (msg == WM_BOTTOM)
+		{
+			win->w_next = NULL;
+			*winptr = win;
+		} else
+		{
+			win->w_next = winhead;
+			winhead = win;
+		}
+	}
+	winptr = &winhead;
+	for (;;)
+	{
+		if ((win = *winptr) == NULL)
+			break;
+		winptr = &win->w_next;
+		if ((int16_t) win->w_id < 0)
+			continue;
+		if (win != winhead)
+		{
+			msg = WM_TOPPED;
+			goto again;
+		}
+		break;
+	}
+}
+
+#else
+
 /* 306de: 00e354c4 */
 VOID make_top(P(WINDOW *) win)
 PP(register WINDOW *win;)
@@ -1011,6 +1071,7 @@ PP(register WINDOW *win;)
 		}
 	}
 }
+#endif
 
 
 /*
@@ -1252,7 +1313,11 @@ PP(int16_t handle;)
 	wind_get(handle, WF_WORKXYWH, &win->w_work.g_x, &win->w_work.g_y, &win->w_work.g_w, &win->w_work.g_h);
 
 	rc_copy(&win->w_work, (GRECT *)&win->w_obj->ob_x);
+#if TP_WINX
+	make_top(win, WM_TOPPED);
+#else
 	make_top(win);
+#endif
 }
 
 
@@ -1340,6 +1405,9 @@ PP(BOOLEAN closeit;)
 
 		if (closeit)
 		{
+#if TP_WINX
+			make_top(NULL, WM_TOPPED);
+#else
 			while (win)
 			{
 				if (win->w_id != -1)
@@ -1351,6 +1419,7 @@ PP(BOOLEAN closeit;)
 					win = win->w_next;
 				}
 			}
+#endif
 		}
 	}
 }
@@ -1443,6 +1512,25 @@ PP(register GRECT *pc;)
 	pc->g_w = min(pc->g_w, rect.g_w);
 	pc->g_h = min(pc->g_h, rect.g_h);
 
+#if TP_WINX
+	{
+		register int16_t a;
+		a = rect.g_x + rect.g_w - winxvars.xAF08 - 8;
+		if (pc->g_x > a)
+			pc->g_x = a;
+
+		a = rect.g_y + rect.g_h - 2;
+		if (pc->g_y > a)
+			pc->g_y = rect.g_y + pc->g_h - 2;
+
+		a = rect.g_x - pc->g_w + winxvars.xAF08 + 16;
+		if (pc->g_x < a)
+			pc->g_x = a;
+
+		if (pc->g_y < rect.g_y)
+			pc->g_y = rect.g_y;
+	}
+#else
 	if (pc->g_x >= (rect.g_x + rect.g_w))
 		pc->g_x = rect.g_x + rect.g_w;
 
@@ -1454,10 +1542,11 @@ PP(register GRECT *pc;)
 
 	if (pc->g_y < rect.g_y)
 		pc->g_y = rect.g_y;
+#endif
 
 	rect.g_x = pc->g_x;
 
-	pc->g_x = (rect.g_x & 0x000f);
+	pc->g_x = rect.g_x & 0x000f;
 
 	if (pc->g_x < 8)
 		pc->g_x = rect.g_x & 0xfff0;

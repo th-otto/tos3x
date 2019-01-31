@@ -100,6 +100,21 @@ _hsti:
 	andi	#$f8ff,sr
 	rts
 
+
+#if TP_WINX
+	xdef	_spl7
+_spl7:
+	move	sr,d0		; save it
+	ori	#$700,sr
+	rts
+	xdef	_spl
+_spl:
+	move.w  4(a7),d0
+	move	d0,sr
+	rts
+#endif
+
+
  
 /*****************************************************************
  *                                                               *

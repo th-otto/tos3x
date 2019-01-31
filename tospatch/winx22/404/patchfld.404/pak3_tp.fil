@@ -1,0 +1,554 @@
+;*******************************************************************************
+;*
+;* Patches fÅr TOS 4.04 auf PAK/3 mit 68020 und 68030 Version 2
+;*
+;* ACHTUNG!!
+;*
+;* Es gibt einige Kollisionen zwischen den Patches aus diesem File und
+;* denen aus dem Patchfile von TOSPATCH, welche aber in den Patches vermerkt
+;* sind.
+;*
+;* Beachtet selbst, wo Kollisionen sind!!!!
+;*
+;* History:
+;*
+;* 26.02.1999  Erste Version basierend auf TOS 3.06-PAK-Patches Version 2.
+
+;*******************************************************************************
+;* SE: (modifiziert von MH)
+;*
+;* Stack einrichten, um die ProzessorunabhÑngigkeiten in den Griff zu bekommen.
+;* Auûerdem muû die MCU initialisiert werden, damit der Speicher Åberhaupt
+;* benutzbar ist. Falls das TOS im ST-RAM ist, wird das jedoch unterlassen, da
+;* es nur mit 4MB-Rechner funktionieren wÅrde und das RAM sowieso initialisiert
+;* ist.
+;*
+;* Falls wir in Wirklichkeit einen Warmstart machen, so fÅhrt das zu keinen
+;* Problemen, da kurz spÑter bei gÅltigen memvalid, memval2 und memval3 die
+;* MCU noch einmal mit dem Wert aus memcntrl ($424) gefÅttert wird.
+;*
+;* Dazu den Zugriff auf DMA entfernt und zuerst den Reset gemacht.
+;* [$FF8006]
+
+34 ;34-44
+~ $4E,70                            ;RESET
+~ $4E,71                            ;NOP
+_IF .RELOCADR < E00000
+ ~ $4E,71,4E,71,4E,71               ;NOP's
+_ELSE
+ ~ $11,FC,00,0A,80,01               ;MOVE.B    #$A,$FFFF8001.W
+_ENDIF
+~ $4F,F9,00,00,07,FC                ;LEA       $07FC,A7
+
+;*******************************************************************************
+;* SE: (14.10.93)
+;* ProzessorunabhÑngiges 4.04.
+;* Initialisierung der 68030 MMU nach Reset.
+;* Video-Init deaktivieren.
+;* [$FF8007]
+
+.NUL_TABLE = E49430
+
+6A ;6A-82, 82-8E
+~ $41,FA,00,1C                      ;LEA       $1C(PC),A0           L0000
+~ $21,C8,00,10                      ;MOVE.L    A0,$10.W
+~ $21,C8,00,2C                      ;MOVE.L    A0,$2C.W
+~ $20,7C,.NUL_TABLE.L               ;MOVEA.L   #.NUL_TABLE,A0
+~ $F0,10,40,00                      ;PMOVE     (A0),TC
+~ $F0,10,08,00                      ;PMOVE     (A0),TT0
+~ $F0,10,0C,00                      ;PMOVE     (A0),TT1
+
+~ $4E,71,4E,71,4E,71                ;NOP
+
+;*******************************************************************************
+;* c't 9/92:
+;* SCU: General-Purpose-Register checken, ob es ein Power-On war.
+;* Da wir das Register nicht haben, mÅssen wir immer die Power-On-Checks
+;* durchfÅhren.
+;* [$FF8007]
+
+8E ;8E-9C
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+
+;*******************************************************************************
+;* MH:
+;* Video-Paletten-Init deaktivieren.
+;* [$FF8266,$FF9800]
+
+F0 ;F0-102
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71
+
+;*******************************************************************************
+;* c't 9/92 / SE (20.11.93):
+;* Monochrom-Mode als Default-Auflîsung.
+
+104
+~ $00,02
+
+510 ;510-514
+;~ $4E,71,4E,71
+
+516
+;~ $00,02
+
+55C ;55C-562 (nîtig?)
+;~ $4E,71,4E,71,4E,71
+
+564
+;~ $00,02
+
+;*******************************************************************************
+;* MH:
+;* Prozessor-Control-Init deaktivieren.
+;* [$FF8007]
+
+
+112 ;112-11A
+~ $4E,71,4E,71,4E,71,4E,71
+
+;*******************************************************************************
+;* MH:
+;* Mem-Init: Endeberechnung deaktivieren. éndern!
+;* [???]
+
+13A ;13A-15E
+;~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+;~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+;~ $4E,71,4E,71
+
+;160 $.RELOCADR.L
+
+;*******************************************************************************
+;* MH:
+;* Videoclock-Init deaktivieren.
+;* [$FF8006,$FF82C0]
+
+288 ;288-29C
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71
+
+;*******************************************************************************
+;* MH:
+;* ???, u.a. Verhinderung der Abfrage der DIP-Switches.
+
+2A2
+~ $50                               ;ST        $A87.L
+
+;*******************************************************************************
+;* MH:
+;* Cookie-Init ab $3B4 anpassen.
+
+
+40A ;_VDO-Cookie auf ST setzen
+;~ $00,00,00,00
+
+416 ;_MCH-Cookie auf ST setzen
+;~ $00,00,00,00
+
+436 ;_SND-Cookie auf ST setzen
+;~ $72,01                           ;MOVEQ     #$01,D1
+
+;*******************************************************************************
+;* MH:
+;* DSP-Init deaktivieren, DSP/DMA-Init deaktivieren
+;* [?]
+
+5B2 ;5B2-5B6
+~ $4E,71,4E,71
+
+5B6 ;5B6-604
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+
+;*******************************************************************************
+;* MH:
+;* ST-Bootproblem (Diskette/ACSI) beheben (unsinnige Routine?).
+
+760
+~ $4E,71,4E,71,4E,71
+
+;*******************************************************************************
+;* MH:
+;* XBIOS-Funktionen reduzieren.
+
+.XBIOS_NA = C04+.BASE
+
+;156C $60.W         ;Anzahl der Funktionen
+
+;156E+2A*4 $.XBIOS_NA.L ;DMA-Read
+;156E+2B*4 $.XBIOS_NA.L ;DMA-Write
+
+;TT-Video-Funktionen (nicht implementiert)
+;156E+50*4 $.XBIOS_NA.L ;E...
+;156E+51*4 $.XBIOS_NA.L ;E...
+;156E+52*4 $.XBIOS_NA.L ;E...
+;156E+53*4 $.XBIOS_NA.L ;E...
+;156E+54*4 $.XBIOS_NA.L ;E...
+;156E+55*4 $.XBIOS_NA.L ;E...
+;156E+56*4 $.XBIOS_NA.L ;E...
+;156E+57*4 $.XBIOS_NA.L ;E...
+
+;Falcon-Video-Funtionen (funktionieren auch mit ST-Video)
+;;156E+58*4 ???          ;V...
+;;156E+59*4 ???          ;V...
+;;156E+5A*4 ???          ;V...
+;;156E+5B*4 ???          ;V...
+;;156E+5C*4 ???          ;V...
+;;156E+5D*4 ???          ;V...
+;;156E+5E*4 ???          ;V...
+;;156E+5F*4 ???          ;V...
+
+;DSP-Funktionen
+156E+60*4 $.XBIOS_NA.L ;Dsp_...
+156E+61*4 $.XBIOS_NA.L ;Dsp_...
+156E+62*4 $.XBIOS_NA.L ;Dsp_...
+156E+63*4 $.XBIOS_NA.L ;Dsp_...
+156E+64*4 $.XBIOS_NA.L ;Dsp_...
+156E+65*4 $.XBIOS_NA.L ;Dsp_...
+156E+66*4 $.XBIOS_NA.L ;Dsp_...
+156E+67*4 $.XBIOS_NA.L ;Dsp_...
+156E+68*4 $.XBIOS_NA.L ;Dsp_...
+156E+69*4 $.XBIOS_NA.L ;Dsp_...
+156E+6A*4 $.XBIOS_NA.L ;Dsp_...
+156E+6B*4 $.XBIOS_NA.L ;Dsp_...
+156E+6C*4 $.XBIOS_NA.L ;Dsp_...
+156E+6D*4 $.XBIOS_NA.L ;Dsp_...
+156E+6E*4 $.XBIOS_NA.L ;Dsp_...
+156E+6F*4 $.XBIOS_NA.L ;Dsp_...
+156E+70*4 $.XBIOS_NA.L ;Dsp_...
+156E+71*4 $.XBIOS_NA.L ;Dsp_...
+156E+72*4 $.XBIOS_NA.L ;Dsp_...
+156E+73*4 $.XBIOS_NA.L ;Dsp_...
+156E+74*4 $.XBIOS_NA.L ;Dsp_...
+156E+75*4 $.XBIOS_NA.L ;Dsp_...
+156E+76*4 $.XBIOS_NA.L ;Dsp_...
+156E+77*4 $.XBIOS_NA.L ;Dsp_...
+156E+78*4 $.XBIOS_NA.L ;Dsp_...
+156E+79*4 $.XBIOS_NA.L ;Dsp_...
+156E+7A*4 $.XBIOS_NA.L ;Dsp_...
+156E+7B*4 $.XBIOS_NA.L ;Dsp_...
+156E+7C*4 $.XBIOS_NA.L ;Dsp_...
+156E+7D*4 $.XBIOS_NA.L ;Dsp_...
+156E+7E*4 $.XBIOS_NA.L ;Dsp_...
+156E+7F*4 $.XBIOS_NA.L ;Dsp_...
+
+156E+80*4 $.XBIOS_NA.L ;Locksnd
+156E+81*4 $.XBIOS_NA.L ;Unlocksnd
+156E+82*4 $.XBIOS_NA.L ;Soundcmd
+156E+83*4 $.XBIOS_NA.L ;Setbuffer
+156E+84*4 $.XBIOS_NA.L ;Setmode
+156E+85*4 $.XBIOS_NA.L ;Settracks
+156E+86*4 $.XBIOS_NA.L ;Setmontracks
+156E+87*4 $.XBIOS_NA.L ;Setinterrupt
+156E+88*4 $.XBIOS_NA.L ;Buffoper
+156E+89*4 $.XBIOS_NA.L ;Dsptristate
+156E+8A*4 $.XBIOS_NA.L ;Gpio
+156E+8B*4 $.XBIOS_NA.L ;Devconnect
+156E+8C*4 $.XBIOS_NA.L ;Sndstatus
+156E+8D*4 $.XBIOS_NA.L ;Buffptr
+
+;*******************************************************************************
+;* MH:
+;* ACSI-DMA aktivieren (wegen Bootproblemen).
+
+18F4 ;18F4-18FA
+~ $4E,71,4E,71,4E,71
+
+;*******************************************************************************
+;* SE: (angepasst von MH) (V2.0)
+;* RTC-Patches:
+;* Die Megauhr soll ja wohl auch ausgelesen werden, oder?
+;* Da das 4.04 natÅrlich nichts von der Mega-Uhr weiû, mÅssen hier andere
+;* Routinen rein.
+
+_IF .RTC
+
+;*******************************************************************************
+;* SE: (19.09.93)
+;* Bei der Zeitinitialisierung beim System-Boot wird nach der Kontrolle auf
+;* Uhrenexistenz auch auf GÅltigkeit getestet.
+;* Muû entfernt werden, da sonst nachtrÑglich verworfen wÅrde:
+
+1FAA
+~ $4E,71,4E,71,4E,71                ;MOVE.B    #$D,$FFFF8961.W
+~ $4E,71,4E,71                      ;MOVE.B    $FFFF8963.W,D0
+~ $4E,71,4E,71                      ;BTST      #7,D0
+~ $4E,71                            ;BNE.S     $C(PC)               L015F
+~ $4E,71,4E,71,4E,71                ;MOVE.L    #$12C80000,-(A7)
+~ $4E,71,4E,71                      ;BSR       $B8(PC)              L0164
+~ $4E,71,4E,71                      ;ADDQ.W    #4,A7
+
+;*******************************************************************************
+;* SE: (19.09.93)
+;* Uhrzeit aus RTC holen, und in D0 im GEMDOS-Format liefern.
+
+1FD4
+~ $61,00,01,3C                ;L0000:BSR       $13C(PC)             L000B
+~ $65,50                            ;BCS.S     $50(PC)              L0001
+~ $08,A8,00,00,00,1B                ;BCLR      #0,$1B(A0)
+~ $42,80                            ;CLR.L     D0
+~ $72,01                            ;MOVEQ     #1,D1
+~ $61,46                            ;BSR.S     $46(PC)              L0002
+~ $E2,81                            ;ASR.L     #1,D1
+~ $EF,C0,16,C5                      ;BFINS     D1,D0{27:5}
+~ $72,05                            ;MOVEQ     #5,D1
+~ $61,3C                            ;BSR.S     $3C(PC)              L0002
+~ $EF,C0,15,46                      ;BFINS     D1,D0{21:6}
+~ $72,09                            ;MOVEQ     #9,D1
+~ $61,34                            ;BSR.S     $34(PC)              L0002
+~ $EF,C0,14,05                      ;BFINS     D1,D0{16:5}
+~ $72,0F                            ;MOVEQ     #$F,D1
+~ $61,2C                            ;BSR.S     $2C(PC)              L0002
+~ $EF,C0,12,C5                      ;BFINS     D1,D0{11:5}
+~ $72,13                            ;MOVEQ     #$13,D1
+~ $61,24                            ;BSR.S     $24(PC)              L0002
+~ $EF,C0,11,C4                      ;BFINS     D1,D0{7:4}
+~ $72,17                            ;MOVEQ     #$17,D1
+~ $61,1C                            ;BSR.S     $1C(PC)              L0002
+~ $EF,C0,10,07                      ;BFINS     D1,D0{0:7}
+~ $40,C2                            ;MOVE      SR,D2
+~ $00,7C,07,00                      ;ORI.W     #$700,SR
+~ $31,C0,6C,FC                      ;MOVE.W    D0,$6CFC.W
+~ $48,40                            ;SWAP      D0
+~ $33,C0,00,00,6C,FE                ;MOVE.W    D0,$6CFE
+~ $48,40                            ;SWAP      D0
+~ $46,C2                            ;MOVE      D2,SR
+~ $4E,75                      ;L0001:RTS
+~ $14,30,10,00                ;L0002:MOVE.B    0(A0,D1.W),D2
+~ $61,12                            ;BSR.S     $12(PC)              L0003
+~ $02,02,00,0F                      ;ANDI.B    #$F,D2
+~ $12,30,10,02                      ;MOVE.B    2(A0,D1.W),D1
+~ $02,01,00,0F                      ;ANDI.B    #$F,D1
+~ $C2,FC,00,0A                      ;MULU      #$A,D1
+~ $D2,02                            ;ADD.B     D2,D1
+~ $2F,00                      ;L0003:MOVE.L    D0,-(A7)
+~ $30,3C,01,01                      ;MOVE.W    #$101,D0
+~ $4E,B9,00,E0,14,22                ;JSR       $E01422
+~ $20,1F                            ;MOVE.L    (A7)+,D0
+~ $4E,75                            ;RTS
+~ $2E,4A                      ;L0004:MOVEA.L   A2,A7
+~ $21,C9,00,08                ;L0005:MOVE.L    A1,8.W
+~ $00,3C,00,01                      ;ORI.B     #1,CCR
+~ $4E,75                            ;RTS
+~ $21,C9,00,08                ;L0006:MOVE.L    A1,8.W
+~ $11,7C,00,01,00,01                ;MOVE.B    #1,1(A0)
+~ $11,7C,00,00,00,1D                ;MOVE.B    #0,$1D(A0)
+~ $02,3C,00,FE                      ;ANDI.B    #-2,CCR
+~ $4E,75                            ;RTS
+~ $00,00,00,00
+
+;*******************************************************************************
+;* SE: (20.09.93)
+;* RTC auf neue Zeit einstellen.
+;* ErhÑlt die Zeit im GEMDOS-Format auf dem Stack (4(SP)).
+
+~ $61,00,00,96                ;L0007:BSR       $96(PC)              L000B
+~ $65,00,00,7E                      ;BCS       $7E(PC)              L0009
+~ $08,A8,00,00,00,1B                ;BCLR      #0,$1B(A0)
+~ $20,2F,00,04                      ;MOVE.L    4(A7),D0
+~ $E9,C0,16,C5                      ;BFEXTU    D0{27:5},D1
+~ $02,81,00,00,00,1F                ;ANDI.L    #$1F,D1
+~ $E3,81                            ;ASL.L     #1,D1
+~ $74,01                            ;MOVEQ     #1,D2
+~ $61,44                            ;BSR.S     $44(PC)              L0008
+~ $E9,C0,15,46                      ;BFEXTU    D0{21:6},D1
+~ $02,81,00,00,00,3F                ;ANDI.L    #$3F,D1
+~ $74,05                            ;MOVEQ     #5,D2
+~ $61,36                            ;BSR.S     $36(PC)              L0008
+~ $E9,C0,14,05                      ;BFEXTU    D0{16:5},D1
+~ $02,81,00,00,00,1F                ;ANDI.L    #$1F,D1
+~ $74,09                            ;MOVEQ     #9,D2
+~ $61,28                            ;BSR.S     $28(PC)              L0008
+~ $E9,C0,12,C5                      ;BFEXTU    D0{11:5},D1
+~ $02,81,00,00,00,1F                ;ANDI.L    #$1F,D1
+~ $74,0F                            ;MOVEQ     #$F,D2
+~ $61,1A                            ;BSR.S     $1A(PC)              L0008
+~ $E9,C0,11,C4                      ;BFEXTU    D0{7:4},D1
+~ $02,81,00,00,00,0F                ;ANDI.L    #$F,D1
+~ $74,13                            ;MOVEQ     #$13,D2
+~ $61,0C                            ;BSR.S     $C(PC)               L0008
+~ $E9,C0,10,07                      ;BFEXTU    D0{0:7},D1
+~ $02,81,00,00,00,7F                ;ANDI.L    #$7F,D1
+~ $74,17                            ;MOVEQ     #$17,D2
+~ $2F,03                      ;L0008:MOVE.L    D3,-(A7)
+~ $42,83                            ;CLR.L     D3
+~ $16,01                            ;MOVE.B    D1,D3
+~ $86,FC,00,0A                      ;DIVU      #$A,D3
+~ $C6,FC,00,0A                      ;MULU      #$A,D3
+~ $92,03                            ;SUB.B     D3,D1
+~ $86,FC,00,0A                      ;DIVU      #$A,D3
+~ $11,81,20,00                      ;MOVE.B    D1,0(A0,D2.W)
+~ $11,83,20,02                      ;MOVE.B    D3,2(A0,D2.W)
+~ $26,1F                            ;MOVE.L    (A7)+,D3
+~ $4E,75                      ;L0009:RTS
+~ $B4,41                      ;L000A:CMP.W     D1,D2
+~ $66,00,FF,52                      ;BNE       -$AE(PC)             L0005
+~ $01,88,00,05                      ;MOVEP.W   D0,5(A0)
+~ $60,00,FF,54                      ;BRA       -$AC(PC)             L0006
+~ $00,00,00,00
+
+;*******************************************************************************
+;* SE: (20.09.93)
+;* Check, ob die Uhr da ist.
+
+~ $24,4F                      ;L000B:MOVEA.L   A7,A2
+~ $22,78,00,08                      ;MOVEA.L   8.W,A1
+~ $41,FA,FF,3A                      ;LEA       -$C6(PC),A0          L0004
+~ $21,C8,00,08                      ;MOVE.L    A0,8.W
+~ $30,7C,FC,20                      ;MOVEA.W   #-$3E0,A0
+~ $08,E8,00,00,00,1B                ;BSET      #0,$1B(A0)
+~ $01,08,00,05                      ;MOVEP.W   5(A0),D0
+~ $32,3C,0A,05                      ;MOVE.W    #$A05,D1
+~ $03,88,00,05                      ;MOVEP.W   D1,5(A0)
+~ $05,08,00,05                      ;MOVEP.W   5(A0),D2
+~ $02,42,0F,0F                      ;ANDI.W    #$F0F,D2
+~ $60,C0                            ;BRA.S     -$40(PC)             L000A
+
+_ENDIF
+
+;*******************************************************************************
+;* Ende der RTC-Patches
+;*******************************************************************************
+
+;*******************************************************************************
+;* MH: 25.01.99 (V2.0)
+;* NVM-RAM-Routine fÅr Rechner ohne NVM installieren.
+;* Simuliert das NVM anhand der NVM-Defaultwerte im RAM (read / write / init).
+
+.NVMBASE = 340      ;Adresse fÅr die simulierten 64 Bytes des Uhrenchips.
+
+_IF .RAMNVM
+ 216C RAMNVM.ABS
+ 216E |$.NVMBASE.L
+ .RAM_INIT:
+ ~ $4A,40                           ;TST.W     D0
+ ~ $67,00,4E6-~.W                   ;BEQ       xxx(PC)              L0000
+ ~ $2F,08                           ;MOVE.L    A0,-(A7)
+ ~ $3F,3C,00,02                     ;MOVE.W    #2,-(A7)
+ ~ $61,00,216C-~.W                  ;BSR       NVMaccess
+ ~ $54,8F                           ;ADDQ.L    #2,A7
+ ~ $20,5F                           ;MOVEA.L   (A7)+,A0
+ ~ $60,00,4DE-~.W                   ;BRA       xxx(PC)              L0001
+ 4DA
+ ~ $60,00,.RAM_INIT-~.W
+_ENDIF
+
+;*******************************************************************************
+;* MH: (V2.0)
+;* NVM-Dummyroutine fÅr Rechner ohne NVM installieren.
+;* Simuliert das NVM anhand der NVM-Defaultwerte (read only).
+
+_IF .RAMNVM = 0
+ 216C
+ ~ DUMMYNVM.ABS
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* Auflîsungsumschaltung anpassen.
+;* [$FF8006, $FF8210, $FF82C2]
+
+836C ;836C-8390 [$FF8282-..., $FF82A2-...]
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71
+
+8398 ;8398-839C [nîtig, wenn $FF820D nicht benutzt wird]
+~ $42,AE,FF,FC                      ;CLR.L     -4(A6)
+
+83D0 ;83D0-83FE [$FF820E, $FF8210, $FF82C2, $FF82C0, $FF8266]
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+
+8406 $00,03 ;Anzahl der Videomodi
+
+843E ;843E-844E
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+
+8458 ;8458-8480
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~ $4E,71,4E,71,4E,71,4E,71
+
+8482 ;8482-8492 (anpassen)
+~ $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+
+;*******************************************************************************
+;* MH:
+;* Monitortypauswahl anpassen.
+;* [$FF8006]
+
+826A ;826A-8274
+~ $70,00                            ;MOVEQ     #0,D0
+~ $10,38,FA,01                      ;MOVE.B    $FFFFFA01.S,D0
+~ $EE,48                            ;LSR.W     #7,D0
+~ $4E,71
+
+830E ;830E-8318
+~ $70,00                            ;MOVEQ     #0,D0
+~ $10,38,FA,01                      ;MOVE.B    $FFFFFA01.S,D0
+~ $EE,48                            ;LSR.W     #7,D0
+~ $4E,71
+
+8578; 8578-8582
+~ $70,00                            ;MOVEQ     #0,D0
+~ $10,38,FA,01                      ;MOVE.B    $FFFFFA01.S,D0
+~ $EE,48                            ;LSR.W     #7,D0
+~ $4E,71
+
+86F2; 86F2-86FC
+~ $70,00                            ;MOVEQ     #0,D0
+~ $10,38,FA,01                      ;MOVE.B    $FFFFFA01.S,D0
+~ $EE,48                            ;LSR.W     #7,D0
+~ $4E,71
+
+8908 ;8908-8912
+~ $70,00                            ;MOVEQ     #0,D0
+~ $10,38,FA,01                      ;MOVE.B    $FFFFFA01.S,D0
+~ $EE,48                            ;LSR.W     #7,D0
+~ $4E,71
+
+89F8 ;89F8-8A02
+~ $70,00                            ;MOVEQ     #0,D0
+~ $10,38,FA,01                      ;MOVE.B    $FFFFFA01.S,D0
+~ $EE,48                            ;LSR.W     #7,D0
+~ $4E,71
+
+8A94 ;8A94-8A9E
+~ $70,00                            ;MOVEQ     #0,D0
+~ $10,38,FA,01                      ;MOVE.B    $FFFFFA01.S,D0
+~ $EE,48                            ;LSR.W     #7,D0
+~ $4E,71
+
+;*******************************************************************************
+;* MH:
+;*
+;* FÅr PAK-Trick um mit FC-TOS auf Mainboard in die PAK-ROMs hochzukommen.
+;*
+;* Sprung nach $E00000 statt $E00030 wegen
+;* -das ist der TOS-Anfang, auch wenn der TOS-Header mal grîûer werden sollte
+;* -ob_spec wird nicht verÑndert!
+
+_IF .BootJMP
+ 4002E
+ ~ $60,06                           ;BRA.S     6(PC)                L0000
+ ~ $4E,F9,00,E0,00,00               ;JMP       $E00000              OS_Main
+ ~ $4A,14                     ;L0000:TST.B     (A4)                
+ ~ $67,06                           ;BEQ.S     6(PC)                L0001
+ ~ $10,1C                           ;MOVE.B    (A4)+,D0            
+ ~ $48,80                           ;EXT.W     D0                  
+ ~ $60,02                           ;BRA.S     2(PC)                L0002
+ ~ $70,20                     ;L0001:MOVEQ     #$20,D0             
+ ~ $1A,C0                     ;L0002:MOVE.B    D0,(A5)+            
+ ~ $52,47                           ;ADDQ.W    #1,D7               
+_ENDIF
+
+;*******************************************************************************
+;* Ende der PAK-Patches
+;*******************************************************************************
+

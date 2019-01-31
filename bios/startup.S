@@ -310,7 +310,7 @@ _main:
         cmp.l   #$fa52235f,cart_base    /* magic - is cartridge present? */
         bne.s   nodiag                  /* no -> go on */
         lea     nodiag(pc),a6           /* save return address */
-        jmp     cart_base+4             /* execute diagnostig cartridge */
+        jmp     cart_base+4             /* execute diagnostic cartridge */
 nodiag:
 
 #if TP_50 /* PAK */
@@ -7254,6 +7254,9 @@ kbdpl2:
         bra       kbdvec42
 kbdpl3:
 #endif
+
+/* 206de: 00e03294 */
+/* 306de: 00e0363a */
 
 /*
  * end of country specific key handling

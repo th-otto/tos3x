@@ -59,6 +59,10 @@
 
 #define ENTER 0x720D					/* enter key on keypad  */
 
+#if TP_WINX
+#define wm_update wx_update
+#endif
+
 
 static int16_t const ml_alrt[] = { ALRT00CRT, ALRT01CRT, ALRT02CRT, ALRT03CRT, ALRT04CRT,
 	ALRT05CRT, ALRTDSWAP
@@ -412,8 +416,12 @@ PP(register GRECT *pt;)
 #if NEWWIN
 		w_drawchange(pt, NIL, NIL);
 #else
+#if TP_WINX
+		wx_drawdesk(pt);
+#else
 		w_drawdesk(pt);
         w_update(DESKWH, pt, DESKWH, FALSE);
+#endif
 #endif
 		break;
 	}

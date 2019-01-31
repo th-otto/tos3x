@@ -51,7 +51,7 @@ LPTREE gl_newdesk;
  */
 int16_t gl_newroot;
 
-intptr_t ad_windspb;
+SPB *ad_windspb;
 
 STATIC OBJECT W_TREE[NUM_MWIN];
 STATIC OBJECT W_ACTIVE[MAXOBJ];
@@ -62,7 +62,16 @@ STATIC LPTREE gl_wtree;
 STATIC TEDINFO gl_aname;
 STATIC TEDINFO gl_ainfo;
 STATIC int16_t wind_msg[8];
+#if !TP_WINX
 STATIC BOOLEAN wasclr; /* WTF */
+#endif
+
+
+#if TP_WINX
+/* all functions here are replaced by the winx patch */
+#define wm_update wx_update
+#define wm_calc wx_calc
+#endif
 
 
 static int16_t const gl_watype[MAXOBJ] =
@@ -260,6 +269,7 @@ PP(register GRECT *pt;)
 }
 
 
+#if !TP_WINX
 static VOID w_setsize(P(int16_t) which, P(int16_t) w_handle, P(GRECT *)pt)
 PP(int16_t which;)
 PP(int16_t w_handle;)
@@ -267,6 +277,7 @@ PP(GRECT *pt;)
 {
 	rc_copy(pt, w_getxptr(which, w_handle));
 }
+#endif
 
 
 /*
@@ -450,6 +461,7 @@ PP(BOOLEAN usetrue;)
 }
 
 
+#if !TP_WINX
 /* 306de: 00e21690 */
 static VOID w_strchg(P(int16_t) w_handle, P(int16_t) obj, P(intptr_t) pstring)
 PP(register int16_t w_handle;)
@@ -466,6 +478,7 @@ PP(register intptr_t pstring;)
 
 	w_cpwalk(w_handle, obj, MAX_DEPTH, TRUE);
 }
+#endif
 
 
 /* 306de: 00e216f4 */
@@ -794,6 +807,7 @@ PP(GRECT *dirty;)
 }
 
 
+#if !TP_WINX
 /*
  *	Routine to fix rectangles in preparation for a source to destination
  *	blit.  If the source is at -1, then the source and destination left
@@ -818,8 +832,10 @@ PP(register GRECT *pd;)
 
 	return FALSE;
 }
+#endif
 
 
+#if !TP_WINX
 /*
  *	Call to move top window.  This involves BLTing the window if none
  *	of it that is partially off the screen needs to be redrawn, else
@@ -896,6 +912,7 @@ PP(GRECT *prc;)
 
 	return *pstop == w_handle;
 }
+#endif
 
 
 /*
@@ -993,6 +1010,7 @@ static VOID w_menufix(NOTHING)
 #endif
 
 
+#if !TP_WINX
 /*
  *	Draw the tree of windows given a major change in some window.  It
  *	may have been sized, moved, fulled, topped, or closed.	An attempt
@@ -1200,8 +1218,10 @@ PP(register GRECT *pt;)
 	/* start the redrawing	*/
 	w_update(start, pc, stop, moved);
 }
+#endif
 
 
+#if !TP_WINX
 /*
  *	Walk down ORECT list looking for the next rect that still has
  *	size when clipped with the passed in clip rectangle
@@ -1224,6 +1244,7 @@ PP(register GRECT *poutwds;)
 
 	poutwds->g_w = poutwds->g_h = 0;
 }
+#endif
 
 
 /*
@@ -1249,6 +1270,7 @@ PP(register GRECT *pt;)
 }
 
 
+#if !TP_WINX
 /*
  *  Start the window manager up by initializing internal variables
  */
@@ -1324,8 +1346,10 @@ BOOLEAN wm_start(NOTHING)
 	
 	return TRUE;
 }
+#endif
 
 
+#if !TP_WINX
 /*
  * wm_init() -	initializes window colors, then start up the window
  *		manager.
@@ -1352,8 +1376,10 @@ VOID wm_init(NOTHING)
 
 	wm_start();
 }
+#endif
 
 
+#if !TP_WINX
 /*
  * AES #100 - wind_create - Initializes a new window 
  *
@@ -1390,8 +1416,10 @@ PP(GRECT *rect;)						/* x, y, width and height of full size window */
 
 	return -1;
 }
+#endif /* TP_WINX */
 
 
+#if !TP_WINX
 /*
  *	Opens or closes a window
  */
@@ -1423,9 +1451,11 @@ PP(BOOLEAN isadd;)
 		w_setsize(WS_PREV, wh, pt);
 	wm_update(END_UPDATE);
 }
+#endif
 
 
 
+#if !TP_WINX
 /*
  * AES #101 - wind_open - Open window
  *
@@ -1442,8 +1472,10 @@ PP(GRECT *rect;)						/* x, y, width and height of opened window */
 {
 	wm_opcl(w_handle, rect, TRUE);
 }
+#endif /* TP_WINX */
 
 
+#if !TP_WINX
 /*
  * AES #102 - wind_close - Close window
  *
@@ -1460,8 +1492,10 @@ PP(int16_t w_handle;)							/* handle of window to be closed */
 {
 	wm_opcl(w_handle, &gl_rzero, FALSE);
 }
+#endif /* TP_WINX */
 
 
+#if !TP_WINX
 /*
  * AES #103 - wind_delete - Delete window
  *
@@ -1488,8 +1522,10 @@ PP(int16_t w_handle;)							/* handle of window to be deleted */
 	D.w_win[w_handle].w_owner = NULL;
 #endif
 }
+#endif /* TP_WINX */
 
 
+#if !TP_WINX
 /*
  * AES #105 - wind_get - Obtains various properties of a window.
  *
@@ -1581,6 +1617,7 @@ PP(register int16_t *poutwds;)							/* return values */
 	if (which != -1)
 		w_getsize(which, w_handle, (GRECT *)poutwds);
 }
+#endif /* TP_WINX */
 
 
 #if 0
@@ -1623,6 +1660,7 @@ static void wm_mktop(int16_t w_handle)
 #endif
 
 
+#if !TP_WINX
 /*
  * AES #106 - wind_set - Alter various window attributes.
  *
@@ -1774,8 +1812,10 @@ PP(register int16_t *pinwds;)							/* values to change to */
 
 	wm_update(END_UPDATE);		/* give up the sync */
 }
+#endif /* TP_WINX */
 
 
+#if !TP_WINX
 /*
  * AES #106 - wind_find - Find the ID of a window at the given coordinates.
  *
@@ -1789,8 +1829,10 @@ PP(int my;)									/* mouse's y position */
 {
 	return ob_find(gl_wtree, ROOT, 2, mx, my);
 }
+#endif /* TP_WINX */
 
 
+#if !TP_WINX
 /*
  * AES #107 - wind_update - Blocks or releases screen operations.
  *
@@ -1815,7 +1857,7 @@ PP(register int beg_update;)								/* flag for the call's function */
 		if (beg_update)
 		{
 			if (!tak_flag(&wind_spb))
-				ev_block(AMUTEX, ad_windspb);
+				ev_block(AMUTEX, (intptr_t)ad_windspb);
 		} else
 		{
 			unsync(&wind_spb);
@@ -1829,8 +1871,10 @@ PP(register int beg_update;)								/* flag for the call's function */
 	return TRUE;
 #endif
 }
+#endif /* TP_WINX */
 
 
+#if !TP_WINX
 /*
  * AES #108 - wind_calc - Calculates the limits or the total space requirement of a window 
  *
@@ -1884,8 +1928,10 @@ PP(int16_t *oh;)								/* output height of work/border area */
 	*ow = iw - lb - rb;
 	*oh = ih - tb - bb;
 }
+#endif /* TP_WINX */
 
 
+#if !TP_WINX
 /*
  * AES #109 - wind_new - Close all windows.
  *
@@ -1933,7 +1979,7 @@ VOID wm_new(NOTHING)
 	ml_ocnt = 0;
 	gl_mntree = 0;
 	gl_mowner = ctl_pd;
-	spb = (SPB *)ad_windspb;
+	spb = ad_windspb;
 	if (spb->sy_tas)
 	{
 		while (spb->sy_tas)
@@ -1946,7 +1992,7 @@ VOID wm_new(NOTHING)
 	return TRUE;
 #endif
 }
-
+#endif /* TP_WINX */
 
 
 #endif /* !NEWWIN */

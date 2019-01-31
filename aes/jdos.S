@@ -390,7 +390,7 @@ _dos_gdir:
 	rts
 
 
-
+/* 306de: 00e25aa2 (unused) */
 #if CCODE
   WORD dos_mkdir(const char *path, int attr)
   {
@@ -421,7 +421,7 @@ mkd_1:	move.w	d1,d0			; return (!DOS_ERR)
 	rts
 
 
-
+/* 306de: 00e25ac6 (unused) */
 #if CCODE
   WORD dos_set(int h, unsigned short time, unsigned short date)
   {
@@ -447,7 +447,7 @@ _dos_set:
 	rts
 
 
-
+/* 306de: 00e25ae0 (unused) */
 #if CCODE
   WORD dos_label(int drive, const char *plabel)
   {
@@ -575,7 +575,7 @@ _dos_space:
 #endif
 
 
-
+/* 306de: 00e25b48 (unused) */
 #if CCODE
   WORD dos_rename(const char *p1, const char *p2)
   	BYTE	*p1;
@@ -594,7 +594,7 @@ _dos_rename:
 	jmp	(a0)
 
 
-
+/* 306de: 00e25b62 */
 #if CCODE
   LONG dos_alloc(long nbytes)
   {

@@ -1,0 +1,13 @@
+;*******************************************************************************
+;* Diese kleine Datei erzeugt aus dem ROM-Image TOS.IMG (512kB lang) acht
+;* 64kB Dateien fr den EPROM-Brenner.
+;*
+;* ½ 1992-99 Markus Heiden
+
+.BASE   = E00000
+.LENGTH =  80000
+.WIDTH  =     .8
+
+>8
+<TOS.IMG
+

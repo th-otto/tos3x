@@ -153,6 +153,10 @@ int16_t sh_search PROTO((SHFIND_PROC routine));
 #define Getrez() trp14(4)
 
 
+#if TP_WINX
+#define wm_new wx_new
+#endif
+
 
 
 /*
@@ -605,10 +609,14 @@ VOID sh_main(NOTHING)
 
 		if (sh_gem)						/* if GEM app then restart */
 		{								/* window and mouse stuff  */
+#if TP_WINX
+			wx_start();
+#else
 #if NEWWIN
 			wm_new();					/* change from wm_start to wm_new 072691 - ml. */
 #else
 			wm_start();
+#endif
 #endif
 			ratinit();
 		}

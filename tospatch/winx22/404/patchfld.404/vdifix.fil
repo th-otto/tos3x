@@ -1,0 +1,50 @@
+;*******************************************************************************
+;* MRF: (angepasst von MH)
+;* VDI-Patch (neue v_opnvwk()-Routine, ersetzt VDIFIX).
+
+.VDI_START = CF98
+.VDI_END   = D01E
+
+.ADR1 = 4B4         ;absoluter Wert
+.ADR2 = 88AE        ;LOW MEM
+.ADR3 = CD40        ;TOS (relativ)
+.ADR4 = 4D182       ;TOS (relativ)
+
+.VDI_START
+~ $48,78,.ADR1.W                    ;PEA       .ADR1.S
+~ $3F,3C,00,48                      ;MOVE.W    #$48,-(A7)
+~ $4E,41                            ;TRAP      #1
+~ $5C,8F                            ;ADDQ.L    #6,A7
+~ $4A,80                            ;TST.L     D0
+~ $66,10                            ;BNE.S     10(PC)               L0001
+~ $20,79,.ADR4+.BASE.L              ;MOVEA.L   .ADR4.L,A0
+~ $20,68,03,92                      ;MOVEA.L   914(A0),A0
+~ $42,68,00,0C                      ;CLR.W     12(A0)
+~ $4E,75                            ;RTS
+~ $22,40                      ;L0001:MOVEA.L   D0,A1
+~ $70,01                            ;MOVEQ     #1,D0
+~ $74,00                            ;MOVEQ     #0,D2
+~ $45,F9,.ADR2.L                    ;LEA       .ADR2.L,A2
+~ $60,0C                            ;BRA.S     12(PC)               L0003
+~ $52,40                      ;L0002:ADDQ.W    #1,D0
+~ $24,0A                            ;MOVE.L    A2,D2
+~ $22,2A,00,40                      ;MOVE.L    64(A2),D1
+~ $67,0E                            ;BEQ.S     14(PC)               L0004
+~ $24,41                            ;MOVEA.L   D1,A2
+~ $B0,6A,00,28                ;L0003:CMP.W     40(A2),D0
+~ $67,EE                            ;BEQ.S     -18(PC)              L0002
+~ $4A,82                            ;TST.L     D2
+~ $67,02                            ;BEQ.S     2(PC)                L0004
+~ $24,42                            ;MOVEA.L   D2,A2
+~ $23,6A,00,40,00,40          ;L0004:MOVE.L    64(A2),64(A1)
+~ $25,49,00,40                      ;MOVE.L    A1,64(A2)
+~ $20,79,.ADR4+.BASE.L              ;MOVEA.L   .ADR4.L,A0
+~ $21,49,01,BE                      ;MOVEA.L   A1,446(A0)
+~ $20,79,.ADR4+.BASE.L              ;MOVEA.L   .ADR4.L,A0
+~ $20,68,03,92                      ;MOVEA.L   914(A0),A0
+~ $31,40,00,0C                      ;MOVE.W    D0,12(A0)
+~ $33,40,00,28                      ;MOVE.W    D0,40(A1)
+~ $60,00,.ADR3-~.W                  ;BRA       .ADR3                L0000
+
+_FILL ~,.VDI_END,$-1
+

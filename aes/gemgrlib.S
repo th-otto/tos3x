@@ -21,6 +21,11 @@
 #include "aesdefs.h"
 #include "asmdefs.h"
 
+#if TP_WINX
+#define _wm_update _wx_update
+#endif
+
+
 #define CCODE 0
 
 /*	GEMGRLIB.C	4/11/84 - 01/07/85	Gregg Morris		*/
@@ -791,7 +796,16 @@ _gr_stilldn:
 	suba.w	#12,sp		;+12 make room on stack for 6 words: &rets[6]
 	move.l	sp,-(sp)	;+16 parm 7 &rets[0]
 	clr.l	-(sp)		;+20 parm 6 0x0L
+#if TP_WINX
+    moveq.l   #1,d0
+    lsl.l     #8,d0
+    move.b    _D+$6f,d0 /* winxvars.xAF11 */
+    addq.b    #1,d0
+    lsl.l     #8,d0
+    move.l    d0,-(a7)
+#else
 	move.l	#$10100,-(sp)	;+24 parm 5 0x00010100L
+#endif
 	clr.l	-(sp)		;+28 parm 4 0x0L
 	clr.l	-(sp)		;+32 parm 3 NULLPTR
 	pea	32+4(sp)	;+36 parm 2 &out

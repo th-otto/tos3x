@@ -46,6 +46,12 @@ PP(register PD *ppd;)
 	register BOOLEAN ret;
 	char temp[9];
 
+#if TP_WINX
+	register char **p_qaddr;
+	p_qaddr = &ppd->p_qaddr;
+	if ((*p_qaddr - 6) == (char *)p_qaddr)
+		*p_qaddr = ppd->p_pid * WX_QUEUE_SIZE + (char *)winxvars.wx_mem + WX_MAXWIN * sizeof(WX_WINDOW);
+#endif
 	ret = FALSE;
 	temp[8] = 0;
 	if (pname != NULL)
@@ -119,6 +125,9 @@ VOID p_nameit(P(PD *) p, P(const char *) pname)
 PP(PD *p;)
 PP(const char *pname;)
 {
+#if TP_WINX
+	wx_nameit(p, pname);
+#endif
 	bfill(8, ' ', p->p_name);
 	strscn(pname, p->p_name, '.');
 }

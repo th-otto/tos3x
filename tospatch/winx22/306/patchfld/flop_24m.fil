@@ -1,0 +1,867 @@
+.mfpdelay       = 162E
+.flush_cache    = 5F2
+.callcrit       = D92
+
+.fd_retry  = 17CA
+.fd_wp     = 17CC
+.fd_latch  = 17CE
+.fd_lastacc = 17D0
+.fd_timeout = 17D8
+.fd_motoron = 17DC
+.fd_desel  = 17DE
+.fd_dev    = 17E0
+.fd_track  = 17E2
+.fd_sect   = 17E4
+.fd_side   = 17E6
+.fd_scount = 17E8
+.fd_buffer = 17EA
+.fd_spt    = 17EE
+.fd_interlv = 17F0
+.fd_virgin = 17F2
+.fd_secmap = 17F4
+.fd_deferr = 17F8
+.fd_curerr = 17FA
+.flopsregs = 17FC
+.dsb       = 1820
+.fd_rtryseek = 1830
+.fd_frb    = 1832
+.fd_copyp  = 1836
+.fd_cscnt  = 183A
+.drivechange = 5B86
+.curflop   = 5B92
+
+;flopini:
+~ $42,b8,.fd_frb.W              ; clr.l     (fd_frb).w
+~ $42,78,.fd_cscnt.W            ; clr.w     (fd_cscnt).w
+~ $43,f8,.dsb.W                 ; lea.l     (dsb).w,a1
+~ $4a,6f,00,0c                  ; tst.w     12(a7)
+~ $67,04                        ; beq.s     flopini1
+~ $43,f8,.dsb+8.W               ; lea.l     (dsb+8).w,a1
+;flopini1:
+~ $33,78,04,40,00,06            ; move.w    ($00000440).w,6(a1)
+~ $33,7c,.DefHDinf.w,00,04      ; move.w    #3,4(a1)
+~ $70,ff                        ; moveq.l   #-1,d0
+~ $33,7c,ff,00,00,02            ; move.w    #$FF00,2(a1)
+~ $61,00,05,c2                  ; bsr       floplock
+~ $67,00,06,4c                  ; beq       flopok
+~ $60,00,06,3a                  ; bra       flopfail
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff,ff,ff,ff,ff
+;flopini4:
+~ $70,f1                        ; moveq.l   #-15,d0 /* E_UNDEV */
+~ $4e,75                        ; rts
+;floprd:
+~ $4a,78,04,a6                  ; tst.w     ($000004A6).w
+~ $67,f6                        ; beq.s     flopini4
+~ $61,00,08,48                  ; bsr       fdchange
+~ $70,f5                        ; moveq.l   #-11,d0 /* E_READF */
+~ $61,00,09,2a                  ; bsr       frbrdcheck
+~ $61,00,05,74                  ; bsr       floplock
+;floprd1:
+~ $61,00,07,aa                  ; bsr       select
+~ $61,00,06,9e                  ; bsr       go2track
+~ $66,00,05,e8                  ; bne       flopfail
+~ $66,00,00,a6                  ; bne       floprd6
+;floprd2:
+~ $33,fc,ff,ff,.fd_curerr.L     ; move.w    #-1,fd_curerr
+~ $3c,bc,01,90                  ; move.w    #$0190,(a6)
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $3c,bc,00,90                  ; move.w    #$0090,(a6)
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $31,fc,00,01,86,04            ; move.w    #$0001,($FFFF8604).w
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $3e,3c,00,80                  ; move.w    #$0080,d7
+~ $61,00,07,c6                  ; bsr       fdcread
+~ $2e,38,04,ba                  ; move.l    ($000004BA).w,d7
+~ $de,bc,00,00,01,2c            ; add.l     #300,d7
+;floprd3:
+~ $08,38,00,05,fa,01            ; btst      #5,($FFFFFA01).w
+~ $67,12                        ; beq.s     floprd4
+~ $be,b8,04,ba                  ; cmp.l     ($000004BA).w,d7
+~ $62,f2                        ; bhi.s     floprd3
+~ $31,fc,ff,fe,.fd_curerr.W     ; move.w    #-2,(fd_curerr).w
+~ $61,00,07,1e                  ; bsr       fdcreset
+~ $60,3e                        ; bra.s     floprd6
+;floprd4:
+~ $3c,bc,00,90                  ; move.w    #$0090,(a6)
+~ $30,16                        ; move.w    (a6),d0
+~ $08,00,00,00                  ; btst      #0,d0
+~ $67,32                        ; beq.s     floprd6
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $61,00,07,9c                  ; bsr       rdfdcd0
+~ $c0,3c,00,1c                  ; and.b     #$1C,d0
+~ $66,22                        ; bne.s     floprd5
+~ $31,fc,00,02,.fd_retry.W      ; move.w    #2,(fd_retry).w
+~ $52,78,.fd_sect.W             ; addq.w    #1,(fd_sect).w
+~ $06,b8,00,00,02,00,.fd_buffer.W ; addi.l    #$00000200,(fd_buffer).w
+~ $53,78,.fd_scount.W           ; subq.w    #1,(fd_scount).w
+~ $67,00,05,58                  ; beq       flopok
+~ $61,00,07,24                  ; bsr       select1
+~ $60,00,ff,60                  ; bra       floprd2
+;floprd5:
+~ $61,18                        ; bsr.s     fdcerr
+;floprd6:
+~ $0c,78,00,01,.fd_retry.W      ; cmpi.w    #1,(fd_retry).w
+~ $66,04                        ; bne.s     floprd7
+~ $61,00,05,b6                  ; bsr       reseek
+;floprd7:
+~ $53,78,.fd_retry.W            ; subq.w    #1,(fd_retry).w
+~ $6a,00,ff,3a                  ; bpl       floprd1
+~ $60,00,05,28                  ; bra       flopfail
+;fdcerr:
+~ $72,f3                        ; moveq.l   #-13,d1 /* E_WRPRO */
+~ $08,00,00,06                  ; btst      #6,d0
+~ $66,14                        ; bne.s     fdcerr1
+~ $72,f8                        ; moveq.l   #-8,d1 /* E_SEEK */
+~ $08,00,00,04                  ; btst      #4,d0
+~ $66,0c                        ; bne.s     fdcerr1
+~ $72,fc                        ; moveq.l   #-4,d1 /* E_CRC */
+~ $08,00,00,03                  ; btst      #3,d0
+~ $66,04                        ; bne.s     fdcerr1
+~ $32,38,.fd_deferr.W           ; move.w    (fd_deferr).w,d1
+;fdcerr1:
+~ $31,c1,.fd_curerr.W           ; move.w    d1,(fd_curerr).w
+~ $4e,75                        ; rts
+;flopwrt:
+~ $4a,78,04,a6                  ; tst.w     ($000004A6).w
+~ $67,00,fe,f4                  ; beq       flopini4
+~ $61,00,07,44                  ; bsr       fdchange
+~ $70,f6                        ; moveq.l   #-10,d0 /* E_WRITF */
+~ $61,00,08,46                  ; bsr       frbwrcheck
+~ $61,00,04,70                  ; bsr       floplock
+~ $30,38,.fd_sect.W             ; move.w    (fd_sect).w,d0
+~ $53,40                        ; subq.w    #1,d0
+~ $80,78,.fd_track.W            ; or.w      (fd_track).w,d0
+~ $80,78,.fd_side.W             ; or.w      (fd_side).w,d0
+~ $66,06                        ; bne.s     flopwrt1
+~ $70,02                        ; moveq.l   #2,d0
+~ $61,00,07,5e                  ; bsr       setdchg
+;flopwrt1:
+~ $61,00,06,90                  ; bsr       select
+~ $61,00,05,84                  ; bsr       go2track
+~ $66,00,04,ce                  ; bne       flopfail
+~ $66,00,00,a6                  ; bne       flopwrt6
+;flopwrt2:
+~ $31,fc,ff,ff,.fd_curerr.W     ; move.w    #-1,(fd_curerr).w
+~ $3c,bc,00,90                  ; move.w    #$0090,(a6)
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $3c,bc,01,90                  ; move.w    #$0190,(a6)
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $3e,3c,00,01                  ; move.w    #$0001,d7
+~ $61,00,06,b0                  ; bsr       fdcwrite
+~ $3c,bc,01,80                  ; move.w    #$0180,(a6)
+~ $3e,3c,00,a0                  ; move.w    #$00A0,d7
+~ $61,00,06,a4                  ; bsr       fdcwrite
+~ $2e,38,04,ba                  ; move.l    ($000004BA).w,d7
+~ $de,bc,00,00,01,2c            ; add.l     #300,d7
+;flopwrt3:
+~ $08,38,00,05,fa,01            ; btst      #5,($FFFFFA01).w
+~ $67,0c                        ; beq.s     flopwrt4
+~ $be,b8,04,ba                  ; cmp.l     ($000004BA).w,d7
+~ $62,f2                        ; bhi.s     flopwrt3
+~ $61,00,06,0a                  ; bsr       fdcreset
+~ $60,3c                        ; bra.s     flopwrt5
+;flopwrt4:
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $61,00,06,94                  ; bsr       rdfdcd0
+~ $61,00,ff,38                  ; bsr       fdcerr
+~ $08,00,00,06                  ; btst      #6,d0
+~ $66,00,04,56                  ; bne       flopfail
+~ $c0,3c,00,5c                  ; and.b     #$5C,d0
+~ $66,22                        ; bne.s     flopwrt5
+~ $31,fc,00,02,.fd_retry.W      ; move.w    #2,(fd_retry).w
+~ $52,78,.fd_sect.W             ; addq.w    #1,(fd_sect).w
+~ $06,b8,00,00,02,00,.fd_buffer.W      ; addi.l    #$00000200,(fd_buffer).w
+~ $53,78,.fd_scount.W           ; subq.w    #1,(fd_scount).w
+~ $67,00,04,44                  ; beq       flopok
+~ $61,00,06,10                  ; bsr       select1
+~ $60,00,ff,66                  ; bra       flopwrt2
+;flopwrt5:
+~ $0c,78,00,01,.fd_retry.W      ; cmpi.w    #1,(fd_retry).w
+~ $66,04                        ; bne.s     flopwrt7
+;flopwrt6:
+~ $61,00,04,a4                  ; bsr       reseek
+;flopwrt7:
+~ $53,78,.fd_retry.W            ; subq.w    #1,(fd_retry).w
+~ $6a,00,ff,42                  ; bpl       flopwrt1
+~ $60,00,04,16                  ; bra       flopfail
+;flopfmt:
+~ $4a,78,04,a6                  ; tst.w     ($000004A6).w
+~ $67,00,fe,04                  ; beq       flopini4
+~ $70,fb                        ; moveq.l   #-5,d0
+~ $0c,af,87,65,43,21,00,16      ; cmpi.l    #$87654321,22(a7)
+~ $66,00,01,de                  ; bne       fmtrac11
+~ $61,00,06,46                  ; bsr       fdchange
+~ $70,ff                        ; moveq.l   #-1,d0
+~ $61,00,07,68                  ; bsr       frbfmtcheck
+~ $61,00,03,72                  ; bsr       floplock
+~ $61,00,05,a8                  ; bsr       select
+~ $31,ef,00,0e,.fd_spt.W        ; move.w    14(a7),(fd_spt).w
+~ $31,ef,00,14,.fd_interlv.W    ; move.w    20(a7),(fd_interlv).w
+~ $31,ef,00,1a,.fd_virgin.W     ; move.w    26(a7),(fd_virgin).w
+~ $21,ef,00,08,.fd_secmap.W     ; move.l    8(a7),(fd_secmap).w
+~ $70,02                        ; moveq.l   #2,d0
+~ $61,00,06,54                  ; bsr       setdchg
+~ $70,03                        ; moveq.l   #3,d0
+~ $0c,78,00,0d,.fd_spt.W        ; cmpi.w    #13,(fd_spt).w
+~ $64,02                        ; bcc.s     flopfmt1
+~ $70,00                        ; moveq.l   #0,d0
+;flopfmt1:
+~ $33,40,00,04                  ; move.w    d0,4(a1)
+~ $61,00,05,32                  ; bsr       steset
+~ $61,00,04,22                  ; bsr       hardseek
+~ $66,00,03,b4                  ; bne       flopfail
+~ $33,78,.fd_track.W,00,02      ; move.w    (fd_track).w,2(a1)
+~ $31,fc,ff,ff,.fd_curerr.W     ; move.w    #-1,(fd_curerr).w
+~ $61,28                        ; bsr.s     fmtrack
+~ $66,00,03,a2                  ; bne       flopfail
+~ $31,f8,.fd_spt.W,.fd_scount.W ; move.w    (fd_spt).w,(fd_scount).w
+~ $31,fc,00,01,.fd_sect.W       ; move.w    #1,(fd_sect).w
+~ $61,00,01,a2                  ; bsr       verify1
+~ $24,78,.fd_buffer.W           ; movea.l   (fd_buffer).w,a2
+~ $4a,52                        ; tst.w     (a2)
+~ $67,00,03,96                  ; beq       flopok
+~ $31,fc,ff,f0,.fd_curerr.W     ; move.w    #-16,(fd_curerr).w
+~ $60,00,03,7e                  ; bra       flopfail
+;fmtrack:
+~ $31,fc,ff,f6,.fd_deferr.W     ; move.w    #-10,(fd_deferr).w /* E_WRITF */
+~ $24,78,.fd_buffer.W           ; movea.l   (fd_buffer).w,a2
+~ $26,78,.fd_secmap.W           ; movea.l   (fd_secmap).w,a3
+~ $72,77                        ; moveq.l   #119,d1
+~ $0c,78,00,0d,.fd_spt.W        ; cmpi.w    #13,(fd_spt).w
+~ $64,02                        ; bcc.s     fmtrack1
+~ $72,3b                        ; moveq.l   #59,d1
+;fmtrack1:
+~ $70,4e                        ; moveq.l   #78,d0
+~ $61,00,01,3e                  ; bsr       wmult
+~ $42,43                        ; clr.w     d3
+~ $4a,78,.fd_interlv.W          ; tst.w     (fd_interlv).w
+~ $6b,00,01,00                  ; bmi       fmtrack9
+~ $76,01                        ; moveq.l   #1,d3
+;fmtrack2:
+~ $38,03                        ; move.w    d3,d4
+;fmtrack3:
+~ $72,0b                        ; moveq.l   #11,d1
+~ $42,00                        ; clr.b     d0
+~ $61,00,01,28                  ; bsr       wmult
+~ $72,02                        ; moveq.l   #2,d1
+~ $70,f5                        ; moveq.l   #-11,d0
+~ $61,00,01,20                  ; bsr       wmult
+~ $14,fc,00,fe                  ; move.b    #$FE,(a2)+
+~ $14,f8,.fd_track+1.W          ; move.b    (fd_track+1).w,(a2)+
+~ $14,f8,.fd_side+1.W           ; move.b    (fd_side+1).w,(a2)+
+~ $14,c4                        ; move.b    d4,(a2)+
+~ $14,fc,00,02                  ; move.b    #$02,(a2)+
+~ $14,fc,00,f7                  ; move.b    #$F7,(a2)+
+~ $72,15                        ; moveq.l   #21,d1
+~ $70,4e                        ; moveq.l   #78,d0
+~ $61,00,01,02                  ; bsr       wmult
+~ $72,0b                        ; moveq.l   #11,d1
+~ $42,00                        ; clr.b     d0
+~ $61,00,00,fa                  ; bsr       wmult
+~ $72,02                        ; moveq.l   #2,d1
+~ $70,f5                        ; moveq.l   #-11,d0
+~ $61,00,00,f2                  ; bsr       wmult
+~ $14,fc,00,fb                  ; move.b    #$FB,(a2)+
+~ $32,3c,00,ff                  ; move.w    #$00FF,d1
+;fmtrack4:
+~ $14,f8,.fd_virgin.W           ; move.b    (fd_virgin).w,(a2)+
+~ $14,f8,.fd_virgin+1.W         ; move.b    (fd_virgin+1).w,(a2)+
+~ $51,c9,ff,f6                  ; dbf       d1,fmtrack4
+~ $14,fc,00,f7                  ; move.b    #$F7,(a2)+
+~ $72,27                        ; moveq.l   #39,d1
+~ $70,4e                        ; moveq.l   #78,d0
+~ $61,00,00,d2                  ; bsr       wmult
+~ $4a,78,.fd_interlv.W          ; tst.w     (fd_interlv).w
+~ $6b,00,00,96                  ; bmi       fmtrack9
+~ $d8,78,.fd_interlv.W          ; add.w     (fd_interlv).w,d4
+~ $b8,78,.fd_spt.W              ; cmp.w     (fd_spt).w,d4
+~ $6f,90                        ; ble.s     fmtrack3
+~ $52,43                        ; addq.w    #1,d3
+~ $b6,78,.fd_interlv.W          ; cmp.w     (fd_interlv).w,d3
+~ $6f,86                        ; ble.s     fmtrack2
+;fmtrack5:
+~ $32,3c,0a,f0                  ; move.w    #$0AF0,d1
+~ $0c,78,00,0d,.fd_spt.W        ; cmpi.w    #13,(fd_spt).w
+~ $64,04                        ; bcc.s     fmtrack6
+~ $32,3c,05,78                  ; move.w    #$0578,d1
+;fmtrack6:
+~ $70,4e                        ; moveq.l   #78,d0
+~ $61,00,00,a2                  ; bsr       wmult
+~ $11,f8,.fd_buffer+3.W,86,0d   ; move.b    (fd_buffer+3).w,($FFFF860D).w
+~ $11,f8,.fd_buffer+2.W,86,0b   ; move.b    (fd_buffer+2).w,($FFFF860B).w
+~ $11,f8,.fd_buffer+1.W,86,09   ; move.b    (fd_buffer+1).w,($FFFF8609).w
+~ $3c,bc,00,90                  ; move.w    #$0090,(a6)
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $3c,bc,01,90                  ; move.w    #$0190,(a6)
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $7e,60                        ; moveq.l   #96,d7
+~ $61,00,04,9e                  ; bsr       fdcwrite
+~ $3c,bc,01,80                  ; move.w    #$0180,(a6)
+~ $3e,3c,00,f0                  ; move.w    #$00F0,d7
+~ $61,00,04,92                  ; bsr       fdcwrite
+~ $2e,38,04,ba                  ; move.l    ($000004BA).w,d7
+~ $de,bc,00,00,01,2c            ; add.l     #300,d7
+;fmtrack7:
+~ $08,38,00,05,fa,01            ; btst      #5,($FFFFFA01).w
+~ $67,24                        ; beq.s     fmtrac10
+~ $be,b8,04,ba                  ; cmp.l     ($000004BA).w,d7
+~ $62,f2                        ; bhi.s     fmtrack7
+~ $61,00,03,f8                  ; bsr       fdcreset
+;fmtrack8:
+~ $7e,01                        ; moveq.l   #1,d7
+~ $4e,75                        ; rts
+;fmtrack9:
+~ $b6,78,.fd_spt.W              ; cmp.w     (fd_spt).w,d3
+~ $67,00,ff,78                  ; beq       fmtrack5
+~ $3c,03                        ; move.w    d3,d6
+~ $dc,46                        ; add.w     d6,d6
+~ $38,33,60,00                  ; move.w    0(a3,d6.w),d4
+~ $52,43                        ; addq.w    #1,d3
+~ $60,00,fe,f2                  ; bra       fmtrack3
+;fmtrac10:
+~ $3c,bc,01,90                  ; move.w    #$0190,(a6)
+~ $30,16                        ; move.w    (a6),d0
+~ $08,00,00,00                  ; btst      #0,d0
+~ $67,da                        ; beq.s     fmtrack8
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $61,00,04,5e                  ; bsr       rdfdcd0
+~ $61,00,fd,02                  ; bsr       fdcerr
+~ $c0,3c,00,44                  ; and.b     #$44,d0
+;fmtrac11:
+~ $4e,75                        ; rts
+;wmult:
+~ $14,c0                        ; move.b    d0,(a2)+
+~ $51,c9,ff,fc                  ; dbf       d1,wmult
+~ $4e,75                        ; rts
+;flopver:
+~ $4a,78,04,a6                  ; tst.w     ($000004A6).w
+~ $67,00,fc,08                  ; beq       flopini4
+~ $61,00,04,58                  ; bsr       fdchange
+~ $70,f5                        ; moveq.l   #-11,d0 /* E_READF */
+~ $61,00,05,7a                  ; bsr       frbfmtcheck
+~ $61,00,01,84                  ; bsr       floplock
+~ $61,00,03,ba                  ; bsr       select
+~ $61,00,02,ae                  ; bsr       go2track
+~ $66,00,01,f8                  ; bne       flopfail
+~ $61,04                        ; bsr.s     verify1
+~ $60,00,02,00                  ; bra       flopok
+;verify1:
+~ $31,fc,ff,f5,.fd_deferr.W     ; move.w    #-11,().w /* E_READF */
+~ $24,78,.fd_buffer.W           ; movea.l   (fd_buffer).w,a2
+~ $06,b8,00,00,02,00,.fd_buffer.W ; addi.l    #$00000200,(fd_buffer).w
+;verify2:
+~ $31,fc,00,02,.fd_retry.W      ; move.w    #2,(fd_retry).w
+~ $3c,bc,00,84                  ; move.w    #$0084,(a6)
+~ $3e,38,.fd_sect.W             ; move.w    (fd_sect).w,d7
+~ $61,00,03,f2                  ; bsr       fdcread
+;verify3:
+~ $11,f8,.fd_buffer+3.W,86,0d   ; move.b    (fd_buffer+3).w,($FFFF860D).w
+~ $11,f8,.fd_buffer+2.W,86,0b   ; move.b    (fd_buffer+2).w,($FFFF860B).w
+~ $11,f8,.fd_buffer+1.W,86,09   ; move.b    (fd_buffer+1).w,($FFFF8609).w
+~ $3c,bc,01,90                  ; move.w    #$0190,(a6)
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $3c,bc,00,90                  ; move.w    #$0090,(a6)
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $4a,38,fa,01                  ; tst.b     ($FFFFFA01).w
+~ $3e,3c,00,01                  ; move.w    #$0001,d7
+~ $61,00,03,b0                  ; bsr       fdcread
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $3e,3c,00,80                  ; move.w    #$0080,d7
+~ $61,00,03,a4                  ; bsr       fdcread
+~ $2e,38,04,ba                  ; move.l    ($000004BA).w,d7
+~ $de,bc,00,00,01,2c            ; add.l     #300,d7
+;verify4:
+~ $08,38,00,05,fa,01            ; btst      #5,($FFFFFA01).w
+~ $67,0c                        ; beq.s     verify5
+~ $be,b8,04,ba                  ; cmp.l     ($000004BA).w,d7
+~ $62,f2                        ; bhi.s     verify4
+~ $61,00,03,02                  ; bsr       fdcreset
+~ $60,36                        ; bra.s     verify7
+;verify5:
+~ $3c,bc,00,90                  ; move.w    #$0090,(a6)
+~ $30,16                        ; move.w    (a6),d0
+~ $08,00,00,00                  ; btst      #0,d0
+~ $67,2a                        ; beq.s     verify7
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $61,00,03,80                  ; bsr       rdfdcd0
+~ $61,00,fc,24                  ; bsr       fdcerr
+~ $c0,3c,00,1c                  ; and.b     #$1C,d0
+~ $66,18                        ; bne.s     verify7
+;verify6:
+~ $52,78,.fd_sect.W             ; addq.w    #1,(fd_sect).w
+~ $53,78,.fd_scount.W           ; subq.w    #1,(fd_scount).w
+~ $66,00,ff,5a                  ; bne       verify2
+~ $04,b8,00,00,02,00,.fd_buffer.W  ; subi.l    #$00000200,(fd_buffer).w
+~ $42,52                        ; clr.w     (a2)
+~ $4e,75                        ; rts
+;verify7:
+~ $0c,78,00,01,.fd_retry.W      ; cmpi.w    #1,(fd_retry).w
+~ $66,04                        ; bne.s     verify8
+~ $61,00,01,a2                  ; bsr       reseek
+;verify8:
+~ $53,78,.fd_retry.W            ; subq.w    #1,(fd_retry).w
+~ $6a,00,ff,4c                  ; bpl       verify3
+~ $34,f8,.fd_sect.W             ; move.w    (fd_sect).w,(a2)+
+~ $60,ce                        ; bra.s     verify6
+;flopvbl:
+~ $4a,78,04,a6                  ; tst.w     ($000004A6).w
+~ $67,00,00,88                  ; beq       flopvbl5
+~ $50,f8,.fd_motoron.W          ; st        (fd_motoron).w
+~ $4a,78,04,3e                  ; tst.w     ($0000043E).w
+~ $66,7c                        ; bne.s     flopvbl5
+~ $4d,f8,86,06                  ; lea.l     ($FFFF8606).w,a6
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $20,38,04,66                  ; move.l    ($00000466).w,d0
+~ $12,00                        ; move.b    d0,d1
+~ $c2,3c,00,07                  ; and.b     #$07,d1
+~ $66,32                        ; bne.s     flopvbl2
+~ $e6,08                        ; lsr.b     #3,d0
+~ $c0,7c,00,01                  ; and.w     #$0001,d0
+~ $41,f8,.fd_wp.W               ; lea.l     (fd_wp).w,a0
+~ $d0,c0                        ; adda.w    d0,a0
+~ $b0,78,04,a6                  ; cmp.w     ($000004A6).w,d0
+~ $66,02                        ; bne.s     flopvbl1
+~ $42,40                        ; clr.w     d0
+;flopvbl1:
+~ $52,00                        ; addq.b    #1,d0
+~ $e3,08                        ; lsl.b     #1,d0
+~ $0a,00,00,07                  ; eori.b    #$07,d0
+~ $61,00,02,c8                  ; bsr       setporta
+~ $61,00,02,fa                  ; bsr       rdfdcd0
+~ $32,00                        ; move.w    d0,d1
+~ $08,01,00,06                  ; btst      #6,d1
+~ $56,d0                        ; sne       (a0)
+~ $10,02                        ; move.b    d2,d0
+~ $61,00,02,b6                  ; bsr       setporta
+;flopvbl2:
+~ $30,38,.fd_wp.W               ; move.w    (fd_wp).w,d0
+~ $81,78,.fd_latch.W            ; or.w      d0,(fd_latch).w
+~ $4a,78,.fd_desel.W            ; tst.w     (fd_desel).w
+~ $66,24                        ; bne.s     flopvbl4
+~ $20,38,04,ba                  ; move.l    ($000004BA).w,d0
+~ $b0,b9,.fd_timeout.L          ; cmp.l     fd_timeout,d0
+~ $64,0a                        ; bcc.s     flopvbl3
+~ $61,00,02,ce                  ; bsr       rdfdcd0
+~ $08,00,00,07                  ; btst      #7,d0
+~ $66,12                        ; bne.s     flopvbl5
+;flopvbl3:
+~ $10,3c,00,07                  ; move.b    #$07,d0
+~ $61,00,02,8a                  ; bsr       setporta
+~ $31,fc,00,01,.fd_desel.W      ; move.w    #1,(fd_desel).w
+;flopvbl4:
+~ $42,78,.fd_motoron.W          ; clr.w     (fd_motoron).w
+;flopvbl5:
+~ $4e,75                        ; rts
+;floplock:
+~ $48,f9,78,f8,.flopsregs.L     ; movem.l   d3-d7/a3-a6,flopsregs
+~ $4d,f8,86,06                  ; lea.l     ($FFFF8606).w,a6
+~ $50,f8,.fd_motoron.W          ; st        (fd_motoron).w
+~ $31,c0,.fd_deferr.W           ; move.w    d0,(fd_deferr).w
+~ $31,c0,.fd_curerr.W           ; move.w    d0,(fd_curerr).w
+~ $31,fc,00,01,04,3e            ; move.w    #$0001,($0000043E).w
+~ $21,ef,00,08,.fd_buffer.W     ; move.l    8(a7),(fd_buffer).w
+~ $31,ef,00,10,.fd_dev.W        ; move.w    16(a7),(fd_dev).w
+~ $31,ef,00,12,.fd_sect.W       ; move.w    18(a7),(fd_sect).w
+~ $31,ef,00,14,.fd_track.W      ; move.w    20(a7),(fd_track).w
+~ $31,ef,00,16,.fd_side.W       ; move.w    22(a7),(fd_side).w
+~ $31,ef,00,18,.fd_scount.W     ; move.w    24(a7),(fd_scount).w
+~ $31,fc,00,02,.fd_retry.W      ; move.w    #2,(fd_retry).w
+~ $43,f8,.dsb.W                 ; lea.l     (dsb).w,a1
+~ $4a,78,.fd_dev.W              ; tst.w     (fd_dev).w
+~ $67,04                        ; beq.s     floploc1
+~ $43,f8,.dsb+8.W               ; lea.l     (dsb+8).w,a1
+;floploc1:
+~ $4a,69,00,02                  ; tst.w     2(a1)
+~ $6a,22                        ; bpl.s     floploc3
+~ $61,00,01,dc                  ; bsr       select
+~ $42,69,00,02                  ; clr.w     2(a1)
+~ $61,00,01,18                  ; bsr       restore
+~ $67,14                        ; beq.s     floploc3
+_IF .FLOP_TEST
+~ $7e,01                        ; moveq.l   #1,d7
+_ELSE
+~ $7e,0A                        ; moveq.l   #10,d7
+_ENDIF
+~ $61,00,00,80                  ; bsr       hardsee1
+~ $66,06                        ; bne.s     floploc2
+~ $61,00,01,0a                  ; bsr       restore
+~ $67,06                        ; beq.s     floploc3
+;floploc2:
+~ $33,7c,ff,00,00,02            ; move.w    #$FF00,2(a1)
+;floploc3:
+~ $4e,75                        ; rts
+;flopfail:
+~ $70,01                        ; moveq.l   #1,d0
+~ $61,00,02,80                  ; bsr       setdchg
+~ $30,38,.fd_curerr.W           ; move.w    (fd_curerr).w,d0
+~ $48,c0                        ; ext.l     d0
+~ $60,02                        ; bra.s     flopok1
+;flopok:
+~ $42,80                        ; clr.l     d0
+;flopok1:
+~ $2f,00                        ; move.l    d0,-(a7)
+~ $4e,b9,.flush_cache+.BASE.L   ; jsr       flush_cache_all_030
+~ $3c,bc,00,86                  ; move.w    #$0086,(a6)
+~ $3e,29,00,02                  ; move.w    2(a1),d7
+~ $61,00,02,02                  ; bsr       fdcread
+~ $7e,10                        ; moveq.l   #16,d7
+~ $61,00,00,f0                  ; bsr       flopcmds
+~ $20,38,04,ba                  ; move.l    ($000004BA).w,d0
+~ $d0,bc,00,00,03,e8            ; add.l     #1000,d0
+~ $23,c0,.fd_timeout.L          ; move.l    d0,fd_timeout
+~ $30,38,.fd_dev.W              ; move.w    (fd_dev).w,d0
+~ $e5,48                        ; lsl.w     #2,d0
+~ $41,f8,.fd_lastacc.W          ; lea.l     (fd_lastacc).w,a0
+~ $21,b8,04,66,00,00            ; move.l    ($00000466).w,0(a0,d0.w)
+~ $0c,78,00,01,04,a6            ; cmpi.w    #$0001,($000004A6).w
+~ $66,06                        ; bne.s     flopok2
+~ $21,78,04,66,00,04            ; move.l    ($00000466).w,4(a0)
+;flopok2:
+~ $20,1f                        ; move.l    (a7)+,d0
+~ $4c,f8,78,f8,.flopsregs.W     ; movem.l   (flopsregs).w,d3-d7/a3-a6
+~ $61,00,02,90                  ; bsr       frbbackcopy
+~ $42,78,04,3e                  ; clr.w     ($0000043E).w
+~ $4e,75                        ; rts
+;hardseek:
+~ $3e,38,.fd_track.W            ; move.w    (fd_track).w,d7
+;hardsee1:
+~ $31,fc,ff,fa,.fd_curerr.W     ; move.w    #-6,(fd_curerr).w /* E_SEEK */
+~ $3c,bc,00,86                  ; move.w    #$0086,(a6)
+~ $61,00,01,aa                  ; bsr       fdcread
+~ $7e,10                        ; moveq.l   #16,d7
+~ $60,00,00,98                  ; bra       flopcmds
+;reseek:
+~ $31,fc,ff,fa,.fd_curerr.W     ; move.w    #-6,(fd_curerr).w /* E_SEEK */
+~ $61,74                        ; bsr.s     restore
+~ $66,52                        ; bne.s     go2trret
+~ $42,69,00,02                  ; clr.w     2(a1)
+~ $3c,bc,00,82                  ; move.w    #$0082,(a6)
+~ $42,47                        ; clr.w     d7
+~ $61,00,01,8c                  ; bsr       fdcread
+~ $3c,bc,00,86                  ; move.w    #$0086,(a6)
+~ $3e,3c,00,05                  ; move.w    #$0005,d7
+~ $61,00,01,80                  ; bsr       fdcread
+~ $7e,10                        ; moveq.l   #16,d7
+~ $61,6e                        ; bsr.s     flopcmds
+~ $66,32                        ; bne.s     go2trret
+~ $33,7c,00,05,00,02            ; move.w    #5,2(a1)
+;go2track:
+~ $31,fc,00,01,.fd_rtryseek.W   ; move.w    #$0001,(fd_rtryseek).w
+;go2trac1:
+~ $31,fc,ff,fa,.fd_curerr.W     ; move.w    #-6,(fd_curerr).w
+~ $3c,bc,00,86                  ; move.w    #$0086,(a6)
+~ $3e,38,.fd_track.W            ; move.w    (fd_track).w,d7
+~ $61,00,01,5c                  ; bsr       fdcread
+_IF .FASTLOAD
+~ $7e,10                        ; moveq.l   #16,d7
+_ELSE
+~ $7e,14                        ; moveq.l   #20,d7
+_ENDIF
+~ $61,4a                        ; bsr.s     flopcmds
+~ $66,0e                        ; bne.s     go2trret
+~ $c0,3c,00,18                  ; and.b     #$18,d0
+~ $66,0a                        ; bne.s     go2trac2
+~ $33,78,.fd_track.W,00,02      ; move.w    (fd_track).w,2(a1)
+~ $42,47                        ; clr.w     d7
+;go2trret:
+~ $4e,75                        ; rts
+;go2trac2:
+~ $30,29,00,04                  ; move.w    4(a1),d0
+~ $c0,7c,00,03                  ; and.w     #$0003,d0
+~ $0a,40,00,03                  ; eori.w    #$0003,d0
+~ $33,40,00,04                  ; move.w    d0,4(a1)
+~ $61,00,00,84                  ; bsr       steset
+~ $53,78,.fd_rtryseek.W         ; subq.w    #1,(fd_rtryseek).w
+~ $66,e4                        ; bne.s     go2trret
+~ $61,02                        ; bsr.s     restore
+~ $60,ba                        ; bra.s     go2trac1
+;restore:
+~ $7e,00                        ; moveq.l   #0,d7
+~ $61,16                        ; bsr.s     flopcmds
+~ $66,0e                        ; bne.s     restore1
+~ $08,00,00,02                  ; btst      #2,d0
+~ $0a,3c,00,04                  ; eori.b    #$04,ccr
+~ $66,04                        ; bne.s     restore1
+~ $42,69,00,02                  ; clr.w     2(a1)
+;restore1:
+~ $4e,75                        ; rts
+;dseekrt:
+~ $01,01,00,00                  ; dc.b      1,1,0,0
+;flopcmds:
+~ $30,29,00,06                  ; move.w    6(a1),d0
+~ $c0,7c,00,03                  ; and.w     #$0003,d0
+~ $4a,69,00,04                  ; tst.w     4(a1)
+~ $67,08                        ; beq.s     flopcms1
+~ $41,fa,ff,ec                  ; lea.l     dseekrt(pc),a0
+~ $10,30,00,00                  ; move.b    0(a0,d0.w),d0
+;flopcms1:
+~ $8e,00                        ; or.b      d0,d7
+~ $8e,11                        ; or.b      (a1),d7
+~ $61,42                        ; bsr.s     steset
+;flopcmd:
+~ $2c,38,04,ba                  ; move.l    ($000004BA).w,d6
+~ $dc,bc,00,00,01,2c            ; add.l     #300,d6
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $61,00,00,ee                  ; bsr       rdfdcd0
+~ $08,00,00,07                  ; btst      #7,d0
+~ $66,0a                        ; bne.s     flopcmd1
+~ $2c,38,04,ba                  ; move.l    ($000004BA).w,d6
+~ $dc,bc,00,00,02,58            ; add.l     #$00000258,d6
+;flopcmd1:
+~ $61,00,00,cc                  ; bsr       fdcread
+;flopcmd2:
+~ $bc,b8,04,ba                  ; cmp.l     ($000004BA).w,d6
+~ $65,10                        ; bcs.s     flopcmd3
+~ $08,38,00,05,fa,01            ; btst      #5,($FFFFFA01).w
+~ $66,f2                        ; bne.s     flopcmd2
+~ $61,00,00,c8                  ; bsr       rdfdcd0
+~ $7c,00                        ; moveq.l   #0,d6
+~ $4e,75                        ; rts
+;flopcmd3:
+~ $61,2c                        ; bsr.s     fdcreset
+~ $7c,ff                        ; moveq.l   #-1,d6
+~ $4e,75                        ; rts
+;steset:
+~ $4a,38,0a,13                  ; tst.b     ($00000A13).w
+~ $66,06                        ; bne.s     steset1
+~ $31,e9,00,04,86,0e            ; move.w    4(a1),($FFFF860E).w
+;steset1:
+~ $4e,75                        ; rts
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff,ff,ff,ff,ff,ff,ff
+~ $ff,ff
+;fdcreset:
+~ $3c,bc,00,80                  ; move.w    #$0080,(a6)
+~ $3e,3c,00,d0                  ; move.w    #$00D0,d7
+~ $61,7c                        ; bsr.s     fdcread
+~ $3f,00                        ; move.w    d0,-(a7)
+~ $30,3c,01,14                  ; move.w    #$0114,d0
+~ $4e,b9,.mfpdelay+.BASE.L      ; jsr       mfpdelay
+~ $30,1f                        ; move.w    (a7)+,d0
+~ $61,7a                        ; bsr.s     rdfdcd0
+~ $4e,75                        ; rts
+;select:
+~ $42,78,.fd_desel.W            ; clr.w     (fd_desel).w
+~ $30,38,.fd_dev.W              ; move.w    (fd_dev).w,d0
+~ $52,00                        ; addq.b    #1,d0
+~ $e3,08                        ; lsl.b     #1,d0
+~ $80,78,.fd_side.W             ; or.w      (fd_side).w,d0
+~ $0a,00,00,07                  ; eori.b    #$07,d0
+~ $c0,3c,00,07                  ; and.b     #$07,d0
+~ $61,28                        ; bsr.s     setporta
+~ $3c,bc,00,82                  ; move.w    #$0082,(a6)
+~ $3e,29,00,02                  ; move.w    2(a1),d7
+~ $61,46                        ; bsr.s     fdcread
+;select1:
+~ $3c,bc,00,84                  ; move.w    #$0084,(a6)
+~ $3e,38,.fd_sect.W             ; move.w    (fd_sect).w,d7
+~ $61,3c                        ; bsr.s     fdcread
+~ $11,f8,.fd_buffer+3.W,86,0d   ; move.b    (fd_buffer+3).w,($FFFF860D).w
+~ $11,f8,.fd_buffer+2.W,86,0b   ; move.b    (fd_buffer+2).w,($FFFF860B).w
+~ $11,f8,.fd_buffer+1.W,86,09   ; move.b    (fd_buffer+1).w,($FFFF8609).w
+~ $4e,75                        ; rts
+;setporta:
+~ $40,e7                        ; move.w    sr,-(a7)
+~ $00,7c,07,00                  ; ori.w     #$0700,sr
+~ $11,fc,00,0e,88,00            ; move.b    #$0E,($FFFF8800).w
+~ $12,38,88,00                  ; move.b    ($FFFF8800).w,d1
+~ $14,01                        ; move.b    d1,d2
+~ $c2,3c,00,f8                  ; and.b     #$F8,d1
+~ $82,00                        ; or.b      d0,d1
+~ $11,c1,88,02                  ; move.b    d1,($FFFF8802).w
+~ $46,df                        ; move.w    (a7)+,sr
+~ $4e,75                        ; rts
+;fdcwrite:
+~ $48,47                        ; swap      d7
+~ $3e,3c,01,80                  ; move.w    #$0180,d7
+~ $60,06                        ; bra.s     wrfdcd7
+;fdcread:
+~ $48,47                        ; swap      d7
+~ $3e,3c,00,80                  ; move.w    #$0080,d7
+;wrfdcd7:
+~ $61,0e                        ; bsr.s     rwdelay
+~ $21,c7,86,04                  ; move.l    d7,($FFFF8604).w
+~ $4e,75                        ; rts
+;rdfdcd0:
+~ $61,06                        ; bsr.s     rwdelay
+~ $30,38,86,04                  ; move.w    ($FFFF8604).w,d0
+~ $4e,75                        ; rts
+;rwdelay:
+~ $3f,00                        ; move.w    d0,-(a7)
+! ~ + 2            ;Damit .FLOPPY_DELAY nicht reloziert wird
+~ $30,3c,.FLOPPY_DELAY.W        ; move.w    #$0119,d0
+~ $4e,b9,.mfpdelay+.BASE.L      ; jsr       mfpdelay
+~ $30,1f                        ; move.w    (a7)+,d0
+~ $4e,75                        ; rts
+;fdchange:
+~ $0c,78,00,01,04,a6            ; cmpi.w    #$0001,($000004A6).w
+~ $66,30                        ; bne.s     fdchang2
+~ $30,2f,00,10                  ; move.w    16(a7),d0
+~ $b0,78,.curflop.W             ; cmp.w     (curflop).w,d0
+~ $67,22                        ; beq.s     fdchang1
+~ $3f,00                        ; move.w    d0,-(a7)
+~ $3f,3c,ff,ef                  ; move.w    #-17,-(a7)
+~ $4e,b9,.callcrit+.BASE.L      ; jsr       callcrit
+~ $58,4f                        ; addq.w    #4,a7
+~ $31,fc,ff,ff,.fd_latch.W      ; move.w    #-1,(fd_latch).w
+~ $41,f8,.fd_lastacc.W          ; lea.l     (fd_lastacc).w,a0
+~ $42,98                        ; clr.l     (a0)+
+~ $42,90                        ; clr.l     (a0)
+~ $31,ef,00,10,.curflop.W       ; move.w    16(a7),(curflop).w
+;fdchang1:
+~ $42,6f,00,10                  ; clr.w     16(a7)
+;fdchang2:
+~ $4e,75                        ; rts
+;setdchg:
+~ $41,f8,.drivechange.W         ; lea.l     (drivechange).w,a0
+~ $1f,00                        ; move.b    d0,-(a7)
+~ $30,38,.fd_dev.W              ; move.w    (fd_dev).w,d0
+~ $0c,78,00,01,04,a6            ; cmpi.w    #1,($000004A6).w
+~ $66,04                        ; bne.s     setdchg1
+~ $30,38,.curflop.W             ; move.w    (curflop).w,d0
+;setdchg1:
+~ $11,9f,00,00                  ; move.b    (a7)+,0(a0,d0.w)
+~ $4e,75                        ; rts
+;floprate:
+~ $43,f9,.dsb.L                 ; lea.l     dsb,a1
+~ $4a,6f,00,04                  ; tst.w     4(a7)
+~ $67,06                        ; beq.s     floprat1
+~ $43,f9,.dsb+8.L               ; lea.l     dsb+8,a1
+;floprat1:
+~ $30,29,00,06                  ; move.w    6(a1),d0
+~ $32,2f,00,06                  ; move.w    6(a7),d1
+~ $b2,7c,ff,ff                  ; cmp.w     #$FFFF,d1
+~ $67,16                        ; beq.s     floprat2
+~ $b2,7c,ff,fe                  ; cmp.w     #$FFFE,d1
+~ $67,14                        ; beq.s     floprat3
+~ $b2,7c,ff,fd                  ; cmp.w     #$FFFD,d1
+~ $67,16                        ; beq.s     floprat4
+~ $b2,7c,ff,fc                  ; cmp.w     #$FFFC,d1
+~ $67,16                        ; beq.s     floprat5
+~ $33,41,00,06                  ; move.w    d1,6(a1)
+;floprat2:
+~ $48,c0                        ; ext.l     d0
+~ $4e,75                        ; rts
+;floprat3:
+~ $12,bc,00,08                  ; move.b    #$08,(a1)
+~ $70,00                        ; moveq.l   #0,d0
+~ $4e,75                        ; rts
+;floprat4:
+~ $42,11                        ; clr.b     (a1)
+~ $70,00                        ; moveq.l   #0,d0
+~ $4e,75                        ; rts
+;floprat5:
+~ $4a,11                        ; tst.b     (a1)
+~ $56,c0                        ; sne       d0
+~ $48,80                        ; ext.w     d0
+~ $48,c0                        ; ext.l     d0
+~ $4e,75                        ; rts
+;frbbackcopy:
+~ $32,38,.fd_cscnt.W            ; move.w    (fd_cscnt).w,d1
+~ $67,2e                        ; beq.s     frbback3
+~ $2f,00                        ; move.l    d0,-(a7)
+~ $4e,b9,.flush_cache+.BASE.L   ; jsr       flush_cache_all_030
+~ $20,78,.fd_copyp.W            ; movea.l   (fd_copyp).w,a0
+~ $22,78,.fd_frb.W              ; movea.l   (fd_frb).w,a1
+;frbback0:
+~ $42,78,.fd_cscnt.W            ; clr.w     (fd_cscnt).w
+~ $eb,41                        ; asl.w     #5,d1
+~ $53,41                        ; subq.w    #1,d1
+~ $20,08                        ; move.l    a0,d0
+~ $08,00,00,01                  ; btst      #1,d0
+~ $66,10                        ; bne.s     frbback4
+~ $20,1f                        ; move.l    (a7)+,d0
+;frbback1:
+~ $20,d9                        ; move.l    (a1)+,(a0)+
+;frbback2:
+~ $20,d9                        ; move.l    (a1)+,(a0)+
+~ $20,d9                        ; move.l    (a1)+,(a0)+
+~ $20,d9                        ; move.l    (a1)+,(a0)+
+~ $51,c9,ff,f6                  ; dbf       d1,frbback1
+;frbback3:
+~ $4e,75                        ; rts
+;frbback4:
+~ $20,1f                        ; move.l    (a7)+,d0
+~ $30,d9                        ; move.w    (a1)+,(a0)+
+~ $61,ee                        ; bsr.s     frbback2
+~ $30,d9                        ; move.w    (a1)+,(a0)+
+~ $4e,75                        ; rts
+;frbrdcheck:
+~ $20,6f,00,08                  ; movea.l   8(a7),a0
+~ $b1,f8,04,2e                  ; cmpa.l    ($0000042E).w,a0
+~ $65,ea                        ; bcs.s     frbback3
+~ $61,54                        ; bsr.s     getfrb
+~ $21,ef,00,08,.fd_copyp.W      ; move.l    8(a7),(fd_copyp).w
+~ $2f,78,.fd_frb.W,00,08        ; move.l    (fd_frb).w,8(a7)
+~ $31,ef,00,18,.fd_cscnt.W      ; move.w    24(a7),(fd_cscnt).w
+~ $4e,75                        ; rts
+;frbwrcheck:
+~ $20,6f,00,08                  ; movea.l   8(a7),a0
+~ $b1,f8,04,2e                  ; cmpa.l    ($0000042E).w,a0
+~ $65,ca                        ; bcs.s     frbback3
+~ $61,34                        ; bsr.s     getfrb
+~ $22,6f,00,08                  ; movea.l   8(a7),a1
+~ $20,78,.fd_frb.W              ; movea.l   (fd_frb).w,a0
+~ $2f,48,00,08                  ; move.l    a0,8(a7)
+~ $32,2f,00,18                  ; move.w    24(a7),d1
+~ $2f,00                        ; move.l    d0,-(a7)
+~ $60,96                        ; bra.s     frbback0
+;frbfmtcheck:
+~ $20,6f,00,08                  ; movea.l   8(a7),a0
+~ $b1,f8,04,2e                  ; cmpa.l    ($0000042E).w,a0
+~ $65,aa                        ; bcs.s     frbback3
+~ $61,14                        ; bsr.s     getfrb
+~ $21,ef,00,08,.fd_copyp.W      ; move.l    8(a7),(fd_copyp).w
+~ $2f,78,.fd_frb.W,00,08        ; move.l    (fd_frb).w,8(a7)
+~ $31,fc,00,01,.fd_cscnt.W      ; move.w    #1,(fd_cscnt).w
+~ $4e,75                        ; rts
+;getfrb:
+~ $4a,b9,.fd_frb.L              ; tst.l     fd_frb
+~ $66,20                        ; bne.s     getfrb3
+~ $20,78,05,a0                  ; movea.l   ($000005A0).w,a0
+~ $b0,fc,00,00                  ; cmpa.w    #$0000,a0
+~ $67,18                        ; beq.s     getfrb4
+;getfrb1:
+~ $4a,90                        ; tst.l     (a0)
+~ $67,14                        ; beq.s     getfrb4
+~ $0c,98,5f,46,52,42            ; cmpi.l    #$5F465242,(a0)+
+~ $67,04                        ; beq.s     getfrb2
+~ $58,88                        ; addq.l    #4,a0
+~ $60,f0                        ; bra.s     getfrb1
+;getfrb2:
+~ $23,d8,.fd_frb.L              ; move.l    (a0)+,fd_frb
+;getfrb3:
+~ $4e,75                        ; rts
+;getfrb4:
+~ $50,8f                        ; addq.l    #8,a7
+~ $70,f4                        ; moveq.l   #-12,d0
+~ $4e,75                        ; rts

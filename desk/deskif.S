@@ -35,6 +35,19 @@
 #  endif
 #endif
 
+#if TP_WINX
+#define _wm_update _wx_update
+#define _wm_close _wx_close
+#define _wm_delete _wx_delete
+#define _wm_find _wx_find
+#define _wm_create _wx_create
+#define _wm_open _wx_open
+#define _wm_get _wx_get
+#define _wm_set _wx_set
+#define _wm_calc _wx_calc
+#endif
+
+
 #define CCODE 0
 
 	xref _pglobal
@@ -310,9 +323,11 @@ WORD graf_handle(WORD *gwchar, WORD *ghchar, WORD *gwbox, WORD *ghbox)
   *ghchar = gl_hchar;
   *gwbox = gl_wbox;
   *ghbox = gl_hbox;
-  return(gl_handle);
+  return gl_handle;
 }
 #endif
+/* actually unused */
+#if BINEXACT
 	xdef _graf_handle
 _graf_handle:
 	lea	4(sp),a1
@@ -326,6 +341,7 @@ _graf_handle:
 	move.w	_gl_hbox,(a0)
 	move.w	_gl_handle,d0
 	rts
+#endif
 
 
 #if CCODE

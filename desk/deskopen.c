@@ -595,7 +595,11 @@ PP(register WINDOW *win;)
 			cat_path(buffer, win->w_path);
 	} else
 	{
+#if TP_WINX
+		close_top(win);
+#else
 		close_top();
+#endif
 	}
 }
 
@@ -604,6 +608,17 @@ PP(register WINDOW *win;)
  * Close top window
  */
 /* 306de: 00e30eca */
+#if TP_WINX
+VOID close_top(P(WINDOW *) win)
+PP(register WINDOW *win;)
+{
+	if (win != NULL)
+	{
+		do_box(win, win->w_icon, TRUE, FALSE, FALSE);
+		close_window(win->w_id, TRUE);	/* close it */
+	}
+}
+#else
 VOID close_top(NOTHING)
 {
 	register WINDOW *win;
@@ -614,6 +629,7 @@ VOID close_top(NOTHING)
 		close_window(win->w_id, TRUE);	/* close it */
 	}
 }
+#endif
 
 
 /*

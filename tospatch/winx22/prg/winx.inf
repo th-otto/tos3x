@@ -1,0 +1,100 @@
+# WINX.INF
+
+# Allgemeines
+# ===========
+# Ueber diese ASCII-Datei kann man ein mit dem Patchprogramm WINX
+# modifiziertes TOS konfigurieren. Sie wird beim Start von WINX (bzw.
+# WINXCOOK) eingelesen, falls sie sich ebenfalls im AUTO-Ordner
+# befindet. WINX.INF kann mit einem einfachen Editor veraendert werden.
+# Leidet man unter Speicherknappheit, sollte man alle Kommentare aus
+# WINX.INF entfernen, da es unkomprimiert im Speicher gehalten wird.
+# Kommentare werden mit dem Zeichen '#' eingeleitet und reichen bis zum
+# Ende der Zeile. Zeilen duerfen bis zu 128 Zeichen lang werden.
+# Leerzeilen, Leerzeichen und Tabs koennen beliebig eingefuegt werden.
+# Zeilen, die nicht mit einem Kommentar beginnen, enthalten Kon-
+# figurationsinformationen.
+
+# Schalter
+# ========
+# Einzelne Eigenschaften der WINX-Patches koennen gezielt ueber
+# Konfigurationsschalter ein- bzw. ausgeschaltet werden. Die 'globalen'
+# Schalter wirken dabei auf alle Applikationen und Accessories.
+# Neben diesen hat jedes Programm noch eigene 'lokale' Schalter, die
+# individuelle Eigenschaften des jeweiligen Programms bestimmen.
+# Ein <SCHALTER> wird angegeben durch seinen Index und seinen Zustand
+# (dabei steht '+' fuer ein- und '-' fÅr ausgeschaltet).
+# Eine <SCHALTERLISTE> kann aus beliebig vielen <SCHALTER>n bestehen.
+# Beispiel fÅr eine Schalterliste:  2- 7- 4+.
+
+# Globale Schalter
+# ----------------
+# Beim Start des GEM wird der Zustand der globalen Schalter aus der
+# .GLOBAL-Zeile uebernommen. Schalter, die dort nicht definiert sind,
+# werden eingeschaltet.
+# Syntax: '.GLOBAL' '=' <SCHALTERLISTE>.
+
+# G1 40 Fenster (sonst 8)
+# G2 Rechtsklick auf Fensterrahmen an SCRENMGR (sonst an Applikation)
+# G3 Einfacher Linksklick aktiviert Echtzeitfunktionen 
+#    (sonst Rechtsklick, falls G2 eingeschaltet ist, sonst Doppelklick)
+# G4 Scrollpfeile waehrend der Benutzung selektieren
+# G5 Scrollbalken waehrend der Benutzung selektieren
+# G6 Bewegungselement waehrend der Benutzung selektieren
+# G7 Groessenelement waehrend der Benutzung selektieren
+# G8 Sliderhintergrund mit breitem Rahmen (sonst schmal)
+# G9 Hintere Fenster auch bei Klick auf Kontrollelemente nach vorne
+#    bringen, falls die CONTROL-Taste gedrueckt ist
+# G10 Vorderstes Fenster bei Klick auf den Titel nach hinten stellen
+# G11 Fensterrahmen im 3D-Look (ab GEM 3.31)
+# G12 Musterbezugspunktkorrektur
+# G13 Applikationsname bei Pexec ins GEM uebernehmen (wg. appl_find)
+
+.GLOBAL  = 5-
+
+# Lokale Schalter
+# ---------------
+# Beim Start eines Programms werden seine lokalen Schalter gesetzt.
+# Dazu wird WINX.INF nach der ersten Zeile durchsucht, welche mit
+# einem Namensmuster beginnt, das auf den Programmnamen passt. Diese
+# Zeile liefert die lokalen Schalter des Programms.
+# Syntax: <NAME> '=' <SCHALTERLISTE>.
+#   <NAME> ist der Namensanteil eines Programmnamens PFAD\NAME.EXT
+#   (d.h. der Name OHNE Pfad und Extension).
+#   <NAME> darf die Wildcards * und ? enthalten. Dabei passt * auf
+#   eine beliebig lange Zeichenkette und ? auf genau ein Zeichen.
+#   Der leere Name ist fuer das GEM-Desktop reserviert.
+#   Der Name, der nur aus einem * besteht, sollte das letzte Namens-
+#   muster sein, da es auf alle Programmnamen passt.
+# Schalter, die nicht in der Zeile mit dem Namensmuster definiert sind,
+# werden aus der Schalterliste von '*' uebernommen. Schalter, die auch
+# dort nicht definiert sind, werden eingeschaltet.
+
+# L1 Kontrollelemente an hinteren Fenstern
+# L2 Minimale Anzahl von Rahmenelementen
+# L3 Applikation akzeptiert WM_ONTOP- und WM_UNTOPPED-Nachricht
+# L4 Optimiertes Redraw beim Aktivieren
+# L5 Optimiertes Redraw beim Verschieben
+# L6 Optimiertes Redraw beim Vergroessern (nur GEM 3.xx)
+# L7 Optimiertes Verschmelzen von Redraw-Nachrichten (nur GEM 3.xx)
+# L8 Alert bei falschem Aufruf von Fensterfunktionen (nur GEM 3.xx)
+# L9 Scrollpfeile getrennt (sonst rechts unten zusammen)
+# L10 Scrollpfeile mit Scrollboxen (erst ab GEM 3.xx mit Funktion)
+# L11 Fenster auch links aus Bildschirm schiebbar (sonst nur rechts)
+# L12 Fehlerhafte Fensterposition und -groesse korrigieren
+
+         =        # GEM-Desktop
+TC*      = 1- 11- # Beispiel fuer ein Programm, das keine Kontroll-
+                  #  elemente an hinteren Fenstern erlaubt und seine
+                  #  Fenster nicht links rausschieben laesst
+*        =        # Lokale Schalter fuer Programme, deren Name auf kein
+                  #  vorangehendes Namensmuster passt. Ausserdem werden
+                  #  aus diesem Eintrag alle Schalter uebernommen, die
+                  #  unter dem gefunden Eintrag nicht definiert sind.
+                  
+# Verzoegerungswerte
+# ==================
+# Einstellen der Verzoegerungswerte fuer die Scrollelemente (Ansprech-
+# zeit und Wiederholrate), das Schliess- und das Maximalgroessenelement.
+# Syntax: '.DDELAY' '=' <ARROW1> ',' <ARROW2> ',' <CLOSE> ',' <FULL>
+
+.DDELAY = 460,40,1000,2000

@@ -1,0 +1,324 @@
+;*******************************************************************************
+;* Harun Scheutzow: (implementiert von MH)
+;* Neue Bios-Routinen Getbpb und Rwabs mit ED-UnterstÅtzung:
+;* - Es werden keine nicht erfolgten Diskettenwechsel mehr erkannt.
+;* - Rwabs-Schreibroutinen zerstîren keine VDI-Zeichensatzinformationen mehr.
+;* - Es kînnen auch Disketten mit nur einer FAT genutzt werden.
+
+.BIOS1_START = 480C
+.BIOS1_END   = 4A62
+.BIOS2_START = 4CE2
+.BIOS2_END   = 4F04
+
+.ADR1  = 1680       ;LOW MEM
+.ADR2  = 1682       ;LOW MEM
+.ADR3  = 8896       ;LOW MEM
+.ADR4  = 8D74       ;LOW MEM
+.ADR5  = 8EBA       ;LOW MEM
+
+.ADR6  =  D6C       ;TOS (relativ)
+.ADR7  = 10C4       ;TOS (relativ)
+.ADR8  = 3DB4       ;TOS (relativ)
+.ADR9  = 3EB0       ;TOS (relativ)
+.ADR10 = 419A       ;TOS (relativ)
+.ADR11 = 4ADA       ;TOS (relativ)
+
+.BIOS1_START
+~ $4E,56,00,00                      ;LINK      A6,#0
+~ $48,E7,03,0C                      ;MOVEM.L   A4-A5/D6-D7,-(A7)
+~ $2A,7C,.ADR5.L                    ;MOVEA.L   #.ADR5,A5
+~ $30,2E,00,08                      ;MOVE.W    8(A6),D0
+~ $67,08                            ;BEQ.S     8(PC)                L0000
+~ $DA,FC,00,24                      ;ADDA.W    #$24,A5
+~ $53,40                            ;SUBQ.W    #1,D0
+~ $66,5C                            ;BNE.S     92(PC)               L0003
+~ $28,4D                      ;L0000:MOVEA.L   A5,A4
+~ $3F,3C,00,06                ;L0001:MOVE.W    #6,-(A7)
+~ $42,A7                            ;CLR.L     -(A7)
+~ $3F,3C,00,01                      ;MOVE.W    #1,-(A7)
+~ $3F,2E,00,08                      ;MOVE.W    8(A6),-(A7)
+~ $42,A7                            ;CLR.L     -(A7)
+~ $2F,39,00,00,04,C6                ;MOVE.L    $4C6.L,-(A7)
+~ $4E,B9,.ADR8+.BASE.L              ;JSR       .ADR8
+~ $4F,EF,00,12                      ;LEA       18(A7),A7
+~ $4A,80                            ;TST.L     D0
+~ $6C,0E                            ;BGE.S     14(PC)               L0002
+~ $3F,2E,00,08                      ;MOVE.W    8(A6),-(A7)
+~ $3F,00                            ;MOVE.W    D0,-(A7)
+~ $4E,B9,.ADR6+.BASE.L              ;JSR       .ADR6
+~ $58,8F                            ;ADDQ.L    #4,A7
+~ $0C,80,00,01,00,00          ;L0002:CMPI.L    #$10000,D0
+~ $67,C6                            ;BEQ.S     -58(PC)              L0001
+~ $4A,80                            ;TST.L     D0
+~ $6B,1C                            ;BMI.S     28(PC)               L0003
+~ $20,79,00,00,04,C6                ;MOVEA.L   $4C6.L,A0
+~ $10,28,00,0C                      ;MOVE.B    12(A0),D0
+~ $E1,40                            ;ASL.W     #8,D0
+~ $10,28,00,0B                      ;MOVE.B    11(A0),D0
+~ $3E,00                            ;MOVE.W    D0,D7
+~ $6F,08                            ;BLE.S     8(PC)                L0003
+~ $42,46                            ;CLR.W     D6
+~ $1C,28,00,0D                      ;MOVE.B    13(A0),D6
+~ $66,06                            ;BNE.S     6(PC)                L0004
+~ $42,80                      ;L0003:CLR.L     D0
+~ $60,00,01,26                      ;BRA       294(PC)              L000D
+~ $38,87                      ;L0004:MOVE.W    D7,(A4)
+~ $39,46,00,02                      ;MOVE.W    D6,2(A4)
+~ $10,28,00,17                      ;MOVE.B    23(A0),D0
+~ $E1,40                            ;ASL.W     #8,D0
+~ $10,28,00,16                      ;MOVE.B    22(A0),D0
+~ $39,40,00,08                      ;MOVE.W    D0,8(A4)
+~ $42,47                            ;CLR.W     D7
+~ $0C,28,00,02,00,10                ;CMPI.B    #2,16(A0)
+~ $64,06                            ;BCC.S     6(PC)                L0005
+~ $42,40                            ;CLR.W     D0
+~ $00,47,00,02                      ;ORI.W     #2,D7
+~ $39,47,00,10                ;L0005:MOVE.W    D7,16(A4)
+~ $52,40                            ;ADDQ.W    #1,D0
+~ $39,40,00,0A                      ;MOVE.W    D0,10(A4)
+~ $30,14                            ;MOVE.W    (A4),D0
+~ $C1,EC,00,02                      ;MULS      2(A4),D0
+~ $39,40,00,04                      ;MOVE.W    D0,4(A4)
+~ $10,28,00,12                      ;MOVE.B    18(A0),D0
+~ $E1,40                            ;ASL.W     #8,D0
+~ $10,28,00,11                      ;MOVE.B    17(A0),D0
+~ $EB,40                            ;ASL.W     #5,D0
+~ $48,C0                            ;EXT.L     D0
+~ $81,D4                            ;DIVS      (A4),D0
+~ $39,40,00,06                      ;MOVE.W    D0,6(A4)
+~ $30,2C,00,0A                      ;MOVE.W    10(A4),D0
+~ $D0,6C,00,06                      ;ADD.W     6(A4),D0
+~ $D0,6C,00,08                      ;ADD.W     8(A4),D0
+~ $39,40,00,0C                      ;MOVE.W    D0,12(A4)
+~ $10,28,00,14                      ;MOVE.B    20(A0),D0
+~ $E1,40                            ;ASL.W     #8,D0
+~ $10,28,00,13                      ;MOVE.B    19(A0),D0
+~ $90,6C,00,0C                      ;SUB.W     12(A4),D0
+~ $48,C0                            ;EXT.L     D0
+~ $81,EC,00,02                      ;DIVS      2(A4),D0
+~ $39,40,00,0E                      ;MOVE.W    D0,14(A4)
+~ $0C,40,0F,EE                      ;CMPI.W    #$FEE,D0
+~ $63,06                            ;BLS.S     6(PC)                L0006
+~ $00,6C,00,01,00,10                ;ORI.W     #1,16(A4)
+~ $10,28,00,1B                ;L0006:MOVE.B    27(A0),D0
+~ $E1,40                            ;ASL.W     #8,D0
+~ $10,28,00,1A                      ;MOVE.B    26(A0),D0
+~ $3B,40,00,14                      ;MOVE.W    D0,20(A5)
+~ $10,28,00,19                      ;MOVE.B    25(A0),D0
+~ $E1,40                            ;ASL.W     #8,D0
+~ $10,28,00,18                      ;MOVE.B    24(A0),D0
+~ $3B,40,00,18                      ;MOVE.W    D0,24(A5)
+~ $C1,ED,00,14                      ;MULS      20(A5),D0
+~ $3B,40,00,16                      ;MOVE.W    D0,22(A5)
+~ $10,28,00,1D                      ;MOVE.B    29(A0),D0
+~ $E1,40                            ;ASL.W     #8,D0
+~ $10,28,00,1C                      ;MOVE.B    28(A0),D0
+~ $3B,40,00,1A                      ;MOVE.W    D0,26(A5)
+~ $10,28,00,14                      ;MOVE.B    20(A0),D0
+~ $E1,40                            ;ASL.W     #8,D0
+~ $10,28,00,13                      ;MOVE.B    19(A0),D0
+~ $48,C0                            ;EXT.L     D0
+~ $81,ED,00,16                      ;DIVS      22(A5),D0
+~ $3B,40,00,12                      ;MOVE.W    D0,18(A5)
+~ $7E,02                            ;MOVEQ     #2,D7
+~ $1B,B0,70,08,70,1C          ;L0007:MOVE.B    8(A0,D7.W),28(A5,D7.W)
+~ $51,CF,FF,F8                      ;DBF       D7,-8(PC)            L0007
+~ $7E,03                            ;MOVEQ     #3,D7
+~ $1B,B0,70,27,70,1F          ;L0008:MOVE.B    39(A0,D7.W),31(A5,D7.W)
+~ $51,CF,FF,F8                      ;DBF       D7,-8(PC)            L0008
+~ $22,7C,.ADR4.L                    ;MOVEA.L   #.ADR4,A1
+~ $4A,6E,00,08                      ;TST.W     8(A6)
+~ $67,04                            ;BEQ.S     4(PC)                L0009
+~ $D2,FC,00,0C                      ;ADDA.W    #$C,A1
+~ $7E,05                      ;L0009:MOVEQ     #5,D7
+~ $42,40                      ;L000A:CLR.W     D0
+~ $3C,3C,00,FF                      ;MOVE.W    #$FF,D6
+~ $D0,58                      ;L000B:ADD.W     (A0)+,D0
+~ $51,CE,FF,FC                      ;DBF       D6,-4(PC)            L000B
+~ $32,C0                            ;MOVE.W    D0,(A1)+
+~ $51,CF,FF,F0                      ;DBF       D7,-16(PC)           L000A
+~ $3E,2E,00,08                      ;MOVE.W    8(A6),D7
+~ $30,7C,.ADR2.W                    ;MOVEA.W   #.ADR2,A0
+~ $32,7C,.ADR1.W                    ;MOVEA.W   #.ADR1,A1
+~ $42,40                            ;CLR.W     D0
+~ $11,B1,70,00,70,00                ;MOVE.B    0(A1,D7.W),0(A0,D7.W)
+~ $67,02                            ;BEQ.S     2(PC)                L000C
+~ $70,01                            ;MOVEQ     #1,D0
+~ $32,7C,.ADR3.W              ;L000C:MOVEA.W   #.ADR3,A1
+~ $13,80,70,00                      ;MOVE.B    D0,0(A1,D7.W)
+~ $20,0C                            ;MOVE.L    A4,D0
+~ $4C,DF,30,C0                ;L000D:MOVEM.L   (A7)+,A4-A5/D6-D7
+~ $4E,5E                            ;UNLK      A6
+~ $4E,75                            ;RTS
+
+_FILL ~,.BIOS1_END,$-1
+
+.BIOS2_START
+~ $4E,56,FF,F4                      ;LINK      A6,#$FFF4
+~ $48,E7,3F,04                      ;MOVEM.L   A5/D2-D7,-(A7)
+~ $2A,7C,.ADR5.L                    ;MOVEA.L   #.ADR5,A5
+~ $4A,6E,00,10                      ;TST.W     16(A6)
+~ $67,04                            ;BEQ.S     4(PC)                L0000
+~ $DA,FC,00,24                      ;ADDA.W    #$24,A5
+~ $42,40                      ;L0000:CLR.W     D0
+~ $08,2E,00,00,00,0D                ;BTST      #0,13(A6)
+~ $67,02                            ;BEQ.S     2(PC)                L0001
+~ $70,01                            ;MOVEQ     #1,D0
+~ $3D,40,FF,FE                ;L0001:MOVE.W    D0,-2(A6)
+~ $4A,6D,00,16                      ;TST.W     22(A5)
+~ $66,0A                            ;BNE.S     10(PC)               L0002
+~ $70,09                            ;MOVEQ     #9,D0
+~ $3B,40,00,16                      ;MOVE.W    D0,22(A5)
+~ $3B,40,00,18                      ;MOVE.W    D0,24(A5)
+~ $60,00,01,B8                ;L0002:BRA       440(PC)              L0013
+~ $20,2E,00,0A                ;L0003:MOVE.L    10(A6),D0
+~ $4A,6E,FF,FE                      ;TST.W     -2(A6)
+~ $67,06                            ;BEQ.S     6(PC)                L0004
+~ $20,39,00,00,04,C6                ;MOVE.L    $4C6.L,D0
+~ $2D,40,FF,FA                ;L0004:MOVE.L    D0,-6(A6)
+~ $3C,2E,00,0E                      ;MOVE.W    14(A6),D6
+~ $48,C6                            ;EXT.L     D6
+~ $8D,ED,00,16                      ;DIVS      22(A5),D6
+~ $38,2E,00,0E                      ;MOVE.W    14(A6),D4
+~ $48,C4                            ;EXT.L     D4
+~ $89,ED,00,16                      ;DIVS      22(A5),D4
+~ $48,44                            ;SWAP      D4
+~ $42,45                            ;CLR.W     D5
+~ $B8,6D,00,18                      ;CMP.W     24(A5),D4
+~ $65,06                            ;BCS.S     6(PC)                L0005
+~ $7A,01                            ;MOVEQ     #1,D5
+~ $98,6D,00,18                      ;SUB.W     24(A5),D4
+~ $76,01                      ;L0005:MOVEQ     #1,D3
+~ $4A,6E,FF,FE                      ;TST.W     -2(A6)
+~ $66,18                            ;BNE.S     24(PC)               L0007
+~ $30,2D,00,18                      ;MOVE.W    24(A5),D0
+~ $90,44                            ;SUB.W     D4,D0
+~ $B0,6E,00,12                      ;CMP.W     18(A6),D0
+~ $6C,08                            ;BGE.S     8(PC)                L0006
+~ $36,2D,00,18                      ;MOVE.W    24(A5),D3
+~ $96,44                            ;SUB.W     D4,D3
+~ $60,04                            ;BRA.S     4(PC)                L0007
+~ $36,2E,00,12                ;L0006:MOVE.W    18(A6),D3
+~ $4A,6E,FF,FE                ;L0007:TST.W     -2(A6)
+~ $67,10                            ;BEQ.S     16(PC)               L0008
+~ $2E,AE,FF,FA                      ;MOVE.L    -6(A6),(A7)
+~ $2F,2E,00,0A                      ;MOVE.L    10(A6),-(A7)
+~ $4E,B9,.ADR7+.BASE.L              ;JSR       .ADR7
+~ $58,8F                            ;ADDQ.L    #4,A7
+~ $08,2E,00,00,00,09          ;L0008:BTST      #0,9(A6)
+~ $67,4C                            ;BEQ.S     76(PC)               L000D
+~ $30,06                            ;MOVE.W    D6,D0
+~ $80,45                            ;OR.W      D5,D0
+~ $66,46                            ;BNE.S     70(PC)               L000D
+~ $0C,44,00,06                      ;CMPI.W    #6,D4
+~ $64,40                            ;BCC.S     64(PC)               L000D
+~ $48,E7,03,04                      ;MOVEM.L   A5/D6-D7,-(A7)
+~ $30,04                            ;MOVE.W    D4,D0
+~ $E3,40                            ;ASL.W     #1,D0
+~ $2A,7C,.ADR4.L                    ;MOVEA.L   #.ADR4,A5
+~ $4A,6E,00,10                      ;TST.W     16(A6)
+~ $67,04                            ;BEQ.S     4(PC)                L0009
+~ $DA,FC,00,0C                      ;ADDA.W    #$C,A5
+~ $DA,C0                      ;L0009:ADDA.W    D0,A5
+~ $7E,06                            ;MOVEQ     #6,D7
+~ $9E,44                            ;SUB.W     D4,D7
+~ $BE,43                            ;CMP.W     D3,D7
+~ $65,02                            ;BCS.S     2(PC)                L000A
+~ $3E,03                            ;MOVE.W    D3,D7
+~ $53,47                      ;L000A:SUBQ.W    #1,D7
+~ $20,6E,FF,FA                      ;MOVEA.L   -6(A6),A0
+~ $3C,3C,00,FF                ;L000B:MOVE.W    #$FF,D6
+~ $42,40                            ;CLR.W     D0
+~ $D0,58                      ;L000C:ADD.W     (A0)+,D0
+~ $51,CE,FF,FC                      ;DBF       D6,-4(PC)            L000C
+~ $3A,C0                            ;MOVE.W    D0,(A5)+
+~ $51,CF,FF,F0                      ;DBF       D7,-16(PC)           L000B
+~ $4C,DF,20,C0                      ;MOVEM.L   (A7)+,A5/D6-D7
+~ $52,44                      ;L000D:ADDQ.W    #1,D4
+~ $08,2E,00,00,00,09          ;L000E:BTST      #0,9(A6)
+~ $67,5C                            ;BEQ.S     92(PC)               L0010
+~ $3E,83                            ;MOVE.W    D3,(A7)
+~ $3F,05                            ;MOVE.W    D5,-(A7)
+~ $3F,06                            ;MOVE.W    D6,-(A7)
+~ $3F,04                            ;MOVE.W    D4,-(A7)
+~ $3F,2E,00,10                      ;MOVE.W    16(A6),-(A7)
+~ $42,A7                            ;CLR.L     -(A7)
+~ $2F,2E,FF,FA                      ;MOVE.L    -6(A6),-(A7)
+~ $4E,B9,.ADR9+.BASE.L              ;JSR       .ADR9
+~ $4F,EF,00,10                      ;LEA       16(A7),A7
+~ $2E,00                            ;MOVE.L    D0,D7
+~ $4A,87                            ;TST.L     D7
+~ $66,38                            ;BNE.S     56(PC)               L000F
+~ $4A,79,00,00,04,44                ;TST.W     $444.L
+~ $67,30                            ;BEQ.S     48(PC)               L000F
+~ $3E,83                            ;MOVE.W    D3,(A7)
+~ $3F,05                            ;MOVE.W    D5,-(A7)
+~ $3F,06                            ;MOVE.W    D6,-(A7)
+~ $3F,04                            ;MOVE.W    D4,-(A7)
+~ $3F,2E,00,10                      ;MOVE.W    16(A6),-(A7)
+~ $42,A7                            ;CLR.L     -(A7)
+~ $2F,39,00,00,04,C6                ;MOVE.L    $4C6.L,-(A7)
+~ $4E,B9,.ADR10+.BASE.L             ;JSR       .ADR10
+~ $4F,EF,00,10                      ;LEA       16(A7),A7
+~ $2E,00                            ;MOVE.L    D0,D7
+~ $4A,87                            ;TST.L     D7
+~ $66,0C                            ;BNE.S     12(PC)               L000F
+~ $20,79,00,00,04,C6                ;MOVEA.L   $4C6.L,A0
+~ $4A,50                            ;TST.W     (A0)
+~ $67,02                            ;BEQ.S     2(PC)                L000F
+~ $7E,F0                            ;MOVEQ     #$F0,D7
+~ $60,34                      ;L000F:BRA.S     52(PC)               L0011
+~ $3E,83                      ;L0010:MOVE.W    D3,(A7)
+~ $3F,05                            ;MOVE.W    D5,-(A7)
+~ $3F,06                            ;MOVE.W    D6,-(A7)
+~ $3F,04                            ;MOVE.W    D4,-(A7)
+~ $3F,2E,00,10                      ;MOVE.W    16(A6),-(A7)
+~ $42,A7                            ;CLR.L     -(A7)
+~ $2F,2E,FF,FA                      ;MOVE.L    -6(A6),-(A7)
+~ $4E,B9,.ADR8+.BASE.L              ;JSR       .ADR8
+~ $4F,EF,00,10                      ;LEA       16(A7),A7
+~ $2E,00                            ;MOVE.L    D0,D7
+~ $4A,6E,FF,FE                      ;TST.W     -2(A6)
+~ $67,10                            ;BEQ.S     16(PC)               L0011
+~ $2E,AE,00,0A                      ;MOVE.L    10(A6),(A7)
+~ $2F,2E,FF,FA                      ;MOVE.L    -6(A6),-(A7)
+~ $4E,B9,.ADR7+.BASE.L              ;JSR       .ADR7
+~ $58,8F                            ;ADDQ.L    #4,A7
+~ $4A,87                      ;L0011:TST.L     D7
+~ $6C,34                            ;BGE.S     52(PC)               L0012
+~ $3E,AE,00,10                      ;MOVE.W    16(A6),(A7)
+~ $20,07                            ;MOVE.L    D7,D0
+~ $3F,00                            ;MOVE.W    D0,-(A7)
+~ $4E,B9,.ADR6+.BASE.L              ;JSR       .ADR6
+~ $54,8F                            ;ADDQ.L    #2,A7
+~ $2E,00                            ;MOVE.L    D0,D7
+~ $0C,6E,00,02,00,08                ;CMPI.W    #2,8(A6)
+~ $6C,1A                            ;BGE.S     26(PC)               L0012
+~ $0C,87,00,01,00,00                ;CMPI.L    #$10000,D7
+~ $66,12                            ;BNE.S     18(PC)               L0012
+~ $3E,AE,00,10                      ;MOVE.W    16(A6),(A7)
+~ $4E,B9,.ADR11+.BASE.L             ;JSR       .ADR11
+~ $0C,40,00,02                      ;CMPI.W    #2,D0
+~ $66,02                            ;BNE.S     2(PC)                L0012
+~ $7E,F2                            ;MOVEQ     #$F2,D7
+~ $0C,87,00,01,00,00          ;L0012:CMPI.L    #$10000,D7
+~ $67,00,FF,28                      ;BEQ       -216(PC)             L000E
+~ $20,07                            ;MOVE.L    D7,D0
+~ $6B,1E                            ;BMI.S     30(PC)               L0014
+~ $30,03                            ;MOVE.W    D3,D0
+~ $48,C0                            ;EXT.L     D0
+~ $72,09                            ;MOVEQ     #9,D1
+~ $E3,A0                            ;ASL.L     D1,D0
+~ $D1,AE,00,0A                      ;ADD.L     D0,10(A6)
+~ $D7,6E,00,0E                      ;ADD.W     D3,14(A6)
+~ $97,6E,00,12                      ;SUB.W     D3,18(A6)
+~ $4A,6E,00,12                ;L0013:TST.W     18(A6)
+~ $66,00,FE,44                      ;BNE       -444(PC)             L0003
+~ $42,80                            ;CLR.L     D0
+~ $4A,9F                      ;L0014:TST.L     (A7)+
+~ $4C,DF,20,F8                      ;MOVEM.L   (A7)+,A5/D3-D7
+~ $4E,5E                            ;UNLK      A6
+~ $4E,75                            ;RTS
+
+_FILL ~,.BIOS2_END,$-1
+

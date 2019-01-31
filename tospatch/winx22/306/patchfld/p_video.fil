@@ -1,0 +1,161 @@
+;******************************************************************************
+; P_VIDEO.FIL	Patchfile fÅr TOS 3.06 fÅr PAK/3:  Video-Initialisierung
+;		Benutzte Variablen: .NATION .Grafik_Bombs
+;		énderungen ggÅ. _VIDEO.FIL aus PATCHFLD.SE:
+;		 - aus TP306V20: nochmal Video-Mode, Korrekturen
+;		 - aus TP306V20: Anpassung von v_opnwk
+;		   Farbinitialisierung funktioniert wieder
+;		 - aus TP306V20: Neue vs_color- und vq_color-Routinen
+;		   Jetzt kînnen die Farben eingestellt werden
+;		 - .NATION statt .ENG, erweitert auf: FRG, USA, UK, FRA
+
+;------------------------------------------------------------------------------
+;	Atari-Logo beim Booten, damit man das angepasste TOS erkennt
+;	SE 02.10.93, Anpassung fÅr franzîsisches TOS von Zim 02.06.00
+
+36268 +.d2
+~ $00,00,00,01, FF,FE,00,00, 00,FF,FC,07, 8E,24,37,80
+~ $7F,FE,00,00, 00,FF,F8,04, 51,28,60,40, 3F,FE,00,00
+~ $00,FF,E0,07, 9F,30,C3,80, 0F,FE,00,00, 00,FF,80,04
+~ $11,29,80,40, 03,FE,00,00, 00,FC,00,04, 11,25,07,80
+~ $00,7E,00,00, 00,E0,00,00, 00,00,00,00, 00,0E,00,00
+
+;------------------------------------------------------------------------------
+;	Video-RAM nur 32 statt 150 kByte groû
+;	c't 9/92
+
+2A2 $00,00,80,00
+2A8 $07,FF
+
+;------------------------------------------------------------------------------
+;	Monochrom-Mode
+;	c't 9/92; SE 20.11.93
+
+5A4 $72,00              ; Default-Farb-Auflîsung = 1 (ST-LOW)
+5AE $72,02              ; MOVEQ #2,D1
+
+;------------------------------------------------------------------------------
+;	Atari-Logo in korrektem Zeilenabstand ausgeben:
+;	SE 21.09.93
+
+77E $00,70        ; ZeilenlÑnge-Logobreite auf Zieladresse addieren (ST-LOW)
+798 $00,44        ; ZeilenlÑnge-Logobreite auf Zieladresse addieren (ST-HIGH)
+
+;------------------------------------------------------------------------------
+;	Video-Mode-Erkennung bei Monitor-Change
+;	c't 9/92
+
+;CAC $10,3C,00,00                    ;MOVE.B    #0,D0             ******
+
+;CC8 $10,3C,00,00                    ;MOVE.B    #0,D0             ******
+
+CD8 $10,38,82,60              ;L0077:MOVE.B    $FFFF8260.w,D0
+~   $C0,3C,00,03                    ;AND.B     #3,D0
+~   $B0,3C,00,02                    ;CMP.B     #2,D0
+
+CF0 $10,3C,00,02                    ;MOVE.B    #2,D0
+
+D0C $12,38,82,60                    ;MOVE.B    $FFFF8260.w,D1
+
+D16 $11,C1,82,60                    ;MOVE.B    D1,$FFFF8260.W
+
+;------------------------------------------------------------------------------
+;	... nochmal Video-Mode
+;	c't 9/92
+
+888 $00,02
+
+116A $82,60    ; Getrez()
+116E $00,03
+
+11A8 $82,60    ; Setscreen()
+11B4 $82,60
+
+;------------------------------------------------------------------------------
+;	Bombenausgabe auf Grafikkarten/Grafikerweiterungen u.Ñ.
+;	Schwierigkeiten: Auf Grafikkarten ohne Bitplanes (zB MegaVision300)
+;	werden die Bomben in Farbe nicht korrekt ausgegeben.
+;	SE 09.12.93
+
+_IF .Grafik_Bombs
+1272
+~ $45,F8,3A,1A                      ;LEA       $3A1A.W,A2
+~ $3E,12                            ;MOVE.W    (A2),D7
+~ $53,47                            ;SUBQ.W    #1,D7
+~ $78,00                            ;MOVEQ     #0,D4
+~ $38,2A,FF,FE                      ;MOVE.W    -2(A2),D4
+~ $20,78,04,4E                      ;MOVEA.L   $44E.W,A0
+~ $30,2A,FF,FC                      ;MOVE.W    -4(A2),D0
+~ $E2,48                            ;LSR.W     #1,D0
+~ $C0,C4                            ;MULU      D4,D0
+~ $D1,C0                            ;ADDA.L    D0,A0
+~ $43,FA,02,66                      ;LEA       $266(PC),A1          L0003
+~ $7C,0F                            ;MOVEQ     #$F,D6
+~ $34,01                      ;L0000:MOVE.W    D1,D2
+~ $24,48                            ;MOVEA.L   A0,A2
+~ $3A,07                      ;L0001:MOVE.W    D7,D5
+~ $34,D1                      ;L0002:MOVE.W    (A1),(A2)+
+~ $51,CD,FF,FC                      ;DBF       D5,-4(PC)            L0002
+~ $51,CA,FF,F6                      ;DBF       D2,-$A(PC)           L0001
+~ $54,49                            ;ADDQ.W    #2,A1
+~ $D0,C4                            ;ADDA.W    D4,A0
+~ $51,CE,FF,EA                      ;DBF       D6,-$16(PC)          L0000
+~ $4E,75                            ;RTS
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	Blitter wird vom TOS nicht erkannt
+;	c't 9/92
+
+.IGNORE_BLITTER = 1
+
+;******************************************************************************
+;	... nochmal Video-Mode, Korrekturen aus TP306V20
+;	Anpassung fÅr franzîsisches TOS von Zim 02.06.00
+
+6974 +.d1   $0003.W        ; korrigiert
+6978 +.d1   $4E71.W        ; neu
+
+6CBC +.d1   $0002.W        ; neu
+6DB8 +.d1   $60,00,00,C8   ; neu
+6E70 +.d1   $0002.W        ; neu
+
+;------------------------------------------------------------------------------
+;	(ersetzt: Benutzung der TT-Palette verhindern, c't 9/92)
+;	MH: (04.11.94) aus TP306V20
+;	Anpassung von v_opnwk. Farbinitialisierung funktioniert wieder.
+;	MH: (14.10.94) aus TP306V20
+;	Neue vs_color- und vq_color-Routinen.
+;	Jetzt kînnen die Farben eingestellt werden.
+;	Anpassung fÅr franzîsisches TOS von Zim 02.06.00
+
+.V_COLOR = 1        ;1: Neue Farbroutinen einbinden, 0: nicht einbinden
+_IF .V_COLOR
+
+.V_OPNWK    =  672C +.d1
+
+.VS_COLOR   =  6EA4 +.d1            ; war RTS
+.VQ_COLOR   =  7052 +.d1            ; war RTS
+
+.MAP_TAB    = 3D25E +.d2
+.REMAP_TAB  = 3D45E +.d2
+
++v_openwk.fil           ; 194 Bytes
+
++vx_color.fil           ; 898 Bytes (vs_ und vq_color zusammen)
+
+.MAP_TAB
+ ~     $00,00,00,0F,00,01,00,02     ;DC.W      $0000,$000F,$0001,$0002
+ ~     $00,04,00,06,00,03,00,05     ;DC.W      $0004,$0006,$0003,$0005
+ ~     $00,07,00,08,00,09,00,0A     ;DC.W      $0007,$0008,$0009,$000A
+ ~     $00,0C,00,0E,00,0B,00,0D     ;DC.W      $000C,$000E,$000B,$000D
+
+.REMAP_TAB
+ ~     $00,00,00,02,00,03,00,06     ;DC.W      $0000,$0002,$0003,$0006
+ ~     $00,04,00,07,00,05,00,08     ;DC.W      $0004,$0007,$0005,$0008
+ ~     $00,09,00,0A,00,0B,00,0E     ;DC.W      $0009,$000A,$000B,$000E
+ ~     $00,0C,00,0F,00,0D,00,01     ;DC.W      $000C,$000F,$000D,$0001
+
+_ENDIF
+
+;******************************************************************************

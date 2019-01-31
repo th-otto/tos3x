@@ -1,0 +1,415 @@
+;******************************************************************************
+; P_STD4.FIL	Patchfile fÅr TOS 3.06 fÅr PAK/3:  Standard TOS-Patches
+;		Benutzte Variablen:  .BOOT_TIME .FASTPRN .PRINT_TIMEOUT
+;		énderungen ggÅ. _STANDRD.FIL aus PATCHFLD.SE:
+;		 - .BOOT_TIME hinzu (wird in MAIN gesetzt)
+;		 - .PRINT_TIMEOUT hinzu (wird in MAIN gesetzt)
+;		 - Autoexec-Stackpointer und Memory-Listen-Patch
+;		   jetzt auch im englischen TOS
+;		 - LÑnge des Wartebalkens entsprechend .BOOT_TIME
+;		énderungen ggÅ. _ADDITIO.FIL aus PATCHFLD.SE:
+;		Benutzte Variablen:  .GrowShrink .VDIFIX 
+;		 - Falls .GrowShrink=.0: Grow- und Shrinkboxen ausschalten,
+;		 - aus TP306V20: VDIFIX eingefÅgt (noch ausgeschaltet)
+;		.NATION  (FRG, USA, UK, FRA)
+
+;******************************************************************************
+;	Geschmacksparameter
+
+;*******************************************************************************
+;* MH: (19.02.1997)
+;* Logoausgabe auflîsungsunabhÑngig.
+;* [ALL]
+
+_IF .LOGO !O! .NEWVIDEO
+ 750
+ ~ $22,78,04,4E                     ;MOVEA.L   $44E.S,A1
+ ~ $45,F8,3A,1A                     ;LEA       $3A1A.S,A2
+ ~ $38,12                           ;MOVE.W    (A2),D4
+ ~ $3A,2A,FF,FE                     ;MOVE.W    -2(A2),D5
+ ~ $30,05                           ;MOVE.W    D5,D0
+ ~ $C0,FC,00,08                     ;MULU      #8,D0
+ ~ $D2,C0                           ;ADDA.W    D0,A1
+ ~ $70,55                           ;MOVEQ     #$55,D0
+ ~ $72,05                     ;L0000:MOVEQ     #5,D1
+ ~ $24,49                           ;MOVEA.L   A1,A2
+ ~ $24,04                     ;L0001:MOVE.L    D4,D2
+ ~ $36,18                           ;MOVE.W    (A0)+,D3
+ ~ $32,C3                     ;L0002:MOVE.W    D3,(A1)+
+ ~ $53,42                           ;SUBQ.W    #1,D2
+ ~ $66,FA                           ;BNE.S     -6(PC)               L0002
+ ~ $51,C9,FF,F4                     ;DBF       D1,-12(PC)           L0001
+ ~ $43,F2,50,00                     ;LEA       0(A2,D5.W),A1
+ ~ $51,C8,FF,E8                     ;DBF       D0,-24(PC)           L0000
+ _FILL ~,79E,$4E71.W                ;NOP
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* 60Hz beim Start in Farbe (Original: 2 wÑre 50Hz).
+;* [ALL]
+
+_IF .COLOR_60HZ
+ _IF .PAK
+  175F $00
+ _ELSE
+  D5   $00
+ _ENDIF
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* MMU-Reset verhindern, damit das TOS auch im TT-RAM lauffÑhig ist.
+;* FÅr ROMRAM nîtig!
+;* [ALL]
+;*
+;* >>> Achtung: Nur fÅr RAM-TOS!
+;* >>> Dieser Patch funktioniert nicht mit den PAK III-Patches.
+
+_IF .NO_MMU_RESET !A! (.PAK = 0)
+ 68   $4E,71,4E,71,4E,71,4E,71
+ 1702 $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* Modifizierte Reset-Routine. HÑlt RAM-TOS 3.06 auch bei Hardreset von
+;* Tastatur und Resettaste (Resettaste nur bei _RAMR_S2.ABS) im RAM.
+;* [ALL]
+;*
+;* >>> Achtung: Nur fÅr RAM-TOS!
+;* >>> Dieser Patch funktioniert nicht mit den PAK III-Patches.
+
+_IF .RAMRESET !A! (.PAK = 0)
+
+ _IF .RELOCADR>=1000000
+  D8 ramr_f2.abs         ;kein Konfigurationstest, TT-RAM-TOS nicht lîschen,
+                         ;Speicher ab $100 lîschen
+                         ;Tastatur-Soft-Reset: Reset
+                         ;Tastatur-Hard-Reset: CRC-Test/Speicher lîschen/Reset
+                         ;Resetknopf         : Normaler Reset
+                         ;Falls beim CRC-Test ein Fehler auftritt,
+                         ;wird das TOS aus dem Ram entfernt.
+
+  119 $.WIDTH/8-1.B      ;Parameter fÅr CRC Berechnung setzen
+  120 $(.LENGTH-.WIDTH/4)/(.WIDTH/8).L
+  128 $((.WIDTH/8)!A!7)*200!O!5088.W
+  142 $((.WIDTH/8)!A!7)*200!O!5088.W
+
+  376A+.d1 $150-~.W   ;Key-Hardreset auf eigene Routine umbiegen
+ _ENDIF
+
+ _IF .RELOCADR<FA0000
+  D8 ramr_s2.abs         ;kein Konfigurationstest, ST-RAM-TOS nicht lîschen,
+                         ;Speicher ab $100 lîschen
+                         ;Tastatur-Soft-Reset: Reset
+                         ;Tastatur-Hard-Reset: CRC-Test/Speicher lîschen/Reset
+                         ;Resetknopf         : CRC-Test/Reset
+                         ;Falls beim CRC-Test ein Fehler auftritt,
+                         ;wird das TOS aus dem Ram entfernt.
+
+  119 $.WIDTH/8-1.B      ;Parameter fÅr CRC Berechnung setzen
+  120 $(.LENGTH-.WIDTH/4)/(.WIDTH/8).L
+  128 $((.WIDTH/8)!A!7)*200!O!5088.W
+  142 $((.WIDTH/8)!A!7)*200!O!5088.W
+
+  376A+.d1 $150-~.W   ;Key-Hardreset auf eigene Routine umbiegen
+ _ENDIF
+
+_ENDIF
+
+;*******************************************************************************
+;* MRF: (angepasst von MH)
+;* Speicher ab $100 initialisieren und nicht ab $400. Damit hat man neben den
+;* Vektoren keinen Mist mehr im Ram.
+;* [ALL]
+;*
+;* >>> Dieser Patch funktioniert nicht mit dem RAMRESET-Patch.
+
+_IF .MEM_INIT !A! (.RAMRESET = 0) !A! (.PAK = 0)
+  196 $0100.W
+_ENDIF
+
+;*******************************************************************************
+;* MRF: (angepasst von MH)
+;* _shell_p wird beim RESET zurÅckgesetzt (wie es sich gehîrt).
+;* [ALL]
+;*
+;* >>> Dieser Patch funktioniert nicht mit den PAK III-Patches.
+
+_IF .SHELL_P !A! (.PAK = 0)
+ 234 $42,B8,04,F6,3E,7C,57,58,42,38,0A,12
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* Fehler beim FPU-Test beheben.
+;* [ALL]
+;*
+;* >>> Dieser Patch funktioniert nicht mit den PAK III-Patches,
+;*     ist dort aber bereits integriert.
+
+_IF .FPU_TEST !A! (.PAK = 0)
+ 460 $f2,00,40,00   ;fmove.l   d0,fp0
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* CRC-Routine des TOS evtl. anpassen (z.B. fÅr 1024kB TOS 3.06).
+;* [ALL]
+
+7D6 $(.LENGTH-.WIDTH/4)/(.WIDTH/8).L
+7DC $.WIDTH/8-1.W
+7E6 $.WIDTH/8.W
+7F8 $.LENGTH-.WIDTH/4.L
+802 $.WIDTH/8.W
+
+;*******************************************************************************
+;* MH:
+;* Nur CRC-Check ausschalten.
+;* [ALL]
+;*
+;* >>> Dieser Patch Åberschneidet sich mit einem PAK III-Patch, wenn
+;*     .StaticRAM = 1 ist. Das macht aber nichts, da der entsprechende Patch
+;*     (Abbruch bei CRC-Fehler im TOS) komplett Åberschrieben wird.
+
+_IF .KILL_CRC
+ _FILL 7D4,886,$4E71.W
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	MH: Verringern der Zeitspanne, ab der - nach Systemstart - noch
+;	ein PrÅfsummentest und ein RAM-Test ausgefÅhrt wird.
+
+; .BOOT_TIME=.80            ; Original: 80 sec    (kein Test: 0 sec)
+
+9A4 $ .BOOT_TIME*.200.l     ; Zeit in Sekunden * 200  (Orig. $00003E80)
+A06 $ .BOOT_TIME-.1.w       ; LÑnge des Wartebalkens  (Orig. $004F = 80 Zeichen)
+!9A4,9A6           ;Damit die Zeit nicht reloziert wird.
+
+;------------------------------------------------------------------------------
+;	MH: Schnelle Druckerroutinen fÅr den Parallelport (Fastprint).
+;	Ausgabe-, Eingabe- und Warteroutine werden ersetzt.
+;	Entspricht FASTPRN.PRG von Ecki aus der c't.
+;	ZusÑtzlich wird noch die Eingaberoutine ersetzt.
+
+_IF .FASTPRN
++fastprn.fil
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* éndert den Papiervorschub bei der Hardcopy ab. Somit kann sowohl auf einem
+;* NEC P6, wie auch weiterhin auf einem EPSON eine Hardcopy gemacht werden
+;* (siehe ST-Computer 10/90).
+;* [ALL]
+
+_IF .NEC_P6
+ 3695B+.d2 $1B,41,07,FF
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	MRF: (angepasst von MH) Druckertimeout auf minimal 5 sec setzen
+;	>>> Geht beim Atari-Laser in die Hose!
+
+_IF .FASTPRN
+ 22F8+1E
+_ELSE
+ 231C
+_ENDIF
+
+! ~ , ~ + 2                ; Damit Zeit nicht reloziert wird
+~ $ .PRINT_TIMEOUT*.200.l      ; Zeit in Sekunden * 200  (Orig. $00001770)
+
+;******************************************************************************
+;	Standard-Patches
+
+;------------------------------------------------------------------------------
+;	MRF: (angepasst von MH) Boot-Device-Fehler beheben (ST-Computer 1/90)
+
+_IF .BOOT_DEV
+912     $30,39           ; MOVE.W    $446.L,D0     ; war MOVE.B
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	Plattenscanning auf IDE ausdehnen (Booten von IGITT, Ñh, IDE-Platten)
+;	SE 24.01.94
+
+_IF .IDE_BOOT
+B12     $78,10                   ; MOVEQ   #$10,D4
+_ENDIF
+
+;*******************************************************************************
+;* GE-Soft:
+;* Der Eagle-Patch. Monochrommonitorchange unterbinden.
+;* [ALL]
+
+_IF .EAGLE
+ CEA $60
+ CFA $60
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	MH: Stackpointer bei Autoexec korrigieren (ST-Computer 1/90)
+
+_IF .STACK_POINTER
+13D2
+~       $DE,FC,00,0C     ; ADDA.W    #$C,A7        ; war ADDA.W  #6,A7
+~       $4A,40           ; TST.W     D0
+~       $66,68           ; BNE.S     104(PC)
+~       $3F,3C,00,07     ; MOVE.W    #7,-(A7)
+~       $2F,38,0A,20     ; MOVE.L    $A20.S,-(A7)  ; war MOVE.L  $A20.L,-(A7)
+_ENDIF
+
+;*******************************************************************************
+;* MRF: (angepasst von MH)
+;* Die Megauhr kann NICHT mehr mit dem TOS verstellt werden. Dazu muû man nun
+;* ein externes Stellprogramm aufrufen. Dies hat natÅrlich den Vorteil, daû
+;* auch fremde Programme die Uhr nicht mehr verstellen kînnen (wenn die
+;* - wie Åblich - das TOS verwenden).
+;* [ALL]
+
+_IF .LOCK_CLOCK
+ 158E $1018+.BASE.L   ;Zeiger auf MOVEQ #$0,D0 / RTS setzen.
+_ENDIF
+
+;*******************************************************************************
+;* TRK:
+;* conterm setzen: Bit 2 gesetzt: Glocke bei CNTRL-G.
+;*                 Bit 1   ''   : Tastenwiederholung ein.
+;*                 Bit 0   ''   : Tastenklick ein.
+;* [ALL?]
+
+25FB $.CONTERM
+
+;*******************************************************************************
+_IF .VDIFIX
+
+;	MRF: (angepasst von MH) aus TP306V20
+;	VDI-Patch: Neue v_opnvwk()-Routine, ersetzt VDIFIX
+;	*** Achtung: DirektÅbernahme aus TOS 1.04. Also: Erst testen! ***
+
+A886+.d1
++vdi.fil;	; (.122)
+
+_ENDIF			; Ende .VDIFIX
+
+;*******************************************************************************
+;* SE:
+;* Initiatoridentification beim SCSI-Zugriff, TT meldet sich als ID 7
+;* Damit kann auch von Quantum Empire u.Ñ. gebootet werden.
+;* [ALL]
+
+_IF .SCSI_ID
+ 1C40 $70,80
+_ENDIF
+
+;*******************************************************************************
+;* TRK: (angepasst von MH)
+;* Setzt den hdmode auf Null. Aus SEEKUP von Martin Osieka entnommen.
+;* Adresse dieses Patches durch TRK.
+;* Der Patch Ñndert nur die Initialisierung mit drei.
+;* Das Åbrige Verhalten bleibt.
+;*
+;* Kurzbeschreibung:
+;* SEEKUP schaltet auf STs unter TOS 3.06 die Verdoppelung der
+;* Seekrate aus (erkennbar am Seek-GerÑusch der Laufwerke).
+;*
+;* typedef struct {
+;*   char cmdbit3;   /* $00 oder $08, wird zum Positionierkommando geodert
+;*                      Kann mit Flopsrate() verÑndert/abgefragt werden    */
+;*   char dummy;     /* nicht benutzt */
+;*   short track;    /* Aktuelle Spur */
+;*   short hdmode;   /* 0 oder 3, wird in Register $FF860E geschrieben
+;*                      Dieses Register existiert auf STs nicht */
+;*   short seekrate; /* hdmode=0: 0: 6ms, 1: 12ms, 2: 2ms, 3: 3ms
+;*                      hdmode=3: 0,1: 12ms, 2,3: 6ms
+;*                      Kann mit Flopsrate() verÑndert/abgefragt werden */
+;* } dsb3S;
+;*
+;* Das TOS verwaltet die Informationen zu den Floppylaufwerken in DSBs.
+;* Initialisiert werden die DSBs mit { 0, 0, 0xFF00, 3, _seekrate}, damit
+;* ist auf STs defaultmaessig 6ms eingestellt. Die Trackpositionierroutine
+;* schaltet im Fehlerfall <hdmode> um und macht daraufhin einen weiteren
+;* Versuch. Die Formatierfunktion setzt <hdmode> abhaengig von der Anzahl
+;* der Sektoren pro Spur. Besser waere es wohl, wenn das TOS bei jedem
+;* erkannten Diskettenwechsel <hdmode> zunaechst auf 0 setzen wuerde.
+;* [ALL]
+;*
+;* >>> Achtung: DirektÅbernahme aus TOS 2.06. Also: Erst testen!
+;* >>> Nicht fÅr MSTE / TT!
+
+_IF .SEEK_UP
+ 3BCA+.d1 $0000.W
+_ENDIF
+
+;*******************************************************************************
+;* (DK): (10.11.93)
+;* Im Floppy-Test Track 10 ansteuern auf Track 1 ansteuern geÑndert.
+;* [ALL]
+
+_IF .FLOP_TEST !A! (.NEW_FLOPFMT = 0)
+ 4200+.d1 $7E,01
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* Fast-Load-Bit fÅr schnelleres Laden (siehe ST-Computer 1/90).
+;* Produziert Fehler bei einigen Laufwerken.
+;* [ALL]
+
+_IF .FASTLOAD !A! (.NEW_FLOPFMT = 0)
+ 42F3+.d1 $10
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	Karsten Isakovic (implementiert durch MRF): (angepasst von MH)
+;	Beseitigt den Fehler, der beim einen Mshrink(0)-Aufruf die
+;	Memory-Listen zerstîrte.
+; 	>>> DirektÅbernahme aus TOS 1.04. Also: Erst testen!
+;	Anpassung fÅr engl. und franz. TOS von Zim 02.06.00
+
+_IF .M_SHRINK
+1826C +.d1
+~       $2F,2E,00,0A            ; MOVE.L    10(A6),-(A7)        
+~       $4E,B9,183FE+.BASE+.d1.L ; JSR       $E183FE             
+~       $58,8F                  ; ADDQ.L    #4,A7               
+~       $4E,71                  ; NOP                           
+_ENDIF
+
+;******************************************************************************
+_IF .GrowShrink = 0		; ggf. Grow- und Shrinkboxen ausschalten
+
+;------------------------------------------------------------------------------
+;	RB: (angepasst von MH)  Grow- und Shrinkboxen ausschalten
+;	Anpassung fÅr engl. TOS von Zim 06.09.96
+;	Anpassung fÅr franzîsisches TOS von Zim 02.06.00
+
+24B92 +.d1   $4E,75
+24BD6 +.d1   $4E,75
+
+_ENDIF			; Ende .GrowShrink
+
+;*******************************************************************************
+;* Martin Osieka: (implementiert durch MH)
+;* Puffer fÅr NEWDESK.INF vergrîûern. Originalroutinen aus SHBUF 1.3!
+;* Zu nÑheren Informationen siehe SHBUF.
+;* [ALL]
+
+;.SHBUFSIZE = 7FFE  ;In diese Zeile kann die gewÅnschte Puffergrîûe
+                    ;eingetragen werden. Maximum ist $7FFE => 32kB pro Puffer.
+                    ;Da es 2 Puffer gibt => max. 64kB Speicherverbrauch
+                    ;'Originalwert' ist $1000.
+
+_IF .SHBUFSIZE > 1000
+ +shbuf.fil         ;SHBUF-Patch einbinden
+_ENDIF
+
+;******************************************************************************
+
+;------------------------------------------------------------------------------
+;	Blitter wird vom TOS nicht erkannt
+;	c't 9/92
+_IF .IGNORE_BLITTER
+ 15DC $70,00,4E,75  ;MOVEQ #$0,D0 / RTS
+_ENDIF

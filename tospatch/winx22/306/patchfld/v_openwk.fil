@@ -1,0 +1,52 @@
+.V_OPNWK
+~ $70,00                      ; moveq.l   #0,d0
+~ $10,38,04,4c                ; move.b    ($0000044C).w,d0
+~ $20,78,3a,22                ; movea.l   ($00003A22).w,a0
+~ $32,10                      ; move.w    (a0),d1
+~ $b2,7c,00,01                ; cmp.w     #1,d1
+~ $67,2a                      ; beq.s     .FindDev3
+~ $b0,7c,00,02                ; cmp.w     #2,d0
+~ $67,24                      ; beq.s     .FindDev3
+~ $55,41                      ; subq.w    #2,d1
+~ $6b,0a                      ; bmi.s     .FindDev0
+~ $b2,40                      ; cmp.w     d0,d1
+~ $67,1c                      ; beq.s     .FindDev3
+~ $b2,7c,00,02                ; cmp.w     #2,d1
+~ $65,02                      ; bcs.s     .FindDev1
+.FindDev0:
+~ $72,00                      ; moveq.l   #0,d1
+.FindDev1:
+~ $3f,01                      ; move.w    d1,-(a7)
+~ $70,ff                      ; moveq.l   #-1,d0
+~ $2f,00                      ; move.l    d0,-(a7)
+~ $2f,00                      ; move.l    d0,-(a7)
+~ $3f,3c,00,05                ; move.w    #5,-(a7)
+~ $4e,4e                      ; trap      #14
+~ $4f,ef,00,0c                ; lea.l     12(a7),a7
+~ $60,04                      ; bra.s     FindDev4
+.FindDev3:
+~ $61,00,01,e0                ; bsr       $00E0694A (esc_init)
+.FindDev4:
+~ $41,fa,00,2a                ; lea.l     paltab16(pc),a0
+~ $10,38,04,4c                ; move.b    ($0000044C).w,d0
+~ $67,08                      ; beq.s     .FindDev5
+~ $b0,3c,00,02                ; cmp.b     #2,d0
+~ $62,02                      ; bhi.s     .FindDev5
+~ $51,88                      ; subq.l    #8,a0
+.FindDev5:
+~ $48,50                      ; pea.l     (a0)
+~ $3f,3c,00,06                ; move.w    #6,-(a7)
+~ $4e,4e                      ; trap      #14
+~ $5c,8f                      ; addq.l    #6,a7
+~ $70,00                      ; moveq.l   #0,d0
+~ $10,38,04,4c                ; move.b    ($0000044C).w,d0
+~ $4e,75                      ; rts
+.paltab4:
+~ $0f,ff,0f,00,00,f0,00,00
+.paltab16:
+~ $0f,ff,0f,00,00,f0,0f,f0
+~ $00,0f,0f,0f,00,ff,05,55
+~ $03,33,0f,33,03,f3,0f,f3
+~ $03,3f,0f,3f,03,ff,00,00
+
+_FILL ~, .V_OPNWK + C2, $FFFF.W

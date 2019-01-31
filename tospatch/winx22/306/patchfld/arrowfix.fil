@@ -1,0 +1,255 @@
+;******************************************************************************
+_IF .ARROWFIX
+
+;------------------------------------------------------------------------------
+;	Martin Osieka: (implementiert von MH, erweitert auf .FRA von Zim)
+;	Neue Scrollroutinen fÅr GEM. Originalroutinen aus ARROWFIX 1.5!
+;
+;	In .TIME steht die Default-Ansprechzeit bis zur ersten Wiederholung
+;	einer Scrollnachricht in Schritten von 0,125s. 
+;	ZulÑssige Werte: 0 bis 9, Original-Default ist 3.
+;	Diese Ansprechzeit lÑût sich auch mit dem ARROWFIX.CPX einstellen.
+;
+;	*** Funktioniert nicht zusammen mit dem Winx-Patch! ***  Also:
+;	TOS mit WINX: Kein ARROWFIX-Patch! (ist bereits in WINX mit drin)
+;	TOS ohne WINX: ARROWFIX-Patch verwenden
+
+;.TIME = 3	; Ansprechzeit in 0,125s.
+
+;------------------------------------------------------------------------------
+
+ .ADR1   = 1BE2A+.d1
+ .ADR2   = 21DAA+.d1
+ .ADR3   = 22C24+.d1
+ .ADR4   = 258AA+.d1
+ .ADR5   = 34AFE+.d2
+ .ADR6   = 34BA6+.d2
+ .ADR7   = 35816+.d2
+ .ADR8   = 35F6A+.d2
+ .ADR9   = 3DED4+.d2
+
+ .PATCH1 = 1A040+.d1
+ .PATCH2 = 1B474+.d1
+ .ev_mesag = 1BDC8+.d1
+ .PATCH4 = 1C1B8 +.d1
+ .PATCH5 = 1E018 +.d1
+ .downorup = 1E938 +.d1
+ .PATCH7 = 261B8 +.d1
+ .PATCH8 = 262FA +.d1
+ .PATCH9 = 2E44E +.d1
+
+.TICKS       = 8BD2
+.gl_dclick   = 8EDA
+.gl_dcindex  = 8F28
+.gl_ticktime = 9024
+.appl_msg    = 94B6
+.gl_mowner   = 950A
+.rlr         = E54A
+.button      = E6FA
+
+.PATCH1
+~ $4E,B9,.ADR1+.BASE.L          ; jsr       .ADR1
+~ $50,8F                        ; addq.l    #8,a7
+~ $4A,40                        ; tst.w     d0
+_FILL ~ , ~ + 14 , $4E71.W      ; nop
+
+.PATCH2
+~ $76,00                        ; moveq     #0,d3
+~ $16,39,.gl_dcindex.L          ; move.b    $8f28,d3
+~ $53,83                        ; subq.l    #1,d3
+~ $EF,83                        ; asl.l     #7,d3
+~ $87,F9,.gl_ticktime.L         ; divs.w    $9024,d3
+~ $48,C3                        ; ext.l     d3
+~ $D6,B9,.TICKS.L               ; add.l     $8BD2,d3
+~ $60,0A                        ; bra.s     10(pc)               l0001
+~ $20,6D,00,02            ;L0000: movea.l   2(a5),a0
+~ $4A,68,00,94                  ; tst.w     148(a0)
+~ $6E,52                        ; bgt.s     82(pc)               l0003
+~ $20,6D,00,02            ;L0001: movea.l   2(a5),a0
+~ $43,E8,00,26                  ; lea       38(a0),a1
+~ $08,28,00,01,00,1F            ; btst      #1,31(a0)
+~ $67,24                        ; beq.s     36(pc)               l0002
+~ $42,51                        ; clr.w     (a1)
+~ $42,67                        ; clr.w     -(a7)
+~ $42,A7                        ; clr.l     -(a7)
+~ $3F,2E,FF,EE                  ; move.w    -18(a6),-(a7)
+~ $3F,07                        ; move.w    d7,-(a7)
+~ $3F,28,00,1C                  ; move.w    28(a0),-(a7)
+~ $3F,04                        ; move.w    d4,-(a7)
+~ $48,79,.appl_msg.L            ; pea       $94b6
+~ $4E,B9,.ADR2+.BASE.L          ; jsr       .adr2
+~ $DE,FC,00,12                  ; adda.w    #18,a7
+~ $60,1E                        ; bra.s     30(pc)               l0003
+~ $4A,51                  ;L0002: tst.w     (a1)
+~ $66,1A                        ; bne.s     26(pc)               l0003
+~ $52,59                        ; addq.w    #1,(a1)+
+~ $32,C4                        ; move.w    d4,(a1)+
+~ $20,79,.rlr.L                 ; movea.l   $e54a,a0
+~ $32,E8,00,1C                  ; move.w    28(a0),(a1)+
+~ $42,59                        ; clr.w     (a1)+
+~ $32,C7                        ; move.w    d7,(a1)+
+~ $32,EE,FF,EE                  ; move.w    -18(a6),(a1)+
+~ $42,99                        ; clr.l     (a1)+
+~ $42,51                        ; clr.w     (a1)
+~ $4E,B9,.ADR4+.BASE.L    ;L0003: jsr       .adr4
+~ $08,39,00,00,.button+1.L      ; btst      #0,$e6fb
+~ $67,0A                        ; beq.s     10(pc)               l0004
+~ $B6,B9,.TICKS.L               ; cmp.l     $8bd2,d3
+~ $64,E8                        ; bcc.s     -24(pc)              l0003
+~ $60,8A                        ; bra.s     -118(pc)             l0000
+_FILL ~,~+3C,$4E71.W      ;L0004: nop
+
+.ev_mesag
+~ $2F,2F,00,04                  ; move.l    4(a7),-(a7)
+~ $3F,3C,00,10                  ; move.w    #$10,-(a7)
+~ $20,79,.rlr.L                 ; movea.l   $e54a,a0
+~ $3F,28,00,1C                  ; move.w    28(a0),-(a7)
+~ $3F,3C,00,01                  ; move.w    #1,-(a7)
+~ $4A,68,00,94                  ; tst.w     148(a0)
+~ $6E,0E                        ; bgt.s     14(pc)               l0007
+~ $2F,2F,00,0E                  ; move.l    14(a7),-(a7)
+~ $61,00,DC,D2                  ; bsr       -9006(pc)            l0005
+~ $58,8F                        ; addq.l    #4,a7
+~ $4A,40                        ; tst.w     d0
+~ $66,04                        ; bne.s     4(pc)                l0008
+~ $61,00,DD,0A            ;L0007: bsr       -8950(pc)            l0006
+~ $DE,FC,00,0A            ;L0008: adda.w    #10,a7
+~ $4E,75                        ; rts
+
+.PATCH4
+~ $41,F9,.gl_dcindex+1.L        ; lea       $8f29,a0
+~ $42,40                        ; clr.w     d0
+~ $10,10                        ; move.b    (a0),d0
+~ $43,EF,00,06                  ; lea       6(a7),a1
+~ $4A,51                        ; tst.w     (a1)
+~ $67,26                        ; beq.s     38(pc)               l0009
+~ $10,21                        ; move.b    -(a1),d0
+~ $10,80                        ; move.b    d0,(a0)
+~ $4E,B9,.PATCH8+.BASE.L        ; jsr       .patch8
+~ $72,00                        ; moveq     #0,d1
+~ $12,00                        ; move.b    d0,d1
+~ $43,F9,.ADR9+.BASE.L          ; lea       .adr9,a1
+~ $D2,C1                        ; adda.w    d1,a1
+~ $D2,C1                        ; adda.w    d1,a1
+~ $32,11                        ; move.w    (a1),d1
+~ $83,F9,.gl_ticktime.L         ; divs.w    $9024,d1
+~ $33,C1,.gl_dclick.L           ; move.w    d1,$8eda
+~ $4E,75                  ;L0009: rts
+~ $4E,75                        ; rts
+
+.PATCH5
+~ $3F,3C,.TIME+1.B,03           ; move.w    #$xx03,-(a7)
+
+.downorup
+~ $10,2F,00,09                  ; move.b    9(a7),d0
+~ $12,2F,00,05                  ; move.b    5(a7),d1
+~ $B3,00                        ; eor.b     d1,d0
+~ $C0,2F,00,08                  ; and.b     8(a7),d0
+~ $57,C0                        ; seq       d0
+~ $C0,3C,00,01                  ; and.b     #1,d0
+~ $B0,2F,00,06                  ; cmp.b     6(a7),d0
+~ $56,C0                        ; sne       d0
+~ $C0,7C,00,01                  ; and.w     #1,d0
+~ $67,1A                        ; beq.s     downoru1
+~ $20,57                        ; movea.l   (a7),a0
+~ $0C,68,2E,87,FF,F2            ; cmpi.w    #$2E87,-14(a0)
+~ $66,10                        ; bne.s     downoru1
+~ $22,39,.rlr.L                 ; move.l    $0000E54A,d1
+~ $B2,B9,.gl_mowner.L           ; cmp.l     $0000950A,d1
+~ $67,02                        ; beq.s     downoru1
+~ $70,00                        ; moveq.l   #0,d0
+;downoru1:
+~ $4E,75                        ; rts
+
+
+.PATCH7
+~ $4E,71,4E,71,4E,71,4E,71      ; nop
+
+.PATCH8
+~ $53,89                        ; subq.l    #1,a1
+~ $53,88                        ; subq.l    #1,a0
+~ $12,11                        ; move.b    (a1),d1
+~ $67,06                        ; beq.s     6(pc)                l000c
+~ $6B,02                        ; bmi.s     2(pc)                l000b
+~ $10,81                        ; move.b    d1,(a0)
+~ $30,10                  ;L000B: move.w    (a0),d0
+~ $4E,75                  ;L000C: rts
+
+.PATCH9
+~ $48,E7,40,0C                  ; movem.l   d1/a4-a5,-(a7)
+~ $28,6F,00,10                  ; movea.l   16(a7),a4
+~ $3E,AC,00,06            ;L000D: move.w    6(a4),(a7)
+~ $4E,B9,.ADR7+.BASE.L          ; jsr       .adr7
+~ $2A,40                        ; movea.l   d0,a5
+~ $20,0D                        ; move.l    a5,d0
+~ $67,00,00,8E                  ; beq       142(pc)              l001e
+~ $30,2C,00,08                  ; move.w    8(a4),d0
+~ $B0,7C,00,07                  ; cmp.w     #7,d0
+~ $62,00,00,82                  ; bhi       130(pc)              l001e
+~ $D0,40                        ; add.w     d0,d0
+~ $30,3B,00,06                  ; move.w    6(pc,d0.w),d0        l000e
+~ $4E,FB,00,02                  ; jmp       2(pc,d0.w)           l000e
+~ $00,10                  ;L000E: dc.w      $0010                l000f
+~ $00,14                        ; dc.w      $0014                l0010
+~ $00,1C                        ; dc.w      $001c                l0012
+~ $00,20                        ; dc.w      $0020                l0013
+~ $00,34                        ; dc.w      $0034                l0016
+~ $00,38                        ; dc.w      $0038                l0017
+~ $00,40                        ; dc.w      $0040                l0019
+~ $00,44                        ; dc.w      $0044                l001a
+~ $72,00                  ;L000F: moveq     #0,d1
+~ $60,02                        ; bra.s     2(pc)                l0011
+~ $72,01                  ;L0010: moveq     #1,d1
+~ $30,2D,00,8C            ;L0011: move.w    140(a5),d0
+~ $60,08                        ; bra.s     8(pc)                l0015
+~ $72,00                  ;L0012: moveq     #0,d1
+~ $60,02                        ; bra.s     2(pc)                l0014
+~ $72,01                  ;L0013: moveq     #1,d1
+~ $70,01                  ;L0014: moveq     #1,d0
+~ $3F,01                  ;L0015: move.w    d1,-(a7)
+~ $3F,00                        ; move.w    d0,-(a7)
+~ $2F,0D                        ; move.l    a5,-(a7)
+~ $4E,B9,.ADR5+.BASE.L          ; jsr       .adr5
+~ $50,8F                        ; addq.l    #8,a7
+~ $60,22                        ; bra.s     34(pc)               l001d
+~ $72,03                  ;L0016: moveq     #3,d1
+~ $60,02                        ; bra.s     2(pc)                l0018
+~ $72,02                  ;L0017: moveq     #2,d1
+~ $30,2D,00,8A            ;L0018: move.w    138(a5),d0
+~ $60,08                        ; bra.s     8(pc)                l001c
+~ $72,03                  ;L0019: moveq     #3,d1
+~ $60,02                        ; bra.s     2(pc)                l001b
+~ $72,02                  ;L001A: moveq     #2,d1
+~ $70,01                  ;L001B: moveq     #1,d0
+~ $3F,01                  ;L001C: move.w    d1,-(a7)
+~ $3F,00                        ; move.w    d0,-(a7)
+~ $2F,0D                        ; move.l    a5,-(a7)
+~ $4E,B9,.ADR6+.BASE.L          ; jsr       .adr6
+~ $50,8F                        ; addq.l    #8,a7
+~ $61,24                  ;L001D: bsr.s     36(pc)               l001f
+~ $66,1C                        ; bne.s     28(pc)               l001e
+~ $42,57                        ; clr.w     (a7)
+~ $4E,B9,.ADR8+.BASE.L          ; jsr       .adr8
+~ $52,57                        ; addq.w    #1,(a7)
+~ $4E,B9,.ADR3+.BASE.L          ; jsr       .adr8
+~ $2E,8C                        ; move.l    a4,(a7)
+~ $4E,B9,.ev_mesag+.BASE.L      ; jsr       .ev_mesag
+~ $60,00,FF,64                  ; bra       -156(pc)             l000d
+~ $4C,DF,30,02            ;L001E: movem.l   (a7)+,d1/a4-a5
+~ $4E,75                        ; rts
+~ $20,79,.rlr.L           ;L001F: movea.l   $e54a,a0
+~ $22,68,00,90                  ; movea.l   144(a0),a1
+~ $4A,68,00,94                  ; tst.w     148(a0)
+~ $66,08                        ; bne.s     8(pc)                l0020
+~ $43,E8,00,26                  ; lea       38(a0),a1
+~ $4A,59                        ; tst.w     (a1)+
+~ $67,06                        ; beq.s     6(pc)                l0021
+~ $0C,51,00,18            ;L0020: cmpi.w    #$18,(a1)
+~ $4E,75                        ; rts
+~ $70,01                  ;L0021: moveq     #1,d0
+~ $4E,75                        ; rts
+
+;------------------------------------------------------------------------------
+_ENDIF
+
+;******************************************************************************

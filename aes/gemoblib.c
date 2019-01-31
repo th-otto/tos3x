@@ -222,7 +222,10 @@ PP(char *tmpl_str;)
 PP(char *fmtstr;)
 {
 	register char *pfbeg, *ptbeg, *prbeg;
-	char *pfend, *ptend, *prend;
+#if BINEXACT
+	char *pfend;
+#endif
+	char *ptend, *prend;
 	register int16_t inc, ptlen, prlen;
 
 	if (*raw_str == '@')
@@ -245,7 +248,9 @@ PP(char *fmtstr;)
 		prbeg = prbeg + prlen - 1;
 	}
 
+#if BINEXACT
 	pfend = pfbeg + (inc * ptlen);
+#endif
 	ptend = ptbeg + (inc * ptlen);
 	prend = prbeg + (inc * prlen);
 

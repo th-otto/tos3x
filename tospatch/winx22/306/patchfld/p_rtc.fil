@@ -1,0 +1,98 @@
+;******************************************************************************
+; P_RTC.FIL	Patchfile fÅr TOS 3.06 fÅr PAK/3:  Routinen fÅr Mega-Uhr
+;		Benutzte Variablen:  Keine
+;		énderungen ggÅ. _RTC.FIL aus PATCHFLD.SE:
+;		 - Patch vollstÑndig Åberarbeitet
+;		 - Initialisierung beim Booten ruft get_rtc direkt
+;		 - Xbios ruft die Low-Level-Routinen mit jsr auf, der
+;		   Umweg Åber tget_rtc und anschlieûend jmp(A3) entfÑllt
+;		 - Low-Level-Routine tget_rtc ist nun arbeitslos
+;		 - Jahr 2000 Patch fÅr die Uhr im Tastaturprozessor
+
+;------------------------------------------------------------------------------
+;	RTC Low-Level Routinen  tget_rtc, get_rtc, set_rtc
+;
+;	VollstÑndig Åberarbeitet. Wichtigste énderungen:
+;	 - Die Alarm-Register bleiben unangetastet (im Gegensatz zu TOS 2.06)
+;	 - Das Wochentagsregister wird nicht benutzt (wurde in TOS 2.06 zwar
+;	   gesetzt, aber nicht weiter benutzt). 
+;	 - Die Routine tget_rtc wird nicht mehr benutzt. Der Test, ob ein
+;	   RTC vorhanden ist, findet in get_rtc und set_rtc ohnehin statt.
+;	 - In get_rtc wird der RTC zweimal ausgelesen (wie in TOS 2.06,
+;	   wohl um fehlerhafte Daten zu vermeiden, falls der RTC gerade
+;	   wÑhrend des Auslesens seine Register verÑndert).
+;	 - In set_rtc wird der RTC nach dem Setzen auch gestartet. Das war
+;	   im alten PAK-Patch nicht der Fall. Wichtig, falls der RTC von
+;	   der Batterie getrennt wurde, sonst blieb die Uhr auf der
+;	   gesetzten Zeit stehen.
+;	 - In set_rtc: RTC Reset hinzu (sonst zÑhlte der RTC nach Spannungs-
+;	   unterbrechung falsch, Stunden Åber 24 konnten vorkommen)
+;	 - In set_rtc: Zeit/Datum jetzt in 8(A7), wegen jsr statt jmp
+
++zrtc3.fil
+
+;------------------------------------------------------------------------------
+;	RTC-Initialisierung beim Booten: 
+;
+;	Soll den RTC, falls vorhanden, auslesen und die Systemvariablen Zeit
+;	und Datum setzen. Im Original umstÑndlich Åber tget_rtc gelîst. 
+;
+;	Mit dem alten PAK-Patch wurde nur getestet, ob der RTC vorhanden ist,
+;	aber ausgelesen wurden Datum und Uhrzeit nicht. Datum und Uhrzeit
+;	wurden erst nach dem nÑchsten Pterm gesetzt.
+;
+;	Jetzt wird die Leseroutine get_rtc direkt angesprungen, dort wird
+;	alles notwendige erledigt.
+
+716
+~ $4E,B9,.get_rtc+.BASE.L     ; JSR       $E01F20     ; war jsr    $E01EF0
+~ $64,18                      ; BCC.S     24(PC)      ; war beq.s  24(PC)
+
+;------------------------------------------------------------------------------
+;	Xbios(22) Settime und Xbios(23) Gettime:
+;
+;	Im Original umstÑndlich gelîst (tst_rtc wurde mehrfach aufgerufen).
+
+156E                          ;                      Xbios(23) Gettime
+~ $4E,B9,.get_rtc+.BASE.L     ; JSR     $E01F20      get_rtc direkt aufrufen      
+~ $64,24                      ; BCC.S   36(PC)       erfolgreich? dann rts
+~ $4E,F9,00,E0,21,A4          ; JMP     $E021A4      sonst Keyboard-Zeit lesen
+
+157C                          ;                      Xbios(22) Settime
+~ $33,EF,00,04,00,00,82,B6    ; MOVE.W  4(A7),$82B6         
+~ $33,EF,00,06,00,00,57,5C    ; MOVE.W  6(A7),$575C.L       
+
+~ $4E,B9,.set_rtc+.BASE.L     ; JSR     $E01FC6      set_rtc direkt aufrufen       
+~ $64,06                      ; BCC.S   6(PC)        erfolgreich? dann rts
+~ $4E,F9,00,E0,21,CE          ; JMP     $E021CE      sonst Keyboard-Zeit setzen
+
+~ $4E,75               ; L0002: RTS                           
+
+~ $FF,FF,FF,FF,FF,FF          ; DC.W    $FFFF,$FFFF,$FFFF 
+
+;------------------------------------------------------------------------------
+;	Patch fÅr die Tastaturprozessor-Uhr und die Jahre 2000 bis 2079.
+;
+;	Idee von Philip Taylor <philipt@dial.pipex.com> fÅr TOS 2.06
+;	Mitgeteilt von Rainer Seitel @ KA in Maus.Computer.Atari.News
+;	Ins PAK-TOS eingefÅgt von Zim 08-04-99
+;
+;	Problem: Auf einem Atari ST ohne Uhrenchip, bei dem die Uhr des 
+;	Tastaturprozessors benutzt wird, wird ab dem Jahr 2000 das Jahr 
+;	falsch gelesen und gespeichert.
+;
+;	Ursache ist, dass von den beiden in der Tastaturprozessoruhr 
+;	gespeicherten Ziffern 80 fÅr die beiden letzten Stellen des Jahres 
+;	1980 abgezogen wird. Durch den öberlauf der Ganzzahlsubtraktion ist 
+;	das Ergebnis im Jahr 2000: 2^7 - 80 = 48. Dies entspricht dem Jahr 
+;	1980 + 48 = 2028.
+;
+;	Lîsung: Die Addition und Subtraktion von 80 entfÑllt. Damit 
+;	funktioniert die Uhr von 1980 bis 2079. Die anderen Uhrenchips 
+;	werden vom TOS auch so behandelt.
+
+2168    $4E,71,4E,71            ; NOP      Original:  SUBI.B  #$50,D0
+
+221A    $4E,71,4E,71            ; NOP      Original:  ADDI.B  #$80,(A0)
+
+;******************************************************************************

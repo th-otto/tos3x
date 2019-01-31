@@ -1,0 +1,31 @@
+WINX 2.2 [17.10.1993] - 
+Patchprogramm fÅr die GEM-Fensterverwaltung
+
+Zum WINX-Programmpaket gehîren die folgenden Dateien:
+
+  LIESMICH - die Datei, die sie gerade lesen
+  NEUES - énderungen seit der letzten Version
+  WINX.PRG - das eigentliche Patchprogramm
+  WINX.INF - Datei mit Konfigurationsinformationen
+  WINX.GER - deutsche Dokumentation
+  WINX.UPL - Upload-Beschreibung in deutsch
+  WINXCOOK.PRG - Zusatzprogramm fÅr WINX modifizierte ROMs
+  WINXPROG.GER - Programmiertips in deutsch
+  WINX.ENG, WINXPROG.ENG - englischsprachige Texte
+
+Nachdem sie diese Datei komplett gelesen haben, sollten sie sich WINX.GER
+zu GemÅte fÅhren. Gehîren sie jedoch zu denjenigen, die grundsÑtzlich
+keine Dokus lesen, sollten sie zumindestens die folgende Beispiel-
+installation beachten, die in den meisten FÑllen zum Erfolg fÅhren sollte:
+
+  Entferne folgende Programme, falls sie im entsprechenden Ordner sind:
+    AUTO:  GEMRAM.PRG, WINX.PRG, WINXCOOK.PRG, WINX.INF, ARROWFIX.PRG
+    CPX:   WINX.CPX, ARROWFIX.CPX
+  Kopiere erst GEMRAM.PRG dann WINX.PRG und WINX.INF in den AUTO-Ordner.
+  Kopiere WINX.CPX in den CPX-Ordner (falls XCONTROL benutzt wird).
+  Schalte MiNT zunÑchst ab.
+
+Mit freundlichen GrÅûen
+Martin Osieka
+
+

@@ -1,0 +1,64 @@
+; overwrites code for dos_mkdir/dos_set/dos_label/dos_rename
+
+;wx_fill:
+~ $2f,08                        ; move.l    a0,-(a7)
+~ $30,1b                        ; move.w    (a3)+,d0
+~ $b0,7c,00,02                  ; cmp.w     #2,d0
+~ $66,72                        ; bne.s     wx_fill5
+~ $32,39,.D+58.L                ; move.w    $0000AEFA,d1 ; D.g_uda.winx.xAEFA
+~ $08,01,00,0b                  ; btst      #11,d1
+~ $67,66                        ; beq.s     wx_fill5
+~ $32,13                        ; move.w    (a3),d1
+~ $53,41                        ; subq.w    #1,d1
+~ $b2,7c,00,05                  ; cmp.w     #5,d1
+~ $62,5c                        ; bhi.s     wx_fill5
+~ $74,03                        ; moveq.l   #3,d2
+~ $d2,41                        ; add.w     d1,d1
+~ $d2,41                        ; add.w     d1,d1
+~ $22,3b,10,5a                  ; move.l    wx_fill6(pc,d1.w),d1
+~ $20,2b,00,02                  ; move.l    2(a3),d0
+~ $c0,42                        ; and.w     d2,d0
+~ $67,14                        ; beq.s     wx_fill3
+~ $55,40                        ; subq.w    #2,d0
+~ $6b,0c                        ; bmi.s     wx_fill2
+~ $67,06                        ; beq.s     wx_fill1
+~ $48,41                        ; swap      d1
+~ $e5,59                        ; rol.w     #2,d1
+~ $60,08                        ; bra.s     wx_fill3
+;wx_fill1:
+~ $e5,59                        ; rol.w     #2,d1
+~ $48,41                        ; swap      d1
+;wx_fill2:
+~ $e5,59                        ; rol.w     #2,d1
+~ $48,41                        ; swap      d1
+;wx_fill3:
+~ $48,40                        ; swap      d0
+~ $c0,42                        ; and.w     d2,d0
+~ $48,41                        ; swap      d1
+~ $e0,79                        ; ror.w     d0,d1
+~ $48,41                        ; swap      d1
+~ $e0,79                        ; ror.w     d0,d1
+~ $20,01                        ; move.l    d1,d0
+~ $48,40                        ; swap      d0
+~ $e5,58                        ; rol.w     #2,d0
+~ $48,40                        ; swap      d0
+~ $e5,58                        ; rol.w     #2,d0
+~ $41,f9,.intin.L               ; lea.l     $0000AB98,a0
+;wx_fill4:
+~ $20,c1                        ; move.l    d1,(a0)+
+~ $20,c0                        ; move.l    d0,(a0)+
+~ $51,ca,ff,fa                  ; dbf       d2,wx_fill4
+~ $70,10                        ; moveq.l   #16,d0
+~ $2f,00                        ; move.l    d0,-(a7)
+~ $3f,3c,00,70                  ; move.w    #112,-(a7) ; vsf_udpat
+~ $4e,b9,.gsx_ncode.L           ; jsr       $00E2508A
+~ $5c,8f                        ; addq.l    #6,a7
+~ $70,04                        ; moveq.l   #4,d0
+;wx_fill5:
+~ $20,5f                        ; movea.l   (a7)+,a0
+~ $b0,50                        ; cmp.w     (a0),d0
+~ $4e,75                        ; rts
+;wx_fill6:
+~ $00,00,44,44,00,00,55,55
+~ $88,88,55,55,55,55,aa,aa
+~ $aa,aa,dd,dd,55,55,ff,ff

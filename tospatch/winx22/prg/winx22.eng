@@ -1,0 +1,449 @@
+PROGRAM
+     WINX 2.2 [10/17/1993]
+
+DESCPRITION
+     WINX expands GEM of TOS version up to version 4.04 to some of the
+     features which also are usable in MultiTOS. From users point of 
+     view this is (among other stuff) for example more windows, control
+     elements for background windows and an expanded user interface
+     (this relates to the usage of control elements). Additionally
+     some bugs and deficiencies of the different GEM versions have been
+     removed or repaired and expansions have been built in. A very
+     developer friendly function is a mode to let WINX check for
+     improper calls of the AES window library.
+
+     Theoretically, ALL 'clean written' 'well-behaved' GEM programs
+     should get along with these changes easily, but the practical side
+     is slightly :-) different. Even TOS internal GEM Desktop had to be
+     changed for some reasons. Please be sure, that if one of your
+     programs will have several problems with WINX, it also has very
+     good chances to have problems with MultiTOS, too. It would be a
+     good idea to give a hint to the authors to test the program with
+     WINX and to let them get into contact with ATARI to let them be
+     informed how to legally get MultiTOS for testing purposes.
+
+     WINX will integrate an expanded user interface into GEM if the TOS
+     version is greater than 2.xx. This changes the way of mouse usage:
+     Starting with this version of WINX, both mouse buttons can be used
+     to select the window control elements. The right button will induce
+     action, that is started after release of the button. If the left
+     mouse botton is used, action is performed immediately and as long
+     as the mouse button is not released again. You can recognize this
+     state by a change of the mouse form: The arrow looses its shaft.
+     A good example for this is the moving of a window. If you select
+     the move bar of the window with the right mouse botton, then a
+     frame is drawn which can be moved to a different position. Only
+     after releasing the mouse button the window is redrawn at the new
+     position. If you use the left mouse button to select the move bar,
+     the window is redrawn constantly just where the mouse moves. The
+     same behavoiur holds for the usage of the sizer, closer, full-size
+     box and scroll bars.
+
+     Action started by klicking the scroller arrows of into the 
+     scrollbar did not change. They already and always leaded to direct
+     response of the program. Aditionally, a clicking on the scroller
+     arrows with the right mouse key sets the scrollbar to the start
+     (or end) of the scrollable area. If you click into the scrollarea,
+     the scrollbar is directly put to this position.
+     
+     Another new feature is an addition for handling a click on the
+     title bar of the window. Up to now, this could only top a back-
+     ground window. Now it also is possible to backdrop windows, if a
+     program can already handle the newly defined message.
+
+     The CONTROL key is a modifier for actions which are performed by
+     clicking window control elements. If CONTROL is pressed while the
+     mouse click is performed, the normal meaning of the control
+     elements is lifted away. Instead of this, the window is put into
+     front or background. This is very useful if a window is only
+     partly visible.
+
+     If CONTROL is pressed while the right mouse button is released,
+     the action that SHOULD be performed is ignored. For example if you
+     started to move a window, but then again prefer to leave it at the
+     previous place.
+
+     Here is a list of the changes/expansions WINX does install into
+     GEM. In detail
+
+        '*'     stands for new stuff in this version
+        '[G..]' or
+        '[L..]  stands for a flag which indicates, that this
+                feature can be activated or switched off
+                (see part CONFIGURATION in this text)
+
+     Unfortunately this part of manual might be very technical - it
+     is despite of that a good idea to read it at least once, because
+     you otherwise will miss some features of WINX.
+
+     GEM-SCRENMGR:
+     (the part of GEM, which besides other things deals with clicks on
+     window elements)
+     - [L1] use control elements for background windows
+     * [G10] BackDrop function: By clicking on the title bar of the top
+       window it is put to the backgorund (disabled), if the application
+       supports the backdrop message or only one window is open.
+     * [G9] if you hold the CONTROL key while performing a click on a
+       window control element, the meaning of the control element is
+       disabled. Instead of the normal state, a background window gets
+       topped or a topped window is set into background (if BackDrop is
+       turned ON)
+     * Repeat for scroll arrows for TOS 1.00
+     * Fixed AES problems with WM_ARROWED messages (ARROWFIX patches)
+       These are:
+       TOS >= 1.04:   Doubly sent message
+       TOS 2.06/3.06: Doubly sent message, delayed message, wrong overlength
+       TOS 4.01-4.04: Doubly sent message, delayed message
+       ARROWFIX.ENG (part of ARROWFIX) tells you details.
+     - optical response for usage of control elements
+       [G4] Selection of scroll arrows
+       [G5] Selection of scroll bars
+       [G6] Selection of mover element
+       [G7] Selection of sizer element
+     * [G2] Send right mouse button clicks on window frames
+       to the SCRENMGR (otherwise to the application)
+     * [G3] Left mouse button click activates realtime functions
+       (otherwise: G2=ON: right mouse button click, G2=OFF: double
+        click with left mouse button)
+     * [G11] It's now possible to move windows beyond the left
+       border of the screen
+
+     GEM-DESKTOP:
+     - handling of events for background windows
+     * Integration of backdrop
+     * topping and untopping of windows does no loger change the
+       selected files in directory windows of NEWDESK from TOS 2.x/3.x
+     - TOS 2.x/3.x Desktop handles 8 instead of 7 windows, TOS 1.x
+       only 4, as always.
+     - If scrolling is performed in background windows, the desktop
+       tries only to newly display as little as possible and copy as
+       much as possible.
+
+     Window management:
+     - [G1] Increase number of available windows to 40 (instead of 8)
+     - [L1] use control elements for backed windows
+     - [L2] minimise number of window frame elements (up to now, a
+       window with a sizer always had a horizontal and a vertical bar,
+       which does not neccessarily makes sense)
+     - [G8] wider frame for slider elements on the window frame (very
+       much discussed option :-) similar to old MultiTOS versions)
+     * Window Colors for TOS 1.xx can be set with WINCOLOR.CPX. This
+       CPX is in the humble opinion of the author, anyway preferably
+       to be used instead of the original WCOLOS.CPX, even for
+       TOS 2.xx/3.xx.
+     * Improved redraw for windows (new display of frame and contents)
+     * Activating (and deactivating) does not change the WF_PREVXYWH-
+       rectangle of the window any more. In this rectangle, the most
+       recent change of position and size of the window is placed.
+     * [L3] Opening and topping a window send WM_ONTOP, backdrop and
+       closing WM_UNTOPPED
+     * only one object tree is used to display the background
+     * wind_set has been modified (optimized WF_SLIDE routine;
+       WF_BOTTOM; WF_BEVENT)
+     * wind_get has been modified (WF_NEWDESK; WF_BEVENT; WF_BOTTOM;
+       WF_OWNER; WF_TOP; WF_COLOR; WF_DCOLOR)
+     - modification of wind_calc for the changed way window frames are
+       built
+     * completyly new module for the calculation of rectangle lists,
+       which can optimize calculation time and number of rectangles
+     * [L4] Optimized redraw for topping windows:
+       For topping and closig of a window, if possible only the parts
+       of the newly topped window are newly displayed. Unfortunately
+       this leads to incomplete redraws for some applications.
+     * [L5] Optimized redraw for moving windows:
+       If this switch is set, all visible parts of the window are
+       copied, and redraw messages are only sent for the rest of the
+       rectangles. Eventually redraw messages have to be merged, this
+       can force redraw for copied areas.
+     * [L6] Optimized redraw for sizing windows:
+       If this switch is set, applications get only redraw messages
+       for the newly visible parts of the window.
+     * [L7] Optimized merging of redraw messages:
+       With all curent TOS Versions, the number of redraw messages
+       per window that was stored in the message buffer of the
+       application was limited to one. If a second message had to be
+       stored, the redraw rectangle of the first message was replaced
+       with a rectangle, that contained a rectangle which held the
+       retangles of the old and the new message. MultiTOS does NOT
+       merge these messages any more. Both solutions have limitations.
+       WINX implements the usage of a compromise. WINX only merges two
+       redraw messages if the resulting rectangle is not bigger than
+       25% of the sum of both single rectangles. Furthermore the
+       applications can store two redraw messages per window now.
+     * [L9] There are two ways, how the scroll arrows can be displayed
+       in the frame of a window now: At top/bottom leftmost/rightmost
+       position of the scrollbar or all just besides the other in the
+       rightmost downmost edge of the window frame.
+     * It now is possible to only use wind_update if no other program
+       already owns control. Additionally wind_update is checked for
+       underflow.
+     - all other routines have been modified to be able to handle the
+       increased number of windows
+     * [G11] 3D window frame (starting with GEM 3.31)
+
+     Various:
+     - enlargement of the message buffer of an application from 8 to
+       40 standard messages (this can highly help avoiding deadlocks
+       of AES)
+     - The wait time for a mouse click has been set to exactly be the
+       same as the setting of the doubleclick time. In all current
+       versions of GEM, there is no consistant handling of the
+       duration beetween a mouseclick of the user and the procession
+       of it by the SCRENMGR. Up to now, the duration is dependant
+       from the question, if minimum one application or accessory waits
+       for a doubleclick event or not. The usage of the doubleclick as
+       a timebase is necessary, because otherwise, in case of a click
+       on a title element of a backed window, moving and topping could
+       not always be distinguished
+     * TIMER/BUTTON problem for evnt_multi() has been fixed, this means
+       you only get the button event, if the application owns the mouse
+     * support for WF_BEVENT flags during the mapping of button events
+       to applications
+     * TOS 1.xx: Now the dynamically requested structures for
+       administration of accesories are explicitly cleared (as in newer
+       TOS versions). This avoids problems with AUTO folder programs,
+       which might have used these parts of memory already in the boot
+       phase (leaving garbage there).
+     * [G12] Fill patterns for GEM objects now always will be drawn
+       relative to the left topmost edge of the object (instead of
+       being relative to 0/0 of the current screen).
+     * Now also for TOS 1.00 and 1.02, the name of the active
+       application is reset every time the internal Desktop is started.
+     * [L8] If this switch is switched ON, WINX displays an Alert every
+       time where an application tries to call OS window functions with
+       wrong parameters.
+     * [G13] If a program B is started from the currently running
+       program A, now the name, GEM recognizes as the currently running
+       appliction, is set to be B. At the point of termination of B,
+       the name is reset to A. This makes appl_find() work correctly
+       also in the above case. (Up to now, A has been found instead
+       of B).
+     * wind_new() now sets the ownership of mouseclicks to the main
+       application (instead of setting it to the SCRENMGR). This avoids
+       the loss of the first mouse click on a desktop object after an
+       application has been terminated.
+     * A call of wind_unpdate( BEG_UPDATE) has been inserted into the
+       wind_new() call. wind_new() is used by the desktop to clear up
+       the screen after termination of applications. The insertion of
+       wind_update() helps to avoid, that accesories are affected by
+       this at an unfavorable time.
+     * A bug in the mechanism of the task dispatch in GEM 3.xx has
+       been fixed. This should suppress (possible harmful) task
+       switching during the display of alerts generated from the
+       critical error handler.
+     * 'Phantom typist' patch
+
+INSTALLATION
+     To do all these changes, WINX must deeply take control of the
+     working of AES and GEM. The necessary changes can be achived with
+     three methods:
+
+     a) Patching a copy of GEM in RAM
+          You install a copy of GEM in the machines RAM at BOOT time
+          which is modified by WINX before GEM is started. This can be
+          achieved with one of the following programs.
+
+          Name; Description; where to get; author; RAM used; uses cookie
+
+          ROMRAM    TOS speeder for TT030;
+                    Mailbox Maus HH2 (Freeware);
+                    Alexander Herzlinger; >256 KB; PTOS
+          VRAM030   Virtual memory management for TT030 and FALCON030;
+                    OverScan, D-12277 Berlin;
+                    Alexander Herzlinger; >256 KB; VRAM
+          ROMSPEED  TOS speeder for TT030 (Part of OUTSIDE virtual
+                    memory mangement for TT030);
+                    MAXON Verlag; D-65734 Eschborn;
+                    Uwe Seimet; >256 KB; USRS
+          GEMRAM    Install GEM in RAM (ST,TT,FALCON);
+                    Mailbox Maus MTK (Freeware);
+                    Martin Osieka; 80-200 KB; MOGR
+
+     b) Patching a TOS file
+          You can use WINX to modify your ROM contents to be feasible
+          to be burned into EPROMs and reinstall a changed TOS version
+          including the WINX patches in your machine. This only works
+          with ORIGINAL unmodified (c) ATARI ROMs and is only allowed
+          for your personal use - you may not distribute ROM Image
+          files nowhere, neither modified nor unmodified.
+          To get ready to burn files, just start WINX in the desktop
+          or load in an original TOS Image file. After WINX changed
+          the contents, you can save it again for burning it.
+
+     c) Patching single GEM routines
+          If you have a machine with Original TOS 1.00, 1.02 or 1.04,
+          you can use WINX without copying GEM to RAM with GEMRAM.
+          Even here WINX.PRG must be in the AUTO folder. At the time
+          GEM is started, WINX intercepts the GEM startup and only
+          installs some (ok, these are some more) routines in RAM.
+          This is not possible with later TOS releases due to a
+          change (a very positive change) in AES and Desktops
+          subroutine calling mechanism. The modified GEM-routines
+          use only about 16 kByte of RAM.
+
+     In addition to the amount of memory for the RAM copy of GEM or
+     the RAM copy of GEM routines, WINX needs about 20 kByte for
+     the additional GEM-window structures.
+
+     WINX has been modified to work with the following official GEM
+     versions:
+
+        GEM(AES)   TOS
+          1.20     GER 1.00/1.02
+          1.40     GER 1.04/1.06/1.62
+          3.00     GER 3.01
+          3.10     GER 2.05/3.05
+          3.20     GER/UK 2.06/3.06
+          3.31     4.01
+          3.40     4.02-4.04
+
+     WINX identifies GEM by the length of the GEM-TEXT-Segment.
+     GEM Versions of foreign/unknown countries are accepted if the
+     length is identical.
+
+CONFIGURATION
+     Most of the changes WINX can do with GEM, can be turned on and off
+     with 'switches'. The setting of those switches can be changed by
+     editing the configuration file WINX.INF, which HAS to be in the
+     AUTO folder also. This is an ASCII file which can be easily 
+     changed using a text editor.
+
+     Beginning with WINX version 2.1 global and local switches can be
+     distinguished. Global switches have effect for all applications,
+     whereas local switches can be set individually for each 
+     applications. All further description can be seen from WINX.INF.
+
+     For the near future, all these settings should be able to be
+     performed with a CPX-module, but the enlightenig spark how this
+     can be done in a really user-friedly way did still not come
+     across my mind.
+
+     The repeat times of closer, full-size box and scroll arrows
+     can be set via WINX.CPX, too.
+
+TERMINATE AND KEEP RESIDENT
+     WINX is a TKR-program and made of a TKR-loader, in which the
+     TKR-module 'WINX.TKR' has been inserted. The concept of TKR is
+     that programs, which need resident memory (TKR-modules), get this
+     amount of memory given from another program (the TKR-loader).
+     Following this concept, the TKR-module can be concentrated to its
+     real work and only uses a minimum of memory. The used TKR-Loader
+     can contain an unlimited amount of TKR-modules and other programs.
+     If you press the SHIFT-key while the TKR-Loader is started, the
+     loader asks for each TKR module if it should be started. The TKR-
+     loader displays the amount of memory that will be kept resident
+     after end of installation.
+
+KNOWN PROBLEMS
+     - some older pprograms use the window handle as an index for own
+       internal tables; this of course is really bad programming style
+       and can cause those programs to crash while using many open
+       windows.
+     - Some programs limit their own acess to windows by a fixed number
+       without having a good reason (for example the original desktop).
+     - WINX Versions before 2.0 crashed, if a programme die used the
+       window handle -1 (NOWINDOW). This is fixed now.
+     - TOS14FIX only can be installed after WINX.
+     - TEMPLMON Versions < 2.0 must been started before WINX.
+     - Many programs cannot cope with the correct redraw of
+       background windows, mostly the scrolling in partly overlaped
+       windows quite often makes problems.
+     - MultiGEM will only allow 10 windows per application.
+     - WINX 2.1 will only be be supported by MultiGEM 2.00 (year of
+       copyright 1993!) (also see Update hints in MultiGEM Manual)
+     - since MultiGEM uses its own mapping of window handles, some new
+       wind_get() modes return wrong values:
+         WF_OWNER, WF_BOTTOM, WF_TOP (for owner and belowwin)
+     - BackDrop only works completely, if it is supported by the
+       used programs.
+     - Some graphic cards (i.e. their VDI-Driver) obviously have
+       problems with userdefined patterns. In this case, the switch
+       for defining relatively to which point a fill patterns should
+       be displayed, should be set to 0/0 and the maker of the card
+       and driver should be asked to change his software.
+     - If the switch for setting the fill pattern drawing to be
+       relative to the object is turned off, objects of windows are
+       always displayed completely. In addition to this, it might be
+       neccasary to switch off the redraw optimisation (for example
+       for XCONTROL)
+     - If a program opened very many windows (>20) there might be a
+       problem if the optimized merging of redraw messages is active
+       [L7] and the screen has to be displayed completely new.
+     - At the time exiting an application, GEM closes the windows of
+       accesories automatically. In some (seldom) cases, accessories
+       are not getting the information about the termination in time,
+       so they try to access windows, that already do not exist any
+       more. If WINX is set to report wrong window library calls, an
+       error message is displayed. The problem behind this is
+       conceptual in GEM. To avoid the display of those error messages
+       switch of the error report feature of WINX.
+
+IMPORTANT NOTES FOR PROGRAMMERS
+     (see file WINXPROG.ENG)
+
+VEKTORS, COOKIES, ETC.
+     In case c) under installation the LineF-Vektor is changed
+     (XBRA-ID is AESF).
+     WINX (and WINXCOOK, the support program for a WINX modified ROM)
+     generates the cookie WINX starting with version 2.1 of WINX. The
+     cookie holds a pointer to a function that can return version
+     specific information about WINX.
+
+     If the WINX cookie is installed, the GEMDOS trap is intercepted
+     on start of GEM (XBRA ID is WINX)
+
+     GEMRAM tries to find out the language for its messages looking at
+     the OSHEADER, after this, the _AKP cookie is checked (if existing).
+     On start from Desktop, the environment variable AE_LANG is
+     additionally checked. If the returned language is different from
+     german, english messages are used. The display format for the
+     date is derived from the _IDT cookie and if this cookie does not
+     exist, from the language setting.
+
+COPYRIGHT
+     Author:     (\/) Martin Osieka
+     Adress:     Martin Osieka, Erbacherstr. 2,
+                 D-64283 Darmstadt, Bundesrepublik Deutschland
+     Internet:   Martin_Osieka@mtk.maus.de
+
+     If you write letters and would like to get an answer, please do
+     not forget to submit a self-adressed envelope with enough
+     international answer coupons or german stamps.
+
+     WINX is freeware and may be distributed in ANY form as long as
+     program and all texts are distributed in a complete, unmodified
+     form. The files are:
+
+     WINX.PRG, WINX.CPX      patch program und configuration CPX module
+     WINXCOOK.PRG            program for WINX modified ROMs
+     WINX.GER, WINXPROG.GER  documentation (german)
+     WINX.ENG, WINXPROG.ENG  documentation (english)
+     WINX.UPL                upload-description (german)
+     LIESMICH                short description (german)
+     NEUES                   what's new (german)
+
+WARNING
+     This program worked stable and normal behaved for some time in
+     my own programming environment. Besides all tries to avoid bugs
+     in development and testing you have to be aware, that this is
+     based on the analysis of internal GEM Code. GEM has parts, but
+     I wouldn't claim that, what I saw 'structured'. For this reason
+     it easily may happen, that someone misses a point somewhere.
+     And this is in fact VERY easy. For this reason, I include the
+     following message:
+
+     *********************************************************************
+     * THIS PROGRAM COMES WITH ABSOLUTELY NO WARRANTY AGAINST MISUSE,    *
+     * DATA LOSS, BRAIN DAMAGE, EARTHQUAKE AND WHATEVER MAY HAPPEN       *
+     * BEFORE/AFTER OR WHILE USING IT. IT IS ABSOLUTELY *YOUR OWN* RISK. *
+     *********************************************************************
+
+     This cannot be emphazised enough, if you indeed use this program
+     together with dirty programming trick software.
+
+MANY THANKS TO
+     Normen B. Kowalewski for translation of main parts of this document
+
+SEE ALSO
+     Documentation of GEMRAM, ARROWFIX and WINCOLOR
+     

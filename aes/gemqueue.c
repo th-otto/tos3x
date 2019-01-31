@@ -50,7 +50,11 @@ PP(QPB *m;)
 	{
 		LBCOPY(p->p_qindex + p->p_qaddr, m->qpb_buf, n);
 		/* if its a redraw msg try to find a matching msg and union the redraw rects together */
-		nm = (int16_t *) & p->p_queue[p->p_qindex];
+#if TP_WINX
+		nm = (int16_t *) (p->p_qaddr + p->p_qindex);
+#else
+		nm = (int16_t *) &p->p_queue[p->p_qindex];
+#endif
 
 		if (nm[0] == AC_CLOSE)
 			p->p_stat |= PS_TRYSUSPEND;
@@ -58,12 +62,20 @@ PP(QPB *m;)
 		if (nm[0] == WM_REDRAW)
 		{
 			index = 0;
-			while ((index < p->p_qindex) && (n))
+			while ((index < p->p_qindex) && n)
 			{
+#if TP_WINX
+				om = (int16_t *) (p->p_qaddr + index);
+#else
 				om = (int16_t *) & p->p_queue[index];
-				if ((om[0] == WM_REDRAW) && (nm[3] == om[3]))
+#endif
+				if (om[0] == WM_REDRAW && nm[3] == om[3])
 				{
+#if TP_WINX
+					wx_rmerge(nm /* a3 */, om /* a4 */);
+#else
 					rc_union((GRECT *)&nm[4], (GRECT *)&om[4]);
+#endif
 					n = 0;
 				} else
 				{
@@ -98,7 +110,11 @@ PP(intptr_t lm;)
 	p = fpdnm(NULL, m->qpb_pid);
 
 	if (isqwrite)
+#if TP_WINX
+		qready = (m->qpb_cnt <= (WX_QUEUE_SIZE - p->p_qindex));
+#else
 		qready = (m->qpb_cnt <= (QUEUE_SIZE - p->p_qindex));
+#endif
 	else
 		qready = (p->p_qindex > 0);
 

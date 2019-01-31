@@ -1019,6 +1019,9 @@ _bb_fill:
 
 	lea	_gl_fis,a0			; a0 -> gl_fis
 	move.w	  (a3)+,d0			; d0 <- fis
+#if TP_WINX
+	bsr wx_fill
+#endif
 	cmp.w	   (a0),d0
 	beq	       L41			; if (fis != gl_fis)
 
@@ -1530,3 +1533,71 @@ UWORD ch_height(WORD fn)
 	return 0;
 }
 #endif
+
+
+#if TP_WINX
+wx_fill:
+		move.l    a0,-(a7)
+		cmp.w     #2,d0
+		bne.s     wx_fill5
+		move.w    _D+$58,d1 /* winxvars.xAEFA */
+		btst      #11,d1
+		beq.s     wx_fill5
+		move.w    (a3),d1
+		subq.w    #1,d1
+		cmp.w     #5,d1
+		bhi.s     wx_fill5
+		moveq.l   #3,d2
+		add.w     d1,d1
+		add.w     d1,d1
+		move.l    wx_fill6(pc,d1.w),d1
+		move.l    2(a3),d0
+		and.w     d2,d0
+		beq.s     wx_fill3
+		subq.w    #2,d0
+		bmi.s     wx_fill2
+		beq.s     wx_fill1
+		swap      d1
+		rol.w     #2,d1
+		bra.s     wx_fill3
+wx_fill1:
+		rol.w     #2,d1
+		swap      d1
+wx_fill2:
+		rol.w     #2,d1
+		swap      d1
+wx_fill3:
+		swap      d0
+		and.w     d2,d0
+		swap      d1
+		ror.w     d0,d1
+		swap      d1
+		ror.w     d0,d1
+		move.l    d1,d0
+		swap      d0
+		rol.w     #2,d0
+		swap      d0
+		rol.w     #2,d0
+		lea.l     _intin,a0
+wx_fill4:
+		move.l    d1,(a0)+
+		move.l    d0,(a0)+
+		dbf       d2,wx_fill4
+		moveq.l   #16,d0
+		move.l    d0,-(a7)
+		move.w    #112,-(a7) /* vsf_udpat */
+		bsr       _gsx_ncode
+		addq.l    #6,a7
+		moveq.l   #4,d0
+wx_fill5:
+		movea.l   (a7)+,a0
+		rts
+wx_fill6:
+		dc.b $00,$00,$44,$44
+		dc.b $00,$00,$55,$55
+		dc.b $88,$88,$55,$55
+		dc.b $55,$55,$aa,$aa
+		dc.b $aa,$aa,$dd,$dd
+		dc.b $55,$55,$ff,$ff
+
+#endif /* TP_WINX */

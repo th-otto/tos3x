@@ -1,6 +1,6 @@
 AES_OBJS1=gemaints.o gemaplib.o gemasync.o gembase.o gembind.o gemcli.o gemctrl.o gemdisp.o
 AES_OBJS2=gemevlib.o gemflag.o gemfmalt.o gemfmlib.o gemfslib.o gemglobe.o geminit.o
-AES_OBJS3=geminput.o gemmnlib.o gemobed.o gemobjop.o gempd.o gemqueue.o gemrom.o
+AES_OBJS3=geminput.o gemmnlib.o gemobed.o gemobjop.o gempd.o gemqueue.o gemrom.o winx.o
 AES_OBJS4=gemrslib.o gemsclib.o gemshlib.o gemwmlib.o gemwrect.o newwrect.o newwmlib.o romcart.o
 AES_OBJS5=gemoblib.o mn_mbar.o mn_menu.o mn_popup.o mn_submn.o mn_tools.o mn_index.o mn_event.o
 #DBG_OBJS = nf_debug.o vsprintf.o doprint.o
@@ -79,6 +79,7 @@ AES_CSRCS=\
 	mn_index.c \
 	mn_event.c \
 	function.c \
+	winx.c \
 	$(DBG_OBJS:.o=.c) \
 	${empty}
 

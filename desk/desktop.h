@@ -240,7 +240,11 @@ VOID blt_window PROTO((WINDOW *win, int16_t mode, int16_t size));
 VOID view_adjust PROTO((WINDOW *win));
 VOID sort_show PROTO((int16_t mode, BOOLEAN view));
 VOID view_fixmode PROTO((WINDOW *win));
+#if TP_WINX
+VOID make_top PROTO((WINDOW *win, int16_t msg));
+#else
 VOID make_top PROTO((WINDOW *win));
+#endif
 VOID ini_windows PROTO((NOTHING));
 WINDOW *alloc_win PROTO((NOTHING));
 WINDOW *get_win PROTO((int16_t handle));
@@ -551,7 +555,11 @@ VOID ch_path PROTO((WINDOW *win));
 BOOLEAN open_subdir PROTO((WINDOW *win, int16_t icon, BOOLEAN opendisk, BOOLEAN init, BOOLEAN redraw));
 VOID show_item PROTO((NOTHING));
 VOID close_path PROTO((WINDOW *win));
+#if TP_WINX
+VOID close_top PROTO((WINDOW *win));
+#else
 VOID close_top PROTO((NOTHING));
+#endif
 VOID open_item PROTO((int16_t item, int16_t type, WINDOW *win));
 VOID open_file PROTO((WINDOW *win, int16_t item, const char *tail));
 BOOLEAN open_disk PROTO((int16_t icon, const char *path, BOOLEAN init));

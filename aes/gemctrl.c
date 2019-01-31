@@ -87,6 +87,14 @@ int16_t rets[6];							/* added 2/4/87 ... and now unused */
 #endif
 int16_t ml_ocnt;
 
+#if TP_WINX
+#define wm_update wx_update
+#define wm_find wx_find
+#define wm_get wx_get
+#endif
+
+
+
 /* used to convert from window object # to window message code */
 STATIC int16_t const gl_wa[] = {
 	WA_UPLINE,
@@ -116,11 +124,18 @@ PP(int16_t m4;)
 {
 	if (message)
 		ap_sendmsg(appl_msg, message, owner, wh, m1, m2, m3, m4);
+#if TP_WINX
+	while ((button & (1 << winxvars.xAF11)) != 0x0)
+		dsptch();
+#else
 	/* wait for button to come up */
 	while ((button & 0x0001) != 0x0)
 		dsptch();
+#endif
 }
 
+
+/* WINXTODO: in winx02.fil */
 
 /* 206de: 00e1778e */
 /* 306de: 00e1b1f4 */
@@ -357,7 +372,7 @@ PP(int16_t my;)
 #if BINEXACT
 		cpt = ob_find(gl_awind, 10L, mx, my); /* sigh */
 #else
-		cpt = ob_find(gl_awind, 0, 10, mx, my);
+		cpt = ob_find((LPTREE) gl_awind, 0, 10, mx, my);
 #endif
         w_getsize(WS_CURR, w_handle, &t);
         r_get(&t, &x, &y, &w, &h);
@@ -381,7 +396,7 @@ PP(int16_t my;)
 			if (gr_watchbox(gl_awind, cpt, SELECTED, NORMAL))
 			{
 				message = (cpt == W_CLOSER) ? WM_CLOSED : WM_FULLED;
-				ob_change(gl_awind, cpt, NORMAL, TRUE);
+				ob_change((LPTREE) gl_awind, cpt, NORMAL, TRUE);
 			}
 			break;
 		case W_NAME:
@@ -416,7 +431,7 @@ PP(int16_t my;)
 			/*
 			 * cpt + 1: W_HSLIDE -> W_HELEV, W_VSLIDE -> W_VELEV
 			 */
-			ob_offset(gl_awind, cpt + 1, &px, &py);
+			ob_offset((LPTREE) gl_awind, cpt + 1, &px, &py);
 			if (cpt == W_HSLIDE)
 			{
 				/* fix up for index into gl_wa */
@@ -438,7 +453,7 @@ PP(int16_t my;)
 		case W_VELEV:
 			message = cpt == W_HELEV ? WM_HSLID : WM_VSLID;
 			/* slide is 1 less than elev */
-			x = gr_slidebox(gl_awind, cpt - 1, cpt, cpt == W_VELEV);
+			x = gr_slidebox((LPTREE) gl_awind, cpt - 1, cpt, cpt == W_VELEV);
 			break;
 		}
 		if (message == WM_ARROWED)
@@ -446,7 +461,7 @@ PP(int16_t my;)
 			x = gl_wa[cpt - W_UPARROW];
 			wm_update(END_UPDATE);			/* give up the screen */
 
-#if TP_48 /* ARROWFIX */
+#if TP_48 & !TP_WINX /* ARROWFIX */
 			{
 				extern int32_t TICKS;
 				extern int16_t gl_dcindex;
@@ -551,6 +566,8 @@ PP(int16_t my;)
 #endif
 }
 
+
+/* WINXTODO: in winx02.fil */
 
 /* 306de: 00e1b580 */
 VOID hctl_button(P(int16_t) mx, P(int16_t) my)
@@ -660,7 +677,7 @@ PP(int16_t h;)
 	t2.g_y = y;
 	t2.g_w = w;
 	t2.g_h = h;
-#if (AES3D) & !BINEXACT
+#if AES3D & !BINEXACT
 	wm_get(deskwind, WF_FIRSTXYWH, temp, NULL);
 #else
 	wm_get(deskwind, WF_FIRSTXYWH, temp); /* BUG: missing parameter for >= 0x0330 */
@@ -684,7 +701,7 @@ PP(int16_t h;)
 			gsx_sclip(&t1);
 			ob_draw((LPTREE)tree, stobj, MAX_DEPTH);
 		}
-#if (AES3D) & !BINEXACT
+#if AES3D & !BINEXACT
 		wm_get(deskwind, WF_NEXTXYWH, temp, NULL);
 #else
 		wm_get(deskwind, WF_NEXTXYWH, temp); /* BUG: missing parameter for >= 0x0330 */
@@ -716,7 +733,7 @@ PP(GRECT *pr;)
 	/* and get mouse event posted correctly */
 	post_mouse(gl_mowner, xrat, yrat);
 	/* post a button event in case the new owner was waiting */
-#if AESVERSION <= 0x320
+#if (AESVERSION <= 0x320) & !TP_WINX
 	post_button(gl_mowner, button, 1);
 #endif
 
@@ -746,7 +763,11 @@ VOID ctlmgr(NOTHING)
 
 	while (1)
 	{
+#if TP_WINX
+		wx_setactive();
+#else
 		w_setactive();
+#endif
 		/*
 		 * if no waiting to go out of menu area
 		 * then give mouse to owner of top window
@@ -755,10 +776,14 @@ VOID ctlmgr(NOTHING)
 		/* gl_ctwait.m_out = inside(mx, my, &gl_ctwait.m_x); */
 
 		/* wait for something to happen */
+#if TP_WINX
+		ev_which = ev_multi(MU_KEYBD | MU_BUTTON | MU_M1, &gl_ctwait, &gl_ctwait, 0x0L, 0x01020300L, NULL, lrets);
+#else
 #if AES3D
 		ev_which = ev_multi(MU_KEYBD | MU_BUTTON | MU_M1 | MU_MESAG, &gl_ctwait, &gl_ctwait, 0x0L, 0x0001ff01L, msgbuf, lrets);
 #else
 		ev_which = ev_multi(MU_KEYBD | MU_BUTTON | MU_M1, &gl_ctwait, &gl_ctwait, 0x0L, 0x0001ff01L, NULL, lrets);
+#endif
 #endif
 		/* grab screen sink */
 		wm_update(BEG_UPDATE);
@@ -819,7 +844,11 @@ PP(BOOLEAN mon;)
 {
 	if (mon)							/* turn on and show the mouse   */
 	{
+#if TP_WINX
+		wx_getmouse();
+#else
 		getmouse();
+#endif
 		tmpmon = gl_mouse;				/* mouse on flag        */
 		tmpmoff = gl_moff;
 		gsx_xmfset(ad_armice);			/* change the mouse form    */
@@ -874,7 +903,11 @@ PP(BOOLEAN beg_ownit;)
 			/* get_mkown(&ml_pmown, &ml_pkown); */
 
 			ml_pmown = gl_mowner;		/* save the mouse owner    */
+#if TP_WINX
+			ml_pkown = gl_mowner;		/* save the keyboard owner */
+#else
 			ml_pkown = gl_kowner;		/* save the keyboard owner */
+#endif
 
 			ct_chgown(rlr, &gl_rscreen);	/* change mouse ownership  */
 		}								/* and the control rect    */

@@ -54,6 +54,11 @@ char const stacc[] = "\\*.ACC";
 int16_t used_acc;							/* currently number of acc  */
 
 
+#if TP_WINX
+#define wm_update wx_update
+#endif
+
+
 /*
  * Make sure everybody is on the suspend list before going on
  */

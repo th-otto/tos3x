@@ -1,0 +1,62 @@
+WINX 2.2 [17.10.1993]
+
+- Die .LOCAL-Zeile in WINX.INF wurde abgeschafft. Lokale Schalter
+  eines Programms, die nicht direkt in der Schalterliste des Namens-
+  musters gefunden werden, welches auf den Programmnamen pat, werden
+  jetzt nicht mehr aus der .LOCAL-Zeile, sondern aus der Zeile mit
+  dem Namensmuster "*" gesetzt. Damit ist das ganze zwar nicht mehr
+  so flexibel, dafr aber hoffentlich verst„ndlicher.
+- WINX legt den WINX-Cookie jetzt auch an, falls das GEM bereits
+  mit dieser WINX-Version gepatcht wurde (z.B. wenn man mit ROMRAM
+  sein TOS resident im RAM installierte). WINXCOOK wird damit mehr
+  oder weniger berflssig, falls man nicht auf den Speicherplatz
+  auf dem Bootlaufwerk achten mu.
+- Der WINX-Funktionshandler wurde erweitert um eine Funktion, die es
+  erlaubt die Bildschirmgr”e nachtr„glich zu „ndern (fr den Support
+  von WINX durch AutoSwitch-OverScan und Konsorten)
+    #define WFC_SETSCR 12
+    (winxfunc( WFC_SETSCR, newscrw, newscrh) == 0) => SUCCESS
+- Patch fr das 'Phantom Typist' Problem (TOS >= 1.06). Da sich der
+  Fehler nicht gezielt reproduzieren l„t, ist es aber nicht sicher,
+  ob der Patch die L”sung bringt. Schaden tut er jedenfalls nicht ;-)
+- Fehlte die WINX.INF-Datei, erschien eine fehlerhafte Meldung
+- Die Defaultwerte von WINX k”nnen direkt in die Datei gepatcht werden.
+- Es ist jetzt nur noch ein Patchversuch pro WINX-Aufruf m”glich
+- Die verschiedenen Verz”gerungswerte k”nnen jetzt auch ber WINX.INF
+  eingestellt werden (die Werte im CPX haben aber noch Priorit„t!):
+    .DDELAY=arrow1,arrow2,closer,fuller
+  Beispiel (entspricht der Defaulteinstellung):
+    .DDELAY=460,40,1000,2000
+  (alle Werte in ms; die Aufl”sung des Timers betr„gt 20ms).
+- Im TOS 1.00-1.04 klappte die šberprfung, ob einer Applikation ein
+  Mausklick zugeordnet ist, nicht 100%ig (z.B. wenn der SCRENMGR beim
+  Scrollen die Kontrolle hatte)
+- Das Sichern eines gepatchten TOS 1.00-1.04 fhrte zu einem bombigen
+  Ergebnis.
+- Nach Fehlermeldungen wartet WINX einen Moment, so da diese lesbar
+  sind.
+- Der Einbau der appl_getinfo()-Funktion in WINX fhrte zu Problemen
+  mit Programmen, die zum einen Userdefs in der Menzeile benutzen
+  und zum anderen mit einer „lteren TurboC-GEM-Bibliothek gelinkt
+  wurden (GEMINI 1.21, ...) . Dieser Fehler wird jetzt abgefangen.
+- wind_get( WF_WINX) liefert jetzt WF_WINX, falls es die Funktion gibt.
+  Damit kann man darauf verzichten vorher zu prfen, ob wind_get()
+  berhaupt einen gltigen Funktionswert liefert. Erg„nzend wurde
+  das Beispiel fr eine has_appl_getinfo()-Funktion ge„ndert.
+
+    #define WF_WINX 22360
+    
+    int has_appl_getinfo( void)
+    /* Liefert TRUE, falls das AES appl_getinfo() bereitstellt */
+    {
+      static int hagi = -1;
+      int ign;
+
+      if (hagi < 0) {      
+        hagi = ((_GemParBlk.global[ 0] >= 0x400) ||
+          (wind_get( 0, WF_WINX, &ign, &ign, &ign, &ign) == WF_WINX));
+      };
+      return( hagi);
+    } /* has_appl_getinfo */
+  
+WINX 2.1 [9.9.1993]

@@ -1,0 +1,175 @@
+;***************************************************************************
+;* Martin Osieka: (implementiert durch MH)
+;* Puffer fr NEWDESK.INF vergr”žern. Originalroutinen aus SHBUF 1.3!
+;* N„here Informationen siehe SHBUF.
+;* Maximale Puffergr”že ist $7FFE => 32kB pro Puffer.
+;* Da es 2 Puffer gibt => MAXIMAL 64kB Speicherverbrauch.
+;* Die Puffergr”že muž in der Variablen .BUFFER stehen.
+
+_IF .BUFFER > 7FFE
+ .BUFFER = 7FFE
+_ENDIF
+
+20B5E
+~ $4E,B9,28206+.BASE.L          ;JSR
+
+2510E
+~ $2E,BC,.BUFFER.L              ;MOVE.L    #.BUFFER,(SP)
+~ $61,1A                        ;BSR.S     $XXXX
+~ $23,C0,00,00,E6,D0            ;MOVE.L    D0,$E6D0
+~ $61,12                        ;BSR.S     $XXXX
+~ $23,C0,00,00,A5,16            ;MOVE.L    D0,$A516
+~ $61,0A                        ;BSR.S     $XXXX
+~ $2D,40,FF,F8                  ;MOVE.L    D0,-8(A6)
+~ $42,45                        ;CLR.W     D5
+~ $2F,00                        ;MOVE.L    D0,-(SP)
+~ $60,06                        ;BRA.S     $XXXX
+~ $4E,F9,34A12+.BASE.L          ;JMP       $XXXX
+~ $3F,3C,00,03                  ;MOVE.W    #3,-(SP)
+~ $4E,B9,2739E+.BASE.L          ;JSR       $XXXX
+~ $5C,8F                        ;ADDQ.L    #6,SP
+
+25248
+~ $3F,3C,.BUFFER.W              ;MOVE.W    #.BUFFER,(SP)
+
+254A8
+~ $3E,BC,.BUFFER.W              ;MOVE.W    #.BUFFER,-(SP)
+~ $2F,2E,FF,F8                  ;MOVE.L    -8(A6),-(SP)
+~ $4E,B9,28206+.BASE.L          ;JSR       $XXXX
+~ $58,8F                        ;ADDQ.L    #4,SP
+
+281E4
+~ $30,3C,.BUFFER.W              ;MOVE.W    #.BUFFER,D0
+~ $32,2F,00,08                  ;MOVE.W    8(SP),D1
+~ $B2,7C,FF,FF                  ;CMP.W     #$FFFF,D1
+~ $67,2C                        ;BEQ.S     $XXXX
+~ $B0,41                        ;CMP.W     D1,D0
+~ $64,02                        ;BCC.S     $XXXX
+~ $32,00                        ;MOVE.W    D0,D1
+~ $30,01                        ;MOVE.W    D1,D0
+~ $22,79,00,00,E6,D0            ;MOVEA.L   $E6D0,A1
+~ $20,6F,00,04                  ;MOVEA.L   4(SP),A0
+~ $60,14                        ;BRA.S     $XXXX
+~ $32,2F,00,08                  ;MOVE.W    8(SP),D1
+~ $20,79,00,00,E6,D0            ;MOVEA.L   $E6D0,A0
+~ $22,6F,00,04                  ;MOVEA.L   4(SP),A1
+~ $70,01                        ;MOVEQ     #1,D0
+~ $60,02                        ;BRA.S     $XXXX
+~ $10,D9                        ;MOVE.B    (A1)+,(A0)+
+~ $51,C9,FF,FC                  ;DBRA      D1,$XXXX
+~ $4E,75                        ;RTS
+~ $4E,71                        ;NOP
+~ $4E,71                        ;NOP
+
+3BE64
+~ $4E,56,FF,EA                  ;LINK      A6,#$FFEA
+~ $48,E7,03,04                  ;MOVEM.L   D6-7/A5,-(SP)
+~ $3E,BC,.BUFFER.W              ;MOVE.W    #.BUFFER,(SP)
+~ $2F,39,00,00,A5,16            ;MOVE.L    $A516,-(SP)
+~ $4E,B9,49354+.BASE.L          ;JSR       $XXXX
+~ $58,8F                        ;ADDQ.L    #4,SP
+~ $4E,71                        ;NOP
+~ $20,79,00,00,A5,16            ;MOVEA.L   $A516,A0
+~ $2E,88                        ;MOVE.L    A0,(SP)
+~ $0C,10,00,23                  ;CMPI.B    #$23,(A0)
+~ $67,00,00,E0                  ;BEQ.W     $XXXX
+~ $42,67                        ;CLR.W     -(SP)
+~ $3F,3C,.BUFFER.W              ;MOVE.W    #.BUFFER,-(SP)
+~ $4E,B9,34F62+.BASE.L          ;JSR       $XXXX
+~ $58,8F                        ;ADDQ.L    #4,SP
+
+3BF0A
+~ $2E,B9,00,00,A5,16            ;MOVE.L    $A516,(SP)
+
+3BF10
+~ $2F,3C,.BUFFER.L              ;MOVE.L    #.BUFFER,-(SP)
+
+3BF28
+~ $BE,BC,.BUFFER.L              ;CMP.L     #.BUFFER,D7
+
+3BF4E
+~ $2F,39,00,00,A5,16            ;MOVE.L    $A516,-(SP)
+
+3BF66
+~ $D1,F9,00,00,A5,16            ;ADDA.L    $A516,A0
+
+3BF6E
+~ $3E,BC,.BUFFER.W              ;MOVE.W    #.BUFFER,(SP)
+
+3BF72
+~ $2F,39,00,00,A5,16            ;MOVE.L    $A516,-(SP)
+
+3BFBA
+~ $2E,B9,00,00,A5,16            ;MOVE.L    $A516,(SP)
+
+3C1A8
+~ $0C,AE,.BUFFER.L,FF,E6        ;CMPI.L    #.BUFFER,-$1A(A6)
+
+3C1E8
+~ $2E,B9,00,00,A5,16            ;MOVE.L    $A516,(SP)
+
+3C1F0
+~ $3F,3C,.BUFFER.W              ;MOVE.W    #.BUFFER,-(SP)
+
+3C844
+~ $0C,6E,.BUFFER.W,FF,FA        ;CMPI.W    #.BUFFER,-6(A6)
+
+3C85C
+~ $2E,B9,00,00,A5,16            ;MOVE.L    $A516,(SP)
+
+3C86E
+~ $3E,BC,.BUFFER.W              ;MOVE.W    #.BUFFER,(SP)
+
+3C872
+~ $2F,39,00,00,A5,16            ;MOVE.L    $A516,-(SP)
+
+3C8D6
+~ $2E,B9,00,00,A5,16            ;MOVE.L    $A516,(SP)
+
+3C970
+~ $2F,39,00,00,A5,16            ;MOVE.L    $A516,-(SP)
+
+3E684
+~ $2E,B9,00,00,A5,16            ;MOVE.L    $A516,(SP)
+
+3E68C
+~ $3F,3C,.BUFFER.W              ;MOVE.W    #.BUFFER,-(SP)
+
+3E698
+~ $2E,B9,00,00,A5,16            ;MOVE.L    $A516,(SP)
+
+3E69E
+~ $2F,3C,.BUFFER.L              ;MOVE.L    #.BUFFER,-(SP)
+
+3E6C4
+~ $20,79,00,00,A5,16            ;MOVEA.L   $A516,A0
+~ $0C,10,00,23                  ;CMPI.B    #$23,(A0)
+~ $66,06                        ;BNE.S     $XXXX
+~ $0C,28,00,61,00,01            ;CMPI.B    #$61,1(A0)
+~ $4E,71                        ;NOP
+~ $66,00,00,3A                  ;BNE.W     $XXXX
+~ $3E,BC,.BUFFER.W              ;MOVE.W    #.BUFFER,(SP)
+~ $2F,39,00,00,A5,16            ;MOVE.L    $A516,-(SP)
+~ $4E,B9,4935E+.BASE.L          ;JSR       $XXXX
+~ $58,8F                        ;ADDQ.L    #4,SP
+
+449B0
+~ $2E,BC,.BUFFER.L              ;MOVE.L    #.BUFFER,(SP)
+
+449DA
+~ $3F,3C,.BUFFER.W              ;MOVE.W    #.BUFFER,-(SP)
+
+449EC
+~ $2F,39,00,00,A5,16            ;MOVE.L    $A516,-(SP)
+
+44B4A
+~ $2E,BC,.BUFFER.L              ;MOVE.L    #.BUFFER,(SP)
+
+44B68
+~ $3F,3C,.BUFFER.W              ;MOVE.W    #.BUFFER,-(SP)
+
+4935E
+~ $41,F9,28206+.BASE.L          ;LEA       $XXXX,A0
+
+;***************************************************************************
+;* Ende des SHBUF-Patches

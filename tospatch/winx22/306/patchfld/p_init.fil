@@ -1,0 +1,235 @@
+;******************************************************************************
+; P_INIT.FIL	Patchfile fÅr TOS 3.06 fÅr PAK/3:  Initialisierung
+;		énderungen ggÅ. _20_30.FIL aus PATCHFLD.SE:
+;		 - Der TOS-Anfang wurde Åberarbeitet und wird jetzt aus 
+;		   einem BinÑrfile (begin71.b) eingelesen. Damit entfallen 
+;		   einige Patches aus INIT.FIL und 20_30.FIL
+;		 - Beim Booten wird jetzt die FPU wieder mit FRESTORE 
+;		   zurÅckgesetzt, wie im Original-3.06 auch
+;		 - Memvalid-PrÅfung (Entscheidung,ob Warm-oder Kaltstart) 
+;		   bevor die Memory-Konfiguration in der MCU gesetzt wird
+;		Zim 20.12.2011: RSC-Bereich wird fÅr Boot-Patch verschoben
+;		P_INIT4.FIL setzt die Variablen .ROMTOP und .TOS_INFO, die
+;		spÑter ggf. benîtigt werden
+;		.NATION  (FRG, USA, UK, FRA)
+
+;******************************************************************************
+;	TOS-Anfang als BinÑrdatei einlesen ($E0.0000 bis $E0.029C, 668 Bytes)
+
+30
++begin71.fil
+
+;------------------------------------------------------------------------------
+;	Cookie-Test der FPU prÑzisiert, Code von Dirk EOS Katzschke @ H
+;	SE 29.10.93
+
+440
+~ $20,FC,5F,46,50,55                ;MOVE.L    #'_FPU',(A0)+
+~ $72,00                            ;MOVEQ     #0,D1
+~ $22,79,00,00,00,2C                ;MOVEA.L   $2C.L,A1
+~ $45,FA,00,28                      ;LEA       $28(PC),A2           L0003
+~ $23,CA,00,00,00,2C                ;MOVE.L    A2,$2C.L
+~ $F3,27                            ;FSAVE     -(A7)
+~ $10,2F,00,01                      ;MOVE.B    1(A7),D0
+~ $0C,00,00,18                      ;CMPI.B    #$18,D0
+~ $67,10                            ;BEQ.S     $10(PC)              L0001
+~ $0C,00,00,38                      ;CMPI.B    #$38,D0
+~ $67,08                            ;BEQ.S     8(PC)                L0000
+~ $0C,00,00,40                      ;CMPI.B    #$40,D0
+~ $66,06                            ;BNE.S     6(PC)                L0002
+~ $54,41                            ;ADDQ.W    #2,D1
+~ $54,41                      ;L0000:ADDQ.W    #2,D1
+~ $54,41                      ;L0001:ADDQ.W    #2,D1
+~ $54,41                      ;L0002:ADDQ.W    #2,D1
+~ $48,41                      ;L0003:SWAP      D1
+~ $20,C1                            ;MOVE.L    D1,(A0)+
+~ $23,C9,00,00,00,2C                ;MOVE.L    A1,$2C.L
+~ $60,12                            ;BRA.S     $12(PC)              L0004
+
+~ $FF,FF,FF,FF,FF,FF,FF,FF          ; Rest (9 Worte) mit $FF auffÅllen
+~ $FF,FF,FF,FF,FF,FF,FF,FF
+~ $FF,FF
+
+;******************************************************************************
+;	Anzahl der XBIOS-Funktionen reduzieren
+;	c't 9/92
+
+E2C   $00,41                        ; hîchste Nummer: Xbios(65) Blitmode
+
+;------------------------------------------------------------------------------
+;	Bei den entfernten XBIOS-Funktionen ist reichlich Platz fÅr 
+;	énderungen:  1756 - 186A
+
+1756
+~ $FF,FF,FF,FF,FF,FF,FF,FF          ; zum AbstÅtzen des Adress-Counters
+~ $FF,FF,FF,FF,FF,FF
+
+;------------------------------------------------------------------------------
+;	Synchronisierung mit DE-Signal an TBI
+
+;1764                               ;                       Aufruf von $E005B0
+.SyncDE:                            ; ~ in Variable speichern
+~ $61,00,00,08                      ;BSR       8(PC)                L0000
+~ $11,C1,82,60                      ;MOVE.B    D1,-$7DA0.W
+~ $4E,75                            ;RTS
+
+;176E                               ;                       Aufruf von $E000D6
+_IF !NOT! .Alt_Sync
+~ $41,F8,FA,21                ;L0000:LEA       $FFFFFA21.W,A0
+~ $43,F8,FA,1B                      ;LEA       $FFFFFA1B.W,A1
+~ $08,B8,00,00,FA,07                ;BCLR      #0,$FFFFFA07.W
+~ $78,01                            ;MOVEQ     #1,D4
+~ $42,11                            ;CLR.B     (A1)
+~ $10,BC,00,F0                      ;MOVE.B    #$F0,(A0)
+~ $12,BC,00,08                      ;MOVE.B    #8,(A1)
+~ $B8,10                      ;L0001:CMP.B     (A0),D4
+~ $66,FC                            ;BNE.S     -4(PC)               L0001
+~ $18,10                      ;L0002:MOVE.B    (A0),D4
+~ $36,3C,02,67                      ;MOVE.W    #$0267,D3
+~ $B8,10                      ;L0003:CMP.B     (A0),D4
+~ $66,F6                            ;BNE.S     -$A(PC)              L0002
+~ $51,CB,FF,FA                      ;DBF       D3,-6(PC)            L0003
+~ $12,BC,00,10                      ;MOVE.B    #$10,(A1)
+~ $4E,75                            ;RTS
+_ELSE
+~ $16,38,82,01                ;L0000:MOVE.B    $FFFF8201.S,D3
+~ $18,38,82,03                      ;MOVE.B    $FFFF8203.S,D4
+~ $41,F8,82,05                      ;LEA       $FFFF8205.S,A0
+~ $43,F8,82,07                      ;LEA       $FFFF8207.S,A1
+~ $B6,10                      ;L0001:CMP.B     (A0),D3
+~ $66,04                            ;BNE.S     4(PC)                L0002
+~ $B8,11                            ;CMP.B     (A1),D4
+~ $67,F8                            ;BEQ.S     -8(PC)               L0001
+~ $B6,10                      ;L0002:CMP.B     (A0),D3
+~ $66,FC                            ;BNE.S     -4(PC)               L0002
+~ $B8,11                            ;CMP.B     (A1),D4
+~ $66,F8                            ;BNE.S     -8(PC)               L0002
+~ $4E,75                            ;RTS
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	Initialisierung des DMA-Sound, Test auf GSTMCU
+
+;17A0                               ;                       Aufruf von $E00270
+.InitDMASound:                      ; ~ in Variable speichern, wozu?
+~ $2C,4F                            ;MOVEA.L   A7,A6
+~ $41,FA,00,38                      ;LEA       $38(PC),A0           L0004
+~ $21,C8,00,08                      ;MOVE.L    A0,8.W
+~ $42,78,89,00                      ;CLR.W     $FFFF8900.W
+~ $50,F9,00,00,0A,12                ;ST        $0A12.L
+~ $41,FA,00,08                      ;LEA       8(PC),A0             L0000
+~ $31,D8,89,24                      ;MOVE.W    (A0)+,$FFFF8924.W
+~ $60,1A                            ;BRA.S     $1A(PC)              L0003
+~ $0F,FE,09,D1,0A,A9,0A,29    ;L0000:DC.B
+~ $09,0D,08,8D,08,03,00,00          ;DC.B
+~ $31,C0,89,22                ;L0001:MOVE.W    D0,$FFFF8922.W
+~ $4A,78,89,22                ;L0002:TST.W     $FFFF8922.W
+~ $66,FA                            ;BNE.S     -6(PC)               L0002
+~ $30,18                      ;L0003:MOVE.W    (A0)+,D0
+~ $66,F2                            ;BNE.S     -$E(PC)              L0001
+~ $2E,4E                      ;L0004:MOVEA.L   A6,A7
+~ $11,FC,00,5A,82,0D                ;MOVE.B    #$5A,$FFFF820D.W
+~ $4A,38,82,03                      ;TST.B     $FFFF8203.W
+~ $10,38,82,0D                      ;MOVE.B    $FFFF820D.W,D0
+~ $B0,3C,00,5A                      ;CMP.B     #$5A,D0
+~ $66,0C                            ;BNE.S     $C(PC)               L0005
+~ $42,38,82,0D                      ;CLR.B     $FFFF820D.W
+~ $4A,78,82,40                      ;TST.W     $FFFF8240.W
+~ $4A,38,82,0D                      ;TST.B     $FFFF820D.W
+~ $56,F9,00,00,0A,13          ;L0005:SNE       $0A13.L
+~ $4E,75                            ;RTS
+
+;------------------------------------------------------------------------------
+;	Cookie-Check _VDO und _MCH, wie in TOS 2.06
+
+;1806                               ;                       Aufruf von $E003DE
+.MCHTest:                           ; ~ in Variable speichern
+~ $20,FC,5F,56,44,4F                ;MOVE.L    #'_VDO',(A0)+
+~ $4A,38,0A,13                      ;TST.B     $0A13.W
+~ $67,06                            ;BEQ.S     6(PC)                L0000
+~ $42,98                            ;CLR.L     (A0)+
+~ $42,80                            ;CLR.L     D0
+~ $60,40                            ;BRA.S     $40(PC)              L0003
+~ $20,FC,00,01,00,00          ;L0000:MOVE.L    #$00010000,(A0)+
+~ $20,3C,00,01,00,00                ;MOVE.L    #$00010000,D0
+~ $22,78,00,08                      ;MOVEA.L   8.W,A1
+~ $45,FA,00,12                      ;LEA       $12(PC),A2           L0001
+~ $21,CA,00,08                      ;MOVE.L    A2,8.W
+~ $24,4F                            ;MOVEA.L   A7,A2
+~ $4A,38,8E,09                      ;TST.B     $FFFF8E09.W
+~ $30,3C,00,10                      ;MOVE.W    #$10,D0
+~ $60,16                            ;BRA.S     $16(PC)              L0002
+~ $42,40                      ;L0001:CLR.W     D0
+~ $2E,4A                            ;MOVEA.L   A2,A7
+~ $47,FA,00,10                      ;LEA       $10(PC),A3           L0002
+~ $21,CB,00,08                      ;MOVE.L    A3,8.W
+~ $4A,39,FF,F0,00,39                ;TST.B     $FFF00039.L
+~ $30,3C,00,08                      ;MOVE.W    #8,D0
+~ $21,C9,00,08                ;L0002:MOVE.L    A1,8.W
+~ $2E,4A                            ;MOVEA.L   A2,A7
+~ $20,FC,5F,4D,43,48          ;L0003:MOVE.L    #'_MCH',(A0)+
+~ $20,C0                            ;MOVE.L    D0,(A0)+
+~ $4E,75                            ;RTS
+~ $FF,FF,FF,FF,FF,FF,FF,FF,FF,FF    ; Rest mit $FF auffÅllen
+
+.XBIOSPlatzEnd:
+_IF .XBIOSPlatzEnd > 186C
+ _ERROR 'XBIOS-Platz Åberschritten!!!!'
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	Sprung zu _VDO- und _MCH-Cookies anpassen
+;	SE 04.11.93
+
+3DE
+~ $61,00                            ; BSR    $nnn(PC)
+~ $.MCHTest-~.w
+~ $60,12                            ; BRA.S  $12(PC)
+
+~ $FF,FF,FF,FF,FF,FF,FF,FF          ; Rest (9 Worte) mit $FF auffÅllen
+~ $FF,FF,FF,FF,FF,FF,FF,FF
+~ $FF,FF
+
+;------------------------------------------------------------------------------
+;	Zweiten Sprung zum Setzen von syncmode anpassen
+
+5B0
+~ $61,00                            ; BSR    $nnn(PC)
+~ $.SyncDE-~.w
+
+;******************************************************************************
+;	ST-RAM-Test aus TOS 2.06, im NVM-Bereich untergebracht
+
+208C
+~ $4e,75                            ;RTS fÅr Xbios(46) NVMAccess
+
+;208E
+~ $E4,4E                      ;L0000:LSR.W     #2,D6
+~ $20,47                            ;MOVEA.L   D7,A0
+~ $50,88                            ;ADDQ.L    #8,A0
+~ $61,00,00,28                      ;BSR       $28(PC)              L0003
+~ $67,1A                            ;BEQ.S     $1A(PC)              L0002
+~ $20,47                            ;MOVEA.L   D7,A0
+~ $D1,C7                            ;ADDA.L    D7,A0
+~ $50,88                            ;ADDQ.L    #8,A0
+~ $61,00,00,1C                      ;BSR       $1C(PC)              L0003
+~ $67,0C                            ;BEQ.S     $C(PC)               L0001
+~ $30,7C,00,08                      ;MOVEA.W   #8,A0
+~ $61,00,00,12                      ;BSR       $12(PC)              L0003
+~ $66,04                            ;BNE.S     4(PC)                L0002
+~ $58,46                            ;ADDQ.W    #4,D6
+~ $58,46                      ;L0001:ADDQ.W    #4,D6
+~ $04,81,00,20,00,00          ;L0002:SUBI.L    #$200000,D1
+~ $67,D2                            ;BEQ.S     -$2E(PC)             L0000
+~ $4E,75                            ;RTS
+~ $D1,C1                      ;L0003:ADDA.L    D1,A0
+~ $42,40                            ;CLR.W     D0
+~ $43,E8,01,F8                      ;LEA       $1F8(A0),A1
+~ $B0,58                      ;L0004:CMP.W     (A0)+,D0
+~ $66,08                            ;BNE.S     8(PC)                L0005
+~ $06,40,FA,54                      ;ADDI.W    #$FA54,D0
+~ $B3,C8                            ;CMPA.L    A0,A1
+~ $66,F4                            ;BNE.S     -$C(PC)              L0004
+~ $4E,75                      ;L0005:RTS
+
+;******************************************************************************

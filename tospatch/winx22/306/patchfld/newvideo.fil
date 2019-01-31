@@ -1,0 +1,121 @@
+;*******************************************************************************
+;* MH:
+;* NEWVIDEO-Patch.
+;* Dient zum Aktivieren eines EPROM-Sequencers schon wÑhrend der Bootphase.
+;* [ALL]
+;*
+;* >>> Nur fÅr STs mit EPROM-Sequencer Videoerweiterung
+
+_IF .PAK !A! !NOT! .Alt_Sync
+ /"Unbedingt alternative Bildschirmsynchronisierung aktivieren!"
+_ENDIF
+
+_IF !NOT! .NATION !IN! [.FRG]
+ _ERROR "unsupported country"
+_ENDIF
+
+.X_ST_LOW  =  .320  ;ST-Low : Default  320 * 200
+.Y_ST_LOW  =  .200
+.X_ST_MED  =  .640  ;ST-Med : Default  640 * 200
+.Y_ST_MED  =  .200
+.X_ST_HIGH =  .640  ;ST-High: Default  640 * 400
+.Y_ST_HIGH =  .400
+
+.X_TT_LOW  =  .320  ;(TT-Low : Default  320 * 480)
+.Y_TT_LOW  =  .480
+.X_TT_MED  =  .640  ;(TT-Med : Default  640 * 480)
+.Y_TT_MED  =  .480
+.X_TT_HIGH = .1280  ;(TT-High: Default 1280 * 960)
+.Y_TT_HIGH =  .960
+
+;* Bildschirmgrîûe berechnen
+
+.SIZE_ST_LOW  = (.X_ST_LOW +.15!A!-.16)*.Y_ST_LOW *.4/.8
+.SIZE_ST_MED  = (.X_ST_MED +.15!A!-.16)*.Y_ST_MED *.2/.8
+.SIZE_ST_HIGH = (.X_ST_HIGH+.15!A!-.16)*.Y_ST_HIGH*.1/.8
+
+.SCREEN_SIZE = .SIZE_ST_LOW
+
+_IF .SCREEN_SIZE < .SIZE_ST_MED
+ .SCREEN_SIZE = .SIZE_ST_MED
+_ENDIF
+_IF .SCREEN_SIZE < .SIZE_ST_HIGH
+ .SCREEN_SIZE = .SIZE_ST_HIGH
+_ENDIF
+
+
+_IF (.SWITCH=6)!OR!(.SWITCH=7)               ;Umschaltung ggf. aktivieren
+ CE $2^.SWITCH!O!7.W
+_ENDIF
+
+2A2  $.SCREEN_SIZE.L                         ;Bildschirmgrîûe setzen
+2A8  $.SCREEN_SIZE/.16-.1.W
+
+14E2 $.X_ST_LOW.W,.X_ST_MED.W,.X_ST_HIGH.W   ;Hardcopy-Routine anpassen
+14E8 $.Y_ST_LOW.W,.Y_ST_MED.W,.Y_ST_HIGH.W
+
+6A36+.d1               ;Tabelle mit Auflîsungsdaten (LineA)
+~ $.4.W, .X_ST_LOW*.4/.8.W,  .Y_ST_LOW.W,  .X_ST_LOW.W               ;ST_LOW
+~ $.2.W, .X_ST_MED*.2/.8.W,  .Y_ST_MED.W,  .X_ST_MED.W               ;ST_MED
+~ $.1.W, .X_ST_HIGH*.1/.8.W, .Y_ST_HIGH.W, .X_ST_HIGH.W              ;ST_HIGH
+~ $0.W,0.W,0.W,0.W                                                   ;undef.
+~ $.4.W, .X_TT_MED*.4/.8.W,  .Y_TT_MED.W,  .X_TT_MED.W               ;TT_MED
+~ $0.W,0.W,0.W,0.W                                                   ;undef.
+~ $.1.W, .X_TT_HIGH*.1/.8.W, .Y_TT_HIGH.W, .X_TT_HIGH.W              ;TT_HIGH
+~ $.8.W, .X_TT_LOW*.8/.8.W,  .Y_TT_LOW.W,  .X_TT_LOW.W               ;TT_LOW
+
+6B46+.d1               ;Initialisierung des VDI
+.ST_LOW:
+~ $41,FA,00,72                     ;LEA       114(PC),A0           L0005
+~ $60,56                           ;BRA.S     86(PC)               L0003
+.ST_MED:
+~ $41,FA,00,7A                     ;LEA       122(PC),A0           L0006
+~ $60,50                           ;BRA.S     80(PC)               L0003
+.ST_HIGH:
+~ $41,FA,00,82                     ;LEA       130(PC),A0           L0007
+~ $60,3E                           ;BRA.S     62(PC)               L0002
+.TT_MED:
+~ $41,FA,00,8A                     ;LEA       138(PC),A0           L0008
+~ $60,38                           ;BRA.S     56(PC)               L0002
+.TT_HIGH:
+~ $42,78,37,AC                     ;CLR.W     $37AC.S
+~ $31,FC,00,02,37,B4               ;MOVE.W    #2,$37B4.S
+~ $31,FC,00,01,37,0E               ;MOVE.W    #1,$370E.S
+~ $42,78,37,16                     ;CLR.W     $3716.S
+~ $02,78,FF,FE,73,AC               ;ANDI.W    #$FFFE,$73AC.S
+~ $4A,78,3A,C6                     ;TST.W     $3AC6.S
+~ $66,08                           ;BNE.S     8(PC)                L0000
+~ $00,78,00,01,77,64               ;ORI.W     #1,$7764.S
+~ $60,06                           ;BRA.S     6(PC)                L0001
+~ $00,78,00,01,77,06         ;L0000:ORI.W     #1,$7706.S
+~ $41,FA,00,64               ;L0001:LEA       100(PC),A0           L0009
+~ $60,10                           ;BRA.S     16(PC)               L0003
+.TT_LOW:
+~ $41,FA,00,6C                     ;LEA       108(PC),A0           L000A
+~ $02,78,FF,FE,73,AC         ;L0002:ANDI.W    #$FFFE,$73AC.S
+~ $00,78,00,01,77,64               ;ORI.W     #1,$7764.S
+~ $31,D8,37,66               ;L0003:MOVE.W    (A0)+,$3766.W
+~ $31,D8,37,68                     ;MOVE.W    (A0)+,$3768.W
+~ $31,D8,37,6C                     ;MOVE.W    (A0)+,$376C.W
+~ $31,D8,37,6E                     ;MOVE.W    (A0)+,$376E.W
+~ $31,D8,37,80                     ;MOVE.W    (A0)+,$3780.S
+~ $31,D8,37,14                     ;MOVE.W    (A0)+,$3714.S
+~ $60,00,6CCE+.d1-~.W              ;BRA       278(PC)              L000B
+
+;* X-1, Y-1, 0, X_WIDTH in um, Y_WIDTH in um, Colors, Planes
+
+~ $.X_ST_LOW-1.W,  .Y_ST_LOW-1.W,  .556.W, .556.W,  .16.W, .4.W ;ST_LOW
+~ $.X_ST_MED-1.W,  .Y_ST_MED-1.W,  .278.W, .556.W,   .4.W, .2.W ;ST_MED
+~ $.X_ST_HIGH-1.W, .Y_ST_HIGH-1.W, .278.W, .278.W,   .2.W, .1.W ;ST_HIGH
+~ $.X_TT_MED-1.W,  .Y_TT_MED-1.W,  .278.W, .278.W,  .16.W, .4.W ;TT_MED
+~ $.X_TT_HIGH-1.W, .Y_TT_HIGH-1.W, .278.W, .278.W,   .2.W, .1.W ;TT_HIGH
+~ $.X_TT_LOW-1.W,  .Y_TT_LOW-1.W,  .556.W, .278.W, .256.W, .8.W ;TT_LOW
+
+_FILL ~,6CA8+.d1,$-1   ;Leerbereich lîschen
+
+369E0+.d2 $.ST_LOW+.BASE.L,.ST_MED+.BASE.L,.ST_HIGH+.BASE.L,.ST_LOW+.BASE.L
+~         $.TT_MED+.BASE.L,.ST_LOW+.BASE.L,.TT_HIGH+.BASE.L,.TT_LOW+.BASE.L
+
+;*******************************************************************************
+;* Ende des NEWVIDEO-Patches
+;*******************************************************************************

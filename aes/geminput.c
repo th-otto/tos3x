@@ -108,7 +108,12 @@ PP(int16_t new;)
 
 	m = gl_mowner;
 
+#if TP_WINX
+	if (new == MB_DOWN ||
+		((winxvars.global_flags & 0x02) && new == 2))
+#else
 	if (new == MB_DOWN)
+#endif
 	{
 		mx = xrat;
 		my = yrat;
@@ -131,7 +136,11 @@ PP(int16_t new;)
 #if AES3D
 					wm_get(wh, WF_WORKXYWH, &t.g_x, NULL);
 #else
+#if TP_WINX
+					wx_get(wh, WF_WORKXYWH, &t.g_x);
+#else
 					wm_get(wh, WF_WORKXYWH, &t.g_x);
+#endif
 #endif
 
 #if NEWWIN
@@ -151,14 +160,26 @@ PP(int16_t new;)
 				}
 			}
 #else
+#if TP_WINX
 			if (inside(mx, my, &gl_rmenu))
-			{							/* Hit any window?  */
+			{							/* Hit any window? */
+				wh = NIL;
+				m = ctl_pd;
+			} else
+			{
+				wh = wx_find(mx, my) ? NIL : 0;
+				m = wx_srchwp(wh, new);
+			}
+#else
+			if (inside(mx, my, &gl_rmenu))
+			{							/* Hit any window? */
 				wh = NIL;
 			} else
 			{
 				wh = wm_find(mx, my) ? NIL : 0;
 			}
 			m = wh == NIL ? ctl_pd : srchwp(0)->w_owner;
+#endif
 #endif
 		}
 	}
@@ -187,7 +208,11 @@ PP(register int16_t my;)
 	if (inside(mx, my, &gl_rmenu))
 		return (-1);
 	/* if on any window beside the desktop then ctrl mgr owns */
-	return ((wm_find(mx, my) ? -1 : 0));
+#if TP_WINX
+	return wx_find(mx, my) ? -1 : 0;
+#else
+	return wm_find(mx, my) ? -1 : 0;
+#endif
 }
 
 
@@ -216,7 +241,11 @@ PP(register int16_t state;)
 			 * if someone cares about multiple clicks and this is
 			 * not a null mouse then set up delay else just fork it
 			 */
-			if (gl_bpend && state)
+			if (
+#if !TP_WINX & !TP_48
+				gl_bpend &&
+#endif
+				state)
 			{
 				/* start click cnt at 1 establish desired state and set wait flag */
 				gl_bclick = 1;

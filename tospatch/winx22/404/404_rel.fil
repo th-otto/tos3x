@@ -1,0 +1,1483 @@
+;*******************************************************************************
+;* Patchfile fÅr das TOS 4.04 V2.0 beta 2 (TosPatch V2.9.8 erforderlich)
+;*
+;* Das Format dieser Datei kann man wohl den Zeilen selbst entnehmen.
+;* Mit dem ";" beginnt eine Kommentarzeile (wer hÑtte es gedacht?), damit
+;* kann man sehr schîn einzelne Patches auslassen. Die meisten Patches haben
+;* jetzt jedoch eine Variable am Anfang, die bestimmt, ob der Patch eingebunden
+;* wird oder nicht. ZusÑtzlich kann in einigen FÑllen mit dieser - oder auch
+;* einer darauf folgenden Variablen - der Patch konfiguriert werden.
+;*
+;* Ich hoffe, daû durch dieses Patchprogramm das éndern des TOS nun endlich
+;* auf geregelten Bahnen verlÑuft, denn jeder kann relativ einfach Patches
+;* verîffentlichen und auch nicht so erfahrene User kînnen diese Åbernehmen.
+;*
+;* Wer eigene Patches hinzufÅgen will, sollte eine eigene Kennung wÑhlen,
+;* und diese im folgenden Kopf eintragen. Patches von anderen NIEMALS Ñndern!
+;* Vielleicht hat sich derjenige doch was dabei gedacht! Wenn doch, so ist
+;* die énderung genau zu dokumentieren! Es muû herausgestellt werden, wie
+;* der Patch vorher aussah und was geÑndert wurde.
+;*
+;* Nochwas zu Weitergabe: Es sollten nur die Patches aktiviert sein, die fÅr
+;* JEDEN etwas bringen. Also NUR FEHLERKORREKTUREN. Alle "Verbesserungen" sind
+;* besser zu deaktivieren. Wer sie will, kann sie immer noch Åbernehmen.
+;*
+;*
+;*	Name				   | KÅrzel | Datum
+;* --------------------------------------------
+;*	Michael Ruge		   | MR 	| 24.09.94
+;*	Steffen Engel		   | SE 	| 01.10.94
+;*	Jens Fellmuth		   | JF 	| 23.10.94
+;*	Thomas Binder		   | TB 	| 10.09.95
+;*	Volker Warmers		   | VW 	| 07.07.97
+;*	Markus Heiden		   | MH 	| 22.01.99
+;*	Markus Fritze,	‰-soft | MRF	| ?
+;*	??? 				   | HUCKY	| ?
+;*	JÅrgen Meyer		   | TFR	| ?
+;*	Tracker 			   | TRK	| ?
+;*	Ralf Biedermann 	   | RB 	| ?
+;*
+;* Bei Fehlermeldungen und Erweiterungen bitte ich um eine Mitteilung an:
+;*
+;* Email to: markus@markusheiden.de
+;*
+;* Die Falcon-Patches sind gesammelt worden von:
+;*
+;* Michael Ruge
+;* Konrad-Adenauer-Ring 14
+;* 65428 RÅsselsheim-KînigstÑdten
+;* Telefon & AB: +49-6142-33429
+;* Email to: Michael_Ruge@WI2.MAUS.DE
+;* http://members.aol.com/michruge/index.html
+;*
+;* TosPatch: Ω 1990 	 ‰-soft, Markus Fritze (MRF)
+;*			 Ω 1994-1998 Michael Ruge (MR)
+;*			 Ω 1992-1999 Markus Heiden (MH)
+;*
+;* Bitte wendet Euch nicht mehr an Markus Fritze, wenn Ihr Probleme habt,
+;* sondern ausschlieûlich an mich (Markus Heiden) !!!
+;*
+;*
+;* Carityware:
+;*
+;* Diese Patchliste ist Carityware das heiût, jeder der sich sein TOS 4.04
+;* patcht ist verpflichtet mindestens eine Spende von DM 20.- an eine gemein-
+;* nÅtzigen Einrichtung (einem Tierheim beispielsweise) zu tÑtigen!
+;*
+;*
+;* Haftungsausschluû:
+;*
+;* Die Autoren kînnen keine Haftung fÅr direkte oder indirekte SchÑden
+;* finanzieller, materieller oder sonstiger Art Åbernehmen, die durch den
+;* Gebrauch dieses Patchprogramms entstehen.
+;*
+;*
+;* Urheberrecht (Copyright):
+;*
+;* Das Urheberrecht (Copyright) dieses Patchprogrammes liegt bei den
+;* Autoren der entsprechenden Programmteile / Patches.
+;*
+;*
+;* Weiterhin ist zu beachten:
+;*
+;* 1. Dem Archiv dÅrfen keine weiteren Dateien hinzugefÅgt werden bzw. die
+;* vorhandenen Dateien nicht verÑndert werden, insbesondere keine Mailbox-
+;* werbung, keine Werbung fÅr PD-Serien oder sonstwelche Werbung jeglicher
+;* Art beigefÅgt werden. Dies ist durch das Urheberrechtsgesetz, ›2 und ›17,
+;* geregelt. Demzufolge ist die Herausgabe nur mit allen zugehîrigen Dateien
+;* und in unverÑnderter Form erlaubt.
+;*
+;* 2. Die Weitergabe per CD-ROM bedarf meiner schriftlichen Genehmigung (ohne
+;* wenn und aber). Dies ist gegebenenfalls (LizenzvertrÑge) vom CD-ROM Her-
+;* steller/Vertreiber im gÅltigen Deutschen Recht nachzulesen.
+;*
+;*******************************************************************************
+
+;*******************************************************************************
+;* MH:
+;* TOS-Daten festlegen.
+;* >>> Achtung: TOS-LÑnge (.LENGTH) MUSS durch 16 teilbar sein!
+
+.BASE	= E00000	;TOS-ROM-Adresse  (TOS 4.04: $E00000)
+.LENGTH =  80000	;TOS-LÑnge		  (TOS 4.04:  $80000)
+.WIDTH	=	  .8	;TOS-Breite 	  (TOS 4.04:	  .8)
+
+.NATION = -1		;TOS-NationalitÑt (TOS 4.04: keine bestimmte)
+
+;*******************************************************************************
+;* MH:
+;* Einleseformat des Patchprogramms
+
+<404.IMG			;Ungepatches TOS 4.04 aus File 404.IMG lesen.
+;<* 				 ;ROM auslesen (.LENGTH muû gleich der TOS-LÑnge sein).
+
+=08.03.1993,.NATION ;Muss die Version vom 8.3.1993 sein und die
+					;TOS-NationalitÑt muss stimmen! (sonst Message)
+
+;*******************************************************************************
+;* MH:
+;* Ausgabeformat des Patchprogramms:
+;* >[Anzahl der TOS-Files] [Obere RAM-Grenze des Rechners - .LENGTH]
+
+;* FÅr RAM-TOS:
+
+;>1 05000000-.LENGTH ;	64MB-TT-RAM / 1 File ;Im TT-Ram lÑuft das TOS schneller!
+;>1 03000000-.LENGTH ;	32MB-TT-RAM / 1 File ;Dies ersetzt (fast) ROMRAM
+>1 02000000-.LENGTH ;	16MB-TT-RAM / 1 File ;oder Ñhnliche TOS-Beschleuniger!
+;>1 01800000-.LENGTH ;	 8MB-TT-RAM / 1 File ;(FastVar nicht implementiert)
+;>1 01400000-.LENGTH ;	 4MB-TT-RAM / 1 File
+;>1 00C00000-.LENGTH ;	12MB-ST-RAM / 1 File
+;>1 00800000-.LENGTH ;	 8MB-ST-RAM / 1 File
+;>1 00400000-.LENGTH ;	4MB-ST-RAM / 1 File ;Mit weniger als 2MB Speicher
+;>1 00280000-.LENGTH ; 2,5MB-ST-RAM / 1 File ;macht es kaum Sinn TOS 4.04 im
+;>1 00200000-.LENGTH ;	 2MB-ST-RAM / 1 File ;Ram zu halten, auûer vielleicht
+;>1 00100000-.LENGTH ;	 1MB-ST-RAM / 1 File ;zum Testen der Patches.
+
+;* FÅr ROM-TOS:
+
+;* 1 nicht relozierte Datei (TOS.IMG) erzeugen (fÅr Falcon-PLCC-Eprom):
+;>1
+;.WIDTH = .8		 ;.WIDTH fÅr CRC-Berechnung anpassen.
+
+;* 2 nicht relozierte Dateien (TOS.LO/HI) erzeugen (fÅr PLCC->DIL-Adapter):
+;>2
+;.WIDTH = .16		 ;.WIDTH fÅr CRC-Berechnung anpassen.
+
+;* 4 nicht relozierte Dateien (TOS.EE/EO/OE/OO) erzeugen (fÅr 32-Bit Systeme):
+;>4
+;.WIDTH = .32		 ;.WIDTH fÅr CRC-Berechnung anpassen.
+
+;* 4 nicht relozierte Dateien (TOS.U10/U11/U12/U13) erzeugen (fÅr PAK3):
+;>4,PAK3
+;.WIDTH = .32		 ;.WIDTH fÅr CRC-Berechnung anpassen.
+
+;*******************************************************************************
+;* MH:
+;* Reloc-Korrekturen NUR (!!!) fÅr das TOS 4.04 vom 8.3.1993
+;* nach einer Idee von Andreas Kromke (KAOS 1.2 bzw. KAOS 1.4).
+;* Die Reloc-Korrekturen unterstÅtzen TOS-LÑngen bis $100000.
+
+?4DF3C,51574
+!1D4C,1EAC,2978,3A0E,5E8A,5EC2,8E7C,9C36,B05A,B064,B886,B890,BC7E
+!BC88,C1EA,C1F6,C296,C2A0,C2CA,C2D6,C2E6,C2F4,C36C,C37A,C4E4,C4EE,C50C
+!C516,CB0C,CB16,CC2E,CC38,CC52,CC5C,DC82,DC94,1100A,11016,110AE,11124
+!1112A,11212,19540,19A56,19D58,19FA4,1A2DC,1A64A,1BC30,1BD70,1BDE6
+!1C0EA,1DD16,1E26A,1E41E,2161C,22A62,23082,2321E,24006,2460A,25F96
+!26F48,277D0,27B9A,27C86,331BC,33B8E,35AF0,35B12,39B3E,39C58,39C82
+!3A032,40A4E,46CBC,47104,4725C,472E8,496C8,49952,4B092,4B094,4B75A,4B75C
+!4D388,4D4F0,4D790,4D794,4D798,4D79C,4D7A0,4D7A4,4D7A8
+!4D7AC,4D990,4D994,4D998,4D99C,4D9A0,4D9A4,4D9A8,4D9AC
+
+!12BC..12DC   ;Bombenimage (32 Bytes)
+!49434..4983C ;Atari-Logo (1032 Bytes)
+!49B96..4A916 ;Keyboard-Tabellen 0-8 (9 * (3 * 128) = 3456 Bytes)
+!4B248..4B6C8 ;Fontimage 6x6  (1152 Bytes)
+!4B924..4C124 ;Fontimage 8x8  (2048 Bytes)
+!4C124..4D124 ;Fontimage 8x16 (4096 Bytes)
+!4D5D0..4D9D0 ;Color-Map-Table und Color-Remap-Table (2*512 Bytes = 1024 Bytes)
+!51062..5107F ;Desktop-Tastaturbelegung (29 Bytes)
+;!517F8..7AAD0 ;RSCs etc.
+
+;*******************************************************************************
+;* MH:
+;* Berechnen und Setzen der CRC-PrÅfsumme von TOS 2.x/3.x/4.x.
+;* Beim Start des TOS  erscheint sonst die Message 'CRC-error in chip X.',
+;* falls der Test nicht ausgeschaltet ist (s.u.).
+;* (Auch wichtig fÅr den RAMRESET-Patch, da sonst bei jedem Hardreset das TOS
+;* aus dem RAM entfernt wird.)
+
+.CRC = 1			;1: CRC berechnen und setzen, 0: CRC nicht berechnen
+
+;*******************************************************************************
+;* Ins Patchdirectory wechseln:
+
+-PATCHFLD.404\		;Dsetpath("PATCHFLD.404\")
+
+;*******************************************************************************
+;* CPU auf 16MHz
+;*
+;* CPU- und BLITTER-Taktfrequenz wird vom ROM-TOS auf 16MHz gesetzt. Lediglich
+;* in der RESET-Phase wird die CPU mit 8MHz getaktet, um sÑmtliche Systemkompo-
+;* nenten synchronisieren zu kînnen. Daher kein Patch erforderlich!
+
+;*******************************************************************************
+;* MH: 12.04.1999 (V2.0)
+;*
+;* GET MEM Initialisierung:
+;* Stellt Patches Speicher zur VerfÅgung (ab os_membot).
+;*
+;* Benutzung: .GET_MEM stellt die Anfangsadresse des Speicherbereichs dar.
+;*			  Neue Endadresse einfach in .GET_MEM schreiben.
+
+.GET_MEM = 8F9A
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* PAK III-Patches Version 2 (fÅr 68030-Version). Es gibt auch noch
+;* ein modifiziertes Atari-Fuji mit PAK/3-Schriftzug von SE (s.u.).
+;*
+;* >>> Einige andere Patches werden aktiviert bzw. deaktiviert (s.u.).
+
+.PAK = 0			;1: PAK-Patches einbinden, 0: PAK-Patches nicht einbinden
+
+.StaticRAM = 0		;1: TOS fÅr Static-RAMs,
+					;0: TOS fÅr ROMs/EPROMs.
+.BootJMP = 1		;1: PAK-Trick einbinden, um mit $FC0000-TOS auf Mainboard
+					;	in die PAK-ROMs hochzukommen.
+					;0: PAK-Trick nicht einbinden.
+.Blitter = 0		;1: Blitter erkennen,
+					;0: Blitter nicht benutzen (Default).
+.RTC = 1			;1: MegaST-Echtzeituhr benutzen,
+					;0: Falcon/TT-Uhr benutzen.
+.RAMNVM = 0 		;1: NVM im RAM emulieren (Init: TOS-Defaults),
+					;0: TOS-Defaults (read only) benutzen.
+
+_IF .PAK
+ +PAK3_TP.FIL
+_ENDIF
+
+;*******************************************************************************
+;* VW,MH: 24.01.1999 (V2.0)
+;*
+;* TOS-Datum auf aktuelles (GEMDOS-) Datum setzen.
+;*
+;* >>> Achtung: Kann SysMon irritieren.
+
+.SET_DATE = 0		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .SET_DATE
+ .DAY1		= .DAY / .10				;Tag nach BCD wandeln.
+ .DAY0		= .DAY !MOD! .10
+ .BCD_DAY	= .DAY1 * .16 + .DAY0
+ .MONTH1	= .MONTH / .10				;Monat nach BCD wandeln.
+ .MONTH0	= .MONTH !MOD! .10
+ .BCD_MONTH = .MONTH1 * .16 + .MONTH0
+ .YEAR3 	= .YEAR / .1000 			;Jahr nach BCD wandeln.
+ .YEAR2 	= .YEAR !MOD! .1000 / .100
+ .YEAR1 	= .YEAR !MOD! .100 / .10
+ .YEAR0 	= .YEAR !MOD! .10
+ .BCD_YEAR	= .YEAR3 * .4096 + .YEAR2 * .256 + .YEAR1 * .16 + .YEAR0
+
+ 18 $.BCD_MONTH, .BCD_DAY, .BCD_YEAR.W	;BCD-Format: MM,TT,JJ,JJ
+
+ 1E $.DATE.W		;GEMDOS-Format:
+					;Bit 0...4 <=> Tag, von 1..31
+					;Bit 5...8 <=> Monat, von 1..12
+					;Bit 9..15 <=> Jahr seit 1980, von 0..119, d.h. bis 2099
+					;(aus ST-Computer 1/90, Seite 122 ff.)
+_ENDIF
+
+;*******************************************************************************
+;* MR: 01.06.1996 (V1.4)
+;*
+;* Speicher ab $100 initialisieren und nicht ab $400. Damit hat man neben den
+;* Vektoren keinen Mist mehr im Ram.
+;*
+;* >>> Achtung: Lîscht den Inhalt eines evtl. aktivierten RAM-NVMs.
+
+.MEM_INIT = 0		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .MEM_INIT
+ 168 $0100.w
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* Setzt die Steprate der Laufwerke A: und B:
+;* $0 = 6 ms,	$1 = 12 ms,   $2 = 2 ms,   $3 = 3 ms.
+
+.SET_STEP  = 0		;1: Patch einbinden, 0: Patch nicht einbinden
+.STEP_RATE = 3		;GewÅnschte Steprate hier eintragen.
+
+_IF .SET_STEP
+ 372 $.STEP_RATE.W
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* HD-Cookie installieren. Nicht fÅr Mega STE/TT !!!
+;* Format: 0xkkkkkk / normal (Mega STE/TT): $01415443
+;* kkkkkk: Kennung, wer den Cookie installiert hat.
+;* x=0: normale Schreibdichte (DD 720kB/360kB)
+;* x=1: Hohe Schreibdichte (HD 1.44MB)
+;* x=2: Extrahohe Schreibdichte (ED 2,88MB)
+;* x>2: reserviert
+;*
+;* >>> Achtung: Hat kein Effekt bei PAK-Patches.
+
+.SET_COOKIE = 0 		 ;1: Patch einbinden, 0: Patch nicht einbinden
+.FDC_COOKIE = 01000000	 ;FDC-Cookie-Wert, z.B. HD: 01000000 oder ED: 02000000.
+
+_IF .SET_COOKIE
+ _FILL 448,458,$4E71.W
+ 460 $.FDC_COOKIE.L
+_ENDIF
+
+;*******************************************************************************
+;* SE, MH: 05.03.1999 (V2.0)
+;* Cookie-Test der FPU prÑzisiert, Code von Dirk EOS Katzschke @ H.
+;*
+;* >>> Achtung: Hat kein Effekt bei PAK-Patches (ist dort jedoch eingebaut).
+
+.FPU_Cookie = 1 	;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .FPU_Cookie !OR! .PAK
+ 464 ;464-4C2
+ ~ $20,FC,5F,46,50,55				 ;MOVE.L	#$5F465055,(A0)+	;(#"_FPU")
+ ~ $72,00							 ;MOVEQ 	#0,D1
+ ~ $22,79,00,00,00,2C				 ;MOVEA.L	$2C.L,A1
+ ~ $45,FA,00,28 					 ;LEA		$28(PC),A2			 L0003
+ ~ $23,CA,00,00,00,2C				 ;MOVE.L	A2,$2C.L
+ ~ $F3,27							 ;FSAVE 	-(A7)
+ ~ $10,2F,00,01 					 ;MOVE.B	1(A7),D0
+ ~ $0C,00,00,18 					 ;CMPI.B	#$18,D0
+ ~ $67,10							 ;BEQ.S 	$10(PC) 			 L0001
+ ~ $0C,00,00,38 					 ;CMPI.B	#$38,D0
+ ~ $67,08							 ;BEQ.S 	8(PC)				 L0000
+ ~ $0C,00,00,40 					 ;CMPI.B	#$40,D0
+ ~ $66,06							 ;BNE.S 	6(PC)				 L0002
+ ~ $54,41							 ;ADDQ.W	#2,D1
+ ~ $54,41					   ;L0000:ADDQ.W	#2,D1
+ ~ $54,41					   ;L0001:ADDQ.W	#2,D1
+ ~ $54,41					   ;L0002:ADDQ.W	#2,D1
+ ~ $48,41					   ;L0003:SWAP		D1
+ ~ $20,C1							 ;MOVE.L	D1,(A0)+
+ ~ $23,C9,00,00,00,2C				 ;MOVE.L	A1,$2C.L
+
+ _FILL ~,4C2,$4E71.W
+_ENDIF
+
+;*******************************************************************************
+;* MH: 24.01.1999 (V2.0)
+;* Setzt die Zeitspanne ab der nach Systemstart noch ein CRC-Test durchgefÅhrt
+;* wird. 0 schaltet den Test ab. Originalwert ist .80 Sekunden!
+
+.CRC_TIME = .80 	;GewÅnschte Wartezeit (in Sekunden) hier eintragen.
+
+6A4
+! ~ , ~+2
+~ $.CRC_TIME*.200.L
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* CRC-Routine des TOS evtl. anpassen (z.B. fÅr 1024kB TOS).
+
+.SET_CRC = 1		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .SET_CRC
+ !6B2,6B4,6B8
+ 6B2 $(.LENGTH-.WIDTH/4)/(.WIDTH/8).L
+ 6B8 $.WIDTH/8-1.W
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* Bei CRC-Fehler Endlosschleife.
+
+.CRC_HOLD = 0		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .CRC_HOLD !OR! (.PAK !AND! .StaticRAM)
+ 740
+ ~ $60,FE
+_ENDIF
+
+;*******************************************************************************
+;* MR: 01.06.1996 (V1.4)
+;*
+;* Boot-Device-Fehler beheben (siehe ST-Computer 1/90).
+
+.BOOT_DEV = 1		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .BOOT_DEV
+ 7E2 $30
+_ENDIF
+
+;*******************************************************************************
+;* MH: 24.01.99 (V2.0)
+;* Speichertest und Wartebalken abschalten.
+
+.SKIP_RAMTEST = 0	;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .SKIP_RAMTEST
+ 99C $60
+_ENDIF
+
+;*******************************************************************************
+;* MH: (V2.0)
+;* Bootreihenfolge Ñndern.
+;* 00-07: ACSI 0-7, 08-0F: SCSI 0-7; 10: AT, -1: Ende.
+;* Default: 10,08,09,0A,0B,0C,0D,0E,0F,-1 -> max. 9 GerÑte!
+
+.BOOT_ORDER = 0 	;1: Bootreihenfolge verÑndern, 0: Patch nicht einbinden.
+.NO_LUN 	= 0 	;1: Keine LUNs abfragen, 0: Patch nicht einbinden.
+
+_IF .NO_LUN
+ B44
+ ~ $00,00 ;keine LUNs scannen.
+_ENDIF
+
+_IF .BOOT_ORDER !OR! .PAK
+ BA4
+ _IF .PAK
+  ~ $00,01,02,03,04,05,06,07,-1 ;Hier Bootreihenfolge eintragen (max. 9 + '-1').
+ _ELSE
+  ~ $00,01,02,03,04,05,06,07,-1 ;Hier Bootreihenfolge eintragen (max. 9 + '-1').
+ _ENDIF
+_ENDIF
+
+;*******************************************************************************
+;* MR: 01.06.96 (V1.4) / VW 07.07.97 (V1.5)
+;*
+;* Stackpointer bei Autoexec korrigieren (siehe ST-Computer 1/90).
+
+.STACK_POINTER = 1	;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .STACK_POINTER
+ 1198 $DE,FC,00,0C,4A,40,66,68,3F,3C,00,07,2F,38
+_ENDIF
+
+;*******************************************************************************
+;* MR: 08.11.94 (V1.0) / VW 07.07.97 (V1.5)
+;*
+;* Ersetzt die Atari-Bomben durch andere Objekte. Original ist BOMBS.BIN.
+
+.BOMBS = 0; 		;0: Patch nicht einbinden.
+					;1: Atari-Fuji im neuen Design von Volker Warmers.
+					;2: Atom-Pilz.
+					;3: der "Mann mit der Pfeife" aus original Atari 8*16 Font.
+					;4: Stinkefinger.
+					;5: Totenkopf von Volker Warmers.
+
+12BC
+
+_SWITCH .BOMBS
+ _CASE 1: ~ BOMBS\ATARINEW.BIN
+ _CASE 2: ~ BOMBS\ATOMPILZ.BIN
+ _CASE 3: ~ BOMBS\PFEIFKPF.BIN
+ _CASE 4: ~ BOMBS\STFINGER.BIN
+ _CASE 5: ~ BOMBS\TOTENKPF.BIN
+_ENDSWITCH
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* Die Echtzeituhr kann NICHT mehr mit dem TOS verstellt werden. Dazu muû man
+;* nun ein externes Stellprogramm aufrufen. Dies hat natÅrlich den Vorteil, daû
+;* auch fremde Programme die Uhr nicht mehr verstellen kînnen (wenn die
+;* - wie Åblich - das TOS verwenden).
+
+.LOCK_CLOCK = 0 	;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .LOCK_CLOCK
+ 137E
+ ~ $E4A+.BASE.L 	;Zeiger auf MOVEQ #$0,D0 / RTS setzen.
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* Blitter abschaltbar machen.
+;*
+;* >>> Achtung: Wenn der Blitter tatsÑchlich abgeschaltet wird, kann das TOS
+;*              selbst keine Ausgaben mehr machen!
+
+.SWITCH_BLITTER = 0 ;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .SWITCH_BLITTER
+ 13EA $4E,71,4E,71	;NOP / NOP
+_ENDIF
+
+;*******************************************************************************
+;* MH: (V2.0)
+;* Der Blitter wird vom TOS verleugnet und nicht benutzt.
+;*
+;* >>> Achtung: Das TOS selbst kann ohne Blitter keine Ausgaben mehr machen!
+
+.IGNORE_BLITTER = 0 ;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .IGNORE_BLITTER !OR! (.PAK !AND! (.Blitter = 0))
+ 13F8 $70,00,4E,75	;MOVEQ #$0,D0 / RTS
+_ENDIF
+
+;*******************************************************************************
+;* MH: (V2.0)
+;* Anzahl der XBIOS-Funktionen berichtigen.
+
+.CORRECT_XBIOS = 1	;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .CORRECT_XBIOS
+ 156C $98.W 		;TatsÑchliche Anzahl der Funktionen.
+_ENDIF
+
+;*******************************************************************************
+;* SE/MR: 08.11.94 (V1.0) / VW: 07.07.97 (V1.5)
+;*
+;* Falcon meldet sich bei Selektion als SCSI-GerÑt 7 (Initiator-Identifikation)
+;*
+;* Sinnvoll ist es, wenn dann bei arbitrierenden Festplattentreibern auch die
+;* SCSI-ID auf 7 gesetzt wird, damit der Treiber und eine evtl. Verwendung von
+;* DMARead/Write nicht zur Selektion verschiedener Initiatoren fÅhren.
+;*
+;* Dieser Patch sollte nur verwendet werden, wenn man eine SCSI-Platte benutzt,
+;* die Initiator-Identifikation verlangt (z.B. Quantum Empire, Fujitsu MOD) und
+;* nicht den Plattentreiber von IDE bootet.
+;*
+;* Hierzu _MUSS_ ein Festplattentreiber verwendet werden, der Bus-Arbitration
+;* unterstÅtzt, z.B. HDDriver ab Version 3.50 von Uwe Seimet (ist enthalten bei
+;* OUTSIDE, Vertrieb Maxon, und DISKUS, Vertrieb CCD, oder einzeln als Paket bei
+;* Uwe Seimet selbst).
+;*
+;* Der ATARI Festplattentreiber AHDI unterstÅtzt Bus-Arbitration _NICHT_!
+
+.SCSI_ID = 0		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .SCSI_ID
+ 1C0E $7080.w
+_ENDIF
+
+;*******************************************************************************
+;* MR: 08.11.94 (V1.0)
+;*
+;* IDE-Festplatte wird abgewÅrgt beim Systemstart und es wird von einer, falls
+;* vorhandenen und bootbaren, SCSI-Festplatte, ansonsten von Diskette gebootet
+;*
+;* Nur sinnvoll, falls der Rechner wÑhrend des Starts beim Zugriff auf die IDE-
+;* Festplatte (Rootprogramm und Festplattentreiber laden und starten) mit Bomben
+;* um sich wirft und nicht in den Desktop kommt.
+;*
+;* Eigentlich nur der VollstÑndigkeit halber mit aufgenommen, im normalen
+;* Betrieb absolut unsinnig (also mehr etwas fÅr HÑndler/WerkstÑtten)!
+
+.SKIP_AT = 0		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .SKIP_AT
+ 1ECE $00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+ 1EEC $00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00
+_ENDIF
+
+;*******************************************************************************
+;* MR/JF: 08.11.94 (V1.0) / VW: 07.07.97 (V1.5)
+;*
+;* Vorteilhaft, wenn man nur SCSI-Festplatten am Falcon betreibt und keine IDE-
+;* Platte eingebaut ist (Gedenkminute fÅr nicht gefundene IDE-Platte wird unter-
+;* drÅckt!). Somit wird dann schneller von einer SCSI-Platte gebootet.
+;*
+;* Mit besonderem Dank an Steffen Engel und Jens Fellmuth fÅr die Tips und Hilfe
+;* bei der Suche nach dieser verlausten Routine.
+;*
+;* Originalwert ist 5s.
+
+.IDE_TIMEOUT = .5	;Zeit kann hier geÑndert werden (in Sekunden).
+
+!1F16				;Damit Zeit nicht reloziert wird.
+1F16 $.IDE_TIMEOUT * .200.w
+
+;*******************************************************************************
+;* MH:
+;* Schnelle Druckerausgaberoutinen fÅr den Parallelport (Fastprint).
+;* Entspricht FASTPRN.PRG von Ecki aus der c't.
+
+.FASTPRN = 1		;1: FASTPRN einbinden, 0: FASTPRN nicht einbinden
+
+_IF .FASTPRN
+ 23F6 FASTPRN.ABS
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* Druckertimeout setzen. Originalwert ist 30s. Minimalwert ist 5s!
+;*
+;* >>> Achtung: Der Atari-Laser braucht etwas lÑnger (30s nîtig).
+
+.PRN_TIMEOUT = .30	;Zeit kann hier geÑndert werden (in Sekunden)
+
+_IF .FASTPRN
+ 23F6+20
+ !~ 				;Damit Zeit nicht reloziert wird.
+ ~ $.PRN_TIMEOUT*.200.W
+_ELSE
+ 241A
+ !~,~+2 			;Damit Zeit nicht reloziert wird.
+ ~ $.PRN_TIMEOUT * .200.L
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* CLR.B $20.W eleminieren. Verhindert das Lîschen des Highbytes der
+;* Privilegverletzungs-Exception.
+
+.CORRECT_PRIV = 0	;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .CORRECT_PRIV
+ 25FA
+ ~ $4E,71,4E,71
+_ENDIF
+
+;*******************************************************************************
+;* MR: 01.06.1996 (V1.4)
+;*
+;* conterm setzen: Bit 2 gesetzt: Glocke bei Cntrl-G ein.
+;*				   Bit 1	"	: Tastenwiederholung ein.
+;*				   Bit 0	"	: Tastenklick ein.
+;*
+;* Default ist %111: Glocke EIN, Tastenwiederholung EIN, Tastenklick EIN.
+
+.CONTERM	 = %111 ;GewÅnschten Wert hier eintragen (Bit 2, Bit 1, Bit 0)
+
+26B9 $.CONTERM
+
+;*******************************************************************************
+;* MR: 15.04.1994 (V1.2)
+;*
+;* REQ (DTR)-Signal am LAN-Port (SCC_Port A) auf LOW legen,
+;* DTR-Signal am Modem-Port (SCC_Port B) auf LOW legen
+;* (Initialisierungswerte fÅr Zilog 8530 SCC-Chip ab $2D32).
+
+.CORRECT_DTR = 1	;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .CORRECT_DTR
+ 2D3B $62	;Orignalwert ist $E2
+ 2D51 $62	;Orignalwert ist $EA
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* ST-MFP als Default-Schnittstelle (statt SCC A).
+
+.USE_ST_MFP = 0 	;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .USE_ST_MFP !OR! .PAK
+ 2D06
+ ~ $2BEA+.BASE.L
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* Verdoppelt die ZÑhlgeschwindigkeit des 200 Hz-Timers. Damit STonX korrekte
+;* Zeiten mit dem 100 Hz-Timer simulieren kann.
+;*
+;* >>> Achtung: Bis jetzt ungetestet!
+
+.SIM_100HZ = 0		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .SIM_100HZ
+ 3C50
+ ~ $54,B9,00,00,04,BA				;ADDQ.L    #2,$4BA.L
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* Setzt den hdmode auf Null. Aus SEEKUP von Martin Osieka entnommen.
+;* Der Patch Ñndert nur die Initialisierung mit drei.
+;* Das Åbrige Verhalten bleibt.
+;*
+;* Kurzbeschreibung:
+;* SEEKUP schaltet auf STs unter TOS 3.06 die Verdoppelung der
+;* Seekrate aus (erkennbar am Seek-GerÑusch der Laufwerke).
+;*
+;* typedef struct {
+;*	 char cmdbit3;	 /* $00 oder $08, wird zum Positionierkommando geodert
+;*						Kann mit Flopsrate() verÑndert/abgefragt werden    */
+;*	 char dummy;	 /* nicht benutzt */
+;*	 short track;	 /* Aktuelle Spur */
+;*	 short hdmode;	 /* 0 oder 3, wird in Register $FF860E geschrieben
+;*						Dieses Register existiert auf STs nicht */
+;*	 short seekrate; /* hdmode=0: 0: 6ms, 1: 12ms, 2: 2ms, 3: 3ms
+;*						hdmode=3: 0,1: 12ms, 2,3: 6ms
+;*						Kann mit Flopsrate() verÑndert/abgefragt werden */
+;* } dsb3S;
+;*
+;* Das TOS verwaltet die Informationen zu den Floppylaufwerken in DSBs.
+;* Initialisiert werden die DSBs mit { 0, 0, 0xFF00, 3, _seekrate}, damit
+;* ist auf STs defaultmaessig 6ms eingestellt. Die Trackpositionierroutine
+;* schaltet im Fehlerfall <hdmode> um und macht daraufhin einen weiteren
+;* Versuch. Die Formatierfunktion setzt <hdmode> abhaengig von der Anzahl
+;* der Sektoren pro Spur. Besser waere es wohl, wenn das TOS bei jedem
+;* erkannten Diskettenwechsel <hdmode> zunaechst auf 0 setzen wuerde.
+;* [FRG/USA]
+;*
+;* >>> Achtung: DirektÅbernahme aus TOS 2.06. Also: Erst testen!
+;* >>>          Nicht fÅr MSTE / TT / Falcon!
+
+.SEEK_UP = 0		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .SEEK_UP
+ 3D7C
+ ~ $0000.W
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;* Im Floppy-Test Track 10 ansteuern auf Track 1 ansteuern geÑndert.
+
+.FLOP_TEST = 0		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .FLOP_TEST
+ 438C
+ ~ $7E,01
+_ENDIF
+
+;*******************************************************************************
+;* MR: 08.11.1994 (V1.0)
+;*
+;* Fast-Load-Bit fÅr schnelleres Laden (siehe ST-Computer 1/90).
+;*
+;* >>> Achtung: Produziert Fehler bei einigen Laufwerken (z.B. beim original
+;*              Falcon 030 Floppy von Atari), deswegen hier deaktivert!
+
+.FASTLOAD = 0		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .FASTLOAD
+ 447F $10
+_ENDIF
+
+;*******************************************************************************
+;* MR: 08.11.1994 (V1.0)
+;*
+;* Suche nach Laufwerk B unterbinden -> schnelleres Booten.
+;*
+;* >>> Achtung: Funktioniert nicht mit 2 (physikalischen) Floppylaufwerken!
+
+.SKIP_B = 0 		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .SKIP_B
+ 4803 $01 ;JA, die Routinen die gepatcht werden mÅssen, existieren DREIMAL!
+ A497 $01
+ 3E55D $01
+_ENDIF
+
+;*******************************************************************************
+;* Harun Scheutzow: (implementiert von MH)
+;*
+;* Neue Bios-Routinen Getbpb und Rwabs mit ED-UnterstÅtzung:
+;* - Es werden keine nicht erfolgten Diskettenwechsel mehr erkannt.
+;* - Rwabs-Schreibroutinen zerstîren keine VDI-Zeichensatzinformationen mehr.
+;* - Es kînnen auch Disketten mit nur einer FAT genutzt werden.
+
+.ED_BIOS = 1		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .ED_BIOS
+ +ED_BIOS.FIL
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;*
+;* AusfÅhren des Bootsektors der Diskette verhindern.
+;* (Ist ja nicht ganz so radikal schon im NORM_BOOT-Patch enthalten).
+
+.KILL_BOOT = 0		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .KILL_BOOT
+ 4F68
+ ~ $60
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;*
+;* Wenn _bootdev >= 2 (also Laufwerk C) ist, wird der Bootsektor der Diskette
+;* nach einem Warmstart nicht mehr ausgefÅhrt. Bis zu TOS 1.4 war dies auch
+;* so, aber seit TOS 1.4 wird der Bootsektor stets ausgefÅhrt. Dies kostet
+;* bei einem RESET nicht nur Zeit, sondern hilft auch zur Verbreitung von
+;* Bootsektor-Viren.
+
+.NORM_BOOT = 1		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .NORM_BOOT
+ 4F6A
+ ~ $BE,78,04,46
+ ~ $6F,4F9A-(~-1)
+ ~ $70,01
+ ~ $3E,80
+ ~ $42,A7
+ ~ $3F,00
+ ~ $42,67
+ ~ $42,A7
+ ~ $2F,38,04,C6
+ ~ $61,00,3DB4-~.W
+ ~ $4E,71
+_ENDIF
+
+;*******************************************************************************
+;* MRF: (angepasst von MH)
+;*
+;* VDI-Patch (neue v_opnvwk()-Routine, ersetzt VDIFIX).
+;*
+;* >>> Achtung: DirektÅbernahme aus TOS 1.04. Also: Erst testen!
+
+.VDIFIX = 0 		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .VDIFIX
+ +VDIFIX.FIL
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;*
+;* Blitterbenutzung des TOS abschalten.
+;*
+;* >>> Man sieht nichts mehr, bis ein evtl. vorhandenes externes VDI bootet
+;*	   (z.B. NVDI).
+
+.Blitter_OFF = 0	 ;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .Blitter_OFF
+ 1096A $00,00
+_ENDIF
+
+;*******************************************************************************
+;* MR: 08.11.1994 (V1.0)
+;*
+;* Grow- und Shrinkboxen ausschalten. Bringt Speed beim Bildschirmaufbau!
+
+.DRAW_BOXES = 0 	;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .DRAW_BOXES
+ 33AAA $4E,75 ;RTS
+ 33AEE $4E,75 ;RTS
+_ENDIF
+
+;*******************************************************************************
+;* MH: 23.01.1999 (V2.0)
+;*
+;* Mit diesem Patch wird das Peseta Zeichen durch das Esszet-Zeichen ersetzt.
+;* Dies sieht nun mal auf den meisten Nadeldruckern besser aus. Allerdings wirkt
+;* es natÅrlich nur bei Texten, welche mit dem gepatchten TOS eingegeben werden.
+;* In den alten Texten steht ja noch das 'û'.
+;*
+;* Macht Probleme bei Everest und Wordplus 3.20 TT auf meinem Falcon 030,
+;* daher nur als Kommentar!
+
+.NEW_SZ = 0 		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+.FRG_KBD_TAB = 49E96
+
+_IF .NEW_SZ
+ .FRG_KBD_TAB+00C $E1
+ .FRG_KBD_TAB+10C $E1
+_ENDIF
+
+;*******************************************************************************
+;* MR: 01.06.1996 (V1.4)
+;*
+;* Korrektes MSDOS-Format (statt $EB nun $EB34904E als 1. Bytes im Bootsektor).
+
+.MS_DOS = 0 		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .MS_DOS
+ 3A02A $DE,FC,00,0C,2A,BC,EB,34,90,4E
+_ENDIF
+
+;*******************************************************************************
+;* MR: 08.11.1994 (V1.0)
+;*
+;* Atari-Anfangsfuji ersetzen. Originalfuji ist ATARI.ABS.
+
+.FUJI = 0			;0: Kein neues Fuji einbinden.
+					;1: 'Gib Dos keine Chance' von Reiner Rosin.
+					;2: 'GeTuned'-Figur von Sven Spitzmacher.
+					;3: 'United Federations of Planet'-Logo (Star Trek) von MR.
+					;4: 'X' von MR.
+					;5: 'e' (Scheiû-egale) von MR.
+					;6: 'intel(tm) outside'-Logo von Volker Warmers.
+					;7: modifiziertes Atarifuji mit PAK/3-Schriftzug von SE.
+
+49434 ;49434-4083C (.1032 Bytes)
+
+_SWITCH .FUJI
+ _CASE 1: ~ FUJI\GIB_DOS.ABS
+ _CASE 2: ~ FUJI\GT_TOS.ABS
+ _CASE 3: ~ FUJI\UFP_LOGO.ABS
+ _CASE 4: ~ FUJI\X.ABS
+ _CASE 5: ~ FUJI\SCHEGALE.ABS
+ _CASE 6: ~ FUJI\INTL_OUT.ABS
+ _CASE 7: ~ FUJI\PAK3.ABS
+_ENDSWITCH
+
+;*******************************************************************************
+;* MH: 25.01.1999 (V2.0)
+;*
+;* NVM-Default setzen. Setzt die Defaultwerte, die genommen werden, falls kein
+;* NVM vorhanden ist.
+;*
+;* BootprÑferenz:	   00: keine (Default), 40: Unix, 80: TOS
+;* Sprache, Tastaur:   0: USA, 1: FRG, 2: FRA, 3: UK,
+;*					   4: SPA, 5: ITA, 7: SWF, 8: SWG
+;* Datumsformat:	   x0: MMTTJJ, x1: TTMMJJ, x2: JJMMTT, x3: JJTTMM
+;*					   1x: 24h-Uhr, 0x: 12h-Uhr
+;* Datumstrennzeichen: ASCII-Trennzeichen fÅr das Datum.
+;* Wartezeit:		   Boot-Wartezeit in Sekunden (Default .32 Sekunden).
+
+.SET_NVM = 1		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .SET_NVM
+ .DEFAULT_NVM = 49B82 ;49B82-49B92 (.16 Bytes)
+
+ .DEFAULT_NVM+1 $00 		  ;BootprÑferenz
+ .DEFAULT_NVM+6 $01 		  ;Lowword des _AKP-Cookies: Sprache
+ .DEFAULT_NVM+7 $01 		  ;Lowword des _AKP-Cookies: Tastatur
+ .DEFAULT_NVM+8 $11 		  ;Lowword des _IDT-Cookies: Datumsformat
+ .DEFAULT_NVM+9 $'.'		  ;Lowword des _IDT-Cookies  Datumstrennzeichen
+ .DEFAULT_NVM+A $.20		  ;Wartezeit beim Booten in Sekunden
+_ENDIF
+
+;*******************************************************************************
+;* MR: 08.11.1994 (V1.0)
+;*
+;* éndert den Papiervorschub bei der Hardcopy ab - somit kann sowohl auf einem
+;* NEC P6 wie auch weiterhin auf einem EPSON eine Hardcopy gemacht werden
+;* (Åbernommen aus der ST-Computer 10/90).
+;*
+;* Funktioniert eh' nur in ST-Hoch (SM124), habe es daher auch nicht getestet!
+
+.NEC_P6 = 0 		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .NEC_P6
+ 4AE48 $1B,41,07,FF
+_ENDIF
+
+;*******************************************************************************
+;* VW: 07.07.1997 (V1.5)
+;*
+;* SystemzeichensÑtze Ñndern.
+;*
+;* Die einzubindenden ZeichensÑtze _MöSSEN_ im BinÑrformat vorliegen!
+;*
+;* Die ZeichensÑtze VW_SYSxx.BIN, die diesem Archiv beiliegen, wurden von
+;* Volker Warmers editiert und sind _ABSOLUT_ kompatibel zu den original
+;* Atari System-Fonts.
+
+.FONTS = 0			;1: Fonts einbinden, 0: Keine Fonts einbinden
+
+_IF .FONTS
+ -FONTS\			;Dsetpath("FONTS\")
+ 4B248 VW_SYS06.BIN ;<<< 6x6 Font hier eintragen (1152 Bytes)
+ 4B924 VW_SYS08.BIN ;<<< 8x8 Font hier eintragen (2048 Bytes)
+ 4C124 VW_SYS16.BIN ;<<< 8x16 Font hier eintragen (4096 Bytes)
+ -..				;Dsetpath("..") (Ein Verzeichnis zurÅck)
+_ENDIF
+
+;*******************************************************************************
+;* VW: 07.07.1997 (V1.5)
+;*
+;* Atari-Fuji im neuen Design (von Volker Warmers) auch fÅr's FÅllmuster.
+
+.NEW_FILL = 0		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .NEW_FILL
+ 4D194 ;4D194-4D1B4 (.32 Bytes)
+ ~ BOMBS\ATARINEW.BIN
+_ENDIF
+
+;*******************************************************************************
+;* MR 20.01.1995 (V1.2) / VW 07.07.1997 (V1.5)
+;*
+;* Standard-Tastenbelegung fÅr die Desktopfunktionen Ñndern.
+;*
+;* Die nachfolgende Tastenbelegung wurde von Volker Warmers 'entworfen'.
+
+.DESK_TAST = 0		;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .DESK_TAST
+ 51062 $'ôISLOûEéAMFKT12340PH*.+-VBNDR'
+_ENDIF
+
+;*******************************************************************************
+;* MH: 25.01.1999 (V2.0)
+;*
+;* Das Default-NEWDESK.INF und die Resourcen zum Includen!
+;* Hier nun die ultimative Mîglichkeit, sich das TOS nach seinen WÅnschen
+;* zu gestalten. Originalfiles befinden sich im Ordner ORG.
+;*
+;* Vorsicht: Alle 3 Files dÅrfen zusammen max. 64kB lang sein, da die
+;*			 Pointer auf dieselbigen Words sind.
+;*
+;* Wenn man mehr Icons gleichzeitig auf dem Desktop haben mîchte, muû man
+;* in der 2.RSC-Datei (xxx2.RSC) im 11. Formular (ICONS) einfach mehr Boxen
+;* reinsetzen. Ich habe im Ordner NEW die Anzahl der Icons schon von 48 auf 160
+;* vergrîûert.
+;*
+;* Man kann nun auch neue und mehr Icons in sein TOS einbinden (anstatt
+;* DESKICON.RSC zu verwenden). Die Icons findet man in der 2. RSC-Datei
+;* (xxx2.RSC) im 9. Formular (DESKICON). Hier einfach neue oder andere
+;* Icons eintragen.
+
+.RSC = 0			;1: Patch einbinden, 0: Patch nicht einbinden.
+
+.RSC_BEGIN = 517F8
+.RSC_END   = 7AAD0
+
+_IF .RSC
+ -RSC\							   ;Ins RSC-Subdirectory wechseln
+ .RSC_BEGIN 					   ;Startadresse setzen
+
+ .USA_RSC_TAB:
+ .USA_RSC_TAB+A   NEW\USA1.RSC	   ;<<< Amerikanische Resource-Datei 1 hier eintragen
+ .USA_RSC1_END: ~ NEW\USA2.RSC	   ;<<< Amerikanische Resource-Datei 2 hier eintragen
+ .USA_RSC2_END: ~ NEW\USA.INF	   ;<<< Amerikanische NEWDESK.INF hier eintragen
+
+ .USA_INF_END:	_EVEN $FF		   ;Damit nachfolgender Code ausfÅhrbar bleibt
+ .USA_RSC_END:					   ;RSC/NEWDESK-Ende sichern
+
+ .USA_RSC_TAB	$.USA_RSC1_END-.USA_RSC_TAB.W
+ .USA_RSC_TAB+2 $.USA_RSC2_END-.USA_RSC_TAB.W
+ .USA_RSC_TAB+4 $.USA_INF_END-.USA_RSC_TAB.W
+ .USA_RSC_TAB+6 $00,00,00,00	   ;Unbenutzte EintrÑge lîschen
+
+ .USA_RSC_END
+
+ .FRG_RSC_TAB:
+ .FRG_RSC_TAB+A   NEW\FRG1.RSC	   ;<<< Deutsche Resource-Datei 1 hier eintragen
+ .FRG_RSC1_END: ~ NEW\FRG2.RSC	   ;<<< Deutsche Resource-Datei 2 hier eintragen
+ .FRG_RSC2_END: ~ NEW\FRG.INF	   ;<<< Deutsche NEWDESK.INF hier eintragen
+
+ .FRG_INF_END:	_EVEN $FF		   ;Damit nachfolgender Code ausfÅhrbar bleibt
+ .FRG_RSC_END:					   ;RSC/NEWDESK-Ende sichern
+
+ .FRG_RSC_TAB	$.FRG_RSC1_END-.FRG_RSC_TAB.W
+ .FRG_RSC_TAB+2 $.FRG_RSC2_END-.FRG_RSC_TAB.W
+ .FRG_RSC_TAB+4 $.FRG_INF_END-.FRG_RSC_TAB.W
+ .FRG_RSC_TAB+6 $00,00,00,00	   ;Unbenutzte EintrÑge lîschen
+
+ .FRG_RSC_END
+
+ .FRA_RSC_TAB:
+ .FRA_RSC_TAB+A   NEW\FRA1.RSC	   ;<<< Franzîsische Resource-Datei 1 hier eintragen
+ .FRA_RSC1_END: ~ NEW\FRA2.RSC	   ;<<< Franzîsische Resource-Datei 2 hier eintragen
+ .FRA_RSC2_END: ~ NEW\FRA.INF	   ;<<< Franzîsische NEWDESK.INF hier eintragen
+
+ .FRA_INF_END:	_EVEN $FF		   ;Damit nachfolgender Code ausfÅhrbar bleibt
+ .FRA_RSC_END:					   ;RSC/NEWDESK-Ende sichern
+
+ .FRA_RSC_TAB	$.FRA_RSC1_END-.FRA_RSC_TAB.W
+ .FRA_RSC_TAB+2 $.FRA_RSC2_END-.FRA_RSC_TAB.W
+ .FRA_RSC_TAB+4 $.FRA_INF_END-.FRA_RSC_TAB.W
+ .FRA_RSC_TAB+6 $00,00,00,00	   ;Unbenutzte EintrÑge lîschen
+
+ .FRA_RSC_END
+
+ .ITA_RSC_TAB:
+ .ITA_RSC_TAB+A   NEW\ITA1.RSC	   ;<<< Italienische Resource-Datei 1 hier eintragen
+ .ITA_RSC1_END: ~ NEW\ITA2.RSC	   ;<<< Italienische Resource-Datei 2 hier eintragen
+ .ITA_RSC2_END: ~ NEW\ITA.INF	   ;<<< Italienische NEWDESK.INF hier eintragen
+
+ .ITA_INF_END:	_EVEN $FF		   ;Damit nachfolgender Code ausfÅhrbar bleibt
+ .ITA_RSC_END:					   ;RSC/NEWDESK-Ende sichern
+
+ .ITA_RSC_TAB	$.ITA_RSC1_END-.ITA_RSC_TAB.W
+ .ITA_RSC_TAB+2 $.ITA_RSC2_END-.ITA_RSC_TAB.W
+ .ITA_RSC_TAB+4 $.ITA_INF_END-.ITA_RSC_TAB.W
+ .ITA_RSC_TAB+6 $00,00,00,00	   ;Unbenutzte EintrÑge lîschen
+
+ .ITA_RSC_END
+
+ .SPA_RSC_TAB:
+ .SPA_RSC_TAB+A   NEW\SPA1.RSC	   ;<<< Spanische Resource-Datei 1 hier eintragen
+ .SPA_RSC1_END: ~ NEW\SPA2.RSC	   ;<<< Spanische Resource-Datei 2 hier eintragen
+ .SPA_RSC2_END: ~ NEW\SPA.INF	   ;<<< Spanische NEWDESK.INF hier eintragen
+
+ .SPA_INF_END:	_EVEN $FF		   ;Damit nachfolgender Code ausfÅhrbar bleibt
+ .SPA_RSC_END:					   ;RSC/NEWDESK-Ende sichern
+
+ .SPA_RSC_TAB	$.SPA_RSC1_END-.SPA_RSC_TAB.W
+ .SPA_RSC_TAB+2 $.SPA_RSC2_END-.SPA_RSC_TAB.W
+ .SPA_RSC_TAB+4 $.SPA_INF_END-.SPA_RSC_TAB.W
+ .SPA_RSC_TAB+6 $00,00,00,00	   ;Unbenutzte EintrÑge lîschen
+
+ .SPA_RSC_END
+
+ .RSC_END:						   ;Resourcen-Ende merken
+
+ 50A26							   ;Tabelle auf die internationalen Resourcen
+ ~ $.USA_RSC_TAB+.BASE.L
+ ~ $.FRG_RSC_TAB+.BASE.L
+ ~ $.FRA_RSC_TAB+.BASE.L
+ ~ $.USA_RSC_TAB+.BASE.L
+ ~ $.SPA_RSC_TAB+.BASE.L
+ ~ $.ITA_RSC_TAB+.BASE.L
+ ~ $.USA_RSC_TAB+.BASE.L
+
+ -..							   ;ZurÅck ins normale Patchfield wechseln.
+_ENDIF
+
+!.RSC_BEGIN .. .RSC_END 		   ;Im RSC/NEWDESK.INF nicht relozieren.
+.RSC_END						   ;Ab Ende RSC/NEWDESK.INF geht es weiter.
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;*
+;* Speichertest fÅr Falcon-/ST- und TT-RAM.
+
+.Mem_Test = 0		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .Mem_Test !OR! .PAK
+ .Mem_Test_Start:
+ ~ $4F,F8,7F,FC 					;LEA	   $7FFC.S,A7
+ ~ $4B,F8,00,08 					;LEA	   8.S,A5
+ ~ $28,55							;MOVEA.L   (A5),A4
+ ~ $26,4F							;MOVEA.L   A7,A3
+ ~ $41,FA,00,36 					;LEA	   54(PC),A0			L0001
+ ~ $2A,88							;MOVE.L    A0,(A5)
+ ~ $10,38,80,06 					;MOVE.B    $FFFF8006.S,D0
+ ~ $2A,8C							;MOVE.L    A4,(A5)
+ ~ $2E,4B							;MOVEA.L   A3,A7
+ ~ $E2,08							;LSR.B	   #1,D0
+ ~ $12,00							;MOVE.B    D0,D1
+ ~ $C2,3C,00,01 					;AND.B	   #1,D1
+ ~ $E4,08							;LSR.B	   #2,D0
+ ~ $C0,3C,00,06 					;AND.B	   #6,D0
+ ~ $82,00							;OR.B	   D0,D1
+ ~ $2A,3C,00,08,00,00				;MOVE.L    #$80000,D5
+ ~ $E3,A5							;ASL.L	   D1,D5
+ ~ $B2,3C,00,05 					;CMP.B	   #5,D1
+ ~ $65,06							;BCS.S	   6(PC)				L0000
+ ! ~+2
+ ~ $2A,3C,00,E0,00,00				;MOVE.L    #$E00000,D5
+ ~ $7C,0A					  ;L0000:MOVEQ	   #$A,D6
+ ~ $60,00,00,F6 					;BRA	   246(PC)				L0011
+ ~ $2A,8C					  ;L0001:MOVE.L    A4,(A5)
+ ~ $2E,4B							;MOVEA.L   A3,A7
+ ~ $11,FC,00,0A,80,01				;MOVE.B    #$A,$FFFF8001.S
+ ~ $41,F8,00,08 					;LEA	   8.S,A0
+ ~ $43,F9,00,20,00,08				;LEA	   $200008,A1
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $32,3C,FA,54 					;MOVE.W    #$FA54,D1
+ ~ $34,3C,00,FB 					;MOVE.W    #$FB,D2
+ ~ $30,C0					  ;L0002:MOVE.W    D0,(A0)+
+ ~ $32,C0							;MOVE.W    D0,(A1)+
+ ~ $D0,41							;ADD.W	   D1,D0
+ ~ $51,CA,FF,F8 					;DBF	   D2,-8(PC)			L0002
+ ~ $70,5A							;MOVEQ	   #$5A,D0
+ ~ $11,C0,82,0D 					;MOVE.B    D0,$FFFF820D.S
+ ~ $4A,38,82,03 					;TST.B	   $FFFF8203.S
+ ~ $B0,38,82,0D 					;CMP.B	   $FFFF820D.S,D0
+ ~ $66,16							;BNE.S	   22(PC)				L0003
+ ~ $42,38,82,0D 					;CLR.B	   $FFFF820D.S
+ ~ $4A,78,82,40 					;TST.W	   $FFFF8240.S
+ ~ $4A,38,82,0D 					;TST.B	   $FFFF820D.S
+ ~ $66,08							;BNE.S	   8(PC)				L0003
+ ~ $2E,3C,00,04,00,00				;MOVE.L    #$40000,D7
+ ~ $60,06							;BRA.S	   6(PC)				L0004
+ ~ $2E,3C,00,00,02,00		  ;L0003:MOVE.L    #$200,D7
+ ~ $32,3C,FA,54 			  ;L0004:MOVE.W    #$FA54,D1
+ ~ $24,3C,00,20,00,00				;MOVE.L    #$200000,D2
+ ~ $7C,00							;MOVEQ	   #0,D6
+ ~ $E4,4E					  ;L0005:LSR.W	   #2,D6
+ ~ $20,47							;MOVEA.L   D7,A0
+ ~ $50,88							;ADDQ.L    #8,A0
+ ~ $D1,C2							;ADDA.L    D2,A0
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,00,FB 					;MOVE.W    #$FB,D3
+ ~ $B0,58					  ;L0006:CMP.W	   (A0)+,D0
+ ~ $66,08							;BNE.S	   8(PC)				L0007
+ ~ $D0,41							;ADD.W	   D1,D0
+ ~ $51,CB,FF,F8 					;DBF	   D3,-8(PC)			L0006
+ ~ $60,34							;BRA.S	   52(PC)				L000C
+ ~ $20,47					  ;L0007:MOVEA.L   D7,A0
+ ~ $D1,C7							;ADDA.L    D7,A0
+ ~ $50,88							;ADDQ.L    #8,A0
+ ~ $D1,C2							;ADDA.L    D2,A0
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,00,FB 					;MOVE.W    #$FB,D3
+ ~ $B0,58					  ;L0008:CMP.W	   (A0)+,D0
+ ~ $66,08							;BNE.S	   8(PC)				L0009
+ ~ $D0,41							;ADD.W	   D1,D0
+ ~ $51,CB,FF,F8 					;DBF	   D3,-8(PC)			L0008
+ ~ $60,18							;BRA.S	   24(PC)				L000B
+ ~ $41,F8,00,08 			  ;L0009:LEA	   8.S,A0
+ ~ $D1,C2							;ADDA.L    D2,A0
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,00,FB 					;MOVE.W    #$FB,D3
+ ~ $B0,58					  ;L000A:CMP.W	   (A0)+,D0
+ ~ $66,0A							;BNE.S	   10(PC)				L000C
+ ~ $D0,41							;ADD.W	   D1,D0
+ ~ $51,CB,FF,F8 					;DBF	   D3,-8(PC)			L000A
+ ~ $58,46							;ADDQ.W    #4,D6
+ ~ $58,46					  ;L000B:ADDQ.W    #4,D6
+ ~ $94,BC,00,20,00,00		  ;L000C:SUBA.L    #$200000,D1
+ ~ $6A,AA							;BPL.S	   -86(PC)				L0005
+ ~ $11,C6,80,01 					;MOVE.B    D6,$FFFF8001.S
+ ~ $43,FA,00,32 					;LEA	   50(PC),A1			L0010
+ ~ $2A,89							;MOVE.L    A1,(A5)
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,FB,55 					;MOVE.W    #$FB55,D3
+ ~ $2E,3C,00,02,00,00				;MOVE.L    #$20000,D7
+ ~ $22,47							;MOVEA.L   D7,A1
+ ~ $20,49					  ;L000D:MOVEA.L   A1,A0
+ ~ $34,00							;MOVE.W    D0,D2
+ ~ $72,2A							;MOVEQ	   #$2A,D1
+ ~ $31,02					  ;L000E:MOVE.W    D2,-(A0)
+ ~ $D4,43							;ADD.W	   D3,D2
+ ~ $51,C9,FF,FA 					;DBF	   D1,-6(PC)			L000E
+ ~ $20,49							;MOVEA.L   A1,A0
+ ~ $72,2A							;MOVEQ	   #$2A,D1
+ ~ $B1,60					  ;L000F:EOR.W	   D0,-(A0)
+ ~ $66,0A							;BNE.S	   10(PC)				L0010
+ ~ $D0,43							;ADD.W	   D3,D0
+ ~ $51,C9,FF,F8 					;DBF	   D1,-8(PC)			L000F
+ ~ $D3,C7							;ADDA.L    D7,A1
+ ~ $60,E0							;BRA.S	   -32(PC)				L000D
+ ~ $2A,8C					  ;L0010:MOVE.L    A4,(A5)
+ ~ $93,C7							;SUBA.L    D7,A1
+ ~ $2A,09							;MOVE.L    A1,D5
+ ~ $49,F8,04,00 			  ;L0011:LEA	   $400.S,A4
+ ~ $28,05							;MOVE.L    D5,D4
+ ~ $98,8C							;SUB.L	   A4,D4
+ ~ $E0,8C							;LSR.L	   #8,D4
+ ~ $53,84							;SUBQ.L    #1,D4
+ ~ $4B,F8,01,00 					;LEA	   $100.S,A5
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $20,40							;MOVEA.L   D0,A0
+ ~ $72,00							;MOVEQ	   #0,D1
+ ~ $22,41							;MOVEA.L   D1,A1
+ ~ $74,00							;MOVEQ	   #0,D2
+ ~ $24,42							;MOVEA.L   D2,A2
+ ~ $76,00							;MOVEQ	   #0,D3
+ ~ $26,43							;MOVEA.L   D3,A3
+ ~ $48,D4,0F,0F 			  ;L0012:MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $D9,CD							;ADDA.L    A5,A4
+ ~ $51,CC,FF,DC 					;DBF	   D4,-36(PC)			L0012
+ ~ $11,C6,04,24 					;MOVE.B    D6,$424.S
+ ~ $21,C5,04,2E 					;MOVE.L    D5,$42E.S
+ ~ $21,FC,75,20,19,F3,04,20 		;MOVE.L    #$752019F3,$420.S
+ ~ $21,FC,23,76,98,AA,04,3A 		;MOVE.L    #$237698AA,$43A.S
+ ~ $21,FC,55,55,AA,AA,05,1A 		;MOVE.L    #$5555AAAA,$51A.S
+ ~ $4F,F8,7F,FC 					;LEA	   $7FFC.S,A7
+ ~ $4B,F8,00,08 					;LEA	   8.S,A5
+ ~ $28,55							;MOVEA.L   (A5),A4
+ ~ $26,4F							;MOVEA.L   A7,A3
+ ~ $41,FA,00,0C 					;LEA	   12(PC),A0			L0013
+ ~ $2A,88							;MOVE.L    A0,(A5)
+ ! ~+6
+ ~ $33,FC,00,00,FF,D0,00,E0 		;MOVE.W    #0,$FFD000E0.L
+ ~ $41,FA,00,54 			  ;L0013:LEA	   84(PC),A0			L0017
+ ~ $2A,88							;MOVE.L    A0,(A5)
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,FB,55 					;MOVE.W    #$FB55,D3
+ ~ $2E,3C,00,04,00,00				;MOVE.L    #$40000,D7
+ ~ $43,F9,01,00,00,00				;LEA	   $1000000.L,A1
+ ~ $22,38,7F,FC 					;MOVE.L    $7FFC.W,D1
+ ~ $46,81							;NOT.L	   D1
+ ~ $23,41,7F,FC 					;MOVE.L    D1,$7FFC(A1)
+ ~ $D3,C7							;ADDA.L    D7,A1
+ ~ $24,49							;MOVEA.L   A1,A2
+ ~ $55,8A							;SUBQ.L    #2,A2
+ ~ $B2,B8,7F,FC 					;CMP.L	   $7FFC.W,D1
+ ~ $67,28							;BEQ.S	   40(PC)				L0017
+ ~ $20,49					  ;L0014:MOVEA.L   A1,A0
+ ~ $34,00							;MOVE.W    D0,D2
+ ~ $31,02							;MOVE.W    D2,-(A0)
+ ~ $B4,52							;CMP.W	   (A2),D2
+ ~ $67,1E							;BEQ.S	   30(PC)				L0017
+ ~ $D4,43							;ADD.W	   D3,D2
+ ~ $72,29							;MOVEQ	   #$29,D1
+ ~ $31,02					  ;L0015:MOVE.W    D2,-(A0)
+ ~ $D4,43							;ADD.W	   D3,D2
+ ~ $51,C9,FF,FA 					;DBF	   D1,-6(PC)			L0015
+ ~ $20,49							;MOVEA.L   A1,A0
+ ~ $72,2A							;MOVEQ	   #$2A,D1
+ ~ $B1,60					  ;L0016:EOR.W	   D0,-(A0)
+ ~ $66,0A							;BNE.S	   10(PC)				L0017
+ ~ $D0,43							;ADD.W	   D3,D0
+ ~ $51,C9,FF,F8 					;DBF	   D1,-8(PC)			L0016
+ ~ $D3,C7							;ADDA.L    D7,A1
+ ~ $60,D8							;BRA.S	   -40(PC)				L0014
+ ~ $2A,8C					  ;L0017:MOVE.L    A4,(A5)
+ ~ $2E,4B							;MOVEA.L   A3,A7
+ ~ $93,C7							;SUBA.L    D7,A1
+ ~ $B3,FC,01,00,00,00				;CMPA.L    #$1000000,A1
+ ~ $62,02							;BHI.S	   2(PC)				L0018
+ ~ $93,C9							;SUBA.L    A1,A1
+ ~ $21,C9,05,A4 			  ;L0018:MOVE.L    A1,$5A4.S
+ ~ $21,FC,13,57,BD,13,05,A8 		;MOVE.L    #$1357BD13,$5A8.S
+ ~ $4E,D6							;JMP	   (A6)
+ .Mem_Test_End:
+
+ 13A
+ ~ $4D,FA,1DA-~.W					;LEA	   weiter(PC),A6
+ ~ $4E,F9,.Mem_Test_Start+.BASE.L	;JMP	   Mem_Test_Start
+ _FILL ~,1DA,$4E71.W
+
+ .Mem_Test_End
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;*
+;* PrÑzise Cookie-Routinen.
+
+.Cookie = 0 		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .Cookie !OR! .PAK
+ .Cookie_Start:
+ ~ COOKIE.ABS
+ .Cookie_End:
+
+ 3B4
+ ~ $4E,B9,.Cookie_Start+.BASE.L 	;JSR	   Cookie_Start
+ ~ $60,00,4C2-~.W					;BRA.W	   weiter
+ _FILL ~,4C2,$4E71.W				;Rest mit NOP's fÅllen
+
+ .Cookie_End
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;*
+;* TT-RAM-Einbindung (BIOS 0: Getmpb) aus TOS 3.06.
+
+.Getmpb = 0 		;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .Getmpb !OR! .PAK
+ .Getmpb_Start:
+ ~ $20,6F,00,04 					;MOVEA.L   4(A7),A0
+ ~ $43,F8,04,8E 					;LEA	   $48E.W,A1
+ ~ $20,C9							;MOVE.L    A1,(A0)+
+ ~ $42,98							;CLR.L	   (A0)+
+ ~ $42,98							;CLR.L	   (A0)+
+ ~ $42,99							;CLR.L	   (A1)+
+ ~ $22,F8,04,32 					;MOVE.L    $432.W,(A1)+
+ ~ $20,38,04,36 					;MOVE.L    $436.W,D0
+ ~ $90,B8,04,32 					;SUB.L	   $432.W,D0
+ ~ $22,C0							;MOVE.L    D0,(A1)+
+ ~ $42,99							;CLR.L	   (A1)+
+ ~ $0C,B8,13,57,BD,13,05,A8 		;CMPI.L    #$1357BD13,$5A8.W
+ ~ $66,28							;BNE.S	   48(PC)				L0000
+ ~ $0C,B8,01,00,00,00,05,A4 		;CMPI.L    #$1000000,$5A4.W
+ ~ $63,1E							;BLS.S	   36(PC)				L0000
+ ~ $45,F8,0A,02 					;LEA	   $A02.W,A2
+ ~ $23,4A,FF,F0 					;MOVE.L    A2,-16(A1)
+ ~ $42,9A							;CLR.L	   (A2)+
+ ~ $24,FC,01,00,00,01				;MOVE.L    #$1000001,(A2)+
+ ~ $20,38,05,A4 					;MOVE.L    $5A4.W,D0
+ ~ $90,BC,01,00,00,00				;SUB.L	   #$1000000,D0
+ ~ $24,C0							;MOVE.L    D0,(A2)+
+ ~ $42,9A							;CLR.L	   (A2)+
+ ~ $4E,75					  ;L0000:RTS
+ .Getmpb_End:
+
+ 153C $.Getmpb_Start+.BASE.L		;als Bios 0 eintragen.
+
+ .Getmpb_End
+_ENDIF
+
+;*******************************************************************************
+;* MH: 05.03.1999 (V2.0)
+;*
+;* Blitter-Emulation fÅr das TOS.
+;* FÅr den Fall, daû kein Hardware-Blitter vorhanden ist oder er nicht benutzt
+;* werden soll.
+
+.SoftBlitter = 0	;1: Patch einbinden, 0: Patch nicht einbinden.
+
+_IF .SoftBlitter !OR! .PAK
+ .Blitter_Reg = .GET_MEM      ;Speicher fÅr die emulierten Blitterregister
+ .GET_MEM = .GET_MEM + 40     ;allozieren
+
+ .Blitter_Start:
+ ~ BLITTER.ABS
+ .Blitter_End:
+ !.Blitter_Start .. .Blitter_End
+
+ .Blitter_Do = .Blitter_Start+14+.BASE
+
+ .Blitter_Start+1A $.Blitter_Reg+20.L
+
+ 13E6  $4E,71						;Blitter anschalten erlauben,
+									;obwohl kein echter Blitter da ist.
+ 13F4  $70,00						;Immer 0 zurÅckliefern, bei Blitterabfrage
+									;(nîtig fÅr z.B. NVDI)
+
+ 11B00 $.Blitter_Reg+3C.L
+ 11BC2 $4E,B9,.Blitter_Do.L
+
+ 11BDE $.Blitter_Reg+3C.L
+ 11C4A $4E,B9,.Blitter_Do.L
+
+ 11C7C $.Blitter_Reg+3C.L
+ 11D14 $38,BB,00,D8 				;MOVE.W    -40(PC,D0.W),(A4)
+ 11D36 $4E,B9,.Blitter_Do.L
+ ~	   $54,89
+
+ 11D68 $.Blitter_Reg+3C.L
+ 125AE $4E,B9,.Blitter_Do.L
+
+ 12876 $.Blitter_Reg+3C.L
+ 12922 $4E,B9,.Blitter_Do.L
+ 1296E $4E,B9,.Blitter_Do.L
+ 129CA $4E,B9,.Blitter_Do.L
+
+ 12A10 $.Blitter_Reg+3C.L
+ 12BCC $4E,B9,.Blitter_Do.L
+ 12C58 $4E,B9,.Blitter_Do.L
+
+ 12C86 $.Blitter_Reg+3C.L
+ 12CAA $3A,BB,00,60 				;MOVE.W    96(PC,D0.W),(A5)
+ 12CE2 $4E,B9,.Blitter_Do.L
+ ~	   $54,8A
+
+ 12D1E $.Blitter_Reg+20.L
+ 12D66 $4E,B9,.Blitter_Do.L
+
+ 12D88 $.Blitter_Reg+20.L
+ 12DCE $4E,B9,.Blitter_Do.L
+
+ 12E10 $.Blitter_Reg+28.L
+ 12E8A $4E,B9,.Blitter_Do.L
+
+ 17AC4 $.Blitter_Reg+3C.L
+ 17B46 $4E,B9,.Blitter_Do.L
+ 17BDE $4E,B9,.Blitter_Do.L
+
+ .Blitter_End
+_ENDIF
+
+;*******************************************************************************
+;* MH:
+;* Abbruch bei öberschreiten der TOS-LÑnge.
+
+_IF ~ > .LENGTH-.WIDTH/4
+ _ERROR 'Patches lÑnger als das TOS'
+_ENDIF
+
+;*******************************************************************************
+;* Martin Osieka: (implementiert durch MH) 05.03.1999 (V2.0)
+;* Puffer fÅr NEWDESK.INF vergrîûern. Originalroutinen aus SHBUF 1.3!
+;* Zu nÑheren Informationen siehe SHBUF.
+
+.SHBUF	= 0 		;1: Patch einbinden, 0: Patch nicht einbinden
+
+.BUFFER = 7FFE		;In diese Zeile kann die gewÅnschte Puffergrîûe
+					;eingetragen werden. Maximum ist $7FFE => 32kB pro Puffer.
+					;Da es 2 Puffer gibt => max. 64kB Speicherverbrauch
+					;'Originalwert' ist $1000.
+
+_IF .SHBUF
+ +SHBUF.FIL 		;SHBUF-Patch einbinden
+_ENDIF
+
+;*******************************************************************************
+;* MH: 12.04.1999 (V2.0)
+;*
+;* GET MEM Abschluû:
+;* Stellt Patches Speicher zur VerfÅgung (ab os_membot).
+
+C
+! ~ , ~+2
+~ $.GET_MEM.L
+
+;*******************************************************************************
+;* Das Patchdirectory verlassen
+
+-.. 		   ;Dsetpath("..") (ein Verzeichnis zurÅck)
+
+;*******************************************************************************
+;* Ende der Datei... Viel Spaû mit dem gepatchten TOS 4.04!
+;*******************************************************************************
+

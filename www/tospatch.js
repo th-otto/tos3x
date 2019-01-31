@@ -4,18 +4,21 @@ function contermClick()
 	var f = document.getElementById('conterm');
 	f.value = (f.value & 6) + c.checked * 1;
 }
+
 function contermRepeat()
 {
 	var c = document.getElementById('conterm_repeat');
 	var f = document.getElementById('conterm');
 	f.value = (f.value & 5) + c.checked * 2;
 }
+
 function contermBell()
 {
 	var c = document.getElementById('conterm_bell');
 	var f = document.getElementById('conterm');
 	f.value = (f.value & 3) + c.checked * 4;
 }
+
 function contermChange()
 {
 	var c;
@@ -27,6 +30,8 @@ function contermChange()
 	c = document.getElementById('conterm_bell');
 	c.checked = (f.value & 4) != 0;
 }
+
+
 function changeFuji()
 {
 	var f = document.getElementById('fuji');
@@ -56,6 +61,8 @@ function changeFuji()
 		i.src = "fuji/intl_out.bmp";
 	}
 }
+
+
 function changeBombs()
 {
 	var f = document.getElementById('tp_16');
@@ -79,6 +86,8 @@ function changeBombs()
 		i.src = "bombs/totenkpf.bmp";
 	}
 }
+
+
 function change6x6()
 {
 	var f = document.getElementById('tp_35_6');
@@ -96,6 +105,7 @@ function change6x6()
 		i.src = "fonts/6x6/monaco.png";
 	}
 }
+
 function change8x8()
 {
 	var f = document.getElementById('tp_35_8');
@@ -113,6 +123,7 @@ function change8x8()
 		i.src = "fonts/8x8/monaco.png";
 	}
 }
+
 function change8x16()
 {
 	var f = document.getElementById('tp_35_16');
@@ -199,6 +210,7 @@ function change8x16()
 		i.src = "fonts/8x16/typewrit.png";
 	}
 }
+
 function change16x32()
 {
 	var f = document.getElementById('tp_35_32');
@@ -213,6 +225,8 @@ function change16x32()
 		}
 	}
 }
+
+
 function previewIcon(name)
 {
 	var input = document.getElementById(name);
@@ -229,6 +243,7 @@ function previewIcon(name)
 		}
 	}
 }
+
 function killIcon(name)
 {
 	var input = document.getElementById(name);
@@ -238,6 +253,8 @@ function killIcon(name)
 		previewIcon(name);
 	}
 }
+
+
 function changePak()
 {
 	var tosVersion = document.getElementById('tosversion').value;
@@ -252,6 +269,8 @@ function changePak()
 	/* document.getElementById('tp_56').disabled = disabled; no longer needed */
 	document.getElementById('tp_57').disabled = disabled;
 }
+
+
 function changeTosVersion()
 {
 	var tosVersion = document.getElementById('tosversion').value;
@@ -259,12 +278,121 @@ function changeTosVersion()
 	var disabled = tosVersion == '306' ? '' : 'disabled';
 	document.getElementById('tp_35_32').disabled = disabled;
 }
+
 function changeSwitch()
 {
 	var f = document.getElementById('tp_58');
 	var disabled = f.checked ? '' : 'disabled';
 	document.getElementById('tp_59').disabled = disabled;
 }
+
+
+function winxChangeGlobal()
+{
+	var c;
+	var f = document.getElementById('winx_global');
+	var value = f.value;
+	for (var i = 1; i <= 16; i++)
+	{
+		c = document.getElementById('winx_g' + i);
+		if (c)
+			c.checked = (value & 1) != 0;
+		value /= 2;
+	}
+}
+
+function winxGlobal(i)
+{
+	var c;
+	var f = document.getElementById('winx_global');
+	c = document.getElementById('winx_g' + i);
+	if (c)
+	{
+		var mask = 1 << (i - 1);
+		f.value = (f.value & (65535 - mask)) + c.checked * mask;
+	}
+}
+
+function winxChangeLocal()
+{
+	var c;
+	var f = document.getElementById('winx_local');
+	var value = f.value;
+	for (var i = 1; i <= 16; i++)
+	{
+		c = document.getElementById('winx_l' + i);
+		if (c)
+			c.checked = (value & 1) != 0;
+		value /= 2;
+	}
+}
+
+function winxLocal(i)
+{
+	var c;
+	var f = document.getElementById('winx_local');
+	c = document.getElementById('winx_l' + i);
+	if (c)
+	{
+		var mask = 1 << (i - 1);
+		f.value = (f.value & (65535 - mask)) + c.checked * mask;
+	}
+}
+
+function winxChangeLocal()
+{
+	var c;
+	var f = document.getElementById('winx_local');
+	var value = f.value;
+	for (var i = 1; i <= 16; i++)
+	{
+		c = document.getElementById('winx_l' + i);
+		if (c)
+			c.checked = (value & 1) != 0;
+		value /= 2;
+	}
+}
+
+function winxLocal(i)
+{
+	var c;
+	var f = document.getElementById('winx_local');
+	c = document.getElementById('winx_l' + i);
+	if (c)
+	{
+		var mask = 1 << (i - 1);
+		f.value = (f.value & (65535 - mask)) + c.checked * mask;
+	}
+}
+
+function winxChangeDesktop()
+{
+	var c;
+	var f = document.getElementById('winx_desktop');
+	var value = f.value;
+	for (var i = 1; i <= 16; i++)
+	{
+		c = document.getElementById('winx_d' + i);
+		if (c)
+			c.checked = (value & 1) != 0;
+		value /= 2;
+	}
+}
+
+function winxDesktop(i)
+{
+	var c;
+	var f = document.getElementById('winx_desktop');
+	c = document.getElementById('winx_d' + i);
+	if (c)
+	{
+		var mask = 1 << (i - 1);
+		f.value = (f.value & (65535 - mask)) + c.checked * mask;
+	}
+}
+
+
+
 function onload()
 {
 	changeTosVersion();
@@ -275,6 +403,10 @@ function onload()
 	change8x16();
 	change16x32();
 	changeSwitch();
+	contermChange();
+	winxChangeGlobal();
+	winxChangeLocal();
+	winxChangeDesktop();
 	for (var i = 1; i <= 12; i++)
 	{
 		previewIcon('tp_37_' + i);

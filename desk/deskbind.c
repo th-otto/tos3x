@@ -11,6 +11,12 @@
 #include "aesbind.h"
 
 
+#if TP_WINX
+#include "../aes/winx.h"
+#define wm_new wx_new
+#endif
+
+
 
 /* 306de: 00e28052 */
 VOID wind_new(NOTHING)

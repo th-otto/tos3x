@@ -1,0 +1,313 @@
+HINWEISE FöR ENTWICKLER (zur WINX Version 2.2 [17.10.1993])
+
+Diese Datei enthÑlt Hinweise zum Umgang mit der Fensterverwaltung des
+GEM im allgemeinen und der von WINX im speziellen.
+
+- In der Testphase eigener Programme sollte man WINX immer so
+  konfigurieren, daû fehlerhafte wind_-Aufrufe angezeigt werden.
+  Die einzige wind_-Funktion, die man mit einer ungÅltigen
+  Fensterkennung aufrufen darf ohne eine Fehlermeldung zu
+  bekommen, ist Åbrigens wind_get( WF_OWNER).
+
+- wind_get()/wind_set()
+  Diese beiden Funktionen liefern jetzt im Fehlerfall den Wert
+  0, sonst 1 (bisher wurde immer der Wert 1 zurÅckgegeben).
+  Ein Fehler wird z.B. gemeldet, falls ein WF_-Modus nicht
+  implementiert ist, bzw. ein Funktionsaufruf mit einer ungÅltigen
+  Fensterkennung erfolgte. Beim Start eines Programms sollte
+  man zunÑchst prÅfen, ob wind_get() einen sinnvollen RÅckgabe-
+  wert liefert. 
+    #define WF_RETURN 1
+    retok = (wind_get( 0, WF_RETURN, &ign, &ign, &ign, &ign) == 0);
+  Es ist unkritisch unter den bisherigen GEM-Versionen einen
+  unbekannten WF_-Modus zu benutzen, da dieser ignoriert wird.
+
+- wind_get( 0, WF_WINX(=22360='WX'), &version, &date, &func_h, &func_l)
+  Liefert WF_WINX, falls WINX >= 2.1 installiert ist, sonst 0.
+  version:  Bit [15..12]  Beta-Kennung
+            Bit [11.. 8]  Major (momentan 2)
+            Bit [ 7.. 4]  Minor (momentan 1)
+            Bit [ 3.. 0]  Interne Kennung
+  date:     Erstellungsdatum im GEMDOS-Format
+  func_h/l: High- und Lowword der Adresse der WINX-Cookiefunktion,
+            falls der WINX-Cookie intalliert ist, sonst NULL.
+
+- wind_get( 0, WF_WINXCFG(=22361), &gmask, &gflags, &lmask, &lflags)
+  Liefert die fÅr die Applikation gÅltigen Konfigurationsschalter.
+  gmask:   Ein gesetztes Bit bedeutet, daû der Schalter existiert.
+  gflags:  Globale Konfigurationsschalter. Ein Schalterwert ist nur
+           dann gÅltig, wenn das entsprechende Bit in gmask gesetzt
+           ist (Bit 0 entspricht Schalter 1, etc.).
+  lmask:   Ein gesetztes Bit bedeutet, daû der Schalter existiert.
+  lflags:  Lokale Konfigurationsschalter. Ein Schalterwert ist nur
+           dann gÅltig, wenn das entsprechende Bit in lmask gesetzt
+           ist (Bit 0 entspricht Schalter 1, etc.).
+  Obwohl man die Konfigurationsschalter mit dieser Funktion abfragen
+  kann, sollte man trotzdem mîglichst darauf verzichten. Der
+  Funktionswert muss unbedingt geprueft werden!
+
+- wind_get( rsv0, 22362-22400, &rsv2, &rsv3, &rsv4, &rsv5)
+  wind_set( rsv0, 22362-22400, rsv2, rsv3, rsv4, rsv5)
+  Undokumentierte bzw. reservierte WINX-Erweiterungen.
+      
+- wind_get( 0, WF_TOP, &topwin, &topowner, &belowwin)
+  Liefert die Kennung des obersten Fensters im Fensterstapel.
+  Ist kein Fenster offen, enthÑlt topwin 0.
+
+- wind_get( win, WF_OWNER(=20), &owner, &isopen, &abovewin, &belowwin)
+  Liefert Informationen Åber ein Fenster. Das Fenster kann auch
+  geschlossen sein (d.h. es ist nicht im Fensterstapel), bzw.
+  gar nicht existieren (dann liefert die Funktion 0).
+
+- wind_set( win, WF_BOTTOM(=25), 0, 0, 0, 0)
+  WF_BOTTOM stellt ein Fenster im Fensterstapel nach hinten. Das
+  Fenster muû offen sein.
+
+- wind_get( 0, WF_BOTTOM(=25), &bottomwin)
+  Liefert die Kennung des untersten Fensters im Fensterstapel.
+  Ist kein Fenster offen enthÑlt bottomwin -1 (NOWINDOW).
+
+- wind_set( win, WF_BEVENT(=24), 0/1, 0, 0, 0)
+  WF_BEVENT sorgt dafÅr, daû der Besitzer des Fensters beim Klick
+  in das Fensterinnere keine WM_TOPPED-Nachricht erhÑlt, wenn das
+  Fenster nicht aktiv ist. Stattdessen wird ein MU_BUTTON aus-
+  gelîst, falls der Besitzer eine entsprechende Anforderung bei
+  evnt_multi() gestellt hat.
+
+- wind_get( win, WF_BEVENT, &v1, &v2, &v3, &v4)
+  Liefert den BEVENT-Status des Fensters im Bit 0 von v1.
+
+- wind_get( win, WF_NEWDESK, &treehig, &treelow, &treeroot, &ign)
+  Liefert den aktuellen Hintergrundbaum und sein Wurzelobjekt.
+  ACHTUNG: Bisher ist nicht dokumentiert wie man diese Information
+  nutzen kann.
+
+- wind_get( win, WF_COLOR, &obj, &col1, &col2);
+  Liefert die Farben eines Objekts des Fensterrahmens.
+  ACHTUNG: obj muû in intin[ 2] Åbergeben werden. contrl[ 1] muû
+  auf 3 vergrîûert werden!
+
+- wind_get( 0, WF_DCOLOR, &obj, &col1, &col2);
+  Liefert die Defaultfarben eines Objekts des Fensterrahmens.
+  ACHTUNG: obj muû in intin[ 2] Åbergeben werden. contrl[ 1] muû
+  auf 3 vergrîûert werden!
+
+- Position und Grîûe des ROOT-Objekts eines eigenen Hintergrund-
+  baums, der mit wind_set( WF_NEWDESK) angemeldet wird, sollten
+  vorher mit einen Aufruf von
+    wind_get( 0, WF_WORKXYWH, &deskx, &desky, &deskw, &deskh)
+  bestimmt werden (also nicht mit WF_CURRXYWH).
+
+- wind_set( win, WF_CURRXYWH, x, y,w, h), wind_open( win, x, y, w, h)
+  Nach diesen Operationen sollte man immer mit
+    wind_get( win, WF_CURRXYWH, &currx, &curry, &currw, &currh)
+  die tatsÑchlichen Werte ermitteln, da das AES Position und Grîûe
+  eventuell automatisch korrigiert hat.
+  
+- wind_set( win, WF_NAME, text), wind_set( win, WF_INFO, text)
+  Man sollte keine Annahmen darÅber machen, ob die Fensterverwaltung
+  eine Kopie des Strings <text> anlegt oder nur den Zeiger ablegt.
+  <text> sollte nach dem Aufruf der Funktion nicht mehr verÑndert
+  werden.
+  
+- [WM_BOTTOMED(=33) apid 0 win 0 0 0 0]-Nachricht
+  Diese Nachricht benutzt der SCRENMGR um die Applikation aufzu-
+  fordern, das Fenster mit
+    wind_set( win, WF_BOTTOM, 0,0,0,0)
+  nach hinten zu stellen.
+  Nach dieser Aktion sollte die Applikation NICHT explizit ein 
+  eigenes Fenster aktivieren. Hat die Applikation mehr als ein Fenster
+  offen, und will sie deren Reihenfolge nicht Ñndern, sollte sie
+  alle eigenen Fenster nach hinten stellen (praktisch wÑre es,
+  wenn das AES dafÅr eine Funktion anbieten wÅrde...).
+
+- inverse 'Fenster wechseln' Funktion
+  Ein Applikation die diese Funktion anbietet, sollte dabei
+  ihr oberstes Fenster mit WF_BOTTOM nach hinten stellen und
+  das jetzt oberste in der eigene Fensterliste mit WF_TOP
+  aktivieren (um sicherzustellen, daû die Applikation die
+  Tastaturkontrolle behÑlt.
+
+- [WM_UNTOPPED(=30) apid 0 win 0 0 0 0]-Nachricht
+  [WM_ONTOP(=31) apid 0 win 0 0 0 0]-Nachricht
+  Diese Meldungen werden dazu benutzt, um Applikationen Åber eine
+  VerÑnderung des aktiven Fensters zu informieren. WM_UNTOPPED
+  wird nach dem ôffnen bzw. Aktivieren eines Fensters an den
+  Besitzer des vorher aktiven Fensters geschickt. WM_ONTOP
+  wird nach dem Schlieûen bzw. Deaktivieren des aktiven Fensters
+  an den Besitzer des danach aktiven Fensters geschickt.
+  Zum Zeitpunkt der Ankunft der Nachricht kann sich der Fenster-
+  stapel bereits wieder verÑndert haben.
+
+- [WM_ARROWED apid 0 win WA_aaa speed_aaa WA_bbb speed_bbb]
+  Die WM_ARROWED-Nachricht wurde in WINX erweitert um - Åber das neu
+  Kontrollelement 'Scrollbox' - in beliebige Richtungen mit variierbarer
+  Geschwindigkeit scrollen zu kînnen.
+  
+  Die Auswertung kînnte in C etwa folgendermaûen aussehen:
+  
+  switch (mesag[ 0]) {
+  case WM_ARROWED:
+    scrollx = scrolly = 0;
+    speed = (mesag[ 5] < 0) ? -mesag[ 5] : 1;
+    switch (mesag[ 4]) {
+    case WA_UPLINE: scrolly = -speed; break;
+    case WA_DNLINE: scrolly = speed; break;
+    case WA_LFLINE: scrollx = -speed; break;
+    case WA_RTLINE: scrollx = speed; break;
+    case WA_UPPAGE: scrolly = -(speed * linesperpage); break;
+    case WA_DNPAGE: scrolly = (speed * linesperpage); break;
+    case WA_LFPAGE: scrollx = -(speed * linesperpage); break;
+    case WA_RTPAGE: scrollx = (speed * linesperpage); break;
+    };
+    if (mesag[ 7] < 0) {
+      speed = -mesag[ 7];
+      switch (mesag[ 6]) {
+      case WA_UPLINE: scrolly = scrolly - speed; break;
+      case WA_DNLINE: scrolly = scrolly + speed; break;
+      case WA_LFLINE: scrollx = scrollx - speed; break;
+      case WA_RTLINE: scrollx = scrollx + speed; break;
+      case WA_UPPAGE: scrolly = scrolly - (speed * linesperpage); break;
+      case WA_DNPAGE: scrolly = scrolly + (speed * linesperpage); break;
+      case WA_LFPAGE: scrollx = scrollx - (speed * linesperpage); break;
+      case WA_RTPAGE: scrollx = scrollx + (speed * linesperpage); break;
+      };
+    };
+    if ((scrollx != 0) || (scrolly != 0)) {
+      scroll_window( mesag[ 3], scrollx, scrolly);
+    };
+  };
+  
+  ACHTUNG: Diese Erweiterung wurde von ATARI noch nicht abgesegnet!
+  Sie ist aber kompatibel zu den bisherigen TOS-Versionen [Stand 6/93]
+
+- wind_update() speicherte bisher Applikationen, die auf die
+  Update-Kontrolle warteten, in einer LIFO-Warteschlange (d.h.
+  der letzte der die Update-Kontrolle anforderte erhielt sie als
+  nÑchster). WINX benutzt hingegen eine FIFO. 
+     
+- wind_update( BEG_UPDATE|0x100); wind_update( BEG_MCTRL|0x100);
+  WINX implementiert den 'check and set mode' von AES 4.0.
+  Dabei wird die Update-Kontrolle nur noch Åbernommen, falls
+  keine andere Applikation die Kontrolle hat bzw. die eigene
+  Applikation besitzt. Kann die Applikation die Kontrolle nicht
+  Åbernehmen, liefert die Funktion den Wert 0.
+
+- wind_update( END_...) wird jetzt auf Unterlauf geprÅft und im
+  Fehlerfall mit einem Alert gewÅrdigt.
+
+- wind_new() loeschte bisher immer rigoros alle anstehenden 
+  Update-Anforderungen. WINX interpretiert wind_new() als AufrÑum-
+  funktion fÅr eine abgestÅrzte Hauptapplikation und lîscht daher
+  auch nur noch deren Update-Anforderungen. Die Neuinitialisierung
+  der Fensterverwaltung fÅhrt WINX jetzt unter Update-Kontrolle
+  durch, dadurch ist garantiert, daû die Fenster nicht verschwinden
+  wÑhrend ein ACC die Update-Kontrolle besitzt.
+
+- appl_getinfo()
+  Ab der Version 2.2 stellt WINX die AES-Funktion appl_getinfo() Åber
+  den Trap 2 zur VerfÅgung. Die momentan von WINX implementierten Sub-
+  funktionen 11 und 12 liefern als Funktionswert 1, die anderen 0.
+  ACHTUNG: Bevor man appl_getinfo() aufruft, muû man prÅfen, ob das
+  AES diese Funktion unterstÅtzt, da ansonsten ein Fehlermeldungsalert
+  ausgegeben wird. appl_getinfo() wurde von ATARI ab der AES-Version
+  4.00 implementiert. Momentan kann man z.B. folgende Testfunktion
+  benutzen:
+
+    #define WF_WINX 22360
+    
+    int has_appl_getinfo( void)
+    /* Liefert TRUE, falls das AES appl_getinfo() bereitstellt */
+    {
+      static int hagi = -1;
+      int ign;
+
+      if (hagi < 0) {      
+        hagi = ((_GemParBlk.global[ 0] >= 0x400) ||
+          (wind_get( 0, WF_WINX, &ign, &ign, &ign, &ign) == WF_WINX));
+      };
+      return( hagi);
+    } /* has_appl_getinfo */
+
+- Echtzeitaktionen
+  WÑhrend einer Echtzeitaktion gibt der SCRENMGR die Ausgabekontrolle
+  ab. Die Mauskontrolle bleibt hingegen beim SCRENMGR (allerdings kann
+  sie temporÑr von einer Applikation Åbernommen werden). WÑhrend der
+  Echtzeitaktion wird die Applikation, der das zugeordnete Fenster
+  gehîrt, gezwungen mehr Zeit an das AES abzugeben.
+
+- Musterbezugspunkt
+  Ist die Schalter eingeschaltet, sorgt WINX dafÅr, daû bei der
+  Ausgabe eines GEM-Objekts der Bezugspunkt eines FÅllmusters in
+  der linken oberen Ecke des Objekts liegt (statt wie bisher bei
+  0/0). Nur so ist es z.B. mîglich, nach dem Verschieben eines
+  Fensters, die Ausgabe auf die vorher unsichtbaren Teile der
+  Objekte zu beschrÑnken.
+
+- Redraw von Fenstern
+  Die Fensteroperationen wind_open(), wind_set( WF_CURR|WF_TOP), etc.
+  senden Redraws fÅr die Bereiche des Fensters, die neu sichtbar
+  werden. Einige AES Version senden statt dieser Teilredraws Redraws
+  fÅr das komplette Fenster (dies ist unter UmstÑnden notwendig,
+  damit FÅllmuster, etc. zusammenpassen). Will/muû man gleichzeitig
+  zur Fensteroperation den Fensterinhalt Ñndern, sollte man sich
+  selbst mit appl_write() ein Komplettredraw schicken, welches dann
+  mit den von der Fensterverwaltung erzeugten Redraws vereinigt wird.
+  Unter AES 4.00 werden die Redraws momentan nicht vereinigt, daher
+  kann man fÅr dieses AES entweder eine Sonderbehandlung implementieren
+  oder hoffen, daû ATARI irgendwann zur alten Lîsung zurÅckfindet.
+
+- Der WINX-Cookie enthÑlt als Wert einen Zeiger auf eine Funktion
+  Åber die bestimmte Eigenschaften der akt. WINX-Version erfragt
+  werden kînnen.
+
+    long cdecl winxfunc( short funcid, ...);  /* PureC-Syntax */
+
+  Die Parameter werden auf dem Stack Åbergeben, der Resultatwert 
+  wird in D0 zurÅckgegeben. Wenn es nicht anders angegeben ist,
+  bedeutet der Resultatwert -1L, daû die Funktion nicht existiert
+  bzw. momentan nicht ansprechbar ist.
+  Einige Funktionen sind fÅr die interne Kommunikation reserviert.
+  Auûer dem Register D0 werden keine weiteren Register verÑndert.
+
+  Der Zugriff auf einige internen Variablen von WINX ist fÅr
+  TSR-Programme mîglich. DiesbezÅgliche Informationen kînnen
+  beim Autor bezogen werden.
+
+- Zuordnung der Mausklicks zu den Applikationen
+
+  Mausklick || vorderstes Fenster |  hinteres Fenster  | Desktop  |   MenÅ   |
+            ||  Rahmen   Inneres  |  Rahmen   Inneres  |          |          |
+  ----------++--------------------+--------------------+----------+----------+
+            ||                                                               |
+            ||                    AES Versionen <= 3.20                      |
+            ||                                                               |
+  links     || SCRENMGR  Besitzer | SCRENMGR  SCRENMGR | Besitzer | SCRENMGR |
+            ||                    |                    |          |          |
+  rechts    || Besitzer  Besitzer |   BdvF      BdvF   |   BdvF   |   BdvF   |
+            ||                                                               |
+            ||                    MultiTOS 1.01 (Stand 5/93)                 |
+            ||                                                               |
+  links     || SCRENMGR  Besitzer | SCRENMGR    SMoB   | Besitzer | SCRENMGR |
+            ||                    |                    |          |          |
+  rechts    || SCRENMGR  Besitzer | SCRENMGR  Besitzer | Besitzer | SCRENMGR |
+            ||                                                               |
+            ||                           WINX 2.1                            |
+            ||                                                               |
+  links     || SCRENMGR  Besitzer | SCRENMGR    SMoB   | Besitzer | SCRENMGR |
+            ||                    |                    |          |          |
+  rechts G2+|| SCRENMGR  Besitzer | SCRENMGR  Besitzer | Besitzer | SCRENMGR |
+         G2-|| Besitzer  Besitzer |   BdvF      BdvF   |   BdvF   |   BdvF   |
+  ----------++--------------------+--------------------+----------+----------+
+  
+                BdvF = Besitzer des vordersten Fensters
+                SMoB = SCRENMGR oder Besitzer (bei gesetztem BEVENT-Flag)
+
+  Nachdem der EmpfÑnger des Klicks bestimmt ist, wird geprÅft, ob der Zustand der
+  Maustasten der BUTTON-Anforderung der Applikation entspricht. Ist dies der
+  Fall, wird das Ereignis der Applikation gemeldet.
+  Leider kann es auch vorkommen, daû andere Applikation den Klick erhalten (z.B.
+  bei der Benutzung des Timers). Dieses Problem ist in MultiTOS und in WINX 2.1
+  behoben.
+
+       

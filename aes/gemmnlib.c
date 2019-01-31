@@ -217,7 +217,11 @@ PP(int16_t *pitem;)
 	buparm = 0x00010101L;
 	cur_title = cur_menu = cur_item = NIL;
 
-	ctlmouse(TRUE);						/*  3/4/86      */
+#if TP_WINX
+	ctlmouse(2);
+#else
+	ctlmouse(TRUE);
+#endif
 
 #if !BINEXACT
 	rect = 0; /* quiet compiler */

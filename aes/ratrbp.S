@@ -82,10 +82,10 @@ _b_click:
 	bra	bout3
 
 bout2:
-#if !TP_48 /* ARROWFIX */
+#if !TP_WINX & !TP_48 /* ARROWFIX */
 	tst.w	_gl_bpend		; if ( gl_bpend && state )
-#endif
 	beq	bout4
+#endif
 	tst.w	d0
 	beq	bout4
 	move.w	#1,_gl_bclick		; gl_bclick = 1
@@ -224,13 +224,24 @@ _b_delay:
 bdout1:
 	rts
 
-#if TP_48 /* ARROWFIX */
+#if !TP_WINX & TP_48 /* ARROWFIX */
 /*
  * Only place where this functions was used is in hctl_window().
  * The ARROWFIX removes that code.
  * In the original patch, this routine was overwritten
  * with the code to handle the extended modes of ev_dclick().
  */
+#else
+#if TP_WINX
+/* WINXTODO */
+	xdef	_delay
+_delay:
+	movea.l   _D+$5A,a0 /* winxvars.wx_mem */
+	adda.l    d0,a0
+	move.w    21840(a0),d0
+	divs.w    _gl_ticktime,d0
+	ext.l     d0
+	rts
 #else
 /*
  *	delay( ticks )
@@ -250,6 +261,7 @@ delay:
 	bcc.b	delay			; busy-wait...
 xdelay:
 	rts
+#endif
 #endif
 
 

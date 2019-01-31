@@ -49,7 +49,7 @@ ifeq ($(USE_CROSS_ALCYON),1)
 	$(AM_V_at)${RELMOD} romdump.rel $@
 	@$(RM) romdump.rel
 else
-	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ romdump.o
+	$(AM_V_LD)${LD} ${LDFLAGS} -s -o $@ romdump.o
 endif
 
 romdump.o: romdump.c GNUmakefile

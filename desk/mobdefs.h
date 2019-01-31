@@ -440,6 +440,7 @@ typedef struct rshdr
 #define WM_NEWTOP   29
 #define WM_UNTOPPED	30
 #define WM_ONTOP	31
+#define WM_BOTTOM	33
 
 #define AC_OPEN     40
 #define AC_CLOSE    41

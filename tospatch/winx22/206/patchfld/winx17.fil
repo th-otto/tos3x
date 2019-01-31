@@ -1,0 +1,30 @@
+[00e31a5e] 206f 0004                 movea.l   4(a7),a0
+[00e31a62] 7015                      moveq.l   #21,d0
+[00e31a64] 43f9 0000 7702            lea.l     $00007702,a1
+[00e31a6a] 2208                      move.l    a0,d1
+[00e31a6c] 6720                      beq.s     $00E31A8E
+[00e31a6e] 2449                      movea.l   a1,a2
+[00e31a70] 600a                      bra.s     $00E31A7C
+[00e31a72] b288                      cmp.l     a0,d1
+[00e31a74] 6604                      bne.s     $00E31A7A
+[00e31a76] 2490                      move.l    (a0),(a2)
+[00e31a78] 6002                      bra.s     $00E31A7C
+[00e31a7a] 2441                      movea.l   d1,a2
+[00e31a7c] 2212                      move.l    (a2),d1
+[00e31a7e] 66f2                      bne.s     $00E31A72
+[00e31a80] 4a40                      tst.w     d0
+[00e31a82] 6706                      beq.s     $00E31A8A
+[00e31a84] 2091                      move.l    (a1),(a0)
+[00e31a86] 2288                      move.l    a0,(a1)
+[00e31a88] 6004                      bra.s     $00E31A8E
+[00e31a8a] 4290                      clr.l     (a0)
+[00e31a8c] 2488                      move.l    a0,(a2)
+[00e31a8e] 2049                      movea.l   a1,a0
+[00e31a90] 2050                      movea.l   (a0),a0
+[00e31a92] 2008                      move.l    a0,d0
+[00e31a94] 670a                      beq.s     $00E31AA0
+[00e31a96] 4a68 0004                 tst.w     4(a0)
+[00e31a9a] 6df4                      blt.s     $00E31A90
+[00e31a9c] b1d1                      cmpa.l    (a1),a0
+[00e31a9e] 66c2                      bne.s     $00E31A62
+[00e31aa0] 4e75                      rts

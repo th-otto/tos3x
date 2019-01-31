@@ -289,7 +289,11 @@ BOOLEAN rsc_read(NOTHING)
 
 	tosrsc = RSCTABLE[st_lang];
 
+#if TP_WINX
+	if (!(gl_pglue = wx_alloc((int32_t) tosrsc[2])))
+#else
 	if (!(gl_pglue = dos_alloc((int32_t) tosrsc[2])))
+#endif
 	{
 		Cconws("Unable to install AES resource!\r\n");
 		return FALSE;
@@ -315,7 +319,11 @@ BOOLEAN rsc_read(NOTHING)
 	/* copy rsc to ram */
 	intptr = tosrsc;
 
+#if TP_WINX
+	gl_pglue = wx_alloc((int32_t) intptr[2]);
+#else
 	gl_pglue = dos_alloc((int32_t) intptr[2]);
+#endif
 	if (!gl_pglue)
 	{
 		Cconws("Unable to install resource !");

@@ -105,17 +105,20 @@ typedef struct uda
 	/*  926 */	
 } UDA;
 #endif
+
 #if MC68K
+
 UDA
 {
 	/*    0 */	int16_t		u_insuper;		/* in supervisor flag	*/ 
 	/*    2 */	uint32_t	u_regs[15];		/* d0-d7, a0-a6			*/
 	/*   62 */	uint32_t	*u_spsuper;		/* supervisor stack 	*/
 	/*   66 */	uint32_t	*u_spuser;		/* user stack 			*/
-	/*   70 */	uint32_t	u_super[STACK_SIZE];
+	/*   70 */	uint32_t u_super[STACK_SIZE];
 	/* 1862/2070 */	uint32_t	u_supstk;
 	/* 1866/2074 */
 };
+
 UDA2
 {
 	int16_t		u_insuper;		/* in supervisor flag		*/ 
@@ -135,6 +138,7 @@ UDA3
 	uint32_t	u_super[STACK3_SIZE];
 	uint32_t	u_supstk;
 };
+
 #endif
 
 #define NOCANCEL 0x0001		/* event is occuring 	*/
@@ -197,7 +201,7 @@ PD
 	/*66/140 */	EVB	*p_qnq;
 	/*70/144 */	char *p_qaddr;			/* message queue pointer	*/
 	/*64/148 */	int16_t	p_qindex;		/* message queue index		*/
-	/*76/150 */	char	p_queue[QUEUE_SIZE];
+	/*76/150 */	char p_queue[QUEUE_SIZE];
 	/*<320=204/320=278/>=330=406 */
 };
 

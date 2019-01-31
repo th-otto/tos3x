@@ -1,0 +1,140 @@
+;******************************************************************************
+; P_MFP.FIL	Patchfile fÅr TOS 3.06 fÅr PAK/3:  MFP-Routinen
+;		Benutzte Variablen: .HasTTMfp
+;		énderungen ggÅ. _MFP.FIL aus PATCHFLD.SE:  Nur Optik
+
+;******************************************************************************
+_IF .HasTTMfp=.0	; Nur patchen, falls kein TT-MFP eingebaut ist
+
+;------------------------------------------------------------------------------
+;	Delay-Routine  SE 13.10.93
+;	Zeitmessung von Timer C im TT-MFP auf Timer C im ST-MFP verlegt
+;	Zur Messung wird Polling von TCDR verwendet (Auflîsung 26 usec)
+;	Diesen Patch weglassen, wenn ein TT-MFP eingebaut wurde!
+
+162E
+~ $48,E7,C0,80                      ;MOVEM.L   A0/D0-D1,-(A7)
+~ $72,00                            ;MOVEQ     #0,D1
+~ $12,00                            ;MOVE.B    D0,D1
+~ $66,04                            ;BNE.S     4(PC)                L0000
+~ $32,3C,01,00                      ;MOVE.W    #$100,D1
+~ $E0,48                      ;L0000:LSR.W     #8,D0
+~ $02,40,00,07                      ;ANDI.W    #7,D0
+~ $10,3B,00,1E                      ;MOVE.B    $1E(PC,D0.W),D0      L0003
+~ $C2,C0                            ;MULU      D0,D1
+~ $E8,89                            ;LSR.L     #4,D1
+~ $54,81                            ;ADDQ.L    #2,D1
+~ $41,F9,FF,FF,FA,23                ;LEA       $FFFFFA23.L,A0
+~ $10,10                      ;L0001:MOVE.B    (A0),D0
+~ $B0,10                      ;L0002:CMP.B     (A0),D0
+~ $67,FC                            ;BEQ.S     -4(PC)               L0002
+~ $51,C9,FF,F8                      ;DBF       D1,-8(PC)            L0001
+~ $4C,DF,01,03                      ;MOVEM.L   (A7)+,A0/D0-D1
+~ $4E,75                            ;RTS
+~ $00                         ;L0003:DC.B      0
+~ $01                               ;DC.B      1
+~ $03                               ;DC.B      3
+~ $04                               ;DC.B      4
+~ $0D                               ;DC.B      13
+~ $10                               ;DC.B      16
+~ $19                               ;DC.B      25
+~ $32                               ;DC.B      50
+
+;------------------------------------------------------------------------------
+;	MFP-Init  c't 9/92
+;	Diesen Patch weglassen, wenn ein TT-MFP eingebaut wurde!
+
+24F4 $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~    $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+2552 $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+~    $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+26A4 $4E,71,4E,71,4E,71,4E,71,4E,71,4E,71
+
+;------------------------------------------------------------------------------
+;	BCONMAP-Tabelle, TT-MFP entfernt  SE 16.12.93
+;	Eintrag fÅr MFP-Serielle
+;	Diesen Patch weglassen, wenn ein TT-MFP eingebaut wurde!
+
+2B4A
+~ $00,E0,23,A4                ;L01F8:DC.L      $00E023A4            L0191
+~ $00,E0,23,BA                      ;DC.L      $00E023BA            L0194
+~ $00,E0,24,06                      ;DC.L      $00E02406            L019A
+~ $00,E0,24,1E                      ;DC.L      $00E0241E            L019D
+~ $00,E0,2A,66                      ;DC.L      $00E02A66            L01EA
+~ $00,00,0E,A6                      ;DC.B      $00,$00,$0E,$A6
+
+;	Eintrag fÅr SCC-B
+~ $00,E0,2F,A8                      ;DC.L      $00E02FA8            L021F
+~ $00,E0,2F,B2                      ;DC.L      $00E02FB2            L0220
+~ $00,E0,2F,BC                      ;DC.L      $00E02FBC            L0221
+~ $00,E0,2F,C6                      ;DC.L      $00E02FC6            L0222
+~ $00,E0,30,AA                      ;DC.L      $00E030AA            L0234
+~ $00,00,17,A6                      ;DC.B      $00,$00,$17,$A6
+
+;	Eintrag fÅr TT-MFP kann entfernt werden
+;~ $00,E0,2C,7C                      ;DC.L      $00E02C7C            L01FD
+;~ $00,E0,2C,84                      ;DC.L      $00E02C84            L01FE
+;~ $00,E0,2C,90                      ;DC.L      $00E02C90            L01FF
+;~ $00,E0,2C,98                      ;DC.L      $00E02C98            L0200
+;~ $00,E0,2C,E6                      ;DC.L      $00E02CE6            L0201
+;~ $00,00,13,5E                      ;DC.B      $00,$00,$13,'^'
+
+;	Eintrag fÅr SCC-A
+~ $00,E0,2F,D2                      ;DC.L      $00E02FD2            L0223
+~ $00,E0,2F,DC                      ;DC.L      $00E02FDC            L0224
+~ $00,E0,2F,E6                      ;DC.L      $00E02FE6            L0225
+~ $00,E0,2F,F0                      ;DC.L      $00E02FF0            L0226
+~ $00,E0,30,A0                      ;DC.L      $00E030A0            L0233
+~ $00,00,15,82                      ;DC.B      $00,$00,$15,$82
+
+;------------------------------------------------------------------------------
+;	Initialisierung der BCONMAP-Tabelle  SE 16.12.93
+;	Testet, ob GSTMCU vorliegt (d.h. Register $FFFF8E09 vorhanden ist).
+;	Dann (MegaSTE) werden auch die weiteren Seriellen berÅcksichtigt.
+;	Diesen Patch weglassen, wenn ein TT-MFP eingebaut wurde!
+
+2C38
+~ $41,F8,10,FE                      ;LEA       $10FE.W,A0
+~ $21,C8,10,EE                      ;MOVE.L    A0,$10EE.W
+~ $70,01                            ;MOVEQ     #1,D0
+
+~ $24,78,00,08                      ;MOVEA.L   8.W,A2
+
+~ $43,FA,00,10                      ;LEA       $10(PC),A1           L0001
+~ $21,C9,00,08                      ;MOVE.L    A1,8.W
+
+~ $22,4F                            ;MOVEA.L   A7,A1
+
+~ $4A,38,8E,09                      ;TST.B     $FFFF8E09.W    ; nur GSTMCU
+~ $30,3C,00,03                      ;MOVE.W    #3,D0
+
+~ $2E,49                      ;L0001:MOVEA.L   A1,A7
+~ $21,CA,00,08                      ;MOVE.L    A2,8.W
+
+~ $31,C0,10,F2                      ;MOVE.W    D0,$10F2.W     ; 1=ST, 3=MSTE
+~ $31,FC,00,06,10,F4                ;MOVE.W    #6,$10F4.W
+
+~ $43,FA,FE,E0                      ;LEA       -$120(PC),A1         L0000
+~ $24,49                            ;MOVEA.L   A1,A2
+
+~ $70,11                            ;MOVEQ     #$11,D0
+~ $20,DA                      ;L0002:MOVE.L    (A2)+,(A0)+
+~ $51,C8,FF,FC                      ;DBF       D0,-4(PC)            L0002
+
+~ $41,F8,05,22                      ;LEA       $522.W,A0
+~ $20,99                            ;MOVE.L    (A1)+,(A0)
+~ $21,59,00,20                      ;MOVE.L    (A1)+,$20(A0)
+~ $21,59,00,40                      ;MOVE.L    (A1)+,$40(A0)
+~ $21,59,00,60                      ;MOVE.L    (A1)+,$60(A0)
+~ $21,D9,10,F6                      ;MOVE.L    (A1)+,$10F6.W
+~ $21,D9,10,FA                      ;MOVE.L    (A1)+,$10FA.W
+~ $4E,75                            ;RTS
+
+_ENDIF		; Ende .HasTTMfp
+
+;******************************************************************************
+;	Mega STE hat kein SCCDMA!!  SE 23.01.93
+
+2D72 $4e,71,4e,71
+
+;******************************************************************************

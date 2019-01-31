@@ -323,7 +323,7 @@ VOID gem_main(NOTHING)
 	/* which is used by resource calls  */
 
 	ad_sysglo = (intptr_t)&DGLO->g_sysglo[0];
-	ad_windspb = (intptr_t)&wind_spb;
+	ad_windspb = &wind_spb;
 
 	/****************************************/
 
@@ -1148,7 +1148,11 @@ PP(int16_t h;)
 	while (1)
 	{
 		forker();
+#if TP_WINX
+		if (!(button & (1 << winxvars.xAF11)))
+#else
 		if (!(button & 0x01))
+#endif
 		{
 			status = FALSE;
 			break;

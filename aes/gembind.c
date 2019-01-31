@@ -130,7 +130,7 @@ PP(register VOIDPTR *addr_in;)
 		}
 		break;
 #endif
-	
+
 	/* Event Manager */
 	case EVNT_KEYBD:
 		ret = ev_keybd();
@@ -346,48 +346,99 @@ PP(register VOIDPTR *addr_in;)
 
 	/* Window Manager */
 	case WIND_CREATE:
+#if TP_WINX
+		ret = wx_create(WM_KIND, (GRECT *)&WM_WX);
+#else
 		ret = wm_create(WM_KIND, (GRECT *)&WM_WX);
+#endif
 		break;
 	case WIND_OPEN:
+#if TP_WINX
+		wx_open(WM_HANDLE, (GRECT *)&WM_WX);
+#else
 		wm_open(WM_HANDLE, (GRECT *)&WM_WX);
+#endif
 		break;
 	case WIND_CLOSE:
+#if TP_WINX
+		wx_close(WM_HANDLE);
+#else
 		wm_close(WM_HANDLE);
+#endif
 		break;
 	case WIND_DELETE:
+#if TP_WINX
+		wx_delete(WM_HANDLE);
+#else
 		wm_delete(WM_HANDLE);
+#endif
 		break;
+
+#if TP_WINX
+	case APPL_GETINFO:
+		ret = int_in[0] - 11;
+		if ((uint16_t)ret > 1)
+			return 0;
+		WM_HANDLE = 0;
+		WM_WFIELD = 0x575b + ret;
+#endif
+		/* fall through */
+
 	case WIND_GET:
+#if TP_WINX
+		ret = wx_get(WM_HANDLE, WM_WFIELD, &WM_OX);
+#else
 #if AES3D
 		ret = wm_get(WM_HANDLE, WM_WFIELD, &WM_OX, (int16_t *)&WM_IX);
 #else
 		/* BUG: ignores return value */
 		wm_get(WM_HANDLE, WM_WFIELD, &WM_OX);
 #endif
+#endif
 		break;
 	case WIND_SET:
+#if TP_WINX
+		ret = wx_set(WM_HANDLE, WM_WFIELD, (int16_t *)&WM_IX);
+#else
 		wm_set(WM_HANDLE, WM_WFIELD, (int16_t *)&WM_IX); /* BUG: ignores return value */
+#endif
 		break;
 	case WIND_FIND:
+#if TP_WINX
+		ret = wx_find(WM_MX, WM_MY);
+#else
 		ret = wm_find(WM_MX, WM_MY);
+#endif
 		break;
 	case WIND_UPDATE:
+#if TP_WINX
+		ret = wx_update(WM_BEGUP);
+#else
 #if (AESVERSION >= 0x330) | !BINEXACT
 		ret = wm_update(WM_BEGUP);
 #else
 		/* BUG: ignores return value */
 		wm_update(WM_BEGUP);
 #endif
+#endif
 		break;
 	case WIND_CALC:
+#if TP_WINX
+		wx_calc(WM_WCTYPE, WM_WCKIND, WM_WCIX, WM_WCIY, WM_WCIW, WM_WCIH, &WM_WCOX, &WM_WCOY, &WM_WCOW, &WM_WCOH);
+#else
 		wm_calc(WM_WCTYPE, WM_WCKIND, WM_WCIX, WM_WCIY, WM_WCIW, WM_WCIH, &WM_WCOX, &WM_WCOY, &WM_WCOW, &WM_WCOH);
+#endif
 		break;
 	case WIND_NEW:
+#if TP_WINX
+		ret = wx_new();
+#else
 #if (AESVERSION >= 0x330) | !BINEXACT
 		ret = wm_new();
 #else
 		/* BUG: ignores return value */
 		wm_new();
+#endif
 #endif
 		break;
 

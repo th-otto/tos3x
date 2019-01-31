@@ -1,0 +1,161 @@
+; country specific offsets for various routines
+; .d1 is caused by different alt-key handling in bios,
+;    and affects all addresses >= $00E0363A
+; .d2 is caused by different time/date formats in desktop,
+;    and affects all addresses >= $00E2FF6A
+_SWITCH .NATION
+  _CASE .FRG, .SWG:
+    .d1 = 0
+    .d2 = 0
+  _CASE .USA, .UK:
+    .d1 = -5A
+    .d2 = -30
+  _CASE .FRA, .SWE, .SWF:
+    .d1 = 1E
+    .d2 = 1E
+  _CASE .SPA:
+    .d1 = 2C
+    .d2 = 2C
+  _CASE .ITA:
+    .d1 = 0E
+    .d2 = 0E
+  _DEFAULT:
+    _ERROR "unsupported country"
+_ENDSWITCH
+
+
+_SWITCH .NATION
+_CASE .FRG:
+!001D6
+!01514
+!01CE6
+!01E88
+!028D8
+!038B2
+!0650E
+!073B4
+!0E5BC
+!14126
+!1561C
+!15676
+!15D70
+!163C8
+!169D6
+!16B24
+!1738E
+!173A2
+!1B5B0
+!1C6C2
+!1CB62
+!1CCDA
+!1D7CA
+!1ECAA
+!1FE62
+!204CA
+!20730
+!207FE
+!20A24
+!21290
+!242BA
+!24C76
+!26642
+!2665E
+!2A01E
+!2A10C
+!2A3CA
+!2F268
+!2F290
+!2F47E
+!3091C
+!362AC
+!36518
+!36B18
+!36B1A
+!371E0
+!371E2
+!377AA
+!383AA
+!38C7A
+!39580
+!395D4
+!3969C
+!39876
+!39956
+!39964
+!399A0
+!399A2
+!399A4
+!399A6
+!39AB0
+!39F6A
+!39F74
+!39F7A
+!3A1FE
+!3A4BE
+!3A6BE
+!3A6CE
+!3A714
+!3A8CE
+!3A914
+!3ACC4
+!3B518
+!3B718
+!3B898
+!3BC98
+!3BEB0
+!3BFB6
+!3C356
+!3C76E
+!3D062
+!3D41E
+!3D420
+!3D422
+!3D424
+!3D426
+!3D428
+!3D42A
+!3D42C
+!3D42E
+!3D430
+!3D432
+!3D434
+!3D436
+!3D438
+!3D43A
+!3D43C
+!3D61E
+!3D620
+!3D622
+!3D624
+!3D626
+!3D628
+!3D62A
+!3D62C
+!3D62E
+!3D630
+!3D632
+!3D634
+!3D636
+!3D638
+!3D63A
+!3D63C
+!3FA66
+!4254C
+!426E6
+!42874
+!42878
+!43938
+
+!014F6..01516       ;Bombenimage
+!36018..36420       ;Atari-Logo
+!3676C..368EC       ;Keyboard-Tabelle
+!36CCE..3714E       ;6x6 Fontimage
+!373AA..37BAA       ;8x8 Fontimage
+!37BAA..38BAA       ;8x16 Fontimage
+!38E60..3CE60       ;16x32 Fontimage
+!3E514..3E532       ;Desktop-Tastaturbelegung
+
+_DEFAULT: _IF .RELOCADR <> .BASE
+           _ERROR 'unsupported country'
+          _ENDIF
+_ENDSWITCH

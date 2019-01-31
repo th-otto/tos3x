@@ -1,0 +1,277 @@
+;******************************************************************************
+; P_DRIVE.FIL	Patchfile fÅr TOS 3.06 fÅr PAK/3:  Laufwerksgeschichten
+;		Benutzte Variablen: .NATION .SKIP_B .DefHDinf .BPatch
+;		énderungen ggÅ. _DRIVES.FIL aus PATCHFLD.SE:
+;		 - Floppy-BIOS: Zugriff auf TT-Reg. $FF860E entfernt
+;		 - Floppy-BIOS: Track 1 statt Track 10 entfernt
+;		 - Floppy-BIOS: Floppy Wartepause entfernt
+;		 - Neue Floppy-XBIOS-Routinen von Zim hinzu (flop_24m)
+;		 - Falls .SKIP_B: Keine Suche nach Laufwerk B:
+;		 - Falls .BPatch: GetBPB-Patch v. Harun Scheutzow (bpb_hs2)
+;		 - Falls .BPatch: Rwabs-Patch v. Harun Scheutzow (rwabszi6)
+;		 - .DefHDinf: Default-Steprate kann gewÑhlt werden
+;		énderungen ggÅ. _ADDITIO.FIL aus PATCHFLD.SE:
+;		Benutzte Variablen: .NATION .HDwait .ROMTOP
+;		 - Falls .HDwait: Plattenwarter statt Balken, aber 
+;		   nur fÅr deutschen TOS
+;		 - Variable .Additional entfÑllt
+;		 - .NATION statt .ENG, erweitert auf: FRG, USA, UK, FRA
+
+;*******************************************************************************
+;* Harun Scheutzow: (implementiert von MH)
+;* HD-Cookie installieren. Nicht fÅr Mega STE/TT !!!
+;* Format: 0xkkkkkk / normal (Mega STE/TT): $01415443
+;* kkkkkk: Kennung, wer den Cookie installiert hat.
+;* x=0: normale Schreibdichte (DD 720kB/360kB)
+;* x=1: Hohe Schreibdichte (HD 1.44MB)
+;* x=2: Extrahohe Schreibdichte (ED 2,88MB)
+;* x>2: reserviert
+;* [ALL]
+;*
+;* >>> Achtung: Nicht fÅr Mega STE / TT !
+
+_IF .FDC_COOKIE <> 01415443
+ _FILL 426,434,$4E71.W
+ 43C $.FDC_COOKIE.L
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	Bootpreference nicht aus SCU holen, sondern direkt in D0 schreiben
+;	c't 9/92;	korrigiert zu MOVEQ #$80,d0 SE 21.09.93
+
+_IF .PAK
+B14     $4E,71                   ; NOP                ; statt Zugriff auf SCU
+~       $70,80                   ; MOVEQ   #$80,d0
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	SCSI-I/O muû immer Fehler -12 zurÅckgeben
+;	c't 9/92;	auf -1 umgestellt SE 18.09.93
+
+_IF .PAK
+1B68    $70,FF                  ; MOVEQ #-1,D0
+~       $4E,75                  ; RTS
+1BA4    $70,FF                  ; MOVEQ #-1,D0
+~       $4E,75                  ; RTS
+1CFE    $4E,75                  ; RTS
+_ENDIF
+
+;------------------------------------------------------------------------------
+;	RB: Suche nach Laufwerk 'B' unterbinden -> schnelleres Booten (3 sec)
+;	>>> Funktioniert nicht mit 2 Laufwerken!
+;	Anpassung fÅr engl. TOS von Zim 06.09.96
+;	Anpassung fÅr franzîsisches TOS von Zim 02.06.00
+
+_IF .SKIP_B                   ; falls nur ein Laufwerk angeschlossen ist
+
+5648+.d1 $0001.W
+
+_ENDIF
+
+;*******************************************************************************
+;* RB:
+;* AusfÅhren des Bootsektors der Diskette verhindern
+;* (Ist ja nicht ganz so radikal schon im bootdevice-Patch enthalten).
+;* [ALL]
+
+_IF .KILL_BOOT
+ 5D9C+.d1 $60
+_ENDIF
+
+;*******************************************************************************
+;* MRF: (angepasst von MH)
+;* Wenn _bootdev >= 2 (also Laufwerk C) ist, wird der Bootsektor der Diskette
+;* nach einem Warmstart nicht mehr ausgefÅhrt. Bis zu TOS 1.4 war dies auch
+;* so, aber seit TOS 1.4 wird der Bootsektor stets ausgefÅhrt. Dies kostet
+;* bei einem RESET nicht nur Zeit, sondern hilft auch zur Verbreitung von
+;* Bootsektor-Viren.
+;* [ALL]
+
+_IF .NORM_BOOT
+5DA0+.d1
+ ~ $BE,78,04,46             ; cmp.w     ($00000446).w,d7
+ ~ $6F,2E                   ; ble       $00E05DD4
+ ~ $70,01                   ; moveq.l   #1,d0
+ ~ $3E,80                   ; move.w    d0,(a7)
+ ~ $42,A7                   ; clr.l     -(a7)
+ ~ $3F,00                   ; move.w    d0,-(a7)
+ ~ $42,67                   ; clr.w     -(a7)
+ ~ $42,A7                   ; clr.l     -(a7)
+ ~ $2F,38,04,C6             ; move.l    ($000004C6).w,-(a7)
+ ~ $61,00,DE,58             ; bsr       floprd
+_ENDIF
+
+;******************************************************************************
+;	Flop: XBIOS-Patch von Holger Zimmermann
+;	Ersetzt die die folgenden XBIOS-Routinen des TOS 3.06 vollstÑndig: 
+;	Floprd, Flopwr, Flopver, Flopfmt, Floprate, VBL-Routine
+;	Keine Unterscheidung mehr zwischen ST und STE notwendig
+;	306.GER: EO3BA8 bis E045D8 (2608 Bytes)
+;	306.ENG: EO3B4E bis E0457E (Offset: -$5A)
+;	Anpassung fÅr franzîsisches TOS von Zim 02.06.00
+
+_IF .NEW_FLOPFMT
+3BA8+.d1
++flop_24m.fil
+_ELSE
+3BCA +.d1   $ .DefHDinf.w       ; Default hd density setzen (3=HD, 0=DD)
+_ENDIF
+
+;******************************************************************************
+_IF .BPatch                     ; ggf. Haruns Patches einfÅgen
+
+;------------------------------------------------------------------------------
+;	GetBPB: BIOS-Patch von Harun Scheutzow
+;	Ersetzt die Floppy-Getbpb-Routine des TOS 3.06 vollstÑndig 
+;	Aus BPATCH.PRG-Versiondatum 21.11.1992 von Harun Scheutzow
+;	Ins PAK-TOS eingefÅgt von Zim 18-08-96
+;	306.GER: EO565C bis E058AE (594 Bytes)
+;	306.ENG: EO5602 bis E05854 (Offset: -$5A)
+;	Anpassung fÅr franzîsisches TOS von Zim 02.06.00
+
+.Flopwr     = 3D12+.d1+.BASE
+.Flopver    = 3FFE+.d1+.BASE
+.i_mediach  = 5918+.d1+.BASE
+.Floprd     = 3C10+.d1+.BASE
+
+565C +.d1
++bpb_hs2.fil           ; 594 Bytes
+
+;------------------------------------------------------------------------------
+;	Rwabs: BIOS-Patch von Harun Scheutzow
+;	Ersetzt die Floppy-Rwabs-Routine des TOS 3.06 teilweise 
+;	Aus BPATCH.PRG-Versiondatum 21.11.1992 von Harun Scheutzow
+;	Modifiziert und ins PAK-TOS eingefÅgt von Zim 15-12-97
+;	306.GER: EO5B1E bis E05D38 (538 Bytes)
+;	306.ENG: EO5AC4 bis E05CDE (Offset: -$5A)
+;	Anpassung fÅr franzîsisches TOS von Zim 02.06.00
+
+5B1E +.d1
++rwabszi6.fil        ; 538 Bytes
+
+_ENDIF                          ; Ende .BPatch
+
+;*******************************************************************************
+;*
+;* Warte-Pause fÅr Floppyzugriffe etwas erhîhen, damit die Probleme mit 50 MHz
+;* behoben werden. Originalwert $119.
+
+_IF .NEW_FLOPFMT
+ 4452+.d1
+ ! ~ + 2            ;Damit .FLOPPY_DELAY nicht reloziert wird
+ ~ $30,3C,.FLOPPY_DELAY.W  ;Verzîgerung einpatchen
+_ELSE
+ 4448+.d1
+ ! ~ + 2            ;Damit .FLOPPY_DELAY nicht reloziert wird
+ ~ $30,3C,.FLOPPY_DELAY.W  ;Verzîgerung einpatchen
+_ENDIF
+
+;*******************************************************************************
+;* MRF: (angepasst von MH)
+;* Korrektes MSDOS-Format (Statt $EB nun $EB34904E als 1. Bytes im Bootsektor).
+;* [ALL]
+
+_IF .MS_DOS
+ 2A3C2+.d1 $DE,FC,00,0C,2A,BC,EB,34,90,4E
+_ENDIF
+
+;*******************************************************************************
+;* c't 9/92:
+;* TT-Register $FF860E:
+
+_IF (.PAK) !A! (.NEW_FLOPFMT = 0)
+  3E54+.d1 $4E,B9,.ROMTOP.L        ; jsr .ROMTOP
+  ~        $4E,71                  ; nop
+  430C+.d1 $4E,B9,.ROMTOP.L        ; jsr .ROMTOP
+  ~        $4E,71                  ; nop
+.ROMTOP $4a,38,0a,13               ; tst.b (STEFlag).w
+  ~ $66,04                         ; bne.s
+  ~ $31,c0,86,0e                   ; move.w    d0,($FFFF860E).w
+  ~ $33,40,00,04                   ; move.w    d0,fd_density(a1)
+  ~ $4e,75                         ; rts
+.ROMTOP:
+
+  4360+.d1 $4E,B9,.ROMTOP.L        ; jsr .ROMTOP
+.ROMTOP $4a,38,0a,13               ; tst.b (STEFlag).w
+  ~ $66,06                         ; bne.s
+  ~ $31,e9,00,04,86,0e             ; move.w    fd_density(a1),($FFFF860E).w
+  ~ $4e,75                         ; rts
+.ROMTOP:
+
+_ENDIF
+
+;******************************************************************************
+_IF .HDwait                     ; ggf. Plattenwarter installieren
+
+;------------------------------------------------------------------------------
+;	Nach RAM-Test, statt Wartebalken: Warten, bis Harddisk ready meldet
+;	öbernommen aus _ADDITIO.FIL aus PATCHFLD.SE:
+;	SE 28.01.94
+;	Zim 20.11.11: Zieladresse jetzt .ROMTOP statt fest auf 46232
+;	Keine Kollision mehr mit anderen Erweiterungen
+;	Kann jetzt z.B. zusammen mit dem NOVA-Patch benutzt werden
+;	Jetzt unabhÑngig von .NATION, es muss nur .ROMTOP definiert sein
+
+9c8     $4E,B9,.ROMTOP+.base.l          ; Jsr zum Harddisk-Waiter
+9ce     $4E,f9,00,e0,0b,0c              ; Jmp SearchDrive
+
+;------------------------------------------------------------------------------
+
+.ROMTOP                         ; Zeiger auf freien Bereich hinter ROM-Code
+~       $48,E7,FF,FE                    ;MOVEM.L   A0-A6/D0-D7,-(A7)
+~       $48,7A,00,7E                    ;PEA       $7E(PC)              L0006
+~       $3F,3C,00,09                    ;MOVE.W    #9,-(A7)
+~       $4E,41                          ;TRAP      #1
+~       $5C,8F                          ;ADDQ.L    #6,A7
+~       $3C,3C,00,10              ;L0000:MOVE.W    #$10,D6
+~       $3F,3C,FF,FF              ;L0001:MOVE.W    #-1,-(A7)
+~       $3F,3C,00,0B                    ;MOVE.W    #$B,-(A7)
+~       $4E,4D                          ;TRAP      #$D
+~       $58,8F                          ;ADDQ.L    #4,A7
+~       $08,00,00,03                    ;BTST      #3,D0
+~       $66,00,00,4C                    ;BNE       $4C(PC)              L0004
+~       $3F,06                          ;MOVE.W    D6,-(A7)
+~       $2F,38,04,C6                    ;MOVE.L    $4C6.W,-(A7)
+~       $3F,3C,00,01                    ;MOVE.W    #1,-(A7)
+~       $2F,3C,00,00,00,00              ;MOVE.L    #0,-(A7)
+~       $3F,3C,00,2A                    ;MOVE.W    #$2A,-(A7)
+~       $4E,4E                          ;TRAP      #$E
+~       $4F,EF,00,0E                    ;LEA       $E(A7),A7
+~       $4A,80                          ;TST.L     D0
+~       $66,26                          ;BNE.S     $26(PC)              L0003
+~       $20,78,04,C6                    ;MOVEA.L   $4C6.W,A0
+~       $30,3C,00,FF                    ;MOVE.W    #$FF,D0
+~       $72,00                          ;MOVEQ     #0,D1
+~       $D2,58                    ;L0002:ADD.W     (A0)+,D1
+~       $51,C8,FF,FC                    ;DBF       D0,-4(PC)            L0002
+~       $B2,7C,12,34                    ;CMP.W     #$1234,D1
+~       $66,10                          ;BNE.S     $10(PC)              L0003
+~       $48,7A,00,3C                    ;PEA       $3C(PC)              L0007
+~       $3F,3C,00,09                    ;MOVE.W    #9,-(A7)
+~       $4E,41                          ;TRAP      #1
+~       $5C,8F                          ;ADDQ.L    #6,A7
+~       $60,00,00,14                    ;BRA       $14(PC)              L0005
+~       $51,CE,FF,A6              ;L0003:DBF       D6,-$5A(PC)          L0001
+~       $60,9E                          ;BRA.S     -$62(PC)             L0000
+~       $48,7A,00,2E              ;L0004:PEA       $2E(PC)              L0008
+~       $3F,3C,00,09                    ;MOVE.W    #9,-(A7)
+~       $4E,41                          ;TRAP      #1
+~       $5C,8F                          ;ADDQ.L    #6,A7
+~       $4C,DF,7F,FF              ;L0005:MOVEM.L   (A7)+,A0-A6/D0-D7
+~       $4E,75                          ;RTS
+~       $53,75,63,68,65,20,6E,61  ;L0006:DC.B      'Suche na'
+~       $63,68,20,46,65,73,74,70        ;DC.B      'ch Festp'
+~       $6C,61,74,74,65,00              ;DC.B      'latte',$00
+~       $20,2D,3E,20,4F,6B,00,00  ;L0007:DC.B      ' -> Ok',$00,$00
+~       $20,2D,3E,20,41,62,62,72  ;L0008:DC.B      ' -> Abbr'
+~       $75,63,68,00                    ;DC.B      'uch',$00
+
+.ROMTOP:            ; Zeiger auf freien Bereich zeigt jetzt hinter diesen Patch
+
+_ENDIF		; zu .HDwait
+
+;******************************************************************************
+
+_IF .HD_BIT <> 0
++hd_bit.fil
+_ENDIF

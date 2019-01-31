@@ -1,0 +1,143 @@
+.getbpb:
+~ $4e,56,00,00                ; link      a6,#$0000
+~ $48,e7,03,0c                ; movem.l   d6-d7/a4-a5,-(a7)
+~ $3a,7c,77,aa                ; movea.w   #$77AA,a5
+~ $30,2e,00,08                ; move.w    8(a6),d0
+~ $67,08                      ; beq.s     getbpb1
+~ $da,fc,00,24                ; adda.w    #$0024,a5
+~ $53,40                      ; subq.w    #1,d0
+~ $66,5c                      ; bne.s     getbpb4
+;getbpb1:
+~ $28,4d                      ; movea.l   a5,a4
+;getbpb2:
+~ $3f,3c,00,06                ; move.w    #$0006,-(a7)
+~ $42,a7                      ; clr.l     -(a7)
+~ $3f,3c,00,01                ; move.w    #$0001,-(a7)
+~ $3f,2e,00,08                ; move.w    8(a6),-(a7)
+~ $42,a7                      ; clr.l     -(a7)
+~ $2f,39,00,00,04,c6          ; move.l    $000004C6,-(a7)
+~ $4e,b9,.Floprd.L            ; jsr       $00E03C10
+~ $4f,ef,00,12                ; lea.l     18(a7),a7
+~ $4a,80                      ; tst.l     d0
+~ $6c,0e                      ; bge.s     getbpb3
+~ $3f,2e,00,08                ; move.w    8(a6),-(a7)
+~ $3f,00                      ; move.w    d0,-(a7)
+~ $4e,b9,00,e0,0d,92          ; jsr       $00E00D92
+~ $58,8f                      ; addq.l    #4,a7
+;getbpb3:
+~ $0c,80,00,01,00,00          ; cmpi.l    #$00010000,d0
+~ $67,c6                      ; beq.s     getbpb2
+~ $4a,80                      ; tst.l     d0
+~ $6b,1c                      ; bmi.s     getbpb4
+~ $20,79,00,00,04,c6          ; movea.l   $000004C6,a0
+~ $10,28,00,0c                ; move.b    12(a0),d0
+~ $e1,40                      ; asl.w     #8,d0
+~ $10,28,00,0b                ; move.b    11(a0),d0
+~ $3e,00                      ; move.w    d0,d7
+~ $6f,08                      ; ble.s     getbpb4
+~ $42,46                      ; clr.w     d6
+~ $1c,28,00,0d                ; move.b    13(a0),d6
+~ $66,06                      ; bne.s     getbpb5
+;getbpb4:
+~ $42,80                      ; clr.l     d0
+~ $60,00,01,24                ; bra       getbpb14
+;getbpb5:
+~ $38,87                      ; move.w    d7,(a4)
+~ $39,46,00,02                ; move.w    d6,2(a4)
+~ $10,28,00,17                ; move.b    23(a0),d0
+~ $e1,40                      ; asl.w     #8,d0
+~ $10,28,00,16                ; move.b    22(a0),d0
+~ $39,40,00,08                ; move.w    d0,8(a4)
+~ $42,47                      ; clr.w     d7
+~ $0c,28,00,02,00,10          ; cmpi.b    #$02,16(a0)
+~ $64,06                      ; bcc.s     getbpb6
+~ $42,40                      ; clr.w     d0
+~ $00,47,00,02                ; ori.w     #$0002,d7
+;getbpb6:
+~ $39,47,00,10                ; move.w    d7,16(a4)
+~ $52,40                      ; addq.w    #1,d0
+~ $39,40,00,0a                ; move.w    d0,10(a4)
+~ $30,14                      ; move.w    (a4),d0
+~ $c1,ec,00,02                ; muls.w    2(a4),d0
+~ $39,40,00,04                ; move.w    d0,4(a4)
+~ $10,28,00,12                ; move.b    18(a0),d0
+~ $e1,40                      ; asl.w     #8,d0
+~ $10,28,00,11                ; move.b    17(a0),d0
+~ $eb,40                      ; asl.w     #5,d0
+~ $48,c0                      ; ext.l     d0
+~ $81,d4                      ; divs.w    (a4),d0
+~ $39,40,00,06                ; move.w    d0,6(a4)
+~ $30,2c,00,0a                ; move.w    10(a4),d0
+~ $d0,6c,00,06                ; add.w     6(a4),d0
+~ $d0,6c,00,08                ; add.w     8(a4),d0
+~ $39,40,00,0c                ; move.w    d0,12(a4)
+~ $10,28,00,14                ; move.b    20(a0),d0
+~ $e1,40                      ; asl.w     #8,d0
+~ $10,28,00,13                ; move.b    19(a0),d0
+~ $90,6c,00,0c                ; sub.w     12(a4),d0
+~ $48,c0                      ; ext.l     d0
+~ $81,ec,00,02                ; divs.w    2(a4),d0
+~ $39,40,00,0e                ; move.w    d0,14(a4)
+~ $0c,40,0f,ee                ; cmpi.w    #$0FEE,d0
+~ $63,06                      ; bls.s     getbpb7
+~ $00,6c,00,01,00,10          ; ori.w     #$0001,16(a4)
+;getbpb7:
+~ $10,28,00,1b                ; move.b    27(a0),d0
+~ $e1,40                      ; asl.w     #8,d0
+~ $10,28,00,1a                ; move.b    26(a0),d0
+~ $3b,40,00,14                ; move.w    d0,20(a5)
+~ $10,28,00,19                ; move.b    25(a0),d0
+~ $e1,40                      ; asl.w     #8,d0
+~ $10,28,00,18                ; move.b    24(a0),d0
+~ $3b,40,00,18                ; move.w    d0,24(a5)
+~ $c1,ed,00,14                ; muls.w    20(a5),d0
+~ $3b,40,00,16                ; move.w    d0,22(a5)
+~ $10,28,00,1d                ; move.b    29(a0),d0
+~ $e1,40                      ; asl.w     #8,d0
+~ $10,28,00,1c                ; move.b    28(a0),d0
+~ $3b,40,00,1a                ; move.w    d0,26(a5)
+~ $10,28,00,14                ; move.b    20(a0),d0
+~ $e1,40                      ; asl.w     #8,d0
+~ $10,28,00,13                ; move.b    19(a0),d0
+~ $48,c0                      ; ext.l     d0
+~ $81,ed,00,16                ; divs.w    22(a5),d0
+~ $3b,40,00,12                ; move.w    d0,18(a5)
+~ $7e,02                      ; moveq.l   #2,d7
+;getbpb8:
+~ $1b,b0,70,08,70,1c          ; move.b    8(a0,d7.w),28(a5,d7.w)
+~ $51,cf,ff,f8                ; dbf       d7,getbpb8
+~ $7e,03                      ; moveq.l   #3,d7
+;getbpb9:
+~ $1b,b0,70,27,70,1f          ; move.b    39(a0,d7.w),31(a5,d7.w)
+~ $51,cf,ff,f8                ; dbf       d7,getbpb9
+~ $32,7c,73,50                ; movea.w   #$7350,a1
+~ $4a,6e,00,08                ; tst.w     8(a6)
+~ $67,04                      ; beq.s     getbpb10
+~ $d2,fc,00,0c                ; adda.w    #$000C,a1
+;getbpb10:
+~ $7e,05                      ; moveq.l   #5,d7
+;getbpb11:
+~ $42,40                      ; clr.w     d0
+~ $3c,3c,00,ff                ; move.w    #$00FF,d6
+;getbpb12:
+~ $d0,58                      ; add.w     (a0)+,d0
+~ $51,ce,ff,fc                ; dbf       d6,getbpb12
+~ $32,c0                      ; move.w    d0,(a1)+
+~ $51,cf,ff,f0                ; dbf       d7,getbpb11
+~ $3e,2e,00,08                ; move.w    8(a6),d7
+~ $30,7c,17,ce                ; movea.w   #$17CE,a0
+~ $32,7c,17,cc                ; movea.w   #$17CC,a1
+~ $42,40                      ; clr.w     d0
+~ $11,b1,70,00,70,00          ; move.b    0(a1,d7.w),0(a0,d7.w)
+~ $67,02                      ; beq.s     getbpb13
+~ $70,01                      ; moveq.l   #1,d0
+;getbpb13:
+~ $32,7c,5b,86                ; movea.w   #$5B86,a1
+~ $13,80,70,00                ; move.b    d0,0(a1,d7.w)
+~ $20,0c                      ; move.l    a4,d0
+;getbpb14:
+~ $4c,df,30,c0                ; movem.l   (a7)+,d6-d7/a4-a5
+~ $4e,5e                      ; unlk      a6
+~ $4e,75                      ; rts
+
+_FILL ~,.getbpb+252,$ff

@@ -695,7 +695,11 @@ name: ds.t size
 	PTR(_drl)
 	
 	V(_D,b,13982) /* sizeof(THEGLO) */
-	
+#if TP_WINX
+	xdef _winxvars
+_winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
+#endif
+
 	PTR(_eul)
 	INT(_fpt)
 	PTR(_nrl)

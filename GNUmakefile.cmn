@@ -75,11 +75,11 @@ endif
 BUILD_CC = gcc
 BUILD_CFLAGS = -O -Wall
 
-CC = $(CROSSPREFIX)gcc -mshort
+CC = $(CROSSPREFIX)gcc -mshort -Werror
 CPP = $(CC) -xc $(CPPFLAGS) -E -P
 CPPOUT = -o
 LD = $(CC)
-AS = $(CROSSPREFIX)as --mri
+AS = $(CC) -Wa,--mri
 AR = $(CROSSPREFIX)ar
 ARFLAGS = rcs
 RANLIB = $(CROSSPREFIX)ranlib

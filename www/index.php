@@ -937,6 +937,104 @@ from certain harddisks (eg. Quantum Empire)
 <tr><td colspan="3"><hr /></td></tr>
 
 <tr>
+<td style="vertical-align: top;" >
+WINX-Patch:
+</td>
+<td style="vertical-align: top;" >
+<input type="checkbox" name="tp_winx" value="1"/><br />
+Global flags: <input type="number" id="winx_global" name="winx_global" value="65535" min="0" max="65535" style="width: 6em" onchange="winxChangeGlobal();" /><br />
+</td>
+<td style="vertical-align: top;" >
+<input type="checkbox" id="winx_g1" name="winx_g1" value="1" checked="checked" onclick="winxGlobal(1);" />40 windows (otherwise 8)<br />
+<input type="checkbox" id="winx_g2" name="winx_g2" value="1" checked="checked" onclick="winxGlobal(2);" />right click to SCRENMGR (otherwise application)<br />
+<input type="checkbox" id="winx_g3" name="winx_g3" value="1" checked="checked" onclick="winxGlobal(3);" />left click activates realtime (otherwise rightclick)<br />
+<input type="checkbox" id="winx_g4" name="winx_g4" value="1" checked="checked" onclick="winxGlobal(4);" />activate scroll arrows<br />
+<input type="checkbox" id="winx_g5" name="winx_g5" value="1" checked="checked" onclick="winxGlobal(5);" />activate scroll bars<br />
+<input type="checkbox" id="winx_g6" name="winx_g6" value="1" checked="checked" onclick="winxGlobal(6);" />activate mover<br />
+<input type="checkbox" id="winx_g7" name="winx_g7" value="1" checked="checked" onclick="winxGlobal(7);" />activate sizer<br />
+<input type="checkbox" id="winx_g8" name="winx_g8" value="1" checked="checked" onclick="winxGlobal(8);" />wide slider background<br />
+<input type="checkbox" id="winx_g9" name="winx_g9" value="1" checked="checked" onclick="winxGlobal(9);" />contrl-click on element activates background window<br />
+<input type="checkbox" id="winx_g10" name="winx_g10" value="1" checked="checked" onclick="winxGlobal(10);" />click on title puts window to background<br />
+<input type="checkbox" id="winx_g11" name="winx_g11" value="1" checked="checked" onclick="winxGlobal(11);" />3D-Lock for window frame<br />
+<input type="checkbox" id="winx_g12" name="winx_g12" value="1" checked="checked" onclick="winxGlobal(12);" />pattern reference point correction<br />
+<input type="checkbox" id="winx_g13" name="winx_g13" value="1" checked="checked" onclick="winxGlobal(13);" />use application name for appl_find()<br />
+<input type="checkbox" id="winx_g14" name="winx_g14" value="1" checked="checked" onclick="winxGlobal(14);" />change mouse cursor for realtime functions<br />
+<br />
+</td>
+</tr>
+<tr>
+<td></td>
+<td style="vertical-align: top;" >
+Local flags: <input type="number" id="winx_local" name="winx_local" value="65535" min="0" max="65535" style="width: 6em" onchange="winxChangeLocal();" /><br />
+</td>
+<td style="vertical-align: top;" >
+<input type="checkbox" id="winx_l1" name="winx_l1" value="1" checked="checked" onclick="winxLocal(1);" />Control elements for background windows<br />
+<input type="checkbox" id="winx_l2" name="winx_l2" value="1" checked="checked" onclick="winxLocal(2);" />Minimal amount of control elements<br />
+<input type="checkbox" id="winx_l3" name="winx_l3" value="1" checked="checked" onclick="winxLocal(3);" />Application accepts WM_ONTOP/WM_UNTOPPED<br />
+<input type="checkbox" id="winx_l4" name="winx_l4" value="1" checked="checked" onclick="winxLocal(4);" />Optimized redraw for activation<br />
+<input type="checkbox" id="winx_l5" name="winx_l5" value="1" checked="checked" onclick="winxLocal(5);" />Optimized redraw for moving<br />
+<input type="checkbox" id="winx_l6" name="winx_l6" value="1" checked="checked" onclick="winxLocal(6);" />Optimized redraw for sizing<br />
+<input type="checkbox" id="winx_l7" name="winx_l7" value="1" checked="checked" onclick="winxLocal(7);" />Merge redraw messages<br />
+<input type="checkbox" id="winx_l8" name="winx_l8" value="1" checked="checked" onclick="winxLocal(8);" />Alert on wrong AES calls<br />
+<input type="checkbox" id="winx_l9" name="winx_l9" value="1" checked="checked" onclick="winxLocal(9);" />Separate scroll arrows<br />
+<input type="checkbox" id="winx_l10" name="winx_l10" value="1" checked="checked" onclick="winxLocal(10);" />Scroll arrows with boxes<br />
+<input type="checkbox" id="winx_l11" name="winx_l11" value="1" checked="checked" onclick="winxLocal(11);" />Allow to move windows outside of screen<br />
+<input type="checkbox" id="winx_l12" name="winx_l12" value="1" checked="checked" onclick="winxLocal(12);" />Fix wrong window positions<br />
+<br />
+</td>
+</tr>
+<tr>
+<td></td>
+<td style="vertical-align: top;" >
+Desktop flags: <input type="number" id="winx_desktop" name="winx_desktop" value="65535" min="0" max="65535" style="width: 6em" onchange="winxChangeDesktop();" /><br />
+</td>
+<td style="vertical-align: top;" >
+<input type="checkbox" id="winx_d1" name="winx_d1" value="1" checked="checked" onclick="winxLocal(1);" />Control elements for background windows<br />
+<input type="checkbox" id="winx_d2" name="winx_d2" value="1" checked="checked" onclick="winxLocal(2);" />Minimal amount of control elements<br />
+<input type="checkbox" id="winx_d3" name="winx_d3" value="1" checked="checked" onclick="winxLocal(3);" />Application accepts WM_ONTOP/WM_UNTOPPED<br />
+<input type="checkbox" id="winx_d4" name="winx_d4" value="1" checked="checked" onclick="winxLocal(4);" />Optimized redraw for activation<br />
+<input type="checkbox" id="winx_d5" name="winx_d5" value="1" checked="checked" onclick="winxLocal(5);" />Optimized redraw for moving<br />
+<input type="checkbox" id="winx_d6" name="winx_d6" value="1" checked="checked" onclick="winxLocal(6);" />Optimized redraw for sizing<br />
+<input type="checkbox" id="winx_d7" name="winx_d7" value="1" checked="checked" onclick="winxLocal(7);" />Merge redraw messages<br />
+<input type="checkbox" id="winx_d8" name="winx_d8" value="1" checked="checked" onclick="winxLocal(8);" />Alert on wrong AES calls<br />
+<input type="checkbox" id="winx_d9" name="winx_d9" value="1" checked="checked" onclick="winxLocal(9);" />Separate scroll arrows<br />
+<input type="checkbox" id="winx_d10" name="winx_d10" value="1" checked="checked" onclick="winxLocal(10);" />Scroll arrows with boxes<br />
+<input type="checkbox" id="winx_d11" name="winx_d11" value="1" checked="checked" onclick="winxLocal(11);" />Allow to move windows outside of screen<br />
+<input type="checkbox" id="winx_d12" name="winx_d12" value="1" checked="checked" onclick="winxLocal(12);" />Fix wrong window positions<br />
+</td>
+</tr>
+<tr>
+<td></td>
+<td>
+Initial scroll delay: <input type="number" id="winx_init_scroll" name="winx_init_scroll" value="460" min="0" max="5000" style="width: 6em" /><br />
+</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>
+Continous scroll delay: <input type="number" id="winx_scroll_cont" name="winx_scroll_cont" value="40" min="0" max="5000" style="width: 6em" /><br />
+</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>
+Continous close delay: <input type="number" id="winx_close_cont" name="winx_close_cont" value="1000" min="0" max="5000" style="width: 6em" /><br />
+</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>
+Continous full delay: <input type="number" id="winx_full_cont" name="winx_full_cont" value="2000" min="0" max="5000" style="width: 6em" /><br />
+</td>
+<td></td>
+</tr>
+
+<tr><td colspan="3"><hr /></td></tr>
+
+<tr>
 <td colspan="3">
 <table>
 <tr>

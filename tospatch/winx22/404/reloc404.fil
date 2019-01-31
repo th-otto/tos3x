@@ -1,0 +1,44 @@
+;*******************************************************************************
+;* TOS 4.04 an eine bestimmte Adresse relozieren
+;*
+;* Ω 1992-99 Markus Heiden
+
+.BASE   = E00000    ;TOS-Basisadresse
+.LENGTH =  80000    ;LÑnge des TOS'
+.WIDTH  =     .8    ;Organisation des TOS (16-bittig)
+
+<404.IMG            ;TOS 4.04 lesen
+=08.03.1993,-1      ;muû die Version vom 8.3.1993 sein! (sonst Message!)
+
+;>1 05000000-.LENGTH ;	64MB-TT-RAM / 1 File ;Im TT-Ram lÑuft das TOS schneller!
+;>1 03000000-.LENGTH ;	32MB-TT-RAM / 1 File ;Dies ersetzt (fast) ROMRAM
+;>1 02000000-.LENGTH ;	16MB-TT-RAM / 1 File ;oder Ñhnliche TOS-Beschleuniger!
+;>1 01800000-.LENGTH ;	 8MB-TT-RAM / 1 File ;(FastVar nicht implementiert)
+;>1 01400000-.LENGTH ;	 4MB-TT-RAM / 1 File
+;>1 00C00000-.LENGTH ;	12MB-ST-RAM / 1 File
+;>1 00800000-.LENGTH ;	 8MB-ST-RAM / 1 File
+>1 00400000-.LENGTH ;	4MB-ST-RAM / 1 File ;Mit weniger als 2MB Speicher
+;>1 00280000-.LENGTH ; 2,5MB-ST-RAM / 1 File ;macht es kaum Sinn TOS 4.04 im
+;>1 00200000-.LENGTH ;	 2MB-ST-RAM / 1 File ;Ram zu halten, auûer vielleicht
+;>1 00100000-.LENGTH ;	 1MB-ST-RAM / 1 File ;zum Testen der Patches.
+
+;Reloc-Korrekturen NUR (!!!) fÅr das TOS 4.04 vom 8.3.1993
+;nach einer Idee von Andreas Kromke (KAOS 1.2 bzw. KAOS 1.4).
+;Die Reloc-Korrekturen unterstÅtzen TOS-LÑngen bis $100000.
+
+?4DF3C,51574
+!12DA,1D4C,1EAC,2978,3A0E,5E8A,5EC2,8E7C,9C36,B05A,B064,B886,B890,BC7E
+!BC88,C1EA,C1F6,C296,C2A0,C2CA,C2D6,C2E6,C2F4,C36C,C37A,C4E4,C4EE,C50C
+!C516,CB0C,CB16,CC2E,CC38,CC52,CC5C,DC82,DC94,1100A,11016,110AE,11124
+!1112A,11212,19540,19A56,19D58,19FA4,1A2DC,1A64A,1BC30,1BD70,1BDE6
+!1C0EA,1DD16,1E26A,1E41E,2161C,22A62,23082,2321E,24006,2460A,25F96
+!26F48,277D0,27B9A,27C86,331BC,33B8E,35AF0,35B12,39B3E,39C58,39C82
+!3A032,40A4E,46CBC,47104,4725C,472E8,496C8,49952,4B092,4B75A
+!4BD24,4C924,4D388,4D4F0,4D790,4D794,4D798,4D79C,4D7A0,4D7A4,4D7A8
+!4D7AC,4D990,4D994,4D998,4D99C,4D9A0,4D9A4,4D9A8,4D9AC,58D4E,58EE8
+!59076,5907A,5A80E,5A9F2,5D97C,5DB16,5DCA4,5DCA8,5EFC8,695C0,6975A
+!698E8,698EC,71910,71AAA,71C38,71C3C,79E12,79FAC,7A13A,7A13E
+	
+;PrÅfsumme berechnen
+›
+
