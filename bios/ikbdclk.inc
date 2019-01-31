@@ -10,7 +10,7 @@
 _clockvec:
         lea.l     (clockbuf).w,a0
         bsr       bcdget
-#if !BINEXACT /* Year 2k fix */
+#if BINEXACT /* Year 2k fix */
         subi.b    #80,d0                        /* adjust so that 1980 => 0 for time base */
 #endif
         move.b    d0,d2
@@ -83,7 +83,7 @@ isetdt:
         move.b    d2,d0
         andi.b    #$7F,d0
         bsr.s     bcdput
-#if !BINEXACT /* Year 2k fix */
+#if BINEXACT /* Year 2k fix */
         addi.b    #$80,(a0)
 #endif
         move.b    #$1B,d1    /* send set clock command */
