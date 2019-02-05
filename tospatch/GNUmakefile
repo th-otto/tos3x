@@ -13,7 +13,7 @@ include $(top_srcdir)/Makefile.sil
 CPPFLAGS = -I../common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = tospatch.ttp tosload.prg romdump.tos
+PROGRAMS = tospatch.ttp loadtos.prg romdump.tos
 
 all:: $(PROGRAMS)
 
@@ -32,16 +32,16 @@ endif
 
 tospatch.o: tospatch.S GNUmakefile
 
-tosload.prg: tosload.o ${MAKEFILE}
+loadtos.prg: loadtos.o ${MAKEFILE}
 ifeq ($(USE_CROSS_ALCYON),1)
-	$(AM_V_LD)${LINK68} $(SYMBOLS) tosload.rel=tosload.o
-	$(AM_V_at)${RELMOD} tosload.rel $@
-	@$(RM) tosload.rel
+	$(AM_V_LD)${LINK68} $(SYMBOLS) loadtos.rel=loadtos.o
+	$(AM_V_at)${RELMOD} loadtos.rel $@
+	@$(RM) loadtos.rel
 else
-	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ tosload.o
+	$(AM_V_LD)${LD} ${LDFLAGS} -nostdlib -nostartfiles -s -o $@ loadtos.o
 endif
 
-tosload.o: tosload.S GNUmakefile
+loadtos.o: loadtos.S GNUmakefile
 
 romdump.tos: romdump.o ${MAKEFILE}
 ifeq ($(USE_CROSS_ALCYON),1)
