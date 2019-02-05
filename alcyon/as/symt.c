@@ -290,13 +290,24 @@ PP(int constpc;)
 	while (fchr >= ' ')
 	{									/* until a control char */
 		if (smode == 2 && fchr == '.')
+		{
 			tmode = 3;
-		else if (isalpha(fchr) || fchr == '~' || fchr == '_' || (fchr == '$' && i))
-			tmode = 3;
-		else if (isdigit(fchr))
-			tmode = 0;
-		else
+		} else if (smode == 1 && i == 1 && p[-1] == '0' && (fchr == 'x' || fchr == 'X'))
+		{
+			smode = 2;
 			tmode = 6;
+			*p++ = fchr;					/* save character */
+			fchr = '$';
+		} else if (isalpha(fchr) || fchr == '~' || fchr == '_' || (fchr == '$' && i))
+		{
+			tmode = 3;
+		} else if (isdigit(fchr))
+		{
+			tmode = 0;
+		} else
+		{
+			tmode = 6;
+		}
 		tmode = sttbl[tmode + smode];	/* new state */
 		if (tmode == 3)
 			break;						/* end of item */
