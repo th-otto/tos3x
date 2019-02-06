@@ -24,7 +24,7 @@ all::
 
 include $(top_srcdir)/config.mak
 
-FLAGSTOPASS = COUNTRY=$(COUNTRY) TOSVERSION=$(TOSVERSION) SYMBOLS=$(SYMBOLS)
+FLAGSTOPASS = COUNTRY=$(COUNTRY) TOSVERSION=$(TOSVERSION)
 
 dist::
 	rm -rf $(DISTDIR1) $(DISTDIR2)
@@ -54,14 +54,14 @@ maps:
 		for lang in us de fr es it se sf sg; do \
 			$(MAKE) clean; \
 			$(MAKE) SYMBOLS=-s TOSVERSION=$${version} COUNTRY=$${lang} || exit 1; \
-			cnm -g glue/tos.img > glue/tos$${version}$${lang}.map; \
+			cnm glue/tos.img | sort | uniq > glue/tos$${version}$${lang}.map; \
 		done; \
 	done
 	for version in 208; do \
 		for lang in de us fr; do \
 			$(MAKE) clean; \
 			$(MAKE) SYMBOLS=-s TOSVERSION=$${version} COUNTRY=$${lang} || exit 1; \
-			cnm -g glue/tos.img > glue/tos$${version}$${lang}.map; \
+			cnm glue/tos.img | sort | uniq > glue/tos$${version}$${lang}.map; \
 		done; \
 	done
 	$(MAKE) clean

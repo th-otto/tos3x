@@ -24,13 +24,13 @@ _SWITCH .NATION
 _ENDSWITCH
 
 
-_SWITCH .NATION
-_CASE .FRG:
-!001D6
-!01514
+!001D6 ; address used to setup ttram refresh rate
 !01CE6
 !01E88
 !028D8
+
+_SWITCH .NATION
+_CASE .FRG:
 !038B2
 !0650E
 !073B4

@@ -45,7 +45,7 @@ CARTBASE = E40000
 
 ifeq ($(USE_CROSS_ALCYON),1)
 tos.img: $(STARTUP) $(LIBS) tosimg.tmp tosrsc$(COUNTRY).o vars.o tosvars.o
-	$(LINK68) '[abs,symbols,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
+	$(LINK68) '[abs,symbols,locals,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
 
 # For the PAK/BootJmp option, we need to know the start of the resource area first
 tosimg.tmp: $(STARTUP) $(LIBS) rscend.o vars.o tosvars.o

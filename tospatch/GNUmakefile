@@ -19,11 +19,11 @@ all:: $(PROGRAMS)
 
 include SRCFILES
 
-#SYMBOLS = '[symbols,locals]'
+#ASYMBOLS := '[symbols,locals]'
 
 tospatch.ttp: tospatch.o ${MAKEFILE}
 ifeq ($(USE_CROSS_ALCYON),1)
-	$(AM_V_LD)${LINK68} $(SYMBOLS) tospatch.rel=tospatch.o
+	$(AM_V_LD)${LINK68} $(ASYMBOLS) tospatch.rel=tospatch.o
 	$(AM_V_at)${RELMOD} tospatch.rel $@
 	@$(RM) tospatch.rel
 else
@@ -34,7 +34,7 @@ tospatch.o: tospatch.S GNUmakefile
 
 loadtos.prg: loadtos.o ${MAKEFILE}
 ifeq ($(USE_CROSS_ALCYON),1)
-	$(AM_V_LD)${LINK68} $(SYMBOLS) loadtos.rel=loadtos.o
+	$(AM_V_LD)${LINK68} $(ASYMBOLS) loadtos.rel=loadtos.o
 	$(AM_V_at)${RELMOD} loadtos.rel $@
 	@$(RM) loadtos.rel
 else
@@ -45,7 +45,7 @@ loadtos.o: loadtos.S GNUmakefile
 
 romdump.tos: romdump.o ${MAKEFILE}
 ifeq ($(USE_CROSS_ALCYON),1)
-	$(AM_V_LD)${LINK68} $(SYMBOLS) romdump.rel=$(LIB)$(CRT0),romdump.o,$(LIB)$(LIBC)
+	$(AM_V_LD)${LINK68} $(ASYMBOLS) romdump.rel=$(LIB)$(CRT0),romdump.o,$(LIB)$(LIBC)
 	$(AM_V_at)${RELMOD} romdump.rel $@
 	@$(RM) romdump.rel
 else

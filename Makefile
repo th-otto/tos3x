@@ -9,7 +9,7 @@ all::
 
 include $(top_srcdir)/config.mak
 
-FLAGSTOPASS = COUNTRY=$(COUNTRY) TOSVERSION=$(TOSVERSION) SYMBOLS=$(SYMBOLS)
+FLAGSTOPASS = COUNTRY=$(COUNTRY) TOSVERSION=$(TOSVERSION)
 
 all clean distclean dist check::
 	$(MAKE) -C common $(FLAGSTOPASS) $@
