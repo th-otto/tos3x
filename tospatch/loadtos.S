@@ -31,14 +31,16 @@ start:
                 bsr     supexec
 
                 moveq   #0,d0
-                move.b  128(a5),D0      ;Commandline vorhanden?
+                lea     128(a5),a4
+                move.b  (a4)+,D0        ;Commandline vorhanden?
                 beq     normal          ;Nein! =>
-                cmp.b   #126,D0         ;Commandline zu lang?
-                bhi     normal          ;Ja! =>
+                cmp.b   #127,D0         ;ARGV?
+                beq     argv            ;Ja! =>
+                bcc     normal          ;Commandline zu lang?
 
-                st      cmdflag
-                clr.b   -127(A5,D0.w)   ;Ende markieren
-                lea     129(a5),a0
+argv:           st      cmdflag
+                clr.b   0(A4,D0.w)   ;Ende markieren
+                move.l  a4,a0
                 bra     open
 
 normal:         sf      cmdflag
@@ -379,9 +381,7 @@ cover_msg:      DC.B 13,10,27,'p RAM-TOS Loader V',version,'         ',date,' ',
 
                 DC.b '>>> LOADTOS V',version,' - '
                 DC.B $bd,'1992-96 Markus Heiden / '
-                DC.B $bd,'1990 '
-                /* dc.b $e4,'-soft, ' xxx */
-                dc.b 'Markus Fritze / '
+                DC.B $bd,'1990 ',$e4,'-soft, Markus Fritze / '
                 DC.B $bd,'1994 EWK <<<',0
 
                 EVEN
