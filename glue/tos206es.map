@@ -4516,6 +4516,7 @@
 00e36a56 D _icndata
 00e36a66 D _Nextlin
 00e36ad6 D _tosrsc
+00e3e206 D _edata
 00fa0000 a cart_bas
 00ff8240 a palette
 01000000 a FASTRAMB

@@ -22,7 +22,6 @@
 
 ?724      ;'?' ist richtig, da forciertes Relozieren.
 
-!13D0
 !1D3A
 !1D3E
 !1DF0
@@ -60,6 +59,8 @@
 !3A60A
 !3A60E
 !3B6CE
+
+!13B2..13D2   ; bomb image
 
 !325AE..329B6       ;Atari-Logo
 !33086..33506       ;6x6  Fontimage

@@ -1,3 +1,88 @@
+; country specific offsets for various routines
+; .d1 is caused by different alt-key handling in bios,
+;    and affects all addresses >= $00E03294
+; .d2 is caused by different time/date formats in desktop,
+;    and affects all addresses >= $00E2C504
+_SWITCH .NATION
+
+  _CASE .USA:
+    .d1 = -5A
+    .d2 = -30
+    .INFDATA = 3699C
+    .RSC_TAB = 36A38
+    .TOSINFO_OFS = 1A8B
+    .ROMTOP  = 3DECA
+
+  _CASE .FRG:
+    .d1 = 0
+    .d2 = 0
+    .INFDATA = 36A28
+    .RSC_TAB = 36AC4
+    .TOSINFO_OFS = 1A4A    ; offset to tos-info-dialog from RSC_TAB
+    .ROMTOP  = 3DFC8
+
+  _CASE .FRA:
+    .d1 = 1E
+    .d2 = 1E
+    .INFDATA = 36A62
+    .RSC_TAB = 36AFE
+    .TOSINFO_OFS = 1B71
+    .ROMTOP  = 3E286
+
+  _CASE .UK:
+    .d1 = -5A
+    .d2 = -30
+    .INFDATA = 3699C
+    .RSC_TAB = 36A38
+    .TOSINFO_OFS = 1A8B
+    .ROMTOP  = 3DECA
+
+  _CASE .SPA:
+    .d1 = 2C
+    .d2 = 2C
+    .INFDATA = 36A3A
+    .RSC_TAB = 36A62
+    .TOSINFO_OFS = 1B5A
+    .ROMTOP  = 3E206
+
+  _CASE .ITA:
+    .d1 = 0E
+    .d2 = 0E
+    .INFDATA = 36A0E
+    .RSC_TAB = 36AAA
+    .TOSINFO_OFS = 1B31
+    .ROMTOP  = 3E06E
+
+  _CASE .SWE:
+    .d1 = 1E
+    .d2 = 1E
+    .INFDATA = 369C6
+    .RSC_TAB = 36A62
+    .TOSINFO_OFS = 1A6E
+    .ROMTOP  = 3E0BA
+
+  _CASE .SWF:
+    .d1 = 2C
+    .d2 = 2C
+    .INFDATA = 36A70
+    .RSC_TAB = 36B0C
+    .TOSINFO_OFS = 1B71
+    .ROMTOP  = 3E294
+
+  _CASE .SWG:
+    .d1 = 2C
+    .d2 = 2C
+    .INFDATA = 36A54
+    .RSC_TAB = 36AF0
+    .TOSINFO_OFS = 1A4A
+    .ROMTOP  = 3DFF4
+
+  _DEFAULT:
+    _ERROR "unsupported country"
+_ENDSWITCH
+
+.RSC_LEN  = .ROMTOP-.RSC_TAB
+
 ;*******************************************************************************
 ;* MH:
 ;* Reloc-Korrekturen NUR (!!!) fÅr das TOS 2.06 vom 14.11.1991
@@ -6,68 +91,71 @@
 
 ?724      ;'?' ist richtig, da forciertes Relozieren.
 
-!13D0
-!199E
-!1D3A
-!1D3E
-!1DF0
-!1DF6
-!25A2
-!34CC
-!622C
-!6DB6
-!8DA8
-!8DCA
-!EE70
-!106C0
-!11BB6
-!11C10
-!1230A
-!12962
-!12F70
-!130BE
-!13928
-!1393C
-!17B4A
-!18C5C
-!190FC
-!19274
-!19D64
-!1B244
-!1C3FC
-!1CA64
-!1CCCA
-!1CD98
-!1CFBE
-!1D82A
-!20854
-!21210
-!22BDC
-!22BF8
-!265B8
-!266A6
-!26964
-!2B802
-!2B82A
-!2BA18
-!2CEB6
-!32842
-!32ED0
-!32ED2
-!33598
-!3359A
-!33B62
-!34762
-!351C0
-!377FC
-!3A2E2
-!3A47C
-!3A60A
-!3A60E
-!3B6CE
+!0199E ; move.b    #$EC,$FFF0001D
+!01D3A ; and.b     #$E0,d0
+!01D3E ; and.b     #$E0,d1
+!01DF0 ; and.b     #$E0,d1
+!01DF6 ; and.b     #$E0,d0
+!025A2 ; move.b    #$EF,14(a2)
 
-!325AE..329B6       ;Atari-Logo
-!33086..33506       ;6x6  Fontimage
-!33762..33F62       ;8x8  Fontimage
-!33F62..34F62       ;8x16 Fontimage
+!034CC+.d1 ; move.b    #$EF,d2
+!08DA8+.d1 ; move.w    #$00E1,-(a7)
+!08DCA+.d1 ; move.w    #$00E1,-(a7)
+!0EE70+.d1 ; move.b    $E5(pc,d0.w),d0
+!106C0+.d1 ; movem.l   (a7)+,d5-d7
+!11BB6+.d1 ; cmpi.b    #$E5,(a3)
+!11C10+.d1 ; cmpi.b    #$E5,(a0)
+!1230A+.d1 ; cmpi.b    #$E5,(a3)
+!12962+.d1 ; move.b    #$E5,-6(a6)
+!12F70+.d1 ; move.b    #$E5,-2(a6)
+!130BE+.d1 ; move.b    #$E5,-20(a6)
+!13928+.d1 ; cmpi.b    #$E5,(a4)
+!1393C+.d1 ; cmpi.b    #$E5,(a5)
+!17B4A+.d1 ; movem.l   (a7)+,d5-d7
+!18C5C+.d1 ; movem.l   (a7)+,d5-d7
+!190FC+.d1 ; movem.l   (a7)+,d5-d7
+!19274+.d1 ; movem.l   (a7)+,d5-d7
+!19D64+.d1 ; movem.l   (a7)+,d5-d7
+!1B244+.d1 ; movem.l   (a7)+,d5-d7
+!1C3FC+.d1 ; movem.l   (a7)+,d5-d7
+!1CA64+.d1 ; movem.l   (a7)+,d5-d7
+!1CCCA+.d1 ; movem.l   (a7)+,d5-d7
+!1CD98+.d1 ; movem.l   (a7)+,d5-d7
+!1CFBE+.d1 ; movem.l   (a7)+,d5-d7
+!1D82A+.d1 ; movem.l   (a7)+,d5-d7
+!20854+.d1 ; movem.w   46(a7),d5-d7
+!21210+.d1 ; movem.l   36(a7),d5-d7
+!22BDC+.d1 ; clr.w     224(a5)
+!22BF8+.d1 ; move.w    #$0080,224(a5)
+!26510+.d1 ; move.w    #$0080,224(a4) (us)
+!265B8+.d1 ; move.w    #$0001,226(a4)
+!265EA+.d1 ; clr.w     224(a4) (us)
+!26612+.d1 ; move.w    #$0080,224(a4)
+!266A6+.d1 ; btst      #0,227(a4)
+!26964+.d1 ; move.b    #$E9,(a5)
+!2B802+.d1 ; clr.w     226(a5)
+!2B806+.d1 ; clr.w     226(a5) (us)
+!2B82A+.d1 ; move.w    #$0001,226(a5)
+!2B832+.d1 ; move.w    #$0001,226(a5) (us)
+!2BA18+.d1 ; btst      #0,227(a5)
+!2CEB6+.d2 ; movea.l   228(a4),a0
 
+!013B2 .. 013D2   ; bomb image
+!06218+.d1 .. 0625E+.d1 ; offset table in vdi
+!06DA6+.d1 .. 06DC6+.d1 ; offset table in vdi
+
+!325AE+.d2 .. 329B6+.d2 ; Atari logo
+!329B6+.d2 .. 32BB6+.d2 ; crc table
+!32BB6+.d2 .. 32D36+.d2 ; bios keyboard tables
+!32D36+.d2 .. 32D54+.d2 ; bell sound
+!32D54+.d2 .. 32D72+.d2 ; click sound
+!32E84+.d2 .. 33086+.d2 ; 6x6 offsets
+!33086+.d2 .. 33506+.d2 ; 6x6 font data
+!33560+.d2 .. 33762+.d2 ; 8x8 offsets
+!33762+.d2 .. 33F62+.d2 ; 8x8 font data
+!33F62+.d2 .. 34F62+.d2 ; 8x16 font data
+!34FBE+.d2 .. 35258+.d2 ; vdi patterns
+!353B4+.d2 .. 353F4+.d2 ; pel mapping tables
+!362AA+.d2 .. 362C8+.d2 ; desktop keyboard table
+!367C0+.d2 .. .INFDATA+2C ; desktop strings
+!.RSC_TAB .. .ROMTOP ; resource data

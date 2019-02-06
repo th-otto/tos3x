@@ -215,5 +215,7 @@ PP(char **argv;)
 	
 	fprintf(fp, "};\n");
 	
+	fprintf(fp, "char const edata[2] = { 0xff, 0xff };\n");
+
 	return EXIT_SUCCESS;
 }

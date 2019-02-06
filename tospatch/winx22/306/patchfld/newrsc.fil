@@ -96,6 +96,8 @@ _EVEN $00
 
 .ROMTOP = .RSC_TAB+.RSC_LEN                             ; neues ROMTOP in Variable speichern
 
+!.RSC_TAB .. .ROMTOP ; resource data
+
 _ENDIF
 
 .TOS_INFO = .RSC_TAB + .TOSINFO_OFS  ; zeigt auf TOS Info Dialog

@@ -620,13 +620,13 @@ mkplis5x:
 mkplis11:       addq.l  #1,A6
                 lea     PCRB(ptchtab),A0 ;Ausnahmentabellenende suchen
                 movea.l a0,a2
-                lea.l   1024(a2),a2
+                lea.l   1024*4(a2),a2
 mkplis12:       tst.l   (A0)+
                 bne.s   mkplis12
                 subq.l  #4,A0
                 lea     PCRB(ptchtab2),A1 ;Feldausnahmentabellenende suchen
                 movea.l a1,a3
-                lea.l   256(a3),a3
+                lea.l   256*2*4(a3),a3
 mkpli12a:       tst.l   (A1)
                 addq.l  #8,A1
                 bne.s   mkpli12a
@@ -3790,8 +3790,8 @@ neednl:         ds.b 1
 number_puffer:  DS.B 32
 filename:       DS.B 256
 ptchtab:        DS.L 1024       ;1024 Reloc-Korrekturen
-ptchtab2:       DS.L 512	    ; 512 Feld-Reloc-Korrekturen
-forced_table:   DS.L 256        ; 512 Forcierte Reloc-Korrekturen
+ptchtab2:       DS.L 256*2	    ; 256 Feld-Reloc-Korrekturen
+forced_table:   DS.L 256        ; 256 Forcierte Reloc-Korrekturen
 varvalue:       DS.L 1024       ;1024 Variablen
 varname:        DS.B 1024*16
 

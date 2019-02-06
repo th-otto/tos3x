@@ -85,31 +85,6 @@
 ;>2         ; 2 nicht relozierte Dateien (TOS.LO/HI) erzeugen.
 ;>4         ; 4 nicht relozierte Dateien (TOS.EE/EO/OE/OO) erzeugen.
 
-; country specific offsets for various routines
-; .d1 is caused by different alt-key handling in bios,
-;    and affects all addresses >= $00E03294
-; .d2 is caused by different time/date formats in desktop,
-;    and affects all addresses >= $00E2C504
-_SWITCH .NATION
-  _CASE .FRG, .SWG:
-    .d1 = 0
-    .d2 = 0
-  _CASE .USA, .UK:
-    .d1 = -5A
-    .d2 = -30
-  _CASE .FRA, .SWE, .SWF:
-    .d1 = 1E
-    .d2 = 1E
-  _CASE .SPA:
-    .d1 = 2C
-    .d2 = 2C
-  _CASE .ITA:
-    .d1 = 0E
-    .d2 = 0E
-  _DEFAULT:
-    _ERROR "Nation wird nicht unterstÅtzt"
-_ENDSWITCH
-
 ;*******************************************************************************
 ;* MH:
 ;* Berechnen und Setzen der CRC-PrÅfsumme von TOS 2.06/3.06.

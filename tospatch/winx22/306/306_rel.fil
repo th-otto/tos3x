@@ -267,7 +267,6 @@ _ENDSWITCH
 
 -patchfld	; Dsetpath("patchfld\")
 
-+romtop.fil
 +relocs.fil
 +newrsc.fil
 

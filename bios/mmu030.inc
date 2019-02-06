@@ -66,8 +66,8 @@ skipmmuinit:
         rts
 
 	    data
-/* 306de: 00e36520 */
-/* 306us: 00e364f0 */
+/* 306de: 00e36420 */
+/* 306us: 00e363f0 */
 mmurom_table:
 /* tia: top level table (for 0x00000000-0xffffffff) */
         dc.l      TABLE(tib1)        /* for 0x00000000-0x0fffffff, use table tib1 */

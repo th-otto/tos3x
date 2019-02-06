@@ -5154,6 +5154,7 @@
 00e3ec22 D _icndata
 00e3ec32 D _Nextlin
 00e3eca2 D _tosrsc
+00e46134 D _edata
 00fa0000 a cart_bas
 01000000 a FASTRAMB
 87654321 a GEM_MUPB

@@ -1,53 +1,24 @@
 _SWITCH .NATION
 
-_CASE .FRG:
-  .RSC_TAB = 3ED2E   ; Beginn des RSC-Bereichs
-  .TOSINFO_OFS = 1A4A    ; Offset zum TOS-Info-Dialog ab RSC_TAB
-  .ROMTOP  = 46232   ; erste Adresse hinter originalem RSC/NEWDESK.INF
-
 _CASE .USA:
-  .RSC_TAB = 3ECA2   ; -8C
-  .TOSINFO_OFS = 1A8B
-  .ROMTOP  = 46134   ; erste Adresse hinter originalem RSC/NEWDESK.INF
 
-_CASE .UK:
-  .RSC_TAB = 3ECA2   ; -8C
-  .TOSINFO_OFS = 1A8B
-  .ROMTOP  = 46134   ; erste Adresse hinter originalem RSC/NEWDESK.INF
+_CASE .FRG:
 
 _CASE .FRA:
-  .RSC_TAB = 3ED68   ; +3A
-  .TOSINFO_OFS = 1B71
-  .ROMTOP  = 464F0   ; erste Adresse hinter originalem RSC/NEWDESK.INF
+
+_CASE .UK:
 
 _CASE .SPA:
-  .RSC_TAB = 3ED40
-  .TOSINFO_OFS = 1B5A
-  .ROMTOP  = 46470   ; erste Adresse hinter originalem RSC/NEWDESK.INF
 
 _CASE .ITA:
-  .RSC_TAB = 3ED14
-  .TOSINFO_OFS = 1B31
-  .ROMTOP  = 462D8   ; erste Adresse hinter originalem RSC/NEWDESK.INF
-
-_CASE .SWF:
-  .RSC_TAB = 3ED68   ; +3A
-  .TOSINFO_OFS = 1B71
-  .ROMTOP  = 464F0   ; erste Adresse hinter originalem RSC/NEWDESK.INF
-
-_CASE .SWG:
-  .RSC_TAB = 3ED2E   ; Beginn des RSC-Bereichs
-  .TOSINFO_OFS = 1A4A    ; Offset zum TOS-Info-Dialog ab RSC_TAB
-  .ROMTOP  = 46232   ; erste Adresse hinter originalem RSC/NEWDESK.INF
 
 _CASE .SWE:
-  .RSC_TAB = 3ECCC
-  .TOSINFO_OFS = 1A6E
-  .ROMTOP  = 46324   ; erste Adresse hinter originalem RSC/NEWDESK.INF
+
+_CASE .SWF:
+
+_CASE .SWG:
 
 _DEFAULT:
   _ERROR "unsupported country"
 
 _ENDSWITCH
-
-.RSC_LEN  = .ROMTOP-.RSC_TAB
