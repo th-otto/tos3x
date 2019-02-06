@@ -17,9 +17,6 @@
 ;>1 0D0000 ;  1MB-Rechner / 1 File ;kaum Sinn TOS 1.04 im Ram zu halten,
 ;>1 050000 ;0.5MB-Rechner / 1 File ;auûer vielleicht zum Testen der Patches!
 
-;Reloc-Korrekturen NUR (!!!) fÅr das deutsche TOS 1.04 vom 06.04.1989
-;nach einer Idee von Andreas Kromke (KAOS 1.2 bzw KAOS 1.4)
-
-!117E,3A4C,3BAC,890E,B01C,1ABF4,288CA,29676,297B2
-!29B52,29D08,2A5B2,2A6B2,2EC00
-
+-patchfld      ;Dsetpath("PATCHFLD")
++relocs.fil
+-..

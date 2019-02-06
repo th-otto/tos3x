@@ -71,34 +71,23 @@
 ;* Ausgabeformat des Patchprogramms:
 ;* >[Anzahl der TOS-Files] [Obere Ramgrenze des Rechners - .LENGTH]
 
->1 3D0000 ;   4MB-Rechner / 1 File
+;>1 3D0000 ;   4MB-Rechner / 1 File
 ;>1 2D0000 ;   3MB-Rechner / 1 File
 ;>1 250000 ; 2.5MB-Rechner / 1 File
 ;>1 1D0000 ;   2MB-Rechner / 1 File ;Mit weniger als 2MB Speicher macht es
 ;>1 0D0000 ;   1MB-Rechner / 1 File ;kaum Sinn TOS 1.04 im Ram zu halten,
 ;>1 050000 ; 0.5MB-Rechner / 1 File ;aužer vielleicht zum Testen derPatches!
 
-;>1        ; 1 nicht relozierte Datei (TOS.IMG) erzeugen
+>1         ; 1 nicht relozierte Datei (TOS.IMG) erzeugen
 ;>2        ; 2 nicht relozierte Dateien (TOS.LO/HI) erzeugen.
 ;>6        ; 6 nicht relozierte Dateien (TOS.LO?/HI?) erzeugen.
 
-;*******************************************************************************
-;* MRF:
-;* Reloc-Korrekturen NUR (!!!) fr das TOS 1.04 vom 6.4.1989
-;* nach einer Idee von Andreas Kromke (KAOS 1.2 bzw. KAOS 1.4).
-;* Die Reloc-Korrekturen untersttzen TOS-L„ngen bis $30000. 
-
-!117E,3A4C,3BAC,890E,B01C,1ABF4,288CA,29676,297B2
-!29B52,29D08,2A5B2,2A6B2
-
-!DA2  ..DC2         ;Bombenimage
-!28A78..28EF8       ;6X6  Fontimage
-!29154..29954       ;8x8  Fontimage
-!29954..2A954       ;8x16 Fontimage
 
 ;***************************************************************************
 
--PATCHFLD.104\      ;Dsetpath("PATCHFLD.104\")
+-patchfld      ;Dsetpath("PATCHFLD")
+
++relocs.fil
 
 ;*******************************************************************************
 ;* MH:
@@ -560,7 +549,7 @@ _ENDIF
 .NEW_KBD = 0        ;1: Neue Keyboardtabelle einbinden, 0: Nichts einbinden
 
 _IF .NEW_KBD
- -DEMO.KBD\                   ;Dsetpath("DEMO.KBD\")
+ -demo.kbd                    ;Dsetpath("DEMO.KBD")
  282CE FRG\GERMAN.KBD         ;Hier gewnschte Keyboardtabelle eintragen
  -..                          ;Dsetpath("..") (ein Verzeichnis zurck)
 _ENDIF
@@ -590,7 +579,7 @@ _ENDIF
 .FONTS = 0          ;1: Fonts einbinden, 0: Keine Fonts einbinden
 
 _IF .FONTS
- -FONTS\                  ;Dsetpath("FONTS\")
+ -fonts                   ;Dsetpath("FONTS")
  28A78 6X6_FONT.ABS       ;1152 Bytes (da 6x6 Font!)
  29154 8X8_FONT.ABS       ;2048 Bytes (8x8 Font)
  29954 NEU.ABS            ;4096 Bytes (8x16 Font)
@@ -610,7 +599,7 @@ _ENDIF
 .ICONS = 0          ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .ICONS
- -ICONS\                 ;Dsetpatch("ICONS\")
+ -icons                  ;Dsetpatch("ICONS\")
  ;* die Images sind jeweils 128 Bytes (4 Byte = eine Zeile => 32 Zeilen) lang.
  2C202 TOSFACES.IMG      ;Ausrufezeichen
  2C282                   ;Fragezeichen in form_alert()
@@ -636,7 +625,7 @@ _ENDIF
 .MOUSE = 0          ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .MOUSE
- -MFORM\            ;Dsetpath("MFORM\")
+ -mform             ;Dsetpath("MFORM")
  2C382 MFORM0.ABS   ;ARROW
  2C3CC MFORM1.ABS   ;TEXT_CRSR
  2C416 MFORM2.ABS   ;BUSY_BEE
@@ -725,7 +714,7 @@ _IF .RSC
 
  _ENDIF
 
- -..\..\            ;Zurck ins normale Patchfield wechseln.
+ -..\..             ;Zurck ins normale Patchfield wechseln.
 
 _ENDIF
 
@@ -854,7 +843,7 @@ _ENDIF
 ;*
 ;* >>> Dieser Patch funktioniert nicht mit dem Winx-Patch!
 
-.ARROWFIX = 0       ;1: Patch einbinden, 0: Patch nicht einbinden
+.ARROWFIX = 1       ;1: Patch einbinden, 0: Patch nicht einbinden
 
 .TIME     = .3      ;Ansprechzeit in 0,125s.
 

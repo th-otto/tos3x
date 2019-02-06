@@ -1,0 +1,25 @@
+;*******************************************************************************
+;* MRF:
+;* Reloc-Korrekturen NUR (!!!) fÅr das TOS 1.04 vom 6.4.1989
+;* nach einer Idee von Andreas Kromke (KAOS 1.2 bzw. KAOS 1.4).
+;* Die Reloc-Korrekturen unterstÅtzen TOS-LÑngen bis $30000. 
+
+!117E
+!3A4C
+!3BAC
+!890E
+!B01C
+!1ABF4
+!288CA
+!29676
+!297B2
+!29B52
+!29D08
+!2A5B2
+!2A6B2
+!2EC00
+
+!DA2  ..DC2         ;Bombenimage
+!28A78..28EF8       ;6X6  Fontimage
+!29154..29954       ;8x8  Fontimage
+!29954..2A954       ;8x16 Fontimage

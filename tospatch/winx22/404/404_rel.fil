@@ -191,7 +191,7 @@
 ;*******************************************************************************
 ;* Ins Patchdirectory wechseln:
 
--PATCHFLD.404\		;Dsetpath("PATCHFLD.404\")
+-patchfld		;Dsetpath("PATCHFLD.404\")
 
 ;*******************************************************************************
 ;* CPU auf 16MHz
@@ -949,7 +949,7 @@ _ENDIF
 .FONTS = 0			;1: Fonts einbinden, 0: Keine Fonts einbinden
 
 _IF .FONTS
- -FONTS\			;Dsetpath("FONTS\")
+ -fonts 			;Dsetpath("FONTS\")
  4B248 VW_SYS06.BIN ;<<< 6x6 Font hier eintragen (1152 Bytes)
  4B924 VW_SYS08.BIN ;<<< 8x8 Font hier eintragen (2048 Bytes)
  4C124 VW_SYS16.BIN ;<<< 8x16 Font hier eintragen (4096 Bytes)
@@ -1007,7 +1007,7 @@ _ENDIF
 .RSC_END   = 7AAD0
 
 _IF .RSC
- -RSC\							   ;Ins RSC-Subdirectory wechseln
+ -rsc 							   ;Ins RSC-Subdirectory wechseln
  .RSC_BEGIN 					   ;Startadresse setzen
 
  .USA_RSC_TAB:

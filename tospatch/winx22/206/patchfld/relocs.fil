@@ -1,0 +1,73 @@
+;*******************************************************************************
+;* MH:
+;* Reloc-Korrekturen NUR (!!!) fÅr das TOS 2.06 vom 14.11.1991
+;* nach einer Idee von Andreas Kromke (KAOS 1.2 bzw KAOS 1.4).
+;* Die Reloc-Korrekturen unterstÅtzen TOS-LÑngen bis $100000.
+
+?724      ;'?' ist richtig, da forciertes Relozieren.
+
+!13D0
+!199E
+!1D3A
+!1D3E
+!1DF0
+!1DF6
+!25A2
+!34CC
+!622C
+!6DB6
+!8DA8
+!8DCA
+!EE70
+!106C0
+!11BB6
+!11C10
+!1230A
+!12962
+!12F70
+!130BE
+!13928
+!1393C
+!17B4A
+!18C5C
+!190FC
+!19274
+!19D64
+!1B244
+!1C3FC
+!1CA64
+!1CCCA
+!1CD98
+!1CFBE
+!1D82A
+!20854
+!21210
+!22BDC
+!22BF8
+!265B8
+!266A6
+!26964
+!2B802
+!2B82A
+!2BA18
+!2CEB6
+!32842
+!32ED0
+!32ED2
+!33598
+!3359A
+!33B62
+!34762
+!351C0
+!377FC
+!3A2E2
+!3A47C
+!3A60A
+!3A60E
+!3B6CE
+
+!325AE..329B6       ;Atari-Logo
+!33086..33506       ;6x6  Fontimage
+!33762..33F62       ;8x8  Fontimage
+!33F62..34F62       ;8x16 Fontimage
+
