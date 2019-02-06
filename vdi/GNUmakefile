@@ -16,7 +16,7 @@ LIBS =
 CPPFLAGS = -I$(top_srcdir)/common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-all:: $(top_srcdir)/common/config.h vdi.a
+all:: $(top_srcdir)/common/config.h vdi.a vdivar.o
 
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak

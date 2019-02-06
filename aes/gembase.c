@@ -40,7 +40,6 @@ EVB *zlr;
 
 int32_t elinkoff;
 
-/*	char	dodisp;		*/
 char indisp;
 
 char infork;

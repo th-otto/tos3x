@@ -30,6 +30,7 @@ int symflg;						/* set if symbol table to be saved */
 int udfflg;						/* set if undefined symbols allowed */
 int chnflg;						/* set if linking chained program */
 int dmpflg;						/* set for dumping symbol table */
+int dmprelocs;
 
 static int libflg;				/* set if an input file to be searched */
 
@@ -243,7 +244,7 @@ static char libname[] = "/lib/lib6.a";	/* Default library name */
 #ifdef HAVE_MKTEMP
 static const char *tfbase = "loXXXXXX";	/* Temp base name */
 char tdisk[80] = "/tmp/";			/* Temp disk name */
-#else /* CP/M and VMS */
+#else
 static const char *tfbase = "loXXXXXA";	/* Temp base name */
 char tdisk[80];					/* Temp disk name */
 #endif
@@ -689,13 +690,13 @@ PP(int lflg;)
 		case INSABS:					/* first word of instr */
 		case DABS:						/* data absolute */
 			put16be(i, p);
-			if (saverbits)
+			if (saverbits || dmprelocs)
 				put16be(j, pr);			/* relocation bits */
 			break;
 
 		case LUPPER:					/* high word of long */
 			l1 = ((int32_t)i) << 16;
-			if (saverbits)
+			if (saverbits || dmprelocs)
 				put16be(j, pr);			/* upper word relocation bits */
 			l1 |= get16be(ibuf);
 			j = get16be(rbuf);
@@ -706,9 +707,10 @@ PP(int lflg;)
 			switch (j & RBMASK)
 			{
 			case DABS:
-				if (saverbits)
+				if (saverbits || dmprelocs)
 					put16be(j, pr);
 				break;
+
 			case INSABS:
 			case LUPPER:
 			default:
@@ -716,26 +718,26 @@ PP(int lflg;)
 
 			case TRELOC:
 				l1 += textbase;
-				if (saverbits)
+				if (saverbits || dmprelocs)
 					put16be(j, pr);
 				break;
 
 			case DRELOC:
 				l1 += database;
-				if (saverbits)
+				if (saverbits || dmprelocs)
 					put16be(j, pr);
 				break;
 
 			case BRELOC:
 				l1 += bssbase;
-				if (saverbits)
+				if (saverbits || dmprelocs)
 					put16be(j, pr);
 				break;
 
 			case EXTVAR:
 				wasext++;
 				l1 += extval(j >> 3);
-				if (saverbits)
+				if (saverbits || dmprelocs)
 					put16be(extbase(j >> 3), pr);
 				break;
 
@@ -746,7 +748,7 @@ PP(int lflg;)
 					errorx(_("relative address overflow at %lx in %s\n"), (long)tpc - 2, ifilname);
 					prextname(j >> 3);	/* give name referenced */
 				}
-				if (saverbits)
+				if (saverbits || dmprelocs)
 					put16be(DABS, pr);
 				goto outlowd;
 
@@ -791,7 +793,7 @@ PP(int lflg;)
 
 		default:
 		  do2199:
-			fatalx(FALSE, _("invalid relocation flag in %s\n"), ifilname);
+			fatalx(FALSE, _("invalid relocation flag %d in %s\n"), j & RBMASK, ifilname);
 			break;
 		}
 	}
@@ -1642,7 +1644,12 @@ PP(struct symtab *ap;)
 static VOID gettempf(P(FILE **) fp)
 PP(FILE **fp;)
 {
-	(TFCHAR)++;
+	static int tfcindex = 0;
+	static char const validchars[] = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	tfcindex++;
+	if (tfcindex >= ((int)sizeof(validchars) - 1))
+		tfcindex = 0;
+	TFCHAR = validchars[tfcindex];
 	if ((*fp = fopen(tfilname, "wb")) == NULL)
 	{
 		fatalx(FALSE, _("unable to open temporary file: %s\n"), tfilname);
@@ -1979,13 +1986,13 @@ PP(char *ofilname;)
 
 	if (Zflag | Dflag | Bflag)
 	{									/* output expanded header */
-		put32be(datastart, obuf);
-		put32be(bssstart, obuf);
+		put32be(database, obuf);
+		put32be(bssbase, obuf);
 	}
 
 	gettempf(&tbuf);					/* temp for data words */
 	dafnc = TFCHAR;
-	if (saverbits)
+	if (saverbits || dmprelocs)
 	{
 		gettempf(&rtbuf);				/* temp for text relocatin bits */
 		rtfnc = TFCHAR;
@@ -2021,7 +2028,7 @@ static VOID wrjumps(NOTHING)
 
 		textbase += SIZEOF_OVCALBLK;	/* bump for block size  */
 
-		if (saverbits)
+		if (saverbits || dmprelocs)
 		{
 			put16be(INSABS, rtbuf);		/* jsr          */
 			put16be(LUPPER, rtbuf);		/* address of ovhandler */
@@ -2091,11 +2098,11 @@ static VOID wrovtab(NOTHING)
 		for (j = 1; j <= 6; j++, pt++)	/* write filename   */
 		{
 			put16be(*pt, tbuf);
-			if (saverbits)
+			if (saverbits || dmprelocs)
 				put16be(DABS, rdbuf);
 		}
 		put32be(ovtab1.tbldpt, tbuf);	/* write loadpt  */
-		if (saverbits)
+		if (saverbits || dmprelocs)
 		{
 			put16be(LUPPER, rdbuf);
 			put16be(TRELOC, rdbuf);
@@ -2183,6 +2190,121 @@ PP(int32_t size;)
 }
 
 
+static VOID prrelocs(P(int) fnc, P(int32_t) offset, P(int32_t) size)
+PP(int fnc;)
+PP(register int32_t offset;)
+PP(register int32_t size;)
+{
+	register unsigned int i, j;
+	register int longf;
+	register FILE *p;
+	register FILE *pr;
+	register int32_t l1;
+
+	p = obuf;
+
+	TFCHAR = fnc;
+	if ((pr = fopen(tfilname, "rb")) == NULL)
+		fatalx(FALSE, _("unable to reopen file: %s\n"), tfilname);
+
+	fflush(p);
+	if (Zflag | Dflag | Bflag)
+		fseek(p, HDSIZ2 + offset, SEEK_SET);
+	else
+		fseek(p, HDSIZE + offset, SEEK_SET);
+
+	while (size > 0)
+	{
+		longf = 0;
+		i = get16be(p);
+		j = get16be(pr);
+		switch (j & RBMASK)
+		{								/* relocation bits */
+		case INSABS:					/* first word of instr */
+		case DABS:						/* data absolute */
+			break;
+
+		case LUPPER:					/* high word of long */
+			l1 = ((int32_t)i) << 16;
+			l1 |= get16be(p);
+			j = get16be(pr);
+			longf++;					/* doing two words */
+		  dorelc:
+			switch (j & RBMASK)
+			{
+			case DABS:
+				break;
+			case INSABS:
+			case LUPPER:
+			default:
+				goto do2199;
+
+			case TRELOC:
+				if (dmprelocs & 0x01)
+					printf(" RELOC: %08lx TEXT %08lx\n", (unsigned long)offset, (unsigned long)l1);
+				break;
+
+			case DRELOC:
+				if (dmprelocs & 0x02)
+					printf(" RELOC: %08lx DATA %08lx\n", (unsigned long)offset, (unsigned long)l1);
+				break;
+
+			case BRELOC:
+				if (dmprelocs & 0x04)
+					printf(" RELOC: %08lx BSS  %08lx\n", (unsigned long)offset, (unsigned long)l1);
+				break;
+
+			case EXTVAR:
+				break;
+
+			case EXTREL:
+				break;
+			}
+			break;
+
+		case TRELOC:
+		case DRELOC:
+		case BRELOC:
+		case EXTVAR:
+		case EXTREL:
+			l1 = (int32_t)(int)i;			/* sign extend to long like 68000 */
+			goto dorelc;
+
+		default:
+		  do2199:
+			fatalx(FALSE, _("invalid relocation flag %d in %s\n"), j & RBMASK, tfilname);
+			break;
+		}
+		if (longf)
+		{
+			offset += 4;
+			size -= 4;
+		} else
+		{
+			offset += 2;
+			size -= 2;
+		}
+	}
+	fclose(pr);
+	fflush(p);
+}
+
+
+static VOID closetemps(NOTHING)
+{
+	if (rtbuf)
+	{
+		fclose(rtbuf);
+		rtbuf = NULL;
+	}
+	if (rdbuf)
+	{
+		fclose(rdbuf);
+		rdbuf = NULL;
+	}
+}
+
+
 /************************************************************************
  *
  * finalwr() -- do the final writting to the output file
@@ -2211,7 +2333,11 @@ static VOID finalwr(NOTHING)
 		cpdata(&rtbuf, rtfnc, textsize);
 		/* copy data relocations to output file */
 		cpdata(&rdbuf, rdfnc, datasize);
+	} else
+	{
+		closetemps();
 	}
+		
 	fflush(obuf);
 #if 0
 	if (stacksize)
@@ -2228,6 +2354,18 @@ static VOID finalwr(NOTHING)
 	{
 		errorx(_("write error on file: %s\n"), outfname);
 	}
+
+	if (dmprelocs && obuf)
+	{
+		fclose(obuf);
+		if ((obuf = fopen(outfname, "rb")) == NULL)
+			fatalx(FALSE, _("unable to reopen file: %s\n"), outfname);
+		printf("TEXT:\n");
+		prrelocs(rtfnc, 0, textsize);
+		printf("DATA:\n");
+		prrelocs(rdfnc, textsize, datasize);
+	}
+	
 	endit(exstat);
 }
 
@@ -2471,14 +2609,15 @@ static VOID buildf(NOTHING)
 VOID endit(P(int) stat)
 PP(int stat;)
 {
-	if (stat == 0)
+	if (stat == 0 && obuf)
 		fclose(obuf);
 	if (dafnc)
 	{
 		TFCHAR = dafnc;
 		unlink(tfilname);
 	}
-	if (saverbits)
+	closetemps();
+	if (saverbits || dmprelocs)
 	{
 		TFCHAR = rtfnc;
 		unlink(tfilname);

@@ -57,7 +57,7 @@ _va_dcl
 	va_start(args, fmt);
 	vfprintf(stderr, fmt, args);
 	va_end(args);
-	endit(-1);
+	endit(1);
 }
 
 VOID synerr(P(const char *) str)

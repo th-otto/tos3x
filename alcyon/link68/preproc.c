@@ -56,31 +56,12 @@
 #define CHAINED		15
 #define DUMPSYMS	16
 #define PRGFLAGS	17
+#define RELOCS		18
 
 #define	TOKLEN	FNAMELEN				/* max len. file or option name */
 
 #define MFLTYPE	".68K"					/* default root filetype    */
 #define OFLTYPE	".O68"					/* default overlay filetype */
-
-/* option string values -- change here for foreign language */
-
-#define ABSSTR	"ABSOLUTE"
-#define ALLSTR	"ALLMODS"
-#define BSSSTR	"BSSBASE"
-#define CHNSTR	"CHAINED"
-#define COMSTR	"COMMAND"
-#define DATSTR	"DATABASE"
-#define IGNSTR	"IGNORE"
-#define INCSTR	"INCLUDE"
-#define LOCSTR	"LOCALS"
-#define MAPSTR	"MAP"
-#define NOLSTR	"NOLOCALS"
-#define SYMSTR	"SYMBOLS"
-#define TEMSTR	"TEMPFILES"
-#define TEXSTR	"TEXTBASE"
-#define UDFSTR	"UNDEFINED"
-#define DMPSTR	"XXZZY"
-#define PRGSTR  "PRGFLAGS"
 
 /* syntax error submessages -- change for foreign language */
 
@@ -403,87 +384,92 @@ PP(char *oname;)
 	int count, op;
 
 	count = 0;							/* no matches yet   */
-	if (match(oname, ABSSTR))
+	if (match(oname, "ABSOLUTE"))
 	{
 		op = ABSOLUTE;
 		count++;
 	}
-	if (match(oname, ALLSTR))
+	if (match(oname, "ALLMODS"))
 	{
 		op = ALLMODS;
 		count++;
 	}
-	if (match(oname, BSSSTR))
+	if (match(oname, "BSSBASE"))
 	{
 		op = BSSBASE;
 		count++;
 	}
-	if (match(oname, CHNSTR))
+	if (match(oname, "CHAINED"))
 	{
 		op = CHAINED;
 		count++;
 	}
-	if (match(oname, COMSTR))
+	if (match(oname, "COMMAND"))
 	{
 		op = COMMAND;
 		count++;
 	}
-	if (match(oname, DATSTR))
+	if (match(oname, "DATABASE"))
 	{
 		op = DATABASE;
 		count++;
 	}
-	if (strcmp(oname, DMPSTR) == 0)
+	if (strcmp(oname, "XXZZY") == 0)
 	{
 		op = DUMPSYMS;
 		count++;
 	}
-	if (strcmp(oname, PRGSTR) == 0)
+	if (match(oname, "PRGFLAGS"))
 	{
 		op = PRGFLAGS;
 		count++;
 	}
-	if (match(oname, INCSTR))
+	if (match(oname, "RELOCS"))
+	{
+		op = RELOCS;
+		count++;
+	}
+	if (match(oname, "INCLUDE"))
 	{
 		op = INCLUDE;
 		count++;
 	}
-	if (match(oname, IGNSTR))
+	if (match(oname, "IGNORE"))
 	{
 		op = IGNORE;
 		count++;
 	}
-	if (match(oname, LOCSTR))
+	if (match(oname, "LOCALS"))
 	{
 		op = LOCALS;
 		count++;
 	}
-	if (match(oname, MAPSTR))
+	if (match(oname, "MAP"))
 	{
 		op = MAP;
 		count++;
 	}
-	if (match(oname, NOLSTR))
+	if (match(oname, "NOLOCALS"))
 	{
 		op = NOLOCALS;
 		count++;
 	}
-	if (match(oname, SYMSTR))
+	if (match(oname, "SYMBOLS"))
 	{
 		op = SYMBOLS;
 		count++;
 	}
-	if (match(oname, TEMSTR))
+	if (match(oname, "TEMPFILES"))
 	{
 		op = TEMPFILES;
 		count++;
 	}
-	if (match(oname, TEXSTR))
+	if (match(oname, "TEXTBASE"))
 	{
 		op = TEXTBASE;
 		count++;
 	}
-	if (match(oname, UDFSTR))
+	if (match(oname, "UNDEFINED"))
 	{
 		op = UNDEFINED;
 		count++;
@@ -538,7 +524,7 @@ static VOID globops(NOTHING)
 
 	tokenum = scan();					/* skip to next token   */
 
-	while ((tokenum != RBRACK) && (tokenum != NOMORE))
+	while (tokenum != RBRACK && tokenum != NOMORE)
 	{
 		if (tokenum != NAMETK)			/* better be a name */
 		{
@@ -602,6 +588,37 @@ static VOID globops(NOTHING)
 		} else if (opnum == PRGFLAGS)
 		{
 			prgflags = scannum();
+		} else if (opnum == RELOCS)
+		{
+			if (lookahd() == EQSIGN)
+			{
+				scan();
+				tokenum = scan();
+				if (tokenum == NAMETK)
+				{
+					for (opnum = 0; tokenval[opnum] != '\0'; opnum++)
+					{
+						switch (tokenval[opnum])
+						{
+						case 't':
+						case 'T':
+							dmprelocs |= 0x01;
+							break;
+						case 'd':
+						case 'D':
+							dmprelocs |= 0x02;
+							break;
+						case 'b':
+						case 'B':
+							dmprelocs |= 0x04;
+							break;
+						}
+					}
+				}
+			} else
+			{
+				dmprelocs = 0x07;
+			}
 		} else if (opnum == UNDEFINED)
 		{
 			udfflg = TRUE;				/* allow undefineds */

@@ -45,7 +45,7 @@ CARTBASE = E40000
 
 ifeq ($(USE_CROSS_ALCYON),1)
 tos.img: $(STARTUP) $(LIBS) tosimg.tmp tosrsc$(COUNTRY).o vars.o tosvars.o
-	$(LINK68) '[abs,symbols,locals,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
+	$(LINK68) '[abs,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
 
 # For the PAK/BootJmp option, we need to know the start of the resource area first
 tosimg.tmp: $(STARTUP) $(LIBS) rscend.o vars.o tosvars.o
@@ -55,6 +55,13 @@ rscend.h: tosimg.tmp
 	tosrsc=`$(BIN)cnm $< | $(GREP) tosrsc | $(SED) -e 's/ .*$$//' -e 's/^00//' | $(TR) abcdef ABCDEF`; \
 	fill=`echo "16 i E40030 $$tosrsc - p" | $(DC)`; \
 	echo "#define RSCGAP $$fill" > $@
+
+tos.rel: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o tosvars.o ../vdi/vdivar.o ../aes/gembase.o sbss.o ebss.o
+	$(AM_V_at)$(CP) ../vdi/cbssdefs.o .
+	$(AM_V_at)$(CP) ../aes/gembase.o .
+	$(LINK68) '[abs,relocs=td,text[$(rombase)],bss[0]]' tosrel.tmp=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o > $@
+	$(AM_V_at)$(RM) tosrel.tmp
+
 endif
 
 cartridg.img: cartridg.o
@@ -92,7 +99,7 @@ dosdir::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a $(IMG) tos.img tosimg.tmp cartridg.tmp cartridg.img $(PROGRAMS) tosrsc*.c glue.* rscend.h $(top_srcdir)/common/config.h
+	$(RM) *.o *.a *.i $(IMG) tos.img tosimg.tmp cartridg.tmp cartridg.img $(PROGRAMS) tosrsc*.c glue.* rscend.h tosrel.tmp tos.rel $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak *.img

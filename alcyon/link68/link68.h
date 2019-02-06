@@ -89,6 +89,7 @@ extern int	ignflg;			/* ignore 16-bit address overflow */
 extern int	udfflg;			/* allow undefined symbols */
 extern int	chnflg;			/* chained program */
 extern int	dmpflg;			/* dump symbols -- undocumented */
+extern int  dmprelocs;
 
 /* flags for input files */
 
