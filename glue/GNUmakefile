@@ -57,15 +57,15 @@ rscend.h: tosimg.tmp
 	echo "#define RSCGAP $$fill" > $@
 endif
 
-cartridge.img: cartridge.o
+cartridg.img: cartridg.o
 ifeq ($(USE_CROSS_ALCYON),1)
 	$(LINK68) -o cartridg.tmp -a $(CARTBASE) x 0 cartridg.o
 	dd bs=1 skip=36 < cartridg.tmp > $@
 else
-	$(LD) -nostartfiles -nostdlib -o cartridge.tmp -Wl,--script=../common/rom.ld,-Ttext=0x$(CARTBASE),-Tbss=0 cartridge.o
+	$(LD) -nostartfiles -nostdlib -o cartridg.tmp -Wl,--script=../common/rom.ld,-Ttext=0x$(CARTBASE),-Tbss=0 cartridg.o
 endif
-	$(MV) cartridge.tmp $@
-	$(RM) cartridge.tmp
+	$(MV) cartridg.tmp $@
+	$(RM) cartridg.tmp
 
 $(IMG): tos.img $(MKROM)
 	$(MKROM) pad $(ROMSIZE) $< $@
@@ -92,7 +92,7 @@ dosdir::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a $(IMG) tos.img tosimg.tmp cartridge.tmp cartridge.img $(PROGRAMS) tosrsc*.c glue.* rscend.h $(top_srcdir)/common/config.h
+	$(RM) *.o *.a $(IMG) tos.img tosimg.tmp cartridg.tmp cartridg.img $(PROGRAMS) tosrsc*.c glue.* rscend.h $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak *.img
