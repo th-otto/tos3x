@@ -102,6 +102,9 @@ function change6x6()
 		i.src = "fonts/6x6/polish.png";
 	}
 	if (f.value == 3) {
+		i.src = "fonts/6x6/czech.png";
+	}
+	if (f.value == 4) {
 		i.src = "fonts/6x6/monaco.png";
 	}
 }
@@ -120,6 +123,9 @@ function change8x8()
 		i.src = "fonts/8x8/polish.png";
 	}
 	if (f.value == 3) {
+		i.src = "fonts/8x8/czech.png";
+	}
+	if (f.value == 4) {
 		i.src = "fonts/8x8/monaco.png";
 	}
 }
@@ -138,75 +144,78 @@ function change8x16()
 		i.src = "fonts/8x16/polish.png";
 	}
 	if (f.value == 3) {
-		i.src = "fonts/8x16/monaco.png";
+		i.src = "fonts/8x16/czech.png";
 	}
 	if (f.value == 4) {
-		i.src = "fonts/8x16/blue.png";
+		i.src = "fonts/8x16/monaco.png";
 	}
 	if (f.value == 5) {
-		i.src = "fonts/8x16/classic.png";
+		i.src = "fonts/8x16/blue.png";
 	}
 	if (f.value == 6) {
-		i.src = "fonts/8x16/classic1.png";
+		i.src = "fonts/8x16/classic.png";
 	}
 	if (f.value == 7) {
-		i.src = "fonts/8x16/classic2.png";
+		i.src = "fonts/8x16/classic1.png";
 	}
 	if (f.value == 8) {
-		i.src = "fonts/8x16/computer.png";
+		i.src = "fonts/8x16/classic2.png";
 	}
 	if (f.value == 9) {
-		i.src = "fonts/8x16/cursive.png";
+		i.src = "fonts/8x16/computer.png";
 	}
 	if (f.value == 10) {
-		i.src = "fonts/8x16/desktop.png";
+		i.src = "fonts/8x16/cursive.png";
 	}
 	if (f.value == 11) {
-		i.src = "fonts/8x16/deutsch.png";
+		i.src = "fonts/8x16/desktop.png";
 	}
 	if (f.value == 12) {
-		i.src = "fonts/8x16/eight.png";
+		i.src = "fonts/8x16/deutsch.png";
 	}
 	if (f.value == 13) {
-		i.src = "fonts/8x16/griech.png";
+		i.src = "fonts/8x16/eight.png";
 	}
 	if (f.value == 14) {
-		i.src = "fonts/8x16/ibm_g2.png";
+		i.src = "fonts/8x16/griech.png";
 	}
 	if (f.value == 15) {
-		i.src = "fonts/8x16/kritzel.png";
+		i.src = "fonts/8x16/ibm_g2.png";
 	}
 	if (f.value == 16) {
-		i.src = "fonts/8x16/mac_font.png";
+		i.src = "fonts/8x16/kritzel.png";
 	}
 	if (f.value == 17) {
-		i.src = "fonts/8x16/mcappeal.png";
+		i.src = "fonts/8x16/mac_font.png";
 	}
 	if (f.value == 18) {
-		i.src = "fonts/8x16/old.png";
+		i.src = "fonts/8x16/mcappeal.png";
 	}
 	if (f.value == 19) {
-		i.src = "fonts/8x16/rally.png";
+		i.src = "fonts/8x16/old.png";
 	}
 	if (f.value == 20) {
-		i.src = "fonts/8x16/skyvox.png";
+		i.src = "fonts/8x16/rally.png";
 	}
 	if (f.value == 21) {
-		i.src = "fonts/8x16/stencil.png";
+		i.src = "fonts/8x16/skyvox.png";
 	}
 	if (f.value == 22) {
-		i.src = "fonts/8x16/sv.png";
+		i.src = "fonts/8x16/stencil.png";
 	}
 	if (f.value == 23) {
-		i.src = "fonts/8x16/tempus.png";
+		i.src = "fonts/8x16/sv.png";
 	}
 	if (f.value == 24) {
-		i.src = "fonts/8x16/thin.png";
+		i.src = "fonts/8x16/tempus.png";
 	}
 	if (f.value == 25) {
-		i.src = "fonts/8x16/thin1.png";
+		i.src = "fonts/8x16/thin.png";
 	}
 	if (f.value == 26) {
+		i.src = "fonts/8x16/thin1.png";
+	}
+	if (f.value == 27) {
 		i.src = "fonts/8x16/typewrit.png";
 	}
 }
@@ -220,7 +229,7 @@ function change16x32()
 		if (f.value == 0) {
 			i.src = "fonts/16x32/system.png";
 		}
-		if (f.value == 3) {
+		if (f.value == 4) {
 			i.src = "fonts/16x32/monaco.png";
 		}
 	}

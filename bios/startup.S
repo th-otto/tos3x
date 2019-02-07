@@ -1300,11 +1300,18 @@ cooMCH2:	move.l    a1,(_buserror).w
 
 cooSWI: move.b    #$7F,d0
         tst.b     STEFlag
+#if OS_COUNTRY == CTRY_CZ
+        bne.s     nomicro-4 /* apparently buggy patch; jumps into middle of instruction */
+#else
         bne.s     nomicro
+#endif
         move.l    #$5F535749,(a0)+ /* '_SWI' */
         moveq.l   #0,d0
         move.w    (STConfig).w,d0
         lsr.w     #8,d0
+#if OS_COUNTRY == CTRY_CZ
+		bclr      #6,d0 /* WTF? */
+#endif
         move.l    d0,(a0)+
 nomicro:
         moveq.l   #3,d1
@@ -1315,8 +1322,12 @@ nomicro:
 yesstereo:
         move.l    d1,(a0)+
 #if !TP_08 /* SET_FDC_COOKIE */
+#if OS_COUNTRY == CTRY_CZ
+		nop
+#else
         btst      #6,d0
         bne.s     nofdc
+#endif
         move.b    #$08,dsb+fd_drivetype
 #endif
         move.l    #$5F464443,(a0)+ /* '_FDC' */
@@ -7253,6 +7264,36 @@ kbdpl2:
         move.b    #$7D,d0
         bra       kbdvec42
 kbdpl3:
+#endif
+
+#if OS_COUNTRY == CTRY_CZ
+        cmpi.b    #$1A,d1                       /* convert ALT-udiaresis to @ or backslash */
+        bne.s     kbdcz1
+        move.b    #$40,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$5C,d0
+        bra       kbdvec42
+kbdcz1:
+        cmpi.b    #$27,d1                       /* convert ALT-odiaresis to [ or { */
+        bne.s     kbdcz2
+        move.b    #$5B,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7B,d0
+        bra       kbdvec42
+kbdcz2:
+        cmpi.b    #$28,d1                       /* convert ALT-adiaresis to ] or } */
+        bne.s     kbdcz3
+        move.b    #$5D,d0
+        move.b    (_shifty).w,d2
+        andi.b    #$03,d2
+        beq       kbdvec42
+        move.b    #$7D,d0
+        bra       kbdvec42
+kbdcz3:
 #endif
 
 /* 206de: 00e03294 */

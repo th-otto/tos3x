@@ -77,12 +77,12 @@
 /* General Defines */
 #define	SOH			'\01'
 #define	SSIZE		8
-#define	LINESIZE	512
+#define	LINESIZE	2048
 #define	MAXARGS		60
 #define	ARGBSIZE	1000
-#define	TOKSIZE		300
+#define	TOKSIZE		1024
 #define	DEFSIZE		1024
-#define PBSIZE		1000
+#define PBSIZE		2000
 
 #define TRUE		1
 #define FALSE		0

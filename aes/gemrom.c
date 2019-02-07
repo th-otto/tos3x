@@ -50,7 +50,7 @@ VOIDPTR gl_pglue;
 BOOLEAN nodesk;		/* desk.rsc already read in ? */
 BOOLEAN nogem;		/* gem.rsc already read in ? */
 
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_MX) | (OS_COUNTRY == CTRY_TR) | (OS_COUNTRY == CTRY_DK)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_IT) | (OS_COUNTRY == CTRY_ES) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_MX) | (OS_COUNTRY == CTRY_TR) | (OS_COUNTRY == CTRY_DK) | (OS_COUNTRY == CTRY_CZ)
 #define EUROTIME 1		/*			European Style       */
 #define EURODATE 1		/*			Date/TimeFlag	     */
 #endif

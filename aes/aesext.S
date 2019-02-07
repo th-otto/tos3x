@@ -50,7 +50,7 @@ _getcookie      equ 0
 #if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
 _infdata        equ DESKDBASE+$8E6                      /* 306us:E3EC06 */
 #endif
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_DE)
 _infdata        equ DESKDBASE+$942                      /* 306de:E3EC92 */
 #endif
 #if (OS_COUNTRY == CTRY_ES)
@@ -83,7 +83,7 @@ _getcookie      equ 0
 #if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
 _infdata        equ DESKDBASE+$8E6                      /* 206us:E3699C */
 #endif
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ)
 _infdata        equ DESKDBASE+$942                      /* 206de:E36A28 */
 #endif
 #if (OS_COUNTRY == CTRY_ES)
@@ -116,7 +116,7 @@ _getcookie      equ 0
 #if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
 _infdata        equ DESKDBASE+$8E6                      /* 208us:E3694C */
 #endif
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ)
 _infdata        equ DESKDBASE+$942                      /* 208de:E369D8 */
 #endif
 #if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)

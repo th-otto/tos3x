@@ -112,6 +112,9 @@ int16_t const dat_first[576] =
 #include "../tospatch/fonts/6x6/polish.c"
 #endif
 #if TP_35_6 == 3
+#include "../tospatch/fonts/6x6/czech.c"
+#endif
+#if TP_35_6 == 4
 #include "../tospatch/fonts/6x6/monaco.c"
 #endif
 };

@@ -106,7 +106,7 @@
 #define HICREG		2			/* highest reg # used for code gen */
 #define BITSPCHAR	8			/* bits per char */
 #define CHRSPWORD	2			/* chars per word */
-#define STRSIZE 	300 		/* max string length */
+#define STRSIZE 	1024 		/* max string length */
 #define NFARGS		40			/* max no. of args to function */
 #define NFRSTR		128 		/* max no. of forward ref struct proto */
 #define PATHSIZE	128

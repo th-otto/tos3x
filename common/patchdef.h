@@ -354,31 +354,32 @@
  * 0: original system font
  * 1: new font from tospatch archive
  * 2: polish font found in tos306pl
- * 3: Monaco Mono
+ * 3: czech font
+ * 4: Monaco Mono
  * below are only available in 8x16:
- * 4: blue
- * 5: classic
- * 6: classic 1
- * 7: classic 2
- * 8: computer
- * 9: cursive
- * 10: desktop
- * 11: deutsch
- * 12: eight
- * 13: griech
- * 14: ibm_g2
- * 15: kritzel
- * 16: mac_font
- * 17: mcappeal
- * 18: old
- * 19: rally
- * 20: skyvox
- * 21: stencil
- * 22: sv
- * 23: tempus
- * 24: thin
- * 25: thin1
- * 26: typewrit
+ * 5: blue
+ * 6: classic
+ * 7: classic 1
+ * 8: classic 2
+ * 9: computer
+ * 10: cursive
+ * 11: desktop
+ * 12: deutsch
+ * 13: eight
+ * 14: griech
+ * 15: ibm_g2
+ * 16: kritzel
+ * 17: mac_font
+ * 18: mcappeal
+ * 19: old
+ * 20: rally
+ * 21: skyvox
+ * 22: stencil
+ * 23: sv
+ * 24: tempus
+ * 25: thin
+ * 26: thin1
+ * 27: typewrit
  */
 /* for 6x6 font */
 #ifndef TP_35_6

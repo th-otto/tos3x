@@ -50,6 +50,8 @@ Country:
 <option value="se">Sweden</option>
 <option value="sf">Switzerland (French)</option>
 <option value="sg">Switzerland (German)</option>
+<option value="pl">Poland</option>
+<option value="cz">Czech Republic</option>
 </select>
 </td>
 </tr>
@@ -1046,7 +1048,8 @@ Substitute 6x6 font:
 <option value="0" selected="selected">Original Atari font</option>
 <option value="1">Modified Atari font</option>
 <option value="2">Polish font from tos306pl</option>
-<option value="3">Monaco Mono</option>
+<option value="3">Czech font</option>
+<option value="4">Monaco Mono</option>
 </select>
 </td>
 <td>
@@ -1060,7 +1063,8 @@ Substitute 8x8 font:
 <option value="0" selected="selected">Original Atari font</option>
 <option value="1">Modified atari font</option>
 <option value="2">Polish font from tos306pl</option>
-<option value="3">Monaco Mono</option>
+<option value="3">Czech font</option>
+<option value="4">Monaco Mono</option>
 </select>
 </td>
 <td>
@@ -1076,30 +1080,31 @@ Substitute 8x16 font:
 <option value="0" selected="selected">Original Atari font</option>
 <option value="1">Modified Atari font</option>
 <option value="2">Polish font from tos306pl</option>
-<option value="3">Monaco Mono</option>
-<option value="4">Blue</option>
-<option value="5">Classic</option>
-<option value="6">Classic 1</option>
-<option value="7">Classic 2</option>
-<option value="8">Computer</option>
-<option value="9">Cursive</option>
-<option value="10">Desktop</option>
-<option value="11">Deutsch</option>
-<option value="12">Eight</option>
-<option value="13">Griech</option>
-<option value="14">IBM G2</option>
-<option value="15">Kritzel</option>
-<option value="16">Mac font</option>
-<option value="17">Mc Appeal</option>
-<option value="18">Old</option>
-<option value="19">Rally</option>
-<option value="20">Skyvox</option>
-<option value="21">Stencil</option>
-<option value="22">Sv</option>
-<option value="23">Tempus</option>
-<option value="24">Thin</option>
-<option value="25">Thin 1</option>
-<option value="26">Typewriter</option>
+<option value="3">Czech font</option>
+<option value="4">Monaco Mono</option>
+<option value="5">Blue</option>
+<option value="6">Classic</option>
+<option value="7">Classic 1</option>
+<option value="8">Classic 2</option>
+<option value="9">Computer</option>
+<option value="10">Cursive</option>
+<option value="11">Desktop</option>
+<option value="12">Deutsch</option>
+<option value="13">Eight</option>
+<option value="14">Griech</option>
+<option value="15">IBM G2</option>
+<option value="16">Kritzel</option>
+<option value="17">Mac font</option>
+<option value="18">Mc Appeal</option>
+<option value="19">Old</option>
+<option value="20">Rally</option>
+<option value="21">Skyvox</option>
+<option value="22">Stencil</option>
+<option value="23">Sv</option>
+<option value="24">Tempus</option>
+<option value="25">Thin</option>
+<option value="26">Thin 1</option>
+<option value="27">Typewriter</option>
 </select>
 </td>
 <td>
@@ -1111,7 +1116,7 @@ Substitute 16x32 font:
 <td>
 <select id="tp_35_32" name="tp_35_32" onchange="change16x32();" style="vertical-align: middle; padding: 0 0;" >
 <option value="0" selected="selected">Original Atari font</option>
-<option value="3">Monaco Mono</option>
+<option value="4">Monaco Mono</option>
 </select>
 </td>
 <td>

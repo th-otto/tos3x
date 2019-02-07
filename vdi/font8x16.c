@@ -39,75 +39,78 @@ int16_t const dat_8x16[2048] =
 #include "../tospatch/fonts/8x16/polish.c"
 #endif
 #if TP_35_16 == 3
-#include "../tospatch/fonts/8x16/monaco.c"
+#include "../tospatch/fonts/8x16/czech.c"
 #endif
 #if TP_35_16 == 4
-#include "../tospatch/fonts/8x16/blue.c"
+#include "../tospatch/fonts/8x16/monaco.c"
 #endif
 #if TP_35_16 == 5
-#include "../tospatch/fonts/8x16/classic.c"
+#include "../tospatch/fonts/8x16/blue.c"
 #endif
 #if TP_35_16 == 6
-#include "../tospatch/fonts/8x16/classic1.c"
+#include "../tospatch/fonts/8x16/classic.c"
 #endif
 #if TP_35_16 == 7
-#include "../tospatch/fonts/8x16/classic2.c"
+#include "../tospatch/fonts/8x16/classic1.c"
 #endif
 #if TP_35_16 == 8
-#include "../tospatch/fonts/8x16/computer.c"
+#include "../tospatch/fonts/8x16/classic2.c"
 #endif
 #if TP_35_16 == 9
-#include "../tospatch/fonts/8x16/cursive.c"
+#include "../tospatch/fonts/8x16/computer.c"
 #endif
 #if TP_35_16 == 10
-#include "../tospatch/fonts/8x16/desktop.c"
+#include "../tospatch/fonts/8x16/cursive.c"
 #endif
 #if TP_35_16 == 11
-#include "../tospatch/fonts/8x16/deutsch.c"
+#include "../tospatch/fonts/8x16/desktop.c"
 #endif
 #if TP_35_16 == 12
-#include "../tospatch/fonts/8x16/eight.c"
+#include "../tospatch/fonts/8x16/deutsch.c"
 #endif
 #if TP_35_16 == 13
-#include "../tospatch/fonts/8x16/griech.c"
+#include "../tospatch/fonts/8x16/eight.c"
 #endif
 #if TP_35_16 == 14
-#include "../tospatch/fonts/8x16/ibm_g2.c"
+#include "../tospatch/fonts/8x16/griech.c"
 #endif
 #if TP_35_16 == 15
-#include "../tospatch/fonts/8x16/kritzel.c"
+#include "../tospatch/fonts/8x16/ibm_g2.c"
 #endif
 #if TP_35_16 == 16
-#include "../tospatch/fonts/8x16/mac_font.c"
+#include "../tospatch/fonts/8x16/kritzel.c"
 #endif
 #if TP_35_16 == 17
-#include "../tospatch/fonts/8x16/mcappeal.c"
+#include "../tospatch/fonts/8x16/mac_font.c"
 #endif
 #if TP_35_16 == 18
-#include "../tospatch/fonts/8x16/old.c"
+#include "../tospatch/fonts/8x16/mcappeal.c"
 #endif
 #if TP_35_16 == 19
-#include "../tospatch/fonts/8x16/rally.c"
+#include "../tospatch/fonts/8x16/old.c"
 #endif
 #if TP_35_16 == 20
-#include "../tospatch/fonts/8x16/skyvox.c"
+#include "../tospatch/fonts/8x16/rally.c"
 #endif
 #if TP_35_16 == 21
-#include "../tospatch/fonts/8x16/stencil.c"
+#include "../tospatch/fonts/8x16/skyvox.c"
 #endif
 #if TP_35_16 == 22
-#include "../tospatch/fonts/8x16/sv.c"
+#include "../tospatch/fonts/8x16/stencil.c"
 #endif
 #if TP_35_16 == 23
-#include "../tospatch/fonts/8x16/tempus.c"
+#include "../tospatch/fonts/8x16/sv.c"
 #endif
 #if TP_35_16 == 24
-#include "../tospatch/fonts/8x16/thin.c"
+#include "../tospatch/fonts/8x16/tempus.c"
 #endif
 #if TP_35_16 == 25
-#include "../tospatch/fonts/8x16/thin1.c"
+#include "../tospatch/fonts/8x16/thin.c"
 #endif
 #if TP_35_16 == 26
+#include "../tospatch/fonts/8x16/thin1.c"
+#endif
+#if TP_35_16 == 27
 #include "../tospatch/fonts/8x16/typewrit.c"
 #endif
 };

@@ -16,10 +16,10 @@ _SWITCH .NATION
   _CASE .FRG:
     .d1 = 0
     .d2 = 0
-    .INFDATA = 36A28
-    .RSC_TAB = 36AC4
+    .INFDATA = 36A28       ; desktop filenames
+    .RSC_TAB = 36AC4       ; start of resource data
     .TOSINFO_OFS = 1A4A    ; offset to tos-info-dialog from RSC_TAB
-    .ROMTOP  = 3DFC8
+    .ROMTOP  = 3DFC8       ; end of text+data segments
 
   _CASE .FRA:
     .d1 = 1E
@@ -76,6 +76,14 @@ _SWITCH .NATION
     .RSC_TAB = 36AF0
     .TOSINFO_OFS = 1A4A
     .ROMTOP  = 3DFF4
+
+  _CASE .CZE:
+    .d1 = 0
+    .d2 = 0
+    .INFDATA = 36A28       ; desktop filenames
+    .RSC_TAB = 36AC4       ; start of resource data
+    .TOSINFO_OFS = 1A4A    ; offset to tos-info-dialog from RSC_TAB
+    .ROMTOP  = 3DFC8       ; end of text+data segments
 
   _DEFAULT:
     _ERROR "unsupported country"

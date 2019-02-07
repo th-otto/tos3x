@@ -119,6 +119,9 @@ int16_t const dat_8x8[1024] =
 #include "../tospatch/fonts/8x8/polish.c"
 #endif
 #if TP_35_8 == 3
+#include "../tospatch/fonts/8x8/czech.c"
+#endif
+#if TP_35_8 == 4
 #include "../tospatch/fonts/8x8/monaco.c"
 #endif
 };

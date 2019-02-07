@@ -83,7 +83,7 @@ static int16_t const key1table[] = {
 #endif
 #endif
 
-#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ)
 /* GERMANY|SWISSFRE|SWISSGER */
 static int16_t const key2table[] = {
 	0x1e00,	/* ALT-'A' */
@@ -195,7 +195,7 @@ static int16_t const con1table[] = {
 #endif
 #endif
 
-#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL)
+#if MULTILANG_SUPPORT | (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SF) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ)
 /* GERMANY|SWISSFRE|SWISSGER */
 static int16_t const con2table[] = {
 	0x1e01,	/* CTRL-'A' */
@@ -530,6 +530,7 @@ PP(uint16_t key;)
 	case CTRY_DE:
 	case CTRY_SF:
 	case CTRY_SG:
+	case CTRY_CZ:
 		keytable = key2table;
 		contable = con2table;
 		break;

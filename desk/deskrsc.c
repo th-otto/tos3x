@@ -1,5 +1,7 @@
 #include "desktop.h"
 
+#define NEED_STRINGS
+
 #if !STR_IN_RSC
 
 #if OS_COUNTRY == CTRY_US
@@ -48,6 +50,10 @@
 
 #if OS_COUNTRY == CTRY_PL
 #include "rsc/306/strpl.h"
+#endif
+
+#if OS_COUNTRY == CTRY_CZ
+#include "rsc/306/strcz.h"
 #endif
 
 #endif

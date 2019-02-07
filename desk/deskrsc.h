@@ -25,7 +25,7 @@ error
 #if OS_COUNTRY == CTRY_UK
 #include "rsc/306/deskuk.h"
 #endif
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_CZ)
 #include "rsc/306/deskde.h"
 #endif
 #if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
@@ -63,6 +63,11 @@ error
  */
 #if !STR_IN_RSC
 
+#if (OS_COUNTRY == CTRY_CZ)
+#include "rsc/306/strcz.h"
+#endif
+
+#ifndef More
 extern char const More[];
 extern char const Endfile[];
 extern char const Cart[]; /* unused; taken from desktop.inf instead */
@@ -87,5 +92,6 @@ extern char const Istrs[];
 extern char const Device[];
 extern char const Sinf[];
 extern char const Litem[];
+#endif
 
 #endif

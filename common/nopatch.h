@@ -100,7 +100,7 @@
 #define TP_02 0
 #define TP_03 0
 #define TP_04 0
-#define TP_05 (OS_COUNTRY == CTRY_PL)
+#define TP_05 ((OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ))
 #define TP_06 0
 #define TP_07 0
 #define TP_08 0
@@ -108,9 +108,9 @@
 #define TP_10 0
 #define TP_11 0
 #define TP_12 0
-#define TP_13 (OS_COUNTRY == CTRY_PL)
+#define TP_13 ((OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ))
 #define TP_14 0
-#define TP_15 (OS_COUNTRY == CTRY_PL)
+#define TP_15 ((OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ))
 #define TP_16 0
 #define TP_17 0
 #define TP_18 0
@@ -135,9 +135,15 @@
 #define TP_35_8 2
 #define TP_35_16 2
 #else
+#if OS_COUNTRY == CTRY_CZ
+#define TP_35_6 3
+#define TP_35_8 3
+#define TP_35_16 3
+#else
 #define TP_35_6 0
 #define TP_35_8 0
 #define TP_35_16 0
+#endif
 #endif
 #define TP_35_32 0
 #define TP_40 0

@@ -85,6 +85,13 @@
 #define GLUELEN     $00007658
 #endif
 
+#if OS_COUNTRY == CTRY_CZ
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $000009DE
+#define GLUELEN     $00007504
+#endif
+
 #if OS_COUNTRY == CTRY_PL
 #if BINEXACT
 #undef RAMVERSION
@@ -154,7 +161,7 @@
 #define GLUELEN     $00007492
 #endif
 
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_PL)
+#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ)
 #define BIOSTLEN    BTLEN_US+$5A
 #define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $000009DE
@@ -276,6 +283,13 @@
 #define DESKTLEN    DTLEN_US-$2A
 #define DESKDLEN    $0000095E
 #define GLUELEN     $00007658
+#endif
+
+#if OS_COUNTRY == CTRY_CZ
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $000009DE
+#define GLUELEN     $00007504
 #endif
 
 /*
