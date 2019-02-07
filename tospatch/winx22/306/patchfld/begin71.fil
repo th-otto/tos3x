@@ -151,6 +151,7 @@ _ENDIF
 ~ $41,fa,00,0e                ; lea.l     refresh_done(pc),a0
 ~ $21,c8,00,08                ; move.l    a0,($00000008).w
 ~ $33,fc,00,00,ff,d0,00,e0    ; move.w    #$0000,$FFD000E0
+! ~ - 2
 .refresh_done:
 ~ $41,fa,00,54                ; lea.l     tt_ramsize_done(pc),a0
 ~ $21,c8,00,08                ; move.l    a0,($00000008).w

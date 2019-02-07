@@ -55,10 +55,8 @@ _ENDSWITCH
 ;>1 0180000 ; 2MB-ST-RAM / 1 File
 
 -patchfld	; Dsetpath("patchfld\")
-
 +relocs.fil
-
 -..                ; Dsetpath ('..')
+
 ;PrÅfsumme berechnen
 .CRC = 1
-
