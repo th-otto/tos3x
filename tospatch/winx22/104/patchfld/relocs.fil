@@ -1,3 +1,105 @@
+; country specific offsets for various routines
+; .d1 is caused by different alt-key handling in bios,
+;    and affects all addresses >= $00
+; .d2 is caused by different time/date formats in desktop,
+;    and affects all addresses >= $00
+_SWITCH .NATION
+
+  _CASE .USA:
+    .d1 = -5A
+    .d2 = -30
+    .INFDATA = 
+    .RSC_TAB = 2BA10
+    .TOSINFO_OFS = 
+    .ROMTOP  = 2FBD4
+
+  _CASE .FRG:
+    .d1 = 0
+    .d2 = 0
+    .INFDATA = 
+    .RSC_TAB = 2BA3E
+    .TOSINFO_OFS = 
+    .ROMTOP  = 2FC64
+
+  _CASE .FRA:
+    .d1 = 1E
+    .d2 = 1E
+    .INFDATA = 
+    .RSC_TAB = 2BA5C
+    .TOSINFO_OFS = 1B71
+    .ROMTOP  = 2FF32
+
+  _CASE .UK:
+    .d1 = -5A
+    .d2 = -30
+    .INFDATA = 
+    .RSC_TAB = 2BA10
+    .TOSINFO_OFS = 
+    .ROMTOP  = 2FBD4
+
+  _CASE .SPA:
+    .d1 = 2C
+    .d2 = 2C
+    .INFDATA = 
+    .RSC_TAB = 2BA6A
+    .TOSINFO_OFS = 
+    .ROMTOP  = 2FE84
+
+  _CASE .ITA:
+    .d1 = 0E
+    .d2 = 0E
+    .INFDATA = 
+    .RSC_TAB = 
+    .TOSINFO_OFS = 
+    .ROMTOP  = 
+
+  _CASE .SWE:
+    .d1 = 1E
+    .d2 = 1E
+    .INFDATA = 
+    .RSC_TAB = 2BA66
+    .TOSINFO_OFS = 
+    .ROMTOP  = 2FD36
+
+  _CASE .SWF:
+    .d1 = 2C
+    .d2 = 2C
+    .INFDATA = 
+    .RSC_TAB = 
+    .TOSINFO_OFS = 
+    .ROMTOP  = 
+
+  _CASE .SWG:
+    .d1 = 2C
+    .d2 = 2C
+    .INFDATA = 
+    .RSC_TAB = 
+    .TOSINFO_OFS = 
+    .ROMTOP  = 
+
+  _CASE .CZE:
+    .d1 = 2C
+    .d2 = 2C
+    .INFDATA = 
+    .RSC_TAB = 2BA3E
+    .TOSINFO_OFS = 
+    .ROMTOP  = 2FC64
+
+  _CASE .HOL:
+    .d1 = 2C
+    .d2 = 2C
+    .INFDATA = 
+    .RSC_TAB = 2BA0C
+    .TOSINFO_OFS = 
+    .ROMTOP  = 2FDD8
+
+  _DEFAULT:
+    _ERROR "unsupported country"
+_ENDSWITCH
+
+.RSC_LEN  = .ROMTOP-.RSC_TAB
+
+;*******************************************************************************
 ;*******************************************************************************
 ;* MRF:
 ;* Reloc-Korrekturen NUR (!!!) fÅr das TOS 1.04 vom 6.4.1989
@@ -11,15 +113,25 @@
 !B01C
 !1ABF4
 !288CA
-!29676
-!297B2
-!29B52
-!29D08
-!2A5B2
-!2A6B2
 !2EC00
 
-!DA2  ..DC2         ;Bombenimage
-!28A78..28EF8       ;6X6  Fontimage
-!29154..29954       ;8x8  Fontimage
-!29954..2A954       ;8x16 Fontimage
+!DA2  ..DC2         ; bomb image
+!28A78..28EF8       ; 6x6 font data
+!29154..29954       ; 8x8 font data
+!29954..2A954       ; 8x16 font data
+
+!325AE+.d2 .. 329B6+.d2 ; Atari logo
+!329B6+.d2 .. 32BB6+.d2 ; crc table
+!32BB6+.d2 .. 32D36+.d2 ; bios keyboard tables
+!32D36+.d2 .. 32D54+.d2 ; bell sound
+!32D54+.d2 .. 32D72+.d2 ; click sound
+!32E84+.d2 .. 33086+.d2 ; 6x6 offsets
+!33086+.d2 .. 33506+.d2 ; 6x6 font data
+!33560+.d2 .. 33762+.d2 ; 8x8 offsets
+!33762+.d2 .. 33F62+.d2 ; 8x8 font data
+!33F62+.d2 .. 34F62+.d2 ; 8x16 font data
+!34FBE+.d2 .. 35258+.d2 ; vdi patterns
+!353B4+.d2 .. 353F4+.d2 ; pel mapping tables
+!362AA+.d2 .. 362C8+.d2 ; desktop keyboard table
+!367C0+.d2 .. .INFDATA+2C ; desktop strings
+!.RSC_TAB .. .ROMTOP ; resource data

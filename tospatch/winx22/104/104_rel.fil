@@ -675,27 +675,30 @@ _ENDIF
 
 .RSC = 0            ;1: RSC-Patch einbinden, 0: RSC-Patch nicht einbinden
 
-_SWITCH .NATION
-_CASE .FRG: .INSTALL_RSC = 277B6
-            .RSC_TAB     = 2BA3E
-            .RSC_END     = 2FC64
-_DEFAULT: .RSC = 0
-_ENDSWITCH
-
 _IF .RSC
  _IF .ICONS !O! .INFO_TXT !O! .MOUSE
   _ERROR "Entweder RSC/DESKTOP-Patch oder nur die anderen RSC-Patches benutzen"
  _ENDIF
 
  _SWITCH .NATION
- _CASE .FRG: -RSC\FRG\             ;Ins deutsche Subdirectory wechseln
+ _CASE .FRG: -rsc\de
+ _CASE .USA: -rsc\us
+ _CASE .FRG: -rsc\fr
+ _CASE .UK:  -rsc\uk
+ _CASE .SPA: -rsc\es
+ _CASE .ITA: -rsc\it
+ _CASE .SWE: -rsc\se
+ _CASE .SWF: -rsc\sf
+ _CASE .SWG: -rsc\sg
+ _CASE .CZE: -rsc\cz
+ _CASE .HOL: -rsc\nl
  _ENDSWITCH
  
- .RSC_TAB+A   104_1.RSC            ;Resource-Datei 1
- .RSC1_END: ~ 104_2.RSC            ;Resource-Datei 2
- .RSC2_END: ~ DESKTOP.INF          ;DESKTOP.INF
- .INF_END:  _EVEN                  ;Damit nachfolgender Code ausfÅhrbar bleibt 
- .RSC_END:                         ;RSC/DESKTOP-Ende sichern
+ .RSC_TAB+A   aes.rsc            ;Resource-Datei 1
+ .RSC1_END: ~ desk.rsc           ;Resource-Datei 2
+ .RSC2_END: ~ desktop.inf        ;DESKTOP.INF
+ .INF_END:  _EVEN                ;Damit nachfolgender Code ausfÅhrbar bleibt 
+ .ROMTOP:                        ;RSC/DESKTOP-Ende sichern
 
  _IF .INF_END-.RSC_TAB < 8000
   .RSC_TAB          $.RSC1_END-.RSC_TAB.w
@@ -716,10 +719,11 @@ _IF .RSC
 
  -..\..             ;ZurÅck ins normale Patchfield wechseln.
 
+!.RSC_TAB .. .ROMTOP              ;Im RSC/DESKTOP.INF nicht Relozieren
+
 _ENDIF
 
-!.RSC_TAB .. .RSC_END              ;Im RSC/DESKTOP.INF nicht Relozieren
-.RSC_END                           ;Ab Ende RSC/DESKTOP.INF geht es weiter.
+.ROMTOP                           ;Ab Ende RSC/DESKTOP.INF geht es weiter.
 
 ;*******************************************************************************
 ;* MRF:
