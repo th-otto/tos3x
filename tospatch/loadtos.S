@@ -211,13 +211,13 @@ copy_loop:      move.l  -(A0),-(A1)     ;16 Bytes kopieren
 
                 bra     tos_start       ;TOS aktivieren
 
-domem_err:
+domem_error:
                 tst.b     existflag
                 beq.s     domem1
                 tst.b     cmdflag
                 bne       mem_error
 domem1:
-                lea.l     loaddir_message(pc),a0
+                lea.l     loaddir_msg(pc),a0
                 bsr       printstr
                 clr.l     -(a7)
                 move.w    #$0020,-(a7)
