@@ -18,8 +18,10 @@
 #define WF_APG11        0x575b
 #define WF_APG12        0x575c
 
-#define W_SMALLER   19
-#define W_BOTTOMER  20
+#define W_UPGRIP   19
+#define W_DNGRIP   20
+#define W_LFGRIP   21
+#define W_RTGRIP   22
 
 #define WX_MAXOBJ   23
 
@@ -66,7 +68,9 @@ typedef struct wx_window
 	/* 24 */	GRECT		w_work;
 	/* 32 */	GRECT		w_prev;
 	/* 40 */	GRECT		w_curr;
-	/* 48 */    char unused1[10];
+	/* 48 */    int16_t     w_handle;
+	/* 50 */    struct wx_window *w_prevlink;
+	/* 54 */    struct wx_window *w_nextlink;
 	/* 58 */	int16_t		w_hslide;
 	/* 60 */	int16_t		w_vslide;
 	/* 62 */	int16_t		w_hslsiz;
@@ -94,7 +98,7 @@ typedef struct {
 } WX_MEM;
 
 struct wxinfo {
-	WX_MEM *wx_mem;
+	WX_MEM **wx_mem;
 	int16_t maxwin;
 	uint16_t size_win;
 	PD **rlr;
@@ -156,6 +160,13 @@ extern struct _winxvars winxvars;
 #define WX_NOCLIP     0x0400 /* Allow to move windows outside of screen */
 #define WX_WCORR      0x0800 /* Fix wrong window positions */
 
+/*
+ * opcodes for winxfunc:
+ *
+ *  3 - called when returning from gem_main()
+ *  7 - called to lookup an application name
+ * 11 - returns address of delay values in d0
+ */
 
 
 int16_t wx_create PROTO((uint16_t kind, GRECT *rect));

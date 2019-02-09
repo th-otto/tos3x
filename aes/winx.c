@@ -98,6 +98,44 @@ PP(uint16_t mask;)
 }
 
 
+/* 306de/winx22: 00e21320 */
+static WX_WINDOW *wx_prev(P(int16_t) wh)
+PP(int16_t wh;)
+{
+	return wx_getwin(wh)->w_prevlink;
+}
+
+
+/* 306de/winx22: 00e2132e */
+static VOID wx_unlink(P(int16_t) wh)
+PP(int16_t wh;)
+{
+	register WX_WINDOW *win, *prev, *next;
+	win = wx_getwin(wh);
+	prev = win->w_prevlink;
+	next = win->w_nextlink;
+	next->w_prevlink = prev;
+	prev->w_nextlink = next;
+	win->w_prevlink = NULL;
+	win->w_nextlink = NULL;
+}
+
+
+/* 306de/winx22: 00e2134c */
+static VOID wx_link(P(int16_t) wh)
+PP(int16_t wh;)
+{
+	register WX_WINDOW *win, *prev, *next;
+	win = wx_getwin(wh);
+	prev = wx_gmem()->win;
+	next = prev->w_nextlink;
+	next->w_prevlink = win;
+	win->w_nextlink = next;
+	win->w_prevlink = prev;
+	prev->w_nextlink = win;
+}
+
+
 /* 306de/winx22: e213aa */
 static BOOLEAN wx_bgctrl(P(int16_t) handle)
 PP(int16_t handle;)
@@ -593,10 +631,16 @@ int16_t wx_find(P(int) mx, P(int) my)
 PP(int mx;)									/* mouse's x position */
 PP(int my;)									/* mouse's y position */
 {
-	WX_MEM *mem = wx_gmem();
-
-	(VOID)mem;
-	return 0;
+	register WX_WINDOW *win;
+	
+	win = wx_gmem()->win;
+	do
+	{
+		win = win->w_nextlink;
+		if (inside(mx, my, &win->w_curr))
+			return win->w_handle;
+	} while (win->w_handle != DESK);
+	return NIL;
 }
 
 

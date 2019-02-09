@@ -56,12 +56,15 @@ SPB *ad_windspb;
 STATIC OBJECT W_TREE[NUM_MWIN];
 STATIC OBJECT W_ACTIVE[MAXOBJ];
 
+#if !TP_WINX
 STATIC BOOLEAN w_walkflag;
-
 STATIC LPTREE gl_wtree;
+#endif
 STATIC TEDINFO gl_aname;
 STATIC TEDINFO gl_ainfo;
+#if !TP_WINX
 STATIC int16_t wind_msg[8];
+#endif
 #if !TP_WINX
 STATIC BOOLEAN wasclr; /* WTF */
 #endif
@@ -134,7 +137,9 @@ static TEDINFO const gl_asamp =
 };
 
 
+#if !TP_WINX
 static BOOLEAN w_union PROTO((ORECT *po, GRECT *pt));
+#endif
 
 
 
@@ -782,6 +787,7 @@ PP(int16_t w7;)
 #endif
 
 
+#if !TP_WINX
 /* 206us: 00e1e35c */
 /* 306de: 00e21e1c */
 static VOID w_redraw(P(int16_t) w_handle, P(GRECT *) dirty)
@@ -809,6 +815,7 @@ PP(GRECT *dirty;)
 		}
 	}
 }
+#endif
 
 
 #if !TP_WINX
@@ -1253,6 +1260,7 @@ PP(register GRECT *poutwds;)
 #endif
 
 
+#if !TP_WINX
 /*
  *	Walk down ORECT list and accumulate the union of all the owner rectangles
  */
@@ -1274,6 +1282,7 @@ PP(register GRECT *pt;)
 
 	return TRUE;
 }
+#endif
 
 
 #if !TP_WINX

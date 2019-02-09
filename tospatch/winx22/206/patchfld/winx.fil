@@ -37,7 +37,9 @@
 .gr_slidebox = 2155A+.d1+.BASE
 .gsx_mret    = 2160E+.d1+.BASE
 .gsx_ncode   = 21624+.d1+.BASE
+.inside      = 2225C+.d1+.BASE
 .rc_intersect= 222A8+.d1+.BASE
+.rc_union    = 22312+.d1+.BASE
 .mice_state  = 2BDF4+.d1+.BASE
 
 .srl_row     = 31098+.d2+.BASE
