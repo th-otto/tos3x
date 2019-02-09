@@ -5,7 +5,7 @@
 ~ $30,1b                        ; move.w    (a3)+,d0
 ~ $b0,7c,00,02                  ; cmp.w     #2,d0
 ~ $66,72                        ; bne.s     wx_fill5
-~ $32,39,.D+58.L                ; move.w    $0000AEFA,d1 ; D.g_uda.winx.xAEFA
+~ $32,39,.D+58.L                ; move.w    $0000AEFA,d1  /* winxvars.global_flags */
 ~ $08,01,00,0b                  ; btst      #11,d1
 ~ $67,66                        ; beq.s     wx_fill5
 ~ $32,13                        ; move.w    (a3),d1

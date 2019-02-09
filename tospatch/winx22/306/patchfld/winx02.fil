@@ -20,7 +20,7 @@
 ~ $2f,20                        ; move.l    -(a0),-(a7)
 ~ $3f,20                        ; move.w    -(a0),-(a7)
 ~ $48,79,.appl_msg.L            ; pea.l     $000094B6 ; _appl_msg
-~ $4e,b9,.WINX08+.BASE+12.L     ; jsr       $00E211DE
+~ $4e,b9,.WINX08+.BASE+12.L     ; jsr       ap_send0
 ~ $de,fc,00,12                  ; adda.w    #18,a7
 ;ctmsg4:
 ~ $4e,75                        ; rts
@@ -37,7 +37,7 @@
 ~ $4e,56,ff,e8                  ; link      a6,#-24
 ~ $48,e7,5f,1c                  ; movem.l   d1/d3-d7/a3-a5,-(a7)
 ~ $47,ee,ff,ea                  ; lea.l     -22(a6),a3
-~ $3a,39,.D+58.L                ; move.w    $0000AEFA,d5
+~ $3a,39,.D+58.L                ; move.w    $0000AEFA,d5 /* winxvars.global_flags */
 ~ $72,02                        ; moveq.l   #2,d1
 ~ $b2,68,00,04                  ; cmp.w     4(a0),d1
 ~ $57,c0                        ; seq       d0
@@ -52,10 +52,10 @@
 ~ $1d,40,ff,e8                  ; move.b    d0,-24(a6)
 ~ $36,28,00,06                  ; move.w    6(a0),d3
 ~ $2e,90                        ; move.l    (a0),(a7)
-~ $4e,b9,.WINX08+.BASE+13D2.L   ; jsr       $00E2259E
+~ $4e,b9,.WINX08+.BASE+13D2.L   ; jsr       wx_find
 ~ $3e,00                        ; move.w    d0,d7
 ~ $6f,00,02,48                  ; ble       hctlw31
-~ $4e,b9,.WINX08+.BASE+5C.L     ; jsr       $00E21228
+~ $4e,b9,.WINX08+.BASE+5C.L     ; jsr       wx_getwin
 ~ $2a,48                        ; movea.l   a0,a5
 ~ $3c,2d,00,06                  ; move.w    6(a5),d6
 ~ $20,4b                        ; movea.l   a3,a0
@@ -124,7 +124,7 @@
 ~ $61,00,01,c8                  ; bsr       hctlw33
 ~ $4e,b9,.WINX08+.BASE+1AC0.L   ; jsr       $00E22C8C
 ~ $01,a8                        ; dc.w      hctlw30-.
-;hctlw7a:
+.hctlw7a:
 ~ $61,00,01,d2                  ; bsr       hctlw37
 ~ $c9,c5                        ; muls.w    d5,d4
 ~ $60,e2                        ; bra.s     hctlw5
@@ -170,7 +170,7 @@
 ;hctlw12a:
 ~ $60,a0                        ; bra.s     hctlw10
 ;hctlw13:
-~ $4e,f9,.WINX08+.BASE+7A.L     ; jmp       $00E21246
+~ $4e,f9,.WINX08+.BASE+7A.L     ; jmp       wx_chkwin
 ;hctlw14:
 ~ $08,06,00,05                  ; btst      #5,d6
 ~ $67,94                        ; beq.s     hctlw10
@@ -234,7 +234,7 @@
 ;hctlw22:
 ~ $61,00,00,9a                  ; bsr       hctlw33
 ~ $4e,b9,.WINX08+.BASE+1744.L   ; jsr       $00E22910
-~ $fe,d4                        ; dc.w      hctlw7a-.
+~ $.hctlw7a-~.W                 ; dc.w      hctlw7a-.
 ;hctlw23:
 ~ $78,18                        ; moveq.l   #24,d4
 ~ $12,3b,30,dc                  ; move.b    hctlw21-10(pc,d3.w),d1

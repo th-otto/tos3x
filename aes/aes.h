@@ -209,9 +209,6 @@ typedef int BOOLEAN;
 typedef intptr_t LPTREE;
 
 
-#define DESKWH     0
-
-
 /*
  * large.s
  */

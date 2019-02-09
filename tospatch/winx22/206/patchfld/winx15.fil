@@ -50,7 +50,7 @@
 ~ $24,4c                        ; movea.l   a4,a2
 ~ $30,2d,00,04                  ; move.w    4(a5),d0
 ~ $c1,fc,01,22                  ; muls.w    #$0122,d0
-~ $20,79,.D+5A.L                ; movea.l   $0000AEFC,a0 /* D.g_uda.winx.wx_mem */
+~ $20,79,.D+5A.L                ; movea.l   $0000AEFC,a0 /* winxvars.wx_mem */
 ~ $d1,c0                        ; adda.l    d0,a0
 ~ $22,68,00,9e                  ; movea.l   158(a0),a1
 ~ $41,e8,00,18                  ; lea.l     24(a0),a0
@@ -94,24 +94,24 @@
 ~ $20,3c,57,49,4e,58            ; move.l    #'WINX',d0
 ~ $61,46                        ; bsr.s     getcookie
 ~ $20,c0                        ; move.l    d0,(a0)+
-~ $41,f9,.D+50.L                ; lea.l     $0000AEF2,a0
+~ $41,f9,.D+50.L                ; lea.l     $0000AEF2,a0  /* winxvars */
 ~ $70,01                        ; moveq.l   #1,d0
-~ $4e,b9,.WINX08+.BASE+258.L    ; jsr       $00E21424
+~ $4e,b9,.WINX08+.BASE+258.L    ; jsr       wx_callfunc
 ~ $67,06                        ; beq.s     wx_alloc1
-~ $33,c0,.D+58.L                ; move.w    d0,$0000AEFA /* global_flags */
+~ $33,c0,.D+58.L                ; move.w    d0,$0000AEFA /* winxvars.global_flags */
 ;wx_alloc1:
 ~ $20,1f                        ; move.l    (a7)+,d0
 ~ $4e,75                        ; rts
 ;winxvers:
 ~ $57,49,4e,58                  ; dc.b 'WINX'
-~ $02,20                        ; dc.w $220
-~ $1b,51                        ; dc.w $1b51 /* 1993/10/17 */
+~ $.WX_VERSION.W                ; dc.w $220
+~ $.WX_DATE.W                   ; dc.w $1b51 /* 1993/10/17 */
 ~ $.GLOBAL.W                    ; dc.w $1fff /* global flags */
 
 ;winxinfo:
-~ $.D+5A.L                      ; dc.l D+$5A /* &D.g_uda.winx.wx_mem */
+~ $.D+5A.L                      ; dc.l D+$5A /* winxvars.wx_mem */
 ~ $00,28                        ; dc.w WX_MAXWIN
-~ $01,22                        ; dc.w 290 /* sizeof(WINDOW) */
+~ $01,22                        ; dc.w 290 /* sizeof(WX_WINDOW) */
 ~ $.rlr.L                       ; dc.l rlr
 ~ $00,90                        ; dc.w $0090
 ~ $05,00                        ; dc.w WX_QUEUE_SIZE

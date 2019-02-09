@@ -957,7 +957,7 @@ Global flags: <input type="number" id="winx_global" name="winx_global" value="65
 <input type="checkbox" id="winx_g8" name="winx_g8" value="1" checked="checked" onclick="winxGlobal(8);" />wide slider background<br />
 <input type="checkbox" id="winx_g9" name="winx_g9" value="1" checked="checked" onclick="winxGlobal(9);" />contrl-click on element activates background window<br />
 <input type="checkbox" id="winx_g10" name="winx_g10" value="1" checked="checked" onclick="winxGlobal(10);" />click on title puts window to background<br />
-<input type="checkbox" id="winx_g11" name="winx_g11" value="1" checked="checked" onclick="winxGlobal(11);" />3D-Lock for window frame<br />
+<input type="checkbox" id="winx_g11" name="winx_g11" value="1" checked="checked" onclick="winxGlobal(11);" />3D-Look for window frame<br />
 <input type="checkbox" id="winx_g12" name="winx_g12" value="1" checked="checked" onclick="winxGlobal(12);" />pattern reference point correction<br />
 <input type="checkbox" id="winx_g13" name="winx_g13" value="1" checked="checked" onclick="winxGlobal(13);" />use application name for appl_find()<br />
 <input type="checkbox" id="winx_g14" name="winx_g14" value="1" checked="checked" onclick="winxGlobal(14);" />change mouse cursor for realtime functions<br />

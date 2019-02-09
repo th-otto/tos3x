@@ -4,6 +4,11 @@
 
 ; 306-206: 3A66
 
+.WX_VERSION = 220
+.WX_DATE    = 1B51 ; 1993/10/17
+
+.WX_QUEUE_SIZE = 500
+
 .WINX08 = 211CC+.d1
 .WINX09 = 25AA2+.d1
 .WINX15 = 34C12+.d2
@@ -12,10 +17,10 @@
 .WINX20 = 3E18A+.d2
 
 ;Damit WINX richtig reloziert wird
-!.WINX08+124A ; 22416
-!.WINX08+1764 ; 22930
 !.WINX08+246  ; 21412
 !.WINX08+250  ; 2141C
+!.WINX08+124A ; 22416
+!.WINX08+1764 ; 22930
 !.WINX08+FDA  ; INIT_SCROLL 221A6
 !.WINX08+FDC  ; CONT_SCROLL 221A8
 !.WINX08+FDE  ; CONT_CLOSE 221AA
@@ -33,6 +38,8 @@
 .gr_dragbox  = 24EEE+.d1+.BASE
 .gr_slidebox = 24FC0+.d1+.BASE
 .gsx_ncode   = 2508A+.d1+.BASE
+.gsx_mret    = 25074+.d1+.BASE
+.rc_intersect= 25D0E+.d1+.BASE
 .mice_state  = 2F85A+.d1+.BASE
 
 .srl_row     = 34AFE+.d2+.BASE
@@ -50,11 +57,15 @@
 .ad_stdesk   = 8F4E
 .ad_windspb  = 8F7E
 .gl_ticktime = 9024
+.w_walkflag  = 913A
 .winhead     = 914C
 .gl_newdesk  = 9156
+.gl_hbox     = 92D4
 .gl_rfull    = 94A2
+.gl_rscreen  = 94AC
 .appl_msg    = 94B6
 .gl_newroot  = 94D8
+.gl_wbox     = 9504
 .gl_mowner   = 950A
 .s_stofit    = 95AE
 .gl_wtop     = 95D6
@@ -249,7 +260,9 @@
 ;
 ; replacements for all window manager functions
 ;
-.WINX08 winx08.abs              ;211CC - 230A4 (.7896)
+.WINX08
+;+winx08.fil              ;211CC - 230A4 (.7896)
+.WINX08 winx08.abs
 .WINX08+246     $.LOCAL.W       ; 21412
 .WINX08+250     $.DESKTOP.W     ; 2141C
 .WINX08+FDA     $.INIT_SCROLL.W ; 221A6

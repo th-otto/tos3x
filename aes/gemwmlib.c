@@ -134,18 +134,12 @@ static TEDINFO const gl_asamp =
 };
 
 
-
-VOID w_nilit PROTO((int16_t num, OBJECT olist[]));
-VOID w_obadd PROTO((OBJECT *olist, int16_t parent, int16_t child));
-VOID w_setup PROTO((PD *ppd, int16_t w_handle, int16_t kind));
-VOID setcol PROTO((int16_t ndx, WINDOW *wp, BOOLEAN topped));
-static VOID w_adjust PROTO((int16_t parent, int16_t obj, int16_t x, int16_t y,  int16_t w, int16_t h));
 static BOOLEAN w_union PROTO((ORECT *po, GRECT *pt));
 
 
 
 /* 306de: 00e211cc */
-VOID w_nilit(P(int16_t) num, P(OBJECT *) olist)
+static VOID w_nilit(P(int16_t) num, P(OBJECT *) olist)
 PP(register int16_t num;)
 PP(OBJECT * olist;)
 {
@@ -163,7 +157,7 @@ PP(OBJECT * olist;)
  *  is added at the end of the parent's current sibling list.
  *  It is also initialized.
  */
-VOID w_obadd(P(OBJECT *) olist, P(int16_t) parent, P(int16_t) child)
+static VOID w_obadd(P(OBJECT *) olist, P(int16_t) parent, P(int16_t) child)
 PP(OBJECT *olist;)
 PP(register int16_t parent;)
 PP(register int16_t child;)
@@ -185,8 +179,9 @@ PP(register int16_t child;)
 }
 
 
+#if !TP_WINX
 /* 306de: 00e21296 */
-VOID w_setup(P(PD *) ppd, P(int16_t) w_handle, P(int16_t) kind)
+static VOID w_setup(P(PD *) ppd, P(int16_t) w_handle, P(int16_t) kind)
 PP(PD *ppd;)
 PP(int16_t w_handle;)
 PP(int16_t kind;)
@@ -208,6 +203,7 @@ PP(int16_t kind;)
 		pwin->w_bcolor[i] = wbcolor[i];
 	}
 }
+#endif
 
 
 /* 306de: 00e21328 */
@@ -284,7 +280,7 @@ PP(GRECT *pt;)
  * setcol() - set the color of an object.
  */
 /* 306de: 00e21412 */
-VOID setcol(P(int16_t) ndx, P(WINDOW *) wp, P(BOOLEAN) topped)
+static VOID setcol(P(int16_t) ndx, P(WINDOW *) wp, P(BOOLEAN) topped)
 PP(int16_t ndx;)							/* index into object structure */
 PP(WINDOW *wp;)								/* pointer to window structure */
 PP(BOOLEAN topped;)							/* YES: top window color */
@@ -356,6 +352,7 @@ PP(int16_t h;)
 }
 
 
+#if !TP_WINX
 /*
  *	Walk the list and draw the parts of the window tree owned by this window
  */
@@ -398,8 +395,10 @@ PP(register GRECT *pc;)
 		}
 	}
 }
+#endif
 
 
+#if !TP_WINX
 /*
  *  Draw the desktop background pattern underneath the current set of windows
  */
@@ -430,10 +429,12 @@ PP(register GRECT *dirty;)							/* rectangle of dirty area */
 	dirty->g_h += DROP_SIZE;
 #endif
 
-	do_walk(DESKWH, (OBJECT *)tree, root, depth, dirty);
+	do_walk(DESK, (OBJECT *)tree, root, depth, dirty);
 }
+#endif
 
 
+#if !TP_WINX
 static VOID w_cpwalk(P(int16_t) wh, P(int16_t) obj, P(int16_t) depth, P(BOOLEAN) usetrue)
 PP(register int16_t wh;)
 PP(int16_t obj;)
@@ -459,6 +460,7 @@ PP(BOOLEAN usetrue;)
 	w_bldactive(wh);
 	do_walk(wh, gl_awind, obj, depth, &c);
 }
+#endif
 
 
 #if !TP_WINX
@@ -601,7 +603,7 @@ PP(register int16_t h;)
 }
 
 
-#define w_top() (gl_wtop != NIL ? gl_wtop : DESKWH)
+#define w_top() (gl_wtop != NIL ? gl_wtop : DESK)
 
 
 VOID w_setactive(NOTHING)
@@ -751,6 +753,7 @@ PP(register int16_t w_handle;)
 }
 
 
+#if !TP_WINX
 /* 
  * ap_sendmsg() - send message to current process
  */
@@ -776,6 +779,7 @@ PP(int16_t w7;)
 	ap_msg[7] = w7;
 	ap_rdwr(AQWRT, towhom, 16, ADDR(&ap_msg[0]));
 }
+#endif
 
 
 /* 206us: 00e1e35c */
@@ -873,7 +877,7 @@ PP(GRECT *prc;)
 		((s.g_y + s.g_h > gl_height) && (d.g_y < s.g_y)))
 	{
 		rc_union(&s, &d);
-		*pstop = DESKWH;
+		*pstop = DESK;
 	} else
 	{
 		*pstop = w_handle;
@@ -915,6 +919,7 @@ PP(GRECT *prc;)
 #endif
 
 
+#if !TP_WINX
 /*
  *	Draw windows from top to bottom.  If top is 0, then start at the topmost
  *	window.  If bottom is 0, then start at the bottomost window.  For the
@@ -939,14 +944,14 @@ PP(BOOLEAN moved;)
 	gsx_moff();
 
 	/* update windows from top to bottom */
-	if (bottom == DESKWH)
+	if (bottom == DESK)
 		bottom = W_TREE[ROOT].ob_head;
 
 	/* if there are windows */
 	if (bottom != NIL)
 	{
 		/* start at the top */
-		if (top == DESKWH)
+		if (top == DESK)
 			top = W_TREE[ROOT].ob_tail;
 		/* draw windows from top to bottom */
 		do
@@ -975,6 +980,7 @@ PP(BOOLEAN moved;)
 
 	gsx_mon();
 }
+#endif
 
 
 #if 0
@@ -1078,7 +1084,7 @@ PP(register GRECT *pt;)
 #endif
 	
 	start = w_handle;		/* init. starting window */
-	stop = DESKWH;			/* stop at the top */
+	stop = DESK;			/* stop at the top */
 
 	/* set flag to say we haven't moved the top window */
 	moved = FALSE;
@@ -1140,7 +1146,7 @@ PP(register GRECT *pt;)
 
 			/* start at bottom if a shrink occurred */
 			if (pt->g_w < pc->g_w || pt->g_h < pc->g_h)
-				start = DESKWH;
+				start = DESK;
 
 			/* update rect. is the union of two sizes + the drop shadow */
 			pc->g_w = max(pt->g_w, pc->g_w) + DROP_SIZE;
@@ -1165,19 +1171,19 @@ PP(register GRECT *pt;)
 			if ((pt->g_w == pc->g_w) && (pt->g_h == pc->g_h) && (gl_wtop == w_handle))
 			{
 				moved = w_move(w_handle, &stop, pc);
-				start = DESKWH;
+				start = DESK;
 			}
 
 			/* check for a close */
 			if (!(pt->g_w && pt->g_h))
-				start = DESKWH;
+				start = DESK;
 
 			/* handle other moves and shrinks */
-			if (start != DESKWH)
+			if (start != DESK)
 			{
 				rc_union(pt, pc);
 				if (!rc_equal(pt, pc))
-					start = DESKWH;
+					start = DESK;
 			}
 		}
 	}
@@ -1212,7 +1218,7 @@ PP(register GRECT *pt;)
 #endif
 
 	/* update the desktop background */
-	if (start == DESKWH)
+	if (start == DESK)
 		w_drawdesk(pc);
 
 	/* start the redrawing	*/
@@ -1324,11 +1330,11 @@ BOOLEAN wm_start(NOTHING)
 	po->o_gr.g_y = gl_hbox;
 	po->o_gr.g_w = gl_width;
 	po->o_gr.g_h = gl_height - gl_hbox;
-	w_setup(rlr, DESKWH, NONE);
-	w_setsize(WS_CURR, DESKWH, &gl_rscreen);
-	w_setsize(WS_PREV, DESKWH, &gl_rscreen);
-	w_setsize(WS_FULL, DESKWH, &gl_rfull);
-	w_setsize(WS_WORK, DESKWH, &gl_rfull);
+	w_setup(rlr, DESK, NONE);
+	w_setsize(WS_CURR, DESK, &gl_rscreen);
+	w_setsize(WS_PREV, DESK, &gl_rscreen);
+	w_setsize(WS_FULL, DESK, &gl_rfull);
+	w_setsize(WS_WORK, DESK, &gl_rfull);
 
 	/* init global variables */
 	gl_wtop = NIL;
@@ -1582,7 +1588,7 @@ PP(register int16_t *poutwds;)							/* return values */
 		poutwds[0] = pwin->w_vslsiz;
 		break;
 	case WF_TOP:
-		poutwds[0] = /*w_top()*/ gl_wtop == NIL ? DESKWH : gl_wtop;
+		poutwds[0] = /*w_top()*/ gl_wtop == NIL ? DESK : gl_wtop;
 		break;
 	case WF_FIRSTXYWH:
 	case WF_NEXTXYWH:
@@ -1723,7 +1729,7 @@ PP(register int16_t *pinwds;)							/* values to change to */
 		{
 			w_walkflag = FALSE;
 			w_drawdesk((GRECT *)pinwds);
-			w_update(DESKWH, (GRECT *)pinwds, DESKWH, FALSE);
+			w_update(DESK, (GRECT *)pinwds, DESK, FALSE);
 		}
 		break;
 	case WF_NEWDESK:

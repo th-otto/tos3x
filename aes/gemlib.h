@@ -287,14 +287,6 @@ typedef struct window
 	/* 132 */
 } WINDOW;
 
-#if TP_WINX
-typedef struct wx_window
-{
-	WINDOW aes;
-	char unused1[158];
-} WX_WINDOW;
-#endif
-
 #define NUM_ORECT (NUM_WIN * 10)	/* is this enough???	*/
 
 /* system foreground and* background rules but transparent */

@@ -370,7 +370,7 @@ PP(int16_t my;)
 		tree = gl_awind;
 		UNUSED(tree);
 #if BINEXACT
-		cpt = ob_find(gl_awind, 10L, mx, my); /* sigh */
+		cpt = ob_find((LPTREE) gl_awind, 10L, mx, my); /* sigh */
 #else
 		cpt = ob_find((LPTREE) gl_awind, 0, 10, mx, my);
 #endif
@@ -828,9 +828,8 @@ PP(int16_t pid;)
 	gl_dabase = 0;
 	/* figure out load addr */
 	ldaddr = LLCS() + ((int32_t) & ctlmgr);
-	/* create process to    */
-	/* execute it       */
-	return (pstart(&ctlmgr, "SCRENMGR.LOC", ldaddr));
+	/* create process to execute it */
+	return pstart(&ctlmgr, "SCRENMGR.LOC", ldaddr);
 }
 
 

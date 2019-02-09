@@ -11,11 +11,10 @@
 #define NIL (-1)
 #define DESK            0				/* Desktop window handle */
 
-/* max string length	*/
-#define MAX_LEN 81
-/* max depth of search or draw	*/
+/* max depth of search or draw for objects */
 #define MAX_DEPTH 8
-/* inside patterns	*/
+
+/* inside patterns */
 #define IP_HOLLOW 0
 #define IP_1PATT 1
 #define IP_2PATT 2
@@ -25,16 +24,16 @@
 #define IP_6PATT 6
 #define IP_SOLID 7
 
-/* gsx modes		*/
+/* gsx modes */
 #define MD_REPLACE 1
 #define MD_TRANS   2
 #define MD_XOR     3
 #define MD_ERASE   4
 
-/* bit blt rules	*/
+/* bit blt rules */
 #define ALL_WHITE  0
 #define S_AND_D    1
-#define	S_AND_NOTD 2
+#define S_AND_NOTD 2
 #define S_ONLY     3
 #define NOTS_AND_D 4
 #define	D_ONLY     5
@@ -49,10 +48,12 @@
 #define NOTS_OR_D 13
 #define	NOT_SANDD 14
 #define ALL_BLACK 15
-						/* font types		*/
-#define IBM 3
+
+/* font types */
+#define IBM   3
 #define SMALL 5
-						/* Graphic types of obs	*/
+
+/* Graphic types of obs	*/
 #define G_BOX     20
 #define G_TEXT    21
 #define G_BOXTEXT 22
@@ -66,7 +67,9 @@
 #define G_FBOXTEXT 30
 #define G_ICON    31
 #define G_TITLE   32
-						/* Object flags		 */
+#define G_CICON	  33
+
+/* Object flags */
 #define NONE       0x0
 #define SELECTABLE 0x1
 #define DEFAULT    0x2
@@ -77,7 +80,11 @@
 #define TOUCHEXIT 0x40
 #define HIDETREE  0x80
 #define INDIRECT 0x100
-						/* Object states	*/
+#define IS3DOBJ	 0x200		/* set for any 3D object */
+#define IS3DACT	 0x400		/* 0 for indicator, 1 for activator */
+#define SUBMENU	 0x800
+
+/* Object states */
 #define NORMAL    0x0
 #define SELECTED  0x1
 #define CROSSED   0x2
@@ -85,7 +92,10 @@
 #define DISABLED  0x8
 #define OUTLINED 0x10
 #define SHADOWED 0x20
-						/* Object colors	*/
+#define WHITEBAK 0x40
+#define DRAW3D	 0x80
+
+/* Object colors */
 #define WHITE    0
 #define BLACK    1
 #define RED      2
@@ -102,17 +112,21 @@
 #define LCYAN    13
 #define LYELLOW  14
 #define LMAGENTA 15
-					/* editable text field definitions */
+
+/* editable text field definitions */
 #define EDSTART 0
 #define EDINIT  1
 #define EDCHAR  2
 #define EDEND   3
-					/* editable text justification	  */
+
+/* editable text justification */
 #define TE_LEFT  0
 #define TE_RIGHT 1
 #define TE_CNTR  2
 
-/*	Structure Definitions */
+/*
+ * Structure Definitions
+ */
 
 typedef struct object
 {

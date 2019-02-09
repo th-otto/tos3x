@@ -50,7 +50,7 @@ PP(register PD *ppd;)
 	register char **p_qaddr;
 	p_qaddr = &ppd->p_qaddr;
 	if ((*p_qaddr - 6) == (char *)p_qaddr)
-		*p_qaddr = ppd->p_pid * WX_QUEUE_SIZE + (char *)winxvars.wx_mem + WX_MAXWIN * sizeof(WX_WINDOW);
+		*p_qaddr = winxvars.wx_mem->queue[ppd->p_pid];
 #endif
 	ret = FALSE;
 	temp[8] = 0;

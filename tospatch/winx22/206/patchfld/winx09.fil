@@ -5,7 +5,7 @@
 ~ $30,1b                        ; move.w    (a3)+,d0
 ~ $b0,7c,00,02                  ; cmp.w     #2,d0
 ~ $66,72                        ; bne.s     wx_fill5
-~ $32,39,.D+58.L                ; move.w    $0000AEFA,d1 ; D.g_uda.winx.xAEFA
+~ $32,39,.D+58.L                ; move.w    $0000AEFA,d1  /* winxvars.global_flags */
 ~ $08,01,00,0b                  ; btst      #11,d1
 ~ $67,66                        ; beq.s     wx_fill5
 ~ $32,13                        ; move.w    (a3),d1
@@ -43,7 +43,7 @@
 ~ $e5,58                        ; rol.w     #2,d0
 ~ $48,40                        ; swap      d0
 ~ $e5,58                        ; rol.w     #2,d0
-~ $41,f9,.intin.L               ; lea.l     $0000AB98,a0 ; intin
+~ $41,f9,.intin.L               ; lea.l     $0000AB98,a0
 ;wx_fill4:
 ~ $20,c1                        ; move.l    d1,(a0)+
 ~ $20,c0                        ; move.l    d0,(a0)+
@@ -51,7 +51,7 @@
 ~ $70,10                        ; moveq.l   #16,d0
 ~ $2f,00                        ; move.l    d0,-(a7)
 ~ $3f,3c,00,70                  ; move.w    #112,-(a7) ; vsf_udpat
-~ $4e,b9,.gsx_ncode.L           ; jsr       $00E2508A ; gsx_ncode
+~ $4e,b9,.gsx_ncode.L           ; jsr       $00E2508A
 ~ $5c,8f                        ; addq.l    #6,a7
 ~ $70,04                        ; moveq.l   #4,d0
 ;wx_fill5:

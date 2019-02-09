@@ -565,7 +565,7 @@ PP(register int16_t *ow;)							/* return values */
 
 	UNUSED(i);
 	
-	if ((field == WF_DCOLOR) || (field == WF_TOP) || (field == WF_SCREEN) || (field == WF_BOTTOM))
+	if (field == WF_DCOLOR || field == WF_TOP || field == WF_SCREEN || field == WF_BOTTOM)
 		goto wg_1;
 
 	if ((wp = srchwp(handle)) == NULL)

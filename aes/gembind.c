@@ -380,13 +380,13 @@ PP(register VOIDPTR *addr_in;)
 		if ((uint16_t)ret > 1)
 			return 0;
 		WM_HANDLE = 0;
-		WM_WFIELD = 0x575b + ret;
+		WM_WFIELD = WF_APG11 + ret;
 #endif
 		/* fall through */
 
 	case WIND_GET:
 #if TP_WINX
-		ret = wx_get(WM_HANDLE, WM_WFIELD, &WM_OX);
+		ret = wx_get(WM_HANDLE, WM_WFIELD, &WM_OX, (int16_t *)&WM_IX);
 #else
 #if AES3D
 		ret = wm_get(WM_HANDLE, WM_WFIELD, &WM_OX, (int16_t *)&WM_IX);

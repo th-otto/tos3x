@@ -4,6 +4,9 @@
 
 ; 306-206: 3A66
 
+.WX_VERSION = 220
+.WX_DATE    = 1B51 ; 1993/10/17
+
 .WINX08 = 1D766+.d1
 .WINX09 = 2203C+.d1
 .WINX15 = 311AC+.d2
@@ -32,7 +35,9 @@
 .gr_stilldn  = 21326+.d1+.BASE
 .gr_dragbox  = 21488+.d1+.BASE
 .gr_slidebox = 2155A+.d1+.BASE
+.gsx_mret    = 2160E+.d1+.BASE
 .gsx_ncode   = 21624+.d1+.BASE
+.rc_intersect= 222A8+.d1+.BASE
 .mice_state  = 2BDF4+.d1+.BASE
 
 .srl_row     = 31098+.d2+.BASE
@@ -50,11 +55,15 @@
 .ad_stdesk   = 7504
 .ad_windspb  = 7534
 .gl_ticktime = 75DA
+.w_walkflag  = 76F0
 .winhead     = 7702
 .gl_newdesk  = 770C
+.gl_hbox     = 788A
 .gl_rfull    = 7A58
+.gl_rscreen  = 7A62
 .appl_msg    = 7A6C
 .gl_newroot  = 7A8E
+.gl_wbox     = 7ABA
 .gl_mowner   = 7AC0
 .s_stofit    = 7B64
 .gl_wtop     = 7B8C

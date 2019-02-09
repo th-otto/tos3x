@@ -514,7 +514,11 @@ VOID gem_main(NOTHING)
 	else
 		LLSET(ad_stdesk + 12, 0x00001143L);
 
+#if TP_WINX
+	wx_init();
+#else
 	wm_init();
+#endif
 #if SUBMENUS
 	mn_init();
 #endif
@@ -626,6 +630,9 @@ VOID gem_main(NOTHING)
 	cli();
 	givecpm();
 	sti();
+#if TP_WINX
+	wx_callfunc(3, 0L, NULL);
+#endif
 }
 
 

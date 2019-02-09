@@ -420,7 +420,7 @@ PP(register GRECT *pt;)
 		wx_drawdesk(pt);
 #else
 		w_drawdesk(pt);
-        w_update(DESKWH, pt, DESKWH, FALSE);
+        w_update(DESK, pt, DESK, FALSE);
 #endif
 #endif
 		break;

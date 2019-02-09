@@ -25,7 +25,8 @@
 #define OBDEFS_H
 
 #define ROOT 0
-#define NIL -1
+#define NIL (-1)
+#define DESK            0				/* Desktop window handle */
 
 /* keyboard states */
 #define K_RSHIFT 0x0001

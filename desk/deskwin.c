@@ -1515,7 +1515,7 @@ PP(register GRECT *pc;)
 #if TP_WINX
 	{
 		register int16_t a;
-		a = rect.g_x + rect.g_w - winxvars.xAF08 - 8;
+		a = rect.g_x + rect.g_w - winxvars.wbox - 8;
 		if (pc->g_x > a)
 			pc->g_x = a;
 
@@ -1523,7 +1523,7 @@ PP(register GRECT *pc;)
 		if (pc->g_y > a)
 			pc->g_y = rect.g_y + pc->g_h - 2;
 
-		a = rect.g_x - pc->g_w + winxvars.xAF08 + 16;
+		a = rect.g_x - pc->g_w + winxvars.wbox + 16;
 		if (pc->g_x < a)
 			pc->g_x = a;
 

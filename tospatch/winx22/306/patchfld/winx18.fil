@@ -15,7 +15,7 @@
 ;do_xyf2:
 ~ $30,29,00,00                  ; move.w    0(a1),d0
 ~ $d0,42                        ; add.w     d2,d0
-~ $90,79,.D+66.L                ; sub.w     $0000AF08,d0 /* D.g_uda.winx.xAF08 */
+~ $90,79,.D+66.L                ; sub.w     $0000AF08,d0 /* winxvars.xAF08 */
 ~ $51,40                        ; subq.w    #8,d0
 ~ $b0,44                        ; cmp.w     d4,d0
 ~ $6c,02                        ; bge.s     do_xyf3

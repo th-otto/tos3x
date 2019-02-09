@@ -238,7 +238,7 @@ bdout1:
 _delay:
 	movea.l   _D+$5A,a0 /* winxvars.wx_mem */
 	adda.l    d0,a0
-	move.w    21840(a0),d0
+	move.w    21840(a0),d0 /* wx_mem->init_scroll */
 	divs.w    _gl_ticktime,d0
 	ext.l     d0
 	rts

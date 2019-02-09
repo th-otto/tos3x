@@ -99,12 +99,4 @@
 #define QUEUE_SIZE 128
 #endif
 
-#if TP_WINX
-#define WX_VERSION    0x220
-#define WX_DATE       0x1b51 /* 1993/10/17 */
-
-#define WX_QUEUE_SIZE 0x500
-#define WX_MAXWIN     40
-#endif
-
 #define CMDLEN 128
