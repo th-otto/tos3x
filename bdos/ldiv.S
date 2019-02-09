@@ -1,3 +1,4 @@
+#ifndef __GNUC__
 	xref _ldivr
 	comm _ldivr,4
 	globl bdosldiv
@@ -73,3 +74,4 @@ L1:
 	movem.l (sp)+,d3-d7
 	unlk a6
 	rts
+#endif /* __GNUC__ */

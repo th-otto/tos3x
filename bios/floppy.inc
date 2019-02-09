@@ -27,7 +27,7 @@ _flopini:
         beq.s     flopini1
         lea.l     dsb+8,a1
 flopini1:
-        move.w    _seekrat,fd_seekrate(a1)      /* setup default seek rate */
+        move.w    _seekrate,fd_seekrate(a1)     /* setup default seek rate */
 #if TP_22 /* SEEK_UP */
         move.w    #0,fd_density(a1)             /* default: HD mode */
 #else
@@ -1468,8 +1468,8 @@ hd_portb:
 	xdef fd_cscnt
 	comm fd_cscnt,2
 	
-	xdef flopsreg
-	comm flopsreg,2
+	xdef flopsregs
+	comm flopsregs,2
 	
 	xdef fd_side
 	comm fd_side,2

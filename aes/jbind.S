@@ -259,6 +259,7 @@ exok:
  * ========================================================
  *
  */
+#ifndef __GNUC__
 	xdef	lmul
 	xdef	_lmul
 lmul:
@@ -374,6 +375,7 @@ La1:
 	movem.l	(sp)+,d3-d7
 	unlk	a6
 	rts
+#endif
 
 /*
  *

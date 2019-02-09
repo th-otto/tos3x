@@ -75,7 +75,7 @@ endif
 BUILD_CC = gcc
 BUILD_CFLAGS = -O -Wall
 
-CC = $(CROSSPREFIX)gcc -mshort -Werror
+CC = $(CROSSPREFIX)gcc -g -mshort -Werror -ffreestanding -fno-builtin-memcpy
 CPP = $(CC) -xc $(CPPFLAGS) -E -P
 CPPOUT = -o
 LD = $(CC)

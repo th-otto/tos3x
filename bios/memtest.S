@@ -361,7 +361,13 @@ prtdec2:
         movem.l   d1-d2,-(a7)
 		move.l    d2,-(a7)
 		move.l    d0,-(a7)
-		jsr       bdosldivr
+#ifdef __GNUC__
+		jsr       ___modsi3
+		move.l    d0,_ldivr
+		jsr       ___divsi3
+#else
+		jsr       bdosldiv
+#endif
 		addq.l    #8,a7
         tst.l     d0
         bne.s     prtdec3
@@ -387,7 +393,11 @@ prtdec5:
         move.l    d0,-(a7)
         pea       10.w
         move.l    d2,-(a7)
+#ifdef __GNUC__
+		jsr       ___divsi3
+#else
         jsr       bdosldiv
+#endif
         addq.l    #8,a7
         move.l    d0,d2
         move.l    (a7)+,d0
@@ -480,3 +490,7 @@ prtdec6:
 		xdef memttop
 		comm memttop,4
 
+#ifdef __GNUC__
+		xdef _ldivr
+		comm _ldivr,4
+#endif

@@ -35,6 +35,8 @@
  * }
  */
 
+#ifndef __GNUC__
+
 	xdef	lmul
 	text
 lmul:
@@ -67,3 +69,5 @@ L3:
 L4:
 	unlk	a6
 	rts
+
+#endif /* __GNUC__ */

@@ -70,7 +70,8 @@ name: ds.t size
 	BYTE(_has_dmasound)
 	BYTE(STEFlag)
 
-	V(__sbss,b,0)	/* end of "base" BSS; start of the BSS area that is zeroed by BIOS */
+	xdef __sbss
+__sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIOS */
 
 	V(privinst,l,2)
 
@@ -395,7 +396,8 @@ name: ds.t size
 	V(_beptr,l,3)
 
 /* This label is referenced by the OSHEADER */
-	V(_endvdibss,b,0)
+	xdef _endvdibss
+_endvdibss: ds.b 0
 
 /* start AES+DESKTOP */
 
@@ -767,7 +769,10 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 /* end AES+DESKTOP */
 
 /* This label is referenced by the GEM_MUPB structure */
-	V(_endgembss,b,0)
+	xdef _endgembss
+_endgembss:	ds.b 0
 
 /* This label is referenced by the BIOS initialization */
-	V(__ebss,b,0)
+	xdef __ebss
+__ebss:	ds.b 0
+	ds.b 0

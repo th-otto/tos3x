@@ -3609,7 +3609,7 @@ autoscan:
         tst.w     d0
         bne.s     autosca4                      /* if Mshrink failed, done */
         move.w    #7,-(a7)
-        move.l    (execpath.w),-(a7)
+        move.l    (execpath).w,-(a7)
 #else
         addq.w    #6,a7
         tst.w     d0
@@ -8374,8 +8374,8 @@ cooksize equ NCOOKIES*2*4
 		xdef execpath
 		comm execpath,4
 
-		xdef execfnam
-		comm execfnam,32
+		xdef execfname
+		comm execfname,32
 
 		xdef _tim_c_sieve
 		comm _tim_c_sieve,2

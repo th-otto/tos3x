@@ -7,7 +7,7 @@
 /* *************************** typeahead buffer ************************* */
 /* The following data structures are used for the typeahead buffer:	  */
 /* The 3 elements are prn,aux,con */
-int32_t glbkbchart[3][KBBUFSZ];				/* The actual typeahead buffer    */
+int32_t glbkbchar[3][KBBUFSZ];				/* The actual typeahead buffer    */
 int32_t *buptr[3];
 int32_t *beptr[3];
 int glbcolumn[3];

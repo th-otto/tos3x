@@ -864,10 +864,18 @@ nxtdigit:
 	beq	nomore
 	move.l	#$a,-(sp)
 	move.l	d4,-(sp)
+#ifdef __GNUC__
+	jsr	___divsi3
+#else
 	jsr	ldiv
+#endif
 	move.l	d0,d6		; x = d6 = lvalue / 10
 	move.l	d0,(sp)
+#ifdef __GNUC__
+	jsr	___mulsi3
+#else
 	jsr	lmul
+#endif
 	addq.l #8,sp		; d0 = (x * 10)
 	move.l	d4,d2
 	sub.l	d0,d2		; d2 = lvalue - (x * 10)

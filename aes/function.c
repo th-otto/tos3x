@@ -601,3 +601,17 @@ PP(register const char *ptest;)
 }
 
 #endif
+
+
+#ifdef __GNUC__
+#include <string.h>
+void *memcpy(void *s1, const void *s2, size_t n)
+{
+	register char *ts1 = (char *)s1;
+	register const char *ts2 = (const char *)s2;
+
+	while (n--)
+		*ts1++ = *ts2++;
+	return s1;
+}
+#endif

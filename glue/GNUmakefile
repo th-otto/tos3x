@@ -45,22 +45,39 @@ CARTBASE = E40000
 
 ifeq ($(USE_CROSS_ALCYON),1)
 tos.img: $(STARTUP) $(LIBS) tosimg.tmp tosrsc$(COUNTRY).o vars.o tosvars.o
-	$(LINK68) '[abs,symbols,locals,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
+	$(AM_V_LD)$(LINK68) '[abs,symbols,locals,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o
 
 # For the PAK/BootJmp option, we need to know the start of the resource area first
 tosimg.tmp: $(STARTUP) $(LIBS) rscend.o vars.o tosvars.o
-	$(LINK68) '[abs,symbols,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],rscend.o
+	$(AM_V_LD)$(LINK68) '[abs,symbols,text[$(rombase)],bss[0]]' $@=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],rscend.o
 
 rscend.h: tosimg.tmp
-	tosrsc=`$(BIN)cnm $< | $(GREP) tosrsc | $(SED) -e 's/ .*$$//' -e 's/^00//' | $(TR) abcdef ABCDEF`; \
+	$(AM_V_GEN)tosrsc=`$(BIN)cnm $< | $(GREP) tosrsc | $(SED) -e 's/ .*$$//' -e 's/^00//' | $(TR) abcdef ABCDEF`; \
 	fill=`echo "16 i E40030 $$tosrsc - p" | $(DC)`; \
 	echo "#define RSCGAP $$fill" > $@
 
 tos.rel: $(STARTUP) $(LIBS) tosrsc$(COUNTRY).o vars.o tosvars.o ../vdi/vdivar.o ../aes/gembase.o sbss.o ebss.o
 	$(AM_V_at)$(CP) ../vdi/cbssdefs.o .
 	$(AM_V_at)$(CP) ../aes/gembase.o .
-	$(LINK68) '[abs,relocs=td,text[$(rombase)],bss[0]]' tosrel.tmp=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o > $@
+	$(AM_V_LD)$(LINK68) '[abs,relocs=td,text[$(rombase)],bss[0]]' tosrel.tmp=$(STARTUP),vars.o,tosvars.o,../bios/bios.a[all],../vdi/vdi.a[all],../bdos/bdos.a[all],../aes/aes.a[all],../desk/desk.a[all],tosrsc$(COUNTRY).o > $@
 	$(AM_V_at)$(RM) tosrel.tmp
+
+else
+
+CCLIBS := `$(CC) -print-file-name=libgcc.a`
+LDFLAGS := -nostdlib -nostartfiles -Wl,--script=../common/rom.ld,--entry=_os_entry,-Ttext=0x$(rombase),-Tbss=0
+
+tos.img: $(STARTUP) $(LIBS) tosimg.tmp tosrsc$(COUNTRY).o vars.o tosvars.o ebss.o
+	$(AM_V_LD)$(LD) $(LDFLAGS) -o $@ $(STARTUP) vars.o tosvars.o ../bios/bios.a ../vdi/vdi.a ../bdos/bdos.a ../vdi/vdi.a ../aes/aes.a ../desk/desk.a tosrsc$(COUNTRY).o $(CCLIBS)
+
+# For the PAK/BootJmp option, we need to know the start of the resource area first
+tosimg.tmp: $(STARTUP) $(LIBS) rscend.o vars.o tosvars.o ebss.o
+	$(AM_V_LD)$(LD) $(LDFLAGS),-Map,tostmp.map -o $@ $(STARTUP) vars.o tosvars.o ../bios/bios.a ../vdi/vdi.a ../bdos/bdos.a ../vdi/vdi.a ../aes/aes.a ../desk/desk.a rscend.o $(CCLIBS)
+
+rscend.h: tosimg.tmp
+	$(AM_V_GEN)tosrsc=`$(GREP) tosrsc tostmp.map | $(SED) -e 's/.*0x\([0-9a-fA-F]*\).*/\1/' -e 's/^00//' | $(TR) abcdef ABCDEF`; \
+	fill=`echo "16 i E40030 $$tosrsc - p" | $(DC)`; \
+	echo "#define RSCGAP $$fill" > $@
 
 endif
 
@@ -99,7 +116,7 @@ dosdir::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/$(subdir)
 
 clean:
-	$(RM) *.o *.a *.i $(IMG) tos.img tosimg.tmp cartridg.tmp cartridg.img $(PROGRAMS) tosrsc*.c glue.* rscend.h tosrel.tmp tos.rel $(top_srcdir)/common/config.h
+	$(RM) *.o *.a *.i $(IMG) tos.img tosimg.tmp cartridg.tmp cartridg.img tostmp.map $(PROGRAMS) tosrsc*.c glue.* rscend.h tosrel.tmp tos.rel $(top_srcdir)/common/config.h
 
 distclean: clean
 	$(RM) $(top_srcdir)/common/sections.mak *.img

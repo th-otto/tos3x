@@ -706,7 +706,7 @@ _gsx_mxmy:
 #if CCODE
 WORD gsx_button(NOTHING)
 {
-	return (button);
+	return button;
 }
 #endif
 	xdef _gsx_button
@@ -809,10 +809,9 @@ WORD gsx_char(NOTHING)
 	pintin[1] = FALSE;
 	gsx_ncode(STRING_INPUT, FALSE, 2);
 	if (contrl[4])
-	  return(pintout[0]);
+		return(pintout[0]);
 	else
-	  return(0);
-
+		return(0);
 }
 #endif
 

@@ -20,6 +20,7 @@
 #define WS_CURR 3
 
 STATIC BOOLEAN w_walkflag;
+struct _winxvars winxvars;
 
 
 /* 306de/winx22: 00e21e68 */
@@ -94,6 +95,16 @@ PP(int16_t handle;)
 PP(uint16_t mask;)
 {
 	return wx_chkpd((WX_PD *)wx_getwin(handle)->w_owner, mask);
+}
+
+
+/* 306de/winx22: e213aa */
+static BOOLEAN wx_bgctrl(P(int16_t) handle)
+PP(int16_t handle;)
+{
+	if (handle == gl_wtop)
+		return TRUE;
+	return wx_chkwin(handle, WX_BGCTRL);
 }
 
 
@@ -289,7 +300,6 @@ PP(const int16_t *iw;)
 		gsx_mret((VOIDPTR *)poutwds, (int32_t *)(poutwds + 2));
 		break;
 	case WF_NEWDESK:
-		/* BUG? TOS checks gl_newdesk first */
 		*((LPTREE *)poutwds) = gl_newdesk;
 		poutwds[2] = gl_newroot;
 		break;
@@ -322,7 +332,7 @@ PP(const int16_t *iw;)
 		poutwds[0] = 0x1fff;
 		poutwds[1] = winxvars.global_flags;
 		poutwds[2] = 0xfff;
-		poutwds[3] = rlr->p_flags;
+		poutwds[3] = ((WX_PD *)rlr)->p_flags;
 		ret = w_field;
 		break;
 	case WF_DDELAY:
@@ -355,6 +365,48 @@ PP(const int16_t *iw;)
 }
 
 
+/* 306de/winx22: 00e218e8 */
+static VOID do_walk(P(int16_t) wh, P(int16_t) which, P(int16_t) obj, P(int16_t) depth, P(OBJECT *) tree, P(GRECT *) pc)
+PP(register int16_t wh;)
+PP(int16_t which;)
+PP(int16_t obj;)
+PP(int16_t depth;)
+PP(OBJECT *tree;)
+PP(register GRECT *pc;)
+{
+}
+
+
+/* 306de/winx22: 00e21c82 */
+static VOID draw_top(P(int16_t) wh, P(int16_t) which)
+PP(register int16_t wh;)
+PP(int16_t which;)
+{
+}
+
+
+/* 306de/winx22: 00e21bb0 */
+static VOID draw_change(P(int16_t) w_handle, P(GRECT *) pt)
+PP(register int16_t w_handle;)
+PP(register GRECT *pt;)
+{
+}
+
+
+static VOID wx_setcolor(P(int16_t *) colors, P(int16_t) idx, P(int16_t) color)
+PP(int16_t *colors;)
+PP(int16_t idx;)
+PP(int16_t color;)
+{
+	if (color != -1)
+		colors[idx] = color;
+	colors[W_UPGRIP] = colors[W_UPARROW];
+	colors[W_DNGRIP] = colors[W_DNARROW];
+	colors[W_LFGRIP] = colors[W_LFARROW];
+	colors[W_RTGRIP] = colors[W_RTARROW];
+}
+
+
 /* 306de/winx22: 00e22434 */
 int16_t wx_set(P(int16_t) w_handle, P(int16_t) w_field, P(int16_t *) pinwds)
 PP(register int16_t w_handle;)						/* window handle */
@@ -364,6 +416,9 @@ PP(register int16_t *pinwds;)						/* values to change to */
 	register WX_WINDOW *pwin = 0;
 	register int16_t ret = TRUE;
 	register int16_t which = 0;
+	register int16_t *pint;
+	register int16_t kind;
+	WX_MEM *mem = wx_gmem();
 	
 	wx_update(BEG_UPDATE);
 	if ((uint16_t)w_field <= WF_BOTTOM)
@@ -414,10 +469,74 @@ PP(register int16_t *pinwds;)						/* values to change to */
 	
 	case WF_NAME:
 		which = W_NAME;
+		pwin->w_pname = *(char **)pinwds;
+		if (pwin->w_kind & NAME)
+			if (pwin->w_flags & VF_INTREE)
+				do_walk(w_handle, which, -1, -1, NULL, NULL);
 		break;
 	
 	case WF_INFO:
 		which = W_INFO;
+		pwin->w_pinfo = *(char **)pinwds;
+		if (pwin->w_kind & INFO)
+			if (pwin->w_flags & VF_INTREE)
+				do_walk(w_handle, which, -1, -1, NULL, NULL);
+		break;
+
+	case WF_TOP:
+		which = -1;
+		/* fall through */
+	case WF_BOTTOM:
+		if (w_handle == DESK)
+		{
+			wx_error(WIND_SET);
+		} else
+		{
+			if (pwin->w_flags & VF_INTREE)
+				draw_top(w_handle, which);
+		}
+		break;
+		
+	case WF_CURRXYWH:
+		if (w_handle == DESK || !(pwin->w_flags & VF_INTREE))
+			wx_error(WIND_SET);
+		else
+			draw_change(w_handle, (GRECT *)pinwds);
+		break;
+
+	case WF_VSLSIZE:
+		pint = &pwin->w_vslsiz;
+		which = W_VSLIDE;
+		kind = VSLIDE;
+		goto set_int;
+	case WF_HSLSIZE:
+		pint = &pwin->w_hslsiz;
+		which = W_HSLIDE;
+		kind = HSLIDE;
+		goto set_int;
+	case WF_VSLIDE:
+		pint = &pwin->w_vslide;
+		which = W_VSLIDE;
+		kind = VSLIDE;
+		goto set_int;
+	case WF_HSLIDE:
+		pint = &pwin->w_hslide;
+		which = W_HSLIDE;
+		kind = HSLIDE;
+	set_int:
+		w_field = pinwds[0];
+		if (w_field < -1)
+			w_field = -1;
+		else if (w_field > 1000)
+			w_field = 1000;
+		if (*pint != w_field)
+		{
+			*pint = w_field;
+			if (pwin->w_kind & kind)
+				if (wx_bgctrl(w_handle))
+					if (pwin->w_flags & VF_INTREE)
+						do_walk(w_handle, which, -1, -1, NULL, NULL);
+		}
 		break;
 
 	case WF_RESVD:
@@ -426,6 +545,41 @@ PP(register int16_t *pinwds;)						/* values to change to */
 		{
 			wx_drawdesk((GRECT *)pinwds);
 		}
+		break;
+
+	case WF_NEWDESK:
+		if (*((LPTREE *)pinwds) == 0)
+		{
+			gl_newdesk = ad_stdesk;
+			gl_newroot = ROOT;
+		} else
+		{
+			gl_newdesk = *((LPTREE *)pinwds);
+			gl_newroot = pinwds[2];
+		}
+		break;
+
+	case WF_BEVENT:
+		pwin->w_flags = (pwin->w_flags & 0xff) | (pinwds[0] << 8);
+		break;
+
+	case WF_COLOR:
+		wx_setcolor(pwin->w_tcolor, pinwds[0], pinwds[1]);
+		wx_setcolor(pwin->w_bcolor, pinwds[0], pinwds[2]);
+		if (pwin->w_flags & VF_INTREE)
+			do_walk(w_handle, which, -1, -1, NULL, NULL);
+		break;
+
+	case WF_DCOLOR:
+		wx_setcolor(mem->tcolor, pinwds[0], pinwds[1]);
+		wx_setcolor(mem->bcolor, pinwds[0], pinwds[2]);
+		break;
+
+	case WF_DDELAY:
+		mem->init_scroll = pinwds[0];
+		mem->cont_scroll = pinwds[1];
+		mem->cont_close = pinwds[2];
+		mem->cont_full = pinwds[3];
 		break;
 	}
 
@@ -439,6 +593,9 @@ int16_t wx_find(P(int) mx, P(int) my)
 PP(int mx;)									/* mouse's x position */
 PP(int my;)									/* mouse's y position */
 {
+	WX_MEM *mem = wx_gmem();
+
+	(VOID)mem;
 	return 0;
 }
 
@@ -488,8 +645,9 @@ PP(register GRECT *dirty;)							/* rectangle of dirty area */
 
 
 /* 306de/winx22: 00E22152 */
-VOID wx_init(NOTHING)
+BOOLEAN wx_init(NOTHING)
 {
+	return FALSE;
 }
 
 
@@ -616,7 +774,6 @@ PP(int16_t w7;)
 	ap_msg[7] = w7;
 	if (towhom != pid || pd->p_qindex <= (WX_QUEUE_SIZE - 16))
 		ap_rdwr(AQWRT, towhom, 16, &ap_msg[0]);
-	(VOID)wx_chkwin;
 	(VOID)wx_get_globals;
 }
 
