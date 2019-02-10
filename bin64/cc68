@@ -12,6 +12,7 @@ CPPFLAGS=
 CFLAGS=-f
 LDFLAGS=
 ASFLAGS="-u -L"
+AESFLAGS=
 undefined=false
 nolocals=false
 absolute=false
@@ -37,6 +38,7 @@ do
 	-fomit-frame-pointer) ;;
 	--optimize) optimize=true ;;
 	-fomit-frame-pointer) ;;
+	-faes) AESFLAGS=-A ;;
 	-a)
 	     textbase=$1
 	     shift
@@ -82,10 +84,10 @@ if $compile; then
 		base=$(basename $infile .c)
 		test "$V" = 1 && echo "${BIN}cp68 ${CPPFLAGS} ${infile} ${base}.i"
 		if ${BIN}cp68 ${CPPFLAGS} ${infile} ${base}.i; then
-			test "$V" = 1 && echo "${BIN}c068 ${base}.i ${base}.1 ${base}.2 ${base}.3 ${CFLAGS}"
-			if ${BIN}c068 ${base}.i ${base}.1 ${base}.2 ${base}.3 ${CFLAGS}; then
-				test "$V" = 1 && echo "${BIN}c168 ${base}.1 ${base}.2 ${base}.s"
-				if ${BIN}c168 ${base}.1 ${base}.2 ${base}.s; then
+			test "$V" = 1 && echo "${BIN}c068 ${base}.i ${base}.1 ${base}.2 ${base}.3 ${CFLAGS} ${AESFLAGS}"
+			if ${BIN}c068 ${base}.i ${base}.1 ${base}.2 ${base}.3 ${CFLAGS} ${AESFLAGS}; then
+				test "$V" = 1 && echo "${BIN}c168 ${base}.1 ${base}.2 ${base}.s ${AESFLAGS}"
+				if ${BIN}c168 ${base}.1 ${base}.2 ${base}.s ${AESFLAGS}; then
 					status=0
 					if $optimize; then
 						test "$V" = 1 && echo "${BIN}optimize -q ${base}.s"

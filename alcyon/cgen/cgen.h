@@ -129,6 +129,7 @@ extern short mflag; /* bool: debug skeleton match */
 extern short oflag; /* bool: debug operators */
 extern short gflag; /* bool: generate line labels for cdb */
 extern short lflag; /* bool: assume long address variables */
+extern short aesflag; /* bool: hack for TOS 1.x AES */
 
 /* expression tree storage */
 #define EXPSIZE     4096

@@ -46,6 +46,7 @@ short oflag; /* bool: debug operators */
 short gflag; /* bool: generate line labels for cdb */
 short m68010; /* bool: generate code for m68010 */
 short lflag = 1; /* bool: assume long address variables */
+short aesflag; /* bool: hack for TOS 1.x AES */
 
 
 short nextlabel = 10000;
@@ -551,6 +552,10 @@ PP(char **argv;)
 			case 'T':					/* generates code for the 68010 */
 			case 't':
 				m68010++;
+				continue;
+
+			case 'A':
+				aesflag++;
 				continue;
 
 			case '\0':

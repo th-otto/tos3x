@@ -171,7 +171,7 @@ PP(char **argv;)							/* argument pointers */
 			switch (*q++)
 			{
 			case 'e':					/* ieee floats */
-				fflag = 0;				
+				fflag = 0;
 				continue;
 
 			case 'f':					/* FFP floats */
@@ -217,6 +217,10 @@ PP(char **argv;)							/* argument pointers */
 					}
 					q++;
 				}
+				continue;
+
+			case 'A':
+				aesflag = 1;
 				continue;
 
 			case '\0':

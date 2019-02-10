@@ -287,6 +287,7 @@ short gflag;					/* symbolic debugger flag */
 short xflag;					/* translate int's to long's */
 short tflag;					/* put strings into text seg */
 short wflag;					/* don't generate warning messages */
+short aesflag;					/* hack for TOS 1.x AES */
 #ifndef NOPROFILE
 short profile;					/* profiler output */
 #endif
