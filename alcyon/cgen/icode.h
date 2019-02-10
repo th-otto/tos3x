@@ -197,11 +197,14 @@
 #define INTSIZE     2
 #define CHARSIZE    1
 #define SSIZE       8               /* chars per symbol */
-#define TRUE        1
-#define FALSE       0
 #define TABC        '\t'            /* tab character */
 #define EOLC        '\n'            /* end of line character */
 #define BITSPBYTE   8
+
+#ifndef FALSE
+#define TRUE        1
+#define FALSE       0
+#endif
 
 /* operator class priorities */
 #define TRMPRI      0               /* terminal nodes */

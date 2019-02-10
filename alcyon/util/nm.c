@@ -11,6 +11,7 @@
 
 #include <cout.h>
 #include <sendc68.h>
+#undef MAXFILES
 #include "../include/option.h"
 #include "util.h"
 

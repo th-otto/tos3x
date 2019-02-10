@@ -1,9 +1,4 @@
-#ifdef __ALCYON__
-#  define UNUSED(x)
-#else
-#  define UNUSED(x) ((void)(x))
-#endif
-
+#ifndef __ALCYON__
 #ifndef __GNUC__
 # ifndef __PUREC__
 #   ifndef __TURBOC__
@@ -13,7 +8,9 @@
 #   endif
 # endif
 #endif
+#endif
 
+#ifndef PROTO
 #ifdef __ALCYON__
 #define VOID						/* Void function return	   */
 #define VOIDPTR char *
@@ -29,6 +26,15 @@
 #define P(t) t
 #define PP(v)
 #endif
+#endif
+
+#ifndef UNUSED
+#  ifdef __ALCYON__
+#    define UNUSED(x)
+#  else
+#    define UNUSED(x) ((void)(x))
+#  endif
+#endif
 
 #ifndef VOID
 #define VOID	void					/* Void function return	   */
@@ -41,8 +47,10 @@
 #include <cout.h>
 #include <ar68.h>
 
+#ifndef FALSE
 #define FALSE 0
 #define TRUE  1
+#endif
 
 int lgetl PROTO((int32_t *lp, FILE *f));
 int lgetw PROTO((unsigned short *lp, FILE *f));

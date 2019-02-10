@@ -52,14 +52,16 @@ struct hdr2
 
 /* structure of the symbol table */
 
+#ifndef SYNAMLEN
 #define SYNAMLEN	8
+#define OSTSIZE    14      /* symbol table entry length on object file */
+#endif
 
 struct nlist {
 	char n_name[SYNAMLEN];
 	unsigned short n_type;
 	int32_t n_value;
 };
-#define OSTSIZE    14      /* symbol table entry length on object file */
 
 /* HDSIZE should be 28 bytes, HDSIZ2 should be 36 bytes */
 #define HDSIZE		28		/* sizeof(hdr) on disk */

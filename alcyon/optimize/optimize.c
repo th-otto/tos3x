@@ -33,6 +33,7 @@
 
 #define _(x) x
 
+#undef MAXPATH
 #define MAXPATH 256
 
 static int clr_total;

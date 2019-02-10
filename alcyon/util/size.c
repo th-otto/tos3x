@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cout.h>
+#undef MAXFILES
 #include "../include/option.h"
 #include "util.h"
 

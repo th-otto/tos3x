@@ -12,11 +12,14 @@
 
 /* format of a symbol entry in the main table */
 
+#ifndef SYNAMLEN
+#define SYNAMLEN	8
 #define OSTSIZE	14	/* symbol table entry length on object file */
 					/* without table link */
+#endif
+
 #define STESIZE	18	/* byte length of symbol table entry */
 
-#define SYNAMLEN	8
 struct symtab {
 	char name[SYNAMLEN];		/* symbol name */
 	short flags;				/* bit flags */

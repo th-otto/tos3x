@@ -52,6 +52,11 @@ struct symhash {
 static struct symhash eirt[SZIRT];
 static struct symhash saveirt[SZIRT];
 
+#ifdef __ALCYON__
+#define ULONG long
+#else
+#define ULONG unsigned long
+#endif
 
 
 /* initial reference table for globals */
@@ -184,7 +189,7 @@ struct ovtab {
 	char tbext[TBEXTSIZE + 1];	/* file extension -- no dot (.) */
 	int32_t tbldpt;				/* load point for module */
 };
-#define SIZEOF_OVTAB 16
+#define SIZE_OVTAB 16
 
 /* structure of an indirect call to an overlay routine */
 
@@ -195,7 +200,7 @@ struct ovcalblk {
 	short jmprout;			/* jump to overlayed routine */
 	int32_t routaddr;		/* address to jump to */
 };
-#define SIZEOF_OVCALBLK 16
+#define SIZE_OVCALBLK 16
 
 static struct ovtab ovtab1;
 
@@ -1443,7 +1448,7 @@ PP(register struct symtab *spt;)
 	cbadd = ovpt->ovdtbase;				/* get address of new code  */
 	if (i != ROOT)						/* non-root text-based globals  */
 		cbadd -= ovpt->ovtxbase;		/* are relocated later     */
-	ovpt->ovdtbase += SIZEOF_OVCALBLK;	/* bump size up for new code */
+	ovpt->ovdtbase += SIZE_OVCALBLK;	/* bump size up for new code */
 	lemt(eirt);							/* get pointers right       */
 	for (;;)
 	{
@@ -1501,7 +1506,7 @@ PP(register struct ovtrnode *ovpt;)		/* points to node in command tree */
 				ovrefs += chkovext(cursym);	/* check ext ref    */
 			cursym++;					/* get the next symbol  */
 		}
-	newbase = ovrefs * SIZEOF_OVCALBLK;	/* size of extra code    */
+	newbase = ovrefs * SIZE_OVCALBLK;	/* size of extra code    */
 	ovpt->ovbsbase += newbase;			/* add in space for ovcalls */
 	ovpt->ovcap += newbase;				/* ovdtbase adjusted in chkovext */
 	if (onum == ROOT)
@@ -2017,7 +2022,7 @@ static VOID wrjumps(NOTHING)
 	while (jpt != NULL)
 	{
 		onum = (jpt->globref)->ovlnum;	/* where is global? */
-		ovcall.ovtabad = ovtable + ((onum - 1) * SIZEOF_OVCALBLK);
+		ovcall.ovtabad = ovtable + ((onum - 1) * SIZE_OVCALBLK);
 		ovcall.routaddr = (jpt->globref)->vl1;
 
 		put16be(ovcall.jsrovh, obuf);	/* jsr  _ovhdlr */
@@ -2026,7 +2031,7 @@ static VOID wrjumps(NOTHING)
 		put16be(ovcall.jmprout, obuf);	/* jmp  routine */
 		put32be(ovcall.routaddr, obuf);
 
-		textbase += SIZEOF_OVCALBLK;	/* bump for block size  */
+		textbase += SIZE_OVCALBLK;	/* bump for block size  */
 
 		if (saverbits || dmprelocs)
 		{
@@ -2241,17 +2246,17 @@ PP(register int32_t size;)
 
 			case TRELOC:
 				if (dmprelocs & 0x01)
-					printf(" RELOC: %08lx TEXT %08lx\n", (unsigned long)offset, (unsigned long)l1);
+					printf(" RELOC: %08lx TEXT %08lx\n", (ULONG)offset, (ULONG)l1);
 				break;
 
 			case DRELOC:
 				if (dmprelocs & 0x02)
-					printf(" RELOC: %08lx DATA %08lx\n", (unsigned long)offset, (unsigned long)l1);
+					printf(" RELOC: %08lx DATA %08lx\n", (ULONG)offset, (ULONG)l1);
 				break;
 
 			case BRELOC:
 				if (dmprelocs & 0x04)
-					printf(" RELOC: %08lx BSS  %08lx\n", (unsigned long)offset, (unsigned long)l1);
+					printf(" RELOC: %08lx BSS  %08lx\n", (ULONG)offset, (ULONG)l1);
 				break;
 
 			case EXTVAR:
@@ -2703,9 +2708,9 @@ PP(char **argv;)
 	if (ovflag && !chnflg)
 	{									/* add room for overlay table in root's data segment */
 		ovtable = ovtree[ROOT]->ovbsbase;	/* changes in ovexts  */
-		ovtree[ROOT]->ovbsbase += numovls * SIZEOF_OVTAB;
-		ovtree[ROOT]->ovcap += numovls * SIZEOF_OVTAB;
-		rdtsize += numovls * SIZEOF_OVTAB;
+		ovtree[ROOT]->ovbsbase += numovls * SIZE_OVTAB;
+		ovtree[ROOT]->ovcap += numovls * SIZE_OVTAB;
+		rdtsize += numovls * SIZE_OVTAB;
 	}
 	fixcoms();							/* allocate common and global static space */
 	hihiaddr = ovtree[ROOT]->ovcap;		/* current top of bss   */

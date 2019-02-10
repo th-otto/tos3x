@@ -18,8 +18,10 @@
 #include <ar68.h>
 #include "util.h"
 
+#ifndef FALSE
 #define FALSE 0
 #define TRUE  1
+#endif
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
