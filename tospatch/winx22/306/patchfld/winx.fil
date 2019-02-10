@@ -367,7 +367,7 @@
 35BA0+.d2
 +winx18.fil              ;35BA0 - 35C22 (.130)
 
-; replace unused graf_handle by a helper function
+; replace unused graf_handle by a helper function to initialize the window colors
 .WINX19
 +winx19.fil              ;35DC0 - 35DE8 (.40)
 

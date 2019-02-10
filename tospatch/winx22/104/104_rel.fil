@@ -136,7 +136,7 @@ _ENDIF
 ;* MRF:
 ;* _shell_p wird beim RESET zurckgesetzt (wie es sich geh”rt).
 
-.SHELL_P = 1        ;1: Patch einbinden, 0: Patch nicht einbinden
+.SHELL_P = 0        ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .SHELL_P
  310 $42,B8,04,F6,41,F8,00,08,70,3D
@@ -146,7 +146,7 @@ _ENDIF
 ;* MRF:
 ;* Uhrzeit beim RESET vom Keyboard-Prozessor (siehe ST-Computer 1/90).
 
-.TIME_SAVE = 1      ;1: Patch einbinden, 0: Patch nicht einbinden
+.TIME_SAVE = 0      ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .TIME_SAVE
  448 $6A
@@ -156,7 +156,7 @@ _ENDIF
 ;* MRF:
 ;* Boot-Device-Fehler beheben (siehe ST-Computer 1/90).
 
-.BOOT_DEV = 1       ;1: Patch einbinden, 0: Patch nicht einbinden
+.BOOT_DEV = 0       ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .BOOT_DEV
  4B8 $3039.W
@@ -289,7 +289,7 @@ _ENDIF
 ;* bei einem RESET nicht nur Zeit, sondern hilft auch zur Verbreitung von
 ;* Bootsektor-Viren.
 
-.NORM_BOOT = 1      ;1: Patch einbinden, 0: Patch nicht einbinden
+.NORM_BOOT = 0      ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .NORM_BOOT
 1CDE $BE,78,04,46,6F,2E,70,01,3E,80,42,A7,3F,00,42,67
@@ -316,7 +316,7 @@ _ENDIF
 ;*
 ;* >>> Achtung: Funktioniert _NICHT_ mit dem c't-Uhr-Patch!
 
-.ALARM = 1          ;1: Patch einbinden, 0: Patch nicht einbinden
+.ALARM = 0          ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .ALARM !A! (.CT_HD = 0)
  1F70 UHRPATCH.ABS   ;1F70 - 1FC2 (.82)
@@ -344,7 +344,7 @@ _ENDIF
 ;*
 ;* >>> Achtung: Funktioniert _NICHT_ mit dem c't-Uhr-Patch!
 
-.CORRECT_DAY = 1    ;1: Patch einbinden, 0: Patch nicht einbinden
+.CORRECT_DAY = 0    ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .CORRECT_DAY !A! (.CT_CLOCK = 0)
  2080 SETWOCH.ABS   ;2080 - 215C (.220)
@@ -357,7 +357,7 @@ _ENDIF
 ;* Entspricht FASTPRN.PRG von Ecki aus der c't.
 ;* Zus„tzlich wird noch die Eingaberoutine ersetzt.
 
-.FASTPRN = 1        ;1: FASTPRN einbinden, 0: FASTPRN nicht einbinden
+.FASTPRN = 0        ;1: FASTPRN einbinden, 0: FASTPRN nicht einbinden
 
 _IF .FASTPRN
  278  $338C+.BASE.L ;Warteroutine auf neue Routine
@@ -419,7 +419,7 @@ _ENDIF
 ;* MRF:
 ;* Rsconf-Fehler beheben (aus dem TOS14FIX.PRG, ST-Computer 1/90).
 
-.RSCONF1 = 1        ;1: Patch einbinden, 0: Patch nicht einbinden
+.RSCONF1 = 0        ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .RSCONF1
  3A3E $B0,7C,00,03,62,14,66,0E,60,08,4E,71,4E,71,4E,71,4E,71
@@ -430,7 +430,7 @@ _ENDIF
 ;* kein Startbit beim Setzen der Baudrate senden (der 2.Fehler in Rsconf()...)
 ;* (Grže in die Schweiz fr diesen Tip...).
 
-.RSCONF2 = 1        ;1: Patch einbinden, 0: Patch nicht einbinden
+.RSCONF2 = 0        ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .RSCONF2
  3A5F $04
@@ -452,7 +452,7 @@ _ENDIF
 ;* Beseitigt den Fehler, der beim einen Mshrink(0)-Aufruf die Memory-Listen
 ;* zerst”rte.
 
-.M_SHRINK = 1       ;1: Patch einbinden, 0: Patch nicht einbinden
+.M_SHRINK = 0       ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .M_SHRINK
  8AD0 $2F,2E,00,0A,61,00,01,8E,58,8F,4E,71,4E,71
@@ -462,7 +462,7 @@ _ENDIF
 ;* Alex Esser, ST-Computer 10/90 (implementiert durch MRF):
 ;* Dieser eine Patch macht POOLFIXx.PRG von Atari berflssig.
 
-.POOLFIX = 1        ;1: Patch einbinden, 0: Patch nicht einbinden
+.POOLFIX = 0        ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .POOLFIX
  9064 $4E,71,4E,71,4E,71,4E,71
@@ -472,7 +472,7 @@ _ENDIF
 ;* MRF:
 ;* VDI-Patch (neue v_opnvwk()-Routine, ersetzt VDIFIX).
 
-.VDIFIX = 1         ;1: Patch einbinden, 0: Patch nicht einbinden
+.VDIFIX = 0         ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .VDIFIX
  E22A VDI.ABS       ;E22A - E2BC (.146)
@@ -483,7 +483,7 @@ _ENDIF
 ;* Patch, welcher nun auch Bildschirmbreiten erlaubt, die nicht durch 16
 ;* teilbar sind. Sonst gibt es beim Scrollen Mll... Bei Overscan n”tig.
 
-.OVERSCANFIX = 1    ;1: Patch einbinden, 0: Patch nicht einbinden
+.OVERSCANFIX = 0    ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .OVERSCANFIX
  1265E $CE,C0,E8,4F
@@ -505,7 +505,7 @@ _ENDIF
 ;* MRF:
 ;* korrekter AES-Pfad (aus dem TOS14FIX.PRG, ST-Computer 1/90).
 
-.TOSFIX = 1         ;1: Patch einbinden, 0: Patch nicht einbinden
+.TOSFIX = 0         ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .TOSFIX
  2411E TOSFIX.ABS   ;2411E - 2414A (.44)
@@ -821,7 +821,7 @@ _ENDIF
 ;*
 ;* >>> Funktioniert nicht zusammen mit dem Arrowfix-Patch!
 
-.WINX        = 0    ;1: Patch einbinden, 0: Patch nicht einbinden
+.WINX        = 1    ;1: Patch einbinden, 0: Patch nicht einbinden
 
 .GLOBAL      = %1111111111111 ;Globale Schalter (rechts: Schalter 1)
 .LOCAL       =  %111111111111 ;Lokale Schalter  (rechts: Schalter 1)
@@ -832,7 +832,7 @@ _ENDIF
 .CONT_FULL   =          .2000 ;Continous full delay in ms
 
 _IF .WINX
- +WINX.FIL          ;WINX-Patch einbinden
+ +winx.fil          ;WINX-Patch einbinden
 _ENDIF
 
 ;*******************************************************************************

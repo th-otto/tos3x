@@ -8,7 +8,7 @@ _SWITCH .NATION
   _CASE .USA:
     .d1 = -5A
     .d2 = -30
-    .INFDATA = 
+    .INFDATA =
     .RSC_TAB = 2BA10
     .TOSINFO_OFS = 
     .ROMTOP  = 2FBD4
@@ -16,15 +16,15 @@ _SWITCH .NATION
   _CASE .FRG:
     .d1 = 0
     .d2 = 0
-    .INFDATA = 
+    .INFDATA = 2BA3E
     .RSC_TAB = 2BA3E
-    .TOSINFO_OFS = 
+    .TOSINFO_OFS = 1
     .ROMTOP  = 2FC64
 
   _CASE .FRA:
     .d1 = 1E
     .d2 = 1E
-    .INFDATA = 
+    .INFDATA = 2BA3E
     .RSC_TAB = 2BA5C
     .TOSINFO_OFS = 1B71
     .ROMTOP  = 2FF32
@@ -32,7 +32,7 @@ _SWITCH .NATION
   _CASE .UK:
     .d1 = -5A
     .d2 = -30
-    .INFDATA = 
+    .INFDATA = 2BA3E
     .RSC_TAB = 2BA10
     .TOSINFO_OFS = 
     .ROMTOP  = 2FBD4
@@ -114,24 +114,3 @@ _ENDSWITCH
 !1ABF4
 !288CA
 !2EC00
-
-!DA2  ..DC2         ; bomb image
-!28A78..28EF8       ; 6x6 font data
-!29154..29954       ; 8x8 font data
-!29954..2A954       ; 8x16 font data
-
-!325AE+.d2 .. 329B6+.d2 ; Atari logo
-!329B6+.d2 .. 32BB6+.d2 ; crc table
-!32BB6+.d2 .. 32D36+.d2 ; bios keyboard tables
-!32D36+.d2 .. 32D54+.d2 ; bell sound
-!32D54+.d2 .. 32D72+.d2 ; click sound
-!32E84+.d2 .. 33086+.d2 ; 6x6 offsets
-!33086+.d2 .. 33506+.d2 ; 6x6 font data
-!33560+.d2 .. 33762+.d2 ; 8x8 offsets
-!33762+.d2 .. 33F62+.d2 ; 8x8 font data
-!33F62+.d2 .. 34F62+.d2 ; 8x16 font data
-!34FBE+.d2 .. 35258+.d2 ; vdi patterns
-!353B4+.d2 .. 353F4+.d2 ; pel mapping tables
-!362AA+.d2 .. 362C8+.d2 ; desktop keyboard table
-!367C0+.d2 .. .INFDATA+2C ; desktop strings
-!.RSC_TAB .. .ROMTOP ; resource data
