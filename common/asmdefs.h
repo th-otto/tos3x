@@ -74,3 +74,13 @@
 #define D0_FP0              dc.l $f2004000        /* fmove.l d0,fp0 6888X, 68040-68060 */
 
 #define CINVA_IC            dc.w $f498            /* 68040 */
+
+#if TOSVERSION < 0x200
+#	define ABSW(x) x(a5)
+#	define ABSW2(x) x
+#   define SETBASEREG suba.l    a5,a5
+#else
+#	define ABSW(x) (x).w
+#	define ABSW2(x) (x).w
+#   define SETBASEREG
+#endif

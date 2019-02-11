@@ -144,7 +144,7 @@ static BOOLEAN w_union PROTO((ORECT *po, GRECT *pt));
 
 
 /* 306de: 00e211cc */
-static VOID w_nilit(P(int16_t) num, P(OBJECT *) olist)
+LINEF_STATIC VOID w_nilit(P(int16_t) num, P(OBJECT *) olist)
 PP(register int16_t num;)
 PP(OBJECT * olist;)
 {
@@ -162,7 +162,7 @@ PP(OBJECT * olist;)
  *  is added at the end of the parent's current sibling list.
  *  It is also initialized.
  */
-static VOID w_obadd(P(OBJECT *) olist, P(int16_t) parent, P(int16_t) child)
+LINEF_STATIC VOID w_obadd(P(OBJECT *) olist, P(int16_t) parent, P(int16_t) child)
 PP(OBJECT *olist;)
 PP(register int16_t parent;)
 PP(register int16_t child;)
@@ -186,7 +186,7 @@ PP(register int16_t child;)
 
 #if !TP_WINX
 /* 306de: 00e21296 */
-static VOID w_setup(P(PD *) ppd, P(int16_t) w_handle, P(int16_t) kind)
+LINEF_STATIC VOID w_setup(P(PD *) ppd, P(int16_t) w_handle, P(int16_t) kind)
 PP(PD *ppd;)
 PP(int16_t w_handle;)
 PP(int16_t kind;)
@@ -212,7 +212,7 @@ PP(int16_t kind;)
 
 
 /* 306de: 00e21328 */
-static GRECT *w_getxptr(P(int16_t) which, P(int16_t) w_handle)
+LINEF_STATIC GRECT *w_getxptr(P(int16_t) which, P(int16_t) w_handle)
 PP(int16_t which;)
 PP(int16_t w_handle;)
 {
@@ -271,7 +271,7 @@ PP(register GRECT *pt;)
 
 
 #if !TP_WINX
-static VOID w_setsize(P(int16_t) which, P(int16_t) w_handle, P(GRECT *)pt)
+LINEF_STATIC VOID w_setsize(P(int16_t) which, P(int16_t) w_handle, P(GRECT *)pt)
 PP(int16_t which;)
 PP(int16_t w_handle;)
 PP(GRECT *pt;)
@@ -309,7 +309,7 @@ PP(BOOLEAN topped;)							/* YES: top window color */
 
 
 /* 306de: 00e21484 */
-static VOID w_adjust(P(int16_t) parent, P(int16_t) obj, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
+LINEF_STATIC VOID w_adjust(P(int16_t) parent, P(int16_t) obj, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(int16_t parent;)
 PP(register int16_t obj;)
 PP(int16_t x;)
@@ -335,7 +335,7 @@ PP(int16_t h;)
 
 
 /* 306de: 00e214d4 */
-static VOID w_hvassign(
+LINEF_STATIC VOID w_hvassign(
 	P(BOOLEAN) isvert, P(int16_t) parent, P(int16_t) obj,
 	P(int16_t) vx, P(int16_t) vy,
 	P(int16_t) hx, P(int16_t) hy,
@@ -362,7 +362,7 @@ PP(int16_t h;)
  *	Walk the list and draw the parts of the window tree owned by this window
  */
 /* 306de: 00e21528 */
-static VOID do_walk(P(int16_t) wh, P(OBJECT *) tree, P(int16_t) obj, P(int16_t) depth, P(GRECT *) pc)
+LINEF_STATIC VOID do_walk(P(int16_t) wh, P(OBJECT *) tree, P(int16_t) obj, P(int16_t) depth, P(GRECT *) pc)
 PP(register int16_t wh;)
 PP(OBJECT *tree;)
 PP(int16_t obj;)
@@ -440,7 +440,7 @@ PP(register GRECT *dirty;)							/* rectangle of dirty area */
 
 
 #if !TP_WINX
-static VOID w_cpwalk(P(int16_t) wh, P(int16_t) obj, P(int16_t) depth, P(BOOLEAN) usetrue)
+LINEF_STATIC VOID w_cpwalk(P(int16_t) wh, P(int16_t) obj, P(int16_t) depth, P(BOOLEAN) usetrue)
 PP(register int16_t wh;)
 PP(int16_t obj;)
 PP(int16_t depth;)
@@ -470,7 +470,7 @@ PP(BOOLEAN usetrue;)
 
 #if !TP_WINX
 /* 306de: 00e21690 */
-static VOID w_strchg(P(int16_t) w_handle, P(int16_t) obj, P(intptr_t) pstring)
+LINEF_STATIC VOID w_strchg(P(int16_t) w_handle, P(int16_t) obj, P(intptr_t) pstring)
 PP(register int16_t w_handle;)
 PP(register int16_t obj;)
 PP(register intptr_t pstring;)
@@ -489,7 +489,7 @@ PP(register intptr_t pstring;)
 
 
 /* 306de: 00e216f4 */
-static VOID w_barcalc(P(BOOLEAN) isvert, P(int16_t) space, P(int16_t) sl_value, P(int16_t) sl_size, P(int16_t) min_sld, P(GRECT *)ptv, P(GRECT *) pth)
+LINEF_STATIC VOID w_barcalc(P(BOOLEAN) isvert, P(int16_t) space, P(int16_t) sl_value, P(int16_t) sl_size, P(int16_t) min_sld, P(GRECT *)ptv, P(GRECT *) pth)
 PP(BOOLEAN isvert;)
 PP(register int16_t space;)
 PP(register int16_t sl_value;)
@@ -513,7 +513,7 @@ PP(GRECT *pth;)
 
 
 /* 306de: 00e21790 */
-static VOID w_bldbar(P(uint16_t) kind, P(BOOLEAN) istop,
+LINEF_STATIC VOID w_bldbar(P(uint16_t) kind, P(BOOLEAN) istop,
 	P(int16_t) w_bar, P(WINDOW *) wp,
 	P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(uint16_t kind;)
@@ -790,7 +790,7 @@ PP(int16_t w7;)
 #if !TP_WINX
 /* 206us: 00e1e35c */
 /* 306de: 00e21e1c */
-static VOID w_redraw(P(int16_t) w_handle, P(GRECT *) dirty)
+LINEF_STATIC VOID w_redraw(P(int16_t) w_handle, P(GRECT *) dirty)
 PP(register int16_t w_handle;)
 PP(GRECT *dirty;)
 {
@@ -826,7 +826,7 @@ PP(GRECT *dirty;)
  */
 /* 206us: 00e1e400 */
 /* 306de: 00e21ec0 */
-static BOOLEAN w_mvfix(P(GRECT *) ps, P(GRECT *) pd)
+LINEF_STATIC BOOLEAN w_mvfix(P(GRECT *) ps, P(GRECT *) pd)
 PP(register GRECT *ps;)
 PP(register GRECT *pd;)
 {
@@ -855,7 +855,7 @@ PP(register GRECT *pd;)
  */
 /* 206us: 00e1e43e */
 /* 306de: 00e21efe */
-static BOOLEAN w_move(P(int16_t) w_handle, P(int16_t *) pstop, P(GRECT *) prc)
+LINEF_STATIC BOOLEAN w_move(P(int16_t) w_handle, P(int16_t *) pstop, P(GRECT *) prc)
 PP(register int16_t w_handle;)
 PP(register int16_t *pstop;)
 PP(GRECT *prc;)
@@ -1032,7 +1032,7 @@ static VOID w_menufix(NOTHING)
  *	requests based on the rectangle that needs to be cleaned up.
  */
 /* 306de: 00e220fa */
-static VOID draw_change(P(int16_t) w_handle, P(GRECT *) pt)
+LINEF_STATIC VOID draw_change(P(int16_t) w_handle, P(GRECT *) pt)
 PP(register int16_t w_handle;)
 PP(register GRECT *pt;)
 {
@@ -1240,7 +1240,7 @@ PP(register GRECT *pt;)
  *	size when clipped with the passed in clip rectangle
  */
 /* 306de: 00e22404 */
-static VOID w_owns(P(int16_t) w_handle, P(ORECT *) po, P(GRECT *) pt, P(GRECT *) poutwds)
+LINEF_STATIC VOID w_owns(P(int16_t) w_handle, P(ORECT *) po, P(GRECT *) pt, P(GRECT *) poutwds)
 PP(int16_t w_handle;)
 PP(register ORECT *po;)
 PP(GRECT *pt;)
@@ -1265,7 +1265,7 @@ PP(register GRECT *poutwds;)
  *	Walk down ORECT list and accumulate the union of all the owner rectangles
  */
 /* 306de: 00e22464 */
-static BOOLEAN w_union(P(ORECT *) po, P(GRECT *) pt)
+LINEF_STATIC BOOLEAN w_union(P(ORECT *) po, P(GRECT *) pt)
 PP(register ORECT *po;)
 PP(register GRECT *pt;)
 {
@@ -1364,7 +1364,7 @@ BOOLEAN wm_start(NOTHING)
 #endif
 
 
-#if !TP_WINX
+#if !TP_WINX & (AESVERSION >= 0x200)
 /*
  * wm_init() -	initializes window colors, then start up the window
  *		manager.

@@ -37,6 +37,7 @@ static ERROR dorwabs PROTO((int16_t rw, char *buf, RECNO recnr, int16_t dev, int
  * default function for system variable hdv_init
  */
 /* 306de: 00e055da */
+/* 104de: 00fc16ba */
 /* 404: 00e04792 */
 VOID bhdv_init(NOTHING)
 {
@@ -82,6 +83,7 @@ VOID bhdv_init(NOTHING)
  * Was never implemented in any offical ROM version.
  */
 /* 306de: 00e05652 */
+/* 104de: 00fc1732 */
 ERROR dbmsg(P(int16_t) rsrvd, P(int16_t) msg_num, P(int32_t) msg_arg)
 PP(int16_t rsrvd;)
 PP(int16_t msg_num;)
@@ -99,6 +101,7 @@ PP(int32_t msg_arg;)
  */
 /* 206de: 00e0526a */
 /* 306de: 00e0565c */
+/* 104de: 00fc173c */
 /* 404: 00e0480c */
 BPB *bhdv_getbpb(P(int16_t) dev)
 PP(int16_t dev;)
@@ -203,6 +206,7 @@ PP(int16_t dev;)
  * default function for system variable hdv_mediach
  */
 /* 306de: 00e058ae */
+/* 104de: 00fc18ec */
 /* 404: 00e04a6c */
 int16_t bhdv_mediach(P(int16_t) dev)
 PP(int16_t dev;)
@@ -292,6 +296,7 @@ PP(int16_t dev;)
  * default function for system variable hdv_rw
  */
 /* 306de: 00e05a96 */
+/* 104de: 00fc1a24 */
 /* 404: 00e04c5c */
 ERROR bhdv_rwabs(P(int16_t) rw, P(char *) buf, P(int16_t) cnt, P(RECNO) recnr, P(int16_t) dev, P(LRECNO) lrecnr)
 PP(int16_t rw;)
@@ -330,6 +335,7 @@ PP(LRECNO lrecnr;) /* not supported by TOS */
 
 /* 206de: 00e0572c */
 /* 306de: 00e05b1e */
+/* 104de: 00fc1aac */
 static ERROR dorwabs(P(int16_t) rw, P(char *) buf, P(RECNO) recnr, P(int16_t) dev, P(int16_t) cnt)
 PP(int16_t rw;)
 PP(char *buf;)
@@ -436,6 +442,7 @@ PP(int16_t cnt;)
  */
 /* 206de: 00e05946 */
 /* 306de: 00e05d38 */
+/* 104de: 00fc1c76 */
 long random(NOTHING)
 {
 	if (rseed == 0)
@@ -452,6 +459,7 @@ long random(NOTHING)
  */
 /* 206de: 00e05996 */
 /* 306de: 00e05d88 */
+/* 104de: 00fc1cc6 */
 /* 404: 00e04f54 */
 int16_t bhdv_boot(NOTHING)
 {
@@ -536,6 +544,7 @@ static char const proto_data[NUM_PROTOBT_ENTRIES * 19] = {
  * XBIOS #18 - Protobt - Generate a standard boot-sector for a floppy disk.
  */
 /* 306de: 00e05e04 */
+/* 104de: 00fc1d42 */
 VOID protobt(P(VOIDPTR) buf, P(int32_t) serialno, P(int16_t) disktype, P(int16_t) execflag)
 PP(VOIDPTR buf;)
 PP(int32_t serialno;)
@@ -590,6 +599,7 @@ PP(int16_t execflag;)
 
 
 /* 306de: 00e05ef8 */
+/* 104de: 00fc1e2e */
 static int16_t sectsum(P(const int16_t *) buf, P(int) count)
 PP(const int16_t *buf;)
 PP(int count;)

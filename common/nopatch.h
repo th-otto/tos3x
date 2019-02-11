@@ -245,3 +245,8 @@
 #undef TP_57
 #define TP_57 1
 #endif
+
+#if TOSVERSION < 0x200
+#undef TP_41
+#define TP_41 0
+#endif

@@ -9,6 +9,7 @@
 
 
 
+#include "config.h"
 #include "asmdefs.h"
 #include "header.h"
 #include "tosvars.inc"
@@ -45,45 +46,6 @@ FASTRAMBASE equ $01000000
 #define SCCB_CTRL SCCB_BASE+0
 #define SCCB_DATA SCCN_BASE+2
 
-
-/*
- * struct dsb {
- *    uint8_t drivetype;    == 8 for HD
- *    uint8_t pad;
- *    uint16_t curtrack;
- *    uint16_t density;     0 = SD, 3 = DD
- *    uint16_t seekrate;
- * };
- */
-fd_drivetype equ 0
-fd_curtrack equ 2
-fd_density equ 4
-fd_seekrate equ 6
-
-/*
- * size of a raw sector for flopfmt:
- *    12 gap $00
- * +   3 id mark $f5
- * +   1 address mark $fe
- * +   1 track #
- * +   1 side #
- * +   1 sector #
- * +   1 sector size
- * +   1 checksum $f7
- * +  22 gap $4e
- * +  12 gap $00
- * +   3 id mark
- * +   1 address mark $fb
- * + 512 data
- * +   1 checksum $f7
- * +  40 gap $4e
- * = 612
- */
-#define FD_RAWSEC 612
-#define FD_RAWTRACK (60 + 18 * FD_RAWSEC + 1401)
-
-#define DMA_DATA $ffff8604
-#define DMA_CTRL $ffff8606
 
 /* ==== Definitions ========================================================== */
 
@@ -513,7 +475,7 @@ ret_1b:
 #endif
 notpal:
 #if STBOOK
-		move.b    #STLOW,(v_shf_mod).w      /* Switch to 640x400x1 */
+		move.b    #STHIGH,(v_shf_mod).w     /* Switch to 640x400x1 */
         move.b    #$80,(LcdPControl).w      /* LCD display on */
         tst.w     tt_mcu                    /* ST Book: ??? */
 #endif
@@ -2577,7 +2539,13 @@ vbl_no_palette:
         move.l    (_screenpt).w,(_v_bas_ad).w
         move.b    (_v_bas_ad+2).w,(v_bas_m).w
         move.b    (_v_bas_ad+1).w,(v_bas_h).w
+#if TOSVERSION >= 0x200
+#if !BINEXACT
+        tst.b     STEFlag
+        bne.s     vbl_no_screenpt
+#endif
         move.b    (_v_bas_ad+3).w,(v_bas_l).w       /* BUG: no test that 820d actually exists */
+#endif
 vbl_no_screenpt:
         bsr       _flopvbl
 vbl_no_queue:
@@ -3172,9 +3140,11 @@ _physbase:
         lsl.w     #8,d0
         move.b    (v_bas_m).w,d0    /* load and shift bits 8..15 */
         lsl.l     #8,d0
+#if TOSVERSION >= 0x200
         tst.b     STEFlag
         bne.s     physbas1
         move.b    (v_bas_l).w,d0
+#endif
 physbas1:
         rts
 
@@ -3234,7 +3204,13 @@ nosetl:
         bmi.s     nosetp
         move.b    9(a7),(v_bas_h).w
         move.b    10(a7),(v_bas_m).w
+#if TOSVERSION >= 0x200
+#if !BINEXACT
+        tst.b     STEFlag
+        bne.s     nosetp
+#endif
         move.b    11(a7),(v_bas_l).w         /* BUG: no test that 820d actually exists */
+#endif
 nosetp:
 /* --- set screen resolution (clears the screen, clobbers the cursor): */
         tst.w     12(a7)                     /* if(rez < 0) then ignore it */
@@ -3424,9 +3400,11 @@ drawbo6:
         lsl.w     #8,d0
         move.b    (v_bas_m).w,d0
         lsl.l     #8,d0
+#if TOSVERSION >= 0x200
         tst.b     STEFlag
         bne.s     drawbo1
         move.b    (v_bas_l).w,d0
+#endif
 drawbo1:
         movea.l   d0,a0                      /* a0 -> base of mem to draw at */
         cmp.w     #TTHIGH,d7
@@ -5828,7 +5806,7 @@ initdev1:
         move.l    (a1)+,32(a0)                  /* Fix tconin for dev 1 */
         move.l    (a1)+,64(a0)                  /* Fix tcostat for dev 1 */
         move.l    (a1)+,96(a0)                  /* Fix tconout for dev 1 */
-        move.l    (a1)+,(bcmap_root+8).w        /* Fix srconf for RS232 */
+        move.l    (a1)+,(bcmap_root+8).w        /* Fix rsconf for RS232 */
         move.l    (a1)+,(bcmap_root+12).w       /* Fix Iorec for RS232 */
         rts
 

@@ -107,6 +107,7 @@ VOID release(NOTHING)
 }
 
 
+#if AESVERSION >= 0x200
 /*
  * Give everyone a chance to run, at least once
  */
@@ -121,6 +122,7 @@ VOID all_run(NOTHING)
 	wm_update(BEG_UPDATE);
 	wm_update(END_UPDATE);
 }
+#endif
 
 
 /*
@@ -131,7 +133,7 @@ VOID all_run(NOTHING)
  *	accessory is too big to fit it will be not be loaded.
  */
 /* 306de: 00e1aea6 */
-int16_t sndcli(P(char *) pfilespec, P(int16_t) acc)
+static int16_t sndcli(P(char *) pfilespec, P(int16_t) acc)
 PP(register char *pfilespec;)
 PP(int16_t acc;)
 {

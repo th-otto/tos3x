@@ -101,7 +101,7 @@ PP(int16_t *pmaxlen;)
 				while (TRUE)
 				{
 					tmp = LBGET(palstr + curr_id);
-					if ((tmp != ']') && (tmp != '|'))
+					if (tmp != ']' && tmp != '|')
 					{
 						curr_id++;
 						continue;
@@ -113,7 +113,7 @@ PP(int16_t *pmaxlen;)
 			curr_id++;
 			nxttmp = LBGET(palstr + curr_id);
 
-			if ((tmp == ']') || (tmp == '|'))
+			if (tmp == ']' || tmp == '|')
 			{
 				if (tmp == nxttmp)
 				{
@@ -394,5 +394,5 @@ PP(const char *palstr;)
 		gsx_moff();						/* CHANGED 5/10 LKW */
 #endif
 	/* return selection */
-	return (i - BUT_OFF + 1);
+	return i - BUT_OFF + 1;
 }

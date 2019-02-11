@@ -29,9 +29,6 @@
 #define      Mfree(a)        gemdos(0x49,a)
 
 
-VOID just_draw PROTO((LPTREE tree, int16_t obj, int16_t sx, int16_t sy));
-int16_t ob_user PROTO((LPTREE tree, int16_t obj, GRECT *pt, intptr_t userblk, int16_t curr_state, int16_t new_state));
-
 
 
 
@@ -279,7 +276,7 @@ PP(char *fmtstr;)
  *	routine.
  */
 /* 306de: 00e2339a */
-int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt, P(intptr_t) userblk, P(int16_t) curr_state, P(int16_t) new_state)
+LINEF_STATIC int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt, P(intptr_t) userblk, P(int16_t) curr_state, P(int16_t) new_state)
 PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(GRECT *pt;)
@@ -303,8 +300,8 @@ PP(int16_t new_state;)
 
 #if AES3D
 
-int16_t xor16 PROTO((int16_t col));
-BOOLEAN xor_ok PROTO((int16_t type, int16_t flags, intptr_t spec));
+static int16_t xor16 PROTO((int16_t col));
+static BOOLEAN xor_ok PROTO((int16_t type, int16_t flags, intptr_t spec));
 VOID draw_hi PROTO((GRECT *prect, int16_t state, int16_t clip, int16_t th, int16_t icol));
 
 /*
@@ -409,7 +406,7 @@ PP(int16_t icol;)								/* interior color */
  */
 
 
-int16_t xor16(P(int16_t) col)
+static int16_t xor16(P(int16_t) col)
 PP(int16_t col;)
 {
 	static int16_t const xor16tab[] = {
@@ -441,7 +438,7 @@ PP(int16_t col;)
  *
  * (used by just_draw() and ob_change())
  */
-BOOLEAN xor_ok(P(int16_t) type, P(int16_t) flags, P(intptr_t) spec)
+static BOOLEAN xor_ok(P(int16_t) type, P(int16_t) flags, P(intptr_t) spec)
 PP(int16_t type;)
 PP(int16_t flags;)
 PP(intptr_t spec;)
@@ -483,7 +480,7 @@ PP(intptr_t spec;)
  *	Routine to draw an object from an object tree.
  */
 /* 306de: 00e233f2 */
-VOID just_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) sx, P(int16_t) sy)
+LINEF_STACK VOID just_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) sx, P(int16_t) sy)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(register int16_t sx;)

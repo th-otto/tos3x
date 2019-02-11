@@ -103,7 +103,8 @@ PP(register PD *p;)
 	p->p_stat &= ~PS_MWAIT;
 	p->p_stat |= PS_RUN;
 	/* find the end     */
-	for (pq = (q = (PD *) & rlr)->p_link; pq; pq = (q = pq)->p_link) ;
+	for (pq = (q = (PD *) & rlr)->p_link; pq; pq = (q = pq)->p_link)
+		;
 	/* link him in */
 	p->p_link = pq;
 	q->p_link = p;

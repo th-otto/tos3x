@@ -71,21 +71,10 @@
 static TEDINFO edblk;
 #endif
 
-int16_t ob_getsp PROTO((LPTREE tree, int16_t obj, TEDINFO *pted));
-BOOLEAN check PROTO((char *in_char, char valchar));
-int16_t scan_to_end PROTO((char *pstr, int16_t idx, char chr));
-VOID ins_char PROTO((char *str, int16_t pos, char chr, int16_t tot_len));
-int16_t find_pos PROTO((char *str, int16_t pos));
-VOID pxl_rect PROTO((LPTREE tree, int16_t obj, int16_t ch_pos, GRECT *pt));
-VOID curfld PROTO((LPTREE tree, int16_t obj, int16_t new_pos, int16_t dist));
-int16_t instr PROTO((char chr, const char *str));
-VOID ob_stfn PROTO((int16_t idx, int16_t *pstart, int16_t *pfinish));
-int16_t ob_delit PROTO((int16_t idx));
-
 
 
 #if UNLINKED
-int16_t ob_getsp(P(LPTREE) tree, P(int16_t) obj, P(TEDINFO *) pted)
+LINEF_STATIC int16_t ob_getsp(P(LPTREE) tree, P(int16_t) obj, P(TEDINFO *) pted)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(TEDINFO *pted;)
@@ -155,7 +144,7 @@ PP(GRECT *pt;)
  *	during field entry the cursor will jump to the first 
  *	raw string underscore after that character.
  */
-int16_t scan_to_end(P(char *) pstr, P(int16_t) idx, P(char) chr)
+LINEF_STATIC int16_t scan_to_end(P(char *) pstr, P(int16_t) idx, P(char) chr)
 PP(register char *pstr;)
 PP(register int16_t idx;)
 PP(char chr;)
@@ -172,7 +161,7 @@ PP(char chr;)
 /*
  *	Routine to insert a character in a string by
  */
-VOID ins_char(P(char *) str, P(int16_t) pos, P(char) chr, P(int16_t) tot_len)
+LINEF_STATIC VOID ins_char(P(char *) str, P(int16_t) pos, P(char) chr, P(int16_t) tot_len)
 PP(register char *str;)
 PP(int16_t pos;)
 PP(char chr;)
@@ -197,7 +186,7 @@ PP(register int16_t tot_len;)
  *       for the position that was input (in raw string relative numbers).
  *       The returned position will always be right before an '_'.
  */
-int16_t find_pos(P(char *) str, P(int16_t) pos)
+LINEF_STATIC int16_t find_pos(P(char *) str, P(int16_t) pos)
 PP(register char *str;)
 PP(register int16_t pos;)
 {
@@ -226,7 +215,7 @@ PP(register int16_t pos;)
 }
 
 
-VOID pxl_rect(P(LPTREE) tree, P(int16_t) obj, P(int16_t) ch_pos, P(GRECT *) pt)
+LINEF_STATIC VOID pxl_rect(P(LPTREE) tree, P(int16_t) obj, P(int16_t) ch_pos, P(GRECT *) pt)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(int16_t ch_pos;)
@@ -248,7 +237,7 @@ PP(register GRECT *pt;)
 /*
  *	Routine to redraw the cursor or the field being editted.
  */
-VOID curfld(P(LPTREE) tree, P(int16_t) obj, P(int16_t) new_pos, P(int16_t) dist)
+LINEF_STATIC VOID curfld(P(LPTREE) tree, P(int16_t) obj, P(int16_t) new_pos, P(int16_t) dist)
 PP(LPTREE tree;)
 PP(int16_t obj;)
 PP(int16_t new_pos;)
@@ -289,7 +278,7 @@ PP(int16_t dist;)
  *	range.  The character ranges are
  *	stored as enumerated characters (xyz) or ranges (x..z)
  */
-int16_t instr(P(char) chr, P(const char *) str)
+LINEF_STATIC int16_t instr(P(char) chr, P(const char *) str)
 PP(register char chr;)
 PP(register char *str;)
 {
@@ -314,7 +303,7 @@ PP(register char *str;)
  *	Routine to verify that the character matches the validation
  *	string.  If necessary, upshift it.
  */
-BOOLEAN check(P(char *) in_char, P(char) valchar)
+LINEF_STATIC BOOLEAN check(P(char *) in_char, P(char) valchar)
 PP(register char *in_char;)
 PP(char valchar;)
 {
@@ -379,7 +368,7 @@ PP(char valchar;)
  *	Find STart and FiNish of a raw string relative to the template
  *	string.  The start is determined by the InDeX position given.
  */
-VOID ob_stfn(P(int16_t) idx, P(int16_t *) Pstart, P(int16_t *) pfinish)
+LINEF_STATIC VOID ob_stfn(P(int16_t) idx, P(int16_t *) Pstart, P(int16_t *) pfinish)
 PP(int16_t idx;)
 PP(int16_t *Pstart;)
 PP(int16_t *pfinish;)
@@ -392,7 +381,7 @@ PP(int16_t *pfinish;)
 }
 
 
-int16_t ob_delit(P(int16_t) idx)
+LINEF_STATIC int16_t ob_delit(P(int16_t) idx)
 PP(int16_t idx;)
 {
 	register THEGLO *DGLO;

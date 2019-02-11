@@ -71,7 +71,17 @@ PP(register VOIDPTR *addr_in;)
 	{
 	/* Application Manager  */
 	case APPL_INIT:
+#if AESVERSION < 0x200
+		LLSET(pglobal, (((long)AESVERSION) << 16) | (MULTITOS ? 0 : 1));
+		LWSET(pglobal + 4, rlr->p_pid);
+		LWSET(pglobal + 20, gl_nplanes);
+		LLSET(pglobal + 22, &D);
+		LWSET(pglobal + 26, gl_bvdisk);
+		LWSET(pglobal + 28, gl_bvhard);
+		return rlr->p_pid;
+#else
 		ret = ap_init(pglobal);
+#endif
 		break;
 	case APPL_READ:
 		/* BUG: ignores the return value of ap_rdwr() */

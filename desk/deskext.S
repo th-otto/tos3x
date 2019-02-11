@@ -245,8 +245,10 @@ ldiv            equ AESTBASE+$BFCC
 		comm _gl_nrows,2
 		xdef _sh_iscart
 		comm _sh_iscart,2
+#if AESVERSION >= 0x200
 		xdef _ctldown
 		comm _ctldown,2
+#endif
 		xdef _gl_restype
 		comm _gl_restype,2
 		xdef _gl_rschange

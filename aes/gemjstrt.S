@@ -85,9 +85,9 @@ gemstart:
 	move.l	#ustak+128,a7	/* switch stacks, dos needs a user stack  */
 	move.l	4(a5),a5	/* basepage address */
 /*	or.l	#7,$28(a5)	* prgflags in basepage */
-	move.l	$c(a5),d0	/* textlen */
-	add.l	$14(a5),d0	/* datalen */
-	add.l	$1c(a5),d0	/* bsslen */
+	move.l	12(a5),d0	/* textlen */
+	add.l	20(a5),d0	/* datalen */
+	add.l	28(a5),d0	/* bsslen */
 	add.l	#$100,d0	/* skip los pageos baseos */
 	move.l	d0,-(a7)	/* size */
 	move.l	a5,-(a7)	/* basepage */
@@ -110,7 +110,7 @@ gemstart:
  * (880825 kbad)
  *
  */
-	movea.l	$2c(a5),a0		/* save the environment pointer */
+	movea.l	44(a5),a0		/* save the environment pointer */
 	move.l	a0,_ad_envrn
 	move.l	($4c2).w,d0			/* get drvbits */
 	and.l	#$4,d0			/* drive C there? */
@@ -160,7 +160,7 @@ sh_start:
 	addq.l	#6,a7
 	movea.l	d0,a0
 	move.w	#((fsize/2)-1),d1
-	movea.l	#_linef,a1
+	movea.l	#_linefhandler,a1
 lop:
 	move.w	(a1)+,(a0)+	/* move linef code to ram */
 	dbf	d1,lop

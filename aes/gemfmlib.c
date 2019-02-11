@@ -160,7 +160,7 @@ PP(int16_t which;)
 		theflag = LWGET(OB_FLAGS(obj));
 
 		if (theflag & flag)
-			return (obj);
+			return obj;
 
 		if (theflag & LASTOB)
 			obj = -1;
@@ -168,7 +168,7 @@ PP(int16_t which;)
 			obj += inc;
 	}
 
-	return (start_obj);
+	return start_obj;
 }
 
 
@@ -211,11 +211,11 @@ PP(int16_t *pnew_obj;)
 		if (direction == DEFLT && *pnew_obj != 0)
 		{
 			ob_change(tree, *pnew_obj, LWGET(OB_STATE(*pnew_obj)) | SELECTED, TRUE);
-			return (FALSE);
+			return FALSE;
 		}
 	}
 
-	return (TRUE);
+	return TRUE;
 }
 
 
@@ -234,6 +234,7 @@ PP(int16_t *pnew_obj;)
 	int16_t parent, state, flags;
 	int16_t cont, tstate, tflags;
 	int16_t lrets[6];
+
 	cont = TRUE;
 	orword = 0x0;
 
@@ -377,7 +378,7 @@ PP(int16_t start_fld;)
 	/* give up mouse and screen ownership */
 	take_ownership(FALSE);
 	/* return exit object   */
-	return (next_obj);
+	return next_obj;
 }
 
 

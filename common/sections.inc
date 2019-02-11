@@ -306,6 +306,136 @@
 #endif /* TOSVERSION == 0x208 */
 
 
+#if TOSVERSION == 0x104
+
+#define BIOSTBASE   $00FC0000
+
+#define BTLEN_US    $0000641C
+#define DTLEN_US    $0000FBCC
+
+#if OS_COUNTRY == CTRY_US
+#define GLUELEN     $41C4
+#endif
+
+#if OS_COUNTRY == CTRY_DE
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$2A
+#define DESKDLEN    $000009DE
+#define GLUELEN     $00004226
+#endif
+
+#if OS_COUNTRY == CTRY_FR
+#define GLUELEN     $000044D6
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+#define GLUELEN     $000041C4
+#endif
+
+#if OS_COUNTRY == CTRY_ES
+#define GLUELEN     $0000441A
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+#define GLUELEN     $000043B2
+#endif
+
+#if OS_COUNTRY == CTRY_SF
+#define GLUELEN     $000044D6
+#endif
+
+#if OS_COUNTRY == CTRY_NL
+#define GLUELEN     $000043CC
+#endif
+
+#if OS_COUNTRY == CTRY_CZ
+#define GLUELEN     $00004226
+#endif
+
+/*
+ * these are identical in all language versions
+ */
+#define BIOSDLEN    $00000888
+#define VDITLEN     $0000999A
+#define VDIDLEN     $00002846
+#define BDOSTLEN    $000062FC
+#define BDOSDLEN    $0000039E
+#define AESTLEN     $0000CCD6
+#define AESDLEN     $000006D8
+
+#endif /* TOSVERSION == 0x104 */
+
+
+#if TOSVERSION == 0x106
+
+#if OS_COUNTRY == CTRY_US
+#define GLUELEN     $000041C4
+#endif
+
+#if OS_COUNTRY == CTRY_DE
+#define GLUELEN     $00004226
+#endif
+
+#if OS_COUNTRY == CTRY_FR
+#define GLUELEN     $000044D6
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+#define GLUELEN     $000041C4
+#endif
+
+#if OS_COUNTRY == CTRY_ES
+#define GLUELEN     $0000441A
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+#define GLUELEN     $000043B2
+#endif
+
+#if OS_COUNTRY == CTRY_SF
+#define GLUELEN     $000044D6
+#endif
+
+#endif /* TOSVERSION == 0x106 */
+
+
+#if TOSVERSION == 0x162
+
+#if OS_COUNTRY == CTRY_US
+#define GLUELEN     $000041C4
+#endif
+
+#if OS_COUNTRY == CTRY_DE
+#define GLUELEN     $00004226
+#endif
+
+#if OS_COUNTRY == CTRY_FR
+#define GLUELEN     $000044D6
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+#define GLUELEN     $000041C4
+#endif
+
+#if OS_COUNTRY == CTRY_ES
+#define GLUELEN     $0000441A
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+#define GLUELEN     $000043B2
+#endif
+
+#if OS_COUNTRY == CTRY_SF
+#define GLUELEN     $000044D6
+#endif
+
+#if OS_COUNTRY == CTRY_CZ
+#define GLUELEN     $00004226
+#endif
+
+#endif /* TOSVERSION == 0x162 */
+
+
 #ifndef BIOSTBASE
 #if RAMVERSION
 #define BIOSTBASE   $00380000

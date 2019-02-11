@@ -137,6 +137,7 @@ PP(int16_t m4;)
 
 /* WINXTODO: in winx02.fil */
 
+/* 104de: 00fddcc4 */
 /* 206de: 00e1778e */
 /* 306de: 00e1b1f4 */
 VOID hctl_window(P(int16_t) w_handle, P(int16_t) mx, P(int16_t) my)

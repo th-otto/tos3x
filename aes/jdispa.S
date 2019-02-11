@@ -213,7 +213,7 @@ _gotopgm:
 	move	sr,savsr		; save sr
 	ori	#$700,SR		; turn interrupts off
 	movea.l	_rlr,a0			; get pd
-	move.l	$18(a0),a0		; pd->ldaddr is base page of program
+	move.l	24(a0),a0		; pd->ldaddr is base page of program
 	tst.w	(longframe).w		; if not on longframe CPU
 	beq.b	g_1			; don't need a format word
 	clr	-(sp)			; otherwise fake a format word

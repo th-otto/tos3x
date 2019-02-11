@@ -710,7 +710,9 @@ extern int16_t intin[];
 extern int16_t intout[];
 extern int16_t ptsin[];
 extern int16_t gl_btrue;
+#if AESVERSION >= 0x200
 extern BOOLEAN ctldown;
+#endif
 extern int16_t gl_restype;
 extern BOOLEAN gl_rschange;
 extern int16_t gl_ncols;

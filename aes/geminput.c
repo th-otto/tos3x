@@ -203,10 +203,10 @@ PP(register int16_t my;)
 {
 	/* if inside ctrl rect then owned by active process */
 	if (inside(mx, my, &ctrl))
-		return (1);
+		return 1;
 	/* if in menu bar then owned by ctrl mgr  */
 	if (inside(mx, my, &gl_rmenu))
-		return (-1);
+		return -1;
 	/* if on any window beside the desktop then ctrl mgr owns */
 #if TP_WINX
 	return wx_find(mx, my) ? -1 : 0;
@@ -381,7 +381,7 @@ PP(register CQUEUE *qptr;)
 	q2 = qptr->c_front++;
 	if (qptr->c_front == KBD_SIZE)
 		qptr->c_front = 0;
-	return (qptr->c_buff[q2]);
+	return qptr->c_buff[q2];
 }
 
 
@@ -498,7 +498,7 @@ PP(register intptr_t buparm;)
 	flag = (buparm >> 24) & 0x00ffL;	/* clicks   */
 	mask = (buparm >> 8) & 0x00ffL;		/* which button */
 	val = (buparm) & 0x00ffL;			/* up or down   */
-	return (((mask & (val ^ new)) == 0) != flag);
+	return ((mask & (val ^ new)) == 0) != flag;
 }
 
 
@@ -624,7 +624,7 @@ PP(register int16_t ry;)
 	mo.m_y = LLOWD(e->e_parm);
 	mo.m_w = LHIWD(e->e_return);
 	mo.m_h = LLOWD(e->e_return);
-	return (mo.m_out != inside(rx, ry, (GRECT *)&mo.m_x));
+	return mo.m_out != inside(rx, ry, (GRECT *)&mo.m_x);
 }
 
 
@@ -656,8 +656,8 @@ PP(register int32_t c;)								/* # of ticks to wait  */
 {
 	register EVB *p, *q;
 
-	if (c == 0x0L)
-		c = 0x1L;
+	if (c == 0)
+		c = 1;
 
 	cli();
 	if (CMP_TICK)
@@ -680,19 +680,19 @@ PP(register int32_t c;)								/* # of ticks to wait  */
 	q = (EVB *)((char *) &dlr - elinkoff);
 	for (p = dlr; p; p = (q = p)->e_link)
 	{
-		if (c <= (int32_t) p->e_parm)
+		if (c <= p->e_parm)
 			break;
-		c -= (int32_t) p->e_parm;
+		c -= p->e_parm;
 	}
 	e->e_pred = q;
 	q->e_link = e;
-	e->e_parm = (int32_t) c;
+	e->e_parm = c;
 	e->e_link = p;
 	if (p)
 	{
-		c = (int32_t) p->e_parm - c;
+		c = p->e_parm - c;
 		p->e_pred = e;
-		p->e_parm = (int32_t) c;
+		p->e_parm = c;
 	}
 	sti();
 }

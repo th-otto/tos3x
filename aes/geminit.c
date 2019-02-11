@@ -152,7 +152,9 @@ BOOLEAN sh_up;						/* is the sh_start being ran yet ? */ /* unused */
 BOOLEAN autoexec;					/* autoexec a file ?    */
 STATIC char g_autoboot[CMDLEN];
 STATIC int16_t g_flag;
+#if AESVERSION >= 0x200
 BOOLEAN ctldown;					/* ctrl key down ? */ /* referenced by DESKTOP */
+#endif
 /* 8/1/92 */
 #if AES3D
 BOOLEAN act3dtxt;					/* look of 3D activator text */
@@ -294,6 +296,24 @@ VOID setres(NOTHING)
 #endif
 
 
+#if AESVERSION < 0x200
+/*
+ * Give everyone a chance to run, at least once
+ */
+/* 306de: 00e1ae70 */
+VOID all_run(NOTHING)
+{
+	int16_t i;
+
+	for (i = 0; i < used_acc; i++)
+		dsptch();
+	/* then get in the wait line */
+	wm_update(BEG_UPDATE);
+	wm_update(END_UPDATE);
+}
+#endif
+
+
 /* 306de: 00e1dca8 */
 /* 404: 00e24a90 */
 VOID gem_main(NOTHING)
@@ -346,7 +366,7 @@ VOID gem_main(NOTHING)
 	gl_rbuf = 0;
 
 	/* initialize pointers to heads of event list and thread list       */
-	elinkoff = (intptr_t)(char *) &evx.e_link - (intptr_t)(char *) &evx;
+	elinkoff = (intptr_t)(char *) &evx.e_link - (intptr_t)(char *) &evx; /* offsetof(EVB, e_link) */
 
 	/* link up all the evb's to the event unused list */
 	eul = 0;
@@ -408,6 +428,7 @@ VOID gem_main(NOTHING)
 	gl_mowner = gl_kowner = ctl_pd = ictlmgr(rlr->p_pid);
 
 	/* New stuff 8/13/91    */
+#if AESVERSION >= 0x200
 #if BINEXACT
 	/*
 	 * Bug: Kbshift() called without mode parameter
@@ -418,10 +439,13 @@ VOID gem_main(NOTHING)
 #else
 	ctldown = Kbshift(-1) & 0x0004 ? TRUE : FALSE;
 #endif
+#endif
 
 	rsc_read();							/* read in resource */
 
+#if AESVERSION >= 0x200
 	if (!ctldown)
+#endif
 		ldaccs();						/* load in accessories  */
 
 	pred_dinf();						/* pre read the inf */
@@ -517,7 +541,11 @@ VOID gem_main(NOTHING)
 #if TP_WINX
 	wx_init();
 #else
+#if AESVERSION >= 0x200
 	wm_init();
+#else
+	wm_start();
+#endif
 #endif
 #if SUBMENUS
 	mn_init();
@@ -729,8 +757,10 @@ int16_t pred_dinf(NOTHING)
 	awinp[2] = (IP_SOLID << 4) | WHITE;
 #endif
 
+#if AESVERSION >= 0x200
 	if (ctldown)
 		goto p_1;
+#endif
 
 	if (isdrive() && diskin)			/* there is a disk  */
 	{

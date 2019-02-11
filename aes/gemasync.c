@@ -89,9 +89,9 @@ PP(register EVB *p;)
 		p->e_link->e_pred = p->e_pred;
 		if (p->e_flag & EVDELAY)
 		{
-			c = (int32_t) p->e_link->e_parm;
-			c += (int32_t) p->e_parm;
-			p->e_link->e_parm = (int32_t) c;
+			c = p->e_link->e_parm;
+			c += p->e_parm;
+			p->e_link->e_parm = c;
 		}
 	}
 	p->e_nextp = eul;
@@ -188,9 +188,9 @@ PP(register intptr_t aparm;)
 
 		for (p = dlr; p; p = (q = p)->e_link)
 		{
-			if (aparm <= (int32_t) p->e_parm)
+			if (aparm <= p->e_parm)
 				break;
-			aparm -= (int32_t) p->e_parm;
+			aparm -= p->e_parm;
 		}
 
 		e->e_pred = q;
@@ -200,9 +200,9 @@ PP(register intptr_t aparm;)
 
 		if (p)
 		{
-			aparm = (int32_t) p->e_parm - aparm;
+			aparm = p->e_parm - aparm;
 			p->e_pred = e;
-			p->e_parm = (int32_t) aparm;
+			p->e_parm = aparm;
 		}
 		sti();
 

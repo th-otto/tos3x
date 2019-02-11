@@ -20,6 +20,10 @@
 		xdef _bcon5out
 		xdef _bcon2out
 
+/* from GEMDOS */
+		xdef _osinit
+		xdef bdoslmul
+
 #if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
 line1010    equ VDITBASE+$14B6
 _SETBLT     equ VDITBASE+$1AAA
@@ -30,6 +34,9 @@ blink       equ VDITBASE+$11A4
 _cursconf   equ VDITBASE+$11D6
 _bcon5out   equ VDITBASE+$0E1C
 _bcon2out   equ VDITBASE+$0E28
+
+_osinit   equ BDOSTBASE+$5588
+bdoslmul  equ BDOSTBASE+$298
 #endif
 
 #if (TOSVERSION >= 0x200) & (TOSVERSION < 0x300)
@@ -42,20 +49,54 @@ blink       equ VDITBASE+$0402
 _cursconf   equ VDITBASE+$0434
 _bcon5out   equ VDITBASE+$006C
 _bcon2out   equ VDITBASE+$0078
-#endif
 
-/* from GEMDOS */
-		xdef _osinit
-		xdef bdoslmul
-
-#if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400)
-_osinit   equ BDOSTBASE+$5588
-bdoslmul  equ BDOSTBASE+$298
-#endif
-
-#if (TOSVERSION >= 0x200) & (TOSVERSION < 0x300)
 _osinit   equ BDOSTBASE+$55D8
 bdoslmul  equ BDOSTBASE+$2E8
+#endif
+
+#if TOSVERSION == 0x104
+line1010    equ VDITBASE+0
+_SETBLT     equ VDITBASE+0
+_GETBLT     equ VDITBASE+0
+esc_init    equ VDITBASE+0
+resetdev    equ VDITBASE+0
+blink       equ VDITBASE+0
+_cursconf   equ VDITBASE+0
+_bcon5out   equ VDITBASE+0
+_bcon2out   equ VDITBASE+0
+
+_osinit   equ BDOSTBASE+0
+bdoslmul  equ BDOSTBASE+
+#endif
+
+#if TOSVERSION == 0x106
+line1010    equ VDITBASE+0
+_SETBLT     equ VDITBASE+0
+_GETBLT     equ VDITBASE+0
+esc_init    equ VDITBASE+0
+resetdev    equ VDITBASE+0
+blink       equ VDITBASE+0
+_cursconf   equ VDITBASE+0
+_bcon5out   equ VDITBASE+0
+_bcon2out   equ VDITBASE+0
+
+_osinit   equ BDOSTBASE+0
+bdoslmul  equ BDOSTBASE+
+#endif
+
+#if TOSVERSION == 0x162
+line1010    equ VDITBASE+0
+_SETBLT     equ VDITBASE+0
+_GETBLT     equ VDITBASE+0
+esc_init    equ VDITBASE+0
+resetdev    equ VDITBASE+0
+blink       equ VDITBASE+0
+_cursconf   equ VDITBASE+0
+_bcon5out   equ VDITBASE+0
+_bcon2out   equ VDITBASE+0
+
+_osinit   equ BDOSTBASE+0
+bdoslmul  equ BDOSTBASE+
 #endif
 
 /* from AES */

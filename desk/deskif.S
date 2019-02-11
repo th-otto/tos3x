@@ -26,6 +26,7 @@
 
 #include "config.h"
 #include "deskdefs.h"
+#include "../aes/aesdefs.h"
 #include "asmdefs.h"
 
 #if BINEXACT
@@ -60,6 +61,7 @@
 	xref _gl_bvhard
 
 
+#if AESVERSION >= 0x200
 #if CCODE
 WORD appl_bvset(WORD bvdisk, WORD bvhard)
 {
@@ -75,6 +77,7 @@ _appl_bvset:
 	move.w	10-4(sp),_gl_bvhard
 	moveq	#1,d0
 	rts
+#endif
 
 
 #if CCODE
@@ -100,6 +103,15 @@ disp1:	move.l	d0,-(sp)		; save return value
 	rts				; ... and return
 
 
+#if AESVERSION < 0x200
+	xdef _far_call
+_far_call:
+	move.l    8(a7),-(a7)
+	movea.l   8(a7),a0
+	jsr       (a0)
+	addq.l    #4,a7
+	rts
+#endif
 
 
 #if CCODE
@@ -119,8 +131,7 @@ WORD evnt_multi(UWORD flags, UWORD bclk, UWORD bmsk, UWORD bst,
   tmcount = ( (LONG)(thc) << 16);
   tmcount += tlc;
 
-  which = ev_multi(flags, &m1flags, &m2flags,
-*			tmcount, buparm, mepbuff, &rets[0]);
+  which = ev_multi(flags, &m1flags, &m2flags, tmcount, buparm, mepbuff, &rets[0]);
   dsptch();
   *pmx = rets[0];
   *pmy = rets[1];
@@ -314,6 +325,50 @@ _form_center:
 	lea	12(a6),a2		; copy coords back
 	lea	-8(a6),a1
 	bra	cplp4
+
+#if AESVERSION < 0x200
+	xdef graf_mouse
+_graf_mouse:
+	link      a6,#-4
+	movem.l   d6-d7,-(a7)
+	move.w    8(a6),d7
+	cmp.w     #255,d7
+	ble.s     grmo3
+	cmp.w     #256,d7
+	bne.s     grmo1
+	jsr _gsx_moff
+grmo1:
+	cmp.w     #257,d7
+	bne.s     grmo2
+	jsr _gsx_mon
+grmo2:
+	bra.s     grmo6
+grmo3:
+	cmp.w     #255,d7
+	beq.s     grmo4
+	move.l    a6,(a7)
+	subq.l    #4,(a7)
+	move.w    d7,-(a7)
+	addq.w    #3,(a7)
+	move.w    #14,-(a7)
+	move.l    _ad_sysglo,-(a7)
+	jsr _rs_gaddr
+	addq.l    #8,a7
+	movea.l   -4(a6),a0
+	move.l    (a0),-4(a6)
+	bra.s     grmo5
+grmo4:
+	move.l    10(a6),-4(a6)
+grmo5:
+	move.l    -4(a6),(a7)
+	jsr _gsx_mfset
+grmo6:
+	jsr _dsptch
+	tst.l     (a7)+
+	movem.l   (a7)+,d7
+	unlk      a6
+	rts
+#endif
 
 
 #if CCODE

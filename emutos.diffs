@@ -1,0 +1,2 @@
+setscreen:
+   call vsync() befre writing hardware shift register

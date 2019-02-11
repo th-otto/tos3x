@@ -33,7 +33,13 @@ bios.a: $(BIOS_OBJS) ${MAKEFILE}
 startup.o: startup.S $(top_srcdir)/common/config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc nvram.inc ikbdclk.inc floppy.inc
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(NO_BRANCH_OPT) $(CPPFLAGS) -c -o $@ $<
 
+start1x.o: start1x.S $(top_srcdir)/common/config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc nvram.inc ikbdclk.inc floppy.inc
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(NO_BRANCH_OPT) $(CPPFLAGS) -c -o $@ $<
+
 vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+
+vars1x.o: $(top_srcdir)/common/vars1x.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
@@ -46,7 +52,7 @@ prtkeys$(EXEEXT): prtkeys.o
 
 ifeq ($(USE_CROSS_ALCYON),1)
 # sections.mak might have just been generated, make sure it is reread
-bios.o: tosvars.o vars.o $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
+bios.o: tosvars.o $(VARS_OBJS) $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 blkdev.o: blkdev.c
@@ -55,8 +61,8 @@ blkdev.o: blkdev.c
 	$(AM_V_at)$(AS) $(ASFLAGS) -c $*.s
 	$(AM_V_at)$(RM) $*.s
 
-single:
-	$(LD) -u -s -l -o bios.o -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o
+single: tosvars.o $(VARS_OBJS) biosext.o $(BIOS_OBJS) ${MAKEFILE}
+	$(LD) -u -s -l -o bios.o -a $(bios_tbase) $(bios_dbase) 0 tosvars.o $(VARS_OBJS) $(BIOS_OBJS) biosext.o
 endif
 
 check:: bios.o $(top_srcdir)/common/sections.mak

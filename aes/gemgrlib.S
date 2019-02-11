@@ -1487,7 +1487,7 @@ _gr_sl1:
         move.w    d6,-(a7)
         move.w    #1000,-(a7)
         move.w    d2,-(a7)
-        jsr       _MUL_DIV
+        jsr       _mul_div
         addq.l    #6,a7
 _gr_sl2:
         adda.w    #$0038,a7

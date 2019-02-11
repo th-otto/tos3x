@@ -250,3 +250,7 @@ TTMFP_REGS      equ $fffffa81
 
 NVRAM_ADDR_REG  equ $ffff8961
 NVRAM_DATA_REG  equ $ffff8963
+
+#define DMA_DATA $ffff8604
+#define DMA_CTRL $ffff8606
+

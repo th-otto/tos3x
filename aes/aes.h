@@ -100,6 +100,17 @@ typedef int BOOLEAN;
 #  define STATIC static
 #endif
 
+/*
+ * for functions that are supposed to be static,
+ * but must be visible for the line-f trap table
+ */
+#define LINEF_HACK (TOSVERSION <= 0x104)
+#if LINEF_HACK
+#define LINEF_STATIC
+#else
+#define LINEF_STATIC static
+#endif
+
 
 /*
  * coerce short ptr to low word  of long
@@ -410,7 +421,6 @@ extern const char stacc[];
 
 VOID release PROTO((NOTHING));
 VOID all_run PROTO((NOTHING));
-int16_t sndcli PROTO((char *pfilespec, int16_t acc));
 VOID ldaccs PROTO((NOTHING));
 VOID free_accs PROTO((NOTHING));
 BOOLEAN cre_aproc PROTO((NOTHING));

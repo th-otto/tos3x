@@ -52,9 +52,11 @@ name: ds.t size
 
 	V(oshdr,b,6+64)
 
+#if TOSVERSION >= 0x200
 	V(cookies,l,NCOOKIES*2)
 
 	INT(_bootpref)					/* boot pref for _dmaboot */
+#endif
 
 #if (TOSVERSION >= 0x400)
 	V(dspin,b,1)		/* spinup delay before _dmaboot */
@@ -67,13 +69,17 @@ name: ds.t size
 	V(_altmd,l,4)
 #endif
 
+#if (TOSVERSION >= 0x200)
 	BYTE(_has_dmasound)
 	BYTE(STEFlag)
+#endif
 
 	xdef __sbss
 __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIOS */
 
+#if (TOSVERSION >= 0x200)
 	V(privinst,l,2)
+#endif
 
 	PTR(savepc)
 	PTR(execpath)
@@ -83,14 +89,16 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	V(_pbdef,b,30)
 
-	PTR(lastacstm)
+	LONG(lastacstm)
 
+#if (TOSVERSION >= 0x200)
 	V(scsicmd,b,10)
 
 	V(dmarwflg,b,1)
 	even
 	
 	V(idebuf,b,SECTOR_SIZE)
+#endif
 
 	ds.l 1 /* unused */
 
@@ -100,9 +108,11 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	LONG(waketimeAlarm)
 #endif
 
+#if TOSVERSION >= 0x200
 	V(rs232ibuf,b,SERIAL_BUFSIZE)
 	V(rs232obuf,b,SERIAL_BUFSIZE)
 	V(rs232iorec,b,2*14+8)
+#endif
 
 	V(ikbdiorec,b,14)
 	V(ikbdbuf,b,SERIAL_BUFSIZE)
@@ -156,6 +166,7 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	INT(iclk_ready)
 
+#if TOSVERSION >= 0x200
 	V(bcmap_root,b,16)
 
 	V(bcmap_devs,l,4*6) /* should be 3 for 2.06 but isnt */
@@ -173,6 +184,7 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	V(mdm2ibuf,b,SERIAL_BUFSIZE)
 	V(mdm2obuf,b,SERIAL_BUFSIZE)
 	V(mdm2iorec,b,2*14+8)
+#endif
 
 	INT(fd_retry)
 	V(_fd_wp,b,NUMFLOPPIES)
@@ -202,6 +214,12 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	PTR(fd_frb)
 	PTR(fd_copyp)
 	INT(fd_cscnt)
+
+#if TOSVERSION < 0x200
+	V(rs232ibuf,b,SERIAL_BUFSIZE)
+	V(rs232obuf,b,SERIAL_BUFSIZE)
+	V(rs232iorec,b,2*14+8)
+#endif
 
 	PTR(memtnext)
 	PTR(memtaddr)
@@ -643,7 +661,9 @@ _endvdibss: ds.b 0
 	INT(_tmpmoff)
 	INT(_windspec)
 	PTR(_gl_store)
+#if AESVERSION >= 0x200
 	INT(_ctldown)
+#endif
 	INT(_autoexec)
 	INT(_fs_topptr)
 	INT(_d_nrows)

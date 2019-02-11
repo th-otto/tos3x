@@ -151,11 +151,13 @@ else
 	if $undefined; then
 		LDFLAGS="${LDFLAGS}un,"
 	fi
-	if $nolocals; then
-		LDFLAGS="${LDFLAGS}no,"
-	fi
 	if $symbols; then
 		LDFLAGS="${LDFLAGS}sy,"
+		if $nolocals; then
+			LDFLAGS="${LDFLAGS}no,"
+		else
+			LDFLAGS="${LDFLAGS}locals,"
+		fi
 	fi
 	if test "$textbase" != ""; then
 		LDFLAGS="${LDFLAGS}text[$textbase],"

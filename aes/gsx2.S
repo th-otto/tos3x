@@ -69,11 +69,8 @@ _gsx2:
  *	sp+06	m2
  *	sp+08	d1
  */
-	xdef	_MUL_DIV
-_MUL_DIV: ds.b 0
 	xdef	_mul_div
-_mul_div: ds.b 0
-
+_mul_div:
 	move.w	6(sp),d0	;	 m2
 	add.w	d0,d0		;      2*m2
 	muls	4(sp),d0	;   m1*2*m2

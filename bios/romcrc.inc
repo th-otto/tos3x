@@ -1,3 +1,5 @@
+#if TOSVERSION >= 0x200
+
 		text
 /*
  * uint16_t check_rom_crc(void *start, long count, short offset)
@@ -74,3 +76,5 @@ rom_crc_table:
         dc.w $6e17,$7e36,$4e55,$5e74,$2e93,$3eb2,$0ed1,$1ef0
 
 	text
+
+#endif

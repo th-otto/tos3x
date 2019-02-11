@@ -1,4 +1,20 @@
-BIOS_OBJS=startup.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
+BIOS_306_OBJS=startup.o
+BIOS_208_OBJS=startup.o
+BIOS_206_OBJS=startup.o
+BIOS_162_OBJS=start1x.o
+BIOS_106_OBJS=start1x.o
+BIOS_104_OBJS=start1x.o
+
+BIOS_OBJS=$(BIOS_$(TOSVERSION)_OBJS) keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
+
+VARS_306_OBJS=vars.o
+VARS_208_OBJS=vars.o
+VARS_206_OBJS=vars.o
+VARS_162_OBJS=vars1x.o
+VARS_106_OBJS=vars1x.o
+VARS_104_OBJS=vars1x.o
+
+VARS_OBJS=$(VARS_$(TOSVERSION)_OBJS)
 
 BIOS_HEADERS=\
 	bios.h \
@@ -26,6 +42,7 @@ BIOS_INCLUDES=\
 
 BIOS_ASRCS = \
 	startup.S \
+	start1x.S \
 	prt.S \
 	memtest.S \
 	${empty}
