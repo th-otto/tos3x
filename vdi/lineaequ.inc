@@ -357,7 +357,7 @@
 #define vl_col_fg		2830
 /* either a maping of reg's or true val */
 #define pal_map			2834
-/* all the vectored primitives */
+/* all the vectored primitives (40 ptrs) */
 #define V_PRIMITIVES		3858
 
 #endif

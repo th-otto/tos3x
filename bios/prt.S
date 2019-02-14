@@ -1,6 +1,7 @@
 #include "tosvars.inc"
 
 /* 306de: 00e05f48 */
+/* 104de: 00fc1e84 */
 		xdef _plststat
 _plststat:
         movem.l   d3-d7/a3-a6,-(a7)
@@ -11,6 +12,7 @@ _plststat:
         rts
 
 /* 306de: 00e05f5a */
+/* 104de: 00fc1e96 */
 		xdef _prtlst
 _prtlst:
         move.w    6(a7),d0
@@ -25,6 +27,7 @@ _prtlst:
         rts
 
 /* 306de: 00e05f76 */
+/* 104de: 00fc1eb2 */
 		xdef _pauxstat
 _pauxstat:
         movem.l   d3-d7/a3-a6,-(a7)
@@ -35,6 +38,7 @@ _pauxstat:
         rts
 
 /* 306de: 00e05f88 */
+/* 104de: 00fc1ec4 */
 		xdef _prtaux
 _prtaux:
         move.w    6(a7),d0

@@ -1015,6 +1015,7 @@ floploc3:
  */
 /* 306de: 00e04216 */
 /* 206de: 00e03e06 */
+/* 104de: 00fc145c */
 flopfail:
         moveq.l   #MEDIAMAYCHANGE,d0            /* disk change mode = unsure */
         bsr       setdchg                       /* set media change mode */
@@ -1509,6 +1510,7 @@ rwdly1:     dbf       d7,rwdly1
  */
 /* 306de: 00e04454 */
 /* 206de: 00e0406a */
+/* 104de: 00fc1640 */
 fdchange:
             cmpi.w    #1,_nflops                /* if there are zero or two floppies */
             bne.s     fdchang2                  /* then do nothing (return OK) */

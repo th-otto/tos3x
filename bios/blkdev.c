@@ -1,6 +1,7 @@
 #include "bios.h"
 #include <toserrno.h>
 #include "tosvars.h"
+#include "../bdos/bdosdefs.h"
 
 /* read/write flags */
 #define RW_READ             0
@@ -19,7 +20,9 @@ long fd_mediach;
 int fd_err[NUMFLOPPIES]; /* only set once in bhdv_init; unused otherwise */
 char drivechange[NUMFLOPPIES];
 long fd_lastacc[NUMFLOPPIES];
+#if TOSVERSION >= 0x200
 int16_t bpbsums[BPBSECT]; /* BUG: should be part of BLKDEV */
+#endif
 char fd_latch[NUMFLOPPIES];
 char fd_wp[NUMFLOPPIES];
 char drivechange[NUMFLOPPIES];
@@ -31,6 +34,12 @@ BLKDEV blkdev[NUMFLOPPIES];
 static int16_t getiword PROTO((const uint8_t *addr));
 static int16_t sectsum PROTO((const int16_t *buf, int count));
 static ERROR dorwabs PROTO((int16_t rw, char *buf, RECNO recnr, int16_t dev, int16_t cnt));
+
+#if TOSVERSION < 0x200
+#define dskbufp dskbuf
+extern char dskbuf[];
+#endif
+
 
 
 /*
@@ -112,7 +121,9 @@ PP(int16_t dev;)
 	register int16_t spc;
 	char unused[8];
 	ERROR err;
+#if TOSVERSION >= 0x200
 	const int16_t *buf;
+#endif
 	
 	UNUSED(unused);
 	if (dev >= NUMFLOPPIES)
@@ -158,10 +169,12 @@ PP(int16_t dev;)
 	bpb->datrec = bpb->fatrec + bpb->rdlen + bpb->fsiz;
 	bpb->numcl = (getiword(BS->sec) - bpb->datrec) / bpb->clsiz;
 	bpb->b_flags = 0;
+#if GEMDOS >= 0x18
 	if (BS->fat < 2)
 	{
 		bpb->b_flags |= B_1FAT;
 	}
+#endif
 #if TP_25 /* ED_BIOS */
 	if (BS->numcl > 4078)
 		bpb->b_flags |= B_16;
@@ -177,9 +190,12 @@ PP(int16_t dev;)
 
 	for (i = 0; i < 3; i++)
 		bdev->serial[i] = BS->serial[i];
+#if TOSVERSION >= 0x200
 	for (i = 0; i < 4; i++)
 		bdev->serial2[i] = BS->serial2[i];
+#endif
 	
+#if TOSVERSION >= 0x200
 	buf = (const int16_t *)dskbufp;
 	for (i = 0; i < BPBSECT; i++)
 	{
@@ -191,6 +207,7 @@ PP(int16_t dev;)
 #endif
 		buf += SECTOR_SIZE / 2;
 	}
+#endif
 
 	drivechange[dev] = (fd_latch[dev] = fd_wp[dev]) ? MEDIAMAYCHANGE : MEDIANOCHANGE;
 	
@@ -227,6 +244,8 @@ PP(int16_t dev;)
 
 
 /* 306de: 00e05918 */
+/* 104de: 00fc1956 */
+#if TOSVERSION >= 0x200
 static int ckmediach(P(int16_t) dev)
 PP(int16_t dev;)
 {
@@ -283,6 +302,7 @@ PP(int16_t dev;)
 		}
 		if (!(fd_latch[dev] = fd_wp[dev]))
 			drivechange[dev] = MEDIANOCHANGE;
+
 #undef i
 #undef BS
 
@@ -290,6 +310,55 @@ PP(int16_t dev;)
 	
 	return MEDIANOCHANGE;
 }
+#else
+static int ckmediach(P(int16_t) _dev)
+PP(int16_t _dev;)
+{
+	register BLKDEV *bdev;
+	register int ret;
+	register int dev;
+	register ERROR err;
+	
+	dev = _dev;
+	bdev = &blkdev[dev];
+	ret = bhdv_mediach(dev);
+	if (ret == MEDIACHANGE)
+	{
+		return ret;
+	} else if (ret == MEDIAMAYCHANGE)
+	{
+		do {
+#if BINEXACT
+			/* 0L = ugly hack to pass 2 zeroes */
+			err = floprd(dskbufp, NULL, dev, 1, 0L, BPBSECT);
+#else
+			err = floprd(dskbufp, NULL, dev, 1, 0, 0, BPBSECT);
+#endif
+			if (err < 0)
+			{
+				err = callcrit((int16_t)err, dev);
+			}
+		} while (err == CRITIC_RETRY_REQUEST);
+
+		if (err < 0)
+			return err;
+
+#define BS ((struct fat16_bs *)dskbufp)
+
+#define i ret /* reuse register variable */
+		for (i = 0; i < 3; i++)
+			if (BS->serial[i] != bdev->serial[i])
+				return MEDIACHANGE;
+		if (!(fd_latch[dev] = fd_wp[dev]))
+			drivechange[dev] = MEDIANOCHANGE;
+#undef i
+#undef BS
+
+	}
+	
+	return MEDIANOCHANGE;
+}
+#endif
 
 
 /*
@@ -351,8 +420,10 @@ PP(int16_t cnt;)
 	register int numsect;
 	int odd;
 	char *bufp;
+#if TOSVERSION >= 0x200
 	char *p;
 	int i;
+#endif
 	
 	bdev = &blkdev[dev];
 	odd = !(((intptr_t) buf) & 1) ? 0 : 1;
@@ -381,6 +452,7 @@ PP(int16_t cnt;)
 		{
 			numsect = cnt;
 		}
+#if TOSVERSION >= 0x200
 		if (bufp != buf)
 			cpy512(buf, bufp);
 		if ((rw & RW_WRITE) && (track | side) == 0 && sector < BPBSECT)
@@ -401,10 +473,17 @@ PP(int16_t cnt;)
 			}
 		}
 		sector++;
+#else
+		sector++;
+#endif
 		
 		do {
 			if (rw & RW_WRITE)
 			{
+#if TOSVERSION < 0x200
+				if (bufp != buf)
+					cpy512(buf, bufp);
+#endif
 				err = flopwrt(bufp, NULL, dev, sector, track, side, numsect);
 				if (err == 0 && fverify)
 				{
@@ -527,7 +606,11 @@ int16_t bhdv_boot(NOTHING)
 }
 
 
+#if TOSVERSION >= 0x200
 #define NUM_PROTOBT_ENTRIES 6
+#else
+#define NUM_PROTOBT_ENTRIES 4
+#endif
 static char const proto_data[NUM_PROTOBT_ENTRIES * 19] = {
 #define LEW(x) x & 0xff, x / 0x100
 	/* bps               spc res     fat dir       sec         media spf      spt      sides   hid */
@@ -535,8 +618,10 @@ static char const proto_data[NUM_PROTOBT_ENTRIES * 19] = {
 	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(112), LEW(720),   0xfd, LEW(2),  LEW(9),  LEW(2), LEW(0),   /* 1 = DS, 40 tracks, SD */
 	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(112), LEW(720),   0xf9, LEW(5),  LEW(9),  LEW(1), LEW(0),   /* 2 = SS, 80 tracks, SD */
 	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(112), LEW(1440),  0xf9, LEW(5),  LEW(9),  LEW(2), LEW(0),   /* 3 = DS, 80 tracks, SD */
+#if TOSVERSION >= 0x200
 	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(224), LEW(2880),  0xf0, LEW(5),  LEW(18), LEW(2), LEW(0),   /* 4 = DS, 80 tracks, HD */ /* BUG: MSDOS uses 1 spc */
 	   LEW(SECTOR_SIZE), 2,  LEW(1), 2,  LEW(224), LEW(5760),  0xf0, LEW(10), LEW(36), LEW(2), LEW(0),   /* 5 = DS, 80 tracks, ED */ /* BUG: MSDOS uses 240 dir entries, and 9 spf */
+#endif
 #undef LEW
 };
 
@@ -578,7 +663,11 @@ PP(int16_t execflag;)
 		/* BUG: serial2 checked by floppy mediach detection, but not set here */
 	}
 	
-	if (disktype >= 0 && disktype < NUM_PROTOBT_ENTRIES)
+	if (disktype >= 0
+#if TOSVERSION >= 0x200
+		&& disktype < NUM_PROTOBT_ENTRIES
+#endif
+		)
 	{
 		idx = disktype * 19;
 		for (i = 0; i < 19; idx++, i++)
@@ -600,6 +689,7 @@ PP(int16_t execflag;)
 
 /* 306de: 00e05ef8 */
 /* 104de: 00fc1e2e */
+#if (TOSVERSION >= 0x200) | !BINEXACT
 static int16_t sectsum(P(const int16_t *) buf, P(int) count)
 PP(const int16_t *buf;)
 PP(int count;)
@@ -612,9 +702,22 @@ PP(int count;)
 		sum += *p++;
 	return sum;
 }
+#else
+static int16_t sectsum(P(const int16_t *) buf, P(int) count)
+PP(const int16_t *buf;)
+PP(int count;)
+{
+	register int16_t sum;
+	
+	for (sum = 0; count-- != 0; )
+		sum += *buf++;
+	return sum;
+}
+#endif
 
 
 /* 306de: 00e05f22 */
+/* 104de: 00fc1e5e */
 static int16_t getiword(P(const uint8_t *) addr)
 PP(const uint8_t *addr;)
 {

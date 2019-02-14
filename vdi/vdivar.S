@@ -163,7 +163,11 @@ lineavars:
 #if TOSVERSION >= 0x300
 	ds.b 2310
 #else
+#if TOSVERSION >= 0x200
 	ds.b 172
+#else
+	ds.b 172
+#endif
 #endif
 #endif
 

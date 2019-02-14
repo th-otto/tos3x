@@ -3,14 +3,23 @@
 #include "tosvars.inc"
 #include "biosdefs.h"
 
+#if TOSVERSION < 0x200
+#	undef ABSW
+#	undef ABSW2
+#	undef SETBASEREG
+#	define ABSW(x) x(a1)
+#	define ABSW2(x) x
+#   define SETBASEREG suba.l    a1,a1
+#endif
+
 nvram_rtc_year_offset equ 1980-1968
 
-	xdef ngetdt
-	xdef readRTCTime
-	xdef writeRTCTime
-	xdef checkRTC
+        xdef ngetdt
+        xdef readRTCTime
+        xdef writeRTCTime
+        xdef checkRTC
 
-	text
+        text
 
 /* NVRAM_ADDR_REG  equ $ffff8961 */
 /* NVRAM_DATA_REG  equ $ffff8963 */
@@ -23,8 +32,8 @@ rtc_sec         equ $fffffc20
 ngetdt:
         bsr       checkRTC
         bcs.s     inittc2
-        move.b    #$0D,(NVRAM_ADDR_REG).w /* select register D */
-        move.b    (NVRAM_DATA_REG).w,d0
+        move.b    #$0D,ABSW(NVRAM_ADDR_REG) /* select register D */
+        move.b    ABSW(NVRAM_DATA_REG),d0
         btst      #7,d0                   /* is RAM & time valid? */
         bne.s     inittc1                 /* yes */
         move.l    #$12C80000,-(a7)        /* (9<<9)+(6<<5)+8 */
@@ -46,35 +55,35 @@ inittc2:
 readRTCTime:
         bsr       checkRTC
         bcs.s     inittc2
-        move.b    #$0D,(NVRAM_ADDR_REG).w /* select register D */
-        btst      #7,(NVRAM_DATA_REG).w   /* is RAM & time valid? */
-        beq       rdttc2                  /* no, fail */
+        move.b    #$0D,ABSW(NVRAM_ADDR_REG) /* select register D */
+        btst      #7,ABSW(NVRAM_DATA_REG)   /* is RAM & time valid? */
+        beq       rdttc2                    /* no, fail */
         move.w    sr,d2
         move.w    d2,d0
         or.w      #$0700,d0
 rdttc1:
-        move.b    #$0A,(NVRAM_ADDR_REG).w /* select register A */
-        btst      #7,(NVRAM_DATA_REG).w   /* is update in progress? */
-        bne.s     rdttc1                  /* yes, wait */
+        move.b    #$0A,ABSW(NVRAM_ADDR_REG) /* select register A */
+        btst      #7,ABSW(NVRAM_DATA_REG)   /* is update in progress? */
+        bne.s     rdttc1                    /* yes, wait */
         moveq.l   #0,d0
         move.l    d0,d1
-        move.b    #$00,(NVRAM_ADDR_REG).w /* select register 0 (seconds) */
-        move.b    (NVRAM_DATA_REG).w,d0
+        move.b    #$00,ABSW(NVRAM_ADDR_REG) /* select register 0 (seconds) */
+        move.b    ABSW(NVRAM_DATA_REG),d0
         asr.w     #1,d0
-        move.b    #$02,(NVRAM_ADDR_REG).w /* select register 2 (minutes) */
-        move.b    (NVRAM_DATA_REG).w,d1
-        dc.w $efc0,$1546                  /* bfins     d1,d0{21:6} */
-        move.b    #$04,(NVRAM_ADDR_REG).w /* select register 4 (hours) */
-        move.b    (NVRAM_DATA_REG).w,d1
-        dc.w $efc0,$1405                  /* bfins     d1,d0{16:5} */
-        move.b    #$07,(NVRAM_ADDR_REG).w /* select register 7 (day of month) */
-        move.b    (NVRAM_DATA_REG).w,d1
-        dc.w $efc0,$12c5                  /* bfins     d1,d0{11:5} */
-        move.b    #$08,(NVRAM_ADDR_REG).w /* select register 8 (month) */
-        move.b    (NVRAM_DATA_REG).w,d1
-        dc.w $efc0,$11c4                  /* bfins     d1,d0{7:4} */
-        move.b    #$09,(NVRAM_ADDR_REG).w /* select register 9 (year) */
-        move.b    (NVRAM_DATA_REG).w,d1
+        move.b    #$02,ABSW(NVRAM_ADDR_REG) /* select register 2 (minutes) */
+        move.b    ABSW(NVRAM_DATA_REG),d1
+        dc.w $efc0,$1546                    /* bfins     d1,d0{21:6} */
+        move.b    #$04,ABSW(NVRAM_ADDR_REG) /* select register 4 (hours) */
+        move.b    ABSW(NVRAM_DATA_REG),d1
+        dc.w $efc0,$1405                    /* bfins     d1,d0{16:5} */
+        move.b    #$07,ABSW(NVRAM_ADDR_REG) /* select register 7 (day of month) */
+        move.b    ABSW(NVRAM_DATA_REG),d1
+        dc.w $efc0,$12c5                    /* bfins     d1,d0{11:5} */
+        move.b    #$08,ABSW(NVRAM_ADDR_REG) /* select register 8 (month) */
+        move.b    ABSW(NVRAM_DATA_REG),d1
+        dc.w $efc0,$11c4                    /* bfins     d1,d0{7:4} */
+        move.b    #$09,ABSW(NVRAM_ADDR_REG) /* select register 9 (year) */
+        move.b    ABSW(NVRAM_DATA_REG),d1
         sub.b     #nvram_rtc_year_offset,d1
         dc.w $efc0,$1007                  /* bfins     d1,d0{0:7} */
         move.w    d2,sr
@@ -98,49 +107,49 @@ writeRTCTime:
         bsr       checkRTC
         bcs       inittc2
         move.l    4(a7),d0
-        move.b    #$0B,(NVRAM_ADDR_REG).w /* select register B */
-        move.b    #$80,(NVRAM_DATA_REG).w /* abort update cycle */
-        move.b    #$0A,(NVRAM_ADDR_REG).w /* select register A */
-        move.b    #$2A,(NVRAM_DATA_REG).w /* divider = 2, rate = 10 */
-        move.b    #$0B,(NVRAM_ADDR_REG).w /* select register B */
-        move.b    #$8E,(NVRAM_DATA_REG).w /* enable data mode binary, 24hr, daylight savings */
-        move.b    #$00,(NVRAM_ADDR_REG).w /* select register 0 (seconds) */
+        move.b    #$0B,ABSW(NVRAM_ADDR_REG) /* select register B */
+        move.b    #$80,ABSW(NVRAM_DATA_REG) /* abort update cycle */
+        move.b    #$0A,ABSW(NVRAM_ADDR_REG) /* select register A */
+        move.b    #$2A,ABSW(NVRAM_DATA_REG) /* divider = 2, rate = 10 */
+        move.b    #$0B,ABSW(NVRAM_ADDR_REG) /* select register B */
+        move.b    #$8E,ABSW(NVRAM_DATA_REG) /* enable data mode binary, 24hr, daylight savings */
+        move.b    #$00,ABSW(NVRAM_ADDR_REG) /* select register 0 (seconds) */
         dc.w $e9c0,$16c5    /* bfextu    d0{27:5},d1  */
         add.b     d1,d1
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$02,(NVRAM_ADDR_REG).w /* select register 2 (minutes) */
+        move.b    d1,ABSW(NVRAM_DATA_REG)
+        move.b    #$02,ABSW(NVRAM_ADDR_REG) /* select register 2 (minutes) */
         dc.w $e9c0,$1546    /* bfextu    d0{21:6},d1 */
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$04,(NVRAM_ADDR_REG).w /* select register 4 (hours) */
+        move.b    d1,ABSW(NVRAM_DATA_REG)
+        move.b    #$04,ABSW(NVRAM_ADDR_REG) /* select register 4 (hours) */
         dc.w $e9c0,$1405    /* bfextu    d0{16:5},d1 */
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$07,(NVRAM_ADDR_REG).w /* select register 7 (day of month) */
+        move.b    d1,ABSW(NVRAM_DATA_REG)
+        move.b    #$07,ABSW(NVRAM_ADDR_REG) /* select register 7 (day of month) */
         dc.w $e9c0,$12c5    /* bfextu    d0{11:5},d1 */
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$08,(NVRAM_ADDR_REG).w /* select register 8 (month) */
+        move.b    d1,ABSW(NVRAM_DATA_REG)
+        move.b    #$08,ABSW(NVRAM_ADDR_REG) /* select register 8 (month) */
         dc.w $e9c0,$11c4    /* bfextu    d0{7:4},d1 */
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$09,(NVRAM_ADDR_REG).w /* select register 9 (year) */
+        move.b    d1,ABSW(NVRAM_DATA_REG)
+        move.b    #$09,ABSW(NVRAM_ADDR_REG) /* select register 9 (year) */
         dc.w $e9c0,$1007    /* bfextu    d0{0:7},d1 */
         add.b     #nvram_rtc_year_offset,d1
-        move.b    d1,(NVRAM_DATA_REG).w
-        move.b    #$0B,(NVRAM_ADDR_REG).w
-        move.b    #$0E,(NVRAM_DATA_REG).w
+        move.b    d1,ABSW(NVRAM_DATA_REG)
+        move.b    #$0B,ABSW(NVRAM_ADDR_REG)
+        move.b    #$0E,ABSW(NVRAM_DATA_REG)
         rts
 
 /* 306de: 00e0205e */
 checkRTC:
         movea.l   a7,a0
-        movea.l   (_buserror).w,a1
-        move.l    #nvramfail,(_buserror).w
-        move.b    #$00,(NVRAM_ADDR_REG).w
-        move.b    (NVRAM_DATA_REG).w,d0
-        move.l    a1,(_buserror).w
+        movea.l   ABSW(_buserror),a1
+        move.l    #nvramfail,ABSW(_buserror)
+        move.b    #$00,ABSW(NVRAM_ADDR_REG)
+        move.b    ABSW(NVRAM_DATA_REG),d0
+        move.l    a1,ABSW(_buserror)
         andi.b    #$FE,ccr                /* clear carry bit */
         rts
 nvramfail:
         movea.l   a0,a7
-        move.l    a1,(_buserror).w
+        move.l    a1,ABSW(_buserror)
         ori.b     #$01,ccr                /* set carry bit */
         rts
 
@@ -148,7 +157,7 @@ nvramfail:
  * XBIOS #42 - NVMaccess
  */
 /* 306de: 00e0208c */
-	xdef _nvmaccess
+        xdef _nvmaccess
 _nvmaccess:
         moveq.l   #-5,d0       /* return E_BADRQ in case of error */
         move.w    4(a7),d1
@@ -194,8 +203,8 @@ nvmrd2:
         rts
 /* erase NVRAM and update the checksum */
 nvminit:
-        lea.l     (NVRAM_ADDR_REG).w,a1
-        lea.l     (NVRAM_DATA_REG).w,a2
+        lea.l     ABSW(NVRAM_ADDR_REG),a1
+        lea.l     ABSW(NVRAM_DATA_REG),a2
         moveq.l   #0,d0
         moveq.l   #14,d1
         moveq.l   #49,d2       /* fill 48 bytes plus checksum */
@@ -242,8 +251,8 @@ nvmcrc1:
  * sum up nvm data 14-62
  */
 nvmsum:
-        lea.l     (NVRAM_ADDR_REG).w,a1
-        lea.l     (NVRAM_DATA_REG).w,a2
+        lea.l     ABSW(NVRAM_ADDR_REG),a1
+        lea.l     ABSW(NVRAM_DATA_REG),a2
         moveq.l   #0,d0
         moveq.l   #14,d1
         moveq.l   #47,d2
@@ -260,18 +269,30 @@ nvmsum1:
 #if MSTECLK
 
 /* 206de: 00e01a96 */
+/* 104de: 00fc1f4c */
 ngetdt: bsr.s     checkRTC
         bcs.s     ngetdt2
         bsr.s     readRTCTime
         cmp.l     #-1,d0
         beq.s     ngetdt2
+#if TOSVERSION < 0x200
+		move.w    d0,_time
+		swap      d0
+		move.w    d0,_date
+        moveq     #0,d0
+        rts
+ngetdt2:
+        moveq     #-1,d0
+        rts
+#else
         moveq     #0,d0
 ngetdt2:
         rts
+#endif
 
 #if STBOOK
 checkRTC:
-	movea.w   #rtc_sec,a0
+        movea.w   #rtc_sec,a0
         move.b    #$00,29(a0)               /* Clear RTC Test register */
         move.b    #$0c,31(a0)               /* Reset 1 Hz & 16 Hz alarm pulse */
         move.b    #$08,27(a0)               /* Clock Start, Alarm off, Bank 0 */
@@ -279,12 +300,20 @@ checkRTC:
         rts
 #else
 /* 206de: 00e01aa8 */
-checkRTC:   movea.w   #rtc_sec,a0
-            move.l    (_buserror).w,d2
+/* 104de: 00fc1f70 */
+checkRTC:
+			SETBASEREG
+			movea.w   #rtc_sec,a0
+            move.l    ABSW(_buserror),d2
             movea.l   sp,a2
-            move.l    #chkRTC2,(_buserror).w
+            move.l    #chkRTC2,ABSW(_buserror)
+#if (TOSVERSION >= 0x200)) | !BINEXACT
             bset      #0,27(a0)
-            move.l    d2,(_buserror).w
+#else
+            move.b    #9,27(a0)
+#endif
+
+            move.l    d2,ABSW(_buserror)
 #if !BINEXACT
 /* preserve old value */
             movep.w   5(a0),d0
@@ -304,11 +333,15 @@ checkRTC:   movea.w   #rtc_sec,a0
             movep.w   d0,5(a0)
 #endif
             move.b    #1,1(a0)
+#if (TOSVERSION >= 0x200) | !BINEXACT
             bclr      #0,27(a0)
+#else
+            move.b    #8,27(a0)
+#endif
             move.b    #0,29(a0)
             rts
 chkRTC2:    movea.l   a2,sp
-            move.l    d2,(_buserror).w
+            move.l    d2,ABSW(_buserror)
 chkRTC3:    ori       #1,ccr                    /* RTC not available */
             rts
 #endif /* STBOOK */
@@ -316,8 +349,8 @@ chkRTC3:    ori       #1,ccr                    /* RTC not available */
 /* 206de: 00e01af8 */
 readRTCTime:bsr.s     checkRTC
             bcs       rdRTCErr
-            lea       (rtcbufa).w,a1
-            lea       (rtcbufb).w,a2
+            lea       ABSW2(rtcbufa),a1
+            lea       ABSW2(rtcbufb),a2
             bsr       rdRTCMask
 rdRTC2:     exg       a1,a2
             bsr       rdRTCMask
@@ -358,18 +391,27 @@ rdRTC3:     move.b    (a1,d0.w),d1
             asl.w     #5,d0
             add.w     d0,d1
             moveq     #0,d0
+#if (TOSVERSION < 0x200) & BINEXACT
+            move.b    0(a1),d0
+#else
             move.b    (a1),d0
+#endif
             mulu.w    #10,d0
             add.b     1(a1),d0
             asl.w     #8,d0
             asl.w     #1,d0
             add.w     d0,d1
+#if TOSVERSION >= 0x200
             move      sr,d2
             ori       #$700,sr
             move.w    d1,_date
             swap      d1
             move.w    d1,_time
             move      d2,sr
+#else
+            swap      d1
+#endif
+
             move.l    d1,d0
             rts
 
@@ -387,10 +429,12 @@ rdRTCErr:   moveq  #-1,d0
 
 writeRTCTime:bsr      checkRTC
             bcs       no_RTC_found
-            lea       (rtcbufa).w,a1
+            lea       ABSW2(rtcbufa),a1
+#if (TOSVERSION >= 0x200) | !BINEXACT
             movea.w   4(sp),a2
             bsr       rtcwday
             move.b    d0,6(a1)
+#endif
             move.w    6(sp),d1
             move.w    d1,d0
             and.l     #$1f,d0
@@ -432,29 +476,46 @@ writeRTCTime:bsr      checkRTC
             ext.l     d1
             move.l    d1,d2
             divu.w    #10,d1
+#if (TOSVERSION < 0x200) & BINEXACT
+            move.b    d1,0(a1)
+#else
             move.b    d1,(a1)
+#endif
             swap      d1
             move.b    d1,1(a1)
             divu.w    #4,d2
             swap      d2
-            move.b    #$e,$1f(a0)
-            bset      #0,$1b(a0) /* select bank 1 */
-            move.b    #1,$15(a0) /* set 24h mode */
-            move.b    d2,$17(a0) /* set learyear register */
+#if (TOSVERSION >= 0x200) | !BINEXACT
+            move.b    #$e,31(a0)
+            bset      #0,27(a0) /* select bank 1 */
+#else
+			clr.b     6(a1)
+			move.b    #$02,31(a0)
+			move.b    #$09,27(a0)
+#endif
+            move.b    #1,21(a0) /* set 24h mode */
+            move.b    d2,$17(a0) /* set leapyear register */
+#if (TOSVERSION >= 0x200) | !BINEXACT
             bclr      #0,$1b(a0) /* select bank 0 */
             bclr      #3,$1b(a0) /* stop the clock */
+#else
+			move.b    #$08,27(a0)
+#endif
             moveq     #$c,d0
             moveq     #1,d1
 wrRTC2:     move.b    (a1,d0.w),(a0,d1.w)
             addq.w    #2,d1
             dbra      d0,wrRTC2
+#if (TOSVERSION >= 0x200) | !BINEXACT
             bset      #3,$1b(a0) /* start the clock */
+#endif
             moveq     #0,d0
             rts
 
 no_RTC_found:moveq    #-1,d0
             rts
 
+#if (TOSVERSION >= 0x200) | !BINEXACT
 rtcwday:    moveq     #2,d2
             move.w    a2,d0
             lsr.w     #8,d0
@@ -486,6 +547,7 @@ rtcwday2:   subq.w #1,d1
 daysOffsetToMonths:DC.W $0000,$001f,$003b,$005a
             DC.W      $0078,$0097,$00b5,$00d4
             DC.W      $00f3,$0111,$0130,$014e
+#endif
 
 #endif /* MSTECLK */
 
@@ -495,7 +557,7 @@ daysOffsetToMonths:DC.W $0000,$001f,$003b,$005a
  * XBIOS #47 - Waketime
  */
 /* 206de: 00e01d0a */
-	xdef _waketime
+        xdef _waketime
 _waketime:  move.l    4(sp),d0
             beq       clrwtim
             cmp.l     #-1,d0
@@ -598,8 +660,10 @@ enawtim2:   movea.w   #rtc_sec,a0
             move.b    d0,$11(a0)                /* RTC 1-hour alarm register */
             swap      d0
             move.b    d0,$f(a0)                 /* RTC 10-day alarm register */
+#if (TOSVERSION >= 0x200) | !BINEXACT
             movea.w   waketimeAlarm,a2
             bsr       rtcwday
+#endif
             move.b    d0,$d(a0)                 /* RTC day-of-the-week alarm register */
             bset      #2,$1b(a0)                /* RTC Alarm on */
             bclr      #0,$1b(a0)                /* RTC select Bank 0 */
@@ -671,16 +735,16 @@ ngetdt3:
 ngetdt4:
       movea.l   a2,a7
 ngetdt5:
-      move.l    a1,(_buserror).w
+      move.l    a1,ABSW(_buserror)
       ori.b     #1,ccr
       rts
 ngetdt6:
-      move.l    a1,(_buserror).w
+      move.l    a1,ABSW(_buserror)
       move.b    #1,1(a0)
       move.b    #0,$1d(a0)
       andi.b    #-2,ccr
       rts
-	  dc.b 0,0,0,0
+      dc.b 0,0,0,0
 
 
 /*
@@ -746,9 +810,9 @@ writeR10:
  */
 checkRTC:
       movea.l   a7,a2
-      movea.l   (_buserror).w,a1
+      movea.l   ABSW(_buserror),a1
       lea       ngetdt4(pc),a0          
-      move.l    a0,(_buserror).w
+      move.l    a0,ABSW(_buserror)
       movea.w   #rtc_sec,a0
       bset      #0,$1b(a0)
       movep.w   5(a0),d0
@@ -759,13 +823,13 @@ checkRTC:
       bra.s     writeR10
 #endif
 
-	bss
+        bss
 
 #if MSTECLK
-	xdef rtcbufa
-	comm rtcbufa,13
-	xdef rtcbufb
-	comm rtcbufb,13
-	xdef waketimeAlarm
-	comm waketimeAlarm,4
+        xdef rtcbufa
+        comm rtcbufa,13
+        xdef rtcbufb
+        comm rtcbufb,13
+        xdef waketimeAlarm
+        comm waketimeAlarm,4
 #endif

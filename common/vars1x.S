@@ -324,7 +324,9 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	V(_ofdbuf,b,70*80)
 #endif
 
+#if TOSVERSION >= 0x200
 	V(_bpbsums,w,BPBSECT*NUMFLOPPIES)
+#endif
 	INT(_oscnt)
 
 	V(_ram8x8,b,90)
@@ -356,7 +358,7 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	even
 #endif
 
-	V(_blkdev,b,36*NUMFLOPPIES)
+	V(_blkdev,b,32*NUMFLOPPIES)
 	V(_secbuf,b,4*SECTOR_SIZE)
 	BYTE(_osuser)
 	PTR(_dirrec)

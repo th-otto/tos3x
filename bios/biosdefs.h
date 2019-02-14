@@ -11,7 +11,11 @@
 #define SERIAL_BUFSIZE 256
 
 /* number of sectors for media change detection */
+#if TOSVERSION >= 0x200
 #define BPBSECT 6
+#else
+#define BPBSECT 1
+#endif
 
 /* media def has not changed */
 #define MEDIANOCHANGE    0

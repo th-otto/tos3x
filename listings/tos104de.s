@@ -2288,6 +2288,8 @@ sectsum:
 [00fc1e56] 4cdf 0080                 movem.l   (a7)+,d7
 [00fc1e5a] 4e5e                      unlk      a6
 [00fc1e5c] 4e75                      rts
+
+getiword:
 [00fc1e5e] 4e56 fffc                 link      a6,#$FFFC
 [00fc1e62] 206e 0008                 movea.l   8(a6),a0
 [00fc1e66] 1028 0001                 move.b    1(a0),d0
@@ -2301,6 +2303,8 @@ sectsum:
 [00fc1e7e] 8041                      or.w      d1,d0
 [00fc1e80] 4e5e                      unlk      a6
 [00fc1e82] 4e75                      rts
+
+_plststat:
 [00fc1e84] 48e7 1f1e                 movem.l   d3-d7/a3-a6,-(a7)
 [00fc1e88] 9bcd                      suba.l    a5,a5
 [00fc1e8a] 206d 0506                 movea.l   1286(a5),a0
@@ -2333,6 +2337,8 @@ sectsum:
 [00fc1ed8] 584f                      addq.w    #4,a7
 [00fc1eda] 4cdf 78f8                 movem.l   (a7)+,d3-d7/a3-a6
 [00fc1ede] 4e75                      rts
+
+zeromem:
 [00fc1ee0] 206f 0004                 movea.l   4(a7),a0
 [00fc1ee4] 226f 0008                 movea.l   8(a7),a1
 [00fc1ee8] 48e7 1f10                 movem.l   d3-d7/a3,-(a7)
@@ -50888,7 +50894,8 @@ _ui_mupb:
 [00fe8230] 8765 4321                 dc.l      $87654321
 [00fe8234] 0000 a84e                 dc.l      _endgembss
            00fd 3b8e                 dc.l      gemstart
-           0002                 move.w    a6,2(a5,d0.w)
+proto_data:
+[00fe823c] 0002                 move.w    a6,2(a5,d0.w)
 [00fe823e] 0101                      btst      d0,d1
 [00fe8240] 0002 4000                 ori.b     #$00,d2
 [00fe8244] 6801                      bvc.s     $00FE8247
@@ -50900,6 +50907,7 @@ _ui_mupb:
 [00fe8254] 0270 00d0 02fd            andi.w    #$00D0,-3(a0,d0.w*2) ; 68020+ only
 [00fe825a] 0200 0900                 andi.b    #$00,d0
 [00fe825e] 0200 0000                 andi.b    #$00,d0
+
 [00fe8262] 0002 0201                 ori.b     #$01,d2
 [00fe8266] 0002 7000                 ori.b     #$00,d2
 [00fe826a] d002                      add.b     d2,d0
@@ -50910,6 +50918,7 @@ _ui_mupb:
 [00fe8276] 0202 0100                 andi.b    #$00,d2
 [00fe827a] 0270 00a0 05f9 0500 0900  andi.w    #$00A0,([$05000900,zd0.w*4]) ; 68020+ only
 [00fe8284] 0200 0000                 andi.b    #$00,d0
+
 [00fe8288] 0f0f 0d06                 movep.w   3334(a7),d7
 [00fe828c] 0906                      btst      d4,d6
 [00fe828e] 0806 0802                 btst      #2050,d6
@@ -61986,11 +61995,18 @@ gem.rsc:
 0A24: fd_deferr
 0A26: fd_curerr
 0A4C: dsb
+0A54: rtcbufa
+0A61: rtcbufb
 0C70: rs232iorec
 0E7D: shifty
 0EAC: prtconfig
+0EB0: rseed
+0EC6: fd_mediach
+0ECC: drivechange
 0ED4: curflop
-0ED4: fd_lastacc
+0F16: blkdev
+0FAA: fd_err
+181C: dskbuf
 378A: time
 3BAA: virt_work
 5622: _run
