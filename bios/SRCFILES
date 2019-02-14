@@ -1,11 +1,11 @@
-BIOS_306_OBJS=startup.o
-BIOS_208_OBJS=startup.o
-BIOS_206_OBJS=startup.o
-BIOS_162_OBJS=start1x.o
-BIOS_106_OBJS=start1x.o
-BIOS_104_OBJS=start1x.o
+BIOS_306_OBJS=startup.o nvram.o ikbdclk.o chardev.o floppy.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
+BIOS_208_OBJS=startup.o nvram.o ikbdclk.o chardev.o floppy.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
+BIOS_206_OBJS=startup.o nvram.o ikbdclk.o chardev.o floppy.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
+BIOS_162_OBJS=start1x.o floppy.o blkdev.o chardev.o ikbdclk.o nvram.o keytbl.o sounds.o prtblk.o prt.o memtest.o
+BIOS_106_OBJS=start1x.o floppy.o blkdev.o chardev.o ikbdclk.o nvram.o keytbl.o sounds.o prtblk.o prt.o memtest.o
+BIOS_104_OBJS=start1x.o floppy.o blkdev.o chardev.o ikbdclk.o nvram.o keytbl.o sounds.o prtblk.o prt.o memtest.o
 
-BIOS_OBJS=$(BIOS_$(TOSVERSION)_OBJS) keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
+BIOS_OBJS=$(BIOS_$(TOSVERSION)_OBJS)
 
 VARS_306_OBJS=vars.o
 VARS_208_OBJS=vars.o
@@ -30,11 +30,8 @@ BIOS_HEADERS=\
 
 BIOS_INCLUDES=\
 	dma.inc \
-	floppy.inc \
-	ikbdclk.inc \
 	linea.inc \
 	mmu030.inc \
-	nvram.inc \
 	romcrc.inc \
 	scrdmp.inc \
 	intpriv.inc \
@@ -43,6 +40,10 @@ BIOS_INCLUDES=\
 BIOS_ASRCS = \
 	startup.S \
 	start1x.S \
+	nvram.S \
+	ikbdclk.S \
+	chardev.S \
+	floppy.S \
 	prt.S \
 	memtest.S \
 	${empty}

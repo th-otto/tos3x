@@ -254,3 +254,6 @@ NVRAM_DATA_REG  equ $ffff8963
 #define DMA_DATA $ffff8604
 #define DMA_CTRL $ffff8606
 
+psgsel    equ $FFFF8800
+psgrd     equ $FFFF8800
+psgwr     equ $FFFF8802

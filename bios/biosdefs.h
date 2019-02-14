@@ -92,3 +92,7 @@
 #else
 #define rs232devs 3
 #endif
+
+#define FASTRAMBASE $01000000
+
+#define HD_SUPPORT (TOSVERSION >= 0x200)

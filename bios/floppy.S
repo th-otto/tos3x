@@ -1,3 +1,9 @@
+#include "config.h"
+#include "asmdefs.h"
+#include "tosvars.inc"
+#include "biosdefs.h"
+
+
 #if TOSVERSION >= 0x300
 FRB_THRESHOLD equ $00A00000
 #else
@@ -8,7 +14,6 @@ FRB_THRESHOLD equ $00400000
 #endif
 #endif
 
-#define HD_SUPPORT (TOSVERSION >= 0x200)
 
 #if HD_SUPPORT
 /*
@@ -60,7 +65,7 @@ dsb_sizeof equ 4
 #define FD_RAWTRACK (60 + 18 * FD_RAWSEC + 1401)
 
 
-	text
+        text
 
 /*
  * flopini - initialize floppies
@@ -72,7 +77,7 @@ dsb_sizeof equ 4
 /* 306de: 00e03ba8 */
 /* 206de: 00e037c6 */
 /* 104de: 00fc0ef0 */
-	xdef _flopini
+        xdef _flopini
 _flopini:
 #if TOSVERSION >= 0x200
         clr.l     fd_frb
@@ -190,10 +195,10 @@ checkfd2:   movem.l   (sp)+,d0-d7/a6
 /* 306de: 00e03c10 */
 /* 206de: 00e03820 */
 /* 104de: 00fc0f38 */
-	xdef _floprd
+        xdef _floprd
 _floprd:
 #if STBOOK
-	bsr.s     checkfdc
+        bsr.s     checkfdc
         beq.s     drvnrdy
 #endif
 #if TOSVERSION >= 0x300
@@ -239,7 +244,7 @@ floprd2:
         move.l    ABSW(_hz_200),d7
         add.l     #300,d7                       /* set timeout timer */
 #else
-	move.l    #$00040000,d7
+        move.l    #$00040000,d7
 #endif
 /* --- Wait for read completion: */
 floprd3:
@@ -249,8 +254,8 @@ floprd3:
         cmp.l     ABSW(_hz_200),d7              /* timeout reached? */
         bhi.s     floprd3                       /* (punt on timeout) */
 #else
-	subq.l    #1,d7
-	bne.s     floprd3
+        subq.l    #1,d7
+        bne.s     floprd3
 #endif
 
 /* ---- check status after read */
@@ -330,10 +335,10 @@ fdcerr1:
 /* 306de: 00e03d12 */
 /* 206de: 00e0391c */
 /* 104de: 00fc100a */
-	xdef _flopwrt
+        xdef _flopwrt
 _flopwrt:
 #if STBOOK
-	bsr       checkfdc
+        bsr       checkfdc
         beq       drvnrdy
 #endif
 #if TOSVERSION >= 0x300
@@ -392,7 +397,7 @@ flopwrt2:
         move.l    ABSW(_hz_200),d7
         add.l     #300,d7                       /* d7 = timeout timer */
 #else
-	move.l    #$00040000,d7
+        move.l    #$00040000,d7
 #endif
 flopwrt3:
         btst      #5,ABSW(MFP_GPIP)             /* done yet? */
@@ -401,8 +406,8 @@ flopwrt3:
         cmp.l     ABSW(_hz_200),d7              /* timeout reached? */
         bhi.s     flopwrt3                      /* (still tickin') */
 #else
-	subq.l    #1,d7
-	bne.s     flopwrt3
+        subq.l    #1,d7
+        bne.s     flopwrt3
 #endif
         bsr       fdcreset                      /* timed out -- reset 1770 */
         bra.s     flopwrt5                      /* and retry */
@@ -456,6 +461,7 @@ flopwrt7:
 /* 306de: 00e03e02 */
 /* 206de: 00e03a04 */
 /* 104de: 00fc10c6 */
+        xdef _flopfmt
 _flopfmt:
         cmpi.l    #$87654321,22(a7)             /* check for magic# on stack */
         bne       flopfail                      /* no magic, so we just saved the world */
@@ -488,14 +494,14 @@ _flopfmt:
         moveq.l   #0,d0                         /* SD mode */
 flopfmt1:
 #if TP_41 /* HD_BIT */
-	bsr       hd_porta
+        bsr       hd_porta
 #else
 #if STBOOK
-	bsr       hdselect                      /* select SD/HD mode of floppy */
+        bsr       hdselect                      /* select SD/HD mode of floppy */
 #else
 #if (TOSVERSION < 0x300) | TP_50
-	tst.b     STEFlag                       /* no STE hardware available? */
-	bne.s     flopfmt2                      /* (correct) */
+        tst.b     STEFlag                       /* no STE hardware available? */
+        bne.s     flopfmt2                      /* (correct) */
 #endif
         move.w    d0,ABSW($FFFF860E)
 #endif /* STBOOK */
@@ -676,7 +682,7 @@ fmtrack6:
         move.l   ABSW (_hz_200),d7
         add.l     #300,d7                       /* d7 = timeout timer */
 #else
-	move.l    #$00040000,d7
+        move.l    #$00040000,d7
 #endif
 /* --- wait for 1770 complete: */
 fmtrack7:
@@ -686,8 +692,8 @@ fmtrack7:
         cmp.l     ABSW(_hz_200),d7              /* timeout reached? */
         bhi.s     fmtrack7                      /* (still tickin') */
 #else
-	subq.l    #1,d7
-	bne.s     fmtrack7
+        subq.l    #1,d7
+        bne.s     fmtrack7
 #endif
         bsr       fdcreset                      /* timed out -- reset 1770 */
 fmtrack8:
@@ -739,10 +745,10 @@ wmult:
 /* 306de: 00e03ffe */
 /* 206de: 00e03bfe */
 /* 104de: 00fc1286 */
-	xdef _flopver
+        xdef _flopver
 _flopver:
 #if STBOOK
-	bsr       checkfdc
+        bsr       checkfdc
         beq       drvnrdy
 #endif
 #if TOSVERSION >= 0x300
@@ -817,7 +823,7 @@ verify3:
         move.l    ABSW(_hz_200),d7
         add.l     #300,d7                       /* d7 = timeout timer */
 #else
-	move.l    #$00040000,d7
+        move.l    #$00040000,d7
 #endif
 *--- wait for command completion
 verify4:
@@ -827,8 +833,8 @@ verify4:
         cmp.l     ABSW(_hz_200),d7              /* timeout reached? */
         bhi.s     verify4                       /* (still tickin') */
 #else
-	subq.l    #1,d7
-	bne.s     verify4
+        subq.l    #1,d7
+        bne.s     verify4
 #endif
         bsr       fdcreset                      /* reset controller and return error */
         bra.s     verify7
@@ -870,8 +876,9 @@ verify8:
 /* 306de: 00e04106 */
 /* 206de: 00e03cfe */
 /* 104de: 00fc1360 */
+        xdef _flopvbl
 _flopvbl:
-	SETBASEREG
+        SETBASEREG
 #if TOSVERSION >= 0x300
         tst.w     ABSW(_nflops)                 /* any floppy drives installed? */
         beq       flopvbl5                      /* (no, return "unknown device") */
@@ -959,7 +966,7 @@ flopvbl5:
 /* 104de: 00fc13dc */
 floplock:
         movem.l   d3-d7/a3-a6,flopsregs         /* save C registers */
-	SETBASEREG
+        SETBASEREG
         lea.l     ABSW(DMA_CTRL),a6             /* a6 -> DMA_CTRL */
         st        ABSW(fd_motoron)              /* kludge motor state = ON */
         move.w    d0,ABSW(fd_deferr)            /* set default error number */
@@ -1138,17 +1145,17 @@ go2trac2:
         and.w     #$0003,d0
         eori.w    #$0003,d0                     /* toggle between SD/HD mode for a second seek try */
 #if TP_41 /* HD_BIT */
-	bsr       hd_porta
+        bsr       hd_porta
 #else
 #if STBOOK
-	move.w    d0,fd_density(a1)
+        move.w    d0,fd_density(a1)
         bsr       hdselect                      /* select SD/HD mode of floppy */
 #else
 #if (TOSVERSION < 0x300) | TP_50
-	move.w    d0,fd_density(a1)
-	tst.b     STEFlag                       /* no STE hardware available? */
-	bne.s     go2trc2b                      /* (correct) */
-	move.w    d0,ABSW($FFFF860E)
+        move.w    d0,fd_density(a1)
+        tst.b     STEFlag                       /* no STE hardware available? */
+        bne.s     go2trc2b                      /* (correct) */
+        move.w    d0,ABSW($FFFF860E)
 go2trc2b:
 #else
         move.w    d0,ABSW($FFFF860E)
@@ -1168,7 +1175,7 @@ go2trac3:
 #if (TOSVERSION >= 0x200)
         clr.w     d7                            /* set EQ */
 #else
-	and.b     #$18,d7
+        and.b     #$18,d7
 #endif
 go2trret:
         rts
@@ -1225,15 +1232,15 @@ flopcms1:
 #if HD_SUPPORT
         or.b      (a1),d6                       /* (a1) == 8 for HD, with sets the verify bit in the command */
 #if TP_41 /* HD_BIT */
-	bsr       hd_port
+        bsr       hd_port
 #else
 #if STBOOK
         move.w    fd_density(a1),d0             /* get SD/HD mode */
         bsr.s     hdselect                      /* select SD/HD mode of floppy */
 #else
 #if (TOSVERSION < 0x300) | TP_50
-	tst.b     STEFlag                       /* no STE hardware available? */
-	bne.s     flopcmd                       /* (correct) */
+        tst.b     STEFlag                       /* no STE hardware available? */
+        bne.s     flopcmd                       /* (correct) */
 #endif
         move.w    fd_density(a1),ABSW($FFFF860E)
 #endif
@@ -1254,7 +1261,7 @@ flopcmd:
         move.l    ABSW(_hz_200),d7              /* setup timeout (assume short) */
         add.l     #300,d7
 #else
-	move.l    #$00040000,d7
+        move.l    #$00040000,d7
 #endif
         move.w    #$0080,(a6)                   /* select 1770 command register */
         bsr       rdfdcd0                       /* read it to clobber READY status */
@@ -1264,7 +1271,7 @@ flopcmd:
         move.l    ABSW(_hz_200),d7              /* extra timeout for motor startup */
         add.l     #600,d7
 #else
-	move.l    #$00040000,d7
+        move.l    #$00060000,d7
 #endif
 flopcmd1:
         bsr       wrfdcd6                       /* write command (in d6) */
@@ -1273,8 +1280,8 @@ flopcmd2:
         cmp.l     ABSW(_hz_200),d7              /* timeout? */
         bcs.s     flopcmd3                      /* (yes, reset and return failure) */
 #else
-	subq.l    #1,d7
-	beq.s     flopcmd3
+        subq.l    #1,d7
+        beq.s     flopcmd3
 #endif
         btst      #5,ABSW2(MFP_GPIP)            /* 1770 completion? */
         bne.s     flopcmd2                      /* (not yet, so wait some more) */
@@ -1287,7 +1294,7 @@ flopcmd3:
         moveq.l   #0,d6
         subq.w    #1,d6                         /* and return NE */
 #else
-	moveq.l   #1,d6
+        moveq.l   #1,d6
 #endif
         rts
 
@@ -1336,9 +1343,9 @@ r1770b:     cmp.b     ABSW(MFP_TCDR),d1
             beq.s     r1770b
             dbra      d0,r1770a
 #else
-	move.w    #16-1,d7
+            move.w    #16-1,d7
 r1770a:
-	dbf       d7,r1770a
+            dbf       d7,r1770a
 #endif
 #endif
 #if (TOSVERSION >= 0x200)
@@ -1368,7 +1375,7 @@ select:
             move.w    fd_curtrack(a1),d7        /* for current track number */
             bsr.s     wrfdcd7
 #if TOSVERSION < 0x200
-	    clr.b     ABSW(lastacstm)
+            clr.b     ABSW(lastacstm)
 #endif
 select1:
             move.w    #$0084,(a6)               /* setup requested sector_number from */
@@ -1417,7 +1424,7 @@ wrfdcd6:
 #if TOSVERSION >= 0x200
             rts
 #else
-	    bra.s     rwdelay
+            bra.s     rwdelay
 #endif
 
 /* write d7 to selected FDC register */
@@ -1429,7 +1436,7 @@ wrfdcd7:
 #if TOSVERSION >= 0x200
             rts
 #else
-	    bra.s     rwdelay
+            bra.s     rwdelay
 #endif
 
 /* read selected FDC register into d7 */
@@ -1441,7 +1448,7 @@ rdfdcd7:
 #if TOSVERSION >= 0x200
             rts
 #else
-	    bra.s     rwdelay
+            bra.s     rwdelay
 #endif
 
 /* read selected FDC register into d0 */
@@ -1453,7 +1460,7 @@ rdfdcd0:
 #if TOSVERSION >= 0x200
             rts
 #else
-	    /* fall through into rwdelay again */
+        /* fall through into rwdelay again */
 #endif
 
 rwdelay:
@@ -1468,7 +1475,7 @@ rwdelay:
             move.w    (a7)+,d0
 #else
 #if TOSVERSION >= 0x200
-	    movem.l   d0-d1,-(sp)               /* save registers */
+            movem.l   d0-d1,-(sp)               /* save registers */
             move.w    #2,d0
 rwdly1:     move.b    ABSW(MFP_TCDR),d1         /* busy-loop: give 1770 time to settle */
 rwdly2:     cmp.b     ABSW(MFP_TCDR),d1
@@ -1476,12 +1483,12 @@ rwdly2:     cmp.b     ABSW(MFP_TCDR),d1
             dbra      d0,rwdly1
             movem.l   (sp)+,d0-d1               /* restore registers */
 #else
-		move.w    sr,-(a7)
-		move.w    d7,-(a7)
-		move.w    #32,d7
-rwdly1:		dbf       d7,rwdly1
-		move.w    (a7)+,d7
-		move.w    (a7)+,sr
+            move.w    sr,-(a7)
+            move.w    d7,-(a7)
+            move.w    #32,d7
+rwdly1:     dbf       d7,rwdly1
+            move.w    (a7)+,d7
+            move.w    (a7)+,sr
 #endif
 #endif /* TTMFP_SUPPORT */
             rts
@@ -1556,6 +1563,7 @@ setdchg1:
 /* 306de: 00e044b6 */
 /* 206de: 00e040cc */
 /* 104de: 00fc1692 */
+        xdef _floprate
 _floprate:
 /* --- pick a DSB */
 #if HD_SUPPORT
@@ -1734,69 +1742,69 @@ hd_portb:
             rts
 #endif /* TP_41 */
 
-	bss
+    bss
 
-	xdef fd_spt
-	comm fd_spt,2
+    xdef fd_spt
+    comm fd_spt,2
 
-	xdef fd_desel
-	comm fd_desel,2
-	
+    xdef fd_desel
+    comm fd_desel,2
+    
 #if TOSVERSION >= 0x200
-	xdef fd_timeout
-	comm fd_timeout,4
+    xdef fd_timeout
+    comm fd_timeout,4
 #endif
-	
-	xdef fd_sect
-	comm fd_sect,2
-	
-	xdef fd_curerr
-	comm fd_curerr,2
-	
-	xdef fd_virgin
-	comm fd_virgin,2
-	
-	xdef fd_motoron
-	comm fd_motoron,2
-	
-	xdef fd_scount
-	comm fd_scount,2
+    
+    xdef fd_sect
+    comm fd_sect,2
+    
+    xdef fd_curerr
+    comm fd_curerr,2
+    
+    xdef fd_virgin
+    comm fd_virgin,2
+    
+    xdef fd_motoron
+    comm fd_motoron,2
+    
+    xdef fd_scount
+    comm fd_scount,2
 
-	xdef fd_retry
-	comm fd_retry,2
-	
-	xdef fd_copyp
-	comm fd_copyp,4
-	
-	xdef fd_frb
-	comm fd_frb,4
-	
-	xdef fd_interlv
-	comm fd_interlv,2
-	
-	xdef fd_cscnt
-	comm fd_cscnt,2
-	
-	xdef flopsregs
-	comm flopsregs,2
-	
-	xdef fd_side
-	comm fd_side,2
-	
-	xdef fd_rtryseek
-	comm fd_rtryseek,2
-	
-	xdef fd_dev
-	comm fd_dev,2
-	
-	xdef fd_secmap
-	comm fd_secmap,4
-	
-	xdef fd_track
-	comm fd_track,2
-	
-	xdef fd_buffer
-	comm fd_buffer,4
-	
-	xdef fd_deferr
-	comm fd_deferr,2
+    xdef fd_retry
+    comm fd_retry,2
+    
+    xdef fd_copyp
+    comm fd_copyp,4
+    
+    xdef fd_frb
+    comm fd_frb,4
+    
+    xdef fd_interlv
+    comm fd_interlv,2
+    
+    xdef fd_cscnt
+    comm fd_cscnt,2
+    
+    xdef flopsregs
+    comm flopsregs,2
+    
+    xdef fd_side
+    comm fd_side,2
+    
+    xdef fd_rtryseek
+    comm fd_rtryseek,2
+    
+    xdef fd_dev
+    comm fd_dev,2
+    
+    xdef fd_secmap
+    comm fd_secmap,4
+    
+    xdef fd_track
+    comm fd_track,2
+    
+    xdef fd_buffer
+    comm fd_buffer,4
+    
+    xdef fd_deferr
+    comm fd_deferr,2

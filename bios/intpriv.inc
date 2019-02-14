@@ -1,6 +1,7 @@
 /*
  * Flush instruction and data cache (68020+)
  */
+	xdef flushCaches
 flushCaches:
         move.w    sr,-(a7)
         ori.w     #$0700,sr

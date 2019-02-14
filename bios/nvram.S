@@ -1,3 +1,15 @@
+#include "config.h"
+#include "asmdefs.h"
+#include "tosvars.inc"
+#include "biosdefs.h"
+
+nvram_rtc_year_offset equ 1980-1968
+
+	xdef ngetdt
+	xdef readRTCTime
+	xdef writeRTCTime
+	xdef checkRTC
+
 	text
 
 /* NVRAM_ADDR_REG  equ $ffff8961 */
@@ -136,6 +148,7 @@ nvramfail:
  * XBIOS #42 - NVMaccess
  */
 /* 306de: 00e0208c */
+	xdef _nvmaccess
 _nvmaccess:
         moveq.l   #-5,d0       /* return E_BADRQ in case of error */
         move.w    4(a7),d1
@@ -482,6 +495,7 @@ daysOffsetToMonths:DC.W $0000,$001f,$003b,$005a
  * XBIOS #47 - Waketime
  */
 /* 206de: 00e01d0a */
+	xdef _waketime
 _waketime:  move.l    4(sp),d0
             beq       clrwtim
             cmp.l     #-1,d0

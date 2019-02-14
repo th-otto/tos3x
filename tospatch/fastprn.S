@@ -14,6 +14,7 @@
 /* 306de: 00e022ee */
 /* 206de: 00e02016 */
 /* 306pl: 00e022ee */
+	xdef _bcon0out
 _bcon0out:
         btst      #4,(_prtconfig).w  /* Printer configured for output to RS232? */
         bne       _bcon6out
@@ -79,6 +80,7 @@ offgib:
  */
 /* 306pl: 0038235a */
 /* 206de: 00e02082 */
+	xdef_bcon0in
 _bcon0in:
         bsr.s     gpipisr7
         moveq.l   #7,d1
@@ -101,6 +103,7 @@ bcon0in1:
  */
 /* 306pl: 00382378 */
 /* 206de: 00e020a0 */
+	xdef _bco0stat
 _bco0stat:
         andi.b    #$FE,(MFP_DDR).w
         moveq.l   #0,d0

@@ -1,3 +1,9 @@
+#include "config.h"
+#include "asmdefs.h"
+#include "tosvars.inc"
+#include "biosdefs.h"
+
+
 	text
 
 /**************************************************************************
@@ -7,6 +13,7 @@
  **************************************************************************/
 /* 306de: 00e02160 */
 /* 206de: 00e01e86 */
+	xdef _clockvec
 _clockvec:
         lea.l     (clockbuf).w,a0
         bsr       bcdget
@@ -37,6 +44,7 @@ _clockvec:
 
 /* 306de: 00e021a4 */
 /* 206de: 00e01eca */
+	xdef igetdt
 igetdt:
         move.b    #-1,(iclk_ready).w
         move.b    #$1C,d1    /* send read clock command */
@@ -55,6 +63,7 @@ igetdt2:
 
 /* 306de: 00e021ce */
 /* 206de: 00e01ef4 */
+	xdef isetdt
 isetdt:
         move.l    4(a7),(iclkwtime).w
         lea.l     iclkbuf+6,a0
