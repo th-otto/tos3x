@@ -13,9 +13,13 @@
  **************************************************************************/
 /* 306de: 00e02160 */
 /* 206de: 00e01e86 */
+/* 104de: 00fc315e */
 	xdef _clockvec
 _clockvec:
-        lea.l     (clockbuf).w,a0
+#if TOSVERSION < 0x200
+		lea.l     0,a5
+#endif
+        lea.l     ABSW(clockbuf),a0
         bsr       bcdget
 #if BINEXACT /* Year 2k fix */
         subi.b    #80,d0                        /* adjust so that 1980 => 0 for time base */
@@ -37,37 +41,39 @@ _clockvec:
         bsr       bcdget
         lsr.b     #1,d0                         /* adjust to provide two second increments... */
         add.b     d0,d2                         /* ...another @!#%@#$% kludge, thank you ! */
-        move.l    d2,(iclkrtime).w
-        move.b    #$00,(iclk_ready).w           /* clear handshaking flag */
+        move.l    d2,ABSW(iclkrtime)
+        move.b    #0,ABSW(iclk_ready)           /* clear handshaking flag */
         rts
 
 
 /* 306de: 00e021a4 */
 /* 206de: 00e01eca */
+/* 104de: 00fc31a8 */
 	xdef igetdt
 igetdt:
-        move.b    #-1,(iclk_ready).w
+        move.b    #-1,ABSW(iclk_ready)
         move.b    #$1C,d1    /* send read clock command */
         bsr       ikbd_writeb
-        movea.l   (_hz_200).w,a0
+        movea.l   ABSW(_hz_200),a0
         adda.w    #200,a0
         moveq.l   #0,d0
 igetdt1:
-        cmpa.l    (_hz_200).w,a0
+        cmpa.l    ABSW(_hz_200),a0
         bcs.s     igetdt2
-        tst.b     (iclk_ready).w
+        tst.b     ABSW(iclk_ready)
         bne.s     igetdt1
-        move.l    (iclkrtime).w,d0
+        move.l    ABSW(iclkrtime),d0
 igetdt2:
         rts
 
 /* 306de: 00e021ce */
 /* 206de: 00e01ef4 */
+/* 104de: 00fc31d2 */
 	xdef isetdt
 isetdt:
-        move.l    4(a7),(iclkwtime).w
+        move.l    4(a7),ABSW(iclkwtime)
         lea.l     iclkbuf+6,a0
-        move.l    (iclkwtime).w,d2
+        move.l    ABSW(iclkwtime),d2
         move.b    d2,d0
         andi.b    #$1F,d0  /* write seconds */
         asl.b     #1,d0

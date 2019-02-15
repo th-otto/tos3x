@@ -20,7 +20,11 @@ vme_mask  equ $FFFF8E0D
 
 /* ==== Iorec offsets ======================================================== */
 
+#if (TOSVERSION >= 0x200) | !BINEXACT
 #define buf
+#else
+#define buf 0
+#endif
 size    equ 4
 head    equ 6
 tail    equ 8
@@ -36,9 +40,13 @@ highwater equ 2*IOREC_SIZE+2
 xoff      equ 2*IOREC_SIZE+3
 ctr       equ 2*IOREC_SIZE+4
 xonoffc   equ 2*IOREC_SIZE+5
+#if TOSVERSION >= 0x200
 baudrate  equ 2*IOREC_SIZE+6
 datamask  equ 2*IOREC_SIZE+7
 EXTIOREC_SIZE equ 2*IOREC_SIZE+8
+#else
+EXTIOREC_SIZE equ 2*IOREC_SIZE+6
+#endif
 
 BCONMAP_START_HANDLE equ 6
 
@@ -103,7 +111,11 @@ _bcon3out:
 bcon3o1:
         lea.l     ABSW(ACIA_MIDI_BASE),a1
 bcon3o2:
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    (a1),d2
+#else
+        move.b    ACIA_CTRL(a1),d2
+#endif
         btst      #1,d2
         beq.s     bcon3o2
         move.b    d1,ACIA_DATA(a1)
@@ -199,7 +211,7 @@ _bcon3in:
 bcon3i1:
         movea.l   buf(a0),a1                    /* get base address of buffer */
         and.l     #$0000FFFF,d1
-#if TOSVERSION < 0x300
+#if ((TOSVERSION >= 0x200) & (TOSVERSION < 0x300)) | !BINEXACT
         moveq     #0,d0
 #endif
         move.b    0(a1,d1.l),d0                 /* get character */
@@ -229,6 +241,7 @@ bcon3i2:
  **************************************************************************/
 /* 306de: 00e022ee */
 /* 206de: 00e02016 */
+/* 104de: 00fc32f6 */
 	xdef _bcon0out
 _bcon0out:
         btst      #4,ABSW(_prtconfig)  /* Printer configured for output to RS232? */
@@ -256,11 +269,19 @@ bcon0o3:
         moveq.l   #7,d1                         /* get current io enable register contents */
         bsr       gientry
         ori.b     #$80,d0                       /* set port b for output */
+#if (TOSVERSION < 0x200) | !BINEXACT
+        moveq     #$87,d1                       /* set to write to io enable */
+#else
         move.b    #$87,d1                       /* set to write to io enable */
+#endif
         bsr       gientry
         move.w    d3,sr                         /* restore status register */
         move.w    6(a7),d0                      /* retrieve byte to be sent and... */
+#if (TOSVERSION < 0x200) | !BINEXACT
+        moveq     #$8F,d1                       /* write out byte to parallel port */
+#else
         move.b    #$8F,d1                       /* write out byte to parallel port */
+#endif
         bsr       gientry
         move.w    sr,-(a7)
         ori.w     #$0700,sr
@@ -276,7 +297,11 @@ strobeoff:
         bra       onbit
 
 strobeon:
+#if (TOSVERSION < 0x200) | !BINEXACT
+        moveq     #$DF,d2
+#else
         move.b    #$DF,d2
+#endif
         bra       offbit
 
 
@@ -285,12 +310,17 @@ strobeon:
  */
 /* 306de: 00e02372 */
 /* 206de: 00e0209a */
+/* 104de: 00fc3372 */
 	xdef _bcon0in
 _bcon0in:
         moveq.l   #7,d1                         /* get current io enable register contents */
         bsr       gientry
         andi.b    #$7F,d0                       /* set port b for input */
+#if (TOSVERSION < 0x200) | !BINEXACT
+        moveq     #$87,d1                       /* set to write to io enable */
+#else
         move.b    #$87,d1                       /* set to write to io enable */
+#endif
         bsr       gientry
         bsr.s     strobeoff                     /* busy off! */
 bcon0in1:
@@ -308,11 +338,16 @@ bcon0in1:
  **************************************************************************/
 /* 306de: 00e02394 */
 /* 206de: 00e020bc */
+/* 104de: 00fc3392 */
 	xdef _bco0stat
 _bco0stat:
-        lea.l     ABSW(MFP_GPIP),a0
+        lea.l     ABSW2(MFP_GPIP),a0
         moveq.l   #-1,d0
+#if (TOSVERSION >= 0x200) | !BINEXACT
         btst      #0,(a0)
+#else
+        btst      #0,0(a0)
+#endif
         beq.s     bco0st1
         moveq.l   #0,d0
 bco0st1:
@@ -327,9 +362,10 @@ bco0st1:
  **************************************************************************/
 /* 306de: 00e023a4 */
 /* 206de: 00e020cc */
+/* 104de: 00fc33a6 */
 	xdef _bcon6stat
 _bcon6stat:
-        lea.l     ABSW(rs232iorec),a0             /* point to rs-232 buffer record */
+        lea.l     ABSW2(rs232iorec),a0            /* point to rs-232 buffer record */
 bcon6st1:
         moveq.l   #-1,d0
         lea.l     head(a0),a1
@@ -347,10 +383,13 @@ bcon6st2:
  **************************************************************************/
 /* 306de: 00e023ba */
 /* 206de: 00e020e2 */
+/* 104de: 00fc33be */
 	xdef _bcon6in
 _bcon6in:
-        lea.l     ABSW(rs232iorec),a0           /* point to rs-232 buffer record */
-        lea.l     ABSW(MFP_REGS),a2
+        lea.l     ABSW2(rs232iorec),a0          /* point to rs-232 buffer record */
+#if (TOSVERSION >= 0x200) | !BINEXACT
+        lea.l     ABSW(MFP_REGS),a2				/* missing in 1.04 but a2 maybe used in bcon6o1 */
+#endif
 bcon6in1:
         bsr       iorecget
         move.w    d0,-(a7)
@@ -365,11 +404,23 @@ bcon6in2:
         bgt.s     bcon6in3
         tst.b     highwater(a0)                 /* high-water flag already set? */
         beq.s     bcon6in3
+#if TOSVERSION >= 0x200
         bsr.s     rs232cont
+#else
+        clr.b     highwater(a0)                 /* clear high-water flag */
+        btst      #0,ctr(a0)                    /* is the rs232 mode xon/xoff? */
+        bne.s     rs232co1                      /* (yes) */
+        bsr       rtson
+        bra       bcon6in3
+rs232co1:
+        move.b    #$11,xonoffc(a0)              /* "xon" */
+        bsr       bcon6o0
+#endif
 bcon6in3:
         move.w    (a7)+,d0
         rts
 
+#if TOSVERSION >= 0x200
 rs232cont:
         clr.b     highwater(a0)                 /* clear high-water flag */
         btst      #0,ctr(a0)                    /* is the rs232 mode xon/xoff? */
@@ -378,6 +429,7 @@ rs232cont:
 rs232co1:
         move.b    #$11,xonoffc(a0)              /* "xon" */
         bra.s     bcon6o1
+#endif
 
 /**************************************************************************
  *                                                                        *
@@ -386,9 +438,10 @@ rs232co1:
  **************************************************************************/
 /* 306de: 00e02406 */
 /* 206de: 00e0212e */
+/* 104de: 00fc3408 */
 	xdef _bco6stat
 _bco6stat:
-        lea.l     ABSW(rs232iorec+IOREC_SIZE),a0  /* point to rs-232 output buffer record */
+        lea.l     ABSW2(rs232iorec+IOREC_SIZE),a0  /* point to rs-232 output buffer record */
 bco6s1:
         move.w    tail(a0),d1
         bsr       wrapin
@@ -407,13 +460,17 @@ _bco6sret:
  **************************************************************************/
 /* 306de: 00e0241e */
 /* 206de: 00e02146 */
+/* 104de: 00fc3422 */
 	xdef _bcon6out
 _bcon6out:
         move.w    6(a7),d0
-        lea.l     ABSW(rs232iorec+IOREC_SIZE),a0  /* point to rs-232 output buffer record */
+        lea.l     ABSW2(rs232iorec+IOREC_SIZE),a0  /* point to rs-232 output buffer record */
         bsr       iorecput
+#if TOSVERSION >= 0x200
         lea.l     ABSW(rs232iorec),a0           /* point to rs-232 input buffer record */
-        lea.l     ABSW(MFP_REGS),a2
+#endif
+bcon6o0:
+        lea.l     ABSW2(MFP_REGS),a2
 bcon6o1:
         tst.b     MFP_TSR-MFP_REGS(a2)          /* transmitter status */
         bpl.s     bcon6o2                       /* not ready */
@@ -438,10 +495,11 @@ bcon6o2:
  **************************************************************************/
 /* 306de: 00e02446 */
 /* 206de: 00e0216e */
+/* 104de: 00fc344a */
 	xdef _bco4stat
 _bco4stat:
         moveq.l   #-1,d0
-        move.b    ABSW(ACIA_IKBD_BASE+ACIA_CTRL),d2 /* grab ikbd status */
+        move.b    ABSW2(ACIA_IKBD_BASE+ACIA_CTRL),d2 /* grab ikbd status */
         btst      #1,d2
         bne.s     bco4st1                           /* status okay to send */
         moveq.l   #0,d0                             /* status not okay */
@@ -460,28 +518,41 @@ bco4st1:
  **************************************************************************/
 /* 306de: 00e02456 */
 /* 206de: 00e0217e */
+/* 104de: 00fc345c */
 	xdef _bcon4out
 _bcon4out:
         move.w    6(a7),d1
     xdef ikbd_writeb
 ikbd_writeb:
-        lea.l     ABSW(ACIA_IKBD_BASE),a1       /* point to ikbd register base */
+        lea.l     ABSW2(ACIA_IKBD_BASE),a1      /* point to ikbd register base */
 ikbd_wr1:
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    (a1),d2                       /* grab keyboard status */
+#else
+        move.b    0(a1),d2                       /* grab keyboard status */
+#endif
         btst      #1,d2
         beq.s     ikbd_wr1
 #if TTMFP_SUPPORT | TP_50
         move.w    #$0400,d0
         bsr       mfpdelay
 #else
+#if TOSVERSION >= 0x200
         lea       ABSW(MFP_TCDR),a0
         move.w    #$bf,d0
 ikput2: move.b    (a0),d2
 ikput3: cmp.b     (a0),d2
         beq.s     ikput3
         dbra      d0,ikput2
+#else
+		move.w    #$03B6,d2
+ikbd_wr2:
+		bsr.s     ikbd_wr3
+		dbf       d2,ikbd_wr2
+#endif
 #endif
         move.b    d1,ACIA_DATA(a1)              /* write char to the ikbd port */
+ikbd_wr3:
         rts
 
 /**************************************************************************
@@ -495,9 +566,10 @@ ikput3: cmp.b     (a0),d2
  **************************************************************************/
 /* 306de: 00e02474 */
 /* 206de: 00e021a6 */
+/* 104de: 00fc3480 */
 		xdef _ikbdws
 _ikbdws:
-#if TOSVERSION >= 0x300
+#if (TOSVERSION >= 0x300) | (TOSVERSION < 0x200)
         moveq.l   #0,d3
 #endif
         move.w    4(a7),d3
@@ -532,6 +604,7 @@ bcon2st1:
  */
 /* 306de: 00e0249e */
 /* 206de: 00e021ce */
+/* 104de: 00fc34aa */
 /* 404: 00e025a4 */
 	xdef _bcon2in
 _bcon2in:
@@ -568,6 +641,24 @@ _bco2stat:
         rts
 
 
+#if TOSVERSION < 0x200
+/*********************************************************
+ * VT52 emulator callback for the bell sound
+ *********************************************************/
+/* 306de: 00e03b86 */
+/* 206de: 00e037a4 */
+/* 104de: 00fc34e4 */
+#if !BINEXACT
+		xdef ringbell
+#endif
+ringbell:
+        btst      #2,ABSW(_conterm)             /* console bell enabled? */
+        beq.s     soundir8                      /* (no sound) */
+        move.l    #_bellsnd,ABSW(_sndtable)     /* sound data for console bell */
+        move.b    #0,ABSW(_snddelay)            /* enable sound timer */
+soundir8:
+        rts
+#endif
 
 /***********************************************************************************
  *                                                                                 *
@@ -590,9 +681,10 @@ _bco2stat:
  ***********************************************************************************/
 /* 306de: 00e024d6 */
 /* 206de: 00e02206 */
+/* 104de: 00fc34fc */
 	xdef initmfp
 initmfp:
-        lea.l     ABSW(MFP_REGS),a0             /* init mfp address pointer */
+        lea.l     ABSW2(MFP_REGS),a0            /* init mfp address pointer */
         moveq.l   #0,d0
         movep.l   d0,0(a0)                      /* clear gpip thru iera */
         movep.l   d0,8(a0)                      /* clear ierb thru isra */
@@ -609,7 +701,9 @@ initmfp:
         move.b    #$58,MFP_VR-MFP_REGS(a0)      /* set mfp autovector to $140 and s-bit */
 #endif
 
+#if TOSVERSION >= 0x200
         clr.b     ABSW(_privvio) /* ??? */
+#endif
 
 /* init the "c" timer */
         move.w    #$1111,ABSW(_tim_c_sieve)     /* setup bitstream for /4 on timer c interrupts */
@@ -629,11 +723,19 @@ initmfp:
         moveq.l   #1,d1                         /* init for /4 for 9600 baud */
         moveq.l   #2,d2                         /* init for 9600 baud */
         bsr       settimer                      /* branch to out timer initialier... */
-        move.b    #$01,ABSW(rs232iorec+baudrate) /* baudrate = 9600 */
+#if (TOSVERSION >= 0x200)
+        move.b    #1,ABSW(rs232iorec+baudrate)  /* baudrate = 9600 */
+#else
+        move.w    #1,ABSW2(baudrate)            /* baudrate = 9600 */
+#endif
 
 /* now init the 3 rs232 chip registers */
+#if (TOSVERSION >= 0x200)
         lea.l     ABSW(MFP_REGS),a0
         move.l    #$00880105,d0
+#else
+        move.l    #$00880101,d0
+#endif
         movep.l   d0,MFP_SCR-MFP_REGS(a0)
 #if TTMFP_SUPPORT
 /* now init the 3 rs232 chip registers in mfp #2 */
@@ -804,7 +906,10 @@ rs232table:
         dc.w      SERIAL_BUFSIZE,0,0,128,192
         dc.l      rs232obuf
         dc.w      SERIAL_BUFSIZE,0,0,128,192
-        dc.b      0,0,0,0,1,0,1,-1
+        dc.b      0,0,0,0,1,0
+#if TOSVERSION >= 0x200
+        dc.b      1,-1
+#endif
 
 /* array of exception vector addresses for the above interrupts, including */
 /* dummy vectors that point to "rte's". */
@@ -1365,7 +1470,6 @@ _rsconf:
 #if TOSVERSION >= 0x200
         movea.l   ABSW(bcmap_root+8),a0 /* bcmap_root.rscon */
         jmp       (a0)
-#endif
 
 /*
  * Rsconf function for device 6 (rs232 driven by MFP)
@@ -1375,11 +1479,16 @@ _rsconf:
 _rs6conf:
         lea.l     ABSW(rs232iorec),a0           /* point to current output buffer record */
         lea.l     ABSW(MFP_REGS),a2             /* set mfp chip address pointer */
+#endif
 rs6conf1:
         moveq.l   #0,d0
         cmpi.w    #-2,4(a7)                     /* -2 = return last baudrate */
         bne.s     rs6conf2
+#if TOSVERSION >= 0x200
         move.b    baudrate(a0),d0               /* last baudrate */
+#else
+        move.w    ABSW2(baudrate),d0            /* last baudrate */
+#endif
         rts
 rs6conf2:
         ori.w     #$0700,sr                     /* no interrupts for now */
@@ -1403,7 +1512,9 @@ rs6conf3:
 rs6conf4:
         tst.b     highwater(a0)                 /* RTS set? */
         beq.s     rs6conf5                      /* no... */
+#if TOSVERSION >= 0x200
         bsr       rs232cont                     /* reenable RTS */
+#endif
 rs6conf5:
         move.w    (a7)+,d0                      /* new handshake state */
         move.b    d0,ctr(a0)                    /* set new handshake state */
@@ -1453,6 +1564,7 @@ bauddata: dc.b $01,$02,$04,$05,$08,$0a,$0b,$10,$20,$40,$60,$80,$8f,$af,$40,$60
 /* 306de: 00e02b4a */
 /* 206de: 00e02814 */
 bcondevs:
+#if TOSVERSION >= 0x200
         dc.l      _bcon6stat                    /* Dev 6: "Modem 1" - ST MFP */
         dc.l      _bcon6in
         dc.l      _bco6stat
@@ -1460,7 +1572,6 @@ bcondevs:
         dc.l      _rs6conf
         dc.l      rs232iorec
 
-#if TOSVERSION >= 0x200
         dc.l      _bcon7stat                    /* Dev 7: "Modem 2" - SCC Channel B */
         dc.l      _bcon7in
         dc.l      _bco7stat
@@ -3838,6 +3949,7 @@ kbrate1:
  *************************************************************************/
 /* 306de: 00e03a96 */
 /* 206de: 00e036b4 */
+/* 104de: 00fc4294 */
 	xdef _kbdvbase
 _kbdvbase:
         move.l    #_kbdvecs+4,d0
@@ -3995,53 +4107,13 @@ soundir7:
         movem.l   (a7)+,d0-d1/a0                /* pop stack & exit */
         rts
 
-/*
- * sound data...
- *
- *
- * format:
- *
- *      sound data usually is found in byte pairs, the first of which is the command
- *      and the second is the argument.  However, some commands take on more than
- *      1 argument
- *
- *      cmd     function        argument(s)
- *      00      load reg0       data0
- *      01      load reg1       data0
- *      02      load reg2       data0
- *      03      load reg3       data0
- *      04      load reg4       data0
- *      05      load reg5       data0
- *      06      load reg6       data0
- *      07      load reg7       data0   note: b7 & b6 forced set for all data to r...
- *      08      load reg8       data0
- *      09      load reg9       data0
- *      0A      load reg10      data0
- *      0B      load reg11      data0
- *      0C      load reg12      data0
- *      0D      load reg13      data0
- *
- *
- *      80      init temp w/    data0
- *
- *      81      loop defined
- *              by 3 args       data0 as register to load using temp
- *                              data1 as increment/decrement (signed) of temp
- *                              data2 as loop terminator value of temp
- *
- *      82-FF   set delay
- *              timer           data0 is # of counts till next update
- *                                      note: if data0 = 0, sound is terminated
- *
- *
- *
- */
-
+#if TOSVERSION >= 0x200
 /*********************************************************
  * VT52 emulator callback for the bell sound
  *********************************************************/
 /* 306de: 00e03b86 */
 /* 206de: 00e037a4 */
+/* 104de: 00fc34e4 */
 #if !BINEXACT
 		xdef ringbell
 #endif
@@ -4060,6 +4132,7 @@ ringbell:
 	xdef _do_bell
 _do_bell:
         move.l    #_bellsnd,ABSW(_sndtable)     /* sound data for console bell */
-        move.b    #$00,ABSW(_snddelay)          /* enable sound timer */
+        move.b    #0,ABSW(_snddelay)            /* enable sound timer */
 soundir8:
         rts
+#endif

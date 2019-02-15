@@ -552,7 +552,7 @@ daysOffsetToMonths:DC.W $0000,$001f,$003b,$005a
 #endif /* MSTECLK */
 
 
-#if MSTECLK
+#if MSTECLK & (TOSVERSION >= 0x200)
 /*
  * XBIOS #47 - Waketime
  */
@@ -830,6 +830,8 @@ checkRTC:
         comm rtcbufa,13
         xdef rtcbufb
         comm rtcbufb,13
+#if TOSVERSION >= 0x200
         xdef waketimeAlarm
         comm waketimeAlarm,4
+#endif
 #endif

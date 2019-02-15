@@ -152,6 +152,7 @@ static int prtstr PROTO((const char *s));
  */
 /* 306de: 00e045d8 */
 /* 206de: 00e041e6 */
+/* 104de: 00fc215c */
 int16_t prtblk(P(const PBDEF *) par)
 PP(const PBDEF *par;)
 {

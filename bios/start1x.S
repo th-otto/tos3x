@@ -1512,7 +1512,7 @@ xbios_vecs:
 #else
         dc.l bios_unimpl
 #endif
-#if MSTECLK
+#if MSTECLK & (TOSVERSION >= 0x200)
         dc.l _waketime
 #else
         dc.l bios_unimpl

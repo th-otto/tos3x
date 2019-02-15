@@ -2311,6 +2311,8 @@ _plststat:
 [00fc1e8e] 4e90                      jsr       (a0)
 [00fc1e90] 4cdf 78f8                 movem.l   (a7)+,d3-d7/a3-a6
 [00fc1e94] 4e75                      rts
+
+prtlst:
 [00fc1e96] 302f 0006                 move.w    6(a7),d0
 [00fc1e9a] 48e7 1f1e                 movem.l   d3-d7/a3-a6,-(a7)
 [00fc1e9e] 3f00                      move.w    d0,-(a7)
@@ -2327,6 +2329,8 @@ _plststat:
 [00fc1ebc] 4e90                      jsr       (a0)
 [00fc1ebe] 4cdf 78f8                 movem.l   (a7)+,d3-d7/a3-a6
 [00fc1ec2] 4e75                      rts
+
+prtaux:
 [00fc1ec4] 302f 0006                 move.w    6(a7),d0
 [00fc1ec8] 48e7 1f1e                 movem.l   d3-d7/a3-a6,-(a7)
 [00fc1ecc] 3f00                      move.w    d0,-(a7)
@@ -3560,6 +3564,8 @@ _prtblk:
 [00fc30dc] 4cdf 30c0                 movem.l   (a7)+,d6-d7/a4-a5
 [00fc30e0] 4e5e                      unlk      a6
 [00fc30e2] 4e75                      rts
+
+prtchar:
 [00fc30e4] 4e56 fffc                 link      a6,#$FFFC
 [00fc30e8] 4a39 0000 0eb4            tst.b     $00000EB4
 [00fc30ee] 6722                      beq.s     $00FC3112
@@ -3587,6 +3593,8 @@ _prtblk:
 [00fc312a] 4240                      clr.w     d0
 [00fc312c] 4e5e                      unlk      a6
 [00fc312e] 4e75                      rts
+
+prtstr:
 [00fc3130] 4e56 fffc                 link      a6,#$FFFC
 [00fc3134] 6018                      bra.s     $00FC314E
 [00fc3136] 206e 0008                 movea.l   8(a6),a0
@@ -3605,6 +3613,8 @@ _prtblk:
 [00fc3158] 4240                      clr.w     d0
 [00fc315a] 4e5e                      unlk      a6
 [00fc315c] 4e75                      rts
+
+_clockvec:
 [00fc315e] 4bf9 0000 0000            lea.l     $00000000,a5
 [00fc3164] 41ed 0e63                 lea.l     3683(a5),a0
 [00fc3168] 6100 00ea                 bsr       $00FC3254
@@ -3939,11 +3949,15 @@ _bcon2in:
 _bco2stat:
 [00fc34e0] 70ff                      moveq.l   #-1,d0
 [00fc34e2] 4e75                      rts
+
+ringbell:
 [00fc34e4] 082d 0002 0484            btst      #2,1156(a5)
 [00fc34ea] 670e                      beq.s     $00FC34FA
 [00fc34ec] 2b7c 00fe 844e 0ea6       move.l    #$00FE844E,3750(a5)
 [00fc34f4] 1b7c 0000 0eaa            move.b    #$00,3754(a5)
 [00fc34fa] 4e75                      rts
+
+initmfp:
 [00fc34fc] 41f9 ffff fa01            lea.l     $FFFFFA01,a0
 [00fc3502] 7000                      moveq.l   #0,d0
 [00fc3504] 01c8 0000                 movep.l   d0,0(a0)
@@ -4804,6 +4818,8 @@ _giaccess:
 [00fc40aa] 4cdf 0106                 movem.l   (a7)+,d1-d2/a0
 [00fc40ae] 46df                      move.w    (a7)+,sr
 [00fc40b0] 4e75                      rts
+
+dtron:
 [00fc40b2] 74ef                      moveq.l   #-17,d2
 [00fc40b4] 602c                      bra.s     $00FC40E2
 
@@ -51080,6 +51096,7 @@ proto_data:
 [00fe8448] 0000                      dc.w      $0000
 [00fe844a] 0000                      dc.w      $0000
 [00fe844c] 0000                      dc.w      $0000
+_bellsnd:
 [00fe844e] 0034 0100 0200            ori.b     #$00,0(a4,d0.w*2) ; 68020+ only
 [00fe8454] 0300                      btst      d1,d0
 [00fe8456] 0400 0500                 subi.b    #$00,d0
@@ -51088,6 +51105,7 @@ proto_data:
 [00fe8462] 0a00 0b00                 eori.b    #$00,d0
 [00fe8466] 0c10 0d09                 cmpi.b    #$09,(a0)
 [00fe846a] ff00                      dc.w      $FF00
+_clicksnd:
 [00fe846c] 003b 0100 0200            ori.b     #$00,$00FE846E(pc,d0.w*2) ; 68020+ only
 [00fe8472] 0300                      btst      d1,d0
 [00fe8474] 0400 0500                 subi.b    #$00,d0
@@ -61997,15 +62015,72 @@ gem.rsc:
 0A4C: dsb
 0A54: rtcbufa
 0A61: rtcbufb
+0A6E: baudrate
+0A70: rs232ibuf
+0B70: rs232obuf
 0C70: rs232iorec
+0C92: ikbdiorec
+0CA0: ikbdbuf
+0DA0: midiiorec
+0DAE: midibuf
+0E2A: kbdvecs
+0E63: clockbuf
+0E6C: iclkrtime
+0E70: iclkwtime
 0E7D: shifty
+0EA0: lst_timeout
+0EA4: tim_c_sieve
+0EA6: sndtable
+0EAA: snddelay
 0EAC: prtconfig
+0EAE: iclk_ready
 0EB0: rseed
+0EB4: prtbdev
+0EB6: prtboch
+0EB8: prtbbva
+0EBA: prtbflg
+0EBC: prtbdma
 0EC6: fd_mediach
 0ECC: drivechange
+0ECE: prtbbyt
 0ED4: curflop
+0ED6: prtbwor
+0ED8: prtbstr
+0EDC: prtbp2
+0EE0: prtbchu
+0EE2: prtbp1
+0EE6: prtbgva
+0EE8: prtbend
+0EEC: prtbpms
+0EEE: prtbidx
+0ED0: prtbilo
+0ED2: prtbihi
+0EE0: prtbchu
+0EF0: prtbinv
+0EF2: prtbink
+0EF4: width
+0EF6: prtbrva
+0EF8: pbpar
 0F16: blkdev
+0F56: height
+0F78: prtbpla
+0F7A: prtboff
+0F7C: prtbtco
+0F7E: prtbaco
+0FA0: prtbeps
 0FAA: fd_err
+0FAE: prtbhei
+0FB8: prtbmon
+0FBA: prtbmed
+0FBC: prtbemp
+0FBE: prtblin
+0FC0: prtbbit
+0FBC: prtboma
+0FC4: prtbdot
+0FC6: prtbodd
+0FE8: prtbpre
+0FEA: prtbamo
+0FEC: prtblow
 181C: dskbuf
 378A: time
 3BAA: virt_work

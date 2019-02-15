@@ -128,14 +128,15 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 #if MSTECLK
 	V(rtcbufa,b,13)
 	V(rtcbufb,b,13)
+#if TOSVERSION >= 0x200
 	LONG(waketimeAlarm)
 #endif
+#endif
 
-#if TOSVERSION >= 0x200
+	INT(baudrate)
 	V(rs232ibuf,b,SERIAL_BUFSIZE)
 	V(rs232obuf,b,SERIAL_BUFSIZE)
-	V(rs232iorec,b,2*14+8)
-#endif
+	V(rs232iorec,b,2*14+6)
 
 	V(ikbdiorec,b,14)
 	V(ikbdbuf,b,SERIAL_BUFSIZE)
@@ -143,10 +144,8 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	V(midiiorec,b,14)
 	V(midibuf,b,128)
 
-	V(_kbdvecs,b,42)
+	V(_kbdvecs,b,38)
 
-	INT(kb_altnum)
-	
 	V(kbdbuf,b,7)
 	V(mousebuf,b,5)
 	V(relmbuf,b,3)
@@ -213,12 +212,6 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	PTR(fd_frb)
 	PTR(fd_copyp)
 	INT(fd_cscnt)
-
-#if TOSVERSION < 0x200
-	V(rs232ibuf,b,SERIAL_BUFSIZE)
-	V(rs232obuf,b,SERIAL_BUFSIZE)
-	V(rs232iorec,b,2*14+8)
-#endif
 
 	PTR(memtnext)
 	PTR(memtaddr)

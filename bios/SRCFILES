@@ -1,9 +1,9 @@
 BIOS_306_OBJS=startup.o nvram.o ikbdclk.o chardev.o floppy.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
 BIOS_208_OBJS=startup.o nvram.o ikbdclk.o chardev.o floppy.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
 BIOS_206_OBJS=startup.o nvram.o ikbdclk.o chardev.o floppy.o keytbl.o sounds.o prtblk.o blkdev.o prt.o memtest.o
-BIOS_162_OBJS=start1x.o floppy.o blkdev.o prt.o zeromem.o nvram.o chardev.o ikbdclk.o keytbl.o sounds.o prtblk.o memtest.o
-BIOS_106_OBJS=start1x.o floppy.o blkdev.o prt.o zeromem.o nvram.o chardev.o ikbdclk.o keytbl.o sounds.o prtblk.o memtest.o
-BIOS_104_OBJS=start1x.o floppy.o blkdev.o prt.o zeromem.o nvram.o chardev.o ikbdclk.o keytbl.o sounds.o prtblk.o memtest.o
+BIOS_162_OBJS=start1x.o floppy.o blkdev.o prt.o zeromem.o nvram.o prtblk.o ikbdclk.o chardev.o keytbl.o sounds.o memtest.o
+BIOS_106_OBJS=start1x.o floppy.o blkdev.o prt.o zeromem.o nvram.o prtblk.o ikbdclk.o chardev.o keytbl.o sounds.o memtest.o
+BIOS_104_OBJS=start1x.o floppy.o blkdev.o prt.o zeromem.o nvram.o prtblk.o ikbdclk.o chardev.o keytbl.o sounds.o memtest.o
 
 BIOS_OBJS=$(BIOS_$(TOSVERSION)_OBJS)
 
