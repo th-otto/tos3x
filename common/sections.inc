@@ -310,8 +310,8 @@
 
 #define BIOSTBASE   $00FC0000
 
-#define BTLEN_US    $0000641C
-#define DTLEN_US    $0000FBCC
+#define BTLEN_US    $0000432E
+#define DTLEN_US    $000079F6
 
 #if OS_COUNTRY == CTRY_US
 #define GLUELEN     $41C4
@@ -355,10 +355,10 @@
 /*
  * these are identical in all language versions
  */
-#define BIOSDLEN    $00000888
-#define VDITLEN     $0000999A
+#define BIOSDLEN    $00000256
+#define VDITLEN     $000098A2
 #define VDIDLEN     $00002846
-#define BDOSTLEN    $000062FC
+#define BDOSTLEN    $00005F64
 #define BDOSDLEN    $0000039E
 #define AESTLEN     $0000CCD6
 #define AESDLEN     $000006D8
@@ -449,16 +449,28 @@
  * now calculate addresses from above
  * The order of all TOS versions is BIOS, VDI, GEMDOS, AES, DESK (+ glued resource files)
  */
+#if TOSVERSION >= 0x200
 #define VDITBASE  BIOSTBASE+BIOSTLEN
 #define BDOSTBASE VDITBASE+VDITLEN
 #define AESTBASE  BDOSTBASE+BDOSTLEN
+#else
+#define BDOSTBASE BIOSTBASE+BIOSTLEN
+#define VDITBASE  BDOSTBASE+BDOSTLEN
+#define AESTBASE  VDITBASE+VDITLEN
+#endif
 #define DESKTBASE AESTBASE+AESTLEN
 #define ETEXT     DESKTBASE+DESKTLEN
 
 #define BIOSDBASE ETEXT
+#if TOSVERSION >= 0x200
 #define VDIDBASE  BIOSDBASE+BIOSDLEN
 #define BDOSDBASE VDIDBASE+VDIDLEN
 #define AESDBASE  BDOSDBASE+BDOSDLEN
+#else
+#define BDOSDBASE BIOSDBASE+BIOSDLEN
+#define VDIDBASE  BDOSDBASE+BDOSDLEN
+#define AESDBASE  VDIDBASE+VDIDLEN
+#endif
 #define DESKDBASE AESDBASE+AESDLEN
 #define EDATA     DESKDBASE+DESKDLEN+GLUELEN
 

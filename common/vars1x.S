@@ -89,15 +89,6 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	V(_pbdef,b,30)
 
-#if (TOSVERSION >= 0x200)
-	V(scsicmd,b,10)
-
-	V(dmarwflg,b,1)
-	even
-	
-	V(idebuf,b,SECTOR_SIZE)
-#endif
-
 	INT(fd_retry)
 	V(_fd_wp,b,NUMFLOPPIES)
 	V(_fd_latch,b,NUMFLOPPIES)
@@ -188,40 +179,98 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	INT(iclk_ready)
 
-#if TOSVERSION >= 0x200
-	V(bcmap_root,b,16)
+	LONG(_rseed)
 
-	V(bcmap_devs,l,4*6) /* should be 3 for 2.06 but isnt */
+	BYTE(_prtbdev)
+	even
 
-#if TTMFP_SUPPORT
-	V(mdm3ibuf,b,SERIAL_BUFSIZE)
-	V(mdm3obuf,b,SERIAL_BUFSIZE)
-	V(mdm3iorec,b,2*14+8)
-#endif
+	BYTE(_prtboch)
+	even
 
-	V(mdm4ibuf,b,SERIAL_BUFSIZE)
-	V(mdm4obuf,b,SERIAL_BUFSIZE)
-	V(mdm4iorec,b,2*14+8)
+	INT(_prtbbval)
 
-	V(mdm2ibuf,b,SERIAL_BUFSIZE)
-	V(mdm2obuf,b,SERIAL_BUFSIZE)
-	V(mdm2iorec,b,2*14+8)
-#endif
-
-	INT(fd_rtryseek)
-	PTR(fd_frb)
-	PTR(fd_copyp)
-	INT(fd_cscnt)
-
-	PTR(memtnext)
-	PTR(memtaddr)
-	PTR(memtbot)
-	PTR(memtend)
-	PTR(memttop)
-	PTR(memtzone)
-	LONG(memtsize)
+	BYTE(_prtbflg)
+	even
 	
-	INT(memterr)
+	BYTE(_prtbdmask)
+	even
+	
+	V(_prtboval,w,4)
+	LONG(_fd_mediach)
+	
+	INT(_prtbwidth)
+
+	V(_drivechange,b,NUMFLOPPIES)
+	INT(_prtbbytes)
+
+	BYTE(_prtbilow)
+	even
+	BYTE(_prtbihigh)
+	even
+
+	INT(_curflop)
+
+	INT(_prtbwords)
+	PTR(_prtbstrt)
+	PTR(_prtbp2)
+	INT(_prtbchunk)
+
+	PTR(_prtbp1)
+	INT(_prtbgval)
+	PTR(_prtbend)
+	INT(_prtbpmsk)
+	INT(_prtbidx)
+	INT(_prtbinvert)
+	INT(_prtbink)
+	INT(_width)
+	INT(_prtbrval)
+	V(_pbpar,b,30)
+
+	V(_blkdev,b,32*NUMFLOPPIES)
+	INT(_height)
+	V(_prtbval,w,16)
+
+	INT(_prtbplanes)
+	INT(_prtboffset)
+
+	INT(_prtbtcol)
+
+	BYTE(_prtbacol)
+	even
+	V(_prtbmaxval,w,16)
+	BYTE(_prtbeps)
+	even
+	V(_prtbobuf,b,8)
+	V(_fd_err,w,NUMFLOPPIES)
+	INT(_prtbheight)
+	V(_prtbmval,w,4)
+	BYTE(_prtbmono)
+	even
+	BYTE(_prtbmed)
+	even
+	BYTE(_prtbempty)
+	even
+	INT(_prtblines)
+	INT(_prtbbits)
+	INT(_prtbomask)
+	INT(_prtbdots)
+	BYTE(_prtbodd)
+	even
+	V(_prtbminval,w,16)
+	BYTE(_prtbprez)
+	even
+	BYTE(_prtbamon)
+	even
+	BYTE(_prtblow)
+	even
+	BYTE(_prtbbol)
+	even
+
+	ds.b 12
+
+	V(fstack,w,1034+2)
+
+	ds.b 8
 
 /*
  * disk_buffer plus pad for equated arrays
@@ -231,83 +280,41 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	ds.w 1 /* unused */
 
+	V(_glbcolumn,w,3)
+
+	INT(_rrecno)
+
+	INT(_rwrtflg)
 	PTR(biosav)
+	PTR(_rdm)
+	INT(_dirlock)
 
 	ds.l 1 /* unused */
 
 	INT(savesr)
 
-	V(fstack,w,1034)
-	PTR(fstrt)
 	PTR(old_tik)
 	PTR(old_2)
 
-	LONG(_rseed)
-
-	BYTE(_prtbdev)
-	even
-
-	BYTE(_prtboch)
-	even
-
 	INT(_msec)
 
-	INT(_prtbbval)
-
-	ds.b 1024 /* unused? $00004b58 */
-    
+	ds.b 988
+	
 	V(_supstk,w,SUPSIZ)
 
-	BYTE(_prtbflg)
-	even
-	
-	BYTE(_prtbdmask)
-	even
-	
 	INT(_time)
-
-	V(_prtboval,w,4)
 
 	V(_root,l,MAXQUICK)
 
+	ds.b 16 /* unused? $00004b58 */
+    
 	ds.b 60 /* unused? $0000577A */
 
 	V(_glbkbchar,l,3*KBBUFSZ)
 
 	PTR(_ofdlist)
 
-	LONG(_fd_mediach)
-	V(_glbcolumn,w,3)
-	INT(_prtbwidth)
-	
-	V(_drivechange,b,NUMFLOPPIES)
-	INT(_rrecno)
-	INT(_prtbbytes)
-
-	BYTE(_prtbilow)
-	even
-	BYTE(_prtbihigh)
-	even
-
-	INT(_rwrtflg)
-	INT(_curflop)
-
-	INT(_prtbwords)
-	PTR(_prtbstrt)
-	PTR(_prtbp2)
-	INT(_prtbchunk)
-
 	V(_virt_work,b,180+MU_PLANES*16*2)
-
-	PTR(_prtbp1)
-	PTR(_rdm)
-	INT(_prtbgval)
-	PTR(_prtbend)
-	INT(_prtbpmsk)
-	INT(_prtbidx)
-	INT(_dirlock)
-	INT(_prtbinvert)
-	INT(_prtbink)
 
 #if STBOOK
 	V(_ofdbuf,b,70*80)
@@ -325,7 +332,6 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	V(_ram8x8,b,90)
 
 	LONG(_rwerr)
-	INT(_prtbrval)
 	V(_pmd,l,3)
 	V(_sft,b,OPNFILES*10-6*10)
 
@@ -337,8 +343,6 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	V(_ram8x16,b,90)
     
-	V(_pbpar,b,30)
-
 #if !STBOOK
 	V(_fill,b,3)
 	even
@@ -351,60 +355,22 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	even
 #endif
 
-	V(_blkdev,b,32*NUMFLOPPIES)
 	V(_secbuf,b,4*SECTOR_SIZE)
 	BYTE(_osuser)
 	PTR(_dirrec)
-	V(_prtbval,w,16)
 	V(_dirtbl,l,NCURDIR)
-	INT(_prtbplanes)
-	INT(_prtboffset)
 	V(_errbuf,l,3)
-	INT(_prtbtcol)
-
-	BYTE(_prtbacol)
-	even
-	V(_prtbmaxval,w,16)
-	BYTE(_prtbeps)
-	even
-	V(_prtbobuf,b,8)
-	V(_fd_err,w,NUMFLOPPIES)
 	V(_diruse,b,NCURDIR)
 	V(_drvtbl,l,BLKDEVNUM)
 	INT(_drvsel)
-	INT(_prtbheight)
-	BYTE(_prtbmono)
-	even
-	V(_prtbmval,w,4)
-	BYTE(_prtbmed)
-	even
-	BYTE(_prtbempty)
-	even
 	LONG(_uptime)
-	INT(_prtblines)
 	INT(_errdrv)
 
-	BYTE(_prtbodd)
-	even
-
-	INT(_prtbdots)
-	INT(_prtbomask)
-	INT(_prtbbits)
-	BYTE(_prtbprez)
-	even
-	V(_prtbminval,w,16)
 	V(_ospd,b,256)
 	V(_buptr,l,3)
 
-	BYTE(_prtblow)
-	even
-	BYTE(_prtbamon)
-	even
-    
 	INT(_date)
 	V(_bcbx,b,4*20) /* 4*sizeof(BCB) */
-	BYTE(_prtbbol)
-	even
 	V(_beptr,l,3)
 
 /* This label is referenced by the OSHEADER */

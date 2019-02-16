@@ -51,7 +51,6 @@ SIZE_FONT_HEAD	equ	90	     * size of font_head structure in FONTDEF.H
 		xdef	_done
 		xdef	_gotseed
 		xdef	_h_align
-		xdef	_height
 		xdef	_leftoldy
 		xdef	_leftdirection
 		xdef	_leftseed
@@ -70,7 +69,6 @@ SIZE_FONT_HEAD	equ	90	     * size of font_head structure in FONTDEF.H
 		xdef	_search_color
 		xdef	_seed_type
 		xdef	_v_align
-		xdef	_width
 		xdef	_wordx
 		xdef	_wordy
 		xdef	_xleft
@@ -118,7 +116,10 @@ _leftseed	equ	_fill_buffer+38 	; like _gotseed. (new seedfill)
 _h_align	equ	_fill_buffer+40
 _leftcollision	equ	_fill_buffer+40 	; like _collision. (new seedfill)
 _v_align	equ	_fill_buffer+42		; scaler alignments
+#if TOSVERSION >= 0x200
+		xdef	_width
 _width		equ	_fill_buffer+44
+#endif
 _collision	equ	_fill_buffer+42  	; seed was removed from Q (new rtn)
 #if VIDEL_SUPPORT
 _search_color	equ	_fill_buffer+44		; the color of the border
@@ -126,7 +127,10 @@ _Q		equ	_fill_buffer+48	 	; storage for the seed points (1280)
 #else
 _Q		equ	_fill_buffer+44	 	; storage for the seed points (1280)
 #endif
+#if TOSVERSION >= 0x200
+		xdef	_height
 _height		equ	_fill_buffer+46		; extent of string set in dqt_extent
+#endif
 _wordx		equ	_fill_buffer+48
 _wordy		equ	_fill_buffer+50		; add this to each space for interword
 _rmword		equ	_fill_buffer+52		; the number of pixels left over

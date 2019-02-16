@@ -1,6 +1,6 @@
 ; country specific offsets for various routines
 ; .d1 is caused by different alt-key handling in bios,
-;    and affects all addresses >= $00
+;    and affects all addresses >= $00fc3e6a
 ; .d2 is caused by different time/date formats in desktop,
 ;    and affects all addresses >= $00
 _SWITCH .NATION

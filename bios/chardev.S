@@ -17,6 +17,7 @@
 #define SCCB_DATA SCCN_BASE+2
 
 vme_mask  equ $FFFF8E0D
+scu_gp1   equ $FFFF8E09
 
 /* ==== Iorec offsets ======================================================== */
 
@@ -52,6 +53,7 @@ BCONMAP_START_HANDLE equ 6
 
 /* ==== Structures =========================================================== */
 
+#if TOSVERSION >= 0x200
 #define kbdvec    _kbdvecs+0
 #define midivec   _kbdvecs+4
 #define vkbderr   _kbdvecs+8
@@ -64,6 +66,19 @@ BCONMAP_START_HANDLE equ 6
 #define ikbdsys   _kbdvecs+36
 #define ikbdstate _kbdvecs+40
 #define kbdlength _kbdvecs+41
+#else
+#define midivec   _kbdvecs+0
+#define vkbderr   _kbdvecs+4
+#define vmiderr   _kbdvecs+8
+#define statvec   _kbdvecs+12
+#define mousevec  _kbdvecs+16
+#define clockvec  _kbdvecs+20
+#define joyvec    _kbdvecs+24
+#define midisys   _kbdvecs+28
+#define ikbdsys   _kbdvecs+32
+#define ikbdstate _kbdvecs+36
+#define kbdlength _kbdvecs+37
+#endif
 
 
 		text
@@ -776,19 +791,23 @@ initmfp2:
         moveq.l   #IOREC_SIZE-1,d0
         bsr       copymem
 
+#if TOSVERSION >= 0x200
         move.w    #-1,kb_altnum                 /* reset alt-numpad ascii entering */
+#endif
         move.l    #aciasys2,d0                  /* init ikbd and midi error handler address */
         move.l    d0,ABSW(vkbderr)              /* init keyboard error handler address */
         move.l    d0,ABSW(vmiderr)              /* init midi error handler address */
         move.l    #_midivec,ABSW(midivec)       /* point to system midi interrupt vector */
         move.l    #_midisys,ABSW(midisys)
         move.l    #_ikbdsys,ABSW(ikbdsys)
+#if TOSVERSION >= 0x200
         move.l    #_kbdvec,ABSW(kbdvec)
+#endif
 /* reset midi acia */
-        move.b    #$03,ABSW(ACIA_MIDI_BASE+ACIA_CTRL)     /* init the midi acia via master reset */
+        move.b    #$03,ABSW2(ACIA_MIDI_BASE+ACIA_CTRL)     /* init the midi acia via master reset */
 /* init the acia to divide by 16x clock, 8 bit data, 1 stop bit, no parity, */
 /* rts low, transmitting interrupt disabled, receiving interrupt enabled */
-        move.b    #$95,ABSW(ACIA_MIDI_BASE+ACIA_CTRL)
+        move.b    #$95,ABSW2(ACIA_MIDI_BASE+ACIA_CTRL)
 
 /* initialize the keyboard acia interrupt vector exception address */
         move.b    #CONTERM,ABSW(_conterm)       /* enabled keyclick, repeat key, bell functions */
@@ -797,7 +816,9 @@ initmfp2:
         move.l    d0,ABSW(statvec)
         move.l    d0,ABSW(mousevec)
         move.l    d0,ABSW(joyvec)
+#if TOSVERSION >= 0x200
         bsr       initdevstables
+#endif
 
 /* Sound routine initialization */
         moveq.l   #0,d0
@@ -822,11 +843,11 @@ initmfp2:
         bsr       _bioskeys                     /* point key translation address to the rom based translation tables */
 
 /* reset ikbd acia */
-        move.b    #$03,ABSW(ACIA_IKBD_BASE+ACIA_CTRL) /* init the acia via master Reset */
+        move.b    #$03,ABSW2(ACIA_IKBD_BASE+ACIA_CTRL) /* init the acia via master Reset */
 /* now that the vector is initialized, we can allow interrupts to occur! */
 /* init the acia do divide by 64 clock, 8 bit data, 1 stop bit, no parity, */
 /* rts low, transmitting interrupt disabled, receiving interrupt enabled */
-        move.b    #$96,ABSW(ACIA_IKBD_BASE+ACIA_CTRL)
+        move.b    #$96,ABSW2(ACIA_IKBD_BASE+ACIA_CTRL)
 
         movea.l   #mfpvectr,a3                  /* point to initializing array of exception vec's */
         moveq.l   #3,d1                         /* init branch counter/index */
@@ -962,9 +983,14 @@ mfpvectr:
  ***********************************************************************************/
 /* 306de: 00e0270a */
 /* 206de: 00e023d4 */
+/* 104de: 00fc36ac */
 settimer:
         movem.l   d0-d4/a0-a3,-(a7)             /* save all registers to be messed with!! */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         movea.w   #MFP_REGS,a0                  /* set mfp chip address pointer */
+#else
+        movea.l   #MFP_REGS,a0                  /* set mfp chip address pointer */
+#endif
 
         movea.l   #imrt,a3                      /* mask off the timer's interrupt maskable bit */
         movea.l   #imrmt,a2
@@ -1051,6 +1077,7 @@ tdrtab:  dc.b $1e,$20,$22,$24
  ***********************************************************************************/
 /* 306de: 00e027b0 */
 /* 206de: 00e0247a */
+/* 104de: 00fc3754 */
 	xdef _mfpint
 _mfpint:
         move.w    4(a7),d0
@@ -1098,6 +1125,7 @@ initint:
  *************************************************************************/
 /* 306de: 00e027da */
 /* 206de: 00e024a4 */
+/* 104de: 00fc377e */
 	xdef _jdisint
 _jdisint:
         move.w    4(a7),d0
@@ -1109,18 +1137,27 @@ _jdisint:
 
 jdisint1:
         movem.l   d0-d1/a0-a1,-(a7)             /* save affected registers */
-        lea.l     ABSW(MFP_REGS),a0             /* set mfp chip address pointer */
+        lea.l     ABSW2(MFP_REGS),a0            /* set mfp chip address pointer */
         lea.l     MFP_IMRA-MFP_REGS(a0),a1      /* set a1 to the mskoff routine */
         bsr.s     bselect                       /* generate the appropriate bit to clear */
         bclr      d1,(a1)                       /* and clear the bit... */
         lea.l     MFP_IERA-MFP_REGS(a0),a1      /* set a1 for another mskoff call */
         bsr.s     bselect
         bclr      d1,(a1)                       /* and clear the bit... */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         lea.l     MFP_ISRA-MFP_REGS(a0),a1      /* now set up to check for interrupts in progress */
         bsr.s     bselect                       /* get proper a/b version... */
         move.b    #$FE,d0
         rol.b     d1,d0
         move.b    d0,(a1)
+#else
+        lea.l     MFP_IPRA-MFP_REGS(a0),a1      /* now set up to check for interrupts in progress */
+        bsr.s     bselect                       /* get proper a/b version... */
+        bclr      d1,(a1)
+        lea.l     MFP_ISRA-MFP_REGS(a0),a1
+        bsr.s     bselect
+        bclr      d1,(a1)
+#endif
         movem.l   (a7)+,d0-d1/a0-a1             /* restore affected registers */
         rts
 
@@ -1135,6 +1172,7 @@ jdisint1:
  *************************************************************************/
 /* 306de: 00e02810 */
 /* 206de: 00e024da */
+/* 104de: 00fc37b8 */
 	xdef _jenabint
 _jenabint:
         move.w    4(a7),d0
@@ -1145,7 +1183,7 @@ _jenabint:
  *************************************************************************/
 jenabin1:
         movem.l   d0-d1/a0-a1,-(a7)             /* save affected registers */
-        lea.l     ABSW(MFP_REGS),a0             /* set mfp chip address pointer */
+        lea.l     ABSW2(MFP_REGS),a0            /* set mfp chip address pointer */
         lea.l     MFP_IERA-MFP_REGS(a0),a1      /* set up to enable the interrupt enable bit */
         bsr.s     bselect
         bset      d1,(a1)                       /* and set the bit... */
@@ -1188,10 +1226,11 @@ bselect1:
  *************************************************************************/
 /* 306de: 00e02848 */
 /* 205de: 00e02512 */
+/* 104de: 00fc37f2 */
 rcvrint:
         movem.l   d0-d1/a0-a2,-(a7)             /* save affected registers */
-        lea.l     ABSW(rs232iorec),a0           /* point to current output buffer record */
-        lea.l     ABSW(MFP_REGS),a2             /* set mfp chip address pointer */
+        lea.l     ABSW2(rs232iorec),a0          /* point to current output buffer record */
+        lea.l     ABSW2(MFP_REGS),a2            /* set mfp chip address pointer */
 rcvrint1:
         move.b    MFP_RSR-MFP_REGS(a2),rcv(a0)  /* do the required rsr read before the udr read! */
         move.b    MFP_UDR-MFP_REGS(a2),d0       /* get incoming data byte */
@@ -1239,7 +1278,11 @@ rcvrint6:
         bpl.s     rcvrint7                      /* not ready */
         bsr       iorecout
 rcvrint7:
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    #$EF,MFP_ISRA-MFP_REGS(a2)
+#else
+        bclr      #4,MFP_ISRA-MFP_REGS(a2)
+#endif
         movem.l   (a7)+,d0-d1/a0-a2             /* restore affected registers */
         rte
 
@@ -1250,13 +1293,20 @@ rcvrint7:
  *************************************************************************/
 /* 306de: 00e028e2 */
 /* 205de: 00e025ac */
+/* 104de: 00fc3890 */
 txrint:
         movem.l   d0-d1/a0-a2,-(a7)             /* save affected registers */
-        lea.l     ABSW(MFP_REGS),a2             /* set mfp chip address pointer */
-        lea.l     ABSW(rs232iorec),a0           /* point to current output buffer record */
+        lea.l     ABSW2(MFP_REGS),a2            /* set mfp chip address pointer */
+#if (TOSVERSION >= 0x200)
+        lea.l     ABSW2(rs232iorec),a0          /* point to current output buffer record */
+#endif
 txrint1:
         bsr       iorecout
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    #$FB,MFP_ISRA-MFP_REGS(a2)    /* xmit buffer empty */
+#else
+		bclr      #2,MFP_ISRA-MFP_REGS(a2)
+#endif
         movem.l   (a7)+,d0-d1/a0-a2             /* restore affected registers */
         rte
 
@@ -1267,14 +1317,19 @@ txrint1:
  *************************************************************************/
 /* 306de: 00e028fe */
 /* 206de: 00e025c8 */
+/* 104de: 00fc38aa */
 ctsint:
         movem.l   d0-d1/a0-a2,-(a7)             /* save affected registers */
-        lea.l     ABSW(rs232iorec),a0           /* point to current output buffer record */
-        lea.l     ABSW(MFP_REGS),a2             /* set mfp chip address pointer */
+        lea.l     ABSW2(rs232iorec),a0          /* point to current output buffer record */
+        lea.l     ABSW2(MFP_REGS),a2            /* set mfp chip address pointer */
 
         btst      #1,ctr(a0)                    /* are we using CTS/RTS flow control? */
         beq.s     ctsint2                       /* no... */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         btst      #2,(a2)                       /* CTS already active? */
+#else
+        btst      #2,0(a2)                      /* CTS already active? */
+#endif
         bne.s     ctsint1                       /* yes... */
         clr.b     xoff(a0)                      /* xon_flag = 0 */
         bset      #2,MFP_AER-MFP_REGS(a2)       /* CTS set */
@@ -1286,7 +1341,11 @@ ctsint1:
         move.b    #-1,xoff(a0)                  /* xon_flag = -1 */
         bclr      #2,MFP_AER-MFP_REGS(a2)
 ctsint2:
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    #$FB,MFP_ISRB-MFP_REGS(a2)    /* clear CTS */
+#else
+		bclr      #2,MFP_ISRB-MFP_REGS(a2)
+#endif
         movem.l   (a7)+,d0-d1/a0-a2             /* restore affected registers */
         rte
 
@@ -1296,26 +1355,38 @@ ctsint2:
  *************************************************************************/
 /* 306de: 00e02944 */
 /* 206de: 00e0260e */
+/* 104de: 00fc38f6 */
 rxerror:
         movem.l   d0/a0,-(a7)                   /* save all registers */
-        lea.l     ABSW(MFP_REGS),a0             /* set mfp chip address pointer */
+        lea.l     ABSW2(MFP_REGS),a0            /* set mfp chip address pointer */
 rxerror1:
         move.b    MFP_RSR-MFP_REGS(a0),rs232iorec+rcv /* receiver status register */
         move.b    MFP_UDR-MFP_REGS(a0),d0       /* dummy read of data register */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    #$F7,MFP_ISRA-MFP_REGS(a0)
+#else
+		bclr      #3,MFP_ISRA-MFP_REGS(a0)
+#endif
         movem.l   (a7)+,d0/a0                   /* restore all registers */
         rte
 
 /* 306de: 00e02964 */
 /* 206de: 00e0262e */
+/* 104de: 00fc3918 */
 txerror:
         move.l    a0,-(a7)
-        lea.l     ABSW(MFP_REGS),a0             /* set mfp chip address pointer */
+        lea.l     ABSW2(MFP_REGS),a0            /* set mfp chip address pointer */
 txerror1:
         move.b    MFP_TSR-MFP_REGS(a0),rs232iorec+wr5  /* transmitter status register */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    #$FD,MFP_ISRA-MFP_REGS(a0)
+#else
+		bclr      #1,MFP_ISRA-MFP_REGS(a0)
+#endif
         movea.l   (a7)+,a0                      /* restore all registers */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         tst.b     ABSW(MFP_TSR)
+#endif
         rte
 
 /*************************************************************************
@@ -1323,17 +1394,31 @@ txerror1:
  *************************************************************************/
 /* 306de: 00e02980 */
 /* 206de: 00e0264a */
+/* 104de: 00fc3932 */
 iorecout:
+#if (TOSVERSION >= 0x200)
         move.l    a0,-(a7)                      /* save all registers */
+#else
+        lea.l     ABSW2(rs232iorec),a0          /* point to current output buffer record */
+#endif
+#if (TOSVERSION < 0x200)
+		move.b    ctr(a0),d0
+		and.b     xoff(a0),d0
+		bne.s     ioreco3
+#endif
         move.b    xonoffc(a0),d0                /* send handshake byte pending? */
         beq.s     ioreco1                       /* no... */
         clr.b     xonoffc(a0)                   /* clear handshake byte */
         bra.s     ioreco2                       /* output the handshake byte */
 ioreco1:
+#if (TOSVERSION >= 0x200)
         move.b    ctr(a0),d0                    /* flow control active? */
         and.b     xoff(a0),d0                   /* and xon-flag */
         bne.s     ioreco3                       /* yes... */
         adda.w    #IOREC_SIZE,a0                /* switch to output ring buffer */
+#else
+        lea.l     ABSW2(rs232iorec+IOREC_SIZE),a0          /* point to current output buffer record */
+#endif
         move.w    head(a0),d0                   /* head-index */
         cmp.w     tail(a0),d0                   /* = tail-index? */
         beq.s     ioreco3                       /* buffer empty? => out */
@@ -1344,7 +1429,9 @@ ioreco2:
         move.b    MFP_TSR-MFP_REGS(a2),rs232iorec+wr5   /* save transmitter status; BUG: should be wr5(a0) */
         move.b    d0,MFP_UDR-MFP_REGS(a2)       /* output the byte */
 ioreco3:
+#if (TOSVERSION >= 0x200)
         movea.l   (a7)+,a0                      /* restore all registers */
+#endif
         rts
 
 /*************************************************************************
@@ -1386,8 +1473,9 @@ iorecget:
  *************************************************************************/
 /* 306de: 00e029fc */
 /* 206de: 00e026c6 */
+/* 104de: 00fc39b6 */
 rtson:
-        lea.l     ABSW(psgsel),a1
+        lea.l     ABSW2(psgsel),a1
         move.w    sr,-(a7)
         ori.w     #$0700,sr
         move.b    #$0E,(a1)
@@ -1402,8 +1490,9 @@ rtson:
  *************************************************************************/
 /* 306de: 00e02a18 */
 /* 206de: 00e026e2 */
+/* 104de: 00fc39d4 */
 rtsoff:
-        lea.l     ABSW(psgsel),a1
+        lea.l     ABSW2(psgsel),a1
         move.w    sr,-(a7)
         ori.w     #$0700,sr
         move.b    #$0E,(a1)
@@ -1430,10 +1519,11 @@ wrapin1:
  */
 /* 306de: 00e02a40 */
 /* 206de: 00e0270a */
+/* 104de: 00fc39fe */
 	xdef _iorec
 _iorec:
-#if TOSVERSION >= 0x200
         move.w    4(a7),d1             /* device number */
+#if TOSVERSION >= 0x200
         beq.s     iorec1               /* for device 0 (rs232), return bconmap configuration */
 #endif
         asl.l     #2,d1
@@ -1465,6 +1555,7 @@ iorectab:
  */
 /* 306de: 00e02a60 */
 /* 206de: 00e0272a */
+/* 104de: 00fc3a16 */
 	xdef _rsconf:
 _rsconf:
 #if TOSVERSION >= 0x200
@@ -1478,24 +1569,20 @@ _rsconf:
 /* 206de: 00e02730 */
 _rs6conf:
         lea.l     ABSW(rs232iorec),a0           /* point to current output buffer record */
-        lea.l     ABSW(MFP_REGS),a2             /* set mfp chip address pointer */
-#endif
+#define mfpareg a2
+        lea.l     ABSW(MFP_REGS),mfpareg        /* set mfp chip address pointer */
 rs6conf1:
         moveq.l   #0,d0
         cmpi.w    #-2,4(a7)                     /* -2 = return last baudrate */
         bne.s     rs6conf2
-#if TOSVERSION >= 0x200
         move.b    baudrate(a0),d0               /* last baudrate */
-#else
-        move.w    ABSW2(baudrate),d0            /* last baudrate */
-#endif
         rts
 rs6conf2:
         ori.w     #$0700,sr                     /* no interrupts for now */
 /*
  *      first we grab the old ucs,rsr,tsr,scr contents
  */
-        movep.l   MFP_UCR-MFP_REGS(a2),d7
+        movep.l   MFP_UCR-MFP_REGS(mfpareg),d7
         move.w    6(a7),d0                      /* if -1 then don't change */
         cmp.w     #$0003,d0
         bhi.s     rs6conf6
@@ -1512,9 +1599,7 @@ rs6conf3:
 rs6conf4:
         tst.b     highwater(a0)                 /* RTS set? */
         beq.s     rs6conf5                      /* no... */
-#if TOSVERSION >= 0x200
         bsr       rs232cont                     /* reenable RTS */
-#endif
 rs6conf5:
         move.w    (a7)+,d0                      /* new handshake state */
         move.b    d0,ctr(a0)                    /* set new handshake state */
@@ -1522,49 +1607,121 @@ rs6conf6:
 /*  set timer baud rate */
         tst.w     4(a7)                         /* if -1 then don't change */
         bmi.s     rs6conf7
-        bclr      #0,MFP_RSR-MFP_REGS(a2)       /* disable receiver */
-        bclr      #0,MFP_TSR-MFP_REGS(a2)       /* disable transmitter */
+        bclr      #0,MFP_RSR-MFP_REGS(mfpareg)  /* disable receiver */
+        bclr      #0,MFP_TSR-MFP_REGS(mfpareg)  /* disable transmitter */
         move.w    4(a7),d1                      /* new baudrate */
         move.b    d1,baudrate(a0)               /* store for later */
         move.b    baudctrl(pc,d1.w),d0          /* get baudrate control register settings mask */
         move.b    bauddata(pc,d1.w),d2          /* get baudrate data register value */
-        andi.b    #$70,MFP_TCDCR-MFP_REGS(a2)
-        move.b    d2,MFP_TDDR-MFP_REGS(a2)      /* set tuner D to new baud rate */
-        or.b      d0,MFP_TCDCR-MFP_REGS(a2)
-        bset      #0,MFP_RSR-MFP_REGS(a2)       /* enable receiver */
-        bset      #0,MFP_TSR-MFP_REGS(a2)       /* enable transmitter */
+        andi.b    #$70,MFP_TCDCR-MFP_REGS(mfpareg)
+        move.b    d2,MFP_TDDR-MFP_REGS(mfpareg) /* set tuner D to new baud rate */
+        or.b      d0,MFP_TCDCR-MFP_REGS(mfpareg)
+        bset      #0,MFP_RSR-MFP_REGS(mfpareg)  /* enable receiver */
+        bset      #0,MFP_TSR-MFP_REGS(mfpareg)  /* enable transmitter */
 rs6conf7:
         tst.w     8(a7)                         /* if -1 then don't change */
         bmi.s     rs6conf8
-        move.b    9(a7),MFP_UCR-MFP_REGS(a2)    /* set ucr */
+        move.b    9(a7),MFP_UCR-MFP_REGS(mfpareg) /* set ucr */
 rs6conf8:
         tst.w     10(a7)                        /* if -1 then don't change */
         bmi.s     rs6conf9
-        move.b    11(a7),MFP_RSR-MFP_REGS(a2)   /* set rsr */
+        move.b    11(a7),MFP_RSR-MFP_REGS(mfpareg) /* set rsr */
 rs6conf9:
         tst.w     12(a7)                        /* if -1 then don't change */
         bmi.s     rs6con10
-        move.b    13(a7),MFP_TSR-MFP_REGS(a2)   /* set tsr */
+        move.b    13(a7),MFP_TSR-MFP_REGS(mfpareg) /* set tsr */
 rs6con10:
         tst.w     14(a7)                        /* if -1 then don't change */
         bmi.s     rs6con11
-        move.b    15(a7),MFP_SCR-MFP_REGS(a2)   /* set scr */
+        move.b    15(a7),MFP_SCR-MFP_REGS(mfpareg) /* set scr */
 rs6con11:
         move.l    d7,d0                         /* move old contents of rs-232 registers to d0.l */
         rts
+#undef mfpareg
+
+#else
+
+/*
+ * Rsconf function for device 6 (rs232 driven by MFP)
+ */
+        cmpi.w    #-2,4(a7)                     /* -2 = return last baudrate */
+        bne.s     rs6conf2
+        move.w    ABSW2(baudrate),d0            /* last baudrate */
+        rts
+rs6conf2:
+        ori.w     #$0700,sr                     /* no interrupts for now */
+        lea.l     ABSW2(rs232iorec),a0          /* point to current output buffer record */
+#define mfpareg a1
+        lea.l     ABSW2(MFP_REGS),mfpareg       /* set mfp chip address pointer */
+/*
+ *      first we grab the old ucs,rsr,tsr,scr contents
+ */
+        movep.l   MFP_UCR-MFP_REGS(mfpareg),d7
+        move.w    6(a7),d0                      /* if -1 then don't change */
+        cmp.w     #-1,d0
+        beq.s     rs6conf6
+        move.b    d0,ctr(a0)
+        beq.s     rs6conf5
+		and.b     #$FD,d0
+        beq.s     rs6conf5
+		move.b    #1,d0
+rs6conf5:
+        move.b    d0,ctr(a0)                    /* set new handshake state */
+rs6conf6:
+/*  set timer baud rate */
+        tst.w     4(a7)                         /* if -1 then don't change */
+        bmi.s     rs6conf7
+		moveq.l   #0,d0
+        move.b    d0,MFP_RSR-MFP_REGS(mfpareg)  /* disable receiver */
+        move.b    d0,MFP_TSR-MFP_REGS(mfpareg)  /* disable transmitter */
+        move.w    4(a7),d1                      /* new baudrate */
+        move.w    d1,baudrate                   /* store for later */
+        lea       baudctrl,a2
+        move.b    0(a2,d1.w),d0                 /* get baudrate control register settings mask */
+        lea       bauddata,a2
+        move.b    0(a2,d1.w),d2                 /* get baudrate data register value */
+		move.l    d0,d1
+		moveq.l   #3,d0
+		bsr       settimer
+		moveq.l   #1,d0
+        move.b    d0,MFP_RSR-MFP_REGS(mfpareg)  /* enable receiver */
+        move.b    d0,MFP_TSR-MFP_REGS(mfpareg)  /* enable transmitter */
+rs6conf7:
+        tst.w     8(a7)                         /* if -1 then don't change */
+        bmi.s     rs6conf8
+        move.b    9(a7),MFP_UCR-MFP_REGS(mfpareg) /* set ucr */
+rs6conf8:
+        tst.w     10(a7)                        /* if -1 then don't change */
+        bmi.s     rs6conf9
+        move.b    11(a7),MFP_RSR-MFP_REGS(mfpareg) /* set rsr */
+rs6conf9:
+        tst.w     12(a7)                        /* if -1 then don't change */
+        bmi.s     rs6con10
+        move.b    13(a7),MFP_TSR-MFP_REGS(mfpareg) /* set tsr */
+rs6con10:
+        tst.w     14(a7)                        /* if -1 then don't change */
+        bmi.s     rs6con11
+        move.b    15(a7),MFP_SCR-MFP_REGS(mfpareg) /* set scr */
+rs6con11:
+        move.l    d7,d0                         /* move old contents of rs-232 registers to d0.l */
+        rts
+#endif
+
+#undef mfpareg
 
 /* baudrate table - control register setting */
 baudctrl: dc.b $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$02,$02
 /* baudrate table - data register setting */
 bauddata: dc.b $01,$02,$04,$05,$08,$0a,$0b,$10,$20,$40,$60,$80,$8f,$af,$40,$60
 
+
+#if TOSVERSION >= 0x200
 /*
  * initial values for 4 extra MAPTAB structures
  */
 /* 306de: 00e02b4a */
 /* 206de: 00e02814 */
 bcondevs:
-#if TOSVERSION >= 0x200
         dc.l      _bcon6stat                    /* Dev 6: "Modem 1" - ST MFP */
         dc.l      _bcon6in
         dc.l      _bco6stat
@@ -1652,10 +1809,10 @@ bconmap1:
 #endif
 
 
+#if TOSVERSION >= 0x200
 /* 306de: 00e02c38 */
 /* 206de: 00e028ea */
 initdevstables:
-#if TOSVERSION >= 0x200
         lea.l     ABSW(bcmap_devs),a0
         move.l    a0,ABSW(bcmap_root+0)     /* bcmap_root.maptab */
         move.w    #rs232devs,ABSW(bcmap_root+4) /* bcmap_root.maptabsize */
@@ -1671,13 +1828,11 @@ initdevnoscc:
         move.l    a2,ABSW(_buserror)
         move.w    d0,ABSW(bcmap_root+4)
 #endif
-#endif
         lea.l     bcondevs(pc),a1
         move.w    #rs232devs*6-1,d0
 initdev1:
         move.l    (a1)+,(a0)+
         dbf       d0,initdev1
-#if TOSVERSION >= 0x200
         move.w    #6,ABSW(bcmap_root+6)         /* Device 6 is mapped into device 1 (Aux) */
 /* install device 6 vectors also in system variables for device 1 (aux) */
         lea.l     bcondevs,a1
@@ -1688,8 +1843,8 @@ initdev1:
         move.l    (a1)+,96(a0)                  /* Fix tconout for dev 1 */
         move.l    (a1)+,ABSW(bcmap_root+8)      /* Fix rsconf for RS232 */
         move.l    (a1)+,ABSW(bcmap_root+12)     /* Fix Iorec for RS232 */
-#endif
         rts
+#endif
 
 #if TTMFP_SUPPORT
 /*
@@ -2476,8 +2631,14 @@ mdm2table:
  *************************************************************************/
 /* 306de: 00e03268 */
 /* 206de: 00e02ec2 */
+/* 104de: 00fc3aec */
 _int_acia:
+#if TOSVERSION >= 0x200
         movem.l   d0-d3/a0-a3,-(a7)
+#else
+        movem.l   d0-d3/a0-a3/a5,-(a7)
+#endif
+        SETBASEREG
 intacia1:
         movea.l   ABSW(midisys),a2
         jsr       (a2)
@@ -2485,8 +2646,16 @@ intacia1:
         jsr       (a2)
         btst      #4,ABSW(MFP_GPIP)    /* ACIA receiver buffer empty? */
         beq.s     intacia1             /* no, read more bytes */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    #$BF,ABSW(MFP_ISRB)  /* clear in-service bit */
+#else
+        bclr      #6,ABSW(MFP_ISRB)    /* clear in-service bit */
+#endif
+#if TOSVERSION >= 0x200
         movem.l   (a7)+,d0-d3/a0-a3
+#else
+        movem.l   (a7)+,d0-d3/a0-a3/a5
+#endif
         rte
 
 _midisys:
@@ -2496,10 +2665,14 @@ _midisys:
         bra.s     _aciasys
 _ikbdsys:
         lea.l     ABSW(ikbdiorec),a0
-        lea.l     ABSW(ACIA_IKBD_BASE),a1
+        lea.l     ABSW2(ACIA_IKBD_BASE),a1
         movea.l   ABSW(vkbderr),a2
 _aciasys:
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    (a1),d2
+#else
+        move.b    0(a1),d2
+#endif
         btst      #7,d2        /* interrupt request? */
         beq.s     aciasys2     /* no, ignore */
         btst      #0,d2        /* receiver data full? */
@@ -2542,6 +2715,7 @@ aciasys2:
  */
 /* 306de: 00e032cc */
 /* 206de: 00e02f26 */
+/* 104de: 00fc3b56 */
 aciaread:
         move.b    ACIA_DATA(a1),d0      /* read data byte */
         cmpa.l    #ikbdiorec,a0
@@ -2549,9 +2723,13 @@ aciaread:
         tst.b     ABSW(ikbdstate)       /* inside a multi-byte packet? */
         bne.s     in_packet             /* ikbdstate != 0 => go and add to the packet */
         cmpi.b    #$F6,d0               /* is byte a packet header? */
+#if TOSVERSION >= 0x200
         bcc.s     begin_packet          /* byte >= 0xf6 => go begin receiving a packet */
         move.l    ABSW(kbdvec),-(a7)    /* ordinary key byte in d0. jump in vector */
         rts
+#else
+        bcs       _kbdvec               /* byte < 0xf6 => go begin receiving a key */
+#endif
 begin_packet:
         subi.b    #$F6,d0               /* generate table index */
         andi.l    #$000000FF,d0
@@ -2629,6 +2807,7 @@ kbd_joy:
  ********************************/
 /* 306de: 00e033ea */
 /* 206de: 00e03044 */
+/* 104de: 00fc3c70 */
 _kbdvec:
         move.b    ABSW(_shifty),d1              /* get current shift state */
         cmpi.b    #$2A,d0                       /* left shift pressed? */
@@ -2669,6 +2848,7 @@ kbdvec7:
         cmpi.b    #$B8,d0                       /* ALT released? */
         bne.s     kbdvec8
         bclr      #3,d1
+#if TOSVERSION >= 0x200
         tst.w     kb_altnum                     /* ascii code via numpad active? */
         bmi.s     kbdvec10
         move.b    d1,ABSW(_shifty)
@@ -2678,15 +2858,23 @@ kbdvec7:
         move.b    kb_altnum+1,d0                /* get entered ascii code */
         move.w    #-1,kb_altnum
         bra       kbdvec44
+#else
+        bra       kbdvec10
+#endif
 kbdvec8:
         cmpi.b    #$3A,d0                       /* CAPS LOCK pressed? */
         bne.s     kbdvec11
         btst      #0,ABSW(_conterm)             /* should click sound be produced? */
         beq.s     kbdvec9
+#if TOSVERSION >= 0x200
         movem.l   d0-d2/a0-a2,-(a7)
         movea.l   ABSW(_kcl_hook),a0
         jsr       (a0)
         movem.l   (a7)+,d0-d2/a0-a2
+#else
+        move.l    #_clicksnd,ABSW(_sndtable)
+        move.b    #$00,ABSW(_snddelay)
+#endif
 kbdvec9:
         bchg      #4,d1                         /* toggle CAPS LOCK state */
 kbdvec10:
@@ -2719,10 +2907,15 @@ kbdvec14:
 kbdvec15:
         btst      #0,ABSW(_conterm)             /* should click sound be produced? */
         beq.s     kbdvec16
+#if TOSVERSION >= 0x200
         movem.l   d0-d2/a0-a2,-(a7)
         movea.l   ABSW(_kcl_hook),a1
         jsr       (a1)
         movem.l   (a7)+,d0-d2/a0-a2
+#else
+        move.l    #_clicksnd,ABSW(_sndtable)
+        move.b    #$00,ABSW(_snddelay)
+#endif
 kbdvec16:
         move.l    a0,-(a7)                      /* store ikbdiorec pointer */
         moveq.l   #0,d1
@@ -2790,6 +2983,7 @@ kbdvec26:
 kbdvec27:
         btst      #3,ABSW(_shifty)              /* is alt active? */
         beq       kbdvec42
+#if TOSVERSION >= 0x200
         cmp.b     #$67,d1                       /* keypad key 0 - 9? */
         bcs.s     kbdvec29                      /* no */
         cmp.b     #$70,d1
@@ -2807,6 +3001,7 @@ kbdvec28:
         movea.l   (a7)+,a0
         rts
 kbdvec29:
+#endif
 
 /*
  * Country-dependent key translations
@@ -2815,6 +3010,7 @@ kbdvec29:
 /* 206any: 00e0323a */
 /* 205any: 00e028a0 */
 /* 106any: 00e03fc4 */
+/* 104any: 00fc3e10 */
 #if OS_COUNTRY == CTRY_US
 /* nothing to do */
 #endif
@@ -3160,6 +3356,7 @@ kbdcz3:
 
 /* 206de: 00e03294 */
 /* 306de: 00e0363a */
+/* 104de: 00fc3e6a */
 
 /*
  * end of country specific key handling
@@ -3258,7 +3455,11 @@ kbdvec45:
         beq.s     kbdvec47                      /* yes, drop it */
         movea.l   buf(a0),a2
         swap      d0                            /* put shift state to high word */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         clr.w     d0
+#else
+        move.w    #0,d0
+#endif
         move.b    ABSW(_shifty),d0
         swap      d0
         lsl.l     #8,d0
@@ -3284,6 +3485,7 @@ kbdvec46:
 kbdvec47:
         rts
 
+#if TOSVERSION >= 0x200
 /*
  * default function for system variable kcl_hook
  */
@@ -3294,6 +3496,7 @@ _do_keyclick:
         move.l    #_clicksnd,ABSW(_sndtable)
         move.b    #$00,ABSW(_snddelay)
         rts
+#endif
 
 /* 306de: 00e0379a */
 midiread:
@@ -3302,6 +3505,7 @@ midiread:
 
 /* 306de: 00e037a0 */
 /* 206de: 00e033fa */
+/* 104de: 00fc3fc4 */
 _midivec:
         move.w    tail(a0),d1                   /* get current tail pointer offset */
         addq.w    #1,d1                         /* index = tail + 1 */
@@ -3344,7 +3548,11 @@ keymous4:
         move.b    ABSW(_shifty),d0              /* get current button status */
         lsr.b     #5,d0                         /* shift right button bit to 'd0' */
         addi.b    #$F8,d0                       /* add relative mouse header */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    d0,(a0)                       /* store in first byte of record header */
+#else
+        move.b    d0,0(a0)                      /* store in first byte of record header */
+#endif
         move.b    d1,1(a0)                      /* store x value in second byte of record buffer */
         move.b    d2,2(a0)                      /* store y value in third byte of record buffer */
         jsr       (a2)
@@ -3358,6 +3566,7 @@ mousekey:  dc.b      $47,$c7,$52,$d2
 /* 306de: 00e0380c */
 /* 206de: 00e03466 */
 /* 404: 00e0398c */
+	xdef coldboot
 coldboot:
         move.w    #$2700,sr                 /* disable all IRQSR */
 
@@ -3371,6 +3580,33 @@ coldboo3:   move.l    d0,(a0)+
             movea.l   ABSW($0004),a0            /* jump into the ROM to reset the system */
             jmp       (a0)
 
+#else
+#if TOSVERSION < 0x200
+			lea       coldboor(pc),a0
+			move.w    #16-1,d0
+			movea.w   #$0008,a1
+coldboo1:	move.l    (a0)+,(a1)+				/* copy erase routine to $000c... */
+			dbra      d0,coldboo1
+			SETBASEREG
+			jmp       ABSW($0008)
+
+coldboor:	lea       coldbooe(pc),a0
+			move.l    a0,ABSW(_buserror)
+			lea       coldbend(pc),a0
+			moveq     #0,d0
+			move.l    d0,d1
+			move.l    d0,d2
+			move.l    d0,d3
+			move.l    d0,d4
+			move.l    d0,d5
+			move.l    d0,d6
+			move.l    d0,d7
+coldbool:	movem.l   d0-d7,(a0)
+			adda.w    #$0020,a0
+			bra.s     coldbool
+coldbooe:   move.l    ABSW(4),a0
+            jmp       (a0)
+coldbend:   dc.w 0
 #else
 #if (TOSVERSION < 0x300) & !TP_50
 			move.w    #(coldbend-coldboor)/4-1,d0
@@ -3388,8 +3624,8 @@ coldbool:	move.l    d0,(a0)+
 			move.l    d0,(a0)+
 			move.l    d0,(a0)+
 			bra.s     coldbool
-coldbooe:nop
-coldbend:  ds.b 0
+coldbooe:   nop
+coldbend:   ds.b 0
 
 #else
 #if TP_50 /* PAK */
@@ -3458,8 +3694,9 @@ coldbend:  ds.b 0
         data
 zero2:  dc.l 0
 		text
-#endif
-#endif
+#endif /* TOSVERSION > 0x200 */
+#endif /* TOSVERSION > 0x300 */
+#endif /* STBOOK */
 
 
 /*************************************************************************
@@ -3491,6 +3728,7 @@ zero2:  dc.l 0
  *************************************************************************/
 /* 306de: 00e0387e */
 /* 206de: 00e03498 */
+/* 104de: 00fc407e */
 	xdef _giaccess
 _giaccess:
         move.w    4(a7),d0
@@ -3499,7 +3737,7 @@ gientry:
         move.w    sr,-(a7)
         ori.w     #$0700,sr
         movem.l   d1-d2/a0,-(a7)                /* save affected registers */
-        lea.l     ABSW(psgsel),a0               /* init desired gi register addr */
+        lea.l     ABSW2(psgsel),a0              /* init desired gi register addr */
         move.b    d1,d2                         /* make a copy to test for read or write */
         andi.b    #$0F,d1                       /* turn off any extraneous bits */
         move.b    d1,(a0)                       /* select register */
@@ -3518,7 +3756,11 @@ giacces1:
  *       routine to turn on the dtr signal                           *
  *********************************************************************/
 dtron:
+#if (TOSVERSION < 0x200) | !BINEXACT
+        moveq     #$EF,d2
+#else
         move.b    #$EF,d2
+#endif
         bra.s     offbit
 
 /*********************************************************************
@@ -3537,6 +3779,7 @@ dtron:
  *********************************************************************/
 /* 306de: 00e038b6 */
 /* 206de: 00e034d0 */
+/* 104de: 00fc40b6 */
 	xdef _ongibit
 _ongibit:
         moveq.l   #0,d2
@@ -3550,7 +3793,11 @@ onbit:
         bsr.s     gientry                       /* go get it... */
         move.l    (a7)+,d2
         or.b      d2,d0                         /* set bit(s) on */
+#if (TOSVERSION < 0x200) | !BINEXACT
+        moveq     #$8E,d1                       /* setup to write to port a */
+#else
         move.b    #$8E,d1                       /* setup to write to port a */
+#endif
         bsr.s     gientry                       /* go set it and return */
         move.w    (a7)+,sr
         movem.l   (a7)+,d0-d2
@@ -3573,6 +3820,7 @@ onbit:
  *********************************************************************/
 /* 306de: 00e038de */
 /* 206de: 00e034f8 */
+/* 104de: 00fc40dc */
 	xdef _offgibit
 _offgibit:
         moveq.l   #0,d2
@@ -3586,7 +3834,11 @@ offbit:
         bsr.s     gientry                       /* go get it... */
         move.l    (a7)+,d2
         and.b     d2,d0                         /* turn bit(s) off */
+#if (TOSVERSION < 0x200) | !BINEXACT
+        moveq     #$8E,d1                       /* setup to write to port a */
+#else
         move.b    #$8E,d1                       /* setup to write to port a */
+#endif
         bsr.s     gientry                       /* go set it and return */
         move.w    (a7)+,sr
         movem.l   (a7)+,d0-d2
@@ -3633,6 +3885,7 @@ offbit:
 
 /* 306de: 00e03906 */
 /* 206de: 00e03520 */
+/* 104de: 00fc4102 */
 /* first we determine if the init is for a absolute, relative or keycode */
 /* mouse action. */
 	xdef _initmouse
@@ -3699,7 +3952,11 @@ setmouse:
         move.b    2(a3),(a2)+                   /* set x threshold/scale/delta */
         move.b    3(a3),(a2)+                   /* set y threshold/scale/delta */
         moveq.l   #16,d1                        /* setup to determine if top/bottom */
+#if (TOSVERSION >= 0x200) | !BINEXACT
         sub.b     (a3),d1                       /* set y=0 at ? */
+#else
+        sub.b     0(a3),d1                      /* set y=0 at ? */
+#endif
         move.b    d1,(a2)+
         move.b    #$07,(a2)+                    /* set mouse button action */
         move.b    1(a3),(a2)+                   /* mouse button parameter */
@@ -3743,6 +4000,7 @@ setmouse:
  *************************************************************************/
 /* 306de: 00e039ce */
 /* 206de: 00e035e8 */
+/* 104de: 00fc41cc */
 	xdef _xbtimer
 _xbtimer:
         moveq.l   #0,d0
@@ -3789,6 +4047,7 @@ xbtimtab:  dc.b 13,8,5,4
  *************************************************************************/
 /* 306de: 00e03a08 */
 /* 206de: 00e03622 */
+/* 104de: 00fc4206 */
 /* 404: 00e03b64 */
 	xdef _keytbl
 _keytbl:
@@ -3821,13 +4080,14 @@ _keytbl3:
  *************************************************************************/
 /* 306de: 00e03a08 */
 /* 206de: 00e0364e */
+/* 104de: 00fc4232 */
 	xdef _bioskeys
 _bioskeys:
 #if TOSVERSION < 0x400
         move.l    #_keytblnorm,ABSW(_curkeytbl)
         move.l    #_keytblshift,ABSW(_curkeytbl+4)
         move.l    #_keytblcaps,ABSW(_curkeytbl+8)
-#if TOSVERSION < 0x300
+#if (TOSVERSION >= 0x200) & (TOSVERSION < 0x300)
 		clr.b     ABSW(kb_key_last)
 #endif
         rts
@@ -3848,6 +4108,7 @@ _bioskeys:
  *************************************************************************/
 /* 306de: 00e03a4e */
 /* 206de: 00e0366c */
+/* 104de: 00fc424c */
 	xdef _dosound
 _dosound:
         move.l    ABSW(_sndtable),d0            /* return current status in D0.L */
@@ -3874,6 +4135,7 @@ dosound1:
  *************************************************************************/
 /* 306de: 00e03a62 */
 /* 206de: 00e03680 */
+/* 104de: 00fc4260 */
 	xdef _setprt
 _setprt:
         move.w    ABSW(_prtconfig),d0           /* get current config word before we change it */
@@ -3902,6 +4164,7 @@ setprt1:
  *************************************************************************/
 /* 306de: 00e03a74 */
 /* 206de: 00e03692 */
+/* 104de: 00fc4272 */
 	xdef _kbrate
 _kbrate:
         move.w    ABSW(kb_initial),d0           /* get current initial/repeat values */
@@ -3952,7 +4215,7 @@ kbrate1:
 /* 104de: 00fc4294 */
 	xdef _kbdvbase
 _kbdvbase:
-        move.l    #_kbdvecs+4,d0
+        move.l    #midivec,d0
         rts
 
 /*************************************************************************
@@ -3975,12 +4238,14 @@ _kbdvbase:
  */
 /* 306de: 00e03a9e */
 /* 206de: 00e036bc */
+/* 104de: 00fc429c */
 timercint:
         addq.l    #1,_hz_200                    /* increment raw tick counter */
         rol.w     _tim_c_sieve                  /* rotate divisor bits */
         bpl.s     timerci3                      /* if not 4th interrupt, then return */
         movem.l   d0-d7/a0-a6,-(a7)
-
+		SETBASEREG
+		
         bsr.s     soundirq                      /* process sounds */
 
         btst      #1,ABSW(_conterm)             /* check for key repeat enabled */
@@ -4012,7 +4277,11 @@ timerci2:
         addq.w    #2,a7                         /* cleanup stack */
         movem.l   (a7)+,d0-d7/a0-a6
 timerci3:
+#if (TOSVERSION >= 0x200) | !BINEXACT
         move.b    #$DF,ABSW(MFP_ISRB)           /* clear the interrupt channel */
+#else
+        bclr      #5,ABSW2(MFP_ISRB)            /* clear the interrupt channel */
+#endif
         rte
 
 /*********************************************************

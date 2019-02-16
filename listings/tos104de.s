@@ -230,7 +230,7 @@ _main:
 [00fc03b8] 6100 0190                 bsr       $00FC054A
 [00fc03bc] 51c8 fffa                 dbf       d0,$00FC03B8
 [00fc03c0] 7002                      moveq.l   #2,d0
-[00fc03c2] 6100 0264                 bsr       _run_cartridge_applications
+[00fc03c2] 6100 0264                 bsr       $00FC0628
 [00fc03c6] 9bcd                      suba.l    a5,a5
 [00fc03c8] 102d 8260                 move.b    -32160(a5),d0
 [00fc03cc] c03c 0003                 and.b     #$03,d0
@@ -253,10 +253,10 @@ _main:
 [00fc0414] 2b7c 00fc 0030 046e       move.l    #$00FC0030,1134(a5)
 [00fc041c] 3b7c 0001 0452            move.w    #$0001,1106(a5)
 [00fc0422] 4240                      clr.w     d0
-[00fc0424] 6100 0202                 bsr       _run_cartridge_applications
+[00fc0424] 6100 0202                 bsr       $00FC0628
 [00fc0428] 46fc 2300                 move.w    #$2300,sr
 [00fc042c] 7001                      moveq.l   #1,d0
-[00fc042e] 6100 01f8                 bsr       _run_cartridge_applications
+[00fc042e] 6100 01f8                 bsr       $00FC0628
 biosinit:
 [00fc0432] 4eb9 00fc 95c8            jsr       _osinit
 [00fc0438] 33f9 00fc 001e 0000 60be  move.w    $00FC001E,$000060BE
@@ -327,7 +327,7 @@ biosinit:
 
 diskboot:
 [00fc0530] 7003                      moveq.l   #3,d0
-[00fc0532] 6100 00f4                 bsr       _run_cartridge_applications
+[00fc0532] 6100 00f4                 bsr       $00FC0628
 [00fc0536] 2079 0000 047a            movea.l   $0000047A,a0
 [00fc053c] 4e90                      jsr       (a0)
 [00fc053e] 4a40                      tst.w     d0
@@ -4167,6 +4167,8 @@ _jenabint:
 [00fc37ec] 4e75                      rts
 [00fc37ee] 5489                      addq.l    #2,a1
 [00fc37f0] 4e75                      rts
+
+rsvrint:
 [00fc37f2] 48e7 c0e0                 movem.l   d0-d1/a0-a2,-(a7)
 [00fc37f6] 41f9 0000 0c70            lea.l     $00000C70,a0
 [00fc37fc] 45f9 ffff fa01            lea.l     $FFFFFA01,a2
@@ -4209,12 +4211,16 @@ _jenabint:
 [00fc3884] 08aa 0004 000e            bclr      #4,14(a2)
 [00fc388a] 4cdf 0703                 movem.l   (a7)+,d0-d1/a0-a2
 [00fc388e] 4e73                      rte
+
+txrint:
 [00fc3890] 48e7 c0e0                 movem.l   d0-d1/a0-a2,-(a7)
 [00fc3894] 45f9 ffff fa01            lea.l     $FFFFFA01,a2
 [00fc389a] 6100 0096                 bsr       $00FC3932
 [00fc389e] 08aa 0002 000e            bclr      #2,14(a2)
 [00fc38a4] 4cdf 0703                 movem.l   (a7)+,d0-d1/a0-a2
 [00fc38a8] 4e73                      rte
+
+ctsint:
 [00fc38aa] 48e7 c0e0                 movem.l   d0-d1/a0-a2,-(a7)
 [00fc38ae] 41f9 0000 0c70            lea.l     $00000C70,a0
 [00fc38b4] 45f9 ffff fa01            lea.l     $FFFFFA01,a2
@@ -4233,6 +4239,8 @@ _jenabint:
 [00fc38ea] 08aa 0002 0010            bclr      #2,16(a2)
 [00fc38f0] 4cdf 0703                 movem.l   (a7)+,d0-d1/a0-a2
 [00fc38f4] 4e73                      rte
+
+rxerror:
 [00fc38f6] 48e7 8080                 movem.l   d0/a0,-(a7)
 [00fc38fa] 41f9 ffff fa01            lea.l     $FFFFFA01,a0
 [00fc3900] 13e8 002a 0000 0c8c       move.b    42(a0),$00000C8C
@@ -4240,12 +4248,16 @@ _jenabint:
 [00fc390c] 08a8 0003 000e            bclr      #3,14(a0)
 [00fc3912] 4cdf 0101                 movem.l   (a7)+,d0/a0
 [00fc3916] 4e73                      rte
+
+txerror:
 [00fc3918] 2f08                      move.l    a0,-(a7)
 [00fc391a] 41f9 ffff fa01            lea.l     $FFFFFA01,a0
 [00fc3920] 13e8 002c 0000 0c8d       move.b    44(a0),$00000C8D
 [00fc3928] 08a8 0001 000e            bclr      #1,14(a0)
 [00fc392e] 205f                      movea.l   (a7)+,a0
 [00fc3930] 4e73                      rte
+
+iorecout:
 [00fc3932] 41f9 0000 0c70            lea.l     $00000C70,a0
 [00fc3938] 1028 0020                 move.b    32(a0),d0
 [00fc393c] c028 001f                 and.b     31(a0),d0
@@ -4390,10 +4402,14 @@ _rsconf:
 [00fc3b06] 08ad 0006 fa11            bclr      #6,-1519(a5)
 [00fc3b0c] 4cdf 2f0f                 movem.l   (a7)+,d0-d3/a0-a3/a5
 [00fc3b10] 4e73                      rte
+
+_midisys:
 [00fc3b12] 41ed 0da0                 lea.l     3488(a5),a0
 [00fc3b16] 43ed fc04                 lea.l     -1020(a5),a1
 [00fc3b1a] 246d 0e36                 movea.l   3638(a5),a2
 [00fc3b1e] 600e                      bra.s     $00FC3B2E
+
+_ikbdsys:
 [00fc3b20] 41ed 0c92                 lea.l     3218(a5),a0
 [00fc3b24] 43f9 ffff fc00            lea.l     $FFFFFC00,a1
 [00fc3b2a] 246d 0e32                 movea.l   3634(a5),a2
@@ -4409,7 +4425,11 @@ _rsconf:
 [00fc3b4c] 6706                      beq.s     $00FC3B54
 [00fc3b4e] 1029 0002                 move.b    2(a1),d0
 [00fc3b52] 4ed2                      jmp       (a2)
+
+aciasys2:
 [00fc3b54] 4e75                      rts
+
+aciaread:
 [00fc3b56] 1029 0002                 move.b    2(a1),d0
 [00fc3b5a] b1fc 0000 0c92            cmpa.l    #$00000C92,a0
 [00fc3b60] 6600 045c                 bne       $00FC3FBE
@@ -4491,6 +4511,8 @@ _rsconf:
 [00fc3c66] 246d 0e46                 movea.l   3654(a5),a2
 [00fc3c6a] 41ed 0e69                 lea.l     3689(a5),a0
 [00fc3c6e] 609e                      bra.s     $00FC3C0E
+
+_kbdvec:
 [00fc3c70] 122d 0e7d                 move.b    3709(a5),d1
 [00fc3c74] 0c00 002a                 cmpi.b    #$2A,d0
 [00fc3c78] 6606                      bne.s     $00FC3C80
@@ -4737,6 +4759,8 @@ _rsconf:
 [00fc3fbc] 4e75                      rts
 [00fc3fbe] 246d 0e2e                 movea.l   3630(a5),a2
 [00fc3fc2] 4ed2                      jmp       (a2)
+
+_midivec:
 [00fc3fc4] 3228 0008                 move.w    8(a0),d1
 [00fc3fc8] 5241                      addq.w    #1,d1
 [00fc3fca] b268 0004                 cmp.w     4(a0),d1
@@ -4983,6 +5007,8 @@ _kbrate:
 _kbdvbase:
 [00fc4294] 203c 0000 0e2e            move.l    #$00000E2E,d0
 [00fc429a] 4e75                      rts
+
+timercint:
 [00fc429c] 52b9 0000 04ba            addq.l    #1,$000004BA
 [00fc42a2] e7f9 0000 0ea4            rol.w     $00000EA4
 [00fc42a8] 6a4a                      bpl.s     $00FC42F4
@@ -5010,6 +5036,8 @@ _kbdvbase:
 [00fc42f0] 4cdf 7fff                 movem.l   (a7)+,d0-d7/a0-a6
 [00fc42f4] 08b9 0005 ffff fa11       bclr      #5,$FFFFFA11
 [00fc42fc] 4e73                      rte
+
+soundirq:
 [00fc42fe] 48e7 c080                 movem.l   d0-d1/a0,-(a7)
 [00fc4302] 202d 0ea6                 move.l    3750(a5),d0
 [00fc4306] 677a                      beq.s     $00FC4382
@@ -5056,6 +5084,17 @@ _kbdvbase:
 [00fc437e] 2b48 0ea6                 move.l    a0,3750(a5)
 [00fc4382] 4cdf 0103                 movem.l   (a7)+,d0-d1/a0
 [00fc4386] 4e75                      rts
+
+********************************************************************************
+********************************************************************************
+*
+* End BIOS text len 0x4388
+*
+* Start GEMDOS
+*
+********************************************************************************
+********************************************************************************
+
 [00fc4388] 4e56 fffc                 link      a6,#$FFFC
 [00fc438c] 306e 0008                 movea.w   8(a6),a0
 [00fc4390] 227c 0000 5680            movea.l   #$00005680,a1
@@ -11498,6 +11537,8 @@ x20_inq:
 [00fc948c] 4e4e                      trap      #14
 [00fc948e] 5c4f                      addq.w    #6,a7
 [00fc9490] 4e75                      rts
+
+bdoslmul:
 [00fc9492] 4e56 fffc                 link      a6,#$FFFC
 [00fc9496] 4242                      clr.w     d2
 [00fc9498] 4aae 0008                 tst.l     8(a6)
@@ -11524,6 +11565,7 @@ x20_inq:
 [00fc94e0] 4480                      neg.l     d0
 [00fc94e2] 4e5e                      unlk      a6
 [00fc94e4] 4e75                      rts
+
 [00fc94e6] 4e56 fffe                 link      a6,#$FFFE
 [00fc94ea] 48e7 3f00                 movem.l   d2-d7,-(a7)
 [00fc94ee] 4243                      clr.w     d3
@@ -12522,6 +12564,16 @@ xsettime:
 [00fca2e8] 4e5e                      unlk      a6
 [00fca2ea] 4e75                      rts
 
+********************************************************************************
+********************************************************************************
+*
+* End GEMDOS text len 0x5F64
+*
+* Start VDI
+*
+********************************************************************************
+********************************************************************************
+
 _v_escape:
 [00fca2ec] 49f9 0000 2ad6            lea.l     $00002AD6,a4
 [00fca2f2] 206c 000a                 movea.l   10(a4),a0
@@ -12569,11 +12621,11 @@ J1:
 [00fca350] 3940 ffe8                 move.w    d0,-24(a4)
 [00fca354] 6000 02e0                 bra       $00FCA636
 
-_bcon2out:
 _bcon5out:
 [00fca358] 322f 0006                 move.w    6(a7),d1
 [00fca35c] c27c 00ff                 and.w     #$00FF,d1
 [00fca360] 6000 0416                 bra       $00FCA778
+_bcon2out:
 [00fca364] 322f 0006                 move.w    6(a7),d1
 [00fca368] 49f9 0000 2ad6            lea.l     $00002AD6,a4
 [00fca36e] c27c 00ff                 and.w     #$00FF,d1
@@ -21742,7 +21794,9 @@ _vq_color:
 [00fd1e7e] 0000                      dc.w      $0000
 [00fd1e80] 008e 011d 01ac            ori.l     #$011D01AC,a6 ; apollo only
 [00fd1e86] 023b 02ca 0359            andi.b    #$CA,([pc,zd0.w*2]) ; 68020+ only
-[00fd1e8c] 03e8 7a0f                 bset      d1,31247(a0)
+[00fd1e8c] 03e8
+
+[00fd1e8e] 7a0f                 bset      d1,31247(a0)
 [00fd1e90] 3200                      move.w    d0,d1
 [00fd1e92] c245                      and.w     d5,d1
 [00fd1e94] 3602                      move.w    d2,d3
@@ -21840,42 +21894,43 @@ _vq_color:
 [00fd1fa2] ca7c 000c                 and.w     #$000C,d5
 [00fd1fa6] 287b 5006                 movea.l   $00FD1FAE(pc,d5.w),a4
 [00fd1faa] 6000 0092                 bra       $00FD203E
-[00fd1fae] 00fd 2290                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fb2] 00fd 2298                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fb6] 00fd 2298                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fba] 00fd 2290                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fbe] 00fd 22d6                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fc2] 00fd 2372                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fc6] 00fd 22ca                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fca] 00fd 2344                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fce] 00fd 22c4                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fd2] 00fd 236c                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fd6] 00fd 22dc                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fda] 00fd 2352                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fde] 00fd 22b8                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fe2] 00fd 2336                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fe6] 00fd 22a0                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fea] 00fd 2360                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1fee] 00fd 22a6                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1ff2] 00fd 2328                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1ff6] 00fd 22b2                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1ffa] 00fd 2366                 cmp2.b    ???,d2 ; 68020+ only
-[00fd1ffe] 00fd 22d6                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2002] 00fd 2352                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2006] 00fd 22ca                 cmp2.b    ???,d2 ; 68020+ only
-[00fd200a] 00fd 236c                 cmp2.b    ???,d2 ; 68020+ only
-[00fd200e] 00fd 22c4                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2012] 00fd 2344                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2016] 00fd 22dc                 cmp2.b    ???,d2 ; 68020+ only
-[00fd201a] 00fd 2372                 cmp2.b    ???,d2 ; 68020+ only
-[00fd201e] 00fd 22b2                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2022] 00fd 2336                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2026] 00fd 22a6                 cmp2.b    ???,d2 ; 68020+ only
-[00fd202a] 00fd 2360                 cmp2.b    ???,d2 ; 68020+ only
-[00fd202e] 00fd 22a0                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2032] 00fd 2328                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2036] 00fd 22b8                 cmp2.b    ???,d2 ; 68020+ only
-[00fd203a] 00fd 2366                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fae] 00fd2290                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fb2] 00fd2298                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fb6] 00fd2298                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fba] 00fd2290                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fbe] 00fd22d6                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fc2] 00fd2372                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fc6] 00fd22ca                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fca] 00fd2344                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fce] 00fd22c4                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fd2] 00fd236c                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fd6] 00fd22dc                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fda] 00fd2352                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fde] 00fd22b8                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fe2] 00fd2336                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fe6] 00fd22a0                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fea] 00fd2360                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1fee] 00fd22a6                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1ff2] 00fd2328                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1ff6] 00fd22b2                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1ffa] 00fd2366                 cmp2.b    ???,d2 ; 68020+ only
+[00fd1ffe] 00fd22d6                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2002] 00fd2352                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2006] 00fd22ca                 cmp2.b    ???,d2 ; 68020+ only
+[00fd200a] 00fd236c                 cmp2.b    ???,d2 ; 68020+ only
+[00fd200e] 00fd22c4                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2012] 00fd2344                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2016] 00fd22dc                 cmp2.b    ???,d2 ; 68020+ only
+[00fd201a] 00fd2372                 cmp2.b    ???,d2 ; 68020+ only
+[00fd201e] 00fd22b2                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2022] 00fd2336                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2026] 00fd22a6                 cmp2.b    ???,d2 ; 68020+ only
+[00fd202a] 00fd2360                 cmp2.b    ???,d2 ; 68020+ only
+[00fd202e] 00fd22a0                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2032] 00fd2328                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2036] 00fd22b8                 cmp2.b    ???,d2 ; 68020+ only
+[00fd203a] 00fd2366                 cmp2.b    ???,d2 ; 68020+ only
+
 [00fd203e] 4aae ffde                 tst.l     -34(a6)
 [00fd2042] 6718                      beq.s     $00FD205C
 [00fd2044] 4bf9 00fd 2274            lea.l     $00FD2274,a5
@@ -21921,22 +21976,22 @@ _vq_color:
 [00fd20c6] 2d4a ffde                 move.l    a2,-34(a6)
 [00fd20ca] 6090                      bra.s     $00FD205C
 [00fd20cc] 4e75                      rts
-[00fd20ce] 00fd 23c4                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20d2] 00fd 23e4                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20d6] 00fd 2408                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20da] 00fd 242c                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20de] 00fd 2452                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20e2] 00fd 2472                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20e6] 00fd 2474                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20ea] 00fd 2494                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20ee] 00fd 24b4                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20f2] 00fd 24d6                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20f6] 00fd 24f8                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20fa] 00fd 2516                 cmp2.b    ???,d2 ; 68020+ only
-[00fd20fe] 00fd 2538                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2102] 00fd 255a                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2106] 00fd 257c                 cmp2.b    ???,d2 ; 68020+ only
-[00fd210a] 00fd 25a0                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20ce] 00fd23c4                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20d2] 00fd23e4                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20d6] 00fd2408                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20da] 00fd242c                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20de] 00fd2452                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20e2] 00fd2472                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20e6] 00fd2474                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20ea] 00fd2494                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20ee] 00fd24b4                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20f2] 00fd24d6                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20f6] 00fd24f8                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20fa] 00fd2516                 cmp2.b    ???,d2 ; 68020+ only
+[00fd20fe] 00fd2538                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2102] 00fd255a                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2106] 00fd257c                 cmp2.b    ???,d2 ; 68020+ only
+[00fd210a] 00fd25a0                 cmp2.b    ???,d2 ; 68020+ only
 [00fd210e] b07c 0005                 cmp.w     #$0005,d0
 [00fd2112] 6788                      beq.s     $00FD209C
 [00fd2114] 48e7 0018                 movem.l   a3-a4,-(a7)
@@ -22208,6 +22263,7 @@ _vq_color:
 [00fd23bc] d2ee fffc                 adda.w    -4(a6),a1
 [00fd23c0] 4ed4                      jmp       (a4)
 [00fd23c2] c047                      and.w     d7,d0
+
 [00fd23c4] 32bc 0000                 move.w    #$0000,(a1)
 [00fd23c8] 4ed3                      jmp       (a3)
 [00fd23ca] c047                      and.w     d7,d0
@@ -22460,10 +22516,12 @@ _vq_color:
 [00fd25de] e755                      roxl.w    #3,d5
 [00fd25e0] 247b 5004                 movea.l   $00FD25E6(pc,d5.w),a2
 [00fd25e4] 4ed2                      jmp       (a2)
-[00fd25e6] 00fd 260e                 cmp2.b    ???,d2 ; 68020+ only
-[00fd25ea] 00fd 2622                 cmp2.b    ???,d2 ; 68020+ only
-[00fd25ee] 00fd 25f6                 cmp2.b    ???,d2 ; 68020+ only
-[00fd25f2] 00fd 260a                 cmp2.b    ???,d2 ; 68020+ only
+
+[00fd25e6] 00fd260e                 cmp2.b    ???,d2 ; 68020+ only
+[00fd25ea] 00fd2622                 cmp2.b    ???,d2 ; 68020+ only
+[00fd25ee] 00fd25f6                 cmp2.b    ???,d2 ; 68020+ only
+[00fd25f2] 00fd260a                 cmp2.b    ???,d2 ; 68020+ only
+
 [00fd25f6] 2448                      movea.l   a0,a2
 [00fd25f8] 1692                      move.b    (a2),(a3)
 [00fd25fa] d4c2                      adda.w    d2,a2
@@ -22604,9 +22662,11 @@ _vq_color:
 [00fd2752] 4e90                      jsr       (a0)
 [00fd2754] 4cdf 030f                 movem.l   (a7)+,d0-d3/a0-a1
 [00fd2758] 4e75                      rts
-[00fd275a] 00fd 2766                 cmp2.b    ???,d2 ; 68020+ only
-[00fd275e] 00fd 27ac                 cmp2.b    ???,d2 ; 68020+ only
-[00fd2762] 00fd 27e2                 cmp2.b    ???,d2 ; 68020+ only
+
+[00fd275a] 00fd2766                 cmp2.b    ???,d2 ; 68020+ only
+[00fd275e] 00fd27ac                 cmp2.b    ???,d2 ; 68020+ only
+[00fd2762] 00fd27e2                 cmp2.b    ???,d2 ; 68020+ only
+
 [00fd2766] e24e                      lsr.w     #1,d6
 [00fd2768] 7000                      moveq.l   #0,d0
 [00fd276a] 9140                      subx.w    d0,d0
@@ -36967,6 +37027,7 @@ takeerr:
 [00fdd342] 33c0 0000 6e20            move.w    d0,DOS_AX
 [00fdd348] 4e75                      rts
 
+aeslmul:
 [00fdd34a] 4e56 fffc                 link      a6,#$FFFC
 [00fdd34e] 4242                      clr.w     d2
 [00fdd350] 4aae 0008                 tst.l     8(a6)
@@ -50905,6 +50966,18 @@ linefhandler:
 [00fe78be] 4e75                      rts
 lineftab:
 
+********************************************************************************
+********************************************************************************
+*
+* End DESKTOP text len 0x
+*
+* End text segment
+*
+* Start BIOS data
+*
+********************************************************************************
+********************************************************************************
+
 
 _ui_mupb:
 [00fe8230] 8765 4321                 dc.l      $87654321
@@ -50954,6 +51027,8 @@ proto_data:
 [00fe82c4] 1b32 ff00                 move.b    (a2,a7.l*8),-(a5) ; 68020+ only; reserved BD=0
 [00fe82c8] 1b58 00ff                 move.b    (a0)+,255(a5)
 [00fe82cc] 0000                      dc.w      $0000
+
+keytblnorm:
 [00fe82ce] 001b 3132                 ori.b     #$32,(a3)+
 [00fe82d2] 3334 3536 3738 3930 9e27  move.w    ([$37383930,a4],d3.w*4,$9E27),-(a1) ; 68020+ only
 [00fe82dc] 0809 7177                 btst      #29047,a1
@@ -51002,6 +51077,8 @@ proto_data:
 [00fe8348] 0000                      dc.w      $0000
 [00fe834a] 0000                      dc.w      $0000
 [00fe834c] 0000                      dc.w      $0000
+
+keytblshift:
 [00fe834e] 001b 2122                 ori.b     #$22,(a3)+
 [00fe8352] dd24                      add.b     d6,-(a4)
 [00fe8354] 2526                      move.l    -(a6),-(a2)
@@ -51049,6 +51126,8 @@ proto_data:
 [00fe83c8] 0000                      dc.w      $0000
 [00fe83ca] 0000                      dc.w      $0000
 [00fe83cc] 0000                      dc.w      $0000
+
+keytblcaps:
 [00fe83ce] 001b 3132                 ori.b     #$32,(a3)+
 [00fe83d2] 3334 3536 3738 3930 9e27  move.w    ([$37383930,a4],d3.w*4,$9E27),-(a1) ; 68020+ only
 [00fe83dc] 0809 5157                 btst      #20823,a1
@@ -51113,6 +51192,17 @@ _clicksnd:
 [00fe847c] 0810 0d03                 btst      #3331,(a0)
 [00fe8480] 0b80                      bclr      d5,d0
 [00fe8482] 0c01 ff00                 cmpi.b    #$00,d1
+
+********************************************************************************
+********************************************************************************
+*
+* End BIOS data len 0x0256
+*
+* Start GEMDOS data
+*
+********************************************************************************
+********************************************************************************
+
 [00fe8486] 0000                      dc.w      $0000
 [00fe8488] 0008 0000                 ori.b     #$00,a0 ; apollo only
 [00fe848c] 000a 0000                 ori.b     #$00,a2 ; apollo only
@@ -51205,8 +51295,8 @@ _clicksnd:
 [00fe8576] 4420                      neg.b     -(a0)
 [00fe8578] 2a2a 2a1b                 move.l    10779(a2),d5
 [00fe857c] 4b00                      chk.l     d0,d5 ; 68020+ only
-_mdlink:mds:						 
-[00fe857e] 0000 1810                 dc.l _pmd
+fstrtend:						 
+[00fe857e] 0000 1810                 dc.l fstack+1034*2
 _nday:
 [00fe8582] 0000                      dc.w      $0000
 [00fe8584] 001f 001c                 ori.b     #$1C,(a7)+
@@ -62023,7 +62113,7 @@ gem.rsc:
 0CA0: ikbdbuf
 0DA0: midiiorec
 0DAE: midibuf
-0E2A: kbdvecs
+0E2E: kbdvecs
 0E63: clockbuf
 0E6C: iclkrtime
 0E70: iclkwtime
@@ -62041,8 +62131,11 @@ gem.rsc:
 0EBA: prtbflg
 0EBC: prtbdma
 0EC6: fd_mediach
+0ECA: prtbwidth
 0ECC: drivechange
 0ECE: prtbbyt
+0ED0: prtbilo
+0ED2: prtbihi
 0ED4: curflop
 0ED6: prtbwor
 0ED8: prtbstr
@@ -62053,9 +62146,6 @@ gem.rsc:
 0EE8: prtbend
 0EEC: prtbpms
 0EEE: prtbidx
-0ED0: prtbilo
-0ED2: prtbihi
-0EE0: prtbchu
 0EF0: prtbinv
 0EF2: prtbink
 0EF4: width
@@ -62063,13 +62153,17 @@ gem.rsc:
 0EF8: pbpar
 0F16: blkdev
 0F56: height
+0F58: prtbval
 0F78: prtbpla
 0F7A: prtboff
 0F7C: prtbtco
 0F7E: prtbaco
+0F80: prtbmaxval
 0FA0: prtbeps
+0FA2: prtbobuf
 0FAA: fd_err
 0FAE: prtbhei
+0FB0: prtbmval
 0FB8: prtbmon
 0FBA: prtbmed
 0FBC: prtbemp
@@ -62078,10 +62172,14 @@ gem.rsc:
 0FBC: prtboma
 0FC4: prtbdot
 0FC6: prtbodd
+0FC8: prtbminval
 0FE8: prtbpre
 0FEA: prtbamo
 0FEC: prtblow
+0FEE: prtbbol
+0FFC: fstack
 181C: dskbuf
+2ADC: lineavars
 378A: time
 3BAA: virt_work
 5622: _run

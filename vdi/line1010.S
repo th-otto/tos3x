@@ -44,6 +44,7 @@
 *************************************************************************
 
 /* 306de: 00e0792c */
+/* 104de: 00fcab96 */
 /* 404: 00e094ea */
 		xdef	line1010
 line1010:	move.l	2(sp),a1	; fetch pc off stack.
@@ -147,6 +148,7 @@ bp9:
 * pointer to system fonts
 *-
 /* 306de: 00e07a20 */
+/* 104de: 00fcac14 */
 fonts:	dc.l	_f6x6
 		dc.l	_f8x8
 		dc.l	_f8x16

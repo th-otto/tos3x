@@ -1775,26 +1775,28 @@ hd_portb:
     xdef fd_retry
     comm fd_retry,2
     
+#if (TOSVERSION >= 0x200)
+    xdef fd_rtryseek
+    comm fd_rtryseek,2
+
+    xdef fd_frb
+    comm fd_frb,4
+
     xdef fd_copyp
     comm fd_copyp,4
     
-    xdef fd_frb
-    comm fd_frb,4
+    xdef fd_cscnt
+    comm fd_cscnt,2
+#endif
     
     xdef fd_interlv
     comm fd_interlv,2
-    
-    xdef fd_cscnt
-    comm fd_cscnt,2
     
     xdef flopsregs
     comm flopsregs,2
     
     xdef fd_side
     comm fd_side,2
-    
-    xdef fd_rtryseek
-    comm fd_rtryseek,2
     
     xdef fd_dev
     comm fd_dev,2

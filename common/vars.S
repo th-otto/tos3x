@@ -245,8 +245,7 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	INT(savesr)
 
-	V(fstack,w,1034)
-	PTR(fstrt)
+	V(fstack,w,1034+2)
 	PTR(old_tik)
 	PTR(old_2)
 

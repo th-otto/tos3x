@@ -205,7 +205,7 @@ nodiag:
         lea       memcret(pc),a6
         bra       memchk
 memcret:
-        bne.s      noreset
+        bne.s     resetvec
         move.b    ABSW(memctrl),ABSW(memconf)  /* initialize memory controller */
 
 resetvec:
@@ -1808,7 +1808,11 @@ _getmpb:
 /* --- initialize MPB: */
         move.l    a1,(a0)            /* mp_mfl = &themd; */
         clr.l     4(a0)              /* mp_mal = NULL; */
+#if TOSVERSION >= 0x200
         clr.l     8(a0)              /* mp_rover = NULL; */
+#else
+        move.l    a1,8(a0)           /* mp_rover = &themd; */
+#endif
 /* ---- initialize MD: */
         clr.l     (a1)               /* themd.m_link = NULL; */
         move.l    ABSW(_membot),4(a1)  /* themd.m_start = membot; */
@@ -2786,8 +2790,6 @@ noblitter:
 		comm kb_initial,1
 		xdef kb_repeat
 		comm kb_repeat,1
-		xdef kb_altnum
-		comm kb_altnum,2
 		
 		xdef savepc
 		comm savepc,4
