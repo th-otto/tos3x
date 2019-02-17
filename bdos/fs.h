@@ -309,7 +309,11 @@ DND *findit PROTO((const char *name, const char **sp, int dflag));
 int getpath PROTO((const char *p, char *d, int dirspec));
 BOOLEAN match PROTO((const char *s1, const char *s2));
 int xcmps PROTO((const char *s, const char *d));
+#if GEMDOS >= 0x18
 VOID flushall PROTO((NOTHING));
+#else
+VOID flushbcb PROTO((BCB *b));
+#endif
 
 char *getrec PROTO((RECNO recno, DMD *dm, int wrtflg));
 char *packit PROTO((const char *s, char *d));

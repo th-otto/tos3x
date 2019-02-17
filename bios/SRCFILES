@@ -7,15 +7,6 @@ BIOS_104_OBJS=start1x.o floppy.o blkdev.o prt.o zeromem.o nvram.o prtblk.o ikbdc
 
 BIOS_OBJS=$(BIOS_$(TOSVERSION)_OBJS)
 
-VARS_306_OBJS=vars.o
-VARS_208_OBJS=vars.o
-VARS_206_OBJS=vars.o
-VARS_162_OBJS=vars1x.o
-VARS_106_OBJS=vars1x.o
-VARS_104_OBJS=vars1x.o
-
-VARS_OBJS=$(VARS_$(TOSVERSION)_OBJS)
-
 BIOS_HEADERS=\
 	bios.h \
 	biosdefs.h \

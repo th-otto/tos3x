@@ -25,9 +25,7 @@ char secbuf[4][512];
  *	(vme bios does this in biosc.c)
  */
 
-#if !GEMDOS
 BCB *bufl[2];
-#endif
 
 
 /*
@@ -36,6 +34,7 @@ BCB *bufl[2];
 
 /* 306de: 00e18a6c */
 /* 306us: 00e18a12 */
+/* 104de: 00fc95c8 */
 VOID osinit(NOTHING)
 {
 	/* set up sector buffers */

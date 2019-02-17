@@ -19,21 +19,6 @@
 
 #include "config.h"
 
-/*
- * set to 1 if we are on a 68010+ with 8-byte trap exception frames
- */
-#ifndef P68010
-#define P68010  (TOSVERSION >= 0x300)
-#endif
-
-/*
- * set to 1 if we are on a 68030+ (else 0)
- * Used when invalidating caches might be neccessary
- */
-#ifndef P68030
-#define P68030  (TOSVERSION >= 0x300) | TP_50
-#endif
-
 #if TOSVERSION >= 0x206
 #define	MAX_PAL		4096	/* palette size                     */
 #else

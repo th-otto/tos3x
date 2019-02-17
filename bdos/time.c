@@ -16,6 +16,7 @@ GEMDOS time and date functions
 
 /* 306de: 00e196a4 */
 /* 306us: 00e1964a */
+/* 104de: 00fca200 */
 int32_t xgetdate(NOTHING)
 {
 #if !GEMDOS
@@ -36,6 +37,7 @@ int32_t xgetdate(NOTHING)
 
 /* 306de: 00e196b4 */
 /* 306us: 00e1965a */
+/* 104de: 00fca210 */
 int32_t xsetdate(P(int16_t) d)
 PP(int16_t d;)
 {
@@ -74,6 +76,7 @@ PP(int16_t d;)
 
 /* 306de: 00e19732 */
 /* 306us: 00e196d8 */
+/* 104de: 00fca28e */
 int32_t xgettime(NOTHING)
 {
 #if !GEMDOS
@@ -95,6 +98,7 @@ int32_t xgettime(NOTHING)
 
 /* 306de: 00e19742 */
 /* 306us: 00e196e8 */
+/* 104de: 00fca29e */
 int32_t xsettime(P(int16_t) t)
 PP(int16_t t;)
 {

@@ -75,6 +75,33 @@
 
 #define CINVA_IC            dc.w $f498            /* 68040 */
 
+/*
+ * set to 1 if we run on plain 68k only
+ */
+#define P68000  (TOSVERSION < 0x200)
+
+/*
+ * set to 1 if we are on a 68010+ with 8-byte trap exception frames.
+ * This will produce slightly better code in the gemdos dispatcher,
+ * but won't run on 68000.
+ * If 0, _longframe will be checked at runtime.
+ */
+#define P68010  (TOSVERSION >= 0x300)
+
+/*
+ * outcome of the above 2:
+ * TOS 1.x: does no checks, and assumes short exception frames
+ * TOS 2.x: checks at runtime
+ * TOS 3.x: does no checks, and assumes long exception frames
+ */
+
+/*
+ * set to 1 if we are on a 68030+ (else 0)
+ * Used when invalidating caches might be neccessary
+ */
+#define P68030  ((TOSVERSION >= 0x300) | TP_50)
+
+
 #if TOSVERSION < 0x200
 #	define ABSW(x) x(a5)
 #	define ABSW2(x) x

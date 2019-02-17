@@ -359,7 +359,7 @@
 #define VDITLEN     $000098A2
 #define VDIDLEN     $00002846
 #define BDOSTLEN    $00005F64
-#define BDOSDLEN    $0000039E
+#define BDOSDLEN    $00000396
 #define AESTLEN     $0000CCD6
 #define AESDLEN     $000006D8
 

@@ -44,6 +44,7 @@ static DND *leftmost PROTO((DND *));
 
 /* 306de: 00e1412c */
 /* 306us: 00e140d2 */
+/* 104de: 00fc4c18 */
 DND *fsgetofd(NOTHING)
 {
 	register int i;
@@ -78,6 +79,7 @@ DND *fsgetofd(NOTHING)
 
 /* 306de: 00e141ac */
 /* 306us: 00e14152 */
+/* 104de: 00fc4c98 */
 static DND *leftmost(P(DND *) dnd)
 PP(register DND *dnd;)
 {
@@ -115,6 +117,7 @@ PP(register DND *dnd;)
 
 /* 306de: 00e1423e */
 /* 306us: 00e141e4 */
+/* 104de: 00fc4d2a */
 DMD *getdmd(P(int) drv)
 PP(int drv;)
 {
@@ -139,6 +142,7 @@ PP(int drv;)
 
 /* 306de: 00e1428e */
 /* 306us: 00e14234 */
+/* 104de: 00fc4d7a */
 ERROR login(P(BPB *) b, P(int) drv)
 PP(BPB *b;)									/*  bios parm block for drive       */
 PP(int drv;)								/*  drive number            */
@@ -168,7 +172,9 @@ PP(int drv;)								/*  drive number            */
 
 	dm->m_fatrec = b->fatrec;
 	dm->m_16 = b->b_flags & B_16;		/* set 12 or 16 bit fat flag */
+#if FAT1_SUPPORT
 	dm->m_1fat = b->b_flags & B_1FAT;	/* set fixed media flag */
+#endif
 	dm->m_clsiz = cs;					/*  set cluster size in sectors */
 	dm->m_clsizb = b->clsizb;			/*    and in bytes      */
 	dm->m_recsiz = rsiz;				/*  set record (sector) size    */
@@ -205,6 +211,7 @@ PP(int drv;)								/*  drive number            */
 }
 
 
+#if GEMDOS >= 0x18
 /* 306de: 00e144d2 */
 /* 306us: 00e14478 */
 static VOID invalidate(P(int) drv)
@@ -258,7 +265,11 @@ PP(register BCB *b;)
 			rwabsw(b->b_bufr, 1, b->b_bufrec + dm->m_recoff[typ], drv);
 			
 			/* flush to both fats */
-			if (typ == BT_FAT && !dm->m_1fat)
+			if (typ == BT_FAT 
+#if FAT1_SUPPORT
+				&& !dm->m_1fat
+#endif
+				)
 				rwabsw(b->b_bufr, 1, b->b_bufrec + dm->m_recoff[BT_FAT] - dm->m_fsiz, drv);
 
 			b->b_bufdrv = drv;					/* re-validate */
@@ -320,19 +331,86 @@ PP(DMD *dm;)
 	drv = dm->m_drvnum;
 	if (Mediach(drv) == MEDIAMAYCHANGE)
 	{
+#if GEMDOS >= 0x18
 		invalidate(drv);
+#endif
 	}
 	for (b = bufl[BI_DATA]; b != NULL; b = b->b_link)
 	{
 		if (b->b_bufdrv == drv && b->b_bufrec >= start && b->b_bufrec < end)
 		{
 			if (b->b_dirty)
+			{
 				flush(b);
+			}
 			b->b_bufdrv = -1;
 		}
 	}
 	rwabs(wrtflg, buf, count, start + dm->m_recoff[BT_DATA], dm->m_drvnum);
 }
+
+
+#else
+
+/* 104de: 00fc4faa */
+VOID flushbcb(P(BCB *) b)
+PP(register BCB *b;)
+{
+	register DMD *dm;				/*  media descr for buffer  */
+	register int typ;
+	register int drv;
+	
+	if (b->b_bufdrv == -1)
+		return;
+	if (!b->b_dirty)
+		return;
+
+	dm = b->b_dm;
+	typ = b->b_buftyp;
+	drv = b->b_bufdrv;
+
+	for (b = &bufl[typ != BT_DATA ? BI_FAT : BI_DATA]; b != NULL; b = b->b_link) /* BUG: address operator is wrong */
+	{
+		if (b->b_bufdrv == drv && b->b_dirty && b->b_buftyp == typ)
+		{
+			b->b_bufdrv = -1;					/* invalidate in case of error */
+			rwabsw(b->b_bufr, 1, b->b_bufrec + dm->m_recoff[typ], drv);
+			
+			/* flush to both fats */
+			if (typ == BT_FAT 
+#if FAT1_SUPPORT
+				&& !dm->m_1fat
+#endif
+				)
+				rwabsw(b->b_bufr, 1, b->b_bufrec + dm->m_recoff[BT_FAT] - dm->m_fsiz, drv);
+
+			b->b_bufdrv = drv;					/* re-validate */
+			b->b_dirty = 0;
+		}
+	}
+}
+
+
+/* 104de: 00fc50c0 */
+static VOID usrio(P(int) wrtflg, P(RECNO) count, P(RECNO) recno, P(char *)buf, P(DMD *)dmd)
+PP(int wrtflg;)
+PP(RECNO count;)
+PP(RECNO recno;)
+PP(char *buf;)
+PP(DMD *dmd;)
+{
+	register BCB *b;
+	
+	for (b = bufl[BI_DATA]; b != NULL; b = b->b_link)
+		if (dmd->m_drvnum == b->b_bufdrv && b->b_bufrec >= recno && b->b_bufrec < (recno + count))
+		{
+			flushbcb(b);
+			b->b_bufdrv = -1;
+		}
+	rwabs(wrtflg, buf, count, dmd->m_recoff[BT_DATA] + recno, dmd->m_drvnum);
+}
+
+#endif
 
 
 /*
@@ -342,6 +420,7 @@ PP(DMD *dm;)
 
 /* 306de: 00e1473e */
 /* 306us: 00e146e4 */
+/* 104de: 00fc516a */
 char *getrec(P(RECNO) recno, P(DMD *)dm, P(int) wrtflg)
 PP(register RECNO recno;)
 PP(register DMD *dm;)
@@ -351,15 +430,27 @@ PP(int wrtflg;)
 	register int typ;
 	register int unused;
 	register int err;
+#if GEMDOS >= 0x18
 	register int drv;
 	BCB *mtbuf;
 	register BCB *p;
 	BCB **q;
 	BCB **phdr;
 	LRECNO lrecno;
+#else
+	register BCB **q;
+	BCB *p;
+	BCB *mtbuf;
+	BCB **phdr;
+	LRECNO lrecno;
+#endif
 	
 	UNUSED(unused);
+#if GEMDOS >= 0x18
 	drv = dm->m_drvnum;
+#else
+#define drv dm->m_drvnum
+#endif
 	lrecno = recno;
 	if (recno >= 0 || (-dm->m_recoff[BI_FAT] - dm->m_fatrec) > recno)
 	{
@@ -401,16 +492,19 @@ PP(int wrtflg;)
 
 
 	if (!b)
-	{									/* 
-										 *  not in memory.  If there was an 'empty; buffer, use it.
-										 */
+	{
+		/* 
+		 *  not in memory.  If there was an 'empty; buffer, use it.
+		 */
 		if (mtbuf)
 			b = mtbuf;
 
+#if GEMDOS >= 0x18
 		if (Mediach(drv) == MEDIAMAYCHANGE)
 		{
 			invalidate(drv);
 		}
+#endif
 
 		/*
 		 *  find predecessor of mtbuf, or last guy in list, which
@@ -427,9 +521,14 @@ PP(int wrtflg;)
 		 *  flush the current contents of the buffer, and read in the 
 		 * new record.
 		 */
+#if GEMDOS >= 0x18
 		if (b->b_bufdrv != -1 && b->b_dirty)
 			flush(b);
 		b->b_bufdrv = -1;					/* invalidate in case of error */
+#else
+		flushbcb(b);
+		b->b_bufrec = -1;					/* invalidate in case of error */
+#endif
 		rwabs(0, b->b_bufr, 1, recno + dm->m_recoff[typ], drv);
 
 		/*
@@ -445,11 +544,17 @@ PP(int wrtflg;)
 	{									/* use a buffer, but first validate media */
 		if ((err = Mediach(b->b_bufdrv)))
 		{
+#if GEMDOS >= 0x18
 			if (err == MEDIAMAYCHANGE)
 			{
 				invalidate(b->b_bufdrv);
 				goto doio;				/* media may be changed */
-			} else if (err == MEDIACHANGE)
+			} else
+#else
+			if (err == MEDIAMAYCHANGE)
+				goto doio;				/* media may be changed */
+#endif
+			if (err == MEDIACHANGE)
 			{							/* media definitely changed */
 				errdrv = b->b_bufdrv;
 				rwerr = E_CHNG;			/* media change */
@@ -474,11 +579,14 @@ PP(int wrtflg;)
 		b->b_dirty = 1;
 
 	return b->b_bufr;
+
+#undef drv
 }
 
 
 /* 306de: 00e1492c */
 /* 306us: 00e148d2 */
+/* 104de: 00fc5322 */
 static char *getdirrec(P(RECNO) recno, P(DMD *)dm, P(int) wrtflg)
 PP(RECNO recno;)
 PP(DMD *dm;)
@@ -502,6 +610,7 @@ PP(int wrtflg;)
 
 /* 306de: 00e1498a */
 /* 306us: 00e14930 */
+/* 104de: 00fc5380 */
 VOID clfix(P(CLNO) cl, P(CLNO) link, P(DMD *) dm)
 PP(register CLNO cl;)
 PP(CLNO link;)
@@ -583,6 +692,7 @@ PP(register DMD *dm;)
 
 /* 306de: 00e14b62 */
 /* 306us: 00e14b08 */
+/* 104de: 00fc5558 */
 CLNO getcl(P(CLNO) cl, P(DMD *) dm)
 PP(register CLNO cl;)
 PP(register DMD *dm;)
@@ -660,6 +770,7 @@ PP(register DMD *dm;)
 
 /* 306de: 00e14d1a */
 /* 306us: 00e14cc0 */
+/* 104de: 00fc5710 */
 int nextcl(P(OFD *) p, P(int) wrtflg)
 PP(register OFD *p;)
 PP(int wrtflg;)
@@ -743,6 +854,7 @@ retcl:
 
 /* 306de: 00e14e22 */
 /* 306us: 00e14dc8 */
+/* 104de: 00fc5818 */
 CLNO xgscan16(P(DMD *) dm, P(CLNO) numcl, P(int) flag)
 PP(DMD *dm;)
 PP(CLNO numcl;)
@@ -803,6 +915,7 @@ PP(int flag;)
 
 /* 306de: 00e14ece */
 /* 306us: 00e14e74 */
+/* 104de: 00fc58c4 */
 static VOID addit(P(OFD *) p, P(long) siz, P(int) flg)
 PP(register OFD *p;)
 PP(long siz;)
@@ -841,6 +954,7 @@ PP(int flg;)								/* update curbyt ? (yes if less than 1 cluster transferred) 
 
 /* 306de: 00e14f10 */
 /* 306us: 00e14eb6 */
+/* 104de: 00fc5906 */
 ERROR xrw(P(int) wrtflg, P(OFD *) p, P(long) len, P(char *) ubufr, P(xfer) bufxfr)
 PP(int wrtflg;)
 PP(register OFD *p;)
@@ -990,7 +1104,7 @@ PP(xfer bufxfr;)
 					goto mulio;
 				}
 			}
-		}								/*  end while  */
+		}
 
 		/* 
 		 *  do "tail" records 
@@ -1031,7 +1145,7 @@ PP(xfer bufxfr;)
 			goto exit;
 		}
 
-#ifdef __ALCYON__
+#if BINEXACT
 		/* BUG too many arguments */
 		(*bufxfr) (lentail, bufp, ubufr, wrtflg);
 #else
@@ -1061,6 +1175,7 @@ exit:
 
 /* 306de: 00e152e2 */
 /* 306us: 00e15288 */
+/* 104de: 00fc5cd8 */
 ERROR ckdrv(P(int) d)
 PP(register int d;)									/* has this drive been accessed, or had a media change */
 {
@@ -1120,6 +1235,7 @@ PP(register int d;)									/* has this drive been accessed, or had a media chan
 
 /* 306de: 00e153c8 */
 /* 306us: 00e1536e */
+/* 104de: 00fc5dbe */
 ERROR xgetfree(P(int32_t *) bufp, P(int16_t) drv)					/*+ get disk free space data into buffer */
 PP(register int16_t drv;)
 PP(int32_t *bufp;)

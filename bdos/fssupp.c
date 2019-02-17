@@ -22,6 +22,7 @@
 
 /* 306de: 00e1726a */
 /* 306us: 00e17210 */
+/* 104de: 00fc7c8c */
 ERROR xsfirst(P(const char *) name, P(int16_t) att)
 PP(const char *name;)
 PP(int16_t att;)
@@ -46,6 +47,7 @@ PP(int16_t att;)
 
 /* 306de: 00e1728c */
 /* 306us: 00e17232 */
+/* 104de: 00fc7cae */
 ERROR xcreat(P(const char *) fname, P(int8_t) attr)
 PP(const char *fname;)
 PP(int8_t attr;)
@@ -74,6 +76,7 @@ PP(int8_t attr;)
 
 /* 306de: 00e172c8 */
 /* 306us: 00e1726e */
+/* 104de: 00fc7cea */
 ERROR xopen(P(const char *) fname, P(int16_t) mode)
 PP(const char *fname;)
 PP(int16_t mode;)
@@ -90,6 +93,7 @@ PP(int16_t mode;)
 
 /* 306de: 00e172e0 */
 /* 306us: 00e17286 */
+/* 104de: 00fc7d02 */
 int xlog2(P(int) n)
 PP(int n;)
 {
@@ -104,6 +108,7 @@ PP(int n;)
 
 /* 306de: 00e17306 */
 /* 306us: 00e172ac */
+/* 104de: 00fc7d28 */
 VOID xmovs(P(int) n, P(const VOIDPTR) psrc, P(VOIDPTR) pdst)
 PP(register int n;)
 PP(const VOIDPTR psrc;)
@@ -126,6 +131,7 @@ PP(VOIDPTR pdst;)
 
 /* 306de: 00e17330 */
 /* 306us: 00e172d6 */
+/* 104de: 00fc7d52 */
 int xcmps(P(const char *) s, P(const char *) d)
 PP(register const char *s;)
 PP(register const char *d;)
@@ -145,6 +151,7 @@ PP(register const char *d;)
 
 /* 306de: 00e1737c */
 /* 306us: 00e17322 */
+/* 104de: 00fc7d9e */
 BOOLEAN match(P(const char *) s1, P(const char *) s2)
 PP(register const char *s1;)							/*  name we are checking        */
 PP(register const char *s2;)									/*  name in fcb             */
@@ -182,7 +189,7 @@ PP(register const char *s2;)									/*  name in fcb             */
 }
 
 
-#ifdef	NEWCODE
+#ifdef NEWCODE
 #define	isnotdelim(x)	((x) && (x!='*') && (x!=SLASH) && (x!='.') && (x!=' '))
 
 #define	MAXFNCHARS	8
@@ -285,6 +292,7 @@ PP(register char *s2;)									/*  s2 dest         */
 
 /* 306de: 00e17424 */
 /* 306us: 00e173ca */
+/* 104de: 00fc7e46 */
 VOID builds(P(const char *) s1, P(char *) s2)
 PP(register char *s1;)							/*  source          */
 PP(register char *s2;)									/*  s2 dest         */
@@ -339,6 +347,7 @@ PP(register char *s2;)									/*  s2 dest         */
 
 /* 306de: 00e17508 */
 /* 306us: 00e174ae */
+/* 104de: 00fc7f2a */
 int getpath(P(const char *) p, P(char *) d, P(int) dirspec)
 PP(register const char *p;)								/*  start of path element to crack  */
 PP(char *d;)									/*  ptr to destination buffer       */
@@ -378,6 +387,7 @@ PP(int dirspec;)							/*  true = no file name, just dir path  */
 
 /* 306de: 00e17568 */
 /* 306us: 00e1750e */
+/* 104de: 00fc7f8a */
 char *packit(P(const char *) s, P(char *) d)
 PP(const char *s;)
 PP(char *d;)
@@ -416,6 +426,7 @@ PP(char *d;)
 
 /* 306de: 00e1761a */
 /* 306us: 00e175c0 */
+/* 104de: 00fc803c */
 char *dopath(P(DND *) p, P(char *) buf)
 PP(DND *p;)
 PP(char *buf;)
@@ -431,6 +442,7 @@ PP(char *buf;)
 
 /* 306de: 00e17662 */
 /* 306us: 00e17608 */
+/* 104de: 00fc8084 */
 int contains_dots(P(const char *) name, P(char) ill)
 PP(register const char *name;)
 PP(char ill;)
@@ -456,6 +468,7 @@ PP(char ill;)
 
 /* 306de: 00e176a4 */
 /* 306us: 00e1764a */
+/* 104de: 00fc80c6 */
 int ncmps(P(int) n, P(const char *) s, P(const char *) d)
 PP(register int n;)
 PP(register const char *s;)

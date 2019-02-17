@@ -57,20 +57,11 @@
 #define MAXQUICK 5
 
 /*
- * set to 1 if we are on a 68010+ with 8-byte trap exception frames.
- * This will produce slightly better code in the gemdos dispatcher,
- * but won't run on 68000.
- * If 0, _longframe will be checked at runtime, but the BIOS
- * might still have other assumptions.
+ * support for filesystems with 1 fat only
  */
-#ifndef P68010
-#define P68010  (TOSVERSION >= 0x300)
-#endif
+#define FAT1_SUPPORT (GEMDOS >= 0x18)
 
 /*
- * set to 1 if we are on a 68030+ (else 0)
- * Used when invalidating caches might be neccessary
+ * support for alternate ram
  */
-#ifndef P68030
-#define P68030  (TOSVERSION >= 0x300)
-#endif
+#define ALTRAM_SUPPORT (GEMDOS >= 0x18)

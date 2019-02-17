@@ -138,7 +138,11 @@ FND const funcs[0x58] = {
 	/* 0x12 */ { GDF xauxistat, 0x82 },
 	/* 0x13 */ { GDF xauxostat, 0x82 },
 
+#if ALTRAM_SUPPORT
 	/* 0x14 */ { GDF xmaddalt, 1 },
+#else
+	/* 0x14 */ { GDF ni, 0 },
+#endif
 	/* 0x15 */ { GDF ni, 0 }, /* Srealloc - not implemented */
 	/* 0x16 */ { GDF ni, 0 }, /* Slbopen - not implemented */
 	/* 0x17 */ { GDF ni, 0 }, /* Slbclose - not implemented */
@@ -203,7 +207,11 @@ FND const funcs[0x58] = {
 	/* 0x42 */ { GDF xlseek, 0x81 },
 
 	/* 0x43 */ { GDF xchmod, 1 },
+#if ALTRAM_SUPPORT
 	/* 0x44 */ { GDF xmxalloc, 1 }, /* F_IOCtl in PC-DOS */
+#else
+	/* 0x44 */ { GDF ni, 0 },
+#endif
 	/* 0x45 */ { GDF xdup, 0 },
 	/* 0x46 */ { GDF xforce, 0 },
 	
@@ -253,6 +261,7 @@ int8_t const stddev[NUMSTD] = { H_Console, H_Console, H_Aux, H_Print, H_Console,
 
 /* 306de: 00e18b00 */
 /* 306us: 00e18aa6 */
+/* 104de: 00fc965c */
 int32_t xgetver(NOTHING)
 {
 	return ((GEMDOS & 0xff) << 8) | ((GEMDOS >> 8) & 0xff);					/*  minor.major */
@@ -265,6 +274,7 @@ int32_t xgetver(NOTHING)
 
 /* 306de: 00e18b0e */
 /* 306us: 00e18ab4 */
+/* 104de: 00fc966a */
 VOID cinit(NOTHING)
 {
 	register PD *r;
@@ -302,6 +312,7 @@ VOID cinit(NOTHING)
 
 /* 306de: 00e18bb6 */
 /* 306us: 00e18b5c */
+/* 104de: 00fc9712 */
 VOID freetree(P(DND *)d)
 PP(DND *d;)
 {
@@ -333,6 +344,7 @@ PP(DND *d;)
 
 /* 306de: 00e18c46 */
 /* 306us: 00e18bec */
+/* 104de: 00fc97a2 */
 VOID offree(P(DMD *) d)
 PP(DMD *d;)
 {
@@ -388,6 +400,7 @@ PP(int16_t *pw;)
 
 /* 306de: 00e18cc6 */
 /* 306us: 00e18c6c */
+/* 104de: 00fc9822 */
 /* 404: 00e1dc30 */
 int32_t osif2(P(int16_t *) pw)
 PP(int16_t *pw;)
@@ -727,6 +740,7 @@ PP(int16_t n;)
 
 /* 306de: 00e193ac */
 /* 306us: 00e19352 */
+/* 104de: 00fc9f08 */
 VOID tikfrk(P(int) n)
 PP(int n;)
 {
@@ -798,6 +812,7 @@ PP(int n;)
 
 /* 306de: 00e194ec */
 /* 306us: 00e19492 */
+/* 104de: 00fca048 */
 ERROR chgdrv(P(int16_t) drv, P(ERROR) rc)
 PP(int16_t drv;)
 PP(ERROR rc;)
@@ -845,6 +860,7 @@ PP(ERROR rc;)
 
 /* 306de: 00e1964e */
 /* 306us: 00e195f4 */
+/* 104de: 00fca1aa */
 ERROR adddrv(P(int16_t) drv, P(ERROR) rc)
 PP(int16_t drv;)
 PP(ERROR rc;)

@@ -25,6 +25,7 @@ MDBLOCK *root[MAXQUICK];
 
 /* 306de: 00e185b0 */
 /* 306us: 00e18556 */
+/* 104de: 00fc8d52 */
 VOID osminit(NOTHING)
 {
 	ofdlist = NULL;
@@ -34,6 +35,7 @@ VOID osminit(NOTHING)
 
 /* 306de: 00e185ce */
 /* 306us: 00e18574 */
+/* 104de: 00fc8d70 */
 VOID ofdadd(P(MDBLOCK *) p, P(long) len)
 PP(register MDBLOCK *p;)
 PP(register long len;)
@@ -59,6 +61,7 @@ PP(register long len;)
 
 /* 306de: 00e1862c */
 /* 306us: 00e185d2 */
+/* 104de: 00fc8dce */
 OFD *mgetofd(NOTHING)
 {
 	register MDBLOCK *p;
@@ -126,6 +129,7 @@ found:
 
 /* 306de: 00e186da */
 /* 306us: 00e18680 */
+/* 104de: 00fc8e7c */
 static MDBLOCK *ofdmore(NOTHING)
 {
 	register MDBLOCK *p;
@@ -151,6 +155,7 @@ static MDBLOCK *ofdmore(NOTHING)
 
 /* 306de: 00e18738 */
 /* 306us: 00e186de */
+/* 104de: 00fc8eda */
 MD *mgetmd(NOTHING)
 {
 	register MDBLOCK *p;
@@ -217,6 +222,7 @@ found:
 
 /* 306de: 00e18804 */
 /* 306us: 00e187aa */
+/* 104de: 00fc8fa6 */
 static MDBLOCK *getosm(NOTHING)
 {
 	register MDBLOCK *p;
@@ -273,7 +279,11 @@ static MDBLOCK *getosm(NOTHING)
 	{
 		p2 = mdfind(&p1, &a, p);
 		mdlink(x, p2);
+#if GEMDOS >= 0x18
 		x->m_own = MF_FREE;
+#else
+		p2->m_own = NULL;
+#endif
 		x++;
 		idx++;
 		while (idx < MDS_PER_BLOCK)
@@ -290,10 +300,12 @@ static MDBLOCK *getosm(NOTHING)
 
 /* 306de: 00e188f8 */
 /* 306us: 00e1889e */
+/* 104de: 00fc909e */
 int mdlink(P(MD *) m, P(MD *) p)
 PP(register MD *m;)
 PP(register MD *p;)
 {
+#if GEMDOS >= 0x18
 	register int i;
 	static MD **mds[2] = { &pmd.mp_mfl, &pmd.mp_mal };
 	register MD *q;
@@ -311,6 +323,23 @@ PP(register MD *p;)
 			q = (p2 = q)->m_link;
 		}
 	}
+#else
+	register MD *q;
+	MD **p1;
+	MD *p2;
+	
+	for (p1 = &pmd.mp_mfl; p1 < &pmd.mp_rover; p1++)
+	{
+		q = (p2 = (MD *)p1)->m_link;
+		while (q != NULL)
+		{
+			if (q == m)
+				goto found;
+			q = (p2 = q)->m_link;
+		}
+	}
+#endif
+
 	return TRUE;
 	
 found:
@@ -322,6 +351,7 @@ found:
 
 /* 306de: 00e18962 */
 /* 306us: 00e18908 */
+/* 104de: 00fc9106 */
 MD *mdfind(P(MDBLOCK **) p1, P(int *) a, P(MDBLOCK *) p)
 PP(MDBLOCK **p1;)
 PP(int *a;)
@@ -336,7 +366,9 @@ PP(MDBLOCK *p;)
 	
 	while (q != NULL)
 	{
+#if GEMDOS >= 0x18
 		if (q->x_flag > 0)
+#endif
 		{
 			m = &q->buf[i];
 			while (i < MDS_PER_BLOCK)
@@ -356,7 +388,7 @@ PP(MDBLOCK *p;)
 		i = 0;
 	}
 
-#ifndef __ALCYON__
+#if !BINEXACT
 	/* BUG: no explicit return statement here, but has q == NULL in D0 */
 	return NULL;
 #endif
@@ -369,6 +401,7 @@ PP(MDBLOCK *p;)
 
 /* 306de: 00e189ce */
 /* 306us: 00e18974 */
+/* 104de: 00fc916c */
 OFD *oftdel(P(OFD *) ofd)
 PP(OFD *ofd;)
 {
@@ -384,6 +417,7 @@ PP(OFD *ofd;)
 
 /* 306de: 00e189f8 */
 /* 306us: 00e1899e */
+/* 104de: 00fc9196 */
 VOIDPTR xmdfree(P(MD *) m)
 PP(register MD *m;)
 {

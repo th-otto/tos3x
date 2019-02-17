@@ -280,14 +280,7 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	ds.w 1 /* unused */
 
-	V(_glbcolumn,w,3)
-
-	INT(_rrecno)
-
-	INT(_rwrtflg)
 	PTR(biosav)
-	PTR(_rdm)
-	INT(_dirlock)
 
 	ds.l 1 /* unused */
 
@@ -312,17 +305,21 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	V(_glbkbchar,l,3*KBBUFSZ)
 
-	PTR(_ofdlist)
+	ds.b 4
+
+	V(_glbcolumn,w,3)
+	INT(_rrecno)
+
+	INT(_rwrtflg)
 
 	V(_virt_work,b,180+MU_PLANES*16*2)
 
-#if STBOOK
+	PTR(_rdm)
+	INT(_dirlock)
+	PTR(_ofdlist)
+
 	V(_ofdbuf,b,70*80)
 	LONG(_ldivr)
-#else
-	LONG(_ldivr)
-	V(_ofdbuf,b,70*80)
-#endif
 
 #if TOSVERSION >= 0x200
 	V(_bpbsums,w,BPBSECT*NUMFLOPPIES)
@@ -343,19 +340,13 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	V(_ram8x16,b,90)
     
-#if !STBOOK
 	V(_fill,b,3)
 	even
-#endif
 
 	V(_bakbuf,l,3)
 
-#if STBOOK
-	V(_fill,b,3)
-	even
-#endif
-
 	V(_secbuf,b,4*SECTOR_SIZE)
+
 	BYTE(_osuser)
 	PTR(_dirrec)
 	V(_dirtbl,l,NCURDIR)

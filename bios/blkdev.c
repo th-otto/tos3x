@@ -169,7 +169,7 @@ PP(int16_t dev;)
 	bpb->datrec = bpb->fatrec + bpb->rdlen + bpb->fsiz;
 	bpb->numcl = (getiword(BS->sec) - bpb->datrec) / bpb->clsiz;
 	bpb->b_flags = 0;
-#if GEMDOS >= 0x18
+#if FAT1_SUPPORT
 	if (BS->fat < 2)
 	{
 		bpb->b_flags |= B_1FAT;

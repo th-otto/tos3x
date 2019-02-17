@@ -12,11 +12,13 @@
 #include "mem.h"
 #include <toserrno.h>
 
+#if ALTRAM_SUPPORT
 /*
  * value ORed to the start address for blocks
  * allocated from alt mem
  */
 #define M_ALTFLAG 1L
+#endif
 
 
 /*
@@ -47,32 +49,39 @@ static VOID printstr PROTO((const char *str));
 
 /* 306de: 00e1800c */
 /* 306us: 00e17fb2 */
+/* 104de: 00fc8972 */
 VOID xminit(NOTHING)
 {
-	register MD *q;
-	register MD *unused;
-	register intptr_t start;
-	register intptr_t am;
-	
-	UNUSED(unused);
 	Getmpb(&pmd);
-	for (q = pmd.mp_mfl; q != NULL; q = q->m_link)
+
+#if ALTRAM_SUPPORT
 	{
-		start = q->m_start;
-		if ((start &= 0x0)) /* ??? */
+		register MD *q;
+		register MD *unused;
+		register intptr_t start;
+		register intptr_t am;
+		
+		UNUSED(unused);
+		for (q = pmd.mp_mfl; q != NULL; q = q->m_link)
 		{
-			am = 2;
-			am -= start;
-			q->m_start += am;
-			q->m_length -= am;
+			start = q->m_start;
+			if ((start &= 0x0)) /* ??? */
+			{
+				am = 2;
+				am -= start;
+				q->m_start += am;
+				q->m_length -= am;
+			}
+			q->m_length = q->m_length & ~1L;
+			if (q->m_length < 0)
+				q->m_length = 0;
 		}
-		q->m_length = q->m_length & ~1L;
-		if (q->m_length < 0)
-			q->m_length = 0;
 	}
+#endif
 }
 
 
+#if ALTRAM_SUPPORT
 /* 306de: 00e1806c */
 /* 306us: 00e18012 */
 static int32_t xmfsize(P(MPB *) mp, P(int16_t) mode)
@@ -97,10 +106,13 @@ PP(int16_t mode;)
 	}
 	return maxval;
 }
+#endif
 
 
 /* 306de: 00e180b8 */
 /* 306us: 00e1805e */
+/* 104de: 00fc898a */
+#if ALTRAM_SUPPORT
 MD *ffit(P(long) amount, P(MPB *) mp, P(int16_t) mode)
 PP(long amount;)
 PP(MPB *mp;)
@@ -124,6 +136,7 @@ PP(int16_t mode;)
 #endif
 		return NULL;
 	}
+
 	if (amount <= 0)
 		return NULL;
 	amount = (amount + 1) & ~1;
@@ -215,6 +228,104 @@ PP(int16_t mode;)
 	return q;					/* got some */
 }
 
+#else
+
+MD *ffit(P(long) amount, P(MPB *) mp)
+PP(long amount;)
+PP(MPB *mp;)
+{
+	register MD *q;
+	register MD *p;
+	register MD *q1;
+	register BOOLEAN getmax;
+	register int32_t maxval;
+	
+#if	STATIUMEM
+	++ccffit;
+#endif
+
+	p = mp->mp_rover;
+	maxval = 0;
+	if (p == NULL)		/* get free list pointer */
+	{
+#if	DBGIUMEM
+		kprintf("ffit: null rover\n");
+#endif
+		return NULL;
+	}
+
+	if (amount == -1)
+	{
+		getmax = TRUE;
+	} else
+	{
+		getmax = FALSE;
+	}
+
+	q = p->m_link;
+	do
+	{
+		if (q == NULL)
+		{
+			p = (MD *)mp;
+			q = p->m_link;
+		}
+	
+		if (!getmax && q->m_length >= amount)
+		{
+			if (q->m_length == amount)
+			{
+				/* take the whole thing */
+				p->m_link = q->m_link;
+			} else
+			{
+				if ((q1 = mgetmd()) == NULL)
+				{
+#if	DBGIUMEM
+					kprintf("ffit: Null Mget\n");
+#endif
+					return NULL;
+				}
+	
+				/*  init new MD  */
+			
+				q1->m_length = q->m_length - amount;
+				q1->m_start = q->m_start + amount;
+				q1->m_link = q->m_link;
+			
+				/*  adjust allocated block  */
+			
+				q->m_length = amount;
+				p->m_link = q1;
+			}
+	
+			/*  link allocate block into allocated list,
+			   mark owner of block, & adjust rover  */
+		
+			q->m_link = mp->mp_mal;
+			mp->mp_mal = q;
+		
+			q->m_own = run;
+			
+			mp->mp_rover = (MD *)mp == p ? p->m_link : p;
+			return q;					/* got some */
+		} else
+		{
+			if (q->m_length > maxval)
+				maxval = q->m_length;
+		}
+		
+		p = q;
+		q = p->m_link;
+	} while (mp->mp_rover != p);
+	
+	if (getmax)
+		return maxval;
+	else
+		return NULL;
+}
+#endif /* ALTRAM_SUPPORT */
+
 
 /*
  *  xsetblk - 
@@ -230,7 +341,11 @@ PP(int16_t mode;)
 ERROR xsetblk(P(int16_t) n, P(VOIDPTR) blk, P(int32_t) len)
 PP(int16_t n;)									/*  dummy, not used         */
 PP(VOIDPTR blk;)								/*  addr of block to free   */
+#if GEMDOS >= 0x18 | !BINEXACT
 PP(register int32_t len;)								/*  length of block to free */
+#else
+PP(int32_t len;)								/*  length of block to free */
+#endif
 {
 	register MD *m, *p;
 
@@ -239,6 +354,7 @@ PP(register int32_t len;)								/*  length of block to free */
 	 * Traverse the list of memory descriptors looking for this block.
 	 */
 
+#if ALTRAM_SUPPORT
 	for (p = pmd.mp_mal; p; p = p->m_link)
 		if ((intptr_t) blk == (p->m_start & ~M_ALTFLAG))
 			goto found;
@@ -250,11 +366,29 @@ PP(register int32_t len;)								/*  length of block to free */
 	return E_IMBA;
 
 found:
+#else
+	for (p = pmd.mp_mal; p; p = p->m_link)
+		if ((intptr_t) blk == (p->m_start))
+			break;
+
+	/*
+	 * If block address doesn't match any memory descriptor, then abort.
+	 */
+
+	if (p == NULL)
+		return E_IMBA;
+#endif
+
 	/*
 	 *  Always shrink to an even word length.
 	 */
+#if GEMDOS >= 0x18 | !BINEXACT
 	len++;
 	len &= ~1L;
+#else
+	if (len & 1)
+		len++;
+#endif
 
 	/*
 	 *  If the caller is not shrinking the block size, then abort.
@@ -305,6 +439,8 @@ found:
 
 /* 306de: 00e182bc */
 /* 306us: 00e18262 */
+/* 104de: 00fc8b26 */
+#if ALTRAM_SUPPORT
 VOID freeit(P(MD *) m, P(MPB *) mp)
 PP(register MD *m;)
 PP(MPB *mp;)
@@ -360,6 +496,63 @@ PP(MPB *mp;)
 		}
 	}
 }
+#else
+VOID freeit(P(MD *) m, P(MPB *) _mp)
+PP(MD *m;)
+PP(MPB *_mp;)
+{
+	register MD *p, *q;
+	register MPB *mp;
+	MD *p1;
+	
+#if	STATIUMEM
+	++ccfreeit;
+#endif
+
+	mp = _mp;
+	p1 = NULL;
+	q = (MD *)mp;
+	p = ((MPB *)q)->mp_mfl;
+	
+	for (; p; p = (q = p)->m_link)
+	{
+		if (m->m_start <= p->m_start)
+			break;
+		p1 = p;
+	}
+
+	m->m_link = p;
+	q->m_link = m;
+	if (mp->mp_rover == NULL)
+		mp->mp_rover = m;
+
+	if (p)
+	{
+		if (m->m_start + m->m_length == p->m_start)
+		{								/* join to higher neighbor */
+			m->m_length += p->m_length;
+			m->m_link = p->m_link;
+			
+			if (mp->mp_rover == p)
+				mp->mp_rover = m;
+			xmdfree(p);
+		}
+	}
+	
+	if (p1)
+	{
+		if (p1->m_start + p1->m_length == m->m_start)
+		{								/* join to lower neighbor */
+			p1->m_length += m->m_length;
+			p1->m_link = m->m_link;
+
+			if (mp->mp_rover == m)
+				mp->mp_rover = p1;
+			xmdfree(m);
+		}
+	}
+}
+#endif
 
 
 /*
@@ -370,6 +563,7 @@ PP(MPB *mp;)
  *	Last modified	SCC	3 Jun 85
  */
 
+#if ALTRAM_SUPPORT
 /* 306de: 00e18372 */
 /* 306us: 00e18318 */
 int32_t xmxalloc(P(int32_t) amount, P(int16_t) mode)
@@ -394,6 +588,7 @@ PP(int16_t mode;)
 			return 0;
 	}
 }
+#endif
 
 
 /*
@@ -406,13 +601,31 @@ PP(int16_t mode;)
 
 /* 306de: 00e183cc */
 /* 306us: 00e18372 */
+/* 104de: 00fc8c10 */
 int32_t xmalloc(P(int32_t) amount)
 PP(int32_t amount;)
 {
+#if ALTRAM_SUPPORT
 	if (run->p_flags & PF_ALLOCTTRAM)
 		return xmxalloc(amount, MX_PTTRAM);
 	else
 		return xmxalloc(amount, MX_STRAM);
+#else
+	register MD *m;
+
+	if (amount != -1L && (amount & 1))
+		amount++;
+	/*
+	 *  Pass the request on to the internal routine.  If it was not able 
+	 *  to grant the request, then abort.
+	 */
+
+	if ((m = ffit(amount, &pmd)) == NULL)
+		return 0;
+	if (amount == -1)
+		return (int32_t)m;
+	return m->m_start;
+#endif
 }
 
 
@@ -424,11 +637,13 @@ PP(int32_t amount;)
 
 /* 306de: 00e183fe */
 /* 306us: 00e183a4 */
+/* 104de: 00fc8c64 */
 ERROR xmfree(P(int32_t) addr)
 PP(int32_t addr;)
 {
 	register MD *p, **q;
 
+#if ALTRAM_SUPPORT
 	for (p = *(q = &pmd.mp_mal); p; p = *(q = &p->m_link))
 		if (addr == (p->m_start & ~M_ALTFLAG))
 			goto found;
@@ -436,6 +651,14 @@ PP(int32_t addr;)
 	return E_IMBA;
 
 found:
+#else
+	for (p = *(q = &pmd.mp_mal); p; p = *(q = &p->m_link))
+		if (addr == (p->m_start))
+			break;
+	if (p == NULL)
+		return E_IMBA;
+
+#endif
 	*q = p->m_link;
 	freeit(p, &pmd);
 
@@ -445,6 +668,7 @@ found:
 
 /* 306de: 00e183fe */
 /* 306us: 00e183a4 */
+/* 104de: 00fc8cac */
 VOID xmakeres(P(PD *) p)
 PP(PD *p;)
 {
@@ -470,6 +694,7 @@ PP(PD *p;)
  *  free it
  */
 
+#if GEMDOS >= 0x18
 /* 306de: 00e1847c */
 /* 306us: 00e18422 */
 VOID xmfreall(P(PD *) r)
@@ -491,10 +716,12 @@ PP(PD *r;)
 		}
 	}
 }
+#endif
 
 
 /* 306de: 00e184be */
 /* 306us: 00e18464 */
+/* 104de: 00fc8ce0 */
 VOID xmsetown(P(VOIDPTR) paddr, P(PD *) own)
 PP(VOIDPTR paddr;)
 PP(PD *own;)
@@ -505,7 +732,11 @@ PP(PD *own;)
 	addr = paddr;
 	for (q = pmd.mp_mal; q != NULL; q = q->m_link)
 	{
-		if ((intptr_t)addr == (q->m_start & ~M_ALTFLAG))
+		if ((intptr_t)addr == (q->m_start
+#if ALTRAM_SUPPORT
+			& ~M_ALTFLAG
+#endif
+			))
 		{
 			q->m_own = own;
 			return;
@@ -514,6 +745,7 @@ PP(PD *own;)
 }
 
 
+#if ALTRAM_SUPPORT
 /* 306de: 00e184f8 */
 /* 306us: 00e1849e */
 ERROR xmaddalt(P(char *) start, P(int32_t) len)
@@ -544,10 +776,12 @@ PP(int32_t len;)
 	
 	return E_OK;
 }
+#endif
 
 
 /* 306de: 00e18570 */
 /* 306us: 00e18516 */
+/* 104de: 00fc8d12 */
 VOID foldermsg(NOTHING)
 {
 	printstr("\033H*** OUT OF INTERNAL MEMORY:\033K\r\n*** USE FOLDR100.PRG TO GET MORE.\033K\r\n\033K\n\033K\n*** SYSTEM HALTED ***\033K");
@@ -560,7 +794,7 @@ PP(const char *str;)
 {
 	while (*str)
 	{
-#ifdef __ALCYON__
+#if BINEXACT
 		trap13(0x00030002L, *str);
 #else
 		Bconout(2, *str);

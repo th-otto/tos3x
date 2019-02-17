@@ -15,6 +15,7 @@
 
 /* 306de: 00e1720e */
 /* 306us: 00e171b4 */
+/* 104de: 00fc7c30 */
 /* 404: 00e1b57c */
 DTAINFO *xgetdta(NOTHING)							/*+ return address of dta */
 {
@@ -28,6 +29,7 @@ DTAINFO *xgetdta(NOTHING)							/*+ return address of dta */
 
 /* 306de: 00e17220 */
 /* 306us: 00e171c6 */
+/* 104de: 00fc7c42 */
 VOID xsetdta(P(DTAINFO *) addr)							/*+ set transfer address to addr */
 PP(DTAINFO *addr;)
 {
@@ -61,6 +63,7 @@ PP(register char c;)
 
 /* 306de: 00e17234 */
 /* 306us: 00e171da */
+/* 104de: 00fc7c56 */
 ERROR xsetdrv(P(int16_t) drv)
 PP(int16_t drv;)
 {
@@ -80,6 +83,7 @@ PP(int16_t drv;)
 
 /* 306de: 00e17254 */
 /* 306us: 00e171fa */
+/* 104de: 00fc7c76 */
 ERROR xgetdrv(NOTHING)
 {
 	return run->p_curdrv;

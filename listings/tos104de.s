@@ -2393,6 +2393,8 @@ zeromem:
 [00fc1f6a] 4e75                      rts
 [00fc1f6c] 70ff                      moveq.l   #-1,d0
 [00fc1f6e] 4e75                      rts
+
+checkRTC:
 [00fc1f70] 93c9                      suba.l    a1,a1
 [00fc1f72] 307c fc20                 movea.w   #$FC20,a0
 [00fc1f76] 2429 0008                 move.l    8(a1),d2
@@ -5173,6 +5175,8 @@ xauxostat:
 [00fc445a] 548f                      addq.l    #2,a7
 [00fc445c] 4e5e                      unlk      a6
 [00fc445e] 4e75                      rts
+
+conbrk:
 [00fc4460] 4e56 fffe                 link      a6,#$FFFE
 [00fc4464] 48e7 3f00                 movem.l   d2-d7,-(a7)
 [00fc4468] 3e2e 0008                 move.w    8(a6),d7
@@ -5193,7 +5197,7 @@ xauxostat:
 [00fc449a] 3e87                      move.w    d7,(a7)
 [00fc449c] 6100 0088                 bsr       $00FC4526
 [00fc44a0] 3ebc ffe0                 move.w    #$FFE0,(a7)
-[00fc44a4] 4eb9 00fc 8126            jsr       _xterm
+[00fc44a4] 4eb9 00fc 8126            jsr       $00FC8126
 [00fc44aa] b67c 0013                 cmp.w     #$0013,d3
 [00fc44ae] 6604                      bne.s     $00FC44B4
 [00fc44b0] 7801                      moveq.l   #1,d4
@@ -5240,6 +5244,8 @@ xauxostat:
 [00fc451e] 4cdf 00f8                 movem.l   (a7)+,d3-d7
 [00fc4522] 4e5e                      unlk      a6
 [00fc4524] 4e75                      rts
+
+buflush:
 [00fc4526] 4e56 fffc                 link      a6,#$FFFC
 [00fc452a] 207c 0000 5680            movea.l   #$00005680,a0
 [00fc4530] 326e 0008                 movea.w   8(a6),a1
@@ -5260,6 +5266,8 @@ xauxostat:
 [00fc4564] 2280                      move.l    d0,(a1)
 [00fc4566] 4e5e                      unlk      a6
 [00fc4568] 4e75                      rts
+
+conadd:
 [00fc456a] 4e56 0000                 link      a6,#$0000
 [00fc456e] 48e7 0700                 movem.l   d5-d7,-(a7)
 [00fc4572] 3e2e 0008                 move.w    8(a6),d7
@@ -5314,6 +5322,8 @@ xauxostat:
 [00fc4616] 4cdf 00c0                 movem.l   (a7)+,d6-d7
 [00fc461a] 4e5e                      unlk      a6
 [00fc461c] 4e75                      rts
+
+conout:
 [00fc461e] 4e56 0000                 link      a6,#$0000
 [00fc4622] 48e7 0700                 movem.l   d5-d7,-(a7)
 [00fc4626] 3e2e 0008                 move.w    8(a6),d7
@@ -5373,6 +5383,8 @@ xtabout:
 [00fc46c6] 548f                      addq.l    #2,a7
 [00fc46c8] 4e5e                      unlk      a6
 [00fc46ca] 4e75                      rts
+
+tabout:
 [00fc46cc] 4e56 0000                 link      a6,#$0000
 [00fc46d0] 48e7 0700                 movem.l   d5-d7,-(a7)
 [00fc46d4] 3e2e 0008                 move.w    8(a6),d7
@@ -5399,6 +5411,8 @@ xtabout:
 [00fc4714] 4cdf 00c0                 movem.l   (a7)+,d6-d7
 [00fc4718] 4e5e                      unlk      a6
 [00fc471a] 4e75                      rts
+
+cookdout:
 [00fc471c] 4e56 0000                 link      a6,#$0000
 [00fc4720] 48e7 0700                 movem.l   d5-d7,-(a7)
 [00fc4724] 3e2e 0008                 move.w    8(a6),d7
@@ -5454,6 +5468,8 @@ xprtout:
 [00fc47b4] 588f                      addq.l    #4,a7
 [00fc47b6] 4e5e                      unlk      a6
 [00fc47b8] 4e75                      rts
+
+getch:
 [00fc47ba] 4e56 0000                 link      a6,#$0000
 [00fc47be] 48e7 0700                 movem.l   d5-d7,-(a7)
 [00fc47c2] 3e2e 0008                 move.w    8(a6),d7
@@ -5518,6 +5534,8 @@ x7in:
 [00fc487c] 6100 ff3c                 bsr       $00FC47BA
 [00fc4880] 4e5e                      unlk      a6
 [00fc4882] 4e75                      rts
+
+conin:
 [00fc4884] 4e56 0000                 link      a6,#$0000
 [00fc4888] 48e7 0700                 movem.l   d5-d7,-(a7)
 [00fc488c] 3e2e 0008                 move.w    8(a6),d7
@@ -5629,6 +5647,8 @@ xprt_line:
 [00fc49ac] 548f                      addq.l    #2,a7
 [00fc49ae] 4e5e                      unlk      a6
 [00fc49b0] 4e75                      rts
+
+prt_line:
 [00fc49b2] 4e56 0000                 link      a6,#$0000
 [00fc49b6] 48e7 0304                 movem.l   d6-d7/a5,-(a7)
 [00fc49ba] 3e2e 0008                 move.w    8(a6),d7
@@ -5646,6 +5666,8 @@ xprt_line:
 [00fc49d8] 4cdf 2080                 movem.l   (a7)+,d7/a5
 [00fc49dc] 4e5e                      unlk      a6
 [00fc49de] 4e75                      rts
+
+newline:
 [00fc49e0] 4e56 0000                 link      a6,#$0000
 [00fc49e4] 48e7 0700                 movem.l   d5-d7,-(a7)
 [00fc49e8] 3c2e 0008                 move.w    8(a6),d6
@@ -5670,6 +5692,8 @@ xprt_line:
 [00fc4a1e] 4cdf 00c0                 movem.l   (a7)+,d6-d7
 [00fc4a22] 4e5e                      unlk      a6
 [00fc4a24] 4e75                      rts
+
+backsp:
 [00fc4a26] 4e56 0000                 link      a6,#$0000
 [00fc4a2a] 48e7 0704                 movem.l   d5-d7/a5,-(a7)
 [00fc4a2e] 4a6e 000e                 tst.w     14(a6)
@@ -5741,6 +5765,8 @@ readline:
 [00fc4af6] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc4afa] 4e5e                      unlk      a6
 [00fc4afc] 4e75                      rts
+
+cgets:
 [00fc4afe] 4e56 fffc                 link      a6,#$FFFC
 [00fc4b02] 48e7 0f00                 movem.l   d4-d7,-(a7)
 [00fc4b06] 3e2e 0008                 move.w    8(a6),d7
@@ -5838,6 +5864,8 @@ readline:
 [00fc4c10] 4cdf 00e0                 movem.l   (a7)+,d5-d7
 [00fc4c14] 4e5e                      unlk      a6
 [00fc4c16] 4e75                      rts
+
+fsgetofd:
 [00fc4c18] 4e56 0000                 link      a6,#$0000
 [00fc4c1c] 48e7 031c                 movem.l   d6-d7/a3-a5,-(a7)
 [00fc4c20] 4247                      clr.w     d7
@@ -5882,6 +5910,8 @@ readline:
 [00fc4c90] 4cdf 3880                 movem.l   (a7)+,d7/a3-a5
 [00fc4c94] 4e5e                      unlk      a6
 [00fc4c96] 4e75                      rts
+
+leftmost:
 [00fc4c98] 4e56 0000                 link      a6,#$0000
 [00fc4c9c] 48e7 030c                 movem.l   d6-d7/a4-a5,-(a7)
 [00fc4ca0] 2a6e 0008                 movea.l   8(a6),a5
@@ -5935,6 +5965,8 @@ readline:
 [00fc4d22] 4cdf 3080                 movem.l   (a7)+,d7/a4-a5
 [00fc4d26] 4e5e                      unlk      a6
 [00fc4d28] 4e75                      rts
+
+getdmd:
 [00fc4d2a] 4e56 0000                 link      a6,#$0000
 [00fc4d2e] 48e7 0104                 movem.l   d7/a5,-(a7)
 [00fc4d32] 4eb9 00fc 8dce            jsr       $00FC8DCE
@@ -5957,6 +5989,8 @@ readline:
 [00fc4d72] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc4d76] 4e5e                      unlk      a6
 [00fc4d78] 4e75                      rts
+
+login:
 [00fc4d7a] 4e56 ffe0                 link      a6,#$FFE0
 [00fc4d7e] 206e 0008                 movea.l   8(a6),a0
 [00fc4d82] 3d50 ffee                 move.w    (a0),-18(a6)
@@ -6095,6 +6129,8 @@ readline:
 [00fc4fa4] 4280                      clr.l     d0
 [00fc4fa6] 4e5e                      unlk      a6
 [00fc4fa8] 4e75                      rts
+
+flush:
 [00fc4faa] 4e56 0000                 link      a6,#$0000
 [00fc4fae] 48e7 070c                 movem.l   d5-d7/a4-a5,-(a7)
 [00fc4fb2] 2a6e 0008                 movea.l   8(a6),a5
@@ -6169,6 +6205,8 @@ readline:
 [00fc50b8] 4cdf 30c0                 movem.l   (a7)+,d6-d7/a4-a5
 [00fc50bc] 4e5e                      unlk      a6
 [00fc50be] 4e75                      rts
+
+usrio:
 [00fc50c0] 4e56 0000                 link      a6,#$0000
 [00fc50c4] 48e7 0104                 movem.l   d7/a5,-(a7)
 [00fc50c8] 2a79 0000 04b6            movea.l   $000004B6,a5
@@ -6214,6 +6252,8 @@ readline:
 [00fc5162] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc5166] 4e5e                      unlk      a6
 [00fc5168] 4e75                      rts
+
+getrec:
 [00fc516a] 4e56 fff0                 link      a6,#$FFF0
 [00fc516e] 48e7 1f1c                 movem.l   d3-d7/a3-a5,-(a7)
 [00fc5172] 3e2e 0008                 move.w    8(a6),d7
@@ -6343,6 +6383,8 @@ readline:
 [00fc531a] 4cdf 38f0                 movem.l   (a7)+,d4-d7/a3-a5
 [00fc531e] 4e5e                      unlk      a6
 [00fc5320] 4e75                      rts
+
+getdirrec:
 [00fc5322] 4e56 fffc                 link      a6,#$FFFC
 [00fc5326] 33fc 0001 0000 3ce2       move.w    #$0001,$00003CE2
 [00fc532e] 3eae 000e                 move.w    14(a6),(a7)
@@ -6364,6 +6406,8 @@ readline:
 [00fc5376] 2039 0000 5e92            move.l    $00005E92,d0
 [00fc537c] 4e5e                      unlk      a6
 [00fc537e] 4e75                      rts
+
+clfix:
 [00fc5380] 4e56 fff2                 link      a6,#$FFF2
 [00fc5384] 48e7 0f1c                 movem.l   d4-d7/a3-a5,-(a7)
 [00fc5388] 3e2e 0008                 move.w    8(a6),d7
@@ -6508,6 +6552,8 @@ readline:
 [00fc5550] 4cdf 38e0                 movem.l   (a7)+,d5-d7/a3-a5
 [00fc5554] 4e5e                      unlk      a6
 [00fc5556] 4e75                      rts
+
+getcl:
 [00fc5558] 4e56 fff8                 link      a6,#$FFF8
 [00fc555c] 48e7 0f1c                 movem.l   d4-d7/a3-a5,-(a7)
 [00fc5560] 3e2e 0008                 move.w    8(a6),d7
@@ -6653,6 +6699,8 @@ readline:
 [00fc5708] 4cdf 38e0                 movem.l   (a7)+,d5-d7/a3-a5
 [00fc570c] 4e5e                      unlk      a6
 [00fc570e] 4e75                      rts
+
+nextcl:
 [00fc5710] 4e56 0000                 link      a6,#$0000
 [00fc5714] 48e7 3f0c                 movem.l   d2-d7/a4-a5,-(a7)
 [00fc5718] 2a6e 0008                 movea.l   8(a6),a5
@@ -6753,6 +6801,8 @@ readline:
 [00fc5810] 4cdf 30f8                 movem.l   (a7)+,d3-d7/a4-a5
 [00fc5814] 4e5e                      unlk      a6
 [00fc5816] 4e75                      rts
+
+xgscan16:
 [00fc5818] 4e56 0000                 link      a6,#$0000
 [00fc581c] 48e7 3f0c                 movem.l   d2-d7/a4-a5,-(a7)
 [00fc5820] 382e 000c                 move.w    12(a6),d4
@@ -6828,6 +6878,8 @@ readline:
 [00fc58bc] 4cdf 30f8                 movem.l   (a7)+,d3-d7/a4-a5
 [00fc58c0] 4e5e                      unlk      a6
 [00fc58c2] 4e75                      rts
+
+addit:
 [00fc58c4] 4e56 0000                 link      a6,#$0000
 [00fc58c8] 48e7 0104                 movem.l   d7/a5,-(a7)
 [00fc58cc] 2a6e 0008                 movea.l   8(a6),a5
@@ -6846,6 +6898,8 @@ readline:
 [00fc58fe] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc5902] 4e5e                      unlk      a6
 [00fc5904] 4e75                      rts
+
+xrw:
 [00fc5906] 4e56 ffce                 link      a6,#$FFCE
 [00fc590a] 48e7 030c                 movem.l   d6-d7/a4-a5,-(a7)
 [00fc590e] 2a6e 000a                 movea.l   10(a6),a5
@@ -7136,6 +7190,8 @@ readline:
 [00fc5cd0] 4cdf 3080                 movem.l   (a7)+,d7/a4-a5
 [00fc5cd4] 4e5e                      unlk      a6
 [00fc5cd6] 4e75                      rts
+
+ckdrv:
 [00fc5cd8] 4e56 fffc                 link      a6,#$FFFC
 [00fc5cdc] 48e7 0f04                 movem.l   d4-d7/a5,-(a7)
 [00fc5ce0] 3e2e 0008                 move.w    8(a6),d7
@@ -7274,6 +7330,8 @@ xgetfree:
 [00fc5e66] 4cdf 30f0                 movem.l   (a7)+,d4-d7/a4-a5
 [00fc5e6a] 4e5e                      unlk      a6
 [00fc5e6c] 4e75                      rts
+
+ixdirdup:
 [00fc5e6e] 4e56 fffc                 link      a6,#$FFFC
 [00fc5e72] 302e 000a                 move.w    10(a6),d0
 [00fc5e76] 226e 000c                 movea.l   12(a6),a1
@@ -7290,6 +7348,8 @@ xgetfree:
 [00fc5ea0] 5211                      addq.b    #1,(a1)
 [00fc5ea2] 4e5e                      unlk      a6
 [00fc5ea4] 4e75                      rts
+
+GetDnd:
 [00fc5ea6] 4e56 fffa                 link      a6,#$FFFA
 [00fc5eaa] 48e7 011c                 movem.l   d7/a3-a5,-(a7)
 [00fc5eae] 2a6e 0008                 movea.l   8(a6),a5
@@ -7344,6 +7404,8 @@ xgetfree:
 [00fc5f6e] 4cdf 3800                 movem.l   (a7)+,a3-a5
 [00fc5f72] 4e5e                      unlk      a6
 [00fc5f74] 4e75                      rts
+
+scan:
 [00fc5f76] 4e56 ffec                 link      a6,#$FFEC
 [00fc5f7a] 48e7 031c                 movem.l   d6-d7/a3-a5,-(a7)
 [00fc5f7e] 2a6e 0008                 movea.l   8(a6),a5
@@ -7439,6 +7501,8 @@ xgetfree:
 [00fc60a2] 4cdf 3880                 movem.l   (a7)+,d7/a3-a5
 [00fc60a6] 4e5e                      unlk      a6
 [00fc60a8] 4e75                      rts
+
+dcrack:
 [00fc60aa] 4e56 0000                 link      a6,#$0000
 [00fc60ae] 48e7 030c                 movem.l   d6-d7/a4-a5,-(a7)
 [00fc60b2] 206e 0008                 movea.l   8(a6),a0
@@ -7489,6 +7553,8 @@ xgetfree:
 [00fc613e] 4cdf 3080                 movem.l   (a7)+,d7/a4-a5
 [00fc6142] 4e5e                      unlk      a6
 [00fc6144] 4e75                      rts
+
+findit:
 [00fc6146] 4e56 ffec                 link      a6,#$FFEC
 [00fc614a] 48e7 031c                 movem.l   d6-d7/a3-a5,-(a7)
 [00fc614e] 2d6e 0008 fffc            move.l    8(a6),-4(a6)
@@ -7709,6 +7775,8 @@ xgetdir:
 [00fc63e4] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc63e8] 4e5e                      unlk      a6
 [00fc63ea] 4e75                      rts
+
+makbuf:
 [00fc63ec] 4e56 0000                 link      a6,#$0000
 [00fc63f0] 48e7 010c                 movem.l   d7/a4-a5,-(a7)
 [00fc63f4] 286e 000c                 movea.l   12(a6),a4
@@ -7734,6 +7802,8 @@ xgetdir:
 [00fc644e] 4cdf 3000                 movem.l   (a7)+,a4-a5
 [00fc6452] 4e5e                      unlk      a6
 [00fc6454] 4e75                      rts
+
+dirinit:
 [00fc6456] 4e56 fff6                 link      a6,#$FFF6
 [00fc645a] 48e7 071c                 movem.l   d5-d7/a3-a5,-(a7)
 [00fc645e] 2a6e 0008                 movea.l   8(a6),a5
@@ -7993,6 +8063,8 @@ xrmdir:
 [00fc681c] 4cdf 3880                 movem.l   (a7)+,d7/a3-a5
 [00fc6820] 4e5e                      unlk      a6
 [00fc6822] 4e75                      rts
+
+ixsfirst:
 [00fc6824] 4e56 fff8                 link      a6,#$FFF8
 [00fc6828] 48e7 010c                 movem.l   d7/a4-a5,-(a7)
 [00fc682c] 0c6e 0008 000c            cmpi.w    #$0008,12(a6)
@@ -8058,6 +8130,7 @@ xrmdir:
 [00fc6902] 4cdf 3000                 movem.l   (a7)+,a4-a5
 [00fc6906] 4e5e                      unlk      a6
 [00fc6908] 4e75                      rts
+
 xsnext:
 [00fc690a] 4e56 ffe6                 link      a6,#$FFE6
 [00fc690e] 48e7 0f1c                 movem.l   d4-d7/a3-a5,-(a7)
@@ -8190,6 +8263,8 @@ xsnext:
 [00fc6a9c] 4cdf 38e0                 movem.l   (a7)+,d5-d7/a3-a5
 [00fc6aa0] 4e5e                      unlk      a6
 [00fc6aa2] 4e75                      rts
+
+ixclose:
 [00fc6aa4] 4e56 ffc6                 link      a6,#$FFC6
 [00fc6aa8] 48e7 071c                 movem.l   d5-d7/a3-a5,-(a7)
 [00fc6aac] 2a6e 0008                 movea.l   8(a6),a5
@@ -8288,6 +8363,8 @@ xsnext:
 [00fc6bf8] 4cdf 38c0                 movem.l   (a7)+,d6-d7/a3-a5
 [00fc6bfc] 4e5e                      unlk      a6
 [00fc6bfe] 4e75                      rts
+
+makofd:
 [00fc6c00] 4e56 0000                 link      a6,#$0000
 [00fc6c04] 48e7 010c                 movem.l   d7/a4-a5,-(a7)
 [00fc6c08] 2a6e 0008                 movea.l   8(a6),a5
@@ -8308,6 +8385,8 @@ xsnext:
 [00fc6c50] 4cdf 3000                 movem.l   (a7)+,a4-a5
 [00fc6c54] 4e5e                      unlk      a6
 [00fc6c56] 4e75                      rts
+
+ixread:
 [00fc6c58] 4e56 0000                 link      a6,#$0000
 [00fc6c5c] 48e7 0704                 movem.l   d5-d7/a5,-(a7)
 [00fc6c60] 2a6e 0008                 movea.l   8(a6),a5
@@ -8335,6 +8414,8 @@ xsnext:
 [00fc6ca0] 4cdf 20c0                 movem.l   (a7)+,d6-d7/a5
 [00fc6ca4] 4e5e                      unlk      a6
 [00fc6ca6] 4e75                      rts
+
+ixwrite:
 [00fc6ca8] 4e56 fffc                 link      a6,#$FFFC
 [00fc6cac] 2ebc 00fc 9582            move.l    #$00FC9582,(a7)
 [00fc6cb2] 2f2e 0010                 move.l    16(a6),-(a7)
@@ -8345,6 +8426,8 @@ xsnext:
 [00fc6cc8] defc 000e                 adda.w    #$000E,a7
 [00fc6ccc] 4e5e                      unlk      a6
 [00fc6cce] 4e75                      rts
+
+makopn:
 [00fc6cd0] 4e56 fffc                 link      a6,#$FFFC
 [00fc6cd4] 48e7 011c                 movem.l   d7/a3-a5,-(a7)
 [00fc6cd8] 2a6e 0008                 movea.l   8(a6),a5
@@ -8413,6 +8496,8 @@ xsnext:
 [00fc6dd8] 4cdf 3800                 movem.l   (a7)+,a3-a5
 [00fc6ddc] 4e5e                      unlk      a6
 [00fc6dde] 4e75                      rts
+
+ixcreat:
 [00fc6de0] 4e56 ffe6                 link      a6,#$FFE6
 [00fc6de4] 48e7 071c                 movem.l   d5-d7/a3-a5,-(a7)
 [00fc6de8] 1d7c 00e5 fffa            move.b    #$E5,-6(a6)
@@ -8613,6 +8698,8 @@ xsnext:
 [00fc708a] 4cdf 38c0                 movem.l   (a7)+,d6-d7/a3-a5
 [00fc708e] 4e5e                      unlk      a6
 [00fc7090] 4e75                      rts
+
+ixopen:
 [00fc7092] 4e56 fff8                 link      a6,#$FFF8
 [00fc7096] 48e7 010c                 movem.l   d7/a4-a5,-(a7)
 [00fc709a] 4257                      clr.w     (a7)
@@ -8809,6 +8896,8 @@ xunlink:
 [00fc7300] 4cdf 3000                 movem.l   (a7)+,a4-a5
 [00fc7304] 4e5e                      unlk      a6
 [00fc7306] 4e75                      rts
+
+ixdel:
 [00fc7308] 4e56 fffc                 link      a6,#$FFFC
 [00fc730c] 48e7 070c                 movem.l   d5-d7/a4-a5,-(a7)
 [00fc7310] 206e 0008                 movea.l   8(a6),a0
@@ -9069,6 +9158,8 @@ xrename:
 [00fc7662] 4cdf 38f0                 movem.l   (a7)+,d4-d7/a3-a5
 [00fc7666] 4e5e                      unlk      a6
 [00fc7668] 4e75                      rts
+
+xrendir:
 [00fc766a] 4e56 ffe4                 link      a6,#$FFE4
 [00fc766e] 48e7 0300                 movem.l   d6-d7,-(a7)
 [00fc7672] 4257                      clr.w     (a7)
@@ -9152,6 +9243,8 @@ xlseek:
 [00fc7772] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc7776] 4e5e                      unlk      a6
 [00fc7778] 4e75                      rts
+
+ixlseek:
 [00fc777a] 4e56 fffc                 link      a6,#$FFFC
 [00fc777e] 48e7 1f0c                 movem.l   d3-d7/a4-a5,-(a7)
 [00fc7782] 2a6e 0008                 movea.l   8(a6),a5
@@ -9240,6 +9333,8 @@ xlseek:
 [00fc7882] 4cdf 30f0                 movem.l   (a7)+,d4-d7/a4-a5
 [00fc7886] 4e5e                      unlk      a6
 [00fc7888] 4e75                      rts
+
+syshnd:
 [00fc788a] 4e56 0000                 link      a6,#$0000
 [00fc788e] 48e7 0300                 movem.l   d6-d7,-(a7)
 [00fc7892] 3e2e 0008                 move.w    8(a6),d7
@@ -9256,6 +9351,8 @@ xlseek:
 [00fc78b2] 4cdf 0080                 movem.l   (a7)+,d7
 [00fc78b6] 4e5e                      unlk      a6
 [00fc78b8] 4e75                      rts
+
+getofd:
 [00fc78ba] 4e56 fffc                 link      a6,#$FFFC
 [00fc78be] 4a6e 0008                 tst.w     8(a6)
 [00fc78c2] 6d08                      blt.s     $00FC78CC
@@ -9327,6 +9424,7 @@ xforce:
 [00fc7990] 588f                      addq.l    #4,a7
 [00fc7992] 4e5e                      unlk      a6
 [00fc7994] 4e75                      rts
+ixforce:
 [00fc7996] 4e56 0000                 link      a6,#$0000
 [00fc799a] 48e7 0f04                 movem.l   d4-d7/a5,-(a7)
 [00fc799e] 2a6e 000c                 movea.l   12(a6),a5
@@ -9505,6 +9603,8 @@ xwrite:
 [00fc7b90] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc7b94] 4e5e                      unlk      a6
 [00fc7b96] 4e75                      rts
+
+opnfil:
 [00fc7b98] 4e56 0000                 link      a6,#$0000
 [00fc7b9c] 48e7 0700                 movem.l   d5-d7,-(a7)
 [00fc7ba0] 6158                      bsr.s     $00FC7BFA
@@ -9534,6 +9634,8 @@ xwrite:
 [00fc7bf2] 4cdf 00c0                 movem.l   (a7)+,d6-d7
 [00fc7bf6] 4e5e                      unlk      a6
 [00fc7bf8] 4e75                      rts
+
+ffhndl:
 [00fc7bfa] 4e56 0000                 link      a6,#$0000
 [00fc7bfe] 48e7 0304                 movem.l   d6-d7/a5,-(a7)
 [00fc7c02] 4247                      clr.w     d7
@@ -9596,6 +9698,7 @@ xsfirst:
 [00fc7ca8] 5c8f                      addq.l    #6,a7
 [00fc7caa] 4e5e                      unlk      a6
 [00fc7cac] 4e75                      rts
+
 xcreat:
 [00fc7cae] 4e56 fffc                 link      a6,#$FFFC
 [00fc7cb2] 082e 0004 000d            btst      #4,13(a6)
@@ -9623,6 +9726,7 @@ xopen:
 [00fc7cfc] 588f                      addq.l    #4,a7
 [00fc7cfe] 4e5e                      unlk      a6
 [00fc7d00] 4e75                      rts
+xlog2:
 [00fc7d02] 4e56 0000                 link      a6,#$0000
 [00fc7d06] 48e7 0300                 movem.l   d6-d7,-(a7)
 [00fc7d0a] 4247                      clr.w     d7
@@ -9637,6 +9741,8 @@ xopen:
 [00fc7d20] 4cdf 0080                 movem.l   (a7)+,d7
 [00fc7d24] 4e5e                      unlk      a6
 [00fc7d26] 4e75                      rts
+
+xmovs:
 [00fc7d28] 4e56 0000                 link      a6,#$0000
 [00fc7d2c] 48e7 030c                 movem.l   d6-d7/a4-a5,-(a7)
 [00fc7d30] 3e2e 0008                 move.w    8(a6),d7
@@ -9652,6 +9758,8 @@ xopen:
 [00fc7d4a] 4cdf 3080                 movem.l   (a7)+,d7/a4-a5
 [00fc7d4e] 4e5e                      unlk      a6
 [00fc7d50] 4e75                      rts
+
+xcmps:
 [00fc7d52] 4e56 0000                 link      a6,#$0000
 [00fc7d56] 48e7 030c                 movem.l   d6-d7/a4-a5,-(a7)
 [00fc7d5a] 2a6e 0008                 movea.l   8(a6),a5
@@ -9680,6 +9788,8 @@ xopen:
 [00fc7d96] 4cdf 3080                 movem.l   (a7)+,d7/a4-a5
 [00fc7d9a] 4e5e                      unlk      a6
 [00fc7d9c] 4e75                      rts
+
+match:
 [00fc7d9e] 4e56 0000                 link      a6,#$0000
 [00fc7da2] 48e7 030c                 movem.l   d6-d7/a4-a5,-(a7)
 [00fc7da6] 2a6e 0008                 movea.l   8(a6),a5
@@ -9745,6 +9855,8 @@ xopen:
 [00fc7e3e] 4cdf 3080                 movem.l   (a7)+,d7/a4-a5
 [00fc7e42] 4e5e                      unlk      a6
 [00fc7e44] 4e75                      rts
+
+builds:
 [00fc7e46] 4e56 0000                 link      a6,#$0000
 [00fc7e4a] 48e7 070c                 movem.l   d5-d7/a4-a5,-(a7)
 [00fc7e4e] 2a6e 0008                 movea.l   8(a6),a5
@@ -9831,6 +9943,8 @@ xopen:
 [00fc7f22] 4cdf 30c0                 movem.l   (a7)+,d6-d7/a4-a5
 [00fc7f26] 4e5e                      unlk      a6
 [00fc7f28] 4e75                      rts
+
+getpath:
 [00fc7f2a] 4e56 0000                 link      a6,#$0000
 [00fc7f2e] 48e7 070c                 movem.l   d5-d7/a4-a5,-(a7)
 [00fc7f32] 2a6e 0008                 movea.l   8(a6),a5
@@ -9870,6 +9984,8 @@ xopen:
 [00fc7f82] 4cdf 30c0                 movem.l   (a7)+,d6-d7/a4-a5
 [00fc7f86] 4e5e                      unlk      a6
 [00fc7f88] 4e75                      rts
+
+packit:
 [00fc7f8a] 4e56 0000                 link      a6,#$0000
 [00fc7f8e] 48e7 0304                 movem.l   d6-d7/a5,-(a7)
 [00fc7f92] 206e 0008                 movea.l   8(a6),a0
@@ -9927,6 +10043,8 @@ xopen:
 [00fc8034] 4cdf 2080                 movem.l   (a7)+,d7/a5
 [00fc8038] 4e5e                      unlk      a6
 [00fc803a] 4e75                      rts
+
+dopath:
 [00fc803c] 4e56 fffc                 link      a6,#$FFFC
 [00fc8040] 206e 0008                 movea.l   8(a6),a0
 [00fc8044] 4aa8 0018                 tst.l     24(a0)
@@ -9948,6 +10066,8 @@ xopen:
 [00fc807c] 202e 000c                 move.l    12(a6),d0
 [00fc8080] 4e5e                      unlk      a6
 [00fc8082] 4e75                      rts
+
+contains_dots:
 [00fc8084] 4e56 0000                 link      a6,#$0000
 [00fc8088] 48e7 0304                 movem.l   d6-d7/a5,-(a7)
 [00fc808c] 2a6e 0008                 movea.l   8(a6),a5
@@ -9974,6 +10094,8 @@ xopen:
 [00fc80be] 4cdf 2080                 movem.l   (a7)+,d7/a5
 [00fc80c2] 4e5e                      unlk      a6
 [00fc80c4] 4e75                      rts
+
+ncmps:
 [00fc80c6] 4e56 0000                 link      a6,#$0000
 [00fc80ca] 48e7 030c                 movem.l   d6-d7/a4-a5,-(a7)
 [00fc80ce] 3e2e 0008                 move.w    8(a6),d7
@@ -10003,7 +10125,7 @@ xtermres:
 [00fc8110] 2eb9 0000 5622            move.l    $00005622,(a7)
 [00fc8116] 4eb9 00fc 8cac            jsr       $00FC8CAC
 [00fc811c] 3eae 000c                 move.w    12(a6),(a7)
-[00fc8120] 6104                      bsr.s     _xterm
+[00fc8120] 6104                      bsr.s     $00FC8126
 [00fc8122] 4e5e                      unlk      a6
 [00fc8124] 4e75                      rts
 _xterm:
@@ -10036,6 +10158,8 @@ x0term:
 [00fc8188] 619c                      bsr.s     _xterm
 [00fc818a] 4e5e                      unlk      a6
 [00fc818c] 4e75                      rts
+
+ixterm:
 [00fc818e] 4e56 0000                 link      a6,#$0000
 [00fc8192] 48e7 070c                 movem.l   d5-d7/a4-a5,-(a7)
 [00fc8196] 4246                      clr.w     d6
@@ -10101,6 +10225,7 @@ x0term:
 [00fc8248] 4cdf 30c0                 movem.l   (a7)+,d6-d7/a4-a5
 [00fc824c] 4e5e                      unlk      a6
 [00fc824e] 4e75                      rts
+
 xexec:
 [00fc8250] 4e56 ffd2                 link      a6,#$FFD2
 [00fc8254] 4240                      clr.w     d0
@@ -10405,12 +10530,14 @@ xexec:
 [00fc86ec] 202e 000e                 move.l    14(a6),d0
 [00fc86f0] 4e5e                      unlk      a6
 [00fc86f2] 4e75                      rts
+
+xpgmld:
 [00fc86f4] 4e56 ffc0                 link      a6,#$FFC0
 [00fc86f8] 48e7 1f1c                 movem.l   d3-d7/a3-a5,-(a7)
 [00fc86fc] 2a6e 000c                 movea.l   12(a6),a5
 [00fc8700] 4257                      clr.w     (a7)
 [00fc8702] 2f2e 0008                 move.l    8(a6),-(a7)
-[00fc8706] 4eb9 00fc 7cea            jsr       xopen
+[00fc8706] 4eb9 00fc 7cea            jsr       $00FC7CEA
 [00fc870c] 588f                      addq.l    #4,a7
 [00fc870e] 2d40 ffe8                 move.l    d0,-24(a6)
 [00fc8712] 3800                      move.w    d0,d4
@@ -10420,33 +10547,33 @@ xexec:
 [00fc871e] 486e fffe                 pea.l     -2(a6)
 [00fc8722] 2f3c 0000 0002            move.l    #$00000002,-(a7)
 [00fc8728] 3f04                      move.w    d4,-(a7)
-[00fc872a] 4eb9 00fc 7b12            jsr       xread
+[00fc872a] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc8730] defc 000a                 adda.w    #$000A,a7
 [00fc8734] 0c6e 601a fffe            cmpi.w    #$601A,-2(a6)
 [00fc873a] 670e                      beq.s     $00FC874A
 [00fc873c] 3e84                      move.w    d4,(a7)
-[00fc873e] 4eb9 00fc 7a46            jsr       xclose
+[00fc873e] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc8744] 70be                      moveq.l   #-66,d0
 [00fc8746] 6000 0220                 bra       $00FC8968
 [00fc874a] 486e ffc4                 pea.l     -60(a6)
 [00fc874e] 2f3c 0000 0010            move.l    #$00000010,-(a7)
 [00fc8754] 3f04                      move.w    d4,-(a7)
-[00fc8756] 4eb9 00fc 7b12            jsr       xread
+[00fc8756] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc875c] defc 000a                 adda.w    #$000A,a7
 [00fc8760] 486e ffe8                 pea.l     -24(a6)
 [00fc8764] 2f3c 0000 0004            move.l    #$00000004,-(a7)
 [00fc876a] 3f04                      move.w    d4,-(a7)
-[00fc876c] 4eb9 00fc 7b12            jsr       xread
+[00fc876c] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc8772] defc 000a                 adda.w    #$000A,a7
 [00fc8776] 486e ffc0                 pea.l     -64(a6)
 [00fc877a] 2f3c 0000 0004            move.l    #$00000004,-(a7)
 [00fc8780] 3f04                      move.w    d4,-(a7)
-[00fc8782] 4eb9 00fc 7b12            jsr       xread
+[00fc8782] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc8788] defc 000a                 adda.w    #$000A,a7
 [00fc878c] 486e fffc                 pea.l     -4(a6)
 [00fc8790] 2f3c 0000 0002            move.l    #$00000002,-(a7)
 [00fc8796] 3f04                      move.w    d4,-(a7)
-[00fc8798] 4eb9 00fc 7b12            jsr       xread
+[00fc8798] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc879e] defc 000a                 adda.w    #$000A,a7
 [00fc87a2] 202e ffc8                 move.l    -56(a6),d0
 [00fc87a6] d0ae ffc4                 add.l     -60(a6),d0
@@ -10471,7 +10598,7 @@ xexec:
 [00fc87f4] b0ae ffd8                 cmp.l     -40(a6),d0
 [00fc87f8] 6f0e                      ble.s     $00FC8808
 [00fc87fa] 3e84                      move.w    d4,(a7)
-[00fc87fc] 4eb9 00fc 7a46            jsr       xclose
+[00fc87fc] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc8802] 70d9                      moveq.l   #-39,d0
 [00fc8804] 6000 0162                 bra       $00FC8968
 [00fc8808] 4285                      clr.l     d5
@@ -10500,7 +10627,7 @@ xexec:
 [00fc884a] 2eae fff4                 move.l    -12(a6),(a7)
 [00fc884e] 2f2e ffec                 move.l    -20(a6),-(a7)
 [00fc8852] 3f04                      move.w    d4,-(a7)
-[00fc8854] 4eb9 00fc 7b12            jsr       xread
+[00fc8854] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc885a] 5c8f                      addq.l    #6,a7
 [00fc885c] 4a6e fffc                 tst.w     -4(a6)
 [00fc8860] 6600 00ce                 bne       $00FC8930
@@ -10510,12 +10637,12 @@ xexec:
 [00fc886c] d0ae ffec                 add.l     -20(a6),d0
 [00fc8870] 2f00                      move.l    d0,-(a7)
 [00fc8872] 0697 0000 001c            addi.l    #$0000001C,(a7)
-[00fc8878] 4eb9 00fc 7718            jsr       xlseek
+[00fc8878] 4eb9 00fc 7718            jsr       $00FC7718
 [00fc887e] 5c8f                      addq.l    #6,a7
 [00fc8880] 486e ffe0                 pea.l     -32(a6)
 [00fc8884] 2f3c 0000 0004            move.l    #$00000004,-(a7)
 [00fc888a] 3f04                      move.w    d4,-(a7)
-[00fc888c] 4eb9 00fc 7b12            jsr       xread
+[00fc888c] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc8892] defc 000a                 adda.w    #$000A,a7
 [00fc8896] 4aae ffe0                 tst.l     -32(a6)
 [00fc889a] 6700 0094                 beq       $00FC8930
@@ -10526,7 +10653,7 @@ xexec:
 [00fc88ac] bc8b                      cmp.l     a3,d6
 [00fc88ae] 650e                      bcs.s     $00FC88BE
 [00fc88b0] 3e84                      move.w    d4,(a7)
-[00fc88b2] 4eb9 00fc 7a46            jsr       xclose
+[00fc88b2] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc88b8] 70be                      moveq.l   #-66,d0
 [00fc88ba] 6000 00ac                 bra       $00FC8968
 [00fc88be] 202e ffe4                 move.l    -28(a6),d0
@@ -10537,13 +10664,13 @@ xexec:
 [00fc88cc] bc8b                      cmp.l     a3,d6
 [00fc88ce] 650e                      bcs.s     $00FC88DE
 [00fc88d0] 3e84                      move.w    d4,(a7)
-[00fc88d2] 4eb9 00fc 7a46            jsr       xclose
+[00fc88d2] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc88d8] 70be                      moveq.l   #-66,d0
 [00fc88da] 6000 008c                 bra       $00FC8968
 [00fc88de] 2e8b                      move.l    a3,(a7)
 [00fc88e0] 2f2e ffd8                 move.l    -40(a6),-(a7)
 [00fc88e4] 3f04                      move.w    d4,-(a7)
-[00fc88e6] 4eb9 00fc 7b12            jsr       xread
+[00fc88e6] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc88ec] 5c8f                      addq.l    #6,a7
 [00fc88ee] 2d40 ffdc                 move.l    d0,-36(a6)
 [00fc88f2] 2a2e ffdc                 move.l    -36(a6),d5
@@ -10585,12 +10712,14 @@ xexec:
 [00fc8956] 4eb9 00fc 1ee0            jsr       $00FC1EE0
 [00fc895c] 588f                      addq.l    #4,a7
 [00fc895e] 3e84                      move.w    d4,(a7)
-[00fc8960] 4eb9 00fc 7a46            jsr       xclose
+[00fc8960] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc8966] 4280                      clr.l     d0
 [00fc8968] 4a9f                      tst.l     (a7)+
 [00fc896a] 4cdf 38f0                 movem.l   (a7)+,d4-d7/a3-a5
 [00fc896e] 4e5e                      unlk      a6
 [00fc8970] 4e75                      rts
+
+xminit:
 [00fc8972] 4e56 fffc                 link      a6,#$FFFC
 [00fc8976] 2ebc 0000 5328            move.l    #$00005328,(a7)
 [00fc897c] 4267                      clr.w     -(a7)
@@ -10598,6 +10727,8 @@ xexec:
 [00fc8984] 548f                      addq.l    #2,a7
 [00fc8986] 4e5e                      unlk      a6
 [00fc8988] 4e75                      rts
+
+ffit:
 [00fc898a] 4e56 0000                 link      a6,#$0000
 [00fc898e] 48e7 071c                 movem.l   d5-d7/a3-a5,-(a7)
 [00fc8992] 206e 000c                 movea.l   12(a6),a0
@@ -10733,6 +10864,8 @@ xsetblk:
 [00fc8b1e] 4cdf 3000                 movem.l   (a7)+,a4-a5
 [00fc8b22] 4e5e                      unlk      a6
 [00fc8b24] 4e75                      rts
+
+freeit:
 [00fc8b26] 4e56 fffc                 link      a6,#$FFFC
 [00fc8b2a] 48e7 011c                 movem.l   d7/a3-a5,-(a7)
 [00fc8b2e] 266e 000c                 movea.l   12(a6),a3
@@ -10855,6 +10988,8 @@ xmfree:
 [00fc8ca4] 4cdf 3000                 movem.l   (a7)+,a4-a5
 [00fc8ca8] 4e5e                      unlk      a6
 [00fc8caa] 4e75                      rts
+
+xmakeres:
 [00fc8cac] 4e56 0000                 link      a6,#$0000
 [00fc8cb0] 48e7 010c                 movem.l   d7/a4-a5,-(a7)
 [00fc8cb4] 287c 0000 532c            movea.l   #$0000532C,a4
@@ -10874,6 +11009,8 @@ xmfree:
 [00fc8cd8] 4cdf 3000                 movem.l   (a7)+,a4-a5
 [00fc8cdc] 4e5e                      unlk      a6
 [00fc8cde] 4e75                      rts
+
+xmsetown:
 [00fc8ce0] 4e56 0000                 link      a6,#$0000
 [00fc8ce4] 48e7 010c                 movem.l   d7/a4-a5,-(a7)
 [00fc8ce8] 286e 0008                 movea.l   8(a6),a4
@@ -10890,12 +11027,16 @@ xmfree:
 [00fc8d0a] 4cdf 3000                 movem.l   (a7)+,a4-a5
 [00fc8d0e] 4e5e                      unlk      a6
 [00fc8d10] 4e75                      rts
+
+foldermsg:
 [00fc8d12] 4e56 fffc                 link      a6,#$FFFC
 [00fc8d16] 2ebc 00fe 851a            move.l    #$00FE851A,(a7)
 [00fc8d1c] 6106                      bsr.s     $00FC8D24
 [00fc8d1e] 60fe                      bra.s     $00FC8D1E
 [00fc8d20] 4e5e                      unlk      a6
 [00fc8d22] 4e75                      rts
+
+printstr:
 [00fc8d24] 4e56 fffc                 link      a6,#$FFFC
 [00fc8d28] 601c                      bra.s     $00FC8D46
 [00fc8d2a] 206e 0008                 movea.l   8(a6),a0
@@ -10911,6 +11052,8 @@ xmfree:
 [00fc8d4c] 66dc                      bne.s     $00FC8D2A
 [00fc8d4e] 4e5e                      unlk      a6
 [00fc8d50] 4e75                      rts
+
+osminit:
 [00fc8d52] 4e56 fffc                 link      a6,#$FFFC
 [00fc8d56] 42b9 0000 3b9c            clr.l     $00003B9C
 [00fc8d5c] 2ebc 0000 15e0            move.l    #$000015E0,(a7)
@@ -10919,6 +11062,8 @@ xmfree:
 [00fc8d6a] 588f                      addq.l    #4,a7
 [00fc8d6c] 4e5e                      unlk      a6
 [00fc8d6e] 4e75                      rts
+
+ofdadd:
 [00fc8d70] 4e56 0000                 link      a6,#$0000
 [00fc8d74] 48e7 070c                 movem.l   d5-d7/a4-a5,-(a7)
 [00fc8d78] 2a6e 0008                 movea.l   8(a6),a5
@@ -10944,6 +11089,8 @@ xmfree:
 [00fc8dc6] 4cdf 30c0                 movem.l   (a7)+,d6-d7/a4-a5
 [00fc8dca] 4e5e                      unlk      a6
 [00fc8dcc] 4e75                      rts
+
+mgetofd:
 [00fc8dce] 4e56 0000                 link      a6,#$0000
 [00fc8dd2] 48e7 0f1c                 movem.l   d4-d7/a3-a5,-(a7)
 [00fc8dd6] 4245                      clr.w     d5
@@ -11004,6 +11151,8 @@ xmfree:
 [00fc8e74] 4cdf 38e0                 movem.l   (a7)+,d5-d7/a3-a5
 [00fc8e78] 4e5e                      unlk      a6
 [00fc8e7a] 4e75                      rts
+
+ofdmore:
 [00fc8e7c] 4e56 0000                 link      a6,#$0000
 [00fc8e80] 48e7 011c                 movem.l   d7/a3-a5,-(a7)
 [00fc8e84] 2a79 0000 379c            movea.l   $0000379C,a5
@@ -11038,6 +11187,8 @@ xmfree:
 [00fc8ed2] 4cdf 3800                 movem.l   (a7)+,a3-a5
 [00fc8ed6] 4e5e                      unlk      a6
 [00fc8ed8] 4e75                      rts
+
+mgetmd:
 [00fc8eda] 4e56 fffc                 link      a6,#$FFFC
 [00fc8ede] 48e7 031c                 movem.l   d6-d7/a3-a5,-(a7)
 [00fc8ee2] 99cc                      suba.l    a4,a4
@@ -11100,6 +11251,8 @@ xmfree:
 [00fc8f9e] 4cdf 3880                 movem.l   (a7)+,d7/a3-a5
 [00fc8fa2] 4e5e                      unlk      a6
 [00fc8fa4] 4e75                      rts
+
+getosm:
 [00fc8fa6] 4e56 fff6                 link      a6,#$FFF6
 [00fc8faa] 48e7 1f1c                 movem.l   d3-d7/a3-a5,-(a7)
 [00fc8fae] 9bcd                      suba.l    a5,a5
@@ -11179,6 +11332,8 @@ xmfree:
 [00fc9096] 4cdf 38f0                 movem.l   (a7)+,d4-d7/a3-a5
 [00fc909a] 4e5e                      unlk      a6
 [00fc909c] 4e75                      rts
+
+mdlink:
 [00fc909e] 4e56 fff8                 link      a6,#$FFF8
 [00fc90a2] 48e7 011c                 movem.l   d7/a3-a5,-(a7)
 [00fc90a6] 2a6e 0008                 movea.l   8(a6),a5
@@ -11214,6 +11369,8 @@ xmfree:
 [00fc90fe] 4cdf 3800                 movem.l   (a7)+,a3-a5
 [00fc9102] 4e5e                      unlk      a6
 [00fc9104] 4e75                      rts
+
+mdfind:
 [00fc9106] 4e56 0000                 link      a6,#$0000
 [00fc910a] 48e7 030c                 movem.l   d6-d7/a4-a5,-(a7)
 [00fc910e] 206e 0008                 movea.l   8(a6),a0
@@ -11251,6 +11408,8 @@ xmfree:
 [00fc9164] 4cdf 3080                 movem.l   (a7)+,d7/a4-a5
 [00fc9168] 4e5e                      unlk      a6
 [00fc916a] 4e75                      rts
+
+oftdel:
 [00fc916c] 4e56 0000                 link      a6,#$0000
 [00fc9170] 48e7 0104                 movem.l   d7/a5,-(a7)
 [00fc9174] 2a6e 0008                 movea.l   8(a6),a5
@@ -11264,6 +11423,8 @@ xmfree:
 [00fc918e] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc9192] 4e5e                      unlk      a6
 [00fc9194] 4e75                      rts
+
+xmdfree:
 [00fc9196] 4e56 0000                 link      a6,#$0000
 [00fc919a] 48e7 031c                 movem.l   d6-d7/a3-a5,-(a7)
 [00fc919e] 2a6e 0008                 movea.l   8(a6),a5
@@ -11452,6 +11613,7 @@ callos:
 [00fc93aa] 588f                      addq.l    #4,a7
 
 entusr:
+_gouser:
 [00fc93ac] 2a79 0000 5622            movea.l   $00005622,a5
 [00fc93b2] 2b40 0068                 move.l    d0,104(a5)
 [00fc93b6] 2c6d 007c                 movea.l   124(a5),a6
@@ -11512,6 +11674,7 @@ x20_inq:
 [00fc9436] 6702                      beq.s     $00FC943A
 [00fc9438] 70ff                      moveq.l   #-1,d0
 [00fc943a] 4e73                      rte
+oscall:
 [00fc943c] 4e56 0000                 link      a6,#$0000
 [00fc9440] 2f08                      move.l    a0,-(a7)
 [00fc9442] 41ee 0008                 lea.l     8(a6),a0
@@ -11566,6 +11729,7 @@ bdoslmul:
 [00fc94e2] 4e5e                      unlk      a6
 [00fc94e4] 4e75                      rts
 
+bdosldiv:
 [00fc94e6] 4e56 fffe                 link      a6,#$FFFE
 [00fc94ea] 48e7 3f00                 movem.l   d2-d7,-(a7)
 [00fc94ee] 4243                      clr.w     d3
@@ -11625,6 +11789,8 @@ bdoslmul:
 [00fc957a] 4cdf 00f8                 movem.l   (a7)+,d3-d7
 [00fc957e] 4e5e                      unlk      a6
 [00fc9580] 4e75                      rts
+
+_usr2xfr:
 [00fc9582] 226f 0006                 movea.l   6(a7),a1
 [00fc9586] 206f 000a                 movea.l   10(a7),a0
 [00fc958a] 6008                      bra.s     $00FC9594
@@ -11725,6 +11891,8 @@ _cinit:
 [00fc970a] 4cdf 3080                 movem.l   (a7)+,d7/a4-a5
 [00fc970e] 4e5e                      unlk      a6
 [00fc9710] 4e75                      rts
+
+freetree:
 [00fc9712] 4e56 0000                 link      a6,#$0000
 [00fc9716] 48e7 0300                 movem.l   d6-d7,-(a7)
 [00fc971a] 206e 0008                 movea.l   8(a6),a0
@@ -11768,6 +11936,8 @@ _cinit:
 [00fc979a] 4cdf 0080                 movem.l   (a7)+,d7
 [00fc979e] 4e5e                      unlk      a6
 [00fc97a0] 4e75                      rts
+
+offree:
 [00fc97a2] 4e56 0000                 link      a6,#$0000
 [00fc97a6] 48e7 0304                 movem.l   d6-d7/a5,-(a7)
 [00fc97aa] 4247                      clr.w     d7
@@ -12283,6 +12453,8 @@ _osif:
 [00fc9f00] 202e ffde                 move.l    -34(a6),d0
 [00fc9f04] 4e5e                      unlk      a6
 [00fc9f06] 4e75                      rts
+
+tikfrk:
 [00fc9f08] 4e56 0000                 link      a6,#$0000
 [00fc9f0c] 48e7 0300                 movem.l   d6-d7,-(a7)
 [00fc9f10] 302e 0008                 move.w    8(a6),d0
@@ -12353,6 +12525,8 @@ _osif:
 [00fca040] 4cdf 0080                 movem.l   (a7)+,d7
 [00fca044] 4e5e                      unlk      a6
 [00fca046] 4e75                      rts
+
+chgdrv:
 [00fca048] 4e56 ffee                 link      a6,#$FFEE
 [00fca04c] 306e 0008                 movea.w   8(a6),a0
 [00fca050] d1c8                      adda.l    a0,a0
@@ -12450,6 +12624,8 @@ _osif:
 [00fca1a4] 548f                      addq.l    #2,a7
 [00fca1a6] 4e5e                      unlk      a6
 [00fca1a8] 4e75                      rts
+
+adddrv:
 [00fca1aa] 4e56 0000                 link      a6,#$0000
 [00fca1ae] 48e7 0104                 movem.l   d7/a5,-(a7)
 [00fca1b2] 3eae 0008                 move.w    8(a6),(a7)
@@ -51425,6 +51601,17 @@ funcs:
 [00fe8812] 5052                      addq.w    #8,(a2)
 [00fe8814] 4e3a 0070 726e            cmpiw.l   #$0070,$00FEFA84(pc) ; apollo only
 [00fe881a] 3a00                      move.w    d0,d5
+
+********************************************************************************
+********************************************************************************
+*
+* End GEMDOS data len 0x396
+*
+* Start VDI data
+*
+********************************************************************************
+********************************************************************************
+
 [00fe881c] 0001 0008                 ori.b     #$08,d1
 [00fe8820] 3678 3620                 movea.w   ($00003620).w,a3
 [00fe8824] 7379                      ???
@@ -62177,13 +62364,40 @@ gem.rsc:
 0FEA: prtbamo
 0FEC: prtblow
 0FEE: prtbbol
+0FF2: biosav
+0FFA: savesr
 0FFC: fstack
+1814: old_tik
+1818: old_2
 181C: dskbuf
 2ADC: lineavars
+2B88: msec
 378A: time
+37DC: glbkbchar
+3B9C: ofdlist
+3BA0: glbcolumn
+3BA6: rrecno
+3BA8: rwrtflg
 3BAA: virt_work
+3CDE: rdm
+3CE2: dirlock
+3CE4: ofdbuf
+52C4: ldivr
+5324: rwerr
+5328: pmd
 5622: _run
+5680: fill
+5684: bakbuf
+5E92: dirrec
+5F36: errbuf
+5F42: diruse
+5F6A: drvtable
+5FAC: uptime
+5FB0: errdrv
+60B2: buptr
 60BE: date
+60C0: bcbx
+6110: beptr
 6122: gl_rstype
 6124: gl_rschange
 61AA: diskin
