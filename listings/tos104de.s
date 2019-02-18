@@ -7885,7 +7885,7 @@ xmkdir:
 [00fc6568] 4eb9 00fc 7308            jsr       $00FC7308
 [00fc656e] 508f                      addq.l    #8,a7
 [00fc6570] 3eae fffe                 move.w    -2(a6),(a7)
-[00fc6574] 4eb9 00fc 7a46            jsr       xclose
+[00fc6574] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc657a] 4aae fff6                 tst.l     -10(a6)
 [00fc657e] 6706                      beq.s     $00FC6586
 [00fc6580] 202e fff6                 move.l    -10(a6),d0
@@ -7972,7 +7972,7 @@ xmkdir:
 [00fc66e2] 206e fff2                 movea.l   -14(a6),a0
 [00fc66e6] 217c 0000 0000 000c       move.l    #$00000000,12(a0)
 [00fc66ee] 3eae fffe                 move.w    -2(a6),(a7)
-[00fc66f2] 4eb9 00fc 7a46            jsr       xclose
+[00fc66f2] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc66f8] 4280                      clr.l     d0
 [00fc66fa] 4e5e                      unlk      a6
 [00fc66fc] 4e75                      rts
@@ -9064,7 +9064,7 @@ xrename:
 [00fc7516] 6000 0148                 bra       $00FC7660
 [00fc751a] 3ebc 0002                 move.w    #$0002,(a7)
 [00fc751e] 2f2e 000a                 move.l    10(a6),-(a7)
-[00fc7522] 4eb9 00fc 7cea            jsr       xopen
+[00fc7522] 4eb9 00fc 7cea            jsr       $00FC7CEA
 [00fc7528] 588f                      addq.l    #4,a7
 [00fc752a] 2800                      move.l    d0,d4
 [00fc752c] 6c06                      bge.s     $00FC7534
@@ -9110,7 +9110,7 @@ xrename:
 [00fc75b8] defc 000c                 adda.w    #$000C,a7
 [00fc75bc] 3e86                      move.w    d6,(a7)
 [00fc75be] 2f2e 000e                 move.l    14(a6),-(a7)
-[00fc75c2] 4eb9 00fc 7cae            jsr       xcreat
+[00fc75c2] 4eb9 00fc 7cae            jsr       $00FC7CAE
 [00fc75c8] 588f                      addq.l    #4,a7
 [00fc75ca] 3e00                      move.w    d0,d7
 [00fc75cc] 3e87                      move.w    d7,(a7)
@@ -9128,7 +9128,7 @@ xrename:
 [00fc75fc] defc 000c                 adda.w    #$000C,a7
 [00fc7600] 026b fffe 0004            andi.w    #$FFFE,4(a3)
 [00fc7606] 3e87                      move.w    d7,(a7)
-[00fc7608] 4eb9 00fc 7a46            jsr       xclose
+[00fc7608] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc760e] 3ebc 0002                 move.w    #$0002,(a7)
 [00fc7612] 2f2b 0018                 move.l    24(a3),-(a7)
 [00fc7616] 6100 f48c                 bsr       $00FC6AA4
@@ -9145,7 +9145,7 @@ xrename:
 [00fc763e] defc 000c                 adda.w    #$000C,a7
 [00fc7642] 2004                      move.l    d4,d0
 [00fc7644] 3e80                      move.w    d0,(a7)
-[00fc7646] 4eb9 00fc 7a46            jsr       xclose
+[00fc7646] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc764c] 2a00                      move.l    d0,d5
 [00fc764e] 6c04                      bge.s     $00FC7654
 [00fc7650] 2005                      move.l    d5,d0
@@ -10120,7 +10120,7 @@ xtermres:
 [00fc80fc] 2eae 0008                 move.l    8(a6),(a7)
 [00fc8100] 2f39 0000 5622            move.l    $00005622,-(a7)
 [00fc8106] 4267                      clr.w     -(a7)
-[00fc8108] 4eb9 00fc 8a78            jsr       xsetblk
+[00fc8108] 4eb9 00fc 8a78            jsr       $00FC8A78
 [00fc810e] 5c8f                      addq.l    #6,a7
 [00fc8110] 2eb9 0000 5622            move.l    $00005622,(a7)
 [00fc8116] 4eb9 00fc 8cac            jsr       $00FC8CAC
@@ -10146,7 +10146,7 @@ _xterm:
 [00fc8168] 4280                      clr.l     d0
 [00fc816a] 302e 0008                 move.w    8(a6),d0
 [00fc816e] 2140 0068                 move.l    d0,104(a0)
-[00fc8172] 4eb9 00fc 93ac            jsr       entusr
+[00fc8172] 4eb9 00fc 93ac            jsr       $00FC93AC
 [00fc8178] 4a9f                      tst.l     (a7)+
 [00fc817a] 4cdf 2000                 movem.l   (a7)+,a5
 [00fc817e] 4e5e                      unlk      a6
@@ -10155,7 +10155,7 @@ _xterm:
 x0term:
 [00fc8182] 4e56 fffc                 link      a6,#$FFFC
 [00fc8186] 4257                      clr.w     (a7)
-[00fc8188] 619c                      bsr.s     _xterm
+[00fc8188] 619c                      bsr.s     $00FC8126
 [00fc818a] 4e5e                      unlk      a6
 [00fc818c] 4e75                      rts
 
@@ -10170,7 +10170,7 @@ ixterm:
 [00fc81a4] 3e00                      move.w    d0,d7
 [00fc81a6] 6f08                      ble.s     $00FC81B0
 [00fc81a8] 3e87                      move.w    d7,(a7)
-[00fc81aa] 4eb9 00fc 7a46            jsr       xclose
+[00fc81aa] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc81b0] 5246                      addq.w    #1,d6
 [00fc81b2] bc7c 0006                 cmp.w     #$0006,d6
 [00fc81b6] 6de2                      blt.s     $00FC819A
@@ -10185,7 +10185,7 @@ ixterm:
 [00fc81d2] 660a                      bne.s     $00FC81DE
 [00fc81d4] 3e86                      move.w    d6,(a7)
 [00fc81d6] 5c57                      addq.w    #6,(a7)
-[00fc81d8] 4eb9 00fc 7a46            jsr       xclose
+[00fc81d8] 4eb9 00fc 7a46            jsr       $00FC7A46
 [00fc81de] 5246                      addq.w    #1,d6
 [00fc81e0] bc7c 004b                 cmp.w     #$004B,d6
 [00fc81e4] 6dd6                      blt.s     $00FC81BC
@@ -10259,7 +10259,7 @@ xexec:
 [00fc82b6] 4eb9 00fc 7d28            jsr       $00FC7D28
 [00fc82bc] 5c8f                      addq.l    #6,a7
 [00fc82be] 2ebc 0000 5f36            move.l    #$00005F36,(a7)
-[00fc82c4] 4eb9 00fc 92fc            jsr       _xsetjmp
+[00fc82c4] 4eb9 00fc 92fc            jsr       $00FC92FC
 [00fc82ca] 2d40 ffea                 move.l    d0,-22(a6)
 [00fc82ce] 6742                      beq.s     $00FC8312
 [00fc82d0] 4aae ffe2                 tst.l     -30(a6)
@@ -10526,7 +10526,7 @@ xexec:
 [00fc86da] 2f28 002c                 move.l    44(a0),-(a7)
 [00fc86de] 4eb9 00fc 8ce0            jsr       $00FC8CE0
 [00fc86e4] 588f                      addq.l    #4,a7
-[00fc86e6] 4eb9 00fc 93ac            jsr       entusr
+[00fc86e6] 4eb9 00fc 93ac            jsr       $00FC93AC
 [00fc86ec] 202e 000e                 move.l    14(a6),d0
 [00fc86f0] 4e5e                      unlk      a6
 [00fc86f2] 4e75                      rts
@@ -11477,7 +11477,7 @@ __osinit:
 [00fc9242] 508f                      addq.l    #8,a7
 [00fc9244] 23c0 0000 1814            move.l    d0,$00001814
 [00fc924a] 46f9 0000 0ffa            move.w    $00000FFA,sr
-[00fc9250] 4eb9 00fc 966a            jsr       _cinit
+[00fc9250] 4eb9 00fc 966a            jsr       $00FC966A
 [00fc9256] 4e75                      rts
 
 _trap13:
@@ -11497,11 +11497,11 @@ ground_it:
 [00fc927a] 6724                      beq.s     $00FC92A0
 [00fc927c] b07c 0073                 cmp.w     #$0073,d0
 [00fc9280] 6608                      bne.s     $00FC928A
-[00fc9282] 4eb9 00fc ab20            jsr       _GSX_ENTRY
+[00fc9282] 4eb9 00fc ab20            jsr       $00FCAB20
 [00fc9288] 4e73                      rte
 [00fc928a] b07c ffff                 cmp.w     #$FFFF,d0
 [00fc928e] 6608                      bne.s     $00FC9298
-[00fc9290] 203c 00fc ab20            move.l    #_GSX_ENTRY,d0
+[00fc9290] 203c 00fc ab20            move.l    #$00FCAB20,d0
 [00fc9296] 4e73                      rte
 [00fc9298] 2f39 0000 1818            move.l    $00001818,-(a7)
 [00fc929e] 4e75                      rts
@@ -11509,7 +11509,7 @@ ground_it:
 oterm:
 [00fc92a0] 2e79 00fe 857e            movea.l   $00FE857E,a7
 [00fc92a6] 4267                      clr.w     -(a7)
-[00fc92a8] 6100 ee7c                 bsr       _xterm
+[00fc92a8] 6100 ee7c                 bsr       $00FC8126
 [00fc92ac] 4afc                      illegal
 [00fc92ae] 4e73                      rte
 
@@ -11609,7 +11609,7 @@ _enter:
 [00fc939c] 2e7c 0000 1810            movea.l   #$00001810,a7
 callos:
 [00fc93a2] 2f08                      move.l    a0,-(a7)
-[00fc93a4] 4eb9 00fc 9822            jsr       _osif
+[00fc93a4] 4eb9 00fc 9822            jsr       $00FC9822
 [00fc93aa] 588f                      addq.l    #4,a7
 
 entusr:
@@ -11679,7 +11679,7 @@ oscall:
 [00fc9440] 2f08                      move.l    a0,-(a7)
 [00fc9442] 41ee 0008                 lea.l     8(a6),a0
 [00fc9446] 2f08                      move.l    a0,-(a7)
-[00fc9448] 4eb9 00fc 9822            jsr       _osif
+[00fc9448] 4eb9 00fc 9822            jsr       $00FC9822
 [00fc944e] 588f                      addq.l    #4,a7
 [00fc9450] 205f                      movea.l   (a7)+,a0
 [00fc9452] 4e5e                      unlk      a6
@@ -11831,9 +11831,9 @@ _osinit:
 [00fc961e] 23fc 0000 5c90 0000 610c  move.l    #$00005C90,$0000610C
 [00fc9628] 23fc 0000 60c0 0000 04b2  move.l    #$000060C0,$000004B2
 [00fc9632] 23fc 0000 60e8 0000 04b6  move.l    #$000060E8,$000004B6
-[00fc963c] 4eb9 00fc 920a            jsr       __osinit
+[00fc963c] 4eb9 00fc 920a            jsr       $00FC920A
 [00fc9642] 3eb9 0000 0446            move.w    $00000446,(a7)
-[00fc9648] 4eb9 00fc 7c56            jsr       xsetdrv
+[00fc9648] 4eb9 00fc 7c56            jsr       $00FC7C56
 [00fc964e] 4e5e                      unlk      a6
 [00fc9650] 4e75                      rts
 [00fc9652] 4e56 fffc                 link      a6,#$FFFC
@@ -11989,7 +11989,7 @@ _osif:
 [00fc9848] 70e0                      moveq.l   #-32,d0
 [00fc984a] 6000 06b8                 bra       $00FC9F04
 [00fc984e] 2ebc 0000 5f36            move.l    #$00005F36,(a7)
-[00fc9854] 4eb9 00fc 92fc            jsr       _xsetjmp
+[00fc9854] 4eb9 00fc 92fc            jsr       $00FC92FC
 [00fc985a] 2d40 ffde                 move.l    d0,-34(a6)
 [00fc985e] 6700 008e                 beq       $00FC98EE
 [00fc9862] 0cae ffff fff2 ffde       cmpi.l    #$FFFFFFF2,-34(a6)
@@ -12070,7 +12070,7 @@ _osif:
 [00fc998c] 486e fff2                 pea.l     -14(a6)
 [00fc9990] 2f3c 0000 0001            move.l    #$00000001,-(a7)
 [00fc9996] 3f2e ffea                 move.w    -22(a6),-(a7)
-[00fc999a] 4eb9 00fc 7b12            jsr       xread
+[00fc999a] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc99a0] defc 000a                 adda.w    #$000A,a7
 [00fc99a4] b0bc 0000 0001            cmp.l     #$00000001,d0
 [00fc99aa] 660e                      bne.s     $00FC99BA
@@ -12084,7 +12084,7 @@ _osif:
 [00fc99c0] 486e fff2                 pea.l     -14(a6)
 [00fc99c4] 2f3c 0000 0001            move.l    #$00000001,-(a7)
 [00fc99ca] 3f2e ffea                 move.w    -22(a6),-(a7)
-[00fc99ce] 4eb9 00fc 7b12            jsr       xread
+[00fc99ce] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc99d4] defc 000a                 adda.w    #$000A,a7
 [00fc99d8] 102e fff2                 move.b    -14(a6),d0
 [00fc99dc] 4880                      ext.w     d0
@@ -12094,7 +12094,7 @@ _osif:
 [00fc99e8] 5697                      addq.l    #3,(a7)
 [00fc99ea] 2f3c 0000 0001            move.l    #$00000001,-(a7)
 [00fc99f0] 3f2e ffea                 move.w    -22(a6),-(a7)
-[00fc99f4] 4eb9 00fc 7b52            jsr       xwrite
+[00fc99f4] 4eb9 00fc 7b52            jsr       $00FC7B52
 [00fc99fa] 5c8f                      addq.l    #6,a7
 [00fc99fc] 4280                      clr.l     d0
 [00fc99fe] 6000 0504                 bra       $00FC9F04
@@ -12110,7 +12110,7 @@ _osif:
 [00fc9a24] 2eae fff8                 move.l    -8(a6),(a7)
 [00fc9a28] 2f2e ffce                 move.l    -50(a6),-(a7)
 [00fc9a2c] 3f2e ffea                 move.w    -22(a6),-(a7)
-[00fc9a30] 4eb9 00fc 7b52            jsr       xwrite
+[00fc9a30] 4eb9 00fc 7b52            jsr       $00FC7B52
 [00fc9a36] 5c8f                      addq.l    #6,a7
 [00fc9a38] 2d40 ffd2                 move.l    d0,-46(a6)
 [00fc9a3c] 6c0a                      bge.s     $00FC9A48
@@ -12140,7 +12140,7 @@ _osif:
 [00fc9a8a] 2eae fff4                 move.l    -12(a6),(a7)
 [00fc9a8e] 2f3c 0000 0001            move.l    #$00000001,-(a7)
 [00fc9a94] 3f2e ffea                 move.w    -22(a6),-(a7)
-[00fc9a98] 4eb9 00fc 7b12            jsr       xread
+[00fc9a98] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc9a9e] 5c8f                      addq.l    #6,a7
 [00fc9aa0] b0bc 0000 0001            cmp.l     #$00000001,d0
 [00fc9aa6] 663e                      bne.s     $00FC9AE6
@@ -12155,7 +12155,7 @@ _osif:
 [00fc9aca] 486e fff2                 pea.l     -14(a6)
 [00fc9ace] 2f3c 0000 0001            move.l    #$00000001,-(a7)
 [00fc9ad4] 3f2e ffea                 move.w    -22(a6),-(a7)
-[00fc9ad8] 4eb9 00fc 7b12            jsr       xread
+[00fc9ad8] 4eb9 00fc 7b12            jsr       $00FC7B12
 [00fc9ade] defc 000a                 adda.w    #$000A,a7
 [00fc9ae2] 6018                      bra.s     $00FC9AFC
 [00fc9ae4] 6002                      bra.s     $00FC9AE8
@@ -62372,7 +62372,9 @@ gem.rsc:
 181C: dskbuf
 2ADC: lineavars
 2B88: msec
+2F8A: supstk
 378A: time
+37C8: root
 37DC: glbkbchar
 3B9C: ofdlist
 3BA0: glbcolumn
@@ -62383,17 +62385,23 @@ gem.rsc:
 3CE2: dirlock
 3CE4: ofdbuf
 52C4: ldivr
+52C8: oscnt
 5324: rwerr
 5328: pmd
+5334: sft
 5622: _run
 5680: fill
 5684: bakbuf
+5690: secbuf
+5E90: osuser
 5E92: dirrec
 5F36: errbuf
 5F42: diruse
-5F6A: drvtable
+5F6A: drvtbl
+5FAA: drvsel
 5FAC: uptime
 5FB0: errdrv
+5FB2: ospd
 60B2: buptr
 60BE: date
 60C0: bcbx

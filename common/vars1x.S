@@ -266,11 +266,16 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 	BYTE(_prtbbol)
 	even
 
-	ds.b 12
+	ds.b 2
+	PTR(biosav)
+
+	ds.b 4
+	INT(savesr)
 
 	V(fstack,w,1034+2)
 
-	ds.b 8
+	PTR(old_tik)
+	PTR(old_2)
 
 /*
  * disk_buffer plus pad for equated arrays
@@ -278,19 +283,14 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
  */
 #include "../vdi/vdivar.S"
 
-	ds.w 1 /* unused */
+	INT(_msec)
 
-	PTR(biosav)
+	ds.w 1 /* unused */
 
 	ds.l 1 /* unused */
 
-	INT(savesr)
-
-	PTR(old_tik)
-	PTR(old_2)
-
-	INT(_msec)
-
+	ds.b 30
+	
 	ds.b 988
 	
 	V(_supstk,w,SUPSIZ)
@@ -299,13 +299,11 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	V(_root,l,MAXQUICK)
 
-	ds.b 16 /* unused? $00004b58 */
-    
 	ds.b 60 /* unused? $0000577A */
 
 	V(_glbkbchar,l,3*KBBUFSZ)
 
-	ds.b 4
+	PTR(_ofdlist)
 
 	V(_glbcolumn,w,3)
 	INT(_rrecno)
@@ -316,7 +314,6 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	PTR(_rdm)
 	INT(_dirlock)
-	PTR(_ofdlist)
 
 	V(_ofdbuf,b,70*80)
 	LONG(_ldivr)
@@ -667,7 +664,7 @@ _endvdibss: ds.b 0
 	PTR(_dlr)
 	PTR(_drl)
 	
-	V(_D,b,13982) /* sizeof(THEGLO) */
+	V(_D,b,6636) /* sizeof(THEGLO) */
 #if TP_WINX
 	xdef _winxvars
 _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
