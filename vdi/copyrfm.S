@@ -109,6 +109,7 @@ PAT_FLAG	equ	  4	/* flag:1 SRCE and PATTERN   flag:0 SOURCE only */
 
 /* 306de: 00e0c998 */
 /* 206de: 00e0cd50 */
+/* 104de: 00fd0fb0 */
 	xdef	_COPY_RFM
 _COPY_RFM:
 
@@ -195,10 +196,10 @@ dst_calc:
 
 compare:
 #if TOSVERSION < 0x400
-#if TOSVERSION >= 0x300
-	move.l    #278,d3   /* WUT ??? */
+#if PLANES8
+	move.l    #$116,d3
 #else
-	moveq.l   #22,d3   /* WUT ??? */
+	moveq.l   #$16,d3
 #endif
 	btst      d1,d3
 	beq       bad_parameter

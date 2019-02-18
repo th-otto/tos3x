@@ -46,6 +46,7 @@
 
 /* 306de: 00e0cc46 */
 /* 206de: 00e0d004 */
+/* 104de: 00fd1264 */
 *  in:
 *	a6.l	points to 76 byte parameter block
 	xdef	KG_BLT

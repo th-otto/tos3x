@@ -101,6 +101,7 @@ _TRAN_FM:
 #else
 /* 306de: 00e0d25a */
 /* 206de: 00e0da2e */
+/* 104de: 00fd1c8e */
 	xdef _vr_trnfm
 _vr_trnfm:
 #endif

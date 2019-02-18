@@ -62,6 +62,7 @@
 
 /* 306de: 00e0c0a4 */
 /* 206de: 00e0c414 */
+/* 104de: 00fd0674 */
 		xdef	_vtrap1
 _vtrap1:	PIXLA(a0)
 		move.l	(sp)+,PIXLV(retsav,a0)
@@ -118,6 +119,7 @@ _vtrap14b:	PIXLA(a0)
 
 /* 306de: 00e0c0c4 */
 /* 206de: 00e0c424 */
+/* 104de: 00fd0684 */
 		xdef	_TRNSFONT
 _TRNSFONT:
 		PIXLA(a1)
@@ -202,6 +204,7 @@ ST_PUTPIX:
 #else
 /* 306de: 00e0c0e6 */
 /* 206de: 00e0c446 */
+/* 104de: 00fd06a6 */
 		xdef	_put_pix
 _put_pix:
 #endif
@@ -291,6 +294,7 @@ ST_GETPIX:
 #else
 /* 306de: 00e0c12e */
 /* 206de: 00e0c48e */
+/* 104de: 00fd06ee */
 		xdef	_get_pix
 _get_pix:
 #endif
@@ -833,6 +837,7 @@ ST_RECTFILL:
 		xdef	_RECTFILL
 _RECTFILL: ds.b 0
 #if !PLANES8
+/* 104de: 00fd082e */
 		xdef	M_RECTFILL
 M_RECTFILL: ds.b 0
 #endif

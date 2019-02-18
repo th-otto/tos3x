@@ -28,11 +28,11 @@ vdi.a: $(VDI_$(TOSVERSION)_OBJS) ${MAKEFILE}
 
 ifeq ($(USE_CROSS_ALCYON),1)
 # sections.mak might have just been generated, make sure it is reread
-vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_OBJS) ${MAKEFILE}
+vdi.o: tosvars.o $(VARS_OBJS) vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_OBJS) ${MAKEFILE}
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
-single:
-	$(LD) -s -l -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_OBJS)
+single: tosvars.o $(VARS_OBJS) vdiext.o $(VDI_OBJS) ${MAKEFILE}
+	$(LD) -s -l -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o $(VARS_OBJS) vdiext.o $(VDI_OBJS)
 
 #
 # sed: optimizer seems to have missed an add.l #4,(sp) in make_header()
@@ -48,10 +48,13 @@ text.o: text.c
 
 endif
 
+tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
+
 vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
+vars1x.o: $(top_srcdir)/common/vars1x.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 vdiext.o: vdiext.S $(top_srcdir)/common/sections.inc

@@ -75,6 +75,7 @@ _scrtsiz:	dc.w	204	; WUT THE FUT ??$*&@!??
 
 /* 306de: 00e0bfb4 */
 /* 206de: 00e0b74a */
+/* 104de: 00fcf9aa */
 	xdef	_CLC_DDA
 _CLC_DDA:
 	PIXLA(a0)
@@ -121,6 +122,7 @@ smal_ok:
 
 /* 306de: 00e0bfe6 */
 /* 206de: 00e0b77c */
+/* 104de: 00fcf9dc */
 _ACT_SIZ:
 
 	PIXLA(a0)
@@ -187,6 +189,7 @@ sz_sm_2:
 
 /* 306de: 00e0c038 */
 /* 206de: 00e0b7ce */
+/* 104de: 00fcfa2e */
 _TEXT_BLT:
 	movem.l	a5-a6,-(sp)
 	LA(a6)

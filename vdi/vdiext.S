@@ -36,6 +36,18 @@ _zeromem equ BIOSTBASE+$1548
 _zeromem equ BIOSTBASE+$148E
 #endif
 
+#if TOSVERSION == 0x104
+_zeromem equ BIOSTBASE+$1EE0
+#endif
+
+#if TOSVERSION == 0x106
+_zeromem equ BIOSTBASE+$1EE0
+#endif
+
+#if TOSVERSION == 0x162
+_zeromem equ BIOSTBASE+$1EE0
+#endif
+
 #else
 
 _zeromem equ BIOSTBASE+$1548

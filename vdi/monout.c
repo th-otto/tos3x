@@ -69,6 +69,7 @@ int16_t code PROTO((int16_t x,int16_t y));
  */
 /* 306de: 00e08b94 */
 /* 206de: 00e082b2 */
+/* 104de: 00fcc50a */
 VOID vq_extnd(NOTHING)
 {
 	register int16_t i;
@@ -121,6 +122,7 @@ VOID vq_extnd(NOTHING)
  */
 /* 306de: 00e08c5c */
 /* 206de: 00e0837a */
+/* 104de: 00fcc5d2 */
 VOID v_clswk(NOTHING)
 {
 	ATTRIBUTE *next_work;
@@ -144,6 +146,7 @@ VOID v_clswk(NOTHING)
  */
 /* 306de: 00e08ca4 */
 /* 206de: 00e083c2 */
+/* 104de: 00fcc61a */
 VOID v_pline(NOTHING)
 {
 	register int16_t l;
@@ -181,6 +184,7 @@ VOID v_pline(NOTHING)
  */
 /* 306de: 00e08d14 */
 /* 206de: 00e0845c */
+/* 104de: 00fcc6b4 */
 VOID v_pmarker(NOTHING)
 {
 	int16_t i, j, num_lines, num_vert, x_center, y_center, sav_points[10];
@@ -250,16 +254,15 @@ VOID v_pmarker(NOTHING)
 			{
 				*pts_in++ = x_center + scale * (*m_ptr++);
 				*pts_in++ = y_center + scale * (*m_ptr++);
-			}							/* End for:  extract points. */
+			}
 
 			/* Output the polyline. */
 
 			mrk_ptr = m_ptr;			/* Save for next pass */
 			v_pline();
 			m_ptr = mrk_ptr;
-		}								/* End for:  over the number of polylines defining the marker. */
-
-	}									/* End for:  over marker points. */
+		}
+	}
 
 	/* Restore the PTSIN pointer */
 
@@ -281,6 +284,7 @@ VOID v_pmarker(NOTHING)
  */
 /* 306de: 00e08e5a */
 /* 206de: 00e085a2 */
+/* 104de: 00fcc7fa */
 VOID v_fillarea(NOTHING)
 {
 	plygn();
@@ -292,6 +296,7 @@ VOID v_fillarea(NOTHING)
  */
 /* 306de: 00e08e66 */
 /* 206de: 00e085ae */
+/* 104de: 00fcc806 */
 VOID v_gdp(NOTHING)
 {
 	int16_t i, ltmp_end, rtmp_end;
@@ -391,6 +396,7 @@ VOID v_gdp(NOTHING)
  */
 /* 306de: 00e09016 */
 /* 206de: 00e0875e */
+/* 104de: 00fcc9b6 */
 VOID vql_attributes(NOTHING)
 {
 	register int16_t *pointer;
@@ -417,6 +423,7 @@ VOID vql_attributes(NOTHING)
  */
 /* 306de: 00e09072 */
 /* 206de: 00e087ba */
+/* 104de: 00fcca12 */
 VOID vqm_attributes(NOTHING)
 {
 	register int16_t *pointer;
@@ -444,6 +451,7 @@ VOID vqm_attributes(NOTHING)
  */
 /* 306de: 00e090d2 */
 /* 206de: 00e0881a */
+/* 104de: 00fcca72 */
 VOID vqf_attributes(NOTHING)
 {
 	register int16_t *pointer;
@@ -493,6 +501,7 @@ VOID pline(NOTHING)
 
 /* 306de: 00e091ae */
 /* 206de: 00e088f6 */
+/* 104de: 00fccb4e */
 BOOLEAN clip_line(NOTHING)
 {
 #if BINEXACT & (TOSVERSION < 0x400) /* only register declaration different */
@@ -549,6 +558,7 @@ BOOLEAN clip_line(NOTHING)
 
 /* 306de: 00e0932a */
 /* 206de: 00e08a72 */
+/* 104de: 00fcccca */
 int16_t code(P(int16_t ) x, P(int16_t ) y)
 PP(int16_t x;)
 PP(int16_t y;)
@@ -572,6 +582,7 @@ PP(int16_t y;)
 
 /* 306de: 00e09382 */
 /* 206de: 00e08aca */
+/* 104de: 00fccd22 */
 VOID plygn(NOTHING)
 {
 	register int16_t *pointer, i, k;
@@ -650,6 +661,7 @@ VOID plygn(NOTHING)
  */
 /* 306de: 00e094e2 */
 /* 206de: 00e08c52 */
+/* 104de: 00fcceaa */
 VOID gdp_rbox(NOTHING)
 {
 	register int16_t i, j;
@@ -774,6 +786,7 @@ VOID gdp_rbox(NOTHING)
  */
 /* 306de: 00e09824 */
 /* 206de: 00e08ffc */
+/* 104de: 00fcd254 */
 VOID gdp_arc(NOTHING)
 {
 	register int16_t *pointer;
@@ -827,6 +840,7 @@ VOID clc_nsteps(NOTHING)
  */
 /* 306de: 00e0990a */
 /* 206de: 00e090e2 */
+/* 104de: 00fcd33a */
 VOID gdp_ell(NOTHING)
 {
 	register int16_t *pointer;
@@ -1091,6 +1105,7 @@ VOID cir_dda(NOTHING)
 
 /* 306de: 00e09e1e */
 /* 206de: 00e0956c */
+/* 104de: 00fcd7c4 */
 VOID wline(NOTHING)
 {
 	int16_t i, k, box[10];							/* box two high to close polygon */
@@ -1178,7 +1193,7 @@ VOID wline(NOTHING)
 			vy = SMUL_DIV(vx, xsize, ysize);
 			vx = k;
 			perp_off(&vx, &vy);
-		}								/* End else:  neither horizontal nor vertical. */
+		}
 
 		/* Prepare the control and points parameters for the polygon call. */
 
@@ -1221,7 +1236,7 @@ VOID wline(NOTHING)
 
 		wx1 = wx2;
 		wy1 = wy2;
-	}									/* End for:  over number of points. */
+	}
 
 	/* Restore the attribute environment. */
 
@@ -1231,6 +1246,7 @@ VOID wline(NOTHING)
 
 /* 306de: 00e0a010 */
 /* 206de: 00e09756 */
+/* 104de: 00fcd9ae */
 VOID perp_off(P(int16_t *) px, P(int16_t *) py)
 PP(int16_t *px;)
 PP(int16_t *py;)
@@ -1302,9 +1318,9 @@ PP(int16_t *py;)
 			else
 			{
 				u--;
-			}							/* End else:  continue on row. */
-		}								/* End else:  other than top row. */
-	}									/* End FOREVER loop. */
+			}
+		}
+	}
 
 	/* Transform the solution according to the quadrant. */
 
@@ -1314,6 +1330,7 @@ PP(int16_t *py;)
 
 /* 306de: 00e0a154 */
 /* 206de: 00e09896 */
+/* 104de: 00fcdaee */
 VOID quad_xform(P(int) quad, P(int) x, P(int) y, P(int16_t *) tx, P(int16_t *) ty)
 PP(int quad;)
 PP(int x;)
@@ -1332,7 +1349,7 @@ PP(int16_t *ty;)
 	case 3:
 		*tx = -x;
 		break;
-#if ((TOSVERSION == 0x206) | (TOSVERSION == 0x208)) & BINEXACT
+#if (TOSVERSION < 0x300) & BINEXACT
 		asm("ds.b 0"); /* hmpf, optimizer seems to have missed to remove superfluous bra */
 #endif
 	}
@@ -1347,8 +1364,11 @@ PP(int16_t *ty;)
 	case 3:
 	case 4:
 		*ty = -y;
-#if ((TOSVERSION != 0x206) & (TOSVERSION != 0x208)) | !BINEXACT /* hmpf */
+#if (TOSVERSION < 0x200) | (TOSVERSION >= 0x300) | !BINEXACT /* hmpf */
 		break;
+#endif
+#if (TOSVERSION < 0x200) & BINEXACT
+		asm("ds.b 0"); /* hmpf, optimizer seems to have missed to remove superfluous bra */
 #endif
 	}
 }
@@ -1356,6 +1376,7 @@ PP(int16_t *ty;)
 
 /* 306de: 00e0a1cc */
 /* 206de: 00e0990c */
+/* 104de: 00fcdb66 */
 VOID do_circ(P(int16_t) cx, P(int16_t) cy)
 PP(int16_t cx;)
 PP(int16_t cy;)
@@ -1416,6 +1437,7 @@ PP(int16_t cy;)
 
 /* 306de: 00e0a2ca */
 /* 206de: 00e09a14 */
+/* 104de: 00fcdc6e */
 VOID s_fa_attr(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1436,12 +1458,12 @@ VOID s_fa_attr(NOTHING)
 	LV(s_endsty) = work_ptr->line_end;
 	work_ptr->line_beg = SQUARED;
 	work_ptr->line_end = SQUARED;
-
-}										/* End "s_fa_attr". */
+}
 
 
 /* 306de: 00e0a336 */
 /* 206de: 00e09a80 */
+/* 104de: 00fcdcda */
 VOID r_fa_attr(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1454,11 +1476,12 @@ VOID r_fa_attr(NOTHING)
 	work_ptr->fill_per = LV(s_fill_per);
 	work_ptr->line_beg = LV(s_begsty);
 	work_ptr->line_end = LV(s_endsty);
-}										/* End "r_fa_attr". */
+}
 
 
 /* 306de: 00e0a36e */
 /* 206de: 00e09ab8 */
+/* 104de: 00fcdd12 */
 VOID do_arrow(NOTHING)
 {
 	int16_t x_start, y_start, new_x_start, new_y_start;
@@ -1498,11 +1521,12 @@ VOID do_arrow(NOTHING)
 	/* End if:  ending point is arrowed. */
 	/* Restore the attribute environment. */
 	r_fa_attr();
-}										/* End "do_arrow". */
+}
 
 
 /* 306de: 00e0a40a */
 /* 206de: 00e09b54 */
+/* 104de: 00fcddae */
 VOID arrow(P(int16_t *) xy, P(int16_t) inc)
 PP(int16_t *xy;)
 PP(int16_t inc;)
@@ -1546,7 +1570,7 @@ PP(int16_t inc;)
 
 		if ((line_len = vec_len(ABS(dx), ABS(dy))) >= arrow_len)
 			break;
-	}									/* End for:  over i. */
+	}
 
 	/* Set xybeg to the point we found */
 
@@ -1609,12 +1633,13 @@ PP(int16_t inc;)
 	{
 		*ptr2 = *ptr1;
 		*(ptr2 + 1) = *(ptr1 + 1);
-	}									/* End while. */
-}										/* End "arrow". */
+	}
+}
 
 
 /* 306de: 00e0a676 */
 /* 206de: 00e09dc0 */
+/* 104de: 00fce01a */
 VOID init_wk(NOTHING)
 {
 	register int16_t l;
@@ -1736,6 +1761,7 @@ VOID init_wk(NOTHING)
  */
 /* 306de: 00e0a886 */
 /* 206de: 00e09fd0 */
+/* 104de: 00fce22a */
 VOID d_opnvwk(NOTHING)
 {
 	register int16_t handle;
@@ -1809,6 +1835,7 @@ VOID d_opnvwk(NOTHING)
  */
 /* 306de: 00e0a900 */
 /* 206de: 00e0a062 */
+/* 104de: 00fce2bc */
 VOID d_clsvwk(NOTHING)
 {
 	register ATTRIBUTE *work_ptr;
@@ -1834,6 +1861,7 @@ VOID d_clsvwk(NOTHING)
  */
 /* 306de: 00e0a956 */
 /* 206de: 00e0a0b8 */
+/* 104de: 00fce312 */
 VOID dsf_udpat(NOTHING)
 {
 	register int16_t *sp, *dp, i, count;

@@ -45,6 +45,7 @@
 
 /* 306de: 00e07f20 */
 /* 206de: 00e073ac */
+/* 104de: 00fcb604 */
 		xdef _SETBLT
 		xdef rout_init
 rout_init:
@@ -102,6 +103,7 @@ rCopyLoop:
 
 /* 306de: 00e07f48 */
 /* 206de: 00e073d4 */
+/* 104de: 00fcb62c */
 		xdef _GETBLT
 _GETBLT:
 #if TOSVERSION >= 0x400

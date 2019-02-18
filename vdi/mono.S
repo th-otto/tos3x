@@ -42,6 +42,7 @@ fail_ret:
 *  Entry point here..
 /* 306de: 00e0c050 */
 /* 206de: 00e0c2e2 */
+/* 104de: 00fd0542 */
 	xdef	_MONO8XHT
 _MONO8XHT:
 #if TOSVERSION < 0x400

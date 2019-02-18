@@ -50,6 +50,7 @@
 *	a2	pointer to LineA variables
 
 /* 206de: 00e0c644 */
+/* 104de: 00fd08a4 */
 	xdef	hb_rect
 hb_rect:
 

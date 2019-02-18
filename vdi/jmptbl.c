@@ -34,7 +34,9 @@
 #include "gsxdef.h"
 #include "gsxextrn.h"
 
+/* VDI functions 1 - 39 */
 /* 306de: 00e3d65e */
+/* 104de: 00feade6 */
 VOID (*jmptb1[]) PROTO((NOTHING)) =
 {
 	v_opnwk,
@@ -78,7 +80,9 @@ VOID (*jmptb1[]) PROTO((NOTHING)) =
 	dst_alignment
 };
 
+/* VDI functions 100 - 131 */
 /* 306de: 00e3d6fa */
+/* 104de: 00feae82 */
 VOID (*jmptb2[]) PROTO((NOTHING)) =
 {
 	d_opnvwk,
@@ -120,6 +124,7 @@ VOID (*jmptb2[]) PROTO((NOTHING)) =
  ************************************************************************/
 
 /* 306de: 00e07fa2 */
+/* 104de: 00fcb684 */
 VOID SCREEN(NOTHING)
 {
 	register int16_t opcode, r, *control;

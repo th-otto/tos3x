@@ -50,6 +50,7 @@ OF4 equ -FBASE-4
 
 /* 306de: 00e0e104 */
 /* 206de: 00e0e9ba */
+/* 104de: 00fd2b1a */
 		xdef	 sb_mono
 sb_mono:
 #if TOSVERSION >= 0x400

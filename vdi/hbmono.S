@@ -48,6 +48,7 @@ OF equ FBASE
 *   a1   =  line A variable reference base
 *-
 /* 206de: 00e0c336 */
+/* 104de: 00fd0596 */
 	xdef	 hb_mono
 hb_mono:
 #if TOSVERSION >= 0x400

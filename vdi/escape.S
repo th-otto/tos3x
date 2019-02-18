@@ -137,6 +137,7 @@ O6 equ 6 ; WTF? why?
 
 /* 306de: 00e07226 */
 /* 206de: 00e06094 */
+/* 104de: 00fca2ec */
 	xdef	_v_escape
 _v_escape:
 	PIXL6(a4)
@@ -168,7 +169,7 @@ esc_tbl:
 	dc.w	v_rvoff-esc_tbl			; reverse video off
 	dc.w	vq_curaddress-esc_tbl	; inquire current alpha cursor address
 	dc.w	vq_tabstatus-esc_tbl	; inquire tablet status
-	dc.w	vq_hardcopy-esc_tbl		; hardcopy
+	dc.w	v_hardcopy-esc_tbl		; hardcopy
 	dc.w	v_dspcur-esc_tbl		; place graphic cursor at location
 	dc.w	v_rmcur-esc_tbl			; remove last graphic cursor
 
@@ -202,6 +203,7 @@ v_offset:
 
 /* 306de: 00e07292 */
 /* 206de: 00e06100 */
+/* 104de: 00fca358 */
 	xdef	_asc_out
 _asc_out: ds.b 0
 /*
@@ -226,6 +228,7 @@ conout: ds.b 0
  */
 /* 306de: 00e0729e */
 /* 206de: 00e0610c */
+/* 104de: 00fca364 */
 	xdef _bcon2out
 _bcon2out: ds.b 0
 
@@ -244,6 +247,7 @@ gsx_conout:
 
 /* 306de: 00e072b4 */
 /* 206de: 00e06122 */
+/* 104de: 00fca37a */
 	xdef	normal_ascii
 normal_ascii:
 
@@ -313,6 +317,10 @@ ringbell  equ $3684+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
 
 #if TOSVERSION == 0x208
 ringbell  equ $359E+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
+#endif
+
+#if TOSVERSION == 0x104
+ringbell  equ $33C4+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
 #endif
 
 	dc.w $6000,ringbell
@@ -522,6 +530,7 @@ b2w_tbl:
 
 /* 306de: 00e073e6 */
 /* 206de: 00e0625a */
+/* 104de: 00fca4b6 */
 vq_chcells:		move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
 		move.w	#2,8(a0)		; 2 integers are returned.
 
@@ -535,6 +544,7 @@ vq_chcells:		move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
 
 /* 306de: 00e07406 */
 /* 206de: 00e0627e */
+/* 104de: 00fca4d6 */
 v_esc_nop:
 esc_exit:	rts
 
@@ -545,7 +555,8 @@ esc_exit:	rts
 
 /* 306de: 00e07408 */
 /* 206de: 00e06280 */
-vq_hardcopy:	move.w	#20,-(sp)		; Invoke bios
+/* 104de: 00fca4d8 */
+v_hardcopy:	move.w	#20,-(sp)		; Invoke bios
 		trap	#14
 
 		addq.l	#2,sp			; clean up stack
@@ -558,6 +569,7 @@ vq_hardcopy:	move.w	#20,-(sp)		; Invoke bios
 
 /* 306de: 00e07412 */
 /* 206de: 00e0628a */
+/* 104de: 00fca4e2 */
 v_enter_cur:		bsr	escE			; clear and home.
 		bra	esce			; show cursor regardless of cnt
 
@@ -568,6 +580,7 @@ v_enter_cur:		bsr	escE			; clear and home.
 
 /* 306de: 00e07418 */
 /* 206de: 00e06290 */
+/* 104de: 00fca4e8 */
 v_exit_cur:		bsr	hide_cursor		; cursor hidden upon exit
 *						; fall through to clr and home
 
@@ -588,6 +601,7 @@ escE:		bsr	escH			; home cursor.
 
 /* 306de: 00e07420 */
 /* 206de: 00e06298 */
+/* 104de: 00fca4f0 */
 escA:
 v_curup:		move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor Y
 		beq	esc_exit		; if top of screen, do nothing
@@ -604,6 +618,7 @@ up_cursor:	subq.w	#1,d1			; d1 <- Y of previous line
 
 /* 306de: 00e07430 */
 /* 306de: 00e062a8 */
+/* 104de: 00fca500 */
 escB:
 v_curdown:		move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor Y
 		cmp.w	LV((v_celmy)+O6,a4),d1
@@ -621,6 +636,7 @@ down_cursor:	addq.w	#1,d1			; d1 <- Y of next line
 
 /* 306de: 00e07444 */
 /* 206de: 00e062bc */
+/* 104de: 00fca514 */
 escC:
 v_curright:
 
@@ -640,6 +656,7 @@ v_curright:
 
 /* 306de: 00e07458 */
 /* 206de: 00e062d0 */
+/* 104de: 00fca528 */
 escD:
 v_curleft:
 
@@ -658,6 +675,7 @@ v_curleft:
 
 /* 306de: 00e07468 */
 /* 206de: 00e062e0 */
+/* 104de: 00fca538 */
 escH:
 v_curhome:
 
@@ -673,6 +691,7 @@ v_curhome:
 
 /* 306de: 00e07470 */
 /* 206de: 00e062e8 */
+/* 104de: 00fca540 */
 escJ:
 v_eeos:
 
@@ -699,6 +718,7 @@ v_eeos:
 
 /* 306de: 00e07482 */
 /* 206de: 00e062fa */
+/* 104de: 00fca552 */
 escK:
 v_eeol:	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- current cursor X
 		move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current line Y
@@ -713,6 +733,7 @@ v_eeol:	move.w	LV((v_curcx)+O6,a4),d0		; d0 <- current cursor X
 
 /* 306de: 00e07494 */
 /* 206de: 00e0630c */
+/* 104de: 00fca564 */
 vs_curaddress:
 
 	move.l	LV((INTIN)+O6,a4),a0		; a0 -> INTIN array
@@ -729,6 +750,7 @@ vs_curaddress:
 
 /* 306de: 00e074a6 */
 /* 206de: 00e0631e */
+/* 104de: 00fca576 */
 vs_curtext:
 
 	move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
@@ -757,6 +779,7 @@ ef12_lend:
 
 /* 306de: 00e074c8 */
 /* 206de: 00e06340 */
+/* 104de: 00fca598 */
 escp:
 v_rvon:	bset.b	#F_REVID,LV(V_STAT_0,a4)	 ; set reverse bit in v_stat_0
 		rts
@@ -769,6 +792,7 @@ v_rvon:	bset.b	#F_REVID,LV(V_STAT_0,a4)	 ; set reverse bit in v_stat_0
 
 /* 306de: 00e074ce */
 /* 206de: 00e06346 */
+/* 104de: 00fca59e */
 escq:
 v_rvoff:	bclr.b	#F_REVID,LV(V_STAT_0,a4)		; clr reverse bit in v_stat_0
 		rts
@@ -780,6 +804,7 @@ v_rvoff:	bclr.b	#F_REVID,LV(V_STAT_0,a4)		; clr reverse bit in v_stat_0
 
 /* 306de: 00e074d4 */
 /* 206de: 00e0634c */
+/* 104de: 00fca5a4 */
 vq_curaddress:
 
 	move.l	LV((CONTRL)+O6,a4),a0		; a0 -> CONTRL array.
@@ -800,6 +825,7 @@ vq_curaddress:
 
 /* 306de: 00e074f4 */
 /* 206de: 00e0636c */
+/* 104de: 00fca5c4 */
 vq_tabstatus:
 
 	moveq.l	#1,d0
@@ -816,6 +842,7 @@ vq_tabstatus:
 
 /* 306de: 00e07506 */
 /* 206de: 00e0637e */
+/* 104de: 00fca5d6 */
 v_dspcur:
 
 	movea.l	LV((INTIN)+O6,a4),a0		; a0 -> INTIN array.
@@ -829,6 +856,7 @@ v_dspcur:
 
 /* 306de: 00e07512 */
 /* 206de: 00e0638a */
+/* 104de: 00fca5e2 */
 v_rmcur:
 
 	jmp	_v_hide_c		; hide graphic cursor.
@@ -919,6 +947,7 @@ escd:
 
 /* 306de: 00e07562 */
 /* 206de: 00e063de */
+/* 104de: 00fca636 */
 show_cursor:
 
 	move.w	LV((disab_cnt)+O6,a4),d0	; old count=0  =>  cursor is visible
@@ -963,6 +992,7 @@ escf:
 
 /* 306de: 00e07592 */
 /* 206de: 00e0640e */
+/* 104de: 00fca666 */
 hide_cursor:
 
 	addq.w	#1,LV((disab_cnt)+O6,a4)	; increment the disable counter.
@@ -1067,6 +1097,7 @@ escw:
 
 /* 306de: 00e075f8 */
 /* 206de: 00e06474 */
+/* 104de: 00fca6cc */
 ascii_cr:
 
 	clr.w	d0			; d0 <- X of beginning of line
@@ -1080,6 +1111,7 @@ ascii_cr:
 
 /* 306de: 00e07602 */
 /* 206de: 00e0647e */
+/* 104de: 00fca6d6 */
 ascii_lf:
 
 	move.w	LV((v_curcy)+O6,a4),d1		; d1 <- current cursor y.
@@ -1125,6 +1157,7 @@ ascii_lf:
 
 /* 306de: 00e0761a */
 /* 206de: 00e06496 */
+/* 104de: 00fca6ee */
 	xdef blink
 blink:	PIXL6(a4)
 
@@ -1163,6 +1196,7 @@ bl_exit:
  */
 /* 306de: 00e0764c */
 /* 206de: 00e064c8 */
+/* 104de: 00fca720 */
 	xdef _cursconf
 _cursconf:
 	PIXL6(a4)
@@ -1237,6 +1271,7 @@ getdelay:
 
 /* 306de: 00e076a4 */
 /* 206de: 00e06520 */
+/* 104de: 00fca778 */
 ascii_out:
 	PIXL6(a4)
 	cmp.w	LV((v_fnt_st)+O6,a4),d1		; test against minimum
@@ -1607,6 +1642,7 @@ st_move_cursor:
 #else
 /* 306de: 00e077f6 */
 /* 206de: 00e06826 */
+/* 104de: 00fcaa7e */
 move_cursor:
 #endif
 		addq.w	#1,LV((disab_cnt)+O6,a4)	; << BEGIN CRITICAL SECTION >>
@@ -1702,6 +1738,7 @@ neg_byte:
 *******************************************************************************
 
 /* 306de: 00e07858 */
+/* 104de: 00fcaac4 */
 v_fontinit:	move.l	LV((INTIN)+O6,a4),a0
 		move.l	(a0),a0			; a0 -> font header.
 
@@ -1714,6 +1751,7 @@ v_fontinit:	move.l	LV((INTIN)+O6,a4),a0
 *******************************************************************************
 
 /* 306de: 00e0785e */
+/* 104de: 00fcaaca */
 	xdef	gl_f_init
 gl_f_init: ds.b 0
 		PIXL6(a4)

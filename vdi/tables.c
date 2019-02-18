@@ -105,7 +105,7 @@ int16_t const ROM_DEV_TAB[45] = {
 	1,		/* 36	Text Rotation			 */
 	1,		/* 37	Polygonfill			     */		
 	0,		/* 38	Cell Array			     */
-#if TOSVERSION >= 0x300
+#if (TOSVERSION < 0x200) | (TOSVERSION >= 0x300)
 	MAX_PAL,/* 39	Pallette size			 */
 #else
 	0,		/* 39	Pallette size			 */
@@ -139,7 +139,7 @@ int16_t const ROM_SIZ_TAB[12] = {
 
 int16_t const ROM_INQ_TAB[45] = {
 	4,		/*  0  type of alpha/graphic controllers*/
-#if TOSVERSION >= 0x300
+#if (TOSVERSION < 0x200) | (TOSVERSION >= 0x300)
 	MAX_PAL,	/*  1  number of background colors	*/
 #else
 	0,		/*  1  number of background colors	*/

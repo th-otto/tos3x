@@ -70,6 +70,7 @@ O6 equ 6 /* WTF? why? */
 
 /* 306de: 00e0da98 */
 /* 206de: 00e0e45c */
+/* 104de: 00fd25bc */
 		xdef sb_cell
 sb_cell:
 #if TOSVERSION >= 0x300
@@ -231,6 +232,7 @@ word_i:		move.w	(a2),d5		/* d5 <- character word */
 
 /* 306de: 00e0db90 */
 /* 206de: 00e0e4da */
+/* 104de: 00fd263a */
 		xdef sb_scrup
 sb_scrup:
 	move.w	LV((v_celmy)+O6,a4),d3		/* d3 <- Ymax */
@@ -282,6 +284,7 @@ blank_up:
 
 /* 306de: 00e0dbd4 */
 /* 206de: 00e0e51e */
+/* 104de: 00fd267e */
 		xdef sb_scrdn
 sb_scrdn:
 	move.w	LV((v_celmy)+O6,a4),d3		/* d3 <- Ymax */
@@ -372,6 +375,7 @@ blank_tab:
 
 /* 306de: 00e0dc38 */
 /* 206de: 00e0e582 */
+/* 104de: 00fd26e2 */
 		xdef sb_blank
 sb_blank:
 	movem.l	d0-d3/a0-a1,-(sp)

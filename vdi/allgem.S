@@ -42,6 +42,7 @@ DEFREZ    equ 6
  *******************************************************************************/
 
 /* 306de: 00e06676 */
+/* 104de: 00fcb270 */
 		xdef	_GSHIFT_S
 _GSHIFT_S:	move.b	_shifty,d0	; Get the keyboard state
 		andi.w	#$000F,d0	; We only want the low 4 bits
@@ -64,6 +65,7 @@ return:		rts
  *******************************************************************************/
 
 /* 306de: 00e06682 */
+/* 104de: 00fcb27c */
 		xdef	_v_clrwk
 _v_clrwk: PIXLA(a0)
 #if TOSVERSION < 0x400
@@ -192,6 +194,7 @@ _INIT_G:	PIXLA(a1)
  *******************************************************************************/
 
 /* 306de: 00e066e6 */
+/* 104de: 00fcb2e0 */
    		xdef	_vex_timv
 _vex_timv:	PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0
@@ -335,6 +338,7 @@ FindDev6:
  * old Version for ST compatible modes only
  */
 /* 206de: 00e070b8 */
+/* 104de: 00fcb310 */
 _FindDevice:
 		move.w    #$0004,-(a7)
         trap      #14         /* Getrez() */
@@ -400,7 +404,8 @@ FindDev5:
 #endif
 
 #if (TOSVERSION < 0x300) | TP_50
-		
+
+#if TOSVERSION >= 0x200
 paltab4:  dc.w $0fff
           dc.w $0f00
           dc.w $00f0
@@ -421,6 +426,28 @@ paltab16: dc.w $0fff
           dc.w $0f3f
           dc.w $03ff
           dc.w $0000
+#else
+paltab4:  dc.w $0777
+          dc.w $0700
+          dc.w $0070
+          dc.w $0000
+paltab16: dc.w $0777
+          dc.w $0700
+          dc.w $0070
+          dc.w $0770
+          dc.w $0007
+          dc.w $0707
+          dc.w $0077
+          dc.w $0555
+          dc.w $0333
+          dc.w $0733
+          dc.w $0373
+          dc.w $0773
+          dc.w $0337
+          dc.w $0737
+          dc.w $0377
+          dc.w $0000
+#endif
 
 #endif
 
@@ -435,6 +462,7 @@ paltab16: dc.w $0fff
  *******************************************************************************/
 
 /* 306de: 00e067ee */
+/* 104de: 00fcb3c6 */
 tick_int:
 #if TOSVERSION >= 0x400
 		subq.l  #4,sp			; leave some room on the stack
@@ -463,6 +491,7 @@ tick_int:
  *******************************************************************************/
 
 /* 306de: 00e06806 */
+/* 104de: 00fcb3de */
    		xdef	_DINIT_G
 _DINIT_G:	PIXLA(a1)
 		move.l	PIXLV(tim_chain,a1),-(sp)	; reset timer vector
@@ -537,6 +566,7 @@ _GCHC_KEY:	PIXLA(a1)
  *******************************************************************************/
 
 /* 306de: 00e06830 */
+/* 104de: 00fcb408 */
 		xdef	_GLOC_KEY
 _GLOC_KEY:	PIXLA(a1)
 		moveq.l	#3,d1		; d1 <- mask for updating cur_ms_stat
@@ -587,6 +617,7 @@ key_stat:	move.w	 d0,-(sp)	; preserve mouse status
  *******************************************************************************/
 
 /* 306de: 00e0687e */
+/* 104de: 00fcb456 */
    		xdef	_GCHR_KEY
 _GCHR_KEY:	move.w	#DEV,-(sp)	; see if a character present
 		move.w	#BCONSTAT,-(sp)
@@ -624,6 +655,7 @@ no_char:	rts
  *******************************************************************************/
 
 /* 306de: 00e068ac */
+/* 104de: 00fcb484 */
 mouse_init:
 		PIXLA(a1)
 		lea	user_init,a0		; button and motion vectors
@@ -693,6 +725,7 @@ user_init:	rts
  *******************************************************************************/
 
 /* 306de: 00e06932 */
+/* 104de: 00fcb50a */
 dinit_mouse:	move.l	_vblqueue,a0	; remove draw routine from vblank queue
 		clr.l	(a0)
 
@@ -862,6 +895,7 @@ esc3:		move.l	_v_bas_ad,PIXLV(v_cur_ad,a1)	; home cursor.
 
 /* 306de: 00e0694a */
 /* 206de: 00e072ca */
+/* 104de: 00fcb522 */
 		xdef	esc_init
 		xdef	_esc_init
 esc_init:
@@ -928,6 +962,7 @@ esc1:
 
 /* 306de: 00e069f4 */
 /* 206de: 00e07354 */
+/* 104de: 00fcb5ac */
 		xdef resetdev
 resetdev:
         move.l    #_STSoftList,PIXLV(LA_SOFTROUTINES,a1)

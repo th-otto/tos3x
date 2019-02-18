@@ -285,21 +285,15 @@ __sbss:	ds.b 0 /* end of "base" BSS; start of the BSS area that is zeroed by BIO
 
 	INT(_msec)
 
-	ds.w 1 /* unused */
+	ds.b 1024 /* unused */
 
-	ds.l 1 /* unused */
-
-	ds.b 30
-	
-	ds.b 988
-	
 	V(_supstk,w,SUPSIZ)
 
 	INT(_time)
 
 	V(_root,l,MAXQUICK)
 
-	ds.b 60 /* unused? $0000577A */
+	ds.b 60 /* unused? */
 
 	V(_glbkbchar,l,3*KBBUFSZ)
 
@@ -701,7 +695,7 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	PTR(_rs_hdr)
 	PTR(_gl_tmp)
 	
-	ds.b 16 /* unused? $0000e630 */
+	ds.b 16 /* unused? */
 	
 	INT(_nodesk)
 	INT(_srcbuf)

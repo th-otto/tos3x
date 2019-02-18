@@ -168,6 +168,7 @@ chr_op:		dc.w	BM_SRC+00,BM_SRC+12,BM_SRC+03,BM_SRC+15
 
 #if TOSVERSION < 0x300
 /* 206de: 00e0667c */
+/* 104de: 00fca8d4 */
 p_sc_up:
 	V_JUMP(V_SCRUP,a4,a5)		; a5 -> version of p_sc_up
 #endif

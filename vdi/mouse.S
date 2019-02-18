@@ -68,6 +68,7 @@
  *******************************************************************************/
 /* 306de: 00e0c300 */
 /* 206de: 00e0c79a */
+/* 104de: 00fd09fa */
 		xdef	mouse_rel
 mouse_rel:	movem.l	d0-d7/a0-a6,-(sp)
 		PIXLA(a2)
@@ -232,6 +233,7 @@ cur_replace:
  */
 /* 306de: 00e0c3d8 */
 /* 206de: 00e0c86e */
+/* 104de: 00fd0ace */
 		xdef	_MOV_CUR
 _MOV_CUR: PIXLA(a0)
 		move.w	SR,-(sp)	/* save old status register */
@@ -312,6 +314,7 @@ vblank_exit:	rts
 
 /* 306de: 00e0c436 */
 /* 206de: 00e0c8cc */
+/* 104de: 00fd0b2c */
 		xdef	_vex_butv
 _vex_butv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		/* point to contrl array */
@@ -331,6 +334,7 @@ _vex_butv: PIXLA(a1)
 
 /* 306de: 00e0c44e */
 /* 206de: 00e0c8e4 */
+/* 104de: 00fd0b44 */
 		xdef	_vex_motv
 _vex_motv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		/* point to contrl array */
@@ -350,6 +354,7 @@ _vex_motv: PIXLA(a1)
 
 /* 306de: 00e0c466 */
 /* 206de: 00e0c8fc */
+/* 104de: 00fd0b5c */
 		xdef	_vex_curv
 _vex_curv: PIXLA(a1)
 		move.l	PIXLV(CONTRL,a1),a0		/* point to contrl array */
@@ -444,6 +449,7 @@ st_cur_display:
 #else
 /* 306de: 00e0c47e */
 /* 206de: 00e0c914 */
+/* 104de: 00fd0b74 */
 		xdef	cur_display
 cur_display:
 #endif
@@ -1012,6 +1018,7 @@ st_cur_replace:
 #else
 /* 306de: 00e0c694 */
 /* 206de: 00e0cae6 */
+/* 104de: 00fd0d46 */
 		xdef cur_replace
 cur_replace:
 #endif
@@ -1262,6 +1269,7 @@ hang_it_up:
  */
 /* 306de: 00e0c7fe */
 /* 206de: 00e0cbb6 */
+/* 104de: 00fd0e16 */
 		xdef	_HIDE_CUR
 _HIDE_CUR:	PIXLA(a5)
 		lea	PIXLV(HIDE_CNT,a5),a2
@@ -1290,6 +1298,7 @@ hid_cur1:	rts
  */
 /* 306de: 00e0c81c */
 /* 206de: 00e0cbd4 */
+/* 104de: 00fd0e34 */
 		xdef	_DIS_CUR
 _DIS_CUR:	PIXLA(a5)
 		cmp.w	#1,PIXLV(HIDE_CNT,a5)	/* If cur is to be redisplayed, */
@@ -1353,6 +1362,7 @@ DEV_COL equ DEV_TAB+26
 
 /* 306de: 00e0c864 */
 /* 206de: 00e0cc1c */
+/* 104de: 00fd0e7c */
 		xdef	_vsc_form
 _vsc_form: PIXLA(a2)
 		addq.b	#1,PIXLV(mouse_flag,a2)	/* deny access to mouse_cdb */
@@ -1432,6 +1442,7 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
  */
 /* 306de: 00e0c8f8 */
 /* 206de: 00e0ccb0 */
+/* 104de: 00fd0f10 */
 		xdef	_SET_CUR
 _SET_CUR: PIXLA(a1)
 		lea	PIXLV(xydraw,a1),a0		/* a0 -> vblank draw parameter block */
@@ -1458,6 +1469,7 @@ _SET_CUR: PIXLA(a1)
  */
 /* 306de: 00e0c918 */
 /* 206de: 00e0ccd0 */
+/* 104de: 00fd0f30 */
 		xdef	_vq_mouse
 _vq_mouse:
 		PIXLA(a2)
