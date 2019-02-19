@@ -51,7 +51,6 @@ VOID pass1a(NOTHING)
 	register long reduced;
 	register int i, wsize;
 	long itpos;
-	unsigned short opcode;
 	
 	pitix = ITBSZ;
 	reduced = itoffset = 0L;
@@ -102,26 +101,6 @@ VOID pass1a(NOTHING)
 					} else
 					{
 						continue;
-					}
-				} else if (itype == ITCN && format == 9 && extflg && aesflag)
-				{
-					if ((opcode = isaes(extsym->name)) != 0)
-					{
-						i = 4;
-						if ((stbuf[0].itrl & 0xff) < (ITOP1 + 1))
-						{
-							rpterr(_("i.t. overflow"));
-							asabort();
-						}
-						stbuf[2].itop.ptrw2 = dcptr;
-						stbuf[2].itrl = WORDSIZ;
-						stbuf[ITOP1].itty = ITCN;
-						stbuf[ITOP1].itrl = ABS;
-						stbuf[ITOP1].itop.l = opcode;
-						stbuf[ITOP1 + 1].itty = ITSP;
-						stbuf[ITOP1 + 1].itrl = 0;
-						stbuf[ITOP1 + 1].itop.oper = EOLC;
-						wsize = (ITOP1 + 1) * sizeof(struct it);
 					}
 				}
 				if (i != 0)

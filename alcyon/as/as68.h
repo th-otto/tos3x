@@ -324,7 +324,6 @@ short *prlb;
 short ins[5];           /* holds instruction words */
 
 short extflg, extref;   /* external in expr */
-struct symtab *extsym;
 
 struct op {
     short ea;           /* effective address bits */

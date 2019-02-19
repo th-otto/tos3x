@@ -650,8 +650,7 @@ VOID opito(NOTHING)
 	{
 		if (numops != 2 || immed[1] || indir[1] || numcon[1] || numsym[1] || numreg[1] >= AREGLO)
 		{
-			stbuf[2].itop.ptrw2 = moveptr;	/* change it back */
-			opcpt = moveptr;
+			stbuf[2].itop.ptrw2 = opcpt = moveptr;	/* change it back */
 		}
 	}
 	
@@ -659,8 +658,28 @@ VOID opito(NOTHING)
 	{
 		if (numreg[0] && numreg[1] && indir[0] && indir[1])
 		{
-			stbuf[2].itop.ptrw2 = cmpmptr;
-			opcpt = cmpmptr;
+			stbuf[2].itop.ptrw2 = opcpt = cmpmptr;
+		}
+	}
+	
+	if (aesflag && (stbuf[2].itop.ptrw2 == jsrptr || stbuf[2].itop.ptrw2 == bsrptr) &&
+		stbuf[ITOP1].itty == ITSY)
+	{
+		register unsigned short opcode;
+		register struct symtab *extsym = stbuf[ITOP1].itop.ptrw2;
+		
+		if ((opcode = isaes(extsym->name)) != 0)
+		{
+			if (itwc < (ITOP1 + 1))
+			{
+				rpterr(_("i.t. overflow"));
+				asabort();
+			}
+			stbuf[2].itop.ptrw2 = opcpt = dcptr;
+			stbuf[2].itrl = WORDSIZ;
+			stbuf[ITOP1].itty = ITCN;
+			stbuf[ITOP1].itrl = ABS;
+			stbuf[ITOP1].itop.l = opcode;
 		}
 	}
 	
