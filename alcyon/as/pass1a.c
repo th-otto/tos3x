@@ -107,7 +107,6 @@ VOID pass1a(NOTHING)
 				{
 					if ((opcode = isaes(extsym->name)) != 0)
 					{
-						printf("replacing aes sym %s: $%04x\n", extsym->name, opcode);
 						i = 4;
 						if ((stbuf[0].itrl & 0xff) < (ITOP1 + 1))
 						{

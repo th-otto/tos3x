@@ -108,17 +108,17 @@ PP(int nas;)								/* number of A registers */
 
 	if (gflag)							/* for symbolic debugger */
 		oprintf("\n\t~_lE%d:", lineno);
-	if (nds || nas)
+	if (aesflag)
 	{
-		if (aesflag)
-		{
-			unsigned int mask = 1;
-			if (nds)
-				mask |= ((1 << nds) - 1) << (8 - nds - 2);
-			if (nas)
-				mask |= ((1 << nas) - 1) << (14 - nas - 2);
-			oprintf("\tdc.w $%04x\n", mask | 0xf000);
-		} else
+		unsigned int mask = 1;
+		if (nds)
+			mask |= ((1 << nds) - 1) << (8 - nds - 2);
+		if (nas)
+			mask |= ((1 << nas) - 1) << (14 - nas - 2);
+		oprintf("\tdc.w $%04x\n", mask | 0xf000);
+	} else
+	{
+		if (nds || nas)
 		{
 			oprintf("\ttst.l (sp)+\n\tmovem.l (sp)+,");	/* 1 arg stuff */
 			if (nds)
@@ -131,9 +131,8 @@ PP(int nas;)								/* number of A registers */
 				oprintf("R%d-R13", 14 - nas);
 			oputchar('\n');
 		}
-	}
-	if (nds == 0 || nas == 0 || !aesflag)
 		oprintf("\tunlk R14\n\trts\n");
+	}
 
 	SAVESTATE(savep, lfil, sbol);
 	if (!nds && !nas)					/* adjust for 1 arg */
