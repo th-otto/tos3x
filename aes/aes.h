@@ -104,7 +104,6 @@ typedef int BOOLEAN;
  * for functions that are supposed to be static,
  * but must be visible for the line-f trap table
  */
-#define LINEF_HACK (TOSVERSION <= 0x104)
 #if LINEF_HACK
 #define LINEF_STATIC
 #else
@@ -275,6 +274,7 @@ extern uint16_t gl_actbutcol;				/* activator button color */
 extern uint16_t gl_alrtcol;					/* alert background color */
 #endif
 extern int16_t crt_error;					/* critical error handler semaphore */
+extern int16_t used_acc;					/* currently number of acc  */
 
 #if (AESVERSION >= 0x330) | !BINEXACT
 extern int16_t adeskp[3];					/* desktop colors & backgrounds */

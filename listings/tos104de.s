@@ -62646,9 +62646,12 @@ gem.rsc:
 60BE: date
 60C0: bcbx
 6110: beptr
+611E: retsava
 6122: gl_rstype
 6124: gl_rschange
+6126: ustak
 61AA: diskin
+666A: xxaddr
 6A7E: ml_mnhold
 6A82: ml_ctrl
 6A8A: ml_pmown
@@ -62676,6 +62679,7 @@ gem.rsc:
 6F0C: sh_isgem
 6F14: gl_rlen
 6F18: gl_hbox
+6FEE: g_wsend
 6FF2: rs_global
 6FF8: elinkoff
 7002: gl_pglue
@@ -62684,12 +62688,12 @@ gem.rsc:
 700E: gl_rfull
 701A: appl_msg
 702C: gl_rscreen
-708A: autoexec
 7052: gl_kowner
 705A: gl_wbox
 705C: gl_mntree
 7060: gl_mowner
 706A: wind_spb
+708A: autoexec
 715E: intin
 742A: DOS_ERR
 745E: D

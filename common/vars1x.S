@@ -364,12 +364,19 @@ _endvdibss: ds.b 0
 	PTR(retsava)
 	INT(_gl_restype)
 	INT(_gl_rschange)
+	ds.b 2
 	V(ustak,l,33)
 	INT(_diskin)
+#if AESVERSION >= 0x200
 	INT(dummycmd)
 	INT(execmode)
 	LONG(execflags)
-	
+#endif
+#if AESVERSION < 0x200
+	PTR(_xxaddr)
+	INT(_g_wsend)
+#endif
+
 	ds.b 2 /* unused? $000083ac */
 	
 	PTR(_ad_rso)

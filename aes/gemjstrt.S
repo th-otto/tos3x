@@ -65,11 +65,13 @@ uda_size	equ	74+4*STACK_SIZE
    but harmless because only memory below that is accessed.
    Most likely wrong port from x86 version where u_supstk is 2 bytes
 */
+#if TOSVERSION >= 0x200
 init_size	equ	uda_size-2
+#else
+init_size	equ	uda_size
+#endif
 fsize		equ	100		* size of linef handler in bytes+ a little fat
 
-#define fline		0		/* 1-line "F" included */
-					/* 0-line "F" not included */
 
 
 
@@ -84,7 +86,9 @@ gemstart:
 	move.l	a7,a5		/* save stack */
 	move.l	#ustak+128,a7	/* switch stacks, dos needs a user stack  */
 	move.l	4(a5),a5	/* basepage address */
-/*	or.l	#7,$28(a5)	* prgflags in basepage */
+#if 0
+	or.l	#7,$28(a5)	/* prgflags in basepage */
+#endif
 	move.l	12(a5),d0	/* textlen */
 	add.l	20(a5),d0	/* datalen */
 	add.l	28(a5),d0	/* bsslen */
@@ -94,10 +98,17 @@ gemstart:
 	move	d0,-(a7)	/* junk word */
 	move	#$4a,-(a7)	/* Mshrink */
 	trap	#1
+#if (TOSVERSION >= 0x200) | !BINEXACT
 	adda.w	#12,a7
+#else
+	adda.l	#12,a7
+#endif
 
-/*	move.l	a7,-(a7)	* use same stacks for now */
+#if (TOSVERSION >= 0x200) | !BINEXACT
 	clr.l	-(a7)		/* Super(0L) */
+#else
+	move.l	a7,-(a7)	/* use same stacks for now */
+#endif
 	move.w	#32,-(a7)	/* drdos get sup mode */
 	trap	#1
 	addq	#6,a7
@@ -112,7 +123,7 @@ gemstart:
  */
 	movea.l	44(a5),a0		/* save the environment pointer */
 	move.l	a0,_ad_envrn
-	move.l	($4c2).w,d0			/* get drvbits */
+	move.l	ABSW2($4c2),d0			/* get drvbits */
 	and.l	#$4,d0			/* drive C there? */
 	beq.b	not_ours		/* nope, leave the env alone */
 	cmp.l	#$50415448,(a0)+		/* 'PATH' check 1st longword ; BUG: might be unaligned access */
@@ -121,9 +132,13 @@ gemstart:
 	bne.b	not_ours
 
 /* section changed 8/9/90 AKP */
+#if TOSVERSION >= 0x200
 	move.l	(a0),d0			/* get last long to d0 */
 	clr.b	d0			    /* clear last byte so it's "don't care" */
 	cmp.l	#$5c000000,d0		/* check for "\00" */
+#else
+	cmp.l   #$5C000000,(a0)
+#endif
 	bne.b	not_ours
 	move.b	#'C',-2(a0)		/* make it PATH=0C:\00 */
 
@@ -151,8 +166,8 @@ sh_start:
 /*
  *		 LINE "F"
  */
-#if fline
-	move.b	$2c,d0
+#if LINEF_HACK
+	move.b	ABSW2($2c),d0
 	beq	nolinef		/* linef vector already installed */
 	move.l	#fsize,-(a7)
 	move.w	#$48,-(a7)
@@ -160,20 +175,24 @@ sh_start:
 	addq.l	#6,a7
 	movea.l	d0,a0
 	move.w	#((fsize/2)-1),d1
-	movea.l	#_linefhandler,a1
+	movea.l	#linefhandler,a1
 lop:
 	move.w	(a1)+,(a0)+	/* move linef code to ram */
 	dbf	d1,lop
-	move.l	d0,$2c		/* install ram linef vector */
+	move.l	d0,ABSW2($2c)		/* install ram linef vector */
 nolinef:
 	nop
 #endif
 
 	move.w  #1,_diskin	/* added 08/28/85 */
-/*	clr.w	_g_wsend */
+#if AESVERSION < 0x200
+	clr.w	_g_wsend
+#endif
+
 
 /*	bra begin */
 
+#if AESVERSION >= 0x200
 	move.w	#$30,-(sp)	/* Sversion */
 	trap	#1
 	addq	#2,sp
@@ -231,6 +250,7 @@ beg:
 	move.w	#32,-(a7)	/* drdos get sup mode */
 	trap	#1		/* Super(0L) */
 	addq	#6,a7
+#endif
 
 begin:
 
@@ -244,19 +264,28 @@ beg1:
 
 	move.l	#_justretf,_drwaddr	/* initialize some bss pointers */
 	move.l	#_tikcod,_tikaddr
+#if AESVERSION < 0x200
+	move.l  #_xxcod,_xxaddr
+#endif
 
 /* initialize first stack pointer in first uda */
 
 	move.l	#_D,a6		/* base of uda */
 	move.l	a6,a5
+#if (TOSVERSION >= 0x200) | !BINEXACT
 	adda.w	#init_size,a6	/* add sizeof uda */
+#else
+	adda.l	#init_size,a6	/* add sizeof uda */
+#endif
 	move.l	a6,62(a5)	/* initialize stack pointer in uda */
 	move.l	a6,a7
 
 	jsr	_gem_main
 
+#if AESVERSION >= 0x200
 	clr	(sp)
 	trap	#1
+#endif
 
 /*
  * never get here
@@ -296,9 +325,16 @@ oktrap:
 	comm ustak,132
 	xdef	_diskin		/* added 08/2/8/85 */
 	comm _diskin,2	/* added */
+#if AESVERSION >= 0x200
 	xdef dummycmd
 	comm dummycmd,2
 	xdef execmode
 	comm execmode,2
 	xdef execflags
 	comm execflags,4
+#else
+	xdef _g_wsend
+	comm _g_wsend,2
+	xdef _xxaddr
+	comm _xxaddr,4
+#endif

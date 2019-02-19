@@ -100,3 +100,5 @@
 #endif
 
 #define CMDLEN 128
+
+#define LINEF_HACK (TOSVERSION <= 0x104)

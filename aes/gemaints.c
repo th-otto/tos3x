@@ -34,6 +34,13 @@
 #include "gemlib.h"
 
 
+#if AESVERSION < 0x200
+VOID xxcod(NOTHING)
+{
+}
+#endif
+
+
 /* 306de: 00e19944 */
 VOID signal(P(EVB *) e)
 PP(EVB *e;)
