@@ -1,4 +1,4 @@
-AS68_SRCS = dir.c expr.c list.c main.c misc.c pass1a.c pass2.c symt.c putchd.c libput.c libget.c
+AS68_SRCS = dir.c expr.c list.c main.c misc.c pass1a.c pass2.c symt.c aes.c putchd.c libput.c libget.c
 
 AS68_OBJS = $(AS68_SRCS:.c=.o)
 

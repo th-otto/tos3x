@@ -601,13 +601,33 @@ PP(struct symtab *apkptr;)
 	pkstr = apkstr;
 	pkptr = apkptr->name;
 	i = SYNAMLEN;
-	while (*pkstr && i)
+	while (i && *pkstr)
 	{
 		*pkptr++ = *pkstr++;
 		i--;
 	}
 	while (i--)
 		*pkptr++ = '\0';				/* pad with zeroes */
+}
+
+
+int nameeq(P(const char *) name1, P(const char *) name2, P(int) len)
+PP(register const char *name1;)
+PP(register const char *name2;)
+PP(register int len;)
+{
+	register short i;
+
+	i = len;
+	while (i && *name1)
+	{
+		if (*name1++ != *name2++)
+			return FALSE;
+		i--;
+	}
+	if (i == 0 || *name2 == '\0')
+		return TRUE;
+	return FALSE;
 }
 
 
@@ -687,7 +707,7 @@ PP(int cnt;)
 			printf("(stmt)");
 			break;
 		case ITSY:
-			printf("%s", its[i].itop.ptrw2 ? its[i].itop.ptrw2->name : "(nil)");
+			printf("%-.*s", SYNAMLEN, its[i].itop.ptrw2 ? its[i].itop.ptrw2->name : "(nil)");
 			break;
 		case ITCN:
 			printf("$%lx", (long)its[i].itop.l);

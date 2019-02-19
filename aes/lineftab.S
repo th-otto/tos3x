@@ -52,7 +52,7 @@
 [00fe798c] dc.l $00fe57d2            ; F0CC ; wm_get AES
 [00fe7990] dc.l $00fe58ba            ; F0D0 ; wm_set AES
 [00fe7994] dc.l $00fe5ad6            ; F0D4 ; wm_calc AES
-[00fe7998] dc.l $00fd3cb8            ; F0D8 ; trap
+[00fe7998] dc.l $00fd3cb8            ; F0D8 ; trap AES
 [00fe799c] dc.l $00fd947e            ; F0DC
 [00fe79a0] dc.l $00fd7cb6            ; F0E0 ; rsrc_gaddr DESKTOP
 [00fe79a4] dc.l $00fe6a36            ; F0E4
@@ -233,7 +233,7 @@
 [00fe7c60] dc.l $00fd7b02            ; F3A0 ; form_center DESKTOP
 [00fe7c64] dc.l $00fd7ad0            ; F3A4 ; form_dial DESKTOP
 [00fe7c68] dc.l $00fd7c7a            ; F3A8 ; objc_draw DESKTOP
-[00fe7c6c] dc.l $00fd7c52            ; F3AC ; objc_offset
+[00fe7c6c] dc.l $00fd7c52            ; F3AC ; objc_offset DESKTOP
 [00fe7c70] dc.l $00fd68fa            ; F3B0
 [00fe7c74] dc.l $00fe5f1a            ; F3B4 ; fmt_str AES
 [00fe7c78] dc.l $00fdd14a            ; F3B8 ; dos_avail AES
@@ -546,7 +546,7 @@
 [00fe8144] dc.l $00fe289c            ; F884 ; check AES
 [00fe8148] dc.l $00fe26a0            ; F888 ; ins_char AES
 [00fe814c] dc.l $00fe2674            ; F88C ; scan_to_end AES
-[00fe8150] dc.l $00fdeaba            ; F890 ; fapd
+[00fe8150] dc.l $00fdeaba            ; F890 ; fapd AES
 [00fe8154] dc.l $00fdeb9a            ; F894 ; getpd AES
 [00fe8158] dc.l $00fdcf22            ; F898
 [00fe815c] dc.l $00fdec7c            ; F89C ; doq AES

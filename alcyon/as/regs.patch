@@ -1,0 +1,97 @@
+diff --git a/alcyon/as/dir.c b/alcyon/as/dir.c
+index c92f3a7..f578f83 100644
+--- a/alcyon/as/dir.c
++++ b/alcyon/as/dir.c
+@@ -424,13 +424,21 @@ static int chkreg(NOTHING)
+ 
+ 
+ /* make a register mask for the reg routine */
+-static int mkmask(NOTHING)
++static short mkmask(NOTHING)
+ {
+ 	register const short *p;
+ 	register short i, j, mask;
+ 
+ 	p = regmsk;
+ 	mask = 0;
++	if (fchr == '#')
++	{
++		fchr = gchr();
++		expr(p1gi);							/* get opcode value */
++		if (itype != ITCN)
++			return -1;
++		return (short)ival.l;
++	}
+ 	while ((i = chkreg()) != -1)
+ 	{
+ 		if (fchr == '-')
+diff --git a/alcyon/as/pass2.c b/alcyon/as/pass2.c
+index e7e3eb3..7d244a1 100644
+--- a/alcyon/as/pass2.c
++++ b/alcyon/as/pass2.c
+@@ -779,30 +779,47 @@ PP(const int16_t *ap;)
+ 	register uint16_t mask;
+ 
+ 	p = ap;
+-	mask = 0;
+-	while ((i = getreg()) != -1)
++	if (ckitc(pitw, '#'))
+ 	{
+-		if (ckitc(pitw, '-'))
++		struct it *start = pitw;
++		
++		printf("reglist: %d %d\n", pitw->itty, pitw->itop.l);
++		pitw++;
++		expr(p2gi);
++		pitw = start;
++		if (ival.l < 0 || ival.l > 65535L)
++			uerr(45); /* illegal register list */
++		mask = (uint16_t) ival.l;
++		if (ap == regmsk1)
++			mask = fixmask(mask);
++		modelen = WORDSIZ;
++	} else
++	{
++		mask = 0;
++		while ((i = getreg()) != -1)
+ 		{
+-			pitw++;
+-			if ((j = getreg()) < 0)
++			if (ckitc(pitw, '-'))
+ 			{
+-				uerr(45); /* illegal register list */
+-				break;
++				pitw++;
++				if ((j = getreg()) < 0)
++				{
++					uerr(45); /* illegal register list */
++					break;
++				}
++				while (i <= j)
++					mask |= p[i++];
++			} else
++			{
++				mask |= p[i];
+ 			}
+-			while (i <= j)
+-				mask |= p[i++];
+-		} else
+-		{
+-			mask |= p[i];
++			if (ckitc(pitw, '/'))
++				pitw++;
++			else
++				break;
+ 		}
+-		if (ckitc(pitw, '/'))
+-			pitw++;
+-		else
+-			break;
++		if (!mask)
++			uerr(45); /* illegal register list */
+ 	}
+-	if (!mask)
+-		uerr(45); /* illegal register list */
+ 	return mask;
+ }
+ 

@@ -130,8 +130,11 @@
 #define CEOF     0
 
 /* Miscellaneous Defines */
+#ifndef FALSE
 #define TRUE    1   /* boolean values */
 #define FALSE   0   /* boolean values */
+#endif
+
 #define ITBSZ   256 /* size of the it buffer */
 #define STMAX   200 /* size of intermediate text buffer */
 #define SZIRT   128
@@ -294,7 +297,7 @@ struct symtab *addaptr;
 struct symtab *cmpaptr;
 struct symtab *subaptr;
 struct symtab *cmpmptr;
-struct symtab *equptr;
+struct symtab *dcptr;
 struct symtab *andptr;
 struct symtab *andiptr;
 struct symtab *eorptr;
@@ -321,6 +324,7 @@ short *prlb;
 short ins[5];           /* holds instruction words */
 
 short extflg, extref;   /* external in expr */
+struct symtab *extsym;
 
 struct op {
     short ea;           /* effective address bits */
@@ -352,6 +356,7 @@ char *sfname;				/* Source filename */
 short didorg;
 short shortadr;         /* short addresses if set */
 short m68010;           /* 68010 code */
+short aesflag;
 
 /* pass 1 global variables */
 short numops;           /* number of operands */
@@ -533,6 +538,7 @@ VOID mmte PROTO((NOTHING));
 struct symtab *mdemt PROTO((const char *mdstr, int dirnum));
 VOID pack PROTO((const char *apkstr, struct symtab *apkptr));
 int gchr PROTO((NOTHING));
+int nameeq PROTO((const char *name1, const char *name2, int len));
 VOID wostb PROTO((NOTHING));
 VOID uerr PROTO((int errn, ...));
 VOID xerr PROTO((int errn, ...));
@@ -546,3 +552,6 @@ VOID setldfn PROTO((const char *ap));
 FILE *openfi PROTO((const char *pname, const char *mode));
 VOID prstbuf PROTO((const char *tag));
 VOID prits PROTO((const struct it *its, int cnt));
+
+
+unsigned short isaes PROTO((const char *name));

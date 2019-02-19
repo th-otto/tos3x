@@ -102,6 +102,7 @@ PP(struct symtab *p;)
 	if (extflg)
 		uerr(36);						/* two externals in expr */
 	extflg++;
+	extsym = p;
 	extref = p->vextno;					/* get external # */
 	rval = EXTRN;
 	itype = ITCN;
@@ -126,10 +127,11 @@ PP(int reloc_val;)
 			reloc = BSS;
 		else
 			reloc = ABS;
+		extsym = ival.ptrw2;
 		ival.l = ival.ptrw2->vl1;		/* symbol value */
 		if (itype != ITCW)
 			itype = ITCN;				/* constant */
-	} else if (itype == ITSY && ival.ptrw2->flags & SYXR)
+	} else if (itype == ITSY && (ival.ptrw2->flags & SYXR))
 	{									/* external symbol */
 		fixext(ival.ptrw2);
 		reloc = EXTRN;
@@ -405,6 +407,7 @@ PP(aexpr iploc;)
 	register short iop;
 
 	extflg = starmul = iop = lpflg = 0;
+	extsym = NULL;
 	piop = &opstk[0];
 	itr = -1;							/* tree stack pointer */
 	pitr = tree;

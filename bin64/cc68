@@ -1,7 +1,8 @@
 #!/bin/sh
 
-BIN=../bin64/
-LIB=../lib
+BIN=${0%/*}
+test "$BIN" = "" && BIN=.
+BIN="$BIN/"
 
 compile=false
 generate_asm=false
@@ -39,6 +40,7 @@ do
 	--optimize) optimize=true ;;
 	-fomit-frame-pointer) ;;
 	-faes) AESFLAGS=-A ;;
+	-A) AESFLAGS=-A ;;
 	-a)
 	     textbase=$1
 	     shift
@@ -96,8 +98,8 @@ if $compile; then
 						fi
 					fi
 					if ! $generate_asm; then
-						test "$V" = 1 && echo "${BIN}as68 ${ASFLAGS} ${base}.s"
-						if ! ${BIN}as68 ${ASFLAGS} ${base}.s; then
+						test "$V" = 1 && echo "${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${base}.s"
+						if ! ${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${base}.s; then
 							status=1
 						fi
 					fi
@@ -113,8 +115,8 @@ if $compile; then
 		base=$(basename $infile .S)
 		test "$V" = 1 && echo "${BIN}cp68 ${CPPFLAGS} -P ${infile} ${base}.i"
 		if ${BIN}cp68 ${CPPFLAGS} -P ${infile} ${base}.i; then
-			test "$V" = 1 && echo "${BIN}as68 ${ASFLAGS} ${base}.i"
-			if ${BIN}as68 ${ASFLAGS} ${base}.i; then
+			test "$V" = 1 && echo "${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${base}.i"
+			if ${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${base}.i; then
 				status=0
 			fi
 		fi
@@ -122,8 +124,8 @@ if $compile; then
 		;;
 	*.s)
 		base=$(basename $infile .s)
-		test "$V" = 1 && echo "${BIN}as68 ${ASFLAGS} ${infile}"
-		if ${BIN}as68 ${ASFLAGS} ${infile}; then
+		test "$V" = 1 && echo "${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${infile}"
+		if ${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${infile}; then
 			status=0
 		fi
 		rm -f ${base}.i
