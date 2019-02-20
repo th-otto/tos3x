@@ -369,7 +369,7 @@ PP(register BCB *b;)
 	typ = b->b_buftyp;
 	drv = b->b_bufdrv;
 
-	for (b = &bufl[typ != BT_DATA ? BI_FAT : BI_DATA]; b != NULL; b = b->b_link) /* BUG: address operator is wrong */
+	for (b = (BCB *)&bufl[typ != BT_DATA ? BI_FAT : BI_DATA]; b != NULL; b = b->b_link) /* BUG: address operator is wrong */
 	{
 		if (b->b_bufdrv == drv && b->b_dirty && b->b_buftyp == typ)
 		{

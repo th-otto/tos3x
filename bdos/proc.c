@@ -808,7 +808,7 @@ PP(char *v;)								/* command, tail, environment   */
 		 *   allocate base page
 		 */
 
-		if ((max = ffit(-1L, &pmd)) < sizeof(PD))
+		if ((max = (int32_t)ffit(-1L, &pmd)) < sizeof(PD))
 		{								/*  not enough even for PD  */
 			freeit(env, &pmd);
 #if	DBGPROC
@@ -842,7 +842,7 @@ PP(char *v;)								/* command, tail, environment   */
 			*ptr++ = 0;
 #endif
 		b->p_xdta = (DTAINFO *)&b->p_cmdlin[0];	/* default p_xdta is p_cmdlin */
-		b->p_env = env->m_start;
+		b->p_env = (char *)env->m_start;
 
 		/* now inherit standard files from me */
 

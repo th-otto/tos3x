@@ -320,7 +320,7 @@ PP(MPB *mp;)
 	} while (mp->mp_rover != p);
 	
 	if (getmax)
-		return maxval;
+		return (MD *)maxval;
 	else
 		return NULL;
 }
