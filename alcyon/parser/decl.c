@@ -139,7 +139,11 @@ PP(int32_t size;)							/* size of single data item 3.4 i=> l */
 			if (sp->s_type == type)
 			{
 				if (sc == sp->s_sc || sc == EXTERNAL || sc == DEXTERN)
+				{
+					if (sc == EXTERNAL && sp->s_sc == DEXTERN)
+						sp->s_sc = EXTERNAL;
 					break;
+				}
 				if (ISFUNCTION(sp->s_type) && sc == STATIC)
 					break;
 				if (sc == AUTO && SUPTYPE(type) == FUNCTION)
@@ -391,7 +395,7 @@ VOID doextdef(NOTHING)
 				return;
 			}
 			if (!ISTYPEDEF(sp) && sc != STATIC)
-				if (NOTFUNCTION(sp->s_type))	/* .globl ext. vars */
+				if (NOTFUNCTION(sp->s_type) && sp->s_sc != DEXTERN)	/* .globl ext. vars */
 					OUTEXTDEF(sp->s_symbol);	/* BUG: causes assembler to spit out unresolved reference */
 			if (NOTFUNCTION(sp->s_type))
 			{							/* not function, check init */
