@@ -57,7 +57,7 @@
 [00fe79a0] dc.l $00fd7cb6            ; F0E0 ; rsrc_gaddr DESKTOP
 [00fe79a4] dc.l $00fe6a36            ; F0E4
 [00fe79a8] dc.l $00fd7af6            ; F0E8 ; form_error DESKTOP
-[00fe79ac] dc.l $00fe7592            ; F0EC
+[00fe79ac] dc.l $00fe7592            ; F0EC ; trp14 AES
 [00fe79b0] dc.l $00fe7582            ; F0F0 ; trp13 AES
 [00fe79b4] dc.l $00fe0920            ; F0F4 ; fm_show AES
 [00fe79b8] dc.l $00fe6988            ; F0F8
@@ -110,16 +110,16 @@
 [00fe7a74] dc.l $00fdf894            ; F1B4
 [00fe7a78] dc.l $00fe17de            ; F1B8 ; gr_scale AES
 [00fe7a7c] dc.l $00fe176e            ; F1BC
-[00fe7a80] dc.l $00fd4be8            ; F1C0
-[00fe7a84] dc.l $00fd4bbe            ; F1C4
+[00fe7a80] dc.l $00fd4be8            ; F1C0 ; gsx_xcbox AES
+[00fe7a84] dc.l $00fd4bbe            ; F1C4 ; gsx_xbox AES
 [00fe7a88] dc.l $00fe172a            ; F1C8 ; gr_xor AES
 [00fe7a8c] dc.l $00fe191c            ; F1CC ; gr_setup AES
 [00fe7a90] dc.l $00fd4612            ; F1D0
 [00fe7a94] dc.l $00fe3826            ; F1D4
 [00fe7a98] dc.l $00fe36cc            ; F1D8
 [00fe7a9c] dc.l $00fdfd20            ; F1DC
-[00fe7aa0] dc.l $00fd4bbe            ; F1E0
-[00fe7aa4] dc.l $00fd4bbe            ; F1E4
+[00fe7aa0] dc.l $00fd4bbe            ; F1E0 ; gsx_xbox; duplicate AES
+[00fe7aa4] dc.l $00fd4bbe            ; F1E4 ; gsx_xbox; duplicate AES
 [00fe7aa8] dc.l $00fe1dbe            ; F1E8
 [00fe7aac] dc.l $00fe5d02            ; F1EC
 [00fe7ab0] dc.l $00fe1874            ; F1F0 ; gr_stilldn AES
@@ -132,11 +132,11 @@
 [00fe7acc] dc.l $00fe5a92            ; F20C ; wm_update; duplicate AES
 [00fe7ad0] dc.l $00fe191c            ; F210 ; gr_setup; duplicate AES
 [00fe7ad4] dc.l $00fe1a48            ; F214 ; gr_clamp; duplicate AES
-[00fe7ad8] dc.l $00fe1da0            ; F218
+[00fe7ad8] dc.l $00fe1da0            ; F218 ; gsx_mxmy AES
 [00fe7adc] dc.l $00fe5dda            ; F21C
 [00fe7ae0] dc.l $00fe18e2            ; F220
 [00fe7ae4] dc.l $00fe5a92            ; F224 ; wm_update; duplicate AES
-[00fe7ae8] dc.l $00fe1da0            ; F228
+[00fe7ae8] dc.l $00fe1da0            ; F228 ; gsx_mxmy; duplicate AES
 [00fe7aec] dc.l $00fe3876            ; F22C ; ob_relxywh AES
 [00fe7af0] dc.l $00fe19ac            ; F230
 [00fe7af4] dc.l $00fe5bce            ; F234 ; mul_div AES
@@ -199,8 +199,8 @@
 [00fe7bd8] dc.l $00fd7a8e            ; F318 ; evnt_button DESKTOP
 [00fe7bdc] dc.l $00fd4d3a            ; F31C
 [00fe7be0] dc.l $00fd4d76            ; F320
-[00fe7be4] dc.l $00fd4e14            ; F324
-[00fe7be8] dc.l $00fd4dac            ; F328
+[00fe7be4] dc.l $00fd4e14            ; F324 ; escan_str DESKTOP
+[00fe7be8] dc.l $00fd4dac            ; F328 ; scan_2 DESKTOP
 [00fe7bec] dc.l $00fd4e40            ; F32C
 [00fe7bf0] dc.l $00fe5e38            ; F330 ; min AES
 [00fe7bf4] dc.l $00fd7cd8            ; F334 ; shel_get DESKTOP
@@ -214,7 +214,7 @@
 [00fe7c14] dc.l $00fd4e82            ; F354
 [00fe7c18] dc.l $00fe5e54            ; F358 ; bfill AES
 [00fe7c1c] dc.l $00fd4e5a            ; F35C
-[00fe7c20] dc.l $00fd4de4            ; F360
+[00fe7c20] dc.l $00fd4de4            ; F360 ; save_2 DESKTOP
 [00fe7c24] dc.l $00fd55be            ; F364
 [00fe7c28] dc.l $00fd7ce2            ; F368 ; shel_put DESKTOP
 [00fe7c2c] dc.l $00fe5eae            ; F36C ; xstrpcpy AES
@@ -274,7 +274,7 @@
 [00fe7d04] dc.l $00fda0e0            ; F444
 [00fe7d08] dc.l $00fe6d20            ; F448
 [00fe7d0c] dc.l $00fe7126            ; F44C
-[00fe7d10] dc.l $00fe7592            ; F450 ; trp14 AES
+[00fe7d10] dc.l $00fe7592            ; F450 ; trp14 AES; duplicate
 [00fe7d14] dc.l $00fe74ba            ; F454
 [00fe7d18] dc.l $00fe73d0            ; F458
 [00fe7d1c] dc.l $00fe5e44            ; F45C ; max AES
@@ -335,7 +335,7 @@
 [00fe7df8] dc.l $00fdd09a            ; F538 ; dos_label AES
 [00fe7dfc] dc.l $00fd813e            ; F53C
 [00fe7e00] dc.l $00fe600a            ; F540 ; inf_gindex AES
-[00fe7e04] dc.l $00fd5596            ; F544
+[00fe7e04] dc.l $00fd5596            ; F544 ; app_reschange DESKTOP
 [00fe7e08] dc.l $00fe5e6a            ; F548 ; toupper AES
 [00fe7e0c] dc.l $00fd4cfc            ; F54C
 [00fe7e10] dc.l $00fe5eba            ; F550 ; strscn AES
@@ -500,7 +500,7 @@
 [00fe808c] dc.l $00fe0a3a            ; F7CC ; fs_back AES
 [00fe8090] dc.l $00fe1224            ; F7D0 ; r_dir AES
 [00fe8094] dc.l $00fdd048            ; F7D4 ; dos_gdir AES
-[00fe8098] dc.l $00fe1da0            ; F7D8
+[00fe8098] dc.l $00fe1da0            ; F7D8 ; gsx_mxmy; duplicate AES
 [00fe809c] dc.l $00fe12f8            ; F7DC ; r_files AES
 [00fe80a0] dc.l $00fe160e            ; F7E0 ; fs_draw AES
 [00fe80a4] dc.l $00fe14b8            ; F7E4 ; r_sort AES
@@ -522,7 +522,7 @@
 [00fe80e4] dc.l $00fe1afc            ; F824 ; gsx_mfree AES
 [00fe80e8] dc.l $00fdd224            ; F828 ; giveerr AES
 [00fe80ec] dc.l $00fddb9a            ; F82C ; free_accs AES
-[00fe80f0] dc.l $00fe1c2a            ; F830 ; gsx_wclose AES
+[00fe80f0] dc.l $00fe1c2a            ; F830 ; gsx_wsclose AES
 [00fe80f4] dc.l $00fdd1e2            ; F834 ; givecpm AES
 [00fe80f8] dc.l $00fde6dc            ; F838 ; post_keybd AES
 [00fe80fc] dc.l $00fe64be            ; F83C ; b_delay AES

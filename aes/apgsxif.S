@@ -156,6 +156,7 @@ VOID gsx_sclip(GRECT *pt)
 }
 #endif
 /* 306de: 00e24440 */
+/* 104de: 00fd4612 */
 	xdef _gsx_sclip
 _gsx_sclip:
 
@@ -205,6 +206,7 @@ VOID gsx_gclip(GRECT *pt)
 }
 #endif
 /* 306de: 00e24452 */
+/* 104de: 00fd4660 */
 	xdef _gsx_gclip
 _gsx_gclip:
 
@@ -235,6 +237,7 @@ BOOLEAN gsx_chkclip(GRECT *pt)
 }
 #endif
 /* 306de: 00e24470 */
+/* 104de: 00fd467e */
 	xdef _gsx_chkclip
 _gsx_chkclip:
 
@@ -289,6 +292,7 @@ VOID gsx_pline(WORD offx, WORD offy, WORD cnt, const WORD *pts)
 }
 #endif
 /* 306de: 00e244b4 */
+/* 104de: 00fd46c2 */
 	xdef	_gsx_pline
 _gsx_pline:
 
@@ -329,6 +333,7 @@ VOID gsx_cline(UWORD x1, UWORD y1, UWORD x2, UWORD y2)
 }
 #endif
 /* 306de: 00e244de */
+/* 104de: 00fd46ec */
 	xdef	_gsx_cline
 _gsx_cline:
 
@@ -389,6 +394,7 @@ VOID gsx_attr(UWORD text, UWORD mode, UWORD color)
 }
 #endif
 /* 306de: 00e244fe */
+/* 104de: 00fd4700 */
 	xdef _gsx_attr
 _gsx_attr:
 
@@ -466,6 +472,7 @@ VOID gsx_bxpts(GRECT *pt)
 }
 #endif
 /* 306de: 00e24576 */
+/* 104de: 00fd4770 */
 	xdef _gsx_bxpts
 _gsx_bxpts:
 
@@ -498,6 +505,7 @@ VOID gsx_box(GRECT *pt)
 	av_pline(5, &ptsin[0]);
 }
 #endif
+/* 104de: 00fd4796 */
 	xdef	_gsx_box
 _gsx_box:
 
@@ -533,8 +541,10 @@ VOID gsx_fix(FDB *pfd, int16_t *theaddr, WORD wb, WORD h)
 	pfd->fd_addr = theaddr;
 }
 #endif
+/* 104de: 00fd47ac */
 	xdef _gsx_fix
 _gsx_fix:
+ig_fix:
 
 	lea	4(sp),a0
 
@@ -622,6 +632,7 @@ VOID gsx_blt(int16_t *saddr, UWORD sx, UWORD sy, UWORD swb, int16_t *daddr, UWOR
 }
 #endif
 /* 306de: 00e245f2 */
+/* 104de: 00fd47e8 */
 	xdef	_gsx_blt
 _gsx_blt:
 
@@ -638,7 +649,7 @@ _gsx_blt:
 	move.w	(a3)+,-(sp)		; push swb
 	pea	(a0)			; push saddr
 	pea	(a4)			; push *gl_src
-	bsr	_gsx_fix
+	bsr	ig_fix
 
 	jsr	_gsx_moff		; hide cursor
 
@@ -648,7 +659,7 @@ _gsx_blt:
 	move.w	(a3)+,-(sp)		; push dwb
 	pea	(a0)			; push daddr
 	pea	(a5)			; push *gl_dst
-	bsr	_gsx_fix
+	bsr	ig_fix
 
 	lea	_ptsin,a0
 	move.l	a0,a1
@@ -697,6 +708,7 @@ VOID bb_screen(WORD scrule, WORD scsx, WORD scsy, WORD scdx, WORD scdy, WORD scw
 }
 #endif
 /* 306de: 00e2467c */
+/* 104de: 00fd4862 */
 	xdef _bb_screen
 _bb_screen:
 
@@ -731,6 +743,7 @@ VOID gsx_trans(int16_t *saddr, UWORD swb, int16_t *daddr, UWORD dwb, UWORD h, WO
 }
 #endif
 /* 306de: 00e246a0 */
+/* 104de: 00fd4884 */
 /* BUG for AES3D: fg/bg not used */
 	xdef _gsx_trans
 _gsx_trans:
@@ -746,13 +759,13 @@ _gsx_trans:
 	move.w	-(a3),-(sp)		; push dwb
 	move.l	-(a3),-(sp)		; push daddr
 	pea	 (a5)			; push gl_dst
-	bsr	_gsx_fix
+	bsr	ig_fix
 
 	move.w	   d3,-(sp)		; push h
 	move.w	-(a3),-(sp)		; push swb
 	move.l	-(a3),-(sp)		; push saddr
 	pea	 (a4)			; push gl_src
-	bsr	_gsx_fix
+	bsr	ig_fix
 
 	move.l	#$00010001,10(a4)	; gl_src.fd_stand=gl_src.fd_nplanes=1
 
@@ -817,6 +830,7 @@ VOID gsx_start(NOTHING)
 }
 #endif
 /* 306de: 00e246ea */
+/* 104de: 00fd48ca */
 /* 404: 00e335ec */
 /* WTF, this called only once at startup, why bother with asm madness? */
 	xdef _gsx_start
@@ -920,6 +934,7 @@ _gsxsta2:
 	divs	d0,d5			; d5 <- gl_wbox
 	move.w	d5,_gl_wbox
 
+#if (AESVERSION >= 0x200) | !BINEXACT
 	move.w	d5,d0			; d0 <- gl_wbox
 	sub.w	#2,d0
 	cmp.w	_gl_wchar,d0		; gl_wbox must >= gl_wchar + 2
@@ -927,6 +942,7 @@ _gsxsta2:
 	move.w	_gl_wchar,d5
 	add.w	#2,d5
 	move.w	d5,_gl_wbox
+#endif
 
 x_x1:	pea	$000F0007		;  (sp) <- 15
 	jsr	_gsx_1code		; 2(sp) <-  7
@@ -1006,6 +1022,7 @@ VOID bb_fill(WORD mode, WORD fis, WORD patt, WORD hx, WORD hy, WORD hw, WORD hh)
 }
 #endif
 /* 306de: 00e24894 */
+/* 104de: 00fd4a42 */
 	xdef _bb_fill
 _bb_fill:
 
@@ -1060,7 +1077,7 @@ L42:	lea	_ptsin,a0
 	clr.l	-(sp)
 	clr.l	-(sp)
 	pea	 (a3)
-	bsr	_gsx_fix		; gsx_fix(&gl_dst, 0x0L, 0, 0)
+	bsr	ig_fix		; gsx_fix(&gl_dst, 0x0L, 0, 0)
 
 	pea	 (a3)
 	pea	_ptsin
@@ -1136,6 +1153,7 @@ VOID gsx_tcalc(WORD font, const char *ptext, WORD ptextw, WORD ptexth, WORD pnum
 }
 #endif
 /* 306de: 00e2491e */
+/* 104de: 00fd4abe */
  	xdef	_gsx_tcalc
 _gsx_tcalc:
 
@@ -1230,6 +1248,7 @@ VOID gsx_tblt(WORD tb_f, WORD x, WORD y, WORD tb_nc)
 }
 #endif
 /* 306de: 00e24988 */
+/* 104de: 00fd4b24 */
 	xdef	_gsx_tblt
 _gsx_tblt:
 
@@ -1303,6 +1322,7 @@ VOID gsx_xbox(GRECT *pt)
 }
 #endif
 /* 306de: 00e24a2a */
+/* 104de: 00fd4bbe */
 	xdef _gsx_xbox
 _gsx_xbox:
 
@@ -1311,7 +1331,11 @@ _gsx_xbox:
 
 	move.l	#_ptsin,(sp)		; do the top
 	move.w	    #4,-(sp)		; right side
+#if (AESVERSION >= 0x200) | !BINEXACT
 	bsr.s	_gsx_xline		; and bottom; NOTE: bsr.s has offset 126
+#else
+	bsr		_gsx_xline		; and bottom; NOTE: bsr.s has offset 126
+#endif
 
 	move.l	  2(sp),a0		; a0 -> ptsin[0]
 	addq.l	     #4,a0		; a0 -> ptsin[2]
@@ -1370,6 +1394,7 @@ VOID gsx_xcbox(GRECT *pt)
 }
 #endif
 /* 306de: 00e24a52 */
+/* 104de: 00fd4be8 */
 	xdef _gsx_xcbox
 _gsx_xcbox:
 
@@ -1452,6 +1477,7 @@ VOID gsx_xline(WORD ptscount, WORD ppoints)
 }
 #endif
 /* 306de: 00e24abc */
+/* 104de: 00fd4c52 */
 	xdef	_gsx_xline
 _gsx_xline:
 

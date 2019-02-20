@@ -276,6 +276,7 @@ PP(int16_t my;)
 					ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
 				} else
 				{
+#if AESVERSION >= 0x200
 					if (!p->p_msgtosend)
 					{					/* message is sent */
 						p->p_msgtosend = TRUE;
@@ -288,6 +289,7 @@ PP(int16_t my;)
 						p->p_message[6] = w;
 						p->p_message[7] = h;
 					}
+#endif
 				}
 
 				dsptch();
@@ -477,10 +479,13 @@ PP(int16_t my;)
 				next:
 						if (p->p_stat & PS_MWAIT)
 						{
+#if AESVERSION >= 0x200
 							p->p_msgtosend = FALSE;
+#endif
 							ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, 0, 0, 0);
 						} else
 						{
+#if AESVERSION >= 0x200
 							if (!p->p_msgtosend)
 							{					/* message is sent */
 								p->p_msgtosend = TRUE;
@@ -493,6 +498,7 @@ PP(int16_t my;)
 								p->p_message[6] = 0;
 								p->p_message[7] = 0;
 							}
+#endif
 						}
 					}
 					do
@@ -514,6 +520,7 @@ PP(int16_t my;)
 					ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
 				} else
 				{
+#if AESVERSION >= 0x200
 					if (!p->p_msgtosend)
 					{					/* message is sent */
 						p->p_msgtosend = TRUE;
@@ -530,6 +537,7 @@ PP(int16_t my;)
 						p->p_message[6] = w;
 						p->p_message[7] = h;
 					}
+#endif
 				}
 
 				dsptch();
@@ -851,7 +859,11 @@ PP(BOOLEAN mon;)
 #endif
 		tmpmon = gl_mouse;				/* mouse on flag        */
 		tmpmoff = gl_moff;
+#if AESVERSION >= 0x320
 		gsx_xmfset(ad_armice);			/* change the mouse form    */
+#else
+		gsx_mfset(ad_armice);			/* change the mouse form    */
+#endif
 		if (!gl_mouse)					/* if currently the mouse is    */
 		{
 			gsx_1code(SHOW_CUR, 0);		/* off, then turn it on     */

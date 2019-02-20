@@ -43,7 +43,9 @@ BOOLEAN ccopy_save;						/* copy ?   */
 BOOLEAN cdele_save;						/* delete ? */
 BOOLEAN write_save;						/* write ?  */
 BOOLEAN cbit_save;						/* bitblt   */
+#if AESVERSION >= 0x200
 int16_t pref_save;						/* screen pref  */
+#endif
 BOOLEAN s_cache;						/* cache    */
 BOOLEAN s_stofit;						/* size to fit  */
 uint16_t windspec;						/* window pattern   */

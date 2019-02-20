@@ -41,17 +41,14 @@
 #include "gemrsc.h"
 
 
-#define ROPEN 0
-#define WOPEN 1
-#define RWOPEN 2
-#define TEXTBASE 8
-
 ACCPD *gl_pacc[MAX_ACCS];		/* total of 6 desk acc, 1 from rom  */
 int16_t gl_naccs;
 char *gl_adacc[MAX_ACCS];		/* addresses of accessories */
 char *sys_adacc;
 char const stacc[] = "\\*.ACC";
-int16_t used_acc;							/* currently number of acc  */
+#if AESVERSION >= 0x200
+STATIC int16_t used_acc;		/* currently number of acc  */
+#endif
 
 
 #if TP_WINX
@@ -143,7 +140,7 @@ PP(int16_t acc;)
 	PD *p;
 
 	strcpy(D.s_cmd, pfilespec);
-	handle = dos_open(ad_shcmd, ROPEN);
+	handle = dos_open(ad_shcmd, RMODE_RD);
 	if (!DOS_ERR)
 	{									/* allocate PD memory for accessory */
 		err_ret = (acc != 0) ? cre_aproc() : TRUE;
@@ -195,10 +192,12 @@ VOID ldaccs(NOTHING)
 	UNUSED(psp);
 	
 	gl_naccs = 0;
+#if AESVERSION >= 0x200
 	used_acc = 0;
 
 	if (cart_init())
 		used_acc += ld_cartacc();
+#endif
 
 	if (isdrive() && diskin)
 	{
@@ -219,6 +218,7 @@ VOID ldaccs(NOTHING)
 
 		name += 0x1EL;
 
+#if AESVERSION >= 0x200
 		for (i = 0; i < MAX_ACCS && used_acc < MAX_ACCS && ret; i++)
 		{
 			if (sndcli(name, used_acc))
@@ -226,6 +226,7 @@ VOID ldaccs(NOTHING)
 
 			ret = dos_snext();
 		}
+#endif
 	}
 }
 

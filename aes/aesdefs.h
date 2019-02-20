@@ -92,11 +92,19 @@
 #define NFORKS      96
 #define QUEUE_SIZE 256
 #else
+#if AESVERSION >= 0x200
 #define STACK_SIZE  448
 #define STACK2_SIZE 300
 #define STACK3_SIZE 350
 #define NFORKS      32
 #define QUEUE_SIZE 128
+#else
+#define STACK_SIZE  448
+#define STACK2_SIZE 300
+#define STACK3_SIZE 350
+#define NFORKS      32
+#define QUEUE_SIZE 108
+#endif
 #endif
 
 #define CMDLEN 128

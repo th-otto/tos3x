@@ -11,13 +11,13 @@ AES_306_OBJS=${AES_306_OBJS1} ${AES_306_OBJS2} ${AES_306_OBJS3} ${AES_306_OBJS4}
 AES_206_OBJS=${AES_306_OBJS}
 AES_208_OBJS=${AES_206_OBJS}
 
-AES_104_OBJS1=geminit.o gemaints.o gemaplib.o gemasync.o gembase.o gembind.o gemcli.o gemctrl.o gemdisp.o
+AES_104_OBJS1=geminit.o apgrlib.o apgsxif.o gemaints.o gemaplib.o gemasync.o gembase.o gembind.o gemcli.o gemctrl.o gemdisp.o
 AES_104_OBJS2=gemevlib.o gemflag.o gemfmalt.o gemfmlib.o gemfslib.o gemglobe.o linefhdl.o
 AES_104_OBJS3=geminput.o gemmnlib.o gemobed.o gemobjop.o gempd.o gemqueue.o gemrom.o winx.o
 AES_104_OBJS4=gemrslib.o gemsclib.o gemshlib.o gemwmlib.o gemwrect.o newwrect.o newwmlib.o romcart.o
 AES_104_OBJS5=gemoblib.o mn_mbar.o mn_menu.o mn_popup.o mn_submn.o mn_tools.o mn_index.o mn_event.o
 #DBG_OBJS = nf_debug.o vsprintf.o doprint.o
-AES_104_OBJS6=apgrlib.o apgsxif.o gemgrlib.o gemgsxif.o gsx2.o jbind.o $(DBG_OBJS)
+AES_104_OBJS6=gemgrlib.o gemgsxif.o gsx2.o jbind.o $(DBG_OBJS)
 AES_104_OBJS7=jdispa.o jdos.o large.o function.o optimize.o ratrbp.o trap14.o
 
 AES_104_OBJS=${AES_104_OBJS1} ${AES_104_OBJS2} ${AES_104_OBJS3} ${AES_104_OBJS4} ${AES_104_OBJS5} ${AES_104_OBJS6} ${AES_104_OBJS7}
@@ -105,6 +105,9 @@ AES_CSRCS=\
 AES_SRCS = $(AES_HEADERS) $(AES_ASRCS) $(AES_CSRCS)
 
 SRCS:=${AES_SRCS}
+
+AESFLAGS_104 = -A
+CPPFLAGS += $(AESFLAGS_$(TOSVERSION))
 
 EXTRA_DIST1:=\
 	Makefile \

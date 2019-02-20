@@ -51,6 +51,7 @@
  */
 /* 206de: 00e2271c */
 /* 306de: 00e26182 */
+/* 104de: 00fe639c */
 	xdef	_far_bchange
 _far_bchange:
 	move.l	a7,gstksave		; save stack, paranoid code
@@ -118,6 +119,7 @@ bout1:
  *	  d0 = xposition, d1 = yposition in absolute pixels
  */
 /* 306de: 00e26208 */
+/* 104de: 00fe6422 */
 	xdef	_far_mchange
 _far_mchange:
 	move.l	a7,gstksave		; save stack
@@ -158,6 +160,7 @@ _justretf:
  *	 do not need to save registers
  */
 /* 306de: 00e26248 */
+/* 104de: 00fe6462 */
 	xdef	_tikcod
 _tikcod:
 	move.l	a7,tstksave		; save stack
@@ -199,6 +202,7 @@ tpollmb:
 
 /*	b_delay( amnt ) */
 /* 306de: 00e262a4 */
+/* 104de: 00fe64be */
 	xdef	_b_delay
 _b_delay:
 	move.w	4(sp),d0		; get the amnt
@@ -251,6 +255,7 @@ _delay:
  */
 /* 206de: 00e22894 */
 /* 306de: 00e262fa */
+/* 104de: 00fe6514 */
 	xdef	_delay
 _delay:
 	move.l	4(sp),d0

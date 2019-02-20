@@ -273,8 +273,9 @@ extern uint16_t gl_indbutcol;				/* indicator button color */
 extern uint16_t gl_actbutcol;				/* activator button color */
 extern uint16_t gl_alrtcol;					/* alert background color */
 #endif
+#if AESVERSION >= 0x200
 extern int16_t crt_error;					/* critical error handler semaphore */
-extern int16_t used_acc;					/* currently number of acc  */
+#endif
 
 #if (AESVERSION >= 0x330) | !BINEXACT
 extern int16_t adeskp[3];					/* desktop colors & backgrounds */

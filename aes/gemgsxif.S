@@ -681,6 +681,20 @@ _gsx_tick:
 	rts
 
 
+#if AESVERSION < 0x200
+	xdef _gsx_mfset
+_gsx_mfset:
+	bsr.s     ig_moff
+	moveq.l   #37-1,d0
+	movea.l   4(a7),a0
+	movea.l   _ad_intin,a1
+gsx_mf1:
+	move.w    (a0)+,(a1)+
+	dbf       d0,gsx_mf1
+	moveq.l   #0,d0
+	bsr       vdi_call
+	bra       _gsx_mon
+#endif
 
 
 #if CCODE
@@ -734,10 +748,12 @@ VOID gsx_moff(NOTHING)
 }
 #endif
 /* 306de: 00e25350 */
+/* 104de: 00fe1dbe */
 	xdef _gsx_moff
 	xdef _ratexit
 _ratexit:
 _gsx_moff:
+ig_moff:
 
 	tst.w	_gl_moff
 	bne	L35

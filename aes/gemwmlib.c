@@ -38,8 +38,10 @@
 int16_t gl_wtop;
 OBJECT *gl_awind;
 
+#if (AESVERSION >= 0x200) | TP_WINX
 int16_t wtcolor[MAXOBJ];					/* topped window object colors  */
 int16_t wbcolor[MAXOBJ];					/* background window object colors */
+#endif
 
 /*
  * current desktop background pattern.
@@ -201,12 +203,14 @@ PP(int16_t kind;)
 	pwin->w_hslide = pwin->w_vslide = 0;	/* slider at left/top	*/
 	pwin->w_hslsiz = pwin->w_vslsiz = -1;	/* use default size 	*/
 
+#if (AESVERSION >= 0x200) | TP_WINX
 	/* initialize window object colors */
 	for (i = 0; i < MAXOBJ; i++)
 	{
 		pwin->w_tcolor[i] = wtcolor[i];
 		pwin->w_bcolor[i] = wbcolor[i];
 	}
+#endif
 }
 #endif
 
@@ -293,10 +297,12 @@ PP(BOOLEAN topped;)							/* YES: top window color */
 	register int16_t color;
 	register OBJECT *obj;
 	
+#if (AESVERSION >= 0x200) | TP_WINX
 	if (topped)
 		color = wp->w_tcolor[ndx];
 	else
 		color = wp->w_bcolor[ndx];
+#endif
 	obj = &W_ACTIVE[ndx];
 	if (obj->ob_type == G_BOXTEXT)
 	{
@@ -1800,6 +1806,8 @@ PP(register int16_t *pinwds;)							/* values to change to */
 			pwin->w_flags &= ~VF_KEEPWIN;
 		break;
 #endif
+
+#if (AESVERSION >= 0x200) | TP_WINX
 	case WF_COLOR:
 		if (pinwds[1] != -1)
 			pwin->w_tcolor[pinwds[0]] = pinwds[1];
@@ -1815,6 +1823,7 @@ PP(register int16_t *pinwds;)							/* values to change to */
 			wbcolor[pinwds[0]] = pinwds[2];
 #if !BINEXACT
 		break; /* somehow not removed by optimize */
+#endif
 #endif
 	}
 

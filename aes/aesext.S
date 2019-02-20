@@ -140,6 +140,8 @@ _save_2         equ DESKTBASE+$5208
 _app_reschange  equ DESKTBASE+$1902
 _XDeselect      equ 0
 _getcookie      equ 0
+  xdef _set_defdrv
+_set_defdrv     equ 0
 #if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
 _infdata        equ DESKDBASE+$8E6                      /* 206us:E3699C */
 #endif

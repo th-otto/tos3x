@@ -280,8 +280,10 @@ typedef struct window
 	/* 42 */	int16_t		w_vslide;
 	/* 44 */	int16_t		w_hslsiz;
 	/* 46 */	int16_t		w_vslsiz;
+#if (AESVERSION >= 0x200) | TP_WINX
 	/* 48 */    int16_t     w_tcolor[MAXOBJ];	
 	/* 86 */    int16_t     w_bcolor[MAXOBJ];	
+#endif
 	/* 124 */	ORECT		*w_rlist;	/* owner rectangle list	*/
 	/* 128 */	ORECT		*w_rnext;	/* used for search first search next */
 	/* 132 */

@@ -328,7 +328,32 @@ PP(register VOIDPTR *addr_in;)
 			ctlmouse(FALSE);
 			maddr = (VOIDPTR)1;
 		}
+#if AESVERSION >= 0x200
 		gr_mouse(GR_MNUMBER, GR_MADDR);
+#else
+		if (GR_MNUMBER > USER_DEF)
+		{
+			if (GR_MNUMBER == M_OFF)
+				gsx_moff();
+			else if (GR_MNUMBER == M_ON)
+				gsx_mon();
+		} else
+		{
+			VOIDPTR grmaddr;
+			
+			if (GR_MNUMBER != USER_DEF)			/* set new mouse form   */
+			{
+				/* BUG: gsx_mfset will crash if this fails because number is out of range... */
+				rs_gaddr(ad_sysglo, R_BIPDATA, MICE0 + GR_MNUMBER, &grmaddr);
+				grmaddr = (MFORM *)LLGET((intptr_t)grmaddr);
+			} else
+			{
+				grmaddr = (MFORM *)LLGET((intptr_t)GR_MADDR);
+			}
+
+			gsx_mfset(grmaddr);
+		}
+#endif
 		if (maddr)
 			ctlmouse(TRUE);
 		break;

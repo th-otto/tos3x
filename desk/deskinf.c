@@ -538,7 +538,9 @@ PP(char *buffer;)
 				write_save = envr & 0x01;
 				pcurr = scan_2(pcurr, &envr);
 				cbit_save = (envr & 0x10) ? TRUE : FALSE;
+#if AESVERSION >= 0x200
 				pref_save = envr & 0x0F;	/* screen resolution    */
+#endif
 
 				/* This is the extended stuff   */
 
@@ -803,7 +805,9 @@ PP(BOOLEAN todisk;)
 	pcurr = save_2(pcurr, envr);
 
 	envr = 0x0;							/* set resolution prefence  */
+#if AESVERSION >= 0x200
 	envr |= pref_save;
+#endif
 	envr |= (cbit_save << 4);			/* High order bit       */
 	pcurr = save_2(pcurr, envr);
 

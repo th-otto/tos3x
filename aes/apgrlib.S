@@ -77,6 +77,7 @@ VOID gr_inside(GRECT *pt, WORD th)
 }
 #endif
 /* 306de: 00e2414c */
+/* 104de: 00fd4388 */
 	xdef	_gr_inside
 _gr_inside:
 	move.l	4(sp),a0		; a0 contains grect pointer
@@ -110,8 +111,10 @@ VOID gr_rect(UWORD icolor, UWORD ipattern, GRECT *pt)
 }
 #endif
 /* 306de: 00e24160 */
+/* 104de: 00fd439c */
 	xdef	_gr_rect
 _gr_rect:
+gr_rect:
 	movem.l	d3-d5/a3-a3,-(sp)
 	movem.w	16+4(sp),d3-d4		; d3 = icolor,d4 = pattern
 	move.l	16+8(sp),a3		; a3 = pt
@@ -176,6 +179,7 @@ WORD gr_just(WORD just, WORD font, const char *ptext, WORD w, WORD h, GRECT *pt)
 }
 #endif
 /* 306de: 00e241a8 */
+/* 104de: 00fd43dc */
 	xdef	_gr_just
 _gr_just:
 	movem.l	d0-d7/a3-a3,-(sp)
@@ -243,8 +247,10 @@ VOID gr_gtext(WORD just, WORD font, const char *ptext, GRECT *pt)
 }
 #endif
 /* 306de: 00e24216 */
+/* 104de: 00fd4446 */
 	xdef	_gr_gtext
 _gr_gtext:
+gr_gtext:
 	movem.l	d0-d1/a3,-(sp)		; save a3 and make room for
 *					; a grect
 	move.l	sp,a3			; which is pointed to by a3
@@ -300,6 +306,7 @@ VOID gr_crack(UWORD color, WORD *pbc, WORD *ptc, WORD *pip, WORD *pic, WORD *pmd
 }
 #endif
 /* 306de: 00e2425a */
+/* 104de: 00fd4484 */
 	xdef	_gr_crack
 _gr_crack:
 	move.w	4(sp),d0		; d0 contains color
@@ -378,6 +385,7 @@ VOID gr_gicon(WORD state, int16_t *pmask, int16_t *pdata, const char *ptext, WOR
 }
 #endif
 /* 306de: 00e242b4 */
+/* 104de: 00fd44de */
 	xdef	_gr_gicon
 _gr_gicon:
 	movem.l	d3-d7/a3-a4,-(sp)	; 28 bytes 
@@ -405,7 +413,7 @@ L62:	move.l	28+6(sp),d0		; get pmask
 	move.l	a4,-(sp)
 	move.w	#IP_SOLID,-(sp)
 	move.w	d3,-(sp)
-	bsr	_gr_rect
+	bsr	gr_rect
 	addq.l	#8,sp
 L63:
 	move.l	28+10(sp),d0		; pdata
@@ -431,7 +439,7 @@ L64:	move.w	#MD_TRANS,-(sp)
 	move.l	a4,-(sp)
 	move.l	34+14(sp),-(sp)		; push ptext
 	move.l	#$00020005,-(sp)	; push SMALL then TE_CNTR
-	bsr	_gr_gtext
+	bsr	gr_gtext
 	lea	14(sp),sp
 	movem.l	(sp)+,d3-d7/a3-a4
 	rts
@@ -497,10 +505,15 @@ VOID gr_box(WORD x, WORD y, WORD w, WORD h, WORD th)
 }
 #endif
 
+/* 104de: 00fd45be */
 	xdef	_gr_box
 _gr_box:
 	movem.l	d3/a3-a4,-(sp)		; save some needed registers
+#if (AESVERSION >= 0x200) | !BINEXACT
 	suba.w	#16,sp			; need 8 bytes for local grects
+#else
+	suba.l	#16,sp			; need 8 bytes for local grects
+#endif
 	move.l	sp,a3			; a3 <- t grect
 	lea	8(sp),a4		; a4 <- n grect
 	move.w	28+12(sp),d3		; th

@@ -565,7 +565,7 @@ _endvdibss: ds.b 0
 	INT(_DOS_AX)
 	LONG(_gl_mlen)
 	INT(_gl_mask)
-	INT(_gl_ncol)
+	INT(_gl_ncols)
 	V(_path2,b,PATHLEN)
 	INT(_d_display)
 	INT(_w_walkflag)
@@ -652,7 +652,7 @@ _endvdibss: ds.b 0
 	GRECT(_gl_rzero)
 	INT(_gl_mouse)
 	INT(_s_stofit)
-	INT(_gl_nrow)
+	INT(_gl_nrows)
 	INT(_infsize)
 	INT(_numicon)
 	INT(_sh_up) /* unused */
@@ -750,10 +750,7 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	MFDB(_gl_dst)
 	GRECT(_gl_rfs)
 	PTR(_rs_hdr)
-	PTR(_gl_tmp)
-	
-	ds.b 16 /* unused? $0000e630 */
-	
+	MFDB(_gl_tmp)
 	INT(_nodesk)
 	INT(_srcbuf)
 	INT(_er_num)

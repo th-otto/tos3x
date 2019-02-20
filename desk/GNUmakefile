@@ -28,18 +28,21 @@ desk.a: $(DESK_OBJS) ${MAKEFILE}
 
 ifeq ($(USE_CROSS_ALCYON),1)
 # sections.mak might have just been generated, make sure it is reread
-desk.o: vars.o $(DESK_OBJS) deskext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
+desk.o: $(VARS_OBJS) $(DESK_OBJS) deskext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
-single:
-	$(LD) -u -s -l -o desk.o -a $(desk_tbase) $(desk_dbase) 0 vars.o $(DESK_OBJS) deskext.o
+single: $(VARS_OBJS) $(DESK_OBJS) deskext.o
+	$(LD) -u -s -l -o desk.o -a $(desk_tbase) $(desk_dbase) 0 $(VARS_OBJS) $(DESK_OBJS) deskext.o
 endif
 
+
+tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
-tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
+vars1x.o: $(top_srcdir)/common/vars1x.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 check:: desk.o $(top_srcdir)/common/sections.mak

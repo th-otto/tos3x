@@ -20,7 +20,9 @@ PP(register int16_t res;)
 		return FALSE;
 
 	gl_restype = res;
+#if AESVERSION >= 0x200
 	pref_save = res;
+#endif
 	gl_rschange = TRUE;
 	return TRUE;
 }

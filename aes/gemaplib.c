@@ -73,7 +73,9 @@ PP(intptr_t pglobal;)
 	LLSET(pglobal + 22, &D);
 	LWSET(pglobal + 26, gl_bvdisk);
 	LWSET(pglobal + 28, gl_bvhard);
+#if AESVERSION >= 0x200
 	rlr->p_msgtosend = FALSE;
+#endif
 	return rlr->p_pid;
 }
 
@@ -110,12 +112,14 @@ int16_t ap_exit(NOTHING)
 int16_t rd_mymsg(P(VOIDPTR) buffer)
 PP(VOIDPTR buffer;)
 {
+#if AESVERSION >= 0x200
 	if (rlr->p_msgtosend)				/* there is a message   */
 	{
 		LBCOPY(buffer, rlr->p_message, 16);
 		rlr->p_msgtosend = FALSE;		/* message is sent  */
 		return TRUE;
 	} else
+#endif
 		return FALSE;
 }
 

@@ -56,6 +56,7 @@ PD *slr;
 /****************************************************************/
 
 /* 306de: 00e1b8ea */
+/* 104de: 00fde286 */
 BOOLEAN forkq(P(FCODE) fcode, P(int32_t) fdata)
 PP(FCODE fcode;)
 PP(int32_t fdata;)
@@ -94,6 +95,7 @@ PP(int32_t fdata;)
 
 
 /* 306de: 00e1b94a */
+/* 104de: 00fde2de */
 VOID disp_act(P(PD *) p)
 PP(register PD *p;)
 {
@@ -247,11 +249,13 @@ VOID disp(NOTHING)
 	register PD *p;
 	register PD *p1;
 
+#if AESVERSION >= 0x200
 	/* take the process p off the ready list root */
 	if (crt_error)
 	{
 		dpd = rlr;						/* save the current process */
 	}
+#endif
 
 	rlr = (p = rlr)->p_link;
 	/* based on the state of the process p do something */
@@ -307,6 +311,7 @@ VOID disp(NOTHING)
 
 	} while (fpcnt);
 
+#if AESVERSION >= 0x200
 	if (crt_error)
 	{
 		if (rlr != dpd)					/* is the 1st guy the same  */
@@ -335,6 +340,8 @@ VOID disp(NOTHING)
 #endif
 		;
 	}
+#endif
+
 	/* This process is to be suspended when it return to here   */
 	if (rlr->p_stat & PS_TRYSUSPEND)
 	{

@@ -321,7 +321,9 @@ bye2:
 	LWSET(OB_Y(FSVELEV), 0);
 	LWSET(OB_HEIGHT(FSVELEV), LWGET(OB_HEIGHT(FSVSLID)));
 
+#if AESVERSION >= 0x320
 	gr_mouse(M_SAVE, NULL);
+#endif
 	gsx_mfset(ad_armice);				/* arrow pointer    */
 
 	ob_draw(tree, 0, MAX_DEPTH);		/* draw the box     */
@@ -562,7 +564,9 @@ bye2:
 	fm_dial(FMD_FINISH, &gl_rcenter, &gl_rfs);
 	dos_sdta((VOIDPTR)savedta);
 	gsx_sclip(&clip);
+#if AESVERSION >= 0x320
 	gr_mouse(M_RESTORE, NULL);
+#endif
 
 #undef xtree
 #undef XTREE
@@ -631,7 +635,9 @@ PP(register uint16_t *count;)
 	status = TRUE;
 
   r_exit:
+#if AESVERSION >= 0x320
 	gr_mouse(M_PREV, NULL);
+#endif
 	return status;
 }
 

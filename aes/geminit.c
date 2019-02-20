@@ -165,8 +165,10 @@ uint16_t gl_indbutcol;				/* indicator button color */
 uint16_t gl_actbutcol;				/* activator button color */
 uint16_t gl_alrtcol;				/* alert background color */
 #endif
+#if AESVERSION >= 0x200
 int16_t crt_error;					/* critical error handler semaphore     */
 				/* set in jbind.s, checked by dispatcher    */
+#endif
 #if (AESVERSION >= 0x330) | !BINEXACT
 int16_t adeskp[3];					/* desktop colors & backgrounds */
 STATIC int16_t awinp[3];			/* window colors & backgrounds */ /* not used anymore?? */
@@ -300,12 +302,12 @@ VOID setres(NOTHING)
 /*
  * Give everyone a chance to run, at least once
  */
-/* 306de: 00e1ae70 */
+/* 104de: 00fd3ce6 */
 VOID all_run(NOTHING)
 {
 	int16_t i;
 
-	for (i = 0; i < used_acc; i++)
+	for (i = 0; i < NUM_ACCS; i++)
 		dsptch();
 	/* then get in the wait line */
 	wm_update(BEG_UPDATE);
@@ -315,6 +317,7 @@ VOID all_run(NOTHING)
 
 
 /* 306de: 00e1dca8 */
+/* 104de: 00fd3d0a */
 /* 404: 00e24a90 */
 VOID gem_main(NOTHING)
 {
@@ -385,7 +388,9 @@ VOID gem_main(NOTHING)
 	fpt = 0;
 	fph = 0;
 	infork = 0;
+#if AESVERSION >= 0x200
 	crt_error = FALSE;
+#endif
 
 	/* initialize sync blocks */
 	wind_spb.sy_tas = 0;
@@ -414,7 +419,11 @@ VOID gem_main(NOTHING)
 	rlr = &DGLO->g_pd[curpid];
 	rlr->p_pid = curpid++;
 	rlr->p_link = 0;
+#if AESVERSION >= 0x200
 	rlr->p_stat = PS_RUN;
+#else
+	rlr->p_stat = 0;
+#endif
 	cda = rlr->p_cda;
 
 	/* restart the tick */
@@ -528,6 +537,7 @@ VOID gem_main(NOTHING)
 	rs_gaddr(ad_sysglo, R_TREE, SCREEN, (VOIDPTR *)&ad_stdesk);
 	tree = ad_stdesk;
 
+#if AESVERSION >= 0x200
 	/* fix up the GEM rsc. file now that we have an open WS    */
 	/* This code is also in gemshlib, but it belongs here so that the correct
 	 * default GEM backdrop pattern is set for accessories and autoboot app.
@@ -537,6 +547,7 @@ VOID gem_main(NOTHING)
 		LLSET(ad_stdesk + 12, 0x00001173L);
 	else
 		LLSET(ad_stdesk + 12, 0x00001143L);
+#endif
 
 #if TP_WINX
 	wx_init();
@@ -610,7 +621,7 @@ VOID gem_main(NOTHING)
 		*(sh_name(apath)) = 0;			/* change path\filename to path */
 		do_cdir(apath[0] - 'A', apath);
 
-		sh_write(1, (g_flag - 0), 0, &g_autoboot[0], "");
+		sh_write(1, g_flag - 0, 0, g_autoboot, "");
 	}
 
 #if AESVERSION >= 0x330
@@ -668,6 +679,7 @@ VOID gem_main(NOTHING)
  * process init
  */
 /* 306de: 00e1e226 */
+/* 104de: 00fd413a */
 VOID pinit(P(PD *) ppd, P(CDA *) pcda)
 PP(register PD *ppd;)
 PP(CDA *pcda;)
@@ -679,7 +691,7 @@ PP(CDA *pcda;)
 }
 
 
-#if BINEXACT
+#if (AESVERSION >= 0x200) & BINEXACT
 /* 306de: 00e1e260 */
 int32_t set_cache(P(int32_t) newcacr)
 PP(register int32_t newcacr;)
@@ -698,12 +710,15 @@ PP(register int32_t newcacr;)
  *
  * ++ERS 1/14/93: also read the preferred desktop backgrounds
  */
-/* 206de: 00e1a818 */
 /* 306de: 00e1e27e */
+/* 206de: 00e1a818 */
+/* 104de: 00fd4168 */
 int16_t pred_dinf(NOTHING)
 {
 	int16_t res;
+#if (AESVERSION >= 0x200) | !BINEXACT
 	int16_t cache;
+#endif
 	register int16_t bsize, fh, change, cont;
 	char *pbuf;
 	register char *temp;
@@ -766,18 +781,22 @@ int16_t pred_dinf(NOTHING)
 	{
 		defdrv = dos_gdrv();			/* save default drive   */
 		dos_chdir("\\");				/* open newdesk.inf */
-		fh = dos_open("NEWDESK.INF", 0x0);
+#if AESVERSION >= 0x200
+		fh = dos_open("NEWDESK.INF", RMODE_RD);
 		if (DOS_ERR)					/* no file      */
+#endif
 		{								/* try desktop.inf  */
-			fh = dos_open(infdata, 0x0);
+			fh = dos_open(infdata, RMODE_RD);
 			if (DOS_ERR)				/* no file      */
 			{
 				if (isdrive() & 0x04)	/* try the hard disk    */
 				{
 					do_cdir(2, "\\");
-					fh = dos_open("NEWDESK.INF", 0x0);
+#if AESVERSION >= 0x200
+					fh = dos_open("NEWDESK.INF", RMODE_RD);
 					if (DOS_ERR)		/* failed to open   */
-						fh = dos_open(infdata, 0x0);
+#endif
+						fh = dos_open(infdata, RMODE_RD);
 				} else
 				{
 					DOS_ERR = TRUE;
@@ -832,6 +851,7 @@ int16_t pred_dinf(NOTHING)
 #else
 #define CCHE_OFFSET 11
 #endif
+#if (AESVERSION >= 0x200) | !BINEXACT
 					if (LONGFRAME)
 					{
 						scan_2(temp + CCHE_OFFSET, &cache);	/* fixed 6/26/90 Mui    */
@@ -839,6 +859,7 @@ int16_t pred_dinf(NOTHING)
 						if (cache & 2)
 							set_cache(CACHE_ON);
 					} else
+#endif
 					{					/* turn on the bit ?        */
 #if BINEXACT /* sigh... */
 						trp14(((res & 0xF0) >> 4) ? 0x00400001L : 0x00400000L);
@@ -876,10 +897,17 @@ int16_t pred_dinf(NOTHING)
 #endif
 						if (gl_rschange)	/* if we've been here before    */
 						{
+#if (AESVERSION >= 0x200)
 							save_2(temp, (res & 0xF0) | gl_restype);
+#else
+							save_2(temp, (res & 0xF0) | (gl_restype - 1));
+#endif
 						} else
 						{
 							res &= 0xF;
+#if (AESVERSION < 0x200)
+							res += 1;
+#endif
 							gl_rschange = FALSE;
 							if (!app_reschange(res))
 								change = FALSE;	/* NO no res change     */
@@ -903,6 +931,7 @@ int16_t pred_dinf(NOTHING)
  * Save 25 columns and full height of the screen memory
  */
 /* 306de: 00e1e4e6 */
+/* 104de: 00fd430c */
 BOOLEAN gsx_malloc(NOTHING)
 {
 #if (TOSVERSION >= 0x400) | !BINEXACT
@@ -926,7 +955,13 @@ BOOLEAN gsx_malloc(NOTHING)
 	 * and has been fixed above for TOS 4.x
 	 */
 	gl_mlen = (int32_t)((gl_ws.ws_yres + 1) * (gl_ws.ws_xres + 1));
+#if AESVERSION >= 0x200
 	gl_mlen = (gl_nplanes * gl_mlen) / 16;
+#else
+	gl_mlen = (gl_nplanes * gl_mlen) / 32;
+	if (gl_mlen < 13312)
+		gl_mlen = 13312;
+#endif
 #endif
 
 	gl_tmp.fd_addr = dos_alloc(gl_mlen);
@@ -945,11 +980,13 @@ BOOLEAN gsx_malloc(NOTHING)
 }
 
 
+#if AESVERSION >= 0x200
 /*
  * return TRUE if HARD DISK
  * Doesn't NEED to return anything -- 881109 kbad
  */
 /* 306de: 00e1e556 */
+/* 104de: 00fd598e */
 VOID set_defdrv(NOTHING)
 {
 	/* This fugly statement gets drvbits, masks drive C,
@@ -958,8 +995,10 @@ VOID set_defdrv(NOTHING)
 	 */
 	dos_sdrv((isdrive() & 0x04) >> 1);
 }
+#endif
 
 
+#if AESVERSION >= 0x320
 /* 306de: 00e1e572 */
 VOID gsx_xmfset(P(MFORM *) pmfnew)
 PP(MFORM *pmfnew;)
@@ -969,8 +1008,10 @@ PP(MFORM *pmfnew;)
 	gsx_ncode(ST_CUR_FORM, 0, sizeof(MFORM) / 2);
 	gsx_mon();
 }
+#endif
 
 
+#if AESVERSION >= 0x200
 /* 306de: 00e1e5ae */
 VOID gsx_mfset(P(MFORM *) pmfnew)
 PP(MFORM *pmfnew;)
@@ -986,8 +1027,10 @@ PP(MFORM *pmfnew;)
 #endif
 	gsx_mon();
 }
+#endif
 
 
+#if AESVERSION >= 0x200
 /*
  * AES #78 - graf_mouse - Change the appearance of the mouse pointer.
  *
@@ -1041,6 +1084,7 @@ PP(MFORM *grmaddr;)
 		gsx_mfset(grmaddr);
 	}
 }
+#endif
 
 
 #if AES3D

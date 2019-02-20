@@ -265,7 +265,7 @@ beg1:
 	move.l	#_justretf,_drwaddr	/* initialize some bss pointers */
 	move.l	#_tikcod,_tikaddr
 #if AESVERSION < 0x200
-	move.l  #_xxcod,_xxaddr
+	move.l  #_far_draw,_drawaddr
 #endif
 
 /* initialize first stack pointer in first uda */

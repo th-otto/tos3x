@@ -35,7 +35,9 @@
 
 
 #if AESVERSION < 0x200
-VOID xxcod(NOTHING)
+/* 104de: 00fd7fe6 */
+VOID dr_code(P(intptr_t) src)
+PP(register intptr_t src;)
 {
 }
 #endif
