@@ -30,7 +30,7 @@
 #define SEEKREL	1	/*relative seek flag*/
 
 #define LINELEN  2040	/* maximum input/output string length */
-#define FNAMELEN 15	/* drive, name, and type, null terminated */
+#define FNAMELEN 128	/* drive, name, and type, null terminated */
 #define MAXOVLS  255	/* maximum number of overlays */
 #define	MAXOVDEP 5	/* maximum nesting depth for overlays */
 #define	ROOT	 0	/* overlay number for root */
