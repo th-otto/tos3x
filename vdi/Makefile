@@ -24,25 +24,16 @@ CPPFLAGS +=
 
 vdi.a: tosvars.o $(top_srcdir)/common/config.h $(VDI_OBJS) ${MAKEFILE}
 	$(RM) $@
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS1)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS2)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS3)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS4)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS5)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS6)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS7)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS8)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS9)
-	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS10)
+	$(AR) $(ARFLAGS) $@ $(VDI_$(TOSVERSION)_OBJS)
 
 # sections.mak might have just been generated, make sure it is reread
-vdi.o: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_OBJS) ${MAKEFILE}
+vdi.o: tosvars.o $(VARS_OBJS) vdiext.o $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.mak $(VDI_OBJS) ${MAKEFILE}
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single:
-	$(LD) -s -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o vars.o vdiext.o $(VDI_OBJS)
+	$(LD) -s -o vdi.o -a $(vdi_tbase) $(vdi_dbase) 0 tosvars.o $(VARS_OBJS) vdiext.o $(VDI_OBJS)
 
-vdi.rel: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_OBJS) vdi.lnk $(top_srcdir)/common/sections.mak ${MAKEFILE}
+vdi.rel: tosvars.o $(VARS_OBJS) vdiext.o $(top_srcdir)/common/config.h $(VDI_OBJS) vdi.lnk $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(RM) $@
 	$(LINK68) [abs,textbase[$(vdi_tbase)],database[$(vdi_dbase)],bssbase[0],co[vdi.lnk]]
 
@@ -55,6 +46,11 @@ vdi.rel: tosvars.o vars.o vdiext.o $(top_srcdir)/common/config.h $(VDI_OBJS) vdi
 # distinguished from .s
 #
 vars.o: $(top_srcdir)/common/vars.S vdivar.S
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+
+vars1x.o: $(top_srcdir)/common/vars1x.S vdivar.S
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i

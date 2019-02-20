@@ -988,7 +988,8 @@ PP(int argc;)
 PP(char **argv;)
 {
 	register short i;
-
+	char *ofilename;
+	
 #ifdef __ALCYON__
 	/* symbols etoa and ftoa are unresolved */
 	asm("xdef _etoa");
@@ -1011,6 +1012,7 @@ PP(char **argv;)
 
 	shortadr = 0;						/* long addresses... */
 	aesflag = 0;
+	ofilename = NULL;
 	
 	i = 1;
 	while (argv[i][0] == '-')
@@ -1061,6 +1063,10 @@ PP(char **argv;)
 			aesflag = 1;
 			break;
 
+		case 'o':
+			ofilename = argv[i++];
+			break;
+
 		default:
 			usage();
 		}
@@ -1072,7 +1078,10 @@ PP(char **argv;)
 	/* open source file */
 	ifn = openfi(argv[i], "r");
 	/* create relocatable object file name */
-	setldfn(argv[i]);
+	if (ofilename)
+		strcpy(ldfn, ofilename);
+	else
+		setldfn(argv[i]);
 	/* open loader file */
 	lfil = openfi(ldfn, "wb");
 	

@@ -38,7 +38,7 @@ ldiv.o: ldiv.S
 	$(AM_V_at)${RM} $*.i
 
 # sections.mak might have just been generated, make sure it is reread
-bdos.o: $(top_srcdir)/common/config.h tosvars.o vars.o vdidsp.o $(top_srcdir)/common/sections.mak $(BDOS_OBJS) ${MAKEFILE}
+bdos.o: $(top_srcdir)/common/config.h tosvars.o $(VARS_OBJS) vdidsp.o $(top_srcdir)/common/sections.mak $(BDOS_OBJS) ${MAKEFILE}
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 osmem.o: osmem.c
@@ -52,9 +52,14 @@ osmem.o: osmem.c
 	$(AM_V_at)${RM} $*.s $*.i $*.1 $*.2 $*.3
 
 single:
-	$(LD) -s -l -o bdos.o -a $(bdos_tbase) $(bdos_dbase) 0 tosvars.o vars.o vdidsp.o $(BDOS_OBJS)
+	$(LD) -s -l -o bdos.o -a $(bdos_tbase) $(bdos_dbase) 0 tosvars.o $(VARS_OBJS) vdidsp.o $(BDOS_OBJS)
 
 vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+
+vars1x.o: $(top_srcdir)/common/vars1x.S $(top_srcdir)/common/config.h
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i

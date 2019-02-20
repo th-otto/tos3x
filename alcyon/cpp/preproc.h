@@ -84,8 +84,11 @@
 #define	DEFSIZE		1024
 #define PBSIZE		2000
 
+#ifndef FALSE
 #define TRUE		1
 #define FALSE		0
+#endif
+
 #define NDEFS		20
 
 #define CSTKSIZE    20

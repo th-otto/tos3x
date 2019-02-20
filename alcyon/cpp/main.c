@@ -12,6 +12,7 @@ int pflag;
 int Cflag;
 int Eflag;
 int asflag;
+int aesflag;
 char *source;			/* preprocessor source file */
 char dest[MAXPSIZE];		/* preprocessor destination file */
 FILE *inbuf, *outbuf;
@@ -193,6 +194,10 @@ PP(register char **argv;)
 
 			case '5':					/* s5 compatiblity */
 				v_compat = 5;
+				continue;
+
+			case 'A':
+				aesflag++;
 				continue;
 
 			default:

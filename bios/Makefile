@@ -21,38 +21,63 @@ bios.a: tosvars.o $(BIOS_OBJS) ${MAKEFILE}
 # because on a FAT filesystem, .S cannot be
 # distinguished from .s
 #
-startup.o: startup.S $(top_srcdir)/common/config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc nvram.inc ikbdclk.inc floppy.inc
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+startup.o: startup.S $(top_srcdir)/common/config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc
+	$(AM_V_AS)${CPP} $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
-start1x.o: start1x.S $(top_srcdir)/common/config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc nvram.inc ikbdclk.inc floppy.inc
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+start1x.o: start1x.S $(top_srcdir)/common/config.h header.h scrdmp.inc mmu030.inc romcrc.inc dma.inc
+	$(AM_V_AS)${CPP} $*.S $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
 vars.o: $(top_srcdir)/common/vars.S $(top_srcdir)/common/config.h
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_AS)${CPP} $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
+	$(AM_V_at)${RM} $*.i
+
+vars1x.o: $(top_srcdir)/common/vars1x.S $(top_srcdir)/common/config.h
+	$(AM_V_AS)${CPP} $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
 tosvars.o: $(top_srcdir)/common/tosvars.S $(top_srcdir)/common/config.h
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $< $*.i
+	$(AM_V_AS)${CPP} $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i $@
 	$(AM_V_at)${RM} $*.i
 
 prt.o: prt.S
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_AS)${CPP} $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
 memtest.o: memtest.S
-	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i
+	$(AM_V_AS)${CPP} $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+nvram.o: nvram.S
+	$(AM_V_AS)$(CPP) $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+ikbdclk.o: ikbdclk.S
+	$(AM_V_AS)$(CPP) $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+chardev.o: chardev.S
+	$(AM_V_AS)$(CPP) $< $*.i
+	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
+	$(AM_V_at)${RM} $*.i
+
+floppy.o: floppy.S
+	$(AM_V_AS)$(CPP) $< $*.i
 	$(AM_V_at)${BIN}as68${EXEEXT} ${ASFLAGS} ${$*_ASFLAGS} $*.i
 	$(AM_V_at)${RM} $*.i
 
 # sections.mak might have just been generated, make sure it is reread
-bios.o: tosvars.o vars.o $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
+bios.o: tosvars.o $(VARS_OBJS) $(BIOS_OBJS) biosext.o $(top_srcdir)/common/sections.mak ${MAKEFILE}
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 blkdev.o: blkdev.c
@@ -67,7 +92,7 @@ blkdev.o: blkdev.c
 
 
 single:
-	$(LD) -u -s -l -o bios.o -a $(bios_tbase) $(bios_dbase) 0 tosvars.o vars.o $(BIOS_OBJS) biosext.o
+	$(LD) -u -s -l -o bios.o -a $(bios_tbase) $(bios_dbase) 0 tosvars.o $(VARS_OBJS) $(BIOS_OBJS) biosext.o
 
 biosext.o: biosext.S $(top_srcdir)/common/config.h $(top_srcdir)/common/sections.inc
 	$(AM_V_AS)${BIN}cp68${EXEEXT} ${CPPFLAGS} -P $*.S $*.i

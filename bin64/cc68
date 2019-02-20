@@ -84,6 +84,7 @@ if $compile; then
 	case $infile in
 	*.c)
 		base=$(basename $infile .c)
+		result="${base}.o"
 		test "$V" = 1 && echo "${BIN}cp68 ${CPPFLAGS} ${infile} ${base}.i"
 		if ${BIN}cp68 ${CPPFLAGS} ${infile} ${base}.i; then
 			test "$V" = 1 && echo "${BIN}c068 ${base}.i ${base}.1 ${base}.2 ${base}.3 ${CFLAGS} ${AESFLAGS}"
@@ -102,6 +103,11 @@ if $compile; then
 						if ! ${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${base}.s; then
 							status=1
 						fi
+					else
+						result="${base}.s"
+					fi
+					if test "$outfile" != "" -a "$outfile" != "$result"; then
+						mv "$result" "$outfile" || status=1
 					fi
 				fi
 			fi
@@ -113,20 +119,28 @@ if $compile; then
 		;;
 	*.S)
 		base=$(basename $infile .S)
+		result="${base}.o";
 		test "$V" = 1 && echo "${BIN}cp68 ${CPPFLAGS} -P ${infile} ${base}.i"
 		if ${BIN}cp68 ${CPPFLAGS} -P ${infile} ${base}.i; then
 			test "$V" = 1 && echo "${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${base}.i"
 			if ${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${base}.i; then
 				status=0
+				if test "$outfile" != "" -a "$outfile" != "$result"; then
+					mv "$result" "$outfile" || status=1
+				fi
 			fi
 		fi
 		rm -f ${base}.i
 		;;
 	*.s)
 		base=$(basename $infile .s)
+		result="${base}.o";
 		test "$V" = 1 && echo "${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${infile}"
 		if ${BIN}as68 ${ASFLAGS} ${AESFLAGS} ${infile}; then
 			status=0
+			if test "$outfile" != "" -a "$outfile" != "$result"; then
+				mv "$result" "$outfile" || status=1
+			fi
 		fi
 		rm -f ${base}.i
 		;;

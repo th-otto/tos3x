@@ -11,7 +11,7 @@ AES_306_OBJS=${AES_306_OBJS1} ${AES_306_OBJS2} ${AES_306_OBJS3} ${AES_306_OBJS4}
 AES_206_OBJS=${AES_306_OBJS}
 AES_208_OBJS=${AES_206_OBJS}
 
-AES_104_OBJS1=geminit.o apgrlib.o apgsxif.o gemaints.o gemaplib.o gemasync.o gembase.o gembind.o gemcli.o gemctrl.o gemdisp.o
+AES_104_OBJS1=geminit.o apgrlib.o apgsxif.o ../desk1x/deskinf.o gemaints.o gemaplib.o gemasync.o gembase.o gembind.o gemcli.o gemctrl.o gemdisp.o
 AES_104_OBJS2=gemevlib.o gemflag.o gemfmalt.o gemfmlib.o gemfslib.o gemglobe.o linefhdl.o
 AES_104_OBJS3=geminput.o gemmnlib.o gemobed.o gemobjop.o gempd.o gemqueue.o gemrom.o winx.o
 AES_104_OBJS4=gemrslib.o gemsclib.o gemshlib.o gemwmlib.o gemwrect.o newwrect.o newwmlib.o romcart.o

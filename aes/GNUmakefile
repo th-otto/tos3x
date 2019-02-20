@@ -62,6 +62,7 @@ dosdir::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(DOSDIR)/$(subdir)
 
 clean:
+	$(RM) $(AES_OBJS)
 	$(RM) *.o *.a *.ndx $(PROGRAMS) $(top_srcdir)/common/config.h
 
 distclean: clean

@@ -16,11 +16,7 @@ CPPFLAGS +=
 
 desk.a: tosvars.o $(top_srcdir)/common/config.h $(DESK_OBJS) ${MAKEFILE}
 	$(RM) $@
-	$(AR) $(ARFLAGS) $@ $(DESK_OBJS1)
-	$(AR) $(ARFLAGS) $@ $(DESK_OBJS2)
-	$(AR) $(ARFLAGS) $@ $(DESK_OBJS3)
-	$(AR) $(ARFLAGS) $@ $(DESK_OBJS4)
-	$(AR) $(ARFLAGS) $@ $(DESK_OBJS5)
+	$(AR) $(ARFLAGS) $@ $(DESK_OBJS)
 
 #
 # need to repeat the default suffix rule here,
