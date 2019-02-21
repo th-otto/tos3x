@@ -614,7 +614,7 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 
 	PTR(_eul)
 	INT(_mtrans)
-	PTR(_applist)
+	PTR(_thedesk)
 	INT(_fpt)
 	PTR(_nrl)
 	PTR(_rlr)

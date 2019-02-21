@@ -46,13 +46,8 @@ static char const mkeys[MAXMENU] = {
 	0x00, 0x00, 0x4D, 0x56, 0x50
 };
 
-char uhex_dig PROTO((int16_t wd));
-const char *inf_xdesk PROTO((const char *pcurr));
-const char *inf_parse PROTO((const char *pcurr));
-VOID inf_scan PROTO((char *buffer));
-int16_t hex_dig PROTO((char achar));
-char *save_win PROTO((WINDOW *win, char *pcurr));
-VOID tt_color PROTO((BOOLEAN put));
+static int16_t hex_dig PROTO((char achar));
+static VOID tt_color PROTO((BOOLEAN put));
 
 
 
@@ -72,7 +67,8 @@ PP(char *buffer;)
  * Reverse of hex_dig()
  */
 /* 306de: 00e2b5b4 */
-char uhex_dig(P(int16_t) wd)
+/* 104de: 00fd4d76 */
+static char uhex_dig(P(int16_t) wd)
 PP(register int16_t wd;)
 {
 	if (wd >= 0 && wd <= 9)
@@ -107,6 +103,7 @@ PP(register char *ppstr;)
  * pcurr pointing one space past the end of the four hex digits
  */
 /* 306de: 00e2b62a */
+/* 104de: 00fd4dac */
 char *scan_2(P(const char *) pcurr, P(int16_t *) pwd)
 PP(register const char *pcurr;)
 PP(register int16_t *pwd;)
@@ -128,6 +125,7 @@ PP(register int16_t *pwd;)
  * Reverse of scan_2()
  */
 /* 306de: 00e2b66e */
+/* 104de: 00fd4d76 */
 char *save_2(P(char *) pcurr, P(uint16_t) wd)
 PP(register char *pcurr;)
 PP(uint16_t wd;)
@@ -159,7 +157,7 @@ PP(register const char *pstr;)
  * Scan the desktop icon
  */
 /* 306de: 00e2b6dc */
-const char *inf_xdesk(P(const char *)pcurr)
+static const char *inf_xdesk(P(const char *)pcurr)
 PP(register const char *pcurr;)
 {
 	register int16_t ix;
@@ -265,7 +263,7 @@ PP(register const char *pcurr;)
  * Just scan the application
  */
 /* 306de: 00e2b8fe */
-const char *inf_parse(P(const char *)pcurr)
+static const char *inf_parse(P(const char *)pcurr)
 PP(register const char *pcurr;)
 {
 	register APP *app;
@@ -367,7 +365,7 @@ static int16_t const inf_permute[MAXMENU + 2] = {
 #endif
 
 /* 306de: 00e2ba0c */
-VOID inf_scan(P(char *)buffer)
+static VOID inf_scan(P(char *)buffer)
 PP(char *buffer;)
 {
 	register int16_t i, tmp;
@@ -575,6 +573,7 @@ PP(char *buffer;)
  */
 /* 206de: 00e28446 */
 /* 306de: 00e2beac */
+/* 104de: 00fd5062 */
 VOID read_inf(NOTHING)
 {
 	int16_t handle;
@@ -668,7 +667,8 @@ VOID read_inf(NOTHING)
  *	Convert a single hex ASCII digit to a number
  */
 /* 306de: 00e2c064 */
-int16_t hex_dig(P(char) achar)
+/* 104de: 00fd4d3a */
+static int16_t hex_dig(P(char) achar)
 PP(register char achar;)
 {
 	if (achar >= '0' && achar <= '9')
@@ -682,7 +682,7 @@ PP(register char achar;)
 
 
 /* 306de: 00e2c0a8 */
-char *save_win(P(WINDOW *)win, P(char *)pcurr)
+static char *save_win(P(WINDOW *)win, P(char *)pcurr)
 PP(register WINDOW *win;)
 PP(register char *pcurr;)
 {
@@ -1166,7 +1166,7 @@ PP(register int16_t *py;)
  * Put or get color and pattern
  */
 /* 306de: 00e2c98e */
-VOID tt_color(P(BOOLEAN) put)
+static VOID tt_color(P(BOOLEAN) put)
 PP(BOOLEAN put;)
 {
 	int16_t j;

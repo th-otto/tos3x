@@ -61,14 +61,19 @@
 #endif
 
 typedef int BOOLEAN;
+
+#ifndef FALSE
 #define FALSE 0
 #define TRUE  1
+#endif
 
 
+#ifndef UNUSED
 #ifdef __ALCYON__
 #  define UNUSED(x)
 #else
 #  define UNUSED(x) ((void)(x))
+#endif
 #endif
 
 #define I8086	0	/* Intel 8086/8088 */
@@ -94,10 +99,12 @@ typedef int BOOLEAN;
  * For this to work, some variables that should be static must be globally
  * visible.
  */
+#ifndef STATIC
 #if BINEXACT
 #  define STATIC
 #else
 #  define STATIC static
+#endif
 #endif
 
 /*
@@ -324,8 +331,10 @@ BOOLEAN streq PROTO((const char *p1, const char *p2));
  * Note however that is still not the standard behaviour: they return
  * the end of the string +1 instead of the destination.
  */
+#ifndef strcpy
 #define strcpy(dst, src) xstrpcpy(src, dst)
 #define strcat(dst, src) xstrpcat(src, dst)
+#endif
 char *xstrpcpy PROTO((const char *src, char *dst));
 char *xstrpcat PROTO((const char *src, char *dst));
 char *strscn PROTO((const char *src, char *dst, char stp));

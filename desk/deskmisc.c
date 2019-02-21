@@ -216,6 +216,7 @@ PP(int16_t state;)
 
 
 /* 306de: 00e2f870 */
+/* 104de: 00fdb032 */
 VOID desk_wait(P(BOOLEAN) state)
 PP(BOOLEAN state;)
 {

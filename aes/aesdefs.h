@@ -1,3 +1,6 @@
+#ifndef AESDEFS_H
+#define AESDEFS_H
+
 #if TOSVERSION >= 0x100
 #undef AESVERSION
 #define AESVERSION 0x120
@@ -110,3 +113,5 @@
 #define CMDLEN 128
 
 #define LINEF_HACK (TOSVERSION <= 0x104)
+
+#endif /* AESDEFS_H */

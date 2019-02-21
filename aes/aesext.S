@@ -134,9 +134,6 @@ _bios           equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBAC
 _gemdos         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBBC
 _g_name         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$9CE8
 _deskmain       equ DESKTBASE+(DESKTLEN-DTLEN_US)+$D6B6 /* 206us:E3005C 206de:E3008C */
-_scan_2         equ DESKTBASE+$51C4
-_escan_str      equ DESKTBASE+$518C
-_save_2         equ DESKTBASE+$5208
 _app_reschange  equ DESKTBASE+$1902
 _XDeselect      equ 0
 _getcookie      equ 0
@@ -163,69 +160,6 @@ _infdata        equ DESKDBASE+$8C2                      /* 206se:E3EC30 */
 #endif
 
 
-#if TOSVERSION == 0x106
-_xbios          equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FB9C
-_bios           equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBAC
-_gemdos         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBBC
-_g_name         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$9CE8
-_deskmain       equ DESKTBASE+(DESKTLEN-DTLEN_US)+$D6B6 /* 206us:E3005C 206de:E3008C */
-_scan_2         equ DESKTBASE+$51C4
-_escan_str      equ DESKTBASE+$518C
-_save_2         equ DESKTBASE+$5208
-_app_reschange  equ DESKTBASE+$1902
-_XDeselect      equ 0
-_getcookie      equ 0
-#if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
-_infdata        equ DESKDBASE+$8E6                      /* 206us:E3699C */
-#endif
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ)
-_infdata        equ DESKDBASE+$942                      /* 206de:E36A28 */
-#endif
-#if (OS_COUNTRY == CTRY_ES)
-_infdata        equ DESKDBASE+$928                      /* 206es:E36A3A */
-#endif
-#if (OS_COUNTRY == CTRY_IT)
-_infdata        equ DESKDBASE+$91A                      /* 206it:E36A0E */
-#endif
-#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
-_infdata        equ DESKDBASE+$95E                      /* 206fr:E3ECCC */
-#endif
-#if OS_COUNTRY == CTRY_SE
-_infdata        equ DESKDBASE+$8C2                      /* 206se:E3EC30 */
-#endif
-#endif
-
-#if TOSVERSION == 0x162
-_xbios          equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FB9C
-_bios           equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBAC
-_gemdos         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$FBBC
-_g_name         equ DESKTBASE+(DESKTLEN-DTLEN_US)+$9CE8
-_deskmain       equ DESKTBASE+(DESKTLEN-DTLEN_US)+$D6B6 /* 206us:E3005C 206de:E3008C */
-_scan_2         equ DESKTBASE+$51C4
-_escan_str      equ DESKTBASE+$518C
-_save_2         equ DESKTBASE+$5208
-_app_reschange  equ DESKTBASE+$1902
-_XDeselect      equ 0
-_getcookie      equ 0
-#if (OS_COUNTRY == CTRY_US) | (OS_COUNTRY == CTRY_UK)
-_infdata        equ DESKDBASE+$8E6                      /* 206us:E3699C */
-#endif
-#if (OS_COUNTRY == CTRY_DE) | (OS_COUNTRY == CTRY_SG) | (OS_COUNTRY == CTRY_PL) | (OS_COUNTRY == CTRY_CZ)
-_infdata        equ DESKDBASE+$942                      /* 206de:E36A28 */
-#endif
-#if (OS_COUNTRY == CTRY_ES)
-_infdata        equ DESKDBASE+$928                      /* 206es:E36A3A */
-#endif
-#if (OS_COUNTRY == CTRY_IT)
-_infdata        equ DESKDBASE+$91A                      /* 206it:E36A0E */
-#endif
-#if (OS_COUNTRY == CTRY_FR) | (OS_COUNTRY == CTRY_SF)
-_infdata        equ DESKDBASE+$95E                      /* 206fr:E3ECCC */
-#endif
-#if OS_COUNTRY == CTRY_SE
-_infdata        equ DESKDBASE+$8C2                      /* 206se:E3EC30 */
-#endif
-#endif
 
 
 

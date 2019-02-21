@@ -98,6 +98,11 @@
 #define ADFORMAT          11 /* form/dialog */
 
 #define ADICON            12 /* free form */
+#define IDISK              1 /* ICON in tree ADICON */ /* max len 12 */
+#define IDIR               2 /* ICON in tree ADICON */ /* max len 12 */
+#define ITRASHCAN          3 /* ICON in tree ADICON */ /* max len 12 */
+#define IPRG               4 /* ICON in tree ADICON */ /* max len 12 */
+#define IFILE              5 /* ICON in tree ADICON */ /* max len 12 */
 
 #define PRINTFIL          13 /* free form */
 
