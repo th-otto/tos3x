@@ -61,7 +61,7 @@ PP(const char *ptr;)
 /* 306de: 00e2ac28 */
 VOID pri_win(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	register int16_t serial;
 	int16_t maxitems, i, type;
 	DIR *dir;
@@ -122,8 +122,8 @@ VOID pri_win(NOTHING)
  * Create a new folder on the top window
  */
 /* 306de: 00e2ada2 */
-VOID newfolder(P(WINDOW *)win)
-PP(register WINDOW *win;)
+VOID newfolder(P(DESKWIN *)win)
+PP(register DESKWIN *win;)
 {
 	char namenew[NAMELEN];
 	char nameold[NAMELEN];
@@ -212,8 +212,8 @@ PP(register WINDOW *win;)
  * Sort the files
  */
 /* 306de: 00e2af56 */
-VOID sort_file(P(WINDOW *)win, P(int16_t) mode)
-PP(WINDOW *win;)
+VOID sort_file(P(DESKWIN *)win, P(int16_t) mode)
+PP(DESKWIN *win;)
 PP(int16_t mode;)
 {
 	register DIR *dir;
@@ -312,9 +312,9 @@ PP(int16_t mode;)
  * Scroll up or down
  */
 /* 306de: 00e2b17e */
-VOID set_newview(P(int16_t) index, P(WINDOW *)win)
+VOID set_newview(P(int16_t) index, P(DESKWIN *)win)
 PP(int16_t index;)
-PP(register WINDOW *win;)
+PP(register DESKWIN *win;)
 {
 	register int16_t i, k, items, vicons;
 	DIR *dir;
@@ -401,8 +401,8 @@ PP(register WINDOW *win;)
  * Read the files into a window
  */
 /* 306de: 00e2b316 */
-int16_t read_files(P(WINDOW *)win, P(int16_t) attr)
-PP(register WINDOW *win;)
+int16_t read_files(P(DESKWIN *)win, P(int16_t) attr)
+PP(register DESKWIN *win;)
 PP(int16_t attr;)
 {
 	register int32_t items, volume, sizes;

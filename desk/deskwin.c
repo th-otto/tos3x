@@ -22,9 +22,9 @@
 static GRECT const w_sizes = { 150, 150, 150, 150 };
 static OBJECT const blank = { -1, -1, -1, G_BOX, NONE, NORMAL, 0x000000F0L, 0, 0, 0, 0 };
 
-BOOLEAN alloc_obj PROTO((int16_t mode, WINDOW *win));
+BOOLEAN alloc_obj PROTO((int16_t mode, DESKWIN *win));
 #if TOSVERSION >= 0x400
-VOID ret_win PROTO((WINDOW *win));
+VOID ret_win PROTO((DESKWIN *win));
 #endif
 
 
@@ -32,8 +32,8 @@ VOID ret_win PROTO((WINDOW *win));
  * Update the window info line
  */
 /* 306de: 00e34308 */
-VOID winfo(P(WINDOW *) win)
-PP(WINDOW *win;)
+VOID winfo(P(DESKWIN *) win)
+PP(DESKWIN *win;)
 {
 	register int16_t i;
 	register DIR *dir;
@@ -88,9 +88,9 @@ PP(WINDOW *win;)
 
 
 /* 306de: 00e34418 */
-WINDOW *w_gnext(NOTHING)
+DESKWIN *w_gnext(NOTHING)
 {
-	WINDOW *win;
+	DESKWIN *win;
 
 	while (ww_win)
 	{
@@ -105,7 +105,7 @@ WINDOW *w_gnext(NOTHING)
 
 
 /* 306de: 00e34452 */
-WINDOW *w_gfirst(NOTHING)
+DESKWIN *w_gfirst(NOTHING)
 {
 	ww_win = winhead;
 	return w_gnext();
@@ -120,7 +120,7 @@ WINDOW *w_gfirst(NOTHING)
 VOID up_2allwin(P(const char *) path)
 PP(const char *path;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	win = w_gfirst();
 
@@ -150,7 +150,7 @@ PP(const char *path;)
 PP(BOOLEAN dofull;)								/* compare full path    */
 PP(BOOLEAN change;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	win = w_gfirst();
 
@@ -195,8 +195,8 @@ PP(BOOLEAN dofull;)
  * Do the actual update of a particular window
  */
 /* 306de: 00e34584 */
-BOOLEAN up_win(P(WINDOW *) win, P(BOOLEAN) mediac)
-PP(WINDOW *win;)
+BOOLEAN up_win(P(DESKWIN *) win, P(BOOLEAN) mediac)
+PP(DESKWIN *win;)
 PP(BOOLEAN mediac;)
 {
 	char *ptr;
@@ -241,8 +241,8 @@ PP(BOOLEAN mediac;)
 /* 306de: 00e3464c */
 VOID bottop(NOTHING)
 {
-	register WINDOW *win;
-	WINDOW *win1;
+	register DESKWIN *win;
+	DESKWIN *win1;
 	int16_t item;
 	int16_t buffer[8];
 
@@ -342,7 +342,7 @@ VOID free_path(NOTHING)
 /* 306de: 00e34804 */
 VOID clr_allwin(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	win = w_gfirst();
 
@@ -358,8 +358,8 @@ VOID clr_allwin(NOTHING)
  * Clean up and dselect the window objects
  */
 /* 306de: 00e34832 */
-VOID clr_xwin(P(WINDOW *) win, P(BOOLEAN) infoupdate)
-PP(register WINDOW *win;)
+VOID clr_xwin(P(DESKWIN *) win, P(BOOLEAN) infoupdate)
+PP(register DESKWIN *win;)
 PP(BOOLEAN infoupdate;)
 {
 	OBJECT *obj;
@@ -399,8 +399,8 @@ PP(BOOLEAN infoupdate;)
  * Move the vertical bar
  */
 /* 306de: 00e348f4 */
-VOID srl_verbar(P(WINDOW *) win, P(uint16_t) pos)
-PP(register WINDOW *win;)
+VOID srl_verbar(P(DESKWIN *) win, P(uint16_t) pos)
+PP(register DESKWIN *win;)
 PP(uint16_t pos;)
 {
 	int32_t l;
@@ -452,8 +452,8 @@ PP(uint16_t pos;)
  * Move the horizontal bar
  */
 /* 306de: 00e349ec */
-VOID srl_hzbar(P(WINDOW *) win, P(uint16_t) pos)
-PP(register WINDOW *win;)
+VOID srl_hzbar(P(DESKWIN *) win, P(uint16_t) pos)
+PP(register DESKWIN *win;)
 PP(uint16_t pos;)
 {
 	int32_t l;
@@ -520,8 +520,8 @@ PP(uint16_t pos;)
  * Scroll the content down
  */
 /* 306de: 00e34afe */
-VOID srl_row(P(WINDOW *) win, P(int16_t) row, P(int16_t) dir)
-PP(register WINDOW *win;)
+VOID srl_row(P(DESKWIN *) win, P(int16_t) row, P(int16_t) dir)
+PP(register DESKWIN *win;)
 PP(int16_t row;)
 PP(int16_t dir;)
 {
@@ -550,8 +550,8 @@ PP(int16_t dir;)
 
 
 /* 306de: 00e34ba6 */
-VOID srl_col(P(WINDOW *) win, P(int16_t) col, P(int16_t) dir)
-PP(register WINDOW *win;)
+VOID srl_col(P(DESKWIN *) win, P(int16_t) col, P(int16_t) dir)
+PP(register DESKWIN *win;)
 PP(register int16_t col;)
 PP(int16_t dir;)
 {
@@ -579,8 +579,8 @@ PP(int16_t dir;)
  */
 /* WINXTODO: in winx15 */
 /* 306de: 00e34c12 */
-VOID blt_window(P(WINDOW *) win, P(int16_t) mode, P(int16_t) size)
-PP(register WINDOW *win;)
+VOID blt_window(P(DESKWIN *) win, P(int16_t) mode, P(int16_t) size)
+PP(register DESKWIN *win;)
 PP(int16_t mode;)
 PP(int16_t size;)
 {
@@ -723,8 +723,8 @@ PP(int16_t size;)
  * adjust the scroll bars.
  */
 /* 306de: 00e34fbc */
-VOID view_adjust(P(WINDOW *) win)
-PP(register WINDOW *win;)
+VOID view_adjust(P(DESKWIN *) win)
+PP(register DESKWIN *win;)
 {
 	register OBJECT *obj;
 	register uint16_t x, col;
@@ -832,7 +832,7 @@ VOID sort_show(P(int16_t) mode, P(BOOLEAN) view)
 PP(int16_t mode;)
 PP(BOOLEAN view;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	desk_wait(TRUE);
 
@@ -865,8 +865,8 @@ PP(BOOLEAN view;)
  * It used the s_stofit flag to set the horizontal number of icon!
  */
 /* 306de: 00e35272 */
-VOID view_fixmode(P(WINDOW *) win)
-PP(WINDOW *win;)
+VOID view_fixmode(P(DESKWIN *) win)
+PP(DESKWIN *win;)
 {
 	register int16_t x, y, w, i, offx;
 	int16_t h, limitw, limith;
@@ -991,12 +991,12 @@ PP(WINDOW *win;)
  */
 #if TP_WINX
 /* 306de: 00e354c4 */
-VOID make_top(P(WINDOW *) win, P(int16_t) msg)
-PP(register WINDOW *win;)
+VOID make_top(P(DESKWIN *) win, P(int16_t) msg)
+PP(register DESKWIN *win;)
 PP(int16_t msg;)
 {
-	register WINDOW **winptr;
-	register WINDOW *next;
+	register DESKWIN **winptr;
+	register DESKWIN *next;
 
 again:
 	if (win)
@@ -1042,10 +1042,10 @@ again:
 #else
 
 /* 306de: 00e354c4 */
-VOID make_top(P(WINDOW *) win)
-PP(register WINDOW *win;)
+VOID make_top(P(DESKWIN *) win)
+PP(register DESKWIN *win;)
 {
-	register WINDOW *winptr;
+	register DESKWIN *winptr;
 
 	if (win)
 	{
@@ -1078,9 +1078,9 @@ PP(register WINDOW *win;)
  * Allocate a window object
  */
 /* 306de: 00e35508 */
-BOOLEAN alloc_obj(P(int16_t) mode, P(WINDOW *) win)
+BOOLEAN alloc_obj(P(int16_t) mode, P(DESKWIN *) win)
 PP(int16_t mode;)
-PP(register WINDOW *win;)
+PP(register DESKWIN *win;)
 {
 	register int16_t i, j;
 	register uint16_t item;
@@ -1174,7 +1174,7 @@ PP(register WINDOW *win;)
 VOID ini_windows(NOTHING)
 {
 	register int16_t i;
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	d_level = 4;
 
@@ -1223,8 +1223,8 @@ VOID ini_windows(NOTHING)
 
 
 #if TOSVERSION >= 0x400
-VOID ret_win(P(WINDOW *) win)
-PP(WINDOW *win;)
+VOID ret_win(P(DESKWIN *) win)
+PP(DESKWIN *win;)
 {
 	if (win->w_obj)
 	{
@@ -1238,9 +1238,9 @@ PP(WINDOW *win;)
 
 
 /* 306de: 00e357e6 */
-WINDOW *alloc_win(NOTHING)
+DESKWIN *alloc_win(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	win = winhead;
 
@@ -1270,10 +1270,10 @@ WINDOW *alloc_win(NOTHING)
  * Get the window data structure address according to handle
  */
 /* 306de: 00e35816 */
-WINDOW *get_win(P(int16_t) handle)
+DESKWIN *get_win(P(int16_t) handle)
 PP(int16_t handle;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	win = winhead;
 
@@ -1296,7 +1296,7 @@ PP(int16_t handle;)
 VOID open_window(P(int16_t) handle)
 PP(int16_t handle;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	win = get_win(handle);				/* window's size    */
 	/* open it */
@@ -1327,7 +1327,7 @@ PP(int16_t handle;)
 /* 306de: 00e3591e */
 int16_t create_window(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	int16_t handle;
 
 	/* Do we have any window pd ?   */
@@ -1356,13 +1356,13 @@ int16_t create_window(NOTHING)
  * Get the top window
  */
 /* 306de: 00e35976 */
-WINDOW *get_top(NOTHING)
+DESKWIN *get_top(NOTHING)
 {
 	return w_gfirst();
 
 #if UNLINKED
 	int16_t handle, ret;
-	WINDOW *win;
+	DESKWIN *win;
 
 	/* find out who is on top */
 	wind_get(0, WF_TOP, &handle, &ret, &ret, &ret);
@@ -1384,7 +1384,7 @@ VOID close_window(P(int16_t) handle, P(BOOLEAN) closeit)
 PP(int16_t handle;)
 PP(BOOLEAN closeit;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	if (closeit)						/* close window     */
 		wind_close(handle);
@@ -1432,7 +1432,7 @@ PP(BOOLEAN closeit;)
 /* 306de: 00e35a02 */
 VOID free_windows(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	int16_t i;
 
 	for (i = 0; i < MAXWIN; i++)
@@ -1466,7 +1466,7 @@ PP(int16_t which;)
 {
 	GRECT pt;
 	register OBJECT *obj;
-	WINDOW *win;
+	DESKWIN *win;
 	GRECT px;
 
 	rc_copy(pc, &px);

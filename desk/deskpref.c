@@ -126,7 +126,7 @@ VOID col_pa_pref(NOTHING)
 {
 	register OBJECT *obj;
 	register int16_t ret;
-	register WINDOW *win;
+	register DESKWIN *win;
 	int32_t newwin;
 	int32_t newdesk;
 	int32_t *outpat;

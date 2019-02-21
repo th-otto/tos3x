@@ -235,9 +235,9 @@ PP(const char *path;)
  * Run an application include doing dialogue box
  */
 /* 306de: 00e32e1e */
-VOID exec_file(P(const char *)infile, P(WINDOW *)win, P(int16_t) item, P(const char *)intail)
+VOID exec_file(P(const char *)infile, P(DESKWIN *)win, P(int16_t) item, P(const char *)intail)
 PP(const char *infile;)
-PP(WINDOW *win;)
+PP(DESKWIN *win;)
 PP(int16_t item;)
 PP(const char *intail;)
 {

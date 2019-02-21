@@ -220,37 +220,37 @@ VOID q_write PROTO((NOTHING));
 /*
  * deskwin.c
  */
-VOID winfo PROTO((WINDOW *win));
-WINDOW *w_gnext PROTO((NOTHING));
-WINDOW *w_gfirst PROTO((NOTHING));
+VOID winfo PROTO((DESKWIN *win));
+DESKWIN *w_gnext PROTO((NOTHING));
+DESKWIN *w_gfirst PROTO((NOTHING));
 VOID up_2allwin PROTO((const char *path));
 VOID up_1allwin PROTO((const char *path, BOOLEAN full, BOOLEAN change));
 VOID up_allwin PROTO((const char *path, BOOLEAN full));
-BOOLEAN up_win PROTO((WINDOW *win, BOOLEAN mediac));
+BOOLEAN up_win PROTO((DESKWIN *win, BOOLEAN mediac));
 VOID bottop PROTO((NOTHING));
 BOOLEAN path_alloc PROTO((int16_t level));
 VOID free_path PROTO((NOTHING));
 VOID clr_allwin PROTO((NOTHING));
-VOID clr_xwin PROTO((WINDOW *win, BOOLEAN infoupdate));
-VOID srl_verbar PROTO((WINDOW *win, uint16_t pos));
-VOID srl_hzbar PROTO((WINDOW *win, uint16_t pos));
-VOID srl_row PROTO((WINDOW *win, int16_t row, int16_t dir));
-VOID srl_col PROTO((WINDOW *win, int16_t col, int16_t dir));
-VOID blt_window PROTO((WINDOW *win, int16_t mode, int16_t size));
-VOID view_adjust PROTO((WINDOW *win));
+VOID clr_xwin PROTO((DESKWIN *win, BOOLEAN infoupdate));
+VOID srl_verbar PROTO((DESKWIN *win, uint16_t pos));
+VOID srl_hzbar PROTO((DESKWIN *win, uint16_t pos));
+VOID srl_row PROTO((DESKWIN *win, int16_t row, int16_t dir));
+VOID srl_col PROTO((DESKWIN *win, int16_t col, int16_t dir));
+VOID blt_window PROTO((DESKWIN *win, int16_t mode, int16_t size));
+VOID view_adjust PROTO((DESKWIN *win));
 VOID sort_show PROTO((int16_t mode, BOOLEAN view));
-VOID view_fixmode PROTO((WINDOW *win));
+VOID view_fixmode PROTO((DESKWIN *win));
 #if TP_WINX
-VOID make_top PROTO((WINDOW *win, int16_t msg));
+VOID make_top PROTO((DESKWIN *win, int16_t msg));
 #else
-VOID make_top PROTO((WINDOW *win));
+VOID make_top PROTO((DESKWIN *win));
 #endif
 VOID ini_windows PROTO((NOTHING));
-WINDOW *alloc_win PROTO((NOTHING));
-WINDOW *get_win PROTO((int16_t handle));
+DESKWIN *alloc_win PROTO((NOTHING));
+DESKWIN *get_win PROTO((int16_t handle));
 VOID open_window PROTO((int16_t handle));
 int16_t create_window PROTO((NOTHING));
-WINDOW *get_top PROTO((NOTHING));
+DESKWIN *get_top PROTO((NOTHING));
 VOID close_window PROTO((int16_t handle, BOOLEAN closeit));
 VOID free_windows PROTO((NOTHING));
 VOID do_redraw PROTO((int16_t handle, GRECT *pc, int16_t which));
@@ -262,12 +262,12 @@ VOID do_xyfix PROTO((GRECT *pc));
  */
 extern BOOLEAN back_update;						/* update background    */
 
-BOOLEAN ch_obj PROTO((int16_t mx, int16_t my, WINDOW **win, int16_t *item, int16_t *type));
+BOOLEAN ch_obj PROTO((int16_t mx, int16_t my, DESKWIN **win, int16_t *item, int16_t *type));
 BOOLEAN ch_undo PROTO((NOTHING));
 VOID file_op PROTO((const char *dest, int16_t mode));
 BOOLEAN build_rect PROTO((OBJECT *obj, GRECT *rect, int16_t w, int16_t h));
-VOID r_box PROTO((int16_t id, WINDOW *win));
-VOID hd_down PROTO((int16_t sitem, int16_t stype, WINDOW *swin));
+VOID r_box PROTO((int16_t id, DESKWIN *win));
+VOID hd_down PROTO((int16_t sitem, int16_t stype, DESKWIN *swin));
 int16_t make_icon PROTO((int16_t drive, int16_t icon, int16_t type, const char *text));
 
 
@@ -386,10 +386,10 @@ VOID fc_start PROTO((const char *source, int16_t op));
  * deskfile.c
  */
 VOID pri_win PROTO((NOTHING));
-VOID newfolder PROTO((WINDOW *win));
-VOID sort_file PROTO((WINDOW *win, int16_t mode));
-VOID set_newview PROTO((int16_t index, WINDOW *win));
-int16_t read_files PROTO((WINDOW *win, int16_t attr));
+VOID newfolder PROTO((DESKWIN *win));
+VOID sort_file PROTO((DESKWIN *win, int16_t mode));
+VOID set_newview PROTO((int16_t index, DESKWIN *win));
+int16_t read_files PROTO((DESKWIN *win, int16_t attr));
 
 
 /*
@@ -455,7 +455,7 @@ extern int16_t d_exit;		/* desktop exit flag	*/
 extern char mentable[MAXMENU];
 extern int16_t const tb3[MAXMENU];
 extern BOOLEAN o_status;							/* for o_select */
-extern WINDOW *o_win;
+extern DESKWIN *o_win;
 extern int16_t o_type;
 extern int16_t o_item;
 
@@ -486,10 +486,10 @@ ICONBLK *get_icon PROTO((int16_t item));
 OBJECT *get_tree PROTO((int16_t item));
 char *get_fstring PROTO((int16_t item));
 char *get_string PROTO((int16_t item));
-DIR *get_dir PROTO((WINDOW *win, int16_t item));
-VOID up_1 PROTO((WINDOW *win));
-VOID up_2 PROTO((WINDOW *win));
-char *put_name PROTO((WINDOW *win, const char *name));
+DIR *get_dir PROTO((DESKWIN *win, int16_t item));
+VOID up_1 PROTO((DESKWIN *win));
+VOID up_2 PROTO((DESKWIN *win));
+char *put_name PROTO((DESKWIN *win, const char *name));
 BOOLEAN in_parent PROTO((OBJECT *obj, int16_t child));
 VOID xinf_sset PROTO((OBJECT *obj, int16_t item, const char *buf1));
 VOID mice_state PROTO((int16_t state));
@@ -551,19 +551,19 @@ VOID desk_pref PROTO((NOTHING));
  * deskopen.c
  */
 VOID open_def PROTO((NOTHING));
-VOID ch_path PROTO((WINDOW *win));
-BOOLEAN open_subdir PROTO((WINDOW *win, int16_t icon, BOOLEAN opendisk, BOOLEAN init, BOOLEAN redraw));
+VOID ch_path PROTO((DESKWIN *win));
+BOOLEAN open_subdir PROTO((DESKWIN *win, int16_t icon, BOOLEAN opendisk, BOOLEAN init, BOOLEAN redraw));
 VOID show_item PROTO((NOTHING));
-VOID close_path PROTO((WINDOW *win));
+VOID close_path PROTO((DESKWIN *win));
 #if TP_WINX
-VOID close_top PROTO((WINDOW *win));
+VOID close_top PROTO((DESKWIN *win));
 #else
 VOID close_top PROTO((NOTHING));
 #endif
-VOID open_item PROTO((int16_t item, int16_t type, WINDOW *win));
-VOID open_file PROTO((WINDOW *win, int16_t item, const char *tail));
+VOID open_item PROTO((int16_t item, int16_t type, DESKWIN *win));
+VOID open_file PROTO((DESKWIN *win, int16_t item, const char *tail));
 BOOLEAN open_disk PROTO((int16_t icon, const char *path, BOOLEAN init));
-VOID do_box PROTO((WINDOW *win, int16_t item, int16_t desk, int16_t open, BOOLEAN openfull));
+VOID do_box PROTO((DESKWIN *win, int16_t item, int16_t desk, int16_t open, BOOLEAN openfull));
 BOOLEAN ch_drive PROTO((int16_t id));
 VOID upfdesk PROTO((char *s, char *new));
 VOID xvq_chcells PROTO((int16_t *num));
@@ -586,7 +586,7 @@ VOID sea_file PROTO((char *filename));
  */
 extern BOOLEAN x_status;			/* for x_select         */
 extern int16_t x_type;				/* ditto            */
-extern WINDOW *x_win;				/* ditto            */
+extern DESKWIN *x_win;				/* ditto            */
 extern int16_t d_dir;				/* count how many folders are selected inside the window */
 
 VOID x_del PROTO((NOTHING));
@@ -594,7 +594,7 @@ BOOLEAN o_select PROTO((NOTHING));
 BOOLEAN x_select PROTO((NOTHING));
 BOOLEAN x_next PROTO((const char **name, int16_t *type));
 BOOLEAN x_first PROTO((const char **name, int16_t *type));
-BOOLEAN i_find PROTO((int16_t mx, int16_t my, WINDOW **winout, int16_t *item, int16_t *type));
+BOOLEAN i_find PROTO((int16_t mx, int16_t my, DESKWIN **winout, int16_t *item, int16_t *type));
 BOOLEAN i_next PROTO((int16_t start, OBJECT *obj, int16_t *itemout));
 
 
@@ -605,7 +605,7 @@ BOOLEAN ch_tail PROTO((const char *ptr, char *tail));
 VOID print_file PROTO((NOTHING));
 VOID launch_pref PROTO((NOTHING));
 BOOLEAN set_dir PROTO((const char *path));
-VOID exec_file PROTO((const char *infile, WINDOW *win, int16_t item, const char *intail));
+VOID exec_file PROTO((const char *infile, DESKWIN *win, int16_t item, const char *intail));
 VOID run_it PROTO((const char *file, char *tail, BOOLEAN graphic, BOOLEAN setdir));
 
 
@@ -620,7 +620,7 @@ BOOLEAN showfile PROTO((const char *fname, int mode));
  */
 extern char dr[];						/* drives flag          */
 extern BOOLEAN p_timedate;				/* preserve time and date   */
-extern WINDOW *ww_win;					/* for w_gfirst and w_gnext */
+extern DESKWIN *ww_win;					/* for w_gfirst and w_gnext */
 extern int16_t d_nrows;					/* number of rows used by show  */
 extern int16_t d_level;					/* window path level        */
 extern char *d_path;					/* window path buffer       */
@@ -657,8 +657,8 @@ extern char *path3;
 extern char inf_path[PATHLEN];			/* store the inf path   */
 extern char g_buffer[160];				/* merge string buffer  */
 extern char comtail[PATHLEN];			/* comtail tail buffer */
-extern WINDOW winpd[MAXWIN];			/* window process structure */
-extern WINDOW *winhead;					/* head of window list      */
+extern DESKWIN winpd[MAXWIN];			/* window process structure */
+extern DESKWIN *winhead;				/* head of window list      */
 extern GRECT full;						/* full window size value   */
 extern GRECT fobj;						/* file object  */
 extern int16_t deskp[3];				/* desktop pattern  */

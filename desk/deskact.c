@@ -18,15 +18,15 @@
 
 BOOLEAN back_update;						/* update background    */
 
-VOID chk_rect PROTO((WINDOW *win, GRECT *rect, int16_t id));
+VOID chk_rect PROTO((DESKWIN *win, GRECT *rect, int16_t id));
 VOID frame PROTO((int16_t x1, int16_t y1, int16_t x2, int16_t y2));
 int16_t dist PROTO((int16_t x, int16_t y));
-VOID win_desk PROTO((WINDOW *swin, int16_t sitems, int16_t ditem, int16_t mx, int16_t my));
+VOID win_desk PROTO((DESKWIN *swin, int16_t sitems, int16_t ditem, int16_t mx, int16_t my));
 VOID desk_desk PROTO((int16_t sitem, int16_t ditem, int16_t mx, int16_t my));
 BOOLEAN gh_init PROTO((OBJECT *obj, BOOLEAN disk));
 VOID ghost_icon PROTO((int16_t offx, int16_t offy, BOOLEAN disk));
 VOID to_desk PROTO((int16_t ditem, const char *tail));
-VOID to_win PROTO((int16_t sitem, WINDOW *swin, int16_t ditem, WINDOW *dwin));
+VOID to_win PROTO((int16_t sitem, DESKWIN *swin, int16_t ditem, DESKWIN *dwin));
 
 
 
@@ -36,10 +36,10 @@ VOID to_win PROTO((int16_t sitem, WINDOW *swin, int16_t ditem, WINDOW *dwin));
  * Return TRUE if it is
  */
 /* 306de: 00e26466 */
-BOOLEAN ch_obj(P(int16_t) mx, P(int16_t) my, P(WINDOW **) win, P(int16_t *) item, P(int16_t *) type)
+BOOLEAN ch_obj(P(int16_t) mx, P(int16_t) my, P(DESKWIN **) win, P(int16_t *) item, P(int16_t *) type)
 PP(int16_t mx;)
 PP(int16_t my;)
-PP(WINDOW **win;)
+PP(DESKWIN **win;)
 PP(int16_t *item;)
 PP(int16_t *type;)
 {
@@ -348,8 +348,8 @@ PP(int16_t h;)
  * Check whose is inside the rect and select the object
  */
 /* 306de: 00e26ab6 */
-VOID chk_rect(P(WINDOW *) win, P(GRECT *) rect, P(int16_t) id)
-PP(register WINDOW *win;)
+VOID chk_rect(P(DESKWIN *) win, P(GRECT *) rect, P(int16_t) id)
+PP(register DESKWIN *win;)
 PP(GRECT *rect;)
 PP(int16_t id;)
 {
@@ -453,9 +453,9 @@ PP(int16_t y2;)
  * Draw a box and wait for button to go up
  */
 /* 306de: 00e26cf8 */
-VOID r_box(P(int16_t) id, P(WINDOW *) win)
+VOID r_box(P(int16_t) id, P(DESKWIN *) win)
 PP(int16_t id;)
-PP(WINDOW *win;)
+PP(DESKWIN *win;)
 {
 	register int16_t tmpx, tmpy;
 	register int16_t tmpx1, tmpy1;
@@ -542,8 +542,8 @@ PP(int16_t y;)
  * Move icons from window to desktop
  */
 /* 306de: 00e26eb6 */
-VOID win_desk(P(WINDOW *) swin, P(int16_t) sitems, P(int16_t) ditem, P(int16_t) mx, P(int16_t) my)
-PP(register WINDOW *swin;)
+VOID win_desk(P(DESKWIN *) swin, P(int16_t) sitems, P(int16_t) ditem, P(int16_t) mx, P(int16_t) my)
+PP(register DESKWIN *swin;)
 PP(int16_t sitems;)
 PP(int16_t ditem;)
 PP(int16_t mx;)
@@ -819,10 +819,10 @@ PP(BOOLEAN disk;)
  * Handle the holding down button event
  */
 /* 306de: 00e27544 */
-VOID hd_down(P(int16_t) sitem, P(int16_t) stype, P(WINDOW *)swin)
+VOID hd_down(P(int16_t) sitem, P(int16_t) stype, P(DESKWIN *)swin)
 PP(register int16_t sitem;)
 PP(register int16_t stype;)
-PP(register WINDOW *swin;)
+PP(register DESKWIN *swin;)
 {
 	register int16_t pitem, state;
 	BOOLEAN itype;
@@ -834,8 +834,8 @@ PP(register WINDOW *swin;)
 	int16_t ptype, pid;
 	BOOLEAN docopy;
 	int16_t cx, cy, offx, offy, o1, o2;
-	WINDOW *dwin;
-	WINDOW *pwin;
+	DESKWIN *dwin;
+	DESKWIN *pwin;
 	register OBJECT *pobj;
 	register OBJECT *sobj;
 	GRECT pt;
@@ -1065,7 +1065,7 @@ PP(register WINDOW *swin;)
 		{
 			if (!exec)
 				ditem = 0;
-			to_win(sitem, (WINDOW *) 0, ditem, dwin);
+			to_win(sitem, (DESKWIN *) 0, ditem, dwin);
 		}
 	}
 
@@ -1110,7 +1110,7 @@ PP(const char *tail;)
 		break;
 
 	case XFILE:
-		open_file((WINDOW *) 0, ditem, tail);
+		open_file((DESKWIN *) 0, ditem, tail);
 		break;
 
 	case PRINTER:
@@ -1128,11 +1128,11 @@ PP(const char *tail;)
  * Take action when something is dragged to window
  */
 /* 306de: 00e27b98 */
-VOID to_win(P(int16_t) sitem, P(WINDOW *)swin, P(int16_t) ditem, P(WINDOW *)dwin)
+VOID to_win(P(int16_t) sitem, P(DESKWIN *)swin, P(int16_t) ditem, P(DESKWIN *)dwin)
 PP(int16_t sitem;)
-PP(WINDOW *swin;)
+PP(DESKWIN *swin;)
 PP(int16_t ditem;)
-PP(WINDOW *dwin;)
+PP(DESKWIN *dwin;)
 {
 	register DIR *dir;
 	register char *temp;

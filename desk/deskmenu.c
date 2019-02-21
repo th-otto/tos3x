@@ -331,7 +331,7 @@ int16_t const tb3[MAXMENU] = {
 static int16_t const altnum[] = { 0x7800, 0x7900, 0x7a00, 0x7c00, 0x7d00, 0x7b00, 0 };
 
 BOOLEAN o_status;							/* for o_select */
-WINDOW *o_win;
+DESKWIN *o_win;
 int16_t o_type;
 int16_t o_item;
 
@@ -339,7 +339,7 @@ int16_t o_item;
 int16_t loop_find PROTO((int16_t input, const int16_t *table, int16_t *index));
 VOID sel_all PROTO((NOTHING));
 VOID hd_keybd PROTO((uint16_t key));
-VOID foption PROTO((WINDOW *win));
+VOID foption PROTO((DESKWIN *win));
 VOID do_scroll PROTO((int16_t *msgbuff));
 VOID do_opt PROTO((int16_t msgbuff));
 VOID hd_menu PROTO((int16_t *msgbuff));
@@ -422,7 +422,7 @@ VOID menu_verify(NOTHING)
 {
 	int16_t enable;
 	register int16_t i;
-	WINDOW *win;
+	DESKWIN *win;
 	int16_t type;
 	const char *str;
 
@@ -483,7 +483,7 @@ VOID menu_verify(NOTHING)
 /* 306de: 00e2df94 */
 VOID sel_all(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	register DIR *dir;
 	register int16_t i;
 	char buffer[NAMELEN];
@@ -513,7 +513,7 @@ VOID hd_keybd(P(uint16_t) key)
 PP(uint16_t key;)
 {
 	OBJECT *obj;
-	register WINDOW *win;
+	register DESKWIN *win;
 	register int16_t item;
 	int16_t msgbuff[8];
 	char buffer[NAMELEN];
@@ -552,7 +552,7 @@ PP(uint16_t key;)
 
 	if ((app = app_key(key)))
 	{
-		exec_file(app->a_name, (WINDOW *) 0, 0, Nostr);
+		exec_file(app->a_name, (DESKWIN *) 0, 0, Nostr);
 		return;
 	}
 
@@ -714,8 +714,8 @@ PP(uint16_t key;)
  */
 /* 206de: 00e2a8e8 */
 /* 306de: 00e2e34e */
-VOID foption(P(WINDOW *)win)
-PP(register WINDOW *win;)
+VOID foption(P(DESKWIN *)win)
+PP(register DESKWIN *win;)
 {
 	register OBJECT *obj;
 	char buffer[NAMELEN];
@@ -766,7 +766,7 @@ VOID do_scroll(P(int16_t *)msgbuff)
 PP(int16_t *msgbuff;)
 {
 	register int16_t act;
-	register WINDOW *win;
+	register DESKWIN *win;
 	int16_t bdown, x, y;
 #if TP_WINX
 	int16_t mult;
@@ -1093,7 +1093,7 @@ PP(int16_t msgbuff;)
 {
 	OBJECT *obj;
 	int16_t ret, type;
-	register WINDOW *win;
+	register DESKWIN *win;
 	char buffer[NAMELEN];
 	char buf2[NAMELEN];
 	const char *str;
@@ -1249,7 +1249,7 @@ VOID hd_msg(P(int16_t *)msgbuff)
 PP(int16_t *msgbuff;)
 {
 	register int16_t handle;
-	register WINDOW *win;
+	register DESKWIN *win;
 	register OBJECT *obj;
 #if !TP_WINX
 	int16_t shrink;

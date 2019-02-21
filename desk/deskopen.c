@@ -48,7 +48,7 @@ PP(int16_t *num;)
 VOID open_def(NOTHING)
 {
 	register int16_t i;
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	win = winpd;
 
@@ -64,8 +64,8 @@ VOID open_def(NOTHING)
 
 
 /* 306de: 00e30366 */
-VOID ch_path(P(WINDOW *)win)
-PP(register WINDOW *win;)
+VOID ch_path(P(DESKWIN *)win)
+PP(register DESKWIN *win;)
 {
 	int16_t i, num, len;
 
@@ -89,8 +89,8 @@ PP(register WINDOW *win;)
  * open -- open a disk
  */
 /* 306de: 00e303f8 */
-BOOLEAN open_subdir(P(WINDOW *)win, P(int16_t) icon, P(BOOLEAN) opendisk, P(BOOLEAN) init, P(BOOLEAN) redraw)
-PP(register WINDOW *win;)
+BOOLEAN open_subdir(P(DESKWIN *)win, P(int16_t) icon, P(BOOLEAN) opendisk, P(BOOLEAN) init, P(BOOLEAN) redraw)
+PP(register DESKWIN *win;)
 PP(int16_t icon;)
 PP(BOOLEAN opendisk;)
 PP(BOOLEAN init;)
@@ -152,7 +152,7 @@ PP(BOOLEAN redraw;)
 /* 306de: 00e3051e */
 VOID show_item(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	if (x_status)						/* something is selected    */
 	{
@@ -575,8 +575,8 @@ PP(char *buffer;)
  * Close a path
  */
 /* 306de: 00e30e48 */
-VOID close_path(P(WINDOW *)win)
-PP(register WINDOW *win;)
+VOID close_path(P(DESKWIN *)win)
+PP(register DESKWIN *win;)
 {
 	char *ptr;
 	int16_t item;
@@ -609,8 +609,8 @@ PP(register WINDOW *win;)
  */
 /* 306de: 00e30eca */
 #if TP_WINX
-VOID close_top(P(WINDOW *) win)
-PP(register WINDOW *win;)
+VOID close_top(P(DESKWIN *) win)
+PP(register DESKWIN *win;)
 {
 	if (win != NULL)
 	{
@@ -621,7 +621,7 @@ PP(register WINDOW *win;)
 #else
 VOID close_top(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 
 	if ((win = get_top()) != NULL)
 	{
@@ -636,10 +636,10 @@ VOID close_top(NOTHING)
  * open an item
  */
 /* 306de: 00e30f10 */
-VOID open_item(P(int16_t) item, P(int16_t) type, P(WINDOW *)win)
+VOID open_item(P(int16_t) item, P(int16_t) type, P(DESKWIN *)win)
 PP(register int16_t item;)
 PP(int16_t type;)
-PP(WINDOW *win;)
+PP(DESKWIN *win;)
 {
 	char buffer[16];
 	register IDTYPE *itype;
@@ -722,8 +722,8 @@ PP(WINDOW *win;)
  * Open a file, it may be an executable file
  */
 /* 306de: 00e310e6 */
-VOID open_file(P(WINDOW *)win, P(int16_t) item, P(const char *)tail)
-PP(register WINDOW *win;)
+VOID open_file(P(DESKWIN *)win, P(int16_t) item, P(const char *)tail)
+PP(register DESKWIN *win;)
 PP(int16_t item;)
 PP(const char *tail;)
 {
@@ -782,7 +782,7 @@ PP(const char *path;)
 PP(BOOLEAN init;)
 {
 	int16_t handle;
-	WINDOW *win;
+	DESKWIN *win;
 
 	if (path[0] == CHAR_FOR_CARTRIDGE)	/* cartridge    */
 	{
@@ -821,8 +821,8 @@ PP(BOOLEAN init;)
  * Do a grow or shrink box on a disk icon
  */
 /* 306de: 00e312ee */
-VOID do_box(P(WINDOW *)win, P(int16_t) item, P(int16_t) desk, P(int16_t) open, P(BOOLEAN) openfull)
-PP(WINDOW *win;)
+VOID do_box(P(DESKWIN *)win, P(int16_t) item, P(int16_t) desk, P(int16_t) open, P(BOOLEAN) openfull)
+PP(DESKWIN *win;)
 PP(int16_t item;)
 PP(int16_t desk;)
 PP(int16_t open;)								/* item number, desk icon, open/close */

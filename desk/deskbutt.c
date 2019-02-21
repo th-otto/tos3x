@@ -104,8 +104,8 @@ PP(int16_t my;)
 	register int16_t item;
 	int16_t xitem, type, keypress, state;
 	register OBJECT *obj;
-	register WINDOW *win;
-	WINDOW *win1;
+	register DESKWIN *win;
+	DESKWIN *win1;
 
 	/* click on any objects */
 
@@ -165,7 +165,7 @@ PP(int16_t my;)
 				if (!keypress)			/* clean up all the disk icons  */
 					clr_dicons();
 
-				r_box(0, (WINDOW *) 0);
+				r_box(0, (DESKWIN *) 0);
 				return;
 			} else
 			{

@@ -12,7 +12,7 @@
 
 char dr[32];							/* drives flag          */
 BOOLEAN p_timedate;						/* preserve time and date   */
-WINDOW *ww_win;							/* for w_gfirst and w_gnext */
+DESKWIN *ww_win;						/* for w_gfirst and w_gnext */
 int16_t d_nrows;						/* number of rows used by show  */
 int16_t d_level;						/* window path level        */
 char *d_path;							/* window path buffer       */
@@ -59,8 +59,8 @@ char *path3;
 char inf_path[PATHLEN];					/* store the inf path   */
 char g_buffer[160];						/* merge string buffer  */
 char comtail[PATHLEN];					/* comtail tail buffer */
-WINDOW winpd[MAXWIN];					/* window process structure */
-WINDOW *winhead;						/* head of window list      */
+DESKWIN winpd[MAXWIN];					/* window process structure */
+DESKWIN *winhead;						/* head of window list      */
 GRECT full;								/* full window size value   */
 GRECT fobj;								/* file object  */
 int16_t deskp[3];						/* desktop pattern  */

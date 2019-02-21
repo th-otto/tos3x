@@ -133,8 +133,8 @@ PP(int16_t item;)
 
 
 /* 306de: 00e2f722 */
-DIR *get_dir(P(WINDOW *)win, P(int16_t) item)
-PP(WINDOW *win;)
+DIR *get_dir(P(DESKWIN *)win, P(int16_t) item)
+PP(DESKWIN *win;)
 PP(int16_t item;)
 {
 	int16_t j;
@@ -147,8 +147,8 @@ PP(int16_t item;)
 
 
 /* 306de: 00e2f752 */
-VOID up_1(P(WINDOW *)win)
-PP(WINDOW *win;)
+VOID up_1(P(DESKWIN *)win)
+PP(DESKWIN *win;)
 {
 	set_newview(win->w_srtitem, win);
 	do_redraw(win->w_id, &full, 0);
@@ -159,8 +159,8 @@ PP(WINDOW *win;)
  * Update window because someone change the d_state
  */
 /* 306de: 00e2f786 */
-VOID up_2(P(WINDOW *)win)
-PP(WINDOW *win;)
+VOID up_2(P(DESKWIN *)win)
+PP(DESKWIN *win;)
 {
 	up_1(win);
 	winfo(win);
@@ -171,8 +171,8 @@ PP(WINDOW *win;)
  * Put a file name into the win path buffer
  */
 /* 306de: 00e2f79e */
-char *put_name(P(WINDOW *)win, P(const char *) name)
-PP(WINDOW *win;)
+char *put_name(P(DESKWIN *)win, P(const char *) name)
+PP(DESKWIN *win;)
 PP(const char *name;)
 {
 	strcpy(win->w_buf, win->w_path);

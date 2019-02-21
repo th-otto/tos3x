@@ -8,7 +8,7 @@
 
 #include "desktop.h"
 
-VOID pos_item PROTO((WINDOW *win, int16_t newi));
+VOID pos_item PROTO((DESKWIN *win, int16_t newi));
 BOOLEAN rec_sea PROTO((char *filename));
 BOOLEAN display PROTO((char *filename));
 VOID mass_string PROTO((char *str1));
@@ -19,8 +19,8 @@ VOID mass_string PROTO((char *str1));
  * Position an item within a window
  */
 /* 306de: 00e31aca */
-VOID pos_item(P(WINDOW *) win, P(int16_t) newi)
-PP(register WINDOW *win;)
+VOID pos_item(P(DESKWIN *) win, P(int16_t) newi)
+PP(register DESKWIN *win;)
 PP(int16_t newi;)
 {
 	register int16_t i, j, k;
@@ -94,7 +94,7 @@ PP(int16_t newi;)
 VOID sea_file(P(char *)filename)
 PP(char *filename;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	register DIR *dir;
 	register int16_t i;
 	const char *str;
@@ -274,7 +274,7 @@ PP(char *filename;)
 {
 	int32_t size;
 	register char *addr;
-	register WINDOW *win;
+	register DESKWIN *win;
 	register DIR *dir;
 	register int16_t i;
 	int16_t newi;

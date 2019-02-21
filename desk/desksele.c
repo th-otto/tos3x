@@ -13,7 +13,7 @@
 BOOLEAN x_status;			/* for x_select         */
 STATIC int16_t x_index;		/* For x_next and x_first   */
 int16_t x_type;				/* ditto            */
-WINDOW *x_win;				/* ditto            */
+DESKWIN *x_win;				/* ditto            */
 STATIC int16_t x_cur;		/* x_del            */
 int16_t d_dir;				/* count how many folders are selected inside the window */
 
@@ -123,7 +123,7 @@ PP(int16_t mode;)								/* TRUE == window mode  */
 /* 306de: 00e324c2 */
 BOOLEAN o_select(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	register OBJECT *obj;
 	register int16_t i, j;
 
@@ -154,7 +154,7 @@ BOOLEAN o_select(NOTHING)
 	}
 
 	o_type = DESKICON;					/* Now try desktop */
-	o_win = (WINDOW *) 0;
+	o_win = (DESKWIN *) 0;
 	return o_status = i_next(1, background, &o_item);
 }
 
@@ -165,12 +165,12 @@ BOOLEAN o_select(NOTHING)
 /* 306de: 00e32582 */
 BOOLEAN x_select(NOTHING)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	register DIR *dir;
 	register int16_t i;
 	int16_t j;
 
-	x_win = (WINDOW *) 0;
+	x_win = (DESKWIN *) 0;
 	x_type = DESKICON;
 
 	win = w_gfirst();
@@ -249,7 +249,7 @@ BOOLEAN x_first(P(const char **)name, P(int16_t *)type)
 PP(const char **name;)
 PP(int16_t *type;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	register int16_t i, j;
 	DIR *dir;
 
@@ -290,14 +290,14 @@ PP(int16_t *type;)
  * Find out what the user has clicked on based on the mx and my
  */
 /* 306de: 00e327aa */
-BOOLEAN i_find(P(int16_t) mx, P(int16_t) my, P(WINDOW **)winout, P(int16_t *)item, P(int16_t *)type)
+BOOLEAN i_find(P(int16_t) mx, P(int16_t) my, P(DESKWIN **)winout, P(int16_t *)item, P(int16_t *)type)
 PP(register int16_t mx;)
 PP(register int16_t my;)
-PP(WINDOW **winout;)
+PP(DESKWIN **winout;)
 PP(int16_t *item;)
 PP(int16_t *type;)
 {
-	register WINDOW *win;
+	register DESKWIN *win;
 	register int16_t which;
 
 	win = w_gfirst();
@@ -327,7 +327,7 @@ PP(int16_t *type;)
 	{
 		*item = which;
 		*type = DESKICON;
-		*winout = (WINDOW *) 0;
+		*winout = (DESKWIN *) 0;
 		return TRUE;
 	}
 

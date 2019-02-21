@@ -29,7 +29,7 @@ BOOLEAN font_save;
 BOOLEAN s_defdir;
 BOOLEAN s_fullpath;
 
-STATIC WINDOW *warray[MAXWIN];			/* window structure */ /* should be local to save_inf */
+STATIC DESKWIN *warray[MAXWIN];			/* window structure */ /* should be local to save_inf */
 
 #define SAVE_ATARI	128
 
@@ -369,7 +369,7 @@ static VOID inf_scan(P(char *)buffer)
 PP(char *buffer;)
 {
 	register int16_t i, tmp;
-	register WINDOW *pws;
+	register DESKWIN *pws;
 	register const char *pcurr;
 	APP *app;
 	char *ptmp;
@@ -682,8 +682,8 @@ PP(register char achar;)
 
 
 /* 306de: 00e2c0a8 */
-static char *save_win(P(WINDOW *)win, P(char *)pcurr)
-PP(register WINDOW *win;)
+static char *save_win(P(DESKWIN *)win, P(char *)pcurr)
+PP(register DESKWIN *win;)
 PP(register char *pcurr;)
 {
 	char *ptmp;
@@ -724,7 +724,7 @@ BOOLEAN save_inf(P(BOOLEAN) todisk)
 PP(BOOLEAN todisk;)
 {
 	register APP *start;
-	register WINDOW *win;
+	register DESKWIN *win;
 	register char *pcurr;
 	register int16_t envr, i;
 	int16_t j, w, len, h, handle;

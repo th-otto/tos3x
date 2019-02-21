@@ -30,9 +30,9 @@ typedef	struct dta
 	DIR	dirfile;
 } DTA;
 
-typedef	struct	window
+typedef	struct deskwin
 {
-	struct window *w_next;	/* link pointer		*/
+	struct deskwin *w_next;	/* link pointer		*/
 	uint16_t w_id;			/* window handle	*/
 	uint16_t w_free;		/* window free to use	*/
 	char	*w_path;		/* window path name	*/
@@ -63,7 +63,7 @@ typedef	struct	window
 	int16_t	w_vvicons;	/* number of invisible icon per col	*/
 	int16_t	w_xcol;		/* number of visible column of icon	 138*/
 	int16_t	w_xrow;		/* number of visible row of icon	*/
-} WINDOW;	
+} DESKWIN;	
 
 
 typedef struct myblk
