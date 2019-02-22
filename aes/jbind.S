@@ -53,15 +53,19 @@ NOERR   equ     0
         even
 
         xdef    _crit_err
-        comm _crit_err,32
-
-#define _dk_err _crit_err+4
-#define savestk _crit_err+8
-#define _SAV2TRP _crit_err+12
-#define _savsup _crit_err+16
-#define drawsp _crit_err+20
-#define _ldivr _crit_err+24
-#define errsave _crit_err+28
+        comm _crit_err,4
+        xdef    savestk
+        comm savestk,4
+        xdef    _SAV2TRP
+        comm _SAV2TRP,4
+        xdef    _savsup
+        comm _savsup,4
+        xdef    drawsp
+        comm drawsp,4
+        xdef    _aesldivr
+        comm _aesldivr,4
+        xdef    errsave
+        comm errsave,4
 
 #if TOSVERSION >= 0x400
 ERRSTKSIZE equ 1604
@@ -126,6 +130,12 @@ _takeerr:
         bra     call_err
         
 #if AESVERSION >= 0x200
+
+        bss
+        xdef    _dk_err
+        comm _dk_err,4
+		text
+		
         xdef    _deskerr
 _deskerr:
         move.l  #-1,d0                  /* get the old one */
@@ -323,7 +333,7 @@ _ldiv:
         move.l  8(a6),d7
         move.l  12(a6),d6
         bne     La2
-        move.l  #$80000000,_ldivr
+        move.l  #$80000000,_aesldivr
         move.l  #$80000000,d0
         divs.w  #0,d0                   /* div by zero trap */
         bra.s   La1
@@ -374,12 +384,12 @@ La6:
         cmp     #1,d3
         bne     La16
         neg.l   d7
-        move.l  d7,_ldivr
+        move.l  d7,_aesldivr
         move.l  d5,d0
         neg.l   d0
         bra     La1
 La16:
-        move.l  d7,_ldivr
+        move.l  d7,_aesldivr
         move.l  d5,d0
 La1:
         tst.l   (sp)+

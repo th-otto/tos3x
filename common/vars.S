@@ -444,7 +444,14 @@ _endvdibss: ds.b 0
 	V(_wtcolor,w,MAXOBJ)
 	V(_wbcolor,w,MAXOBJ)
 	V(pblock,l,5)
-	V(_crit_err,l,8) /* _crit_err,_dk_err,savestk,_SAV2TRP,_savsup,drawsp,_ldivr,errsave */
+	LONG(_crit_err)
+	LONG(_dk_err)
+	LONG(savestk)
+	LONG(_SAV2TRP)
+	LONG(_savsup)
+	LONG(drawsp)
+	LONG(_aesldivr)
+	LONG(errsave)
 	
 #if TOSVERSION >= 0x400
 	V(errstk,l,401)

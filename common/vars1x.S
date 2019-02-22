@@ -374,16 +374,17 @@ _endvdibss: ds.b 0
 	INT(execmode)
 	LONG(execflags)
 #endif
-	ds.b 1214
+	ds.b 1198
 	
-#if AESVERSION < 0x200
+	LONG(_crit_err)
+	LONG(savestk)
+	LONG(_SAV2TRP)
+	LONG(_savsup)
 	PTR(_drawaddr)
 	PTR(drawsp)
-#endif
-
-	ds.b 12
-	ds.b 1024
-	
+	LONG(_aesldivr)
+	LONG(errsave)
+	V(errstk,l,257)
 	PTR(_ml_mnhold)
 	GRECT(_ml_ctrl)
 	PTR(_ml_pmown)
@@ -671,13 +672,6 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	PTR(_pathcopy)
 	INT(_defdrv)
 	V(_aautopath,b,CMDLEN)
-	V(_crit_err,l,8) /* _crit_err,_dk_err,savestk,_SAV2TRP,_savsup,drawsp,_ldivr,errsave */
-	
-#if TOSVERSION >= 0x400
-	V(errstk,l,401)
-#else
-	V(errstk,l,257)
-#endif
 	
 	INT(_pr_yrat)
 

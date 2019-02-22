@@ -62729,8 +62729,9 @@ gem.rsc:
 6666: savsup
 666A: drawaddr
 666E: drawsp
+6672: aesldivr
 6676: errsave
-667E: errstk
+667A: errstk
 6A7E: ml_mnhold
 6A82: ml_ctrl
 6A8A: ml_pmown
