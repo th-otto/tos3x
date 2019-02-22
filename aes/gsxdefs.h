@@ -116,6 +116,8 @@
 #define TEXT_CLIP		129
 
 
+#ifndef __FDB
+#define __FDB 1
 typedef struct fdbstr
 {
 	VOIDPTR     fd_addr;
@@ -128,6 +130,7 @@ typedef struct fdbstr
 	int16_t		fd_r2;
 	int16_t		fd_r3;
 } FDB;
+#endif
 
 
 extern FDB gl_src;

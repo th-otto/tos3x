@@ -72,8 +72,9 @@
 #define	NOT_SORD   8
 #define	NOT_SXORD  9
 #define D_INVERT  10
-#define	NOT_D     11
-#define	S_OR_NOTD 12
+#define	NOT_D     10
+#define	S_OR_NOTD 11
+#define NOT_S     12
 #define NOTS_OR_D 13
 #define	NOT_SANDD 14
 #define ALL_BLACK 15
@@ -430,6 +431,15 @@ typedef struct rshdr
 
 
 /*
+ * FORM Manager Definitions
+ */
+/* Form flags */
+#define FMD_START  0
+#define FMD_GROW   1
+#define FMD_SHRINK 2
+#define FMD_FINISH 3
+
+/*
  * GRAPHICS Manager Definitions
  */
 /* Mouse Forms */
@@ -497,5 +507,38 @@ typedef struct moblk
 	int16_t		m_w;
 	int16_t		m_h;
 } MOBLK;
+
+#ifndef __FDB
+#define __FDB 1
+/*
+ * MISCELLANEOUS Structures
+ */
+/* Memory Form Definition Block */
+typedef struct fdbstr
+{
+	VOIDPTR	    fd_addr;
+	int16_t		fd_w;
+	int16_t		fd_h;
+	int16_t		fd_wdwidth;
+	int16_t		fd_stand;
+	int16_t		fd_nplanes;
+	int16_t		fd_r1;
+	int16_t		fd_r2;
+	int16_t		fd_r3;
+} FDB;
+#endif
+
+#ifndef __MENU
+#define __MENU 1
+/* Structure for passing menu data */
+typedef struct _menu
+{
+	OBJECT *mn_tree;					/* Object tree of the menu */
+	int16_t mn_menu;					/* Parent of the menu items */
+	int16_t mn_item;					/* Starting menu item      */
+	int16_t mn_scroll;					/* scroll flag for the menu */
+	int16_t mn_keystate;				/* Key State           */
+} MENU;
+#endif
 
 #endif

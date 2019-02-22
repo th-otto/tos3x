@@ -81,6 +81,7 @@ _givecpm:
  * --Grab trap 2 so we can do our own system reset if the program wants to.
  */
 /* 306de: 00e2557a */
+/* 104de: 00fdd1ee */
         xdef    _takecpm
 _takecpm:
         move.l  (TRP2VEC).w,_SAV2TRP    /* Save current Trap 2 vector. */
@@ -108,12 +109,14 @@ call_err:
         rts
 
 /* 306de: 00e255aa */
+/* 104de: 00fdd224 */
         xdef    _giveerr
 _giveerr:
         move.l  _crit_err,d0
         bra     call_err
 
 /* 306de: 00e255b2 */
+/* 104de: 00fdd22c */
         xdef    _takeerr
 _takeerr:
         move.l  #-1,d0                  /* get the old one */
@@ -122,6 +125,7 @@ _takeerr:
         move.l  #_err_trap,d0           /* set ours */
         bra     call_err
         
+#if AESVERSION >= 0x200
         xdef    _deskerr
 _deskerr:
         move.l  #-1,d0                  /* get the old one */
@@ -141,12 +145,14 @@ _dk_trap:
         jmp     _err_trap               /* don't return to here */
 d_out:  
         rts
+#endif
         
 
 /*
  *      ASSUME CALLING PROCESS HAS ENOUGH STACK
  */
 /* 306de: 00e255ec */
+/* 104de: 00fdd23e */
         xdef  _err_trap
 _err_trap:
 #if AESVERSION >= 0x200
@@ -215,6 +221,7 @@ er_1:
  *      set DOS_ERR 
  */
 /* 306de: 00e2568e */
+/* 104de: 00fdd2cc */
         xdef    _dos_exec
 _dos_exec:
         jsr     _cli
@@ -392,6 +399,7 @@ La1:
  * calling program can be done.
  */
 /* 306de: 00e257f8 */
+/* 104de: 00fdd43c */
 _grptrp:
         tst.w   d0                      /* Is function number system reset ? */
         beq     _back

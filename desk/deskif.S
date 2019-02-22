@@ -327,7 +327,7 @@ _form_center:
 	bra	cplp4
 
 #if AESVERSION < 0x200
-	xdef graf_mouse
+	xdef _graf_mouse
 _graf_mouse:
 	link      a6,#-4
 	movem.l   d6-d7,-(a7)

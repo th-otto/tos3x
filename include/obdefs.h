@@ -30,6 +30,13 @@
 #define MD_XOR     3
 #define MD_ERASE   4
 
+/* gsx styles */
+#define FIS_HOLLOW  0
+#define FIS_SOLID   1
+#define FIS_PATTERN 2
+#define FIS_HATCH   3
+#define FIS_USER    4
+
 /* bit blt rules */
 #define ALL_WHITE  0
 #define S_AND_D    1
@@ -113,6 +120,23 @@
 #define LYELLOW  14
 #define LMAGENTA 15
 
+/* 7-30-92 - ml.    3D objects */
+
+#define	LK3DIND	    1	/* change look of 3D indicators */
+#define	LK3DACT	    2	/* change look of 3D action objects */
+#define	INDBUTCOL   3	/* change color of buttons */
+#define	ACTBUTCOL   4	/* change color of buttons */
+#define	ALRTCOL	    5	/* change color of alert background */
+#define AD3DVALUE   6	/* get pixel adjustment for 3D objects */
+
+/* scrp_read return values */
+#define SC_FTCSV 0x0001
+#define SC_FTTXT 0x0002
+#define SC_FTGEM 0x0004
+#define SC_FTIMG 0x0008
+#define SC_FTDCA 0x0010
+#define SC_FTUSR 0x8000
+
 /* editable text field definitions */
 #define EDSTART 0
 #define EDINIT  1
@@ -146,7 +170,7 @@ typedef struct object
 
 typedef struct orect
 {
-struct orect	*o_link;
+	struct orect *o_link;
 	short	o_x;
 	short	o_y;
 	short	o_w;

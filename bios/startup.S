@@ -3020,7 +3020,7 @@ _getmpb:
         lea.l     (_altmd).w,a2
         move.l    a2,(a1)            /* themd.m_link = &altmd; */
         clr.l     (a2)               /* altmd.m_link = NULL; */
-        move.l    #FASTRAMBASE+1,4(a2)   /* altmd.m_start = (base address of fast mem) | M_ALTFLAG */
+        move.l    #1+FASTRAMBASE,4(a2)   /* altmd.m_start = (base address of fast mem) | M_ALTFLAG */
         move.l    _ramtop,d0
         sub.l     #FASTRAMBASE,d0
         move.l    d0,8(a2)           /* altmd.m_length = ramtop - base address of fast mem */

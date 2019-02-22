@@ -871,10 +871,10 @@ PP(register char *dst;)
 
 
 /* 306de: 00e30124 */
-char *g_name(P(const char *) file)
+const char *g_name(P(const char *) file)
 PP(const char *file;)
 {
-	char *tail;
+	const char *tail;
 
 	tail = r_slash(file);
 	if (*tail == '\\')

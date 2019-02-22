@@ -21,6 +21,12 @@ all:: aes.a
 include $(top_srcdir)/config.mak
 -include $(top_srcdir)/common/sections.mak
 
+ifeq ($(USE_CROSS_ALCYON),1)
+ifeq ($(TOSVERSION),104)
+CPPFLAGS += -A
+endif
+endif
+
 include SRCFILES
 
 STARTUP =	gemjstrt.o
@@ -34,7 +40,7 @@ aes.o: $(VARS_OBJS) $(STARTUP) $(AES_OBJS) aesext.o $(top_srcdir)/common/section
 	$(MAKE) TOSVERSION=$(TOSVERSION) COUNTRY=$(COUNTRY) single
 
 single: $(VARS_OBJS) $(STARTUP) $(AES_OBJS) aesext.o
-	$(LD) -s -l -o aes.o -a $(aes_tbase) $(aes_dbase) 0 $(VARS_OBJS) $(STARTUP) $(AES_OBJS) aesext.o
+	$(LD) -l -s -o aes.o -a $(aes_tbase) $(aes_dbase) 0 $(VARS_OBJS) $(STARTUP) $(AES_OBJS) aesext.o
 
 endif
 

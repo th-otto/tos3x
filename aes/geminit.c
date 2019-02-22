@@ -813,7 +813,9 @@ int16_t pred_dinf(NOTHING)
 		}
 	}
 	/* if we read it from disk, reschange may have changed. */
+#if AESVERSION >= 0x200
   p_1:
+#endif
 	if (change)
 	{
 		temp = pbuf;

@@ -404,10 +404,10 @@ PP(int16_t *ptxtlen;)
 }
 
 
-VOID inf_sset(P(OBJECT *) tree, P(int16_t) obj, P(char *) pstr)
+VOID inf_sset(P(OBJECT *) tree, P(int16_t) obj, P(const char *) pstr)
 PP(OBJECT *tree;)
 PP(int16_t obj;)
-PP(char *pstr;)
+PP(const char *pstr;)
 {
 	char *text;
 	int16_t txtlen;

@@ -390,9 +390,7 @@ m_2:
 
 	desknoerr();
 
-#if AESVERSION >= 0x200
 	pref_save = gl_restype;				/* get the real res     */
-#endif
 	/* change the menu bar      */
 	do_view(s_view == S_ICON ? ICONITEM : TEXTITEM);
 

@@ -644,9 +644,7 @@ extern BOOLEAN ccopy_save;				/* copy ?   */
 extern BOOLEAN cdele_save;				/* delete ? */
 extern BOOLEAN write_save;				/* write ?  */
 extern BOOLEAN cbit_save;				/* bitblt   */
-#if AESVERSION >= 0x200
 extern int16_t pref_save;				/* screen pref  */
-#endif
 extern BOOLEAN s_cache;					/* cache    */
 extern BOOLEAN s_stofit;				/* size to fit  */
 extern uint16_t windspec;				/* window pattern   */

@@ -16,6 +16,9 @@ include SRCFILES
 
 CPPFLAGS +=
 
+AESFLAGS_104 = -A
+CPPFLAGS += $(AESFLAGS_$(TOSVERSION))
+
 STARTUP =	gemjstrt.o
 
 aes.a: $(STARTUP) $(AES_OBJS) ${MAKEFILE}

@@ -94,6 +94,7 @@ typedef uint16_t (*PARMBFUNC) PROTO((PARMBLK *f_data));
 
 uint16_t far_call PROTO((PARMBFUNC f_code, PARMBLK *f_data));
 
+#if AESVERSION >= 0x200
 /* 306de: 00e232d0 */
 uint16_t far_call(P(PARMBFUNC) fcode, P(PARMBLK *) fdata)
 PP(PARMBFUNC fcode;)
@@ -101,6 +102,7 @@ PP(PARMBLK *fdata;)
 {
 	return (*fcode) (fdata);
 }
+#endif
 
 
 

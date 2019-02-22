@@ -97,7 +97,9 @@ int16_t ap_exit(NOTHING)
 #endif
 
 	all_run();
+#if AESVERSION >= 0x200
 	release();
+#endif
 #if SUBMENUS
 	mn_free(rlr->p_pid);
 #endif

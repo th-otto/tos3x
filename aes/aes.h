@@ -342,8 +342,8 @@ int16_t strchk PROTO((const char *s, const char *t));
 VOID fmt_str PROTO((const char *instr, char *outstr));
 VOID unfmt_str PROTO((const char *instr, char *outstr));
 VOID fs_sset PROTO((LPTREE tree, int16_t obj, char *pstr, char **ptext, int16_t *ptxtlen));
-VOID inf_sset PROTO((OBJECT *tree, int16_t obj, char *pstr));
-VOID fs_sget PROTO((OBJECT *tree, int16_t obj, char *pstr));
+VOID inf_sset PROTO((OBJECT *tree, int16_t obj, const char *pstr));
+VOID fs_sget PROTO((LPTREE tree, int16_t obj, char *pstr));
 VOID inf_fldset PROTO((LPTREE tree, int16_t obj, uint16_t testfld, uint16_t testbit, uint16_t truestate, uint16_t falsestate));
 int16_t inf_gindex PROTO((LPTREE tree, int16_t baseobj, int16_t numobj));
 int16_t inf_what PROTO((OBJECT *tree, int16_t ok, int16_t cncl));
@@ -1059,8 +1059,8 @@ extern BOOLEAN do_once; /* used by desktop only */
 
 VOID XDeselect PROTO((OBJECT *tree, int16_t obj));
 BOOLEAN getcookie PROTO((int32_t cookie, int32_t *val));
-char *scan_2 PROTO((char *pcurr, int16_t *pwd));
-char *escan_str PROTO((char *pcurr, char *ppstr));
+char *scan_2 PROTO((const char *pcurr, int16_t *pwd));
+char *escan_str PROTO((const char *pcurr, char *ppstr));
 char *save_2 PROTO((char *pcurr, uint16_t wd));
 BOOLEAN app_reschange PROTO((int16_t res));
 const char *g_name PROTO((const char *file));

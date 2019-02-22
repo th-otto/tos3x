@@ -8,6 +8,8 @@
  * you want to create an exact binary image of an official
  * ROM version. This is because, due to the way the linker works,
  * it is impossible to get the same order of symbols in the bss section.
+ *
+ * This file is for version 1.x only. For 2.x/3.x, see vars.S.
  */
 
 #include "config.h"
@@ -507,8 +509,9 @@ _endvdibss: ds.b 0
 	
 	PTR(_gl_rbuf)
 
-	ds.b 52
-	
+	ds.b 22
+
+	V(_pglobal,w,15)
 	INT(_gl_wclip)
 	V(_g_autoboot,b,CMDLEN)
 	INT(_sh_isgem)
@@ -620,7 +623,7 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	PTR(_rlr)
 	PTR(_rul)
 	V(_evx,b,28) /* sizeof(EVB) */
-	PTR(_lp_end)
+	PTR(_g_buffer)
 	PTR(_lp_mid)
 	PTR(_zlr)
 	INT(_g_flag)
@@ -661,16 +664,13 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 #if 0
 	INT(_d_dir)
 	PTR(_slr)
+	PTR(_lp_end)
 
 	V(_fsname,b,40)
 	V(_fcopy,b,40)
 	PTR(_pathcopy)
 	INT(_defdrv)
 	V(_aautopath,b,CMDLEN)
-#if (AESVERSION >= 0x200) | TP_WINX
-	V(_wtcolor,w,MAXOBJ)
-	V(_wbcolor,w,MAXOBJ)
-#endif
 	V(_crit_err,l,8) /* _crit_err,_dk_err,savestk,_SAV2TRP,_savsup,drawsp,_ldivr,errsave */
 	
 #if TOSVERSION >= 0x400
@@ -699,25 +699,19 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	V(_intout,w,10)
 	INT(_xprint)
 	INT(_m_st)
-	GRECT(_full)
 	V(_temp,b,50) /* unused */
 	INT(_gl_dabase)
 	V(_gl_adacc,l,MAX_ACCS)
-	V(_winp,w,3)
 	V(_rets,w,6) /* unused */
 	INT(_xrat)
 	INT(_yrat)
-	INT(_s_cache)
 	INT(_gl_naccs)
 	V(_gl_pacc,l,MAX_ACCS)
 	V(_desk_acc,l,MAX_ACCS)
 	V(_ib,b,34)      /* ICONBLK */
 	PTR(_ad_fsnames)
 	PTR(_ad_select)
-	V(_g_buffer,b,160)
-	INT(_s_defdir)
 	INT(_gl_dclick)
-	INT(_cdele_save)
 	TEDINFO(_gl_aname)
 	PTR(_ad_pfile) /* unused */
 	PTR(_ad_fpath)
@@ -727,9 +721,7 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	INT(_q_change)
 	PTR(_gh_buffer)
 	V(_chxcache,l,2) /* USERBLK */
-	PTR(_iconaddr)
 	PTR(old_bcode)
-	INT(_cbit_save)
 	INT(_back_up)
 	PTR(_ad_fsdta)
 	V(_dr,b,32)
@@ -746,17 +738,14 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	INT(_f_level)
 	PTR(old_mcode)
 	V(_path1,b,PATHLEN)
-	GRECT(_r_dicon)
 	V(_path2,b,PATHLEN)
 	INT(_d_display)
 	INT(_w_walkflag)
 	PTR(_winhead)
 	PTR(_path3)
-	INT(_pref_save)
 	PTR(_gl_newdesk)
 	INT(_wasclr)
 	GRECT(_gl_rmnactv)
-	V(_pglobal,w,15)
 	V(_inf_path,b,PATHLEN)
 	PTR(_cart_dta)
 	V(_gl_mkrect,b,12)  /* ORECT */
@@ -764,7 +753,6 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	PTR(_ad_title)
 	V(_gl_ctwait,w,5) /* MOBLK */
 	INT(_p_timedate)
-	PTR(_appfree)
 	V(_mentable,b,MAXMENU)
 	even
 	PTR(_ad_fstree)
@@ -773,7 +761,6 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
  	V(_W_TREE,b,24*NUM_WIN)  /* OBJECT[NUM_WIN] */
 	LONG(_gl_mnpid) /* BUG: should be int */
 	INT(_pr_mclick)
-	PTR(_appnode)
 	PTR(_iconmem)
 	INT(_gl_play)
 	V(_comtail,b,PATHLEN)
@@ -789,14 +776,11 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	LONG(_fs_fnum)
 	INT(_maxicon)
 	INT(_x_index)
-	INT(_ccopy_save)
 	LONG(_numfiles)
 	V(_wind_msg,w,8)
-	V(_autofile,b,PATHLEN)
 	PTR(_gl_wtree)
 	INT(_gemsize)
 	PTR(_lp_start)
-	INT(_s_fullpath)
 	INT(_gl_mouse)
 	INT(_s_stofit)
 	INT(_infsize)
@@ -812,14 +796,12 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	INT(_fs_topptr)
 	INT(_d_nrows)
 	INT(_gl_wtop)
-	INT(_write_save)
 	INT(_desksiz)
 	PTR(_deskptr)
 	INT(_o_status)
 	INT(_pr_xrat)
 	INT(_pr_button)
 	TEDINFO(_edblk)
-	GRECT(_dicon)
 	GRECT(_gl_rfs)
 	PTR(_rs_hdr)
 	PTR(_o_win)
@@ -827,7 +809,6 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	PTR(_fixdst)
 	PTR(_infptr)
 	PTR(_pxpath)
-	PTR(_ww_win)
 	PTR(_fixsrc)
 	PTR(_gemptr)
 	INT(_apsize)
@@ -838,7 +819,6 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	INT(_tbutton)
 	INT(_m_cpu)
 	INT(_nogem)
-	V(_deskp,w,3)
 	INT(_gl_mx)
 	INT(_gl_my)
 	PTR(_cpbox)
@@ -847,14 +827,7 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	PTR(_x_win)
 	INT(_wwait)
 	PTR(_dpd)
-#if TP_47 /* SHBUF */
-	PTR(_afile)
-#else
-	V(_afile,b,SIZE_AFILE)
-#endif
-	V(_winpd,b,142*MAXWIN)
  	V(_W_ACTIVE,b,24*MAXOBJ)  /* OBJECT[MAXOBJ] */
-	V(_warray,l,MAXWIN)
 	V(_dtabuf,b,44+4)
 	V(_pxyarray,w,10) /* unused */
 	V(_q_path,b,40) /* unused */
@@ -875,12 +848,10 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	INT(_srclen)
 	INT(_dstbuf)
 	INT(_dstlen)
-	INT(_s_view)
 	INT(_o_type)
 	V(_d_xywh,w,18)
 	V(_f_xywh,w,18)
 	INT(_x_type)
-	INT(_s_sort)
 	INT(_tmpmon)
 	INT(_button)
 #endif
