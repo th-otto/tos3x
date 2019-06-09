@@ -68,11 +68,7 @@ PP(int16_t mode;)								/* TRUE == window mode  */
 		if (obj[i].ob_flags & HIDETREE)
 			continue;
 
-#if COLORICON_SUPPORT
-		if (obj[i].ob_type == G_CICON)	/* icon ?   */
-#else
 		if (obj[i].ob_type == G_ICON)	/* icon ?   */
-#endif
 		{
 			x1 = obj[i].ob_x + offx;
 			y1 = obj[i].ob_y + offy;
@@ -382,11 +378,7 @@ PP(int16_t *type;)
 		if (temp == DISK)
 		{
 			strcpy(path1, wildext);
-#if COLORICON_SUPPORT
-			path1[0] = itype->i_cicon.monoblk.ib_char[1];
-#else
 			path1[0] = itype->i_iblk.ib_char[1];
-#endif
 			*name = path1;
 			*type = temp;
 			goto xd_1;

@@ -357,7 +357,7 @@ PP(int16_t i;)
 	register int16_t l;
 	register char *str;
 
-	obj = menu_addr;
+	obj = d->rtree[ADMENU];
 	str = (char *)obj[tb3[i]].ob_spec;
 	l = strlen(str);
 	if (mentable[i])
@@ -435,7 +435,7 @@ VOID menu_verify(NOTHING)
 
 	i = 0;
 	while (tb1[i])
-		menu_ienable(menu_addr, tb1[i++], enable);
+		menu_ienable(d->rtree[ADMENU], tb1[i++], enable);
 
 	i = 0;
 
@@ -450,12 +450,12 @@ VOID menu_verify(NOTHING)
 	}
 	
 	while (tb2[i])
-		menu_ienable(menu_addr, tb2[i++], enable);
+		menu_ienable(d->rtree[ADMENU], tb2[i++], enable);
 
 	enable = x_first(&str, &type);
 
-	menu_ienable(menu_addr, DELMENU, enable);
-	menu_ienable(menu_addr, IAPPITEM, enable);
+	menu_ienable(d->rtree[ADMENU], DELMENU, enable);
+	menu_ienable(d->rtree[ADMENU], IAPPITEM, enable);
 
 	enable = FALSE;
 
@@ -464,14 +464,14 @@ VOID menu_verify(NOTHING)
 		if (w_gnext())
 			enable = TRUE;
 
-		menu_ienable(menu_addr, SEAMENU, TRUE);
-		menu_ienable(menu_addr, SHOWITEM, TRUE);
+		menu_ienable(d->rtree[ADMENU], SEAMENU, TRUE);
+		menu_ienable(d->rtree[ADMENU], SHOWITEM, TRUE);
 	}
 
-	menu_ienable(menu_addr, BOTTOP, enable);
+	menu_ienable(d->rtree[ADMENU], BOTTOP, enable);
 	ch_cache(FALSE);
 #ifdef PRINTITEM /* take out for sparrow */
-	menu_ienable(menu_addr, PRINTITEM, gl_restype <= 3 ? TRUE : FALSE);
+	menu_ienable(d->rtree[ADMENU], PRINTITEM, gl_restype <= 3 ? TRUE : FALSE);
 #endif
 }
 
@@ -523,32 +523,6 @@ PP(uint16_t key;)
 	UNUSED(str);
 	UNUSED(obj);
 	
-#if MULTILANG_SUPPORT
-	switch (st_keybd)
-	{
-	case CTRY_DE:
-	case CTRY_SF:
-	case CTRY_SG:
-	case CTRY_CZ:
-		keytable = key2table;
-		contable = con2table;
-		break;
-	case CTRY_FR:
-		keytable = key3table;
-		contable = con3table;
-		break;
-	case CTRY_US:					/* usa */
-	case CTRY_UK:					/* uk   */
-	case CTRY_ES:					/* spain */
-	case CTRY_IT:					/* italy */
-	case CTRY_SE:					/* sweden */
-	default:
-		keytable = key1table;
-		contable = con1table;
-		break;
-	}
-#endif
-
 	if ((app = app_key(key)))
 	{
 		exec_file(app->a_name, (DESKWIN *) 0, 0, Nostr);
@@ -898,11 +872,7 @@ PP(int16_t msgbuff;)
 
 	case IAPPITEM:
 		if (x_first(&str, &button))
-#if POPUP_SUPPORT
-			mins_app();
-#else
 			ins_app();
-#endif
 		break;
 
 	case INSDISK:
@@ -914,11 +884,7 @@ PP(int16_t msgbuff;)
 		break;
 
 	case PREFITEM:						/* desktop preference   */
-#if POPUP_SUPPORT
-		mdesk_pref();					/* cjg 07/07/92 */
-#else
 		desk_pref();
-#endif
 		break;
 
 	case READINF:
@@ -959,11 +925,7 @@ PP(int16_t msgbuff;)
 		break;
 
 	case MEMMENU:
-#if POPUP_SUPPORT
-		mv_desk();						/* cjg - 07/07/92 */
-#else
 		av_desk();
-#endif
 		break;
 
 	case SAVEITEM:						/* save desktop     */
@@ -973,7 +935,7 @@ PP(int16_t msgbuff;)
 
 #ifdef PRINTITEM								/* take out for sparrow */
 	case PRINTITEM:						/* print screen     */
-		if (!(menu_addr[PRINTITEM].ob_state & DISABLED))
+		if (!(d->rtree[ADMENU][PRINTITEM].ob_state & DISABLED))
 		{
 			if (do1_alert(PRINTTOP) == 1)
 			{
@@ -1063,9 +1025,9 @@ PP(int16_t msgbuff;)
 	}
 
   	while (xxxview[i])
-		menu_icheck(menu_addr, xxxview[i++], 0);
+		menu_icheck(d->rtree[ADMENU], xxxview[i++], 0);
 
-	menu_icheck(menu_addr, msgbuff, 1);
+	menu_icheck(d->rtree[ADMENU], msgbuff, 1);
 }
 
 
@@ -1115,7 +1077,7 @@ PP(int16_t msgbuff;)
 		break;
 
 	case DELMENU:
-		if (!(menu_addr[DELMENU].ob_state & DISABLED))
+		if (!(d->rtree[ADMENU][DELMENU].ob_state & DISABLED))
 		{
 			if (x_status)
 			{
@@ -1222,7 +1184,7 @@ PP(int16_t *msgbuff;)
 		break;
 	}
 
-	menu_tnormal(menu_addr, msgbuff[3], 1);
+	menu_tnormal(d->rtree[ADMENU], msgbuff[3], 1);
 }
 
 
@@ -1230,11 +1192,11 @@ PP(int16_t *msgbuff;)
  * Handle all the different messages
  */
 /* 306de: 00e2ec12 */
-VOID hd_msg(P(int16_t *)msgbuff)
-PP(int16_t *msgbuff;)
+VOID hd_msg(NOTHIN)
 {
 	register int16_t handle;
 	register DESKWIN *win;
+	register THEDSK *d;
 	register OBJECT *obj;
 #if !TP_WINX
 	int16_t shrink;
@@ -1243,10 +1205,26 @@ PP(int16_t *msgbuff;)
 	GRECT pt;
 	GRECT *pc;
 
+	d = thedesk;
+	d7 = d6 = 0;
+	
 	UNUSED(w);
 	UNUSED(h);
 	UNUSED(y);
 	
+	switch (d->msgbuff[0])
+	{
+	case WM_REDRAW:
+	case WM_TOPPED:
+	case WM_CLOSED:
+	case WM_ARROWED:
+	case WM_HSLID:
+	case WM_VSLID:
+	case WM_MOVED:
+	case WM_FULLED:
+	case WM_SIZED:
+		break;
+	}
 	if (msgbuff[0] == MN_SELECTED)
 	{
 		hd_menu(msgbuff);
@@ -1407,7 +1385,7 @@ VOID actions(NOTHING)
 	{
 		menu_verify();
 		q_write();						/* update inf file  */
-		event = evnt_multi(MU_MESAG | MU_BUTTON | MU_KEYBD, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* mesaage buffer   */
+		event = evnt_multi(MU_MESAG | MU_BUTTON | MU_KEYBD, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, d->p_msgbuff,	/* message buffer   */
 					0, 0,		/* timer counter    */
 					&mx, &my, &button, &kstate, &kreturn, &clicks);
 
@@ -1416,11 +1394,11 @@ VOID actions(NOTHING)
 		if (event & MU_MESAG)
 			hd_msg(msgbuff);
 
-		if (event & MU_BUTTON)
-			hd_button(clicks, kstate, mx, my);
-
 		if (event & MU_KEYBD)
 			hd_keybd(kreturn);
+
+		if (event & MU_BUTTON)
+			hd_button(clicks, kstate, mx, my);
 
 		wind_update(FALSE);
 	}
@@ -1478,7 +1456,6 @@ int32_t av_mem(NOTHING)
 }
 
 
-#if !POPUP_SUPPORT
 /* 306de: 00e2f1ea */
 VOID av_desk(NOTHING)
 {
@@ -1494,7 +1471,7 @@ VOID av_desk(NOTHING)
 	char buf[2];
 
 	obj = get_tree(SSYSTEM);
-	obj1 = menu_addr;
+	obj1 = d->rtree[ADMENU];
 
 	for (i = 0; i < MAXMENU; i++)		/* save a copy  */
 		temp[i] = mentable[i];
@@ -1669,4 +1646,3 @@ ad_1:								/* restore the pointer  */
 	*str = 1;
 	do_finish(SSYSTEM);
 }
-#endif

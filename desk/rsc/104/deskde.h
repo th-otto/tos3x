@@ -50,30 +50,30 @@
 
 
 
-#define MENU1              0 /* menu */
-#define DESKMENU           3 /* TITLE in tree MENU1 */
-#define FILEMENU           4 /* TITLE in tree MENU1 */
-#define VIEWMENU           5 /* TITLE in tree MENU1 */
-#define OPTNMENU           6 /* TITLE in tree MENU1 */
-#define ABOUITEM           9 /* STRING in tree MENU1 */
-#define OPENITEM          18 /* STRING in tree MENU1 */
-#define SHOWITEM          19 /* STRING in tree MENU1 */
-#define NEWFITEM          21 /* STRING in tree MENU1 */
-#define CLSFITEM          22 /* STRING in tree MENU1 */
-#define CLSWITEM          23 /* STRING in tree MENU1 */
-#define FORMITEM          25 /* STRING in tree MENU1 */
-#define ICONITEM          27 /* STRING in tree MENU1 */
-#define TEXTITEM          28 /* STRING in tree MENU1 */
-#define NAMEITEM          30 /* STRING in tree MENU1 */
-#define DATEITEM          31 /* STRING in tree MENU1 */
-#define SIZEITEM          32 /* STRING in tree MENU1 */
-#define TYPEITEM          33 /* STRING in tree MENU1 */
-#define IDSKITEM          35 /* STRING in tree MENU1 */
-#define IAPPITEM          36 /* STRING in tree MENU1 */
-#define PREFITEM          38 /* STRING in tree MENU1 */
-#define SAVEITEM          39 /* STRING in tree MENU1 */
-#define PRINTITEM         40 /* STRING in tree MENU1 */
-#define BITBLT            42 /* STRING in tree MENU1 */
+#define ADMENU             0 /* menu */
+#define DESKMENU           3 /* TITLE in tree ADMENU */
+#define FILEMENU           4 /* TITLE in tree ADMENU */
+#define VIEWMENU           5 /* TITLE in tree ADMENU */
+#define OPTNMENU           6 /* TITLE in tree ADMENU */
+#define ABOUITEM           9 /* STRING in tree ADMENU */
+#define OPENITEM          18 /* STRING in tree ADMENU */
+#define SHOWITEM          19 /* STRING in tree ADMENU */
+#define NEWFITEM          21 /* STRING in tree ADMENU */
+#define CLSFITEM          22 /* STRING in tree ADMENU */
+#define CLSWITEM          23 /* STRING in tree ADMENU */
+#define FORMITEM          25 /* STRING in tree ADMENU */
+#define ICONITEM          27 /* STRING in tree ADMENU */
+#define TEXTITEM          28 /* STRING in tree ADMENU */
+#define NAMEITEM          30 /* STRING in tree ADMENU */
+#define DATEITEM          31 /* STRING in tree ADMENU */
+#define SIZEITEM          32 /* STRING in tree ADMENU */
+#define TYPEITEM          33 /* STRING in tree ADMENU */
+#define IDSKITEM          35 /* STRING in tree ADMENU */
+#define IAPPITEM          36 /* STRING in tree ADMENU */
+#define PREFITEM          38 /* STRING in tree ADMENU */
+#define SAVEITEM          39 /* STRING in tree ADMENU */
+#define PRINTITEM         40 /* STRING in tree ADMENU */
+#define BITBLT            42 /* STRING in tree ADMENU */
 
 #define ADFILEIN           1 /* form/dialog */
 
@@ -106,40 +106,40 @@
 
 #define PRINTFIL          13 /* free form */
 
-#define STRNG1             0 /* Free string */
+#define STISTR             0 /* Free string */
 /*  %L Bytes in %W Dateien. */
 
-#define STRNG2             1 /* Free string */
+#define STMORE             1 /* Free string */
 /* -MEHR- */
 
-#define STRNG3             2 /* Free string */
+#define STENDFILE          2 /* Free string */
 /* -ENDE DER DATEI- */
 
-#define STRNG4             3 /* Free string */
+#define STCART             3 /* Free string */
 /* ROM MODUL */
 
-#define STRNG5             4 /* Free string */
+#define STCPYSTR           4 /* Free string */
 /* ORDNER/DATEIEN KOPIEREN */
 
-#define STRNG6             5 /* Free string */
+#define STDELSTR           5 /* Free string */
 /* ORDNER/DATEIEN L™SCHEN */
 
-#define STRNG7             6 /* Free string */
+#define STFILEINFO         6 /* Free string */
 /* DATEI INFORMATION */
 
-#define STRNG8             7 /* Free string */
+#define STFOLDINFO         7 /* Free string */
 /* ORDNER INFORMATION */
 
-#define STRNG9             8 /* Free string */
+#define STMOVESTR          8 /* Free string */
 /* ORDNER/DATEIEN VERSCHIEBEN */
 
-#define STRNG10            9 /* Free string */
+#define STREADERROR        9 /* Free string */
 /* -LESEFEHLER- */
 
-#define STRNG11           10 /* Free string */
+#define STCANTOPEN        10 /* Free string */
 /* KANN NICHT GE™FFNET WERDEN */
 
-#define STRNG12           11 /* Free string */
+#define STNOMEM           11 /* Free string */
 /* NICHT GENšGEND SPEICHERPLATZ */
 
 #define STNOAPPL          12 /* Alert string */

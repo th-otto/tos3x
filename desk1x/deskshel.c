@@ -50,7 +50,7 @@ PP(char *tail;)
 VOID show_file(P(const char *)file)
 PP(const char *file;)
 {
-	menu_bar(menu_addr, FALSE);
+	menu_bar(d->rtree[ADMENU], FALSE);
 	dv_hide_c();
 	dv_enter_cur();
 	xvq_chcells(&d_nrows);
@@ -58,7 +58,7 @@ PP(const char *file;)
 	showfile(file, FALSE);
 	dv_exit_cur();
 	dv_show_c(0);
-	menu_bar(menu_addr, TRUE);
+	menu_bar(d->rtree[ADMENU], TRUE);
 	form_dial(FMD_FINISH, 0, 0, 0, 0, full.g_x, full.g_y, full.g_w, full.g_h);
 	wait_msg();
 }

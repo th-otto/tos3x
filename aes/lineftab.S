@@ -11,23 +11,23 @@
 [00fe78e8] dc.l $00fe1dda            ; F028 ; gsx_mon AES
 [00fe78ec] dc.l $00fe1e5a            ; F02C ; avst_clip AES
 [00fe78f0] dc.l $00fe1e46            ; F030 ; av_pline AES
-[00fe78f4] dc.l $00fe1dda            ; F034 ; gsx_mon; duplicate AES
+[00fe78f4] dc.l $00fe1dda            ; F034 ; gsx_mon; duplicate; unused AES
 [00fe78f8] dc.l $00fe5bba            ; F038 ; gsx2 AES
-[00fe78fc] dc.l $00fe1dbe            ; F03C ; gsx_moff; duplicate AES
+[00fe78fc] dc.l $00fe1dbe            ; F03C ; gsx_moff; duplicate; unused AES
 [00fe7900] dc.l $00fe1ebe            ; F040 ; avrt_cpyfm AES
 [00fe7904] dc.l $00fe1eac            ; F044 ; avro_cpyfm AES
-[00fe7908] dc.l $00fe1dda            ; F048 ; gsx_mon; duplicate AES
+[00fe7908] dc.l $00fe1dda            ; F048 ; gsx_mon; duplicate; unused AES
 [00fe790c] dc.l $00fe1ed4            ; F04C ; avr_trnfm AES
 [00fe7910] dc.l $00fe1b1e            ; F050 ; gsx_ncode AES
 [00fe7914] dc.l $00fe1e6e            ; F054 ; avst_height AES
-[00fe7918] dc.l $00fe1b3c            ; F058 ; gsx_1code; duplicate AES
+[00fe7918] dc.l $00fe1b3c            ; F058 ; gsx_1code; duplicate; unused AES
 [00fe791c] dc.l $00fe1ede            ; F05C ; avsl_width AES
-[00fe7920] dc.l $00fe1b3c            ; F060 ; gsx_1code; duplicate AES
+[00fe7920] dc.l $00fe1b3c            ; F060 ; gsx_1code; duplicate; unused AES
 [00fe7924] dc.l $00fe1e9c            ; F064 ; avr_recfl AES
 [00fe7928] dc.l $00fe5c46            ; F068 ; LBWMOV AES
-[00fe792c] dc.l $00fe1e6e            ; F06C ; avst_height; duplicate AES
-[00fe7930] dc.l $00fe1e46            ; F070 ; av_pline; duplicate AES
-[00fe7934] dc.l $00fe1b3c            ; F074 ; gsx_1code; duplicate AES
+[00fe792c] dc.l $00fe1e6e            ; F06C ; avst_height; duplicate; unused AES
+[00fe7930] dc.l $00fe1e46            ; F070 ; av_pline; duplicate; unused AES
+[00fe7934] dc.l $00fe1b3c            ; F074 ; gsx_1code; duplicate; unused AES
 [00fe7938] dc.l $00fe24d2            ; F078 ; mn_clsda AES
 [00fe793c] dc.l $00fdf958            ; F07C ; ap_rdwr AES
 [00fe7940] dc.l $00fd3ce6            ; F080 ; all_run AES
@@ -118,25 +118,25 @@
 [00fe7a94] dc.l $00fe3826            ; F1D4
 [00fe7a98] dc.l $00fe36cc            ; F1D8
 [00fe7a9c] dc.l $00fdfd20            ; F1DC
-[00fe7aa0] dc.l $00fd4bbe            ; F1E0 ; gsx_xbox; duplicate AES
-[00fe7aa4] dc.l $00fd4bbe            ; F1E4 ; gsx_xbox; duplicate AES
+[00fe7aa0] dc.l $00fd4bbe            ; F1E0 ; gsx_xbox; duplicate; unused AES
+[00fe7aa4] dc.l $00fd4bbe            ; F1E4 ; gsx_xbox; duplicate; unused AES
 [00fe7aa8] dc.l $00fe1dbe            ; F1E8
 [00fe7aac] dc.l $00fe5d02            ; F1EC
 [00fe7ab0] dc.l $00fe1874            ; F1F0 ; gr_stilldn AES
 [00fe7ab4] dc.l $00fd4612            ; F1F4
 [00fe7ab8] dc.l $00fd4700            ; F1F8
-[00fe7abc] dc.l $00fe5a92            ; F1FC ; wm_update; duplicate AES
+[00fe7abc] dc.l $00fe5a92            ; F1FC ; wm_update; duplicate; unused AES
 [00fe7ac0] dc.l $00fe1a48            ; F200 ; gr_clamp AES
 [00fe7ac4] dc.l $00fe18e2            ; F204 ; gr_wait AES
-[00fe7ac8] dc.l $00fe5a92            ; F208 ; wm_update; duplicate AES
-[00fe7acc] dc.l $00fe5a92            ; F20C ; wm_update; duplicate AES
-[00fe7ad0] dc.l $00fe191c            ; F210 ; gr_setup; duplicate AES
-[00fe7ad4] dc.l $00fe1a48            ; F214 ; gr_clamp; duplicate AES
+[00fe7ac8] dc.l $00fe5a92            ; F208 ; wm_update; duplicate; unused AES
+[00fe7acc] dc.l $00fe5a92            ; F20C ; wm_update; duplicate; unused AES
+[00fe7ad0] dc.l $00fe191c            ; F210 ; gr_setup; duplicate; unused AES
+[00fe7ad4] dc.l $00fe1a48            ; F214 ; gr_clamp; duplicate; unused AES
 [00fe7ad8] dc.l $00fe1da0            ; F218 ; gsx_mxmy AES
 [00fe7adc] dc.l $00fe5dda            ; F21C
 [00fe7ae0] dc.l $00fe18e2            ; F220
-[00fe7ae4] dc.l $00fe5a92            ; F224 ; wm_update; duplicate AES
-[00fe7ae8] dc.l $00fe1da0            ; F228 ; gsx_mxmy; duplicate AES
+[00fe7ae4] dc.l $00fe5a92            ; F224 ; wm_update; duplicate; unused AES
+[00fe7ae8] dc.l $00fe1da0            ; F228 ; gsx_mxmy; duplicate; unused AES
 [00fe7aec] dc.l $00fe3876            ; F22C ; ob_relxywh AES
 [00fe7af0] dc.l $00fe19ac            ; F230
 [00fe7af4] dc.l $00fe5bce            ; F234 ; mul_div AES
@@ -150,7 +150,7 @@
 [00fe7b14] dc.l $00fd4660            ; F254 ; gsx_gclip AES
 [00fe7b18] dc.l $00fd7a28            ; F258 ; far_call DESKTOP
 [00fe7b1c] dc.l $00fe6198            ; F25C ; ob_sst AES
-[00fe7b20] dc.l $00fd4388            ; F260 ; gr_inside; duplicate AES
+[00fe7b20] dc.l $00fd4388            ; F260 ; gr_inside; duplicate; unused AES
 [00fe7b24] dc.l $00fd467e            ; F264 ; gsx_chkclip AES
 [00fe7b28] dc.l $00fe5c74            ; F268 ; LBCOPY AES
 [00fe7b2c] dc.l $00fd4484            ; F26C ; gr_crack AES
@@ -178,7 +178,7 @@
 [00fe7b84] dc.l $00fd7b1a            ; F2C4 ; graf_mouse DESKTOP
 [00fe7b88] dc.l $00fd46c2            ; F2C8 ; gsx_pline AES
 [00fe7b8c] dc.l $00fd5e3a            ; F2CC
-[00fe7b90] dc.l $00fd7a36            ; F2D0
+[00fe7b90] dc.l $00fd7a36            ; F2D0 ; evnt_multi DESKTOP
 [00fe7b94] dc.l $00fd5d7c            ; F2D4
 [00fe7b98] dc.l $00fd4700            ; F2D8
 [00fe7b9c] dc.l $00fd7bb0            ; F2DC ; graf_mkstate DESKTOP
@@ -327,7 +327,7 @@
 [00fe7dd8] dc.l $00fd4660            ; F518 ; gs_gclip AES
 [00fe7ddc] dc.l $00fd7e58            ; F51C
 [00fe7de0] dc.l $00fd4b24            ; F520
-[00fe7de4] dc.l $00fdb85a            ; F524
+[00fe7de4] dc.l $00fdb85a            ; F524 ; hd_msg DESKTOP
 [00fe7de8] dc.l $00fe5fe8            ; F528 ; inf_fldset AES
 [00fe7dec] dc.l $00fd8164            ; F52C
 [00fe7df0] dc.l $00fd8284            ; F530
@@ -386,7 +386,7 @@
 [00fe7ec4] dc.l $00fd87dc            ; F604
 [00fe7ec8] dc.l $00fd59a0            ; F608
 [00fe7ecc] dc.l $00fd8a16            ; F60C
-[00fe7ed0] dc.l $00fdb6f6            ; F610
+[00fe7ed0] dc.l $00fdb6f6            ; F610 ; hd_keybd DESKTOP
 [00fe7ed4] dc.l $00fd8622            ; F614
 [00fe7ed8] dc.l $00fdba7e            ; F618
 [00fe7edc] dc.l $00fd55e8            ; F61C ; save_inf DESKTOP
@@ -417,7 +417,7 @@
 [00fe7f40] dc.l $00fd8d90            ; F680
 [00fe7f44] dc.l $00fd7c0e            ; F684 ; menu_bar DESKTOP
 [00fe7f48] dc.l $00fdbb94            ; F688
-[00fe7f4c] dc.l $00fdb5ea            ; F68C
+[00fe7f4c] dc.l $00fdb5ea            ; F68C ; hd_button DESKTOP
 [00fe7f50] dc.l $00fd598e            ; F690 ; set_defdrv AES
 [00fe7f54] dc.l $00fd9e58            ; F694
 [00fe7f58] dc.l $00fd7d14            ; F698 ; wind_create DESKTOP
@@ -531,7 +531,7 @@
 [00fe8108] dc.l $00fe3826            ; F848 ; ob_actxywh AES
 [00fe810c] dc.l $00fe2000            ; F84C ; menu_sr AES
 [00fe8110] dc.l $00fe1f40            ; F850 ; rect_change AES
-[00fe8114] dc.l $00fe1db6            ; F854
+[00fe8114] dc.l $00fe1db6            ; F854 ; gsx_button AES
 [00fe8118] dc.l $00fe1fc6            ; F858 ; menu_set AES
 [00fe811c] dc.l $00fe2040            ; F85C ; menu_down AES
 [00fe8120] dc.l $00fd46ec            ; F860 ; gsx_cline; duplicate AES
@@ -574,7 +574,7 @@
 [00fe81b4] dc.l $00fe4186            ; F8F4 ; sh_path AES
 [00fe81b8] dc.l $00fe4094            ; F8F8 ; sh_toalpha AES
 [00fe81bc] dc.l $00fe665a            ; F8FC ; cart_exec AES
-[00fe81c0] dc.l $00fdbc88            ; F900 ; deskmain AES
+[00fe81c0] dc.l $00fdbc88            ; F900 ; deskmain DESKTOP
 [00fe81c4] dc.l $00fdd2cc            ; F904 ; dos_exec AES
 [00fe81c8] dc.l $00fe45ea            ; F908 ; w_getxptr AES
 [00fe81cc] dc.l $00fe4534            ; F90C ; w_obadd AES

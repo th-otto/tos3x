@@ -393,7 +393,7 @@ PP(int16_t showit;)
 		gsx_sclip(&gl_rzero);
 		ob_draw(tree, THEBAR, MAX_DEPTH);
 		gsx_attr(FALSE, MD_REPLACE, BLACK);	/* not xor mode! */
-		gsx_cline(0, gl_hbox - 1, gl_width - 1, gl_hbox - 1);
+		gsx_fcline(0, gl_hbox - 1, gl_width - 1, gl_hbox - 1);
 	} else
 	{
 		gl_mntree = 0;

@@ -19,51 +19,6 @@
 
 
 
-#if COLORICON_SUPPORT
-/*
- * copy iconblk image
- * return the sources type
- */
-int16_t cp_iblk(P(int16_t) number, P(CICONBLK *)dest_ciblk)
-PP(int16_t number;)
-PP(register CICONBLK *dest_ciblk;)
-{
-	OBJECT *obj;
-	CICONBLK *ciblk;
-	ICONBLK *iblk;
-
-	if (number >= numicon)
-		number = numicon - 1;
-
-	obj = get_icon(number);
-
-	if (obj->ob_type == G_ICON)
-	{
-		iblk = (ICONBLK *) (obj->ob_spec);
-		dest_ciblk->monoblk.ib_pmask = iblk->ib_pmask;
-		dest_ciblk->monoblk.ib_pdata = iblk->ib_pdata;
-		dest_ciblk->monoblk.ib_char[0] = iblk->ib_char[0];
-		dest_ciblk->monoblk.ib_char[1] = iblk->ib_char[1];
-		dest_ciblk->monoblk.ib_xchar = iblk->ib_xchar;
-		dest_ciblk->monoblk.ib_ychar = iblk->ib_ychar;
-		dest_ciblk->mainlist = NULL;
-	} else								/* must be G_CICON */
-	{
-		ciblk = (CICONBLK *) (obj->ob_spec);
-		dest_ciblk->monoblk.ib_pmask = ciblk->monoblk.ib_pmask;
-		dest_ciblk->monoblk.ib_pdata = ciblk->monoblk.ib_pdata;
-		dest_ciblk->monoblk.ib_char[0] = ciblk->monoblk.ib_char[0];
-		dest_ciblk->monoblk.ib_char[1] = ciblk->monoblk.ib_char[1];
-		dest_ciblk->monoblk.ib_xchar = ciblk->monoblk.ib_xchar;
-		dest_ciblk->monoblk.ib_ychar = ciblk->monoblk.ib_ychar;
-		dest_ciblk->mainlist = ciblk->mainlist;
-	}
-
-	return obj->ob_type;
-}
-#endif
-
-
 /*
  * Remove desktop icons
  */
@@ -102,7 +57,6 @@ VOID rm_icons(NOTHING)
 }
 
 
-#if !POPUP_SUPPORT
 /*
  * Install application
  */
@@ -343,17 +297,10 @@ VOID ins_app(NOTHING)
 		/* OK to install */
 		if (ret == APREMOVE)
 		{
-#if (TOSVERSION >= 0x400) | !BINEXACT
-			if (*str)					/* changed 3/3/92   */
-				strcpy(autofile, Nostr);
-			if (!newapp)
-				app_free(app);
-#else
 			if (!newapp)
 				app_free(app);
 			if (*str)
 				strcpy(autofile, Nostr);
-#endif
 		}
 
 	is_1:
@@ -369,7 +316,6 @@ ins_6:
 	else
 		do1_alert(NOINSTAL);
 }
-#endif
 
 
 /*
@@ -379,12 +325,7 @@ ins_6:
 VOID ins_icons(NOTHING)
 {
 	register OBJECT *obj;
-#if COLORICON_SUPPORT
 	register CICONBLK *iblk;
-	CICONBLK ciblk;
-#else
-	register CICONBLK *iblk;
-#endif
 	register OBJECT *obj1;
 	register int16_t type, item, icon, style;
 	int16_t ret, limit, redraw, select, xitem;
@@ -393,12 +334,6 @@ VOID ins_icons(NOTHING)
 	char idbuffer[2];
 	char buffer[14];
 	GRECT pt;
-#if TOSVERSION >= 0x400
-	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
-#endif
-#if COLORICON_SUPPORT
-	intptr_t saveptr;
-#endif
 
 	quit = FALSE;
 	xitem = item = o_item;
@@ -407,21 +342,12 @@ VOID ins_icons(NOTHING)
 	obj1 = background;
 	limit = numicon;					/* max number of icon   */
 
-#if COLORICON_SUPPORT
-	saveptr = obj[IICON].ob_spec;
-#endif
-
 #if !BINEXACT
 	which = ret = 0; /* quiet compiler */
 #endif
 
 	while (TRUE)
 	{
-#if COLORICON_SUPPORT
-		obj[IICON].ob_type = G_CICON;	/* 7/11/92 */
-		ciblk.monoblk = *(ICONBLK *) (obj[IICON].ob_spec);
-		obj[IICON].ob_spec = (intptr_t)&ciblk;
-#endif
 		iblk = (CICONBLK *) (obj[IICON].ob_spec);
 		redraw = FALSE;
 
@@ -429,11 +355,7 @@ VOID ins_icons(NOTHING)
 		{
 			type = backid[item].i_type;
 			strcpy(buffer, ((CICONBLK *) (obj1[item].ob_spec))->monoblk.ib_ptext);
-#if COLORICON_SUPPORT
-			buf1[0] = idbuffer[0] = backid[item].i_cicon.monoblk.ib_char[1];
-#else
 			buf1[0] = idbuffer[0] = backid[item].i_iblk.ib_char[1];
-#endif
 			icon = backid[item].i_icon;
 			if (icon >= numicon)
 				icon = numicon - 1;
@@ -480,11 +402,7 @@ VOID ins_icons(NOTHING)
 		if (driver)
 			obj[ret].ob_state = SELECTED;
 
-#if COLORICON_SUPPORT
-		cp_iblk(icon, iblk);
-#else
 		cp_iblk(get_icon(icon), &iblk->monoblk);
-#endif
 
 		iblk->monoblk.ib_char[1] = 0;
 
@@ -528,11 +446,7 @@ VOID ins_icons(NOTHING)
 #if AES3D
 				XSelect(obj, ret);		/* cjg 08/06/92 */
 #endif
-#if COLORICON_SUPPORT
-				cp_iblk(icon, iblk);
-#else
 				cp_iblk(get_icon(icon), &iblk->monoblk);
-#endif
 				iblk->monoblk.ib_char[1] = 0;
 				objc_draw(obj, IBOX, 1, full.g_x, full.g_y, full.g_w, full.g_h);
 				cl_delay();
@@ -603,11 +517,7 @@ VOID ins_icons(NOTHING)
 	in_4:
 		redraw = TRUE;				/* user selected OK */
 		iblk = (CICONBLK *) (obj1[item].ob_spec);
-#if COLORICON_SUPPORT
-		cp_iblk(icon, iblk);
-#else
 		cp_iblk(get_icon(icon), &iblk->monoblk);
-#endif
 		backid[item].i_icon = icon;
 
 		strcpy(iblk->monoblk.ib_ptext, ((TEDINFO *) (obj[DRLABEL].ob_spec))->te_ptext);
@@ -652,15 +562,11 @@ VOID ins_icons(NOTHING)
 	}									/* while */
 
 	do_finish(ADINSDIS);
-#if COLORICON_SUPPORT
-	obj[IICON].ob_spec = saveptr;
-#endif
 }
 
 
 
 
-#if !COLORICON_SUPPORT
 /* 306de: 00e2d47e */
 VOID cp_iblk(P(const ICONBLK *)src_iblk, P(ICONBLK *)dest_iblk)
 PP(register const ICONBLK *src_iblk;)
@@ -673,8 +579,6 @@ PP(register ICONBLK *dest_iblk;)
 	dest_iblk->ib_xchar = src_iblk->ib_xchar;
 	dest_iblk->ib_ychar = src_iblk->ib_ychar;
 }
-
-#endif
 
 
 
@@ -689,21 +593,10 @@ VOID ins_wicons(NOTHING)
 	BOOLEAN ret;
 	int16_t limit, index, quit, itype;
 	int16_t type, install, pref, status;
-#if COLORICON_SUPPORT
 	CICONBLK *iblk;
-	CICONBLK ciblk;
-#else
-	CICONBLK *iblk;
-#endif
 	char buffer[14];
 	char buf2[14];
 	const char *str;
-#if TOSVERSION >= 0x400
-	int16_t mk_x, mk_y, mk_buttons, mk_kstate;
-#endif
-#if COLORICON_SUPPORT
-	int32_t saveptr;
-#endif
 
 	UNUSED(install);
 	obj = get_tree(INWICON);
@@ -712,17 +605,9 @@ VOID ins_wicons(NOTHING)
 
 	x_first(&str, &itype);
 	status = TRUE;
-#if COLORICON_SUPPORT
-	saveptr = obj[WICON].ob_spec;
-#endif
 
 	while (status)
 	{									/* 7/11/92 */
-#if COLORICON_SUPPORT
-		obj[WICON].ob_type = G_CICON;
-		ciblk.monoblk = *(ICONBLK *) (obj[WICON].ob_spec);
-		obj[WICON].ob_spec = (intptr_t)&ciblk;
-#endif
 		iblk = (CICONBLK *) (obj[WICON].ob_spec);
 		inf_sset(obj, WNAME, Nostr);
 		obj[WFOLDER].ob_state = NORMAL;
@@ -778,11 +663,7 @@ VOID ins_wicons(NOTHING)
 			buf2[0] = 0;
 		}
 
-#if COLORICON_SUPPORT
-		cp_iblk(index, iblk);
-#else
 		cp_iblk(get_icon(index), &iblk->monoblk);
-#endif
 		iblk->monoblk.ib_char[1] = 0;
 
 		fm_draw(INWICON);
@@ -800,9 +681,6 @@ VOID ins_wicons(NOTHING)
 
 			if (ret == WUP)
 			{
-#if TOSVERSION >= 0x400
-			cg_3:
-#endif
 				if (index)
 				{
 					index--;
@@ -817,9 +695,6 @@ VOID ins_wicons(NOTHING)
 
 			if (ret == WDOWN)
 			{
-#if TOSVERSION >= 0x400
-			cg_4:
-#endif
 				if ((index + 1) < limit)
 				{
 					index++;
@@ -827,27 +702,10 @@ VOID ins_wicons(NOTHING)
 #if AES3D
 					XSelect(obj, ret);
 #endif
-#if COLORICON_SUPPORT
-					cp_iblk(index, iblk);
-#else
 					cp_iblk(get_icon(index), &iblk->monoblk);
-#endif
 					iblk->monoblk.ib_char[1] = 0;
 					objc_draw(obj, WBOX, 1, full.g_x, full.g_y, full.g_w, full.g_h);
 					cl_delay();
-
-					/* cjg 08/06/92 */
-#if TOSVERSION >= 0x400
-					graf_mkstate(&mk_x, &mk_y, &mk_buttons, &mk_kstate);
-					if (mk_buttons)
-					{
-						if (ret == WUP)
-							goto cg_3;
-
-						if (ret == WDOWN)
-							goto cg_4;
-					}
-#endif
 				}
 #if AES3D
 				wait_up();
@@ -937,9 +795,6 @@ VOID ins_wicons(NOTHING)
 	}									/* while more      */
 
 	do_finish(INWICON);
-#if COLORICON_SUPPORT
-	obj[WICON].ob_spec = saveptr;
-#endif
 	sort_show(0, TRUE);
 }
 
@@ -969,11 +824,7 @@ VOID ins_drive(NOTHING)
 	{
 		if ((!(obj[i].ob_flags & HIDETREE)) && backid[i].i_type == DISK)
 		{
-#if COLORICON_SUPPORT
-			id = backid[i].i_cicon.monoblk.ib_char[1];
-#else
 			id = backid[i].i_iblk.ib_char[1];
-#endif
 			if (id <= '`' && id >= 'A')
 			{
 				dr[id - 'A'] = 1;

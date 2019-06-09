@@ -529,7 +529,7 @@ bye2:
 
 		bret = fm_do(tree, FSELECTION);
 
-		gsx_mxmy(&mx, &my);
+		gsx_fmxmy(&mx, &my);
 
 		ret = bret & 0x7FFF;
 

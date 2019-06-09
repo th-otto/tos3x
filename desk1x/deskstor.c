@@ -18,7 +18,6 @@ char *d_path;							/* window path buffer       */
 int16_t pxyarray[10];					/* input point array        */ /* unused */
 int16_t d_xywh[18];						/* disk icon pline points   */
 int16_t f_xywh[18];						/* file icon pline points   */
-OBJECT *menu_addr;						/* menu address         */
 OBJECT *background;						/* desktop object address   */
 int16_t maxicon;						/* max number of desktop icons  */
 BOOLEAN i_status;						/* current status TURE or FALSE */ /* unused */

@@ -345,7 +345,7 @@ VOID wait_msg(NOTHING)
 
 	do
 	{
-		event = evnt_multi(MU_MESAG | MU_TIMER, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* mesaage buffer   */
+		event = evnt_multi(MU_MESAG | MU_TIMER, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* message buffer   */
 					0, 0,		/* timer counter    */
 					&trash, &trash, &trash, &trash, &trash, &trash);
 

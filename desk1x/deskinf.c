@@ -640,7 +640,7 @@ PP(BOOLEAN todisk;)
 	/********* save the opened window first	************/
 
 	/* save windows */
-	for (i = 0; i < 4; i++) /* BUG: should be MAXWIN */
+	for (i = 0; i < MAXWIN; i++)
 	{
 		*pcurr++ = '#';
 		*pcurr++ = 'W';

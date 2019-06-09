@@ -641,6 +641,11 @@ extern ICONBLK ib;
 
 int16_t ob_sysvar PROTO((uint16_t mode, uint16_t which, uint16_t inval1, uint16_t inval2, int16_t *outval1, int16_t *outval2));
 VOID ob_format PROTO((int16_t just, char *raw_str, char *tmpl_str, char *fmt_str));
+#if LINEF_HACK
+VOID ob_fformat PROTO((int16_t just, char *raw_str, char *tmpl_str, char *fmt_str));
+#else
+#define ob_fformat ob_format
+#endif
 VOID ob_draw PROTO((LPTREE tree, int16_t obj, int16_t depth));
 int16_t ob_find PROTO((LPTREE tree, int16_t currobj, int16_t depth, int16_t mx, int16_t my));
 VOID ob_add PROTO((LPTREE tree, int16_t parent, int16_t child));
@@ -746,6 +751,11 @@ VOID gsx_gclip PROTO((GRECT *pt));
 BOOLEAN gsx_chkclip PROTO((GRECT *pt));
 VOID gsx_pline PROTO((int16_t offx, int16_t offy, int16_t cnt, const int16_t *pts));
 VOID gsx_cline PROTO((uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2));
+#if LINEF_HACK
+VOID gsx_fcline PROTO((uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2));
+#else
+#define gsx_fcline gsx_cline
+#endif
 VOID gsx_attr PROTO((uint16_t text, uint16_t mode, uint16_t color));
 VOID gsx_bxpts PROTO((GRECT *pt));
 VOID gsx_box PROTO((GRECT *pt));

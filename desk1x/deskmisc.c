@@ -159,16 +159,6 @@ PP(int16_t drive;)
 }
 
 
-#if COLORICON_SUPPORT
-OBJECT *get_icon(P(int16_t) item)
-PP(int16_t item;)
-{
-	if (item >= numicon)
-		item = numicon - 1;
-
-	return &iconaddr[item];
-}
-#else
 /* 306de: 00e2f6b2 */
 ICONBLK *get_icon(P(int16_t) item)
 PP(int16_t item;)
@@ -178,7 +168,6 @@ PP(int16_t item;)
 
 	return (ICONBLK *)(iconaddr[item].ob_spec);
 }
-#endif
 
 
 /* 306de: 00e2f6e4 */
@@ -388,7 +377,7 @@ VOID wait_msg(NOTHING)
 
 	do
 	{
-		event = evnt_multi(MU_MESAG | MU_TIMER, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* mesaage buffer   */
+		event = evnt_multi(MU_MESAG | MU_TIMER, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* message buffer   */
 					0, 0,		/* timer counter    */
 					&trash, &trash, &trash, &trash, &trash, &trash);
 

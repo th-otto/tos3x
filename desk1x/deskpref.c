@@ -15,7 +15,6 @@
 /*
  * Set preferences dialog
  */
-#if !POPUP_SUPPORT
 /* 306de: 00e316e8 */
 VOID desk_pref(NOTHING)
 {
@@ -112,7 +111,6 @@ VOID desk_pref(NOTHING)
 	}
 
 }
-#endif
 
 
 /*

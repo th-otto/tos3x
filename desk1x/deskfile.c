@@ -318,9 +318,7 @@ PP(register DESKWIN *win;)
 {
 	register int16_t i, k, items, vicons;
 	DIR *dir;
-#if !COLORICON_SUPPORT
 	register ICONBLK *icon;
-#endif
 	register OBJECT *obj;
 	OBJECT *obj1;
 	int16_t len, type;
@@ -355,12 +353,8 @@ PP(register DESKWIN *win;)
 		if (s_view == S_ICON)
 		{
 			app_icon(&dir[i].d_name[0], (dir[i].d_att & FA_DIREC) ? FOLDER : -1, &type);
-#if COLORICON_SUPPORT
-			cp_iblk(type, (CICONBLK *) (obj->ob_spec));
-#else
 			icon = get_icon(type);
 			cp_iblk(icon, (ICONBLK *) (obj->ob_spec));
-#endif
 			((CICONBLK *) (obj->ob_spec))->monoblk.ib_char[1] = 0;
 			((CICONBLK *) (obj->ob_spec))->monoblk.ib_ptext = &dir[i].d_name[0];
 		} else

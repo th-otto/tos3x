@@ -817,11 +817,7 @@ PP(DESKWIN *win;)
 	int16_t h, limitw, limith;
 	int16_t type, offy;
 	int16_t len, col, row, doitc;
-#if COLORICON_SUPPORT
-	CICONBLK *iblk;
-#else
 	ICONBLK *iblk;
-#endif
 	char *text;
 	register OBJECT *obj;
 	OBJECT *obj1;
@@ -835,13 +831,8 @@ PP(DESKWIN *win;)
 		h = dicon.g_h;					/* Change also at deskinf.c */
 		offx = gl_hchar == 8 ? gl_wchar / 2 : gl_wchar;
 		offy = gl_hchar / 2;
-#if COLORICON_SUPPORT
-		type = G_CICON;
-		iblk = win->w_ciblk;
-#else
 		type = G_ICON;
 		iblk = win->w_iblk;
-#endif
 #if !BINEXACT
 		ted = 0; /* quiet compiler */
 		text = 0;
@@ -1027,11 +1018,7 @@ PP(register DESKWIN *win;)
 	register uint16_t item;
 	register OBJECT *obj1, *obj2;
 	int16_t w, h, len;
-#if COLORICON_SUPPORT
-	CICONBLK *iblk;
-#else
 	ICONBLK *iblk;
-#endif
 	TEDINFO *ted;
 	uint16_t k;
 	int32_t size;
@@ -1080,11 +1067,7 @@ PP(register DESKWIN *win;)
 		for (i = 0; i < item; i++)		/* copy object structure */
 			LBCOPY(obj1++, &iconaddr[ICON1], sizeof(OBJECT));
 
-#if COLORICON_SUPPORT
-		win->w_ciblk = iblk = (CICONBLK *)obj1;
-#else
 		win->w_iblk = iblk = (ICONBLK *)obj1;
-#endif
 
 		/* start of the iconblk area    */
 		for (i = 0; i < item; i++)		/* copy icon structure      */

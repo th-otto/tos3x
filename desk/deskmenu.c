@@ -1435,7 +1435,7 @@ VOID actions(NOTHING)
 	{
 		menu_verify();
 		q_write();						/* update inf file  */
-		event = evnt_multi(MU_MESAG | MU_BUTTON | MU_KEYBD, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* mesaage buffer   */
+		event = evnt_multi(MU_MESAG | MU_BUTTON | MU_KEYBD, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, msgbuff,	/* message buffer   */
 					0, 0,		/* timer counter    */
 					&mx, &my, &button, &kstate, &kreturn, &clicks);
 

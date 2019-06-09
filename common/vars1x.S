@@ -465,8 +465,9 @@ _endvdibss: ds.b 0
 	ds.b 2
 	
 	PTR(_ad_path)
+	PTR(old_bcode)
 
-	ds.b 4
+	ds.b 2
 	
 	INT(_gl_hclip)
 	INT(_gl_bvhard)
@@ -484,15 +485,15 @@ _endvdibss: ds.b 0
 	INT(_gl_hschar)
 	INT(_sh_iscart)
 
-	ds.b 38
+	ds.b 36
 	
+	INT(_gl_moff)
 	GRECT(_gl_rcenter)
+	INT(_gl_graphic)
+	INT(_gl_lcolor)
+	PTR(old_mcode)
 
 	ds.b 2
-	
-	INT(_gl_lcolor)
-
-	ds.b 4
 	
 	INT(_gl_ticktime)
 	INT(_gl_nplanes)
@@ -577,8 +578,9 @@ _endvdibss: ds.b 0
 	
 	V(_wind_spb,b,10)    /* sizeof(SPB) */
 	GRECT(_gl_rzero)
+	INT(_gl_mouse)
 
-	ds.b 4
+	ds.b 2
 	
 	INT(_gl_nrows)
 
@@ -714,23 +716,17 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	INT(_gl_dcindex)
 	INT(_q_change)
 	PTR(_gh_buffer)
-	V(_chxcache,l,2) /* USERBLK */
-	PTR(old_bcode)
 	INT(_back_up)
 	PTR(_ad_fsdta)
 	V(_dr,b,32)
 	V(_gl_cmform,w,37) /* MFORM */
 	INT(_f_rename)
 	PTR(_background)
-	PTR(_menu_addr)
-	INT(_gl_moff)
 	V(_hdr_buff,w,18)   /* RSHDR */
 	INT(_d_maxcolor)
 	INT(_d_level)
-	INT(_gl_graphic)
 	INT(_f_abort)
 	INT(_f_level)
-	PTR(old_mcode)
 	V(_path1,b,PATHLEN)
 	V(_path2,b,PATHLEN)
 	INT(_d_display)
@@ -775,7 +771,6 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	PTR(_gl_wtree)
 	INT(_gemsize)
 	PTR(_lp_start)
-	INT(_gl_mouse)
 	INT(_s_stofit)
 	INT(_infsize)
 	INT(_numicon)

@@ -267,7 +267,7 @@ PP(int16_t dist;)
 	if (dist)
 		ob_draw(tree, obj, 0);
 	else
-		gsx_cline(t.g_x, t.g_y, t.g_x, t.g_y + t.g_h - 1);
+		gsx_fcline(t.g_x, t.g_y, t.g_x, t.g_y + t.g_h - 1);
 	/* turn on cursor in new position */
 	gsx_sclip(&oc);
 }
@@ -445,7 +445,7 @@ PP(int16_t kind;)
 		DGLO->g_valstr[len++] = DGLO->g_valstr[ii - 1];
 	DGLO->g_valstr[len] = '\0';
 	/* init formatted string */
-	ob_format(edblk.te_just, &DGLO->g_rawstr[0], &DGLO->g_tmpstr[0], &DGLO->g_fmtstr[0]);
+	ob_fformat(edblk.te_just, &DGLO->g_rawstr[0], &DGLO->g_tmpstr[0], &DGLO->g_fmtstr[0]);
 	switch (kind)
 	{
 	case EDINIT:
@@ -541,7 +541,7 @@ PP(int16_t kind;)
 
 		if (!no_redraw)
 		{
-			ob_format(edblk.te_just, &DGLO->g_rawstr[0], &DGLO->g_tmpstr[0], &DGLO->g_fmtstr[0]);
+			ob_fformat(edblk.te_just, &DGLO->g_rawstr[0], &DGLO->g_tmpstr[0], &DGLO->g_fmtstr[0]);
 			ob_stfn(*idx, &nstart, &nfinish);
 			start = min(start, nstart);
 			dist = max(finish, nfinish) - start;

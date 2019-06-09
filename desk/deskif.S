@@ -327,6 +327,7 @@ _form_center:
 	bra	cplp4
 
 #if AESVERSION < 0x200
+/* WTF: that code is just duplicated from AES */
 	xdef _graf_mouse
 _graf_mouse:
 	link      a6,#-4
@@ -891,7 +892,7 @@ wndcp:	move.l	28(sp),-(sp)
 	bra	disp1
 
 
-#if !BINEXACT
+#if !BINEXACT & (AESVERSION >= 0x200)
 	xdef _inq_cache
 _inq_cache:
 	move.l 4(a7),d1

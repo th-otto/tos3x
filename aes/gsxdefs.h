@@ -165,7 +165,17 @@ VOID gsx_mret PROTO((VOIDPTR *pmaddr, int32_t *pmlen));
 
 
 VOID gsx_1code PROTO((int16_t code, int16_t value));
-VOID gsx_ncode PROTO((int16_t code, int16_t n, int16_t m));
+VOID gsx_ncode PROTO((int16_t code, int16_t nptsin, int16_t nintin));
+VOID gsx_mxmy PROTO((int16_t *pmx, int16_t *pmy));
+#if LINEF_HACK
+VOID gsx_1acode PROTO((int16_t code, int16_t value));
+VOID gsx_acode PROTO((int16_t code, int16_t nptsin, int16_t nintin));
+VOID gsx_fmxmy PROTO((int16_t *pmx, int16_t *pmy));
+#else
+#define gsx_acode gsx_ncode
+#define gsx_1acode gsx_1code
+#define gsx_fmxmy gsx_mxmy
+#endif
 VOID gsx_init PROTO((NOTHING));
 VOID gsx_graphic PROTO((BOOLEAN tographic));
 VOID gsx_escapes PROTO((int16_t esc_code));
@@ -179,7 +189,6 @@ VOID bb_save PROTO((GRECT *ps));
 VOID bb_restore PROTO((GRECT *ps));
 VOID gsx_resetmb PROTO((NOTHING));
 int16_t gsx_tick PROTO((intptr_t tcode, intptr_t *ptsave));
-VOID gsx_mxmy PROTO((int16_t *pmx, int16_t *pmy));
 int16_t gsx_button PROTO((NOTHING));
 VOID gsx_moff PROTO((NOTHING));
 VOID gsx_mon PROTO((NOTHING));

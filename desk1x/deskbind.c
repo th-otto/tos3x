@@ -53,75 +53,6 @@ PP(const char *name;)
 }
 
 
-#if POPUP_SUPPORT
-int16_t rsrc_obfix(P(LPTREE) tree, P(int16_t) obj)
-PP(LPTREE tree;)
-PP(int16_t obj;)
-{
-	int16_t ret;
-
-	ret = rs_obfix(tree, obj);
-	dsptch();
-	return ret;
-}
-
-
-int16_t menu_popup(P(MENU *)menu, P(int16_t) x, P(int16_t) y, P(MENU *)mdata)
-PP(MENU *menu;)
-PP(int16_t x;)
-PP(int16_t y;)
-PP(MENU *mdata;)
-{
-	int16_t ret;
-
-	ret = mn_popup(rlr->p_pid, menu, x, y, mdata);
-	dsptch();
-	return ret;
-}
-
-
-int16_t menu_istart(P(int16_t) code, P(OBJECT *)mtree, P(int16_t) mmenu, P(int16_t) start)
-PP(int16_t code;)
-PP(OBJECT *mtree;)
-PP(int16_t mmenu;)
-PP(int16_t start;)
-{
-	int16_t ret;
-
-	ret = mn_istart(rlr->p_pid, code, mtree, mmenu, start);
-	dsptch();
-	return ret;
-}
-#endif
-
-
-#if AES3D
-VOID objc_gclip(P(LPTREE) tree, P(int16_t) which, P(int16_t *)x, P(int16_t *)y, P(int16_t *)rx, P(int16_t *)ry, P(int16_t *)w, P(int16_t *)h)
-PP(LPTREE tree;)
-PP(int16_t which;)
-PP(int16_t *x;)
-PP(int16_t *y;)
-PP(int16_t *rx;)
-PP(int16_t *ry;)
-PP(int16_t *w;)
-PP(int16_t *h;)
-{
-	ob_gclip(tree, which, x, y, rx, ry, w, h);
-	dsptch();
-}
-#endif
-
-
-/* 306de: 00e280c0 */
-VOID graf_mouse(P(int16_t) style, P(MFORM *)grmaddr)
-PP(int16_t style;)
-PP(MFORM *grmaddr;)
-{
-	gr_mouse(style, grmaddr);
-	dsptch();
-}
-
-
 /*
  * show cursor
  */
@@ -181,16 +112,3 @@ PP(int16_t *pxy;)
 	ptsin[3] = pxy[3];
 	gsx_ncode(129, 2, 1);
 }
-
-
-#if !BINEXACT
-VOID dvq_chcells(P(int16_t *) rows, P(int16_t *) cols)
-PP(int16_t *rows;)
-PP(int16_t *cols;)
-{
-	contrl[5] = 1;
-	gsx_ncode(5, 0, 0);
-	*rows = intout[0];
-	*cols = intout[1];
-}
-#endif

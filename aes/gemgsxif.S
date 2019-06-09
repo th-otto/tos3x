@@ -141,6 +141,7 @@ VOID gsx_mfree(NOTHING)
 }
 #endif
 /* 306de: 00e25064 */
+/* 104de: 00fe1afc */
 /* 404: 00e33f06 */
 	xdef _gsx_mfree
 _gsx_mfree:
@@ -164,6 +165,7 @@ VOID gsx_mret(VOIDPTR *pmaddr, int32_t *pmlen)
 }
 #endif
 /* 306de: 00e25074 */
+/* 104de: 00fe1b08 */
 	xdef _gsx_mret
 _gsx_mret:
 
@@ -190,9 +192,14 @@ VOID gsx_ncode(WORD code, WORD n, WORD m)
 }
 #endif
 /* 306de: 00e2508a */
+/* 104de: 00fe1b1e */
 /* 404: 00e33f34 */
 	xdef _gsx_ncode
-_gsx_ncode:
+_gsx_ncode: ds.b 0
+#if LINEF_HACK
+	xdef _gsx_acode
+_gsx_acode: ds.b 0
+#endif
 
 	lea	4(sp),a0
 	lea	_contrl,a1
@@ -215,8 +222,13 @@ VOID gsx_1code(WORD code, WORD value)
 }
 #endif
 /* 306de: 00e250a8 */
+/* 104de: 00fe1b3c */
 	xdef _gsx_1code
-_gsx_1code:
+_gsx_1code: ds.b 0
+#if LINEF_HACK
+	xdef _gsx_1acode
+_gsx_1acode: ds.b 0
+#endif
 
 	move.w  6(sp),_intin
 
@@ -241,6 +253,7 @@ VOID gsx_init(NOTHING)
 }
 #endif
 /* 306de: 00e250c0 */
+/* 104de: 00fe1b54 */
 	xdef _gsx_init
 _gsx_init:
 
@@ -279,6 +292,7 @@ VOID gsx_graphic(BOOLEAN tographic)
 }
 #endif
 /* 306de: 00e250e4 */
+/* 104de: 00fe1b74 */
 	xdef _gsx_graphic
 _gsx_graphic:
 
@@ -316,6 +330,7 @@ VOID av_hardcopy(NOTHING)
 }
 #endif
 /* 306de: 00e2511e */
+/* 104de: 00fe1bae */
 	xdef _av_hardcopy
 _av_hardcopy:
 	moveq.l	#17,d0
@@ -344,6 +359,7 @@ escape:	move.w	d0,_contrl+10
 
 *****	 Open physical work station for 6 resolutions	*****
 /* 306de: 00e25132 */
+/* 104de: 00fe1bc2 */
 /* 404: 00e33fdc */
 	xdef _gsx_wsopen
 _gsx_wsopen:
@@ -425,6 +441,7 @@ VOID gsx_wsclose(NOTHING)
 }
 #endif
 /* 306de: 00e251d4 */
+/* 104de: 00fe1c2a */
 	xdef _gsx_wsclose
 _gsx_wsclose:
 
@@ -440,6 +457,7 @@ VOID ratinit(NOTHING)
 	gl_moff = 0;
 }
 #endif
+/* 104de: 00fe1c30 */
 	xdef _ratinit
 _ratinit:
 
@@ -482,6 +500,7 @@ VOID bb_set(WORD sx, WORD sy, WORD sw, WORD sh, WORD *pts1, WORD *pts2, FDB *pfd
 	gsx_mon();
 }
 #endif
+/* 104de: 00fe1c44 */
 	xdef _bb_set
 _bb_set:
 
@@ -555,6 +574,7 @@ VOID bb_save(GRECT *ps)
 }
 #endif
 /* 306de: 00e25260 */
+/* 104de: 00fe1cb2 */
 	xdef _bb_save
 _bb_save:
 
@@ -576,6 +596,7 @@ _bb_save:
 
 
 /* 306de: 00e25290 */
+/* 104de: 00fe1ce2 */
 	xdef _bb_restore
 _bb_restore:
 
@@ -614,6 +635,7 @@ WORD gsx_setmb(UWORD *boff, UWORD *moff, VOIDPTR *pdrwaddr)
 }
 #endif
 /* 306de: 00e252c0 */
+/* 104de: 00fe1d12 */
 	xdef _gsx_setmb
 _gsx_setmb:
 
@@ -644,6 +666,7 @@ VOID gsx_resetmb(NOTHING)
 	gsx_ncode(CUR_VECX, 0, 0);     dont' replace cursor draw vector */
 }
 #endif
+/* 104de: 00fe1d44 */
 	xdef _gsx_resetmb
 _gsx_resetmb:
 
@@ -666,6 +689,7 @@ WORD gsx_tick(intptr_t tcode, intptr_t *ptsave)
 }
 #endif
 /* 306de: 00e25312 */
+/* 104de: 00fe1d64 */
 	xdef _gsx_tick
 _gsx_tick:
 
@@ -682,6 +706,7 @@ _gsx_tick:
 
 
 #if AESVERSION < 0x200
+/* 104de: 00fe1d84 */
 	xdef _gsx_mfset
 _gsx_mfset:
 	bsr.s     ig_moff
@@ -705,8 +730,13 @@ VOID gsx_mxmy(WORD *pmx, WORD *pmy)
 }
 #endif
 /* 306de: 00e25332 */
+/* 104de: 00fe1da0 */
 	xdef _gsx_mxmy
-_gsx_mxmy:
+_gsx_mxmy: ds.b 0
+#if LINEF_HACK
+	xdef _gsx_fmxmy
+_gsx_fmxmy: ds.b 0
+#endif
 
 	lea	4(sp),a0
 	move.l	(a0)+,a1
@@ -780,6 +810,7 @@ VOID gsx_mon(NOTHING)
 }
 #endif
 /* 306de: 00e2536c */
+/* 104de: 00fe1dda */
 	xdef _gsx_mon
 _gsx_mon:
 
@@ -851,6 +882,7 @@ WORD av_opnwk(WORD *pwork_in, WORD *phandle, WORD *pwork_out)
 }
 #endif
 /* 306de: 00e2538c */
+/* 104de: 00fe1dfa */
 /* 404: 00e3423c */
 	xdef _av_opnwk
 _av_opnwk:
@@ -883,6 +915,7 @@ VOID av_pline(WORD count, WORD *pxyarray)
 }
 #endif
 /* 306de: 00e253d8 */
+/* 104de: 00fe1e46 */
 /* 404: 00e34288 */
 	xdef _av_pline
 _av_pline:
@@ -911,6 +944,7 @@ VOID avst_clip(WORD clip_flag, WORD pxyarray)
 }
 #endif
 /* 306de: 00e253ec */
+/* 104de: 00fe1e5a */
 	xdef _avst_clip
 _avst_clip:
 
@@ -939,6 +973,7 @@ VOID avst_height(WORD height, WORD *pchr_width, WORD *pchr_height, WORD *pcell_w
 }
 #endif
 /* 306de: 00e25400 */
+/* 104de: 00fe1e6e */
 	xdef _avst_height
 _avst_height:
 
@@ -974,6 +1009,7 @@ VOID avr_recfl(WORD *pxyarray, FDB *pdesMFDB) /* ??? why MFDB ??? */
 }
 #endif
 /* 306de: 00e2542e */
+/* 104de: 00fe1e9c */
 	xdef _avr_recfl
 _avr_recfl:
 
@@ -999,6 +1035,7 @@ VOID avro_cpyfm(WORD wr_mode, WORD *pxyarray, WORD *psrcMFDB, WORD *pdesMFDB)
 }
 #endif
 /* 306de: 00e2543e */
+/* 104de: 00fe1eac */
 	xdef _avro_cpyfm
 _avro_cpyfm:
 
@@ -1031,6 +1068,7 @@ VOID avrt_cpyfm(WORD wr_mode, WORD *pxyarray, FDB *psrcMFDB, FDB *pdesMFDB, WORD
 }
 #endif
 /* 306de: 00e25450 */
+/* 104de: 00fe1ebe */
 	xdef _avrt_cpyfm
 _avrt_cpyfm:
 
@@ -1056,6 +1094,7 @@ VOID avr_trnfm(FDB *psrcMFDB, FDB *pdesMFDB)
 }
 #endif
 /* 306de: 00e25466 */
+/* 104de: 00fe1ed4 */
 	xdef _avr_trnfm
 _avr_trnfm:
 
@@ -1076,6 +1115,7 @@ VOID avsl_width(WORD width)
 }
 #endif
 /* 306de: 00e25470 */
+/* 104de: 00fe1ede */
 	xdef _avsl_width
 _avsl_width:
 	lea	_ptsin,a1
@@ -1119,6 +1159,7 @@ vdi_short:
 * in:
 *	d0	offset into vdi_list
 /* 306de: 00e25498 */
+/* 104de: 00fe1f06 */
 /* 404: 00e34348 */
 vdi_call:
 
@@ -1134,7 +1175,11 @@ vdi_sh:	move.w	d0,-(sp)
 
 vdi_cont:
 
+#if LINEF_HACK
+	jsr	_gsx_acode
+#else
 	jsr	_gsx_ncode
+#endif
 	addq.l	#6,sp
 	move.l	#_ptsin,pioff		; some routines alter this pointer
 	rts				; so we shall always reset it.

@@ -1,6 +1,6 @@
 #define PATHLEN		128
 #define NAMELEN     14
-#define	MAXWIN		8	/* max number of window	*/
+#define	MAXWIN		4	/* max number of window	*/
 
 #ifndef BINEXACT
 #define BINEXACT 1
@@ -16,14 +16,6 @@
 
 #ifndef AES3D
 #define AES3D (AESVERSION >= 0x330)
-#endif
-
-#ifndef COLORICON_SUPPORT
-#define COLORICON_SUPPORT (AESVERSION >= 0x330)
-#endif
-
-#ifndef POPUP_SUPPORT
-#define POPUP_SUPPORT (AESVERSION >= 0x330)
 #endif
 
 /* max number of menus  cjg - 07/07/92 */

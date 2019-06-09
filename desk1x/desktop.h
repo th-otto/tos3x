@@ -19,14 +19,6 @@
 #include "mobdefs.h"
 #include "window.h"
 
-/*
- * TOS versions before 4.x had some language dependant strings
- * compiled into the executable.
- * Since TOS 4.x, all those strings are now part of the resource file.
- */
-#define STR_IN_RSC (TOSVERSION >= 0x400)
-
-
 #include "deskrsc.h"
 #include "osbind.h"
 
@@ -173,22 +165,21 @@ typedef struct idtype
 {
 	int16_t i_type;
 	int16_t i_icon;
-#if COLORICON_SUPPORT
-	CICONBLK i_cicon;
-#else
 	ICONBLK i_iblk;
-#endif
 	const char *i_path;
 	char i_name[NAMELEN];
 } IDTYPE;
 
 
 typedef struct {
-	/*     0 */ char unused1[13370];
+	/*     0 */ char unused1[13350];
+	/* 13350 */ int16_t *msgbuf[8];		
+	/* 13366 */ int16_t *p_msgbuf;		
 	/* 13370 */ GRECT full;				/* full window size value */
 	/*     0 */ char unused2[272];
 	/* 13650 */ char *str;				/* rsrc_gaddr result */
-	/*     0 */ char unused6[82];
+	/* 13654 */ OBJECT *rtree[16];		/* resource trees */
+	/* 13718 */ char unused6[18];
 	/* 13736 */ GRECT r_dicon;			/* real time desktop icon size */
 	/* 13744 */ int16_t o13744;
 	/* 13746 */ int16_t o13746;
@@ -221,8 +212,8 @@ typedef struct {
 	/* 23558 */ BOOLEAN cbit_save;		/* bitblt */
 	/* 23560 */ int16_t pref_save;		/* screen pref */
 	/* 23562 */ BOOLEAN write_save;		/* write ? */
-	/* 23564 */ DESKWIN winpd[MAXWIN]; /* window process structure */
-	/* 24652 */ char unused5[5788];
+	/* 23564 */ DESKWIN winpd[MAXWIN];	/* window process structure */
+	/* 24652 */ char unused5[6332];
 	/* 30440 */ char autofile[PATHLEN];
 	/* 30568 */
 	
@@ -331,9 +322,6 @@ VOID dv_exit_cur PROTO((NOTHING));
 VOID dv_enter_cur PROTO((NOTHING));
 VOID dvs_clip PROTO((BOOLEAN clip_flag, const int16_t *pxyarray));
 
-#if !BINEXACT
-VOID dvq_chcells PROTO((int16_t *rows, int16_t *cols));
-#endif
 
 /*
  * deskif.S
@@ -429,7 +417,7 @@ char *escan_str PROTO((const char *pcurr, char *ppstr)); /* also referenced by A
 char *scan_2 PROTO((const char *pcurr, int16_t *pwd)); /* also referenced by AES */
 char *save_2 PROTO((char *pcurr, uint16_t wd)); /* also referenced by AES */
 char *save_sstr PROTO((char *pcurr, const char *pstr));
-VOID read_inf PROTO((NOTHING));
+BOOLEAN read_inf PROTO((NOTHING));
 VOID save_inf PROTO((BOOLEAN todisk));
 VOID app_posicon PROTO((int16_t colx, int16_t coly, int16_t *px, int16_t *py));
 VOID app_mtoi PROTO((int16_t newx, int16_t newy, int16_t *px, int16_t *py));
@@ -438,22 +426,13 @@ VOID app_mtoi PROTO((int16_t newx, int16_t newy, int16_t *px, int16_t *py));
 /*
  * deskins.c
  */
-#if COLORICON_SUPPORT
-int16_t cp_iblk PROTO((int16_t number, CICONBLK *dest_ciblk));
-#else
 VOID cp_iblk PROTO((const ICONBLK *src_iblk, ICONBLK *dest_iblk));
-#endif
 VOID rm_icons PROTO((NOTHING));
-#if !POPUP_SUPPORT
-VOID ins_app PROTO((NOTHING));
-#endif
 VOID ins_icons PROTO((NOTHING));
 VOID ins_wicons PROTO((NOTHING));
 VOID ins_drive PROTO((NOTHING));
 VOID cl_delay PROTO((NOTHING));
-#if !POPUP_SUPPORT
 VOID ins_app PROTO((NOTHING));
-#endif
 
 
 /*
@@ -486,9 +465,7 @@ VOID do_file PROTO((int16_t msgbuff));
 VOID hd_msg PROTO((int16_t *msgbuff));
 VOID actions PROTO((NOTHING));
 int32_t av_mem PROTO((NOTHING));
-#if !POPUP_SUPPORT
 VOID av_desk PROTO((NOTHING));
-#endif
 
 
 /*
@@ -497,11 +474,7 @@ VOID av_desk PROTO((NOTHING));
 int16_t m_sfirst PROTO((const char *path, int16_t att));
 int16_t c_path_alloc PROTO((const char *path));
 BOOLEAN hit_disk PROTO((int16_t drive));
-#if COLORICON_SUPPORT
-OBJECT *get_icon PROTO((int16_t item));
-#else
 ICONBLK *get_icon PROTO((int16_t item));
-#endif
 OBJECT *get_tree PROTO((int16_t item));
 char *get_fstring PROTO((int16_t item));
 char *get_string PROTO((int16_t item));
@@ -548,9 +521,7 @@ VOID wait_msg PROTO((NOTHING));
 /*
  * deskpref.c
  */
-#if !POPUP_SUPPORT
 VOID desk_pref PROTO((NOTHING));
-#endif
 
 
 /*
@@ -631,7 +602,6 @@ extern int16_t d_level;					/* window path level        */
 extern char *d_path;					/* window path buffer       */
 extern int16_t d_xywh[18];				/* disk icon pline points   */
 extern int16_t f_xywh[18];				/* file icon pline points   */
-extern OBJECT *menu_addr;				/* menu address         */
 extern OBJECT *background;				/* desktop object address   */
 extern int16_t maxicon;					/* max number of desktop icons  */
 extern intptr_t gh_buffer;				/* ghost icon outline buffer address */
@@ -762,8 +732,6 @@ int32_t trp14 PROTO((short code, ...));
 int16_t trp14int PROTO((short code, ...));
 int32_t trp13 PROTO((short code, ...));
 
-VOID deskerr PROTO((NOTHING));
-VOID desknoerr PROTO((NOTHING));
 VOID mediach PROTO((int16_t drv));
 
 VOID gsx_attr PROTO((uint16_t text, uint16_t mode, uint16_t color));

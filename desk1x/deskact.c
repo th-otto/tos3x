@@ -1097,11 +1097,7 @@ PP(const char *tail;)
 
 	case DISK:							/* copy to disk     */
 		strcpy(buffer, wildext);
-#if COLORICON_SUPPORT
-		buffer[0] = itype->i_cicon.monoblk.ib_char[1];
-#else
 		buffer[0] = itype->i_iblk.ib_char[1];
-#endif
 		file_op(buffer, OP_COPY);
 		break;
 
@@ -1190,18 +1186,10 @@ PP(const char *text;)
 	{
 		itype = &backid[id];
 		obj = background;
-#if COLORICON_SUPPORT
-		cp_iblk(icon, (CICONBLK *) (obj[id].ob_spec));
-#else
 		cp_iblk(get_icon(icon), (ICONBLK *) (obj[id].ob_spec));
-#endif
 		/* $00E2D47E */
 		itype->i_type = type;
-#if COLORICON_SUPPORT
-		itype->i_cicon.monoblk.ib_char[1] = (char) drive;
-#else
 		itype->i_iblk.ib_char[1] = (char) drive;
-#endif
 		itype->i_icon = icon;
 		strcpy(((CICONBLK *) (obj[id].ob_spec))->monoblk.ib_ptext, text);
 	}

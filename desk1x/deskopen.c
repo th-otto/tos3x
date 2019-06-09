@@ -29,15 +29,9 @@ VOID locate_item PROTO((int16_t item, const char **path, BOOLEAN file));
 VOID xvq_chcells(P(int16_t *)num)
 PP(int16_t *num;)
 {
-#if BINEXACT
 	contrl[5] = 1;
 	gsx_ncode(5, 0, 0);
 	*num = intout[0];
-#else
-	int16_t rows, cols;
-	dvq_chcells(&rows, &cols);
-	*num = rows;
-#endif
 }
 
 
@@ -690,11 +684,7 @@ PP(DESKWIN *win;)
 
 		case DISK:						/* open a disk      */
 			strcpy(buffer, wildext);
-#if COLORICON_SUPPORT
-			buffer[0] = itype->i_cicon.monoblk.ib_char[1];
-#else
 			buffer[0] = itype->i_iblk.ib_char[1];
-#endif
 			open_disk(item, buffer, TRUE);
 			break;
 

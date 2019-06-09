@@ -130,6 +130,10 @@
 IBM	equ	3
 SMALL	equ	5
 
+#if LINEF_HACK
+	xdef	_ob_fformat
+_ob_fformat equ _ob_format
+#endif
 
 
 #if CCODE
@@ -335,7 +339,11 @@ VOID gsx_cline(UWORD x1, UWORD y1, UWORD x2, UWORD y2)
 /* 306de: 00e244de */
 /* 104de: 00fd46ec */
 	xdef	_gsx_cline
-_gsx_cline:
+_gsx_cline: ds.b 0
+#if LINEF_HACK
+	xdef	_gsx_fcline
+_gsx_fcline: ds.b 0
+#endif
 
 	jsr	_gsx_moff
 
@@ -888,7 +896,11 @@ _gsxsta2:
 
 	clr.l	    -(sp)		; gsx_ncode(VQT_ATTRIBUTES, 0, 0)
 	move.w	#38,-(sp)		; inquire text attributes (vqt_attributes)
+#if LINEF_HACK
+	jsr	_gsx_acode
+#else
 	jsr	_gsx_ncode
+#endif
 
 	lea	_ptsout,a1
 	move.w	(a1)+,_gl_wptschar		; gl_wptschar  <- ptsout[0]

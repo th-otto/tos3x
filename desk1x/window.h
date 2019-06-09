@@ -36,23 +36,13 @@ typedef	struct deskwin
 	/*   8 */ int16_t w_coli;			/* the horizontal column index */
 	/*  10 */ int16_t w_rowi;			/* the vertical row index */
 	/*  12 */ int16_t w_icon;			/* disk icon that owns this window */
-	/*  14 */ char w_path[12];			/* window path name */
-	/*  18 */ char w_info[INFOLEN];		/* info line */
-	/*  88 */ GRECT	w_work;				/* the current working xywh */
-	/*  96 */ OBJECT *w_obj;			/* pointer to objects */
-	/* 100 */ int16_t w_srtitem;		/* file item # to start with */
-	/* 104 */ int16_t w_vicons;			/* maximum visible icons */
-	/* 106 */ DIR *w_memory;			/* file memory owns by this window */
+	/*  14 */ char w_path[82];			/* window path name */
+	/*  96 */ int16_t w_id;				/* window handle */
+	/*  98 */ char w_info[14];			/* info line */
 	/* 110 */ int16_t w_items;			/* max number of file items */
 	/* 112 */ int16_t w_maxicons;		/* max # of icons allocated in window */
-	/* 114 */ int16_t w_icol;			/* max number of col at any time */
-	/* 116 */ int16_t w_irow;			/* max number of row at any time */
 	/* 118 */ TEDINFO *w_ted;
-#if COLORICON_SUPPORT
-	/* 122 */ CICONBLK *w_ciblk;		/* starting address of ciconblk */
-#else
 	/* 122 */ ICONBLK *w_iblk;			/* starting address of iconblk */
-#endif
 	/* 126 */ char *w_text;				/* starting address of text */
 	/* 132 */ int16_t w_hvicons;		/* number of invisible icon per row */
 	/* 136 */ int16_t w_vvicons;		/* number of invisible icon per col */
