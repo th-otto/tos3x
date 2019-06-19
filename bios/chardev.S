@@ -259,7 +259,12 @@ bcon3i2:
 /* 104de: 00fc32f6 */
 	xdef _bcon0out
 _bcon0out:
-        btst      #4,ABSW(_prtconfig)  /* Printer configured for output to RS232? */
+#if BINEXACT
+/* BUG: prtconfig is a word, btst will check in the most significant byte */
+        btst      #4,ABSW(_prtconfig)           /* Printer configured for output to RS232? */
+#else
+        btst      #4,(_prtconfig+1).w           /* Printer configured for output to RS232? */
+#endif
         bne       _bcon6out
         move.l    ABSW(_hz_200),d2              /* d2 = hz_200 - prt_to */
         sub.l     ABSW(lst_timeout),d2          /* (compute time since last timeout) */
@@ -356,6 +361,11 @@ bcon0in1:
 /* 104de: 00fc3392 */
 	xdef _bco0stat
 _bco0stat:
+#if !BINEXACT
+/* BUG: there was no test for bit #4 of prtconfig */
+        btst      #4,(_prtconfig+1).w           /* Printer configured for output to RS232? */
+        bne       _bco6stat
+#endif
         lea.l     ABSW2(MFP_GPIP),a0
         moveq.l   #-1,d0
 #if (TOSVERSION >= 0x200) | !BINEXACT
