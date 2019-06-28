@@ -2594,7 +2594,7 @@ biosxbios:
         tst.w     (a7)+                  /* skip format word */
 traph2: movem.l   d3-d7/a3-a7,-(a1)      /* regs, including stack pointer */
         move.l    a1,_savptr
-        btst      #13,d0                 /* were we in user mode? */
+        btst      #13,d0                 /* were we in supervisor mode? */
         bne.s     bx_sp_ok               /* yes, the sp already points to the arguments */
         move.l    usp,a7                 /* no, the arguments were on the user stack */
 bx_sp_ok:

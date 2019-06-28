@@ -766,6 +766,7 @@ initmfp:
 /* now init the 3 rs232 chip registers in mfp #2 */
         lea.l     ABSW(TTMFP_REGS),a0
         move.l    #$00880105,d0
+        /* BUG: that will enable the transmitter before baudrate has been set */
         movep.l   d0,MFP_SCR-MFP_REGS(a0)       /* inits scr,ucr,rsr,tsr */
         move.b    #$01,ABSW(MFP_TCDCR+(TTMFP_REGS-MFP_REGS)) /* timer c+d control register: delay 1:4 */
         move.b    #$02,ABSW(MFP_TDDR+(TTMFP_REGS-MFP_REGS))  /* timer d data register */
