@@ -236,6 +236,12 @@ okrc:
  *
  ******************************************************************************/
 
+/* 206de: 00e0fb50 */
+/* 208de: 00e0fb00 */
+/* 306de: 00e13606 */
+/* 104de: 00fc9332 */
+/* 404: 00e1c2ea */
+
 _enter:
     btst.b  #5,(sp)     /* are we in supervisor mode? */
     bne enter_1     /* yes, go check sup stack */

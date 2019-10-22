@@ -1,0 +1,104 @@
+offsets between us and other languages for most roms:
+german:  $5a
+french:  $78
+uk:      0
+spanish: $86
+italian: $68
+swedish: $78
+swiss/f: $86
+swiss/g: $86
+czech:   $5a (unofficial, patched german version)
+
+           bios      xbios    gemdos    gemdos    linea
+                              enter     dispatch
+100/us:    fc074e    fc0748   fc4cee    fc922c    fc9c48
+100/de:    fc074e    fc0748   fc4d48    fc9286    fc9ca2
+100/fr:    fc074e    fc0748   fc4d66    fc92a4    fc9cc0
+100/uk:    fc074e    fc0748   fc4cee    fc922c    fc9c48
+100/es:    fc074e    fc0748   fc4d74    fc92b2    fc9cce
+100/it:    fc074e    fc0748   fc4d56    fc9294    fc9cb0
+100/se:    fc074e    fc0748   fc4d66    fc92a4    fc9cc0
+100/sf:    fc074e    fc0748   fc4d74    fc92b2    fc9cce
+100/sg:    fc074e    fc0748   fc4d74    fc92b2    fc9cce
+
+102/us:    fc07f8    fc07f2   fc4f6e    fc94e4    fc9f0c
+102/de:    fc07f8    fc07f2   fc4fc8    fc953e    fc9f66
+102/fr:    fc07f8    fc07f2   fc4fe6    fc955c    fc9f84
+102/uk:    fc07f8    fc07f2   fc4f6e    fc94e4    fc9f0c
+102/es:    fc07f8    fc07f2   fc4e12    fc9376    fc9d88 ; offset -$15C/-$16E/-$184
+102/it:    fc07f8    fc07f2   fc4fd6    fc954c    fc9f74
+102/se:    fc07f8    fc07f2   fc4e2e    fc93a4    fc9dcc ; offset -$140
+
+104/us:    fc07ca    fc07c4   fc92d8    fc97c8    fcab3c
+104/de:    fc07ca    fc07c4   fc9332    fc9822    fcab96
+104/fr:    fc07ca    fc07c4   fc9350    fc9840    fcabb4
+104/uk:    fc07ca    fc07c4   fc92d8    fc97c8    fcab3c
+104/es:    fc07ca    fc07c4   fc935e    fc984e    fcabc2
+104/it:    fc07ca    fc07c4   fc9340    fc9830    fcaba4
+104/se:    fc07ca    fc07c4   fc9350    fc9840    fcabb4
+104/sf:    fc07ca    fc07c4   fc935e    fc984e    fcabc2
+104/sg:    fc07ca    fc07c4   fc935e    fc984e    fcabc2
+
+106/us:    e00940    e0093a   e094a8    e099f4    e0ad68
+106/de:    e00940    e0093a   e09502    e09a4e    e0adc2
+106/fr:    e00940    e0093a   e09520    e09a6c    e0ade0
+106/uk:    e00940    e0093a   e094a8    e099f4    e0ad68
+106/es:    e00940    e0093a   e0952e    e09a7a    e0adee
+106/it:    e00940    e0093a   e09510    e09a5c    e0add0
+106/se:    e00940    e0093a   e09520    e09a6c    e0ade0
+106/sf:    e00940    e0093a   e0952e    e09a7a    e0adee
+106/sg:    e00940    e0093a   e0952e    e09a7a    e0adee
+
+162/us:    e00940    e0093a   e0956c    e09a62    e0add6
+162/de:    e00940    e0093a   e095c6    e09abc    e0ae30
+162/fr:    e00940    e0093a   e095e4    e09ada    e0ae4e
+162/uk:    e00940    e0093a   e0956c    e09a62    e0add6
+162/es:    e00940    e0093a   e095f2    e09ae8    e0ae5c
+162/it:    e00940    e0093a   e095d4    e09aca    e0ae3e
+162/se:    e00940    e0093a   e095e4    e09ada    e0ae4e
+162/sf:    e00940    e0093a   e095f2    e09ae8    e0ae5c
+162/sg:    e00940    e0093a   e095f2    e09ae8    e0ae5c
+
+205/us:    e00a14    e00a0e   e0e916    e13f84    e057c8
+205/de:    e00a14    e00a0e   e0e970    e13fde    e05822
+205/fr:    e00a14    e00a0e   e0e98e    e13ffc    e05840
+205/uk:    e00a14    e00a0e   e0e916    e13f84    e057c8
+205/es:    e00a14    e00a0e   e0e99c    e1400a    e0584e
+205/it:    e00a14    e00a0e   e0e97e    e13fec    e05830
+205/se:    e00a14    e00a0e   e0e98e    e13ffc    e05840
+205/sf:    e00a14    e00a0e   e0e99c    e1400a    e0584e
+205/sg:    e00a14    e00a0e   e0e99c    e1400a    e0584e
+
+206/us:    e00d44    e00d3e   e0faf6    e15206    e068e4
+206/de:    e00d44    e00d3e   e0fb50    e15260    e0693e
+206/fr:    e00d44    e00d3e   e0fb6e    e1527e    e0695c
+206/uk:    e00d44    e00d3e   e0faf6    e15206    e068e4
+206/es:    e00d44    e00d3e   e0fb7c    e1528c    e0696a
+206/it:    e00d44    e00d3e   e0fb5e    e1526e    e0694c
+206/se:    e00d44    e00d3e   e0fb6e    e1527e    e0695c
+206/sf:    e00d44    e00d3e   e0fb7c    e1528c    e0696a
+206/sg:    e00d44    e00d3e   e0fb7c    e1528c    e0696a
+
+207/us:    e00d1e    e00d14   e0fe8c    e1559c    e06c7a
+
+208/us:    e00c6a    e00c64   e0faa6    e151b6    e06898
+208/de:    e00c6a    e00c64   e0fb00    e15210    e068ee
+208/fr:    e00c6a    e00c64   e0fb1e    e1522e    e0690c
+208/uk:    e00c6a    e00c64   e0faa6    e151b6    e06898
+
+306/us:    e00da2    e00d9c   e135ac    e18c6c    e078d2
+306/de:    e00da2    e00d9c   e13606    e18cc6    e0792c
+306/fr:    e00da2    e00d9c   e13624    e18ce4    e0794a
+306/uk:    e00da2    e00d9c   e135ac    e18c6c    e078d2
+306/es:    e00da2    e00d9c   e13632    e18cf2    e07958
+306/it:    e00da2    e00d9c   e13614    e18cd4    e0793a
+306/se:    e00da2    e00d9c   e13624    e18ce4    e0794a
+306/sf:    e00da2    e00d9c   e13632    e18cf2    e07958
+306/sg:    e00da2    e00d9c   e13632    e18cf2    e07958
+
+400:       e00d20    e00d1a   e1b114    e1c51e    e0948a
+401:       e00d3e    e00d38   e1b236    e1c640    e09480
+402:       e00d3e    e00d38   e1c28a    e1dbd0    e0948a
+404:       e00d7c    e00d76   e1c2ea    e1dc30    e094ea
+
+492:       01024a    010244   028ea8    02a7f2    018e7e
