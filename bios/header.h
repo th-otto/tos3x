@@ -69,6 +69,14 @@
 #define OS_DOSDATE $176E
 #endif
 
+/* TOS version 2.07 is sparrow version */
+#if TOSVERSION >= 0x207
+#undef OS_DATE
+#undef OS_DOSDATE
+#define OS_DATE $02291992
+#define OS_DOSDATE $185D
+#endif
+
 /* TOS version 2.08 is 2.06 for the ST-book */
 #if TOSVERSION >= 0x208
 #undef OS_DATE
