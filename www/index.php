@@ -108,6 +108,7 @@ Do not reset MMU:
 <td>
 <input type="checkbox" name="tp_60" value="1" /><br />
 </td>
+<td>
 Needed to make the TOS work when run from TT-RAM,
 eg. when using ROMRAM.
 <td>
