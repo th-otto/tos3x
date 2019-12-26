@@ -443,6 +443,8 @@
 [00fc06b6] 006f 0300 0002            ori.w     #$0300,2(a7)
 [00fc06bc] 301f                      move.w    (a7)+,d0
 [00fc06be] 4e73                      rte
+
+int_vbl:
 [00fc06c0] 52b9 0000 0466            addq.l    #1,$00000466
 [00fc06c6] 5379 0000 0452            subq.w    #1,$00000452
 [00fc06cc] 6b00 00cc                 bmi       $00FC079A
@@ -4757,6 +4759,8 @@
 [00fc4296] 4cdf 7fff                 movem.l   (a7)+,d0-d7/a0-a6
 [00fc429a] 08b9 0005 ffff fa11       bclr      #5,$FFFFFA11
 [00fc42a2] 4e73                      rte
+
+soundirq:
 [00fc42a4] 48e7 c080                 movem.l   d0-d1/a0,-(a7)
 [00fc42a8] 202d 0ea6                 move.l    3750(a5),d0
 [00fc42ac] 677a                      beq.s     $00FC4328

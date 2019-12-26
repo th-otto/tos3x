@@ -462,8 +462,8 @@ int_vbl:
 [00fc06d0] 48e7 fffe                 movem.l   d0-d7/a0-a6,-(a7)
 [00fc06d4] 52b9 0000 0462            addq.l    #1,$00000462
 [00fc06da] 9bcd                      suba.l    a5,a5
-[00fc06dc] 122d fa01                 move.b    -1535(a5),d1
-[00fc06e0] 102d 8260                 move.b    -32160(a5),d0
+[00fc06dc] 122d fa01                 move.b    $fa01(a5),d1
+[00fc06e0] 102d 8260                 move.b    $8260(a5),d0
 [00fc06e4] c03c 0003                 and.b     #$03,d0
 [00fc06e8] b03c 0002                 cmp.b     #$02,d0
 [00fc06ec] 6c14                      bge.s     $00FC0702
@@ -475,29 +475,29 @@ int_vbl:
 [00fc0700] 6012                      bra.s     $00FC0714
 [00fc0702] 0801 0007                 btst      #7,d1
 [00fc0706] 671a                      beq.s     $00FC0722
-[00fc0708] 102d 044a                 move.b    1098(a5),d0
+[00fc0708] 102d 044a                 move.b    $044a(a5),d0
 [00fc070c] b03c 0002                 cmp.b     #$02,d0
 [00fc0710] 6d02                      blt.s     $00FC0714
 [00fc0712] 4200                      clr.b     d0
-[00fc0714] 1b40 044c                 move.b    d0,1100(a5)
-[00fc0718] 1b40 8260                 move.b    d0,-32160(a5)
-[00fc071c] 206d 046e                 movea.l   1134(a5),a0
+[00fc0714] 1b40 044c                 move.b    d0,$044c(a5)
+[00fc0718] 1b40 8260                 move.b    d0,$8260(a5)
+[00fc071c] 206d 046e                 movea.l   $046e(a5),a0
 [00fc0720] 4e90                      jsr       (a0)
 [00fc0722] 4eb9 00fc a6ee            jsr       $00FCA6EE
 [00fc0728] 9bcd                      suba.l    a5,a5
-[00fc072a] 4aad 045a                 tst.l     1114(a5)
+[00fc072a] 4aad 045a                 tst.l     $045a(a5)
 [00fc072e] 6716                      beq.s     $00FC0746
-[00fc0730] 206d 045a                 movea.l   1114(a5),a0
-[00fc0734] 43ed 8240                 lea.l     -32192(a5),a1
+[00fc0730] 206d 045a                 movea.l   045a(a5),a0
+[00fc0734] 43ed 8240                 lea.l     $8240(a5),a1
 [00fc0738] 303c 000f                 move.w    #$000F,d0
 [00fc073c] 32d8                      move.w    (a0)+,(a1)+
 [00fc073e] 51c8 fffc                 dbf       d0,$00FC073C
-[00fc0742] 42ad 045a                 clr.l     1114(a5)
-[00fc0746] 4aad 045e                 tst.l     1118(a5)
+[00fc0742] 42ad 045a                 clr.l     $045a(a5)
+[00fc0746] 4aad 045e                 tst.l     $045e(a5)
 [00fc074a] 6712                      beq.s     $00FC075E
-[00fc074c] 2b6d 045e 044e            move.l    1118(a5),1102(a5)
-[00fc0752] 1b6d 0450 8203            move.b    1104(a5),-32253(a5)
-[00fc0758] 1b6d 044f 8201            move.b    1103(a5),-32255(a5)
+[00fc074c] 2b6d 045e 044e            move.l    $045e(a5),$044e(a5)
+[00fc0752] 1b6d 0450 8203            move.b    $0450(a5),$8203(a5)
+[00fc0758] 1b6d 044f 8201            move.b    $044f(a5),$8201(a5)
 [00fc075e] 6100 0c00                 bsr       $00FC1360
 [00fc0762] 3e39 0000 0454            move.w    $00000454,d7
 [00fc0768] 6720                      beq.s     $00FC078A
@@ -511,7 +511,7 @@ int_vbl:
 [00fc0782] 4cdf 0180                 movem.l   (a7)+,d7/a0
 [00fc0786] 51cf ffea                 dbf       d7,$00FC0772
 [00fc078a] 9bcd                      suba.l    a5,a5
-[00fc078c] 4a6d 04ee                 tst.w     1262(a5)
+[00fc078c] 4a6d 04ee                 tst.w     $04ee(a5)
 [00fc0790] 6604                      bne.s     $00FC0796
 [00fc0792] 6100 0566                 bsr       $00FC0CFA
 [00fc0796] 4cdf 7fff                 movem.l   (a7)+,d0-d7/a0-a6
