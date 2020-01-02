@@ -2762,6 +2762,7 @@ begin_p1:
 begin_p2:
         rts
 
+                                        /* 0 1 2 3 4 5 6 7 8 9 */
 ikbd_state_table:                     dc.b 1,2,3,3,3,3,4,5,6,7
 kbd_length_table:                     dc.b 7,5,2,2,2,2,6,2,1,1
 

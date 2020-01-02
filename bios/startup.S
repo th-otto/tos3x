@@ -1563,6 +1563,8 @@ clockdone:
 /*
  * Draw the Atari logo.
  */
+/* 306xx: 00e0074a */
+/* 206xx: 00e00762 */
         movea.l   #atarilogo,a0
         movea.l   (_v_bas_ad).w,a1
 #if (OS_COUNTRY == CTRY_PL) | TP_62 | TP_58
@@ -1653,6 +1655,26 @@ logodone:
 		text
 
         data
+
+/* 306us: e35fe8 */
+/* 306de: e36018 */
+/* 306fr: e36036 */
+/* 306uk: e35fe8 */
+/* 306es: e36044 */
+/* 306it: e36026 */
+/* 306sv: e36036 */
+/* 306sf: e36044 */
+/* 306sg: e36044 */
+
+/* 206us: e3257e */
+/* 206de: e325ae */
+/* 206fr: e325cc */
+/* 206us: e3257e */
+/* 206es: e325da */
+/* 206it: e325bc */
+/* 206sv: e325ae */
+/* 206sf: e325da */
+/* 206sg: e325da */
 
 /* 96x86 image of atari logo displayed at boot time */
 atarilogo:
