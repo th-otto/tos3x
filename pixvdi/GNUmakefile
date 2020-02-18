@@ -44,7 +44,7 @@ check:: vdi.o $(top_srcdir)/common/sections.mak
 	exit $$status
 
 dist::
-	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR2)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 
 clean:

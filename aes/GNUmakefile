@@ -61,7 +61,7 @@ check:: aes.o $(top_srcdir)/common/sections.mak
 	$(AM_V_at)$(CMP) $(CMPL) -x --ignore-initial=0x$(aes_doff):0x$(aes_tleno) --offsets=0x$(aes_dbase):0x$(aes_tlen) --bytes=0x$(aes_dlen) $(top_srcdir)/roms/tos$(TOSVERSION)$(COUNTRY).img aes.o
 
 dist::
-	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR1)/$(subdir)
+	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR1)/$(subdir)
 	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 
 dosdir::

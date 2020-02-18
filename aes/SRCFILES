@@ -168,3 +168,4 @@ EXTRA_DIST1:=\
 
 EXTRA_DIST2:=\
 	GNUmakefile \
+	${empty}
