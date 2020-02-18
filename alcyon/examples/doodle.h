@@ -1,7 +1,7 @@
 /*
  * resource set indices for doodle
  *
- * created by ORCS 2.14
+ * created by ORCS 2.17
  */
 
 /*
@@ -17,11 +17,13 @@
  * Number of Trees:          4
  * Number of Userblks:       0
  * Number of Images:         10
- * Total file size:          4376
+ * Total file size:          4326
  */
 
 #undef RSC_NAME
+#ifndef __ALCYON__
 #define RSC_NAME "doodle"
+#endif
 #undef RSC_ID
 #ifdef doodle
 #define RSC_ID doodle
@@ -62,36 +64,36 @@
 #define DOODERAP  25 /* STRING in tree DOODMENU */
 #define DOODPENS  27 /* STRING in tree DOODMENU */
 #define COLOR0    29 /* STRING in tree DOODMENU */
-#define COLOR1    30 /* STRING in tree DOODMENU */
-#define COLOR2    31 /* STRING in tree DOODMENU */
-#define COLOR3    32 /* STRING in tree DOODMENU */
-#define COLOR4    33 /* STRING in tree DOODMENU */
-#define COLOR5    34 /* STRING in tree DOODMENU */
-#define COLOR6    35 /* STRING in tree DOODMENU */
-#define COLOR7    36 /* STRING in tree DOODMENU */
-#define COLOR8    37 /* STRING in tree DOODMENU */
-#define COLOR9    38 /* STRING in tree DOODMENU */
-#define COLOR10   39 /* STRING in tree DOODMENU */
-#define COLOR11   40 /* STRING in tree DOODMENU */
-#define COLOR12   41 /* STRING in tree DOODMENU */
-#define COLOR13   42 /* STRING in tree DOODMENU */
-#define COLOR14   43 /* STRING in tree DOODMENU */
-#define COLOR15   44 /* STRING in tree DOODMENU */
-#define COLORB0   45 /* BOX in tree DOODMENU */
-#define COLORB1   46 /* BOX in tree DOODMENU */
-#define COLORB2   47 /* BOX in tree DOODMENU */
-#define COLORB3   48 /* BOX in tree DOODMENU */
-#define COLORB4   49 /* BOX in tree DOODMENU */
-#define COLORB5   50 /* BOX in tree DOODMENU */
-#define COLORB6   51 /* BOX in tree DOODMENU */
-#define COLORB8   52 /* BOX in tree DOODMENU */
-#define COLORB9   53 /* BOX in tree DOODMENU */
-#define COLORB7   54 /* BOX in tree DOODMENU */
-#define COLORB10  55 /* BOX in tree DOODMENU */
-#define COLORB11  56 /* BOX in tree DOODMENU */
-#define COLORB12  57 /* BOX in tree DOODMENU */
-#define COLORB13  58 /* BOX in tree DOODMENU */
-#define COLORB14  59 /* BOX in tree DOODMENU */
+#define COLORB0   30 /* BOX in tree DOODMENU */
+#define COLOR1    31 /* STRING in tree DOODMENU */
+#define COLORB1   32 /* BOX in tree DOODMENU */
+#define COLOR2    33 /* STRING in tree DOODMENU */
+#define COLORB2   34 /* BOX in tree DOODMENU */
+#define COLOR3    35 /* STRING in tree DOODMENU */
+#define COLORB3   36 /* BOX in tree DOODMENU */
+#define COLOR4    37 /* STRING in tree DOODMENU */
+#define COLORB4   38 /* BOX in tree DOODMENU */
+#define COLOR5    39 /* STRING in tree DOODMENU */
+#define COLORB5   40 /* BOX in tree DOODMENU */
+#define COLOR6    41 /* STRING in tree DOODMENU */
+#define COLORB6   42 /* BOX in tree DOODMENU */
+#define COLOR7    43 /* STRING in tree DOODMENU */
+#define COLORB7   44 /* BOX in tree DOODMENU */
+#define COLOR8    45 /* STRING in tree DOODMENU */
+#define COLORB8   46 /* BOX in tree DOODMENU */
+#define COLOR9    47 /* STRING in tree DOODMENU */
+#define COLORB9   48 /* BOX in tree DOODMENU */
+#define COLOR10   49 /* STRING in tree DOODMENU */
+#define COLORB10  50 /* BOX in tree DOODMENU */
+#define COLOR11   51 /* STRING in tree DOODMENU */
+#define COLORB11  52 /* BOX in tree DOODMENU */
+#define COLOR12   53 /* STRING in tree DOODMENU */
+#define COLORB12  54 /* BOX in tree DOODMENU */
+#define COLOR13   55 /* STRING in tree DOODMENU */
+#define COLORB13  56 /* BOX in tree DOODMENU */
+#define COLOR14   57 /* STRING in tree DOODMENU */
+#define COLORB14  58 /* BOX in tree DOODMENU */
+#define COLOR15   59 /* STRING in tree DOODMENU */
 #define COLORB15  60 /* BOX in tree DOODMENU */
 
 #define DOODINFD   1 /* form/dialog */
@@ -141,7 +143,7 @@
 #    define _WORD short
 #  endif
 #endif
-extern _WORD doodle_rsc_load(void);
+extern _WORD doodle_rsc_load(_WORD wchar, _WORD hchar);
 extern _WORD doodle_rsc_gaddr(_WORD type, _WORD idx, void *gaddr);
 extern _WORD doodle_rsc_free(void);
 #endif

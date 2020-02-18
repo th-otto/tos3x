@@ -52,10 +52,6 @@
 /*------------------------------*/
 /*      defines                 */
 /*------------------------------*/
-#define ARROW           0
-#define HOURGLASS       2
-#define END_UPDATE      0				/* Window Update Flags   */
-#define BEG_UPDATE      1
 
 #define PEN_INK         BLACK
 #define PEN_ERASER      WHITE
@@ -1211,23 +1207,15 @@ static BOOLEAN do_save(NOTHING)
 static VOID do_clnormal(NOTHING)
 {
 #ifdef DOODCOLR
-	menu_icheck(gl_menu, COLOR0, FALSE);
-	menu_icheck(gl_menu, COLOR1, FALSE);
-	menu_icheck(gl_menu, COLOR2, FALSE);
-	menu_icheck(gl_menu, COLOR3, FALSE);
-	menu_icheck(gl_menu, COLOR4, FALSE);
-	menu_icheck(gl_menu, COLOR5, FALSE);
-	menu_icheck(gl_menu, COLOR6, FALSE);
-	menu_icheck(gl_menu, COLOR7, FALSE);
-	menu_icheck(gl_menu, COLOR8, FALSE);
-	menu_icheck(gl_menu, COLOR9, FALSE);
-	menu_icheck(gl_menu, COLOR10, FALSE);
-	menu_icheck(gl_menu, COLOR11, FALSE);
-	menu_icheck(gl_menu, COLOR12, FALSE);
-	menu_icheck(gl_menu, COLOR13, FALSE);
-	menu_icheck(gl_menu, COLOR14, FALSE);
-	menu_icheck(gl_menu, COLOR15, FALSE);
-	menu_icheck(gl_menu, COLOR0 + pen_ink, TRUE);
+	static short const ind[16] = {
+		COLOR0, COLOR1, COLOR2, COLOR3, COLOR4, COLOR5, COLOR6, COLOR7,
+		COLOR8, COLOR9, COLOR10, COLOR11, COLOR12, COLOR13, COLOR14, COLOR15
+	};
+	short i;
+	
+	for (i = 0; i < 16; i++)
+		menu_icheck(gl_menu, ind[i], FALSE);
+	menu_icheck(gl_menu, ind[pen_ink], TRUE);
 #endif
 }
 
@@ -1454,40 +1442,68 @@ PP(short item;)
 		switch (item)
 		{
 		case COLOR0:
-		case COLOR1:
-		case COLOR2:
-		case COLOR3:
-		case COLOR4:
-		case COLOR5:
-		case COLOR6:
-		case COLOR7:
-		case COLOR8:
-		case COLOR9:
-		case COLOR10:
-		case COLOR11:
-		case COLOR12:
-		case COLOR13:
-		case COLOR14:
-		case COLOR15:
-			pen_ink = item - COLOR0;
-			break;
 		case COLORB0:
+			pen_ink = 0;
+			break;
+		case COLOR1:
 		case COLORB1:
+			pen_ink = 1;
+			break;
+		case COLOR2:
 		case COLORB2:
+			pen_ink = 2;
+			break;
+		case COLOR3:
 		case COLORB3:
+			pen_ink = 3;
+			break;
+		case COLOR4:
 		case COLORB4:
+			pen_ink = 4;
+			break;
+		case COLOR5:
 		case COLORB5:
+			pen_ink = 5;
+			break;
+		case COLOR6:
 		case COLORB6:
+			pen_ink = 6;
+			break;
+		case COLOR7:
 		case COLORB7:
+			pen_ink = 7;
+			break;
+		case COLOR8:
 		case COLORB8:
+			pen_ink = 8;
+			break;
+		case COLOR9:
 		case COLORB9:
+			pen_ink = 9;
+			break;
+		case COLOR10:
 		case COLORB10:
+			pen_ink = 10;
+			break;
+		case COLOR11:
 		case COLORB11:
+			pen_ink = 11;
+			break;
+		case COLOR12:
 		case COLORB12:
+			pen_ink = 12;
+			break;
+		case COLOR13:
 		case COLORB13:
+			pen_ink = 13;
+			break;
+		case COLOR14:
 		case COLORB14:
+			pen_ink = 14;
+			break;
+		case COLOR15:
 		case COLORB15:
-			pen_ink = item - COLORB0;
+			pen_ink = 15;
 			break;
 		}
 
