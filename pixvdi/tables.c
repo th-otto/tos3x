@@ -63,7 +63,7 @@ int16_t const ROM_DEV_TAB[45] = {
   	199,	/* 1	y resolution			     */
   	0,	/* 2	device precision 0=exact,1=not exact */
   	338,	/* 3	width of pixel			     */
-  	372,	/* 4	heigth of pixel			     */
+  	372,	/* 4	height of pixel			     */
   	1,	/* 5	character sizes			     */
    MX_LN_STYLE,	/* 6	linestyles		       	     */
 	0,	/* 7	linewidth			     */

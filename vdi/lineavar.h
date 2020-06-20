@@ -177,8 +177,10 @@ typedef struct vdiVars {
 
 /*
  * the lineavars point here:
+ * 404: 3e86
  * 306: 3a1a
  * 206: 2904
+ * 104: 2adc
  */
 	LAEXT int16_t        v_planes;	         /* number of video planes               */
 	LAEXT int16_t        v_lin_wr;	         /* number of bytes/video line           */

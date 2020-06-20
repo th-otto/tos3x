@@ -1144,7 +1144,7 @@ lab26:
 	jsr	_gr_clamp	;gr_clanp(o.g_x, o.g_y, wmin, hmin, &o.g_w,
 *				;		&o.g_h);
 
-	moveq	#1,d1		;do for heigth then width
+	moveq	#1,d1		;do for height then width
 wdhtlp:
 	move.w	50-30(sp),d0	;d0 = o.g_y
 	add.w	50-26(sp),d0	;d0 = o.g_y + o.g_h

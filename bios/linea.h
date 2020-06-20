@@ -40,9 +40,9 @@
 #define CUR_Y         (lineavars-$156)	/* word */
 #define CUR_FLAG      (lineavars-$154)	/* byte */
 #define MOUSE_FLAG    (lineavars-$153)	/* byte */
-#define SAV_CUR_X     (lineavars-$152)	/* word */
-#define SAV_CUR_Y     (lineavars-$150)	/* word */
-#define RETSAV        (lineavars-$14e)	/* long */
+#define RETSAV        (lineavars-$152)	/* long */
+#define SAV_CUR_X     (lineavars-$14e)	/* word */
+#define SAV_CUR_Y     (lineavars-$14c)	/* word */
 #define SAVE_LEN      (lineavars-$14a)	/* word */
 #define SAVE_ADDR     (lineavars-$148)	/* long */
 #define SAVE_STAT     (lineavars-$144)	/* word */
@@ -74,7 +74,10 @@
 #define V_REZ_VT      (lineavars-$004)	/* word */
 #define V_BYTES_LIN   (lineavars-$002)	/* word */
 
-/* $3a1a in tos306 */
+/* 404: $3e86 */
+/* 306: $3a1a */
+/* 206: $2904 */
+/* 104: $2adc */
 #define LA_PLANES     (lineavars+$000)	/* word */
 #define LA_LIN_WR     (lineavars+$002)	/* word */
 #define LA_CONTROL    (lineavars+$004)	/* long */
@@ -148,10 +151,10 @@
 #define LA_FG_BP_6     (lineavars+$658)	/* word */
 #define LA_FG_BP_7     (lineavars+$65a)	/* word */
 #define LA_FG_BP_8     (lineavars+$65c)	/* word */
-#define LA_SAVELEN     (lineavars+$65e)	/* word */
-#define LA_SAVEADDR    (lineavars+$660)	/* long */
-#define LA_SAVESTAT    (lineavars+$664)	/* word */
-#define LA_SAVEAREA    (lineavars+$666)	/* 256 longs */
+#define LA_SAVLEN      (lineavars+$65e)	/* word */
+#define LA_SAVADDR     (lineavars+$660)	/* long */
+#define LA_SAVSTAT     (lineavars+$664)	/* word */
+#define LA_SAVAREA     (lineavars+$666)	/* 256 longs */
 #define LA_QCIRCLE     (lineavars+$a66)	/* 80 words */
 #define LA_BYTPERPIX   (lineavars+$b06)	/* word */
 #define LA_FORMID      (lineavars+$b08)	/* word */

@@ -74,12 +74,12 @@ CUR_Y:         ds.w 1      (lineavars-$156)	/* word */
 CUR_FLAG:      ds.b 1      (lineavars-$154)	/* byte */
                xdef MOUSE_FLAG
 MOUSE_FLAG:    ds.b 1      (lineavars-$153)	/* byte */
-               xdef SAV_CURX
-SAV_CURX:      ds.w 1      (lineavars-$152)	/* word */
-               xdef SAV_CURY
-SAV_CURY:      ds.w 1      (lineavars-$150)	/* word */
                xdef RETSAV
-RETSAV:        ds.l 1      (lineavars-$14e)	/* long */
+RETSAV:        ds.l 1      (lineavars-$152)	/* long */
+               xdef SAV_CURX
+SAV_CURX:      ds.w 1      (lineavars-$14e)	/* word */
+               xdef SAV_CURY
+SAV_CURY:      ds.w 1      (lineavars-$14c)	/* word */
                xdef SAVE_LEN
 SAVE_LEN:      ds.w 1      (lineavars-$14a)	/* word */
                xdef SAVE_ADDR
@@ -141,8 +141,10 @@ V_REZ_VT:      ds.w 1      (lineavars-$004)	/* word */
                xdef V_BYTES_LIN
 V_BYTES_LIN:   ds.w 1      (lineavars-$002)	/* word */
 
-/* 306de: $3a1a */
-/* 206de: $2904 */
+/* 404: $3e86 */
+/* 306: $3a1a */
+/* 206: $2904 */
+/* 104: $2adc */
                xdef lineavars
 lineavars:     ds.b 0
                xdef LA_PLANES

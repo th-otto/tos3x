@@ -239,9 +239,9 @@ _MOV_CUR: PIXLA(a0)
 		move.w	SR,-(sp)	/* save old status register */
 		ori.w	#$0700,SR	/* turn off interrupts */
 		lea	PIXLV(xydraw,a0),a0
-		move.w	d0,(a0)+	/* new X */
-		move.w	d1,(a0)+	/* new Y */
-		bset.b	#0,(a0)		/* mark data available */
+		move.w	d0,(a0)+	/* new CUR_X */
+		move.w	d1,(a0)+	/* new CUR_Y */
+		bset.b	#0,(a0)		/* mark data available in draw_flag/CUR_FLAG */
 		move.w	(sp)+,SR	/* restore old SR */
 		rts
 
@@ -271,8 +271,8 @@ vb_draw:	PIXLA(a5)
  *  while we are in the process of retrieving it.
  */
 		move.l	PIXLV(xydraw,a5),d1		/* d1[31:16] <- cursor X */
-		move.l	d1,d0			/* d1[15:00] <- cursor Y */
-		swap	d0			/* d0[15:00] <- cursor X */
+		move.l	d1,d0			/* d1[15:00] <- cursor CUR_Y */
+		swap	d0			/* d0[15:00] <- cursor CUR_X */
 
 #if MULTI_LINEA
 		movem.l	d0-d1/a5,-(sp)		/* Save new xy */
@@ -1422,8 +1422,8 @@ xfm_move_loop:	move.w	(a0)+,(a1)+
 		move.w	SR,d0
 		ori.w	#$0700,SR		/* >>>> BEGIN ATOM <<<< */
 
-		move.l	PIXLV(GCURXY,a2),(a0)+	/* setup the vblank draw packet */
-		bset.b	#0,(a0)
+		move.l	PIXLV(GCURXY,a2),(a0)+	/* setup the vblank draw packet in CUR_X/CUR_Y */
+		bset.b	#0,(a0)			/* mark data available in draw_flag/CUR_FLAG */
 
 		move.w	d0,SR			/* >>>>  END ATOM  <<<< */
 
@@ -1452,8 +1452,8 @@ _SET_CUR: PIXLA(a1)
 		ori.w	#$0700,SR		/* >>>> BEGIN ATOM <<<< */
 
 		move.l	d1,PIXLV(GCURXY,a1)		/* set GCURX and GCURY */
-		move.l	d1,(a0)+		/* set vblank draw packet */
-		bset.b	#0,(a0)			/* mark data valid */
+		move.l	d1,(a0)+		/* set vblank draw packet CUR_X/CUR_Y */
+		bset.b	#0,(a0)			/* mark data valid in draw_flag/CUR_FLAG */
 
 		move.w	d0,SR			/* >>>>  END ATOM  <<<< */
 
