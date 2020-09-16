@@ -111,7 +111,6 @@ Do not reset MMU:
 <td>
 Needed to make the TOS work when run from TT-RAM,
 eg. when using ROMRAM.
-<td>
 </td>
 </tr>
 

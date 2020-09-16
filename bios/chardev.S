@@ -3146,7 +3146,7 @@ kbdsg5:
 #endif
 
 #if OS_COUNTRY == CTRY_FR
-        cmpi.b    #$1A,d1                       /* convert ALT-? to [ or { */
+        cmpi.b    #$1A,d1                       /* convert ALT-^ to [ or { */
         bne.s     kbdfr1
         move.b    #$5B,d0
         move.b    ABSW(_shifty),d2
@@ -3155,7 +3155,7 @@ kbdsg5:
         move.b    #$7B,d0
         bra       kbdvec42
 kbdfr1:
-        cmpi.b    #$1B,d1                       /* convert ALT-? to ] or } */
+        cmpi.b    #$1B,d1                       /* convert ALT-$ to ] or } */
         bne.s     kbdfr2
         move.b    #$5D,d0
         move.b    ABSW(_shifty),d2
@@ -3164,7 +3164,7 @@ kbdfr1:
         move.b    #$7D,d0
         bra       kbdvec42
 kbdfr2:
-        cmpi.b    #$28,d1                       /* convert ALT-? to backslash or 0 */
+        cmpi.b    #$28,d1                       /* convert ALT-u to backslash or 0 */
         bne.s     kbdfr3
         move.b    #$5C,d0
         move.b    ABSW(_shifty),d2
@@ -3173,7 +3173,7 @@ kbdfr2:
         move.b    #$00,d0
         bra       kbdvec42
 kbdfr3:
-        cmpi.b    #$2B,d1                       /* convert ALT-? to @ or tilde */
+        cmpi.b    #$2B,d1                       /* convert ALT-# to @ or tilde */
         bne.s     kbdfr4
         move.b    #$40,d0
         move.b    ABSW(_shifty),d2
@@ -3189,7 +3189,7 @@ kbdfr4:
 #endif
 
 #if OS_COUNTRY == CTRY_ES
-        cmpi.b    #$1A,d1                       /* convert ALT-? to [ or { */
+        cmpi.b    #$1A,d1                       /* convert ALT-' to [ or { */
         bne.s     kbdes1
         move.b    #$5B,d0
         move.b    ABSW(_shifty),d2
@@ -3198,7 +3198,7 @@ kbdfr4:
         move.b    #$7B,d0
         bra       kbdvec42
 kbdes1:
-        cmpi.b    #$1B,d1                       /* convert ALT-? to ] or } */
+        cmpi.b    #$1B,d1                       /* convert ALT-` to ] or } */
         bne.s     kbdes2
         move.b    #$5D,d0
         move.b    ABSW(_shifty),d2
@@ -3216,7 +3216,7 @@ kbdes2:
         move.b    #$40,d0
         bra       kbdvec42
 kbdes3:
-        cmpi.b    #$28,d1                       /* convert ALT-? to # or @ */
+        cmpi.b    #$28,d1                       /* convert ALT-; to # or @ */
         bne.s     kbdes4
         move.b    #$81,d0
         move.b    ABSW(_shifty),d2
@@ -3225,7 +3225,7 @@ kbdes3:
         move.b    #$00,d0
         bra       kbdvec42
 kbdes4:
-        cmpi.b    #$27,d1                       /* convert ALT-? to # or @ */
+        cmpi.b    #$27,d1                       /* convert ALT-n to 0 */
         bne.s     kbdes5
         move.b    #$00,d0
         bra       kbdvec42
@@ -3233,7 +3233,7 @@ kbdes5:
 #endif
 
 #if OS_COUNTRY == CTRY_IT
-        cmpi.b    #$1A,d1                       /* convert ALT-? to [ or { */
+        cmpi.b    #$1A,d1                       /* convert ALT-e to [ or { */
         bne.s     kbdit1
         move.b    #$5B,d0
         move.b    ABSW(_shifty),d2
@@ -3242,7 +3242,7 @@ kbdes5:
         move.b    #$7B,d0
         bra       kbdvec42
 kbdit1:
-        cmpi.b    #$1B,d1                       /* convert ALT-? to ] or } */
+        cmpi.b    #$1B,d1                       /* convert ALT-+ to ] or } */
         bne.s     kbdit2
         move.b    #$5D,d0
         move.b    ABSW(_shifty),d2
@@ -3251,7 +3251,7 @@ kbdit1:
         move.b    #$7D,d0
         bra       kbdvec42
 kbdit2:
-        cmpi.b    #$2B,d1                       /* convert ALT-? to degree or tilde */
+        cmpi.b    #$2B,d1                       /* convert ALT-\ to degree or tilde */
         bne.s     kbdit3
         move.b    #$F8,d0
         move.b    ABSW(_shifty),d2
@@ -3268,7 +3268,7 @@ kbdit4:
 #endif
 
 #if OS_COUNTRY == CTRY_SE
-        cmpi.b    #$1A,d1                       /* convert ALT-? to [ or { */
+        cmpi.b    #$1A,d1                       /* convert ALT-a to [ or { */
         bne.s     kbdsv1
         move.b    #$5B,d0
         move.b    ABSW(_shifty),d2
@@ -3277,7 +3277,7 @@ kbdit4:
         move.b    #$7B,d0
         bra       kbdvec42
 kbdsv1:
-        cmpi.b    #$1B,d1                       /* convert ALT-? to ] or } */
+        cmpi.b    #$1B,d1                       /* convert ALT-u to ] or } */
         bne.s     kbdsv2
         move.b    #$5D,d0
         move.b    ABSW(_shifty),d2
@@ -3286,7 +3286,7 @@ kbdsv1:
         move.b    #$7D,d0
         bra       kbdvec42
 kbdsv2:
-        cmpi.b    #$28,d1                       /* convert ALT-? to grave accent or tilde */
+        cmpi.b    #$28,d1                       /* convert ALT-a to grave accent or tilde */
         bne.s     kbdsv3
         move.b    #$60,d0
         move.b    ABSW(_shifty),d2
@@ -3295,7 +3295,7 @@ kbdsv2:
         move.b    #$7e,d0
         bra       kbdvec42
 kbdsv3:
-        cmpi.b    #$2B,d1                       /* convert ALT-? to ^ or @ */
+        cmpi.b    #$2B,d1                       /* convert ALT-\ to ^ or @ */
         bne.s     kbdsv4
         move.b    #$5E,d0
         move.b    ABSW(_shifty),d2
