@@ -1206,7 +1206,25 @@ vdi_list:
 	dc.b	000,001,016		; VSL_WID	vsl_width
 
 
+/* driver id to use in v_opnwk() call */
 restable:
-	dc.w	0,2,5,7,3,4,6,8,9
+	dc.w	0
+	dc.w	2 /* ST-LOW 320x200x16 */
+	dc.w	5 /* ST-LOW 320x200x16 */
+	dc.w	7 /* ST-LOW 320x200x16 */
+	dc.w	3 /* ST-MED 640x200x4 */
+	dc.w	4 /* ST-HIGH 640x400x2 */
+	dc.w	6 /* TT-MED 640x480x16 */
+	dc.w	8 /* TT-HIGH 1280x960x2 */
+	dc.w	9 /* TT-LOW 320x480x256 */
+/* internal resolution type; compared against gl_restype */
 restype:
-	dc.w	0,1,1,1,2,3,4,5,6
+	dc.w	0
+	dc.w	1 /* ST-LOW 320x200x16 */
+	dc.w	1
+	dc.w	1
+	dc.w	2 /* ST-MED 640x200x4 */
+	dc.w	3 /* ST-HIGH 640x400x2 */
+	dc.w	4 /* TT-MED 640x480x16 */
+	dc.w	5 /* TT-HIGH 1280x960x2 */
+	dc.w	6 /* TT-LOW 320x480x256 */
