@@ -1,4 +1,5 @@
 SRCS = \
+	arrow.s \
 	ct_hd1.S \
 	ct_hd2.S \
 	fastprn.S \
@@ -16,6 +17,10 @@ SRCS = \
 EXTRA_DIST1 = \
 	Makefile \
 	SRCFILES \
+	fonts \
+	fuji \
+	icons \
+	mform \
 	$(empty)
 
 EXTRA_DIST2 = \

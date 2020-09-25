@@ -71,6 +71,7 @@ $(top_srcdir)/common/sections.mak: $(top_srcdir)/common/sections.inc $(top_srcdi
 	$(AM_V_at)$(SED) -e 's/$(QBS)$$//g' -e '//d' sections.i > sections.1
 	$(AM_V_at)$(BC) -q < sections.1 > $@
 	$(AM_V_at)$(RM) sections.i sections.1
+	$(AM_V_at)-touch $(top_srcdir)/common/localcnf.h
 
 # check that TOSVERSION and COUNTRY are valid
 all:: tosversion_$(TOSVERSION) country_$(COUNTRY)

@@ -152,6 +152,7 @@ AES_CSRCS=\
 	mn_event.c \
 	function.c \
 	winx.c \
+	winx.h \
 	$(DBG_OBJS:.o=.c) \
 	${empty}
 

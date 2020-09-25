@@ -1,6 +1,6 @@
 SRCS = compiler.h stdint.h types.h toserrno.h ostruct.h \
 	falcon.h vars.S tosvars.S tosvars.inc sections.inc \
-	asmdefs.h ctrycode.h ws.h rom.ld
+	asmdefs.h ctrycode.h ws.h rom.ld nopatch.h patchdef.h
 
 EXTRA_DIST1 = \
 	Makefile \
