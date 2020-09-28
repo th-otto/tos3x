@@ -610,6 +610,20 @@ PP(int declok;)								/* as opposed to casting op */
 			indecl = 0;
 			break;
 
+		case R_ASM:
+			if (scope_level == GLOB_SCOPE)
+			{
+				doasm();
+				indecl = declok;
+				continue;
+			}
+			/*
+			 * inside functions do this after parameters have been assigned to registers,
+			 * in stmt();
+			 */
+			indecl = 0;
+			break;
+
 		case R_TYPEDEF:
 			if (tdflag)
 				error(_("invalid typedef statement"));
@@ -654,6 +668,7 @@ PP(int declok;)								/* as opposed to casting op */
 
 		case R_STRUCT:
 			cvalue = STRUCT;
+			/* fall through */
 		case R_UNION:
 			token = get_s_or_u(&parent, &tsize, &dtype);
 			if (token != FRSTRUCT)
@@ -919,7 +934,7 @@ PP(int castflg;)							/* casting flag, 1=>allow no declarator */
 				dalloc(1L);
 			else
 			{
-				tsp = dsp;				/* 4 save in case of reset */
+				tsp = dsp;				/* save in case of reset */
 				value = cexpr();		/* recurses on sizeof.... resets dsp */
 				if (dsp != tsp)
 				{

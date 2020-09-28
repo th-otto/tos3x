@@ -301,7 +301,7 @@ short treedebug;				/* expr tree debug flag */
 int32_t dtab[DSIZE];			/* short => long */
 short cdp;						/* next entry in dtab to alloc */
 
-/* lexical analyzer value s */
+/* lexical analyzer values */
 short cvalue;					/* current token if keyword or CINT */
 short ccbytes;					/* number of bytes in char constant */
 short cstrsize; 				/* current string size */
@@ -536,6 +536,7 @@ VOID putexpr PROTO((const char *name, struct tnode *tp));
  */
 VOID stmt PROTO((NOTHING));
 VOID outassign PROTO((struct tnode *ltp, struct tnode *rtp));
+VOID doasm PROTO((NOTHING));
 
 
 /*

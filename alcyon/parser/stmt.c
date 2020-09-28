@@ -447,7 +447,7 @@ static VOID doreturn(NOTHING)
  * doasm - handles: asm( "string" ) ;
  *      Outputs the string as literal assembly language code
  */
-static VOID doasm(NOTHING)
+VOID doasm(NOTHING)
 {
 	outline();							/* output line number */
 	OUTNULL();							/* null tree for line number */
