@@ -62,6 +62,7 @@ do
 	     compile=true
              ;;
 	-W*) ;;
+	-g*) ;;
 	-I)
 	     CPPFLAGS="$CPPFLAGS -I $1"
 	     shift
