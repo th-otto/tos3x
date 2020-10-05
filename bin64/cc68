@@ -39,6 +39,7 @@ do
 	-fomit-frame-pointer) ;;
 	--optimize) optimize=true ;;
 	-fomit-frame-pointer) ;;
+	-fno-common) ;;
 	-faes) AESFLAGS=-A ;;
 	-A) AESFLAGS=-A ;;
 	-a)
@@ -187,9 +188,22 @@ else
 	fi
 	LDFLAGS=$(echo $LDFLAGS | sed -e 's/,$//')
 	infile=$(echo $infile | tr ' ' ',')
-	test "$V" = 1 && echo "${BIN}link68 [${LDFLAGS}] ${outfile}=${infile}"
-	if ${BIN}link68 [${LDFLAGS}] ${outfile}=${infile}; then
+	relfile="${outfile}"
+	case $outfile in
+	*.rel)
+		;;
+	*)
+		relfile=${outfile%.*}.rel
+		;;
+	esac
+	test "$V" = 1 && echo "${BIN}link68 [${LDFLAGS}] ${relfile}=${infile}"
+	if ${BIN}link68 [${LDFLAGS}] ${relfile}=${infile}; then
 		status=0
+	fi
+	if test "$status" = 0 -a "${outfile}" != "${relfile}"; then
+		test "$V" = 1 && echo ${BIN}relmod "${relfile}" "${outfile}"
+		${BIN}relmod "${relfile}" "${outfile}" || $status=1
+		rm -f "${relfile}"
 	fi
 fi
 
