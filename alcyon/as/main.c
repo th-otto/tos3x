@@ -1101,8 +1101,9 @@ PP(char **argv;)
 	endptr = mdemt("end", 1);		/* end statement */
 	mdemt("data", 2);				/* dsect directive(code DATA based) */
 	mdemt("text", 3);				/* psect directive(code TEXT based) */
-	mdemt("equ", 4);		/* equate */
+	mdemt("equ", 4);				/* equate */
 	mdemt("set", 5);				/* .set - same as .equ */
+	mdemt("ascii", 7);				/* define ascii string */
 	dcptr = mdemt("dc", 8);			/* define constant */
 	mdemt("globl", 9);				/* define global (public) symbols */
 	mdemt("xdef", 9);				/* define global (public) symbols */

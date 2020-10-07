@@ -425,6 +425,7 @@ VOID hext PROTO((NOTHING));
 VOID hend PROTO((NOTHING));
 VOID hds PROTO((NOTHING));
 VOID hdc PROTO((NOTHING));
+VOID hascii PROTO((NOTHING));
 VOID horg PROTO((NOTHING));
 VOID hmask2 PROTO((NOTHING));
 VOID hreg PROTO((NOTHING));
@@ -447,6 +448,7 @@ VOID sbss PROTO((NOTHING));
 VOID seven PROTO((NOTHING));
 VOID sorg PROTO((NOTHING));
 VOID sdc PROTO((NOTHING));
+VOID sascii PROTO((NOTHING));
 VOID ssection PROTO((NOTHING));
 /* Conditional assembly directives */
 VOID hifeq PROTO((NOTHING));

@@ -14,7 +14,7 @@ adirect const p1direct[DIRECT] = {
     hequ,       /*  4 */
     hequ,       /*  5  .set same as .equ */
     0,          /*  6 */
-    0,          /*  7 */
+    hascii,     /*  7 */
     hdc,        /*  8 */
     hent,       /*  9 */
     hext,       /* 10 */
@@ -51,7 +51,7 @@ adirect const p2direct[DIRECT] = {
     0,          /*  4 */
     0,          /*  5 */
     0,          /*  6 */
-    0,          /*  7 */
+    sascii,     /*  7 */
     sdc,        /*  8 */
     0,          /*  9 */
     0,          /* 10 */

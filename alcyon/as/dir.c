@@ -364,6 +364,15 @@ VOID hdc(NOTHING)
 }
 
 
+/* define byte directive */
+VOID hascii(NOTHING)
+{
+	modelen = 1;
+	chkeven();
+	hdata(modelen);
+}
+
+
 /* handle org statement */
 VOID horg(NOTHING)
 {
@@ -912,6 +921,13 @@ PP(int dtyp;)
 
 VOID sdc(NOTHING)
 {
+	sdata(modelen);
+}
+
+
+VOID sascii(NOTHING)
+{
+	modelen = 1;
 	sdata(modelen);
 }
 
