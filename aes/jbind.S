@@ -551,7 +551,24 @@ _far_draw:
 
         data
         even
-_err_tbl:       dc.b    4,1,1,2,1,1,2,2,4,2,2,2,0,3,4,2,6
+_err_tbl:
+		dc.b 4 /* -1 (ERROR) -> ALRT04CRT (Your output device is not receiving data) */
+		dc.b 1 /* -2 (EDRVNR) -> ALRT01CRT (drive is not responding) */
+		dc.b 1 /* -3 (EUNCMD) -> ALRT01CRT (drive is not responding) */
+		dc.b 2 /* -4 (E_CRC) -> ALRT02CRT (Data on the disk may be damaged) */
+		dc.b 1 /* -5 (EBADRQ) -> ALRT01CRT (drive is not responding) */
+		dc.b 1 /* -6 (E_SEEK) -> ALRT01CRT (drive is not responding) */
+		dc.b 2 /* -7 (EMEDIA) -> ALRT02CRT (Data on the disk may be damaged) */
+		dc.b 2 /* -8 (ESECNF) -> ALRT02CRT (Data on the disk may be damaged) */
+		dc.b 4 /* -9 (EPAPER) -> ALRT04CRT (Your output device is not receiving data) */
+		dc.b 2 /* -10 (EWRITF) -> ALRT02CRT (Data on the disk may be damaged) */
+		dc.b 2 /* -11 (EREADF) -> ALRT02CRT (Data on the disk may be damaged) */
+		dc.b 2 /* -12 (EGENRL) -> ALRT02CRT (Data on the disk may be damaged) */
+		dc.b 0 /* -13 (EWRPRO) -> ALRT00CRT (disk is write-protected) */
+		dc.b 3 /* -14 (E_CHNG) -> ALRT03CRT (cannot read data on the disk) */
+		dc.b 4 /* -15 (EUNDEV) -> ALRT04CRT (Your output device is not receiving data) */
+		dc.b 2 /* -16 (EBADSF) -> ALRT02CRT (Data on the disk may be damaged) */
+		dc.b 6 /* -17 (EOTHER) -> ALRTDSWAP (Please insert disk B into drive A) */
 
         bss
         even

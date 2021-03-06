@@ -39,7 +39,24 @@ start:
 	
 	dc.l $014c
 	dc.w 0,0,0,0,0,0,0,0,0,0,0
-	
+
+/*
+ * fake a boot sector:
+ *   0x00 bra[2] = 0x601c
+ *   0x02 loader[6] = 
+ *   0x08 serial[3] = 
+ *   0x0b bps[2] = 512
+ *   0x0d spc    = 1
+ *   0x0e res[2] = 1
+ *   0x10 fat    = 2
+ *   0x11 dir[2] = 16
+ *   0x13 sec[2] = 0x1f8
+ *   0x15 media  = 0xf9
+ *   0x16 spf[2] = 2
+ *   0x18 spt[2] = 1
+ *   0x1a sides[2] = 1
+ *   0x1c hid[2] = 0
+ */
 install:
 
 		move.w    #IMAGE_SIZE,d0          /* size of the image */

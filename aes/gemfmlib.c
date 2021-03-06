@@ -64,8 +64,14 @@
 #endif
 
 
-static int16_t const ml_alrt[] = { ALRT00CRT, ALRT01CRT, ALRT02CRT, ALRT03CRT, ALRT04CRT,
-	ALRT05CRT, ALRTDSWAP
+static int16_t const ml_alrt[] = {
+	ALRT00CRT,
+	ALRT01CRT,
+	ALRT02CRT,
+	ALRT03CRT,
+	ALRT04CRT,
+	ALRT05CRT,
+	ALRTDSWAP
 };
 static int16_t const ml_pwlv[] = { 0x0102, 0x0102, 0x0102, 0x0101, 0x0002, 0x0001, 0x0101 };
 
