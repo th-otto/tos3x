@@ -2643,6 +2643,8 @@ mdm2table:
 /* 306de: 00e03268 */
 /* 206de: 00e02ec2 */
 /* 104de: 00fc3aec */
+/* 106de: 00e03ca0 */
+/* 162de: 00e03ca0 */
 _int_acia:
 #if TOSVERSION >= 0x200
         movem.l   d0-d3/a0-a3,-(a7)
@@ -2727,6 +2729,8 @@ aciasys2:
 /* 306de: 00e032cc */
 /* 206de: 00e02f26 */
 /* 104de: 00fc3b56 */
+/* 106de: 00e03d0a */
+/* 162de: 00e03d0a */
 aciaread:
         move.b    ACIA_DATA(a1),d0      /* read data byte */
         cmpa.l    #ikbdiorec,a0
@@ -3021,8 +3025,9 @@ kbdvec29:
 /* 306any: 00e035e0 */
 /* 206any: 00e0323a */
 /* 205any: 00e028a0 */
-/* 106any: 00e03fc4 */
 /* 104any: 00fc3e10 */
+/* 106any: 00e03fc4 */
+/* 162any: 00e03fc4 */
 #if OS_COUNTRY == CTRY_US
 /* nothing to do */
 #endif
@@ -3518,6 +3523,8 @@ midiread:
 /* 306de: 00e037a0 */
 /* 206de: 00e033fa */
 /* 104de: 00fc3fc4 */
+/* 106de: 00e04188 */
+/* 162de: 00e04188 */
 _midivec:
         move.w    tail(a0),d1                   /* get current tail pointer offset */
         addq.w    #1,d1                         /* index = tail + 1 */

@@ -152,18 +152,24 @@ PP(int16_t dev;)
 		(spc = BS->spc & 0xff) <= 0)
 		return NULL;
 	
-#if TP_25 /* ED_BIOS */
-#define res1 getiword(BS->res)
-#else
-#define res1 1
-#endif
-
 	bpb->recsiz = bps;
 	bpb->clsiz = spc;
 	bpb->fsiz = getiword(BS->spf);
 	/* BUG: original code assumes 2 FATs */
 	/* BUG: original code ignores res field of bootsector */
-	bpb->fatrec = bpb->fsiz + res1;
+#if TP_25 | !BINEXACT /* ED_BIOS */
+	{
+		int16_t res1;
+		res1 = getiword(BS->res);
+		if (res1 == 0)
+			res1 = 1;
+		bpb->fatrec = res1;
+		if (BS->fat >= 2)
+			bpb->fatrec += bpb->fsiz;
+	}
+#else
+	bpb->fatrec = bpb->fsiz + 1;
+#endif
 	bpb->clsizb = bpb->recsiz * bpb->clsiz;
 	bpb->rdlen = (getiword(BS->dir) << 5) / bpb->recsiz;
 	bpb->datrec = bpb->fatrec + bpb->rdlen + bpb->fsiz;
@@ -213,7 +219,6 @@ PP(int16_t dev;)
 	
 #undef i
 #undef BS
-#undef res1
 
 	return &bdev->bpb;
 }
