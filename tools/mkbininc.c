@@ -173,6 +173,7 @@ PP(char **argv;)
 	 * The constant RSCGAP is computed from the Makefile,
 	 * by linking the image without a resource first.
 	 */
+	fprintf(fp, "#if (TOSVERSION >= 0x200)\n");
 	fprintf(fp, "#if TP_50 & TP_53\n");
 	fprintf(fp, "#include \"rscend.h\"\n");
 	fprintf(fp, "#ifndef RSCGAP\n");
@@ -185,6 +186,7 @@ PP(char **argv;)
 	fprintf(fp, "static char const fillup[RSCGAP] = { 0 };\n");
 	fprintf(fp, "static char const bootjmp[] = { 0x4E,0xF9,0,0xE0,0,0 };\n");
 	fprintf(fp, "#endif\n");
+	fprintf(fp, "#endif\n\n");
 	fprintf(fp, "#endif\n\n");
 
 	fprintf(fp, "char const %s[] = {\n", symname);
