@@ -423,7 +423,7 @@ PP(long target_size;)
 	}
 	
 	/* read the input file */
-	ret = read_file(infile, infilename, buffer, source_size);
+	ret = read_file(infile, infilename, buffer, source_size > target_size ? target_size : source_size);
 	if (!ret)
 		return ret;
 
@@ -447,6 +447,10 @@ PP(long target_size;)
 		 */
 		banks = 1;
 		banksize = 0x3fffeL;
+		/*
+		 * Makefile passes 257 here to distinguish it from ordinary ROMS;
+		 * adjust that
+		 */
 		target_size = 256L * 1024L;
 	} else if (tos_version != 0 && target_size == 512L * 1024L)
 	{
