@@ -119,12 +119,12 @@ typedef int BOOLEAN;
 
 
 /*
- * coerce short ptr to low word  of long
+ * coerce short ptr to low word of long
  */
 #define LW(x) ( (int32_t)((uint16_t)(x)) )
 
 /*
- * coerce short ptr to high word  of lonh
+ * coerce short ptr to high word of long
  */
 #define HW(x) ((int32_t)((uint16_t)(x)) << 16)
 
