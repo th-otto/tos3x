@@ -655,7 +655,7 @@ _objc_change:
 
 
 #if CCODE
-WORD rsrc_free(NOTHIN)
+WORD rsrc_free(NOTHING)
 {
   WORD		ret;
   ret = rs_free( pglobal);

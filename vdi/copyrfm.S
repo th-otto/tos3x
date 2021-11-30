@@ -197,9 +197,9 @@ dst_calc:
 compare:
 #if TOSVERSION < 0x400
 #if PLANES8
-	move.l    #$116,d3
+	move.l    #$116,d3              /* allow only 1,2,4,8 planes */
 #else
-	moveq.l   #$16,d3
+	moveq.l   #$16,d3               /* allow only 1,2,4 planes */
 #endif
 	btst      d1,d3
 	beq       bad_parameter
