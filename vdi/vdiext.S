@@ -14,6 +14,7 @@
 
 /* from BIOS */
 		xdef _zeromem
+		xdef ringbell
 		text
 #if BINEXACT
 #  ifdef __GNUC__
@@ -26,26 +27,32 @@
 
 #if TOSVERSION == 0x306
 _zeromem equ BIOSTBASE+$1680
+ringbell equ BIOSTBASE+$3B2C+(BIOSTLEN-BTLEN_US)
 #endif
 
 #if TOSVERSION == 0x206
 _zeromem equ BIOSTBASE+$1548
+ringbell equ BIOSTBASE+$374A+(BIOSTLEN-BTLEN_US)
 #endif
 
 #if TOSVERSION == 0x208
 _zeromem equ BIOSTBASE+$148E
+ringbell equ BIOSTBASE+$3664+(BIOSTLEN-BTLEN_US)
 #endif
 
 #if TOSVERSION == 0x104
 _zeromem equ BIOSTBASE+$1EE0
+ringbell equ BIOSTBASE+$34E4
 #endif
 
 #if TOSVERSION == 0x106
 _zeromem equ BIOSTBASE+$1EE0
+ringbell equ BIOSTBASE+$34E4
 #endif
 
 #if TOSVERSION == 0x162
 _zeromem equ BIOSTBASE+$1EE0
+ringbell equ BIOSTBASE+$34E4
 #endif
 
 #else
