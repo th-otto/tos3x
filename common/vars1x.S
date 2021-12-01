@@ -461,9 +461,8 @@ _endvdibss: ds.b 0
 	
 	INT(_gl_recd)
 	INT(_gl_bdesired)
+	INT(_gl_apid)
 
-	ds.b 2
-	
 	PTR(_ad_path)
 	PTR(old_bcode)
 
@@ -662,7 +661,7 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 
 /* XXX */
 
-	ds.b 14
+	ds.b 10
 
 #if 0
 	INT(_d_dir)
@@ -779,9 +778,6 @@ _winxvars equ _D+$50  /* near the bottom of the SCRENMGR supervisor stack */
 	INT(_tmpmoff)
 	INT(_windspec)
 	PTR(_gl_store)
-#if AESVERSION >= 0x200
-	INT(_ctldown)
-#endif
 	INT(_fs_topptr)
 	INT(_d_nrows)
 	INT(_gl_wtop)

@@ -310,58 +310,92 @@
 
 #define BIOSTBASE   $00FC0000
 
-#define BTLEN_US    $0000432E
-#define DTLEN_US    $000079F6
-
-#if OS_COUNTRY == CTRY_US
-#define GLUELEN     $41C4
-#endif
-
-#if OS_COUNTRY == CTRY_DE
-#define BIOSTLEN    BTLEN_US+$5A
-#define DESKTLEN    DTLEN_US-$2A
-#define DESKDLEN    $000009DE
-#define GLUELEN     $00004226
-#endif
-
-#if OS_COUNTRY == CTRY_FR
-#define GLUELEN     $000044D6
-#endif
-
-#if OS_COUNTRY == CTRY_UK
-#define GLUELEN     $000041C4
-#endif
-
-#if OS_COUNTRY == CTRY_ES
-#define GLUELEN     $0000441A
-#endif
-
-#if OS_COUNTRY == CTRY_IT
-#define GLUELEN     $000043B2
-#endif
-
-#if OS_COUNTRY == CTRY_SF
-#define GLUELEN     $000044D6
-#endif
-
-#if OS_COUNTRY == CTRY_NL
-#define GLUELEN     $000043CC
-#endif
-
-#if OS_COUNTRY == CTRY_CZ
-#define GLUELEN     $00004226
-#endif
-
 /*
- * these are identical in all language versions
+ * these are identical in almost all language versions
  */
 #define BIOSDLEN    $00000256
 #define VDITLEN     $000098A2
 #define VDIDLEN     $00002846
 #define BDOSTLEN    $00005F64
 #define BDOSDLEN    $00000396
-#define AESTLEN     $0000CCD6
-#define AESDLEN     $000006D8
+#define AESTLEN     $00000000 /* included in desk */
+#define AESDLEN     $00000000 /* included in desk */
+
+
+#define BTLEN_US    $0000432E
+#define DTLEN_US    $000146CA
+
+#if OS_COUNTRY == CTRY_US
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
+#define DESKDLEN    $000009E0
+#define GLUELEN     $000041C4
+#endif
+
+#if OS_COUNTRY == CTRY_DE
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$28
+#define DESKDLEN    $000009DC
+#define GLUELEN     $00004226
+#endif
+
+#if OS_COUNTRY == CTRY_FR
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$28
+#define DESKDLEN    $000009FA
+#define GLUELEN     $000044D6
+#endif
+
+#if OS_COUNTRY == CTRY_UK
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
+#define DESKDLEN    $000009E0
+#define GLUELEN     $000041C4
+#endif
+
+#if OS_COUNTRY == CTRY_ES
+#define BIOSTLEN    BTLEN_US+$86
+#define DESKTLEN    DTLEN_US-$28
+#define DESKDLEN    $000009C4
+#define GLUELEN     $0000441A
+#endif
+
+#if OS_COUNTRY == CTRY_IT
+#define BIOSTLEN    BTLEN_US+$68
+#define DESKTLEN    DTLEN_US-$28
+#define DESKDLEN    $000009B6 /* to be done */
+#define GLUELEN     $000043B2 /* to be checked */
+#endif
+
+#if OS_COUNTRY == CTRY_SG
+#define BIOSTLEN    BTLEN_US+$86
+#define DESKTLEN    DTLEN_US-$28
+#define DESKDLEN    $000009DC /* to be checked */
+#define GLUELEN     $00004266 /* to be checked */
+#endif
+
+#if OS_COUNTRY == CTRY_SF
+#define BIOSTLEN    BTLEN_US+$86
+#define DESKTLEN    DTLEN_US-$28
+#define DESKDLEN    $000009FA /* to be checked */
+#define GLUELEN     $000044D6 /* to be checked */
+#endif
+
+#if OS_COUNTRY == CTRY_NL
+#define BIOSTLEN    BTLEN_US
+#define DESKTLEN    DTLEN_US
+#define DESKDLEN    $000009E0
+#define GLUELEN     $000043CC
+#undef VDITLEN
+#define VDITLEN     $0000989E /* for some reason not known yet, 4 bytes shorter */
+#endif
+
+#if OS_COUNTRY == CTRY_CZ
+#define BIOSTLEN    BTLEN_US+$5A
+#define DESKTLEN    DTLEN_US-$28
+#define DESKDLEN    $000009DC
+#define GLUELEN     $00004226
+#endif
 
 #endif /* TOSVERSION == 0x104 */
 
@@ -447,13 +481,18 @@
 
 /*
  * now calculate addresses from above
- * The order of all TOS versions is BIOS, VDI, GEMDOS, AES, DESK (+ glued resource files)
  */
 #if TOSVERSION >= 0x200
+/*
+ * The order of all TOS versions is BIOS, VDI, GEMDOS, AES, DESK (+ glued resource files)
+ */
 #define VDITBASE  BIOSTBASE+BIOSTLEN
 #define BDOSTBASE VDITBASE+VDITLEN
 #define AESTBASE  BDOSTBASE+BDOSTLEN
 #else
+/*
+ * The order of all TOS versions is BIOS, GEMDOS, VDI, AES+DESK (+ glued resource files)
+ */
 #define BDOSTBASE BIOSTBASE+BIOSTLEN
 #define VDITBASE  BDOSTBASE+BDOSTLEN
 #define AESTBASE  VDITBASE+VDITLEN
