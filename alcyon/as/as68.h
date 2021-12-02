@@ -138,7 +138,7 @@
 #define ITBSZ   256 /* size of the it buffer */
 #define STMAX   200 /* size of intermediate text buffer */
 #define SZIRT   128
-#define EXTSZ   512
+#define EXTSZ   1024
 #define DIRECT  34  /* number of entries in p2direct */
 #define ORGDIR  14  /* org entry in p2direct */
 
