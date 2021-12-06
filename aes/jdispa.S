@@ -43,16 +43,20 @@
  *****************************************************************/
 	bss
 	even
-	xdef savea0
-	comm savea0,654
 
 /* for savestate */
-#define srsave savea0+4
+	xdef savea0
+	comm savea0,4
 /* _cli and _si */
-#define savsr  savea0+6
+	xdef srsave
+	comm srsave,2
+	xdef savsr
+	comm savsr,2
 /* for psetup */
-#define psetsr savea0+8
-#define dspstk savea0+10+160*4
+	xdef psetsr
+	comm psetsr,2
+	xdef dspstk
+	comm dspstk,161*4
 
 	text
 
@@ -160,7 +164,7 @@ _savestate:
 	move.l	a1,64(a0)		/* save USP to u_spuser */
 	move.l	savea0,32(a0)
 
-	lea	dspstk,sp		; Load a dispatcher stack
+	lea	dspstk+160*4,sp		; Load a dispatcher stack
 	move	srsave,sr		; Restore interrupts
 	jsr	_disp			; Go to the Sub dispatcher
 

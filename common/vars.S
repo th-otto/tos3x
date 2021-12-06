@@ -459,7 +459,12 @@ _endvdibss: ds.b 0
 	V(errstk,l,257)
 #endif
 	
-	V(savea0,b,654) /* savea0,srsave,savsr,psetsr,dspstk */
+	V(savea0,l,1)
+	V(srsave,w,1)
+	V(savsr,w,1)
+	V(psetsr,w,1)
+	V(dspstk,l,161)
+
 	LONG(retaddr)
 	LONG(tr_retsave)
 	PTR(_drwaddr)
