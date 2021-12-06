@@ -1,18 +1,20 @@
+_os_entry:
 [00e00000] 602e                      bra.s      $00E00030
-[00e00002] 0106                      btst       d0,d6
-[00e00004] 00e0                      dc.w       $00E0 ; illegal
-[00e00006] 0030 00e0 0000            ori.b      #$E0,0(a0,d0.w)
-[00e0000c] 0000                      dc.w       $0000
-[00e0000e] 615c                      bsr.s      $00E0006C
-[00e00010] 00e0                      dc.w       $00E0 ; illegal
-[00e00012] 0030 00e2 a1aa 0729 1989  ori.b      #$E2,([$0729,a2.w],$1989) ; 68020+ only
-[00e0001c] 0003 12fd                 ori.b      #$FD,d3
-[00e00020] 0000                      dc.w       $0000
-[00e00022] 37cc 0000                 move.w     a4,$00E00024(pc,d0.w) ; apollo only
-[00e00026] 0ebd 0000                 moves.l    ???,d0
-[00e0002a] 5662                      addq.w     #3,-(a2)
-[00e0002c] 0000                      dc.w       $0000
-[00e0002e] 0000                      dc.w       $0000
+[00e00002] 0106                      dc.w       $0104
+[00e00004] 00e0 0030                 dc.l       _main
+           00e0 0000                 dc.l       _os_entry
+[00e0000c] 0000 615c                 dc.l       _endvdibss
+[00e00010] 00e0 0030                 dc.l       _main
+           00e2 a1aa                 dc.l       _ui_mupb
+           0729 1989                 dc.l       $07291989
+[00e0001c] 0003                      dc.w       3
+           12fd                      dc.w       $12fd
+[00e00020] 0000 37cc                 dc.l       _root
+           0000 0ebd                 dc.l       _shifty
+           0000 5662                 dc.l       _run
+[00e0002c] 0000 0000                 dc.l       0
+
+_main:
 [00e00030] 46fc 2700                 move.w     #$2700,sr
 [00e00034] 4e70                      reset
 [00e00036] 9bcd                      suba.l     a5,a5
@@ -326,6 +328,8 @@
 [00e00536] 4cdf 0101                 movem.l    (a7)+,d0/a0
 [00e0053a] 4ef9 08e0 0ca2            jmp        $08E00CA2
 [00e00540] 4e71                      nop
+
+biosinit:
 [00e00542] 4eb9 00e0 97f4            jsr        $00E097F4
 [00e00548] 33f9 00e0 001e 0000 60fe  move.w     $00E0001E,$000060FE
 [00e00552] 4eb9 00e0 2124            jsr        $00E02124
@@ -392,6 +396,8 @@
 [00e0063a] 4700                      chk.l      d0,d3 ; 68020+ only
 [00e0063c] 0000                      dc.w       $0000
 [00e0063e] 8001                      or.b       d1,d0
+
+diskboot:
 [00e00640] 7003                      moveq.l    #3,d0
 [00e00642] 6100 0126                 bsr        $00E0076A
 [00e00646] 2079 0000 047a            movea.l    $0000047A,a0
@@ -401,6 +407,8 @@
 [00e00652] 41f9 0000 185c            lea.l      $0000185C,a0
 [00e00658] 4e90                      jsr        (a0)
 [00e0065a] 4e75                      rts
+
+dmaboot:
 [00e0065c] 7e00                      moveq.l    #0,d7
 [00e0065e] 2f39 0000 04ba            move.l     $000004BA,-(a7)
 [00e00664] 99cc                      suba.l     a4,a4
@@ -419,6 +427,8 @@
 [00e0068a] 66d8                      bne.s      $00E00664
 [00e0068c] 588f                      addq.l     #4,a7
 [00e0068e] 4e75                      rts
+
+_dmaread:
 [00e00690] 7a01                      moveq.l    #1,d5
 [00e00692] 4dec 8606                 lea.l      -31226(a4),a6
 [00e00696] 4bec 8604                 lea.l      -31228(a4),a5
@@ -484,6 +494,8 @@
 [00e00764] 62f2                      bhi.s      $00E00758
 [00e00766] 72ff                      moveq.l    #-1,d1
 [00e00768] 4e75                      rts
+
+_run_cartridge_applications:
 [00e0076a] 41f9 00fa 0000            lea.l      $00FA0000,a0
 [00e00770] 0c98 abcd ef42            cmpi.l     #$ABCDEF42,(a0)+
 [00e00776] 661a                      bne.s      $00E00792
@@ -523,6 +535,8 @@
 [00e007e6] 0f3f
 [00e007e8] 03ff                      bset       d1,???
 [00e007ea] 0000                      dc.w       $0000
+
+int_hbl:
 [00e007ec] 3f00                      move.w     d0,-(a7)
 [00e007ee] 302f 0002                 move.w     2(a7),d0
 [00e007f2] c07c 0700                 and.w      #$0700,d0
@@ -530,6 +544,8 @@
 [00e007f8] 006f 0300 0002            ori.w      #$0300,2(a7)
 [00e007fe] 301f                      move.w     (a7)+,d0
 [00e00800] 4e73                      rte
+
+int_vbl:
 [00e00802] 52b9 0000 0466            addq.l     #1,$00000466
 [00e00808] 5379 0000 0452            subq.w     #1,$00000452
 [00e0080e] 6b00 0100                 bmi        $00E00910
@@ -608,6 +624,8 @@
 [00e0090c] 4cdf 7fff                 movem.l    (a7)+,d0-d7/a0-a6
 [00e00910] 5279 0000 0452            addq.w     #1,$00000452
 [00e00916] 4e73                      rte
+
+_vsync:
 [00e00918] 40e7                      move.w     sr,-(a7)
 [00e0091a] 027c f8ff                 andi.w     #$F8FF,sr
 [00e0091e] 2039 0000 0466            move.l     $00000466,d0
@@ -618,8 +636,12 @@
 [00e00930] 2f39 0000 0404            move.l     $00000404,-(a7)
 [00e00936] 70ff                      moveq.l    #-1,d0
 [00e00938] 4e75                      rts
+
+_xbiostrap:
 [00e0093a] 41fa 009c                 lea.l      $00E009D8(pc),a0
 [00e0093e] 6004                      bra.s      $00E00944
+
+_biostrap:
 [00e00940] 41fa 0064                 lea.l      $00E009A6(pc),a0
 [00e00944] 2279 0000 04a2            movea.l    $000004A2,a1
 [00e0094a] 301f                      move.w     (a7)+,d0
@@ -654,204 +676,160 @@
 [00e0099c] 3f19                      move.w     (a1)+,-(a7)
 [00e0099e] 23c9 0000 04a2            move.l     a1,$000004A2
 [00e009a4] 4e73                      rte
-[00e009a6] 000c 00e0                 ori.b      #$E0,a4 ; apollo only
-[00e009aa] 0b9e                      bclr       d5,(a6)+
-[00e009ac] 00e0                      dc.w       $00E0 ; illegal
-[00e009ae] 0ae4 00e0                 cas.b      d0,d3,-(a4) ; 68020+ only
-[00e009b2] 0aea 00e0 0af6            cas.b      d0,d3,2806(a2) ; 68020+ only
-[00e009b8] 8000                      or.b       d0,d0
-[00e009ba] 0476 00e0 0bca 00e0       subi.w     #$00E0,([za6,zd0.l*2],$00E0) ; 68020+ only; reserved BD=0
-[00e009c2] 0be2                      bset       d5,-(a2)
-[00e009c4] 8000                      or.b       d0,d0
-[00e009c6] 0472 00e0 0af0            subi.w     #$00E0,-16(a2,d0.l*2) ; 68020+ only
-[00e009cc] 8000                      or.b       d0,d0
-[00e009ce] 047e 00e0                 subi.w     #$00E0,???
-[00e009d2] 0b86                      bclr       d5,d6
-[00e009d4] 00e0                      dc.w       $00E0 ; illegal
-[00e009d6] 0b8c 0041                 movep.w    d5,65(a4)
-[00e009da] 00e0                      dc.w       $00E0 ; illegal
-[00e009dc] 42c6                      move.w     ccr,d6
-[00e009de] 00e0                      dc.w       $00E0 ; illegal
-[00e009e0] 0794                      bclr       d3,(a4)
-[00e009e2] 00e0                      dc.w       $00E0 ; illegal
-[00e009e4] 0bea 00e0                 bset       d5,224(a2)
-[00e009e8] 0bfe                      bset       d5,???
-[00e009ea] 00e0                      dc.w       $00E0 ; illegal
-[00e009ec] 0c04 00e0                 cmpi.b     #$E0,d4
-[00e009f0] 0c10 00e0                 cmpi.b     #$E0,(a0)
-[00e009f4] 0c5c 00e0                 cmpi.w     #$00E0,(a4)+
-[00e009f8] 0c64 00e0                 cmpi.w     #$00E0,-(a4)
-[00e009fc] 10d4                      move.b     (a4),(a0)+
-[00e009fe] 00e0                      dc.w       $00E0 ; illegal
-[00e00a00] 11b2 00e0 127a            move.b     -32(a2,d0.w),122(a0,d1.w*2) ; 68020+ only
-[00e00a06] 00e0                      dc.w       $00E0 ; illegal
-[00e00a08] 190a                      move.l     b2,-(a4) ; apollo only
-[00e00a0a] 00e0                      dc.w       $00E0 ; illegal
-[00e00a0c] 346a 00e0                 movea.w    224(a2),a2
-[00e00a10] 3914                      move.w     (a4),-(a4)
-[00e00a12] 00e0                      dc.w       $00E0 ; illegal
-[00e00a14] 3bbe 00e0                 move.w     ???,-32(a5,d0.w)
-[00e00a18] 3bd6                      move.w     (a6),???
-[00e00a1a] 00e0                      dc.w       $00E0 ; illegal
-[00e00a1c] 43ca                      lea.l      (b2),a1 ; apollo only
-[00e00a1e] 00e0                      dc.w       $00E0 ; illegal
-[00e00a20] 1e4e                      movea.l    b6,b7 ; apollo only
-[00e00a22] 00e0                      dc.w       $00E0 ; illegal
-[00e00a24] 1f1a                      move.b     (a2)+,-(a7)
-[00e00a26] 00e0                      dc.w       $00E0 ; illegal
-[00e00a28] 1444                      movea.l    d4,b2 ; apollo only
-[00e00a2a] 00e0                      dc.w       $00E0 ; illegal
-[00e00a2c] 0e96 00e0                 moves.l    (a6),d0
-[00e00a30] a94c                      mov3q.l    #4,a4
-[00e00a32] 00e0                      dc.w       $00E0 ; illegal
-[00e00a34] 0fe8 00e0                 bset       d7,224(a0)
-[00e00a38] 0fda                      bset       d7,(a2)+
-[00e00a3a] 00e0                      dc.w       $00E0 ; illegal
-[00e00a3c] 43f6 00e0                 lea.l      -32(a6,d0.w),a1
-[00e00a40] 3658                      movea.w    (a0)+,a3
-[00e00a42] 00e0                      dc.w       $00E0 ; illegal
-[00e00a44] 393e                      move.w     ???,-(a4)
-[00e00a46] 00e0                      dc.w       $00E0 ; illegal
-[00e00a48] 3978 00e0 4242            move.w     ($000000E0).w,16962(a4)
-[00e00a4e] 00e0                      dc.w       $00E0 ; illegal
-[00e00a50] 42a0                      clr.l      -(a0)
-[00e00a52] 00e0                      dc.w       $00E0 ; illegal
-[00e00a54] 427a 00e0                 clr.w      $00E00B36(pc) ; apollo only
-[00e00a58] 4390                      chk.w      (a0),d1
-[00e00a5a] 00e0                      dc.w       $00E0 ; illegal
-[00e00a5c] 4410                      neg.b      (a0)
-[00e00a5e] 00e0                      dc.w       $00E0 ; illegal
-[00e00a60] 4424                      neg.b      -(a4)
-[00e00a62] 00e0                      dc.w       $00E0 ; illegal
-[00e00a64] 4458                      neg.w      (a0)+
-[00e00a66] 00e0                      dc.w       $00E0 ; illegal
-[00e00a68] 4436 00e0                 neg.b      -32(a6,d0.w)
-[00e00a6c] 2334 00e0                 move.l     -32(a4,d0.w),-(a1)
-[00e00a70] 0918                      btst       d4,(a0)+
-[00e00a72] 00e0                      dc.w       $00E0 ; illegal
-[00e00a74] 0ade 00e0                 cas.b      d0,d3,(a6)+ ; 68020+ only
-[00e00a78] 0c88 00e0 0794            cmpi.l     #$00E00794,a0 ; apollo only
-[00e00a7e] 00e0                      dc.w       $00E0 ; illegal
-[00e00a80] 186a 00e0                 movea.l    224(a2),b4 ; apollo only
-[00e00a84] 0794                      bclr       d3,(a4)
-[00e00a86] 00e0                      dc.w       $00E0 ; illegal
-[00e00a88] 0794                      bclr       d3,(a4)
-[00e00a8a] 00e0                      dc.w       $00E0 ; illegal
-[00e00a8c] 0794                      bclr       d3,(a4)
-[00e00a8e] 00e0                      dc.w       $00E0 ; illegal
-[00e00a90] 0794                      bclr       d3,(a4)
-[00e00a92] 00e0                      dc.w       $00E0 ; illegal
-[00e00a94] 0794                      bclr       d3,(a4)
-[00e00a96] 00e0                      dc.w       $00E0 ; illegal
-[00e00a98] 0794                      bclr       d3,(a4)
-[00e00a9a] 00e0                      dc.w       $00E0 ; illegal
-[00e00a9c] 0794                      bclr       d3,(a4)
-[00e00a9e] 00e0                      dc.w       $00E0 ; illegal
-[00e00aa0] 0794                      bclr       d3,(a4)
-[00e00aa2] 00e0                      dc.w       $00E0 ; illegal
-[00e00aa4] 0794                      bclr       d3,(a4)
-[00e00aa6] 00e0                      dc.w       $00E0 ; illegal
-[00e00aa8] 0794                      bclr       d3,(a4)
-[00e00aaa] 00e0                      dc.w       $00E0 ; illegal
-[00e00aac] 0794                      bclr       d3,(a4)
-[00e00aae] 00e0                      dc.w       $00E0 ; illegal
-[00e00ab0] 0794                      bclr       d3,(a4)
-[00e00ab2] 00e0                      dc.w       $00E0 ; illegal
-[00e00ab4] 0794                      bclr       d3,(a4)
-[00e00ab6] 00e0                      dc.w       $00E0 ; illegal
-[00e00ab8] 0794                      bclr       d3,(a4)
-[00e00aba] 00e0                      dc.w       $00E0 ; illegal
-[00e00abc] 0794                      bclr       d3,(a4)
-[00e00abe] 00e0                      dc.w       $00E0 ; illegal
-[00e00ac0] 0794                      bclr       d3,(a4)
-[00e00ac2] 00e0                      dc.w       $00E0 ; illegal
-[00e00ac4] 0794                      bclr       d3,(a4)
-[00e00ac6] 00e0                      dc.w       $00E0 ; illegal
-[00e00ac8] 0794                      bclr       d3,(a4)
-[00e00aca] 00e0                      dc.w       $00E0 ; illegal
-[00e00acc] 0794                      bclr       d3,(a4)
-[00e00ace] 00e0                      dc.w       $00E0 ; illegal
-[00e00ad0] 0794                      bclr       d3,(a4)
-[00e00ad2] 00e0                      dc.w       $00E0 ; illegal
-[00e00ad4] 0794                      bclr       d3,(a4)
-[00e00ad6] 00e0                      dc.w       $00E0 ; illegal
-[00e00ad8] 0794                      bclr       d3,(a4)
-[00e00ada] 00e0                      dc.w       $00E0 ; illegal
-[00e00adc] 103a 206f                 move.b     $00E02B4D(pc),d0
-[00e00ae0] 0004 4ed0                 ori.b      #$D0,d4
+
+
+bios_vecs:
+[00e009a6] 000c                      dc.w      12
+           00e00b9e                  dc.l      _getmpb
+[00e009ac] 00e00ae4                  dc.l      _bconstat
+           00e00aea                  dc.l      _bconin
+           00e00af6                  dc.l      _bconout
+[00e009b8] 80000476                  dc.l      _hdv_rw+$80000000
+           00e00bca                  dc.l      _setexc
+           00e00be2                  dc.l      _tickcal
+[00e009c4] 80000472                  dc.l      _hdv_bpb+$80000000
+           00e00af0                  dc.l      _bcostat
+[00e009cc] 8000047e                  dc.l      _hdv_mediach+$80000000
+           00e00b86                  dc.l      _drvmap
+[00e009d4] 00e00b8c                  dc.l      _kbshift
+
+xbios_vecs:
+[00e009d8] 0041                      dc.w (xbvecsend-xbios_vecs)/4
+[00e009da] 00e042c6                  dc.l _initmouse
+[00e009de] 00e00794                  dc.l bios_unimpl
+[00e009e2] 00e00bea                  dc.l _physbase
+           00e00bfe                  dc.l _logbase
+[00e009ea] 00e00c04                  dc.l _getrez
+           00e00c10                  dc.l _vsetscreen
+           00e00c5c                  dc.l _setpalette
+           00e00c64                  dc.l _setcolor
+           00e010d4                  dc.l _floprd
+[00e009fe] 00e011b2                  dc.l _flopwrt
+           00e0127a                  dc.l _flopfmt
+[00e00a06] 00e0190a                  dc.l _dbmsg
+[00e00a0a] 00e0346a                  dc.l _midiws
+           00e03914                  dc.l _mfpint
+[00e00a12] 00e03bbe                  dc.l _iorec
+           00e03bd6                  dc.l _rsconf
+[00e00a1a] 00e043ca                  dc.l _keytbl
+[00e00a1e] 00e01e4e                  dc.l _random
+[00e00a22] 00e01f1a                  dc.l _protobt
+[00e00a26] 00e01444                  dc.l _flopver
+[00e00a2a] 00e00e96                  dc.l _scrdmp
+           00e0a94c                  dc.l _cursconf
+[00e00a32] 00e00fe8                  dc.l _settime
+           00e00fda                  dc.l _gettime
+[00e00a3a] 00e043f6                  dc.l _bioskeys
+           00e03658                  dc.l _ikbdws
+[00e00a42] 00e0393e                  dc.l _jdisint
+[00e00a46] 00e03978                  dc.l _jenabint
+           00e04242                  dc.l _giaccess
+[00e00a4e] 00e042a0                  dc.l _offgibit
+[00e00a52] 00e0427a                  dc.l _ongibit
+           00e04390                  dc.l _xbtimer
+[00e00a5a] 00e04410                  dc.l _dosound
+[00e00a5e] 00e04424                  dc.l _setprt
+[00e00a62] 00e04458                  dc.l _kbdvbase
+[00e00a66] 00e04436                  dc.l _kbrate
+           00e02334                  dc.l _prtblk
+           00e00918                  dc.l _vsync
+[00e00a72] 00e00ade                  dc.l _supexec
+           00e00c88                  dc.l _puntaes
+           00e00794                  dc.l bios_unimpl
+[00e00a7e] 00e0186a                  dc.l _floprate
+           00e00794                  dc.l bios_unimpl
+[00e00a86] 00e00794                  dc.l bios_unimpl
+[00e00a8a] 00e00794                  dc.l bios_unimpl
+[00e00a8e] 00e00794                  dc.l bios_unimpl
+[00e00a92] 00e00794                  dc.l bios_unimpl
+[00e00a96] 00e00794                  dc.l bios_unimpl
+[00e00a9a] 00e00794                  dc.l bios_unimpl
+[00e00a9e] 00e00794                  dc.l bios_unimpl
+[00e00aa2] 00e00794                  dc.l bios_unimpl
+[00e00aa6] 00e00794                  dc.l bios_unimpl
+[00e00aaa] 00e00794                  dc.l bios_unimpl
+[00e00aae] 00e00794                  dc.l bios_unimpl
+[00e00ab2] 00e00794                  dc.l bios_unimpl
+[00e00ab6] 00e00794                  dc.l bios_unimpl
+[00e00aba] 00e00794                  dc.l bios_unimpl
+[00e00abe] 00e00794                  dc.l bios_unimpl
+[00e00ac2] 00e00794                  dc.l bios_unimpl
+[00e00ac6] 00e00794                  dc.l bios_unimpl
+[00e00aca] 00e00794                  dc.l bios_unimpl
+[00e00ace] 00e00794                  dc.l bios_unimpl
+[00e00ad2] 00e00794                  dc.l bios_unimpl
+[00e00ad6] 00e00794                  dc.l bios_unimpl
+[00e00ada] 00e0103a                  dc.l _blitmode
+
+_supexec:
+[00e00ade] 206f 0004                 movea.l    4(a7),a0
+[00e00ae2] 4ed0                      jmp        (a0)
+
+_bconstat:
 [00e00ae4] 41ed 051e                 lea.l      1310(a5),a0
 [00e00ae8] 6010                      bra.s      $00E00AFA
+
+_bconin:
 [00e00aea] 41ed 053e                 lea.l      1342(a5),a0
 [00e00aee] 600a                      bra.s      $00E00AFA
+
+_bcostat:
 [00e00af0] 41ed 055e                 lea.l      1374(a5),a0
 [00e00af4] 6004                      bra.s      $00E00AFA
+
+_bconout:
 [00e00af6] 41ed 057e                 lea.l      1406(a5),a0
 [00e00afa] 302f 0004                 move.w     4(a7),d0
 [00e00afe] e548                      lsl.w      #2,d0
 [00e00b00] 2070 0000                 movea.l    0(a0,d0.w),a0
 [00e00b04] 4ed0                      jmp        (a0)
-[00e00b06] 00e0                      dc.w       $00E0 ; illegal
-[00e00b08] 0794                      bclr       d3,(a4)
-[00e00b0a] 00e0                      dc.w       $00E0 ; illegal
-[00e00b0c] 357e 00e0                 move.w     ???,224(a2)
-[00e00b10] 366c 00e0                 movea.w    224(a4),a3
-[00e00b14] 347e                      movea.w    ???,a2
-[00e00b16] 00e0                      dc.w       $00E0 ; illegal
-[00e00b18] 0794                      bclr       d3,(a4)
-[00e00b1a] 00e0                      dc.w       $00E0 ; illegal
-[00e00b1c] 0794                      bclr       d3,(a4)
-[00e00b1e] 00e0                      dc.w       $00E0 ; illegal
-[00e00b20] 0794                      bclr       d3,(a4)
-[00e00b22] 00e0                      dc.w       $00E0 ; illegal
-[00e00b24] 0794                      bclr       d3,(a4)
-[00e00b26] 00e0                      dc.w       $00E0 ; illegal
-[00e00b28] 354a 00e0                 move.w     a2,224(a2)
-[00e00b2c] 3596 00e0                 move.w     (a6),-32(a2,d0.w)
-[00e00b30] 3682                      move.w     d2,(a3)
-[00e00b32] 00e0                      dc.w       $00E0 ; illegal
-[00e00b34] 3498                      move.w     (a0)+,(a2)
-[00e00b36] 00e0                      dc.w       $00E0 ; illegal
-[00e00b38] 0794                      bclr       d3,(a4)
-[00e00b3a] 00e0                      dc.w       $00E0 ; illegal
-[00e00b3c] 0794                      bclr       d3,(a4)
-[00e00b3e] 00e0                      dc.w       $00E0 ; illegal
-[00e00b40] 0794                      bclr       d3,(a4)
-[00e00b42] 00e0                      dc.w       $00E0 ; illegal
-[00e00b44] 0794                      bclr       d3,(a4)
-[00e00b46] 00e0                      dc.w       $00E0 ; illegal
-[00e00b48] 356a 00e0 35e0            move.w     224(a2),13792(a2)
-[00e00b4e] 00e0                      dc.w       $00E0 ; illegal
-[00e00b50] 36b8 00e0                 move.w     ($000000E0).w,(a3)
-[00e00b54] 3622                      move.w     -(a2),d3
-[00e00b56] 00e0                      dc.w       $00E0 ; illegal
-[00e00b58] 3442                      movea.w    d2,a2
-[00e00b5a] 00e0                      dc.w       $00E0 ; illegal
-[00e00b5c] 0794                      bclr       d3,(a4)
-[00e00b5e] 00e0                      dc.w       $00E0 ; illegal
-[00e00b60] 0794                      bclr       d3,(a4)
-[00e00b62] 00e0                      dc.w       $00E0 ; illegal
-[00e00b64] 0794                      bclr       d3,(a4)
-[00e00b66] 00e0                      dc.w       $00E0 ; illegal
-[00e00b68] 34ce                      move.w     a6,(a2)+
-[00e00b6a] 00e0                      dc.w       $00E0 ; illegal
-[00e00b6c] 35fa 00e0 a590            move.w     $00E00C4E(pc),$00DFB0FE(pc) ; apollo only
-[00e00b72] 00e0                      dc.w       $00E0 ; illegal
-[00e00b74] 3452                      movea.w    (a2),a2
-[00e00b76] 00e0                      dc.w       $00E0 ; illegal
-[00e00b78] 3634 00e0                 move.w     -32(a4,d0.w),d3
-[00e00b7c] a584                      move.l     acc2,d4
-[00e00b7e] 00e0                      dc.w       $00E0 ; illegal
-[00e00b80] 0794                      bclr       d3,(a4)
-[00e00b82] 00e0                      dc.w       $00E0 ; illegal
-[00e00b84] 0794                      bclr       d3,(a4)
+
+[00e00b06] 00e00794                      dc.l      bios_unimpl
+[00e00b0a] 00e0357e                      dc.l      _bcon6stat
+           00e0366c                      dc.l      _bcon2stat
+           00e0347e                      dc.l      _bcon3stat
+[00e00b16] 00e00794                      dc.l      bios_unimpl
+[00e00b1a] 00e00794                      dc.l      bios_unimpl
+[00e00b1e] 00e00794                      dc.l      bios_unimpl
+[00e00b22] 00e00794                      dc.l      bios_unimpl
+[00e00b26] 00e0354a                      dc.l      _bcon0in
+           00e03596                      dc.l      _bcon6in
+           00e03682                      dc.l      _bcon2in
+[00e00b32] 00e03498                      dc.l      _bcon3in
+[00e00b36] 00e00794                      dc.l      bios_unimpl
+[00e00b3a] 00e00794                      dc.l      bios_unimpl
+[00e00b3e] 00e00794                      dc.l      bios_unimpl
+[00e00b42] 00e00794                      dc.l      bios_unimpl
+[00e00b46] 00e0356a                      dc.l      _bco0stat
+           00e035e0                      dc.l      _bco6stat
+[00e00b4e] 00e036b8                      dc.l      _bco2stat
+           00e03622                      dc.l      _bco4stat
+[00e00b56] 00e03442                      dc.l      _bco3stat
+[00e00b5a] 00e00794                      dc.l      bios_unimpl
+[00e00b5e] 00e00794                      dc.l      bios_unimpl
+[00e00b62] 00e00794                      dc.l      bios_unimpl
+[00e00b66] 00e034ce                      dc.l      _bcon0out
+[00e00b6a] 00e035fa                      dc.l      _bcon6out
+           00e0a590                      dc.l      _bcon2out
+[00e00b72] 00e03452                      dc.l      _bcon3out
+[00e00b76] 00e03634                      dc.l      _bcon4out
+           00e0a584                      dc.l      _bcon5out
+[00e00b7e] 00e00794                      dc.l      bios_unimpl
+[00e00b82] 00e00794                      dc.l      bios_unimpl
+
+_drvmap:
 [00e00b86] 202d 04c2                 move.l     1218(a5),d0
 [00e00b8a] 4e75                      rts
+
+_kbshift:
 [00e00b8c] 7000                      moveq.l    #0,d0
 [00e00b8e] 102d 0ebd                 move.b     3773(a5),d0
 [00e00b92] 322f 0004                 move.w     4(a7),d1
 [00e00b96] 6b04                      bmi.s      $00E00B9C
 [00e00b98] 1b41 0ebd                 move.b     d1,3773(a5)
 [00e00b9c] 4e75                      rts
+
+_getmpb:
 [00e00b9e] 206f 0004                 movea.l    4(a7),a0
 [00e00ba2] 43ed 048e                 lea.l      1166(a5),a1
 [00e00ba6] 2089                      move.l     a1,(a0)
@@ -864,6 +842,8 @@
 [00e00bc0] 2340 0008                 move.l     d0,8(a1)
 [00e00bc4] 42a9 000c                 clr.l      12(a1)
 [00e00bc8] 4e75                      rts
+
+_setexc:
 [00e00bca] 302f 0004                 move.w     4(a7),d0
 [00e00bce] e548                      lsl.w      #2,d0
 [00e00bd0] 91c8                      suba.l     a0,a0
@@ -873,9 +853,13 @@
 [00e00bdc] 6b02                      bmi.s      $00E00BE0
 [00e00bde] 2081                      move.l     d1,(a0)
 [00e00be0] 4e75                      rts
+
+_tickcal:
 [00e00be2] 7000                      moveq.l    #0,d0
 [00e00be4] 302d 0442                 move.w     1090(a5),d0
 [00e00be8] 4e75                      rts
+
+_physbase:
 [00e00bea] 7000                      moveq.l    #0,d0
 [00e00bec] 102d 8201                 move.b     -32255(a5),d0
 [00e00bf0] e148                      lsl.w      #8,d0
@@ -883,12 +867,18 @@
 [00e00bf6] e188                      lsl.l      #8,d0
 [00e00bf8] 102d 820d                 move.b     -32243(a5),d0
 [00e00bfc] 4e75                      rts
+
+_logbase:
 [00e00bfe] 202d 044e                 move.l     1102(a5),d0
 [00e00c02] 4e75                      rts
+
+_getrez:
 [00e00c04] 7000                      moveq.l    #0,d0
 [00e00c06] 102d 8260                 move.b     -32160(a5),d0
 [00e00c0a] c03c 0003                 and.b      #$03,d0
 [00e00c0e] 4e75                      rts
+
+_vsetscreen:
 [00e00c10] 4aaf 0004                 tst.l      4(a7)
 [00e00c14] 6b06                      bmi.s      $00E00C1C
 [00e00c16] 2b6f 0004 044e            move.l     4(a7),1102(a5)
@@ -906,8 +896,12 @@
 [00e00c4e] 4eb9 00e0 b74e            jsr        $00E0B74E
 [00e00c54] 3b7c 0001 0452            move.w     #$0001,1106(a5)
 [00e00c5a] 4e75                      rts
+
+_setpalette:
 [00e00c5c] 2b6f 0004 045a            move.l     4(a7),1114(a5)
 [00e00c62] 4e75                      rts
+
+_setcolor:
 [00e00c64] 322f 0004                 move.w     4(a7),d1
 [00e00c68] d241                      add.w      d1,d1
 [00e00c6a] c27c 001f                 and.w      #$001F,d1
@@ -918,6 +912,8 @@
 [00e00c7e] 6b06                      bmi.s      $00E00C86
 [00e00c80] 31af 0006 1000            move.w     6(a7),0(a0,d1.w)
 [00e00c86] 4e75                      rts
+
+_puntaes:
 [00e00c88] 207a f38a                 movea.l    $00E00014(pc),a0
 [00e00c8c] 0c90 8765 4321            cmpi.l     #$87654321,(a0)
 [00e00c92] 660c                      bne.s      $00E00CA0
@@ -926,6 +922,8 @@
 [00e00c9a] 4290                      clr.l      (a0)
 [00e00c9c] 6000 f392                 bra        $00E00030
 [00e00ca0] 4e75                      rts
+
+any_vec:
 [00e00ca2] 6102                      bsr.s      $00E00CA6
 [00e00ca4] 4e71                      nop
 [00e00ca6] 9bcd                      suba.l     a5,a5
@@ -948,6 +946,8 @@
 [00e00ce4] 3f3c 004c                 move.w     #$004C,-(a7)
 [00e00ce8] 4e41                      trap       #1
 [00e00cea] 6000 f344                 bra        $00E00030
+
+drawbombs:
 [00e00cee] 1e2d 8260                 move.b     -32160(a5),d7
 [00e00cf2] ce7c 0003                 and.w      #$0003,d7
 [00e00cf6] de47                      add.w      d7,d7
@@ -980,10 +980,13 @@
 [00e00d46] 0000                      dc.w       $0000
 [00e00d48] 0000                      dc.w       $0000
 [00e00d4a] 00a0 00a0 0050            ori.l      #$00A00050,-(a0)
-[00e00d50] 0050 206f                 ori.w      #$206F,(a0)
-[00e00d54] 0004 226f                 ori.b      #$6F,d4
-[00e00d58] 0008 303c                 ori.b      #$3C,a0 ; apollo only
-[00e00d5c] 003f 12d8                 ori.b      #$D8,???
+[00e00d50] 0050
+
+_cpy512:
+[00e00d52] 206f 0004                 movea.l   4(a7),a0
+           226f 0008                 movea.l   8(a7),a1
+           303c 003f                 move.w    #63,d0
+[00e00d5e] 12d8                      move.b     (a0)+,(a1)+
 [00e00d60] 12d8                      move.b     (a0)+,(a1)+
 [00e00d62] 12d8                      move.b     (a0)+,(a1)+
 [00e00d64] 12d8                      move.b     (a0)+,(a1)+
@@ -995,6 +998,8 @@
 [00e00d72] 4e75                      rts
 [00e00d74] 2f39 0000 046a            move.l     $0000046A,-(a7)
 [00e00d7a] 4e75                      rts
+
+_chdv_init:
 [00e00d7c] 5c41                      addq.w     #6,d1
 [00e00d7e] 5554                      subq.w     #2,(a4)
 [00e00d80] 4f5c                      lea.l      (a4)+,b7 ; apollo only
@@ -1003,6 +1008,8 @@
 [00e00d88] 1234 5678                 move.b     120(a4,d5.w*8),d1 ; 68020+ only
 [00e00d8c] 9abc def0 41fa            sub.l      #$DEF041FA,d5
 [00e00d92] ffea                      dc.w       $FFEA ; illegal
+
+autoexec:
 [00e00d94] 43fa ffec                 lea.l      $00E00D82(pc),a1
 [00e00d98] 23df 0000 09c0            move.l     (a7)+,$000009C0
 [00e00d9e] 9bcd                      suba.l     a5,a5
@@ -1031,6 +1038,8 @@
 [00e00de8] defc 0010                 adda.w     #$0010,a7
 [00e00dec] 2f39 0000 09c0            move.l     $000009C0,-(a7)
 [00e00df2] 4e75                      rts
+
+autoscan:
 [00e00df4] 42a7                      clr.l      -(a7)
 [00e00df6] 3f3c 0020                 move.w     #$0020,-(a7)
 [00e00dfa] 4e41                      trap       #1
@@ -1080,10 +1089,14 @@
 [00e00e88] 4ff9 0000 37ca            lea.l      $000037CA,a7
 [00e00e8e] 2f39 0000 09c0            move.l     $000009C0,-(a7)
 [00e00e94] 4e75                      rts
+
+_scrdmp:
 [00e00e96] 2079 0000 0502            movea.l    $00000502,a0
 [00e00e9c] 4e90                      jsr        (a0)
 [00e00e9e] 33fc ffff 0000 04ee       move.w     #$FFFF,$000004EE
 [00e00ea6] 4e75                      rts
+
+_bscr_dump:
 [00e00ea8] 9bcd                      suba.l     a5,a5
 [00e00eaa] 2b6d 044e 0a18            move.l     1102(a5),2584(a5)
 [00e00eb0] 426d 0a1c                 clr.w      2588(a5)
@@ -1122,7 +1135,9 @@
 [00e00f34] 0190                      bclr       d0,(a0)
 [00e00f36] 0002 01ff                 ori.b      #$FF,d2
 [00e00f3a] 03ff                      bset       d1,???
-[00e00f3c] ffff 0600 2900 0080       vperm      #$29000080,e8,e8,e14
+[00e00f3c] ffff
+
+[00e00f3e] 0600 2900 0080       vperm      #$29000080,e8,e8,e14
 [00e00f44] 4840                      swap       d0
 [00e00f46] 11f0 01f0 07fc 0ffe 0dfe  move.b     ($07FC0FFE),($00000DFE).w ; 68020+ only
 [00e00f50] 1fff                      move.b     ???,???
@@ -1130,6 +1145,8 @@
 [00e00f56] 0fde                      bset       d7,(a6)+
 [00e00f58] 07fc 03f8                 bset       d3,#$F8 ; illegal
 [00e00f5c] 00e0                      dc.w       $00E0 ; illegal
+
+waitvbl:
 [00e00f5e] 41f9 ffff fa21            lea.l      $FFFFFA21,a0
 [00e00f64] 43f9 ffff fa1b            lea.l      $FFFFFA1B,a1
 [00e00f6a] 12bc 0010                 move.b     #$10,(a1)
@@ -1147,6 +1164,8 @@
 [00e00f90] 51cb fffa                 dbf        d3,$00E00F8C
 [00e00f94] 12bc 0010                 move.b     #$10,(a1)
 [00e00f98] 4ed6                      jmp        (a6)
+
+run_reset_resident:
 [00e00f9a] 2079 0000 042e            movea.l    $0000042E,a0
 [00e00fa0] 90fc 0200                 suba.w     #$0200,a0
 [00e00fa4] b1fc 0000 0400            cmpa.l     #$00000400,a0
@@ -1167,15 +1186,21 @@
 [00e00fd4] 205f                      movea.l    (a7)+,a0
 [00e00fd6] 60c8                      bra.s      $00E00FA0
 [00e00fd8] 4e75                      rts
+
+_gettime:
 [00e00fda] 47f9 00e0 219a            lea.l      $00E0219A,a3
 [00e00fe0] 49f9 00e0 3380            lea.l      $00E03380,a4
 [00e00fe6] 600c                      bra.s      $00E00FF4
+
+_settime:
 [00e00fe8] 47f9 00e0 2258            lea.l      $00E02258,a3
 [00e00fee] 49f9 00e0 33aa            lea.l      $00E033AA,a4
 [00e00ff4] 6100 1152                 bsr        $00E02148
 [00e00ff8] 6402                      bcc.s      $00E00FFC
 [00e00ffa] 264c                      movea.l    a4,a3
 [00e00ffc] 4ed3                      jmp        (a3)
+
+instoshdr:
 [00e00ffe] 41fa f000                 lea.l      $00E00000(pc),a0
 [00e01002] 43f9 0000 0940            lea.l      $00000940,a1
 [00e01008] 702f                      moveq.l    #47,d0
@@ -1189,6 +1214,8 @@
 [00e01030] 4e75                      rts
 [00e01032] 4ef9 0000 0000            jmp        $00000000
 [00e01038] 60f8                      bra.s      $00E01032
+
+_blitmode:
 [00e0103a] 6126                      bsr.s      $00E01062
 [00e0103c] 3800                      move.w     d0,d4
 [00e0103e] 3a00                      move.w     d0,d5
@@ -1234,6 +1261,8 @@
 [00e010c8] 6100 0626                 bsr        $00E016F0
 [00e010cc] 6700 0564                 beq        $00E01632
 [00e010d0] 6000 0552                 bra        $00E01624
+
+_floprd:
 [00e010d4] 6100 0742                 bsr        $00E01818
 [00e010d8] 70f5                      moveq.l    #-11,d0
 [00e010da] 6100 04c8                 bsr        $00E015A4
@@ -1291,6 +1320,8 @@
 [00e011a8] 322d 0a64                 move.w     2660(a5),d1
 [00e011ac] 3b41 0a66                 move.w     d1,2662(a5)
 [00e011b0] 4e75                      rts
+
+_flopwrt:
 [00e011b2] 6100 0664                 bsr        $00E01818
 [00e011b6] 70f6                      moveq.l    #-10,d0
 [00e011b8] 6100 03ea                 bsr        $00E015A4
@@ -1341,6 +1372,8 @@
 [00e0126e] 536d 0a36                 subq.w     #1,2614(a5)
 [00e01272] 6a00 ff5e                 bpl        $00E011D2
 [00e01276] 6000 03ac                 bra        $00E01624
+
+_flopfmt:
 [00e0127a] 0caf 8765 4321 0016       cmpi.l     #$87654321,22(a7)
 [00e01282] 6600 03a0                 bne        $00E01624
 [00e01286] 6100 0590                 bsr        $00E01818
@@ -1458,6 +1491,8 @@
 [00e0143c] 14c0                      move.b     d0,(a2)+
 [00e0143e] 51c9 fffc                 dbf        d1,$00E0143C
 [00e01442] 4e75                      rts
+
+_flopver:
 [00e01444] 6100 03d2                 bsr        $00E01818
 [00e01448] 70f5                      moveq.l    #-11,d0
 [00e0144a] 6100 0158                 bsr        $00E015A4
@@ -1741,6 +1776,8 @@
 [00e01860] 302d 0a48                 move.w     2632(a5),d0
 [00e01864] 119f 0000                 move.b     (a7)+,0(a0,d0.w)
 [00e01868] 4e75                      rts
+
+_floprate:
 [00e0186a] 41f9 0000 0a8c            lea.l      $00000A8C,a0
 [00e01870] 4a6f 0004                 tst.w      4(a7)
 [00e01874] 6706                      beq.s      $00E0187C
@@ -1783,6 +1820,8 @@
 [00e01904] 6dae                      blt.s      $00E018B4
 [00e01906] 4e5e                      unlk       a6
 [00e01908] 4e75                      rts
+
+_dbmsg:
 [00e0190a] 4e56 fffc                 link       a6,#$FFFC
 [00e0190e] 4280                      clr.l      d0
 [00e01910] 4e5e                      unlk       a6
@@ -2203,6 +2242,8 @@
 [00e01e46] 4cdf 20f8                 movem.l    (a7)+,d3-d7/a5
 [00e01e4a] 4e5e                      unlk       a6
 [00e01e4c] 4e75                      rts
+
+_random:
 [00e01e4e] 4e56 fffc                 link       a6,#$FFFC
 [00e01e52] 4ab9 0000 0ef0            tst.l      $00000EF0
 [00e01e58] 6616                      bne.s      $00E01E70
@@ -2263,6 +2304,8 @@
 [00e01f12] 4cdf 0080                 movem.l    (a7)+,d7
 [00e01f16] 4e5e                      unlk       a6
 [00e01f18] 4e75                      rts
+
+_protobt:
 [00e01f1a] 4e56 fffa                 link       a6,#$FFFA
 [00e01f1e] 48e7 0704                 movem.l    d5-d7/a5,-(a7)
 [00e01f22] 4a6e 0012                 tst.w      18(a6)
@@ -2595,6 +2638,8 @@
 [00e0232e] 4e75                      rts
 [00e02330] 70ff                      moveq.l    #-1,d0
 [00e02332] 4e75                      rts
+
+_prtblk:
 [00e02334] 4e56 0000                 link       a6,#$0000
 [00e02338] 48e7 070c                 movem.l    d5-d7/a4-a5,-(a7)
 [00e0233c] 2a6e 0008                 movea.l    8(a6),a5
@@ -3746,12 +3791,16 @@
 [00e0343a] c2fc 000a                 mulu.w     #$000A,d1
 [00e0343e] d041                      add.w      d1,d0
 [00e03440] 4e75                      rts
+
+_bco3stat:
 [00e03442] 70ff                      moveq.l    #-1,d0
 [00e03444] 142d fc04                 move.b     -1020(a5),d2
 [00e03448] 0802 0001                 btst       #1,d2
 [00e0344c] 6602                      bne.s      $00E03450
 [00e0344e] 7000                      moveq.l    #0,d0
 [00e03450] 4e75                      rts
+
+_bcon3out:
 [00e03452] 322f 0006                 move.w     6(a7),d1
 [00e03456] 43ed fc04                 lea.l      -1020(a5),a1
 [00e0345a] 1429 0000                 move.b     0(a1),d2
@@ -3759,6 +3808,8 @@
 [00e03462] 67f6                      beq.s      $00E0345A
 [00e03464] 1341 0002                 move.b     d1,2(a1)
 [00e03468] 4e75                      rts
+
+_midiws:
 [00e0346a] 7600                      moveq.l    #0,d3
 [00e0346c] 362f 0004                 move.w     4(a7),d3
 [00e03470] 246f 0006                 movea.l    6(a7),a2
@@ -3766,6 +3817,8 @@
 [00e03476] 61de                      bsr.s      $00E03456
 [00e03478] 51cb fffa                 dbf        d3,$00E03474
 [00e0347c] 4e75                      rts
+
+_bcon3stat:
 [00e0347e] 41ed 0de0                 lea.l      3552(a5),a0
 [00e03482] 43ed fc04                 lea.l      -1020(a5),a1
 [00e03486] 70ff                      moveq.l    #-1,d0
@@ -3775,6 +3828,8 @@
 [00e03492] 6602                      bne.s      $00E03496
 [00e03494] 7000                      moveq.l    #0,d0
 [00e03496] 4e75                      rts
+
+_bcon3in:
 [00e03498] 61e4                      bsr.s      $00E0347E
 [00e0349a] 4a40                      tst.w      d0
 [00e0349c] 67fa                      beq.s      $00E03498
@@ -3793,6 +3848,8 @@
 [00e034c6] 3141 0006                 move.w     d1,6(a0)
 [00e034ca] 46df                      move.w     (a7)+,sr
 [00e034cc] 4e75                      rts
+
+_bcon0out:
 [00e034ce] 082d 0004 0eec            btst       #4,3820(a5)
 [00e034d4] 6600 0124                 bne        $00E035FA
 [00e034d8] 242d 04ba                 move.l     1210(a5),d2
@@ -3832,6 +3889,8 @@
 [00e03540] 6000 0d3e                 bra        $00E04280
 [00e03544] 74df                      moveq.l    #-33,d2
 [00e03546] 6000 0d5e                 bra        $00E042A6
+
+_bcon0in:
 [00e0354a] 7207                      moveq.l    #7,d1
 [00e0354c] 6100 0cfc                 bsr        $00E0424A
 [00e03550] 0200 007f                 andi.b     #$7F,d0
@@ -3844,12 +3903,16 @@
 [00e03562] 61e0                      bsr.s      $00E03544
 [00e03564] 720f                      moveq.l    #15,d1
 [00e03566] 6000 0ce2                 bra        $00E0424A
+
+_bco0stat:
 [00e0356a] 41f9 ffff fa01            lea.l      $FFFFFA01,a0
 [00e03570] 70ff                      moveq.l    #-1,d0
 [00e03572] 0828 0000 0000            btst       #0,0(a0)
 [00e03578] 6702                      beq.s      $00E0357C
 [00e0357a] 7000                      moveq.l    #0,d0
 [00e0357c] 4e75                      rts
+
+_bcon6stat:
 [00e0357e] 41f9 0000 0cb0            lea.l      $00000CB0,a0
 [00e03584] 70ff                      moveq.l    #-1,d0
 [00e03586] 43e8 0006                 lea.l      6(a0),a1
@@ -3858,6 +3921,8 @@
 [00e03590] 6602                      bne.s      $00E03594
 [00e03592] 7000                      moveq.l    #0,d0
 [00e03594] 4e75                      rts
+
+_bcon6in:
 [00e03596] 41f9 0000 0cb0            lea.l      $00000CB0,a0
 [00e0359c] 6100 05b6                 bsr        $00E03B54
 [00e035a0] 3f00                      move.w     d0,-(a7)
@@ -3880,6 +3945,8 @@
 [00e035da] 612c                      bsr.s      $00E03608
 [00e035dc] 301f                      move.w     (a7)+,d0
 [00e035de] 4e75                      rts
+
+_bco6stat:
 [00e035e0] 41f9 0000 0cbe            lea.l      $00000CBE,a0
 [00e035e6] 3228 0008                 move.w     8(a0),d1
 [00e035ea] 6100 05c6                 bsr        $00E03BB2
@@ -3899,12 +3966,16 @@
 [00e0361a] 6100 04d6                 bsr        $00E03AF2
 [00e0361e] 46df                      move.w     (a7)+,sr
 [00e03620] 4e75                      rts
+
+_bco4stat:
 [00e03622] 70ff                      moveq.l    #-1,d0
 [00e03624] 1439 ffff fc00            move.b     $FFFFFC00,d2
 [00e0362a] 0802 0001                 btst       #1,d2
 [00e0362e] 6602                      bne.s      $00E03632
 [00e03630] 7000                      moveq.l    #0,d0
 [00e03632] 4e75                      rts
+
+_bcon4out:
 [00e03634] 322f 0006                 move.w     6(a7),d1
 [00e03638] 43f9 ffff fc00            lea.l      $FFFFFC00,a1
 [00e0363e] 1429 0000                 move.b     0(a1),d2
@@ -3915,6 +3986,8 @@
 [00e0364e] 51ca fffc                 dbf        d2,$00E0364C
 [00e03652] 1341 0002                 move.b     d1,2(a1)
 [00e03656] 4e75                      rts
+
+_ikbdws:
 [00e03658] 7600                      moveq.l    #0,d3
 [00e0365a] 362f 0004                 move.w     4(a7),d3
 [00e0365e] 246f 0006                 movea.l    6(a7),a2
@@ -3922,6 +3995,8 @@
 [00e03664] 61d2                      bsr.s      $00E03638
 [00e03666] 51cb fffa                 dbf        d3,$00E03662
 [00e0366a] 4e75                      rts
+
+_bcon2stat:
 [00e0366c] 41ed 0cd2                 lea.l      3282(a5),a0
 [00e03670] 70ff                      moveq.l    #-1,d0
 [00e03672] 45e8 0006                 lea.l      6(a0),a2
@@ -3930,6 +4005,8 @@
 [00e0367c] 6602                      bne.s      $00E03680
 [00e0367e] 7000                      moveq.l    #0,d0
 [00e03680] 4e75                      rts
+
+_bcon2in:
 [00e03682] 61e8                      bsr.s      $00E0366C
 [00e03684] 4a40                      tst.w      d0
 [00e03686] 67fa                      beq.s      $00E03682
@@ -3948,6 +4025,8 @@
 [00e036b0] 3141 0006                 move.w     d1,6(a0)
 [00e036b4] 46df                      move.w     (a7)+,sr
 [00e036b6] 4e75                      rts
+
+_bco2stat:
 [00e036b8] 70ff                      moveq.l    #-1,d0
 [00e036ba] 4e75                      rts
 [00e036bc] 41f9 ffff fa01            lea.l      $FFFFFA01,a0
@@ -4120,6 +4199,8 @@ dummyrts:
 [00e03936] 614a                      bsr.s      $00E03982
 [00e03938] 4cdf 0707                 movem.l    (a7)+,d0-d2/a0-a2
 [00e0393c] 4e75                      rts
+
+_jdisint:
 [00e0393e] 302f 0004                 move.w     4(a7),d0
 [00e03942] 0280 0000 000f            andi.l     #$0000000F,d0
 [00e03948] 48e7 c0c0                 movem.l    d0-d1/a0-a1,-(a7)
@@ -4138,6 +4219,8 @@ dummyrts:
 [00e03970] 0391                      bclr       d1,(a1)
 [00e03972] 4cdf 0303                 movem.l    (a7)+,d0-d1/a0-a1
 [00e03976] 4e75                      rts
+
+_jenabint:
 [00e03978] 302f 0004                 move.w     4(a7),d0
 [00e0397c] 0280 0000 000f            andi.l     #$0000000F,d0
 [00e03982] 48e7 c0c0                 movem.l    d0-d1/a0-a1,-(a7)
@@ -4296,6 +4379,8 @@ dummyrts:
 [00e03bb8] 6502                      bcs.s      $00E03BBC
 [00e03bba] 7200                      moveq.l    #0,d1
 [00e03bbc] 4e75                      rts
+
+_iorec:
 [00e03bbe] 322f 0004                 move.w     4(a7),d1
 [00e03bc2] e581                      asl.l      #2,d1
 [00e03bc4] 203b 1004                 move.l     $00E03BCA(pc,d1.w),d0
@@ -4303,6 +4388,8 @@ dummyrts:
 [00e03bca] 0000                      dc.w       $0000
 [00e03bcc] 0cb0 0000 0cd2 0000       cmpi.l     #$00000CD2,0(a0,d0.w)
 [00e03bd4] 0de0                      bset       d6,-(a0)
+
+_rsconf:
 [00e03bd6] 0c6f fffe 0004            cmpi.w     #$FFFE,4(a7)
 [00e03bdc] 6608                      bne.s      $00E03BE6
 [00e03bde] 3039 0000 0aae            move.w     $00000AAE,d0
@@ -4794,6 +4881,8 @@ midiread:
 [00e0423a] 206d 0004                 movea.l    4(a5),a0
 [00e0423e] 4ed0                      jmp        (a0)
 [00e04240] 0000                      dc.w       $0000
+
+_giaccess:
 [00e04242] 302f 0004                 move.w     4(a7),d0
 [00e04246] 322f 0006                 move.w     6(a7),d1
 [00e0424a] 40e7                      move.w     sr,-(a7)
@@ -4813,6 +4902,8 @@ midiread:
 [00e04274] 4e75                      rts
 [00e04276] 74ef                      moveq.l    #-17,d2
 [00e04278] 602c                      bra.s      $00E042A6
+
+_ongibit:
 [00e0427a] 7400                      moveq.l    #0,d2
 [00e0427c] 342f 0004                 move.w     4(a7),d2
 [00e04280] 48e7 e000                 movem.l    d0-d2,-(a7)
@@ -4828,6 +4919,8 @@ midiread:
 [00e04298] 46df                      move.w     (a7)+,sr
 [00e0429a] 4cdf 0007                 movem.l    (a7)+,d0-d2
 [00e0429e] 4e75                      rts
+
+_offgibit:
 [00e042a0] 7400                      moveq.l    #0,d2
 [00e042a2] 342f 0004                 move.w     4(a7),d2
 [00e042a6] 48e7 e000                 movem.l    d0-d2,-(a7)
@@ -4843,6 +4936,8 @@ midiread:
 [00e042be] 46df                      move.w     (a7)+,sr
 [00e042c0] 4cdf 0007                 movem.l    (a7)+,d0-d2
 [00e042c4] 4e75                      rts
+
+_initmouse:
 [00e042c6] 4a6f 0004                 tst.w      4(a7)
 [00e042ca] 6726                      beq.s      $00E042F2
 [00e042cc] 2b6f 000a 0e7e            move.l     10(a7),3710(a5)
@@ -4901,6 +4996,8 @@ midiread:
 [00e04386] 14fc 0007                 move.b     #$07,(a2)+
 [00e0438a] 14eb 0001                 move.b     1(a3),(a2)+
 [00e0438e] 4e75                      rts
+
+_xbtimer:
 [00e04390] 7000                      moveq.l    #0,d0
 [00e04392] 7200                      moveq.l    #0,d1
 [00e04394] 7400                      moveq.l    #0,d2
@@ -4918,6 +5015,8 @@ midiread:
 [00e043c0] 6100 f560                 bsr        $00E03922
 [00e043c4] 4e75                      rts
 [00e043c6] 0d08 0504                 movep.w    1284(a0),d6
+
+_keytbl:
 [00e043ca] 4aaf 0004                 tst.l      4(a7)
 [00e043ce] 6b06                      bmi.s      $00E043D6
 [00e043d0] 2b6f 0004 0ebe            move.l     4(a7),3774(a5)
@@ -4929,21 +5028,29 @@ midiread:
 [00e043e8] 2b6f 000c 0ec6            move.l     12(a7),3782(a5)
 [00e043ee] 203c 0000 0ebe            move.l     #$00000EBE,d0
 [00e043f4] 4e75                      rts
+
+_bioskeys:
 [00e043f6] 2b7c 00e2 a248 0ebe       move.l     #$00E2A248,3774(a5)
 [00e043fe] 2b7c 00e2 a2c8 0ec2       move.l     #$00E2A2C8,3778(a5)
 [00e04406] 2b7c 00e2 a348 0ec6       move.l     #$00E2A348,3782(a5)
 [00e0440e] 4e75                      rts
+
+_dosound:
 [00e04410] 202d 0ee6                 move.l     3814(a5),d0
 [00e04414] 222f 0004                 move.l     4(a7),d1
 [00e04418] 6b08                      bmi.s      $00E04422
 [00e0441a] 2b41 0ee6                 move.l     d1,3814(a5)
 [00e0441e] 422d 0eea                 clr.b      3818(a5)
 [00e04422] 4e75                      rts
+
+_setprt:
 [00e04424] 302d 0eec                 move.w     3820(a5),d0
 [00e04428] 4a6f 0004                 tst.w      4(a7)
 [00e0442c] 6b06                      bmi.s      $00E04434
 [00e0442e] 3b6f 0004 0eec            move.w     4(a7),3820(a5)
 [00e04434] 4e75                      rts
+
+_kbrate:
 [00e04436] 302d 0ede                 move.w     3806(a5),d0
 [00e0443a] 4a6f 0004                 tst.w      4(a7)
 [00e0443e] 6b16                      bmi.s      $00E04456
@@ -4954,6 +5061,8 @@ midiread:
 [00e0444e] 322f 0006                 move.w     6(a7),d1
 [00e04452] 1b41 0edf                 move.b     d1,3807(a5)
 [00e04456] 4e75                      rts
+
+_kbdvbase:
 [00e04458] 203c 0000 0e6e            move.l     #$00000E6E,d0
 [00e0445e] 4e75                      rts
 [00e04460] 52b9 0000 04ba            addq.l     #1,$000004BA
@@ -5054,6 +5163,8 @@ midiread:
 [00e0459e] 4280                      clr.l      d0
 [00e045a0] 4e5e                      unlk       a6
 [00e045a2] 4e75                      rts
+
+xconstat:
 [00e045a4] 4e56 fffc                 link       a6,#$FFFC
 [00e045a8] 2079 0000 5662            movea.l    $00005662,a0
 [00e045ae] 1028 0030                 move.b     48(a0),d0
@@ -5063,6 +5174,8 @@ midiread:
 [00e045b8] 61b4                      bsr.s      $00E0456E
 [00e045ba] 4e5e                      unlk       a6
 [00e045bc] 4e75                      rts
+
+xconostat:
 [00e045be] 4e56 fffc                 link       a6,#$FFFC
 [00e045c2] 2079 0000 5662            movea.l    $00005662,a0
 [00e045c8] 1028 0031                 move.b     49(a0),d0
@@ -5074,6 +5187,8 @@ midiread:
 [00e045dc] 548f                      addq.l     #2,a7
 [00e045de] 4e5e                      unlk       a6
 [00e045e0] 4e75                      rts
+
+xprtostat:
 [00e045e2] 4e56 fffc                 link       a6,#$FFFC
 [00e045e6] 2079 0000 5662            movea.l    $00005662,a0
 [00e045ec] 1028 0033                 move.b     51(a0),d0
@@ -5085,6 +5200,8 @@ midiread:
 [00e04600] 548f                      addq.l     #2,a7
 [00e04602] 4e5e                      unlk       a6
 [00e04604] 4e75                      rts
+
+xauxistat:
 [00e04606] 4e56 fffc                 link       a6,#$FFFC
 [00e0460a] 2079 0000 5662            movea.l    $00005662,a0
 [00e04610] 1028 0032                 move.b     50(a0),d0
@@ -5094,6 +5211,8 @@ midiread:
 [00e0461a] 6100 ff52                 bsr        $00E0456E
 [00e0461e] 4e5e                      unlk       a6
 [00e04620] 4e75                      rts
+
+xauxostat:
 [00e04622] 4e56 fffc                 link       a6,#$FFFC
 [00e04626] 2079 0000 5662            movea.l    $00005662,a0
 [00e0462c] 1028 0032                 move.b     50(a0),d0
@@ -5285,6 +5404,8 @@ midiread:
 [00e04870] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e04874] 4e5e                      unlk       a6
 [00e04876] 4e75                      rts
+
+xtabout:
 [00e04878] 4e56 fffc                 link       a6,#$FFFC
 [00e0487c] 3eae 0008                 move.w     8(a6),(a7)
 [00e04880] 0257 00ff                 andi.w     #$00FF,(a7)
@@ -5350,6 +5471,7 @@ midiread:
 [00e04932] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e04936] 4e5e                      unlk       a6
 [00e04938] 4e75                      rts
+xauxout:
 [00e0493a] 4e56 fffc                 link       a6,#$FFFC
 [00e0493e] 3eae 0008                 move.w     8(a6),(a7)
 [00e04942] 2079 0000 5662            movea.l    $00005662,a0
@@ -5362,6 +5484,7 @@ midiread:
 [00e0495c] 588f                      addq.l     #4,a7
 [00e0495e] 4e5e                      unlk       a6
 [00e04960] 4e75                      rts
+xprtout:
 [00e04962] 4e56 fffc                 link       a6,#$FFFC
 [00e04966] 3eae 0008                 move.w     8(a6),(a7)
 [00e0496a] 2079 0000 5662            movea.l    $00005662,a0
@@ -5427,6 +5550,7 @@ midiread:
 [00e04a30] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e04a34] 4e5e                      unlk       a6
 [00e04a36] 4e75                      rts
+x7in:
 [00e04a38] 4e56 fffc                 link       a6,#$FFFC
 [00e04a3c] 2079 0000 5662            movea.l    $00005662,a0
 [00e04a42] 1028 0030                 move.b     48(a0),d0
@@ -5456,6 +5580,8 @@ midiread:
 [00e04a84] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e04a88] 4e5e                      unlk       a6
 [00e04a8a] 4e75                      rts
+
+xconin:
 [00e04a8c] 4e56 fffc                 link       a6,#$FFFC
 [00e04a90] 2079 0000 5662            movea.l    $00005662,a0
 [00e04a96] 1028 0030                 move.b     48(a0),d0
@@ -5465,6 +5591,8 @@ midiread:
 [00e04aa0] 61b2                      bsr.s      $00E04A54
 [00e04aa2] 4e5e                      unlk       a6
 [00e04aa4] 4e75                      rts
+
+x8in:
 [00e04aa6] 4e56 0000                 link       a6,#$0000
 [00e04aaa] 48e7 0700                 movem.l    d5-d7,-(a7)
 [00e04aae] 2079 0000 5662            movea.l    $00005662,a0
@@ -5484,6 +5612,8 @@ midiread:
 [00e04ad6] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e04ada] 4e5e                      unlk       a6
 [00e04adc] 4e75                      rts
+
+xauxin:
 [00e04ade] 4e56 fffc                 link       a6,#$FFFC
 [00e04ae2] 2079 0000 5662            movea.l    $00005662,a0
 [00e04ae8] 1028 0032                 move.b     50(a0),d0
@@ -5495,6 +5625,7 @@ midiread:
 [00e04afc] 548f                      addq.l     #2,a7
 [00e04afe] 4e5e                      unlk       a6
 [00e04b00] 4e75                      rts
+rawconio:
 [00e04b02] 4e56 0000                 link       a6,#$0000
 [00e04b06] 48e7 0300                 movem.l    d6-d7,-(a7)
 [00e04b0a] 0c6e 00ff 0008            cmpi.w     #$00FF,8(a6)
@@ -5526,6 +5657,8 @@ midiread:
 [00e04b5a] 4cdf 0080                 movem.l    (a7)+,d7
 [00e04b5e] 4e5e                      unlk       a6
 [00e04b60] 4e75                      rts
+
+xprt_line:
 [00e04b62] 4e56 fffc                 link       a6,#$FFFC
 [00e04b66] 2eae 0008                 move.l     8(a6),(a7)
 [00e04b6a] 2079 0000 5662            movea.l    $00005662,a0
@@ -5627,6 +5760,8 @@ midiread:
 [00e04c8a] 4cdf 20c0                 movem.l    (a7)+,d6-d7/a5
 [00e04c8e] 4e5e                      unlk       a6
 [00e04c90] 4e75                      rts
+
+readline:
 [00e04c92] 4e56 0000                 link       a6,#$0000
 [00e04c96] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e04c9a] 2a6e 0008                 movea.l    8(a6),a5
@@ -7117,6 +7252,8 @@ midiread:
 [00e05f86] 4cdf 20e0                 movem.l    (a7)+,d5-d7/a5
 [00e05f8a] 4e5e                      unlk       a6
 [00e05f8c] 4e75                      rts
+
+xgetfree:
 [00e05f8e] 4e56 0000                 link       a6,#$0000
 [00e05f92] 48e7 1f0c                 movem.l    d3-d7/a4-a5,-(a7)
 [00e05f96] 3e2e 000c                 move.w     12(a6),d7
@@ -7489,6 +7626,8 @@ midiread:
 [00e06434] 4cdf 3880                 movem.l    (a7)+,d7/a3-a5
 [00e06438] 4e5e                      unlk       a6
 [00e0643a] 4e75                      rts
+
+xchdir:
 [00e0643c] 4e56 fffc                 link       a6,#$FFFC
 [00e06440] 48e7 1f00                 movem.l    d3-d7,-(a7)
 [00e06444] 206e 0008                 movea.l    8(a6),a0
@@ -7571,6 +7710,7 @@ midiread:
 [00e06530] 4cdf 00f0                 movem.l    (a7)+,d4-d7
 [00e06534] 4e5e                      unlk       a6
 [00e06536] 4e75                      rts
+xgetdir:
 [00e06538] 4e56 0000                 link       a6,#$0000
 [00e0653c] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e06540] 4a6e 000c                 tst.w      12(a6)
@@ -7686,6 +7826,8 @@ midiread:
 [00e066ba] 4cdf 38c0                 movem.l    (a7)+,d6-d7/a3-a5
 [00e066be] 4e5e                      unlk       a6
 [00e066c0] 4e75                      rts
+
+xmkdir:
 [00e066c2] 4e56 ffce                 link       a6,#$FFCE
 [00e066c6] 3ebc 0010                 move.w     #$0010,(a7)
 [00e066ca] 2f2e 0008                 move.l     8(a6),-(a7)
@@ -7808,6 +7950,8 @@ midiread:
 [00e068c8] 4280                      clr.l      d0
 [00e068ca] 4e5e                      unlk       a6
 [00e068cc] 4e75                      rts
+
+xrmdir:
 [00e068ce] 4e56 fff0                 link       a6,#$FFF0
 [00e068d2] 48e7 031c                 movem.l    d6-d7/a3-a5,-(a7)
 [00e068d6] 3ebc 0001                 move.w     #$0001,(a7)
@@ -7959,6 +8103,7 @@ midiread:
 [00e06ad2] 4cdf 3000                 movem.l    (a7)+,a4-a5
 [00e06ad6] 4e5e                      unlk       a6
 [00e06ad8] 4e75                      rts
+xsnext:
 [00e06ada] 4e56 ffe6                 link       a6,#$FFE6
 [00e06ade] 48e7 0f1c                 movem.l    d4-d7/a3-a5,-(a7)
 [00e06ae2] 2079 0000 5662            movea.l    $00005662,a0
@@ -8552,6 +8697,7 @@ midiread:
 [00e072d0] 4cdf 3000                 movem.l    (a7)+,a4-a5
 [00e072d4] 4e5e                      unlk       a6
 [00e072d6] 4e75                      rts
+xchmod:
 [00e072d8] 4e56 fff6                 link       a6,#$FFF6
 [00e072dc] 48e7 010c                 movem.l    d7/a4-a5,-(a7)
 [00e072e0] 42ae fff8                 clr.l      -8(a6)
@@ -8619,6 +8765,7 @@ midiread:
 [00e073ae] 4cdf 3000                 movem.l    (a7)+,a4-a5
 [00e073b2] 4e5e                      unlk       a6
 [00e073b4] 4e75                      rts
+xgsdtof:
 [00e073b6] 4e56 fffc                 link       a6,#$FFFC
 [00e073ba] 48e7 010c                 movem.l    d7/a4-a5,-(a7)
 [00e073be] 3eae 000c                 move.w     12(a6),(a7)
@@ -8670,6 +8817,7 @@ midiread:
 [00e07460] 4cdf 3000                 movem.l    (a7)+,a4-a5
 [00e07464] 4e5e                      unlk       a6
 [00e07466] 4e75                      rts
+xunlink:
 [00e07468] 4e56 fff8                 link       a6,#$FFF8
 [00e0746c] 48e7 010c                 movem.l    d7/a4-a5,-(a7)
 [00e07470] 42ae fff8                 clr.l      -8(a6)
@@ -8797,6 +8945,7 @@ midiread:
 [00e075f0] 4cdf 30c0                 movem.l    (a7)+,d6-d7/a4-a5
 [00e075f4] 4e5e                      unlk       a6
 [00e075f6] 4e75                      rts
+xrename:
 [00e075f8] 4e56 ffdc                 link       a6,#$FFDC
 [00e075fc] 48e7 1f1c                 movem.l    d3-d7/a3-a5,-(a7)
 [00e07600] 42ae ffdc                 clr.l      -36(a6)
@@ -9014,6 +9163,7 @@ midiread:
 [00e078e0] 4cdf 0080                 movem.l    (a7)+,d7
 [00e078e4] 4e5e                      unlk       a6
 [00e078e6] 4e75                      rts
+xlseek:
 [00e078e8] 4e56 0000                 link       a6,#$0000
 [00e078ec] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e078f0] 3eae 000c                 move.w     12(a6),(a7)
@@ -9172,6 +9322,7 @@ midiread:
 [00e07ac4] 2030 9800                 move.l     0(a0,a1.l),d0
 [00e07ac8] 4e5e                      unlk       a6
 [00e07aca] 4e75                      rts
+xdup:
 [00e07acc] 4e56 0000                 link       a6,#$0000
 [00e07ad0] 48e7 0304                 movem.l    d6-d7/a5,-(a7)
 [00e07ad4] 4a6e 0008                 tst.w      8(a6)
@@ -9213,6 +9364,7 @@ midiread:
 [00e07b48] 4cdf 2080                 movem.l    (a7)+,d7/a5
 [00e07b4c] 4e5e                      unlk       a6
 [00e07b4e] 4e75                      rts
+xforce:
 [00e07b50] 4e56 fffc                 link       a6,#$FFFC
 [00e07b54] 2eb9 0000 5662            move.l     $00005662,(a7)
 [00e07b5a] 2f2e 0008                 move.l     8(a6),-(a7)
@@ -9284,6 +9436,8 @@ midiread:
 [00e07c0e] 4cdf 20e0                 movem.l    (a7)+,d5-d7/a5
 [00e07c12] 4e5e                      unlk       a6
 [00e07c14] 4e75                      rts
+
+xclose:
 [00e07c16] 4e56 0000                 link       a6,#$0000
 [00e07c1a] 48e7 070c                 movem.l    d5-d7/a4-a5,-(a7)
 [00e07c1e] 302e 0008                 move.w     8(a6),d0
@@ -9350,6 +9504,7 @@ midiread:
 [00e07cda] 4cdf 30c0                 movem.l    (a7)+,d6-d7/a4-a5
 [00e07cde] 4e5e                      unlk       a6
 [00e07ce0] 4e75                      rts
+xread:
 [00e07ce2] 4e56 0000                 link       a6,#$0000
 [00e07ce6] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e07cea] 3eae 0008                 move.w     8(a6),(a7)
@@ -9372,6 +9527,7 @@ midiread:
 [00e07d1a] 4cdf 2000                 movem.l    (a7)+,a5
 [00e07d1e] 4e5e                      unlk       a6
 [00e07d20] 4e75                      rts
+xwrite:
 [00e07d22] 4e56 0000                 link       a6,#$0000
 [00e07d26] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e07d2a] 3eae 0008                 move.w     8(a6),(a7)
@@ -9442,16 +9598,22 @@ midiread:
 [00e07df8] 4cdf 2080                 movem.l    (a7)+,d7/a5
 [00e07dfc] 4e5e                      unlk       a6
 [00e07dfe] 4e75                      rts
+
+xgetdta:
 [00e07e00] 4e56 fffc                 link       a6,#$FFFC
 [00e07e04] 2079 0000 5662            movea.l    $00005662,a0
 [00e07e0a] 2028 0020                 move.l     32(a0),d0
 [00e07e0e] 4e5e                      unlk       a6
 [00e07e10] 4e75                      rts
+
+xsetdta:
 [00e07e12] 4e56 fffc                 link       a6,#$FFFC
 [00e07e16] 2079 0000 5662            movea.l    $00005662,a0
 [00e07e1c] 216e 0008 0020            move.l     8(a6),32(a0)
 [00e07e22] 4e5e                      unlk       a6
 [00e07e24] 4e75                      rts
+
+xsetdrv:
 [00e07e26] 4e56 fffc                 link       a6,#$FFFC
 [00e07e2a] 302e 0008                 move.w     8(a6),d0
 [00e07e2e] 2279 0000 5662            movea.l    $00005662,a1
@@ -9460,6 +9622,8 @@ midiread:
 [00e07e3c] 4eb9 00e0 9428            jsr        $00E09428
 [00e07e42] 4e5e                      unlk       a6
 [00e07e44] 4e75                      rts
+
+xgetdrv:
 [00e07e46] 4e56 fffc                 link       a6,#$FFFC
 [00e07e4a] 2079 0000 5662            movea.l    $00005662,a0
 [00e07e50] 1028 0037                 move.b     55(a0),d0
@@ -9467,6 +9631,8 @@ midiread:
 [00e07e56] 48c0                      ext.l      d0
 [00e07e58] 4e5e                      unlk       a6
 [00e07e5a] 4e75                      rts
+
+xsfirst:
 [00e07e5c] 4e56 fffc                 link       a6,#$FFFC
 [00e07e60] 2079 0000 5662            movea.l    $00005662,a0
 [00e07e66] 2ea8 0020                 move.l     32(a0),(a7)
@@ -9476,6 +9642,8 @@ midiread:
 [00e07e78] 5c8f                      addq.l     #6,a7
 [00e07e7a] 4e5e                      unlk       a6
 [00e07e7c] 4e75                      rts
+
+xcreat:
 [00e07e7e] 4e56 fffc                 link       a6,#$FFFC
 [00e07e82] 082e 0004 000d            btst       #4,13(a6)
 [00e07e88] 6610                      bne.s      $00E07E9A
@@ -9494,6 +9662,8 @@ midiread:
 [00e07eb4] 588f                      addq.l     #4,a7
 [00e07eb6] 4e5e                      unlk       a6
 [00e07eb8] 4e75                      rts
+
+xopen:
 [00e07eba] 4e56 fffc                 link       a6,#$FFFC
 [00e07ebe] 3eae 000c                 move.w     12(a6),(a7)
 [00e07ec2] 2f2e 0008                 move.l     8(a6),-(a7)
@@ -9871,6 +10041,8 @@ midiread:
 [00e082c0] 4cdf 3080                 movem.l    (a7)+,d7/a4-a5
 [00e082c4] 4e5e                      unlk       a6
 [00e082c6] 4e75                      rts
+
+xtermres:
 [00e082c8] 4e56 fffc                 link       a6,#$FFFC
 [00e082cc] 2eae 0008                 move.l     8(a6),(a7)
 [00e082d0] 2f39 0000 5662            move.l     $00005662,-(a7)
@@ -9883,6 +10055,8 @@ midiread:
 [00e082f0] 6104                      bsr.s      $00E082F6
 [00e082f2] 4e5e                      unlk       a6
 [00e082f4] 4e75                      rts
+
+xterm:
 [00e082f6] 4e56 0000                 link       a6,#$0000
 [00e082fa] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e082fe] 2ebc ffff ffff            move.l     #$FFFFFFFF,(a7)
@@ -9905,6 +10079,8 @@ midiread:
 [00e0834a] 4cdf 2000                 movem.l    (a7)+,a5
 [00e0834e] 4e5e                      unlk       a6
 [00e08350] 4e75                      rts
+
+x0term:
 [00e08352] 4e56 fffc                 link       a6,#$FFFC
 [00e08356] 4257                      clr.w      (a7)
 [00e08358] 619c                      bsr.s      $00E082F6
@@ -9975,6 +10151,7 @@ midiread:
 [00e08418] 4cdf 30c0                 movem.l    (a7)+,d6-d7/a4-a5
 [00e0841c] 4e5e                      unlk       a6
 [00e0841e] 4e75                      rts
+xexec:
 [00e08420] 4e56 ffd2                 link       a6,#$FFD2
 [00e08424] 4240                      clr.w      d0
 [00e08426] 48c0                      ext.l      d0
@@ -10548,6 +10725,7 @@ midiread:
 [00e08c40] 4cdf 38c0                 movem.l    (a7)+,d6-d7/a3-a5
 [00e08c44] 4e5e                      unlk       a6
 [00e08c46] 4e75                      rts
+xsetblk:
 [00e08c48] 4e56 0000                 link       a6,#$0000
 [00e08c4c] 48e7 010c                 movem.l    d7/a4-a5,-(a7)
 [00e08c50] 2879 0000 536c            movea.l    $0000536C,a4
@@ -10674,6 +10852,7 @@ midiread:
 [00e08dd8] 4cdf 3800                 movem.l    (a7)+,a3-a5
 [00e08ddc] 4e5e                      unlk       a6
 [00e08dde] 4e75                      rts
+xmalloc:
 [00e08de0] 4e56 0000                 link       a6,#$0000
 [00e08de4] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e08de8] 0cae ffff ffff 0008       cmpi.l     #$FFFFFFFF,8(a6)
@@ -10699,6 +10878,7 @@ midiread:
 [00e08e2c] 4cdf 2000                 movem.l    (a7)+,a5
 [00e08e30] 4e5e                      unlk       a6
 [00e08e32] 4e75                      rts
+xmfree:
 [00e08e34] 4e56 0000                 link       a6,#$0000
 [00e08e38] 48e7 010c                 movem.l    d7/a4-a5,-(a7)
 [00e08e3c] 287c 0000 536c            movea.l    #$0000536C,a4
@@ -11172,6 +11352,8 @@ midiread:
 [00e093d2] 4cdf 3880                 movem.l    (a7)+,d7/a3-a5
 [00e093d6] 4e5e                      unlk       a6
 [00e093d8] 4e75                      rts
+
+__osinit:
 [00e093da] 23fc 00e0 9502 0000 0084  move.l     #$00E09502,$00000084
 [00e093e4] 23f9 0000 0088 0000 1858  move.l     $00000088,$00001858
 [00e093ee] 23fc 00e0 9448 0000 0088  move.l     #$00E09448,$00000088
@@ -11256,6 +11438,8 @@ midiread:
 [00e094fc] 2e58                      movea.l    (a0)+,a7
 [00e094fe] 2f10                      move.l     (a0),-(a7)
 [00e09500] 4e75                      rts
+
+_enter:
 [00e09502] 0817 0005                 btst       #5,(a7)
 [00e09506] 660c                      bne.s      $00E09514
 [00e09508] 4e68                      move.l     usp,a0
@@ -11302,6 +11486,8 @@ midiread:
 [00e09590] 2f08                      move.l     a0,-(a7)
 [00e09592] 4eb9 00e0 9a4e            jsr        $00E09A4E
 [00e09598] 588f                      addq.l     #4,a7
+
+_gouser:
 [00e0959a] 2a79 0000 5662            movea.l    $00005662,a5
 [00e095a0] 2b40 0068                 move.l     d0,104(a5)
 [00e095a4] 2c6d 007c                 movea.l    124(a5),a6
@@ -11515,6 +11701,8 @@ midiread:
 [00e097ec] 12d8                      move.b     (a0)+,(a1)+
 [00e097ee] 51c8 fffc                 dbf        d0,$00E097EC
 [00e097f2] 4e75                      rts
+
+_osinit:
 [00e097f4] 4e56 fffc                 link       a6,#$FFFC
 [00e097f8] 23fc 0000 6114 0000 6100  move.l     #$00006114,$00006100
 [00e09802] 23fc 0000 613c 0000 6128  move.l     #$0000613C,$00006128
@@ -11533,10 +11721,14 @@ midiread:
 [00e09874] 4eb9 00e0 7e26            jsr        $00E07E26
 [00e0987a] 4e5e                      unlk       a6
 [00e0987c] 4e75                      rts
+
+ni:
 [00e0987e] 4e56 fffc                 link       a6,#$FFFC
 [00e09882] 70e0                      moveq.l    #-32,d0
 [00e09884] 4e5e                      unlk       a6
 [00e09886] 4e75                      rts
+
+xgetver:
 [00e09888] 4e56 fffc                 link       a6,#$FFFC
 [00e0988c] 203c 0000 1500            move.l     #$00001500,d0
 [00e09892] 4e5e                      unlk       a6
@@ -11665,6 +11857,8 @@ midiread:
 [00e09a46] 4cdf 2080                 movem.l    (a7)+,d7/a5
 [00e09a4a] 4e5e                      unlk       a6
 [00e09a4c] 4e75                      rts
+
+_osif:
 [00e09a4e] 4e56 ffc6                 link       a6,#$FFC6
 [00e09a52] 5239 0000 5ed0            addq.b     #1,$00005ED0
 [00e09a58] 4279 0000 5308            clr.w      $00005308
@@ -12336,11 +12530,15 @@ midiread:
 [00e0a424] 4cdf 2000                 movem.l    (a7)+,a5
 [00e0a428] 4e5e                      unlk       a6
 [00e0a42a] 4e75                      rts
+
+xgetdate:
 [00e0a42c] 4e56 fffc                 link       a6,#$FFFC
 [00e0a430] 4280                      clr.l      d0
 [00e0a432] 3039 0000 60fe            move.w     $000060FE,d0
 [00e0a438] 4e5e                      unlk       a6
 [00e0a43a] 4e75                      rts
+
+xsetdate:
 [00e0a43c] 4e56 0000                 link       a6,#$0000
 [00e0a440] 48e7 0700                 movem.l    d5-d7,-(a7)
 [00e0a444] 3e2e 0008                 move.w     8(a6),d7
@@ -12383,11 +12581,15 @@ midiread:
 [00e0a4b2] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e0a4b6] 4e5e                      unlk       a6
 [00e0a4b8] 4e75                      rts
+
+xgettime:
 [00e0a4ba] 4e56 fffc                 link       a6,#$FFFC
 [00e0a4be] 4280                      clr.l      d0
 [00e0a4c0] 3039 0000 37ca            move.w     $000037CA,d0
 [00e0a4c6] 4e5e                      unlk       a6
 [00e0a4c8] 4e75                      rts
+
+xsettime:
 [00e0a4ca] 4e56 fffc                 link       a6,#$FFFC
 [00e0a4ce] 302e 0008                 move.w     8(a6),d0
 [00e0a4d2] c07c 001f                 and.w      #$001F,d0
@@ -12457,9 +12659,13 @@ J1:
 [00e0a578] c0ec 0008                 mulu.w     8(a4),d0
 [00e0a57c] 3940 ffe8                 move.w     d0,-24(a4)
 [00e0a580] 6000 02e0                 bra        $00E0A862
+
+_bcon5out:
 [00e0a584] 322f 0006                 move.w     6(a7),d1
 [00e0a588] c27c 00ff                 and.w      #$00FF,d1
 [00e0a58c] 6000 0416                 bra        $00E0A9A4
+
+_bcon2out:
 [00e0a590] 322f 0006                 move.w     6(a7),d1
 [00e0a594] 49f9 0000 2b16            lea.l      $00002B16,a4
 [00e0a59a] c27c 00ff                 and.w      #$00FF,d1
@@ -12751,6 +12957,8 @@ J2:
 [00e0a944] 08d4 0001                 bset       #1,(a4)
 [00e0a948] 67f2                      beq.s      $00E0A93C
 [00e0a94a] 4e75                      rts
+
+_cursconf:
 [00e0a94c] 49f9 0000 2b16            lea.l      $00002B16,a4
 [00e0a952] 302f 0004                 move.w     4(a7),d0
 [00e0a956] b07c 0007                 cmp.w      #$0007,d0
@@ -24138,6 +24346,8 @@ J3:
 [00e13de6] 2449                      movea.l    a1,a2
 [00e13de8] 51ce ff80                 dbf        d6,$00E13D6A
 [00e13dec] 4e75                      rts
+
+gemstart:
 [00e13dee] 2a4f                      movea.l    a7,a5
 [00e13df0] 2e7c 0000 61e6            movea.l    #$000061E6,a7
 [00e13df6] 2a6d 0004                 movea.l    4(a5),a5
@@ -24192,6 +24402,8 @@ J3:
 [00e13ede] 2e4e                      movea.l    a6,a7
 [00e13ee0] 4eb9 00e1 3f48            jsr        $00E13F48
 [00e13ee6] 60b2                      bra.s      $00E13E9A
+
+_trap:
 [00e13ee8] 23df 0000 615e            move.l     (a7)+,$0000615E
 [00e13eee] 4279 0000 746e            clr.w      $0000746E
 [00e13ef4] 4279 0000 6e64            clr.w      $00006E64
@@ -24202,6 +24414,8 @@ J3:
 [00e13f06] 33fc 0001 0000 746e       move.w     #$0001,$0000746E
 [00e13f0e] 2f39 0000 615e            move.l     $0000615E,-(a7)
 [00e13f14] 4e75                      rts
+
+all_run:
 [00e13f16] 4e56 fffa                 link       a6,#$FFFA
 [00e13f1a] 426e fffe                 clr.w      -2(a6)
 [00e13f1e] 600a                      bra.s      $00E13F2A
@@ -24215,6 +24429,8 @@ J3:
 [00e13f3e] 4eb9 00e2 8176            jsr        $00E28176
 [00e13f44] 4e5e                      unlk       a6
 [00e13f46] 4e75                      rts
+
+gem_main:
 [00e13f48] 4e56 fff4                 link       a6,#$FFF4
 [00e13f4c] 48e7 030c                 movem.l    d6-d7/a4-a5,-(a7)
 [00e13f50] 2a7c 0000 74a2            movea.l    #$000074A2,a5
@@ -24498,6 +24714,7 @@ J3:
 [00e14466] 4cdf 3080                 movem.l    (a7)+,d7/a4-a5
 [00e1446a] 4e5e                      unlk       a6
 [00e1446c] 4e75                      rts
+pinit:
 [00e1446e] 4e56 0000                 link       a6,#$0000
 [00e14472] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e14476] 2a6e 0008                 movea.l    8(a6),a5
@@ -24897,6 +25114,7 @@ J3:
 [00e149ca] 4fef 0010                 lea.l      16(a7),a7
 [00e149ce] 4cdf 1808                 movem.l    (a7)+,d3/a3-a4
 [00e149d2] 4e75                      rts
+gsx_clip:
 [00e149d4] 206f 0004                 movea.l    4(a7),a0
 [00e149d8] 2248                      movea.l    a0,a1
 [00e149da] 45f9 0000 7470            lea.l      $00007470,a2
@@ -36395,9 +36613,13 @@ J3:
 [00e1e42e] defc 0010                 adda.w     #$0010,a7
 [00e1e432] 4e5e                      unlk       a6
 [00e1e434] 4e75                      rts
+
+_cli:
 [00e1e436] 40f9 0000 640e            move.w     sr,$0000640E
 [00e1e43c] 007c 0700                 ori.w      #$0700,sr
 [00e1e440] 4e75                      rts
+
+_sti:
 [00e1e442] 46f9 0000 640e            move.w     $0000640E,sr
 [00e1e448] 4e75                      rts
 [00e1e44a] 007c 0700                 ori.w      #$0700,sr
@@ -36673,11 +36895,14 @@ J3:
 [00e1e7d0] 6100 fd84                 bsr        $00E1E556
 [00e1e7d4] defc 000a                 adda.w     #$000A,a7
 [00e1e7d8] 4e75                      rts
+givecpm:
 [00e1e7da] 23f9 0000 66a6 0000 0088  move.l     $000066A6,$00000088
 [00e1e7e4] 4e75                      rts
+takecpm:
 [00e1e7e6] 23f9 0000 0088 0000 66a6  move.l     $00000088,$000066A6
 [00e1e7f0] 23fc 00e1 ea34 0000 0088  move.l     #$00E1EA34,$00000088
 [00e1e7fa] 4e75                      rts
+retake:
 [00e1e7fc] 23fc 00e1 ea34 0000 0088  move.l     #$00E1EA34,$00000088
 [00e1e806] 203c 00e1 e836            move.l     #$00E1E836,d0
 [00e1e80c] 2f00                      move.l     d0,-(a7)
@@ -36842,6 +37067,8 @@ J3:
 [00e1ea2c] 4cdf 00f8                 movem.l    (a7)+,d3-d7
 [00e1ea30] 4e5e                      unlk       a6
 [00e1ea32] 4e75                      rts
+
+_grptrp:
 [00e1ea34] 4a40                      tst.w      d0
 [00e1ea36] 6714                      beq.s      $00E1EA4C
 [00e1ea38] 0c40 00c8                 cmpi.w     #$00C8,d0
@@ -36850,9 +37077,12 @@ J3:
 [00e1ea42] 6710                      beq.s      $00E1EA54
 [00e1ea44] 2f39 0000 66a6            move.l     $000066A6,-(a7)
 [00e1ea4a] 4e75                      rts
+_back:
 [00e1ea4c] 4267                      clr.w      -(a7)
 [00e1ea4e] 3f3c 004c                 move.w     #$004C,-(a7)
 [00e1ea52] 4e41                      trap       #1
+
+_gosuper:
 [00e1ea54] 4eb9 00e1 e436            jsr        $00E1E436
 [00e1ea5a] 4e68                      move.l     usp,a0
 [00e1ea5c] 48e0 7ffe                 movem.l    d1-d7/a0-a6,-(a0)
@@ -37890,6 +38120,7 @@ J3:
 [00e1f91e] 4cdf 0080                 movem.l    (a7)+,d7
 [00e1f922] 4e5e                      unlk       a6
 [00e1f924] 4e75                      rts
+ctlmouse:
 [00e1f926] 4e56 fffc                 link       a6,#$FFFC
 [00e1f92a] 4a6e 0008                 tst.w      8(a6)
 [00e1f92e] 674c                      beq.s      $00E1F97C
@@ -39119,6 +39350,8 @@ J3:
 [00e20a70] 4cdf 3800                 movem.l    (a7)+,a3-a5
 [00e20a74] 4e5e                      unlk       a6
 [00e20a76] 4e75                      rts
+
+crysbind:
 [00e20a78] 4e56 ffec                 link       a6,#$FFEC
 [00e20a7c] 48e7 0700                 movem.l    d5-d7,-(a7)
 [00e20a80] 2e2e 000a                 move.l     10(a6),d7
@@ -39739,6 +39972,8 @@ J3:
 [00e21332] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e21336] 4e5e                      unlk       a6
 [00e21338] 4e75                      rts
+
+_xif:
 [00e2133a] 4e56 ffbe                 link       a6,#$FFBE
 [00e2133e] 3ebc 0004                 move.w     #$0004,(a7)
 [00e21342] 206e 0008                 movea.l    8(a6),a0
@@ -39794,6 +40029,8 @@ J3:
 [00e21408] 20b9 0000 6ad8            move.l     $00006AD8,(a0)
 [00e2140e] 4e5e                      unlk       a6
 [00e21410] 4e75                      rts
+
+ap_rdwr:
 [00e21412] 4e56 fffc                 link       a6,#$FFFC
 [00e21416] 486e 000a                 pea.l      10(a6)
 [00e2141a] 3f2e 0008                 move.w     8(a6),-(a7)
@@ -39801,6 +40038,8 @@ J3:
 [00e21424] 5c8f                      addq.l     #6,a7
 [00e21426] 4e5e                      unlk       a6
 [00e21428] 4e75                      rts
+
+ap_find:
 [00e2142a] 4e56 fff6                 link       a6,#$FFF6
 [00e2142e] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e21432] 2eae 0008                 move.l     8(a6),(a7)
@@ -39821,6 +40060,8 @@ J3:
 [00e21460] 4cdf 2000                 movem.l    (a7)+,a5
 [00e21464] 4e5e                      unlk       a6
 [00e21466] 4e75                      rts
+
+ap_tplay:
 [00e21468] 4e56 fff4                 link       a6,#$FFF4
 [00e2146c] 48e7 0700                 movem.l    d5-d7,-(a7)
 [00e21470] 2e2e 0008                 move.l     8(a6),d7
@@ -39922,6 +40163,8 @@ J3:
 [00e215fc] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e21600] 4e5e                      unlk       a6
 [00e21602] 4e75                      rts
+
+ap_trecord:
 [00e21604] 4e56 fffc                 link       a6,#$FFFC
 [00e21608] 48e7 1f00                 movem.l    d3-d7,-(a7)
 [00e2160c] 2e2e 0008                 move.l     8(a6),d7
@@ -40009,6 +40252,7 @@ J3:
 [00e21754] 4eb9 00e1 ef1c            jsr        $00E1EF1C
 [00e2175a] 4e5e                      unlk       a6
 [00e2175c] 4e75                      rts
+ev_keybd:
 [00e2175e] 4e56 fffc                 link       a6,#$FFFC
 [00e21762] 4297                      clr.l      (a7)
 [00e21764] 3f3c 0005                 move.w     #$0005,-(a7)
@@ -40016,6 +40260,7 @@ J3:
 [00e2176a] 548f                      addq.l     #2,a7
 [00e2176c] 4e5e                      unlk       a6
 [00e2176e] 4e75                      rts
+ev_button:
 [00e21770] 4e56 fff6                 link       a6,#$FFF6
 [00e21774] 4280                      clr.l      d0
 [00e21776] 302e 0008                 move.w     8(a6),d0
@@ -40039,6 +40284,7 @@ J3:
 [00e217ac] 302e fffe                 move.w     -2(a6),d0
 [00e217b0] 4e5e                      unlk       a6
 [00e217b2] 4e75                      rts
+ev_mouse:
 [00e217b4] 4e56 fffa                 link       a6,#$FFFA
 [00e217b8] 2eae 0008                 move.l     8(a6),(a7)
 [00e217bc] 3f3c 0006                 move.w     #$0006,-(a7)
@@ -40052,6 +40298,7 @@ J3:
 [00e217de] 302e fffe                 move.w     -2(a6),d0
 [00e217e2] 4e5e                      unlk       a6
 [00e217e4] 4e75                      rts
+ev_mesag:
 [00e217e6] 4e56 fffc                 link       a6,#$FFFC
 [00e217ea] 4279 0000 7032            clr.w      $00007032
 [00e217f0] 2eae 0008                 move.l     8(a6),(a7)
@@ -40097,6 +40344,7 @@ J3:
 [00e2187c] 4cdf 2000                 movem.l    (a7)+,a5
 [00e21880] 4e5e                      unlk       a6
 [00e21882] 4e75                      rts
+ev_multi:
 [00e21884] 4e56 ffea                 link       a6,#$FFEA
 [00e21888] 48e7 0f0c                 movem.l    d4-d7/a4-a5,-(a7)
 [00e2188c] 3e2e 0008                 move.w     8(a6),d7
@@ -40308,6 +40556,7 @@ J3:
 [00e21ba0] 4cdf 30e0                 movem.l    (a7)+,d5-d7/a4-a5
 [00e21ba4] 4e5e                      unlk       a6
 [00e21ba6] 4e75                      rts
+ev_dclick:
 [00e21ba8] 4e56 fffc                 link       a6,#$FFFC
 [00e21bac] 4a6e 000a                 tst.w      10(a6)
 [00e21bb0] 6728                      beq.s      $00E21BDA
@@ -40616,6 +40865,7 @@ J3:
 [00e21f82] 4cdf 00e0                 movem.l    (a7)+,d5-d7
 [00e21f86] 4e5e                      unlk       a6
 [00e21f88] 4e75                      rts
+fm_alert:
 [00e21f8a] 4e56 ffdc                 link       a6,#$FFDC
 [00e21f8e] 48e7 0700                 movem.l    d5-d7,-(a7)
 [00e21f92] 486e ffee                 pea.l      -18(a6)
@@ -40802,6 +41052,7 @@ J3:
 [00e221f8] 4cdf 00f8                 movem.l    (a7)+,d3-d7
 [00e221fc] 4e5e                      unlk       a6
 [00e221fe] 4e75                      rts
+fm_keybd:
 [00e22200] 4e56 0000                 link       a6,#$0000
 [00e22204] 48e7 0300                 movem.l    d6-d7,-(a7)
 [00e22208] 7eff                      moveq.l    #-1,d7
@@ -40859,6 +41110,7 @@ J3:
 [00e222a4] 4cdf 0080                 movem.l    (a7)+,d7
 [00e222a8] 4e5e                      unlk       a6
 [00e222aa] 4e75                      rts
+fm_button:
 [00e222ac] 4e56 ffe6                 link       a6,#$FFE6
 [00e222b0] 48e7 0f00                 movem.l    d4-d7,-(a7)
 [00e222b4] 2e2e 0008                 move.l     8(a6),d7
@@ -40968,6 +41220,7 @@ J3:
 [00e22422] 4cdf 00e0                 movem.l    (a7)+,d5-d7
 [00e22426] 4e5e                      unlk       a6
 [00e22428] 4e75                      rts
+fm_do:
 [00e2242a] 4e56 ffee                 link       a6,#$FFEE
 [00e2242e] 48e7 0f00                 movem.l    d4-d7,-(a7)
 [00e22432] 2e2e 0008                 move.l     8(a6),d7
@@ -41075,6 +41328,7 @@ J3:
 [00e2259a] 4cdf 00e0                 movem.l    (a7)+,d5-d7
 [00e2259e] 4e5e                      unlk       a6
 [00e225a0] 4e75                      rts
+fm_dial:
 [00e225a2] 4e56 0000                 link       a6,#$0000
 [00e225a6] 48e7 030c                 movem.l    d6-d7/a4-a5,-(a7)
 [00e225aa] 3e2e 0008                 move.w     8(a6),d7
@@ -41168,6 +41422,7 @@ J3:
 [00e226d6] 7001                      moveq.l    #1,d0
 [00e226d8] 4e5e                      unlk       a6
 [00e226da] 4e75                      rts
+fm_error:
 [00e226dc] 4e56 0000                 link       a6,#$0000
 [00e226e0] 48e7 0300                 movem.l    d6-d7,-(a7)
 [00e226e4] 0c6e 003f 0008            cmpi.w     #$003F,8(a6)
@@ -41249,6 +41504,7 @@ J3:
 [00e227ac] 4cdf 3080                 movem.l    (a7)+,d7/a4-a5
 [00e227b0] 4e5e                      unlk       a6
 [00e227b2] 4e75                      rts
+fs_input:
 [00e227b4] 4e56 ff36                 link       a6,#$FF36
 [00e227b8] 48e7 0f00                 movem.l    d4-d7,-(a7)
 [00e227bc] 2ebc 0000 6f54            move.l     #$00006F54,(a7)
@@ -42197,6 +42453,7 @@ J3:
 [00e23578] 61aa                      bsr.s      $00E23524
 [00e2357a] defc 001c                 adda.w     #$001C,a7
 [00e2357e] 4e75                      rts
+gr_growbox:
 [00e23580] 48e7 3f0e                 movem.l    d2-d7/a4-a6,-(a7)
 [00e23584] 61d8                      bsr.s      $00E2355E
 [00e23586] 2f16                      move.l     (a6),-(a7)
@@ -42219,6 +42476,7 @@ J3:
 [00e235ba] defc 0018                 adda.w     #$0018,a7
 [00e235be] 4cdf 70e0                 movem.l    (a7)+,d5-d7/a4-a6
 [00e235c2] 4e75                      rts
+gr_shrinkbox:
 [00e235c4] 48e7 3f0e                 movem.l    d2-d7/a4-a6,-(a7)
 [00e235c8] 6194                      bsr.s      $00E2355E
 [00e235ca] 4eb9 00e2 3d22            jsr        $00E23D22
@@ -42273,6 +42531,7 @@ J3:
 [00e23654] 588f                      addq.l     #4,a7
 [00e23656] 4cdf 00f0                 movem.l    (a7)+,d4-d7
 [00e2365a] 4e75                      rts
+gr_movebox:
 [00e2365c] 48e7 7f04                 movem.l    d1-d7/a5,-(a7)
 [00e23660] 2a4f                      movea.l    a7,a5
 [00e23662] 4cef 00e0 0024            movem.l    36(a7),d5-d7
@@ -42349,6 +42608,7 @@ J3:
 [00e23718] 3c81                      move.w     d1,(a6)
 [00e2371a] 4cdf 70f0                 movem.l    (a7)+,d4-d7/a4-a6
 [00e2371e] 4e75                      rts
+gr_watchbox:
 [00e23720] 48e7 3f06                 movem.l    d2-d7/a5-a6,-(a7)
 [00e23724] 41ef 0024                 lea.l      36(a7),a0
 [00e23728] 2a58                      movea.l    (a0)+,a5
@@ -42450,6 +42710,7 @@ J3:
 [00e2384c] 4eb9 00e1 4ad2            jsr        $00E14AD2
 [00e23852] 508f                      addq.l     #8,a7
 [00e23854] 4e75                      rts
+gr_rubbox:
 [00e23856] 41ef 0010                 lea.l      16(a7),a0
 [00e2385a] 2f10                      move.l     (a0),-(a7)
 [00e2385c] 2f20                      move.l     -(a0),-(a7)
@@ -42496,6 +42757,7 @@ J3:
 [00e238d2] defc 000c                 adda.w     #$000C,a7
 [00e238d6] 4cdf 7860                 movem.l    (a7)+,d5-d6/a3-a6
 [00e238da] 4e75                      rts
+gr_dragbox:
 [00e238dc] 48e7 3f0e                 movem.l    d2-d7/a4-a6,-(a7)
 [00e238e0] 4cef 70c0 0028            movem.l    40(a7),d6-d7/a4-a6
 [00e238e6] 3f3c 0001                 move.w     #$0001,-(a7)
@@ -42567,6 +42829,7 @@ J3:
 [00e239a8] 61ca                      bsr.s      $00E23974
 [00e239aa] defc 000c                 adda.w     #$000C,a7
 [00e239ae] 4e75                      rts
+gr_slidebox:
 [00e239b0] 48e7 ff0e                 movem.l    d0-d7/a4-a6,-(a7)
 [00e239b4] 41ef 0030                 lea.l      48(a7),a0
 [00e239b8] 2858                      movea.l    (a0)+,a4
@@ -42610,6 +42873,7 @@ J3:
 [00e23a22] defc 0038                 adda.w     #$0038,a7
 [00e23a26] 4cdf 70f0                 movem.l    (a7)+,d4-d7/a4-a6
 [00e23a2a] 4e75                      rts
+gr_mkstate:
 [00e23a2c] 41fa 0016                 lea.l      $00E23A44(pc),a0
 [00e23a30] 43ef 0004                 lea.l      4(a7),a1
 [00e23a34] 7003                      moveq.l    #3,d0
@@ -42805,6 +43069,7 @@ J3:
 [00e23cda] 20b9 0000 a87e            move.l     $0000A87E,(a0)
 [00e23ce0] 3039 0000 6c9a            move.w     $00006C9A,d0
 [00e23ce6] 4e75                      rts
+gsx_mfset:
 [00e23ce8] 6138                      bsr.s      $00E23D22
 [00e23cea] 7024                      moveq.l    #36,d0
 [00e23cec] 206f 0004                 movea.l    4(a7),a0
@@ -42822,6 +43087,7 @@ J3:
 [00e23d18] 4e75                      rts
 [00e23d1a] 3039 0000 a890            move.w     $0000A890,d0
 [00e23d20] 4e75                      rts
+gsx_moff:
 [00e23d22] 4a79 0000 6e4a            tst.w      $00006E4A
 [00e23d28] 660c                      bne.s      $00E23D36
 [00e23d2a] 707b                      moveq.l    #123,d0
@@ -42829,6 +43095,7 @@ J3:
 [00e23d30] 4279 0000 70c0            clr.w      $000070C0
 [00e23d36] 5279 0000 6e4a            addq.w     #1,$00006E4A
 [00e23d3c] 4e75                      rts
+gsx_mon:
 [00e23d3e] 7001                      moveq.l    #1,d0
 [00e23d40] 9179 0000 6e4a            sub.w      d0,$00006E4A
 [00e23d46] 6614                      bne.s      $00E23D5C
@@ -42945,6 +43212,7 @@ J3:
 [00e23ec4] 30ae 0012                 move.w     18(a6),(a0)
 [00e23ec8] 4e5e                      unlk       a6
 [00e23eca] 4e75                      rts
+do_chg:
 [00e23ecc] 4e56 0000                 link       a6,#$0000
 [00e23ed0] 48e7 0f00                 movem.l    d4-d7,-(a7)
 [00e23ed4] 2e2e 0008                 move.l     8(a6),d7
@@ -43275,6 +43543,7 @@ J3:
 [00e24322] 4cdf 00f8                 movem.l    (a7)+,d3-d7
 [00e24326] 4e5e                      unlk       a6
 [00e24328] 4e75                      rts
+mn_bar:
 [00e2432a] 4e56 fffc                 link       a6,#$FFFC
 [00e2432e] 48e7 3f00                 movem.l    d2-d7,-(a7)
 [00e24332] 2e2e 0008                 move.l     8(a6),d7
@@ -43393,6 +43662,7 @@ J3:
 [00e244dc] 4cdf 00f8                 movem.l    (a7)+,d3-d7
 [00e244e0] 4e5e                      unlk       a6
 [00e244e2] 4e75                      rts
+mn_clsda:
 [00e244e4] 4e56 0000                 link       a6,#$0000
 [00e244e8] 48e7 0300                 movem.l    d6-d7,-(a7)
 [00e244ec] 4247                      clr.w      d7
@@ -43415,6 +43685,7 @@ J3:
 [00e24524] 4cdf 0080                 movem.l    (a7)+,d7
 [00e24528] 4e5e                      unlk       a6
 [00e2452a] 4e75                      rts
+mn_register:
 [00e2452c] 4e56 fff2                 link       a6,#$FFF2
 [00e24530] 48e7 0700                 movem.l    d5-d7,-(a7)
 [00e24534] 3e2e 0008                 move.w     8(a6),d7
@@ -43453,6 +43724,7 @@ J3:
 [00e245aa] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e245ae] 4e5e                      unlk       a6
 [00e245b0] 4e75                      rts
+ob_center:
 [00e245b2] 4e56 fff0                 link       a6,#$FFF0
 [00e245b6] 48e7 3f00                 movem.l    d2-d7,-(a7)
 [00e245ba] 262e 0008                 move.l     8(a6),d3
@@ -43867,6 +44139,7 @@ J3:
 [00e24a7c] 4cdf 2000                 movem.l    (a7)+,a5
 [00e24a80] 4e5e                      unlk       a6
 [00e24a82] 4e75                      rts
+ob_edit:
 [00e24a84] 4e56 ffce                 link       a6,#$FFCE
 [00e24a88] 48e7 3f0c                 movem.l    d2-d7/a4-a5,-(a7)
 [00e24a8c] 2e2e 0008                 move.l     8(a6),d7
@@ -44610,6 +44883,7 @@ J3:
 [00e2553c] 4cdf 20f0                 movem.l    (a7)+,d4-d7/a5
 [00e25540] 4e5e                      unlk       a6
 [00e25542] 4e75                      rts
+ob_draw:
 [00e25544] 4e56 fff8                 link       a6,#$FFF8
 [00e25548] 48e7 0300                 movem.l    d6-d7,-(a7)
 [00e2554c] 2e2e 0008                 move.l     8(a6),d7
@@ -44651,6 +44925,7 @@ J3:
 [00e255d6] 4cdf 0080                 movem.l    (a7)+,d7
 [00e255da] 4e5e                      unlk       a6
 [00e255dc] 4e75                      rts
+ob_find:
 [00e255de] 4e56 ffe4                 link       a6,#$FFE4
 [00e255e2] 48e7 0f04                 movem.l    d4-d7/a5,-(a7)
 [00e255e6] 2e2e 0008                 move.l     8(a6),d7
@@ -44741,6 +45016,7 @@ J3:
 [00e25702] 4cdf 20e0                 movem.l    (a7)+,d5-d7/a5
 [00e25706] 4e5e                      unlk       a6
 [00e25708] 4e75                      rts
+ob_add:
 [00e2570a] 4e56 0000                 link       a6,#$0000
 [00e2570e] 48e7 3f00                 movem.l    d2-d7,-(a7)
 [00e25712] 2e2e 0008                 move.l     8(a6),d7
@@ -44782,6 +45058,7 @@ J3:
 [00e2576e] 4cdf 00f8                 movem.l    (a7)+,d3-d7
 [00e25772] 4e5e                      unlk       a6
 [00e25774] 4e75                      rts
+ob_delete:
 [00e25776] 4e56 fffc                 link       a6,#$FFFC
 [00e2577a] 48e7 3f00                 movem.l    d2-d7,-(a7)
 [00e2577e] 2e2e 0008                 move.l     8(a6),d7
@@ -44847,6 +45124,7 @@ J3:
 [00e2581c] 4cdf 00f8                 movem.l    (a7)+,d3-d7
 [00e25820] 4e5e                      unlk       a6
 [00e25822] 4e75                      rts
+ob_order:
 [00e25824] 4e56 fff8                 link       a6,#$FFF8
 [00e25828] 48e7 3f00                 movem.l    d2-d7,-(a7)
 [00e2582c] 2e2e 0008                 move.l     8(a6),d7
@@ -44925,6 +45203,7 @@ J3:
 [00e258fa] 4cdf 00f8                 movem.l    (a7)+,d3-d7
 [00e258fe] 4e5e                      unlk       a6
 [00e25900] 4e75                      rts
+ob_change:
 [00e25902] 4e56 ffec                 link       a6,#$FFEC
 [00e25906] 48e7 0704                 movem.l    d5-d7/a5,-(a7)
 [00e2590a] 2e2e 0008                 move.l     8(a6),d7
@@ -45086,6 +45365,7 @@ J3:
 [00e25b28] 508f                      addq.l     #8,a7
 [00e25b2a] 4e5e                      unlk       a6
 [00e25b2c] 4e75                      rts
+ob_offset:
 [00e25b2e] 4e56 0000                 link       a6,#$0000
 [00e25b32] 48e7 070c                 movem.l    d5-d7/a4-a5,-(a7)
 [00e25b36] 2e2e 0008                 move.l     8(a6),d7
@@ -45186,6 +45466,7 @@ J3:
 [00e25c42] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e25c46] 4e5e                      unlk       a6
 [00e25c48] 4e75                      rts
+rs_obfix:
 [00e25c4a] 4e56 0000                 link       a6,#$0000
 [00e25c4e] 48e7 0f00                 movem.l    d4-d7,-(a7)
 [00e25c52] 302e 000c                 move.w     12(a6),d0
@@ -45545,6 +45826,7 @@ J3:
 [00e26064] 23d0 0000 a844            move.l     (a0),$0000A844
 [00e2606a] 4e5e                      unlk       a6
 [00e2606c] 4e75                      rts
+rs_free:
 [00e2606e] 4e56 fffc                 link       a6,#$FFFC
 [00e26072] 23ee 0008 0000 7036       move.l     8(a6),$00007036
 [00e2607a] 207c 0000 000e            movea.l    #$0000000E,a0
@@ -45558,6 +45840,7 @@ J3:
 [00e2609c] 7001                      moveq.l    #1,d0
 [00e2609e] 4e5e                      unlk       a6
 [00e260a0] 4e75                      rts
+rs_gaddr:
 [00e260a2] 4e56 0000                 link       a6,#$0000
 [00e260a6] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e260aa] 2a6e 0010                 movea.l    16(a6),a5
@@ -45576,6 +45859,7 @@ J3:
 [00e260d0] 4cdf 2000                 movem.l    (a7)+,a5
 [00e260d4] 4e5e                      unlk       a6
 [00e260d6] 4e75                      rts
+rs_saddr:
 [00e260d8] 4e56 0000                 link       a6,#$0000
 [00e260dc] 48e7 0300                 movem.l    d6-d7,-(a7)
 [00e260e0] 2eae 0008                 move.l     8(a6),(a7)
@@ -45719,6 +46003,7 @@ J3:
 [00e262c6] 6100 fbd2                 bsr        $00E25E9A
 [00e262ca] 4e5e                      unlk       a6
 [00e262cc] 4e75                      rts
+rs_load:
 [00e262ce] 4e56 0000                 link       a6,#$0000
 [00e262d2] 48e7 0700                 movem.l    d5-d7,-(a7)
 [00e262d6] 2e2e 0008                 move.l     8(a6),d7
@@ -45736,6 +46021,7 @@ J3:
 [00e262f4] 4cdf 00c0                 movem.l    (a7)+,d6-d7
 [00e262f8] 4e5e                      unlk       a6
 [00e262fa] 4e75                      rts
+sc_read:
 [00e262fc] 4e56 fffc                 link       a6,#$FFFC
 [00e26300] 2ebc 0000 92e4            move.l     #$000092E4,(a7)
 [00e26306] 2f2e 0008                 move.l     8(a6),-(a7)
@@ -45743,6 +46029,7 @@ J3:
 [00e26310] 588f                      addq.l     #4,a7
 [00e26312] 4e5e                      unlk       a6
 [00e26314] 4e75                      rts
+sc_write:
 [00e26316] 4e56 fffc                 link       a6,#$FFFC
 [00e2631a] 2eae 0008                 move.l     8(a6),(a7)
 [00e2631e] 2f3c 0000 92e4            move.l     #$000092E4,-(a7)
@@ -45750,6 +46037,7 @@ J3:
 [00e2632a] 588f                      addq.l     #4,a7
 [00e2632c] 4e5e                      unlk       a6
 [00e2632e] 4e75                      rts
+sh_read:
 [00e26330] 4e56 fffc                 link       a6,#$FFFC
 [00e26334] 3ebc 0080                 move.w     #$0080,(a7)
 [00e26338] 2f39 0000 6dcc            move.l     $00006DCC,-(a7)
@@ -45764,6 +46052,7 @@ J3:
 [00e26360] 7001                      moveq.l    #1,d0
 [00e26362] 4e5e                      unlk       a6
 [00e26364] 4e75                      rts
+sh_write:
 [00e26366] 4e56 fffc                 link       a6,#$FFFC
 [00e2636a] 3ebc 0080                 move.w     #$0080,(a7)
 [00e2636e] 2f2e 000e                 move.l     14(a6),-(a7)
@@ -45785,6 +46074,7 @@ J3:
 [00e263b0] 7001                      moveq.l    #1,d0
 [00e263b2] 4e5e                      unlk       a6
 [00e263b4] 4e75                      rts
+sh_get:
 [00e263b6] 4e56 fffc                 link       a6,#$FFFC
 [00e263ba] 3eae 000c                 move.w     12(a6),(a7)
 [00e263be] 2f3c 0000 9526            move.l     #$00009526,-(a7)
@@ -45794,6 +46084,7 @@ J3:
 [00e263d0] 7001                      moveq.l    #1,d0
 [00e263d2] 4e5e                      unlk       a6
 [00e263d4] 4e75                      rts
+sh_put:
 [00e263d6] 4e56 fffc                 link       a6,#$FFFC
 [00e263da] 3eae 000c                 move.w     12(a6),(a7)
 [00e263de] 2f2e 0008                 move.l     8(a6),-(a7)
@@ -45891,6 +46182,7 @@ J3:
 [00e2652e] 4cdf 2000                 movem.l    (a7)+,a5
 [00e26532] 4e5e                      unlk       a6
 [00e26534] 4e75                      rts
+sh_envrn:
 [00e26536] 4e56 0000                 link       a6,#$0000
 [00e2653a] 48e7 011c                 movem.l    d7/a3-a5,-(a7)
 [00e2653e] 2a6e 0008                 movea.l    8(a6),a5
@@ -46008,6 +46300,7 @@ J3:
 [00e26680] 4cdf 2000                 movem.l    (a7)+,a5
 [00e26684] 4e5e                      unlk       a6
 [00e26686] 4e75                      rts
+sh_find:
 [00e26688] 4e56 ffee                 link       a6,#$FFEE
 [00e2668c] 48e7 0f0c                 movem.l    d4-d7/a4-a5,-(a7)
 [00e26690] 4245                      clr.w      d5
@@ -47665,6 +47958,7 @@ J3:
 [00e27d1e] 4cdf 30c0                 movem.l    (a7)+,d6-d7/a4-a5
 [00e27d22] 4e5e                      unlk       a6
 [00e27d24] 4e75                      rts
+wm_create:
 [00e27d26] 4e56 0000                 link       a6,#$0000
 [00e27d2a] 48e7 0300                 movem.l    d6-d7,-(a7)
 [00e27d2e] 4247                      clr.w      d7
@@ -47746,6 +48040,7 @@ J3:
 [00e27e20] 4cdf 2080                 movem.l    (a7)+,d7/a5
 [00e27e24] 4e5e                      unlk       a6
 [00e27e26] 4e75                      rts
+wm_open:
 [00e27e28] 4e56 fffc                 link       a6,#$FFFC
 [00e27e2c] 3ebc 0001                 move.w     #$0001,(a7)
 [00e27e30] 2f2e 000a                 move.l     10(a6),-(a7)
@@ -47754,6 +48049,7 @@ J3:
 [00e27e3c] 5c8f                      addq.l     #6,a7
 [00e27e3e] 4e5e                      unlk       a6
 [00e27e40] 4e75                      rts
+wm_close:
 [00e27e42] 4e56 fffc                 link       a6,#$FFFC
 [00e27e46] 4257                      clr.w      (a7)
 [00e27e48] 2f3c 0000 70b8            move.l     #$000070B8,-(a7)
@@ -47762,6 +48058,7 @@ J3:
 [00e27e56] 5c8f                      addq.l     #6,a7
 [00e27e58] 4e5e                      unlk       a6
 [00e27e5a] 4e75                      rts
+wm_delete:
 [00e27e5c] 4e56 fffc                 link       a6,#$FFFC
 [00e27e60] 302e 0008                 move.w     8(a6),d0
 [00e27e64] c1fc 0038                 muls.w     #$0038,d0
@@ -47770,6 +48067,7 @@ J3:
 [00e27e70] 0268 fffe 3164            andi.w     #$FFFE,12644(a0)
 [00e27e76] 4e5e                      unlk       a6
 [00e27e78] 4e75                      rts
+wm_get:
 [00e27e7a] 4e56 fff8                 link       a6,#$FFF8
 [00e27e7e] 48e7 071c                 movem.l    d5-d7/a3-a5,-(a7)
 [00e27e82] 3e2e 0008                 move.w     8(a6),d7
@@ -47848,6 +48146,7 @@ J3:
 [00e27f6c] 4cdf 38c0                 movem.l    (a7)+,d6-d7/a3-a5
 [00e27f70] 4e5e                      unlk       a6
 [00e27f72] 4e75                      rts
+wm_set:
 [00e27f74] 4e56 ffee                 link       a6,#$FFEE
 [00e27f78] 48e7 1f0c                 movem.l    d3-d7/a4-a5,-(a7)
 [00e27f7c] 3e2e 0008                 move.w     8(a6),d7
@@ -47985,6 +48284,7 @@ J3:
 [00e2814c] 4cdf 30f0                 movem.l    (a7)+,d4-d7/a4-a5
 [00e28150] 4e5e                      unlk       a6
 [00e28152] 4e75                      rts
+wm_find:
 [00e28154] 4e56 fffc                 link       a6,#$FFFC
 [00e28158] 2f2e 0008                 move.l     8(a6),-(a7)
 [00e2815c] 3f3c 0002                 move.w     #$0002,-(a7)
@@ -48020,6 +48320,7 @@ J3:
 [00e281ca] 4cdf 0080                 movem.l    (a7)+,d7
 [00e281ce] 4e5e                      unlk       a6
 [00e281d0] 4e75                      rts
+wm_calc:
 [00e281d2] 4e56 0000                 link       a6,#$0000
 [00e281d6] 48e7 3f00                 movem.l    d2-d7,-(a7)
 [00e281da] 3e2e 000a                 move.w     10(a6),d7
@@ -48086,6 +48387,7 @@ J3:
 [00e28280] 4cdf 00f8                 movem.l    (a7)+,d3-d7
 [00e28284] 4e5e                      unlk       a6
 [00e28286] 4e75                      rts
+wm_new:
 [00e28288] 4e56 0000                 link       a6,#$0000
 [00e2828c] 48e7 0104                 movem.l    d7/a5,-(a7)
 [00e28290] 6100 f856                 bsr        $00E27AE8
@@ -50470,15 +50772,18 @@ J3:
 [00e2a196] 4cdf 2000                 movem.l    (a7)+,a5
 [00e2a19a] 4e5e                      unlk       a6
 [00e2a19c] 4e75                      rts
+
+size_theglo:
 [00e2a19e] 4e56 fffc                 link       a6,#$FFFC
 [00e2a1a2] 303c 1992                 move.w     #$1992,d0
 [00e2a1a6] 4e5e                      unlk       a6
 [00e2a1a8] 4e75                      rts
-[00e2a1aa] 8765                      or.w       d3,-(a5)
-[00e2a1ac] 4321                      chk.l      -(a1),d1 ; 68020+ only
-[00e2a1ae] 0000                      dc.w       $0000
-[00e2a1b0] a892 00e1                 mac.w      d1.u,d0.u,0,(a2)&,d4,acc0
-[00e2a1b4] 3dee 0002                 move.w     2(a6),???
+
+_ui_mupb:
+[00e2a1aa] 87654321                      chk.l      -(a1),d1 ; 68020+ only
+[00e2a1ae] 0000a892
+           00e13dee
+[00e2a1b6] 0002                 move.w     2(a6),???
 [00e2a1b8] 0101                      btst       d0,d1
 [00e2a1ba] 0002 4000                 ori.b      #$00,d2
 [00e2a1be] 6801                      bvc.s      $00E2A1C1
@@ -50781,211 +51086,98 @@ J3:
 [00e2a50a] 001f 001f                 ori.b      #$1F,(a7)+
 [00e2a50e] 001e 001f                 ori.b      #$1F,(a6)+
 [00e2a512] 001e 001f                 ori.b      #$1F,(a6)+
-[00e2a516] 00e0                      dc.w       $00E0 ; illegal
-[00e2a518] 8352                      or.w       d1,(a2)
-[00e2a51a] 0000                      dc.w       $0000
-[00e2a51c] 00e0                      dc.w       $00E0 ; illegal
-[00e2a51e] 4a8c                      tst.l      a4
-[00e2a520] 0080 00e0 4878            ori.l      #$00E04878,d0
-[00e2a526] 0081 00e0 4ade            ori.l      #$00E04ADE,d1
-[00e2a52c] 0082 00e0 493a            ori.l      #$00E0493A,d2
-[00e2a532] 0082 00e0 4962            ori.l      #$00E04962,d2
-[00e2a538] 0083 00e0 4b02            ori.l      #$00E04B02,d3
-[00e2a53e] 0080 00e0 4a38            ori.l      #$00E04A38,d0
-[00e2a544] 0080 00e0 4aa6            ori.l      #$00E04AA6,d0
-[00e2a54a] 0080 00e0 4b62            ori.l      #$00E04B62,d0
-[00e2a550] 0081 00e0 4c92            ori.l      #$00E04C92,d1
-[00e2a556] 0080 00e0 45a4            ori.l      #$00E045A4,d0
-[00e2a55c] 0080 00e0 987e            ori.l      #$00E0987E,d0
-[00e2a562] 0000                      dc.w       $0000
-[00e2a564] 00e0                      dc.w       $00E0 ; illegal
-[00e2a566] 987e                      sub.w      ???,d4
-[00e2a568] 0000                      dc.w       $0000
-[00e2a56a] 00e0                      dc.w       $00E0 ; illegal
-[00e2a56c] 7e26                      moveq.l    #38,d7
-[00e2a56e] 0000                      dc.w       $0000
-[00e2a570] 00e0                      dc.w       $00E0 ; illegal
-[00e2a572] 987e                      sub.w      ???,d4
-[00e2a574] 0000                      dc.w       $0000
-[00e2a576] 00e0                      dc.w       $00E0 ; illegal
-[00e2a578] 45be                      chk.w      ???,d2
-[00e2a57a] 0081 00e0 45e2            ori.l      #$00E045E2,d1
-[00e2a580] 0083 00e0 4606            ori.l      #$00E04606,d3
-[00e2a586] 0082 00e0 4622            ori.l      #$00E04622,d2
-[00e2a58c] 0082 00e0 987e            ori.l      #$00E0987E,d2
-[00e2a592] 0000                      dc.w       $0000
-[00e2a594] 00e0                      dc.w       $00E0 ; illegal
-[00e2a596] 987e                      sub.w      ???,d4
-[00e2a598] 0000                      dc.w       $0000
-[00e2a59a] 00e0                      dc.w       $00E0 ; illegal
-[00e2a59c] 987e                      sub.w      ???,d4
-[00e2a59e] 0000                      dc.w       $0000
-[00e2a5a0] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5a2] 987e                      sub.w      ???,d4
-[00e2a5a4] 0000                      dc.w       $0000
-[00e2a5a6] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5a8] 987e                      sub.w      ???,d4
-[00e2a5aa] 0000                      dc.w       $0000
-[00e2a5ac] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5ae] 7e46                      moveq.l    #70,d7
-[00e2a5b0] 0000                      dc.w       $0000
-[00e2a5b2] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5b4] 7e12                      moveq.l    #18,d7
-[00e2a5b6] 0001 00e0                 ori.b      #$E0,d1
-[00e2a5ba] 987e                      sub.w      ???,d4
-[00e2a5bc] 0000                      dc.w       $0000
-[00e2a5be] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5c0] 987e                      sub.w      ???,d4
-[00e2a5c2] 0000                      dc.w       $0000
-[00e2a5c4] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5c6] 987e                      sub.w      ???,d4
-[00e2a5c8] 0000                      dc.w       $0000
-[00e2a5ca] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5cc] 987e                      sub.w      ???,d4
-[00e2a5ce] 0000                      dc.w       $0000
-[00e2a5d0] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5d2] 987e                      sub.w      ???,d4
-[00e2a5d4] 0000                      dc.w       $0000
-[00e2a5d6] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5d8] 987e                      sub.w      ???,d4
-[00e2a5da] 0000                      dc.w       $0000
-[00e2a5dc] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5de] 987e                      sub.w      ???,d4
-[00e2a5e0] 0000                      dc.w       $0000
-[00e2a5e2] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5e4] 987e                      sub.w      ???,d4
-[00e2a5e6] 0000                      dc.w       $0000
-[00e2a5e8] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5ea] 987e                      sub.w      ???,d4
-[00e2a5ec] 0000                      dc.w       $0000
-[00e2a5ee] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5f0] 987e                      sub.w      ???,d4
-[00e2a5f2] 0000                      dc.w       $0000
-[00e2a5f4] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5f6] 987e                      sub.w      ???,d4
-[00e2a5f8] 0000                      dc.w       $0000
-[00e2a5fa] 00e0                      dc.w       $00E0 ; illegal
-[00e2a5fc] 987e                      sub.w      ???,d4
-[00e2a5fe] 0000                      dc.w       $0000
-[00e2a600] 00e0                      dc.w       $00E0 ; illegal
-[00e2a602] 987e                      sub.w      ???,d4
-[00e2a604] 0000                      dc.w       $0000
-[00e2a606] 00e0                      dc.w       $00E0 ; illegal
-[00e2a608] 987e                      sub.w      ???,d4
-[00e2a60a] 0000                      dc.w       $0000
-[00e2a60c] 00e0                      dc.w       $00E0 ; illegal
-[00e2a60e] 987e                      sub.w      ???,d4
-[00e2a610] 0000                      dc.w       $0000
-[00e2a612] 00e0                      dc.w       $00E0 ; illegal
-[00e2a614] a42c 0000 00e0            mac.w      d0.l,d0.l,0,224(a4),d2,acc1
-[00e2a61a] a43c 0000                 mac.w      d?.l,d?.l,0,acc0
-[00e2a61e] 00e0                      dc.w       $00E0 ; illegal
-[00e2a620] a4ba 0000                 mac.w      d?.l,d?.l,0,acc1
-[00e2a624] 00e0                      dc.w       $00E0 ; illegal
-[00e2a626] a4ca 0000                 mac.w      a2.l,a2.l,0,acc1
-[00e2a62a] 00e0                      dc.w       $00E0 ; illegal
-[00e2a62c] 987e                      sub.w      ???,d4
-[00e2a62e] 0000                      dc.w       $0000
-[00e2a630] 00e0                      dc.w       $00E0 ; illegal
-[00e2a632] 7e00                      moveq.l    #0,d7
-[00e2a634] 0000                      dc.w       $0000
-[00e2a636] 00e0                      dc.w       $00E0 ; illegal
-[00e2a638] 9888                      sub.l      a0,d4
-[00e2a63a] 0000                      dc.w       $0000
-[00e2a63c] 00e0                      dc.w       $00E0 ; illegal
-[00e2a63e] 82c8                      divu.w     a0,d1
-[00e2a640] 0001 00e0                 ori.b      #$E0,d1
-[00e2a644] 987e                      sub.w      ???,d4
-[00e2a646] 0000                      dc.w       $0000
-[00e2a648] 00e0                      dc.w       $00E0 ; illegal
-[00e2a64a] 987e                      sub.w      ???,d4
-[00e2a64c] 0000                      dc.w       $0000
-[00e2a64e] 00e0                      dc.w       $00E0 ; illegal
-[00e2a650] 987e                      sub.w      ???,d4
-[00e2a652] 0000                      dc.w       $0000
-[00e2a654] 00e0                      dc.w       $00E0 ; illegal
-[00e2a656] 987e                      sub.w      ???,d4
-[00e2a658] 0000                      dc.w       $0000
-[00e2a65a] 00e0                      dc.w       $00E0 ; illegal
-[00e2a65c] 5f8e                      subq.l     #7,a6
-[00e2a65e] 0001 00e0                 ori.b      #$E0,d1
-[00e2a662] 987e                      sub.w      ???,d4
-[00e2a664] 0000                      dc.w       $0000
-[00e2a666] 00e0                      dc.w       $00E0 ; illegal
-[00e2a668] 987e                      sub.w      ???,d4
-[00e2a66a] 0000                      dc.w       $0000
-[00e2a66c] 00e0                      dc.w       $00E0 ; illegal
-[00e2a66e] 66c2                      bne.s      $00E2A632
-[00e2a670] 0001 00e0                 ori.b      #$E0,d1
-[00e2a674] 68ce                      bvc.s      $00E2A644
-[00e2a676] 0001 00e0                 ori.b      #$E0,d1
-[00e2a67a] 643c                      bcc.s      $00E2A6B8
-[00e2a67c] 0001 00e0                 ori.b      #$E0,d1
-[00e2a680] 7e7e                      moveq.l    #126,d7
-[00e2a682] 0001 00e0                 ori.b      #$E0,d1
-[00e2a686] 7eba                      moveq.l    #-70,d7
-[00e2a688] 0001 00e0                 ori.b      #$E0,d1
-[00e2a68c] 7c16                      moveq.l    #22,d6
-[00e2a68e] 0000                      dc.w       $0000
-[00e2a690] 00e0                      dc.w       $00E0 ; illegal
-[00e2a692] 7ce2                      moveq.l    #-30,d6
-[00e2a694] 0082 00e0 7d22            ori.l      #$00E07D22,d2
-[00e2a69a] 0082 00e0 7468            ori.l      #$00E07468,d2
-[00e2a6a0] 0001 00e0                 ori.b      #$E0,d1
-[00e2a6a4] 78e8                      moveq.l    #-24,d4
-[00e2a6a6] 0081 00e0 72d8            ori.l      #$00E072D8,d1
-[00e2a6ac] 0001 00e0                 ori.b      #$E0,d1
-[00e2a6b0] 987e                      sub.w      ???,d4
-[00e2a6b2] 0000                      dc.w       $0000
-[00e2a6b4] 00e0                      dc.w       $00E0 ; illegal
-[00e2a6b6] 7acc                      moveq.l    #-52,d5
-[00e2a6b8] 0000                      dc.w       $0000
-[00e2a6ba] 00e0                      dc.w       $00E0 ; illegal
-[00e2a6bc] 7b50                      ???
-[00e2a6be] 0000                      dc.w       $0000
-[00e2a6c0] 00e0                      dc.w       $00E0 ; illegal
-[00e2a6c2] 6538                      bcs.s      $00E2A6FC
-[00e2a6c4] 0001 00e0                 ori.b      #$E0,d1
-[00e2a6c8] 8de0                      divs.w     -(a0),d6
-[00e2a6ca] 0001 00e0                 ori.b      #$E0,d1
-[00e2a6ce] 8e34 0001                 or.b       1(a4,d0.w),d7
-[00e2a6d2] 00e0                      dc.w       $00E0 ; illegal
-[00e2a6d4] 8c48                      or.w       a0,d6 ; apollo only
-[00e2a6d6] 0002 00e0                 ori.b      #$E0,d2
-[00e2a6da] 8420                      or.b       -(a0),d2
-[00e2a6dc] 0003 00e0                 ori.b      #$E0,d3
-[00e2a6e0] 82f6 0000                 divu.w     0(a6,d0.w),d1
-[00e2a6e4] 00e0                      dc.w       $00E0 ; illegal
-[00e2a6e6] 987e                      sub.w      ???,d4
-[00e2a6e8] 0000                      dc.w       $0000
-[00e2a6ea] 00e0                      dc.w       $00E0 ; illegal
-[00e2a6ec] 7e5c                      moveq.l    #92,d7
-[00e2a6ee] 0001 00e0                 ori.b      #$E0,d1
-[00e2a6f2] 6ada                      bpl.s      $00E2A6CE
-[00e2a6f4] 0000                      dc.w       $0000
-[00e2a6f6] 00e0                      dc.w       $00E0 ; illegal
-[00e2a6f8] 987e                      sub.w      ???,d4
-[00e2a6fa] 0000                      dc.w       $0000
-[00e2a6fc] 00e0                      dc.w       $00E0 ; illegal
-[00e2a6fe] 987e                      sub.w      ???,d4
-[00e2a700] 0000                      dc.w       $0000
-[00e2a702] 00e0                      dc.w       $00E0 ; illegal
-[00e2a704] 987e                      sub.w      ???,d4
-[00e2a706] 0000                      dc.w       $0000
-[00e2a708] 00e0                      dc.w       $00E0 ; illegal
-[00e2a70a] 987e                      sub.w      ???,d4
-[00e2a70c] 0000                      dc.w       $0000
-[00e2a70e] 00e0                      dc.w       $00E0 ; illegal
-[00e2a710] 987e                      sub.w      ???,d4
-[00e2a712] 0000                      dc.w       $0000
-[00e2a714] 00e0                      dc.w       $00E0 ; illegal
-[00e2a716] 987e                      sub.w      ???,d4
-[00e2a718] 0000                      dc.w       $0000
-[00e2a71a] 00e0                      dc.w       $00E0 ; illegal
-[00e2a71c] 75f8                      ???
-[00e2a71e] 0002 00e0                 ori.b      #$E0,d2
-[00e2a722] 73b6                      ???
-[00e2a724] 0001 ffff                 ori.b      #$FF,d1
+
+funcs:
+[00e2a516] 00e08352 0000             x0term
+[00e2a51c] 00e04a8c 0080             xconin
+           00e04878 0081             xtabout
+           00e04ade 0082             xauxin
+           00e0493a 0082             xauxout
+           00e04962 0083             xprtout
+           00e04b02 0080             rawconio
+           00e04a38 0080             x7in
+           00e04aa6 0080             x8in
+           00e04b62 0081             xprt_line
+           00e04c92 0080             readline
+           00e045a4 0080             xconstat
+           00e0987e 0000             ni
+[00e2a564] 00e0987e 0000             ni
+[00e2a56a] 00e07e26 0000             xsetdrv
+[00e2a570] 00e0987e 0000             ni
+[00e2a576] 00e045be 0081             xconostat
+           00e045e2 0083             xprtostat
+           00e04606 0082             xauxistat
+           00e04622 0082             xauxostat
+           00e0987e 0000             ni
+[00e2a594] 00e0987e 0000             ni
+[00e2a59a] 00e0987e 0000             ni
+[00e2a5a0] 00e0987e 0000             ni
+[00e2a5a6] 00e0987e 0000             ni
+[00e2a5ac] 00e07e46 0000             xgetdrv
+[00e2a5b2] 00e07e12 0001             xsetdta
+           00e0987e 0000             ni
+[00e2a5be] 00e0987e 0000             ni
+[00e2a5c4] 00e0987e 0000             ni
+[00e2a5ca] 00e0987e 0000             ni
+[00e2a5d0] 00e0987e 0000             ni
+[00e2a5d6] 00e0987e 0000             ni
+[00e2a5dc] 00e0987e 0000             ni
+[00e2a5e2] 00e0987e 0000             ni
+[00e2a5e8] 00e0987e 0000             ni
+[00e2a5ee] 00e0987e 0000             ni
+[00e2a5f4] 00e0987e 0000             ni
+[00e2a5fa] 00e0987e 0000             ni
+[00e2a600] 00e0987e 0000             ni
+[00e2a606] 00e0987e 0000             ni
+[00e2a60c] 00e0987e 0000             ni
+[00e2a612] 00e0a42c 0000             xgetdate
+           00e0a43c 0000             xsetdate
+[00e2a61e] 00e0a4ba 0000             xgettime
+[00e2a624] 00e0a4ca 0000             xsettime
+[00e2a62a] 00e0987e 0000             ni
+[00e2a630] 00e07e00 0000             xgetdta
+[00e2a636] 00e09888 0000             xgetver
+[00e2a63c] 00e082c8 0001             xtermres
+           00e0987e 0000             ni
+[00e2a648] 00e0987e 0000             ni
+[00e2a64e] 00e0987e 0000             ni
+[00e2a654] 00e0987e 0000             ni
+[00e2a65a] 00e05f8e 0001             xgetfree
+           00e0987e 0000             ni
+[00e2a666] 00e0987e 0000             ni
+[00e2a66c] 00e066c2 0001             xmkdir
+           00e068ce 0001             xrmdir
+           00e0643c 0001             xchdir
+           00e07e7e 0001             xcreat
+           00e07eba 0001             xopen
+           00e07c16 0000             xclose
+[00e2a690] 00e07ce2 0082             xread
+           00e07d22 0082             xwrite
+           00e07468 0001             xunlink
+           00e078e8 0081             xlseek
+           00e072d8 0001             xchmod
+           00e0987e 0000             ni
+[00e2a6b4] 00e07acc 0000             xdup
+[00e2a6ba] 00e07b50 0000             xforce
+[00e2a6c0] 00e06538 0001             xgetdir
+           00e08de0 0001             xmalloc
+           00e08e34 0001             xmfree
+[00e2a6d2] 00e08c48 0002             xsetblk
+           00e08420 0003             xexec
+           00e082f6 0000             xterm
+[00e2a6e4] 00e0987e 0000             ni
+[00e2a6ea] 00e07e5c 0001             xsfirst
+           00e06ada 0000             xsnext
+[00e2a6f6] 00e0987e 0000             ni
+[00e2a6fc] 00e0987e 0000             ni
+[00e2a702] 00e0987e 0000             ni
+[00e2a708] 00e0987e 0000             ni
+[00e2a70e] 00e0987e 0000             ni
+[00e2a714] 00e0987e 0000             ni
+[00e2a71a] 00e075f8 0002             xrename
+           00e073b6 0001             xgsdtof
+
+[00e2a726] ffff                 ori.b      #$FF,d1
 [00e2a728] fefd ffff 00e0            nfB??.l    $00E1A80A
 [00e2a72e] 9bec 00e0                 suba.l     224(a4),a5
 [00e2a732] 9c10                      sub.b      (a0),d6
@@ -61356,7303 +61548,9 @@ J3:
 [00e31bd0] 0a01 0002                 eori.b     #$02,d1
 [00e31bd4] 0014 0000                 ori.b      #$00,(a4)
 [00e31bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e31ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e320f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e321f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e322f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e323f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e324f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e325f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e326f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e327f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e328f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e329f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32a98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32aa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32aa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32af0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32af8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32b98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32bb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32bb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32bc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32bc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32bd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e32ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e330f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e331f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e332f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e333f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e334f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e335f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e336f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e337f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e338f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e339f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33a98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33aa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33aa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33af0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33af8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33b98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33bb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33bb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33bc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33bc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33bd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e33ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e340f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e341f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e342f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e343f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e344f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e345f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e346f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e347f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e348f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e349f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34a98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34aa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34aa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34af0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34af8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34b98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34bb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34bb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34bc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34bc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34bd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e34ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e350f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e351f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e352f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e353f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e354f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e355f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e356f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e357f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e358f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e359f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35a98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35aa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35aa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35af0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35af8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35b98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35bb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35bb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35bc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35bc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35bd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e35ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e360f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e361f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e362f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e363f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e364f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e365f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e366f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e367f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e368f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e369f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36a98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36aa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36aa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36af0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36af8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36b98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36bb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36bb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36bc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36bc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36bd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e36ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e370f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e371f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e372f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e373f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e374f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e375f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e376f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e377f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e378f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e379f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37a98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37aa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37aa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37af0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37af8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37b98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37bb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37bb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37bc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37bc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37bd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e37ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e380f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e381f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e382f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e383f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e384f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e385f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e386f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e387f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e388f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e389f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38a98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38aa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38aa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38af0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38af8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38b98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38bb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38bb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38bc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38bc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38bd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e38ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e390f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e391f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e392f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e393f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e394f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e395f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e396f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e397f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e398f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e399f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39a98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39aa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39aa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39af0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39af8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39b98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39bb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39bb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39bc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39bc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39bd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39bd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39be0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39be8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39bf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39bf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39c98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39cb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39cb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39cc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39cc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39cd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39cd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39cf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39cf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39d98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39da0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39da8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39db0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39db8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39dc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39dc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39dd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39dd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39de0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39de8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39df0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39df8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39e98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39eb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39eb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39f98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39fe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e39ff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a0f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a1f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a2f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a3f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a4f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a5f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a6f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a7f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a8f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3a9f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aa98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aaa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aaa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aaf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aaf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ab98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3abf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ac98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3acb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3acb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3acc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3acc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3acd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3acd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ace0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ace8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3acf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3acf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ad98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ada0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ada8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3adb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3adb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3adc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3adc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3add0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3add8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ade0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ade8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3adf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3adf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ae98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aeb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aeb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3af98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3afe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3aff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b0f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b1f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b2f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b3f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b4f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b5f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b6f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b7f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b8f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3b9f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ba98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3baa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3baa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3baf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3baf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bb98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bbf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bc98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bcb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bcb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bcc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bcc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bcd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bcd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bcf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bcf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bd98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bda0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bda8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bdb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bdb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bdc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bdc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bdd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bdd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bde0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bde8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bdf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bdf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3be98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3beb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3beb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bf98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bfe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3bff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c0f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c1f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c2f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c3f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c4f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c5f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c6f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c7f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c8f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3c9f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ca98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3caa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3caa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3caf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3caf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cb98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cbf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cc98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ccb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ccb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ccc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ccc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ccd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ccd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ccf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ccf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cd98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cda0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cda8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cdb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cdb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cdc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cdc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cdd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cdd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cde0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cde8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cdf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cdf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ce98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ceb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ceb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ced0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ced8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cf98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cfe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3cff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d0f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d1f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d2f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d3f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d4f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d5f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d6f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d7f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d8f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3d9f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3da98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3daa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3daa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3daf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3daf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3db98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dbf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dc98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dcb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dcb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dcc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dcc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dcd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dcd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dcf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dcf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dd98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dda0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dda8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ddb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ddb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ddc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ddc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ddd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ddd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dde0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dde8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ddf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ddf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3de98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3deb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3deb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ded0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ded8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3def0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3def8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3df98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dfe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3dff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e0f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e1f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e2f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e3f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e4f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e5f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e6f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e7f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e8f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3e9f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ea98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eaa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eaa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ead0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ead8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eaf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eaf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eb98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ebf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ec98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ecb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ecb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ecc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ecc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ecd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ecd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ece0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ece8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ecf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ecf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ed98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eda0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eda8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3edb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3edb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3edc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3edc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3edd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3edd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ede0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ede8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3edf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3edf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ee98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eeb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eeb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ef98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3efe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3eff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f000] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f008] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f010] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f018] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f020] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f028] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f030] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f038] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f040] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f048] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f050] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f058] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f060] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f068] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f070] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f078] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f080] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f088] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f090] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f098] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f0f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f100] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f108] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f110] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f118] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f120] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f128] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f130] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f138] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f140] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f148] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f150] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f158] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f160] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f168] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f170] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f178] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f180] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f188] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f190] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f198] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f1f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f200] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f208] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f210] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f218] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f220] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f228] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f230] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f238] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f240] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f248] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f250] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f258] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f260] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f268] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f270] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f278] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f280] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f288] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f290] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f298] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f2f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f300] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f308] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f310] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f318] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f320] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f328] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f330] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f338] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f340] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f348] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f350] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f358] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f360] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f368] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f370] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f378] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f380] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f388] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f390] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f398] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f3f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f400] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f408] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f410] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f418] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f420] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f428] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f430] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f438] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f440] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f448] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f450] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f458] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f460] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f468] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f470] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f478] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f480] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f488] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f490] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f498] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f4f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f500] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f508] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f510] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f518] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f520] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f528] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f530] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f538] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f540] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f548] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f550] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f558] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f560] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f568] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f570] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f578] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f580] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f588] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f590] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f598] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f5f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f600] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f608] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f610] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f618] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f620] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f628] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f630] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f638] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f640] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f648] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f650] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f658] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f660] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f668] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f670] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f678] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f680] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f688] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f690] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f698] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f6f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f700] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f708] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f710] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f718] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f720] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f728] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f730] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f738] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f740] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f748] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f750] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f758] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f760] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f768] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f770] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f778] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f780] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f788] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f790] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f798] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f7f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f800] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f808] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f810] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f818] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f820] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f828] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f830] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f838] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f840] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f848] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f850] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f858] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f860] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f868] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f870] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f878] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f880] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f888] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f890] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f898] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f8f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f900] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f908] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f910] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f918] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f920] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f928] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f930] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f938] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f940] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f948] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f950] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f958] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f960] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f968] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f970] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f978] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f980] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f988] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f990] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f998] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9a0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9a8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9b0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9b8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9c0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9c8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9d0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9d8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9e0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9e8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9f0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3f9f8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fa98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3faa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3faa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fab0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fab8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fac0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fac8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fad0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fad8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fae0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fae8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3faf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3faf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fb98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fba0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fba8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fbf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fc98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fca0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fca8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fcb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fcb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fcc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fcc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fcd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fcd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fce0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fce8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fcf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fcf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fd98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fda0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fda8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fdb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fdb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fdc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fdc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fdd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fdd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fde0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fde8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fdf0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fdf8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fe98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fea0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fea8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3feb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3feb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fec0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fec8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fed0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fed8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fee0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fee8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fef0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fef8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff00] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff08] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff10] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff18] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff20] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff28] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff30] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff38] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff40] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff48] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff50] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff58] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff60] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff68] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff70] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff78] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff80] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff88] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff90] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ff98] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffa0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffa8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffb0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffb8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffc0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffc8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffd0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffd8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffe0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3ffe8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fff0] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
-[00e3fff8] ffff ffff ffff ffff       vperm      #$FFFFFFFF,e23,e23,e23
+
+
+37cc: root
+5662: _run
+60FE: date
+74A2: D

@@ -359,7 +359,7 @@ PP(register VOIDPTR *addr_in;)
 		break;
 	case GRAF_MKSTATE:
 		ret = gr_mkstate(&GR_MX, &GR_MY, &GR_MSTATE, &GR_KSTATE);
-		/* BUG: the asm version of gr_mkstate returns garbage,
+		/* BUG: the asm version of gr_mkstate returns -1,
 		   and the call should always return TRUE */
 		break;
 	

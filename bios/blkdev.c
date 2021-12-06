@@ -410,6 +410,7 @@ PP(LRECNO lrecnr;) /* not supported by TOS */
 /* 206de: 00e0572c */
 /* 306de: 00e05b1e */
 /* 104de: 00fc1aac */
+/* 404: 00e04ce2 */
 static ERROR dorwabs(P(int16_t) rw, P(char *) buf, P(RECNO) recnr, P(int16_t) dev, P(int16_t) cnt)
 PP(int16_t rw;)
 PP(char *buf;)
@@ -432,6 +433,10 @@ PP(int16_t cnt;)
 	
 	bdev = &blkdev[dev];
 	odd = !(((intptr_t) buf) & 1) ? 0 : 1;
+	/*
+	 * This can happen if nobody called Getbpb() before.
+	 * Assume single-sided, 9 sectors per track.
+	 */
 	if (bdev->geometry.spc == 0)
 		bdev->geometry.spt = bdev->geometry.spc = 9;
 	while (cnt != 0)
