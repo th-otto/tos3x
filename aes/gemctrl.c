@@ -518,9 +518,9 @@ PP(int16_t my;)
 				if (p->p_stat == PS_MWAIT)
 				{
 					ap_sendmsg(appl_msg, message, pwin->w_owner->p_pid, w_handle, x, y, w, h);
+#if AESVERSION >= 0x200
 				} else
 				{
-#if AESVERSION >= 0x200
 					if (!p->p_msgtosend)
 					{					/* message is sent */
 						p->p_msgtosend = TRUE;
@@ -899,7 +899,7 @@ PP(BOOLEAN mon;)
 /*	0 = end mouse control	*/
 /*	1 = mouse control	*/
 
-/* 3066de: 00e1b846 */
+/* 306de: 00e1b846 */
 VOID take_ownership(P(BOOLEAN) beg_ownit)
 PP(BOOLEAN beg_ownit;)
 {

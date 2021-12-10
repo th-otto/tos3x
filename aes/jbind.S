@@ -76,9 +76,11 @@ ERRSTKSIZE equ 1028
         text
 
 /* 306de: 00e25570 */
+/* 104de: 00fdd1e2 */
+/* 106de: 00e1e7da */
         xdef    _givecpm
 _givecpm:
-        move.l  _SAV2TRP,(TRP2VEC).w    /* Restore Trap 2 vector. */
+        move.l  _SAV2TRP,ABSW2(TRP2VEC)    /* Restore Trap 2 vector. */
         rts
 
 /*
@@ -86,18 +88,20 @@ _givecpm:
  */
 /* 306de: 00e2557a */
 /* 104de: 00fdd1ee */
+/* 106de: 00e1e7e6 */
         xdef    _takecpm
 _takecpm:
-        move.l  (TRP2VEC).w,_SAV2TRP    /* Save current Trap 2 vector. */
-        move.l  #_grptrp,(TRP2VEC).w    /* Replace vector with ours. */
+        move.l  ABSW2(TRP2VEC),_SAV2TRP /* Save current Trap 2 vector. */
+        move.l  #_grptrp,ABSW2(TRP2VEC) /* Replace vector with ours. */
         rts
 /*
  *      retake gem trap and error trap after execing a program
  */
 /* 306de: 00e2558c */
+/* 106de: 00e1e7fc */
         xdef    _retake
 _retake:
-        move.l  #_grptrp,(TRP2VEC).w    /* Replace vector with ours. */
+        move.l  #_grptrp,ABSW2(TRP2VEC) /* Replace vector with ours. */
         move.l  #_err_trap,d0           /* set ours */
 
 /*      bra     call_err                 FALL TRHU */
@@ -114,6 +118,7 @@ call_err:
 
 /* 306de: 00e255aa */
 /* 104de: 00fdd224 */
+/* 106de: 00e1e81c */
         xdef    _giveerr
 _giveerr:
         move.l  _crit_err,d0
@@ -121,6 +126,7 @@ _giveerr:
 
 /* 306de: 00e255b2 */
 /* 104de: 00fdd22c */
+/* 106de: 00e1e824 */
         xdef    _takeerr
 _takeerr:
         move.l  #-1,d0                  /* get the old one */
@@ -163,6 +169,7 @@ d_out:
  */
 /* 306de: 00e255ec */
 /* 104de: 00fdd23e */
+/* 106de: 00e1e836 */
         xdef  _err_trap
 _err_trap:
 #if AESVERSION >= 0x200
@@ -173,8 +180,10 @@ _err_trap:
         move.l  62(a0),savestk          /* save the stack (u_spsuper) */
         
         move.w  4(a7),d0                /* error */
+#if AESVERSION >= 0x200
         cmp.w   #-15,d0
         beq     er_1                    /* ignore */
+#endif
 
         move.w  6(a7),d1                /* drive */
         jsr     _cli
@@ -232,6 +241,7 @@ er_1:
  */
 /* 306de: 00e2568e */
 /* 104de: 00fdd2cc */
+/* 106de: 00e1e8c4 */
         xdef    _dos_exec
 _dos_exec:
         jsr     _cli
@@ -239,7 +249,11 @@ _dos_exec:
         move.l  8(a0),a0                /* get uda (pd->uda) */
         move.l  62(a0),_savsup          /* save uda->supstk */
         move.l  a7,a1                   /* get current a7 */
+#if AESVERSION >= 0x200
         suba.w  #128,a1                 /* give up some space */
+#else
+        suba.l  #64,a1                  /* give up some space */
+#endif
         move.l  a1,62(a0)               /* make uda->supstk below GEM's ssp */
         jsr     _sti
 
@@ -250,7 +264,11 @@ _dos_exec:
         move.w  8(a1),-(a7)             /*  segenv       (3) */
         move.w  #$4B,-(a7)              /*  command */
         trap    #1
+#if (AESVERSION >= 0x200) | !BINEXACT
         adda.w  #16,a7
+#else
+        adda.l  #16,a7
+#endif
 
         jsr     _cli
         move.l  _rlr,a0
@@ -410,6 +428,7 @@ La1:
  */
 /* 306de: 00e257f8 */
 /* 104de: 00fdd43c */
+/* 106de: 00e1ea34 */
 _grptrp:
         tst.w   d0                      /* Is function number system reset ? */
         beq     _back

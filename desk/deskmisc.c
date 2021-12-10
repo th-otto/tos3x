@@ -871,10 +871,10 @@ PP(register char *dst;)
 
 
 /* 306de: 00e30124 */
-const char *g_name(P(const char *) file)
+char *g_name(P(const char *) file)
 PP(const char *file;)
 {
-	const char *tail;
+	char *tail;
 
 	tail = r_slash(file);
 	if (*tail == '\\')
@@ -951,7 +951,8 @@ int16_t fill_string(P(const char *)string, P(int16_t) item)
 PP(const char *string;)
 PP(int16_t item;)
 {
-	char *ptr, *ptr1;
+	char *ptr;
+	char *ptr1;
 
 	ptr1 = ptr = g_name(string);
 

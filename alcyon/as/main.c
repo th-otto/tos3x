@@ -989,7 +989,8 @@ PP(char **argv;)
 {
 	register short i;
 	char *ofilename;
-	
+	char *arg;
+
 #ifdef __ALCYON__
 	/* symbols etoa and ftoa are unresolved */
 	asm("xdef _etoa");
@@ -1017,7 +1018,9 @@ PP(char **argv;)
 	i = 1;
 	while (argv[i][0] == '-')
 	{									/* may be print or initialize */
-		switch (argv[i++][1])
+		arg = argv[i++];
+		
+		switch (arg[1])
 		{
 		case 'a':						/* short addresses only */
 			shortadr = -1;
@@ -1061,6 +1064,8 @@ PP(char **argv;)
 
 		case 'A':
 			aesflag = 1;
+			if (arg[2] == '0')
+				aesflag = 0;
 			break;
 
 		case 'o':

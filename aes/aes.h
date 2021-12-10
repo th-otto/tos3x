@@ -447,6 +447,10 @@ extern int16_t deskwind;							/* added 7/25/91 window handle of DESKTOP   */
 extern int16_t rets[6];							/* added 2/4/87     */
 #endif
 extern int16_t ml_ocnt;
+#if AESVERSION < 0x200
+extern BOOLEAN g_wsend;
+extern int16_t gl_fakemsg;
+#endif
 
 VOID ct_msgup PROTO((int16_t message, int16_t owner, int16_t wh, int16_t m1, int16_t m2, int16_t m3, int16_t m4));
 VOID hctl_window PROTO((int16_t w_handle, int16_t mx, int16_t my));
@@ -581,7 +585,7 @@ VOID kchange PROTO((int16_t ch, int16_t kstat));
 VOID post_keybd PROTO((PD *p, uint16_t ch));
 VOID bchange PROTO((int16_t new, int16_t clicks));
 int16_t downorup PROTO((int16_t new, intptr_t buparm));
-VOID post_button PROTO((PD * p, int16_t new, int16_t clks));
+VOID post_button PROTO((PD *p, int16_t new, int16_t clks));
 VOID mchange PROTO((int16_t rx1, int16_t ry1));
 VOID post_mouse PROTO((PD *p, int16_t grx, int16_t gry));
 int16_t inorout PROTO((EVB *e, int16_t rx, int16_t ry));
@@ -604,9 +608,6 @@ extern int16_t gl_dabase;
 extern int16_t gl_dabox;
 
 uint16_t do_chg PROTO((LPTREE tree, int16_t iitem, uint16_t chgvalue, int16_t dochg, int16_t dodraw, int16_t chkdisabled));
-#if SUBMENUS
-#else
-#endif
 int16_t mn_do PROTO((int16_t *ptitle, int16_t *pitem));
 VOID mn_bar PROTO((LPTREE tree, int16_t showit));
 VOID mn_clsda PROTO((NOTHING));
@@ -641,11 +642,6 @@ extern ICONBLK ib;
 
 int16_t ob_sysvar PROTO((uint16_t mode, uint16_t which, uint16_t inval1, uint16_t inval2, int16_t *outval1, int16_t *outval2));
 VOID ob_format PROTO((int16_t just, char *raw_str, char *tmpl_str, char *fmt_str));
-#if LINEF_HACK
-VOID ob_fformat PROTO((int16_t just, char *raw_str, char *tmpl_str, char *fmt_str));
-#else
-#define ob_fformat ob_format
-#endif
 VOID ob_draw PROTO((LPTREE tree, int16_t obj, int16_t depth));
 int16_t ob_find PROTO((LPTREE tree, int16_t currobj, int16_t depth, int16_t mx, int16_t my));
 VOID ob_add PROTO((LPTREE tree, int16_t parent, int16_t child));
@@ -751,11 +747,6 @@ VOID gsx_gclip PROTO((GRECT *pt));
 BOOLEAN gsx_chkclip PROTO((GRECT *pt));
 VOID gsx_pline PROTO((int16_t offx, int16_t offy, int16_t cnt, const int16_t *pts));
 VOID gsx_cline PROTO((uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2));
-#if LINEF_HACK
-VOID gsx_fcline PROTO((uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2));
-#else
-#define gsx_fcline gsx_cline
-#endif
 VOID gsx_attr PROTO((uint16_t text, uint16_t mode, uint16_t color));
 VOID gsx_bxpts PROTO((GRECT *pt));
 VOID gsx_box PROTO((GRECT *pt));
@@ -961,7 +952,9 @@ int dos_chdir PROTO((const char *path));
 int dos_sdrv PROTO((int drv));
 int dos_chmod PROTO((const char *path, int attr));
 int dos_delete PROTO((const char *path));
+int dos_rmdir PROTO((const char *path));
 int dos_free PROTO((VOIDPTR ptr));
+int dos_create PROTO((const char *path, int attr));
 int do_cdir PROTO((int drv, const char *path));
 int isdrive PROTO((NOTHING)); /* BUG: should be declared as returning LONG */
 long trap PROTO((short code, ...));
@@ -1006,8 +999,13 @@ VOID sti PROTO((NOTHING));
 VOID hsti PROTO((NOTHING));
 VOID dsptch PROTO((NOTHING));
 VOID savestate PROTO((NOTHING));
+#if AESVERSION < 0x200
+VOID savestate PROTO((UDA *pd));
+VOID switchto PROTO((UDA *pd));
+#else
 VOID switchto PROTO((NOTHING));
 VOID gotopgm PROTO((NOTHING));
+#endif
 VOID psetup PROTO((PD *pd, VOIDPTR pcode));
 int16_t pgmld PROTO((int16_t handle, const char *pname, intptr_t *ldaddr));
 
@@ -1033,7 +1031,6 @@ VOID i_ptsin PROTO((int16_t *));
 VOID i_intin PROTO((int16_t *));
 VOID i_ptsout PROTO((int16_t *));
 VOID i_intout PROTO((int16_t *));
-VOID i_ptr PROTO((VOIDPTR));
 VOID i_lptr1 PROTO((VOIDPTR, ...));
 VOID i_ptr2 PROTO((VOIDPTR));
 VOID m_lptr2 PROTO((VOIDPTR *));
@@ -1073,8 +1070,45 @@ char *scan_2 PROTO((const char *pcurr, int16_t *pwd));
 char *escan_str PROTO((const char *pcurr, char *ppstr));
 char *save_2 PROTO((char *pcurr, uint16_t wd));
 BOOLEAN app_reschange PROTO((int16_t res));
-const char *g_name PROTO((const char *file));
+char *g_name PROTO((const char *file));
 BOOLEAN deskmain PROTO((NOTHING));
+
+
+
+#if LINEF_HACK
+/* actually same functions, but with different opcode entries in linef dispatcher */
+VOID ob_fformat PROTO((int16_t just, char *raw_str, char *tmpl_str, char *fmt_str));
+VOID ob_foffset PROTO((LPTREE tree, int16_t obj, int16_t *pxoff, int16_t *pyoff));
+VOID gr_fmovebox PROTO((int16_t w, int16_t h, int16_t srcx, int16_t srcy, int16_t dstx, int16_t dsty));
+VOID gr_fdragbox PROTO((int16_t w, int16_t h, int16_t sx, int16_t sy, GRECT *pc, int16_t *pdx, int16_t *pdy));
+VOID gsx_fcline PROTO((uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2));
+VOID gsx_ftblt PROTO((int16_t tb_f, int16_t x, int16_t y, int16_t tb_nc));
+int dos_ffree PROTO((VOIDPTR ptr));
+VOID rc_fconstrain PROTO((const GRECT *pc, GRECT *pt));
+BOOLEAN rc_fequal PROTO((const GRECT *p1, const GRECT *p2));
+int16_t inf_fgindex PROTO((LPTREE tree, int16_t baseobj, int16_t numobj));
+VOID feveryobj PROTO((LPTREE tree, int16_t this, int16_t last, EVERYOBJ_CALLBACK routine, int16_t startx, int16_t starty, int16_t maxdep));
+int32_t trp13int PROTO((short code, ...));
+int32_t trp13int PROTO((short code, ...));
+VOID gsx_fgclip PROTO((GRECT *pt));
+VOID gsx_fattr PROTO((uint16_t text, uint16_t mode, uint16_t color));
+#else
+#define ob_fformat ob_format
+#define ob_foffset ob_offset
+#define gr_fmovebox gr_movebox
+#define gr_fdragbox gr_dragbox
+#define gsx_fcline gsx_cline
+#define gsx_ftblt gsx_tblt
+#define dos_ffree dos_free
+#define rc_fconstrain rc_constrain
+#define rc_fequal rc_equal
+#define inf_fgindex inf_gindex
+#define feveryobj everyobj
+#define trp13int trp13
+#define trp14int trp14
+#define gsx_fgclip gsx_gclip
+#define gsx_fattr gsx_attr
+#endif
 
 #if TP_WINX
 #include "winx.h"

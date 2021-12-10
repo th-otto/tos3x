@@ -54,6 +54,8 @@
 
 /* 306de: 00e254f8 */
 /* 404: 00e343a8 */
+/* 104de: 00fe5bba */
+/* 106de: 00e282cc */
 	xdef	_gsx2
 _gsx2:
 	lea	pblock,a0	; a0 -> pblock
@@ -127,8 +129,6 @@ _i_intout: ds.b 0
 	rts
 
 
-	xdef	_i_ptr
-_i_ptr: ds.b 0
 	xdef	_i_lptr1
 _i_lptr1: ds.b 0
 

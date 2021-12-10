@@ -212,8 +212,11 @@ VOID gsx_gclip(GRECT *pt)
 /* 306de: 00e24452 */
 /* 104de: 00fd4660 */
 	xdef _gsx_gclip
-_gsx_gclip:
-
+_gsx_gclip: ds.b 0
+#if LINEF_HACK
+	xdef _gsx_fgclip
+_gsx_fgclip: ds.b 0
+#endif
 	move.l	4(sp),a0		; a0 -> pt
 	move.w	_gl_xclip,(a0)+		; pt->g_x <- gl_xclip
 	move.w	_gl_yclip,(a0)+
@@ -404,7 +407,11 @@ VOID gsx_attr(UWORD text, UWORD mode, UWORD color)
 /* 306de: 00e244fe */
 /* 104de: 00fd4700 */
 	xdef _gsx_attr
-_gsx_attr:
+_gsx_attr: ds.b 0
+#if LINEF_HACK
+	xdef _gsx_fattr
+_gsx_fattr: ds.b 0
+#endif
 
 	lea	4(sp),a0		; a0 -> parameters
 	movem.l	d3-d4/a3-a4,-(sp)

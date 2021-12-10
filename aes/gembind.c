@@ -39,6 +39,8 @@ uint16_t crysbind PROTO((int16_t opcode, intptr_t pglobal, uint16_t *int_in, int
 
 /* 206de: 00e1686c */
 /* 306de: 00e1a2d2 */
+/* 104de: 00fdf10c */
+/* 106de: 00e20a78 */
 uint16_t crysbind(P(int16_t) opcode, P(intptr_t) pglobal, P(uint16_t *) int_in, P(int16_t *) int_out, P(VOIDPTR *) addr_in)
 PP(int16_t opcode;)
 PP(register intptr_t pglobal;)
@@ -78,7 +80,7 @@ PP(register VOIDPTR *addr_in;)
 		LLSET(pglobal + 22, &D);
 		LWSET(pglobal + 26, gl_bvdisk);
 		LWSET(pglobal + 28, gl_bvhard);
-		return rlr->p_pid;
+		ret = rlr->p_pid;
 #else
 		ret = ap_init(pglobal);
 #endif
@@ -530,6 +532,10 @@ PP(register VOIDPTR *addr_in;)
  *	routine.
  */
 
+/* 306de: 00e1ad0a */
+/* 206de: 00e172a4 */
+/* 104de: 00fdf894 */
+/* 106de: 00e2133a */
 VOID xif(P(intptr_t) pcrys_blk)
 PP(intptr_t pcrys_blk;)
 {

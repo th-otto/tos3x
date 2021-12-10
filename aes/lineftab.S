@@ -142,7 +142,7 @@
 [00fe7af4] dc.l $00fe5bce            ; F234 ; mul_div AES
 [00fe7af8] dc.l $00fd47ac            ; F238 ; gsx_fix AES
 [00fe7afc] dc.l $00fdd11c            ; F23C ; dos_alloc; duplicate; unused AES
-[00fe7b00] dc.l $00fdd188            ; F240
+[00fe7b00] dc.l $00fdd188            ; F240 ; dos_free; duplicate AES
 [00fe7b04] dc.l $00fd48ca            ; F244 ; gsx_start AES
 [00fe7b08] dc.l $00fd47ac            ; F248 ; gsx_fix; duplicate; unused AES
 [00fe7b0c] dc.l $00fe5e82            ; F24C ; strlen AES
@@ -167,20 +167,20 @@
 [00fe7b58] dc.l $00fe5cb4            ; F298 ; r_set AES
 [00fe7b5c] dc.l $00fe5ccc            ; F29C ; inside AES
 [00fe7b60] dc.l $00fe391a            ; F2A0 ; get_prev AES
-[00fe7b64] dc.l $00fe355c            ; F2A4 ; ob_delete; duplicate; unused AES
+[00fe7b64] dc.l $00fe355c            ; F2A4 ; ob_delete; duplicate AES
 [00fe7b68] dc.l $00fe2dc6            ; F2A8 ; just_draw AES
 [00fe7b6c] dc.l $00fe5f7e            ; F2AC ; fs_sset AES
 [00fe7b70] dc.l $00fe600a            ; F2B0 ; inf_gindex; duplicate AES
 [00fe7b74] dc.l $00fd7c66            ; F2B4 ; objc_find DESKTOP
 [00fe7b78] dc.l $00fd6228            ; F2B8
 [00fe7b7c] dc.l $00fd4f6e            ; F2BC ; app_mtoi DESKTOP
-[00fe7b80] dc.l $00fda192            ; F2C0
+[00fe7b80] dc.l $00fda192            ; F2C0 ; do_redraw DESKTOP
 [00fe7b84] dc.l $00fd7b1a            ; F2C4 ; graf_mouse DESKTOP
 [00fe7b88] dc.l $00fd46c2            ; F2C8 ; gsx_pline AES
 [00fe7b8c] dc.l $00fd5e3a            ; F2CC
 [00fe7b90] dc.l $00fd7a36            ; F2D0 ; evnt_multi DESKTOP
 [00fe7b94] dc.l $00fd5d7c            ; F2D4
-[00fe7b98] dc.l $00fd4700            ; F2D8 ; gsx_attr; duplicate; unused AES
+[00fe7b98] dc.l $00fd4700            ; F2D8 ; gsx_attr; duplicate AES
 [00fe7b9c] dc.l $00fd7bb0            ; F2DC ; graf_mkstate DESKTOP
 [00fe7ba0] dc.l $00fe5dda            ; F2E0 ; rc_constrain AES
 [00fe7ba4] dc.l $00fd5e9a            ; F2E4
@@ -241,7 +241,7 @@
 [00fe7c80] dc.l $00fdd11c            ; F3C0 ; dos_alloc AES
 [00fe7c84] dc.l $00fd81e8            ; F3C4
 [00fe7c88] dc.l $00fe5fac            ; F3C8 ; inf_sset AES
-[00fe7c8c] dc.l $00fd695a            ; F3CC
+[00fe7c8c] dc.l $00fd695a            ; F3CC ; fm_draw DESKTOP
 [00fe7c90] dc.l $00fd7abc            ; F3D0 ; form_do DESKTOP
 [00fe7c94] dc.l $00fe6034            ; F3D4 ; inf_what AES
 [00fe7c98] dc.l $00fd6b16            ; F3D8
@@ -252,7 +252,7 @@
 [00fe7cac] dc.l $00fd691c            ; F3EC ; do_finish DESKTOP
 [00fe7cb0] dc.l $00fdd188            ; F3F0 ; dos_free AES
 [00fe7cb4] dc.l $00fdd168            ; F3F4 ; dos_sdta AES
-[00fe7cb8] dc.l $00fd6a5a            ; F3F8
+[00fe7cb8] dc.l $00fd6a5a            ; F3F8 ; xtr_mask DESKTOP
 [00fe7cbc] dc.l $00fdcfb4            ; F3FC ; dos_sfirst AES
 [00fe7cc0] dc.l $00fd7620            ; F400
 [00fe7cc4] dc.l $00fe5ed0            ; F404 ; xstrpcat AES
@@ -268,18 +268,18 @@
 [00fe7cec] dc.l $00fe5fd0            ; F42C ; fs_sget AES
 [00fe7cf0] dc.l $00fe5f4e            ; F430 ; unfmt_str AES
 [00fe7cf4] dc.l $00fd791e            ; F434
-[00fe7cf8] dc.l $00fd6a0a            ; F438
-[00fe7cfc] dc.l $00fd69b6            ; F43C
-[00fe7d00] dc.l $00fe752a            ; F440
-[00fe7d04] dc.l $00fda0e0            ; F444
+[00fe7cf8] dc.l $00fd6a0a            ; F438 ; drawclip DESKTOP
+[00fe7cfc] dc.l $00fd69b6            ; F43C ; drawfld DESKTOP
+[00fe7d00] dc.l $00fe752a            ; F440 ; fc_draw DESKTOP
+[00fe7d04] dc.l $00fda0e0            ; F444 ; hd_win DESKTOP
 [00fe7d08] dc.l $00fe6d20            ; F448 ; fc_format DESKTOP
 [00fe7d0c] dc.l $00fe7126            ; F44C ; fc_copy DESKTOP
 [00fe7d10] dc.l $00fe7592            ; F450 ; trp14int; duplicate AES
-[00fe7d14] dc.l $00fe74ba            ; F454
+[00fe7d14] dc.l $00fe74ba            ; F454 ; fc_bar DESKTOP
 [00fe7d18] dc.l $00fe73d0            ; F458 ; fc_rwsec DESKTOP
 [00fe7d1c] dc.l $00fe5e44            ; F45C ; max AES
 [00fe7d20] dc.l $00fe7408            ; F460 ; fc_clfix DESKTOP
-[00fe7d24] dc.l $00fd8780            ; F464
+[00fe7d24] dc.l $00fd8780            ; F464 ; desk_dfree DESKTOP
 [00fe7d28] dc.l $00fd8d76            ; F468
 [00fe7d2c] dc.l $00fdd164            ; F46C ; dos_gdrv AES
 [00fe7d30] dc.l $00fd8fae            ; F470
@@ -301,9 +301,9 @@
 [00fe7d70] dc.l $00fda13c            ; F4B0
 [00fe7d74] dc.l $00fdcd94            ; F4B4
 [00fe7d78] dc.l $00fd7d48            ; F4B8 ; wind_set DESKTOP
-[00fe7d7c] dc.l $00fdce1c            ; F4BC
+[00fe7d7c] dc.l $00fdce1c            ; F4BC ; wind_grget DESKTOP
 [00fe7d80] dc.l $00fd94c8            ; F4C0 ; send_msg DESKTOP
-[00fe7d84] dc.l $00fd80aa            ; F4C4
+[00fe7d84] dc.l $00fd80aa            ; F4C4 ; xform_do DESKTOP
 [00fe7d88] dc.l $00fd9572            ; F4C8
 [00fe7d8c] dc.l $00fd6cce            ; F4CC
 [00fe7d90] dc.l $00fd7774            ; F4D0
@@ -324,8 +324,8 @@
 [00fe7dcc] dc.l $00fd7d6e            ; F50C ; my_itoa DESKTOP
 [00fe7dd0] dc.l $00fd7e02            ; F510 ; fmt_date DESKTOP
 [00fe7dd4] dc.l $00fd7db6            ; F514 ; fmt_time DESKTOP
-[00fe7dd8] dc.l $00fd4660            ; F518 ; gs_gclip AES
-[00fe7ddc] dc.l $00fd7e58            ; F51C
+[00fe7dd8] dc.l $00fd4660            ; F518 ; gsx_gclip AES
+[00fe7ddc] dc.l $00fd7e58            ; F51C ; bldstring DESKTOP
 [00fe7de0] dc.l $00fd4b24            ; F520 ; gsx_tblt; duplicate AES
 [00fe7de4] dc.l $00fdb85a            ; F524 ; hd_msg DESKTOP
 [00fe7de8] dc.l $00fe5fe8            ; F528 ; inf_fldset AES
@@ -333,7 +333,7 @@
 [00fe7df0] dc.l $00fd8284            ; F530
 [00fe7df4] dc.l $00fdd178            ; F534 ; dos_chmod AES
 [00fe7df8] dc.l $00fdd09a            ; F538 ; dos_label AES
-[00fe7dfc] dc.l $00fd813e            ; F53C
+[00fe7dfc] dc.l $00fd813e            ; F53C ; fmdodraw DESKTOP
 [00fe7e00] dc.l $00fe600a            ; F540 ; inf_gindex AES
 [00fe7e04] dc.l $00fd5596            ; F544 ; app_reschange DESKTOP
 [00fe7e08] dc.l $00fe5e6a            ; F548 ; toupper AES
@@ -387,26 +387,26 @@
 [00fe7ec8] dc.l $00fd59a0            ; F608
 [00fe7ecc] dc.l $00fd8a16            ; F60C
 [00fe7ed0] dc.l $00fdb6f6            ; F610 ; hd_keybd DESKTOP
-[00fe7ed4] dc.l $00fd8622            ; F614
+[00fe7ed4] dc.l $00fd8622            ; F614 ; desk_pref DESKTOP
 [00fe7ed8] dc.l $00fdba7e            ; F618
 [00fe7edc] dc.l $00fd55e8            ; F61C ; save_inf DESKTOP
 [00fe7ee0] dc.l $00fe1bae            ; F620 ; av_hardcopy AES
 [00fe7ee4] dc.l $00fd65ba            ; F624
 [00fe7ee8] dc.l $00fd66ba            ; F628
 [00fe7eec] dc.l $00fd9d76            ; F62C
-[00fe7ef0] dc.l $00fdb318            ; F630
+[00fe7ef0] dc.l $00fdb318            ; F630 ; do_file DESKTOP
 [00fe7ef4] dc.l $00fdb17c            ; F634
 [00fe7ef8] dc.l $00fe75e0            ; F638 ; mediach AES
-[00fe7efc] dc.l $00fdae56            ; F63C
-[00fe7f00] dc.l $00fdaeae            ; F640
+[00fe7efc] dc.l $00fdae56            ; F63C ; rb_start DESKTOP
+[00fe7f00] dc.l $00fdaeae            ; F640 ; rb_stop DESKTOP
 [00fe7f04] dc.l $00fdb3bc            ; F644
 [00fe7f08] dc.l $00fdcc68            ; F648
-[00fe7f0c] dc.l $00fdb470            ; F64C
+[00fe7f0c] dc.l $00fdb470            ; F64C ; do_opt DESKTOP
 [00fe7f10] dc.l $00fd7be8            ; F650 ; menu_tnormal DESKTOP
-[00fe7f14] dc.l $00fdb774            ; F654
+[00fe7f14] dc.l $00fdb774            ; F654 ; hd_menu DESTKOP
 [00fe7f18] dc.l $00fda422            ; F658
 [00fe7f1c] dc.l $00fdcbe0            ; F65C
-[00fe7f20] dc.l $00fdcb5c            ; F660
+[00fe7f20] dc.l $00fdcb5c            ; F660 ; srl_bar DESKTOP
 [00fe7f24] dc.l $00fd7ab0            ; F664 ; evnt_dclick DESKTOP
 [00fe7f28] dc.l $00fd7988            ; F668 ; ap_init AES
 [00fe7f2c] dc.l $00fd7d0a            ; F66C ; wind_update DESKTOP
@@ -430,7 +430,7 @@
 [00fe7f74] dc.l $00fdd4ee            ; F6B4 ; signal AES
 [00fe7f78] dc.l $00fdfbfc            ; F6B8 ; ev_block AES
 [00fe7f7c] dc.l $00fdeb0a            ; F6BC ; fpdnm AES
-[00fe7f80] dc.l $00fe5c12            ; F6C0 ; i_ptr AES
+[00fe7f80] dc.l $00fe5c12            ; F6C0 ; i_lptr1 AES
 [00fe7f84] dc.l $00fe1b1e            ; F6C4 ; gsx_ncode; duplicate AES
 [00fe7f88] dc.l $00fe5c26            ; F6C8 ; m_lptr2 AES
 [00fe7f8c] dc.l $00fde286            ; F6CC ; forkq AES
@@ -448,7 +448,7 @@
 [00fe7fbc] dc.l $00fdec42            ; F6FC ; pstart AES
 [00fe7fc0] dc.l $00fe65f4            ; F700 ; ld_cartacc AES
 [00fe7fc4] dc.l $00fdd170            ; F704 ; dos_chdir AES
-[00fe7fc8] dc.l $00fdda30            ; F708 ; sndclI AES
+[00fe7fc8] dc.l $00fdda30            ; F708 ; sndcli AES
 [00fe7fcc] dc.l $00fd413a            ; F70C ; pinit AES
 [00fe7fd0] dc.l $00fe4e6c            ; F710 ; ap_sendmsg AES
 [00fe7fd4] dc.l $00fe4bac            ; F714 ; w_bldactive AES
@@ -568,7 +568,7 @@
 [00fe819c] dc.l $00fe1b74            ; F8DC ; gsx_graphic AES
 [00fe81a0] dc.l $00fd430c            ; F8E0 ; gsx_malloc AES
 [00fe81a4] dc.l $00fe1c30            ; F8E4 ; ratinit AES
-[00fe81a8] dc.l $00fe1dbe            ; F8E8 ; gsx_moff; duplicate AES
+[00fe81a8] dc.l $00fe1dbe            ; F8E8 ; ratexit; duplicate AES
 [00fe81ac] dc.l $00fe40b2            ; F8EC ; sh_draw AES
 [00fe81b0] dc.l $00fe4254            ; F8F0 ; sh_search AES
 [00fe81b4] dc.l $00fe4186            ; F8F4 ; sh_path AES

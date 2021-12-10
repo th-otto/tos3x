@@ -2789,6 +2789,7 @@ xbvecsend:
 
 #if TOSVERSION >= 0x300
 /* unknown: 00e00fae; seems to be unused */
+_brwabs:
         btst      #0,1(a7)
         bne.s     bx_notodd
         move.l    #rw_ret,(a7)

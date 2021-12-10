@@ -214,6 +214,8 @@ PP(int16_t *outval2;)
  *	template string build a formatted string.
  */
 /* 306de: 00e232e4 */
+/* 104de: 00fe2ce2 */
+/* 106de: 00e24df0 */
 VOID ob_format(P(int16_t) just, P(char *) raw_str, P(char *) tmpl_str, P(char *) fmtstr)
 PP(int16_t just;)
 PP(char *raw_str;)
@@ -278,6 +280,8 @@ PP(char *fmtstr;)
  *	routine.
  */
 /* 306de: 00e2339a */
+/* 104de: 00fe2d84 */
+/* 106de: 00e24ea2 */
 LINEF_STATIC int16_t ob_user(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt, P(intptr_t) userblk, P(int16_t) curr_state, P(int16_t) new_state)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -482,7 +486,9 @@ PP(intptr_t spec;)
  *	Routine to draw an object from an object tree.
  */
 /* 306de: 00e233f2 */
-LINEF_STACK VOID just_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) sx, P(int16_t) sy)
+/* 104de: 00fe2dc6 */
+/* 106de: 00e24ef2 */
+LINEF_STATIC VOID just_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) sx, P(int16_t) sy)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
 PP(register int16_t sx;)
@@ -730,7 +736,6 @@ PP(register int16_t sy;)
 
 				gr_rect(icol, ipat, pt);
 				gr_inside(pt, -tmpth);
-
 			}
 			break;
 		}
@@ -858,7 +863,6 @@ PP(register int16_t sy;)
 			if (obtype == G_BUTTON)
 			{
 				tmpx = pt->g_x + ((pt->g_w - (len * gl_wchar)) / 2);
-
 #if AES3D
 				/* July 30 1992 - ml. */
 				if (three_d)
@@ -984,6 +988,8 @@ PP(register int16_t sy;)
  *	Object draw routine that walks tree and draws appropriate objects.
  */
 /* 306de: 00e23ab2 */
+/* 104de: 00fe3366 */
+/* 106de: 00e25544 */
 VOID ob_draw(P(LPTREE) tree, P(int16_t) obj, P(int16_t) depth)
 PP(register LPTREE tree;)
 PP(int16_t obj;)
@@ -993,7 +999,6 @@ PP(int16_t depth;)
 	int16_t sx, sy;
 
 	last = (obj == ROOT) ? NIL : LWGET(OB_NEXT(obj));
-
 	pobj = get_par(tree, obj);
 
 	if (pobj != NIL)
@@ -1019,6 +1024,8 @@ PP(int16_t depth;)
 /* o b _ f i n d                                                        */
 /************************************************************************/
 /* 306de: 00e23b52 */
+/* 104de: 00fe33e6 */
+/* 106de: 00e255de */
 int16_t ob_find(P(LPTREE) tree, P(int16_t) currobj, P(int16_t) depth, P(int16_t) mx, P(int16_t) my)
 PP(register LPTREE tree;)
 PP(register int16_t currobj;)
@@ -1117,6 +1124,8 @@ PP(int16_t my;)
  *	It is also initialized.
  */
 /* 306de: 00e23c82 */
+/* 104de: 00fe34f8 */
+/* 106de: 00e2570a */
 VOID ob_add(P(LPTREE) tree, P(int16_t) parent, P(int16_t) child)
 PP(register LPTREE tree;)
 PP(register int16_t parent;)
@@ -1148,7 +1157,11 @@ PP(register int16_t child;)
  *	Routine to delete an object from the tree.
  */
 /* 306de: 00e23cee */
+/* 104de: 00fe355c */
+/* 106de: 00e25776 */
 /* BUG: doesnt return FALSE as documented */
+asm("  .globl _ob_fdelete")
+asm("_ob_fdelete: ds.b 0")
 VOID ob_delete(P(LPTREE) tree, P(int16_t) obj)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
@@ -1195,6 +1208,8 @@ PP(register int16_t obj;)
  *	is the tail of the list.
  */
 /* 306de: 00e23d9c */
+/* 104de: 00fe35fc */
+/* 106de: 00e25824 */
 /* BUG: doesnt return FALSE as documented */
 VOID ob_order(P(LPTREE) tree, P(int16_t) mov_obj, P(int16_t) new_pos)
 PP(register LPTREE tree;)
@@ -1210,7 +1225,7 @@ PP(int16_t new_pos;)
 	else
 		return;
 
-	ob_delete(tree, mov_obj);
+	ob_fdelete(tree, mov_obj);
 	chg_obj = LWGET(phead = OB_HEAD(parent));
 	pmove = OB_NEXT(mov_obj);
 	if (new_pos == 0)
@@ -1251,6 +1266,8 @@ PP(int16_t new_pos;)
  *	object using the current clip rectangle.
  */
 /* 306de: 00e23e7a */
+/* 104de: 00fe36cc */
+/* 106de: 00e25902 */
 /* BUG: doesnt return FALSE as documented */
 VOID ob_change(P(LPTREE) tree, P(int16_t) obj, P(int16_t) new_state, P(int16_t) redraw)
 PP(register LPTREE tree;)
@@ -1317,6 +1334,8 @@ PP(int16_t redraw;)
 
 
 /* 306de: 00e23fb6 */
+/* 104de: 00fe37f4 */
+/* 106de: 00e25a48 */
 uint16_t ob_fs(P(LPTREE) tree, P(int16_t) ob, P(int16_t *) pflag)
 PP(LPTREE tree;)
 PP(int16_t ob;)
@@ -1331,6 +1350,10 @@ PP(int16_t *pflag;)
 /* o b _ a c t x y w h                                                  */
 /************************************************************************/
 /* 306de: 00e23fea */
+/* 104de: 00fe3826 */
+/* 106de: 00e25a7c */
+asm("  .globl _ob_factxywh")
+asm("_ob_factxywh: ds.b 0")
 VOID ob_actxywh(P(LPTREE) tree, P(int16_t) obj, P(GRECT *) pt)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
@@ -1352,6 +1375,8 @@ PP(register GRECT *pt;)
 /* o b _ r e l x y w h                                                  */
 /************************************************************************/
 /* 306de: 00e24042 */
+/* 104de: 00fe3876 */
+/* 106de: 00e25ad6 */
 VOID ob_relxywh(P(LPTREE) tree, P(int16_t) obj, P(GRECT *)pt)
 PP(LPTREE tree;)
 PP(int16_t obj;)
@@ -1378,6 +1403,10 @@ PP(GRECT *pt;)
  *	of all the objects parents up to and including the root.
  */
 /* 306de: 00e2409a */
+/* 104de: 00fe38c2 */
+/* 106de: 00e25b2e */
+asm("  .globl _ob_foffset")
+asm("_ob_foffset: ds.b 0")
 VOID ob_offset(P(LPTREE) tree, P(int16_t) obj, P(int16_t *) pxoff, P(int16_t *) pyoff)
 PP(register LPTREE tree;)
 PP(register int16_t obj;)
@@ -1498,6 +1527,8 @@ PP(int16_t *phcl;)
  *	return NIL.
  */
 /* 306de: 00e240fe */
+/* 104de: 00fe391a */
+/* 106de: 00e25b92 */
 int16_t get_prev(P(LPTREE) tree, P(int16_t) parent, P(int16_t) obj)
 PP(register LPTREE tree;)
 PP(int16_t parent;)

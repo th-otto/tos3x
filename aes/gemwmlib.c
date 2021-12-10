@@ -125,11 +125,11 @@ static int32_t const gl_waspec[MAXOBJ] =
     0x00011101L     /* W_HELEV      */
 };
 
-#if BINEXACT
+#if (AESVERSION >= 0x200) & BINEXACT
 static short const garbage[] = {
 	 /* hההה?? */
-	0x2304, 0x3405, 0x4506, 0x56a7, 0x6708, 0x7809, 0x890a, 0x9a0b, 0xab0c, 0xbc0d, 0xcd0e, 0xde0f, 0x2314, 0x3405,
-	0x4506, 0x5607, 0x6708, 0x7819, 0x890a, 0x9a0b, 0xab0c, 0xbc0d, 0xcd0e, 0xde0f
+	0x2304, 0x3405, 0x4506, 0x56a7, 0x6708, 0x7809, 0x890a, 0x9a0b, 0xab0c, 0xbc0d, 0xcd0e, 0xde0f,
+	0x2314, 0x3405,	0x4506, 0x5607, 0x6708, 0x7819, 0x890a, 0x9a0b, 0xab0c, 0xbc0d, 0xcd0e, 0xde0f
 };
 #endif
 
@@ -146,6 +146,8 @@ static BOOLEAN w_union PROTO((ORECT *po, GRECT *pt));
 
 
 /* 306de: 00e211cc */
+/* 104de: 00fe44ec */
+/* 106de: 00e2696e */
 LINEF_STATIC VOID w_nilit(P(int16_t) num, P(OBJECT *) olist)
 PP(register int16_t num;)
 PP(OBJECT * olist;)
@@ -164,6 +166,8 @@ PP(OBJECT * olist;)
  *  is added at the end of the parent's current sibling list.
  *  It is also initialized.
  */
+/* 104de: 00fe4534 */
+/* 106de: 00e269be */
 LINEF_STATIC VOID w_obadd(P(OBJECT *) olist, P(int16_t) parent, P(int16_t) child)
 PP(OBJECT *olist;)
 PP(register int16_t parent;)
@@ -188,13 +192,18 @@ PP(register int16_t child;)
 
 #if !TP_WINX
 /* 306de: 00e21296 */
+/* 104de: 00fe45a6 */
+/* 106de: 00e26a38 */
 LINEF_STATIC VOID w_setup(P(PD *) ppd, P(int16_t) w_handle, P(int16_t) kind)
 PP(PD *ppd;)
 PP(int16_t w_handle;)
 PP(int16_t kind;)
 {
 	register WINDOW *pwin;
+#if AESVERSION >= 0x200
 	int i;
+	UNUSED(i);
+#endif
 	
 	pwin = srchwp(w_handle);
 	pwin->w_owner = ppd;
@@ -216,6 +225,8 @@ PP(int16_t kind;)
 
 
 /* 306de: 00e21328 */
+/* 104de: 00fe45ea */
+/* 106de: 00e26a84 */
 LINEF_STATIC GRECT *w_getxptr(P(int16_t) which, P(int16_t) w_handle)
 PP(int16_t which;)
 PP(int16_t w_handle;)
@@ -257,6 +268,8 @@ PP(int16_t w_handle;)
  * Get the size (x,y,w,h) of the window
  */
 /* 306de: 00e213a6 */
+/* 104de: 00fe4660 */
+/* 106de: 00e26b02 */
 VOID w_getsize(P(int16_t) which, P(int16_t) w_handle, P(GRECT *)pt)
 PP(register int16_t which;)
 PP(int16_t w_handle;)
@@ -285,6 +298,7 @@ PP(GRECT *pt;)
 #endif
 
 
+#if AESVERSION >= 0x200 | TP_WINX
 /*
  * setcol() - set the color of an object.
  */
@@ -297,12 +311,10 @@ PP(BOOLEAN topped;)							/* YES: top window color */
 	register int16_t color;
 	register OBJECT *obj;
 	
-#if (AESVERSION >= 0x200) | TP_WINX
 	if (topped)
 		color = wp->w_tcolor[ndx];
 	else
 		color = wp->w_bcolor[ndx];
-#endif
 	obj = &W_ACTIVE[ndx];
 	if (obj->ob_type == G_BOXTEXT)
 	{
@@ -312,9 +324,14 @@ PP(BOOLEAN topped;)							/* YES: top window color */
 		obj->ob_spec = (obj->ob_spec & 0xffff0000L) | ((int32_t)color & 0x0000ffffL);
 	}
 }
+#else
+#define setcol(a,b,c)
+#endif
 
 
 /* 306de: 00e21484 */
+/* 104de: 00fe46b6 */
+/* 106de: 00e26b6e */
 LINEF_STATIC VOID w_adjust(P(int16_t) parent, P(int16_t) obj, P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(int16_t parent;)
 PP(register int16_t obj;)
@@ -323,6 +340,7 @@ PP(int16_t y;)
 PP(int16_t w;)
 PP(int16_t h;)
 {
+#if (AESVERSION >= 0x200) | !BINEXACT
 	register OBJECT *pobj;
 	
 	pobj = &W_ACTIVE[obj];
@@ -336,11 +354,17 @@ PP(int16_t h;)
 #endif
 
 	pobj->ob_head = pobj->ob_tail = NIL;
+#else
+	rc_copy((GRECT *)&x, (GRECT *)&W_ACTIVE[obj].ob_x); /* WTF */
+	W_ACTIVE[obj].ob_head = W_ACTIVE[obj].ob_tail = NIL;
+#endif
 	w_obadd(&W_ACTIVE[ROOT], parent, obj);
 }
 
 
 /* 306de: 00e214d4 */
+/* 104de: 00fe4716 */
+/* 106de: 00e26bdc */
 LINEF_STATIC VOID w_hvassign(
 	P(BOOLEAN) isvert, P(int16_t) parent, P(int16_t) obj,
 	P(int16_t) vx, P(int16_t) vy,
@@ -368,6 +392,8 @@ PP(int16_t h;)
  *	Walk the list and draw the parts of the window tree owned by this window
  */
 /* 306de: 00e21528 */
+/* 104de: 00fe4760 */
+/* 106de: 00e26c32 */
 LINEF_STATIC VOID do_walk(P(int16_t) wh, P(OBJECT *) tree, P(int16_t) obj, P(int16_t) depth, P(GRECT *) pc)
 PP(register int16_t wh;)
 PP(OBJECT *tree;)
@@ -414,6 +440,8 @@ PP(register GRECT *pc;)
  *  Draw the desktop background pattern underneath the current set of windows
  */
 /* 306de: 00e215e0 */
+/* 104de: 00fe47fa */
+/* 106de: 00e26cea */
 VOID w_drawdesk(P(GRECT *) dirty)
 PP(register GRECT *dirty;)							/* rectangle of dirty area */
 {
@@ -446,6 +474,8 @@ PP(register GRECT *dirty;)							/* rectangle of dirty area */
 
 
 #if !TP_WINX
+/* 104de: 00fe4842 */
+/* 106de: 00e26d3c */
 LINEF_STATIC VOID w_cpwalk(P(int16_t) wh, P(int16_t) obj, P(int16_t) depth, P(BOOLEAN) usetrue)
 PP(register int16_t wh;)
 PP(int16_t obj;)
@@ -461,7 +491,7 @@ PP(BOOLEAN usetrue;)
 	} else
 	{
 		/* use global clip */
-		gsx_gclip(&c);
+		gsx_fgclip(&c);
 		/* add in drop shadow */
 #if DROP_SIZE
 		c.g_w += DROP_SIZE;
@@ -476,6 +506,8 @@ PP(BOOLEAN usetrue;)
 
 #if !TP_WINX
 /* 306de: 00e21690 */
+/* 104de: 00fe488e */
+/* 106de: 00e26d9a */
 LINEF_STATIC VOID w_strchg(P(int16_t) w_handle, P(int16_t) obj, P(intptr_t) pstring)
 PP(register int16_t w_handle;)
 PP(register int16_t obj;)
@@ -495,6 +527,8 @@ PP(register intptr_t pstring;)
 
 
 /* 306de: 00e216f4 */
+/* 104de: 00fe48e8 */
+/* 106de: 00e26dfe */
 LINEF_STATIC VOID w_barcalc(P(BOOLEAN) isvert, P(int16_t) space, P(int16_t) sl_value, P(int16_t) sl_size, P(int16_t) min_sld, P(GRECT *)ptv, P(GRECT *) pth)
 PP(BOOLEAN isvert;)
 PP(register int16_t space;)
@@ -519,25 +553,42 @@ PP(GRECT *pth;)
 
 
 /* 306de: 00e21790 */
+/* 104de: 00fe4968 */
+/* 106de: 00e26e9a */
 LINEF_STATIC VOID w_bldbar(P(uint16_t) kind, P(BOOLEAN) istop,
-	P(int16_t) w_bar, P(WINDOW *) wp,
+	P(int16_t) w_bar,
+#if AESVERSION >= 0x200
+	P(WINDOW *) wp,
+#else
+	P(int16_t) sl_value,
+	P(int16_t) sl_size,
+#endif
 	P(int16_t) x, P(int16_t) y, P(int16_t) w, P(int16_t) h)
 PP(uint16_t kind;)
 PP(BOOLEAN istop;)
 PP(int16_t w_bar;)
+#if AESVERSION >= 0x200
 PP(register WINDOW *wp;)
+#else
+PP(int16_t sl_value;)
+PP(int16_t sl_size;)
+#endif
 PP(register int16_t x;)
 PP(register int16_t y;)
 PP(register int16_t w;)
 PP(register int16_t h;)
 {
+#if AESVERSION >= 0x200
 	int16_t sl_value, sl_size;
+#endif
 	BOOLEAN isvert;
 	int16_t obj;
 	uint16_t upcmp, dncmp, slcmp;
 	register int16_t w_up;
 	int16_t w_dn, w_slide, min_sld;
+#if AESVERSION >= 0x200
 	int16_t w_elev;
+#endif
 	int16_t unused;
 	int16_t space;
 	
@@ -545,8 +596,10 @@ PP(register int16_t h;)
 	isvert = w_bar == W_VBAR;
 	if (isvert)
 	{
+#if AESVERSION >= 0x200
 		sl_value = wp->w_vslide;
 		sl_size = wp->w_vslsiz;
+#endif
 		upcmp = UPARROW;
 		dncmp = DNARROW;
 		slcmp = VSLIDE;
@@ -554,11 +607,15 @@ PP(register int16_t h;)
 		w_dn = W_DNARROW;
 		w_slide = W_VSLIDE;
 		min_sld = gl_hbox;
+#if AESVERSION >= 0x200
 		w_elev = W_VELEV;
+#endif
 	} else
 	{
+#if AESVERSION >= 0x200
 		sl_value = wp->w_hslide;
 		sl_size = wp->w_hslsiz;
+#endif
 		upcmp = LFARROW;
 		dncmp = RTARROW;
 		slcmp = HSLIDE;
@@ -566,7 +623,9 @@ PP(register int16_t h;)
 		w_dn = W_RTARROW;
 		w_slide = W_HSLIDE;
 		min_sld = gl_wbox;
+#if AESVERSION >= 0x200
 		w_elev = W_HELEV;
+#endif
 	}
 	
 	setcol(w_bar, wp, istop);
@@ -617,6 +676,8 @@ PP(register int16_t h;)
 #define w_top() (gl_wtop != NIL ? gl_wtop : DESK)
 
 
+/* 104de: 00fe4b64 */
+/* 106de: 00e270aa */
 VOID w_setactive(NOTHING)
 {
 	GRECT d;
@@ -631,6 +692,8 @@ VOID w_setactive(NOTHING)
 
 
 /* 306de: 00e21a70 */
+/* 104de: 00fe4bac */
+/* 106de: 00e27100 */
 VOID w_bldactive(P(int16_t) w_handle)
 PP(register int16_t w_handle;)
 {
@@ -703,6 +766,12 @@ PP(register int16_t w_handle;)
 			/* comment out following line to enable pattern in window title */
 			gl_aname.te_color = (istop && !issub) ? WTS_FG : WTN_FG;
 #endif
+#if AESVERSION < 0x200
+			if (istop)
+				gl_aname.te_color = WTS_FG;
+			else
+				gl_aname.te_color = WTN_FG;
+#endif
 		}
 		pt->g_x = 0;
 		pt->g_y += (gl_hbox - 1);
@@ -743,14 +812,22 @@ PP(register int16_t w_handle;)
 	if (havevbar)
 	{
 		pt->g_x += pt->g_w;
+#if AESVERSION >= 0x200
 		w_bldbar(kind, istop /* || issub */, W_VBAR, pw, pt->g_x, 0, pt->g_w + 2, pt->g_h+2);
+#else
+		w_bldbar(kind, istop /* || issub */, W_VBAR, pw->w_vslide, pw->w_vslsize, pt->g_x, 0, pt->g_w + 2, pt->g_h+2);
+#endif
 	}
 
 	/* do horizontal bar area */
 	if (havehbar)
 	{
 		pt->g_y += pt->g_h;
+#if AESVERSION >= 0x200
 		w_bldbar(kind, istop /* || issub */, W_HBAR, pw, 0, pt->g_y, pt->g_w + 2, pt->g_h+2);
+#else
+		w_bldbar(kind, istop /* || issub */, W_HBAR, pw->w_hslide, pw->w_hslsize, 0, pt->g_y, pt->g_w + 2, pt->g_h+2);
+#endif
 	}
 
 	/* do sizer area */
@@ -758,8 +835,12 @@ PP(register int16_t w_handle;)
 	{
 		setcol(W_SIZER, pw, istop);
 		w_adjust(W_DATA, W_SIZER, pt->g_x, pt->g_y, gl_wbox, gl_hbox);
+#if AESVERSION >= 0x200
 		W_ACTIVE[W_SIZER].ob_spec &= 0xffffL;
 		W_ACTIVE[W_SIZER].ob_spec |= (istop && (kind & SIZER)) ? 0x06010000L: 0x00010000L;
+#else
+		W_ACTIVE[W_SIZER].ob_spec = (istop && (kind & SIZER)) ? 0x06011100L: 0x00011100L;
+#endif
 	}
 }
 
@@ -770,6 +851,8 @@ PP(register int16_t w_handle;)
  */
 /* 206us: 00e1e2ea */
 /* 306de: 00e21daa */
+/* 104de: 00fe4e6c */
+/* 106de: 00e273e4 */
 VOID ap_sendmsg(P(int16_t *) ap_msg, P(int16_t) type, P(int16_t) towhom, P(int16_t) w3, P(int16_t) w4, P(int16_t) w5, P(int16_t) w6, P(int16_t) w7)
 PP(int16_t *ap_msg;)
 PP(int16_t type;)
@@ -796,6 +879,8 @@ PP(int16_t w7;)
 #if !TP_WINX
 /* 206us: 00e1e35c */
 /* 306de: 00e21e1c */
+/* 104de: 00fe4ed8 */
+/* 106de: 00e27456 */
 LINEF_STATIC VOID w_redraw(P(int16_t) w_handle, P(GRECT *) dirty)
 PP(register int16_t w_handle;)
 PP(GRECT *dirty;)
@@ -832,6 +917,8 @@ PP(GRECT *dirty;)
  */
 /* 206us: 00e1e400 */
 /* 306de: 00e21ec0 */
+/* 104de: 00fe4f62 */
+/* 106de: 00e274fa */
 LINEF_STATIC BOOLEAN w_mvfix(P(GRECT *) ps, P(GRECT *) pd)
 PP(register GRECT *ps;)
 PP(register GRECT *pd;)
@@ -861,6 +948,8 @@ PP(register GRECT *pd;)
  */
 /* 206us: 00e1e43e */
 /* 306de: 00e21efe */
+/* 104de: 00fe4f94 */
+/* 106de: 00e27538 */
 LINEF_STATIC BOOLEAN w_move(P(int16_t) w_handle, P(int16_t *) pstop, P(GRECT *) prc)
 PP(register int16_t w_handle;)
 PP(register int16_t *pstop;)
@@ -940,6 +1029,8 @@ PP(GRECT *prc;)
  *	drawn the outside borders.
  */
 /* 306de: 00e22038 */
+/* 104de: 00fe50a8 */
+/* 106de: 00e27672 */
 VOID w_update(P(int16_t) bottom, P(GRECT *) pt, P(int16_t) top, P(BOOLEAN) moved)
 PP(register int16_t bottom;)
 PP(register GRECT *pt;)
@@ -954,7 +1045,7 @@ PP(BOOLEAN moved;)
 	
 	/* limit to screen */
 	rc_intersect(&gl_rfull, pt);
-	gsx_moff();
+	gsx_fmoff();
 
 	/* update windows from top to bottom */
 	if (bottom == DESK)
@@ -1038,6 +1129,8 @@ static VOID w_menufix(NOTHING)
  *	requests based on the rectangle that needs to be cleaned up.
  */
 /* 306de: 00e220fa */
+/* 104de: 00fe514c */
+/* 106de: 00e27734 */
 LINEF_STATIC VOID draw_change(P(int16_t) w_handle, P(GRECT *) pt)
 PP(register int16_t w_handle;)
 PP(register GRECT *pt;)
@@ -1074,7 +1167,7 @@ PP(register GRECT *pt;)
 	wm_calc(WC_WORK, srchwp(w_handle)->w_kind, pt->g_x, pt->g_y, pt->g_w, pt->g_h, &pw->g_x, &pw->g_y, &pw->g_w, &pw->g_h);
 
 	/* update rectangle lists */
-	everyobj(gl_wtree, ROOT, NIL, (EVERYOBJ_CALLBACK)newrect, 0, 0, MAX_DEPTH);
+	feveryobj(gl_wtree, ROOT, NIL, (EVERYOBJ_CALLBACK)newrect, 0, 0, MAX_DEPTH);
 
 	/* remember oldtop & set new one */
 	oldtop = gl_wtop;
@@ -1246,6 +1339,8 @@ PP(register GRECT *pt;)
  *	size when clipped with the passed in clip rectangle
  */
 /* 306de: 00e22404 */
+/* 104de: 00fe5414 */
+/* 106de: 00e27a3e */
 LINEF_STATIC VOID w_owns(P(int16_t) w_handle, P(ORECT *) po, P(GRECT *) pt, P(GRECT *) poutwds)
 PP(int16_t w_handle;)
 PP(register ORECT *po;)
@@ -1271,6 +1366,8 @@ PP(register GRECT *poutwds;)
  *	Walk down ORECT list and accumulate the union of all the owner rectangles
  */
 /* 306de: 00e22464 */
+/* 104de: 00fe5464 */
+/* 106de: 00e27a9e */
 LINEF_STATIC BOOLEAN w_union(P(ORECT *) po, P(GRECT *) pt)
 PP(register ORECT *po;)
 PP(register GRECT *pt;)
@@ -1296,6 +1393,8 @@ PP(register GRECT *pt;)
  *  Start the window manager up by initializing internal variables
  */
 /* 306de: 00e224ae */
+/* 104de: 00fe549e */
+/* 106de: 00e27ae8 */
 BOOLEAN wm_start(NOTHING)
 {
 	register int16_t i;
@@ -1412,6 +1511,8 @@ VOID wm_init(NOTHING)
 /* 206us: 00e1ec82 */
 /* 306de: 00e22742 */
 /* 206x: 00e1e3a8 */
+/* 104de: 00fe56b2 */
+/* 106de: 00e27d26 */
 int16_t wm_create(P(uint16_t) kind, P(GRECT *) rect)
 PP(uint16_t kind;)						/* kind of window to be created */
 PP(GRECT *rect;)						/* x, y, width and height of full size window */
@@ -1445,7 +1546,9 @@ PP(GRECT *rect;)						/* x, y, width and height of full size window */
  *	Opens or closes a window
  */
 /* 306de: 00e227c6 */
-static VOID wm_opcl(P(int16_t) wh, P(GRECT *) pt, P(BOOLEAN) isadd)
+/* 104de: 00fe5726 */
+/* 106de: 00e27daa */
+LINEF_STATIC VOID wm_opcl(P(int16_t) wh, P(GRECT *) pt, P(BOOLEAN) isadd)
 PP(register int16_t wh;)
 PP(register GRECT *pt;)
 PP(BOOLEAN isadd;)
@@ -1486,6 +1589,8 @@ PP(BOOLEAN isadd;)
  *	     - returns TRUE (1) if everything is fine.
  */
 /* 306de: 00e22844 */
+/* 104de: 00fe578a */
+/* 106de: 00e27e28 */
 /* BUG: does not return anything */
 VOID wm_open(P(int16_t) w_handle, P(GRECT *) rect)
 PP(int16_t w_handle;)					/* handle of window to be opened */
@@ -1507,6 +1612,8 @@ PP(GRECT *rect;)						/* x, y, width and height of opened window */
  *
  */
 /* 306de: 00e2285e */
+/* 104de: 00fe57a0 */
+/* 106de: 00e27e42 */
 /* BUG: does not return anything */
 VOID wm_close(P(int16_t) w_handle)
 PP(int16_t w_handle;)							/* handle of window to be closed */
@@ -1527,6 +1634,8 @@ PP(int16_t w_handle;)							/* handle of window to be closed */
  *
  */
 /* 306de: 00e22878 */
+/* 104de: 00fe57b6 */
+/* 106de: 00e27e5c */
 /* BUG: does not return anything */
 VOID wm_delete(P(int16_t) w_handle)
 PP(int16_t w_handle;)							/* handle of window to be deleted */
@@ -1556,6 +1665,8 @@ PP(int16_t w_handle;)							/* handle of window to be deleted */
  *
  */
 /* 306de: 00e22896 */
+/* 104de: 00fe57d2 */
+/* 106de: 00e27e7a */
 #if AES3D
 VOID wm_get(P(int16_t) w_handle, P(int16_t) w_field, P(int16_t *)poutwds, P(const int16_t *) iw)
 PP(register int16_t w_handle;)						/* window handle */
@@ -1619,6 +1730,7 @@ PP(register int16_t *poutwds;)							/* return values */
         poutwds[0] = D.w_win[w_handle].w_flags >> 3;
         break;
 #endif
+#if AESVERSION >= 0x200
 	case WF_NEWDESK:
 		if (gl_newdesk)
 		{
@@ -1631,6 +1743,11 @@ PP(register int16_t *poutwds;)							/* return values */
 		}
 #if !BINEXACT
 		break; /* somehow not removed by optimize */
+#endif
+#else
+#if BINEXACT
+		break; /* somehow not removed by optimize */
+#endif
 #endif
 	}
 	/* BUG: WF_COLOR/WF_DCOLOR not supported */
@@ -1691,6 +1808,8 @@ static void wm_mktop(int16_t w_handle)
  *
  */
 /* 306de: 00e229b4 */
+/* 104de: 00fe58ba */
+/* 106de: 00e27f74 */
 /* BUG: does not return anything */
 VOID wm_set(P(int16_t) w_handle, P(int16_t) w_field, P(int16_t *) pinwds)
 PP(register int16_t w_handle;)						/* window handle */
@@ -1794,6 +1913,9 @@ PP(register int16_t *pinwds;)							/* values to change to */
 		UNUSED(blen);
 		UNUSED(minw);
 		break;
+#if (AESVERSION < 0x200) & BINEXACT
+		break;
+#endif
 #if 0 /* PC-GEM only; conflicts with WF_COLOR */
 	case WF_TATTRB:
 		if (pinwds[0] & WA_SUBWIN)
@@ -1847,6 +1969,8 @@ PP(register int16_t *pinwds;)							/* values to change to */
  *
  */
 /* 306de: 00e22c02 */
+/* 104de: 00fe5a76 */
+/* 106de: 00e28154 */
 int16_t wm_find(P(int) mx, P(int) my)
 PP(int mx;)									/* mouse's x position */
 PP(int my;)									/* mouse's y position */
@@ -1869,6 +1993,8 @@ PP(int my;)									/* mouse's y position */
  */
 /* BUG: does not return anything */
 /* 306de: 00e22c24 */
+/* 104de: 00fe5a92 */
+/* 106de: 00e28176 */
 #if (AESVERSION >= 0x330) | !BINEXACT
 int16_t wm_update(P(int) beg_update)
 #else
@@ -1910,6 +2036,8 @@ PP(register int beg_update;)								/* flag for the call's function */
  */
 /* BUG: does not return anything */
 /* 306de: 00e22c80 */
+/* 104de: 00fe5ad6 */
+/* 106de: 00e281d2 */
 VOID wm_calc(P(int16_t) wtype, P(int16_t) kind, P(int16_t) ix, P(int16_t) iy, P(int16_t) iw, P(int16_t) ih, P(int16_t *) ox, P(int16_t *) oy, P(int16_t *) ow, P(int16_t *) oh)
 PP(int16_t wtype;)								/* the type of calculation to perform */
 PP(register int16_t kind;)						/* components present in the window */
@@ -1973,6 +2101,8 @@ PP(int16_t *oh;)								/* output height of work/border area */
  *	
  */
 /* 306de: 00e22d36 */
+/* 104de: 00fe5b84 */
+/* 106de: 00e28288 */
 #if (AESVERSION >= 0x330) | !BINEXACT
 int16_t wm_new(NOTHING)
 #else

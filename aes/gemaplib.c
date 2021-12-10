@@ -64,6 +64,8 @@ int16_t gl_my;					/* 3/12/86  */
  * Application Init
  */
 /* 306de: 00e199fc */
+/* 104de: 00fd7988 (in deskif.S) */
+#if AESVERSION >= 0x200
 int16_t ap_init(P(intptr_t) pglobal)
 PP(intptr_t pglobal;)
 {
@@ -73,11 +75,26 @@ PP(intptr_t pglobal;)
 	LLSET(pglobal + 22, &D);
 	LWSET(pglobal + 26, gl_bvdisk);
 	LWSET(pglobal + 28, gl_bvhard);
-#if AESVERSION >= 0x200
 	rlr->p_msgtosend = FALSE;
-#endif
 	return rlr->p_pid;
 }
+#endif
+
+
+/*
+ * AES #16 - appl_bvset - Set the available logical drives for the file-selector. 
+ */
+/* 104de: 00fd79cc (in deskif.S) */
+#if 0
+int16_t ap_bvset(P(int16_t) bvdisk, P(int16_t) bvhard)
+PP(int16_t bvdisk;)
+PP(int16_t bvhard;)
+{
+	gl_bvdisk = bvdisk;
+	gl_bvhard = bvhard;
+	return TRUE;
+}
+#endif
 
 
 /*
@@ -86,6 +103,9 @@ PP(intptr_t pglobal;)
  * Application Exit
  */
 /* 306de: 00e19a72 */
+/* 104de: 00fd79e0 (in deskif.S) */
+/* 106de: inlined in gembind */
+#if AESVERSION >= 0x200
 int16_t ap_exit(NOTHING)
 {
 	mn_clsda();
@@ -105,8 +125,10 @@ int16_t ap_exit(NOTHING)
 #endif
 	return TRUE;
 }
+#endif
 
 
+#if AESVERSION >= 0x200
 /*
  * Read the internal process message
  */
@@ -114,16 +136,15 @@ int16_t ap_exit(NOTHING)
 int16_t rd_mymsg(P(VOIDPTR) buffer)
 PP(VOIDPTR buffer;)
 {
-#if AESVERSION >= 0x200
 	if (rlr->p_msgtosend)				/* there is a message   */
 	{
 		LBCOPY(buffer, rlr->p_message, 16);
 		rlr->p_msgtosend = FALSE;		/* message is sent  */
 		return TRUE;
 	} else
-#endif
 		return FALSE;
 }
+#endif
 
 
 /*
@@ -133,6 +154,8 @@ PP(VOIDPTR buffer;)
  *	APplication READ or WRITE
  */
 /* 306de: 00e19afe */
+/* 104de: 00fdf958 */
+/* 106de: 00e2140e */
 int16_t ap_rdwr(P(int16_t) code, P(int16_t) id, P(int16_t) length, P(int16_t *) pbuff)
 PP(int16_t code;)
 PP(int16_t id;)
@@ -163,6 +186,8 @@ PP(int16_t *pbuff;)
  *	APplication FIND
  */
 /* 306de: 00e19b16 */
+/* 104de: 00fdf96a */
+/* 106de: 00e2142a */
 int16_t ap_find(P(const char *) pname)
 PP(const char *pname;)
 {
@@ -185,6 +210,8 @@ PP(const char *pname;)
  *	Application Tape Player
  */
 /* 306de: 00e19b54 */
+/* 104de: 00fdf998 */
+/* 106de: 00e21486 */
 VOID ap_tplay(P(intptr_t) pbuff, P(int16_t) length, P(int16_t) scale)
 PP(register intptr_t pbuff;)
 PP(int16_t length;)
@@ -288,6 +315,8 @@ PP(int16_t scale;)
  *	APplication Tape RECorDer
  */
 /* 306de: 00e19cf0 */
+/* 104de: 00fdfaee */
+/* 106de: 00e21604 */
 int16_t ap_trecd(P(intptr_t) pbuff, P(int16_t) length)
 PP(register intptr_t pbuff;)
 PP(register int16_t length;)
@@ -308,10 +337,14 @@ PP(register int16_t length;)
 	/* done recording so figure out length  */
 	cli();
 	gl_recd = FALSE;
+#if AESVERSION >= 0x200
 	length = length - gl_rlen;			/* Fixed 4/5/90     */
+#endif
 	gl_rlen = 0;
-	/*	length = ((int16_t)(gl_rbuf - pbuff)) / sizeof(FPD);	*/
-	gl_rbuf = 0x0L;
+#if AESVERSION < 0x200
+	length = ((int16_t)(gl_rbuf - pbuff)) / sizeof(FPD);
+#endif
+	gl_rbuf = 0;
 	sti();
 	/* convert to machine independent recording */
 	for (i = 0; i < length; i++)

@@ -55,6 +55,8 @@ int16_t gl_ticktime;
  *	state.
  */
 /* 306de: 00e1bcb6 */
+/* 104de: 00fdfba2 */
+/* 106de: 00e216d4 */
 VOID ev_rets(P(int16_t *) lrets)
 PP(int16_t *lrets;)
 {
@@ -79,6 +81,8 @@ PP(int16_t *lrets;)
  *	single return code.
  */
 /* 306de: 00e1bd12 */
+/* 104de: 00fdfbfc */
+/* 106de: 00e21730 */
 int16_t ev_block(P(int16_t) code, P(intptr_t) lvalue)
 PP(int16_t code;)
 PP(intptr_t lvalue;)
@@ -97,6 +101,8 @@ PP(intptr_t lvalue;)
  *	Wait for a key to be ready at the keyboard and return it. 
  */
 /* 306de: 00e1bd40 */
+/* 104de: 00fdfc1c */
+/* 106de: 00e2175e */
 uint16_t ev_keybd(NOTHING)
 {
 	return ev_block(AKBIN, 0x0L);
@@ -113,6 +119,8 @@ uint16_t ev_keybd(NOTHING)
  *	state before some time interval.
  */
 /* 306de: 00e1bd52 */
+/* 104de: 00fdfc2c */
+/* 106de: 00e2175e */
 uint16_t ev_button(P(int16_t) bflgclks, P(uint16_t) bmask, P(uint16_t) bstate, P(int16_t *) lrets)
 PP(int16_t bflgclks;)
 PP(uint16_t bmask;)
@@ -135,6 +143,8 @@ PP(int16_t *lrets;)
  *	Wait for the mouse to leave or enter a specified rectangle.
  */
 /* 306de: 00e1bd96 */
+/* 104de: 00fdfc6c */
+/* 106de: 00e217b4 */
 uint16_t ev_mouse(P(MOBLK *)pmo, P(int16_t *) lrets)
 PP(MOBLK *pmo;)
 PP(int16_t *lrets;)
@@ -156,12 +166,16 @@ PP(int16_t *lrets;)
  */
 /* 206de: 00e18362 */
 /* 306de: 00e1bdc8 */
+/* 104de: 00fdfc98 */
+/* 106de: 00e217e6 */
 int16_t ev_mesag(P(int16_t *) pbuff)
 PP(int16_t *pbuff;)
 {
 #if TP_WINX | TP_48 /* ARROWFIX */
 	if (rlr->p_qindex > 0 || !rd_mymsg(pbuff))
 		return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
+
+	return TRUE;
 #else
 #if AESVERSION > 0x320
 	if (rlr->p_qindex > 0)
@@ -169,13 +183,18 @@ PP(int16_t *pbuff;)
 		return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
 	} else
 #endif
+#if AESVERSION >= 0x200
 	{
 		if (!rd_mymsg(pbuff))
 			return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
 	}
-#endif /* TP_WINX | TP_48 */
 
 	return TRUE;
+#else
+	g_wsend = 0;
+	return ap_rdwr(AQRD, rlr->p_pid, 16, pbuff);
+#endif
+#endif /* TP_WINX | TP_48 */
 }
 
 
@@ -185,6 +204,8 @@ PP(int16_t *pbuff;)
  *	Wait the specified time to be completed.
  */
 /* 306de: 00e1be00 */
+/* 104de: 00fdfcbe */
+/* 106de: 00e21812 */
 int16_t ev_timer(P(int32_t) count)
 PP(int32_t count;)
 {
@@ -197,6 +218,8 @@ PP(int32_t count;)
  */
 /* 306de: 00e1be2a */
 /* 206de: 00e183c4 */
+/* 104de: 00fdfce4 */
+/* 106de: 00e2183c */
 int16_t ev_mchk(P(MOBLK *) pmo)
 PP(register MOBLK *pmo;)
 {
@@ -213,6 +236,8 @@ PP(register MOBLK *pmo;)
  *	Do a multi-wait on the specified events.
  */
 /* 306de: 00e1be72 */
+/* 104de: 00fdfd20 */
+/* 106de: 00e21844 */
 int16_t ev_multi(P(int16_t) flags, P(MOBLK *) pmo1, P(MOBLK *) pmo2, P(int32_t) tmcount, P(intptr_t) buparm, P(int16_t *) mebuff, P(int16_t *) prets)
 PP(register int16_t flags;)
 PP(register MOBLK *pmo1;)
@@ -265,8 +290,10 @@ PP(int16_t *prets;)
 				}
 			}
 
+#if AESVERSION >= 0x200
 			if (mowner(tbutton) != rlr)
 				what &= ~MU_BUTTON;
+#endif
 		}
 	}
 	/* quick check mouse rec */
@@ -301,8 +328,10 @@ PP(int16_t *prets;)
 			what |= MU_MESAG;
 		} else
 		{
+#if AESVERSION >= 0x200
 			if (rd_mymsg(mebuff))
 				what |= MU_MESAG;
+#endif
 		}
 	}
 
@@ -384,6 +413,11 @@ PP(int16_t *prets;)
 		}
 	}
 
+#if AESVERSION < 0x200
+	if (what & MU_MESAG)
+		g_wsend = 0;
+#endif
+
 	/* return what happened */
 	return what;
 }
@@ -394,6 +428,8 @@ PP(int16_t *prets;)
  */
 /* 206de: 00e18752 */
 /* 306de: 00e1c1b8 */
+/* 104de: 00fdffe6 */
+/* 106de: 00e21ba8 */
 int16_t ev_dclick(P(int16_t) rate, P(int16_t) setit)
 PP(int16_t rate;)
 PP(int16_t setit;)

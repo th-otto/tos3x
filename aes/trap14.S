@@ -64,6 +64,8 @@
 	text
 
 /* 404: 00e3576c */
+/* 104de: 00fe7582 */
+/* 106de: 00e29e74 */
 	xdef _trp13
 _trp13:
 	move.l	(sp)+,trp13aret
@@ -73,8 +75,8 @@ _trp13:
 
 
 	xdef _trp14
-_trp14: ds.b 0
 	xdef _trp14int
+_trp14: ds.b 0
 _trp14int: ds.b 0
 	move.l	(sp)+,trp14aret
 	trap	#14
@@ -82,6 +84,8 @@ _trp14int: ds.b 0
 	rts
 
 
+/* 104de: 00fe75a2 */
+/* 106de: 00e29e96 */
 	xdef _getmouse
 _getmouse:
 	dc.w	$A000
@@ -140,7 +144,7 @@ putmcp:
 	even
 	
 	xdef fspec		/* file to look for (doesn't matter) */
-	comm fspec,112
+	comm fspec,8
 	xdef mydev
 	comm mydev,2
 	xdef oldgetbpb
@@ -153,6 +157,8 @@ putmcp:
 	text
 
 /* 404: 00e357c8 */
+/* 104de: 00fe75e0 */
+/* 106de: 00e29ed2 */
 	xdef _mediach
 _mediach:
 	move.w	4(sp),d0
@@ -202,13 +208,13 @@ loop:
 
 noclose:
 	moveq	#0,d0
-	cmp.l	#newgetbpb,$472.w	; still installed?
+	cmp.l	#newgetbpb,_hdv_bpb.w	; still installed?
 	bne.b	done			; nope
 
 	moveq	#1,d0			; yup! remove & return TRUE
-	move.l	oldgetbpb,$472.w
-	move.l	oldmediach,$47e.w
-	move.l	oldrwabs,$476.w
+	move.l	oldgetbpb,_hdv_bpb.w
+	move.l	oldmediach,_hdv_mediach.w
+	move.l	oldrwabs,_hdv_rw.w
 
 done:
 #if 0
@@ -228,14 +234,16 @@ done:
  *                                                                       *
  *************************************************************************/
 /* 306de: 00e2640a */
+/* 104de: 00fe7680 */
+/* 106de: 00e29f72 */
 /* 404: 00e35866 */
 newgetbpb:
 	move.w	mydev,d0
 	cmp.w	4(sp),d0
 	bne.b	dooldg
-	move.l	oldgetbpb,$472.w ; it's mine: un-install new vectors
-	move.l	oldmediach,$47e.w
-	move.l	oldrwabs,$476.w
+	move.l	oldgetbpb,_hdv_bpb.w ; it's mine: un-install new vectors
+	move.l	oldmediach,_hdv_mediach.w
+	move.l	oldrwabs,_hdv_rw.w
 dooldg:	move.l	oldgetbpb,a0	; continue here whether mine or not: call old.
 	jmp	(a0)
 
@@ -245,6 +253,8 @@ dooldg:	move.l	oldgetbpb,a0	; continue here whether mine or not: call old.
  *                                                                       *
  *************************************************************************/
 /* 306de: 00e26436 */
+/* 104de: 00fe76ae */
+/* 106de: 00e29fa0 */
 /* 404: 00e35892 */
 newmediach:
 	move.w	mydev,d0
@@ -263,6 +273,8 @@ dooldm:	move.l	oldmediach,a0	; not mine: call old vector.
  *                                                                       *
  *************************************************************************/
 /* 306de: 00e2644e */
+/* 104de: 00fe76c6 */
+/* 106de: 00e29fb8 */
 /* 404: 00e358aa */
 newrwabs:
 	move.w	mydev,d0

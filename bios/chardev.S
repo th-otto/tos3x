@@ -290,17 +290,17 @@ bcon0o3:
         bsr       gientry
         ori.b     #$80,d0                       /* set port b for output */
 #if (TOSVERSION < 0x200) | !BINEXACT
-        moveq     #$87,d1                       /* set to write to io enable */
+        moveq     #-121,d1                      /* set to write to io enable */
 #else
-        move.b    #$87,d1                       /* set to write to io enable */
+        move.b    #0x87,d1                      /* set to write to io enable */
 #endif
         bsr       gientry
         move.w    d3,sr                         /* restore status register */
         move.w    6(a7),d0                      /* retrieve byte to be sent and... */
 #if (TOSVERSION < 0x200) | !BINEXACT
-        moveq     #$8F,d1                       /* write out byte to parallel port */
+        moveq     #-113,d1                      /* write out byte to parallel port */
 #else
-        move.b    #$8F,d1                       /* write out byte to parallel port */
+        move.b    #0x8F,d1                      /* write out byte to parallel port */
 #endif
         bsr       gientry
         move.w    sr,-(a7)
@@ -318,7 +318,7 @@ strobeoff:
 
 strobeon:
 #if (TOSVERSION < 0x200) | !BINEXACT
-        moveq     #$DF,d2
+        moveq     #-33,d2
 #else
         move.b    #$DF,d2
 #endif
@@ -337,7 +337,7 @@ _bcon0in:
         bsr       gientry
         andi.b    #$7F,d0                       /* set port b for input */
 #if (TOSVERSION < 0x200) | !BINEXACT
-        moveq     #$87,d1                       /* set to write to io enable */
+        moveq     #-121,d1                      /* set to write to io enable */
 #else
         move.b    #$87,d1                       /* set to write to io enable */
 #endif
@@ -1565,7 +1565,7 @@ iorectab:
 /* 306de: 00e02a60 */
 /* 206de: 00e0272a */
 /* 104de: 00fc3a16 */
-	xdef _rsconf:
+	xdef _rsconf
 _rsconf:
 #if TOSVERSION >= 0x200
         movea.l   ABSW(bcmap_root+8),a0 /* bcmap_root.rscon */
@@ -3774,7 +3774,7 @@ giacces1:
  *********************************************************************/
 dtron:
 #if (TOSVERSION < 0x200) | !BINEXACT
-        moveq     #$EF,d2
+        moveq     #-17,d2
 #else
         move.b    #$EF,d2
 #endif
@@ -3811,7 +3811,7 @@ onbit:
         move.l    (a7)+,d2
         or.b      d2,d0                         /* set bit(s) on */
 #if (TOSVERSION < 0x200) | !BINEXACT
-        moveq     #$8E,d1                       /* setup to write to port a */
+        moveq     #-114,d1                      /* setup to write to port a */
 #else
         move.b    #$8E,d1                       /* setup to write to port a */
 #endif
@@ -3852,7 +3852,7 @@ offbit:
         move.l    (a7)+,d2
         and.b     d2,d0                         /* turn bit(s) off */
 #if (TOSVERSION < 0x200) | !BINEXACT
-        moveq     #$8E,d1                       /* setup to write to port a */
+        moveq     #-114,d1                      /* setup to write to port a */
 #else
         move.b    #$8E,d1                       /* setup to write to port a */
 #endif

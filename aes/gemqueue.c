@@ -37,6 +37,8 @@ VOID doq PROTO((int16_t donq, PD *p, QPB *m));
 
 
 /* 306de: 00e20062 */
+/* 104de: 00fdec7c */
+/* 106de: 00e20578 */
 VOID doq(P(int16_t) donq, P(PD *) p, P(QPB *) m)
 PP(int16_t donq;)
 PP(register PD *p;)
@@ -56,8 +58,10 @@ PP(QPB *m;)
 		nm = (int16_t *) &p->p_queue[p->p_qindex];
 #endif
 
+#if AESVERSION >= 0x200
 		if (nm[0] == AC_CLOSE)
 			p->p_stat |= PS_TRYSUSPEND;
+#endif
 
 		if (nm[0] == WM_REDRAW)
 		{
@@ -67,7 +71,7 @@ PP(QPB *m;)
 #if TP_WINX
 				om = (int16_t *) (p->p_qaddr + index);
 #else
-				om = (int16_t *) & p->p_queue[index];
+				om = (int16_t *) &p->p_queue[index];
 #endif
 				if (om[0] == WM_REDRAW && nm[3] == om[3])
 				{
@@ -95,6 +99,8 @@ PP(QPB *m;)
 
 
 /* 306de: 00e2014e */
+/* 104de: 00fded44 */
+/* 106de: 00e20658 */
 VOID aqueue(P(BOOLEAN) isqwrite, P(EVB *) e, P(intptr_t) lm)
 PP(BOOLEAN isqwrite;)
 PP(register EVB *e;)

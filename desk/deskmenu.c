@@ -44,6 +44,9 @@ STATIC const int16_t *contable;
 #define wm_update wx_update
 #endif
 
+#if TP_WINX | TP_48 /* ARROWFIX */
+int16_t wm_update PROTO((int code));
+#endif
 
 /* Alternate keys table */
 

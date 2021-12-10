@@ -216,7 +216,7 @@ PP(register intptr_t aparm;)
 		if (cda->c_q.c_cnt)
 		{
 			/* another satisfied customer */
-			e->e_return = (uint16_t) dq(&cda->c_q);
+			e->e_return = dq(&cda->c_q);
 			zombie(e);
 		} else							/* time to zzzzz... */
 		{

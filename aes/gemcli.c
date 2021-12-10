@@ -56,6 +56,7 @@ STATIC int16_t used_acc;		/* currently number of acc  */
 #endif
 
 
+#if AESVERSION >= 0x200
 /*
  * Make sure everybody is on the suspend list before going on
  */
@@ -102,6 +103,7 @@ VOID release(NOTHING)
 
 	slr = (PD *) 0;
 }
+#endif
 
 
 #if AESVERSION >= 0x200
@@ -130,14 +132,17 @@ VOID all_run(NOTHING)
  *	accessory is too big to fit it will be not be loaded.
  */
 /* 306de: 00e1aea6 */
-static int16_t sndcli(P(char *) pfilespec, P(int16_t) acc)
+/* 106de: 00e1f0a4 */
+LINEF_STATIC int16_t sndcli(P(char *) pfilespec, P(int16_t) acc)
 PP(register char *pfilespec;)
 PP(int16_t acc;)
 {
 	register int16_t handle;
 	int16_t err_ret;
 	intptr_t ldaddr;
+#if AESVERSION >= 0x200
 	PD *p;
+#endif
 
 	strcpy(D.s_cmd, pfilespec);
 	handle = dos_open(ad_shcmd, RMODE_RD);
@@ -157,15 +162,18 @@ PP(int16_t acc;)
 				else
 					gl_adacc[gl_naccs] = (char *)ldaddr;	/* save acc address */
 
+#if AESVERSION >= 0x200
 				p = pstart(gotopgm, pfilespec, ldaddr);
 				p->p_stat |= PS_TRYSUSPEND;
+#else
+				pstart(gotopgm, pfilespec, ldaddr);
+#endif
 				return TRUE;
 			}
 		}
 	}
 
 	return FALSE;
-
 }
 
 
@@ -180,10 +188,14 @@ PP(int16_t acc;)
  *	will go back to the boot drive.
  */
 /* 306de: 00e1af76 */
+/* 106de: 00e1f166 */
 VOID ldaccs(NOTHING)
 {
 	register int16_t i;
 	int16_t ret;
+#if AESVERSION < 0x200
+	int16_t used_acc;		/* currently number of acc  */
+#endif
 	char *psp;
 	int16_t defdrv;
 	char tempadds[50];
@@ -192,12 +204,10 @@ VOID ldaccs(NOTHING)
 	UNUSED(psp);
 	
 	gl_naccs = 0;
-#if AESVERSION >= 0x200
 	used_acc = 0;
 
 	if (cart_init())
 		used_acc += ld_cartacc();
-#endif
 
 	if (isdrive() && diskin)
 	{
@@ -218,7 +228,6 @@ VOID ldaccs(NOTHING)
 
 		name += 0x1EL;
 
-#if AESVERSION >= 0x200
 		for (i = 0; i < MAX_ACCS && used_acc < MAX_ACCS && ret; i++)
 		{
 			if (sndcli(name, used_acc))
@@ -226,12 +235,12 @@ VOID ldaccs(NOTHING)
 
 			ret = dos_snext();
 		}
-#endif
 	}
 }
 
 
 /* 306de: 00e1b084 */
+/* 106de: 00e1f26a */
 VOID free_accs(NOTHING)
 {
 	register int16_t i;
@@ -254,6 +263,7 @@ VOID free_accs(NOTHING)
 
 
 /* 306de: 00e1b0fe */
+/* 106de: 00e1f2e4 */
 BOOLEAN cre_aproc(NOTHING)
 {
 	register PD *ppd;
@@ -266,7 +276,9 @@ BOOLEAN cre_aproc(NOTHING)
 	paccpd = (ACCPD *) dos_alloc((uint32_t) sizeof(ACCPD));
 	if (paccpd)
 	{
+#if AESVERSION >= 0x200
 		bfill(sizeof(ACCPD), 0, paccpd);
+#endif
 		gl_pacc[gl_naccs] = paccpd;
 		ppd = &paccpd->ac_pd;
 		puda = &paccpd->ac_uda;

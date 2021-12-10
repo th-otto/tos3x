@@ -110,6 +110,7 @@ nextbit:
  *				const GRECT *gr;
  *				int	*xptr,*yptr,*wptr,*hptr;
  */
+/* 104de: 00fe5c9c */
 	xdef	_r_get
 _r_get:
 	movem.l	a3-a4,-(sp)	; save a3,a4
@@ -184,7 +185,9 @@ _inside:
  *				int	*ptr1,ptr2*
  */
 	xdef _rc_equal
-_rc_equal:
+_rc_equal: ds.b 0
+	xdef _rc_fequal
+_rc_fequal: ds.b 0
 	movem.l	4(sp),a0-a1	; a0 -> grect 1, a1 -> grect 2
 	cmpm.l	(a0)+,(a1)+	; are the x and y equal
 	bne	retfalse
@@ -300,7 +303,9 @@ uni4:
  *				GRECT	*const_ptr,*xywhptr;
  */
 	xdef _rc_constrain
-_rc_constrain:
+_rc_constrain: ds.b 0
+	xdef _rc_fconstrain
+_rc_fconstrain: ds.b 0
 	movem.l	4(sp),a0-a1	; a0 -> x of constrain rect, a1 -> grect
 	move.w	(a0),d0		; d0 = const_x
 	cmp.w	(a1),d0		; If ( x < const_x )
@@ -661,7 +666,7 @@ _fs_sset:
 /*
  *
  * inf_sset
- *		C binding:	inf_sset(tree,obj,pstr,&text,&txtlen);
+ *		C binding:	inf_sset(tree,obj,pstr);
  *
  */
 	xdef _inf_sset
@@ -699,7 +704,7 @@ _fs_sget: ds.b 0
 
 
 /*
- * inff_fldset	This routine is used to set an objects flags based on 
+ * inf_fldset	This routine is used to set an objects flags based on 
  *		the outcome of a 'and' operation.  The word is set to
  *		the 'truestate' if the operation is true else set to
  *		'falsestate'
@@ -732,7 +737,9 @@ inf1:
  *					long	tree;
  */
 	xdef _inf_gindex
-_inf_gindex:
+_inf_gindex: ds.b 0
+	xdef _inf_fgindex
+_inf_fgindex: ds.b 0
 	movea.w	#OB_STATE+1,a0	; a0 = offset to byte to test
 	bsr	get_addr
 
@@ -766,7 +773,7 @@ _inf_what:
 	move.w	#2,-(sp)	; sp = 2
 	move.w	10(sp),-(sp)	; sp = ok
 	move.l	8(sp),-(sp)	; sp = tree
-	jsr	_inf_gindex	; find selected object
+	jsr	_inf_fgindex	; find selected object
 	addq.l	#8,sp
 
 	cmp.w	#-1,d0		; if (ret == -1)

@@ -815,7 +815,7 @@ static VOID imoveop(NOTHING)
  *     move.l #yx,-(sp)
  *     with stack correction for 2 bytes
  */
-#if 0 /* unussed */
+#if 0 /* unused */
 static VOID imov1_op(NOTHING)
 {
 	register long in_ind;

@@ -683,7 +683,7 @@ _endvdibss: ds.b 0
 	INT(_gl_wtop)
 	INT(_write_save)
 	PTR(_applist)
-	INT(_desksiz)
+	INT(_desksize)
 	PTR(_deskptr)
 	INT(_o_status)
 	INT(_gl_wsptschar)
