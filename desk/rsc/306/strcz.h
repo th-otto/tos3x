@@ -3,6 +3,41 @@
 #ifdef NEED_STRINGS
 
 /* 206cz: e367c2-e36a02 (576 bytes) */
+
+#if 0
+/*
+ * using seperate variables does not produce identical results,
+ * so we have to use (another) hack
+ */
+char const More[] = "-D\240le-";
+char const Endfile[] = "-Konec souboru-";
+char const Cart[] = "ROM modul";
+char const Cpystr[] = "Kop\241rovat soubor(y)";
+char const Delstr[] = "Mazat soubor(y)";
+char const Fileinfo[] = "Informace o souboru";
+char const Foldinfo[] = "Informace o po\251ada\207i";
+char const Movestr[] = "P\251en\202st soubor(y)";
+char const Readerror[] = "-Chyba \207ten\241-";
+char const Cantopen[] = "Nelze otev\251\241t";
+char const Nomem[] = "Nen\241 voln\240 pam\210\237";
+char const dempty1[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+char const Cachetxt[] = "  Cache                   [ ]";
+char const Blttxt[] =   "  Blitter                 [ ]";
+char const Nconflict[] = "Jm\202no ji\221 existuje!";
+char const Rname[] = "P\251ejmenovat c\241lov\230 objekt";
+char const Crenstr[] = "Kop\241rovat a p\251ejmenovat objekt(y)";
+char const Mrenstr[] = "P\251en\202st a p\251ejmenovat objekt(y)";
+char const Istr[] = " %L bajt\226 v %W objektu.";
+char const Isels[] = " %L bajt\226 v %W vybran\230ch objektech.";
+char const Isel[] = " %L bajt\226 v %W vybran\202m objektu.";
+char const Istrs[] = " %L bajt\226 v %W objektech.";
+char const Device[] = "Za\251\241zen\241";
+char const Sinf[] = "Vyber .INF soubor";
+char const Litem[] = "Hledej objekt";
+char const dempty2[] = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+
+#else
+
 char const czstr[] = "\
 -D\240le-\0\
 -Konec souboru-\0\
@@ -29,6 +64,8 @@ Za\251\241zen\241\0\
 Vyber .INF soubor\0\
 Hledej objekt\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\
 ";
+
+#endif
 
 #else
 
