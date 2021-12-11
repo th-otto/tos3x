@@ -34,15 +34,6 @@
 #include "gemlib.h"
 
 
-#if AESVERSION < 0x200
-/* 104de: 00fd7fe6 */
-VOID dr_code(P(intptr_t) src)
-PP(register intptr_t src;)
-{
-}
-#endif
-
-
 /* 306de: 00e19944 */
 VOID signal(P(EVB *) e)
 PP(EVB *e;)
