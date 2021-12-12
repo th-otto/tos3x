@@ -26,6 +26,113 @@ int mkstemp(char *template);
 #endif
 
 
+short mode;             /* operand mode (byte, word, long) */
+short modelen;          /* operand length per mode */
+
+short fchr;             /* first char in term */
+FILE *ifn;              /* source file descriptor */
+int pitix;              /* ptr to it buffer */
+short itwc;             /* number of words in it buffer */
+struct it *pitw;        /* ptr to it buffer next entry */
+short itype;            /* type of item */
+union iival ival;       /* value of item */
+struct symtab *lblpt;   /* label pointer */
+char lbt[SYNAMLEN + 1]; /* holds label name */
+int32_t loctr;          /* location counter */
+int32_t savelc[4];      /* save relocation counters for 3 bases */
+short nite;             /* number of entries in stbuf */
+struct it *pnite;
+struct symtab *opcpt;   /* pointer to opcode entry in main table */
+short p2flg;            /* 0=>pass 1  1=>pass 2 */
+struct irts *pirt;      /* entry in initial reference table */
+short reloc;            /* reloc value returned by expr evaluator (expr) */
+short rlflg;            /* relocation value of current location counter */
+struct hdr2 couthd;     /* cout header structure */
+
+short format;
+FILE *itfn;             /* it file number */
+short prtflg;           /* print output flag */
+short undflg;           /* make undefined symbols external flag */
+
+short starmul;          /* * is multiply operator */
+
+struct symtab *endptr;
+struct symtab *addptr;
+struct symtab *orgptr;
+struct symtab *subptr;
+struct symtab *addiptr;
+struct symtab *addqptr;
+struct symtab *subiptr;
+struct symtab *subqptr;
+struct symtab *cmpptr;
+struct symtab *addaptr;
+struct symtab *cmpaptr;
+struct symtab *subaptr;
+struct symtab *cmpmptr;
+struct symtab *dcptr;
+struct symtab *andptr;
+struct symtab *andiptr;
+struct symtab *eorptr;
+struct symtab *eoriptr;
+struct symtab *orptr;
+struct symtab *oriptr;
+struct symtab *cmpiptr;
+struct symtab *moveptr;
+struct symtab *moveqptr;
+struct symtab *exgptr;
+struct symtab *evenptr;
+struct symtab *jsrptr;
+struct symtab *bsrptr;
+struct symtab *nopptr;
+
+short plevel;           /* parenthesis level counter */
+short opdix;            /* operand index counter */
+
+short *pins;
+short *prlb;
+short ins[5];           /* holds instruction words */
+
+short extflg, extref;   /* external in expr */
+
+struct op opnd[2];
+
+FILE *lfil;				/* loader output file descriptor */
+FILE *dafil;            /* temp file for data stuff */
+FILE *trfil;			/* temp for text relocation bits */
+FILE *drfil;            /* temp for data relocation bits */
+
+char itfilnam[PATH_MAX];
+char dafilnam[PATH_MAX];
+char trfilnam[PATH_MAX];
+char drfilnam[PATH_MAX];
+char ldfn[PATH_MAX];        /* name of the relocatable object file */
+char *sfname;				/* Source filename */
+
+/* assembler flag variables */
+short didorg;
+short shortadr;         /* short addresses if set */
+short m68010;           /* 68010 code */
+short aesflag;
+char *lineftbl;
+
+/* pass 1 global variables */
+short numops;           /* number of operands */
+short inoffset;         /* offset directive */
+short p1inlen;          /* pass 1 instr length */
+
+/* pass 2 global variables */
+short instrlen;         /* pass 2 bytes in current instruction */
+  
+/* General Assembler Variables */
+char peekc;
+short ca_true;          /* true unless in a false CA */
+short ca;               /* depth of conditional assembly, none = 0 */
+short ca_level;         /* at what CA depth did CA go false? */
+short nerror;           /* # of assembler errors */
+short in_err;           /* don't generate instrlen err if in err state */
+int32_t itoffset;
+short equflg;           /* doing an equate stmt */
+short refpc;            /* * referenced in expr */
 
 
 /*
@@ -1064,8 +1171,7 @@ PP(char **argv;)
 
 		case 'A':
 			aesflag = 1;
-			if (arg[2] == '0')
-				aesflag = 0;
+			lineftbl = &arg[2];
 			break;
 
 		case 'o':

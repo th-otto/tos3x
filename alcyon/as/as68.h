@@ -224,106 +224,106 @@ struct it {
 #define itrl b.b._itrl
 #define swd1 b.w
 
-short mode;             /* operand mode (byte, word, long) */
-short modelen;          /* operand length per mode */
+extern short mode;             /* operand mode (byte, word, long) */
+extern short modelen;          /* operand length per mode */
 
-struct symtab *bmte;    /* beginning of main table */
-struct symtab *emte;    /* end of main table */
+extern struct symtab *bmte;    /* beginning of main table */
+extern struct symtab *emte;    /* end of main table */
 
-short itbuf[ITBSZ];     /* it buffer */
+extern short itbuf[ITBSZ];     /* it buffer */
 
-struct it stbuf[STMAX]; /* holds it for one statement */
+extern struct it stbuf[STMAX]; /* holds it for one statement */
 
-struct symtab *lmte;    /* last entry in main table */
+extern struct symtab *lmte;    /* last entry in main table */
 
 struct irts {
 	struct symtab *irle;		/* ptr to last entry in chain */
 	struct symtab *irfe;		/* ptr to first entry in chain */
 };
 
-int32_t stlen;             /* length of symbol table */
+extern int32_t stlen;             /* length of symbol table */
 
 /* initial reference table for symbols */
-struct irts sirt[SZIRT];
+extern struct irts sirt[SZIRT];
 
 /* initial reference table to opcodes */
-struct irts oirt[SZIRT];
+extern struct irts oirt[SZIRT];
 
 /* external symbol table */
-struct symtab *extbl[EXTSZ];
-int extindx;            /* index to external symbol table */
+extern struct symtab *extbl[EXTSZ];
+extern int extindx;            /* index to external symbol table */
 
-int absln;              /* absolute line number */
-int p2absln;            /* pass 2 line number */
-short fcflg;            /* 0=>passed an item.  1=>first char */
-short fchr;             /* first char in term */
-FILE *ifn;              /* source file descriptor */
-int pitix;              /* ptr to it buffer */
-short itwc;             /* number of words in it buffer */
-struct it *pitw;        /* ptr to it buffer next entry */
-short itype;            /* type of item */
-union iival ival;       /* value of item */
-struct symtab *lblpt;   /* label pointer */
-char lbt[SYNAMLEN + 1]; /* holds label name */
-int32_t loctr;          /* location counter */
-int32_t savelc[4];      /* save relocation counters for 3 bases */
-short nite;             /* number of entries in stbuf */
-struct it *pnite;
-struct symtab *opcpt;   /* pointer to opcode entry in main table */
-short p2flg;            /* 0=>pass 1  1=>pass 2 */
-struct irts *pirt;      /* entry in initial reference table */
-short reloc;            /* reloc value returned by expr evaluator (expr) */
-short rlflg;            /* relocation value of current location counter */
-struct hdr2 couthd;     /* cout header structure */
+extern int absln;              /* absolute line number */
+extern int p2absln;            /* pass 2 line number */
+extern short fcflg;            /* 0=>passed an item.  1=>first char */
+extern short fchr;             /* first char in term */
+extern FILE *ifn;              /* source file descriptor */
+extern int pitix;              /* ptr to it buffer */
+extern short itwc;             /* number of words in it buffer */
+extern struct it *pitw;        /* ptr to it buffer next entry */
+extern short itype;            /* type of item */
+extern union iival ival;       /* value of item */
+extern struct symtab *lblpt;   /* label pointer */
+extern char lbt[SYNAMLEN + 1]; /* holds label name */
+extern int32_t loctr;          /* location counter */
+extern int32_t savelc[4];      /* save relocation counters for 3 bases */
+extern short nite;             /* number of entries in stbuf */
+extern struct it *pnite;
+extern struct symtab *opcpt;   /* pointer to opcode entry in main table */
+extern short p2flg;            /* 0=>pass 1  1=>pass 2 */
+extern struct irts *pirt;      /* entry in initial reference table */
+extern short reloc;            /* reloc value returned by expr evaluator (expr) */
+extern short rlflg;            /* relocation value of current location counter */
+extern struct hdr2 couthd;     /* cout header structure */
 
-short format;
-FILE *itfn;             /* it file number */
-short prtflg;           /* print output flag */
-short undflg;           /* make undefined symbols external flag */
+extern short format;
+extern FILE *itfn;             /* it file number */
+extern short prtflg;           /* print output flag */
+extern short undflg;           /* make undefined symbols external flag */
 
-short starmul;          /* * is multiply operator */
+extern short starmul;          /* * is multiply operator */
 
 /* Symbol Table Pointers for Subset of Opcodes */
-struct symtab *endptr;
-struct symtab *addptr;
-struct symtab *orgptr;
-struct symtab *subptr;
-struct symtab *addiptr;
-struct symtab *addqptr;
-struct symtab *subiptr;
-struct symtab *subqptr;
-struct symtab *cmpptr;
-struct symtab *addaptr;
-struct symtab *cmpaptr;
-struct symtab *subaptr;
-struct symtab *cmpmptr;
-struct symtab *dcptr;
-struct symtab *andptr;
-struct symtab *andiptr;
-struct symtab *eorptr;
-struct symtab *eoriptr;
-struct symtab *orptr;
-struct symtab *oriptr;
-struct symtab *cmpiptr;
-struct symtab *moveptr;
-struct symtab *moveqptr;
-struct symtab *exgptr;
-struct symtab *evenptr;
-struct symtab *jsrptr;
-struct symtab *bsrptr;
-struct symtab *nopptr;
+extern struct symtab *endptr;
+extern struct symtab *addptr;
+extern struct symtab *orgptr;
+extern struct symtab *subptr;
+extern struct symtab *addiptr;
+extern struct symtab *addqptr;
+extern struct symtab *subiptr;
+extern struct symtab *subqptr;
+extern struct symtab *cmpptr;
+extern struct symtab *addaptr;
+extern struct symtab *cmpaptr;
+extern struct symtab *subaptr;
+extern struct symtab *cmpmptr;
+extern struct symtab *dcptr;
+extern struct symtab *andptr;
+extern struct symtab *andiptr;
+extern struct symtab *eorptr;
+extern struct symtab *eoriptr;
+extern struct symtab *orptr;
+extern struct symtab *oriptr;
+extern struct symtab *cmpiptr;
+extern struct symtab *moveptr;
+extern struct symtab *moveqptr;
+extern struct symtab *exgptr;
+extern struct symtab *evenptr;
+extern struct symtab *jsrptr;
+extern struct symtab *bsrptr;
+extern struct symtab *nopptr;
 
 extern short indir[2];
 extern short immed[2];
-short plevel;           /* parenthesis level counter */
-short opdix;            /* operand index counter */
+extern short plevel;           /* parenthesis level counter */
+extern short opdix;            /* operand index counter */
 
 /* ptrs to ins[] and rlbits[] */
-short *pins;
-short *prlb;
-short ins[5];           /* holds instruction words */
+extern short *pins;
+extern short *prlb;
+extern short ins[5];           /* holds instruction words */
 
-short extflg, extref;   /* external in expr */
+extern short extflg, extref;   /* external in expr */
 
 struct op {
     short ea;           /* effective address bits */
@@ -333,48 +333,51 @@ struct op {
     short ext;          /* external variable # */
     short idx;          /* index register if any */
     short xmod;         /* mode of index reg */
-} opnd[2];
+};
 
-FILE *lfil;				/* loader output file descriptor */
-FILE *dafil;            /* temp file for data stuff */
-FILE *trfil;			/* temp for text relocation bits */
-FILE *drfil;            /* temp for data relocation bits */
+extern struct op opnd[2];
+
+extern FILE *lfil;				/* loader output file descriptor */
+extern FILE *dafil;            /* temp file for data stuff */
+extern FILE *trfil;			/* temp for text relocation bits */
+extern FILE *drfil;            /* temp for data relocation bits */
 
 #ifndef PATH_MAX
 #define PATH_MAX 256
 #endif
 
-char itfilnam[PATH_MAX];
-char dafilnam[PATH_MAX];
-char trfilnam[PATH_MAX];
-char drfilnam[PATH_MAX];
-char ldfn[PATH_MAX];        /* name of the relocatable object file */
-char *sfname;				/* Source filename */
+extern char itfilnam[PATH_MAX];
+extern char dafilnam[PATH_MAX];
+extern char trfilnam[PATH_MAX];
+extern char drfilnam[PATH_MAX];
+extern char ldfn[PATH_MAX];        /* name of the relocatable object file */
+extern char *sfname;				/* Source filename */
 
 /* assembler flag variables */
-short didorg;
-short shortadr;         /* short addresses if set */
-short m68010;           /* 68010 code */
-short aesflag;
+extern short didorg;
+extern short shortadr;         /* short addresses if set */
+extern short m68010;           /* 68010 code */
+extern short aesflag;
+extern char *lineftbl;
 
 /* pass 1 global variables */
-short numops;           /* number of operands */
-short inoffset;         /* offset directive */
-short p1inlen;          /* pass 1 instr length */
+extern short numops;           /* number of operands */
+extern short inoffset;         /* offset directive */
+extern short p1inlen;          /* pass 1 instr length */
 
 /* pass 2 global variables */
-short instrlen;         /* pass 2 bytes in current instruction */
+extern short instrlen;         /* pass 2 bytes in current instruction */
   
 /* General Assembler Variables */
-char peekc;
-short ca_true;          /* true unless in a false CA */
-short ca;               /* depth of conditional assembly, none = 0 */
-short ca_level;         /* at what CA depth did CA go false? */
-short nerror;           /* # of assembler errors */
-short in_err;           /* don't generate instrlen err if in err state */
-int32_t itoffset;
-short equflg;           /* doing an equate stmt */
-short refpc;            /* * referenced in expr */
+extern char peekc;
+extern short ca_true;          /* true unless in a false CA */
+extern short ca;               /* depth of conditional assembly, none = 0 */
+extern short ca_level;         /* at what CA depth did CA go false? */
+extern short nerror;           /* # of assembler errors */
+extern short in_err;           /* don't generate instrlen err if in err state */
+extern int32_t itoffset;
+extern short equflg;           /* doing an equate stmt */
+extern short refpc;            /* * referenced in expr */
 
 /* defines */
 #undef tolower

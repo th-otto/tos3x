@@ -13,6 +13,18 @@
 
 
 int poslab;
+struct symtab *bmte;    /* beginning of main table */
+struct symtab *emte;    /* end of main table */
+short itbuf[ITBSZ];     /* it buffer */
+struct it stbuf[STMAX]; /* holds it for one statement */
+struct symtab *lmte;    /* last entry in main table */
+struct irts sirt[SZIRT];
+struct irts oirt[SZIRT];
+struct symtab *extbl[EXTSZ];
+int extindx;            /* index to external symbol table */
+int absln;              /* absolute line number */
+int p2absln;            /* pass 2 line number */
+short fcflg;            /* 0=>passed an item.  1=>first char */
 
 static int xcol = 0;							/* Column number            */
 static int spcnt = 0;							/* Fill counter             */

@@ -224,3 +224,5 @@
 #define UNOPRI      17              /* !, ++, --, &, *, -, ~, sizeof */
 #define LPNPRI      18              /* ., ->, [, (, function call */
 #define PSTPRI      19              /* in-stack post--, post++ */
+
+extern short inittype;

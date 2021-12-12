@@ -60,6 +60,98 @@ static char const program_name[] = "c068";
 static struct kludge_iob obuf, lbuf, sbuf, ibuf;
 #endif
 
+struct swtch swtab[SWSIZE];
+
+struct ops opstack[OPSSIZE];
+struct ops *opp;
+FILE *ofil, *lfil, *sfil, *ifil, *obp;
+
+short scope_decls[SCOPE_LEVLS]; /* decls at this scope ?? */
+short scope_level;				/* global=0, func=1 */
+short indecl;					/* are we in a decl ?? */
+short predecl;					/* value previous to sizeof */	
+short tdflag;					/* declaration is a typedef proto */
+struct symbol *tdp; 			/* points to typedef prototype */
+short localsize;				/* length of local variables */
+short naregs;					/* keeps track of ptr registers alloc'd */
+short ndregs;					/* keep track of data registers alloc'd */
+short boffset;					/* current bit offset in structure */
+short in_struct;				/* set when in structure declaration */
+
+
+/* Miscellaneous Variables for expression handling */
+short opdotsave;				/* vars used by the expression evaluator */
+short opdontop; 				/* op on top of expr stack ?? */
+VOIDPTR *opdsave;
+struct ops *oprsave;
+VOIDPTR opdstack[OPDSIZE];		/* operand stack */
+VOIDPTR *opdp;					/* operand stack pointer */
+char *opap; 					/* ptr to next avail loc in exprarea */
+short commastop;				/* stop parse at comma */
+short colonstop;				/* stop parse at colon */
+
+/* Miscellaneous Variables for statement generation */
+short cswp; 					/* current low switch table index */
+short clabel;					/* continue label */
+short blabel;					/* break label */
+short rlabel;					/* return label */
+short dlabel;					/* default label */
+	
+/* Miscellaneous Variables */
+short lineno;					/* current line number of input */
+short lst_ln_id;				/* last line an id was output on... */
+short cr_last;					/* determine if # is file specification */
+short errcnt;					/* count of errors */
+char source[PATHSIZE];			/* source filename for error reporting */
+struct tnode *frp;				/* pointer to function return info node */
+short smember;					/* set when seen . or -> */
+short instmt;					/* in a stmt */
+short infunc;					/* set when in function body */
+short reducep;					/* if(procid); reduction */
+short peektok;					/* peeked at token */
+
+
+/* Parser flags */
+short fflag;					/* FFP floats */
+short gflag;					/* symbolic debugger flag */
+short xflag;					/* translate int's to long's */
+short tflag;					/* put strings into text seg */
+short wflag;					/* don't generate warning messages */
+short aesflag;					/* hack for TOS 1.x AES */
+#ifndef NOPROFILE
+short profile;					/* profiler output */
+#endif
+#ifdef DEBUG
+short initdebug;				/* init debug flag */
+short symdebug; 				/* sym debug flag */
+short treedebug;				/* expr tree debug flag */
+#endif
+
+/* dimension table */
+int32_t dtab[DSIZE];			/* short => long */
+short cdp;						/* next entry in dtab to alloc */
+
+/* lexical analyzer values */
+short cvalue;					/* current token if keyword or CINT */
+short ccbytes;					/* number of bytes in char constant */
+short cstrsize; 				/* current string size */
+int32_t clvalue;				/* current token value if long constant */
+struct symbol *csp; 			/* current token symbol ptr if SYMBOL */
+char cstr[STRSIZE]; 			/* current token value if CSTRING */
+struct symbol *dsp; 			/* declarator symbol pointer */
+
+
+/* 0 no structure */
+struct symbol *struc_parent[10];/* ptrs to struc symbols */
+struct symbol *struc_sib[10];	/* ptrs to struc symbols */
+struct symbol *hold_sib;		/* wrap sib past struct decl */
+
+struct farg fargtab[NFARGS];
+
+/* forward referenced structure prototype names */
+struct symbol *frstab[NFRSTR];
+short frstp;
+
 
 static VOID outeof(NOTHING)
 {

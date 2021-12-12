@@ -213,68 +213,69 @@ struct swtch {
 	short sw_label;
 	short sw_value;
 #endif
-} swtab[SWSIZE];
+};
+extern struct swtch swtab[SWSIZE];
 
 /* operator and operand stack used by expr */
 struct ops {					/* operator stack */
 	short o_op; 				/* operator */
 	short o_pri;				/* priority */
-} opstack[OPSSIZE];
-struct ops *opp;
+};
+extern struct ops opstack[OPSSIZE];
+extern struct ops *opp;
 	
 /* output buffers for intermediate code and strings */
-FILE *ofil, *lfil, *sfil, *ifil, *obp;
+extern FILE *ofil, *lfil, *sfil, *ifil, *obp;
 
 #define EXPSIZE 	4096
 extern char exprarea[EXPSIZE];
 
 
 /* Miscellaneous Variables for declarations */
-short scope_decls[SCOPE_LEVLS]; /* decls at this scope ?? */
-short scope_level;				/* global=0, func=1 */
-short indecl;					/* are we in a decl ?? */
-short predecl;					/* value previous to sizeof */	
-short tdflag;					/* declaration is a typedef proto */
-struct symbol *tdp; 			/* points to typedef prototype */
-short localsize;				/* length of local variables */
-short naregs;					/* keeps track of ptr registers alloc'd */
-short ndregs;					/* keep track of data registers alloc'd */
-short boffset;					/* current bit offset in structure */
-short in_struct;				/* set when in structure declaration */
+extern short scope_decls[SCOPE_LEVLS]; /* decls at this scope ?? */
+extern short scope_level;				/* global=0, func=1 */
+extern short indecl;					/* are we in a decl ?? */
+extern short predecl;					/* value previous to sizeof */	
+extern short tdflag;					/* declaration is a typedef proto */
+extern struct symbol *tdp; 			/* points to typedef prototype */
+extern short localsize;				/* length of local variables */
+extern short naregs;					/* keeps track of ptr registers alloc'd */
+extern short ndregs;					/* keep track of data registers alloc'd */
+extern short boffset;					/* current bit offset in structure */
+extern short in_struct;				/* set when in structure declaration */
 
 /* Miscellaneous Variables for expression handling */
-short opdotsave;				/* vars used by the expression evaluator */
-short opdontop; 				/* op on top of expr stack ?? */
-short strassign;
-VOIDPTR *opdsave;
-struct ops *oprsave;
-VOIDPTR opdstack[OPDSIZE];		/* operand stack */
-VOIDPTR *opdp;					/* operand stack pointer */
-char *opap; 					/* ptr to next avail loc in exprarea */
+extern short opdotsave;				/* vars used by the expression evaluator */
+extern short opdontop; 				/* op on top of expr stack ?? */
+extern short strassign;
+extern VOIDPTR *opdsave;
+extern struct ops *oprsave;
+extern VOIDPTR opdstack[OPDSIZE];		/* operand stack */
+extern VOIDPTR *opdp;					/* operand stack pointer */
+extern char *opap; 					/* ptr to next avail loc in exprarea */
 extern short const opinfo[];	/* operator info table */
-short commastop;				/* stop parse at comma */
-short colonstop;				/* stop parse at colon */
+extern short commastop;				/* stop parse at comma */
+extern short colonstop;				/* stop parse at colon */
 
 /* Miscellaneous Variables for statement generation */
-short cswp; 					/* current low switch table index */
-short clabel;					/* continue label */
-short blabel;					/* break label */
-short rlabel;					/* return label */
-short dlabel;					/* default label */
+extern short cswp; 					/* current low switch table index */
+extern short clabel;					/* continue label */
+extern short blabel;					/* break label */
+extern short rlabel;					/* return label */
+extern short dlabel;					/* default label */
 	
 /* Miscellaneous Variables */
-short lineno;					/* current line number of input */
-short lst_ln_id;				/* last line an id was output on... */
-short cr_last;					/* determine if # is file specification */
-short errcnt;					/* count of errors */
-char source[PATHSIZE];			/* source filename for error reporting */
-short strassign;
-struct tnode *frp;				/* pointer to function return info node */
-short smember;					/* set when seen . or -> */
-short instmt;					/* in a stmt */
-short infunc;					/* set when in function body */
-short reducep;					/* if(procid); reduction */
-short peektok;					/* peeked at token */
+extern short lineno;					/* current line number of input */
+extern short lst_ln_id;				/* last line an id was output on... */
+extern short cr_last;					/* determine if # is file specification */
+extern short errcnt;					/* count of errors */
+extern char source[PATHSIZE];			/* source filename for error reporting */
+extern struct tnode *frp;				/* pointer to function return info node */
+extern short smember;					/* set when seen . or -> */
+extern short instmt;					/* in a stmt */
+extern short infunc;					/* set when in function body */
+extern short reducep;					/* if(procid); reduction */
+extern short peektok;					/* peeked at token */
 
 /* Parser Variables which are initialized in parser.ext */
 extern char *exprp; 			/* place to start building expression */
@@ -282,48 +283,49 @@ extern short nextlabel; 		/* generates unique label numbers */
 extern char const dinfo[];
 
 /* Parser flags */
-short fflag;					/* FFP floats */
-short gflag;					/* symbolic debugger flag */
-short xflag;					/* translate int's to long's */
-short tflag;					/* put strings into text seg */
-short wflag;					/* don't generate warning messages */
-short aesflag;					/* hack for TOS 1.x AES */
+extern short fflag;					/* FFP floats */
+extern short gflag;					/* symbolic debugger flag */
+extern short xflag;					/* translate int's to long's */
+extern short tflag;					/* put strings into text seg */
+extern short wflag;					/* don't generate warning messages */
+extern short aesflag;					/* hack for TOS 1.x AES */
 #ifndef NOPROFILE
-short profile;					/* profiler output */
+extern short profile;					/* profiler output */
 #endif
 #ifdef DEBUG
-short initdebug;				/* init debug flag */
-short symdebug; 				/* sym debug flag */
-short treedebug;				/* expr tree debug flag */
+extern short initdebug;				/* init debug flag */
+extern short symdebug; 				/* sym debug flag */
+extern short treedebug;				/* expr tree debug flag */
 #endif
 
 /* dimension table */
-int32_t dtab[DSIZE];			/* short => long */
-short cdp;						/* next entry in dtab to alloc */
+extern int32_t dtab[DSIZE];			/* short => long */
+extern short cdp;						/* next entry in dtab to alloc */
 
 /* lexical analyzer values */
-short cvalue;					/* current token if keyword or CINT */
-short ccbytes;					/* number of bytes in char constant */
-short cstrsize; 				/* current string size */
-int32_t clvalue;				/* current token value if long constant */
-struct symbol *csp; 			/* current token symbol ptr if SYMBOL */
-char cstr[STRSIZE]; 			/* current token value if CSTRING */
-struct symbol *dsp; 			/* declarator symbol pointer */
+extern short cvalue;					/* current token if keyword or CINT */
+extern short ccbytes;					/* number of bytes in char constant */
+extern short cstrsize; 				/* current string size */
+extern int32_t clvalue;				/* current token value if long constant */
+extern struct symbol *csp; 			/* current token symbol ptr if SYMBOL */
+extern char cstr[STRSIZE]; 			/* current token value if CSTRING */
+extern struct symbol *dsp; 			/* declarator symbol pointer */
 
 /* 0 no structure */
-struct symbol *struc_parent[10];/* ptrs to struc symbols */
-struct symbol *struc_sib[10];	/* ptrs to struc symbols */
-struct symbol *hold_sib;		/* wrap sib past struct decl */
+extern struct symbol *struc_parent[10];/* ptrs to struc symbols */
+extern struct symbol *struc_sib[10];	/* ptrs to struc symbols */
+extern struct symbol *hold_sib;		/* wrap sib past struct decl */
 
 /* function argument table, used to collect function parameters */
 struct farg {
 	struct symbol *f_sp;
 	short f_offset;
-} fargtab[NFARGS];
+};
+extern struct farg fargtab[NFARGS];
 
 /* forward referenced structure prototype names */
-struct symbol *frstab[NFRSTR];
-short frstp;
+extern struct symbol *frstab[NFRSTR];
+extern short frstp;
 
 /* Macro's used by the Parser */
 #define ISTYPEDEF(sp)		(sp->s_attrib & STYPEDEF)

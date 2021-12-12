@@ -7,8 +7,6 @@
 
 #include "parser.h"
 
-short inittype;
-
 short bfield_ty;						/* type of bit field currently initializing */
 
 short bits_init;						/* current bit field init value */

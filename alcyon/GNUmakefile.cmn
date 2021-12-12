@@ -71,6 +71,7 @@ WARN = \
 	-Wpointer-arith \
 	-Wcast-qual \
 	-Waggregate-return \
+	-fno-common \
 	-Wundef
 
 

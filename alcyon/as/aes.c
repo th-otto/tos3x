@@ -397,7 +397,7 @@ static struct aestab const aesfuncs[] = {
 	{ 0xF5F8, "xfdab74", DESKTOP, 0 },
 	{ 0xF5FC, "menu_icheck", DESKTOP, 0 },
 	{ 0xF600, "xfdc09c", DESKTOP, 0 },
-	{ 0xF604, "xfd87dc", DESKTOP, 0 },
+	{ 0xF604, "ins_disk", DESKTOP, 0 },
 	{ 0xF608, "xfd59a0", DESKTOP, 0 },
 	{ 0xF60C, "xfd8a16", DESKTOP, 0 },
 	{ 0xF610, "hd_keybd", DESKTOP, 0 },
