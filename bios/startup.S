@@ -137,9 +137,15 @@ _os_conf:               /* Flag for PAL version + country */
     dc.w   OS_CONF_MULTILANG
 #else
 #if OS_COUNTRY == CTRY_PL
+	/* hack for polish version: apparently language code not patched */
     dc.w   (CTRY_UK<<1)+OS_PAL
 #else
+#if (OS_COUNTRY == CTRY_NL) & (TOSVERSION == 0x104)
+	/* hack for dutch version: apparently wrong language code used */
+    dc.w   (CTRY_SA<<1)+OS_PAL
+#else
     dc.w   (OS_COUNTRY<<1)+OS_PAL
+#endif
 #endif
 #endif
 _os_dosdate:
@@ -1960,6 +1966,7 @@ ikbdres:
  */
 /* 306de: 00e0098a */
 /* 206de: 00e00962 */
+/* 104de: 00fc0530 */
 diskboot:
         moveq.l   #3,d0
         bsr       _run_cartridge_applications
@@ -1978,6 +1985,7 @@ nodiskboot:
 
 /* 306de: 00e009a2 */
 /* 206de: 00e0097a */
+/* 104de: 00fc054c */
 dmaboot:
 #if TP_10 /* SET_TIME_RAM */
         move.l    #BOOT_TIME*200,d7
@@ -2239,6 +2247,7 @@ scanextrom:
 #endif
 /* 306de: 00e00bbc */
 /* 206de: 00e00b68 */
+/* 104de: 00fc0628 */
 _run_cartridge_applications:
         lea     cart_base,a0
 cartext2:
@@ -2263,6 +2272,7 @@ cartover:
 
 /* 306de: 00e00bee */
 /* 206de: 00e00b9a */
+/* 104de: 00fc0652 */
 bios_unimpl:
 		rts
 
@@ -2322,6 +2332,7 @@ memchk3:
  */
 /* 306de: 00e00c24 */
 /* 206de: 00e00bd0 */
+/* 104de: 00fc068a */
 dflt_pal:
 		dc.w $0fff     /* 0 white */
 		dc.w $0f00     /* 1 red */
@@ -2353,6 +2364,7 @@ dflt_pal:
  */
 /* 306de: 00e00c44 */
 /* 206de: 00e00bf0 */
+/* 104de: 00fc06aa */
 /* 404: 00e00c9a */
 int_hbl:
         move.w    d0,-(a7)            /* save d0 */
@@ -2372,6 +2384,7 @@ is_ipl:
 /* 306de: 00e00c5a */
 /* 206de: 00e00c06 */
 /* 208de: 00e00baa */
+/* 104de: 00fc06c0 */
 /* 404: 00e00cb0 */
 int_vbl:
         addq.l    #1,_frclock         /* increase num of happened ints */
@@ -2521,6 +2534,7 @@ vbl_end:
 
 /* 306de: 00e00d78 */
 /* 206de: 00e00d1a */
+/* 104de: 00fc07a0 */
 just_rte:
         rte
 
@@ -2529,6 +2543,7 @@ just_rte:
  */
 /* 306de: 00e00d7a */
 /* 206de: 00e00d1c */
+/* 104de: 00fc07a2 */
 _vsync:
         move.w    sr,-(a7)
         andi.w    #$FBFF,sr							/* enable vbl interrupts */
@@ -2547,6 +2562,7 @@ vsyncwait:
  */
 /* 306de: 00e00d92 */
 /* 206de: 00e00d34 */
+/* 104de: 00fc07ba */
 		xdef _callcrit
 _callcrit:
         move.l    _etv_critic,-(a7)
@@ -2590,6 +2606,7 @@ critret:
 
 /* 306de: 00e00d9c */
 /* 206de: 00e00d3e */
+/* 104de: 00fc07c4 */
 /* 404: 00e00d76 */
 _xbiostrap:
         lea.l     xbios_vecs(pc),a0
@@ -2599,6 +2616,7 @@ _xbiostrap:
 
 /* 306de: 00e00da2 */
 /* 206de: 00e00d44 */
+/* 104de: 00fc07ca */
 /* 404: 00e00d7c */
 _biostrap:
         lea.l     bios_vecs(pc),a0
@@ -2654,6 +2672,7 @@ trph3:  move.l    (a1)+,-(a7)            /* return adress */
 /* ------ jump table for BIOS functions: */
 /* 306de: 00e00dfa */
 /* 206de: 00e00da4 */
+/* 104de: 00fc0818 */
 #if (TOSVERSION >= 0x300) | TP_50
 #define INDIRECT 1
 #else
@@ -2677,6 +2696,7 @@ bios_vecs:
 /* ------ jump table for XBIOS functions: */
 /* 306de: 00e00e2c */
 /* 206de: 00e00dd6 */
+/* 104de: 00fc084a */
 xbios_vecs:
         dc.w (xbvecsend-xbios_vecs)/4
         dc.l _initmouse
@@ -2817,6 +2837,7 @@ rw_ret:
  */
 /* 306de: 00e00fd0 */
 /* 206de: 00e00edc */
+/* 104de: 00fc0950 */
 _supexec:
         movea.l   4(a7),a0
         jmp       (a0)
@@ -2843,6 +2864,7 @@ _supexec:
  */
 /* 306de: 00e00fd6 */
 /* 206de: 00e00ee2 */
+/* 104de: 00fc0956 */
 _bbconstat:
         lea.l     (_bconstat_vec).w,a0
         moveq.l   #0,d1 /* offsetof(MAPTAB, Bconstat) */
@@ -2864,6 +2886,7 @@ _bbconstat:
  */
 /* 306de: 00e00fde */
 /* 206de: 00e00eea */
+/* 104de: 00fc095c */
 _bbconin:
         lea.l     (_bconin_vec).w,a0
         moveq.l   #4,d1 /* offsetof(MAPTAB, Bconin) */
@@ -2878,6 +2901,7 @@ _bbconin:
  */
 /* 306de: 00e00fe6 */
 /* 206de: 00e00ef2 */
+/* 104de: 00fc0962 */
 _bbcostat:
         lea.l     (_bcostat_vec).w,a0
         moveq.l   #8,d1 /* offsetof(MAPTAB, Bcostat) */
@@ -2888,6 +2912,7 @@ _bbcostat:
  */
 /* 306de: 00e00fee */
 /* 206de: 00e00efa */
+/* 104de: 00fc0968 */
 _bbconout:
         lea.l     (_bconout_vec).w,a0
         moveq.l   #12,d1 /* offsetof(MAPTAB, Bconout) */
@@ -2931,6 +2956,7 @@ doxconstd:
  */
 /* 306de: 00e01024 */
 /* 206de: 00e00f30 */
+/* 104de: 00fc0978 */
 /* 404: 00e00e56 */
 tconstat:
         dc.l      bios_unimpl
@@ -2977,6 +3003,7 @@ tconstat:
  */
 /* 306de: 00e010a4 */
 /* 206de: 00e00fb0 */
+/* 104de: 00fc09f8 */
 _drvmap:
         move.l    (_drvbits).w,d0
         rts
@@ -2998,6 +3025,7 @@ _drvmap:
  */
 /* 306de: 00e010aa */
 /* 206de: 00e00fb6 */
+/* 104de: 00fc09fe */
 _kbshift:
         moveq.l   #0,d0
         move.b    (_shifty).w,d0
@@ -3020,6 +3048,7 @@ kbshift1:
  */
 /* 306de: 00e010bc */
 /* 206de: 00e00fc8 */
+/* 104de: 00fc0a10 */
 _getmpb:
         movea.l   4(a7),a0
         lea.l     (_themd).w,a1
@@ -3067,6 +3096,7 @@ getmpb1:
  */
 /* 306de: 00e01124 */
 /* 206de: 00e00ff4 */
+/* 104de: 00fc0a3c */
 _setexc:
         move.w    4(a7),d0          /* d0 = vector # */
         lsl.w     #2,d0             /* turn into longword index */
@@ -3084,6 +3114,7 @@ setexc1:
  */
 /* 306de: 00e0113c */
 /* 206de: 00e0100c */
+/* 104de: 00fc0a54 */
 _tickcal:
         moveq.l   #0,d0
         move.w    (_timer_ms).w,d0
@@ -3096,6 +3127,7 @@ _tickcal:
  */
 /* 306de: 00e01144 */
 /* 206de: 00e01014 */
+/* 104de: 00fc0a5c */
 _physbase:
         moveq.l   #0,d0             /* cleanup pointer-to-be */
         move.b    (v_bas_h).w,d0    /* load and shift bits 16..23 */
@@ -3117,6 +3149,7 @@ physbas1:
  */
 /* 306de: 00e01160 */
 /* 206de: 00e01030 */
+/* 104de: 00fc0a6c */
 _logbase:
         move.l    (_v_bas_ad).w,d0
         rts
@@ -3128,6 +3161,7 @@ _logbase:
  */
 /* 306de: 00e01166 */
 /* 206de: 00e01036 */
+/* 104de: 00fc0a72 */
 _getrez:
         moveq.l   #0,d0
 #if STBOOK
@@ -3155,6 +3189,7 @@ _getrez:
  */
 /* 306de: 00e01172 */
 /* 206de: 00e01042 */
+/* 104de: 00fc0a7e */
 _vsetscreen:
 /* --- set logical location: */
         tst.l     4(a7)                      /* if(logloc < 0) then ignore it */
@@ -3202,6 +3237,7 @@ nosetr:
  */
 /* 306de: 00e011c8 */
 /* 206de: 00e0108e */
+/* 104de: 00fc0ac4 */
 _setpalette:
         move.l    4(a7),(_colorptr).w     /* next VBL will do this */
         rts
@@ -3217,6 +3253,7 @@ _setpalette:
  */
 /* 306de: 00e011d0 */
 /* 206de: 00e01096 */
+/* 104de: 00fc0acc */
 _setcolor:
         move.w    4(a7),d1                   /* get color number */
         add.w     d1,d1                      /* turn into word index */
@@ -3245,6 +3282,7 @@ setcol3:
  */
 /* 306de: 00e01202 */
 /* 206de: 00e010c8 */
+/* 104de: 00fc0af0 */
 _puntaes:
         movea.l   _os_magic(pc),a0           /* get pointer to magic */
         cmpi.l    #$87654321,(a0)            /* is the magic still there? */
@@ -3264,6 +3302,7 @@ puntaes1:
  */
 /* 306de: 00e0121c */
 /* 206de: 00e010e2 */
+/* 104de: 00fc0b0a */
 any_vec:
 #if !P68010
 		jsr       savp_2                     /* stack PC */
@@ -3315,6 +3354,8 @@ any_vec1:
  *  Discussion:  The graphics ain't all that great.   And this is silly.
  *
  */
+/* 104de: 00fc0b56 */
+/* 106de: 00e00cee */
 drawbombs:
 #if (TP_50 & TP_52) | TP_62 /* (PAK & Grafik_Bombs) | LOGO */
 /*
@@ -3415,7 +3456,7 @@ dwidthtab:        /* number of bytes per screen line, indexed by resolution */
 _cpy512:
         movea.l   4(a7),a0
         movea.l   8(a7),a1
-        move.w    #$003F,d0
+        move.w    #(512/8)-1,d0
 cpy512l:
         move.b    (a0)+,(a1)+
         move.b    (a0)+,(a1)+
@@ -3460,6 +3501,8 @@ autoname:                      dc.b '*.PRG',0
  */
 /* 306de: 00e0133c */
 /* 206de: 00e011f6 */
+/* 104de: 00fc0bf4 */
+/* 106de: 00e00d94 */
 autoexec:
         move.l    #$000Bffff,-(a7)
         trap      #13                       /* Kbshift(-1) */
@@ -3611,6 +3654,8 @@ autosca4:
 /* --- what it is: */
 /* 306de: 00e014f6 */
 /* 206de: 00e013b2 */
+/* 104de: 00fc0da2 */
+/* 106de: 00e00f3e */
 bombimage:
 #if TP_16 == 0 /* Bomb */
         dc.b $06,$00,$29,$00,$00,$80,$48,$40,$11,$f0,$01,$f0,$07,$fc,$0f,$fe
@@ -3652,21 +3697,23 @@ waitev:
         jmp       (a6)
 #else
 /* 206de: 00e013d2 */
-waitvbl:    lea       (MFP_TBDR).w,a0           /* a0 -> timer B data register */
-            lea       (MFP_TBCR).w,a1           /* a1 -> timer B control register */
-            bclr      #0,(MFP_IERA).w           /* disable IRQ of timer B */
-            moveq     #1,d4                     /* wait for the timer to expire */
-            clr.b     (a1)                      /* stop timer B */
-            move.b    #$f0,(a0)                 /* event every 240 scan lines */
-            move.b    #8,(a1)                   /* timer b: event count mode (HBL) */
-waitvbl2:   cmp.b     (a0),d4                   /* wait for HBL 239 scan lines to pass */
+/* 104de: 00fc0dc2 */
+/* 106de: 00e00f5e */
+waitvbl:    lea       (MFP_TBDR).w,a0       /* a0 -> timer B data register */
+            lea       (MFP_TBCR).w,a1       /* a1 -> timer B control register */
+            bclr      #0,(MFP_IERA).w       /* disable IRQ of timer B */
+            moveq     #1,d4                 /* wait for the timer to expire */
+            clr.b     (a1)                  /* stop timer B */
+            move.b    #$f0,(a0)             /* event every 240 scan lines */
+            move.b    #8,(a1)               /* timer b: event count mode (HBL) */
+waitvbl2:   cmp.b     (a0),d4               /* wait for HBL 239 scan lines to pass */
             bne.s     waitvbl2
 waitvbl3:   move.b    (a0),d4
-            move.w    #615,d3                   /* wait till we are inside the vbl area */
+            move.w    #615,d3               /* wait till we are inside the vbl area */
 waitvbl4:   cmp.b     (a0),d4
             bne.s     waitvbl3
             dbra      d3,waitvbl4
-            move.b    #$10,(a1)                 /* timer b: reset */
+            move.b    #$10,(a1)             /* timer b: reset */
             jmp       (a6)
 #endif
 
@@ -3687,6 +3734,8 @@ dovsync:
  */
 /* 306de: 00e01530 */
 /* 206de: 00e01408 */
+/* 104de: 00fc0dfe */
+/* 106de: 00e00f9a */
 run_reset_resident:
         movea.l   _phystop,a0                   /* start at the top of the address space */
 run_res1:
@@ -3720,6 +3769,7 @@ run_res3:
  */
 /* 306de: 00e0156e */
 /* 206de: 00e01446 */
+/* 104de: 00fc0e3e */
 _gettime:
         lea.l     readRTCTime,a3
         lea.l     igetdt,a4
@@ -3733,6 +3783,7 @@ _gettime:
  */
 /* 306de: 00e0157c */
 /* 206de: 00e01454 */
+/* 104de: 00fc0e4c */
 _settime:
         move.w    4(a7),_date
         move.w    6(a7),_time
@@ -3755,6 +3806,8 @@ gsettim1:
  */
 /* 306de: 00e015a2 */
 /* 206de: 00e0147a */
+/* 104de: 00fc0e62 */
+/* 106de: 00e00ffe */
 instoshdr:
         lea.l     _os_entry(pc),a0
         lea.l     oshdr+6,a1
@@ -3782,6 +3835,8 @@ braop:
  */
 /* 306de: 00e015dc */
 /* 206de: 00e014b4 */
+/* 104de: 00fc0e9e */
+/* 106de: 00e0103a */
 _blitmode:
 #if TP_18 /* IGNORE_BLITTER */
 		moveq     #0,d0
@@ -3808,6 +3863,7 @@ blitmod1:
  */
 /* 306de: 00e01604 */
 /* 206de: 00e014dc */
+/* 104de: 00fc0ec6 */
 blittest:
         move.w    sr,d1
         move.w    #0,d0                         /* d0 = 0 -> blitter not installed */

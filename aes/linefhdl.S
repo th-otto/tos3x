@@ -388,7 +388,7 @@ lineftab: ds.b 0
 		dc.l _gsx_tblt            ; F520
 		dc.l _hd_msg              ; F524
 		dc.l _inf_fldset          ; F528
-		dc.l xfd8164              ; F52C
+		dc.l inf_fifo             ; F52C
 		dc.l xfd8284              ; F530
 		dc.l _dos_chmod           ; F534
 		dc.l _dos_label           ; F538

@@ -100,7 +100,6 @@ extern FONT_HEAD const f8x8;
 #if PLANES8
 extern FONT_HEAD const f16x32;
 #endif
-#define first f6x6
 
 
 extern	FONT_HEAD ram8x16;
