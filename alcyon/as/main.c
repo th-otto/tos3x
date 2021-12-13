@@ -1184,6 +1184,10 @@ PP(char **argv;)
 	}
 	if (i >= argc)
 		usage();
+		
+	if (aesflag)
+		readlineftab();
+
 	/* Remember source filename */
 	sfname = argv[i];
 	/* open source file */

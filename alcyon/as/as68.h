@@ -559,3 +559,4 @@ VOID prits PROTO((const struct it *its, int cnt));
 
 
 unsigned short isaes PROTO((const char *name));
+VOID readlineftab PROTO((NOTHING));
