@@ -1459,7 +1459,7 @@ static VOID samebra(NOTHING)
 					i++;
 					nxt++;
 				}
-				if (ISNL((i + in_buff)[0]))
+				if (ISNL((i + in_buff)[0]) && ISNL((nxt + in_buff)[0]))
 				{
 					++bra_total;
 					in_ind = nxt_line;
