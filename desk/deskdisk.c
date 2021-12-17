@@ -302,7 +302,8 @@ PP(OBJECT *obj;)
 {
 	register char *bufaddr;
 	register int16_t badindex, ret, i, trackno;
-	int32_t dsb, valuel, value2;
+	int32_t dsb;
+	int32_t avail, total;
 	int16_t devno, j, k, disktype;
 	int16_t sideno, curtrk, skew, skewi;
 	int16_t track, numside, cl;
@@ -316,8 +317,8 @@ PP(OBJECT *obj;)
 	const int16_t *sktable;
 
 	UNUSED(curtrk);
-	UNUSED(value2);
-	UNUSED(valuel);
+	UNUSED(avail);
+	UNUSED(total);
 	UNUSED(dsb);
 	
 	/* format needs 8k buffer   */
@@ -670,7 +671,6 @@ chksrc:
   bailout:
 	Mfree(buf);
 	Mfree(bootbuf);
-	return;
 }
 
 

@@ -108,7 +108,7 @@
 
 #define BUFSIZ 4096						/* Malloc this much as a disk buffer */
 
-							/* #define MAXLINE 24	*//* line interval for --more-- */
+							/* #define MAXLINE 24	*/ /* line interval for --more-- */
 #define MAXCHAR 16						/* character interval for checking keyboard */
 
 /* ASCII equates */

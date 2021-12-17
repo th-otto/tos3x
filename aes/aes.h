@@ -931,11 +931,12 @@ extern BOOLEAN diskin;
 int dos_sfirst PROTO((const char *name, int attrib));
 int dos_snext PROTO((NOTHING));
 int dos_open PROTO((const char *name, int mode));
+int dos_create PROTO((const char *name, int mode));
 int dos_read PROTO((int fd, size_t size, VOIDPTR buf));
 int dos_write PROTO((int fd, size_t size, VOIDPTR buf));
 long dos_lseek PROTO((int fd, int whence, long offset));
 int dos_gdir PROTO((int drive, char *pdrvpath));
-int dos_mkdir PROTO((const char *path, int attr));
+int dos_mkdir PROTO((const char *path));
 int dos_set PROTO((int h, uint16_t time, uint16_t date));
 int dos_label PROTO((int drive, const char *name));
 int dos_space PROTO((int drive, int32_t *total, int32_t *avail));
@@ -950,11 +951,10 @@ int dos_gdrv PROTO((NOTHING));
 int dos_close PROTO((int fd));
 int dos_chdir PROTO((const char *path));
 int dos_sdrv PROTO((int drv));
-int dos_chmod PROTO((const char *path, int attr));
+int dos_chmod PROTO((const char *path, BOOLEAN setit, int attr));
 int dos_delete PROTO((const char *path));
 int dos_rmdir PROTO((const char *path));
 int dos_free PROTO((VOIDPTR ptr));
-int dos_create PROTO((const char *path, int attr));
 int do_cdir PROTO((int drv, const char *path));
 int isdrive PROTO((NOTHING)); /* BUG: should be declared as returning LONG */
 long trap PROTO((short code, ...));
@@ -1092,6 +1092,7 @@ int32_t trp13int PROTO((short code, ...));
 int32_t trp13int PROTO((short code, ...));
 VOID gsx_fgclip PROTO((GRECT *pt));
 VOID gsx_fattr PROTO((uint16_t text, uint16_t mode, uint16_t color));
+VOID ob_fdelete PROTO((LPTREE tree, int16_t obj));
 #else
 #define ob_fformat ob_format
 #define ob_foffset ob_offset
@@ -1108,6 +1109,7 @@ VOID gsx_fattr PROTO((uint16_t text, uint16_t mode, uint16_t color));
 #define trp14int trp14
 #define gsx_fgclip gsx_gclip
 #define gsx_fattr gsx_attr
+#define ob_fdelete ob_delete
 #endif
 
 #if TP_WINX

@@ -401,7 +401,7 @@ _graf_handle:
 
 
 #if CCODE
-VOID graf_rubbox(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, WORD *pwend, WORD phend)
+VOID graf_rubbox(WORD xorigin, WORD yorigin, WORD wmin, WORD hmin, WORD *pwend, WORD *phend)
 {
   gr_rubbox(xorigin, yorigin, wmin, hmin, pwend, phend);
   dsptch();
