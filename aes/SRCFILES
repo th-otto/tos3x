@@ -92,6 +92,7 @@ AES_HEADERS=\
 	obdefs.h \
 	struct88.h \
 	taddr.h \
+	winx.h \
 	${empty}
 
 AES_ASRCS=\
@@ -152,7 +153,6 @@ AES_CSRCS=\
 	mn_event.c \
 	function.c \
 	winx.c \
-	winx.h \
 	$(DBG_OBJS:.o=.c) \
 	${empty}
 
