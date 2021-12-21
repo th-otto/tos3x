@@ -673,7 +673,9 @@ _bco2stat:
 /* 306de: 00e03b86 */
 /* 206de: 00e037a4 */
 /* 104de: 00fc34e4 */
+#if !BINEXACT
 		xdef ringbell
+#endif
 ringbell:
         btst      #2,ABSW(_conterm)             /* console bell enabled? */
         beq.s     soundir8                      /* (no sound) */
@@ -4400,7 +4402,9 @@ soundir7:
 /* 306de: 00e03b86 */
 /* 206de: 00e037a4 */
 /* 104de: 00fc34e4 */
+#if !BINEXACT
 		xdef ringbell
+#endif
 ringbell:
         btst      #2,ABSW(_conterm)             /* console bell enabled? */
         beq.s     soundir8                      /* (no sound) */
