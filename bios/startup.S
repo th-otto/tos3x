@@ -4363,9 +4363,6 @@ cooksize equ NCOOKIES*2*4
 		xdef _tim_c_sieve
 		comm _tim_c_sieve,2
 		
-		xdef kb_delay
-		comm kb_delay,1
-		
 		xdef _shifty
 		comm _shifty,1
 
