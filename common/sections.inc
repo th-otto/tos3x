@@ -381,13 +381,25 @@
 #define GLUELEN     $000044D6 /* to be checked */
 #endif
 
+#if OS_COUNTRY == CTRY_SE
+#define BIOSTLEN    BTLEN_US+$78
+#define DESKTLEN    DTLEN_US-$28
+#define DESKDLEN    $000009DC
+#define GLUELEN     $00004226
+#endif
+
 #if OS_COUNTRY == CTRY_NL
 #define BIOSTLEN    BTLEN_US
 #define DESKTLEN    DTLEN_US
 #define DESKDLEN    $000009E0
 #define GLUELEN     $000043CC
+/*
+ * only version which is 4 bytes shorter,
+ * due to 2 small differences in vdi/monout.c
+ * and vdi/text.c
+ */
 #undef VDITLEN
-#define VDITLEN     $0000989E /* for some reason not known yet, 4 bytes shorter */
+#define VDITLEN     $0000989E
 #endif
 
 #if OS_COUNTRY == CTRY_CZ
