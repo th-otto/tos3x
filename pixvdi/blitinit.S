@@ -69,7 +69,7 @@ _SETBLT:
 setblt0:
 		lea	V_PRIMITIVES(a1),a0	; a0 -> space for primitives
 		move.l	a0,LA_ROUTINES(a1)	; pnt to ram based routine list
-		move.w	#21,d0			; setup the loop count
+		move.w	#22-1,d0			; setup the loop count
 
 rCopyLoop:
 		move.l	(a2)+,(a0)+		; copy vector
@@ -80,12 +80,12 @@ rCopyLoop:
 		jsr	(a1)
 #else
         move.w    d0,LA_BLTMODE+lineavars
-        movea.l   lineavars+LA_CURDEV,a0
+        movea.l   lineavars+LA_SOFTROUTINES,a0
         btst      #0,d0
         beq.s     setblt0
-        movea.l   lineavars+LA_ROUTINES,a0
+        movea.l   lineavars+LA_HARDROUTINES,a0
 setblt0:
-        lea.l     lineavars+LA_USERDEVINIT,a1
+        lea.l     lineavars+LA_ROUTINES,a1
         moveq.l   #9,d0
 rCopyLoop:
         move.l    (a0)+,(a1)+

@@ -136,6 +136,7 @@
  * may differ depending on TOS version used.
  * The layout is below is maybe valid for MULTITOS only.
  */
+/* TOS 4.04 only: */
 #define LA_USERDEVINIT (lineavars+$07a)	/* long */
 #define LA_USERESCINIT (lineavars+$07e)	/* long */
 #define LA_RSRD2       (lineavars+$082)	/* 8 longs */
@@ -143,7 +144,6 @@
 #define LA_CURDEV      (lineavars+$0a6)	/* long */
 #define LA_BLTMODE     (lineavars+$0aa)	/* word */
 #define LA_RSRD3       (lineavars+$0ac)	/* word */
-/* TOS 4.04 only: */
 #define LA_REGQXCOL    (lineavars+$0ae)	/* 24$3 words */
 #define LA_SVBLKPTR    (lineavars+$64e)	/* long */
 #define LA_FG_B_PLANES (lineavars+$652)	/* long */

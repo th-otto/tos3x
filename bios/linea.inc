@@ -257,6 +257,7 @@ LA_FILL_ABORT: ds.l 1      (lineavars+$076)	/* long */
  * may differ depending on TOS version used.
  * The layout below is maybe valid for MULTITOS only.
  */
+#if TOSVERSION >= 0x404
                xdef LA_USERDEVINIT
 LA_USERDEVINIT:ds.l 1      (lineavars+$07a)	/* long */
                xdef LA_USERESCINIT
@@ -267,12 +268,22 @@ LA_RSRD2:      ds.l 8      (lineavars+$082)	/* 8 longs */
 LA_ROUTINES:   ds.l 1      (lineavars+$0a2)	/* long */
                xdef LA_CURDEV
 LA_CURDEV:     ds.l 1      (lineavars+$0a6)	/* long */
+#else
+               xdef LA_ROUTINES
+LA_ROUTINES:ds.l 1      (lineavars+$07a)	/* 10 longs */
+               xdef LA_ROUTINES
+LA_SOFTROUTINES:   ds.l 1      (lineavars+$0a2)	/* long */
+               xdef LA_ROUTINES
+LA_HARDROUTINES:   ds.l 1      (lineavars+$0a6)	/* long */
+#endif
+
                xdef LA_BLTMODE
 LA_BLTMODE:    ds.w 1      (lineavars+$0aa)	/* word */
-               xdef LA_RSRD3
-LA_RSRD3:      ds.w 1      (lineavars+$0ac)	/* word */
+
 #if TOSVERSION >= 0x404
 /* TOS 4.04 only: */
+               xdef LA_RSRD3
+LA_RSRD3:      ds.w 1      (lineavars+$0ac)	/* word */
                xdef LA_REGQXCOL
 LA_REGQXCOL:   ds.w 240*3  (lineavars+$0ae)	/* 240*3 words */
                xdef LA_SVBLKPTR

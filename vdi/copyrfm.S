@@ -36,7 +36,7 @@
 	move.l	func(r),r
 #else
 #define V_FUNC(func,la,r) \
-	move.l	PIXLV((USERDEVINIT)+func,la),r
+	move.l	PIXLV((LA_ROUTINES)+func,la),r
 #endif
 
 #define V_CALL(func,la,r) \

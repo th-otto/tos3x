@@ -68,7 +68,7 @@ _SETBLT:
 setblt0:
 		lea	V_PRIMITIVES(a1),a0	; a0 -> space for primitives
 		move.l	a0,PIXLV(LA_ROUTINES,a1)	; pnt to ram based routine list
-		move.w	#21,d0			; setup the loop count
+		move.w	#22-1,d0			; setup the loop count
 
 rCopyLoop:
 		move.l	(a2)+,(a0)+		; copy vector
@@ -82,10 +82,10 @@ rCopyLoop:
         movea.l   PIXLV(LA_SOFTROUTINES,a1),a0
         btst      #0,d0
         beq.s     setblt0
-        movea.l   PIXLV(LA_ROUTINES,a1),a0
+        movea.l   PIXLV(LA_HARDROUTINES,a1),a0
 setblt0:
-        lea.l     PIXLV(USERDEVINIT,a1),a1
-        moveq.l   #9,d0
+        lea.l     PIXLV(LA_ROUTINES,a1),a1
+        moveq.l   #10-1,d0
 rCopyLoop:
         move.l    (a0)+,(a1)+
         dbf       d0,rCopyLoop

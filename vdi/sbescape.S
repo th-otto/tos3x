@@ -38,7 +38,7 @@ O6 equ 0
 #else
 O6 equ 6 /* WTF? why? */
 #define V_FUNC(func,la,r) \
-	move.l	LV((USERDEVINIT)+O6+func,la),r
+	move.l	LV((LA_ROUTINES)+O6+func,la),r
 #define PIXL6(r) lea lineavars-O6,r
 #endif
 

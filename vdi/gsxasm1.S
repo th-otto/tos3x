@@ -53,7 +53,7 @@ FRAG_LEN	equ  MAX_PLANES*4+4 ; space for fragment of 16 planes
 	move.l	func(r),r
 #else
 #define V_FUNC(func,la,r) \
-	move.l	LV((USERDEVINIT)+func,la),r
+	move.l	LV((LA_ROUTINES)+func,la),r
 #endif
 
 #define V_CALL(func,la,r) \

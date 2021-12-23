@@ -247,15 +247,16 @@ typedef struct vdiVars {
 	LAEXT int16_t        TEXT_BG;            /* text background color                */
 	LAEXT int16_t        COPYTRAN;           /* cp rstr frm type flag (opaque/trans) */
 	LAEXT int16_t        (*quitfill) PROTO((NOTHING));      /* ptr to routine for quitting seedfill */
+
+#if TOSVERSION >= 0x400
 	LAEXT int16_t	(*USERDEVINIT) PROTO((NOTHING));          /* ptr to user routine before dev_init  */
 	LAEXT int16_t	(*USERESCINIT) PROTO((NOTHING));          /* ptr to user routine before esc_init  */
 	LAEXT int32_t	resrvd2[8];		         /* reserved				    */
-
-#if TOSVERSION >= 0x400
 	LAEXT VOID (**LA_ROUTINES) PROTO((NOTHING));     /* ptr to primitives vector list	    */
 	LAEXT const SCREENDEF   *LA_CURDEV;	     /* ptr to a current device structure    */
 #else
-	LAEXT VOID (**LA_ROUTINES) PROTO((NOTHING)); /* hardware assisted drawing primitives  */
+	LAEXT VOIDPTR        LA_ROUTINES[10];    /* currently active drawing primitives */
+	LAEXT VOID (**LA_HARDROUTINES) PROTO((NOTHING)); /* hardware assisted drawing primitives  */
 	LAEXT VOID (**LA_SOFTROUTINES) PROTO((NOTHING)); /* drawing primitives done in software   */
 #endif
 	LAEXT int16_t        BLT_MODE;           /* 0: soft BiT BLiT 1: hard BiT BLiT    */

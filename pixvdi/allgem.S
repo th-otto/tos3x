@@ -761,8 +761,8 @@ esc2:
 /* 306de: 00e069f4 */
 		xdef resetdev
 resetdev:
-        move.l    #_STSoftList,PIXLV(LA_CURDEV,a1)
-        move.l    #_STHardList,PIXLV(LA_ROUTINES,a1)
+        move.l    #_STSoftList,PIXLV(LA_SOFTROUTINES,a1)
+        move.l    #_STHardList,PIXLV(LA_HARDROUTINES,a1)
         jmp       _SETBLT
 
 rezinit:
