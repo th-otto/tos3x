@@ -54,9 +54,11 @@ name: ds.t size
 
 	V(oshdr,b,6+64)
 
-#if TOSVERSION >= 0x200
+#if TOSVERSION >= 0x106
 	V(cookies,l,NCOOKIES*2)
+#endif
 
+#if TOSVERSION >= 0x200
 	INT(_bootpref)					/* boot pref for _dmaboot */
 #endif
 

@@ -321,7 +321,7 @@ ringbell  equ $359E+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
 #endif
 
 #if TOSVERSION == 0x104
-ringbell  equ $33C4+(BIOSTLEN-BTLEN_US)-(VDITBASE-BIOSTBASE)
+ringbell  equ $341E-(VDITBASE-BIOSTBASE)
 #endif
 
 	dc.w $6000,ringbell
@@ -1357,8 +1357,8 @@ end_o_line:
 	clr.w	d1			; scroll from top of screen.
 
 #if TOSVERSION < 0x400
-	pea	save_it(pc)		 return to "save_it"
-	bra	p_sc_up			 do the scroll.
+	pea	save_it(pc)		 ; return to "save_it"
+	bra	p_sc_up			 ; do the scroll.
 #else
 	movem.l d0/a1,-(sp)		; SAVE ME!!!!!
 	bsr	p_sc_up			 ; do the scroll.

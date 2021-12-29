@@ -15,6 +15,13 @@ FRB_THRESHOLD equ $00400000
 #endif
 
 
+#if (TOSVERSION >= 0x200)
+#define FLOP_TIMEOUT 300
+#else
+#define FLOP_TIMEOUT 200
+#endif
+
+
 #if HD_SUPPORT
 /*
  * struct dsb {
@@ -240,9 +247,9 @@ floprd2:
         move.w    #$0080,(a6)                   /* startup 1770 "read sector" command */
         move.w    #$0080,d7                     /* (read single) */
         bsr       wrfdcd7
-#if TOSVERSION >= 0x200
-        move.l    ABSW(_hz_200),d7
-        add.l     #300,d7                       /* set timeout timer */
+#if TOSVERSION >= 0x106
+        move.l    ABSW2(_hz_200),d7
+        add.l     #FLOP_TIMEOUT,d7              /* set timeout timer */
 #else
         move.l    #$00040000,d7
 #endif
@@ -250,8 +257,8 @@ floprd2:
 floprd3:
         btst      #5,ABSW(MFP_GPIP)             /* 1770 done yet? */
         beq.s     floprd4                       /* (yes) */
-#if TOSVERSION >= 0x200
-        cmp.l     ABSW(_hz_200),d7              /* timeout reached? */
+#if TOSVERSION >= 0x106
+        cmp.l     ABSW2(_hz_200),d7             /* timeout reached? */
         bhi.s     floprd3                       /* (punt on timeout) */
 #else
         subq.l    #1,d7
@@ -335,6 +342,7 @@ fdcerr1:
 /* 306de: 00e03d12 */
 /* 206de: 00e0391c */
 /* 104de: 00fc100a */
+/* 106de: 00e011b2 */
         xdef _flopwrt
 _flopwrt:
 #if STBOOK
@@ -393,17 +401,17 @@ flopwrt2:
         move.w    #$0180,(a6)                   /* load "WRITE SECTOR" command */
         move.w    #$00A0,d7                     /* into 1770 cmdreg */
         bsr       wrfdcd7
-#if TOSVERSION >= 0x200
-        move.l    ABSW(_hz_200),d7
-        add.l     #300,d7                       /* d7 = timeout timer */
+#if TOSVERSION >= 0x106
+        move.l    ABSW2(_hz_200),d7
+        add.l     #FLOP_TIMEOUT,d7              /* d7 = timeout timer */
 #else
         move.l    #$00040000,d7
 #endif
 flopwrt3:
         btst      #5,ABSW(MFP_GPIP)             /* done yet? */
         beq.s     flopwrt4                      /* (yes, check status) */
-#if TOSVERSION >= 0x200
-        cmp.l     ABSW(_hz_200),d7              /* timeout reached? */
+#if TOSVERSION >= 0x106
+        cmp.l     ABSW2(_hz_200),d7             /* timeout reached? */
         bhi.s     flopwrt3                      /* (still tickin') */
 #else
         subq.l    #1,d7
@@ -461,6 +469,7 @@ flopwrt7:
 /* 306de: 00e03e02 */
 /* 206de: 00e03a04 */
 /* 104de: 00fc10c6 */
+/* 106de: 00e0127a */
         xdef _flopfmt
 _flopfmt:
         cmpi.l    #$87654321,22(a7)             /* check for magic# on stack */
@@ -678,9 +687,9 @@ fmtrack6:
         move.w    #$0180,(a6)                   /* select 1770 cmd register */
         move.w    #$00F0,d7                     /* write format_track command */
         bsr       wrfdcd7
-#if TOSVERSION >= 0x200
-        move.l   ABSW (_hz_200),d7
-        add.l     #300,d7                       /* d7 = timeout timer */
+#if TOSVERSION >= 0x106
+        move.l    ABSW2(_hz_200),d7
+        add.l     #FLOP_TIMEOUT,d7              /* d7 = timeout timer */
 #else
         move.l    #$00040000,d7
 #endif
@@ -688,8 +697,8 @@ fmtrack6:
 fmtrack7:
         btst      #5,ABSW(MFP_GPIP)             /* is 1770 done? */
         beq.s     fmtrac10                      /* (yes) */
-#if TOSVERSION >= 0x200
-        cmp.l     ABSW(_hz_200),d7              /* timeout reached? */
+#if TOSVERSION >= 0x106
+        cmp.l     ABSW2(_hz_200),d7             /* timeout reached? */
         bhi.s     fmtrack7                      /* (still tickin') */
 #else
         subq.l    #1,d7
@@ -819,9 +828,9 @@ verify3:
         move.w    #$0080,(a6)                   /* write READ SECTOR command */
         move.w    #$0080,d7
         bsr       wrfdcd7
-#if TOSVERSION >= 0x200
-        move.l    ABSW(_hz_200),d7
-        add.l     #300,d7                       /* d7 = timeout timer */
+#if TOSVERSION >= 0x106
+        move.l    ABSW2(_hz_200),d7
+        add.l     #FLOP_TIMEOUT,d7              /* d7 = timeout timer */
 #else
         move.l    #$00040000,d7
 #endif
@@ -829,8 +838,8 @@ verify3:
 verify4:
         btst      #5,ABSW(MFP_GPIP)             /* test for 1770 done */
         beq.s     verify5                       /* (yes, it completed) */
-#if TOSVERSION >= 0x200
-        cmp.l     ABSW(_hz_200),d7              /* timeout reached? */
+#if TOSVERSION >= 0x106
+        cmp.l     ABSW2(_hz_200),d7             /* timeout reached? */
         bhi.s     verify4                       /* (still tickin') */
 #else
         subq.l    #1,d7
@@ -1258,9 +1267,9 @@ flopcms1:
  *
  */
 flopcmd:
-#if (TOSVERSION >= 0x200)
-        move.l    ABSW(_hz_200),d7              /* setup timeout (assume short) */
-        add.l     #300,d7
+#if (TOSVERSION >= 0x106)
+        move.l    ABSW2(_hz_200),d7             /* setup timeout (assume short) */
+        add.l     #FLOP_TIMEOUT,d7
 #else
         move.l    #$00040000,d7
 #endif
@@ -1268,17 +1277,17 @@ flopcmd:
         bsr       rdfdcd0                       /* read it to clobber READY status */
         btst      #7,d0                         /* is motor on? */
         bne.s     flopcmd1                      /* (yes, keep short timeout) */
-#if (TOSVERSION >= 0x200)
-        move.l    ABSW(_hz_200),d7              /* extra timeout for motor startup */
-        add.l     #600,d7
+#if (TOSVERSION >= 0x106)
+        move.l    ABSW2(_hz_200),d7             /* extra timeout for motor startup */
+        add.l     #FLOP_TIMEOUT*2,d7
 #else
         move.l    #$00060000,d7
 #endif
 flopcmd1:
         bsr       wrfdcd6                       /* write command (in d6) */
 flopcmd2:
-#if (TOSVERSION >= 0x200)
-        cmp.l     ABSW(_hz_200),d7              /* timeout? */
+#if (TOSVERSION >= 0x106)
+        cmp.l     ABSW2(_hz_200),d7             /* timeout? */
         bcs.s     flopcmd3                      /* (yes, reset and return failure) */
 #else
         subq.l    #1,d7

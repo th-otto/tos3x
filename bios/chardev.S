@@ -666,12 +666,10 @@ _bco2stat:
         rts
 
 
-#if TOSVERSION < 0x200
+#if TOSVERSION <= 0x104
 /*********************************************************
  * VT52 emulator callback for the bell sound
  *********************************************************/
-/* 306de: 00e03b86 */
-/* 206de: 00e037a4 */
 /* 104de: 00fc34e4 */
 #if !BINEXACT
 		xdef ringbell
@@ -2882,14 +2880,14 @@ kbdvec8:
         bne.s     kbdvec11
         btst      #0,ABSW(_conterm)             /* should click sound be produced? */
         beq.s     kbdvec9
-#if TOSVERSION >= 0x200
+#if TOSVERSION >= 0x200 /* BUG: no check here in 1.06 */
         movem.l   d0-d2/a0-a2,-(a7)
         movea.l   ABSW(_kcl_hook),a0
         jsr       (a0)
         movem.l   (a7)+,d0-d2/a0-a2
 #else
         move.l    #_clicksnd,ABSW(_sndtable)
-        move.b    #$00,ABSW(_snddelay)
+        move.b    #0,ABSW(_snddelay)
 #endif
 kbdvec9:
         bchg      #4,d1                         /* toggle CAPS LOCK state */
@@ -2923,14 +2921,14 @@ kbdvec14:
 kbdvec15:
         btst      #0,ABSW(_conterm)             /* should click sound be produced? */
         beq.s     kbdvec16
-#if TOSVERSION >= 0x200
+#if TOSVERSION >= 0x106
         movem.l   d0-d2/a0-a2,-(a7)
         movea.l   ABSW(_kcl_hook),a1
         jsr       (a1)
         movem.l   (a7)+,d0-d2/a0-a2
 #else
         move.l    #_clicksnd,ABSW(_sndtable)
-        move.b    #$00,ABSW(_snddelay)
+        move.b    #0,ABSW(_snddelay)
 #endif
 kbdvec16:
         move.l    a0,-(a7)                      /* store ikbdiorec pointer */
@@ -3502,7 +3500,7 @@ kbdvec46:
 kbdvec47:
         rts
 
-#if TOSVERSION >= 0x200
+#if TOSVERSION >= 0x106
 /*
  * default function for system variable kcl_hook
  */
@@ -3511,7 +3509,7 @@ kbdvec47:
 	xdef _do_keyclick
 _do_keyclick:
         move.l    #_clicksnd,ABSW(_sndtable)
-        move.b    #$00,ABSW(_snddelay)
+        move.b    #0,ABSW(_snddelay)
         rts
 #endif
 
@@ -4395,13 +4393,12 @@ soundir7:
         movem.l   (a7)+,d0-d1/a0                /* pop stack & exit */
         rts
 
-#if TOSVERSION >= 0x200
+#if TOSVERSION >= 0x106
 /*********************************************************
  * VT52 emulator callback for the bell sound
  *********************************************************/
 /* 306de: 00e03b86 */
 /* 206de: 00e037a4 */
-/* 104de: 00fc34e4 */
 #if !BINEXACT
 		xdef ringbell
 #endif

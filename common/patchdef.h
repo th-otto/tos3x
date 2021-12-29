@@ -714,6 +714,14 @@
 #endif
 
 /*
+ * TP_69: TIME_SAVE: Read system time from keyboard processor
+ * (see ST-Computer 1/90)
+ */
+#ifndef TP_69
+#define TP_69 0
+#endif
+
+/*
  * TP_WINX: WINX 2.2 patch
  */
 #ifndef TP_WINX

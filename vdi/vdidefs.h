@@ -19,7 +19,7 @@
 
 #include "config.h"
 
-#if TOSVERSION >= 0x206
+#if TOSVERSION >= 0x106
 #define	MAX_PAL		4096	/* palette size                     */
 #else
 #define MAX_PAL		512	    /* palette size                     */

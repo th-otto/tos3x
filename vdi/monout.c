@@ -1367,7 +1367,7 @@ PP(int16_t *ty;)
 #if (TOSVERSION < 0x200) | (TOSVERSION >= 0x300) | !BINEXACT /* hmpf */
 		break;
 #endif
-#if (TOSVERSION < 0x200) & BINEXACT
+#if (TOSVERSION <= 0x104) & BINEXACT & (OS_COUNTRY != CTRY_NL)
 		asm("ds.b 0"); /* hmpf, optimizer seems to have missed to remove superfluous bra */
 #endif
 	}

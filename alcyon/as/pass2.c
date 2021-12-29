@@ -76,7 +76,7 @@ static VOID relbr(NOTHING)
 		ins[0] |= ((short)ival.l & 0xff);
 	}
 	/* make it a nop if destination is next instruction */
-	if ((instrlen == 2 && ival.l == 0) || (instrlen == 4 && ival.l == 2))
+	if (!didorg && ((instrlen == 2 && ival.l == 0) || (instrlen == 4 && ival.l == 2)))
 	{
 		opcpt = nopptr;
 		ins[0] = opcpt->vl1;

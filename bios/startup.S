@@ -809,8 +809,6 @@ nomemchk:
 #endif /* TP_03 */
 
 
-/* detect basic STe/TT DMA sound */
-
 #if TP_05 /* SHELL_P */
 		clr.l     (_shell_p).w
         movea.w   #SUPSIZ*2+_supstk,a7
@@ -890,6 +888,8 @@ vmeinit:    move.l    a0,(_buserror).w
 
 #if (TOSVERSION < 0x400)
 
+/* detect basic STe/TT DMA sound */
+
 #if TP_05 /* SHELL_P */
         clr.b     (_has_dmasound).w
 #else
@@ -940,9 +940,9 @@ nostedetect:
 #else
         sf        STEFlag
 #endif
-#endif
+#endif /* STBOOK */
 
-#else
+#else /* STBOOK | (TOSVERSION >= 0x400) */
 
 		move.b    ($FFFF8006).w,d0
 		move.b    d0,d1
@@ -3137,6 +3137,8 @@ _physbase:
 #if TOSVERSION >= 0x200
         tst.b     STEFlag
         bne.s     physbas1
+#endif
+#if TOSVERSION >= 0x106
         move.b    (v_bas_l).w,d0
 #endif
 physbas1:
@@ -3150,6 +3152,7 @@ physbas1:
 /* 306de: 00e01160 */
 /* 206de: 00e01030 */
 /* 104de: 00fc0a6c */
+/* 106de: 00e00bfe */
 _logbase:
         move.l    (_v_bas_ad).w,d0
         rts
@@ -3162,6 +3165,7 @@ _logbase:
 /* 306de: 00e01166 */
 /* 206de: 00e01036 */
 /* 104de: 00fc0a72 */
+/* 106de: 00e00c0a */
 _getrez:
         moveq.l   #0,d0
 #if STBOOK
@@ -3190,6 +3194,7 @@ _getrez:
 /* 306de: 00e01172 */
 /* 206de: 00e01042 */
 /* 104de: 00fc0a7e */
+/* 106de: 00e00c10 */
 _vsetscreen:
 /* --- set logical location: */
         tst.l     4(a7)                      /* if(logloc < 0) then ignore it */
@@ -3201,8 +3206,9 @@ nosetl:
         bmi.s     nosetp
         move.b    9(a7),(v_bas_h).w
         move.b    10(a7),(v_bas_m).w
-#if TOSVERSION >= 0x200
+#if TOSVERSION >= 0x106
 #if !BINEXACT
+		/* BUG: no test for STEFlag here in original */
         tst.b     STEFlag
         bne.s     nosetp
 #endif
@@ -3238,6 +3244,7 @@ nosetr:
 /* 306de: 00e011c8 */
 /* 206de: 00e0108e */
 /* 104de: 00fc0ac4 */
+/* 106de: 00e00c5c */
 _setpalette:
         move.l    4(a7),(_colorptr).w     /* next VBL will do this */
         rts
@@ -3254,6 +3261,7 @@ _setpalette:
 /* 306de: 00e011d0 */
 /* 206de: 00e01096 */
 /* 104de: 00fc0acc */
+/* 106de: 00e00c64 */
 _setcolor:
         move.w    4(a7),d1                   /* get color number */
         add.w     d1,d1                      /* turn into word index */

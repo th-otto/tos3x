@@ -169,7 +169,7 @@ PP(register int flag;)
 	
 	UNUSED(retry);
 	stop = 0;
-#if (GEMDOS >= 0x0018)
+#if (GEMDOS >= 0x0017) | (TOSVERSION >= 0x106)
 		while ((flag && fill[h] == 0) || (h != BFHPRN && Bconstat(h) != 0))
 #else
 	do
@@ -204,7 +204,7 @@ PP(register int flag;)
 				}
 			} while (stop);
 		}
-#if (GEMDOS < 0x0018)
+#if (GEMDOS < 0x0017) & (TOSVERSION < 0x106)
 	} while (flag && fill[h] == 0);
 #endif
 }

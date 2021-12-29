@@ -124,7 +124,7 @@ VOID d_gtext(NOTHING)
 /*  Now checks all fonts, not just system.				*/
 
 		if (
-#if (TOSVERSION < 0x200) & BINEXACT
+#if (TOSVERSION <= 0x104) & BINEXACT
 			fnt_ptr->font_id == 1 &&
 #endif
 #if BINEXACT & (TOSVERSION < 0x400)
