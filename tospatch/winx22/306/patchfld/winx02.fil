@@ -160,7 +160,7 @@
 ~ $01,4e                        ; dc.w      hctlw30-.
 ~ $41,eb,00,06                  ; lea.l     6(a3),a0
 ~ $48,68,00,02                  ; pea.l     2(a0)
-~ $48,50                        ; ori.b     #$50,d2
+~ $48,50                        ; pea.l     (a0)
 ~ $48,6e,ff,f8                  ; pea.l     -8(a6)
 ~ $2f,18                        ; move.l    (a0)+,-(a7)
 ~ $2f,18                        ; move.l    (a0)+,-(a7)
@@ -230,7 +230,7 @@
 ~ $d6,00                        ; add.b     d0,d3
 ~ $60,16                        ; bra.s     hctlw23
 ;hctlw21:
-~ $02,03,00,01,00,06,07,04,05,00 
+~ $02,03,00,01,00,06,07,04,05,00
 ;hctlw22:
 ~ $61,00,00,9a                  ; bsr       hctlw33
 ~ $4e,b9,.WINX08+.BASE+1744.L   ; jsr       $00E22910
@@ -324,12 +324,14 @@
 ~ $30,03                        ; move.w    d3,d0
 ~ $20,4c                        ; movea.l   a4,a0
 ~ $4e,f9,.WINX08+.BASE+1C2.L    ; jmp       $00E2138E
+
+;+322:
 ;hctlw40:
 ~ $20,4b                        ; movea.l   a3,a0
 ~ $24,6d,00,02                  ; movea.l   2(a5),a2
 ~ $4a,40                        ; tst.w     d0
 ~ $67,06                        ; beq.s     hctlw41
-~ $4a,6a,00,94                  ; tst.w     148(a2)
+~ $4a,6a,.WX_QUEUE_OFFSET+4.W   ; tst.w     p_qindex(a2)
 ~ $6e,38                        ; bgt.s     hctlw44
 ;hctlw41:
 ~ $43,ea,00,26                  ; lea.l     38(a2),a1

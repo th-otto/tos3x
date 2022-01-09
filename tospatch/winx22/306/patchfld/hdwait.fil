@@ -1,5 +1,26 @@
 ;*******************************************************************************
 ;* MRF: (angepasst von MH)
+;* Harddisk-Waiter (zum gleichzeitigen Anschalten von Rechner und Platte).
+;* Leider ist mir unbekannt, von wem diese Routine stammt, ich habe sie in
+;* einem Bootsektor gefunden. Zudem kann man das Warten mit [ALTERNATE]
+;* abbrechen (wenn z.B. keine Platte vorhanden ist).
+;* [ALL]
+;*
+;* >>> Achtung: Der Harddisk-Waiter funktioniert nur mit einer Platte. Zudem
+;*              bin ich nur sicher, daž er mit meiner Megafile 60 funktioniert.
+
+.HD_WAIT0 = 0       ;1: Patch einbinden, 0: Patch nicht einbinden
+
+_IF .HD_WAIT0
+ .HD_WAIT:      ~ hdwait0.abs                ;L„nge 224 Bytes
+ !.HD_WAIT+A .. ~                            ;in diesem Patch nicht relozieren
+
+ 70C            |$4E,B9,.HD_WAIT+.BASE.L     ;JSR zum Harddisk-Waiter
+ 712            |$4E,71,4E,71                ;NOP's
+_ENDIF
+
+;*******************************************************************************
+;* MRF: (angepasst von MH)
 ;* Alternativer Hardisk-Waiter. Wartet .TIME Sekunden bei einem
 ;* Kaltstart auf die Platte. Dies funktioniert mit allen Platten!
 ;* Mit Tastendruck kann das Warten abgebrochen werden.
@@ -12,7 +33,7 @@
 .TIME     = .12     ;Wartezeit in s
 
 _IF .HD_WAIT1
- .HD_WAIT:      ~ HDWAIT1.ABS                ;L„nge 58 Bytes
+ .HD_WAIT:      ~ hdwait1.abs                ;L„nge 58 Bytes
  !.HD_WAIT+A .. ~                            ;in diesem Patch nicht relozieren
  .HD_WAIT+C     |$.TIME*.200.L               ;Wartezeit eintragen
 
@@ -30,7 +51,7 @@ _ENDIF
 .DEVICE   = 0       ;DMA-Device, auf das gewartet werden soll (0-7)
 
 _IF .HD_WAIT2
- .HD_WAIT:      ~ HDWAIT2.ABS                ;L„nge 334 Bytes
+ .HD_WAIT:      ~ hdwait2.abs                ;L„nge 334 Bytes
  !.HD_WAIT+A .. ~                            ;in diesem Patch nicht relozieren
 
  ;.HD_WAIT+10    |$4E,71                      ;Nur fr RAM-TOS und >=2 Harddisks
@@ -52,7 +73,7 @@ _ENDIF
 .HD_WAIT3 = 0       ;1: Patch  einbinden, 0: Patch nicht einbinden
 
 _IF .HD_WAIT3
- .HD_WAIT:    ~ HDWAIT3.ABS   ;L„nge 174 Bytes
+ .HD_WAIT:    ~ hdwait3.abs   ;L„nge 174 Bytes
  !.HD_WAIT .. ~               ;In diesem Patch nicht relozieren
 
  9C8 |$4E,B9,.HD_WAIT+.BASE.L ;JSR zum Harddisk-Waiter

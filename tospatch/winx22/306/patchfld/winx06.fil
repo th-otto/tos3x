@@ -2,7 +2,7 @@
 ~ $22,6f,00,0a                  ; movea.l   10(a7),a1 ; PD *ppd
 ~ $30,29,00,1c                  ; move.w    28(a1),d0 ; p_pid
 ~ $32,00                        ; move.w    d0,d1
-~ $45,e9,00,90                  ; lea.l     144(a1),a2 ; p_qaddr
+~ $45,e9,.WX_QUEUE_OFFSET.W     ; lea.l     p_qaddr(a1),a2
 ~ $24,12                        ; move.l    (a2),d2
 ~ $5d,82                        ; subq.l    #6,d2
 ~ $b5,c2                        ; cmpa.l    d2,a2

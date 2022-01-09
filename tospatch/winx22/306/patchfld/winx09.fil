@@ -43,7 +43,7 @@
 ~ $e5,58                        ; rol.w     #2,d0
 ~ $48,40                        ; swap      d0
 ~ $e5,58                        ; rol.w     #2,d0
-~ $41,f9,.intin.L               ; lea.l     $0000AB98,a0
+~ $41,f9,.intin.L               ; lea.l     intin,a0
 ;wx_fill4:
 ~ $20,c1                        ; move.l    d1,(a0)+
 ~ $20,c0                        ; move.l    d0,(a0)+
@@ -51,7 +51,7 @@
 ~ $70,10                        ; moveq.l   #16,d0
 ~ $2f,00                        ; move.l    d0,-(a7)
 ~ $3f,3c,00,70                  ; move.w    #112,-(a7) ; vsf_udpat
-~ $4e,b9,.gsx_ncode.L           ; jsr       $00E2508A
+~ $4e,b9,.gsx_ncode.L           ; jsr       gsx_ncode
 ~ $5c,8f                        ; addq.l    #6,a7
 ~ $70,04                        ; moveq.l   #4,d0
 ;wx_fill5:
@@ -59,6 +59,9 @@
 ~ $b0,50                        ; cmp.w     (a0),d0
 ~ $4e,75                        ; rts
 ;wx_fill6:
-~ $00,00,44,44,00,00,55,55
-~ $88,88,55,55,55,55,aa,aa
-~ $aa,aa,dd,dd,55,55,ff,ff
+~ $00,00,44,44
+~ $00,00,55,55
+~ $88,88,55,55
+~ $55,55,aa,aa
+~ $aa,aa,dd,dd
+~ $55,55,ff,ff

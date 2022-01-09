@@ -81,14 +81,14 @@
 ~ $4e,75                        ; rts
 ;doscr17:
 ~ $20,79,.rlr.L                 ; movea.l   $0000E54A,a0
-~ $22,68,00,90                  ; movea.l   144(a0),a1
-~ $4a,68,00,94                  ; tst.w     148(a0)
+~ $22,68,.WX_QUEUE_OFFSET.W     ; movea.l   p_qaddr(a0),a1
+~ $4a,68,.WX_QUEUE_OFFSET+4.W   ; tst.w     p_qindex(a0)
 ~ $66,08                        ; bne.s     doscr18
 ~ $43,e8,00,26                  ; lea.l     38(a0),a1
 ~ $4a,59                        ; tst.w     (a1)+
 ~ $67,06                        ; beq.s     doscr19
 ;doscr18:
-~ $0c,51,00,18                  ; cmpi.w    #$0018,(a1)
+~ $0c,51,00,18                  ; cmpi.w    #24,(a1)
 ~ $4e,75                        ; rts
 ;doscr19:
 ~ $70,01                        ; moveq.l   #1,d0

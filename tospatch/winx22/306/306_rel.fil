@@ -19,6 +19,62 @@
 ;           - umgestellt, INIT4.FIL auf UK-TOS erweitert
 
 ;******************************************************************************
+; Einleseformat
+
+.WIDTH  =    .32    ; wenn wir splitten, dann bitte in vier Bytes
+.BASE   = E00000    ; TOS-ROM-Adresse (Default $E00000)
+.LENGTH =  80000    ; TOS-L„nge (Default $80000)
+
+;------------------------------------------------------------------------------
+; Ausgabeformat
+
+>1		; eine Datei (TOS.IMG) erzeugen
+;>4, PAK3		; gesplittet zum Brennen (U10=EE, U11=OE, U12=EO, U13=OO)
+
+;******************************************************************************
+
+.NATION = .FRG	; TOS-Nationalit„t (z.Zt. m”glich: FRG, USA, UK, FRA, SPA, ITA, SWF, SWG, SWE)
+
+;------------------------------------------------------------------------------
+_SWITCH .NATION
+
+_CASE .FRG:
+  <tos306de.img	; Original TT-TOS 3.06 deutsch   (CRC: 2272.6158.13C5.2020)
+
+_CASE .USA:
+  <tos306us.img	; Original TOS 3.06 amerikanisch (CRC: 514F.7DE4.797D.963C)
+
+_CASE .UK:
+  <tos306uk.img	; Original TT-TOS 3.06 amerikanisch
+
+_CASE .FRA:
+  <tos306fr.img	; Original TOS 3.06 franz”sisch  (CRC: 1001.847B.5E08.C44E)
+
+_CASE .SPA:
+  <tos306es.img	; Original TOS 3.06 spanish (gabs nie)  (CRC: 83E3.3B49.9BD1.47F8)
+
+_CASE .ITA:
+  <tos306it.img	; Original TOS 3.06 italienisch (gabs nie) (CRC: 6838:927B:DDD9:7BFB)
+
+_CASE .SWF:
+  <tos306sf.img	; Original TOS 3.06 Schweiz (franz”sisch) (CRC: 134E:515F:18F1:B496)
+
+_CASE .SWG:
+  <tos306sg.img	; Original TOS 3.06 Schweiz (german) (CRC: A29D:CD1B:1435:037E)
+
+_CASE .SWE:
+  <tos306se.img	; Original TOS 3.06 Schwedish (CRC: F95C:C029:E9AE:25B4)
+
+_DEFAULT:
+  _ERROR "unsupported country"
+
+_ENDSWITCH
+
+;------------------------------------------------------------------------------
+=24.09.1991,.NATION ; Version und Nationalit„t muž stimmen (sonst Message!)
+.CRC = 1                   ; Berechnen und Setzen der CRC-Prfsumme vom TOS.
+
+;******************************************************************************
 ; Schalter fr verschiedene Patch-Varianten
 
 ; Weitere Schalter (Standard: alles auf .0)
@@ -197,72 +253,6 @@ _ELSE
 _ENDIF
 
 ;******************************************************************************
-; Einleseformat
-
-.WIDTH  =    .32    ; wenn wir splitten, dann bitte in vier Bytes
-.BASE   = E00000    ; TOS-ROM-Adresse (Default $E00000)
-.LENGTH =  80000    ; TOS-L„nge (Default $80000)
-
-;------------------------------------------------------------------------------
-; Ausgabeformat
-
->1		; eine Datei (TOS.IMG) erzeugen
-;>4, PAK3		; gesplittet zum Brennen (U10=EE, U11=OE, U12=EO, U13=OO)
-
-;******************************************************************************
-
-.NATION = .FRG	; TOS-Nationalit„t (z.Zt. m”glich: FRG, USA, UK, FRA, SPA, ITA, SWF, SWG, SWE)
-
-;------------------------------------------------------------------------------
-_SWITCH .NATION
-
-_CASE .FRG:
-  <tos306de.ori	; Original TT-TOS 3.06 deutsch   (CRC: 2272.6158.13C5.2020)
-
-_CASE .USA:
-  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
-  <tos306us.ori	; Original TOS 3.06 amerikanisch (CRC: 514F.7DE4.797D.963C)
-
-_CASE .UK:
-  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
-  <tos306us.ori	; Original TT-TOS 3.06 amerikanisch
-  -patchfld	; Dsetpath("patchfld\")
-  +_us2uk.fil	; UK-TOS aus USA-TOS erzeugen
-  -..           ; Dsetpath ('..')
-
-_CASE .FRA:
-  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
-  <tos306fr.ori	; Original TOS 3.06 franz”sisch  (CRC: 1001.847B.5E08.C44E)
-
-_CASE .SPA:
-  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
-  <tos306es.ori	; Original TOS 3.06 spanish (gabs nie)  (CRC: 83E3.3B49.9BD1.47F8)
-
-_CASE .ITA:
-  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
-  <tos306it.ori	; Original TOS 3.06 italienisch (gabs nie) (CRC: 6838:927B:DDD9:7BFB)
-
-_CASE .SWF:
-  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
-  <tos306sf.ori	; Original TOS 3.06 Schweiz (franz”sisch) (CRC: 134E:515F:18F1:B496)
-
-_CASE .SWG:
-  <tos306sg.ori	; Original TOS 3.06 Schweiz (german) (CRC: A29D:CD1B:1435:037E)
-
-_CASE .SWE:
-  .WINX=.0	; Kein deutsches TOS: WINX immer auschalten!
-  <tos306se.ori	; Original TOS 3.06 Schwedish (CRC: F95C:C029:E9AE:25B4)
-
-_DEFAULT:
-  _ERROR "unsupported country"
-
-_ENDSWITCH
-
-;------------------------------------------------------------------------------
-=24.09.1991,.NATION ; Version und Nationalit„t muž stimmen (sonst Message!)
-.CRC = 1                   ; Berechnen und Setzen der CRC-Prfsumme vom TOS.
-
-;******************************************************************************
 ; Aufruf der Patchfiles
 
 -patchfld	; Dsetpath("patchfld\")
@@ -271,6 +261,17 @@ _ENDSWITCH
 +newrsc.fil
 
 ;------------------------------------------------------------------------------
+
+_IF .WINX
+_SWITCH .NATION
+_CASE .FRG:
+_CASE .SWG:
+  ;
+
+_DEFAULT:
+  .WINX=0	; No German TOS: Always switch off WINX!
+_ENDSWITCH
+_ENDIF
 
 _IF .WINX
 
@@ -287,7 +288,7 @@ _IF .WINX
 _ENDIF
 
 _IF .ARROWFIX !A! (.WINX = 0)
- .TIME = 3;	Ansprechzeit in 0,125s (Original-Wert ist 3)
+ .TIME = .3;	;Initial delay in 0,125s.
 
  +arrowfix.fil;	ARROWFIX 1.5:  Neue GEM-Scrollroutinen (wie in TP306V20)
 _ENDIF

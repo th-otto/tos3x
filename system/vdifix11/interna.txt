@@ -34,9 +34,10 @@ Und dies alles nur, weil der Block dahinter, statt davor gehÑngt wurde !
 
 ########################################################################
 
-Hier nun der Code fÅr v_opnvwk aus TOS 1.0 - 06.02.86 - $FCD4D8
-			           TOS 1.4 - 06.04.89 - $FCE22A
-			           TOS 1.6 - 29.07.89 - $E0E454
+Hier nun der Code fÅr v_opnvwk aus TOS 1.00 - 06.02.86 - $FCD4D8
+			           TOS 1.04 - 06.04.89 - $FCE22A
+			           TOS 1.06 - 29.07.89 - $E0E454
+			           TOS 1.62 - 01.01.90 - $E0E4C2
                                    TOS 030 - 23.05.89 - $E085BC
 	MALLOC($134)
 	move.l	D0,A5		;   new = Malloc($134)

@@ -81,7 +81,7 @@
 ~ $3f,3c,00,48                  ; move.w    #$0048,-(a7)
 ~ $4e,41                        ; trap      #1
 ~ $5c,4f                        ; addq.w    #6,a7
-~ $41,f9,.D+50.L                ; lea.l     $0000AEF2,a0
+~ $41,f9,.D+50.L                ; lea.l     $0000AEF2,a0  /* winxvars */
 ~ $43,fa,00,38                  ; lea.l     winxvers(pc),a1
 ~ $20,d9                        ; move.l    (a1)+,(a0)+
 ~ $20,d9                        ; move.l    (a1)+,(a0)+

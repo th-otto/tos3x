@@ -273,20 +273,18 @@ PP(char *v;)								/* command, tail, environment   */
 			else
 				return E_PLFMT;
 		}
-		goto donehdr;
-	}
-	
-	if (mode == PE_BPFLAGS)
-	{
-		hdr.h01_ldflags = (long)s;
 	} else
 	{
-		hdr.h01_ldflags = 0;
-	}
-
-	hdr.h01_tlen = hdr.h01_dlen = hdr.h01_blen = 0;
+		if (mode == PE_BPFLAGS)
+		{
+			hdr.h01_ldflags = (long)s;
+		} else
+		{
+			hdr.h01_ldflags = 0;
+		}
 	
-donehdr:
+		hdr.h01_tlen = hdr.h01_dlen = hdr.h01_blen = 0;
+	}
 	
 	/* will we need memory and a psp ? */
 
@@ -748,6 +746,8 @@ PP(char *v;)								/* command, tail, environment   */
 			freeit(env, &pmd);
 		xlongjmp(bakbuf, rc);
 	}
+
+	/* will we need memory and a psp ? */
 
 	if (mode != PE_GO && mode != PE_GOTHENFREE)
 	{									/* get largest memory partition available */

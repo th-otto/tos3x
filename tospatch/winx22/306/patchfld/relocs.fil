@@ -3,11 +3,14 @@
 ;    and affects all addresses >= $00E0363A
 ; .d2 is caused by different time/date formats in desktop,
 ;    and affects all addresses >= $00E2FF6A
+; .d3 is caused by different length of desktop data segment,
+;    and affects all addresses >= $00E3E930
 _SWITCH .NATION
 
   _CASE .USA:
     .d1 = -5A
     .d2 = -30
+    .d3 = .d2
     .INFDATA = 3EC06
     .RSC_TAB = 3ECA2
     .TOSINFO_OFS = 1A8B
@@ -16,6 +19,7 @@ _SWITCH .NATION
   _CASE .FRG:
     .d1 = 0
     .d2 = 0
+    .d3 = .d2
     .INFDATA = 3EC92       ; desktop filenames
     .RSC_TAB = 3ED2E       ; start of resource data
     .TOSINFO_OFS = 1A4A    ; offset to tos-info-dialog from RSC_TAB
@@ -24,6 +28,7 @@ _SWITCH .NATION
   _CASE .FRA:
     .d1 = 1E
     .d2 = 1E
+    .d3 = .d2
     .INFDATA = 3ECCC
     .RSC_TAB = 3ED68
     .TOSINFO_OFS = 1B71
@@ -32,6 +37,7 @@ _SWITCH .NATION
   _CASE .UK:
     .d1 = -5A
     .d2 = -30
+    .d3 = .d2
     .INFDATA = 3EC06
     .RSC_TAB = 3ECA2
     .TOSINFO_OFS = 1A8B
@@ -40,6 +46,7 @@ _SWITCH .NATION
   _CASE .SPA:
     .d1 = 2C
     .d2 = 2C
+    .d3 = .d2
     .INFDATA = 3ECA4
     .RSC_TAB = 3ED40
     .TOSINFO_OFS = 1B5A
@@ -48,6 +55,7 @@ _SWITCH .NATION
   _CASE .ITA:
     .d1 = 0E
     .d2 = 0E
+    .d3 = .d2
     .INFDATA = 3EC78
     .RSC_TAB = 3ED14
     .TOSINFO_OFS = 1B31
@@ -56,6 +64,7 @@ _SWITCH .NATION
   _CASE .SWE:
     .d1 = 1E
     .d2 = 1E
+    .d3 = .d2
     .INFDATA = 3EC30
     .RSC_TAB = 3ECCC
     .TOSINFO_OFS = 1A6E
@@ -64,6 +73,7 @@ _SWITCH .NATION
   _CASE .SWF:
     .d1 = 2C
     .d2 = 2C
+    .d3 = .d2
     .INFDATA = 3ECDA
     .RSC_TAB = 3ED76
     .TOSINFO_OFS = 1B71
@@ -72,6 +82,7 @@ _SWITCH .NATION
   _CASE .SWG:
     .d1 = 2C
     .d2 = 2C
+    .d3 = .d2
     .INFDATA = 3ECBE
     .RSC_TAB = 3ED5A
     .TOSINFO_OFS = 1A4A

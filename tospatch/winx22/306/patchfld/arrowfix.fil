@@ -47,6 +47,8 @@ _IF .ARROWFIX
 .rlr         = E54A
 .button      = E6FA
 
+.WX_QUEUE_OFFSET = 90 ; offsetof(struct PD, p_qaddr)
+
 .PATCH1
 ~ $4E,B9,.ADR1+.BASE.L          ; jsr       .ADR1
 ~ $50,8F                        ; addq.l    #8,a7
@@ -63,7 +65,7 @@ _FILL ~ , ~ + 14 , $4E71.W      ; nop
 ~ $D6,B9,.TICKS.L               ; add.l     $8BD2,d3
 ~ $60,0A                        ; bra.s     10(pc)               l0001
 ~ $20,6D,00,02            ;L0000: movea.l   2(a5),a0
-~ $4A,68,00,94                  ; tst.w     148(a0)
+~ $4A,68,.WX_QUEUE_OFFSET+4.W   ; tst.w     p_qindex(a0)
 ~ $6E,52                        ; bgt.s     82(pc)               l0003
 ~ $20,6D,00,02            ;L0001: movea.l   2(a5),a0
 ~ $43,E8,00,26                  ; lea       38(a0),a1
@@ -105,7 +107,7 @@ _FILL ~,~+3C,$4E71.W      ;L0004: nop
 ~ $20,79,.rlr.L                 ; movea.l   $e54a,a0
 ~ $3F,28,00,1C                  ; move.w    28(a0),-(a7)
 ~ $3F,3C,00,01                  ; move.w    #1,-(a7)
-~ $4A,68,00,94                  ; tst.w     148(a0)
+~ $4A,68,.WX_QUEUE_OFFSET+4.W   ; tst.w     p_qindex(a0)
 ~ $6E,0E                        ; bgt.s     14(pc)               l0007
 ~ $2F,2F,00,0E                  ; move.l    14(a7),-(a7)
 ~ $61,00,DC,D2                  ; bsr       -9006(pc)            l0005
@@ -141,25 +143,25 @@ _FILL ~,~+3C,$4E71.W      ;L0004: nop
 ~ $3F,3C,.TIME+1.B,03           ; move.w    #$xx03,-(a7)
 
 .downorup
-~ $10,2F,00,09                  ; move.b    9(a7),d0
-~ $12,2F,00,05                  ; move.b    5(a7),d1
-~ $B3,00                        ; eor.b     d1,d0
-~ $C0,2F,00,08                  ; and.b     8(a7),d0
-~ $57,C0                        ; seq       d0
-~ $C0,3C,00,01                  ; and.b     #1,d0
-~ $B0,2F,00,06                  ; cmp.b     6(a7),d0
-~ $56,C0                        ; sne       d0
-~ $C0,7C,00,01                  ; and.w     #1,d0
-~ $67,1A                        ; beq.s     downoru1
-~ $20,57                        ; movea.l   (a7),a0
-~ $0C,68,2E,87,FF,F2            ; cmpi.w    #$2E87,-14(a0)
-~ $66,10                        ; bne.s     downoru1
-~ $22,39,.rlr.L                 ; move.l    $0000E54A,d1
-~ $B2,B9,.gl_mowner.L           ; cmp.l     $0000950A,d1
-~ $67,02                        ; beq.s     downoru1
-~ $70,00                        ; moveq.l   #0,d0
+~ $10,2f,00,09               ; move.b     9(a7),d0
+~ $12,2f,00,05               ; move.b     5(a7),d1
+~ $b3,00                     ; eor.b      d1,d0
+~ $c0,2f,00,08               ; and.b      8(a7),d0
+~ $57,c0                     ; seq        d0
+~ $c0,3c,00,01               ; and.b      #1,d0
+~ $b0,2f,00,06               ; cmp.b      6(a7),d0
+~ $56,c0                     ; sne        d0
+~ $c0,7c,00,01               ; and.w      #1,d0
+~ $67,1a                     ; beq.s      downoru1
+~ $20,57                     ; movea.l    (a7),a0
+~ $0c,68,2e,87,ff,f2         ; cmpi.w     #$2E87,-14(a0)
+~ $66,10                     ; bne.s      downoru1
+~ $22,39,.rlr.L              ; move.l     $0000E54A,d1
+~ $b2,b9,.gl_mowner.L        ; cmp.l      $0000950A,d1
+~ $67,02                     ; beq.s      downoru1
+~ $70,00                     ; moveq.l    #0,d0
 ;downoru1:
-~ $4E,75                        ; rts
+~ $4e,75                     ; rts
 
 
 .PATCH7
@@ -238,8 +240,8 @@ _FILL ~,~+3C,$4E71.W      ;L0004: nop
 ~ $4C,DF,30,02            ;L001E: movem.l   (a7)+,d1/a4-a5
 ~ $4E,75                        ; rts
 ~ $20,79,.rlr.L           ;L001F: movea.l   $e54a,a0
-~ $22,68,00,90                  ; movea.l   144(a0),a1
-~ $4A,68,00,94                  ; tst.w     148(a0)
+~ $22,68,.WX_QUEUE_OFFSET.W     ; movea.l   p_qaddr(a0),a1
+~ $4A,68,.WX_QUEUE_OFFSET+4.W   ; tst.w     p_qindex(a0)
 ~ $66,08                        ; bne.s     8(pc)                l0020
 ~ $43,E8,00,26                  ; lea       38(a0),a1
 ~ $4A,59                        ; tst.w     (a1)+
