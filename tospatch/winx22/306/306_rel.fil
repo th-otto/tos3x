@@ -263,17 +263,6 @@ _ENDIF
 ;------------------------------------------------------------------------------
 
 _IF .WINX
-_SWITCH .NATION
-_CASE .FRG:
-_CASE .SWG:
-  ;
-
-_DEFAULT:
-  .WINX=0	; No German TOS: Always switch off WINX!
-_ENDSWITCH
-_ENDIF
-
-_IF .WINX
 
  .GLOBAL      = %1111111111111 ; global flags (rightmost: flag G1)
  .LOCAL       =  %111111111111 ; local flags  (rightmost: flag L1)

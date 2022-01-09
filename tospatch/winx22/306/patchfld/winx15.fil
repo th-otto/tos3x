@@ -56,7 +56,7 @@
 ~ $41,e8,00,18                  ; lea.l     24(a0),a0
 ~ $30,2d,00,04                  ; move.w    4(a5),d0
 ~ $42,67                        ; clr.w     -(a7)
-~ $4e,b9,.WINX08+.BASE+886.L    ; jsr       $00E21A52
+~ $4e,b9,.WINXWM+.BASE+886.L    ; jsr       $00E21A52
 ~ $54,8f                        ; addq.l    #2,a7
 ~ $32,1f                        ; move.w    (a7)+,d1
 ~ $30,1f                        ; move.w    (a7)+,d0
@@ -96,7 +96,7 @@
 ~ $20,c0                        ; move.l    d0,(a0)+
 ~ $41,f9,.D+50.L                ; lea.l     $0000AEF2,a0  /* winxvars */
 ~ $70,01                        ; moveq.l   #1,d0
-~ $4e,b9,.WINX08+.BASE+258.L    ; jsr       wx_callfunc
+~ $4e,b9,.WINXWM+.BASE+258.L    ; jsr       wx_callfunc
 ~ $67,06                        ; beq.s     wx_alloc1
 ~ $33,c0,.D+58.L                ; move.w    d0,$0000AEFA /* winxvars.global_flags */
 ;wx_alloc1:
@@ -105,8 +105,9 @@
 ;winxvers:
 ~ $57,49,4e,58                  ; dc.b 'WINX'
 ~ $.WX_VERSION.W                ; dc.w $220
-~ $.WX_DATE.W                   ; dc.w $1b51 /* 1993/10/17 */
+~ $.WX_DATE.W                   ; dc.w $1b51
 ~ $.GLOBAL.W                    ; dc.w $1fff /* global flags */
+!~-6..~
 
 ;winxinfo:
 ~ $.D+5A.L                      ; dc.l D+$5A /* winxvars.wx_mem */
@@ -118,7 +119,7 @@
 ~ $.gl_newdesk.L                ; dc.l gl_newdesk
 ~ $.gl_newroot.L                ; dc.l gl_newroot
 ~ $.ad_stdesk.L                 ; dc.l ad_stdesk
-~ $.WINX08+.BASE+BEE.L          ; dc.l .WINX08+BEE
+~ $.WINXWM+.BASE+BEE.L          ; dc.l .WINXWM+BEE
 
 ;getcookie:
 ~ $2f,08                        ; move.l    a0,-(a7)

@@ -72,7 +72,7 @@
 ~ $42,57                        ; clr.w     (a7)
 ~ $4e,b9,.wind_update.L         ; jsr       $00E35F6A
 ~ $52,57                        ; addq.w    #1,(a7)
-~ $4e,b9,.WINX08+.BASE+1408.L   ; jsr       $00E225D4 ; wx_update
+~ $4e,b9,.WINXWM+.BASE+1408.L   ; jsr       $00E225D4 ; wx_update
 ~ $2e,8c                        ; move.l    a4,(a7)
 ~ $4e,b9,.ev_mesag+.BASE.L      ; jsr       $00E1BDC8
 ~ $60,00,ff,66                  ; bra       doscr0
