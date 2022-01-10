@@ -39,13 +39,13 @@
 _SWITCH .NATION
 
 _CASE .FRG:
-  <tos306de.img	; Original TT-TOS 3.06 deutsch   (CRC: 2272.6158.13C5.2020)
+  <tos306de.img	; Original TOS 3.06 deutsch   (CRC: 2272.6158.13C5.2020)
 
 _CASE .USA:
   <tos306us.img	; Original TOS 3.06 amerikanisch (CRC: 514F.7DE4.797D.963C)
 
 _CASE .UK:
-  <tos306uk.img	; Original TT-TOS 3.06 amerikanisch
+  <tos306uk.img	; Original TOS 3.06 british
 
 _CASE .FRA:
   <tos306fr.img	; Original TOS 3.06 franz”sisch  (CRC: 1001.847B.5E08.C44E)
@@ -69,6 +69,8 @@ _DEFAULT:
   _ERROR "unsupported country"
 
 _ENDSWITCH
+
+;<*                  ;read from ROM (.LENGTH must match TOS-Length).
 
 ;------------------------------------------------------------------------------
 =24.09.1991,.NATION ; Version und Nationalit„t muž stimmen (sonst Message!)

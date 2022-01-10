@@ -1,0 +1,20 @@
+; replaces ev_mesag
+
+.ev_mesag:
+~ $2f,2f,00,04                  ; move.l    4(a7),-(a7)
+~ $3f,3c,00,10                  ; move.w    #$0010,-(a7)
+~ $20,79,.rlr.L                 ; movea.l   $0000E54A,a0
+~ $3f,28,00,1c                  ; move.w    28(a0),-(a7)
+~ $3f,3c,00,01                  ; move.w    #1,-(a7)
+~ $4a,68,00,94                  ; tst.w     148(a0)
+~ $6e,0e                        ; bgt.s     ev_msg1
+~ $2f,2f,00,0e                  ; move.l    14(a7),-(a7)
+~ $61,00,.rd_mymsg-~.W          ; bsr       $00E19ABC
+~ $58,8f                        ; addq.l    #4,a7
+~ $4a,40                        ; tst.w     d0
+~ $66,04                        ; bne.s     ev_msg2
+;ev_msg1:
+~ $61,00,.ap_rdwr-~.W           ; bsr       $00E19AFE
+;ev_msg2:
+~ $de,fc,00,0a                  ; adda.w    #10,a7
+~ $4e,75                        ; rts

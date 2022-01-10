@@ -1,0 +1,27 @@
+~ $2F,0D                    ; move.l    a5,-(a7)
+~ $40,C1                    ; move.w    sr,d1
+~ $00,7C,07,00              ; ori.w     #$0700,sr
+~ $0c,79,00,20,.fpcnt.l     ; cmpi.w    #$0020,fpcnt.l
+~ $6c,42                    ; bge.s     forkq2
+~ $30,39,.fpt.l             ; move.w    fpt.l,d0
+~ $e7,40                    ; asl.w     #3,d0
+~ $48,c0                    ; ext.l     d0
+~ $2a,40                    ; movea.l   d0,a5
+~ $db,fc,.D.L               ; adda.l    #D,a5
+~ $db,fc,00,00,17,58        ; adda.l    #5976,a5
+~ $52,79,.fpt.l             ; addq.w    #1,fpt.l
+~ $0c,79,00,20,.fpt.l       ; cmpi.w    #$0020,fpt
+~ $66,06                    ; bne.s     forkq1
+~ $42,79,.fpt.l             ; clr.w     fpt.l
+;forkq1:
+~ $2A,AF,00,08              ; move.l    8(a7),(a5)
+~ $2B,6F,00,0C,00,04        ; move.l    12(a7),4(a5)
+~ $52,79,.fpcnt.l           ; addq.w    #1,fpcnt.l
+~ $70,01                    ; moveq.l   #1,d0
+~ $60,02                    ; bra.s     forkq3
+;forkq2:
+~ $42,40                    ; clr.w     d0
+;forkq3:
+~ $46,C1                    ; move.w    d1,sr
+~ $2A,5F                    ; movea.l   (a7)+,a5
+~ $4E,75                    ; rts

@@ -1,0 +1,40 @@
+;make_top:
+~ $20,6f,00,04                  ; movea.l   4(a7),a0
+;maketop8:
+~ $70,15                        ; moveq.l   #21,d0 /* WM_TOPPED */
+;maketop0:
+~ $43,f9,.winhead.L             ; lea.l     $0000914C,a1
+~ $22,08                        ; move.l    a0,d1
+~ $67,20                        ; beq.s     maketop5
+~ $24,49                        ; movea.l   a1,a2
+~ $60,0a                        ; bra.s     maketop3
+;maketop1:
+~ $b2,88                        ; cmp.l     a0,d1
+~ $66,04                        ; bne.s     maketop2
+~ $24,90                        ; move.l    (a0),(a2)
+~ $60,02                        ; bra.s     maketop3
+;maketop2:
+~ $24,41                        ; movea.l   d1,a2
+;maketop3:
+~ $22,12                        ; move.l    (a2),d1
+~ $66,f2                        ; bne.s     maketop1
+~ $4a,40                        ; tst.w     d0
+~ $67,06                        ; beq.s     maketop4
+~ $20,91                        ; move.l    (a1),(a0)
+~ $22,88                        ; move.l    a0,(a1)
+~ $60,04                        ; bra.s     maketop5
+;maketop4:
+~ $42,90                        ; clr.l     (a0)
+~ $24,88                        ; move.l    a0,(a2)
+;maketop5:
+~ $20,49                        ; movea.l   a1,a0
+;maketop6:
+~ $20,50                        ; movea.l   (a0),a0
+~ $20,08                        ; move.l    a0,d0
+~ $67,0a                        ; beq.s     maketop7
+~ $4a,68,00,04                  ; tst.w     4(a0)
+~ $6d,f4                        ; blt.s     maketop6
+~ $b1,d1                        ; cmpa.l    (a1),a0
+~ $66,c2                        ; bne.s     maketop8
+;maketop7:
+~ $4e,75                        ; rts

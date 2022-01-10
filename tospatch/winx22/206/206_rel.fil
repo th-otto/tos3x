@@ -60,8 +60,42 @@
 ;* MRF:
 ;* Einleseformat des Patchprogramms
 
-<STE_TOS.IMG        ;Ungepatches TOS 2.06 aus File STE_TOS.IMG lesen.
-;<*                  ;ROM auslesen (.LENGTH muž gleich der TOS-L„nge sein).
+;------------------------------------------------------------------------------
+_SWITCH .NATION
+
+_CASE .FRG:
+  <tos206de.img	; Original TOS 2.06 deutsch
+
+_CASE .USA:
+  <tos206us.img	; Original TOS 2.06 amerikanisch
+
+_CASE .UK:
+  <tos206uk.img	; Original TOS 2.06 british
+
+_CASE .FRA:
+  <tos206fr.img	; Original TOS 2.06 franz”sisch
+
+_CASE .SPA:
+  <tos206es.img	; Original TOS 2.06 spanish (gabs nie)
+
+_CASE .ITA:
+  <tos206it.img	; Original TOS 2.06 italienisch (gabs nie)
+
+_CASE .SWF:
+  <tos206sf.img	; Original TOS 2.06 Schweiz (franz”sisch)
+
+_CASE .SWG:
+  <tos206sg.img	; Original TOS 2.06 Schweiz (german)
+
+_CASE .SWE:
+  <tos206se.img	; Original TOS 2.06 Schwedish
+
+_DEFAULT:
+  _ERROR "unsupported country"
+
+_ENDSWITCH
+
+;<*                  ;read from ROM (.LENGTH must match TOS-Length).
 
 =14.11.1991,.NATION ;Muss die Version vom 14.11.1991 sein und die
                     ;TOS-Nationalit„t muss stimmen! (sonst Message)
@@ -740,94 +774,10 @@ _ENDIF
 ;*******************************************************************************
 ;* MH:
 ;* Das Default-NEWDESK.INF und die Resourcen zum Includen!!!
-;* Hier nun die ultimative M”glichkeit, sich das TOS nach seinen Wnschen
-;* zu gestalten. Originalfiles: RSC_1.RSC,RSC_2.RSC,NEWDESK.INF.
-;*
-;* Vorsicht: Alle 3 Files drfen jeweils max. 64kB lang sein, da die
-;*           Pointer auf dieselbigen Words sind. Allerdings sind im TOS
-;*           sowieso nur noch ca. 8kB frei, so daž man aufpassen muž, das
-;*           TOS-Ende nicht zu berschreiten. Man kann aber den Wert der
-;*           Variable .LENGTH vergr”žern, so daž das TOS l„nger wird
-;*           (TOSPATCH zeigt dann eine Message, daž das gelesenen TOS zu
-;*           kurz sei, aber da kann man dann einfach SPACE drcken).
-;*           Das funktioniert aber nur, falls das TOS aus einer Datei
-;*           und nicht aus dem ROM gelesen wird!
-;*
-;* Diese Dateien von TOS 2.06 und TOS 3.06 sind identisch(!), d.h. sie
-;* k”nnen fr beide TOS-Versionen zum Patchen genutzt werden.
-;*
-;* Wenn man mehr Icons gleichzeitig auf dem Desktop haben m”chte, muž man
-;* in der 2.RSC-Datei (RSC_2.RSC) im 13. Formular (ICONS) einfach mehr Boxen
-;* reinsetzen. Ich habe in der Datei RSC_2X.RSC die Anzahl der Icons
-;* schon von 48 auf 160 vergr”žert.
-;*
-;* Man kann nun auch neue und mehr Icons in sein TOS einbinden (anstatt
-;* DESKICON.RSC zu verwenden). Die Icons findet man in der 2. RSC-Datei
-;* (RSC_2.RSC) im 11. Formular (DESKICON). Hier einfach neue oder andere
-;* Icons eintragen.
 
 .RSC = 0            ;1: RSC-Patch einbinden, 0: RSC-Patch nicht einbinden
 
-_SWITCH .NATION
-_CASE .FRG: .INSTALL_RSC = 1C8D0
-            .RSC_TAB     = 36AC4
-            .RSC_END     = 3DFC8
-            .GEMDOS      = 15EB0   ;Fr _NEWRSC.ABS
-            .MALLOC      = 220FC
-            .BIOS        = 228AA
-            .UNABLE_TXT  = 35EB4
-_DEFAULT: .RSC = 0
-_ENDSWITCH
-
-_IF .RSC
- _IF .ICONS !O! .INFO_TXT !O! .MOUSE
-  _ERROR "Entweder RSC/NEWDESK-Patch oder nur die anderen RSC-Patches benutzen"
- _ENDIF
-
- _SWITCH .NATION
- _CASE .FRG: -RSC\FRG\             ;Ins deutsche Subdirectory wechseln
- _ENDSWITCH
-
- .RSC_TAB+A   RSC_1.RSC            ;<<< Resource-Datei 1 hier eintragen
- .RSC1_END: ~ RSC_2.RSC            ;<<< Resource-Datei 2 hier eintragen
- .RSC2_END: ~ NEWDESK.INF          ;<<< NEWDESK.INF hier eintragen
-
- .INF_END:  _EVEN FF               ;Damit nachfolgender Code ausfhrbar bleibt
- .RSC_END:                         ;RSC/NEWDESK-Ende sichern
-
- _IF .INF_END-.RSC_TAB < 8000
-  .INSTALL_RSC+ A   $.RSC_TAB+.BASE.L
-  .INSTALL_RSC+5A   $.RSC_TAB+.BASE.L
-
-  .RSC_TAB          $.RSC1_END-.RSC_TAB.W
-  .RSC_TAB+2        $.RSC2_END-.RSC_TAB.W
-  .RSC_TAB+4        $.INF_END-.RSC_TAB.W
-  .RSC_TAB+6        $00,00,00,00   ;Unbenutzte Eintr„ge l”schen
-
- _ELSE
-  /'Resourcen sind l„nger als 32kB... (',.INF_END-.RSC_TAB,')'
-  .INSTALL_RSC      ..\..\newrsc.abs
-  .INSTALL_RSC+A    $.RSC_TAB+.BASE.L
-  .INSTALL_RSC+10   $.INSTALL_RSC+A6+.BASE.L
-  .INSTALL_RSC+18   $.MALLOC+.BASE.L
-  .INSTALL_RSC+26   $.UNABLE_TXT+.BASE.L
-  .INSTALL_RSC+30   $.GEMDOS-~.W
-  .INSTALL_RSC+3E   $.BIOS-~.W
-  .INSTALL_RSC+4C   $.RSC_TAB+.BASE.L
-
-  .RSC_TAB          $.RSC1_END-(.RSC_TAB+A).W
-  .RSC_TAB+2        $.RSC2_END-.RSC1_END.W
-  .RSC_TAB+4        $.INF_END-.RSC2_END.W
-  .RSC_TAB+6        $00,00,00,00   ;Unbenutzte Eintr„ge l”schen
-
- _ENDIF
-
- -..\..\            ;Zurck ins normale Patchfield wechseln.
-
-_ENDIF
-
-!.RSC_TAB .. .RSC_END              ;Im RSC/NEWDESK.INF nicht relozieren.
-.RSC_END                           ;Ab Ende RSC/NEWDESK.INF geht es weiter.
++newrsc.fil
 
 ;***************************************************************************
 ;* EWK: 

@@ -1,0 +1,98 @@
+;*******************************************************************************
+;* MH:
+;* Das Default-NEWDESK.INF und die Resourcen zum Includen!!!
+;* Hier nun die ultimative Mîglichkeit, sich das TOS nach seinen WÅnschen
+;* zu gestalten. Originalfiles: AES.RSC,DESK.RSC,NEWDESK.INF.
+;*
+;* Vorsicht: Alle 3 Files dÅrfen jeweils max. 64kB lang sein, da die
+;*           Pointer auf dieselbigen Words sind. Allerdings sind im TOS
+;*           sowieso nur noch ca. 8kB frei, so daû man aufpassen muû, das
+;*           TOS-Ende nicht zu Åberschreiten. Man kann aber den Wert der
+;*           Variable .LENGTH vergrîûern, so daû das TOS lÑnger wird
+;*           (TOSPATCH zeigt dann eine Message, daû das gelesenen TOS zu
+;*           kurz sei, aber da kann man dann einfach SPACE drÅcken).
+;*           Das funktioniert aber nur, falls das TOS aus einer Datei
+;*           und nicht aus dem ROM gelesen wird!
+;*
+;* Diese Dateien von TOS 2.06 und TOS 3.06 sind identisch(!), d.h. sie
+;* kînnen fÅr beide TOS-Versionen zum Patchen genutzt werden.
+;*
+;* Wenn man mehr Icons gleichzeitig auf dem Desktop haben mîchte, muû man
+;* in der 2.RSC-Datei (DESK.RSC) im 13. Formular (ICONS) einfach mehr Boxen
+;* reinsetzen. Ich habe in der Datei DESKX.RSC die Anzahl der Icons
+;* schon von 48 auf 160 vergrîûert.
+;*
+;* Man kann nun auch neue und mehr Icons in sein TOS einbinden (anstatt
+;* DESKICON.RSC zu verwenden). Die Icons findet man in der 2. RSC-Datei
+;* (DESK.RSC) im 11. Formular (DESKICON). Hier einfach neue oder andere
+;* Icons eintragen.
+
+.INSTALL_RSC = 1C8D0+.d1
+
+_IF .RSC
+
+ _IF .ICONS !O! .INFO_TXT !O! .MOUSE
+  _ERROR "Either use the RSC/NEWDESK patch or just the other RSC patches"
+ _ENDIF
+
+.RSC_TAB+A
+_SWITCH .NATION
+  _CASE .USA:
+    -rsc\us                ; english RSC-files
+  _CASE .FRG:
+    -rsc\de                ; german RSC-files
+  _CASE .UK:
+    -rsc\uk                ; english RSC-files
+  _CASE .FRA:
+    -rsc\fr                ; french RSC-files
+  _CASE .SPA:
+    -rsc\es                ; spanish RSC-files
+  _CASE .ITA:
+    -rsc\es                ; italian RSC-files
+  _CASE .SWE:
+    -rsc\se                ; swedish RSC-files
+  _CASE .SWF:
+    -rsc\sf                ; french RSC-files
+  _CASE .SWG:
+    -rsc\sg                ; german RSC-files
+  _DEFAULT:
+    _ERROR "unsupported country"
+_ENDSWITCH
+
+.AES_RSC_START:
+~ aes.rsc            ;<<< enter name of GEM resource file here
+_EVEN $00
+~ $00,00,00,00
+.DESK_RSC_START:
+~ desk.rsc           ;<<< enter name of DESKTOP resource file here
+_EVEN $00
+~ $00,00,00,00
+.NEWDESK_INF:
+~ newdesk.inf        ;<<< enter name of NEWDESK.INF here
+_EVEN $00
+~ $00,00,00,00,00,00
+.RSC_LEN = ~-.RSC_TAB
+
+_IF ~ > .LENGTH
+    _ERROR "RSC files do not fit in ROM"
+_ENDIF
+
+_IF .RSC_LEN >= 10000
+    _ERROR "RSC files are larger than 64K"
+_ENDIF
+
+-..\..
+
+; now (re)generate the glue header
+.RSC_TAB
+~ $.DESK_RSC_START-.RSC_TAB.W
+~ $.NEWDESK_INF-.RSC_TAB.W
+~ $.RSC_LEN.W
+
+.ROMTOP = .RSC_TAB+.RSC_LEN                             ; save new end in ROMTOP
+
+_ENDIF
+
+.TOS_INFO = .RSC_TAB + .TOSINFO_OFS  ; zeigt auf TOS Info Dialog
+
+!.RSC_TAB .. .ROMTOP          ; do not relocate in RSC/NEWDESK.INF

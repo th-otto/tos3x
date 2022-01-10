@@ -89,6 +89,7 @@ _SWITCH .NATION
     _ERROR "unsupported country"
 _ENDSWITCH
 
+.RSC_END  = .ROMTOP
 .RSC_LEN  = .ROMTOP-.RSC_TAB
 
 ;*******************************************************************************
