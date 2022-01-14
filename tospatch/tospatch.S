@@ -13,9 +13,6 @@ stack_size      EQU 4096        ;Stack fuer das Programm
 
                 TEXT
 
-#define PCRD(x) x(pc)
-#define PCRB(x) x(pc)
-
 init:           movea.l 4(SP),A6        ;Basepageadresse holen
                 movea.w #$0100,A5       ;Groesse der Basepage
                 adda.l  12(A6),A5       ;+ Groesse des TEXT-Segments
@@ -31,13 +28,13 @@ init:           movea.l 4(SP),A6        ;Basepageadresse holen
 
                 bsr     getargs
                 
-                lea     PCRD(init_text),A0
+                lea     init_text(pc),A0
                 bsr     print_line
 
                 bsr     openlog
                 bsr     setlog
 
-                lea     PCRD(read_1st_text),A0
+                lea     read_1st_text(pc),A0
                 bsr     print_line
 
                 movea.l a6,a0
@@ -50,10 +47,10 @@ init:           movea.l 4(SP),A6        ;Basepageadresse holen
                 clr.b   0(a1,d0.l)
                 
                 bsr     mkplis          ;ASCII-Datei auswerten
-                movea.l PCRB(btchbuf),a0
+                movea.l btchbuf(pc),a0
                 bsr     mfree
 
-                move.l  PCRB(buffer),d0
+                move.l  buffer(pc),d0
                 beq.s   exit
                 
                 bsr     reloc_it        ;TOS patchen...
@@ -67,7 +64,7 @@ exit1:          bsr     setlog0
                 bsr     closelog
                 tst.b   quiet
                 bne.s   quit
-                pea     PCRD(key_text)    ;Taste...
+                pea     key_text(pc)    ;Taste...
                 move.w  #9,-(SP)        ;Cconws
                 trap    #1              ;GEMDOS 9
                 addq.l  #6,SP
@@ -129,18 +126,18 @@ getargs6:
                 bsr       getfname
                 beq.s     getargs1
 getargs7:
-                lea.l     PCRD(bfname),a6
+                lea.l     bfname(pc),a6
 getargs8:
                 rts
 
 ****************************************
 
 openlog:        movem.l   d0/a0,-(a7)
-                move.b    PCRB(logflg),d0
+                move.b    logflg(pc),d0
                 beq.s     openlog1
-                lea.l     PCRD(logopen_txt),a0
+                lea.l     logopen_txt(pc),a0
                 bsr       print_line
-                lea.l     PCRD(logname),a0
+                lea.l     logname(pc),a0
                 bsr       fcreate
                 move.w    d0,loghdl
                 bpl.s     openlog1
@@ -149,12 +146,12 @@ openlog1:       movem.l   (a7)+,d0/a0
                 rts
 
 closelog:       movem.l   d0/a0,-(a7)
-                move.b    PCRB(logflg),d0
+                move.b    logflg(pc),d0
                 beq.s     closelg1
-                lea.l     PCRD(logclose_txt),a0
+                lea.l     logclose_txt(pc),a0
                 bsr       print_line
-                lea.l     PCRD(logname),a0
-                move.w    PCRB(loghdl),d0
+                lea.l     logname(pc),a0
+                move.w    loghdl(pc),d0
                 bsr       fclose
 closelg1:       movem.l   (a7)+,d0/a0
                 rts
@@ -168,7 +165,7 @@ setlog0:        clr.b     dolog
 
 logline:
                 movem.l   d0-d7/a0-a6,-(a7)
-                move.b    PCRB(dolog),d0
+                move.b    dolog(pc),d0
                 beq.s     logline3
                 moveq.l   #0,d0
                 movea.l   a0,a1
@@ -178,7 +175,7 @@ logline1:       tst.b     (a1)+
                 bra.s     logline1
 logline2:       pea.l     (a0)
                 move.l    d0,-(a7)
-                move.w    PCRB(loghdl),-(a7)
+                move.w    loghdl(pc),-(a7)
                 move.w    #$0040,-(a7)
                 trap      #1
                 lea.l     12(a7),a7
@@ -187,7 +184,7 @@ logline3:       movem.l   (a7)+,d0-d7/a0-a6
 
 clrrange:
                 move.l    d0,-(a7)
-                move.b    PCRB(adrflg),d0
+                move.b    adrflg(pc),d0
                 beq.s     clrrang1
                 moveq.l   #0,d0
                 move.l    d0,rangelo
@@ -198,18 +195,18 @@ clrrang1:       move.l    (a7)+,d0
 
 prrange:        movem.l   d0-d1,-(a7)
                 clr.b     neednl
-                move.l    PCRB(rangelo),d0
-                move.l    PCRB(rangehi),d1
+                move.l    rangelo(pc),d0
+                move.l    rangehi(pc),d1
                 beq.s     prrange1
                 bsr       logrange
 prrange1:       movem.l   (a7)+,d0-d1
                 rts
 
 prcrange:       movem.l   d0-d1,-(a7)
-                move.b    PCRB(neednl),d0
+                move.b    neednl(pc),d0
                 beq.s     prcrang1
-                move.l    PCRB(rangelo),d0
-                move.l    PCRB(rangehi),d1
+                move.l    rangelo(pc),d0
+                move.l    rangehi(pc),d1
                 beq.s     prcrang1
                 bsr.s     logrange
                 moveq.l   #0,d0
@@ -219,10 +216,10 @@ prcrang1:       movem.l   (a7)+,d0-d1
                 rts
 
 ckrange:        movem.l   d0-d3/a0,-(a7)
-                move.b    PCRB(neednl),d2
+                move.b    neednl(pc),d2
                 beq.s     ckrange4
                 add.l     d1,d0
-                movem.l   PCRB(rangelo),d2-d3
+                movem.l   rangelo(pc),d2-d3
                 tst.l     d3
                 beq.s     ckrange2
                 cmp.l     d3,d1
@@ -248,24 +245,24 @@ ckrange4:       movem.l   (a7)+,d0-d3/a0
                 rts
 
 logrange:       movem.l   d0-d1/a0,-(a7)
-                lea.l     PCRD(log_patch),a0
+                lea.l     log_patch(pc),a0
                 bsr       print_line
                 bsr       hex_out
                 neg.l     d0
                 add.l     d1,d0
                 subq.l    #1,d0
                 beq.s     lograng1
-                lea.l     PCRD(log_hyphen),a0
+                lea.l     log_hyphen(pc),a0
                 bsr       print_line
                 move.l    d1,d0
                 bsr       hex_out
-lograng1:       lea.l     PCRD(lf_text),a0
+lograng1:       lea.l     lf_text(pc),a0
                 bsr       print_line
                 movem.l   (a7)+,d0-d1/a0
                 rts
 
 clradr:         move.l    d0,-(a7)
-                move.b    PCRB(adrflg),d0
+                move.b    adrflg(pc),d0
                 beq.s     clradr1
                 clr.l     lastadr
                 move.b    #1,neednl
@@ -274,36 +271,36 @@ clradr1:        move.l    (a7)+,d0
 
 lognl:          movem.l   d0/a0,-(a7)
                 clr.b     neednl
-                move.l    PCRB(lastadr),d0
+                move.l    lastadr(pc),d0
                 beq.s     lognl1
-                lea.l     PCRD(lf_text),a0
+                lea.l     lf_text(pc),a0
                 bsr       print_line
 lognl1:         movem.l   (a7)+,d0/a0
                 rts
 
 logadr:         movem.l   d0-d1/a0,-(a7)
-                move.b    PCRB(neednl),d1
+                move.b    neednl(pc),d1
                 beq.s     logadr3
-                move.l    PCRB(lastadr),d1
+                move.l    lastadr(pc),d1
                 bne.s     logadr1
-                lea.l     PCRD(log_reloc),a0
+                lea.l     log_reloc(pc),a0
                 bsr       print_line
                 bra.s     logadr2
-logadr1:        lea.l     PCRD(comma_text),a0
+logadr1:        lea.l     comma_text(pc),a0
                 bsr       print_line
 logadr2:        bsr       hex_out
                 addq.l    #1,d1
                 and.b     #7,d1
                 move.l    d1,lastadr
                 bne.s     logadr3
-                lea.l     PCRD(lf_text),a0
+                lea.l     lf_text(pc),a0
                 bsr       print_line
 logadr3:        movem.l   (a7)+,d0-d1/a0
                 rts
 
 clradrx:
                 move.l    d0,-(a7)
-                move.b    PCRB(adrflg),d0
+                move.b    adrflg(pc),d0
                 beq.s     clradrx1
                 clr.l     lastadr
                 move.b    #1,neednl
@@ -313,30 +310,30 @@ clradrx1:       move.l    (a7)+,d0
 lognlx:
                 movem.l   d0/a0,-(a7)
                 clr.b     neednl
-                move.l    PCRB(lastadr),d0
+                move.l    lastadr(pc),d0
                 beq.s     lognlx1
-                lea.l     PCRD(lf_text),a0
+                lea.l     lf_text(pc),a0
                 bsr       print_line
 lognlx1:
                 movem.l   (a7)+,d0/a0
                 rts
 
 logcrc:         movem.l   d0-d1/a0,-(a7)
-                move.b    PCRB(neednl),d1
+                move.b    neednl(pc),d1
                 beq.s     logcrc3
-                move.l    PCRB(lastadr),d1
+                move.l    lastadr(pc),d1
                 bne.s     logcrc1
-                lea.l     PCRD(log_crc),a0
+                lea.l     log_crc(pc),a0
                 bsr       print_line
                 bra.s     logcrc2
-logcrc1:        lea.l     PCRD(comma_text),a0
+logcrc1:        lea.l     comma_text(pc),a0
                 bsr       print_line
 logcrc2:        bsr       hex_out
                 addq.l    #1,d1
                 and.b     #$07,d1
                 move.l    d1,lastadr
                 bne.s     logcrc3
-                lea.l     PCRD(lf_text),a0
+                lea.l     lf_text(pc),a0
                 bsr       print_line
 logcrc3:        movem.l   (a7)+,d0-d1/a0
                 rts
@@ -347,10 +344,10 @@ logcrc3:        movem.l   (a7)+,d0-d1/a0
 *    output_format.l: Anzahl der zu speichernden Teildateien
 *    width.l        : Breite des TOS
 
-save_tos:       move.l  PCRB(output_format),D2 ;D2 = Anzahl der Files
+save_tos:       move.l  output_format(pc),D2 ;D2 = Anzahl der Files
                 beq     savtos_end      ;kein File? Ja! =>
                 
-                lea     PCRD(write_tos),A0 ;'Schreibe TOS'
+                lea     write_tos(pc),A0 ;'Schreibe TOS'
                 bsr     print_line      ;ausgeben
 
                 cmp.l   #32,D2          ;Zu viele Files?
@@ -359,8 +356,8 @@ save_tos:       move.l  PCRB(output_format),D2 ;D2 = Anzahl der Files
                 bne.s   savtos1         ;Nein! =>
 
                 bsr     get_length      ;TOS in einem Stueck abspeichern
-                lea     PCRD(fname),A0
-                movea.l PCRB(buffer),a1
+                lea     fname(pc),A0
+                movea.l buffer(pc),a1
                 bra     write_file
 
 savtos1:        bsr     get_width
@@ -402,14 +399,14 @@ savtos2:        lsr.w     #1,d1
 
 savtos3:        asl.w   #2,D0             ;auf Longword-Offset
 
-                lea     PCRD(wx_tab),A5   ;Adresse der Extensiontabelle berechnen
-                move.l  PCRB(machine_type),d1
+                lea     wx_tab(pc),A5   ;Adresse der Extensiontabelle berechnen
+                move.l  machine_type(pc),d1
                 cmp.l   (a5)+,d1
                 bhi     error55
                 asl.l   #2,d1
                 movea.l 0(a5,d1.l),a5
                 movea.l 0(A5,D0.w),A5
-                movea.l PCRB(buffer),a6
+                movea.l buffer(pc),a6
 
                 moveq   #'0',D7         ;Nummer fuer TOS-Dateien
 
@@ -419,11 +416,11 @@ savtos4:        moveq.l #0,d1
 savtos4a:       move.l    d1,d0
                 asl.l     #2,d0
                 lea.l     0(a5,d0.l),a0
-                lea.l     PCRD(fname_ext),a1
+                lea.l     fname_ext(pc),a1
                 move.b    (a0)+,(a1)+
                 move.b    (a0)+,(a1)+
                 move.b    (a0)+,(a1)
-                cmp.l     PCRB(output_format),d3
+                cmp.l     output_format(pc),d3
                 beq.s     savtos5
                 tst.b     (a1)
                 bne       error56
@@ -433,14 +430,14 @@ savtos5:        lea     0(A6,D6.l),A2   ;Anfangsadresse berechnen
                 adda.l  d1,a2
                 movea.l a4,a3           ;Zwischenspeicher fuer File
 
-                lea.l     PCRD(space_text),a0
+                lea.l     space_text(pc),a0
                 bsr       print_line
                 bsr       get_reloc_adr
                 move.l    a2,d0
                 sub.l     a6,d0
                 add.l     a0,d0
                 bsr       hex_out
-                lea.l     PCRD(colon_text),a0
+                lea.l     colon_text(pc),a0
                 bsr       print_line
 
                 move.l  D4,D0
@@ -453,7 +450,7 @@ savtos6:        move.b  (A2),(A3)+      ;TOS in Zwischenspeicher kopieren
                 add.l   D4,D5           ;Laenge aufsummieren
 
                 move.l  d4,d0
-                lea     PCRD(fname),A0    ;File schreiben
+                lea     fname(pc),A0    ;File schreiben
                 movea.l a4,a1
                 bsr     write_file
 
@@ -475,36 +472,36 @@ savtos8:        sub.l   D3,D2           ;schon alle Files?
 savtos_end:     rts
 
 mkplis:         bsr     clrrange
-                move.l  PCRB(btchbuf),A6
+                move.l  btchbuf(pc),A6
                 
                 move.w    #$002A,-(a7) /* Tgetdate */
                 trap      #1
                 addq.l    #2,a7
-                lea.l     PCRD(datevar),a0
+                lea.l     datevar(pc),a0
                 bsr       write_var
                 move.l    d0,d1
                 moveq.l   #31,d0
                 and.l     d1,d0
-                lea.l     PCRD(dayvar),a0
+                lea.l     dayvar(pc),a0
                 bsr       write_var
                 lsr.l     #5,d1
                 moveq.l   #15,d0
                 and.l     d1,d0
-                lea.l     PCRD(monthvar),a0
+                lea.l     monthvar(pc),a0
                 bsr       write_var
                 lsr.l     #4,d1
                 moveq.l   #127,d0
                 and.l     d1,d0
                 add.w     #1980,d0
-                lea.l     PCRD(yearvar),a0
+                lea.l     yearvar(pc),a0
                 bsr       write_var
 
                 moveq   #0,D0           ;'CRC' erzeugen und auf 0 setzen
-                lea.l   PCRD(crcvar),a0
+                lea.l   crcvar(pc),a0
                 bsr     write_var
 
                 moveq.l   #0,d0
-                lea.l     PCRD(countries),a0
+                lea.l     countries(pc),a0
 wrctry0:
                 tst.w     (a0)
                 beq.s     wrctry1
@@ -565,12 +562,12 @@ mkplis1a:       cmp.b   #'.',d0
 * Patches auswerten
 
 mkplis3:        bsr     get_term        ;Patchoffset holen
-                cmp.l   PCRB(max_length),d0
+                cmp.l   max_length(pc),d0
                 bcs.s   mkplis4
                 bsr       get_base        ;TOS-Basisadresse holen
                 sub.l     a0,d0
                 bcs       error1
-                cmp.l     PCRB(max_length),d0
+                cmp.l     max_length(pc),d0
                 bcc       error1
 mkplis4:        move.l    d0,d6
                 bsr       skip_space
@@ -591,16 +588,16 @@ mkplis5d:       cmpi.b    #'|',d0          ;Flag setzen
                 addq.l    #1,a6
 
 mkplis5x: 
-                move.l    PCRB(current_adr),d5
+                move.l    current_adr(pc),d5
                 move.l    d6,current_adr
 
                 bsr       skip_space
                 bne       error0
-                movea.l   PCRB(buffer),a0
+                movea.l   buffer(pc),a0
                 move.l    a0,d0
                 beq       error3
                 adda.l    d6,a0
-                move.l    PCRB(max_length),d0
+                move.l    max_length(pc),d0
                 sub.l     d6,d0
                 bsr       read_patches
                 bmi       error27
@@ -618,13 +615,13 @@ mkplis5x:
 * Relocausnahmen auswerten
 
 mkplis11:       addq.l  #1,A6
-                lea     PCRB(ptchtab),A0 ;Ausnahmentabellenende suchen
+                lea     ptchtab(pc),A0 ;Ausnahmentabellenende suchen
                 movea.l a0,a2
                 lea.l   1024*4(a2),a2
 mkplis12:       tst.l   (A0)+
                 bne.s   mkplis12
                 subq.l  #4,A0
-                lea     PCRB(ptchtab2),A1 ;Feldausnahmentabellenende suchen
+                lea     ptchtab2(pc),A1 ;Feldausnahmentabellenende suchen
                 movea.l a1,a3
                 lea.l   256*2*4(a3),a3
 mkpli12a:       tst.l   (A1)
@@ -692,7 +689,7 @@ mkplis14:       addq.l  #1,A6
                 bsr.s   mkplis16
                 bsr.s   mkplis16
                 bsr.s   mkplis16
-                move.l  PCRB(buffer),A0 ;Adresse des Datums im TOS
+                move.l  buffer(pc),A0 ;Adresse des Datums im TOS
                 move.l  a0,d0
                 beq     error3
                 cmp.l   24(A0),D1       ;Ist es gleich dem angegebenen?
@@ -705,7 +702,7 @@ mkpli14a:
                 bne     error2
                 addq.l  #1,a6
                 bsr     get_term
-                move.l  PCRB(buffer),A0
+                move.l  buffer(pc),A0
                 move.w  28(a0),d1
                 asr.b   #1,d1
                 ext.w   d1
@@ -735,7 +732,7 @@ mkplis17:       addq.l  #1,A6
 ****************************************
 * TOS aus ROM lesen
 
-                lea     PCRD(read_rom_text),A0
+                lea     read_rom_text(pc),A0
                 bsr     print_line
 
                 bsr     get_base        ;TOS-Basisadresse und
@@ -757,7 +754,7 @@ mkplis18:       move.l  (A1)+,(A0)+     ;TOS kopieren
 * TOS von Disk lesen
 
 mkplis19:       bsr     prcrange
-                lea     PCRD(read_tos),A0
+                lea     read_tos(pc),A0
                 bsr     print_line
 
                 bsr     get_length
@@ -804,7 +801,7 @@ mkplis22:       bsr     skip_space      ;Ist Relozieradresse angegeben?
 mkpli22a:       bsr     get_base
                 move.l  a0,d0
 
-mkpli22b:       lea.l   PCRD(relocvar),a0
+mkpli22b:       lea.l   relocvar(pc),a0
                 bsr     write_var
                 clr.l     machine_type
                 bsr       skip_space
@@ -813,7 +810,7 @@ mkpli22b:       lea.l   PCRD(relocvar),a0
                 bne       error2
                 bsr       skip_space
                 bne       error0
-                lea.l     PCRD(mach_tab),a1
+                lea.l     mach_tab(pc),a1
 mkpli22h:
                 moveq.l   #15,d0
                 movea.l   a6,a0
@@ -840,7 +837,7 @@ mkpli22e:
                 movea.l   a0,a6
                 move.l    (a1)+,d0
                 move.l    d0,machine_type
-                cmp.l     PCRD(wx_tab),d0
+                cmp.l     wx_tab(pc),d0
                 bls       mkplis2
                 bra       error55
 mkpli22f:
@@ -860,7 +857,7 @@ mkpli22g:
 mkplis23:       addq.l  #1,A6
                 bsr       prcrange
 
-                lea     PCRD(path_text),A0
+                lea     path_text(pc),A0
                 bsr     print_line
 
                 bsr     getfilename
@@ -874,7 +871,7 @@ mkplis23:       addq.l  #1,A6
                 addq.l  #6,SP
                 movem.l (a7)+,d0-d7/a0-a6
 
-                lea     PCRD(path_end_text),A0
+                lea     path_end_text(pc),A0
                 bsr     print_line
                 bra     mkplis2
 
@@ -888,7 +885,7 @@ mkplis25:       tst.l   if_count        ;noch eine offener _IF-Befehl?
                 bne     error40         ;Ja! =>
                 tst.l   sel_count       ;noch eine offener _SELECT-Befehl?
                 bne     error46         ;Ja! =>
-                move.w  PCRB(filenr),d0 ;Ende des 2. Batchfile?
+                move.w  filenr(pc),d0 ;Ende des 2. Batchfile?
                 bne.s   mkpli25a        ;Ja! =>
                 bsr     prrange
                 rts
@@ -897,7 +894,7 @@ mkplis25:       tst.l   if_count        ;noch eine offener _IF-Befehl?
 * Ende eines 2. Batchfiles
 
 mkpli25a:       bsr     prcrange
-                lea.l   PCRD(batch_end_text),a0
+                lea.l   batch_end_text(pc),a0
                 bsr     print_line
                 subq.w  #1,filenr       ;Flag fuer 2. Batchfile loeschen
                 move.l  (SP)+,sel_count
@@ -914,7 +911,7 @@ mkpli25a:       bsr     prcrange
 * CRC-Berechnung aktivieren
 
 mkplis26:       moveq   #1,D0           ;Eine 1 in Variable 'CRC' schreiben
-                lea.l   PCRD(crcvar),a0
+                lea.l   crcvar(pc),a0
                 bsr     write_var
                 bra     mkplis2
 
@@ -923,7 +920,7 @@ mkplis26:       moveq   #1,D0           ;Eine 1 in Variable 'CRC' schreiben
 * Focierte Relozierausnahmen auswerten
 
 mkplis27:       addq.l  #1,A6
-                lea     PCRB(forced_table),A0 ;Ausnahmentabellenende suchen
+                lea     forced_table(pc),A0 ;Ausnahmentabellenende suchen
 mkplis28:       tst.l   (A0)+
                 bne.s   mkplis28
                 subq.l  #4,A0
@@ -953,11 +950,11 @@ mkplis30:       addq.l  #1,A6
 mkplis31:       addq.l  #1,A6
                 bsr       prcrange
 
-                move.w  PCRB(filenr),d0
+                move.w  filenr(pc),d0
                 cmp.w   #256,d0
                 bcc     error19
 
-                lea     PCRD(read_2nd_text),A0
+                lea     read_2nd_text(pc),A0
                 bsr     print_line
                 bsr     getfilename
                 bne       error0
@@ -968,10 +965,10 @@ mkplis31:       addq.l  #1,A6
                 movea.l   a0,a1
                 move.l    a1,-(a7)        ;batch buffer,
                 move.l    a6,-(a7)        ;Textpointer,
-                move.l    PCRB(line),-(a7)  ;Zeilennummer und
-                move.l    PCRB(if_count),-(a7) ;Bedingungszaehler sichern
-                move.l    PCRB(sw_count),-(a7)
-                move.l    PCRB(sel_count),-(a7)
+                move.l    line(pc),-(a7)  ;Zeilennummer und
+                move.l    if_count(pc),-(a7) ;Bedingungszaehler sichern
+                move.l    sw_count(pc),-(a7)
+                move.l    sel_count(pc),-(a7)
                 addq.w    #1,filenr
                 movea.l   a5,a0
 
@@ -1004,7 +1001,7 @@ mkplis34:       bsr     get_vname
 ****************************************
 * ~ auf .VARIABLE setzen
 
-                move.l  PCRB(current_adr),d0
+                move.l  current_adr(pc),d0
                 bsr     write_var
                 bra     mkplis1
 
@@ -1022,7 +1019,7 @@ mkpli34a:       bsr     skip_space
                 beq     error51
                 bra     error54
 mkpli34b:
-                move.l    PCRB(sel_var),d7
+                move.l    sel_var(pc),d7
 mkpli34c:
                 bsr       skip_space
                 bne       error48
@@ -1046,7 +1043,7 @@ mkpli34d:       bsr       get_term
                 beq.s     mkpli34c
                 bra       error48
 mkpli34e:       move.l    d1,d0
-                cmp.l     PCRB(sel_var),d7
+                cmp.l     sel_var(pc),d7
                 beq.s     mkpli34g
                 bra       error48
 mkpli34f:       bsr       get_term
@@ -1115,7 +1112,7 @@ mkplis39:       move.b  (A6)+,D1
                 clr.b   -1(A6)          ;Textende mit Nullbyte abschliessen
                 bsr     print_line      ;Text ausgeben
                 bra.s   mkpli37c
-mkplis40:       lea     PCRD(lf_text),A0  ;Ausgabe mit LF/CR
+mkplis40:       lea     lf_text(pc),A0  ;Ausgabe mit LF/CR
                 bsr     print_line      ;abschliessen
                 bra     mkplis2
 
@@ -1124,7 +1121,7 @@ mkplis40:       lea     PCRD(lf_text),A0  ;Ausgabe mit LF/CR
 * Befehle, die mit _ anfangen, ausfuehren
 
 mkplis41:       addq.l  #1,A6
-                lea     PCRD(com_tab),A1  ;Befehlstabelle holen
+                lea     com_tab(pc),A1  ;Befehlstabelle holen
 mkplis42:       moveq   #15,D0          ;Ein Befehl ist 16 Bytes lang
                 movea.l A6,A0
 mkplis43:       move.b  (A0)+,D2        ;Zeichen holen
@@ -1142,7 +1139,7 @@ mkplis43:       move.b  (A0)+,D2        ;Zeichen holen
                 bpl.s   mkplis43        ;Nein! =>
 mkpli43b:       movea.l A0,A6           ;Textpointer aktualisieren
                 move.w  (a1)+,d1
-                move.w  PCRB(cond_flag),d0
+                move.w  cond_flag(pc),d0
                 beq.s   mkpli43a
                 cmp.w   d0,d1
                 bne     mkplis2
@@ -1230,7 +1227,7 @@ cmderror:       bsr       prcrange
                 cmpi.b  #'"',D0         ;ein " als Textanfang?
                 bne     error2          ;Nein! =>
 
-mkpli54a:       lea     PCRD(error_txt),A0 ;'Fehler: '
+mkpli54a:       lea     error_txt(pc),A0 ;'Fehler: '
                 bsr     print_line      ;ausgeben
 
                 movea.l A6,A0           ;Zeiger auf Textanfang setzen
@@ -1257,17 +1254,17 @@ cmdeven:        moveq.l #-1,d7
                 addq.l  #1,a6
 cmdeven0:       moveq.l #0,d7
                 bsr     get_term
-cmdeven1:       move.l  PCRB(current_adr),D1 ;akt. Adresse holen
+cmdeven1:       move.l  current_adr(pc),D1 ;akt. Adresse holen
                 btst    #0,D1           ;gerade?
                 beq     mkplis2         ;Ja! => fertig
                 move.l  d0,d2
                 addq.l  #1,d1           ;1 Byte soll geschrieben werden
-                cmp.l   PCRB(max_length),d1
+                cmp.l   max_length(pc),d1
                 bcc     error1
                 move.l  d1,current_adr
                 tst.l   d7
                 bne     mkplis2
-                movea.l PCRB(buffer),a0
+                movea.l buffer(pc),a0
                 move.l  a0,d7
                 beq     error3
                 move.b  d2,-1(a0,d1.l)        ;an akt. Adresse schreiben
@@ -1283,12 +1280,12 @@ cmdfill:
                 bmi       error0
                 bsr       get_term
                 move.l    d0,d6
-                cmp.l     PCRB(max_length),d6
+                cmp.l     max_length(pc),d6
                 bcs.s     cmdfill1
                 bsr       get_base
                 sub.l     a0,d6
                 bcs       error1
-                cmp.l     PCRB(max_length),d6
+                cmp.l     max_length(pc),d6
                 bcc       error1
 cmdfill1:
                 bsr       skip_space
@@ -1299,12 +1296,12 @@ cmdfill1:
                 bne       error0
                 bsr       get_term
                 move.l    d0,d7
-                cmp.l     PCRB(max_length),d7
+                cmp.l     max_length(pc),d7
                 bcs.s     cmdfill2
                 bsr       get_base
                 sub.l     a0,d7
                 bcs       error1
-                cmp.l     PCRB(max_length),d7
+                cmp.l     max_length(pc),d7
                 bcc       error1
 cmdfill2:
                 bsr       skip_space
@@ -1322,12 +1319,12 @@ cmdfill2:
                 bne.s     cmdfill3
                 addq.l    #1,a6
 cmdfill3:
-                move.l    PCRB(current_adr),d4
+                move.l    current_adr(pc),d4
                 move.l    d6,current_adr
                 bsr       skip_space
                 bmi       error0
                 moveq.l   #32,d0
-                lea.l     PCRB(number_puffer),a0
+                lea.l     number_puffer(pc),a0
                 bsr       read_patches
                 bmi       error30
                 tst.b     d1
@@ -1338,12 +1335,12 @@ cmdfil3a:
                 move.l    d5,d0
                 move.l    d6,d1
                 bsr       ckrange
-                movea.l   PCRB(buffer),a1
+                movea.l   buffer(pc),a1
                 move.l    a1,d7
                 beq       error3
                 adda.l    d6,a1
 cmdfill4:
-                lea.l     PCRB(number_puffer),a0
+                lea.l     number_puffer(pc),a0
                 move.l    d2,d1
 cmdfill5:
                 move.b    (a0)+,(a1)+
@@ -1458,7 +1455,7 @@ cmdselect:
                 bmi       error0
                 bsr       get_term
                 addq.l    #1,sel_count
-                move.l    PCRB(sel_var),-(a7)
+                move.l    sel_var(pc),-(a7)
                 move.w    #'SE',-(a7)
                 move.l    d0,sel_var
                 bra       mkplis2
@@ -1569,7 +1566,7 @@ readpa4:
                 beq.s     readpa1
                 bra       error2
 mkplis7a:
-                move.l    PCRB(variable),d0
+                move.l    variable(pc),d0
                 addq.l    #1,a6
                 move.b    (a6)+,d2
                 and.b     #$DF,d2
@@ -1624,7 +1621,7 @@ readpae1:
 * Routinen zum auslesen der Systemvariablen
 
 get_base:       move.l  d0,-(a7)
-                lea.l   PCRD(basevar),a0
+                lea.l   basevar(pc),a0
                 bsr     read_var        ;Variable auslesen
                 bne     error25         ;Nicht gefunden? Ja! =>
                 movea.l D0,A0           ;Variablenwert nach A0
@@ -1632,14 +1629,14 @@ get_base:       move.l  d0,-(a7)
                 rts
 
 get_length:     move.l  a0,-(a7)
-                lea.l   PCRD(lengthvar),a0
+                lea.l   lengthvar(pc),a0
                 bsr     read_var        ;Variable auslesen
                 bne     error25         ;Nicht gefunden? Ja! ?>
                 move.l  (a7)+,a0
                 rts
 
 get_reloc_adr:  move.l  d0,-(a7)
-                lea.l   PCRD(relocvar),a0
+                lea.l   relocvar(pc),a0
                 bsr     read_var        ;Variablenwert lesen
                 bne.s   getrel1         ;Nicht vorhanden? Ja! =>
                 movea.l D0,A0           ;Variablenwert nach A1
@@ -1650,7 +1647,7 @@ getrel1:        suba.l  A0,A0           ;Defaultwert (= nicht Relozieren) setzen
                 rts
 
 get_width:      move.l  a0,-(a7)
-                lea.l   PCRD(widthvar),a0
+                lea.l   widthvar(pc),a0
                 bsr     read_var        ;Variablewert lesen
                 bne     error25         ;Nicht vorhanden? Ja! =>
                 cmp.l   #8,D0           ;Wert OK?
@@ -1666,7 +1663,7 @@ getwid1:        move.l  (a7)+,a0
 
 
 get_crc:        move.l    a0,-(a7)
-                lea.l     PCRD(crcvar),a0
+                lea.l     crcvar(pc),a0
                 bsr       read_var
                 beq.s     get_crc1
                 moveq.l   #0,d0
@@ -1709,7 +1706,7 @@ getter4a:       move.b    6(a7),d0
 getter5:
                 move.w    (a7)+,d0
                 move.l    (a7)+,d1
-                lea.l     PCRD(optab),a0
+                lea.l     optab(pc),a0
                 move.w    d0,d4
                 and.w     #$007F,d4
                 cmp.w     (a0)+,d4
@@ -1931,12 +1928,12 @@ end_in:
 end_do:         move.l  D1,-(SP)        ;Ergebnis und
                 move.w  D3,-(SP)        ;2. Kommando wieder auf den Stack
 
-gettere:        subq.w  #1,D7           ;Eine Verschachtelung weniger
+                subq.w  #1,D7           ;Eine Verschachtelung weniger
                 bne     getter4a        ;Fertig? Nein! =>
                 tst.w   (a7)
                 bne     getter6
                 addq.l   #2,a7
-gettere2:       move.l  (SP)+,D0        ;Ergebnis und
+                move.l  (SP)+,D0        ;Ergebnis und
 gettere3:       movem.l (SP)+,D1-A1     ;Register wiederholen
                 rts
 
@@ -1949,7 +1946,7 @@ gettere3:       movem.l (SP)+,D1-A1     ;Register wiederholen
 get_number:     movem.l   d2/a0-a1,-(a7)
                 bsr     skip_space      ;Zeilenende?
                 bne.s     get_num4
-                lea.l     PCRD(upriority),a0
+                lea.l     upriority(pc),a0
 get_num1:
                 tst.b     (a0)
                 beq.s     get_num4
@@ -2024,7 +2021,7 @@ get_u1:         bne.s     get_uerr
                 bra.s     get_uend
 
 get_current:    addq.l  #1,A6           ;'#' uebespringen
-                move.l  PCRB(current_adr),D0 ;Aktuelle Adresse holen
+                move.l  current_adr(pc),D0 ;Aktuelle Adresse holen
 
 get_uend:       moveq   #0,D1
                 movem.l (a7)+,d1/a0
@@ -2132,7 +2129,7 @@ get_command:    movem.l   d0/d2/a0-a1,-(a7)
                 bsr     skip_space      ;Zeilenende?
                 bne.s   getcmd5         ;Ja! =>
 
-getcmd1:        lea     PCRD(priority),A0 ;Tabellenadresse holen
+getcmd1:        lea     priority(pc),A0 ;Tabellenadresse holen
 
 getcmd2:        tst.b  (a0)             ;Schon die ganze Tabelle verglichen?
                 beq.s   getcmd5         ;Ja =>
@@ -2247,8 +2244,8 @@ makev4:         move.l    d2,(a1)
 search_var:     movem.l   d0-d2/a2-a5,-(a7)
                 movea.l   a0,a2
                 move.l    #$00000400,d2
-                lea.l     PCRB(varname),a0
-                lea.l     PCRB(varvalue),a1
+                lea.l     varname(pc),a0
+                lea.l     varvalue(pc),a1
                 suba.l    a4,a4
 srchvar1:       move.w    #16,d1
                 movea.l   a2,a3
@@ -2311,7 +2308,7 @@ getvc2:         moveq.l   #-1,d1
 getfilename:
                 movem.l   d0-d1,-(a7)
                 moveq.l   #0,d0
-                lea.l     PCRB(filename),a0
+                lea.l     filename(pc),a0
 getfil1:        move.b    (a6)+,d1
                 beq.s     getfil2
                 cmp.b     #13,d1
@@ -2327,7 +2324,7 @@ getfil1:        move.b    (a6)+,d1
                 move.b    d1,(a0)+
                 addq.b    #1,d0
                 bpl.s     getfil1
-getfil3:        lea.l     PCRB(filename),a0
+getfil3:        lea.l     filename(pc),a0
                 moveq.l   #-1,d0
                 movem.l   (a7)+,d0-d1
                 rts
@@ -2335,7 +2332,7 @@ getfil2:        clr.b     (a0)
                 subq.l    #1,a6
                 tst.b     d0
                 beq.s     getfil3
-                lea.l     PCRB(filename),a0
+                lea.l     filename(pc),a0
                 moveq.l   #0,d0
                 movem.l   (a7)+,d0-d1
                 rts
@@ -2429,7 +2426,7 @@ rw_file:        move.l  A1,-(SP)        ;File-Puffer
                 clr.w   -(SP)           ;keine bes. Attribute
                 move.l  A0,-(SP)        ;Adresse des Filenames
 
-                lea     PCRD(space_text),A0
+                lea     space_text(pc),A0
                 bsr     print_line
                 movea.l (SP),A0
                 bsr     print_line
@@ -2462,7 +2459,7 @@ rw_file:        move.l  A1,-(SP)        ;File-Puffer
 ****************************************
 * rw_ok/rw_err: Routinen fuer erfolgreichen bzw. fehlerhaften Abschluss
 
-rw_ok:          lea     PCRD(ok_text),A0
+rw_ok:          lea     ok_text(pc),A0
                 bra     print_line
 
 rw_err1:        move.w  D7,-(SP)        ;Handle
@@ -2470,7 +2467,7 @@ rw_err1:        move.w  D7,-(SP)        ;Handle
                 trap    #1              ;GEMDOS 62
                 addq.l  #4,SP
 
-rw_err:         lea     PCRD(error_text),A0
+rw_err:         lea     error_text(pc),A0
                 bsr     print_line
                 move.w  #10,d7
                 bra     exit1
@@ -2529,11 +2526,11 @@ rl_err:         move.w  D7,-(SP)        ;Handle
                 trap    #1              ;GEMDOS 62
                 addq.l  #4,SP
 
-rl_err1:        lea     PCRD(space_text),A0
+rl_err1:        lea     space_text(pc),A0
                 bsr     print_line
                 movem.l (SP)+,D1-A6     ;Register wiederholen
                 bsr     print_line      ;Filename ausgeben
-                lea     PCRD(error_text),A0 ;'...Fehler'
+                lea     error_text(pc),A0 ;'...Fehler'
                 bsr     print_line      ;ausgeben
                 move.w  #10,d7
                 bra     exit1
@@ -2543,7 +2540,7 @@ rl_err1:        lea     PCRD(space_text),A0
 fcreate:
                 movem.l   d1-d7/a0-a6,-(a7)
                 movea.l   a0,a1
-                lea.l     PCRD(space_text),a0
+                lea.l     space_text(pc),a0
                 bsr       print_line
                 movea.l   a1,a0
                 bsr       print_line
@@ -2561,7 +2558,7 @@ fcreate:
 fclose:
                 movem.l   d1-d7/a0-a6,-(a7)
                 movea.l   a0,a1
-                lea.l     PCRD(space_text),a0
+                lea.l     space_text(pc),a0
                 bsr.s     print_line
                 movea.l   a1,a0
                 bsr.s     print_line
@@ -2569,10 +2566,10 @@ fclose:
                 move.w    #$003E,-(a7)
                 trap      #1
                 addq.l    #4,a7
-                lea.l     PCRD(ok_text),a0
+                lea.l     ok_text(pc),a0
                 tst.w     d0
                 bpl.s     fclose1
-                lea.l     PCRD(error_text),a0
+                lea.l     error_text(pc),a0
 fclose1:        bsr.s     print_line
                 movem.l   (a7)+,d1-d7/a0-a6
                 rts
@@ -2614,7 +2611,7 @@ print_line:     movem.l D0-A6,-(SP)
                 rts
 
 cconws:         movem.l   d0-d7/a0-a6,-(a7)
-                move.b    PCRB(quiet),d0
+                move.b    quiet(pc),d0
                 bne.s     cconws1
                 move.l    a0,-(a7)
                 move.w    #$0009,-(a7)
@@ -2653,7 +2650,7 @@ prline1:        move.w  #$000B,-(SP)    ;Cconis
                 cmp.b   #$1B,D0         ;War 'ESC' gedrueckt?
                 bne.s   prline2         ;Nein! => Zurueck
 
-abbruch:        pea     PCRD(abbruch_text)
+abbruch:        pea     abbruch_text(pc)
                 move.w  #9,-(SP)        ;Cconws
                 trap    #1              ;GEMDOS 9
                 addq.l  #6,SP
@@ -2667,7 +2664,7 @@ prline2:        movem.l (SP)+,D0-A6     ;Zurueck
 * print_point: Gibt einen Punkt aus
 
 print_point:    move.l  A0,-(SP)
-                lea     PCRD(point_text),A0
+                lea     point_text(pc),A0
                 bsr     print_line
                 movea.l (SP)+,A0
                 rts
@@ -2677,7 +2674,7 @@ print_point:    move.l  A0,-(SP)
 * IN D0.l: Auszugebende Zahl
 
 hex_out2:       movem.l D0/D6-A1,-(SP)
-                lea     PCRB(number_puffer),A0
+                lea     number_puffer(pc),A0
                 movea.l A0,A1
                 move.l  #$24303000,(A1)+
                 subq.l  #1,A1
@@ -2685,7 +2682,7 @@ hex_out2:       movem.l D0/D6-A1,-(SP)
                 bra.s   hex_out1
 
 hex_out:        movem.l D0/D6-A1,-(SP)
-                lea     PCRB(number_puffer),A0
+                lea     number_puffer(pc),A0
                 movea.l A0,A1
                 move.l  #$24303030,(A1)+
                 move.l  #$30303030,(A1)+
@@ -2710,10 +2707,10 @@ hex_out3:       lsr.l   #4,D0
 
 dez_out:        movem.l D0/D6-A2,-(SP)
 
-                lea     PCRB(number_puffer),A0
+                lea     number_puffer(pc),A0
                 lea     1(A0),A1
                 move.l  #$2e300000,(A0)
-                lea     PCRD(dez_tab),A2
+                lea     dez_tab(pc),A2
 dez_out0:       move.l  (A2)+,D7
                 beq.s   dez_out5
                 cmp.l   D7,D0
@@ -2737,7 +2734,7 @@ dez_out5:       bsr     print_line
                 rts
 
 bin_out:        movem.l   d0/d6-d7/a0-a1,-(a7)
-                lea.l     PCRB(number_puffer),a0
+                lea.l     number_puffer(pc),a0
                 movea.l   a0,a1
                 move.w    #$2530,(a1)+
                 moveq.l   #31,d7
@@ -2769,13 +2766,13 @@ reloc_it:       bsr       get_base
                 beq.s     relocite
                 move.l    a0,d0
 
-                lea     PCRD(reloc_text),A0
+                lea     reloc_text(pc),A0
                 bsr     print_line
                 bsr     hex_out
                 bsr     clradr
-                move.b  PCRB(neednl),d0
+                move.b  neednl(pc),d0
                 beq.s   reloc_i1
-                lea.l   PCRD(lf_text),a0
+                lea.l   lf_text(pc),a0
                 bsr     print_line
 reloc_i1:
 
@@ -2783,9 +2780,9 @@ reloc_i1:
                 bsr     reloc
                 bsr     forced_reloc
 
-                move.b  PCRB(neednl),d0
+                move.b  neednl(pc),d0
                 bne.s   reloc_i2
-                lea     PCRD(lf_text),A0
+                lea     lf_text(pc),A0
                 bsr     print_line
 reloc_i2:       bsr     lognl
 relocite:       rts
@@ -2793,7 +2790,7 @@ relocite:       rts
 ****************************************
 * optimize: Sortiert patch_table
 
-optimize:       lea     PCRB(ptchtab),A6
+optimize:       lea     ptchtab(pc),A6
                 movea.l A6,A0
 
                 tst.l   (A0)+
@@ -2812,7 +2809,7 @@ optim2:         move.l  D0,4(A0)
                 addq.l  #4,A0
                 bra.s   optim0
 
-optim3:         lea     PCRB(ptchtab2),A6
+optim3:         lea     ptchtab2(pc),A6
                 movea.l A6,A0
 
                 tst.l   (A0)
@@ -2878,14 +2875,14 @@ reloc:          bsr       get_base
                 bsr       get_length
                 adda.l    d0,a1
 
-                move.l  PCRB(buffer),A2
+                move.l  buffer(pc),A2
                 movea.l A2,A3
                 adda.l  d0,A3
 
                 movea.l A2,A4
 
-                lea     PCRB(ptchtab),A5
-                lea     PCRB(ptchtab2),A6
+                lea     ptchtab(pc),A5
+                lea     ptchtab2(pc),A6
 
                 move.w  #$F0FF,D2
                 move.w  #$6000,D3
@@ -2904,7 +2901,7 @@ reloc1:         move.w  (A4)+,D1
                 sub.w   A2,D0
                 bne.s   reloc2
 
-                move.b  PCRB(neednl),d0
+                move.b  neednl(pc),d0
                 bne.s   reloc2
                 bsr     print_point
 
@@ -2955,7 +2952,7 @@ reloc7:         sub.l   A0,D1
                 move.l  D1,-2(A4)
                 move.l  a4,d0
                 subq.l  #2,d0
-                sub.l   PCRB(buffer),d0
+                sub.l   buffer(pc),d0
                 bsr     logadr
 
 reloc3:         addq.l  #2,A4
@@ -2965,7 +2962,7 @@ reloc3:         addq.l  #2,A4
                 move.w  A4,D0
                 sub.w   A2,D0
                 bne.s   reloc1
-                move.b  PCRB(neednl),d0
+                move.b  neednl(pc),d0
                 bne     reloc1
                 bsr     print_point
                 bra     reloc1
@@ -2982,8 +2979,8 @@ forced_reloc:   bsr     get_base
                 move.l  a0,d1
                 bsr     get_reloc_adr
                 sub.l   a0,d1
-                move.l  PCRB(buffer),A0
-                lea     PCRB(forced_table),A3
+                move.l  buffer(pc),A0
+                lea     forced_table(pc),A3
 
 forcer1:        move.l  (A3)+,D0
                 beq.s   forcer2
@@ -3011,13 +3008,13 @@ crc_checksum:   movem.l   d0-d7/a0-a6,-(a7)
                 move.l  d0,d6
                 sub.l   D7,D6
 
-                lea     PCRD(cksum_text),A0
+                lea     cksum_text(pc),A0
                 bsr     print_line
 
                 bsr     clradrx
-                move.b  PCRB(neednl),d0
+                move.b  neednl(pc),d0
                 beq.s   crc0
-                lea.l   PCRD(lf_text),a0
+                lea.l   lf_text(pc),a0
                 bsr     print_line
 crc0:
                 lsr.l   #1,D7
@@ -3033,9 +3030,9 @@ crc1:           lsr.w   #1,D0
 crc2:           lsr.l   D1,D6
                 movea.l D6,A4
 
-                move.l  PCRB(buffer),A6
+                move.l  buffer(pc),A6
                 movea.l a6,a2
-                lea     PCRD(crctab),A1
+                lea     crctab(pc),A1
 
                 cmpa.w  #1,A3           ;Schrittweite 1?
                 bhi.s   crc5            ;Nein! =>
@@ -3070,7 +3067,7 @@ crc4:           move.b  (A0),D3
                 bsr       logcrc
                 add.l     a3,d0
                 bsr       logcrc
-                move.b    PCRB(neednl),d0
+                move.b    neednl(pc),d0
                 bne.s     crc4a
                 bsr     print_point
 crc4a:
@@ -3118,7 +3115,7 @@ crc8:           move.b  (A0)+,D3
                 subq.l  #2,D2           ;2 Durchgaenge fuer (A4) Bytes
                 bne.s   crc8
 
-                move.b  PCRB(neednl),d2
+                move.b  neednl(pc),d2
                 bne.s   crc8a
                 bsr     print_point
 crc8a:
@@ -3148,13 +3145,13 @@ crc8a:
                 bne.s   crc6
 
 crc9:           
-                move.b  PCRB(neednl),d0
+                move.b  neednl(pc),d0
                 bne.s   crc10
-                lea.l   PCRD(space_text),a0
+                lea.l   space_text(pc),a0
                 bsr     print_line
-                lea.l   PCRD(oparen_text),a0
+                lea.l   oparen_text(pc),a0
                 bsr     print_line
-                movea.l PCRB(buffer),a6
+                movea.l buffer(pc),a6
                 bsr     get_length
                 adda.l  d0,a6
                 bsr     get_width
@@ -3165,12 +3162,12 @@ crc13:          move.b  (a6)+,d0
                 bsr     hex_out2
                 subq.l  #1,d1
                 beq.s   crc12
-                lea.l   PCRD(comma_text),a0
+                lea.l   comma_text(pc),a0
                 bsr     print_line
                 bra.s   crc13
-crc12:          lea.l   PCRD(cparen_text),a0
+crc12:          lea.l   cparen_text(pc),a0
                 bsr     print_line
-                lea.l   PCRD(lf_text),a0
+                lea.l   lf_text(pc),a0
                 bsr     print_line
 crc10:          bsr     lognlx
 crc11:          movem.l (a7)+,d0-d7/a0-a6
@@ -3300,10 +3297,10 @@ error57:        moveq   #57,D0
 
 error_handler:  move.w  d0,d7
                 add.w   #100,d7
-                lea.l   PCRD(lf_text),a0
+                lea.l   lf_text(pc),a0
                 bsr     print_line
                 lsl.w   #2,d0
-                lea     PCRD(error_tab),A0
+                lea     error_tab(pc),A0
                 movea.l 0(A0,D0.w),A0
                 move.b  (A0)+,D6
 
@@ -3312,21 +3309,21 @@ user_error:
                 move.b  d6,d0
                 and.b   #1,D0
                 bne.s   errorh2
-                lea     PCRD(line_text),A0
+                lea     line_text(pc),A0
                 bsr     print_line
-                move.l  PCRB(line),D0
+                move.l  line(pc),D0
                 bsr     dez_out
                 moveq.l #0,d0
-                move.w  PCRB(filenr),d0
+                move.w  filenr(pc),d0
                 beq.s   errorh1
-                lea     PCRD(batch_text),A0
+                lea     batch_text(pc),A0
                 bsr     print_line
                 bsr     dez_out
-                lea     PCRD(batch2_text),A0
+                lea     batch2_text(pc),A0
                 bsr     print_line
-errorh1:        lea     PCRD(point_text),A0
+errorh1:        lea     point_text(pc),A0
                 bsr     print_line
-errorh2:        lea     PCRD(lf_text),A0
+errorh2:        lea     lf_text(pc),A0
                 bsr     print_line
                 move.b  d6,d0
                 and.b   #4,d0
@@ -3339,7 +3336,7 @@ errorh2:        lea     PCRD(lf_text),A0
                 moveq.l #1,d7
                 tst.b   quiet
                 bne     quit
-                lea     PCRD(key2_text),A0
+                lea     key2_text(pc),A0
                 bsr     print_line
                 move.w  #7,-(SP)
                 trap    #1
@@ -3521,13 +3518,13 @@ com_tab:
                 DC.B 'IFNDEF',0,0,0,0,0,0,0,0,0,0
                 DC.W 'IF'
                 dc.l cmdifndef
-if_txt:         DC.B 'IF',0,0,0,0,0,0,0,0,0,0,0,0,0,0
+                DC.B 'IF',0,0,0,0,0,0,0,0,0,0,0,0,0,0
                 DC.W 'IF'
                 DC.L cmdif
-else_txt:       DC.B 'ELSE',0,0,0,0,0,0,0,0,0,0,0,0
+                DC.B 'ELSE',0,0,0,0,0,0,0,0,0,0,0,0
                 DC.W 'IF'
                 DC.L cmdelse
-endif_txt:      DC.B 'ENDIF',0,0,0,0,0,0,0,0,0,0,0
+                DC.B 'ENDIF',0,0,0,0,0,0,0,0,0,0,0
                 DC.W 'IF'
                 DC.L cmdendif
                 DC.B 'SWITCH',0,0,0,0,0,0,0,0,0,0

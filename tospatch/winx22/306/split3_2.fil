@@ -6,7 +6,7 @@
 
 .BASE   = E00000
 .LENGTH =  80000
-.WIDTH  =    .32
+.WIDTH  =    .16
 
 >2
 <TOS.IMG
