@@ -46,7 +46,7 @@
 #define  FALSE	0
 
 
-#define SIZE_ERROR ((size_t)-1)
+#define SIZE_ERROR ((long)-1)
 #undef MIN
 #define MIN(a, b) ((a)<=(b) ? (a) : (b))
 #define BUFFER_SIZE (16*1024)
@@ -459,6 +459,13 @@ PP(long target_size;)
 		 */
 		banks = 4;
 		banksize = 0x1fffeL;
+	} else if (tos_version < 0x200 && target_size == 256L * 1024L)
+	{
+		/*
+		 * TOS 1.06/1.62: 2 128KB ROMs, without CRC
+		 */
+		banks = 0;
+		banksize = 0;
 	} else if (tos_version != 0 && target_size == 256L * 1024L)
 	{
 		/*

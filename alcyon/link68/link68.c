@@ -2434,7 +2434,7 @@ static VOID dumpsyms(NOTHING)
 	struct symtab *p;
 
 	printf("\nDUMP OF INTERNAL SYMBOL TABLE\n");
-	printf("BMTE = %lx, LMTE = %lx\n\n", (intptr_t)bmte, (intptr_t)lmte);
+	printf("BMTE = %lx, LMTE = %lx\n\n", (long)(intptr_t)bmte, (long)(intptr_t)lmte);
 
 	for (p = bmte; p != NULL && p != lmte; p = p->next)
 	{
@@ -2461,7 +2461,7 @@ static VOID dumpsyms(NOTHING)
 		printf("\n");
 		printf("VALUE:   %lx\n", p->vl1);
 		printf("OVERLAY: %d\n", p->ovlnum);
-		printf("INTERNAL ADDRESS = %lx, LINK = %lx\n\n", (intptr_t)p, (intptr_t)p->tlnk);
+		printf("INTERNAL ADDRESS = %lx, LINK = %lx\n\n", (long)(intptr_t)p, (long)(intptr_t)p->tlnk);
 	}
 	dmpflg = FALSE;
 }

@@ -25,9 +25,6 @@ c068$(EXEEXT): $(C068_OBJS)
 install: all
 	$(CP) $(PROGRAMS) $(BIN)
 
-install64: all
-	$(CP) $(PROGRAMS) ../../bin64
-
 check::
 	$(AM_V_at)for i in $(PROGRAMS); do cmp $$i.ttp ../bin/$$i.ttp; done
 

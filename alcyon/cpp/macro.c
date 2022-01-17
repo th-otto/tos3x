@@ -136,7 +136,7 @@ PP(const char *infile;)
 	} else if (strcmp(token, "__LINE") == 0 || strcmp(token, "__LINE__") == 0)
 	{
 		xline = literal ? lit_num : (filep == &filestack[0]) ? lineno : (filep - 1)->lineno;
-		itoa(xline, buf, 0);
+		myitoa(xline, buf, 0);
 		p = buf;
 		while (*p)
 			ppputl(*p++);
@@ -375,7 +375,7 @@ PP(int lnum;)
 
 	fputc('#', outbuf);
 	fputc(' ', outbuf);
-	itoa(lnum, tmp, 0);
+	myitoa(lnum, tmp, 0);
 	for (p = tmp; *p; p++)
 		fputc(*p == '\\' ? '/' : *p, outbuf);
 	fputc(' ', outbuf);

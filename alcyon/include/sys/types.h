@@ -36,9 +36,18 @@ typedef __SIZE_TYPE__ size_t;
 #ifdef __ALCYON__
 #define __SSIZE_TYPE__ int
 #else
+#ifdef __MINGW64__
+#define __SSIZE_TYPE__ long long int
+#else
+#ifdef __MINGW32__
+#define __SSIZE_TYPE__ int /* otherwise conflicts with corecrt.h */
+#else
 #define __SSIZE_TYPE__ long
 #endif
 #endif
+#endif
+#endif
+
 typedef __SSIZE_TYPE__ ssize_t;
 
 #ifndef __PTRDIFF_TYPE__

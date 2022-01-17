@@ -28,9 +28,6 @@ dist clean distclean::
 all::
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 
-install64::
-	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
-
 check::
 
 dist::

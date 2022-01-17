@@ -193,6 +193,6 @@ int domacro PROTO((int nd));
 extern int status;
 
 VOID cexit PROTO((NOTHING));
-VOID itoa PROTO((int n, char *s, int w));
+VOID myitoa PROTO((int n, char *s, int w));
 int strindex PROTO((const char *str, char chr));
 int atoi PROTO((const char *as));

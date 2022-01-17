@@ -39,6 +39,8 @@ int execvp PROTO((const char *file, char *const argv[]));
 int execvpe PROTO((const char *file, char *const argv[], char *const envp[]));
 
 char *getpass PROTO((const char *prompt));	/* get password function */
+#ifdef __ALCYON__ /* only used in lib; avoid redefinition otherwise */
 VOID swab PROTO((VOIDPTR from, VOIDPTR to, ssize_t n));
+#endif
 
 #endif /* __UNISTD_H__ */

@@ -20,9 +20,6 @@ cp68$(EXEEXT): ${OBJS}
 install: all
 	$(CP) $(PROGRAMS) $(BIN)
 
-install64: all
-	$(CP) $(PROGRAMS) ../../bin64
-
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR2)/$(subdir)
 	$(CP) -a $(EXTRA_DIST2) $(top_srcdir)/$(DISTDIR2)/$(subdir)

@@ -113,7 +113,7 @@ PP(register int val;)
 
 /* ------------------------------------------------------------------------- */
 
-static VOID itoa(P(int) val, P(char *)str)
+static VOID myitoa(P(int) val, P(char *)str)
 PP(register int val;)
 PP(register char *str;)
 {
@@ -398,8 +398,8 @@ static BOOLEAN addinrange(NOTHING)
 				i = nxt_line + 7;
 			}
 			val = myatoi(in_buff + i);
-			itoa(val, numstr);
-			itoa(val + 2, numstr1);
+			myitoa(val, numstr);
+			myitoa(val + 2, numstr1);
 			if (strlen(numstr) != strlen(numstr1))
 				goto fail;
 			for (j = strlen(numstr1) - 1; j >= 0; --j)
@@ -1071,7 +1071,7 @@ static VOID mv2pea1(NOTHING)
 							{
 								ADDC('-');
 							}
-							itoa((int)val, out_buff + out_ind);
+							myitoa((int)val, out_buff + out_ind);
 							while ((out_ind + out_buff)[0] != 0)
 								++out_ind;
 							ADDC('(');
@@ -1177,8 +1177,8 @@ static BOOLEAN add4munch(NOTHING)
 				i = nxt_line + 7;
 			}
 			val = myatoi(in_buff + i);
-			itoa(val, numstr);
-			itoa(val + 4, numstr1);
+			myitoa(val, numstr);
+			myitoa(val + 4, numstr1);
 			if (strlen(numstr) != strlen(numstr1))
 				goto fail;
 			for (j = strlen(numstr1) - 1; j >= 0; --j)
@@ -1304,7 +1304,7 @@ static VOID mv2pea2(NOTHING)
 							{
 								ADDC('-');
 							}
-							itoa((int)val, out_buff + out_ind);
+							myitoa((int)val, out_buff + out_ind);
 							while ((out_ind + out_buff)[0] != 0)
 								++out_ind;
 							ADDC('(');

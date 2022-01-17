@@ -548,6 +548,7 @@ static VOID tmp2ar(NOTHING)
 		return;
 	}
 	fclose(tempfd);
+	tempfd = NULL;
 	if ((ifd = open(tempname, O_RDONLY|O_BINARY)) < 0)
 	{
 		fprintf(stderr, _("%s: failed to open %s\n"), program_name, tempname);
@@ -558,7 +559,7 @@ static VOID tmp2ar(NOTHING)
 	buff[0] = buff[1] = buff[2] = buff[3] = 0;
 	write(ofd, buff, 4);
 	close(ofd);
-	tempfd = fdopen(ifd, "rb");
+	close(ifd);
 }
 
 
@@ -645,7 +646,9 @@ PP(char **argv;)
 		fprintf(stderr, _("usage: %s [rdxtpvabi] [pos] archive file [file ...]\n"), program_name);
 		endit(0);
 	}
+#ifdef SIGHUP
 	signal(SIGHUP, endit);
+#endif
 	signal(SIGINT, endit);
 	ap = &argv[1];
 	p1 = *ap++;

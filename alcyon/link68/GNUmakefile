@@ -26,9 +26,6 @@ relmod$(EXEEXT): $(RELMOD_OBJS)
 install: all
 	$(CP) $(PROGRAMS) $(BIN)
 
-install64: all
-	$(CP) $(PROGRAMS) ../../bin64
-
 check::
 
 dist::

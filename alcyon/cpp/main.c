@@ -269,7 +269,7 @@ VOID cexit(NOTHING)
  * itoa - integer to ASCII conversion
  *      Converts integer to ASCII string, handles '-'.
  */
-VOID itoa(P(int) n, P(char *) s, P(int) w)
+VOID myitoa(P(int) n, P(char *) s, P(int) w)
 PP(int n;)									/* number to convert */
 PP(char *s;)								/* resulting string */
 PP(int w;)									/* minimum width of string */

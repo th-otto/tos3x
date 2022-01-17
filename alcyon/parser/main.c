@@ -14,6 +14,10 @@
 #include <unistd.h>
 #include "../include/stdarg.h"
 
+#ifdef __MINGW32__
+typedef void (*sighandler_t)(int sig);
+#endif
+
 
 /*
  *	ALCYON C Compiler for the Motorola 68000 - Parser
@@ -232,8 +236,12 @@ PP(char **argv;)							/* argument pointers */
 		usage();
 
 	signal(SIGINT, (sighandler_t)cleanup);
+#ifdef SIGQUIT
 	signal(SIGQUIT, (sighandler_t)cleanup);
+#endif
+#ifdef SIGHUP
 	signal(SIGHUP, (sighandler_t)cleanup);
+#endif
 	signal(SIGTERM, (sighandler_t)cleanup);
 
 	argv++;
