@@ -68,11 +68,11 @@ maps:
 	$(RM) glue/*.img glue/glue.*
 
 dosdir::
-	for i in $(SUBDIRS) lib; do $(MKDIR_P) $(DOSDIR)/$$i; done
+	for i in $(SUBDIRS) lib bin/tos; do $(MKDIR_P) $(DOSDIR)/$$i; done
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 	$(CP) -a $(EXTRA_DIST1) $(DOSDIR)
 	$(CP) -a -r include $(DOSDIR)
-	$(CP) -a -r bin $(DOSDIR)
+	$(CP) -a -r bin/tos $(DOSDIR)/bin
 	$(CP) -a -r aes/rsc $(DOSDIR)/aes
 	$(CP) -a -r desk/rsc $(DOSDIR)/desk
 	$(CP) -a lib/*.o lib/*.a lib/*.ndx lib/as68symb.dat $(DOSDIR)/lib
@@ -82,7 +82,6 @@ dist::
 	$(CP) -a $(EXTRA_DIST1) $(EXTRA_DIST2) $(DISTDIR1)
 	$(CP) -a -r include $(DISTDIR1)
 	$(CP) -a -r bin $(DISTDIR1)
-	$(CP) -a -r bin64 $(DISTDIR1)
 	$(CP) -a -r aes/rsc $(DISTDIR1)/aes
 	$(CP) -a -r desk/rsc $(DISTDIR1)/desk
 	$(CP) -a lib/*.o lib/*.a lib/*.ndx lib/as68symb.dat $(DISTDIR1)/lib
