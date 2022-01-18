@@ -150,7 +150,7 @@
 
 /*
  * TP_17: LOCK_CLOCK: Lock Mega-ST clock
- * 
+ *
  * Prevents the hardware clock from being set by TOS.
  * A separate program is then needed to update it.
  */
@@ -160,7 +160,7 @@
 
 /*
  * TP_18: IGNORE_BLITTER: Ignore the blitter
- * 
+ *
  * The blitter will be disavowed and ignored by TOS
  * Should be set if PAK patches are also applied.
  */
@@ -170,7 +170,7 @@
 
 /*
  * TP_19: FASTPRN: Fast printer routines for the parallel port
- * 
+ *
  * Output, Input- and wait functions will be replaced.
  * Corresponds to FASTPRN.PRG from Ecki from the c't magazine.
  */
@@ -180,7 +180,7 @@
 
 /*
  * TP_20: TIMEOUT: Set printer timeout
- * 
+ *
  * Original value is 30 seconds. Minimum value is 5 seconds.
  * Does not work with the Atari Laser Printer.
  */
@@ -193,7 +193,7 @@
 
 /*
  * TP_21: SET_CONTERM: Set conterm
- * 
+ *
  * Bit 2 set: bell on CNTRL-G
  * Bit 1 set: key repeat on
  * Bit 0 set: key click on

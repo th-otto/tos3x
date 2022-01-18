@@ -2932,6 +2932,7 @@ doxconxx:
         movea.l   0(a0,d1.w),a0
         jmp       (a0)
 doxconret:
+retzero:
         moveq.l   #0,d0
         rts
 doxconstd:
