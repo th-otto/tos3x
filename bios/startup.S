@@ -958,7 +958,7 @@ nostedetect:
 
 #if TP_06 /* MSTE_CACHE_ON */
 		tst.b     (STEFlag).w
-		beq.s     nostec
+		bne.s     nostec
 		ori.b     #3,($ffff8e21).w /* turn on 16MHz and cache */
 nostec:
 #endif /* TP_06 */

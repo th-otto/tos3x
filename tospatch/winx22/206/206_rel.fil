@@ -212,8 +212,13 @@ _ENDIF
 .MSTE_CACHE_ON = 0  ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .MSTE_CACHE_ON
- 26C $56,F8,0A,03,00,38,00,03,8E,21,22,7C,00,00,CC,B2
- 27C $30,7C,0A,04,42,58,B3,C8,66,FA
+ 26C $56,F8,0A,03         ; sne        ($00000A03).w
+ ~   $00,38,00,03,8E,21   ; ori.b      #3,($FFFF8E21).w
+ ~   $22,7C,00,00,CC,B2   ; movea.l    #$0000CCB2,a1
+ ~   $30,7C,0A,04         ; movea.w    #$0A04,a0
+ ~   $42,58               ; clr.w      (a0)+
+ ~   $B3,C8               ; cmpa.l     a0,a1
+ ~   $66,FA               ; bne        $00000280
 _ENDIF
 
 ;*******************************************************************************
