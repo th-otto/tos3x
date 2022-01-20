@@ -20,12 +20,9 @@ hd_wait2:
                 dbra    d5,hd_wait1
 hd_wait3:
                 lea     hd_w18(pc),a0
-                bra.s   hd_wait5
+                bra.s   hd_wait6
 hd_wait4:
                 lea     hd_w17(pc),a0
-hd_wait5:
-                bsr.s   hd_wait6
-                rts
 
 hd_wait6:
                 move.l  a0,-(sp)

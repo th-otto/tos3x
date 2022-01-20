@@ -34,7 +34,7 @@ hd_w3:
             move.w    #9,-(a7) /* Cconws */
             trap      #1
             addq.l    #6,a7
-            bra.w     hd_w6
+            bra.s     hd_w6
 hd_w4:
             dbf       d6,hd_w2
             bra.s     hd_w1

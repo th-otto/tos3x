@@ -756,8 +756,10 @@ static int is_arrowed(NOTHING)
 	p = rlr;
 	if (p->p_qindex)
 		return *((int16_t *)p->p_qaddr) == WM_ARROWED;
+#if AESVERSION >= 0x200
 	if (p->p_msgtosend)
 		return p->p_message[0] == WM_ARROWED;
+#endif
 	return FALSE;
 }
 #endif /* TP_WINX | TP_48 */

@@ -1,0 +1,55 @@
+~ $48,e7,ff,fe               ; movem.l    d0-d7/a0-a6,-(a7)
+~ $48,7a,00,7e               ; pea.l      hd_w7(pc)
+~ $3f,3c,00,09               ; move.w     #9,-(a7) ; Cconws
+~ $4e,41                     ; trap       #1
+~ $5c,8f                     ; addq.l     #6,a7
+;hd_w1:
+~ $3c,3c,00,10               ; move.w     #$0010,d6
+;hd_w2:
+~ $3f,3c,ff,ff               ; move.w     #-1,-(a7)
+~ $3f,3c,00,0b               ; move.w     #11,-(a7) ; Kbshift
+~ $4e,4d                     ; trap       #13
+~ $58,8f                     ; addq.l     #4,a7
+~ $08,00,00,03               ; btst       #3,d0
+~ $66,00,00,4c               ; bne.w      hd_w5
+~ $3f,06                     ; move.w     d6,-(a7)
+~ $2f,38,04,c6               ; move.l     ($000004C6).w,-(a7)
+~ $3f,3c,00,01               ; move.w     #$0001,-(a7)
+~ $2f,3c,00,00,00,00         ; move.l     #$00000000,-(a7)
+~ $3f,3c,00,2a               ; move.w     #$002A,-(a7) ; DMAread
+~ $4e,4e                     ; trap       #14
+~ $4f,ef,00,0e               ; lea.l      14(a7),a7
+~ $4a,80                     ; tst.l      d0
+~ $66,26                     ; bne.s      hd_w4
+~ $20,78,04,c6               ; movea.l    ($000004C6).w,a0
+~ $30,3c,00,ff               ; move.w     #$00FF,d0
+~ $72,00                     ; moveq.l    #0,d1
+;hd_w3:
+~ $d2,58                     ; add.w      (a0)+,d1
+~ $51,c8,ff,fc               ; dbf        d0,hd_w3
+~ $b2,7c,12,34               ; cmp.w      #$1234,d1
+~ $66,10                     ; bne.s      hd_w4
+~ $48,7a,00,3c               ; pea.l      hd_w8(pc)
+~ $3f,3c,00,09               ; move.w     #9,-(a7) ; Cconws
+~ $4e,41                     ; trap       #1
+~ $5c,8f                     ; addq.l     #6,a7
+~ $60,00,00,14               ; bra.w      hd_w6
+;hd_w4:
+~ $51,ce,ff,a6               ; dbf        d6,hd_w2
+~ $60,9e                     ; bra.s      hd_w1
+;hd_w5:
+~ $48,7a,00,2e               ; pea.l      hd_w9(pc)
+~ $3f,3c,00,09               ; move.w     #9,-(a7) ; Cconws
+~ $4e,41                     ; trap       #1
+~ $5c,8f                     ; addq.l     #6,a7
+;hd_w6:
+~ $4c,df,7f,ff               ; movem.l    (a7)+,d0-d7/a0-a6
+~ $4e,75                     ; rts
+;hd_w7:
+~ $'Suche nach Festplatte',0
+;hd_w8:
+~ $' -> OK',0
+_EVEN $00
+;hd_w9:
+~ $' -> Abbruch',0
+_EVEN $00

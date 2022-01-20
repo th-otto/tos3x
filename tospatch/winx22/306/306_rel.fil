@@ -149,7 +149,7 @@ _ENDSWITCH
 
 .COLOR_60HZ = 0     ;60Hz beim Start in Farbe (Original: 2 w„re 50Hz).
 
-.VDIFIX = 0	    ; VDI-Patch: Neue v_opnvwk()-Routine, ersetzt VDIFIX
+.VDIFIX = 1	    ; VDI-Patch: Neue v_opnvwk()-Routine, ersetzt VDIFIX
 
 .M_SHRINK = 1       ;Beseitigt den Fehler, der beim einen Mshrink(0)-Aufruf die Memory-Listen
                     ;zerst”rte.
@@ -208,6 +208,8 @@ _ENDSWITCH
 .INFO_TXT = 0       ;Set a customized text in about dialog
 
 .NEW_KBD = 0        ;Replace keyboard tables
+
+.NEW_SZ = 0         ;Replace german sharp s
 
 .FUJI = 0           ;0: Kein neues Fuji einbinden.
                     ;1: modifiziertes Atarifuji mit PAK/3-Schriftzug von SE.

@@ -94,6 +94,20 @@
 #undef TP_67
 #undef TP_68
 #undef TP_69
+#undef TP_70
+#undef TP_71
+#undef TP_72
+#undef TP_73
+#undef TP_74
+#undef TP_75
+#undef TP_76
+#undef TP_77
+#undef TP_78
+#undef TP_79
+#undef TP_80
+#undef TP_81
+#undef TP_82
+#undef TP_83
 #undef TP_WINX
 
 #define TP_01 0
@@ -175,7 +189,21 @@
 #define TP_66 0
 #define TP_67 0
 #define TP_68 0
-#define TP_69 0
+#define TP_69 (((OS_COUNTRY == CTRY_SE) | (OS_COUNTRY == CTRY_CZ)) & (TOSVERSION < 0x162))
+#define TP_70 (((OS_COUNTRY == CTRY_SE) | (OS_COUNTRY == CTRY_CZ)) & (TOSVERSION < 0x162))
+#define TP_71 0
+#define TP_72 0
+#define TP_73 (((OS_COUNTRY == CTRY_SE) | (OS_COUNTRY == CTRY_CZ)) & (TOSVERSION < 0x162))
+#define TP_74 0
+#define TP_75 0
+#define TP_76 0
+#define TP_77 0
+#define TP_78 0
+#define TP_79 0
+#define TP_80 0
+#define TP_81 0
+#define TP_82 0
+#define TP_83 0
 #define TP_WINX 0
 
 #endif

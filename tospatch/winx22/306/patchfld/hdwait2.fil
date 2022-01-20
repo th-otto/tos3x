@@ -1,0 +1,18 @@
+~ $33,f9,.BASE+1E.l,82b6.L   ; move.w     $00E0001E,_date ; instruction that was patched out
+~ $2c,3c,.HD_WAITTIME*200.L  ; move.l     #(HD_WAITTIME*200),d6
+~ $bc,b8,04,ba               ; cmp.l      ($000004BA).w,d6
+~ $63,22                     ; bls.s      hd_wait2
+~ $dc,b8,04,ba               ; add.l      ($000004BA).w,d6
+;hd_wait1:
+~ $bc,b8,04,ba               ; cmp.l      ($000004BA).w,d6
+~ $63,18                     ; bls.s      hd_wait2
+~ $2f,3c,00,01,00,02         ; move.l     #$00010002,-(a7)
+~ $4e,4d                     ; trap       #13
+~ $58,8f                     ; addq.l     #4,a7
+~ $4a,40                     ; tst.w      d0
+~ $67,ec                     ; beq.s      hd_wait1
+~ $2f,3c,00,02,00,02         ; move.l     #$00020002,-(a7)
+~ $4e,4d                     ; trap       #13
+~ $58,8f                     ; addq.l     #4,a7
+;hd_wait2:
+~ $4e,75                     ; rts

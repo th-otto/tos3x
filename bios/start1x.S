@@ -837,7 +837,7 @@ biosinit:
 /* --- set the current system time and date */
         move.w    _os_dosdate,_date  /* use BIOS time as current time */
 #if (HD_WAIT == 1) | (HD_WAIT == 2) | (HD_WAIT == 3)
-		jsr       hd_wait
+		bsr       hd_wait
 #endif
         jsr       ngetdt             /* set current time to RTC time */
         bcc.s     clockdone

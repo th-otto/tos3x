@@ -422,6 +422,10 @@
  * TP_37_10: floppy2
  * TP_37_11: new program
  * TP_37_12: harddisk
+ *
+ * These must set to a filename of an 32x32 monochrome ICO
+ * (windows icon) file in the icons folder.
+ * example: #define TP_37_1 "../tospatch/data/icons/floppy.ico"
  */
 
 /*
@@ -434,6 +438,10 @@
  * TP_38_5: Thin cross
  * TP_38_6: Thick cross
  * TP_38_7: Outline cross
+ *
+ * These must set to a filename of an 16x16 monochrome CUR
+ * (windows cursor) file in the mform folder.
+ * example: #define TP_38_0 "../tospatch/data/mform/mform0.cur"
  */
 
 /*
@@ -441,6 +449,10 @@
  * TP_39_1: Note icon
  * TP_39_2: Question icon
  * TP_39_3: Stop icon
+ *
+ * These must set to a filename of an 32x32 monochrome ICO
+ * (windows icon) file in the icons folder.
+ * example: #define TP_39_1 "../tospatch/data/icons/note.ico"
  */
 
 /*
@@ -652,7 +664,7 @@
 /*
  * TP_63: Magnum
  *
- * Adjust floppy routines vor Magnum Fastram
+ * Adjust floppy routines for Magnum Fastram
  *
  * Needed for Magnum-ST with 16MB-SIMM in computers with 1MB ST-RAM,
  * when the low 3 MB ($100000 - $3fffff) should be used

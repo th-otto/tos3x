@@ -42,6 +42,24 @@ _IF .NEW_KBD
 _ENDIF
 
 ;*******************************************************************************
+;* MRF: (angepasst von MH)
+;* û in ein IBM-· wandeln. Damit wird kein Pesata, sondern ein Beta-"·"
+;* ausgegeben. Dies sieht nun mal auf den meisten Nadeldruckern besser aus.
+;* Dies wirkt natÅrlich nur bei Texten, welche mit dem gepachten TOS eingegeben
+;* werden. In den alten steht ja noch das û drin.
+;*
+;* HUCKY: Macht Probleme bei Script... Deswegen als Kommentar
+
+_IF .NEW_SZ
+_SWITCH .NATION
+_CASE .FRG:
+ .KBD_TAB+00C $E1
+ .KBD_TAB+10C $E1
+_ENDSWITCH
+_ENDIF
+
+
+;*******************************************************************************
 ;* MH:
 ;* Atari-Anfangsfuji ersetzen. Originalfuji ist ATARI.ABS.
 ;* [ALL]

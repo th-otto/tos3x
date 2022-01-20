@@ -549,7 +549,7 @@ _ENDIF
 ;*
 ;* >>> Achtung: DirektÅbernahme aus TOS 1.04. Also: Erst testen!
 
-.VDI_FIX = 0        ;1: Patch einbinden, 0: Patch nicht einbinden
+.VDI_FIX = 1        ;1: Patch einbinden, 0: Patch nicht einbinden
 
 _IF .VDI_FIX        ;(.122)
  9FD0 vdi.abs
@@ -642,7 +642,7 @@ _ENDSWITCH
 
 .NEW_KBD = 0        ;1: Neue Keyboardtabelle einbinden, 0: Nichts einbinden
 
-.KBD_TAB = 32BB6
+.KBD_TAB = 32BB6+.d2
 
 _IF .NEW_KBD
  -keyboard                   ;Dsetpath("KEYBOARD")
@@ -661,11 +661,12 @@ _ENDIF
 
 .NEW_SZ = 0         ;1: Patch einbinden, 0: Patch nicht einbinden
 
-.KBD_TAB = 32BB6
-
 _IF .NEW_SZ
+_SWITCH .NATION
+_CASE .FRG:
  .KBD_TAB+00C $E1
  .KBD_TAB+10C $E1
+_ENDSWITCH
 _ENDIF
 
 
@@ -822,10 +823,11 @@ _ENDIF
 ;* >>> Achtung: Der Harddisk-Waiter funktioniert nur mit einer Platte. Zudem
 ;*              bin ich nur sicher, daû er mit meiner Megafile 60 funktioniert.
 
-.HD_WAIT0 = 0       ;1: Patch einbinden, 0: Patch nicht einbinden
+.HD_WAIT1 = 0       ;1: Patch einbinden, 0: Patch nicht einbinden
+.HD_WAITTIME = .10  ;Wartezeit in s
 
-_IF .HD_WAIT0
- .HD_WAIT:      ~ hdwait.abs                ;LÑnge 222 Bytes
+_IF .HD_WAIT1
+ .HD_WAIT:      +hdwait1.fil                 ;LÑnge 222 Bytes
  !.HD_WAIT+8 .. ~                            ;in diesem Patch nicht relozieren
 
  72E            |$4E,B9,.HD_WAIT+.BASE.L     ;Jsr zum Harddisk-Waiter
@@ -841,13 +843,12 @@ _ENDIF
 ;* Zeitspanne festlegt, ab der Systemstart noch die Tests ausgefÅhrt
 ;* werden, die entsprechende Zeit eintrÑgt.
 
-.HD_WAIT1 = 0       ;1: Patch  einbinden, 0: Patch nicht einbinden
-.TIME     = .12     ;Wartezeit in s (max. 327s !!!).
+.HD_WAIT2 = 0       ;1: Patch  einbinden, 0: Patch nicht einbinden
+.HD_WAITTIME = .12  ;Wartezeit in s (max. 327s !!!).
 
-_IF .HD_WAIT1
- .HD_WAIT:      ~ hdwait1.abs               ;LÑnge 60 Bytes
+_IF .HD_WAIT2
+ .HD_WAIT:      +hdwait2.fil                 ;LÑnge 60 Bytes
  !.HD_WAIT+8 .. ~                            ;in diesem Patch nicht relozieren
- .HD_WAIT+A     |$.TIME*.200.W               ;Wartezeit eintragen
 
  72E            |$4E,B9,.HD_WAIT+.BASE.L     ;Jsr zum Harddisk-Waiter
  734            |$4E,71,4E,71                ;NOP's
@@ -857,20 +858,15 @@ _ENDIF
 ;* MH:
 ;* Hardisk-Waiter von EWK
 
-.HD_WAIT2 = 0       ;1: Patch  einbinden, 0: Patch nicht einbinden
-.TIME = .30         ;max. Wartezeit in s (max. 99s !!!)
-.DEVICE = 0         ;DMA-Device, auf das gewartet werden soll (0-7)
+.HD_WAIT3 = 0       ;1: Patch  einbinden, 0: Patch nicht einbinden
+.HD_WAITTIME = .30  ;max. Wartezeit in s (max. 99s !!!)
+.HD_WAITDEVICE = 0  ;DMA-Device, auf das gewartet werden soll (0-7)
 
-_IF .HD_WAIT2
- .HD_WAIT:      ~ hdwait2.abs               ;LÑnge 350 Bytes
+_IF .HD_WAIT3
+ .HD_WAIT:      +hdwait3.fil                 ;LÑnge 350 Bytes
  !.HD_WAIT+8 .. ~                            ;in diesem Patch nicht relozieren
 
- .HD_WAIT+E     |$4E,71                      ;Nur fÅr RAM-TOS und >=2 Harddisks
-
- .HD_WAIT+1F    |$.TIME.B                    ;Wartezeit eintragen
- .HD_WAIT+86    |$.DEVICE*20.W               ;Device eintragen
- .HD_WAIT+92    |$.DEVICE*20.W
- .HD_WAIT+10A   |$.DEVICE+30.B
+ ;.HD_WAIT+E     |$4E,71                      ;Nur fÅr RAM-TOS und >=2 Harddisks
 
  72E            |$4E,B9,.HD_WAIT+.BASE.L     ;Jsr zum Harddisk-Waiter
  734            |$4E,71,4E,71                ;Rest mit NOP's auffÅllen
@@ -878,7 +874,7 @@ _ENDIF
 
 ;*******************************************************************************
 ;* Gerhard Huber: (implementiert von MH)
-;* NovaPatch. Ansteurung der Novakarten schon beim Booten.
+;* NovaPatch. Ansteuerung der Novakarten schon beim Booten.
 ;* FÅr alle Nova ausser Typ 2 und 6.
 
 .NOVA = 0           ;1: Patch einbinden, 0: Patch nicht einbinden
