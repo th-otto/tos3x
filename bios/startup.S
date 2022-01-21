@@ -458,7 +458,7 @@ initpal2:
         clr.b     (v_bas_m).w
 
 #if TP_03 /* RAMRESET */
-#include "../tospatch/ramres.S"
+#include "../tospatch/patches/ramres.S"
 #else
 
 #if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400) & !TP_50
@@ -1685,28 +1685,28 @@ logodone:
 /* 96x86 image of atari logo displayed at boot time */
 atarilogo:
 #if TP_33 == 0
-#include "../tospatch/fuji/atari.S"
+#include "../tospatch/data/fuji/atari.S"
 #endif
 #if TP_33 == 1
-#include "../tospatch/fuji/pak3.S"
+#include "../tospatch/data/fuji/pak3.S"
 #endif
 #if TP_33 == 2
-#include "../tospatch/fuji/gib_dos.S"
+#include "../tospatch/data/fuji/gib_dos.S"
 #endif
 #if TP_33 == 3
-#include "../tospatch/fuji/gt_tos.S"
+#include "../tospatch/data/fuji/gt_tos.S"
 #endif
 #if TP_33 == 4
-#include "../tospatch/fuji/schegale.S"
+#include "../tospatch/data/fuji/schegale.S"
 #endif
 #if TP_33 == 5
-#include "../tospatch/fuji/ufp_logo.S"
+#include "../tospatch/data/fuji/ufp_logo.S"
 #endif
 #if TP_33 == 6
-#include "../tospatch/fuji/x.S"
+#include "../tospatch/data/fuji/x.S"
 #endif
 #if TP_33 == 7
-#include "../tospatch/fuji/intl_out.S"
+#include "../tospatch/data/fuji/intl_out.S"
 #endif
 
 		text
@@ -2150,7 +2150,7 @@ dmadone:
 #endif
 
 #if TP_14 /* CT_HD */
-#include "../tospatch/ct_hd1.S"
+#include "../tospatch/patches/ct_hd1.S"
 #else
         clr.w     (_bootpref).w
 confdone:
@@ -4298,20 +4298,20 @@ esetsm2:
         text
 
 #if HD_WAIT == 1
-#include "../tospatch/hdwait1.S"
+#include "../tospatch/patches/hdwait1.S"
 #endif
 #if HD_WAIT == 2
-#include "../tospatch/hdwait2.S"
+#include "../tospatch/patches/hdwait2.S"
 #endif
 #if HD_WAIT == 3
-#include "../tospatch/hdwait3.S"
+#include "../tospatch/patches/hdwait3.S"
 #endif
 #if HD_WAIT == 4
-#include "../tospatch/hdwait4.S"
+#include "../tospatch/patches/hdwait4.S"
 #endif
 
 #if TP_46 /* NOVA */
-#include "../tospatch/nova.S"
+#include "../tospatch/patches/nova.S"
 #endif
 
 		bss

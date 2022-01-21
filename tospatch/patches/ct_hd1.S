@@ -1,4 +1,5 @@
                 clr.w   (_bootpref).w
+confdone:
 
                 clr.w   -(sp)
                 movea.l (_dskbufp).w,a0

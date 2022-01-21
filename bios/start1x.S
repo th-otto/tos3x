@@ -321,7 +321,7 @@ initpal2:
         clr.b     ABSW(v_bas_m)
 
 #if TP_03 /* RAMRESET */
-#include "../tospatch/ramres.S"
+#include "../tospatch/patches/ramres.S"
 #else
 
 #if (TOSVERSION >= 0x300) & (TOSVERSION < 0x400) & !TP_50
@@ -2677,20 +2677,20 @@ noblitter:
 		text
 
 #if HD_WAIT == 1
-#include "../tospatch/hdwait1.S"
+#include "../tospatch/patches/hdwait1.S"
 #endif
 #if HD_WAIT == 2
-#include "../tospatch/hdwait2.S"
+#include "../tospatch/patches/hdwait2.S"
 #endif
 #if HD_WAIT == 3
-#include "../tospatch/hdwait3.S"
+#include "../tospatch/patches/hdwait3.S"
 #endif
 #if HD_WAIT == 4
-#include "../tospatch/hdwait4.S"
+#include "../tospatch/patches/hdwait4.S"
 #endif
 
 #if TP_46 /* NOVA */
-#include "../tospatch/nova.S"
+#include "../tospatch/patches/nova.S"
 #endif
 
 		bss

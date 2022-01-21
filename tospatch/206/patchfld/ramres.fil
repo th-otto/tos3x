@@ -7,6 +7,7 @@
 ~ $21,fc,00,01,00,00,82,00   ; move.l     #$00010000,($FFFF8200).w
 ~ $4d,fa,00,8c               ; lea.l      $00E00154(pc),a6
 ~ $60,00,0a,e6               ; bra        $00E00BB2
+;E000CE:
 ~ $46,fc,27,00               ; move.w     #$2700,sr
 ~ $42,b8,04,20               ; clr.l      ($00000420).w
 ~ $20,78,00,04               ; movea.l    ($00000004).w,a0
@@ -23,15 +24,15 @@
 ;E000F6:
 ~ $47,fa,ff,08               ; lea.l      $00E00000(pc),a3
 ~ $43,f9,329b6+.d2+.BASE.L   ; lea.l      rom_crc_table,a1
-~ $7e,01                     ; moveq.l    #1,d7
+~ $7e,.WIDTH/8-1             ; moveq.l    #1,d7 ; number of banks for CRC calculation
 ;E00102:
-~ $24,3c,00,01,ff,fe         ; move.l     #$0001FFFE,d2
+~ $24,3c,(.LENGTH-.WIDTH/4)/(.WIDTH/8).L     ; move.l     #$0001FFFE,d2
 ~ $70,00                     ; moveq.l    #0,d0
 ~ $7a,00                     ; moveq.l    #0,d5
 ~ $20,4b                     ; movea.l    a3,a0
 ;E0010E:
 ~ $36,10                     ; move.w     (a0),d3
-~ $54,88                     ; addq.l     #2,a0
+~ $((.WIDTH/8)!A!7)*2!O!50,88                     ; addq.l     #2,a0
 ~ $3c,05                     ; move.w     d5,d6
 ~ $e1,4d                     ; lsl.w      #8,d5
 ~ $e0,4e                     ; lsr.w      #8,d6
@@ -50,7 +51,7 @@
 ~ $66,d8                     ; bne.s      $00E0010E
 ~ $32,10                     ; move.w     (a0),d1
 ~ $1c,01                     ; move.b     d1,d6
-~ $54,88                     ; addq.l     #2,a0
+~ $((.WIDTH/8)!A!7)*2!O!50,88                     ; addq.l     #2,a0
 ~ $12,18                     ; move.b     (a0)+,d1
 ~ $b0,41                     ; cmp.w      d1,d0
 ~ $66,06                     ; bne.s      $00E00148

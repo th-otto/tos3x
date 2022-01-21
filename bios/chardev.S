@@ -236,7 +236,7 @@ bcon3i2:
 
 #if TP_19 /* FASTPRN */
 
-#include "../tospatch/fastprn.S"
+#include "../tospatch/patches/fastprn.S"
 
 #else
 

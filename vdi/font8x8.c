@@ -110,18 +110,18 @@ int16_t const off_8x8[257] =
 int16_t const dat_8x8[1024] =
 {
 #if TP_35_8 == 0
-#include "../tospatch/fonts/8x8/system.c"
+#include "../tospatch/data/fonts/8x8/system.c"
 #endif
 #if TP_35_8 == 1
-#include "../tospatch/fonts/8x8/tospatch.c"
+#include "../tospatch/data/fonts/8x8/tospatch.c"
 #endif
 #if TP_35_8 == 2
-#include "../tospatch/fonts/8x8/polish.c"
+#include "../tospatch/data/fonts/8x8/polish.c"
 #endif
 #if TP_35_8 == 3
-#include "../tospatch/fonts/8x8/czech.c"
+#include "../tospatch/data/fonts/8x8/czech.c"
 #endif
 #if TP_35_8 == 4
-#include "../tospatch/fonts/8x8/monaco.c"
+#include "../tospatch/data/fonts/8x8/monaco.c"
 #endif
 };

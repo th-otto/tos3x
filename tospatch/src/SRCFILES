@@ -1,0 +1,14 @@
+SRCS = \
+	tospatch.S \
+	loadtos.S \
+	romdump.c \
+	$(empty)
+
+EXTRA_DIST1 = \
+	Makefile \
+	SRCFILES \
+	$(empty)
+
+EXTRA_DIST2 = \
+	GNUmakefile \
+	$(empty)

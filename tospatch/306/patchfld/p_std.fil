@@ -82,8 +82,9 @@ _ENDIF
 
 _IF .RAMRESET !A! (.PAK = 0)
 
+D8
  _IF .RELOCADR>=1000000
-  D8 ramr_f2.abs         ;kein Konfigurationstest, TT-RAM-TOS nicht lîschen,
+  +ramr_f2.fil           ;kein Konfigurationstest, TT-RAM-TOS nicht lîschen,
                          ;Speicher ab $100 lîschen
                          ;Tastatur-Soft-Reset: Reset
                          ;Tastatur-Hard-Reset: CRC-Test/Speicher lîschen/Reset
@@ -91,27 +92,17 @@ _IF .RAMRESET !A! (.PAK = 0)
                          ;Falls beim CRC-Test ein Fehler auftritt,
                          ;wird das TOS aus dem Ram entfernt.
 
-  119 $.WIDTH/8-1.B      ;Parameter fÅr CRC Berechnung setzen
-  120 $(.LENGTH-.WIDTH/4)/(.WIDTH/8).L
-  128 $((.WIDTH/8)!A!7)*200!O!5088.W
-  142 $((.WIDTH/8)!A!7)*200!O!5088.W
-
   376A+.d1 $150-~.W   ;Key-Hardreset auf eigene Routine umbiegen
  _ENDIF
 
  _IF .RELOCADR<FA0000
-  D8 ramr_s2.abs         ;kein Konfigurationstest, ST-RAM-TOS nicht lîschen,
+  +ramr_s2.fil           ;kein Konfigurationstest, ST-RAM-TOS nicht lîschen,
                          ;Speicher ab $100 lîschen
                          ;Tastatur-Soft-Reset: Reset
                          ;Tastatur-Hard-Reset: CRC-Test/Speicher lîschen/Reset
                          ;Resetknopf         : CRC-Test/Reset
                          ;Falls beim CRC-Test ein Fehler auftritt,
                          ;wird das TOS aus dem Ram entfernt.
-
-  119 $.WIDTH/8-1.B      ;Parameter fÅr CRC Berechnung setzen
-  120 $(.LENGTH-.WIDTH/4)/(.WIDTH/8).L
-  128 $((.WIDTH/8)!A!7)*200!O!5088.W
-  142 $((.WIDTH/8)!A!7)*200!O!5088.W
 
   376A+.d1 $150-~.W   ;Key-Hardreset auf eigene Routine umbiegen
  _ENDIF

@@ -168,12 +168,7 @@ _IF .RAMRESET
                          ;Falls beim CRC-Test ein Fehler auftritt,
                          ;wird das TOS aus dem Ram entfernt.
 
- 101 $.WIDTH/8-1.B       ;Parameter fÅr die CRC-Berechnung setzen
- 104 $(.LENGTH-.WIDTH/4)/(.WIDTH/8).L
- 110 $((.WIDTH/8)!A!7)*200!O!5088.W
- 13A $((.WIDTH/8)!A!7)*200!O!5088.W
-
- 33C4+.d1 $CD0A-.d1.W    ;Key-Hardreset auf eigene Routine umbiegen
+ 33C4+.d1 $CE-~.W        ;Key-Hardreset auf eigene Routine umbiegen
 _ENDIF 
 
 ;*******************************************************************************

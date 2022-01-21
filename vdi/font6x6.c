@@ -103,18 +103,18 @@ int16_t const off_6x6[257] =
 int16_t const dat_6x6[576] =
 {
 #if TP_35_6 == 0
-#include "../tospatch/fonts/6x6/system.c"
+#include "../tospatch/data/fonts/6x6/system.c"
 #endif
 #if TP_35_6 == 1
-#include "../tospatch/fonts/6x6/tospatch.c"
+#include "../tospatch/data/fonts/6x6/tospatch.c"
 #endif
 #if TP_35_6 == 2
-#include "../tospatch/fonts/6x6/polish.c"
+#include "../tospatch/data/fonts/6x6/polish.c"
 #endif
 #if TP_35_6 == 3
-#include "../tospatch/fonts/6x6/czech.c"
+#include "../tospatch/data/fonts/6x6/czech.c"
 #endif
 #if TP_35_6 == 4
-#include "../tospatch/fonts/6x6/monaco.c"
+#include "../tospatch/data/fonts/6x6/monaco.c"
 #endif
 };

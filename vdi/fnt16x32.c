@@ -90,10 +90,10 @@ int16_t const off_16x32[257] = {
 
 int16_t const dat_16x32[8192] = {
 #if TP_35_32 == 0
-#include "../tospatch/fonts/16x32/system.c"
+#include "../tospatch/data/fonts/16x32/system.c"
 #endif
 #if TP_35_32 == 4
-#include "../tospatch/fonts/16x32/monaco.c"
+#include "../tospatch/data/fonts/16x32/monaco.c"
 #endif
 };
 

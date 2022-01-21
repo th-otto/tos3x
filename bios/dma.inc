@@ -197,7 +197,11 @@ dodmaread:
         bsr       scsiread       /* it's an SCSI device */
         rts
 domdmar1:
+#if TP_14 /* CT_HD */
+	bsr.s     read_boot
+#else
         bsr       rcvacsi        /* it's an ACSI device */
+#endif
 #else
 #if TP_14 /* CT_HD */
 	bsr.s     read_boot
@@ -209,7 +213,7 @@ domdmar1:
 
 #if TP_14 /* CT_HD */
 
-#include "../tospatch/ct_hd2.S"
+#include "../tospatch/patches/ct_hd2.S"
 
 #else
 
