@@ -1,55 +1,155 @@
 ;***************************************************************************
 ;* Martin Osieka: (implementiert durch MH)
-;* Puffer fr NEWDESK.INF vergr”žern. Originalroutinen aus SHBUF 1.2!
+;* Puffer fr NEWDESK.INF vergr”žern. Originalroutinen aus SHBUF 1.3!
 ;* N„here Informationen siehe SHBUF.
 ;* Maximale Puffergr”že ist $7FFE => 32kB pro Puffer.
-;* Da es 2 Puffer gibt => MAXIMAL 64kB Speicherverbrauch.
-;* Die Puffergr”že muž in der Variablen .BUFFER stehen.
+;* Da es 2 Puffer gibt => maximal 64kB Speicherverbrauch.
+;* Die Puffergr”že muž in der Variablen .SHBUFSIZE stehen.
 
-_IF .BUFFER > 7FFE
-.BUFFER = 7FFE
+_IF .SHBUFSIZE > 7FFE
+.SHBUFSIZE = 7FFE
 _ENDIF
 
-17230 $4E,B9,00,E1,D1,A4
-1A818 BUF1.ABS
-1A828 $.BUFFER.L
-1A926 $.BUFFER.W
-1AA5C $.BUFFER.W
-1AA62 $4E,B9,00,E1,D1,A4
-1D182 BUF2.ABS
-1D184 $.BUFFER.W
-28446 BUF3.ABS
-28450 $.BUFFER.W
-28476 $.BUFFER.W
-284E6 $2E,B9,00,00,7B,A8
-284EE $.BUFFER.L
-28506 $.BUFFER.L
-28522 $2F,39,00,00,7B,A8
-2853A $D1,F9,00,00,7B,A8
-28544 $.BUFFER.W
-28546 $2F,39,00,00,7B,A8
-2858C $2E,B9,00,00,7B,A8
-28742 $.BUFFER.L
-2877C $2E,B9,00,00,7B,A8
-28786 $.BUFFER.W
-28C9C $.BUFFER.W
-28CB0 $2E,B9,00,00,7B,A8
-28CC4 $.BUFFER.W
-28CC6 $2F,39,00,00,7B,A8
-28D26 $2E,B9,00,00,7B,A8
-28DBC $2F,39,00,00,7B,A8
-2AC36 $2E,B9,00,00,7B,A8
-2AC40 $.BUFFER.W
-2AC4A $2E,B9,00,00,7B,A8
-2AC52 $.BUFFER.L
-2AC76 BUF4.ABS
-2AC8C $.BUFFER.W
-30550 $.BUFFER.L
-30578 $.BUFFER.W
-30588 $2F,39,00,00,7B,A8
-306C6 $.BUFFER.L
-306E2 $.BUFFER.W
-324DC $41,F9,00,E1,D1,A4
+ .ADR1    = 1D1A4+.d1
+ .ADR2    = 220FC+.d1
+
+.afile = 7ba8
+.D_s_save = 9458+219E
+
+17230+.d1
+~ $4E,B9,.ADR1+.BASE.L              ;JSR       .ADR1
+
+1A826+.d1
+~ $2e,bc,.SHBUFSIZE.L        ; move.l     #$00007FFE,(a7)
+~ $61,1a                     ; bsr.s      $00E1A848
+~ $23,c0,.D_s_save.L         ; move.l     d0,$0000B5F6
+~ $61,12                     ; bsr.s      $00E1A848
+~ $23,c0,.afile.L            ; move.l     d0,$00007BA8
+~ $61,0a                     ; bsr.s      $00E1A848
+~ $2d,40,ff,f8               ; move.l     d0,-8(a6)
+~ $42,45                     ; clr.w      d5
+~ $2f,00                     ; move.l     d0,-(a7)
+~ $60,06                     ; bra.s      $00E1A84E
+;E1A848:
+~ $4e,f9,.ADR2+.BASE.L       ; jmp        $00E220FC
+;E1A84E:
+
+1A926+.d1 $.SHBUFSIZE.W
+
+1AA5C+.d1 $.SHBUFSIZE.W
+
+1AA62+.d1 $4E,B9,.ADR1+.BASE.L    ;JSR       .ADR1
+
+1D182+.d2
+~ $30,3c,.SHBUFSIZE.W        ; move.w     #$7FFE,d0
+~ $32,2f,00,08               ; move.w     8(a7),d1
+~ $b2,7c,ff,ff               ; cmp.w      #$FFFF,d1
+~ $67,2c                     ; beq.s      $00E1D1BC
+~ $b0,41                     ; cmp.w      d1,d0
+~ $64,02                     ; bcc.s      $00E1D196
+~ $32,00                     ; move.w     d0,d1
+;E1D196:
+~ $30,01                     ; move.w     d1,d0
+~ $22,79,.D_s_save.L         ; movea.l    $0000B5F6,a1
+~ $20,6f,00,04               ; movea.l    4(a7),a0
+~ $60,14                     ; bra.s      $00E1D1B8
+;E1D1A4:
+~ $32,2f,00,08               ; move.w     8(a7),d1
+~ $20,79,.D_s_save.L         ; movea.l    $0000B5F6,a0
+~ $22,6f,0004                ; movea.l    4(a7),a1
+~ $70,01                     ; moveq.l    #1,d0
+~ $60,02                     ; bra.s      $00E1D1B8
+;E1D1B6:
+~ $10,d9                     ; move.b     (a1)+,(a0)+
+;E1D1B8:
+~ $51,c9,fffc                ; dbf        d1,$00E1D1B6
+;E1D1BC:
+~ $4e,75                     ; rts
+~ $4e,71                     ; nop
+~ $4e,71                     ; nop
+
+2844e+.d1
+~ $3e,bc,.SHBUFSIZE.W        ; move.w     #$7FFE,(a7)
+~ $2f,39,.afile.L            ; move.l     $00007BA8,-(a7)
+28460+.d1
+~ $4e,71                     ; nop
+~ $20,79,.afile.L            ; movea.l    $00007BA8,a0
+~ $2e,88                     ; move.l     a0,(a7)
+~ $0c,10,00,23               ; cmpi.b     #$23,(a0)
+~ $67,00,00,d2               ; beq        $00E28542
+~ $42,67                     ; clr.w      -(a7)
+~ $3f,3c,.SHBUFSIZE.W        ; move.w     #$7FFE,-(a7)
+
+284E6+.d1
+~ $2E,B9,.afile.L                   ;MOVE.L    afile,(A7)
+~ $2F,3C,.SHBUFSIZE.L               ;MOVE.L    #.SHBUFSIZE,-(A7)
+
+28506+.d1 $.SHBUFSIZE.L
+
+28522+.d1 $2F,39,.afile.L           ;MOVE.L    afile,-(A7)
+
+2853A+.d1 $D1,F9,.afile.L           ;ADDA.L    afile,A0
+
+28544+.d1
+~ $.SHBUFSIZE.W
+~ $2F,39,.afile.L                   ;MOVE.L    afile,-(A7)
+
+2858C+.d1
+~ $2E,B9,.afile.L                   ;MOVE.L    afile,(A7)
+
+28742+.d1 $.SHBUFSIZE.L
+
+2877C+.d1
+~ $2E,B9,.afile.L                   ;MOVE.L    afile,(A7)
+
+28786+.d1 $.SHBUFSIZE.W
+
+28C9C+.d1 $.SHBUFSIZE.W
+
+28CB0+.d1
+~ $2E,B9,.afile.L                   ;MOVE.L    afile,(A7)
+
+28CC4+.d1
+~ $.SHBUFSIZE.W
+~ $2F,39,.afile.L                   ;MOVE.L    afile,-(A7)
+
+28D26+.d1
+~ $2E,B9,.afile.L                   ;MOVE.L    afile,(A7)
+
+28DBC+.d1
+~ $2F,39,.afile.L                   ;MOVE.L    afile,-(A7)
+
+2AC36+.d1
+~ $2E,B9,.afile.L                   ;MOVE.L    afile,(A7)
+
+2AC40+.d1 $.SHBUFSIZE.W
+
+2AC4A+.d1
+~ $2E,B9,.afile.L                   ;MOVE.L    $95F2,(A7)
+~ $2F,3C,.SHBUFSIZE.L               ;MOVE.L    #.SHBUFSIZE,-(A7)
+
+2AC76+.d1
+~ $20,79,.afile.L                   ;MOVEA.L   afile,A0
+~ $0C,10,00,23                      ;CMPI.B    #$23,(A0)
+~ $66,06                            ;BNE.S     6(PC)
+~ $0C,28,00,61,00,01                ;CMPI.B    #$61,1(A0)
+~ $66,36                            ;BNE.S     $00E2ACC0
+~ $3E,BC,.SHBUFSIZE.W               ;MOVE.W    #$7FFE,(A7)
+~ $2F,39,.afile.L                   ;MOVE.L    afile,-(A7)
+
+30550+.d1 $.SHBUFSIZE.L
+
+30578+.d1 $.SHBUFSIZE.W
+
+30588+.d1
+~ $2F,39,.afile.L                   ;MOVE.L    afile,-(A7)
+
+306C6+.d1 $.SHBUFSIZE.L
+
+306E2+.d1 $.SHBUFSIZE.W
+
+324DC+.d1
+~ $41,F9,.ADR1+.BASE.L              ;LEA       .ADR1,A0
 
 ;***************************************************************************
 ;* Ende des SHBUF-Patches

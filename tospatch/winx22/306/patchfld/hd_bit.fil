@@ -20,7 +20,7 @@
 ;.HD_PORTB:
 ~ $40,e7                        ; move.w    sr,-(a7)
 ~ $00,7c,07,00                  ; ori.w     #$0700,sr
-~ $11,fc,00,0e, 8800            ; move.b    #$0E,($FFFF8800).w
+~ $11,fc,00,0e,88,00            ; move.b    #$0E,($FFFF8800).w
 ~ $12,38,88,00                  ; move.b    ($FFFF8800).w,d1
 _IF .HD_BIT = 6
 ~ $c2,3c,00,bf                  ; and.b     #$BF,d1

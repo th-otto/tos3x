@@ -1,9 +1,9 @@
 ;******************************************************************************
 ; P_STD4.FIL	Patchfile fÅr TOS 3.06 fÅr PAK/3:  Standard TOS-Patches
-;		Benutzte Variablen:  .BOOT_TIME .FASTPRN .PRINT_TIMEOUT
+;		Benutzte Variablen:  .BOOT_TIME .FASTPRN .PRNTIMEOUT
 ;		énderungen ggÅ. _STANDRD.FIL aus PATCHFLD.SE:
 ;		 - .BOOT_TIME hinzu (wird in MAIN gesetzt)
-;		 - .PRINT_TIMEOUT hinzu (wird in MAIN gesetzt)
+;		 - .PRNTIMEOUT hinzu (wird in MAIN gesetzt)
 ;		 - Autoexec-Stackpointer und Memory-Listen-Patch
 ;		   jetzt auch im englischen TOS
 ;		 - LÑnge des Wartebalkens entsprechend .BOOT_TIME
@@ -219,7 +219,7 @@ _ELSE
 _ENDIF
 
 ! ~ , ~ + 2                ; Damit Zeit nicht reloziert wird
-~ $ .PRINT_TIMEOUT*.200.l      ; Zeit in Sekunden * 200  (Orig. $00001770)
+~ $ .PRNTIMEOUT*.200.l     ; Zeit in Sekunden * 200  (Orig. $00001770)
 
 ;******************************************************************************
 ;	Standard-Patches

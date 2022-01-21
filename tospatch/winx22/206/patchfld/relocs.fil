@@ -8,6 +8,7 @@ _SWITCH .NATION
   _CASE .USA:
     .d1 = -5A
     .d2 = -30
+    .d3 = .d2
     .INFDATA = 3699C
     .RSC_TAB = 36A38
     .TOSINFO_OFS = 1A8B
@@ -16,6 +17,7 @@ _SWITCH .NATION
   _CASE .FRG:
     .d1 = 0
     .d2 = 0
+    .d3 = .d2
     .INFDATA = 36A28       ; desktop filenames
     .RSC_TAB = 36AC4       ; start of resource data
     .TOSINFO_OFS = 1A4A    ; offset to tos-info-dialog from RSC_TAB
@@ -24,6 +26,7 @@ _SWITCH .NATION
   _CASE .FRA:
     .d1 = 1E
     .d2 = 1E
+    .d3 = .d2
     .INFDATA = 36A62
     .RSC_TAB = 36AFE
     .TOSINFO_OFS = 1B71
@@ -32,6 +35,7 @@ _SWITCH .NATION
   _CASE .UK:
     .d1 = -5A
     .d2 = -30
+    .d3 = .d2
     .INFDATA = 3699C
     .RSC_TAB = 36A38
     .TOSINFO_OFS = 1A8B
@@ -40,6 +44,7 @@ _SWITCH .NATION
   _CASE .SPA:
     .d1 = 2C
     .d2 = 2C
+    .d3 = .d2
     .INFDATA = 36A3A
     .RSC_TAB = 36A62
     .TOSINFO_OFS = 1B5A
@@ -48,6 +53,7 @@ _SWITCH .NATION
   _CASE .ITA:
     .d1 = 0E
     .d2 = 0E
+    .d3 = .d2
     .INFDATA = 36A0E
     .RSC_TAB = 36AAA
     .TOSINFO_OFS = 1B31
@@ -56,6 +62,7 @@ _SWITCH .NATION
   _CASE .SWE:
     .d1 = 1E
     .d2 = 1E
+    .d3 = .d2
     .INFDATA = 369C6
     .RSC_TAB = 36A62
     .TOSINFO_OFS = 1A6E
@@ -64,6 +71,7 @@ _SWITCH .NATION
   _CASE .SWF:
     .d1 = 2C
     .d2 = 2C
+    .d3 = .d2
     .INFDATA = 36A70
     .RSC_TAB = 36B0C
     .TOSINFO_OFS = 1B71
@@ -72,6 +80,7 @@ _SWITCH .NATION
   _CASE .SWG:
     .d1 = 2C
     .d2 = 2C
+    .d3 = .d2
     .INFDATA = 36A54
     .RSC_TAB = 36AF0
     .TOSINFO_OFS = 1A4A
@@ -80,6 +89,7 @@ _SWITCH .NATION
   _CASE .CZE:
     .d1 = 0
     .d2 = 0
+    .d3 = .d2
     .INFDATA = 36A28       ; desktop filenames
     .RSC_TAB = 36AC4       ; start of resource data
     .TOSINFO_OFS = 1A4A    ; offset to tos-info-dialog from RSC_TAB

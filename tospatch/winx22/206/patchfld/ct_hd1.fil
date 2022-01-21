@@ -1,0 +1,24 @@
+~ $42,78,0a,00               ; clr.w      ($00000A00).w
+~ $42,67                     ; clr.w      -(a7)
+~ $20,78,04,c6               ; movea.l    ($000004C6).w,a0
+~ $48,68,02,00               ; pea.l      512(a0)
+~ $3f,3c,00,01               ; move.w     #$0001,-(a7)
+~ $42,a7                     ; clr.l      -(a7)
+~ $4e,b9,00,e0,15,e6         ; jsr        _dmaread
+~ $4f,ef,00,0c               ; lea.l      12(a7),a7
+~ $4a,80                     ; tst.l      d0
+~ $66,1e                     ; bne.s      ctend
+~ $20,78,04,c6               ; movea.l    ($000004C6).w,a0
+~ $41,e8,02,00               ; lea.l      512(a0),a0
+~ $22,48                     ; movea.l    a0,a1
+~ $70,00                     ; moveq.l    #0,d0
+~ $32,3c,01,ff               ; move.w     #$01FF,d1
+;ctcheck1:
+~ $d0,59                     ; add.w      (a1)+,d0
+~ $51,c9,ff,fc               ; dbf        d1,ctcheck1
+~ $0c,40,12,34               ; cmpi.w     #$1234,d0
+~ $66,02                     ; bne.s      ctend
+~ $4e,d0                     ; jmp        (a0)
+;ctend:
+~ $4e,75                     ; rts
+_FILL ~,~+42,$4e71.W

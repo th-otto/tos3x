@@ -95,58 +95,52 @@ _ENDIF
 ;*******************************************************************************
 ;* HUCKY: (angepasst von MH)
 ;* Nun noch was, wenn man das Aussehen vom AES ver„ndern will...
-;* [FRG]
+;* [ALL]
 ;*
 ;* >>> BESSER: Gleich neue RSC-Files schaffen und einbinden (s.u.)!
 ;* >>> Dieser Patch funktioniert nicht mit dem RSC/NEWDESK-Patch.
 
-_SWITCH .NATION
-_CASE .FRG: .IMAGES1 = 3F4E6
-            .IMAGES2 = 420D8
-_DEFAULT: .ICONS = 0
-_ENDSWITCH
-
 _IF .ICONS
- -icons                            ;Dsetpath("ICONS")
- ;* die Images sind jeweils 128 Bytes (4 Byte / Zeile => 32 Zeilen) lang.
- .IMAGES1        TOSFACES.IMG      ;Ausrufezeichen
- .IMAGES1+ 80                      ;Fragezeichen in form_alert()
- .IMAGES1+100                      ;Stopschild
- .IMAGES2                          ;i-Image in der Infobox des Desktops
- ;* die folgenden Icons bestehen jeweils auf 256 Bytes. 128 Bytes Maske,
- ;* 128 Byte Image fr das Icon
- .IMAGES2+ 80   TOSICONS.IMG       ;Diskettenlaufwerk
- .IMAGES2+180   ORDNER.IMG         ;Ordner
- .IMAGES2+280                      ;Papierkorb
- .IMAGES2+380   PROGRAMM.IMG       ;Programm
- .IMAGES2+480   DATEI.IMG          ;Datei
- -..                               ;Dsetpath("..") (Ein Verzeichnis zurck)
+ .IMAGES1 = .RSC_TAB+7B8
+ .IMAGES2 = .RSC_TAB+33AA
+
+ -icons                         ;Dsetpath("ICONS\")
+ ;* the images are each 128 bytes long (4 bytes = one line => 32 lines).
+ .IMAGES1     note.img          ;Exclamation mark
+ .IMAGES1+ 80 quest.img         ;Question mark in form_alert()
+ .IMAGES1+100 stop.img          ;Stop sign
+ .IMAGES2     atari.img         ;Atari image in the info box of the desktop
+ ;* the following icons are 256 bytes each. 128 bytes for the mask, and 128 byte
+ ;* for the data
+ .IMAGES2+ 80 floppy.img        ;Floppy drive
+ .IMAGES2+180 folder.img        ;Folder
+ .IMAGES2+280 trash.img         ;Trashcan
+ .IMAGES2+380 program.img       ;Program
+ .IMAGES2+480 file.img          ;File
+ -..                            ;Dsetpath("..")
 _ENDIF
 
 ;*******************************************************************************
 ;* MRF: (angepasst von MH)
 ;* Die Mausformen (Aufbau der Struktur gem„ž der AES-Funktion "graf_handle").
-;* [FRG]
+;* [ALL]
 ;*
 ;* >>> BESSER: Gleich neue RSC-Files schaffen und einbinden (s.u.)!
 ;* >>> Dieser Patch funktioniert nicht mit dem RSC/NEWDESK-Patch.
 
 
-_SWITCH .NATION
-_CASE .FRG: .IMAGES = 3F666
-_DEFAULT: .MOUSE = 0
-_ENDSWITCH
-
 _IF .MOUSE
- -MFORM                            ;Dsetpath("MFORM\")
- .IMAGES       MFORM0.ABS          ;ARROW
- .IMAGES+ 4A   MFORM1.ABS          ;TEXT_CRSR
- .IMAGES+ 94   MFORM2.ABS          ;BUSY_BEE
- .IMAGES+ DE   MFORM3.ABS          ;POINT_HAND
- .IMAGES+128   MFORM4.ABS          ;FLAT_HAND
- .IMAGES+172   MFORM5.ABS          ;THIN_CROSS
- .IMAGES+1BC   MFORM6.ABS          ;THICK_CROSS
- .IMAGES+206   MFORM7.ABS          ;OUTL_CROSS
+ .IMAGES = .RSC_TAB+938
+
+ -mform                            ;Dsetpath("MFORM\")
+ .IMAGES       mform0.abs   ;ARROW
+ .IMAGES+ 4A   mform1.abs   ;TEXT_CRSR
+ .IMAGES+ 94   mform2.abs   ;BUSY_BEE
+ .IMAGES+ DE   mform3.abs   ;POINT_HAND
+ .IMAGES+128   mform4.abs   ;FLAT_HAND
+ .IMAGES+172   mform5.abs   ;THIN_CROSS
+ .IMAGES+1BC   mform6.abs   ;THICK_CROSS
+ .IMAGES+206   mform7.abs   ;OUTL_CROSS
  -..                               ;Dsetpath("..") (Ein Verzeichnis zurck)
 _ENDIF
 
@@ -155,7 +149,7 @@ _ENDIF
 ;* Eingabe eines individuellen Textes ins Info-Men.
 ;* Hierzu kann der Text mittels ASCII-Code eingeben werden, darf dabei
 ;* jedoch nicht l„nger als 29 Zeichen sein.
-;* [FRG]
+;* [ALL]
 ;*
 ;* >>> BESSER: Gleich neue RSC-Files schaffen und einbinden (s.u.)!
 ;* >>> Dieser Patch funktioniert nicht mit dem RSC/NEWDESK-Patch.

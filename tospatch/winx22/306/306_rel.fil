@@ -126,7 +126,7 @@ _ENDSWITCH
 
 .GrowShrink = 1	; Grow- und Shrinkboxen: 1=ein (wie Original 3.06), 0=aus 
 
-.FASTPRN = 1	; Schnelle Druckerroutinen fÅr den Parallelport: 1=ein
+.FASTPRN = 0	; Schnelle Druckerroutinen fÅr den Parallelport: 1=ein
 
 .SHELL_P = 1        ;_shell_p wird beim RESET zurÅckgesetzt (wie es sich gehîrt).
 
@@ -145,7 +145,7 @@ _ENDSWITCH
 
 .BOOT_TIME = .15	; Zeit (sec) fÅr Wartebalken beim Kaltstart (Orig. 80 sec)
 
-.PRINT_TIMEOUT = .15	; Druckertimeout (sec) (Orig. 30 sec)
+.PRNTIMEOUT = .15	; Druckertimeout (sec) (Orig. 30 sec)
 
 .COLOR_60HZ = 0     ;60Hz beim Start in Farbe (Original: 2 wÑre 50Hz).
 

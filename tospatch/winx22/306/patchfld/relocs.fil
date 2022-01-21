@@ -88,6 +88,15 @@ _SWITCH .NATION
     .TOSINFO_OFS = 1A4A
     .ROMTOP  = 4625E
 
+  _CASE .CZE:
+    .d1 = 0
+    .d2 = 0
+    .d3 = .d2
+    .INFDATA = 3EC92       ; desktop filenames
+    .RSC_TAB = 3ED2E       ; start of resource data
+    .TOSINFO_OFS = 1A4A    ; offset to tos-info-dialog from RSC_TAB
+    .ROMTOP  = 46232       ; end of text+data segments
+
   _DEFAULT:
     _ERROR "unsupported country"
 _ENDSWITCH

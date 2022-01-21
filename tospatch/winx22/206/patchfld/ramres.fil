@@ -1,0 +1,116 @@
+~ $41,fa,0b,20               ; lea.l      $00E00BD0(pc),a0
+~ $43,f8,82,40               ; lea.l      ($FFFF8240).w,a1
+~ $70,07                     ; moveq.l    #7,d0
+;E000B8:
+~ $22,d8                     ; move.l     (a0)+,(a1)+
+~ $51,c8,ff,fc               ; dbf        d0,$00E000B8
+~ $21,fc,00,01,00,00,82,00   ; move.l     #$00010000,($FFFF8200).w
+~ $4d,fa,00,8c               ; lea.l      $00E00154(pc),a6
+~ $60,00,0a,e6               ; bra        $00E00BB2
+~ $46,fc,27,00               ; move.w     #$2700,sr
+~ $42,b8,04,20               ; clr.l      ($00000420).w
+~ $20,78,00,04               ; movea.l    ($00000004).w,a0
+~ $43,f8,00,08               ; lea.l      ($00000008).w,a1
+~ $70,3d                     ; moveq.l    #61,d0
+;E000E0:
+~ $22,c8                     ; move.l     a0,(a1)+
+~ $51,c8,ff,fc               ; dbf        d0,$00E000E0
+~ $60,00,ff,48               ; bra        $00E00030
+;E000EA:
+~ $bd,fc,00,e0,00,5c         ; cmpa.l     #$00E0005C,a6
+~ $67,8c                     ; beq.s      $00E0007E
+~ $4d,fa,ff,3c               ; lea.l      $00E00030(pc),a6
+;E000F6:
+~ $47,fa,ff,08               ; lea.l      $00E00000(pc),a3
+~ $43,f9,329b6+.d2+.BASE.L   ; lea.l      rom_crc_table,a1
+~ $7e,01                     ; moveq.l    #1,d7
+;E00102:
+~ $24,3c,00,01,ff,fe         ; move.l     #$0001FFFE,d2
+~ $70,00                     ; moveq.l    #0,d0
+~ $7a,00                     ; moveq.l    #0,d5
+~ $20,4b                     ; movea.l    a3,a0
+;E0010E:
+~ $36,10                     ; move.w     (a0),d3
+~ $54,88                     ; addq.l     #2,a0
+~ $3c,05                     ; move.w     d5,d6
+~ $e1,4d                     ; lsl.w      #8,d5
+~ $e0,4e                     ; lsr.w      #8,d6
+~ $b7,06                     ; eor.b      d3,d6
+~ $dc,46                     ; add.w      d6,d6
+~ $38,31,60,00               ; move.w     0(a1,d6.w),d4
+~ $b9,45                     ; eor.w      d4,d5
+~ $32,00                     ; move.w     d0,d1
+~ $e1,48                     ; lsl.w      #8,d0
+~ $b7,41                     ; eor.w      d3,d1
+~ $e0,49                     ; lsr.w      #8,d1
+~ $d2,41                     ; add.w      d1,d1
+~ $38,31,10,00               ; move.w     0(a1,d1.w),d4
+~ $b9,40                     ; eor.w      d4,d0
+~ $53,82                     ; subq.l     #1,d2
+~ $66,d8                     ; bne.s      $00E0010E
+~ $32,10                     ; move.w     (a0),d1
+~ $1c,01                     ; move.b     d1,d6
+~ $54,88                     ; addq.l     #2,a0
+~ $12,18                     ; move.b     (a0)+,d1
+~ $b0,41                     ; cmp.w      d1,d0
+~ $66,06                     ; bne.s      $00E00148
+~ $e1,4e                     ; lsl.w      #8,d6
+~ $1c,10                     ; move.b     (a0),d6
+~ $ba,46                     ; cmp.w      d6,d5
+;E00148:
+~ $66,00,331c+.d1.W          ; bne        $00E03466
+~ $54,8b                     ; addq.l     #2,a3
+~ $55,87                     ; subq.l     #2,d7
+~ $6a,b0                     ; bpl.s      $00E00102
+~ $4e,d6                     ; jmp        (a6)
+;E00154:
+~ $67,00,00,9c               ; beq        $00E001F2
+~ $4d,fa,00,04               ; lea.l      $00E0015E(pc),a6
+~ $60,98                     ; bra.s      $00E000F6
+;E0015E:
+~ $4f,f8,7f,fe               ; lea.l      ($00007FFE).w,a7
+~ $28,78,00,08               ; movea.l    ($00000008).w,a4
+~ $21,fc,3466+.d1+.BASE.l,00,08      ; move.l     #$00E03466,($00000008).w
+~ $45,fa,fe,90               ; lea.l      $00E00000(pc),a2
+~ $2e,3c,00,02,00,00         ; move.l     #$00020000,d7
+~ $20,47                     ; movea.l    d7,a0
+~ $36,3c,fb,55               ; move.w     #$FB55,d3
+;E0017E:
+~ $22,48                     ; movea.l    a0,a1
+~ $34,00                     ; move.w     d0,d2
+~ $72,2a                     ; moveq.l    #42,d1
+;E00184:
+~ $33,02                     ; move.w     d2,-(a1)
+~ $d4,43                     ; add.w      d3,d2
+~ $51,c9,ff,fa               ; dbf        d1,$00E00184
+~ $22,48                     ; movea.l    a0,a1
+~ $72,2a                     ; moveq.l    #42,d1
+;E00190:
+~ $b1,61                     ; eor.w      d0,-(a1)
+~ $66,b4                     ; bne.s      $00E00148
+~ $d0,43                     ; add.w      d3,d0
+~ $51,c9,ff,f8               ; dbf        d1,$00E00190
+~ $d1,c7                     ; adda.l     d7,a0
+~ $b1,ca                     ; cmpa.l     a2,a0
+~ $63,de                     ; bls.s      $00E0017E
+~ $20,4a                     ; movea.l    a2,a0
+~ $21,cc,00,08               ; move.l     a4,($00000008).w
+~ $4c,d1,7a,ff               ; movem.l    (a1),d0-d7/a1/a3-a6
+;E001AA:
+~ $48,e0,ff,5e               ; movem.l    d0-d7/a1/a3-a6,-(a0)
+~ $48,e0,ff,5e               ; movem.l    d0-d7/a1/a3-a6,-(a0)
+~ $48,e0,ff,5e               ; movem.l    d0-d7/a1/a3-a6,-(a0)
+~ $48,e0,ff,5e               ; movem.l    d0-d7/a1/a3-a6,-(a0)
+~ $48,e0,ff,4e               ; movem.l    d0-d7/a1/a4-a6,-(a0)
+~ $b0,fc,01,00               ; cmpa.w     #$0100,a0
+~ $62,e6                     ; bhi.s      $00E001AA
+~ $21,ca,04,2e               ; move.l     a2,($0000042E).w
+~ $21,fc,75,20,19,f3,04,20   ; move.l     #$752019F3,($00000420).w
+~ $21,fc,23,76,98,aa,04,3a   ; move.l     #$237698AA,($0000043A).w
+~ $21,fc,55,55,aa,aa,05,1a   ; move.l     #$5555AAAA,($0000051A).w
+~ $42,b8,05,a4               ; clr.l      ($000005A4).w
+~ $21,fc,13,57,bd,13,05,a8   ; move.l     #$1357BD13,($000005A8).w
+~ $11,f8,80,01,04,24         ; move.b     ($FFFF8001).w,($00000424).w
+;E001F2:
+~ $21,fc,31,41,59,26,04,26   ; move.l     #$31415926,($00000426).w
+~ $21,fc,00,e0,00,ea,04,2a   ; move.l     #$00E000EA,($0000042A).w

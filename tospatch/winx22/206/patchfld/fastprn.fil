@@ -1,12 +1,7 @@
- 310  $22F8+80+.BASE.L        ;Warteroutine auf neue Routine
- 1044 $22F8+62+.BASE.L        ;bconin-Vector auf neue Routine
- 1064 $22F8+80+.BASE.L        ;Warteroutine auf neue Routine
-
-22F8
 ~ $41,f8,04,ba               ; lea.l      (_hz_200).w,a0
 ~ $26,10                     ; move.l     (a0),d3
 ~ $24,03                     ; move.l     d3,d2
-~ $96,b8,10,de               ; sub.l      ($000010DE).w,d3
+~ $96,b8,10,ec               ; sub.l      ($000010EC).w,d3
 ~ $0c,83,00,00,03,e8         ; cmpi.l     #5*200,d3
 ~ $65,10                     ; bcs.s      bcon0o2
 ;bcon0o1:
@@ -17,7 +12,7 @@
 ~ $0c,83,.PRNTIMEOUT*200.L   ; cmpi.l     #30*200,d3
 ~ $65,f0                     ; bcs.s      bcon0o1
 ;bcon0o2:
-~ $21,d0,10,de               ; move.l     (a0),($000010DE).w
+~ $21,d0,10,ec               ; move.l     (a0),($000010EC).w
 ~ $70,00                     ; moveq.l    #0,d0
 ~ $4e,75                     ; rts
 ;bcon0o3:
@@ -88,5 +83,3 @@
 ~ $00,7c,07,00               ; ori.w      #$0700,sr
 ~ $4e,75                     ; rts
 ~ $ff,ff
-
-262E $61,00,22F8+92-~.W      ;Routine zum Strobe setzen hat sich verschoben...

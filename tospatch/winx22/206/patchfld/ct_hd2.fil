@@ -1,0 +1,87 @@
+;dodmaread:
+~ $61,06                     ; bsr.s      read_boot
+~ $4e,75                     ; rts
+;dodmawrite:
+~ $70,ff                     ; moveq.l    #-1,d0
+~ $4e,75                     ; rts
+;read_boot:
+~ $47,f8,86,04               ; lea.l      ($FFFF8604).w,a3
+~ $45,f8,86,06               ; lea.l      ($FFFF8606).w,a2
+~ $34,3c,00,c8               ; move.w     #$00C8,d2
+~ $36,3c,00,ca               ; move.w     #$00CA,d3
+~ $50,f8,04,3e               ; st         ($0000043E).w
+~ $34,83                     ; move.w     d3,(a2)
+~ $36,bc,00,80               ; move.w     #$0080,(a3)
+~ $61,48                     ; bsr.s      ctwait
+~ $42,53                     ; clr.w      (a3)
+~ $34,82                     ; move.w     d2,(a2)
+~ $61,42                     ; bsr.s      ctwait
+~ $61,7e                     ; bsr.s      ctibus
+~ $43,fa,00,8e               ; lea.l      ctcmd(pc),a1
+~ $72,05                     ; moveq.l    #5,d1
+;sendct1:
+~ $61,46                     ; bsr.s      ctgbyte
+~ $66,2c                     ; bne.s      ctend2
+~ $70,00                     ; moveq.l    #0,d0
+~ $10,19                     ; move.b     (a1)+,d0
+~ $36,80                     ; move.w     d0,(a3)
+~ $51,c9,ff,f4               ; dbf        d1,sendct1
+~ $20,3c,00,00,17,70         ; move.l     #30*200,d0
+~ $61,34                     ; bsr.s      ctgbyte1
+~ $22,48                     ; movea.l    a0,a1
+~ $32,3c,01,ff               ; move.w     #$01FF,d1
+;ctread:
+~ $61,2a                     ; bsr.s      ctgbyte
+~ $66,10                     ; bne.s      ctend2
+~ $30,13                     ; move.w     (a3),d0
+~ $12,c0                     ; move.b     d0,(a1)+
+~ $51,c9,ff,f6               ; dbf        d1,ctread
+~ $61,1e                     ; bsr.s      ctgbyte
+~ $30,13                     ; move.w     (a3),d0
+~ $c0,7c,00,ff               ; and.w      #$00FF,d0
+;ctend2:
+~ $34,bc,00,80               ; move.w     #$0080,(a2)
+~ $51,f8,04,3e               ; sf         ($0000043E).w
+~ $4e,75                     ; rts
+;ctwait:
+~ $70,04                     ; moveq.l    #4,d0
+~ $d0,b8,04,ba               ; add.l      ($000004BA).w,d0
+;ctwait1:
+~ $b0,b8,04,ba               ; cmp.l      ($000004BA).w,d0
+~ $62,fa                     ; bhi.s      ctwait1
+~ $4e,75                     ; rts
+;ctgbyte:
+~ $70,64                     ; moveq.l    #100,d0
+;ctgbyte1:
+~ $34,83                     ; move.w     d3,(a2)
+~ $36,bc,00,01               ; move.w     #$0001,(a3)
+~ $34,82                     ; move.w     d2,(a2)
+~ $d0,b8,04,ba               ; add.l      ($000004BA).w,d0
+~ $21,c0,0a,82               ; move.l     d0,($00000A82).w
+;ctgbyte2:
+~ $30,13                     ; move.w     (a3),d0
+~ $c0,7c,00,01               ; and.w      #$0001,d0
+~ $66,10                     ; bne.s      ctgbyte3
+~ $20,38,0a,82               ; move.l     ($00000A82).w,d0
+~ $b0,b8,04,ba               ; cmp.l      ($000004BA).w,d0
+~ $62,ee                     ; bhi.s      ctgbyte2
+~ $61,14                     ; bsr.s      ctibus1
+~ $70,ff                     ; moveq.l    #-1,d0
+~ $4e,75                     ; rts
+;ctgbyte3:
+~ $61,0e                     ; bsr.s      ctibus1
+~ $70,00                     ; moveq.l    #0,d0
+~ $4e,75                     ; rts
+;ctibus:
+~ $34,83                     ; move.w     d3,(a2)
+~ $36,bc,00,02               ; move.w     #$0002,(a3)
+~ $34,82                     ; move.w     d2,(a2)
+~ $42,53                     ; clr.w      (a3)
+;ctibus1:
+~ $34,83                     ; move.w     d3,(a2)
+~ $42,53                     ; clr.w      (a3)
+~ $34,82                     ; move.w     d2,(a2)
+~ $4e,75                     ; rts
+;ctcmd:
+~ $08,00,00,00,01,01
+_FILL ~,~+C6,$4e71.W

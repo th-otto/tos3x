@@ -1,18 +1,18 @@
 .d_opnvwk:
-~ $48,78,01,b4                   ; pea.l     ($000001B4).w
-~ $3f,3c,00,48                   ; move.w    #$0048,-(a7)
+~ $48,78,01,34                   ; pea.l     ($00000134).w
+~ $3f,3c,00,48                   ; move.w    #$0048,-(a7) ; Malloc
 ~ $4e,41                         ; trap      #1
 ~ $5c,8f                         ; addq.l    #6,a7
 ~ $4a,80                         ; tst.l     d0
 ~ $66,0a                         ; bne.s     opnvwk1
-~ $20,78,3a,1e                   ; movea.l   ($00003A1E).w,a0 ; CONTRL
+~ $20,78,29,08                   ; movea.l   ($00002908).w,a0 ; CONTRL
 ~ $42,68,00,0c                   ; clr.w     12(a0)
 ~ $4e,75                         ; rts
 ;opnvwk1:
 ~ $22,40                         ; movea.l   d0,a1
 ~ $70,01                         ; moveq.l   #1,d0
 ~ $74,00                         ; moveq.l   #0,d2
-~ $45,f8,5b,a0                   ; lea.l     ($00005BA0).w,a2 ; virt_work
+~ $45,f8,42,30                   ; lea.l     ($00004230).w,a2 ; virt_work
 ~ $60,0c                         ; bra.s     opnvwk3
 ;opnvwk2:
 ~ $52,40                         ; addq.w    #1,d0
@@ -29,10 +29,10 @@
 ;opnvwk4:
 ~ $23,6a,00,40,00,40             ; move.l    64(a2),64(a1)
 ~ $25,49,00,40                   ; move.l    a1,64(a2)
-~ $21,c9,38,4a                   ; move.l    a1,($0000384A).w ; cur_work
-~ $20,78,3a,1e                   ; movea.l   ($00003A1E).w,a0 ; CONTRL
+~ $21,c9,27,34                   ; move.l    a1,($00002734).w ; cur_work
+~ $20,78,29,08                   ; movea.l   ($00002908).w,a0 ; CONTRL
 ~ $31,40,00,0c                   ; move.w    d0,12(a0)
 ~ $33,40,00,28                   ; move.w    d0,40(a1)
 ~ $60,00,fd,96                   ; bra       init_wk
 
-_FILL ~,.d_opnvwk+7A,$4e71.W
+_FILL ~,~+36,$4e71.W

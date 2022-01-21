@@ -1,7 +1,7 @@
 .getbpb:
 ~ $4e,56,00,00                ; link      a6,#0
 ~ $48,e7,03,0c                ; movem.l   d6-d7/a4-a5,-(a7)
-~ $3a,7c,77,aa                ; movea.w   #$77AA,a5
+~ $3a,7c,5d,60                ; movea.w   #$5D60,a5
 ~ $30,2e,00,08                ; move.w    8(a6),d0
 ~ $67,08                      ; beq.s     getbpb1
 ~ $da,fc,00,24                ; adda.w    #$0024,a5
@@ -16,13 +16,13 @@
 ~ $3f,2e,00,08                ; move.w    8(a6),-(a7)
 ~ $42,a7                      ; clr.l     -(a7)
 ~ $2f,39,00,00,04,c6          ; move.l    $000004C6,-(a7)
-~ $4e,b9,.Floprd.L            ; jsr       $00E03C10
+~ $4e,b9,03820+.d1+.BASE.L    ; jsr       $00E03820
 ~ $4f,ef,00,12                ; lea.l     18(a7),a7
 ~ $4a,80                      ; tst.l     d0
 ~ $6c,0e                      ; bge.s     getbpb3
 ~ $3f,2e,00,08                ; move.w    8(a6),-(a7)
 ~ $3f,00                      ; move.w    d0,-(a7)
-~ $4e,b9,00,e0,0d,92          ; jsr       $00E00D92
+~ $4e,b9,00,e0,0d,34          ; jsr       $00E00D34
 ~ $58,8f                      ; addq.l    #4,a7
 ;getbpb3:
 ~ $0c,80,00,01,00,00          ; cmpi.l    #$00010000,d0
@@ -110,7 +110,7 @@
 ;getbpb9:
 ~ $1b,b0,70,27,70,1f          ; move.b    39(a0,d7.w),31(a5,d7.w)
 ~ $51,cf,ff,f8                ; dbf       d7,getbpb9
-~ $32,7c,73,50                ; movea.w   #$7350,a1
+~ $32,7c,59,60                ; movea.w   #$5960,a1
 ~ $4a,6e,00,08                ; tst.w     8(a6)
 ~ $67,04                      ; beq.s     getbpb10
 ~ $d2,fc,00,0c                ; adda.w    #$000C,a1
@@ -125,14 +125,14 @@
 ~ $32,c0                      ; move.w    d0,(a1)+
 ~ $51,cf,ff,f0                ; dbf       d7,getbpb11
 ~ $3e,2e,00,08                ; move.w    8(a6),d7
-~ $30,7c,17,ce                ; movea.w   #$17CE,a0
-~ $32,7c,17,cc                ; movea.w   #$17CC,a1
+~ $30,7c,15,b8                ; movea.w   #$15B8,a0
+~ $32,7c,15,b6                ; movea.w   #$15B6,a1
 ~ $42,40                      ; clr.w     d0
 ~ $11,b1,70,00,70,00          ; move.b    0(a1,d7.w),0(a0,d7.w)
 ~ $67,02                      ; beq.s     getbpb13
 ~ $70,01                      ; moveq.l   #1,d0
 ;getbpb13:
-~ $32,7c,5b,86                ; movea.w   #$5B86,a1
+~ $32,7c,42,16                ; movea.w   #$4216,a1
 ~ $13,80,70,00                ; move.b    d0,0(a1,d7.w)
 ~ $20,0c                      ; move.l    a4,d0
 ;getbpb14:

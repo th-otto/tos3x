@@ -1,0 +1,30 @@
+~ $48,a7,c0,00               ; movem.w    d0-d1,-(a7)
+~ $30,29,00,04               ; move.w     4(a1),d0
+~ $60,04                     ; bra.s      $00E0000E
+;.HD_PORTA:
+~ $48,a7,c0,00               ; movem.w    d0-d1,-(a7)
+;.HD_PORTB:
+~ $40,e7                     ; move.w     sr,-(a7)
+~ $00,7c,07,00               ; ori.w      #$0700,sr
+~ $11,fc,00,0e,88,00         ; move.b     #$0E,($FFFF8800).w
+~ $12,38,88,00               ; move.b     ($FFFF8800).w,d1
+_IF .HD_BIT = 6
+~ $c2,3c,00,bf               ; and.b      #$BF,d1
+_ELSE
+~ $c2,3c,00,7f               ; and.b      #$7F,d1
+_ENDIF
+~ $c0,3c,00,01               ; and.b      #$01,d0
+_IF .HD_INVERT
+~ $0a,00,00,01               ; eori.b     #$01,d0
+_ENDIF
+_IF .HD_BIT = 6
+~ $ed,08                     ; lsl.b     #6,d0
+_ELSE
+~ $ef,08                     ; lsl.b      #7,d0
+_ENDIF
+~ $80,01                     ; or.b       d1,d0
+~ $11,fc,00,0e,88,00         ; move.b     #$0E,($FFFF8800).w
+~ $11,c0,88,02               ; move.b     d0,($FFFF8802).w
+~ $46,df                     ; move.w     (a7)+,sr
+~ $4c,9f,00,03               ; movem.w    (a7)+,d0-d1
+~ $4e,75                     ; rts
