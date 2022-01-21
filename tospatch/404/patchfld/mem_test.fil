@@ -1,0 +1,195 @@
+ .Mem_Test_Start:
+ ~ $4F,F8,7F,FC 					;LEA	   $7FFC.S,A7
+ ~ $4B,F8,00,08 					;LEA	   8.S,A5
+ ~ $28,55							;MOVEA.L   (A5),A4
+ ~ $26,4F							;MOVEA.L   A7,A3
+ ~ $41,FA,00,36 					;LEA	   54(PC),A0			L0001
+ ~ $2A,88							;MOVE.L    A0,(A5)
+ ~ $10,38,80,06 					;MOVE.B    $FFFF8006.S,D0
+ ~ $2A,8C							;MOVE.L    A4,(A5)
+ ~ $2E,4B							;MOVEA.L   A3,A7
+ ~ $E2,08							;LSR.B	   #1,D0
+ ~ $12,00							;MOVE.B    D0,D1
+ ~ $C2,3C,00,01 					;AND.B	   #1,D1
+ ~ $E4,08							;LSR.B	   #2,D0
+ ~ $C0,3C,00,06 					;AND.B	   #6,D0
+ ~ $82,00							;OR.B	   D0,D1
+ ~ $2A,3C,00,08,00,00				;MOVE.L    #$80000,D5
+ ~ $E3,A5							;ASL.L	   D1,D5
+ ~ $B2,3C,00,05 					;CMP.B	   #5,D1
+ ~ $65,06							;BCS.S	   6(PC)				L0000
+ ! ~+2
+ ~ $2A,3C,00,E0,00,00				;MOVE.L    #$E00000,D5
+ ~ $7C,0A					  ;L0000:MOVEQ	   #$A,D6
+ ~ $60,00,00,F6 					;BRA	   246(PC)				L0011
+ ~ $2A,8C					  ;L0001:MOVE.L    A4,(A5)
+ ~ $2E,4B							;MOVEA.L   A3,A7
+ ~ $11,FC,00,0A,80,01				;MOVE.B    #$A,$FFFF8001.S
+ ~ $41,F8,00,08 					;LEA	   8.S,A0
+ ~ $43,F9,00,20,00,08				;LEA	   $200008,A1
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $32,3C,FA,54 					;MOVE.W    #$FA54,D1
+ ~ $34,3C,00,FB 					;MOVE.W    #$FB,D2
+ ~ $30,C0					  ;L0002:MOVE.W    D0,(A0)+
+ ~ $32,C0							;MOVE.W    D0,(A1)+
+ ~ $D0,41							;ADD.W	   D1,D0
+ ~ $51,CA,FF,F8 					;DBF	   D2,-8(PC)			L0002
+ ~ $70,5A							;MOVEQ	   #$5A,D0
+ ~ $11,C0,82,0D 					;MOVE.B    D0,$FFFF820D.S
+ ~ $4A,38,82,03 					;TST.B	   $FFFF8203.S
+ ~ $B0,38,82,0D 					;CMP.B	   $FFFF820D.S,D0
+ ~ $66,16							;BNE.S	   22(PC)				L0003
+ ~ $42,38,82,0D 					;CLR.B	   $FFFF820D.S
+ ~ $4A,78,82,40 					;TST.W	   $FFFF8240.S
+ ~ $4A,38,82,0D 					;TST.B	   $FFFF820D.S
+ ~ $66,08							;BNE.S	   8(PC)				L0003
+ ~ $2E,3C,00,04,00,00				;MOVE.L    #$40000,D7
+ ~ $60,06							;BRA.S	   6(PC)				L0004
+ ~ $2E,3C,00,00,02,00		  ;L0003:MOVE.L    #$200,D7
+ ~ $32,3C,FA,54 			  ;L0004:MOVE.W    #$FA54,D1
+ ~ $24,3C,00,20,00,00				;MOVE.L    #$200000,D2
+ ~ $7C,00							;MOVEQ	   #0,D6
+ ~ $E4,4E					  ;L0005:LSR.W	   #2,D6
+ ~ $20,47							;MOVEA.L   D7,A0
+ ~ $50,88							;ADDQ.L    #8,A0
+ ~ $D1,C2							;ADDA.L    D2,A0
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,00,FB 					;MOVE.W    #$FB,D3
+ ~ $B0,58					  ;L0006:CMP.W	   (A0)+,D0
+ ~ $66,08							;BNE.S	   8(PC)				L0007
+ ~ $D0,41							;ADD.W	   D1,D0
+ ~ $51,CB,FF,F8 					;DBF	   D3,-8(PC)			L0006
+ ~ $60,34							;BRA.S	   52(PC)				L000C
+ ~ $20,47					  ;L0007:MOVEA.L   D7,A0
+ ~ $D1,C7							;ADDA.L    D7,A0
+ ~ $50,88							;ADDQ.L    #8,A0
+ ~ $D1,C2							;ADDA.L    D2,A0
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,00,FB 					;MOVE.W    #$FB,D3
+ ~ $B0,58					  ;L0008:CMP.W	   (A0)+,D0
+ ~ $66,08							;BNE.S	   8(PC)				L0009
+ ~ $D0,41							;ADD.W	   D1,D0
+ ~ $51,CB,FF,F8 					;DBF	   D3,-8(PC)			L0008
+ ~ $60,18							;BRA.S	   24(PC)				L000B
+ ~ $41,F8,00,08 			  ;L0009:LEA	   8.S,A0
+ ~ $D1,C2							;ADDA.L    D2,A0
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,00,FB 					;MOVE.W    #$FB,D3
+ ~ $B0,58					  ;L000A:CMP.W	   (A0)+,D0
+ ~ $66,0A							;BNE.S	   10(PC)				L000C
+ ~ $D0,41							;ADD.W	   D1,D0
+ ~ $51,CB,FF,F8 					;DBF	   D3,-8(PC)			L000A
+ ~ $58,46							;ADDQ.W    #4,D6
+ ~ $58,46					  ;L000B:ADDQ.W    #4,D6
+ ~ $94,BC,00,20,00,00		  ;L000C:SUBA.L    #$200000,D1
+ ~ $6A,AA							;BPL.S	   -86(PC)				L0005
+ ~ $11,C6,80,01 					;MOVE.B    D6,$FFFF8001.S
+ ~ $43,FA,00,32 					;LEA	   50(PC),A1			L0010
+ ~ $2A,89							;MOVE.L    A1,(A5)
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,FB,55 					;MOVE.W    #$FB55,D3
+ ~ $2E,3C,00,02,00,00				;MOVE.L    #$20000,D7
+ ~ $22,47							;MOVEA.L   D7,A1
+ ~ $20,49					  ;L000D:MOVEA.L   A1,A0
+ ~ $34,00							;MOVE.W    D0,D2
+ ~ $72,2A							;MOVEQ	   #$2A,D1
+ ~ $31,02					  ;L000E:MOVE.W    D2,-(A0)
+ ~ $D4,43							;ADD.W	   D3,D2
+ ~ $51,C9,FF,FA 					;DBF	   D1,-6(PC)			L000E
+ ~ $20,49							;MOVEA.L   A1,A0
+ ~ $72,2A							;MOVEQ	   #$2A,D1
+ ~ $B1,60					  ;L000F:EOR.W	   D0,-(A0)
+ ~ $66,0A							;BNE.S	   10(PC)				L0010
+ ~ $D0,43							;ADD.W	   D3,D0
+ ~ $51,C9,FF,F8 					;DBF	   D1,-8(PC)			L000F
+ ~ $D3,C7							;ADDA.L    D7,A1
+ ~ $60,E0							;BRA.S	   -32(PC)				L000D
+ ~ $2A,8C					  ;L0010:MOVE.L    A4,(A5)
+ ~ $93,C7							;SUBA.L    D7,A1
+ ~ $2A,09							;MOVE.L    A1,D5
+ ~ $49,F8,04,00 			  ;L0011:LEA	   $400.S,A4
+ ~ $28,05							;MOVE.L    D5,D4
+ ~ $98,8C							;SUB.L	   A4,D4
+ ~ $E0,8C							;LSR.L	   #8,D4
+ ~ $53,84							;SUBQ.L    #1,D4
+ ~ $4B,F8,01,00 					;LEA	   $100.S,A5
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $20,40							;MOVEA.L   D0,A0
+ ~ $72,00							;MOVEQ	   #0,D1
+ ~ $22,41							;MOVEA.L   D1,A1
+ ~ $74,00							;MOVEQ	   #0,D2
+ ~ $24,42							;MOVEA.L   D2,A2
+ ~ $76,00							;MOVEQ	   #0,D3
+ ~ $26,43							;MOVEA.L   D3,A3
+ ~ $48,D4,0F,0F 			  ;L0012:MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $48,D4,0F,0F 					;MOVEM.L   A0-A3/D0-D3,(A4)
+ ~ $D9,CD							;ADDA.L    A5,A4
+ ~ $51,CC,FF,DC 					;DBF	   D4,-36(PC)			L0012
+ ~ $11,C6,04,24 					;MOVE.B    D6,$424.S
+ ~ $21,C5,04,2E 					;MOVE.L    D5,$42E.S
+ ~ $21,FC,75,20,19,F3,04,20 		;MOVE.L    #$752019F3,$420.S
+ ~ $21,FC,23,76,98,AA,04,3A 		;MOVE.L    #$237698AA,$43A.S
+ ~ $21,FC,55,55,AA,AA,05,1A 		;MOVE.L    #$5555AAAA,$51A.S
+ ~ $4F,F8,7F,FC 					;LEA	   $7FFC.S,A7
+ ~ $4B,F8,00,08 					;LEA	   8.S,A5
+ ~ $28,55							;MOVEA.L   (A5),A4
+ ~ $26,4F							;MOVEA.L   A7,A3
+ ~ $41,FA,00,0C 					;LEA	   12(PC),A0			L0013
+ ~ $2A,88							;MOVE.L    A0,(A5)
+ ! ~+6
+ ~ $33,FC,00,00,FF,D0,00,E0 		;MOVE.W    #0,$FFD000E0.L
+ ~ $41,FA,00,54 			  ;L0013:LEA	   84(PC),A0			L0017
+ ~ $2A,88							;MOVE.L    A0,(A5)
+ ~ $70,00							;MOVEQ	   #0,D0
+ ~ $36,3C,FB,55 					;MOVE.W    #$FB55,D3
+ ~ $2E,3C,00,04,00,00				;MOVE.L    #$40000,D7
+ ~ $43,F9,01,00,00,00				;LEA	   $1000000.L,A1
+ ~ $22,38,7F,FC 					;MOVE.L    $7FFC.W,D1
+ ~ $46,81							;NOT.L	   D1
+ ~ $23,41,7F,FC 					;MOVE.L    D1,$7FFC(A1)
+ ~ $D3,C7							;ADDA.L    D7,A1
+ ~ $24,49							;MOVEA.L   A1,A2
+ ~ $55,8A							;SUBQ.L    #2,A2
+ ~ $B2,B8,7F,FC 					;CMP.L	   $7FFC.W,D1
+ ~ $67,28							;BEQ.S	   40(PC)				L0017
+ ~ $20,49					  ;L0014:MOVEA.L   A1,A0
+ ~ $34,00							;MOVE.W    D0,D2
+ ~ $31,02							;MOVE.W    D2,-(A0)
+ ~ $B4,52							;CMP.W	   (A2),D2
+ ~ $67,1E							;BEQ.S	   30(PC)				L0017
+ ~ $D4,43							;ADD.W	   D3,D2
+ ~ $72,29							;MOVEQ	   #$29,D1
+ ~ $31,02					  ;L0015:MOVE.W    D2,-(A0)
+ ~ $D4,43							;ADD.W	   D3,D2
+ ~ $51,C9,FF,FA 					;DBF	   D1,-6(PC)			L0015
+ ~ $20,49							;MOVEA.L   A1,A0
+ ~ $72,2A							;MOVEQ	   #$2A,D1
+ ~ $B1,60					  ;L0016:EOR.W	   D0,-(A0)
+ ~ $66,0A							;BNE.S	   10(PC)				L0017
+ ~ $D0,43							;ADD.W	   D3,D0
+ ~ $51,C9,FF,F8 					;DBF	   D1,-8(PC)			L0016
+ ~ $D3,C7							;ADDA.L    D7,A1
+ ~ $60,D8							;BRA.S	   -40(PC)				L0014
+ ~ $2A,8C					  ;L0017:MOVE.L    A4,(A5)
+ ~ $2E,4B							;MOVEA.L   A3,A7
+ ~ $93,C7							;SUBA.L    D7,A1
+ ~ $B3,FC,01,00,00,00				;CMPA.L    #$1000000,A1
+ ~ $62,02							;BHI.S	   2(PC)				L0018
+ ~ $93,C9							;SUBA.L    A1,A1
+ ~ $21,C9,05,A4 			  ;L0018:MOVE.L    A1,$5A4.S
+ ~ $21,FC,13,57,BD,13,05,A8 		;MOVE.L    #$1357BD13,$5A8.S
+ ~ $4E,D6							;JMP	   (A6)
+ .Mem_Test_End:
+
+ 13A
+ ~ $4D,FA,1DA-~.W					;LEA	   weiter(PC),A6
+ ~ $4E,F9,.Mem_Test_Start+.BASE.L	;JMP	   Mem_Test_Start
+ _FILL ~,1DA,$4E71.W
+
+ .Mem_Test_End

@@ -422,8 +422,8 @@ _ENDIF
 .NVMBASE = 340      ;Adresse fÅr die simulierten 64 Bytes des Uhrenchips.
 
 _IF .RAMNVM
- 216C RAMNVM.ABS
- 216E |$.NVMBASE.L
+ 216C
+ +ramnvm.fil
  .RAM_INIT:
  ~ $4A,40                           ;TST.W     D0
  ~ $67,00,4E6-~.W                   ;BEQ       xxx(PC)              L0000
@@ -444,7 +444,7 @@ _ENDIF
 
 _IF .RAMNVM = 0
  216C
- ~ DUMMYNVM.ABS
+ +dummynvm.fil
 _ENDIF
 
 ;*******************************************************************************

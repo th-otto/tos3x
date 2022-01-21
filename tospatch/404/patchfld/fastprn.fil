@@ -1,0 +1,40 @@
+~ $70,00                     ; moveq.l    #0,d0
+~ $20,78,04,ba               ; movea.l    ($000004BA).w,a0
+~ $22,08                     ; move.l     a0,d1
+~ $91,f8,11,b6               ; suba.l     ($000011B6).w,a0
+~ $b0,fc,03,e8               ; cmpa.w     #1000,a0
+~ $65,12                     ; bcs.s      $00E0241A
+;E02408:
+~ $01,38,fa,01               ; btst       d0,($FFFFFA01).w
+~ $67,14                     ; beq.s      $00E02422
+~ $20,78,04,ba               ; movea.l    ($000004BA).w,a0
+~ $91,c1                     ; suba.l     d1,a0
+~ $b0,fc,.PRNTIMEOUT*.200.W  ; cmpa.w     #$1770,a0
+!~-2
+~ $65,ee                     ; bcs.s      $00E02408
+;E0241A:
+~ $21,f8,04,ba,11,b6         ; move.l     ($000004BA).w,($000011B6).w
+~ $4e,75                     ; rts
+;E02422:
+~ $41,f8,88,00               ; lea.l      ($FFFF8800).w,a0
+~ $43,f8,88,02               ; lea.l      ($FFFF8802).w,a1
+~ $40,c3                     ; move.w     sr,d3
+~ $00,7c,07,00               ; ori.w      #$0700,sr
+~ $70,c0                     ; moveq.l    #-64,d0
+~ $10,bc,00,07               ; move.b     #$07,(a0)
+~ $80,10                     ; or.b       (a0),d0
+~ $12,80                     ; move.b     d0,(a1)
+~ $10,bc,00,0f               ; move.b     #$0F,(a0)
+~ $12,af,00,07               ; move.b     7(a7),(a1)
+~ $70,df                     ; moveq.l    #-33,d0
+~ $10,bc,00,0e               ; move.b     #$0E,(a0)
+~ $c0,10                     ; and.b      (a0),d0
+~ $12,80                     ; move.b     d0,(a1)
+~ $12,10                     ; move.b     (a0),d1
+~ $12,10                     ; move.b     (a0),d1
+~ $80,3c,00,20               ; or.b       #$20,d0
+~ $12,80                     ; move.b     d0,(a1)
+~ $46,c3                     ; move.w     d3,sr
+~ $70,ff                     ; moveq.l    #-1,d0
+~ $4e,75                     ; rts
+~ $ff,ff,ff,ff,ff,ff
