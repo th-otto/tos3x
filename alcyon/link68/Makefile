@@ -1,7 +1,7 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-PROGRAMS = link68$(EXEEXT) relmod$(EXEEXT)
+PROGRAMS = link68$(EXEEXT) relmod$(EXEEXT) reldump$(EXEEXT)
 LIBS = ${LIBC}
 CPPFLAGS += -DGEMDOS
 
@@ -14,6 +14,9 @@ link68$(EXEEXT): $(LINK_OBJS) ${MAKEFILE}
 
 relmod$(EXEEXT): $(RELMOD_OBJS) ${MAKEFILE}
 	$(AM_V_LD)$(LD) $(LDFLAGS) -u -h 7 -o $@ $(CRT0) nofloat.o $(RELMOD_OBJS) $(LIBS)
+
+reldump$(EXEEXT): $(RELDUMP_OBJS) ${MAKEFILE}
+	$(AM_V_LD)$(LD) $(LDFLAGS) -u -h 7 -o $@ $(CRT0) nofloat.o $(RELDUMP_OBJS) $(LIBS)
 
 link68.rel::
 	cp ../libsrc/crt0.o .

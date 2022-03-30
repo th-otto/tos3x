@@ -11,7 +11,7 @@ CPPFLAGS = -I ../common -DGEMDOS
 #CPPFLAGS += -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
 
-PROGRAMS = link68$(EXEEXT) relmod$(EXEEXT)
+PROGRAMS = link68$(EXEEXT) relmod$(EXEEXT) reldump$(EXEEXT)
 
 all: $(PROGRAMS)
 
@@ -22,6 +22,9 @@ link68$(EXEEXT): $(LINK_OBJS)
 
 relmod$(EXEEXT): $(RELMOD_OBJS)
 	$(AM_V_LD)$(LD) $(RELMOD_OBJS) $(LDFLAGS) -o $@
+
+reldump$(EXEEXT): $(RELDUMP_OBJS)
+	$(AM_V_LD)$(LD) $(RELDUMP_OBJS) $(LDFLAGS) -o $@
 
 install: all
 	$(CP) $(PROGRAMS) $(BIN)

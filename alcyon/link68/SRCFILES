@@ -1,10 +1,12 @@
 LINK_SRCS = link68.c preproc.c lnkmess.c
 RELMOD_SRCS = relmod.c
+RELDUMP_SRCS = reldump.c
 
 LINK_OBJS = $(LINK_SRCS:.c=.o)
 RELMOD_OBJS = $(RELMOD_SRCS:.c=.o)
+RELDUMP_OBJS = $(RELDUMP_SRCS:.c=.o)
 
-SRCS = $(LINK_SRCS) $(RELMOD_SRCS) link68.h
+SRCS = $(LINK_SRCS) $(RELMOD_SRCS) $(RELDUMP_SRCS) link68.h
 
 EXTRA_DIST1 = Makefile SRCFILES
 EXTRA_DIST2 = GNUmakefile

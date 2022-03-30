@@ -240,6 +240,7 @@ PP(const char **np;)
 /* 306de: 00e15750 */
 /* 306us: 00e156f6 */
 /* 104de: 00fc6146 */
+/* 404: 00e1b696 */
 DND *findit(P(const char *) name, P(const char **) sp, P(int) dflag)
 PP(const char *name;)								/*  name of file/dir            */
 PP(const char **sp;)
@@ -369,6 +370,7 @@ PP(int dflag;)								/*  T: name is for a directory      */
 /* 306de: 00e15876 */
 /* 306us: 00e1581c */
 /* 104de: 00fc626c */
+/* 404: 00e19218 */
 ERROR xchdir(P(const char *) p)
 PP(const char *p;)
 {
