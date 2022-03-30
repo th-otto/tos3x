@@ -564,15 +564,19 @@ static struct symtab *nthsym(P(unsigned int) extno)
 PP(register unsigned int extno;)
 {
 	register struct symtab *p;
+	register unsigned int i;
 	
 	p = symptr;
-	while (extno && p)
+	i = extno;
+	while (i && p)
 	{
-		--extno;
+		--i;
 		p = p->next;
 	}
 	if (p == NULL)
-		fatalx(FALSE, _("%s: corrupted"), ifilname);
+	{
+		fatalx(FALSE, _("%s: (%u) corrupted\n"), ifilname, extno);
+	}
 	return p;
 }
 
@@ -903,7 +907,9 @@ static VOID relocsym(NOTHING)
 	{
 		if (lmte->flags & SYEQ)			/* equated */
 			return;						/* abs */
-		fatalx(FALSE, _("invalid symbol flag in %s, symbol: \"%.*s\"\n"), ifilname, SYNAMLEN, lmte->name);
+		if (lmte->flags == SYDF)		/* Pure-C generates this for abs symbols */
+			return;
+		fatalx(FALSE, _("invalid symbol flag %04x in %s, symbol: \"%.*s\"\n"), lmte->flags, ifilname, SYNAMLEN, lmte->name);
 	}
 	lmte->vl1 += l;
 }
@@ -1025,6 +1031,10 @@ static VOID addsym(NOTHING)
 				prdup(p->name);
 			}
 		}
+	} else if (lmte->flags == SYDF)
+	{
+		p = lemt(eirt);
+		mmte();
 	} else
 	{
 		/* normal symbol */
@@ -1151,7 +1161,7 @@ PP(int lflg;)
 	register int32_t l;
 
 	if (firstsym >= &fsymp[NFILE])
-		fatalx(FALSE, _("%s: too many input files"), ifilname);
+		fatalx(FALSE, _("%s: too many input files\n"), ifilname);
 	/* remember where this symbol table starts */
 	*firstsym = lmte;
 	l = couthd.ch_tsize + couthd.ch_dsize + HDSIZE;
@@ -1164,6 +1174,8 @@ PP(int lflg;)
 	{
 		/* read one symbol entry */
 		getsym();
+		/* if (lmte->flags == 0xa800)
+			lmte->vl1 = 0; */
 		/* fix its address */
 		relocsym();
 		/* add to symbol table */
@@ -1326,7 +1338,7 @@ PP(register struct ovtrnode *opt;)		/* pointer to node in command tree */
 
 		/* search if lib? */
 		libflg = !(fpt->fnflags & FNALL);
-		/* ommit locals? */
+		/* omit locals? */
 		Xflag = (fpt->fnflags & FNLOCS);
 
 		/* process the file */

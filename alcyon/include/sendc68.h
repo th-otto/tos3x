@@ -22,7 +22,7 @@
 
 struct symtab {
 	char name[SYNAMLEN];		/* symbol name */
-	short flags;				/* bit flags */
+	unsigned short flags;		/* bit flags */
 	long  vl1;					/* symbol value */
 #ifdef LINK68
 	short ovlnum;				/* overlay number */
