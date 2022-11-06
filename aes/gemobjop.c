@@ -75,6 +75,10 @@ PP(int16_t *pth;)
 	*ptype = tmp->ob_type & 0x00ff;		/* set user type variable */
 
 	/* IF indirect then get pointer */
+	/*
+	 * BUG: will not work when using the same address for flags & type,
+	 * like in ob_center
+	 */
 	if (*pflags & INDIRECT)
 		*pspec = LLGET(tmp->ob_spec);
 
@@ -102,6 +106,10 @@ PP(int16_t *pth;)
 
 	case G_BUTTON:						/* for a button make thicker */
 		th--;
+		/*
+		 * BUG: will actually use ob_state when using the same address for flags & state,
+		 * like in ob_center
+		 */
 		if (*pflags & EXIT)				/* one thicker ( - (neg) is thicker) */
 			th--;
 		if (*pflags & DEFAULT)			/* still one more thick */

@@ -127,6 +127,9 @@ PP(GRECT *pt;)
 
 	if (LWGET(OB_STATE(ROOT)) & SHADOWED)
 	{
+		/*
+		 * BUG: ob_sst() will do strange things when using the same output variable here
+		 */
 		ob_sst(tree, ROOT, &ilong, &iword, &iword, &iword, &rec, &th);
 		th = (th > 0) ? th : -th;
 		th = 2 * th;
