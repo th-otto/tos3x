@@ -1,5 +1,5 @@
 top_srcdir=../..
-subdir=src
+subdir=tospatch/src
 
 # 
 # cross compiling

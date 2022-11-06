@@ -8,7 +8,6 @@ SUBDIRS = src
 
 EXTRA_DIST1 = \
 	Makefile \
-	SRCFILES \
 	data \
 	patches \
 	$(empty)
