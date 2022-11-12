@@ -414,7 +414,8 @@ PP(char **argv;)
 			{
 				if (len > (int)strlen(infostr))
 					len = (int)strlen(infostr);
-				memcpy(infostr, TP_36, len + 1);
+				memcpy(infostr, TP_36, len);
+				infostr[len] = '\0';
 			}
 		}
 #endif
@@ -767,6 +768,22 @@ PP(char **argv;)
 				putbeshort(address - 4, 0x4020);
 				putbeshort(address - 2, 0x4020);
 				putbeshort(address - 0, 0x0d0a);
+			}
+		}
+
+		if (country && strcmp(country, "sf") == 0)
+		{
+			if (i == 0 && size == 0x1444) /* 2.06/3.06 */
+			{
+				putbeshort(address - 2, 0x0f00);
+			} else if (i == 1 && size == 0x609c)
+			{
+				putbeshort(address - 2, 0x5d10);
+			} else if (i == 2 && size == 0x029c)
+			{
+				putbeshort(address - 4, 0x1100);
+				putbeshort(address - 2, 0x0001);
+				putbeshort(address - 0, 0x0003);
 			}
 		}
 	}
