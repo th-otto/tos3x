@@ -134,10 +134,10 @@ static const uint16_t *const RSCTABLE[] = {
 	RSCUS,								/* UK */
 	RSCES,								/* Spanish */
 	RSCIT,								/* Italian */
-	RSCUS,								/* supposed to be SWEDISH    */
+	RSCSV,								/* supposed to be SWEDISH    */
 #if !BINEXACT
-	RSCFR,								/* Switzerland (French)  */
-	RSCDE,								/* Switzerland (German)  */
+	RSCSF,								/* Switzerland (French)  */
+	RSCSG,								/* Switzerland (German)  */
 	RSCTR,								/* Turkish */
 	RSCFI,								/* Finnish */
 	RSCNO,								/* Norwegian */

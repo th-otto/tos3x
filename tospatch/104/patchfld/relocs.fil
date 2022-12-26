@@ -3,101 +3,105 @@
 ;    and affects all addresses >= $00fc3e6a/03e6a
 ; .d2 is caused by different time/date formats in desktop,
 ;    and affects all addresses >= $00fd7dd0/17dd0
+; .d3 is caused by different length of desktop data segment,
+;    and affects all addresses >= $00feb116/2b116
 _SWITCH .NATION
 
   _CASE .USA:
     .d1 = -5A
     .d2 = -32
-    .INFDATA =
+    .d3 = -2E
     .RSC_TAB = 2BA10
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FBD4
+    .TOS_INFO = 2D1A8
 
   _CASE .FRG:
     .d1 = 0
     .d2 = 0
-    .INFDATA = 2BA3E
+    .d3 = 0
     .RSC_TAB = 2BA3E
-    .TOSINFO_OFS = 1
     .ROMTOP  = 2FC64
+    .TOS_INFO = 2D1D7
 
   _CASE .FRA:
     .d1 = 1E
     .d2 = 1E
-    .INFDATA = 2BA3E
+    .d3 = 1E
     .RSC_TAB = 2BA5C
-    .TOSINFO_OFS = 1B71
     .ROMTOP  = 2FF32
+    .TOS_INFO = 2D32A
 
   _CASE .UK:
     .d1 = -5A
     .d2 = -32
-    .INFDATA = 2BA3E
+    .d3 = -2E
     .RSC_TAB = 2BA10
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FBD4
+    .TOS_INFO = 2D1A8
 
   _CASE .SPA:
     .d1 = 2C
     .d2 = 2C
-    .INFDATA = 
+    .d3 = 2C
     .RSC_TAB = 2BA6A
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FE84
+    .TOS_INFO = 2D2FE
 
   _CASE .ITA:
     .d1 = 0E
     .d2 = 0E
-    .INFDATA = 
+    .d3 = 0E
     .RSC_TAB = 2BA4C
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FDFE
+    .TOS_INFO = 2D2B1
 
   _CASE .SWE:
     .d1 = 1E
     .d2 = 1E
-    .INFDATA = 
+    .d3 = 1E
     .RSC_TAB = 2BA5C
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FD36
+    .TOS_INFO = 2D257
 
   _CASE .SWF:
     .d1 = 2C
     .d2 = 2C
-    .INFDATA = 
+    .d3 = 2C
     .RSC_TAB = 2BA6A
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FF40
+    .TOS_INFO = 2D339
 
   _CASE .SWG:
     .d1 = 2C
     .d2 = 2C
-    .INFDATA = 
+    .d3 = 2C
     .RSC_TAB = 2BA6A
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FC90
+    .TOS_INFO = 2D203
 
   _CASE .CZE:
     .d1 = 0
     .d2 = 0
-    .INFDATA = 
+    .d3 = 0
     .RSC_TAB = 2BA3E
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FC64
+    .TOS_INFO = 2D1AB
 
   _CASE .HOL:
-    .d1 = -5A
+    .d1 = -5E
     .d2 = -36
-    .INFDATA = 
+    .d3 = -32
     .RSC_TAB = 2BA0C
-    .TOSINFO_OFS = 
     .ROMTOP  = 2FDD8
+    .TOS_INFO = 2D22B
 
   _DEFAULT:
     _ERROR "unsupported country"
 _ENDSWITCH
 
 .RSC_LEN  = .ROMTOP-.RSC_TAB
+
+.INSTALL_RSC = 277B6+.d2
 
 ;*******************************************************************************
 ;*******************************************************************************
@@ -121,5 +125,5 @@ _ENDSWITCH
 !28F52+.d2 .. 29154+.d2 ; 8x8 font offsets
 !29154+.d2 .. 29954+.d2 ; 8x8 font data
 !29954+.d2 .. 2A954+.d2 ; 8x16 font data
+!2A9AE+.d2 .. 2ADE6+.d2 ; VDI patterns
 !.RSC_TAB .. .ROMTOP ; resource data
-

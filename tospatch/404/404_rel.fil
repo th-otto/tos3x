@@ -158,21 +158,97 @@
 ;* nach einer Idee von Andreas Kromke (KAOS 1.2 bzw. KAOS 1.4).
 ;* Die Reloc-Korrekturen unterstÅtzen TOS-LÑngen bis $100000.
 
-?4DF3C,51574
-!1D4C,1EAC,2978,3A0E,5E8A,5EC2,8E7C,9C36,B05A,B064,B886,B890,BC7E
-!BC88,C1EA,C1F6,C296,C2A0,C2CA,C2D6,C2E6,C2F4,C36C,C37A,C4E4,C4EE,C50C
-!C516,CB0C,CB16,CC2E,CC38,CC52,CC5C,DC82,DC94,1100A,11016,110AE,11124
-!1112A,11212,19540,19A56,19D58,19FA4,1A2DC,1A64A,1BC30,1BD70,1BDE6
-!1C0EA,1DD16,1E26A,1E41E,2161C,22A62,23082,2321E,24006,2460A,25F96
-!26F48,277D0,27B9A,27C86,331BC,33B8E,35AF0,35B12,39B3E,39C58,39C82
-!3A032,40A4E,46CBC,47104,4725C,472E8,496C8,49952,4B092,4B094,4B75A,4B75C
-!4D388,4D4F0,4D790,4D794,4D798,4D79C,4D7A0,4D7A4,4D7A8
-!4D7AC,4D990,4D994,4D998,4D99C,4D9A0,4D9A4,4D9A8,4D9AC
+?4DF3C
+?51574
+
+!1D4C ; andi.b    #$EF,d0
+!1EAC ; move.b    #$EC,$FFF0001D
+!2978 ; move.b    #$EF,14(a2)
+!3A0E ; move.b    #$EF,d2
+!5E8A ; andi.b    #$EF,d0
+!5EC2 ; andi.b    #$EF,d0
+!8E7C ; jmp disp
+!9C36 ; move.w    68(a4),238(a0)
+!B05A ; move.w    226(a0),(a7)
+!B064 ; move.w    224(a0),-(a7)
+!B886 ; move.w    226(a0),(a7)
+!B890 ; move.w    224(a0),-(a7)
+!BC7E ; move.w    226(a0),(a7)
+!BC88 ; move.w    224(a0),-(a7)
+!C1EA ; muls.w    224(a1),d0
+!C1F6 ; divs.w    226(a1),d0
+!C296 ; move.w    224(a0),d0
+!C2A0 ; move.w    226(a1),d1
+!C2CA ; muls.w    224(a1),d0
+!C2D6 ; divs.w    226(a1),d0
+!C2E6 ; move.w    226(a0),d6
+!C2F4 ; move.w    224(a0),-(a7)
+!C36C ; move.w    226(a0),d6
+!C37A ; move.w    224(a0),-(a7)
+!C4E4 ; move.w    224(a0),(a7)
+!C4EE ; move.w    226(a0),-(a7)
+!C50C ; move.w    226(a0),(a7)
+!C516 ; move.w    224(a0),-(a7)
+!CB0C ; move.w    224(a0),(a7)
+!CB16 ; move.w    226(a0),-(a7)
+!CC2E ; move.w    226(a0),(a7)
+!CC38 ; move.w    224(a0),-(a7)
+!CC52 ; move.w    226(a0),(a7)
+!CC5C ; move.w    224(a0),-(a7)
+!DC82 ; move.w    -2(a6),228(a0)
+!DC94 ; move.w    d0,238(a0)
+!1100A ; move.w    14(a5),224(a0)
+!11016 ; move.w    16(a5),226(a0)
+!1106a .. 1146a ; colors
+!19540 ; cmpi.b    #$E5,(a3)
+!19A56 ; cmpi.b    #$E5,d5
+!19D58 ; cmpi.b    #$E5,d6
+!19FA4 ; cmpi.b    #$E5,d0
+!1A2DC ; move.b    #$E5,(a0)
+!1A64A ; move.b    #$E5,(a0)
+!1BC30 ; cmpi.b    #$E5,(a3)
+!1BD70 ; cmpi.b    #$E5,d0
+!1BDE6 ; cmpi.b    #$E5,(a3)
+!1C0EA ; movem.l   (a7)+,d5-d7
+!1DD16 ; jmp disp
+!1E26A ; movem.l   -12(a6),d5-d7
+!1E41E ; movem.l   (a7)+,d5-d7
+!2161C ; movem.l   (a7)+,d5-d7
+!22A62 ; movem.l   (a7)+,d5-d7
+!23082 ; movem.l   (a7)+,d5-d7
+!2321E ; movem.l   (a7)+,d5-d7
+!24006 ; movem.l   (a7)+,d5-d7
+!2460A ; movem.l   (a7)+,d5-d7
+!25F96 ; movem.l   (a7)+,d5-d7
+!26F48 ; movem.l   (a7)+,d5-d7
+!277D0 ; movem.l   (a7)+,d5-d7
+!27B9A ; movem.l   (a7)+,d5-d7
+!27C86 ; movem.l   (a7)+,d5-d7
+!331BC ; movem.w   46(a7),d5-d7
+!33B8E ; movem.l   36(a7),d5-d7
+!35AF0 ; andi.w    #$FF7F,224(a5)
+!35B12 ; ori.w     #$0080,224(a5)
+!39B3E ; ori.w     #$0080,224(a4)
+!39C58 ; andi.w    #$FF7F,224(a4)
+!39C82 ; ori.w     #$0080,224(a4)
+!3A032 ; move.b    #$E9,(a5)
+!40A4E ; movea.l   228(a4),a0
+!46CBC ; movea.l   228(a5),a0
+!47104 ; movea.l   228(a5),a0
+!4725C ; movea.l   228(a5),a1
+!472E8 ; movea.l   228(a5),a0
+
+!49952 ; data
+!4D388 ; data
+!4D4F0 ; data
+!4d5d0..4d9d0 ; Color-Map-Table
 
 !12BC..12DC   ;Bombenimage (32 Bytes)
 !49434..4983C ;Atari-Logo (1032 Bytes)
 !49B96..4A916 ;Keyboard-Tabellen 0-8 (9 * (3 * 128) = 3456 Bytes)
+!4b046..4b248 ;6x6 offsets
 !4B248..4B6C8 ;Fontimage 6x6  (1152 Bytes)
+!4b722..4b924 ;8x8 offsets
 !4B924..4C124 ;Fontimage 8x8  (2048 Bytes)
 !4C124..4D124 ;Fontimage 8x16 (4096 Bytes)
 !4D5D0..4D9D0 ;Color-Map-Table und Color-Remap-Table (2*512 Bytes = 1024 Bytes)
