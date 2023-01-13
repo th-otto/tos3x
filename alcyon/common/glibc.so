@@ -1,0 +1,3 @@
+/* GNU ld script  */
+OUTPUT_FORMAT(elf64-x86-64)
+GROUP ( /lib64/libc.so.6 /lib64/libdl.so.2 /usr/lib64/libc_nonshared.a AS_NEEDED ( /lib64/ld-linux-x86-64.so.2 ) )

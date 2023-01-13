@@ -8,6 +8,7 @@
 /*
  *	C68 Parser - include file
  */
+#include "../common/linux/libcwrap.h"
 #include "../include/compiler.h"
 #include <stdio.h>
 #include <stdint.h>

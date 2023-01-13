@@ -5,6 +5,7 @@
     San Diego, Ca.  92121
 */
 
+#include "../common/linux/libcwrap.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <cout.h>

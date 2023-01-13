@@ -18,10 +18,10 @@ all: $(PROGRAMS)
 include SRCFILES
 
 link68$(EXEEXT): $(LINK_OBJS)
-	$(AM_V_LD)$(LD) $(LINK_OBJS) $(LDFLAGS) -o $@
+	$(AM_V_LD)$(LD) $(LINK_OBJS) $(LDFLAGS) $(GLIBC_SO) -o $@
 
 relmod$(EXEEXT): $(RELMOD_OBJS)
-	$(AM_V_LD)$(LD) $(RELMOD_OBJS) $(LDFLAGS) -o $@
+	$(AM_V_LD)$(LD) $(RELMOD_OBJS) $(LDFLAGS) $(GLIBC_SO) -o $@
 
 reldump$(EXEEXT): $(RELDUMP_OBJS)
 	$(AM_V_LD)$(LD) $(RELDUMP_OBJS) $(LDFLAGS) -o $@

@@ -21,16 +21,16 @@ all: $(PROGRAMS)
 include SRCFILES
 
 size68$(EXEEXT): $(SIZE_OBJS)
-	$(AM_V_LD)$(LD) $(SIZE_OBJS) $(LDFLAGS) -o $@ $(LIBS)
+	$(AM_V_LD)$(LD) $(SIZE_OBJS) $(LDFLAGS) $(GLIBC_SO) -o $@ $(LIBS)
 
 nm68$(EXEEXT): $(NM_OBJS)
-	$(AM_V_LD)$(LD) $(NM_OBJS) $(LDFLAGS) -o $@ $(LIBS)
+	$(AM_V_LD)$(LD) $(NM_OBJS) $(LDFLAGS) $(GLIBC_SO) -o $@ $(LIBS)
 
 ar68$(EXEEXT): $(AR_OBJS)
-	$(AM_V_LD)$(LD) $(AR_OBJS) $(LDFLAGS) -o $@ $(LIBS)
+	$(AM_V_LD)$(LD) $(AR_OBJS) $(LDFLAGS) $(GLIBC_SO) -o $@ $(LIBS)
 
 analyze$(EXEEXT): $(ANALYZE_OBJS)
-	$(AM_V_LD)$(LD) $(ANALYZE_OBJS) $(LDFLAGS) -o $@ $(LIBS)
+	$(AM_V_LD)$(LD) $(ANALYZE_OBJS) $(LDFLAGS) $(GLIBC_SO) -o $@ $(LIBS)
 
 dist::
 	$(CP) -a $(SRCS) $(EXTRA_DIST1) $(top_srcdir)/$(DISTDIR2)/$(subdir)

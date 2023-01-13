@@ -19,7 +19,7 @@ all: $(PROGRAMS)
 include SRCFILES
 
 as68$(EXEEXT): $(AS68_OBJS)
-	$(AM_V_LD)$(CC) ${CFLAGS} $(AS68_OBJS) ${LIBS} $(LDFLAGS) -o $@
+	$(AM_V_LD)$(CC) ${CFLAGS} $(AS68_OBJS) ${LIBS} $(LDFLAGS) $(GLIBC_SO) -o $@
 
 install: all
 	$(CP) $(PROGRAMS) $(BIN)

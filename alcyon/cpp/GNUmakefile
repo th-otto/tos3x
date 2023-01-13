@@ -15,7 +15,7 @@ PROGRAMS = cp68$(EXEEXT)
 all: $(PROGRAMS)
 
 cp68$(EXEEXT): ${OBJS}
-	$(AM_V_LD)${CC} ${CFLAGS} ${OBJS} ${LIBS} $(LDFLAGS) -o $@
+	$(AM_V_LD)${CC} ${CFLAGS} ${OBJS} ${LIBS} $(GLIBC_SO) $(LDFLAGS) -o $@
 
 install: all
 	$(CP) $(PROGRAMS) $(BIN)

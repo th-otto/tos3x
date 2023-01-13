@@ -19,7 +19,7 @@ all: $(PROGRAMS)
 include SRCFILES
 
 c168$(EXEEXT): $(C168_OBJS)
-	$(AM_V_LD)$(CC) ${CFLAGS} $(C168_OBJS) ${LIBS} $(LDFLAGS) -o $@
+	$(AM_V_LD)$(CC) ${CFLAGS} $(C168_OBJS) ${LIBS} $(LDFLAGS) $(GLIBC_SO) -o $@
 
 install: all
 	$(CP) $(PROGRAMS) $(BIN)

@@ -20,7 +20,7 @@ all: $(PROGRAMS)
 include SRCFILES
 
 c068$(EXEEXT): $(C068_OBJS)
-	$(AM_V_LD)$(CC) ${CFLAGS} $(C068_OBJS) ${LIBS} $(LDFLAGS) -o $@
+	$(AM_V_LD)$(CC) ${CFLAGS} $(C068_OBJS) ${LIBS} $(LDFLAGS) $(GLIBC_SO) -o $@
 
 install: all
 	$(CP) $(PROGRAMS) $(BIN)

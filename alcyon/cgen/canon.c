@@ -20,6 +20,7 @@ PP(struct tnode **tpp;)						/* pointer to tree */
 	register int32_t rval, lval;
 	short anylong, lconst;
 
+	lconst = 0;
 	rval = 0; /* quiet compiler */
 	tp = *tpp;
 	op = tp->t_op;
