@@ -41,6 +41,7 @@ uint16_t crysbind PROTO((int16_t opcode, intptr_t pglobal, uint16_t *int_in, int
 /* 306de: 00e1a2d2 */
 /* 104de: 00fdf10c */
 /* 106de: 00e20a78 */
+/* 404: 00e1ffc4 */
 uint16_t crysbind(P(int16_t) opcode, P(intptr_t) pglobal, P(uint16_t *) int_in, P(int16_t *) int_out, P(VOIDPTR *) addr_in)
 PP(int16_t opcode;)
 PP(register intptr_t pglobal;)
@@ -536,6 +537,7 @@ PP(register VOIDPTR *addr_in;)
 /* 206de: 00e172a4 */
 /* 104de: 00fdf894 */
 /* 106de: 00e2133a */
+/* 404: 00e20be0 */
 VOID xif(P(intptr_t) pcrys_blk)
 PP(intptr_t pcrys_blk;)
 {
