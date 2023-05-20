@@ -157,7 +157,11 @@ sh_start:
 	clr.w	_sh_doexec
 	clr.w	_sh_iscart
 #if TOSVERSION >= 0x400
+#if CT2
+	move.w	#$1a,_d_rezword		/* default resolution for CT2 */
+#else
 	move.w	#$82,_d_rezword		/* default resolution for sparrow */
+#endif
 #endif
 
 #if DOWARNING

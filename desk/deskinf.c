@@ -59,7 +59,9 @@ VOID m_infpath(P(char *)buffer)
 PP(char *buffer;)
 {
 	strcpy(buffer, infpath);			/* C:\NEWDESK.INF */
+#if !CT2
 	buffer[0] = (isdrive() & 0x04) ? 'C' : 'A';
+#endif
 }
 
 

@@ -197,6 +197,9 @@ _main:
         move.w #$0100,(DMA_CTRL).w /* reset ACSI chip... */
         move.w #$0000,(DMA_CTRL).w /* ...leave in read state. */
 #endif
+#if CT2
+	    jmp $010001e0
+#else
 #if TOSVERSION >= 0x400
 		move.w ($FFFF8006).w,d0 /* read to auto-config mem cntrlr */
 #endif
@@ -204,6 +207,7 @@ _main:
 		nop
 #else
         reset                  /* reset all hardware */
+#endif
 #endif
 
 #if TOSVERSION >= 0x400

@@ -58,6 +58,7 @@ $(top_srcdir)/common/config.h: $(top_srcdir)/config.mak ${MAKEFILE}
 	$(AM_V_at)echo '# define BINEXACT $(BINEXACT)' >> $@
 	$(AM_V_at)echo '#endif' >> $@
 	$(AM_V_at)echo '#define RAMVERSION $(RAMVERSION)' >> $@
+	$(AM_V_at)echo '#define CT2 0' >> $@
 	$(AM_V_at)echo '#include "ctrycode.h"' >> $@
 	$(AM_V_at)echo '#if !BINEXACT' >> $@
 	$(AM_V_at)echo '#include "localcnf.h"' >> $@

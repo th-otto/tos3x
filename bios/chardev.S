@@ -1826,6 +1826,22 @@ initdevstables:
         move.w    #rs232devs,ABSW(bcmap_root+4) /* bcmap_root.maptabsize */
 #if !TTMFP_SUPPORT
         moveq     #1,d0                         /* only MFP RS232 is available */
+#if CT2
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+#else
         movea.l   sp,a1
         movea.l   ABSW(_buserror),a2
         move.l    #initdevnoscc,ABSW(_buserror)
@@ -1834,6 +1850,7 @@ initdevstables:
 initdevnoscc:
         movea.l  a1,sp
         move.l    a2,ABSW(_buserror)
+#endif
         move.w    d0,ABSW(bcmap_root+4)
 #endif
         lea.l     bcondevs(pc),a1
@@ -3669,9 +3686,24 @@ no020_2:
         TO_TTR1_A0
 coldboo0:
 #else
+#if CT2
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+		nop
+#else
         TO_TC(zero2)   /* disable PMMU and address translation */
         TO_TTR0(zero2)
         TO_TTR1(zero2)
+#endif
 #endif
 /* copy erase routine to low memory */
         move.w    #(coldbend-coldboor+3)/4-1,d0

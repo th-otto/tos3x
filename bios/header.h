@@ -120,6 +120,13 @@
 #define OS_DOSDATE $1A68
 #endif
 
+#if CT2
+#undef OS_DATE
+#undef OS_DOSDATE
+#define OS_DATE $04021999
+#define OS_DOSDATE $2682
+#endif
+
 
 /* the PAL/NTSC flag */
 #if (OS_COUNTRY == CTRY_US) | TP_02

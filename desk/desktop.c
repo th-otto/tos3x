@@ -93,7 +93,9 @@ BOOLEAN re_icon(NOTHING)
 	LBCOPY(temp, pglobal, 30);			/* save the pglobal */
 
 	strcpy(buf2, icndata);
+#if !CT2
 	buf2[0] = (isdrive() & 0x4) ? 'C' : 'A';
+#endif
 
 	if (ctldown) /* WTF; this is from AES */
 		return FALSE;
