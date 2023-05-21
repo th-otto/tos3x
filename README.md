@@ -1,11 +1,24 @@
-******************************************************************************
-* Directory Structure
-******************************************************************************
+# What is this?
+
+These are the sources used to build orginal ROM versions of TOS 2.06/3.06,
+the OS used by Atari STE and TT.
+
+The goal of this project was to actually be able to
+regenerate the original ROM images. 
+The sources are not meant to be a base for serious further development, the Alcyon
+compiler tools that were originally used are just too outdated and buggy.
+They could be used to implement smaller patches/fixes.
+
+It is therefor mainly intended to be used as reference.
+
+
+
+# Directory Structure
 
 - bin/tos:  
   Prebuild binaries of tools used in the build process. These are
   essentially identical to the ones from the developer kit, with 
-  modifications as described in alcyon/README. Sources of almost
+  modifications as described in [alcyon/README](). Sources of almost
   all of these tools are found in the alcyon directory.
 
   It also contains a few tools that are not part of the developer-kit,
@@ -17,6 +30,9 @@
   in this directory is just a shell script that recognizes a few of
   the usual unix cc switches, and translates them to call the various
   alcyon executables.
+
+- bin/win32:  
+  Same tools as above, but compiled for windows-32bit.
 
 - include:  
   Include files for the C compiler. Only a few of them are actually
@@ -77,9 +93,8 @@
 
 (the contents of the alcyon directory are now available as a separate archive)
 
-******************************************************************************
-* Assembler sources
-******************************************************************************
+
+# Assembler sources
 
 - Assembler sources are written in a format that is accepted
   both by as68 and by the GNU assembler with the --mri option.
@@ -105,35 +120,32 @@
   to numerous bugs. Either use the fixed version from the bin
   directory or try some other assembler.
 
-******************************************************************************
-* Supported versions
-******************************************************************************
+
+# Supported versions
 
 BIOS, VDI, GEMDOS, AES, DESKTOP: 2.06, 2.08, 3.06
 2.08 is 2.06 modified for ST-Book, it identifies itself as 2.06 though
 
-******************************************************************************
-* Supported language versions
-******************************************************************************
 
-us - USA
-de - Germany
-fr - France
-uk - United Kingdom (uses US resources)
-es - Spain (no ROM yet found to verify)
-it - Italy (no ROM yet found to verify)
-se - Sweden
-fi - Finland (uses swedish keyboard and resources)
-no - Norway (uses swedish keyboard and resources)
-sf - Switzerland (French) (uses french keyboard and resources)
-sg - Switzerland (German) (uses german keyboard and resources)
+# Supported language versions
 
-pl - Poland (only unofficial version 3.06 found on the net)
-cz - Czech (originally was a patched german version)
+- us - USA
+- de - Germany
+- fr - France
+- uk - United Kingdom (uses US resources)
+- es - Spain (no ROM yet found to verify)
+- it - Italy (no ROM yet found to verify)
+- se - Sweden
+- fi - Finland (uses swedish keyboard and resources)
+- no - Norway (uses swedish keyboard and resources)
+- sf - Switzerland (French) (uses french keyboard and resources)
+- sg - Switzerland (German) (uses german keyboard and resources)
 
-******************************************************************************
-* How to compile
-******************************************************************************
+- pl - Poland (only unofficial version 3.06 found on the net)
+- cz - Czech (originally was a patched german version)
+
+
+# How to compile
 
 First off to clarify: the goal of this project was to actually be able to
 regenerate the original ROM images. Most parts of the sources used herein were
