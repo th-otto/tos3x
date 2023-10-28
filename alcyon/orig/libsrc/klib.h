@@ -18,7 +18,7 @@
 #define	getc(f)	xgetc((FILE *)(f))
 #define	getw(f)	xgetw((FILE *)(f))
 #define	fcreat	xfcreat
-#define	putw(w)	xputw(w, (FILE *)(f))
+#define	putw(w, f)	xputw(w, (FILE *)(f))
 #define putc(c, f)	xputc(c, (FILE *)(f))
 #ifdef __ALCYON__
 #define putchar(c) fputc(c, (FILE *)stdout) /* BUG: fputc uses struct _iobuf, not struct iob */

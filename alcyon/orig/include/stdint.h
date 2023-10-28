@@ -61,6 +61,7 @@ typedef uint32_t           uintmax_t;
 # endif
 
 /* Values to test for integral types holding `void *' pointer.  */
+#ifndef __ALCYON__ /* does not work because of 8-chars identifier limit */
 # ifdef __MSHORT__
 # define INTPTR_MIN             (-2147483647L-1)
 # define INTPTR_MAX             (2147483647L)
@@ -84,6 +85,7 @@ typedef uint32_t           uintmax_t;
 # define PTRDIFF_MIN            (-2147483647-1)
 # define PTRDIFF_MAX            (2147483647)
 # endif
+#endif
 
 /* Limit of `size_t' type.  */
 # ifdef __MSHORT__

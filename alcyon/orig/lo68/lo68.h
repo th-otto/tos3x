@@ -73,7 +73,7 @@ char *savlmte;
 
 #define BSIZE	512
 
-struct buf{
+struct buf {
 	int fildes;
 	int nunused;
 	char *xfree;
@@ -110,18 +110,51 @@ char **firstsym;		/*points to entry in fsymp*/
 int extmatch;			/*matched an external in a library entry*/
 int noload;				/*dont load this lib file flag*/
 
+#define LIB1MAGIC	0xff6d
+#define LIB2MAGIC	0xff65
+#define LIB1HDSIZE	16
+#define LIB2HDSIZE	28
+
+struct lib2hdr
+{
+	char l2fname[14];
+	int32_t l2modti;
+	char l2userid;
+	char l2gid;
+	short l2fimode;
+	int32_t l2fsize;
+	short l2junk;
+};
+
 #define NLIB	16		/*max # libraries to process*/
 int lbfictr[NLIB];		/*counts files loaded from one library*/
 int *libfctr;			/*points to lbfictr*/
 int32_t lbfioff[NFILE];	/*each file offset in library*/
 int32_t *libptr;			/*points to lbfioff*/
+
+#define	ARMAG	"!<arch>\n"
+#define	SARMAG	8
+
+#define	ARFMAG	"`\n"
+
+struct ar_hdr
+{
+	char ar_name[16];
+	char ar_date[12];
+	char ar_uid[6];
+	char ar_gid[6];
+	char ar_mode[8];
+	char ar_size[10];
+	char ar_fmag[2];
+};
+struct ar_hdr lib3_hdr;
+
 int libhdsize;
 #if 0
 struct libhdr libhd;	/* 15 apr 83, used to be int[13] */
 #else
 long  libhd[20];		/*length is max lib head size*/
 #endif
-struct hdr couthd;		/* [vlh] 4.1 declared */
 
 int undflg;
 char dafnc;
@@ -140,7 +173,6 @@ char *lastdup;
 char rtfnc;
 char rdfnc;
 int saverbits;
-int shortlflg;
 
 #define TWOKSHT		-1		/* 2k shared text */
 #define FOURKSHT	1	/* 4k shared text */

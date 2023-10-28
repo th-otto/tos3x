@@ -29,12 +29,13 @@
 
 #define lseek bug_lseek
 #include <osif.h>
-#include "lib.h"
+#include "../libsrc/lib.h"
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <portab.h>
 #include <fcntl.h>
+#include <option.h>
 #undef lseek
 int lseek PROTO((int fd, long offs, int whence));
 
@@ -64,6 +65,7 @@ PP(int len;)								/* Command length */
 	register char c;						/* Character temp */
 	FD *pfd;							/* File Desc temp */
 	char tmpbuf[30];					/* Filename temp */
+	int slen;
 
 	/* -> first free location */
 	argv2 = argv = (char **)sbrk(0);
@@ -76,12 +78,12 @@ PP(int len;)								/* Command length */
 		while (*s && isspace((UBYTE)*s))
 			++s;
 		/* End of line? */
-		if (!*s)
+		c = *s;
+		if (!(c))
 			break;
-		if (*s == '"' || *s == '\'')
+		if (strchr("\"'", c) != NULL)
 		{
 			/* Quoted string */
-			c = *s;
 			/* Find next */
 			p = strchr(s + 1, c);
 			if (p == NULL)
@@ -100,67 +102,48 @@ PP(int len;)								/* Command length */
 			if (s[i])
 				s[i++] = '\0';
 			/* Now do i/o scan */
-			switch (*s)
+			if (strchr(s, '?') ||	/* Wild */
+				strchr(s, '*'))		/* Cards? */
 			{
-			case '<':
-				/* Redirecting input */
-				close(STDIN);
-				if (opena(s + 1, O_RDONLY) != STDIN)
-					_err("Cannot open ", s + 1);
-				break;
-
-			case '>':
-				/* Redirecting output */
-				close(STDOUT);
-				if (s[1] == '>')
-				{
-					/* Appending, try to open old */
-					/* BUG: lseek not declared, but returns long not int */
-					if (opena(s + 2, O_WRONLY) != STDOUT || -1 == lseek(STDOUT, 0L, SEEK_END))
-						_err("Cannot append ", s + 1);
-				} else
-				{
-					/* Try to open new */
-					if (creata(s + 1, 0) != STDOUT)
-						_err("Cannot create ", s + 1);
-				}
-				break;
-
-			default:
-
-				if (strchr(s, '?') ||	/* Wild */
-					strchr(s, '*'))		/* Cards? */
-				{
-					/* Use unused channel */
-					pfd = _getccb(STDERR + 1);
-					/* Use buffer for DMA */
+				/* Use unused channel */
+				pfd = _getccb(STDERR + 1);
+				/* Use buffer for DMA */
 #if 1 /* BUG: original library contained call to __BDOS */
-					__BDOS(SETDMA, (long)(pfd->buffer));
+				__BDOS(SETDMA, (long)(pfd->buffer));
 #else
-					__OSIF(SETDMA, pfd->buffer);
+				__OSIF(SETDMA, pfd->buffer);
 #endif
-					/* Do the search */
-					c = __open(STDERR + 1, s, SEARCHF);
-					if (c == 0xff)
-						_err(s, ": No match");
-					/* Do search next's */
-					while (c != 0xff)
-					{
-						/* Convert file to ascii */
-						_toasc(pfd, c, tmpbuf);
-						/* Allocate area */
-						p = _salloc(strlen(tmpbuf) + 1);
-						/* Move in filename */
-						strcpy(p, tmpbuf);
-						/* Add this file to argv */
-						addargv(p);
-						c = __open(STDERR + 1, s, SEARCHN);
-					}
-				} else
+				/* Do the search */
+				c = __open(STDERR + 1, s, SEARCHF);
+				if (c == 0xff)
+					_err(s, ": No match");
+				
+				/* Do search next's */
+				slen = (int)strlen(s);
+				while (slen != 0)
 				{
-					/* save in argv */
-					addargv(s);
+					if (strchr("\\:", s[slen - 1]) != NULL)
+						break;
+					slen--;
 				}
+				while (c != 0xff)
+				{
+					/* Convert file to ascii */
+					_toasc(pfd, c, tmpbuf);
+					/* Allocate area */
+					p = _salloc(strlen(tmpbuf) + slen + 1);
+					/* Move in filename */
+					strncpy(p, s, slen);
+					p[slen] = '\0';
+					strcat(p, tmpbuf);
+					/* Add this file to argv */
+					addargv(p);
+					c = __open(STDERR + 1, s, SEARCHN);
+				}
+			} else
+			{
+				/* save in argv */
+				addargv(s);
 			}
 		}
 	}
@@ -207,6 +190,14 @@ PP(const char *s2;)
 static VOID addargv(P(register char *) ptr)
 PP(register char *ptr;)							/* -> Argument string to add */
 {
+	register char *p;
+	
+	if (ptr != NULL)
+	{
+		p = ptr;
+		while ((*p = tolower(*p)))
+			p++;
+	}
 	/* Load pointer */
 	*argv2 = ptr;
 	/* More room from heap */

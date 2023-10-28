@@ -2011,7 +2011,7 @@ PP(char *ofilname;)
 	dafnc = TFCHAR;
 	if (saverbits || dmprelocs)
 	{
-		gettempf(&rtbuf);				/* temp for text relocatin bits */
+		gettempf(&rtbuf);				/* temp for text relocation bits */
 		rtfnc = TFCHAR;
 		gettempf(&rdbuf);				/* temp for data relocation bits */
 		rdfnc = TFCHAR;

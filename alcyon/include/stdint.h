@@ -60,7 +60,7 @@ typedef uint32_t           uintmax_t;
 # define UINT32_MAX             (4294967295)
 # endif
 
-#if 0 /* does not work because of 8-chars identifer limit */
+#if 0 /* does not work because of 8-chars identifier limit */
 /* Values to test for integral types holding `void *' pointer.  */
 # ifdef __MSHORT__
 # define INTPTR_MIN             (-2147483647L-1)

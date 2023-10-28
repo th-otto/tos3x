@@ -1,0 +1,8 @@
+LO68_SRCS = lo68.c
+
+LO68_OBJS = $(LO68_SRCS:.c=.o)
+
+SRCS = $(LO68_SRCS) lo68.h
+
+EXTRA_DIST1 = Makefile SRCFILES
+EXTRA_DIST2 = GNUmakefile
