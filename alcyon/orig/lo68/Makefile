@@ -1,18 +1,18 @@
 include ../Makefile.cmn
 include ../Makefile.sil
 
-PROGRAMS = lo68$(EXEEXT)
+PROGRAMS = lo68$(EXEEXT) reloc$(EXEEXT)
 LIBS = ${LIBC}
 CPPFLAGS += -DGEMDOS
 
 all: $(PROGRAMS)
 
 include SRCFILES
-include optimize.mak
 
-LIB1OBJS = kputc.o kgetc.o kopen.o kcreat.o xmain.o trap.o xwmain.o open.o xopen.o
+LIB1OBJS = kputc.o kgetc.o kopen.o kcreat.o loxmain.o bdtrap.o xwmain.o loopen.o loxopen.o
 
 LIBOBJS = \
+		$(LIBSRC)crt0.o \
 		$(LIBSRC)kwritef.o \
 		$(LIBSRC)nofloat.o \
 		$(LIBSRC)optoff.o \
@@ -61,12 +61,26 @@ LIBOBJS = \
 		$(LIBSRC)xread.o \
 		$(LIBSRC)xwrite.o \
 		$(LIBSRC)lmul.o \
+		$(LIBSRC)fopen.o \
+		$(LIBSRC)open.o \
+		$(LIBSRC)xopen.o \
+		$(LIBSRC)fread.o \
+		$(LIBSRC)fseek.o \
+		$(LIBSRC)ftell.o \
+		$(LIBSRC)fwrite.o \
+		$(LIBSRC)getw.o \
+		$(LIBSRC)putw.o \
+		$(LIBSRC)filbuf.o \
+		$(LIBSRC)trap.o \
+		$(LIBSRC)fgetc.o \
+		$(LIBSRC)xnwmain.o \
+		$(LIBSRC)xmain.o \
 		$(empty)
 
 #lo68$(EXEEXT): crt0.o $(LO68_OBJS) $(LIBOBJS) ${MAKEFILE}
 #	$(AM_V_LD)$(LD) $(LDFLAGS) -h 7 -o $@ $(CRT0) $(LO68_OBJS) $(LIBOBJS)
 
-lo68.rel: crt0.o $(LO68_OBJS) $(LIB1OBJS) lo68.lnk ${MAKEFILE}
+lo68.rel: locrt0.o $(LO68_OBJS) $(LIB1OBJS) lo68.lnk ${MAKEFILE}
 	$(CP) $(LIBOBJS) .
 	$(RM) $@
 	$(LINK68) [co[lo68.lnk]]
@@ -76,17 +90,31 @@ lo68$(EXEEXT): lo68.rel
 	$(PRGFLAGS) 7 7 $@
 
 
-crt0.o: crt0.S
+reloc.rel: crt0.o $(RELOC_OBJS) $(LIB1OBJS) reloc.lnk ${MAKEFILE}
+	$(CP) $(LIBOBJS) .
+	$(RM) $@
+	$(LINK68) [co[reloc.lnk]]
+
+reloc$(EXEEXT): reloc.rel
+	$(RELMOD) $< $@
+	$(PRGFLAGS) 7 7 $@
+
+
+locrt0.o: locrt0.S
+bdtrap.o: bdtrap.S
 myflush.o: myflush.c
 kgetc.o: kgetc.c
 kputc.o: kputc.c
 kopen.o: kopen.c
 kcreat.o: kcreat.c
-xmain.o: xmain.c
+loxmain.o: loxmain.c
 xwmain.o: xwmain.c
+loopen.o: loopen.c
+loxopen.o: loxopen.c
 
 check::
 	cmp lo68$(EXEEXT) ${BIN}lo68$(EXEEXT)
+	cmp reloc$(EXEEXT) ${BIN}reloc$(EXEEXT)
 
 clean::
 	$(RM) *.o *.a $(PROGRAMS:.ttp=.s) *.i *.1 *.2 *.rel *.mod $(PROGRAMS)

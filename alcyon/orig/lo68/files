@@ -1,0 +1,134 @@
+../bin/reloc.prg: text 0x00002950, data 0x000005b0, bss 0x000023ac
+0x00000000 - 0x0000067e <unknown>
+0x0000067e - 0x00000918 xnwmain.o
+             0x0000067e ___main
+             0x00000910 _nowildc
+0x00000918 - 0x00000920 fdecls.o
+             0x00000918 ___fdecl
+0x00000920 - 0x00000970 <unknown>
+0x00000970 - 0x00000ad6 fopen.o
+             0x00000970 __fopen
+             0x00000a8c _fopen
+             0x00000aa4 _fopena
+             0x00000abc _fopenb
+0x00000ad6 - 0x00000b24 fread.o
+             0x00000ad6 _fread
+0x00000b24 - 0x00000b8c fseek.o
+             0x00000b24 _fseek
+             0x00000b78 _rewind
+0x00000b8c - 0x00000c64 ftell.o
+             0x00000b8c _ftell
+0x00000c64 - 0x00000cb4 fwrite.o
+             0x00000c64 _fwrite
+0x00000cb4 - 0x00000ce6 getw.o
+             0x00000cb4 _getw
+0x00000ce6 - 0x00000d7e xmain.o
+             0x00000ce6 __main
+0x00000d7e - 0x00000de4 optoff.o
+             0x00000d7e __optoff
+0x00000de4 - 0x00000e26 scanf.o
+             0x00000de4 _scanf
+             0x00000e06 _fscanf
+0x00000e26 - 0x00000e68 putw.o
+             0x00000e26 _putw
+0x00000e68 - 0x00000ea0 fgetc.o
+             0x00000e68 _fgetc
+0x00000ea0 - 0x00000f96 filbuf.o
+             0x00000ea0 __filbuf
+0x00000f96 - 0x0000101e read.o
+             0x00000f96 _read
+0x0000101e - 0x00001140 readasc.o
+             0x0000101e __rdasc
+             0x000010fe __cr_col
+0x00001140 - 0x000011ae readbin.o
+             0x00001140 __rdbin
+0x000011ae - 0x000012ae creat.o
+             0x000011ae __creat
+             0x00001264 _creat
+             0x0000127c _creata
+             0x00001294 _creatb
+0x000012ae - 0x000012c6 exit.o
+             0x000012ae _exit
+0x000012c6 - 0x000012f8 cleanup.o
+             0x000012c6 __cleanu
+0x000012f8 - 0x00001350 fclose.o
+             0x000012f8 _fclose
+0x00001350 - 0x000013d8 close.o
+             0x00001350 _close
+0x000013d8 - 0x000013e0 ctype.o
+             0x000013d8 ____atab
+0x000013e0 - 0x0000147a fflush.o
+             0x000013e0 _fflush
+0x0000147a - 0x000015be open.o
+             0x0000147a __open
+             0x00001574 _open
+             0x0000158c _opena
+             0x000015a4 _openb
+0x000015be - 0x00001630 lseek.o
+             0x000015be _lseek
+             0x0000161a _tell
+0x00001630 - 0x00001abc doprt.o
+             0x00001630 __doprt
+0x00001abc - 0x00001b2c fputn.o
+             0x00001abc _fputn
+0x00001b2c - 0x00001b72 fputc.o
+             0x00001b2c _fputc
+0x00001b72 - 0x00001cc0 flsbuf.o
+             0x00001b72 __flsbuf
+0x00001cc0 - 0x00001d3c isatty.o
+             0x00001cc0 _isatty
+             0x00001cf4 _isdev
+             0x00001d20 _ttyname
+0x00001d3c - 0x00002048 malloc.o
+             0x00001d3c _malloc
+             0x00001eca _free
+             0x00001fc8 _realloc
+0x00002048 - 0x00002058 mallocnd.o
+             0x00002048 _malloc_
+             0x00002050 __errmal
+0x00002058 - 0x000020ca prtint.o
+             0x00002058 ___prtin
+0x000020ca - 0x00002180 prtld.o
+             0x000020ca ___prtld
+0x00002180 - 0x000021ee prtshort.o
+             0x00002180 ___prtsh
+0x000021ee - 0x00002258 sbrk.o
+             0x000021ee _sbrk
+0x00002258 - 0x000022d6 write.o
+             0x00002258 _write
+0x000022d6 - 0x0000233c allocc.o
+             0x000022d6 __allocc
+             0x00002320 __freec
+0x0000233c - 0x000023cc chinit.o
+             0x0000233c __chinit
+             0x0000235e ___chini
+0x000023cc - 0x0000242e chkc.o
+             0x000023cc __chkc
+0x0000242e - 0x0000253e writeasc.o
+             0x0000242e __wrtasc
+0x0000253e - 0x000025b8 writebin.o
+             0x0000253e __wrtbin
+0x000025b8 - 0x000026fc xopen.o
+             0x000025b8 ___open
+             0x000026c8 _ucase
+0x000026fc - 0x00002726 strcat.o
+             0x000026fc _strcat
+0x00002726 - 0x00002748 strcpy.o
+             0x00002726 _strcpy
+0x00002748 - 0x0000276e strlen.o
+             0x00002748 _strlen
+0x0000276e - 0x00002776 <unknown>
+0x00002776 - 0x000027e8 stricmp.o
+             0x00002776 __strcmp
+0x000027e8 - 0x00002864 uldiv.o
+             0x000027e8 _uldiv
+0x00002864 - 0x00002874 blivot.o
+             0x00002864 _sw_
+0x00002874 - 0x000028b0 xread.o
+             0x00002874 __pc_rea
+0x000028b0 - 0x000028ec xwrite.o
+             0x000028b0 __pc_wri
+0x000028ec - 0x000028fc trap.o
+             0x000028ec _trap
+0x000028fc - 0x00002950 lmul.o
+             0x000028fc lmul

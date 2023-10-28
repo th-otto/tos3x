@@ -329,7 +329,6 @@ PP(char **argv;)
 		{
 			switch (*++pc)
 			{
-
 			case 'l':					/*library */
 				pc--;
 				break;
@@ -830,9 +829,7 @@ VOID addmte(P(NOTHING))
 
 int hash(P(NOTHING))
 {
-	register ht1,
-	 i;									/*temps */
-
+	register ht1, i;					/*temps */
 	register char *p;
 
 	ht1 = 0;
@@ -852,11 +849,8 @@ VOID pack(P(int *) apkstr, P(int *) apkptr)
 PP(int *apkstr;)
 PP(int *apkptr;)
 {
-
 	register int i;
-
-	register int *pkstr,
-	*pkptr;
+	register int *pkstr, *pkptr;
 
 	pkstr = apkstr;
 	pkptr = apkptr;
@@ -895,9 +889,7 @@ VOID addsizes(P(NOTHING))
 
 VOID savsymtab(P(NOTHING))
 {
-	register char **p1,
-	**p2;
-
+	register char **p1, **p2;
 	register i;
 
 	savlmte = lmte;
@@ -915,9 +907,7 @@ VOID savsymtab(P(NOTHING))
 /*restore the symbol table as it was when we last saved it*/
 VOID restsymtab(P(NOTHING))
 {
-	register char **p1,
-	**p2;
-
+	register char **p1, **p2;
 	register i;
 
 	lmte = savlmte;
@@ -1024,7 +1014,7 @@ VOID fixexts(P(NOTHING))
 		if (*(sx2 = sx1 + 1) == 0)		/*this chain empty */
 			continue;
 
-/* go thru symbols on chain*/
+		/* go thru symbols on chain*/
 		sx2 = *sx2;						/*first entry on this chain */
 		while (1)
 		{
@@ -1163,8 +1153,10 @@ PP(char *ap;)
 	close(rbuf.fildes);
 }
 
-/*make the outut file and write the header*/
 
+/*
+ * make the outut file and write the header
+ */
 VOID makeofile(P(NOTHING))
 {
 	int32_t l;
@@ -1322,7 +1314,6 @@ PP(int stat;)
 /* load files from a library.  the library is open in ibuf, the*/
 /* count of files to load is pointed to by libfctr, and the offset*/
 /* of each file is pointed to by libptr.*/
-
 VOID loadlib(P(NOTHING))
 {
 	register i, j;
@@ -1347,7 +1338,6 @@ VOID loadlib(P(NOTHING))
 
 /* do a long seek on buffer bp given a long file offset*/
 /* last argument indicates relative or absolute seek*/
-
 VOID lbseek(P(long) al, P(struct buf *)bp)
 PP(long al;)
 PP(struct buf *bp;)
@@ -1373,7 +1363,6 @@ PP(struct buf *bp;)
 /* so the external name must be looked on the global chains and*/
 /* the value of the matching symbol used. symptr points to the*/
 /* first symbol for the current file's symbol table*/
-
 int32_t extval(P(int) extno)
 PP(int extno;)
 {
@@ -1395,7 +1384,6 @@ PP(int extno;)
 
 /* look up the relocation base for an external symbol. must use same*/
 /* method as in extval for the same reasons (see comment above)*/
-
 VOID extbase(P(int) extno)
 {
 	register struct symtab *p;
@@ -1581,10 +1569,8 @@ PP(int libflg;)
 /* do the final writting to the output file*/
 /* copy the initialized data from the temp file to the output file*/
 /* write the symbol table to the output file*/
-
 VOID finalwr(P(NOTHING))
 {
-
 	if ((textsize + textstart) != textbase)
 	{
 		printf(": finalwr: text size error\n");
@@ -1597,7 +1583,7 @@ VOID finalwr(P(NOTHING))
 		cpdata(&rtbuf, rtfnc, textsize);
 		cpdata(&rdbuf, rdfnc, datasize);
 	}
-	myfflush(&obuf);
+	fflush(&obuf);
 	if (lseek(obuf.fildes, 14L, 0) < 0 || write(obuf.fildes, &stlen, 4) != 4)
 	{
 		printf(": output file write error\n");
@@ -1615,7 +1601,7 @@ PP(long size;)
 {
 	register j;
 
-	myfflush(pb);
+	fflush(pb);
 	close(pb->fildes);
 	TFCHAR = fnc;
 	if ((fopen(tfilname, pb, 1)) < 0)
@@ -1641,7 +1627,7 @@ VOID osymt(P(NOTHING))
 	if (sflag)							/*no symbol table desired */
 		return;
 
-/* now output the symbols deleting externals*/
+	/* now output the symbols deleting externals*/
 
 	for (p = bmte; p < lmte; p++)
 	{
@@ -1653,7 +1639,7 @@ VOID osymt(P(NOTHING))
 	}
 }
 
-/* output symbols in a form to be read by a debugger*/
+/* output symbols in a form to be read by a debugger */
 /* call with pointer to symbol table entry*/
 
 long ll = 0;
@@ -1752,8 +1738,8 @@ PP(struct symtab *ap;)
 	return (0);
 }
 
-/* test two symbol names for equality*/
 
+/* test two symbol names for equality */
 int eqstr(P(char *) ap1, P(char *) ap2)
 PP(char *ap1;)
 PP(char *ap2;)
@@ -1775,8 +1761,7 @@ PP(char *ap2;)
 }
 
 
-/* print an error message giving an external name*/
-
+/* print an error message giving an external name */
 VOID prextname(P(int) extno)
 PP(int extno;)
 {
