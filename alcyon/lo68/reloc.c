@@ -341,6 +341,14 @@ PP(char **argv;)					/* -> Arg strings       */
 	register int32_t i, l;				/* Temps            */
 	register FILE *ifp, *ofp,*rfp;		/* File pointers        */
 
+#ifdef __ALCYON__
+	/* symbols etoa and ftoa are unresolved */
+	asm("xdef _etoa");
+	asm("_etoa equ 0");
+	asm("xdef _ftoa");
+	asm("_ftoa equ 0");
+#endif
+
 	if (argc != 4 && argc != 3)		/* Gotta have right format  */
 	{
 		usage();						/* Print out nasty message  */

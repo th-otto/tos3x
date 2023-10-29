@@ -332,7 +332,6 @@ PP(register FILE *sp;)
  * do a long seek on buffer bp  given a long file offset
  *  last argument indicates relative or absolute seek
  */
-
 static VOID lbseek(P(int32_t) al, P(FILE *) bp)
 PP(int32_t al;)
 PP(FILE *bp;)
@@ -369,7 +368,7 @@ static BOOLEAN rdlibhdr(NOTHING)
 	register union alibhd *p;
 	register int i;
 	register FILE *fp = ibuf;
-	
+
 	p = &libhd;
 	switch (libhdsize)
 	{
@@ -579,6 +578,7 @@ PP(register unsigned int extno;)
 	}
 	return p;
 }
+
 
 /************************************************************************
  *
@@ -1010,12 +1010,12 @@ static VOID addsym(NOTHING)
 		}
 		p = lemt(girt);
 	 addtry2:
-	 	if (p == lmte)
-	 	{
+		if (p == lmte)
+		{
 			mmte();
 		} else
 		{
-		 	if (chnflg && (p->ovlnum != ROOT) &&
+			if (chnflg && (p->ovlnum != ROOT) &&
 				(lmte->ovlnum != ROOT) && (p->ovlnum != lmte->ovlnum))
 			{
 				p = nextsy(p->tlnk);	/* try again */
@@ -1606,7 +1606,8 @@ static int eqstr(P(const char *) ap1, P(const char *) ap2)
 PP(const char *ap1;)
 PP(const char *ap2;)
 {
-	register const char *p1, *p2;
+	register const char *p1;
+	register const char *p2;
 	register int i;
 
 	p1 = ap1;
@@ -1891,8 +1892,8 @@ PP(struct symtab *ap;)
 	p->vl1 = bsscomm;
 	p->ovlnum = ROOT;					/* the global goes in the root  */
 	bsscomm += (l + 1) & ~1;			/* always start at even address */
-	lemt(girt);							/* set ptrs for global chain    */
-	mmte();								/* add to global chain      */
+	lemt(girt);							/* set ptrs for global chain */
+	mmte();								/* add to global chain */
 }
 
 
@@ -2189,7 +2190,7 @@ PP(int32_t size;)
 {
 	register int j;
 	register FILE *pb;
-	
+
 	pb = *ppb;
 	fflush(pb);
 	fclose(pb);
@@ -2615,7 +2616,7 @@ static VOID buildf(NOTHING)
 	strcat(tfilname, tdisk);			/* Put disk name in first  */
 	strcat(tfilname, tfbase);			/* Put in filename now    */
 
-#ifdef HAVE_MKTEMP						/* On UNIX,           */
+#ifdef HAVE_MKTEMP
 	mktemp(tfilname);					/* Make a temp filename   */
 #endif
 
