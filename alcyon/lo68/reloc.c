@@ -295,6 +295,8 @@ PP(int32_t length;)							/* =  # bytes in the file   */
 		case TRELOC:					/* If relocatable, relocate */
 		case BRELOC:
 			j += bias;					/* Add in bias          */
+			loword = (unsigned short)j;
+			hiword = (unsigned short)((j >> 16) & 0xffff);
 			break;
 		case DABS:						/* If not relocatable, don't */
 		case INSABS:
