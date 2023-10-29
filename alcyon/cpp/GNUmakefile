@@ -9,6 +9,7 @@ LIBS =
 
 CPPFLAGS = -I../common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
+LDFLAGS += -s
 
 PROGRAMS = cp68$(EXEEXT)
 

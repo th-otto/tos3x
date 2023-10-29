@@ -85,5 +85,7 @@ WARN = \
 	$(AM_V_AS)$(AS) $(ASFLAGS) $(CPPFLAGS) -c -o $@ $<
 
 ifeq ($(shell uname -s),Linux)
+ifeq ($(CROSSPREFIX),)
 GLIBC_SO = $(top_srcdir)/common/glibc.so
+endif
 endif

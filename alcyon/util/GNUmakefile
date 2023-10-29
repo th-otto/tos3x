@@ -13,6 +13,7 @@ include ../Makefile.sil
 CPPFLAGS = -I ../common
 #CPPFLAGS += -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
+LDFLAGS += -s
 
 PROGRAMS = size68$(EXEEXT) nm68$(EXEEXT) ar68$(EXEEXT) analyze$(EXEEXT)
 

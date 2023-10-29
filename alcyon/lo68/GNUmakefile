@@ -10,6 +10,7 @@ include $(top_srcdir)/Makefile.sil
 CPPFLAGS = -I ../common -DGEMDOS
 #CPPFLAGS += -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
+LDFLAGS += -s
 
 PROGRAMS = lo68$(EXEEXT) reloc$(EXEEXT)
 

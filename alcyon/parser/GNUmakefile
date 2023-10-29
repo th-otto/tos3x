@@ -14,6 +14,7 @@ LIBS =
 CPPFLAGS = -I../common
 #CPPFLAGS += -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
+LDFLAGS += -s
 
 all: $(PROGRAMS)
 

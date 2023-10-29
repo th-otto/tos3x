@@ -10,6 +10,7 @@ include ../Makefile.sil
 CPPFLAGS = -I ../common -DGEMDOS
 #CPPFLAGS += -I $(INC)
 CFLAGS = $(OPTS) $(WARN)
+LDFLAGS += -s
 
 PROGRAMS = link68$(EXEEXT) relmod$(EXEEXT) reldump$(EXEEXT)
 
