@@ -1,0 +1,10 @@
+LO68_SRCS = lo68.c
+RELOC_SRCS = reloc.c
+
+LO68_OBJS = $(LO68_SRCS:.c=.o)
+RELOC_OBJS = $(RELOC_SRCS:.c=.o)
+
+SRCS = $(LO68_SRCS) $(RELOC_SRSC)
+
+EXTRA_DIST1 = Makefile SRCFILES
+EXTRA_DIST2 = GNUmakefile
