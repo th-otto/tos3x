@@ -61,7 +61,7 @@ struct ar_hdr
 
 struct symtab {
 	char name[SYNAMLEN];	/* symbol name */
-	short flags;			/* bit flags */
+	unsigned short flags;	/* bit flags */
 	int32_t vl1;			/* symbol value */
 	struct symtab *next;	/* global table link */
 	struct symtab *tlnk;	/* table link */
@@ -250,10 +250,9 @@ static char const etexstr[] = "_etext\0\0";
 static char const edatstr[] = "_edata\0\0";
 static char const eendstr[] = "_end\0\0\0\0";
 
-int ignflg;
-int debug;
-int exstat;
-int dmprelocs;
+static int ignflg;
+static int exstat;
+static int dmprelocs;
 
 static int32_t lbctr;
 static int32_t libfilsize;
@@ -806,7 +805,7 @@ PP(int libflg;)
 			}
 			if (ignflg == 0 && longf == 0 && (l1 & 0xffff8000L) && saof)
 			{
-				fprintf(stderr, ": short address overflow in %s\n", ifilname);
+				fprintf(stderr, ": short address overflow at %lx in %s\n", (long)tpc - 2, ifilname);
 				if (wasext)
 					prextname(j >> 3);
 				exstat = 1;
@@ -928,7 +927,9 @@ static VOID relocsym(NOTHING)
 	{
 		if (lmte->flags & SYEQ)			/* equated */
 			return;						/* abs */
-		fprintf(stderr, ": File Format error: Invalid symbol flags = %o\n", (int) lmte->flags);
+		if (lmte->flags == SYDF)
+			return;
+		fprintf(stderr, ": File Format error: Invalid symbol flags = %04x, symbol: \"%.*s\"\n", lmte->flags, SYNAMLEN, lmte->name);
 		endit(1);
 	}
 	lmte->vl1 += l;

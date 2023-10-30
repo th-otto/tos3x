@@ -27,8 +27,6 @@ reloc$(EXEEXT): $(RELOC_OBJS) ${MAKEFILE}
 install: all
 	$(CP) $(PROGRAMS) $(BIN)
 
-crt0.o: crt0.S
-
 check::
 
 dist::
