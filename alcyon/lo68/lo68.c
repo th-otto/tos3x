@@ -138,7 +138,11 @@ static int32_t textstart;
 static int32_t datastart;
 static int32_t bssstart;
 
-static char *ifilname;			/*points to name of current input file*/
+#define FNAMELEN 128
+
+static const char *ifilname;			/* points to name of current input file */
+static char ilibmem[FNAMELEN * 2 + 2];
+static const char *ilibname;
 
 #define NFILE	256		/* max # files we can process*/
 static struct symtab *fsymp[NFILE];		/* points to first symbol for each .o file */
@@ -440,6 +444,8 @@ static BOOLEAN rdlibhdr(NOTHING)
 	}
 	if (libhd.hdr2.l2fname[0] == '\0')
 		return FALSE;
+	sprintf(ilibmem, "%s(%s)", ilibname, p->hdr2.l2fname);
+	ifilname = ilibmem;
 	return TRUE;
 }
 
@@ -471,7 +477,7 @@ PP(char *apkptr;)
 
 	pkstr = (const short *)apkstr;
 	pkptr = (short *)apkptr;
-	for (i = 0; i < SYNAMLEN / (sizeof (*pkstr)); i++)
+	for (i = 0; i < (int)(SYNAMLEN / (sizeof (*pkstr))); i++)
 		*pkptr++ = *pkstr++;
 }
 
@@ -546,7 +552,7 @@ PP(struct symtab *amtpt;)
   lemtl:
 	p1 = (short *)mtpt->name;
 	p2 = (short *)lmte->name;
-	for (i = 0; i < SYNAMLEN / (sizeof (*p1)); i++)
+	for (i = 0; i < (int)(SYNAMLEN / (sizeof (*p1))); i++)
 	{
 		if (*p1++ != *p2++)
 		{
@@ -865,6 +871,7 @@ static VOID loadlib(NOTHING)
 	i = *libfctr++;
 	if (i == 0)
 		return;
+	ilibname = ifilname;
 	while (i--)
 	{
 		/* load the files */
@@ -927,9 +934,11 @@ static VOID relocsym(NOTHING)
 	{
 		if (lmte->flags & SYEQ)			/* equated */
 			return;						/* abs */
+#if 0
 		if (lmte->flags == SYDF)
 			return;
-		fprintf(stderr, ": File Format error: Invalid symbol flags = %04x, symbol: \"%.*s\"\n", lmte->flags, SYNAMLEN, lmte->name);
+#endif
+		fprintf(stderr, "Invalid symbol flag %04x, in %s, symbol: \"%.*s\"\n", lmte->flags, ifilname, SYNAMLEN, lmte->name);
 		endit(1);
 	}
 	lmte->vl1 += l;
@@ -1192,20 +1201,20 @@ static VOID searchlib(NOTHING)
 {
 	if (libfctr >= &lbfictr[NLIB])
 	{
-		fprintf(stderr, "too many libraries\n");
+		fprintf(stderr, "%s: too many libraries\n", ifilname);
 		endit(1);
 	}
 	/* no files from this library yet */
 	*libfctr = 0;
 	/* current library position - skip magic */
 	lbctr = 2;
+	ilibname = ifilname;
 	while (rdlibhdr())					/* read library file header */
 	{
 		/* save current state of symbol table */
 		savsymtab();
 		extmatch = 0;
 		noload = 0;
-		ifilname = libhd.hdr2.l2fname;
 		/* read the file header */
 		readhdr();
 		/* load this files symbol table & try match */

@@ -428,7 +428,7 @@ PP(char *apkptr;)
 
 	pkstr = (const short *)apkstr;
 	pkptr = (short *)apkptr;
-	for (i = 0; i < SYNAMLEN / (sizeof (*pkstr)); i++)
+	for (i = 0; i < (int)(SYNAMLEN / (sizeof (*pkstr))); i++)
 		*pkptr++ = *pkstr++;
 }
 
@@ -503,7 +503,7 @@ PP(struct symtab *amtpt;)
   lemtl:
 	p1 = (short *)mtpt->name;
 	p2 = (short *)lmte->name;
-	for (i = 0; i < SYNAMLEN / (sizeof (*p1)); i++)
+	for (i = 0; i < (int)(SYNAMLEN / (sizeof (*p1))); i++)
 	{
 		if (*p1++ != *p2++)
 		{

@@ -65,6 +65,7 @@ OPTS = -O2 -fomit-frame-pointer
 #
 WARN = \
 	-Wall \
+	-W \
 	-Wstrict-prototypes \
 	-Wmissing-prototypes \
 	-Wshadow \
