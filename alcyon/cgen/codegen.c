@@ -576,6 +576,7 @@ PP(int reg;)								/* register to use */
 				tp->t_op = rtp->t_op + (EQADD - ADD);
 				continue;
 			}
+			/* fall through */
 		case EQLSH:
 		case EQRSH:
 			if (ltp->t_sc != REGISTER)

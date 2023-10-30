@@ -12,8 +12,8 @@ PP(const char *string;)
 	ptsin[1] = y;
 	i = 0;
 	do
-		;
-	while ((intin[i++] = *string++ & 0xff) != 0);
+	{
+	} while ((intin[i++] = *string++ & 0xff) != 0);
 
 	contrl[0] = 8;
 	contrl[1] = 1;

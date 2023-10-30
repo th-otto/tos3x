@@ -75,6 +75,7 @@ PP(register struct tnode *rtp;)						/* right subtree pointer */
 		pushopd(ltp);					/* expr . name stuff */
 		maketree(INDR);
 		ltp = (struct tnode *) popopd();	/* ltp cannot be 0 */
+		/* fall through */
 	case PERIOD:						/* expr . name */
 		if (!(ISSTEL(rtp)))
 			error(_("invalid structure member name"));
@@ -205,6 +206,7 @@ PP(int op;)									/* for cast operator */
 			}
 			break;
 		}
+		/* fall through */
 	case PTR_LONG:						/* need to generate mult or div */
 	case LONG_PTR:						/* of the ptd to objects length */
 		if (len == 1)
@@ -218,6 +220,7 @@ PP(int op;)									/* for cast operator */
 	case INT_LONG:
 		if (tp->t_op == CINT)			/* constant conversion */
 			return (struct tnode *)lcnalloc(type, (int32_t) ((struct conode *) tp)->t_value);
+		/* fall through */
 	case UNSN_LONG:
 		cop = INT2L;
 		break;

@@ -934,10 +934,8 @@ static VOID relocsym(NOTHING)
 	{
 		if (lmte->flags & SYEQ)			/* equated */
 			return;						/* abs */
-#if 0
 		if (lmte->flags == SYDF)
 			return;
-#endif
 		fprintf(stderr, "Invalid symbol flag %04x, in %s, symbol: \"%.*s\"\n", lmte->flags, ifilname, SYNAMLEN, lmte->name);
 		endit(1);
 	}

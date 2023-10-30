@@ -279,7 +279,7 @@ static int getctok(NOTHING)
 				}
 				cvalue = (cvalue << 8) | c;
 			}
-			if (count < (sizeof(cvalue) - 2))
+			if (count < (int)(sizeof(cvalue) - 2))
 				warning(_("multi-character character constant"));
 			if (cvalue < -128 || cvalue > 255)
 				warning(_("character constant out of range"));

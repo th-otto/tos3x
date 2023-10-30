@@ -223,6 +223,7 @@ PP(int pflag;)
 VOID prtline(P(int) flg)
 PP(int flg;)
 {
+	UNUSED(flg);
 	while (fchr != EOLC && fchr != CEOF)
 	{
 		putchar(fchr);

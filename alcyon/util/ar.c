@@ -119,6 +119,7 @@ PP(int crfl;)
 	register FILE *i;
 	unsigned short ib;
 
+	UNUSED(crfl);
 	if ((i = fopen(arp, "rb")) == NULL)
 	{									/* does not exist */
 		areof = 1;
@@ -202,6 +203,7 @@ PP(const char *oname;)
 	register long l;
 	register int flags, sz;
 
+	UNUSED(iname);
 	flags = aflags;
 	if (flags & WHDR)
 	{
@@ -238,7 +240,7 @@ PP(const char *oname;)
 			fprintf(stderr, _("%s: read error: %s\n"), program_name, strerror(errno));
 			endit(0);
 		}
-		if (fwrite(buff, sizeof(char), i, ofd) != i)
+		if ((int)fwrite(buff, sizeof(char), i, ofd) != i)
 			goto iwrerr;
 		l -= i;
 	}

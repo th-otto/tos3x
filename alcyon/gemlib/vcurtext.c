@@ -8,8 +8,8 @@ PP(const char *string;)
 
 	intstr = intin;
 	do
-		;
-	while ((*intstr++ = *string++ & 0xff) != 0);
+	{
+	} while ((*intstr++ = *string++ & 0xff) != 0);
 
 	contrl[0] = 5;
 	contrl[1] = 0;

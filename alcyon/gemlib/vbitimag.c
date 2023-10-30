@@ -21,8 +21,8 @@ PP(int16_t *xy;)
 	intin[4] = valign;
 	i = 5;
 	do 
-		;
-	while ((intin[i++] = *filename++ & 0xff) != 0);
+	{	;
+	} while ((intin[i++] = *filename++ & 0xff) != 0);
 
 	contrl[0] = 5;
 	contrl[1] = 2;

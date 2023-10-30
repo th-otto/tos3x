@@ -8,8 +8,8 @@ PP(const char *filename;)
 
 	intstr = intin;
 	do
-		;
-	while ((*intstr++ = *filename++ & 0xff) != 0);
+	{
+	} while ((*intstr++ = *filename++ & 0xff) != 0);
 	
 	contrl[0] = 5;
 	contrl[1] = 0;

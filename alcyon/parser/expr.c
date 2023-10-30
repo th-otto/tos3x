@@ -135,6 +135,7 @@ PP(int preset;)
 			case PREDEC:
 			case POSTDEC:
 				pushopd(cnalloc(INT, 1));
+				/* fall through */
 			default:
 				if (!maketree(op))
 					goto exprerr;
@@ -227,6 +228,7 @@ PP(short *token;)
 			*token = ASM;
 		else
 			return IS_ERROR;
+		/* fall through */
 	case COMPL:
 	case NOT:
 		if (opdontop)					/* can't have: operand unary-op */

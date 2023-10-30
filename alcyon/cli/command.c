@@ -1342,7 +1342,7 @@ PP(char *dst;)
 							if (!(srchb[21] & 0x18))
 							{
 								mkSrc();
-								if (!mkDst()) ; /* ??? runaway ';'? */
+								if (!mkDst())
 								{
 									wrtnl();
 									dspSrc();
@@ -1952,17 +1952,17 @@ PP(char *cmdtl;)
 	/* Null termintate. */
 	envPtr[i] = 0;
 
-	for (i = 0; (cmd[i] = *s) != 0 && (i < sizeof(cmd)); s++, i++)
+	for (i = 0; (cmd[i] = *s) != 0 && (i < (int)sizeof(cmd)); s++, i++)
 		if (*s == '.')
 			tlNtFnd = 0;
 
 	if (tlNtFnd)
-		for (j = 0; (cmd[i] = prgTail[j]) != 0 && (i < sizeof(cmd)); i++, j++)
+		for (j = 0; (cmd[i] = prgTail[j]) != 0 && (i < (int)sizeof(cmd)); i++, j++)
 			;
 
 	i = 0;
 	gtpath = -1;
-	while ((ch = cmd[i++]) != 0 && (i <= sizeof(cmd)))
+	while ((ch = cmd[i++]) != 0 && (i <= (int)sizeof(cmd)))
 		if (ch == ':' || ch == '\\')
 			gtpath = 0;
 
@@ -2028,13 +2028,13 @@ PP(char **parms;)
 	char cmd[130];
 	char *cmdptr;
 
-	for (i = 0; (cmd[i] = *s) != 0 && (i < sizeof(cmd)); s++, i++)
+	for (i = 0; (cmd[i] = *s) != 0 && (i < (int)sizeof(cmd)); s++, i++)
 		if (*s == '.')
 			tlNtFnd = 0;
 
 	if (tlNtFnd)
 	{
-		for (j = 0; (cmd[i] = batTail[j]) != 0 && (i < sizeof(cmd)); i++, j++)
+		for (j = 0; (cmd[i] = batTail[j]) != 0 && (i < (int)sizeof(cmd)); i++, j++)
 			;
 	}
 	
@@ -2042,7 +2042,7 @@ PP(char **parms;)
 	{
 		i = 0;
 		gtpath = -1;
-		while ((ch = cmd[i++]) != 0 && (i <= sizeof(cmd)))
+		while ((ch = cmd[i++]) != 0 && (i <= (int)sizeof(cmd)))
 			if (ch == ':' || ch == '\\')
 				gtpath = 0;
 

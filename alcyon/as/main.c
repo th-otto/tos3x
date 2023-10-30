@@ -348,6 +348,7 @@ static int calcilen(NOTHING)
 	{
 	case 20:
 		i += 2;							/* for reg mask */
+		/* fall through */
 	case 1:								/* two ea's -- one of which may be a reg */
 	case 15:
 	case 30:
@@ -356,6 +357,7 @@ static int calcilen(NOTHING)
 	case 3:
 	case 21:
 		i += lenea(1);
+		/* fall through */
 	case 16:
 	case 24:
 	case 25:
@@ -414,6 +416,7 @@ static int calcilen(NOTHING)
 	case 23:
 		if (immed[0])
 			i += (mode == LONG ? LONGSIZ : WORDSIZ);
+		/* fall through */
 	case 17:
 	case 22:
 		i += lenea(1);
@@ -1253,7 +1256,7 @@ PP(char **argv;)
 	mdemt("page", 33);				/* page define, ignore */
 	
 	/* make entries in main table for registers */
-	for (i = 0; i < sizeof(regnames) / sizeof(regnames[0]); i++)
+	for (i = 0; i < (short)(sizeof(regnames) / sizeof(regnames[0])); i++)
 		equreg(regnames[i].name, regnames[i].val);
 	
 	/* make entries in opcode table */

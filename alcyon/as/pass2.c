@@ -193,11 +193,11 @@ static VOID opf1(NOTHING)
 
 	if (!get2ops())
 		return;
-	if (ins[0] == AND || ins[0] == OR)
+	if ((unsigned short)ins[0] == AND || (unsigned short)ins[0] == OR)
 	{
 		if (cksprg(&opnd[1], CCR) || cksprg(&opnd[1], SR))
 		{
-			if (ins[0] == AND)
+			if ((unsigned short)ins[0] == AND)
 				opcpt = andiptr;
 			else
 				opcpt = oriptr;

@@ -9,8 +9,8 @@ PP(int16_t *extent;)
 
 	intstr = intin;
 	do
-		;
-	while ((*intstr++ = *string++ & 0xff) != 0);
+	{
+	} while ((*intstr++ = *string++ & 0xff) != 0);
 
 	i_ptsout(extent);
 

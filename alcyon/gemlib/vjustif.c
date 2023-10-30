@@ -19,8 +19,8 @@ PP(int16_t char_space;)
 	intin[1] = char_space;
 	intstr = &intin[2];
 	do 
-		;
-	while ((*intstr++ = *string++ & 0xff) != 0);
+	{
+	} while ((*intstr++ = *string++ & 0xff) != 0);
 
 	contrl[0] = 11;
 	contrl[1] = 2;

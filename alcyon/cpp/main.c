@@ -175,6 +175,7 @@ PP(register char **argv;)
 
 			case 'C':					/* Leave comments in... */
 				Cflag++;
+				/* fall through */
 			case 'E':					/* Preprocessor to stdout */
 				Eflag++;
 				continue;

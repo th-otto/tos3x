@@ -550,6 +550,7 @@ VOID stmt(NOTHING)
 					return;
 				stmt();
 			}
+			/* fall through */
 		case CEOF:
 			error(_("{ not matched by }"));
 		case SEMI:						/* null statement */
@@ -565,6 +566,7 @@ VOID stmt(NOTHING)
 				dolabel();
 				continue;
 			}
+			/* fall through */
 		default:						/* anything else... */
 			pbtok(token);
 			outexpr(expr(0));

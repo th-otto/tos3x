@@ -137,6 +137,7 @@ PP(int preset;)
 			case PREDEC:
 			case POSTDEC:
 				pushopd(cnalloc(INT, 1));
+				/* fall through */
 			default:
 				if (!maketree(op))
 					goto exprerr;

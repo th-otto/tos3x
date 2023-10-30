@@ -172,7 +172,8 @@ static int gspreg(NOTHING)
 VOID getea(P(int) opn)
 PP(int opn;)
 {
-	register short i, disp, inst;
+	register short i, disp;
+	register unsigned short inst;
 	register struct op *p;
 
 	p = &opnd[opn];
@@ -628,7 +629,7 @@ PP(long length;)
 	fseek(fp, 0L, SEEK_SET);
 	while (length > 0)
 	{
-		if (length > sizeof(itbuf))				/* 512 bytes at a time      */
+		if (length > (long)sizeof(itbuf))				/* 512 bytes at a time      */
 			j = sizeof(itbuf);
 		else
 			j = length;					/* Last one                 */
@@ -785,6 +786,7 @@ PP(struct op *apea;)
 		case 1:						/* xxx.L */
 			doupper(p);
 			p->con &= 0xffffL;		/* clear for dodisp check */
+			/* fall through */
 
 		case 0:						/* xxx.W */
 			dodisp(p);

@@ -116,7 +116,7 @@ VOID pass1a(NOTHING)
 						rpterr(_("seek error on intermediate file"));
 						asabort();
 					}
-					if (fwrite(&stbuf[0], 1, wsize, itfn) != wsize)
+					if ((int)fwrite(&stbuf[0], 1, wsize, itfn) != wsize)
 					{
 						rpterr(_("write error on it file"));
 						asabort();

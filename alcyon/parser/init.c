@@ -221,6 +221,7 @@ PP(int sc;)									/* for bit field init */
 			outinit(tp, inittype);
 			return 4 + plus;
 		}
+		/* fall through */
 	case DOUBLE:
 	case FLOAT:
 		outfp_or_l(value);
