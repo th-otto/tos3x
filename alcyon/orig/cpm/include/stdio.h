@@ -79,21 +79,21 @@ extern struct _iobuf _iob[MAXFILES];    /* an array of this info            */
 
 /****************************************************************************/
 
-FLOAT atof();
-FLOAT ceil();
-FLOAT cos();
-FLOAT sin();
-FLOAT exp();
-FLOAT fabs();
-FLOAT floor();
-FLOAT fmod();
-FLOAT log();
-FLOAT pow();
-FLOAT sinh();
-FLOAT tanh();
-FLOAT sqrt();
-FLOAT tan();
-FLOAT atan();
+double atof();
+double ceil();
+double cos();
+double sin();
+double exp();
+double fabs();
+double floor();
+double fmod();
+double log();
+double pow();
+double sinh();
+double tanh();
+double sqrt();
+double tan();
+double atan();
 
 LONG atol();
 LONG ftell();
@@ -108,9 +108,9 @@ WORD atoi();
 WORD brk();
 
 BYTE *sbrk();
-BYTE *malloc();
-BYTE *calloc();
-BYTE *realloc();
+VOIDPTR malloc PROTO((unsigned int size));
+VOIDPTR realloc PROTO((VOIDPTR ptr, unsigned int size));
+VOIDPTR calloc PROTO((unsigned int nmemb, unsigned int size));
 BYTE *ftoa();
 BYTE *etoa();
 BYTE *getpass();
@@ -119,7 +119,7 @@ BYTE *fgets();
 BYTE *index();
 BYTE *rindex();
 BYTE *mktemp();
-int sprintf();
+int sprintf PROTO((char *, const char *, ...));
 BYTE *strcat();
 BYTE *strncat();
 BYTE *strcpy();
