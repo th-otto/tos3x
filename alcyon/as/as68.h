@@ -344,7 +344,11 @@ extern FILE *trfil;			/* temp for text relocation bits */
 extern FILE *drfil;            /* temp for data relocation bits */
 
 #ifndef PATH_MAX
+#ifdef _WIN32
+#define PATH_MAX 260 /* avoid redefinition */
+#else
 #define PATH_MAX 256
+#endif
 #endif
 
 extern char itfilnam[PATH_MAX];
