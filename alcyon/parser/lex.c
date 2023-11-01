@@ -138,6 +138,10 @@ PP(double f;)
 		exp--;
 	f = f * 16777216.0 + 0.5;			/* 2 ^ 24 */
 	l = f;
+	if (l >= 0x01000000L)
+	{
+		l = 0x00ffffffL;
+	}
 	l <<= 8;
 	if (sign)
 		l |= 0x80;
@@ -172,6 +176,10 @@ PP(double f;)
 	f = f - 1.0;
 	f = f * 8388608.0 + 0.5;			/* 2 ^ 23 */
 	l = f;
+	if (l >= 0x00800000L)
+	{
+		l = 0x007fffffL;
+	}
 	if (sign)
 		l |= 0x80000000;
 	exp = (exp + BIAS) << 23;
