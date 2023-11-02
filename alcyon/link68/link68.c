@@ -2617,7 +2617,11 @@ static VOID buildf(NOTHING)
 	strcat(tfilname, tfbase);			/* Put in filename now    */
 
 #ifdef HAVE_MKTEMP
-	mktemp(tfilname);					/* Make a temp filename   */
+	{
+		int fd = mkstemp(tfilname);		/* Make a temp filename   */
+		if (fd >= 0)
+			close(fd);
+	}
 #endif
 
 	tfchar = &tfilname[(int)strlen(tfilname) - 1];	/* Set pointer  */
