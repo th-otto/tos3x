@@ -5,9 +5,11 @@ top_srcdir=../..
 include $(top_srcdir)/GNUmakefile.cmn
 include $(top_srcdir)/Makefile.sil
 
+CFLAGS += -mieee
+
 CPPFLAGS = -I$(INC)
 
-LIBF_OBJS = \
+LIBE_OBJS = \
 	atof.o \
 	ceil.o \
 	etoa.o \
@@ -19,6 +21,7 @@ LIBF_OBJS = \
 	ffpdiv.o \
 	ffpexp.o \
 	ffphthet.o \
+	ffpieee.o \
 	ffplog.o \
 	ffpmul2.o \
 	ffppwr.o \
@@ -26,7 +29,6 @@ LIBF_OBJS = \
 	ffpsqrt.o \
 	ffptheta.o \
 	ffptnorm.o \
-	ffptof.o \
 	floor.o \
 	fmod.o \
 	fpadd.o \
@@ -42,26 +44,41 @@ LIBF_OBJS = \
 	fpsqrt.o \
 	fpsub.o \
 	ftoa.o \
-	ftoffp.o \
 	ftol.o \
+	ieeetof.o \
+	iefabs.o \
+	iefadd.o \
+	iefback.o \
+	iefcmp.o \
+	iefdiv.o \
+	iefexp.o \
+	ieffpi.o \
+	ieffront.o \
+	iefifp.o \
+	ieflog.o \
+	iefmul.o \
+	iefpwr.o \
+	iefsin.o \
+	iefsqrt.o \
 	ltof.o \
-	fpltof.o \
 	xdoprtfp.o \
 	\
 	atan.o \
 	ffpatan.o \
+	iefsinh.o \
+	iefatan.o \
 	cosh.o \
 	sinh.o \
 	tanh.o \
-	ffpsinh.o \
 	fpftol.o \
+	fptoieee.o \
 	$(empty)
 
-all: libf.a
+all: libe.a
 
-libf.a: $(LIBF_OBJS)
+libe.a: $(LIBE_OBJS) ${MAKEFILE}
 	$(AM_V_at)$(RM) $@
-	$(AM_V_AR)$(AR) $(ARFLAGS) $@ ${LIBF_OBJS}
+	$(AM_V_AR)$(AR) $(ARFLAGS) $@ ${LIBE_OBJS}
 
 clean distclean::
 	$(RM) *.o *.a
