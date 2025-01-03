@@ -117,6 +117,7 @@ PP(int16_t *pth;)
 		break;
 	}
 
+	/* BUG: should be >= */
 	if (th > 128)
 		th -= 256;						/* clamp it */
 

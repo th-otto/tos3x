@@ -2002,7 +2002,7 @@ VOID wm_update(P(int) beg_update)
 #endif
 PP(register int beg_update;)								/* flag for the call's function */
 {
-	if (beg_update < 2)
+	if (beg_update < END_MCTRL)
 	{
 		if (beg_update)
 		{
