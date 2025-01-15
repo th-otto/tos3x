@@ -131,12 +131,7 @@ PP(int16_t dev;)
 	bdev = &blkdev[dev];
 	bpb = &bdev->bpb;
 	do {
-#if BINEXACT
-		/* 0L = ugly hack to pass 2 zeroes */
-		err = floprd(dskbufp, NULL, dev, 1, 0L, BPBSECT);
-#else
 		err = floprd(dskbufp, NULL, dev, 1, 0, 0, BPBSECT);
-#endif
 		if (err < 0)
 		{
 			err = callcrit((int16_t)err, dev);
@@ -269,12 +264,7 @@ PP(int16_t dev;)
 	} else if (ret == MEDIAMAYCHANGE)
 	{
 		do {
-#if BINEXACT
-			/* 0L = ugly hack to pass 2 zeroes */
-			err = floprd(dskbufp, NULL, dev, 1, 0L, BPBSECT);
-#else
 			err = floprd(dskbufp, NULL, dev, 1, 0, 0, BPBSECT);
-#endif
 			if (err < 0)
 			{
 				err = callcrit((int16_t)err, dev);
@@ -333,12 +323,7 @@ PP(int16_t _dev;)
 	} else if (ret == MEDIAMAYCHANGE)
 	{
 		do {
-#if BINEXACT
-			/* 0L = ugly hack to pass 2 zeroes */
-			err = floprd(dskbufp, NULL, dev, 1, 0L, BPBSECT);
-#else
 			err = floprd(dskbufp, NULL, dev, 1, 0, 0, BPBSECT);
-#endif
 			if (err < 0)
 			{
 				err = callcrit((int16_t)err, dev);
@@ -587,12 +572,7 @@ int16_t bhdv_boot(NOTHING)
 		return 3;   /* unreadable */
 		asm("L9992");
 #else
-#if BINEXACT
-		/* 0L = ugly hack to pass 2 zeroes */
-		if (floprd(dskbufp, NULL, 0, 1, 0L, 1) == 0)
-#else
 		if (floprd(dskbufp, NULL, 0, 1, 0, 0, 1) == 0)
-#endif
 		{
 			ret = 0;
 		} else if (fd_wp[0] == 0)
