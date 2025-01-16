@@ -127,17 +127,7 @@ VOID d_gtext(NOTHING)
 #if (TOSVERSION <= 0x104) & BINEXACT
 			fnt_ptr->font_id == 1 &&
 #endif
-#if BINEXACT & (TOSVERSION < 0x400)
-			/*
-			 * strange cast; without it produces
-			 *  clr.w d0
-			 *  move 48(a5),d0
-			 * but comparison is done unsigned anyway
-			 */
-			(int)fnt_ptr->bottom <= fnt_ptr->ul_size
-#else
 			fnt_ptr->bottom <= fnt_ptr->ul_size
-#endif
 			)
 		{
 			if (LV(SCALE) && (LV(DDA_INC) == 0xFFFF))
@@ -156,6 +146,10 @@ VOID d_gtext(NOTHING)
 
 		switch (h_align)
 		{
+#if !BINEXACT
+		default:
+			/* BUG: undefined values used below */
+#endif
 		case 0:						/* left justified   */
 			delh = 0;
 			break;
@@ -182,13 +176,7 @@ VOID d_gtext(NOTHING)
 				NPTSOUT = 0;
 			}
 			delh = width - (olin << 1);	/* jde 29aug85      */
-#if !BINEXACT
 			break;
-		default:
-			/* BUG: undefined values used below */
-			delh = 0;
-			break;
-#endif
 		}
 
 		if (LV(STYLE) & SKEW)

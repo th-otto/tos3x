@@ -12,6 +12,9 @@ include $(top_srcdir)/Makefile.sil
 
 CPPFLAGS = -I../common -I$(INC)
 CFLAGS = $(OPTS) $(WARN)
+ifeq ($(USE_CROSS_ALCYON),0)
+CFLAGS += -mno-short
+endif
 
 PROGRAMS = tospatch.ttp loadtos.prg romdump.tos
 

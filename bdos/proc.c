@@ -87,11 +87,7 @@ PP(uint16_t rc;)
 {
 	register PD *r;
 
-#ifdef __ALCYON__
-	indcall(trap13(0x00050102L, -1L));	/*  call user term handler */
-#else
 	indcall(trap13(0x0005, 0x0102, -1L));	/*  call user term handler */
-#endif
 	xbgettime();
 	
 	run = (r = run)->p_parent;
