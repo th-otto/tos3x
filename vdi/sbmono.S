@@ -87,7 +87,7 @@ sb_mono:
 #if TOSVERSION >= 0x400
 	movem.l	(sp)+,a5-a6		; restore a5 and a6
 #else
-	/* BUG: a5+a6 not restored -> crash */
+	/* a5+a6 restored in next_char; won't get here */
 #endif
 	rts				; quit on null height
 

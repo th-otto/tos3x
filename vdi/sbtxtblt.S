@@ -1993,7 +1993,7 @@ repexit:	clr.w	LV(SOURCEX,a6)
 		move.l	a1,sform(a5)
 		rts
 
-upsd_dwn:	move.w	DELX(a6),d0		; a0 -> top of source
+upsd_dwn:	move.w	LV(DELX,a6),d0		; a0 -> top of source
 		add.w	tsdad(a5),d0
 		subq.w	#1,d0			; make width instead of address
 		lsr.w	#4,d0
